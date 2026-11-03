@@ -51,6 +51,25 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 | X, Gilded Riposte | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (an upward crescent in his gold, run hot at the edge, and a gold cloud): 34, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our look (gold guard, upward gold cleave) replaces its red crescent |
 | Merge (its own key, `ultimate`) | tap | The Boki Merge | (n/a) | The Merge is the same for every hero |
 
+## Parity pass (owner 18:45, PARITY_BRIEF)
+
+Source vs ours per slot, LMB first. [D] game data (supervive_kits.md), [F] footage (hero-ref/juggernaut.md, 10 fps
+in the ability clips), [O] owner notes (MAIN_TO_EXT 17:05-17:12). Asserted in `tools/zedran_feel_check.gd`
+("jug parity ...").
+
+| Slot | Beat | Source | Ours | Status |
+|---|---|---|---|---|
+| LMB tap | animation | [F] 0023-0034: a step into each swing, ~1 frame wind-up and 1 frame swing, alternating right-left; the blade trails behind between swings | `jug_slash_r/_l`: coiled step (0.0), the cut at 0.1, follow-through to 0.24, settled by 0.45; alternating | matches |
+| LMB tap | tracking | [F] he walks while swinging; the slash goes toward the aim (some swings look facing-led: unconfirmed) | each slash is aimed at the cursor at the swing; he keeps his full walk | matches (cursor kept: the facing read is unconfirmed) |
+| LMB tap | cadence | [F] swings 0.3-0.4 s apart (0026, 0029, 0033) | one slash per 0.34 s | matches |
+| LMB hold | charge | [F] 0.6-1.0 s, a thin white arc round him (0087); [O] it grows with the hold, shown while charging | tap 0.22 s, full 0.95 s; the ring round him fills, and now a lane on the ground grows as long (7 -> 14 m) and wide as the wave it would throw, gold-hot at full | changed (the preview is new) |
+| LMB hold | projectile | [F] a red crescent bolt at ~20 bh/s (~36 m/s) flying past the cursor to max range; [D] tap 43, hold 107 (2.5x) | 36 m/s (was 20), 7 -> 14 m (was 6 -> 10), hit radius 0.3 -> 0.6 (it was stuck at the grammar default 0.2, so the hitbox never grew), 12 -> 20 (2.5x a slash; was 28), Rage per wave kept (wave_rage 4.2) | changed |
+| RMB hold | pose | [O] the sword held over his head as long as RMB is held | `jug_lunge_wind`: the blade swings up and over and holds high overhead on a loaded back leg; the release chops down and out from overhead (`jug_lunge`) | changed (was a low crouch, the footage's) |
+| RMB hold | hold time | [O] holdable indefinitely, no auto-release | `rmb_auto_t` = INF (was full + 0.4 s) | changed |
+| RMB hold | perfect release | [O] a release at the right moment goes a bit further, with a clear "now" cue and a distinct sound | at full, then once a second: the raised blade flashes white-hot with a ring (0.15 s window); let go in it: +20% distance, the cursor's perfect star, a bright metal ring | new |
+| RMB tap / air / chain | all | [F]/[D] | unchanged (matched by the item 21/22 passes: see the per-slot table) | matches |
+| Dash, E, X | all | [F]/[D] | unchanged (the item 21/22/51 passes) | matches |
+
 ## Warchain: the state machine
 
 The owner's review (items 21 and 22) asked for the source's level of control on E. Sources, by precedence:

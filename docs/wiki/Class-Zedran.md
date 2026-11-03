@@ -62,10 +62,10 @@ What the in-game kit card (K) says.
 | Loop | Melee bruiser: get in, chain them close, and finish the wounded. |
 | Passive: Rage | Damage fills Rage. Full, you're Enraged: more damage, faster dashes and cooldowns. Knocks heal you. |
 | Dash: Rampage | Two charges (a third at rank 2) of a short dash attack the way you face. Its tip hits twice as hard. |
-| RMB: Smash | Tap: a heavy slam, harder on the wounded; a knock after its sweet spot resets your ultimate. Hold: charge, then fling yourself forward. In the air: slam down at your cursor. |
+| RMB: Smash | Tap: a heavy slam, harder on the wounded; a knock after its sweet spot resets your ultimate. Hold as long as you like: charge, then fling yourself forward; let go as the raised blade flashes to fling further. In the air: slam down at your cursor. |
 | E: Warchain | Throw a chain at a foe or a wall. Press E again to be hauled to it; steer as you go. |
 | Hunter ultimate: Gilded Riposte | Guard for 0.65s, taking nothing, then lunge into a cleave that heals you; a knock with it resets it. |
-| Weapon: Greatsword | Wide slashes, double at the tip. Hold to throw a Searing Wave. |
+| Weapon: Greatsword | Wide slashes, double at the tip. Hold to throw a Searing Wave: the longer you hold, the bigger, longer and harder it is. |
 
 ### Abilities in full
 
@@ -76,7 +76,7 @@ What the in-game kit card (K) says.
 **Smash (RMB, 2s cooldown).**
 
 - *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a 4m strike ahead: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Its sweet spot is the far tip, dead ahead: knock a hunter within 2s of hitting them there and the Gilded Riposte is ready again.
-- *Hold:* Lunge: a crouched wind-up (the lane grows ahead of you, magenta and flashing at full, 0.8s), then release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. You can jump while you charge. Strike nothing and the cooldown doubles.
+- *Hold:* Lunge: the blade raised over your head (the lane grows ahead of you, magenta and flashing at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. At full the raised blade flashes white once a second: let go on the flash for 20% more distance. You can jump while you charge. Strike nothing and the cooldown doubles.
 - *In the air:* Meteor Drop: a disc shows under your cursor (5m at most). Press and you hang over it for a beat, the blade raised (everyone sees where you'll land), then dive onto it: a 2.6m burst, 18 and slow 40% for 1.5s; the inner ring (1.2m) takes +50% and is stunned 0.8s. You rise from the crouch over half a second. It has its own cooldown, 7.2s, so a Smash right before it does not hold it back.
 - *During E:* With the Warchain: press while it pulls you, or as you arrive, for a Cinder Spin at once (2.6m, 18, blights 4s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); charge while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 

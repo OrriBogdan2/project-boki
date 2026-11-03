@@ -59,6 +59,8 @@ var chain_lunges := 0
 var haul_slams := 0
 var haul := {}                 # a Haul Slam armed for the end of the pull: {k}
 var lunge_full := false        # the Lunge charge reached full (its flash played)
+var perfect_flashed := -1      # the last perfect window whose cue played (-1: none this hold)
+var perfects := 0              # (tests) Lunges let go in a perfect window
 var knock_healed := 0.0        # (tests) health the knock heals gave back
 var rampage_wind := 0.0        # the Rampage's crouch still to go before the drive
 var rampage_dir := Vector2.ZERO  # the way the Rampage will drive once its crouch ends
@@ -309,6 +311,7 @@ func _drop_holds() -> void:
 	rmb_queued_at = -9.0
 	dash_held = false
 	lunge_full = false
+	perfect_flashed = -1
 
 func fx() -> DJFx:
 	return DJFx.of(m)
@@ -362,6 +365,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		lmb_t += dt
 		if lmb_t > float(ld["tap"]):
 			h.mel_hold = wave_k()
+			_wave_preview()
 			if anim_id != "jug_wave_wind": play("jug_wave_wind")
 		if lmb_t >= float(ld["full"]) + 0.5: _wave()      # held well past full: it goes by itself
 	elif lmb_t >= 0.0:
@@ -371,6 +375,17 @@ func lmb_override(held: bool, dt: float) -> bool:
 		lmb_buf = 0.0
 		_slash()
 	return true
+
+## The Searing Wave charging: its lane on the ground grows as long and as wide as the wave it would throw now,
+## going gold-hot at full, and the cursor ring fills.
+func _wave_preview() -> void:
+	var ld := lmb_def()
+	var k := wave_k()
+	var lane := {"len": lerpf(float(ld["wave_range"][0]), float(ld["wave_range"][1]), k),
+			"width": lerpf(float(ld["wave_size"][0]), float(ld["wave_size"][1]), k) * 2.0, "k": k, "fill": k,
+			"col": WAVE_RED, "col_full": WAVE_FULL}
+	AimKit.lane(h, "lmb", lane)
+	AimKit.charge(h, k, {"col": WAVE_RED, "col2": WAVE_FULL})
 
 ## The Searing Wave charge waits out what stops the blade, rather than ending: a dash its hold row keeps it through.
 func _hold_waits() -> bool:
@@ -421,6 +436,7 @@ func _wave() -> void:
 	var k := wave_k()
 	lmb_t = -1.0
 	h.mel_hold = 0.0
+	AimKit.hide(h, "lmb")
 	h.fire_cd = float(ld["wave_rate"])
 	waves += 1
 	play("jug_wave")
@@ -446,7 +462,7 @@ func _wave() -> void:
 	var sd: Variant = _my_last_shot()
 	if sd != null:
 		sd["col"] = WAVE_RED              # its sparks along the way are red too
-		fx().ride(sd, "crescent_bolt", WAVE_RED, WAVE_EDGE if not full else WAVE_FULL, 1.6, wave_size * 2.2)
+		fx().ride(sd, "crescent_bolt", WAVE_RED, WAVE_EDGE if not full else WAVE_FULL, 1.6, wave_size * 3.6)
 	m.sfx("jug_wave", h.pos, -2.0, 1.0 - 0.15 * k)
 	var steps := int(rng / 1.2)
 	for s in steps:
@@ -571,8 +587,9 @@ func _tip() -> void:
 func rmb_charge_full() -> float:
 	return float(rmb_def().get("full_t", 0.9))
 
+## Held as long as you like: it never lets go by itself (the Lunge waits at full until you let go).
 func rmb_auto_t() -> float:
-	return rmb_charge_full() + 0.4
+	return INF
 
 ## Holding past the tap: the Lunge's crouched wind-up pose (held while you charge). Hooked, the lane runs
 ## down the chain instead: letting go is a Chain Lunge along it.
@@ -603,10 +620,28 @@ func rmb_hold_tick(t: float) -> void:
 			net_ring(h.pos, 1.2, Color("ffcf6a"))
 	if k >= 1.0 and not lunge_full:
 		lunge_full = true
-		var d := h.aim_dir()
-		fx().star(h.pos + Vector3(d.x * 0.5, 1.0, d.y * 0.5), LUNGE_FULL, 1.8, 0.22)
 		m.sfx("jug_full", h.pos, -2.0 if h.is_local() else -6.0, 1.0)
-		if h.is_local() and m.cam: m.cam.add_trauma(0.1)
+	var window := perfect_window(t)
+	if window >= 0 and window != perfect_flashed:
+		perfect_flashed = window
+		_perfect_cue()
+
+## The perfect-release window the held Lunge is in at `t` s of hold (0 at full charge, then one every
+## lunge.perfect_every), or -1 between them.
+func perfect_window(t: float) -> int:
+	var ld: Dictionary = rmb_def()["lunge"]
+	var since := t - rmb_charge_full()
+	if since < 0.0:
+		return -1
+	var every := float(ld["perfect_every"])
+	return int(since / every) if fmod(since, every) < float(ld["perfect_w"]) else -1
+
+## "Now": the raised blade flashes white-hot along its length and a bright ring of the hilt rings out.
+func _perfect_cue() -> void:
+	var tip := h.pos + Vector3(0, 3.0, 0)
+	fx().star(tip, Color(1, 1, 1), 1.6, 0.16, LUNGE_FULL)
+	fx().star(h.pos + Vector3(0, 2.2, 0), LUNGE_FULL, 1.0, 0.16)
+	m.sfx("jug_full", h.pos, -3.0 if h.is_local() else -7.0, 1.5)
 
 func lunge_k(t: float) -> float:
 	var sd := rmb_def()
@@ -717,7 +752,8 @@ func fire_rmb(c: Dictionary) -> void:
 	elif dropping:
 		meteor.start()
 	elif c.get("hold", false):
-		_lunge(lunge_k(float(c.get("t", 0.0))))
+		var held_t := float(c.get("t", 0.0))
+		_lunge(lunge_k(held_t), perfect_window(held_t) >= 0)
 	else:
 		# the Finishing Slam winds up first (you keep aiming); everyone sees the warning over you
 		slam_w = {"t": float(rmb_def()["windup"])}
@@ -791,12 +827,14 @@ func _shock_ring(at: Vector3) -> void:
 				SWEET_RING, 0.9)
 
 ## The hold: a charged dash attack into the first foe in its path; a miss doubles the cooldown.
-func _lunge(k: float) -> void:
+## The Lunge let go at charge `k`; `perfect`: in a perfect window, it flings him lunge.perfect_k further.
+func _lunge(k: float, perfect: bool) -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
-	var dist := lerpf(float(ld["dist"][0]), float(ld["dist"][1]), k)
+	var dist := lerpf(float(ld["dist"][0]), float(ld["dist"][1]), k) * (float(ld["perfect_k"]) if perfect else 1.0)
 	var t := dist / float(ld["speed"])
 	var dv := h.aim_dir()
 	lunge_full = false
+	perfect_flashed = -1
 	AimKit.hide(h, "rmb")
 	travel(dist, t, {"invuln": 0.0, "trail": "dust", "dir": dv})
 	fx().crescent(h.pos + Vector3(0, 0.9, 0), dv, 50.0, 2.0, LUNGE_RED, Color(1, 0.8, 0.6), 0.25)
@@ -805,6 +843,10 @@ func _lunge(k: float) -> void:
 	play("jug_lunge")
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "LUNGE", col_of(rmb_def()), false)
 	m.sfx("charge", h.pos, -3.0, 0.7 + 0.4 * k)
+	if perfect:
+		perfects += 1
+		AimKit.perfect(h, {"col": LUNGE_FULL})
+		m.sfx("jug_lunge_hit", h.pos, -4.0 if h.is_local() else -8.0, 1.6)      # a bright metal ring on the release
 
 func _tick_lunge() -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
@@ -882,6 +924,7 @@ func arm_haul() -> void:
 	rmb_down = false
 	rmb_t = 0.0
 	lunge_full = false
+	perfect_flashed = -1
 	AimKit.hide(h, "rmb")
 	if spend_rmb(true):
 		haul = {"k": hk}
