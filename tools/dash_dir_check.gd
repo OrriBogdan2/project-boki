@@ -64,6 +64,8 @@ func _dash_back(m: Match) -> float:
 	hunter.do_dash()
 	if hunter.ak is RimewrightKit:
 		return ((hunter.ak as RimewrightKit).rinkrun["dir"] as Vector2).y * 3.0     # (its Rink Run steers along this)
+	if hunter.ak is JuggernautKit:
+		return (hunter.ak as JuggernautKit).rampage_dir.y * 3.0     # (it drives this way after its crouch)
 	return hunter.roll_dir.y * hunter.roll_speed * hunter.roll_t
 
 func run(main: Node) -> void:

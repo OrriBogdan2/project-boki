@@ -220,7 +220,7 @@ static func _still_dancer(A: Arena, P: Hunter, D: Hunter, K: ThiefKit, w: String
 			if w == "fizzle":
 				if K.fizzles > 0 and not A.has_meta("fz_at"): A.set_meta("fz_at", t)
 				return float(A.get_meta("fz_at", 9.0)) + 0.05
-			return float(A.get_meta("b_at", 9.0)) + 0.05
+			return float(A.get_meta("b_at", 9.0)) + 0.02
 		"primed", "vault":
 			if at(t, dt, 0.4):
 				P.dashes = P.max_dashes()

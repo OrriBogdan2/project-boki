@@ -69,6 +69,7 @@ var last_drop := Vector3.ZERO
 var knock_healed := 0.0        # (tests) health the knock heals gave back
 var rampage_wind := 0.0        # the Rampage's crouch still to go before the drive
 var rampage_n := 0             # Rampage presses (a merge starting mid-crouch cancels the drive)
+var rampage_dir := Vector2.ZERO  # the way the Rampage will drive once its crouch ends
 var trail_t := 0.0
 
 func _setup() -> void:
@@ -466,6 +467,7 @@ func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	var wind := float(dd.get("windup", 0.15))
 	var dir := dash_dir()
+	rampage_dir = dir
 	st["last_dash"] = "rampage"
 	rampage_wind = wind
 	rampage_n += 1
