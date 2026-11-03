@@ -66,3 +66,16 @@ The owner saw an explosion when Dancer dashed, **while not merged**. His rule: "
 - A **small, quick animation**: a short arms-out or chest-out flare pose (about 0.15–0.25 s) as it fires, plus the shield swirl on him. Any short ring at cast is the real area, so it must match the actual radius exactly.
 - Remove any cursor-placed telegraph or aim for E. Check against briefs/hero-ref/linwick.md and the game data for radius, pull and shield numbers.
 - Assert: E fires on the press frame, the area is centred on the caster, the pull and shield apply, and there's no cursor dependence.
+
+## 12. Tamsin: only the skate, no separate fast dash, and more ice under her (kit fix)
+- The owner sees **two** movement abilities: a fast dash **and** the skate. She should have **only the skate** (Rinkrun) on Shift.
+  - Remove the separate dash: the tap dash, the air "usual long dash" fallback in rimewright.json and kit code, and any class dash still bound for her.
+  - **In the air:** follow the source data in briefs/supervive-data/ if it says what Celeste does. Otherwise, pressing Shift in the air buffers the skate to start on landing; there's no air dash.
+  - Update the kit text and any dash charges or pips shown in the HUD for her.
+- **Make the skate read clearly:**
+  - ice forming under her as she goes: small slabs or plates that appear under her feet and fade behind her as a trail
+  - spray off her edges on turns
+  - a frost sheen at the contact point
+  
+  Our own look, pooled effects. It has to be obvious she's skating on ice she makes, not sliding or dashing.
+- **Assert:** Tamsin has no dash besides the skate (no `travel()` dash on Shift tap), the air press doesn't dash, and the trail emits while skating.
