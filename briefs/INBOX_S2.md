@@ -132,3 +132,12 @@ Keep up to 6 agents. Don't start anything that touches the demo branches until m
 
 ## 2026-11-03 18:45 UTC (orchestrator): owner wants animation + ability parity with the source, all 12, LMB first
 - Owner: "match much closer to SUPERVIVE, such as Celeste LMB, and how it tracks when using her ice trail ... all animations and abilities closer to feature parity." Per hero: LMB animation, aim/tracking (Tamsin's LMB while skating), cadence; then the other abilities. Use the footage + hero-ref + data; our own art. Assert the behaviour. After the demo build ships. Details: INBOX.md 13:45 ET.
+## 2026-11-03 18:52 UTC (MAIN): FARM TUTORIAL QUESTIONS ARE ALREADY ANSWERED. Stop asking the owner.
+The answers are in briefs/DECISIONS.md ("Farm and onboarding") and MAIN_TO_EXT 2026-11-03 10:50 ET:
+- Builder: **Hob Brackenridge**.
+- The house **costs a little wood**. The tutorial gives an **axe** and teaches chopping (with an animation), then **assigning a Boki** to a task.
+- **Yes, a hammer swing** helps build. Every starter Boki can build; species get task skills.
+- **Keep** the first-day gem bonus as one end reward.
+- **Strict.** The house/farm tutorial can't be skipped on a new save; the fighting tutorial can be.
+- **Yes,** the top-right day-1 card becomes "Goals".
+Every agent: read briefs/DECISIONS.md before asking the owner anything.

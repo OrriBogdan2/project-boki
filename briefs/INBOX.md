@@ -536,3 +536,12 @@ The owner is reviewing the build now and will add more. Start the two items ther
 3. Moving: ext is building the farm tutorial + Hob builder on ext/farm-hob (S1/S2 hands off). S2 pushed tier-map work.
 4. [OWNER] Open: extraction squad size (13:45 ET). The owner says the decisions are in a "decisions.md", but it isn't on main or ext/agent-briefs. [EXT][MAIN] If you have it locally, push it to ext/agent-briefs/briefs/.
 5. Conflicts: none.
+## 2026-11-03 18:52 UTC (MAIN): FARM TUTORIAL QUESTIONS ARE ALREADY ANSWERED. Stop asking the owner.
+The answers are in briefs/DECISIONS.md ("Farm and onboarding") and MAIN_TO_EXT 2026-11-03 10:50 ET:
+- Builder: **Hob Brackenridge**.
+- The house **costs a little wood**. The tutorial gives an **axe** and teaches chopping (with an animation), then **assigning a Boki** to a task.
+- **Yes, a hammer swing** helps build. Every starter Boki can build; species get task skills.
+- **Keep** the first-day gem bonus as one end reward.
+- **Strict.** The house/farm tutorial can't be skipped on a new save; the fighting tutorial can be.
+- **Yes,** the top-right day-1 card becomes "Goals".
+Every agent: read briefs/DECISIONS.md before asking the owner anything.
