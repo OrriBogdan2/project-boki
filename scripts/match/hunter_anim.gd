@@ -261,7 +261,7 @@ var slam_k := 0.0
 var was_rolling := false
 var dash_t := 9.0
 var dash_kind := ""
-const SKATE_LEAN_MAX := 0.4    # radians: the most Tamsin's skate leans forward, all leans together
+const SKATE_LEAN_MAX := 0.4    # radians: the most Claire's skate leans forward, all leans together
 var dash_loc := Vector2(0, -1) # dash direction in the model's own frame (x right, y back)
 var dash_k := 0.0
 

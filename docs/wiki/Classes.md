@@ -4,7 +4,7 @@ A class is a whole character: its own dash, a passive with a resource it builds,
 click), a right-click ability with several variants, a utility on E and an ultimate on R. There are
 twelve, four in each weight class:
 
-- **Light:** [Dancer](Class-Dancer.md) (stay on one target from range, cartwheel and reset), [Archer](Class-Archer.md) (pin people, then the big shot), [Vireo](Class-Vireo.md) (load Sparks, then Wirerun through them) and [Tamsin](Class-Tamsin.md) (chill foes, shelter the squad behind ice).
+- **Light:** [Dancer](Class-Dancer.md) (stay on one target from range, cartwheel and reset), [Archer](Class-Archer.md) (pin people, then the big shot), [Vireo](Class-Vireo.md) (load Sparks, then Wirerun through them) and [Claire](Class-Claire.md) (chill foes, shelter the squad behind ice).
 - **Medium:** [Marlowe](Class-Marlowe.md) (burr charges and one long needle), [Linnet](Class-Linnet.md) (heal, carry the downed), [Dolm](Class-Dolm.md) (raise rocks, punch them into the fight) and [Ostra](Class-Ostra.md) (swell, plant a seed, trade places).
 - **Heavy:** [Zedran](Class-Zedran.md) (rage, chain in, crush), [Bulwark](Class-Bulwark.md) (block, then smash them into walls), [Dredge](Class-Dredge.md) (haul a foe in, drop the anchor) and [Ashwick](Class-Ashwick.md) (build Char, flash foes over).
 
@@ -60,7 +60,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Dredge](Class-Dredge.md) | 193 / 2 | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |
 | [Linwick](Class-Linwick.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Merge) |
 | [Moosh Moosh](Class-Moosh-Moosh.md) | 145 / 1 | Ember Cast | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
-| [Tamsin](Class-Tamsin.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Merge) |
+| [Claire](Class-Claire.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Merge) |
 | [Breah](Class-Breah.md) | 145 / 1 | Rubble Fists | Molten Guard | Rubble Leap | Quakefall | Stone Row | none (Boki Merge) |
 | [Ostra](Class-Ostra.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Merge) |
 
@@ -79,7 +79,7 @@ Every save starts with Venator. In the new-game flow you pick 1 of 3 more (Zedra
 | [Dredge](Class-Dredge.md) | medium | Make it out carrying 8 items | 8 |
 | [Linwick](Class-Linwick.md) | pick at the start, else easy | Hit 3 enemies at once with one ability | 1 |
 | [Moosh Moosh](Class-Moosh-Moosh.md) | hard | Revive 4 teammates, once 6 Hunters are open | 4 |
-| [Tamsin](Class-Tamsin.md) | medium | Slow 20 enemies | 20 |
+| [Claire](Class-Claire.md) | medium | Slow 20 enemies | 20 |
 | [Breah](Class-Breah.md) | hard | Hit 3 enemies at once with one ability, 5 times, once 6 Hunters are open | 5 |
 | [Ostra](Class-Ostra.md) | hard | Knock down 3 hunters while merged with your Boki, once 8 Hunters are open | 3 |
 
@@ -126,10 +126,10 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | Moosh Moosh | Bring 3 wild Boki home | 3 | Glider: Puffball Wings |
 | Moosh Moosh | Make it out of 5 expeditions | 5 | Title: Wisp Keeper |
 | Moosh Moosh | Open 8 chests | 8 | Banner: Moon Lantern |
-| Tamsin | Slow 40 enemies | 40 | Colourway: Hoarfrost |
-| Tamsin | Fly through 10 air rings | 10 | Glider: Frost Kite |
-| Tamsin | Revive 2 teammates | 2 | Emote: Snow Angel |
-| Tamsin | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
+| Claire | Slow 40 enemies | 40 | Colourway: Hoarfrost |
+| Claire | Fly through 10 air rings | 10 | Glider: Frost Kite |
+| Claire | Revive 2 teammates | 2 | Emote: Snow Angel |
+| Claire | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
 | Breah | Hit 3 enemies at once with one ability, 5 times | 5 | Skin: Slate and Moss |
 | Breah | Knock 12 enemies into walls | 12 | Emote: Ground Pound |
 | Breah | Open 10 chests | 10 | Glider: Slate Kite |

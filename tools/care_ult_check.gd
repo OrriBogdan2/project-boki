@@ -171,7 +171,7 @@ func _tender_breaks() -> void:
 	await _free(m)
 
 
-# ================================================================== Tamsin: Rimelock
+# ================================================================== Claire: Rimelock
 func rimewright() -> void:
 	var r: Array = sc.setup("rimewright", 4.0)
 	var m: Match = r[0]

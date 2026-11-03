@@ -11,7 +11,7 @@
   - [Zedran](Class-Zedran.md)
   - [Bulwark](Class-Bulwark.md)
   - [Moosh Moosh](Class-Moosh-Moosh.md)
-  - [Tamsin](Class-Tamsin.md)
+  - [Claire](Class-Claire.md)
 - [Boki](Boki.md)
   - [Species](Boki-Species.md)
   - [Growth](Boki-Growth.md)

@@ -138,7 +138,7 @@ Params: `a` (the hunter), `b` (the cursor point, clamped to `range`), `r` (1.35)
 
 ### Extras the sheets need
 ```gdscript
-AimKit.line(h, "aim")                                        # the thin aim line to the cursor (Ostra, Tamsin)
+AimKit.line(h, "aim")                                        # the thin aim line to the cursor (Ostra, Claire)
 AimKit.line(h, "aim", {"col": Color("ffd25a"), "hot": 0.6})   # Dancer's gold empowered line
 AimKit.line(h, "aim", {"len": 20.0})                          # past the cursor to max range (Pin stage 2)
 AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Breah Tetraform: a long line, inward chevrons, centre ring

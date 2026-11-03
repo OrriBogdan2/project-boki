@@ -2,7 +2,7 @@
 
     python3 tools/gen_care_sfx.py      (then: godot --headless --import)
 
-tend_* : Moosh Moosh's warm, wooden and lantern-bright sounds. rime_* : Tamsin's glassy, gliding, cracking ones.
+tend_* : Moosh Moosh's warm, wooden and lantern-bright sounds. rime_* : Claire's glassy, gliding, cracking ones.
 """
 import math, os, random, struct, wave
 
@@ -89,7 +89,7 @@ save('tend_pickup', mix(scale(mul(lp(noise(0.3), 500), env(N(0.3), 0.03, 0.1)), 
 # Kindled to 5: a crackle of catching embers
 save('tend_kindled', mix(*[at(scale(hiss(0.03, 2000, 7000, 0.001, 0.008), rnd.uniform(0.4, 1.0)), rnd.uniform(0, 0.25)) for _ in range(9)] + [scale(chirp(260, 520, 0.2, 0.01, 0.1), 0.4)]), -21)
 
-# ---- Tamsin: ice, blades, glass
+# ---- Claire: ice, blades, glass
 # Ice Dart: a thin glassy flick
 save('rime_shard', mix(scale(chirp(2300, 1500, 0.07, 0.002, 0.025), 0.6), scale(mul(hp(noise(0.08), 3500), env(N(0.08), 0.001, 0.02)), 0.6)), -24)
 # ... skating: a heavier, straighter crack of a lance of ice

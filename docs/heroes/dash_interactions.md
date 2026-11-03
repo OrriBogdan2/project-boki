@@ -262,39 +262,39 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Moosh Moosh | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | Moosh Moosh | hold RMB through an air dash |  | the hold carries through and lets go there |
 | Moosh Moosh | hold RMB through a jump |  | the hold carries through and lets go there |
-| Tamsin | ground dash -> LMB | Data: Skate is a held mode, released to stop. Footage (0239-0245, 0285-0290): she fires the whole skate and the darts become straight thick beams. Ours: darts fly as beams at normal damage (data pass); the skate goes on. | fires mid-dash; dash momentum carries; variant: beam |
-| Tamsin | ground dash -> RMB | Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the spear aim and throw go on while she keeps skating. | fires mid-dash; dash momentum carries |
-| Tamsin | ground dash -> E | Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the Rink Wall's tell and slide start while she keeps skating. | fires mid-dash; dash momentum carries |
-| Tamsin | ground dash -> ult (X) | Data: the ult makes her invulnerable inside a slowing zone; footage (ult f25-f55): she is rooted in the crystal. Owner (18:20): skating into it keeps her momentum. Ours: Rimelock ends the skate and the skate's speed carries her on as the shell closes (x.carry_t 0.5 s, easing to a stop: 11.5 m/s gives 2.9 m), then she is rooted. | cancels the dash; dash momentum carries |
-| Tamsin | ground dash -> Q glove | No source glove; the skate is a held move, so a glove goes off from it like her abilities. | fires mid-dash; dash momentum carries |
-| Tamsin | air dash -> LMB | No air dash: Shift in the air buffers the Skate to the landing (owner item 12; the footage never starts a skate in the air). | the kit's own dash state: not routed yet |
-| Tamsin | air dash -> RMB | No air dash (see lmb). | the kit's own dash state: not routed yet |
-| Tamsin | air dash -> E | No air dash (see lmb). | the kit's own dash state: not routed yet |
-| Tamsin | air dash -> ult (X) | No air dash (see lmb). | the kit's own dash state: not routed yet |
-| Tamsin | air dash -> Q glove | No air dash (see lmb). | the kit's own dash state: not routed yet |
-| Tamsin | LMB -> dash | Footage: she starts skating while firing and keeps firing; the darts turn to beams. Ours: the same. | the dash goes, the ability keeps running; dash momentum carries; variant: beam |
-| Tamsin | RMB -> dash | Data: Skate can be held at any time. Ours: Shift during the spear aim or the throw's wind-up starts the skate and the throw still goes. | the dash goes, the ability keeps running; dash momentum carries |
-| Tamsin | E -> dash | Data: Skate can be held at any time. Ours: Shift during the wall's 0.2s tell starts the skate and the wall still erupts. | the dash goes, the ability keeps running; dash momentum carries |
-| Tamsin | ult (X) -> dash | Data: reactivating ends Chilling Finale early. Owner item 27: Shift ends Rimelock (as X again would; a late press still cracks it open) and she skates straight out at full speed. | the dash cancels its wind-up or recovery; dash momentum carries |
-| Tamsin | Q glove -> dash | No source glove; the skate starts and the glove's effect stays. | the dash goes, the ability keeps running; dash momentum carries |
-| Tamsin | jump -> LMB |  | fires mid-jump (default) |
-| Tamsin | jump -> RMB |  | fires mid-jump (default) |
-| Tamsin | jump -> E |  | fires mid-jump (default) |
-| Tamsin | jump -> ult (X) |  | fires mid-jump (default) |
-| Tamsin | jump -> Q glove |  | fires mid-jump (default) |
-| Tamsin | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| Tamsin | LMB -> air dash | No air dash in the source (owner item 12). | **exception:** the move waits for the ability's end (owner item 12: she has no air dash; Shift in the air waits for the landing) |
-| Tamsin | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| Tamsin | RMB -> air dash | No air dash in the source (owner item 12). | **exception:** the move waits for the ability's end (owner item 12: she has no air dash; Shift in the air waits for the landing) |
-| Tamsin | E -> jump |  | the move goes at once, the ability keeps running (default) |
-| Tamsin | E -> air dash | No air dash in the source (owner item 12). | **exception:** the move waits for the ability's end (owner item 12: she has no air dash; Shift in the air waits for the landing) |
-| Tamsin | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
-| Tamsin | ult (X) -> air dash | No air dash in the source (owner item 12). | **exception:** the move waits for the ability's end (owner item 12: she has no air dash; Shift in the air waits for the landing) |
-| Tamsin | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
-| Tamsin | Q glove -> air dash | No air dash in the source (owner item 12). | **exception:** the move waits for the ability's end (owner item 12: she has no air dash; Shift in the air waits for the landing) |
-| Tamsin | hold RMB through a ground dash |  | the hold carries through and lets go there |
-| Tamsin | hold RMB through an air dash |  | the hold carries through and lets go there |
-| Tamsin | hold RMB through a jump |  | the hold carries through and lets go there |
+| Claire | ground dash -> LMB | Data: Skate is a held mode, released to stop. Footage (0239-0245, 0285-0290): she fires the whole skate and the darts become straight thick beams. Ours: darts fly as beams at normal damage (data pass); the skate goes on. | fires mid-dash; dash momentum carries; variant: beam |
+| Claire | ground dash -> RMB | Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the spear aim and throw go on while she keeps skating. | fires mid-dash; dash momentum carries |
+| Claire | ground dash -> E | Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the Rink Wall's tell and slide start while she keeps skating. | fires mid-dash; dash momentum carries |
+| Claire | ground dash -> ult (X) | Data: the ult makes her invulnerable inside a slowing zone; footage (ult f25-f55): she is rooted in the crystal. Owner (18:20): skating into it keeps her momentum. Ours: Rimelock ends the skate and the skate's speed carries her on as the shell closes (x.carry_t 0.5 s, easing to a stop: 11.5 m/s gives 2.9 m), then she is rooted. | cancels the dash; dash momentum carries |
+| Claire | ground dash -> Q glove | No source glove; the skate is a held move, so a glove goes off from it like her abilities. | fires mid-dash; dash momentum carries |
+| Claire | air dash -> LMB | No air dash: Shift in the air buffers the Skate to the landing (owner item 12; the footage never starts a skate in the air). | the kit's own dash state: not routed yet |
+| Claire | air dash -> RMB | No air dash (see lmb). | the kit's own dash state: not routed yet |
+| Claire | air dash -> E | No air dash (see lmb). | the kit's own dash state: not routed yet |
+| Claire | air dash -> ult (X) | No air dash (see lmb). | the kit's own dash state: not routed yet |
+| Claire | air dash -> Q glove | No air dash (see lmb). | the kit's own dash state: not routed yet |
+| Claire | LMB -> dash | Footage: she starts skating while firing and keeps firing; the darts turn to beams. Ours: the same. | the dash goes, the ability keeps running; dash momentum carries; variant: beam |
+| Claire | RMB -> dash | Data: Skate can be held at any time. Ours: Shift during the spear aim or the throw's wind-up starts the skate and the throw still goes. | the dash goes, the ability keeps running; dash momentum carries |
+| Claire | E -> dash | Data: Skate can be held at any time. Ours: Shift during the wall's 0.2s tell starts the skate and the wall still erupts. | the dash goes, the ability keeps running; dash momentum carries |
+| Claire | ult (X) -> dash | Data: reactivating ends Chilling Finale early. Owner item 27: Shift ends Rimelock (as X again would; a late press still cracks it open) and she skates straight out at full speed. | the dash cancels its wind-up or recovery; dash momentum carries |
+| Claire | Q glove -> dash | No source glove; the skate starts and the glove's effect stays. | the dash goes, the ability keeps running; dash momentum carries |
+| Claire | jump -> LMB |  | fires mid-jump (default) |
+| Claire | jump -> RMB |  | fires mid-jump (default) |
+| Claire | jump -> E |  | fires mid-jump (default) |
+| Claire | jump -> ult (X) |  | fires mid-jump (default) |
+| Claire | jump -> Q glove |  | fires mid-jump (default) |
+| Claire | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
+| Claire | LMB -> air dash | No air dash in the source (owner item 12). | **exception:** the move waits for the ability's end (owner item 12: she has no air dash; Shift in the air waits for the landing) |
+| Claire | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
+| Claire | RMB -> air dash | No air dash in the source (owner item 12). | **exception:** the move waits for the ability's end (owner item 12: she has no air dash; Shift in the air waits for the landing) |
+| Claire | E -> jump |  | the move goes at once, the ability keeps running (default) |
+| Claire | E -> air dash | No air dash in the source (owner item 12). | **exception:** the move waits for the ability's end (owner item 12: she has no air dash; Shift in the air waits for the landing) |
+| Claire | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
+| Claire | ult (X) -> air dash | No air dash in the source (owner item 12). | **exception:** the move waits for the ability's end (owner item 12: she has no air dash; Shift in the air waits for the landing) |
+| Claire | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
+| Claire | Q glove -> air dash | No air dash in the source (owner item 12). | **exception:** the move waits for the ability's end (owner item 12: she has no air dash; Shift in the air waits for the landing) |
+| Claire | hold RMB through a ground dash |  | the hold carries through and lets go there |
+| Claire | hold RMB through an air dash |  | the hold carries through and lets go there |
+| Claire | hold RMB through a jump |  | the hold carries through and lets go there |
 | Breah | ground dash -> LMB | Footage tip 'Punch to Extend Dash/RMB': a punch during Landslide goes off and carries her on. Ours: the boulder or punch goes off mid-leap and the leap's arc carries on (a punch's step pushes her a little further). | fires mid-dash; dash momentum carries |
 | Breah | ground dash -> RMB | Footage tip 'Dash -> RMB Dunk Combo' (0965-1010): Landslide shoves the foe out, then she leap-slams onto it. Ours: the charge starts mid-leap; let go in the air and the slam lands where the leap does. | fires mid-dash; dash momentum carries |
 | Breah | ground dash -> E | Card: Rockwave is only castable over ground; nothing on casting it mid-Landslide. Ours: held to the landing, then raised from there. | buffered to the dash's end |
