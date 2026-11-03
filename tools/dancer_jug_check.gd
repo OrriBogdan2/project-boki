@@ -94,18 +94,30 @@ func thief(a) -> void:
 			K.last_bolt_emp and absf(ed - 13.44) < 0.9 and haste_after <= 0.0, "%.1f m haste %.2f" % [ed, haste_after])
 	A.ok("dancer LMB: each bolt has its own pooled look",
 			DJFx.of(m).free_pools.has("ride_chakram") and DJFx.of(m).free_pools.has("puff"))
-	# Marks: +12% per Mark on bolts only, up to 8
+	# Marks: +10% per Mark on bolts only, no cap
 	A.fresh(T)
 	K.mark_gap = {}
 	K.add_mark(T, 2, true)
-	A.ok("dancer passive: +12% per Mark on bolts only",
-			absf(K.outgoing(T, 10.0, {"src": "shot"}) - 12.4) < 0.01
+	A.ok("dancer passive: +10% per Mark on bolts only",
+			absf(K.outgoing(T, 10.0, {"src": "shot"}) - 12.0) < 0.01
 			and absf(K.outgoing(T, 10.0, {"src": "abil", "ab": "utility"}) - 10.0) < 0.01,
 			"%.2f" % K.outgoing(T, 10.0, {"src": "shot"}))
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "utility"})
 	A.ok("dancer passive: ability hits don't stack", K.marks_on(T) == 2)
 	K.add_mark(T, 20, true)
-	A.ok("dancer passive: eight Marks at most", K.marks_on(T) == 8 and K.res_text() == "8/8", K.res_text())
+	A.ok("dancer passive: Marks have no cap (22 after 20 more), eight diamonds show",
+			K.marks_on(T) == 22 and K.res_text() == "22" and K.pip_count() == 8 and K.res_frac() == 1.0, K.res_text())
+	A.ok("dancer passive: 22 Marks make a bolt 3.2x", absf(K.outgoing(T, 10.0, {"src": "shot"}) - 32.0) < 0.01)
+	# Vault ranks: empowered +20% at rank 2 and again at rank 3, the speed boost half again as big at rank 3
+	var vault_ranks: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["dash"] = rk
+		vault_ranks.append([K.prime_rank_k(), K.vault_haste()])
+	P.slot_lv["dash"] = 1
+	A.ok("dancer Vault ranks: empowered +20% / +40%, speed boost 0.18 -> 0.27 at rank 3",
+			absf(float(vault_ranks[0][0]) - 1.0) < 0.001 and absf(float(vault_ranks[1][0]) - 1.2) < 0.001
+			and absf(float(vault_ranks[2][0]) - 1.4) < 0.001 and absf(float(vault_ranks[1][1]) - 0.18) < 0.001
+			and absf(float(vault_ranks[2][1]) - 0.27) < 0.001, str(vault_ranks))
 	# Vault: a cartwheel, speed, the next bolt empowered; it lands for 3.5x and the Vault comes back
 	A.fresh(T)
 	P.teleport(home)
@@ -317,8 +329,32 @@ func juggernaut(a) -> void:
 	var home: Vector3 = r[4]
 	var lv: int = r[5]
 	var K: JuggernautKit = P.ak
-	A.ok("juggernaut: greatsword, 3 Rampage charges at rank 1",
-			P.wid == "greatsword" and P.max_dashes() >= 3.0, "%s %.0f" % [P.wid, P.max_dashes()])
+	P.slot_lv["dash"] = 1
+	var charges_r1 := P.max_dashes()
+	P.slot_lv["dash"] = 2
+	var charges_r2 := P.max_dashes()
+	P.slot_lv["dash"] = 1
+	A.ok("juggernaut: greatsword, 2 Rampage charges at rank 1 and 3 at rank 2",
+			P.wid == "greatsword" and charges_r1 == 2.0 and charges_r2 == 3.0,
+			"%s %.0f %.0f" % [P.wid, charges_r1, charges_r2])
+	var smash_ks: Array = []
+	var chain_ks: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["sec"] = rk
+		P.slot_lv["kin"] = rk
+		smash_ks.append(K.smash_k())
+		chain_ks.append(K.cd_k("kin"))
+	P.slot_lv["sec"] = 1
+	var air_r1 := K.air_cooldown()
+	P.slot_lv["sec"] = 3
+	var air_r3 := K.air_cooldown()
+	P.slot_lv["sec"] = 1
+	P.slot_lv["kin"] = 1
+	A.ok("juggernaut ranks: Smash +20% at rank 2 and 3, Warchain cooldown -12.5% / -37.5%, Meteor Drop 7.2s -> 4.8s",
+			absf(float(smash_ks[0]) - 1.0) < 0.001 and absf(float(smash_ks[1]) - 1.2) < 0.001
+			and absf(float(smash_ks[2]) - 1.4) < 0.001 and absf(float(chain_ks[1]) - 0.875) < 0.001
+			and absf(float(chain_ks[2]) - 0.625) < 0.001 and absf(air_r1 - 7.2) < 0.001 and absf(air_r3 - 4.8) < 0.001,
+			"%s %s %.1f %.1f" % [smash_ks, chain_ks, air_r1, air_r3])
 	# Rage (Blazing Spirit): damage fills it; nothing below full; Enraged gives damage, dash and ability haste
 	K.res = 0.0
 	K.enraged_t = 0.0
@@ -474,8 +510,31 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut RMB air: Meteor Drop slows, centre stunned",
 			K.last_variant == "air" and A.dmg(T) >= 24.0 and T.slow_t > 0.0 and T.stun_t > 0.0,
 			"took %.0f slow %.2f stun %.2f" % [A.dmg(T), T.slow_t, T.stun_t])
+	A.ok("juggernaut Meteor Drop: its own 7.2s slot, the Smash charge untouched",
+			float(K.cd["air"]) > 6.0 and float(K.cd["air"]) <= 7.2 and K.ch_rmb >= 1.0 and float(K.cd["rmb"]) <= 0.0,
+			"air cd %.2f smash charge %.1f cd %.2f" % [float(K.cd["air"]), K.ch_rmb, float(K.cd["rmb"])])
+	P.teleport(T.pos + Vector3(-4.0, 3.0, 0))
+	P.grounded = false
+	A.aim_at(P, T.pos)
+	P.ak.press_rmb()
+	A.step(m, 0.2)
+	A.ok("juggernaut Meteor Drop: a second one is denied while its slot rests", K.drops == 1, "drops %d" % K.drops)
+	K.cd["air"] = 0.0
+	K.ch_rmb = 0.0
+	K.cd["rmb"] = 2.0
+	P.teleport(T.pos + Vector3(-4.0, 3.0, 0))
+	P.grounded = false
+	A.aim_at(P, T.pos)
+	P.ak.press_rmb()
+	A.step(m, 0.5)
+	A.ok("juggernaut Meteor Drop: it fires with the Smash resting (usable right after a ground Smash)",
+			K.drops == 2 and K.ch_rmb < 1.0 and float(K.cd["air"]) > 6.0,
+			"drops %d air cd %.2f" % [K.drops, float(K.cd["air"])])
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	K.cd["air"] = 0.0
 	# Rampage (Flame Step): a dash attack, aimed like any dash (ArchKit.dash_dir: WASD by default); the tip
-	# hits double; rank 3 adds a charge
+	# hits double; rank 2 adds a charge
 	A.step(m, 1.0)
 	P.teleport(home)
 	A.fresh(T)
@@ -489,7 +548,20 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut dash: Rampage the way you dash, tip hits",
 			K.tips >= 1 and A.dmg(T) >= 14.0 and P.dashes < 2.5,
 			"tips %d took %.0f dashes %.2f" % [K.tips, A.dmg(T), P.dashes])
+	A.ok("juggernaut dash: the tip does not stun into a wall", T.wallstun <= 0.0, "wallstun %.2f" % T.wallstun)
+	# rank 3: a shot dodged through the dash feeds Rage (through the real dodge hook); rank 1 does not
+	K.res = 0.0
+	K.on_perfect_dodge()
+	var rage_r1 := K.res
 	P.slot_lv["dash"] = 3
+	K.res = 0.0
+	P.dodged = false
+	P.inv_t = 0.3
+	P.dash_at = m.time
+	P.hurt(10.0, T, {"src": "shot"})
+	A.ok("juggernaut dash rank 3: a dodged shot builds Rage (15), rank 1 does not",
+			rage_r1 <= 0.01 and absf(K.res - 15.0) < 0.5, "r1 %.1f r3 %.1f" % [rage_r1, K.res])
+	P.inv_t = 0.0
 	P.slot_lv["dash"] = 1
 	# E: the Warchain hooks a foe (blight); its cooldown waits for the pull; a Smash in the pull spins
 	P.teleport(home)
@@ -781,8 +853,22 @@ func combos(a) -> void:
 	A.step(m, 0.5)
 	A.ok("combo dancer: an empowered bolt that misses is spent",
 			TK.primed_hits == 2 and TK.primed_t <= 0.0 and P.dashes < P.max_dashes() - 0.5)
-	# Knife into a foe at rank 3 > Vault reset
+	# Knife into a foe: the Vault comes back with the Knife's rank 3, not Vault's
 	P.slot_lv["dash"] = 3
+	P.slot_lv["kin"] = 2
+	P.teleport(home)
+	A.fresh(T)
+	T2.teleport(home + Vector3(0, 0, 9.0))
+	A.aim_at(P, T.pos)
+	P.dashes = 0.0
+	TK.cd["e"] = 0.0
+	P.ak.use_e()
+	A.step(m, 0.35)
+	A.ok("combo dancer: Knife in a foe at rank 2 (Vault rank 3) gives no Vault back",
+			P.dashes < 0.99, "dashes %.2f" % P.dashes)
+	P.ak.use_e()
+	A.step(m, 0.3)
+	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 3
 	P.teleport(home)
 	A.fresh(T)
@@ -792,7 +878,7 @@ func combos(a) -> void:
 	TK.cd["e"] = 0.0
 	P.ak.use_e()
 	A.step(m, 0.35)
-	A.ok("combo dancer: Knife in a foe (rank 3) = Vault reset + refund",
+	A.ok("combo dancer: Knife in a foe (Knife rank 3) = Vault reset + refund",
 			P.dashes >= 0.99 and float(TK.cd["e"]) < 10.0, "dashes %.2f e cd %.1f" % [P.dashes, float(TK.cd["e"])])
 	P.ak.use_e()
 	A.step(m, 0.05)

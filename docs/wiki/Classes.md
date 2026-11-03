@@ -52,11 +52,11 @@ your class in the Expedition menu, and you can try every class against dummies i
 | Class | Weight | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
 | [Dancer](Class-Dancer.md) | Light | Arc Bolts | Marks | Vault | Bola | Shadow Knife | none (Boki Merge) |
-| [Pin](Class-Pin.md) | Light | Longbow | Focus | Spirit Walk | Snare | Hail Wall | none (Boki Merge) |
+| [Archer](Class-Archer.md) | Light | Longbow | Focus | Grapple Arrow | Snare | Hail Wall | none (Boki Merge) |
 | [Vireo](Class-Vireo.md) | Light | Coilcaster | Sparks | Wirerun | Coilshot | Skycall | none (Boki Merge) |
 | [Marlowe](Class-Marlowe.md) | Medium | Quill Rifle | Fever | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
 | [Zedran](Class-Zedran.md) | Heavy | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Merge) |
-| [Bjorn](Class-Bjorn.md) | Heavy | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Merge) |
+| [Bulwark](Class-Bulwark.md) | Heavy | Tower Shield & Mace | Guard | Whirl | Shield | Mending Ground | none (Boki Merge) |
 | [Dredge](Class-Dredge.md) | Heavy | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |
 | [Ashwick](Class-Ashwick.md) | Heavy | Torch Lance | Flashover | Spark Leap | Cinder Shot | Furnace Cloak | none (Boki Merge) |
 | [Linnet](Class-Linnet.md) | Medium | Lantern Crook | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
@@ -70,9 +70,9 @@ The weight class sets health, speed, mass and dash charges; the class kit sits o
 
 | Weight | Health | Speed (m/s) | Dash charges | Mass | Glide cap | Classes | In short |
 |---|---|---|---|---|---|---|---|
-| Light | 124 | 4.4 | 1 | 0.85 | 1.2 | Dancer, Pin, Vireo, Tamsin | Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest. |
+| Light | 124 | 4.4 | 1 | 0.85 | 1.2 | Dancer, Archer, Vireo, Tamsin | Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest. |
 | Medium | 145 | 4.4 | 1 | 1 | 1 | Marlowe, Linnet, Dolm, Ostra | The all-rounder: middle health, speed, dash and glide. |
-| Heavy | 193 | 4.4 | 2 | 1.35 | 0.85 | Zedran, Bjorn, Dredge, Ashwick | Slow and tough. Two short dashes, the most health, and very hard to push off a ledge. |
+| Heavy | 193 | 4.4 | 2 | 1.35 | 0.85 | Zedran, Bulwark, Dredge, Ashwick | Slow and tough. Two short dashes, the most health, and very hard to push off a ledge. |
 
 ### Run levels
 
