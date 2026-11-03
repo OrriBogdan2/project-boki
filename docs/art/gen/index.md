@@ -479,3 +479,26 @@ One 2048x2048 sheet per Warden in `textures/<name>_materials.png`: a 2x2 grid of
 | `textures/vex_materials.png` | gunmetal and brass mechanical arm plating with pistons; sleek dark slate segmented armour plates; handwritten scripture paper strips with red wax seals; dark wooden prayer beads on cord | 1bc23169 |
 | `textures/cinder_materials.png` | glossy charcoal-black salamander scales with glowing ember-orange blotches; glowing feathery gill-frill membrane; scorched cracked brass goggles; bubbling green liquid fire in glass | e97bed7a |
 | `textures/moosh_materials.png` | soft red-orange fox fur with cream tips; fur turning into living flame at the tail tip; cream linen courier tunic; moss-green knitted wool scarf | 5a3dbee2 |
+
+### Vex (gunslinger), Hired Gun (supersedes Venatrix; base name was Venator)
+Owner direction: East Asian, named Vex, grizzled confident vet, a bit crazy, ember aura.
+
+Warden block:
+> Redesign the character from the first two reference images: Vex, the Hired Gun, an elite marine sniper of rigid faith whose sanity is slipping. A striking East Asian woman in her late thirties, a grizzled veteran: tall, lean, athletic, upright and commanding, with a faint glowing orange ember aura. Weathered scarred face (scar through one eyebrow, one across the cheek, a nicked lip), soot, a few grey strands, long black hair in a high ponytail, no hat. A cocky crooked half-grin with a slightly crazed glint in her eyes. Battle-worn fitted dark slate armour with segmented plates, a short high-collared dark coat with long tails, tall black boots, an orange signal scarf, one oversized slate shoulder plate engraved with a small open-eye-in-a-teardrop sigil, a bandolier of spiked brass charges, dog tags. Her left arm is a sleek gunmetal and brass mechanical prosthetic with dark wooden prayer beads around the wrist; her right eye is a small glowing orange brass mechanical lens. Scripture paper strips with red wax seals tied to her rifle and shoulder plate. A long ember sniper rifle with glowing orange vents. No real-world religious symbols. (Prompt prefix for this short form: "Premium stylised fantasy hero art, hand-painted 3D look, rich painted textures, soft rim light, polished game-studio quality. Match the art style and rendering of the third reference image exactly, copying nothing else from it.")
+
+| File | Size | Studio image | Notes |
+|---|---|---|---|
+| `wardens/vex_splash.png` | 2752x1536 | 9a8a0e1e | |
+| `wardens/vex_portrait.png` | 2048x2048 | d4ae5c7c | |
+| `wardens/vex_turnaround.png` | 3168x1344 | 86913d76 | |
+
+Owner: Venatrix looked really bad; make her East Asian, call her Vex, assertive with more aura, a grizzled super-confident vet who's a bit crazy. Prompts were shortened (the studio flagged 'prompt too long' and stalled on long wide-format prompts); the splash/turnaround use the short block above, and the portrait used the longer block in the git history.
+
+Splash:
+> Splash art, 16:9: a ruined cliffside chapel at dusk, broken stained glass, candles in the rubble, a storm sea of clouds below; Vex stands tall in the broken window frame aiming the rifle out over the clouds, vents glowing, ponytail, coat tails, scarf and scripture strips whipping in the wind, grinning while she mutters a prayer, spent casings at her feet, full figure. Golden dusk light against cold blue storm shadows. No text, no logos.
+
+Portrait:
+> (longer block version) Portrait bust, square 1:1, for a game hero picker: head and shoulders, three-quarter view, a grizzled East Asian veteran woman in her late thirties with a weathered, scarred, striking face and a few grey strands, long glossy black hair in a sleek high ponytail, the small glowing orange brass mechanical lens over her right eye and an intense dark human left eye, a cocky, crooked half-grin and a slightly crazed glint in her eye, the orange scarf at her neck, the high-collared dark coat, the top of the sleek mechanical left arm with prayer beads, a scripture strip tied to the slate shoulder plate. Exactly one mechanical eye. Simple dark slate gradient background with a faint warm orange glow, strong rim light. No text, no logos.
+
+Turnaround:
+> Turnaround reference sheet: the same character three times side by side at the same scale, FRONT, SIDE, BACK, neutral A-pose, full body, one ground line, flat even studio light, plain light grey background. Mechanical arm on the same side in every view, rifle hanging muzzle-down in the human hand in every view, shoulder plate on the other shoulder; ponytail, coat tails and scarf visible in the back view. No text, no labels, no logos.
