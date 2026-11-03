@@ -268,3 +268,26 @@ Portrait:
 
 Turnaround:
 > Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. One hand crossbow in each hand, hanging down, in every view; the braid and wing-scale coat-tails clearly visible in the back view. No text, no labels, no logos.
+
+### Claire (rimewright), face rework (supersedes the Tamsin take above)
+Owner direction: renamed from Tamsin; cuter, sweeter animated-film face.
+
+Warden block:
+> Redesign the character from the first two reference images at full production quality, keeping her design (a competition skating dress fading from glacier teal to midnight crusted with frost rhinestones, sheer sparkling sleeves, layered chiffon skirt, white competition skates on long blades, high ponytail, an ice fan), and make her a frost-sprite, more striking and epic than the reference: Claire, the Icy Dancer, a nineteen-year-old champion skater who skated the frozen sea the night the land broke and came back part ice. About seven and a half heads tall, slight and graceful with an athlete's long legs. Pale cool skin with patches of clear crystalline ice growing on her cheekbone, collarbone, shoulders and forearms, catching the light like cut glass. Her hair is frost-white and turns into stiff feathery frost crystals toward the tips, in a high ponytail with a teal scrunchie. Her face is very cute and sweet in a polished animated-feature-film style: a soft rounded heart-shaped face, very large expressive bright icy-blue eyes with long lashes, a small button nose, softly rosy cheeks, a warm sweet smile, delicate eyebrows, youthful and charming, gentle and kind but confident; smooth flawless stylised skin. A little glitter at the eyes. Her fan is a folding fan of thin ice blades. A thin trail of frost and snowflakes follows her. Our own skater: no fur stole, no bun, no cape. Keep her own look: frost-feather high ponytail and teal skating dress; no side braid, no cape, no long gown.
+
+| File | Size | Studio image | Notes |
+|---|---|---|---|
+| `wardens/claire_splash.png` | 2752x1536 | 001db5be | |
+| `wardens/claire_portrait.png` | 2048x2048 | ac5c0d01 | |
+| `wardens/claire_turnaround.png` | 3168x1344 | 6375c8e0 | |
+
+Owner: 'more Disney, Elsa, cute'. Done in plain words only (no film, studio or character named) and she keeps her own frost-feather ponytail and teal skating dress, so she stays clear of that character's signature look.
+
+Splash:
+> Splash art, 16:9 widescreen: a vast frozen lake on a floating isle under a night sky with aurora, broken ice floes and shards rising around her; Claire spins mid-jump in a full extension, one leg high, skate blades flashing, carving a glowing spiral of ice into the air, her ice fan open throwing a fan of sharp ice spears, frost-feather ponytail whipping, snow sparkle everywhere, full figure, elegant and fierce. Cool moonlight and teal aurora glow. Palette: midnight, deep rink blue, rime white, glacier teal, frost-white hair, pale skin, blade silver. No text, no logos.
+
+Portrait:
+> Portrait bust, square 1:1, for a game hero picker: head and shoulders, three-quarter view, a sweet, warm smile with big sparkling eyes, crystalline ice patches on her cheekbone and shoulder, frost-white ponytail turning into feathery frost crystals, teal scrunchie, glitter at the eyes, the open ice fan raised beside her face, snowflakes drifting. Simple deep teal-midnight gradient background, strong cool rim light. Palette: midnight, glacier teal, rime white, pale skin, silver. No text, no logos.
+
+Turnaround:
+> Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. The ice fan closed in the same hand in every view, the ice patches in the same places, skates on in every view, ponytail visible in the side and back views. No text, no labels, no logos.
