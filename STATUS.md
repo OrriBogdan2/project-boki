@@ -1,10 +1,10 @@
-2026-11-03T14:10:10Z
+2026-11-03T14:28:05Z
 
 == S1 BRANCH TABLE (current; older detail further down) ==
 branch | commit | state | Net | checks
-ext/airdash-glide | 411a591 | READY TO MERGE (re-verify on main 4d39c623 running) | main's (no sync change) | full suite 0 failures + --airdash-glide-check (new) + --move-feel-check + --wallmove-check 0 failures
+ext/airdash-glide | 411a591 | READY TO MERGE (re-verified on main 4d39c623, 14:2x UTC: full suite + --airdash-glide-check 0 failures; --obstacle-check 1 failure also on plain main) | main's (no sync change) | full suite 0 failures + --airdash-glide-check (new) + --move-feel-check + --wallmove-check 0 failures
 ext/mapclean | 2082d0d | NOT READY: re-merge running (14:05 UTC) | main's | conflicts with main in tools/make_hollowcrown.py (vs breakables 61f8772b kegs, already in integ77); do NOT merge 2082d0d; new tip will be reported here
-ext/kitdata-vireo-venator | 67454b5 | READY TO MERGE AT THE TIP (on dash-flow-base 4edc562 + main integ77; S1 DashRules removed, Vireo/Venator rows live in S2 DashFlow; dash rings stay stripped) | main's | full suite 0 failures except --dash-flow-check 1 failure "bulwark air dash -> lmb, pressed early: lost", which also fails on plain origin/ext/dash-flow-base (S2's, not this branch); mage combo 83, gunslinger 67; health + gen_wiki clean
+ext/kitdata-vireo-venator | 67454b5 | READY TO MERGE AT THE TIP (on dash-flow-base 4edc562 + main integ77; S1 DashRules removed, Vireo/Venator rows live in S2 DashFlow; dash rings stay stripped) | main's | full suite 0 failures except --dash-flow-check 1 failure "bulwark air dash -> lmb, pressed early: lost", which also fails on plain origin/ext/dash-flow-base (S2's, not this branch); mage combo 83, gunslinger 67; health + gen_wiki clean | re-verified on main 4d39c623 + dash-flow-base bf711e9: full suite, mage 83/0, gunslinger 67/0; only --dash-flow-check bulwark row (S2's, same on bare dash-flow-base) and --obstacle-check (same on main)
 ext/kitdata-pin-bjorn | 7dede8e | READY TO MERGE AT THE TIP (kit data + OWNER_REVIEW Pin #5 #6, Bjorn #10 #29 #30, #32/#35 rows for Pin and Bjorn; supersedes 93e9640) | main's (no sync change) | full suite 0 failures (hero combo 217, archer 119, bulwark 98), health + gen_wiki clean
 ext/kitdata-linwick-dredge | 90c7138 | READY (kit data) | main's | full suite 0 failures
 ext/kitdata-moosh-tamsin | c6932ae | READY (kit data); NET NOTE: zone bridge event gained an optional colour field, no bump | 0.17.0 | full suite 0 failures
@@ -16,7 +16,7 @@ BJORN #10 #29 #30: DONE by S1 on ext/kitdata-pin-bjorn @ 7dede8e. S2: skip them.
 DASH TABLE: converged on DashFlow. ext/kitdata-vireo-venator @ 67454b5 has no DashRules left (no rows needed porting; DashFlow already covered them; the S1 mage "rmb_to_dash cancels" row was not carried over since DashFlow's into_dash rows are empty for mage). hero_ult.gd now matches main's newer version (sha1 ef9d382e), taken from main by merge. For S2: --dash-flow-check fails "bulwark air dash -> lmb, pressed early: lost" on dash-flow-base itself (Bulwark mace lmb_override drops an early tap).
 Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on over drops and the abyss (gameplay change) OK? 2 m shield push and 4.2 m wall OK (no source numbers)? The aegis plates read like planks from top-down.
 
-Running now: 2 Sonnet agents (since 14:05 UTC): mapclean re-merge onto main 4d39c623; suite verify of airdash-glide and kitdata-vireo-venator on 4d39c623 (physics pass touched hunter movement).
+Running now: 1 Sonnet agent (since 14:05 UTC): mapclean re-merge onto main 4d39c623. Verify of airdash-glide + kitdata-vireo-venator on 4d39c623 DONE: both PASS as-is, tips unchanged.
 Queued: none on S1 (Dancer handed to S2). Farm tutorial build waits for owner answers.
 Last INBOX entry handled: 2026-11-03 14:05 UTC ORCH check-in (matches S1 actions: mapclean HOLD + re-merge running; airdash-glide and kitdata-vireo-venator suite on 4d39c623 running)
 Watcher: received 19:06 UTC entry
