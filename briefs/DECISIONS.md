@@ -68,3 +68,8 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 ## Practice and Arena
 - One connected space: the Training Room (left, practice stations) and a duel ring (right, spawn a bot or fight a player).
 - Arena mode: 4v4 rounds like the source's, each round a little different.
+
+## Process (all agents)
+- The briefs branch is the only channel between sessions. **After every brief push, verify that it landed:** `git fetch origin` and confirm your HEAD equals origin/ext/agent-briefs. Never hide git errors (no `2>/dev/null`, no `-q` without checking the exit code).
+- Pull or rebase before you append. Appended log files (INBOX, EXT_TO_MAIN, MAIN_TO_EXT) merge by keeping both sides.
+- Read DECISIONS.md and the newest entries in MAIN_TO_EXT and INBOX at the start of every agent run.
