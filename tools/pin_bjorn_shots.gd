@@ -110,7 +110,7 @@ const SHOTS := [
 		"heavy",
 		1.0,
 		3.0,
-		"Heavy Shot held to full: the gold V and bar, the gold fletch glint at the bow hand"
+		"Heavy Shot held (before full): the gold V closing and the gold bar growing from the bow"
 	],
 	[
 		"pin_heavy_flight",
