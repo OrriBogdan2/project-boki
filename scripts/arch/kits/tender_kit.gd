@@ -22,7 +22,6 @@ var carry_t := 0.0
 var safe_t := 0.0
 var setdown_was := false        # the set-down key (crouch, never F: F is the Boki system's) was down last tick
 const SETDOWN := "crouch"      # the one place to change the set-down key (a Hunter.inp key)
-var last_dash_pass := false    # the last Relay Step went through a teammate (tests)
 var look: CareLook             # pooled visuals (made on first use)
 var shot_seen := 0             # the hunter's shot counter at the last ember we dressed
 var seed_aim := false          # RMB held: the dotted lane and the coiled pose are up (a hold: dropped on merge)
@@ -207,9 +206,6 @@ func _drop_holds() -> void:
 func carrying() -> Array:
 	return CareUtil.carried_of(m, h)
 
-func move_k() -> float:
-	return 1.0 - (float(d["passive"].get("slow", 0.3)) if not carrying().is_empty() else 0.0)
-
 func can_pick() -> bool:
 	return lock_t <= 0.0 and h.stun_t <= 0.0 and h.root_t <= 0.0 and not busy() and not Hex.active(h)
 
@@ -271,9 +267,7 @@ func drop_all(broken: bool) -> void:
 	h.shield_t = 0.0
 	lock_t = maxf(lock_t, 1.5)          # set down: not picked straight back up
 	if broken:
-		var pd: Dictionary = d["passive"]
-		h.stun_t = maxf(h.stun_t, float(pd.get("drop_stun", 0.6)))
-		lock_t = float(pd.get("lock", 4.0))
+		lock_t = float(d["passive"].get("lock", 4.0))
 		m.fx.word(h.pos + Vector3(0, 2.4, 0), "DROPPED", Color("ff8a6a"), false)
 		m.sfx("knock", h.pos, -4.0, 1.2)
 
@@ -285,40 +279,15 @@ func on_dash(use_ex: bool) -> bool:
 	var air: Dictionary = dd.get("air", {})
 	var dist := float(air.get("dist", 8.5)) if use_ex else float(dd.get("dist", 4.2))
 	var tt := float(air.get("time", 0.8)) if use_ex else float(dd.get("time", 0.16))
-	var from := h.pos
 	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12)), "dir": dash_dir()}, use_ex)
 	h.ghost_t = 0.3          # her ember motes, not the shared after-image (from the first frame)
-	# travel applies the global dash feel; the glide and the relay line use the same scaled numbers, except
-	# the glide's length, which is the source's measured 11-15 m and so skips the global shortening
-	var feel := dash_feel()
-	if not use_ex:
-		dist *= float(feel["dist"])
-	tt *= float(feel["time"])
+	# travel applies the global dash feel to the time; the glide's length is the source's measured 11-15 m
+	# and so skips the global shortening
 	if use_ex:
-		_start_glide(dist, tt)
+		_start_glide(dist, tt * float(dash_feel()["time"]))
 	play("mm_dash_air" if use_ex else "mm_dash")
 	m.sfx("tend_hop", h.pos, -3.0, 0.9 if use_ex else 1.0)
 	aft_t = 0.0
-	var rd := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
-	var to := from + Vector3(rd.x, 0, rd.y).normalized() * dist
-	last_dash_pass = false
-	var ar := float(dd.get("ally_r", 1.1))
-	for o in CareUtil.mates(m, h, Vector3.INF, 1e9, false):
-		var c := Geometry2D.get_closest_point_to_segment(
-				Vector2(o.pos.x, o.pos.z), Vector2(from.x, from.z), Vector2(to.x, to.z))
-		if Vector2(o.pos.x, o.pos.z).distance_to(c) < ar + o.r and absf(o.pos.y - from.y) < 2.0:
-			last_dash_pass = true
-			if use_ex:
-				h.ex_cd *= 1.0 - float(dd.get("refund", 0.5))
-			else:
-				h.dashes = minf(h.max_dashes(), h.dashes + float(dd.get("refund", 0.5)))
-			wind_back_hearth(float(dd.get("e_refund", 1.0)))
-			m.fx.ring(o.pos, 1.3, col_of(dd), 0.3)
-			m.fx.word(o.pos + Vector3(0, 2.2, 0), "RELAY", col_of(dd), false)
-			m.sfx("tend_relay", o.pos, -4.0, 1.0)
-			lk().burst("plus", o.pos + Vector3(0, 1.2, 0), {"r": 0.5, "dur": 0.3})
-			if not use_ex: play("mm_relay")
-			break
 	return true
 
 ## The air dash is her long glide (dash.air): a quick ramp to a flat burst, then a float out at a share of
@@ -393,6 +362,12 @@ func fire_rmb(c: Dictionary) -> void:
 	m.sfx("tend_seed", h.pos, -2.0, 1.0)
 	Feel.shake(m, "cast", h, h.pos)
 
+## The Burrseed's burst radius: rank 3 doubles it (the source's detonation-radius upgrade).
+func burst_radius() -> float:
+	var seed_def: Dictionary = rmb_def()["seed"]
+	var r3_k := float(seed_def.get("r3_k", 2.0))
+	return float(seed_def["burst_r"]) * (r3_k if rank("sec") >= 3 else 1.0)
+
 func _stick(e: Ent) -> void:
 	var sd: Dictionary = rmb_def()["seed"]
 	burr_n += 1
@@ -400,7 +375,7 @@ func _stick(e: Ent) -> void:
 	# the area shows at once: a disc the size of the burst under them, and a light column falling
 	lk().burst("column", e.pos, {"col": Color("8a5cff"), "r": 1.0, "dur": float(sd["delay"]) + 0.1, "ent": e})
 	m.sfx("tend_stick", e.pos, -3.0, 1.0)
-	net_ring(e.pos, float(sd["burst_r"]), col_of(rmb_def()))
+	net_ring(e.pos, burst_radius(), col_of(rmb_def()))
 
 func _tick_burrs(dt: float) -> void:
 	var sd: Dictionary = rmb_def()["seed"]
@@ -417,9 +392,9 @@ func _tick_burrs(dt: float) -> void:
 		lk().keep(
 				key, "disc", t.pos,
 				{
-					"r": float(sd["burst_r"]), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": 1.2,
+					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": 1.2,
 					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 0.9})
-		AimKit.circle(h, key, {"at": t.pos, "r": float(sd["burst_r"]), "fill": k, "all": true, "col": Color("b98aff")})
+		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": Color("b98aff")})
 		if float(b["left"]) <= 0.0:
 			burrs.erase(b)
 			lk().drop(key)
@@ -429,7 +404,7 @@ func _tick_burrs(dt: float) -> void:
 func _burst(t: Ent) -> void:
 	var sd: Dictionary = rmb_def()["seed"]
 	var at := t.pos
-	var rr := float(sd["burst_r"])
+	var rr := burst_radius()
 	var col := col_of(rmb_def())
 	# the flare: the disc snaps out bigger and brighter, then a root beam holds on each foe
 	lk().burst(
@@ -486,7 +461,7 @@ func e_recast() -> bool:
 		hearth["to"] = to
 		hearth["pos"] = h.pos
 	hearth["tossed"] = true
-	hearth["boost"] = float(ed.get("boost_t", 1.0)) * (2.0 if rank("kin") >= 3 else 1.0)
+	hearth["boost"] = float(ed.get("boost_t", 1.0))
 	play("mm_toss")
 	m.sfx("tend_toss", h.pos, -2.0, 1.2)
 	h._ab_feedback("k1", "cast")
@@ -515,12 +490,6 @@ func _tick_hearth(dt: float) -> void:
 	if hearth.is_empty():
 		return
 	var ed := e_def()
-	# a stun on the bearer puts the light out
-	var on_me: bool = String(hearth["mode"]) == "self" or (
-			String(hearth["mode"]) == "latched" and hearth.get("who") == h)
-	if on_me and h.stun_t > 0.0:
-		_hearth_end(false, "OUT")
-		return
 	if String(hearth["mode"]) == "flying":
 		var p: Vector3 = hearth["pos"]
 		var to: Vector3 = hearth["to"]
@@ -561,12 +530,16 @@ func _tick_hearth(dt: float) -> void:
 	if float(hearth["left"]) <= 0.0:
 		_hearth_end(true, "FLARE")
 
+## The extra healing for the second after a throw; rank 3 doubles it (the source's level-4 upgrade).
+func throw_boost() -> float:
+	return float(e_def().get("boost", 0.5)) * (2.0 if rank("kin") >= 3 else 1.0)
+
 func heal_k() -> float:
 	return 1.0 + 0.15 * float(maxi(0, rank("kin") - 1))
 
 func _pulse(c: Vector3, per: float) -> void:
 	var ed := e_def()
-	var boost := 1.5 if float(hearth.get("boost", 0.0)) > 0.0 else 1.0
+	var boost := 1.0 + throw_boost() if float(hearth.get("boost", 0.0)) > 0.0 else 1.0
 	for o in m.hunters:
 		if o.team != h.team or o.out or o.extracted:
 			continue

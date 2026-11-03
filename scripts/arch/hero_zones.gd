@@ -9,7 +9,7 @@ extends RefCounted
 ## game sends them; every other game builds the same thing, so a rock stops a remote body the same way.
 ##   ["zone", "rock",   nid, rid, x, y, z, dx, dz, len, time, hp]
 ##   ["zone", "rockgo", rid]                     a rock was launched or crumbled: remove it
-##   ["zone", "bridge", nid, x, y, z, dx, dz, len, width, time]
+##   ["zone", "bridge", nid, x, y, z, dx, dz, len, width, time, color?]   (color: hex, rock-tan when absent)
 ##   ["zone", "seed",   nid, sid, x, y, z, rmax, grow]
 ##   ["zone", "pop",    sid]
 ## ["zone", "tp",     nid, x, y, z]            a body another game owns was moved (Trade, the Nightwell catch): its
@@ -194,15 +194,16 @@ static func remove_rock(m: Node, w: Dictionary, send := true) -> void:
 
 ## A temporary rock bridge over the abyss from `from` along `dir`. Returns the tiles turned to ground.
 static func bridge(
-	m: Node, by: Ent, from: Vector3, dir: Vector2, len_: float, width: float, time_: float, send := true
+	m: Node, by: Ent, from: Vector3, dir: Vector2, len_: float, width: float, time_: float, send := true,
+	color := "#d9b27a"
 ) -> int:
-	var n: int = m.verbs.add_bridge(by, from, dir, {"length": len_, "width": width, "time": time_, "color": "#d9b27a"})
+	var n: int = m.verbs.add_bridge(by, from, dir, {"length": len_, "width": width, "time": time_, "color": color})
 	if n > 0 and send and by != null and (m.net_on or capture) and not by.remote:
 		tx(
 			m,
 			[
 				"zone", "bridge", by.nid, m._r(from.x), m._r(from.y), m._r(from.z), snappedf(dir.x, 0.001),
-				snappedf(dir.y, 0.001), snappedf(len_, 0.1), snappedf(width, 0.1), snappedf(time_, 0.1)
+				snappedf(dir.y, 0.001), snappedf(len_, 0.1), snappedf(width, 0.1), snappedf(time_, 0.1), color
 			]
 		)
 	return n
@@ -273,9 +274,10 @@ static func net_in(m: Node, x: Array) -> void:
 			if x.size() < 11: return
 			var by2: Ent = m.ents_by_id.get(String(x[2]), null)
 			if by2 != null:
+				var tint := String(x[11]) if x.size() > 11 else "#d9b27a"
 				bridge(
 					m, by2, Vector3(x[3], x[4], x[5]), Vector2(x[6], x[7]), float(x[8]), float(x[9]), float(x[10]),
-					false
+					false, tint
 				)
 		"seed":
 			if x.size() < 9: return
