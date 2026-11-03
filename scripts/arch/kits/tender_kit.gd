@@ -286,8 +286,12 @@ func on_dash(use_ex: bool) -> bool:
 	var dist := float(air.get("dist", 8.5)) if use_ex else float(dd.get("dist", 4.2))
 	var tt := float(air.get("time", 0.8)) if use_ex else float(dd.get("time", 0.16))
 	var from := h.pos
-	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12))}, use_ex)
+	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12)), "dir": dash_dir()}, use_ex)
 	h.ghost_t = 0.1          # her ember motes, not the shared after-image (from the first frame)
+	# travel applies the global dash feel; the glide and the relay line use the same scaled numbers
+	var feel := dash_feel()
+	dist *= float(feel["dist"])
+	tt *= float(feel["time"])
 	if use_ex:
 		_start_glide(dist, tt)
 	play("mm_dash_air" if use_ex else "mm_dash")

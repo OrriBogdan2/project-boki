@@ -107,8 +107,6 @@ func cast_e() -> bool: return false
 func e_recast() -> bool: return false                # E pressed while it's up (Sigil detonation)
 func cast_r() -> bool: return false
 func r_recast() -> bool: return false                # R pressed while it runs (Last Round release)
-## X, the hero ultimate (HeroUlt): start it (true = it went off and the cooldown starts).
-func cast_ult() -> bool: return false
 ## X pressed while the ult runs (true = handled, e.g. an early landing).
 func ult_recast() -> bool: return false
 func ult_running() -> bool: return false
@@ -262,6 +260,14 @@ func use_e() -> void:
 		last_e = String(e_def().get("name", ""))
 	else:
 		h._ab_feedback("k1", "deny")
+
+## X: the hero's own ultimate. No hero has one yet; a kit that does overrides both. Returns true when it went off.
+func cast_ult() -> bool:
+	return false
+
+## Does this hero have an ultimate on X (the HUD shows the slot only then)?
+func has_ult() -> bool:
+	return false
 
 ## R: the archetype's ultimate. With the bond meter full the cast is Bonded (§5 option C): the ult's
 ## own tell, then 0.2s later the kin merges (its on_start), one T5 moment for the caster.
@@ -444,7 +450,18 @@ func dash_dir() -> Vector2:
 		return h.aim_dir()
 	return move.normalized()
 
+static var _dash_feel := {}
+
+## The global dash feel for this hunter (content/rules/dash_feel.json): {dist, time} multipliers.
+func dash_feel() -> Dictionary:
+	if _dash_feel.is_empty():
+		_dash_feel = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/dash_feel.json"))
+	return _dash_feel.get(id, _dash_feel["default"])
+
 func travel(dist: float, t: float, extra := {}, use_ex := false) -> void:
+	var feel := dash_feel()
+	dist *= float(feel["dist"])
+	t *= float(feel["time"])
 	var e := {"type": "dash", "speed": dist / maxf(0.02, t), "time": t, "invuln": float(extra.get("invuln", 0.0))}
 	for k in extra:
 		e[k] = extra[k]

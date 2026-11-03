@@ -252,7 +252,8 @@ func tender() -> void:
 	var air: Dictionary = K.dash_def()["air"]
 	ok(
 			"mm air dash: a long glide of about dash.air.dist, held up while it floats (her own move)",
-			absf(glide_d - float(air["dist"])) < 2.0 and sink < 1.0 and K.anim_id == "mm_dash_air",
+			absf(glide_d - float(air["dist"]) * float(K.dash_feel()["dist"])) < 2.0 and sink < 1.0
+				and K.anim_id == "mm_dash_air",
 			"%.1f m, sank %.2f m in 0.5 s" % [glide_d, sink])
 	ok(
 			"mm body: small (a 0.74 model) with the 0.34 m hitbox",
