@@ -5,6 +5,7 @@ extends RefCounted
 
 static func build(gun: Node3D, weapon: String, m_gun: Material, m_dark: Material, m_acc: Material) -> bool:
 	if HeroArmsDJ.build(gun, weapon, m_dark, m_acc): return true      # Dancer's Arc Bolts
+	if HeroArmsVV.build(gun, weapon, m_gun, m_dark, m_acc): return true      # Vireo's finger coil, Venator's rifle
 	match weapon:
 		"rubble_fists":
 			# one great stone gauntlet: a slab fist ringed with strapped plates and a glowing seam

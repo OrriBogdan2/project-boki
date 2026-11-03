@@ -1,6 +1,6 @@
 class_name HeroDemo
 extends RefCounted
-## Screenshot tooling for Vireo and Marlowe (used by ArenaDemo): --arena-demo=hero_<id>_<move> with
+## Screenshot tooling for Vireo and Venator (used by ArenaDemo): --arena-demo=hero_<id>_<move> with
 ##   --arena-shot=<png>                      one frame at the moment of the move
 ##   --hero-frames=<png> --hero-times=a,b,c  a contact sheet: one cropped frame per time (seconds
 ##                                           after the ability is pressed), for the animation strips

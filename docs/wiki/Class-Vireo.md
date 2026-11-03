@@ -38,9 +38,9 @@ straight through them is a Blowout that gives your dash back at once.
 |---|---|
 | Body | 124 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Coilcaster (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The storm-kite runner. Charges you up shot by shot, then runs straight through you and comes out the other side with the dash back. |
+| Fantasy | The storm-kite runner. Points and crackles bolts from her fingertip until a foe is fully charged, then runs straight through them as a streak of lightning and comes out with the dash back. |
 | Silhouette | the copper rod mast and kite pennant on the back |
-| Resource | Sparks (max 4) |
+| Resource | Static (max 4) |
 
 ### Kit card
 
@@ -48,25 +48,28 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Every hit loads a Spark onto the target; at 4 they're Live. Wirerun through a Live foe for a Blowout: big damage and your dash back at once. |
-| Passive: Sparks | Sparks: your hits stack up to 4 on a foe (Live). Wirerun through a Live foe: Blowout, and the dash resets. A knock heals you. |
-| Dash: Wirerun | Wirerun: hold to stretch it (5 to 8.5m), let go to streak forward; shots pass through you and anyone you cross takes a hit. |
-| RMB: Coilshot | Coilshot: hold to charge a heavy round that throws the first foe back; slammed into a wall or another foe, they're stunned. |
-| E: Skycall | Skycall: mark a spot; a moment later lightning flings everyone there along your aim and pins them to the ground (no dashing). |
-| Weapon: Coilcaster | A copper coil on the forearm that spits bolts which pass through everyone in a line; each hit loads a Spark. |
+| Loop | Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them. |
+| Passive: Static | Static: every hit adds a stack (4 max, shown over their head). The 4th calls a sky bolt and makes them Live. |
+| Dash: Wirerun | Wirerun: hold to charge a lane (length grows with the hold), let go to streak; through a 4-Static foe it hits double and comes back at once. |
+| RMB: Storm Rod | Storm Rod: hold to summon a copper rod, let go to throw it to full range. It knocks the first foe back, stuns them on a wall and leaves a charge orb. |
+| E: Skycall | Skycall: drop a circle at your cursor, then flick the mouse to pick the drag. 0.8s later lightning drags everyone inside that way and grounds them. |
+| X: Kitefall | Kitefall (ultimate, level 6): launch up out of reach, then strike down at your cursor anywhere in a wide ring. It knocks everyone round the landing back and adds Static. |
+| Weapon: Coilcaster | Finger bolts every 0.8s, left hand then right, out to full range through everyone in line. Each hit adds 1 Static. |
 
 ### Abilities in full
 
-**Sparks (passive).** Your bolts, Coilshot and Skycall each load a Spark onto what they hit (up to 4, 4.5s, refreshed by every hit). At 4 the foe is Live: a ring of crackling pips over them that everyone sees. Wirerun through a Live foe for a Blowout: 8 damage plus 15% of their health, a T4 hit, their Sparks spent and your dash recharged on the spot. Knocking a hunter down heals you for 15% of your health.
+**Static (passive).** Your finger bolts, Storm Rod and Skycall each add Static to what they hit (Skycall adds 2; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Nothing else gives Wirerun back. Knocking a hunter down heals you for 15% of your health.
 
-**Wirerun (dash, Shift, 9s cooldown).** Press and hold: a lane grows from 5 to 8.5m over 0.45s for everyone to see; let go and you streak along it. Shots pass straight through you for the whole run, and every foe you cross takes 10. Crossing a Live foe is a Blowout and gives the dash straight back. Picking up a charge mote also gives it back.
+**Wirerun (dash, Shift, 8s cooldown).** Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 5 to 8.5m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 32m/s (shots pass through you), carrying that drift. Every foe you cross takes 10. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once: the only way it comes back early.
 
-**Coilshot (RMB, 10s cooldown).**
+**Storm Rod (RMB, 8s cooldown).**
 
-- *Tap:* A quick Coilshot (it still takes 0.33s to wind): 9 damage, 6m, a short throw.
-- *Hold:* Hold up to 1s: up to 15 damage, 13m and a big throw. A foe thrown into a wall or into another foe is stunned 0.8s (so is the one they hit). Hitting a hunter drops a charge mote 0.5s later: pick it up for your dash back.
+- *Tap:* Let go early (it still takes 0.3s to summon): 18 damage and a short knock, flying the full 13m lane.
+- *Hold:* Hold to 1s (your body flashes when it's full; at 1.2s it throws itself): 30 damage and about 1.8m of knockback. Thrown into a wall or another foe they're stunned 0.8s. Every foe hit leaves a charge orb at the impact that zaps nearby foes with Static; Wirerun through the orb bursts it for 2 Static on everyone near it.
 
-**Skycall (E, 12s cooldown).** Mark a spot up to 9m away (a filling ring everyone sees); 0.55s later lightning strikes it: 14 damage, a Spark, and everyone inside is flung along your aim and Grounded for 1.2s (no dashing). It also flings any charge mote it catches, so you can steal a rival's.
+**Skycall (E, 10.5s cooldown).** Press to drop a circle at your cursor (up to 11m), then flick the mouse within 0.3s to set the drag: toward you pulls them in, away throws them out (no flick: away from you). A pillar of light narrows over it for 0.8s, then lightning strikes: 20 damage, 2 Static, and everyone inside is dragged along the ground about 7m that way and Grounded for 1.5s (no dashing). Charge orbs it catches are flung the same way and become yours.
+
+**Kitefall (X, hero ultimate from level 6, 42s cooldown).** Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 22, is knocked back and gains 1 Static. Landing it on an enemy hunter fills your Boki bond.
 
 ### Ranks
 
@@ -74,9 +77,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 10s -> 9s, damage +15%. | cooldown 10s -> 8s, damage +30%; +20% damage on top. |
-| Dash (Shift) | recharge 9s -> 7.6s. | recharge 9s -> 6.3s; the run's own hit deals double. |
-| E | cooldown 12s -> 10.8s, damage +15%. | cooldown 12s -> 6.6s (3s off), damage +30%. |
+| RMB | cooldown 8s -> 7.2s, damage +15%. | cooldown 8s -> 6.4s, damage +30%; +20% damage on top. |
+| Dash (Shift) | recharge 8s -> 7.2s. | recharge 8s -> 6.4s; the run's own hit deals +50%. |
+| E | cooldown 10.5s -> 9.5s, damage +15%. | cooldown 10.5s -> 5.4s (3s off), damage +30%. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E.
 
@@ -84,8 +87,8 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Moment | Tell |
 |---|---|
-| Building up | crackling pips over every target with Sparks, one per Spark |
-| Armed / full | a Live foe: four bright pips spinning in a ring, a hum and arcs to the ground |
-| Dash spent | a fading wire streak where the run went |
+| Building up | a marker over every foe with Static: one pip per stack and the count, sparks on them that grow |
+| Armed / full | a Live foe: a sky bolt lands on them, four bright pips spin fast and gold sparks crackle |
+| Dash spent | a fading lightning streak where the run went |
 
 <!-- /gen:kit -->

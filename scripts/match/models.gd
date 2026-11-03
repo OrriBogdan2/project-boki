@@ -884,8 +884,13 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	# the ring under your feet shows the real hitbox, whatever your size
 	var hit_k := Arch.hit_r(arch, Data.CLASSES[cls]) / float(Data.CLASSES[cls]["hit_r"])
 	ring.scale = Vector3(1.0 / bulk, 1.0, 1.0 / bulk) * hit_k / (rs * ck * size_k)
+	var torso_node := root.find_child("Torso", true, false) as Node3D
+	if torso_node != null:
+		torso_node.scale.x *= float(body.get("chest", 1.0))
 	return root
 
+## A hero's own body against its class (content/archetypes/<id>.json "body"): size (model scale),
+## chest (upper-body width), hit_r (hitbox radius, m), nameplate (m above the soles).
 ## Moves a hunter's toon material onto the hero shader (hero_toon.gdshader) with the same settings,
 ## plus the hero tuning: a crisper light/shadow split, shadows that keep their colour, a coloured
 ## fresnel rim (cool on metal, the surface's own colour elsewhere) and a little top light.
@@ -1660,7 +1665,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(gun, box(0.09, 0.05, 0.16), m_acc, Vector3(0, 0.05, 0.06))
 			grip.call(-0.02, 0.15)
 		"quill_rifle":
-			# Marlowe's drum rifle: a squat receiver, a drum of burr charges under it, a long needle barrel
+			# Venator's drum rifle: a squat receiver, a drum of burr charges under it, a long needle barrel
 			var bronze := shiny(Color("b9732f"), 0.6)
 			part(gun, box(0.1, 0.12, 0.42), m_gun, Vector3(0, 0, -0.12))
 			part(gun, cyl(0.1, 0.1, 0.1, 14), bronze, Vector3(0, -0.12, -0.14), Vector3.ONE, Vector3(0, 0, PI / 2))

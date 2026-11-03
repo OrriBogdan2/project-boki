@@ -11,7 +11,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 |---|---|---|---|---|---|---|---|---|
 | Arc Bolts | Dancer | light | 9 | 0.45s | 99 | 0.5s | 12m | A spinning bolt from alternating hands every 0.45s. It flies to your cursor (12m at most) and fizzles there if it hits nothing. |
 | Burst Rifle | none | medium | 7 | 0.45s | 27 | 1.5s | 10.5m | Three rounds per pull. Accurate at range. |
-| Coilcaster | Vireo | light | 8 | 0.42s | 12 | 1.3s | 9m | A copper coil worn on the forearm. Each bolt crackles through everyone in a line. |
+| Coilcaster | Vireo | light | 12 | 0.8s | 99 | 1s | 13m | No gun: a copper coil at each wrist. She points and a jagged bolt cracks from her fingertip, left hand then right, out to full range. |
 | Torch Lance | Ashwick | heavy | 2.7 | 0.1s | 80 | 1.6s | 6m | Hold to roar out a cone of fire 6m long: 8 seconds of fuel, then a short refill. It builds Char; at full Char the foe ignites. |
 | Greatsword | Zedran | heavy | 11 | 0.5s | 1 | 0.1s | 3.4m | A slow, huge 3-hit combo, strongest on the tip. Hold 1s for a slam that stuns and throws people far. |
 | Hoar Fan | Tamsin | light | 3.4 | 0.5s | 99 | 1s | 10m | A folding fan of ice slats. Hold to throw a flurry of 4 homing shards, then 3 heavy ones that fly faster and further. Eight shards on one foe Splinter them. Double damage during a Rinkrun. |
@@ -19,7 +19,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 | Longbow | Pin | light | 30 | 0.35s | 1 | 0.25s | 12m | Hold to draw, let go to loose. 0.6s Empowered: 30 damage, lands at the cursor (up to 12m). 1.15s Supercharged: 60 damage, flies past the cursor to 16m. Let go right as a stage comes up and your next draw is 60% faster; hold 0.5s past Supercharged and the arrow is overdrawn (half damage). Let go early for 15 at the cursor. You walk slower while drawing. |
 | Longsword | none | medium | 8.2 | 0.36s | 1 | 0.1s | 2.7m | A wide 3-hit combo, stronger on the tip of the blade. Hold 0.8s for a long-reaching thrust. |
 | Minigun | none | heavy | 3.8 | 0.1s | 90 | 3s | 10m | Spins up for 0.7s, then fires a stream that tightens the longer you hold it. Slows you while firing. |
-| Quill Rifle | Marlowe | medium | 6 | 0.12s | 24 | 1.7s | 9.5m | A steady auto rifle fed from a drum. Long strings of fire lose half their punch after ten rounds, and Rattled foes take more. |
+| Quill Rifle | Venator | medium | 6 | 0.12s | 24 | 1.7s | 11m | A long-shrouded auto rifle fed from a drum, firing out to full range. Long strings of fire lose half their punch after ten rounds; Dazed foes take 90% more. |
 | Rifle | none | medium | 6 | 0.13s | 20 | 1.8s | 9.5m | Steady and accurate. Long strings of fire lose some damage, so fire in bursts. |
 | Rubble Fists | Dolm | medium | 9 | 0.6s | 1 | 0.1s | 11m | Tap to hurl a boulder 11m. Hold and let go to punch: it throws foes back, stuns them against a wall and sends rocks flying. |
 | Shotgun | Dredge | heavy | 4 | 1s | 6 | 1.8s | 5m | Seven slugs that slow and stop at 5m. One slug landing still hurts. Spread grows with each shot; dashing resets it. |

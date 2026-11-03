@@ -14,7 +14,7 @@ const ARCHES := {
 	"thief": {"name": "Dancer", "cls": "light"},
 	"archer": {"name": "Pin", "cls": "light"},
 	"mage": {"name": "Vireo", "cls": "light"},
-	"gunslinger": {"name": "Marlowe", "cls": "medium"},
+	"gunslinger": {"name": "Venator", "cls": "medium"},
 	"juggernaut": {"name": "Zedran", "cls": "heavy"},
 	"bulwark": {"name": "Bjorn", "cls": "heavy"},
 	"dredge": {"name": "Dredge", "cls": "heavy"},

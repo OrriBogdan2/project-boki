@@ -115,7 +115,7 @@ func _arena() -> void:
 		var mid := -1.0
 		var ring_ok := false
 		if a == "gunslinger":
-			# Marlowe's hold is Longneedle's charge (E): a ring, a full tick, the shot
+			# Venator's hold is Longneedle's charge (E): a ring, a full tick, the shot
 			P.ak.cd["e"] = 0.0; P.ak.use_e()
 			step(m, 0.5)
 			ok("hold: gunslinger Longneedle winds up (ring)", not P.ak.chg.is_empty() and is_instance_valid(P.ak.chg.get("ring")))

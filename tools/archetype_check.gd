@@ -111,7 +111,7 @@ func run(main_node: Node) -> void:
 		if String(a).begins_with("--ak-only="): only = String(a).substr(10)
 	for who in ["mage", "gunslinger"]:
 		if "--%s-combo-check" % who in OS.get_cmdline_user_args():
-			var hc = load("res://tools/hero_combo_check.gd").new()      # Vireo's and Marlowe's cross-ability interactions
+			var hc = load("res://tools/hero_combo_check.gd").new()      # Vireo's and Venator's cross-ability interactions
 			await hc.run(main_node, who)
 			return
 	if "--kit-combo-check" in OS.get_cmdline_user_args():
@@ -168,7 +168,7 @@ func _data() -> void:
 	var rk_ok := true
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
-			if sl == "ult" and not Arch.def(a).has("r"): continue      # Vireo and Marlowe have no R (Boki Merge owns it)
+			if sl == "ult" and not Arch.def(a).has("r"): continue      # Vireo and Venator have no R (Boki Merge owns it)
 			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
 			if not (r2.contains("->") and r2.length() > 20): rk_ok = false
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
@@ -344,7 +344,7 @@ func _mage() -> void:
 	P.teleport(home); aim_at(P, T.pos); P.dashes = P.max_dashes(); fresh(T)
 	P.inp["dash_down"] = true
 	P.do_dash()
-	ok("vireo dash: press starts the lane", not K.wire.is_empty() and P.dashes >= 1.0)
+	ok("vireo dash: press starts the lane, the charge spent on the press", not K.wire.is_empty() and P.dashes < 1.0)
 	step(m, 0.5, func(): P.inp["dash_down"] = true; aim_at(P, T.pos))
 	P.inp["dash_down"] = false
 	step(m, 0.5)
@@ -362,15 +362,13 @@ func _mage() -> void:
 	hold(m, P, 1.0)
 	step(m, 0.9)
 	ok("vireo RMB hold: Coilshot hits + Sparks", K.last_variant == "hold" and dmg(T) >= 12.0 and K.spark_n(T) >= 1, "took %.0f" % dmg(T))
-	ok("vireo RMB: a hunter hit drops a mote", K.motes.size() >= 1, str(K.motes.size()))
-	if not K.motes.is_empty():
-		P.teleport(K.motes[0]["pos"]); step(m, 0.2)
-	ok("vireo mote: picking it up gives Wirerun back", K.mote_pickups == 1 and P.dashes >= 1.0)
+	ok("vireo RMB: a hit drops a charge orb", K.motes.size() >= 1, str(K.motes.size()))
+	ok("vireo RMB: the orb does not give Wirerun back (only a full-Static foe does)", P.dashes < 1.0)
 	# Skycall: lightning flings and grounds
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(5, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.cd["e"] = 0.0
 	var x0 := T.pos.x
 	P.ak.use_e()
-	step(m, 0.9)
+	step(m, 1.2)
 	ok("vireo E: Skycall damages, flings, Sparks", dmg(T) >= 12.0 and T.pos.x > x0 + 1.0 and K.spark_n(T) >= 1, "took %.0f moved %.1f" % [dmg(T), T.pos.x - x0])
 	ok("vireo E: Grounded (no dashing)", KitStatus.grounded(T))
 	var d0 := T.dashes
@@ -383,37 +381,38 @@ func _gunslinger() -> void:
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]; var T2: Hunter = r[3]
 	var home: Vector3 = r[4]
 	var K: GunslingerKit = P.ak
-	ok("marlowe: Quill Rifle in hand, medium, no R", P.wid == "quill_rifle" and Arch.weight("gunslinger") == "medium" and not Arch.def("gunslinger").has("r"))
-	# Fever: abilities stack lifesteal
+	var medium := Arch.weight("gunslinger") == "medium"
+	ok("venator: Quill Rifle in hand, medium, no R", P.wid == "quill_rifle" and medium and not Arch.def("gunslinger").has("r"))
+	# Fever: abilities stack lifesteal (4 x 5%)
 	P.hp = 60.0
 	K.on_deal(T, 10.0, {"src": "abil", "ab": "utility"})
 	K.on_deal(T, 10.0, {"src": "abil", "ab": "k1"})
-	ok("marlowe passive: abilities build Fever", K.res >= 2.0)
+	ok("venator passive: abilities build Fever", K.res >= 2.0)
 	var hp0 := P.hp
 	K.on_deal(T, 100.0, {"src": "shot"})
-	ok("marlowe passive: Fever heals off damage", P.hp > hp0 + 10.0, "healed %.1f" % (P.hp - hp0))
+	ok("venator passive: Fever heals off damage", P.hp > hp0 + 8.0, "healed %.1f" % (P.hp - hp0))
 	K.res = 0.0
-	# Burr Charge on a foe: sticks (2 hits' worth), pops, Rattles
-	fresh(T); T2.teleport(home + Vector3(12, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+	# Burr Charge: thrown past the foe, it blasts a cone back from the ground at the lane's end, Dazing
+	fresh(T); T2.teleport(home + Vector3(12, 0, 0)); P.teleport(home); T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	tap(m, P)
-	step(m, 1.3)
-	ok("marlowe RMB: Burr Charge sticks, pops, Rattles", dmg(T) >= 12.0 and KitStatus.rattled(T) and K.rattles >= 1, "took %.0f" % dmg(T))
-	ok("marlowe RMB: attach + blast both fed Fever", K.res >= 2.0, "fever %.0f" % K.res)
-	# a Rattled foe takes more from the rifle
+	step(m, 1.6)
+	var dazed := KitStatus.rattled(T) and K.rattles >= 1
+	ok("venator RMB: the cone blast hits and Dazes", dmg(T) >= 12.0 and dazed, "took %.0f" % dmg(T))
+	ok("venator RMB: the blast fed Fever", K.res >= 1.0, "fever %.0f" % K.res)
 	var base := K.outgoing(T, 10.0, {"src": "shot"})
-	ok("marlowe Rattled: rifle +28%", is_equal_approx(base, 12.8), "%.1f" % base)
+	ok("venator Dazed: rifle +90%", is_equal_approx(base, 19.0), "%.1f" % base)
 	# Longneedle: charge, then a piercing beam
 	fresh(T); KitStatus.clear_rattled(T); K.cd["e"] = 0.0; aim_at(P, T.pos)
 	P.ak.use_e()
-	ok("marlowe E: Longneedle winds up slowed", not K.needle.is_empty() and K.move_k() < 1.0)
+	ok("venator E: Longneedle winds up slowed", not K.needle.is_empty() and K.move_k() < 1.0)
 	step(m, 0.5)
 	var early := dmg(T)
 	step(m, 0.6)
-	ok("marlowe E: needle fires after the charge, shaves its cooldown", early < 0.5 and dmg(T) >= 30.0 and float(K.cd["e"]) < 12.0 * 0.75, "early %.0f took %.0f cd %.1f" % [early, dmg(T), float(K.cd["e"])])
+	ok("venator E: needle fires after the charge, shaves its cooldown", early < 0.5 and dmg(T) >= 30.0 and float(K.cd["e"]) < 12.0 * 0.75, "early %.0f took %.0f cd %.1f" % [early, dmg(T), float(K.cd["e"])])
 	# Slipstep: tap skids, hold slides, early release refunds
 	P.teleport(home); P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1)
-	P.do_dash(); step(m, 0.4)
-	ok("marlowe dash tap: Slipstep skid", K.last_dash_kind == "step" and P.flat_dist(home) > 1.6, "moved %.1f" % P.flat_dist(home))
+	P.do_dash(); step(m, 0.6)      # the tap skid runs ~0.5s
+	ok("venator dash tap: Slipstep skid", K.last_dash_kind == "step" and P.flat_dist(home) > 1.8, "moved %.1f" % P.flat_dist(home))
 	P.inp["move"] = Vector2.ZERO
 	await done(m)
 
@@ -524,7 +523,7 @@ func _bulwark() -> void:
 
 # ------------------------------------------------------------------ levels and the Bonded R
 func _levels_and_bond() -> void:
-	var r := setup("thief", 6.0, "cindle")      # (a kit with an R: Vireo and Marlowe have none)
+	var r := setup("thief", 6.0, "cindle")      # (a kit with an R: Vireo and Venator have none)
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	# a fresh run: R locked until level 6
 	P.lvl = 1; P.xp = 0.0; P.skill_pts = 1

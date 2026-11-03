@@ -296,6 +296,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 ## right click and the class dodge.
 func set_arch(a: String) -> void:
 	arch = "" if a == "" or a == "none" else Arch.fix(a, cls)
+	r = _hit_radius()
 	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch) if arch != "" else null
 	HunterMove.apply(self)
@@ -1658,6 +1659,9 @@ func _emit_shot() -> void:
 		extra["farf"] = [rng * float(wpn.get("far_start", 0.6)), float(wpn["far_mult"]), rng]
 	if AimMode.take(self) == AimMode.CURSOR:
 		life = AimMode.dist(self, rng) / spd      # lands at the cursor, clamped to range (scripts/match/aim/aim_mode.gd)
+	if wpn.get("pierce", false):      # through everyone in line (Vireo's bolts)
+		extra["pierce"] = true
+		extra["hitset"] = {}
 	if wpn.has("boom"):
 		extra["boom"] = wpn["boom"]; extra["boom_kb"] = wpn["boom_kb"]
 	if crit_t > 0.0:
@@ -3216,7 +3220,8 @@ func _dash_anim_kind() -> String:
 		return "skate"
 	if move_kind == "rush":
 		return "rush"
-	return String(DODGE_ANIM.get(cls, "roll"))
+	var own := ak.dodge_anim() if ak else ""      # the kit's own (Slipstep's slide)
+	return own if own != "" else String(DODGE_ANIM.get(cls, "roll"))
 
 func _anim_state(stretch: float) -> void:
 	var s := anim_s
