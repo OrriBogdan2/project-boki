@@ -145,8 +145,11 @@ func _chest_and_keys() -> void:
 	ok("a rival can loot them", R.chest_keys == 3 and int(box["chest_keys"]) == 0, "keys %d" % R.chest_keys)
 	# on the ground
 	R.chest_keys = 0
+	BeltKeys.sync(R)
+	R.ctrl = "idle"      # it waits by the key, not wandering off an edge
+	R.inp["move"] = Vector2.ZERO
 	var np := m.pickups.size()
-	m.drop("ckey", R.pos + Vector3(0.2, 0.6, 0), 1)
+	m.drop("ckey", R.pos + Vector3(0.2, 0.6, 0), 1, "", "", Vector3.ZERO)
 	ok("a dropped key lies on the ground", m.pickups.size() == np + 1 and String(m.pickups[-1]["kind"]) == "ckey")
 	step(m, 1.5)
 	ok("walking into it picks it up", R.chest_keys == 1, "keys %d" % R.chest_keys)
@@ -174,7 +177,7 @@ func _cap_and_belt(m: Match, P: Hunter, R: Hunter) -> void:
 		if other != R:
 			other.teleport(R.pos + Vector3(30, 0, 30))     # (nobody else in grabbing range of the key)
 	var np := m.pickups.size()
-	m.drop("ckey", R.pos + Vector3(0.2, 0.6, 0), 1)
+	m.drop("ckey", R.pos + Vector3(0.2, 0.6, 0), 1, "", "", Vector3.ZERO)      # (no random toss: it stays in reach)
 	step(m, 1.5)
 	var still_there := m.pickups.size() == np + 1
 	var held := R.chest_keys
@@ -182,6 +185,7 @@ func _cap_and_belt(m: Match, P: Hunter, R: Hunter) -> void:
 	ok("belt adapter: count", KeyChest.count(R, "chest") == cap and KeyChest.count(R, "rift") == R.rift_keys)
 	ok("belt adapter: take spends keys", KeyChest.take(R, "chest", 2) == 2 and R.chest_keys == cap - 2)
 	ok("belt adapter: take never goes below zero", KeyChest.take(R, "chest", 9) == cap - 2 and R.chest_keys == 0)
+	R.belt = UtilityBelt.empty()      # a free belt slot too: a key type takes one (BeltKeys)
 	for pk in m.pickups:
 		if String(pk["kind"]) == "ckey":
 			R.teleport(pk["pos"] - Vector3(0, 0.3, 0))     # (the dropped key can roll out of reach while it waits)
@@ -440,7 +444,7 @@ func _sources() -> void:
 	var m: Match = await build(5, {"teams": 1, "god": true})
 	var R: Dictionary = KeyBonus.rules()
 	var keep := R.duplicate(true)
-	for k in ["monster", "pot", "crate", "barrel", "train_crate"]:
+	for k in ["monster", "pot", "crate", "barrel", "keg", "train_crate"]:
 		R[k] = 1.0
 	for k in ["boss", "elite"]:
 		R[k] = {"odds": 1.0, "two": 1.0}
@@ -457,11 +461,11 @@ func _sources() -> void:
 		var want := 1 if kind_s == "monster" else 2
 		ok("a dead %s drops a bonus key" % kind_s, mb != null and m.keys.bonus_given == k0 + want,
 				"%d -> %d" % [k0, m.keys.bonus_given])
-	for kind_s in ["pot", "crate", "barrel"]:
+	for kind_s in ["pot", "crate", "barrel", "keg"]:
 		var brk := _break_of(m, kind_s)
 		var k0 := _ckeys(m)
 		if not brk.is_empty():
-			m._break(brk, m.player)
+			m.brk.smash(brk, m.player)
 			step(m, 0.2)
 		ok("a broken %s drops one" % kind_s, not brk.is_empty() and _ckeys(m) >= k0 + 1, "%d -> %d" % [k0, _ckeys(m)])
 	var shrub_none := m.keys.shrublings.all(func(s): return KeyBonus.mob_source(s) == "")

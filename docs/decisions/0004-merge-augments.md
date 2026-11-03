@@ -17,7 +17,7 @@
 - **Augments** (`MergeAugment`, data in `content/merge_forms/<id>.json` under `aug`, fallback forms get one from their type in `content/rules/merge_forms.json`):
   - LMB: a rider on every attack through the existing shot/swing rider path (`Hunter._kin_riders`: chain, pierce, slow, burn, an extra effect list on every Nth attack).
   - RMB and E: when the hero casts one (`CombatBus.ability_used` "secondary" / "kin"), the form adds an effect list in the effect grammar at the same spot and recharges that slot faster. It works on any kit, because it hangs off the cast signal and not off a kit's own code.
-  - Shift: a form dash on top of the hero's own dash (`dash_kind`: sweep = damage along the path, charge = armoured shove, reflect = a short mirror window, burst = the old type burst).
+  - Shift: a form dash on top of the hero's own dash (`dash_kind`: sweep = damage along the path, charge = armoured shove, reflect = a short mirror window, trail = the type rider on what you pass, then haste; no dash makes an area burst).
   - Stats: a modest passive through `KinMerge.passives` (damage reduction, speed, cooldown rate).
 - **Clarity:** augmented slots get a tint and a Boki-type badge on the HUD, and every add-on has its own ring and word colour. The last 3s of the window warn loudly: the R slot flashes, a rising tick each second, the parts flicker, a screen-edge pulse in the form colour.
 - **Ending:**
@@ -31,4 +31,4 @@
 
 ## Consequences
 - New: `scripts/kin/merge_augment.gd`, `docs/decisions/0004-merge-augments.md`. Rewritten: `tools/merge_form_check.gd`, `merge_kit.gd` (ultimate only). Deleted: `merge_holds.gd`. Wiring only in hunter.gd, kin.gd, kin_follow.gd, kin_command.gd, arch kits' `KinMerge.active` guards (now `transforming`), hud.gd, boki_hud.gd, bot.gd.
-- Debt: the six other Boki have fallback augments (the type rider on LMB, the type dash burst, no RMB/E add-ons) and a basic burst ultimate until their form files land.
+- Debt: the six other Boki have fallback augments (the type rider on LMB, the type dash trail, no RMB/E add-ons) and a basic burst ultimate until their form files land.

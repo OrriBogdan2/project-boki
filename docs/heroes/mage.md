@@ -23,6 +23,13 @@ its worth is the escape and the Static) knocks back about 1 bh and adds 1 Static
 source's 37.5 s at our pace, 42 s. Ranges use 1 body
 height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 5 to 8.5 m (main's lane; not scaled by the dash feel), Skycall circle 1.8 m radius.
 
+## Ranks (kit data pass)
+Rank 2 is the shared step (cooldown -10%, damage +15%). Rank 3 is the hero's own: Storm Rod throw +50% damage
+(`rmb.rank3_mult`; the source's rank IV is +50%), Wirerun's own hit doubles (`dash.rank3_mult`; the source's rank IV is
++100% on the non-passive dash damage, so the Blowout does not grow), Skycall cooldown -3s. The source has three
+upgrades before the last one (+20% damage and -1s on the spear, -0.75s on Surge, +25% on the strike); our rank system has
+one shared step and one special, so those collapse into the shared step.
+
 ## Per-slot table
 | Slot | Input | Aim | What it does | Telegraph / reticle | Move (KMovesVV) | Sound |
 |---|---|---|---|---|---|---|

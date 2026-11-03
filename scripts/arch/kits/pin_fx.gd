@@ -8,7 +8,7 @@ extends Node3D
 ##   green Empowered, mint-teal Supercharged, gold for a full Heavy Shot)
 ## - stars: the teal X-star on a Supercharged hit, the red-white Heavy Shot impact
 ## - arrows: the look of each of her shots (Empowered green bolt, Supercharged white-teal beam, a dull
-##   overdrawn shaft, the gold Impaling arrow with violet fins, the snare), each with its own trail, drawn
+##   overdrawn shaft, the gold Impaling arrow with violet fins), each with its own trail, drawn
 ##   over the shot the match moves (the round's own sphere is shrunk away)
 ## - spent arrows: one that lands with no hit stays stuck in the ground glowing teal for 4 s
 ## - the Rain of Arrows: the curved panels with fletch posts, a ground glow, arrows streaking down, blue
@@ -133,7 +133,6 @@ const LOOK := {
 	"super": [Color("c8fff0"), Color("e8fffa"), TEAL, Color(0.45, 1.0, 0.88, 1.0), 5.0, 0.5, 1.35],
 	"over": [Color("9fb8a0"), Color("c8d8c0"), Color("7a9a80"), Color(0.6, 0.75, 0.62, 0.35), 1.0, 0.06, 0.9],
 	"heavy": [GOLD, Color("fff0b0"), VIOLET, Color(1.0, 0.72, 0.2, 0.95), 3.0, 0.42, 2.25],
-	"snare": [Color("b8f06a"), Color("e8ffb0"), Color("d8ff8a"), Color(0.75, 1.0, 0.4, 0.6), 1.4, 0.08, 0.9],
 }
 
 func _dress(n: Node3D, kind: String) -> void:

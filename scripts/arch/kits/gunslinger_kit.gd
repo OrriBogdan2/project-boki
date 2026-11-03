@@ -163,10 +163,9 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 	if t is Hunter and ((t as Hunter).downed or t.hp <= 0.0) and not knocked.has(t.get_instance_id()):
 		_on_knock(t)
 
-## Hot Streak: a knock gives Slipstep back (and heals); rank 3 also resets the Burr Charge.
+## Hot Streak: a knock gives Slipstep back (the takedown heal is DashReset's); rank 3 also resets the Burr Charge.
 func _on_knock(t: Ent) -> void:
 	knocked[t.get_instance_id()] = true
-	h.heal(h.max_hp * float(res_def()["knock_heal"]))
 	h.dashes = h.max_dashes()
 	if rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())
@@ -237,12 +236,10 @@ func on_dash(use_ex: bool) -> bool:
 	m.sfx("vn_slide", h.pos, -4.0)
 	return true
 
-func _slide_end(early: bool) -> void:
+func _slide_end() -> void:
 	var dd := dash_def()
 	h.roll_t = 0.0
-	if early:
-		h.dashes = minf(h.max_dashes(), h.dashes + float(dd["refund"]))
-	elif rank("dash") >= 3:
+	if rank("dash") >= 3:
 		h.add_buff("move_speed", 0.25, 2.0)
 		fx().ring(h.pos, 1.0, col_of(dd), HOT, 0.25)
 	var air := bool(slide.get("air", false))
@@ -260,7 +257,7 @@ func _skid(t: float, dd: Dictionary) -> void:
 	var feel := dash_feel()                 # the global dash feel, as travel() applies it
 	var dur := float(dd["roll_t"]) * float(feel["time"])
 	if t >= dur:
-		_slide_end(false)
+		_slide_end()
 		return
 	var run := float(h.cdat["speed"])
 	var peak := 2.0 * float(dd["roll"]) * float(feel["dist"]) / dur - run
@@ -277,13 +274,14 @@ func _tick_slide(dt: float) -> void:
 	if not bool(slide["held"]):
 		if bool(slide.get("air", false)):
 			if t >= float(slide["len_t"]):
-				_slide_end(false)
+				_slide_end()
 			return
 		var can_hold := not h.downed and h.stun_t <= 0.0 and h.root_t <= 0.0 and h.grounded
 		if t >= float(dd["tap_t"]) and not bool(slide.get("tap", false)):
 			if held("dash") and can_hold:
 				slide["held"] = true
 				slide["t0"] = t
+				h.dashes -= float(dd["hold_cost"])       # the longer slide takes longer to come back
 				h.roll_dir = slide["dir"]
 				h.move_kind = "dash"
 				m.fx.dust(h.pos, 8)
@@ -294,7 +292,7 @@ func _tick_slide(dt: float) -> void:
 	var st_t := t - float(slide["t0"])
 	var dur := float(dd["slide_t"])
 	if not held("dash") or st_t >= dur or h.stun_t > 0.0 or h.root_t > 0.0:
-		_slide_end(st_t < dur * 0.9 and h.stun_t <= 0.0 and h.root_t <= 0.0)
+		_slide_end()
 		return
 	var k := 1.0 - st_t / dur
 	h.roll_t = maxf(h.roll_t, dt * 1.5)
@@ -465,14 +463,13 @@ func _detonate(b: Dictionary) -> void:
 	_cone(at, b["out"] as Vector2, bd, bool(b["wall"]))
 
 ## The blast: a cone back out of the stick point, shoving everything in it along the cone (toward the
-## thrower) and Dazing it; a hunter shoved into more terrain is stunned, and that shaves the cooldown.
+## thrower) and Dazing it; a hunter shoved into more terrain is stunned.
 func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 	last_cone = {"at": at, "dir": out, "wall": wall}
 	fx().fan(ground(at), out, float(bd["cone_len"]), float(bd["cone_deg"]), EMBER, HOT, 0.35)
 	var spray := Vector3(out.x, 0.2, out.y)
 	m.fx.burst(at + Vector3(out.x, 0.4, out.y) * 1.5, EMBER, 18, 8.0, 0.4, 3.0, 1.4, spray, float(bd["cone_deg"]) * 0.5)
 	net_ring(at, 1.6, EMBER)
-	var shaved := false
 	for f in m.foes_of(h.team):
 		if not f.hittable(): continue
 		if absf(f.pos.y - at.y) > 2.6: continue
@@ -490,9 +487,6 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 			slam["dr"] = true
 			f.hurt(0.1, h, slam)
 			m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 2.0, "WALLED", EMBER, false)   # over DAZED
-			shaved = true
-	if shaved:
-		cd["rmb"] = float(cd["rmb"]) * (1.0 - float(bd["shave"]))
 
 # ------------------------------------------------------------------ E: Longneedle
 func cast_e() -> bool:
@@ -597,8 +591,10 @@ func _fire_needle() -> void:
 				m.sfx("hero_skewer", f.pos, 0.0)
 	if hits > 0:
 		var maxcd := float(ed["cooldown"]) * cd_k("kin")
-		var nn := hits if rank("kin") >= 3 else 1
-		cd["e"] = maxf(0.0, float(cd["e"]) - maxcd * float(ed["shave"]) * nn)
+		var cut := float(ed["shave"])
+		if rank("kin") >= 3:
+			cut = float(ed["shave_rank3"]) * hits       # rank 3: 30% for every hunter hit
+		cd["e"] = maxf(0.0, float(cd["e"]) - maxcd * cut)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

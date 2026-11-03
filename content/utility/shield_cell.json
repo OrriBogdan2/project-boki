@@ -1,0 +1,25 @@
+{
+ "id": "shield_cell",
+ "name": "Shield cell",
+ "short": "Cell",
+ "icon": "brightshield",
+ "col": "7ac8ff",
+ "use": "fx",
+ "cd": 2.0,
+ "max": 3,
+ "bring": [
+  1,
+  2,
+  3
+ ],
+ "price": 45,
+ "desc": "A 40-point shield around you for 8s.",
+ "effects": [
+  {
+   "type": "shield",
+   "amount": 40.0,
+   "time": 8.0,
+   "color": "7ac8ff"
+  }
+ ]
+}

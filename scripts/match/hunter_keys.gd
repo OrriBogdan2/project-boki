@@ -48,7 +48,6 @@ static func _toast_due(h: Hunter) -> bool:
 	h.set_meta("ult_toast_at", h.m.time)
 	return true
 
-## A press that did nothing: the soft warning sound (the hunter ultimate has no slot to shake).
+## A press that did nothing: the X tile shakes red with the soft warning sound (HunterUltTile).
 static func _deny(h: Hunter) -> void:
-	if h.is_local():
-		h.m.sfx("warn", null, -16.0, 1.6)
+	h._ab_feedback("x", "deny")

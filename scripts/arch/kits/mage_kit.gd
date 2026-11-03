@@ -412,7 +412,7 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	run_t = time
 	last_dash_kind = "wire"
 	play("mage_dash_go")
-	var dmg := float(dd["dmg"]) * (1.5 if rank("dash") >= 3 else 1.0)
+	var dmg := float(dd["dmg"]) * run_rank_k()
 	h.dash_pass = {"hit": {}, "w": float(dd["width"]) + 0.6, "kx": func(f: Ent): _wire_hit(f, dmg)}
 	var b := a + Vector3(v.x, 0, v.y) * time
 	fx().arc(a, b, TEAL, GOLD, 1.1, time + 0.25)
@@ -568,6 +568,14 @@ func fire_rmb(c: Dictionary) -> void:
 	else:
 		_coil(k)
 
+## Rank 3 of the Storm Rod: its throw hits harder (rmb.rank3_mult).
+func rod_rank_k() -> float:
+	return float(rmb_def()["rank3_mult"]) if rank("sec") >= 3 else 1.0
+
+## Rank 3 of Wirerun: the run's own hit hits harder; the Blowout is the passive's and does not grow (dash.rank3_mult).
+func run_rank_k() -> float:
+	return float(dash_def()["rank3_mult"]) if rank("dash") >= 3 else 1.0
+
 func _coil(k: float) -> void:
 	var cd_ := rmb_def()["coil"] as Dictionary
 	var dir := h.aim_dir()
@@ -575,7 +583,7 @@ func _coil(k: float) -> void:
 	var rng := float(cd_["range"])                       # a fixed lane: the charge never changes the range
 	var push := lerpf(float(cd_["push"][0]), float(cd_["push"][1]), k)
 	last_push = push
-	if rank("sec") >= 3: dmg *= 1.2
+	dmg *= rod_rank_k()
 	var delivery := {"type": "projectile", "speed": float(cd_["speed"]), "range": rng, "size": 0.22}
 	var effects := [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}]
 	var stg := stage("rmb", {"delivery": delivery, "effects": effects})

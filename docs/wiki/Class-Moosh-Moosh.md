@@ -55,7 +55,7 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Support medic: heals and carries the downed, roots whoever chases them. |
 | Passive: Bearer | Bearer: run into a downed teammate to carry up to 2 behind a shield. |
-| Dash: Relay Step | Relay Step: a quick hop where you move; through a teammate it refunds half a dash. |
+| Dash: Relay Step | Relay Step: a quick hop where you move; in the air, a long floaty glide. |
 | LMB | Ember Cast: hold to push embers from alternating hands; they fly past the cursor and each hit on a foe adds Kindle. |
 | RMB: Burrseed | Burrseed: hold to aim the lane, let go to throw; it sticks to a foe and roots them 0.7s later. |
 | E: Hearthlight | Hearthlight: a healing ring on you; press again to throw it to the cursor. |
@@ -64,15 +64,15 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Bearer (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). You carry a Bearer shield (40, +6 a level) that refills each time you pick someone up. While you carry them they don't bleed out and can't be stomped, and you move 30% slower. Press crouch to set them down. If the shield breaks or you're stunned, rooted or hexed, you're stunned 0.6s, drop them, and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
+**Bearer (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). You carry a Bearer shield (40, +6 a level) that refills each time you pick someone up. While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If the shield breaks or you're stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
 
-**Relay Step (dash, Shift, 7.5s cooldown).** A quick 4.2m hop (in the air: your long dash). Pass through a teammate on the way and half a charge comes back, and Hearthlight's cooldown drops 1s.
+**Relay Step (dash, Shift, 7.5s cooldown).** A quick 4.2m hop (in the air: your long dash).
 
 **Burrseed (RMB, 8s cooldown).**
 
-- *Tap:* Hold to show a faint dotted lane to the seed's full 14m (it flies past the cursor); let go to throw. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a violet disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m, and each is Kindled.
+- *Tap:* Hold to show a faint dotted lane to the seed's full 14m (it flies past the cursor); let go to throw. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a violet disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled.
 
-**Hearthlight (E, 11s cooldown).** A 2.6m ring of lantern light round you for 2.5s: it heals teammates inside 10 over its life, then flares for 22. Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over. A stun while it's on you puts it out.
+**Hearthlight (E, 11s cooldown).** A 2.6m ring of lantern light round you for 2.5s: it heals teammates inside 10 over its life, then flares for 22. Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.
 
 **Hearth Call (hunter ultimate, from level 6, 46s cooldown).** Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a lantern tether heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you.
 
@@ -82,9 +82,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 8s -> 7.2s, damage +15%. | cooldown 8s -> 6.4s, damage +30%; the roots last 0.3s longer. |
+| RMB | cooldown 8s -> 7.2s, damage +15%. | cooldown 8s -> 6.4s, damage +30%; the roots last 0.3s longer and the burst is twice as wide. |
 | Dash (Shift) | recharge 7.5s -> 6.4s per charge. | recharge 7.5s -> 5.3s; picking up a teammate refreshes your long air dash. |
-| E | cooldown 11s -> 9.9s, healing +15%. | cooldown 11s -> 8.8s, healing +30%; the thrown light's 50% boost lasts 2s instead of 1s. |
+| E | cooldown 11s -> 9.9s, healing +15%. | cooldown 11s -> 8.8s, healing +30%; the thrown light's healing boost is 100% instead of 50%. |
 
 **Suggested level-up order** (what bots follow): E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > Glove (Q).
 

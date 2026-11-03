@@ -1,5 +1,5 @@
 {
- "_doc": "Drop tables for gear and weapon tunings (scripts/match/gear_drops.gd). Each table is a list of rolls: kind gear (a piece for one of the five slots) or tune (a weapon upgrade pickup, brand = an element one). chance = odds the roll happens; bonus = rarity steps up; min_rar = the lowest rarity it can be (0 Common .. 4 Legendary); slot = force a slot (glove, passive, armor, boots, kit). Bosses drop fewer, higher-value items. extract_mats: farm materials an extracted piece of gear also gives, by rarity (Common..Legendary). The chest table is the one chest type (all chests are locked, see content/rules/keys.json).",
+ "_doc": "bot_start.slots: boots first, then up to two different active gloves (Gloves.bot_fill). Drop tables for gear and weapon tunings (scripts/match/gear_drops.gd). Each table is a list of rolls: kind gear (a piece for one of the five slots) or tune (a weapon upgrade pickup, brand = an element one). chance = odds the roll happens; bonus = rarity steps up; min_rar = the lowest rarity it can be (0 Common .. 4 Legendary); slot = force a slot (glove, passive, armor, boots). Bosses drop fewer, higher-value items. extract_mats: farm materials an extracted piece of gear also gives, by rarity (Common..Legendary). The chest table is the one chest type (all chests are locked, see content/rules/keys.json).",
  "rarity_weights": [
   30,
   36,
@@ -11,8 +11,7 @@
   "glove": 3.0,
   "passive": 1.5,
   "armor": 2.0,
-  "boots": 2.0,
-  "kit": 1.5
+  "boots": 2.0
  },
  "ground_spacing": 1.25,
  "tables": {
@@ -145,7 +144,7 @@
    "bonus": 0
   },
   "hard": {
-   "slots": 2,
+   "slots": 3,
    "bonus": 0
   },
   "expert": {
