@@ -10,7 +10,9 @@ const CLOUD_HOLE := 16.0       # m: the clear hole round you in it, so the cloud
 const TRAIL_STEP := 0.05       # s between trail points
 const COMET_TRAIL := 70        # points: ~3.5 s of comet trail
 const DIVER_TRAIL := 30        # points: ~1.5 s of contrail
+const TRAIL_FADE := 3          # points a trail loses each step once it has ended (a comet's goes in ~1 s)
 const COMET_R := 1.7           # m: the orb's radius (the squad rides inside)
+const FREEFALL_CHASE := 0.55   # how far the camera drops behind you high up (CamRig.chase: ~45 degrees down)
 const SPEED_LINES := """
 shader_type canvas_item;
 // k: the speed lines 0..1 (the dive), flash: the white of punching through the clouds 0..1
@@ -34,14 +36,20 @@ void fragment() {
 """
 const ORB := """
 shader_type spatial;
-render_mode unshaded, blend_add, depth_draw_never, cull_back, shadows_disabled, fog_disabled;
-uniform vec4 core : source_color = vec4(1.0, 0.55, 0.18, 1.0);
-uniform vec4 rim : source_color = vec4(1.0, 0.92, 0.6, 1.0);
+render_mode unshaded, blend_mix, depth_draw_never, cull_back, shadows_disabled, fog_disabled;
+uniform vec4 core : source_color = vec4(1.0, 0.45, 0.12, 1.0);
+uniform vec4 rim : source_color = vec4(1.0, 0.78, 0.35, 1.0);
+uniform vec4 hot : source_color = vec4(1.0, 0.97, 0.85, 1.0);
+varying float front;
+void vertex() {
+	front = clamp(-VERTEX.z / 1.7, 0.0, 1.0);
+}
 void fragment() {
-	float f = pow(1.0 - abs(dot(NORMAL, VIEW)), 2.2);
-	float flick = 0.85 + 0.15 * sin(TIME * 23.0 + UV.y * 40.0 + UV.x * 17.0);
-	ALBEDO = mix(core.rgb * 0.45, rim.rgb * 1.6, f) * flick;
-	ALPHA = clamp(0.3 + f, 0.0, 1.0);
+	float f = pow(1.0 - abs(dot(NORMAL, VIEW)), 2.5);
+	float flick = 0.8 + 0.2 * sin(TIME * 23.0 + UV.y * 40.0 + UV.x * 17.0);
+	float lead = pow(front, 3.0);
+	ALBEDO = mix(mix(core.rgb, rim.rgb, f), hot.rgb, lead * 0.8) * flick;
+	ALPHA = clamp(0.1 + 0.85 * f + 0.4 * lead, 0.0, 0.95);
 }
 """
 const RIBBON := """
@@ -50,7 +58,8 @@ render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabl
 void fragment() {
 	float across = 1.0 - abs(UV.y * 2.0 - 1.0);
 	ALBEDO = COLOR.rgb * (0.6 + 0.8 * across);
-	ALPHA = COLOR.a * smoothstep(0.0, 0.7, across);
+	// faded out close to the camera, so a trail running back past the view never washes it out
+	ALPHA = COLOR.a * smoothstep(0.0, 0.7, across) * smoothstep(12.0, 30.0, length(VERTEX));
 }
 """
 
@@ -76,20 +85,19 @@ func _init(match_node: Match) -> void:
 	_build_clouds()
 	_build_overlay()
 
-## The camera in the freefall: turned with your heading (so forward is up), pulled well back and
-## looking down, so the islands below are in view; recording mode takes a lower, wider sweep.
+## The camera in the freefall: behind you along your heading (so forward is up) and looking ahead
+## and down over the islands, so high up the whole Hollow Crown spreads out in front of you; it
+## settles into the usual view as you near the ground. Recording mode pulls further back.
 static func frame_freefall(match_node: Match, p: Hunter) -> void:
 	var cam := match_node.cam
 	var steer: Hunter = p.comet_lead if p.comet_lead else p
 	if steer.fall_dir.length() > 0.01:
 		cam.yaw_to = atan2(-steer.fall_dir.x, -steer.fall_dir.y)
 	var hk := clampf(SkyFall.height_over(match_node.world, p.pos) / SkyFall.SKY_Y, 0.0, 1.0)
-	if Record.clean():
-		cam.zoom_to = lerpf(2.0, 3.4, hk)
-		cam.top_to = lerpf(0.2, 0.45, hk)
-	else:
-		cam.zoom_to = lerpf(1.6, 2.7, hk)
-		cam.top_to = lerpf(0.35, 0.8, hk)
+	var far := smoothstep(0.12, 0.5, hk)
+	cam.top_to = 0.0
+	cam.chase_to = FREEFALL_CHASE * far * (1.2 if Record.clean() else 1.0)
+	cam.zoom_to = lerpf(1.1, 1.55, far) * lerpf(1.0, 1.9 if Record.clean() else 1.0, far)
 
 func _process(delta: float) -> void:
 	if m.paused:
@@ -120,7 +128,7 @@ func _local(delta: float) -> void:
 		return
 	_cloud_mat.set_shader_parameter("hole_xz", Vector2(p.pos.x, p.pos.z))
 	var fall := clampf(-p.vel.y, 0.0, SkyFall.DIVE_FALL)
-	var calm := SkyFall.FLOAT_FALL * 0.6       # m/s: no speed lines below this fall
+	var calm := SkyFall.FLOAT_FALL + 1.0       # m/s: no speed lines while floating
 	var dive_k := clampf((fall - calm) / (SkyFall.DIVE_FALL - calm), 0.0, 1.0) if p.dropping else 0.0
 	var above := p.pos.y > CLOUD_Y
 	if _was_above and not above and p.dropping:
@@ -205,7 +213,11 @@ func _trail(key: String, on: bool, at: Vector3, max_pts: int, delta: float) -> v
 	if on:
 		pts.insert(0, at)
 	elif pts.size() > 0:
-		pts.remove_at(pts.size() - 1)
+		pts.resize(maxi(0, pts.size() - TRAIL_FADE))
+	else:
+		(tr["node"] as Node).queue_free()      # (gone: nothing left to draw)
+		_trails.erase(key)
+		return
 	while pts.size() > max_pts:
 		pts.remove_at(pts.size() - 1)
 	tr["pts"] = pts

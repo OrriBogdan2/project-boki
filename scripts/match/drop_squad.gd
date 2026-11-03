@@ -242,8 +242,11 @@ func on_lead_jump(l: Hunter) -> void:
 		n += 1
 	events.append("jump %s +%d" % [l.pname, n])
 
-## Every step of the match: the comets, and the landing kick for anyone down off a burst.
+## Every step of the match: Boki aboard the ship stay on their hunters, and the comets.
 func tick(dt: float) -> void:
 	clock += dt
 	_tick_acks()
+	for h in m.hunters:
+		if h.riding and not h.remote and h.kin and h.kin.state == "active":
+			KinFollow.hop_on(h.kin)      # (left beside you, it would step off the ship and fall)
 	comet.tick()

@@ -116,21 +116,22 @@ static func land(h: Hunter) -> void:
 static func assist(m: Match, h: Hunter) -> void:
 	if (h.inp["move"] as Vector2).length() > 0.1:
 		return
-	var hv := Vector2(h.vel.x, h.vel.z)
-	var lands_at := h.pos
+	var land := land_if_void(m, h, DEPLOY_H)
+	if land != Vector3.INF:
+		h.inp["move"] = keys_toward(h, land) if h.dropping else Vector2(land.x - h.pos.x, land.z - h.pos.z).normalized()
+
+## If h's drop, carrying on as it is, would come down `low` m over the abyss: the nearest island spot
+## to steer for. INF when it comes down on solid ground, or is more than ASSIST_LOOK_S off.
+static func land_if_void(m: Match, h: Hunter, low: float) -> Vector3:
+	var at := h.pos
 	if h.dropping:
-		var secs := maxf(0.0, height_over(m.world, h.pos) - DEPLOY_H) / maxf(1.0, -h.vel.y) + ASSIST_GLIDE_S
+		var secs := maxf(0.0, height_over(m.world, h.pos) - low) / maxf(1.0, -h.vel.y) + ASSIST_GLIDE_S
 		if secs > ASSIST_LOOK_S:
-			return
-		lands_at += Vector3(hv.x, 0.0, hv.y) * secs
-	if not m.world.is_void(lands_at.x, lands_at.z):
-		return
-	var land := nearest_land(m, lands_at)
-	if land == Vector3.INF:
-		return
-	h.ai["land"] = land
-	h.ai["retarget"] = true      # (no looking for somewhere else: this is the nearest)
-	bot_steer(m, h)
+			return Vector3.INF
+		at += Vector3(h.vel.x, 0.0, h.vel.z) * secs
+	if not m.world.is_void(at.x, at.z):
+		return Vector3.INF
+	return nearest_land(m, at)
 
 ## The nearest island spot (the spawn and portal spots at island edges) to `at`, or INF.
 static func nearest_land(m: Match, at: Vector3) -> Vector3:
@@ -143,9 +144,22 @@ static func nearest_land(m: Match, at: Vector3) -> Vector3:
 			best = sp
 	return best
 
+## The freefall keys that bring h down on `land`: floating when it's far, diving when it's in reach,
+## braking when it's nearly overhead (turning back if it's behind).
+static func keys_toward(h: Hunter, land: Vector3) -> Vector2:
+	var to := Vector2(land.x - h.pos.x, land.z - h.pos.z)
+	var reach := to.length() / maxf(1.0, h.pos.y - maxf(land.y, 0.0) - DEPLOY_H)     # m across per m of fall
+	var dir := to.normalized()
+	var ahead := h.fall_dir.dot(dir)
+	if reach < 0.35 or to.length() < 3.0:
+		return dir if ahead < 0.0 else -h.fall_dir
+	if ahead < 0.7 or reach > 0.85:
+		return dir * 0.45          # turn first, or far: float for the reach
+	return dir                     # in reach: dive
+
 # ------------------------------------------------------------------ bots
-## A bot's keys on the way down: toward its spot, floating when it's far, diving when it's in reach,
-## braking when it's nearly overhead; under the glider, straight for the spot.
+## A bot's keys on the way down: for its spot (somewhere closer if it's out of reach); under the
+## glider, straight for it.
 static func bot_steer(m: Match, h: Hunter) -> void:
 	var land: Vector3 = h.ai.get("land", h.pos)
 	var to := Vector2(land.x - h.pos.x, land.z - h.pos.z)
@@ -153,21 +167,11 @@ static func bot_steer(m: Match, h: Hunter) -> void:
 		h.inp["move"] = to.normalized() if to.length() > 0.6 else Vector2.ZERO
 		return
 	var drop := maxf(1.0, h.pos.y - maxf(land.y, 0.0) - DEPLOY_H)
-	var reach := to.length() / drop      # metres across per metre of fall needed
-	if reach > FLOAT_SPEED / FLOAT_FALL and not h.ai.get("retarget", false):
+	if to.length() / drop > FLOAT_SPEED / FLOAT_FALL and not h.ai.get("retarget", false):
 		h.ai["retarget"] = true
 		h.ai["land"] = _bot_spot_in_reach(m, h, drop * FLOAT_SPEED / FLOAT_FALL * 0.85)
 		return
-	var dir := to.normalized()
-	var ahead := h.fall_dir.dot(dir)
-	if reach < 0.35 or to.length() < 3.0:
-		h.inp["move"] = dir if ahead < 0.0 else -h.fall_dir     # nearly overhead: brake (turning back if it's behind)
-	elif ahead < 0.7:
-		h.inp["move"] = dir * 0.45          # turn first, floating
-	elif reach > 0.85:
-		h.inp["move"] = dir * 0.45          # far: float for the reach
-	else:
-		h.inp["move"] = dir                 # in reach: dive
+	h.inp["move"] = keys_toward(h, land)
 
 ## The closest landing spot within `reach`, away from squads already heading somewhere close.
 static func _bot_spot_in_reach(m: Match, h: Hunter, reach: float) -> Vector3:

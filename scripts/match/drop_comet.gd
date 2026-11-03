@@ -8,7 +8,6 @@ extends RefCounted
 ## so every game knows who rides it and where it came down. Break-aways go as DropSquad's "dsep".
 
 const BURST_H := 14.0         # m over the ground below: the comet bursts (above SkyFall.DEPLOY_H)
-const SAFE_Y := 48.0          # m: below this the comet is pulled off the abyss toward the nearest island
 const SPOT_GAP := 2.2         # m between the burst's landing spots
 const BURST_ARC := 1.6        # m: the hop out of the burst, over the straight line down
 const BOT_BREAK_CHANCE := 0.4 # a bot rider picks a break-off height this often
@@ -73,6 +72,7 @@ func ride(r: Hunter) -> void:
 	_seat(r)
 	r.vel = l.vel
 	r.fall_dir = l.fall_dir
+	r.face = l.face
 	r.diving = l.diving
 	r.gliding = true
 	if r.ctrl == "local" and r.inp["jump"]:
@@ -138,18 +138,13 @@ func tick() -> void:
 		if h.drop_glide and h.grounded and h.pad.is_empty() and not h.remote:
 			SkyFall.land(h)
 
-## The jumpmaster's heading low over the abyss: pulled toward the nearest island (SkyFall.steer).
+## The jumpmaster's keys when the comet would come down over the abyss: for the nearest island,
+## whatever is pressed (SkyFall.steer).
 func steer_off_abyss(l: Hunter, mv: Vector2) -> Vector2:
-	if l.pos.y > SAFE_Y or not leads(l) or not m.world.is_void(l.pos.x, l.pos.z):
+	if not leads(l):
 		return mv
-	var land := SkyFall.nearest_land(m, l.pos)
-	if land == Vector3.INF:
-		return mv
-	var to := Vector2(land.x - l.pos.x, land.z - l.pos.z)
-	if to.length() < 3.0:
-		return -l.fall_dir         # over it: brake and come down
-	# turn for it, floating (braking too if it's behind)
-	return to.normalized() * (1.0 if l.fall_dir.dot(to.normalized()) < 0.0 else 0.45)
+	var land := SkyFall.land_if_void(m, l, BURST_H)
+	return SkyFall.keys_toward(l, land) if land != Vector3.INF else mv
 
 ## The comet bursts: everyone in it in this game is flung onto their own spot round its ground point.
 func burst(team: int, at := Vector3.INF, from_net := false) -> void:
@@ -164,8 +159,9 @@ func burst(team: int, at := Vector3.INF, from_net := false) -> void:
 			_burst_one(h, i, ground)
 	comets.erase(team)
 	squad.events.append("burst %s %d" % [l.pname, mem.size()])
-	m.fx.burst(l.pos, Color(1.0, 0.62, 0.25), 40, 14.0, 0.8, 2.0, 3.0)
-	m.fx.burst(l.pos, Color(1.0, 0.92, 0.6), 24, 8.0, 0.5, 0.0, 2.2)
+	m.fx.burst(l.pos + Vector3(0, 0.9, 0), Color(1.0, 0.55, 0.2), 30, 12.0, 0.7, 4.0, 1.8)
+	m.fx.burst(l.pos + Vector3(0, 0.9, 0), Color(1.0, 0.85, 0.5), 14, 6.0, 0.4, 0.0, 1.2)
+	m.fx.ring(ground + Vector3(0, 0.1, 0), 4.0, Color(1.0, 0.6, 0.3, 0.8), 0.5)
 	m.sfx("boom", l.pos, -6.0 if m.player and m.player.team == team else -14.0, 0.75)
 	m.sfx("whoosh", l.pos, -4.0, 0.8)
 	if m.player and m.player.team == team:

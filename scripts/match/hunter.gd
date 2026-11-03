@@ -2156,6 +2156,8 @@ func sim(dt: float) -> void:
 	var want := atan2(-ad.x, -ad.y)
 	if roll_t > 0.0:
 		want = atan2(-roll_dir.x, -roll_dir.y)
+	elif dropping:
+		want = atan2(-fall_dir.x, -fall_dir.y)      # the freefall faces your heading, not the cursor
 	face = lerp_angle(face, want, minf(1.0, dt * 20.0))
 
 func pad_launch(to: Vector3) -> void:
