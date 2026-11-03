@@ -190,12 +190,13 @@ The farm building pass (docs/decisions/0004-farm-building.md). Farm level is poi
 | levels | [0, 6, 16, 30, 48, 70] |
 | levels_doc | Points needed for farm level 1..6 (index 0 is level 1). |
 | milestones | {"first_extract": {"name": "First extraction", "stat": "extracts", "n": 1, "text": "Make it out of an expedition once"}, "first_boss": {"name": "First boss", "stat": "bosses", "n": 1, "text": "Defeat a boss in a lair"}, "scan3": {"name": "Three scanned", "stat": "caught", "n": 3, "text": "Scan and bring home 3 wild Boki"}} |
-| starter | ["house", "crop_patch", "cook_pot"] |
-| starter_doc | Placed at once, no site: a new farm has no builders yet. |
-| unlock | {"picket": {"level": 2}, "stone_wall": {"level": 3}, "hedge": {"level": 3}, "path_stone": {"level": 2}, "path_wood": {"level": 3}, "water": {"level": 4}, "bush": {"level": 2}, "tree": {"level": 2}, "pine": {"level": 3}, "blossom_tree": {"milestone": "scan3"}, "lantern": {"level": 2}, "lamp_post": {"level": 3}, "bench": {"level": 2}, "kin_bed": {"level": 2}, "rug": {"level": 3}, "rug_long": {"level": 4}, "banner": {"level": 3}, "pillar": {"level": 4}, "kin_statue": {"milestone": "scan3"}, "fountain": {"milestone": "first_boss"}, "job_board": {"level": 2}, "lumber_camp": {"level": 2}, "quarry": {"level": 2}, "storage_chest": {"level": 2}, "hearth_oven": {"level": 3}, "workbench": {"level": 3}, "seed_garden": {"level": 3}, "kiln": {"level": 4}, "spark_mill": {"level": 4}, "ranch_pen": {"level": 4}, "infirmary": {"level": 4}, "cold_store": {"level": 5}, "market_stall": {"level": 2}, "boki_burrow": {"level": 2}, "training_post": {"level": 2}, "nesting_nook": {"level": 3}, "graveyard": {"level": 3}, "workshop": {"level": 2}, "cottage": {"level": 3}, "armory": {"milestone": "first_extract"}, "shrine": {"milestone": "first_boss"}} |
+| starter | ["crop_patch", "cook_pot"] |
+| starter_doc | Placed at once, no site. The house is not here: it goes up as a site your Boki build (build.house), free on a new save. |
+| start_doc | What Hob offers from the first minute is every item with no entry in unlock: house, crop_patch, cook_pot, ranch_pen, fence, path_dirt, flowers (and the feeder in storage). Everything in unlock opens by farm level or milestone and is then drawn up when you talk to Hob (scripts/home/farm_builder.gd). |
+| unlock | {"path_clear": {"level": 2}, "picket": {"level": 2}, "path_stone": {"level": 2}, "bush": {"level": 2}, "job_board": {"level": 2}, "lumber_camp": {"level": 2}, "quarry": {"level": 2}, "storage_chest": {"level": 2}, "market_stall": {"level": 3}, "boki_burrow": {"level": 3}, "training_post": {"level": 3}, "tree": {"level": 3}, "lantern": {"level": 3}, "bench": {"level": 3}, "kin_bed": {"level": 3}, "hearth_oven": {"level": 3}, "workbench": {"level": 3}, "nesting_nook": {"level": 3}, "seed_garden": {"level": 4}, "workshop": {"level": 4}, "graveyard": {"level": 4}, "stone_wall": {"level": 4}, "hedge": {"level": 4}, "path_wood": {"level": 4}, "pine": {"level": 4}, "lamp_post": {"level": 4}, "rug": {"level": 4}, "cottage": {"level": 4}, "kiln": {"level": 5}, "spark_mill": {"level": 5}, "infirmary": {"level": 5}, "cold_store": {"level": 5}, "water": {"level": 5}, "rug_long": {"level": 5}, "banner": {"level": 5}, "pillar": {"level": 5}, "blossom_tree": {"milestone": "scan3"}, "kin_statue": {"milestone": "scan3"}, "fountain": {"milestone": "first_boss"}, "armory": {"milestone": "first_extract"}, "shrine": {"milestone": "first_boss"}} |
 | cradles | {"6": 4, "7": 5, "8": 6} |
 | cradles_doc | Incubator cradle number -> farm level that lets you buy it. |
-| build | {"market_stall": {"gems": 10, "wood": 6, "fibre": 4, "labour": 4}, "nesting_nook": {"gems": 15, "wood": 10, "fibre": 6, "labour": 6}, "boki_burrow": {"gems": 12, "wood": 8, "stone": 5, "fibre": 4, "labour": 6}, "training_post": {"gems": 10, "wood": 8, "stone": 2, "labour": 4}, "graveyard": {"gems": 8, "stone": 10, "fibre": 2, "labour": 5}, "job_board": {"gems": 5, "wood": 4, "labour": 3}, "lumber_camp": {"gems": 8, "wood": 4, "stone": 2, "labour": 4}, "quarry": {"gems": 8, "wood": 4, "stone": 2, "labour": 4}, "storage_chest": {"gems": 5, "wood": 5, "fibre": 2, "labour": 3}, "hearth_oven": {"gems": 12, "wood": 6, "stone": 6, "labour": 5}, "workbench": {"gems": 10, "wood": 8, "fibre": 2, "labour": 5}, "spark_mill": {"gems": 16, "wood": 8, "stone": 6, "coals": 1, "labour": 7}, "cold_store": {"gems": 14, "wood": 4, "stone": 8, "fibre": 3, "labour": 6}, "ranch_pen": {"gems": 12, "wood": 10, "fibre": 6, "labour": 6}, "infirmary": {"gems": 14, "wood": 6, "stone": 6, "fibre": 4, "labour": 6}, "seed_garden": {"gems": 8, "wood": 4, "fibre": 4, "labour": 4}, "kiln": {"gems": 10, "stone": 8, "wood": 2, "labour": 5}} |
+| build | {"house": {"labour": 8}, "market_stall": {"gems": 10, "wood": 6, "fibre": 4, "labour": 4}, "nesting_nook": {"gems": 15, "wood": 10, "fibre": 6, "labour": 6}, "boki_burrow": {"gems": 12, "wood": 8, "stone": 5, "fibre": 4, "labour": 6}, "training_post": {"gems": 10, "wood": 8, "stone": 2, "labour": 4}, "graveyard": {"gems": 8, "stone": 10, "fibre": 2, "labour": 5}, "job_board": {"gems": 5, "wood": 4, "labour": 3}, "lumber_camp": {"gems": 8, "wood": 4, "stone": 2, "labour": 4}, "quarry": {"gems": 8, "wood": 4, "stone": 2, "labour": 4}, "storage_chest": {"gems": 5, "wood": 5, "fibre": 2, "labour": 3}, "hearth_oven": {"gems": 12, "wood": 6, "stone": 6, "labour": 5}, "workbench": {"gems": 10, "wood": 8, "fibre": 2, "labour": 5}, "spark_mill": {"gems": 16, "wood": 8, "stone": 6, "coals": 1, "labour": 7}, "cold_store": {"gems": 14, "wood": 4, "stone": 8, "fibre": 3, "labour": 6}, "ranch_pen": {"gems": 12, "wood": 10, "fibre": 6, "labour": 6}, "infirmary": {"gems": 14, "wood": 6, "stone": 6, "fibre": 4, "labour": 6}, "seed_garden": {"gems": 8, "wood": 4, "fibre": 4, "labour": 4}, "kiln": {"gems": 10, "stone": 8, "wood": 2, "labour": 5}} |
 | upgrade | {"2": {"gems": 20, "wood": 8, "stone": 6, "fibre": 4, "labour": 6, "level": 3}, "3": {"gems": 45, "wood": 14, "stone": 12, "coals": 2, "fibre": 8, "labour": 10, "level": 5}} |
 | upgrade_doc | Cost to reach tier 2 and tier 3. 'level' is the farm level it needs. Work stations work 25% / 50% faster at L2 / L3. |
 | tier_speed | [1.0, 1.25, 1.5] |
@@ -204,6 +205,38 @@ The farm building pass (docs/decisions/0004-farm-building.md). Farm level is poi
 | house_upgrade | {"2": {"gems": 40, "wood": 10, "stone": 6, "fibre": 6, "labour": 8, "level": 3}, "3": {"gems": 80, "wood": 18, "stone": 14, "coals": 2, "fibre": 10, "labour": 12, "level": 5}} |
 | swing_s | 6 |
 | crew_slots | 2 |
+
+## farm_builder (`content/rules/farm_builder.json`)
+
+Hob Brackenridge, the farm's builder (docs/decisions/0011-farm-builder-tutorial.md). He stands by the house; press interact to talk. Blueprints with a level or milestone in farm_build.json unlock for real only once Hob has drawn them up, so a level-up or milestone makes a 'new blueprints' toast and a mark over his head. Everything with no entry there is on offer from the start.
+
+| Setting | Value |
+|---|---|
+| name | Hob Brackenridge |
+| short | Hob |
+| stand | {"along": 2.4, "side": 4.2, "desc": "Metres in front of the house centre and to its right, so he never blocks the door."} |
+| talk_reach | 2.4 |
+| hint_more | Talk to Hob for more |
+| toast | New blueprints: talk to Hob |
+| lines | {"first": "Name's Hob. I draw up what you can build. Start with a house, a patch, a pot and a pen, and I'll have more when the farm has grown.", "nothing": "Nothing new yet. Grow the farm: harvest, hatch, scan, and make it out of an expedition.", "level_2": "You've got a crew now. Let's give them something to swing at.", "level_3": "Real work needs a real bench.", "level_4": "Pens, kilns, a proper hospital. Now we're talking.", "level_5": "Cold store. Mind the draught.", "level_6": "Nothing left that I haven't drawn. Keep building.", "first_extract": "You came back alive. Take this blueprint.", "first_boss": "Bring me a trophy and I'll carve it in stone.", "scan3": "Three Boki scanned? Then you'll want somewhere to put them."} |
+| menu_hint_empty | Hob has nothing new for you yet. |
+
+## farm_tutorial (`content/rules/farm_tutorial.json`)
+
+The guided farm tutorial (state: Save.d.tutorial.ft = {step, done, skipped}). Short, skippable, one prompt at a time. Every owner-confirmable choice is under 'options' so it is a one-line change.
+
+| Setting | Value |
+|---|---|
+| options | {"tracker_replaces_day1": true, "player_swing": true, "swing_cooldown_s": 2.0, "end_gems": 30, "house_first": true, "strict_order": false, "skippable": true, "house_cost_in": "farm_build.json build.house (free: labour only)"} |
+| options_doc | tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: E near a site swings a hammer (one swing per swing_cooldown_s), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). house_first: the other steps wait until the house is down. strict_order: true makes every step wait for the one before. skippable: Tab on the prompt asks to skip. |
+| house_spot | {"from": "landing", "x": 0.0, "z": -7.0} |
+| start_food | {"kibble": 3} |
+| build_wait_s | 30 |
+| steps | [{"id": "house", "title": "Put your house down", "hints": {"place": "Press {build}, pick House, then click the marked spot", "wait": "Your Boki are building it. Watch, or press {interact} at the house to swing a hammer too"}, "world": {"place": "Your house goes here", "wait": "Building..."}}, {"id": "feed", "title": "Feed your Boki", "hints": {"place": "Press {build} and set the trough down", "fill": "Walk up to the trough and press {interact} to fill it from your pantry"}, "world": {"place": "", "fill": "Fill the trough"}}, {"id": "crop", "title": "Grow something", "hints": {"patch": "Press {build} and put a crop patch down", "plant": "Plant a seed in the patch ({interact})", "water": "Water it ({interact})", "grow": "Give it a moment to grow, then pick it", "pick": "Pick it ({interact})"}, "world": {"patch": "", "plant": "Plant a seed", "water": "Water it", "grow": "Growing", "pick": "Pick it"}}, {"id": "pet", "title": "Say hi to your Boki", "hints": {"go": "Walk up to your Boki and press {interact}"}, "world": {"go": "Pet me"}}, {"id": "hob", "title": "Meet the builder", "hints": {"go": "Hob draws up more buildings. Walk up and press {interact}"}, "world": {"go": "Hob the builder"}}, {"id": "expedition", "title": "Head out", "needs_all": true, "hints": {"go": "Ready? Step into the portal ({interact}) for your first expedition"}, "world": {"go": "Portal"}}] |
+| skip_ask | Skip the tutorial? |
+| done_toast | Tutorial done! +{gems} gems |
+| skip_label | Skip tutorial |
+| tracker | {"title": "Goals", "max": 5, "per_source": {"unlock": 2, "mastery": 1, "milestone": 1, "level": 1}, "per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."} |
 
 ## gear (`content/rules/gear.json`)
 

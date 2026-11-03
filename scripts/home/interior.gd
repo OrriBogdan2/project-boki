@@ -60,7 +60,6 @@ func _ready() -> void:
 	else:
 		decor = (visit.get("decor", []) as Array).duplicate(true) if room == "house" else []
 	_rebuild_decor()
-	var went_in := Progress.day1_mark("inside") if visit.is_empty() else ""
 	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Save.d.get("look", {}), Arch.of_save())
 	add_child(player)
 	ppos = Vector3(W * 0.5, 0, D - 0.9)
@@ -68,8 +67,6 @@ func _ready() -> void:
 	cam.snap(Vector3(W * 0.5, 0, D * 0.5 - 0.6))
 	_spawn_kin()
 	_build_ui()
-	if went_in != "":
-		_day1_ticked(went_in)
 	Sfx.play_ambience("")
 	Sfx.play("whoosh", null, -14.0)
 
@@ -267,10 +264,6 @@ func _process(delta: float) -> void:
 		n.position = pos
 		n.get_node("Body").position.y = absf(sin(k["hop"])) * 0.1
 	cam.follow(Vector3(W * 0.5, 0, D * 0.5 - 0.6).lerp(ppos, 0.2), d, false)
-	# steps ticked somewhere else while in here (the inventory) show up straight away
-	if is_instance_valid(day1_box) and int(day1_box.get_meta("n", -1)) != Progress.day1_steps().size():
-		_refresh_day1()
-		_refresh_gems()
 	if decorating:
 		_update_ghost()
 	else:
@@ -339,31 +332,8 @@ func _pet_kin(k: Dictionary) -> void:
 		rec["pet_m"] = int(Save.d["matches"])
 		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
 	Save.save_game()
-	var r := Progress.day1_mark("pet")
-	if r != "":
-		_day1_ticked(r)
-
-func _day1_ticked(r: String) -> void:
-	Sfx.play("unlock", null, -8.0)
-	if r == "all":
-		_toast("First day done! +30 gems")
-	_refresh_day1()
-	_refresh_gems()
-
-func _refresh_gems() -> void:
-	var g := root_ui.find_child("Gems", true, false) as Label
-	if g: g.text = "%d gems" % int(Save.d["gems"])
-
-## The first-day checklist stays on screen indoors too.
-var day1_box: PanelContainer = null
-func _refresh_day1() -> void:
-	if is_instance_valid(day1_box):
-		day1_box.queue_free()
-	day1_box = null
-	if not visit.is_empty() or not Progress.day1_active():
-		return
-	day1_box = Progress.day1_box()
-	root_ui.add_child(day1_box)
+	if visit.is_empty():
+		FarmTutorial.event("pet")
 
 func _leave() -> void:
 	if decorating: _toggle_decorate()
@@ -563,7 +533,6 @@ func _build_ui() -> void:
 	panel_host.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	panel_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root_ui.add_child(panel_host)
-	_refresh_day1()
 
 func _deco_button_text() -> void:
 	if deco_btn:

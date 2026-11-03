@@ -1,0 +1,112 @@
+{
+	"desc": "The guided farm tutorial (state: Save.d.tutorial.ft = {step, done, skipped}). Short, skippable, one prompt at a time. Every owner-confirmable choice is under 'options' so it is a one-line change.",
+	"options": {
+		"tracker_replaces_day1": true,
+		"player_swing": true,
+		"swing_cooldown_s": 2.0,
+		"end_gems": 30,
+		"house_first": true,
+		"strict_order": false,
+		"skippable": true,
+		"house_cost_in": "farm_build.json build.house (free: labour only)"
+	},
+	"options_doc": "tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: E near a site swings a hammer (one swing per swing_cooldown_s), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). house_first: the other steps wait until the house is down. strict_order: true makes every step wait for the one before. skippable: Tab on the prompt asks to skip.",
+	"house_spot": {
+		"from": "landing",
+		"x": 0.0,
+		"z": -7.0
+	},
+	"start_food": {
+		"kibble": 3
+	},
+	"build_wait_s": 30,
+	"steps": [
+		{
+			"id": "house",
+			"title": "Put your house down",
+			"hints": {
+				"place": "Press {build}, pick House, then click the marked spot",
+				"wait": "Your Boki are building it. Watch, or press {interact} at the house to swing a hammer too"
+			},
+			"world": {
+				"place": "Your house goes here",
+				"wait": "Building..."
+			}
+		},
+		{
+			"id": "feed",
+			"title": "Feed your Boki",
+			"hints": {
+				"place": "Press {build} and set the trough down",
+				"fill": "Walk up to the trough and press {interact} to fill it from your pantry"
+			},
+			"world": {
+				"place": "",
+				"fill": "Fill the trough"
+			}
+		},
+		{
+			"id": "crop",
+			"title": "Grow something",
+			"hints": {
+				"patch": "Press {build} and put a crop patch down",
+				"plant": "Plant a seed in the patch ({interact})",
+				"water": "Water it ({interact})",
+				"grow": "Give it a moment to grow, then pick it",
+				"pick": "Pick it ({interact})"
+			},
+			"world": {
+				"patch": "",
+				"plant": "Plant a seed",
+				"water": "Water it",
+				"grow": "Growing",
+				"pick": "Pick it"
+			}
+		},
+		{
+			"id": "pet",
+			"title": "Say hi to your Boki",
+			"hints": {
+				"go": "Walk up to your Boki and press {interact}"
+			},
+			"world": {
+				"go": "Pet me"
+			}
+		},
+		{
+			"id": "hob",
+			"title": "Meet the builder",
+			"hints": {
+				"go": "Hob draws up more buildings. Walk up and press {interact}"
+			},
+			"world": {
+				"go": "Hob the builder"
+			}
+		},
+		{
+			"id": "expedition",
+			"title": "Head out",
+			"needs_all": true,
+			"hints": {
+				"go": "Ready? Step into the portal ({interact}) for your first expedition"
+			},
+			"world": {
+				"go": "Portal"
+			}
+		}
+	],
+	"skip_ask": "Skip the tutorial?",
+	"done_toast": "Tutorial done! +{gems} gems",
+	"skip_label": "Skip tutorial",
+	"tracker": {
+		"title": "Goals",
+		"max": 5,
+		"per_source": {
+			"unlock": 2,
+			"mastery": 1,
+			"milestone": 1,
+			"level": 1
+		},
+		"per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."
+	}
+}

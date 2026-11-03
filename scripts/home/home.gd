@@ -55,6 +55,8 @@ var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and 
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
 var training: HomeTraining = null  # the Training Grounds isle, where your combat kit works (home_training.gd)
+var hob: FarmHob = null            # Hob the builder: blueprints, and a hammer for sites (farm_hob.gd)
+var guide: FarmGuide = null        # the Goals card and the farm tutorial on screen (farm_guide.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
 var hmk: HomeMarket = null         # the Drift Pens (Boki market) and the Tradewind Exchange (home_market.gd)
@@ -162,6 +164,9 @@ func _ready() -> void:
 	hg = HomeGather.new(self)
 	training = HomeTraining.new(self)
 	hw = HomeWork.new(self)
+	if visit.is_empty():
+		hob = FarmHob.new(self)
+		guide = FarmGuide.new(self)
 	if visit.is_empty(): Work.ensure()
 	var path_col := Color("9c7a52")
 	spots["portal"] = Vector3(38.0, 0, 39.0)
@@ -258,15 +263,9 @@ func _sync_fixtures() -> void:
 	if not fs:
 		return
 	_fixture_spots()
-	if visit.is_empty() and Progress.day1_active():
-		# the first day's farm-start steps tick off as they go down
-		var r1 := Progress.day1_mark("house") if spots["house"].x > -100.0 else ""
-		var r2 := Progress.day1_mark("patch") if not HomeLayout.fixtures(_d(), "farm").is_empty() else ""
-		if (r1 != "" or r2 != "") and is_instance_valid(top_chips):
-			_refresh_day1.call_deferred()
-			_refresh_top.call_deferred()
 	var e := _fx1("house")
 	house_node = (hb.nodes.get(int(e["u"])) as Node3D) if hb and not e.is_empty() else null
+	if hob: hob.sync()
 	e = _fx1("burrow")
 	var bn: Node3D = (hb.nodes.get(int(e["u"])) as Node3D) if hb and not e.is_empty() else null
 	burrow_node = bn.get_node_or_null("Burrow") as Node3D if is_instance_valid(bn) else null
@@ -654,7 +653,7 @@ func _ready_rest() -> void:
 	await _slice()
 	_build_ui()
 	_refresh_top()
-	_refresh_day1()
+	if guide: guide.build_ui()
 	if building:
 		building = false
 		set_process(true)
@@ -1029,6 +1028,7 @@ func _process(delta: float) -> void:
 		if training: _keep_off_hub(training.hud)
 	_move_player(d)
 	_move_kin(d)
+	if guide: guide.tick(d)
 	_care_tick(d)
 	if hecon: hecon.tick(d)
 	_update_bubbles(d)
@@ -2019,6 +2019,11 @@ func _find_interact() -> void:
 	for i in gh_plots.size():
 		var d := p2.distance_to(Vector2(gh_plots[i].position.x, gh_plots[i].position.z))
 		if d < bd: bd = d; best = {"kind": "plot", "arr": "gh_plots", "i": i}
+	if hob:
+		var near_hob := hob.find(p2)
+		if not near_hob.is_empty():
+			bd = 0.5
+			best = near_hob
 	for nm in ["pot", "stall", "portal", "house", "ferry", "rack"]:
 		if not spots.has(nm) or (nm == "rack" and not visit.is_empty()): continue
 		var sp: Vector3 = spots[nm]
@@ -2205,6 +2210,7 @@ func _label_for(it: Dictionary) -> String:
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
+		"hob", "site": return hob.label(it)
 		"feeder", "grave", "graveyard", "place": return hecon.label(it)
 		"station": return "Job Board" if it["id"] == "job_board" else "%s: assign a Boki" % HomeLayout.CATALOG[it["id"]]["name"]
 		"wild": return hg.label(it)
@@ -2241,6 +2247,7 @@ func _use(it: Dictionary) -> void:
 			else: nook_tab = "Incubator"; _open_nook()
 		"tryon": training.open_tryon()
 		"burrow": _open_burrow()
+		"hob", "site": hob.use(it)
 		"feeder", "grave", "graveyard", "place": hecon.use(it)
 		"station":
 			if it["id"] == "job_board" or not hw: open_job_board()
@@ -2543,35 +2550,10 @@ func _close_panel() -> void:
 	if was.ends_with(" evolved") or was.ends_with(" is changing") or was == "Welcome home":
 		_play_evolutions.call_deferred()
 
-# ---- your first day: the checklist lives in Progress so the house rooms can show and tick it too
-const DAY1 := Progress.DAY1
-var day1_box: PanelContainer = null
-
-func _day1_active() -> bool:
-	return visit.is_empty() and Progress.day1_active()
-
+# ---- the farm tutorial hears about the first things you do (FarmTutorial); the Goals card is FarmGuide
 func _day1(step: String) -> void:
-	if not visit.is_empty():
-		return
-	var r := Progress.day1_mark(step)
-	if r == "":
-		return
-	Sfx.play("unlock", null, -8.0)
-	if r == "all":
-		_toast("First day done! +30 gems")
-	_refresh_day1()
-	_refresh_top()
-
-func _refresh_day1() -> void:
-	if is_instance_valid(day1_box):
-		day1_box.queue_free()
-	day1_box = null
-	if not _day1_active():
-		return
-	day1_box = Progress.day1_box()
-	root_ui.add_child(day1_box)
-	if is_instance_valid(panel_host):
-		root_ui.move_child(day1_box, panel_host.get_index())     # menus open on top of it
+	if visit.is_empty():
+		FarmTutorial.event(step)
 
 func _open_welcome() -> void:
 	# shown once: marked seen as soon as it opens, however it's closed
@@ -2608,19 +2590,6 @@ func _grow_left(arr: String, d: Dictionary) -> String:
 func _farm_tick() -> void:
 	if not visit.is_empty():
 		return
-	# steps done elsewhere (inside the house, the inventory) show up here
-	if _day1_active() and typeof(Save.d["tutorial"].get("day1")) == TYPE_DICTIONARY:
-		var dd: Dictionary = Save.d["tutorial"]["day1"]
-		if dd.size() >= Progress.day1_list().size():
-			Save.d["tutorial"]["day1_done"] = true
-			Save.d["gems"] = int(Save.d["gems"]) + 30
-			_toast("First day done! +30 gems")
-			Save.save_game()
-			_refresh_day1()
-			_refresh_top()
-		elif is_instance_valid(day1_box) and int(day1_box.get_meta("n", -1)) != dd.size():
-			_refresh_day1()
-			if is_instance_valid(day1_box): day1_box.set_meta("n", dd.size())
 	var now := Time.get_unix_time_from_system()
 	for arr in ["plots", "gh_plots"]:
 		var nodes: Array = plots if arr == "plots" else gh_plots

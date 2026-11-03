@@ -990,9 +990,7 @@ func toggle() -> void:
 	if not can_build():
 		return
 	active = true
-	var opened := FarmUnlocks.announce()
-	if not opened.is_empty():
-		h._toast("New to build: %s" % ", ".join(opened.slice(0, 3).map(func(i): return FarmUnlocks.name_of(String(i)))))
+	cat = "Buildings"      # B always opens on Buildings
 	h.prompt_box.visible = false
 	h.cam.zoom_to = maxf(h.cam.zoom_to, 1.35)
 	h.set_build_ui(true)
@@ -1718,6 +1716,8 @@ func _build_bar() -> void:
 	var tabs := UI.hbox(5)
 	col.add_child(tabs)
 	for ct in HomeLayout.CATS:
+		if not FarmBuilder.tab_shown(self, ct):
+			continue
 		var cc: String = ct
 		var tb := UI.choice(ct, ct == cat, func(): cat = cc; page = 0; _build_bar())
 		tb.add_theme_font_size_override("font_size", 14)
@@ -1778,6 +1778,7 @@ func _build_bar() -> void:
 	hint_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hint_lbl.clip_text = true
 	foot.add_child(hint_lbl)
+	FarmBuilder.add_footer(foot)
 	foot.add_child(UI.key_hints([["LMB", "place / pick up"], [Settings.key_cap("rotate"), "turn"], ["X", "store"], ["Ctrl Z", "undo"], ["Esc", "cancel"], [Settings.key_cap("build"), "done"]], 12, Color(1, 1, 1, 0.75)))
 	h.root_ui.add_child(card)
 	bar = card
@@ -1818,7 +1819,6 @@ func _tab_items() -> Array:
 					var mx := HomeLayout.max_of(id, h._d())
 					var full: bool = mx > 0 and int(lay["inv"].get(id, 0)) == 0 and HomeLayout.count_of(id, h._d()) >= mx
 					if not full and not FarmUnlocks.open(id):
-						out.append(FarmBuildUi.locked_entry(id))
 						continue
 					var bc := _entry_cost(id)
 					var en := {"t": "%s\n%s" % [fc["name"], ("built" if mx == 1 else "all placed") if full else ("" if not bc.is_empty() else price_text(id))], "cb": func(): take(iid),
@@ -1834,7 +1834,6 @@ func _tab_items() -> Array:
 				var bb: String = b
 				var nm: String = Data.BUILDINGS[b]["name"]
 				if not HomeLayout.placed(b, h._d()) and not FarmUnlocks.open(b):
-					out.append(FarmBuildUi.locked_entry(b))
 					continue
 				if not HomeLayout.placed(b, h._d()):
 					var cost := "free" if bool(Data.BUILDINGS[b].get("free", false)) or h._has_b(b) else "%d gems" % int(Data.BUILDINGS[b]["cost"])
@@ -1874,7 +1873,6 @@ func _tab_items() -> Array:
 				if String(c["cat"]) != cat: continue
 				var iid: String = id
 				if not FarmUnlocks.open(id):
-					out.append(FarmBuildUi.locked_entry(id))
 					continue
 				var pc := cost_of(id, 1)
 				var bc := _entry_cost(id)

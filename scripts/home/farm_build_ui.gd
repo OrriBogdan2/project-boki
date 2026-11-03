@@ -2,7 +2,7 @@ class_name FarmBuildUi
 extends RefCounted
 ## Build mode's extras for the farm building pass: the footprint outline and snapping grid round the
 ## ghost, the reason a spot is refused floating over it, the pop when something lands, and the
-## entries for the locked items and the Upgrades tab. HomeBuild calls these from a few places.
+## entries for the Upgrades tab. HomeBuild calls these from a few places.
 
 const GRID_R := 3                         # tiles of snapping grid shown round the ghost
 
@@ -92,11 +92,6 @@ static func pop(n: Node3D) -> void:
 	tw.tween_property(n, "scale", s, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 # ------------------------------------------------------------------ bar entries
-## The bar entry for a catalog item that needs a farm unlock to be built: greyed with its requirement.
-static func locked_entry(id: String) -> Dictionary:
-	return {"t": "%s\n%s" % [FarmUnlocks.name_of(id), FarmUnlocks.lock_short(id)], "cb": func(): pass, "off": true, "lock": true,
-		"tip": "%s opens at: %s. %s" % [FarmUnlocks.name_of(id), FarmUnlocks.lock_text(id), String(HomeLayout.CATALOG.get(id, {}).get("desc", Data.BUILDINGS.get(id, {}).get("desc", "")))]}
-
 ## The Upgrades tab: one entry per standing building that has a next tier.
 static func upgrade_entries(hb: HomeBuild) -> Array:
 	var out: Array = []

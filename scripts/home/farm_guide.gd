@@ -1,0 +1,213 @@
+class_name FarmGuide
+extends RefCounted
+## The farm's guidance on screen (home.gd owns one): the Goals tracker in the top-right slot
+## (GoalTracker), and while the tutorial runs, one prompt in the world over what to do next and one
+## hint line at the bottom with a Skip button. The rules are FarmTutorial; none of it shows when
+## visiting. Skipping puts the house down as a site if it isn't, so a skipper isn't stuck.
+
+var h
+var tracker: PanelContainer = null
+var hint_box: PanelContainer = null
+var hint_lbl: Label = null
+var skip_row: HBoxContainer = null
+var marker: Label3D = null
+var sig := ""
+var t := 0.0
+var detect_t := 0.0
+var asking := false
+
+func _init(home) -> void:
+	h = home
+
+func build_ui() -> void:
+	if h.root_ui == null:
+		return
+	refresh()
+
+## Rebuilds the card and the hint now.
+func refresh() -> void:
+	if not h.visit.is_empty() or h.root_ui == null:
+		return
+	if is_instance_valid(tracker):
+		tracker.queue_free()
+	tracker = GoalTracker.build()
+	sig = GoalTracker.signature()
+	if tracker:
+		h.root_ui.add_child(tracker)
+		if is_instance_valid(h.panel_host):
+			h.root_ui.move_child(tracker, h.panel_host.get_index())      # menus open on top of it
+	_refresh_hint()
+
+func tick(dt: float) -> void:
+	if not h.visit.is_empty():
+		return
+	t += dt
+	detect_t -= dt
+	if h.hob:
+		h.hob.tick(dt)
+	if detect_t <= 0.0:
+		detect_t = 0.5
+		_poll()
+	_update_marker()
+
+func _poll() -> void:
+	var was_done := bool(FarmTutorial.state()["done"])
+	if FarmTutorial.active():
+		FarmTutorial.detect()
+		if FarmTutorial.current() == "feed":
+			FarmTutorial.give_food()
+	var st := FarmTutorial.state()
+	if bool(st["done"]) and not was_done and not bool(st["skipped"]):
+		var gems := str(int(FarmTutorial.option("end_gems")))
+		h._toast(String(FarmTutorial.rules()["done_toast"]).replace("{gems}", gems))
+		Sfx.play("unlock", null, -6.0)
+		h._refresh_top()
+	if GoalTracker.signature() != sig:
+		refresh()
+	else:
+		_refresh_hint()
+
+# ------------------------------------------------------------------ the hint line
+func _refresh_hint() -> void:
+	var id := FarmTutorial.current()
+	if id == "":
+		_clear_hint()
+		return
+	if not is_instance_valid(hint_box):
+		_make_hint()
+	var s := FarmTutorial.hint_text(id)
+	if id == "house" and FarmTutorial.stage(id) == "wait":
+		s = "%s (%s)" % [s, _site_progress()]
+	hint_lbl.text = "%d/%d  %s" % [FarmTutorial.done_count() + 1, FarmTutorial.steps().size(), s]
+
+func _clear_hint() -> void:
+	if is_instance_valid(hint_box):
+		hint_box.queue_free()
+	hint_box = null
+	if is_instance_valid(marker):
+		marker.queue_free()
+	marker = null
+
+func _site_progress() -> String:
+	var e := FarmHob.house_entry()
+	if e.is_empty() or not FarmSites.has_site(e):
+		return "done"
+	return "%d/%d swings" % [int(e["site"]["got"]), int(e["site"]["need"])]
+
+func _make_hint() -> void:
+	hint_box = UI.card(Color(0.06, 0.07, 0.11, 0.9), 10, 14)
+	UI.set_card_border(hint_box, Color(UI.GOLD, 0.5), 1)
+	hint_box.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	hint_box.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	hint_box.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	hint_box.offset_bottom = -92
+	var row := UI.hbox(14)
+	hint_box.add_child(row)
+	hint_lbl = UI.label("", 16, UI.INK, UI.semi)
+	hint_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
+	row.add_child(hint_lbl)
+	skip_row = UI.hbox(6)
+	row.add_child(skip_row)
+	_skip_buttons()
+	h.root_ui.add_child(hint_box)
+
+func _skip_buttons() -> void:
+	for c in skip_row.get_children():
+		c.queue_free()
+	if not bool(FarmTutorial.option("skippable")):
+		return
+	if not asking:
+		skip_row.add_child(UI.button(String(FarmTutorial.rules()["skip_label"]), func():
+			asking = true
+			_skip_buttons(), 0))
+		return
+	skip_row.add_child(UI.label(String(FarmTutorial.rules()["skip_ask"]), 14, UI.MUTED))
+	skip_row.add_child(UI.button("Yes", func(): skip(), 0))
+	skip_row.add_child(UI.button("No", func():
+		asking = false
+		_skip_buttons(), 0))
+
+## Skips the tutorial: nothing is granted or taken; the house is put down as a site if it isn't.
+func skip() -> void:
+	asking = false
+	FarmTutorial.skip()
+	if FarmHob.house_entry().is_empty():
+		place_house()
+	_clear_hint()
+	h.hob.sync()
+	h._refresh_top()
+
+## The tutorial's house spot: from the landing, as the data says.
+func house_spot() -> Vector3:
+	var sp: Dictionary = FarmTutorial.rules()["house_spot"]
+	return HomeLayout.LANDING + Vector3(float(sp["x"]), 0, float(sp["z"]))
+
+## Puts the house down as a construction site on the free ground nearest the suggested spot.
+func place_house() -> bool:
+	var hb: HomeBuild = h.hb
+	var was_active := hb.active
+	if not was_active:
+		hb.active = true
+	hb.take("house")
+	var found := false
+	var p := house_spot()
+	var sz := HomeLayout.size_of("house", 0)
+	for rad in 24:
+		for k in 24:
+			var a := float(k) / 24.0 * TAU
+			var x := int(round(p.x + cos(a) * rad - sz.x * 0.5))
+			var z := int(round(p.z + sin(a) * rad - sz.y * 0.5))
+			var cs := HomeLayout.cells_of([x, z, x + sz.x - 1, z + sz.y - 1])
+			if hb.fits(hb.held, cs):
+				hb.cells = cs
+				hb._check_cells()
+				found = hb.place_held()
+				break
+		if found:
+			break
+	hb._drop_held()
+	hb.active = was_active
+	return found
+
+# ------------------------------------------------------------------ the world prompt
+func _target(id: String) -> Vector3:
+	match id:
+		"house":
+			var e := FarmHob.house_entry()
+			return house_spot() if e.is_empty() else HomeLayout.deco_center(e)
+		"feed":
+			var fs := Econ.feeders()
+			return Vector3(float(fs[0]["x"]), 0, float(fs[0]["z"])) if not fs.is_empty() else Vector3.INF
+		"crop":
+			return h.plots[0].position if not h.plots.is_empty() and FarmTutorial.stage(id) != "patch" else Vector3.INF
+		"pet":
+			for k in h.kins:
+				if String(k["rec"]["uid"]) == String(Save.d["active"]):
+					return k["pos"]
+		"hob":
+			return h.hob.pos
+		"expedition":
+			return h.spots["portal"]
+	return Vector3.INF
+
+func _update_marker() -> void:
+	var id := FarmTutorial.current()
+	var txt := FarmTutorial.world_text(id)
+	var at := _target(id) if id != "" and txt != "" else Vector3.INF
+	if at.x == INF or at.x < -100.0:
+		if is_instance_valid(marker):
+			marker.visible = false
+		return
+	if not is_instance_valid(marker):
+		marker = Label3D.new()
+		marker.font_size = 56
+		marker.pixel_size = 0.0095
+		marker.outline_size = 16
+		marker.modulate = UI.GOLD
+		marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		marker.no_depth_test = true
+		marker.render_priority = 4
+		h.add_child(marker)
+	marker.visible = true
+	marker.text = "%s\n▼" % txt
+	marker.position = at + Vector3(0, 3.6 + sin(t * 3.0) * 0.18, 0)
