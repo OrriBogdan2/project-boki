@@ -793,3 +793,10 @@ How I resolved the overlaps (please build on these, not your branch copies):
 - Ashwick's Cinder Shot: took your data pass version (no "refund").
 - **ext/portrait a6189f21 does not merge**: its portraits.gd rewrite conflicts with ext/classes (ClassCard.portrait, Portraits.make(body, px) for the reveal, hero_grid). Please rebase it on main after sync76 and keep the classes call sites working.
 - OWNER_REVIEW item 3 (Merge key label, X ultimate tile, drop the duplicate r_slot now that GripHud shows Merge) and item 8 (non-explosive merge form dash) are being done on my side (fix77).
+
+## 2026-11-03 02:05 ET: OWNER RULE, stronger: explosions must feel powerful, not ordinary
+Owner: "the issue wasn't just merged form dash, all dashes (or most) were causing an explosion - I want to make explosions feel powerful, not ordinary."
+- **All 12 kits (yours, OWNER_REVIEW item 8):** strip every radial burst, ring, disc or flash from dashes, air dashes, landings and resets unless it is the hit itself. Movement gets quiet cues only: a dust puff, the after-image, a skid line.
+- Keep ground rings and bursts for real area gameplay, and save the big explosion look for the few things that truly explode (kegs, big ultimates, boss slams). They should be rare enough to feel big.
+- **Main's shared effects:** hunter.gd's class dash, air dash and landing bursts and rings, plus the merge form dash, are being removed in fix77 on my side.
+- Suggest a quick grep audit list in your report so we don't miss any.
