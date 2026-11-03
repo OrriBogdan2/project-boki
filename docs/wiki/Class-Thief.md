@@ -39,7 +39,7 @@ primes a heavier hit, and landing that hit gives the flip straight back.
 
 |  |  |
 |---|---|
-| Weight class | Light (124 health, 5 m/s, 1 dash charge) |
+| Weight class | Light (124 health, 4.4 m/s, 1 dash charge) |
 | Signature weapon | Twin Blades (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The cutpurse duelist. Sticks to one mark, flips past them, never lets go. |
 | Silhouette | the hood tail and cape |
@@ -83,7 +83,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Dash (Shift) | recharge 6.5s -> 5.5s per charge. | recharge 6.5s -> 4.6s; Primed hits +20%, and a Shadow Knife that sticks in a foe resets Vault. |
 | E | cooldown 18s -> 16.2s, damage +15%. | cooldown 18s -> 14.4s, damage +30%; sticking refunds 25% of the cooldown (50% in a foe). |
 
-**Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > R (ultimate) > RMB > E > R (ultimate) > Glove (Q).
+**Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 
 ### What enemies can read
 

@@ -259,9 +259,10 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 				ln.modulate = col
 			elif not n.get("crit", false):
 				ln.modulate = col
+			_num_look(ln, bool(n.get("crit", false)))
 			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)))
 			ln.modulate.a = 1.0
-			ln.scale = Vector3.ONE * (1.75 if crit else 1.45)
+			ln.scale = Vector3.ONE * (CRIT_POP if crit else 1.45)
 			return
 	var l: Label3D = num_pool.pop_front()
 	num_pool.append(l)
@@ -270,11 +271,12 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 			nums.erase(n); break
 	l.text = prefix + str(int(round(v)))
 	l.modulate = col
+	_num_look(l, crit)
 	l.font_size = _num_size(v, crit)
 	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
 	l.global_position = at + off
 	l.visible = true
-	l.scale = Vector3.ONE * (1.9 if crit else 1.5)
+	l.scale = Vector3.ONE * (CRIT_POP if crit else 1.5)
 	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit})
 
 ## How long a number keeps taking hits after the last one, and how long it lingers on the target.
@@ -282,6 +284,16 @@ const MERGE_T := 0.45
 const STICK_T := 0.3
 const WORD_STACK_T := 0.5        # s a word still claims its spot for stacking
 const WORD_GAP := 0.6            # m between stacked words, along the camera's up
+
+const CRIT_POP := 2.2          # a crit lands this many times its size and settles (a normal hit: 1.5)
+const NUM_OUTLINE := Color(0.05, 0.04, 0.08, 0.9)     # every number's dark outline ...
+const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)    # ... a crit's is a hot ember brown, and thicker
+
+## Outline per kind: crits get a thicker, warm outline so they read as a different thing, not just
+## a yellower number (pooled labels are reused, so every number sets this).
+func _num_look(l: Label3D, crit: bool) -> void:
+	l.outline_modulate = CRIT_OUTLINE if crit else NUM_OUTLINE
+	l.outline_size = 20 if crit else 14
 
 ## Bigger totals and crits read bigger, within a small range so numbers never cover the fight.
 func _num_size(v: float, crit: bool) -> int:
@@ -297,6 +309,7 @@ func word(at: Vector3, txt: String, col: Color, big := false) -> void:
 			nums.erase(n); break
 	l.text = txt
 	l.modulate = col
+	_num_look(l, false)
 	l.font_size = 58 if big else 40
 	l.global_position = at + _word_lift(at)
 	l.visible = true

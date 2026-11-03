@@ -157,6 +157,7 @@ func set_hold(kind: String, dur := 0.15) -> void:
 func holding() -> String:
 	return hold_kind if m.time < hold_until else ""
 var rift_keys := 0               # Rift Keys carried: each opens a rift hatch once (see Exits); they go in your deathbox
+var chest_keys := 0              # chest keys carried: each opens one chest (KeyChest); they go in your deathbox
 var kin: Ent = null             # the active kin: its abilities are on Q and V, its ultimate on R
 var kin2: Ent = null            # the benched kin, swapped in with X
 var swap_cd := 0.0
@@ -3019,8 +3020,8 @@ func level_slot(slot: String) -> bool:
 func _bot_spend() -> void:
 	var order := ["sec", "dash", "kin", "gear", "sec", "kin", "dash", "gear", "sec", "kin", "dash", "gear"]
 	if ak:
-		# the archetype's recommended order (ARCHETYPES §6), which skips the R until it opens
-		order = (ak.d.get("order", []) as Array).filter(func(x): return x != "ult") + ["gear", "gear", "kin", "dash", "sec"]
+		# the archetype's recommended order (ARCHETYPES §6); the R is not ranked with points
+		order = (ak.d.get("order", []) as Array) + ["gear", "gear", "kin", "dash", "sec"]
 	while skill_pts > 0:
 		if can_level("ult"):
 			level_slot("ult"); continue

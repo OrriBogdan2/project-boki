@@ -35,7 +35,7 @@ head first, and hits back harder after every knock.
 
 |  |  |
 |---|---|
-| Weight class | Heavy (193 health, 4.55 m/s, 2 dash charges) |
+| Weight class | Heavy (193 health, 4.4 m/s, 2 dash charges) |
 | Signature weapon | Torch Lance (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The flue sweep. Hoses foes down with fire until they blaze, rams them head first, and hits back harder after every knock. |
 | Silhouette | the tall sooty top hat and the bellows on the back |

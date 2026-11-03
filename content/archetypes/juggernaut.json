@@ -26,7 +26,7 @@
 	"e": {"delivery": "projectile", "name": "Warchain", "short": "Chain", "icon": "hook", "col": "#d8c0a0", "cooldown": 13.0, "range": 10.0, "speed": 34.0, "dmg": 8.0, "time": 4.0, "reel_speed": 22.0, "refund_foe": 0.33,
 		"desc": "Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.",
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add"}},
-	"order": ["dash", "sec", "kin", "sec", "dash", "ult", "sec", "kin", "ult", "gear"],
+	"order": ["dash", "sec", "kin", "sec", "dash", "sec", "kin", "gear"],
 	"rank3": {"dash": "a third charge", "sec": "+20% damage on every Smash; its sweet spot also crashes and heals you", "kin": "hooking a foe refunds 33% of the cooldown"},
 	"rank2": {"sec": "Rank 2: cooldown 3s -> 2.7s, damage +15%.", "dash": "Rank 2: recharge 9s -> 7.6s per charge.", "kin": "Rank 2: cooldown 13s -> 11.7s, damage +15%."},
 	"rank_next": {"sec": "Rank 3: cooldown 3s -> 2.4s, damage +30%; +20% damage on every Smash, and its sweet spot also crashes (24 in 3m) and heals you 60% of the damage it deals; a knock resets the crash.", "kin": "Rank 3: cooldown 13s -> 10.4s, damage +30%; hooking a foe refunds 33% of the cooldown.", "dash": "Rank 3: recharge 9s -> 6.3s; a third charge."},

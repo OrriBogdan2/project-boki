@@ -440,9 +440,9 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 404,
+"long_line": 403,
 "nested_ternary": 7,
-"semicolon": 421,
+"semicolon": 420,
 "shadow": 3
 },
 "scripts/match/abilities.gd": {
@@ -615,7 +615,7 @@
 },
 "scripts/match/hunter.gd": {
 "history_comment": 44,
-"long_line": 101,
+"long_line": 100,
 "nested_ternary": 21,
 "semicolon": 56,
 "shadow": 4
@@ -696,13 +696,13 @@
 "scripts/match/life.gd": {
 "long_line": 18,
 "nested_ternary": 1,
-"semicolon": 8
+"semicolon": 7
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 240,
-"nested_ternary": 23,
-"semicolon": 163,
+"long_line": 239,
+"nested_ternary": 22,
+"semicolon": 161,
 "shadow": 9
 },
 "scripts/match/merge_look.gd": {
@@ -728,7 +728,7 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 290,
+"long_line": 292,
 "nested_ternary": 12,
 "semicolon": 283,
 "shadow": 3
@@ -896,9 +896,9 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 235,
-"nested_ternary": 48,
-"semicolon": 57,
+"long_line": 215,
+"nested_ternary": 42,
+"semicolon": 56,
 "shadow": 2
 },
 "scripts/ui/hud_tip.gd": {
@@ -1099,7 +1099,7 @@
 "shadow": 1
 },
 "tools/gear_check.gd": {
-"long_line": 26,
+"long_line": 25,
 "semicolon": 1,
 "shadow": 1
 },
@@ -1209,7 +1209,7 @@
 },
 "tools/polish_check.gd": {
 "long_line": 4,
-"semicolon": 5
+"semicolon": 4
 },
 "tools/practice_hero_check.gd": {
 "long_line": 6,

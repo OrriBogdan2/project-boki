@@ -650,7 +650,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		if s > bs: bs = s; best = o
 	if best == null:
 		for mb in m.mobs:
-			if mb.dead or mb == ign_e: continue
+			if mb.dead or mb == ign_e or (mb is Shrubling and (mb as Shrubling).ss == "disguised"): continue
 			# a sleeping boss can't be hurt; an awake one is worth walking up to
 			if mb is Boss and (mb as Boss).dormant: continue
 			var d := h.flat_dist(mb)
@@ -780,9 +780,14 @@ func _choose(m: Match, h: Hunter) -> void:
 			if KinLoss.scannable_by(h, k) and Capture.room(h) and h.flat_dist(k) < 14.0 + (GOAL_KEEP if k.pos.distance_to(cur) < 2.0 else 0.0):
 				goal = k.pos; gk = "catch"; break
 	if goal == Vector3.INF:
-		var bd := 18.0
+		var kg := BotKeys.goal(m, h, cur)      # no key yet: fight for one first
+		if not kg.is_empty():
+			goal = kg[0]
+			gk = String(kg[1])
+	if goal == Vector3.INF:
+		var bd := BotKeys.chest_range(h)       # a key in hand: now a chest
 		for c in m.chests:
-			if c["open"]: continue
+			if not BotKeys.chest_open_for(h, c): continue
 			var d := h.flat_dist(c["pos"]) - (GOAL_KEEP if c["pos"] == cur else 0.0)
 			if d < bd: bd = d; goal = c["pos"]; gk = "chest"
 	if goal == Vector3.INF:

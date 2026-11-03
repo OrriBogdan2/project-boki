@@ -47,11 +47,11 @@ static func stairs_start(m, at: Vector3) -> Vector3:
 		m.set_meta("stairs_demo", Vector3(mid.x + 0.5, at.y, mid.y + 0.5))
 	return at
 
-## --chest-demo: a row of crate, chest, pot, rare chest and powder keg 1.7 m apart on a flat open
+## --chest-demo: a row of crate, chest, pot, second chest and powder keg 1.7 m apart on a flat open
 ## patch near the start, you just below it, so the two kinds of prop can be told apart in one frame.
 static func chest_row(m) -> void:
 	# test (--chest-demo): on a flat open patch near where you start, a row of crate, chest, pot,
-	# rare chest and powder keg 1.7 m apart, you just below it, so the two kinds of prop can be
+	# second chest and powder keg 1.7 m apart, you just below it, so the two kinds of prop can be
 	# told apart in one frame
 	var base: Vector3 = m.player.pos
 	var busy: Array = []      # exits, portals, pads, chests and breakables already there
@@ -81,12 +81,11 @@ static func chest_row(m) -> void:
 			if flat.call(c):
 				base = c; found = true; break
 		if found: break
-	var row := ["crate", "chest", "pot", "chest1", "barrel"]
+	var row := ["crate", "chest", "pot", "chest", "barrel"]
 	for k in row.size():
 		var q: Vector3 = base + Vector3((k - 2) * 1.7, 0, 0)
 		match String(row[k]):
-			"chest": m.add_chest(q, 0)
-			"chest1": m.add_chest(q, 1)
+			"chest": m.add_chest(q)
 			_: m._add_break(String(row[k]), q)
 	m.player.teleport(base + Vector3(0, 0, 2.6))
 
