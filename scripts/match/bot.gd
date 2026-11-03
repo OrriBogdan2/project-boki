@@ -31,7 +31,11 @@ static func crowd_at(m: Match, h: Hunter, p: Vector3, r: float) -> int:
 ## Just landed and hasn't started anything: bots leave them be for FRESH_T (no third-partying
 ## someone the moment they touch down); whoever they hit can still hit back (provoked, in _choose).
 static func fresh(m: Match, o: Ent) -> bool:
-	return o is Hunter and ((o as Hunter).dropping or m.time - float(o.get_meta("landed_t", -99.0)) < float(m.opts.get("fresh_t", FRESH_T)))
+	if not o is Hunter:
+		return false
+	var h := o as Hunter
+	# (still coming down from the drop, glider included, counts too)
+	return h.dropping or h.drop_glide or m.time - float(h.get_meta("landed_t", -99.0)) < float(m.opts.get("fresh_t", FRESH_T))
 
 const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "board", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
 

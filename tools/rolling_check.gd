@@ -138,9 +138,12 @@ func _session(main: Node) -> void:
 		ok(bl_ok, "the Blight knows when the earlier squads landed (its ramp is per squad)")
 	# land
 	var t := 0.0
-	while (m.player.riding or m.player.dropping) and t < 90.0:
-		m.step(Match.DT); t += Match.DT
-	ok(not m.player.riding and not m.player.dropping, "you land (%.0f s after setting off)" % t)
+	# (down means landed: the drop's freefall, then its glider, docs/decisions/0012)
+	var in_air := func(): return m.player.riding or m.player.dropping or m.player.drop_glide
+	while in_air.call() and t < 90.0:
+		m.step(Match.DT)
+		t += Match.DT
+	ok(not in_air.call(), "you land (%.0f s after setting off)" % t)
 	var fl := Rolling.floor_at(m.sess_time())
 	var spent := 0
 	for k in m.player.slot_lv: spent += int(m.player.slot_lv[k])

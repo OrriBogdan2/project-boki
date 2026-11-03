@@ -19,21 +19,23 @@ const VY_RATE := 7.0          # 1/s: the fall reaches 90% of a new speed in ~0.3
 const FORWARD_DOT := 0.5      # keys at least this far along your heading count as forward (dive)
 const BACK_DOT := -0.5        # ... and this far against it as back (a full brake; less brakes less)
 const DEPLOY_H := 12.0        # m over the ground below you: the glider opens by itself
+const LOW_DEPLOY_H := 4.0     # m: the same for a short drop (a small map, a respawn): a plunge, over in a few seconds
 const VOID_DEPLOY_Y := 16.0   # m (world height): over the abyss it opens here, high enough to glide to land
 const DEPLOY_POP := -1.6      # m/s: the canopy catching checks your fall to this
 const JUMP_LEAD := 6.0        # s: bots leave the ship this long before it passes nearest their spot
 const ASSIST_LOOK_S := 8.0    # s: letting go, the drop looks this far ahead for where you'd come down
 const ASSIST_GLIDE_S := 1.5   # s: how far the glide carries on after it opens, in that look ahead
 
-## Off the skyship (or into the sky over a small map): freefall along `dir`.
-static func start(h: Hunter, dir: Vector2) -> void:
+## Off the skyship (or, `low`, a short drop into the sky over a small map or a respawn): freefall along `dir`.
+static func start(h: Hunter, dir: Vector2, low := false) -> void:
+	h.set_meta("deploy_h", LOW_DEPLOY_H if low else DEPLOY_H)
 	h.dropping = true
 	h.diving = false
 	h.drop_glide = false
 	h.gliding = true
 	h.glide_k = 1.0
 	h.grounded = false
-	h.fall_dir = dir.normalized() if dir.length() > 0.01 else Vector2(0, -1)
+	h.fall_dir = dir.normalized()       # (none: straight down until the keys pick a heading)
 	h.vel = Vector3(h.fall_dir.x, 0.0, h.fall_dir.y) * 3.0
 	var k: Kin = h.kin
 	if k != null and not k.dead and k.state == "active":
@@ -52,6 +54,8 @@ static func steer(h: Hunter, mv: Vector2, dt: float) -> Vector2:
 			var ang := h.fall_dir.angle_to(mv)
 			if absf(ang) < deg_to_rad(150.0):
 				h.fall_dir = h.fall_dir.rotated(clampf(ang, -TURN_RATE * dt, TURN_RATE * dt))
+	if h.fall_dir == Vector2.ZERO:
+		return hv.lerp(Vector2.ZERO, 1.0 - exp(-STEER_RATE * dt))
 	var along := mv.dot(h.fall_dir)
 	h.diving = along > FORWARD_DOT
 	var speed := DIVE_SPEED if h.diving else lerpf(FLOAT_SPEED, BRAKE_SPEED, clampf(along / BACK_DOT, 0.0, 1.0))
@@ -59,7 +63,8 @@ static func steer(h: Hunter, mv: Vector2, dt: float) -> Vector2:
 
 ## The freefall's vertical speed for this step.
 static func fall_vy(h: Hunter, dt: float) -> float:
-	var sink := DIVE_FALL if h.diving else FLOAT_FALL
+	var plunge := float(h.get_meta("deploy_h", DEPLOY_H)) < DEPLOY_H
+	var sink := DIVE_FALL if h.diving or plunge else FLOAT_FALL
 	return lerpf(h.vel.y, -sink, 1.0 - exp(-VY_RATE * dt))
 
 ## How high you are over what's below: the ground, or (over the abyss) the opening height there.
@@ -71,7 +76,8 @@ static func height_over(w: World, at: Vector3) -> float:
 ## Every step of a freefall: the glider opens by itself low down (a comet bursts instead).
 static func tick(h: Hunter) -> void:
 	var m: Match = h.m
-	if not (m.skydrop and m.skydrop.comet.has(h)) and height_over(m.world, h.pos) < DEPLOY_H:
+	var opens_at := float(h.get_meta("deploy_h", DEPLOY_H))
+	if not (m.skydrop and m.skydrop.comet.has(h)) and height_over(m.world, h.pos) < opens_at:
 		h.deploy()
 
 ## Space in the freefall: a comet's rider breaks away; anyone else opens the glider.

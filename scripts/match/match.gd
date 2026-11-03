@@ -1187,7 +1187,7 @@ func _start_drop(h: Hunter, at: Vector3) -> void:
 	if world.is_void(at.x + off.x, at.z + off.z):
 		off = Vector3.ZERO
 	h.teleport(at + off + Vector3(0, 26.0, 0))
-	SkyFall.start(h, Vector2.ZERO)
+	SkyFall.start(h, Vector2.ZERO, true)
 	h.ai["land"] = at
 
 # ---- the skyship
