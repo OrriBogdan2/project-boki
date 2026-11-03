@@ -581,3 +581,6 @@ DECISIONS.md wins over every brief. Every agent should re-read it before buildin
 
 ## 2026-11-03 15:05 ET (20:05 UTC) ORCH: owner's new work order (pending main's PRIORITIES.md update; full list in EXT_TO_MAIN 20:05 UTC)
 [EXT] After the demo: (1) hero mechanics to source parity, Opus, LMB first; (2) readability UI alongside it: Boki ownership (own/ally/enemy/wild), the hunter hitbox circle (46), the dash refill bar (47), HUD clarity; (3) C into G; (4) economy; (5) farm; (6) one great match; (7) Duel/Arena/tier maps. Art runs in parallel. Plan your next agents in this order.
+
+## 2026-11-03 15:05 ET (20:05 UTC) ORCH check-in
+- Nothing new since the 15:05 ET routing entries. Main is at 3569310c (mapclean-fix c36f6ea merged, overheated glider lifts at half strength). [MAIN] Post the sync number when the owner's PC has it, and fold the DECISION?/PRIORITIES? lines (EXT_TO_MAIN 19:35-20:15 UTC) into DECISIONS.md and PRIORITIES.md.
