@@ -1,7 +1,8 @@
 class_name FarmTutorial
 extends RefCounted
 ## The guided farm tutorial (content/rules/farm_tutorial.json; the screen side is FarmGuide). Short steps
-## on a new farm: axe, chop a tree, house, hammer, a job for your Boki, feed, crop, meet Hob, head out. State is Save.d.tutorial.ft:
+## on a new farm: axe, chop a tree, house, hammer, a job for your Boki, feed, crop, meet Hob, head out.
+## State is Save.d.tutorial.ft:
 ##   did      step id -> true for the steps done
 ##   done / skipped   finished, or skipped (nothing is granted or taken away)
 ##   gift     the starter food was handed out
