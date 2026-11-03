@@ -13,6 +13,7 @@ func ult(main_node: Node) -> void:
 	await _cast_and_dome()
 	await _catch_and_hold()
 	await _swollen_and_merge()
+	await _lock_breaks()
 	await _burst()
 
 ## The pair check's strip and dummy, with a Boki ready at her side (the bond only fills with one).
@@ -173,6 +174,33 @@ func _swollen_and_merge() -> void:
 	)
 	await done(m)
 
+## Item 16: a hard CC frees her early (a stun, then a knock); the placed well goes on either way.
+func _lock_breaks() -> void:
+	var r := setup_ult("ostra", 7.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var home: Vector3 = r[3]
+	var K: OstraKit = P.ak
+	var W := K.well
+	_press(m, P, home + Vector3(6, 0, 0))
+	step(m, 0.5)
+	P.stun_t = 0.4
+	m.step(DT)
+	ok("lock: a stun frees her early, the well goes on", not W.locked and W.running(), "phase '%s'" % W.phase)
+	step(m, 5.0)
+	K.cd["x"] = 0.0
+	_press(m, P, home + Vector3(6, 0, 0))
+	step(m, 1.5)
+	var at := P.pos
+	P.impulse(Vector2(8.0, 0) * P.mass())
+	step(m, 0.3)
+	ok(
+		"lock: a knock frees her (and moves her), the well goes on",
+		not W.locked and W.is_open() and P.pos.distance_to(at) > 0.8,
+		"moved %.2f" % P.pos.distance_to(at)
+	)
+	await done(m)
+
 ## Burst cap: the well's full 3.5s on a light hunter, then straight into the merge and the merged form's
 ## ultimate, leaves that hunter standing.
 func _burst() -> void:
@@ -207,6 +235,8 @@ func _lock_asserts(m: Match, P: Hunter, K: OstraKit, W: OstraWell, home: Vector3
 	P.inp["fire"] = true
 	P.dashes = P.max_dashes()
 	K.on_dash(false)
+	var seeds0 := K.seed.size()
+	K.use_e()
 	step(m, 0.4)
 	aim_at(P, home + Vector3(6, 0, 0))
 	step(m, 0.1)
@@ -215,6 +245,8 @@ func _lock_asserts(m: Match, P: Hunter, K: OstraKit, W: OstraWell, home: Vector3
 	ok("lock: movement input doesn't move her", Vector2(P.pos.x - at.x, P.pos.z - at.z).length() < 0.05)
 	ok("lock: an RMB press and an attack are ignored", K.snaps == snaps0 and K.snap.is_empty() and P.shot_n == 0)
 	ok("lock: a Shift press is ignored (no Trade)", K.swap.is_empty() and K.swap_aim < 0.0)
+	ok("lock: an E press is ignored (no seed)", K.seed.size() == seeds0 and K.seed.is_empty())
+	ok("lock: the glove and the Boki's C are held too (the cast_locked hook)", K.cast_locked())
 	ok("lock: she cannot turn once committed", P.aim_dir().distance_to(face0) < 0.01 and W.locked)
 	ok("lock: the cast pose is held (ostra_well_snap while it pulls)", K.anim_id == "ostra_well_snap")
 	P.inp["move"] = Vector2.ZERO

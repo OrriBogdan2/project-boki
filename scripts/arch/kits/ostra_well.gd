@@ -15,6 +15,8 @@ const DISC_COL := Color("b06bff")
 const PINK := Color("ff4fd8")
 const TICK := 0.1                       # s between damage ticks
 const HOLD_R := 0.25                    # m from the centre where a caught body stops being drawn in
+const GATHER_Y := 2.4                   # m over her ground point: the orb above her raised hands
+const PULL_Y := 1.1                     # m: the mote at her chest while it pulls
 
 var k: OstraKit
 var phase := ""                         # "" | "tell" (the dome) | "open" (the well)
@@ -79,12 +81,26 @@ func tick(dt: float) -> void:
 func _tick_lock(dt: float) -> void:
 	if not locked:
 		return
-	if k.h.downed or k.h.out or k.h.stun_t > 0.0:
+	if k.h.downed or k.h.out or k.h.stun_t > 0.0 or k.h.knock_t > 0.0:
 		unlock()
 		return
 	lock_t += dt
 	if aim_lock == Vector2.ZERO and lock_t >= float(xd()["wind"]):
 		aim_lock = k.h.aim_dir()
+	_hand_looks()
+
+## What she holds while locked: a black orb swelling over her raised hands as the dome fills, then, while it
+## pulls, a violet mote clenched at her chest.
+func _hand_looks() -> void:
+	var looks := KitLooks.of(k.m)
+	if phase == "tell":
+		var grown := clampf(phase_t / float(xd()["tell"]), 0.0, 1.0)
+		var ahead := k.h.aim_dir() * 0.35
+		var over := k.h.pos + Vector3(ahead.x, GATHER_Y, ahead.y)
+		looks.hold_on("os_well_gather", "dark", k.h, over, lerpf(0.5, 1.6, grown))
+	else:
+		looks.release("os_well_gather")
+		looks.hold_on("os_well_pull", "mote", k.h, k._hand(PULL_Y), 1.4, DISC_COL)
 
 ## Frees Ostra from the cast pose (the well stays); a merge, a CC or the close ends it.
 func unlock() -> void:
@@ -93,6 +109,8 @@ func unlock() -> void:
 	locked = false
 	aim_lock = Vector2.ZERO
 	k.play("ostra_well_end")
+	KitLooks.of(k.m).release("os_well_gather")
+	KitLooks.of(k.m).release("os_well_pull")
 
 ## The dome: everyone sees the well's exact size filling over the 1.0s before it opens.
 func _tick_tell(dt: float) -> void:

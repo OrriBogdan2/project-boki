@@ -574,57 +574,73 @@ const MOVES := {
 			}
 		],
 		[0.60, {}]]},
-	# Nightwell: a committed cast. She gathers low (0.08), then both hands rise wide and high (0.25, the wind-up)
-	# and she holds that pose while the dome shows
+	# Nightwell, a committed cast (she is locked in it, item 16): she sinks with the hands crossed low (0.10),
+	# then rises tall and flings both arms out wide and high, the crook raised (0.25, the commit); she holds
+	# that spread pose while the dome fills
 	"ostra_well": {"hold": true, "keys": [
 		[0.00, {}],
 		[
-			0.08,
+			0.10,
 			{
-				"gp": -0.5, "p": 0.2, "sq": 0.16, "fl": Vector3(-0.45, -0.1, -0.1), "hw": 1.0,
-				"fr": Vector3(0.45, -0.1, -0.1), "rw": 1.0
+				"gp": -0.6, "p": 0.15, "lift": -0.04, "sq": 0.16, "fl": Vector3(0.15, -0.2, -0.3), "hw": 1.0,
+				"fr": Vector3(-0.15, -0.2, -0.3), "rw": 1.0
 			}
 		],
 		[
 			0.25,
 			{
-				"gp": 0.9, "p": -0.3, "sq": -0.18, "lift": 0.2, "fl": Vector3(-0.6, 0.9, -0.2), "hw": 1.0,
-				"fr": Vector3(0.6, 0.9, -0.2), "rw": 1.0
+				"gp": 1.0, "p": -0.12, "lift": 0.45, "sq": -0.25,
+				"fl": Vector3(-0.85, 0.7, 0.1), "hw": 1.0, "fr": Vector3(0.85, 0.7, 0.1), "rw": 1.0
 			}
 		]]},
-	# the well opens: both fists clench in (0.06) and then draw inward at the chest, held while it pulls
-	"ostra_well_snap": {"hold": true, "keys": [
+	# the well opens: the spread hands clench and haul in to the chest (0.08) and she strains there, hunched
+	# forward, the fists working in and out (a loop from 0.30) for as long as it pulls
+	"ostra_well_snap": {"hold": true, "loop": 0.30, "keys": [
 		[
 			0.00,
 			{
-				"gp": 0.9, "p": -0.3, "sq": -0.18, "lift": 0.2, "fl": Vector3(-0.6, 0.9, -0.2), "hw": 1.0,
-				"fr": Vector3(0.6, 0.9, -0.2), "rw": 1.0
+				"gp": 1.0, "p": -0.12, "lift": 0.45, "sq": -0.25, "fl": Vector3(-0.85, 0.7, 0.1), "hw": 1.0,
+				"fr": Vector3(0.85, 0.7, 0.1), "rw": 1.0
 			}
 		],
 		[
-			0.06,
+			0.08,
 			{
-				"gp": -0.2, "p": 0.2, "sq": 0.1, "lift": 0.08, "fl": Vector3(-0.1, 0.4, -0.5), "hw": 1.0,
-				"fr": Vector3(0.1, 0.4, -0.5), "rw": 1.0
+				"gp": -0.1, "p": -0.4, "lift": 0.1, "sq": 0.22, "fl": Vector3(-0.2, 0.35, -0.42), "hw": 1.0,
+				"fr": Vector3(0.2, 0.35, -0.42), "rw": 1.0
 			}
 		],
 		[
-			0.20,
+			0.30,
 			{
-				"gp": 0.3, "p": 0.1, "lift": 0.12, "fl": Vector3(-0.2, 0.6, -0.55), "hw": 1.0,
-				"fr": Vector3(0.2, 0.6, -0.55), "rw": 1.0
+				"gp": 0.0, "p": -0.3, "lift": 0.16, "sq": 0.12, "fl": Vector3(-0.3, 0.3, -0.52), "hw": 1.0,
+				"fr": Vector3(0.3, 0.3, -0.52), "rw": 1.0
+			}
+		],
+		[
+			0.45,
+			{
+				"gp": -0.1, "p": -0.38, "lift": 0.11, "sq": 0.2, "fl": Vector3(-0.2, 0.35, -0.42), "hw": 1.0,
+				"fr": Vector3(0.2, 0.35, -0.42), "rw": 1.0
+			}
+		],
+		[
+			0.60,
+			{
+				"gp": 0.0, "p": -0.3, "lift": 0.16, "sq": 0.12, "fl": Vector3(-0.3, 0.3, -0.52), "hw": 1.0,
+				"fr": Vector3(0.3, 0.3, -0.52), "rw": 1.0
 			}
 		]]},
-	# the well closes: the hands let go and drop
+	# the well closes (or she is freed): the hands let go and drop, and she floats back down
 	"ostra_well_end": {"keys": [
 		[
 			0.00,
 			{
-				"gp": 0.3, "p": 0.1, "lift": 0.12, "fl": Vector3(-0.2, 0.6, -0.55), "hw": 1.0,
-				"fr": Vector3(0.2, 0.6, -0.55), "rw": 1.0
+				"gp": 0.0, "p": -0.3, "lift": 0.16, "sq": 0.12, "fl": Vector3(-0.3, 0.3, -0.52), "hw": 1.0,
+				"fr": Vector3(0.3, 0.3, -0.52), "rw": 1.0
 			}
 		],
-		[0.30, {}]]},
+		[0.35, {}]]},
 	# Swollen: lifted off the ground, arms flung up and wide, one full turn in the air, then down
 	"ostra_empower": {"keys": [
 		[0.00, {}],
