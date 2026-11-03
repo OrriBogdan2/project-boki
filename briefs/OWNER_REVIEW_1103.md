@@ -258,3 +258,8 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Do it per hero together with item 32's dash → ability rows, and item 24 for Moosh Moosh.
 - Assert: no two heroes use the same dash move id; each dash's move length fits the dash duration.
 - Screenshots: a 5-frame strip per hero, ground and air, next to one matching reference frame description (never copy the frames into the repo).
+
+## 36. Dredge's ult: he can move slowly while charging and firing it (kit fix, Dredge branch with items 31/33)
+- While the ult charges (the "loading" phase) and while it fires, Dredge can walk at a reduced speed instead of being rooted. Use the source's move-speed values for Kingpin's ult in `briefs/supervive-data/`; default ~30% of run speed while charging and ~20% while firing. He keeps turning to aim at the cursor throughout.
+- Reuse item 31's slowed-cast helper.
+- Assert: planar speed during charge and fire is in the slow range (> 0, below run speed); the aim follows the cursor.
