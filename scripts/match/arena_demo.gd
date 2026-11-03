@@ -44,7 +44,7 @@ const ANIM_DEMO := {
 	"arc_heavy_wind": ["archer", "longbow", [0.55, 0.7, 0.9, 1.1, 1.3, 1.6]],
 	"arc_heavy": ["archer", "longbow", [1.2, 1.35, 1.42, 1.48, 1.58, 1.8]],
 	"arc_hail": ["archer", "longbow", [0.5, 0.56, 0.64, 0.74, 0.95, 1.2]],
-	"pin_roll": ["archer", "longbow", [0.5, 0.54, 0.58, 0.63, 0.7, 0.8]],
+	"pin_roll": ["archer", "longbow", [0.5, 0.56, 0.62, 0.7, 0.8, 0.95]],
 	"arc_super": ["archer", "longbow", [1.6, 1.66, 1.7, 1.75, 1.85, 2.1]],
 	"arc_tap": ["archer", "longbow", [0.5, 0.56, 0.6, 0.66, 0.74, 0.9]],
 	"arc_perfect": ["archer", "longbow", [0.98, 1.06, 1.12, 1.2, 1.32, 1.5]],

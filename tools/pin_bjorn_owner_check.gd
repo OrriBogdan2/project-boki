@@ -61,6 +61,11 @@ func pin() -> void:
 	var bad: int = await flow.combos_of(main, "archer")
 	ok("pin item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; holds go through every move",
 		bad == 0, "%d failing (the DASHFLOW lines)" % bad)
+	var parity = load("res://tools/parity_pvb.gd").new()
+	parity.main = main
+	await parity.pin()
+	n += parity.n
+	fails += parity.fails
 
 func ready_bow(P: Hunter) -> void:
 	P.fire_cd = 0.0
@@ -586,7 +591,7 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	P.inp["sec_hold"] = false
 	step(m, 0.5)
 	ok("pin dash > RMB and E: both start during the dash", rolling and rmb_ok and e_ok, "rmb %s e %s" % [rmb_ok, e_ok])
-	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.18, "pin_flick": 0.22})
+	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.28, "pin_flick": 0.22})
 
 ## into_dash.x for Bjorn: Shift while planted for Faultline isn't lost, it goes when the plant ends.
 func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:
