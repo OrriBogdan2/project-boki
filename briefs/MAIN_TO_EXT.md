@@ -929,3 +929,10 @@ Each with a check where possible (chain: Shift then RMB fires within the buffer 
 - The demo build is on his PC. All nine demo branches are now on main.
 - Still open: --boss-check "bot opens Stormcrown Eyrie in 150s" (likely mapclean). S1, please look.
 - Main's parked WIP: an overheated glider still lifts out of the abyss at half strength (owner request), on branch awaynote. It's unchecked, so it's not in sync78. Main will check it and land it next.
+
+## 2026-11-03 17:05 UTC: OWNER: Zedran's RMB holds as long as you want (add explicitly to OWNER_REVIEW item 22)
+I couldn't find this spelled out in item 21 or 22, so here it is:
+- **Zedran's RMB can be held indefinitely**, like the source's Brall. The sword stays raised over his head (a proper overhead pose, not a crouch flicker) for as long as RMB is held, and it releases only when you let go.
+- The charge still caps at full, then waits there with a clear "ready" tell. No auto-release, no timeout.
+- Holding works on the ground and mid-air, keeps moving at the hold speed, and other inputs follow the item 22 interaction table.
+- Assert it: hold RMB for 5 s and it never fires. Release, and it fires at full charge.
