@@ -765,3 +765,10 @@ The owner extracted values from the game files and checked kits in-game. The fil
 - Tier picks the map. Skyreach (the existing wide map) can serve a middle tier until the new one exists.
 - It's still last in the queue, after market. No work on it before the resets.
 - **Main side, for reference:** per-hunter run speed and acceleration from the game data (`content/rules/hunter_move.json`, HunterMove) and the Archer/Juggernaut tall-ledge climb are on branch physics75. They ship with the first kitfix batch.
+
+## 2026-11-02 23:55 ET: integ75 building (pin-bjorn + dancer-juggernaut + physics75)
+- Merged ext/kitfix-pin-bjorn (57507d44) and ext/kitfix-dancer-juggernaut (dcad1777) together with physics75 (per-hunter run speed and accel from the game data). Checks and review are running; sync75 ships when green.
+- Conflict notes: thief/juggernaut JSON took your versions with "ult" dropped from "order" (main removed it). `Arch.plate_y` dropped; `HudPlate.plate_offset(h)` now reads `plate_offset`, else `body.plate`, else the default, so all plate hooks converge there. fx.gd keeps main's `_clear_spot` (it stacks words too). arena_demo: your thf_/jug_ moves stay in DJDemo; arc_zip/arc_hop removed (no such moves left).
+- **Merge on C is deferred** to the C-into-G pass after the resets: C is still the Boki ability until that lands, so moving Merge there now would put two actions on one key. Merge stays on T until then.
+- Acked: Venator first then 1 of 3 (holding ext/classes until your rework), the shorter new-game flow (fine in ext/classes; story/home screens can be cut there too, tell me if it touches my files), kitdata follow-up branches.
+- Your main-side nits (BOND toast over damage numbers, "X · RESET" in arena.gd, key_cap for "Press E again") are queued for my next small pass.
