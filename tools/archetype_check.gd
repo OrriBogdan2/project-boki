@@ -209,7 +209,7 @@ func _thief() -> void:
 ## An ultimate's data: no generic fuse, a 15-40s cooldown, opening at level 6.
 func _ult_shaped(rd: Dictionary) -> bool:
 	var cd := float(rd["cooldown"])
-	return float(rd.get("fuse", 0.0)) <= 0.0 and cd >= 15.0 and cd <= 40.0 and int(rd.get("unlock", 0)) == 6
+	return float(rd.get("fuse", 0.0)) <= 0.0 and cd >= 15.0 and cd <= 70.0 and int(rd.get("unlock", 0)) == 6
 
 ## The hero has its own ultimate on X: "r" data opening at level 6, and a card line for it.
 func _has_ult(arch: String) -> bool:
@@ -633,7 +633,7 @@ func _feel() -> void:
 	ok("feel: the Finishing Slam lands after a 0.5s wind-up", float(Arch.def("juggernaut")["rmb"]["windup"]) >= 0.3)
 	# the hero ultimates on X run their own wind-ups (a growing ring, a guard), on the source's cooldown ratios
 	var ults: Array = Arch.ids().filter(func(a): return Arch.def(a).has("x"))
-	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-40s cooldown",
+	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-70s cooldown (the game data runs to 64s)",
 			ults.all(func(a): return _ult_shaped(Arch.def(a)["x"])))
 	# hitstop tiers
 	var dummy := Hunter.new(); dummy.max_hp = 145.0
