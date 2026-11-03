@@ -369,7 +369,8 @@ func _out(m: Match, slot: String, move: String) -> String:
 	if not went:
 		return "n/a: it doesn't go off here"
 	_steps(m, 2)
-	var moved := {"y": hunter.pos.y, "dashes": hunter.dashes, "ex": hunter.ex_cd}
+	var moved := {"y": hunter.pos.y, "dashes": hunter.dashes, "ex": hunter.ex_cd, "roll": hunter.roll_t,
+			"dashing": hunter.ak.in_dash()}
 	hunter.inp["jump" if move == "jump" else "dash"] = true
 	for i in 90:
 		m.step(Match.DT)
@@ -378,12 +379,14 @@ func _out(m: Match, slot: String, move: String) -> String:
 			return "act" if after <= ACT_S + 0.001 else "late %.2fs" % after
 	return "lost"
 
-## Did the move go: a jump leaves the ground rising, a dash spends a charge (or the long dash) or runs.
+## Did the move go: a jump leaves the ground rising, a dash spends a charge (or the long dash) or starts a new
+## dash or roll (one already running when Shift was pressed, like a flight, doesn't count).
 func _moved(b: Dictionary, move: String) -> bool:
 	if move == "jump":
 		return hunter.vel.y > 0.5 and hunter.pos.y > float(b["y"]) + 0.01
 	var spent := hunter.dashes < float(b["dashes"]) - 0.01 or hunter.ex_cd > float(b["ex"]) + 0.01
-	return spent or hunter.ak.in_dash() or hunter.roll_t > 0.0
+	var started := (hunter.ak.in_dash() and not bool(b["dashing"])) or hunter.roll_t > float(b["roll"]) + 0.01
+	return spent or started
 
 ## Control: held past the kit's threshold then let go on the ground, does `slot` go off on the release?
 func _is_hold(m: Match, slot: String) -> bool:
