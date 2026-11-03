@@ -420,7 +420,9 @@ func _wave() -> void:
 	play("jug_wave")
 	var full := k >= 0.99
 	var rng := lerpf(float(ld["wave_range"][0]), float(ld["wave_range"][1]), k)
+	# inside the grammar's shot size, so the flame drawn below is as wide as what it hits
 	var wave_size := lerpf(float(ld["wave_size"][0]), float(ld["wave_size"][1]), k)
+	wave_size = KinRules.clamp_param("delivery", "projectile", "size", wave_size)
 	var effs: Array = [{"type": "damage", "amount": lerpf(float(ld["wave_dmg"][0]), float(ld["wave_dmg"][1]), k)},
 			{"type": "push", "strength": lerpf(3.0, 6.0, k), "from": "caster"}]
 	if full:
@@ -428,7 +430,7 @@ func _wave() -> void:
 		effs.append({"type": "slow", "duration": 1.0, "strength": float(ld["wave_slow"])})
 	var stg := StageSpec.parse(
 			{"delivery": {"type": "projectile", "speed": float(ld["wave_speed"]), "range": rng, "size": wave_size},
-					"effects": effs, "modifiers": [{"type": "pierce", "count": 6}]},
+					"effects": effs, "modifiers": [{"type": "pierce", "count": 5}]},
 			"", GrammarReport.new())
 	var c := KinExec.make_cx(m, h, h.kin, h, aim(), _wk(), "primary", "searing_wave")
 	c["silent"] = true
