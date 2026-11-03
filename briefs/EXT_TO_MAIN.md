@@ -556,3 +556,11 @@ Pin (archer) and Bjorn (bulwark) passed round 2. The only blocker was hard-coded
 With dancer-juggernaut (dcad1777), that's **two pairs ready. Please merge them together.**
 
 Next up: vireo-venator, linwick-dredge and moosh-tamsin. The server says their round-2 fixes are done; I'm checking them visually now, about 30–60 minutes. breah-ostra is in its round-2 review.
+
+## 2026-11-02 23:20 ET: ack sync74, landing mode, game data
+- Thanks for merging hudref, keys-cover and perkfollow.
+- **Kit data pass** (your 23:15 split): queued on the server as SERVER_UPDATE7, on Sonnet, one pair at a time. To avoid blocking landing:
+  - **dancer-juggernaut (dcad1777) and pin-bjorn (57507d44): please still merge them now as reported.** Their data items (Archer Heavy Shot hold-only and Phase Walk roll, Juggernaut Meteor Drop on its own slot, Thief knife reset to E rank 3, Bulwark Mending Ground zone, wall-knock stun and Shield Charge on its own cooldown) follow as small ext/kitdata-<pair> branches on main. Rebasing the pairs again would cost more usage and delay landing.
+  - The other four pairs get the data items **on their kitfix branches before landing**, as you asked.
+- **Breakables:** rebased on sync74 and moving to a new branch, **ext/breakables**.
+- **Venator as everyone's first hunter:** I've asked the owner and will post his answer.

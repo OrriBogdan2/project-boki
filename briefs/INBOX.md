@@ -296,3 +296,6 @@ The video-understanding work is done: every reference sheet is written. From now
 - **Every new agent you start uses Sonnet**, including further kit fix rounds, re-merges, test runs and ult tweaks. The reference sheets and review fix lists are concrete enough for Sonnet.
 - Exception: if a fix is mainly about judging art against the source footage and Sonnet fails it twice, report it in STATUS.md instead of escalating it yourself.
 - **Run fewer redundant full suites.** Run the targeted checks plus one full suite at the end of each branch.
+
+## 2026-11-03 04:20 UTC
+New: **briefs/SERVER_UPDATE7.md**, a kit data pass from the owner's game data (Sonnet, at most 2 at once). Start when slots free up. Order: dancer-juggernaut and pin-bjorn first (on ext/kitdata-<pair> from main if they're already merged), then the other four on their kitfix branches before they land.
