@@ -4,7 +4,7 @@ class_name BokiPens
 ##
 ## Two kinds of listing:
 ##   "pen"    Wenna's pens: a few ordinary common Boki, restocked each day, priced within what one
-##            free-kit run earns (PEN_PRICE_MIN..PEN_PRICE_MAX). This is the economy floor's market
+##            low fixed band (PEN_PRICE_MIN..PEN_PRICE_MAX). This is the economy floor's market
 ##            (Lifeline): a player with no Boki can always afford one after a run or two.
 ##   "player" a Boki another player put up (with the server backend) or you put up yourself
 ##            (locally: your own listings wait in the pens, and Wenna's regulars buy one now and
@@ -29,7 +29,7 @@ const MERCHANT := "Wenna"
 const MAX_LISTED := 3         # your open listings at once
 ## Boki that cost you nothing (or were bought here) can't be listed: otherwise the pens would be a
 ## gem mint (buy at 30-45, resell at ~70). Origins from Boki.origin.how.
-const NO_RESALE := ["market", "stray", "loaner"]
+const NO_RESALE := ["market", "stray"]
 
 static func _st() -> Dictionary:
 	if typeof(Save.d.get("pens", null)) != TYPE_DICTIONARY:

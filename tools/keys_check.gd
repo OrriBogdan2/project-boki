@@ -174,7 +174,7 @@ func _cap_and_belt(m: Match, P: Hunter, R: Hunter) -> void:
 		if other != R:
 			other.teleport(R.pos + Vector3(30, 0, 30))     # (nobody else in grabbing range of the key)
 	var np := m.pickups.size()
-	m.drop("ckey", R.pos + Vector3(0.2, 0.6, 0), 1)
+	m.drop("ckey", R.pos + Vector3(0.2, 0.6, 0), 1, "", "", Vector3.ZERO)      # (no random toss: it stays in reach)
 	step(m, 1.5)
 	var still_there := m.pickups.size() == np + 1
 	var held := R.chest_keys
@@ -182,6 +182,7 @@ func _cap_and_belt(m: Match, P: Hunter, R: Hunter) -> void:
 	ok("belt adapter: count", KeyChest.count(R, "chest") == cap and KeyChest.count(R, "rift") == R.rift_keys)
 	ok("belt adapter: take spends keys", KeyChest.take(R, "chest", 2) == 2 and R.chest_keys == cap - 2)
 	ok("belt adapter: take never goes below zero", KeyChest.take(R, "chest", 9) == cap - 2 and R.chest_keys == 0)
+	R.belt = UtilityBelt.empty()      # a free belt slot too: a key type takes one (BeltKeys)
 	for pk in m.pickups:
 		if String(pk["kind"]) == "ckey":
 			R.teleport(pk["pos"] - Vector3(0, 0.3, 0))     # (the dropped key can roll out of reach while it waits)
