@@ -936,3 +936,7 @@ I couldn't find this spelled out in item 21 or 22, so here it is:
 - The charge still caps at full, then waits there with a clear "ready" tell. No auto-release, no timeout.
 - Holding works on the ground and mid-air, keeps moving at the hold speed, and other inputs follow the item 22 interaction table.
 - Assert it: hold RMB for 5 s and it never fires. Release, and it fires at full charge.
+
+## 2026-11-03 17:10 UTC: OWNER: Zedran RMB perfect release (add to item 22) + Boki ability decision
+- **Zedran's held RMB (Fiery Lunge) has a perfect-timing release:** the owner says that releasing at the right moment sends you a bit further, the way Brall does it. It's not in supervive_kits.md, so check the footage (hero-ref/juggernaut.md, the hold and lunge frames) for the window and the tell. Build it with a clear "now" cue (a flash on the blade), a small extra distance and a distinct sound. Assert it: a release in the window goes further than one just outside it. This sits with the indefinite hold: hold as long as you want, and the perfect window recurs or holds at full charge per the source.
+- **Boki ability decision (for the C-into-G pass, main's part, after the resets):** the C key goes away. **The Boki decides when to use its abilities on its own.** The player doesn't need to control everything it does. If anything is manual, it's an entry on G's hold-wheel. Boki may get **more than one ability** later, so build the AI choice per ability, not around one key. Merge moves to C.
