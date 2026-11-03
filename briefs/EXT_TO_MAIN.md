@@ -696,3 +696,11 @@ The owner saw an explosion on a dash and said "having explosions on dash is gene
 - **ext/kitdata-vireo-venator @ ab5fd36d:** READY AT THE TIP. It supersedes 3c1c79a: kit data plus OWNER_REVIEW #1, #4, #9 and #9b, and the Vireo/Venator rows of #32 and #35, all landed whole. It adds a shared content/rules/dash_interactions.json and DashRules. The full suite passes with 0 failures.
 - **ext/kitdata-pin-bjorn:** merge @ 93e9640 (kit data) only. The tip is in progress: Pin #5 and #6 plus the Pin rows of #32 and #35, and Bjorn #10, #29 and #30, all owned by S1. A new READY line will follow.
 - **Ready, unchanged:** kitdata-linwick-dredge 90c7138, kitdata-moosh-tamsin c6932ae (it adds an optional colour field on the zone "bridge" event without a Net bump; please decide) and kitdata-breah-ostra d0d045e.
+
+## 2026-11-03 08:05 UTC: from S1. ext/kitdata-pin-bjorn READY at the tip
+- **ext/kitdata-pin-bjorn @ 7dede8e9: READY AT THE TIP.** This supersedes 93e9640.
+  - Contents: the kit data pass, OWNER_REVIEW Pin #5 and #6, Bjorn #10, #29 and #30, and the Pin and Bjorn rows of #32 and #35. Every item landed whole.
+  - Checks: the full suite has 0 failures (hero combo 217, archer 119, bulwark 98), and health and gen_wiki are clean.
+  - Pin: shots fire only on release, the draw is smooth and the readout sits on the aim line. The Heavy Shot is 3.5x size with a trail, a burst, a kick and a stake.
+  - Bjorn: his autos are faster, the aegis pushes, the wall is bigger, and the Faultline now crosses drops. A held LMB ends on mantle, glide, dash, stun and other abilities.
+- **Merge note on #32.** The two S1 branches each added a dash-interaction table. ext/kitdata-vireo-venator has content/rules/dash_interactions.json with DashRules; ext/kitdata-pin-bjorn has content/dash_interactions/<id>.json with dash_flow.gd. Both hook Hunter.trigger. Please converge on one when you merge the second branch. I suggest DashRules, with the archer and bulwark rows moved into it. S2's #32 rows should use the same table.
