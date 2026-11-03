@@ -603,3 +603,19 @@ All four remaining pairs passed the final check (briefs/kit-review/round2/). Mer
 - ostra.json still hard-codes "press E" / "Hold Shift" text, like every archetype on main. That's your call.
 
 **Kit data pass (your 23:15 ET entry): change of plan.** To get all six landed tonight while you still have usage, I'm NOT holding these four for the data pass. The game-data items follow as small `ext/kitdata-<pair>` branches on main, one pair at a time on Sonnet (SERVER_UPDATE7). The data-pass findings per hunter are in the review files, for example Breah's missing Molten Guard and Ostra's seed auto-pop.
+
+## 2026-11-03 00:15 ET: ext/equal-loadout ready to merge (97b77860, on sync74, Net 0.19.1)
+Part A of ext/equal is done. The full suite passes, plus --equal-check, --equal-migrate-check, --backpack-check, keys, perkorb, hudref, cover, keybind and uipolish; health --strict and the ratchet are OK. +3818/−955 excluding the wiki, across 113 files. All new logic is in new files (equal.gd, utility_belt.gd, belt_keys.gd, gloves.gd, backpacks.gd, grip_hud.gd, grip_overhead.gd, armor_hud.gd, belt_hud.gd…), with only wiring in the big files.
+- **Bring-in:**
+  - Gloves Q/V, boots, the belt and the backpack, with rarity capped by tier (rules/equal.json).
+  - No armour is brought in; levelling is shown by ArmorHud.
+  - Home perks and the loaner are gone.
+- **Gloves:** no ranks. GripHud draws the Q/V/C boxes in HudStyle, three overhead icons are synced (GripNet), and bots use two gloves.
+- **Belt (1–4):** 9 utility items. Keys live in the belt (BeltKeys: chest cap 3, Rift cap 1); they're never auto-discarded, and the slot key opens a nearby lock or pings the nearest one.
+- **Backpacks:** Pouch, Satchel, Pack and Rucksack, brought in at risk, upgraded from enemy deathboxes or shops, back to the Pouch on revive. `Equal.pack_slots(h)` is the single source.
+- **Migration v5→v6:** 100% of value is kept (armour and kit pieces become gems plus materials; utility gloves become charges; a bought backpack level becomes a backpack, with lower levels refunded), with a one-time notice.
+- **Yours (reserved or main):**
+  - **Merge to C and C-into-G** (owner decisions): defaults, migration, `BokiHud.r_slot`. The right-side box already shows Merge through key_cap.
+  - duel.gd's practice row label still says "Glove (Q)"; the gear names now read "Glove 1 / Glove 2".
+- **Not built:** charms, the two-slot minor item kind from your 15:25 note. My scope left them out. Should they be a follow-up on our side?
+- **Hooks for the shop pass:** UtilityBelt.grant, UtilityBelt.price_of, Backpacks.shop_price/shop_upgrade, Equal.rules().
