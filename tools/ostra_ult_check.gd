@@ -15,14 +15,26 @@ func ult(main_node: Node) -> void:
 	await _swollen_and_merge()
 	await _burst()
 
+## The pair check's strip and dummy, with a Boki ready at her side (the bond only fills with one).
+func setup_ult(arch: String, dist: float) -> Array:
+	var r := setup(arch, dist)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var rec := Save.new_kin("puddlet")
+	rec["trust"] = 95.0
+	var kin: Kin = m.give_kin(P, rec)
+	kin.stow()
+	kin.brain.think_t = 1e9
+	return r
+
 func _press(m: Match, P: Hunter, at: Vector3) -> void:
 	P.ak.cd["x"] = 0.0
 	aim_at(P, at)
-	P.ak.use_x()
+	HunterKeys.ult_pressed(P)
 	m.step(DT)
 
 func _cast_and_dome() -> void:
-	var r := setup("ostra", 6.0)
+	var r := setup_ult("ostra", 6.0)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
@@ -63,7 +75,7 @@ func _cast_and_dome() -> void:
 		HeroUlt.paid_total == paid0,
 		"paid %.2f" % (HeroUlt.paid_total - paid0)
 	)
-	P.ak.use_x()
+	HunterKeys.ult_pressed(P)
 	ok("ult: the cooldown denies a new cast", W.casts == 1, "casts %d" % W.casts)
 	_press(m, P, home + Vector3(25, 0, 0))
 	var reach := Vector2(W.center.x - home.x, W.center.z - home.z).length()
@@ -71,7 +83,7 @@ func _cast_and_dome() -> void:
 	await done(m)
 
 func _catch_and_hold() -> void:
-	var r := setup("ostra", 7.0)
+	var r := setup_ult("ostra", 7.0)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
@@ -130,7 +142,7 @@ func _catch_and_hold() -> void:
 	await done(m)
 
 func _swollen_and_merge() -> void:
-	var r := setup("ostra", 7.0)
+	var r := setup_ult("ostra", 7.0)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
@@ -166,7 +178,7 @@ func _burst() -> void:
 	var land := func(m: Match, P: Hunter, T: Hunter) -> void:
 		P.ak.cd["x"] = 0.0
 		aim_at(P, T.pos)
-		P.ak.use_x()
+		HunterKeys.ult_pressed(P)
 		step(m, 4.6)
 	var out: Dictionary = await BURST.run(ac, "ostra", 2.5, land)
 	var real_burst: bool = float(out["ult"]) > 3.0 and float(out["total"]) > float(out["ult"])

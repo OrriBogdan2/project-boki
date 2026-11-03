@@ -374,6 +374,7 @@ func _ostra() -> void:
 	var aps := []
 	for lv in [1, 10]:
 		P.lvl = lv
+		LevelGrowth.apply(P)      # levels set on the hunter grow nothing until applied (as when gained)
 		reset.call()
 		T.teleport(home + Vector3(6.0, 0, 0))
 		aim_at(P, T.pos)

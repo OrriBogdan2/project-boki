@@ -64,7 +64,7 @@ func _setup_input() -> void:
 	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your archetype's right-click ability (its variants: tap, hold, air...)
 	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the archetype's ability, Shift the archetype's
 	# dash, Space jump and glide (Mouse 5 glides too), Q your active glove, E the archetype's utility,
-	# R the archetype's ultimate (bonded when the bond meter is full), C your kin's own ability (it
+	# R reload, X the hunter's ultimate, T merge with your Boki (a full bond meter), C your kin's own ability (it
 	# cast from where it is), G (or middle mouse) throw / recall your kin, hold G to hold or follow, 1 tonic, 2 armor kit, F interact.
 	_key("signature", [KEY_E])                # the archetype's utility (E)
 	_key("kin_ability", [KEY_C])              # the kin's own ability: cast from wherever the Boki is
@@ -81,8 +81,9 @@ func _setup_input() -> void:
 	_key("jump", [KEY_SPACE])
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # hold Mouse 5 (the front side button) in the air to glide, like holding Space; never jumps
 	_key("glide", [], MOUSE_BUTTON_XBUTTON1)  # Mouse 4 glides too (not advertised)
-	_key("reload", [])                        # reloading is automatic
-	_key("ultimate", [KEY_R])                 # the Boki Merge (needs a full bond meter)
+	_key("reload", [KEY_R])                   # reload by hand (it also reloads on its own after a short idle)
+	_key("hunter_ult", [KEY_X])               # the hunter's own ultimate (level 6; none yet, see ArchKit.cast_ult)
+	_key("ultimate", [KEY_T])                 # Merge with your Boki (level 6, a full bond meter); T again releases
 	_key("tonic", [KEY_1])
 	_key("scores", [KEY_TAB])
 	_key("menu", [KEY_ESCAPE])
@@ -94,13 +95,12 @@ func _setup_input() -> void:
 	_key("inventory", [KEY_I])                # your things
 	_key("build", [KEY_B])                    # at home: build mode (lay out the island); indoors: decorate
 	_key("rotate", [KEY_R])                   # build mode: turn what you're holding
-	_key("emote", [KEY_T])                    # in a match: hold for the emote wheel (truce, deal, no...); T talks to kin at home
+	_key("emote", [KEY_Y])                    # in a match: hold for the emote wheel (truce, deal, no...)
 	_key("map", [KEY_M])                      # in a match: the full map (ping it with the mouse)
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
 	_key("record", [KEY_F10])                 # recording mode (Record): clean HUD, then no HUD
 	_key("record_orbit", [KEY_F9])            # recording mode, HUD hidden: slow camera orbit
-	_key("separate", [KEY_Z])                 # (was X, now the ultimate's second key) riding in / dropping behind the leader: break away and drop solo
-	_key("hunter_ult", [KEY_X])               # the hero's own ultimate (unlocks at level 6, its own cooldown)
+	_key("separate", [KEY_Z])                 # riding in / dropping behind the leader: break away and drop solo
 
 func goto(screen: String, opts := {}) -> void:
 	match_opts = opts

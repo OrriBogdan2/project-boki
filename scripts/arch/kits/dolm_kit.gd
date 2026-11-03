@@ -56,7 +56,7 @@ func _setup() -> void:
 	spine = BreahSpine.new(self)
 
 # ------------------------------------------------------------------ X: Basalt Spine (BreahSpine)
-func cast_ult() -> bool: return spine.start()
+func start_ult() -> bool: return spine.start()
 func ult_running() -> bool: return spine.running()
 
 ## The id prefix of her rocks (unique per hunter, the same on every game).
@@ -475,7 +475,7 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	var dist := float(dd["dist"]) * (float(dd["speed_k"]) if rank("dash") >= 3 else 1.0)
 	var t := float(dd["time"]) * (float(dd["speed_k"]) if rank("dash") >= 3 else 1.0)
-	var dir := h.aim_dir()
+	var dir := dash_dir()
 	play("breah_dash")
 	# the rock bursts up just in front of her, a puff behind, then rides ahead of her for the dash
 	var front := h.pos + Vector3(dir.x, 0, dir.y) * 0.9
@@ -610,7 +610,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		return
 	if HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and dist > 3.0 and dist < 9.0 and los and randf() < 0.1:
 		h.inp["aim"] = tgt.pos
-		h.inp["xult"] = true
+		cast_ult()
 		return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 4.0 and dist < 9.0 and los and randf() < 0.25:
 		h.inp["sig"] = true

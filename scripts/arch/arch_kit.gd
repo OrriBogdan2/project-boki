@@ -107,14 +107,11 @@ func cast_e() -> bool: return false
 func e_recast() -> bool: return false                # E pressed while it's up (Sigil detonation)
 func cast_r() -> bool: return false
 func r_recast() -> bool: return false                # R pressed while it runs (Last Round release)
-## X, the hero ultimate (HeroUlt): start it (true = it went off and the cooldown starts).
-func cast_ult() -> bool: return false
-## X pressed while the ult runs (true = handled, e.g. an early landing).
+## The hero ultimate (HeroUlt): start it (true = it went off and the cooldown starts).
+func start_ult() -> bool: return false
+## The ult key pressed while the ult runs (true = handled, e.g. an early landing).
 func ult_recast() -> bool: return false
 func ult_running() -> bool: return false
-## The X press (Hunter.tick, "hunter_ult"): the level gate, the cooldown and the kit's cast.
-func use_x() -> void:
-	HeroUlt.use(self)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
@@ -262,6 +259,15 @@ func use_e() -> void:
 		last_e = String(e_def().get("name", ""))
 	else:
 		h._ab_feedback("k1", "deny")
+
+## X: the hero's own ultimate (HeroUlt: the level gate, its cooldown, then the kit's start_ult()).
+## Returns true when it went off.
+func cast_ult() -> bool:
+	return HeroUlt.use(self)
+
+## Does this hero have an ultimate on X (the HUD shows the slot only then)?
+func has_ult() -> bool:
+	return not x_def().is_empty()
 
 ## R: the archetype's ultimate. With the bond meter full the cast is Bonded (§5 option C): the ult's
 ## own tell, then 0.2s later the kin merges (its on_start), one T5 moment for the caster.

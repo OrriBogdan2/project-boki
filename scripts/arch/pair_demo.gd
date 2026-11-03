@@ -115,7 +115,7 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 			P.inp["aim"] = D.pos + Vector3(1.6, 0.9, 1.4)
 			if at(t, dt, 0.5):
 				K.cd["x"] = 0.0
-				K.use_x()
+				HunterKeys.ult_pressed(P)
 	if P.ammo < 3: P.ammo = int(P.wpn["mag"])
 
 ## Basalt Spine: X held from 0.4s at the dummy, the cursor dragged to swing the ridge, let go at 0.72s.
@@ -127,7 +127,7 @@ static func _spine_input(P: Hunter, D: Hunter, t: float, dt: float) -> void:
 		P.inp["aim"] = D.pos + Vector3(0.9, 0.9, 0.0) + Vector3(2.2, 0, 2.6) * swing
 	if at(t, dt, 0.4):
 		P.ak.cd["x"] = 0.0
-		P.ak.use_x()
+		HunterKeys.ult_pressed(P)
 
 ## Single moments: name -> [the strip move whose input it replays, the time to save the frame at,
 ## where the hunter starts (x offset from the dummy)].

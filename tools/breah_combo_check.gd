@@ -379,12 +379,14 @@ func _breah() -> void:
 	# quiet level growth: ability damage scales with LevelGrowth.ap (through power())
 	var lv0 := P.lvl
 	P.lvl = 1
+	LevelGrowth.apply(P)
 	reset.call()
 	T.teleport(home + Vector3(1.3, 0, 0))
 	var apk1 := LevelGrowth.ap(P)      # (the level the hunter is at when it lands: early hits may have levelled it)
 	K._slam(0.0, true)
 	var d_l1 := dmg(T)
 	P.lvl = 10
+	LevelGrowth.apply(P)
 	reset.call()
 	T.teleport(home + Vector3(1.3, 0, 0))
 	var apk := LevelGrowth.ap(P)

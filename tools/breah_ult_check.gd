@@ -16,15 +16,27 @@ func ult(main_node: Node) -> void:
 	await _guards()
 	await _burst()
 
+## The pair check's strip and dummy, with a Boki ready at her side (the bond only fills with one).
+func setup_ult(arch: String, dist: float) -> Array:
+	var r := setup(arch, dist)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var rec := Save.new_kin("puddlet")
+	rec["trust"] = 95.0
+	var kin: Kin = m.give_kin(P, rec)
+	kin.stow()
+	kin.brain.think_t = 1e9
+	return r
+
 func _press(m: Match, P: Hunter, at: Vector3, hold_down: bool) -> void:
 	P.ak.cd["x"] = 0.0
 	aim_at(P, at)
 	P.inp["x_down"] = hold_down
-	P.ak.use_x()
+	HunterKeys.ult_pressed(P)
 	m.step(DT)
 
 func _cast_and_rise() -> void:
-	var r := setup("dolm", 9.0)
+	var r := setup_ult("dolm", 9.0)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
@@ -74,7 +86,7 @@ func _cast_and_rise() -> void:
 		HeroUlt.paid_total == paid0,
 		"paid %.2f" % (HeroUlt.paid_total - paid0)
 	)
-	P.ak.use_x()
+	HunterKeys.ult_pressed(P)
 	ok("ult: the cooldown denies a new cast", S.casts == 1, "casts %d" % S.casts)
 	var newest: float = ult_rocks.map(func(w): return float(w["t"])).max()
 	var life := newest + m.time - S.last_rise_t
@@ -82,7 +94,7 @@ func _cast_and_rise() -> void:
 	await done(m)
 
 func _drag_slow_shove() -> void:
-	var r := setup("dolm", 6.0)
+	var r := setup_ult("dolm", 6.0)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
@@ -121,7 +133,7 @@ func _drag_slow_shove() -> void:
 	await done(m)
 
 func _punch_and_bond() -> void:
-	var r := setup("dolm", 16.0)
+	var r := setup_ult("dolm", 16.0)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
@@ -186,7 +198,7 @@ func _punch(m: Match, P: Hunter, T: Hunter) -> void:
 	m.step(DT)
 
 func _guards() -> void:
-	var r := setup("dolm", 6.0)
+	var r := setup_ult("dolm", 6.0)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var home: Vector3 = r[3]
@@ -197,7 +209,7 @@ func _guards() -> void:
 	var ok_drop := merged and not K.spine.running() and float(K.cd["x"]) == 0.0
 	ok("merge hold: a merge while aiming the ult drops it, not spent", ok_drop, "phase '%s'" % K.spine.phase)
 	await done(m)
-	r = setup("dolm", 6.0)
+	r = setup_ult("dolm", 6.0)
 	m = r[0]
 	P = r[1]
 	home = r[3]

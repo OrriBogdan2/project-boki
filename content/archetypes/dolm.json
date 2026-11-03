@@ -12,7 +12,7 @@
 		"rmb": "Quakefall: hold to gather, let go to hop and slam; the centre stuns. Jump while holding to leap forward.",
 		"e": "Stone Row: raise three rocks ahead. Stand on them, climb them, or punch them into foes.",
 		"dash": "Rubble Rush: dash behind a rock that shoves foes, then rolls on and slows whoever it hits.",
-		"x": "Basalt Spine: from level 6, raise a long ridge of rocks at the cursor; hold X and drag to turn it. Over the abyss it is a walkway.",
+		"x": "Basalt Spine: from level 6, raise a long ridge of rocks at the cursor; hold and drag to turn it. Over the abyss it is a walkway.",
 		"passive": "Tremor Sense: sneak to see enemies in a cone ahead through walls; it widens as you sneak.",
 		"weapons": {"rubble_fists": "Tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies."}
 	},
@@ -38,7 +38,7 @@
 	"x": {"name": "Basalt Spine", "short": "Spine", "icon": "earthshatter", "col": "#ff7a2a", "unlock": 6, "cooldown": 45.0,
 		"range": 11.0, "len": 19.8, "rocks": 13, "drag_min": 0.8, "aim_max": 3.0, "tell": 0.2, "rise": 0.4, "time": 7.0,
 		"slow_r": 1.6, "slow_t": 1.0, "slow_k": 0.35, "rise_dmg": 1.0, "bridge_w": 2.0, "bond_t": 4.0, "rock_cap": 40.0,
-		"desc": "Tap X: a ridge of 13 rocks, 19.8m long, centred at the cursor (up to 11m away) and across your aim. Hold X and drag the cursor to swing it round its centre; let go to cast. Molten cracks show along the line for 0.2s, then the rocks erupt from the centre outward over 0.4s, slowing foes beside them by 35% for 1s and shoving anyone on the line aside. They are your rocks for 7s: they stop foes and their shots, you stand on them and climb them, and a punch along the ridge launches the whole line (its rocks deal at most 40 to any one hunter). Over the abyss the line becomes a 2m walkway for 7s. 45s."},
+		"desc": "Tap: a ridge of 13 rocks, 19.8m long, centred at the cursor (up to 11m away) and across your aim. Hold the key and drag the cursor to swing it round its centre; let go to cast. Molten cracks show along the line for 0.2s, then the rocks erupt from the centre outward over 0.4s, slowing foes beside them by 35% for 1s and shoving anyone on the line aside. They are your rocks for 7s: they stop foes and their shots, you stand on them and climb them, and a punch along the ridge launches the whole line (its rocks deal at most 40 to any one hunter). Over the abyss the line becomes a 2m walkway for 7s. 45s."},
 	"order": ["sec", "dash", "kin", "sec", "dash", "kin", "sec", "kin", "dash", "gear"],
 	"rank3": {"sec": "slamming a foe or a rock gives a Molten Guard shield of 18, up to 4 stacks", "dash": "the barrel runs a third further", "kin": "an extra row of rocks behind the first"},
 	"rank2": {"sec": "Rank 2: cooldown 9s -> 8.1s, damage +15%.", "dash": "Rank 2: recharge 9s -> 7.6s per charge.", "kin": "Rank 2: cooldown 13s -> 11.7s, rocks hit +15%."},

@@ -95,7 +95,7 @@ func spine_across(m: Match, P: Hunter, home: Vector3) -> void:
 	P.inp["aim"] = home + Vector3(6.5, 0.9, 0)
 	step(m, 0.1)
 	P.inp["x_down"] = true
-	P.ak.use_x()
+	HunterKeys.ult_pressed(P)
 	P.inp["aim"] = home + Vector3(12.0, 0.9, 0)
 	step(m, 0.2)
 	P.inp["x_down"] = false

@@ -47,7 +47,7 @@ What the in-game kit card (K) says.
 
 **Brimseed (E, 11s cooldown).** Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, then pops by itself; press E again (from 0.3s) to pop it sooner. Damage 12 up to 3.5 times that by how long it grew, and everyone it catches is Grounded for 1s. Swollen: larger and quicker.
 
-**Nightwell (X, hero ultimate from level 6, 64s cooldown).** Tap X: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched, and you are free to act. Swollen: 5.1m wide. 64s.
+**Nightwell (X, hero ultimate from level 6, 64s cooldown).** Tap: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched, and you are free to act. Swollen: 5.1m wide. 64s.
 
 ### Ranks
 

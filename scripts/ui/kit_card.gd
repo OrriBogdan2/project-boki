@@ -11,9 +11,20 @@ const SIZE := Vector2(890, 600)
 const BODY_H := 372.0
 const TILE := Vector2(431, 116)
 const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r", "x"]
-const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "R", "x": "X"}
-const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate",
-	"x": "Ultimate"}
+## (The ultimate tiles have no fixed key: _cap reads it from Settings.)
+const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "", "x": ""}
+## The key cap on a slot's tile. The R tile is the Merge unless the class ultimates are on; X is the hero ultimate.
+static func _cap(slot: String) -> String:
+	if slot == "x":
+		return Settings.key_cap("hunter_ult")
+	if slot == "r":
+		return Settings.key_cap("hunter_ult" if KinCommand.class_ults() else "ultimate")
+	return String(KEYS[slot])
+
+const LABEL := {
+	"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate",
+	"x": "Ultimate",
+}
 ## Which looping preview each archetype's abilities get (KitPreview kinds).
 const PREVIEW := {
 	"thief": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "knife", "r": "lines"},
@@ -127,8 +138,8 @@ func _tile(slot: String) -> Control:
 	var dot := UI.IconDot.new(String(info["icon"]), col, 38.0)
 	dot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	ic.add_child(dot)
-	if String(KEYS[slot]) != "":
-		var kc := UI.keycap(String(KEYS[slot]), 11)
+	if _cap(slot) != "":
+		var kc := UI.keycap(_cap(slot), 11)
 		kc.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		kc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		ic.add_child(kc)
@@ -187,8 +198,8 @@ func _show_detail(slot: String) -> void:
 	top.add_theme_constant_override("separation", 10)
 	top.add_child(UI.IconDot.new(String(info["icon"]), col, 30.0))
 	top.add_child(UI.label(String(info["name"]), 24, UI.INK, UI.big))
-	if String(KEYS[slot]) != "":
-		var kc := UI.keycap(String(KEYS[slot]), 13)
+	if _cap(slot) != "":
+		var kc := UI.keycap(_cap(slot), 13)
 		kc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		top.add_child(kc)
 	v.add_child(top)
@@ -291,14 +302,15 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			var xd: Dictionary = d["x"]
 			var tag := "level %d · %ss" % [int(xd.get("unlock", 6)), KinText.n(float(xd.get("cooldown", 30.0)))]
 			var xcol := Color(String(xd.get("col", "#ffffff")))
+			var merge_key := Settings.key_cap("ultimate")
 			out.merge({"name": String(xd["name"]), "icon": String(xd.get("icon", "")), "col": xcol,
 				"tag": tag, "line": String(cd.get("x", ""))}, true)
 			out["detail"] = [["", String(xd.get("desc", ""))],
-				["Bond", "Landing it on a hunter fills your Boki bond a long way, ready for the Merge on R."]]
+				["Bond", "Landing it on a hunter fills your Boki bond a long way, ready for the Merge (%s)." % merge_key]]
 		"r" when not d.has("r"):
 			# no hero ultimate: R is the Boki's Merge (the Boki system owns it)
 			out.merge({"name": "Boki Merge", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
-			out["detail"] = [["", "R is not a hero ability here: it is the Boki Merge. Your Boki fuses with you and its kind sets the merged form."]]
+			out["detail"] = [["", "%s is not a hero ability here: it is the Boki Merge. Your Boki fuses with you and its kind sets the merged form." % Settings.key_cap("ultimate")]]
 		"r":
 			# R is the Merge for every class (docs/decisions/0001); the class's own ultimate is held back behind
 			# boki_system.json class_ults until the hero-port work folds it into the kits
@@ -306,10 +318,10 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			var on := KinCommand.class_ults() and not sd.is_empty()
 			out.merge({"name": String(sd["name"]) if on else "Merge", "icon": String(sd.get("icon", "")) if on else "bond", "col": Color(String(sd.get("col", "#ffffff"))) if on else Color("ffd27a"),
 				"tag": ("level 6 · %ss · %ss fuse" % [KinText.n(float(sd.get("cooldown", 100.0))), KinText.n(float(sd.get("fuse", 0.45)))]) if on else "level 6 · full bond meter", "line": String(cd.get("r", "")) if on else "You and your Boki become one: its colour, its type, your abilities changed."}, true)
-			out["detail"] = [["Merge", "Press R with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the merge by its type and power."],
+			out["detail"] = [["Merge", "Press %s with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the merge by its type and power." % Settings.key_cap("ultimate")],
 				["Boki out?", "It leaps back through anything in its way and merges you in mid-air."],
 				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
-				] + ([["Held back", "%s: %s (the class ultimate, off while R is the Merge)" % [String(sd["name"]), String(sd.get("desc", ""))]]] + _ranks(a, "ult") if not sd.is_empty() else [])
+				] + ([["Held back", "%s: %s (the class ultimate, off while the Merge is on %s)" % [String(sd["name"]), String(sd.get("desc", "")), Settings.key_cap("ultimate")]]] + _ranks(a, "ult") if not sd.is_empty() else [])
 	return out
 
 ## The ranks to come, in order (rank 2's concrete change first, then rank 3's special), as one row
@@ -397,7 +409,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		var dot := UI.IconDot.new(String(info["icon"]), info["col"], 26.0)
 		dot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		bv.add_child(dot)
-		var k := String(KEYS[s]) if String(KEYS[s]) != "" else "passive"
+		var k := _cap(s) if _cap(s) != "" else "passive"
 		var kl := UI.label(k, 10, UI.MUTED, UI.big)
 		kl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		kl.mouse_filter = Control.MOUSE_FILTER_IGNORE
