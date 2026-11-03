@@ -17,7 +17,7 @@ extends ArchKit
 ## - Dash, Rampage (Flame Step): 3 charges of a dash attack the way you face, the tip hits double.
 ## - E, Warchain (Feysteel Chain): a chain to a foe (blighted) or a wall; recast to pull yourself in.
 ## - X, Gilded Riposte (JuggernautUlt, level 6): a 0.65s gold guard that blocks everything, then a lunging
-##   upward cleave that heals 80% of its damage; a knock with it makes it ready again. R is the Boki Merge.
+##   upward cleave that heals 80% of its damage; a knock with it makes it ready again. The Boki Merge has its own key.
 ## Matched to the footage in briefs/hero-ref/juggernaut.md; docs/heroes/juggernaut.md.
 
 const SLASH_OUT := Color("ff3df0")     # the slash crescent's magenta edge

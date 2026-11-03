@@ -213,13 +213,14 @@ static func still(A: Arena, P: Hunter, D: Hunter, w: String, t: float, dt: float
 
 static func _still_dancer(A: Arena, P: Hunter, D: Hunter, K: ThiefKit, w: String, t: float, dt: float) -> float:
 	match w:
-		"lmb":
-			P.inp["fire"] = t > 0.4 and t < 0.43
-			return 0.47
-		"fizzle":
-			P.inp["aim"] = P.pos + Vector3(3.5, 0.9, -1.5)
-			P.inp["fire"] = t > 0.4 and t < 0.43
-			return 0.4 + 3.8 / 45.0 + 0.06
+		"lmb", "fizzle":
+			if w == "fizzle": P.inp["aim"] = P.pos + Vector3(3.5, 0.9, -1.5)
+			P.inp["fire"] = t > 0.3 and K.bolts == 0
+			if K.bolts > 0 and not A.has_meta("b_at"): A.set_meta("b_at", t)
+			if w == "fizzle":
+				if K.fizzles > 0 and not A.has_meta("fz_at"): A.set_meta("fz_at", t)
+				return float(A.get_meta("fz_at", 9.0)) + 0.05
+			return float(A.get_meta("b_at", 9.0)) + 0.05
 		"primed", "vault":
 			if at(t, dt, 0.4):
 				P.dashes = P.max_dashes()

@@ -8,7 +8,7 @@ extends ArchKit
 ## - Passive, Marks: every bolt that hits stacks a Mark on the target (gold diamonds over their head, up
 ##   to 8): each makes your bolts on them stronger. A knock or an assist heals you.
 ## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
-##   harder from the outer band, refreshing every Mark; the Vault comes back. R is the Boki Merge.
+##   harder from the outer band, refreshing every Mark; the Vault comes back. The Boki Merge has its own key.
 ## - Dash, Vault: a short cartwheel; the next bolt is empowered (3.5x, 2 Marks, Shred) and landing it
 ##   gives the Vault back (the payoff: T4, pay_cashin, VAULT RESET).
 ## - RMB, Bola: a 0.4s wind-up with the lane showing, then a kit-run Bola that grounds the first foe and
