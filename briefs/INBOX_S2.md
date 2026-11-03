@@ -82,3 +82,12 @@
 
 ## 2026-11-03 16:05 UTC (orchestrator): demo-integ, use mapclean caf5deb
 - For ext/demo-integ, take ext/mapclean at **caf5deb** (S1 re-merged it on 4d39c623, breakables conflict resolved, READY 15:00 UTC), not 2082d0d.
+
+## 2026-11-03 16:10 UTC: owner approved the concepts; new queue (after ext/demo-integ's full suite is posted)
+Owner on ext/concepts: "concepts are good, obviously a bit too shape-y and needs a good amount of polish". Specific: **Ostra more menacing; Moosh Moosh cuter**; polish everyone.
+1. **Concepts 1b (Opus, 1 agent), on ext/concepts:** a polish pass on all 12 sheets: less geometric, more organic forms (tapered limbs, overlapping cloth and armour, varied curves, secondary detail where the eye lands), richer shading and rim light, expressive faces and poses. Ostra: more menacing (taller, sharper, a grin that unsettles, long fingers, a darker palette with sickly violet light), never the source's look. Moosh Moosh: cuter (bigger head and eyes, shorter limbs, rounder shapes, a bigger tail, a happier pose). Keep each silhouette identifiable. Redo the lineup. Report for owner review.
+2. **Concept phase 2 (Opus), starting with the approved shapes (don't wait for 1b's polish on the silhouettes):** build the in-engine Warden models from the sheets, one hero at a time, starting with Bjorn, Pin and Zedran, on `ext/warden-models` from main: hero-quality proportions, materials, signature pieces, and nothing breaking hitboxes, animations or kit FX anchors. Each hero: a turnaround strip at gameplay zoom and close-up, next to its sheet. Models.hunter changes stay wiring-only (models.gd is main's): put the builders in new files. Fit item 45's MantleLook so the creator sliders apply on top.
+3. **Dancer feel pass (item 7), Sonnet or Opus at your call:** her dash and dash-empowered autos to the source (data + footage + hero-ref), with item 32/35 rows.
+4. **Finish ext/class-titles** (de196566, ext's stopped agent): merge main, take the screenshots (hero picker, "<player> the <title>" in a match and kill feed, a wiki page), run the final suite, report READY. Sonnet.
+5. Then the post-reset work, in this order, one agent each: ext/drop, ext/market (incl. Black Market with a Ransom tab and rare stock), and the higher-tier map (briefs/specs/BIGGER_MAP.md as amended by MAIN_TO_EXT 23:25 ET: a separate map for higher tiers; The Hollow Crown stays the beginner map).
+Keep up to 6 agents. Don't start anything that touches the demo branches until main has merged ext/demo-integ.
