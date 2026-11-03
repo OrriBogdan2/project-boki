@@ -23,6 +23,13 @@ The only conflict seen merging them all is the generated `docs/heroes/dash_inter
 Not for tonight: `ext/concepts` 87c121b (concept sheets, for ext/owner review), `ext/mantle-look` @ d6558b6 READY (post-demo; save v8; not yet re-merged on physics76).
 Shots: `ext/hero-shots-s2` (README with captions).
 
+## NEW QUEUE (INBOX 16:10-16:20), started 16:35 UTC, 4 agents
+- Concepts 1b (Opus) on ext/concepts: polish all 12, Ostra menacing, Moosh Moosh cuter, Cinder salamander-folk, Tamsin young pro skater, height/build scale in the lineup.
+- Warden models phase 2 (Opus) on ext/warden-models, cut from ext/demo-integ-core 70df4da (not bare main, so the models match tonight's kits; nothing pushed to the demo branches): merges ext/mantle-look first, then Bjorn, Pin, Zedran.
+- Dancer feel pass, item 7 (Opus) on ext/dancer-feel, also cut from ext/demo-integ-core 70df4da.
+- ext/class-titles finish (Sonnet): merge main, screenshots, full suite; also trial-merges against demo-integ-core.
+- Queued after these: ext/drop, ext/market, higher-tier map (one agent each, in that order).
+
 ## Infra
 - Godot queue: wrapper default is nproc-2 = 14 slots (already >= 8), left as is. S1: no change needed.
 - Agents (6 max per 07:30): ALL hero agents on Opus 5.5 medium per 08:00 (the Sonnet Breah/Ostra/Tamsin+Dredge agents were stopped at ~07:20 real UTC and replaced by Opus agents continuing from their commits), Breah, Ostra, Tamsin+Dredge, Zedran 21/22/35 (Opus 5.5 medium per owner), prologue-polish (Opus 5.5 medium, allowed by 07:45), dash-flow base (Opus 5.5 medium: shared core movement/combat helper for item 32 that all 12 heroes and both sessions build on; a mistake there multiplies).
