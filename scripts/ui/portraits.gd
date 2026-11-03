@@ -176,6 +176,8 @@ static func _stage(s: Dictionary) -> SubViewport:
 		var n := mdl.get_node_or_null(path) as Node3D
 		if n:
 			n.visible = false
+	for mat in mdl.get_meta("mats", []):
+		(mat as ShaderMaterial).set_shader_parameter("no_fog", true)     # (the match's sight fog greys it otherwise)
 	vp.add_child(mdl)
 	var head := _head_box(mdl)
 	var cam := _camera(head, Arch.def(s["arch"]).get("portrait", {}) if Arch.exists(s["arch"]) else {})
