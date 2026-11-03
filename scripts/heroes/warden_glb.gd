@@ -117,7 +117,8 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 static func neutral_rest(arch: String) -> Dictionary:
 	if not _neutral.has(arch):
 		_measuring = true
-		var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", PlayerLook.neutral(), arch)
+		var look := PlayerLook.neutral()
+		var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", look, arch)
 		_measuring = false
 		_neutral[arch] = m.get_meta("rig_rest")
 		m.free()
