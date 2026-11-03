@@ -107,8 +107,9 @@ func cast_e() -> bool: return false
 func e_recast() -> bool: return false                # E pressed while it's up (Sigil detonation)
 func cast_r() -> bool: return false
 func r_recast() -> bool: return false                # R pressed while it runs (Last Round release)
-## The ult key pressed while the ult runs (true = handled, e.g. an early landing).
+## X pressed while the hero ultimate runs (HeroUlt.press; true = handled, e.g. an early landing).
 func ult_recast() -> bool: return false
+## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass

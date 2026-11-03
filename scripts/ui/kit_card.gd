@@ -302,7 +302,7 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "kin")
 		"x":
 			var xd: Dictionary = d["x"]
-			var tag := "level %d · %ss" % [HeroUlt.unlock_level(), KinText.n(float(xd.get("cooldown", 30.0)))]
+			var tag := "level %d · %ss" % [int(Hunter.ULT_AT[0]), KinText.n(float(xd.get("cooldown", 30.0)))]
 			var xcol := Color(String(xd.get("col", "#ffffff")))
 			var merge_key := Settings.key_cap("ultimate")
 			out.merge({"name": String(xd["name"]), "icon": String(xd.get("icon", "")), "col": xcol,

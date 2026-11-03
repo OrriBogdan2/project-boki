@@ -28,6 +28,13 @@ func setup_ult(arch: String, dist: float) -> Array:
 	kin.brain.think_t = 1e9
 	return r
 
+## The bond this hunter's current ult cast has paid (KinBond keeps it on the hunter by cast id).
+func paid(P: Hunter) -> float:
+	var c: Dictionary = P.get_meta("bond_cast", {})
+	if String(c.get("id", "")) != HeroUlt.cast_id(P.ak):
+		return 0.0
+	return float(c.get("got", 0.0))
+
 func _press(m: Match, P: Hunter, at: Vector3, hold_down: bool) -> void:
 	P.ak.cd["x"] = 0.0
 	aim_at(P, at)
@@ -48,9 +55,10 @@ func _cast_and_rise() -> void:
 	_press(m, P, home + Vector3(7, 0, 0), false)
 	ok("ult: no cast below level 6", not S.running() and float(K.cd["x"]) == 0.0, "level %d" % P.lvl)
 	P.lvl = 6
-	var paid0 := HeroUlt.paid_total
+	var paid0 := paid(P)
 	_press(m, P, home + Vector3(7, 0, 0), false)
 	var released := m.time
+	ok("ult: one X press is one cast", int(P.used.get("x", 0)) == 1 and S.casts == 1, "used %s" % str(P.used.get("x")))
 	m.step(DT)
 	var cd_now := float(K.cd["x"])
 	ok(
@@ -83,8 +91,8 @@ func _cast_and_rise() -> void:
 	)
 	ok(
 		"ult bond: nothing when it catches nobody",
-		HeroUlt.paid_total == paid0,
-		"paid %.2f" % (HeroUlt.paid_total - paid0)
+		paid(P) == paid0,
+		"paid %.2f" % (paid(P) - paid0)
 	)
 	HunterKeys.ult_pressed(P)
 	ok("ult: the cooldown denies a new cast", S.casts == 1, "casts %d" % S.casts)
@@ -114,7 +122,7 @@ func _drag_slow_shove() -> void:
 	# T stands right on the swung line, 2m from the centre: it is shoved aside, slowed, and that is a land
 	var on_line := S.center + Vector3(want.x, 0, want.y) * 2.0
 	T.teleport(on_line)
-	var paid0 := HeroUlt.paid_total
+	var paid0 := paid(P)
 	P.inp["x_down"] = false
 	step(m, 0.9)
 	ok("ult drag: let go casts along the dragged line", S.axis.dot(want) > 0.99 and S.phase == "up", str(S.axis))
@@ -125,11 +133,11 @@ func _drag_slow_shove() -> void:
 		T.slow_t > 0.0 and absf(T.slow_k - 0.35) < 0.01,
 		"slow %.2f" % T.slow_t
 	)
-	var paid := HeroUlt.paid_total - paid0
+	var paid := paid(P) - paid0
 	ok("ult bond: a hunter slowed by the rise is a land (a hit: 0.6)", absf(paid - 0.6) < 0.001, "paid %.2f" % paid)
-	paid0 = HeroUlt.paid_total
+	paid0 = paid(P)
 	step(m, 1.0)
-	ok("ult bond: paid once per cast, nothing more while it stands", HeroUlt.paid_total == paid0)
+	ok("ult bond: paid once per cast, nothing more while it stands", paid(P) == paid0)
 	await done(m)
 
 func _punch_and_bond() -> void:
@@ -144,7 +152,7 @@ func _punch_and_bond() -> void:
 	ok("ult beats: the rocks rise from the centre outward over 0.4s", absf(spread - 0.4) < 0.05, "%.2f" % spread)
 	var n_up := rocks(m).filter(func(w): return w.has("ult")).size()
 	ok("ult: 13 rocks over 19.8m on open ground", n_up == 13, "rocks %d" % n_up)
-	var paid0 := HeroUlt.paid_total
+	var paid0 := paid(P)
 	var l0 := K.launches
 	_punch(m, P, T)
 	step(m, 0.8)
@@ -161,20 +169,20 @@ func _punch_and_bond() -> void:
 	)
 	ok(
 		"ult bond: a ridge rock into a hunter is a land",
-		HeroUlt.paid_total - paid0 > 0.0,
-		"paid %.2f" % (HeroUlt.paid_total - paid0)
+		paid(P) - paid0 > 0.0,
+		"paid %.2f" % (paid(P) - paid0)
 	)
 	# after the 4s window its rocks no longer fill the bond
 	step(m, float(K.x_def()["time"]))
 	fresh(T)
 	_ridge_along(m, P, home)
 	step(m, float(K.x_def()["bond_t"]) + 0.2)
-	paid0 = HeroUlt.paid_total
+	paid0 = paid(P)
 	_punch(m, P, T)
 	step(m, 0.8)
 	ok(
 		"ult bond: a ridge rock after the 4s window pays nothing",
-		dmg(T) > 0.0 and HeroUlt.paid_total == paid0,
+		dmg(T) > 0.0 and paid(P) == paid0,
 		"dmg %.1f" % dmg(T)
 	)
 	await done(m)

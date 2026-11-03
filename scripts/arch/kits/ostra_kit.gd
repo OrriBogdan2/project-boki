@@ -47,7 +47,7 @@ func _setup() -> void:
 	well = OstraWell.new(self)
 
 # ------------------------------------------------------------------ X: Nightwell (OstraWell)
-func cast_ult() -> bool: return HeroUlt.cast(self, well.start)
+func cast_ult() -> bool: return HeroUlt.press(self, well.start)
 func has_ult() -> bool: return true
 func ult_running() -> bool: return well.running()
 
@@ -482,7 +482,7 @@ func _pop(hit: bool) -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and dist < 9.0 and los and randf() < 0.1:
+	if HeroUlt.ready(self) and dist < 9.0 and los and randf() < 0.1:
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return

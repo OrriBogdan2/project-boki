@@ -90,9 +90,15 @@ func _tick_aim(dt: float) -> void:
 		axis = drag.normalized()
 	if h.is_local():
 		AimKit.span(h, "x", {"at": center, "dir": axis, "len": float(xd()["len"]), "chevrons": 6, "col": PREVIEW_COL})
-	var held := bool(h.inp.get("x_down", false))
-	if not held or phase_t >= float(xd()["aim_max"]):
+	if not _held() or phase_t >= float(xd()["aim_max"]):
 		_erupt()
+
+## Is X still down? Main's X path sends only the press, so the local player's key is read here; tests and
+## scripted demos hold it through inp["x_down"]. Bots never hold (a tap).
+func _held() -> bool:
+	if bool(k.h.inp.get("x_down", false)):
+		return true
+	return k.h.is_local() and Input.is_action_pressed("hunter_ult")
 
 ## Release: the cracks show for everyone, the rocks are scheduled centre-out.
 func _erupt() -> void:

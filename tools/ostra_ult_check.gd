@@ -27,6 +27,13 @@ func setup_ult(arch: String, dist: float) -> Array:
 	kin.brain.think_t = 1e9
 	return r
 
+## The bond this hunter's current ult cast has paid (KinBond keeps it on the hunter by cast id).
+func paid(P: Hunter) -> float:
+	var c: Dictionary = P.get_meta("bond_cast", {})
+	if String(c.get("id", "")) != HeroUlt.cast_id(P.ak):
+		return 0.0
+	return float(c.get("got", 0.0))
+
 func _press(m: Match, P: Hunter, at: Vector3) -> void:
 	P.ak.cd["x"] = 0.0
 	aim_at(P, at)
@@ -46,8 +53,9 @@ func _cast_and_dome() -> void:
 	_press(m, P, home + Vector3(6, 0, 0))
 	ok("ult: no cast below level 6", not W.running() and float(K.cd["x"]) == 0.0, "level %d" % P.lvl)
 	P.lvl = 6
-	var paid0 := HeroUlt.paid_total
+	var paid0 := paid(P)
 	_press(m, P, home + Vector3(6, 0, 0))
+	ok("ult: one X press is one cast", int(P.used.get("x", 0)) == 1 and W.casts == 1, "used %s" % str(P.used.get("x")))
 	var cd_now := float(K.cd["x"])
 	ok(
 		"ult cast: a tap sets the well at the cursor, the thrust move plays, its own cooldown starts (64s)",
@@ -72,8 +80,8 @@ func _cast_and_dome() -> void:
 	ok("ult: it closes after 3.5s, quietly", not W.running() and W.opens == 1, "phase '%s'" % W.phase)
 	ok(
 		"ult bond: nothing when it catches nobody",
-		HeroUlt.paid_total == paid0,
-		"paid %.2f" % (HeroUlt.paid_total - paid0)
+		paid(P) == paid0,
+		"paid %.2f" % (paid(P) - paid0)
 	)
 	HunterKeys.ult_pressed(P)
 	ok("ult: the cooldown denies a new cast", W.casts == 1, "casts %d" % W.casts)
@@ -108,7 +116,7 @@ func _catch_and_hold() -> void:
 		e.max_hp = 10000.0
 		e.hp = e.max_hp
 	HeroZones.rock(m, P, c + Vector3(0, 0, -1.8), Vector2(0, 1), "wall", 2.0, 30.0, 999.0, false)
-	var paid0 := HeroUlt.paid_total
+	var paid0 := paid(P)
 	_press(m, P, c)
 	step(m, 1.05)
 	ok(
@@ -116,7 +124,7 @@ func _catch_and_hold() -> void:
 		T.stun_t > 3.2 and KitLooks.of(m).crowned(T),
 		"stun %.2f" % T.stun_t
 	)
-	var paid := HeroUlt.paid_total - paid0
+	var paid := paid(P) - paid0
 	ok("ult bond: a hunter caught when it opens is a land (a hit: 0.6)", absf(paid - 0.6) < 0.001, "paid %.2f" % paid)
 	step(m, 0.5)
 	var off := Vector2(T.pos.x - c.x, T.pos.z - c.z).length()
@@ -132,9 +140,9 @@ func _catch_and_hold() -> void:
 	tap(m, P)
 	step(m, 0.4)
 	ok("ult: Ostra is free to act while it holds (a Snap)", K.snaps == 1, "snaps %d" % K.snaps)
-	paid0 = HeroUlt.paid_total
+	paid0 = paid(P)
 	step(m, 2.0)
-	ok("ult bond: paid once per cast, never per tick", HeroUlt.paid_total == paid0)
+	ok("ult bond: paid once per cast, never per tick", paid(P) == paid0)
 	var per := float(K.x_def()["tick_dmg"]) * K.power("x")
 	ok("ult payoff: small ticks every 0.1s (35 over 3.5s)", absf(dmg(T) - per * 35.0) < per * 2.0, "dmg %.2f" % dmg(T))
 	step(m, 0.3)

@@ -1,62 +1,62 @@
 class_name HeroUlt
 extends RefCounted
-## What a hero's own ultimate (the "hunter_ult" action) needs beyond main's route. HunterKeys.ult_pressed gates
-## the level (Hunter.ULT_AT) and calls the kit's ArchKit.cast_ult(); a kit with an ult overrides cast_ult() as
-## `HeroUlt.cast(self, <its start>)` and has_ult() as true. Here: the ult's own cooldown (cd["x"]), the recast
-## while it runs, the HUD slot data, and the bond on a land (KinBond.from_ult, one id per cast), never the cast alone.
+## The hero's own ultimate on X: the parts main's X path (HunterKeys.ult_pressed: the level gate, then
+## ArchKit.cast_ult) doesn't carry. A kit's cast_ult() returns HeroUlt.press(self, start): a recast while the ult
+## runs, else the ult's own cooldown (cd["x"]) and a fresh cast id. Landing it charges the Boki bond through
+## landed(), never the cast alone (KinBond.from_ult: the best event of a cast counts).
 
-static var paid_total := 0.0      # (tests) bond the ults added this run (KinBond.from_ult's returns)
+static var _casts := 0            # cast ids are "<hero>_<n>", one per cast, unique in the run
 
-## The kit's cast_ult(): a recast while the ult runs, else its own cooldown, then `start` (the kit's own
-## cast, true when it went off). True when the ult went off or a recast was handled.
-static func cast(k: ArchKit, start: Callable) -> bool:
-	if k.ult_running() and k.ult_recast():
-		return true
+## The X press after main's level gate: a recast while it runs (ult_recast), else nothing while busy, merged or
+## cooling down, else `start` (the kit's own cast). True when the press did something; main denies on false.
+static func press(k: ArchKit, start: Callable) -> bool:
+	if k.x_def().is_empty():
+		return false
+	if k.ult_running():
+		return k.ult_recast()
 	if k.busy() or KinMerge.active(k.h) or float(k.cd["x"]) > 0.0:
 		return false
 	if not bool(start.call()):
 		return false
+	_casts += 1
 	k.cd["x"] = cooldown(k)
-	k.st["ult_casts"] = int(k.st.get("ult_casts", 0)) + 1
+	k.st["ult_cast"] = "%s_%d" % [k.id, _casts]
 	k.h.used["x"] = int(k.h.used.get("x", 0)) + 1
 	k.h._ab_feedback("x", "cast")
 	CombatBus.ability_used.emit(k.h, k.id + "_x", "ultimate")
 	return true
 
-## Is the ult open at this hunter's level (main's gate, Hunter.ULT_AT)?
-static func unlocked(k: ArchKit) -> bool:
-	return k.h.lvl >= unlock_level()
-
-static func unlock_level() -> int:
-	return int(Hunter.ULT_AT[0])
+## Can a bot press X now (main's level gate and the ult's own cooldown)?
+static func ready(k: ArchKit) -> bool:
+	return not k.x_def().is_empty() and k.h.lvl >= int(Hunter.ULT_AT[0]) and float(k.cd["x"]) <= 0.0
 
 static func cooldown(k: ArchKit) -> float:
 	return float(k.x_def().get("cooldown", 30.0))
 
+## The id of the cast in flight ("" before the first).
+static func cast_id(k: ArchKit) -> String:
+	return String(k.st.get("ult_cast", ""))
+
 ## The ult connected with `target`: an enemy hunter it hit, knocked or killed fills the Boki bond.
 static func landed(k: ArchKit, target: Ent) -> void:
-	if not (target is Hunter) or target.team == k.h.team:
+	if not (target is Hunter) or target.team == k.h.team or cast_id(k) == "":
 		return
 	var kind := "hit"
 	if target.dead:
 		kind = "kill"
 	elif (target as Hunter).downed:
 		kind = "knock"
-	from_ult(k, kind)
+	KinBond.from_ult(k.h, kind, cast_id(k))
 
-## Bond for an ult that landed ("hit", "knock" or "kill"): KinBond pays the best event of each cast once.
-static func from_ult(k: ArchKit, kind: String) -> void:
-	var cast_id := "%s_%d" % [k.id, int(k.st.get("ult_casts", 0))]
-	paid_total += KinBond.from_ult(k.h, kind, cast_id)
-
-## The HUD's X slot data, the same keys Hunter.slot_info uses.
+## The ult's slot data in the keys Hunter.slot_info uses (for a HUD tile that shows its cooldown).
 static func slot_info(k: ArchKit) -> Dictionary:
 	var xd := k.x_def()
 	var cd_left := float(k.cd["x"])
+	var unlock := int(Hunter.ULT_AT[0])
 	return {
 		"name": String(xd.get("name", "")), "short": String(xd.get("short", "")), "icon": String(xd.get("icon", "")),
 		"col": k.col_of(xd), "desc": String(xd.get("desc", "")), "cd": cd_left, "cd_max": cooldown(k),
 		"charges": 1 if cd_left <= 0.0 else 0, "max_charges": 1, "verb": "x", "level": 1,
-		"ready": cd_left <= 0.0 and unlocked(k), "locked": not unlocked(k), "unlock": unlock_level(),
+		"ready": cd_left <= 0.0 and k.h.lvl >= unlock, "locked": k.h.lvl < unlock, "unlock": unlock,
 		"up": k.ult_running(),
 	}

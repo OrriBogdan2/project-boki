@@ -3955,7 +3955,6 @@ func _gather_input() -> void:
 	player.inp["dash_down"] = Input.is_action_pressed("dash") and not paused     # hold-shaped dashes (Slide, Rampage)
 	var quick: bool = Settings.get_v("cast_on_press")
 	player.inp["sec_hold"] = Input.is_action_pressed("secondary") and not paused and not on_panel
-	player.inp["x_down"] = Input.is_action_pressed("hunter_ult") and not paused     # hold-and-drag ults (Basalt Spine)
 	# crouch: hold by default, or tap to toggle (the web version defaults to toggle, so you never
 	# hold Ctrl while pressing W, which closes the browser tab)
 	if Settings.get_v("crouch_toggle"):

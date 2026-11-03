@@ -124,4 +124,4 @@ extra row again.
 - Net is unchanged: rocks still travel as `["zone", ...]` events (the Spine's too, and its walkway as a `"bridge"` event);
   `top` is a constant.
 - Basalt Spine: `scripts/arch/kits/breah_spine.gd` (BreahSpine). Its hold field is `phase == "aim"`, cleared by
-  `DolmKit._drop_holds()` through `spine.drop()`. The held key reaches kits as `h.inp["x_down"]` (Match._gather_input).
+  `DolmKit._drop_holds()` through `spine.drop()`. Main sends only the X press, so BreahSpine._held() reads the local key (tests hold it with `inp["x_down"]`).

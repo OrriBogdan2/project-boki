@@ -56,7 +56,7 @@ func _setup() -> void:
 	spine = BreahSpine.new(self)
 
 # ------------------------------------------------------------------ X: Basalt Spine (BreahSpine)
-func cast_ult() -> bool: return HeroUlt.cast(self, spine.start)
+func cast_ult() -> bool: return HeroUlt.press(self, spine.start)
 func has_ult() -> bool: return true
 func ult_running() -> bool: return spine.running()
 
@@ -609,7 +609,7 @@ func _raise_feel() -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and dist > 3.0 and dist < 9.0 and los and randf() < 0.1:
+	if HeroUlt.ready(self) and dist > 3.0 and dist < 9.0 and los and randf() < 0.1:
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return
