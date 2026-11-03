@@ -366,6 +366,11 @@ func _late_homing() -> void:
 			shot >= 3 and hp0 - T.hp >= float(P.wpn["dmg"]) * float(shot) * 0.6,
 			"%d beams, %.0f damage" % [shot, hp0 - T.hp])
 	P.inp["move"] = Vector2.ZERO
+	step(m, 1.8)
+	var slabs := K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size()
+	ok(
+			"tm Shift: her ice trail lasts a few seconds (plates still down 2 s after the skate), skate cd 13 s (data)",
+			slabs >= 3 and absf(P.dash_regen() - 13.0) < 0.01, "%d plates, cd %.1f s" % [slabs, P.dash_regen()])
 	await _free(m)
 
 ## Owner 19:50: the further the spear goes, the longer it travels; it always starts at her, never at the target.
@@ -1122,13 +1127,19 @@ func rimewright() -> void:
 				and not K.lk().showing("spear_prop"),
 			"after %.2f s, %.2f m out at %.2f m up, %.1f m/s" % [waited, off_her, from.y - P.pos.y, spd])
 	var flight := 0.0
+	var hp_fly := T.hp
 	while K.zones.is_empty() and flight < 1.5:
 		step(m, 1.0 / 60.0)
 		flight += 1.0 / 60.0
+	var landed := hp_fly - T.hp
 	var want_flight := Vector2(cur.x - from.x, cur.z - from.z).length() / float(ld["speed"])
 	ok(
 			"tm RMB: it travels out to the target, landing on arrival (not at the cast)",
 			flight > 0.25 and absf(flight - want_flight) < 0.06, "flight %.2f s, want %.2f" % [flight, want_flight])
+	ok(
+			"tm RMB: the landing hits a small area (game data: 156 in a small AoE + slow): 18 within 1.2 m",
+			absf(landed - float(ld["dmg"]) * K.power("sec")) < 0.5 and float(ld["impact_r"]) <= 1.5,
+			"%.1f" % landed)
 	var zat: Vector3 = K.zones[0]["at"] if not K.zones.is_empty() else Vector3.INF
 	ok(
 			"tm RMB: the spear lands at the cursor and leaves a slow zone",
@@ -1147,8 +1158,8 @@ func rimewright() -> void:
 		step(m, 1.0 / 60.0)
 		since += 1.0 / 60.0
 	ok(
-			"tm RMB: it detonates 1.8 s after landing: the big hit and a freeze",
-			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp > 50.0 and T.root_t > 0.0,
+			"tm RMB: it detonates 1.8 s after landing: the big hit and a slow, no root (the data has none)",
+			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp > 50.0 and T.root_t <= 0.0 and T.slow_t > 0.0,
 			"at %.2f s, %.0f damage, root %.2f" % [since, hb - T.hp, T.root_t])
 	await _free(m)
 	# --- Rink Wall: a 0.2 s tell, narrow just ahead, widening as it slides, stops at the cursor

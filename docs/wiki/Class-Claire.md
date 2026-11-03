@@ -43,7 +43,7 @@ R is your Boki's Merge.
 |---|---|
 | Body | 124 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Hoar Fan (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that freezes where it lands, and a sliding wall of ice that shoves foes where she wants them. |
+| Fantasy | A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them. |
 | Silhouette | the big furred collar and the long trailing scarf, on blade skates |
 | Resource | Chill (max 8) |
 
@@ -57,24 +57,24 @@ What the in-game kit card (K) says.
 | Passive: Hoarfrost | Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them. |
 | Dash: Skate | Skate: hold the dash key to skate where you move; your darts fly straight and thick. |
 | LMB | Ice Dart: hold for a barrage of slow darts that curve onto the foe at your cursor; every fifth to seventh is a large one. |
-| RMB: Ice Spear | Ice Spear: lands at the cursor, slows there, and bursts and freezes 1.8s later. |
+| RMB: Ice Spear | Ice Spear: pushed out to the cursor, it hits and slows where it lands, then bursts 1.8s later. |
 | E: Rink Wall | Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it. |
 | Hunter ultimate: Rimelock | Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun. |
 | Weapon: Hoar Fan | Hold for a barrage of slow darts that curve onto the foe at your cursor, ending in three large ones. |
 
 ### Abilities in full
 
-**Hoarfrost (passive).** Your damaging abilities Chill foes for 4s (a Chilled foe is a little slower and shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 30 damage to everyone within 3m, plus Chill.
+**Hoarfrost (passive).** Your damaging abilities Chill foes for 4s (a Chilled foe is a little slower and shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.
 
-**Skate (dash, Shift, 8.5s cooldown).** Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly straight and thick. In the air, press it to buffer the skate: it starts the moment you land.
+**Skate (dash, Shift, 13s cooldown).** Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams. In the air, press it to buffer the skate: it starts the moment you land.
 
 **Ice Spear (RMB, 10.2s cooldown, 2 charges).**
 
-- *Tap:* Hold to see the landing ring at the cursor (up to 12m) as the spear forms between your palms; let go and you push it out. The spear drives out to the cursor (the further, the longer it takes) and lands there (4 damage to a foe in the way, where it then lands) and leaves a 2.2m slow zone (35% slower, Chill) for 1.8s, then detonates: 60 damage in 2.7m and a 0.5s freeze. 2 charges.
+- *Tap:* Hold to see the landing ring at the cursor (up to 12m) as the spear forms between your palms; let go and you push it out. The spear drives out to the cursor (the further, the longer it takes) and lands there (or on a foe in the way): 18 damage and a short slow to foes within 1.2m, and a 2.2m slow zone (35% slower, Chill) for 1.8s, then it detonates: 60 damage in 2.7m and a brief encasing slow. 2 charges.
 
 **Rink Wall (E, 17s cooldown).** A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.
 
-**Rimelock (hunter ultimate, from level 6, 47s cooldown).** Cast it: you are sealed in a frost shell, invulnerable and rooted, and a 7.2m (4 body heights) rink snaps out round you. Cast from a skate, your momentum carries you about 3m on as the shell closes, then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun.
+**Rimelock (hunter ultimate, from level 6, 80s cooldown).** Cast it: you are sealed in a frost shell, invulnerable and rooted, and a 7.2m (4 body heights) rink snaps out round you. Cast from a skate, your momentum carries you about 3m on as the shell closes, then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun.
 
 ### Ranks
 
@@ -83,7 +83,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
 | RMB | cooldown 10.2s -> 9.2s, damage +15%. | cooldown 10.2s -> 8.2s, damage +30%; the detonation hits 45% harder. |
-| Dash (Shift) | recharge 8.5s -> 7.7s. | recharge 8.5s -> 6.8s; a Skate over the Abyss lays ice underfoot that holds for 5s. |
+| Dash (Shift) | recharge 13s -> 11s. | recharge 13s -> 9.1s; a Skate over the Abyss lays ice underfoot that holds for 5s. |
 | E | cooldown 17s -> 15.3s, wall strength +15%. | cooldown 17s -> 13.6s, wall strength +30%; +40 wall strength. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).

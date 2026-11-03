@@ -196,7 +196,8 @@ func rimewright() -> void:
 	ok("tm X: sealed in, the 4 bh rink shown to everyone, the cast move", not K.rime.is_empty()
 		and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 7.2) < 0.05
 		and K.ulk().showing("rink") and K.ulk().showing("bud") and K.anim_id in ["tm_rime", "tm_rime_hold"], K.anim_id)
-	ok("tm X: its own cooldown (47 s) starts on the cast, no bond for the cast", absf(float(K.cd["x"]) - 47.0) < 0.5
+	ok("tm X: its own cooldown (80 s, game data) starts on the cast, no bond for the cast",
+		absf(float(K.cd["x"]) - 80.0) < 0.5
 		and _bond_kind(K) == "")
 	var php := P.hp
 	P.hurt(30.0, T, {"src": "shot"})

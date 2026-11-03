@@ -39,7 +39,7 @@ var ult_look: UltLook
 const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
 const SLAB_GAP := 0.06         # s between ice plates under the skate
 const SLAB_LEAD := 0.5         # m ahead of her middle a plate forms (under the leading blade)
-const SLAB_LIFE := 1.2         # s a plate stays before it fades
+const SLAB_LIFE := 3.0         # s a plate stays before it fades (the owner's "a few seconds")
 const SHATTER_R := 2.7         # m, the Shatter's spike starburst (about 1.5 body heights)
 const PUSH_T := 0.1           # s from letting go of RMB to the release: both palms drive forward (tm_spear)
 const SPEAR_ARC := 0.25        # m the driven spear's low flight bows above the line from her palms to the ground
@@ -583,8 +583,9 @@ func _release_spear() -> void:
 	var dist := AimMode.dist(h, float(ld["range"]))
 	var on_land := func(_s: Dictionary, at: Vector3, _e: Ent, _why: String): _spear_land(at)
 	var extra := {"src": "abil", "ab": "utility", "tracer": 1.4, "kb": 0.0, "kx": on_land}
+	# the spear itself does no damage on the way: its hit is the landing's small area (_spear_land)
 	m.spawn_shot(
-			h, start, dir * spd, float(ld["dmg"]) * power("sec"), dist / spd, float(ld["hit_r"]) * 0.5,
+			h, start, dir * spd, 0.0, dist / spd, float(ld["hit_r"]) * 0.5,
 			col_of(rmb_def()), extra)
 	var s := lk().last_shot()
 	var land_y: float = ground(start + Vector3(dir.x, 0, dir.y) * dist).y + 0.1
@@ -606,6 +607,12 @@ func _spear_land(at0: Vector3) -> void:
 	m.fx.burst(at + Vector3(0, 0.4, 0), Color(0.9, 1.0, 1.0, 0.6), 10, 1.2, 0.8, -1.0, 2.2)      # the chill puff
 	m.sfx("rime_zone", at, -1.0, 0.85)
 	m.sfx("rime_shard", at, -4.0, 0.6)
+	# the landing hit (the source's small area): foes right where it lands take it and a short slow
+	for f in foes_in(at, float(ld["impact_r"])):
+		f.hurt(
+				float(ld["dmg"]) * power("sec"), h,
+				{"src": "abil", "ab": "utility", "tags": ["utility", "lance"], "slow": 0.6, "slow_k": 0.35})
+		add_chill(f)
 	if h.flat_dist(at) < LAND_KICK_R:
 		Feel.shake(m, "t2", h, at)
 	net_ring(at, float(ld["zone_r"]), col_of(rmb_def()))
@@ -653,8 +660,8 @@ func _detonate(at: Vector3) -> void:
 		f.hurt(
 				float(ld["burst_dmg"]) * power("sec") * blast_k, h,
 				{
-					"src": "abil", "ab": "utility", "tags": ["utility", "lance"], "root": float(ld["freeze"]),
-					"dr": true, "slow": 0.8, "slow_k": 0.3, "payoff": true})
+					"src": "abil", "ab": "utility", "tags": ["utility", "lance"], "slow": 0.8, "slow_k": 0.3,
+					"payoff": true})
 		lk().burst("shell", f.pos, {"dur": float(ld["encase_t"]), "ent": f})
 
 # ------------------------------------------------------------------ E: Rink Wall
