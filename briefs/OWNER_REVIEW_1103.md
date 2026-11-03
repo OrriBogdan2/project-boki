@@ -320,3 +320,8 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - One clear move: a readable wind-up pose (hands gathering void energy, the body leaning in), a distinct release beat, the effect visibly travelling or forming from him, and a short recovery. Our own look, in his violet colours.
 - Assert: the timing matches the data table; damage lands on the release or impact frame, not at the press.
 - Screenshots: a 5-frame strip from wind-up to impact.
+
+## 41. Concept pass notes (owner, 06:55 UTC)
+- **Bjorn (Frozen Bulwark):** owner's mood reference is a well-known big, friendly shield-carrying hero from another game. Use it for **mood only**: a huge, warm-hearted, cold-climate protector whose massive shield is the centrepiece. Our own design, e.g. a giant northern ferryman whose shield is the frozen, iron-banded prow of his old ship, with a fur-lined coat, rime-crusted gauntlets and a big laugh in his idle. Must not be mistakable for that character (no copying his face, facial hair style, shield shape or outfit).
+- **Ostra and Tamsin** are the two closest to their source heroes today. The concept pass must push both further from the source look; the owner is fine with differences. Ostra follows items 18 and 39 (menacing void jester). Tamsin gets an original ice-skater design (Icy Dancer).
+- The rest of the roster already has clear directions in item 39.
