@@ -1,5 +1,5 @@
 # S2 status (second server session)
-Updated: 2026-11-03 08:38 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
+Updated: 2026-11-03 08:46 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
 
 ## Infra
 - Godot queue: wrapper default is nproc-2 = 14 slots (already >= 8), left as is. S1: no change needed.
@@ -43,7 +43,13 @@ Updated: 2026-11-03 08:38 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (
   **For main (DEBT entry):** reserved KinExec._burst (ring + burst + shake + boom) fires on every dash with Pebbit (Gravity Wake) and on Cindle attacks: the remaining "explosion" on Boki riders.
   Owner Qs (Linwick/Moosh): explosion sounds now -7 dB with a -6 dBFS ceiling (chosen, no agreed level): OK, and bring hero blast sounds (br_burst, dr_blast, pay_slam, os_pop) down too? Moosh glide shortened to 10.7 m for the 3x rule (source 11-15 m): or lengthen the ground skip to ~4 m and keep 12 m? Linwick air poof as a smoke cloud blown out behind him (no footage) OK? burst cap with longer Flue Flight 117 of 124 HP OK?
 
-## Dancer (taken from S1's queue per INBOX_S2 07:30: S1 lists ext/fix-dancer as queued, not started). **S1: please leave Dancer #8 + rows to S2.** Pin, Vireo, Venator stay with S1 (in progress).
+## Dancer: items 8, 35, 32 DONE (Opus), branch `ext/review-dancer`
+- Item 8: the six cartwheel effects removed (landing ring, air spark sprays + ring, armed_fx ring/burst, expiry burst, per-frame glint burst, the shared full_ready ring/sparks incl. the online ring pulse); the cue is a tight gold four-point star at the throwing hand that flares on landing (online: a small ping at the hand). Card/doc text names the empowered next bolt.
+- Item 35: thf_vault_r/l fit the 0.48 s dash (crouch, star push-off, full turn, landing crouch); air thf_exdash held to landing then a new thf_land.
+- Item 32: all 20 rows + into_dash with sources; dash->LMB 'fire' variant 'empowered' (footage 0193); a move started mid-cartwheel waits out the flip; dagger recast blink ends a cartwheel. dancer combo 92/0, juggernaut 91/0, dash-flow all thief rows OK, health OK.
+- Being merged with Zedran's branch (they share dj_demo.gd / kmoves_dj.gd): ext/review-dancer will be the Dancer+Zedran superset for main.
+- **Item 8 audit of other heroes' cosmetic dash bursts (main 801bfbf lines; most already fixed on our pair branches):** Pin archer_kit.gd:360, pin_spirit.gd:42-44/119/122; Venator gunslinger_kit.gd:233-235, :123, :247; Vireo mage_kit.gd:441 ring(2.7); Bjorn bulwark_kit.gd:611, :621. **S1: Pin/Venator/Vireo lines are yours.** Shared hunter.gd:1277 dust burst, :1169/1171 and :1202/1203 kin rider bursts (rider ones touch reserved Boki behaviour; main's call).
+  Owner Qs (Dancer): the air Cartwheel now empowers the next bolt (data Quickflip + footage say so), but our air dash is the shared long dash on its own 12.5 s cooldown, so it's an extra empowered bolt: keep, or make it spend a Vault charge? Dash->LMB fires at once mid-flip (footage 0193): OK, or buffer to landing? RMB/E/X during a flip not in footage, kept 'fire': OK?
 
 ## Prologue polish
 - Branch `ext/prologue-polish` from origin/ext/prologue5 54f8304, aae7ef6 local: per-slide eased camera with cuts, MOODS lighting table, Crown keep, Wyrm rise/roar/dive, Mantle lights scatter, slide 4 restaged in prologue_boki.gd (no clipping across all 492 frames, asserted), slide 3/4 owner text, new --prologue-check 7/0, class-unlock 137/0, health OK. Slide 4 final (a9afdaf): touch in silhouette (kneeling, relic held at chest height in both hands, lead Boki rears up to nose it), relic wakes with hot core, outlined pulsing ring and warm light on the pair, then hangs above them. HunterAnim gained an 'offer' interact pose (4 lines). Pushed; full suite running. Shots: ext/hero-shots-s2 prologue/. Shots: /home/boki/shots-s2/prologue/.
