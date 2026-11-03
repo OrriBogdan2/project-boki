@@ -14,12 +14,14 @@ func hold_fire(m: Match, P: Hunter, at: Vector3, secs: float) -> void:
 		P.inp["fire"] = true
 		aim_at(P, at))
 
-## The best bond event this cast has paid (HeroUlt's stand-in for KinBond.from_ult).
+## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
 func best(P: Hunter) -> float:
-	return float(P.ak.st.get("ult_bond_best", 0.0))
+	var c: Dictionary = P.get_meta("bond_cast", {})
+	return float(c.get("got", 0.0)) if String(c.get("id", "")) == HeroUlt.cast_id(P.ak) else 0.0
 
+## Presses X the way the match does (main's HunterKeys.ult_pressed: the level gate, then the kit's cast_ult).
 func press_x(m: Match, P: Hunter) -> void:
-	P.inp["xult"] = true
+	HunterKeys.ult_pressed(P)
 	m.step(DT)
 
 ## Holds LMB until one more beam has gone (or `cap` s pass).
@@ -40,7 +42,7 @@ func light_target(T: Hunter, P: Hunter) -> void:
 	T.armor = 0.0
 
 func pin() -> void:
-	var r := setup("archer", 7.0, "", true)
+	var r := setup("archer", 7.0, BURST_KIN, true)      # a Boki at hand: KinBond fills the meter only with one ready
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
@@ -59,8 +61,11 @@ func pin() -> void:
 	# the cast: no bond on the cast alone, the telegraph, its own move
 	P.ult = 0.0
 	aim_at(P, T.pos)
+	var casts0 := int(P.used.get("x", 0))
 	press_x(m, P)
 	ok("pin ult cast: three shots empowered for 6s", K.ult.active() and K.ult.left == 3, "left %d" % K.ult.left)
+	ok("pin ult: one X press is one cast (main's X path only)", int(P.used.get("x", 0)) == casts0 + 1,
+		"casts +%d" % (int(P.used.get("x", 0)) - casts0))
 	ok("pin ult cooldown: 36s from the cast",
 		absf(float(K.cd["x"]) - float(xd["cooldown"])) < 0.1,
 		"%.1f" % float(K.cd["x"]))
@@ -95,11 +100,11 @@ func pin() -> void:
 	ok("pin ult anim: the beam plays pin_ult_loose", K.anim_id == "pin_ult_loose", K.anim_id)
 	ok("pin ult small: the beam knocks back", T.vel.x > 0.5 or T.pos.x > home.x + 7.05, "vel %.2f" % T.vel.x)
 	# a miss pays nothing
-	var b0 := HeroUlt.paid_total
+	var b0 := best(P)
 	beam(m, P, K, home + Vector3(0, 0, 12))
 	step(m, 0.2)
-	ok("pin ult bond: a beam that misses pays nothing", HeroUlt.paid_total == b0 and K.ult.fired == 2,
-		"paid %.2f -> %.2f" % [b0, HeroUlt.paid_total])
+	ok("pin ult bond: a beam that misses pays nothing", best(P) == b0 and K.ult.fired == 2,
+		"owed %.2f -> %.2f" % [b0, best(P)])
 	ok("pin ult small: she can move between shots", K.move_k() > 0.9, "move_k %.2f" % K.move_k())
 	# the last beam executes a hunter it leaves under 12%
 	T.max_hp = 150.0
@@ -193,7 +198,7 @@ func _pin_burst() -> void:
 	await done(m)
 
 func bjorn() -> void:
-	var r := setup("bulwark", 7.0, "", true)
+	var r := setup("bulwark", 7.0, BURST_KIN, true)      # a Boki at hand: KinBond fills the meter only with one ready
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
@@ -211,8 +216,10 @@ func bjorn() -> void:
 	T.teleport(home + Vector3(7, 0, 0))
 	T2.teleport(home + Vector3(10, 0, 1.0))
 	aim_at(P, T.pos)
-	var paid0 := HeroUlt.paid_total
+	var casts0 := int(P.used.get("x", 0))
 	press_x(m, P)
+	ok("bjorn ult: one X press is one cast (main's X path only)", int(P.used.get("x", 0)) == casts0 + 1,
+		"casts +%d" % (int(P.used.get("x", 0)) - casts0))
 	step(m, 0.1)
 	ok("bjorn ult cast: planted, hammer up (bul_ult_wind)",
 		K.ult.phase == "wind" and K.anim_id == "bul_ult_wind" and K.move_k() == 0.0,
@@ -240,8 +247,8 @@ func bjorn() -> void:
 		hit_t and absf(dmg(T) - want) < want * 0.35 and dmg(T2) > want * 0.6,
 		"took %.0f / %.0f (want %.0f) stunned %s" % [dmg(T), dmg(T2), want, hit_t])
 	ok("bjorn ult bond: two hunters thrown, the cast pays its best event once (hit, 0.6)",
-		absf(best(P) - 0.6) < 0.001 and absf(HeroUlt.paid_total - paid0 - 0.6) < 0.001 and P.ult >= 0.6,
-		"best %.2f paid %.2f meter %.3f" % [best(P), HeroUlt.paid_total - paid0, P.ult])
+		absf(best(P) - 0.6) < 0.001 and HeroUlt.cast_id(K).begins_with("bulwark_") and P.ult >= 0.6,
+		"best %.2f cast %s meter %.3f" % [best(P), HeroUlt.cast_id(K), P.ult])
 	step(m, 0.4)
 	ok("bjorn ult small: a scar stays on the lane and slows a foe on it",
 		not K.ult.scar.is_empty() and K.ult.phase == "", "scar %s" % str(K.ult.scar.keys()))
@@ -269,12 +276,11 @@ func _bjorn_more() -> void:
 	step(m, 0.3)
 	P.ult = 0.0
 	aim_at(P, home + Vector3(0, 0, -6))
-	var paid_miss := HeroUlt.paid_total
 	press_x(m, P)
 	step(m, 1.4)
 	ok("bjorn ult bond: a Faultline that hits nobody pays nothing",
-		K.ult.slams == 1 and HeroUlt.paid_total == paid_miss,
-		"paid %.2f -> %.2f" % [paid_miss, HeroUlt.paid_total])
+		K.ult.slams == 1 and best(P) == 0.0 and HeroUlt.cast_id(K) != "",
+		"owed %.2f" % best(P))
 	press_x(m, P)
 	ok("bjorn ult cooldown: no recast while it recharges", K.ult.phase == "")
 	# a raised ledge 6 m out stops the fissure: the foe beyond is safe

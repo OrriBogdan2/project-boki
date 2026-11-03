@@ -616,7 +616,7 @@ static func _anim_ult(P: Hunter, mv: String, t: float, dt: float) -> void:
 	var cast_at := 0.5 if mv in ["pin_ult_cast", "bul_ult_wind", "bul_ult_slam"] else 0.3
 	if _at(t, dt, cast_at):
 		K.cd["x"] = 0.0
-		K.use_x()
+		HunterKeys.ult_pressed(P)
 		if mv == "pin_ult_final":
 			(K as ArcherKit).ult.left = 1
 	P.inp["fire"] = mv.begins_with("pin_ult_") and mv != "pin_ult_cast" and t > 0.5 and t < 0.6

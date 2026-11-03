@@ -169,7 +169,10 @@ func fire_ok() -> bool:
 	return wall.is_empty() and not ult.planted()
 
 ## X: Faultline. The aegis comes down and a Crushing Blow charge is dropped as he plants.
-func cast_ult() -> bool:
+func cast_ult() -> bool: return HeroUlt.press(self, _start_ult)
+func has_ult() -> bool: return true
+
+func _start_ult() -> bool:
 	_drop_holds()
 	return ult.cast()
 

@@ -169,8 +169,8 @@ func dash_afterimage() -> bool:
 	return true
 
 ## X: Starpiercer, the next shots empowered.
-func cast_ult() -> bool:
-	return ult.cast()
+func cast_ult() -> bool: return HeroUlt.press(self, ult.cast)
+func has_ult() -> bool: return true
 
 func ult_running() -> bool:
 	return ult.active()

@@ -156,7 +156,7 @@ func _loose() -> void:
 	if left <= 0:
 		end()
 
-## A beam passed through a foe: shred, the impact, the bond (UltSlot), the last beam's execute.
+## A beam passed through a foe: shred, the impact, the bond (HeroUlt.landed), the last beam's execute.
 func _hit(e: Ent, beam: Dictionary) -> void:
 	if e == null or not is_instance_valid(e):
 		return

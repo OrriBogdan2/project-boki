@@ -107,14 +107,10 @@ func cast_e() -> bool: return false
 func e_recast() -> bool: return false                # E pressed while it's up (Sigil detonation)
 func cast_r() -> bool: return false
 func r_recast() -> bool: return false                # R pressed while it runs (Last Round release)
-## X, the hero ultimate (HeroUlt): start it (true = it went off and the cooldown starts).
-func cast_ult() -> bool: return false
-## X pressed while the ult runs (true = handled, e.g. an early landing).
+## X pressed while the hero ultimate runs (HeroUlt.press; true = handled, e.g. an early landing).
 func ult_recast() -> bool: return false
+## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
-## The X press (Hunter.tick, "hunter_ult"): the level gate, the cooldown and the kit's cast.
-func use_x() -> void:
-	HeroUlt.use(self)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
@@ -264,8 +260,11 @@ func use_e() -> void:
 	else:
 		h._ab_feedback("k1", "deny")
 
-## Does the ammo panel draw its own hunter-ultimate key tile for this hero? Heroes with an "x" ult show
-## theirs in the HUD's X slot (UltSlot), so the panel's tile stays off for them.
+## X: the hero's own ultimate. No hero has one yet; a kit that does overrides both. Returns true when it went off.
+func cast_ult() -> bool:
+	return false
+
+## Does this hero have an ultimate on X (the HUD shows the slot only then)?
 func has_ult() -> bool:
 	return false
 

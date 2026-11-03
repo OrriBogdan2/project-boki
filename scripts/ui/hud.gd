@@ -1446,7 +1446,6 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 				_rounded(er, Color(0, 0, 0, 0.45), 10)
 	BokiHud.aug_mark(self, p, er, "e")
 	x += s + gap
-	x = UltSlot.draw(self, p, x, y, s, gap)        # X: the hero ultimate
 	# R: the Merge (the bond meter), a little bigger; then C and G
 	var us := 58.0
 	var ur := Rect2(Vector2(x, y - (us - s)), Vector2(us, us))
