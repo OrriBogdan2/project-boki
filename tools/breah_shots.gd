@@ -5,7 +5,7 @@ extends "res://tools/vv_shots.gd"
 
 const GRID_CROP := Vector2i(280, 200)    # px round the hero per strip frame (scaled 1.5x)
 const GRID_COLS := 3
-const PARTS := ["rmb"]
+const PARTS := ["rmb", "dash"]
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -90,3 +90,31 @@ func _breah_rmb() -> void:
 	marks.append([1.0, "full", "rmb_charge", "Quakefall charging: the red circle a hop ahead, the sweet spot grown"])
 	marks.append([1.58, "full", "rmb_slam", "Quakefall landing: the starburst, chips and crater where she lands"])
 	await _go(2.1, hold_rmb, marks)
+
+## Her two dash moves: Rubble Leap on the ground, the long dash in the air (5 frames each).
+func _breah_dash() -> void:
+	await _reset(9.0)
+	_aim(home + Vector3(4.0, 0, 0))
+	P.ak.on_dash(false)
+	var ground := _strip(
+		"dash_ground_strip",
+		"Rubble Leap (ground dash), gameplay zoom: crouched on the rock as it heaves up; kicked off it, fists swept"
+			+ " back; tucked at the top, fists overhead; legs reaching down; the two-fist landing (dust, no ring)."
+			+ " Reference: footage 0516-0518, the rock bursting up in front and a low shove behind it (ours is the"
+			+ " owner's leap over that rock)",
+		[0.04, 0.13, 0.31, 0.47, 0.64]
+	)
+	await _go(0.9, Callable(), ground)
+	await _reset(9.0)
+	_aim(home + Vector3(4.0, 0, 0))
+	P.pos.y += 2.2
+	P.grounded = false
+	P.do_dash()
+	var air := _strip(
+		"dash_air_strip",
+		"Air dash, gameplay zoom: the gather (fists in at the chest); the shoulder-first barge, lead fist low,"
+			+ " legs trailing; held through the push; braced, knees up, as it ends (0.23s). Reference: the source's"
+			+ " ground shove (footage 128.8-129.4 s, shoulder down behind the rock, fists forward), taken into the air",
+		[0.02, 0.07, 0.13, 0.19, 0.24]
+	)
+	await _go(0.4, Callable(), air)

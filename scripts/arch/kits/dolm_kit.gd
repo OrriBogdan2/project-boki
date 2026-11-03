@@ -521,9 +521,7 @@ func on_dash(use_ex: bool) -> bool:
 	var flight := float(dd["time"]) * float(dash_feel()["time"])
 	leap = {"t": 0.0, "wait": LEAP_CROUCH, "T": flight, "from": h.pos, "to": to, "dir": dir, "land_at": -1.0}
 	play("breah_dash")
-	# the rock bursts up under her first; she crouches on it, then leaps
-	m.fx.burst(h.pos + Vector3(0, 0.4, 0), Color("a8805a"), 14, 5.0, 0.4, 9.0, 1.2)
-	m.fx.burst(h.pos + Vector3(0, 0.2, 0), MOLTEN, 8, 4.0, 0.3, 6.0, 0.9)
+	# the rock heaves up under her first (dust, no blast: no explosions on a dash); she crouches on it, then leaps
 	m.fx.dust(h.pos, 10)
 	m.sfx("br_rise", h.pos, -4.0, 1.2)
 	AimKit.circle(
@@ -596,24 +594,22 @@ func _leap_off() -> void:
 	h.launch_to(leap["to"], float(leap["T"]))
 	h.inv_t = maxf(h.inv_t, float(dd["invuln"]))
 	h.dash_at = m.time
-	m.fx.burst(h.pos + Vector3(0, 0.2, 0), Color("c9a27a"), 12, 4.0, 0.35, 6.0, 1.2)
+	m.fx.dust(h.pos, 6)
 	m.sfx("br_leap", h.pos, -3.0, 1.0)
 	Feel.dash_sound(m, id, h.pos, h)
 	Feel.shake(m, "dash", h, h.pos)
 	if h.is_local() and m.cam: m.cam.punch(0.03)
 
-## The landing: a crash ring that shoves everyone beside her (the first of the leap's two hits).
+## The landing: a crash that shoves everyone beside her (the first of the leap's two hits).
 func _leap_land() -> void:
 	var dd := dash_def()
 	leap_lands += 1
 	var at := h.pos
 	var r := float(dd["land_r"])
 	play("breah_leap_land")
-	KitLooks.of(m).impact(at, r, 0.5)
-	m.fx.dust(at, 14)
+	m.fx.dust(at, 14)      # the hit area was the landing circle all through the flight: no ring or blast here
 	m.sfx("br_slam", at, -5.0, 1.15)
 	Feel.shake(m, "t2", h, at)
-	net_ring(at, r, Color("ff5a2a"))
 	rider_points(leap["from"], at)
 	for f in foes_in(at, r, 2.0):
 		leap_hits += 1
@@ -638,6 +634,10 @@ func _landslide_launch(at: Vector3, dir: Vector2) -> void:
 ## Her own hand tell (the molten fists) replaces the shared white charge orb.
 func charge_orb() -> bool:
 	return false
+
+## Her dash moves (breah_dash, breah_exdash) are the whole dash pose: no shared roll under them.
+func dodge_anim() -> String:
+	return "kit"
 
 func dash_afterimage() -> bool:
 	m.fx.burst(h.pos + Vector3(0, 0.5, 0), Color(0.62, 0.48, 0.34, 0.8), 3, 1.2, 0.4, -1.0, 1.6)

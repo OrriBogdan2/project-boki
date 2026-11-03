@@ -544,6 +544,7 @@ func _breah() -> void:
 	P.do_dash()
 	ok("anim: her long air dash plays breah_exdash", K.anim_id == "breah_exdash")
 	step(m, 0.8)
+	await _dash_moves(m, P, T, home, K, reset)
 	# ---- rank 3
 	P.slot_lv["sec"] = 3
 	P.slot_lv["kin"] = 3
@@ -729,6 +730,58 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 		)
 		P.inp["glide"] = false
 		step(m, 0.8)
+
+## Item 35: her own ground (Rubble Leap) and air (the long dash) moves, ids no other hero's table has, each one
+## keyed to end with its dash (the leap's crouch and flight; the air dash's time with the dash feel), and
+## neither dash draws a ground ring or a blast (the leap's hit area is its landing circle, shown in flight).
+func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
+	var ids := ["breah_dash", "breah_exdash"]
+	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
+		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
+	ok(
+		"item 35: her ground and air dash moves are two distinct ids, hers alone (KMovesStone, no other table)",
+		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("breah_"))
+			and not others.any(func(t): return ids.any(func(id): return (t as Dictionary).has(id)))
+	)
+	var feel_t := float(K.dash_feel()["time"])
+	var ground_t := DolmKit.LEAP_CROUCH + float(K.dash_def()["time"]) * feel_t
+	var air_t := float(P.cdat["ex_time"]) * feel_t
+	var lengths: Array = ids.map(func(id): return float((KMovesStone.MOVES[id]["keys"] as Array)[-1][0]))
+	ok(
+		"item 35: each dash move ends with its dash (ground %.2fs, air %.2fs)" % [ground_t, air_t],
+		absf(float(lengths[0]) - ground_t) <= 0.03 and float(lengths[1]) <= air_t + 0.005 and float(lengths[1]) > 0.15,
+		str(lengths)
+	)
+	for air in [false, true]:
+		reset.call()
+		T.teleport(home + Vector3(0, 0, 12.0))
+		aim_at(P, home + Vector3(3.0, 0, 0))
+		if air:
+			P.pos.y += 1.5
+			P.grounded = false
+			P.ex_cd = 0.0
+			P.do_dash()
+		else:
+			P.ak.on_dash(false)
+		if air:
+			m.step(DT)
+			P.render(DT, 1.0)
+			ok(
+				"item 35: her air dash plays breah_exdash as the whole pose (no shared roll under it)",
+				K.anim_id == "breah_exdash" and String(P.anim_s.get("dash_kind", "")) == "kit",
+				"anim %s kind %s roll %.2f" % [K.anim_id, str(P.anim_s.get("dash_kind")), P.roll_t]
+			)
+		var seen: Array = m.fx.rings.duplicate() + KitLooks.of(m).timed.duplicate()
+		var blasts := [0]
+		step(m, 0.9, func():
+			for e in m.fx.rings + KitLooks.of(m).timed.filter(func(e): return e["kind"] in ["burst", "crater"]):
+				if not seen.any(func(o): return is_same(o, e)):
+					seen.append(e)
+					blasts[0] += 1)
+		ok(
+			"item 35: her %s dash draws no ground ring and no blast" % ("air" if air else "ground"),
+			blasts[0] == 0, "rings/blasts %d" % blasts[0]
+		)
 
 ## Rubble Leap (owner's dash note: a leap, not the source's odd dash): the rock first, an arc to the cursor
 ## clamped by the dash feel, the landing marker for everyone, the landing crash, then the rock's roll-on hit.

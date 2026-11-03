@@ -296,9 +296,10 @@ const MOVES := {
 				"fl": Vector3(-0.34, -0.26, 0.08), "hw": 1.0, "fr": Vector3(0.34, -0.26, 0.08), "rw": 1.0
 			}
 		]]},
-	# Rubble Leap: crouched on the rock as it bursts up (0.06), kicked off it stretched long with the fists
-	# swept back (0.14), tucked at the top with both fists raised overhead (0.34), the legs reaching down
-	# and the fists still high as she drops onto the spot (0.55); breah_leap_land takes the landing
+	# Rubble Leap (her ground dash, 0.58s: the 0.06s crouch and the 0.52s flight): crouched on the rock as it
+	# heaves up (0.06), kicked off it stretched long with the fists swept back (0.12), tucked at the top with
+	# both fists raised overhead (0.30), the legs reaching down (0.46), and the fists-high drop that
+	# breah_leap_land picks up on landing (0.58)
 	"breah_dash": {"keys": [
 		[0.00, {}],
 		[
@@ -309,27 +310,33 @@ const MOVES := {
 			}
 		],
 		[
-			0.14,
+			0.12,
 			{
 				"p": -0.4, "sq": -0.35, "lift": 0.1, "legs": [-0.5, -0.2, 0.4, -0.6], "lw": 1.0,
 				"fl": Vector3(-0.38, 0.3, 0.42), "hw": 1.0, "fr": Vector3(0.38, 0.3, 0.42), "rw": 1.0
 			}
 		],
 		[
-			0.34,
+			0.30,
 			{
 				"p": 0.15, "sq": 0.1, "legs": [1.25, -1.9, 1.05, -1.75], "lw": 1.0,
 				"fl": Vector3(-0.26, 0.82, 0.0), "hw": 1.0, "fr": Vector3(0.26, 0.82, 0.0), "rw": 1.0
 			}
 		],
 		[
-			0.55,
+			0.46,
 			{
-				"p": -0.25, "sq": -0.1, "legs": [0.4, -0.5, 0.3, -0.45], "lw": 1.0,
-				"fl": Vector3(-0.26, 0.75, -0.2), "hw": 1.0, "fr": Vector3(0.26, 0.75, -0.2), "rw": 1.0
+				"p": -0.15, "sq": -0.12, "legs": [0.5, -0.7, 0.4, -0.6], "lw": 1.0,
+				"fl": Vector3(-0.26, 0.8, -0.1), "hw": 1.0, "fr": Vector3(0.26, 0.8, -0.1), "rw": 1.0
 			}
 		],
-		[0.80, {}]]},
+		[
+			0.58,
+			{
+				"p": -0.25, "legs": [0.4, -0.5, 0.3, -0.45], "lw": 1.0, "fl": Vector3(-0.26, 0.75, -0.2), "hw": 1.0,
+				"fr": Vector3(0.26, 0.75, -0.2), "rw": 1.0
+			}
+		]]},
 	# the leap's landing: both fists smashed into the ground with a deep squash (0.05), held down through
 	# the crash (0.25), then she heaves upright
 	"breah_leap_land": {"keys": [
@@ -362,26 +369,40 @@ const MOVES := {
 			}
 		],
 		[0.75, {}]]},
-	# her base dash (the long one): a heavy lumbering shove, palms out, weight thrown into it, and a
-	# squashing two-footed landing
+	# her air dash (the class long dash, 0.23s): the source's shove, taken into the air: a quick gather with
+	# the fists in at the chest (0.03), then a shoulder-first barge, the lead shoulder dropped and turned in,
+	# the lead fist driven out low, the rear one guarding the chest, the legs trailing (0.08), held through
+	# the push (0.18), and braced with the knees coming up to land as it ends (0.23)
 	"breah_exdash": {"keys": [
-		[0.00, {"sq": 0.18, "lift": -0.06, "p": 0.1}],
+		[0.00, {}],
 		[
-			0.07,
+			0.03,
 			{
-				"p": -0.6, "y": -0.3, "sq": -0.1, "legs": [0.7, -1.1, 0.2, -0.4], "lw": 1.0,
-				"fl": Vector3(-0.2, 0.25, -0.7), "hw": 1.0, "fr": Vector3(0.2, 0.25, -0.7), "rw": 1.0
+				"p": 0.12, "sq": 0.22, "lift": -0.04, "legs": [0.6, -1.0, 0.5, -0.9], "lw": 1.0,
+				"fl": Vector3(-0.18, 0.35, -0.15), "hw": 1.0, "fr": Vector3(0.18, 0.35, -0.15), "rw": 1.0
 			}
 		],
 		[
-			0.22,
+			0.08,
 			{
-				"p": -0.5, "y": -0.2, "legs": [0.3, -0.5, 0.7, -1.1], "lw": 1.0, "fl": Vector3(-0.2, 0.2, -0.6),
-				"hw": 0.8, "fr": Vector3(0.2, 0.2, -0.6), "rw": 0.8
+				"p": -0.72, "y": -0.5, "sq": -0.16, "legs": [-0.3, -0.2, -0.7, -0.4], "lw": 1.0,
+				"fl": Vector3(-0.08, 0.0, -0.85), "hw": 1.0, "fr": Vector3(0.24, 0.38, -0.25), "rw": 1.0
 			}
 		],
-		[0.30, {"p": -0.2, "sq": 0.3, "lift": -0.1, "legs": [0.8, -1.3, 0.7, -1.2], "lw": 1.0}],
-		[0.60, {}]]},
+		[
+			0.18,
+			{
+				"p": -0.64, "y": -0.45, "sq": -0.1, "legs": [-0.2, -0.3, -0.6, -0.5], "lw": 1.0,
+				"fl": Vector3(-0.1, 0.05, -0.8), "hw": 1.0, "fr": Vector3(0.24, 0.36, -0.22), "rw": 1.0
+			}
+		],
+		[
+			0.23,
+			{
+				"p": -0.25, "y": -0.15, "sq": 0.16, "legs": [0.8, -1.3, 0.7, -1.2], "lw": 1.0,
+				"fl": Vector3(-0.22, 0.1, -0.45), "hw": 0.8, "fr": Vector3(0.22, 0.15, -0.35), "rw": 0.8
+			}
+		]]},
 	# Stone Row: reared back with both fists high overhead (0.06), slammed down into the ground on the tell
 	# with a deep squash (0.18, the fists travel 1.6m), held down through it, then heaved up and out as the
 	# rocks rise (0.36), a proud settle
