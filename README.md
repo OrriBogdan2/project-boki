@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult), [tamsin/v2/polish](#tamsin/v2/polish-tamsin/v2/polish), [moosh-moosh/v2/polish](#moosh-moosh/v2/polish-moosh-moosh/v2/polish)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult), [tamsin/v2/polish](#tamsin/v2/polish-tamsin/v2/polish), [moosh-moosh/v2/polish](#moosh-moosh/v2/polish-moosh-moosh/v2/polish), [vireo/v2/polish](#vireo/v2/polish-vireo/v2/polish), [venator/v2/polish](#venator/v2/polish-venator/v2/polish)
 
 ## Vireo (mage)
 
@@ -2863,3 +2863,371 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Walk cycle at 1.25x cadence: per-step bob and tail swing (gameplay zoom)**
 
 ![Walk cycle at 1.25x cadence: per-step bob and tail swing (gameplay zoom)](moosh-moosh/v2/polish/tender_walk_strip_game.png)
+
+## vireo/v2/polish (vireo/v2/polish)
+
+**Run: upright, both arms held out wide, short quick steps**
+
+![Run: upright, both arms held out wide, short quick steps](vireo/v2/polish/vireo_anim_run.png)
+
+**Running at gameplay zoom: arms out wide, 0.96 scale, the wider shoulders**
+
+![Running at gameplay zoom: arms out wide, 0.96 scale, the wider shoulders](vireo/v2/polish/vireo_run.png)
+
+**Running at gameplay zoom: arms out wide, 0.96 scale, the wider shoulders (close-up)**
+
+![Running at gameplay zoom: arms out wide, 0.96 scale, the wider shoulders (close-up)](vireo/v2/polish/vireo_run_close.png)
+
+**LMB aim: the line runs through a near cursor (3m) on to full range**
+
+![LMB aim: the line runs through a near cursor (3m) on to full range](vireo/v2/polish/vireo_lmb_aim.png)
+
+**LMB aim: the line runs through a near cursor (3m) on to full range (close-up)**
+
+![LMB aim: the line runs through a near cursor (3m) on to full range (close-up)](vireo/v2/polish/vireo_lmb_aim_close.png)
+
+**LMB left hand: rest, drawn back to the chest, flung out with the finger pointed,the recoil snap up, follow-through, settled**
+
+![LMB left hand: rest, drawn back to the chest, flung out with the finger pointed,the recoil snap up, follow-through, settled](vireo/v2/polish/vireo_anim_lmb_l.png)
+
+**LMB release: the arm out, the fingertip crackling with teal arcs, gold sparks at her feet**
+
+![LMB release: the arm out, the fingertip crackling with teal arcs, gold sparks at her feet](vireo/v2/polish/vireo_lmb_fire.png)
+
+**LMB release: the arm out, the fingertip crackling with teal arcs, gold sparks at her feet (close-up)**
+
+![LMB release: the arm out, the fingertip crackling with teal arcs, gold sparks at her feet (close-up)](vireo/v2/polish/vireo_lmb_fire_close.png)
+
+**LMB: the jagged teal bolt (about 1.2m) in flight, gold core**
+
+![LMB: the jagged teal bolt (about 1.2m) in flight, gold core](vireo/v2/polish/vireo_lmb_bolt.png)
+
+**LMB: the jagged teal bolt (about 1.2m) in flight, gold core (close-up)**
+
+![LMB: the jagged teal bolt (about 1.2m) in flight, gold core (close-up)](vireo/v2/polish/vireo_lmb_bolt_close.png)
+
+**LMB impact: teal splinters spray back toward her; the Static marker above the HP bar**
+
+![LMB impact: teal splinters spray back toward her; the Static marker above the HP bar](vireo/v2/polish/vireo_lmb_impact.png)
+
+**LMB impact: teal splinters spray back toward her; the Static marker above the HP bar (close-up)**
+
+![LMB impact: teal splinters spray back toward her; the Static marker above the HP bar (close-up)](vireo/v2/polish/vireo_lmb_impact_close.png)
+
+**LMB right hand (the finger gun): rest, pulled in, punched out, the wrist flicked up by the recoil, follow-through, settled**
+
+![LMB right hand (the finger gun): rest, pulled in, punched out, the wrist flicked up by the recoil, follow-through, settled](vireo/v2/polish/vireo_anim_lmb_r.png)
+
+**Static 1: one pip lit, a bold 1 on a dark disc above the HP bar, 2 body sparks**
+
+![Static 1: one pip lit, a bold 1 on a dark disc above the HP bar, 2 body sparks](vireo/v2/polish/vireo_static_1.png)
+
+**Static 1: one pip lit, a bold 1 on a dark disc above the HP bar, 2 body sparks (close-up)**
+
+![Static 1: one pip lit, a bold 1 on a dark disc above the HP bar, 2 body sparks (close-up)](vireo/v2/polish/vireo_static_1_close.png)
+
+**Static 2: two pips, the count, 4 sparks on the body**
+
+![Static 2: two pips, the count, 4 sparks on the body](vireo/v2/polish/vireo_static_2.png)
+
+**Static 2: two pips, the count, 4 sparks on the body (close-up)**
+
+![Static 2: two pips, the count, 4 sparks on the body (close-up)](vireo/v2/polish/vireo_static_2_close.png)
+
+**Passive proc: a foe goes Live, her left hand flicked up to the sky as the bolt drops**
+
+![Passive proc: a foe goes Live, her left hand flicked up to the sky as the bolt drops](vireo/v2/polish/vireo_anim_live.png)
+
+**Static 4: the sky bolt, LIVE above the marker, all pips gold, 8 sparks and arcs**
+
+![Static 4: the sky bolt, LIVE above the marker, all pips gold, 8 sparks and arcs](vireo/v2/polish/vireo_static_live.png)
+
+**Static 4: the sky bolt, LIVE above the marker, all pips gold, 8 sparks and arcs (close-up)**
+
+![Static 4: the sky bolt, LIVE above the marker, all pips gold, 8 sparks and arcs (close-up)](vireo/v2/polish/vireo_static_live_close.png)
+
+**RMB summon and hold: the rod arrives in a burst, the arm raises it upright by the shoulder, side-on**
+
+![RMB summon and hold: the rod arrives in a burst, the arm raises it upright by the shoulder, side-on](vireo/v2/polish/vireo_anim_rmb_hold.png)
+
+**RMB pressed: the copper Storm Rod arrives in her raised hand with a teal crackle and a ring**
+
+![RMB pressed: the copper Storm Rod arrives in her raised hand with a teal crackle and a ring](vireo/v2/polish/vireo_rmb_summon.png)
+
+**RMB pressed: the copper Storm Rod arrives in her raised hand with a teal crackle and a ring (close-up)**
+
+![RMB pressed: the copper Storm Rod arrives in her raised hand with a teal crackle and a ring (close-up)](vireo/v2/polish/vireo_rmb_summon_close.png)
+
+**RMB held: the rod upright in her hand (no RELOADING), a fixed double-rail lane to full range**
+
+![RMB held: the rod upright in her hand (no RELOADING), a fixed double-rail lane to full range](vireo/v2/polish/vireo_rmb_aim.png)
+
+**RMB held: the rod upright in her hand (no RELOADING), a fixed double-rail lane to full range (close-up)**
+
+![RMB held: the rod upright in her hand (no RELOADING), a fixed double-rail lane to full range (close-up)](vireo/v2/polish/vireo_rmb_aim_close.png)
+
+**RMB full: the white body flash, the lane gold**
+
+![RMB full: the white body flash, the lane gold](vireo/v2/polish/vireo_rmb_full.png)
+
+**RMB full: the white body flash, the lane gold (close-up)**
+
+![RMB full: the white body flash, the lane gold (close-up)](vireo/v2/polish/vireo_rmb_full_close.png)
+
+**RMB throw: overarm whip, stretch at the release, follow-through, recover**
+
+![RMB throw: overarm whip, stretch at the release, follow-through, recover](vireo/v2/polish/vireo_anim_rmb_throw.png)
+
+**RMB impact: a gold blast, teal crackle and a shock ring, the target knocked back**
+
+![RMB impact: a gold blast, teal crackle and a shock ring, the target knocked back](vireo/v2/polish/vireo_rmb_impact.png)
+
+**RMB impact: a gold blast, teal crackle and a shock ring, the target knocked back (close-up)**
+
+![RMB impact: a gold blast, teal crackle and a shock ring, the target knocked back (close-up)](vireo/v2/polish/vireo_rmb_impact_close.png)
+
+**The charge orb: a gold core in a teal shell with spinning bands, short teal arcs crackling off it**
+
+![The charge orb: a gold core in a teal shell with spinning bands, short teal arcs crackling off it](vireo/v2/polish/vireo_rmb_orb.png)
+
+**The charge orb: a gold core in a teal shell with spinning bands, short teal arcs crackling off it (close-up)**
+
+![The charge orb: a gold core in a teal shell with spinning bands, short teal arcs crackling off it (close-up)](vireo/v2/polish/vireo_rmb_orb_close.png)
+
+**Shift: the charging crouch, the streak (her gold-teal after-images), re-forming on arrival**
+
+![Shift: the charging crouch, the streak (her gold-teal after-images), re-forming on arrival](vireo/v2/polish/vireo_anim_dash.png)
+
+**Shift held: rails out to max, the ticked end ring partway (the cursor plays no part)**
+
+![Shift held: rails out to max, the ticked end ring partway (the cursor plays no part)](vireo/v2/polish/vireo_dash_aim_mid.png)
+
+**Shift held: rails out to max, the ticked end ring partway (the cursor plays no part) (close-up)**
+
+![Shift held: rails out to max, the ticked end ring partway (the cursor plays no part) (close-up)](vireo/v2/polish/vireo_dash_aim_mid_close.png)
+
+**Shift held to full: the end ring at 8.5m, past the 3m cursor**
+
+![Shift held to full: the end ring at 8.5m, past the 3m cursor](vireo/v2/polish/vireo_dash_aim_full.png)
+
+**Shift held to full: the end ring at 8.5m, past the 3m cursor (close-up)**
+
+![Shift held to full: the end ring at 8.5m, past the 3m cursor (close-up)](vireo/v2/polish/vireo_dash_aim_full_close.png)
+
+**Shift released: a lightning streak, the body a trail of her own gold-teal after-images**
+
+![Shift released: a lightning streak, the body a trail of her own gold-teal after-images](vireo/v2/polish/vireo_dash_run.png)
+
+**Shift released: a lightning streak, the body a trail of her own gold-teal after-images (close-up)**
+
+![Shift released: a lightning streak, the body a trail of her own gold-teal after-images (close-up)](vireo/v2/polish/vireo_dash_run_close.png)
+
+**Shift arrival: a ring burst with spark needles**
+
+![Shift arrival: a ring burst with spark needles](vireo/v2/polish/vireo_dash_arrive.png)
+
+**Shift arrival: a ring burst with spark needles (close-up)**
+
+![Shift arrival: a ring burst with spark needles (close-up)](vireo/v2/polish/vireo_dash_arrive_close.png)
+
+**Air dash (her base dash variant): the tuck, the forward tumble, her teal after-images, the landing**
+
+![Air dash (her base dash variant): the tuck, the forward tumble, her teal after-images, the landing](vireo/v2/polish/vireo_anim_dash_ex.png)
+
+**Air dash: her own teal after-images (her silhouette, not a shared pill) and the teal streak**
+
+![Air dash: her own teal after-images (her silhouette, not a shared pill) and the teal streak](vireo/v2/polish/vireo_dash_ex.png)
+
+**Air dash: her own teal after-images (her silhouette, not a shared pill) and the teal streak (close-up)**
+
+![Air dash: her own teal after-images (her silhouette, not a shared pill) and the teal streak (close-up)](vireo/v2/polish/vireo_dash_ex_close.png)
+
+**Payoff: Wirerun through a Live foe, BLOWOUT, the copper refund columns on her**
+
+![Payoff: Wirerun through a Live foe, BLOWOUT, the copper refund columns on her](vireo/v2/polish/vireo_blowout.png)
+
+**Payoff: Wirerun through a Live foe, BLOWOUT, the copper refund columns on her (close-up)**
+
+![Payoff: Wirerun through a Live foe, BLOWOUT, the copper refund columns on her (close-up)](vireo/v2/polish/vireo_blowout_close.png)
+
+**E: the arm sweeps toward the spot, flicks up for the drag, stays up, snaps down at the strike**
+
+![E: the arm sweeps toward the spot, flicks up for the drag, stays up, snaps down at the strike](vireo/v2/polish/vireo_anim_e.png)
+
+**E: the dark disc at the cursor; the flick sets the drag arrow and the gold rim chevron (a pull)**
+
+![E: the dark disc at the cursor; the flick sets the drag arrow and the gold rim chevron (a pull)](vireo/v2/polish/vireo_e_aim.png)
+
+**E: the dark disc at the cursor; the flick sets the drag arrow and the gold rim chevron (a pull) (close-up)**
+
+![E: the dark disc at the cursor; the flick sets the drag arrow and the gold rim chevron (a pull) (close-up)](vireo/v2/polish/vireo_e_aim_close.png)
+
+**E countdown: a dark violet disc, a crackling copper rim, gold veins, the gold pillar narrowing**
+
+![E countdown: a dark violet disc, a crackling copper rim, gold veins, the gold pillar narrowing](vireo/v2/polish/vireo_e_count.png)
+
+**E countdown: a dark violet disc, a crackling copper rim, gold veins, the gold pillar narrowing (close-up)**
+
+![E countdown: a dark violet disc, a crackling copper rim, gold veins, the gold pillar narrowing (close-up)](vireo/v2/polish/vireo_e_count_close.png)
+
+**E strike: lightning, the target dragged toward her, Grounded with shackle rings**
+
+![E strike: lightning, the target dragged toward her, Grounded with shackle rings](vireo/v2/polish/vireo_e_strike.png)
+
+**E strike: lightning, the target dragged toward her, Grounded with shackle rings (close-up)**
+
+![E strike: lightning, the target dragged toward her, Grounded with shackle rings (close-up)](vireo/v2/polish/vireo_e_strike_close.png)
+
+## venator/v2/polish (venator/v2/polish)
+
+**LMB, one round: rest, the 0.03s shoulder kick with the muzzle flipped up, recovering, ready**
+
+![LMB, one round: rest, the 0.03s shoulder kick with the muzzle flipped up, recovering, ready](venator/v2/polish/venator_anim_lmb.png)
+
+**LMB: ember tracers through a near cursor out to full range, the bronze muzzle star**
+
+![LMB: ember tracers through a near cursor out to full range, the bronze muzzle star](venator/v2/polish/venator_lmb_aim.png)
+
+**LMB: ember tracers through a near cursor out to full range, the bronze muzzle star (close-up)**
+
+![LMB: ember tracers through a near cursor out to full range, the bronze muzzle star (close-up)](venator/v2/polish/venator_lmb_aim_close.png)
+
+**LMB on a Dazed target: the big gold numbers (+90%) in frame**
+
+![LMB on a Dazed target: the big gold numbers (+90%) in frame](venator/v2/polish/venator_lmb_dazed.png)
+
+**LMB on a Dazed target: the big gold numbers (+90%) in frame (close-up)**
+
+![LMB on a Dazed target: the big gold numbers (+90%) in frame (close-up)](venator/v2/polish/venator_lmb_dazed_close.png)
+
+**RMB held: the spiked charge raised over his shoulder in the left hand, the rifle kept forward**
+
+![RMB held: the spiked charge raised over his shoulder in the left hand, the rifle kept forward](venator/v2/polish/venator_anim_rmb_hold.png)
+
+**RMB held: the charge cocked by his head, a fixed lane with an arrow tip; the target in it marked**
+
+![RMB held: the charge cocked by his head, a fixed lane with an arrow tip; the target in it marked](venator/v2/polish/venator_rmb_aim.png)
+
+**RMB held: the charge cocked by his head, a fixed lane with an arrow tip; the target in it marked (close-up)**
+
+![RMB held: the charge cocked by his head, a fixed lane with an arrow tip; the target in it marked (close-up)](venator/v2/polish/venator_rmb_aim_close.png)
+
+**RMB throw: the overhand whip, the stretch at the release, follow-through, recover**
+
+![RMB throw: the overhand whip, the stretch at the release, follow-through, recover](venator/v2/polish/venator_anim_rmb_throw.png)
+
+**RMB: the bronze spiked charge in flight with its ember smear, past the person**
+
+![RMB: the bronze spiked charge in flight with its ember smear, past the person](venator/v2/polish/venator_rmb_flight.png)
+
+**RMB: the bronze spiked charge in flight with its ember smear, past the person (close-up)**
+
+![RMB: the bronze spiked charge in flight with its ember smear, past the person (close-up)](venator/v2/polish/venator_rmb_flight_close.png)
+
+**RMB stuck on the ground: the cone shows back toward him for its fuse (everyone sees it)**
+
+![RMB stuck on the ground: the cone shows back toward him for its fuse (everyone sees it)](venator/v2/polish/venator_rmb_cone.png)
+
+**RMB stuck on the ground: the cone shows back toward him for its fuse (everyone sees it) (close-up)**
+
+![RMB stuck on the ground: the cone shows back toward him for its fuse (everyone sees it) (close-up)](venator/v2/polish/venator_rmb_cone_close.png)
+
+**RMB blast: the cone front, the target shoved toward him and Dazed (swirl)**
+
+![RMB blast: the cone front, the target shoved toward him and Dazed (swirl)](venator/v2/polish/venator_rmb_blast.png)
+
+**RMB blast: the cone front, the target shoved toward him and Dazed (swirl) (close-up)**
+
+![RMB blast: the cone front, the target shoved toward him and Dazed (swirl) (close-up)](venator/v2/polish/venator_rmb_blast_close.png)
+
+**RMB on a wall: stuck, the cone back out toward him**
+
+![RMB on a wall: stuck, the cone back out toward him](venator/v2/polish/venator_rmb_wall_cone.png)
+
+**RMB on a wall: stuck, the cone back out toward him (close-up)**
+
+![RMB on a wall: stuck, the cone back out toward him (close-up)](venator/v2/polish/venator_rmb_wall_cone_close.png)
+
+**RMB wall blast**
+
+![RMB wall blast](venator/v2/polish/venator_rmb_wall_blast.png)
+
+**RMB wall blast (close-up)**
+
+![RMB wall blast (close-up)](venator/v2/polish/venator_rmb_wall_blast_close.png)
+
+**Shift: feet-first, leaning back but upright enough to aim, both hands on the rifle, firing; stand-up**
+
+![Shift: feet-first, leaning back but upright enough to aim, both hands on the rifle, firing; stand-up](venator/v2/polish/venator_anim_dash.png)
+
+**Shift: sliding one way, shooting another; his ember after-image, the start ring, a dust scrape**
+
+![Shift: sliding one way, shooting another; his ember after-image, the start ring, a dust scrape](venator/v2/polish/venator_dash.png)
+
+**Shift: sliding one way, shooting another; his ember after-image, the start ring, a dust scrape (close-up)**
+
+![Shift: sliding one way, shooting another; his ember after-image, the start ring, a dust scrape (close-up)](venator/v2/polish/venator_dash_close.png)
+
+**Shift tap: a 0.45s skid, fast at the start and bleeding off, then up**
+
+![Shift tap: a 0.45s skid, fast at the start and bleeding off, then up](venator/v2/polish/venator_anim_slide_tap.png)
+
+**Air dash (his base dash variant): a shoulder-led barrel roll with his ember after-images, the landing**
+
+![Air dash (his base dash variant): a shoulder-led barrel roll with his ember after-images, the landing](venator/v2/polish/venator_anim_dash_ex.png)
+
+**Air dash: his own ember after-images (his silhouette, not a shared pill)**
+
+![Air dash: his own ember after-images (his silhouette, not a shared pill)](venator/v2/polish/venator_dash_ex.png)
+
+**Air dash: his own ember after-images (his silhouette, not a shared pill) (close-up)**
+
+![Air dash: his own ember after-images (his silhouette, not a shared pill) (close-up)](venator/v2/polish/venator_dash_ex_close.png)
+
+**E: braced through the 0.6s cast, the recoil throws the chest back, settle**
+
+![E: braced through the 0.6s cast, the recoil throws the chest back, settle](venator/v2/polish/venator_anim_e.png)
+
+**E cast start: a wide ember line full length, the ember orb at the muzzle**
+
+![E cast start: a wide ember line full length, the ember orb at the muzzle](venator/v2/polish/venator_e_aim_start.png)
+
+**E cast start: a wide ember line full length, the ember orb at the muzzle (close-up)**
+
+![E cast start: a wide ember line full length, the ember orb at the muzzle (close-up)](venator/v2/polish/venator_e_aim_start_close.png)
+
+**E cast end: narrowed to a thin core, the muzzle orb swollen**
+
+![E cast end: narrowed to a thin core, the muzzle orb swollen](venator/v2/polish/venator_e_aim_end.png)
+
+**E cast end: narrowed to a thin core, the muzzle orb swollen (close-up)**
+
+![E cast end: narrowed to a thin core, the muzzle orb swollen (close-up)](venator/v2/polish/venator_e_aim_end_close.png)
+
+**E fire: an ember beam with a hot core and bronze edges, the ember muzzle orb, the smoke ring and recoil**
+
+![E fire: an ember beam with a hot core and bronze edges, the ember muzzle orb, the smoke ring and recoil](venator/v2/polish/venator_e_fire.png)
+
+**E fire: an ember beam with a hot core and bronze edges, the ember muzzle orb, the smoke ring and recoil (close-up)**
+
+![E fire: an ember beam with a hot core and bronze edges, the ember muzzle orb, the smoke ring and recoil (close-up)](venator/v2/polish/venator_e_fire_close.png)
+
+**Payoff: Longneedle through a Dazed hunter at the hit: SKEWERED and the number**
+
+![Payoff: Longneedle through a Dazed hunter at the hit: SKEWERED and the number](venator/v2/polish/venator_skewer.png)
+
+**Payoff: Longneedle through a Dazed hunter at the hit: SKEWERED and the number (close-up)**
+
+![Payoff: Longneedle through a Dazed hunter at the hit: SKEWERED and the number (close-up)](venator/v2/polish/venator_skewer_close.png)
+
+**Passive proc (Hot Streak): a knock, the rifle spun up onto his shoulder, chin up**
+
+![Passive proc (Hot Streak): a knock, the rifle spun up onto his shoulder, chin up](venator/v2/polish/venator_anim_knock.png)
+
+**Hot Streak: the knock gives Slipstep back: +KNOCK, the ember column and ring on him**
+
+![Hot Streak: the knock gives Slipstep back: +KNOCK, the ember column and ring on him](venator/v2/polish/venator_knock.png)
+
+**Hot Streak: the knock gives Slipstep back: +KNOCK, the ember column and ring on him (close-up)**
+
+![Hot Streak: the knock gives Slipstep back: +KNOCK, the ember column and ring on him (close-up)](venator/v2/polish/venator_knock_close.png)
