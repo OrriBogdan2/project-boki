@@ -2,7 +2,9 @@
 # Installs or updates a Project Boki game server box (matchmaker + game server) on a fresh Ubuntu 24.04.
 # Run as root. Idempotent: run it again to update.
 #
-#   install.sh [--region eu|us] [--public-host <ip>] [--src <dir>] [--dry-run]
+#   install.sh [--region eu|us] [--public-host <ip>] [--ports <min>-<max>] [--src <dir>] [--dry-run]
+# --ports: the UDP match port range = how many matches this box runs at once (size it to RAM: a match
+#          server is ~0.5 GB resident, so ~5 on a 4 GB box, 2 on a 2 GB box).
 #
 # --src (default: the directory this script is in) holds what push.sh uploaded:
 #   <src>/matchmaker/   the matchmaker (server/matchmaker in the repo)
@@ -25,6 +27,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --region) REGION="$2"; shift 2 ;;
     --public-host) PUBLIC_HOST="$2"; shift 2 ;;
+    --ports) PORTS="$2"; shift 2 ;;
     --src) SRC="$2"; shift 2 ;;
     --dry-run) DRY=1; shift ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
@@ -91,7 +94,7 @@ if [ "$DRY" = 1 ] || [ ! -f "$ENV_FILE" ]; then
 # Project Boki matchmaker settings (read by boki-matchmaker.service; see server/README.md in the repo).
 REGION=eu
 PUBLIC_HOST=
-SERVER_CMD=/opt/boki/server/ProjectBoki.x86_64 --headless --
+SERVER_CMD=stdbuf -oL -eL /opt/boki/server/ProjectBoki.x86_64 --headless --
 PORT_MIN=7777
 PORT_MAX=7799
 HTTP_PORT=8080
@@ -105,9 +108,13 @@ run chown root:boki "$ENV_FILE"
 run chmod 640 "$ENV_FILE"
 [ -z "$REGION" ] || set_env REGION "$REGION"
 [ -z "$PUBLIC_HOST" ] || set_env PUBLIC_HOST "$PUBLIC_HOST"
+if [ -n "${PORTS:-}" ]; then
+  set_env PORT_MIN "${PORTS%-*}"
+  set_env PORT_MAX "${PORTS#*-}"
+fi
 binaries=(/opt/boki/server/*.x86_64)
 if [ "${#binaries[@]}" = 1 ] && [ -f "${binaries[0]}" ]; then
-  set_env SERVER_CMD "${binaries[0]} --headless --"
+  set_env SERVER_CMD "stdbuf -oL -eL ${binaries[0]} --headless --"      # line-buffered: Godot block-buffers a piped stdout, hiding the ready line
 else
   echo "   no single /opt/boki/server/*.x86_64 yet: SERVER_CMD left as is (push a build, then re-run)"
 fi
