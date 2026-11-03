@@ -32,14 +32,14 @@
 "semicolon": 2
 },
 "scripts/arch/kits/archer_kit.gd": {
-"long_line": 18,
-"semicolon": 5,
+"long_line": 13,
+"semicolon": 3,
 "shadow": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 20,
-"nested_ternary": 4,
-"semicolon": 11
+"long_line": 13,
+"nested_ternary": 1,
+"semicolon": 10
 },
 "scripts/arch/kits/dolm_kit.gd": {
 "nested_ternary": 1
@@ -462,8 +462,7 @@
 "semicolon": 37
 },
 "scripts/match/arena_demo.gd": {
-"long_line": 20,
-"semicolon": 39
+"long_line": 2
 },
 "scripts/match/biome_run.gd": {
 "long_line": 25,
@@ -702,9 +701,9 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 292,
+"long_line": 289,
 "nested_ternary": 12,
-"semicolon": 283,
+"semicolon": 282,
 "shadow": 3
 },
 "scripts/match/music_dir.gd": {
@@ -1002,12 +1001,12 @@
 "semicolon": 2
 },
 "tools/archer_bulwark_combo_check.gd": {
-"long_line": 24,
-"semicolon": 47
+"long_line": 8,
+"semicolon": 20
 },
 "tools/archetype_check.gd": {
-"long_line": 140,
-"semicolon": 136,
+"long_line": 139,
+"semicolon": 135,
 "shadow": 1
 },
 "tools/arena_check.gd": {
