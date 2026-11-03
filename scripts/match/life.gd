@@ -204,6 +204,7 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 	for old in m.boxes:
 		if old["owner"] == h: old["soul_until"] = 0.0
 	var at := box_spot(m, h, why)
+	KinTrack.drop_carried(m, h, at)       # a Boki you were carrying home drops for its owner
 	var b := {"owner": h, "team": h.team, "pos": at, "gems": h.gems, "seeds": h.seeds.duplicate(), "caught": h.caught.duplicate(true),
 		"tonics": maxi(0, h.tonics - h.free_tonics), "kits": h.armor_kits, "soul_until": m.time + R["soul_time"], "prog": {}, "node": null, "empty": false,
 		"gear": [], "pack": h.pack.duplicate(true), "keys": h.rift_keys, "chest_keys": h.chest_keys}
@@ -353,7 +354,7 @@ static func _settle_box(b: Dictionary) -> void:
 	b["empty"] = int(b["gems"]) <= 0 and (b["seeds"] as Dictionary).is_empty() and (b["caught"] as Array).is_empty() \
 		and int(b["tonics"]) <= 0 and int(b["kits"]) <= 0 \
 		and int(b.get("keys", 0)) <= 0 and int(b.get("chest_keys", 0)) <= 0 and (b.get("gear", []) as Array).is_empty() \
-		and (b.get("pack", []) as Array).is_empty() and (b.get("kin", []) as Array).is_empty()
+		and (b.get("pack", []) as Array).is_empty()
 	_refresh_box(b)
 
 ## Takes everything in a box.
@@ -401,7 +402,6 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 	h.rift_keys += int(b.get("keys", 0))
 	var box_keys := int(b.get("chest_keys", 0))
 	var keys_left := box_keys - KeyChest.give(h, box_keys)
-	_kin_from_box(m, h, b)
 	var got := int(b["gems"])
 	b["gems"] = 0
 	b["seeds"] = {}
@@ -451,11 +451,6 @@ static func bring_back(m: Match, o: Hunter, at: Vector3, hp_frac: float, sick: b
 	o.sick_t = R["sickness_time"] if sick else 0.0
 	o.teleport(m.world.free_spot_near(at, [], 1.0, 0.4, 6.0) if not m.world.is_void(at.x, at.z) else at)
 	o.prev = o.pos
-	for w in m.kins.duplicate():
-		# a loose kin of yours nobody captured comes running back
-		if w.is_wild() and not w.dead and w.lost_owner == o:
-			w.dead = true; w.visible = false
-			m.give_kin(o, w.rec)
 	for kk in [o.kin, o.kin2]:
 		# your kin was keeping out of sight; it comes straight back to you
 		if kk and not (kk as Kin).dead and (kk as Kin).state == "away":
@@ -481,79 +476,14 @@ static func make_gone(m: Match, h: Hunter) -> void:
 	# kin that were keeping out of sight flee home: they're never lost that way
 
 # ------------------------------------------------------------------ kin at risk (by run tier)
-## When you die, what happens to your kin depends on the tier you're in (docs/DEATH_AND_REVIVE.md):
-## the Meadow keeps them safe; in the Dusk Isles the kin you have on you (shoulder or bench) drop
-## into your deathbox where anyone can loot them; in the Hollow kin out of your hands (thrown,
-## fighting) can also be captured. Safe kin keep out of sight and come back if you're revived.
+## When you die, what happens to your Boki depends on the tier (docs/decisions/0008, KinLoss): below
+## loss_min_tier it keeps out of sight and goes home with you; from it up it drops dazed and guards
+## your deathbox, to be cradled once you are revived or scanned by an enemy.
 static func kin_on_death(m: Match, h: Hunter, b: Dictionary) -> void:
-	var training: bool = m.opts.get("training", false) or m.opts.get("tutorial", false)
-	b["kin"] = []
 	for kk in [h.kin, h.kin2]:
 		if kk == null or (kk as Kin).dead:
 			continue
-		var k: Kin = kk
-		m.giant_free(k)
-		if Loaner.is_loaner(k.rec):
-			k.state = "away"      # a loaner is never at risk: it keeps out of sight, then goes home to Wenna
-			continue
-		var on_you: bool = k.state in ["shoulder", "bench", "away"] or k.with_owner()
-		if not training and on_you and bool(m.T.get("kin_drop", false)):
-			var rec: Dictionary = k.rec.duplicate(true)
-			k.dead = true; k.visible = false
-			if b.get("node") != null:
-				(b["kin"] as Array).append(rec)
-				if h == m.player:
-					m.player_lost.append({"uid": String(rec.get("uid", "")), "kin": null, "box": b, "holder": null, "rec": rec})
-					m.add_feed("%s dropped into your deathbox" % rec.get("name", "Your Boki"))
-			elif h == m.player:
-				# no ground to drop a box on (lost to the abyss): the kin is swept away with it and
-				# turns up at the Ransom House, same as an unclaimed box. Falling off isn't a way out.
-				m.player_lost.append({"uid": String(rec.get("uid", "")), "kin": null, "box": {}, "holder": null, "rec": rec})
-				m.add_feed("%s was lost with you to the abyss" % rec.get("name", "Your Boki"))
-			continue
-		if not training and not on_you and bool(m.T.get("loose_capture", false)):
-			# loose in the world: dazed, and anyone can capture it
-			m._leave_one_kin(h, k)
-			continue
-		k.state = "away"
-	if not (b["kin"] as Array).is_empty():
-		b["empty"] = false
-		_refresh_box(b)
-		trace(m, "%d kin into %s's box" % [(b["kin"] as Array).size(), h.pname])
-
-## Kin coming out of a box: back to their owner's side, to a teammate to carry home, or off with
-## whoever looted it.
-static func _kin_from_box(m: Match, h: Hunter, b: Dictionary) -> void:
-	var o: Hunter = b["owner"]
-	var left: Array = []
-	for rec in b.get("kin", []):
-		if h == o:
-			m.give_kin(h, rec)
-			if h == m.player: m.add_feed("%s is back with you" % rec.get("name", "Your Boki"))
-			continue
-		if not Capture.room(h):
-			left.append(rec)               # the box is full: it stays in the deathbox
-			Capture.full_note(m, h)
-			continue
-		var r2: Dictionary = (rec as Dictionary).duplicate(true)
-		if o == m.player:
-			r2["lost_from"] = "you"
-			for L in m.player_lost:
-				if String(L["uid"]) == String(rec.get("uid", "")): L["holder"] = h
-			m.add_feed(("%s is carrying %s for you" if h.team == o.team else "%s took %s from your box!") % [h.pname, rec.get("name", "your Boki")])
-			if h.team != o.team:
-				h.stolen_carry = true
-				m.kin_stolen(h, rec)
-		elif h.team != o.team:
-			# a rival's kin: it's yours if you get it home (and it remembers how much it loved them)
-			r2["prev_trust"] = float(rec.get("trust", 50.0))
-			r2["lost_from"] = o.pname
-			r2["trust"] = 20.0
-			r2["memory"] = []
-			h.stolen_carry = true
-			if h == m.player: m.add_feed("You took %s's %s! Extract to keep it." % [o.pname, Data.KIN[r2["species"]]["name"]])
-		h.caught.append(r2)
-	b["kin"] = left
+		KinLoss.on_owner_out(m, h, kk, b["pos"])
 
 # ------------------------------------------------------------------ beacons
 static func place_beacons(m: Match) -> void:

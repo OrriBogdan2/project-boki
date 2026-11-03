@@ -1,6 +1,6 @@
 class_name KeyBonus
 extends RefCounted
-## Bonus chest keys (docs/decisions/0007-keys-and-cover.md). The carrier quota (carriers = chests in
+## Bonus chest keys (docs/decisions/0009-keys-and-cover.md). The carrier quota (carriers = chests in
 ## each region, KeyRun) is the baseline; on top of it, at low odds (content/rules/chest_keys.json):
 ## a lair boss or the Warden, an elite, any other monster, a breakable or a sky-train crate.
 ## Rolled on the keys' own seeded stream (KeyRun.bonus_rng), so the match's other loot never shifts.

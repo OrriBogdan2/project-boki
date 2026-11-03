@@ -463,7 +463,7 @@ def gap(a, b, owner):
     return min(math.hypot(p[0] - q[0], p[1] - q[1]) for p in edgeA[::2] for q in edgeB[::2])
 
 # ------------------------------------------------------------------ hiding cover
-# The tall grass is computed here, not listed by hand (docs/decisions/0007-keys-and-cover.md). Each
+# The tall grass is computed here, not listed by hand (docs/decisions/0009-keys-and-cover.md). Each
 # biome has a share of its walkable ground to cover (content/rules/keys.json "cover"): bloom a lot,
 # meadow some, gloom a little, storm and ember less, frost almost none. Cover comes as PATCHES of 3-6
 # overlapping clumps, put where a fight wants it: beside chests and camps, along the flanks of the
