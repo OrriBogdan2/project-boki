@@ -13,6 +13,12 @@ extends Node
 ## Settings (environment or `-- --relay --port=7777 --max=120`):
 ##   BOKI_PORT, BOKI_MAX_PLAYERS, BOKI_VERSION (required game version, default: this build's),
 ##   BOKI_DISCORD_BOT_TOKEN, BOKI_GUILD_ID, BOKI_ALLOWED_ROLES (comma-separated role ids)
+##
+## A dedicated match server (scripts/core/dedicated_server.gd) runs the same relay with a token
+## table instead: each player's hello must carry one of the matchmaker's one-time tokens.
+
+signal admitted(id: int, slot: int)      # a player passed the handshake (slot -1: the match host)
+signal left(id: int)
 
 const CH_RELIABLE := 0
 const CH_FAST := 1
@@ -27,10 +33,21 @@ var bot_token := ""
 var guild_id := ""
 var allowed_roles: PackedStringArray = []
 var started_at := 0.0
+var tokens := {}           # token -> {name, slot}: the matchmaker's one-time tickets (empty: no token check)
+var used_tokens := {}      # token -> peer id that spent it
+var max_slots := 0         # players a token match seats; a valid token past that is refused "full"
+var host_token := ""       # the dedicated server's own loopback connection presents this one
 
 func _env(k: String, fallback := "") -> String:
 	var v := OS.get_environment(k)
 	return v if v != "" else fallback
+
+## Token mode (call before start): only `table`'s tokens get in, each once, `slots` players at most,
+## plus the host on `host_tok`. The Discord check is off in this mode.
+func use_tokens(table: Dictionary, slots: int, host_tok: String) -> void:
+	tokens = table
+	max_slots = slots
+	host_token = host_tok
 
 func start(args: PackedStringArray) -> int:
 	var port := int(_env("BOKI_PORT", "7777"))
@@ -42,7 +59,7 @@ func start(args: PackedStringArray) -> int:
 	bot_token = _env("BOKI_DISCORD_BOT_TOKEN")
 	guild_id = _env("BOKI_GUILD_ID")
 	allowed_roles = _env("BOKI_ALLOWED_ROLES").split(",", false)
-	auth_on = bot_token != "" and guild_id != "" and allowed_roles.size() > 0
+	auth_on = bot_token != "" and guild_id != "" and allowed_roles.size() > 0 and tokens.is_empty()
 	peer = ENetMultiplayerPeer.new()
 	var err := peer.create_server(port, max_players, 2)
 	if err != OK:
@@ -69,7 +86,8 @@ func _process(_dt: float) -> void:
 
 # ------------------------------------------------------------------ connections
 func _on_join(id: int) -> void:
-	clients[id] = {"auth": false, "pres": {}, "room": "", "uid": "", "name": "", "t": Time.get_unix_time_from_system()}
+	clients[id] = {"auth": false, "pres": {}, "room": "", "uid": "", "name": "", "slot": -1,
+		"t": Time.get_unix_time_from_system()}
 
 func _on_leave(id: int) -> void:
 	var was_authed: bool = clients.has(id) and clients[id]["auth"]
@@ -77,6 +95,7 @@ func _on_leave(id: int) -> void:
 	if was_authed:
 		print("relay: %d left (%d online)" % [id, _online()])
 		_broadcast_peers()
+		left.emit(id)
 
 func _online() -> int:
 	return clients.values().filter(func(c): return c["auth"]).size()
@@ -85,9 +104,16 @@ func _send(id: int, d: Dictionary, fast := false) -> void:
 	var mode := MultiplayerPeer.TRANSFER_MODE_UNRELIABLE_ORDERED if fast else MultiplayerPeer.TRANSFER_MODE_RELIABLE
 	api.send_bytes(JSON.stringify(d).to_utf8_buffer(), id, mode, CH_FAST if fast else CH_RELIABLE)
 
-func _deny(id: int, why: String) -> void:
+## Refuses a connection. `reason` is the machine-readable code the online screen keys its message
+## on ("version", "bad_token", "full"); the version one also carries the version this server runs.
+func _deny(id: int, why: String, reason := "") -> void:
 	if clients.has(id):
-		_send(id, {"k": "deny", "why": why})
+		var d := {"k": "deny", "why": why}
+		if reason != "":
+			d["reason"] = reason
+		if reason == "version":
+			d["ver"] = need_version
+		_send(id, d)
 		print("relay: denied %d: %s" % [id, why])
 	# give the message a moment to leave before cutting the line
 	get_tree().create_timer(0.5).timeout.connect(func(): if peer: peer.disconnect_peer(id))
@@ -143,24 +169,50 @@ func _broadcast_peers() -> void:
 
 # ------------------------------------------------------------------ login
 func _hello(id: int, d: Dictionary) -> void:
+	var tok := String(d.get("tok", ""))
+	if host_token != "" and tok == host_token:
+		_admit(id, "", "Server", -1)      # this very process, over loopback: no version gate
+		return
 	var ver := String(d.get("ver", ""))
 	if ver != need_version:
-		_deny(id, "Your game is out of date (you have %s, the server needs %s). Open the launcher to update." % [ver, need_version])
+		var why := "Your game is out of date (you have %s, the server needs %s). Update the game." % [ver, need_version]
+		_deny(id, why, "version")
+		return
+	if not tokens.is_empty():
+		_hello_token(id, tok, String(d.get("name", "Hunter")))
 		return
 	if not auth_on:
 		_admit(id, "", String(d.get("name", "Hunter")))
 		return
-	var tok := String(d.get("tok", ""))
 	if tok == "":
 		_deny(id, "Log in with Discord from the launcher to play online.")
 		return
 	_check_discord(id, tok)
 
-func _admit(id: int, uid: String, name: String) -> void:
+## Token mode: the host's own token, or one of the matchmaker's, unused, while a seat is free.
+func _hello_token(id: int, tok: String, hello_name: String) -> void:
+	if not tokens.has(tok) or used_tokens.has(tok):
+		_deny(id, "This match ticket isn't valid any more. Queue again.", "bad_token")
+		return
+	if _players() >= max_slots:
+		_deny(id, "This match is already full. Queue again.", "full")
+		return
+	used_tokens[tok] = id
+	var t: Dictionary = tokens[tok]
+	_admit(id, "", String(t.get("name", hello_name)), int(t.get("slot", _players())))
+
+## Players through the handshake, the host not counted.
+func _players() -> int:
+	return clients.values().filter(func(c): return c["auth"] and int(c["slot"]) >= 0).size()
+
+func _admit(id: int, uid: String, player_name: String, slot := -1) -> void:
 	if not clients.has(id):
 		return
 	var c: Dictionary = clients[id]
-	c["auth"] = true; c["uid"] = uid; c["name"] = name.substr(0, 32)
+	c["auth"] = true
+	c["uid"] = uid
+	c["name"] = player_name.substr(0, 32)
+	c["slot"] = slot
 	# one connection per Discord account: a second login replaces the first
 	if uid != "":
 		for other in clients.keys():
@@ -169,6 +221,7 @@ func _admit(id: int, uid: String, name: String) -> void:
 	_send(id, {"k": "welcome", "me": str(id), "online": _online()})
 	print("relay: %d joined as %s (%d online)" % [id, c["name"], _online()])
 	_broadcast_peers()
+	admitted.emit(id, slot)
 
 func _check_discord(id: int, tok: String) -> void:
 	var me = await _http_json("https://discord.com/api/v10/users/@me", "Bearer " + tok)
