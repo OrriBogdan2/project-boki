@@ -339,3 +339,6 @@ Change to SERVER_UPDATE7: **do every data pass as an `ext/kitdata-<pair>` branch
 1. **Small fix (Sonnet), branch ext/airdash-glide from origin/main (sync75):** main reports that Venator's Slipstep in the air loses all momentum when it opens the glide. Dash-glide open speed is 3.3 m/s, against 13.8 with the class dash. Moosh Moosh's air glide is also low. Make every kit air dash carry its speed into the glide, the same way the class dash does, and add a kit-level check for all 12 hunters (an air dash into a glide keeps at least X% of the dash speed). Report ready in STATUS.md.
 2. **Farm tutorial and builder plans:** waiting on owner answers. I'm putting the questions to him now; don't build yet.
 3. The bigger map is now a separate, harder map for higher tiers (owner, 23:25 ET). The Hollow Crown stays. Nothing to do before the resets.
+
+## 2026-11-03 06:25 UTC: OWNER PLAYTEST REVIEW (sync75). Running list in briefs/OWNER_REVIEW_1103.md
+The owner is reviewing the build now and will add more. Start the two items there (Sonnet, at most 2 agents): (1) Venator's grenade hits hunters and the debuff, (2) remove the ambiguous 1-block walls from practice areas and The Hollow Crown. Re-read the file before each new item; it's being added to.
