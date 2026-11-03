@@ -2860,7 +2860,13 @@ func _boss_check() -> void:
 		var outL := Vector3(L["out"].x, 0, L["out"].y)
 		var vic: bool = L.get("victory", false)
 		if L == F:
-			# the lever: a press away from it does nothing; at it, the gate opens
+			# the lever: a press away from it does nothing; at it, the gate opens (pressed well clear of the loot
+			# and the egg: beside them it would pick them up, and where they land follows the fight)
+			var clear := func(q: Vector3) -> float:
+				return m.wpicks.reduce(func(d, wp): return minf(d, q.distance_to(wp["pos"])), 99.0)
+			var spots: Array = [-3.0, 0.0, 3.0].map(func(d): return L["c"] + outL * d)
+			spots.sort_custom(func(a, c): return clear.call(a) > clear.call(c))
+			spot.call(P, spots[0])
 			P.inp["interact"] = true; run.call(Match.DT); P.inp["interact"] = false; run.call(Match.DT)
 			var held: bool = L.get("locked", false)
 			spot.call(P, L["lever"] - outL * 0.8)
