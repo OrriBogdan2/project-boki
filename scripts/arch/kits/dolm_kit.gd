@@ -583,6 +583,8 @@ func _tick_leap(dt: float) -> void:
 	var ur := clampf((flown - lag) / flight, 0.0, 1.0)
 	var rock_at := from.lerp(to, ur) + Vector3(0, 0.5 + sin(ur * PI) * LEAP_ROCK_UP, 0)
 	var land_at := float(leap["land_at"])
+	if land_at < 0.0 and not h.grounded and h.pad.is_empty():
+		h.vel.y -= _leap_pull() * dt
 	if land_at < 0.0 and flown > 0.08 and (h.grounded or flown > flight + 0.5):
 		_leap_land()
 		land_at = flown
@@ -605,6 +607,8 @@ func _rock_down() -> void:
 func _leap_off() -> void:
 	var dd := dash_def()
 	h.launch_to(leap["to"], float(leap["T"]))
+	if h.pad.is_empty():
+		h.vel.y += 0.5 * _leap_pull() * float(leap["T"])     # a heavy rock leap: a higher arc, same landing time
 	h.inv_t = maxf(h.inv_t, float(dd["invuln"]))
 	h.dash_at = m.time
 	m.fx.dust(h.pos, 6)
@@ -612,6 +616,10 @@ func _leap_off() -> void:
 	Feel.dash_sound(m, id, h.pos, h)
 	Feel.shake(m, "dash", h, h.pos)
 	if h.is_local() and m.cam: m.cam.punch(0.03)
+
+## Rubble Leap falls at its own leap_grav (a heavy arc that still lands on time): the pull on top of gravity.
+func _leap_pull() -> float:
+	return maxf(0.0, float(dash_def().get("leap_grav", Hunter.H_GRAV)) - Hunter.H_GRAV)
 
 ## The landing: a crash that shoves everyone beside her (the first of the leap's two hits).
 func _leap_land() -> void:
