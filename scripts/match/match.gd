@@ -2829,7 +2829,7 @@ func on_merge(h: Hunter, k: Kin, u: MergeSpec) -> void:
 	if h == player:
 		player.add_stat("ults")
 		if hud:
-			hud.toast_small("%s  ·  R again for %s" % [String(form["name"]).to_upper(), String(MergeKit.of(h).ult_def()["name"]) if MergeKit.of(h) else "the burst"], form["glow"])
+			hud.toast_small("%s  ·  %s again for %s" % [String(form["name"]).to_upper(), Settings.key_cap("ultimate"), String(MergeKit.of(h).ult_def()["name"]) if MergeKit.of(h) else "the burst"], form["glow"])
 
 func on_merge_end(h: Hunter, why: String) -> void:
 	if h == player and hud and why in ["time", "throw"]:
@@ -3923,6 +3923,8 @@ func _gather_input() -> void:
 			continue
 		if Input.is_action_just_pressed(a[0]):
 			pending_input[a[1]] = true
+	if Input.is_action_just_pressed("hunter_ult") and player and not paused:
+		HunterKeys.ult_pressed(player)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if hud and hud.map_open() and (event.is_action_pressed("menu") or event.is_action_pressed("map")):
@@ -5022,7 +5024,7 @@ var tut_used0 := {}
 # ---- training area
 ## [id, what to do, the action whose key it uses ("" for none)]
 const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then hold Mouse 5 or Space in the air to glide", "jump"],
-	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Use your ultimate (R: open from the start here)", "ultimate"],
+	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Merge with your Boki (%s: open from the start here)", "ultimate"],
 	["secondary", "Use your right click (tap it, then hold it)", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
 	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
 	["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal (tonic, or armor kit when health is full)", "tonic"],
@@ -5123,11 +5125,15 @@ func _update_training(dt: float) -> void:
 
 ## The checklist for this hero: the secondary step only shows for heroes that have one.
 func train_rows() -> Array:
-	return TRAIN.filter(func(t): return t[0] != "secondary" or (player != null and (player.ak != null or (player.runner != null and player.runner.has_slot("utility")))))
+	var rows := TRAIN.filter(func(t): return t[0] != "secondary" or (player != null and (player.ak != null or (player.runner != null and player.runner.has_slot("utility")))))
+	return rows.map(func(t): return [t[0], _train_text(t), t[2]])
+
+func _train_text(t: Array) -> String:
+	return String(t[1]) % Settings.key_cap(String(t[2])) if String(t[1]).contains("%s") else String(t[1])
 
 func _train_label(k: String) -> String:
 	for t in TRAIN:
-		if t[0] == k: return t[1]
+		if t[0] == k: return _train_text(t)
 	return k
 
 func tut_id() -> String:

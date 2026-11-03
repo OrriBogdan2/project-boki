@@ -30,7 +30,7 @@ var chase_stall := 0.0          # seconds spent chasing a target without getting
 var hold_at := Vector3.INF
 var cmd := "follow"               # its standing order (KinFollow): follow | guard | chase | return. State "shoulder" is "return" or a short traversal carry
 var chase_target: Ent = null      # chase: what it sticks to
-var rest_t := 0.0                 # seconds left drained on you after the owner's merge ultimate (drain): no C, no orders, no Sic
+var rest_t := 0.0                 # s left resting after the owner's merge release (land_pumped): no C, orders, Sic
 var disengaged := false           # an explicit Follow / Call back in a fight: it stays at your side until you attack, it or you are hit up close, or you Sic/Chase (KinFollow.disengage)
 var path: Array = []              # its A* path (KinPath), recomputed on path_t
 var path_goal := Vector2i.ZERO
@@ -209,7 +209,7 @@ func slot_open(_slot: String) -> bool:
 func ready_to_fight() -> bool:
 	return not dead and rest_t <= 0.0 and state not in ["downed", "reviving", "bench", "wild", "dazed", "away"]
 
-## Drained after the merge ultimate (docs/decisions/0004)?
+## Resting after the merge ultimate (docs/decisions/0004)?
 func resting() -> bool:
 	return rest_t > 0.0 and not dead
 
@@ -517,19 +517,22 @@ func merge_out() -> void:
 		settle = 1.0
 		m.fx.burst(pos, sp["color"], 16, 3.0)
 
-## The merge ended with its ultimate: the Boki is drained. It rests on you, carried and safe (Return), for `secs`.
-## No C, no Sic, no orders until it is over; its carried bonuses still apply.
-func drain(secs: float) -> void:
+## The merge ended with its ultimate: the Boki lands beside you pumped, following, and rests for `secs`
+## (no C, no Sic, no orders until it is over; its carried bonuses still apply).
+func land_pumped(secs: float) -> void:
 	if dead or owner_h == null:
 		return
 	giant = {}
 	disengaged = false
-	stow()
+	if state == "fused":
+		merge_pop()
 	rest_t = secs
-	m.fx.burst(owner_h.pos + Vector3(0, 1.2, 0), sp["color"], 14, 3.0)
+	m.fx.burst(pos + Vector3(0, 1.0, 0), sp["color"], 22, 4.0)
+	m.fx.ring(pos, 1.6, Color(sp["color"], 0.9), 0.35)
+	m.sfx("kin_happy", pos, -4.0, Unique.voice(rec))
 	KinNet.event(m, "rest", self, owner_h.pos, "%.1f" % secs)
 	if owner_h.is_local():
-		KinCommand.say(owner_h, "%s is drained: resting on you" % rec.get("name", "Your Boki"), Color("a2a8bb"))
+		KinCommand.say(owner_h, "%s is pumped: back in %ds" % [rec.get("name", "Your Boki"), int(ceil(secs))], sp["color"])
 
 ## A merge with a form ended: the Boki springs out beside you, following (not downed, never a shoulder hop).
 func merge_pop() -> void:

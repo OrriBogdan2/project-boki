@@ -2,8 +2,8 @@
 
 Every key can be rebound in **Settings > Controls**. Some keys mean different things at home and in a
 match: **B** is build mode at home and "base to a teammate" in a squad; **T** talks to a Boki at home
-and holds the emote wheel in a match; **C** opens a Boki's details at home and casts your Boki's
-ability in a match; **R** turns a piece in build mode and is your ultimate in a match.
+is Merge in a match (the emote wheel is **Y**); **C** opens a Boki's details at home and casts your Boki's
+ability in a match; **R** turns a piece in build mode and reloads in a match.
 
 ## In a match
 
@@ -18,7 +18,9 @@ ability in a match; **R** turns a piece in build mode and is your ultimate in a 
 | Mouse 5 | Glide at once, without jumping (Mouse 4 works too) |
 | Q | Your active glove |
 | E | Your class's utility |
-| R | Your class's ultimate (from level 6). With a full bond meter it's a **bonded** ultimate: your Boki merges with you as it fires |
+| R | Reload (it also reloads on its own after a short idle) |
+| X | Your hunter's own ultimate (from level 6; no hero has one yet) |
+| T | Merge with your Boki (level 6, full bond meter). Press T again to fire the form's ultimate and release: a 3s afterglow (faster, with a small shield) and your Boki rests 6s beside you |
 | C | Your Boki's own ability: it hops off, casts and hops back |
 | G or middle mouse | Tap: Sic your Boki at the cursor, or Call it back if it is away. Hold: the order wheel (Chase, Guard, Return, Follow) |
 | F | Use: open, pick up, scan a knocked-out wild Boki (hold), revive a teammate, loot a deathbox, finish a downed rival |
@@ -26,9 +28,9 @@ ability in a match; **R** turns a piece in build mode and is your ultimate in a 
 | Alt + an ability key | Put a skill point into that ability (pressing a locked ability unlocks it) |
 | Ctrl | Sneak: slower and quieter, steadier aim, harder to spot |
 | B | Base to a teammate (squads): a 3s channel; moving, attacking or any hit breaks it; you arrive weakened for 3s; 40s cooldown |
-| T (hold) | Emote wheel, including the truce offer |
+| Y (hold) | Emote wheel, including the truce offer |
 | M | Full map; click to ping |
-| P / X | During the drop: pass the drop lead / separate from your squad |
+| P / Z | During the drop: pass the drop lead / separate from your squad |
 | Tab | Scoreboard |
 | I | Inventory and backpack |
 | Esc | Menu: settings, controls, save files |
@@ -74,7 +76,9 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Shift | Archetype dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |
 | Mouse 5 / Mouse 4 | Glide (hold in the air) | `glide` | yes |
-| R / X | Merge with your Boki (needs a full bond meter) | `ultimate` | yes |
+| R | Reload | `reload` | yes |
+| X | Hunter ultimate | `hunter_ult` | yes |
+| T | Merge with your Boki (needs a full bond meter) | `ultimate` | yes |
 | 1 | Heal (tonic, or armor kit when health is full) | `tonic` | yes |
 | Tab | Scoreboard | `scores` | yes |
 | Esc | Menu | `menu` | no |
@@ -86,7 +90,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | I | Inventory | `inventory` | yes |
 | B | Build mode at home / decorate indoors | `build` | yes |
 | R | Turn a piece (build mode) | `rotate` | yes |
-| T | Emote wheel (hold, in a match) | `emote` | yes |
+| Y | Emote wheel (hold, in a match) | `emote` | yes |
 | M | Full map (click to ping) | `map` | yes |
 | P | Pass the drop lead | `pass_lead` | yes |
 | F10 | Recording mode (again: hide the HUD) | `record` | yes |

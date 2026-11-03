@@ -36,12 +36,15 @@ static func hp_pct(lvl: int) -> float:
 static func ap_pct(lvl: int) -> float:
 	return _total("ap", lvl)
 
+## Ability power from the levels a hunter has actually gained (apply() records them): a level set
+## straight on the hunter (practice, tests) grows nothing, the same as its health.
 static func ap(h) -> float:
-	return 1.0 + ap_pct(int(h.lvl)) if h is Hunter else 1.0
+	return 1.0 + ap_pct(int(h.get_meta("growth_lvl", 1))) if h is Hunter else 1.0
 
 ## Max health from levels, kept on the hunter as "growth_hp" so it never stacks; the new health is
 ## added to the bar too (levelling up never costs you health).
 static func apply(h) -> void:
+	h.set_meta("growth_lvl", int(h.lvl))
 	var want := float(h.cdat.get("hp", 0.0)) * hp_pct(int(h.lvl))
 	var had := float(h.get_meta("growth_hp", 0.0))
 	if absf(want - had) < 0.01:
@@ -52,12 +55,20 @@ static func apply(h) -> void:
 
 ## A class change resets max health: forget the growth so apply() adds it again.
 static func reset(h) -> void:
+	if not h.has_meta("growth_lvl"):
+		return
 	h.set_meta("growth_hp", 0.0)
-	apply(h)
+	var want := float(h.cdat.get("hp", 0.0)) * hp_pct(int(h.get_meta("growth_lvl")))
+	h.max_hp += want
+	h.hp += want
+	h.set_meta("growth_hp", want)
 
 ## The level badge tooltip line: what your levels have added so far.
 static func tip(h) -> String:
-	var l := int(h.lvl)
+	var l := int(h.get_meta("growth_lvl", 1))
 	if l < 2:
-		return "Each level: +%d%% max health, +%d%% ability power (half from level %d)" % [roundi(step("hp", 2) * 100.0), roundi(step("ap", 2) * 100.0), int(rules().get("half_from", 7))]
+		var hp_gain := roundi(step("hp", 2) * 100.0)
+		var ap_pct := roundi(step("ap", 2) * 100.0)
+		var half_from := int(rules().get("half_from", 7))
+		return "Each level: +%d%% max health, +%d%% ability power (half from level %d)" % [hp_gain, ap_pct, half_from]
 	return "From levels: +%d%% max health, +%d%% ability power" % [roundi(hp_pct(l) * 100.0), roundi(ap_pct(l) * 100.0)]

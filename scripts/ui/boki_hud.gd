@@ -33,6 +33,7 @@ static func squad_downed(m) -> Array:
 ##   under the square    the key cap (shared slot art)
 ##   above the square    one chip: the bond %, "MERGE" when ready, then while merged the ultimate's unlock seconds / its name / the form
 ## The slot is always the Merge. A Boki that is out leaps back first; that is in the tooltip, not on the slot.
+const BOND_FLASH_S := 0.8    # s: how long the slot glows after the bond meter gains from an ultimate
 const RING_GROW := 4.0       # px: the ring sits this far outside the slot's edge
 const CHIP_LIFT := 22.0      # px: the chip's top edge above the slot (clear of the rank pips at 7px and the "UNLOCK" tag)
 
@@ -85,6 +86,10 @@ static func r_slot(H, p: Hunter, ur: Rect2, us: float) -> void:
 	if fh2 > 0.0:
 		H._rounded(Rect2(Vector2(ur.position.x + 3, ur.end.y - 3 - fh2), Vector2(ur.size.x - 6, fh2)), Color(col, 0.30 if bond < 1.0 else 0.45), 9)
 	var plan := String(ri.get("plan", ""))
+	var flash_age: float = H.m.time - float(p.get_meta("bond_flash_at", -9.0))
+	var gl := 1.0 - flash_age / BOND_FLASH_S
+	if gl > 0.0:
+		H._rounded(ur.grow(RING_GROW + 3.0), Color(1.0, 0.85, 0.3, 0.25 * gl), 14, Color(1.0, 0.85, 0.3, 0.9 * gl), 3)
 	if bond < 1.0:
 		_ring(H, ur.grow(RING_GROW), bond, col, 3.0)
 		if cd_left <= 0.0:
