@@ -877,3 +877,9 @@ The owner says there are too many chests scattered at random since the key chang
 - **Readability:** each group is visible from a distance (a landmark or glint), so it reads as a place worth going to.
 - **Author it in the map generator** (tools/make_hollowcrown.py), not by editing the JSON by hand. Then check keys-check, cover, drop, extract and bot-sanity. Bots should still path to the groups.
 - Small change; fine during the landing freeze.
+
+## 2026-11-03 09:00 ET: SYNC77 SHIPPED (4d39c623): physics pass
+- **Physics pass on main** (content/rules/hunter_move.json "physics", from the game data): air control, fall caps, abyss slow, glide height and swoop, mantle launch. Walking off ledges stays allowed.
+- **Check updates:** Dancer's cartwheel landing wait is now 2.0 s (jumps hang longer). Dredge's abyss reel gap is now 5 tiles (lower gravity). kin-regen moves the owner 15 m away.
+- **Bug fix:** a bot looped in the air at prop-raised ledges. `_ledge_rise` now uses the higher ground.
+- **For your kit checks:** any that pin jump or fall timing may need the same retune.
