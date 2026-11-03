@@ -46,7 +46,7 @@ Where the footage and the wiki are silent, this is the most likely behaviour, an
 - Kindle: 5 stacks, 4s, refreshed per hit, no per-stack decay (the wiki says up to 5).
 - The Empowered pause is 1s.
 - **Hearth Call:** it can't be ended early (no recast in the source); X again is ignored. Damage on her does not break it (the wiki lists only knocked, stunned and range). The break range is the same 12.6m as the cast range. A downed teammate in our game is the source's wisp. Its healing does not scale with ranks (no X ranks); it grows with level (LevelGrowth). The cooldown starts on the cast. With no teammate in the match at all it lights on her (healing at a third) so the key is never dead in solo play.
-- **Hearth Call and the bond:** a completed tether counts as a "hit" for `HeroUlt.from_ult` (`KinBond.from_ult` once ultbond lands), a rescue (a downed teammate stood up) as its top event ("kill"); a broken one pays nothing. The sheet's +0.2 on the teammate's own meter is not built (the amounts are the main session's, in boki_system.json).
+- **Hearth Call and the bond:** a completed tether counts as a "hit" for `KinBond.from_ult` (with the cast's `HeroUlt.cast_id`), a rescue (a downed teammate stood up) as its top event ("kill"); a broken one pays nothing. The sheet's +0.2 on the teammate's own meter is not built (the amounts are the main session's, in boki_system.json).
 - **Body and movement** (owner study, 23:00): the scale, hitbox, cadence and the glide are from the study. Her ground dash keeps 4.2 m in 0.16 s with a small hop. The air glide starts at 8.5 m over 0.8 s (the source measures 11-15 m); `dash.air.dist` is the one number to raise.
 - Starts and stops use the shared acceleration (no per-hero change).
 - Kindle readability is a foot glow that warms from violet to ember per stack. Tinting damage numbers by stack (sheet gap 9, optional) is not done: the numbers come from the shared damage path.
@@ -65,7 +65,7 @@ Where the footage and the wiki are silent, this is the most likely behaviour, an
 | A merge start ends the Burrseed aim with no throw (`seed_aim`, `rmb_down`) | `_drop_holds` | "drop_holds ends the Burrseed aim" |
 | Hearth Call: the aim telegraph (ring, line) on a teammate under the cursor, X to tether; heals while she walks; pulls a downed teammate home and stands them up | `_call_preview`, `cast_ult`, `_tick_call`, `_call_home` | the "mm X" rows |
 | Hearth Call + Hearthlight thrown on the arrival spot (the sheet's pairing) | both run at once | "mm X: other abilities still cast during the channel" |
-| Hearth Call pays the bond only on a completed tether or a rescue | `_call_end` -> `HeroUlt.from_ult` | "mm X: no bond is paid for the cast alone", "... pays the bond as a hit", "a rescue pays ... (kill)", "it breaks ... and pays nothing" |
+| Hearth Call pays the bond only on a completed tether or a rescue | `_call_end` -> `KinBond.from_ult` | "mm X: no bond is paid for the cast alone", "... pays the bond as a hit", "a rescue pays ... (kill)", "it breaks ... and pays nothing" |
 | A merge start ends Hearth Call (no pull, no bond; `hearth_call`) | `_drop_holds`, `ArchKit.drop_holds` | "mm merge: drop_holds ends Hearth Call" |
 
 ## Animation moves
@@ -101,6 +101,6 @@ Strips: `--arena=thief --arena-demo=care_tender_<lmb|emp|rmb|e|dash|air|carry|pa
 ## Engine notes
 - Kit: `scripts/arch/kits/tender_kit.gd`, with helpers in `care_util.gd`. Data: `content/archetypes/tender.json`, `content/weapons/lantern_crook.json`.
 - Merge-start hold fields: `seed_aim` and `rmb_down` (the Burrseed aim), the carry (set down, unbroken), and `hearth_call` (the X channel).
-- X: the shared ult base `HeroUlt` (`scripts/arch/hero_ult.gd`, byte-identical across the six ult branches) routes the `hunter_ult` key (the level gate, the cooldown in `cd["x"]`, the bond stub); the kit overrides `cast_ult`, `ult_running`, `ult_recast`. Numbers are under `"x"` in `content/archetypes/tender.json`. A downed online teammate rides home on the existing "carry" event and stands up through "rev".
+- X: the shared ult base `HeroUlt` (`scripts/arch/hero_ult.gd`, byte-identical across the six ult branches) plugs into main's X path: `HunterKeys.ult_pressed` (the `hunter_ult` key, the level gate) calls the kit's `cast_ult`, which returns `HeroUlt.press(self, _start_call)` (the cooldown in `cd["x"]`, the recast, a cast id); the kit also overrides `has_ult`, `ult_running`, `ult_recast`. Numbers are under `"x"` in `content/archetypes/tender.json`. A downed online teammate rides home on the existing "carry" event and stands up through "rev".
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. The carry uses the existing "carry" event; heals and revives reuse "heal" and "rev". The Burrseed area and the thrown disc are local looks; remote players see the existing Net rings.
 - Checks: `--support-check` (all), `--tender-combo-check` (support + combos, `tools/care_combo_check.gd`).

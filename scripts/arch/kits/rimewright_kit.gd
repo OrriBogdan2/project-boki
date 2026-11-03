@@ -657,8 +657,12 @@ func ult_running() -> bool:
 	return not rime.is_empty()
 
 
+func cast_ult() -> bool: return HeroUlt.press(self, _start_rime)
+func has_ult() -> bool: return true
+
+
 ## Sealed in: invulnerable and rooted, and the rink snaps out round her. Nothing else fires inside.
-func cast_ult() -> bool:
+func _start_rime() -> bool:
 	if not rinkrun.is_empty():
 		_rinkrun_end()
 	if spear_aim or rmb_down:
@@ -806,9 +810,9 @@ func _rime_clear() -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	var x_ready := HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0
+	var x_ready := HeroUlt.ready(self)
 	if rime.is_empty() and x_ready and los and dist < float(x_def()["radius"]) * 0.6 and tgt is Hunter:
-		use_x()          # sealed in with a rival close: it cracks open on them
+		HunterKeys.ult_pressed(h)          # sealed in with a rival close: it cracks open on them
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 12.0 and dist > 3.0 and tgt is Hunter:
 		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * 0.6 + Vector3(0, 0.9, 0)

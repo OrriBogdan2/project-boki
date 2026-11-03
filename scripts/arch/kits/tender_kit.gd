@@ -654,7 +654,7 @@ func _call_preview() -> void:
 
 ## X is open (level) and off cooldown, and she is free to cast.
 func _x_ready() -> bool:
-	return HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and not busy()
+	return HeroUlt.ready(self) and not busy()
 
 
 ## The teammate under the cursor within reach (standing or downed); with no teammate in the match at
@@ -678,7 +678,11 @@ func call_target() -> Hunter:
 	return best
 
 
-func cast_ult() -> bool:
+func cast_ult() -> bool: return HeroUlt.press(self, _start_call)
+func has_ult() -> bool: return true
+
+
+func _start_call() -> bool:
 	AimKit.hide(h, "x_line")
 	AimKit.hide(h, "x_pick")
 	if ult_look != null:
@@ -773,7 +777,7 @@ func _call_end(done: bool) -> void:
 	if rescue:
 		_call_home(who)
 	# a support ult lands on a teammate: a completed tether counts as a hit, a rescue as the top event
-	HeroUlt.from_ult(self, "kill" if rescue else "hit")
+	KinBond.from_ult(h, "kill" if rescue else "hit", HeroUlt.cast_id(self))
 	var at := who.pos if not rescue else h.pos
 	# a rescue has its own revive banner, and the bond word lands on her now: no third word there
 	CareUtil.payoff(m, h, at, "" if rescue else "MENDED", Color("9cf07a"), "tend_arrive")
@@ -862,5 +866,5 @@ func _bot_call() -> void:
 	for o in CareUtil.mates(m, h, h.pos, float(x_def()["range"]) - 1.0):
 		if o.downed or o.hp < o.max_hp * 0.35:
 			h.inp["aim"] = o.pos + Vector3(0, 0.9, 0)
-			use_x()
+			HunterKeys.ult_pressed(h)
 			return

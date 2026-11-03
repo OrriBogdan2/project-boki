@@ -232,7 +232,7 @@ static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, d
 	if arch == "tender":
 		P.inp["aim"] = ally.pos + Vector3(0, 0.9, 0)
 		if what != "ultaim" and _at(t, dt, 0.5):
-			P.inp["xult"] = true      # the aim shot keeps the cursor on the teammate: the preview telegraph
+			HunterKeys.ult_pressed(P)      # the aim shot keeps the cursor on the teammate: the preview telegraph
 		var walking := what != "ultaim" and t > 0.8 and t < 2.3
 		var away: Vector2 = -(A.get_meta("care_right", Vector2(1, 0)) as Vector2)
 		P.inp["move"] = away if walking else Vector2.ZERO
@@ -241,7 +241,7 @@ static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, d
 	if t < 0.3:
 		P.teleport(D.pos + Vector3(-1.0, 0, 3.5))
 	if _at(t, dt, 0.3):
-		P.inp["xult"] = true
+		HunterKeys.ult_pressed(P)
 
 ## Grabs the strip frames and the key frames at their moments; quits after the last one.
 static func _capture(A: Arena, spec: Dictionary, arch: String, what: String, t: float, dt: float) -> void:

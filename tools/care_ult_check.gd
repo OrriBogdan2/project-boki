@@ -20,17 +20,24 @@ func _free(m: Match) -> void:
 	await sc.main.get_tree().process_frame
 
 
-## Presses X (the match's "hunter_ult" press).
+## Presses X the way the match does (main's HunterKeys.ult_pressed: the level gate, then the kit's cast_ult).
 func _press(P: Hunter, m: Match) -> void:
-	P.inp["xult"] = true
+	HunterKeys.ult_pressed(P)
 	step(m, 1.0 / 60.0)
 
 
-## The bond event the kit's last X cast paid for (HeroUlt's stub: hit 0.6, knock 0.7, kill 0.8), "" for none.
+## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
+func _owed(K: ArchKit) -> float:
+	var c: Dictionary = K.h.get_meta("bond_cast", {})
+	return float(c.get("got", 0.0)) if String(c.get("id", "")) == HeroUlt.cast_id(K) else 0.0
+
+
+## The bond event the kit's current X cast paid for (boki_system.json bond_from_ult: hit, knock, kill), "" for none.
 func _bond_kind(K: ArchKit) -> String:
-	var best := float(K.st.get("ult_bond_best", 0.0))
-	for kind in HeroUlt.STUB_FROM_ULT:
-		if absf(float(HeroUlt.STUB_FROM_ULT[kind]) - best) < 0.001:
+	var got := _owed(K)
+	var rules := KinBond.rules()
+	for kind in KinBond.KINDS:
+		if got > 0.0 and absf(float(rules.get(kind, -1.0)) - got) < 0.001:
 			return kind
 	return ""
 
@@ -60,7 +67,10 @@ func tender() -> void:
 	ok("mm X: with the cursor on a teammate, the 7 bh reach ring and a line onto them", aiming
 		and absf(float(ring.get("r", 0.0)) - 12.6) < 0.05)
 	# --- X: the tether starts, cooldown runs, the cast move; no bond for the cast alone
+	var calls0 := int(K.stats["calls"])
 	_press(P, m)
+	ok("mm X: one X press is one cast (main's X path only)", int(K.stats["calls"]) == calls0 + 1,
+		"calls +%d" % (int(K.stats["calls"]) - calls0))
 	ok("mm X: X starts the tether on that teammate with the cast move", not K.hearth_call.is_empty()
 		and K.hearth_call["who"] == A and K.anim_id == "mm_call", K.anim_id)
 	ok("mm X: its own cooldown (46 s) starts on the cast", absf(float(K.cd["x"]) - HeroUlt.cooldown(K)) < 0.2
@@ -177,7 +187,10 @@ func rimewright() -> void:
 	P.lvl = 6
 	var meter0 := P.ult
 	var h0 := T.hp
+	var rimes0 := int(K.stats["rimes"])
 	_press(P, m)
+	ok("tm X: one X press is one cast (main's X path only)", int(K.stats["rimes"]) == rimes0 + 1,
+		"rimes +%d" % (int(K.stats["rimes"]) - rimes0))
 	step(m, 0.25)
 	var ring: Dictionary = AimKit.entry(P, "x")
 	ok("tm X: sealed in, the 4 bh rink shown to everyone, the cast move", not K.rime.is_empty()
@@ -274,13 +287,12 @@ func _rime_sight_and_cap() -> void:
 	var others: Array = [
 			_dummy(m, T.team, P.pos + Vector3(-3.0, 0, 0), "B"), _dummy(m, T.team, P.pos + Vector3(0, 0, -3.0), "C")]
 	step(m, 0.05)
-	var paid0 := HeroUlt.paid_total
 	_press(P, m)
 	step(m, 3.7)
 	ok("tm X: a foe behind a rock is not hit (line of sight)",
 		hidden.hp >= hidden.max_hp - 0.01 and hidden.stun_t <= 0.0
 		and K.last_stunned == 3, "stunned %d" % K.last_stunned)
-	var paid := HeroUlt.paid_total - paid0
+	var paid := _owed(K)
 	ok("tm X: three hunters stunned pay one event for the cast (the best one)", _bond_kind(K) == "hit"
 		and absf(paid - 0.6) < 0.001 and others.size() == 2, "%s %.2f" % [_bond_kind(K), paid])
 	await _free(m)
