@@ -7,6 +7,15 @@
 - Owner notes on the proposals: Dredge must look noticeably broken and oozing (torn plates, black ooze dripping, red rot-light). Vireo: whichever twist is cooler; IMG pick: her storm tattoo sleeve becomes glowing branching lightning scars (one read, not two). Venator: religious in behaviour and going insane, a battle between conservative morals and slipping sanity (prayer beads, scripture strips, a devout soldier's bearing with a cracked, too-wide stare). Gender to confirm: the item 39 table has Venator as F, the owner wrote "him". Rest of the proposals approved as written (Sable as the thief who reached the Wyrmheart, Pin's legs fading to smoke below the knee, Zedran's horns on his head).
 - Generation switches to the owner's Chrome (Claude in Chrome). Owner asked to talk through each Warden's look and lore before generating; per-Warden proposals are with the owner now.
 
+## 2026-11-03 19:05 UTC: deliverable 2 at 11 of 12 Wardens
+- Done (2K originals in `docs/art/gen/wardens/<name>_{splash,portrait,turnaround}.png`, prompts in index.md): Bjorn, Zedran, Dredge, Ostra, Pin, Sable, Tarek, Claire (was Tamsin), Vireo, Cinder, Moosh Moosh.
+- Waiting: **Venator**. The item 39 table has her as F, the owner wrote "him". Owner's direction for the look: devout, religious and going insane, a fight between conservative morals and slipping sanity; part-machine marine (mechanical arm and eye).
+- Open owner picks: Sable's moth wings as real wings (splash) or wing-scale coat-tails (turnaround); whether Cinder should go sleeker and more dangerous.
+- Known turnaround nits for S2 (noted per Warden in index.md): Zedran's back view drops the cleaver, Cinder's lance has a forked tip, Moosh Moosh's back-view tail is small.
+- Credits: the studio balance went from 1,228 to 1,122 this session (about 106; 2 per 2K image).
+- Then deliverable 3 (texture references).
+- **Push still blocked**: the repo isn't attached to this session's sources; all commits are local on `ext/imagegen`.
+
 ## 2026-11-03 18:45 UTC: progress; Tamsin renamed Claire
 - Done (2K, committed): Zedran, Dredge, Ostra, Pin, Tarek, Tamsin/Claire (take 1), Vireo. Generating: Cinder, Moosh Moosh, Sable splash retry, Claire face rework, Vireo turnaround retry. Then Bjorn's set; Venator waits on the owner (gender).
 - **Owner: Tamsin is renamed Claire** (base name for the rimewright / Icy Dancer class; other agents to be told by the owner). Files renamed to `wardens/claire_*`.
