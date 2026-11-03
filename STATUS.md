@@ -1,5 +1,5 @@
 # S2 status (second server session)
-Updated: 2026-11-03 08:03 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
+Updated: 2026-11-03 08:13 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
 
 ## Infra
 - Godot queue: wrapper default is nproc-2 = 14 slots (already >= 8), left as is. S1: no change needed.
@@ -16,9 +16,11 @@ Updated: 2026-11-03 08:03 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (
 
 ## Pair 1: Breah + Ostra
 - Branch `ext/review-breah-ostra` = origin/main 801bfbf + ext/kitdata-breah-ostra d0d045e (merged first, since item 14 asks to build on it; style baseline + wiki from main, regenerated). Ostra work on a local sub-branch, merged back before push.
-- Ostra: DONE 42, 17, 16, 40, 18 (concept note), 35 (local sub-branch ext/review-breah-ostra-o; ostra combo 126/0, archetype 251/0, dash-dir OK, health OK). Item 32 rows in progress (dash-flow-base merged in). Shared-code notes: CastHold (scripts, new helper; also used by Dredge 31) holds only vel.y so knocks land; hunter.gd 2 existing lines now ask ak.cast_locked() (no growth); arena_demo.gd --strip-w and 1280 px cap.
-  Owner Qs (Ostra): Nightwell locks her the full 4.5 s as asked, but footage shows Void free during the pull (f50): keep the lock? Item 39 lists the Void Jester as male, repo uses "she": which? Trade arrival still sends net_ring to remote players (their only arrival cue): keep? Trade end ring/sigil kept as gameplay markers (from footage).
-- Breah: in progress (26 first, 14, 15, 25, 35).
+- Ostra: DONE 42, 17, 16, 40, 18 (concept note), 35, 32 rows (5ec678d; Trade now visible to DashFlow, X->Shift held in the lock's last 0.15 s); shared dash_left() hook for the dash-flow check being added (local sub-branch ext/review-breah-ostra-o; ostra combo 126/0, archetype 251/0, dash-dir OK, health OK). Item 32 rows in progress (dash-flow-base merged in). Shared-code notes: CastHold (scripts, new helper; also used by Dredge 31) holds only vel.y so knocks land; hunter.gd 2 existing lines now ask ak.cast_locked() (no growth); arena_demo.gd --strip-w and 1280 px cap.
+  Owner Qs (Ostra): E and X can't be cast in the air (placed by a ground walk from her feet; data/footage silent): land at the cursor's ground from any height? Nightwell locks her the full 4.5 s as asked, but footage shows Void free during the pull (f50): keep the lock? Item 39 lists the Void Jester as male, repo uses "she": which? Trade arrival still sends net_ring to remote players (their only arrival cue): keep? Trade end ring/sigil kept as gameplay markers (from footage).
+- Breah: DONE 26 (cause in her kit: hop/leap rode the height-holding shared air-dash motion + a forced -26 m/s plunge overrode the glider; now real jump arcs, glider wins), 14 (verdict in docs/heroes/dolm.md "Quakefall review": RMB never spawned a rock; it was a flat dash-like lunge + flying chips; now a 2 m real hop, smash on landing), 15 (Spine raises only real Stone Row rocks on solid ground, clipped at edges, refused with "No ground for the ridge"; walkway over abyss removed), 25 (only the caster climbs, ~0.53 s, everyone else blocked; StoneStand.top_for + 2 lines in hunter.gd), 35 (breah_dash/breah_exdash, no shared roll, leap rings/starburst removed). dolm combo 118/0, zone 22/0, ostra combo 101/0, dash-dir OK, health OK. Item 32 rows in progress; shared HeroZones.bridge being restored (Tamsin's kit calls it on ext/review-tamsin-dredge).
+  Item 26 cross-hero: Zedran Meteor Drop/Rampage, Linwick Soot Ram, Moosh Moosh Relay Step, Breah Rubble Leap: no drop. **Dredge Anchor Drop: drops** (same pattern in dredge_kit) -> being fixed on ext/review-tamsin-dredge.
+  Owner Qs (Breah): RMB while already gliding is refused (glider wins): or should an air slam fold the glider? Item 14 verdict is in docs/heroes/dolm.md (not edited into OWNER_REVIEW, that file is ext's).
 - Screenshots: /home/boki/shots-s2/{breah,ostra}/review/ (to be pushed to ext/hero-shots-s2).
 
 ## Pair 2: Zedran + Bjorn
@@ -39,7 +41,8 @@ Updated: 2026-11-03 08:03 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (
 ## Dancer (taken from S1's queue per INBOX_S2 07:30: S1 lists ext/fix-dancer as queued, not started). **S1: please leave Dancer #8 + rows to S2.** Pin, Vireo, Venator stay with S1 (in progress).
 
 ## Prologue polish
-- Branch `ext/prologue-polish` from origin/ext/prologue5 54f8304. In progress (Opus): framing/camera/animation/lighting per slide, THE BOKI clipping fix, slide 3/4 text per 07:50, slide 4 Mantle-wake staging.
+- Branch `ext/prologue-polish` from origin/ext/prologue5 54f8304, aae7ef6 local: per-slide eased camera with cuts, MOODS lighting table, Crown keep, Wyrm rise/roar/dive, Mantle lights scatter, slide 4 restaged in prologue_boki.gd (no clipping across all 492 frames, asserted), slide 3/4 owner text, new --prologue-check 7/0, class-unlock 137/0, health OK. Coordinator review: slide 4's wake beat (Boki touches relic, glow) is hidden behind the lead Boki in the close shot; restage in progress. Shots: /home/boki/shots-s2/prologue/.
+  Owner Qs (prologue): slide 4 hunter wakes Venator's Mantle (orange, every player's starter) OK? hunter without his rifle in slide 4 OK? slide 3 Mantle lights are plain coloured spheres (glow washed out on the red sky) OK?
 
 ## Queued new tasks (INBOX 07:55, 08:10)
 - Character concept pass phase 1 (`ext/concepts`, Opus): starts when a slot frees after the demo-critical branches; not for tonight.
