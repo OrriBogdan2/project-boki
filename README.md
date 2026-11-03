@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult), [tamsin/v2/polish](#tamsin/v2/polish-tamsin/v2/polish), [moosh-moosh/v2/polish](#moosh-moosh/v2/polish-moosh-moosh/v2/polish), [vireo/v2/polish](#vireo/v2/polish-vireo/v2/polish), [venator/v2/polish](#venator/v2/polish-venator/v2/polish), [pin/v2/polish](#pin/v2/polish-pin/v2/polish), [bjorn/v2/polish](#bjorn/v2/polish-bjorn/v2/polish), [linwick/v2/polish](#linwick/v2/polish-linwick/v2/polish), [dredge/v2/polish](#dredge/v2/polish-dredge/v2/polish), [breah/v2/ult](#breah/v2/ult-breah/v2/ult), [ostra/v2/ult](#ostra/v2/ult-ostra/v2/ult), [vireo/v2/ult](#vireo/v2/ult-vireo/v2/ult), [venator/v2/ult](#venator/v2/ult-venator/v2/ult)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult), [tamsin/v2/polish](#tamsin/v2/polish-tamsin/v2/polish), [moosh-moosh/v2/polish](#moosh-moosh/v2/polish-moosh-moosh/v2/polish), [vireo/v2/polish](#vireo/v2/polish-vireo/v2/polish), [venator/v2/polish](#venator/v2/polish-venator/v2/polish), [pin/v2/polish](#pin/v2/polish-pin/v2/polish), [bjorn/v2/polish](#bjorn/v2/polish-bjorn/v2/polish), [linwick/v2/polish](#linwick/v2/polish-linwick/v2/polish), [dredge/v2/polish](#dredge/v2/polish-dredge/v2/polish), [breah/v2/ult](#breah/v2/ult-breah/v2/ult), [ostra/v2/ult](#ostra/v2/ult-ostra/v2/ult), [vireo/v2/ult](#vireo/v2/ult-vireo/v2/ult), [venator/v2/ult](#venator/v2/ult-venator/v2/ult), [dancer/v2/polish](#dancer/v2/polish-dancer/v2/polish), [zedran/v2/polish](#zedran/v2/polish-zedran/v2/polish)
 
 ## Vireo (mage)
 
@@ -4275,3 +4275,375 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Cinderfall patch: the scorched disc burns with a lit ember rim and flames; the target slowed (close-up)**
 
 ![Cinderfall patch: the scorched disc burns with a lit ember rim and flames; the target slowed (close-up)](venator/v2/ult/venator_ult_zone_close.png)
+
+## dancer/v2/polish (dancer/v2/polish)
+
+**LMB Arc Bolts strip (frame 1: the bolt leaving the hand, a gold chakram with a short orange flame tail): arm cocked back, whipped to full reach with the torso twist, overshoot, settle; gold muzzle star, orange-tailed gold chakram (gameplay zoom)**
+
+![LMB Arc Bolts strip (frame 1: the bolt leaving the hand, a gold chakram with a short orange flame tail): arm cocked back, whipped to full reach with the torso twist, overshoot, settle; gold muzzle star, orange-tailed gold chakram (gameplay zoom)](dancer/v2/polish/anim_thf_lmb_game.png)
+
+**LMB Arc Bolts strip (frame 1: the bolt leaving the hand, a gold chakram with a short orange flame tail): arm cocked back, whipped to full reach with the torso twist, overshoot, settle; gold muzzle star, orange-tailed gold chakram (close-up)**
+
+![LMB Arc Bolts strip (frame 1: the bolt leaving the hand, a gold chakram with a short orange flame tail): arm cocked back, whipped to full reach with the torso twist, overshoot, settle; gold muzzle star, orange-tailed gold chakram (close-up)](dancer/v2/polish/anim_thf_lmb_close.png)
+
+**Empowered bolt strip: Vault, then the stretched throw and recoil, gold aim line (gameplay zoom)**
+
+![Empowered bolt strip: Vault, then the stretched throw and recoil, gold aim line (gameplay zoom)](dancer/v2/polish/anim_thf_primed_game.png)
+
+**Empowered bolt strip: Vault, then the stretched throw and recoil, gold aim line (close-up)**
+
+![Empowered bolt strip: Vault, then the stretched throw and recoil, gold aim line (close-up)](dancer/v2/polish/anim_thf_primed_close.png)
+
+**Vault strip: crouch, sideways cartwheel with legs split, landing crouch; cyan streaks and lilac arc (gameplay zoom)**
+
+![Vault strip: crouch, sideways cartwheel with legs split, landing crouch; cyan streaks and lilac arc (gameplay zoom)](dancer/v2/polish/anim_thf_vault_game.png)
+
+**Vault strip: crouch, sideways cartwheel with legs split, landing crouch; cyan streaks and lilac arc (close-up)**
+
+![Vault strip: crouch, sideways cartwheel with legs split, landing crouch; cyan streaks and lilac arc (close-up)](dancer/v2/polish/anim_thf_vault_close.png)
+
+**Air dash strip: jump, sideways cartwheel carried on its speed, landing; her own cyan streaks (dashes away from the dummy, no pink blur) (gameplay zoom)**
+
+![Air dash strip: jump, sideways cartwheel carried on its speed, landing; her own cyan streaks (dashes away from the dummy, no pink blur) (gameplay zoom)](dancer/v2/polish/anim_thf_exdash_game.png)
+
+**Air dash strip: jump, sideways cartwheel carried on its speed, landing; her own cyan streaks (dashes away from the dummy, no pink blur) (close-up)**
+
+![Air dash strip: jump, sideways cartwheel carried on its speed, landing; her own cyan streaks (dashes away from the dummy, no pink blur) (close-up)](dancer/v2/polish/anim_thf_exdash_close.png)
+
+**Bola strip: right hand raised and circling, the two weights whirling overhead in the violet lane, then the lunging sling (gameplay zoom)**
+
+![Bola strip: right hand raised and circling, the two weights whirling overhead in the violet lane, then the lunging sling (gameplay zoom)](dancer/v2/polish/anim_thf_bola_game.png)
+
+**Bola strip: right hand raised and circling, the two weights whirling overhead in the violet lane, then the lunging sling (close-up)**
+
+![Bola strip: right hand raised and circling, the two weights whirling overhead in the violet lane, then the lunging sling (close-up)](dancer/v2/polish/anim_thf_bola_close.png)
+
+**Shadow Knife strip: whole-body spin with the off hand cocked, side-arm release with the flash (gameplay zoom)**
+
+![Shadow Knife strip: whole-body spin with the off hand cocked, side-arm release with the flash (gameplay zoom)](dancer/v2/polish/anim_thf_knife_game.png)
+
+**Shadow Knife strip: whole-body spin with the off hand cocked, side-arm release with the flash (close-up)**
+
+![Shadow Knife strip: whole-body spin with the off hand cocked, side-arm release with the flash (close-up)](dancer/v2/polish/anim_thf_knife_close.png)
+
+**Blink strip: the cyan afterimage chain, the drop-in arrival (gameplay zoom)**
+
+![Blink strip: the cyan afterimage chain, the drop-in arrival (gameplay zoom)](dancer/v2/polish/anim_thf_blink_game.png)
+
+**Blink strip: the cyan afterimage chain, the drop-in arrival (close-up)**
+
+![Blink strip: the cyan afterimage chain, the drop-in arrival (close-up)](dancer/v2/polish/anim_thf_blink_close.png)
+
+**Encore (X) strip: blades raised, ring opens, volleys with arms snapping out to the sides; short cast word inside the frame (gameplay zoom)**
+
+![Encore (X) strip: blades raised, ring opens, volleys with arms snapping out to the sides; short cast word inside the frame (gameplay zoom)](dancer/v2/polish/anim_thf_encore_game.png)
+
+**Encore (X) strip: blades raised, ring opens, volleys with arms snapping out to the sides; short cast word inside the frame (close-up)**
+
+![Encore (X) strip: blades raised, ring opens, volleys with arms snapping out to the sides; short cast word inside the frame (close-up)](dancer/v2/polish/anim_thf_encore_close.png)
+
+**VAULT RESET flourish strip (gameplay zoom)**
+
+![VAULT RESET flourish strip (gameplay zoom)](dancer/v2/polish/anim_thf_reset_game.png)
+
+**VAULT RESET flourish strip (close-up)**
+
+![VAULT RESET flourish strip (close-up)](dancer/v2/polish/anim_thf_reset_close.png)
+
+**Knock payoff strip: crimson four-point star on the foe, green heal pillar on her, flourish (gameplay zoom)**
+
+![Knock payoff strip: crimson four-point star on the foe, green heal pillar on her, flourish (gameplay zoom)](dancer/v2/polish/anim_thf_flourish_game.png)
+
+**Knock payoff strip: crimson four-point star on the foe, green heal pillar on her, flourish (close-up)**
+
+![Knock payoff strip: crimson four-point star on the foe, green heal pillar on her, flourish (close-up)](dancer/v2/polish/anim_thf_flourish_close.png)
+
+**LMB with the cursor short of the dummy: the blue-violet fizzle puff at the cursor (gameplay zoom)**
+
+![LMB with the cursor short of the dummy: the blue-violet fizzle puff at the cursor (gameplay zoom)](dancer/v2/polish/dj_fizzle_game.png)
+
+**LMB with the cursor short of the dummy: the blue-violet fizzle puff at the cursor (close-up)**
+
+![LMB with the cursor short of the dummy: the blue-violet fizzle puff at the cursor (close-up)](dancer/v2/polish/dj_fizzle_close.png)
+
+**Empowered: the solid thick gold aim line with its glow (#ffc23a), gold glint at the hand (gameplay zoom)**
+
+![Empowered: the solid thick gold aim line with its glow (#ffc23a), gold glint at the hand (gameplay zoom)](dancer/v2/polish/dj_primed_game.png)
+
+**Empowered: the solid thick gold aim line with its glow (#ffc23a), gold glint at the hand (close-up)**
+
+![Empowered: the solid thick gold aim line with its glow (#ffc23a), gold glint at the hand (close-up)](dancer/v2/polish/dj_primed_close.png)
+
+**Vault mid-cartwheel with her cyan streaks (gameplay zoom)**
+
+![Vault mid-cartwheel with her cyan streaks (gameplay zoom)](dancer/v2/polish/dj_vault_game.png)
+
+**Vault mid-cartwheel with her cyan streaks (close-up)**
+
+![Vault mid-cartwheel with her cyan streaks (close-up)](dancer/v2/polish/dj_vault_close.png)
+
+**Bola wind-up: the violet chevron lane, the weights whirling over her head (gameplay zoom)**
+
+![Bola wind-up: the violet chevron lane, the weights whirling over her head (gameplay zoom)](dancer/v2/polish/dj_bola_whirl_game.png)
+
+**Bola wind-up: the violet chevron lane, the weights whirling over her head (close-up)**
+
+![Bola wind-up: the violet chevron lane, the weights whirling over her head (close-up)](dancer/v2/polish/dj_bola_whirl_close.png)
+
+**Bola payoff: amber binding cords and rings; GROUNDED, STUNNED, TANGLED stacked, not printed over each other (gameplay zoom)**
+
+![Bola payoff: amber binding cords and rings; GROUNDED, STUNNED, TANGLED stacked, not printed over each other (gameplay zoom)](dancer/v2/polish/dj_bola_game.png)
+
+**Bola payoff: amber binding cords and rings; GROUNDED, STUNNED, TANGLED stacked, not printed over each other (close-up)**
+
+![Bola payoff: amber binding cords and rings; GROUNDED, STUNNED, TANGLED stacked, not printed over each other (close-up)](dancer/v2/polish/dj_bola_close.png)
+
+**Shadow Knife: the violet arrival circle round the stuck dagger (gameplay zoom)**
+
+![Shadow Knife: the violet arrival circle round the stuck dagger (gameplay zoom)](dancer/v2/polish/dj_knife_game.png)
+
+**Shadow Knife: the violet arrival circle round the stuck dagger (close-up)**
+
+![Shadow Knife: the violet arrival circle round the stuck dagger (close-up)](dancer/v2/polish/dj_knife_close.png)
+
+**Recast one beat after the blink: the chain of cyan afterimages from her start to the dagger (gameplay zoom)**
+
+![Recast one beat after the blink: the chain of cyan afterimages from her start to the dagger (gameplay zoom)](dancer/v2/polish/dj_blink_game.png)
+
+**Recast one beat after the blink: the chain of cyan afterimages from her start to the dagger (close-up)**
+
+![Recast one beat after the blink: the chain of cyan afterimages from her start to the dagger (close-up)](dancer/v2/polish/dj_blink_close.png)
+
+**Knock: the crimson four-point star on the knocked foe, the green heal pillar and +heal on her (gameplay zoom)**
+
+![Knock: the crimson four-point star on the knocked foe, the green heal pillar and +heal on her (gameplay zoom)](dancer/v2/polish/dj_knock_game.png)
+
+**Knock: the crimson four-point star on the knocked foe, the green heal pillar and +heal on her (close-up)**
+
+![Knock: the crimson four-point star on the knocked foe, the green heal pillar and +heal on her (close-up)](dancer/v2/polish/dj_knock_close.png)
+
+**Air dash: the sideways cartwheel with the cyan streak after-image (gameplay zoom)**
+
+![Air dash: the sideways cartwheel with the cyan streak after-image (gameplay zoom)](dancer/v2/polish/dj_exdash_game.png)
+
+**Air dash: the sideways cartwheel with the cyan streak after-image (close-up)**
+
+![Air dash: the sideways cartwheel with the cyan streak after-image (close-up)](dancer/v2/polish/dj_exdash_close.png)
+
+**Encore telegraph: the violet ring growing round her (gameplay zoom)**
+
+![Encore telegraph: the violet ring growing round her (gameplay zoom)](dancer/v2/polish/encore_game.png)
+
+**Encore telegraph: the violet ring growing round her (close-up)**
+
+![Encore telegraph: the violet ring growing round her (close-up)](dancer/v2/polish/encore_close.png)
+
+**Encore impact: blades landing on the dummy in the outer band (gameplay zoom)**
+
+![Encore impact: blades landing on the dummy in the outer band (gameplay zoom)](dancer/v2/polish/encorehit_game.png)
+
+**Encore impact: blades landing on the dummy in the outer band (close-up)**
+
+![Encore impact: blades landing on the dummy in the outer band (close-up)](dancer/v2/polish/encorehit_close.png)
+
+## zedran/v2/polish (zedran/v2/polish)
+
+**Slash strip: step-in, hips turning through, follow-through (gameplay zoom)**
+
+![Slash strip: step-in, hips turning through, follow-through (gameplay zoom)](zedran/v2/polish/anim_jug_slash_game.png)
+
+**Slash strip: step-in, hips turning through, follow-through (close-up)**
+
+![Slash strip: step-in, hips turning through, follow-through (close-up)](zedran/v2/polish/anim_jug_slash_close.png)
+
+**Searing Wave strip: wind-up and release (gameplay zoom)**
+
+![Searing Wave strip: wind-up and release (gameplay zoom)](zedran/v2/polish/anim_jug_wave_game.png)
+
+**Searing Wave strip: wind-up and release (close-up)**
+
+![Searing Wave strip: wind-up and release (close-up)](zedran/v2/polish/anim_jug_wave_close.png)
+
+**Finishing Slam strip: coiled wind-up, strike, settle (gameplay zoom)**
+
+![Finishing Slam strip: coiled wind-up, strike, settle (gameplay zoom)](zedran/v2/polish/anim_jug_slam_game.png)
+
+**Finishing Slam strip: coiled wind-up, strike, settle (close-up)**
+
+![Finishing Slam strip: coiled wind-up, strike, settle (close-up)](zedran/v2/polish/anim_jug_slam_close.png)
+
+**Gilded Riposte (X) strip: gold guard with the gold strip, the cleave; short cast word inside the frame (gameplay zoom)**
+
+![Gilded Riposte (X) strip: gold guard with the gold strip, the cleave; short cast word inside the frame (gameplay zoom)](zedran/v2/polish/anim_jug_riposte_game.png)
+
+**Gilded Riposte (X) strip: gold guard with the gold strip, the cleave; short cast word inside the frame (close-up)**
+
+![Gilded Riposte (X) strip: gold guard with the gold strip, the cleave; short cast word inside the frame (close-up)](zedran/v2/polish/anim_jug_riposte_close.png)
+
+**Lunge strip: crouched coil, fling, impact (gameplay zoom)**
+
+![Lunge strip: crouched coil, fling, impact (gameplay zoom)](zedran/v2/polish/anim_jug_lunge_game.png)
+
+**Lunge strip: crouched coil, fling, impact (close-up)**
+
+![Lunge strip: crouched coil, fling, impact (close-up)](zedran/v2/polish/anim_jug_lunge_close.png)
+
+**Lunge charged through a jump: lane up mid-charge, full flash, release from the air (gameplay zoom)**
+
+![Lunge charged through a jump: lane up mid-charge, full flash, release from the air (gameplay zoom)](zedran/v2/polish/anim_jug_lunge_air_game.png)
+
+**Lunge charged through a jump: lane up mid-charge, full flash, release from the air (close-up)**
+
+![Lunge charged through a jump: lane up mid-charge, full flash, release from the air (close-up)](zedran/v2/polish/anim_jug_lunge_air_close.png)
+
+**Meteor Drop strip onto the cursor disc (gameplay zoom)**
+
+![Meteor Drop strip onto the cursor disc (gameplay zoom)](zedran/v2/polish/anim_jug_meteor_game.png)
+
+**Meteor Drop strip onto the cursor disc (close-up)**
+
+![Meteor Drop strip onto the cursor disc (close-up)](zedran/v2/polish/anim_jug_meteor_close.png)
+
+**Rampage strip: 0.15s crouch with blade cocked high, flat drive with orange flame streaks, tip, low recovery (gameplay zoom)**
+
+![Rampage strip: 0.15s crouch with blade cocked high, flat drive with orange flame streaks, tip, low recovery (gameplay zoom)](zedran/v2/polish/anim_jug_dash_game.png)
+
+**Rampage strip: 0.15s crouch with blade cocked high, flat drive with orange flame streaks, tip, low recovery (close-up)**
+
+![Rampage strip: 0.15s crouch with blade cocked high, flat drive with orange flame streaks, tip, low recovery (close-up)](zedran/v2/polish/anim_jug_dash_close.png)
+
+**Air dash strip: jump, shoulder shove, his own orange flame streaks (gameplay zoom)**
+
+![Air dash strip: jump, shoulder shove, his own orange flame streaks (gameplay zoom)](zedran/v2/polish/anim_jug_exdash_game.png)
+
+**Air dash strip: jump, shoulder shove, his own orange flame streaks (close-up)**
+
+![Air dash strip: jump, shoulder shove, his own orange flame streaks (close-up)](zedran/v2/polish/anim_jug_exdash_close.png)
+
+**Warchain strip: cast, striped link chain attached, pull (gameplay zoom)**
+
+![Warchain strip: cast, striped link chain attached, pull (gameplay zoom)](zedran/v2/polish/anim_jug_chain_game.png)
+
+**Warchain strip: cast, striped link chain attached, pull (close-up)**
+
+![Warchain strip: cast, striped link chain attached, pull (close-up)](zedran/v2/polish/anim_jug_chain_close.png)
+
+**Chain Lunge strip (gameplay zoom)**
+
+![Chain Lunge strip (gameplay zoom)](zedran/v2/polish/anim_jug_chainlunge_game.png)
+
+**Chain Lunge strip (close-up)**
+
+![Chain Lunge strip (close-up)](zedran/v2/polish/anim_jug_chainlunge_close.png)
+
+**Haul Slam strip (gameplay zoom)**
+
+![Haul Slam strip (gameplay zoom)](zedran/v2/polish/anim_jug_haul_game.png)
+
+**Haul Slam strip (close-up)**
+
+![Haul Slam strip (close-up)](zedran/v2/polish/anim_jug_haul_close.png)
+
+**Cinder Spin strip (gameplay zoom)**
+
+![Cinder Spin strip (gameplay zoom)](zedran/v2/polish/anim_jug_spin_game.png)
+
+**Cinder Spin strip (close-up)**
+
+![Cinder Spin strip (close-up)](zedran/v2/polish/anim_jug_spin_close.png)
+
+**Enraged roar strip (gameplay zoom)**
+
+![Enraged roar strip (gameplay zoom)](zedran/v2/polish/anim_jug_roar_game.png)
+
+**Enraged roar strip (close-up)**
+
+![Enraged roar strip (close-up)](zedran/v2/polish/anim_jug_roar_close.png)
+
+**LMB slash: the 175-degree crescent, magenta edge and flame-yellow fill, held at full strength (gameplay zoom)**
+
+![LMB slash: the 175-degree crescent, magenta edge and flame-yellow fill, held at full strength (gameplay zoom)](zedran/v2/polish/dj_slash_game.png)
+
+**LMB slash: the 175-degree crescent, magenta edge and flame-yellow fill, held at full strength (close-up)**
+
+![LMB slash: the 175-degree crescent, magenta edge and flame-yellow fill, held at full strength (close-up)](zedran/v2/polish/dj_slash_close.png)
+
+**Searing Wave released: the flat red flame crescent with orange inner edge and red glow trail (gameplay zoom)**
+
+![Searing Wave released: the flat red flame crescent with orange inner edge and red glow trail (gameplay zoom)](zedran/v2/polish/dj_wave_game.png)
+
+**Searing Wave released: the flat red flame crescent with orange inner edge and red glow trail (close-up)**
+
+![Searing Wave released: the flat red flame crescent with orange inner edge and red glow trail (close-up)](zedran/v2/polish/dj_wave_close.png)
+
+**Warchain in flight: the orange zig-zag ribbon to the barbed hook (gameplay zoom)**
+
+![Warchain in flight: the orange zig-zag ribbon to the barbed hook (gameplay zoom)](zedran/v2/polish/dj_chain_fly_game.png)
+
+**Warchain in flight: the orange zig-zag ribbon to the barbed hook (close-up)**
+
+![Warchain in flight: the orange zig-zag ribbon to the barbed hook (close-up)](zedran/v2/polish/dj_chain_fly_close.png)
+
+**Warchain attached: alternating orange and dark links, spark at the anchor (gameplay zoom)**
+
+![Warchain attached: alternating orange and dark links, spark at the anchor (gameplay zoom)](zedran/v2/polish/dj_chain_game.png)
+
+**Warchain attached: alternating orange and dark links, spark at the anchor (close-up)**
+
+![Warchain attached: alternating orange and dark links, spark at the anchor (close-up)](zedran/v2/polish/dj_chain_close.png)
+
+**Rampage: orange flame streaks behind the flat drive, tip crescent (gameplay zoom)**
+
+![Rampage: orange flame streaks behind the flat drive, tip crescent (gameplay zoom)](zedran/v2/polish/dj_rampage_game.png)
+
+**Rampage: orange flame streaks behind the flat drive, tip crescent (close-up)**
+
+![Rampage: orange flame streaks behind the flat drive, tip crescent (close-up)](zedran/v2/polish/dj_rampage_close.png)
+
+**Enraged: embers and drips on his body, no pale disc under him (gameplay zoom)**
+
+![Enraged: embers and drips on his body, no pale disc under him (gameplay zoom)](zedran/v2/polish/dj_enraged_game.png)
+
+**Enraged: embers and drips on his body, no pale disc under him (close-up)**
+
+![Enraged: embers and drips on his body, no pale disc under him (close-up)](zedran/v2/polish/dj_enraged_close.png)
+
+**Finishing Slam sweet spot: the 3m red-orange shock ring at the impact (gameplay zoom)**
+
+![Finishing Slam sweet spot: the 3m red-orange shock ring at the impact (gameplay zoom)](zedran/v2/polish/dj_sweet_game.png)
+
+**Finishing Slam sweet spot: the 3m red-orange shock ring at the impact (close-up)**
+
+![Finishing Slam sweet spot: the 3m red-orange shock ring at the impact (close-up)](zedran/v2/polish/dj_sweet_close.png)
+
+**Airborne mid-charge: the Lunge lane up while he jumps (no Meteor disc) (gameplay zoom)**
+
+![Airborne mid-charge: the Lunge lane up while he jumps (no Meteor disc) (gameplay zoom)](zedran/v2/polish/dj_lunge_air_game.png)
+
+**Airborne mid-charge: the Lunge lane up while he jumps (no Meteor disc) (close-up)**
+
+![Airborne mid-charge: the Lunge lane up while he jumps (no Meteor disc) (close-up)](zedran/v2/polish/dj_lunge_air_close.png)
+
+**RMB ready: the red outline on a foe under 35% (gameplay zoom)**
+
+![RMB ready: the red outline on a foe under 35% (gameplay zoom)](zedran/v2/polish/dj_exec_game.png)
+
+**RMB ready: the red outline on a foe under 35% (close-up)**
+
+![RMB ready: the red outline on a foe under 35% (close-up)](zedran/v2/polish/dj_exec_close.png)
+
+**Riposte telegraph: the gold guard and the gold strip ahead (gameplay zoom)**
+
+![Riposte telegraph: the gold guard and the gold strip ahead (gameplay zoom)](zedran/v2/polish/riposte_game.png)
+
+**Riposte telegraph: the gold guard and the gold strip ahead (close-up)**
+
+![Riposte telegraph: the gold guard and the gold strip ahead (close-up)](zedran/v2/polish/riposte_close.png)
+
+**Riposte impact: the cleave landing (gameplay zoom)**
+
+![Riposte impact: the cleave landing (gameplay zoom)](zedran/v2/polish/ripostehit_game.png)
+
+**Riposte impact: the cleave landing (close-up)**
+
+![Riposte impact: the cleave landing (close-up)](zedran/v2/polish/ripostehit_close.png)
