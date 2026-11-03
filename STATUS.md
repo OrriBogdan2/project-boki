@@ -1,16 +1,17 @@
 # S2 status (second server session)
-Updated: 2026-11-03 09:27 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
+Updated: 2026-11-03 09:40 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
 
 
-## FOR MAIN: S2 merge plan (all READY, demo cutoff 21:00 UTC; 15:00 report: every S2 pair made it)
-1. `ext/dash-flow-base` @ 4edc562 (shared item 32 helper; everything below contains it).
-2. `ext/review-breah-ostra` @ 81bb7de (Breah + Ostra; also fixes main's flaky --work-check).
-3. `ext/review-linwick-moosh` @ 6634dbb (Linwick + Moosh Moosh AND Tamsin + Dredge; supersedes ext/review-tamsin-dredge d778c03, which is also ready alone).
-4. `ext/review-dancer` @ a0391db (Dancer AND Zedran; supersedes ext/review-zedran-bjorn 7a682bf, also ready alone).
-5. `ext/review-bjorn` @ fcfd231 (Bjorn AND Pin: S1's ext/kitdata-pin-bjorn 7dede8e + the shared DashFlow replacing S1's duplicate; merge this instead of kitdata-pin-bjorn).
-6. `ext/prologue-polish` @ a9afdaf (after ext/prologue5).
-Known conflicts to expect between 2-5: docs/heroes/dash_interactions.md (generated: rerun tools/gen_wiki.py), tools/style_baseline.json, content/rules/hunter_viewer.json (keep every hero's row from its own branch), Hunter.dash_with own_dash_trail line (identical change). Every branch was trial-merged only pairwise; after merging, run --dash-flow-check (expect 0 failures once 5 is in) and the hero combo checks.
-Not for tonight: `ext/concepts` 87c121b (concept sheets, for ext/owner review), `ext/mantle-look` (save v8; suite running).
+## FOR MAIN: S2 merge plan (all READY and ALL NOW ON CURRENT MAIN 16dd7fa / integ77; demo cutoff 21:00 UTC; every S2 pair made it)
+Each branch below already contains origin/main 16dd7fa (merged via ext/dash-flow-base), conflicts resolved and re-checked (hero combo checks, dash-flow, class-unlock, archetype, keys, health), so each should merge into main without conflicts on its own. Merging them into each other may still touch the generated docs/heroes/dash_interactions.md and docs/wiki (rerun tools/gen_wiki.py), tools/style_baseline.json, content/rules/hunter_viewer.json (keep each hero's row from its own branch).
+1. `ext/dash-flow-base` @ bf711e9 (shared item 32 helper + check; contains main).
+2. `ext/review-breah-ostra` @ 3d581a4 (Breah + Ostra; also fixes main's flaky --work-check).
+3. `ext/review-linwick-moosh` @ a633725 (Linwick + Moosh Moosh AND Tamsin + Dredge; supersedes ext/review-tamsin-dredge).
+4. `ext/review-dancer` @ a39df9a (Dancer AND Zedran; supersedes ext/review-zedran-bjorn).
+5. `ext/review-bjorn` @ 4a985a1 (Bjorn AND Pin: S1's kitdata-pin-bjorn + the shared DashFlow replacing S1's duplicate; merge this instead of kitdata-pin-bjorn). With this in, --dash-flow-check is 0 failures (alone, branches 1-4 show 1 known failure: Bjorn air dash -> LMB, fixed here).
+6. `ext/prologue-polish` @ 2a03634 (contains ext/prologue5 and main 16dd7fa; merge this instead of prologue5).
+Full suites were run on each branch's pre-main-merge head (results below); after the main merge each got targeted re-checks, all green.
+Not for tonight: `ext/concepts` 87c121b (concept sheets, for ext/owner review), `ext/mantle-look` (save v8; suite found a hair-check parse break + 3 checks to compare with main; being fixed).
 Shots: `ext/hero-shots-s2` (README with captions).
 
 ## Infra
