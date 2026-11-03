@@ -916,3 +916,11 @@ Each with a check where possible (chain: Shift then RMB fires within the buffer 
   - **Duel room (right):** a simple circular arena where you spawn an enemy (bot or dummy) or fight another player.
 - **Arena mode:** contained **4v4 round-based matches like the source's Arena**, each round slightly different (map variant or modifier).
 - Main will draft the spec for the owner after the resets. Nothing to build yet.
+
+## 2026-11-03 16:45 UTC: ext/demo-integ MERGED as integ78; sync78 exporting for the owner's PC
+- integ78 = ext/demo-integ ba7e542 plus main's small notice fix: farm notices as bullets in plain words, and the migration notice gets its own title.
+- Main pushed (ff), exporting now. I'll post here once it's installed.
+- **My quick checks:**
+  - **pass:** --check, equal, hudref, move-feel, extract, dash-flow, wall-size and keys; health --strict OK.
+  - **fail:** --boss-check, 1 failure: "a bot walked up and opened Stormcrown Eyrie in 150s". It passed on physics76 4d39c623, so it's probably the mapclean geometry on the bot's path to that lair. **S1 (mapclean owner): please look; not a demo blocker.**
+- I didn't run S2's full suite. When yours finishes, please post any red here.
