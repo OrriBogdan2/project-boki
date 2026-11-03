@@ -1,0 +1,182 @@
+<!--META {
+ "name": "Sable", "title": "Silver Thief", "tag": "id thief  ·  female  ·  duelist",
+ "accent": "#c9a0ff", "rim": "#efe2ff", "shadow": 100, "bust_bg": "#221a30",
+ "stage": ["#6a6280", "#15121c"],
+ "relic": "the Moonsilver Key",
+ "mat": {
+  "coat": ["#7a6c9a", "#40355c", "#191326"],
+  "silver": ["#ffffff", "#c4c8d4", "#5c6274"],
+  "skin": ["#f6dcc8", "#d6a88e", "#8e5e4c"],
+  "hair": ["#ffffff", "#d8dce6", "#7c8294"],
+  "black": ["#5a5664", "#2a2830", "#0e0d12"],
+  "plum": ["#c39ae8", "#7c4ea8", "#341a4e"],
+  "wood": ["#9a7454", "#5a3e2a", "#261a10"],
+  "bolt": ["#ffffff", "#d9c2ff", "#7a52c8"]
+ },
+ "glow": {"bolt": "#c9a0ff"},
+ "palette": [["#40355c", "dusk coat"], ["#c4c8d4", "silver"], ["#d8dce6", "white braid"],
+             ["#7c4ea8", "plum lining"], ["#2a2830", "gloves, boots"], ["#d6a88e", "skin"], ["#c9a0ff", "arc bolt"]],
+ "notes": [
+  ["Shape language", "Light and quick: a narrow body on long legs with two long trailing lines, the white braid and the split coat-tails, so she reads as motion even standing. Small sharp shapes (the domino mask, the cuff spikes, the crossbow limbs) and no big masses."],
+  ["Signature features", "A silver domino mask, a single long white braid bound in silver rings, a cropped dusk-violet tailcoat with long split tails and a plum lining, twin hand crossbows that fire arcing bolts, a belt of picks and keys. Nothing hooded: the hood and cape belong to no one now, Pin owns the hood."],
+  ["Reads in-engine", "From above: a slim violet body with a white streak (the braid) and two coat-tails that swing out when she cartwheels. Silver catches the light on the mask, the crossbows and the rings; the arc bolts are the same lilac as her accent."]
+ ]
+} -->
+<g id="defs"></g><!--/defs-->
+<g id="front">
+ <!-- braid swinging out behind -->
+ <path m="hair" d="M18 -590 C50 -590 70 -560 80 -520 C90 -480 100 -440 118 -410 C110 -400 100 -404 94 -414 C78 -444 66 -490 56 -530 C48 -560 34 -572 16 -572Z"/>
+ <path ln="1.4" d="M60 -540 l10 -4 M68 -510 l10 -4 M76 -480 l10 -4 M84 -452 l10 -4"/>
+ <path m="silver" lw="2" d="M58 -560 l14 -6 l4 10 l-14 6Z M90 -450 l14 -6 l4 10 l-14 6Z"/>
+ <path m="hair" lw="2.4" d="M118 -410 C126 -396 124 -380 112 -374 C116 -386 108 -396 100 -400Z"/>
+ <!-- coat-tails -->
+ <path m="coat" d="M-50 -330 L-6 -330 L-24 -200 L-44 -150 L-62 -200 Z"/>
+ <path m="coat" d="M50 -330 L6 -330 L24 -200 L44 -150 L62 -200 Z"/>
+ <path f="plum" d="M-6 -330 L-24 -200 L-34 -176 L-30 -250 L-16 -330Z M6 -330 L24 -200 L34 -176 L30 -250 L16 -330Z"/>
+ <path sh="30" d="M30 -330 L50 -330 L62 -200 L44 -150 Z"/>
+ <!-- legs -->
+ <path m="black" d="M-46 -320 C-50 -260 -48 -200 -44 -150 L-42 -40 L-18 -40 L-16 -150 C-12 -210 -8 -270 -4 -320 Z"/>
+ <path m="black" d="M46 -320 C50 -260 48 -200 44 -150 L46 -40 L22 -40 L16 -150 C12 -210 8 -270 4 -320 Z"/>
+ <path hl="14" d="M-40 -310 C-42 -260 -40 -200 -36 -150 L-34 -50 L-30 -50 L-30 -150 C-34 -200 -36 -260 -34 -310Z"/>
+ <path m="black" d="M-46 -150 C-48 -100 -46 -50 -46 -16 C-60 -10 -64 0 -54 2 L-10 2 C-8 -6 -10 -12 -16 -16 C-16 -60 -14 -110 -12 -150Z"/>
+ <path m="black" d="M46 -150 C48 -100 48 -50 48 -16 C62 -10 66 0 56 2 L12 2 C10 -6 14 -12 18 -16 C18 -60 16 -110 14 -150Z"/>
+ <path m="silver" lw="2" d="M-48 -156 L-10 -156 L-12 -140 L-46 -140Z M48 -156 L12 -156 L14 -140 L46 -140Z"/>
+ <path sh="28" d="M24 -150 L46 -150 C48 -100 48 -50 48 -16 L28 -16Z"/>
+ <!-- torso: cropped tailcoat -->
+ <path m="black" d="M-20 -482 C-40 -480 -54 -470 -56 -454 C-52 -420 -46 -390 -44 -360 L-46 -320 L46 -320 L44 -360 C46 -390 52 -420 56 -454 C54 -470 40 -480 20 -482 Z"/>
+ <path m="coat" d="M-56 -456 C-54 -472 -40 -480 -20 -482 L-8 -440 L-14 -380 L-30 -330 L-52 -330 C-50 -370 -46 -410 -56 -456Z"/>
+ <path m="coat" d="M56 -456 C54 -472 40 -480 20 -482 L8 -440 L14 -380 L30 -330 L52 -330 C50 -370 46 -410 56 -456Z"/>
+ <path f="plum" d="M-20 -482 L-8 -440 L-14 -380 L-20 -380 L-14 -440Z M20 -482 L8 -440 L14 -380 L20 -380 L14 -440Z"/>
+ <path sh="30" d="M30 -478 C46 -474 56 -466 56 -456 C46 -410 50 -370 52 -330 L30 -330 C36 -380 40 -440 30 -478Z"/>
+ <path m="silver" lw="2" d="M-36 -404 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0Z M-36 -380 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0Z M28 -404 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0Z M28 -380 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0Z"/>
+ <!-- belt of picks and keys -->
+ <path m="wood" d="M-50 -342 Q0 -332 50 -342 L50 -322 Q0 -312 -50 -322Z"/>
+ <path m="silver" lw="2" d="M-8 -342 h16 v20 h-16Z"/>
+ <path m="silver" lw="1.6" d="M24 -324 l2 18 l4 0 l0 -6 l4 0 l0 -4 l-4 0 l-2 -8Z M-34 -326 l0 22 M-28 -326 l0 18"/>
+ <path ln="1.6" d="M-34 -326 l0 22 M-28 -326 l0 18"/>
+ <!-- high collar -->
+ <path m="coat" d="M-30 -486 L-26 -520 L-12 -502 L12 -502 L26 -520 L30 -486 L14 -476 L-14 -476Z"/>
+ <path f="plum" d="M-26 -520 L-12 -502 L-14 -490 L-24 -494Z M26 -520 L12 -502 L14 -490 L24 -494Z"/>
+ <!-- arms with the twin crossbows -->
+ <path m="coat" d="M-50 -474 C-70 -470 -80 -454 -82 -430 L-88 -370 L-66 -364 L-60 -420Z"/>
+ <path m="black" d="M-90 -372 L-64 -366 L-66 -320 L-92 -324Z"/>
+ <path m="silver" lw="2" d="M-92 -374 L-62 -368 L-60 -360 L-94 -366Z M-94 -366 l-8 -6 l6 10Z"/>
+ <path m="coat" d="M50 -474 C70 -470 80 -454 82 -430 L88 -370 L66 -364 L60 -420Z"/>
+ <path sh="30" d="M70 -466 C80 -450 84 -420 88 -370 L78 -368 C76 -410 74 -440 70 -466Z"/>
+ <path m="black" d="M90 -372 L64 -366 L66 -320 L92 -324Z"/>
+ <path m="silver" lw="2" d="M92 -374 L62 -368 L60 -360 L94 -366Z M94 -366 l8 -6 l-6 10Z"/>
+ <g transform="translate(-80 -306)">
+  <path m="wood" d="M-6 -6 L6 -6 L8 20 L-8 20Z"/>
+  <path m="black" d="M-8 -40 L8 -40 L10 -2 L-10 -2Z"/>
+  <path m="silver" lw="2.4" d="M-34 -30 C-20 -40 20 -40 34 -30 L34 -24 C20 -32 -20 -32 -34 -24Z"/>
+  <path ln="1.2" d="M-34 -26 L0 -10 L34 -26"/>
+  <path m="bolt" lw="1.6" d="M-2 -60 L2 -60 L2 -30 L-2 -30Z M-5 -58 L0 -68 L5 -58Z"/>
+ </g>
+ <g transform="translate(80 -306)">
+  <path m="wood" d="M-6 -6 L6 -6 L8 20 L-8 20Z"/>
+  <path m="black" d="M-8 -40 L8 -40 L10 -2 L-10 -2Z"/>
+  <path m="silver" lw="2.4" d="M-34 -30 C-20 -40 20 -40 34 -30 L34 -24 C20 -32 -20 -32 -34 -24Z"/>
+  <path ln="1.2" d="M-34 -26 L0 -10 L34 -26"/>
+  <path m="bolt" lw="1.6" d="M-2 -60 L2 -60 L2 -30 L-2 -30Z M-5 -58 L0 -68 L5 -58Z"/>
+  <path rim="2.4" d="M10 -38 L10 -4"/>
+ </g>
+ <path m="black" d="M-92 -324 C-96 -310 -90 -294 -78 -292 C-66 -292 -62 -306 -66 -320Z"/>
+ <path m="black" d="M92 -324 C96 -310 90 -294 78 -292 C66 -292 62 -306 66 -320Z"/>
+ <!-- head -->
+ <path m="skin" d="M-11 -502 L11 -502 L12 -484 L-12 -484Z"/>
+ <path m="skin" d="M-28 -544 C-30 -580 30 -580 28 -544 L26 -520 C22 -500 10 -492 0 -492 C-10 -492 -22 -500 -26 -520Z"/>
+ <path sh="28" d="M12 -574 C24 -568 28 -556 28 -544 L26 -520 C22 -502 14 -494 8 -493 C20 -520 22 -556 12 -574Z"/>
+ <path m="hair" d="M-32 -546 C-38 -584 -10 -598 6 -596 C30 -594 38 -572 32 -546 C26 -566 12 -574 -4 -574 C-18 -574 -28 -566 -32 -546Z"/>
+ <path m="hair" lw="2.4" d="M-32 -546 C-34 -560 -30 -572 -20 -578 C-26 -566 -26 -552 -22 -540Z"/>
+ <path m="hair" lw="2.4" d="M-32 -546 C-28 -576 0 -584 22 -578 C8 -568 -6 -556 -12 -540 C-18 -546 -26 -548 -32 -546Z"/>
+ <path ln="1.4" d="M-20 -560 C-10 -570 4 -574 14 -574 M-24 -552 C-16 -562 -6 -566 2 -568"/>
+ <path m="silver" lw="2" d="M-30 -544 C-18 -552 18 -552 30 -544 L28 -530 C18 -526 10 -528 4 -532 L0 -528 L-4 -532 C-10 -528 -18 -526 -28 -530Z"/>
+ <path fill="#1d1724" d="M-20 -540 Q-13 -546 -6 -540 Q-13 -536 -20 -540Z M20 -540 Q13 -546 6 -540 Q13 -536 20 -540Z"/>
+ <circle cx="-13" cy="-540" r="2" fill="#d9c2ff"/><circle cx="13" cy="-540" r="2" fill="#d9c2ff"/>
+ <path hl="70" d="M-26 -546 C-18 -550 -10 -550 -4 -548 C-12 -548 -20 -546 -26 -542Z"/>
+ <path m="skin" lw="1.8" d="M-3 -528 Q-6 -516 -6 -512 Q0 -509 6 -512 Q6 -516 3 -528Z"/>
+ <path fill="#9a3a52" stroke="#1d1724" stroke-width="1.6" d="M-9 -503 Q0 -498 10 -505 Q2 -500 -9 -503Z"/>
+ <path rim="2.6" d="M18 -590 C32 -582 36 -566 32 -548"/>
+</g><!--/front-->
+<g id="tq">
+ <!-- braid streaming -->
+ <path m="hair" d="M0 -590 C40 -596 74 -574 98 -540 C120 -510 140 -490 170 -480 C164 -470 150 -470 140 -476 C110 -490 90 -516 72 -540 C52 -566 30 -574 0 -572Z"/>
+ <path ln="1.4" d="M80 -548 l8 -8 M98 -526 l8 -8 M116 -506 l8 -8 M136 -490 l6 -10"/>
+ <path m="silver" lw="2" d="M66 -566 l12 -8 l6 10 l-12 8Z M120 -508 l12 -8 l6 10 l-12 8Z"/>
+ <path m="hair" lw="2.4" d="M170 -480 C184 -476 192 -462 186 -450 C182 -462 170 -466 160 -464Z"/>
+ <!-- coat-tails flaring back -->
+ <path m="coat" d="M0 -330 L44 -330 C70 -290 100 -250 130 -224 L100 -220 L80 -196 L60 -236 Z"/>
+ <path f="plum" d="M0 -330 L14 -330 C34 -290 54 -260 80 -236 L60 -236Z"/>
+ <path m="coat" d="M-40 -330 L4 -330 C20 -280 40 -230 70 -190 L44 -188 L26 -164 L12 -210 Z"/>
+ <path f="plum" d="M-40 -330 L-26 -330 C-10 -280 4 -240 26 -212 L12 -210Z"/>
+ <path rim="2.6" d="M60 -310 C80 -276 104 -246 128 -226"/>
+ <g id="L-tqbody">
+ <!-- legs, mid-step -->
+ <path m="black" d="M0 -320 C10 -260 20 -200 30 -150 L48 -40 L72 -46 L56 -150 C50 -210 44 -270 42 -320 Z"/>
+ <path m="black" d="M30 -150 C40 -100 48 -60 52 -16 C64 -12 70 -2 60 2 L22 2 C20 -6 22 -12 28 -16 C24 -60 18 -110 12 -150Z" transform="translate(22 0)"/>
+ <path m="silver" lw="2" d="M34 -156 L74 -158 L76 -142 L36 -140Z"/>
+ <path m="black" d="M-48 -320 C-58 -260 -70 -200 -80 -150 L-90 -40 L-64 -38 L-52 -150 C-42 -210 -28 -270 -14 -320 Z"/>
+ <path m="black" d="M-84 -150 C-86 -100 -88 -50 -92 -16 C-112 -10 -118 0 -108 2 L-60 2 C-58 -6 -60 -12 -64 -16 C-62 -60 -58 -110 -54 -150Z"/>
+ <path m="silver" lw="2" d="M-88 -156 L-52 -156 L-54 -140 L-86 -140Z"/>
+ <path hl="16" d="M-44 -310 C-52 -260 -62 -200 -72 -150 L-76 -60 L-72 -60 L-66 -150 C-56 -200 -46 -260 -38 -310Z"/>
+ <!-- torso -->
+ <path m="black" d="M-36 -482 C-56 -478 -68 -466 -70 -450 C-64 -418 -56 -390 -54 -360 L-56 -320 L36 -320 L36 -360 C40 -390 46 -420 48 -452 C44 -470 30 -482 10 -482 Z"/>
+ <path m="coat" d="M-70 -452 C-68 -470 -54 -480 -36 -482 L-24 -440 L-30 -380 L-44 -330 L-62 -330 C-60 -370 -58 -410 -70 -452Z"/>
+ <path m="coat" d="M48 -452 C46 -470 30 -480 10 -482 L-2 -440 L4 -380 L20 -330 L42 -330 C40 -370 40 -410 48 -452Z"/>
+ <path sh="30" d="M22 -478 C40 -474 48 -464 48 -452 C40 -410 40 -370 42 -330 L20 -330 C28 -380 32 -440 22 -478Z"/>
+ <path m="wood" d="M-60 -342 Q-10 -332 40 -342 L40 -322 Q-10 -312 -60 -322Z"/>
+ <path m="silver" lw="2" d="M-20 -342 h16 v20 h-16Z"/>
+ <path m="coat" d="M-44 -486 L-40 -520 L-26 -502 L0 -502 L12 -520 L16 -486 L0 -476 L-28 -476Z"/>
+ <path f="plum" d="M-40 -520 L-26 -502 L-28 -490 L-38 -494Z"/>
+ <path rim="2.6" d="M46 -448 C42 -410 40 -370 42 -334"/>
+ <!-- far arm, crossbow low -->
+ <path m="coat" d="M30 -474 C50 -470 60 -454 62 -430 L66 -370 L44 -364 L40 -420Z"/>
+ <path m="black" d="M68 -372 L42 -366 L44 -320 L70 -324Z"/>
+ <path m="black" d="M70 -324 C74 -310 68 -294 56 -292 C44 -292 40 -306 44 -320Z"/>
+ <!-- head turned to her right -->
+ <path m="skin" d="M-30 -502 L-8 -502 L-6 -484 L-32 -484Z"/>
+ <path m="skin" d="M-52 -544 C-52 -580 6 -582 6 -546 L4 -520 C0 -500 -12 -492 -24 -492 C-36 -492 -48 -500 -52 -516 C-56 -522 -58 -530 -54 -534Z"/>
+ <path sh="28" d="M-8 -576 C2 -568 6 -556 6 -546 L4 -520 C0 -502 -6 -494 -12 -493 C-2 -520 0 -556 -8 -576Z"/>
+ <path m="hair" d="M-54 -546 C-60 -584 -32 -598 -16 -596 C8 -594 16 -572 10 -546 C4 -566 -10 -574 -26 -574 C-40 -574 -50 -566 -54 -546Z"/>
+ <path m="hair" lw="2.4" d="M-56 -546 C-50 -576 -24 -584 -2 -578 C-16 -568 -30 -558 -36 -540 C-42 -546 -50 -548 -56 -546Z"/>
+ <path ln="1.4" d="M-44 -560 C-34 -570 -20 -574 -10 -574"/>
+ <path m="silver" lw="2" d="M-56 -544 C-44 -552 -6 -552 6 -544 L4 -530 C-6 -526 -14 -528 -20 -532 L-24 -528 L-28 -532 C-34 -528 -44 -526 -54 -530Z"/>
+ <path fill="#1d1724" d="M-48 -540 Q-42 -546 -36 -540 Q-42 -536 -48 -540Z M-4 -540 Q-11 -546 -18 -540 Q-11 -536 -4 -540Z"/>
+ <circle cx="-42" cy="-540" r="1.8" fill="#d9c2ff"/><circle cx="-11" cy="-540" r="2" fill="#d9c2ff"/>
+ <path m="skin" lw="1.8" d="M-32 -524 C-37 -518 -39 -514 -37 -511 Q-33 -509 -29 -511"/>
+ <path fill="#9a3a52" stroke="#1d1724" stroke-width="1.6" d="M-44 -502 Q-34 -497 -22 -505 Q-32 -500 -44 -502Z"/>
+ <path hl="70" d="M-50 -546 C-42 -550 -34 -550 -28 -548 C-36 -548 -44 -546 -50 -542Z"/>
+ <path rim="2.6" d="M0 -590 C14 -582 16 -566 12 -548"/>
+ </g>
+ <!-- near arm aiming the crossbow -->
+ <path m="coat" d="M-56 -470 C-80 -464 -100 -452 -118 -438 L-160 -424 L-156 -402 L-110 -414 C-90 -424 -72 -436 -58 -446Z"/>
+ <path m="black" d="M-160 -428 L-154 -400 L-186 -394 L-190 -420Z"/>
+ <path m="silver" lw="2" d="M-158 -432 L-152 -398 L-146 -398 L-150 -432Z"/>
+ <g transform="translate(-206 -408) rotate(-90)">
+  <path m="wood" d="M-6 -6 L6 -6 L8 20 L-8 20Z"/>
+  <path m="black" d="M-8 -40 L8 -40 L10 -2 L-10 -2Z"/>
+  <path m="silver" lw="2.4" d="M-34 -30 C-20 -40 20 -40 34 -30 L34 -24 C20 -32 -20 -32 -34 -24Z"/>
+  <path ln="1.2" d="M-34 -26 L0 -10 L34 -26"/>
+  <path m="bolt" lw="1.6" d="M-2 -60 L2 -60 L2 -30 L-2 -30Z M-5 -58 L0 -68 L5 -58Z"/>
+  <g class="fx"><circle cx="0" cy="-66" r="16" fill="url(#L-bolt-g)"/></g>
+ </g>
+</g><!--/tq-->
+<g id="bust">
+ <defs><radialGradient id="L-bustbg" cx="0.3" cy="0.3" r="0.9"><stop offset="0" stop-color="#8a76b0"/><stop offset="0.55" stop-color="#352a4c"/><stop offset="1" stop-color="#110d1a"/></radialGradient></defs>
+ <rect width="320" height="320" fill="url(#L-bustbg)"/>
+ <use href="#L-tqbody" transform="translate(206 1250) scale(2.0)"/>
+</g><!--/bust-->
+<g id="relic">
+ <ellipse cx="150" cy="282" rx="80" ry="12" fill="url(#gshadow)"/>
+ <g class="fx"><circle cx="150" cy="120" r="80" fill="url(#L-bolt-g)" opacity="0.45"/></g>
+ <!-- a long silver key: crescent bow, star-cut bit -->
+ <path m="silver" d="M150 46 C108 46 86 80 92 116 C98 150 130 166 150 166 C130 150 114 128 116 106 C118 82 134 66 150 62 C166 66 182 82 184 106 C186 128 170 150 150 166 C170 166 202 150 208 116 C214 80 192 46 150 46Z"/>
+ <circle m="bolt:r" lw="2.4" cx="150" cy="108" r="16"/>
+ <path m="silver" d="M142 160 h16 v96 h-16Z"/>
+ <path m="silver" d="M158 210 h30 v10 h-12 v10 h12 v10 h-30Z M158 244 h20 v12 h-20Z"/>
+ <path m="silver" lw="2.4" d="M134 168 h32 v12 h-32Z"/>
+ <path hl="60" d="M145 166 h4 v86 h-4Z M100 100 C104 80 120 62 140 56 C120 66 108 82 106 102Z"/>
+ <path rim="3" d="M206 100 C210 130 190 156 168 164"/>
+ <path fill="none" stroke="#1d1724" stroke-width="6" d="M150 256 C150 270 170 276 190 266"/>
+ <path fill="none" stroke="#7c4ea8" stroke-width="3" d="M150 256 C150 270 170 276 190 266"/>
+</g><!--/relic-->
