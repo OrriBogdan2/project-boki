@@ -169,7 +169,7 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
   sunburst at the fists and a crescent sweep across the fan per wave, a violet flicker rising from each target.
 
 ## Engine notes
-The reel is a Displace "haul" tow (`scripts/combat/displace.gd`, decision 0011): the body moves in small steps toward wherever
+The reel is a Displace "haul" tow (`scripts/combat/displace.gd`, decision 0016): the body moves in small steps toward wherever
 Dredge is now, with a weighted velocity (`SWING`), so it swings when he moves. It is hauled over rock tiles (`World.T_BLOCK`) and
 props to the first clear spot, stopped by a cliff rise (`Displace.CLIFF`) or a placed wall (`Verbs.wall_blocks`); the void is not
 special. A player online is reeled on their own game the same way; the kit ends the reel when that game says it arrived. The hook's shot carries `"rocks": true`, which the match's shot step

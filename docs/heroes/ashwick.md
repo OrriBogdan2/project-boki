@@ -174,7 +174,7 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
 ## Engine notes
 The hose is simulated on the match step (`scripts/arch/kits/ashwick_hose.gd`); a puff stops at a wall (`World.occupy`) and hurts
 only with line of sight from the puff. The burn uses the engine's own burn status (credit to Cinder); remote bodies get it through
-a hit with a burn option. The cloak's drag is a Displace "step" tow (decision 0011): foes move in steps against the world's occupancy test, a player online
+a hit with a burn option. The cloak's drag is a Displace "step" tow (decision 0016): foes move in steps against the world's occupancy test, a player online
 on their own game.
 Flue Flight rides the hunter's own dash movement (`Hunter.dash_with`, kind "jet"), re-aimed every step, so walls stop it as they
 stop a dash; the kit holds him a little off the ground. Other players see the ember ring and carpet as Net fx rings and the moves

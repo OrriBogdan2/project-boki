@@ -1,4 +1,4 @@
-# 0011: Displacing another game's body (Displace)
+# 0016: Displacing another game's body (Displace)
 
 - **Status:** accepted
 - **Date:** 2026-11-03
