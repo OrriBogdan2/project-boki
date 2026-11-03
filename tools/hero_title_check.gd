@@ -34,7 +34,7 @@ func run(main: Node) -> void:
 			var found_old := _old_name_in(String(text))
 			ok(found_old == "", "%s: no old name in a player-facing label (%s)" % [id, found_old])
 		var intro := HeroTitle.intro_block(id, 300.0)
-		var has_origin := intro.get_child_count() == 2 and intro.get_meta("hero_intro") == id
+		var has_origin: bool = intro.get_child_count() == 2 and intro.get_meta("hero_intro") == id
 		ok(has_origin, "%s class intro has origin and story" % id)
 		intro.free()
 		ok(HeroTitle.origin_line(id).contains(HeroTitle.base_name(id)), "%s intro says who it was originally" % id)
