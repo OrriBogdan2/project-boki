@@ -149,8 +149,9 @@ func _reload() -> void:
 	P.lvl = 1
 	ok(not HunterKeys.ult_pressed(P), "X before level %d does nothing" % int(Hunter.ULT_AT[0]))
 	P.lvl = int(Hunter.ULT_AT[0])
-	ok(not HunterKeys.ult_pressed(P),
-		"X at level %d with no hero ultimate does nothing (ArchKit.cast_ult is false)" % P.lvl)
+	var has_own := P.ak != null and P.ak.has_ult()        # the default medium (Venator) has one: Cinderfall
+	ok(HunterKeys.ult_pressed(P) == has_own,
+		"X at level %d goes off only through a hero's own ultimate (cast_ult; has one: %s)" % [P.lvl, has_own])
 
 # ------------------------------------------------------------------ the bond hook
 func _bond() -> void:
