@@ -758,3 +758,10 @@ The owner extracted values from the game files and checked kits in-game. The fil
   
   Main does the run speeds and docs now; the bigger physics pass comes after the owner checks in.
 - If a kit pass needs a per-hunter movement value, read it from the table in supervive_physics.md. Don't hard-code it; main will expose it on the archetype data (`move_speed`, `accel`).
+
+## 2026-11-02 23:25 ET: OWNER DIRECTION: keep The Hollow Crown as the beginner map; harder tiers get other maps
+"Maybe the base map is good for beginners, and the harder maps can be different maps as well as harder enemies, so we don't waste this existing map."
+- **Changes the queued "bigger map" task:** don't grow The Hollow Crown 2-3x. Keep it as is for the beginner tiers (tier 0-1, where Boki can't be lost), and build the bigger map as a **separate map for the higher tiers**, with harder enemies there.
+- Tier picks the map. Skyreach (the existing wide map) can serve a middle tier until the new one exists.
+- It's still last in the queue, after market. No work on it before the resets.
+- **Main side, for reference:** per-hunter run speed and acceleration from the game data (`content/rules/hunter_move.json`, HunterMove) and the Archer/Juggernaut tall-ledge climb are on branch physics75. They ship with the first kitfix batch.
