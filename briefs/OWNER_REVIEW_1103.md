@@ -340,3 +340,8 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
   3. THE SUNDERING (land breaking + ships fleeing): "It broke the land into a thousand isles. The Wardens who stood against it fell, and their power scattered."
   4. THE BOKI (Boki + homestead): "On the broken isles, survivors found the Boki, and started over."
   5. THE RACE (hunters gliding in): "Somewhere in the ruins lies the Wyrmheart: one wish to remake the world, or rule it. Every hunter wants it. So does the Wyrm."
+
+## 44. Mantles explained, and merge forms look like the original Warden + Boki (owner, 07:50 UTC)
+- Lore: a Mantle is dormant until its wearer bonds with a Boki; the Boki awakens it; a Merge wakes it fully and the Bearer takes the original Warden's shape blended with the Boki. In the Lore Bible.
+- Prologue slides 3-4 text explains it (S2, ext/prologue-polish).
+- Merge forms: main's files; direction sent to main for after the concept pass (needs the base-character looks first).

@@ -28,3 +28,9 @@
   - Polish the transitions between slides, and keep the text readable over every frame.
 - Keep it lean: reuse Models, Look and existing scene code; delete what you replace; health --strict with no budget raised.
 - Deliver: a 5-frame strip per slide (start, middle, end, plus 2 key beats) at 1280x720 in shots, viewed by you; the targeted checks (--class-unlock-check covers prologue -> hatch); health, gen_wiki --check. Report it READY in STATUS before the 21:00 UTC cutoff; ext reviews the strips.
+
+## 2026-11-03 07:50 UTC: prologue-polish: two text lines change (owner wants the Mantles explained)
+- In ext/prologue-polish, change slides 3 and 4 to (keep 5 slides; the rest of the text stays):
+  - 3 THE SUNDERING: "It broke the land into a thousand isles.\nThe Wardens who stood against it fell, and their power scattered as Mantles."
+  - 4 THE BOKI: "On the broken isles, survivors found the Boki.\nA hunter bonded to one could wake a fallen Warden's Mantle."
+- Stage slide 4 to show it: the hunter kneels and the Boki touches the relic he wears (or holds), and it wakes with a glow in his class colour. Use existing glow/particle tools.

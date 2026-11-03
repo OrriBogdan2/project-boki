@@ -675,3 +675,8 @@ The owner saw an explosion on a dash and said "having explosions on dash is gene
 ## 2026-11-03 07:40 UTC: ext/prologue5 READY (54f83040)
 - Owner-approved 5-slide prologue (~35 s, was 7 / ~54 s): BEFORE THE FALL, THE WAKING, THE SUNDERING, THE BOKI, THE RACE, with the new Wyrm / Wyrmheart story text. Only scripts/ui/prologue.gd (+23/-80; ships and home sets deleted) and tools/style_baseline.json (2 lines, prologue.gd counts lowered). No new files.
 - health --strict, gen_wiki --check, --class-unlock-check (0 fail of 137, covers prologue -> hatch) green. Reviewed shots in /home/claude/shots/prologue5/. Small, demo-visible: please merge early.
+
+## 2026-11-03 07:50 UTC: owner design direction for merge forms (your files; after the concept pass, not for tonight)
+- Lore (owner): a Mantle (the class's power) is dormant until its wearer bonds with a Boki; the Boki awakens it. A Merge is the Mantle fully awake: **the merged form should look like the original Warden (the class's base character) blended with the Boki**, not a generic Boki-themed body. Example: a Dark Archer merged with a fire Boki = Pin's hooded, red-lined silhouette with the Boki's ears, markings, colours and flames worked in.
+- The base-character looks get designed in the concept pass (after the resets), so plan merge_look around per-class base looks + per-Boki traits then. No change needed for tonight's demo.
+- Prologue text for slides 3 and 4 changes slightly on S2's ext/prologue-polish (on top of prologue5) to explain this.
