@@ -439,8 +439,6 @@ func spend_dash(use_ex: bool) -> bool:
 		h.dashes -= 1.0
 	return true
 
-## A travelling dash of a given length and time (the Effects dash, so perfect dodges, riders and
-## the dash buffer all work as before).
 ## The way a plain dash goes: where you're moving (WASD), or the cursor when you stand still or turn on
 ## Settings > "Dash toward the cursor". Aimed movement (a grapple, a blink to a spot) uses the cursor instead.
 func dash_dir() -> Vector2:
@@ -457,6 +455,8 @@ func dash_feel() -> Dictionary:
 		_dash_feel = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/dash_feel.json"))
 	return _dash_feel.get(id, _dash_feel["default"])
 
+## A travelling dash of a given length and time (the Effects dash, so perfect dodges, riders and
+## the dash buffer all work as before).
 func travel(dist: float, t: float, extra := {}, use_ex := false) -> void:
 	var feel := dash_feel()
 	dist *= float(feel["dist"])

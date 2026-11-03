@@ -70,6 +70,15 @@ func _clear_mobs() -> void:
 			m.mobs.erase(mb)
 			mb.queue_free()
 
+## Metres per second over 0.3s of walking right, after half a second to get up to speed.
+func _walk_speed(P: Hunter) -> float:
+	var walk := func(): P.inp["move"] = Vector2(1, 0)
+	run_for(0.5, walk)
+	var p0 := P.pos
+	run_for(0.3, walk)
+	P.inp["move"] = Vector2.ZERO
+	return Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() / 0.3
+
 func rival() -> Hunter:
 	for h in m.hunters:
 		if h.team != m.player.team:
@@ -220,6 +229,7 @@ func _downed() -> void:
 	_fresh()
 	var P := m.player
 	var k: Kin = P.kin
+	var origin := P.pos
 	var spot := P.pos + Vector3(9.0, 0, 0)
 	k.pos = spot; k.state = "active"; k.fly = {}
 	k.go_down()
@@ -238,17 +248,33 @@ func _downed() -> void:
 	ok(k.state == "downed" and k.rescue_t > 1.0, "...it is not a scoop: 1.7s in it is still going (%.2fs)" % k.rescue_t)
 	run_for(2.2)
 	ok(k.state != "downed" and k.hp >= k.max_hp * 0.55, "...and at 3.5s it is back with a good chunk of health (%s, %.0f%%)" % [k.state, 100.0 * k.hp / k.max_hp])
-	# the rescue is interrupted by crowd control and by a dash, not by plain damage; progress drains back instead of resetting
-	k.pos = P.pos + Vector3(9.0, 0, 0); k.state = "active"; k.fly = {}
+	# you carry it while it fills: walking at 90%, nothing fires, no jump or glide (Shift or interact puts it down);
+	# hard crowd control or a launch drops it
+	P.teleport(origin)
+	var plain := _walk_speed(P)
+	P.teleport(origin)
+	k.pos = origin + Vector3(9.0, 0, 0); k.state = "active"; k.fly = {}
 	k.go_down()
 	P.teleport(Vector3(k.pos.x, k.pos.y, k.pos.z))
 	run_for(1.5)
 	ok(k.rescue_on and k.rescue_t > 1.0, "a second rescue is under way (%.2fs)" % k.rescue_t)
-	ok(KinDowned.rescue_pose(P) == "rs_cradle", "...the rescuer cradles it (pose %s)" % KinDowned.rescue_pose(P))
-	P.inp["move"] = Vector2(1, 0); P.inp["fire"] = true; P.inp["sig"] = true
+	ok(KinDowned.rescue_pose(P) == "rs_carry", "...the rescuer carries it (pose %s)" % KinDowned.rescue_pose(P))
+	ok(float(KinDowned.rules()["carry_speed_k"]) == 0.9, "carrying slows you to 90% (data: carry_speed_k)")
+	var carried := _walk_speed(P)
+	ok(
+		plain > 1.0 and absf(carried / plain - 0.9) < 0.03,
+		"...you walk at 0.9x while carrying (%.2f vs %.2f m/s)" % [carried, plain]
+	)
 	var x0 := P.pos.x
-	run_for(0.3, func(): P.inp["move"] = Vector2(1, 0); P.inp["fire"] = true)
-	ok(absf(P.pos.x - x0) < 0.1 and not P.used.has("fire"), "...you are rooted and can't attack while you do it")
+	run_for(0.3, func(): P.inp["move"] = Vector2(1, 0); P.inp["fire"] = true; P.inp["jump"] = true; P.inp["sec_hold"] = true)
+	for key in ["move", "fire", "jump", "sec_hold"]:
+		P.inp[key] = Vector2.ZERO if key == "move" else false
+	ok(P.pos.x - x0 > 0.5, "...you can walk while you do it (moved %.2fm)" % (P.pos.x - x0))
+	ok(
+		not P.used.has("fire") and P.roll_t <= 0.0 and P.grounded and k.rescue_on,
+		"...firing and jump are blocked, not cancelling"
+	)
+	ok(k.flat_dist(P) < 1.0, "...and the Boki rides with you (%.2fm)" % k.flat_dist(P))
 	P.hurt(5.0, null, {"src": "test"})
 	run_for(0.1)
 	ok(k.rescue_on, "...plain damage does not break it")
@@ -256,32 +282,30 @@ func _downed() -> void:
 	for i in 6:
 		P.hurt(3.0, Rv, {"src": "shot", "kb": Vector2(2.5, 0.0)})          # (bullets: damage and a small shove)
 		run_for(0.1)
-	ok(k.rescue_on and k.rescue_t > 1.5, "...shots during the cradle (damage and the small shove) don't stop it (%.2fs, %s)" % [k.rescue_t, k.rescue_on])
+	ok(
+		k.rescue_on and k.rescue_t > 1.5,
+		"...shots during the carry (damage and the small shove) don't stop it (%.2fs, %s)" % [k.rescue_t, k.rescue_on]
+	)
 	P.stun_t = 0.8
 	run_for(0.1)
-	ok(not k.rescue_on and k.rescue_t > 0.5, "...a stun does, and the progress is kept (%.2fs)" % k.rescue_t)
-	var held := k.rescue_t
-	run_for(0.5, func(): P.stun_t = 0.8)
-	ok(k.rescue_t < held and k.rescue_t > 0.0, "...it drains back over ~2s rather than resetting (%.2f -> %.2f)" % [held, k.rescue_t])
+	ok(
+		not k.rescue_on and k.rescue_t == 0.0 and k.state == "downed",
+		"...a stun drops it, still downed, and the progress is lost (%.2fs)" % k.rescue_t
+	)
+	ok(k.flat_dist(P) < 1.0 and absf(k.pos.y - P.pos.y) < 1.0, "...it falls where you stand")
 	P.stun_t = 0.0
-	run_for(0.3)
-	ok(k.rescue_on, "...running into it again picks it up where it was")
-	P.inp["dash"] = true
-	run_for(0.1, func(): P.inp["dash"] = true)
-	P.inp["dash"] = false
-	ok(not k.rescue_on and k.rescue_block > 0.0, "a dash cancels it too (and it will not restart for a moment)")
-	k.state = "active"; k.fly = {}
-	k.go_down()
-	# a real launch interrupts it; an enemy standing on the Boki blocks the pick-up and pauses the progress
-	P.teleport(k.pos)
-	run_for(1.0)
+	run_for(0.2)
+	ok(not k.rescue_on, "...and it will not restart for a moment")
+	run_for(0.8)
+	ok(k.rescue_on, "...running into it again picks it up")
+	# a real launch interrupts it; an enemy within 1.2m of you pauses the progress and blocks the pick-up
 	P.impulse(Vector2(14.0, 0.0), 6.0)
 	run_for(0.1)
-	ok(not k.rescue_on, "...a launch (a knock-up) does interrupt it")
+	ok(not k.rescue_on and k.rescue_t == 0.0, "...a launch (a knock-up) drops it too")
 	P.teleport(k.pos)
 	P.vel = Vector3.ZERO
-	run_for(1.0, func(): Rv.teleport(Vector3(k.pos.x + 30.0, k.pos.y, k.pos.z)))
-	ok(k.rescue_on and not KinDowned.contested(k), "setup: a rescue under way with nobody on the Boki")
+	run_for(1.5, func(): Rv.teleport(Vector3(k.pos.x + 30.0, k.pos.y, k.pos.z)))
+	ok(k.rescue_on and not KinDowned.contested(k), "setup: a rescue under way with nobody near")
 	var held2 := k.rescue_t
 	run_for(0.5, func(): Rv.teleport(Vector3(k.pos.x + 0.8, k.pos.y, k.pos.z)))
 	ok(KinDowned.contested(k) and k.rescue_t <= held2 + 0.05, "an enemy on the Boki pauses the progress (%.2fs -> %.2fs)" % [held2, k.rescue_t])
@@ -291,6 +315,25 @@ func _downed() -> void:
 	ok(not k.rescue_on and k.rescue_t == 0.0 and k.state == "downed", "...and while they stand there you cannot start picking it up")
 	run_for(0.5, func(): Rv.teleport(Vector3(k.pos.x + 30.0, k.pos.y, k.pos.z)))
 	ok(k.rescue_on, "...once they leave, you can")
+	P.inp["dash"] = true
+	run_for(0.05)
+	P.inp["dash"] = false
+	run_for(0.05)
+	ok(not k.rescue_on and k.rescue_t == 0.0 and P.roll_t <= 0.0, "Shift puts it down (and no dash happens)")
+	run_for(1.0)
+	ok(not k.rescue_on, "...it stays down until you step away")
+	var foe := rival()
+	foe.teleport(Vector3(k.pos.x + 3.0, k.pos.y, k.pos.z))
+	P.teleport(Vector3(k.pos.x + 4.0, k.pos.y, k.pos.z))
+	run_for(0.3, func(): foe.teleport(Vector3(k.pos.x + 3.0, k.pos.y, k.pos.z)))
+	P.teleport(Vector3(k.pos.x + 0.4, k.pos.y, k.pos.z))
+	run_for(0.8, func(): foe.teleport(Vector3(k.pos.x + 3.0, k.pos.y, k.pos.z)))
+	ok(not k.rescue_on, "...and with a foe within 6m running into it does not pick it up")
+	P.inp["interact"] = true
+	run_for(0.1, func(): foe.teleport(Vector3(k.pos.x + 3.0, k.pos.y, k.pos.z)))
+	P.inp["interact"] = false
+	ok(k.rescue_on, "...interact does")
+	foe.teleport(Vector3(k.pos.x + 30.0, k.pos.y, k.pos.z))
 	k.rescue_on = false
 	k.state = "active"; k.fly = {}
 	k.go_down()
