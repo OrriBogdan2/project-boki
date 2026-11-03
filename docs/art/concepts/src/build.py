@@ -16,7 +16,8 @@ one lighting model (key light upper left, rim light right):
 class="fx" marks glows and particles (left out of the black silhouette row).
 Shape helpers (expanded first, into plain paths):
   <limb pts="x y r; x y r; ..." m="mat"/>  a smooth tapered capsule along a spline
-               through the points, r the half-width at each (muscles, fingers, tails)
+               through the points, r the half-width at each (muscles, fingers, tails);
+               fluff="0.2" scallops the edge into tufts (per="n" sets tufts per segment)
   <brush pts="x y w; ..." c="#hex|rim"/>  a tapered ink stroke (w the half-width;
                give the ends 0 for a brush point), ink by default
 
@@ -108,8 +109,8 @@ def _spline(pts, per=10):
     return out
 
 
-def _outline(pts):
-    smp = _spline(pts)
+def _outline(pts, fluff=0.0, per=10):
+    smp = _spline(pts, per)
     n = len(smp)
     left, right = [], []
     for i, (x, y, r) in enumerate(smp):
@@ -117,8 +118,9 @@ def _outline(pts):
         dx, dy = b[0] - a[0], b[1] - a[1]
         d = math.hypot(dx, dy) or 1.0
         nx, ny = -dy / d, dx / d
-        left.append((x + nx * r, y + ny * r))
-        right.append((x - nx * r, y - ny * r))
+        k = (1 + fluff if i % 2 else 1 - fluff * 0.4) if fluff and 0 < i < n - 1 else 1.0
+        left.append((x + nx * r * k, y + ny * r * k))
+        right.append((x - nx * r * k, y - ny * r * k))
     loop = list(left)
 
     def cap(c, r, ang0):
@@ -143,12 +145,43 @@ def _pts(s):
     return [tuple(float(v) for v in chunk.split()) for chunk in s.split(";") if chunk.strip()]
 
 
+def _element(src, eid):
+    """The full <g id="eid">...</g> element from src (balanced), or ''."""
+    i = src.find('<g id="%s"' % eid)
+    if i < 0:
+        return ""
+    depth, j = 0, i
+    for mo in re.finditer(r"<g\b[^>]*?(/?)>|</g>", src[i:]):
+        if mo.group(0) == "</g>":
+            depth -= 1
+        elif not mo.group(1):
+            depth += 1
+        if depth == 0:
+            j = i + mo.end()
+            break
+    return src[i:j]
+
+
+def inline_uses(svg, lib):
+    """Replace <use href="#L-x"> with a copy of L-x from lib (for the silhouette pass)."""
+    def sub(mo):
+        el = _element(lib, mo.group(1))
+        el = re.sub(r'^<g id="[^"]*"', "<g", el)
+        return '<g %s>%s</g>' % (mo.group(2), el) if el else mo.group(0)
+    for _ in range(3):
+        svg = re.sub(r'<use href="#(L-[\w-]+)"\s*([^<>]*?)/>', sub, svg)
+    return svg
+
+
 def shapes(svg, meta):
     """Expand <limb> and <brush> into paths (see the module doc)."""
     def limb(mo):
         attrs = mo.group(2)
-        d = _outline(_pts(re.search(r'\bpts="([^"]*)"', attrs).group(1)))
-        attrs = re.sub(r'\s*\bpts="[^"]*"', "", attrs)
+        fl = re.search(r'\bfluff="([^"]*)"', attrs)
+        per = re.search(r'\bper="([^"]*)"', attrs)
+        d = _outline(_pts(re.search(r'\bpts="([^"]*)"', attrs).group(1)),
+                     float(fl.group(1)) if fl else 0.0, int(per.group(1)) if per else 10)
+        attrs = re.sub(r'\s*\b(pts|fluff|per)="[^"]*"', "", attrs)
         if mo.group(1) == "brush":
             c = re.search(r'\bc="([^"]*)"', attrs)
             col = c.group(1) if c else INK
@@ -217,7 +250,7 @@ def expand(svg, meta, silhouette=False):
     def m_sub(mo):
         tag = mo.group(0)
         lw = re.search(r'\blw="([^"]*)"', tag)
-        w = lw.group(1) if lw else "3"
+        w = lw.group(1) if lw else str(meta.get("lw", 3))
         tag = re.sub(r'\s*\blw="[^"]*"', "", tag)
         return re.sub(r'\bm="([^"]*)"', lambda k: 'fill="%s" stroke="%s" stroke-width="%s" '
                       'stroke-linejoin="round" stroke-linecap="round"' % (_mat_ref(cid, k.group(1)), INK, w), tag)
@@ -356,7 +389,7 @@ def lineup(items):
         p.append(T.run(meta["name"], x, g1 + 28, 15, "L", INK, "middle"))
         p.append(T.run("%s  ·  %.2f m" % (meta["title"], meta.get("height_cm", 180) / 100), x, g1 + 44, 10, "R", "#6d6377", "middle"))
         p.append('<g transform="translate(%.1f %d) scale(%g)">%s</g>'
-                 % (x, g2, sc, expand(g["front"], meta, silhouette=True)))
+                 % (x, g2, sc, expand(inline_uses(g["front"], g["defs"] + g["front"]), meta, silhouette=True)))
         p.append(T.run(meta["name"], x, g2 + 26, 13, "L", "#6d6377", "middle"))
     p.append('<rect x="0" y="412" width="1600" height="2" fill="#bdb3a6"/>')
     return ('<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="780" viewBox="0 0 1600 780">'
