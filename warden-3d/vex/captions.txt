@@ -10,3 +10,13 @@ moves_close_1.png: run (two stride phases), shoot (gunslinger_lmb at 0.03 s), re
 moves_close_2.png: Combat Slide dash at 0.1 s, 0.4 s (low) and 0.62 s (standing up), then the RMB throw at 0.07 s (the slide sinks into this flat test ground on the procedural model too)
 poses_game.png: idle, run, attack, cast, ult at the match camera
 procedural_fallback_front_34.png: the procedural fallback (Settings > Video > Warden models: off) with Vex's new proportions, for comparison
+
+Blender pass (tools/blender/vex.py; replaces the interim mesh above in the game):
+blender_turnaround.png: Blender render (Cycles) of the exported model and its baked atlas: front, 3/4, side, back, rifle hanging in her right hand
+blender_gameplay_match.png: the Blender Vex in a real match (Duskmoor) at the default match camera, centre
+blender_gameplay_zoom.png: the same frame around her, enlarged x4 (nearest): navy beret, orange scarf, the sigil plate, the rifle
+blender_closeup.png: head and shoulders in game, three-quarter: the brass-rimmed lens, her human eye and brows, the beret, the eye-sigil plate over her mechanical arm, the scarf
+blender_front_34.png: full length in game, front and three-quarter, her own rifle (the weapon mesh) in her hands
+blender_vs_sheet.png: her turnaround sheet beside the in-game model, the match-camera strip below
+blender_turnaround_close.png / blender_turnaround_game.png: five angles close and at the match camera
+blender_moves_close_1.png / blender_moves_close_2.png: run, shoot, recoil; Combat Slide (three moments), RMB throw

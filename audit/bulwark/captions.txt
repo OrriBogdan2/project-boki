@@ -1,0 +1,4 @@
+strip_bul_whirl.png: 360 Smash after the audit: the run-up with no gold start burst (1-2), the one spin with its red-gold swirl (the 2.2 m hit area, gameplay) (3-4), the crouched recovery (5-6)
+strip_bul_lumber.png: the long air/out-of-charges dash (lumber) after the audit: the shoulder shove with dust only, no gold bursts along it
+strip_bul_ult_slam.png: Faultline after the audit: the fissure races down the lane and strikes the dummy (4, STUNNED) before its cell erupts (1-2), then the eruption throws it (18, total 22) with a heavy slow (3-5); no second stun
+strip_bul_throw.png: the throw after the audit: wind-up, release, the hammer planting at the dummy under its beacon with no ring at the plant (4-6)
