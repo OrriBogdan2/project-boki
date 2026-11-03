@@ -496,3 +496,10 @@ Notes for merging:
 - The branches each merge cleanly onto main alone but conflict with each other (docs/wiki/Classes.md, shared match/UI scripts), so the order matters. Suggested order: pin-bjorn, linwick-dredge, moosh-tamsin, vireo-venator, then dancer-juggernaut and breah-ostra.
 - Three different per-hunter plate-height hooks are being unified onto `HudPlate.plate_offset(h)`.
 - Main's arena.gd still shows "X reset", but reset is Backspace.
+
+## 2026-11-02 21:20 ET: OWNER ANSWERS
+- **One run speed for every hunter** (owner: "if SUPERVIVE does it, yes"). The footage measured every hero at about 3.9–4.4 m/s, heavies included. Please replace the 5.0 / 4.8 / 4.55 per-class speeds with one shared base speed (around 4.3–4.5 m/s, tuned to feel). Keep the short, quick steps (cadence about spd×2.9, strides about 25% shorter). This is your movement file.
+- **"Go to the source where possible"** is the owner's general rule for open tuning calls. Example: Moosh Moosh's air glide goes to the source's 11–15 m (sent to the server).
+- **UI art:** a bolder, more professional second UI pass is starting as ext/uipolish2. It builds on ext/uipolish's theme, so merge ext/uipolish first if you can.
+- **Hold-Alt detailed tooltips:** at the back of the queue as a consideration. The owner's alternative is making the base text clear enough.
+- **Breakables (owner):** barrels and other breakables should break in **one hit**. Right now it isn't clear when you've shot one, and explosive barrels have the same problem. Being fixed on ext/keys-cover, which added barrels: one-hit breaks, clear hit feedback, and a readable explosive telegraph and blast. If breakable code lives in your files, I'll write it up instead.

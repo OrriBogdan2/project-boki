@@ -285,3 +285,7 @@ The reviews are in briefs/kit-review/round2/. **PASS (minor nits): Pin, Bjorn, V
 - **linwick-dredge:** Dredge's ult slug waves can't be seen at gameplay zoom, and the fan telegraph is near-white. Use bigger, saturated slug projectiles with trails and a coloured fan. Plus the X text fix.
 - **moosh-tamsin:** Tamsin's skate lean stacks with the shared light-dash lean to about 60°, so she lies nearly flat. Clamp the combined lean to about 20-25°. Her Ice Spear still reads white; colour it ice-blue. Plus the Merge text fix. Nit: brighten Moosh Moosh's shot in flight.
 - **For whoever merges second and later:** the branches use three different hooks for per-hunter nameplate height. Converge on ext/hudref's `HudPlate.plate_offset(h)`, which reads `plate_offset` from the archetype JSON.
+
+## 2026-11-03 02:20 UTC: owner answers
+- **moosh-tamsin:** Moosh Moosh's air glide goes to the **source distance, about 11–15 m (start at 12 m)**. The owner's rule is "go to the source where possible". Data only; update the check bound.
+- **General rule for every kit pass:** where a number or behaviour is an open call, go to the source.
