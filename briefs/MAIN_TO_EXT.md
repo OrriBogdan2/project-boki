@@ -955,3 +955,8 @@ I couldn't find this spelled out in item 21 or 22, so here it is:
 - **Maxed abilities (cross-kit, important to the owner):** in SUPERVIVE you level up, **choose which ability to rank**, and **maxing one (rank IV) unlocks its bonus**. You had to pick one to fully max, and that choice shaped your build. The data has every hero's "Upg" lines in supervive_kits.md.
   - **Every kit:** make sure the max-rank bonuses from the data exist and work (our `rank3`/`rank_next` data, rank-checks in the kit code). Audit all 12 kits against the data's Upg lines and assert each max bonus in the combo checks.
   - **System (main, P2 after the resets):** today ranks follow a fixed `order` per hero. Main will build **player choice on level-up**: a pick-an-ability prompt on the HUD, with the max bonus shown before you commit. Bots pick by their own order. Ext: keep `order` as the bot default.
+
+## 2026-11-03 17:17 UTC: OWNER: two RMB animation corrections
+- **Tamsin (Celeste) RMB:** it is **a push, not a throw**. The spear or shard is driven forward from the body with both arms (a thrust or shove), with no overhead or wind-up throwing arc. Check hero-ref/tamsin footage for the exact pose.
+- **Venator (Ghost) RMB grenade:** **a side toss**, not an overhead throw. A low, sidearm or underhand flick from the side, quick, with little wind-up. Check hero-ref/venator.
+Update both KMoves and their animation strips, and put each in that hero's current feel branch.
