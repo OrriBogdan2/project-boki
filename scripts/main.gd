@@ -1078,7 +1078,7 @@ func _economy_check() -> void:
 	var at := P.pos + Vector3(0.6, 0, 0)
 	# 1. a full backpack asks what to drop
 	P.pack_cap = 2
-	P.pack = [Loot.valuable("old_coin"), Loot.gear("tinker_roll", 1)]
+	P.pack = [Loot.valuable("old_coin"), Loot.gear("vest", 1)]
 	m.spawn_val(Loot.valuable("kin_idol"), at)
 	var wp: Dictionary = m.wpicks[m.wpicks.size() - 1]
 	Pack.take_ground(m, P, wp)

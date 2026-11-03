@@ -1498,7 +1498,7 @@ func _spawn_breakables() -> void:
 				if Vector2(x, float(row[0])).length() <= 6.2:
 					spots.append(Vector3(x, 0, float(row[0])))
 		var used: Array = [Vector3(-2.0, 0, 1.2), Vector3(-2.6, 0, 2.2), Vector3(1.4, 0, 1.6), Vector3(3.6, 0, 2.6), Vector3(-3.6, 0, 2.6), Vector3(0, 0, 4.0)]
-		for gid in ["blink", "quake", "bubble", "bastion_plate", "windstep_boots", "tinker_roll"]:
+		for gid in ["blink", "quake", "bubble", "bastion_plate", "windstep_boots", "vest"]:
 			for off in spots:
 				var q2: Vector3 = player.pos + off
 				if used.any(func(u): return (u as Vector3).distance_to(off) < 2.3):
@@ -3912,7 +3912,7 @@ func step(dt: float) -> void:
 		set_meta("pack_demo_done", true)
 		player.pack_cap = 6
 		var gk: Array = Gear.ALL.keys()
-		player.pack = [Loot.gear("skylark_boots", 2), Loot.valuable("sky_pearl"), Loot.gear(String(gk[1 % gk.size()]), 2), Loot.gear("tinker_roll", 1), Loot.valuable("old_coin"), Loot.valuable("kin_idol")]
+		player.pack = [Loot.gear("skylark_boots", 2), Loot.valuable("sky_pearl"), Loot.gear(String(gk[1 % gk.size()]), 2), Loot.gear("vest", 1), Loot.valuable("old_coin"), Loot.valuable("kin_idol")]
 		player.gear[Gear.slot_on(player, String(gk[0]))] = {"id": String(gk[0]), "rar": 3}
 		player.refresh_gear()
 		var pat := world.free_spot_near(player.pos + Vector3(1.0, 0, 0.6), [player.pos], 0.6)

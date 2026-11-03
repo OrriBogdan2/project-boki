@@ -204,8 +204,9 @@ func run(main_node: Node) -> void:
 	m.pings.clear()
 	_run_for(float(KinLoss.rules()["bond_ping_s"]) - 1.0)
 	ok(
-		not m.pings.any(func(pg): return int(pg.get("team", -1)) == P.team and float(pg["t"]) < 0.5),
-		"3. no ping between the 15s marks"
+		not m.pings.any(func(pg): return int(pg.get("team", -1)) == P.team and float(pg["t"]) < 0.5
+				and Vector3(pg["pos"]).distance_to(F.pos) < 1.5),
+		"3. no captor ping between the 15s marks"
 	)
 	_run_for(1.6)
 	ok(

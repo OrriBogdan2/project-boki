@@ -145,8 +145,10 @@ func _chest_and_keys() -> void:
 	ok("a rival can loot them", R.chest_keys == 3 and int(box["chest_keys"]) == 0, "keys %d" % R.chest_keys)
 	# on the ground
 	R.chest_keys = 0
+	BeltKeys.sync(R)
+	R.ctrl = "idle"; R.inp["move"] = Vector2.ZERO      # (it waits by the key, not wandering off an edge)
 	var np := m.pickups.size()
-	m.drop("ckey", R.pos + Vector3(0.2, 0.6, 0), 1)
+	m.drop("ckey", R.pos + Vector3(0.2, 0.6, 0), 1, "", "", Vector3.ZERO)
 	ok("a dropped key lies on the ground", m.pickups.size() == np + 1 and String(m.pickups[-1]["kind"]) == "ckey")
 	step(m, 1.5)
 	ok("walking into it picks it up", R.chest_keys == 1, "keys %d" % R.chest_keys)

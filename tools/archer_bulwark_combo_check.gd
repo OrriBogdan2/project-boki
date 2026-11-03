@@ -155,6 +155,7 @@ func _archer_combos() -> void:
 	ok("pin anim: a tap shot plays arc_tap", K.anim_id == "arc_tap", K.anim_id)
 	step(m, 0.6)
 	# overdraw: held 0.5s past Supercharged, the arrow does half
+	for b in m.breaks: b["dead"] = true      # (no crate or keg in the arrow's way: this is about the bow)
 	T.teleport(home + Vector3(7.0, 0, 0))
 	T2.teleport(home + Vector3(9.0, 0, 0))
 	fresh(T)
