@@ -61,6 +61,9 @@ it bursts it for 2 Static on everyone near it. It does not give Wirerun back (ow
 | Kitefall on an enemy hunter, then the Merge | the strike fills the bond (KinBond.from_ult, a hit); the merge straight after never one-shots a full-health light hunter | `--mage-combo-check` (burst) |
 | Kitefall as a dodge | invulnerable from the take-off to the strike; a strike on nobody pays no bond | `--mage-combo-check` |
 | Boki merge while she hangs | she drops where she took off, nothing strikes, the cooldown stays spent | `--mage-combo-check` |
+| Shift in Kitefall's crouch (item 51) | the Wirerun charges at once; the crouch waits, starts over where the run ended, and she launches from there (the ring moves with her) | `--mage-combo-check` (`Kitefall + Shift ...`) |
+| Jump in Kitefall's crouch (item 51) | the jump goes at once and she launches from up there; the climb starts at her height (no drop first) | `--mage-combo-check` (`Kitefall + jump ...`) |
+| Shift or a jump while Kitefall has her up | nothing: the flight is the ult's own move, held over the ring (the recorded exception in content/dash_flow/mage.json) | `--dash-flow-check` |
 
 ## Small mechanics
 | Mechanic | Source | Footage | Built and checked |

@@ -111,8 +111,14 @@ func mage() -> void:
 	ac.step(m, 0.6)
 	await _mage_whiff(m, P, K, home)
 	await _mage_merge(m, P, K, home)
+	_mage_shift(m, P, K, home)
+	_mage_jump(m, P, K, home)
 	await ac.done(m)
 	await _mage_burst()
+	var flow = load("res://tools/dash_flow_check.gd").new()
+	var bad: int = await flow.combos_of(hc.main, "mage")
+	ok("Vireo item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; the Rod held through every move",
+			bad == 0, "%d failing (the DASHFLOW lines)" % bad)
 
 ## A cast that strikes empty ground: comes down by itself at the cursor when the hover runs out, pays no bond.
 func _mage_whiff(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
@@ -149,6 +155,72 @@ func _mage_merge(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 			not U.running() and U.hits == hits and P.pos.y < home.y + 0.6 and float(K.cd["x"]) > 0.0,
 			"y +%.1f" % (P.pos.y - home.y))
 	KinMerge.end(P, "test")
+
+## Item 51: Shift in Kitefall's crouch charges the Wirerun at once; the crouch waits for the run, starts over
+## where it ended, and she launches from there (the ring moves with her) and still comes down.
+func _mage_shift(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
+	var U := K.ult
+	K.cd["x"] = 0.0
+	P.teleport(home)
+	P.dashes = P.max_dashes()
+	ac.aim_at(P, home + Vector3(6, 0, 0))
+	HunterKeys.ult_pressed(P)
+	ac.step(m, 0.05)
+	var d0 := P.dashes
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	m.step(hc.DT)
+	P.inp["dash"] = false
+	var went := P.dashes < d0 - 0.5 and not K.wire.is_empty()
+	ac.step(m, 0.3)
+	P.inp["dash_down"] = false
+	var t := 0.0
+	var crouched_again := false
+	while U.phase() == MageUlt.CROUCH and t < 2.0:
+		m.step(hc.DT)
+		t += hc.DT
+		crouched_again = crouched_again or (K.run_t <= 0.0 and K.anim_id == "mage_x")
+	var from: Vector3 = U.leap.get("from", home)
+	ok("Kitefall + Shift (item 51): the Wirerun goes from the crouch, then she launches where it took her",
+			went and crouched_again and U.phase() == MageUlt.RISE and hc._flat(from, home) > 2.0
+			and hc._flat(P.pos, from) < 0.3 and AimKit.entry(P, "x_ring").get("at", from) == from,
+			"went %s crouch %s %s from %.1f m out" % [went, crouched_again, U.phase(), hc._flat(from, home)])
+	var xd := K.x_def()
+	ac.step(m, float(xd["rise"]) + float(xd["hover"]) + float(xd["drop"]) + 0.1)
+	ok("Kitefall + Shift (item 51): she still comes down and strikes", U.phase() == MageUlt.AFTER, U.phase())
+	ac.step(m, 0.6)
+
+## Item 51: a jump in Kitefall's crouch goes at once; she launches from up there and the climb starts at her
+## height (it never drops her back to the ground first).
+func _mage_jump(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
+	var U := K.ult
+	K.cd["x"] = 0.0
+	P.teleport(home)
+	ac.aim_at(P, home + Vector3(6, 0, 0))
+	HunterKeys.ult_pressed(P)
+	ac.step(m, 0.05)
+	P.inp["jump"] = true
+	var y0 := P.pos.y
+	var left_at := -1.0
+	var dip := 0.0
+	var last_y := P.pos.y
+	var t := 0.0
+	while U.phase() != MageUlt.AIR and t < 1.5:
+		m.step(hc.DT)
+		t += hc.DT
+		P.inp["jump"] = false
+		if left_at < 0.0 and P.pos.y > y0 + 0.01 and P.vel.y > 0.5:
+			left_at = t
+		if U.phase() == MageUlt.RISE:
+			dip = maxf(dip, last_y - P.pos.y)
+		last_y = P.pos.y
+	ok("Kitefall + jump (item 51): the jump goes within 0.1 s of the press, from the crouch",
+			left_at >= 0.0 and left_at <= 0.1 + 0.001, "%.2f s" % left_at)
+	ok("Kitefall + jump (item 51): she climbs from her jump height, never dropping first, and hangs",
+			U.phase() == MageUlt.AIR and dip < 0.05, "dip %.2f m %s" % [dip, U.phase()])
+	var xd := K.x_def()
+	ac.step(m, float(xd["hover"]) + float(xd["drop"]) + 0.1)
+	ac.step(m, 0.6)
 
 func _mage_burst() -> void:
 	var res: Dictionary = await BURST.run(ac, "mage", 6.0, func(m: Match, P: Hunter, T: Hunter):

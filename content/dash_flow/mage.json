@@ -13,10 +13,10 @@
 		}
 	},
 	"into_dash": {
-		"x": {"mode": "lock", "reason": "today's behaviour, to review", "source": "Not checked against the source yet. Ours today (measured by --dash-flow-check): Shift during Kitefall does nothing (it holds her; MageKit.on_dash refuses while ult.busy())."}
+		"x": {"mode": "fire", "reason": "Only in the flight: once she is up, Shift is refused.", "source": "Not in the data or footage for the crouch: Shift in Kitefall's 0.3s crouch goes at once (the Wirerun charges, or the air dash goes), the crouch waits and starts over where it took her, and she launches from there. The flight (rise, hang, drop) is the ult's own move: the source launches her up and she comes down at a spot she picks (card: 'launch into the air, then pick a location on the ground to forcefully land'; footage vireo.md 0353-0383: she hangs, then streaks down, no other move). Ours holds her over the ring's centre, invulnerable, so a dash there would carry her out of the ring."}
 	},
 	"into_jump": {
-		"x": {"mode": "lock", "reason": "today's behaviour, to review", "source": "Not checked against the source yet. Ours today (measured by --dash-flow-check): no jump during Kitefall (MageUlt clears the jump key while it holds her)."}
+		"x": {"mode": "fire", "reason": "Only in the flight: once she is up, a jump does nothing.", "source": "Not in the data or footage for the crouch: a jump in Kitefall's 0.3s crouch goes, and she launches from up there (the climb starts at her height). The flight is the ult's own move (as into_dash.x): she is already in the air, held over the ring's centre."}
 	},
 	"hold": {
 		"rmb": {
