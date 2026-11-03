@@ -1,17 +1,18 @@
 # S2 status (second server session)
-Updated: 2026-11-03 09:50 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
+Updated: 2026-11-03 14:38 UTC (git/server clock). Last INBOX_S2 handled: 14:25 (pre-merge physics76 into the demo branches).
 
 
-## FOR MAIN: S2 merge plan (all READY and ALL NOW ON CURRENT MAIN 16dd7fa / integ77; demo cutoff 21:00 UTC; every S2 pair made it)
-Each branch below already contains origin/main 16dd7fa (merged via ext/dash-flow-base), conflicts resolved and re-checked (hero combo checks, dash-flow, class-unlock, archetype, keys, health), so each should merge into main without conflicts on its own. Merging them into each other may still touch the generated docs/heroes/dash_interactions.md and docs/wiki (rerun tools/gen_wiki.py), tools/style_baseline.json, content/rules/hunter_viewer.json (keep each hero's row from its own branch).
-1. `ext/dash-flow-base` @ bf711e9 (shared item 32 helper + check; contains main).
-2. `ext/review-breah-ostra` @ 3d581a4 (Breah + Ostra; also fixes main's flaky --work-check).
-3. `ext/review-linwick-moosh` @ a633725 (Linwick + Moosh Moosh AND Tamsin + Dredge; supersedes ext/review-tamsin-dredge).
-4. `ext/review-dancer` @ a39df9a (Dancer AND Zedran; supersedes ext/review-zedran-bjorn).
-5. `ext/review-bjorn` @ 4a985a1 (Bjorn AND Pin: S1's kitdata-pin-bjorn + the shared DashFlow replacing S1's duplicate; merge this instead of kitdata-pin-bjorn). With this in, --dash-flow-check is 0 failures (alone, branches 1-4 show 1 known failure: Bjorn air dash -> LMB, fixed here).
-6. `ext/prologue-polish` @ 2a03634 (contains ext/prologue5 and main 16dd7fa; merge this instead of prologue5).
-Full suites were run on each branch's pre-main-merge head (results below); after the main merge each got targeted re-checks, all green.
-Not for tonight: `ext/concepts` 87c121b (concept sheets, for ext/owner review), `ext/mantle-look` @ d6558b6 READY (post-demo; save v8).
+## FOR MAIN: S2 merge plan (all READY, ALL NOW CONTAIN MAIN 4d39c623 / physics76; demo cutoff 21:00 UTC; every S2 pair made it)
+Re-verified at 14:36 UTC on physics76. Each branch below has origin/main 4d39c623 merged in, conflicts resolved, and was re-checked (that hero's combo checks, --dash-flow-check, --move-feel-check, --dash-dir-check, --hero-combo-check, --zone-check, --class-unlock-check, --archetype-check, --keys-check, health --strict): all 0 failures except the known Bjorn row of --dash-flow-check on branches 1-4 (fixed by branch 5).
+**Trial integration (main 4d39c623 + all six below + S1's ext/airdash-glide 411a591 + ext/kitdata-vireo-venator 67454b5, merged in plan order): every check 0 failures**: airdash-glide, dash-flow (0, Bjorn fixed), move-feel, dash-dir, zone, keys, archetype 299, class-unlock 137, hero-combo 221, all 12 hero combo checks (dolm 118, ostra 128, ashwick 86, tender 72, rimewright 68, dredge 86, dancer 92, juggernaut 135, bulwark 102, archer 119, mage 83, gunslinger 67), prologue, title, health. Logs /home/boki/suite-s2/phys-s2-integ.
+The only conflict seen merging them all is the generated `docs/heroes/dash_interactions.md` (take either side, then `python3 tools/gen_wiki.py`) and the `--airdash-glide-check` line in tools/check_registry.gd next to `--dash-flow-check` (keep both lines).
+1. `ext/dash-flow-base` @ aa37aaf (shared item 32 helper + check).
+2. `ext/review-breah-ostra` @ e20c738 (Breah + Ostra; also fixes main's flaky --work-check). **Physics76 fix in e20c738:** the new gravity made Breah's Quakefall hop hang 0.7 s / 0.88 m (8 dolm asserts failed): hop_up 5.1 -> 3.1 (a ~0.42 s hop, ~0.33 m up), breah_slam keys retimed so the smash lands on the landing frame, charge leap_up 8 -> 6.8 (rides the jump), Rubble Leap gets its own leap_grav 30 (same 0.45 s flight and landing, a readable ~0.9 m arc instead of 0.46 m). dolm 118/0.
+3. `ext/review-linwick-moosh` @ e718d87 (Linwick + Moosh Moosh AND Tamsin + Dredge). Physics76: clean, Moosh glide ratio, Tamsin/Dredge holds all pass (tender 72/0, rimewright 68/0, dredge 86/0, ashwick 86/0).
+4. `ext/review-dancer` @ 7ae07b9 (Dancer AND Zedran). Physics76: one check-file conflict (main lengthened the cartwheel wait for the longer jump; kept the branch's stricter asserts with a 2.4 s wait); Zedran air slam passes (juggernaut 135/0). arena_demo strip code now identical to branch 2's so they merge cleanly.
+5. `ext/review-bjorn` @ c31d4db (Bjorn AND Pin; merge this instead of kitdata-pin-bjorn). With this in, --dash-flow-check is 0 failures. Decision doc line aligned with branch 2 so they merge cleanly.
+6. `ext/prologue-polish` @ a1eecbe (contains ext/prologue5; merge this instead of prologue5). prologue + title checks pass.
+Not for tonight: `ext/concepts` 87c121b (concept sheets, for ext/owner review), `ext/mantle-look` @ d6558b6 READY (post-demo; save v8; not yet re-merged on physics76).
 Shots: `ext/hero-shots-s2` (README with captions).
 
 ## Infra
