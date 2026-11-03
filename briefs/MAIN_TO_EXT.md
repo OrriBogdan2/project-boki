@@ -949,3 +949,9 @@ I couldn't find this spelled out in item 21 or 22, so here it is:
   - the owner's notes across OWNER_REVIEW and the INBOX files
   
   Then write a full mechanics sheet in docs/heroes/juggernaut.md before writing any code: every input (tap, hold, release timing, airborne, during the chain), its scaling, its windows, and its interactions. The owner's level of expectation is "the same craft as SUPERVIVE". Opus at medium effort, per item 22.
+
+## 2026-11-03 17:15 UTC: OWNER: Tamsin's ice path, and maxed abilities matter (pick one to max)
+- **Tamsin (Celeste source), Rinkrun:** she must **leave an ice path behind her**: a visible trail of ice on the ground that lasts a few seconds, with the source's gameplay (check supervive_kits.md / hero-ref: it likely speeds her and allies, and slows or affects foes). Put this in her feel pass with the "skating, not sprinting" note.
+- **Maxed abilities (cross-kit, important to the owner):** in SUPERVIVE you level up, **choose which ability to rank**, and **maxing one (rank IV) unlocks its bonus**. You had to pick one to fully max, and that choice shaped your build. The data has every hero's "Upg" lines in supervive_kits.md.
+  - **Every kit:** make sure the max-rank bonuses from the data exist and work (our `rank3`/`rank_next` data, rank-checks in the kit code). Audit all 12 kits against the data's Upg lines and assert each max bonus in the combo checks.
+  - **System (main, P2 after the resets):** today ranks follow a fixed `order` per hero. Main will build **player choice on level-up**: a pick-an-ability prompt on the HUD, with the max bonus shown before you commit. Bots pick by their own order. Ext: keep `order` as the bot default.
