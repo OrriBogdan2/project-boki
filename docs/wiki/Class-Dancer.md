@@ -6,10 +6,10 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 ## How it plays
 
 1. Hold left click: a bolt leaves each hand in turn every 0.45s and lands at your cursor. Each hit adds a
-   **Mark** to the target (up to 8, each one +12% damage from your bolts).
-2. **Vault** (Shift): a short cartwheel. Your next bolt is **empowered**: a big blue chakram for 3.5 times
-   the damage, two Marks and Shred. The aim line turns gold while it's ready.
-3. Land it and Vault comes back. Cartwheel again. Keep the chain going and the Marks never drop.
+   **Mark** to the target (no cap, each one +10% of a bolt on your bolts).
+2. **Vault** (Shift): a quick sideways cartwheel. Your next bolt is **empowered**: a big blue chakram for 2.3
+   times a bolt (your Marks add to it as usual). You can throw it mid-flip. The aim line turns gold while it's ready.
+3. Land it and Vault comes back at once. Cartwheel again. Keep the chain going and the Marks never drop.
 4. **Bola** (right click): the lane shows for a moment while you aim, then the Bola grounds the first foe
    and flies on; catch a second and both are stunned. It bounces once off a wall.
 5. **Encore** (X, from level 6): a violet ring grows round you and rides with you; for 2s blades fly at every
@@ -20,7 +20,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 
 | Do this | And you get |
 |---|---|
-| Vault, then a bolt that hits within 3s | Empowered: 3.5x, 2 Marks, Shred; Vault comes back and the speed boost ends |
+| Vault, then a bolt that hits within 3s | Empowered: 2.3x a bolt and a Mark; Vault comes back at once and the speed boost ends |
 | Vault, then a bolt that misses | The empowered shot is spent |
 | Bola into a single foe | Grounded 1.5s: no dash, jump or glide, slowed; yellow rings bind them |
 | Bola catches a second foe | Both stunned 0.9s and +13 damage (TANGLED). At rank 3 their Marks pool |
@@ -59,7 +59,7 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Ranged duelist: stay on one foe, cartwheel, and land the big shot. |
 | Passive: Marks | Each hit on the same foe adds a Mark: +10% damage, with no cap. Knocks heal you. |
-| Dash: Vault | Cartwheel a short way (much further from a jump). Your next bolt is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back. |
+| Dash: Vault | Cartwheel a short way (much further from a jump). Your next bolt is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back at once. |
 | RMB: Bola | A short wind-up, then a Bola down the lane: it grounds the first foe and flies on. Catch a second and both are stunned. |
 | E: Shadow Knife | Throw a dagger to your cursor or into a foe. Press E again to blink to it. |
 | Hunter ultimate: Encore | A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge. |
@@ -67,9 +67,9 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Marks (passive).** Every bolt that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your bolts on them deal +10% per Mark. The empowered shot adds 2, the Bola 1. A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
+**Marks (passive).** Every bolt that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your bolts on them deal +10% per Mark. The empowered shot adds one like any bolt, the Bola 1. A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
 
-**Vault (dash, Shift, 4.5s cooldown).** A sideways cartwheel of about 4m the way you move (about 7m from a jump, its speed carried to the landing; shots pass through it; you can shoot mid-flip) and +18% speed until your next hit (2s at most; half as much again at rank 3). Your next bolt within 3s is empowered (a gold glint in your throwing hand, flaring as you land): it flies 12% further for 3.5 times the damage, 2 Marks and Shred; firing it ends the speed (+15% damage taken for 3s). Landing it gives the Vault back. Rank 2: empowered shots +20%; rank 3: +40%.
+**Vault (dash, Shift, 4.5s cooldown).** A sideways cartwheel of 4.5m the way you move in about half a second (about 8m from a jump, its speed carried to the landing; shots pass through it; you can shoot mid-flip) and +18% speed for 2s. Your next bolt within 3s is empowered (a gold glint in your throwing hand, flaring as you land): it flies 12% further and deals 2.3 times a bolt (Marks add to it as to any bolt); firing it ends the speed. Landing it gives the Vault back at once. Rank 2: the empowered bonus +20%; rank 3: +40%.
 
 **Bola (RMB, 7s cooldown).**
 
@@ -87,7 +87,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
 | RMB | cooldown 7s -> 6.3s, damage +15%. | cooldown 7s -> 5.6s, damage +30%; flies 1m further after the first foe, and two foes caught pool their Marks. |
-| Dash (Shift) | recharge 4.5s -> 3.8s per charge; empowered shots +20%. | recharge 4.5s -> 3.2s; empowered shots +40% in all, and the speed boost is half again as big. |
+| Dash (Shift) | recharge 4.5s -> 3.8s per charge; the empowered bonus +20%. | recharge 4.5s -> 3.2s; the empowered bonus +40% in all, and the speed boost is half again as big. |
 | E | cooldown 15s -> 13.5s, damage +15%. | cooldown 15s -> 12s, damage +30%; sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
