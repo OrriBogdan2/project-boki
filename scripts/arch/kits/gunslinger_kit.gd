@@ -3,10 +3,10 @@ extends ArchKit
 ## Venator (archetype id "gunslinger", medium): the ember-rifle skirmisher. docs/heroes/gunslinger.md
 ## has the per-slot table, the assumptions and the research notes (briefs/hero-ref/venator.md, owner notes).
 ##
-## Loop: hold RMB for the Burr Charge's lane, let go to throw. It flies the whole lane, straight past
-## people (it never goes off on a person), and sticks where it meets a wall or the ground at the
-## lane's end: a cone shows back toward you for its fuse, then blasts, shoving everyone in it along the
-## cone (toward you) and Dazing them ("rat" Rattled in code). The rifle does +90% to a Dazed foe, in big
+## Loop: hold RMB for the Burr Charge's lane, let go to throw. A direct hit on a foe damages and Dazes
+## it ("rat" Rattled in code) on the spot. Otherwise it flies the lane and sticks where it meets a wall
+## or the ground at the lane's end: a cone shows back toward you for its fuse, then blasts, shoving
+## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +90% to a Dazed foe, in big
 ## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
 ## shooting. Longneedle: stand still while the line narrows, then a long beam through walls. A knock
 ## gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
@@ -17,6 +17,11 @@ const DEEP := Color("c43a2a")
 const BRONZE := Color("b9732f")
 const SMOKE := Color("d9c2a8")       # the Longneedle's recoil smoke ring: warm, not white
 const SCRAPE := Color("6b4a2e")      # the slide's dust scrape under him
+const BURR_HIT_HEIGHT := 2.6         # m above a foe's feet the charge can still strike
+const SKID_LEN := 2.2                # m, the faint streaks at a slide's start
+const SKID_SPREAD := 0.28            # m off the path's centre line
+const SKID_WIDTH := 0.1
+const SKID_SECONDS := 0.45
 const ECHO_GAP := 0.05               # s between his after-images on a slide or the air dash
 const ECHO_ALPHA := 0.35             # see-through, so the trail never covers his live body
 const ECHO_BACK := 0.35              # m behind him along his travel: the echoes trail, not overlap
@@ -27,6 +32,7 @@ var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, 
 var burr_pool: Array = []      # their nodes, reused
 var needle := {}               # Longneedle's charge: {t}
 var knocked := {}
+var direct_hits := 0           # Burr Charges that struck a foe (tests)
 var rattles := 0               # Burr Charges that blew (tests)
 var dazed_hits := 0            # rifle rounds on a Dazed foe (tests)
 var skewers := 0               # Longneedle payoffs
@@ -226,15 +232,22 @@ func on_dash(use_ex: bool) -> bool:
 	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"])})
 	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0}
 	play("gunslinger_dash")
-	# where it began: his ember after-image standing there (0.6 s), a bright cream ring with an ember
-	# one inside it, and a scrape of dust under him
+	# where it began: his ember after-image standing there (0.6 s), dust, and two faint skid streaks.
+	# No rings or discs: those mean damage or an area in this game
 	fx().echo(h, echo_col(), 0.6, ECHO_ALPHA, ECHO_BACK)
-	fx().ring(ground(start), 1.7, HOT, EMBER, 0.5)
-	fx().ring(ground(start), 1.0, EMBER, HOT, 0.4)
-	fx().disc(ground(start), 1.0, SCRAPE, Color.BLACK, 0.5, SCRAPE.lightened(0.25))
+	_skid_streaks(start, h.roll_dir)
 	m.fx.dust(h.pos, 10)
 	m.sfx("vn_slide", h.pos, -4.0)
 	return true
+
+## Two short, low-contrast scrape lines on the ground along the first stretch of the slide.
+func _skid_streaks(from: Vector3, dir: Vector2) -> void:
+	var along := Vector3(dir.x, 0.0, dir.y)
+	var side := Vector3(-dir.y, 0.0, dir.x) * SKID_SPREAD
+	var low := Vector3(0.0, 0.05, 0.0)
+	for sign_k in [-1.0, 1.0]:
+		var begin: Vector3 = ground(from) + low + side * sign_k
+		fx().smear(begin, begin + along * SKID_LEN, SCRAPE, SCRAPE.lightened(0.2), SKID_WIDTH, SKID_SECONDS)
 
 func _slide_end() -> void:
 	var dd := dash_def()
@@ -361,7 +374,7 @@ func fire_rmb(c: Dictionary) -> void:
 	n.scale = Vector3.ONE
 	var at := h.pos + Vector3(d.x * 0.6, 1.6, d.y * 0.6)
 	if grenade != null and is_instance_valid(grenade) and grenade.visible:
-		at = grenade.global_position       # it leaves from the hand that held it
+		at.y = grenade.global_position.y       # it leaves at the height of the hand, along the lane shown
 		grenade.visible = false
 	n.global_position = at
 	var burr := {"pos": at, "dir": d, "t": 0.0, "node": n, "wall": false, "fuse": -1.0, "fuse0": float(bd["fuse"])}
@@ -420,6 +433,11 @@ func _tick_burrs(dt: float) -> void:
 		# a slight lob: up a little, then down onto the lane's end
 		var gy := ground(flat).y
 		flat.y = lerpf(float(b["y0"]), gy + 0.25, u * u) + 0.6 * sin(PI * u)
+		var victim := _burr_victim(p, flat)
+		if victim != null:
+			burrs.erase(b)
+			_direct_hit(b, victim, flat)
+			continue
 		var ledge: bool = m.world.ground_at(flat.x, flat.z) > float(b["g0"]) + 0.6
 		var walled: bool = m.world.is_block(flat.x, flat.z) or ledge
 		if walled:
@@ -435,6 +453,51 @@ func _tick_burrs(dt: float) -> void:
 		if is_instance_valid(n):
 			n.global_position = b["pos"]
 			n.rotation.y += dt * 14.0
+
+## The first foe the charge touches between two steps, or null. Reach is the foe's body plus the lane's half width.
+func _burr_victim(from: Vector3, to: Vector3) -> Ent:
+	var reach_extra := float(rmb_def()["burr"]["lane_w"]) * 0.5
+	var from_flat := Vector2(from.x, from.z)
+	var to_flat := Vector2(to.x, to.z)
+	var best: Ent = null
+	var best_along := INF
+	for f in m.foes_of(h.team):
+		if not f.hittable():
+			continue
+		var height: float = to.y - f.pos.y
+		if height < -0.3 or height > BURR_HIT_HEIGHT:
+			continue
+		var foe_flat := Vector2(f.pos.x, f.pos.z)
+		var closest := Geometry2D.get_closest_point_to_segment(foe_flat, from_flat, to_flat)
+		if closest.distance_to(foe_flat) > f.r + reach_extra:
+			continue
+		var along := from_flat.distance_to(closest)
+		if along < best_along:
+			best_along = along
+			best = f
+	return best
+
+## A direct hit: it hurts and Dazes the foe it struck and is spent, with no cone.
+func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
+	var bd := rmb_def()["burr"] as Dictionary
+	var n: Node3D = b["node"]
+	if is_instance_valid(n):
+		n.visible = false
+	direct_hits += 1
+	var dir: Vector2 = b["dir"]
+	var spray := Vector3(-dir.x, 0.2, -dir.y)
+	m.fx.flash(at, HOT, 1.2, 0.1)
+	m.fx.burst(at, EMBER, 12, 6.0, 0.35, 2.0, 1.0, spray, 70.0)
+	m.sfx("vn_blast", at, -4.0)
+	net_ring(at, 1.0, EMBER)
+	var o := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"]}
+	victim.hurt(float(bd["hit_dmg"]) * power("sec"), h, o)
+	daze(victim, float(bd["cone_rattle"]))
+
+## Dazed: the foe takes more from the rifle and Longneedle (rattle_k in the data) and is slowed.
+func daze(foe: Ent, seconds: float) -> void:
+	KitStatus.apply(foe, "rat", seconds)
+	fx().swirl(foe, Color("ff4fb0"), HOT, seconds)
 
 ## It meets a wall (or the ground at the lane's end) and sticks: the cone points back the way it came.
 func _stick(b: Dictionary, at: Vector3, wall: bool) -> void:
@@ -479,8 +542,7 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 		var o := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "kb": away * float(bd["push"])}
 		o["lift"] = 2.0
 		f.hurt(float(bd["cone_dmg"]) * power("sec"), h, o)
-		KitStatus.apply(f, "rat", float(bd["cone_rattle"]))         # Dazed: the training dummy too
-		fx().swirl(f, Color("ff4fb0"), HOT, float(bd["cone_rattle"]))
+		daze(f, float(bd["cone_rattle"]))         # the training dummy too
 		if f is Hunter and terrain_behind(f, away, 2.4):
 			wall_slams += 1
 			var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "stun": float(bd["wall_stun"])}

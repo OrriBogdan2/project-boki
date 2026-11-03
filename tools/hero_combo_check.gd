@@ -539,12 +539,24 @@ func _gunslinger() -> void:
 			K.anim_id)
 	P.inp["sec_hold"] = false
 	m.step(DT)
-	# 3. it flies past the person, lands at the lane's end on the ground, shows the cone back toward you, blasts
+	# 3a. a direct hit: the foe in the lane is hurt and Dazed on the spot, the charge is spent, no cone
 	ac.step(m, 0.2)
-	ok("RMB: passes the person in its way (no blast on a person)",
-			not KitStatus.rattled(T) and K.rattles == 0 and not K.burrs.is_empty() and float(K.burrs[0]["fuse"]) < 0.0,
-			"took %.1f rattles %d burrs %s" % [ac.dmg(T), K.rattles, K.burrs])
-	ac.step(m, 0.3)
+	ok("RMB direct hit: damage + Dazed, no cone, the charge is spent",
+			K.direct_hits == 1 and ac.dmg(T) >= 20.0 and KitStatus.rattled(T) and K.rattles == 0 and K.burrs.is_empty(),
+			"took %.1f hits %d rattles %d burrs %d" % [ac.dmg(T), K.direct_hits, K.rattles, K.burrs.size()])
+	var rifle := {"src": "shot"}
+	ok("RMB direct hit: the Dazed foe takes the rifle's +90%", is_equal_approx(K.outgoing(T, 10.0, rifle), 19.0))
+	# 3b. thrown with the foe off the lane: it lands at the lane's end on the ground, shows the cone, blasts
+	ac.fresh(T)
+	KitStatus.clear_rattled(T)
+	T.teleport(home + Vector3(4, 0, 6))
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.teleport(home)
+	ac.step(m, 0.1)
+	P.inp["aim"] = home + Vector3(2.0, 0.9, 0)
+	ac.tap(m, P)
+	ac.step(m, 0.5)
 	var b0: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
 	ok("RMB: sticks on the ground at the lane's end",
 			not b0.is_empty() and float(b0["fuse"]) >= 0.0 and not bool(b0["wall"]) and absf(_flat(b0["pos"], home) - 10.5) < 1.2,
@@ -577,11 +589,18 @@ func _gunslinger() -> void:
 	K.cd["rmb"] = 0.0
 	K.ch_rmb = 1.0
 	var ws0 := K.wall_slams
+	ac.fresh(T2)
+	KitStatus.clear_rattled(T2)
+	T2.teleport(home + Vector3(7.0, 0, -1.5))
+	ac.step(m, 0.1)
+	T2.inv_t = 0.0
 	ac.tap(m, P)
 	ac.step(m, 0.5)
 	var bw: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
 	ok("RMB on a wall: sticks to the wall", not bw.is_empty() and bool(bw["wall"]), str(bw.get("pos", "")))
 	ac.step(m, 1.1)
+	ok("RMB wall cone: a second foe in the cone is hurt and Dazed too",
+			KitStatus.rattled(T2) and ac.dmg(T2) >= 12.0, "took %.0f at %s" % [ac.dmg(T2), str(T2.pos - home)])
 	ok("RMB wall cone: hits, Dazes, shoves into terrain = stun, the cooldown is not shaved",
 			ac.dmg(T) >= 12.0 and KitStatus.rattled(T) and K.wall_slams == ws0 + 1 and float(K.cd["rmb"]) > 6.5 * 0.7,
 			"took %.0f slams %d cd %.1f" % [ac.dmg(T), K.wall_slams - ws0, float(K.cd["rmb"])])
