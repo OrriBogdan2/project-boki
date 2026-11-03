@@ -130,3 +130,26 @@ Portrait:
 
 Turnaround:
 > Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. Her legs end below the knee in the same drifting smoke in every view and she hovers slightly above the ground line with no shadow; the bow is held in the same hand in every view and the quiver sits on her back. No text, no labels, no logos.
+
+### Tarek (dolm), Rock Elementalist
+Owner direction: part stone (basalt-cracked skin with glowing seams, keeps the eye bandana); lore: a blind quarry kid who hears the stone.
+
+Warden block:
+> Redesign the character from the first two reference images at full production quality, keeping his design (teal bandana tied over his eyes with long streaming tails, locs tied up in a crown, one quarried stone slab pauldron, huge stone fists split by glowing molten seams, open rust-leather vest, wrapped shins, bare feet, floating pebbles), and make him part stone, more striking and epic than the reference: Tarek, the Rock Elementalist, a blind quarry kid who hears the stone and answers it. Young, about seven and a half heads tall, slim, springy and athletic, a lean dancer-fighter's build, knees bent, weight on the balls of his bare feet. Deep brown skin that turns to cracked black basalt across his shoulders, forearms, shins and one side of his neck and jaw, the basalt split by thin glowing molten-orange seams; the stone patches look like they grew out of him. His forearms end in two huge rough-cut stone gauntlet fists, each bigger than his head, with molten cracks. The teal bandana always covers his eyes; a calm, confident half-smile. Small rocks and pebbles orbit him, floating. No head or body markings or tattoos, no monk robes.
+
+| File | Size | Studio image | Notes |
+|---|---|---|---|
+| `wardens/tarek_splash.png` | 2752x1536 | b54ced3e | |
+| `wardens/tarek_portrait.png` | 2048x2048 | f381d48d | |
+| `wardens/tarek_turnaround.png` | 3168x1344 | 6b05b37a | |
+
+All take 1. Originality check: no arrow or body tattoos, no monk robes; the teal sash is a plain cloth belt. The portrait shows a stone slab on both shoulders; the turnaround (one slab) is the modelling reference.
+
+Splash:
+> Splash art, 16:9 widescreen: a shattered quarry on a floating isle at dusk, cliffs of layered stone, the ground buckling; Tarek leaps upward mid-strike, both stone fists raised, a huge spine of jagged basalt bursting out of the ground beneath him as he calls it up, boulders and pebbles floating around him, dust and glowing molten cracks in the rock, bandana tails streaming, full figure, dynamic diagonal composition. Warm dusk light with cool shadows, molten orange glow from the cracks. Palette: deep brown skin, black basalt, quarry stone grey, rust leather, teal bandana, dust beige, molten orange. No text, no logos.
+
+Portrait:
+> Portrait bust, square 1:1, for a game hero picker: head and shoulders, three-quarter view, the teal bandana tied over his eyes with its tails drifting, locs tied up in a crown, basalt cracks with glowing molten seams across one side of his jaw and neck and his shoulder, the stone slab pauldron, a calm confident half-smile, a few pebbles floating beside his head. Simple warm dusk gradient background, strong rim light. Palette: deep brown skin, black basalt, quarry grey, teal, molten orange. No text, no logos.
+
+Turnaround:
+> Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. The slab pauldron on the same shoulder in every view, the basalt patches in the same places, both stone fists hanging down, bandana tails visible in the back view. No text, no labels, no logos.
