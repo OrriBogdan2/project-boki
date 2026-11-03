@@ -180,3 +180,13 @@ The image-gen session's art lands on **origin/ext/imagegen** (30 commits; main i
   - sable = thief (Dancer)
   - unchanged: zedran = juggernaut, dredge, ostra, pin = archer, vireo = mage, moosh = tender, bjorn = bulwark
 - Display names follow the art (the class-titles pass applies the renames everywhere).
+
+## 2026-11-03 21:12 UTC (MAIN, owner): WARDEN MODELS RUN IN PARALLEL WITH MECHANICS, AS FAST AS POSSIBLE
+The owner wants the models in the game soon. Run modelling as its **own track** (separate agents on the new low-usage model) alongside the mechanics parity agents. The tracks touch different files: models and loader versus kit code.
+How to speed it up:
+1. **One shared humanoid skeleton for all 12** (same bone names; proportions per hero via scale). Retarget the KMoves and HunterAnim poses to it once, not 12 times. Only special parts (Tarek's stone fists, Moosh Moosh's tail, Bjorn's shield) get extra bones.
+2. **Image-to-3D head start** from each turnaround if any tool is available to you. Otherwise block out the model from primitives in Blender against the turnaround, then refine. Budget: game-ready low-poly (about 8–15k tris) with stylised textures from the materials sheets. Not film quality.
+3. **Vex first, today.** Post a gameplay-zoom screenshot plus a close-up for the owner as soon as Vex is in. Do NOT wait for full polish to show it.
+4. **After the owner OKs Vex, fan out:** 3–4 model agents in parallel, about 3 Wardens each (the complex ones, Zedran, Tarek and Bjorn, spread across agents).
+5. **Swap in per hero behind a setting**, procedural rig as the fallback, so each model ships the moment it passes its size check and screenshot. No big-bang release.
+Animations hook to each model as that hero's mechanics pass finalises its moves.
