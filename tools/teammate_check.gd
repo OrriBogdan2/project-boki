@@ -147,14 +147,28 @@ func _follow() -> void:
 		for mb in m.mobs: mb.dead = true; mb.visible = false)
 	ok(k.state == "shoulder" or (k.state == "active" and k.flat_dist(P) < 3.0) or k.state in ["returning", "flying_home"], "you walk out of range: it comes back to your side (%s, %.1fm)" % [k.state, k.flat_dist(P)])
 	# a threat close by: it stands between you and it
+	_open_ground_for(P, k)
 	var T: Hunter = m.make_hunter("T", 5, "medium", "Rival", "idle", {}, P.pos + Vector3(6, 0, 0))
 	T.max_hp = 1e5; T.hp = 1e5
 	k.comp._find_threat()
 	k.comp.threat = T
 	var hs := k.comp.heel_spot()
+	if hs == Vector3.INF:
+		ok(false, "with a rival close it steps between you and them (no free heel spot at %s)" % str(P.pos))
+		return
 	var to_t := Vector2(T.pos.x - P.pos.x, T.pos.z - P.pos.z).normalized()
 	var to_h := Vector2(hs.x - P.pos.x, hs.z - P.pos.z).normalized()
-	ok(hs != Vector3.INF and to_t.dot(to_h) > 0.8, "with a rival close it steps between you and them (dot %.2f)" % to_t.dot(to_h))
+	ok(to_t.dot(to_h) > 0.8, "with a rival close it steps between you and them (dot %.2f)" % to_t.dot(to_h))
+
+## Moves the player to ground where the Boki has a free heel spot (heel_spot is INF in a tight corner, and a
+## normalised INF is NaN): tries a few random spots.
+func _open_ground_for(p: Hunter, kin: Kin) -> void:
+	for i in 40:
+		if kin.comp.heel_spot() != Vector3.INF and m.world.ground_at(p.pos.x + 6.0, p.pos.z) > World.VOID + 1.0:
+			return
+		p.teleport(m.world.random_ground())
+		for j in 5:
+			m.step(Match.DT)
 
 # ------------------------------------------------------------------ 2. priority, gap, cooldown
 func _priority() -> void:

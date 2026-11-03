@@ -130,7 +130,8 @@ func _data() -> void:
 		var ag: Dictionary = fd["aug"]
 		ok(ag.has("lmb") and ag.has("rmb") and ag.has("e") and ag.has("dash") and ag.has("stats"), "%s: an augment for LMB, RMB, E, the dash and the stats" % id)
 		ok(float((fd["r"] as Dictionary).get("end", 0.0)) > 0.0 and not (fd["r"]["beats"] as Array).is_empty(), "%s: the ultimate is a timeline of beats" % id)
-	ok(float(MergeForm.data()["warn_s"]) == 3.0 and float(MergeForm.data()["rest_s"]) == 12.0, "the warning is the last 3s and the drained rest 12s (merge_forms.json)")
+	var timings_ok := float(MergeForm.data()["warn_s"]) == 3.0 and MergeRelease.rest_s() == 6.0
+	ok(timings_ok, "the warning is the last 3s and the rest after a release 6s (merge_forms.json)")
 	ok(not FileAccess.file_exists("res://scripts/kin/merge_holds.gd"), "MergeHolds (boulder, hover, prism) is gone")
 	var rules := MergeForm.data()
 	ok(not rules.has("tiers") and not rules.has("forms_bonus"), "no tiers or forms_bonus in the merge rules")
@@ -355,9 +356,10 @@ func _ult() -> void:
 	run_for(float(Content.merge_form("titan")["r"]["end"]) + 0.3)
 	ok(not KinMerge.active(P), "the ultimate ends the merge")
 	ok(k.state not in ["fused", "downed", "bench"] and k.hp > 0.0 and k.flat_dist(P) < 8.0, "...and the Boki is beside you, not downed (state %s)" % k.state)
-	var rest := float(MergeForm.data()["rest_s"])
-	ok(k.resting() and k.rest_t > rest - 2.0 and k.rest_t <= rest, "...DRAINED: it rests for about %.0fs (%.1fs left)" % [rest, k.rest_t])
-	ok(k.state == "shoulder" and k.cmd == "return", "...resting on you, safe (state %s cmd %s)" % [k.state, k.cmd])
+	var rest := MergeRelease.rest_s()
+	ok(k.resting() and k.rest_t > rest - 2.0 and k.rest_t <= rest, "...it rests for about %.0fs (%.1fs left)" % [rest, k.rest_t])
+	ok(k.state != "shoulder" and k.cmd == "follow",
+		"...landed beside you pumped, not stowed (state %s cmd %s)" % [k.state, k.cmd])
 	ok(P.ult < 0.2, "...and the bond meter restarts from about 0 (%.2f)" % P.ult)
 	ok(P.merge_cd >= rest - 1.0, "...and Merge waits for the rest (%.1fs)" % P.merge_cd)
 	# while drained: no C, no orders, no Sic, no throw
@@ -366,12 +368,14 @@ func _ult() -> void:
 	run_for(0.1)
 	P.inp["kin_ab"] = false
 	ok(int(P.used.get("kin_ab", 0)) == cu and not k.ready_to_fight(), "C does nothing while it rests")
-	ok(not KinCommand.order(P, "chase") and not KinCommand.order(P, "guard") and k.state == "shoulder", "orders and Sic do nothing while it rests")
-	ok(not KinFollow.set_cmd(k, "chase") and k.cmd == "return", "...the command cannot change either")
+	var no_orders := not KinCommand.order(P, "chase") and not KinCommand.order(P, "guard")
+	ok(no_orders and k.cmd == "follow", "orders and Sic do nothing while it rests")
+	ok(not KinFollow.set_cmd(k, "chase") and k.cmd == "follow", "...the command cannot change either")
+	var st0 := k.state
 	aim_at(P, P.pos + Vector3(8.0, 0, 0))
 	KinCommand.tap(P)
 	run_for(0.3)
-	ok(k.state == "shoulder", "a throw does nothing while it rests")
+	ok(k.state == st0 or k.state == "active", "a throw does nothing while it rests (state %s)" % k.state)
 	# the rest ends
 	run_for(rest + 0.5)
 	ok(not k.resting() and k.ready_to_fight(), "after the rest the Boki is ready again")
@@ -482,7 +486,7 @@ func _ends() -> void:
 	_fresh("pebbit")
 	P = m.player
 	P.kin.stow()
-	P.kin.drain(12.0)
+	P.kin.rest_t = 12.0
 	var T := foe(P.pos + Vector3(4.0, 0, 0))
 	P.ai["throw_cd"] = 0.0
 	for i in 30:
@@ -502,8 +506,8 @@ func _ends() -> void:
 	KinMerge.press(P)
 	ok(not P.kin.disengaged, "starting a merge clears it")
 	P.kin.disengaged = true
-	P.kin.drain(1.0)
-	ok(not P.kin.disengaged, "a drain clears it too")
+	P.kin.land_pumped(1.0)
+	ok(not P.kin.disengaged, "a landing clears it too")
 	# the R slot's fraction stays within 0..1 while drained
 	var ri := P.slot_info("r")
 	ok(float(ri["cd"]) <= float(ri["cd_max"]) + 0.01, "the R slot's cooldown fraction stays within 1 while the Boki rests (%.1f of %.1f)" % [float(ri["cd"]), float(ri["cd_max"])])

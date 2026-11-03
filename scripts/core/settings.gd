@@ -18,7 +18,7 @@ const DEFAULTS := {
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
-	"keys": {}, "keys_v": 2, "keys2_v": 0,
+	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0,
 }
 ## Graphics presets (Video → Quality). High is the game's full look; Low and Medium trade detail for
 ## speed, Ultra pushes draw distance, shadows and level of detail further. A preset sets the plain
@@ -91,8 +91,14 @@ const KEYS_V := 3
 const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
 	["fire", "Weapon attack"], ["secondary", "Archetype ability (right click)"], ["dash", "Archetype dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
-	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Archetype utility (E)"], ["kin_ability", "Boki ability (cast from where your Boki is)"], ["throw", "Boki orders: tap to Sic or Call back, hold for the order wheel"], ["ultimate", "Merge with your Boki (needs a full bond meter)"], ["base", "Base to a teammate (squads)"],
-	["interact", "Use, scan, revive, pet"], ["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"], ["util3", "Utility belt slot 3"], ["scores", "Scoreboard"], ["emote", "Emote wheel (hold, in a match)"],
+	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Archetype utility (E)"],
+	["kin_ability", "Boki ability (cast from where your Boki is)"],
+	["throw", "Boki orders: tap to Sic or Call back, hold for the order wheel"],
+	["ultimate", "Merge with your Boki (needs a full bond meter)"], ["reload", "Reload"], ["hunter_ult", "Hunter ultimate"],
+	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],
+	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
+	["util3", "Utility belt slot 3"], ["util4", "Utility belt slot 4"], ["scores", "Scoreboard"],
+	["emote", "Emote wheel (hold, in a match)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
 	["build", "Build mode at home / decorate indoors"], ["hero", "Change hero (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
@@ -123,7 +129,7 @@ func _ready() -> void:
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
 		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
-	_migrate_keys2()
+	KeyMigrate.run(v)
 	_migrate_belt_keys()
 	if int(v.get("video_v", 1)) < 2 or not cf.has_section_key("s", "video_v"):
 		# crisper by default: 4x MSAA on desktop (the browser build stays on 2x)
@@ -138,27 +144,6 @@ func _ready() -> void:
 		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
 	get_tree().node_added.connect(_on_node_added)
 	get_tree().root.size_changed.connect(_apply_ui_scale)
-
-## (feelfix) Secondary bindings came in: X is the ultimate's second key for everyone, custom bindings
-## included (added only where that slot is empty and X isn't taken), and "separate from the drop"
-## leaves X for Z. Once (keys2_v).
-func _migrate_keys2() -> void:
-	if int(v.get("keys2_v", 0)) >= 1:
-		return
-	var ks: Dictionary = v["keys"]
-	var x_used := false
-	for a in ks:
-		if a != "ultimate" and a != "separate" and (ks[a] as Array).has("key:%d" % KEY_X): x_used = true
-	if ks.has("separate") and (ks["separate"] as Array).has("key:%d" % KEY_X):
-		ks["separate"] = ["key:%d" % KEY_Z]
-	if x_used and not ks.has("ultimate"):
-		ks["ultimate"] = ["key:%d" % KEY_R]      # X is bound elsewhere: the default ultimate [R, X] must not also fire on it
-	if ks.has("ultimate") and not x_used:
-		var ul: Array = ks["ultimate"]
-		if ul.size() < 2 and not ul.has("key:%d" % KEY_X):
-			if ul.is_empty(): ul.append("key:%d" % KEY_R)
-			ul.append("key:%d" % KEY_X)
-	v["keys2_v"] = 1
 
 ## The heal and armor-kit keys became belt slots 1 and 2 (ext/equal): custom bindings move across.
 func _migrate_belt_keys() -> void:
@@ -427,8 +412,8 @@ func conflicts(ev: InputEvent, except := "") -> Array:
 	return out
 
 ## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["talk", "emote"], ["details", "kin_ability"], ["build", "base"], ["rotate", "ultimate"],
-		["play", "gear2"]]
+const SHARED_OK := [["talk", "emote"], ["details", "kin_ability"], ["build", "base"], ["rotate", "reload"],
+		["talk", "ultimate"], ["play", "gear2"]]
 func _shared_ok(a: String, b: String) -> bool:
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
