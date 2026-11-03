@@ -66,15 +66,6 @@
 "long_line": 5,
 "nested_ternary": 1
 },
-"scripts/arch/kits/rimewright_kit.gd": {
-"long_line": 9,
-"nested_ternary": 1,
-"semicolon": 2
-},
-"scripts/arch/kits/tender_kit.gd": {
-"long_line": 8,
-"semicolon": 1
-},
 "scripts/arch/kits/thief_kit.gd": {
 "long_line": 14,
 "nested_ternary": 1
@@ -531,10 +522,6 @@
 "long_line": 11,
 "semicolon": 1
 },
-"scripts/match/care_demo.gd": {
-"long_line": 2,
-"semicolon": 10
-},
 "scripts/match/drop_squad.gd": {
 "history_comment": 1,
 "long_line": 4,
@@ -598,8 +585,7 @@
 "semicolon": 15
 },
 "scripts/match/hero_gear_care.gd": {
-"long_line": 20,
-"semicolon": 5
+"long_line": 1
 },
 "scripts/match/hero_gear_pair.gd": {
 "long_line": 2
@@ -621,7 +607,7 @@
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
-"long_line": 128,
+"long_line": 127,
 "nested_ternary": 6,
 "semicolon": 102
 },
@@ -1240,8 +1226,8 @@
 "semicolon": 1
 },
 "tools/support_check.gd": {
-"long_line": 21,
-"semicolon": 60,
+"long_line": 13,
+"semicolon": 36,
 "shadow": 1
 },
 "tools/swim_check.gd": {

@@ -20,6 +20,10 @@ static func body(id: String) -> Dictionary:
 		return {}
 	return def(id).get("body", {})
 
+## The hitbox radius of a hunter of this archetype and class (the body's hit_r, else the class's).
+static func hit_r(id: String, cdat: Dictionary) -> float:
+	return float(body(id).get("hit_r", cdat.get("hit_r", 0.38 * float(cdat["scale"]))))
+
 static func ids() -> Array:
 	var out: Array = []
 	for a in ORDER:

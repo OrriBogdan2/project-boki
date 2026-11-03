@@ -289,7 +289,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	_kit_from_weapon()
 	dashes = max_dashes()
 	ammo = wpn["mag"]
-	r = float(Arch.body(arch).get("hit_r", cdat.get("hit_r", 0.38 * float(cdat["scale"]))))
+	r = Arch.hit_r(arch, cdat)
 	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look, arch))
 
 ## Switches the archetype mid-match (tests, practice). "" puts back the old class kit: the weapon's
@@ -301,7 +301,7 @@ func set_arch(a: String) -> void:
 	HunterMove.apply(self)
 	if arch != "" and not Arch.weapon_ok(arch, wid):
 		equip(Arch.signature(arch))
-	r = float(Arch.body(arch).get("hit_r", cdat.get("hit_r", 0.38 * float(cdat["scale"]))))
+	r = Arch.hit_r(arch, cdat)
 	_kit_from_weapon()
 
 ## Practice (the Arena and training): become another class and archetype on the spot. Health,
@@ -318,7 +318,7 @@ func reclass(c: String, a: String, w := "") -> void:
 	base_speed = cdat["speed"]
 	dodge_def = Content.class_dodge(cls)
 	arch = Arch.fix(a, cls)
-	r = float(Arch.body(arch).get("hit_r", cdat.get("hit_r", 0.38 * float(cdat["scale"]))))
+	r = Arch.hit_r(arch, cdat)
 	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch)
 	HunterMove.apply(self)
@@ -3206,6 +3206,18 @@ var anim_s := {}
 var _anim_dt := 0.0
 var _anim_n := 0
 const DODGE_ANIM := {"light": "phase", "medium": "roll", "heavy": "charge"}
+
+## The dodge pose HunterAnim plays. Tamsin's skate has its own, so the light-dash lean does not stack
+## on the skate move's lean and tip her over.
+func _dash_anim_kind() -> String:
+	if not strike_at_end.is_empty():
+		return "lunge"
+	if move_kind == "rinkrun":
+		return "skate"
+	if move_kind == "rush":
+		return "rush"
+	return String(DODGE_ANIM.get(cls, "roll"))
+
 func _anim_state(stretch: float) -> void:
 	var s := anim_s
 	s["vel"] = vel; s["face"] = face
@@ -3214,7 +3226,7 @@ func _anim_state(stretch: float) -> void:
 	s["diving"] = diving
 	s["rolling"] = roll_t > 0.0
 	s["dash_dir"] = roll_dir
-	s["dash_kind"] = "lunge" if not strike_at_end.is_empty() else ("rush" if move_kind in ["rush", "rinkrun"] else String(DODGE_ANIM.get(cls, "roll")))
+	s["dash_kind"] = _dash_anim_kind()
 	s["crouch"] = crouch_k
 	s["downed"] = downed
 	s["ledge"] = grap.size() > 0

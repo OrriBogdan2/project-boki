@@ -1,12 +1,31 @@
 {
 	"id": "hoar_fan",
 	"name": "Hoar Fan",
-	"classes": ["light"],
+	"classes": [
+		"light"
+	],
 	"primary": {
-		"dmg": 3.4, "rate": 0.5, "speed": 34, "mag": 99, "reload": 1.0, "kb": 0.4, "spread": 0.0, "range": 10.0, "size": 0.16,
-		"color": "#bff7ef", "sfx": "rime_shard", "fire_slow": 0.9,
-		"desc": "A folding fan of ice slats. Hold to throw a flurry of 4 homing shards, then 3 heavy ones that fly faster and further. Eight shards on one foe Splinter them. Double damage during a Rinkrun.",
-		"kick": 0.04
+		"dmg": 4.0,
+		"rate": 0.18,
+		"speed": 16,
+		"mag": 99,
+		"reload": 1.0,
+		"kb": 0.4,
+		"spread": 0.0,
+		"range": 10.0,
+		"size": 0.26,
+		"color": "#bff7ef",
+		"sfx": "rime_shard",
+		"fire_slow": 0.9,
+		"desc": "A folding fan of ice slats. Hold for a steady stream of slow ice darts (one every 0.18s) that bow out and curve onto the foe nearest your cursor. Eight on one foe Shatter them. While skating they fly straight and thick and hit 1.6x.",
+		"kick": 0.04,
+		"bow_deg": 32.0,
+		"turn": 7.0,
+		"cursor_r": 3.5,
+		"acquire": 9.0,
+		"cone_deg": 75.0,
+		"skate_speed": 30.0,
+		"aim": "max"
 	},
 	"utility": ""
 }

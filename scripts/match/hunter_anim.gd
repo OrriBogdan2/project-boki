@@ -25,7 +25,7 @@ extends RefCounted
 ##
 ## update() takes a state dictionary; every key is optional:
 ##   vel (Vector3) face (yaw) grounded gliding diving rolling dash_dir (Vector2, world) dash_kind
-##   ("phase" "roll" "charge" "lunge"; from the class when left out) crouch (0..1) downed ledge
+##   ("phase" "roll" "charge" "lunge" "skate"; from the class when left out) crouch (0..1) downed ledge
 ##   mantle (0..1, -1 when not) reload (0..1, -1) drink (0..1, -1) stomp (0..1, -1) recoil (0..1)
 ##   flash (0..1) fired (seconds since the last shot) wid (weapon id) swing_n (counts swings)
 ##   combo (combo step of that swing, -1 for a charged attack) charge (0..1 holding a charge)
@@ -65,8 +65,12 @@ const ARCH_STANCE := {
 	"gunslinger": {"lean": 0.03, "width": 0.13, "knee": 0.2, "breath": 2.0},
 	"juggernaut": {"lean": 0.1, "width": 0.25, "knee": 0.34, "breath": 1.35, "arm": 0.7},
 	"bulwark": {"lean": 0.0, "width": 0.24, "knee": 0.3, "breath": 1.5, "arm": 0.7},
-	"tender": {"lean": 0.04, "knee": 0.14, "width": 0.08, "breath": 2.2, "arm": 0.9},
-	"rimewright": {"knee": 0.3, "lean": 0.12, "width": 0.07, "bounce": 1.3, "breath": 2.8, "arm": 1.15},
+	# tender: small, low and forward with the arms out, quick short steps; rimewright: a tall skater, arms
+	# held out, long strides
+	"tender": {
+		"lean": 0.24, "knee": 0.32, "width": 0.1, "bounce": 1.1, "breath": 2.9, "arm": 1.3, "cadence": 1.25},
+	"rimewright": {
+		"knee": 0.22, "lean": 0.14, "width": 0.1, "bounce": 0.4, "breath": 2.4, "arm": 1.25, "cadence": 1.4},
 	"dolm": {"lean": 0.08, "width": 0.2, "knee": 0.3, "breath": 1.6, "arm": 0.8},
 	"ostra": {"lean": -0.05, "width": 0.07, "knee": 0.1, "breath": 1.7, "arm": 0.8},
 	# cadence scales the step rate, stride the step length: Linwick scurries in short quick steps, Dredge
@@ -98,6 +102,10 @@ const HOLDS := {
 	"sword": {"gr": Vector3(0, 0, 0.06), "gl": Vector3.INF},
 	"great": {"gr": Vector3(0, 0, 0.02), "gl": Vector3(0, 0, 0.15)},
 	"twin": {"gr": Vector3(0.06, 0, -0.02), "gl": Vector3(-0.1, -0.06, -0.08)},
+	# nothing held: both hands are free and the kit's moves cast from them (Moosh Moosh)
+	"palm": {
+		"pos": Vector3(0.14, -0.25, -0.1), "low": Vector2.ZERO, "gr": Vector3.ZERO, "gl": Vector3.INF,
+		"kick": 0.0, "push": 0.0, "shake": 0.0},
 }
 
 ## Melee swings per combo step: the blade's yaw (left +), pitch (up +) and roll around the swing
@@ -247,6 +255,7 @@ var slam_k := 0.0
 var was_rolling := false
 var dash_t := 9.0
 var dash_kind := ""
+const SKATE_LEAN_MAX := 0.4    # radians: the most Tamsin's skate leans forward, all leans together
 var dash_loc := Vector2(0, -1) # dash direction in the model's own frame (x right, y back)
 var dash_k := 0.0
 
@@ -360,6 +369,7 @@ func _setup_weapon(w: String) -> void:
 		"greatsword": hold = "great"
 		"twin_blades", "arc_bolts": hold = "twin"
 		"tower_shield": hold = "sword"
+		"lantern_crook": hold = "palm"
 		_: hold = w if HOLDS.has(w) else "_gun"
 	hd = HOLDS[hold]
 	mag = null
@@ -945,6 +955,9 @@ func update(dt: float, s: Dictionary) -> void:
 	# fidgets that move the whole upper body
 	var fid := _fidget_body()
 	pitch += fid.x; yaw += fid.y; roll += fid.z
+	# skating: the skate move owns the lean, capped so she stays up on her blades (about 23 degrees)
+	if dash_k > 0.01 and dash_kind == "skate":
+		pitch = maxf(pitch, -SKATE_LEAN_MAX)
 	# base channel: upright and still, a slow breath
 	pitch = lerpf(pitch, 0.05, base_k * 0.8)
 	# ---- rig: whole-body turns (tricks, rolls, the skydive, lying downed) and squash
@@ -988,6 +1001,8 @@ func update(dt: float, s: Dictionary) -> void:
 		off.y += absf(sin(ph)) * 0.025 * r1 + maxf(0.0, bounce) * 0.006   # springy, up on the toes
 	elif arch == "bulwark":
 		off.y -= absf(cos(ph)) * 0.025 * r1        # heavy, even steps
+	elif arch == "tender":
+		off.y += absf(sin(ph)) * 0.07 * r1         # a small scurry: one quick lift per step
 	elif arch == "mage":
 		off.y += still * (0.012 + sin(t * 1.4 + seed_ph) * 0.008)       # light on its feet, half floating
 	off.y += down_k * 0.15 + base_k * (0.04 + sin(t * 2.0) * 0.015) * smoothstep(0.0, 0.3, base_p)
@@ -1047,7 +1062,8 @@ func update(dt: float, s: Dictionary) -> void:
 ## turns about the hips: forward flip, side flip, spin), sq (squash; negative stretches), legs
 ## [hl kl hr kr] with lw (their weight), fl / fr (a free hand's place from its shoulder) with hw / rw,
 ## blade (the greatsword's yaw, pitch, roll, like SWINGS) with bw, rad (the blade's reach), gp (a
-## gun's extra pitch). A move with "hold": true stays on its last key until another replaces it; with
+## gun's extra pitch), wa / wo (a held weapon's extra pitch, yaw, roll and offset).
+## A move with "hold": true stays on its last key until another replaces it; with
 ## "loop": t as well it cycles from t to the last key instead (a recoil wobble, hand over hand).
 const KMOVES := {
 	# ---------------------------------------------------------------- Vireo (mage) and Marlowe (gunslinger)
@@ -1096,41 +1112,6 @@ const KMOVES := {
 		[0.10, {"p": 0.40, "legs": [0.65, -1.26, 0.53, -1.10], "lw": 1.0, "fl": Vector3(-0.30, 0.05, -0.08), "hw": 0.80, "fr": Vector3(0.30, 0.05, -0.08), "rw": 0.50}],
 		[0.55, {"p": 0.30, "legs": [0.53, -1.02, 0.42, -0.90], "lw": 1.0, "fl": Vector3(-0.30, 0.05, -0.08), "hw": 0.80, "fr": Vector3(0.30, 0.05, -0.08), "rw": 0.50}],
 		[0.90, {}]]},
-	# ---------------------------------------------------------------- Linnet (tender) and Tamsin (rimewright)
-	# Burrseed: wound back with the seed cupped by the ear, then a flick forward
-	"tend_seed": {"keys": [
-		[0.0, {}],
-		[0.09, {"p": 0.14, "y": -0.3, "r": -0.06, "fl": Vector3(-0.1, 0.3, 0.15), "hw": 1.0}],
-		[0.12, {"p": 0.1, "y": -0.2, "r": -0.04, "fl": Vector3(-0.1, 0.3, 0.15), "hw": 1.0}],
-		[0.17, {"p": -0.38, "y": 0.35, "r": 0.05, "fl": Vector3(0.08, 0.12, -0.52), "hw": 1.0}],
-		[0.2, {"p": -0.38, "y": 0.35, "r": 0.05, "fl": Vector3(0.08, 0.12, -0.52), "hw": 1.0}],
-		[0.4, {"p": -0.15, "y": 0.15, "fl": Vector3(0.08, 0.12, -0.52), "hw": 0.6}],
-		[0.6, {}]]},
-	# Hearthlight: a crouch to gather the light, then up with the lantern hand lifted high
-	"tend_hearth": {"keys": [
-		[0.0, {}],
-		[0.1, {"p": -0.2, "fl": Vector3(0.05, 0.0, -0.15), "hw": 1.0}],
-		[0.14, {"p": -0.2, "fl": Vector3(0.05, 0.0, -0.15), "hw": 1.0}],
-		[0.24, {"p": 0.22, "y": 0.05, "fl": Vector3(0.02, 0.58, -0.1), "hw": 1.0}],
-		[0.34, {"p": 0.22, "y": 0.05, "fl": Vector3(0.02, 0.58, -0.1), "hw": 1.0}],
-		[0.6, {}]]},
-	# Rime Javelin: shoulders wound back, then whipped through into the throw
-	"rime_javelin": {"keys": [
-		[0.0, {}],
-		[0.1, {"p": 0.08, "y": -0.55, "r": -0.1, "fl": Vector3(0.12, 0.15, 0.35), "hw": 1.0}],
-		[0.12, {"p": 0.08, "y": -0.55, "r": -0.1, "fl": Vector3(0.12, 0.15, 0.35), "hw": 1.0}],
-		[0.19, {"p": -0.3, "y": 0.65, "r": 0.1, "fl": Vector3(0.06, 0.1, -0.55), "hw": 1.0}],
-		[0.22, {"p": -0.3, "y": 0.65, "r": 0.1, "fl": Vector3(0.06, 0.1, -0.55), "hw": 1.0}],
-		[0.5, {"p": -0.05, "y": 0.1, "fl": Vector3(0.06, 0.1, -0.55), "hw": 0.5}],
-		[0.6, {}]]},
-	# Ice slam: hands together low, then both pushed out and down onto the ice
-	"rime_slam": {"keys": [
-		[0.0, {}],
-		[0.12, {"p": -0.15, "fl": Vector3(0.0, -0.1, -0.2), "hw": 1.0}],
-		[0.15, {"p": -0.15, "fl": Vector3(0.0, -0.1, -0.2), "hw": 1.0}],
-		[0.22, {"p": -0.42, "fl": Vector3(0.02, -0.12, -0.55), "hw": 1.0}],
-		[0.3, {"p": -0.42, "fl": Vector3(0.02, -0.12, -0.55), "hw": 1.0}],
-		[0.6, {}]]},
 	# ---------------------------------------------------------------- Dolm and Ostra
 	# Boulder: both hands gathered at the chest, then thrown from the hip with the whole back
 	"dolm_lmb": {"keys": [
@@ -1197,14 +1178,16 @@ const KMOVES := {
 ## Stride rate (walk phase per metre) of heroes whose step differs from their class: quick, short steps
 ## (their hero sheets measure ~2.3-2.5 strides a second at a run).
 const STRIDE := {"archer": 2.9, "bulwark": 2.9}
-const KM_CH := ["p", "y", "r", "lift", "fx", "fz", "fy", "sq", "lw", "hw", "rw", "bw", "rad", "gp"]
+## wf: how far a kit move takes the held weapon with the body (0: it stays on the aim, 1: it turns with the torso)
+const KM_CH := ["p", "y", "r", "lift", "fx", "fz", "fy", "sq", "lw", "hw", "rw", "bw", "rad", "gp", "wf"]
 var km := {}                   # the kit move's channels this frame (empty: none)
 var km_id := ""
 var km_prev_t := 99.0
 
 ## Samples the kit move at time `tt`: each channel eased between the keys around it.
 static func km_sample(id: String, tt: float) -> Dictionary:
-	var mv: Dictionary = KMOVES.get(id, KMovesPair.MOVES.get(id, MergeMoves.MOVES.get(id, {})))
+	var kit_mv: Dictionary = MergeMoves.MOVES.get(id, KMovesCare.MOVES.get(id, {}))
+	var mv: Dictionary = KMOVES.get(id, KMovesPair.MOVES.get(id, kit_mv))
 	if mv.is_empty():      # Pin and Bjorn, then Dancer and Zedran (kmoves_pin_bjorn.gd, kmoves_dj.gd)
 		mv = KMovesPinBjorn.MOVES.get(id, KMovesDJ.MOVES.get(id, {}))
 	if mv.is_empty():
@@ -1234,7 +1217,7 @@ static func km_sample(id: String, tt: float) -> Dictionary:
 		if la.is_empty(): la = lb
 		if lb.is_empty(): lb = la
 		out[c] = [lerpf(la[0], lb[0], u), lerpf(la[1], lb[1], u), lerpf(la[2], lb[2], u), lerpf(la[3], lb[3], u)]
-	for c in ["fl", "fr", "blade"]:
+	for c in ["fl", "fr", "blade", "wa", "wo"]:
 		var has_a := pa.has(c); var has_b := pb.has(c)
 		if not has_a and not has_b: continue
 		var va2: Vector3 = pa.get(c, pb.get(c)); var vb2: Vector3 = pb.get(c, pa.get(c))
@@ -1364,7 +1347,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 			var sh := float(hd.get("shake", 0.2)) * 0.012
 			gpos += Vector3(sin(t * 91.0) * sh, cos(t * 77.0) * sh, 0.0)
 		# keep the gun on target while the body leans and twists
-		var lock := lerpf(0.5, 0.95, aim_k) * (1.0 - carry_k)
+		var lock := lerpf(0.5, 0.95, aim_k) * (1.0 - carry_k) * (1.0 - float(km.get("wf", 0.0)))
 		lp = -pitch * lock
 		ly = -yaw * lock
 		# reloads
@@ -1487,6 +1470,12 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		gpos = gpos.lerp(Vector3(0.12, 0.42, -0.02), fk)
 		ay = lerpf(ay, 1.57, fk)
 	if not melee:
+		if km.has("wa"):          # a kit move's weapon pivot: extra pitch, yaw, roll about the grip (KMovesCare)
+			var wa: Vector3 = km["wa"]
+			ap += wa.x
+			ay += wa.y
+			ar += wa.z
+		if km.has("wo"): gpos += km["wo"] as Vector3
 		gbas = Basis.from_euler(Vector3(ap, ay, ar))
 		ap = lp; ay = ly; ar = 0.0
 	# emotes: the weapon goes away, the hands do the talking
@@ -1649,8 +1638,10 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		_flag(emote_k * eh_flag)
 	elif flag:
 		flag.visible = false
-	# the gun goes when it's stowed: the right hand is free then
+	# the gun goes when it's stowed: the right hand is free then (and always with nothing held)
 	free_r = maxf(free_r, 1.0 - gun_vis)
+	if hold == "palm":
+		free_r = 1.0
 	free_l = maxf(free_l, 1.0 - gun_vis)
 	if glide_k > 0.01 or dive_k > 0.01 or down_k > 0.01:
 		free_r = maxf(free_r, maxf(glide_k, maxf(dive_k, down_k)))
@@ -1841,13 +1832,16 @@ func _reload_mag(r: float) -> void:
 # ==================================================================== fidgets
 ## Picks a fidget now and then while standing still: each class and race has its own.
 func _tick_fidget(dt: float, still: float, s: Dictionary) -> void:
+	# a kit move playing (a held channel pose too) owns the hands: no fidget may override its pose
+	var kit_pose := not km.is_empty()
 	if fidget != "":
 		fidget_t += dt
-		if fidget_t >= fidget_dur or still < 0.6 or float(s.get("fired", 99.0)) < 0.5 or String(s.get("emote", "")) != "":
+		var interrupted := still < 0.6 or float(s.get("fired", 99.0)) < 0.5 or String(s.get("emote", "")) != ""
+		if fidget_t >= fidget_dur or interrupted or kit_pose:
 			fidget = ""
 			fidget_wait = 4.0 + _rand() * 7.0
 		return
-	if idle_t < 2.5 or still < 0.9:
+	if idle_t < 2.5 or still < 0.9 or kit_pose:
 		return
 	fidget_wait -= dt
 	if fidget_wait > 0.0:
@@ -2062,7 +2056,8 @@ func _cloth(dt: float, vel: Vector3, spd: float, mf: float, ms: float, yaw: floa
 		var wag := sin(t * (2.2 + r1 * 6.0) + seed_ph) * (0.18 + r1 * 0.15)
 		if fidget == "tail":
 			wag += sin(fidget_t * 12.0) * 0.5 * sin(_fidget_p() * PI)
-		var wy4 := wag - clampf(ms / 6.0, -1.0, 1.0) * 0.3 + spin * 0.7 - sin(ph) * 0.15 * r1
+		var stride_swing := 0.5 if arch == "tender" else 0.15      # her trailing tail sways with each quick step
+		var wy4 := wag - clampf(ms / 6.0, -1.0, 1.0) * 0.3 + spin * 0.7 - sin(ph) * stride_swing * r1
 		var wx4 := clampf(mf / 6.0, -0.5, 1.0) * 0.2 - fall * 0.3 + glide_k * 0.2
 		if snap:
 			tl_y = wy4; tl_x = wx4
