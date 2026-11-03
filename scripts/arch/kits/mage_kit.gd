@@ -27,6 +27,7 @@ var strikes: Array = []        # Skycall: {at, t, dir, phase ("flick" | "count")
 var rod: Node3D = null         # the Storm Rod held in the hand while RMB is down
 var rod_full := false
 var knocked := {}
+var slides: Array = []         # Skycall drags in progress: {f, dir, t, dur, dist}
 var blowouts := 0              # tests and the demo
 var slams := 0
 var orb_bursts := 0
@@ -170,6 +171,7 @@ func _tick(dt: float) -> void:
 	_tick_trail()
 	_tick_motes(dt)
 	_tick_strikes(dt)
+	_tick_slides(dt)
 	_tick_lmb()
 	if not wire.is_empty():
 		_tick_wire(dt)
@@ -803,6 +805,24 @@ func _tick_strikes(dt: float) -> void:
 			strikes.erase(s)
 			_strike(s)
 
+## The Skycall drag: a slow ground slide that eases out (speed falls straight to zero), so you can watch
+## them go. It covers exactly slide_dist over slide_t unless a wall stops it.
+func slide_speed(dist: float, dur: float, t: float) -> float:
+	return 2.0 * dist / dur * maxf(0.0, 1.0 - t / dur)
+
+func _tick_slides(dt: float) -> void:
+	for s in slides.duplicate():
+		var f = s["f"]
+		s["t"] = float(s["t"]) + dt
+		if not is_instance_valid(f) or f.dead or float(s["t"]) >= float(s["dur"]):
+			slides.erase(s)
+			continue
+		var v := slide_speed(float(s["dist"]), float(s["dur"]), float(s["t"])) * (s["dir"] as Vector2)
+		f.vel.x = v.x
+		f.vel.z = v.y
+		if f is Hunter:
+			f.knock_t = maxf(f.knock_t, dt * 2.0)
+
 ## The gold rim chevron pointing the drag: two short gold strokes, redrawn every step.
 func _chevron(at: Vector3, d: Vector2, r: float) -> void:
 	var tip := at + Vector3(d.x, 0, d.y) * (r + 0.55) + Vector3(0, 0.15, 0)
@@ -832,7 +852,7 @@ func _strike(s: Dictionary) -> void:
 	for f in foes_in(at, float(ed["radius"])):
 		add_spark(f, int(ed.get("stacks", 2)))
 		# dragged along the ground the way you flicked, pinned there for a moment
-		f.impulse(dir * float(ed["push"]), float(ed["lift"]))
+		slides.append({"f": f, "dir": dir, "t": 0.0, "dur": float(ed["slide_t"]), "dist": float(ed["slide_dist"])})
 		if f is Hunter:
 			KitStatus.apply(f, "gnd", float(ed["grounded"]))
 		fx().shackle(f, TEAL, GOLD, float(ed["grounded"]))

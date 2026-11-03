@@ -1336,6 +1336,8 @@ var spun_t := 0.0              # how long the minigun has been firing (it tighte
 var sus_n := 0                 # rounds in the current string of fire
 var mel_hold := 0.0            # how long the attack key has been held with a sword
 var fire_was := false
+var dfire_buf := 0.0           # an attack tapped inside a dash (DashRules): goes off when the dash ends
+var dfire_was := false
 var swing_buf := 0.0           # a tap that came in mid-swing, played as soon as the swing ends
 var lunge_n := 0               # lunges in a row; each one in a short window goes 25% less far
 var lunge_at := -9.0
@@ -1343,7 +1345,7 @@ var strike_at_end := {}        # a charged lunge's hit, which lands where the lu
 
 ## Called every frame with the attack key's state; decides what that means for this weapon.
 func trigger(dt: float) -> void:
-	var held: bool = inp["fire"]
+	var held: bool = DashRules.lmb(self, inp["fire"], dt)
 	if ak and ak.lmb_override(held, dt):
 		return          # the archetype runs this weapon's attack itself (the Bulwark's mace: throw / smash)
 	if wpn.get("melee", false):

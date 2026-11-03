@@ -149,6 +149,16 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save starts owning `firs
 | default | {"dist": 0.85, "time": 1.15} |
 | mage | {"dist": 1.0, "time": 1.15} |
 
+## dash_interactions (`content/rules/dash_interactions.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Dash -> ability rows per hero (item 32). Values: fires (works during the dash), buffers (held until the dash ends, then goes off if still inside the buffer window), cancels (ends the dash / ability). 'buffer' is the window in seconds after the dash ends. Read by DashRules; docs/heroes/dash_interactions.md mirrors it. |
+| buffer | 0.15 |
+| heroes | {"mage": {"dash": "Wirerun", "ground": {"lmb": "buffers", "rmb": "fires", "e": "fires", "ult": "fires", "dash_again": "buffers"}, "air": {"lmb": "buffers", "rmb": "fires", "e": "fires", "ult": "fires", "dash_again": "buffers"}, "reverse": {"e_to_dash": "fires", "rmb_to_dash": "cancels", "ult_to_dash": "fires"}, "source": "Surge is an invulnerable dash; the data lists no lock on the other keys, so E and the spear can be started mid-dash and a tapped bolt waits for the dash to end. Holding the spear is cancelled by a dash (the spear hold ends).", "ours": "E and RMB are not gated by the dash; a bolt tapped inside the dash goes off at its end."}, "gunslinger": {"dash": "Slipstep", "ground": {"lmb": "fires", "rmb": "fires", "e": "fires", "ult": "fires", "dash_again": "buffers"}, "air": {"lmb": "buffers", "rmb": "fires", "e": "fires", "ult": "fires", "dash_again": "buffers"}, "reverse": {"e_to_dash": "fires", "rmb_to_dash": "fires", "ult_to_dash": "fires"}, "source": "Combat Slide: the rifle keeps firing through the skid (the empowered next shot is the dash payoff).", "ours": "The ground slide fires the rifle (fires_in_dash); the air roll has no slide, so a tap waits for its end."}} |
+
 ## farm_build (`content/rules/farm_build.json`)
 
 The farm building pass (docs/decisions/0004-farm-building.md). Farm level is points from play; items unlock by farm level or a milestone; new buildings are construction sites that Boki build with materials and labour; buildings upgrade L1 to L3. Units: gems and materials are counts, labour is Boki work swings (one swing is about 6 s at building skill 1).
