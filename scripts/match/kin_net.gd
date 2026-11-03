@@ -6,7 +6,7 @@ extends RefCounted
 ##   - Hunter snapshot: index 26 = the merge form worn ("" when not merged), 27 = merge seconds left, 28/29 = shell now/max, 30 = the form's or rescue's pose id
 ##   - Events ["kcmd", kind, nid, x, y, z, extra]: throw (a Sic too), recall (Call back), hop (a leap to your side
 ##     or onto you), cmd (a new order; extra = its id), merge_leap, down, scoop, round, merge (extra = the form),
-##     mcast (a merged form's cast: slot|x|z|radius|seconds), merge_end (extra = why), scan_start / scan_stop / scan_done (the capture beam, Capture; nid = the hunter, extra = the Boki's nid). The owner's game runs the rescue and the recovery timer; other
+##     mcast (a merged form's cast: slot|x|z|radius|seconds), merge_end (extra = why), unbond (a captor no longer carries a Boki: KinTrack; extra = its uid; Net 0.17.0; the bond itself starts from the "caught" event, which now carries the owner's nid, and "gdrop" puts a dropped Boki back in the world), scan_start / scan_stop / scan_done (the capture beam, Capture; nid = the hunter, extra = the Boki's nid). The owner's game runs the rescue and the recovery timer; other
 ##     games get the state and play the moment.
 
 const KIN_AT := 19
@@ -112,6 +112,9 @@ static func on_event(m: Match, x: Array) -> void:
 		"scan_start", "scan_stop", "scan_done":
 			if e is Hunter:
 				Capture.on_net(m, e, String(x[1]), String(x[6]))
+		"unbond":
+			if e is Hunter:
+				KinTrack.on_net(e as Hunter, String(x[1]), String(x[6]))
 		"down":
 			m.fx.burst(at + Vector3(0, 0.4, 0), (e as Kin).sp["color"] if e is Kin else Color.WHITE, 16, 3.0)
 		"scoop", "round":
