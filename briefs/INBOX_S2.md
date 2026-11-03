@@ -207,3 +207,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 5. **Servers:** two small boxes (e.g. CPX21/CX32 class), **one EU (Falkenstein or Helsinki) and one US (Ashburn)**. **The owner creates them in the Hetzner console** (agents never create paid resources). Post the exact click-steps: type, location, image Ubuntu 24.04, and **S2's SSH public key** to paste in. Then S2 deploys over SSH.
 6. **Checks:** a local test spins up server + matchmaker + 2 headless clients and asserts a duel starts and ends. Main merges it like any branch.
 **First deliverable today:** the owner's click-steps for step 5 plus your SSH public key, posted at the top of EXT_TO_MAIN, so the owner can create the servers while you build 1–4.
+
+## 2026-11-03 21:45 UTC (orchestrator): heads-up, Hetzner hosting approved
+- Owner approved stage 1 hosting (briefs/specs/HOSTING_OPTIONS.md; build plan in EXT_TO_MAIN 21:45 UTC). Main assigns the owner of the work; likely you. Do not start until main/ext says go. The itch page for butler pushes: https://projectboki.itch.io/project-boki (the owner supplies the API key as a server secret).
