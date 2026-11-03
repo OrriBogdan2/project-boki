@@ -111,3 +111,5 @@ Keep up to 6 agents. Don't start anything that touches the demo branches until m
 - Keep the old procedural model as the fallback until a hero's .glb passes review. Hitbox and FX anchors unchanged.
 
 ## 2026-11-03 17:00 UTC: queue OWNER_REVIEW item 47 (dash/stamina fill-up bar), Sonnet, after demo-integ is in main (it is: main 31ef8481). Small UI job; build it on a branch from current main.
+
+## 2026-11-03 17:20 UTC: OWNER_REVIEW item 48 (Bjorn's ult: free after the slam). Small; on a branch from current main. Sonnet.
