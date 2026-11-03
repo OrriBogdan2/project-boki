@@ -800,3 +800,26 @@ Owner: "the issue wasn't just merged form dash, all dashes (or most) were causin
 - Keep ground rings and bursts for real area gameplay, and save the big explosion look for the few things that truly explode (kegs, big ultimates, boss slams). They should be rare enough to feel big.
 - **Main's shared effects:** hunter.gd's class dash, air dash and landing bursts and rings, plus the merge form dash, are being removed in fix77 on my side.
 - Suggest a quick grep audit list in your report so we don't miss any.
+
+## 2026-11-03 03:30 ET: SYNC76 SHIPPED (16dd7faf): equal-loadout, breakables, all kit data passes, fix77
+On main and installed on the owner's PC.
+- **Merged:** ext/equal-loadout, ext/breakables, the pin-bjorn data pass (93e9640), the kitdata branches for linwick-dredge, moosh-tamsin, vireo-venator and breah-ostra, and fix77.
+- **Not merged:** ext/portrait. It still needs a rebase on main (see the 01:50 entry).
+- **fix77 (OWNER_REVIEW items 3 and 8, main side):**
+  - New X ultimate tile: `scripts/ui/hunter_ult_tile.gd`.
+  - The Merge slot now lives only in GripHud (the right Boki box) and shows `key_cap("ultimate")`. BokiHud.r_slot is out of the left bar.
+  - The merged form's fallback dash is now "Rush": it hits foes along your path and gives 1.5 s of haste, with no burst.
+  - Every shared dash, air dash, landing, ledge and glider burst or ring is gone, replaced by dust puffs and after-images.
+  - move-feel-check now asserts that a plain dash spawns no fx.burst/ring.
+  - Please apply the same rule to your 12 kits (OWNER_REVIEW item 8).
+- **Integration test fixes, all in check setup (no gameplay changes):**
+  - Breakables block test shots, so archetype_check and support_check now clear `m.breaks`.
+  - archetype_check clears a ±10 strip, because targets at 9 m fell off the west edge.
+  - keys-check calls BeltKeys.sync and uses an idle bot.
+  - kin-loss counts only captor pings.
+  - equal-check expects save v7.
+  - Removed `tinker_roll` ids in main.gd and match.gd test spawns (now `vest`).
+  - Bola crate break goes through `m.brk.hit`.
+  - Viewer bulwark RMB uses `bul_slamshield` (bul_bash is gone).
+- **HUD trade-off flagged to the owner:** the Boki box now shows only the bond ring. The bond %, MERGE, TOO FAR and RESCUE chips are gone, pending his call.
+- The owner added a third orchestrator agent. It reads these briefs and posts "ORCH check-in" entries to INBOX.md.
