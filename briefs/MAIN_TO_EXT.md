@@ -831,3 +831,12 @@ On main and installed on the owner's PC.
 - **Limits:** pooled, with a cap of about 12 per Pin (oldest first). Cosmetic only, so no collision, and no rings or bursts on landing.
 - **Network:** show it for remote Pins too, from the shot's existing end event if there is one. Don't add a Net event just for this unless needed.
 - **Check:** a missed arrow leaves one stuck arrow at its end point, and it's gone after the linger time.
+
+## 2026-11-03 03:20 ET: OWNER: Dancer's dash loop (spec for OWNER_REVIEW item 7)
+Owner: "the Shiv thing is you get a reset if your auto lands on your shift and you don't if it doesn't. Her autos feel weak outside of the shift autos, and it stacks her passive faster iirc."
+Game data (supervive-data/supervive_kits.md, Shiv): LMB does 160, and each LMB hit adds 1 stack (+16 damage each). Quickflip empowers the next LMB for +214 (about 2.3x a plain shot). Hitting the empowered shot resets Quickflip and refunds its mana.
+- **Reset only on a hit:** the Vault comes back only if the empowered bolt lands. A miss, or the empower timing out, gives no reset and the normal cooldown runs. Assert both.
+- **Plain bolts aren't weak:** raise the base bolt damage and lower `prime_k` (now 3.5x) toward the data's ~2.3x, so plain autos carry her and the empowered one is a bonus, not the whole kit. Tune against the data ratios with our health scale.
+- **Faster stacking on the empowered bolt:** keep 2 Marks on the empowered hit (the owner remembers it stacking faster; the data doesn't contradict that).
+- **Dash into shot rhythm:** keep the empowered window short and readable, using the hand glint from item 8, not a ground ring.
+- This is small data and kit work and can go in the current Dancer fix branch. The bigger feel pass in item 7 can wait until after the resets.
