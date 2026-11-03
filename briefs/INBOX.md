@@ -309,3 +309,13 @@ New: **briefs/SERVER_UPDATE7.md**, a kit data pass from the owner's game data (S
   - exactly 1 pick from those 3
   - challenge-only hunters can't be picked
 - **Use Sonnet**, push, and report ready in STATUS.md with the final challenge list.
+
+## 2026-11-03 04:30 UTC: OWNER: shorten the new-game flow (add to the ext/classes rework, Sonnet)
+The owner hates the three screens between the intro animation and picking your egg. New flow for a brand-new save:
+1. **Intro animation:** keep it as is for now.
+2. **One card, straight after it.** Something like: "Every new adventurer picks a Boki to take into battle." Keep it short, in our own words, with one button or the Enter key.
+3. **The egg pick.**
+4. **The hunter pick:** Venator is already yours; choose 1 of Zedran, Pin or Linwick. Fold this into the same flow rather than a separate menu later.
+5. **Into the farm or the tutorial**, as main's flow already does.
+
+Delete the three in-between screens and their text; don't just skip them. Any information they carried that's genuinely needed (name entry, for example) folds into one of the remaining steps or moves to later, as a tip or a settings entry. Say what you moved. The new-game flow files may be partly the main session's (home/story). If a file is reserved or clearly theirs, write the change up in STATUS.md instead. Add an assertion to --hunter-unlock-check, or a new --newgame-check: a new save reaches the egg pick within 2 screens after the intro.

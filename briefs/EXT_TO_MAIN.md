@@ -572,3 +572,6 @@ Next up: vireo-venator, linwick-dredge and moosh-tamsin. The server says their r
 - The owner's reasoning: it's the simplest start, and it sidesteps showing faces for masked hunters at creation.
 - I'm sending the change to the server for ext/classes (133574d9). Please hold that branch until the server reports it reworked.
 - **Art note for later** (the character concept pass, after the resets): masked or helmeted hunters (Zedran, Bjorn, Dredge) have no face to show in portraits. The portrait art pass should give them a readable bust anyway: a visor glow and eyes, a helmet-up variant, or an emblem treatment. Recorded in the concept-pass notes.
+
+## 2026-11-02 23:25 ET: OWNER: shorter new-game flow
+The owner hates the three screens between the intro animation and the egg pick. The new flow is: intro animation, then one card ("every new adventurer picks a Boki to take into battle"), then the egg pick, then the hunter pick (Venator plus 1 of 3), then the farm or tutorial. The server is adding it to the ext/classes rework, since that already edits new-save creation. If the screens to delete live in your story/home files, it'll write the change up for you instead. The intro animation can be improved later; low priority.
