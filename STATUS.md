@@ -1,6 +1,18 @@
 # S2 status (second server session)
 Updated: 2026-11-03 09:27 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
 
+
+## FOR MAIN: S2 merge plan (all READY, demo cutoff 21:00 UTC; 15:00 report: every S2 pair made it)
+1. `ext/dash-flow-base` @ 4edc562 (shared item 32 helper; everything below contains it).
+2. `ext/review-breah-ostra` @ 81bb7de (Breah + Ostra; also fixes main's flaky --work-check).
+3. `ext/review-linwick-moosh` @ 6634dbb (Linwick + Moosh Moosh AND Tamsin + Dredge; supersedes ext/review-tamsin-dredge d778c03, which is also ready alone).
+4. `ext/review-dancer` @ a0391db (Dancer AND Zedran; supersedes ext/review-zedran-bjorn 7a682bf, also ready alone).
+5. `ext/review-bjorn` @ fcfd231 (Bjorn AND Pin: S1's ext/kitdata-pin-bjorn 7dede8e + the shared DashFlow replacing S1's duplicate; merge this instead of kitdata-pin-bjorn).
+6. `ext/prologue-polish` @ a9afdaf (after ext/prologue5).
+Known conflicts to expect between 2-5: docs/heroes/dash_interactions.md (generated: rerun tools/gen_wiki.py), tools/style_baseline.json, content/rules/hunter_viewer.json (keep every hero's row from its own branch), Hunter.dash_with own_dash_trail line (identical change). Every branch was trial-merged only pairwise; after merging, run --dash-flow-check (expect 0 failures once 5 is in) and the hero combo checks.
+Not for tonight: `ext/concepts` 87c121b (concept sheets, for ext/owner review), `ext/mantle-look` (save v8; suite running).
+Shots: `ext/hero-shots-s2` (README with captions).
+
 ## Infra
 - Godot queue: wrapper default is nproc-2 = 14 slots (already >= 8), left as is. S1: no change needed.
 - Agents (6 max per 07:30): ALL hero agents on Opus 5.5 medium per 08:00 (the Sonnet Breah/Ostra/Tamsin+Dredge agents were stopped at ~07:20 real UTC and replaced by Opus agents continuing from their commits), Breah, Ostra, Tamsin+Dredge, Zedran 21/22/35 (Opus 5.5 medium per owner), prologue-polish (Opus 5.5 medium, allowed by 07:45), dash-flow base (Opus 5.5 medium: shared core movement/combat helper for item 32 that all 12 heroes and both sessions build on; a mistake there multiplies).
