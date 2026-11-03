@@ -20,10 +20,13 @@ static func build(W: World, T: Dictionary, neck: Dictionary) -> void:
 		if si < names.size():
 			W.labels.append({"name": String(names[si]), "pos": Vector3(line[k].x, 0, line[k].y), "kind": "rail"})
 	var y := _deck_heights(W, line, st_s)
-	var pts := PackedVector3Array(); pts.resize(n)
+	var pts := PackedVector3Array()
+	pts.resize(n)
 	for k in n:
 		pts[k] = Vector3(line[k].x, y[k], line[k].y)
-	W.train_route = {"pts": pts, "len": n * W.TRAIN_STEP, "stations": st_s, "names": names, "spec": T, "grid": _grid(line)}
+	W.train_route = {
+		"pts": pts, "len": n * W.TRAIN_STEP, "stations": st_s, "names": names, "spec": T, "grid": _grid(line),
+	}
 
 ## Where the track is a given arc length round the loop (wraps).
 static func at(W: World, s: float) -> Vector3:
@@ -122,7 +125,7 @@ static func _piers(W: World, at: Vector2, dir: Vector2, neck: Dictionary) -> voi
 			continue
 		var g0 := at + dir * side * found
 		var gi := W.idx(int(g0.x), int(g0.y))
-		var owner := W.island[gi]
+		var isle := W.island[gi]
 		var lv := W.level[gi]
 		var p0 := at + dir * side * (found + 2.0)
 		var p1 := at + dir * side * 1.7
@@ -137,18 +140,19 @@ static func _piers(W: World, at: Vector2, dir: Vector2, neck: Dictionary) -> voi
 				if W.kind[i] != W.T_VOID:
 					continue
 				W.kind[i] = W.T_GROUND
-				W.island[i] = owner
+				W.island[i] = isle
 				W.level[i] = lv
 				W.depth[i] = -1.6
 				neck[i] = true
-				W.islands[owner]["cells"].append(Vector2i(x, z))
+				W.islands[isle]["cells"].append(Vector2i(x, z))
 
 ## The deck height round the loop: level with the ground at the stops, under anything in the way, and
 ## never changing faster than the dive over ~8 tiles.
 static func _deck_heights(W: World, line: PackedVector2Array, st_s: Array) -> PackedFloat32Array:
 	var n := line.size()
 	var loop := n * W.TRAIN_STEP
-	var want := PackedFloat32Array(); want.resize(n)
+	var want := PackedFloat32Array()
+	want.resize(n)
 	for k in n:
 		var s := k * W.TRAIN_STEP
 		var near_stop := false
@@ -170,7 +174,9 @@ static func _deck_heights(W: World, line: PackedVector2Array, st_s: Array) -> Pa
 static func _blocked(W: World, q: Vector2) -> bool:
 	for z in range(int(q.y - 3), int(q.y + 4)):
 		for x in range(int(q.x - 3), int(q.x + 4)):
-			if W.inb(x, z) and W.kind[W.idx(x, z)] != W.T_VOID and W.level[W.idx(x, z)] < 6 and Vector2(x + 0.5, z + 0.5).distance_to(q) < 2.9:
+			if not W.inb(x, z) or W.kind[W.idx(x, z)] == W.T_VOID or W.level[W.idx(x, z)] >= 6:
+				continue
+			if Vector2(x + 0.5, z + 0.5).distance_to(q) < 2.9:
 				return true
 	return false
 

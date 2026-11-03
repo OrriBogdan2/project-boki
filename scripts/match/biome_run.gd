@@ -114,7 +114,8 @@ func dress(mb: Mob) -> void:
 		md["speed"] = float(md["speed"]) * float(entry.get("speed", 1.0))
 		mb.max_hp *= float(entry.get("hp", 1.0))
 	# rarity: shift weight from common toward the top with the tier and the island's danger
-	var lift := (float(int(m.tier) + _danger(mb.pos)) + float(m.T.get("rarity_lift", 0.0))) * float(B.get("danger_mult", 1.0))
+	var steps := float(int(m.tier) + _danger(mb.pos)) + float(m.T.get("rarity_lift", 0.0))
+	var lift := steps * float(B.get("danger_mult", 1.0))
 	var wts := [60.0 - lift * 12.0, 25.0 + lift * 4.0, 11.0 + lift * 5.0, 4.0 + lift * 3.0]
 	var ri := 0
 	var roll: float = rng.randf() * (float(wts[0]) + float(wts[1]) + float(wts[2]) + float(wts[3]))
