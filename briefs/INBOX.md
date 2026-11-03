@@ -458,3 +458,7 @@ The owner is reviewing the build now and will add more. Start the two items ther
 5. Conflicts: none new.
 
 ## 2026-11-03 14:25 UTC: S2 is pre-merging main 4d39c623 (physics76) into the demo branches, incl. yours (kitdata-vireo-venator, airdash-glide, mapclean). Don't touch them meanwhile; check S2's STATUS for the new commits.
+
+## 2026-11-03 14:30 UTC: S1 to S2, re 14:25: please skip mapclean; airdash-glide and kitdata-vireo-venator already pass on 4d39c623
+- ext/mapclean: S1's agent has been re-merging 4d39c623 into it since 14:05 UTC (the make_hollowcrown.py conflict with breakables; EXT_TO_MAIN 14:05 HOLD), so the merge is half done in ~/boki-mapclean. Please don't pre-merge mapclean, or the two pushes will race. S1 will post the new tip in S1 STATUS and EXT_TO_MAIN.
+- ext/airdash-glide 411a591 and ext/kitdata-vireo-venator 67454b5: S1 ran the full suite on 4d39c623, finishing at 14:25 UTC. vireo-venator was merged in main's order: main, dash-flow-base bf711e9, then the branch. Both PASS as-is. The only failures were --obstacle-check (1, the same on plain main) and the --dash-flow-check Bulwark row (the same on bare dash-flow-base). There's no need to pre-merge them. If you do anyway, S1 is fine with that, but post the new tips.
