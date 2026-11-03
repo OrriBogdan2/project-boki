@@ -1,0 +1,14 @@
+breah_rmb_charge_close.png: Quakefall charging: the red circle a hop ahead, the sweet spot grown (close-up)
+breah_rmb_charge.png: Quakefall charging: the red circle a hop ahead, the sweet spot grown
+breah_rmb_slam_close.png: Quakefall landing: the starburst, chips and crater where she lands (close-up)
+breah_rmb_slam.png: Quakefall landing: the starburst, chips and crater where she lands
+breah_rmb_strip.png: Quakefall (RMB), gameplay zoom: the gathered crouch with the circle and its sweet spot; the push-off; fists high at the top of the short hop; swung down as she drops; the smash on landing; low in the crater
+breah_dash_ground_strip.png: Rubble Leap (ground dash), gameplay zoom: crouched on the rock as it heaves up; kicked off it, fists swept back; tucked at the top, fists overhead; legs reaching down; the two-fist landing (dust, no ring). Reference: footage 0516-0518, the rock bursting up in front and a low shove behind it (ours is the owner's leap over that rock)
+breah_dash_air_strip.png: Air dash, gameplay zoom: the gather (fists in at the chest); the shoulder-first barge, lead fist low, legs trailing; held through the push; braced, knees up, as it ends (0.23s). Reference: the source's ground shove (footage 128.8-129.4 s, shoulder down behind the rock, fists forward), taken into the air
+breah_spine_cracks.png: Basalt Spine released: the molten cracks along the line everyone sees for 0.2s
+breah_spine_cracks_close.png: Basalt Spine released: the molten cracks along the line everyone sees for 0.2s (close-up)
+breah_spine_rising.png: Basalt Spine rising centre-out: real rocks (Stone Row's own), one rock deep
+breah_spine_rising_close.png: Basalt Spine rising centre-out: real rocks (Stone Row's own), one rock deep (close-up)
+breah_spine_up.png: Basalt Spine up: a ridge of punchable rocks across the aim, one rock deep, no land; it stops at the island's edge (lower right)
+breah_spine_up_close.png: Basalt Spine up: a ridge of punchable rocks across the aim, one rock deep, no land; it stops at the island's edge (lower right) (close-up)
+breah_climb_strip.png: Her own rock (item 25), gameplay zoom: she walks into it with no jump, rises up its face with her walk carried on, stands on its top (the rock slides under her, her foot ring on its top) and walks on over (about 0.5s to cross; the top-down camera hides most of the 1.25m rise)

@@ -1,0 +1,8 @@
+meteor_strip.png: Meteor Drop at gameplay zoom, 6 frames: 0.03s into the hang (blade hauled overhead, the marker everyone sees at the clamped cursor), the turn while gathering, the end of the 0.2s hang, the dive with flame streaks (seen, not a teleport), the impact (stun-core shock ring, cracks, dust, CRUSHED), the recovery rising with the blade dragged.
+meteor_impact.png: The Meteor Drop's impact at gameplay zoom: the pink shock ring at the 1.2m stun radius, dust rings, the cracks under him; the dummy at the centre is CRUSHED (stunned).
+pull_steer_strip.png: Warchain pull from 10m with a sideways key held, 6 frames: hooked (striped link chain), the pull (hot chain, his lean into it, the curved flame trail), arriving below the dummy instead of on it.
+pull_steer_game.png: The same steered pull at gameplay zoom: the hooked dummy, the taut chain, and the trail bending down-screen as the steer slides the arrival point.
+spin_in_pull_strip.png: E, E, RMB: the Cinder Spin fires on the press during the pull (blade swung round, the spin arcs), the pull carries on into the dummy.
+lunge_strip.png: The charged Lunge: the coil with the lane growing, full charge (magenta flash), the release driving forward, the hit (20) with the burst and slash.
+dash_ground_strip.png: Rampage (ground dash), 5 frames: the 0.15s crouch with the blade cocked high, the flat drive with orange flame streaks, the tip hit (TIP 21), the low recovery with the blade dragged.
+dash_air_strip.png: His air dash (jug_exdash), 5 frames: knees snapped up, the hurled shoulder charge with the pauldron leading and the blade trailing, flame streaks behind, the knees coming up under him at the end; no ground ring or burst.

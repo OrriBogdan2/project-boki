@@ -1,0 +1,3 @@
+d33_fist_slam_strip.png: Item 33 Anchor Drop, 5 frames: the exact hit cone appears on the ground at the press, fills under the raised fist, the slam at 0.38s (crescent, damage on this frame), recoil with cracks and dust in that area
+d35_dash_ground_lunge_strip.png: Item 35 barge as a monster's low lunge, pitched over the ground, hands clawing ahead and hauling him along, landing in a squat; no burst or ring
+d35_dash_air_pounce_strip.png: Item 35 air barge as a pounce, claws raked forward, legs tucked, heavy drop (the pale ring under him follows him through the jump before the pounce too: the shared ground ring of an airborne hunter, not a dash effect)

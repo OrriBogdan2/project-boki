@@ -1,0 +1,25 @@
+s1_1.png: BEFORE THE FALL, 1.1 s in. start: the land whole at golden hour, a slow push in
+s1_2.png: BEFORE THE FALL, 2.7 s in. beat: the Crown on its isle
+s1_3.png: BEFORE THE FALL, 3.5 s in. middle: cut to a low angle on the Crown
+s1_4.png: BEFORE THE FALL, 5.1 s in. beat: the push in on the Crown
+s1_5.png: BEFORE THE FALL, 6.7 s in. end: the Crown in the evening sun
+s2_1.png: THE WAKING, 1.1 s in. start: the calm before, over the towns to the Crown
+s2_2.png: THE WAKING, 2.7 s in. beat: the Wyrm rises behind the Crown and roars
+s2_3.png: THE WAKING, 3.6 s in. middle: cut wide, the sky reddening as it dives
+s2_4.png: THE WAKING, 4.7 s in. beat: fire on the towns, the frame shaking
+s2_5.png: THE WAKING, 6.9 s in. end: the Wyrm climbs away over the burning land
+s3_1.png: THE SUNDERING, 1.1 s in. start: the burning land, the Wyrm circling
+s3_2.png: THE SUNDERING, 1.9 s in. beat: the land splits (flash, jolt, rocks)
+s3_3.png: THE SUNDERING, 3.3 s in. middle: the Mantles burst out of the Crown
+s3_4.png: THE SUNDERING, 4.5 s in. beat: cut low, the isles drifting apart in dust
+s3_5.png: THE SUNDERING, 7.4 s in. end: the isles sinking, rocks falling past
+s4_1.png: THE BOKI, 1.1 s in. start: a hunter at sunrise, the first Boki out of the grass
+s4_2.png: THE BOKI, 2.5 s in. beat: the lead Boki greets him, he kneels
+s4_3.png: THE BOKI, 4.0 s in. middle: cut side-on, it rears up to nose the relic in his hands and it wakes
+s4_4.png: THE BOKI, 5.5 s in. beat: the woken relic hangs glowing in Venator's colour between them
+s4_5.png: THE BOKI, 7.4 s in. end: the Boki jump for joy, the Mantle rising off him
+s5_1.png: THE RACE, 1.1 s in. start: behind the hunters gliding for the Heart
+s5_2.png: THE RACE, 2.9 s in. beat: the Heart's beam ahead
+s5_3.png: THE RACE, 4.3 s in. middle: cut to the reveal over the isles
+s5_4.png: THE RACE, 5.7 s in. beat: two eyes open far down in the clouds
+s5_5.png: THE RACE, 8.1 s in. end: the Wyrm watching the race

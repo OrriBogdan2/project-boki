@@ -1,0 +1,8 @@
+t28_spear_throw_strip.png: Item 28 Ice Spear, 5 frames: spear raised with the landing ring (aim), drawn back on release (still in hand, nothing at the target), leaving her hand on the whip, in flight near the target, landing with the slow zone
+t13_spear_in_flight.png: Item 13 the bigger star-headed spear in flight with its frosty trail (18 m/s), between her hand and the target
+t13_spear_landing.png: Item 13 the landing: shard burst, chill puff, the 2.2m slow-zone ring with its spinning crystal
+t13_spear_detonation.png: Item 13 the detonation 1.8s later: dome, full-size spike starburst, the 60 hit and the freeze
+t13_wall_full_extension.png: Item 13 Rink Wall slid out to about 11m at full 4.5m width (max travel is now 16.2m, +50%)
+t27_shift_out_of_rimelock_strip.png: Item 27 sealed in Rimelock, Shift: the shell breaks and she skates straight out at full speed, plates under her blades
+t35_dash_ground_skate_strip.png: Items 12/35 her only dash, the skate: push-off, stride, carve, hockey stop; ice plates form under her and fade behind, no ring
+t35_dash_air_press_strip.png: Items 12/35 Shift pressed in the air: no air dash; the skate starts as she lands
