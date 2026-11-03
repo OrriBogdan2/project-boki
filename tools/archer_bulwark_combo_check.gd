@@ -540,6 +540,7 @@ func _spin(lvl: int) -> float:
 	var T: Hunter = r[2]
 	var K: BulwarkKit = P.ak
 	P.lvl = lvl
+	LevelGrowth.apply(P)          # a level set straight on the hunter grows nothing until applied
 	fresh(T)
 	T.teleport(P.pos + Vector3(1.4, 0, 0))
 	aim_at(P, T.pos)

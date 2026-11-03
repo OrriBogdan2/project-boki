@@ -264,11 +264,8 @@ func use_e() -> void:
 	else:
 		h._ab_feedback("k1", "deny")
 
-## X: the hero's own ultimate. No hero has one yet; a kit that does overrides both. Returns true when it went off.
-func cast_ult() -> bool:
-	return false
-
-## Does this hero have an ultimate on X (the HUD shows the slot only then)?
+## Does the ammo panel draw its own hunter-ultimate key tile for this hero? Heroes with an "x" ult show
+## theirs in the HUD's X slot (UltSlot), so the panel's tile stays off for them.
 func has_ult() -> bool:
 	return false
 
