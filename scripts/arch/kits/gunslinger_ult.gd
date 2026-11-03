@@ -59,8 +59,6 @@ func cast() -> bool:
 	kit.m.sfx("vn_nuke_fire", h.pos, -1.0)
 	kit.m.sfx("vn_nuke_fall", at, -2.0)
 	kit.net_ring(at, r, GunslingerKit.EMBER)
-	if h.is_local() and kit.m.cam:
-		kit.m.cam.add_trauma(0.08)
 	return true
 
 ## The shell: a big Burr Charge with its spikes out, made once and reused.

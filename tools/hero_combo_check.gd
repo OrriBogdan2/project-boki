@@ -9,6 +9,7 @@ var ac: RefCounted
 var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
+const VPARITY := preload("res://tools/venator_parity_check.gd")   # Venator against the source (the parity pass)
 
 func ok(name_: String, cond: bool, info := "") -> void:
 	n += 1
@@ -583,7 +584,7 @@ func _gunslinger() -> void:
 	ok("RMB held: a 10.5m lane with an arrow tip, past the cursor",
 			not le.is_empty() and absf(float(le["len"]) - 10.5) < 0.01 and bool(le["tip"]))
 	ok("RMB held: the foe in the lane is marked", AimKit.shown(P, "mark%d" % T.get_instance_id()))
-	ok("RMB held: nothing thrown yet, the grenade cocked overhead",
+	ok("RMB held: nothing thrown yet, the grenade held low at the hip",
 			K.burrs.is_empty() and K.anim_id == "gunslinger_rmb_hold",
 			K.anim_id)
 	P.inp["sec_hold"] = false
@@ -854,6 +855,7 @@ func _gunslinger() -> void:
 	T.downed = false
 	T.hp = T.max_hp
 	P.slot_lv["sec"] = 1
+	VPARITY.new(self).run(m, P, K, T, home)
 	# 8. a Boki merge mid-hold: the Longneedle charge goes with nothing fired
 	ac.fresh(T)
 	P.teleport(home)

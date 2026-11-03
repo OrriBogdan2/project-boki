@@ -15,6 +15,11 @@ const CROUCH := [0.9, -1.5, 0.55, -1.2]
 const TUCK := [1.5, -2.0, 1.4, -1.9]
 const BRACE := [0.6, -1.05, 0.4, -0.8]
 const SLIDE := [-1.2, -0.15, -0.3, -1.8]
+const AIM_CROUCH := [0.55, -0.95, -0.2, -0.55]
+const TOSS_SET := [0.45, -0.75, -0.1, -0.4]
+const TOSS_STEP := [0.7, -0.8, -0.35, -0.25]
+## Venator's rifle shouldered between rounds: the chest low over the front knee, the stock in the shoulder.
+const SHOULDER := {"p": -0.08, "lift": -0.05, "sq": 0.05, "wo": Vector3(0.0, 0.0, 0.02), "legs": AIM_CROUCH, "lw": 0.7}
 
 const MOVES := {
 	# ---------------------------------------------------------------- Vireo
@@ -141,30 +146,38 @@ const MOVES := {
 		[0.3, {"p": -0.1, "lift": 0.04, "sq": -0.15, "fl": Vector3(-0.4, 0.15, 0.0), "hw": 0.7}],
 		[0.5, {}]]},
 	# ---------------------------------------------------------------- Venator
-	# a rifle round: a 0.03 s snap of the shoulder kick, the muzzle flipped up, the stock pushed back
-	"gunslinger_lmb": {"keys": [
-		[0.00, {"p": 0.02}],
-		[0.03, {"p": 0.12, "gp": 0.3, "wo": Vector3(0.0, 0.02, 0.07), "y": 0.05}],
-		[0.08, {"p": 0.05, "gp": 0.1, "wo": Vector3(0.0, 0.0, 0.03)}],
-		[0.14, {}]]},
-	# Spike Grenade held: the grenade cocked up and out beside the left shoulder (clear of the head and
-	# hat from above), the rifle hand forward
-	"gunslinger_rmb_hold": {"hold": true, "keys": [
-		[0.00, {"sq": -0.15}],
-		[0.12, {"p": 0.22, "y": -0.5, "fl": Vector3(-0.32, 0.3, -0.02), "hw": 1.0, "legs": [0.3, -0.5, 0.0, -0.3],
-			"lw": 1.0, "sq": 0.12}],
-		[0.9, {"p": 0.26, "y": -0.55, "fl": Vector3(-0.34, 0.32, -0.04), "hw": 1.0, "legs": [0.32, -0.55, 0.0, -0.32],
-			"lw": 1.0, "sq": 0.15}]]},
-	# Spike Grenade thrown: a fast overhand (0.2 s commit), the arm whipping through, a stretch at the release
-	"gunslinger_rmb": {"keys": [
-		[0.00, {"p": 0.26, "y": -0.55, "fl": Vector3(-0.34, 0.32, -0.04), "hw": 1.0, "legs": [0.32, -0.55, 0.0, -0.32],
-			"lw": 1.0}],
-		[0.07, {"p": -0.4, "y": 0.45, "fl": Vector3(0.12, 0.2, -0.6), "hw": 1.0, "legs": [0.7, -0.8, -0.4, -0.2],
-			"lw": 1.0, "sq": -0.3}],
-		[0.16, {"p": -0.5, "y": 0.55, "fl": Vector3(0.1, -0.25, -0.35), "hw": 0.9, "legs": [0.75, -0.85, -0.4, -0.2],
-			"lw": 1.0, "sq": 0.22}],
-		[0.4, {"p": -0.1, "y": 0.1, "hw": 0.3, "lw": 0.4}],
-		[0.6, {}]]},
+	# a rifle round (footage 0007-0036, 0067-0072: the rifle stays shouldered at the chest on the cursor, the
+	# recoil shows in the gun and the muzzle, the body barely moves; standing he sinks into a low wide aim
+	# crouch, walking the legs keep walking). Every round restarts it on the shouldered pose: the stock kicks
+	# into the shoulder and the muzzle flips up by 0.025 s, back on the aim by 0.09 (the next round is at
+	# 0.12). After the last round the rifle stays up a beat, then he eases out of the crouch by 0.55.
+	"gunslinger_lmb": {"stance": true, "keys": [
+		[0.00, SHOULDER],
+		[0.025, {"p": 0.03, "y": 0.04, "lift": -0.04, "sq": 0.06, "gp": 0.24, "wo": Vector3(0.0, 0.02, 0.08),
+			"legs": AIM_CROUCH, "lw": 0.7}],
+		[0.09, SHOULDER],
+		[0.3, SHOULDER],
+		[0.55, {}]]},
+	# Burr Charge held, the owner's side toss rather than an overhead throw: the charge drawn low beside the
+	# left hip, the torso turned a little away from the aim, a slight crouch; little wind-up, and walking the
+	# legs keep walking
+	"gunslinger_rmb_hold": {"hold": true, "stance": true, "keys": [
+		[0.00, {}],
+		[0.08, {"p": -0.05, "y": -0.4, "lift": -0.04, "sq": 0.1, "fl": Vector3(-0.46, -0.12, 0.16), "hw": 1.0,
+			"legs": TOSS_SET, "lw": 0.8}],
+		[0.6, {"p": -0.06, "y": -0.48, "lift": -0.05, "sq": 0.12, "fl": Vector3(-0.48, -0.14, 0.2), "hw": 1.0,
+			"legs": TOSS_SET, "lw": 0.8}]]},
+	# ... let go: a quick sidearm flick, the hand swept low and forward from the hip (the release at 0.05),
+	# across the body on the follow-through as the torso unwinds and he steps into it, back on the rifle by 0.5
+	"gunslinger_rmb": {"stance": true, "keys": [
+		[0.00, {"p": -0.06, "y": -0.48, "lift": -0.05, "sq": 0.12, "fl": Vector3(-0.48, -0.14, 0.2), "hw": 1.0,
+			"legs": TOSS_SET, "lw": 0.8}],
+		[0.05, {"p": -0.18, "y": 0.35, "lift": -0.06, "sq": -0.15, "fl": Vector3(-0.12, -0.02, -0.62), "hw": 1.0,
+			"legs": TOSS_STEP, "lw": 1.0}],
+		[0.13, {"p": -0.2, "y": 0.5, "lift": -0.05, "sq": 0.05, "fl": Vector3(0.2, 0.04, -0.45), "hw": 1.0,
+			"legs": TOSS_STEP, "lw": 1.0}],
+		[0.32, {"p": -0.06, "y": 0.12, "fl": Vector3(-0.1, 0.0, -0.15), "hw": 0.4, "legs": TOSS_STEP, "lw": 0.4}],
+		[0.5, {}]]},
 	# Combat Slide: dropped feet-first, leaning back (no further than 0.45, so he stays upright enough to
 	# aim), both hands left on the rifle so it stays up and aimed; a scrape squash, then the stand-up
 	"gunslinger_dash": {"keys": [

@@ -26,6 +26,9 @@ const ECHO_GAP := 0.05               # s between his after-images on a slide or 
 const ECHO_ALPHA := 0.35             # see-through, so the trail never covers his live body
 const ECHO_BACK := 0.35              # m behind him along his travel: the echoes trail, not overlap
 const PIP_LIFT := 0.9                # m up the screen the Fever pips sit, clear of his cap and face
+const TOSS_Y := 1.05                 # m: the Burr Charge leaves from the hip (a side toss, not overhead)
+const BRACKET_R := 1.25              # m: the firing brackets either side of him (footage: about 0.7 bh)
+const BRACKET_DEG := 56.0            # each bracket's arc
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, wall, fuse, fuse0, range, out, y0}
@@ -43,7 +46,8 @@ var last_cone := {}            # tests: {at, dir, wall}
 var last_shot := 0
 var aim_marks := 0             # tests: foes marked inside the held lane
 var echo_t := 0.0
-var grenade: Node3D = null     # the Burr Charge cocked in his left hand while RMB is held
+var refill_part := 0.0         # rounds the resting drum has part-refilled
+var grenade: Node3D = null     # the Burr Charge held low in his left hand while RMB is held
 var ult: GunslingerUlt         # Cinderfall, his ultimate on X
 
 func _setup() -> void:
@@ -83,6 +87,8 @@ func _tick(dt: float) -> void:
 	if ult.running():
 		ult.tick(dt)
 	_tick_lmb()
+	_tick_mag(dt)
+	_tick_brackets()
 	_tick_echo(dt)
 	_tick_grenade()
 	_tick_trail()
@@ -198,6 +204,31 @@ func _tick_lmb() -> void:
 			break
 	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:
 		play("gunslinger_lmb")
+
+## While the rifle fires, two thin arcs bracket him left and right (your screen only; the footage's firing
+## brackets), gone a beat after the trigger rests.
+func _tick_brackets() -> void:
+	if not _rifle_in_hand() or h.idle_fire > float(h.wpn["rate"]) + 0.1 or busy():
+		return
+	var d := h.aim_dir()
+	for side in [-1.0, 1.0]:
+		AimKit.arc_wall(h, "lmb_bracket%d" % int(side), {"dir": Vector2(-d.y, d.x) * side, "radius": BRACKET_R,
+				"deg": BRACKET_DEG, "thick": 0.05, "panels": 1, "alpha": 0.8})
+
+func _rifle_in_hand() -> bool:
+	return h.wid == String(d.get("signature", ""))
+
+## The drum refills fast whenever the trigger rests (the source's rifle: 30 rounds, "rapidly reloads when not
+## firing"), so a string after a pause starts on a full drum; run it dry and it is the normal reload.
+func _tick_mag(dt: float) -> void:
+	var mag := int(h.wpn.get("mag", 0))
+	if not _rifle_in_hand() or h.reload_t > 0.0 or h.ammo >= mag or h.idle_fire < float(h.wpn["refill_after"]):
+		refill_part = 0.0
+		return
+	refill_part += float(h.wpn["refill_rate"]) * dt
+	var add := int(refill_part)
+	refill_part -= float(add)
+	h.ammo = mini(mag, h.ammo + add)
 
 func _round_end(at: Vector3, vel: Vector2) -> void:
 	var d := Vector3(-vel.x, 0.4, -vel.y).normalized() if vel.length() > 0.1 else Vector3.UP
@@ -337,7 +368,7 @@ func _tick_aim() -> void:
 			var mark := {"at": f.pos, "r": 0.75, "col": Color("ff4fb0"), "col2": HOT, "alpha": 1.2}
 			AimKit.circle(h, "mark%d" % f.get_instance_id(), mark)
 
-## The charge cocked in his raised left hand while RMB is held (gone the moment it's thrown).
+## The charge held low at his left hip while RMB is held (gone the moment it's thrown).
 func _tick_grenade() -> void:
 	var cocked := rmb_down and h.anim != null and h.anim.hand_l != null and not h.downed
 	if not cocked:
@@ -372,7 +403,7 @@ func fire_rmb(c: Dictionary) -> void:
 		burr_pool.append(n)
 	n.visible = true
 	n.scale = Vector3.ONE
-	var at := h.pos + Vector3(d.x * 0.6, 1.6, d.y * 0.6)
+	var at := h.pos + Vector3(d.x * 0.6, TOSS_Y, d.y * 0.6)
 	if grenade != null and is_instance_valid(grenade) and grenade.visible:
 		at.y = grenade.global_position.y       # it leaves at the height of the hand, along the lane shown
 		grenade.visible = false
@@ -625,7 +656,6 @@ func _fire_needle() -> void:
 	Feel.shake(m, "t3", h, h.pos)
 	if h.is_local():
 		Oomph.punch_dir(m, -d, 0.22)
-		if m.cam: m.cam.add_trauma(0.18)
 	h.impulse(-d * float(ed.get("recoil", 6.0)))                  # the recoil shoves him back a step
 	var hits := 0
 	var dmg0: float = float(ed["dmg"]) * power("kin")
