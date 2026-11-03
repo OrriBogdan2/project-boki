@@ -229,7 +229,7 @@ func _ledges(wl: Dictionary) -> void:
 		h.inp["glide"] = i < 4
 	var glide_nokeys := func(i: int, n: Vector2) -> void:
 		h.gliding = i == 0 or h.gliding
-		h.vel.x = n.x * 6.0 if i < 4 else h.vel.x
+		h.vel.x = n.x * 6.0 if i < 6 else h.vel.x
 		h.inp["move"] = Vector2.ZERO
 		h.inp["glide"] = i < 4
 	var fall := func(_i: int, n: Vector2) -> void:

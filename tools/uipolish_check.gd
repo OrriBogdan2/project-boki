@@ -14,7 +14,7 @@ var n := 0
 
 ## Files that may still build their own boxes: the HUD (ext/hudref owns its look) and reserved files.
 const ALLOWED := ["scripts/ui/hud.gd", "scripts/ui/kin_reveal.gd"]
-const STYLE_MODULE := ["scripts/ui/ui.gd", "scripts/ui/ui_theme.gd", "scripts/ui/ui_frame.gd"]
+const STYLE_MODULE := ["scripts/ui/ui.gd", "scripts/ui/ui_theme.gd", "scripts/ui/ui_frame.gd", "scripts/ui/hud_style.gd"]
 
 func ok(what: String, cond: bool, info := "") -> void:
 	n += 1

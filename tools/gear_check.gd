@@ -190,7 +190,7 @@ func _match() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 9
 	var at: Vector3 = P.pos + Vector3(3, 0, 3)
-	var tables: Array = ["ground", "cache", "crate", "chest0", "chest1", "chest2", "brute", "sentinel", "warden", "glimmer", "bl_skitter", "bl_warden", "boss"]
+	var tables: Array = ["ground", "cache", "crate", "chest", "brute", "sentinel", "warden", "glimmer", "bl_skitter", "bl_warden", "boss"]
 	var total := {}
 	for t in tables:
 		total[t] = 0
@@ -202,7 +202,7 @@ func _match() -> void:
 			clean = false
 	ok("no weapon pickups spawn from any table", clean and not m.wpicks.is_empty(), "%d pickups" % m.wpicks.size())
 	ok("every table is defined and drops something", tables.all(func(t): return int(total[t]) > 0), str(total))
-	ok("chests pay more than crates", int(total["chest2"]) > int(total["chest0"]) and int(total["chest0"]) > int(total["crate"]))
+	ok("a chest pays more than a crate", int(total["chest"]) > int(total["crate"]))
 	var bossn := 0
 	var low := false
 	var brand := false
@@ -217,7 +217,7 @@ func _match() -> void:
 			elif Data.PERKS[e["id"]]["wup"].has("brand"): brand = true
 	ok("a boss drops few items", float(bossn) / 200.0 <= 4.0, "%.2f a boss" % (float(bossn) / 200.0))
 	ok("boss gear is Rare or better, with a Brand and sometimes Legendary", not low and brand and legend > 0, "legend %d/200" % legend)
-	var per_chest := float(total["chest2"]) / 40.0
+	var per_chest := float(total["chest"]) / 40.0
 	ok("a boss drops fewer than a rich chest has junk, but better", float(bossn) / 200.0 <= maxf(per_chest, 3.0))
 	# 5. walking over a tuning applies it; gear goes into its slot and the old piece drops
 	for wp in m.wpicks.duplicate():

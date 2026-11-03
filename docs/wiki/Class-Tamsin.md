@@ -41,7 +41,7 @@ R is your Boki's Merge.
 
 |  |  |
 |---|---|
-| Weight class | Light (124 health, 5 m/s, 1 dash charge) |
+| Weight class | Light (124 health, 4.4 m/s, 1 dash charge) |
 | Signature weapon | Hoar Fan (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that freezes where it lands, and a sliding wall of ice that shoves foes where she wants them. |
 | Silhouette | the big furred collar and the long trailing scarf, on blade skates |

@@ -90,7 +90,8 @@ func run(main: Node) -> void:
 	var w0 := m.wpicks.size()
 	var kill_t := _kill(F, P, C)
 	var gems_new: Array = dropped.filter(func(p): return String(p["kind"]) == "gem")
-	var other_new: Array = dropped.filter(func(p): return String(p["kind"]) != "gem" and String(p["kind"]) != "key")
+	# Rift Keys and chest keys are separate rewards (a lair boss may drop a bonus chest key, decision 0007)
+	var other_new: Array = dropped.filter(func(p): return not String(p["kind"]) in ["gem", "key", "ckey"])
 	var gem_total := 0
 	for p in gems_new: gem_total += int(p["v"])
 	ok(gems_new.size() <= Match.BOSS_GEM_DROPS and gem_total >= int(Data.MOBS["colossus"]["gems"]) * 2 and other_new.is_empty(),

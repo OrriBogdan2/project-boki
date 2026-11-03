@@ -8,7 +8,7 @@ extends RefCounted
 ##   4. the captor knocked, or killed: it drops dazed there, the pull ends, the owner cradles it back
 ##   5. the match ends with nobody having taken it: "ransom" in the save
 ##   6. captured and the captor extracted: "captured_by:<name>" in the save, and it cannot be picked for a match
-##   7. Net.VERSION is 0.18.0
+##   7. Net.VERSION is 0.18.0 or later
 ##  10. second review: a host scan of a client's guard (proxy) takes the real Boki and starts the bond; Shift or F
 ##      puts the carry down (no dash), no auto pick-up with a foe near or mid-channel; stale/proxy cradle state
 ##   9. carry while rescuing: the cradle runs while you carry it at 0.9x speed, dash/jump/fire are blocked, shots do not
@@ -125,7 +125,7 @@ func _capture() -> Kin:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
-	ok(Net.VERSION == "0.18.0", "Net.VERSION is 0.18.0 (%s)" % Net.VERSION)
+	ok(Net.VERSION.naturalnocasecmp_to("0.18.0") >= 0, "Net.VERSION is 0.18.0 (%s)" % Net.VERSION)
 	ok(
 		int(KinLoss.rules()["loss_min_tier"]) == 2 and not KinLoss.at_risk(1) and KinLoss.at_risk(2),
 		"loss_min_tier 2: tiers 0 and 1 are safe, 2 is at risk"

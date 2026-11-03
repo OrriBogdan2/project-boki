@@ -2267,6 +2267,8 @@ static func rare_egg_small(spot: Color, s := 1.0) -> Node3D:
 
 # ---------------------------------------------------------------- monsters
 static func mob(kind: String) -> Node3D:
+	if kind == "shrubling":
+		return ShrublingModel.build(Color("5f9a46"))      # (Shrubling re-dresses it in its island's leaf colour)
 	var md: Dictionary = Data.MOBS[kind]
 	if md.get("blight", false):
 		return BlightModels.build(kind)
@@ -2519,31 +2521,26 @@ static func grass_material(sway: float, flower := false) -> ShaderMaterial:
 		m.set_shader_parameter("tip_tint", Color(1.0, 1.0, 1.0))
 	return m
 
-const CHEST_COLS := [[Color("8a5a35"), Color("f2c84a")], [Color("3f6fb0"), Color("dfe8f2")], [Color("6a3fa8"), Color("f2c84a")]]
+const CHEST_COL := [Color("8a5a35"), Color("f2c84a")]    # (wood, trim) of the primitive chest
 
-## A chest: the imported model (its lid on a hinge), coloured by tier, or the primitive one.
-static func chest(tier := 0) -> Node3D:
+## The chest (there is one kind, and it is locked: see KeyChest): the sculpted model, the imported
+## one (its lid on a hinge), or the primitive one.
+static func chest() -> Node3D:
 	if Flora.v2():
-		return PropSculpt.chest(tier)
-	var pk := _pack_chest(tier)
-	return pk if pk else chest_prim(tier)
+		return PropSculpt.chest()
+	var pk := _pack_chest()
+	return pk if pk else chest_prim()
 
-const CHEST_WOOD := [null, Color("4f86c8"), Color("8a5ad0")]
-
-static func _pack_chest(tier: int) -> Node3D:
-	var id := "dungeon/chest_gold" if tier == 2 else "dungeon/chest"
+static func _pack_chest() -> Node3D:
+	var id := "dungeon/chest"
 	var base := Assets.part(id, "chest")
 	var lidp := Assets.part(id, "chest_lid")
 	if base.is_empty() or lidp.is_empty():
 		return null
-	var cfg := {"rim": 0.3, "bright": 1.12}
-	if CHEST_WOOD[tier] != null:
-		cfg["band"] = Assets.BAND_WOOD
-		cfg["paint"] = CHEST_WOOD[tier]
-	var m := Assets.material("dungeon", cfg)
+	var m := Assets.material("dungeon", {"rim": 0.3, "bright": 1.12})
 	var root := Node3D.new()
 	var body := Node3D.new(); body.name = "Body"; root.add_child(body)
-	var sc := 0.52 * (1.0 + tier * 0.18)
+	var sc := 0.62
 	# the model's lock faces +z and its hinge is at the back (-z); turned round inside Body so the
 	# hinge is at +z like the primitive chest, then Body faces the lock to the camera
 	var turn := Node3D.new(); turn.rotation.y = PI; turn.scale = Vector3.ONE * sc; body.add_child(turn)
@@ -2556,19 +2553,16 @@ static func _pack_chest(tier: int) -> Node3D:
 	body.add_child(lid)
 	part(lid, lidp[0], m, Vector3.ZERO, Vector3.ONE, Vector3(0, PI, 0))
 	body.rotation.y = PI
-	if tier >= 1:
-		var cc: Array = CHEST_COLS[clampi(tier, 0, 2)]
-		var beam := part(root, cyl(0.16, 0.3, 9.0, 10), glow_mat(Color(cc[1] if tier == 1 else Color("c9a0ff"), 0.22)), Vector3(0, 4.5, 0), Vector3.ONE, Vector3.ZERO, "Beacon")
-		beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var beam := part(root, cyl(0.16, 0.3, 6.0, 10), glow_mat(Color(CHEST_COL[1], 0.22)), Vector3(0, 3.0, 0), Vector3.ONE, Vector3.ZERO, "Beacon")
+	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.set_meta("mats", [m, m])
 	return root
 
 ## The chest built from primitives (also the base of a deathbox).
-static func chest_prim(tier := 0) -> Node3D:
+static func chest_prim() -> Node3D:
 	var root := Node3D.new()
-	var cc: Array = CHEST_COLS[clampi(tier, 0, 2)]
-	var mw := toon(cc[0]); var mg := toon(cc[1], true, 0.3 + tier * 0.25)
-	var m_seam := toon(Color(cc[0]).darkened(0.35), false)
+	var mw := toon(CHEST_COL[0]); var mg := toon(CHEST_COL[1], true, 0.5)
+	var m_seam := toon(Color(CHEST_COL[0]).darkened(0.35), false)
 	var body := Node3D.new(); body.name = "Body"; root.add_child(body)
 	# the box: planks, metal corners and a lock plate
 	part(body, box(0.8, 0.42, 0.55), mw, Vector3(0, 0.21, 0))
@@ -2588,18 +2582,17 @@ static func chest_prim(tier := 0) -> Node3D:
 	part(lid, cyl(0.29, 0.29, 0.04, 14), mg, Vector3(0.4, 0.0, -0.27), Vector3(0.6, 1.0, 1.0), Vector3(0, 0, PI / 2))
 	part(body, box(0.16, 0.2, 0.05), mg, Vector3(0, 0.4, -0.29))
 	part(body, sphere(0.035, 6), toon(Color("2b2a33"), false), Vector3(0, 0.38, -0.32))
-	body.scale = Vector3.ONE * (1.0 + tier * 0.18)
+	body.scale = Vector3.ONE * 1.18
 	body.rotation.y = PI   # lock facing the camera
-	if tier >= 1:
-		# a light pillar you can see from other islands
-		var beam := part(root, cyl(0.16, 0.3, 9.0, 10), glow_mat(Color(cc[1] if tier == 1 else Color("c9a0ff"), 0.22)), Vector3(0, 4.5, 0), Vector3.ONE, Vector3.ZERO, "Beacon")
-		beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# a light pillar you can see from other islands
+	var beam := part(root, cyl(0.16, 0.3, 6.0, 10), glow_mat(Color(CHEST_COL[1], 0.22)), Vector3(0, 3.0, 0), Vector3.ONE, Vector3.ZERO, "Beacon")
+	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.set_meta("mats", [mw, mg])
 	return root
 
 ## A dead hunter's deathbox: a squat crate with a glow in its value colour.
 static func deathbox(col: Color) -> Node3D:
-	var root := PropSculpt.chest(0) if Flora.v2() else chest_prim(0)
+	var root := PropSculpt.chest() if Flora.v2() else chest_prim()
 	var own := root.get_node_or_null("Beacon")
 	if own:
 		root.remove_child(own); own.free()      # a deathbox glows in its value colour, not a chest's
@@ -2624,7 +2617,7 @@ static func deathbox(col: Color) -> Node3D:
 ## shrines (blessing, teal), exits (hatches violet, uplinks cyan), rift keys (violet, like the
 ## hatch they open), eggs (warm gold), revive beacons (mint). Loot is gold / rarity coloured with
 ## a pillar and a ground pool; breakables are matte with no glow; decor stays low-contrast.
-const ICON_COLS := {"bless": Color("5fd0b0"), "hatch": Color("b98aff"), "uplink": Color("4ac8f0"), "key": Color("b98aff"),
+const ICON_COLS := {"bless": Color("5fd0b0"), "hatch": Color("b98aff"), "uplink": Color("4ac8f0"), "key": Color("b98aff"), "ckey": Color("f2c84a"),
 	"egg": Color("ffc04a"), "revive": Color("6ae8a0"), "dock": Color("ffb84a")}
 static var _icon_tex := {}
 
@@ -2636,7 +2629,7 @@ static func _icon_sym(kind: String, x: float, y: float) -> bool:
 		"hatch", "uplink", "dock":   # an arrow up and out
 			if y >= -0.02 and y <= 0.56 and absf(x) < 0.48 * (0.56 - y) / 0.58: return true
 			return absf(x) < 0.15 and y > -0.56 and y < 0.0
-		"key":
+		"key", "ckey":
 			var d := Vector2(x, y - 0.24).length()
 			if d < 0.27 and d > 0.12: return true
 			if absf(x) < 0.075 and y < 0.0 and y > -0.6: return true
