@@ -31,6 +31,7 @@ Same model, settings, references and character text for every option; only the s
 - **Give scale as hard relations, not adjectives.** "Much bigger shield" did nothing; what worked was "its top edge is higher than the top of his head, the curled stem post rises another full head-height above that, its bottom edge rests on the ground, and it is about twice as wide as his torso, big enough to hide his entire body."
 - **Don't feed a generated image back as a reference to change it.** Nano Banana copies it almost pixel for pixel (two runs with the previous take as a third reference came back with the same small shield). For a change, use only the concept-sheet crops and put the approved changes in the text.
 - **Owner picks on Bjorn (17:20 UTC):** sleeveless coat (bare muscular arms) and a much, much bigger prow-shield. Current approved frame: `style/bjorn_optA_epic_bigshield.png`.
+- **Owner direction (17:25 UTC): not too many regular humans.** Wardens should feel interesting: give each human-based Warden a clear non-human or otherworldly twist (e.g. part stone, storm-touched, frost-sprite, half-giant, part machine, undead hint) that reads at a glance. Propose each Warden's twist to the owner before generating their set; keep the item 39 originality guard.
 - **Originality checks per image:** reject anything that resembles an existing character (owner's list in item 39 and Bjorn's mood-reference note in item 41).
 
 ## Open questions for the owner

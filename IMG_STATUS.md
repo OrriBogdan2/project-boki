@@ -1,5 +1,8 @@
 # IMG status (image-gen agent)
 
+## 2026-11-03 17:25 UTC: owner direction, fewer regular humans
+- Wardens should feel interesting, not ordinary people: each human-based Warden gets a visible non-human or otherworldly twist, proposed to the owner before generating (rule in STYLE.md). Per-Warden work moves to a fresher session from here.
+
 ## 2026-11-03 17:30 UTC: Bjorn look locked pending a final OK
 - Owner: keep sleeveless, make the shield much bigger. Done: `docs/art/gen/style/bjorn_optA_epic_bigshield.png` (prow-shield as tall as him and twice his torso width). STYLE.md gained two rules: give scale as hard relations; never reuse a generated image as a reference to change it.
 - Credits used so far: about 20.
