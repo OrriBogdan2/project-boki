@@ -154,7 +154,7 @@ Portrait:
 Turnaround:
 > Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. The slab pauldron on the same shoulder in every view, the basalt patches in the same places, both stone fists hanging down, bandana tails visible in the back view. No text, no labels, no logos.
 
-### Tamsin (rimewright), Icy Dancer
+### Claire (rimewright), Icy Dancer (renamed from Tamsin by the owner, 2026-11-03)
 Owner direction: frost-sprite (crystalline ice skin patches, frost-feather hair), a younger pro skater; lore: skated the frozen sea the night the land broke.
 
 Warden block:
@@ -162,9 +162,9 @@ Warden block:
 
 | File | Size | Studio image | Notes |
 |---|---|---|---|
-| `wardens/tamsin_splash.png` | 2752x1536 | 132cfd84 | |
-| `wardens/tamsin_portrait.png` | 2048x2048 | 131bb1be | |
-| `wardens/tamsin_turnaround.png` | 3168x1344 | 9de78817 | |
+| `wardens/claire_splash.png` | 2752x1536 | 132cfd84 | |
+| `wardens/claire_portrait.png` | 2048x2048 | 131bb1be | |
+| `wardens/claire_turnaround.png` | 3168x1344 | 9de78817 | |
 
 All take 1. Originality check: no fur stole, no bun, no cape; frost-feather ponytail and crystalline ice skin patches are our own.
 

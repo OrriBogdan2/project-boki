@@ -7,6 +7,12 @@
 - Owner notes on the proposals: Dredge must look noticeably broken and oozing (torn plates, black ooze dripping, red rot-light). Vireo: whichever twist is cooler; IMG pick: her storm tattoo sleeve becomes glowing branching lightning scars (one read, not two). Venator: religious in behaviour and going insane, a battle between conservative morals and slipping sanity (prayer beads, scripture strips, a devout soldier's bearing with a cracked, too-wide stare). Gender to confirm: the item 39 table has Venator as F, the owner wrote "him". Rest of the proposals approved as written (Sable as the thief who reached the Wyrmheart, Pin's legs fading to smoke below the knee, Zedran's horns on his head).
 - Generation switches to the owner's Chrome (Claude in Chrome). Owner asked to talk through each Warden's look and lore before generating; per-Warden proposals are with the owner now.
 
+## 2026-11-03 18:45 UTC: progress; Tamsin renamed Claire
+- Done (2K, committed): Zedran, Dredge, Ostra, Pin, Tarek, Tamsin/Claire (take 1), Vireo. Generating: Cinder, Moosh Moosh, Sable splash retry, Claire face rework, Vireo turnaround retry. Then Bjorn's set; Venator waits on the owner (gender).
+- **Owner: Tamsin is renamed Claire** (base name for the rimewright / Icy Dancer class; other agents to be told by the owner). Files renamed to `wardens/claire_*`.
+- Owner on Claire's face: cuter and sweeter, like an animated feature film. Prompted in plain words (soft rounded face, big expressive eyes, small nose); no film or character named, and her own ponytail and skating dress stay (no side braid, cape or gown) for the originality guard.
+- Owner allowed Chrome's "download multiple files" prompt for anthum.ai so the 2K originals land in Downloads.
+
 ## 2026-11-03 18:20 UTC: Dredge done
 - `docs/art/gen/wardens/dredge_{splash,portrait,turnaround}.png`. Broken, torn hull, black ooze with crimson rot-light. Next: Ostra, Pin, Sable (queued), then Tarek, Tamsin, Vireo, Cinder, Moosh Moosh, Venator (waiting on the gender question), Bjorn's set.
 
