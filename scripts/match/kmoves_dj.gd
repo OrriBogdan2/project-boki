@@ -33,8 +33,8 @@ const MOVES := {
 		[0.0, {}],
 		[0.1, {"blade": Vector3(-0.4, 1.1, 0.3), "bw": 1.0, "rad": 0.35, "p": 0.15, "y": 0.4, "sq": 0.12, "lift": -0.05,
 				"lw": 1.0, "legs": [0.8, -1.3, -0.5, -0.7]}],
-		[0.28, {"blade": Vector3(0.0, 1.85, 0.0), "bw": 1.0, "rad": 0.4, "p": -0.12, "y": 0.2, "sq": 0.28, "lift": -0.16,
-				"lw": 1.0, "legs": [1.0, -1.6, -0.6, -1.0]}],
+		[0.28, {"blade": Vector3(0.0, 1.85, 0.0), "bw": 1.0, "rad": 0.4, "p": -0.12, "y": 0.2, "sq": 0.28,
+				"lift": -0.16, "lw": 1.0, "legs": [1.0, -1.6, -0.6, -1.0]}],
 		[0.45, {"blade": Vector3(0.0, 2.0, 0.0), "bw": 1.0, "rad": 0.42, "p": -0.18, "y": 0.2, "sq": 0.3, "lift": -0.18,
 				"lw": 1.0, "legs": [1.05, -1.7, -0.65, -1.05]}]]},
 	# ... let go: the overhead blade chops down and out ahead as he drives forward, then the follow-through
