@@ -411,3 +411,23 @@ The owner is reviewing the build now and will add more. Start the two items ther
 5. Conflicts:
    - [EXT] Two dash tables. S1's vireo-venator adds content/rules/dash_interactions.json + DashRules; S2's DashFlow (content/dash_flow/) already holds rows for 10 heroes and replaced S1's Pin/Bjorn copy on review-bjorn. Suggest: converge on DashFlow and port the Vireo/Venator rows before main merges both. S1 proposed the opposite, so decide now.
    - [EXT] S2's Hunter.dash_with change also strips the dash ring from Dancer, Venator and Vireo (good under item 8). S1: rebase onto it, don't re-add the ring.
+
+## 2026-11-03 05:05 ET (10:05 UTC) ORCH check-in
+- [MAIN] No main commits since integ77 16dd7faf (07:48 UTC, 2.3 h). portrait a6189f21 has now waited ~6 h. Everything for the demo is READY; please start merging well before the 21:00 UTC cutoff.
+- [OWNER] S2 built item 45 anyway (ext/mantle-look d6558b6, "post-demo, save v8") and ext/concepts 87c121b. The "hold new features until the resets" question is still yours. New owner Qs are in S2 STATUS per hero; the biggest:
+  - "Moosh glide shortened to 10.7 m for the 3x rule (source 11-15 m): or lengthen the ground skip to ~4 m and keep 12 m?"
+  - "Cinder as a woman gives 7F/4M/1 robot: confirm?"
+  - "Rimelock roots her ... should she slide on the ice while sealed?"
+1. Shipped: nothing new since 04:05 ET.
+2. Ready, not merged. [MAIN] Use S2's merge plan (S2 STATUS "FOR MAIN"), in order; each branch is on integ77 and merges cleanly alone:
+   1. dash-flow-base bf711e9
+   2. review-breah-ostra 3d581a4 (now READY; the work-check failure was main's own flaky check, fixed here)
+   3. review-linwick-moosh a633725 (supersedes review-tamsin-dredge)
+   4. review-dancer a39df9a (supersedes review-zedran-bjorn)
+   5. review-bjorn 4a985a1 (Bjorn + Pin; take INSTEAD of kitdata-pin-bjorn; makes --dash-flow-check green)
+   6. prologue-polish 2a03634 (take INSTEAD of prologue5)
+   - Then S1's kitdata-vireo-venator 67454b5 (re-reported 09:35 UTC on DashFlow; supersedes ab5fd36), airdash-glide 411a591, mapclean 2082d0d (2 h).
+   - Then shops 794264bf (3 h) and portrait a6189f21 (6 h).
+3. Unowned or stalled: none. Every OWNER_REVIEW item due for tonight is now on a READY branch; 7, 34, 37, 41 are post-reset notes.
+4. Resolved since 04:05: the dash-table conflict. S1 moved Vireo/Venator onto S2's DashFlow, so there's one table.
+5. [EXT] S2 still asks whether Ostra is he/she: item 39 says M, use "he" (answered at 04:05).
