@@ -1,7 +1,7 @@
 <!--META {
  "name": "Dredge", "title": "Broken Abomination", "tag": "id dredge  ·  machine  ·  tank",
  "accent": "#e0b040", "rim": "#ffd0dc", "shadow": 200, "bust_bg": "#1a1214",
- "stage": ["#5a4c4c", "#0e0a0a"], "height_cm": 240, "sheet_scale": 0.7, "pos": [225, 665],
+ "stage": ["#5a4c4c", "#0e0a0a"], "height_cm": 225, "fig_scale": 0.9, "sheet_scale": 0.7, "pos": [225, 665],
  "relic": "the Leaking Heart",
  "mat": {
   "brass": ["#c2a46a", "#6e5428", "#20160a"],
@@ -16,7 +16,7 @@
  "palette": [["#6e5428", "tarnished brass"], ["#6a3424", "rust"], ["#4c5058", "hull steel"],
              ["#1c0f1e", "the ooze"], ["#ff3a6a", "rot light"], ["#9a8050", "hauling rope"], ["#e0b040", "lamp brass"]],
  "notes": [
-  ["Shape language", "The tallest thing on the field at 2.40 m, and it is wrong: a dented boiler hull hunched so far over that the cracked helm hangs at chest height, arms long enough to drag their knuckles, legs bent backwards like an animal's. Round, heavy shapes broken by jagged tears, spilled cables and drips: a machine that should have stopped."],
+  ["Shape language", "A 2.25 m hulk, second only to Bjorn and the heaviest thing on the field, and it is wrong: a dented boiler hull hunched so far over that the cracked helm hangs at chest height, arms long enough to drag their knuckles, legs bent backwards like an animal's. Round, heavy shapes broken by jagged tears, spilled cables and drips: a machine that should have stopped."],
   ["Signature features", "A brass diving helm with one cracked porthole and a single red eye inside; a winch drum on one shoulder whose rope ends in a cargo hook; a flared blunderbuss for a right forearm; a three-fingered grab-claw; torn plates showing ribs, spilled cables and black ooze lit from within by red rot-light, dripping as it walks. Nothing animal, no face paint, no hat or bow tie: a machine, not a mascot."],
   ["Reads in-engine", "From above: the biggest round shape in the roster with a drum bump on one side and a long arm on the other. The red light only shows through cracks, the porthole and the chest grille, so as he grows with knocks the cracks can widen and glow brighter: the growth is readable."]
  ]

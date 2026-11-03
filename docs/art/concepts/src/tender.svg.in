@@ -1,7 +1,7 @@
 <!--META {
  "name": "Moosh Moosh", "title": "Fox Cub", "tag": "id tender  ·  female  ·  fox-folk  ·  support",
  "accent": "#ffb040", "rim": "#fff0c8", "shadow": 70, "bust_bg": "#2a2016", "lw": 2.2,
- "stage": ["#7a6a52", "#1a140c"], "height_cm": 98, "sheet_scale": 1.12, "pos": [200, 690],
+ "stage": ["#7a6a52", "#1a140c"], "height_cm": 105, "fig_scale": 1.04, "sheet_scale": 1.12, "pos": [200, 690],
  "relic": "the Hearth Acorn",
  "mat": {
   "fur": ["#ffc080", "#f06a24", "#7a2a08"],
@@ -20,7 +20,7 @@
  "palette": [["#f06a24", "fox fur"], ["#f6e6cc", "cream"], ["#2a2020", "ear tips, boots"],
              ["#e8d2a8", "tunic"], ["#2e8a6a", "moss scarf"], ["#7a5232", "satchel"], ["#ffb03a", "hearth light"]],
  "notes": [
-  ["Shape language", "The smallest Warden, just under a metre, and all circles: a head as wide as her shoulders are tall, stubby limbs, a round bell of a tunic, and a tail bigger than the rest of her, curling up like a flame. The only straight line is the lantern crook, taller than she is. She is never still: hopping, waving, ears up."],
+  ["Shape language", "The smallest Warden at 1.05 m, about six-tenths of a standard hunter, and all circles: a head as wide as her shoulders are tall, stubby limbs, a round bell of a tunic, and a tail bigger than the rest of her, curling up like a flame. The only straight line is the lantern crook, taller than she is. She is never still: hopping, waving, ears up."],
   ["Signature features", "Fox-folk: big black-tipped ears, a huge fluffy tail whose tip burns, red-orange fur with a cream face, a little red flame mark on her forehead and red cheek stripes, big amber eyes and an open grin. A courier's cream tunic, a moss scarf, a satchel stamped with a hearth symbol (no cross), a crook with a hanging lantern, and a pet flame she keeps in her palm."],
   ["Reads in-engine", "The smallest hunter, so the tail and ears do the work: from above, a bright orange swirl with a lantern bobbing on a stick. Her glow is warm gold, kept off everyone else, so heals and light read as hers at once."]
  ]

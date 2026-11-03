@@ -1,7 +1,7 @@
 <!--META {
  "name": "Tamsin", "title": "Icy Dancer", "tag": "id rimewright  ·  female  ·  controller",
  "accent": "#5fd6c4", "rim": "#e6fffb", "shadow": 90, "bust_bg": "#16203a",
- "stage": ["#526684", "#0e121c"], "height_cm": 157, "sheet_scale": 0.92, "pos": [200, 625],
+ "stage": ["#526684", "#0e121c"], "height_cm": 170, "fig_scale": 1.05, "sheet_scale": 0.92, "pos": [200, 625],
  "relic": "the Rink Blade",
  "mat": {
   "dress": ["#7ae8dc", "#1f7aa0", "#121c4a"],
@@ -18,7 +18,7 @@
  "palette": [["#121c4a", "midnight"], ["#1f7aa0", "deep rink"], ["#c8f2ff", "rime"],
              ["#2ab8a6", "glacier teal"], ["#e6ecf6", "frost hair"], ["#e2ae8c", "skin"], ["#c2cad8", "blade silver"]],
  "notes": [
-  ["Shape language", "A young athlete, 1.57 m and sixteen: long clean lines from the toe-pick to the tip of a swinging ponytail, a tight bodice that bursts into a short flared skirt, and one bright sharp shape in her hand (the ice fan). Every pose is a skating position: the toe-pick flourish, the spiral, the spin."],
+  ["Shape language", "A young pro, nineteen, 1.70 m and slight: long clean lines from the toe-pick to the tip of a swinging ponytail, a tight bodice that bursts into a short flared skirt, and one bright sharp shape in her hand (the ice fan). Every pose is a skating position: the toe-pick flourish, the spiral, the spin."],
   ["Signature features", "A competition dress that fades from glacier teal to midnight, crusted with frost rhinestones; sheer sparkling sleeves; a layered chiffon skirt; flesh tights; white competition skates on long blades. Frost-white hair in a high ponytail with a teal scrunchie, glitter at the eyes, a champion's grin. Our own skater: no fur stole, no bun, no cape."],
   ["Reads in-engine", "From above: a slim teal-and-navy line, a white ponytail that whips with every turn, and a bright fan of ice that opens when she casts; the skirt flares on the spin so her direction reads. Rime-white and teal stay off Bjorn, whose ice is crusted and blue."]
  ]
@@ -114,7 +114,7 @@
  <g fill="#fff"><circle cx="-50" cy="-526" r="1.4"/><circle cx="-62" cy="-566" r="1.2"/><circle cx="-66" cy="-600" r="1.4"/></g>
  <g transform="translate(-70 -646) rotate(-14)"><use href="#L-fan"/></g>
  <limb m="skin" lw="2" pts="-68 -628 5.5; -70 -644 7"/>
- <g transform="rotate(-4 0 -515) translate(0 -515) scale(1.1) translate(0 515)"><use href="#L-head"/></g>
+ <g transform="rotate(-4 0 -515)"><use href="#L-head"/></g>
  <g class="fx" fill="#e6fffb"><path d="M120 -560 l3 -8 l3 8 l-3 8Z"/><path d="M-120 -470 l2 -6 l2 6 l-2 6Z"/><path d="M60 -620 l2 -5 l2 5 l-2 5Z"/></g>
 </g><!--/front-->
 <g id="tq">
@@ -139,7 +139,7 @@
   <limb fill="#7adfe0" opacity="0.22" pts="-34 -496 10; -54 -536 8; -70 -574 7; -80 -602 5.5"/>
   <limb m="skin" lw="2" pts="-80 -604 5; -86 -616 6.5"/>
   <limb m="skin" lw="1.8" pts="-88 -620 2.2; -94 -632 1.8; -96 -640 1"/><limb m="skin" lw="1.8" pts="-84 -622 2.2; -86 -636 1.8; -86 -644 1"/>
-  <g transform="rotate(40 0 -515) translate(0 -515) scale(1.1) translate(0 515)"><use href="#L-head"/></g>
+  <g transform="rotate(40 0 -515)"><use href="#L-head"/></g>
  </g>
  <g class="fx" fill="#e6fffb"><path d="M180 -60 l3 -8 l3 8 l-3 8Z"/><path d="M120 -30 l2 -6 l2 6 l-2 6Z"/><path d="M-120 -560 l2 -5 l2 5 l-2 5Z"/></g>
 </g><!--/tq-->

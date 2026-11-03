@@ -38,7 +38,8 @@ ORDER = ["bulwark", "archer", "juggernaut", "ashwick", "ostra", "dolm",
 INK = "#1d1724"
 SHADE = "#241631"
 FIG = 0.76  # default sheet scale of the full-body views (META "sheet_scale" overrides it)
-UNIT = 4.0  # drawing units per cm: every figure stands on y=0 at true height (META "height_cm")
+UNIT = 4.0  # drawing units per cm: every figure stands on y=0 at true height (META "height_cm");
+# META "fig_scale" rescales a drawing in the lineup when its height is changed after drawing
 FONTS = {"L": Font(os.path.join(HERE, "../../../../fonts/LilitaOne-Regular.ttf")),
          "R": Font(os.path.join(HERE, "../../../../fonts/Rubik.ttf"))}
 
@@ -390,7 +391,7 @@ def lineup(items):
     p, defs = ['<rect width="1600" height="780" fill="url(#paper)"/>',
                '<rect width="1600" height="56" fill="%s"/>' % INK], [COMMON_DEFS]
     p.append(T.run("THE TWELVE WARDENS", 30, 40, 30, "L", "#f4efe6", spacing=0.04))
-    p.append(T.run("true heights on one scale (art only: gameplay hitboxes are unchanged)  ·  bottom row: filled black, "
+    p.append(T.run("true heights on one scale (hitboxes follow, compressed to 0.85-1.15x: see README)  ·  bottom row: filled black, "
                    "the gameplay-zoom read", 1570, 38, 14, "R", "#b9b0c2", "end"))
     for ground_y in (g1, g2):
         for cm in range(0, 251, 50):
@@ -403,11 +404,12 @@ def lineup(items):
         x = x0 + step * (i + 0.5)
         defs.append(materials(meta) + expand(g["defs"], meta))
         p.append(ground(x, g1, meta.get("shadow", 120) * sc, meta.get("float", 0)))
-        p.append('<g transform="translate(%.1f %d) scale(%g)">%s</g>' % (x, g1, sc, expand(g["front"], meta)))
+        fs = sc * meta.get("fig_scale", 1.0)
+        p.append('<g transform="translate(%.1f %d) scale(%g)">%s</g>' % (x, g1, fs, expand(g["front"], meta)))
         p.append(T.run(meta["name"], x, g1 + 28, 15, "L", INK, "middle"))
         p.append(T.run("%s  ·  %.2f m" % (meta["title"], meta.get("height_cm", 180) / 100), x, g1 + 44, 10, "R", "#6d6377", "middle"))
         p.append('<g transform="translate(%.1f %d) scale(%g)">%s</g>'
-                 % (x, g2, sc, expand(inline_uses(g["front"], g["defs"] + g["front"]), meta, silhouette=True)))
+                 % (x, g2, fs, expand(inline_uses(g["front"], g["defs"] + g["front"]), meta, silhouette=True)))
         p.append(T.run(meta["name"], x, g2 + 26, 13, "L", "#6d6377", "middle"))
     p.append('<rect x="0" y="412" width="1600" height="2" fill="#bdb3a6"/>')
     return ('<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="780" viewBox="0 0 1600 780">'

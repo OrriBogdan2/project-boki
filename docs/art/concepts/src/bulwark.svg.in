@@ -1,7 +1,7 @@
 <!--META {
  "name": "Bjorn", "title": "Frozen Bulwark", "tag": "id bulwark  ·  male  ·  tank",
  "accent": "#7cc7e8", "rim": "#d6f6ff", "shadow": 190, "bust_bg": "#1f3142", "stage": ["#5e6876", "#181b22"],
- "height_cm": 228, "sheet_scale": 0.76, "pos": [225, 655],
+ "height_cm": 245, "fig_scale": 1.116, "sheet_scale": 0.76, "pos": [225, 655],
  "relic": "the Drowned Bell",
  "mat": {
   "coat": ["#6f93ad", "#3a5874", "#1c2c40"],
@@ -20,7 +20,7 @@
  "palette": [["#3a5874", "drowned coat"], ["#94795f", "seal fur"], ["#74513a", "prow oak"],
              ["#66717d", "ship iron"], ["#c4ecff", "rime"], ["#bdaaa6", "cold skin"], ["#8dffc9", "the glow (hint)"]],
  "notes": [
-  ["Shape language", "The biggest Warden at 2.28 m, and one huge rounded mass: a barrel body under a heaped seal-fur mantle, arms like mooring posts, short planted legs in fur boots, a small laughing head. Round and warm everywhere, with one sharp point: the prow's stem curling up into its little carved sea-serpent, high where the eye lands."],
+  ["Shape language", "The tallest and widest Warden at 2.45 m, and one huge rounded mass: a barrel body under a heaped seal-fur mantle, arms like mooring posts, short planted legs in fur boots, a small laughing head. Round and warm everywhere, with one sharp point: the prow's stem curling up into its little carved sea-serpent, high where the eye lands."],
   ["Signature features", "The frozen prow of his old ship as a shield (iron bands, rime, icicles, the stem post curling over the top), a boat oar cased in ice for a maul, a forked beard with iron rings, frost in his brows, and a big head-back laugh. The undead hint stays small: frost that never melts, a cold green glow in the prow's cracks and, faintly, his eyes."],
   ["Reads in-engine", "From the top-down camera: the tallest, widest hunter, a light pointed wedge on one side and a long diagonal oar on the other. Icy blue against dark navy holds on grass, sand and snow; the green glow is kept for the ult so it reads as an event."]
  ]
