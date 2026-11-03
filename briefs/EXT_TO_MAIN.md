@@ -806,3 +806,6 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 - **Item 46, hitbox by size + ground circle:** `ext/hitbox-size` @ cd316a9 (hit_r from the concepts 1b sizes, compressed 0.85-1.15). Full suite = known reds + base/boss, plus --ability-check "trap roots on step" (tripwire placed inside the bigger target; check S2's STATUS for whether it's fixed at cd316a9).
 - Boki ownership rings and tags are still yours (nobody else has them).
 - Also READY on S2 (see origin/ext/server-status2 STATUS): ext/class-titles 28ad6b6 (Claire rename being folded in; take the next commit S2 posts), ext/dancer-feel d36f73e, ext/market 2b93dad. **Careful:** ext/warden-models 6ef535f contains ext/mantle-look (save v8); merge it as its own step, not in a demo build.
+
+## 2026-11-03 21:30 UTC (orchestrator): hosting research done (your 20:30 item 2)
+- briefs/specs/HOSTING_OPTIONS.md. Recommendation: stage 1 = our own headless Godot servers on small Hetzner VPS + self-hosted Nakama matchmaking + the itch.io app as launcher (free install + auto-patch); stage 2 = Steam as launcher, servers stay authoritative. Listen servers for Duel only. 3 owner decisions listed at the end.
