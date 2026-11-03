@@ -21,6 +21,7 @@ func run(main_node: Node) -> void:
 	ak.main = main
 	await _all()
 	await _hook_hold()
+	await _slam_tell()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	print("DREDGECHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -92,6 +93,47 @@ func _hook_hold() -> void:
 		"hook hold: mid-air his height holds from the throw to the end of the reel",
 		K.grapples >= 1 and K.arrivals >= 1 and drift <= 0.05, "grapples %d arrivals %d drift %.3f" % [
 			K.grapples, K.arrivals, drift]
+	)
+	await ak.done(m)
+
+## Item 33: through the wind-up the slam's area fills on the ground, for everyone, and it is the exact cone
+## the slam hits: a foe just inside its edge is hit, one just outside is not, and only on the slam frame.
+func _slam_tell() -> void:
+	var r: Array = ak.setup("dredge", 6.0, "", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var T2: Hunter = r[3]
+	var home: Vector3 = r[4]
+	var K: DredgeKit = P.ak
+	var ed: Dictionary = K.e_def()
+	var half := deg_to_rad(float(ed["angle"]) * 0.5)
+	var reach := float(ed["radius"])
+	# aim straight along +x; one foe inside the edge of the cone, one just past it (outside the angle)
+	ak.aim_at(P, home + Vector3(5.0, 0, 0))
+	T.teleport(home + Vector3(cos(half - 0.25), 0, sin(half - 0.25)) * (reach - 0.4))
+	T2.teleport(home + Vector3(cos(half + 0.35), 0, sin(half + 0.35)) * (reach - 0.4))
+	ak.fresh(T)
+	ak.fresh(T2)
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	ak.step(m, 0.2)
+	var tell: Dictionary = AimKit.entry(P, "e_tell")
+	var tdir: Vector2 = tell.get("dir", Vector2.ZERO)
+	var fill_mid := float(tell.get("fill", 0.0))
+	ok(
+		"anchor tell: the hit cone is drawn for everyone, the slam's own radius, angle and direction",
+		AimKit.shown(P, "e_tell") and bool(tell.get("all", false))
+			and absf(float(tell.get("len", 0.0)) - reach) < 0.01
+			and absf(float(tell.get("deg", 0.0)) - float(ed["angle"])) < 0.01 and tdir.distance_to(Vector2(1, 0)) < 0.02
+			and fill_mid > 0.3 and fill_mid < 0.8 and ak.dmg(T) == 0.0,
+		"len %.1f deg %.0f fill %.2f" % [float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), fill_mid]
+	)
+	ak.step(m, 0.3)
+	ok(
+		"anchor tell: the slam hits inside the drawn cone and nothing outside it",
+		K.anchors == 1 and ak.dmg(T) > 10.0 and ak.dmg(T2) == 0.0 and not AimKit.shown(P, "e_tell"),
+		"inside %.0f, outside %.0f" % [ak.dmg(T), ak.dmg(T2)]
 	)
 	await ak.done(m)
 
@@ -217,15 +259,16 @@ func _all() -> void:
 	ak.aim_at(P, T.pos)
 	K.cd["e"] = 0.0
 	var hp0: float = ak.dmg(T)
-	var hop0 := P.pos
+	var at0 := P.pos
 	P.ak.use_e()
 	ak.step(m, 0.3)
 	var early := K.anchors
+	var early_dmg: float = ak.dmg(T) - hp0
 	ak.step(m, 0.2)
 	ok(
-		"anchor: hop about a body length forward, the slam lands at ~0.38s",
-		early == 0 and K.anchors == 1 and P.flat_dist(hop0) > 1.2 and P.flat_dist(hop0) < 2.4,
-		"anchors at 0.3s %d, hop %.1f m" % [early, P.flat_dist(hop0)]
+		"anchor: planted, the damage lands on the slam frame (~0.38s), not at the cast",
+		early == 0 and early_dmg == 0.0 and K.anchors == 1 and P.flat_dist(at0) < 0.3,
+		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, P.flat_dist(at0)]
 	)
 	ok(
 		"combo: reel > Anchor Drop = damage, stun, Grounded",

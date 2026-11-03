@@ -17,7 +17,7 @@ const MOVES := {
 	"dr_throw": ["dredge", "shotgun", [0.5, 0.58, 0.64, 0.72, 0.84, 1.0]],
 	"dr_reel": ["dredge", "shotgun", [0.9, 1.05, 1.2, 1.35, 1.5, 1.7]],
 	"dr_rock": ["dredge", "shotgun", [0.55, 0.75, 0.95, 1.15, 1.4, 1.7], 1.0],
-	"dr_anchor": ["dredge", "shotgun", [0.5, 0.64, 0.76, 0.88, 1.1, 1.4]],
+	"dr_anchor": ["dredge", "shotgun", [0.52, 0.66, 0.8, 0.885, 1.0], 1.0],
 	"dr_dive": ["dredge", "shotgun", [0.5, 0.56, 0.64, 0.72, 0.85, 1.2]],
 	"dr_barge": ["dredge", "shotgun", [0.5, 0.53, 0.58, 0.64, 0.72, 0.9]],
 	"dr_barge_run": ["dredge", "shotgun", [0.53, 0.6, 0.98, 1.05, 1.43, 1.5], 1.0],

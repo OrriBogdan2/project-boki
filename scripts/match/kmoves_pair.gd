@@ -91,28 +91,28 @@ const MOVES := {
 		}],
 		[0.22, {"p": -0.08, "sq": 0.05}],
 		[0.36, {}]]},
-	# Anchor Drop (E, 0.38 s to impact): f1 the free fist hauled back and the shoulder turned away; f2 a hop up
-	# and about a body height forward (the kit moves the body); f3 the fist drives down; f4-f5 a crouched
-	# follow-through, then recovery with a small rebound
+	# Anchor Drop (E, 0.38 s to impact, planted): the free fist raised high, the shoulder turned away; up on the
+	# toes at the top (0.3); the fist driven down into the ground in front (0.38, the slam frame); a recoil
+	# bounce (0.48), then a slow recovery
 	"dr_anchor": {"keys": [
 		[0.0, {}],
-		[0.14, {
-			"y": -0.75, "p": 0.3, "fl": Vector3(-0.2, 0.75, 0.3), "hw": 1.0, "fr": Vector3(0.3, 0.0, 0.1), "rw": 0.7,
-			"sq": 0.35, "lift": -0.1, "lw": 1.0, "legs": [0.9, -1.4, 0.7, -1.3]
+		[0.12, {
+			"y": -0.6, "p": 0.22, "fl": Vector3(-0.1, 1.0, 0.15), "hw": 1.0, "fr": Vector3(0.3, 0.1, 0.1), "rw": 0.7,
+			"sq": 0.2, "lw": 1.0, "legs": [0.9, -1.3, 0.7, -1.2]
 		}],
-		[0.26, {
-			"y": -0.45, "p": 0.1, "fl": Vector3(-0.1, 0.95, 0.05), "hw": 1.0, "fr": Vector3(0.3, 0.2, 0.0), "rw": 0.7,
-			"sq": -0.35, "lift": 0.38, "lw": 1.0, "legs": [1.2, -1.9, 1.0, -1.8]
+		[0.3, {
+			"y": -0.8, "p": 0.38, "fl": Vector3(-0.15, 1.2, 0.35), "hw": 1.0, "fr": Vector3(0.35, 0.2, 0.0), "rw": 0.7,
+			"sq": -0.15, "lift": 0.06, "lw": 1.0, "legs": [1.0, -1.5, 0.8, -1.4]
 		}],
 		[0.38, {
-			"y": 0.35, "p": -0.85, "fl": Vector3(0.1, -0.6, -0.75), "hw": 1.0, "fr": Vector3(0.25, -0.3, -0.3),
-			"rw": 0.7, "sq": 0.6, "lift": -0.22, "lw": 1.0, "legs": [1.15, -1.6, -0.45, -1.0]
+			"y": 0.35, "p": -0.9, "fl": Vector3(0.1, -0.65, -0.8), "hw": 1.0, "fr": Vector3(0.25, -0.3, -0.3),
+			"rw": 0.7, "sq": 0.65, "lift": -0.25, "lw": 1.0, "legs": [1.2, -1.7, -0.45, -1.0]
 		}],
-		[0.6, {
-			"y": 0.25, "p": -0.65, "fl": Vector3(0.1, -0.62, -0.7), "hw": 0.9, "sq": 0.3, "lift": -0.16, "lw": 1.0,
-			"legs": [1.05, -1.5, -0.4, -0.9]
+		[0.48, {
+			"y": 0.3, "p": -0.7, "fl": Vector3(0.1, -0.45, -0.7), "hw": 1.0, "fr": Vector3(0.25, -0.2, -0.25),
+			"rw": 0.7, "sq": 0.35, "lift": -0.14, "lw": 1.0, "legs": [1.1, -1.6, -0.4, -0.95]
 		}],
-		[0.82, {"p": 0.08, "sq": -0.08, "lift": 0.03}],
+		[0.75, {"p": -0.2, "fl": Vector3(0.05, 0.1, -0.3), "hw": 0.5, "sq": 0.1, "lift": -0.03}],
 		[1.0, {}]]},
 	# Anchor Drop in the air: both fists locked overhead, knees up, dropping like a stone (held to the ground)
 	"dr_dive": {"hold": true, "keys": [
