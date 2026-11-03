@@ -152,8 +152,7 @@
 "semicolon": 5
 },
 "scripts/core/game.gd": {
-"history_comment": 1,
-"long_line": 12,
+"long_line": 10,
 "nested_ternary": 1,
 "semicolon": 5
 },
@@ -223,7 +222,7 @@
 "semicolon": 1
 },
 "scripts/core/settings.gd": {
-"long_line": 19,
+"long_line": 20,
 "nested_ternary": 1,
 "semicolon": 4
 },
@@ -693,9 +692,6 @@
 "long_line": 24,
 "nested_ternary": 1,
 "semicolon": 25
-},
-"scripts/match/level_growth.gd": {
-"long_line": 1
 },
 "scripts/match/life.gd": {
 "long_line": 22,
@@ -1184,7 +1180,7 @@
 "shadow": 1
 },
 "tools/merge_form_check.gd": {
-"long_line": 89,
+"long_line": 87,
 "semicolon": 20
 },
 "tools/move_feel_check.gd": {
@@ -1257,7 +1253,7 @@
 "semicolon": 11
 },
 "tools/teammate_check.gd": {
-"long_line": 31,
+"long_line": 30,
 "semicolon": 26
 },
 "tools/title_check.gd": {
