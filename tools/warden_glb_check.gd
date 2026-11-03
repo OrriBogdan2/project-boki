@@ -87,6 +87,7 @@ func run(main: Node) -> void:
 		_hitbox(a)
 		_setting(a)
 		_own_motion(a, "bulwark" if a != "bulwark" else "gunslinger")
+		_weapon(a)
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
 	print("WARDENGLB_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
 	main.get_tree().quit()
@@ -267,6 +268,26 @@ func _hitbox(a: String) -> void:
 	ok(absf(ring_w - ring_p) < 0.0001 and shapes == 0,
 			"%s: hit ring %.3f with the .glb, %.3f without (hit radius %.2f m), no collision in the .glb"
 			% [a, ring_w, ring_p, Arch.hit_r(a, Data.CLASSES[Arch.weight(a)])])
+
+## A .glb that carries its weapon: it is in the hands (under the Gun node, whose Muzzle stays where the shots
+## leave), the procedural weapon is hidden, and its magazine is the Gun's Mag the reload animates.
+func _weapon(a: String) -> void:
+	var m := _model(a)
+	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
+	var weapon := gun.get_node_or_null(WardenGlb.WEAPON) as MeshInstance3D
+	if weapon == null:
+		m.free()
+		return
+	var shown := gun.find_children("*", "MeshInstance3D", true, false).filter(
+			func(mi): return (mi as Node3D).is_visible_in_tree() and mi != weapon and not weapon.is_ancestor_of(mi))
+	var mag := gun.get_node_or_null("Mag") as MeshInstance3D
+	var mag_ok := mag != null and mag.mesh != null and mag.mesh.get_surface_count() > 0 and mag in shown
+	var stray := shown.filter(func(mi): return mi != mag)
+	var left := str(stray.map(func(mi): return mi.name))
+	ok(gun.has_node("Muzzle") and stray.is_empty() and mag_ok,
+			"%s holds its own weapon (in the Gun with the Muzzle, procedural parts left %s, its magazine the Mag: %s)"
+			% [a, left, str(mag_ok)])
+	m.free()
 
 ## The skeleton is shared names and layout only: each Warden keeps its own motion. Over an idle and a run
 ## cycle, this Warden's bones and another Warden's (its rig driving the same contract skeleton) take

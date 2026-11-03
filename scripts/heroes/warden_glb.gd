@@ -47,6 +47,8 @@ const GLOW := 1.6              # emission of the glow slot (mechanical eyes, cra
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
 ## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model.
 const SETTING := "warden_models"
+const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
+const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
 static var _measuring := false  # building that neutral model: no .glb on it
@@ -112,6 +114,33 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch)))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
+	_hold_weapon(root, glb)
+
+## The .glb's own weapon (a mesh named WEAPON, modelled in the Gun node's space) goes into the hands in place
+## of the procedural one; the Gun node and its Muzzle stay, so shots and grips are unchanged.
+static func _hold_weapon(root: Node3D, glb: Node3D) -> void:
+	var weapon := glb.find_child(WEAPON, true, false) as Node3D
+	var gun := root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
+	if weapon == null or gun == null:
+		return
+	for mi in gun.find_children("*", "MeshInstance3D", true, false):
+		(mi as MeshInstance3D).visible = false
+	weapon.get_parent().remove_child(weapon)
+	weapon.owner = null
+	gun.add_child(weapon)
+	weapon.transform = Transform3D.IDENTITY
+	# its magazine (WEAPON_MAG) becomes the Gun's Mag, which the reload drops out and slaps back in
+	var mag := weapon.find_child(WEAPON_MAG, true, false) as Node3D
+	var old := gun.get_node_or_null("Mag")
+	if mag and old:
+		var at := WardenGlb.model_xf(gun, mag)
+		gun.remove_child(old)
+		old.free()
+		mag.get_parent().remove_child(mag)
+		mag.owner = null
+		gun.add_child(mag)
+		mag.transform = at
+		mag.name = "Mag"
 
 ## The rig rest of the Warden's model in the neutral look (built once a session).
 static func neutral_rest(arch: String) -> Dictionary:

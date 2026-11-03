@@ -15,7 +15,7 @@ const EPS := 0.0005
 const WARDENS := {
 	"bulwark": {"hit_r": 0.5, "height": 1.15, "width": [1.3, 2.2], "moves": "bul_"},
 	"archer": {"hit_r": 0.37, "height": 0.98, "width": [0.7, 1.15], "moves": "arc_"},
-	"gunslinger": {"hit_r": 0.4, "height": 1.04, "width": [0.85, 1.3], "moves": "gunslinger_"},
+	"gunslinger": {"hit_r": 0.4, "height": 1.04, "width": [0.7, 1.3], "moves": "gunslinger_"},     # (slim, per her art)
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured
@@ -210,7 +210,13 @@ func _body_box(m: Node3D) -> AABB:
 		if String(nd.name) in SKIP:
 			continue
 		if nd is MeshInstance3D and (nd as MeshInstance3D).mesh != null and (nd as Node3D).is_visible_in_tree():
-			var b := (nd as MeshInstance3D).global_transform * (nd as MeshInstance3D).mesh.get_aabb()
+			var mi := nd as MeshInstance3D
+			var b := mi.global_transform * mi.mesh.get_aabb()
+			if mi.skin:           # a 3D Warden: its posed vertices (the mesh box is the rest pose's)
+				var pts := WARDEN_SKIN.points(mi)
+				b = AABB(pts[0], Vector3.ZERO)
+				for p in pts:
+					b = b.expand(p)
 			out = b if first else out.merge(b)
 			first = false
 		stack.append_array(nd.get_children())
