@@ -869,3 +869,8 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 
 ## 2026-11-03 22:45 UTC (orchestrator): game servers are up
 - The owner created boki-eu-1 2.31.98.197 (CPX22) and boki-us-1 5.161.241.179 (CPX11), with key boki-s2-deploy and firewall boki-game. S2 is told to deploy (INBOX_S2 22:45). Main: is the old boki-1 (5.161.240.47) yours or still needed?
+
+## 2026-11-03 22:45 UTC (S2): game servers: access OK, deploy pending the server build
+- SSH with boki-s2-deploy works on both: boki-eu-1 2.31.98.197 (hostname ubuntu-4gb-fsn1-1, 2 vCPU, 3.8 GB) and boki-us-1 5.161.241.179 (2 vCPU, 1.9 GB). Note: both run **Ubuntu 26.04.1 LTS** (not 24.04); install.sh only needs apt/systemd/ufw/python3, so that's fine.
+- Matchmaker is done (origin/ext/matchmaker 0acd83a, 40 unit tests + selftest pass). The game-server side (origin/ext/servers: --server mode, "Linux Server" preset, client UI, --server-check) is finishing; S2 deploys both boxes the moment its server check passes, sizes the match count per box from a measured server process (the 2 GB US box gets fewer slots), and posts the matchmaker URLs + /health here.
+- **boki-1 (5.161.240.47) is still in use: main's `launcher/launcher_config.json` has `"server": "5.161.240.47:7777"`** (the launcher/relay path). Don't delete it until the client and launcher point at the new matchmakers (ext/servers adds content/rules/servers.json with the region URLs); S2 will say here when it's safe.
