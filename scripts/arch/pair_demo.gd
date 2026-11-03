@@ -40,7 +40,7 @@ static func _rmb_hold(K: ArchKit, t: float, dt: float, from: float, secs: float)
 		K.press_rmb()
 
 ## A clean frame for the owner: no hover cards or dev text (recording mode), no hero caption toast, and
-## the camera at --zoom=<z> when given (1.0 is the gameplay zoom; the default is a close-up).
+## the camera at --zoom=<z> when given (1.0 is the gameplay zoom; the default is a close-up), --slowmo=<k>.
 static func stage(m: Node, t: float) -> void:
 	if t > 0.1:
 		return
@@ -49,6 +49,8 @@ static func stage(m: Node, t: float) -> void:
 	var z := 0.0
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--zoom="): z = float(String(a).substr(7))
+		# a slower clock so a short moment (a 0.2s wind-up, a bolt in flight) lands on a drawn frame
+		if String(a).begins_with("--slowmo="): Engine.time_scale = float(String(a).substr(9))
 	if z > 0.0 and m.cam:
 		m.set_meta("zoom_hold", z)
 		m.cam.zoom = z
@@ -89,7 +91,7 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				P.dashes = P.max_dashes()
 				P.do_dash()
 		"br_exdash":
-			P.inp["aim"] = P.pos + Vector3(0.0, 0.0, 5.0)      # (across the arena, clear of the dummy)
+			P.inp["aim"] = P.pos + Vector3(4.0, 0.0, -4.0)      # (past the dummy's side, clear of the HUD)
 			if at(t, dt, 0.45):
 				P.teleport(P.pos + Vector3(0, 1.4, 0))
 				P.grounded = false
@@ -164,8 +166,8 @@ const SHOTS := {
 	"pair_breah_sense_tele": ["br_sense", 1.4, -6.0], "pair_breah_sense_hit": ["br_sense", 0.75, -6.0],
 	"pair_ostra_aim_tele": ["os_orb", 0.45, -4.5], "pair_ostra_orb_key": ["os_orb", 0.52, -9.0],
 	"pair_ostra_orb_hit": ["os_orb", 0.62, -9.0],
-	"pair_ostra_hot_key": ["os_orb_hot", 1.65, -8.0], "pair_ostra_hot_hit": ["os_orb_hot", 1.75, -8.0],
-	"pair_ostra_snap_tele": ["os_snap", 0.55, -4.5], "pair_ostra_snap_key": ["os_snap", 0.73, -4.5],
+	"pair_ostra_hot_key": ["os_orb_hot", 1.6, -8.0], "pair_ostra_hot_hit": ["os_orb_hot", 1.75, -8.0],
+	"pair_ostra_snap_tele": ["os_snap", 0.6, -4.5], "pair_ostra_snap_key": ["os_snap", 0.73, -4.5],
 	"pair_ostra_snap_hit": ["os_snap", 1.0, -4.5],
 	"pair_ostra_swap_tele": ["os_swap", 0.85, -4.5], "pair_ostra_swap_key": ["os_swap", 1.75, -4.5],
 	"pair_ostra_swap_hit": ["os_arrive", 2.76, -4.5],
