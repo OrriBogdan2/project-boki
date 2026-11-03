@@ -3502,8 +3502,8 @@ func _drop_check() -> void:
 	var spot := bot.pos
 	for k in 40:
 		var q := m.world.free_spot_near(bot.pos + Vector3(randf_range(-10, 10), 0, randf_range(-10, 10)), [], 1.0, 0.5, 6.0)
-		if m.world.island_of(q.x, q.z) == m.world.island_of(bot.pos.x, bot.pos.z) and bot.flat_dist(q) > 6.0 and m.world.los(bot.pos, q, bot.pos.y + 1.0):
-			spot = q; break
+		if m.world.island_of(q.x, q.z) == m.world.island_of(bot.pos.x, bot.pos.z) and bot.flat_dist(q) > 6.0 and bot.flat_dist(q) < 9.0 and m.world.los(bot.pos, q, bot.pos.y + 1.0):
+			spot = q; break      # (6-9 m: an unseeded roll, so a far spot made the 6 s walk a coin flip)
 	spot.y = m.world.ground_at(spot.x, spot.z)
 	m.squad_ping(P, spot)
 	var d0 := bot.flat_dist(spot)
