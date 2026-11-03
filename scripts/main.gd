@@ -142,6 +142,7 @@ func _ready() -> void:
 			Save.d["roster"][0]["recall"] = {"kind": "carried_out", "text": "was carried out of the Ember Quarry by you", "place": "the Ember Quarry", "boss": "", "m": 1}
 		if a.begins_with("--lair-demo="): opts["lair_demo"] = a.substr(12); opts["no_drop"] = true
 		if a.begins_with("--lair-boss="): opts["demo_boss"] = a.substr(12)
+		if a.begins_with("--hudref-demo="): opts.merge(HudRefDemo.opts(a), true)
 		if a == "--plate-demo": opts["plate_demo"] = true; opts["no_drop"] = true; opts["teams"] = 3; opts["squad"] = 3
 		if a == "--hold-demo": opts["hold_demo"] = true; opts["no_drop"] = true; opts["teams"] = 4; opts["squad"] = 3
 		if a == "--no-plan": opts["no_plan"] = true

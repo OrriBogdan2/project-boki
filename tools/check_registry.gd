@@ -28,6 +28,7 @@ const CHECKS := {
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
+	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
 	"--aimkit-check": ["res://tools/aimkit_check.gd", "aimkit_check", null],
 	"--title-check": ["res://tools/title_check.gd", "title_check", null],      # the title: menu, key art, frame budget
 	"--hatch-check": ["res://tools/hatch_check.gd", "hatch_check", null],      # the hatch: a quiet, personal moment

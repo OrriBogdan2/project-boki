@@ -13,6 +13,7 @@ extends RefCounted
 ## The slot count goes through Equal.pack_slots(h), which adds slots(h.backpack).
 
 const POUCH := 0
+const COL := UI.ACCENT_HI      # backpacks in the HUD, toasts and the armory: the palette's warm accent text
 
 static func tiers() -> Array:
 	return Equal.rules().get("backpacks", [{"name": "Pouch", "slots": 0}])
@@ -150,7 +151,7 @@ static func box_row(h, b: Dictionary) -> Dictionary:
 	if tier <= POUCH:
 		return {}
 	return {"key": "backpack", "name": label(tier), "sub": "Backpack: more slots for what you carry home",
-		"icon": "satchel", "col": Color("e8c88a"), "upgrade": box_upgrade(h, b)}
+		"icon": "satchel", "col": COL, "upgrade": box_upgrade(h, b)}
 
 ## Takes a bigger backpack from a box: yours goes in its place (a Pouch is nothing to leave).
 ## Returns true when it swapped.
@@ -161,7 +162,7 @@ static func take_from_box(m, h, b: Dictionary) -> bool:
 	b["backpack"] = int(h.backpack)
 	wear(h, theirs)
 	if h == m.player and m.hud:
-		m.hud.toast_small("%s  ·  %d slots now" % [name_of(theirs), int(h.pack_cap)], Color("e8c88a"))
+		m.hud.toast_small("%s  ·  %d slots now" % [name_of(theirs), int(h.pack_cap)], COL)
 	return true
 
 ## The shop pass: the run gems an upgrade to the next tier costs (-1 when there is none).
@@ -186,5 +187,5 @@ static func tip(h) -> Array:
 	var tier := int(h.backpack)
 	var how := "Gear and treasure you're carrying home. Extract to keep it all; die and it stays in your deathbox, "
 	how += "backpack too. Bring a bigger one from your armory, take one from a deathbox or buy one at a shop."
-	return [["%s  %d/%d" % [name_of(tier), h.pack.size(), h.pack_cap], Color("f3eee2")],
-		[how, Color("f3eee2"), 14]]
+	return [["%s  %d/%d" % [name_of(tier), h.pack.size(), h.pack_cap], HudStyle.INK],
+		[how, HudStyle.INK, 14]]

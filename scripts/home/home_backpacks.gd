@@ -14,9 +14,9 @@ static func row(parent: VBoxContainer, reopen: Callable, diff_tier: int) -> void
 	var card := UI.card(UI.CARD, 6, 10)
 	var line := UI.hbox(8)
 	card.add_child(line)
-	line.add_child(Icons.Glyph.new("satchel", Color("e8c88a"), 22.0))
+	line.add_child(Icons.Glyph.new("satchel", Backpacks.COL, 22.0))
 	var slots_now := Equal.base_pack() + Backpacks.slots(now)
-	var nm := UI.label("%s:  %d slots" % [Backpacks.name_of(now), slots_now], 14, Color("e8c88a"), UI.semi)
+	var nm := UI.label("%s:  %d slots" % [Backpacks.name_of(now), slots_now], 14, Backpacks.COL, UI.semi)
 	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	line.add_child(nm)
 	var at := maxi(0, choices.find(now))
@@ -40,12 +40,14 @@ static func row(parent: VBoxContainer, reopen: Callable, diff_tier: int) -> void
 ## The armory's Backpacks tab: what you own, and a Buy button for each bigger tier.
 static func tab(v: VBoxContainer, reopen: Callable) -> void:
 	for tier in range(1, Backpacks.tiers().size()):
+		var card := UI.card(UI.CARD, 10)
 		var r := UI.hbox(10)
-		r.add_child(Icons.Glyph.new("satchel", Color("e8c88a"), 26.0))
+		card.add_child(r)
+		r.add_child(Icons.Glyph.new("satchel", Backpacks.COL, 26.0))
 		var info := UI.vbox(1)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var title := "%s  ×%d" % [Backpacks.label(tier), Backpacks.owned(tier)]
-		info.add_child(UI.label(title, 16, Color("e8c88a"), UI.semi))
+		info.add_child(UI.label(title, 16, Backpacks.COL, UI.semi))
 		var caps: Array = []
 		for t in Data.TIERS.size():
 			if Backpacks.cap(t) >= tier:
@@ -61,7 +63,7 @@ static func tab(v: VBoxContainer, reopen: Callable) -> void:
 			reopen.call(), 0, "plus")
 		buy.disabled = int(Save.d.get("gems", 0)) < cost[0] or int(Save.d.get("scrap", 0)) < cost[1]
 		r.add_child(buy)
-		v.add_child(r)
+		v.add_child(card)
 	var tip_text := "Everyone has the Pouch for free. A bigger backpack is brought into a match and lost in your "
 	tip_text += "deathbox if you go down; in a match you can take a bigger one from a deathbox or buy one at a shop."
 	v.add_child(UI.para(tip_text, 12, UI.FAINT))

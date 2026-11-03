@@ -3,6 +3,7 @@ extends RefCounted
 ## The utility belt on the HUD (UtilityBelt): four slots on keys 1 to 4 in the row above the
 ## weapon card. A slot shows its item's icon, how many charges are left, and lights when pressing
 ## it would do something (a tonic when you are hurt, an armor kit when your armor is down).
+## Look: HudStyle (slot frames, key pills, count badges).
 
 const SLOT := 44.0
 const GAP := 8.0
@@ -18,8 +19,8 @@ static func draw(hud, p: Hunter, x: float, y: float) -> float:
 		var s: Dictionary = p.belt[k]
 		if s.is_empty():
 			hud.hover_spots.append([r, key])
-			hud._rounded(r, Color(0.05, 0.06, 0.09, 0.55), 12, Color(1, 1, 1, 0.08), 2)
-			hud._keycap(Vector2(r.get_center().x, r.end.y), Settings.key_cap(key), hud.MUTED)
+			HudStyle.slot_frame(c, r, HudStyle.MUTED, "off")
+			HudStyle.key_pill(c, Vector2(r.get_center().x, r.end.y), Settings.key_cap(key), HudStyle.MUTED)
 		else:
 			var id := String(s["id"])
 			var col := UtilityBelt.col_of(id)
@@ -28,7 +29,7 @@ static func draw(hud, p: Hunter, x: float, y: float) -> float:
 			var ready := UtilityUse.can_use(p, id) and cd <= 0.0 and not p.downed
 			hud._ab_slot(key, r, UtilityBelt.icon_of(id), Settings.key_cap(key), col, cd / cd_max if cd > 0.0 else 0.0,
 					cd, ready)
-			hud._ctext(Vector2(r.get_center().x, r.position.y - 5), "%d" % int(s["n"]), 12, Color(col, 0.95), hud.big)
+			HudStyle.count_badge(c, Vector2(r.end.x - 4.0, r.position.y + 2.0), int(s["n"]), col)
 		x -= SLOT + GAP
 	return x
 
@@ -38,14 +39,14 @@ static func tip(p: Hunter, k: int) -> Array:
 	var key := Settings.key_cap(UtilityBelt.KEYS[k])
 	var s: Dictionary = p.belt[k]
 	if s.is_empty():
-		out.append(["Utility slot %d" % (k + 1), Color("a9b0bf")])
-		out.append(["Item  ·  %s" % key, Color("a9b0bf"), 12])
-		out.append([EMPTY_TIP, Color("f3eee2"), 14])
+		out.append(["Utility slot %d" % (k + 1), HudStyle.MUTED])
+		out.append(["Item  ·  %s" % key, HudStyle.MUTED, 12])
+		out.append([EMPTY_TIP, HudStyle.INK, 14])
 		return out
 	var id := String(s["id"])
 	var d := UtilityBelt.def(id)
 	out.append([UtilityBelt.name_of(id), UtilityBelt.col_of(id)])
-	out.append(["Item  ·  %s  ·  %d of %d" % [key, int(s["n"]), UtilityBelt.max_of(id)], Color("a9b0bf"), 12])
-	out.append([String(d.get("desc", "")), Color("f3eee2"), 14])
-	out.append(["Lost if you go down: it goes in your deathbox.", Color("a9b0bf"), 13])
+	out.append(["Item  ·  %s  ·  %d of %d" % [key, int(s["n"]), UtilityBelt.max_of(id)], HudStyle.MUTED, 12])
+	out.append([String(d.get("desc", "")), HudStyle.INK, 14])
+	out.append(["Lost if you go down: it goes in your deathbox.", HudStyle.MUTED, 13])
 	return out

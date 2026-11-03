@@ -155,7 +155,8 @@ static func migrate(data: Dictionary) -> Array:
 		if listed.size() > MAX_LISTED:
 			lines.append("  and %d more" % (listed.size() - MAX_LISTED))
 		var still := " (your passive glove is still there)" if had_g1 else ""
-		lines.append("New: a second glove slot on V. Pick a glove for it in the armory%s." % still)
+		var second := "New: a second glove slot on %s. " % Gloves.key_cap(1)
+		lines.append(second + "Pick a glove for it in the armory%s." % still)
 		lines.append("Armor and perks are found in the match now.")
 	data["equal_notice"] = lines
 	return lines

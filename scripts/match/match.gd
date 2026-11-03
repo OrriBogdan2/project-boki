@@ -2235,11 +2235,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 				if "--simtest" in OS.get_cmdline_user_args(): print("ARMOR %s -> %s" % [credit.pname, Hunter.ARMOR_TIERS[lv][0]])
 	var mine := credit == player or (target == player)
 	var armor_hit: bool = o.get("armor", false) or (target is Hunter and (target as Hunter).armor > 0.5)
-	var col := Color("fff4d6")
-	if armor_hit: col = Color("7ac8ff")
-	if crit: col = Color("ffd23f") if not armor_hit else Color("b0e4ff")
-	if target == player: col = Color("ff6a5a")
-	elif target is Kin and target.owner_h == player: col = Color("ffa08a")
+	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player)
 	# only numbers that involve you: other fights nearby don't spray digits over yours
 	if mine:
 		fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, crit)
@@ -4476,6 +4472,7 @@ func step(dt: float) -> void:
 		_hold_demo()
 	if opts.get("plate_demo", false) and player:
 		_plate_demo()
+	if opts.has("hudref_demo"): HudRefDemo.tick(self)
 	if lairs:
 		lairs.bot_pickups()
 		lairs.tick(dt)
@@ -6044,7 +6041,7 @@ func _ser(e: Ent) -> Array:
 	if e is Hunter:
 		var h: Hunter = e
 		return ["h", h.nid, _r(h.pos.x), _r(h.pos.y), _r(h.pos.z), _r(h.vel.x), _r(h.vel.y), _r(h.vel.z), _r(h.face), _r(h.hp), h.max_hp, _flags(h),
-			_r(h.down_hp), _r(h.revive), h.team, h.cls, h.pname, _r(h.shield), _r(h.extract_prog), h.kills, h.knocks, int(h.dmg_done), _r(h.armor), h.max_armor, h.arch, h.wid] + KinNet.hunter_extra(h) + ArchKit.net_move(h) + GripNet.hunter_extra(h)
+			_r(h.down_hp), _r(h.revive), h.team, h.cls, h.pname, _r(h.shield), _r(h.extract_prog), h.kills, h.knocks, int(h.dmg_done), _r(h.armor), h.max_armor, h.arch, h.wid] + KinNet.hunter_extra(h) + ArchKit.net_move(h) + GripNet.hunter_extra(h) + HunterNet.extra(h)
 	if e is Kin:
 		var k: Kin = e
 		return ["k", k.nid, _r(k.pos.x), _r(k.pos.y), _r(k.pos.z), _r(k.face), _r(k.hp), _r(k.max_hp), KIN_STATES.find(k.state), k.species,
@@ -6195,6 +6192,7 @@ func _net_apply(e: Ent, it: Array) -> void:
 			KinNet.apply_hunter(h, it)
 			ArchKit.apply_net_move(h, it)
 			GripNet.apply_hunter(h, it)       # gloves, their cooldowns and the bond meter (the overhead row)
+			HunterNet.apply(h, it)
 		"k":
 			var k: Kin = e
 			k.face = it[5]; k.hp = it[6]; k.max_hp = it[7]

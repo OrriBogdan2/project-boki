@@ -481,9 +481,9 @@ func _gloves() -> void:
 		ok(String(rk[2]["id"]) == DexView.type_of(kb.species) and rk[2]["glow"],
 				"the third icon is the Boki's type, glowing on a full bond (%s)" % String(rk[2]["id"]))
 		R.kin = null
-	var cs := GripOverhead.centres(Vector2(400, 300), true)
-	var above := cs.all(func(c): return (c as Vector2).y < 300.0 - 12.0)
-	ok(cs.size() == 3 and above, "the three icons sit above the nameplate")
+	var cs := GripOverhead.centres(Vector2(400, 300))
+	var under := cs.all(func(c): return (c as Vector2).y >= 300.0 + HudStyle.PLATE_ICON_ROW)
+	ok(cs.size() == 3 and under, "the three icons sit in the row HudStyle leaves under the nameplate")
 	# bots wear two different active gloves and use both
 	var two := 0
 	for i in 20:
