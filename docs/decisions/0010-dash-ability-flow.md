@@ -1,0 +1,20 @@
+# 0010: Dash -> ability flow
+
+- **Status:** accepted
+- **Date:** 2026-11-03
+- **Area:** movement / combat
+
+## Problem
+Owner review item 32: dash -> ability presses must flow like the source, per hero and per pair, from one rule set. Today a press during a dash goes wherever its own code sends it: RMB, E, X and Q mostly fire mid-dash, an LMB tap is lost (`Hunter.can_fire` is false while `roll_t` runs), and a few kits drop or end the dash on their own (Vireo's X and Zedran's early air RMB are lost; Linwick's X ends the dash).
+
+## Options
+1. Per-kit special cases in each kit's cast code: what grew today; no table, nothing to check across heroes.
+2. One helper, `DashFlow` (`scripts/arch/dash_flow.gd`), at the one point the presses are read (`Hunter.tick`, just before the dash and ability keys; `HunterKeys.ult_pressed` for X), reading per-hero rows from `content/dash_flow/<hero>.json` (one file per hero, so per-hero branches never touch the same file).
+
+## Decision
+Option 2. Per ground or air dash and slot (LMB, RMB, E, X, Q) a row says `fire` (mid-dash), `buffer` (held to the dash's end; the default for a missing row) or `cancel` (ends the dash; `carry` keeps its momentum). A held press is never dropped: it goes the step the dash ends, or up to `DashFlow.BUFFER_S` (0.15 s) later while the hunter can't act yet, through its own path (cast or deny cue). Today's behaviour became the starting rows (fire where it fired), so the only change is that presses that used to be lost now buffer. `variant` and `into_dash` (Shift during an ability's wind-up or recovery) are data for the kits to read: the kits still decide the reverse direction (Dredge, Zedran, Vireo, Bjorn, Ostra and Tamsin refuse Shift during some abilities in `on_dash`).
+
+## Consequences
+- "In a dash" is `ArchKit.in_dash()` (the shared Effects dash). Kits that run their dash in their own state list it in `kit_owns` (Ostra's swap, Tamsin's Rink Run, Breah's leap) until they override `in_dash()`. Zedran's crouch before the drive and Vireo's charge before the Wirerun (`wire`) are outside it too.
+- Kit-side cases for the per-hero rows to absorb: Venator's and Tamsin's `fires_in_dash`, Bjorn's own LMB buffer, Linwick's jet ending the dash.
+- Check `--dash-flow-check`; table `docs/heroes/dash_interactions.md` (gen_wiki). No Net or save change.
