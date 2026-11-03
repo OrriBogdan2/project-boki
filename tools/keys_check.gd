@@ -167,6 +167,8 @@ func _chest_and_keys() -> void:
 ## KeyChest.count / take are what the utility belt shows and spends.
 func _cap_and_belt(m: Match, P: Hunter, R: Hunter) -> void:
 	var cap := KeyChest.cap()
+	R.ctrl = "idle"      # held still, so its own bot brain does not spend a key mid-test
+	R.inp["move"] = Vector2.ZERO
 	R.chest_keys = cap
 	var np := m.pickups.size()
 	m.drop("ckey", R.pos + Vector3(0.2, 0.6, 0), 1)
