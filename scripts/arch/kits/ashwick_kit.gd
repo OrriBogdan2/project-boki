@@ -630,7 +630,8 @@ func _tick_drags(dt: float) -> void:
 		if bx != 0.0 and bz != 0.0: drags.erase(dg)
 
 # ------------------------------------------------------------------ X: Flue Flight
-func cast_ult() -> bool: return jet.start()
+func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
+func has_ult() -> bool: return true
 func ult_recast() -> bool: return jet.recast()
 func ult_running() -> bool: return jet.running()
 
@@ -639,9 +640,9 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
 	var te := tgt as Ent
-	if HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and los and dist > 3.0 and dist < 9.0:
+	if HeroUlt.ready(self) and los and dist > 3.0 and dist < 9.0:
 		h.inp["aim"] = tgt.pos
-		h.inp["xult"] = true
+		HunterKeys.ult_pressed(h)
 		return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and los and dist < float(e_def()["radius"]) - 0.5:
 		h.inp["aim"] = tgt.pos

@@ -35,6 +35,7 @@ func _ram(lvl: int) -> float:
 	var T: Hunter = r[2]
 	var K: AshwickKit = P.ak
 	P.lvl = lvl
+	LevelGrowth.apply(P)      # (a level set straight on a hunter grows nothing on its own)
 	ak.fresh(T)
 	K.bash = {"dir": Vector2(1, 0), "start": P.pos}
 	K._bash_impact(T)

@@ -36,7 +36,7 @@ carpet: that fold would have duplicated the X ult, and the ram's rank 3 is back 
 - Numbers keep the source's ratios: cooldown 32s against the cloak's 10.5s (source 25s : 8.3s); the carpet ticks far below the
   hose (about 1/6 of its damage a second, as in the footage), and its value is the slow and the Ignite build-up.
 - Bond: an enemy hunter the carpet burns fills the Boki bond (a hit; a knock or a kill counts higher), the best event of the cast
-  once, never the cast alone (`HeroUlt.landed`, then `KinBond.from_ult`; a guarded stub until branch ultbond lands).
+  once, never the cast alone (`HeroUlt.landed`, then `KinBond.from_ult` with one cast id per cast).
 - Burst: Flue Flight plus the cloak, then straight into a merge and its ultimate, leaves a full-health light hunter standing
   (`--ashwick-combo-check`, "burst").
 

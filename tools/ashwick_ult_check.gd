@@ -17,6 +17,11 @@ func _init(arch_check, ok_cb: Callable) -> void:
 func ok(label: String, cond: bool, info := "") -> void:
 	ok_fn.call(label, cond, info)
 
+## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
+func _owed(P: Hunter) -> float:
+	var c: Dictionary = P.get_meta("bond_cast", {})
+	return float(c.get("got", 0.0)) if String(c.get("id", "")) == HeroUlt.cast_id(P.ak) else 0.0
+
 func run() -> void:
 	await _flight()
 	await _carpet()
@@ -27,7 +32,7 @@ func _cast(P: Hunter, at: Vector3) -> AshwickJet:
 	var K: AshwickKit = P.ak
 	K.cd["x"] = 0.0
 	ak.aim_at(P, at)
-	P.ak.use_x()
+	HunterKeys.ult_pressed(P)
 	return K.jet
 
 func _flight() -> void:
@@ -47,13 +52,17 @@ func _flight() -> void:
 	_cast(P, home + Vector3(10, 0, 0))
 	ok("ult: no cast below level 6", not J.running() and float(K.cd["x"]) == 0.0 and J.flights == 0, "level %d" % P.lvl)
 	P.lvl = 6
-	var paid0 := HeroUlt.paid_total
+	var casts0: int = J.flights
 	_cast(P, home + Vector3(10, 0, 0))
 	ak.step(m, 0.05)
 	var burst_up := AimKit.shown(P, "x_burst") and bool(AimKit.entry(P, "x_burst").get("all", false))
 	ok(
 		"ult cast: lifts off with the ember ring everyone sees", J.running() and burst_up and K.anim_id == "lw_jet",
 		"move %s" % K.anim_id
+	)
+	ok(
+		"ult: one X press is one cast (main's X path only)", J.flights == casts0 + 1,
+		"flights +%d" % (J.flights - casts0)
 	)
 	ok(
 		"ult cast: its own cooldown starts (32s)", absf(float(K.cd["x"]) - 32.0) < 0.2 and float(K.cd["e"]) == 0.0,
@@ -68,7 +77,7 @@ func _flight() -> void:
 		"ult: flies low, off the ground", P.pos.y - m.world.ground_at(P.pos.x, P.pos.z) > 0.2,
 		"height %.2f" % (P.pos.y - home.y)
 	)
-	P.ak.use_x()
+	HunterKeys.ult_pressed(P)
 	var start := P.pos
 	ok(
 		"ult recast: X again lands early", not J.running() and J.early >= 1 and K.anim_id == "lw_land",
@@ -89,11 +98,8 @@ func _flight() -> void:
 		"%.1fm" % flown
 	)
 	ok("ult: the flight ends on its own with the landing move", J.landings >= 2 and K.anim_id == "lw_land")
-	ok(
-		"ult bond: nothing for a cast that lands on nobody", HeroUlt.paid_total == paid0,
-		"paid %.2f" % (HeroUlt.paid_total - paid0)
-	)
-	P.ak.use_x()
+	ok("ult bond: nothing for a cast that lands on nobody", _owed(P) == 0.0, "owed %.2f" % _owed(P))
+	HunterKeys.ult_pressed(P)
 	ok("ult: the cooldown denies a new flight", not J.running() and J.flights == 2, "cd %.1f" % float(K.cd["x"]))
 	await _steer(m, P, K, home)
 	await ak.done(m)
@@ -129,7 +135,6 @@ func _carpet() -> void:
 	var J := K.jet
 	T.teleport(home + Vector3(5.0, 0, 0))
 	T2.teleport(home + Vector3(9.0, 0, 0.4))
-	var paid0 := HeroUlt.paid_total
 	_cast(P, home + Vector3(16, 0, 0))
 	ak.step(m, 1.6, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
 	ak.step(m, 0.7)
@@ -146,15 +151,10 @@ func _carpet() -> void:
 		"dmg %.1f slow %.2f char %.0f" % [ak.dmg(T), T.slow_t, char_t]
 	)
 	ok("ult payoff: the slow is about 30%", absf(T.slow_k - 0.3) < 0.01, "slow_k %.2f" % T.slow_k)
-	var sent := HeroUlt.paid_total - paid0
+	var sent := _owed(P)
 	ok(
-		"ult bond: burning a hunter fills it once per cast (a hit: 0.6, two hunters still 0.6)",
-		absf(sent - 0.6) < 0.001, "sent %.2f" % sent
-	)
-	var stub := HeroUlt._bond_hook() == null
-	ok(
-		"ult bond: through the guarded KinBond.from_ult stub (Bond.add until ultbond lands)", stub and P.ult >= 0.6,
-		"meter %.2f" % P.ult
+		"ult bond: burning a hunter pays once per cast through KinBond.from_ult (a hit: 0.6, two hunters still 0.6)",
+		absf(sent - 0.6) < 0.001 and HeroUlt.cast_id(K).begins_with("ashwick_"), "owed %.2f" % sent
 	)
 	# a knock with it tops the cast up to the knock's share
 	ak.step(m, 4.0)
@@ -163,10 +163,9 @@ func _carpet() -> void:
 	T.teleport(home + Vector3(6.0, 0, 0))
 	T2.teleport(home + Vector3(0, 0, -6.0))
 	P.teleport(home)
-	paid0 = HeroUlt.paid_total
 	_cast(P, home + Vector3(16, 0, 0))
 	ak.step(m, 1.6, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
-	sent = HeroUlt.paid_total - paid0
+	sent = _owed(P)
 	ok(
 		"ult bond: a knock with the carpet counts as the cast's best event (0.7)",
 		T.downed and absf(sent - 0.7) < 0.001, "downed %s sent %.2f" % [T.downed, sent]

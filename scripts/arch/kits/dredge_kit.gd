@@ -715,7 +715,9 @@ func _barge_burst(dir: Vector2) -> void:
 func cast_ult() -> bool:
 	if flying or not pull.is_empty() or wind > 0.0 or not dive.is_empty():
 		return false
-	return broadside.start()
+	return HeroUlt.press(self, broadside.start)
+
+func has_ult() -> bool: return true
 
 func ult_running() -> bool: return broadside.running()
 
@@ -724,9 +726,9 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null or not pull.is_empty() or wind > 0.0 or not dive.is_empty() or broadside.running():
 		return
 	var tf := tgt as Ent
-	if HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and los and dist < 3.5:
+	if HeroUlt.ready(self) and los and dist < 3.5:
 		h.inp["aim"] = tgt.pos
-		h.inp["xult"] = true
+		HunterKeys.ult_pressed(h)
 		return
 	# the Anchor on a foe that has just landed Grounded, or any foe up close
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < float(e_def()["radius"]) + 1.0 and los:

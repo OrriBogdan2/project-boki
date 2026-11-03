@@ -38,7 +38,7 @@ Built as its own ultimate on X (owner decision, SERVER_UPDATE6). It was never fo
   the merge's burst after them leaves a full-health light hunter (124) standing (`--dredge-combo-check`, "burst"). For the same
   reason the slugs take no Salvage back bonus.
 - Bond: a slug that hits an enemy hunter fills the Boki bond (a hit; a knock or a kill counts higher), the best event of the cast
-  once, not per slug or wave (`HeroUlt.landed`, then `KinBond.from_ult`; a guarded stub until branch ultbond lands).
+  once, not per slug or wave (`HeroUlt.landed`, then `KinBond.from_ult` with one cast id per cast).
 
 ## Small mechanics
 | Mechanic | Ours | Source | Footage |

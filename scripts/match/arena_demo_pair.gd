@@ -238,7 +238,7 @@ static func _rock_middle(W, q: Vector3, y: float) -> Vector3:
 static func _ult(P: Hunter) -> void:
 	P.lvl = maxi(P.lvl, 6)
 	P.ak.cd["x"] = 0.0
-	P.ak.use_x()
+	HunterKeys.ult_pressed(P)
 
 static func _payoff(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> float:
 	if mv == "dr":

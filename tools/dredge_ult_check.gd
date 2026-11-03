@@ -18,6 +18,11 @@ func _init(arch_check, ok_cb: Callable) -> void:
 func ok(label: String, cond: bool, info := "") -> void:
 	ok_fn.call(label, cond, info)
 
+## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
+func _owed(P: Hunter) -> float:
+	var c: Dictionary = P.get_meta("bond_cast", {})
+	return float(c.get("got", 0.0)) if String(c.get("id", "")) == HeroUlt.cast_id(P.ak) else 0.0
+
 func run() -> void:
 	await _charge_and_waves()
 	await _guards()
@@ -27,7 +32,7 @@ func _cast(P: Hunter, at: Vector3) -> DredgeBlast:
 	var K: DredgeKit = P.ak
 	K.cd["x"] = 0.0
 	ak.aim_at(P, at)
-	P.ak.use_x()
+	HunterKeys.ult_pressed(P)
 	return K.broadside
 
 func _charge_and_waves() -> void:
@@ -45,7 +50,6 @@ func _charge_and_waves() -> void:
 	_cast(P, home + Vector3(4, 0, 0))
 	ok("ult: no cast below level 6", not B.running() and float(K.cd["x"]) == 0.0 and B.casts == 0, "level %d" % P.lvl)
 	P.lvl = 6
-	var paid0 := HeroUlt.paid_total
 	var shots0: int = m.shot_n
 	_cast(P, home + Vector3(4, 0, 0))
 	ok(
@@ -75,16 +79,15 @@ func _charge_and_waves() -> void:
 		"waves %d shots %d" % [B.waves, m.shot_n - shots0]
 	)
 	ok(
-		"ult bond: nothing for waves that hit nobody", HeroUlt.paid_total == paid0 and P.ult >= 0.0,
-		"paid %.2f" % (HeroUlt.paid_total - paid0)
+		"ult bond: nothing for waves that hit nobody", _owed(P) == 0.0 and B.casts == 1,
+		"owed %.2f casts %d" % [_owed(P), B.casts]
 	)
-	P.ak.use_x()
+	HunterKeys.ult_pressed(P)
 	ok("ult: the cooldown denies a new cast", not B.running() and B.casts == 1, "cd %.1f" % float(K.cd["x"]))
 	# point blank: every slug of both waves lands, with Anti-Heal; the waves 0.6s apart
 	ak.fresh(T)
 	T.teleport(home + Vector3(1.6, 0, 0))
 	T.face = FACE_AWAY
-	paid0 = HeroUlt.paid_total
 	var times: Array = []
 	_cast(P, T.pos)
 	var w := B.waves
@@ -114,7 +117,7 @@ func _charge_and_waves() -> void:
 	ok("ult payoff: the slugs leave Anti-Heal", T.blight_t > 0.0, "%.1fs" % T.blight_t)
 	ok(
 		"ult bond: 12 slugs land, the cast still counts once (a hit: 0.6)",
-		absf(HeroUlt.paid_total - paid0 - 0.6) < 0.001, "paid %.2f" % (HeroUlt.paid_total - paid0)
+		absf(_owed(P) - 0.6) < 0.001, "owed %.2f" % _owed(P)
 	)
 	# further out only the middle slugs reach
 	ak.fresh(T)
