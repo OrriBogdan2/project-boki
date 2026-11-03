@@ -27,18 +27,24 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
-	Save.no_write = true
-	CombatBus.ability_used.connect(_on_used)
 	for hero in _heroes():
-		for slot in DashFlow.SLOTS:
-			var m := _match(main, hero)
-			_slot(m, hero, slot)
-			_combos(m, hero, slot)
-			m.queue_free()
-			await main.get_tree().process_frame
+		await check_hero(main, hero)
 	_print_exceptions()
 	print("DASHFLOW DONE, failures: %d, skipped: %d" % [bad, skipped])
 	main.get_tree().quit()
+
+## Every row of one hero (a hero's own combo check runs this for item 51); returns the failures so far.
+func check_hero(main: Node, hero: String) -> int:
+	Save.no_write = true
+	CombatBus.ability_used.connect(_on_used)
+	for slot in DashFlow.SLOTS:
+		var m := _match(main, hero)
+		_slot(m, hero, slot)
+		_combos(m, hero, slot)
+		m.queue_free()
+		await main.get_tree().process_frame
+	CombatBus.ability_used.disconnect(_on_used)
+	return bad
 
 ## Every hero, or the ones named in --dash-flow-check=<id>,<id>.
 func _heroes() -> Array:
