@@ -5,4 +5,3 @@ creator_face.png: Face tab: Start-from presets, expression, face shape, jaw, eye
 creator_colours.png: Colours tab: skin, hair style, hair colour, eyes and outfit swatches.
 creator_mantle.png: See: In a Mantle shows the same person as the Venator (Hired Gun) Warden, tinted by their picks.
 match_zoom.png: In a match at the default camera: the local Venator and squad portraits as Wardens.
-home_own_person.png: At home with no Mantle on: the player as their own created person.

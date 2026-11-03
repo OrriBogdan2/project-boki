@@ -1,6 +1,176 @@
 # S2 review screenshots
 
-Branches: ext/review-breah-ostra (breah, ostra), ext/review-dancer (dancer + zedran), ext/review-linwick-moosh (tamsin, dredge, linwick, mooshmoosh), ext/review-bjorn (bjorn), ext/prologue-polish (prologue). Captions per folder in captions.txt.
+Branches: ext/review-breah-ostra (breah, ostra), ext/review-dancer (dancer + zedran), ext/review-linwick-moosh (tamsin, dredge, linwick, mooshmoosh), ext/review-bjorn (bjorn), ext/prologue-polish (prologue), ext/mantle-look (mantle). Captions per folder in captions.txt.
+
+## bjorn/review
+
+**owner1103 #29: the raised aegis, plated and bigger, the double chevron pulsing in front (gameplay zoom)**
+
+![o1103_bjorn_aegis_idle.png](bjorn/review/o1103_bjorn_aegis_idle.png)
+
+**owner1103 #29: the raised aegis, plated and bigger, the double chevron pulsing in front (close-up)**
+
+![o1103_bjorn_aegis_idle_close.png](bjorn/review/o1103_bjorn_aegis_idle_close.png)
+
+**owner1103 #29: a foe meets the aegis: the chevron flashes and the foe is pushed back (gameplay zoom)**
+
+![o1103_bjorn_aegis_push.png](bjorn/review/o1103_bjorn_aegis_push.png)
+
+**owner1103 #29: a foe meets the aegis: the chevron flashes and the foe is pushed back (close-up)**
+
+![o1103_bjorn_aegis_push_close.png](bjorn/review/o1103_bjorn_aegis_push_close.png)
+
+**owner1103 #29: the foe has slid back 2 m off the aegis (gameplay zoom)**
+
+![o1103_bjorn_aegis_push_b.png](bjorn/review/o1103_bjorn_aegis_push_b.png)
+
+**owner1103 #29: the foe has slid back 2 m off the aegis (close-up)**
+
+![o1103_bjorn_aegis_push_b_close.png](bjorn/review/o1103_bjorn_aegis_push_b_close.png)
+
+**owner1103 #29: the aegis breaking into chunks and dust (gameplay zoom)**
+
+![o1103_bjorn_aegis_break.png](bjorn/review/o1103_bjorn_aegis_break.png)
+
+**owner1103 #29: the aegis breaking into chunks and dust (close-up)**
+
+![o1103_bjorn_aegis_break_close.png](bjorn/review/o1103_bjorn_aegis_break_close.png)
+
+**owner1103 #30: the held swing, strip 1/5, the wind-up (gameplay zoom)**
+
+![o1103_bjorn_swing_a.png](bjorn/review/o1103_bjorn_swing_a.png)
+
+**owner1103 #30: the held swing, strip 1/5, the wind-up (close-up)**
+
+![o1103_bjorn_swing_a_close.png](bjorn/review/o1103_bjorn_swing_a_close.png)
+
+**owner1103 #30: the held swing, strip 2/5, the hammer comes round, he steps in (gameplay zoom)**
+
+![o1103_bjorn_swing_b.png](bjorn/review/o1103_bjorn_swing_b.png)
+
+**owner1103 #30: the held swing, strip 2/5, the hammer comes round, he steps in (close-up)**
+
+![o1103_bjorn_swing_b_close.png](bjorn/review/o1103_bjorn_swing_b_close.png)
+
+**owner1103 #30: the held swing, strip 3/5, the hit (gameplay zoom)**
+
+![o1103_bjorn_swing_c.png](bjorn/review/o1103_bjorn_swing_c.png)
+
+**owner1103 #30: the held swing, strip 3/5, the hit (close-up)**
+
+![o1103_bjorn_swing_c_close.png](bjorn/review/o1103_bjorn_swing_c_close.png)
+
+**owner1103 #30: the held swing, strip 4/5, the dummy knocked back, Bjorn carried forward (gameplay zoom)**
+
+![o1103_bjorn_swing_d.png](bjorn/review/o1103_bjorn_swing_d.png)
+
+**owner1103 #30: the held swing, strip 4/5, the dummy knocked back, Bjorn carried forward (close-up)**
+
+![o1103_bjorn_swing_d_close.png](bjorn/review/o1103_bjorn_swing_d_close.png)
+
+**owner1103 #30: the held swing, strip 5/5, the dummy 2 m or more away (gameplay zoom)**
+
+![o1103_bjorn_swing_e.png](bjorn/review/o1103_bjorn_swing_e.png)
+
+**owner1103 #30: the held swing, strip 5/5, the dummy 2 m or more away (close-up)**
+
+![o1103_bjorn_swing_e_close.png](bjorn/review/o1103_bjorn_swing_e_close.png)
+
+**owner1103 #35: Bjorn's ground dash (360 Smash), strip 1/5, the push-off (gameplay zoom)**
+
+![o1103_bjorn_dash_a.png](bjorn/review/o1103_bjorn_dash_a.png)
+
+**owner1103 #35: Bjorn's ground dash (360 Smash), strip 1/5, the push-off (close-up)**
+
+![o1103_bjorn_dash_a_close.png](bjorn/review/o1103_bjorn_dash_a_close.png)
+
+**owner1103 #35: Bjorn's ground dash (360 Smash), strip 2/5, the stretched run-up behind the hammer (gameplay zoom)**
+
+![o1103_bjorn_dash_b.png](bjorn/review/o1103_bjorn_dash_b.png)
+
+**owner1103 #35: Bjorn's ground dash (360 Smash), strip 2/5, the stretched run-up behind the hammer (close-up)**
+
+![o1103_bjorn_dash_b_close.png](bjorn/review/o1103_bjorn_dash_b_close.png)
+
+**owner1103 #35: Bjorn's ground dash (360 Smash), strip 3/5, the spin on arrival (gameplay zoom)**
+
+![o1103_bjorn_dash_c.png](bjorn/review/o1103_bjorn_dash_c.png)
+
+**owner1103 #35: Bjorn's ground dash (360 Smash), strip 3/5, the spin on arrival (close-up)**
+
+![o1103_bjorn_dash_c_close.png](bjorn/review/o1103_bjorn_dash_c_close.png)
+
+**owner1103 #35: Bjorn's ground dash (360 Smash), strip 4/5, the low crouched recovery (gameplay zoom)**
+
+![o1103_bjorn_dash_d.png](bjorn/review/o1103_bjorn_dash_d.png)
+
+**owner1103 #35: Bjorn's ground dash (360 Smash), strip 4/5, the low crouched recovery (close-up)**
+
+![o1103_bjorn_dash_d_close.png](bjorn/review/o1103_bjorn_dash_d_close.png)
+
+**owner1103 #35: Bjorn's ground dash (360 Smash), strip 5/5, settled (gameplay zoom)**
+
+![o1103_bjorn_dash_e.png](bjorn/review/o1103_bjorn_dash_e.png)
+
+**owner1103 #35: Bjorn's ground dash (360 Smash), strip 5/5, settled (close-up)**
+
+![o1103_bjorn_dash_e_close.png](bjorn/review/o1103_bjorn_dash_e_close.png)
+
+**owner1103 #35: Bjorn's air dash (the lumbering shove), strip 1/5, the shove off (gameplay zoom)**
+
+![o1103_bjorn_air_dash_a.png](bjorn/review/o1103_bjorn_air_dash_a.png)
+
+**owner1103 #35: Bjorn's air dash (the lumbering shove), strip 1/5, the shove off (close-up)**
+
+![o1103_bjorn_air_dash_a_close.png](bjorn/review/o1103_bjorn_air_dash_a_close.png)
+
+**owner1103 #35: Bjorn's air dash (the lumbering shove), strip 2/5, shoulder first (gameplay zoom)**
+
+![o1103_bjorn_air_dash_b.png](bjorn/review/o1103_bjorn_air_dash_b.png)
+
+**owner1103 #35: Bjorn's air dash (the lumbering shove), strip 2/5, shoulder first (close-up)**
+
+![o1103_bjorn_air_dash_b_close.png](bjorn/review/o1103_bjorn_air_dash_b_close.png)
+
+**owner1103 #35: Bjorn's air dash (the lumbering shove), strip 3/5, the lumber through the air (gameplay zoom)**
+
+![o1103_bjorn_air_dash_c.png](bjorn/review/o1103_bjorn_air_dash_c.png)
+
+**owner1103 #35: Bjorn's air dash (the lumbering shove), strip 3/5, the lumber through the air (close-up)**
+
+![o1103_bjorn_air_dash_c_close.png](bjorn/review/o1103_bjorn_air_dash_c_close.png)
+
+**owner1103 #35: Bjorn's air dash (the lumbering shove), strip 4/5, the end of the shove (gameplay zoom)**
+
+![o1103_bjorn_air_dash_d.png](bjorn/review/o1103_bjorn_air_dash_d.png)
+
+**owner1103 #35: Bjorn's air dash (the lumbering shove), strip 4/5, the end of the shove (close-up)**
+
+![o1103_bjorn_air_dash_d_close.png](bjorn/review/o1103_bjorn_air_dash_d_close.png)
+
+**owner1103 #35: Bjorn's air dash (the lumbering shove), strip 5/5, falling out of it (gameplay zoom)**
+
+![o1103_bjorn_air_dash_e.png](bjorn/review/o1103_bjorn_air_dash_e.png)
+
+**owner1103 #35: Bjorn's air dash (the lumbering shove), strip 5/5, falling out of it (close-up)**
+
+![o1103_bjorn_air_dash_e_close.png](bjorn/review/o1103_bjorn_air_dash_e_close.png)
+
+**owner1103 #29: the Faultline's trail running on out over the abyss at his height (gameplay zoom)**
+
+![o1103_bjorn_abyss.png](bjorn/review/o1103_bjorn_abyss.png)
+
+**owner1103 #29: the Faultline's trail running on out over the abyss at his height (close-up)**
+
+![o1103_bjorn_abyss_close.png](bjorn/review/o1103_bjorn_abyss_close.png)
+
+**owner1103 #29 BEFORE (9c32cd2c, before the item 29 pass): the old raised aegis, a flat translucent slab (gameplay zoom); compare o1103_bjorn_aegis_idle.png**
+
+![o1103_bjorn_aegis_old.png](bjorn/review/o1103_bjorn_aegis_old.png)
+
+**owner1103 #29 BEFORE: the old aegis (close-up); compare o1103_bjorn_aegis_idle_close.png**
+
+![o1103_bjorn_aegis_old_close.png](bjorn/review/o1103_bjorn_aegis_old_close.png)
 
 ## breah/review
 
