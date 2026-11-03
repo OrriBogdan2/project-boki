@@ -1,4 +1,4 @@
-2026-11-03T19:00:36Z
+2026-11-03T19:10:30Z
 
 == S1 BRANCH TABLE (current; older detail further down) ==
 branch | commit | state | Net | checks
@@ -19,7 +19,7 @@ Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on o
 
 Running now: none on S1.
 Queued: none on S1. Farm tutorial/builder moved to ext (ext/farm-hob, INBOX 18:55 UTC).
-Last INBOX entry handled: 2026-11-03 18:55 UTC (farm tutorial + Hob builder + Goals tracker are built locally by ext on ext/farm-hob from S1's plan; S1 does not start it).
+Last INBOX entry handled: 2026-11-03 18:45 UTC ORCH new owner requests (posted out of order after 18:55). Item 1 (animation parity) is routed to S2 hero agents; item 2 (Duel + Arena mode specs) is post-demo with no server named. S1 can write the mode specs (plan only, for owner OK) if routed here; not started. Item 3 is an owner question.
 Watcher: received 19:06 UTC entry
 Questions for the owner: none from S1 (farm plan questions answered in MAIN_TO_EXT 20:40 ET; ext builds it). Also see the ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
