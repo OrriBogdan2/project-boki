@@ -424,7 +424,8 @@ func _unhandled_input(event: InputEvent) -> void:
 # ------------------------------------------------------------------ ui
 func _build_ui() -> void:
 	var ui := CanvasLayer.new(); add_child(ui)
-	root_ui = Control.new(); root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); root_ui.theme = UI.theme()
+	root_ui = Control.new()
+	root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(root_ui)
 	var top := UI.card(Color(0.06, 0.07, 0.1, 0.78), 12, 12)
@@ -473,18 +474,7 @@ func _close_panel() -> void:
 	panel_open = ""
 
 func _toast(txt: String) -> void:
-	var c := UI.card(Color(0.06, 0.07, 0.1, 0.9), 12, 18)
-	var l := UI.label(txt, 20, UI.GOLD, UI.big)
-	l.autowrap_mode = TextServer.AUTOWRAP_OFF
-	c.add_child(l)
-	root_ui.add_child(c)
-	c.reset_size()
-	var vp := get_viewport().get_visible_rect().size
-	c.position = Vector2((vp.x - c.size.x) * 0.5, 100)
-	var tw := create_tween()
-	tw.tween_interval(2.4)
-	tw.tween_property(c, "modulate:a", 0.0, 0.4)
-	tw.tween_callback(c.queue_free)
+	UI.toast(root_ui, txt)
 
 func _row(v: VBoxContainer, text: String, col := UI.INK, size := 15) -> HBoxContainer:
 	var row := UI.hbox(10)
