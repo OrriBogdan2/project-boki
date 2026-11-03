@@ -12,6 +12,13 @@ var w: World
 var P: Hunter
 var flat := Vector3.ZERO        # a flat open spot (6m clear all round)
 const DT := 1.0 / 60.0
+const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
+## The framing is measured on one fixed body: the plain medium hunter (no Warden's shape or class size, so it
+## doesn't move when the default medium Warden's proportions do), holding the medium class's default rifle.
+const REF_WEAPON := "quill_rifle"
+## Heroes whose framing is printed beside it (the tallest on the branch): their feet must stay in frame too.
+const FRAME_HEROES := ["bulwark", "gunslinger"]
+const SPAN_SKIP := ["Glider", "Gun", "Shield"]
 
 ## key -> [op, target, unit, note]. Ops: "<=", ">=", "~" (within tol given as [lo, hi]).
 const T := {
@@ -86,7 +93,10 @@ const T := {
 	"cam_settle_t":            ["<=", 0.35, "s", "camera settles on you after a stop"],
 	"cam_glide_lead_m":        [">=", 0.4, "m", "slight lead in glide direction"],
 	"view_across_m":           ["~", [22.0, 25.0], "m", "ground across a 16:9 screen at the focus (camcal: ~17 hunter silhouettes across, as in gameplay frames)"],
-	"hunter_screen_pct":       ["~", [5.0, 6.2], "%", "medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames; feelfix leans characters back 20 deg toward the camera, which shortens the straight-up measure from ~6.9% to ~5.5%)"],
+	# (the reference body is the plain medium hunter since Vex took her own proportions: at the same camera it
+	# measures 6.56% where the old reference, the default medium Warden at plain size, measured 6.07%, so the
+	# range moved up by that 0.46; the camera did not change)
+	"hunter_screen_pct":       ["~", [5.45, 6.65], "%", "medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames; feelfix leans characters back 20 deg toward the camera, which shortens the straight-up measure from ~6.9% to ~5.5%)"],
 	"hunter_feet_below_pct":   ["~", [1.5, 5.0], "%", "feet below the screen centre, as a share of screen height (camcal: ~3% in gameplay frames)"],
 }
 
@@ -165,9 +175,6 @@ func _flat_spot(r: float) -> Vector3:
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
-	# the framing targets were measured on the procedural medium hunter: keep it (a 3D Warden's one skinned
-	# mesh gives coarser bounds, not a different size on screen)
-	WardenGlb.set_model("gunslinger", false)
 	m = Match.new()
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true})
@@ -883,45 +890,79 @@ func _screen_scale() -> void:
 	var aspect := 16.0 / 9.0
 	var hfov := 2.0 * atan(tan(deg_to_rad(cam.fov) * 0.5) * aspect)
 	# (Camera3D keeps the vertical FOV, so a share of screen HEIGHT doesn't depend on the window shape)
-	var now := _model_span(cam)
-	print("MFEEL framing: style supervive pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), P.model.scale.y, now[2]])
+	var ref := _stand_in("", MantleLook.at_home(PlayerLook.neutral()))
+	var now := _model_span(cam, ref)
+	print("MFEEL framing: style supervive pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), ref.scale.y, now[2]])
 	rec("view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
 	rec("hunter_screen_pct", now[1] / vh * 100.0)
 	rec("hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / vh * 100.0)
+	for id in FRAME_HEROES:
+		var hm := _stand_in(id, PlayerLook.neutral())
+		var hs := _model_span(cam, hm)
+		var kind := "3D" if hm.has_node("Warden") else "procedural"
+		var feet := (float(hs[3]) - vh * 0.5) / vh * 100.0
+		print("MFEEL framing %s (%s model): %.2f%% of screen height, feet %.2f%% below the centre"
+				% [id, kind, hs[1] / vh * 100.0, feet])
+		hm.free()
 	# the same measure for the framing before movefeel (25m, hunters at their plain size), for the doc
 	var d0 := cam.dist
 	var vs: float = Hunter.VIS_SCALE
 	cam.dist = 25.0
-	P.model.scale /= vs
+	ref.scale /= vs
 	cam.snap(P.pos)
-	var was := _model_span(cam)
+	var was := _model_span(cam, ref)
 	print("MFEEL framing before (dist 25.0, scale /%.2f): %.1fm across, hunter %.1f%% of screen height (silhouette %.1f%%); now silhouette %.1f%%" % [vs, 2.0 * 25.0 * tan(hfov * 0.5), was[1] / vh * 100.0, was[0] / vh * 100.0, now[0] / vh * 100.0])
-	P.model.scale *= vs
+	ref.free()
 	cam.dist = d0
 	cam.snap(P.pos)
 
+## A model of Warden `id` ("" with an at-home look: the plain hunter) standing where the player does, at
+## the match's size, leaned toward the camera as the player's model is (Hunter.render), standing at idle.
+func _stand_in(id: String, look: Dictionary) -> Node3D:
+	var cls := Arch.weight(id) if id != "" else "medium"
+	var weapon := Arch.signature(id) if id != "" else REF_WEAPON
+	var h := Models.hunter(cls, Data.TEAM_COLORS[0], weapon, "", look, id)
+	m.add_child(h)
+	var at_scale := h.scale * Hunter.VIS_SCALE
+	var lean := P.model.global_basis.orthonormalized()
+	h.global_transform = Transform3D(lean * Basis.from_scale(at_scale), P.model.global_position)
+	var an := HunterAnim.new(h)
+	for i in 30:
+		an.update(DT, {"fired": 99.0, "face": 0.0, "grounded": true})
+	var sync := h.get_node_or_null("Warden/Sync") as WardenGlb.Sync
+	if sync:
+		sync.apply()
+	return h
+
 ## [silhouette px (every corner on screen, so depth counts too), standing px (feet to the top of the
-## head, straight up at the hunter), model height m] for the player's model (no glider, no ring).
-func _model_span(cam: CamRig) -> Array:
+## head, straight up at the hunter), model height m] for a hunter's body (no glider, ring, weapon or shield:
+## a stand-in holds its weapon in the rest pose, not aimed as the player's is). A 3D
+## Warden's skinned mesh counts its posed vertices (its box is the rest pose's).
+func _model_span(cam: CamRig, model: Node3D) -> Array:
 	var lo := 1e9; var hi := -1e9
 	var ylo := 1e9; var yhi := -1e9
-	var stack: Array = [P.model]
+	var stack: Array = [model]
 	while not stack.is_empty():
 		var n: Node = stack.pop_back()
-		if n.name == "Glider":
+		if n.name in SPAN_SKIP:
 			continue
 		for c in n.get_children(): stack.append(c)
 		if n is MeshInstance3D and (n as MeshInstance3D).is_visible_in_tree() and n.name != "TeamRing":
 			var mi := n as MeshInstance3D
 			var ab := mi.get_aabb()
 			if OS.has_environment("MFEEL_DEBUG"):
-				print("MFEEL   mesh %s size %s" % [str(P.model.get_path_to(mi)), str((mi.global_transform.basis * ab.size).abs().snapped(Vector3(0.01, 0.01, 0.01)))])
-			for k in 8:
-				var wp: Vector3 = mi.global_transform * ab.get_endpoint(k)
+				print("MFEEL   mesh %s size %s" % [str(model.get_path_to(mi)), str((mi.global_transform.basis * ab.size).abs().snapped(Vector3(0.01, 0.01, 0.01)))])
+			var pts := PackedVector3Array()
+			if mi.skin:
+				pts = WARDEN_SKIN.points(mi)
+			else:
+				for k in 8:
+					pts.append(mi.global_transform * ab.get_endpoint(k))
+			for wp in pts:
 				var sp := cam.unproject_position(wp)
 				lo = minf(lo, sp.y); hi = maxf(hi, sp.y)
 				ylo = minf(ylo, wp.y); yhi = maxf(yhi, wp.y)
-	var c := P.model.global_position
+	var c := model.global_position
 	var feet := cam.unproject_position(Vector3(c.x, ylo, c.z))
 	var head := cam.unproject_position(Vector3(c.x, yhi, c.z))
 	return [hi - lo, absf(feet.y - head.y), yhi - ylo, feet.y]
