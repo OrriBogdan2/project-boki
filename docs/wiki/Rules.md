@@ -173,6 +173,27 @@ The farm building pass (docs/decisions/0004-farm-building.md). Farm level is poi
 | bot_start | {"easy": {"slots": 0, "bonus": 0}, "medium": {"slots": 1, "bonus": 0}, "hard": {"slots": 2, "bonus": 0}, "expert": {"slots": 3, "bonus": 1}} |
 | extract_mats | [{"wood": 1}, {"wood": 1}, {"wood": 1, "stone": 1}, {"stone": 2, "scrap": 1}, {"stone": 3, "scrap": 3}] |
 
+## hunter_move (`content/rules/hunter_move.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Per-hunter run speed and acceleration [game data]: SUPERVIVE's CT_LokiCharacterAttributes (MoveSpeed uu/s, MaxAcceleration uu/s^2), divided by 100 for metres. Ids are our archetypes: bulwark = Oath, dredge = Kingpin, thief = Shiv, mage = Joule, dolm = Tetra, ostra = Void, ashwick = Felix, juggernaut = Brall, archer = Myth, tender = Elluna, gunslinger = Ghost, rimewright = Celeste. climb_tall: the hunter can mantle double-high ledges (bCanWallJump: Myth and Brall only). A hunter not listed uses its class speed and the default accel. |
+| default | {"speed": 4.55, "accel": 54.0} |
+| bulwark | {"speed": 4.85, "accel": 47.0} |
+| dredge | {"speed": 4.65, "accel": 47.0} |
+| thief | {"speed": 4.65, "accel": 54.0} |
+| mage | {"speed": 4.65, "accel": 54.0} |
+| dolm | {"speed": 4.65, "accel": 50.0} |
+| ostra | {"speed": 4.65, "accel": 54.0} |
+| ashwick | {"speed": 4.65, "accel": 54.0} |
+| juggernaut | {"speed": 4.55, "accel": 54.0, "climb_tall": true} |
+| archer | {"speed": 4.55, "accel": 54.0, "climb_tall": true} |
+| tender | {"speed": 4.55, "accel": 54.0} |
+| gunslinger | {"speed": 4.55, "accel": 54.0} |
+| rimewright | {"speed": 4.45, "accel": 54.0} |
+
 ## keys (`content/rules/keys.json`)
 
 
