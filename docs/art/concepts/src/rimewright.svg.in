@@ -1,150 +1,156 @@
 <!--META {
  "name": "Tamsin", "title": "Icy Dancer", "tag": "id rimewright  ·  female  ·  controller",
- "accent": "#5fd6c4", "rim": "#e6fffb", "shadow": 95, "bust_bg": "#16203a",
- "stage": ["#4c5e7a", "#0e121c"],
+ "accent": "#5fd6c4", "rim": "#e6fffb", "shadow": 90, "bust_bg": "#16203a",
+ "stage": ["#526684", "#0e121c"], "height_cm": 157, "sheet_scale": 0.92, "pos": [200, 625],
  "relic": "the Rink Blade",
  "mat": {
+  "dress": ["#7ae8dc", "#1f7aa0", "#121c4a"],
   "navy": ["#5a6ca8", "#22306a", "#0a1030"],
-  "fur": ["#ffffff", "#e8eef4", "#9aa8b8"],
   "ice": ["#ffffff", "#c8f2ff", "#5ab0d8"],
   "teal": ["#9af6e8", "#2ab8a6", "#0a4a44"],
-  "skin": ["#f6d6c0", "#d8a684", "#8a5a40"],
-  "hair": ["#ffffff", "#dfe6f2", "#8894aa"],
+  "skin": ["#fff0e6", "#f0c4a6", "#a06a50"],
+  "tights": ["#ffeadc", "#e6b494", "#8a5a42"],
+  "hair": ["#ffffff", "#dfe8f4", "#7a8cae"],
   "silver": ["#ffffff", "#c2cad8", "#5a6274"],
-  "boot": ["#ffffff", "#e6e2ea", "#8e8898"]
+  "boot": ["#ffffff", "#ece8ee", "#8e8898"]
  },
  "glow": {"ice": "#bff4ff"},
- "palette": [["#22306a", "midnight"], ["#e8eef4", "snow fur"], ["#c8f2ff", "rime"],
-             ["#2ab8a6", "glacier teal"], ["#dfe6f2", "frost hair"], ["#d8a684", "skin"], ["#c2cad8", "blade silver"]],
+ "palette": [["#121c4a", "midnight"], ["#1f7aa0", "deep rink"], ["#c8f2ff", "rime"],
+             ["#2ab8a6", "glacier teal"], ["#e6ecf6", "frost hair"], ["#e2ae8c", "skin"], ["#c2cad8", "blade silver"]],
  "notes": [
-  ["Shape language", "The tallest, thinnest hunter: one long vertical line from the bun to the blade tip, with a single big soft shape at the top (the fur stole) and a single big sharp one in her hand (the open ice fan). Long, curving, trailing lines everywhere else: the skirt train and the scarf."],
-  ["Signature features", "A white fur stole, a high-necked midnight leotard scattered with frost sequins, one long sheer skirt-train in glacier teal, frost-white hair in a high bun pierced by ice pins, white lace-up skates on long curved blades, and a folding fan whose ribs are thin blades of ice. Our own dancer: no hood, no cape, no armour."],
-  ["Reads in-engine", "From above: a thin dark line with a white blob (the stole) and a bright fan of ice that opens when she casts; the teal train streams behind her skates so her glide direction reads. Rime-white and teal stay off the other cold hero, Bjorn, whose ice is crusted and blue."]
+  ["Shape language", "A young athlete, 1.57 m and sixteen: long clean lines from the toe-pick to the tip of a swinging ponytail, a tight bodice that bursts into a short flared skirt, and one bright sharp shape in her hand (the ice fan). Every pose is a skating position: the toe-pick flourish, the spiral, the spin."],
+  ["Signature features", "A competition dress that fades from glacier teal to midnight, crusted with frost rhinestones; sheer sparkling sleeves; a layered chiffon skirt; flesh tights; white competition skates on long blades. Frost-white hair in a high ponytail with a teal scrunchie, glitter at the eyes, a champion's grin. Our own skater: no fur stole, no bun, no cape."],
+  ["Reads in-engine", "From above: a slim teal-and-navy line, a white ponytail that whips with every turn, and a bright fan of ice that opens when she casts; the skirt flares on the spin so her direction reads. Rime-white and teal stay off Bjorn, whose ice is crusted and blue."]
  ]
 } -->
 <g id="defs">
- <linearGradient id="L-train" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2ab8a6" stop-opacity="0.95"/><stop offset="0.7" stop-color="#5fd6c4" stop-opacity="0.6"/><stop offset="1" stop-color="#bff4ff" stop-opacity="0.1"/></linearGradient>
+ <linearGradient id="L-chiffon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2ab8a6" stop-opacity="0.95"/><stop offset="0.75" stop-color="#5fd6c4" stop-opacity="0.7"/><stop offset="1" stop-color="#bff4ff" stop-opacity="0.45"/></linearGradient>
+ <radialGradient id="L-iris" cx="0.5" cy="0.4" r="0.6"><stop offset="0" stop-color="#bff8ff"/><stop offset="0.6" stop-color="#2aa0b8"/><stop offset="1" stop-color="#0a3a50"/></radialGradient>
+ <radialGradient id="L-blush"><stop offset="0" stop-color="#ff8a8a" stop-opacity="0.45"/><stop offset="1" stop-color="#ff8a8a" stop-opacity="0"/></radialGradient>
+ <clipPath id="L-bodc"><path d="M-38 -504 C-42 -470 -30 -440 -22 -410 C-26 -390 -32 -370 -34 -352 L34 -352 C32 -370 26 -390 22 -410 C30 -440 42 -470 38 -504 C22 -512 -22 -512 -38 -504Z"/></clipPath>
+ <g id="L-head">
+  <!-- ponytail, whipping out -->
+  <limb m="hair" lw="2.4" fluff="0.06" per="6" pts="6 -616 8; 24 -640 11; 48 -640 12; 66 -620 11; 76 -590 9; 76 -558 6; 70 -532 1"/>
+  <brush c="#8894aa" pts="30 -636 0; 58 -626 1.4; 70 -594 1.2; 72 -560 0"/>
+  <brush c="#ffffff" pts="28 -646 0; 50 -644 1.6; 64 -630 0"/>
+  <path m="hair" d="M-34 -566 C-38 -600 -20 -620 0 -620 C22 -620 38 -600 34 -566 C30 -580 -30 -580 -34 -566Z"/>
+  <ellipse m="teal" lw="2" cx="8" cy="-620" rx="9" ry="6" transform="rotate(-30 8 -620)"/>
+  <limb m="skin" lw="2.4" pts="0 -540 9; 0 -514 10"/>
+  <!-- face: young, sure of herself -->
+  <path m="skin:r" lw="2.6" d="M0 -604 C20 -604 31 -590 31 -568 C31 -550 23 -536 13 -529 C7 -526 -7 -526 -13 -529 C-23 -536 -31 -550 -31 -568 C-31 -590 -20 -604 0 -604Z"/>
+  <path sg="35" d="M4 -604 C22 -604 31 -590 31 -568 C31 -550 23 -536 13 -529 C9 -527 6 -526 4 -526Z"/>
+  <ellipse fill="url(#L-blush)" cx="-18" cy="-550" rx="8" ry="5"/><ellipse fill="url(#L-blush)" cx="18" cy="-550" rx="8" ry="5"/>
+  <path fill="#7adfe0" opacity="0.4" d="M-22 -572 C-16 -580 -6 -580 -3 -572 C-8 -575 -16 -575 -22 -572Z M22 -572 C16 -580 6 -580 3 -572 C8 -575 16 -575 22 -572Z"/>
+  <path fill="#fff" stroke="#1d1724" stroke-width="1.2" d="M-21 -566 C-17 -573 -7 -573 -4 -566 C-8 -561 -17 -561 -21 -566Z M21 -566 C17 -573 7 -573 4 -566 C8 -561 17 -561 21 -566Z"/>
+  <circle fill="url(#L-iris)" cx="-12" cy="-566.5" r="4.6"/><circle fill="url(#L-iris)" cx="12" cy="-566.5" r="4.6"/>
+  <circle fill="#0a1a26" cx="-12" cy="-566.5" r="2.2"/><circle fill="#0a1a26" cx="12" cy="-566.5" r="2.2"/>
+  <circle fill="#fff" cx="-13.6" cy="-568.4" r="1.3"/><circle fill="#fff" cx="10.4" cy="-568.4" r="1.3"/>
+  <brush pts="-23 -566 0; -17 -573 1.4; -8 -573 1.1; -3 -567 0"/><brush pts="23 -566 0; 17 -573 1.4; 8 -573 1.1; 3 -567 0"/>
+  <brush pts="-24 -567 0; -27 -571 0.9; -28 -574 0"/><brush pts="24 -567 0; 27 -571 0.9; 28 -574 0"/>
+  <brush pts="-24 -580 0; -15 -586 1.4; -5 -582 0"/><brush pts="24 -584 0; 15 -588 1.4; 5 -582 0"/>
+  <g fill="#fff"><circle cx="-24" cy="-562" r="0.9"/><circle cx="24" cy="-562" r="0.9"/><circle cx="-26" cy="-558" r="0.7"/><circle cx="26" cy="-558" r="0.7"/></g>
+  <brush c="#b07a60" pts="0 -562 0; -2 -552 0.9; 2 -548 0"/>
+  <path fill="#8a2a3a" stroke="#1d1724" stroke-width="1.2" stroke-linejoin="round" d="M-10 -542 C-4 -538 4 -538 10 -543 C7 -535 -6 -534 -10 -542Z"/>
+  <path fill="#fff" d="M-7 -540.5 C-2 -539 3 -539 7 -541 L6 -539 C2 -538 -3 -538 -6 -539Z"/>
+  <limb m="hair" lw="2" pts="-30 -584 6; -34 -560 5; -32 -538 3; -28 -526 0.6"/>
+  <limb m="hair" lw="2" pts="30 -584 6; 33 -560 4.5; 30 -540 2.5; 26 -530 0.6"/>
+  <!-- side-swept fringe -->
+  <path m="hair" lw="2.2" d="M-33 -566 C-36 -598 -12 -614 10 -608 C26 -604 34 -590 33 -574 C26 -590 12 -596 -4 -592 C-16 -588 -24 -578 -28 -556 C-31 -560 -33 -563 -33 -566Z"/>
+  <brush c="#7a8cae" pts="-26 -590 0; -14 -598 1.2; 4 -600 0"/><brush c="#7a8cae" pts="-30 -576 0; -22 -592 1; -8 -600 0"/><brush c="#7a8cae" pts="10 -606 0; 20 -600 1; 28 -588 0"/><brush c="#7a8cae" pts="-6 -616 0; 8 -614 1; 20 -608 0"/>
+  <brush c="rim" opacity="0.8" pts="22 -604 0; 33 -590 1.6; 34 -574 0"/>
+  <path fill="#e6fffb" stroke="#1d1724" stroke-width="0.8" d="M-32 -556 l2.5 -3 l2.5 3 l-2.5 3Z"/>
+ </g>
+ <g id="L-dress">
+  <!-- skirt: two layers of chiffon flaring out -->
+  <path fill="url(#L-chiffon)" stroke="#1d1724" stroke-width="2" d="M-32 -366 C-56 -340 -84 -316 -96 -284 Q-84 -282 -78 -290 Q-70 -276 -58 -284 Q-46 -270 -34 -282 Q-20 -270 -8 -282 Q6 -270 18 -282 Q32 -272 42 -286 Q56 -276 64 -290 Q76 -284 88 -296 C76 -324 56 -344 32 -366Z"/>
+  <path fill="#1f7aa0" opacity="0.85" stroke="#1d1724" stroke-width="2" d="M-32 -366 C-48 -346 -64 -330 -72 -306 Q-62 -300 -52 -308 Q-42 -296 -30 -306 Q-18 -294 -6 -304 Q6 -294 18 -304 Q30 -296 40 -308 Q52 -302 62 -312 C54 -334 44 -350 32 -366Z"/>
+  <brush c="#e6fffb" opacity="0.7" pts="-50 -326 0; -70 -300 1.4; -80 -290 0"/><brush c="#e6fffb" opacity="0.7" pts="40 -330 0; 60 -306 1.4; 74 -298 0"/>
+  <!-- bodice -->
+  <path m="skin" d="M-38 -504 C-42 -470 -30 -440 -22 -410 C-26 -390 -32 -370 -34 -352 L34 -352 C32 -370 26 -390 22 -410 C30 -440 42 -470 38 -504 C22 -512 -22 -512 -38 -504Z"/>
+  <g clip-path="url(#L-bodc)">
+   <path f="dress" d="M-50 -482 C-34 -470 -14 -468 0 -482 C14 -468 34 -470 50 -482 L50 -340 L-50 -340Z"/>
+   <path fill="#121c4a" opacity="0.18" d="M-50 -520 L50 -520 L50 -482 C34 -470 14 -468 0 -482 C-14 -468 -34 -470 -50 -482Z"/>
+   <path fill="none" stroke="#e6fffb" stroke-width="1.4" opacity="0.85" d="M-30 -440 C-16 -430 -16 -414 -4 -404 M-4 -404 C8 -414 22 -412 28 -398 M0 -470 C2 -450 -6 -436 -4 -404 M-26 -396 C-14 -386 -10 -372 0 -362 M20 -386 C14 -376 12 -366 4 -360"/>
+   <g fill="#fff"><circle cx="-30" cy="-440" r="2"/><circle cx="-4" cy="-404" r="2.6"/><circle cx="28" cy="-398" r="2"/><circle cx="0" cy="-470" r="2"/><circle cx="-26" cy="-396" r="1.6"/><circle cx="20" cy="-386" r="1.6"/><circle cx="-16" cy="-454" r="1.2"/><circle cx="14" cy="-440" r="1.4"/><circle cx="-10" cy="-376" r="1.2"/><circle cx="24" cy="-460" r="1.2"/></g>
+   <rect sg="55" x="-44" y="-520" width="90" height="170"/>
+   <rect hg="30" x="-44" y="-500" width="50" height="80"/>
+  </g>
+  <path fill="none" stroke="#1d1724" stroke-width="2" d="M-38 -484 C-34 -470 -14 -468 0 -482 C14 -468 34 -470 38 -484"/>
+  <path m="teal" lw="1.6" d="M-24 -366 Q0 -358 24 -366 L26 -356 Q0 -348 -26 -356Z"/>
+  <path rim="2.4" d="M36 -496 C38 -470 30 -440 24 -414"/>
+ </g>
+ <g id="L-fan">
+  <g class="fx"><circle cx="0" cy="-60" r="80" fill="url(#L-ice-g)"/></g>
+  <path m="ice" lw="2.2" opacity="0.94" d="M0 0 L-74 -66 L-70 -78 L-60 -76 L-56 -90 L-44 -88 L-36 -100 L-24 -96 L-12 -106 L0 -98 L12 -106 L24 -96 L36 -100 L44 -88 L56 -90 L60 -76 L70 -78 L74 -66Z"/>
+  <path fill="#fff" opacity="0.6" d="M0 -6 L-48 -70 Q0 -96 48 -70Z"/>
+  <path ln="1.2" d="M0 0 L-66 -70 M0 0 L-46 -86 M0 0 L-22 -96 M0 0 L0 -98 M0 0 L22 -96 M0 0 L46 -86 M0 0 L66 -70"/>
+  <circle m="silver" lw="1.6" cx="0" cy="0" r="5"/>
+ </g>
 </g><!--/defs-->
 <g id="front">
- <!-- skirt train behind -->
- <path fill="url(#L-train)" stroke="#1d1724" stroke-width="2.4" d="M10 -380 C70 -360 120 -300 140 -220 C150 -180 160 -150 178 -130 C150 -126 126 -150 110 -180 C90 -230 50 -300 10 -330Z"/>
- <!-- legs: long, crossed in a dancer's stance -->
- <path m="navy" d="M-30 -380 C-34 -300 -30 -220 -22 -150 L-14 -60 L8 -60 L6 -150 C8 -230 10 -300 10 -380Z"/>
- <path m="navy" d="M30 -380 C34 -300 30 -230 22 -160 L-2 -70 L18 -64 L42 -160 C52 -230 56 -300 52 -380Z"/>
- <path sh="28" d="M30 -380 L52 -380 C56 -300 52 -230 42 -160 L18 -64 L8 -68 L30 -160 C36 -230 38 -300 30 -380Z"/>
- <path hl="16" d="M-26 -370 C-28 -300 -26 -230 -20 -160 L-14 -70 L-10 -70 L-14 -160 C-18 -230 -20 -300 -20 -370Z"/>
- <!-- skates -->
- <path m="boot" d="M-20 -80 L8 -80 L10 -30 C14 -24 16 -16 10 -12 L-24 -12 C-28 -20 -24 -40 -20 -80Z"/>
- <path m="boot" d="M-4 -86 L22 -80 L18 -36 C22 -28 20 -18 14 -16 L-14 -18 C-16 -28 -10 -40 -4 -86Z" transform="translate(16 2)"/>
- <path m="silver" lw="2.4" d="M-30 -12 L18 -12 C26 -12 30 -6 26 0 L-26 0 C-34 0 -36 -6 -34 -10Z"/>
- <path m="silver" lw="2.4" d="M2 -14 L42 -14 C50 -14 54 -8 50 -2 L4 -2 C-2 -2 -4 -8 2 -14Z"/>
- <path ln="1.4" d="M-16 -70 l18 6 M-16 -56 l18 6 M-14 -42 l18 6"/>
- <!-- the leotard body -->
- <path m="navy" d="M-24 -494 C-42 -490 -50 -478 -50 -462 C-48 -430 -42 -406 -38 -380 L-36 -366 L54 -366 L52 -380 C48 -406 44 -430 46 -462 C44 -478 34 -490 18 -494Z"/>
- <path sh="30" d="M14 -492 C34 -488 44 -478 46 -462 C44 -430 48 -406 52 -380 L54 -366 L22 -366 C30 -410 30 -460 14 -492Z"/>
- <path hl="18" d="M-42 -462 C-38 -476 -28 -484 -18 -486 C-28 -460 -34 -430 -36 -390 L-40 -400 C-44 -420 -46 -440 -42 -462Z"/>
- <g fill="#dff8ff"><circle cx="-20" cy="-450" r="2"/><circle cx="6" cy="-430" r="1.6"/><circle cx="-10" cy="-410" r="2"/><circle cx="20" cy="-400" r="1.6"/><circle cx="-28" cy="-396" r="1.6"/><circle cx="2" cy="-470" r="1.6"/><circle cx="14" cy="-450" r="1.4"/></g>
- <path m="teal" d="M-40 -384 Q8 -372 54 -384 L56 -364 Q8 -352 -42 -364Z"/>
- <!-- arms: one raised with the fan, one curved low -->
- <path m="navy" d="M-36 -480 C-54 -478 -64 -464 -70 -446 L-86 -394 L-70 -386 L-54 -436Z"/>
- <path m="navy" d="M-86 -396 L-70 -386 L-60 -340 L-74 -334Z"/>
- <path m="skin" d="M-76 -336 C-80 -322 -74 -310 -64 -310 C-56 -312 -54 -324 -58 -338Z"/>
- <path m="navy" d="M36 -480 C52 -486 66 -500 76 -520 L96 -560 L84 -570 L60 -530 L44 -500Z"/>
- <path m="skin" d="M84 -572 C80 -586 88 -598 98 -596 C106 -592 106 -578 98 -568Z"/>
- <!-- the open ice fan -->
- <g transform="translate(96 -584)">
-  <g class="fx"><circle cx="0" cy="-40" r="80" fill="url(#L-ice-g)" opacity="0.5"/></g>
-  <path m="ice" lw="2.4" opacity="0.95" d="M0 0 L-62 -92 C-40 -110 -14 -118 10 -118 C34 -116 56 -104 74 -86 Z"/>
-  <path ln="1.6" d="M0 0 L-44 -104 M0 0 L-22 -114 M0 0 L2 -118 M0 0 L26 -114 M0 0 L50 -100"/>
-  <path fill="url(#L-ice-g)" opacity="0.6" d="M-50 -96 C-30 -108 -10 -112 10 -112 C-8 -100 -30 -94 -50 -84Z"/>
-  <path m="ice" lw="2" d="M-62 -92 l-8 -14 l14 4Z M-44 -104 l-4 -16 l12 8Z M-22 -114 l0 -16 l10 12Z M2 -118 l6 -14 l6 14Z M26 -114 l10 -12 l2 16Z M50 -100 l14 -8 l-4 16Z M74 -86 l16 -4 l-8 14Z"/>
-  <circle m="silver:r" lw="2" cx="0" cy="0" r="6"/>
-  <path rim="2.6" d="M74 -86 C56 -104 34 -116 10 -118"/>
- </g>
- <!-- the fur stole -->
- <path m="fur" d="M-60 -470 C-74 -488 -60 -512 -40 -510 C-30 -526 -10 -528 0 -520 C10 -528 30 -526 40 -510 C60 -512 74 -488 60 -470 C50 -456 30 -460 20 -466 C10 -458 -10 -458 -20 -466 C-30 -460 -50 -456 -60 -470Z"/>
- <path sh="22" d="M60 -470 C50 -456 30 -460 20 -466 C34 -476 50 -480 64 -488 C68 -480 66 -476 60 -470Z"/>
- <path ln="1.5" d="M-48 -490 q8 -8 16 -2 M-14 -508 q8 -8 16 -2 M24 -500 q8 -8 16 0"/>
- <path m="fur" lw="2.4" d="M50 -472 C60 -440 56 -400 64 -370 L52 -366 C44 -398 44 -440 40 -468Z"/>
- <!-- head -->
- <path m="skin" d="M-10 -520 L10 -520 L11 -504 L-11 -504Z"/>
- <path m="skin" d="M-24 -560 C-26 -594 26 -594 24 -560 L22 -536 C18 -518 8 -510 0 -510 C-8 -510 -18 -518 -22 -536Z"/>
- <path sh="28" d="M10 -588 C20 -582 24 -572 24 -560 L22 -536 C18 -520 12 -512 6 -511 C16 -536 18 -572 10 -588Z"/>
- <path m="hair" d="M-28 -556 C-34 -596 -8 -606 4 -604 C24 -602 34 -588 28 -556 C24 -576 14 -584 0 -584 C-12 -584 -22 -576 -28 -556Z"/>
- <path m="hair" lw="2.4" d="M-28 -556 C-30 -570 -24 -584 -12 -590 C-18 -574 -20 -562 -18 -548Z"/>
- <!-- high bun with ice pins -->
- <path m="ice" lw="2" d="M-30 -628 L-4 -616 L-6 -610Z M30 -634 L4 -616 L6 -610Z M2 -652 L2 -620 L-4 -620Z"/>
- <circle m="hair:r" cx="0" cy="-616" r="18"/>
- <path m="teal" lw="2" d="M-16 -604 Q0 -596 16 -604 L14 -598 Q0 -590 -14 -598Z"/>
- <path fill="#fff" stroke="#1d1724" stroke-width="1.5" d="M-18 -556 Q-11 -561 -4 -556 Q-11 -552 -18 -556Z M18 -556 Q11 -561 4 -556 Q11 -552 18 -556Z"/>
- <circle cx="-11" cy="-556" r="2.4" fill="#2a8aa0"/><circle cx="11" cy="-556" r="2.4" fill="#2a8aa0"/>
- <path ln="2" d="M-18 -557 l-3 -3 M18 -557 l3 -3 M-18 -566 L-5 -564 M18 -566 L5 -564"/>
- <path fill="#9ae8ff" opacity="0.7" d="M-20 -552 l2 -2 l2 2 l-2 2Z M18 -552 l2 -2 l2 2 l-2 2Z"/>
- <path m="skin" lw="1.6" d="M-2 -548 Q-5 -538 -5 -534 Q0 -531 5 -534 Q5 -538 2 -548Z"/>
- <path fill="#a84a5a" stroke="#1d1724" stroke-width="1.5" d="M-8 -524 Q0 -519 8 -524 Q0 -521 -8 -524Z"/>
- <path rim="2.6" d="M16 -600 C28 -594 32 -578 28 -560"/>
+ <!-- crossed leg, toe-pick in the ice behind -->
+ <limb m="tights" pts="14 -340 17; 18 -262 14; 10 -182 10.5; -10 -116 9; -30 -72 7"/>
+ <path m="boot" lw="2.4" d="M-40 -82 C-34 -92 -22 -90 -18 -80 L-28 -28 C-30 -20 -38 -18 -44 -22 L-50 -30 C-50 -50 -46 -66 -40 -82Z"/>
+ <path m="silver" lw="2" d="M-52 -30 C-56 -18 -56 -6 -50 0 L-46 -2 L-48 -10 L-42 -22Z"/>
+ <!-- standing leg -->
+ <limb m="tights" pts="-14 -340 17; -22 -262 14; -20 -182 10.5; -16 -120 9; -14 -72 7"/>
+ <path sg="40" d="M-8 -330 L4 -330 C2 -280 -6 -230 -12 -180 L-10 -120 L-8 -80 L-14 -80 Z"/>
+ <path m="boot" lw="2.4" d="M-24 -86 C-22 -96 -6 -96 -4 -86 L-2 -32 C6 -30 14 -26 14 -18 L14 -12 L-30 -12 C-32 -36 -28 -64 -24 -86Z"/>
+ <path ln="1.2" d="M-20 -78 l14 4 M-21 -68 l15 4 M-22 -58 l16 4 M-23 -48 l16 4"/>
+ <path m="silver" lw="2" d="M-28 -12 L12 -12 L10 -6 L-30 -6Z M-34 -4 C-30 0 20 0 28 -2 C32 -6 30 -10 24 -10 L22 -4 L-34 -4Z"/>
+ <path m="silver" lw="1.6" d="M-32 -4 L-38 -10 L-36 -2Z"/>
+ <path hg="45" d="M-22 -84 C-18 -90 -12 -90 -10 -86 L-12 -40 L-18 -40Z"/>
+ <use href="#L-dress"/>
+ <!-- arm out to the side, fingers soft -->
+ <limb m="skin" pts="36 -496 9.5; 62 -466 7.5; 88 -440 6.5; 112 -424 5"/>
+ <limb fill="#7adfe0" opacity="0.22" pts="36 -496 10; 62 -466 8; 88 -440 7; 110 -425 5.5"/>
+ <g fill="#fff"><circle cx="52" cy="-478" r="1.4"/><circle cx="74" cy="-452" r="1.2"/><circle cx="96" cy="-434" r="1.4"/></g>
+ <path m="teal" lw="1.4" d="M104 -436 L114 -420 L108 -416 L98 -432Z"/>
+ <limb m="skin" lw="2" pts="112 -424 5; 122 -418 6.5"/>
+ <limb m="skin" lw="1.8" pts="122 -424 2.2; 136 -428 1.8; 146 -426 1"/><limb m="skin" lw="1.8" pts="124 -418 2.2; 138 -416 1.8; 148 -412 1"/><limb m="skin" lw="1.8" pts="122 -413 2.2; 132 -406 1.8; 138 -400 1"/>
+ <!-- arm raised, the fan open over her head -->
+ <limb m="skin" pts="-36 -496 9.5; -58 -540 7.5; -66 -590 6.5; -68 -628 5"/>
+ <limb fill="#7adfe0" opacity="0.22" pts="-36 -496 10; -58 -540 8; -66 -590 7; -68 -626 5.5"/>
+ <g fill="#fff"><circle cx="-50" cy="-526" r="1.4"/><circle cx="-62" cy="-566" r="1.2"/><circle cx="-66" cy="-600" r="1.4"/></g>
+ <g transform="translate(-70 -646) rotate(-14)"><use href="#L-fan"/></g>
+ <limb m="skin" lw="2" pts="-68 -628 5.5; -70 -644 7"/>
+ <g transform="rotate(-4 0 -515) translate(0 -515) scale(1.1) translate(0 515)"><use href="#L-head"/></g>
+ <g class="fx" fill="#e6fffb"><path d="M120 -560 l3 -8 l3 8 l-3 8Z"/><path d="M-120 -470 l2 -6 l2 6 l-2 6Z"/><path d="M60 -620 l2 -5 l2 5 l-2 5Z"/></g>
 </g><!--/front-->
 <g id="tq">
- <!-- the train streaming back -->
- <path fill="url(#L-train)" stroke="#1d1724" stroke-width="2.4" d="M0 -380 C80 -380 160 -340 210 -270 C230 -240 250 -224 272 -216 C240 -204 210 -220 190 -240 C150 -280 80 -320 0 -330Z"/>
- <!-- the free leg extended back (arabesque) -->
- <path m="navy" d="M20 -376 C60 -380 110 -390 160 -410 L196 -424 L202 -404 L166 -388 C120 -366 70 -350 30 -342Z"/>
- <path m="boot" d="M188 -432 L222 -446 C230 -438 238 -432 246 -432 L248 -420 L206 -402Z"/>
- <path m="silver" lw="2.4" d="M206 -400 L250 -420 C258 -424 262 -416 256 -410 L210 -390 C202 -386 198 -396 206 -400Z"/>
- <g id="L-tqbody">
- <!-- standing leg on the blade -->
- <path m="navy" d="M-30 -380 C-30 -300 -26 -220 -22 -150 L-18 -60 L6 -60 L8 -150 C12 -230 16 -300 18 -380Z"/>
- <path hl="16" d="M-26 -370 C-26 -300 -24 -230 -20 -160 L-16 -70 L-12 -70 L-14 -160 C-18 -230 -20 -300 -20 -370Z"/>
- <path m="boot" d="M-22 -80 L6 -80 L8 -30 C12 -24 14 -16 8 -12 L-30 -12 C-36 -20 -26 -40 -22 -80Z"/>
- <path m="silver" lw="2.4" d="M-50 -12 L14 -12 C22 -12 26 -6 22 0 L-46 0 C-54 0 -58 -8 -50 -12Z"/>
- <path ln="1.4" d="M-18 -70 l18 6 M-18 -56 l18 6"/>
- <!-- body, leaning forward into the glide -->
- <path m="navy" d="M-40 -494 C-58 -490 -66 -478 -66 -462 C-62 -430 -54 -406 -48 -380 L-44 -366 L36 -366 L38 -380 C38 -406 34 -430 36 -462 C34 -478 24 -490 6 -494Z"/>
- <path sh="30" d="M2 -492 C22 -488 34 -478 36 -462 C34 -430 38 -406 38 -380 L36 -366 L8 -366 C16 -410 18 -460 2 -492Z"/>
- <g fill="#dff8ff"><circle cx="-36" cy="-450" r="2"/><circle cx="-10" cy="-430" r="1.6"/><circle cx="-26" cy="-410" r="2"/><circle cx="4" cy="-400" r="1.6"/><circle cx="-14" cy="-470" r="1.6"/></g>
- <path m="teal" d="M-50 -384 Q-6 -372 38 -384 L40 -364 Q-6 -352 -52 -364Z"/>
- <path rim="2.6" d="M34 -460 C34 -430 36 -404 38 -380"/>
- <!-- far arm sweeping back -->
- <path m="navy" d="M20 -482 C40 -480 60 -470 80 -470 L120 -476 L120 -462 L80 -456 C60 -454 40 -458 20 -462Z"/>
- <path m="skin" d="M118 -478 C130 -480 138 -474 136 -466 C134 -460 124 -458 118 -462Z"/>
- <!-- stole -->
- <path m="fur" d="M-76 -470 C-90 -488 -76 -512 -56 -510 C-46 -526 -26 -528 -16 -520 C-6 -528 14 -526 24 -510 C44 -512 58 -488 44 -470 C34 -456 14 -460 4 -466 C-6 -458 -26 -458 -36 -466 C-46 -460 -66 -456 -76 -470Z"/>
- <path sh="22" d="M44 -470 C34 -456 14 -460 4 -466 C18 -476 34 -480 48 -488 C52 -480 50 -476 44 -470Z"/>
- <path ln="1.5" d="M-64 -490 q8 -8 16 -2 M-30 -508 q8 -8 16 -2 M8 -500 q8 -8 16 0"/>
- <path m="fur" lw="2.4" d="M30 -478 C70 -490 110 -480 140 -496 C132 -480 120 -472 100 -470 C76 -466 50 -466 30 -464Z"/>
- <!-- head turned to her right -->
- <path m="skin" d="M-26 -520 L-6 -520 L-5 -504 L-27 -504Z"/>
- <path m="skin" d="M-44 -560 C-44 -594 4 -596 4 -562 L2 -536 C-2 -518 -12 -510 -22 -510 C-32 -510 -42 -518 -44 -532 C-48 -536 -50 -544 -46 -548Z"/>
- <path sh="28" d="M-6 -590 C2 -582 4 -572 4 -562 L2 -536 C-2 -520 -6 -512 -12 -511 C-4 -536 -2 -572 -6 -590Z"/>
- <path m="hair" d="M-48 -556 C-54 -596 -26 -606 -14 -604 C6 -602 14 -588 8 -556 C4 -576 -6 -584 -20 -584 C-32 -584 -42 -576 -48 -556Z"/>
- <path m="ice" lw="2" d="M-36 -632 L-16 -616 L-18 -610Z M14 -636 L-8 -616 L-6 -610Z M-10 -654 L-10 -622 L-16 -622Z"/>
- <circle m="hair:r" cx="-12" cy="-616" r="18"/>
- <path m="teal" lw="2" d="M-28 -604 Q-12 -596 4 -604 L2 -598 Q-12 -590 -26 -598Z"/>
- <path fill="#fff" stroke="#1d1724" stroke-width="1.5" d="M-42 -556 Q-37 -560 -32 -556 Q-37 -552 -42 -556Z M-2 -556 Q-9 -561 -16 -556 Q-9 -552 -2 -556Z"/>
- <circle cx="-37" cy="-556" r="2" fill="#2a8aa0"/><circle cx="-9" cy="-556" r="2.4" fill="#2a8aa0"/>
- <path ln="2" d="M-42 -566 L-32 -564 M-2 -566 L-14 -564 M-2 -557 l3 -3"/>
- <path m="skin" lw="1.6" d="M-28 -546 C-33 -540 -35 -536 -33 -533 Q-30 -531 -26 -533"/>
- <path fill="#a84a5a" stroke="#1d1724" stroke-width="1.5" d="M-38 -524 Q-30 -519 -22 -524 Q-30 -521 -38 -524Z"/>
- <path rim="2.6" d="M0 -600 C10 -594 14 -578 10 -560"/>
+ <!-- the spiral: gliding on one blade, free leg high behind -->
+ <g class="fx"><path fill="#e6fffb" opacity="0.5" d="M-160 -2 C-60 -6 60 -6 220 -2 L220 2 C60 0 -60 0 -160 2Z"/></g>
+ <limb m="tights" pts="12 -344 17; 74 -380 14; 136 -416 10.5; 180 -440 8.5; 206 -456 7"/>
+ <path m="boot" lw="2.4" transform="rotate(-62 216 -462) translate(-24 14)" d="M228 -490 C230 -500 246 -500 248 -490 L250 -436 C258 -434 266 -430 266 -422 L266 -416 L222 -416 C220 -440 224 -468 228 -490Z"/>
+ <path m="silver" lw="2" transform="rotate(-62 216 -462) translate(-24 14)" d="M218 -408 C222 -404 272 -404 280 -406 C284 -410 282 -414 276 -414 L274 -408 L218 -408Z"/>
+ <limb m="tights" pts="-6 -340 17; -10 -262 14; -6 -182 10.5; -2 -120 9; 0 -72 7"/>
+ <path m="boot" lw="2.4" d="M-10 -86 C-8 -96 8 -96 10 -86 L12 -32 C20 -30 28 -26 28 -18 L28 -12 L-16 -12 C-18 -36 -14 -64 -10 -86Z"/>
+ <path ln="1.2" d="M-6 -78 l14 4 M-7 -68 l15 4 M-8 -58 l16 4"/>
+ <path m="silver" lw="2" d="M-14 -12 L26 -12 L24 -6 L-16 -6Z M-20 -4 C-16 0 34 0 42 -2 C46 -6 44 -10 38 -10 L36 -4 L-20 -4Z"/>
+ <g transform="rotate(-52 0 -344)">
+  <!-- far arm: out and back -->
+  <limb m="skin" pts="36 -496 9; 72 -496 7.5; 108 -492 6.5; 140 -488 5"/>
+  <limb fill="#7adfe0" opacity="0.22" pts="36 -496 9.5; 72 -496 8; 108 -492 7; 140 -488 5.5"/>
+  <g transform="translate(156 -488) rotate(70)"><use href="#L-fan"/></g>
+  <limb m="skin" lw="2" pts="140 -488 5.5; 154 -488 7"/>
+  <use href="#L-dress"/>
+  <!-- near arm reaching ahead with the fan -->
+  <limb m="skin" pts="-34 -496 9.5; -54 -536 7.5; -70 -574 6.5; -80 -604 5"/>
+  <limb fill="#7adfe0" opacity="0.22" pts="-34 -496 10; -54 -536 8; -70 -574 7; -80 -602 5.5"/>
+  <limb m="skin" lw="2" pts="-80 -604 5; -86 -616 6.5"/>
+  <limb m="skin" lw="1.8" pts="-88 -620 2.2; -94 -632 1.8; -96 -640 1"/><limb m="skin" lw="1.8" pts="-84 -622 2.2; -86 -636 1.8; -86 -644 1"/>
+  <g transform="rotate(40 0 -515) translate(0 -515) scale(1.1) translate(0 515)"><use href="#L-head"/></g>
  </g>
- <!-- near arm forward with the fan open -->
- <path m="navy" d="M-50 -480 C-70 -478 -90 -470 -110 -470 L-150 -480 L-152 -466 L-112 -456 C-90 -454 -70 -458 -52 -462Z"/>
- <path m="skin" d="M-150 -484 C-162 -486 -170 -478 -166 -470 C-162 -464 -152 -464 -148 -468Z"/>
- <g transform="translate(-170 -478) rotate(-70)">
-  <g class="fx"><circle cx="0" cy="-40" r="80" fill="url(#L-ice-g)" opacity="0.5"/></g>
-  <path m="ice" lw="2.4" opacity="0.95" d="M0 0 L-62 -92 C-40 -110 -14 -118 10 -118 C34 -116 56 -104 74 -86 Z"/>
-  <path ln="1.6" d="M0 0 L-44 -104 M0 0 L-22 -114 M0 0 L2 -118 M0 0 L26 -114 M0 0 L50 -100"/>
-  <path m="ice" lw="2" d="M-62 -92 l-8 -14 l14 4Z M-44 -104 l-4 -16 l12 8Z M-22 -114 l0 -16 l10 12Z M2 -118 l6 -14 l6 14Z M26 -114 l10 -12 l2 16Z M50 -100 l14 -8 l-4 16Z M74 -86 l16 -4 l-8 14Z"/>
-  <circle m="silver:r" lw="2" cx="0" cy="0" r="6"/>
- </g>
- <!-- rime trail from the blade -->
- <g class="fx"><path fill="#dff8ff" opacity="0.5" d="M20 -2 C80 -6 160 -4 240 4 C160 8 80 6 20 4Z"/></g>
+ <g class="fx" fill="#e6fffb"><path d="M180 -60 l3 -8 l3 8 l-3 8Z"/><path d="M120 -30 l2 -6 l2 6 l-2 6Z"/><path d="M-120 -560 l2 -5 l2 5 l-2 5Z"/></g>
 </g><!--/tq-->
 <g id="bust">
- <defs><radialGradient id="L-bustbg" cx="0.35" cy="0.3" r="0.9"><stop offset="0" stop-color="#6a86b0"/><stop offset="0.55" stop-color="#202c4c"/><stop offset="1" stop-color="#0a0e1a"/></radialGradient></defs>
+ <defs><radialGradient id="L-bustbg" cx="0.3" cy="0.25" r="0.9"><stop offset="0" stop-color="#7a9ac0"/><stop offset="0.55" stop-color="#22305a"/><stop offset="1" stop-color="#0c1020"/></radialGradient></defs>
  <rect width="320" height="320" fill="url(#L-bustbg)"/>
- <g class="fx"><circle cx="40" cy="40" r="80" fill="url(#L-ice-g)" opacity="0.35"/></g>
- <use href="#L-tqbody" transform="translate(199 1270) scale(1.95)"/>
+ <g class="fx" fill="#e6fffb" opacity="0.8"><path d="M40 60 l3 -8 l3 8 l-3 8Z"/><path d="M270 120 l2 -6 l2 6 l-2 6Z"/><path d="M250 40 l2 -5 l2 5 l-2 5Z"/></g>
+ <g transform="translate(150 1590) scale(2.5)">
+  <use href="#L-dress"/>
+  <use href="#L-head"/>
+ </g>
 </g><!--/bust-->
 <g id="relic">
  <ellipse cx="150" cy="282" rx="100" ry="12" fill="url(#gshadow)"/>
