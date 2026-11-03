@@ -392,13 +392,13 @@ func _gunslinger() -> void:
 	K.on_deal(T, 100.0, {"src": "shot"})
 	ok("venator passive: Fever heals 6% off damage", absf(P.hp - hp0 - 6.0) < 0.5, "healed %.1f" % (P.hp - hp0))
 	K.res = 0.0
-	# Burr Charge: thrown past the foe, it blasts a cone back from the ground at the lane's end, Dazing
+	# Burr Charge: thrown at a foe, it goes off on them (damage + Dazed, no cone); walls and the ground give the cone
 	fresh(T); T2.teleport(home + Vector3(12, 0, 0)); P.teleport(home); T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	tap(m, P)
 	step(m, 1.6)
-	var dazed := KitStatus.rattled(T) and K.rattles >= 1
-	ok("venator RMB: the cone blast hits and Dazes", dmg(T) >= 12.0 and dazed, "took %.0f" % dmg(T))
-	ok("venator RMB: the blast fed Fever", K.res >= 1.0, "fever %.0f" % K.res)
+	var dazed := KitStatus.rattled(T) and K.direct_hits >= 1
+	ok("venator RMB: a direct hit hurts and Dazes", dmg(T) >= 12.0 and dazed, "took %.0f" % dmg(T))
+	ok("venator RMB: the hit fed Fever", K.res >= 1.0, "fever %.0f" % K.res)
 	var base := K.outgoing(T, 10.0, {"src": "shot"})
 	ok("venator Dazed: rifle +90%", is_equal_approx(base, 19.0), "%.1f" % base)
 	# Longneedle: charge, then a piercing beam
