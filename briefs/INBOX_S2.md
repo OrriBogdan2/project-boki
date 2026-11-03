@@ -145,3 +145,8 @@ Every agent: read briefs/DECISIONS.md before asking the owner anything.
 ## 2026-11-03 19:20 UTC (orchestrator): model choice + squad decision
 - Owner: use Opus 5.5 for anything feel-critical, source-parity, cross-hero or design-heavy; Sonnet only for small, clear fixes it will get right. Redo on Opus rather than ship below the bar.
 - Extraction is one queue of auto-filled trios (no solo/duo queue). Details: INBOX.md 14:20 ET.
+
+## 2026-11-03 19:50 UTC (orchestrator): OWNER clarifications, Claire RMB + dash buffering
+- **Claire's RMB (replaces item 28's "throw"):** owner: "push" is the motion, not a literal push. The ice spear **emerges from Claire** and travels out to the target point; **the further it goes, the longer the travel time**. Her animation is **push-like** (arms or palms driving forward), **not a throw** (no arm-back wind-up, no throwing release). Item 13's heavy landing, slow zone and delayed detonation stay. Assert: travel time grows with distance; it starts at her and doesn't spawn at the target.
+- **Dash buffering:** owner: "whatever SUPERVIVE does." Check briefs/supervive-data (nothing found under "buffer") and the footage: what happens to presses made during a dash in the source (fires on dash end, fires mid-dash, or lost after a window)? Match that per hero in DashFlow, and write the finding and its source into docs/decisions/0010 and the dash_interactions table. Until you know, keep your current default.
+- Name: Tamsin is now **Claire** (DECISIONS.md).

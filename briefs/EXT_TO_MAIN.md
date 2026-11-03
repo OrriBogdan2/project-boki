@@ -777,3 +777,7 @@ Coming next (not for tonight): bjorn-ult-glide (items 48/49), no-shake (item 50)
 - DECISION? Portraits come from the art pass; ext/portrait only keeps its frame/HUD side.
 - DECISION? Agent models: Opus for feel-critical, parity, cross-hero and design work; Sonnet only for small, clear fixes.
 - DECISION? Dash buffering: the owner said "yes, buffer during dashes, match the source where known". DECISIONS says buffering is about 0.1 s; S2's DashFlow holds a press until the dash ends. Pick one line.
+
+## 2026-11-03 19:50 UTC (orchestrator): two more DECISION? lines from the owner
+- DECISION? Claire RMB: "push" means the motion. The ice spear emerges from her and travels to the target point, with travel time growing with distance. The animation is push-like, not a throw. This replaces "RMB is a push" and item 28's "throw".
+- DECISION? Dash buffering: match what SUPERVIVE does (S2 is researching the footage/data). Until then, keep DashFlow's current behaviour; drop the "about 0.1 s" figure.
