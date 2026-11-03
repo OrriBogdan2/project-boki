@@ -1,5 +1,5 @@
 {
-	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash().",
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
 	"dash": {
 		"ground": {
 			"lmb": {
@@ -61,11 +61,19 @@
 		},
 		"x": {
 			"mode": "buffer",
-			"source": "Void is held in the cast for Black Hole's 1.0 s telegraph (footage f23-f33) and acts freely once it opens (f50, shooting); the owner (18:20) keeps that ~1 s lock. Shift during the dome is refused with the deny cue, and one pressed in its last 0.15 s goes the step the well opens and frees her; after that Swap goes at once."
+			"source": "Void is held in the cast for Black Hole's 1.0 s telegraph (footage f23-f33) and acts freely once it opens (f50, shooting); the owner (18:20) keeps that ~1 s lock. Shift during the dome is held (never lost) and goes the step the well opens and frees her; after that Swap goes at once.",
+			"reason": "owner 18:20 (replacing item 16): Nightwell locks her in the cast for the 1.0 s dome only; once it opens Shift goes at once"
 		},
 		"q": {
 			"mode": "fire",
 			"source": "Gloves are instant items; Swap goes at once."
+		}
+	},
+	"into_jump": {
+		"x": {
+			"mode": "lock",
+			"reason": "owner 18:20 (replacing item 16): Nightwell locks her in the cast for the 1.0 s dome only; once it opens she jumps at once",
+			"source": "Footage (ult f23-f33): Void is held in the cast for Black Hole's 1.0 s telegraph, then acts freely (f50). Ours: no jump during the dome (Hunter.do_jump refuses while ArchKit.cast_locked()); a jump after it opens goes at once."
 		}
 	}
 }
