@@ -210,7 +210,39 @@ func _sync() -> void:
 	var rest := PerkOrbs.list(b).filter(func(q): return q["fan"] == fanned[0]["fan"])
 	ok("the rest of the fan stays for the player there", rest.size() == 2 and rest.all(func(q): return PerkOrbs.can_take(b, b.player, q)))
 	ok("but the hunter who took one can't take another there", rest.all(func(q): return PerkOrbs.took_from_fan(b, bot.nid, q)))
-	ok("Net is at 0.16.0 or later", Net.VERSION.naturalnocasecmp_to("0.16.0") >= 0, Net.VERSION)
+	ok("Net is at 0.18.0 or later", Net.VERSION.naturalnocasecmp_to("0.18.0") >= 0, Net.VERSION)
+	# a late joiner: the host sends every live orb again when the player count grows
+	var host_was := Net.host
+	var me_was := Net.me
+	var peers_was := Net.peers.duplicate()
+	Net.me = "host"
+	Net.host = "host"
+	Net.peers = {"host": {}}
+	a.net_on = true
+	PerkOrbs.update(a, 0.0)
+	Net.out_events.clear()
+	PerkOrbs.update(a, 0.0)
+	ok("with no new player nothing is re-sent", Net.out_events.is_empty())
+	Net.peers["late"] = {}
+	PerkOrbs.update(a, 0.0)
+	var joined: Array = Net.out_events.duplicate()
+	var all_odrop: bool = joined.all(func(e): return e[0] == "odrop")
+	ok("a new player makes the host re-send the live orbs", joined.size() == 3 and all_odrop, str(joined.size()))
+	var c := await _start("gunslinger", 13, 2)
+	for e in joined:
+		c._net_ev(JSON.parse_string(JSON.stringify(e)), "host")
+	var seen: Array = PerkOrbs.list(c).map(func(q): return q["id"])
+	var live: Array = PerkOrbs.list(a).map(func(o): return o["id"])
+	seen.sort()
+	live.sort()
+	ok("the late joiner sees the orbs already on the ground", seen.size() == 3 and seen == live)
+	Net.out_events.clear()
+	PerkOrbs.update(a, 0.0)
+	ok("and it is only once", Net.out_events.is_empty())
+	Net.host = host_was
+	Net.peers = peers_was
+	Net.me = me_was
+	c.queue_free()
 	a.net_on = false
 	Net.out_events.clear()
 	a.queue_free()
@@ -253,8 +285,10 @@ func _paths() -> void:
 				var note2: Dictionary = m.hud.lvl_note
 				if not note2.is_empty() and int(note2["lvl"]) == lvl: pop_ok = false      # odd levels: no banner, only the badge flash
 				if m.hud.lvl_pop <= 0.0: pop_ok = false
+				var toast_text: String = m.hud.toasts[-1]["text"] if not m.hud.toasts.is_empty() else ""
+				if not toast_text.contains("+1 skill point"): pop_ok = false
 		ok("%s: levels 2, 4, 6, 8, 10 each apply their path step, odd levels none" % arch, odd_ok and got == steps, "%s vs %s" % [str(got), str(steps)])
-		ok("%s: the level-up pop names what improved on even levels; odd levels only flash the badge" % arch, pop_ok)
+		ok("%s: the level-up pop names what improved on even levels; odd levels toast the skill point" % arch, pop_ok)
 		ok("%s: each level adds 6%% health and 5%% ability power (2-6), half that at 7-10" % arch, grow_ok, grow_info)
 		ok("%s: by level 10 that is +42%% health and +35%% ability power" % arch, is_equal_approx(P.max_hp - P.get_meta("growth_hp", 0.0), P.max_hp - base_hp * 0.42) and is_equal_approx(LevelGrowth.ap(P), 1.35), "ap %.3f" % LevelGrowth.ap(P))
 		ok("%s: the signature weapon stays and is stronger or faster" % arch, P.wid == Arch.signature(String(arch)) and (float(P.wpn["dmg"]) > d0 or steps.has("quickfeed") or steps.has("longreach")))

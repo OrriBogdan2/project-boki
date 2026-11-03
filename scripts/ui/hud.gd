@@ -1308,6 +1308,8 @@ func level_up(lv: int, info := {}) -> void:
 	if lv % 2 == 0:      # only even levels, where the weapon takes its step, get the banner and the gold wash
 		LevelPop.start(self, lv, info)
 		flash(Color("ffd27a"), 0.16)
+	else:
+		toast("LEVEL %d  ·  +1 skill point" % lv, Color("ffd27a"))
 
 func _level_badge(pr: Rect2, p: Hunter) -> void:
 	var gold := Color("ffd27a")

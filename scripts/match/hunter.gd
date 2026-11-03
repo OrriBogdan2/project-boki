@@ -3017,8 +3017,8 @@ func level_slot(slot: String) -> bool:
 func _bot_spend() -> void:
 	var order := ["sec", "dash", "kin", "gear", "sec", "kin", "dash", "gear", "sec", "kin", "dash", "gear"]
 	if ak:
-		# the archetype's recommended order (ARCHETYPES §6), which skips the R until it opens
-		order = (ak.d.get("order", []) as Array).filter(func(x): return x != "ult") + ["gear", "gear", "kin", "dash", "sec"]
+		# the archetype's recommended order (ARCHETYPES §6); the R is not ranked with points
+		order = (ak.d.get("order", []) as Array) + ["gear", "gear", "kin", "dash", "sec"]
 	while skill_pts > 0:
 		if can_level("ult"):
 			level_slot("ult"); continue

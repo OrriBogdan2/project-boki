@@ -21,7 +21,7 @@ static func rules() -> Dictionary:
 		_rules = d if d is Dictionary else {}
 	return _rules
 
-## The match's orb state, kept on the match itself: {list, fan (fan id -> {nid: true}), n, rng, icons}.
+## The match's orb state, kept on the match itself: {list, fan (fan id -> {nid: true}), n, rng, icons, peers (count)}.
 static func st(m) -> Dictionary:
 	if not m.has_meta("perk_orbs"):
 		var r := RandomNumberGenerator.new()
@@ -135,8 +135,22 @@ static func spawn(m, perk: String, at: Vector3, id := "", fan := "", send := tru
 	var o := {"id": id, "perk": perk, "pos": at, "fan": fan, "node": node, "ph": float(at.x) * 1.7 + float(at.z), "faded": false}
 	(s["list"] as Array).append(o)
 	if m.net_on and send:
-		m.net_event(["odrop", id, perk, fan, m._r(at.x), m._r(at.y), m._r(at.z)])
+		_announce(m, o)
 	return o
+
+static func _announce(m, o: Dictionary) -> void:
+	var at: Vector3 = o["pos"]
+	m.net_event(["odrop", o["id"], o["perk"], o["fan"], m._r(at.x), m._r(at.y), m._r(at.z)])
+
+## When a player joins, the host re-sends every live orb so the late joiner sees them.
+static func _greet_joiners(m, s: Dictionary) -> void:
+	if not m.net_on or not Net.is_host():
+		return
+	var count: int = Net.peers.size()
+	if count > int(s.get("peers", count)):
+		for o in s["list"]:
+			_announce(m, o)
+	s["peers"] = count
 
 ## The look: a glowing core with a ring, motes, the perk's icon and its name floating above, all in its colour.
 static func _build(m, perk: String) -> Node3D:
@@ -253,6 +267,7 @@ static func grant(h, perk: String) -> bool:
 ## Bob and spin the orbs, fade a fan you've taken from, and let hunters walk into them.
 static func update(m, dt: float) -> void:
 	var s := st(m)
+	_greet_joiners(m, s)
 	var orbs: Array = s["list"]
 	if orbs.is_empty():
 		return
