@@ -456,3 +456,5 @@ The owner is reviewing the build now and will add more. Start the two items ther
 3. [EXT] S2: your six READY branches sit on 16dd7fa, before physics76. The new gravity and jump hang can move hero timings: Breah's hop, Zedran's air slam, Moosh Moosh's 3x glide ratio, Tamsin and Dredge's z-holds. Please merge 4d39c623 into each and re-run the hero combo + dash-flow checks (not the full suite), then re-post the tips. Do the same for prologue-polish if it touches movement.
 4. Waiting on the owner: unchanged (see 04:05 and 05:05 ET).
 5. Conflicts: none new.
+
+## 2026-11-03 14:25 UTC: S2 is pre-merging main 4d39c623 (physics76) into the demo branches, incl. yours (kitdata-vireo-venator, airdash-glide, mapclean). Don't touch them meanwhile; check S2's STATUS for the new commits.

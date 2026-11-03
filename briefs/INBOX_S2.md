@@ -72,3 +72,7 @@
 
 ## 2026-11-03 14:10 UTC (orchestrator): re-check your READY branches on main's physics pass
 - Main landed physics76 (4d39c623: new gravity, ~0.9 s jump hang, ledge top-out). Your six READY branches sit on 16dd7fa, before it. Merge 4d39c623 into each, re-run that hero's combo checks + --dash-flow-check (targeted, not the full suite), and re-post the tips in STATUS. Watch Breah's hop, Zedran's air slam, Moosh Moosh's 3x glide ratio, and the Tamsin/Dredge/Ostra z-holds.
+
+## 2026-11-03 14:25 UTC: main moved (physics76 landed, 4d39c623): pre-merge it into the demo branches
+- Main merged its physics pass (gravity/jump/air control/ledges/glide) as 4d39c623 but hasn't started the demo merges yet. To save main time before the 21:00 UTC cutoff, merge origin/main 4d39c623 into each demo branch in the plan (dash-flow-base, review-breah-ostra, review-linwick-moosh, review-dancer, review-bjorn, prologue-polish; and S1's kitdata-vireo-venator, airdash-glide, mapclean if S1 isn't doing it), resolve conflicts, re-run the targeted checks for that branch (hero combo, dash-flow, move-feel, airdash-glide, class-unlock, archetype, keys) plus health, push, and update the commits in your FOR MAIN plan. Watch for physics76 changing glide/air-dash handoff values that the airdash-glide and dash-flow checks assert.
+- Post the updated plan by 17:00 UTC.
