@@ -198,7 +198,7 @@ islands = [
          rocks=rocks((188, 184, 189, 185)),
          landings=[[180, 182], [196, 188], [186, 200]],
          chests=[[192, 172]],
-         camps=[[178, 194, "light"]], breakables=[[200, 184, "barrel"], [200, 185, "crate"]],
+         camps=[[178, 194, "light"]], breakables=[[200, 184, "keg"], [200, 185, "crate"]],
          wardens=[[188, 176]]),
     dict(id="saltmere", name="Saltmere", role="landing", region=8, biome="bloom", danger=0, poi=[24, 184], noise=0.08,
          shapes=[poly([(14, 170), (30, 164), (44, 172), (46, 190), (34, 204), (16, 202), (8, 186)], 0)],
