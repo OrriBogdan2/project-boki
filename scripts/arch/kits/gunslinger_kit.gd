@@ -47,6 +47,7 @@ var last_shot := 0
 var aim_marks := 0             # tests: foes marked inside the held lane
 var echo_t := 0.0
 var refill_part := 0.0         # rounds the resting drum has part-refilled
+var round_at := -9.0           # match time of his last rifle round (the firing brackets)
 var grenade: Node3D = null     # the Burr Charge held low in his left hand while RMB is held
 var ult: GunslingerUlt         # Cinderfall, his ultimate on X
 
@@ -195,6 +196,7 @@ func _tick_lmb() -> void:
 	if h.shot_n == last_shot:
 		return
 	last_shot = h.shot_n
+	round_at = m.time
 	var shots: Array = m.get("shots")
 	for i in range(shots.size() - 1, -1, -1):
 		var sd: Dictionary = shots[i]
@@ -208,7 +210,7 @@ func _tick_lmb() -> void:
 ## While the rifle fires, two thin arcs bracket him left and right (your screen only; the footage's firing
 ## brackets), gone a beat after the trigger rests.
 func _tick_brackets() -> void:
-	if not _rifle_in_hand() or h.idle_fire > float(h.wpn["rate"]) + 0.1 or busy():
+	if not _rifle_in_hand() or m.time - round_at > float(h.wpn["rate"]) + 0.1 or busy():
 		return
 	var d := h.aim_dir()
 	for side in [-1.0, 1.0]:
