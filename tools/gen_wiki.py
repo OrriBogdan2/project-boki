@@ -277,7 +277,7 @@ def gen_classes():
         if c.get("lmb"): rows.append(["LMB", c["lmb"]])
         rows += [["RMB: " + d["rmb"]["name"], c.get("rmb", "")], ["E: " + d["e"]["name"], c.get("e", "")]] + ([["R: " + d["r"]["name"], c.get("r", "")]] if "r" in d else [])
         if "x" in d:
-            rows.append(["X: " + d["x"]["name"], c.get("x", "")])
+            rows.append(["Hunter ultimate: " + d["x"]["name"], c.get("x", "")])
         for w, t in c.get("weapons", {}).items():
             rows.append(["Weapon: " + wname(w), t])
         b.append(table(["Slot", "Card text"], rows))
@@ -301,7 +301,7 @@ def gen_classes():
             b.append("**%s (%s, %s cooldown).** %s\n" % (x["name"], label, secs(x.get("cooldown")), x.get("desc", "")))
         if "x" in d:
             xu = d["x"]
-            b.append("**%s (X, hero ultimate from level %s, %s cooldown).** %s\n" % (
+            b.append("**%s (hunter ultimate, from level %s, %s cooldown).** %s\n" % (
                 xu["name"], num(xu.get("unlock", 6)), secs(xu.get("cooldown")), xu.get("desc", "")))
         b.append("### Ranks\n\nRank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.\n")
         rk = []

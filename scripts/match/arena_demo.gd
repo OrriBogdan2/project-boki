@@ -291,7 +291,7 @@ static func tick(A: Arena, dt: float) -> void:
 			at_t = DJDemo.still(A, P, D, w.substr(3), t, dt)      # Dancer and Zedran stills (scripts/arch/dj_demo.gd)
 			if m.hud: m.hud.toasts.clear()
 		_ when w.begins_with("pair_"):
-			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Dolm and Ostra (scripts/arch/pair_demo.gd)
+			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Breah and Ostra (scripts/arch/pair_demo.gd)
 		_ when w.begins_with("anim_"):
 			var mv := w.substr(5)
 			var spec: Array = ANIM_DEMO.get(mv,

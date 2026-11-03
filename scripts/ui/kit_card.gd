@@ -16,6 +16,8 @@ const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": 
 ## The key cap on a slot's tile: the Merge tile unless the class ultimates are on, the hunter's own
 ## ultimate on its X tile.
 static func _cap(slot: String) -> String:
+	if slot == "x":
+		return Settings.key_cap("hunter_ult")
 	if slot == "r":
 		return Settings.key_cap("hunter_ult" if KinCommand.class_ults() else "ultimate")
 	if slot == "x":
@@ -36,8 +38,8 @@ const PREVIEW := {
 	"ashwick": {"dash": "dash", "passive": "meter", "rmb": "projectile", "e": "zone", "x": "steer"},
 	"tender": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "zone"},
 	"rimewright": {"dash": "charge", "passive": "marks", "rmb": "projectile", "e": "shield"},
-	"dolm": {"dash": "dash2", "passive": "meter", "rmb": "heavy", "e": "zone"},
-	"ostra": {"dash": "blink", "passive": "meter", "rmb": "projectile", "e": "zone"},
+	"dolm": {"dash": "dash2", "passive": "meter", "rmb": "heavy", "e": "zone", "x": "fissure"},
+	"ostra": {"dash": "blink", "passive": "meter", "rmb": "projectile", "e": "zone", "x": "zone"},
 }
 
 var arch := ""

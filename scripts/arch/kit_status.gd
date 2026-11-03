@@ -6,7 +6,7 @@ extends RefCounted
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
 ##   rat  Dazed (Venator's Burr Charge; "Rattled" in code): slowed, and his rifle and Longneedle hit
 ##        harder; stars over the head
-##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a DIZZY word and a teal ring
+##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a SLOWED word and a teal ring
 ## The game that owns the body runs the rules; the caster's game sends the Net event
 ## ["kst", nid, kind, seconds, k] for a remote body (Net.VERSION 0.7.0), every game shows it.
 
@@ -113,7 +113,7 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 			m.fx.word(e.pos + Vector3(0, 3.3, 0), "DAZED", RATTLE_COL, false)     # clear above a STUNNED (2.2)
 			m.fx.ring(e.pos, 1.1, RATTLE_COL, 0.25)
 		"dsr":
-			m.fx.word(e.pos + Vector3(0, 2.1, 0), "DIZZY", Color("7fe0d0"), false)
+			m.fx.word(e.pos + Vector3(0, 2.1, 0), "SLOWED", Color("b8a8ff"), false)
 			m.fx.ring(e.pos, 1.0, Color("7fe0d0"), 0.3)
 		"vul":
 			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)

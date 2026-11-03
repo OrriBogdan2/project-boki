@@ -71,8 +71,8 @@ const ARCH_STANCE := {
 		"lean": 0.24, "knee": 0.32, "width": 0.1, "bounce": 1.1, "breath": 2.9, "arm": 1.3, "cadence": 1.25},
 	"rimewright": {
 		"knee": 0.22, "lean": 0.14, "width": 0.1, "bounce": 0.4, "breath": 2.4, "arm": 1.25, "cadence": 1.4},
-	"dolm": {"lean": 0.08, "width": 0.2, "knee": 0.3, "breath": 1.6, "arm": 0.8},
-	"ostra": {"lean": -0.05, "width": 0.07, "knee": 0.1, "breath": 1.7, "arm": 0.8},
+	"dolm": {"lean": 0.1, "width": 0.2, "knee": 0.3, "bounce": 0.0, "breath": 1.6, "arm": 0.7},
+	"ostra": {"lean": 0.0, "width": 0.05, "knee": 0.05, "bounce": 0.0, "breath": 1.4, "arm": 0.8},
 	# cadence scales the step rate, stride the step length: Linwick scurries in short quick steps, Dredge
 	# plants wide, slower, longer ones (hero-ref "Body, scale and movement feel")
 	"ashwick": {
@@ -107,6 +107,11 @@ const HOLDS := {
 	"palm": {
 		"pos": Vector3(0.14, -0.25, -0.1), "low": Vector2.ZERO, "gr": Vector3.ZERO, "gl": Vector3.INF,
 		"kick": 0.0, "push": 0.0, "shake": 0.0},
+	# a gauntlet on each fist (Breah): carried like a gun, but it rides the hand wherever a move sends it
+	"fist": {
+		"pos": Vector3(0.14, -0.2, -0.26), "low": Vector2(-0.35, 0.2), "gr": Vector3(0, -0.02, 0.0), "gl": Vector3.INF,
+		"kick": 0.1, "push": 0.05, "shake": 0.0, "fist": true
+	},
 }
 
 ## Melee swings per combo step: the blade's yaw (left +), pitch (up +) and roll around the swing
@@ -372,6 +377,7 @@ func _setup_weapon(w: String) -> void:
 		"coilcaster": hold = "finger"
 		"tower_shield": hold = "sword"
 		"lantern_crook": hold = "palm"
+		"rubble_fists": hold = "fist"
 		_: hold = w if HOLDS.has(w) else "_gun"
 	hd = HOLDS[hold]
 	mag = null
@@ -387,6 +393,10 @@ func _setup_weapon(w: String) -> void:
 			mag = ch; mag_base = mag.position
 		elif sentinel == 0 and ch.name != "Muzzle" and not ch.is_queued_for_deletion():
 			sentinel = ch.get_instance_id()
+	if hold == "fist" and aim:
+		offhand = gun.duplicate()      # the second gauntlet, on the left fist
+		offhand.name = "Offhand"
+		aim.add_child(offhand)
 	if hold == "twin" and aim:
 		offhand = Node3D.new(); offhand.name = "Offhand"
 		aim.add_child(offhand)
@@ -669,7 +679,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var ph0 := ph
 	if moving:
 		ph += dt * spd * float(STRIDE.get(arch, 2.15 if cls != "heavy" else 1.95)) * float(st.get("cadence", 1.0))
-		if int(floor(ph / PI)) != int(floor(ph0 / PI)):
+		if int(floor(ph / PI)) != int(floor(ph0 / PI)) and KMovesStone.gait(arch) > 0.5:
 			stepped = true
 	# strafing and backpedalling: the legs turn toward where you're going; backwards they swing the other way
 	var want_yaw := 0.0
@@ -715,13 +725,14 @@ func update(dt: float, s: Dictionary) -> void:
 	var phl := ph
 	var phr := ph + PI
 	var stride := float(st.get("stride", 0.62)) + 0.28 * minf(run_k, 1.3)
-	var hl := sin(phl) * stride * r1 * back
-	var hr := sin(phr) * stride * r1 * back
+	var r_leg := r1 * KMovesStone.gait(arch)      # how much the legs walk (a hoverer's barely do)
+	var hl := sin(phl) * stride * r_leg * back
+	var hr := sin(phr) * stride * r_leg * back
 	# the knee folds most while the leg swings through, a little at foot strike
 	var sw_l := maxf(0.0, cos(phl - 0.35 * back))
 	var sw_r := maxf(0.0, cos(phr - 0.35 * back))
-	var kl := -(knee0 * 0.6 + (0.25 + 1.05 * minf(run_k, 1.3)) * pow(sw_l, 1.3) + 0.18 * maxf(0.0, -sin(phl)) ) * r1
-	var kr := -(knee0 * 0.6 + (0.25 + 1.05 * minf(run_k, 1.3)) * pow(sw_r, 1.3) + 0.18 * maxf(0.0, -sin(phr)) ) * r1
+	var kl := -(knee0 * 0.6 + (0.25 + 1.05 * minf(run_k, 1.3)) * pow(sw_l, 1.3) + 0.18 * maxf(0.0, -sin(phl)) ) * r_leg
+	var kr := -(knee0 * 0.6 + (0.25 + 1.05 * minf(run_k, 1.3)) * pow(sw_r, 1.3) + 0.18 * maxf(0.0, -sin(phr)) ) * r_leg
 	# standing: knees soft, the free leg bent and turned out, the weight leg straighter
 	var idle_w := 1.0 - r1
 	var free_l := clampf(wk, 0.0, 1.0)       # the left leg is the free one when the weight is on the right
@@ -1007,6 +1018,9 @@ func update(dt: float, s: Dictionary) -> void:
 		off.y += absf(sin(ph)) * 0.07 * r1         # a small scurry: one quick lift per step
 	elif arch == "mage":
 		off.y += still * (0.012 + sin(t * 1.4 + seed_ph) * 0.008)       # light on its feet, half floating
+	elif arch == "dolm":
+		off.y -= absf(cos(ph)) * 0.03 * r1         # wide, grounded stomps
+	off.y += KMovesStone.hover(arch, t)
 	off.y += down_k * 0.15 + base_k * (0.04 + sin(t * 2.0) * 0.015) * smoothstep(0.0, 0.3, base_p)
 	off.y -= revive_k * 0.02
 	if not km.is_empty():
@@ -1068,68 +1082,6 @@ func update(dt: float, s: Dictionary) -> void:
 ## A move with "hold": true stays on its last key until another replaces it; with
 ## "loop": t as well it cycles from t to the last key instead (a recoil wobble, hand over hand).
 const KMOVES := {
-	# ---------------------------------------------------------------- Dolm and Ostra
-	# Boulder: both hands gathered at the chest, then thrown from the hip with the whole back
-	"dolm_lmb": {"keys": [
-		[0.00, {}],
-		[0.10, {"p": 0.22, "legs": [0.30, -0.60, 0.26, -0.55], "lw": 1.0, "fl": Vector3(-0.08, 0.22, -0.2), "hw": 1.0, "fr": Vector3(0.08, 0.22, -0.2), "rw": 1.0}],
-		[0.20, {"p": -0.45, "sq": 0.1, "legs": [0.44, -0.82, 0.36, -0.72], "lw": 1.0, "fl": Vector3(-0.1, 0.12, -0.62), "hw": 1.0, "fr": Vector3(0.1, 0.12, -0.62), "rw": 1.0}],
-		[0.45, {"p": -0.12, "fl": Vector3(-0.1, 0.0, -0.3), "hw": 0.5, "fr": Vector3(0.1, 0.0, -0.3), "rw": 0.5}],
-		[0.70, {}]]},
-	# Punch held: sunk low, the fist cocked far back, the free forearm up as a guard
-	"dolm_wind": {"hold": true, "keys": [
-		[0.00, {}],
-		[0.18, {"p": 0.2, "y": 0.6, "sq": 0.18, "legs": [0.5, -1.0, 0.42, -0.9], "lw": 1.0, "fl": Vector3(-0.05, 0.3, -0.38), "hw": 1.0, "fr": Vector3(0.34, 0.14, 0.5), "rw": 1.0}]]},
-	# Punch let go: the hips and shoulders unwind into a straight drive
-	"dolm_punch": {"keys": [
-		[0.00, {"p": 0.2, "y": 0.6, "sq": 0.18, "legs": [0.5, -1.0, 0.42, -0.9], "lw": 1.0, "fl": Vector3(-0.05, 0.3, -0.38), "hw": 1.0, "fr": Vector3(0.34, 0.14, 0.5), "rw": 1.0}],
-		[0.07, {"p": -0.6, "y": -0.55, "sq": 0.1, "legs": [0.62, -1.12, 0.5, -0.98], "lw": 1.0, "fl": Vector3(-0.2, 0.1, -0.15), "hw": 1.0, "fr": Vector3(0.0, 0.08, -0.82), "rw": 1.0}],
-		[0.22, {"p": -0.3, "y": -0.2, "fr": Vector3(0.0, 0.0, -0.5), "rw": 0.7, "fl": Vector3(-0.2, 0.1, -0.15), "hw": 0.5}],
-		[0.55, {}]]},
-	# Quakefall held: both fists lifted overhead, the back arched
-	"dolm_rmb_wind": {"hold": true, "keys": [
-		[0.00, {}],
-		[0.2, {"p": 0.42, "lift": 0.1, "legs": [0.2, -0.38, 0.16, -0.3], "lw": 1.0, "fl": Vector3(-0.16, 1.0, 0.1), "hw": 1.0, "fr": Vector3(0.16, 1.0, 0.1), "rw": 1.0}]]},
-	# Quakefall released: both fists driven into the ground, knees wide, the whole body folds over them
-	"dolm_rmb": {"keys": [
-		[0.00, {"p": 0.42, "lift": 0.1, "fl": Vector3(-0.16, 1.0, 0.1), "hw": 1.0, "fr": Vector3(0.16, 1.0, 0.1), "rw": 1.0}],
-		[0.14, {"p": -0.7, "lift": -0.08, "sq": 0.34, "legs": [0.7, -1.3, 0.6, -1.2], "lw": 1.0, "fl": Vector3(-0.16, -0.62, -0.5), "hw": 1.0, "fr": Vector3(0.16, -0.62, -0.5), "rw": 1.0}],
-		[0.40, {"p": -0.35, "sq": 0.14, "legs": [0.4, -0.8, 0.34, -0.7], "lw": 1.0, "fl": Vector3(-0.16, -0.3, -0.35), "hw": 0.7, "fr": Vector3(0.16, -0.3, -0.35), "rw": 0.7}],
-		[0.85, {}]]},
-	# Rubble Rush: shoulder first, fists forward behind the boulder, a hard lean
-	"dolm_dash": {"keys": [
-		[0.00, {}],
-		[0.08, {"p": -0.7, "y": 0.35, "legs": [0.7, -1.2, 0.5, -0.9], "lw": 1.0, "fl": Vector3(-0.1, -0.05, -0.55), "hw": 1.0, "fr": Vector3(0.1, -0.05, -0.55), "rw": 1.0}],
-		[0.24, {"p": -0.5, "y": 0.2, "legs": [0.4, -0.7, 0.6, -1.0], "lw": 1.0, "fl": Vector3(-0.1, 0.0, -0.8), "hw": 1.0, "fr": Vector3(0.1, 0.0, -0.8), "rw": 1.0}],
-		[0.60, {}]]},
-	# Stone Row: one stomp, then both palms pressed to the ground to lift the stone
-	"dolm_e": {"keys": [
-		[0.00, {}],
-		[0.12, {"p": 0.12, "legs": [-0.9, 0.9, 0.2, -0.3], "lw": 1.0, "fl": Vector3(-0.2, 0.3, -0.1), "hw": 1.0, "fr": Vector3(0.2, 0.3, -0.1), "rw": 1.0}],
-		[0.24, {"p": -0.6, "sq": 0.3, "legs": [0.7, -1.2, 0.6, -1.1], "lw": 1.0, "fl": Vector3(-0.2, -0.75, -0.42), "hw": 1.0, "fr": Vector3(0.2, -0.75, -0.42), "rw": 1.0}],
-		[0.50, {"p": -0.5, "sq": 0.24, "fl": Vector3(-0.2, -0.7, -0.45), "hw": 1.0, "fr": Vector3(0.2, -0.7, -0.45), "rw": 1.0}],
-		[0.95, {}]]},
-	# Lantern Trade: the lantern lobbed underhand, the body rising a little as she lets it go
-	"ostra_dash": {"keys": [
-		[0.00, {}],
-		[0.12, {"p": -0.2, "sq": 0.14, "legs": [0.3, -0.6, 0.24, -0.5], "lw": 1.0, "fr": Vector3(0.22, -0.4, 0.1), "rw": 1.0}],
-		[0.26, {"p": 0.3, "lift": 0.12, "fr": Vector3(0.12, 0.7, -0.5), "rw": 1.0, "fl": Vector3(-0.3, 0.1, -0.1), "hw": 0.8}],
-		[0.50, {"p": 0.12, "lift": 0.08, "fr": Vector3(0.1, 0.3, -0.3), "rw": 0.5}],
-		[0.95, {}]]},
-	# Shard Fan: both hands drawn in to the chest, then thrown apart and forward in a flat push
-	"ostra_rmb": {"keys": [
-		[0.00, {}],
-		[0.10, {"p": 0.3, "legs": [0.16, -0.3, 0.14, -0.28], "lw": 1.0, "fl": Vector3(-0.04, 0.22, -0.1), "hw": 1.0, "fr": Vector3(0.04, 0.22, -0.1), "rw": 1.0}],
-		[0.20, {"p": -0.45, "sq": 0.1, "legs": [0.34, -0.65, 0.3, -0.58], "lw": 1.0, "fl": Vector3(-0.3, 0.14, -0.62), "hw": 1.0, "fr": Vector3(0.3, 0.14, -0.62), "rw": 1.0}],
-		[0.45, {"p": -0.1, "fl": Vector3(-0.2, 0.1, -0.3), "hw": 0.5, "fr": Vector3(0.2, 0.1, -0.3), "rw": 0.5}],
-		[0.80, {}]]},
-	# Brimseed: a kneeling plant, one palm to the ground, then rising with the palm open
-	"ostra_e": {"keys": [
-		[0.00, {}],
-		[0.18, {"p": -0.55, "sq": 0.32, "legs": [0.9, -1.5, 0.3, -0.9], "lw": 1.0, "fr": Vector3(0.1, -0.78, -0.4), "rw": 1.0, "fl": Vector3(-0.3, 0.0, -0.1), "hw": 0.6}],
-		[0.40, {"p": -0.45, "sq": 0.28, "fr": Vector3(0.1, -0.78, -0.4), "rw": 1.0}],
-		[0.70, {"p": 0.15, "lift": 0.06, "fr": Vector3(0.2, 0.3, -0.35), "rw": 1.0}],
-		[1.10, {}]]},
 }
 ## Stride rate (walk phase per metre) of heroes whose step differs from their class: quick, short steps
 ## (their hero sheets measure ~2.3-2.5 strides a second at a run).
@@ -1142,7 +1094,7 @@ var km_prev_t := 99.0
 
 ## Samples the kit move at time `tt`: each channel eased between the keys around it.
 static func km_sample(id: String, tt: float) -> Dictionary:
-	var kit_mv: Dictionary = KMovesVV.MOVES.get(id, MergeMoves.MOVES.get(id, KMovesCare.MOVES.get(id, {})))
+	var kit_mv: Dictionary = KMovesVV.MOVES.get(id, KMovesStone.MOVES.get(id, MergeMoves.MOVES.get(id, KMovesCare.MOVES.get(id, {}))))
 	var mv: Dictionary = KMOVES.get(id, KMovesPair.MOVES.get(id, kit_mv))
 	if mv.is_empty():      # Pin and Bjorn, then Dancer and Zedran (kmoves_pin_bjorn.gd, kmoves_dj.gd)
 		mv = KMovesPinBjorn.MOVES.get(id, KMovesDJ.MOVES.get(id, {}))
@@ -1476,6 +1428,9 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	fl += Vector3(0, breath * 0.004 * still, 0)
 	if arch == "mage":
 		fl = fl.lerp(sh_l + Vector3(-0.34, -0.12, -0.1), r1)     # her free arm held out wide as she runs
+	if hd.get("fist", false):
+		# the off fist carried low and forward, ready (a brawler, not a shooter's hanging hand)
+		fl = sh_l + Vector3(-0.1, -0.3 + 0.06 * r1, -0.2 + swing_l * 0.12 * arm_amp)
 	# dodges: arms back (phase lunge), tucked (roll), shoulder guard (charge)
 	if dash_k > 0.01:
 		match dash_kind:
@@ -1621,6 +1576,8 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	var bsh := Vector3(0, breath * 0.005 * still, 0)
 	_ik(arm_l, el_l, sh_l + bsh, tl2, pole_l)
 	_ik(arm_r, el_r, sh_r + bsh, tr2, pole_r)
+	if hd.get("fist", false):
+		_fists_to_hands(grip_r)
 	# the flask in the left hand
 	if drink_k > 0.0 and flask == null and hand_l:
 		flask = Node3D.new(); flask.name = "Flask"
@@ -1736,6 +1693,15 @@ func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
 	return [sh_l, sh_r, 0.0]
 
 ## A support hand that can't reach its grip slides back along the weapon toward the trigger hand.
+## Gauntlets are the fists: each one sits in its hand wherever the hand went (a kit move's reach, a heave
+## overhead), so a move's pose is never held back by the weapon's aim.
+func _fists_to_hands(grip: Vector3) -> void:
+	var to_aim := aim.transform.affine_inverse()
+	if gun and hand_r:
+		gun.position = to_aim * (arm_r.transform * (el_r.transform * hand_r.position)) - gun.basis * grip
+	if offhand and hand_l:
+		offhand.position = to_aim * (arm_l.transform * (el_l.transform * hand_l.position)) - offhand.basis * grip
+
 static func _reachable(sh: Vector3, want: Vector3, back_to: Vector3, reach: float) -> Vector3:
 	if sh.distance_to(want) <= reach:
 		return want
