@@ -2051,6 +2051,7 @@ func _base_check() -> void:
 	var mate := m.base_target(p)
 	if mate == null:
 		print("BCHECK FAIL no teammate"); get_tree().quit(); return
+	mate.ctrl = "idle"   # the check measures the recall landing beside the mate, not where a wandering mate strolls off to during the 3 s channel
 	for i in 30: m.step(Match.DT)
 	p.inp["move"] = Vector2.ZERO
 	p.start_base(mate)
