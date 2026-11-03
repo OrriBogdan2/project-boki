@@ -1034,7 +1034,6 @@ func _narrow(sz: Vector2) -> bool:
 ## Bottom centre: armor and health over the ability row. Bottom left: your kin. Bottom right: your
 ## weapon and what you're carrying. Left: your squad. Hits on you show which way they came from.
 const ARMOR_COL := Color("dfe9f7")      # armor kits and repairs (the armour strip itself: HudStyle / armor_col)
-const STAMINA_COL := Color("ffd66a")    # dash charges: yellow pips under the bars
 const HP_LOW := Color("ff6a5a")
 var armor_lerp := 1.0
 var ready_was := {}        # slot id -> was it ready last frame, for the "ready" flash
@@ -1045,6 +1044,8 @@ var slot_fx := {}          # slot id -> {kind: "cast"|"deny", t}: a pop when a p
 ## A press on an ability slot: "cast" pops it, "deny" (on cooldown, not ready) shakes it red; "reset" (it just came back) swells it with a ring.
 func ability_feedback(id: String, kind: String) -> void:
 	slot_fx[id] = {"kind": kind, "t": 0.0}
+	if id == "dash" and kind == "deny" and m.player:
+		plates.stam.deny(m.player)
 var hurt_dirs: Array = []  # {ang, t}
 var small_toasts: Array = []
 
@@ -1504,6 +1505,8 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 					HudStyle.strip(c, Rect2(Vector2(tx, r.position.y + 38), Vector2(tw, 3)), h.armor / h.max_armor, h.armor_col())
 				if _has_status(h):
 					_status_row(Vector2(tx + tw * 0.5, r.position.y + 52), h)
+				else:
+					plates.stam.draw(c, Rect2(Vector2(tx, r.position.y + 46), Vector2(tw * 0.6, 3)), h)
 			"WISP":
 				var left := _bleed_left(h)
 				var stp: bool = h.get_meta("stomped", false)
@@ -2129,8 +2132,6 @@ var abyss_a := 0.0
 const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
 var abyss_fx: CanvasLayer = null
 
-var dash_seen: Array = []      # per segment of the dash strip: was it full last frame (for the flash)
-var dash_flash: Array = []     # per segment: seconds left on its "it's back" flash
 
 ## A point `up` metres above a hunter's feet, following the body's lean toward the camera
 ## (CamRig.char_lean), so bars and names stay just over the head.

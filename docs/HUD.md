@@ -11,7 +11,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, armour strip, shell, resource bar |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, lock |
 | `portraits.gd` (`Portraits`) | every hunter's face, in the HUD (vitals, squad frames, ally popups) and the menus (`Portraits.Pic`, chip icons): the Warden's painted portrait from `art/portraits/<id>.jpg` (the splash, `<id>_splash.jpg`, in the bigger menu spots), cut to each frame around `content/rules/portraits.json`'s framing, with the frame and its hit, low-health, downed, dead and out states; the rendered model when a Warden has no painted art. New art: `tools/portrait_art.gd`. Check: `--portrait-check` |
-| `dash_strip.gd` | your dash charges under your own plate |
+| `stamina_bar.gd` | the dash bar: segments per charge that refill, flash, tick; overhead, bottom-left and squad frames |
 | `hudref_demo.gd` | `--hudref-demo=plates|fight` screenshot scenes |
 
 Rules of the look:
