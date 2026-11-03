@@ -4,7 +4,7 @@
 	"weight": "light",
 	"color": "#9fe0a8",
 	"body": {
-		"size": 1.04,
+		"size": 1.05,
 		"hit_r": 0.37,
 		"head": 0.72,
 		"legs": 1.62,

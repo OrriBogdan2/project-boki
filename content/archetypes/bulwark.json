@@ -4,7 +4,7 @@
 	"weight": "heavy",
 	"color": "#8fd0ff",
 	"body": {
-		"size": 1.0,
+		"size": 1.02,
 		"build": 1.18,
 		"head": 0.75,
 		"legs": 1.0,

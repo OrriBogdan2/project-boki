@@ -15,6 +15,7 @@ const WARDENS := {
 	"bulwark": {"hit_r": 0.5, "height": 1.15, "width": [1.3, 2.2], "moves": "bul_"},
 	"archer": {"hit_r": 0.37, "height": 0.98, "width": [0.7, 1.15], "moves": "arc_"},
 }
+const ANIM_SEED := 1          # one rest pose for every model measured
 const HEIGHT_TOL := 0.04       # the true height within 4% of the sheet's
 const ANCHORS := ["Rig/Legs/LegL/Knee", "Rig/Legs/LegR/Knee", "Rig/Torso/HeadPivot/Head", "Rig/Torso/Aim/Gun/Muzzle",
 	"Rig/Torso/ArmLPivot/Elbow/Hand", "Rig/Torso/ArmRPivot/Elbow/Hand", "Rig/Torso/PauldronL", "Rig/Torso/PauldronR",
@@ -52,6 +53,10 @@ func run(main: Node) -> void:
 
 func _model(id: String, look: Dictionary) -> Node3D:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", look, id)
+	# the rest pose's stance (which leg takes the weight) is seeded per node: fix the seed so every model
+	# is measured in the same pose and the size comparisons don't drift from build to build
+	m.set_meta("anim_seed", ANIM_SEED)
+	HunterAnim.rest_pose(m)
 	holder.add_child(m)
 	return m
 
