@@ -9,10 +9,17 @@ extends RefCounted
 
 const MUZZLE := 0.9                 # m in front of his chest where the slugs leave his hands
 const RECOVER := 0.3                # s he stays planted after the last wave
-const WAVE_COL := [Color("ffb85a"), Color("a07aff")]     # wave 1 brass gold, wave 2 violet
+const WAVE_COL := [Color("ff9a14"), Color("8a4dff")]     # wave 1 saturated brass, wave 2 violet
 const WAVE_CORE := [Color("fff0c0"), Color("ffe0a0")]
+const WAVE_DARK := [Color("5a2e04"), Color("2a1260")]    # each slug's dark core
 const WAVE_PITCH := [1.0, 0.82]
-const FAN_COL := Color("ffcf70")          # Dredge's brass, the anchor's colour
+## the fan on the ground: Dredge's brass, saturated so it can't read white on bright grass, and how strong
+## its fill and rim are over AimKit's defaults
+const FAN_COL := Color("f08c14")
+const FAN_ALPHA := 1.8
+## s each slug's look hangs at the fan edge fading. Like the source's orbs (f35-f38) the looks always fly the
+## whole fan, even when the slug itself stops on a foe up close, so the wave reads as a fan.
+const SLUG_HOLD := 0.35
 
 var k: DredgeKit
 var h: Hunter
@@ -94,7 +101,7 @@ func _charge_looks(kc: float) -> void:
 	var grow := 1.0 - pow(1.0 - kc, 2.0)
 	var reach := maxf(0.6, float(x["range"]) * grow)
 	AimKit.cone(h, "x_fan", {"dir": blast["dir"], "len": reach, "deg": float(x["fan_deg"]),
-		"fill": kc, "all": true, "col": FAN_COL, "col2": WAVE_COL[1], "alpha": 1.1, "hot": 0.4 * kc})
+		"fill": kc, "all": true, "col": FAN_COL, "col2": WAVE_COL[1], "alpha": FAN_ALPHA, "hot": 0.15 * kc})
 	if not k.tells_visible() or randf() > 0.5:
 		return
 	var hand_l := _hand(-1.0)
@@ -120,13 +127,15 @@ func _wave(i: int) -> void:
 	var speed := float(x["speed"])
 	var life := maxf(0.05, float(x["range"]) - MUZZLE) / speed
 	var dmg := float(x["dmg"]) * k.power("x")
+	var shown := k.tells_visible()
 	for j in n:
 		var ang := deg_to_rad(-fan * 0.5 + fan * float(j) / float(maxi(1, n - 1)))
 		var d := dir.rotated(ang)
+		if shown:
+			var edge := at + Vector3(d.x, 0, d.y) * speed * life
+			k.fx.volley(at, edge, WAVE_COL[i % 2], WAVE_DARK[i % 2], life, SLUG_HOLD)
 		var cb := func(_s: Dictionary, _at: Vector3, e: Ent, why: String) -> void: _slug_hit(i, e, why, dmg)
 		m.spawn_shot(h, at, d * speed, 0.0, life, float(x["size"]), WAVE_COL[i % 2], {"kx": cb})
-		if k.tells_visible():
-			k.fx.ride(m.shots[-1], "orb", WAVE_COL[i % 2], WAVE_CORE[i % 2], 0.9, 0.5)
 	_wave_fx(i, at, dir)
 
 func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
@@ -144,13 +153,13 @@ func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
 ## of the camera back toward him.
 func _wave_fx(i: int, at: Vector3, dir: Vector2) -> void:
 	var x := xd()
-	k.fx.sunburst(at, 1.3, WAVE_COL[i % 2], WAVE_CORE[i % 2], 0.18, true)
+	k.fx.sunburst(at, 1.9, WAVE_COL[i % 2], WAVE_CORE[i % 2], 0.3, true)
 	k.fx.crescent(
-		h.pos + Vector3(0, 0.3, 0), dir, float(x["fan_deg"]), float(x["range"]), WAVE_CORE[i % 2], WAVE_COL[i % 2],
-		0.22
+		h.pos + Vector3(0, 0.3, 0), dir, float(x["fan_deg"]), float(x["range"]), WAVE_COL[i % 2], WAVE_DARK[i % 2],
+		0.32
 	)
 	AimKit.cone(h, "x_fan", {"dir": dir, "len": float(x["range"]), "deg": float(x["fan_deg"]), "edges": true,
-		"all": true, "col": FAN_COL, "alpha": 0.8, "dur": 0.25})
+		"all": true, "col": FAN_COL, "alpha": FAN_ALPHA, "dur": 0.25})
 	m.sfx("dr_blast", h.pos, 0.0, WAVE_PITCH[i % 2])
 	Feel.shake(m, "t3", h, h.pos)
 	if h.is_local():

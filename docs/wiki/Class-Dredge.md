@@ -52,7 +52,7 @@ What the in-game kit card (K) says.
 | Dash: Barge | A short shoulder barge toward the cursor, further in the air. It works while you reel. |
 | RMB: Grapnel | Throw a rope-hook over rocks at the first foe and reel them to your feet, stunned. Strafe to swing them. |
 | E: Anchor Drop | Hop forward and drop the anchor in front of you: damage and a long stun. In the air you smash straight down. |
-| X: Brass Broadside | Ultimate (X, level 6): plant and charge a fan, then two waves of heavy brass slugs with Anti-Heal. |
+| X: Brass Broadside | Brass Broadside (level 6): plant and charge a fan, then two waves of heavy brass slugs with Anti-Heal. |
 | Weapon: Shotgun | Seven slugs in a tight fan that stop 6m out, a shot every half second. Hits from behind hurt more. |
 
 ### Abilities in full

@@ -393,7 +393,7 @@ func _tick_pull(dt: float) -> void:
 ## The rope's thickness while reeling: it swells taut on each hand-over-hand haul.
 func _rope_thick() -> float:
 	var since := fposmod(m.time - anim_at - 0.18, HAUL_T)
-	return 0.32 * (1.0 + 0.45 * (1.0 - smoothstep(0.0, 0.12, since)))
+	return 0.32 * (1.0 + 0.8 * (1.0 - smoothstep(0.0, 0.12, since)))
 
 ## Moves a body `dist` along `dir` in small steps: over rocks and props (lifted onto them), never up a cliff
 ## face (a rise past CLIFF) or through a placed wall. Returns how far it went. Over the void it just goes on.

@@ -10,7 +10,7 @@ extends Node3D
 ## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "chain",
 ##                         "pip", "spiral", "pilot", "anchor", "glow"; stop calling and they hide
 ## - rope(id, a, b)        the braided Grapnel rope, drawn through walls
-## - one-shots: sunburst, scorch, crescent, wave, dot, lava, orb, anchor_drop, embers, puff
+## - one-shots: sunburst, scorch, crescent, wave, dot, lava, orb, anchor_drop, embers, puff, volley (a Broadside slug)
 ##
 ## Each look is two passes (shaders/ld_fx.gdshaderinc): an alpha-blended body, so colour and dark rims read
 ## on bright grass, and an additive glow chained on as next_pass for the hot cores. _param sets both.
@@ -37,6 +37,12 @@ const POOL_CAP := 24           # nodes per kind at most; past it the oldest is t
 const KEEP := 0.1              # s an immediate-style look stays without a refresh
 const FLAME_CAP := 32          # hose puffs drawn at most (the kit keeps about 15)
 const HANG_T := 0.3            # s a scattergun slug hangs as a dot at its stop line
+## a Broadside slug's look (LDFx.volley): its dot (half width, m), the soft halo round it, the smear
+## behind it in flight (m long and wide)
+const VOLLEY_HEAD := 0.34
+const VOLLEY_HALO := 0.8
+const VOLLEY_SMEAR := 1.1
+const VOLLEY_WIDTH := 0.55
 const CINDER_HALO := Color("6a5aff")
 const ROPE_DARK := Color(0.42, 0.3, 0.22)    # the tarred strand of the braid (a vertex colour multiplier)
 const ANCHOR_IRON := Color("3a3f48")
@@ -353,6 +359,50 @@ func dot(at: Vector3, col: Color, scl := 0.16, dur := HANG_T) -> void:
 	n.global_position = at
 	_play(n, "dot", col, col.darkened(0.7), dur, Vector3.ONE * scl, n.material_override)
 
+## A Broadside slug's look, flown on the effect clock instead of riding its shot (the shot lives about
+## 0.2s, too short to read): a `col` orb with a `dark` core and a smear flies from `from` to `to` over `fly`,
+## then hangs there fading over `hold`, as the source's orbs do.
+func volley(from: Vector3, to: Vector3, col: Color, dark: Color, fly: float, hold: float) -> void:
+	var n := _take("volley", _build_volley)
+	for c in n.get_children():
+		var mt := (c as MeshInstance3D).material_override
+		_param(mt, "color", col)
+		_param(mt, "color2", Color(dark, 0.6) if c.name == "Trail" else dark)
+		_param(mt, "life", 0.0)
+	_param((n.get_node("Halo") as MeshInstance3D).material_override, "color2", col)
+	var e := {"node": n, "t": 0.0, "dur": fly + hold, "kind": "volley", "mat": null}
+	e.merge({"from": from, "to": to, "fly": maxf(0.01, fly), "hold": hold})
+	live.append(e)
+	_pose_volley(e, n)
+
+func _build_volley() -> Node3D:
+	var n := Node3D.new()
+	n.add_child(_rider_part("Halo", Color.WHITE, Color.WHITE, VOLLEY_HALO, 0.55))
+	var head := _mi(_quad_mesh(), _mat(M_DOT, Color.WHITE, Color.WHITE, true))
+	head.name = "Head"
+	head.scale = Vector3.ONE * VOLLEY_HEAD
+	head.sorting_offset = 0.1
+	n.add_child(head)
+	var tr := _mi(_ribbon_mesh(), _mat(M_COMET, Color.WHITE, Color.WHITE))
+	tr.name = "Trail"
+	n.add_child(tr)
+	return n
+
+func _pose_volley(e: Dictionary, n: Node3D) -> void:
+	var t := float(e["t"])
+	var fly := float(e["fly"])
+	var from: Vector3 = e["from"]
+	var to: Vector3 = e["to"]
+	n.global_position = from.lerp(to, clampf(t / fly, 0.0, 1.0))
+	var ahead := Vector3(to.x - from.x, 0, to.z - from.z)
+	if ahead.length() > 0.05:
+		n.basis = Basis.looking_at(ahead.normalized(), Vector3.UP)
+	var fade := clampf((t - fly) / maxf(0.01, float(e["hold"])), 0.0, 1.0)
+	for c in n.get_children():
+		_param((c as MeshInstance3D).material_override, "life", fade)
+	var smear := maxf(0.01, VOLLEY_SMEAR * (1.0 - fade))
+	(n.get_node("Trail") as Node3D).scale = Vector3(VOLLEY_WIDTH, VOLLEY_WIDTH, smear)
+
 ## A camera-facing puff that swells and fades (a dash's after-image): mode M_FLAME burns through the fire
 ## ramp on its own, M_ORB uses col (the rim) and col2 (the centre).
 func puff(at: Vector3, mode: int, col: Color, col2: Color, scl: float, dur: float) -> void:
@@ -484,10 +534,6 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			tail_col = Color(Color("3a2a3a"), 0.7)
 		"slug":
 			n.add_child(_rider_part("Head", col, col2, 0.3, 1.0))
-		"orb":
-			# Brass Broadside: a big glowing teardrop, a soft halo of the wave's colour round a hot core
-			n.add_child(_rider_part("Halo", col, col, 1.25, 0.6))
-			n.add_child(_rider_part("Head", col2, col, 0.7, 1.0))
 	var tr := _mi(_ribbon_mesh(), _mat(M_COMET, col, tail_col))
 	tr.name = "Trail"
 	n.add_child(tr)
@@ -511,13 +557,10 @@ func ride(
 	for c in n.get_children():
 		var mt := (c as MeshInstance3D).material_override as ShaderMaterial
 		if c.name == "Head":
-			_param(mt, "color", col2 if kind == "orb" else col)
-			_param(mt, "color2", col if kind == "orb" else col2)
+			_param(mt, "color", col)
+			_param(mt, "color2", col2)
 		if c.name == "Trail":
 			_param(mt, "color", col)
-		if c.name == "Halo" and kind == "orb":
-			_param(mt, "color", col)
-			_param(mt, "color2", col)
 	var sn = sd.get("node")
 	if sn is Node3D and is_instance_valid(sn):
 		(sn as Node3D).visible = false
@@ -638,6 +681,8 @@ func _process(_delta: float) -> void:
 		match String(e["kind"]):
 			"anchor":
 				_pose_anchor(e, n)
+			"volley":
+				_pose_volley(e, n)
 			_:
 				_param(mt, "life", u)
 				if e.get("sweep", false): _param(mt, "progress", minf(1.0, u * 1.8))

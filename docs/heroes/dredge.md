@@ -151,9 +151,10 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
 - Sounds (tools/sfx_linwick_dredge.py): `dr_shot`, `dr_throw`, `dr_grab`, `dr_reel`, `dr_barge`, `dr_anchor_wind`, `dr_dive`,
   `dr_quake`, `dr_hop`, `dr_blast_charge` (a rising brass hum), `dr_blast` (a heavy thump, pitched down for wave 2) (plus the older
   `dr_anchor`, `pay_salvage`).
-- Brass Broadside (`scripts/arch/kits/dredge_blast.gd`): the growing fan, sparks arcing between his fists while charging, big
-  teardrop slugs (LDFx rider "orb": brass gold for wave 1, violet for wave 2), a sunburst at the fists and a crescent sweep across
-  the fan per wave, a violet flicker rising from each target.
+- Brass Broadside (`scripts/arch/kits/dredge_blast.gd`): the growing fan in saturated brass, sparks arcing between his fists
+  while charging, six big orbs per wave with a dark core and a smear (`LDFx.volley`: saturated brass for wave 1, violet for wave
+  2) that fly the whole fan in the shot's 0.2s and hang at its edge fading for 0.35s as the source's orbs do (f35-f38), a
+  sunburst at the fists and a crescent sweep across the fan per wave, a violet flicker rising from each target.
 
 ## Engine notes
 The reel moves the body in small steps toward wherever Dredge is now, with a weighted velocity (`SWING`), so it swings when he
