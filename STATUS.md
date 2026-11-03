@@ -1,13 +1,12 @@
-2026-11-03T19:31:12Z
+2026-11-03T19:40:41Z
 
-FOR MAIN:
-READY: ext/mapclean-fix @ c36f6ea3, checks run: --base-check 3/3 + 1 rerun, --boss-check 3/3 + 1 rerun, wall-size, drop, extract, cover, balloon, check, arena, bot-sanity, boki-system, move-feel, simtest seed 5, health --strict, gen_wiki --check; known-red: --obstacle-check 1 ("expedition cluster", same on plain main). Fixes the base-check and boss-check failures on main (MAIN_TO_EXT asked S1 to look). Merges clean on a3fc5b95.
+FOR MAIN: nothing pending from S1. ext/mapclean-fix c36f6ea merged (9732b33b, 19:35 UTC).
 
 == S1 BRANCH TABLE (current; older detail further down) ==
 branch | commit | state | Net | checks
 ext/airdash-glide | 411a591 | READY TO MERGE (re-verified on main 4d39c623, 14:2x UTC: full suite + --airdash-glide-check 0 failures; --obstacle-check 1 failure also on plain main) | main's (no sync change) | full suite 0 failures + --airdash-glide-check (new) + --move-feel-check + --wallmove-check 0 failures
 ext/mapclean | caf5deb | MERGED to main (31ef8481); its base/boss-check regressions are fixed by ext/mapclean-fix c36f6ea
-ext/mapclean-fix | c36f6ea | READY TO MERGE (on main 31ef8481, merges clean) | main's | fixes main's --base-check + --boss-check failures: bot glide-route abort 1.2m -> 4.0m under landing (bots bailed mid-glide on climbing gaps; Eyrie dial bot looped), base-check idles the mate during the recall (bar unchanged 2.5m). block_prune untouched. base/boss 3x + coordinator rerun PASS; wall-size, drop, extract, cover, balloon, check, arena, bot-sanity, boki-system, move-feel, simtest 0 failures; obstacle 1 = known main failure; health OK, wiki unchanged
+ext/mapclean-fix | c36f6ea | MERGED to main (9732b33b) | main's | base-check + boss-check fixes
 ext/kitdata-vireo-venator | 67454b5 | READY TO MERGE AT THE TIP (on dash-flow-base 4edc562 + main integ77; S1 DashRules removed, Vireo/Venator rows live in S2 DashFlow; dash rings stay stripped) | main's | full suite 0 failures except --dash-flow-check 1 failure "bulwark air dash -> lmb, pressed early: lost", which also fails on plain origin/ext/dash-flow-base (S2's, not this branch); mage combo 83, gunslinger 67; health + gen_wiki clean | re-verified on main 4d39c623 + dash-flow-base bf711e9: full suite, mage 83/0, gunslinger 67/0; only --dash-flow-check bulwark row (S2's, same on bare dash-flow-base) and --obstacle-check (same on main)
 ext/kitdata-pin-bjorn | 7dede8e | READY TO MERGE AT THE TIP (kit data + OWNER_REVIEW Pin #5 #6, Bjorn #10 #29 #30, #32/#35 rows for Pin and Bjorn; supersedes 93e9640) | main's (no sync change) | full suite 0 failures (hero combo 217, archer 119, bulwark 98), health + gen_wiki clean
 ext/kitdata-linwick-dredge | 90c7138 | READY (kit data) | main's | full suite 0 failures
@@ -22,7 +21,7 @@ Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on o
 
 Running now: none on S1.
 Queued: none on S1. Farm tutorial/builder moved to ext (ext/farm-hob, INBOX 18:55 UTC).
-Last INBOX entry handled: 2026-11-03 20:05 UTC ORCH (owner's new work order; also 19:20 owner decisions, 19:35 DECISIONS conflicts). Nothing routed to S1 by name, and the order starts after the demo ships (mapclean-fix c36f6ea not merged yet). S1 is still slimmed (07:30) and idle. S1 can take a lane from the new order if routed, e.g. 3a Boki ownership rings/tags (wiring-only), on Opus per the 19:20 model rule, with DECISIONS.md in the prompt. Not started without routing.
+Last INBOX entry handled: 2026-11-03 20:05 UTC ORCH (owner's new work order; also 19:20 owner decisions, 19:35 DECISIONS conflicts). Nothing routed to S1 by name, and the order starts after the demo ships (mapclean-fix c36f6ea now merged, 9732b33b). S1 is still slimmed (07:30) and idle. S1 can take a lane from the new order if routed, e.g. 3a Boki ownership rings/tags (wiring-only), on Opus per the 19:20 model rule, with DECISIONS.md in the prompt. Not started without routing.
 Watcher: received 19:06 UTC entry
 Questions for the owner: none from S1 (farm plan questions answered in MAIN_TO_EXT 20:40 ET; ext builds it). Also see the ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
