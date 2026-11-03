@@ -29,7 +29,7 @@ const RAM_FRONT_K := 1.4               # the burst speed against the average (fr
 const RAM_BACK_K := 0.85
 const EMBER_EVERY := 0.035             # s between the ember puffs a ram or poof leaves behind
 const POOF_PUFFS := 5                  # smoke puffs the bellows blow out behind him as the air poof goes off
-const CLOAK_POSE_T := 0.3             # s the Furnace Cloak flare holds the flamer up off the aim (as_cloak)
+const CLOAK_POSE_T := 0.25            # s the Furnace Cloak flare holds the flamer up off the aim (as_cloak)
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
 const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the nozzle's tip from the feet in the aim pose: forward, up, right (m)
@@ -160,10 +160,8 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		cd["e"] = 0.0
 		resets += 1
 		m.fx.word(h.pos + Vector3(0, 2.8, 0), "CLOAK READY", col_of(e_def()), true)
-		fx.wave(h.pos, 2.0, col_of(e_def()), 0.35)
-		m.sfx("ab_ready", h.pos, -2.0, 0.8)
+		m.sfx("ab_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the word and the sound)
 		if h.is_local(): h._ab_feedback("k1", "ready")
-		net_ring(h.pos, 2.0, col_of(e_def()))
 
 # ------------------------------------------------------------------ tick
 func _tick(dt: float) -> void:
@@ -268,7 +266,6 @@ func _drop_holds() -> void:
 
 func move_k() -> float:
 	var boost := 1.0 + float(dash_def().get("rank3_boost", 0.0)) if m.time < boost_until else 1.0
-	if was_held and h.wid == "flamethrower": return 0.8 * boost
 	return (0.6 if after_t > 0.0 else 1.0) * boost
 
 ## Rank 3 Cinder Shot holds a second charge.
@@ -289,11 +286,9 @@ func ignite_pct(f: Ent) -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "flamethrower":
 		return false
-	if held and h.ammo <= 0 and h.reload_t <= 0.0:
-		h.start_reload()          # out of fuel: the tank refills
 	# a merge ends the roar: holding the key on must not relight it
 	var merging := KinMerge.transforming(h) or KinMerge.active(h)
-	if held and was_held and not merging and flow.pauses_hold("lmb"):
+	if held and was_held and not merging and flow.pauses_hold("lmb") and not jet.running():
 		_pause_hose()
 		return true
 	if not held or not h.can_fire() or merging or (relight_t > 0.0 and not was_held):
@@ -312,9 +307,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 	var ld := lmbd()
 	if hose_paused:
 		hose_paused = false
-		play("as_lance")              # out of the dash, nozzle already on the aim: the roar is back at once
+		if not jet.running(): play("as_lance")        # out of the dash, nozzle already on the aim: back at once
 	if not was_held:
-		play("as_lance")
+		if not jet.running(): play("as_lance")        # (flying, the flight pose stays)
 		m.sfx("lw_pilot", h.pos, -3.0, 1.0)
 		fx.orb(nozzle(), FLAME_CYAN, PILOT_CORE, 0.8, float(ld["spool"]))      # the pilot flares cyan before the roar
 	was_held = true
@@ -323,13 +318,11 @@ func lmb_override(held: bool, dt: float) -> bool:
 	h.mel_hold = minf(spool, float(ld["spool"]))
 	if spool < float(ld["spool"]):
 		return true                # the pilot's flicker: no fire yet
-	if h.ammo > 0:
-		hose.emit(nozzle(), h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), float(ld["range"]), dt)
+	hose.emit(nozzle(), h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), float(ld["range"]), dt)
 	flame_acc += dt
 	var tick := float(ld["tick"])
-	while flame_acc >= tick and h.ammo > 0:
+	while flame_acc >= tick:
 		flame_acc -= tick
-		h.ammo -= 1               # a tick of fuel (10 a second)
 		_flame_tick(tick)
 	return true
 
@@ -368,11 +361,11 @@ func _flame_tick(tick: float) -> void:
 ## Held: a thin white lane of the shot's full, fixed length (the cursor distance doesn't matter), the gun hand
 ## cocked.
 func rmb_hold_tick(_t: float) -> void:
-	if KinMerge.active(h) or not rmb_ready() or jet.running():
+	if KinMerge.active(h) or not rmb_ready():
 		return
 	if not aiming:
 		aiming = true
-		play("as_aim")
+		if not jet.running(): play("as_aim")       # (flying, the flight pose stays)
 	var rdf := rmb_def()
 	var ln := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)
 	AimKit.lane(
@@ -385,14 +378,11 @@ func fire_rmb(c: Dictionary) -> void:
 	var was_aiming := aiming
 	aiming = false
 	AimKit.hide(h, "rmb")
-	if jet.running():
-		h._ab_feedback("sec", "deny")          # both hands on the jet while flying
-		return
 	if not spend_rmb():
 		if was_aiming: play("")
 		return
 	var rdf := rmb_def()
-	play("as_shot")
+	if not jet.running(): play("as_shot")
 	var amt := float(rdf["dmg"])
 	var rng := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)      # always its full length in the aim direction
 	var shot := {"type": "projectile", "speed": float(rdf["speed"]), "range": rng, "size": float(rdf["size"])}
@@ -589,7 +579,6 @@ func _bash_impact(f: Ent) -> void:
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 	Feel.shake(m, "t2", h, f.pos, f)
 	if h.is_local(): Oomph.punch_dir(m, dir, 0.25)
-	net_ring(f.pos, 1.4, SKULL_COL)
 
 ## Rank 3: a clean ram hit speeds Linwick up and wraps him in a short shield.
 func _ram_reward() -> void:
@@ -676,6 +665,8 @@ func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
 func has_ult() -> bool: return true
 func ult_recast() -> bool: return jet.recast()
 func ult_running() -> bool: return jet.running()
+## In the flight (a roll) the lance and the Cinder Shot still work (item 51: the source is silent, so allow it).
+func fires_in_dash() -> bool: return jet.running()
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

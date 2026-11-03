@@ -71,6 +71,24 @@ func _lance_combos() -> void:
 	ok("lance: it keeps burning through a jump", K.hose.emitted > em2 + 4 and high > 0.3,
 			"emitted +%d, %.2f m up" % [K.hose.emitted - em2, high])
 	P.inp["fire"] = false
+	# audit: no fuel (the data's Flamethrower is a plain hold) and no slow while it roars (only the 0.35 s after)
+	ak.step(m, 1.0)
+	var em3: int = K.hose.emitted
+	var slowest := 9.0
+	var reloaded := false
+	var tf := 0.0
+	while tf < 10.0:
+		keep_fire.call()
+		m.step(ak.DT)
+		tf += ak.DT
+		if tf > 0.5: slowest = minf(slowest, K.move_k())
+		reloaded = reloaded or P.reload_t > 0.0
+	var late: int = K.hose.emitted
+	m.step(ak.DT)
+	ok("lance audit: 10 s of roaring with no fuel to run out (no refill), at his full walk",
+			not reloaded and K.hose.emitted > late and late - em3 > 250 and slowest >= 0.999,
+			"puffs %d, reload %s, move_k %.2f" % [late - em3, reloaded, slowest])
+	P.inp["fire"] = false
 	await ak.done(m)
 
 ## Soot Ram's hit on the first foe with the hunter at level `lvl`.

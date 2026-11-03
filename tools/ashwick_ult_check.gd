@@ -1,8 +1,8 @@
 extends RefCounted
 ## Linwick's ultimate on X, Flue Flight, for --ashwick-combo-check (docs/heroes/ashwick.md): the level gate,
 ## the lift-off telegraph and move, the steering lane, the capped turn, the early landing, the carpet's burn,
-## slow and Char, bond only on a land (the best of hit or knock per cast), the cloak mid-flight, no Cinder
-## mid-flight, a knockback speeding it up, a stun ending it, never over the abyss, the merge drop, the
+## slow and Char, bond only on a land (the best of hit or knock per cast), the cloak, the Cinder Shot and the
+## lance mid-flight, a knockback speeding it up, a stun ending it, never over the abyss, the merge drop, the
 ## cooldown and the burst cap.
 
 const BURST := preload("res://tools/ult_burst.gd")
@@ -55,9 +55,10 @@ func _flight() -> void:
 	var casts0: int = J.flights
 	_cast(P, home + Vector3(10, 0, 0))
 	ak.step(m, 0.05)
-	var burst_up := AimKit.shown(P, "x_burst") and bool(AimKit.entry(P, "x_burst").get("all", false))
+	var no_disc := not AimKit.shown(P, "x_burst")
 	ok(
-		"ult cast: lifts off with the ember ring everyone sees", J.running() and burst_up and K.anim_id == "lw_jet",
+		"ult cast: lifts off in its ember puffs, no aim disc (it hits nothing)", J.running() and no_disc
+				and K.anim_id == "lw_jet",
 		"move %s" % K.anim_id
 	)
 	ok(
@@ -65,7 +66,8 @@ func _flight() -> void:
 		"flights +%d" % (J.flights - casts0)
 	)
 	ok(
-		"ult cast: its own cooldown starts (32s)", absf(float(K.cd["x"]) - 32.0) < 0.2 and float(K.cd["e"]) == 0.0,
+		"ult cast: its own cooldown starts (36s, the data's 45s at the kit's 0.8)",
+		absf(float(K.cd["x"]) - 36.0) < 0.2 and float(K.cd["e"]) == 0.0,
 		"cd %.1f" % float(K.cd["x"])
 	)
 	ak.step(m, 0.25, func(): ak.aim_at(P, home + Vector3(10, 0, 0)))
@@ -180,7 +182,7 @@ func _carpet() -> void:
 	)
 	T.downed = false
 	ak.fresh(T)
-	# a new flight with nobody near: the cloak works mid-flight, the Cinder Shot doesn't
+	# a new flight with nobody near: the cloak and the Cinder Shot work mid-flight (item 51)
 	ak.step(m, 4.0)
 	T.teleport(home + Vector3(0, 0, -5.0))
 	T2.teleport(home + Vector3(-3.0, 0, -5.0))
@@ -194,7 +196,16 @@ func _carpet() -> void:
 	var ch0 := K.ch_rmb
 	P.ak.press_rmb()
 	ak.step(m, 0.02)
-	ok("ult: no Cinder Shot mid-flight", K.ch_rmb == ch0 and J.running())
+	ok("ult: the Cinder Shot goes mid-flight and the flight goes on", K.ch_rmb < ch0 and J.running(),
+			"charges %.1f -> %.1f" % [ch0, K.ch_rmb])
+	K.ch_rmb = float(K.rmb_charges())
+	var em0: int = K.hose.emitted
+	ak.step(m, 0.4, func():
+		P.inp["fire"] = true
+		ak.aim_at(P, home + Vector3(16, 0, 0)))
+	P.inp["fire"] = false
+	ok("ult: the lance roars mid-flight", K.hose.emitted > em0 + 4 and J.running(),
+			"puffs +%d" % (K.hose.emitted - em0))
 	ak.step(m, 1.6, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
 	# Ablaze in about 2.4s of standing in it (4 Char every 0.3s)
 	ak.fresh(T)
