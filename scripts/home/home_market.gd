@@ -1,12 +1,25 @@
 class_name HomeMarket
 extends RefCounted
-## The farm's markets, as panels on the home screen: Wenna's Drift Pens (the Boki market, BokiPens)
-## and the Tradewind Exchange (the materials order book, Exchange). Both open from the market stall
-## (its "Boki" and "Exchange" tabs) and from --open=pens / --open=exchange. home.gd owns the panel.
+## The market stall's panel (docs/decisions/0013-market.md): one panel, its tabs by the stall's
+## level (Stalls.level). L1: the Vendor (seeds, food and utility, wear, furniture, farm goods, selling
+## crops) and the Tradewind Exchange (materials, Exchange). L2 adds the Shelter, your own stall and
+## market search; L3 the Auction House (those four tabs are HomeTrade). Opened from the stall, the
+## hub bar's Market button and --open=shop / exchange[:item] / shelter / stall / search / auctions.
+
+## [tab, the stall level that opens it]
+const TABS := [["Vendor", 1], ["Exchange", 1], ["Shelter", 2], ["My stall", 2], ["Search", 2], ["Auctions", 3]]
+const VENDOR_TABS := ["Seeds", "Kin food", "Wear", "Home", "Farm", "Sell"]
+const OPEN_NAMES := {"shop": "Vendor", "exchange": "Exchange", "shelter": "Shelter", "stall": "My stall",
+	"search": "Search", "auctions": "Auctions"}
+const PANEL := "Market stall"
+const WIDTH := 900.0
+const HOLD_H := 470.0         # px: every tab the same height
 
 var h                         # the Home screen
-var spawn_kin: Callable       # Home._spawn_kin: puts a newly bought Boki on the island
-var filter := {}              # the pens' filters: species, size, min_iv, special, kind
+var spawn_kin: Callable       # Home._spawn_kin: puts a newly adopted Boki on the island
+var trade: HomeTrade
+var tab := "Vendor"
+var vendor_tab := "Seeds"
 var item := "wood"            # the Exchange's item on show
 var qty := 10
 var price := 0
@@ -16,176 +29,270 @@ var note_col := UI.GOOD
 func _init(home, spawn_kin_cb: Callable) -> void:
 	h = home
 	spawn_kin = spawn_kin_cb
+	trade = HomeTrade.new(self)
 
-## --open=pens / --open=exchange[:item] from the home screen. Returns true if it was one of ours.
+## The tabs this stall's level opens.
+func tabs() -> Array:
+	var lv := Stalls.level()
+	return TABS.filter(func(t): return int(t[1]) <= lv).map(func(t): return String(t[0]))
+
+## --open=<name> from the home screen. Returns true if it was one of ours.
 func open_named(which: String) -> bool:
-	if which == "pens":
-		if "--market-demo" in OS.get_cmdline_user_args(): HomeMarket.demo()
-		open_pens()
-		return true
-	if which.begins_with("exchange"):
-		if "--market-demo" in OS.get_cmdline_user_args(): HomeMarket.demo()
-		if ":" in which: item = which.split(":")[1]
-		open_exchange()
-		return true
-	return false
+	var base := which.get_slice(":", 0)
+	if not OPEN_NAMES.has(base):
+		return false
+	if base == "exchange" and ":" in which: item = which.get_slice(":", 1)
+	open(String(OPEN_NAMES[base]))
+	return true
 
-## Screenshots (--market-demo): some gems, wood and stone, a week of wood trades, one of your offers
-## resting on the book and one of your Boki listed at the pens. Never written to the save.
-static func demo() -> void:
-	Save.no_write = true
-	Save.d["gems"] = maxi(int(Save.d.get("gems", 0)), 320)
-	Work.ensure()
-	Save.d["mats"]["wood"] = 46; Save.d["mats"]["stone"] = 18
-	Save.d["scrap"] = 7
-	var rng := RandomNumberGenerator.new(); rng.seed = 11
-	var st := Exchange._st()
-	var h: Array = []
-	var px := 3.0
-	for i in 28:
-		px = clampf(px + rng.randf_range(-0.6, 0.7), 2.0, 6.0)
-		h.append([int(Time.get_unix_time_from_system()) - (28 - i) * 3600, int(round(px)), rng.randi_range(4, 30)])
-	st["hist"]["wood"] = h
-	Exchange.book("wood")
-	Exchange.post("sell", "wood", 12, int(ceil(Exchange.mid("wood"))) + 1)
-	if (Save.d["roster"] as Array).size() < 2:
-		var extra := Save.new_kin("burrlet", "Bun"); extra["level"] = 3
-		Save.d["roster"].append(extra)
-	var other: Dictionary = {}
-	for r in Save.d["roster"]:
-		if KinBox.pinned(r) == "": other = r
-	if not other.is_empty() and BokiPens.listings({"kind": "player"}).is_empty():
-		BokiPens.list_mine(String(other["uid"]), Ransom.value(other))
+## Opens the panel (on `which`, or the last tab).
+func open(which := "") -> void:
+	if which != "": tab = which
+	if not tabs().has(tab): tab = "Vendor"
+	var v: VBoxContainer = h._new_panel(PANEL, WIDTH, true)
+	UI.hold(v, HOLD_H)
+	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Your gems"))
+	UI.shell_tabs(v, tabs(), tab, func(t): open(t))
+	match tab:
+		"Vendor": _vendor(v)
+		"Exchange": _exchange(v)
+		"Shelter": trade.shelter(v)
+		"My stall": trade.stall(v)
+		"Search": trade.search(v)
+		"Auctions": trade.auctions(v)
+	_next_level(v)
 
-func _say(t: String, good := true) -> void:
+## Something to say at the bottom of the tab after an action.
+func say(t: String, good := true) -> void:
 	note = t
 	note_col = UI.GOOD if good else UI.BAD
 
-# ------------------------------------------------------------------ the Drift Pens
-func open_pens() -> void:
-	var v: VBoxContainer = h._new_panel("Drift Pens", 860, true)
-	UI.subtitle(v, "%s's pens: ordinary Boki looking for a hunter, restocked every morning. Boki you list wait here too." % BokiPens.MERCHANT)
-	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Your gems"))
-	# filters
-	var fr := UI.hbox(8)
-	fr.add_child(UI.label("Show", 13, UI.MUTED))
-	var kinds := [["", "All"], ["pen", "Wenna's"], ["player", "Listed"]]
-	for kd in kinds:
-		var kk: String = kd[0]
-		fr.add_child(UI.choice(String(kd[1]), String(filter.get("kind", "")) == kk, func(): filter["kind"] = kk; open_pens(), 84))
-	var sp_ids: Array = [""] + Data.common_kin()
-	var cur_sp := String(filter.get("species", ""))
-	fr.add_child(UI.button(("Species: " + String(Data.KIN[cur_sp]["name"])) if cur_sp != "" else "Species: any", func():
-		filter["species"] = sp_ids[(sp_ids.find(cur_sp) + 1) % sp_ids.size()]
-		open_pens(), 170))
-	var ivs := [0, 80, 100, 120]
-	var cur_iv := int(filter.get("min_iv", 0))
-	fr.add_child(UI.button(("IVs %d+" % cur_iv) if cur_iv > 0 else "IVs: any", func():
-		filter["min_iv"] = ivs[(ivs.find(cur_iv) + 1) % ivs.size()]
-		open_pens(), 110))
-	v.add_child(fr)
-	var ls := BokiPens.listings(filter)
-	if ls.is_empty():
-		v.add_child(UI.empty_state("paw", "Nothing here", "Nothing matches those filters today. Come back tomorrow for fresh stock."))
-	var grid := GridContainer.new(); grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 10); grid.add_theme_constant_override("v_separation", 10)
-	for L in ls:
-		grid.add_child(_pen_card(L))
-	v.add_child(grid)
-	# your listings, and listing one of yours
-	v.add_child(UI.spacer(4))
-	v.add_child(UI.section("Sell one of yours"))
-	var sell_row := UI.hbox(8)
-	var choices: Array = (Save.d["roster"] as Array).filter(func(r): return KinBox.pinned(r) == "" and BokiPens.can_list(r))
-	var rules := UI.para("Your partner, your first Boki and your only Boki stay with you, and so do Boki that came from the pens (or wandered in). Up to %d others can be listed at a fair price (a 5%% listing fee, and 5%% of the sale)." % BokiPens.MAX_LISTED, 12, UI.FAINT)
-	rules.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	v.add_child(rules)
-	if not (choices.is_empty() or (Save.d["roster"] as Array).size() <= 1):
-		for r in choices.slice(0, 4):
-			var rr: Dictionary = r
-			var ask := Ransom.value(rr)
-			sell_row.add_child(UI.button("%s  ·  %d" % [rr["name"], ask], func():
-				var res := BokiPens.list_mine(String(rr["uid"]), ask)
-				_say(("Listed %s for %d gems" % [rr["name"], ask]) if res["ok"] else String(res["why"]), res["ok"])
-				Sfx.play("pickup" if res["ok"] else "click")
-				h._refresh_top()
-				open_pens(), 0, "gem"))
-	v.add_child(sell_row)
-	if note != "":
-		v.add_child(UI.label(note, 14, note_col))
-		note = ""
+func show_note(v: VBoxContainer) -> void:
+	if note == "":
+		return
+	var nl := UI.label(note, 14, note_col)
+	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(nl)
+	note = ""
 
-func _banner(t: String, col: Color) -> Control:
-	var c := UI.card(Color(col, 0.12), 12, 10)
-	var l := UI.para(t, 13, col)
-	l.custom_minimum_size = Vector2(780, 0)
+## One line about what the next stall level opens (nothing more about the future).
+func _next_level(v: VBoxContainer) -> void:
+	var lv := Stalls.level()
+	if lv >= 3:
+		return
+	var nxt := String(Goods.rules()["stall"]["levels"][str(lv + 1)])
+	var l := UI.para("Upgrade the stall (build mode, Upgrades) and it opens: %s." % nxt, 12, UI.FAINT)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	c.add_child(l)
-	return c
+	v.add_child(UI.spacer(4))
+	v.add_child(l)
 
-func _pen_card(L: Dictionary) -> Control:
-	var rec: Dictionary = L["rec"]
-	var sp: Dictionary = Data.KIN[String(rec["species"])]
-	var mine: bool = String(L.get("seller", "")) == "you"
-	var card := UI.card(UI.CARD, 10, 12)
+# ------------------------------------------------------------------ the Vendor
+## The vendor's goods in tabs, as cards. Some only go on sale once you've made it out of enough
+## expeditions or finished a challenge; wear and utility restock by rarity (Stalls.vendor_has).
+func _vendor(v: VBoxContainer) -> void:
+	UI.subtitle(v, "Seeds, food, utility, things to wear and things for the farm")
+	var row := UI.hbox(6)
+	for t in VENDOR_TABS:
+		var tt: String = t
+		row.add_child(UI.choice(tt, vendor_tab == tt, func(): vendor_tab = tt; open(), 0))
+	v.add_child(row)
+	if vendor_tab == "Sell":
+		_vendor_sell(v)
+		return
+	var goods := _vendor_goods()
+	goods.sort_custom(func(a, b): return int(Progress.unlocked(a[0])) > int(Progress.unlocked(b[0])))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 8)
+	for g in goods:
+		grid.add_child(_vendor_card(g))
+	if goods.is_empty():
+		v.add_child(UI.empty_state("shop", "Nothing for sale", "Come back after your next expedition."))
+	v.add_child(grid)
+
+## [key, name, description, price, colour, on_buy, owned_text] for the vendor's tab.
+func _vendor_goods() -> Array:
+	var goods: Array = []
+	match vendor_tab:
+		"Seeds":
+			for c in Data.CROPS:
+				var cd: Dictionary = Data.CROPS[c]
+				var ck: String = c
+				goods.append(["seed:" + c, "%s seeds" % cd["name"], cd["desc"], int(cd["price"]), cd["color"],
+					func(): Save.add_seed(ck, 1), "have %d" % int(Save.d.get("seeds", {}).get(c, 0))])
+		"Kin food":
+			for f in Care.FOODS:
+				var fd: Dictionary = Care.FOODS[f]
+				var fk: String = f
+				goods.append(["food:" + f, fd["name"], fd["desc"], int(fd["price"]), Color("ffb36a"),
+					func(): Save.add_item(fk, 1), "have %d" % int(Save.d["items"].get(f, 0))])
+			goods.append(["tonic", "Tonic", "Heals 40%% in a match (belt key %s)." % Settings.key_cap("util1"), 30, Color("8fe0a0"),
+				func(): Save.add_item("tonic", 1), "have %d" % int(Save.d["items"].get("tonic", 0))])
+			for uid in UtilityBelt.stock_ids():      # the rest of the utility belt (HomeBelt picks what to take)
+				var ui: String = uid
+				if ui == "tonic" or not Stalls.vendor_has("util:" + ui): continue
+				goods.append([ui, UtilityBelt.name_of(ui), UtilityBelt.def(ui)["desc"], UtilityBelt.price_of(ui), UtilityBelt.col_of(ui),
+					func(): Save.add_item(ui, 1), "have %d" % Equal.stash_of(ui)])
+		"Wear":
+			var owned: Array = Save.d.get("accs", [])
+			for a in Data.ACCS:
+				var ak: String = a
+				if not owned.has(ak) and not Stalls.vendor_has("wear:" + ak): continue
+				var ad: Dictionary = Data.ACCS[ak]
+				var cost := -1 if owned.has(ak) else int(ad["price"])
+				var mark := "yours" if owned.has(ak) else ""
+				goods.append(["acc:" + ak, ad["name"], "Put it on from a Boki's card (Dress). Worn on expeditions too.",
+					cost, ad["col"], func(): Goods.give("wear:" + ak), mark])
+		"Home":
+			for f in Data.FURN:
+				var fd: Dictionary = Data.FURN[f]
+				var fk: String = f
+				goods.append(["furn:" + f, fd["name"], "For your house or a cottage. It waits in your inventory until you place it.",
+					int(fd["price"]), Color("c8a07a"), func():
+						if not Save.d.has("furniture"): Save.d["furniture"] = {}
+						Save.d["furniture"][fk] = int(Save.d["furniture"].get(fk, 0)) + 1, "have %d" % int(Save.d.get("furniture", {}).get(f, 0))])
+		"Farm":
+			goods += _farm_goods()
+	return goods
+
+func _farm_goods() -> Array:
+	var goods: Array = HomeGather.shop_goods() + h.hecon.shop_goods()
+	# the Incubator by the Nook: coals to warm Rare Eggs faster, and more cradles
+	goods.append(["coals", "Ember Coals", "Stoke them into the Incubator's brazier: every Rare Egg warms twice as fast for %d minutes." % int(Incubator.COAL_SECS / 60.0),
+		Incubator.COAL_PRICE, Color("ff9a4a"), func(): Save.add_item("coals", 1), "have %d" % int(Save.d["items"].get("coals", 0))])
+	var icost := Incubator.slot_cost()
+	goods.append(["incub_slot", "Incubator cradle", "One more cradle by the Nesting Nook: warm another Rare Egg at the same time (up to %d)." % Incubator.MAX_SLOTS,
+		icost, Color("ffd36a"), func():
+			Save.d["gems"] = int(Save.d["gems"]) + maxi(0, icost)      # Incubator.expand charges it
+			Incubator.expand()
+			if h.hinc: h.hinc.refresh(), "%d cradles" % Incubator.slots()])
+	if int(Save.d["plot_cap"]) < 8:
+		goods.append(["plots", "Two more plots", "Grow more at once.", 120 + 80 * (int(Save.d["plot_cap"]) - 4), Color("9c7a52"), func():
+			Save.d["plot_cap"] = int(Save.d["plot_cap"]) + 2
+			h._build_plots()
+			if h.fs and h.plots.size() < int(Save.d["plot_cap"]):
+				h._toast("Put down another crop patch for them (Build, Buildings)"), "%d plots" % int(Save.d["plot_cap"])])
+	return goods
+
+## One good as a compact row: its icon, name (and what you own), one line of description (all of
+## it on hover), and its price to press.
+func _vendor_card(g: Array) -> Control:
+	var key: String = g[0]
+	var is_open := Progress.unlocked(key)
+	var cost: int = g[3]
+	var col: Color = Color(g[4])
+	var card := UI.card(UI.CARD if is_open else Color(0.1, 0.11, 0.15, 0.9), 10, 12)
 	card.custom_minimum_size = Vector2(404, 0)
-	var row := UI.hbox(10); card.add_child(row)
-	var pv: Control = KinPortrait.view(rec, h.get_tree(), 60.0) if KinPortrait.available() else UI.IconDot.new("paw", sp["color"], 26.0)
-	pv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(pv)
-	var info := UI.vbox(2); info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.tooltip_text = String(g[2]) + ("" if is_open else "\n" + Progress.req_text(key))
+	var hr := UI.hbox(10)
+	card.add_child(hr)
+	var icons := {"seed": "seed", "food": "heart", "tonic": "tonic", "acc": "paw", "furn": "home", "plots": "seed",
+		"coals": "dash", "incub_slot": "egg", "tool": "hammer"}
+	var sw := UI.badge("lock", UI.FAINT, 32.0, UI.R_CTRL)
+	if is_open: sw = UI.badge(String(icons.get(key.split(":")[0], "gem")), col, 32.0, UI.R_CTRL)
+	sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hr.add_child(sw)
+	var nv := UI.vbox(0)
+	nv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var top := UI.hbox(6)
-	top.add_child(UI.label(String(sp["name"]), UI.T_BODY, UI.INK, UI.semi))
-	top.add_child(UI.tag(Unique.size_tag(rec), Color("bfe9ff")))
-	if mine: top.add_child(UI.tag("Yours", UI.GOLD))
-	info.add_child(top)
-	info.add_child(UI.label("Level %d  ·  IVs %d/%d  ·  %s" % [int(rec.get("level", 1)), Care.iv_total(rec), Care.IV_MAX * Care.IV_KEYS.size(), String(sp.get("type", "")).capitalize()], 12, UI.MUTED))
-	info.add_child(UI.label(("Listed by you" if mine else "From %s's pens" % BokiPens.MERCHANT), 12, UI.FAINT))
-	row.add_child(info)
-	var lid := String(L["id"])
-	if mine:
-		row.add_child(UI.button("Take down", func():
-			var r := BokiPens.unlist(lid)
-			_say("%s came back to the farm" % rec["name"] if r["ok"] else String(r["why"]), r["ok"])
-			open_pens(), 110))
-	else:
-		var b := UI.button(str(int(L["price"])), func():
-			var r := BokiPens.buy(lid)
-			if r["ok"]:
-				Sfx.play("unlock")
-				_say("%s is yours. It's waiting on the farm." % Data.KIN[String(r["rec"]["species"])]["name"])
-				h._refresh_top()
-				spawn_kin.call()
-			else:
-				Sfx.play("click")
-				_say(String(r["why"]), false)
-			open_pens(), 80, "gem")
-		b.add_theme_color_override("font_color", UI.GOLD)
-		b.disabled = int(Save.d["gems"]) < int(L["price"])
-		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		row.add_child(b)
+	var nm := UI.label(String(g[1]), UI.T_BODY, UI.INK if is_open else UI.MUTED, UI.semi)
+	nm.clip_text = true
+	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(nm)
+	if is_open and String(g[6]) != "":
+		top.add_child(UI.label(String(g[6]), 12, UI.GOOD if String(g[6]) == "yours" else UI.MUTED))
+	nv.add_child(top)
+	var d := UI.label(Progress.req_text(key), 12, Color("ffb3a8"))
+	if is_open: d = UI.label(String(g[2]), 12, UI.MUTED)
+	d.autowrap_mode = TextServer.AUTOWRAP_OFF
+	d.clip_text = true
+	d.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	nv.add_child(d)
+	hr.add_child(nv)
+	if is_open and cost >= 0:
+		hr.add_child(price_tag(cost, g[5]))
 	return card
 
+## A price you press: gold on an outline, so a page of goods isn't a wall of orange. on_buy runs
+## after the gems are taken.
+func price_tag(cost: int, on_buy: Callable) -> Button:
+	var b := UI.button(str(cost), func():
+		if int(Save.d["gems"]) < cost: return
+		Save.d["gems"] = int(Save.d["gems"]) - cost
+		on_buy.call()
+		Sfx.play("pickup")
+		Save.save_game()
+		h._refresh_top()
+		open(), 76, "gem")
+	b.add_theme_color_override("font_color", UI.GOLD)
+	b.add_theme_color_override("font_hover_color", Color("ffe08a"))
+	b.tooltip_text = "Buy for %d gems" % cost
+	if int(Save.d["gems"]) < cost:
+		b.disabled = true
+		b.tooltip_text = "You need %d more gems" % (cost - int(Save.d["gems"]))
+	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	return b
+
+func _vendor_sell(v: VBoxContainer) -> void:
+	var sell_any := false
+	for s in Data.CROPS:
+		var n := int(Save.d["crops"].get(s, 0))
+		if n <= 0: continue
+		sell_any = true
+		var sk: String = s
+		var gain := maxi(1, int(round(int(Data.CROPS[s]["price"]) * 0.4)))
+		var rc := UI.card(UI.CARD, 10, 12)
+		var row := UI.hbox(12)
+		rc.add_child(row)
+		row.add_child(UI.IconDot.new("seed", Data.CROPS[s]["color"], 22.0))
+		var l := UI.label("%s  ×%d" % [Data.CROPS[s]["name"], n], UI.T_BODY, UI.INK, UI.semi)
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(l)
+		row.add_child(UI.button("Sell 1  ·  %d" % gain, func():
+			if int(Save.d["crops"].get(sk, 0)) <= 0: return
+			Save.d["crops"][sk] = int(Save.d["crops"][sk]) - 1
+			Save.d["gems"] = int(Save.d["gems"]) + gain
+			Sfx.play("pickup")
+			Save.save_game()
+			h._refresh_top()
+			open(), 140, "gem"))
+		v.add_child(rc)
+	if not sell_any:
+		v.add_child(UI.empty_state("seed", "Nothing to sell", "Harvest your plots first, then sell spare crops here."))
+
 # ------------------------------------------------------------------ the Exchange
-func open_exchange() -> void:
-	var v: VBoxContainer = h._new_panel("Tradewind Exchange", 900, true)
-	UI.subtitle(v, "Post a price for wood, stone, scrap, crops, food and tonics. Offers match the best price first; each sale pays a %d%% tax." % int(Exchange.TAX * 100))
-	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Your gems"))
-	var tabs := HFlowContainer.new()
-	tabs.add_theme_constant_override("h_separation", 6); tabs.add_theme_constant_override("v_separation", 6)
+func _exchange(v: VBoxContainer) -> void:
+	UI.subtitle(v, "Tradewind Exchange: post a price for wood, stone, scrap, crops, food and tonics. "
+		+ "Offers match the best price first; each sale pays a %d%% tax." % int(Exchange.TAX * 100))
+	var tabs_row := HFlowContainer.new()
+	tabs_row.add_theme_constant_override("h_separation", 6)
+	tabs_row.add_theme_constant_override("v_separation", 6)
 	for it in Exchange.ORDER:
 		var ik: String = it
-		tabs.add_child(UI.choice("%s  %d" % [Exchange.name_of(it), Exchange.have(it)], item == it, func(): item = ik; price = 0; open_exchange(), 0))
-	v.add_child(tabs)
+		tabs_row.add_child(UI.choice("%s  %d" % [Exchange.name_of(it), Exchange.have(it)], item == it, func():
+			item = ik
+			price = 0
+			open(), 0))
+	v.add_child(tabs_row)
 	var cols := UI.hbox(16)
 	v.add_child(cols)
-	# left: the book and the price history
-	var left := UI.vbox(8); left.custom_minimum_size = Vector2(400, 0)
-	cols.add_child(left)
+	cols.add_child(_exchange_book())
+	cols.add_child(_exchange_offer())
+	if Exchange.BACKEND == "local":
+		v.add_child(UI.para("Offline: Tradewind's traders fill the other side. "
+			+ "With the online backend, every offer here is another player's.", 11, UI.FAINT))
+
+## Left: the book and the price history.
+func _exchange_book() -> Control:
+	var left := UI.vbox(8)
+	left.custom_minimum_size = Vector2(400, 0)
 	left.add_child(UI.section("%s  ·  order book" % Exchange.name_of(item)))
 	var bk := Exchange.book(item)
-	var grid := GridContainer.new(); grid.columns = 4
-	grid.add_theme_constant_override("h_separation", 22); grid.add_theme_constant_override("v_separation", 3)
+	var grid := GridContainer.new()
+	grid.columns = 4
+	grid.add_theme_constant_override("h_separation", 22)
+	grid.add_theme_constant_override("v_separation", 3)
 	for hd in ["Buying", "Price", "Price", "Selling"]:
 		grid.add_child(UI.label(hd, 12, UI.FAINT))
 	var n := maxi((bk["buys"] as Array).size(), (bk["sells"] as Array).size())
@@ -199,9 +306,12 @@ func open_exchange() -> void:
 	left.add_child(grid)
 	left.add_child(UI.section("Price history"))
 	left.add_child(PriceGraph.new(Exchange.history(item), Exchange.ref_price(item)))
-	# right: your offer, and your open offers
-	var right := UI.vbox(8); right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	cols.add_child(right)
+	return left
+
+## Right: your offer, and your open offers.
+func _exchange_offer() -> Control:
+	var right := UI.vbox(8)
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right.add_child(UI.section("Your offer"))
 	if price <= 0: price = Exchange.ref_price(item)
 	var bd := Exchange.band(item)
@@ -209,14 +319,14 @@ func open_exchange() -> void:
 	qrow.add_child(UI.label("Amount", 13, UI.MUTED))
 	for dq in [-10, -1, 1, 10]:
 		var ddq: int = dq
-		qrow.add_child(UI.button(("%+d" % dq), func(): qty = clampi(qty + ddq, 1, 999); open_exchange(), 44))
+		qrow.add_child(UI.button(("%+d" % dq), func(): qty = clampi(qty + ddq, 1, 999); open(), 44))
 	qrow.add_child(UI.label(str(qty), 16, UI.INK, UI.semi))
 	right.add_child(qrow)
 	var prow := UI.hbox(6)
 	prow.add_child(UI.label("Each", 13, UI.MUTED))
 	for dp in [-1, 1]:
 		var ddp: int = dp
-		prow.add_child(UI.button(("%+d" % dp), func(): price = clampi(price + ddp, bd.x, bd.y); open_exchange(), 44))
+		prow.add_child(UI.button(("%+d" % dp), func(): price = clampi(price + ddp, bd.x, bd.y); open(), 44))
 	prow.add_child(UI.label("%d gems" % price, 16, UI.GOLD, UI.semi))
 	prow.add_child(UI.label("(%d-%d)" % [bd.x, bd.y], 12, UI.FAINT))
 	right.add_child(prow)
@@ -224,10 +334,7 @@ func open_exchange() -> void:
 	act.add_child(UI.primary("Buy %d for %d" % [qty, qty * price], func(): _post("buy"), 0, "gem"))
 	act.add_child(UI.button("Sell %d (have %d)" % [qty, Exchange.have(item)], func(): _post("sell"), 0, "gem"))
 	right.add_child(act)
-	if note != "":
-		var nl := UI.label(note, 14, note_col); nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		right.add_child(nl)
-		note = ""
+	show_note(right)
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Your open offers"))
 	var mine := Exchange.mine()
@@ -236,27 +343,27 @@ func open_exchange() -> void:
 	for o in mine:
 		var oid := String(o["id"])
 		var r := UI.hbox(8)
-		var ol := UI.label("%s %d/%d %s at %d" % ["Buying" if o["side"] == "buy" else "Selling", int(o["qty"]) - int(o["left"]), int(o["qty"]), Exchange.name_of(String(o["item"])), int(o["price"])], 13, UI.INK)
+		var ol := UI.label("%s %d/%d %s at %d" % ["Buying" if o["side"] == "buy" else "Selling", int(o["qty"]) - int(o["left"]), int(o["qty"]),
+			Exchange.name_of(String(o["item"])), int(o["price"])], 13, UI.INK)
 		ol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		r.add_child(ol)
-		r.add_child(UI.button("Cancel", func(): Exchange.cancel(oid); h._refresh_top(); open_exchange(), 80))
+		r.add_child(UI.button("Cancel", func(): Exchange.cancel(oid); h._refresh_top(); open(), 80))
 		right.add_child(r)
-	if Exchange.BACKEND == "local":
-		v.add_child(UI.para("Offline: Tradewind's traders fill the other side. With the online backend, every offer here is another player's.", 11, UI.FAINT))
+	return right
 
 func _post(side: String) -> void:
 	var r := Exchange.post(side, item, qty, price)
 	if r["ok"]:
 		Sfx.play("pickup")
 		var f := int(r["filled"])
-		if f >= qty: _say("%s %d %s." % ["Bought" if side == "buy" else "Sold", f, Exchange.name_of(item)])
-		elif f > 0: _say("%s %d now; the other %d wait on the book." % ["Bought" if side == "buy" else "Sold", f, qty - f])
-		else: _say("Your offer is on the book. It fills when someone meets your price.")
+		if f >= qty: say("%s %d %s." % ["Bought" if side == "buy" else "Sold", f, Exchange.name_of(item)])
+		elif f > 0: say("%s %d now; the other %d wait on the book." % ["Bought" if side == "buy" else "Sold", f, qty - f])
+		else: say("Your offer is on the book. It fills when someone meets your price.")
 	else:
 		Sfx.play("click")
-		_say(String(r["why"]), false)
+		say(String(r["why"]), false)
 	h._refresh_top()
-	open_exchange()
+	open()
 
 ## A small line graph of recent trade prices.
 class PriceGraph extends Control:
@@ -272,10 +379,14 @@ class PriceGraph extends Control:
 		if pts.size() < 2:
 			draw_string(UI.body, Vector2(12, size.y * 0.5), "Trades show up here (today's price %d)" % ref, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, UI.FAINT)
 			return
-		var lo := 1e9; var hi := -1e9
+		var lo := 1e9
+		var hi := -1e9
 		for p in pts:
-			lo = minf(lo, float(p[1])); hi = maxf(hi, float(p[1]))
-		if hi - lo < 2.0: lo -= 1.0; hi += 1.0
+			lo = minf(lo, float(p[1]))
+			hi = maxf(hi, float(p[1]))
+		if hi - lo < 2.0:
+			lo -= 1.0
+			hi += 1.0
 		var line := PackedVector2Array()
 		for i in pts.size():
 			var x := 8.0 + (size.x - 16.0) * float(i) / float(pts.size() - 1)

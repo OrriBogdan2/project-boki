@@ -1,7 +1,8 @@
 class_name HomeNotices
 extends RefCounted
 ## One-time notices on the farm screen, moved out of home.gd: a stray turning up (Lifeline.check
-## events) and what the equal-footing save migration converted (EqualMigrate).
+## events), what the equal-footing save migration converted (EqualMigrate), and the Boki the market
+## migration brought home (MarketSave).
 
 ## The toast when a stray turned up.
 static func toast_stray(home: Node, events: Array) -> void:
@@ -13,16 +14,22 @@ static func toast_stray(home: Node, events: Array) -> void:
 					var species_name := String(Data.KIN[String(srec["species"])]["name"])
 					home._show_when_free(["A stray %s wandered onto the farm. With no Boki of your own, " % species_name
 						+ "it's decided to stay with you.",
-						"You can also buy a Boki at %s's Drift Pens." % BokiPens.MERCHANT]))
+						"You can also adopt a Boki at the Shelter (the market stall)."]))
 
 ## The one-time list of what the save migration converted: shown once, then forgotten.
 static func show_migration(home: Node) -> void:
+	var market := String(Save.d.get("market_notice", ""))
+	if market != "":
+		Save.d.erase("market_notice")
+		_later(home, [market], "Boki aren't sold any more")
 	var lines := EqualMigrate.take_notice()
-	if lines.is_empty():
-		return
+	if not lines.is_empty():
+		_later(home, lines, "Matches changed: everyone starts equal")
+
+static func _later(home: Node, lines: Array, title: String) -> void:
 	home.get_tree().create_timer(1.6).timeout.connect(func():
 		if is_instance_valid(home) and home.is_inside_tree():
-			home._show_when_free(lines, "Matches changed: everyone starts equal"))
+			home._show_when_free(lines, title))
 
 ## A notice line as a bullet ("•"); a line that starts with spaces is a sub-point under the one above.
 static func bullet(line: String) -> String:
