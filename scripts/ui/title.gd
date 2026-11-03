@@ -518,6 +518,7 @@ func _build_ui() -> void:
 	root.add_child(ver)
 	# like a game client's login screen: a small news card in the corner, the playtest and how to join
 	var news := UI.glass(12, 12)
+	(news.get_theme_stylebox("panel") as UiFrame).leather(UI.STITCH, 0.05, 5.0)
 	news.name = "News"
 	news.mouse_filter = Control.MOUSE_FILTER_STOP
 	news.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)       # up in the open sky, clear of the squad

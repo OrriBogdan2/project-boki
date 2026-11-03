@@ -21,7 +21,8 @@ static func build(items: Array, go: Callable, btns := {}) -> PanelContainer:
 		b.focus_mode = Control.FOCUS_NONE
 		b.custom_minimum_size = BUTTON
 		b.tooltip_text = "%s  (%s)" % [it[1], cap] if cap != "" else String(it[1])
-		var ic := UI.IconDot.new(String(it[2]), UI.INK, 22.0)
+		var sec_col: Color = UiSkin.section_of(String(it[1]))["col"]      # each entry in its section's colour
+		var ic := UI.IconDot.new(String(it[2]), sec_col, 22.0)
 		ic.position = Vector2(23, 9)
 		b.add_child(ic)
 		var lb := UI.label(String(it[1]), 11, UI.MUTED, UI.semi)
@@ -35,8 +36,14 @@ static func build(items: Array, go: Callable, btns := {}) -> PanelContainer:
 			kc.position = Vector2(2, 2)
 			kc.modulate.a = 0.75
 			b.add_child(kc)
-		b.mouse_entered.connect(func(): ic.col = UI.ACCENT_HI; ic.queue_redraw(); lb.add_theme_color_override("font_color", UI.INK))
-		b.mouse_exited.connect(func(): ic.col = UI.INK; ic.queue_redraw(); lb.add_theme_color_override("font_color", UI.MUTED))
+		b.mouse_entered.connect(func():
+			ic.col = sec_col.lightened(0.35)
+			ic.queue_redraw()
+			lb.add_theme_color_override("font_color", UI.INK))
+		b.mouse_exited.connect(func():
+			ic.col = sec_col
+			ic.queue_redraw()
+			lb.add_theme_color_override("font_color", UI.MUTED))
 		btns[String(it[0])] = b
 		row.add_child(b)
 	return bar

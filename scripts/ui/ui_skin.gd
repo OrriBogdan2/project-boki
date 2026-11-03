@@ -18,7 +18,7 @@ const SYSTEM := Color("c7b0ff")
 ## anything unmatched is SYSTEM with the compass.
 const SECTIONS := [
 	[SYSTEM, "gear", ["Settings"]],
-	[GEAR, "shield", ["Armory", "Try-on", "kit", "Kit", "Hero", "Glider", "Sparring"]],
+	[GEAR, "shield", ["Armory", "Try-on", "kit", "Kit", "Hero", "Glider", "Sparring", "Bag", "Inventory"]],
 	[MARKET, "coin", ["Market", "Exchange", "Guild", "Job Board", "Trophy", "Challenge"]],
 	[EXPEDITION, "portal", ["Expedition", "Ferry", "Islands", "Bridge", "Notice", "online", "match", "Spawn"]],
 	[KIN, "paw", ["Boki", "Kin", "Feed", "Train", "Dress", "Nesting", "hatched", "Burrow", "Pens", "gift",

@@ -205,7 +205,7 @@ func _draw() -> void:
 	var lines := UI.body.get_multiline_string_size(tip, HORIZONTAL_ALIGNMENT_CENTER, tw_ - 40.0, 15, 3).y
 	var card := Rect2(cx - tw_ * 0.5, sz.y - 24.0 - (40.0 + lines), tw_, 40.0 + lines)
 	var bw := minf(480.0, sz.x - 80.0)
-	var br := Rect2(cx - bw * 0.5, card.position.y - 32.0, bw, 8)
+	var br := Rect2(cx - bw * 0.5, card.position.y - 30.0, bw, 7)
 	var af := snappedf(a, 0.1)
 	c.draw_style_box(_well(af), br.grow(2.0))
 	UI.draw_bar(c, br, prog if prog > 0.01 else 0.0, Color(UI.ACCENT, af), Color(0, 0, 0, 0), 4)

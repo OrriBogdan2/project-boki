@@ -196,14 +196,14 @@ static func _tabs_and_tiles(t: Theme) -> void:
 static func _front_menu(t: Theme) -> void:
 	var item := StyleBoxEmpty.new()
 	item.content_margin_left = 20
-	item.content_margin_right = 20
-	item.content_margin_top = 7
-	item.content_margin_bottom = 7
+	item.content_margin_right = 28     # the hover face moves the 8 px to the left: the words nudge, the size holds
+	item.content_margin_top = 6
+	item.content_margin_bottom = 6
 	var item_h := UiFrame.raised(Color(UI.RAISED, 0.94), UI.R_CTRL, 8, UI.RIM).leather(UI.STITCH, 0.07, 4.0)
 	item_h.trim = Color(UI.BRASS, 0.5)
 	item_h.burnish = 0.0
 	item_h.mark = UI.ACCENT
-	item_h.padded(28, 7)
+	item_h.padded(28, 6)
 	item_h.content_margin_right = 20
 	var item_p := item_h.duplicate() as UiFrame
 	item_p.fill = UI.RAISED.darkened(0.15)
