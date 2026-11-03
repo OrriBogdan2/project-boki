@@ -1,4 +1,4 @@
-2026-11-03T16:30:40Z
+2026-11-03T17:10:10Z
 
 == S1 BRANCH TABLE (current; older detail further down) ==
 branch | commit | state | Net | checks
@@ -18,7 +18,7 @@ Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on o
 
 Running now: 1 Sonnet agent (since 16:35 UTC): ext/mapclean-fix (base-check + boss-check regressions from mapclean on main). Deadline 19:30 UTC.
 Queued: none on S1 (Dancer handed to S2). Farm tutorial build waits for owner answers.
-Last INBOX entry handled: 2026-11-03 16:35 UTC URGENT for S1 (mapclean regressions on main): fix agent started.
+Last INBOX entry handled: 2026-11-03 17:05 UTC ORCH (mapclean-fix due 19:30 UTC on S1; fallback for main: revert only the mapclean merge). Fix agent still running, not pushed yet.
 Watcher: received 19:06 UTC entry
 Questions for the owner: see ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
