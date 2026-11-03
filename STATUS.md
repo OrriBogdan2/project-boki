@@ -1,4 +1,4 @@
-2026-11-03T02:21:11Z
+2026-11-03T02:50:10Z
 
 ext/classes | 854258a | REOPENED per INBOX 01:55 + 02:00 (pick 2 of 4 starters Zedran/Venator/Pin/Linwick; kit-themed challenge unlocks, Ostra/Moosh Moosh/Breah hardest and never at creation; cosmetic-only mastery incl. glider designs; Training dummy rename); rework running (Opus) | 0.16.0 (no new sync; save stays v6, adds early_used/told) | full suite 0 failures; --hunter-unlock-check (alias --class-unlock-check) 90 checks; simtest seed-5 wipe same as main. Hunters wording everywhere, weight labels gone, pick 1 at creation + 2 early free picks, HunterViewer (turntable + looping ability moves), hold-to-unlock (1.6 s) with reveal. X row shows only when hero data has "x". Expect wiki conflicts with kitfix renames (Classes.md, sidebar). Owner Qs: all 12 as starters or fewer? early goals (placeholder: play 1, extract 1)? keep per-Hunter goals/levels? 1.6 s hold OK? merge_forms text still says "weight class" (reserved); Arena "Heavy dummy".
 ext/hero-shots | 3bd0520 | done: 12 heroes + farm building + classes; all portraits show signature weapons | - | -
@@ -14,7 +14,7 @@ ext/kitfix-breah-ostra | d49543e (ult pass on ult base v2, main 36d2c5c; kit pas
 
 Running now: polish breah-ostra, ext/classes rework, round-2 fixes on pin-bjorn+linwick-dredge and moosh-tamsin+vireo-venator (all Opus)
 Queued: none. After the running items, all six kitfix pairs have kit + ult + polish on ult base v2; waiting on owner answers and the local re-review.
-Last INBOX entry handled: 2026-11-03 02:30 UTC (incl. 02:20 owner answers: go to the source; Moosh glide 12 m)
+Last INBOX entry handled: 2026-11-03 02:45 UTC (MODEL SWITCH: running Opus agents finish; every NEW agent uses Sonnet; targeted checks while iterating, one full suite at the end of each branch; art-judgement fixes that fail twice on Sonnet get reported here, not escalated)
 Watcher: received 19:06 UTC entry
 Questions for the owner: see ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
@@ -51,3 +51,4 @@ v2 sync moosh+pin: both on hero_ult.gd sha1 8e45c96, X only via main HunterKeys.
 Challenge list (per hunter: unlock challenge, tier, target; 3-5 cosmetic mastery goals; glider designs): coming from the ext/classes rework; will be pasted here for the owner to tune.
 Polish dancer-juggernaut (dcad177, ult base v2 synced): all review items done (readable bolt throws with gold chakram, Bola whirl + violet lane, Knife spin, solid gold empowered aim line, orange zig-zag Warchain, red Searing Wave crescent, pale ground disc from OmniLights removed, sideways cartwheel dash); crash ring partly (crash was replaced by the ult). Body: Dancer 0.95, Zedran 1.12 (also fixed Enraged growth overwriting scale). Full suite 0 failures (dancer combo 83, juggernaut 84, kit combo 38). Shots: ext\/hero-shots dancer\/v2\/polish, zedran\/v2\/polish (92). Owner Qs: kit card hunter-ult tile on main? main X tile cooldown hook (HeroUlt.slot_info)? air cartwheel stays level (shared roll pauses gravity) OK? Dancer arms-out run needs hunter_anim change, worth it?
 Kit review round 2 (02:30): PASS Pin, Bjorn, Vireo, Linwick, Moosh Moosh; FIX Venator, Dredge, Tamsin. Fix agents running on pin-bjorn + linwick-dredge and moosh-tamsin + vireo-venator (key-text fixes everywhere, Dredge ult visibility, Tamsin lean clamp + ice-blue spear, Venator translucent slide trail, Moosh glide 12 m per owner 02:20). Nameplate: will converge on ext\/hudref HudPlate.plate_offset if it is on main, otherwise flagged for the merger.
+Model policy (from 02:45): new agents on Sonnet; currently running Opus agents (breah-ostra polish, ext/classes rework, two round-2 fix agents) finish as is.
