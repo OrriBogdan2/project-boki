@@ -3364,6 +3364,54 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 
 ![round2: air dash strip: the same translucent trailing after-images (fainter than before)](venator/v2/polish/r2_venator_anim_dash_ex.png)
 
+**owner1103: Burr Charge direct hit: damage and DAZED, no cone**
+
+![owner1103: Burr Charge direct hit: damage and DAZED, no cone](venator/v2/polish/venator_owner1103_direct_a.png)
+
+**owner1103: Burr Charge direct hit: damage and DAZED, no cone (close-up)**
+
+![owner1103: Burr Charge direct hit: damage and DAZED, no cone (close-up)](venator/v2/polish/venator_owner1103_direct_a_close.png)
+
+**owner1103: direct hit, a beat later: DAZED**
+
+![owner1103: direct hit, a beat later: DAZED](venator/v2/polish/venator_owner1103_direct_b.png)
+
+**owner1103: direct hit, a beat later: DAZED (close-up)**
+
+![owner1103: direct hit, a beat later: DAZED (close-up)](venator/v2/polish/venator_owner1103_direct_b_close.png)
+
+**owner1103: wall cone hits two dummies, both DAZED**
+
+![owner1103: wall cone hits two dummies, both DAZED](venator/v2/polish/venator_owner1103_wall_cone_a.png)
+
+**owner1103: wall cone hits two dummies, both DAZED (close-up)**
+
+![owner1103: wall cone hits two dummies, both DAZED (close-up)](venator/v2/polish/venator_owner1103_wall_cone_a_close.png)
+
+**owner1103: wall cone, a beat later: both DAZED**
+
+![owner1103: wall cone, a beat later: both DAZED](venator/v2/polish/venator_owner1103_wall_cone_b.png)
+
+**owner1103: wall cone, a beat later: both DAZED (close-up)**
+
+![owner1103: wall cone, a beat later: both DAZED (close-up)](venator/v2/polish/venator_owner1103_wall_cone_b_close.png)
+
+**owner1103: Slipstep start, no rings or disc: ember after-image, dust, faint skid streaks**
+
+![owner1103: Slipstep start, no rings or disc: ember after-image, dust, faint skid streaks](venator/v2/polish/venator_owner1103_slide_start.png)
+
+**owner1103: Slipstep start, no rings or disc: ember after-image, dust, faint skid streaks (close-up)**
+
+![owner1103: Slipstep start, no rings or disc: ember after-image, dust, faint skid streaks (close-up)](venator/v2/polish/venator_owner1103_slide_start_close.png)
+
+**owner1103: Slipstep a moment in, no rings**
+
+![owner1103: Slipstep a moment in, no rings](venator/v2/polish/venator_owner1103_slide_mid.png)
+
+**owner1103: Slipstep a moment in, no rings (close-up)**
+
+![owner1103: Slipstep a moment in, no rings (close-up)](venator/v2/polish/venator_owner1103_slide_mid_close.png)
+
 ## pin/v2/polish (pin/v2/polish)
 
 **Draw toward Empowered: the feathered V closing on the cursor from the bow, the cursor ring filling, no glint yet (gameplay zoom)**
