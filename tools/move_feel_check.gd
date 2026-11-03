@@ -139,11 +139,19 @@ func _reset(p: Vector3, grounded := true) -> void:
 	if "glide_off_t" in P: P.set("glide_off_t", 9.0)
 	_clear_inp()
 
-## A spot with flat, open ground `r` metres all round.
+## A spot with flat, open ground `r` metres all round, on low ground (2m or less) when the map has one:
+## the view's focus sits at 0.6x your height (cam.gd), so the framing numbers are calibrated near island level.
+## The framing numbers also shift a little with the spot (the pose settles differently), so the spot the
+## targets were calibrated on is tried first, and a map change can't move it.
+const CALIB_SPOT := Vector3(99.5, 1.6, 163.5)
 func _flat_spot(r: float) -> Vector3:
-	for k in 4000:
-		var g := w.random_ground()
-		var okk := true
+	for k in 4001:
+		var g: Vector3 = w.random_ground()
+		if k == 0:
+			g = Vector3(CALIB_SPOT.x, w.ground_at(CALIB_SPOT.x, CALIB_SPOT.z), CALIB_SPOT.z)
+		if g.y > 2.0 and k < 3000:
+			continue
+		var okk := not w.is_void(g.x, g.z) and not w.is_block(g.x, g.z)
 		for i in 16:
 			var a := TAU * i / 16.0
 			for d in [r * 0.33, r * 0.66, r]:

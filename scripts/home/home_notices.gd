@@ -22,4 +22,8 @@ static func show_migration(home: Node) -> void:
 		return
 	home.get_tree().create_timer(1.6).timeout.connect(func():
 		if is_instance_valid(home) and home.is_inside_tree():
-			home._show_when_free(lines))
+			home._show_when_free(lines, "Matches changed: everyone starts equal"))
+
+## A notice line as a bullet ("•"); a line that starts with spaces is a sub-point under the one above.
+static func bullet(line: String) -> String:
+	return ("      – " + line.strip_edges()) if line.begins_with("  ") else ("•  " + line)

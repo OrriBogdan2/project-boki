@@ -145,7 +145,7 @@ func _throw() -> void:
 	k.stow()
 	var land := P.pos + Vector3(6.0, 0, 0)
 	# a foe just to the side of the landing spot, out of the flight path itself
-	var mb := mob_at("skitter", land + Vector3(0, 0, 1.3))
+	var mb := mob_at("skitter", land + Vector3(0, 0, 1.6))
 	var stunned := false
 	var landed_d := -1.0          # how far from you it was the moment it landed (it then walks back to your side under Follow)
 	var after_fly := ""           # the state it was in the first step after the throw ended: the landing itself
