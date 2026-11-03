@@ -9,8 +9,10 @@ extends ArchKit
 ##   to 8 shown, no cap): each makes your bolts on them stronger. A knock or an assist heals you.
 ## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
 ##   harder from the outer band, refreshing every Mark; the Vault comes back. The Boki Merge has its own key.
-## - Dash, Vault: a short cartwheel; the next bolt is empowered (3.5x, 2 Marks, Shred) and landing it
-##   gives the Vault back (the payoff: T4, pay_cashin, VAULT RESET).
+## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (3.5x, 2 Marks,
+##   Shred), shown by a gold glint in the throwing hand that flares as she lands, and landing it gives the
+##   Vault back (the payoff: T4, pay_cashin, VAULT RESET). No ring or burst on the dash itself.
+##   What other presses do during the cartwheel: content/dash_flow/thief.json (DashFlow).
 ## - RMB, Bola: a 0.4s wind-up with the lane showing, then a kit-run Bola that grounds the first foe and
 ##   flies on (bouncing once off a wall); a second foe caught and both are stunned with bonus damage.
 ## - E, Shadow Knife: a dagger to the cursor that sticks in the first foe (slows) or lands; recast to blink
@@ -35,6 +37,9 @@ const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the s
 const VAULT_CURVE := [[0.0, 0.4], [0.3, 1.9], [1.0, 0.55]]
 const VAULT_MEAN := 1.2025         # the mean of VAULT_CURVE, so the distance stays the data's
 const TRAIL_EVERY := 0.035         # s between two of her after-images on a dash
+const GLINT_POP_S := 0.22          # s the glint's flare takes to settle as the empowered bolt forms
+const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers get while it's empowered
+const CARTWHEELS := ["thf_vault_r", "thf_vault_l", "thf_exdash"]
 
 var primed_t := 0.0            # Vault empowered the next bolt
 var haste_t := 0.0             # Vault's burst of speed (ends on the empowered hit)
@@ -46,6 +51,8 @@ var bola := {}                 # the Bola in flight: {pos, dir, left, first, bou
 var encore: ThiefUlt           # X, the ultimate
 var wrapped := {}              # foe instance id -> [foe, time left]: the binding rings on the Grounded
 var glint: Node3D = null       # the empowered tell: a gold glint at the weapon hand
+var glint_pop := 0.0           # 1 as the empowered bolt forms (the landing), easing back to 0
+var glint_net_t := 0.0
 var hand := 0                  # 0: the next bolt leaves the right hand, 1: the left
 var _primed_on: Ent = null     # the empowered bolt just reached this foe (its end sets it, on_deal reads it)
 var primed_hits := 0           # (tests, demo)
@@ -59,6 +66,7 @@ var last_bolt_emp := false
 var blinks := 0
 var vault := {}                # the Cartwheel running: {t, dur, speed, air}
 var trail_t := 0.0
+var landing_due := false       # an air cartwheel is over; she lands in a crouch when she touches down
 
 func _setup() -> void:
 	res = 0.0
@@ -211,21 +219,13 @@ func res_frac() -> float:
 func res_text() -> String:
 	return "%d" % best_marks()
 
-## The payoff is armed: the next bolt is empowered.
-func full_ready() -> bool:
-	return primed_t > 0.0
-
+## The payoff lives on the dash (the dash slot's gold dot): the next bolt is empowered. It isn't the shared
+## "resource full" tell, which would ring her feet and spray sparks round her on every Cartwheel.
 func dash_payoff_ready() -> bool:
 	return primed_t > 0.0
 
 func ready_label() -> String:
 	return "EMPOWERED  ·  land it to reset Vault" if primed_t > 0.0 else ""
-
-## The payoff lives on the dash: the right click's slot never shows the gold dot.
-func slot_info(slot: String) -> Dictionary:
-	var out := super.slot_info(slot)
-	if slot in ["sec", "utility"]: out["full"] = false
-	return out
 
 func _tick(dt: float) -> void:
 	haste_t = maxf(0.0, haste_t - dt)
@@ -233,7 +233,7 @@ func _tick(dt: float) -> void:
 		primed_t -= dt
 		if primed_t <= 0.0:
 			primed_t = 0.0
-			m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color(res_col(), 0.6), 6, 1.5, 0.3, -1.0, 0.7)
+			fx().puff(hand_pos(hand == 0), FIZZLE, 0.3, 0.2)       # unused, it fades from the hand
 	_tick_pips(dt)
 	# marks fade on every target we've touched
 	for f in m.foes_of(h.team):
@@ -246,12 +246,13 @@ func _tick(dt: float) -> void:
 	if not bola.is_empty(): _tick_bola(dt)
 	encore.tick(dt)
 	_tick_vault(dt)
+	_tick_landing()
 	_tick_trail(dt)
 	_tick_wrapped(dt)
 	_tick_knife()
-	_tick_glint()
+	_tick_glint(dt)
 	_tick_aim_line()
-	net_pulse(dt, full_ready())
+	_net_glint(dt)
 
 ## The aim line (your screen only): thin and pale lilac to the cursor, clamped to the bolt's range, with an
 ## arrow tick; a thick, solid gold line with a soft gold glow while the next bolt is empowered.
@@ -270,22 +271,37 @@ func _tick_aim_line() -> void:
 func own_aim_line() -> bool:
 	return h.wid == "arc_bolts"
 
-## The empowered tell: a gold glint at the weapon hand (everyone sees it); no light, which pooled into a
-## pale disc on the ground.
-func _tick_glint() -> void:
+## The empowered tell (everyone sees it): a tight gold glint in the hand the next bolt leaves from, a hot core
+## and a turning four-point star, flaring as the bolt forms on the landing. No light (it pooled into a pale disc
+## on the ground) and nothing on the ground.
+func _tick_glint(dt: float) -> void:
 	if glint == null or not is_instance_valid(glint):
 		glint = own_node()
-		var ball := MeshInstance3D.new()
-		ball.mesh = Models.sphere(0.16, 10)
-		ball.material_override = DJFx.solid(EMP_LINE)
-		ball.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		glint.add_child(ball)
+		glint.add_child(_glint_part(Models.sphere(0.07, 8), BOLT_CORE))
+		var star := _glint_part(DJFx.star_mesh(4, 0.2), Color(EMP_LINE, 0.9))
+		star.scale = Vector3.ONE * 0.3
+		glint.add_child(star)
 	glint.visible = primed_t > 0.0 and tells_visible()
+	glint_pop = maxf(0.0, glint_pop - dt / GLINT_POP_S)
 	if glint.visible:
 		glint.global_position = hand_pos(hand == 0)
-		var k := 1.3 + 0.3 * sin(m.time * 14.0)
-		glint.scale = Vector3.ONE * k
-		if randf() < 0.3: m.fx.burst(glint.global_position, res_col(), 1, 0.8, 0.25, -1.0, 0.6)
+		glint.rotation.y = m.time * 5.0
+		glint.scale = Vector3.ONE * (1.0 + 0.12 * sin(m.time * 14.0) + 1.6 * glint_pop * glint_pop)
+
+func _glint_part(mesh: Mesh, col: Color) -> MeshInstance3D:
+	var part := MeshInstance3D.new()
+	part.mesh = mesh
+	part.material_override = DJFx.solid(col)
+	part.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return part
+
+## Online viewers get the glint as a small ping at her hand while the next bolt is empowered.
+func _net_glint(dt: float) -> void:
+	glint_net_t -= dt
+	if primed_t <= 0.0 or glint_net_t > 0.0:
+		return
+	glint_net_t = GLINT_NET_EVERY
+	net_ring(hand_pos(hand == 0), 0.25, EMP_LINE)
 
 func move_k() -> float:
 	return 1.0 + (vault_haste() if haste_t > 0.0 else 0.0)
@@ -381,34 +397,31 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 		m.fx.spark(at, Vector3.UP, BOLT_GOLD, 6, 6.0, 80.0)
 
 # ------------------------------------------------------------------ dash: Vault
+## The Cartwheel: a Vault charge on the ground; in the air (or out of charges) the long dash, flipped her way.
+## From a jump it carries its speed to the landing (the sheet's ~8m over ~0.95s).
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	if not spend_dash(use_ex):
 		return true
+	var air := use_ex or not h.grounded
 	if use_ex:
-		# the long (air) dash is the Cartwheel from a jump: a crouched flick into a sideways cartwheel that
-		# carries its speed on (the sheet's ~8m over ~0.95s) and ends where she lands, with a cyan streak
 		h.ex_next = false            # her own distance and time, not the class's long dash
 		travel(float(dd["air_dist"]), float(dd["air_time"]), {"invuln": 0.1}, true)
 		h.dash_is_ex = true
 		h.vel.y = maxf(h.vel.y, 0.0)
-		vault = {"t": 0.0, "dur": h.roll_t, "speed": h.roll_speed, "air": true}
-		play("thf_exdash")
-		for i in 3:
-			m.later(0.05 * i,
-					func(): if is_instance_valid(h): m.fx.spark(h.pos + Vector3(0, 0.9, 0),
-							Vector3(-h.roll_dir.x, 0.1, -h.roll_dir.y), Arch.color(id), 8, 8.0, 25.0, 0.22, 0.0, 1.2))
-		m.later(float(h.cdat.get("ex_time", 0.2)),
-				func(): if is_instance_valid(h): m.fx.ring(h.pos, 0.8, Arch.color(id), 0.18))
-		return true
 	else:
-		# from a jump the cartwheel carries its speed to the landing and goes much further
-		var air := not h.grounded
 		var dist := float(dd["air_dist"] if air else dd["dist"])
 		travel(dist, float(dd["air_time"] if air else dd["time"]), {"invuln": float(dd["invuln"]), "phase": 0.3})
-		vault = {"t": 0.0, "dur": h.roll_t, "speed": h.roll_speed, "air": air}
-	_vaulted()
+	vault = {"t": 0.0, "dur": h.roll_t, "speed": h.roll_speed, "air": air}
+	_vaulted(air, _empowers(use_ex))
 	return true
+
+## Whether this cartwheel empowers the next bolt: its dash -> LMB row says so (the source's Quickflip does on
+## the ground and from a jump); the long dash on the ground, with the charges spent, doesn't.
+func _empowers(use_ex: bool) -> bool:
+	if use_ex and h.grounded:
+		return false
+	return String(DashFlow.row_of(id, "lmb", not h.grounded)["variant"]) == "empowered"
 
 ## The Cartwheel's speed curve on the ground; from the air it holds its speed and ends where she lands.
 func _tick_vault(dt: float) -> void:
@@ -417,13 +430,26 @@ func _tick_vault(dt: float) -> void:
 	vault["t"] = float(vault["t"]) + dt
 	var u := float(vault["t"]) / maxf(0.01, float(vault["dur"]))
 	if u >= 1.0 or h.roll_t <= 0.0:
-		vault = {}
+		_vault_over()
 		return
 	if bool(vault["air"]):
 		if h.grounded and float(vault["t"]) > 0.12:
 			h.roll_t = 0.0
 		return
 	h.roll_speed = float(vault["speed"]) * _curve(VAULT_CURVE, u) / VAULT_MEAN
+
+## The air cartwheel holds its carried pose until she touches down (the dash can run out first), then lands in
+## a low crouch.
+func _vault_over() -> void:
+	landing_due = bool(vault["air"])
+	vault = {}
+
+func _tick_landing() -> void:
+	if not landing_due or not h.grounded:
+		return
+	landing_due = false
+	if anim_id == "thf_exdash":
+		play("thf_land")
 
 static func _curve(pts: Array, u: float) -> float:
 	for i in pts.size() - 1:
@@ -432,6 +458,17 @@ static func _curve(pts: Array, u: float) -> float:
 		if u <= float(b[0]):
 			return lerpf(float(a[1]), float(b[1]), (u - float(a[0])) / maxf(0.001, float(b[0]) - float(a[0])))
 	return float(pts[-1][1])
+
+## A move another press starts mid-cartwheel (a bolt, the Bola, the dagger) waits out the flip: the ability
+## goes off, the cartwheel isn't cut short.
+func play(move: String) -> void:
+	if not vault.is_empty() and anim_id in CARTWHEELS and move not in CARTWHEELS:
+		return
+	super.play(move)
+
+## Presses during the Cartwheel: the bolt fires mid-flip when its row says so.
+func fires_in_dash() -> bool:
+	return String(flow.row("lmb")["mode"]) == "fire"
 
 ## Her own after-images on every dash: cyan streaks and a spinning cyan star where her hands were (not the
 ## shared team-colour pill).
@@ -449,26 +486,32 @@ func _tick_trail(dt: float) -> void:
 	fx().streak(h.pos + Vector3(0, 0.7, 0), dir, 1.3, 0.5, GHOST, Color("e0fbff"), 0.3)
 	fx().star(h.pos + Vector3(0, 1.0, 0), GHOST, 0.5, 0.22, Color("c9a0ff"))
 
-## After a Vault: the cartwheel (a side flip in the plane of travel, whichever way you go), the white
-## arc its hands and feet trace, the speed, and the next bolt empowered.
-func _vaulted() -> void:
+## After a Vault: the cartwheel (a side flip in the plane of travel, whichever way you go; from a jump the
+## air one), the white arc its hands and feet trace, the speed and, by its row, the next bolt empowered: the
+## glint forms in the throwing hand and flares as she lands.
+func _vaulted(air: bool, empower: bool) -> void:
 	var dd := dash_def()
 	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
 	var right := Vector2(cos(h.face), -sin(h.face))
-	play("thf_vault_r" if dir.dot(right) >= 0.0 else "thf_vault_l")
+	var wheel := "thf_vault_r" if dir.dot(right) >= 0.0 else "thf_vault_l"
+	play("thf_exdash" if air else wheel)
 	var t := float(dd["time"])
 	_swoosh(dir)
 	m.later(t * 0.5, func(): if is_instance_valid(h): _swoosh(dir))
+	m.sfx("dj_cartwheel", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
+	if not empower:
+		return
 	haste_t = float(dd["haste_t"])
 	var was := primed_t > 0.0
 	primed_t = float(dd["primed_t"])
-	m.sfx("dj_cartwheel", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
 	m.later(t, func():
-		if not is_instance_valid(h): return
-		m.fx.ring(h.pos, 0.9, AIM_LILAC, 0.2)      # the halo as she lands (the source's is white; ours lilac)
-		m.sfx("click", h.pos, -6.0 if h.is_local() else -10.0, 2.2))      # the bolt formed in the hand: empowered
+		if not is_instance_valid(h) or primed_t <= 0.0: return
+		glint_pop = 1.0                          # the bolt formed in the hand: empowered
+		net_ring(hand_pos(hand == 0), 0.25, EMP_LINE)
+		m.sfx("click", h.pos, -6.0 if h.is_local() else -10.0, 2.2))
 	if not was:
-		armed_fx("", "dash")                     # empowered: the ready ping, a ring everyone sees
+		m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
+		if h.is_local(): h._ab_feedback("dash", "ready")
 
 func _swoosh(dir: Vector2) -> void:
 	fx().crescent(h.pos + Vector3(0, 0.85, 0), dir, 300.0, 1.05, GHOST, AIM_LILAC, 0.3,
@@ -503,9 +546,7 @@ func _primed_hit(t: Ent) -> void:
 	if is_instance_valid(t) and not t.dead:
 		KitStatus.apply(t, "vul", float(dd["shred_t"]), float(dd["shred"]))
 	payoff_fx(t.pos, "VAULT RESET", res_col(), "pay_cashin", dir, t)
-	m.later(0.1, func():
-		if is_instance_valid(h) and anim_id != "thf_vault_r" and anim_id != "thf_vault_l":
-			play("thf_reset"))
+	m.later(0.1, func(): if is_instance_valid(h): play("thf_reset"))
 	h.dashes = h.max_dashes()
 	DashReset.cue(h)
 
@@ -782,6 +823,9 @@ func _step_to_knife() -> void:
 	AimKit.hide(h, "knife")
 	if busy():
 		return
+	if in_dash():
+		h.roll_t = 0.0                  # the blink ends a cartwheel: she arrives standing
+		vault = {}
 	var f = k.get("target")
 	play("thf_arrive")
 	if f != null and is_instance_valid(f) and not (f as Ent).dead:

@@ -61,8 +61,7 @@
 "nested_ternary": 1
 },
 "scripts/arch/kits/thief_kit.gd": {
-"long_line": 14,
-"nested_ternary": 1
+"long_line": 3
 },
 "scripts/arch/oomph.gd": {
 "long_line": 1,

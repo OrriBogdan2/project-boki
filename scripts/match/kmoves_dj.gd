@@ -175,20 +175,31 @@ const MOVES := {
 		[0.06, {"p": -0.42, "sq": -0.22, "lw": 0.8, "legs": [0.9, -0.8, -0.6, -0.3]}],
 		[0.16, {"p": 0.25, "sq": 0.1, "lw": 0.7, "legs": [0.4, -0.6, -0.2, -0.4]}],
 		[0.5, {}]]},
-	# Vault: a real cartwheel in the plane of travel (0134-0137), legs split wide over the top, arms out;
-	# the dash runs 0.25s, the landing absorbs, back up by 0.55
-	"thf_vault_r": {"keys": [[0.0, {"sq": 0.15, "lw": 0.6, "legs": [0.5, -0.8, 0.4, -0.7]}], [0.04, {"lift": 0.22,
-			"lw": 1.0, "legs": [1.1, -0.15, -1.1, -0.15], "fl": Vector3(-0.42, 0.25, 0.0), "hw": 1.0}],
-		[0.26, {"fz": -6.283, "lift": 0.32, "lw": 1.0, "legs": [1.1, -0.15, -1.1, -0.15],
-				"fl": Vector3(-0.42, 0.25, 0.0),
-				"hw": 1.0}], [0.33, {"fz": -6.283, "sq": 0.28, "lw": 0.8,
-						"legs": [0.7, -1.1, 0.4, -0.9]}], [0.55, {"fz": -6.283}]]},
-	"thf_vault_l": {"keys": [[0.0, {"sq": 0.15, "lw": 0.6, "legs": [0.5, -0.8, 0.4, -0.7]}], [0.04, {"lift": 0.22,
-			"lw": 1.0, "legs": [1.1, -0.15, -1.1, -0.15], "fl": Vector3(-0.42, 0.25, 0.0), "hw": 1.0}],
-		[0.26, {"fz": 6.283, "lift": 0.32, "lw": 1.0, "legs": [1.1, -0.15, -1.1, -0.15],
-				"fl": Vector3(-0.42, 0.25, 0.0),
-				"hw": 1.0}], [0.33, {"fz": 6.283, "sq": 0.28, "lw": 0.8,
-						"legs": [0.7, -1.1, 0.4, -0.9]}], [0.55, {"fz": 6.283}]]},
+	# Vault, the ground Cartwheel (sheet: body 0176-0178, 0134-0137), inside the 0.48s dash: a 0.05s crouch with
+	# the arms swung up and the body leaning into the side, a push-off into a star (legs split, arms wide), one
+	# full turn over the top in the plane of travel, a low two-beat landing crouch at 0.36, upright by 0.48
+	"thf_vault_r": {"keys": [
+		[0.0, {}],
+		[0.05, {"sq": 0.24, "lift": -0.08, "p": 0.12, "r": 0.32, "lw": 1.0, "legs": [0.8, -1.3, 0.6, -1.1],
+				"fl": Vector3(-0.25, 0.6, 0.05), "hw": 1.0, "fr": Vector3(0.25, 0.6, 0.05), "rw": 1.0}],
+		[0.08, {"sq": -0.18, "lift": 0.16, "r": 0.2, "lw": 1.0, "legs": [1.2, -0.05, -1.2, -0.05],
+				"fl": Vector3(-0.55, 0.4, 0.0), "hw": 1.0, "fr": Vector3(0.55, 0.4, 0.0), "rw": 1.0}],
+		[0.3, {"fz": -6.283, "sq": -0.12, "lift": 0.2, "lw": 1.0, "legs": [1.2, -0.05, -1.2, -0.05],
+				"fl": Vector3(-0.55, 0.4, 0.0), "hw": 1.0, "fr": Vector3(0.55, 0.4, 0.0), "rw": 1.0}],
+		[0.36, {"fz": -6.283, "sq": 0.3, "lift": -0.1, "p": 0.18, "lw": 1.0, "legs": [0.9, -1.4, 0.5, -1.2],
+				"fl": Vector3(-0.5, 0.0, 0.15), "hw": 1.0, "fr": Vector3(0.5, 0.0, 0.15), "rw": 1.0}],
+		[0.48, {"fz": -6.283}]]},
+	"thf_vault_l": {"keys": [
+		[0.0, {}],
+		[0.05, {"sq": 0.24, "lift": -0.08, "p": 0.12, "r": -0.32, "lw": 1.0, "legs": [0.8, -1.3, 0.6, -1.1],
+				"fl": Vector3(-0.25, 0.6, 0.05), "hw": 1.0, "fr": Vector3(0.25, 0.6, 0.05), "rw": 1.0}],
+		[0.08, {"sq": -0.18, "lift": 0.16, "r": -0.2, "lw": 1.0, "legs": [1.2, -0.05, -1.2, -0.05],
+				"fl": Vector3(-0.55, 0.4, 0.0), "hw": 1.0, "fr": Vector3(0.55, 0.4, 0.0), "rw": 1.0}],
+		[0.3, {"fz": 6.283, "sq": -0.12, "lift": 0.2, "lw": 1.0, "legs": [1.2, -0.05, -1.2, -0.05],
+				"fl": Vector3(-0.55, 0.4, 0.0), "hw": 1.0, "fr": Vector3(0.55, 0.4, 0.0), "rw": 1.0}],
+		[0.36, {"fz": 6.283, "sq": 0.3, "lift": -0.1, "p": 0.18, "lw": 1.0, "legs": [0.9, -1.4, 0.5, -1.2],
+				"fl": Vector3(-0.5, 0.0, 0.15), "hw": 1.0, "fr": Vector3(0.5, 0.0, 0.15), "rw": 1.0}],
+		[0.48, {"fz": 6.283}]]},
 	# the Bola (0100-0102): the right hand raised over the head and circled (three points every 0.13s)
 	# through the 0.4s lane, the weights whirling round it (DJFx), then slung with a long forward lunge
 	"thf_bola": {"keys": [
@@ -261,22 +272,26 @@ const MOVES := {
 		[0.16, {"y": -0.50, "fl": Vector3(-0.58, 0.1, -0.1), "hw": 1.0}],
 		[0.3, {}]]},
 	# ---------------------------------------------------------------- per-hero base dash (the long air dash)
-	# Dancer's long (air) dash is the Cartwheel from a jump (the sheet's air dash): a crouched flick, the body
-	# turned over sideways with the legs split and arms out, then carried flat and stretched on its speed,
-	# a low landing crouch; a cyan streak (ThiefKit)
-	"thf_exdash": {"keys": [
-		[0.0, {"sq": 0.25, "lift": -0.1, "p": -0.25, "lw": 1.0, "legs": [0.8, -1.4, 0.5, -1.1]}],
-		[0.05, {"lift": 0.2, "sq": -0.15, "lw": 1.0, "legs": [1.15, -0.1, -1.15, -0.1], "fl": Vector3(-0.45, 0.2, 0.0),
-				"hw": 1.0, "fr": Vector3(0.45, 0.2, 0.0), "rw": 1.0}],
-		[0.38, {"fz": -6.283, "lift": 0.28,
-				"lw": 1.0, "legs": [1.15, -0.1, -1.15, -0.1], "fl": Vector3(-0.45, 0.2, 0.0),
-				"hw": 1.0, "fr": Vector3(0.45, 0.2, 0.0), "rw": 1.0}],
-		[0.5, {"fz": -6.283, "p": -0.45, "sq": -0.2, "lift": 0.12, "lw": 1.0, "legs": [0.9, -0.3, -0.9, -0.3],
-				"fl": Vector3(-0.5, 0.05, 0.1), "hw": 1.0, "fr": Vector3(0.5, 0.05, 0.1), "rw": 1.0}],
-		[1.0, {"fz": -6.283, "p": -0.4, "sq": -0.15, "lift": 0.1, "lw": 1.0, "legs": [0.9, -0.3, -0.9, -0.3],
-				"fl": Vector3(-0.5, 0.05, 0.1), "hw": 1.0, "fr": Vector3(0.5, 0.05, 0.1), "rw": 1.0}],
-		[1.1, {"fz": -6.283, "sq": 0.32, "lift": -0.1, "lw": 1.0, "legs": [0.9, -1.5, 0.5, -1.2]}],
-		[1.25, {"fz": -6.283}]]},
+	# the air Cartwheel (sheet: 0129-0134, 303.8-304.5s): a tucked flick, the star turned over sideways (0.08 to
+	# 0.34), then carried flat and stretched on its speed, legs split and arms swept back, held until she lands
+	# (ThiefKit plays thf_land then); the whole air dash runs up to 1.09s, the keys end at 0.5
+	"thf_exdash": {"hold": true, "keys": [
+		[0.0, {}],
+		[0.05, {"sq": 0.28, "lift": -0.04, "p": 0.25, "lw": 1.0, "legs": [1.1, -1.6, 0.9, -1.4],
+				"fl": Vector3(-0.2, 0.15, 0.25), "hw": 1.0, "fr": Vector3(0.2, 0.15, 0.25), "rw": 1.0}],
+		[0.08, {"sq": -0.2, "lift": 0.18, "lw": 1.0, "legs": [1.25, -0.05, -1.25, -0.05],
+				"fl": Vector3(-0.58, 0.3, 0.0), "hw": 1.0, "fr": Vector3(0.58, 0.3, 0.0), "rw": 1.0}],
+		[0.34, {"fz": -6.283, "sq": -0.2, "lift": 0.22, "lw": 1.0, "legs": [1.25, -0.05, -1.25, -0.05],
+				"fl": Vector3(-0.58, 0.3, 0.0), "hw": 1.0, "fr": Vector3(0.58, 0.3, 0.0), "rw": 1.0}],
+		[0.5, {"fz": -6.283, "p": -0.75, "sq": -0.22, "lift": 0.12, "lw": 1.0, "legs": [1.0, -0.2, -1.0, -0.35],
+				"fl": Vector3(-0.45, -0.05, 0.4), "hw": 1.0, "fr": Vector3(0.45, -0.05, 0.4), "rw": 1.0}]]},
+	# touching down from the air Cartwheel (sheet 6: a low crouch held ~0.1s, up in ~0.05s, no dust)
+	"thf_land": {"keys": [
+		[0.0, {"sq": 0.34, "lift": -0.12, "p": 0.2, "lw": 1.0, "legs": [0.9, -1.5, 0.5, -1.2],
+				"fl": Vector3(-0.5, -0.05, 0.15), "hw": 1.0, "fr": Vector3(0.5, -0.05, 0.15), "rw": 1.0}],
+		[0.1, {"sq": 0.3, "lift": -0.1, "p": 0.16, "lw": 1.0, "legs": [0.9, -1.4, 0.5, -1.15],
+				"fl": Vector3(-0.5, 0.0, 0.15), "hw": 0.8, "fr": Vector3(0.5, 0.0, 0.15), "rw": 0.8}],
+		[0.18, {}]]},
 	# Juggernaut lumbers: head down, shoulder driven forward, a heavy stamp and settle at the end
 	"jug_exdash": {"keys": [
 		[0.0, {"p": -0.2, "sq": 0.2, "lw": 0.8, "legs": [0.6, -1.0, -0.4, -0.6], "lift": -0.06}],
