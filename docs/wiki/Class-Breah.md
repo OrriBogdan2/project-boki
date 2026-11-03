@@ -32,7 +32,7 @@ What the in-game kit card (K) says.
 | LMB | Rubble Fists: tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies. |
 | RMB: Quakefall | Quakefall: hold to gather, let go to hop and slam; the centre stuns. Jump while holding to leap forward. |
 | E: Stone Row | Stone Row: raise three rocks ahead. Stand on them, climb them, or punch them into foes. |
-| Hunter ultimate: Basalt Spine | Basalt Spine: from level 6, raise a long ridge of rocks at the cursor; hold and drag to turn it. Over the abyss it is a walkway. |
+| Hunter ultimate: Basalt Spine | Basalt Spine: from level 6, raise a long ridge of rocks at the cursor; hold and drag to turn it. Rocks only rise on solid ground. |
 | Weapon: Rubble Fists | Tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies. |
 
 ### Abilities in full
@@ -49,7 +49,7 @@ What the in-game kit card (K) says.
 
 **Stone Row (E, 13s cooldown).** A red flash on the ground, then three rocks rise in a slight curve 3.4m ahead, spanning 5m (on solid ground only, never into bodies). They stop foes and shots, hold 9s, you can stand on and climb them, and any punch, slam or dash-launch sends them flying.
 
-**Basalt Spine (hunter ultimate, from level 6, 45s cooldown).** Tap: a ridge of 13 rocks, 19.8m long, centred at the cursor (up to 11m away) and across your aim. Hold the key and drag the cursor to swing it round its centre; let go to cast. Molten cracks show along the line for 0.2s, then the rocks erupt from the centre outward over 0.4s, slowing foes beside them by 35% for 1s and shoving anyone on the line aside. They are your rocks for 7s: they stop foes and their shots, you stand on them and climb them, and a punch along the ridge launches the whole line (its rocks deal at most 40 to any one hunter). Over the abyss the line becomes a 2m walkway for 7s. 45s.
+**Basalt Spine (hunter ultimate, from level 6, 45s cooldown).** Tap: a ridge of 13 rocks, 19.8m long, centred at the cursor (up to 11m away) and across your aim. Hold the key and drag the cursor to swing it round its centre; let go to cast. Molten cracks show along the line for 0.2s, then the rocks erupt from the centre outward over 0.4s, slowing foes beside them by 35% for 1s and shoving anyone on the line aside. They are your rocks for 7s: they stop foes and their shots, you stand on them and climb them, and a punch along the ridge launches the whole line (its rocks deal at most 40 to any one hunter). Rocks only rise on solid ground: the ridge stops at the abyss, and with no ground under it the cast is refused. 45s.
 
 ### Ranks
 

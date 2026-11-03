@@ -1,15 +1,13 @@
 class_name HeroZones
 extends RefCounted
-## Placement of what Breah (dolm) and Ostra leave in the world (rocks, rock bridges, the seed): one legality
-## rule for all of it, and the Net side. A rock or seed only goes on solid ground that a body could
-## stand on: not in the abyss, not inside rocks, trees, cliffs or other walls, not through a wall from
-## where the caster stands. Rock bridges only replace abyss tiles (Verbs.add_bridge).
+## Placement of what Breah (dolm) and Ostra leave in the world (rocks, the seed): one legality rule for all
+## of it, and the Net side. A rock or seed only goes on solid ground that a body could stand on: not in the
+## abyss, not inside rocks, trees, cliffs or other walls, not through a wall from where the caster stands.
 ##
 ## Net (Net.VERSION 0.14.0): ["zone", kind, ...] events through the existing "ev" topic. The caster's
 ## game sends them; every other game builds the same thing, so a rock stops a remote body the same way.
 ##   ["zone", "rock",   nid, rid, x, y, z, dx, dz, len, time, hp]
 ##   ["zone", "rockgo", rid]                     a rock was launched or crumbled: remove it
-##   ["zone", "bridge", nid, x, y, z, dx, dz, len, width, time]
 ##   ["zone", "seed",   nid, sid, x, y, z, rmax, grow]
 ##   ["zone", "pop",    sid]
 ## ["zone", "tp",     nid, x, y, z]            a body another game owns was moved (Trade, the Nightwell catch): its
@@ -192,21 +190,6 @@ static func remove_rock(m: Node, w: Dictionary, send := true) -> void:
 	if send:
 		tx(m, ["zone", "rockgo", String(w.get("rid", ""))])
 
-## A temporary rock bridge over the abyss from `from` along `dir`. Returns the tiles turned to ground.
-static func bridge(
-	m: Node, by: Ent, from: Vector3, dir: Vector2, len_: float, width: float, time_: float, send := true
-) -> int:
-	var n: int = m.verbs.add_bridge(by, from, dir, {"length": len_, "width": width, "time": time_, "color": "#d9b27a"})
-	if n > 0 and send and by != null and (m.net_on or capture) and not by.remote:
-		tx(
-			m,
-			[
-				"zone", "bridge", by.nid, m._r(from.x), m._r(from.y), m._r(from.z), snappedf(dir.x, 0.001),
-				snappedf(dir.y, 0.001), snappedf(len_, 0.1), snappedf(width, 0.1), snappedf(time_, 0.1)
-			]
-		)
-	return n
-
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
 ## The seed: a dark indigo glass drum on the ground with a slow violet swirl (shaders/void_glass),
 ## growing to its full width, with a teal rim ring. Ostra's own shape; no other zone looks like it.
@@ -269,14 +252,6 @@ static func net_in(m: Node, x: Array) -> void:
 			var w := find_rock(m, String(x[2]))
 			if not w.is_empty():
 				remove_rock(m, w, false)
-		"bridge":
-			if x.size() < 11: return
-			var by2: Ent = m.ents_by_id.get(String(x[2]), null)
-			if by2 != null:
-				bridge(
-					m, by2, Vector3(x[3], x[4], x[5]), Vector2(x[6], x[7]), float(x[8]), float(x[9]), float(x[10]),
-					false
-				)
 		"seed":
 			if x.size() < 9: return
 			var sid := String(x[3])

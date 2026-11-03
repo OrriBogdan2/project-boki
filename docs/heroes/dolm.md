@@ -44,15 +44,15 @@ sounds from `tools/gen_stone_sfx.py` (names in `scripts/core/sfx_kits.gd`).
 | RMB Quakefall | hold to charge, release | everyone sees a red circle a hop (2m) ahead, radius 3.6-4.5m, its sweet spot growing 0.9-1.8m; the cursor charge ring and full flare; both fists glow molten | release: a short hop (a real 0.35s jump arc, about 2m: 1.1 body heights, 0.4m up) into the centre, then the slam as she lands: 14-30, centre x1.2 and stun 0.5-1.2s (stars), rocks in the ring fly outward, foes in the air are dunked (+40%, +20 over the abyss); a molten starburst, rock chips flying, a dust ring at the edge and a dark red cracked crater for 1s. While charging: walk at 55%, jump = a real leap 3.2m forward, about 1.2m up (circle comes along; let go in the air = the arc carries on, slam on landing), a punch = a 1.5m lunge. In the air: dive and slam on landing. The hop and the leap are real jump arcs (not dashes, which hold your height), so glide works out of them: opening or holding the glider drops the pending slam and the glider takes over, never dragged down | `breah_crouch` (hold), `breah_leap`, `breah_lunge`, `breah_slam`, `breah_dive`, `breah_slam_land` | `br_leap`, `br_shove`, `br_slam` |
 | Shift Rubble Leap | tap | to the cursor (1.2m to about 4.25m); everyone sees the landing circle (1.8m) filling through the flight | the rock bursts up under her (0.06s crouch), she leaps in an arc to the spot (0.52s), lands with a crash: 8 dmg and a shove to everyone within 1.8m, then the rock comes down 0.14s after her and rolls on 6m: 12 dmg, Shred, 1.5s slow. In the air: the class long dash, her own heavy shove with a dust after-image | `breah_dash`, `breah_leap_land`, `breah_exdash` | `br_rise`, `br_leap`, `br_slam`, `br_roll`, `br_shove` |
 | E Stone Row | tap | a 0.2s red-orange flash on the ground at each spot (everyone sees it) | three rocks of jagged basalt columns (tapered, broken tops, leaning apart) in a slight curve 3.4m ahead (outer two 0.45m back, 2.4m apart), thin molten cracks in the ground at their feet cooling over 0.6s; 9s, 45 hp; they block bodies and enemy shots; you stand on them and climb them with a jump; any punch, slam or dash-launch sends them flying | `breah_raise` | `br_crack`, `br_raise` |
-| X Basalt Spine (level 6, 45s) | tap, or hold and drag, release | while X is held (yours only): a pale line 19.8m long with inward chevrons and a centre ring, at the cursor (up to 11m), across the aim; dragging the cursor 0.8m+ from the centre swings it round the centre toward the cursor. On release everyone sees molten cracks along it for 0.2s | 13 rocks of hers erupt from the centre outward over 0.4s with flame bursts: foes within 1.6m are slowed 35% for 1s (1 damage), bodies on the line are moved to their side of it. The rocks stand 7s, block foes and their shots, carry and climb like hers, and fly when punched, slammed or dashed into (a punch along the ridge sweeps it); one cast's rocks deal at most 40 to any one hunter. Over the abyss the line becomes a 2m walkway for 7s. A stun, knock or merge while aiming cancels it unspent | `breah_spine_aim` (hold), `breah_spine` | `br_spine` |
+| X Basalt Spine (level 6, 45s) | tap, or hold and drag, release | while X is held (yours only): a pale line 19.8m long with inward chevrons and a centre ring, at the cursor (up to 11m), across the aim; dragging the cursor 0.8m+ from the centre swings it round the centre toward the cursor. On release everyone sees molten cracks along it for 0.2s | 13 rocks of hers erupt from the centre outward over 0.4s with flame bursts: foes within 1.6m are slowed 35% for 1s (1 damage), bodies on the line are moved to their side of it. The rocks stand 7s, block foes and their shots, carry and climb like hers, and fly when punched, slammed or dashed into (a punch along the ridge sweeps it); one cast's rocks deal at most 40 to any one hunter. They are Stone Row's own rocks (same length, top and thickness), lying along the line, one rock deep. Only solid ground takes a rock: the line is clipped where it crosses the abyss (no walkway, no bridge), and a line with no ground under it is refused with a small "No ground for the ridge" note and a puff of grit, unspent. A stun, knock or merge while aiming cancels it unspent | `breah_spine_aim` (hold), `breah_spine` | `br_spine` |
 | Merge (the `ultimate` action; its key from Settings.key_cap) | (Boki Merge) | | | | |
 
 Rank 3: Quakefall gives a Molten Guard stack (18, the same stacks the punch gives, up to 4, a gold ring) per slam that catches
 something; Rubble Leap takes a second charge and goes a third further; Stone Row raises an extra row of three behind the first (the source's "extra Rock Wall").
 
 **Unfolded:** the kit pass had folded the source's Tetraform into Stone Row rank 3 (a centre-out second row that slowed, and a
-bridge over the abyss). Now that Tetraform is Basalt Spine on X, those parts moved there and rank 3 is the source's plain
-extra row again.
+bridge over the abyss). Now that Tetraform is Basalt Spine on X, the row moved there and rank 3 is the source's plain extra
+row again. The bridge is gone altogether (owner review item 15: no terrain over the abyss from her ult).
 
 ## Quakefall review (owner review item 14, Nov 3)
 - **Before:** the hop was the shared dash motion (2m in 0.15s, 13 m/s, height held flat), so the release read as a quick
@@ -91,7 +91,7 @@ extra row again.
 | Merge start | dive, charge, its leap, Rubble Leap, the Spine's aim and telegraphs all drop | `merge hold: ...` |
 | Basalt Spine, then a punch along it | the whole ridge flies in a stream at whoever is down the line (40 cap per hunter), ROCKFALL | `ult combo: a punch along the ridge launches its rocks in a stream` |
 | Basalt Spine across a fleeing foe | the foe is shoved to its side of the line and slowed; the ridge walls it off | `ult: a body on the line is shoved off it...`, `ult: the rise slows a foe beside it` |
-| Basalt Spine over the abyss | a walkway along the line (a bridge or an escape) | `bridge (Basalt Spine): abyss tiles become ground` (`--zone-check`) |
+| Basalt Spine over the abyss | rocks on the banks only, clipped at the edges; no walkway; a line fully over the abyss is refused | `spine (item 15): over the abyss no walkway...`, `spine (item 15): the line is clipped...` (`--zone-check`), `spine (item 15): a cast fully over the abyss is refused...` |
 | Basalt Spine, punch, then the merge | the target lives (burst cap) | `ult burst: ridge, punch, merge and its ultimate leave a full-health light hunter standing` |
 
 ## Small mechanics
@@ -108,8 +108,8 @@ extra row again.
 | Allies hop over friendly rock walls by jumping against them | wiki (Rockwave), patch 1.01 | no | built more broadly: anyone can climb a rock with a jump and stand on it (owner note); asserted for an ally in the data pass |
 | Tetraform: tap places it across the aim; hold and drag sets the angle | card (patch 1.01 notes), wiki | yes (ult f35-f44) | built on X; asserted `ult drag: ...` |
 | Tetraform rocks spawn after a short delay, centre-out, and slow nearby foes | card, wiki | yes (ult f45-f55) | built: 0.2s cracks, 0.4s rise, 35% slow 1s; asserted `ult beats: ...`, `ult: the rise slows ...` |
-| Tetraform over the abyss makes temporary terrain | card, wiki | yes (guide 161-169s) | built: a 2m walkway for the rocks' 7s |
-| Tetraform can't be used to leave the arena bounds | patch 1.04 notes | no | built by placement: rocks only on legal ground (HeroZones.fits), the walkway only on abyss tiles |
+| Tetraform over the abyss makes temporary terrain | card, wiki | yes (guide 161-169s) | not built: the owner wants rocks only, never land over the abyss (review item 15); the line is clipped at the edges |
+| Tetraform can't be used to leave the arena bounds | patch 1.04 notes | no | built by placement: rocks only on legal ground (HeroZones.fits) |
 | Punched Tetraform rocks launch like any rock (Rocksweeping) | card, guide | yes | built (the punch sweep takes ult rocks); asserted |
 | Tetraform terrain lasts longer per rank (+2.5s at levels 2 and 3) | wiki | no | not built: our X has no ranks |
 | Landslide rock shoves enemies toward the abyss (dunk setup) | footage tip "Dash -> RMB Dunk Combo" | yes (0965-1010) | built as the leap's landing crash (a shove with a lift) and the rock rolling on |
@@ -167,7 +167,7 @@ extra row again.
   wall with a `top`; Ent.ground reads StoneStand.top_under; Hunter's move step calls StoneStand.climb (one line).
 - Every projectile is an ordinary Match shot (spawn_shot), so the height rules and Net behave as for every shot; KitLooks only
   replaces the shared sphere with a pooled skin.
-- Net is unchanged: rocks still travel as `["zone", ...]` events (the Spine's too, and its walkway as a `"bridge"` event);
-  `top` is a constant.
+- Net: rocks travel as `["zone", ...]` events (the Spine's too); `top` is a constant. The Spine's old `"bridge"` event is
+  gone with the walkway (nothing sends it; the receiving branch was removed too).
 - Basalt Spine: `scripts/arch/kits/breah_spine.gd` (BreahSpine). Its hold field is `phase == "aim"`, cleared by
   `DolmKit._drop_holds()` through `spine.drop()`. Main sends only the X press, so BreahSpine._held() reads the local key (tests hold it with `inp["x_down"]`).

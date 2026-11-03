@@ -1,8 +1,8 @@
 extends RefCounted
 ## --zone-check: Breah (dolm) and Ostra placement (docs/heroes/dolm.md, ostra.md). The combo checks extend
 ## this file: tools/breah_combo_check.gd (--dolm-combo-check), tools/ostra_combo_check.gd (--ostra-combo-check).
-##   zone: where rocks, rock bridges, the seed and Trade may land: collision, walls, bodies, abyss edges,
-##         the bridge only replacing abyss tiles and giving them back, and the Net placement events
+##   zone: where rocks, the seed and Trade may land: collision, walls, bodies, abyss edges (the Basalt
+##         Spine clipped there, no walkway), and the Net placement events
 ##         (what one game sends, a second game rebuilds identically).
 
 var main: Node
@@ -89,7 +89,7 @@ func rocks(m: Match) -> Array:
 	return m.verbs.walls.filter(func(w): return w.get("rock", false))
 
 ## Breah's Basalt Spine laid along the aim across the abyss strip: X held at a centre over the gap, the
-## cursor dragged on along the aim, let go; returns once the cracks are done and the walkway is down.
+## cursor dragged on along the aim, let go; returns once the cracks are done.
 func spine_across(m: Match, P: Hunter, home: Vector3) -> void:
 	P.ak.cd["x"] = 0.0
 	P.inp["aim"] = home + Vector3(6.5, 0.9, 0)
@@ -169,22 +169,35 @@ func _zones() -> void:
 		var mid2: Vector3 = (P.ak as DolmKit).rock_mid(w)
 		all_ok = all_ok and not m.world.is_void(mid2.x, mid2.z)
 	ok("stone row: rocks near the edge stay on ground", rocks(m).size() > 0 and all_ok, "rocks %d" % rocks(m).size())
-	# ---- the Basalt Spine's walkway only turns abyss tiles to ground, and gives them back
+	# ---- the Basalt Spine across the abyss: rocks on the ground either side, none over the gap, no walkway
 	var before := void_tiles(m)
-	var ground_before: Array = []
-	for i in m.world.kind.size():
-		if m.world.kind[i] != World.T_VOID: ground_before.append(i)
 	for w in m.verbs.walls.duplicate(): m.verbs._break_wall(w)
+	HeroZones.capture = true
+	HeroZones.sent.clear()
 	spine_across(m, P, home)
-	var after := void_tiles(m)
+	step(m, float(P.ak.x_def()["rise"]) + 0.1)
+	HeroZones.capture = false
 	var spine := (P.ak as DolmKit).spine
-	ok("bridge (Basalt Spine): abyss tiles become ground", spine.bridges == 1 and after < before, "void %d -> %d" % [before, after])
-	var untouched := true
-	for i in ground_before:
-		untouched = untouched and m.world.kind[i] != World.T_VOID
-	ok("bridge: solid ground is never changed", untouched)
-	step(m, float(P.ak.x_def()["time"]) + 1.0)
-	ok("bridge: the abyss comes back when it ends", void_tiles(m) == before, "void %d vs %d" % [void_tiles(m), before])
+	var on_ground := true
+	var near_x := -99.0
+	var far_x := 99.0
+	for w in rocks(m):
+		for end in [w["a"], w["b"]]:
+			on_ground = on_ground and not m.world.is_void((end as Vector2).x, (end as Vector2).y)
+		var mx := (P.ak as DolmKit).rock_mid(w).x - home.x
+		if mx < 4.0: near_x = maxf(near_x, mx)
+		else: far_x = minf(far_x, mx)
+	ok(
+		"spine (item 15): over the abyss no walkway: the abyss stays abyss, no bridge event",
+		void_tiles(m) == before and not HeroZones.sent.any(func(e): return e[1] == "bridge"),
+		"void %d -> %d" % [before, void_tiles(m)]
+	)
+	ok(
+		"spine (item 15): the line is clipped at the abyss edges (rocks on both banks, every end on ground)",
+		on_ground and rocks(m).size() > 2 and rocks(m).size() < int(P.ak.x_def()["rocks"]) and near_x < 4.0
+			and far_x >= 12.0 and spine.rocks_raised == rocks(m).size(),
+		"rocks %d near bank %.1f far bank %.1f" % [rocks(m).size(), near_x, far_x]
+	)
 	await done(m)
 	# ---- a block tile and a body in the way
 	r = setup("dolm", 9.0)
@@ -246,25 +259,6 @@ func _zones() -> void:
 	(P.ak as DolmKit).launch(a_rocks[0], Vector2(1, 0), "punch")
 	for e in HeroZones.sent: HeroZones.net_in(m2, e)
 	ok("net: a launched rock is removed on the other game", rocks(m).size() == 2 and rocks(m2).size() == 2, "a %d b %d" % [rocks(m).size(), rocks(m2).size()])
-	# the bridge
-	HeroZones.sent.clear()
-	await done(m2)
-	await done(m)
-	r = setup("dolm", 9.0, 3, 3)
-	m = r[0]; P = r[1]; home = r[3]
-	var v_before := void_tiles(m)
-	HeroZones.sent.clear()
-	spine_across(m, P, home)
-	var bev: Array = HeroZones.sent.filter(func(e): return e[1] == "bridge")
-	r2 = setup("dolm", 9.0, 3, 3)
-	m2 = r2[0]
-	var remote2 := m2.make_hunter("p1", 0, "medium", "Remote", "idle", {}, r2[3] + Vector3(0, 0, 3), {"arch": "none"})
-	remote2.nid = "p1"
-	m2.ents_by_id["p1"] = remote2
-	remote2.remote = true
-	var v2_before := void_tiles(m2)
-	for e in bev: HeroZones.net_in(m2, e)
-	ok("net: the bridge is rebuilt identically", bev.size() == 1 and v_before - void_tiles(m) == v2_before - void_tiles(m2) and void_tiles(m2) < v2_before, "a %d b %d" % [v_before - void_tiles(m), v2_before - void_tiles(m2)])
 	await done(m2)
 	await done(m)
 	# ---- Ostra: the seed and Trade respect ground, walls and the abyss
