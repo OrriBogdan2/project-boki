@@ -29,7 +29,7 @@
 	"x": {"name": "Gilded Riposte", "short": "Riposte", "icon": "cleave", "col": "#ffc94a", "cooldown": 22.0, "unlock": 6,
 		"guard": 0.65, "strike_t": 0.1, "recover": 0.35, "lunge": 1.8, "len": 3.6, "width": 1.8, "dmg": 34.0, "block_k": 0.2, "blocks_max": 2, "heal": 0.8,
 		"desc": "Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 34, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once."},
-	"order": ["dash", "sec", "kin", "sec", "dash", "ult", "sec", "kin", "ult", "gear"],
+	"order": ["dash", "sec", "kin", "sec", "dash", "sec", "kin", "gear"],
 	"rank3": {"dash": "the tip hits +25% harder", "sec": "+20% damage on every Smash", "kin": "hooking a foe refunds 33% of the cooldown"},
 	"rank2": {"sec": "Rank 2: cooldown 2s -> 1.8s, damage +15%.", "dash": "Rank 2: recharge 9s -> 7.6s per charge.", "kin": "Rank 2: cooldown 9.5s -> 8.6s, damage +15%."},
 	"rank_next": {"sec": "Rank 3: cooldown 2s -> 1.6s, damage +30%; +20% damage on every Smash.", "kin": "Rank 3: cooldown 9.5s -> 7.6s, damage +30%; hooking a foe refunds 33% of the cooldown.", "dash": "Rank 3: recharge 9s -> 6.3s; the tip hits +25% harder."},

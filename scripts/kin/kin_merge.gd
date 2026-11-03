@@ -250,7 +250,10 @@ static func end(h: Hunter, why := "time") -> void:
 	var released: bool = why == "ult" and not st.get("surge", false)
 	var rest := MergeRelease.rest_s()
 	h.merge_st = {}
-	h.merge_cd = maxf(KinParts.MERGE_SPENT_TIME, rest if released else 0.0)
+	var timed_out: bool = why == "time" and not st.get("surge", false)
+	if timed_out:
+		rest = MergeRelease.timeout_rest_s()
+	h.merge_cd = maxf(KinParts.MERGE_SPENT_TIME, rest if released or timed_out else 0.0)
 	if released:
 		h.ult = 0.0          # (the bond restarts from nothing)
 	if kit != null:
@@ -267,6 +270,8 @@ static func end(h: Hunter, why := "time") -> void:
 			k.merge_pop()
 		else:
 			k.merge_out()
+		if timed_out:
+			k.rest_t = rest       # (ran out of time: it rests longer than after a release)
 	h.m.on_merge_end(h, why)
 
 ## The merged patch for one of the kin's slots ({} when not merged or no patch).

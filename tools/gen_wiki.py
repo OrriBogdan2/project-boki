@@ -474,7 +474,7 @@ def gen_maps():
         isl = m.get("islands", [])
         if isl:
             dz = {0: "quiet", 1: "contested", 2: "dangerous"}
-            body += "### Islands\n\n" + table(["Island", "Role", "Biome", "Danger", "Named spots"], [[i.get("name", i["id"]), i.get("role", ""), i.get("biome", "").title(), dz.get(i.get("danger"), str(i.get("danger", ""))), ", ".join(a[2] for a in i.get("areas", []))] for i in isl]) + "\n\n"
+            body += "### Islands\n\n" + table(["Island", "Role", "Biome", "Danger", "Tall grass clumps", "Named spots"], [[i.get("name", i["id"]), i.get("role", ""), i.get("biome", "").title(), dz.get(i.get("danger"), str(i.get("danger", ""))), str(len(i.get("bush", []))), ", ".join(a[2] for a in i.get("areas", []))] for i in isl]) + "\n\n"
         if m.get("lairs"):
             bn = {"colossus": "Stone Colossus", "serpent": "Stormcoil", "brood": "Brood Mother"}
             en = {"dial": "lock dial", "runes": "three rune pylons", "wards": "three ward stones"}
@@ -509,7 +509,8 @@ def gen_maps():
 # ------------------------------------------------------------------ rules
 def gen_rules():
     tiers = gd_const("core/data.gd", "TIERS") or []
-    body = "## Expedition tiers\n\n" + table(["Tier", "Monsters", "Loot", "Wild Boki levels", "Unlocks after", "Boki at risk", "What happens"], [[t["name"], "x" + num(t["mob"]), "x" + num(t["loot"]), "%s to %s" % tuple(t["kin_lvl"]), "%s extractions" % t["unlock"], "no" if not t.get("risk_kin") else ("can be captured" if t.get("loose_capture") else "in your deathbox"), t["desc"]] for t in tiers])
+    loss_min = int((content("rules").get("boki_system") or {}).get("loss", {}).get("loss_min_tier", 2))
+    body = "## Expedition tiers\n\n" + table(["Tier", "Monsters", "Loot", "Wild Boki levels", "Unlocks after", "Boki at risk", "What happens"], [[t["name"], "x" + num(t["mob"]), "x" + num(t["loot"]), "%s to %s" % tuple(t["kin_lvl"]), "%s extractions" % t["unlock"], "no" if i < loss_min else "dropped dazed, can be scanned", t["desc"]] for i, t in enumerate(tiers)])
     mt = gd_const("core/data.gd", "MATCH") or {}
     mc = gd_dict_comments("core/data.gd", "MATCH")
     if mt:

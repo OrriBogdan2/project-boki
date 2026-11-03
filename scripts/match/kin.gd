@@ -48,13 +48,13 @@ var pend_skill := Vector3.INF     # ability to cast when it lands
 var pend_slot := ""
 var down_t := 0.0                 # downed: seconds until it comes round on its own (KinDowned)
 var down_total := 0.0
-var rescue_t := 0.0               # downed: rescue progress in seconds (KinDowned: run into it; drains back after an interrupt)
-var rescue_on := false            # downed: its owner is rescuing it right now (kneeling, rooted)
+var rescue_t := 0.0               # downed: rescue progress in seconds (KinDowned: run into it and carry it; a drop loses it)
+var rescue_on := false            # downed: its owner is carrying it in their arms right now
 var regen_quiet := 0.0             # seconds since it last lost health (KinRegen)
 var regen_hp := 0.0               # its health at the end of the last step (KinRegen)
 var regen_fx := 0.0               # countdown to the next healing mote (KinRegen)
 var mending := false              # KinRegen is healing it right now (the HUD pulses its bar)
-var rescue_block := 0.0           # downed: seconds before a rescue can start again (after a dash cancelled one)
+var rescue_block := 0.0           # downed: seconds before a rescue can start again (after a drop)
 var down_void := false            # downed: it fell into the abyss, only the timer brings it back
 var last_safe := Vector3.INF      # the last solid ground it stood on, where a fall marks it
 var beacon: MeshInstance3D = null # the downed marker pillar (KinDowned.render)
@@ -1019,6 +1019,7 @@ func _sim_dazed(dt: float) -> void:
 		dazed_t -= dt         # (it stays dazed while someone is scanning it)
 	_ground_move(Vector2.ZERO, dt)
 	hp = minf(max_hp * 0.25, hp + dt * 0.5)
+	KinLoss.tick_guard(self, dt)
 	if dazed_t <= 0.0:
 		state = "wild"
 		hp = max_hp * 0.45
@@ -1045,7 +1046,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 # ------------------------------------------------------------------ visuals
 func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
-	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding)) and not KinMerge.inside(self)
+	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding) and not KinLoss.guarding(self)) and not KinMerge.inside(self)
 	KinDowned.render(self, delta)
 	if not model:
 		return

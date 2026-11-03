@@ -23,7 +23,7 @@
 	"x": {"name": "Encore", "short": "Encore", "icon": "dance", "col": "#ff8ac8", "cooldown": 24.0, "unlock": 6,
 		"grow": 0.4, "r0": 2.3, "reach": 5.4, "rim": 0.75, "time": 2.0, "shots": 5, "dmg": 8.0, "rim_dmg": 4.0, "rim_blight": 6.0,
 		"desc": "A violet ring grows round you (0.4s) to 5.4m and rides with you; for 2s a blade flies every 0.4s at each foe inside it (5 at most): 8 each, 12 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched."},
-	"order": ["sec", "dash", "kin", "sec", "dash", "ult", "sec", "kin", "ult", "gear"],
+	"order": ["sec", "dash", "kin", "sec", "dash", "sec", "kin", "gear"],
 	"rank3": {"sec": "flies 1m further after the first foe, and two foes caught pool their Marks", "dash": "empowered shots +20%, and a Shadow Knife that sticks in a foe gives the Vault back", "kin": "sticking refunds 25% of the cooldown (50% in a foe)"},
 	"rank2": {"sec": "Rank 2: cooldown 7s -> 6.3s, damage +15%.", "dash": "Rank 2: recharge 4.5s -> 3.8s per charge.", "kin": "Rank 2: cooldown 15s -> 13.5s, damage +15%."},
 	"rank_next": {"sec": "Rank 3: cooldown 7s -> 5.6s, damage +30%; flies 1m further after the first foe, and two foes caught pool their Marks.", "kin": "Rank 3: cooldown 15s -> 12s, damage +30%; sticking refunds 25% of the cooldown (50% in a foe).", "dash": "Rank 3: recharge 4.5s -> 3.2s; empowered shots +20%, and a Shadow Knife that sticks in a foe gives the Vault back."},

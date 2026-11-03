@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Builds content/maps/hollowcrown.json: the Hollow Crown, a hand-made expedition map.
 
-Every coordinate here is chosen by hand (no randomness). The engine reads the JSON; this script only
-keeps the numbers readable, works out bridge ends from the island outlines, checks the layout
-(lairs on flat ground, spots on open ground, ramps landing where they should) and can draw a
-preview: python3 tools/make_hollowcrown.py --preview out.png
+Every coordinate here is chosen by hand, except the tall grass: place_cover() plants that from rules
+(per-biome share, patches beside chests, camps, lanes, cliffs, bridge heads, in sight of the exits) with a
+fixed seed, so a run always writes the same map. The engine reads the JSON; this script keeps the numbers
+readable, works out bridge ends from the island outlines, checks the layout (lairs on flat ground, spots
+on open ground, ramps landing where they should), prints the cover share per biome and can draw a
+preview: python3 tools/make_hollowcrown.py --preview out.png. Never edit the JSON by hand.
 
 Layout (216 x 216 tiles = metres, north up, heights in terraces of 0.8 m):
 
@@ -37,10 +39,10 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
     rocks (+)         [[x0,z0,x1,z1]] boulder blocks (inclusive tile rects)
     trees (+)         [[x,z]] single trees (they block like rocks)
     crates (+)        [[x,z]] camp supply piles (block)
-    bush              [[x,z,r]] tall grass to hide in
+    bush              [[x,z,r]] tall grass to hide in: computed by place_cover() below, not listed by hand
     landings (+)      [[x,z]] where squads come down (World.spawns)
     camps (+)         [[x,z,"light|normal|heavy"]] monster camps (which monsters: rolled)
-    chests            [[x,z,tier]];  breakables (+) [[x,z,"crate|pot|barrel"]];  weapons (+) [[x,z]]
+    chests            [[x,z]] (one locked chest type);  breakables (+) [[x,z,"crate|pot|barrel"]];  weapons (+) [[x,z]]
     wild (+)          [[x,z]] wild Boki;  shrine (+) [x,z]
     wardens (+)       [[x,z]] Blight Warden posts (how many stand: rolled by danger)
     traps (+)         [[x,z]] where the region's traps go (which trap: the biome's list)
@@ -49,7 +51,7 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
   glides              [a, b] or (+) {a, b, take:[x,z], land:[x,z], name}: glide routes for bots
   pads, updrafts, winds, docks, outposts, hatches, lairs, spawn_points: as Skyreach
 """
-import json, math, os, sys
+import json, math, os, random, sys
 
 SIZE = 216
 LEVEL = 0.8
@@ -82,9 +84,8 @@ islands = [
                 dict(line=[104, 115, 106, 115]), dict(line=[110, 115, 112, 115])],
          pillars=[[100, 104], [116, 104], [100, 112], [116, 112], [86, 102], [86, 114], [130, 102], [130, 114]],
          rocks=rocks((84, 88, 85, 89), (130, 88, 131, 89), (84, 126, 85, 127), (130, 126, 131, 127)),
-         bush=[[84, 118, 1.8], [132, 98, 1.8]],
          landings=[],
-         chests=[[108, 108, 2], [84, 108, 1], [132, 108, 1]],
+         chests=[[108, 108], [84, 108], [132, 108]],
          camps=[[94, 88, "heavy"], [122, 128, "heavy"]],
          breakables=[[126, 88, "barrel"], [127, 88, "crate"], [89, 128, "pot"], [90, 128, "crate"]],
          wardens=[[114, 94], [98, 124], [108, 110]],
@@ -93,14 +94,14 @@ islands = [
     dict(id="gaol_ne", name="Stormcrown Gaol", role="camp", region=0, biome="storm", danger=2, poi=[157, 79], noise=0.05,
          shapes=[poly([(146, 56), (164, 52), (172, 60), (170, 78), (158, 85), (146, 79), (142, 66)], 4)],
          sheer=[[200, 260]],
-         rocks=rocks((147, 81, 148, 81)), bush=[],
-         chests=[[164, 79, 1]], camps=[], breakables=[[150, 78, "pot"], [151, 79, "pot"]],
+         rocks=rocks((147, 81, 148, 81)),
+         chests=[[164, 79]], camps=[], breakables=[[150, 78, "pot"], [151, 79, "pot"]],
          wardens=[[160, 81]], traps=[]),
     dict(id="gaol_sw", name="Ashen Gaol", role="camp", region=0, biome="ember", danger=2, poi=[56, 162], noise=0.05,
          shapes=[poly([(48, 138), (62, 133), (74, 139), (77, 156), (68, 166), (52, 164), (44, 152)], 4)],
          sheer=[[20, 80]],
-         rocks=rocks((72, 158, 72, 159)), bush=[],
-         chests=[[62, 161, 1]], camps=[], breakables=[[51, 140, "barrel"], [52, 140, "crate"]],
+         rocks=rocks((72, 158, 72, 159)),
+         chests=[[62, 161]], camps=[], breakables=[[51, 140, "barrel"], [52, 140, "crate"]],
          wardens=[[74, 146]], traps=[]),
     # ---- FROSTGATE (north): a long frozen ridge. The Keep (lv 6, walled) on its east end looks straight
     # down the Gate Span into the Crown; reach it by the West Stair or the narrow South Stair. The open
@@ -113,9 +114,8 @@ islands = [
          walls=[dict(box=[120, 33, 136, 50], gates=["w", "s"], gate_w=3)],
          rocks=rocks((84, 38, 85, 39), (96, 50, 98, 50), (102, 32, 103, 32), (102, 33, 102, 34), (88, 56, 89, 56)),
          trees=[[78, 46], [80, 49], [92, 29], [95, 28], [112, 60], [117, 61]],
-         bush=[[100, 60, 1.8], [80, 36, 1.4]],
          landings=[[84, 32]],
-         chests=[[128, 41, 1], [76, 44, 0]],
+         chests=[[128, 41], [76, 44]],
          camps=[[92, 44, "light"], [131, 44, "normal"]],
          breakables=[[106, 26, "crate"], [107, 26, "barrel"], [122, 62, "pot"]],
          weapons=[[104, 56]],
@@ -132,9 +132,8 @@ islands = [
          rocks=rocks((34, 96, 35, 97), (55, 96, 55, 99), (39, 116, 41, 116), (39, 117, 39, 117), (58, 112, 59, 113)),
          crates=[[50, 104], [51, 104]],
          trees=[[30, 88], [28, 104], [62, 90]],
-         bush=[[30, 110, 1.6], [56, 72, 1.4]],
          landings=[[38, 120], [58, 66]],
-         chests=[[46, 70, 1], [52, 118, 0]],
+         chests=[[46, 70], [52, 118]],
          camps=[[46, 76, "normal"], [42, 100, "light"]],
          breakables=[[60, 68, "barrel"], [33, 90, "crate"], [34, 90, "crate"], [52, 124, "pot"]],
          weapons=[[38, 108]],
@@ -150,9 +149,8 @@ islands = [
          ramps=[ramp(174, 135, "n", 5, 2, 6, run=2)],
          rocks=rocks((160, 100, 161, 101), (186, 130, 187, 131), (168, 136, 170, 136)),
          trees=[[176, 94], [190, 104], [158, 132]],
-         bush=[[164, 138, 1.6], [188, 120, 1.4]],
          landings=[[186, 100], [176, 140]],
-         chests=[[172, 108, 1], [184, 132, 0]],
+         chests=[[172, 108], [184, 132]],
          camps=[[180, 112, "normal"], [162, 104, "light"]],
          breakables=[[170, 96, "crate"], [171, 96, "pot"], [158, 128, "barrel"]],
          weapons=[[190, 126]],
@@ -166,9 +164,8 @@ islands = [
          sheer=[[60, 110]],
          trees=[[90, 158], [93, 157], [104, 156], [110, 186], [113, 187], [86, 180], [100, 182], [116, 162], [118, 182]],
          rocks=rocks((108, 172, 109, 173)),
-         bush=[[88, 164, 2.2], [102, 178, 2.0], [108, 160, 1.8], [92, 184, 1.6], [114, 168, 1.6]],
          landings=[[86, 168]],
-         chests=[[100, 166, 0], [114, 176, 0]],
+         chests=[[100, 166], [114, 176]],
          camps=[[98, 160, "light"]],
          wild=[[94, 172], [97, 168]],
          breakables=[[82, 172, "pot"], [83, 173, "pot"], [138, 160, "crate"]],
@@ -181,9 +178,8 @@ islands = [
                  circle(26, 24, 5.5, 2)],
          sheer=[[90, 150]],
          trees=[[40, 16], [44, 20], [18, 34]],
-         bush=[[36, 38, 1.6]],
          landings=[[34, 30], [46, 36], [20, 38]],
-         chests=[[26, 24, 1], [42, 28, 0]],
+         chests=[[26, 24], [42, 28]],
          camps=[], breakables=[[30, 40, "crate"], [31, 40, "barrel"]],
          wardens=[],
          areas=[[26, 22, "Lark Stones"]]),
@@ -191,9 +187,8 @@ islands = [
          shapes=[poly([(170, 12), (192, 10), (204, 22), (202, 40), (186, 46), (172, 38), (166, 24)], 0)],
          sheer=[[0, 60]],
          rocks=rocks((178, 18, 179, 18)), trees=[[196, 34], [174, 30]],
-         bush=[[194, 16, 1.4]],
          landings=[[180, 36], [196, 28], [174, 20]],
-         chests=[[198, 24, 0]],
+         chests=[[198, 24]],
          camps=[], breakables=[[184, 40, "crate"], [185, 40, "pot"]],
          wardens=[[184, 16]]),
     dict(id="duskmoor", name="Duskmoor", role="landing", region=7, biome="storm", danger=0, poi=[186, 184], noise=0.08,
@@ -201,25 +196,23 @@ islands = [
          sheer=[[150, 210]],
          trees=[[180, 172], [194, 196], [174, 190]],
          rocks=rocks((188, 184, 189, 185)),
-         bush=[[196, 176, 1.6]],
          landings=[[180, 182], [196, 188], [186, 200]],
-         chests=[[192, 172, 0]],
+         chests=[[192, 172]],
          camps=[[178, 194, "light"]], breakables=[[200, 184, "barrel"], [200, 185, "crate"]],
          wardens=[[188, 176]]),
     dict(id="saltmere", name="Saltmere", role="landing", region=8, biome="bloom", danger=0, poi=[24, 184], noise=0.08,
          shapes=[poly([(14, 170), (30, 164), (44, 172), (46, 190), (34, 204), (16, 202), (8, 186)], 0)],
          sheer=[[150, 210]],
          trees=[[14, 180], [36, 198], [40, 178]],
-         bush=[[20, 196, 1.6]],
          landings=[[16, 190], [34, 176], [28, 198]],
-         chests=[[38, 186, 0]],
+         chests=[[38, 186]],
          camps=[], breakables=[[18, 176, "pot"], [19, 176, "pot"]],
          wardens=[]),
     # ---- Shardfall: a high shard of rock over the south-east gap (lv 10). A one-way launch pad from
     # Stormbreak or the updraft beside it takes you up; from there you glide down onto the Crown,
     # Thornwood or Stormbreak. A rich chest and the best view of the Thornhive and the Crown's south.
     dict(id="shard", name="Shardfall", role="perch", region=0, biome="gloom", danger=2, poi=[148, 144], noise=0.03, perch=True,
-         shapes=[circle(148, 144, 4.6, 10)], sheer=[], chests=[[148, 144, 2]]),
+         shapes=[circle(148, 144, 4.6, 10)], sheer=[], chests=[[148, 144]]),
 ]
 
 BY = {d["id"]: d for d in islands}
@@ -440,6 +433,9 @@ def preview(path, lv, owner, stairs):
             dr.rectangle([R[0] * S, R[1] * S, (R[2] + 1) * S - 1, (R[3] + 1) * S - 1], fill=(70, 70, 70))
         for t in d.get("trees", []):
             dr.ellipse([t[0] * S, t[1] * S, t[0] * S + S, t[1] * S + S], fill=(30, 90, 40))
+        for b in d.get("bush", []):
+            for q in _disc(b[0], b[1], b[2]):
+                dr.rectangle([q[0] * S, q[1] * S, q[0] * S + S - 1, q[1] * S + S - 1], fill=(30, 140, 50))
         for c in d.get("chests", []):
             dr.rectangle([c[0] * S, c[1] * S, c[0] * S + S, c[1] * S + S], fill=(255, 215, 0))
         for c in d.get("landings", []):
@@ -466,9 +462,342 @@ def gap(a, b, owner):
     edgeB = [p for p in B if any((p[0] + dx, p[1] + dz) not in owner for dx, dz in DIRS.values())]
     return min(math.hypot(p[0] - q[0], p[1] - q[1]) for p in edgeA[::2] for q in edgeB[::2])
 
+# ------------------------------------------------------------------ hiding cover
+# The tall grass is computed here, not listed by hand (docs/decisions/0009-keys-and-cover.md). Each
+# biome has a share of its walkable ground to cover (content/rules/keys.json "cover"): bloom a lot,
+# meadow some, gloom a little, storm and ember less, frost almost none. Cover comes as PATCHES of 3-6
+# overlapping clumps, put where a fight wants it: beside chests and camps, along the flanks of the
+# lanes between landmarks, at cliff edges and bridge heads, around the heart's pillars, and in sight
+# of every way out in the bush biomes. Nothing grows on stairs, ramps, bridges, landing drop circles,
+# lair floors or across a lane: lanes keep a clear corridor. The seed is fixed, so the map is the same
+# every time this script runs.
+COVER_SEED = 61
+BUSH_BIOMES = ("bloom", "meadow", "gloom", "storm")     # where Shrublings may live: also where exits get cover
+COVER = {   # share of the biome's ground (inside the keys.json range), clump radius, clumps per patch, smallest patch worth planting (tiles), long bands along lanes?
+    "bloom":  dict(share=0.18, r=(2.2, 3.2), n=(5, 6), least=40, band=False, gap=2, sp=0.88),
+    "meadow": dict(share=0.1, r=(1.4, 2.0), n=(4, 6), least=14, band=True, gap=2),
+    "gloom":  dict(share=0.06, r=(1.3, 1.9), n=(3, 5), least=10, band=False, gap=2),
+    "storm":  dict(share=0.03, r=(1.1, 1.6), n=(3, 4), least=8, band=False, gap=2),
+    "ember":  dict(share=0.024, r=(1.0, 1.5), n=(3, 3), least=6, band=False, gap=2),
+    "frost":  dict(share=0.004, r=(0.9, 1.2), n=(3, 3), least=3, band=False, gap=2),
+}
+LANE_HALF = 1.7         # a lane keeps this much clear on each side of its centre line
+LANDING_R = 5.5         # squads come down inside this circle: no cover
+EXIT_R = {"dock": 3.5, "outpost": 5.5, "hatch": 3.5}
+SIGHT_R = 13.0          # a patch this close, in a clear line, is "in sight" of a way out
+
+def _targets():
+    p = os.path.join(os.path.dirname(__file__), "..", "content", "rules", "keys.json")
+    with open(p) as f:
+        return json.load(f)["cover"]["biome_targets"]
+
+def _disc(cx, cz, r, jitter=0.05):
+    out = set()
+    for z in range(int(cz - r - 1), int(cz + r + 2)):
+        for x in range(int(cx - r - 1), int(cx + r + 2)):
+            if math.hypot(x + 0.5 - cx, z + 0.5 - cz) <= r + jitter: out.add((x, z))
+    return out
+
+def _disc_r(cx, cz, r):
+    return _disc(cx, cz, r, 0.0)
+
+def _seg_dist(px, pz, a, b):
+    vx, vz = b[0] - a[0], b[1] - a[1]; L2 = vx * vx + vz * vz
+    t = max(0.0, min(1.0, ((px - a[0]) * vx + (pz - a[1]) * vz) / L2)) if L2 else 0.0
+    return math.hypot(px - a[0] - vx * t, pz - a[1] - vz * t)
+
+def _wall_tiles(W):
+    out = set()
+    if "line" in W:
+        x0, z0, x1, z1 = W["line"]
+        for x in range(min(x0, x1), max(x0, x1) + 1):
+            for z in range(min(z0, z1), max(z0, z1) + 1): out.add((x, z))
+    elif "box" in W:
+        x0, z0, x1, z1 = W["box"]
+        for x in range(x0, x1 + 1):
+            for z in range(z0, z1 + 1):
+                if x in (x0, x1) or z in (z0, z1): out.add((x, z))
+    elif "ring" in W:
+        cx, cz, r = W["ring"][:3]
+        out |= {q for q in _disc(cx, cz, r + 0.7) if q not in _disc(cx, cz, r - 0.7)}
+    return out
+
+def ramp_tiles(R):
+    dx, dz = DIRS[R["dir"]]; sx, sz = -dz, dx
+    n = (R["to"] - R["from"]) * R.get("run", 1)
+    out = set()
+    for k in range(-6, n + 3):          # the flight, its landing, and the approach to its foot
+        for s in range(-(R["w"] // 2) - 2, R["w"] - R["w"] // 2 + 2):
+            out.add((R["at"][0] + dx * k + sx * s, R["at"][1] + dz * k + sz * s))
+    return out
+
+def _landmarks(d):
+    """The places on an island a lane runs between."""
+    pts = [tuple(p[:2]) for k in ("landings", "chests", "camps") for p in d.get(k, [])]
+    for ek in (docks, outposts, hatches):
+        pts += [tuple(e[:2]) for e in ek if (int(e[0]), int(e[1])) in INISLE[d["id"]]]
+    for R in d.get("ramps", []):
+        dx, dz = DIRS[R["dir"]]
+        pts.append((R["at"][0] - dx * 5, R["at"][1] - dz * 5))
+    for B in bridges:
+        if B["a"] == d["id"]: pts.append(tuple(B["from"]))
+        if B["b"] == d["id"]: pts.append(tuple(B["to"]))
+    return pts
+
+def _lanes(d):
+    """A spanning tree over the island's landmarks: the lanes people walk."""
+    pts = _landmarks(d)
+    if len(pts) < 2: return []
+    inT = [0]; edges = []
+    while len(inT) < len(pts):
+        best = None
+        for i in inT:
+            for j in range(len(pts)):
+                if j in inT: continue
+                L = math.hypot(pts[i][0] - pts[j][0], pts[i][1] - pts[j][1])
+                if best is None or L < best[0]: best = (L, i, j)
+        edges.append((pts[best[1]], pts[best[2]])); inT.append(best[2])
+    return edges
+
+INISLE = {}
+
+class Cover:
+    def __init__(self, lv, owner, stairs):
+        self.lv, self.owner, self.stairs = lv, owner, stairs
+        for d in islands: INISLE[d["id"]] = {p for p, o in owner.items() if o == d["id"] and lv[p] >= 0}
+        self.solid = set(); self.hard = set(); self.lanes = {}; self.things = {}
+        for d in islands:
+            for R in d.get("rocks", []):
+                for z in range(R[1], R[3] + 1):
+                    for x in range(R[0], R[2] + 1): self.solid.add((x, z))
+            for t in d.get("trees", []) + d.get("crates", []) + d.get("pillars", []): self.solid.add((int(t[0]), int(t[1])))
+            for W in d.get("walls", []): self.solid |= _wall_tiles(W)
+        self.hard |= self.solid
+        for d in islands:
+            for R in d.get("ramps", []): self.hard |= ramp_tiles(R)
+            for k in ("chests", "weapons", "wild", "wardens", "traps", "breakables"):
+                for p in d.get(k, []): self.hard |= _disc_r(p[0] + 0.5, p[1] + 0.5, 1.7)
+            if d.get("shrine"): self.hard |= _disc_r(d["shrine"][0], d["shrine"][1], 3.0)
+            for p in d.get("camps", []): self.hard |= _disc_r(p[0] + 0.5, p[1] + 0.5, 3.6)
+            for p in d.get("landings", []): self.hard |= _disc_r(p[0] + 0.5, p[1] + 0.5, LANDING_R)
+        for L in lairs:
+            h = L["half"]
+            for z in range(L["at"][1] - h - 2, L["at"][1] + h + 3):
+                for x in range(L["at"][0] - h - 2, L["at"][0] + h + 3): self.hard.add((x, z))
+        for ek, kind in ((docks, "dock"), (outposts, "outpost"), (hatches, "hatch")):
+            for e in ek: self.hard |= _disc_r(e[0] + 0.5, e[1] + 0.5, EXIT_R[kind])
+        for (x, z), l in lv.items():
+            if l == -2:
+                for dx in range(-2, 3):
+                    for dz in range(-2, 3): self.hard.add((x + dx, z + dz))
+        for q in stairs:
+            for dx in range(-2, 3):
+                for dz in range(-2, 3): self.hard.add((q[0] + dx, q[1] + dz))
+        for d in islands:
+            self.lanes[d["id"]] = _lanes(d)
+        self.lane_tiles = set()
+        for iid, lanes in self.lanes.items():
+            for a, b in lanes:
+                for z in range(int(min(a[1], b[1]) - 3), int(max(a[1], b[1]) + 4)):
+                    for x in range(int(min(a[0], b[0]) - 3), int(max(a[0], b[0]) + 4)):
+                        if _seg_dist(x + 0.5, z + 0.5, a, b) < LANE_HALF: self.lane_tiles.add((x, z))
+        self.hard |= self.lane_tiles
+        self.bush = {}          # tile -> patch id
+        self.patches = []
+
+    def void_ok(self, x, z):
+        for r in (1, 2):
+            for dz in range(-r, r + 1):
+                for dx in range(-r, r + 1):
+                    if max(abs(dx), abs(dz)) == r and (x + dx, z + dz) not in self.lv: return False
+        return True
+
+    def tile_ok(self, q, iid):
+        return self.owner.get(q) == iid and self.lv.get(q, -1) >= 0 and q not in self.stairs and self.void_ok(*q)
+
+    def clump_tiles(self, iid, cx, cz, r):
+        """The tiles the engine would turn to grass, or None when the clump would touch something it must not.
+        The engine fattens each circle by up to 0.3 at random per tile, so what must stay clear is checked
+        with that much margin."""
+        tiles = _disc(cx, cz, r); keep = set(); lvl = None
+        for q in _disc(cx, cz, r, 0.32):
+            if not self.tile_ok(q, iid): continue
+            if q in self.hard: return None
+            l = self.lv[q]
+            if lvl is None: lvl = l
+            elif l != lvl: return None
+            if q in tiles: keep.add(q)
+        if not tiles or len(keep) < 0.7 * len(tiles): return None
+        return keep
+
+    def gap_ok(self, tiles, gap):
+        for (x, z) in tiles:
+            for dx in range(-gap, gap + 1):
+                for dz in range(-gap, gap + 1):
+                    if (x + dx, z + dz) in self.bush and (x + dx, z + dz) not in tiles: return False
+        return True
+
+    def patch(self, rng, iid, c, cfg, heading=None, n_max=None):
+        """3-6 overlapping clumps grown from c. Returns (clumps, tiles) or None."""
+        n = rng.randint(*cfg["n"])
+        if n_max: n = min(n, n_max)
+        clumps = []; tiles = set()
+        for k in range(n):
+            r = round(rng.uniform(*cfg["r"]), 1)
+            placed = False
+            for _try in range(10):
+                if k == 0: pos = c
+                else:
+                    prev = clumps[-1] if (cfg["band"] and heading is not None) else clumps[rng.randrange(len(clumps))]
+                    a = (heading + rng.uniform(-0.5, 0.5)) if (cfg["band"] and heading is not None) else rng.uniform(0, math.tau)
+                    dist = (prev[2] + r) * cfg.get("sp", 0.62)
+                    pos = (prev[0] + math.cos(a) * dist, prev[1] + math.sin(a) * dist)
+                pos = (round(pos[0], 1), round(pos[1], 1))
+                t = self.clump_tiles(iid, pos[0], pos[1], r)
+                if t is None or (k and not (t & tiles) and not any(math.hypot(pos[0] - q[0], pos[1] - q[1]) < (r + q[2]) * 0.75 for q in clumps)): continue
+                clumps.append((pos[0], pos[1], r)); tiles |= t; placed = True; break
+            if not placed and k == 0: return None
+        if len(clumps) < 3 or len(tiles) < cfg["least"]: return None
+        return clumps, tiles
+
+    def plant(self, iid, clumps, tiles, why):
+        pid = len(self.patches)
+        for q in tiles: self.bush[q] = pid
+        self.patches.append(dict(island=iid, clumps=clumps, tiles=tiles, why=why))
+
+    def los(self, a, b):
+        L = math.hypot(b[0] - a[0], b[1] - a[1]); n = max(2, int(L / 0.5))
+        for i in range(n + 1):
+            x = a[0] + (b[0] - a[0]) * i / n; z = a[1] + (b[1] - a[1]) * i / n
+            q = (int(x), int(z))
+            if self.lv.get(q, -1) < 0 and self.lv.get(q, -1) != -2 or q in self.solid: return False
+        return True
+
+def place_cover(lv, owner, stairs):
+    """Fills every island's "bush" and returns the Cover (patches, shares) for the report."""
+    T = _targets()
+    C = Cover(lv, owner, stairs)
+    ground = {}                     # biome -> walkable tiles; island -> tiles
+    for d in islands:
+        n = sum(1 for q in INISLE[d["id"]] if q not in C.solid and q not in C.stairs)
+        ground[d["id"]] = n
+    bground = {}
+    for d in islands: bground[d["biome"]] = bground.get(d["biome"], 0) + ground[d["id"]]
+    # a biome's cover is shared out over its islands by their ground; a perch stays bare
+    budget = {}
+    for b in bground:
+        mid = COVER[b]["share"]
+        assert T[b][0] <= mid <= T[b][1], ("cover share outside the target", b, mid)
+        ids = [d for d in islands if d["biome"] == b and not d.get("perch")]
+        tot = sum(ground[d["id"]] for d in ids)
+        for d in ids: budget[d["id"]] = mid * bground[b] * ground[d["id"]] / max(1, tot)
+    for d in islands: budget.setdefault(d["id"], 0.0)
+    room = lambda d: sum(1 for q in INISLE[d["id"]] if q not in C.hard and C.void_ok(*q)) / max(1, ground[d["id"]])
+    carry = {}                      # cover an island had no room for goes to the roomier islands of its biome
+    for d in sorted(islands, key=room):
+        iid = d["id"]; cfg = COVER[d["biome"]]
+        rng = random.Random("%d:%s" % (COVER_SEED, iid))
+        want = budget[iid] + carry.get(d["biome"], 0.0)
+        if want <= 0: d["bush"] = []; continue
+        have = lambda: sum(len(p["tiles"]) for p in C.patches if p["island"] == iid)
+        anchors = {"exit": [], "chest": [], "camp": [], "bridge": [], "flank": [], "cliff": [], "pillar": []}
+        ring = lambda c, r0, r1, k: [(c[0] + math.cos(a) * rr, c[1] + math.sin(a) * rr)
+                                     for rr in [rng.uniform(r0, r1) for _ in range(k)] for a in [rng.uniform(0, math.tau)]]
+        if d["biome"] in BUSH_BIOMES:
+            for ek in (docks, outposts, hatches):
+                for e in ek:
+                    if (int(e[0]), int(e[1])) in INISLE[iid]: anchors["exit"].append(((e[0] + 0.5, e[1] + 0.5), None))
+        rm = sum(cfg["r"]) / 2.0            # a clump this big, plus what must stay clear of it
+        for p in d.get("chests", []): anchors["chest"] += [(q, None) for q in ring((p[0] + 0.5, p[1] + 0.5), 2.5 + rm, 4.0 + rm, 24)]
+        for p in d.get("camps", []): anchors["camp"] += [(q, None) for q in ring((p[0] + 0.5, p[1] + 0.5), 4.4 + rm, 6.4 + rm, 24)]
+        for B in bridges:
+            for end, isl in ((B["from"], B["a"]), (B["to"], B["b"])):
+                if isl != iid: continue
+                (x0, z0), (x1, z1) = B["from"], B["to"]; L = math.hypot(x1 - x0, z1 - z0); ux, uz = (x1 - x0) / L, (z1 - z0) / L
+                sgn = 1 if end is B["from"] else -1
+                for side in (-1, 1):
+                    for back in (3.5, 5.0):
+                        anchors["bridge"].append(((end[0] + ux * sgn * back - uz * side * (B["r"] + 2.8 + rm), end[1] + uz * sgn * back + ux * side * (B["r"] + 2.8 + rm)), (ux, uz)))
+        for a, b in C.lanes[iid]:
+            L = math.hypot(b[0] - a[0], b[1] - a[1])
+            if L < 8: continue
+            ux, uz = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+            for t in (0.15, 0.3, 0.45, 0.6, 0.75, 0.9):
+                for side in (-1, 1):
+                    off = LANE_HALF + 0.9 + rm + rng.uniform(0.0, 1.8)
+                    anchors["flank"].append(((a[0] + ux * L * t - uz * side * off, a[1] + uz * L * t + ux * side * off), (math.atan2(uz, ux))))
+        for q in sorted(INISLE[iid]):       # a cliff edge: three or four tiles from the drop
+            vd = next((r for r in range(1, 7) if any(max(abs(dx), abs(dz)) == r and (q[0] + dx, q[1] + dz) not in lv
+                                                       for dx in range(-r, r + 1) for dz in range(-r, r + 1))), 7)
+            if vd in (3, 4) and (q[0] * 3 + q[1] * 7) % 13 == 0: anchors["cliff"].append(((q[0] + 0.5, q[1] + 0.5), None))
+        for p in d.get("pillars", []):
+            anchors["pillar"] += [(q, None) for q in ring((p[0] + 0.5, p[1] + 0.5), 1.4 + rm, 2.6 + rm, 6)]
+        lanes_here = C.lanes[iid]       # any other open spot beside a lane, once the deliberate places are used up
+        for q in sorted(INISLE[iid]):
+            if q in C.hard or not C.void_ok(*q) or not lanes_here: continue
+            dl = min(_seg_dist(q[0] + 0.5, q[1] + 0.5, a, b) for a, b in lanes_here)
+            if LANE_HALF + rm + 0.4 <= dl <= LANE_HALF + rm + 5.0: anchors["flank"].append(((q[0] + 0.5, q[1] + 0.5), None))
+        for k in anchors:
+            if k != "flank": rng.shuffle(anchors[k])
+        deliberate = anchors["flank"][:]; rng.shuffle(deliberate)
+        anchors["flank"] = deliberate
+        why_order = ["exit", "chest", "bridge", "camp", "flank", "cliff", "pillar"]
+
+        def try_anchor(kind, c, hd):
+            for _ in range(5 if kind != "exit" else 1):
+                cc = (round(c[0], 1), round(c[1], 1))
+                P = C.patch(rng, iid, cc, cfg, heading=hd if kind in ("flank", "bridge") else None)
+                if P and C.gap_ok(P[1], cfg["gap"]) and (kind == "exit" or have() + len(P[1]) <= want * 1.05 + 3):
+                    return P
+                c = (c[0] + rng.uniform(-0.8, 0.8), c[1] + rng.uniform(-0.8, 0.8))
+            return None
+
+        # a patch in sight of each way out comes first, whatever the share
+        for c, hd in anchors["exit"]:
+            cands = [(q[0] + 0.5, q[1] + 0.5) for q in sorted(INISLE[iid])
+                     if 4.5 <= math.hypot(q[0] + 0.5 - c[0], q[1] + 0.5 - c[1]) <= SIGHT_R - 2.0 and q not in C.hard and C.los(c, (q[0] + 0.5, q[1] + 0.5))]
+            rng.shuffle(cands)
+            for t in cands[:120]:
+                P = try_anchor("exit", t, None)
+                if P and C.los(c, (sum(q[0] for q in P[0]) / len(P[0]), sum(q[1] for q in P[0]) / len(P[0]))):
+                    C.plant(iid, P[0], P[1], "exit"); break
+        for rnd in range(40):
+            if have() >= want * 0.97: break
+            progressed = False
+            for kind in why_order[1:]:
+                if have() >= want * 0.97: break
+                lst = anchors[kind]
+                while lst:
+                    c, hd = lst.pop()
+                    P = try_anchor(kind, c, hd)
+                    if P:
+                        C.plant(iid, P[0], P[1], kind); progressed = True; break
+            if not progressed: break
+        carry[d["biome"]] = max(0.0, want - have())
+        d["bush"] = [[round(c[0], 1), round(c[1], 1), c[2]] for p in C.patches if p["island"] == iid for c in p["clumps"]]
+    return C
+
+def cover_report(C, lv, owner):
+    T = _targets()
+    ground = {}; bush = {}
+    for d in islands:
+        for q in INISLE[d["id"]]:
+            if q in C.solid or q in C.stairs: continue
+            ground[d["biome"]] = ground.get(d["biome"], 0) + 1
+            if q in C.bush: bush[d["biome"]] = bush.get(d["biome"], 0) + 1
+    rows = []
+    for b in ("bloom", "meadow", "gloom", "storm", "ember", "frost"):
+        share = bush.get(b, 0) / max(1, ground.get(b, 1))
+        rows.append((b, share, T[b]))
+    return rows
+
 def main():
     lv, owner, stairs = rasterize()
+    C = place_cover(lv, owner, stairs)
     probs = check(lv, owner, stairs)
+    for b, share, tg in cover_report(C, lv, owner):
+        print('cover %-7s %5.1f %%  (target %.1f-%.1f %%)' % (b, share * 100, tg[0] * 100, tg[1] * 100))
+    print('cover patches', len(C.patches), 'clumps', sum(len(p['clumps']) for p in C.patches))
     for p in probs: print("PROBLEM", p)
     for G in glides:
         own = {p: o for p, o in owner.items() if lv[p] != -2}

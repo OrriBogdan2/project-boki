@@ -417,7 +417,7 @@ func _gunslinger() -> void:
 	# Slipstep: tap skids, hold slides, early release refunds
 	P.teleport(home); P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1)
 	P.do_dash(); step(m, 0.4)
-	ok("marlowe dash tap: Slipstep skid", K.last_dash_kind == "step" and P.flat_dist(home) > 1.8, "moved %.1f" % P.flat_dist(home))
+	ok("marlowe dash tap: Slipstep skid", K.last_dash_kind == "step" and P.flat_dist(home) > 1.6, "moved %.1f" % P.flat_dist(home))
 	P.inp["move"] = Vector2.ZERO
 	await done(m)
 

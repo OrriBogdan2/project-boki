@@ -20,9 +20,13 @@ const CHECKS := {
 	"--music-leave-check": ["res://tools/music_leave_check.gd", "music_leave_check", null],
 	"--shot-vertical-check": ["res://tools/shot_vertical_check.gd", "shot_vertical_check", null],
 	"--kin-regen-check": ["res://tools/kin_regen_check.gd", "kin_regen_check", null],
+	"--kin-loss-check": ["res://tools/kin_loss_check.gd", "kin_loss_check", null],
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--dash-dir-check": ["res://tools/dash_dir_check.gd", "dash_dir_check", null],
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
+	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
+	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
+	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
 	"--aimkit-check": ["res://tools/aimkit_check.gd", "aimkit_check", null],
 	"--dancer-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],
 	"--juggernaut-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "juggernaut"],
@@ -30,12 +34,14 @@ const CHECKS := {
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],
 	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, the boss fan, the fixed weapon path
+	"--farmbuild": ["res://tools/farmbuild_check.gd", "farmbuild_check", null],      # also --farmbuild-shots=<dir>
 }
 
-## Runs the registered check named in args, if any. Returns true when one started (Main stops there).
+## Runs the registered check named in args, if any (a flag also matches --flag=value).
+## Returns true when one started (Main stops there).
 static func run(main: Node, args: PackedStringArray) -> bool:
 	for flag in CHECKS:
-		if flag in args:
+		if Array(args).any(func(a): return String(a).begins_with(flag)):
 			var e: Array = CHECKS[flag]
 			var c = load(String(e[0])).new()
 			main.set_meta(String(e[1]), c)

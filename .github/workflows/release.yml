@@ -58,7 +58,9 @@ jobs:
           (cd launcher && godot --headless --path . --import || true)
 
       - name: Check scripts
-        run: godot --headless --path . -- --check | tee check.log && grep -q "failures: 0" check.log
+        run: |
+          godot --headless --path . -- --check | tee check.log
+          grep -q "failures: 0" check.log
 
       - name: Export game
         run: |
