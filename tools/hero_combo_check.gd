@@ -407,6 +407,7 @@ func _mage() -> void:
 	ok("dash table: the tapped bolt does not fire inside the dash", P.shot_n == n_di and P.roll_t > 0.0)
 	ac.step(m, 0.9)
 	ok("dash table: the bolt tapped inside the dash goes off when it ends", P.shot_n == n_di + 1, "%d -> %d" % [n_di, P.shot_n])
+	P.inp["fire"] = false       # DashFlow's replayed tap leaves the key down in this harness (a real frame rewrites it)
 	var n_di2 := P.shot_n
 	ac.step(m, 0.9)
 	ok("dash table: and only once", P.shot_n == n_di2)
@@ -759,8 +760,8 @@ func _gunslinger() -> void:
 	var n_gd := P.shot_n
 	P.do_dash()
 	m.step(DT)
-	ok("dash table: the ground slide fires, the table says so",
-			String(DashFlow.row_of("gunslinger", "lmb", false)["mode"]) == "fire" and String(DashFlow.row_of("gunslinger", "lmb", true)["mode"]) == "buffer" and K.fires_in_dash())
+	ok("dash table: the slide and the air roll fire LMB, DashFlow says so",
+			String(DashFlow.row_of("gunslinger", "lmb", false)["mode"]) == "fire" and String(DashFlow.row_of("gunslinger", "lmb", true)["mode"]) == "fire" and K.fires_in_dash())
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
