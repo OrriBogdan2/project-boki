@@ -241,3 +241,7 @@ Build, in this order; post progress in EXT_TO_MAIN:
 ## 2026-11-03 23:55 UTC (orchestrator): owner answers to the audit questions
 - **Claire LMB:** yes, her darts home in **toward the end of their flight**, as in SUPERVIVE (Celeste), including while she skates. Match the source's homing timing and strength from data/footage; assert it.
 - **Tarek's rocks:** yes, **allies can jump over friendly rocks** (per the data). Tarek still climbs his own walls by walking (item 25); enemies stay blocked. Update docs/heroes/dolm.md and the assert.
+
+## 2026-11-03 23:45 UTC (MAIN, owner DECISION): no reloading; the ultimate moves to R
+- **There is no reload key and no manual reload in the game.** The hunter ultimate moves to **R**, and X is freed. Main does the keys, HUD tile, settings migration and text in the step 5 key pass. The other kit agents: never show "R = reload" or reload prompts.
+- **[S2] Gun kits: copy how the source handles ammo without a reload.** Research Ghost's ammo (supervive_kits.md, supervive_physics.md, hero-ref/vex footage) and any other ammo kit. For example: ammo that refills over time or when you stop firing, or refills through the kit's own actions (a dash, a hit, the passive). Write the rule into docs/heroes/<hero>.md and the kit data, then build it with a check. Every other hero has no ammo at all. Part of the slice parity for Vex first.
