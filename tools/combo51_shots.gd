@@ -2,6 +2,12 @@ extends "res://tools/breah_shots.gd"
 ## --combo51-shots --shots-dir=<dir> --combo51-hero=juggernaut|dredge|ashwick: owner item 51's new combos for
 ## Zedran, Dredge and Linwick as strips (the Breah rig's 3-wide grid of crops round the hero, tools/breah_shots.gd)
 ## in a live Arena match, under xvfb with a renderer. <dir>/captions.txt gets "file: caption" per file.
+## --combo51-part=<part> takes `_<hero>_<part>` instead (Zedran's "chain": the Warchain's tether and pull, on a
+## map island long enough for its 24 m).
+
+const LONG := 30                # m of flat ground the chain strips need, east of the spot
+
+var part := ""
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -11,13 +17,62 @@ func run(main_node: Node) -> void:
 			dir = arg.substr(12)
 		if arg.begins_with("--combo51-hero="):
 			who = arg.substr(15)
+		if arg.begins_with("--combo51-part="):
+			part = arg.substr(15)
 	hero_name = Arch.name_of(who).to_lower()
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
-	await Callable(self, "_%s" % who).call()
+	await Callable(self, "_%s" % (who if part == "" else who + "_" + part)).call()
 	_write_captions()
 	print("COMBO51SHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
+
+## The parts' rig: an expedition map (the Arena's islands are too small for the chain), the spot on a flat run of
+## LONG m.
+func _setup() -> void:
+	if part == "":
+		await super._setup()
+		return
+	var o := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
+			"arch": who, "cls": Arch.weight(who), "weapon": Arch.signature(who)}
+	m = Match.new()
+	main.add_child(m)
+	await m.start(o)
+	m.set_process(false)
+	P = m.player
+	for mb in m.mobs:
+		mb.queue_free()
+	m.mobs.clear()
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
+	home = _long_spot(P.pos)
+	T = m.make_hunter("T", 5, "medium", "Target", "idle", {}, home + Vector3(7.0, 0, 0), {"arch": "none"})
+	for x in m.hunters:
+		if x != P and x != T:
+			x.teleport(home + Vector3(-30, 0, 30))
+	P.unlock_all()
+	P.lvl = 6
+	if m.hud: m.hud.guide_hidden = true       # (the kit panel would sit over the chain)
+	await _reset(7.0)
+
+func _long_spot(start: Vector3) -> Vector3:
+	var W = m.world
+	for z in range(8, W.h - 8, 2):
+		for x in range(12, W.w - LONG - 4, 2):
+			if _run_flat(W, x, z):
+				return Vector3(x + 0.5, int(W.level[W.idx(x, z)]) * World.LEVEL, z + 0.5)
+	return start
+
+func _run_flat(W, x: int, z: int) -> bool:
+	var lv: int = int(W.level[W.idx(x, z)])
+	for dz in range(-3, 4):
+		for dx in range(-10, LONG):
+			var i: int = W.idx(x + dx, z + dz)
+			var odd: bool = W.stairs.has(i) or W.walls.has(i) or W.props.has(i) or W.bridge.has(i)
+			if W.kind[i] != World.T_GROUND or int(W.level[i]) != lv or odd:
+				return false
+	return true
 
 ## The step at `when` s into a _go (t steps by DT, so an exact float window can be skipped).
 func _at(t: float, when: float) -> bool:
@@ -150,3 +205,47 @@ func _ashwick() -> void:
 		[0.6, 0.76, 0.88, 1.05, 1.3, 1.6]
 	)
 	await _go(1.7, leap, lmarks)
+
+## Zedran's Warchain, as whole views (the chain is longer than a strip crop): it pays out as he backs away and
+## holds taut at 24 m; backing away then pulling slingshots him in; a strafe held in the pull curves him in beside.
+func _juggernaut_chain() -> void:
+	var K: JuggernautKit = P.ak
+	await _reset(-8.0)
+	var taut := func(t: float):
+		if _at(t, 0.1):
+			K.cd["e"] = 0.0
+			K.use_e()
+		P.inp["move"] = Vector2(1, 0) if t > 0.4 else Vector2.ZERO
+		_aim(T.pos)
+	await _go(4.9, taut, [
+		[0.45, "full", "warchain_taut_1", "Zedran Warchain: hooked on the dummy 8 m away, he starts backing off"],
+		[2.6, "full", "warchain_taut_2", "Zedran Warchain: ~17 m, the chain paying out after him"],
+		[4.6, "full", "warchain_taut_3", "Zedran Warchain: at 24 m it is taut and hot and holds: he keeps walking but"
+				+ " stays at its end"]], -9.0)
+	K.warchain.snap("")
+	await _reset(9.0)
+	var sling := func(t: float):
+		if _at(t, 0.1):
+			K.cd["e"] = 0.0
+			K.use_e()
+		P.inp["move"] = Vector2(-1, 0) if t > 0.45 and t < 1.0 else Vector2.ZERO
+		if _at(t, 0.95):
+			K.use_e()
+		_aim(T.pos)
+	await _go(1.5, sling, [
+		[0.9, "full", "warchain_sling_1", "Zedran Warchain: hooked, backing away"],
+		[1.07, "full", "warchain_sling_2", "Zedran Warchain: E while backing away: the slingshot, flying in faster"],
+		[1.25, "full", "warchain_sling_3", "Zedran Warchain: arrived on the dummy, still moving"]], 4.5)
+	await _reset(9.0)
+	var steer := func(t: float):
+		if _at(t, 0.1):
+			K.cd["e"] = 0.0
+			K.use_e()
+		if _at(t, 0.6):
+			K.use_e()
+		P.inp["move"] = Vector2(0, 1) if t > 0.6 else Vector2.ZERO
+		_aim(T.pos)
+	await _go(1.3, steer, [
+		[0.68, "full", "warchain_steer_1", "Zedran Warchain: E with a strafe held: the pull swings out that way"],
+		[0.8, "full", "warchain_steer_2", "Zedran Warchain: curving round toward the dummy"],
+		[0.95, "full", "warchain_steer_3", "Zedran Warchain: arriving beside it, not on its line"]], 4.5)
