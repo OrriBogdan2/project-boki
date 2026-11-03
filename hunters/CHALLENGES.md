@@ -2,12 +2,12 @@
 
 Built on branch ext/classes from `content/rules/class_unlock.json`. Ids in brackets are the data ids, so the kitfix renames carry through.
 
-- **Creation:** pick 2 of Zedran, Venator, Pin and Linwick. Ostra, Moosh Moosh and Breah are never offered there.
+- **Start:** every save owns Venator [gunslinger], who is also the tutorial Hunter. In the new-game flow (card, egg, Hunter pick) you pick 1 of Zedran, Pin and Linwick. Ostra, Moosh Moosh and Breah are never offered there.
 - **Challenges** count across every expedition, whoever you play. A done challenge shows *Hold to unlock* (1.6 s) on the Hunters screen.
 - **Tiers:** easy = about 1-2 expeditions; medium = a handful of expeditions; hard = real effort, once other Hunters are open.
 - **Mastery** goals count only in expeditions played as that Hunter. Each goal done is a mastery level and one cosmetic reward. No reward changes stats or abilities.
 
-## Zedran [juggernaut] (starter: easy challenge only if not picked at creation)
+## Zedran [juggernaut] (starter: easy challenge if you did not pick it)
 
 **Unlock challenge:** Knock 3 enemies into walls. Tier: easy. Target: 3.
 
@@ -18,9 +18,9 @@ Mastery goals:
 3. Open 8 chests (target 8, exploration) -> Banner: Broken Chain
 4. Make it out after being knocked down (target 1, extraction) -> Title: the Unbowed
 
-## Venator [gunslinger] (starter: easy challenge only if not picked at creation)
+## Venator [gunslinger] (yours from the start)
 
-**Unlock challenge:** Land 8 hits from 12 m or more. Tier: easy. Target: 8.
+**Unlock challenge:** none (dropped: he is owned on every new save). His far-hit feat lives on as his first mastery goal.
 
 Mastery goals:
 
@@ -29,7 +29,7 @@ Mastery goals:
 3. Fly through 10 air rings (target 10, exploration) -> Trail: Spent Brass
 4. Make it out of 3 expeditions (target 3, extraction) -> Title: Long Shot
 
-## Pin [archer] (starter: easy challenge only if not picked at creation)
+## Pin [archer] (starter: easy challenge if you did not pick it)
 
 **Unlock challenge:** Stun 4 enemies. Tier: easy. Target: 4.
 
@@ -40,7 +40,7 @@ Mastery goals:
 3. Fly through 8 air rings (target 8, exploration) -> Glider: Paper Crane
 4. Make it out after being knocked down (target 1, extraction) -> Title: Last Arrow
 
-## Linwick [ashwick] (starter: easy challenge only if not picked at creation)
+## Linwick [ashwick] (starter: easy challenge if you did not pick it)
 
 **Unlock challenge:** Hit 3 enemies at once with one ability. Tier: easy. Target: 1.
 

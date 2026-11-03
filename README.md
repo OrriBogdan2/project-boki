@@ -2168,9 +2168,9 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 
 ![Character creation: pick 1 Hunter from the twelve chips; the Hunter viewer shows the model on its turntable playing an ability (LMB Twin Blades), the key and plain line under it, health and dashes (no weight label), the plain-words "How it plays" card and every ability with its key](hunters/creation_viewer.png)
 
-**Hunters screen on a locked Hunter: its easy challenge with progress (4/8) and tier above the viewer, every tile with its state, the mastery goals with counters and cosmetic rewards, and the glider pick**
+**Hunters screen: the first Hunter and the starter pick open, a locked medium Hunter (Thief) with its challenge at 6/12 above the viewer, mastery goals with rewards, and the glider pick**
 
-![Hunters screen on a locked Hunter: its easy challenge with progress (4/8) and tier above the viewer, every tile with its state, the mastery goals with counters and cosmetic rewards, and the glider pick](hunters/hunters_screen.png)
+![Hunters screen: the first Hunter and the starter pick open, a locked medium Hunter (Thief) with its challenge at 6/12 above the viewer, mastery goals with rewards, and the glider pick](hunters/hunters_screen.png)
 
 **The Hunter viewer cycling four abilities on the real model, keys from the player's bindings**
 
@@ -2195,6 +2195,18 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Hold to unlock on a completed challenge (Zedran: knock 3 enemies into walls): the bar half filled while the Hunter powers up in the viewer**
 
 ![Hold to unlock on a completed challenge (Zedran: knock 3 enemies into walls): the bar half filled while the Hunter powers up in the viewer](hunters/hold_unlock.png)
+
+**The one card straight after the prologue: "Every new adventurer picks a Boki to take into battle." with one button (Enter works too), over the dais**
+
+![The one card straight after the prologue: "Every new adventurer picks a Boki to take into battle." with one button (Enter works too), over the dais](hunters/new_game_card.png)
+
+**The egg pick, the next screen after the card (a new save reaches it within 2 screens after the intro); no story lines, Hunter pick or creator in between**
+
+![The egg pick, the next screen after the card (a new save reaches it within 2 screens after the intro); no story lines, Hunter pick or creator in between](hunters/egg_pick.png)
+
+**The Hunter pick after choosing the egg: the first Hunter is named as already yours, 1 of the 3 starters is picked in the viewer (Ashwick here), button "Take Ashwick"**
+
+![The Hunter pick after choosing the egg: the first Hunter is named as already yours, 1 of the 3 starters is picked in the viewer (Ashwick here), button "Take Ashwick"](hunters/hunter_pick.png)
 
 ## pin/v2/ult (pin/v2/ult)
 
