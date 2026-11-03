@@ -729,3 +729,32 @@ The owner approved this plan; please build it.
 - **For keys-cover's breakables follow-up:** please base it on main (sync74). The deathbox now never holds Boki (`_kin_from_box` and `box["kin"]` are gone).
 - **Landing mode:** I'll merge kitfix pairs as you report them, in your order, batching where I can. Merge on C goes in with the first hero batch. The C-into-G button, the ownership rings (wild Boki read as enemies) and the tutorial pass are held until after the resets unless the owner says otherwise.
 - **The owner, on the tutorial:** force Venator (the Ghost equivalent) for the tutorial match and teach each ability on dummies. He's now asking whether Venator should simply be everyone's first hunter. Hold ext/classes' "pick 2 of 4" until his answer, which I'll post here.
+
+## 2026-11-02 23:15 ET: OWNER: real SUPERVIVE game data (source of truth over footage); kit fixes are yours
+The owner extracted values from the game files and checked kits in-game. The files are in `ext/agent-briefs:briefs/supervive-data/`:
+- `supervive_physics.md`: movement physics from the game data (configs and curve tables). 1 uu = 1 cm.
+- `supervive_kits.md`: all 12 hunters' kits from in-game tooltips, with rank II/III/IV upgrades.
+- `kit_comparison.md`: our 12 kits against those tooltips, with file:line refs and a top-10 fix list.
+
+**Split:**
+- **Kits are yours.** Fold `kit_comparison.md` into the kitfix polish passes before each pair lands. The top 10 are:
+  1. Archer: Heavy Shot hold-only, 1 charge, ~1.8x cooldown; drop the tap snare and Tripwire.
+  2. Archer: Phase Walk, a cursor-directed roll that passes through terrain, replaces Grapple.
+  3. Ashwick: an Ignite damage bonus plus a % max-HP tick on the flamethrower.
+  4. Rimewright: Sleet Lance ~12s with 2 charges.
+  5. Dolm: Molten Guard (punch your rocks for a shield) as the base passive; no slam reset.
+  6. Juggernaut: Meteor Drop on its own cooldown slot.
+  7. Thief: a ranged pistol default, and the knife reset moved to E rank 3.
+  8. Bulwark: Mending Ground as a lasting zone, ~12s; any wall knock stuns; Shield Charge on its own cooldown.
+  9. Gunslinger: the hold slide is a longer dash on a longer cooldown with no refund; Fever capped low.
+  10. Dredge: the Grapnel pierces terrain and pulls allies.
+  
+  Plus the small ones: the Tender penalties, Ostra's swap moving allies, the Juggernaut tip stun. R/ultimate mismatches are low priority, since R isn't the ult key; hunter ults go on X.
+- **Main takes physics:**
+  - per-hunter run speed and acceleration
+  - tall-ledge climb for Archer (Myth) and Juggernaut (Brall)
+  - gravity, jump, air control, mantle, the abyss fall window, the glide height hold and swoop
+  - docs/SUPERVIVE_FEEL.md and docs/SUPERVIVE_DATA.md
+  
+  Main does the run speeds and docs now; the bigger physics pass comes after the owner checks in.
+- If a kit pass needs a per-hunter movement value, read it from the table in supervive_physics.md. Don't hard-code it; main will expose it on the archetype data (`move_speed`, `accel`).
