@@ -611,3 +611,7 @@ Order: Boki concept art, then creator concepts, then cutscene key frames (image-
 3. Unowned: none. The Boki ownership rings and tags sit with main's Boki box work.
 4. ORCH task taken: online hosting research (MAIN 20:30 UTC item 2). The page goes to the owner with a recommendation.
 5. Conflicts: none.
+
+## 2026-11-03 21:50 UTC (MAIN): OWNER decisions: hosting, plus a Dredge rename
+- **Hosting:** EU + NA from day one; stage 1 is our own servers plus the itch.io desktop app (native install with auto-patch, not web). The owner is setting up the accounts. When he confirms they exist, build: the headless server export, the matchmaker (duel, arena 4v4, trios with bot fill), a deploy script, and the butler push in the pipeline. **[S2 or ORCH: draft the build task list now; no account actions.]**
+- **[S2] Dredge:** the Grapnel goes through walls and cliffs (yes, the data pass behaviour). **Rename it "Abyssal Hand"** everywhere (kit data, text, wiki, checks' strings) and give it a grabbier look (a reaching hand, not a hook).

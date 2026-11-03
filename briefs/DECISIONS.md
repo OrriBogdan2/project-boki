@@ -42,6 +42,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
   - Animation and ability parity with the source for all 12 hunters, LMB first. Our own art, same motion.
   - Vex (was Venator): RMB is a side toss.
   - Pin: missed arrows linger.
+  - Dredge: the Grapnel is renamed **Abyssal Hand** and goes through walls and cliffs (placed walls still stop it, per the data pass).
 
 ## Boki
 - Regen: 6%/s while carried, 1.5%/s out after 6 s without damage, none while downed.
@@ -71,6 +72,11 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 ## Modes and queues
 - Extraction: one queue, squads of 3, auto-filled (solos are filled in, bots backfill early). No solo or duo queue.
 - Duel: 1v1, online search or against a bot. Arena: 4v4 across several arena maps.
+
+## Hosting and distribution (owner, Nov 3)
+- Stage 1 (testers and early players): our own authoritative headless Godot servers on small VPS **in EU and NA from day one** (Hetzner EU and US: Ashburn/Hillsboro; Edgegap only if more regions are needed), plus a small matchmaker (self-hosted Nakama or a custom one). **Distribution: the itch.io desktop app** installs the native Windows/Mac build and auto-patches via butler. NOT a browser game.
+- Stage 2 (public launch): Steam (GodotSteam) as the launcher; servers stay authoritative.
+- The owner is creating the accounts (itch.io, Hetzner, later Steamworks). Agents never sign up or pay.
 
 ## Practice and Arena
 - One connected space: the Training Room (left, practice stations) and a duel ring (right, spawn a bot or fight a player).
