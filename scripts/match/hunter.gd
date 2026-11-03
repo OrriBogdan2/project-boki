@@ -938,7 +938,8 @@ func _open_glider() -> void:
 ## glide's slow over-speed bleed (GLIDE_OVERSPEED) does the rest. Owner-side only (inputs and
 ## physics run on the owning machine; the result reaches others through the usual Net state).
 const GLIDE_HANDOFF_WINDOW := 0.3   # [est] "right after": open the glider within this long
-const GLIDE_HANDOFF_KEEP := 0.6     # [est] a 23 m/s air dash opens the glider at ~13.8 m/s (cruise 6.5): clearly felt
+const GLIDE_HANDOFF_KEEP := 0.75    # [est] an air dash opens the glider at this share of its speed, up to the cap below
+const GLIDE_HANDOFF_MIN := 3.0      # a burst slower than a walk hands nothing over
 const GLIDE_BOOST_MAX := 14.0       # [est] the most a handoff can start you at (GLIDE_MAX is 15)
 var boost_fx_t := 0.0               # the boost trail lasts while you're well above cruise speed (render)
 const GLIDE_HANDOFF_DOT := 0.3      # "in the same direction": the glide's heading within ~70 degrees
@@ -946,10 +947,21 @@ var _handoff := {}                  # {dir: Vector2, speed: float, at: float} th
 
 ## Call as a lateral burst (dash, rush, blink with speed...) ends: dir is where it went, speed how fast.
 func glide_handoff(dir: Vector2, speed: float) -> void:
-	if dir.length() < 0.01 or speed <= GLIDE_SPEED:
+	if dir.length() < 0.01 or speed <= GLIDE_HANDOFF_MIN:
 		return
 	_handoff = {"dir": dir.normalized(), "speed": speed, "at": m.time}
 	# (already gliding, e.g. a dash that leaves the glider open: _update_glide spends it this step)
+
+## An air dash a kit cut short itself (it zeroed roll_t, as a Slipstep or a landing does) hands its last
+## burst to the glider the way the timed-out class dash does, so every kit's air dash carries into a glide.
+var _last_burst := {}               # {dir: Vector2, speed: float} the roll's last step
+
+func _hand_off_ended_dash() -> void:
+	if roll_t > 0.0 or _last_burst.is_empty():
+		return
+	if not grounded:
+		glide_handoff(_last_burst["dir"], _last_burst["speed"])
+	_last_burst = {}
 
 ## The glider just opened (or is open): spend a fresh handoff on a speed burst along its heading.
 func _take_glide_handoff() -> void:
@@ -2229,9 +2241,11 @@ func _physics(dt: float) -> void:
 	spd *= KinDowned.carry_speed(self)
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
+	_hand_off_ended_dash()
 	if roll_t > 0.0:
 		roll_t -= dt
 		hv = roll_dir * roll_speed
+		_last_burst = {"dir": roll_dir, "speed": roll_speed}
 		if not shove.is_empty():
 			_shove_along()
 		if not dash_pass.is_empty():
@@ -2240,6 +2254,7 @@ func _physics(dt: float) -> void:
 			# out of a dash you keep some of its speed: a little on the ground, most in the air
 			hv = roll_dir * roll_speed * (DASH_CARRY_GROUND if grounded else DASH_CARRY_AIR)
 			glide_handoff(roll_dir, roll_speed)     # (movefeel) open the glider now and it keeps the burst
+			_last_burst = {}
 	elif fly_t > 0.0:
 		fly_t -= dt
 	elif knock_t > 0.0:
