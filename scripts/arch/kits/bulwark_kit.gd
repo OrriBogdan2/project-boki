@@ -43,6 +43,10 @@ var kickstarts := 0             # (checks) downed teammates Mending Ground start
 var ticks_healed := 0           # (checks) heals the zone's ticks gave
 var shield_slams := 0           # (checks) Shield Slams the Shield Charge ended in
 var throw_at := -9.0           # when the hammer last left his hand (the recall lockout)
+var hold_blocked := false      # the Crushing Blow was cut short: the button must come up before it can start again
+var shoved := {}               # foe id -> {foe, dir, left}: foes sliding back off the raised aegis
+var pushed_at := {}            # foe id -> when the aegis last pushed it (one push per "push_gap")
+var pushes := 0                # (checks) foes the raised aegis has pushed back
 ## s after a slam or a spin hit before he can open the glider (wiki: wind-down frames keep the momentum)
 const WINDDOWN := 0.3
 
@@ -136,11 +140,13 @@ func _tick(dt: float) -> void:
 				h.glide_fuel = maxf(0.0, h.glide_fuel - dt / h.glide_max * (float(rmb_def()["surf_heat"]) - 1.0))
 			# his aegis over the wall (armed: it burns hotter), cracking as it weakens
 			fx.aegis_show(wall, 1.0 - clampf(float(wall["hp"]) / maxf(1.0, shield_max()), 0.0, 1.0), full_ready())
+			_shield_push()
 	else:
 		fx.aegis_hide()
 		down_t += dt
 		if down_t >= _shield_stat("wait") and lock_t <= 0.0:
 			shield_hp = minf(shield_max(), shield_hp + _shield_stat("regen") * dt)
+	_tick_shoved(dt)
 	_tick_mace(dt)
 	ult.tick(dt)
 	if not mend.is_empty():
@@ -149,6 +155,55 @@ func _tick(dt: float) -> void:
 	self_pips(3, int(res / 33.0 + 0.01), full_ready(), dt)
 	_tick_crest()
 	net_pulse(dt, full_ready())
+
+# ------------------------------------------------------------------ the raised aegis pushes back
+## The aegis's contact reach past its own thickness (m): a foe pressed against it is in range.
+const PUSH_REACH := 0.4
+
+## Foes that meet the raised aegis are shoved back along its facing ("push" m, once per "push_gap" s each), and
+## a hunter dashing into it is stopped. The double chevron in front of it shows the push (BjornFx.push_hint).
+func _shield_push() -> void:
+	var sd: Dictionary = rmb_def()["shield"]
+	var push := float(sd.get("push", 2.0))
+	var n := h.aim_dir()
+	var a: Vector2 = wall["a"]
+	var b: Vector2 = wall["b"]
+	var flash := false
+	for f in m.foes_of(h.team):
+		if not f.hittable():
+			continue
+		var p := Vector2(f.pos.x, f.pos.z)
+		var q := Geometry2D.get_closest_point_to_segment(p, a, b)
+		var reach: float = f.r + Verbs.WALL_TH + PUSH_REACH
+		var key: int = f.get_instance_id()
+		var in_front: bool = (p - q).dot(n) > 0.0 and absf(f.pos.y - float(wall["y"])) < 2.2
+		if in_front and p.distance_to(q) < reach and m.time - float(pushed_at.get(key, -9.0)) >= float(sd.get("push_gap", 0.6)):
+			pushed_at[key] = m.time
+			shoved[key] = {"foe": f, "dir": n, "left": push}
+			if "roll_t" in f: f.set("roll_t", 0.0)
+			pushes += 1
+			flash = true
+	fx.push_hint(wall, n, push, flash)
+	if flash:
+		m.sfx("bjorn_bash", h.pos, -5.0, 1.4)
+
+## Slides the pushed foes back (a wall behind them stops the slide).
+func _tick_shoved(dt: float) -> void:
+	var speed := float(rmb_def()["shield"].get("push_speed", 14.0))
+	for key in shoved.keys():
+		var e: Dictionary = shoved[key]
+		var f: Ent = e["foe"]
+		if not is_instance_valid(f) or f.dead or float(e["left"]) <= 0.0:
+			shoved.erase(key)
+			continue
+		var step := minf(float(e["left"]), speed * dt)
+		var dir: Vector2 = e["dir"]
+		var np := f.pos + Vector3(dir.x, 0, dir.y) * step
+		if m.world.is_block(np.x, np.z) or m.world.ground_at(np.x, np.z) > f.pos.y + 0.8:
+			shoved.erase(key)
+			continue
+		f.pos = np
+		e["left"] = float(e["left"]) - step
 
 func _tick_crest() -> void:
 	if crest == null or not is_instance_valid(crest):
@@ -275,9 +330,15 @@ func lmb_override(held: bool, dt: float) -> bool:
 	if KinMerge.transforming(h):
 		drop_holds()
 		return true
+	if not held:
+		hold_blocked = false
+	if _hold_interrupted():
+		if lmb_t >= 0.0 or pressed:
+			cancel_hold()
+		return true
+	if hold_blocked:
+		return true
 	if not h.can_fire() or h.fire_cd > 0.0:
-		if lmb_t >= 0.0 and not h.can_fire() and m.time > short_until:
-			lmb_t = -1.0; h.mel_hold = 0.0
 		return true
 	var md := lmb_def()
 	if not mace.is_empty():
@@ -316,6 +377,24 @@ func lmb_override(held: bool, dt: float) -> bool:
 		if lmb_t < float(md["tap"]): _throw()
 		else: _smash()
 	return true
+
+## True while something else has him: a mantle, a glide, a dash, a stun, a launch or a hard knock. The held
+## Crushing Blow ends the moment one starts, and the button has to come up before it can begin again.
+func _hold_interrupted() -> bool:
+	return h.mantling() or h.gliding or h.roll_t > 0.0 or h.stun_t > 0.0 or h.downed or not h.pad.is_empty() \
+		or not h.grap.is_empty() or m.time - maxf(h.kb_time, h.kb_t) < 0.12
+
+## Ends the Crushing Blow's hold with no swing (another ability started, or he was moved): the spin and its
+## tell stop at once and the held button is ignored until it is released.
+func cancel_hold() -> void:
+	if lmb_t >= 0.0 or h.mel_hold > 0.0:
+		lmb_t = -1.0
+		h.mel_hold = 0.0
+		flared = false
+		fx.hold_end()
+		if anim_id == "bul_smash_wind":
+			anim_id = ""
+	hold_blocked = bool(h.inp.get("fire", false))
 
 ## The swing held: the hammer spins in his hand (a whoosh each turn), the glint from 0.6 s, the flare and
 ## the cursor ring's flare at full; the body keeps facing the cursor (Hunter faces its aim).
@@ -499,8 +578,7 @@ func press_rmb() -> void:
 	rmb_down = true
 	rmb_t = 0.0
 	rmb_ctx = {"air": not h.grounded or h.gliding, "e": in_e(), "full": full_ready()}
-	lmb_t = -1.0; h.mel_hold = 0.0
-	if anim_id == "bul_smash_wind": anim_id = ""
+	cancel_hold()
 
 func rmb_hold_tick(t: float) -> void:
 	if t >= float(rmb_def()["hold"]) and wall.is_empty() and lock_t <= 0.0 and shield_hp > 5.0:
@@ -514,8 +592,7 @@ func _raise() -> void:
 	last_variant = "air" if rmb_ctx.get("air", false) else "hold"
 	play("bul_guard")
 	m.sfx("bjorn_shield_up", h.pos, -4.0)
-
-var short_until := 0.0         # a short dash out of a Crushing Blow is under way: the wind-up waits, it isn't cancelled
+	fx.aegis_rise(h.pos + Vector3(d.x, 0, d.y) * 1.2)
 
 ## A Boki merge ends every hold of this kit with no release effect: the Crushing Blow's charge (lmb_t) and the raised
 ## shield (it keeps its hit points and starts its regen). The mace in flight and Mending Ground's pending burst are casts, not holds.
@@ -575,14 +652,15 @@ func on_dash(use_ex: bool) -> bool:
 	if ult.planted():
 		return true          # planted for the slam: Shift waits
 	var dd := dash_def()
-	if lmb_t > float(lmb_def().get("tap", 0.2)) and h.grounded and mace.is_empty():
-		# Shift while winding up the Crushing Blow: a short plain dash (no spin), half a charge, the blow keeps charging
+	var winding := lmb_t > float(lmb_def().get("tap", 0.2))
+	cancel_hold()
+	if winding and h.grounded and mace.is_empty():
+		# Shift while winding up the Crushing Blow: it ends, with a short plain dash (no spin) for half a charge
 		if not spend_dash(false): return true
 		h.dashes = minf(h.max_dashes(), h.dashes + 0.5)       # (half the charge comes back: the reduced cooldown)
 		var sd2 := float(dd.get("short", 2.6))
 		travel(sd2, sd2 / float(dd["whirl_speed"]), {"invuln": 0.0, "trail": "dust", "dir": dash_dir()})
 		st["last_dash"] = "short"
-		short_until = m.time + sd2 / float(dd["whirl_speed"]) + 0.2
 		play("bul_short")
 		m.sfx("ab_whirr", h.pos, -6.0, 0.9)
 		return true
@@ -662,6 +740,7 @@ func _zone_anchor() -> Vector3:
 	return ground(h.pos)
 
 func cast_e() -> bool:
+	cancel_hold()
 	var ed := e_def()
 	var at := _zone_anchor()
 	var r := float(ed["radius"])

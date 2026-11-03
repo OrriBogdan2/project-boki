@@ -9,9 +9,10 @@ extends Node3D
 ##   a gold glint on its head from 0.6 s that grows, a big gold star flare at full charge
 ## - the slam's flaming 180 degree crescent in front, the 360 Smash's red-orange-gold spiral ring
 ## - the Bash's gold fan of force, the dash's gold chevron wake (his own after-image)
-## - his aegis: a solid pale-gold slab leaning out toward the camera, ribs, rim and his hammer sigil,
-##   the whole slab flashing on a block and cracking as it weakens (the verbs wall underneath keeps the
-##   blocking; its plain slab is hidden)
+## - his aegis: a wall of forged plates (two rows, riveted, ribbed, a rim and a hammer boss) leaning out
+##   toward the camera, rising out of the ground in a puff of dust, flashing on a block, darkening as it
+##   weakens and breaking into chunks (the verbs wall underneath keeps the blocking; its plain slab is
+##   hidden), with a pulsing double chevron in front of it showing its push
 ## - Purify: the green light column coming down over the 1 s delay, then the rings
 
 const GOLD := Color("ffc94a")
@@ -50,11 +51,20 @@ const ORBIT_POWER := 3.4
 ## the planted hammer's size, and its lean off vertical (rad)
 const PLANT_SCALE := 1.9
 const PLANT_LEAN := 0.25
-## the aegis slab: radius (m), half its arc (rad), height (m) and how far its top leans out (m)
-const AEGIS_R := 1.6
-const AEGIS_HALF := 0.75
-const AEGIS_H := 1.3
-const AEGIS_LEAN := 1.1
+## the aegis wall: radius (m), half its arc (rad), height (m) and how far its top leans out (m); its chord is
+## about the wall's 4.2 m, its height 30% over the old slab's
+const AEGIS_R := 2.6
+const AEGIS_HALF := 0.92
+const AEGIS_H := 1.7
+const AEGIS_LEAN := 1.2
+const PLATE_N := 7
+const PLATE_COL := Color("c9953a")
+const PLATE_EDGE := Color("8a6428")
+const RIVET_COL := Color("f0d27a")
+const BROKEN_COL := Color("4a3a30")
+## s the wall takes to rise out of the ground, and how long a push flashes its chevron
+const RISE_T := 0.2
+const PUSH_FLASH_T := 0.2
 
 var h: Hunter
 var hammer: Node3D            # the thrown hammer
@@ -71,8 +81,11 @@ var swirl: MeshInstance3D
 var swirl_t := 0.0
 var bash_fan: MeshInstance3D
 var bash_t := 0.0
-var aegis: MeshInstance3D
+var aegis: Node3D              # the plated wall
+var plate_mats: Array = []     # [plate, edge] materials (flash and crack)
 var aegis_hit := 0.0
+var rise_t := 0.0
+var push_flash := 0.0
 var wakes: Array[MeshInstance3D] = []
 var wake_life: Array[float] = []
 var wake_next := 0
@@ -119,8 +132,7 @@ func _ready() -> void:
 	KitShaders.param(bash_fan, "color2", Color("fff0b0"))
 	KitShaders.param(bash_fan, "twist", 0.0)
 	KitShaders.param(bash_fan, "spin", 0.0)
-	var aegis_mesh := KitMeshes.wall(AEGIS_R, -AEGIS_HALF, AEGIS_HALF, AEGIS_H, 28, AEGIS_LEAN)
-	aegis = KitMeshes.inst(self, aegis_mesh, KitShaders.mat("aegis", AEGIS, true))
+	_build_aegis()
 	var wake_mesh := KitMeshes.band(0.35, 0.8, -1.3, 1.3, 14)
 	for i in WAKE_POOL:
 		var wake := KitMeshes.inst(self, wake_mesh, KitShaders.mat("swirl", EMBER, true))
@@ -132,6 +144,48 @@ func _ready() -> void:
 	column.material_override.set_shader_parameter("speed", -1.2)
 	disc = KitMeshes.inst(self, KitMeshes.band(0.2, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GREEN))
 	disc.material_override.set_shader_parameter("color2", Color("e8fff0"))
+
+## The wall of forged plates, built once: two rows of riveted plates along the arc, ribs between them, a
+## rim along the top and a round boss with the hammer's cross in the middle. Local space: the curve's
+## centre at the origin, the apex straight ahead (-Z).
+func _build_aegis() -> void:
+	aegis = Node3D.new()
+	aegis.top_level = true
+	aegis.visible = false
+	add_child(aegis)
+	var plate := Models.toon(PLATE_COL, true, 0.0)
+	var edge := Models.toon(PLATE_EDGE, true, 0.0)
+	var rivet := Models.toon(RIVET_COL, false, 0.2)
+	plate_mats = [plate, edge]
+	var tilt := atan2(AEGIS_LEAN, AEGIS_H)
+	var seg := AEGIS_HALF * 2.0 / PLATE_N
+	var width := 2.0 * AEGIS_R * sin(seg * 0.5)
+	for i in PLATE_N:
+		var b := lerpf(-AEGIS_HALF, AEGIS_HALF, (float(i) + 0.5) / PLATE_N)
+		var facing := Vector3(-tilt, -b, 0.0)
+		for row in 2:
+			var y := AEGIS_H * (0.25 + 0.5 * float(row))
+			var r := AEGIS_R + AEGIS_LEAN * (y / AEGIS_H)
+			var at := Vector3(sin(b) * r, y, -cos(b) * r)
+			Models.part(aegis, Models.box(width * 0.92, AEGIS_H * 0.45, 0.16), plate, at, Vector3.ONE, facing)
+			for cx in [-0.38, 0.38]:
+				var side := Vector3(cos(b), 0, sin(b)) * width * float(cx)
+				var out := Vector3(sin(b), 0, -cos(b)) * 0.1
+				Models.part(aegis, Models.box(0.09, 0.09, 0.07), rivet, at + side + out, Vector3.ONE, facing)
+		var top_r := AEGIS_R + AEGIS_LEAN
+		var rim_at := Vector3(sin(b) * top_r, AEGIS_H + 0.05, -cos(b) * top_r)
+		Models.part(aegis, Models.box(width, 0.14, 0.34), edge, rim_at, Vector3.ONE, Vector3(0, -b, 0))
+		var rb := b - seg * 0.5
+		var rib_r := AEGIS_R + AEGIS_LEAN * 0.5
+		var rib_at := Vector3(sin(rb) * rib_r, AEGIS_H * 0.5, -cos(rb) * rib_r)
+		Models.part(aegis, Models.box(0.13, AEGIS_H * 1.02, 0.24), edge, rib_at, Vector3.ONE, Vector3(-tilt, -rb, 0))
+	var boss_r := AEGIS_R + AEGIS_LEAN * 0.5 + 0.12
+	var boss_at := Vector3(0, AEGIS_H * 0.5, -boss_r)
+	Models.part(aegis, Models.box(0.55, 0.55, 0.14), edge, boss_at, Vector3.ONE, Vector3(-tilt, 0, PI * 0.25))
+	var cross_tilt := Vector3(-tilt, 0, 0)
+	var stem_at := boss_at + Vector3(0, 0, -0.06)
+	Models.part(aegis, Models.box(0.12, 0.5, 0.1), rivet, stem_at, Vector3.ONE, cross_tilt)
+	Models.part(aegis, Models.box(0.4, 0.12, 0.1), rivet, stem_at + Vector3(0, 0.12, 0), Vector3.ONE, cross_tilt)
 
 # ------------------------------------------------------------------ the thrown hammer
 ## In flight at `p` along `dir`, tumbling at `spin_rate` rad/s.
@@ -283,28 +337,57 @@ func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
 	var mid := (a + b) * 0.5
 	var dir := Vector2(mid.x - h.pos.x, mid.y - h.pos.z).normalized()
 	aegis.visible = true
-	# the curve's centre sits behind the slab's midpoint so its apex is the wall line
+	# the curve's centre sits behind the wall's midpoint so its apex is the wall line
 	var c := Vector2(mid.x, mid.y) - dir * AEGIS_R
-	aegis.global_position = Vector3(c.x, float(w["y"]) + 0.15, c.y)
+	aegis.global_position = Vector3(c.x, float(w["y"]) + 0.02, c.y)
 	aegis.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
-	KitShaders.param(aegis, "hurt", hurt)
-	KitShaders.param(aegis, "armed", 1.0 if armed else 0.0)
+	(plate_mats[0] as ShaderMaterial).set_shader_parameter("albedo", PLATE_COL.lerp(BROKEN_COL, hurt * 0.65))
+	(plate_mats[1] as ShaderMaterial).set_shader_parameter("albedo", PLATE_EDGE.lerp(BROKEN_COL, hurt * 0.65))
+	var glow := aegis_hit * 1.2 + (0.35 + 0.15 * sin(Time.get_ticks_msec() * 0.012) if armed else 0.0)
+	(plate_mats[0] as ShaderMaterial).set_shader_parameter("glow", glow)
 
 func aegis_hide() -> void:
 	aegis.visible = false
+	AimKit.hide(h, "aegis_push")
 
-## A block: the whole slab flashes and gold sparks fly off its face at `at`.
+## The wall comes up: it rises out of the ground in a puff of dust.
+func aegis_rise(at: Vector3) -> void:
+	rise_t = RISE_T
+	aegis.scale = Vector3(1.0, 0.05, 1.0)
+	h.m.fx.dust(at, 14)
+	h.m.fx.burst(at + Vector3(0, 0.2, 0), PLATE_EDGE, 8, 3.0, 0.5, 8.0, 1.6, Vector3.UP, 40.0)
+
+## A block: the whole wall flashes and gold sparks fly off its face at `at`.
 func aegis_block(at: Vector3) -> void:
 	aegis_hit = 1.0
 	var out := Vector3(at.x - h.pos.x, 0.15, at.z - h.pos.z).normalized()
 	h.m.fx.spark(at, out, Color("ffd25a"), 14, 9.0, 70.0, 0.25, 10.0, 1.2)
 	h.m.fx.flash(at, Color("ffc94a"), 0.8, 0.06)
 
+## Broken: the plates crumble into chunks and dust.
 func aegis_break(at: Vector3) -> void:
 	aegis.visible = false
-	h.m.fx.burst(at + Vector3(0, 1.0, 0), GOLD, 30, 9.0, 0.6, 12.0, 1.5)
-	h.m.fx.spark(at + Vector3(0, 1.0, 0), Vector3.UP, Color("ffd25a"), 20, 11.0, 160.0, 0.4, 14.0, 1.4)
-	h.m.fx.ring(at, 2.2, EMBER, 0.3)
+	AimKit.hide(h, "aegis_push")
+	h.m.fx.burst(at + Vector3(0, 1.0, 0), PLATE_COL, 22, 7.0, 0.9, 16.0, 2.4)
+	h.m.fx.burst(at + Vector3(0, 0.8, 0), PLATE_EDGE, 16, 5.0, 1.0, 18.0, 2.0)
+	h.m.fx.dust(at, 16)
+	h.m.fx.spark(at + Vector3(0, 1.0, 0), Vector3.UP, Color("ffd25a"), 14, 11.0, 160.0, 0.4, 14.0, 1.4)
+
+## The push the raised wall gives, shown in front of it to everyone: a double chevron pointing outward that
+## pulses along its reach (a gameplay area: foes that touch the wall are pushed this far); `flash` on a push.
+func push_hint(w: Dictionary, n: Vector2, push: float, flash: bool) -> void:
+	if flash:
+		push_flash = PUSH_FLASH_T
+		aegis_hit = 1.0
+	var a: Vector2 = w["a"]
+	var b: Vector2 = w["b"]
+	var mid := (a + b) * 0.5
+	var t := float(h.m.time)
+	var hot := clampf(push_flash / PUSH_FLASH_T, 0.0, 1.0)
+	AimKit.lane(h, "aegis_push", {
+		"from": Vector3(mid.x + n.x * 0.5, h.pos.y, mid.y + n.y * 0.5), "dir": n, "len": push,
+		"width": float(w["len"]) * 0.7, "chevrons": 2, "fill": fmod(t * 1.5, 1.0), "col": GOLD, "col2": AEGIS,
+		"alpha": 1.1 + 0.4 * (0.5 + 0.5 * sin(t * 7.0)) + hot, "hot": 0.3 + hot, "lw": 0.1, "all": true})
 
 # ------------------------------------------------------------------ Purify
 ## The column coming down over the delay (u 0 -> 1), then the disc's rings.
@@ -343,7 +426,11 @@ func _process(_delta: float) -> void:
 	_tick_slam(delta)
 	if aegis_hit > 0.0:
 		aegis_hit = maxf(0.0, aegis_hit - delta * 5.0)
-	KitShaders.param(aegis, "hit", aegis_hit)
+	push_flash = maxf(0.0, push_flash - delta)
+	if rise_t > 0.0:
+		rise_t = maxf(0.0, rise_t - delta)
+		var u := 1.0 - rise_t / RISE_T
+		aegis.scale = Vector3(1.0, lerpf(0.05, 1.0, 1.0 - pow(1.0 - u, 3.0)), 1.0)
 	if disc_t > 0.0:
 		disc_t -= delta
 		var u2 := 1.0 - disc_t / 0.9

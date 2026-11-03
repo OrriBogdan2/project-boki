@@ -31,6 +31,7 @@ var deadeyes := 0              # Deadeyes landed (tests, demo)
 var knock_healed := 0.0        # health the knock passive gave back (tests)
 var sense_t := 0.0
 var pins := 0                  # wall pins landed (tests)
+var heavy_kicks := 0           # Heavy Shot releases that kicked the screen (tests)
 var cremations := 0            # Heavy Shots that knocked a foe burning in the Hail Wall (tests)
 
 func _setup() -> void:
@@ -194,8 +195,8 @@ func _tag_shots() -> void:
 		if x.get("cos", false):
 			continue
 		var kind := "arrow"
-		if String(x.get("src", "")) == "abil":
-			kind = "heavy"
+		if String(x.get("src", "")) == "abil" or x.has("ab"):
+			kind = "heavy"          # (an ability's projectile carries its slot as "ab"; the bow's arrows have none)
 		elif draw.pending != "":
 			kind = draw.pending
 		fx.skin(s, kind)
@@ -405,7 +406,7 @@ const HEAVY_GOLD := Color("ffc24a")
 func _heavy_tele() -> void:
 	var hk := heavy_k()
 	AimKit.vee(h, "rmb_v", {"k": hk, "col": HEAVY_GOLD, "col2": Color("fff0b0"), "glint": hk * 0.5})
-	AimKit.lane(h, "rmb_bar", {"len": 2.0 * AimKit.BH, "len0": 0.3, "k": hk, "width": 0.3, "fill": hk,
+	AimKit.lane(h, "rmb_bar", {"len": 2.0 * AimKit.BH, "len0": 0.3, "k": hk, "width": 0.5, "fill": hk, "tip": true,
 		"col": HEAVY_GOLD, "col2": Color("fff0b0")})
 	AimKit.charge(h, hk, {"col": HEAVY_GOLD, "col2": Color("fff0b0")})
 	fx.bow_glint_at(draw.bow_at(), 1.0 if hk >= 0.99 else 0.0, HEAVY_GOLD)
@@ -480,6 +481,8 @@ func _pin(a: Vector3, k: float) -> void:
 		m.fx.dust(f.pos, 14)
 		m.later(0.12, func(): if is_instance_valid(f): m.fx.ring(f.pos, 1.3, Color.WHITE, 0.3))
 		m.sfx("pin_heavy_hit", f.pos, -3.0)
+		f.flash_t = 0.2                      # a hit flash on the body
+		m.fx.flash(at, HEAVY_GOLD, 1.6 + 0.8 * k, 0.1)
 		# knocked while burning in the Hail Wall: Cremated (a burst of the blue fire)
 		if not rain.is_empty() and _in_rain(f):
 			cremations += 1
@@ -490,6 +493,7 @@ func _pin(a: Vector3, k: float) -> void:
 		# driven into terrain within 3m: pinned (a stun), and the shot lines up: full Focus
 		if _wall_behind(f, dir, float(pd["wall"])):
 			pins += 1
+			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			add_focus(res_max())
 			if rank("sec") >= 3:
 				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)       # rank 3: a wall stun gives a dash charge
@@ -502,10 +506,14 @@ func _pin(a: Vector3, k: float) -> void:
 					Feel.shake(m, "t3", h, f.pos, f))
 	run(stg, cx("rmb", "heavy_shot", a, extra))
 	m.sfx("pin_heavy", h.pos, lerpf(-6.0, 0.0, k), lerpf(1.15, 0.9, k))
+	m.sfx("pin_super", h.pos, lerpf(-8.0, -2.0, k), 0.6)           # a deep thump under it: heavier than the bow
 	var d := h.aim_dir()
 	# a small pink crescent swipe at the feet on the release
 	m.fx.slash(h.pos + Vector3(0, 0.15, 0), atan2(d.y, d.x), PI * 0.6, 1.1, Color("ff9ad8"), false)
-	fx.fletch_burst(h.pos + Vector3(d.x * 0.7, 1.1, d.y * 0.7), 0.6 + 0.5 * k, HEAVY_GOLD, 0.05, 0.1, 0.0, 5.0)
+	# the release burst sits on the aim line at the bow, bigger than any bow cue, and a screen kick along the shot
+	fx.fletch_burst(draw.bow_at(), 1.4 + 0.8 * k, HEAVY_GOLD, 0.08, 0.14, 1.0, 5.0)
+	if h.is_local(): Oomph.punch_dir(m, d, 0.2 + 0.2 * k)
+	heavy_kicks += 1
 	if k >= 0.99: Feel.shake(m, "t2", h, h.pos)
 	h.vel.x -= d.x * (1.5 + 3.0 * k); h.vel.z -= d.y * (1.5 + 3.0 * k)
 

@@ -16,6 +16,8 @@ extends RefCounted
 ##   until its stage 1 (no extra damage), a brief gold fletch burst with a ring at the bow hand.
 ## - Overdraw: held overdraw_t past the last stage, the arrow does overdraw_k of its damage.
 
+## the draw time Hunter._loose reports for a full-Focus shot (it is drawn at once, so no stage clock applies)
+const FOCUS_T := 9.0
 const LINE_A := 0.35           # the faint resting aim line's strength
 const MERGE_T := 0.12          # s the merged bright line holds at stage 1 before the V re-opens
 const SUPER_COL := Color("a8ffe0")
@@ -36,6 +38,7 @@ var last_kind := ""            # the kind of the last arrow loosed: tap, arrow, 
 var pending := ""              # the kind the next shot of ours gets skinned as
 var tgt: Ent = null            # the foe under the Supercharged line
 var perfect_now := false       # the arrow just loosed was a perfect release (its own move)
+var loosed_at := -9.0          # match time the last arrow left the string (a cancelled draw loosed nothing)
 
 func _init(kit: ArcherKit) -> void:
 	k = kit
@@ -68,10 +71,11 @@ func rate() -> float:
 func bonus(t: float) -> float:
 	var s := stage_t()
 	var pt := perfect_t()
+	loosed_at = k.m.time
 	quick = false
 	quick_used = false
 	perfect_now = false
-	if t >= 5.0:
+	if t >= FOCUS_T:
 		# a full Focus shot: drawn at once, the Supercharged line
 		h.shot_aim = AimMode.MAX
 		pending = "super"
@@ -99,9 +103,7 @@ func _perfect() -> void:
 	quick = true
 	perfect_now = true
 	var d := h.aim_dir()
-	var side := Vector2(-d.y, d.x)
-	var at := h.pos + Vector3(d.x * 0.45 + side.x * 0.35, 1.15 * _sc(), d.y * 0.45 + side.y * 0.35)
-	k.fx.fletch_burst(at, 1.1, PinFx.GOLD, 0.13, 0.07, 1.0)
+	k.fx.fletch_burst(bow_at(), 1.1, PinFx.GOLD, 0.13, 0.07, 1.0)
 	AimKit.perfect(h)
 	k.m.sfx("pin_perfect", h.pos, -3.0 if h.is_local() else -8.0, 1.25)
 	if h.is_local(): Oomph.punch_dir(k.m, d, 0.2)
@@ -109,14 +111,16 @@ func _perfect() -> void:
 func _sc() -> float:
 	return float(h.cdat.get("scale", 1.0))
 
+## Where the draw cues sit: on the aim line just ahead of her, low (the camera looks down, so anything held
+## up at the bow hand would show beside the line instead of on it).
 func bow_at() -> Vector3:
 	var d := h.aim_dir()
-	return h.pos + Vector3(d.x * 0.6, 1.1 * _sc(), d.y * 0.6)
+	return h.pos + Vector3(d.x * 0.9, 0.25 * _sc(), d.y * 0.9)
 
 ## Every step: the stage tells, the reticle, the bow's own moves.
 func tick() -> void:
 	var t := h.draw_t
-	var drawing := t >= 0.0 and t < 5.0 and h.wpn.has("draw")
+	var drawing := t >= 0.0 and h.wpn.has("draw")
 	var s := stage_t()
 	var col := Color(String(k.d.get("color", "#9fe0a8")))
 	if h.wpn.has("draw") and not drawing and k.tells_visible() and h.can_fire():
@@ -142,7 +146,13 @@ func tick() -> void:
 	if drawing and was < 0.0:
 		k.play("arc_draw")
 		k.m.sfx("pin_draw", h.pos, -9.0 if h.is_local() else -13.0)
-	elif not drawing and was >= 0.0 and was < 5.0 and k.anim_id in ["arc_draw", "arc_over"]:
+	elif drawing and k.anim_id == "arc_draw":
+		k.anim_at = k.m.time - t           # the pull-back runs on the draw's clock (a quick draw too)
+	elif not drawing and was >= 0.0 and k.anim_id in ["arc_draw", "arc_over"]:
+		if k.m.time - loosed_at > 0.1:
+			k.anim_id = ""                 # the draw was cancelled (a stun, a dash): nothing left the string
+			was = t
+			return
 		k.play(release_move())
 		var loose_sfx := "pin_loose_super" if last_kind == "super" else "pin_loose"
 		k.m.sfx(loose_sfx, h.pos, -3.0 if h.is_local() else -7.0)
