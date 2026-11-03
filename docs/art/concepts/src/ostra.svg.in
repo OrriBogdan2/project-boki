@@ -1,0 +1,160 @@
+<!--META {
+ "name": "Ostra", "title": "Void Jester", "tag": "id ostra  ·  male  ·  floats  ·  controller",
+ "accent": "#a774ff", "rim": "#dcc4ff", "shadow": 80, "float": 1, "bust_bg": "#1c1428",
+ "stage": ["#5c4c74", "#120d1a"],
+ "relic": "the Hollow Bell",
+ "mat": {
+  "void": ["#6a5a8a", "#2e2444", "#100b1a"],
+  "violet": ["#d2b0ff", "#7c48cc", "#2e1456"],
+  "porcelain": ["#ffffff", "#ece6f0", "#9a8eaa"],
+  "silver": ["#f6f8fc", "#a9b1c2", "#474e5e"],
+  "glove": ["#5a5266", "#2a2432", "#0e0b12"],
+  "lamp": ["#f8eaff", "#b07aff", "#4a1a8a"]
+ },
+ "glow": {"void": "#b07aff"},
+ "palette": [["#2e2444", "void cloth"], ["#7c48cc", "jester violet"], ["#ece6f0", "porcelain"],
+             ["#a9b1c2", "bell silver"], ["#2a2432", "glove black"], ["#b07aff", "void light"], ["#14101c", "the wisp"]],
+ "notes": [
+  ["Shape language", "A tall, thin, top-heavy figure that tapers to nothing: the crescent cap and pointed collar make a wide, spiky top, the body narrows through the ribbons into a curling smoke tail. Long thin limbs and long fingers; nothing touches the ground."],
+  ["Signature features", "A porcelain mask with a carved, too-wide grin of teeth and one violet tear; a cap whose two horns curve toward each other like a crescent moon, silver bells at the tips; a ruff of points; a diamond-pattern doublet; violet ribbons dissolving into a wisp; a void lantern that floats at his hand on a tether. Our own jester: no painted scar-smile, no suit, no green."],
+  ["Reads in-engine", "The only hunter with a gap under him and no legs: a dark shape with a white face, a horned top and a curling tail, bobbing above its own shadow. Violet light comes only from the lantern, the tear and the eye-holes, so he reads as a hole in the scene."]
+ ]
+} -->
+<g id="defs">
+ <linearGradient id="L-wisp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2e2444"/><stop offset="0.55" stop-color="#3e2c66" stop-opacity="0.9"/><stop offset="1" stop-color="#7c48cc" stop-opacity="0"/></linearGradient>
+ <linearGradient id="L-ribbon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a68e6"/><stop offset="0.6" stop-color="#5a2ea6" stop-opacity="0.85"/><stop offset="1" stop-color="#5a2ea6" stop-opacity="0"/></linearGradient>
+</g><!--/defs-->
+<g id="front">
+ <!-- smoke tail -->
+ <path fill="url(#L-wisp)" d="M-52 -320 C-60 -250 -40 -190 -10 -150 C20 -110 40 -90 40 -64 C40 -44 22 -40 14 -52 C30 -50 30 -70 14 -84 C-30 -120 -70 -190 -64 -320Z M52 -320 C56 -260 40 -200 20 -160 C40 -130 70 -110 82 -80 C70 -100 40 -120 10 -140Z"/>
+ <path fill="url(#L-wisp)" d="M-50 -320 L50 -320 C50 -250 30 -190 0 -150 C-30 -190 -50 -250 -50 -320Z"/>
+ <g class="fx" fill="#c9a6ff"><circle cx="-30" cy="-120" r="2.6" opacity="0.8"/><circle cx="34" cy="-96" r="2" opacity="0.7"/><circle cx="60" cy="-140" r="2.4" opacity="0.6"/><circle cx="-12" cy="-74" r="1.8" opacity="0.7"/></g>
+ <!-- ribbons, dissolving -->
+ <path fill="url(#L-ribbon)" stroke="#1d1724" stroke-width="2" d="M-50 -330 L-32 -330 C-36 -270 -46 -220 -62 -180 L-70 -196 C-60 -240 -52 -280 -50 -330Z"/>
+ <path fill="url(#L-ribbon)" stroke="#1d1724" stroke-width="2" d="M-22 -330 L-6 -330 C-8 -260 -14 -200 -22 -150 L-30 -168 C-26 -220 -24 -280 -22 -330Z"/>
+ <path fill="url(#L-ribbon)" stroke="#1d1724" stroke-width="2" d="M8 -330 L24 -330 C26 -270 32 -220 44 -170 L34 -180 C24 -230 16 -280 8 -330Z"/>
+ <path fill="url(#L-ribbon)" stroke="#1d1724" stroke-width="2" d="M34 -330 L50 -330 C54 -280 64 -240 78 -200 L68 -204 C52 -246 40 -290 34 -330Z"/>
+ <!-- doublet with diamonds -->
+ <path m="void" d="M-26 -480 C-50 -478 -64 -468 -68 -450 C-64 -420 -56 -380 -52 -350 L-56 -322 L56 -322 L52 -350 C56 -380 64 -420 68 -450 C64 -468 50 -478 26 -480Z"/>
+ <path f="violet" d="M0 -470 L18 -440 L0 -410 L-18 -440Z M0 -410 L18 -380 L0 -350 L-18 -380Z M-36 -440 L-18 -410 L-36 -380 L-54 -410Z M36 -440 L54 -410 L36 -380 L18 -410Z M-36 -380 L-18 -350 L-36 -322 L-52 -350Z M36 -380 L52 -350 L36 -322 L18 -350Z"/>
+ <path sh="30" d="M14 -478 C46 -476 64 -468 68 -450 C64 -420 56 -380 52 -350 L56 -322 L20 -322 C34 -380 34 -440 14 -478Z"/>
+ <path m="silver" lw="2" d="M-56 -334 Q0 -324 56 -334 L56 -320 Q0 -310 -56 -320Z"/>
+ <path rim="3" d="M64 -456 C60 -420 54 -380 52 -340"/>
+ <!-- arms: long and thin -->
+ <path m="void" d="M-52 -470 C-74 -466 -84 -450 -88 -430 L-104 -360 L-86 -352 L-70 -414Z"/>
+ <path m="void" d="M-104 -362 L-86 -352 L-100 -290 L-116 -296Z"/>
+ <path m="violet" lw="2" d="M-108 -372 L-82 -360 L-86 -346 L-112 -356Z"/>
+ <path m="glove" lw="2.4" d="M-116 -298 L-100 -290 C-96 -280 -98 -270 -102 -262 L-98 -230 L-104 -230 L-110 -258 L-112 -228 L-118 -228 L-120 -262 L-128 -236 L-134 -238 L-128 -272Z"/>
+ <path m="void" d="M52 -470 C74 -466 86 -452 92 -432 L112 -378 L96 -368 L76 -414Z"/>
+ <path m="void" d="M112 -380 L96 -368 C100 -400 108 -430 118 -456 L134 -448 C128 -424 120 -400 112 -380Z"/>
+ <path m="violet" lw="2" d="M116 -456 L136 -448 L132 -436 L112 -444Z"/>
+ <path m="glove" lw="2.4" d="M118 -456 L136 -450 C140 -460 140 -470 136 -478 L146 -508 L140 -510 L130 -484 L132 -516 L126 -516 L122 -484 L116 -512 L110 -510 L114 -478 L104 -494 L100 -490 L112 -464Z"/>
+ <!-- the tethered void lantern, floating at his hand -->
+ <path fill="none" stroke="#b07aff" stroke-width="2" stroke-dasharray="4 4" opacity="0.8" d="M134 -500 C150 -470 160 -440 160 -404"/>
+ <g transform="translate(160 -380)">
+  <g class="fx"><circle r="46" fill="url(#L-void-g)"/></g>
+  <path m="silver" lw="2.4" d="M-6 -30 C-6 -40 6 -40 6 -30Z"/>
+  <path m="glove" d="M-18 -30 h36 l-4 8 h-28Z M-18 30 h36 l-4 -8 h-28Z"/>
+  <path f="lamp:r" stroke="#1d1724" stroke-width="2.4" d="M-14 -22 h28 C20 -10 20 10 14 22 h-28 C-20 10 -20 -10 -14 -22Z"/>
+  <path ln="2" d="M-6 -22 v44 M6 -22 v44"/>
+  <circle fill="#140b22" cx="0" cy="0" r="6"/>
+ </g>
+ <!-- collar of points -->
+ <path m="porcelain" d="M-70 -470 L-56 -496 L-40 -476 L-30 -506 L-14 -480 L0 -510 L14 -480 L30 -506 L40 -476 L56 -496 L70 -470 L56 -456 L36 -462 L18 -452 L0 -458 L-18 -452 L-36 -462 L-56 -456Z"/>
+ <path f="violet" d="M-56 -496 L-40 -476 L-48 -462 L-60 -468Z M-14 -480 L0 -510 L0 -462 L-10 -460Z M40 -476 L56 -496 L60 -468 L48 -462Z"/>
+ <path sh="28" d="M14 -480 L30 -506 L40 -476 L56 -496 L70 -470 L56 -456 L36 -462 L18 -452Z"/>
+ <path m="silver:r" lw="1.6" d="M-56 -498 m-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0 M0 -512 m-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0 M56 -498 m-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0"/>
+ <!-- crescent cap: two horns curving to meet -->
+ <path m="void" d="M-32 -560 C-74 -576 -96 -630 -50 -680 C-60 -640 -46 -606 -20 -594 C-8 -604 8 -604 20 -594 C46 -606 60 -640 50 -680 C96 -630 74 -576 32 -560Z"/>
+ <path f="violet" d="M-50 -680 C-60 -640 -46 -606 -20 -594 L-26 -584 C-58 -600 -68 -640 -50 -680Z M50 -680 C60 -640 46 -606 20 -594 L26 -584 C58 -600 68 -640 50 -680Z"/>
+ <path rim="3" d="M62 -664 C84 -630 70 -584 34 -566"/>
+ <circle m="silver:r" cx="-48" cy="-684" r="8"/><circle m="silver:r" cx="48" cy="-684" r="8"/>
+ <path ln="1.4" d="M-52 -682 h8 M44 -682 h8"/>
+ <!-- the mask -->
+ <path m="porcelain" d="M-30 -560 C-32 -596 32 -596 30 -560 L28 -520 C24 -492 10 -476 0 -472 C-10 -476 -24 -492 -28 -520Z"/>
+ <path m="void" lw="2.4" d="M-34 -560 C-30 -590 30 -590 34 -560 C20 -574 -20 -574 -34 -560Z"/>
+ <path sh="16" d="M12 -576 C26 -570 30 -560 30 -548 L28 -520 C24 -496 12 -480 2 -474 C18 -500 22 -550 12 -576Z"/>
+ <path hl="70" d="M-22 -566 C-16 -572 -6 -574 0 -572 C-8 -568 -16 -564 -20 -556Z"/>
+ <path fill="#140b22" stroke="#1d1724" stroke-width="1.6" d="M-24 -546 Q-14 -558 -4 -544 Q-14 -540 -24 -546Z M24 -546 Q14 -558 4 -544 Q14 -540 24 -546Z"/>
+ <circle fill="#d6b8ff" cx="-13" cy="-547" r="2"/><circle fill="#d6b8ff" cx="13" cy="-547" r="2"/>
+ <path m="violet" lw="1.2" d="M12 -538 C10 -530 12 -522 15 -518 C18 -522 18 -530 12 -538Z"/>
+ <path fill="#140b22" stroke="#1d1724" stroke-width="1.8" d="M-26 -518 C-14 -500 14 -500 26 -518 C20 -506 12 -496 0 -494 C-12 -496 -20 -506 -26 -518Z"/>
+ <path fill="#f6f2f8" stroke="#1d1724" stroke-width="1" d="M-22 -514 l3 6 l3 -4 l3 6 l3 -5 l3 6 l3 -5 l3 6 l3 -5 l3 6 l3 -4 l3 6 l3 -6 C10 -506 -10 -506 -22 -514Z"/>
+ <path ln="1.2" d="M-28 -520 l-3 -4 M28 -520 l3 -4"/>
+</g><!--/front-->
+<g id="tq">
+ <!-- smoke tail trailing back and curling -->
+ <path fill="url(#L-wisp)" d="M-40 -330 C-30 -250 10 -190 60 -160 C110 -130 150 -120 160 -90 C170 -60 140 -46 126 -60 C146 -64 148 -84 128 -96 C70 -128 -10 -180 -60 -330Z"/>
+ <path fill="url(#L-wisp)" d="M-50 -330 L50 -330 C50 -260 20 -200 -10 -170 C-40 -210 -54 -260 -50 -330Z"/>
+ <g class="fx" fill="#c9a6ff"><circle cx="60" cy="-130" r="2.6" opacity="0.8"/><circle cx="120" cy="-100" r="2" opacity="0.7"/><circle cx="20" cy="-170" r="2.4" opacity="0.6"/><circle cx="150" cy="-130" r="1.8" opacity="0.7"/></g>
+ <path fill="url(#L-ribbon)" stroke="#1d1724" stroke-width="2" d="M-40 -336 L-24 -336 C-10 -280 20 -240 54 -210 L40 -206 C6 -236 -26 -280 -40 -336Z"/>
+ <path fill="url(#L-ribbon)" stroke="#1d1724" stroke-width="2" d="M-8 -336 L8 -336 C24 -290 54 -260 90 -238 L76 -232 C40 -254 8 -290 -8 -336Z"/>
+ <path fill="url(#L-ribbon)" stroke="#1d1724" stroke-width="2" d="M20 -336 L36 -336 C52 -300 84 -280 120 -268 L106 -260 C70 -272 36 -296 20 -336Z"/>
+ <g id="L-tqbody">
+ <!-- doublet, leaning in -->
+ <path m="void" d="M-40 -482 C-64 -478 -76 -466 -78 -448 C-72 -420 -62 -380 -56 -352 L-58 -324 L44 -324 L42 -352 C48 -382 56 -420 58 -450 C52 -472 30 -482 4 -482Z"/>
+ <path f="violet" d="M-18 -472 L0 -442 L-18 -412 L-36 -442Z M-18 -412 L0 -382 L-18 -352 L-36 -382Z M20 -442 L38 -412 L20 -382 L2 -412Z M-54 -440 L-38 -412 L-54 -384 L-66 -412Z M20 -382 L36 -352 L20 -326 L4 -352Z"/>
+ <path sh="32" d="M0 -480 C30 -480 52 -470 58 -450 C56 -420 48 -382 42 -352 L44 -324 L8 -324 C22 -380 22 -440 0 -480Z"/>
+ <path m="silver" lw="2" d="M-58 -336 Q-6 -326 44 -336 L44 -322 Q-6 -312 -58 -322Z"/>
+ <path rim="3" d="M56 -452 C52 -420 46 -382 42 -344"/>
+ <!-- far arm trailing the lantern -->
+ <path m="void" d="M30 -472 C52 -468 64 -452 70 -432 L92 -380 L76 -370 L54 -416Z"/>
+ <path m="void" d="M92 -382 L76 -370 L98 -318 L114 -326Z"/>
+ <path m="glove" lw="2.4" d="M98 -320 L114 -328 C122 -322 126 -312 124 -302 L136 -276 L130 -274 L118 -296 L124 -268 L118 -266 L110 -294 L108 -266 L102 -266 L102 -296 L96 -306Z"/>
+ <!-- collar -->
+ <path m="porcelain" d="M-84 -468 L-70 -494 L-54 -474 L-44 -504 L-28 -478 L-14 -508 L0 -478 L14 -502 L24 -474 L40 -492 L54 -468 L40 -454 L20 -460 L2 -450 L-16 -456 L-34 -450 L-52 -460 L-70 -454Z"/>
+ <path f="violet" d="M-70 -494 L-54 -474 L-62 -460 L-74 -466Z M-28 -478 L-14 -508 L-14 -460 L-24 -458Z M24 -474 L40 -492 L44 -466 L32 -460Z"/>
+ <path sh="28" d="M0 -478 L14 -502 L24 -474 L40 -492 L54 -468 L40 -454 L20 -460 L2 -450Z"/>
+ <!-- cap and mask, turned to his right -->
+ <path m="void" d="M-52 -560 C-94 -578 -114 -632 -70 -680 C-80 -640 -64 -608 -40 -594 C-28 -604 -10 -604 2 -596 C24 -610 36 -642 28 -682 C70 -630 48 -580 16 -560Z"/>
+ <path f="violet" d="M-70 -680 C-80 -640 -64 -608 -40 -594 L-46 -584 C-78 -602 -90 -640 -70 -680Z M28 -682 C36 -642 24 -610 2 -596 L8 -586 C34 -602 46 -640 28 -682Z"/>
+ <path rim="3" d="M40 -668 C64 -630 46 -586 18 -566"/>
+ <circle m="silver:r" cx="-68" cy="-684" r="8"/><circle m="silver:r" cx="26" cy="-686" r="8"/>
+ <path m="porcelain" d="M-58 -560 C-60 -596 6 -598 6 -562 L4 -522 C0 -494 -14 -478 -26 -474 C-38 -476 -56 -492 -60 -518 C-64 -524 -66 -536 -60 -542Z"/>
+ <path m="void" lw="2.4" d="M-62 -560 C-58 -590 6 -592 10 -562 C-6 -576 -46 -576 -62 -560Z"/>
+ <path sh="16" d="M-10 -578 C2 -570 6 -560 6 -548 L4 -522 C0 -498 -10 -482 -20 -476 C-6 -500 -2 -550 -10 -578Z"/>
+ <path hl="70" d="M-50 -566 C-44 -572 -34 -574 -28 -572 C-36 -568 -44 -564 -48 -556Z"/>
+ <path fill="#140b22" stroke="#1d1724" stroke-width="1.6" d="M-54 -546 Q-46 -556 -38 -544 Q-46 -540 -54 -546Z M-4 -546 Q-14 -558 -24 -544 Q-14 -540 -4 -546Z"/>
+ <circle fill="#d6b8ff" cx="-46" cy="-547" r="1.8"/><circle fill="#d6b8ff" cx="-14" cy="-547" r="2"/>
+ <path m="violet" lw="1.2" d="M-16 -538 C-18 -530 -16 -522 -13 -518 C-10 -522 -10 -530 -16 -538Z"/>
+ <path fill="#140b22" stroke="#1d1724" stroke-width="1.8" d="M-60 -520 C-46 -500 -12 -500 0 -520 C-4 -506 -14 -496 -28 -494 C-42 -496 -54 -506 -60 -520Z"/>
+ <path fill="#f6f2f8" stroke="#1d1724" stroke-width="1" d="M-56 -515 l3 6 l3 -4 l3 6 l3 -5 l3 6 l3 -5 l3 6 l3 -5 l3 6 l3 -4 l3 6 l3 -6 C-16 -506 -40 -506 -56 -515Z"/>
+ </g>
+ <!-- near arm reaching out, fingers spread -->
+ <path m="void" d="M-64 -462 C-86 -452 -100 -436 -112 -416 L-140 -380 L-126 -366 L-96 -398Z"/>
+ <path m="violet" lw="2" d="M-144 -386 L-124 -366 L-132 -356 L-152 -376Z"/>
+ <path m="glove" lw="2.4" d="M-148 -378 L-130 -360 C-138 -350 -148 -348 -158 -350 L-184 -336 L-186 -342 L-162 -358 L-192 -354 L-192 -360 L-164 -366 L-190 -376 L-188 -382 L-160 -374 L-176 -396 L-170 -398 L-152 -380Z"/>
+ <!-- lantern, trailing on its tether -->
+ <path fill="none" stroke="#b07aff" stroke-width="2" stroke-dasharray="4 4" opacity="0.8" d="M126 -270 C150 -250 170 -250 186 -276"/>
+ <g transform="translate(192 -300)">
+  <g class="fx"><circle r="46" fill="url(#L-void-g)"/></g>
+  <path m="silver" lw="2.4" d="M-6 -30 C-6 -40 6 -40 6 -30Z"/>
+  <path m="glove" d="M-18 -30 h36 l-4 8 h-28Z M-18 30 h36 l-4 -8 h-28Z"/>
+  <path f="lamp:r" stroke="#1d1724" stroke-width="2.4" d="M-14 -22 h28 C20 -10 20 10 14 22 h-28 C-20 10 -20 -10 -14 -22Z"/>
+  <path ln="2" d="M-6 -22 v44 M6 -22 v44"/>
+  <circle fill="#140b22" cx="0" cy="0" r="6"/>
+ </g>
+</g><!--/tq-->
+<g id="bust">
+ <defs><radialGradient id="L-bustbg" cx="0.5" cy="0.4" r="0.8"><stop offset="0" stop-color="#5a3a8a"/><stop offset="0.6" stop-color="#22163a"/><stop offset="1" stop-color="#0c0814"/></radialGradient></defs>
+ <rect width="320" height="320" fill="url(#L-bustbg)"/>
+ <g class="fx"><circle cx="160" cy="170" r="150" fill="url(#L-void-g)" opacity="0.35"/></g>
+ <use href="#L-tqbody" transform="translate(196 930) scale(1.38)"/>
+</g><!--/bust-->
+<g id="relic">
+ <ellipse cx="150" cy="286" rx="60" ry="10" fill="url(#gshadow)" opacity="0.6"/>
+ <g class="fx"><circle cx="150" cy="170" r="100" fill="url(#L-void-g)" opacity="0.5"/></g>
+ <!-- a jester's bell, hollow: there is a small night inside it -->
+ <path fill="none" stroke="#1d1724" stroke-width="7" stroke-linecap="round" d="M150 50 C120 40 104 60 116 78"/>
+ <path fill="none" stroke="#7c48cc" stroke-width="3.5" stroke-linecap="round" d="M150 50 C120 40 104 60 116 78"/>
+ <path m="violet" lw="2.4" d="M150 50 C170 30 210 40 200 70 C196 84 178 84 172 76 C186 74 190 60 178 56 C168 54 160 62 156 70Z"/>
+ <circle m="silver:r" cx="150" cy="170" r="74"/>
+ <path sh="30" d="M150 96 C200 100 228 140 224 180 C220 220 190 244 150 244 C190 230 206 200 204 170 C202 130 180 104 150 96Z"/>
+ <path hl="55" d="M100 130 C110 112 128 104 144 104 C124 112 112 124 106 142Z"/>
+ <path fill="#0c0814" stroke="#1d1724" stroke-width="2.4" d="M86 186 C110 200 190 200 214 186 C206 206 180 222 150 222 C120 222 94 206 86 186Z"/>
+ <g fill="#e2d0ff"><circle cx="120" cy="204" r="1.8"/><circle cx="160" cy="210" r="1.4"/><circle cx="186" cy="200" r="2"/><circle cx="140" cy="214" r="1.2"/></g>
+ <path fill="#e2d0ff" d="M168 202 a7 7 0 1 0 6 -10 a5.4 5.4 0 1 1 -6 10Z"/>
+ <path ln="2.2" d="M150 96 L150 186 M80 170 Q150 150 220 170"/>
+ <rect m="silver" lw="2" x="140" y="84" width="20" height="14" rx="4"/>
+ <path rim="3.4" d="M210 130 C226 160 222 200 200 222"/>
+</g><!--/relic-->

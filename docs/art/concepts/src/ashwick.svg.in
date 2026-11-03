@@ -1,0 +1,204 @@
+<!--META {
+ "name": "Cinder", "title": "Mad Pyromancer", "tag": "id ashwick  ·  female  ·  salamander-folk  ·  brawler",
+ "accent": "#ff7a32", "rim": "#ffcf8a", "shadow": 105, "bust_bg": "#2a1612",
+ "stage": ["#6c4a46", "#1a0f0e"],
+ "relic": "the Ember Phial",
+ "mat": {
+  "scale": ["#a8686a", "#62343a", "#24121a"],
+  "face": ["#d29488", "#8e5052", "#3a1a20"],
+  "belly": ["#ffd2a0", "#e8935a", "#9a4a26"],
+  "frill": ["#ffb070", "#f0522e", "#7a1a10"],
+  "apron": ["#9a7454", "#5e4230", "#2a1c14"],
+  "brass": ["#ffe7a6", "#c99a48", "#5a3c14"],
+  "copper": ["#f2a476", "#b5603a", "#5a2814"],
+  "cloth": ["#8a8a7a", "#55554c", "#262622"],
+  "lens": ["#fff6b0", "#ffb43a", "#a3400e"],
+  "flaskg": ["#e8ffc0", "#8ee05a", "#2f7a1e"],
+  "flame": ["#fffbe0", "#ffb03a", "#e0400e"]
+ },
+ "glow": {"flame": "#ffa040", "green": "#9be26a"},
+ "palette": [["#62343a", "charcoal scale"], ["#ff8a3a", "ember speckle"], ["#e8935a", "belly"],
+             ["#f0522e", "frill"], ["#5e4230", "scorched apron"], ["#c99a48", "goggle brass"], ["#8ee05a", "the green flask"]],
+ "notes": [
+  ["Shape language", "A slim S-curve: a forward-leaning, wiry body balanced by a long tail behind, under one big round shape, the frill fanned out behind her head. Small busy shapes (flasks, buckles, goggles) cluster on the chest so the eye stays on her hands and face."],
+  ["Signature features", "Salamander-folk: charcoal scales with ember speckles, a frill crest that flares wide when she casts, slit pupils behind cracked brass goggles, a long tail with a hot tip. A scorched leather apron, bandoliers of glowing flasks, and a copper flame-lance fed from the still on her back."],
+  ["Reads in-engine", "From above: the frill is a bright orange disc on a dark body, and the tail is a second line no other hunter has. Fire is her colour, so her ember tones stay hotter and more saturated than anyone else's; the green flask is the one cool accent."]
+ ]
+} -->
+<g id="defs"></g><!--/defs-->
+<g id="front">
+ <!-- tail sweeping out behind -->
+ <path m="scale" d="M30 -300 C90 -280 150 -230 168 -160 C182 -104 166 -50 120 -40 C96 -36 84 -56 100 -66 C130 -80 140 -110 132 -150 C120 -210 70 -250 20 -262Z"/>
+ <path f="belly" d="M120 -40 C96 -36 84 -56 100 -66 C120 -74 132 -90 136 -112 C142 -80 140 -50 120 -40Z"/>
+ <g class="fx"><circle cx="102" cy="-56" r="24" fill="url(#L-flame-g)"/></g>
+ <path fill="#ffa040" opacity="0.85" d="M150 -200 l3 -3 l3 3 l-3 3Z M160 -150 l3 -3 l3 3 l-3 3Z M140 -230 l2 -2 l2 2 l-2 2Z M158 -110 l2 -2 l2 2 l-2 2Z"/>
+ <!-- the still on her back -->
+ <path m="copper" d="M-70 -470 C-80 -520 -40 -540 0 -540 C40 -540 80 -520 70 -470 L64 -370 L-64 -370Z"/>
+ <path m="brass" d="M-18 -540 L-10 -576 L10 -576 L18 -540Z"/>
+ <path m="copper" lw="2.4" d="M10 -572 C30 -590 60 -584 64 -560 L56 -556 C52 -574 34 -578 18 -566Z"/>
+ <!-- legs: wrapped shins, clawed feet -->
+ <path m="cloth" d="M-52 -260 C-56 -220 -54 -170 -50 -120 L-24 -120 C-20 -170 -16 -220 -12 -260Z"/>
+ <path m="cloth" d="M52 -260 C56 -220 54 -170 50 -120 L24 -120 C20 -170 16 -220 12 -260Z"/>
+ <path m="scale" d="M-50 -130 C-52 -80 -50 -40 -54 -14 L-74 -2 C-78 4 -70 6 -60 4 L-14 4 C-8 2 -10 -4 -16 -8 L-24 -14 C-24 -50 -22 -90 -22 -130Z"/>
+ <path m="scale" d="M50 -130 C52 -80 50 -40 54 -14 L74 -2 C78 4 70 6 60 4 L14 4 C8 2 10 -4 16 -8 L24 -14 C24 -50 22 -90 22 -130Z"/>
+ <path m="apron" lw="2" d="M-52 -116 L-22 -110 L-22 -100 L-52 -104Z M-52 -90 L-22 -84 L-22 -74 L-52 -78Z M-52 -64 L-24 -58 L-24 -48 L-52 -52Z M52 -116 L22 -110 L22 -100 L52 -104Z M52 -90 L22 -84 L22 -74 L52 -78Z M52 -64 L24 -58 L24 -48 L52 -52Z"/>
+ <path fill="#f6efe0" stroke="#1d1724" stroke-width="1.4" d="M-72 0 l-6 6 l8 -2Z M-56 2 l-4 8 l8 -4Z M-20 2 l2 8 l4 -8Z M72 0 l6 6 l-8 -2Z M56 2 l4 8 l-8 -4Z M20 2 l-2 8 l-4 -8Z"/>
+ <!-- body -->
+ <path m="scale" d="M-20 -482 C-46 -480 -62 -470 -66 -452 C-62 -420 -54 -390 -48 -362 L-46 -300 C-50 -280 -54 -266 -56 -252 L56 -252 C54 -266 50 -280 46 -300 L48 -362 C54 -390 62 -420 66 -452 C62 -470 46 -480 20 -482Z"/>
+ <path f="belly" d="M-14 -480 C-20 -440 -22 -380 -20 -300 L20 -300 C22 -380 20 -440 14 -480Z"/>
+ <!-- the apron -->
+ <path m="apron" d="M-40 -440 C-30 -446 30 -446 40 -440 L46 -360 C60 -300 66 -220 62 -140 L42 -150 L30 -132 L14 -150 L0 -136 L-14 -152 L-30 -134 L-44 -150 L-62 -140 C-66 -220 -60 -300 -46 -360Z"/>
+ <path sh="30" d="M10 -444 C26 -446 36 -444 40 -440 L46 -360 C60 -300 66 -220 62 -140 L42 -150 L30 -132 L14 -150 C30 -240 30 -360 10 -444Z"/>
+ <path fill="#1d1724" opacity="0.35" d="M-30 -240 C-20 -250 -6 -246 -8 -232 C-10 -220 -26 -222 -30 -240Z M18 -200 C26 -206 36 -200 34 -190 C30 -180 18 -186 18 -200Z M-40 -170 c4 -6 14 -4 12 4 c-2 6 -12 4 -12 -4Z"/>
+ <path ln="2" d="M-46 -360 Q0 -350 46 -360"/>
+ <path m="apron" lw="2" d="M-40 -440 L-52 -470 L-44 -474 L-32 -444Z M40 -440 L52 -470 L44 -474 L32 -444Z"/>
+ <!-- bandoliers of flasks -->
+ <path m="apron" lw="2.4" d="M-62 -460 L-46 -470 L58 -330 L44 -320Z"/>
+ <path m="apron" lw="2.4" d="M62 -460 L46 -470 L-58 -330 L-44 -320Z"/>
+ <g>
+  <path m="flaskg" lw="2" d="M-38 -432 h12 v8 c6 4 8 10 8 18 c0 10 -8 16 -14 16 c-6 0 -14 -6 -14 -16 c0 -8 2 -14 8 -18Z"/>
+  <path m="flame" lw="2" d="M-14 -400 h10 v8 c5 3 7 8 7 15 c0 8 -7 13 -12 13 c-5 0 -12 -5 -12 -13 c0 -7 2 -12 7 -15Z"/>
+  <path m="flaskg" lw="2" d="M24 -392 h10 v8 c5 3 7 8 7 15 c0 8 -7 13 -12 13 c-5 0 -12 -5 -12 -13 c0 -7 2 -12 7 -15Z"/>
+  <path m="flame" lw="2" d="M42 -430 h12 v8 c6 4 8 10 8 18 c0 10 -8 16 -14 16 c-6 0 -14 -6 -14 -16 c0 -8 2 -14 8 -18Z"/>
+  <path m="brass" lw="1.6" d="M-39 -436 h14 v6 h-14Z M-15 -404 h12 v5 h-12Z M23 -396 h12 v5 h-12Z M41 -434 h14 v6 h-14Z"/>
+  <path hl="70" d="M-34 -414 l3 0 l0 10 l-3 0Z M-10 -386 l2 0 l0 8 l-2 0Z M28 -378 l2 0 l0 8 l-2 0Z M46 -412 l3 0 l0 10 l-3 0Z"/>
+ </g>
+ <!-- right arm (image left) with the flame-lance -->
+ <path m="scale" d="M-56 -470 C-80 -468 -92 -450 -94 -426 L-100 -366 L-76 -362 L-70 -420 Z"/>
+ <path m="apron" d="M-104 -376 L-72 -372 L-70 -320 L-106 -324Z"/>
+ <path ln="1.4" d="M-104 -356 l32 4 M-104 -340 l32 4"/>
+ <g transform="translate(-92 -300) rotate(-24)">
+  <path m="copper" d="M-10 -20 L10 -20 L8 150 L-8 150Z"/>
+  <path m="brass" d="M-16 -24 h32 v26 h-32Z"/>
+  <path m="brass" d="M-12 150 L12 150 L18 184 L-18 184Z"/>
+  <path m="copper" lw="2.4" d="M-20 60 h40 v16 h-40Z"/>
+  <path hl="35" d="M-6 -16 L-3 -16 L-3 146 L-6 146Z"/>
+  <g class="fx"><circle cx="0" cy="198" r="26" fill="url(#L-flame-g)"/></g>
+  <path m="flame" lw="2" d="M0 216 C-12 204 -10 192 -2 186 C0 194 4 194 6 186 C12 196 10 206 0 216Z"/>
+ </g>
+ <path m="apron" lw="2.6" d="M-112 -322 C-118 -306 -112 -286 -96 -284 C-80 -282 -72 -298 -76 -318Z"/>
+ <!-- left arm (image right) holding a flask up -->
+ <path m="scale" d="M56 -470 C80 -468 94 -452 98 -430 L110 -384 L88 -374 L76 -420Z"/>
+ <path m="scale" d="M110 -386 L88 -374 C96 -404 104 -430 112 -452 L132 -444 C128 -420 120 -400 110 -386Z"/>
+ <path m="apron" d="M112 -440 L134 -446 L140 -472 L112 -470Z"/>
+ <path m="apron" lw="2.6" d="M112 -470 C106 -488 114 -504 128 -506 C142 -506 148 -492 140 -472Z"/>
+ <path m="flame" lw="2.2" d="M122 -560 h14 v12 c8 6 12 14 12 24 c0 14 -10 22 -19 22 c-9 0 -19 -8 -19 -22 c0 -10 4 -18 12 -24Z"/>
+ <path m="brass" lw="1.6" d="M120 -566 h18 v8 h-18Z"/>
+ <g class="fx"><circle cx="129" cy="-526" r="34" fill="url(#L-flame-g)" opacity="0.7"/></g>
+ <path hl="70" d="M120 -532 l3 0 l0 14 l-3 0Z"/>
+ <!-- head: frill fan behind -->
+ <g>
+  <path m="frill" d="M-36 -500 C-88 -490 -114 -540 -100 -584 C-86 -630 -40 -660 0 -660 C40 -660 86 -630 100 -584 C114 -540 88 -490 36 -500Z"/>
+  <path ln="2" d="M-20 -520 L-90 -560 M-14 -540 L-70 -626 M0 -546 L0 -656 M14 -540 L70 -626 M20 -520 L90 -560"/>
+  <path fill="#7a1a10" opacity="0.5" d="M-100 -584 C-96 -600 -88 -612 -80 -620 L-50 -540Z M100 -584 C96 -600 88 -612 80 -620 L50 -540Z M-34 -650 C-24 -656 -12 -660 -6 -660 L-6 -560Z M34 -650 C24 -656 12 -660 6 -660 L6 -560Z"/>
+  <path m="frill" lw="2" d="M-102 -580 l-14 -6 l10 -10Z M-74 -632 l-10 -14 l14 0Z M0 -660 l-6 -16 l12 0Z M74 -632 l10 -14 l-14 0Z M102 -580 l14 -6 l-10 -10Z"/>
+  <path rim="3.2" d="M40 -656 C80 -640 104 -610 102 -570"/>
+  <g class="fx"><path fill="#ffd27a" opacity="0.35" d="M-90 -580 C-80 -620 -40 -646 0 -648 C40 -646 80 -620 90 -580 C60 -610 -60 -610 -90 -580Z"/></g>
+ </g>
+ <path m="scale" d="M-14 -500 L14 -500 L16 -476 L-16 -476Z"/>
+ <path m="face" d="M-34 -540 C-36 -580 36 -580 34 -540 L32 -516 C28 -496 12 -488 0 -488 C-12 -488 -28 -496 -32 -516Z"/>
+ <path f="belly" d="M-22 -512 C-14 -500 14 -500 22 -512 C18 -496 10 -490 0 -490 C-10 -490 -18 -496 -22 -512Z"/>
+ <path sh="30" d="M14 -572 C28 -566 34 -554 34 -540 L32 -516 C28 -500 20 -492 12 -490 C24 -520 26 -556 14 -572Z"/>
+ <path fill="#ffa040" opacity="0.9" d="M-24 -566 l3 -3 l3 3 l-3 3Z M20 -560 l2 -2 l2 2 l-2 2Z M-28 -548 l2 -2 l2 2 l-2 2Z"/>
+ <!-- wide grin -->
+ <path fill="#3a1418" stroke="#1d1724" stroke-width="1.8" d="M-22 -514 Q0 -500 22 -514 Q16 -502 0 -499 Q-16 -502 -22 -514Z"/>
+ <path fill="#fff4e0" d="M-18 -512 l3 4 l3 -3 l3 4 l3 -3 l3 4 l3 -3 l3 4 l3 -3 l3 4 l3 -4 l-2 -2 Q0 -506 -18 -512Z"/>
+ <circle cx="-5" cy="-526" r="1.6" fill="#1d1724"/><circle cx="5" cy="-526" r="1.6" fill="#1d1724"/>
+ <!-- goggles: one lens cracked -->
+ <path m="apron" lw="2" d="M-36 -546 L36 -546 L36 -536 L-36 -536Z"/>
+ <circle m="brass" cx="-15" cy="-542" r="13"/><circle m="brass" cx="15" cy="-542" r="13"/>
+ <circle f="lens:r" stroke="#1d1724" stroke-width="2" cx="-15" cy="-542" r="8.5"/>
+ <circle f="lens:r" stroke="#1d1724" stroke-width="2" cx="15" cy="-542" r="8.5"/>
+ <path fill="#1d1724" d="M-16 -549 Q-13 -542 -16 -535 Q-19 -542 -16 -549Z M14 -549 Q17 -542 14 -535 Q11 -542 14 -549Z"/>
+ <path fill="none" stroke="#fff6d8" stroke-width="1.4" d="M9 -548 L14 -542 L12 -538 L18 -534 M14 -542 L21 -545"/>
+ <path hl="70" d="M-20 -548 a3 3 0 1 0 6 0 a3 3 0 1 0 -6 0Z M10 -548 a3 3 0 1 0 6 0 a3 3 0 1 0 -6 0Z"/>
+</g><!--/front-->
+<g id="tq">
+ <!-- tail curling back -->
+ <path m="scale" d="M0 -300 C70 -300 150 -260 186 -190 C214 -134 200 -70 150 -58 C124 -52 110 -74 128 -84 C160 -98 172 -130 160 -170 C140 -230 80 -262 -10 -262Z"/>
+ <path f="belly" d="M150 -58 C124 -52 110 -74 128 -84 C150 -94 164 -110 168 -134 C176 -100 172 -68 150 -58Z"/>
+ <g class="fx"><circle cx="132" cy="-72" r="26" fill="url(#L-flame-g)"/></g>
+ <!-- still on her back -->
+ <path m="copper" d="M10 -470 C4 -520 40 -540 70 -536 C100 -530 116 -500 104 -460 L94 -370 L20 -370Z"/>
+ <path m="brass" d="M50 -536 L56 -572 L74 -572 L76 -534Z"/>
+ <path sh="28" d="M80 -532 C104 -524 114 -500 104 -460 L94 -370 L70 -370 C84 -420 90 -480 80 -532Z"/>
+ <path rim="3" d="M100 -520 C110 -500 108 -470 104 -440"/>
+ <g id="L-tqbody">
+ <!-- frill, flared -->
+ <path m="frill" d="M-40 -500 C-96 -496 -126 -540 -118 -590 C-108 -640 -60 -672 -14 -670 C34 -668 78 -634 84 -590 C92 -540 64 -500 20 -502Z"/>
+ <path ln="2" d="M-30 -520 L-110 -566 M-24 -540 L-86 -636 M-10 -546 L-14 -666 M4 -540 L52 -640 M10 -520 L80 -566"/>
+ <path fill="#7a1a10" opacity="0.5" d="M-118 -590 C-114 -606 -106 -618 -98 -626 L-64 -540Z M84 -590 C82 -606 74 -620 66 -628 L36 -540Z M-48 -660 C-38 -666 -26 -670 -20 -670 L-18 -560Z"/>
+ <path m="frill" lw="2" d="M-120 -586 l-14 -6 l10 -10Z M-90 -640 l-10 -14 l14 0Z M-14 -670 l-6 -16 l12 0Z M58 -642 l10 -14 l-14 0Z M86 -584 l14 -6 l-10 -10Z"/>
+ <path rim="3.2" d="M30 -664 C66 -648 86 -620 86 -580"/>
+ <!-- legs -->
+ <path m="cloth" d="M10 -260 C16 -220 20 -170 22 -120 L46 -120 C46 -170 46 -220 48 -260Z"/>
+ <path m="scale" d="M22 -130 C22 -80 24 -40 22 -14 L10 -4 C6 2 12 6 20 4 L60 4 C64 2 62 -4 56 -8 L48 -14 C48 -50 48 -90 46 -130Z"/>
+ <path m="cloth" d="M-58 -260 C-64 -220 -70 -170 -72 -120 L-46 -120 C-42 -170 -32 -220 -22 -260Z"/>
+ <path m="scale" d="M-72 -130 C-74 -80 -74 -40 -80 -14 L-104 -2 C-108 4 -100 6 -90 4 L-44 4 C-38 2 -40 -4 -46 -8 L-50 -14 C-50 -50 -48 -90 -46 -130Z"/>
+ <path m="apron" lw="2" d="M-72 -116 L-46 -110 L-46 -100 L-72 -104Z M-72 -90 L-48 -84 L-48 -74 L-72 -78Z M22 -116 L46 -110 L46 -100 L22 -104Z M22 -90 L46 -84 L46 -74 L22 -78Z"/>
+ <path fill="#f6efe0" stroke="#1d1724" stroke-width="1.4" d="M-102 0 l-8 4 l8 0Z M-88 2 l-6 8 l8 -4Z M10 2 l-6 6 l8 -2Z"/>
+ <!-- body, leaning in -->
+ <path m="scale" d="M-40 -480 C-66 -476 -80 -462 -82 -444 C-76 -414 -66 -386 -60 -360 L-58 -300 C-62 -280 -66 -266 -66 -252 L46 -252 C46 -266 42 -280 38 -300 L40 -362 C46 -390 52 -420 54 -448 C48 -470 26 -482 0 -482Z"/>
+ <path f="belly" d="M-40 -478 C-50 -440 -52 -380 -48 -300 L-14 -300 C-12 -380 -14 -440 -20 -480Z"/>
+ <path m="apron" d="M-62 -440 C-50 -446 10 -446 22 -440 L30 -360 C44 -300 48 -220 44 -140 L24 -150 L10 -132 L-6 -150 L-20 -136 L-34 -152 L-50 -134 L-64 -150 L-84 -140 C-88 -220 -80 -300 -68 -360Z"/>
+ <path sh="32" d="M-6 -444 C10 -446 20 -444 22 -440 L30 -360 C44 -300 48 -220 44 -140 L24 -150 L10 -132 L-6 -150 C10 -240 10 -360 -6 -444Z"/>
+ <path fill="#1d1724" opacity="0.35" d="M-50 -240 C-40 -250 -26 -246 -28 -232 C-30 -220 -46 -222 -50 -240Z M0 -200 C8 -206 18 -200 16 -190 C12 -180 0 -186 0 -200Z"/>
+ <path m="apron" lw="2.4" d="M-82 -460 L-66 -470 L36 -330 L22 -320Z"/>
+ <path m="flaskg" lw="2" d="M-56 -432 h12 v8 c6 4 8 10 8 18 c0 10 -8 16 -14 16 c-6 0 -14 -6 -14 -16 c0 -8 2 -14 8 -18Z"/>
+ <path m="flame" lw="2" d="M-30 -398 h10 v8 c5 3 7 8 7 15 c0 8 -7 13 -12 13 c-5 0 -12 -5 -12 -13 c0 -7 2 -12 7 -15Z"/>
+ <path m="flaskg" lw="2" d="M-4 -368 h10 v8 c5 3 7 8 7 15 c0 8 -7 13 -12 13 c-5 0 -12 -5 -12 -13 c0 -7 2 -12 7 -15Z"/>
+ <path rim="3" d="M52 -446 C48 -420 42 -390 40 -362"/>
+ <!-- head, turned to her right -->
+ <path m="scale" d="M-34 -500 L-6 -500 L-4 -476 L-36 -476Z"/>
+ <path m="face" d="M-62 -540 C-62 -580 10 -582 12 -544 L12 -520 C8 -500 -10 -490 -26 -490 C-42 -490 -60 -494 -70 -506 C-76 -514 -70 -524 -62 -526Z"/>
+ <path f="belly" d="M-66 -514 C-56 -500 -10 -498 4 -512 C0 -498 -12 -492 -26 -492 C-42 -492 -58 -500 -66 -514Z"/>
+ <path sh="30" d="M-6 -574 C8 -566 12 -556 12 -544 L12 -520 C8 -504 0 -494 -8 -492 C2 -520 4 -556 -6 -574Z"/>
+ <path fill="#ffa040" opacity="0.9" d="M-44 -568 l3 -3 l3 3 l-3 3Z M-4 -560 l2 -2 l2 2 l-2 2Z M-50 -552 l2 -2 l2 2 l-2 2Z"/>
+ <path fill="#3a1418" stroke="#1d1724" stroke-width="1.8" d="M-68 -510 Q-40 -500 -12 -514 Q-18 -500 -36 -498 Q-56 -498 -68 -510Z"/>
+ <path fill="#fff4e0" d="M-64 -509 l3 4 l3 -3 l3 4 l3 -3 l3 4 l3 -3 l3 4 l3 -3 l3 4 l3 -3 l3 4 l3 -4 l-2 -2 Q-40 -504 -64 -509Z"/>
+ <circle cx="-68" cy="-524" r="1.6" fill="#1d1724"/>
+ <path m="apron" lw="2" d="M-64 -546 L12 -546 L12 -536 L-64 -536Z"/>
+ <circle m="brass" cx="-46" cy="-542" r="11"/><circle m="brass" cx="-14" cy="-542" r="13"/>
+ <circle f="lens:r" stroke="#1d1724" stroke-width="2" cx="-46" cy="-542" r="7"/>
+ <circle f="lens:r" stroke="#1d1724" stroke-width="2" cx="-14" cy="-542" r="8.5"/>
+ <path fill="#1d1724" d="M-48 -548 Q-45 -542 -48 -536 Q-51 -542 -48 -548Z M-16 -549 Q-13 -542 -16 -535 Q-19 -542 -16 -549Z"/>
+ <path fill="none" stroke="#fff6d8" stroke-width="1.4" d="M-20 -548 L-15 -542 L-17 -538 L-11 -534 M-15 -542 L-8 -545"/>
+ <path hl="70" d="M-50 -547 a2.5 2.5 0 1 0 5 0 a2.5 2.5 0 1 0 -5 0Z M-20 -548 a3 3 0 1 0 6 0 a3 3 0 1 0 -6 0Z"/>
+ <!-- far arm: the green flask -->
+ <path m="scale" d="M30 -468 C52 -466 64 -450 66 -428 L72 -380 L50 -374 L44 -420Z"/>
+ <path m="apron" lw="2.6" d="M46 -382 C40 -366 46 -348 62 -346 C76 -346 80 -362 74 -380Z"/>
+ </g>
+ <!-- near arm, aiming the flame-lance -->
+ <path m="scale" d="M-60 -466 C-84 -460 -100 -440 -108 -416 L-122 -380 L-100 -370 L-84 -404 Z"/>
+ <path m="apron" d="M-128 -390 L-100 -376 L-114 -336 L-140 -350Z"/>
+ <g transform="translate(-128 -330) rotate(62)">
+  <path m="copper" d="M-10 -20 L10 -20 L8 150 L-8 150Z"/>
+  <path m="brass" d="M-16 -24 h32 v26 h-32Z"/>
+  <path m="brass" d="M-12 150 L12 150 L18 184 L-18 184Z"/>
+  <path m="copper" lw="2.4" d="M-20 60 h40 v16 h-40Z"/>
+  <g class="fx"><circle cx="0" cy="206" r="34" fill="url(#L-flame-g)"/></g>
+  <path m="flame" lw="2" d="M0 226 C-14 212 -12 196 -2 188 C0 198 6 198 8 188 C16 200 12 214 0 226Z"/>
+ </g>
+ <path m="apron" lw="2.6" d="M-146 -346 C-156 -330 -150 -310 -134 -308 C-118 -306 -110 -322 -114 -340Z"/>
+</g><!--/tq-->
+<g id="bust">
+ <defs><radialGradient id="L-bustbg" cx="0.35" cy="0.35" r="0.9"><stop offset="0" stop-color="#b0582e"/><stop offset="0.55" stop-color="#4a1e14"/><stop offset="1" stop-color="#170908"/></radialGradient></defs>
+ <rect width="320" height="320" fill="url(#L-bustbg)"/>
+ <use href="#L-tqbody" transform="translate(186 940) scale(1.4)"/>
+ <g class="fx"><circle cx="40" cy="290" r="60" fill="url(#L-flame-g)" opacity="0.6"/></g>
+</g><!--/bust-->
+<g id="relic">
+ <ellipse cx="150" cy="282" rx="66" ry="12" fill="url(#gshadow)"/>
+ <g class="fx"><circle cx="150" cy="196" r="96" fill="url(#L-flame-g)" opacity="0.55"/></g>
+ <!-- a round-bellied phial with a living ember inside -->
+ <path fill="#fff" fill-opacity="0.16" stroke="#1d1724" stroke-width="3.4" d="M132 72 h36 v52 c40 14 62 48 62 86 c0 44 -36 72 -80 72 c-44 0 -80 -28 -80 -72 c0 -38 22 -72 62 -86Z"/>
+ <path f="flame:r" d="M90 214 c6 -8 20 -10 30 -4 c14 8 26 6 40 -2 c14 -8 30 -6 40 6 c0 36 -26 60 -50 60 c-34 0 -62 -24 -60 -60Z"/>
+ <path m="flame" lw="2" d="M150 252 C122 236 120 204 140 186 C140 204 150 206 156 194 C176 214 176 242 150 252Z"/>
+ <circle fill="#fffbe0" cx="146" cy="232" r="7"/>
+ <path hl="45" d="M100 180 C92 196 90 220 96 240 C102 216 108 196 118 182Z"/>
+ <path m="copper" d="M126 56 h48 v20 h-48Z"/>
+ <path m="apron" lw="2.4" d="M134 56 C132 36 168 36 166 56Z"/>
+ <path m="brass" lw="2" d="M120 120 Q150 130 180 120 L182 132 Q150 142 118 132Z"/>
+ <path fill="none" stroke="#fff6d8" stroke-width="1.6" d="M200 160 L190 176 L198 186 L188 200"/>
+ <path rim="3" d="M212 170 C228 200 226 240 200 262"/>
+</g><!--/relic-->
