@@ -93,7 +93,7 @@ rift = dict(id="rift", name="The Rift", role="heart", region=0, biome="gloom", d
             breakables=[[C + 20, C - 26, "barrel"], [C + 21, C - 26, "crate"], [C - 21, C + 26, "pot"], [C - 20, C + 26, "crate"]],
             wardens=[[C - 4, C - 30], [C + 4, C + 31], [C + 1, C + 2]],
             traps=[[C - 16, C + 14], [C + 16, C - 14]],
-            areas=[[C, C - 4, "The Sanctum"], [C - 28, C + 10, "The Fallen Arches"]])
+            areas=[[C, C - 9, "The Sanctum"], [C - 28, C + 10, "The Fallen Arches"]])
 rift["ramps"] = [auto_ramp(SANCTUM, 2, 6, "e", 5), auto_ramp(SANCTUM, 2, 6, "w", 5)]
 
 # ------------------------------------------------------------------ the region ring
@@ -136,7 +136,7 @@ def region(spec, index):
              weapons=[F.at(-8, 4)],
              wardens=[F.at(2, -12), F.at(27, -14)],
              traps=[F.at(6, -9)],
-             areas=[F.at(-17, -6, high), F.at(12, -12, YARDS[iid])])
+             areas=[F.at(-17, -6, high), F.at(16, -20, YARDS[iid])])
     if extra.get("trees"):
         d["trees"] = thickets(tuple(F.at(-10, 22)), tuple(F.at(10, -26)), tuple(F.at(-29, -8)))
     if extra.get("wild"):
@@ -186,7 +186,7 @@ def outer_isle(spec, index):
              camps=[F.at(-2, 6, "light")],
              breakables=[F.at(15, -8, "crate"), F.at(15, -7, "keg"), F.at(-12, 12, "pot")],
              wardens=[F.at(1, -4)],
-             areas=[F.at(6, 0, PLACES[iid])])
+             areas=[F.at(-12, 9, PLACES[iid])])
     if biome in ("bloom", "meadow"):
         d["trees"] = thickets(tuple(F.at(-8, 18)), tuple(F.at(4, -18)))
     out = F.at(-1, 0); oa = (out[0] - c[0], out[1] - c[1])
