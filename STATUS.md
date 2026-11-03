@@ -1,9 +1,20 @@
 # S2 status (second server session)
-Updated: 2026-11-03 23:10 UTC (git/server clock). Blender 4.5.15 LTS installed (Vex Blender pass running). **ffmpeg installed; footage frames cut**: ~/svvid/frames/<hero>/ at 5 fps for all 12 (numbered like the hero-ref studies; index ~/svvid/frames/README.txt; outside the repo, never committed); every S2 agent brief now points at them.
+Updated: 2026-11-04 00:10 UTC (git/server clock). Last INBOX_S2 handled: 23:55 (kit audit + owner answers).
 
 
 ## FOR MAIN (20:55): `ext/portraits-2d` @ 0a76796 is READY TO MERGE (2D Warden portraits, for tonight's sync)
 - Contains main f048214b. All 12 painted portraits (512² jpg) + splashes (960x540; Vex and Moosh show their portrait until their new splashes land) in art/portraits/, made by tools/portrait_art.gd from origin/ext/imagegen (no 2K originals copied). Portraits cuts each image to its frame around a per-archetype face/splash point (content/rules/portraits.json). Shown in: Mantle pick (second-Hunter) chips, expedition chips, Hunters tiles, Hunter viewer, practice picker, kit card header (splash), unlock reveal (splash), HUD vitals slot, squad frames, ally popups. ext/portrait's HUD frame side taken (frame, hit flash, low-health drain, downed/dead/out, level coin notch); its procedural render polish not taken; procedural make() is the fallback when an image is missing. hud.gd -25/+10 (wiring). Display names Vex + Claire in the two archetype JSONs + hero_kit.gd only (the full rename sweep is ext/class-titles). New --portrait-check 107/0 (every archetype resolves, crops inside, each UI spot shows its image, HUD renders no model, fallback works); class-unlock 137/0, uipolish 26/0, hudref, title, keys 84/0, level-hud, hero-combo 221/0, health OK (re-verified after merging main). Screenshot: /home/boki/shots-s2/portraits-2d/character_select.png (+ viewer, kit card, HUD, reveal, practice, fallback). Merge note: Class-Vex.md / Class-Claire.md wiki renames overlap ext/parity-ostra-claire-moosh (same rename) and ext/class-titles (rename sweep in progress): regenerate with gen_wiki.
+
+## KIT AUDIT (orchestrator 23:40, owner answers 23:55): S2 plan and what my branches already cover
+**Already done on S2 branches (audit HIGH rows; the audit read main only):**
+- Item 50 self-shake: `ext/no-shake` (READY). Item 51 holds/fire mid-dash: `ext/combo-flow-base` + the three combo branches + `ext/bjorn-48-49-51` (READY).
+- Ostra ult ~1 s lock, Claire RMB push-emerge + skate-ult carry, Moosh 3x rule removed (and its assert): `ext/owner-heroes-1820` + `ext/parity-ostra-claire-moosh`.
+- Zedran RMB hold (no auto-fire, perfect release, sword overhead): `ext/parity-zed-dredge-linwick`; **Zedran chain pull by facing/movement + tether extends: `ext/zedran-warchain` @ 95c291c (NEW, pushed; juggernaut 153/0, dash-flow 0)**.
+- Vex RMB side toss: `ext/parity-dancer-venator`. Sable item 7: `ext/dancer-feel`. Pin Shift keeps the draw + roll 3 m/0.27 s + roll-start rings removed; Vireo Wirerun arrival ring removed: `ext/combo-pin-vireo-breah` / `ext/parity-pin-vireo-breah`. Tarek RMB from a glide: `ext/tarek-glide-slam`. Bjorn 49 launch + Shift keeps the hold: `ext/bjorn-48-49-51` / `ext/parity-bjorn`.
+**Running now (Opus):**
+- ONLINE bug (HIGH #1): `ext/online-displace` from main 200effce: every displacement (Cinder E, Dredge hook, Zedran chain, Ostra swap, Vireo fling, Bjorn push, Tarek rocks, ...) moves remote human players on their own game; a two-game assert; Net bump left to main.
+- Audit per hero on each hero's latest branch (table per hero in docs/heroes/<id>.md: done / fixed / disagree): `ext/audit-zed-dredge-cinder` (incl. Dredge Abyssal Hand), `ext/audit-pin-vireo-tarek` (incl. Vireo E hold-drag-release, Tarek allies hop friendly rocks), `ext/audit-ostra-claire-moosh` (incl. Claire darts home in at the end of flight), `ext/audit-sable-vex`. Bjorn's audit starts when a slot frees.
+- Shots go to ext/hero-shots-s2 under audit/<hero>/.
 
 ## GAME SERVERS STAGE 1: LIVE (details + merge notes in EXT_TO_MAIN 22:50)
 - Matchmakers: EU http://2.31.98.197:8080 (3 match slots, UDP 7777-7779), US http://5.161.241.179:8080 (2 slots, 7777-7778); both /health OK (version 0.19.1). A live duel was played end to end from the S2 box over the internet (queue -> token -> join -> match end -> server exit, port freed).
