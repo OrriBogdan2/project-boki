@@ -1,9 +1,9 @@
-"""Synthesizes Dancer's and Juggernaut's ability sounds into audio/*.wav (pure Python, own random stream,
+"""Synthesizes Sable's and Juggernaut's ability sounds into audio/*.wav (pure Python, own random stream,
 so gen_sfx.py and gen_care_sfx.py output is untouched). Every sound is ours, made from tones and noise.
 
     python3 tools/gen_dj_sfx.py      (then: godot --headless --import)
 
-dj_*  : Dancer: bright, glassy, quick (spinning bolts, a whirled cord, a blink).
+dj_*  : Sable: bright, glassy, quick (spinning bolts, a whirled cord, a blink).
 jug_* : Juggernaut: low, heavy, hot (a greatsword, a rising charge, slams).
 """
 import math, os, random, struct, wave
@@ -65,7 +65,7 @@ def whirl(d, rate0, rate1, f):
         out.append(x[i] * (0.35 + 0.65 * max(0.0, math.sin(ph)) ** 2))
     return out
 
-# ---- Dancer
+# ---- Sable
 save('dj_bolt', mix(chirp(1800, 900, 0.12, 0.002, 0.04, 0.3), scale(hiss(0.12, 2500, 7000, 0.001, 0.025), 0.6), scale(chirp(3600, 2400, 0.06, 0.001, 0.02), 0.25)), -22)
 save('dj_bolt_emp', mix(chirp(600, 1500, 0.22, 0.004, 0.12, 0.4), scale(hiss(0.35, 1500, 8000, 0.002, 0.1), 0.9), scale(at(chirp(2200, 700, 0.3, 0.002, 0.12), 0.04), 0.6), scale(mul(lp(noise(0.3), 300), env(N(0.3), 0.002, 0.08)), 0.7)), -17)
 save('dj_fizzle', mix(scale(hiss(0.2, 1800, 6000, 0.01, 0.07), 0.8), scale(chirp(1200, 500, 0.15, 0.005, 0.05), 0.3)), -26)
@@ -92,7 +92,7 @@ save('jug_wave', mix(scale(mul(bp(noise(0.6), 200, 1600), env(N(0.6), 0.02, 0.25
 save('jug_chain', mix(*[scale(at(chirp(900 + 120 * k, 700, 0.06, 0.001, 0.02, 0.6), 0.035 * k), 0.6 - 0.05 * k) for k in range(7)], scale(hiss(0.3, 1000, 4000, 0.01, 0.1), 0.4)), -20)
 save('jug_dash', mix(scale(mul(bp(noise(0.35), 200, 1500), env(N(0.35), 0.01, 0.12)), 0.9), scale(hiss(0.35, 1500, 5000, 0.02, 0.1), 0.5), scale(chirp(150, 80, 0.3, 0.01, 0.1), 0.5)), -19)
 # ---- the ultimates (X)
-# Dancer's Encore: the ring opening (a rising shimmer that lands on two bells), the whirr while the blades
+# Sable's Encore: the ring opening (a rising shimmer that lands on two bells), the whirr while the blades
 # fly (2s of pulsing air), and the quick thunk of a blade landing
 save('dj_encore', mix(scale(mul(whirl(0.45, 8, 22, 2400), rise(N(0.45), 0.5)), 0.8), scale(mul(tone(500, 1400, 0.45), rise(N(0.45), 0.6)), 0.35), scale(at(bell(1319, 0.5, 0.2), 0.4), 0.7), scale(at(bell(1976, 0.4, 0.16), 0.44), 0.5)), -18)
 wn = N(2.0)

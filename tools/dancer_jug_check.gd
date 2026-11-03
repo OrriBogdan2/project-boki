@@ -1,5 +1,5 @@
 extends RefCounted
-## Dancer's (thief) and Juggernaut's checks, run inside --archetype-check and --kit-combo-check (the
+## Sable's (thief) and Juggernaut's checks, run inside --archetype-check and --kit-combo-check (the
 ## helpers come from tools/archetype_check.gd, passed in as A), or alone as --dancer-combo-check /
 ## --juggernaut-combo-check (tools/check_registry.gd). They assert what the hero sheets ask for: cursor
 ## landing, the telegraph while aiming or holding, the charge timings, the payoffs, and the merge holds.
@@ -23,7 +23,7 @@ func run(main_node: Node, who := "all") -> void:
 	print("AKCHECK DONE, %d checks, failures: %d" % [A.n, A.fails])
 	main_node.get_tree().quit(1 if A.fails > 0 else 0)
 
-# ------------------------------------------------------------------ Dancer
+# ------------------------------------------------------------------ Sable
 func thief(a) -> void:
 	A = a
 	var r = A.setup("thief", 6.0, "", true)
@@ -37,7 +37,7 @@ func thief(a) -> void:
 	T2.teleport(home + Vector3(0, 0, 5.5))
 	A.ok("dancer: kit, model, Arc Bolts",
 			K != null and P.model.get_meta("arch") == "thief" and P.wid == "arc_bolts"
-			and Arch.name_of("thief") == "Dancer",
+			and Arch.name_of("thief") == "Silver Thief",
 			P.wid)
 	A.ok("dancer: her moves are keyed (KMovesDJ)",
 			["thf_lmb_r", "thf_lmb_l", "thf_primed", "thf_vault_r", "thf_vault_l", "thf_bola", "thf_knife",
@@ -316,7 +316,7 @@ func thief(a) -> void:
 	await ULT.new().dancer(A)
 
 
-## Rings in Dancer's own colours alive now (the shared team-colour dash ring is Hunter's, not hers).
+## Rings in Sable's own colours alive now (the shared team-colour dash ring is Hunter's, not hers).
 func _dancer_rings(m: Match) -> int:
 	var res_col := Color(Arch.def("thief")["resource"]["col"])
 	var cols := [ThiefKit.AIM_LILAC, ThiefKit.EMP_LINE, Arch.color("thief"), res_col]
@@ -918,7 +918,7 @@ func combos(a) -> void:
 	A.step(m, 1.0)
 	A.ok("combo jug: Enraged hastes the Smash", float(K.cd["rmb"]) < 1.85, "%.2f" % float(K.cd["rmb"]))
 	await A.done(m)
-	# ---- Dancer
+	# ---- Sable
 	r = A.setup("thief", 4.0, "", true)
 	m = r[0]
 	P = r[1]
@@ -1097,7 +1097,7 @@ func merge_holds() -> void:
 			K.lunge.is_empty() and not K.rmb_down and K.ch_rmb >= chg, "charges %.1f of %.1f" % [K.ch_rmb, chg])
 	A.ok("merge hold jug: an armed Haul Slam is dropped", K.haul.is_empty() and K.haul_slams == 0)
 	await A.done(m)
-	# ---- Dancer: the Bola's wind-up stops when a merge starts (a running Encore: tools/dj_ult_check.gd)
+	# ---- Sable: the Bola's wind-up stops when a merge starts (a running Encore: tools/dj_ult_check.gd)
 	r = A.setup("thief", 4.0, "cindle")
 	m = r[0]
 	P = r[1]

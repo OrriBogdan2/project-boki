@@ -1,5 +1,5 @@
 extends RefCounted
-## --ashwick-combo-check: Linwick's (id ashwick) abilities and their interactions in the archetype check's
+## --ashwick-combo-check: Cinder's (id ashwick) abilities and their interactions in the archetype check's
 ## flat strip (docs/heroes/ashwick.md, combinations and small-mechanics tables): the Torch Lance hose (pilot,
 ## full reach past the cursor, lag on a sweep, narrow then billowing, the burning-foe bonus and health chip,
 ## stops at once,
@@ -145,7 +145,8 @@ func _all() -> void:
 		m.step(ak.DT)
 	ok(
 		"linwick: heavy, Torch Lance, 2 ram charges",
-		P.wid == "flamethrower" and P.cls == "heavy" and P.max_dashes() >= 2.0 and Arch.name_of("ashwick") == "Linwick",
+		P.wid == "flamethrower" and P.cls == "heavy" and P.max_dashes() >= 2.0
+			and Arch.name_of("ashwick") == "Mad Pyromancer",
 		"%s %s %s" % [P.wid, P.cls, Arch.name_of("ashwick")]
 	)
 	# --- the hose: the pilot first, then a stream that reaches its full length past a close cursor
@@ -461,7 +462,7 @@ func _all() -> void:
 	ak.step(m, 2.5)
 	ok("ram rank 3: the boost ends after 2s", absf(K.move_k() - 1.0) < 0.02, "move_k %.2f" % K.move_k())
 	P.slot_lv["dash"] = 1
-	# --- Furnace Cloak: fires on the press frame, centred on Linwick whatever the cursor
+	# --- Furnace Cloak: fires on the press frame, centred on Cinder whatever the cursor
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
 	ak.aim_at(P, home + Vector3(-12.0, 0, 9.0))      # the cursor far off to the other side

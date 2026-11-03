@@ -1,6 +1,6 @@
 shader_type spatial;
-// Dancer's and Juggernaut's own effect looks (scripts/arch/kits/dj_fx.gd), one shader, a mode each:
-//   0 star     a camera-facing four-point star round a hot core (Dancer's knock, tip hits)
+// Sable's and Juggernaut's own effect looks (scripts/arch/kits/dj_fx.gd), one shader, a mode each:
+//   0 star     a camera-facing four-point star round a hot core (Sable's knock, tip hits)
 //   1 pillar   a rising column of light, UV.y up the side (the knock heal)
 //   2 comet    a streak along UV.x (0 = head), soft across UV.y (bolt and dagger trails)
 //   3 crescent a two-tone blade arc: UV.x along the sweep, UV.y from the edge (0) inward (1);

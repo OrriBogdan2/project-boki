@@ -1,5 +1,5 @@
 extends "res://tools/hero_pair_check.gd"
-## Breah's ultimate on X, Basalt Spine, for --dolm-combo-check (docs/heroes/dolm.md): the level gate, the
+## Tarek's ultimate on X, Basalt Spine, for --dolm-combo-check (docs/heroes/dolm.md): the level gate, the
 ## tap (across the aim, at the cursor) and the hold-and-drag (pivots on its centre), the preview only while
 ## held, the 0.2s cracks everyone sees, the centre-out rise over 0.4s, the slow beside it, bodies shoved off
 ## the line, the rocks standing apart from Stone Row's, a punch along the ridge launching it, the bond only on

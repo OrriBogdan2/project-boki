@@ -1,6 +1,9 @@
 {
 	"id": "mage",
-	"name": "Vireo",
+	"title": "Storm Slayer",
+	"base_name": "Vireo",
+	"gender": "female",
+	"personality": "Bold and revolutionary, with tattoos, a leather jacket and plenty of jewellery.\nShe calls the lightning down and does not ask permission.",
 	"weight": "light",
 	"plate_offset": 2.2,
 	"body": {"size": 1.12, "chest": 1.15, "hit_r": 0.37},

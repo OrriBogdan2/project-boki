@@ -1034,7 +1034,6 @@ func _narrow(sz: Vector2) -> bool:
 ## Bottom centre: armor and health over the ability row. Bottom left: your kin. Bottom right: your
 ## weapon and what you're carrying. Left: your squad. Hits on you show which way they came from.
 const ARMOR_COL := Color("dfe9f7")      # armor kits and repairs (the armour strip itself: HudStyle / armor_col)
-const STAMINA_COL := Color("ffd66a")    # dash charges: yellow pips under the bars
 const HP_LOW := Color("ff6a5a")
 var armor_lerp := 1.0
 var ready_was := {}        # slot id -> was it ready last frame, for the "ready" flash
@@ -1045,6 +1044,8 @@ var slot_fx := {}          # slot id -> {kind: "cast"|"deny", t}: a pop when a p
 ## A press on an ability slot: "cast" pops it, "deny" (on cooldown, not ready) shakes it red; "reset" (it just came back) swells it with a ring.
 func ability_feedback(id: String, kind: String) -> void:
 	slot_fx[id] = {"kind": kind, "t": 0.0}
+	if id == "dash" and kind == "deny" and m.player:
+		plates.stam.deny(m.player)
 var hurt_dirs: Array = []  # {ang, t}
 var small_toasts: Array = []
 
@@ -1418,7 +1419,7 @@ func _mate_state(h: Hunter) -> Array:
 		return ["WISP", Color("ffb36a"), h.pos, ""]
 	return ["ALIVE", GOOD, h.pos, ""]
 
-## Portraits, one per hunter, rendered once (and a greyed copy for the fallen).
+## Rendered portraits for hunters with no painted art, one per hunter (and a greyed copy for the fallen).
 var portraits := {}       # nid -> SubViewport
 var portraits_grey := {}  # nid -> ImageTexture
 
@@ -1444,31 +1445,16 @@ func portrait_grey(h: Hunter) -> Texture2D:
 		portraits_grey[h.nid] = g
 	return portraits_grey[h.nid]
 
-## A portrait in a rounded frame. state: "" alive, "down" (red pulse), "dead" (grey + X), "out" (check).
+## A hunter's framed portrait (Portraits): its Warden's painted face, or its rendered model when it has
+## none. state: "" alive, "down", "dead", "out". Alive, a hit flashes it and low health drains it.
 func _draw_portrait(r: Rect2, h: Hunter, state: String, border: Color) -> void:
-	_rounded(r.grow(2.0), Color(0.02, 0.02, 0.04, 0.95), 8)
-	var col: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
-	c.draw_rect(r, Color(col.darkened(0.55), 0.9))
-	if state == "dead":
-		c.draw_texture_rect(portrait_grey(h), r, false, Color(0.8, 0.8, 0.85, 0.85))
-		var k := r.size.x * 0.2
-		for pair in [[r.position + Vector2(k, k), r.end - Vector2(k, k)], [Vector2(r.end.x - k, r.position.y + k), Vector2(r.position.x + k, r.end.y - k)]]:
-			c.draw_line(pair[0], pair[1], Color(0, 0, 0, 0.7), 9.0, true)
-			c.draw_line(pair[0], pair[1], Color("ff5a4a"), 5.0, true)
-	else:
-		c.draw_texture_rect(portrait(h), r, false)
-	if state == "down":
-		var pulse := 0.5 + 0.5 * sin(m.time * 8.0)
-		c.draw_rect(r, Color(0.9, 0.1, 0.05, 0.15 + 0.2 * pulse))
-		c.draw_rect(r.grow(1.0), Color(1.0, 0.25, 0.15, 0.55 + 0.45 * pulse), false, 2.5)
-	elif state == "out":
-		c.draw_rect(r, Color(0.05, 0.15, 0.12, 0.45))
-		var a := r.position + r.size * Vector2(0.25, 0.52)
-		var b := r.position + r.size * Vector2(0.43, 0.7)
-		var d := r.position + r.size * Vector2(0.76, 0.3)
-		c.draw_polyline(PackedVector2Array([a, b, d]), Color("8fe3c8"), 5.0, true)
-	else:
-		c.draw_rect(r.grow(1.0), Color(border, 0.8), false, 1.5)
+	var ak := Portraits.arch_of(h)
+	var fallback: Texture2D = null
+	if not Portraits.has_art(ak):
+		fallback = portrait_grey(h) if state == "dead" else portrait(h)
+	var hurt := plates.flash_of(h) if state == "" else 0.0
+	var low := clampf((0.3 - h.hp / maxf(1.0, h.max_hp)) / 0.3, 0.0, 1.0) if state == "" else 0.0
+	Portraits.draw(c, r, ak, fallback, border, state, hurt, low, m.time)
 
 ## Seconds a wisp has left at the normal bleed rate.
 func _bleed_left(h: Hunter) -> float:
@@ -1519,6 +1505,8 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 					HudStyle.strip(c, Rect2(Vector2(tx, r.position.y + 38), Vector2(tw, 3)), h.armor / h.max_armor, h.armor_col())
 				if _has_status(h):
 					_status_row(Vector2(tx + tw * 0.5, r.position.y + 52), h)
+				else:
+					plates.stam.draw(c, Rect2(Vector2(tx, r.position.y + 46), Vector2(tw * 0.6, 3)), h)
 			"WISP":
 				var left := _bleed_left(h)
 				var stp: bool = h.get_meta("stomped", false)
@@ -2121,7 +2109,7 @@ func _draw_scores(sz: Vector2) -> void:
 	for h in hs:
 		var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
 		c.draw_rect(Rect2(Vector2(r.position.x + 12, y - 14), Vector2(4, 18)), tc)
-		_text(Vector2(r.position.x + 22, y), "%s (%s)" % [h.pname, Arch.label(h.arch)], 15, INK if h != m.player else GOLD)
+		_text(Vector2(r.position.x + 22, y), HeroTitle.of_hunter(h), 15, INK if h != m.player else GOLD)
 		if h.kin: _text(Vector2(r.position.x + 260, y), Data.KIN[h.kin.species]["name"], 14, Data.KIN[h.kin.species]["color"])
 		_text(Vector2(r.position.x + 392, y), str(h.knocks), 15)
 		_text(Vector2(r.position.x + 456, y), str(int(h.dmg_done)), 15)
@@ -2144,8 +2132,6 @@ var abyss_a := 0.0
 const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
 var abyss_fx: CanvasLayer = null
 
-var dash_seen: Array = []      # per segment of the dash strip: was it full last frame (for the flash)
-var dash_flash: Array = []     # per segment: seconds left on its "it's back" flash
 
 ## A point `up` metres above a hunter's feet, following the body's lean toward the camera
 ## (CamRig.char_lean), so bars and names stay just over the head.

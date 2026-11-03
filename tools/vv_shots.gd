@@ -1,6 +1,6 @@
 extends RefCounted
 ## --vv-shots --shots-dir=<dir> [--vv-hero=mage|gunslinger] [--vv-tag=v2/polish]: screenshots of Vireo's
-## and Venator's abilities in a live Arena match (run under xvfb with a renderer). Each moment is taken at
+## and Vex's abilities in a live Arena match (run under xvfb with a renderer). Each moment is taken at
 ## the default gameplay zoom and again as a close-up crop round what it shows; every move also gets a
 ## 4-6 frame strip cropped round the hero (anticipation, release, follow-through, recovery). Files go
 ## straight into <dir> as <hero>_<name>.png, and <dir>/MANIFEST_<hero>.txt gets one line per file:
@@ -419,7 +419,7 @@ func _vireo_owner1103() -> void:
 	marks.append([2.4, "full", "owner1103_e_slide_c", c_cap, _on_target])
 	await _go(2.6, flick, marks)
 
-# ------------------------------------------------------------------ Venator
+# ------------------------------------------------------------------ Vex
 func _venator() -> void:
 	await _venator_lmb()
 	await _venator_rmb()

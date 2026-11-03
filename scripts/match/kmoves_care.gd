@@ -1,6 +1,6 @@
 class_name KMovesCare
 extends RefCounted
-## Keyed full-body moves of Moosh Moosh (tender, "mm_") and Tamsin (rimewright, "tm_"): same format and
+## Keyed full-body moves of Moosh Moosh (tender, "mm_") and Claire (rimewright, "tm_"): same format and
 ## channels as HunterAnim.KMOVES, looked up by HunterAnim.km_sample. Timed to the reference sheets'
 ## beats (docs/heroes/tender.md, rimewright.md: Animation moves): anticipation, the release on the
 ## kit's hit time, an overshoot past the key pose, then the settle. Channels used here besides the
@@ -261,7 +261,7 @@ const MOVES := {
 		[0.06, {"fr": Vector3(-0.05, 0.2, -0.25), "rw": 1.0, "sq": 0.1}],
 		[0.12, {"fr": Vector3(0.12, 0.42, -0.1), "rw": 1.0, "sq": -0.12, "lift": 0.06, "y": 0.15}],
 		[0.34, {}]]},
-	# ================================================================ Tamsin
+	# ================================================================ Claire
 	# Ice Dart (LMB stream, one every 0.18 s): the fan snapped open across the body and whipped out at
 	# the cursor, alternating with a flick of the free hand, each with a sharp twist toward the cursor
 	"tm_dart_r": {"keys": [

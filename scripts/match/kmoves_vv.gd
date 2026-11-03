@@ -1,6 +1,6 @@
 class_name KMovesVV
 extends RefCounted
-## Keyed full-body moves of Vireo (mage) and Venator (gunslinger): same format and channels as
+## Keyed full-body moves of Vireo (mage) and Vex (gunslinger): same format and channels as
 ## HunterAnim.KMOVES, looked up by HunterAnim.km_sample. Each is timed to the reference sheet's beats
 ## (briefs/hero-ref/vireo.md, venator.md; 1 frame = 0.2 s there): anticipation, an exaggerated key pose
 ## on the release (squash or stretch), an overshoot past it, then the settle. fl / fr place a free hand
@@ -145,12 +145,12 @@ const MOVES := {
 			"fl": Vector3(-0.15, -0.5, -0.3), "hw": 1.0, "wo": Vector3(0.12, -0.35, -0.25), "gp": 0.7}],
 		[0.3, {"p": -0.1, "lift": 0.04, "sq": -0.15, "fl": Vector3(-0.4, 0.15, 0.0), "hw": 0.7}],
 		[0.5, {}]]},
-	# ---------------------------------------------------------------- Venator
+	# ---------------------------------------------------------------- Vex
 	# a rifle round (footage 0007-0036, 0067-0072: the rifle stays shouldered at the chest on the cursor, the
-	# recoil shows in the gun and the muzzle, the body barely moves; standing he sinks into a low wide aim
+	# recoil shows in the gun and the muzzle, the body barely moves; standing she sinks into a low wide aim
 	# crouch, walking the legs keep walking). Every round restarts it on the shouldered pose: the stock kicks
 	# into the shoulder and the muzzle flips up by 0.025 s, back on the aim by 0.09 (the next round is at
-	# 0.12). After the last round the rifle stays up a beat, then he eases out of the crouch by 0.55.
+	# 0.12). After the last round the rifle stays up a beat, then she eases out of the crouch by 0.55.
 	"gunslinger_lmb": {"stance": true, "keys": [
 		[0.00, SHOULDER],
 		[0.025, {"p": 0.03, "y": 0.04, "lift": -0.04, "sq": 0.06, "gp": 0.24, "wo": Vector3(0.0, 0.02, 0.08),
@@ -159,7 +159,7 @@ const MOVES := {
 		[0.3, SHOULDER],
 		[0.55, {}]]},
 	# Burr Charge held, the owner's side toss rather than an overhead throw: the charge drawn low beside the
-	# left hip and out wide (clear of his body from above), the torso turned a little away, a slight crouch;
+	# left hip and out wide (clear of her body from above), the torso turned a little away, a slight crouch;
 	# little wind-up, and walking the legs keep walking
 	"gunslinger_rmb_hold": {"hold": true, "stance": true, "keys": [
 		[0.00, {}],
@@ -168,7 +168,7 @@ const MOVES := {
 		[0.6, {"p": -0.06, "y": -0.3, "lift": -0.05, "sq": 0.12, "fl": Vector3(-0.6, -0.06, 0.08), "hw": 1.0,
 			"legs": TOSS_SET, "lw": 0.8}]]},
 	# ... let go: a quick sidearm flick, the hand swept low and forward from the hip (the release at 0.05),
-	# across the body on the follow-through as the torso unwinds and he steps into it, back on the rifle by 0.5
+	# across the body on the follow-through as the torso unwinds and she steps into it, back on the rifle by 0.5
 	"gunslinger_rmb": {"stance": true, "keys": [
 		[0.00, {"p": -0.06, "y": -0.3, "lift": -0.05, "sq": 0.12, "fl": Vector3(-0.6, -0.06, 0.08), "hw": 1.0,
 			"legs": TOSS_SET, "lw": 0.8}],

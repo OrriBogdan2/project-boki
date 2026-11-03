@@ -1,6 +1,6 @@
 class_name DolmKit
 extends ArchKit
-## Breah (id dolm, medium): Tremor Sense, Rubble Fists (tap boulder / hold punch), Rubble Leap, Quakefall,
+## Tarek (id dolm, medium): Tremor Sense, Rubble Fists (tap boulder / hold punch), Rubble Leap, Quakefall,
 ## Stone Row, and Basalt Spine on X (breah_spine.gd). docs/heroes/dolm.md. The loop: raise rocks (Stone Row),
 ## then launch them with a held punch (every rock in the lane flies, a whole row one after another),
 ## a slam or a dash into the enemy. Rocks are low walls you can stand on and climb (StoneStand).

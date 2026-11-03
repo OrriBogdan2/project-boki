@@ -1,5 +1,5 @@
 shader_type spatial;
-// The glow pass of Linwick's and Dredge's effect looks: only the hot cores, added on top of the body pass.
+// The glow pass of Cinder's and Dredge's effect looks: only the hot cores, added on top of the body pass.
 render_mode unshaded, shadows_disabled, depth_draw_never, blend_add, cull_disabled, fog_disabled;
 #include "res://shaders/ld_fx.gdshaderinc"
 

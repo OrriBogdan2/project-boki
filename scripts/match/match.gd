@@ -2223,7 +2223,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
 			credit.gain_xp(90.0)
-		add_feed("%s knocked %s" % [credit.pname, h.pname])
+		add_feed("%s knocked %s" % [HeroTitle.of_hunter(credit), HeroTitle.of_hunter(h)])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
 		if credit == player:
@@ -2231,7 +2231,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			if player.kin and player.kin.state != "downed":
 				player.kin.bark("kill")
 	else:
-		add_feed("%s went down" % h.pname)
+		add_feed("%s went down" % HeroTitle.of_hunter(h))
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
 	sfx("knock", h.pos, 0.0)
 	fx.burst(h.pos + Vector3(0, 0.8, 0), Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 24, 5.0, 0.6)
@@ -2349,7 +2349,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if credit is Hunter and credit != h and credit.team != h.team:
 		credit.kills += 1
 		DashReset.takedown(credit, h)
-	add_feed(out_text(h.pname, why))
+	add_feed(out_text(HeroTitle.of_hunter(h), why))
 	if why != "abyss": Juice.kill(self, h, credit)
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)

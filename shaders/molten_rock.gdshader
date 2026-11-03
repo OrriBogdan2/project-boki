@@ -1,5 +1,5 @@
 shader_type spatial;
-// Breah's stone: dark basalt with glowing molten cracks. The cracks are the thin valleys of a value
+// Tarek's stone: dark basalt with glowing molten cracks. The cracks are the thin valleys of a value
 // noise in object space, so every rock and boulder cracks in its own place and nothing tiles.
 // heat 0..1 drives how wide and bright the cracks run (a launched or punched rock runs hot).
 render_mode cull_back, specular_disabled;

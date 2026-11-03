@@ -1,4 +1,4 @@
-# Venator (archetype id `gunslinger`, Medium; was Marlowe)
+# Hired Gun (base character Vex; archetype id `gunslinger`, Medium; was Marlowe)
 
 Internal design note (may cite the source for traceability; nothing in the game does).
 Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (reference
@@ -91,7 +91,7 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
 | Mini Nuke: lands where the cursor was at cast, 1.6 s after, no tracking | reference sheet (both casts) | f29 to f45 | yes: "it lands exactly at the cursor", "nothing lands before 1.6s" |
 | Mini Nuke: +50% damage in the centre | [thebackdash hunter list](https://thebackdash.com) (older "arcane napalm" wording) | red-orange core (f41) | yes: "+50% in the centre" |
 | Mini Nuke: the zone lasts 3 s, damages each second and slows | thebackdash | ticks about every 0.5 s (f48 to f60) | yes: "the patch burns and slows", gone after 3 s |
-| The caster keeps moving after the cast | reference sheet | jump pad at f103 | yes: "Venator moves and can shoot while it falls" |
+| The caster keeps moving after the cast | reference sheet | jump pad at f103 | yes: "Vex moves and can shoot while it falls" |
 
 ## Assumptions (the video is silent or the owner overrode it; the owner can correct these)
 - **Owner rule (1103 playtest):** a direct hit on a hunter hurts and Dazes them; the grenade no longer passes through people. A wall or the ground at the lane's end still gives the cone, which Dazes everyone in it. Dazed raises the rifle by 90% and Longneedle by 20% (the source's reference ratios).

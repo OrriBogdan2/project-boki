@@ -1,6 +1,6 @@
 class_name ThiefUlt
 extends RefCounted
-## Dancer's ultimate on X, Encore (her "x" data in content/archetypes/thief.json; the source's Death Blossom,
+## Sable's ultimate on X, Encore (her "x" data in content/archetypes/thief.json; the source's Death Blossom,
 ## briefs/hero-ref/dancer.md "Ultimate (on X)"). A violet ring grows out from her over 0.4s (the short delay),
 ## then rides with her for 2s while a blade flies from her at every foe inside it every 0.4s (up to 5 each).
 ## Blades from the outer band of the ring (past 75% of its radius) hit harder and blight (healing barely

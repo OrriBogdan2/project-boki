@@ -1,11 +1,11 @@
 class_name GunslingerUlt
 extends RefCounted
-## Venator's ultimate, Cinderfall (X). docs/heroes/gunslinger.md has the numbers and the research notes.
+## Vex's ultimate, Cinderfall (X). docs/heroes/gunslinger.md has the numbers and the research notes.
 ##
 ## One tap: the rifle snaps straight up and fires a shell into the sky. It comes down exactly where the cursor
 ## was (clamped to its range) after a fixed fall. Everyone sees the ground disc fill with its hot centre the whole
 ## time, a fair window to step out. The impact hits everyone on the disc, harder in the centre, and leaves a
-## burning patch that hurts and slows for a few seconds. Venator is free to move and shoot throughout.
+## burning patch that hurts and slows for a few seconds. Vex is free to move and shoot throughout.
 
 const FALL := "fall"
 const BURN := "burn"

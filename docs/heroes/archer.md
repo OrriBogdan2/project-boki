@@ -1,6 +1,6 @@
-# Pin (id `archer`, Light) - fidelity pass (hero sheet pin.md)
+# Dark Archer (base character Pin; id `archer`, Light) - fidelity pass (hero sheet pin.md)
 
-Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name Pin (was Archer); the id, files and save keys stay `archer`.
+Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name is the class title Dark Archer; the id, files and save keys stay `archer`.
 
 ## Research summary
 Sources (gameplay only; notes in our own words, nothing of the source ships):

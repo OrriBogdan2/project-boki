@@ -900,10 +900,10 @@ var lift_t := 0.0              # seconds of the current abyss lift (feathering t
 ## it: it pulls you up harder and faster the deeper you are (ABYSS_LIFT*), then brakes into the last
 ## ABYSS_BRAKE_DIST so you arrive at ground level (let go just before to carry the climb up as height).
 ## Shared by Hunter (matches, the --training ground) and Home (the farm and the Training Grounds).
-static func abyss_lift_vy(vy: float, depth: float, dt: float) -> float:
+static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float:
 	if depth > ABYSS_BRAKE_DIST:
-		var acc := ABYSS_LIFT + ABYSS_LIFT_PER_M * depth
-		var top := minf(ABYSS_LIFT_MAX + ABYSS_LIFT_MAX_PER_M * depth, ABYSS_LIFT_CAP)
+		var acc := (ABYSS_LIFT + ABYSS_LIFT_PER_M * depth) * k
+		var top := minf(ABYSS_LIFT_MAX + ABYSS_LIFT_MAX_PER_M * depth, ABYSS_LIFT_CAP) * k
 		# a fall is caught at once (the canopy bites), then the climb builds
 		if vy < 0.0:
 			vy = move_toward(vy, 0.0, (acc + GLIDE_CATCH) * dt)
@@ -2312,10 +2312,10 @@ func _physics(dt: float) -> void:
 		pass   # rising up a ledge's face (sets vel.y; your keys steer as in any jump)
 	elif gliding and in_current:
 		pass   # the current sets the height
-	elif gliding and not dropping and below_lip and glide_fuel > 0.001:
+	elif gliding and not dropping and below_lip:      # overheated: still lifts, at half strength, while it burns
 		# below ground level over the abyss the glider lifts you hard, then brakes near the top.
 		# Let go just before ground level to carry the lift up as height (feathering)
-		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt)
+		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt, 1.0 if glide_fuel > 0.001 else 0.5)
 		glide_lift.hang_t = GlideLift.HANG_T
 	elif gliding:
 		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
@@ -3174,7 +3174,7 @@ var _anim_dt := 0.0
 var _anim_n := 0
 const DODGE_ANIM := {"light": "phase", "medium": "roll", "heavy": "charge"}
 
-## The dodge pose HunterAnim plays. Tamsin's skate has its own, so the light-dash lean does not stack
+## The dodge pose HunterAnim plays. Claire's skate has its own, so the light-dash lean does not stack
 ## on the skate move's lean and tip her over.
 func _dash_anim_kind() -> String:
 	if not strike_at_end.is_empty():

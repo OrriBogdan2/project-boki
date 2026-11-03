@@ -1,5 +1,5 @@
 extends RefCounted
-## --mage-combo-check / --gunslinger-combo-check: Vireo's and Venator's kits against their reference
+## --mage-combo-check / --gunslinger-combo-check: Vireo's and Vex's kits against their reference
 ## sheets and the owner notes (docs/heroes/mage.md and gunslinger.md, "Combinations"): where every shot
 ## and placement lands (max range vs cursor), the telegraph shown while aiming or holding (AimKit), the
 ## charge timings, and each payoff. Prints HCHECK PASS/FAIL and a DONE line.
@@ -535,7 +535,7 @@ func _mage() -> void:
 	await ac.done(m)
 	fails += ac.fails
 
-# ------------------------------------------------------------------ Venator
+# ------------------------------------------------------------------ Vex
 func _gunslinger() -> void:
 	var r: Array = ac.setup("gunslinger", 5.0, "", true)
 	var m: Match = r[0]
@@ -546,7 +546,7 @@ func _gunslinger() -> void:
 	var K: GunslingerKit = P.ak
 	var bd: Dictionary = K.rmb_def()["burr"]
 	T2.teleport(home + Vector3(30, 0, 0))
-	ok("Venator: the display name", Arch.name_of("gunslinger") == "Venator")
+	ok("Hired Gun: the display name", Arch.name_of("gunslinger") == "Hired Gun")
 	# 1. LMB: to full range past the cursor, an ember tracer; Dazed = +90%, a gold crit number, no decay
 	P.teleport(home)
 	T.teleport(home + Vector3(30, 0, 8))

@@ -1,6 +1,6 @@
 class_name BreahSlam
 extends RefCounted
-## Breah's Quakefall (RMB): hold to gather, let go to hop a short way forward and smash both fists down.
+## Tarek's Quakefall (RMB): hold to gather, let go to hop a short way forward and smash both fists down.
 ## While charging, everyone sees the big circle a hop ahead of her with its sweet spot growing from the
 ## centre; she can walk slowly, jump to leap forward (the circle comes with her) and punch to lunge
 ## further. The centre stuns, foes in the air are dunked, rocks inside fly outward, and at rank 3

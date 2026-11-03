@@ -1,13 +1,13 @@
 class_name KMovesStone
 extends RefCounted
-## Keyed full-body moves of Breah (dolm) and Ostra (same format and channels as HunterAnim.KMOVES; looked
+## Keyed full-body moves of Tarek (dolm) and Ostra (same format and channels as HunterAnim.KMOVES; looked
 ## up by HunterAnim.km_sample after its own table). Timed to the reference sheets' beats: anticipation,
-## the release key on the kit's hit frame, an overshoot, then the settle. Breah is heavy and grounded
+## the release key on the kit's hit frame, an overshoot, then the settle. Tarek is heavy and grounded
 ## (deep knees, squash on every impact, the huge fists leading); Ostra floats (lifts, stretches and a
 ## spin on her Swell, light hands).
 
 const MOVES := {
-	# ---------------------------------------------------------------- Breah
+	# ---------------------------------------------------------------- Tarek
 	# Basalt Spine held: sunk wide and low, both fists spread out to the sides at the ground, the body
 	# turned along the ridge being dragged (it holds while X is down)
 	"breah_spine_aim": {"hold": true, "keys": [

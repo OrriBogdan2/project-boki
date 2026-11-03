@@ -1,4 +1,4 @@
-# Breah (archetype id `dolm`, Medium; was "Dolm")
+# Rock Elementalist (base character Tarek; archetype id `dolm`, Medium; was "Dolm")
 
 Internal note: the behaviour reference is the hero named in the Inspired-by table in docs/ARCHETYPES.md. Nothing below is
 player-facing; every name, number and word in the shipped game is our own (renames: Stonesight -> Tremor Sense, Landslide ->
@@ -188,10 +188,10 @@ row again. The bridge is gone altogether (owner review item 15: no terrain over 
   Strips: /home/boki/shots-s2/breah/review/breah_dash_ground_strip.png, breah_dash_air_strip.png.
 
 ## Rock ownership (owner review item 25)
-- A rock belongs to the Breah who raised it (Stone Row, Basalt Spine): the wall's `by`. Only she climbs it: walking into
+- A rock belongs to the Tarek who raised it (Stone Row, Basalt Spine): the wall's `by`. Only she climbs it: walking into
   its face (moving into it, no jump) lifts her at 5 m/s with her walk carried on, so she rises onto the top and walks
   over it in about half a second (asserted at most 0.6s). Everyone else, allies included, and every bot and Boki is
-  stopped by it as by a full wall, walking or jumping; another Breah's rocks are a wall to her too. A body that lands on
+  stopped by it as by a full wall, walking or jumping; another Tarek's rocks are a wall to her too. A body that lands on
   a rock from above still stands on it and can walk off.
 - This replaces the data pass's ally climb (the source lets allies hop friendly walls); the owner's call wins.
 - Code: StoneStand.top_for (the height a rock blocks the body moving now: its top for its caster, a full wall for others),

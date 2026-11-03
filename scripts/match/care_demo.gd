@@ -183,7 +183,7 @@ static func _script(
 				if arch == "rimewright":
 					P.pos.y += 2.0          # a clear drop, so the press lands well before she does
 					P.grounded = false
-			# Tamsin has no air dash: Shift held in the air starts the skate as she lands
+			# Claire has no air dash: Shift held in the air starts the skate as she lands
 			P.inp["dash_down"] = arch == "rimewright" and t >= go and t < 1.3
 			if _at(t, dt, go):
 				P.ex_cd = 0.0
@@ -239,7 +239,7 @@ static func _payoff(P: Hunter, D: Hunter, Al: Hunter, K: ArchKit, arch: String, 
 		K.use_e()
 
 ## The X ultimates: Moosh Moosh puts the cursor on the (downed) teammate, presses X and walks while it
-## channels; Tamsin seals in beside the dummy and lets the rink crack open.
+## channels; Claire seals in beside the dummy and lets the rink crack open.
 static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, dt: float) -> void:
 	var P: Hunter = A.m.player
 	P.lvl = maxi(P.lvl, 6)

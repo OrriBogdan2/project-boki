@@ -5,7 +5,7 @@ extends RefCounted
 ##   Moosh Moosh: the ember comet and its swirl, the burr orb, the Burrseed root disc, light column and
 ##   root beam, the lantern plus, the rising rays, the Hearthlight disc with its floating lantern, Kindle
 ##   foot glow, and her dash's ember motes.
-##   Tamsin: the ice shard, the skate beam, the star-headed spear (thrown, and held while aiming), the
+##   Claire: the ice shard, the skate beam, the star-headed spear (thrown, and held while aiming), the
 ##   slow-zone flake with its crystal, the detonation dome, the Shatter spikes, the frost shell, the
 ##   frost glow, the skate's ice trail, her air dash's frost streaks and the Rink Wall's ice pillars.
 ## Three shaders of our own: shaders/care_disc.gdshader, care_ice.gdshader, care_glow.gdshader.

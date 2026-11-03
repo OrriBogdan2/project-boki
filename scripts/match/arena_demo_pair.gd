@@ -1,6 +1,6 @@
 class_name ArenaDemoPair
 extends RefCounted
-## Arena screenshot demos for Dredge and Linwick (id ashwick) (ArenaDemo hands over every "pr_*" demo and
+## Arena screenshot demos for Dredge and Cinder (id ashwick) (ArenaDemo hands over every "pr_*" demo and
 ## the two kit cards):
 ##   --arena-demo=pr_<move>          a strip of frames of one kit move (anticipation, release, follow-through,
 ##                                   recovery), cropped round the hunter
@@ -143,7 +143,7 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 			for k in 3:
 				if ArenaDemo._at(t, dt, go + 0.45 * k): P.do_dash()
 		"dr_lunge", "as_leap":
-			# Linwick's ram runs free (footage 0159: the lunge, then upright at once); the lunge hits the dummy
+			# Cinder's ram runs free (footage 0159: the lunge, then upright at once); the lunge hits the dummy
 			var gap := 12.0 if mv == "as_leap" else 3.6
 			if t < go: D.teleport(A.home + Vector3(gap, 0, 0))
 			if t < go and mv == "as_leap":

@@ -1,6 +1,6 @@
 class_name StoneStand
 extends RefCounted
-## Low walls you can stand on (Breah's rocks; any Verbs wall with a "top" height in metres). Only the
+## Low walls you can stand on (Tarek's rocks; any Verbs wall with a "top" height in metres). Only the
 ## rock's own caster climbs it (docs/heroes/dolm.md, Rock ownership): walking into her own rock
 ## lifts her smoothly onto it, no jump needed, and she walks over the top. For everyone else a rock is a
 ## full wall: no climbing, no jumping over it. Anyone dropped onto a rock from above stands on it and can

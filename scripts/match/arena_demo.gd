@@ -7,19 +7,19 @@ extends RefCounted
 ##   bola        the Thief's Bola catching two dummies: Grounded, TANGLED
 ##   juggernaut  greatsword slashes fill Rage (the shoulder glow), the Enraged form
 ##   sweetspot   then a Finishing Slam winds up and lands its sweet spot (--hold-shot: the wind-up)
-##   encore / encorehit   Dancer's X: the ring growing (the telegraph), then a volley landing (the impact)
+##   encore / encorehit   Sable's X: the ring growing (the telegraph), then a volley landing (the impact)
 ##   riposte / ripostehit Zedran's X: the guard with its strip (the telegraph), then the cleave landing
 ##   wave        the greatsword held into a Searing Wave (--hold-shot: at full charge)
 ##   archer      a rooted dummy, full Focus: the lens glint, the aim line, crosshairs over it
 ##   deadeye     the same, ending on the Deadeye payoff
-##   hero_<id>_<move>   Vireo (mage) and Venator (gunslinger) moments, see scripts/arch/hero_demo.gd
+##   hero_<id>_<move>   Vireo (mage) and Vex (gunslinger) moments, see scripts/arch/hero_demo.gd
 ##   bulwark     the shield raised and burning gold, Guard pips full (Shield Slam armed)
 ##   crushed     the same, then letting go: a Shield Slam into the pillar, Crushed
 ##   e_<a> / r_<a> / rmb_<a>   any archetype's E, R or RMB on the still dummy (--e-recast: press E again)
 ##   card / card_<archetype>   the kit card (K); card_detail: the RMB detail page
 ##   menu        the loadout panel (L)
 ##   anim_<move> a strip of frames of one kit move (ANIM_DEMO: arc_* and bul_* for the Archer and Bulwark;
-##               PairDemo.ANIM for Dolm and Ostra; DJDemo.ANIM thf_* and jug_* for Dancer and Juggernaut)
+##               PairDemo.ANIM for Dolm and Ostra; DJDemo.ANIM thf_* and jug_* for Sable and Juggernaut)
 ##   smg         the SMG firing at the dummy; add --legacy-shots for the old look and numbers (before)
 
 const OLD_SMG := {
@@ -114,7 +114,7 @@ static func tick(A: Arena, dt: float) -> void:
 	P.hp = P.max_hp
 	match w:
 		_ when w.begins_with("pr_") or w in ["card_dredge", "card_ashwick"]:
-			at_t = ArenaDemoPair.tick(A, w, t, dt)      # Dredge and Linwick (arena_demo_pair.gd)
+			at_t = ArenaDemoPair.tick(A, w, t, dt)      # Dredge and Cinder (arena_demo_pair.gd)
 		"thief", "primed":
 			# kits2: SMG hits on the dummy stack Marks (gold diamonds, one per Mark), Vault Primes the next
 			# hit (the gold glint, PRIMED), then (primed) the Primed hit lands: VAULT RESET
@@ -199,7 +199,7 @@ static func tick(A: Arena, dt: float) -> void:
 			P.inp["fire"] = t > 0.3 and t < 1.45
 			at_t = 1.3 if "--hold-shot" in OS.get_cmdline_user_args() else 1.56
 		"encore", "encorehit":
-			# Dancer's Encore: the dummy stands in the ring's outer band, a second one inside it
+			# Sable's Encore: the dummy stands in the ring's outer band, a second one inside it
 			if t < 0.05:
 				if P.arch != "thief" or P.wid != "arc_bolts": A.set_arch("thief", "arc_bolts")
 				A.set_kin("puddlet")
@@ -244,7 +244,7 @@ static func tick(A: Arena, dt: float) -> void:
 					A.set_meta("de_at", t)
 				at_t = float(A.get_meta("de_at", 9.0)) + 0.06
 		_ when w.begins_with("hero_"):
-			at_t = HeroDemo.tick(A, P, D, t, dt, w)         # Vireo and Venator (scripts/arch/hero_demo.gd)
+			at_t = HeroDemo.tick(A, P, D, t, dt, w)         # Vireo and Vex (scripts/arch/hero_demo.gd)
 		_ when w.begins_with("e_") or w.begins_with("r_") or w.begins_with("rmb_"):
 			# any archetype's E, R or RMB on the still dummy: e_<arch>, r_<arch>, rmb_<arch> (rmb holds 0.9s)
 			var ar := w.split("_")[1]
@@ -283,10 +283,10 @@ static func tick(A: Arena, dt: float) -> void:
 					P.ak.press_rmb()
 				at_t = go + 0.7 if "--hold-shot" in OS.get_cmdline_user_args() else go + 1.05
 		_ when w.begins_with("dj_"):
-			at_t = DJDemo.still(A, P, D, w.substr(3), t, dt)      # Dancer and Zedran stills (scripts/arch/dj_demo.gd)
+			at_t = DJDemo.still(A, P, D, w.substr(3), t, dt)      # Sable and Zedran stills (scripts/arch/dj_demo.gd)
 			if m.hud: m.hud.toasts.clear()
 		_ when w.begins_with("pair_"):
-			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Breah and Ostra (scripts/arch/pair_demo.gd)
+			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Tarek and Ostra (scripts/arch/pair_demo.gd)
 		_ when w.begins_with("anim_"):
 			var mv := w.substr(5)
 			var spec: Array = ANIM_DEMO.get(mv,
@@ -390,7 +390,7 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 		PairDemo.trigger(P, D, mv, t, dt)
 		return
 	if DJDemo.ANIM.has(mv):
-		DJDemo.trigger(P, D, mv, t, dt)          # Dancer and Juggernaut (scripts/arch/dj_demo.gd)
+		DJDemo.trigger(P, D, mv, t, dt)          # Sable and Juggernaut (scripts/arch/dj_demo.gd)
 		return
 	match mv:
 		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_hail", "pin_roll", "arc_super", "arc_tap", "arc_perfect", "arc_over", "arc_over_loose", "pin_walk", "pin_flick", "pin_deadeye", "pin_rundown", "bul_guard", "bul_crush", "bul_slamshield", "bul_break", "bul_armed", "bul_lumber", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":

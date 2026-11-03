@@ -1,4 +1,4 @@
-# Vireo (archetype id `mage`, Light)
+# Storm Slayer (base character Vireo; archetype id `mage`, Light)
 
 Internal design note. This file may name the source hero for traceability; nothing in the game does.
 Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (reference

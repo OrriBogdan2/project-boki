@@ -4,7 +4,7 @@ extends Node3D
 ## the lead one hops up to greet the hunter, he kneels to it, it hops up to the relic in his hand and the
 ## relic wakes in his Mantle's colour. Built at the set's centre; the prologue calls play() each frame.
 
-## the hunter takes up Venator's Mantle, so the relic wakes in that colour
+## the hunter takes up Vex's Mantle, so the relic wakes in that colour
 const MANTLE := "gunslinger"
 const HUNTER_AT := Vector3(0.9, 0, -0.3)        # m from the set's centre
 const HUNTER_LOOKOUT := -0.93                   # rad: his yaw at first, looking out to the sunrise

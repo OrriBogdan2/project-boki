@@ -137,12 +137,12 @@ func _arena() -> void:
 		P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = float(P.ak.rmb_charges()); P.fire_cd = 0.0
 		step(m, 0.1)
 		if float(P.ak.rmb_def().get("hold", 0.0)) <= 0.0:
-			continue      # no RMB hold variant (Dredge, Linwick: their hold is the lance, see --ashwick-combo-check)
+			continue      # no RMB hold variant (Dredge, Cinder: their hold is the lance, see --ashwick-combo-check)
 		var f0: int = P.ak.charge_fulls
 		var mid := -1.0
 		var ring_ok := false
 		if a == "gunslinger":
-			# Venator's hold is Longneedle's charge (E): a ring, a full tick, the shot
+			# Vex's hold is Longneedle's charge (E): a ring, a full tick, the shot
 			P.ak.cd["e"] = 0.0; P.ak.use_e()
 			step(m, 0.5)
 			ok(

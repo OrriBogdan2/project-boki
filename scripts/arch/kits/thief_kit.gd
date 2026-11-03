@@ -1,6 +1,6 @@
 class_name ThiefKit
 extends ArchKit
-## Dancer (light, id "thief"): a port of SUPERVIVE's Shiv, matched to the footage (briefs/hero-ref/dancer.md),
+## Sable (light, id "thief"): a port of SUPERVIVE's Shiv, matched to the footage (briefs/hero-ref/dancer.md),
 ## scaled to our health and TTK; only the names, art, sounds and on-screen text are ours. docs/heroes/thief.md.
 ##
 ## - LMB, Arc Bolts: a spinning bolt from alternating hands every 0.45s that flies to the cursor (clamped

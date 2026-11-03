@@ -1,6 +1,6 @@
 class_name PairDemo
 extends RefCounted
-## Screenshot tooling for Breah (dolm) and Ostra (used by ArenaDemo): --arena-demo=pair_<what> --arena-shot=<png>.
+## Screenshot tooling for Tarek (dolm) and Ostra (used by ArenaDemo): --arena-demo=pair_<what> --arena-shot=<png>.
 ## Single moments (SHOTS): pair_<hero>_<ability>_<tele|key|hit>, the cards (pair_card_dolm / pair_card_ostra),
 ## and the before/after views pair_dolm_pay / pair_dolm_slam / pair_dolm_rocks / pair_ostra_orb /
 ## pair_ostra_fan / pair_ostra_trade (the same names exist on main, so both sides shoot the same moment).
@@ -268,7 +268,7 @@ static func tick(A: Arena, P: Hunter, D: Hunter, t: float, dt: float, w: String)
 			at_t = float(A.get_meta("pay_at", 9.0)) + 0.3
 	return at_t
 
-## Puts Breah on top of the first rock of her row (verticality, for the row's last frame).
+## Puts Tarek on top of the first rock of her row (verticality, for the row's last frame).
 static func _climb(P: Hunter, K: DolmKit) -> void:
 	var rs := K.my_rocks()
 	if rs.size() < 3 or P.has_meta("climbed"):

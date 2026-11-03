@@ -1,6 +1,6 @@
 class_name VVFx
 extends Node3D
-## Vireo's and Venator's own effects, pooled (one node per match, VVFx.of(m)). Every node is made once
+## Vireo's and Vex's own effects, pooled (one node per match, VVFx.of(m)). Every node is made once
 ## and reused; nothing is created per frame or per shot. One shader, shaders/vv_fx.gdshader, a mode per
 ## look: each draws an alpha-blended body in the hero's colour and adds glow only on its hot core, so
 ## nothing washes out on bright ground. Kinds:
