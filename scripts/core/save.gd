@@ -8,13 +8,13 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 7
+const VERSION := 8
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
 const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
-		5: "_migrate_5_to_6", 6: "_migrate_6_to_7"}
+		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -277,6 +277,11 @@ func _migrate_5_to_6(data: Dictionary) -> void:
 ## and a one-time notice lists it all (EqualMigrate).
 func _migrate_6_to_7(data: Dictionary) -> void:
 	EqualMigrate.migrate(data)
+
+## v7 -> v8: the Mantle look. The saved look gets its body and face sliders, all neutral, and keeps
+## its picks (PlayerLook; docs/decisions/0010-mantle-look.md).
+func _migrate_7_to_8(data: Dictionary) -> void:
+	PlayerLook.migrate(data)
 
 ## v4 -> v5: the gear model. Stored weapons become scrap, gloves become gear items, the loadout
 ## moves to five gear slots (GearSave).

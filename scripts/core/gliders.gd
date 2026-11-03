@@ -98,7 +98,7 @@ static func equip(id: String) -> bool:
 	if not owned(id):
 		return false
 	if not Save.d.has("look"):
-		Save.d["look"] = Models.default_look()
+		Save.d["look"] = PlayerLook.neutral()
 	Save.d["look"]["glider"] = id
 	return true
 
