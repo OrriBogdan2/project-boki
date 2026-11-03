@@ -349,3 +349,8 @@ The owner is reviewing the build now and will add more. Start the two items ther
 
 ## 2026-11-03 07:00 UTC: correction, item 39 rename is ON HOLD
 - The owner stopped the local class-titles agent. Don't start item 39's rename on the server either until ext says go. Item 40 (Ostra RMB) is new; it goes with the Ostra items.
+
+## 2026-11-03 07:05 UTC: owner OKs Opus at discretion for hard kits; work order for items 1-43
+- **Model rule update (owner):** default stays Sonnet, but if a hero's items are complex or a Sonnet agent shows it doesn't understand the source mechanic (Zedran's Warchain is the example), switch that hero's work to Opus 5.5 medium. Say in STATUS.md which heroes went to Opus and why.
+- **Order:** (1) bugs first: item 26 (Breah RMB->glide drop), item 42 (Ostra Shift range), the airdash-glide fix. (2) Then per hero pair, each hero's items together with its rows of items 32 (dash->ability flow) and 35 (own dash animation). Suggested pairs: Zedran+Bjorn (Opus for Zedran), Breah+Ostra, Tamsin+Dredge, Linwick+Moosh Moosh, Pin+Venator, Vireo+Dancer. (3) Item 2 map clean-up whenever a slot is free.
+- Item 43's prologue and item 39's rename are ext's (local). Don't start them.
