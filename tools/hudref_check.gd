@@ -109,10 +109,14 @@ func run(main_node: Node) -> void:
 		"a downed rival shows the downed plate ('%s')" % down_word)
 	var sl: Hunter = foes[3]
 	sl.reveal_t = 3.0       # seen however the headless camera faces
-	await main.get_tree().process_frame
-	await main.get_tree().process_frame
-	var sw := String(_shown(hud, sl).get("word", ""))
-	ok(sw == "SLOWED", "a slowed rival's plate says SLOWED over the bar ('%s', slow %.2f)" % [sw, sl.slow_t])
+	var sw := ""
+	for i in 60:            # vision refreshes every 0.05s and line of sight can lag a few frames headless
+		await main.get_tree().process_frame
+		sw = String(_shown(hud, sl).get("word", ""))
+		if sw == "SLOWED":
+			break
+	var why := "slow %.2f, unseen %s, drawn %s" % [sl.slow_t, sl.unseen, not _shown(hud, sl).is_empty()]
+	ok(sw == "SLOWED", "a slowed rival's plate says SLOWED over the bar ('%s', %s)" % [sw, why])
 	m.knock(foes[0], P, {})
 	await main.get_tree().process_frame
 	ok(float(_state(hud, foes[0]).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
