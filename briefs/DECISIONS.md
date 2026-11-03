@@ -7,6 +7,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 
 ## Identity and Mantle
 - Our own names, art and text. SUPERVIVE is a reference only.
+- Hunter name: **Tamsin is now Claire** (rimewright; owner, Nov 3). Use "Claire" everywhere: display names, kit text, docs and the wiki.
 - Hunters are Wardens' **Mantles**. You take one up for the hunt.
   - On the farm you are yourself (no Mantle, fully customisable).
   - Match look: about 90–100% Mantle (silhouette, weapon, signature colour, VFX locked).
@@ -35,7 +36,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 - Hero specifics live in OWNER_REVIEW_1103.md and the MAIN_TO_EXT entries. Examples:
   - Zedran: RMB held indefinitely, with a perfect release; LMB hold scales.
   - Dancer: reset only on an empowered hit.
-  - Tamsin: skate with an ice path; RMB is a push.
+  - Claire: skate with an ice path; RMB is a push.
   - Venator: RMB is a side toss.
   - Pin: missed arrows linger.
 

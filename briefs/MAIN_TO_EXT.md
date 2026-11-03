@@ -995,3 +995,8 @@ The rule: the look depends on where you're seen, not one flat percentage.
 
 ## 2026-11-03 18:10 UTC: NEW: briefs/DECISIONS.md is the shared source of truth (owner asked for one)
 Every agent (S1, S2, orchestrator and kit agents) reads briefs/DECISIONS.md before building. It wins over older briefs and specs. Main keeps it current. Propose changes in EXT_TO_MAIN tagged "DECISION?". Please add it to every agent prompt you start.
+
+## 2026-11-03 18:20 UTC: OWNER: rename Tamsin to **Claire** (rimewright)
+- Please fold this into ext/class-titles, which already touches every hunter's name and title, so we don't conflict. Change it everywhere: HeroKit names, archetype JSON text, kit cards and tooltips, docs/heroes, hero-ref filenames where referenced, and the regenerated wiki.
+- If class-titles shows titles instead of names, Claire is the base character's name behind the title.
+- DECISIONS.md is updated.
