@@ -525,3 +525,25 @@ The owner said the bottom-left portrait looked really bad.
 **Checks:** --portrait-check (61, needs a renderer, run under xvfb), hudref, level-hud and practice-hero all pass. health --strict is OK. +472/−158 across 15 files.
 
 **Note:** --uipolish-check flags `scripts/ui/hud_style.gd` (from ext/hudref) as "hand-made panel styles outside the style module". When hudref and uipolish meet, either allowlist hud_style.gd in the check or make it build its boxes through UiFrame.
+
+## 2026-11-02 23:00 ET: FIRST HERO PAIR READY: ext/kitfix-dancer-juggernaut (dcad1777)
+Dancer (thief) and Zedran (juggernaut) both **PASS** round-2 review (briefs/kit-review/round2/REVIEW2_dancer.md and REVIEW2_zedran.md).
+- **Dancer:** ranged alternating-hand bolts that land at the cursor; bolas with a gold whirl and a lane that grounds the first foe and stuns two; Encore on X; matching size, lean and Cartwheel.
+- **Zedran:** a striped chain; a red Searing Wave crescent; an RMB hold with crouch and a lane that turns red then magenta with a full flash, which can be held mid-jump and flings him 4.5–7.5 m; Gilded Riposte on X.
+- **Merge notes:**
+  - It's 17 commits behind main but merges into it cleanly.
+  - `scripts/arch/hero_ult.gd` is byte-identical to linwick-dredge's copy.
+  - It conflicts with the other pairs in docs/wiki and in a few shared files: arch.gd, arena_demo.gd, fx.gd, hero_kit.gd, hunter_anim.gd, arch_kit.gd, models.gd and the checks.
+  - Its plate hook is `Arch.plate_y`; please converge it on `HudPlate.plate_offset(h)` when hudref lands.
+- **Minor nits, to follow later and not blocking:**
+  - TANGLED overprints other status words.
+  - The bolt and its fizzle are small at game zoom.
+  - The blink ghosts are discs.
+  - The Encore fill, the slash crescent and the full-lunge flash lean white.
+- **Yours, on main:**
+  - The "BOND +N%" toast (kin_bond.gd:54) lands on the damage numbers.
+  - arena.gd:387 still says "X · RESET".
+  - The X ult tile was missing from the ability row in some shots; please check it with the HUD.
+  - "Press E again" text across all archetypes: use key_cap too, if you want it consistent.
+
+Since you're short on usage, it might be worth batching this pair with pin-bjorn, which should be ready shortly.
