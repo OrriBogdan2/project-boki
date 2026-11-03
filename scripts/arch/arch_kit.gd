@@ -989,6 +989,20 @@ func charge_k() -> float:
 func dash_afterimage() -> bool:
 	return false
 
+## Whether the shared charge tell shows its glowing orb at the hand; kits that draw their own hand tell
+## turn it off.
+func charge_orb() -> bool:
+	return true
+
+func _charge_ball(col: Color) -> Node3D:
+	var g := own_node()
+	var ball := MeshInstance3D.new()
+	ball.mesh = Models.sphere(0.2, 10)
+	ball.material_override = Models.glow_mat(Color(col.lightened(0.2), 1.0))
+	ball.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	g.add_child(ball)
+	return g
+
 func _tick_charge(dt: float) -> void:
 	var cn := charge_now()
 	var src := String(cn[0]); var k := float(cn[1])
@@ -1005,13 +1019,8 @@ func _tick_charge(dt: float) -> void:
 		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
 		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
 		chg["ring"] = ring
-		var g := own_node()
-		var ball := MeshInstance3D.new()
-		ball.mesh = Models.sphere(0.2, 10)
-		ball.material_override = Models.glow_mat(Color(col.lightened(0.2), 1.0))
-		ball.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		g.add_child(ball)
-		chg["glow"] = g
+		if charge_orb():
+			chg["glow"] = _charge_ball(col)
 		net_ring(h.pos, 0.8, rc)            # remote players: "they're winding something up"
 	chg["k"] = k
 	var ring2: Node3D = chg.get("ring")

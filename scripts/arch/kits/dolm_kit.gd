@@ -398,7 +398,6 @@ func _punch(k: float) -> void:
 	m.fx.burst(fp, Color("e8c07a"), int(8 + 10 * k), 4.0 + 4.0 * k, 0.3, 4.0, 1.0, Vector3(dir.x, 0.1, dir.y), 40.0)
 	m.fx.spark(fp, Vector3(dir.x, 0.05, dir.y), MOLTEN, int(8 + 8 * k), 9.0 + 6.0 * k, 22.0, 0.22, 2.0, 1.2)
 	m.fx.slash(h.pos + Vector3(0, 1.0, 0), atan2(dir.y, dir.x), 0.5, float(pd["len"]) * 0.8, MOLTEN, k > 0.6)
-	_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 	m.sfx("br_punch", h.pos, -1.0, 1.0)
 	Feel.shake(m, "t3" if k > 0.6 else "t2", h, fp)
 	var swept := sweep_rocks(dir)
@@ -410,6 +409,7 @@ func _punch(k: float) -> void:
 			launch(w, dir, "punch")
 		else:
 			m.later(float(pd["sweep_stagger"]) * i, func(): if m.verbs.walls.has(w): launch(w, dir, "punch"))
+	var landed := 0
 	for f in foes_in(h.pos, float(pd["len"]) + 0.6):
 		if not AimMode.in_lane(h.pos, dir, float(pd["len"]), float(pd["width"]), f.pos, f.r):
 			continue
@@ -419,6 +419,8 @@ func _punch(k: float) -> void:
 		}
 		var hp0: float = f.hp
 		f.hurt(dmg, h, o)
+		landed += 1
+		_punch_impact(f.pos, dir, k)
 		if terrain_behind(f, dir, 1.6):
 			wall_stuns += 1
 			if not (f is Hunter):
@@ -426,9 +428,11 @@ func _punch(k: float) -> void:
 			m.fx.word(f.pos + Vector3(0, 2.0, 0), "WALLED", Color("ffb36a"), false)
 			KitLooks.of(m).crown(f, float(pd["wall_stun"]))
 		if f.hp < hp0 and h.is_local() and m.cam: m.cam.punch(0.03)
+	if landed == 0:
+		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 
-## The fist's blow landing at the lane's end on the hit frame: a ring of dust, a molten spray thrown on
-## along the punch and a hot chip burst, bigger the longer she held.
+## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a ring of dust,
+## a molten spray thrown on along the punch and a hot chip burst, bigger the longer she held.
 func _punch_impact(at: Vector3, dir: Vector2, k: float) -> void:
 	var fwd := Vector3(dir.x, 0.25, dir.y)
 	m.fx.ring(at, 1.0 + 0.6 * k, Color(0.62, 0.47, 0.32, 0.95), 0.3)
@@ -612,6 +616,10 @@ func _landslide_launch(at: Vector3, dir: Vector2) -> void:
 	m.sfx("br_roll", start, -3.0, 1.0)
 
 ## Her dash after-image: a puff of quarry dust and a few embers, not the shared pill.
+## Her own hand tell (the molten fists) replaces the shared white charge orb.
+func charge_orb() -> bool:
+	return false
+
 func dash_afterimage() -> bool:
 	m.fx.burst(h.pos + Vector3(0, 0.5, 0), Color(0.62, 0.48, 0.34, 0.8), 3, 1.2, 0.4, -1.0, 1.6)
 	m.fx.burst(h.pos + Vector3(0, 0.9, 0), MOLTEN, 1, 1.5, 0.3, 2.0, 0.8)

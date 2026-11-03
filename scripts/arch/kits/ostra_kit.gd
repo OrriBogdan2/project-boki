@@ -269,6 +269,10 @@ func _hover_at(at: Vector3) -> void:
 		h.pos.y = at.y
 
 ## Her after-image on any dash (a merge's dodge): a streak of violet motes off the hem, not the shared pill.
+## Her own hand tell (the charge mote) replaces the shared white charge orb.
+func charge_orb() -> bool:
+	return false
+
 func dash_afterimage() -> bool:
 	m.fx.burst(h.pos + Vector3(0, 0.6, 0), Color(0.55, 0.3, 0.95, 0.75), 3, 0.8, 0.4, -0.5, 1.2)
 	return true

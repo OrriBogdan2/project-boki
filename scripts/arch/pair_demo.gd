@@ -8,7 +8,7 @@ extends RefCounted
 
 const ANIM := {
 	"br_throw": ["dolm", "rubble_fists", [0.5, 0.56, 0.62, 0.7, 0.85, 1.0]],
-	"br_punch": ["dolm", "rubble_fists", [0.7, 1.2, 1.47, 1.52, 1.62, 1.95]],
+	"br_punch": ["dolm", "rubble_fists", [0.7, 1.2, 1.44, 1.47, 1.52, 1.75]],
 	"br_slam": ["dolm", "rubble_fists", [0.8, 1.7, 1.96, 2.04, 2.12, 2.5]],
 	"br_leap": ["dolm", "rubble_fists", [0.85, 1.0, 1.12, 1.28, 1.5, 1.9]],
 	"br_lunge": ["dolm", "rubble_fists", [0.85, 0.93, 0.98, 1.06, 1.25]],
@@ -64,7 +64,7 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 			if t < 0.45: P.teleport(Vector3(D.pos.x - 2.4, P.pos.y, D.pos.z))
 			P.inp["fire"] = t > 0.5 and t < 1.45
 		"br_slam":
-			if t < 0.45: P.teleport(Vector3(D.pos.x - 2.6, P.pos.y, D.pos.z))
+			if t < 0.45: P.teleport(Vector3(D.pos.x - 3.6, P.pos.y, D.pos.z))
 			_rmb_hold(K, t, dt, 0.5, 1.45)
 		"br_leap":
 			_rmb_hold(K, t, dt, 0.5, 1.4)
@@ -152,10 +152,10 @@ static func _spine_input(P: Hunter, D: Hunter, t: float, dt: float) -> void:
 ## where the hunter starts (x offset from the dummy)].
 const SHOTS := {
 	"pair_breah_throw_key": ["br_throw", 0.58, -5.0], "pair_breah_throw_hit": ["br_throw", 0.76, -5.0],
-	"pair_breah_punch_tele": ["br_punch", 1.2, -2.4], "pair_breah_punch_key": ["br_punch", 1.5, -2.4],
-	"pair_breah_punch_hit": ["br_punch", 1.58, -2.4],
-	"pair_breah_slam_tele": ["br_slam", 1.75, -2.6], "pair_breah_slam_key": ["br_slam", 1.99, -2.6],
-	"pair_breah_slam_hit": ["br_slam", 2.07, -2.6],
+	"pair_breah_punch_tele": ["br_punch", 1.2, -2.4], "pair_breah_punch_key": ["br_punch", 1.45, -2.4],
+	"pair_breah_punch_hit": ["br_punch", 1.49, -2.4],
+	"pair_breah_slam_tele": ["br_slam", 1.75, -3.6], "pair_breah_slam_key": ["br_slam", 1.99, -3.6],
+	"pair_breah_slam_hit": ["br_slam", 2.07, -3.6],
 	"pair_breah_leap_key": ["br_leap", 1.15, -5.0], "pair_breah_lunge_key": ["br_lunge", 0.98, -5.0],
 	"pair_breah_dash_tele": ["br_dash", 0.62, -6.0], "pair_breah_dash_key": ["br_dash", 0.82, -6.0],
 	"pair_breah_dash_hit": ["br_dash", 1.12, -6.0], "pair_breah_dash_rock": ["br_dash", 1.3, -6.0],
