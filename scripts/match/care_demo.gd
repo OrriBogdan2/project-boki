@@ -16,8 +16,8 @@ const SPEC := {
 		"strip": [0.6, 0.84, 0.9, 0.98, 1.4, 1.86],
 		"keys": {"rmb_aim": 0.7, "rmb_disc": 1.4, "rmb_root": 1.86}},
 	"tender_e": {"strip": [0.36, 0.4, 0.48, 0.6, 1.06, 1.14], "keys": {"e": 0.5, "e_thrown": 1.3}},
-	"tender_dash": {"strip": [0.3, 0.33, 0.36, 0.42, 0.5, 0.62], "keys": {"dash": 0.36}},
-	"tender_air": {"strip": [0.33, 0.42, 0.55, 0.75, 0.95, 1.2], "keys": {"air": 0.42, "air_float": 0.8}},
+	"tender_dash": {"strip": [0.31, 0.35, 0.41, 0.47, 0.53], "keys": {"dash": 0.41}},
+	"tender_air": {"strip": [0.33, 0.46, 0.75, 1.05, 1.2], "keys": {"air": 0.46, "air_float": 0.8}},
 	"tender_carry": {"strip": [0.3, 0.45, 0.6, 1.0, 1.5, 2.0], "keys": {"carry": 1.5}},
 	"tender_payoff": {"strip": [2.6, 2.75, 2.82, 2.9, 3.0, 3.2], "keys": {"payoff": 2.82}},
 	"tender_walk": {"strip": [0.6, 0.68, 0.76, 0.84, 0.92, 1.0], "keys": {"walk": 0.8}},
@@ -64,6 +64,7 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 	_camera(m, spec)
 	if m.hud: m.hud.guide_hidden = true
 	if t < 0.1:
+		Engine.time_scale = ArenaDemoPair.DEMO_TIME_SCALE      # each slow render frame steps only a sliver
 		# off every hover spot (no tooltip in the frames) and no Boki at her shoulder in the close-ups
 		m.get_viewport().warp_mouse(Vector2(8, 8))
 		for l in m.find_children("*", "Label3D", true, false):
@@ -73,6 +74,8 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 	P.ult = -100.0
 	for k in m.kins + m.mobs:
 		if is_instance_valid(k): (k as Node3D).visible = false
+	if arch == "tender" and what in ["dash", "air"]:
+		P.kin = null           # her own dash only: a Boki's dash rider (its ring or decoy) is the Boki's look
 	var Al: Hunter = (A.get_meta("care_ally") if A.has_meta("care_ally") else null)
 	if Al == null:
 		Al = _setup(A, arch, what)

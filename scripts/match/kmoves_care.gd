@@ -174,12 +174,13 @@ const MOVES := {
 		[
 				0.21,
 				{
-					"sq": -0.12, "lift": 0.06, "y": 0.15, "fl": Vector3(-0.3, 0.3, -0.1), "hw": 0.7,
-					"fr": Vector3(0.3, 0.3, -0.1), "rw": 0.7}],
+					"sq": -0.12, "lift": 0.06, "y": 0.15, "lw": 0.8, "legs": [0.4, -0.7, 0.35, -0.6],
+					"fl": Vector3(-0.3, 0.3, -0.1), "hw": 0.7, "fr": Vector3(0.3, 0.3, -0.1), "rw": 0.7}],
 		[0.24, {}]]},
 	# the air dash, her long float (0.92 s of dash): tucked into a ball for one forward somersault, then
-	# unfurled into a seated float with the knees tucked and the arms out wide like a drifting seed, a little
-	# sway, the legs reaching down, and a soft squash on touchdown (fx stays a full turn: no unwind)
+	# unfurled into a seated float, leaning back with the knees tucked up and both arms up in a happy V like
+	# a drifting seed, a little sway, the legs reaching down, and a soft squash on touchdown (fx stays a full
+	# turn: no unwind)
 	"mm_float": {"keys": [
 		[0.0, {"sq": 0.2, "p": 0.1, "lw": 1.0, "legs": [0.9, -1.4, 0.8, -1.3]}],
 		[
@@ -195,15 +196,15 @@ const MOVES := {
 		[
 				0.36,
 				{
-					"fx": -6.283, "sq": -0.15, "lift": 0.05, "p": 0.1, "r": 0.08, "lw": 1.0,
-					"legs": [1.3, -1.9, 1.2, -1.8], "fl": Vector3(-0.55, 0.3, 0.05), "hw": 1.0,
-					"fr": Vector3(0.55, 0.3, 0.05), "rw": 1.0}],
+					"fx": -6.283, "sq": -0.15, "lift": 0.05, "p": 0.22, "r": 0.1, "lw": 1.0,
+					"legs": [1.5, -2.0, 1.4, -1.9], "fl": Vector3(-0.45, 0.6, -0.05), "hw": 1.0,
+					"fr": Vector3(0.45, 0.6, -0.05), "rw": 1.0}],
 		[
 				0.62,
 				{
-					"fx": -6.283, "sq": -0.08, "lift": 0.05, "p": 0.1, "r": -0.08, "lw": 1.0,
-					"legs": [1.3, -1.9, 1.2, -1.8], "fl": Vector3(-0.55, 0.38, 0.0), "hw": 1.0,
-					"fr": Vector3(0.55, 0.38, 0.0), "rw": 1.0}],
+					"fx": -6.283, "sq": -0.08, "lift": 0.05, "p": 0.22, "r": -0.1, "lw": 1.0,
+					"legs": [1.5, -2.0, 1.4, -1.9], "fl": Vector3(-0.5, 0.55, 0.0), "hw": 1.0,
+					"fr": Vector3(0.5, 0.55, 0.0), "rw": 1.0}],
 		[
 				0.8,
 				{

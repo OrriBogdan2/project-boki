@@ -26,8 +26,8 @@ const MOVES := {
 	"as_lance": ["ashwick", "flamethrower", [0.5, 0.6, 0.7, 0.78, 0.9, 1.2], 1.0],
 	"as_sweep": ["ashwick", "flamethrower", [0.9, 1.0, 1.1, 1.2, 1.3, 1.45], 1.0],
 	"as_shot": ["ashwick", "flamethrower", [0.5, 0.65, 0.92, 0.96, 1.05, 1.3]],
-	"as_leap": ["ashwick", "flamethrower", [0.5, 0.56, 0.66, 0.78, 0.88, 1.05]],
-	"lw_hop": ["ashwick", "flamethrower", [0.5, 0.54, 0.6, 0.7, 0.85, 1.05], 1.0],
+	"as_leap": ["ashwick", "flamethrower", [0.5, 0.56, 0.66, 0.8, 0.95]],
+	"lw_hop": ["ashwick", "flamethrower", [0.5, 0.55, 0.62, 0.78, 1.0], 1.0],
 	"as_cloak": ["ashwick", "flamethrower", [0.5, 0.62, 0.7, 0.78, 1.0, 1.35]],
 	"lw_stoke": ["ashwick", "flamethrower", [0.5, 0.6, 0.7, 0.8, 1.0]],
 	"lw_stoke_lance": ["ashwick", "flamethrower", [0.98, 1.06, 1.12, 1.2, 1.32, 1.5], 1.0],
@@ -143,7 +143,12 @@ static func _drive(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, dt: flo
 			for k in 3:
 				if ArenaDemo._at(t, dt, go + 0.45 * k): P.do_dash()
 		"dr_barge", "as_leap":
-			if t < go: D.teleport(A.home + Vector3(3.6, 0, 0))
+			# Linwick's ram runs free (footage 0159: the lunge, then upright at once); the barge hits the dummy
+			var gap := 12.0 if mv == "as_leap" else 3.6
+			if t < go: D.teleport(A.home + Vector3(gap, 0, 0))
+			if t < go and mv == "as_leap":
+				for e in A.dummies:
+					if e["h"] != D: (e["h"] as Hunter).teleport(A.home + Vector3(0, 0, 14.0))
 			if ArenaDemo._at(t, dt, go):
 				P.dashes = P.max_dashes()
 				P.do_dash()
