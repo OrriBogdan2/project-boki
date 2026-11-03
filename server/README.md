@@ -82,10 +82,25 @@ with stdout piped, and:
 | `READY_TIMEOUT_S` | `30` | how long a server may take to print `ready` |
 | `TOKENS_DIR` | `/run/boki` | where tokens files are written (0600) |
 
+## The game server process
+
+`godot --headless -- --server --port <N> --mode duel|arena|trio --match-id <id> --tokens-file <path>
+[--seed <s>] [--idle-exit <s>]` (scripts/core/dedicated_server.gd) runs one match as the authoritative
+host with no local player: the relay (scripts/server/relay.gd) on that port with the tokens as the only
+way in, and the match in the same process, bots in every seat nobody takes. Seats are team-major and
+sized from the tokens file's `slots`/`team_size` (defaults: duel 2, arena 4v4, trio 4 trios). The match
+starts when every seat is taken or 15 s after the first player; it ends when one team is left or the
+islands fall, the server tells the players (`end`) and exits 0. Exit 2: bad arguments or tokens file;
+3: the port is taken. `--version` prints `BOKI_SERVER version=<Net.VERSION>`. A refused handshake carries
+a reason the online screen keys its message on: `version` (with the server's version), `bad_token`, `full`.
+
+Checks: `godot --headless -- --server-check` (a server on port 7877, two headless players through
+`--join-server=`, the refusals) and `--server-e2e-check` (the matchmaker on 18080 with match ports
+7880-7882, two players queued through it, the refusals it is part of).
+
 ## Run it locally
 
-With a Godot checkout (needs the "Linux Server" preset's `--server` mode on this branch, from
-`ext/servers`):
+With a Godot checkout (the "Linux Server" preset's `--server` mode):
 
 ```sh
 SERVER_CMD="godot --headless --path $PWD --" PUBLIC_HOST=127.0.0.1 TOKENS_DIR=/tmp/boki-tokens \
