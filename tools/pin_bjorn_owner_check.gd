@@ -57,6 +57,10 @@ func pin() -> void:
 	_pin_heavy(m, P, T, K, home, lv)
 	_pin_dash(m, P, T, K)
 	await done(m)
+	var flow = load("res://tools/dash_flow_check.gd").new()
+	var bad: int = await flow.combos_of(main, "archer")
+	ok("pin item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; holds go through every move",
+		bad == 0, "%d failing (the DASHFLOW lines)" % bad)
 
 func ready_bow(P: Hunter) -> void:
 	P.fire_cd = 0.0
@@ -118,14 +122,27 @@ func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void
 		early += arrows(m, P)
 	ok("pin early release: a cooldown mid-draw does not loose it", early == 0 and P.draw_t > 0.5,
 		"arrows %d draw_t %.2f" % [early, P.draw_t])
-	# a dash cancels the draw with no shot, and holding on does not start a new one by itself being a shot
+	# item 51: a dash keeps the draw (it charges on through the roll) and still looses only on the release
+	P.inp["fire"] = false
+	step(m, 1.0)
+	ready_bow(P)
+	var dry := press_dry.bind(P, K, T.pos)
+	step(m, 0.3, dry)
+	var drawn := P.draw_t
 	P.dashes = P.max_dashes()
 	P.do_dash()
-	step(m, 0.4, aim)
-	ok("pin early release: a dash cancels the draw with no arrow", arrows(m, P) == 0
-		and K.draw.loosed_at < m.time - 0.3,
-		"arrows %d" % arrows(m, P))
+	var rolling := P.roll_t > 0.0
+	step(m, 0.12, dry)
+	ok("pin early release: a dash keeps the draw, charging on through the roll, and looses nothing",
+		rolling and arrows(m, P) == 0 and P.draw_t > drawn + 0.08, "draw %.2f -> %.2f arrows %d" % [drawn, P.draw_t,
+		arrows(m, P)])
+	step(m, 0.4, dry)
 	P.inp["fire"] = false
+	m.step(DT)
+	m.step(DT)
+	ok("pin early release: letting go after the dash looses one arrow from the carried draw",
+		arrows(m, P) == 1 and K.draw.last_kind in ["arrow", "super"], "arrows %d kind %s" % [arrows(m, P),
+		K.draw.last_kind])
 	step(m, 1.0)
 
 ## #5: the readout sits on the aim line.
@@ -532,13 +549,15 @@ func _let_go(P: Hunter) -> void:
 func _mode(hero: String, slot: String, in_air: bool) -> String:
 	return String(DashFlow.row_of(hero, slot, in_air)["mode"])
 
-## #32 / #35 for Pin: a press during the roll is carried, RMB / E / X work at once, a draw ends on a dash.
+## #32 / #35 for Pin: a press during the roll is carried, RMB / E / X work at once; item 51: a draw carries
+## through a dash (Shift mid-draw rolls at once).
 func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
-	ok("pin dash table: LMB buffers, RMB / E / X fire, a draw is cancelled by a dash",
+	ok("pin dash table: LMB buffers, RMB / E / X fire, a draw carries through a dash",
 		_mode("archer", "lmb", false) == "buffer" and _mode("archer", "lmb", true) == "buffer"
 		and _mode("archer", "rmb", false) == "fire" and _mode("archer", "e", false) == "fire"
 		and _mode("archer", "x", false) == "fire"
-		and DashFlow.into_dash_of("archer", "lmb").get("mode") == "cancel")
+		and DashFlow.into_dash_of("archer", "lmb").get("mode") == "fire"
+		and ["ground", "air", "jump"].all(func(mv): return DashFlow.hold_row_of("archer", "lmb", mv)["mode"] == "keep"))
 	step(m, 1.5)
 	ready_bow(P)
 	K.res = 0.0
