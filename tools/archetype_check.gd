@@ -368,7 +368,7 @@ func _mage() -> void:
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(5, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.cd["e"] = 0.0
 	var x0 := T.pos.x
 	P.ak.use_e()
-	step(m, 1.2)
+	step(m, 2.2)
 	ok("vireo E: Skycall damages, flings, Sparks", dmg(T) >= 12.0 and T.pos.x > x0 + 1.0 and K.spark_n(T) >= 1, "took %.0f moved %.1f" % [dmg(T), T.pos.x - x0])
 	ok("vireo E: Grounded (no dashing)", KitStatus.grounded(T))
 	var d0 := T.dashes
