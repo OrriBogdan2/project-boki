@@ -289,3 +289,10 @@ The reviews are in briefs/kit-review/round2/. **PASS (minor nits): Pin, Bjorn, V
 ## 2026-11-03 02:20 UTC: owner answers
 - **moosh-tamsin:** Moosh Moosh's air glide goes to the **source distance, about 11–15 m (start at 12 m)**. The owner's rule is "go to the source where possible". Data only; update the check bound.
 - **General rule for every kit pass:** where a number or behaviour is an open call, go to the source.
+
+## 2026-11-03 02:45 UTC: MODEL SWITCH (owner: usage at 75% this week)
+The video-understanding work is done: every reference sheet is written. From now on:
+- **Let running Opus agents finish**: the round-2 fix passes, breah-ostra polish and the ext/classes rework. Don't restart them, since that would waste what's already spent.
+- **Every new agent you start uses Sonnet**, including further kit fix rounds, re-merges, test runs and ult tweaks. The reference sheets and review fix lists are concrete enough for Sonnet.
+- Exception: if a fix is mainly about judging art against the source footage and Sonnet fails it twice, report it in STATUS.md instead of escalating it yourself.
+- **Run fewer redundant full suites.** Run the targeted checks plus one full suite at the end of each branch.
