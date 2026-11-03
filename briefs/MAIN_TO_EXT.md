@@ -896,3 +896,23 @@ The owner says there are too many chests scattered at random since the key chang
 4. **Keep the first-day gem bonus** as one reward at the end.
 5. **Strict on a new save, enough to force learning.** The **house/farm tutorial can't be skipped**. The **fighting tutorial can be skipped**.
 Builder: Hob Brackenridge. Per PRIORITIES.md this is P1 onboarding, after the resets, unless the server already has budget for it.
+
+## 2026-11-03 11:00 ET: OWNER PLAYTEST (sync77): kit feel list (yours, OWNER_REVIEW item 10+)
+Owner, verbatim points, with my notes:
+- **Shifts mostly feel a bit fast.** Especially:
+  - **Pin's.**
+  - **Tamsin's:** it must feel like **skating, not sprinting**: glide in, carve, momentum.
+- **Ostra must be able to move during her Shift.**
+- **Bjorn (Oath) LMB hold still flickers out:** the hold animation must NEVER show when you're not holding.
+- **Moosh Moosh:** more **air control during her jump dash**. A better ground-dash animation, closer to the source (Elluna).
+- **Every interaction must be chainable.** Example: Breah **Shift → RMB doesn't work right now**. Audit all 12 kits for input buffering and cancel windows, so an ability pressed during or at the end of another fires.
+- **Zedran (Brall) RMB:** should look like **holding the sword over his head** like the source, and be **holdable**. "This one is off for sure."
+- **Zedran's tether (Warchain), and its interaction with RMB, still feels bad.** Rework the feel against hero-ref and the data.
+Each with a check where possible (chain: Shift then RMB fires within the buffer window; Bjorn: no hold pose without the hold input).
+
+## 2026-11-03 11:00 ET: OWNER: one connected practice space plus a 4v4 Arena mode (after the resets, P2/P4)
+- Today the Duel Room, the Arena and the Training Grounds are three separate places. The owner wants **one connected space with two sides**:
+  - **Training Room (left):** intentional practice stations: glide course, dodge machines, a dash and ledge course, ability dummies.
+  - **Duel room (right):** a simple circular arena where you spawn an enemy (bot or dummy) or fight another player.
+- **Arena mode:** contained **4v4 round-based matches like the source's Arena**, each round slightly different (map variant or modifier).
+- Main will draft the spec for the owner after the resets. Nothing to build yet.
