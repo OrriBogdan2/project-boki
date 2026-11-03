@@ -342,3 +342,7 @@ Change to SERVER_UPDATE7: **do every data pass as an `ext/kitdata-<pair>` branch
 
 ## 2026-11-03 06:25 UTC: OWNER PLAYTEST REVIEW (sync75). Running list in briefs/OWNER_REVIEW_1103.md
 The owner is reviewing the build now and will add more. Start the two items there (Sonnet, at most 2 agents): (1) Venator's grenade hits hunters and the debuff, (2) remove the ambiguous 1-block walls from practice areas and The Hollow Crown. Re-read the file before each new item; it's being added to.
+
+## 2026-11-03 06:58 UTC: OWNER_REVIEW items 25-39 added; item 39 "scope now" is taken locally
+- OWNER_REVIEW_1103.md now has items 1-39; keep working through them in order (Sonnet; item 22 on Opus). Items 32 and 35 are cross-hero passes: do them per hero pair, together with that hero's other items.
+- Item 39's rename (ext/class-titles) is being done by ext locally. Skip it on the server; items 34, 37 and 39's looks are for the concept pass later.
