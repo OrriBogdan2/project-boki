@@ -20,14 +20,15 @@ const ANIM := {
 	"jug_wave": ["juggernaut", "greatsword", [0.5, 0.9, 1.4, 1.46, 1.55, 1.85]],
 	"jug_slam": ["juggernaut", "greatsword", [0.6, 0.85, 1.08, 1.12, 1.25, 1.6]],
 	"jug_riposte": ["juggernaut", "greatsword", [0.6, 1.0, 1.16, 1.22, 1.32, 1.55]],
-	"jug_lunge": ["juggernaut", "greatsword", [0.6, 0.95, 1.3, 1.43, 1.5, 1.8]],
-	"jug_meteor": ["juggernaut", "greatsword", [0.5, 0.55, 0.62, 0.7, 0.85, 1.1]],
-	"jug_dash": ["juggernaut", "greatsword", [0.5, 0.58, 0.66, 0.76, 0.98, 1.32]],
-	"jug_exdash": ["juggernaut", "greatsword", [0.5, 0.56, 0.62, 0.7, 0.8, 1.0]],
+	"jug_lunge": ["juggernaut", "greatsword", [0.7, 1.2, 1.4, 1.45, 1.52, 1.8]],
+	"jug_meteor": ["juggernaut", "greatsword", [0.53, 0.62, 0.7, 0.82, 0.98, 1.3]],
+	"jug_dash": ["juggernaut", "greatsword", [0.55, 0.64, 0.74, 0.9, 1.2]],
+	"jug_exdash": ["juggernaut", "greatsword", [0.5, 0.54, 0.62, 0.72, 0.9]],
+	"jug_pull": ["juggernaut", "greatsword", [0.82, 0.92, 1.0, 1.08, 1.16, 1.32]],
 	"jug_chain": ["juggernaut", "greatsword", [0.52, 0.58, 0.66, 0.92, 0.98, 1.2]],
 	"jug_chainlunge": ["juggernaut", "greatsword", [1.0, 1.4, 1.62, 1.68, 1.78, 2.1]],
 	"jug_haul": ["juggernaut", "greatsword", [1.0, 1.24, 1.32, 1.42, 1.52, 1.9]],
-	"jug_spin": ["juggernaut", "greatsword", [0.88, 0.92, 0.98, 1.04, 1.12, 1.35]],
+	"jug_spin": ["juggernaut", "greatsword", [0.86, 0.9, 0.95, 1.0, 1.07, 1.2]],
 	"jug_roar": ["juggernaut", "greatsword", [0.5, 0.56, 0.64, 0.8, 1.1, 1.5]],
 	"jug_lunge_air": ["juggernaut", "greatsword", [0.55, 0.75, 0.95, 1.3, 1.42, 1.65]],
 }
@@ -43,8 +44,11 @@ const STILLS := {
 	"chain_fly": ["juggernaut", Vector3(-9.5, 0, 0)], "chain": ["juggernaut", Vector3(-7.0, 0, 0)],
 	"rampage": ["juggernaut", Vector3(-6.5, 0, 0)], "enraged": ["juggernaut", Vector3(-3.0, 0, 1.5)],
 	"sweet": ["juggernaut", Vector3(-3.3, 0, 0)], "lunge_air": ["juggernaut", Vector3(-7.5, 0, 0)],
-	"exec": ["juggernaut", Vector3(-3.0, 0, 0)],
+	"exec": ["juggernaut", Vector3(-3.0, 0, 0)], "meteor_hit": ["juggernaut", Vector3(-4.0, 0, 0)],
+	"pull_steer": ["juggernaut", Vector3(-10.0, 0, 0)],
 }
+
+const STRIP_SLOW := 0.15     # Engine.time_scale while Zedran's strips play
 
 static func at(t: float, dt: float, when: float) -> bool:
 	return ArenaDemo._at(t, dt, when)
@@ -53,6 +57,8 @@ static func at(t: float, dt: float, when: float) -> bool:
 static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	if P.ammo < 3: P.ammo = int(P.wpn["mag"])
+	if t < 0.05 and mv.begins_with("jug_"):
+		Engine.time_scale = STRIP_SLOW       # (a slow software render must not skip the frames a strip asks for)
 	match mv:
 		"thf_lmb":
 			P.inp["fire"] = t > 0.49 and t < 0.52
@@ -74,7 +80,7 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 			if at(t, dt, 0.38): P.do_jump()
 			if at(t, dt, 0.5):
 				P.ex_cd = 0.0
-				P.inp["move"] = Vector2(0, 1)
+				P.inp["move"] = Vector2(0, -1)
 				K.on_dash(true)
 		"thf_bola":
 			if at(t, dt, 0.5):
@@ -116,7 +122,10 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				K.cd["rmb"] = 0.0
 				P.inp["sec_hold"] = false
 				K.press_rmb()
+		"jug_pull":
+			pull_steer(P, K, D, t, dt)
 		"jug_lunge":
+			if t < 0.45: P.teleport(Vector3(D.pos.x - 6.5, P.pos.y, D.pos.z))
 			if at(t, dt, 0.5):
 				K.ch_rmb = 1.0
 				K.cd["rmb"] = 0.0
@@ -124,7 +133,7 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				K.press_rmb()
 		"jug_meteor":
 			if at(t, dt, 0.4):
-				P.teleport(Vector3(D.pos.x - 4.0, P.pos.y + 3.0, D.pos.z))
+				P.teleport(Vector3(D.pos.x - 4.0, P.pos.y + 2.5, D.pos.z))
 				P.grounded = false
 				P.vel = Vector3.ZERO
 			if at(t, dt, 0.5):
@@ -139,7 +148,7 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 			if at(t, dt, 0.38): P.do_jump()
 			if at(t, dt, 0.5):
 				P.ex_cd = 0.0
-				P.inp["move"] = Vector2(0, 1)
+				P.inp["move"] = Vector2(0, -1)
 				K.on_dash(true)
 		"jug_chain":
 			if at(t, dt, 0.5):
@@ -175,6 +184,15 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				K.cd["rmb"] = 0.0
 				P.inp["sec_hold"] = false
 				K.press_rmb()
+
+## The Warchain's pull with a steer: hooked from 10m, pulled in while holding a sideways key.
+static func pull_steer(P: Hunter, K: ArchKit, D: Hunter, t: float, dt: float) -> void:
+	if t < 0.4: P.teleport(Vector3(D.pos.x - 10.0, P.pos.y, D.pos.z))
+	if at(t, dt, 0.45):
+		K.cd["e"] = 0.0
+		K.use_e()
+	if at(t, dt, 0.85): K.use_e()
+	if t > 0.85: P.inp["move"] = Vector2(0, 1)
 
 ## X with the ultimate open (level 6) and off cooldown.
 static func cast_ult(P: Hunter) -> void:
@@ -257,6 +275,8 @@ static func _still_dancer(A: Arena, P: Hunter, D: Hunter, K: ThiefKit, w: String
 	return 1.0
 
 static func _still_zedran(A: Arena, P: Hunter, D: Hunter, K: JuggernautKit, w: String, t: float, dt: float) -> float:
+	if t < 0.05 and w in ["meteor_hit", "pull_steer"]:
+		Engine.time_scale = STRIP_SLOW
 	match w:
 		"slash":
 			P.inp["fire"] = t > 0.4 and t < 0.42
@@ -289,6 +309,17 @@ static func _still_zedran(A: Arena, P: Hunter, D: Hunter, K: JuggernautKit, w: S
 		"lunge_air":
 			lunge_air(P, K, t, dt, 0.3)
 			return 0.3 + 0.32 + 0.22
+		"meteor_hit":
+			if at(t, dt, 0.3):
+				P.teleport(P.pos + Vector3(0, 2.5, 0))
+				P.grounded = false
+				P.vel = Vector3.ZERO
+			if at(t, dt, 0.4): K.press_rmb()
+			if K.meteor.drops > 0 and not A.has_meta("mh_at"): A.set_meta("mh_at", t)
+			return float(A.get_meta("mh_at", 9.0)) + 0.06
+		"pull_steer":
+			pull_steer(P, K, D, t, dt)
+			return 1.1
 		"exec":
 			D.hp = D.max_hp * 0.25
 			K.ch_rmb = 1.0

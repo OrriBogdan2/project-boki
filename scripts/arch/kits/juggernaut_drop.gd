@@ -11,8 +11,11 @@ const PURPLE := Color("b06aff")       # the landing marker (the damage area)
 const CORE := Color("ff5ad8")         # its centre ring: the stun area, and the shock ring on impact
 const STREAK := Color("ff7a1a")       # the dive's flame streaks
 const STREAK_HOT := Color("ffd04a")
-const CRACK := Color("1a0c06")        # the cracks in the ground
+const CRACK := Color("3a2010")        # the cracks in the ground
 const DEBRIS := Color("8a7058")
+const CRACK_T := 1.6                  # s the crack in the ground stays, fading over the last half
+const CRACK_N := 7                    # cracks running out from the impact
+const CRACK_SEGS := 4                 # jagged pieces in each
 
 var k: JuggernautKit
 var phase := ""                       # "" | hang | dive | recover
@@ -28,6 +31,9 @@ var phases: Array = []                # the phases the last one went through
 var last_air := 0.0                   # s from the press to the impact
 var last_recover := 0.0               # s the last recovery ran
 var last_shock_r := 0.0               # m, the shock ring drawn on impact
+var cracks: Node3D = null             # the crack decal (built once, moved to each impact)
+var crack_mat: StandardMaterial3D = null
+var crack_t := 0.0
 
 func _init(kit: JuggernautKit) -> void:
 	k = kit
@@ -94,6 +100,10 @@ func cancel() -> void:
 	phase = ""
 
 func tick(dt: float) -> void:
+	if crack_t > 0.0:
+		crack_t -= dt
+		crack_mat.albedo_color.a = clampf(crack_t / (CRACK_T * 0.5), 0.0, 1.0) * 0.7
+		cracks.visible = crack_t > 0.0
 	if phase == "":
 		return
 	var h := k.h
@@ -181,14 +191,48 @@ func _impact_fx(at: Vector3) -> void:
 	var m := k.m
 	last_shock_r = float(dd["core"])
 	m.fx.ring(at, last_shock_r, CORE, 0.45)
-	m.fx.ring(at, float(dd["radius"]), Color(PURPLE, 0.55), 0.3)
-	for i in 9:
-		var a := TAU * float(i) / 9.0 + randf_range(-0.25, 0.25)
-		k.fx().streak(at + Vector3(0, 0.04, 0), Vector2(cos(a), sin(a)), randf_range(1.2, float(dd["radius"]) + 0.3),
-				0.16, CRACK, Color("4a2010"), 1.6)
+	_crack(at)
 	m.fx.dust(at, 22)
 	m.fx.burst(at + Vector3(0, 0.3, 0), DEBRIS, 18, 6.5, 0.7, 16.0, 1.1, Vector3.UP, 55.0)
 	m.sfx("jug_meteor", at, 0.0, 1.0)
 	m.sfx("jug_slam_hit", at, -5.0, 0.8)
 	Feel.shake(m, "leap", k.h, at)
 	k.net_ring(at, last_shock_r, CORE)
+
+## The crack in the ground: dark jagged fissures of uneven length running out of the impact, kinking as
+## they go, toward the damage area's edge (tapering pieces).
+func _crack(at: Vector3) -> void:
+	if not k.tells_visible():
+		return
+	if cracks == null or not is_instance_valid(cracks):
+		cracks = k.own_node()
+		crack_mat = StandardMaterial3D.new()
+		crack_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		crack_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		crack_mat.albedo_color = CRACK
+		for i in CRACK_N * CRACK_SEGS:
+			var seg := MeshInstance3D.new()
+			var q := QuadMesh.new()
+			q.orientation = PlaneMesh.FACE_Y
+			seg.mesh = q
+			seg.material_override = crack_mat
+			cracks.add_child(seg)
+	cracks.global_position = at + Vector3(0, 0.03, 0)
+	var reach := float(data()["radius"]) * 0.85
+	for i in CRACK_N:
+		var a := TAU * float(i) / float(CRACK_N) + randf_range(-0.3, 0.3)
+		var from := Vector3(cos(a), 0, sin(a)) * 0.25
+		var out := randf_range(0.3, 1.0) * reach
+		for j in CRACK_SEGS:
+			a += randf_range(-0.8, 0.8)
+			var to := from + Vector3(cos(a), 0, sin(a)) * out / float(CRACK_SEGS) * randf_range(0.6, 1.4)
+			_crack_seg(cracks.get_child(i * CRACK_SEGS + j) as MeshInstance3D, from, to, 0.18 - 0.04 * j)
+			from = to
+	crack_t = CRACK_T
+	crack_mat.albedo_color.a = 0.7
+	cracks.visible = true
+
+func _crack_seg(seg: MeshInstance3D, a: Vector3, b: Vector3, width: float) -> void:
+	(seg.mesh as QuadMesh).size = Vector2(width, a.distance_to(b) + width * 0.5)
+	seg.position = (a + b) * 0.5
+	seg.rotation = Vector3(0, atan2(b.x - a.x, b.z - a.z), 0)
