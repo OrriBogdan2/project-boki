@@ -17,7 +17,8 @@ const SPEC := {
 		"keys": {"rmb_aim": 0.7, "rmb_disc": 1.4, "rmb_root": 1.86}},
 	"tender_e": {"strip": [0.36, 0.4, 0.48, 0.6, 1.06, 1.14], "keys": {"e": 0.5, "e_thrown": 1.3}},
 	"tender_dash": {"strip": [0.31, 0.35, 0.41, 0.47, 0.53], "keys": {"dash": 0.41}},
-	"tender_air": {"strip": [0.33, 0.5, 0.8, 1.1, 1.3], "keys": {"air": 0.46, "air_float": 0.8}},
+	"tender_air": {
+		"strip": [0.33, 0.5, 0.8, 1.1, 1.3], "keys": {"air_start": 0.28, "air": 0.46, "air_float": 0.8, "air_land": 1.3}},
 	"tender_carry": {"strip": [0.3, 0.45, 0.6, 1.0, 1.5, 2.0], "keys": {"carry": 1.5}},
 	"tender_payoff": {"strip": [2.6, 2.75, 2.82, 2.9, 3.0, 3.2], "keys": {"payoff": 2.82}},
 	"tender_walk": {"strip": [0.6, 0.68, 0.76, 0.84, 0.92, 1.0], "keys": {"walk": 0.8}},
@@ -42,7 +43,9 @@ const SPEC := {
 	"rimewright_ultaim": {"strip": [0.32, 0.36, 0.42, 0.5, 1.5], "keys": {"ultaim": 0.36}},
 	"rimewright_ultkey": {"strip": [0.33, 0.37, 0.42, 0.5, 2.0, 3.0], "keys": {"ultkey": 2.0}},
 	"rimewright_ultskate": {"strip": [1.1, 1.22, 1.3, 1.4, 1.55], "keys": {"ultskate": 1.3}},
-	"rimewright_skateult": {"strip": [0.7, 0.8, 0.9, 1.05, 1.3, 2.2], "keys": {"skateult": 0.88, "encased": 2.0}},
+	"rimewright_skateult": {
+		"strip": [0.7, 0.8, 0.9, 1.05, 1.3, 2.2],
+		"keys": {"skating": 0.6, "skateult": 0.88, "carried": 1.3, "encased": 2.0}},
 	"rimewright_ult": {"strip": [3.6, 3.81, 3.85, 3.91, 4.0, 4.25], "keys": {"ult_crash": 3.85}},
 }
 
@@ -157,6 +160,8 @@ static func _script(
 		A: Arena, P: Hunter, D: Hunter, Al: Hunter, arch: String, what: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	var go := 0.3
+	if t < 0.2 and (what == "skateult" or (arch == "tender" and what in ["dash", "air"])):
+		_open_lane(A, P, Al)
 	match what:
 		"rmb":
 			# held keys are re-sent every step: the match's own input poll would let go of them
@@ -269,7 +274,15 @@ static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, d
 			P.dashes = P.max_dashes()
 			P.inp["dash"] = true
 
-## Tamsin skates (Shift held from 0.3s), presses X at 0.75s: carried on as the bud seals, then rooted.
+## A long clear lane across the arena below the dummy (no rocks, no teammate in the way) for the dashes.
+static func _open_lane(A: Arena, P: Hunter, Al: Hunter) -> void:
+	var D: Hunter = A.dummies[0]["h"]
+	P.teleport(D.pos + Vector3(6.0, 0, 9.4))
+	if Al != null:
+		Al.teleport(D.pos + Vector3(-12.0, 0, -6.0))
+
+## Tamsin skates (Shift held from 0.3s) inland along the clear lane, presses X at 0.75s: carried on as the bud
+## seals, then rooted.
 static func _skate_ult(A: Arena, P: Hunter, t: float, dt: float) -> void:
 	P.lvl = maxi(P.lvl, 6)
 	if t < 0.3:
