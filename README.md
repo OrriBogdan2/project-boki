@@ -2168,21 +2168,33 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 
 ![Character creation: pick 1 Hunter from the twelve chips; the Hunter viewer shows the model on its turntable playing an ability (LMB Twin Blades), the key and plain line under it, health and dashes (no weight label), the plain-words "How it plays" card and every ability with its key](hunters/creation_viewer.png)
 
-**The Hunters screen (J on the farm): unlocked (Thief playing, Archer), in progress (Juggernaut 1/2, Bulwark 1/5) and locked Hunters, the account level, the next free pick, and the viewer with Juggernaut's goal above it**
+**Hunters screen on a locked Hunter: its easy challenge with progress (4/8) and tier above the viewer, every tile with its state, the mastery goals with counters and cosmetic rewards, and the glider pick**
 
-![The Hunters screen (J on the farm): unlocked (Thief playing, Archer), in progress (Juggernaut 1/2, Bulwark 1/5) and locked Hunters, the account level, the next free pick, and the viewer with Juggernaut's goal above it](hunters/hunters_screen.png)
+![Hunters screen on a locked Hunter: its easy challenge with progress (4/8) and tier above the viewer, every tile with its state, the mastery goals with counters and cosmetic rewards, and the glider pick](hunters/hunters_screen.png)
 
-**The viewer cycling Juggernaut's abilities, 4 frames: auto Rage, LMB Greatsword (Searing Wave), RMB Smash (lunge), R Boki Merge (a cast pose), the first three driving the real model with their kit moves**
+**The Hunter viewer cycling four abilities on the real model, keys from the player's bindings**
 
-![The viewer cycling Juggernaut's abilities, 4 frames: auto Rage, LMB Greatsword (Searing Wave), RMB Smash (lunge), R Boki Merge (a cast pose), the first three driving the real model with their kit moves](hunters/viewer_strip.png)
+![The Hunter viewer cycling four abilities on the real model, keys from the player's bindings](hunters/viewer_strip.png)
 
 **Hold to unlock part-way: the bar has slid out and is half full under "Hold to unlock Archer" while Archer powers up (sparks rising, ring filling, light building)**
 
 ![Hold to unlock part-way: the bar has slid out and is half full under "Hold to unlock Archer" while Archer powers up (sparks rising, ring filling, light building)](hunters/hold_partial.png)
 
-**The full hold's reveal burst: shockwave rings and the flash in Archer's colour as NEW HUNTER steps in over the farm**
+**A full hold unlocks Zedran: the reveal burst**
 
-![The full hold's reveal burst: shockwave rings and the flash in Archer's colour as NEW HUNTER steps in over the farm](hunters/reveal_burst.png)
+![A full hold unlocks Zedran: the reveal burst](hunters/reveal_burst.png)
+
+**Character creation: pick 2 of the 4 starters (Zedran, Venator, Pin, Linwick by id) in the Hunter viewer; "2 / 2 picked" and the Start button names both**
+
+![Character creation: pick 2 of the 4 starters (Zedran, Venator, Pin, Linwick by id) in the Hunter viewer; "2 / 2 picked" and the Start button names both](hunters/creation_pick2.png)
+
+**Glider pick on the Hunters screen: Pin's ring goal done (mastery level 1/4) gives the Paper Crane, clicked and equipped**
+
+![Glider pick on the Hunters screen: Pin's ring goal done (mastery level 1/4) gives the Paper Crane, clicked and equipped](hunters/glider_pick.png)
+
+**Hold to unlock on a completed challenge (Zedran: knock 3 enemies into walls): the bar half filled while the Hunter powers up in the viewer**
+
+![Hold to unlock on a completed challenge (Zedran: knock 3 enemies into walls): the bar half filled while the Hunter powers up in the viewer](hunters/hold_unlock.png)
 
 ## pin/v2/ult (pin/v2/ult)
 
