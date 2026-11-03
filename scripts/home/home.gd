@@ -574,6 +574,8 @@ func _ready_rest() -> void:
 			print("RANSOM lost_news=%d news=%s lost=%d offers=%d" % [res["lost_news"].size(), str(res["ransom_news"]), Save.d["lost_kin"].size(), Save.d["offers"].size()])
 			if Save.d["offers"].is_empty():
 				Save.d["offers"].append({"uid": kc["uid"], "from": "Moss", "gems": 90, "m": 0})
+		if a.begins_with("--ui-tour="):
+			UiTour.run(self, a.substr(10))
 		if a.begins_with("--open="):
 			var which := a.substr(7)
 			get_tree().create_timer(0.2).timeout.connect(func():
@@ -2325,7 +2327,8 @@ func _unhandled_input(event: InputEvent) -> void:
 # ------------------------------------------------------------------ ui
 func _build_ui() -> void:
 	ui = CanvasLayer.new(); add_child(ui)
-	root_ui = Control.new(); root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); root_ui.theme = UI.theme()
+	root_ui = Control.new()
+	root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(root_ui)
 	# top left: your partner and what you have, as quiet chips on glass
@@ -2899,11 +2902,8 @@ func _shop_card(g: Array) -> Control:
 	card.custom_minimum_size = Vector2(364, 0)
 	card.tooltip_text = String(g[2]) + ("" if open else "\n" + Progress.req_text(key))
 	var hr := UI.hbox(10); card.add_child(hr)
-	var sw := PanelContainer.new()
-	var sb := UI._box(Color(col, 0.2) if open else Color(1, 1, 1, 0.05), 10); UI._pad(sb, 6, 6)
-	sw.add_theme_stylebox_override("panel", sb)
 	var icon: String = {"seed": "seed", "food": "heart", "tonic": "tonic", "rift_key": "portal", "acc": "paw", "furn": "home", "plots": "seed", "coals": "dash", "incub_slot": "egg", "tool": "hammer"}.get(key.split(":")[0], "gem")
-	sw.add_child(UI.IconDot.new("lock" if not open else icon, col if open else UI.FAINT, 18.0))
+	var sw := UI.badge(icon if open else "lock", col if open else UI.FAINT, 32.0, UI.R_CTRL)
 	sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hr.add_child(sw)
 	var nv := UI.vbox(0); nv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -2983,7 +2983,8 @@ func _challenge_card(c: Array, ready: bool) -> Control:
 	var bar := ProgressBar.new(); bar.max_value = float(c[4]); bar.value = float(cur); bar.show_percentage = false
 	bar.custom_minimum_size = Vector2(90, 6)
 	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	if donec: bar.add_theme_stylebox_override("fill", UI._box(UI.GOOD, 5))
+	if donec:
+		bar.add_theme_stylebox_override("fill", UI.frame(UI.GOOD, 5, Color(0, 0, 0, 0), 0, 0.0, 0.0, 0.25))
 	pr.add_child(bar)
 	pr.add_child(UI.label("%d / %d" % [cur, int(c[4])], 12, UI.MUTED))
 	if ul.size() > 0: pr.add_child(UI.IconDot.new("lock" if not donec else "check", UI.FAINT, 12.0))
@@ -3728,11 +3729,8 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 	row.add_child(prev_b)
 	if not rec.is_empty():
 		var ksp: Dictionary = Data.KIN[rec["species"]]
-		var dot := PanelContainer.new()
 		var kcol: Color = Color(ksp["color"]).lerp(Color.WHITE, 0.25)
-		var dsb := UI._box(Color(kcol, 0.2), 999); UI._pad(dsb, 7, 7)
-		dot.add_theme_stylebox_override("panel", dsb)
-		dot.add_child(UI.IconDot.new("paw", kcol, 20.0))
+		var dot := UI.badge("paw", kcol, 36.0)
 		dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(dot)
 	var info := UI.vbox(1); info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -4174,21 +4172,7 @@ func _build_bridge_now(k: String) -> void:
 		_toast("%s is open" % Data.ISLES[k]["name"]))
 
 func _toast(txt: String) -> void:
-	var c := UI.card(Color(0.06, 0.07, 0.1, 0.9), 12, 18)
-	var l := UI.label(txt, 22, UI.GOLD, UI.big)
-	l.autowrap_mode = TextServer.AUTOWRAP_OFF
-	c.add_child(l)
-	root_ui.add_child(c)
-	c.reset_size()
-	var vp := get_viewport().get_visible_rect().size
-	c.position = Vector2((vp.x - c.size.x) * 0.5, 90)
-	c.modulate.a = 0.0
-	var tw := create_tween()
-	tw.tween_property(c, "modulate:a", 1.0, 0.2)
-	tw.parallel().tween_property(c, "position:y", 110.0, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.tween_interval(2.2)
-	tw.tween_property(c, "modulate:a", 0.0, 0.4)
-	tw.tween_callback(c.queue_free)
+	UI.toast(root_ui, txt)
 
 func _open_hall() -> void:
 	var v := _new_panel("Trophy Hall", 560)
