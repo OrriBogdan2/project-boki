@@ -11,11 +11,11 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 | Archetype | Weight | Weapons | Dash | Passive | RMB | E | R |
 |---|---|---|---|---|---|---|---|
 | **Thief** | light | Twin Blades | Vault | Marks | Bola | Shadow Knife (18s) | none (T is the Merge) |
-| **Archer** | light | Longbow | Grapple Arrow | Focus | Snare | Hail Wall (15s) | none (T is the Merge) |
+| **Pin** | light | Longbow | Spirit Walk | Focus | Snare | Hail Wall (9s) | none (T is the Merge) |
 | **Vireo** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (T is the Merge) |
 | **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (T is the Merge) |
 | **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (T is the Merge) |
-| **Bulwark** | heavy | Tower Shield & Mace | Whirl | Guard | Shield | Mending Ground (16s) | none (T is the Merge) |
+| **Bjorn** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (11s) | none (T is the Merge) |
 
 ### Thief (light)
 
@@ -29,19 +29,19 @@ _The cutpurse duelist. Sticks to one mark, flips past them, never lets go._
 - **E: Shadow Knife** (18s). Throw a dagger 12m that sticks in the first foe (8 damage, slowed 50% for 2.5s) or in a wall or the ground where it stops. Press E again to step to it at once; after 5s you step to it anyway.
 - Level-up order (bots too): RMB, Dash, E, RMB, Dash, R, RMB, E, R, Q
 
-### Archer (light)
+### Pin (light)
 
 _The warden of high ground. Climbs, reads the field, pins people to walls._
 
-- **Passive: Focus.** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a snare or Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next shot is fully drawn or aimed at once, with +20% range, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m. A knock heals 18.
-- **Shift: Grapple Arrow** (7s a charge). A line arrow at the cursor (9m). If it bites a wall, rock or ledge you zip to it and climb on top; if it bites nothing you hop 3.2m back. Works from a glide and cools it.
+- **Passive: Focus.** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a snare or Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next shot is Supercharged or aimed at once, with +20% range, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m. A knock heals 18.
+- **Shift: Spirit Walk** (6s a charge). A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster, 35% inside something. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.
 - **RMB: Snare** (9s, 2 charges):
   - tap: A snare arrow 11m: 8 damage and root 0.6 on a foe; on the ground it plants a Tripwire (root 1.2, reveal 3s).
   - hold: Heavy Shot: charge 0.5s -> full at 1.1s (rising creak, a ring, a ping at full): 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED).
   - in the air: Plunge: shoot straight down, push 8 around you, lift yourself 3m, cool the glider.
   - with E: With your Hail Wall falling the tap snare roots 1.0.
   - resource full: At 100 Focus the tap roots 1.0.
-- **E: Hail Wall** (15s). Lob a volley up to 9m: 0.35s later a wall of arrows falls along a 6m line across your aim for 4.5s. Foes inside take 5 every 0.5s, are slowed 35% and blighted (healing barely takes).
+- **E: Hail Wall** (9s). Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
 - Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, E
 
 ### Vireo (light)
@@ -82,18 +82,18 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
 - **E: Warchain** (13s). Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 - Level-up order (bots too): Dash, RMB, E, RMB, Dash, R, RMB, E, R, Q
 
-### Bulwark (heavy)
+### Bjorn (heavy)
 
-_The squad's shield. Holds the line, plants a banner, leaps in to save an ally at the edge._
+_The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot._
 
-- **Passive: Guard.** Damage your shield blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Bash is a Shield Slam (push 12, stun 0.6, spends 50). Crushed: a Bash, Shield Charge or full Crushing Blow that knocks a foe into a wall or another foe stuns it 0.5 (8 damage) and heals you 24.
-- **Shift: Whirl** (10s a charge). Whirl: a 3.6m spinning dash that knocks foes aside (6 damage, push 7). With the shield raised it's a Shield Charge: 4.2m behind the shield, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash that costs half a charge.
-- **RMB: Shield** (6s):
+- **Passive: Guard.** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Bash is a Shield Slam (push 12, stun 0.6, spends 50). Crushed: a Bash, Shield Charge or full Crushing Blow that knocks a foe into a wall or another foe stuns it 0.5 (8 damage) and heals you 24.
+- **Shift: 360 Smash** (9s a charge). 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge: 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
+- **RMB: Aegis** (6s):
   - tap: Bash: a 2.6m cone, 12 damage, push 9 (into a wall or a foe: Crushed). Letting go after a block bashes too.
-  - hold: Raise the shield: 160 HP, regenerating; it blocks from the front and you walk slower.
+  - hold: Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower.
   - in the air: Shield Surf: hold to block from the front while gliding.
   - resource full: Guard 50+: Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
-- **E: Mending Ground** (16s). Mark ground up to 7m away (or where your thrown mace lies): 1s later it bursts, healing allies inside 26; if your shield is raised it mends 60. Foes inside are slowed.
+- **E: Mending Ground** (11s). A green light column comes down for 1s on your planted hammer (on you with the hammer in hand), then it heals allies inside 26; if your aegis is raised it mends 60. Foes inside are slowed. A downed teammate inside is a third of the way back up.
 - Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, Q
 
 The old class dashes and weapon RMBs below are kept as data (the verbs return as gloves and other content); a hunter with no archetype still uses them.
@@ -143,7 +143,7 @@ Right click is your weapon's own verb. Hold RMB to see its telegraph (lane, land
 | Burst Rifle | medium | **Leash Bolt** | tether | 10s | A bolt that leashes whoever it hits to you for 3.5s. If they get 6m away it snaps: 22 damage, stunned 1s, dragged back. |
 | Greatsword | heavy | **Earthshatter** | leap slam | 10s | Leap up to 7m and smash down: everyone within 3m is thrown into the air; anyone already airborne is spiked (+60% damage, stunned 1s). |
 | Longsword | medium | **Riposte** | reflect | 8s | Raise your blade for 0.7s: shots hitting your front fly back at the shooter (+30%), and a sword or claw that hits it is parried and stunned 1s. |
-| Minigun | heavy | **Bulwark** | shield wall | 12s | Raise a 3m energy shield in front of you for 5s (160 HP). It turns with your aim and stops enemy shots; yours go through. |
+| Minigun | heavy | **Bracewall** | shield wall | 12s | Raise a 3m energy shield in front of you for 5s (160 HP). It turns with your aim and stops enemy shots; yours go through. |
 | Rifle | medium | **Rail Charge** | charge-shot | 8s | Hold to charge for up to 1s, let go to fire a rail that pierces everyone in its line: 10 to 34 damage, 9 to 17m, full charge stuns. |
 | Shotgun | heavy | **Breach** | knockback | 8s | A point-blank blast that throws everyone in front of you 6m back (into a wall: stunned) and kicks you backwards out of the fight. |
 | SMG | light | **Razor Disc** | boomerang | 7s | Throw a spinning disc 8m that cuts everything it passes, then flies back to you and cuts them again. |
@@ -254,7 +254,7 @@ Each kin has one E ability (`active`), an auto active it uses by itself (`auto`)
 Several verbs appear in more than one element, tuned to fit it:
 
 - **Hook / yank**: Hook Glove (neutral, drags to your feet or zips you to terrain), Stinger Hook (venom: poisons and blights), Leash Bolt (tether that snaps back).
-- **Wall**: Barrier Glove (stone, blocks shots and bodies both ways), Bulwark (energy, follows your aim, yours pass through), Mass Guard (gravity plate, raised for you when you're shot), Prism Wall (crystal, reflects shots).
+- **Wall**: Barrier Glove (stone, blocks shots and bodies both ways), Bracewall (energy, follows your aim, yours pass through), Mass Guard (gravity plate, raised for you when you're shot), Prism Wall (crystal, reflects shots).
 - **Reflect**: Mirror Glove (all-round bubble), Riposte (frontal, parries melee), Refraction (prism, auto when hurt), Prism Wall (reflecting wall).
 - **Slam / knock-up**: Earthshatter (hunter leap), Gravity Slam (kin meteor that pulls in first), Fissure Glove (a line eruption), Vortex Glove (pull then pop).
 - **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits), Moon Swap (lunar: trade places), Lunar dash rider.

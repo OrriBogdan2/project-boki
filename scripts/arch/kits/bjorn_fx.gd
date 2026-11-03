@@ -1,0 +1,407 @@
+class_name BjornFx
+extends Node3D
+## Bjorn's own effects, every one pooled (built once when the kit starts). The coloured ones are layered
+## (KitShaders): an alpha-blended body in his gold, orange and red with the glow on top, so they keep their
+## colour on bright grass.
+## - the thrown hammer (tumbling, a gold-orange glow and trail), planted head-down in the ground under an
+##   upright gold beacon with rising chevrons
+## - the held swing: the hammer whirled round over his shoulder in a wide circle with a gold-orange trail,
+##   a gold glint on its head from 0.6 s that grows, a big gold star flare at full charge
+## - the slam's flaming 180 degree crescent in front, the 360 Smash's red-orange-gold spiral ring
+## - the Bash's gold fan of force, the dash's gold chevron wake (his own after-image)
+## - his aegis: a solid pale-gold slab leaning out toward the camera, ribs, rim and his hammer sigil,
+##   the whole slab flashing on a block and cracking as it weakens (the verbs wall underneath keeps the
+##   blocking; its plain slab is hidden)
+## - Purify: the green light column coming down over the 1 s delay, then the rings
+
+const GOLD := Color("ffc94a")
+const EMBER := Color("ff8a2a")
+const AEGIS := Color("ffcb4f")
+const GREEN := Color("7dffb0")
+const STAR_GOLD := Color("ffd25a")
+## s the full-charge flare shows (the sheet: one bright frame)
+const FLARE_T := 0.15
+## s the slam's crescent stays at full strength, then s it burns away over
+const CRES_HOLD := 0.1
+const CRES_FADE := 0.2
+const SWIRL_T := 0.45
+const BASH_T := 0.2
+## the dash's after-image: a gold chevron wake left behind at chest height, how long each lasts (s), how
+## many are pooled and how often one is left (s)
+const WAKE_T := 0.28
+const WAKE_POOL := 6
+const WAKE_EVERY := 0.06
+## the Bash's gold fan: half its angle (rad) and its reach scale over the Bash's radius
+const BASH_HALF := 0.6
+## the whirled hammer: its size over the one in the hand, how far above the hand the circle runs (m), and
+## its turn rate (rad/s) from the start of the hold to full charge (2.5 to 4 turns a second)
+const ORBIT_SCALE := 1.6
+const ORBIT_RISE := 0.45
+const SPIN_SLOW := 15.7
+const SPIN_FAST := 25.1
+## the whirl's trail ribbon: inner and outer radius (m, before the orbit's scale), how far it reaches back
+## behind the head (rad; the arc runs from there to the head, so the streak's bright end rides the hammer),
+## its colour and its strength at the slowest turn rate
+const ORBIT_IN := 0.3
+const ORBIT_OUT := 1.35
+const ORBIT_ARC := 3.4
+const ORBIT_COL := Color(1.0, 0.56, 0.1)
+const ORBIT_POWER := 3.4
+## the planted hammer's size, and its lean off vertical (rad)
+const PLANT_SCALE := 1.9
+const PLANT_LEAN := 0.25
+## the aegis slab: radius (m), half its arc (rad), height (m) and how far its top leans out (m)
+const AEGIS_R := 1.6
+const AEGIS_HALF := 0.75
+const AEGIS_H := 1.3
+const AEGIS_LEAN := 1.1
+
+var h: Hunter
+var hammer: Node3D            # the thrown hammer
+var hammer_glow: MeshInstance3D
+var trail: MeshInstance3D
+var beacon: MeshInstance3D
+var glint: MeshInstance3D
+var flare: MeshInstance3D
+var flare_t := 0.0
+var orbit_trail: MeshInstance3D
+var crescent: MeshInstance3D
+var cres_t := 0.0
+var swirl: MeshInstance3D
+var swirl_t := 0.0
+var bash_fan: MeshInstance3D
+var bash_t := 0.0
+var aegis: MeshInstance3D
+var aegis_hit := 0.0
+var wakes: Array[MeshInstance3D] = []
+var wake_life: Array[float] = []
+var wake_next := 0
+var wake_at := -1.0
+var column: MeshInstance3D
+var disc: MeshInstance3D
+var disc_t := 0.0
+var disc_r := 1.0
+var spin := 0.0               # the whirled hammer's angle (rad) and its turn rate
+var spin_v := 0.0
+var spin_on := false
+var glint_k := -1.0            # the glint's size 0..1 while it shows (-1: not yet)
+var fx_clock := 0.0            # the match time effects last advanced to
+
+func _init(hunter: Hunter) -> void:
+	h = hunter
+	top_level = true
+	name = "BjornFx"
+
+func _ready() -> void:
+	hammer = Node3D.new()
+	hammer.top_level = true
+	hammer.visible = false
+	add_child(hammer)
+	PinBjornWeapons.hammer(hammer, 1.25)
+	hammer_glow = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", Color(GOLD, 0.9), true))
+	trail = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", Color(1.0, 0.62, 0.2), true))
+	beacon = KitMeshes.inst(self, KitMeshes.pillar(0.22, 0.4, 5.0), KitShaders.mat("beam", GOLD, true))
+	glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", STAR_GOLD, true))
+	flare = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", STAR_GOLD, true))
+	for star in [hammer_glow, glint, flare]:
+		KitShaders.param(star, "white", 0.25)
+	var orbit_mesh := KitMeshes.band(ORBIT_IN, ORBIT_OUT, ORBIT_ARC, 0.0, 36)
+	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", ORBIT_COL, true))
+	var cres_mesh := KitMeshes.band(1.1, 2.9, -PI * 0.5, PI * 0.5, 40)
+	crescent = KitMeshes.inst(self, cres_mesh, KitShaders.mat("crescent", Color(1.0, 0.6, 0.12), true))
+	var swirl_mesh := KitMeshes.band(1.0, 2.4, 0.0, TAU, 48)
+	swirl = KitMeshes.inst(self, swirl_mesh, KitShaders.mat("swirl", Color("e8301a"), true))
+	KitShaders.param(swirl, "color2", Color("ffc93a"))
+	KitShaders.param(swirl, "twist", 2.2)
+	KitShaders.param(swirl, "spin", 5.0)
+	var fan_mesh := KitMeshes.band(0.35, 1.0, -BASH_HALF, BASH_HALF, 16)
+	bash_fan = KitMeshes.inst(self, fan_mesh, KitShaders.mat("swirl", GOLD, true))
+	KitShaders.param(bash_fan, "color2", Color("fff0b0"))
+	KitShaders.param(bash_fan, "twist", 0.0)
+	KitShaders.param(bash_fan, "spin", 0.0)
+	var aegis_mesh := KitMeshes.wall(AEGIS_R, -AEGIS_HALF, AEGIS_HALF, AEGIS_H, 28, AEGIS_LEAN)
+	aegis = KitMeshes.inst(self, aegis_mesh, KitShaders.mat("aegis", AEGIS, true))
+	var wake_mesh := KitMeshes.band(0.35, 0.8, -1.3, 1.3, 14)
+	for i in WAKE_POOL:
+		var wake := KitMeshes.inst(self, wake_mesh, KitShaders.mat("swirl", EMBER, true))
+		KitShaders.param(wake, "color2", GOLD)
+		KitShaders.param(wake, "twist", 0.0)
+		wakes.append(wake)
+		wake_life.append(0.0)
+	column = KitMeshes.inst(self, KitMeshes.pillar(0.9, 1.4, 9.0), KitShaders.mat("beam", GREEN))
+	column.material_override.set_shader_parameter("speed", -1.2)
+	disc = KitMeshes.inst(self, KitMeshes.band(0.2, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GREEN))
+	disc.material_override.set_shader_parameter("color2", Color("e8fff0"))
+
+# ------------------------------------------------------------------ the thrown hammer
+## In flight at `p` along `dir`, tumbling at `spin_rate` rad/s.
+func hammer_fly(p: Vector3, dir: Vector2, spin_rate: float) -> void:
+	hammer.visible = true
+	hammer.global_position = p
+	hammer.rotation = Vector3(Time.get_ticks_msec() * 0.001 * spin_rate, atan2(-dir.x, -dir.y), 0.0)
+	hammer.scale = Vector3.ONE
+	beacon.visible = false
+	hammer_glow.visible = true
+	hammer_glow.global_position = p
+	hammer_glow.scale = Vector3.ONE * 1.1
+	trail.visible = true
+	trail.global_position = p - Vector3(dir.x, 0, dir.y) * 1.0
+	trail.rotation = Vector3(-PI * 0.5, atan2(-dir.x, -dir.y) + PI * 0.5, 0)
+	trail.scale = Vector3(2.0, 0.45, 1.0)
+
+## Planted: standing head-down in the ground, leaning back along its flight, the beacon over it.
+func hammer_plant(p: Vector3, yaw: float) -> void:
+	hammer.visible = true
+	hammer.scale = Vector3.ONE * PLANT_SCALE / 1.25
+	# the head points down (-Z turned to -Y), leaning PLANT_LEAN off vertical
+	hammer.rotation = Vector3(-PI * 0.5 - PLANT_LEAN, yaw, 0.0)
+	var head_drop := 0.62 * PLANT_SCALE * cos(PLANT_LEAN)
+	hammer.global_position = p + Vector3(0, head_drop - 0.2, 0)
+	hammer_glow.visible = false
+	trail.visible = false
+	beacon.visible = true
+	beacon.global_position = p
+
+func hammer_hide() -> void:
+	hammer.visible = false
+	hammer_glow.visible = false
+	trail.visible = false
+	beacon.visible = false
+
+# ------------------------------------------------------------------ the held swing
+## While LMB is held (k = the charge 0..1): the hammer whirls round faster as it charges; the glint on its
+## head shows from 0.6 s and grows.
+func hold(held_t: float, k: float) -> void:
+	spin_on = true
+	spin_v = lerpf(SPIN_SLOW, SPIN_FAST, k)
+	glint_k = k if held_t >= 0.6 else -1.0
+	glint.visible = glint_k >= 0.0
+
+## Full charge: the big gold star on the hammer head.
+func full_flare() -> void:
+	flare_t = FLARE_T
+
+func hold_end() -> void:
+	spin_on = false
+	glint_k = -1.0
+	glint.visible = false
+	orbit_trail.visible = false
+
+## The hand's hammer pivot on the hunter's weapon model (PinBjornWeapons builds it), or null.
+func _pivot() -> Node3D:
+	if h.model == null:
+		return null
+	var gun := h.model.find_child("Gun", true, false)
+	if gun == null:
+		return null
+	for c in gun.get_children():
+		if c.has_meta("hammer_pivot") and not c.is_queued_for_deletion():
+			return c as Node3D
+	return null
+
+func _head_world() -> Vector3:
+	var pv := _pivot()
+	if pv == null or not pv.is_inside_tree():
+		return Vector3.INF
+	return pv.to_global(Vector3(0, 0, -0.62))
+
+## Shows or hides the hammer in his hand (it's out while thrown).
+func in_hand(on: bool) -> void:
+	var pv := _pivot()
+	if pv:
+		pv.visible = on
+
+## The whirl: the hammer swings round flat over his shoulder, its head on a wide circle, the trail ribbon
+## following the head.
+func _whirl(pv: Node3D) -> void:
+	var gun := pv.get_parent() as Node3D
+	var orbit_size := gun.global_basis.get_scale().x * ORBIT_SCALE
+	var centre := gun.global_position + Vector3(0, ORBIT_RISE, 0)
+	var turn := Basis(Vector3.UP, spin)
+	pv.global_transform = Transform3D(turn * Basis(Vector3.RIGHT, 0.12).scaled(Vector3.ONE * orbit_size), centre)
+	orbit_trail.visible = true
+	orbit_trail.global_position = centre
+	orbit_trail.rotation = Vector3(0, spin, 0)
+	orbit_trail.scale = Vector3.ONE * orbit_size / ORBIT_SCALE
+	KitShaders.param(orbit_trail, "power", ORBIT_POWER * clampf(spin_v / SPIN_SLOW, 1.0, 1.4))
+	if glint.visible:
+		glint.global_position = pv.to_global(Vector3(0, 0, -0.62))
+		var pulse := 0.85 + 0.15 * sin(Time.get_ticks_msec() * 0.025)
+		glint.scale = Vector3.ONE * lerpf(0.55, 1.2, glint_k) * pulse
+		KitShaders.param(glint, "power", lerpf(0.8, 1.5, glint_k))
+
+# ------------------------------------------------------------------ slam crescent and smash swirl
+## The Crushing Blow's crescent: 180 degrees in front of `at` toward `dir`, bigger with the charge k.
+func slam(at: Vector3, dir: Vector2, k: float) -> void:
+	crescent.visible = true
+	crescent.global_position = at + Vector3(0, 0.45, 0)
+	crescent.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
+	crescent.scale = Vector3.ONE * lerpf(0.85, 1.0, k)
+	cres_t = CRES_HOLD + CRES_FADE
+
+func smash_ring(at: Vector3) -> void:
+	swirl.visible = true
+	swirl.global_position = at + Vector3(0, 0.3, 0)
+	swirl_t = SWIRL_T
+
+## The Bash (or a Shield Slam): a gold fan of force in front of `at` toward `dir`, out to `reach`, and a
+## flash on the shield; the Shield Slam's burns hotter.
+func bash(at: Vector3, dir: Vector2, reach: float, slam_hit: bool) -> void:
+	bash_fan.visible = true
+	bash_fan.global_position = at + Vector3(0, 0.25, 0)
+	bash_fan.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
+	bash_fan.scale = Vector3.ONE * reach
+	KitShaders.param(bash_fan, "color", EMBER if slam_hit else GOLD)
+	bash_t = BASH_T
+	var shield_at := at + Vector3(dir.x * 0.9, 1.0, dir.y * 0.9)
+	h.m.fx.flash(shield_at, EMBER if slam_hit else GOLD, 1.1, 0.07)
+	h.m.fx.spark(shield_at, Vector3(dir.x, 0.1, dir.y), Color("ffd25a"), 10, 10.0, 40.0, 0.2, 6.0, 1.1)
+
+## The dash's after-image: a gold chevron wake at his chest, pointing the way he faces (pooled, one every
+## WAKE_EVERY s).
+func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
+	var now := float(h.m.time)
+	if now - wake_at < WAKE_EVERY and now >= wake_at:
+		return
+	wake_at = now
+	var wake := wakes[wake_next]
+	wake_life[wake_next] = WAKE_T
+	wake_next = (wake_next + 1) % WAKE_POOL
+	wake.visible = true
+	wake.global_position = at + Vector3(0, 1.0 * body_scale, 0)
+	wake.rotation = Vector3(0, yaw, 0)
+	wake.scale = Vector3.ONE * body_scale
+
+# ------------------------------------------------------------------ the aegis
+## Follows the raised shield (the verbs wall dict): its node is hidden, ours drawn in its place.
+func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
+	var nd: Node3D = w.get("node")
+	if nd and is_instance_valid(nd):
+		nd.visible = false
+	var a: Vector2 = w["a"]
+	var b: Vector2 = w["b"]
+	var mid := (a + b) * 0.5
+	var dir := Vector2(mid.x - h.pos.x, mid.y - h.pos.z).normalized()
+	aegis.visible = true
+	# the curve's centre sits behind the slab's midpoint so its apex is the wall line
+	var c := Vector2(mid.x, mid.y) - dir * AEGIS_R
+	aegis.global_position = Vector3(c.x, float(w["y"]) + 0.15, c.y)
+	aegis.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
+	KitShaders.param(aegis, "hurt", hurt)
+	KitShaders.param(aegis, "armed", 1.0 if armed else 0.0)
+
+func aegis_hide() -> void:
+	aegis.visible = false
+
+## A block: the whole slab flashes and gold sparks fly off its face at `at`.
+func aegis_block(at: Vector3) -> void:
+	aegis_hit = 1.0
+	var out := Vector3(at.x - h.pos.x, 0.15, at.z - h.pos.z).normalized()
+	h.m.fx.spark(at, out, Color("ffd25a"), 14, 9.0, 70.0, 0.25, 10.0, 1.2)
+	h.m.fx.flash(at, Color("ffc94a"), 0.8, 0.06)
+
+func aegis_break(at: Vector3) -> void:
+	aegis.visible = false
+	h.m.fx.burst(at + Vector3(0, 1.0, 0), GOLD, 30, 9.0, 0.6, 12.0, 1.5)
+	h.m.fx.spark(at + Vector3(0, 1.0, 0), Vector3.UP, Color("ffd25a"), 20, 11.0, 160.0, 0.4, 14.0, 1.4)
+	h.m.fx.ring(at, 2.2, EMBER, 0.3)
+
+# ------------------------------------------------------------------ Purify
+## The column coming down over the delay (u 0 -> 1), then the disc's rings.
+func purify(at: Vector3, r: float, u: float) -> void:
+	column.visible = u < 1.0
+	if column.visible:
+		var g := AimMode.ground(h.m, at)
+		column.global_position = g + Vector3(0, lerpf(9.0, 0.0, minf(1.0, u * 1.6)), 0)
+		column.scale = Vector3(r / 1.4, 1.0, r / 1.4) * lerpf(0.5, 1.0, u)
+		column.material_override.set_shader_parameter("power", 0.4 + 0.6 * u)
+
+func purify_burst(at: Vector3, r: float) -> void:
+	column.visible = false
+	disc.visible = true
+	disc.global_position = AimMode.ground(h.m, at) + Vector3(0, 0.07, 0)
+	disc_r = r
+	disc.scale = Vector3.ONE * r * 0.4
+	disc_t = 0.9
+
+func _process(_delta: float) -> void:
+	if not is_instance_valid(h) or h.m == null:
+		return
+	# effects run on match time (a slow frame or a screenshot never skips them), long steps clamped
+	var delta := clampf(float(h.m.time) - fx_clock, 0.0, 1.0 / 30.0)
+	fx_clock = float(h.m.time)
+	_tick_spin(delta)
+	_tick_flare(delta)
+	_tick_slam(delta)
+	if aegis_hit > 0.0:
+		aegis_hit = maxf(0.0, aegis_hit - delta * 5.0)
+	KitShaders.param(aegis, "hit", aegis_hit)
+	if disc_t > 0.0:
+		disc_t -= delta
+		var u2 := 1.0 - disc_t / 0.9
+		disc.scale = Vector3.ONE * disc_r * lerpf(0.4, 1.0, sqrt(u2))
+		disc.material_override.set_shader_parameter("life", 1.0 - u2)
+		disc.visible = disc_t > 0.0
+	if beacon.visible:
+		_stand_beacon()
+	_tick_wakes(delta)
+
+func _tick_wakes(delta: float) -> void:
+	for i in WAKE_POOL:
+		if wake_life[i] <= 0.0:
+			continue
+		wake_life[i] -= delta
+		var life := clampf(wake_life[i] / WAKE_T, 0.0, 1.0)
+		KitShaders.param(wakes[i], "life", life)
+		wakes[i].scale = Vector3.ONE * wakes[i].scale.x * (1.0 + delta * 1.5)
+		wakes[i].visible = wake_life[i] > 0.0
+
+func _tick_spin(delta: float) -> void:
+	var pv := _pivot()
+	if pv == null:
+		return
+	if spin_on:
+		spin += spin_v * delta
+		_whirl(pv)
+	elif pv.transform != Transform3D.IDENTITY:
+		spin = 0.0
+		pv.transform = Transform3D.IDENTITY
+
+func _tick_flare(delta: float) -> void:
+	if flare_t <= 0.0:
+		flare.visible = false
+		return
+	flare_t -= delta
+	var head := _head_world()
+	flare.visible = head != Vector3.INF and flare_t > 0.0
+	if flare.visible:
+		var u := 1.0 - flare_t / FLARE_T
+		flare.global_position = head + Vector3(0, 0.15, 0)
+		flare.scale = Vector3.ONE * lerpf(1.6, 2.3, sqrt(u))
+		KitShaders.param(flare, "ring", 1.0)
+		KitShaders.param(flare, "power", 1.8 * (1.0 - u * 0.6))
+
+func _tick_slam(delta: float) -> void:
+	if cres_t > 0.0:
+		cres_t -= delta
+		KitShaders.param(crescent, "life", clampf(cres_t / CRES_FADE, 0.0, 1.0))
+		crescent.visible = cres_t > 0.0
+	if bash_t > 0.0:
+		bash_t -= delta
+		KitShaders.param(bash_fan, "life", clampf(bash_t / BASH_T * 1.5, 0.0, 1.0))
+		bash_fan.visible = bash_t > 0.0
+	if swirl_t > 0.0:
+		swirl_t -= delta
+		var life := clampf(swirl_t / SWIRL_T, 0.0, 1.0)
+		swirl.rotation.y += delta * 12.0
+		KitShaders.param(swirl, "life", minf(1.0, life * 1.6))
+		swirl.scale = Vector3.ONE * lerpf(1.12, 0.88, life)
+		swirl.visible = swirl_t > 0.0
+
+## The beacon stands along the camera's up so it reads as a vertical ray on screen wherever it is, and
+## pulses.
+func _stand_beacon() -> void:
+	var cam := get_viewport().get_camera_3d()
+	if cam:
+		beacon.global_basis = Basis(Quaternion(Vector3.UP, cam.global_basis.y))
+	KitShaders.param(beacon, "power", 0.75 + 0.25 * sin(Time.get_ticks_msec() * 0.006))

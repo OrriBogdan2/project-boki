@@ -15,7 +15,7 @@ var d: Dictionary = {}
 var res := 0.0                 # the passive's resource (Marks live on targets instead)
 var res_wait := 0.0            # seconds left before it decays out of a fight
 var full_was := false
-var cd := {"rmb": 0.0, "e": 0.0, "r": 0.0}
+var cd := {"rmb": 0.0, "e": 0.0, "r": 0.0, "x": 0.0}
 var ch_rmb := 1.0              # RMB charges
 var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
@@ -62,6 +62,7 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 func rmb_def() -> Dictionary: return d.get("rmb", {})
 func e_def() -> Dictionary: return d.get("e", {})
 func r_def() -> Dictionary: return d.get("r", {})
+func x_def() -> Dictionary: return d.get("x", {})          # the hero ultimate on X (HeroUlt)
 func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
@@ -106,6 +107,10 @@ func cast_e() -> bool: return false
 func e_recast() -> bool: return false                # E pressed while it's up (Sigil detonation)
 func cast_r() -> bool: return false
 func r_recast() -> bool: return false                # R pressed while it runs (Last Round release)
+## X pressed while the hero ultimate runs (HeroUlt.press; true = handled, e.g. an early landing).
+func ult_recast() -> bool: return false
+## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
+func ult_running() -> bool: return false
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
@@ -113,6 +118,7 @@ func on_block(_dmg: float, _by) -> void: pass
 func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func move_k() -> float: return 1.0
+func draw_rate() -> float: return 1.0               # a bow's draw speed (Pin's quick draw after a perfect release)
 func fire_ok() -> bool: return true
 ## The attack key, if this kit runs the weapon's attack itself (true = handled; Hunter.trigger stops).
 func lmb_override(_held: bool, _dt: float) -> bool: return false
@@ -706,6 +712,8 @@ func slot_info(slot: String) -> Dictionary:
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
 				"cd": float(cd["r"]), "cd_max": r_cooldown(), "charges": 1 if float(cd["r"]) <= 0.0 else 0, "max_charges": 1, "verb": "r",
 				"ready": float(cd["r"]) <= 0.0 and int(h.slot_lv.get("ult", 0)) > 0, "bonded": bonded_glow, "up": r_t, "fuse": float(fuse.get("t", 0.0))}, true)
+		"x":
+			return HeroUlt.slot_info(self)
 		"dash", "dodge":
 			var sd := dash_def()
 			var dmax := h.max_dashes()
@@ -977,6 +985,30 @@ func charge_now() -> Array:
 func charge_k() -> float:
 	return float(chg.get("k", -1.0)) if not chg.is_empty() else -1.0
 
+## The colour of the shared charge tell (the ring at the feet, the ticks, the full flash); kits with their
+## own palette override it.
+func charge_color() -> Color:
+	return Arch.color(id)
+
+## Called on each after-image tick of a dash: a kit with its own after-image draws it and returns true;
+## false leaves the shared one.
+func dash_afterimage() -> bool:
+	return false
+
+## Whether the shared charge tell shows its glowing orb at the hand; kits that draw their own hand tell
+## turn it off.
+func charge_orb() -> bool:
+	return true
+
+func _charge_ball(col: Color) -> Node3D:
+	var g := own_node()
+	var ball := MeshInstance3D.new()
+	ball.mesh = Models.sphere(0.2, 10)
+	ball.material_override = Models.glow_mat(Color(col.lightened(0.2), 1.0))
+	ball.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	g.add_child(ball)
+	return g
+
 func _tick_charge(dt: float) -> void:
 	var cn := charge_now()
 	var src := String(cn[0]); var k := float(cn[1])
@@ -984,7 +1016,7 @@ func _tick_charge(dt: float) -> void:
 		if not chg.is_empty():
 			_charge_release()
 		return
-	var col := Arch.color(id)
+	var col := charge_color()
 	if chg.is_empty() or String(chg["src"]) != src:
 		if not chg.is_empty(): _charge_release()
 		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
@@ -993,13 +1025,8 @@ func _tick_charge(dt: float) -> void:
 		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
 		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
 		chg["ring"] = ring
-		var g := own_node()
-		var ball := MeshInstance3D.new()
-		ball.mesh = Models.sphere(0.2, 10)
-		ball.material_override = Models.glow_mat(Color(col.lightened(0.2), 1.0))
-		ball.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		g.add_child(ball)
-		chg["glow"] = g
+		if charge_orb():
+			chg["glow"] = _charge_ball(col)
 		net_ring(h.pos, 0.8, rc)            # remote players: "they're winding something up"
 	chg["k"] = k
 	var ring2: Node3D = chg.get("ring")
@@ -1055,7 +1082,7 @@ func _charge_release() -> void:
 		Oomph.punch_dir(m, h.aim_dir(), 0.06 + 0.26 * k)
 		if full and m.cam: m.cam.add_trauma(0.12)
 	if k > 0.5:
-		m.fx.burst(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), Arch.color(id), int(6 + 14 * k), 3.0 + 5.0 * k, 0.3, 0.0, 1.0, Vector3(h.aim_dir().x, 0.1, h.aim_dir().y), 35.0)
+		m.fx.burst(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), charge_color(), int(6 + 14 * k), 3.0 + 5.0 * k, 0.3, 0.0, 1.0, Vector3(h.aim_dir().x, 0.1, h.aim_dir().y), 35.0)
 
 ## Terrain (a wall, a rock, a ledge face) within `reach` behind `t` along `dir`.
 func terrain_behind(t: Ent, dir: Vector2, reach: float) -> bool:

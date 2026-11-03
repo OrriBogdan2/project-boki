@@ -15,7 +15,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 | Greatsword | Juggernaut | heavy | 11 | 0.5s | 1 | 0.1s | 3.4m | A slow, huge 3-hit combo, strongest on the tip. Hold 1s for a slam that stuns and throws people far. |
 | Hoar Fan | Tamsin | light | 3.4 | 0.5s | 99 | 1s | 10m | A folding fan of ice slats. Hold to throw a flurry of 4 homing shards, then 3 heavy ones that fly faster and further. Eight shards on one foe Splinter them. Double damage during a Rinkrun. |
 | Lantern Crook | Linnet | medium | 8 | 0.4s | 18 | 1.3s | 9m | A shepherd's crook with a lantern on its hook: it flicks an ember every 0.4s, 9m. Embers Kindle what they hit (up to 5); hold fire for a second and the next one flies 40% further. |
-| Longbow | Archer | light | 30 | 0.35s | 1 | 0.25s | 12m | Hold to draw, let go to loose. 0.4s: 30 damage, 12m. 0.9s: 60 damage, 15m. Let go early for 15. You walk slower while drawing. |
+| Longbow | Pin | light | 30 | 0.35s | 1 | 0.25s | 12m | Hold to draw, let go to loose. 0.6s Empowered: 30 damage, lands at the cursor (up to 12m). 1.15s Supercharged: 60 damage, flies past the cursor to 16m. Let go right as a stage comes up and your next draw is 60% faster; hold 0.5s past Supercharged and the arrow is overdrawn (half damage). Let go early for 15 at the cursor. You walk slower while drawing. |
 | Longsword | none | medium | 8.2 | 0.36s | 1 | 0.1s | 2.7m | A wide 3-hit combo, stronger on the tip of the blade. Hold 0.8s for a long-reaching thrust. |
 | Minigun | none | heavy | 3.8 | 0.1s | 90 | 3s | 10m | Spins up for 0.7s, then fires a stream that tightens the longer you hold it. Slows you while firing. |
 | Quill Rifle | Marlowe | medium | 6 | 0.12s | 24 | 1.7s | 9.5m | A steady auto rifle fed from a drum. Long strings of fire lose half their punch after ten rounds, and Rattled foes take more. |
@@ -26,7 +26,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 | Sniper | none | light | 36 | 1.5s | 5 | 2.2s | 16m | Winds up for 0.6s with a laser showing, then hits hard. Weak point-blank, full damage from half range. |
 | Spellstaff | none | medium | 9.5 | 0.55s | 12 | 1.4s | 10m | An orb bolt every 0.45s, 10m. Every 4th bolt hits 50% harder. |
 | Tether Lantern | Ostra | medium | 9 | 0.6s | 12 | 1.5s | 14m | A slow drifting orb every 0.6s, 14m. Pause for 1.4s and the next one is Settled: harder, faster and it slows. |
-| Tower Shield & Mace | Bulwark | heavy | 11 | 0.55s | 1 | 0.1s | 2.4m | Tap to throw the mace: it passes through foes, lies where it lands (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to wind up a Crushing Blow (full at 1.25s: 34 damage, a big knock, stun 0.4) that carries you forward. Right click raises the tower shield. |
+| War Hammer & Aegis | Bjorn | heavy | 11 | 0.55s | 1 | 0.1s | 2.4m | Tap to throw the hammer: it flies to the cursor (up to 9m), passes through foes, stays planted under a gold beacon (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to spin it up into a Crushing Blow (full at 1.25s: 66 damage, a big knock, stun 0.4): a flaming crescent in front that carries you forward. Right click raises the aegis. |
 | Twin Blades | Thief | light | 7 | 0.3s | 1 | 0.1s | 2.3m | Tap for a quick 3-hit combo. Hold 0.5s for a spinning double slash all around you. Right click to knife and step behind the target. |
 
 ## Weapon upgrades
@@ -112,7 +112,7 @@ Every player and bot now plays a class, whose kit owns Shift and right click. A 
 | Weapon | Right click | Cooldown | What it does |
 |---|---|---|---|
 | Shotgun | Breach | 8s | A point-blank blast that throws everyone in front of you 6m back (into a wall: stunned) and kicks you backwards out of the fight. |
-| Minigun | Bulwark | 12s | Raise a 3m energy shield in front of you for 5s (160 HP). It turns with your aim and stops enemy shots; yours go through. |
+| Minigun | Bracewall | 12s | Raise a 3m energy shield in front of you for 5s (160 HP). It turns with your aim and stops enemy shots; yours go through. |
 | Greatsword | Earthshatter | 10s | Leap up to 7m and smash down: everyone within 3m is thrown into the air; anyone already airborne is spiked (+60% damage, stunned 1s). |
 | Burst Rifle | Leash Bolt | 10s | A bolt that leashes whoever it hits to you for 3.5s. If they get 6m away it snaps: 22 damage, stunned 1s, dragged back. |
 | Rifle | Rail Charge | 8s | Hold to charge for up to 1s, let go to fire a rail that pierces everyone in its line: 10 to 34 damage, 9 to 17m, full charge stuns. |

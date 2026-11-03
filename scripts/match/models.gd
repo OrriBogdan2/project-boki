@@ -681,7 +681,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var rig := Node3D.new(); rig.name = "Rig"; root.add_child(rig)
 	var legs := Node3D.new(); legs.name = "Legs"; rig.add_child(legs)
 	var bw: float = [0.88, 1.0, 1.15][clampi(int(lk["body"]), 0, 2)]
-	bw *= float(CLASS_LOOK.get(cls, {}).get("build", 1.0))
+	bw *= float(CLASS_LOOK.get(cls, {}).get("build", 1.0)) * float(Arch.body(arch).get("build", 1.0))
 	var boot_k := float(CLASS_LOOK.get(cls, {}).get("boots", 1.0))
 	var gender := int(lk["gender"])
 	var fem := gender == 0
@@ -876,7 +876,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	root.set_meta("wid", weapon)
 	HunterAnim.rest_pose(root)       # hands on the weapon even where nothing animates it (portraits, galleries)
 	var rs := float(race["scale"])
-	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0))
+	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0)) * float(Arch.body(arch).get("size", 1.0))
 	root.scale = Vector3.ONE * float(Data.CLASSES[cls]["scale"]) * rs * ck
 	ring.scale = Vector3.ONE / (rs * ck)       # the ring under your feet shows the real hitbox, whatever your size
 	return root
@@ -1650,17 +1650,8 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(spin, cyl(0.12, 0.12, 0.04, 16), m_gun, Vector3(0, 0, -0.24), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			merge_static(spin)
 			part(gun, box(0.08, 0.18, 0.14), m_dark, Vector3(0, -0.17, 0.0))
-		"longbow":
-			# the Archer's longbow: two recurved limbs held upright, a taut string, a leather grip
-			var wood := toon(Color("7a5236"))
-			var lpts := [Vector3(0, -0.46, 0.1), Vector3(0, -0.3, 0.0), Vector3(0, -0.12, -0.05), Vector3(0, 0.0, -0.06), Vector3(0, 0.12, -0.05), Vector3(0, 0.3, 0.0), Vector3(0, 0.46, 0.1)]
-			part(gun, HeroKit.loft("longbow", lpts, [Vector2(0.012, 0.02), Vector2(0.018, 0.028), Vector2(0.022, 0.032), Vector2(0.026, 0.034), Vector2(0.022, 0.032), Vector2(0.018, 0.028), Vector2(0.012, 0.02)], 8, Vector3.FORWARD, 1.0), wood, Vector3(0, 0.0, -0.12))
-			part(gun, box(0.006, 0.9, 0.006), toon(Color("f3eee2")), Vector3(0, 0.0, -0.02))
-			part(gun, cyl(0.032, 0.032, 0.12, 10), m_dark, Vector3(0, 0, -0.18))
-			for sy in [-0.46, 0.46]:
-				part(gun, sphere(0.022, 8), m_acc, Vector3(0, sy, -0.02))
-			part(gun, box(0.012, 0.012, 0.5), toon(Color("d8c9a8")), Vector3(0.02, 0.0, -0.3))
-			part(gun, box(0.02, 0.04, 0.05), glow.call(Color("d8ffb0")), Vector3(0.02, 0.0, -0.56))
+		"longbow", "tower_shield":
+			PinBjornWeapons.build(gun, weapon, m_dark, m_acc)      # Pin's recurve, Bjorn's war hammer and aegis
 		"coilcaster":
 			# Vireo's forearm coil: a copper tube wound in rings with a glowing mouth and a bracer grip
 			var cop := shiny(Color("c8793c"), 0.7)
@@ -1692,21 +1683,6 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			var rr := TorusMesh.new(); rr.inner_radius = 0.07; rr.outer_radius = 0.095; rr.rings = 20; rr.ring_segments = 8
 			part(gun, rr, m_acc, Vector3(0, 0, -0.98), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			part(gun, sphere(0.06, 12), glow.call(Color("9ad8ff")), Vector3(0, 0, -0.98))
-		"tower_shield":
-			# the Bulwark's flanged mace, with the tower shield carried on the off side
-			var steel2 := shiny(Color("a8b2c4"), 0.5)
-			part(gun, cyl(0.026, 0.03, 0.5, 10), m_dark, Vector3(0, 0, -0.18), Vector3.ONE, Vector3(PI / 2, 0, 0))
-			part(gun, sphere(0.085, 12), steel2, Vector3(0, 0, -0.46))
-			for k in 4:
-				var fa := TAU * k / 4.0
-				part(gun, box(0.02, 0.1, 0.12), steel2, Vector3(cos(fa) * 0.08, sin(fa) * 0.08, -0.46), Vector3.ONE, Vector3(0, 0, fa))
-			part(gun, box(0.05, 0.05, 0.06), m_acc, Vector3(0, 0, 0.08))
-			var sh := Node3D.new(); sh.name = "Shield"; sh.position = Vector3(-0.28, -0.05, -0.3); gun.add_child(sh)
-			part(sh, box(0.42, 0.62, 0.05), m_acc, Vector3.ZERO)
-			part(sh, box(0.05, 0.66, 0.06), steel2, Vector3(0.2, 0, 0))
-			part(sh, box(0.05, 0.66, 0.06), steel2, Vector3(-0.2, 0, 0))
-			part(sh, sphere(0.06, 10), steel2, Vector3(0, 0.05, -0.04))
-			merge_static(sh)
 		"thumper":
 			part(gun, cyl(0.12, 0.12, 0.62, 14), m_gun, Vector3(0, 0, -0.2), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			part(gun, cyl(0.15, 0.14, 0.1, 14), m_acc, Vector3(0, 0, -0.52), Vector3.ONE, Vector3(PI / 2, 0, 0))

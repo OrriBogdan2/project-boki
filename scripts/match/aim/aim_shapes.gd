@@ -79,14 +79,35 @@ static func _dotted(g: AimGeo, e: Dictionary) -> void:
 static func _vee(g: AimGeo, e: Dictionary) -> void:
 	var o: Vector2 = e["from"]; var u: Vector2 = e["dir"]
 	var l := float(e["len"]); var half := float(e["half"])
+	var fletch := float(e["fletch"])
 	if e["merged"]:
 		g.ribbon(o, o + u * l, _lw(e) * 1.6, _hot(e, 0.9), _hot(e, 0.55))
+		_barbs(g, o, o + u * l, fletch * 1.3, _lw(e), _hot(e, 0.8))
 	else:
 		for s in [-1.0, 1.0]:
 			g.ribbon(o, o + u.rotated(half * s) * l, _lw(e), _rim(e), _rim(e, 0.45))
+			_barbs(g, o, o + u.rotated(half * s) * l, fletch, _lw(e) * 0.8, _rim(e, 0.7))
 	var st := float(e["glint"])
-	if st >= 0.0:
+	if st >= 0.0 and fletch > 0.0:
+		g.leaf(o + u * l * st, u, 0.42 + 0.14 * float(e["hot"]), _hot(e))
+	elif st >= 0.0:
 		g.star(o + u * l * st, 0.32 + 0.12 * float(e["hot"]), _hot(e), PI * 0.25)
+
+## Feather barbs along a line from p0 to p1, swept back toward p0, biggest near p0 (barb_len m at the
+## start; 0 draws none).
+static func _barbs(g: AimGeo, p0: Vector2, p1: Vector2, barb_len: float, w: float, col: Color) -> void:
+	if barb_len <= 0.0:
+		return
+	var d := p1 - p0
+	var l := d.length()
+	if l < 0.6:
+		return
+	var u := d / l
+	var at := 0.45
+	while at < l - 0.2:
+		var k := at / l
+		g.chevron(p0 + u * at, u, barb_len * lerpf(1.0, 0.45, k), w * 0.8, Color(col, col.a * lerpf(1.0, 0.55, k)))
+		at += lerpf(0.42, 0.7, k)
 
 static func _cone(g: AimGeo, e: Dictionary) -> void:
 	var o: Vector2 = e["from"]; var u: Vector2 = e["dir"]
@@ -180,6 +201,7 @@ static func _line(g: AimGeo, e: Dictionary) -> void:
 	var w := float(e["lw"]) * (0.8 + 0.8 * float(e["hot"]))
 	var c := _hot(e, 0.75) if float(e["hot"]) > 0.0 else _rim(e, 0.85)
 	g.ribbon(o, t, w, Color(c, c.a * 0.55), c)
+	_barbs(g, o, t, float(e["fletch"]), w, c)
 	if e["arrow"]:
 		g.arrow(t, d.normalized(), 0.2, w * 1.2, c)
 

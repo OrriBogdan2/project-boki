@@ -247,6 +247,7 @@ var ak: ArchKit = null        # the archetype's kit at run time
 var shot_range_k := 1.0       # the next shot's range (a full Focus: +20%)
 var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
+var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees and barriers don't stop you while > 0
 var nth_n := 0                # shots since the weapon's "every Nth" bonus
 
 
@@ -288,7 +289,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	_kit_from_weapon()
 	dashes = max_dashes()
 	ammo = wpn["mag"]
-	r = float(cdat.get("hit_r", 0.38 * float(cdat["scale"])))
+	r = float(Arch.body(arch).get("hit_r", cdat.get("hit_r", 0.38 * float(cdat["scale"]))))
 	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look, arch))
 
 ## Switches the archetype mid-match (tests, practice). "" puts back the old class kit: the weapon's
@@ -300,6 +301,7 @@ func set_arch(a: String) -> void:
 	HunterMove.apply(self)
 	if arch != "" and not Arch.weapon_ok(arch, wid):
 		equip(Arch.signature(arch))
+	r = float(Arch.body(arch).get("hit_r", cdat.get("hit_r", 0.38 * float(cdat["scale"]))))
 	_kit_from_weapon()
 
 ## Practice (the Arena and training): become another class and archetype on the spot. Health,
@@ -315,8 +317,8 @@ func reclass(c: String, a: String, w := "") -> void:
 	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
 	base_speed = cdat["speed"]
 	dodge_def = Content.class_dodge(cls)
-	r = float(cdat.get("hit_r", 0.38 * float(cdat["scale"])))
 	arch = Arch.fix(a, cls)
+	r = float(Arch.body(arch).get("hit_r", cdat.get("hit_r", 0.38 * float(cdat["scale"]))))
 	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch)
 	HunterMove.apply(self)
@@ -1208,7 +1210,7 @@ var wedged_t := 0.0
 func _occ(x: float, z: float, guard: bool) -> float:
 	var st: SkyTrain = m.skytrain
 	if st == null:
-		return m.world.occupy(x, z, r, pos.y, guard)
+		return m.world.occupy(x, z, r, pos.y, guard, spirit_t > 0.0)
 	var sw := st.solid_at(x, z, pos.y, r)
 	if sw > 0.0:
 		return sw
@@ -1375,11 +1377,11 @@ func trigger(dt: float) -> void:
 			if draw_t < 0.0:
 				draw_t = 0.0
 				m.sfx("charge", pos, -12.0 if is_local() else -16.0, 1.6)
-			draw_t += dt
+			draw_t += dt * (ak.draw_rate() if ak else 1.0)
 			if ak and ak.has_method("take_focus_shot") and draw_t < 0.85 and ak.take_focus_shot():
 				draw_t = 9.0; shot_range_k = 1.2
 				_loose()
-			elif ctrl != "local" and draw_t >= 0.95:
+			elif ctrl != "local" and draw_t >= float((wpn["draw"][-1] as Array)[0]) + 0.05:
 				_loose()
 		elif draw_t >= 0.0:
 			_loose()
@@ -1410,8 +1412,8 @@ func _loose() -> void:
 	for stg in stages:
 		if t >= float(stg[0]):
 			dmg = float(stg[1]); rng = float(stg[2]); spd = float(stg[3])
-	if ak and ak.has_method("draw_bonus") and t < 5.0:
-		dmg *= float(ak.draw_bonus(t))       # let go right at full draw (the perfect window)
+	if ak and ak.has_method("draw_bonus"):
+		dmg *= float(ak.draw_bonus(t))       # the kit's stage rules (Pin: the perfect window, overdraw, where it lands)
 	var keep := wpn
 	wpn = wpn.duplicate()
 	wpn["dmg"] = dmg * wup_dmg; wpn["range"] = rng; wpn["speed"] = spd
@@ -1755,7 +1757,7 @@ func slot_info(slot: String) -> Dictionary:
 	var mki := MergeKit.slot_info(self, slot)
 	if not mki.is_empty():
 		return mki                       # merged: the form's slots
-	if ak and (slot in ["sec", "utility", "k1", "e", "kin", "dash", "dodge"] or KinCommand.class_ults()):
+	if ak and (slot in ["sec", "utility", "k1", "e", "kin", "dash", "dodge", "x"] or KinCommand.class_ults()):
 		return ak.slot_info(slot)
 	var out := {"name": "", "short": "", "icon": "", "col": Color.WHITE, "desc": "", "cd": 0.0, "cd_max": 0.0, "charges": 0, "max_charges": 0, "verb": "", "ready": false, "level": ability_level(slot)}
 	match slot:
@@ -2375,7 +2377,7 @@ func _physics(dt: float) -> void:
 	# it overlaps, and the part of your speed going into it is dropped (no bounce, no catch on a
 	# corner); the axis moves below then only meet terrain, edges and walls.
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
-	var po: Vector2 = m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
+	var po: Vector2 = tgt if spirit_t > 0.0 else m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
 	var block_n := Vector2.ZERO     # out of the rock you met this step (its face's normal)
 	var rock_b := 0.0               # ...and its top, standing in for occupy()'s answer below
 	if po.distance_squared_to(tgt) > 1e-10:
@@ -3362,7 +3364,8 @@ func render(delta: float, alpha: float) -> void:
 		ghost_t -= delta
 		if ghost_t <= 0.0 and model.visible:
 			ghost_t = 0.028
-			m.fx.ghost(position, face, tc, float(cdat["scale"]))
+			if ak == null or not ak.dash_afterimage():
+				m.fx.ghost(position, face, tc, float(cdat["scale"]))
 	elif gliding:
 		# while dropping in, a ring on the ground shows where you'll land
 		if dropping and is_local():
