@@ -303,7 +303,7 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 | bulwark | Frozen Bulwark | Bjorn | M | ice themed; a massive shield; a big man dressed for the cold, frozen outfit |
 | mage | Storm Slayer | Vireo | F | badass and revolutionary: tattoos, shows skin, leather jacket, jewellery |
 | gunslinger | Hired Gun | Venator | F | marine-like, but a cool marine |
-| ashwick | Mad Pyromancer | Linwick | M | chemist-looking outfit (goggles, apron, flasks) |
+| ashwick | Mad Pyromancer | *Cinder* (new, owner 06:53 UTC: Linwick becomes a woman with a fiery name) | F | chemist-looking outfit (goggles, apron, flasks) |
 | dredge | Broken Abomination | Dredge | robot | a broken robot with corruption and evil energy leaking out; creepy, haunted machine |
 | tender | Fox Cub | Moosh Moosh | F | small and fiery like a fox; if another race, a small version of it with red markings and fox features (ears, tail) |
 | rimewright | Icy Dancer | Tamsin | F | (no change requested beyond the ice-skater theme) |
@@ -314,3 +314,9 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 
 **Scope now (small, server, Sonnet; branch ext/class-titles):** change every player-facing string to the titles above, add the "<player> the <title>" label in matches and on the end screen, and add base name + gender + a 2–3 line personality to each content/archetypes/<id>.json and the wiki (gen_wiki). Internal ids stay; no save migration. Add a grep check that no old title/name is used as a player-facing hero label. Display strings only, so it doesn't collide with the kit branches; rebase onto them at merge.
 **Scope later (concept pass, after resets):** the looks in the table, items 18, 34 and 37, and portraits. Concepts go to the owner for approval before any modelling.
+
+## 40. Ostra's RMB: slower, with a clear animation (kit fix, Ostra branch with items 16-18)
+- Today it's too fast to read. Slow it to the source timing from `briefs/supervive-data/` for Void (wind-up, travel or cast, recovery); if the data lacks it, about +40% total cast time, all in the wind-up and travel.
+- One clear move: a readable wind-up pose (hands gathering void energy, the body leaning in), a distinct release beat, the effect visibly travelling or forming from him, and a short recovery. Our own look, in his violet colours.
+- Assert: the timing matches the data table; damage lands on the release or impact frame, not at the press.
+- Screenshots: a 5-frame strip from wind-up to impact.
