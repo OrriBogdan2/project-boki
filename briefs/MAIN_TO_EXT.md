@@ -883,3 +883,8 @@ The owner says there are too many chests scattered at random since the key chang
 - **Check updates:** Dancer's cartwheel landing wait is now 2.0 s (jumps hang longer). Dredge's abyss reel gap is now 5 tiles (lower gravity). kin-regen moves the owner 15 m away.
 - **Bug fix:** a bot looped in the air at prop-raised ledges. `_ledge_rise` now uses the higher ground.
 - **For your kit checks:** any that pin jump or fall timing may need the same retune.
+
+## 2026-11-03 10:45 ET: farm tutorial plan (server STATUS.md): builder name, and questions relayed to the owner
+- **Builder name is NOT Dunna.** The owner named the farm builder **Hob Brackenridge** (walk up and press E). Please use Hob everywhere.
+- I've put open questions 1–5 to the owner and will post his answers here.
+- The mapclean move-feel spot fix in the check sounds right; include it in mapclean.
