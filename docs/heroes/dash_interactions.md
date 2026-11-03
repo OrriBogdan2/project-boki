@@ -22,17 +22,17 @@ One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlo
 | Dancer | E -> dash | Not shown. Ours: the dagger thrown 0.12s into the throw still flies if she cartwheels; a stuck dagger stays to blink to. | the dash goes, the ability keeps running |
 | Dancer | ult (X) -> dash | Footage (0296-0350): she moves and acts freely through Fusillade, which also gives Quickflip back. | the dash goes, the ability keeps running |
 | Dancer | Q glove -> dash | Not in the source; the glove keeps running. | the dash goes, the ability keeps running |
-| Pin | ground dash -> LMB |  | buffered to the dash's end |
-| Pin | ground dash -> RMB |  | fires mid-dash |
-| Pin | ground dash -> E |  | fires mid-dash |
-| Pin | ground dash -> ult (X) |  | fires mid-dash |
+| Pin | ground dash -> LMB | an arrow cannot be drawn in Spirit Walk's dodge roll; the press waits and the draw starts when the roll ends | buffered to the dash's end |
+| Pin | ground dash -> RMB | Impaling Shot can be started in the walk | fires mid-dash |
+| Pin | ground dash -> E | Rain of Arrows can be cast in the walk | fires mid-dash |
+| Pin | ground dash -> ult (X) | Primal Forces can be cast in the walk | fires mid-dash |
 | Pin | ground dash -> Q glove |  | fires mid-dash |
-| Pin | air dash -> LMB |  | buffered to the dash's end |
+| Pin | air dash -> LMB | as the ground roll: the draw starts when the flick ends | buffered to the dash's end |
 | Pin | air dash -> RMB |  | fires mid-dash |
 | Pin | air dash -> E |  | fires mid-dash |
 | Pin | air dash -> ult (X) |  | fires mid-dash |
 | Pin | air dash -> Q glove |  | fires mid-dash |
-| Pin | LMB -> dash |  | the kit's own handling (no row yet) |
+| Pin | LMB -> dash | the dodge roll interrupts a draw: it ends with no arrow | the dash cancels its wind-up or recovery |
 | Pin | RMB -> dash |  | the kit's own handling (no row yet) |
 | Pin | E -> dash |  | the kit's own handling (no row yet) |
 | Pin | ult (X) -> dash |  | the kit's own handling (no row yet) |
@@ -82,21 +82,21 @@ One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlo
 | Zedran | E -> dash | Owner: 'you can cancel or exit per the source'; the source's exit is not shown in the data or footage. Ours: Shift in the Warchain's pull ends it and the Rampage drives at once (no crouch), the pull's speed running into it; while the chain only flies or holds, the dash just goes. | the dash cancels its wind-up or recovery; dash momentum carries |
 | Zedran | ult (X) -> dash | Data: invulnerable, then the strike; footage ult f33-f44: planted ~1.1s, the cleave, the recovery. Ours: the guard and cleave are committed; Shift is held and goes when it's over. | the dash waits for the ability |
 | Zedran | Q glove -> dash |  | the kit's own handling (no row yet) |
-| Bjorn | ground dash -> LMB |  | buffered to the dash's end |
-| Bjorn | ground dash -> RMB |  | fires mid-dash |
-| Bjorn | ground dash -> E |  | fires mid-dash |
-| Bjorn | ground dash -> ult (X) |  | fires mid-dash |
-| Bjorn | ground dash -> Q glove |  | fires mid-dash |
-| Bjorn | air dash -> LMB |  | buffered to the dash's end |
-| Bjorn | air dash -> RMB |  | fires mid-dash |
-| Bjorn | air dash -> E |  | fires mid-dash |
-| Bjorn | air dash -> ult (X) |  | fires mid-dash |
-| Bjorn | air dash -> Q glove |  | fires mid-dash |
-| Bjorn | LMB -> dash |  | the kit's own handling (no row yet) |
-| Bjorn | RMB -> dash |  | the kit's own handling (no row yet) |
-| Bjorn | E -> dash |  | the kit's own handling (no row yet) |
-| Bjorn | ult (X) -> dash |  | the kit's own handling (no row yet) |
-| Bjorn | Q glove -> dash |  | the kit's own handling (no row yet) |
+| Bjorn | ground dash -> LMB | data: Spin Dash dashes forward and hits round him; footage 0371: one hammer spin on arrival. The hammer is busy in the spin, so a throw, recall or swing goes when the dash ends (no footage of the pair) | buffered to the dash's end |
+| Bjorn | ground dash -> RMB | data: Brightshield is a 0.1 s hold, nothing locks it out in the Spin Dash: the aegis rises mid-dash (Shift with it already up is the Shield Bash, see RMB -> dash) | fires mid-dash |
+| Bjorn | ground dash -> E | data: Regen Field drops round the hammer wherever it is and doesn't move him, so it goes mid-dash (no footage of the pair) | fires mid-dash |
+| Bjorn | ground dash -> ult (X) | data: Abyssalbreaker sends a fissure from where he stands; footage f25-f31: he is planted for the slam. It ends the dash where he is (no footage of the pair) | cancels the dash |
+| Bjorn | ground dash -> Q glove | gloves are our own (no source) | fires mid-dash |
+| Bjorn | air dash -> LMB | footage section 5: no air dash shown; as the ground dash, the hammer goes when the shove ends | buffered to the dash's end |
+| Bjorn | air dash -> RMB | no air dash in the footage; as the ground dash | fires mid-dash |
+| Bjorn | air dash -> E | no air dash in the footage; as the ground dash | fires mid-dash |
+| Bjorn | air dash -> ult (X) | no air dash in the footage; as the ground dash, the slam plants him where he is | cancels the dash |
+| Bjorn | air dash -> Q glove | gloves are our own (no source) | fires mid-dash |
+| Bjorn | LMB -> dash | wiki (Spin Dash): Shift while charging the Hammer Smash ends it in a short dash without the spin, on a reduced cooldown (ours: half a charge back) | the dash cancels its wind-up or recovery; variant: short |
+| Bjorn | RMB -> dash | data: Brightshield + Shift is the Shield Bash (6 s, its own cooldown), the shield briefly invulnerable; the aegis stays up through it | the dash goes, the ability keeps running; variant: charge |
+| Bjorn | E -> dash | data: Regen Field stays round the hammer; the dash doesn't touch it | the dash goes, the ability keeps running |
+| Bjorn | ult (X) -> dash | footage f25-f31: planted through the wind-up and the slam; Shift there goes when the plant ends | the dash waits for the ability |
+| Bjorn | Q glove -> dash | gloves are our own (no source) | the dash goes, the ability keeps running |
 | Dredge | ground dash -> LMB | Data: Brute Dash is a plain dash. Footage (493.2-493.6 s): a near-blink of about 0.12 s; he lands, turns back to the aim within 1 frame and fires and walks by 493.6 s. Ours: the shot goes the step the 0.18 s lunge ends. | buffered to the dash's end |
 | Dredge | ground dash -> RMB | Data: Abyssal Grasp has no dash lock. Footage: not shown from a dash. Ours: the arm is thrown from the lunge (its range counts from where he is). | fires mid-dash |
 | Dredge | ground dash -> E | Data: Primal Slam has no dash lock; the dash-into-slam close-in is the hero's engage. Footage: not shown from a dash. Ours: the planted wind-up starts at once and the lunge finishes under it. | fires mid-dash |

@@ -11,15 +11,19 @@ func run(main_node: Node) -> void:
 	var both := "--hero-combo-check" in args
 	var ult = load("res://tools/pin_bjorn_ult_check.gd").new()
 	ult.main = main_node
+	var own = load("res://tools/pin_bjorn_owner_check.gd").new()
+	own.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		await ult.pin()
+		await own.pin()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
 		await _growth()
 		await ult.bjorn()
-	n += ult.n
-	fails += ult.fails
+		await own.bjorn()
+	n += ult.n + own.n
+	fails += ult.fails + own.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -976,7 +980,7 @@ func _bulwark_combos() -> void:
 		K.crushes == c0 + 1 and K.anim_id == "bul_smash",
 		"crushes %d anim %s" % [K.crushes - c0, K.anim_id]
 	)
-	# Shift while winding up the blow: a short plain dash for half a charge, the wind-up goes on
+	# Shift while winding up the blow: it ends the wind-up, with a short plain dash for half a charge
 	step(m, 1.5)
 	reset.call()
 	_clear_wall(m, home, lv, 3)
@@ -988,10 +992,10 @@ func _bulwark_combos() -> void:
 	P.do_dash()
 	step(m, 0.15, func(): P.inp["fire"] = true)
 	ok(
-		"combo bulwark: hold LMB > Shift = short dash, half a charge, still winding",
+		"combo bulwark: hold LMB > Shift = short dash, half a charge, the wind-up ends",
 		K.st.get(
 			"last_dash"
-		) == "short" and K.lmb_t > 0.2 and d0 - P.dashes < 0.8 and P.flat_dist(p0) > 0.8 and K.anim_id == "bul_short",
+		) == "short" and K.lmb_t < 0.0 and d0 - P.dashes < 0.8 and P.flat_dist(p0) > 0.8 and K.anim_id == "bul_short",
 		"dash %s lmb %.2f spent %.2f moved %.1f" % [str(K.st.get("last_dash")), K.lmb_t, d0 - P.dashes, P.flat_dist(p0)]
 	)
 	P.inp["fire"] = false

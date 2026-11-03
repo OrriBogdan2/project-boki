@@ -227,7 +227,7 @@ func _went_off(b: Dictionary, slot: String) -> bool:
 		"lmb":
 			var drew: bool = float(b["draw"]) < 0.0 and float(now["draw"]) >= 0.0
 			return up.call("fire_cd") or up.call("swing") or up.call("mel") or up.call("shots") or drew \
-					or int(now["ammo"]) < int(b["ammo"])
+					or int(now["ammo"]) < int(b["ammo"]) or more.call("cast", "primary")
 		"rmb":
 			return more.call("used", "utility") or more.call("cd", "rmb") or more.call("cast", "secondary") \
 					or float(now["ch"]) < float(b["ch"]) or (bool(now["rmb_down"]) and not bool(b["rmb_down"]))

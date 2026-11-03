@@ -21,81 +21,104 @@ const DRAW_POSE := {
 	"fr": DRAW_BOW
 }
 
+## The arrow nocked (0.05 s into the draw) and the fullest draw (Supercharged and held)
+const NOCK_POSE := {
+	"p": 0.05,
+	"y": 0.25,
+	"lw": 1.0,
+	"legs": [0.15, -0.2, -0.1, -0.1],
+	"hw": 1.0,
+	"fl": Vector3(0.06, 0.14, 0.1),
+	"rw": 1.0,
+	"fr": Vector3(0.04, 0.1, -0.15)
+}
+const FULL_POSE := {
+	"p": 0.24,
+	"y": 0.9,
+	"lw": 1.0,
+	"legs": [0.5, -0.65, -0.38, -0.32],
+	"hw": 1.0,
+	"fl": Vector3(0.2, 0.2, 0.42),
+	"rw": 1.0,
+	"fr": Vector3(0.04, 0.15, -0.64)
+}
+
 const MOVES := {
 	# ---------------------------------------------------------------- Pin (archer; hero sheet pin.md, 5 fps footage)
-	# the bow drawn: hard side-on to the cursor, leaning back, the bow arm thrust out at it and the string
-	# hand pulled back past the chest (0.2 s, one footage frame); the bow arm reaches full length by
-	# Empowered (0.6 s), then a tremble builds toward Supercharged (1.15 s) and the pose holds
+	# the bow drawn, on the draw's own clock (ArcherKit keeps it at Hunter.draw_t, so a quick draw and the
+	# stage cues line up): the arrow nocks on the press (0.05 s), then one steady pull, the bow arm
+	# reaching out and the string hand travelling back, to Empowered (0.6 s) and on to Supercharged (1.15 s)
+	# where it holds; no tremble and no pose pop between stages (keys sit on a straight path)
 	"arc_draw": {"hold": true, "keys": [
-		[0.0, {}],
+		[0.00, {}],
+		[0.05, NOCK_POSE],
 		[
-			0.2,
+			0.20,
 			{
-				"p": 0.16,
-				"y": 0.72,
+				"p": 0.091,
+				"y": 0.4,
 				"lw": 1.0,
-				"legs": [0.4, -0.55, -0.35, -0.3],
+				"legs": [0.232, -0.309, -0.168, -0.155],
 				"hw": 1.0,
-				"fl": Vector3(0.14, 0.17, 0.3),
+				"fl": Vector3(0.09, 0.151, 0.171),
 				"rw": 1.0,
-				"fr": Vector3(0.04, 0.12, -0.42)
-			}
-		],
-		[0.6, DRAW_POSE],
-		[0.8, DRAW_POSE],
-		[
-			0.9,
-			{
-				"p": 0.21,
-				"y": 0.83,
-				"lw": 1.0,
-				"legs": DRAW_LEGS,
-				"hw": 1.0,
-				"fl": DRAW_HAND,
-				"rw": 1.0,
-				"fr": DRAW_BOW
+				"fr": Vector3(0.04, 0.111, -0.273)
 			}
 		],
 		[
-			0.97,
+			0.35,
 			{
-				"p": 0.19,
-				"y": 0.77,
+				"p": 0.132,
+				"y": 0.55,
 				"lw": 1.0,
-				"legs": DRAW_LEGS,
+				"legs": [0.314, -0.418, -0.236, -0.209],
 				"hw": 1.0,
-				"fl": DRAW_HAND,
+				"fl": Vector3(0.12, 0.162, 0.242),
 				"rw": 1.0,
-				"fr": DRAW_BOW
+				"fr": Vector3(0.04, 0.122, -0.395)
 			}
 		],
 		[
-			1.03,
+			0.48,
 			{
-				"p": 0.22,
-				"y": 0.85,
+				"p": 0.167,
+				"y": 0.68,
 				"lw": 1.0,
-				"legs": DRAW_LEGS,
+				"legs": [0.385, -0.513, -0.295, -0.256],
 				"hw": 1.0,
-				"fl": DRAW_HAND,
+				"fl": Vector3(0.146, 0.171, 0.303),
 				"rw": 1.0,
-				"fr": DRAW_BOW
+				"fr": Vector3(0.04, 0.131, -0.502)
+			}
+		],
+		[0.60, DRAW_POSE],
+		[
+			0.80,
+			{
+				"p": 0.215,
+				"y": 0.836,
+				"lw": 1.0,
+				"legs": [0.468, -0.618, -0.361, -0.307],
+				"hw": 1.0,
+				"fl": Vector3(0.181, 0.187, 0.382),
+				"rw": 1.0,
+				"fr": Vector3(0.04, 0.144, -0.615)
 			}
 		],
 		[
-			1.09,
+			1.00,
 			{
-				"p": 0.18,
-				"y": 0.75,
+				"p": 0.229,
+				"y": 0.873,
 				"lw": 1.0,
-				"legs": DRAW_LEGS,
+				"legs": [0.486, -0.636, -0.372, -0.315],
 				"hw": 1.0,
-				"fl": DRAW_HAND,
+				"fl": Vector3(0.192, 0.195, 0.404),
 				"rw": 1.0,
-				"fr": DRAW_BOW
+				"fr": Vector3(0.04, 0.147, -0.629)
 			}
 		],
-		[1.15, DRAW_POSE]]},
+		[1.15, FULL_POSE]]},
 	# the string let go: the hand snaps back open (one frame), no big recoil, then settles
 	"arc_loose": {"keys": [
 		[0.0, DRAW_POSE],
@@ -114,7 +137,7 @@ const MOVES := {
 		[0.42, {}]]},
 	# a Supercharged release: the body kicks back hard, a half step back, the hand flung wide behind
 	"arc_super": {"keys": [
-		[0.0, DRAW_POSE],
+		[0.0, FULL_POSE],
 		[
 			0.05,
 			{
@@ -265,18 +288,18 @@ const MOVES := {
 	# the hammer thrown: cocked far back and low for one frame, leaning away, then an overhand throw that
 	# overshoots past the front before it settles
 	"bul_throw": {"keys": [
-		[0.0, {}],
-		[0.1, {"y": 1.1, "p": 0.3, "gp": 1.2, "sq": -0.1, "lw": 1.0, "legs": [0.2, -0.5, -0.35, -0.3]}],
-		[0.2, {"y": -0.7, "p": -0.42, "gp": -0.6, "sq": 0.15, "lw": 1.0, "legs": [0.85, -0.7, -0.5, -0.3]}],
-		[0.28, {"y": -0.95, "p": -0.48, "gp": -0.95, "sq": 0.2, "lw": 1.0, "legs": [0.9, -0.75, -0.55, -0.3]}],
-		[0.42, {"y": -0.3, "p": -0.15, "gp": -0.2, "lw": 0.6}],
-		[0.62, {}]]},
+		[0, {}],
+		[0.088, {"y": 1.1, "p": 0.3, "gp": 1.2, "sq": -0.1, "lw": 1.0, "legs": [0.2, -0.5, -0.35, -0.3]}],
+		[0.176, {"y": -0.7, "p": -0.42, "gp": -0.6, "sq": 0.15, "lw": 1.0, "legs": [0.85, -0.7, -0.5, -0.3]}],
+		[0.246, {"y": -0.95, "p": -0.48, "gp": -0.95, "sq": 0.2, "lw": 1.0, "legs": [0.9, -0.75, -0.55, -0.3]}],
+		[0.37, {"y": -0.3, "p": -0.15, "gp": -0.2, "lw": 0.6}],
+		[0.546, {}]]},
 	# the hammer called back: the free hand reaches out, then draws in and catches
 	"bul_recall": {"keys": [
-		[0.0, {"hw": 1.0, "fl": Vector3(0.05, 0.1, -0.55), "p": -0.1}],
-		[0.2, {"hw": 1.0, "fl": Vector3(0.05, 0.1, -0.6), "p": -0.15}],
-		[0.34, {"hw": 1.0, "fl": Vector3(-0.05, -0.05, -0.15), "p": 0.1, "sq": 0.12}],
-		[0.55, {}]]},
+		[0, {"hw": 1.0, "fl": Vector3(0.05, 0.1, -0.55), "p": -0.1}],
+		[0.176, {"hw": 1.0, "fl": Vector3(0.05, 0.1, -0.6), "p": -0.15}],
+		[0.299, {"hw": 1.0, "fl": Vector3(-0.05, -0.05, -0.15), "p": 0.1, "sq": 0.12}],
+		[0.484, {}]]},
 	# LMB held: spinning the hammer, side-on and crouched, the hammer arm out to the side, the
 	# shield arm forward; the hammer turns in the hand (BjornFx) while the body keeps facing the cursor
 	"bul_smash_wind": {"hold": true, "keys": [
@@ -359,7 +382,7 @@ const MOVES := {
 				"fr": Vector3(0.05, -0.15, -0.5)
 			}
 		],
-		[0.55, {}]]},
+		[0.5, {}]]},
 	# the aegis raised: braced low behind it, the shield arm out front (holds while it's up)
 	"bul_guard": {"hold": true, "keys": [
 		[0.0, {}],
@@ -556,7 +579,7 @@ const MOVES := {
 		[0.55, {}]]},
 	# overdrawn: the draw arm starts to shake, the chest sags, the bow dips (held while drawing on)
 	"arc_over": {"hold": true, "keys": [
-		[0.0, DRAW_POSE],
+		[0.0, FULL_POSE],
 		[
 			0.08,
 			{

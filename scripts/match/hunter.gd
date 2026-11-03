@@ -251,6 +251,7 @@ var ak: ArchKit = null        # the archetype's kit at run time
 var shot_range_k := 1.0       # the next shot's range (a full Focus: +20%)
 var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
+var focus_draw := false        # the draw in hand is a full-Focus one: at the top stage already, still waiting for the release
 var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees and barriers don't stop you while > 0
 var nth_n := 0                # shots since the weapon's "every Nth" bonus
 
@@ -1378,20 +1379,7 @@ func trigger(dt: float) -> void:
 			mel_hold = 0.0
 		return
 	if wpn.has("draw"):
-		# a bow: hold to draw, let go to loose (a full Focus draws it at once)
-		if held and can_fire() and fire_cd <= 0.0 and ammo > 0:
-			if draw_t < 0.0:
-				draw_t = 0.0
-				m.sfx("charge", pos, -12.0 if is_local() else -16.0, 1.6)
-			draw_t += dt * (ak.draw_rate() if ak else 1.0)
-			if ak and ak.has_method("take_focus_shot") and draw_t < 0.85 and ak.take_focus_shot():
-				draw_t = 9.0; shot_range_k = 1.2
-				_loose()
-			elif ctrl != "local" and draw_t >= float((wpn["draw"][-1] as Array)[0]) + 0.05:
-				_loose()
-		elif draw_t >= 0.0:
-			_loose()
-		if held and ammo <= 0: start_reload()
+		_trigger_bow(held, dt)
 		return
 	if wpn.has("spin_up"):
 		if held and can_fire() and ammo > 0:
@@ -1407,9 +1395,45 @@ func trigger(dt: float) -> void:
 	if held:
 		fire()
 
+## A bow: hold to draw, let go to loose. Only the button coming up looses a player's arrow: a full Focus
+## is drawn at once but still waits for the release, a cooldown never looses it, and a stun, dash or glide
+## cancels the draw with no shot. A bot has no button, so it lets go by itself.
+func _trigger_bow(held: bool, dt: float) -> void:
+	if draw_t < 0.0:
+		focus_draw = false
+	var can_draw: bool = can_fire() and ammo > 0
+	if draw_t >= 0.0 and not held:
+		_loose()
+		return
+	if draw_t >= 0.0 and not can_draw:
+		draw_t = -1.0
+		focus_draw = false
+		return
+	if held and can_draw and (draw_t >= 0.0 or fire_cd <= 0.0):
+		_draw_step(dt)
+	elif held and ammo <= 0:
+		start_reload()
+
+func _draw_step(dt: float) -> void:
+	var top := float((wpn["draw"][-1] as Array)[0])
+	if draw_t < 0.0:
+		draw_t = 0.0
+		m.sfx("charge", pos, -12.0 if is_local() else -16.0, 1.6)
+	if focus_draw:
+		draw_t = top
+	else:
+		draw_t += dt * (ak.draw_rate() if ak else 1.0)
+	if not focus_draw and ak and ak.has_method("take_focus_shot") and draw_t < 0.85 and ak.take_focus_shot():
+		focus_draw = true
+		draw_t = top
+		shot_range_k = 1.2
+	if ctrl == "bot" and (focus_draw or draw_t >= top + 0.05):
+		_loose()
+
 ## Looses a drawn arrow: the draw stage reached sets damage, range and speed.
 func _loose() -> void:
-	var t := draw_t
+	var t := 9.0 if focus_draw else draw_t
+	focus_draw = false
 	draw_t = -1.0
 	if not can_fire() or ammo <= 0:
 		return
