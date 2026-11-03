@@ -498,6 +498,7 @@ func _toggle(v: VBoxContainer, label_txt: String, key: String, hint := "") -> vo
 	var r := _row(v, label_txt, hint)
 	var cb := CheckButton.new()
 	cb.button_pressed = bool(Settings.get_v(key))
+	UiMotion.knob(cb)
 	cb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	cb.toggled.connect(func(on): Settings.set_v(key, on))
 	r.add_child(cb)
@@ -734,6 +735,7 @@ func open_admin() -> void:
 	var god := CheckButton.new()
 	god.text = "God mode: can't be hurt or fall, no cooldowns, endless ammo"
 	god.button_pressed = Game.god
+	UiMotion.knob(god)
 	god.toggled.connect(func(on): Game.god = on)
 	v.add_child(god)
 	# bot difficulty: Auto follows the run tier (and your experience); the rest force one

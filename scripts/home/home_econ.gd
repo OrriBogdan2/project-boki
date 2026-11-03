@@ -475,6 +475,7 @@ func open_feeder(f: Dictionary) -> void:
 		var ab := CheckButton.new()
 		ab.text = "Refills itself from your pantry"
 		ab.button_pressed = on
+		UiMotion.knob(ab)
 		ab.tooltip_text = "Below half full, it tops itself up from your pantry"
 		ab.toggled.connect(func(_on):
 			f["auto"] = not bool(f.get("auto", true))

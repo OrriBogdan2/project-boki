@@ -11,13 +11,14 @@ const SIZE := Vector2(890, 600)
 const BODY_H := 372.0
 const TILE := Vector2(431, 116)
 const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r"]
-## (The ultimate tile has no fixed key: _cap reads it from Settings.)
-const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": ""} 
+## The action whose key each slot's tile shows (Settings.key_cap; the passive has none).
+const ACTION := {"dash": "dash", "passive": "", "lmb": "fire", "rmb": "secondary", "e": "signature", "r": "ultimate"}
 ## The key cap on a slot's tile. The last tile is the Merge unless the class ultimates are on.
 static func _cap(slot: String) -> String:
-	if slot == "r":
-		return Settings.key_cap("hunter_ult" if KinCommand.class_ults() else "ultimate")
-	return String(KEYS[slot])
+	if slot == "r" and KinCommand.class_ults():
+		return Settings.key_cap("hunter_ult")
+	var action := String(ACTION[slot])
+	return Settings.key_cap(action) if action != "" else ""
 
 const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate"}
 ## Which looping preview each archetype's abilities get (KitPreview kinds).
@@ -55,10 +56,14 @@ static func make(arch_id: String, kin_species := "", close_cb := Callable()) -> 
 func _build() -> void:
 	custom_minimum_size = SIZE
 	size = SIZE
-	var frame := UiFrame.raised(UI.SURFACE, UI.R_PANEL, 30, UI.RIM)
-	frame.edge = Color(Arch.color(arch), 0.55)
+	# the hunter's own frame: lighter leather stitched in the hunter's colour, brass corner guards
+	var frame := UiFrame.raised(UI.CARD, UI.R_PANEL, 30, UI.RIM).leather(Color(Arch.color(arch), 0.5), 0.07, 7.0)
+	frame.edge = Color(Arch.color(arch), 0.6)
 	frame.edge_w = 2
-	add_theme_stylebox_override("panel", frame.padded(14, 12))
+	frame.guards = UI.BRASS
+	frame.tint = Arch.color(arch)
+	frame.lit = 0.1
+	add_theme_stylebox_override("panel", frame.padded(18, 16))
 	var d := Arch.def(arch)
 	var cd: Dictionary = d.get("card", {})
 	var col := Arch.color(arch)
@@ -69,7 +74,7 @@ func _build() -> void:
 	var hd := HBoxContainer.new()
 	hd.add_theme_constant_override("separation", 12)
 	v.add_child(hd)
-	var nm := UI.label(Arch.name_of(arch).to_upper(), 30, col, UI.big)
+	var nm := UI.title(Arch.name_of(arch).to_upper(), 30, col)
 	hd.add_child(nm)
 	var wn: Array = Arch.weapons(arch).map(func(w): return String(Data.weapon_stats(w).get("name", w)))
 	var sub := UI.label("%s  ·  %s" % [String(d.get("weight", "")).to_upper(), "  /  ".join(wn)], 14, UI.MUTED, UI.big)
@@ -80,7 +85,9 @@ func _build() -> void:
 		hd.add_child(UI.ghost("Close  (K)", on_close, 120))
 	# how the kit fits together: one line
 	var lp := PanelContainer.new()
-	lp.add_theme_stylebox_override("panel", UI.frame(Color(col, 0.14), UI.R_CTRL, Color(0, 0, 0, 0), 0, 12, 8))
+	var well := UI.frame(Color(0.05, 0.02, 0.0, 0.35), UI.R_CTRL, Color(col, 0.4), 1, 14, 9, 0.0)
+	well.recess = true
+	lp.add_theme_stylebox_override("panel", well)
 	var ll := UI.label(String(cd.get("loop", d.get("fantasy", ""))), 17, UI.INK, UI.big)
 	ll.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lp.add_child(ll)
@@ -114,8 +121,9 @@ func _tile(slot: String) -> Control:
 	t.custom_minimum_size = TILE
 	t.focus_mode = Control.FOCUS_NONE
 	t.flat = true
-	var n := UI.frame(Color(1, 1, 1, 0.045), UI.R_CARD, Color(col, 0.35), 1, 14, 12)
-	var hv := UI.frame(Color(1, 1, 1, 0.085), UI.R_CARD, Color(col, 0.8), 2, 14, 12)
+	var n := UI.tile_face(false, false, col, 14)
+	n.edge = Color(col, 0.3)
+	var hv := UI.tile_face(true, false, col, 14)
 	t.add_theme_stylebox_override("normal", n)
 	t.add_theme_stylebox_override("hover", hv)
 	t.add_theme_stylebox_override("pressed", hv)
@@ -210,7 +218,9 @@ func _show_detail(slot: String) -> void:
 ## The Boki strip: its own C ability and how its type changes this kit.
 func _kin_strip() -> Control:
 	var p := PanelContainer.new()
-	p.add_theme_stylebox_override("panel", UI.frame(Color(1, 1, 1, 0.04), UI.R_CTRL, Color(1, 1, 1, 0.08), 1, 12, 8))
+	var well := UI.frame(Color(0.05, 0.02, 0.0, 0.3), UI.R_CTRL, Color(UI.BRASS, 0.25), 1, 12, 8, 0.0)
+	well.recess = true
+	p.add_theme_stylebox_override("panel", well)
 	p.custom_minimum_size = Vector2(0, 92)
 	var ks: KinSpec = KinLib.kin(kin_sp) if kin_sp != "" else null
 	var v := VBoxContainer.new()
@@ -374,8 +384,9 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		b.custom_minimum_size = Vector2(64, 70)
 		b.focus_mode = Control.FOCUS_NONE
 		b.tooltip_text = "%s: %s" % [String(info["name"]), String(info["line"])]
-		var lit_box := UI.frame(Color(1, 1, 1, 0.1), UI.R_CTRL, Color(info["col"], 0.85), 2, 4, 4)
-		var rest_box := UI.frame(Color(1, 1, 1, 0.05), UI.R_CTRL, Color(info["col"], 0.35), 1, 4, 4)
+		var lit_box := UI.tile_face(true, false, info["col"], 4)
+		var rest_box := UI.tile_face(false, false, info["col"], 4)
+		rest_box.edge = Color(info["col"], 0.3)
 		b.add_theme_stylebox_override("normal", rest_box)
 		b.add_theme_stylebox_override("hover", lit_box)
 		b.add_theme_stylebox_override("pressed", lit_box)

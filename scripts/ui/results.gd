@@ -24,7 +24,9 @@ func show_result(r: Dictionary) -> void:
 	add_child(wash)
 	var center := CenterContainer.new(); center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(center)
 	center.offset_left = 340.0   # leave the left side for the island
-	var panel := UI.sheet(600); center.add_child(panel)
+	var panel := UI.sheet(600)
+	panel.add_theme_stylebox_override("panel", UiTheme.panel_frame(UI.TEAL if won else UI.BAD))
+	center.add_child(panel)
 	UI.pop_in(panel, 0.1)
 	var outer := UI.vbox(14)
 	panel.add_child(outer)
@@ -51,14 +53,23 @@ func show_result(r: Dictionary) -> void:
 	kr.add_child(UI.tag("Extracted" if won else "Didn't make it", UI.TEAL if won else Color("ff9a8a")))
 	kr.add_child(UI.label(kick, UI.T_CAPS, UI.FAINT, UI.caps))
 	head.add_child(kr)
-	head.add_child(UI.title("You made it out" if won else _lost_title(r.get("why", "")), 46, UI.INK))
+	head.add_child(UI.title("You made it out" if won else _lost_title(r.get("why", "")), UI.T_DISPLAY, UI.INK))
 	var how_line := String({"skiff": "Flew out on the skiff from %s. ", "hatch": "Slipped out through a rift hatch. ", "uplink": "Rode the lift out of %s. "}.get(String(r.get("how", "")), ""))
 	if how_line.contains("%s"): how_line = how_line % String(r.get("where", "the islands"))
 	head.add_child(UI.para((how_line + "Everything you carried is yours now.") if won else "Everything you carried stays out in the islands.", UI.T_BODY, UI.MUTED))
-	v.add_child(head)
+	var banner := UI.hbox(16)
+	var outcome_col := UI.TEAL if won else UI.BAD
+	banner.add_child(UiSkin.emblem("portal" if won else "alert", outcome_col, 64.0))
+	head.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	banner.add_child(head)
+	v.add_child(banner)
+	v.add_child(UiSkin.seam_rule())
 	# the four numbers that matter, big and counting up, on one strip; the rest in a quiet line
 	var secs := int(r.get("time", 0))
-	var strip := UI.card(Color(0, 0, 0, 0.2), 14, 14)
+	var strip := PanelContainer.new()
+	var well := UiFrame.sunk(UI.WELL, UI.R_CARD).padded(14, 12)
+	well.rim = Color(UI.BRASS, 0.25)
+	strip.add_theme_stylebox_override("panel", well)
 	var sh := UI.hbox(0); strip.add_child(sh)
 	var big4 := [["knock", "Knocks", float(r.get("knocks", 0)), ""], ["burst", "Damage", float(r.get("damage", 0)), ""],
 		["clock", "Time", float(secs), "time"], ["gem", "Armor", float(r.get("armor_tier", 0)), "armor"]]
@@ -73,7 +84,7 @@ func show_result(r: Dictionary) -> void:
 	for t in [["Kills", int(r.get("kills", 0))], ["Damage taken", int(r.get("taken", 0))], ["Times downed", int(r.get("downs", 0))], ["Revives", int(r.get("revives", 0))]]:
 		var one := UI.hbox(6)
 		one.add_child(UI.label(String(t[0]), UI.T_SMALL, UI.MUTED))
-		one.add_child(UI.label(str(t[1]), UI.T_SMALL, UI.INK, UI.semi))
+		one.add_child(UI.label(str(t[1]), UI.T_SMALL, UI.INK, UI.num))
 		small.add_child(one)
 	v.add_child(small)
 	if won:
@@ -184,12 +195,13 @@ func _stat_tile(icon: String, what: String, value: float, fmt: String, delay: fl
 	var col := UI.vbox(2)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
-	var num := UI.title("0" if fmt == "" else "0:00", 30)
+	var num := UI.title("0" if fmt == "" else "0:00", UI.T_STAT)
 	num.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(num)
 	var lr := UI.hbox(5); lr.alignment = BoxContainer.ALIGNMENT_CENTER
-	lr.add_child(Icons.Glyph.new(icon, Color(1, 0.86, 0.6, 0.8), 13.0))
-	var lab := UI.label(what.to_upper(), 11, UI.MUTED, UI.caps); lab.autowrap_mode = TextServer.AUTOWRAP_OFF
+	lr.add_child(Icons.Glyph.new(icon, UI.BRASS, 13.0))
+	var lab := UI.label(what.to_upper(), UI.T_CAPS, UI.MUTED, UI.caps)
+	lab.autowrap_mode = TextServer.AUTOWRAP_OFF
 	lr.add_child(lab)
 	col.add_child(lr)
 	if fmt == "armor":
@@ -241,8 +253,7 @@ func _kin_card(s: Dictionary) -> Control:
 	var frac := {"v": was}
 	bar_box.draw.connect(func():
 		var r := Rect2(Vector2.ZERO, bar_box.size)
-		bar_box.draw_rect(r, Color(0, 0, 0, 0.4))
-		bar_box.draw_rect(Rect2(r.position, Vector2(r.size.x * float(frac["v"]), r.size.y)), UI.GOOD if td >= 0.0 else Color("ffb36a")))
+		UI.draw_bar(bar_box, r, float(frac["v"]), UI.GOOD if td >= 0.0 else Color("ffb36a"), Color(0, 0, 0, 0.4), 5))
 	trow.add_child(bar_box)
 	var ml := UI.label("%s  (%+d)" % [mood, int(round(td))] if absf(td) >= 0.5 else mood, 14, UI.GOOD if td > 0.5 else (Color("ffb36a") if td < -0.5 else UI.MUTED))
 	trow.add_child(ml)

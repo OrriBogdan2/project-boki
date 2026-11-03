@@ -1,30 +1,34 @@
 class_name UI
 ## The menu kit. Every screen builds its menus in code from these helpers, so they share one look:
-## colour roles, corner radii, a type scale, three button tiers, layered cards and panels
-## (UiFrame), segmented tabs, chips, keycaps, the panel shell (title, close X, tabs, body, footer),
-## confirm boxes, toasts and a blurred backdrop for modals. The Theme itself is UiTheme; install()
-## makes it every Control's default. docs/UI_DESIGN.md has the rules and the full API.
+## the field kit (tooled leather, stitched seams, brass hardware; docs/UI_DESIGN.md), colour roles
+## and section colours, corner radii, a type scale, three button tiers, layered cards and panels
+## (UiFrame), segmented tabs, chips, keycaps, the panel shell (emblem, title, close X, tabs, body,
+## footer), confirm boxes, toasts and a blurred backdrop for modals. The Theme itself is UiTheme;
+## install() makes it every Control's default. Motion is UiMotion, icons UiIcons, sections UiSkin.
 ## The in-match HUD (HudStyle) shares these colour and font tokens.
 
 # ---------------------------------------------------------------- colour roles
-const INK := Color("f3eee2")                        # text
-const MUTED := Color("a9b0bf")                      # secondary text
-const FAINT := Color(0.66, 0.69, 0.78, 0.55)        # hints, disabled
-const BG := Color("110f17")                         # full-screen menu background
-const SURFACE := Color(0.094, 0.082, 0.118, 0.98)   # panels: a warm night, not a cold navy
-const CARD := Color(0.158, 0.142, 0.19, 1.0)        # a card raised off a panel
-const RAISED := Color(0.2, 0.18, 0.235)             # button and tab faces
-const RIM := Color(0.0, 0.0, 0.02, 0.6)             # the dark outer edge of every raised box
-const WELL := Color(0, 0, 0, 0.24)                  # a recess: tab tracks, bars, inputs
-const LINE := Color(1, 1, 1, 0.08)                  # hairlines
-const ACCENT := Color("f2a24a")                     # the one action colour: primary buttons, focus, picked tabs
+const INK := Color("f6efe2")                        # text
+const MUTED := Color("cbbca6")                      # secondary text (warm, AA on every surface)
+const FAINT := Color("a8987f")                      # hints and fine print (AA on panels); disabled
+const BG := Color("1a120e")                         # full-screen menu background
+const SURFACE := Color(0.16, 0.108, 0.082, 0.985)   # panels: deep saddle leather
+const CARD := Color(0.21, 0.148, 0.114, 1.0)        # a card raised off a panel (lighter leather)
+const RAISED := Color(0.29, 0.207, 0.157)           # button and tab faces (tan leather)
+const RIM := Color(0.04, 0.012, 0.0, 0.78)          # the dark outer edge of every raised box
+const WELL := Color(0.05, 0.02, 0.005, 0.4)         # a recess: tab tracks, bars, inputs
+const LINE := Color(1, 0.88, 0.7, 0.1)              # hairlines
+const BRASS := Color("d8a95e")                      # hardware: trims, corner guards, emblem rims (decoration only)
+const BRASS_HI := Color("f7dc9c")                   # brass catching the light
+const STITCH := Color(0.96, 0.82, 0.6, 0.36)        # the seam's thread on leather
+const ACCENT := Color("f2a24a")                     # the one action colour: primary buttons, focus
 const ACCENT_HI := Color("ffd79a")                  # accent text on dark
 const GOOD := Color("8fe0a0")                       # success, owned, ready
 const BAD := Color("ff6a5a")                        # danger, loss, locked
 const GOLD := Color("f2c84a")                       # currency (gems) and rewards
 const TEAL := Color("8fe3c8")                       # info, extraction, the portal
 const INFO := Color("7cc4ff")
-const DARK_INK := Color(0.13, 0.08, 0.05)           # text on accent fills
+const DARK_INK := Color(0.16, 0.08, 0.03)           # text on accent fills and bone keycaps
 
 # ---------------------------------------------------------------- corner radii (px at 720p)
 const R_PANEL := 18      # panels and modals
@@ -34,21 +38,25 @@ const R_SMALL := 6       # tags, tab segments, keycaps
 const R_PILL := 999      # chips and round buttons
 
 # ---------------------------------------------------------------- type scale
+const T_DISPLAY := 46    # a screen's one headline (results, loading; Lilita One)
 const T_TITLE := 30      # one per panel (Lilita One)
+const T_STAT := 30       # stat numbers (Lilita One)
 const T_HEAD := 19       # card titles, item names (Lilita One)
+const T_LABEL := 15      # row labels and button text (Rubik 560)
 const T_BODY := 15       # everything you read (Rubik)
 const T_SMALL := 13      # secondary lines and hints (Rubik)
-const T_CAPS := 12       # section eyebrows (Rubik bold, spaced)
+const T_CAPS := 12       # caps labels and section eyebrows (Rubik 700, tight)
 # ---------------------------------------------------------------- spacing
 const GAP := 12          # between things in a group
 const GAP_BIG := 20      # between groups
-const PAD := 26          # inside a panel
+const PAD := 28          # inside a panel (clear of the stitched seam)
 
 static var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 static var body: Font = preload("res://fonts/Rubik.ttf")
 static var _theme: Theme
-static var semi: FontVariation       # Rubik at a heavier weight, for buttons and small headers
-static var caps: FontVariation       # spaced-out bold, for section headers
+static var semi: FontVariation       # Rubik at a heavier weight, for buttons, labels and small headers
+static var caps: FontVariation       # bold, for caps labels and section eyebrows
+static var num: FontVariation        # Rubik semi with tabular figures, for numbers that line up or count
 
 static func rarity_col(r: int) -> Color:
 	return Data.RARITY[clampi(r, 0, Data.RARITY.size() - 1)]["color"]
@@ -63,7 +71,8 @@ static func theme() -> Theme:
 	caps = FontVariation.new()
 	caps.base_font = body
 	caps.variation_opentype = {"wght": 700}
-	caps.spacing_glyph = 1
+	num = semi.duplicate() as FontVariation
+	num.opentype_features = {TextServerManager.get_primary_interface().name_to_tag("tnum"): 1}
 	_theme = UiTheme.build()
 	return _theme
 
@@ -83,8 +92,8 @@ static func _blank(w: int, h: int) -> ImageTexture:
 ## letters in brackets.
 static func keycap(key: String, size := 13) -> PanelContainer:
 	var p := PanelContainer.new()
-	var sb := UiFrame.raised(Color(0.93, 0.9, 0.84, 0.95), R_SMALL - 1)
-	sb.lip = 2
+	var sb := UiFrame.raised(Color("f1e6d0"), R_SMALL - 1, 0, RIM)
+	sb.lip = 3
 	sb.lit = 0.0
 	sb.padded(6 if key.length() <= 1 else 7, 1)
 	sb.content_margin_bottom = 2
@@ -97,7 +106,7 @@ static func keycap(key: String, size := 13) -> PanelContainer:
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.add_theme_font_override("font", caps if caps else body)
 	l.add_theme_font_size_override("font_size", size - 1 if key.length() > 1 else size)
-	l.add_theme_color_override("font_color", Color(0.16, 0.12, 0.14))
+	l.add_theme_color_override("font_color", DARK_INK)
 	p.add_child(l)
 	return p
 
@@ -120,9 +129,10 @@ static func key_hints(pairs: Array, size := 13, col := Color(1, 1, 1, 0.75)) -> 
 	return row
 
 ## A small spaced-out heading for a group of things in a menu (the "eyebrow").
-static func section(text: String, col := Color("c9a46a")) -> Label:
+static func section(text: String, col := BRASS) -> Label:
 	var l := Label.new()
 	l.text = text.to_upper()
+	UiSkin.ornament(l, col)
 	l.add_theme_font_override("font", caps if caps else body)
 	l.add_theme_font_size_override("font_size", T_CAPS)
 	l.add_theme_color_override("font_color", col)
@@ -146,15 +156,19 @@ static func para(text: String, size := T_SMALL, col := MUTED) -> Label:
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return l
 
+## A heading in Lilita One, pressed into the leather (a dark drop under it).
 static func title(text: String, size := 34, col := INK) -> Label:
 	var l := label(text, size, col, big)
 	l.autowrap_mode = TextServer.AUTOWRAP_OFF
+	l.add_theme_color_override("font_shadow_color", Color(0.05, 0.02, 0.0, 0.7))
+	l.add_theme_constant_override("shadow_offset_y", 2)
+	l.add_theme_constant_override("shadow_offset_x", 0)
 	return l
 
 # ---------------------------------------------------------------- buttons
-## The secondary button (an outline). icon: an Icons id drawn at its left. Hover fills it with the
-## theme's hover colour (no growing: a button never spills over its neighbours or the panel edge);
-## pressing sinks it a touch, in about 70 ms.
+## The secondary button (tan leather, brass trim). icon: an icon id drawn at its left. Hover lights
+## the trim and a warm glow (never grows: a button never spills over its neighbours or the panel
+## edge); pressing dips it and it springs back (UiMotion.press).
 static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
 	var b := Button.new()
 	b.text = text
@@ -164,22 +178,14 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 		b.custom_minimum_size.x = minw
 	if icon != "":
 		set_icon(b, icon)
-	b.resized.connect(func(): b.pivot_offset = b.size * 0.5)
-	var to := func(s: float, secs: float) -> void:
-		if not is_instance_valid(b) or not b.is_inside_tree(): return
-		var tw := b.create_tween()
-		tw.tween_property(b, "scale", Vector2(s, s), secs).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	UiMotion.press(b)
 	b.mouse_entered.connect(func():
 		if b.disabled: return
 		Sfx.play("hover", null, -12.0, 0.05))
-	b.mouse_exited.connect(func(): to.call(1.0, 0.11))
-	b.button_down.connect(func(): if not b.disabled: to.call(0.97, 0.07))
-	b.button_up.connect(func(): to.call(1.0, 0.1))
 	b.focus_entered.connect(func():
 		# keyboard and pad focus tick and lift like the mouse does
 		if not b.is_hovered() and not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 			Sfx.play("hover", null, -14.0, 0.05))
-	b.focus_exited.connect(func(): if not b.is_hovered(): to.call(1.0, 0.11))
 	return b
 
 ## The main button of a screen: filled accent, dark text. One per screen.
@@ -244,76 +250,10 @@ static func set_icon(b: Button, icon: String, px := 16) -> void:
 		draw_icon(b, id, Vector2(x + px * 0.5, b.size.y * 0.5), px * 0.5, col))
 	b.mouse_entered.connect(b.queue_redraw); b.mouse_exited.connect(b.queue_redraw)
 
-## Draws an icon: one of the Icons ids, or one of the menu's own ("close", "back", "next", "check",
-## "lock", "plus", "gear", "home", "bag", "shop", "portal", "hammer", "info").
+## Draws an icon: one of the menu's own (UiIcons: tabs, sections, currencies, buttons) or an Icons id.
 static func draw_icon(c: CanvasItem, id: String, at: Vector2, s: float, col: Color) -> void:
-	var w := maxf(1.8, s * 0.22)
-	match id:
-		"close":
-			c.draw_line(at + Vector2(-s, -s) * 0.62, at + Vector2(s, s) * 0.62, col, w, true)
-			c.draw_line(at + Vector2(s, -s) * 0.62, at + Vector2(-s, s) * 0.62, col, w, true)
-		"back", "next":
-			var d := -1.0 if id == "back" else 1.0
-			c.draw_polyline(PackedVector2Array([at + Vector2(0.3 * d * -s, -0.7 * s), at + Vector2(-0.4 * d * -s, 0), at + Vector2(0.3 * d * -s, 0.7 * s)]), col, w, true)
-		"check":
-			c.draw_polyline(PackedVector2Array([at + Vector2(-0.7, 0.0) * s, at + Vector2(-0.2, 0.5) * s, at + Vector2(0.7, -0.55) * s]), col, w, true)
-		"plus":
-			c.draw_line(at + Vector2(-0.7, 0) * s, at + Vector2(0.7, 0) * s, col, w, true)
-			c.draw_line(at + Vector2(0, -0.7) * s, at + Vector2(0, 0.7) * s, col, w, true)
-		"lock":
-			c.draw_rect(Rect2(at + Vector2(-0.62, -0.05) * s, Vector2(1.24, 0.9) * s), col)
-			c.draw_arc(at + Vector2(0, -0.12) * s, 0.4 * s, PI, TAU, 12, col, w, true)
-		"gear":
-			c.draw_arc(at, 0.5 * s, 0, TAU, 20, col, w, true)
-			for i in 8:
-				var a := TAU * i / 8.0
-				c.draw_line(at + Vector2(cos(a), sin(a)) * 0.6 * s, at + Vector2(cos(a), sin(a)) * 0.95 * s, col, w * 1.3, true)
-			c.draw_circle(at, 0.18 * s, col)
-		"home":
-			c.draw_colored_polygon(PackedVector2Array([at + Vector2(0, -0.85) * s, at + Vector2(0.85, -0.05) * s, at + Vector2(0.6, -0.05) * s, at + Vector2(0.6, 0.75) * s,
-				at + Vector2(-0.6, 0.75) * s, at + Vector2(-0.6, -0.05) * s, at + Vector2(-0.85, -0.05) * s]), col)
-		"bag":
-			c.draw_rect(Rect2(at + Vector2(-0.7, -0.35) * s, Vector2(1.4, 1.1) * s), col)
-			c.draw_arc(at + Vector2(0, -0.35) * s, 0.36 * s, PI, TAU, 12, col, w, true)
-		"shop":
-			c.draw_colored_polygon(PackedVector2Array([at + Vector2(-0.85, -0.2) * s, at + Vector2(-0.6, -0.75) * s, at + Vector2(0.6, -0.75) * s, at + Vector2(0.85, -0.2) * s]), col)
-			c.draw_rect(Rect2(at + Vector2(-0.68, -0.1) * s, Vector2(1.36, 0.85) * s), Color(col, col.a * 0.75))
-		"portal":
-			c.draw_arc(at, 0.78 * s, 0, TAU, 24, col, w, true)
-			c.draw_arc(at, 0.42 * s, 0, TAU, 18, Color(col, col.a * 0.7), w, true)
-		"hammer":
-			c.draw_line(at + Vector2(-0.6, 0.75) * s, at + Vector2(0.25, -0.15) * s, col, w * 1.4, true)
-			c.draw_colored_polygon(PackedVector2Array([at + Vector2(-0.05, -0.75) * s, at + Vector2(0.75, 0.05) * s, at + Vector2(0.45, 0.35) * s, at + Vector2(-0.35, -0.45) * s]), col)
-		"eye":
-			c.draw_arc(at + Vector2(0, 0.55) * s, 0.95 * s, -PI * 0.78, -PI * 0.22, 14, col, w, true)
-			c.draw_arc(at + Vector2(0, -0.55) * s, 0.95 * s, PI * 0.22, PI * 0.78, 14, col, w, true)
-			c.draw_circle(at, 0.28 * s, col)
-		"ruler":
-			c.draw_line(at + Vector2(-0.85, 0.45) * s, at + Vector2(0.45, -0.85) * s, col, w * 2.2, true)
-			for k in 4:
-				var p0 := at + Vector2(-0.6 + k * 0.3, 0.2 - k * 0.3) * s
-				c.draw_line(p0, p0 + Vector2(0.18, 0.18) * s, Color(0, 0, 0, 0.5), maxf(1.0, w * 0.6), true)
-		"pin":
-			c.draw_circle(at + Vector2(0, -0.3) * s, 0.5 * s, col)
-			c.draw_colored_polygon(PackedVector2Array([at + Vector2(-0.42, -0.05) * s, at + Vector2(0.42, -0.05) * s, at + Vector2(0, 0.9) * s]), col)
-			c.draw_circle(at + Vector2(0, -0.3) * s, 0.2 * s, Color(0, 0, 0, 0.45))
-		"female":      # ♀: a ring over a cross
-			c.draw_arc(at + Vector2(0, -0.28) * s, 0.46 * s, 0, TAU, 20, col, w, true)
-			c.draw_line(at + Vector2(0, 0.18) * s, at + Vector2(0, 0.95) * s, col, w, true)
-			c.draw_line(at + Vector2(-0.32, 0.6) * s, at + Vector2(0.32, 0.6) * s, col, w, true)
-		"male":        # ♂: a ring with an arrow up and right
-			c.draw_arc(at + Vector2(-0.22, 0.22) * s, 0.46 * s, 0, TAU, 20, col, w, true)
-			c.draw_line(at + Vector2(0.11, -0.11) * s, at + Vector2(0.78, -0.78) * s, col, w, true)
-			c.draw_polyline(PackedVector2Array([at + Vector2(0.28, -0.8) * s, at + Vector2(0.8, -0.8) * s, at + Vector2(0.8, -0.28) * s]), col, w, true)
-		"alert":
-			c.draw_line(at + Vector2(0, -0.78) * s, at + Vector2(0, 0.22) * s, col, w * 1.5, true)
-			c.draw_circle(at + Vector2(0, 0.66) * s, w * 0.85, col)
-		"info":
-			c.draw_arc(at, 0.85 * s, 0, TAU, 24, col, w, true)
-			c.draw_circle(at + Vector2(0, -0.42) * s, 0.12 * s, col)
-			c.draw_line(at + Vector2(0, -0.12) * s, at + Vector2(0, 0.5) * s, col, w, true)
-		_:
-			Icons.draw(c as Control, id, at, s, col)
+	if not UiIcons.draw(c, id, at, s, col):
+		Icons.draw(c as Control, id, at, s, col)
 
 ## Shows a keycap at the right end of a button ("Enter", "Esc", "1"), so the key that does the same
 ## thing is right there on it.
@@ -344,10 +284,14 @@ static func with_key(b: Button, key: String) -> Button:
 
 # ---------------------------------------------------------------- tabs, chips, cards
 ## A segmented control: names in a dark track, the current one lifted. cb gets the picked name.
-## counts (optional): name -> a small number shown after it. Arrow keys move along it.
-static func tabs(names: Array, cur: String, cb: Callable, counts := {}, minw := 0.0) -> PanelContainer:
+## counts (optional): name -> a small number shown after it. Arrow keys move along it. Known tab
+## names get their icon (UiSkin.TAB_ICONS); the picked one's underline in `col` glides over from
+## wherever it last was (UiMotion.glide).
+static func tabs(names: Array, cur: String, cb: Callable, counts := {}, minw := 0.0, col := ACCENT) -> PanelContainer:
 	var track := PanelContainer.new()
-	track.add_theme_stylebox_override("panel", UiFrame.sunk(WELL, R_SMALL + 5).padded(3, 3))
+	var well := UiFrame.sunk(WELL, R_SMALL + 5).padded(3, 3)
+	well.rim = Color(1, 0.9, 0.75, 0.07)
+	track.add_theme_stylebox_override("panel", well)
 	track.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	var row := hbox(2)
 	track.add_child(row)
@@ -358,7 +302,11 @@ static func tabs(names: Array, cur: String, cb: Callable, counts := {}, minw := 
 		var b := button(txt, func(): if nm != cur: cb.call(nm), minw)
 		b.theme_type_variation = "SegOn" if nm == cur else "Seg"
 		b.set_meta("tab", nm)
+		if UiSkin.tab_icon(nm) != "":
+			set_icon(b, UiSkin.tab_icon(nm), 15)
 		row.add_child(b)
+		if nm == cur:
+			UiMotion.glide(track, b, "|".join(names), col)
 	track.set_meta("pg_keep", true)
 	return track
 
@@ -366,8 +314,8 @@ static func tabs(names: Array, cur: String, cb: Callable, counts := {}, minw := 
 ## an accent edge. Add your content to the returned container. Click, Enter or the pad's A pick it.
 static func tile_card(on: bool, cb: Callable, pad := 12, col := ACCENT) -> PanelContainer:
 	var p := PanelContainer.new()
-	var n := _tile_face(on, false, col, pad)
-	var h := _tile_face(on, true, col, pad)
+	var n := tile_face(on, false, col, pad)
+	var h := tile_face(on, true, col, pad)
 	p.add_theme_stylebox_override("panel", n)
 	p.focus_mode = Control.FOCUS_ALL
 	p.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -405,23 +353,28 @@ static func frame(bg: Color, rad := R_CTRL, edge := Color(0, 0, 0, 0), edge_w :=
 		f.edge_w = edge_w
 	return f.padded(pad_h, pad_v)
 
-## A selectable card's face: raised, lit when hovered, an edge in `col` when picked.
-static func _tile_face(on: bool, hover: bool, col: Color, pad: float) -> UiFrame:
-	var tint := col if on else Color.WHITE
-	var alpha := 0.13 if on else 0.04
-	var fill := Color(tint, alpha + (0.05 if hover else 0.0))
-	var f := UiFrame.raised(fill, R_CARD)
-	f.edge_w = 2 if on else 1
+## A selectable card's face: a leather card, its brass trim lit when hovered; the picked one wears
+## an edge in `col` with a glow inside it.
+static func tile_face(on: bool, hover: bool, col: Color, pad: float) -> UiFrame:
+	var fill := CARD.lerp(col, 0.12) if on else CARD
+	var f := UiFrame.raised(fill.lightened(0.05) if hover else fill, R_CARD, 4, RIM)
+	f.grain = 0.05
+	f.lit = 0.08
+	f.trim = Color(BRASS, 0.55 if hover else 0.18)
 	if on:
-		f.edge = Color(col, 0.9)
-	else:
-		f.edge = Color(1, 1, 1, 0.24 if hover else 0.06)
+		f.edge = Color(col, 0.95)
+		f.edge_w = 2
+		f.glow = Color(col, 0.16)
+	elif hover:
+		f.glow = Color(BRASS_HI, 0.1)
 	return f.padded(pad, pad)
 
 ## A pill: an icon and a value with a tooltip (gems, scrap, stored). col tints it.
 static func chip(icon: String, txt: String, col := INK, tip := "", size := 14) -> PanelContainer:
 	var c := PanelContainer.new()
-	c.add_theme_stylebox_override("panel", frame(Color(col, 0.11), R_PILL, Color(col, 0.18), 1, 10, 4, 0.0))
+	var pill := frame(Color(0.06, 0.03, 0.01, 0.45), R_PILL, Color(col, 0.35), 1, 10, 4, 0.0)
+	pill.recess = true
+	c.add_theme_stylebox_override("panel", pill)
 	c.tooltip_text = tip
 	c.mouse_filter = Control.MOUSE_FILTER_PASS if tip != "" else Control.MOUSE_FILTER_IGNORE
 	c.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -429,7 +382,7 @@ static func chip(icon: String, txt: String, col := INK, tip := "", size := 14) -
 	if icon != "":
 		var g := IconDot.new(icon, col, size + 2.0)
 		h.add_child(g)
-	var l := label(txt, size, INK, semi)
+	var l := label(txt, size, INK, num)
 	l.autowrap_mode = TextServer.AUTOWRAP_OFF
 	h.add_child(l)
 	return c
@@ -444,24 +397,20 @@ static func tag(txt: String, col: Color) -> PanelContainer:
 	c.add_child(l)
 	return c
 
-## Fades and lifts a panel in, so menus open instead of just appearing (about 200 ms).
+## Fades and slides a panel in, so menus open instead of just appearing (UiMotion.open, ~200 ms).
 static func pop_in(c: Control, delay := 0.0) -> void:
-	c.modulate.a = 0.0
-	c.scale = Vector2(0.965, 0.965)
-	var set_pivot := func(): c.pivot_offset = Vector2(c.size.x * 0.5, c.size.y * 0.6)
-	c.resized.connect(set_pivot)
-	set_pivot.call()
-	var tw := c.create_tween().set_parallel(true)
-	tw.tween_property(c, "modulate:a", 1.0, 0.14).set_delay(delay)
-	tw.tween_property(c, "scale", Vector2.ONE, 0.22).set_delay(delay).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	UiMotion.open(c, delay)
 
-## A card raised off a panel: the layered frame (light from the top, a rim, a small shadow when
-## it's opaque), no outline unless it's picked (set_card_border).
+## A card raised off a panel: lighter leather with a faint stitched seam when it's opaque (light
+## from the top, a rim, a small shadow), no outline unless it's picked (set_card_border).
 static func card(col := CARD, pad := 14, rad := R_CARD) -> PanelContainer:
 	var p := PanelContainer.new()
 	var opaque := col.a > 0.6 and rad < R_PILL
 	var sb := UiFrame.raised(col, rad, 6 if opaque else 0, RIM if opaque else Color(0, 0, 0, 0))
-	sb.lit = 0.05 if opaque else 0.0
+	sb.lit = 0.07 if opaque else 0.0
+	if opaque:
+		sb.leather(Color(STITCH, 0.2), 0.05, 5.0)
+		sb.burnish = 0.12
 	p.add_theme_stylebox_override("panel", sb.padded(pad, pad))
 	return p
 
@@ -472,12 +421,14 @@ static func set_card_border(p: PanelContainer, col: Color, w := 2) -> void:
 	sb.edge_w = w
 	p.add_theme_stylebox_override("panel", sb)
 
-## Dark glass for things that float over the world (prompts, hint rows, the hub bar, hover cards).
+## Smoked leather for things that float over the world (prompts, hint rows, the hub bar, hover
+## cards): see-through enough to keep the world, with a brass trim so it's still the kit.
 static func glass(pad := 10, rad := 14) -> PanelContainer:
 	var p := PanelContainer.new()
-	var sb := UiFrame.raised(Color(0.05, 0.045, 0.07, 0.82), rad, 10)
-	sb.edge = Color(1, 0.95, 0.85, 0.08)
-	sb.lit = 0.04
+	var sb := UiFrame.raised(Color(0.1, 0.06, 0.04, 0.86), rad, 10, RIM)
+	sb.trim = Color(BRASS, 0.32)
+	sb.grain = 0.05
+	sb.lit = 0.06
 	sb.padded(pad + 2, pad)
 	p.add_theme_stylebox_override("panel", sb)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -781,7 +732,9 @@ static func scroll_box(content: Control, margin := 120.0) -> Control:
 static func scroll_panel(title_txt: String, width: float, on_close: Callable, close_txt := "Close", scroll := false) -> Array:
 	var p := PanelContainer.new()
 	p.mouse_filter = Control.MOUSE_FILTER_STOP
-	p.theme_type_variation = ""
+	var sec := UiSkin.section_of(title_txt)
+	p.add_theme_stylebox_override("panel", UiTheme.panel_frame(sec["col"]))
+	p.set_meta("sec_col", sec["col"])
 	var outer := vbox(GAP_BIG - 4)
 	p.add_child(outer)
 	var top := vbox(GAP)
@@ -794,7 +747,10 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 		bb.focus_mode = Control.FOCUS_NONE
 		bb.name = "Close"
 		head.add_child(bb)
-	var tcol := vbox(2); tcol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(UiSkin.emblem(String(sec["icon"]), sec["col"], 44.0))
+	var tcol := vbox(0)
+	tcol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tcol.alignment = BoxContainer.ALIGNMENT_CENTER
 	var t := title(title_txt, T_TITLE, INK)
 	t.clip_text = true
 	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -816,6 +772,7 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 	var tabs_slot := vbox(0)
 	tabs_slot.visible = false
 	top.add_child(tabs_slot)
+	top.add_child(UiSkin.seam_rule())
 	var body := vbox(GAP)
 	var foot := hbox(10)
 	foot.visible = false
@@ -913,7 +870,7 @@ static func head_extra(body: Control) -> HBoxContainer:
 ## Tabs under the title (a segmented control). Returns the tabs control.
 static func shell_tabs(body: Control, names: Array, cur: String, cb: Callable, counts := {}) -> Control:
 	var p := _shell_of(body)
-	var tb := tabs(names, cur, cb, counts)
+	var tb := tabs(names, cur, cb, counts, 0.0, p.get_meta("sec_col", ACCENT) if p else ACCENT)
 	if p == null:
 		body.add_child(tb)
 		return tb
@@ -1010,9 +967,10 @@ static func confirm(host: Control, head: String, text: String, yes_txt: String, 
 ## A round tinted badge with an icon (a confirm box's warning, an empty state's mark).
 static func badge(icon: String, col: Color, px := 44.0, rad := R_PILL) -> PanelContainer:
 	var b := PanelContainer.new()
-	var f := UiFrame.raised(Color(col, 0.16), rad)
-	f.edge = Color(col, 0.4)
-	f.lit = 0.08
+	var f := UiFrame.raised(col.darkened(0.66), rad, 6, RIM)
+	f.trim = BRASS
+	f.glow = Color(col, 0.3)
+	f.lit = 0.12
 	b.add_theme_stylebox_override("panel", f.padded(px * 0.24, px * 0.24))
 	b.add_child(IconDot.new(icon, col, px * 0.52))
 	b.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
@@ -1023,23 +981,22 @@ static func badge(icon: String, col: Color, px := 44.0, rad := R_PILL) -> PanelC
 ## ("Bramble Isle is open"). Never more than one line.
 static func toast(host: Control, txt: String, col := GOLD, y := 100.0) -> void:
 	var c := glass(12, R_CARD)
-	var f := c.get_theme_stylebox("panel") as UiFrame
-	f.edge = Color(col, 0.35)
-	f.padded(20, 10)
+	var f := (c.get_theme_stylebox("panel") as UiFrame).leather(Color(STITCH, 0.3), 0.05, 5.0)
+	f.fill = Color(SURFACE, 0.94)
+	f.edge = Color(col, 0.55)
+	f.padded(22, 11)
+	var row := hbox(10)
+	c.add_child(row)
+	var dot := IconDot.new("alert" if col == BAD else "check", col, 18.0)
+	row.add_child(dot)
 	var l := label(txt, 21, col, big)
 	l.add_theme_constant_override("outline_size", 4)
-	l.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.08, 0.6))
-	c.add_child(l)
+	l.add_theme_color_override("font_outline_color", Color(0.06, 0.02, 0.0, 0.6))
+	row.add_child(l)
 	host.add_child(c)
 	c.reset_size()
-	c.position = Vector2((host.get_viewport_rect().size.x - c.size.x) * 0.5, y - 16.0)
-	c.modulate.a = 0.0
-	var tw := c.create_tween()
-	tw.tween_property(c, "modulate:a", 1.0, 0.18)
-	tw.parallel().tween_property(c, "position:y", y, 0.24).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
-	tw.tween_interval(2.2)
-	tw.tween_property(c, "modulate:a", 0.0, 0.4)
-	tw.tween_callback(c.queue_free)
+	c.position.x = (host.get_viewport_rect().size.x - c.size.x) * 0.5
+	UiMotion.toast(c, y)
 
 ## The layer under confirm(): Esc (or the pad's B) cancels it before anything else sees the key.
 class Modal extends Control:

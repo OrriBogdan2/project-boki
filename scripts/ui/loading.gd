@@ -1,3 +1,4 @@
+class_name LoadingScreen
 extends CanvasLayer
 ## The screen between home and an expedition: the tier's sky with islands drifting past and the
 ## skyship crossing, the tier name, what you're heading into, a tip, and a spinner with the stage
@@ -60,7 +61,7 @@ var stars: Array = []
 var sky_tex: GradientTexture2D
 var shade_tex: GradientTexture2D
 var puff: GradientTexture2D
-var _glass_at := {}      # fade step -> the tip card's glass box
+var _glass_at := {}      # fade step -> the tip card (and, at step + 10, the bar recess)
 var stage_label := "Building the map"
 var spin_draws := 0      # frames the spinner has drawn (--load-check: one per frame means it never stalled)
 
@@ -187,7 +188,9 @@ func _draw() -> void:
 	var cx := sz.x * 0.5
 	var base := sz.y * 0.47
 	var kick := "EXPEDITION" if mode_line != "" else "GETTING READY"
-	_text(Vector2(cx, base), kick, UI.caps, 15, Color(UI.GOLD, a), 3)
+	_text(Vector2(cx, base), kick, UI.caps, 15, Color(UI.BRASS_HI, a), 2)
+	_rule(Vector2(cx, base + 10), a)
+	_text(Vector2(cx, base + 64), title, UI.big, 58, Color(0.05, 0.02, 0.0, a * 0.6))
 	_text(Vector2(cx, base + 62), title, UI.big, 58, Color(UI.INK, a))
 	_wrap(Vector2(cx, base + 96), sub, 17, minf(620.0, sz.x - 60.0), Color(UI.MUTED, a))
 	if mode_line != "":
@@ -202,23 +205,47 @@ func _draw() -> void:
 	var lines := UI.body.get_multiline_string_size(tip, HORIZONTAL_ALIGNMENT_CENTER, tw_ - 40.0, 15, 3).y
 	var card := Rect2(cx - tw_ * 0.5, sz.y - 24.0 - (40.0 + lines), tw_, 40.0 + lines)
 	var bw := minf(480.0, sz.x - 80.0)
-	var br := Rect2(cx - bw * 0.5, card.position.y - 30.0, bw, 6)
+	var br := Rect2(cx - bw * 0.5, card.position.y - 32.0, bw, 8)
 	var af := snappedf(a, 0.1)
-	UI.draw_bar(c, br, prog if prog > 0.01 else 0.0, Color(UI.ACCENT, af), Color(1, 1, 1, af * 0.12), 3)
+	c.draw_style_box(_well(af), br.grow(2.0))
+	UI.draw_bar(c, br, prog if prog > 0.01 else 0.0, Color(UI.ACCENT, af), Color(0, 0, 0, 0), 4)
+	if prog > 0.01:
+		c.draw_circle(Vector2(br.position.x + br.size.x * prog, br.get_center().y), 5.5, Color(UI.BRASS_HI, af))
 	_spinner(Vector2(br.position.x + 7.0, br.position.y - 15.0), a)
 	_text(Vector2(br.position.x + 22.0, br.position.y - 10), stage_label + "…", UI.semi, 13, Color(UI.INK, a * 0.8), 0, HORIZONTAL_ALIGNMENT_LEFT)
 	_text(Vector2(br.end.x, br.position.y - 10), "%d%%" % int(prog * 100.0), UI.semi, 13, Color(UI.INK, a * 0.55), 0, HORIZONTAL_ALIGNMENT_RIGHT)
 	# the tip, on a glass card with a small accent tag
-	c.draw_style_box(_glass(af), card)
-	_text(Vector2(cx, card.position.y + 22), "TIP", UI.caps, 11, Color(UI.ACCENT, a), 2)
+	c.draw_style_box(tip_frame(af), card)
+	_text(Vector2(cx, card.position.y + 22), "FIELD TIP", UI.caps, 11, Color(UI.BRASS_HI, a), 1)
 	_wrap(Vector2(cx, card.position.y + 26), tip, 15, tw_ - 40.0, Color(UI.INK, a * 0.85))
 
-## The tip's glass card at a fade step (cached: drawn every frame while loading).
-func _glass(alpha: float) -> UiFrame:
+## The tip's card at a fade step: smoked leather with a stitched seam and brass trim (cached:
+## drawn every frame while loading).
+func tip_frame(alpha: float) -> UiFrame:
 	if not _glass_at.has(alpha):
-		var g := UI.frame(Color(0.05, 0.045, 0.07, alpha * 0.72), 14, Color(1, 1, 1, alpha * 0.07), 1, 0.0, 0.0, alpha * 0.04)
+		var g := UI.frame(Color(UI.SURFACE, alpha * 0.86), 14, Color(0, 0, 0, 0), 0, 0.0, 0.0, alpha * 0.06)
+		g.leather(Color(UI.STITCH, UI.STITCH.a * alpha), 0.05 * alpha, 6.0)
+		g.trim = Color(UI.BRASS, 0.3 * alpha)
+		g.guards = Color(UI.BRASS, alpha)
 		_glass_at[alpha] = g
 	return _glass_at[alpha]
+
+## The progress bar's recess at a fade step (cached).
+func _well(alpha: float) -> UiFrame:
+	var key := alpha + 10.0
+	if not _glass_at.has(key):
+		var w := UiFrame.sunk(Color(0.05, 0.02, 0.0, 0.55 * alpha), 6)
+		w.rim = Color(UI.BRASS, 0.35 * alpha)
+		_glass_at[key] = w
+	return _glass_at[key]
+
+## A short brass rule with a diamond under the kicker.
+func _rule(at: Vector2, a: float) -> void:
+	var col := Color(UI.BRASS, a * 0.8)
+	c.draw_line(at + Vector2(-70, 0), at + Vector2(-10, 0), col, 1.5, true)
+	c.draw_line(at + Vector2(10, 0), at + Vector2(70, 0), col, 1.5, true)
+	var d := PackedVector2Array([at + Vector2(0, -4), at + Vector2(4, 0), at + Vector2(0, 4), at + Vector2(-4, 0)])
+	c.draw_colored_polygon(d, col)
 
 ## A ring with a turning arc that grows and shrinks as it goes round: moves every frame, so a
 ## stalled frame shows at once.
@@ -228,7 +255,7 @@ func _spinner(p: Vector2, a: float) -> void:
 	c.draw_arc(p, r, 0.0, TAU, 28, Color(1, 1, 1, a * 0.14), 2.5, true)
 	var head := t * TAU * 1.15
 	var span := lerpf(0.5, 3.6, 0.5 + 0.5 * sin(t * 2.6))
-	c.draw_arc(p, r, head - span, head, 24, Color(UI.ACCENT, a), 2.5, true)
+	c.draw_arc(p, r, head - span, head, 24, Color(UI.BRASS_HI, a), 2.5, true)
 
 func _island(p: Vector2, w: float, d: float, biome: Dictionary, a: float, sd: int) -> void:
 	var r := RandomNumberGenerator.new(); r.seed = sd
