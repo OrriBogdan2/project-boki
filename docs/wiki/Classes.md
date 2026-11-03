@@ -61,7 +61,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Linwick](Class-Linwick.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Merge) |
 | [Moosh Moosh](Class-Moosh-Moosh.md) | 145 / 1 | Ember Cast | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
 | [Tamsin](Class-Tamsin.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Merge) |
-| [Breah](Class-Breah.md) | 145 / 1 | Rubble Fists | Tremor Sense | Rubble Leap | Quakefall | Stone Row | none (Boki Merge) |
+| [Breah](Class-Breah.md) | 145 / 1 | Rubble Fists | Molten Guard | Rubble Leap | Quakefall | Stone Row | none (Boki Merge) |
 | [Ostra](Class-Ostra.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Merge) |
 
 ### How Hunters unlock
@@ -142,7 +142,7 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 
 ### Run levels
 
-Every expedition starts at level 1 with one skill point and every ability locked. Each level gives a point. Ranks per slot: RMB 3, Glove (Q) 3, Dash (Shift) 3, E 3, R (ultimate) 2. The ultimate opens at level 6 (rank 2 at 9).
+Every expedition starts at level 1 with one skill point and every ability locked. Each level gives a point. Ranks per slot: RMB 3, Dash (Shift) 3, E 3, R (ultimate) 2. The ultimate opens at level 6 (rank 2 at 9).
 
 | Level | Total XP |  |
 |---|---|---|

@@ -28,7 +28,7 @@ func setup(arch: String, dist: float, kin_sp := "", second := false) -> Array:
 	var hx := int(floor(P.pos.x)); var hz := int(floor(P.pos.z))
 	var hi: int = W.idx(hx, hz)
 	var lv: int = int(W.level[hi]) if W.kind[hi] != World.T_VOID else 0
-	for dz in range(-6, 7):
+	for dz in range(-10, 11):      # (targets are parked 9m to either side)
 		for dx in range(-8, int(dist) + 12):
 			if not W.inb(hx + dx, hz + dz): continue
 			var i: int = W.idx(hx + dx, hz + dz)
@@ -36,6 +36,7 @@ func setup(arch: String, dist: float, kin_sp := "", second := false) -> Array:
 			W.level[i] = lv
 			W.island[i] = W.island[hi]
 			W.stairs.erase(i); W.walls.erase(i); W.props.erase(i); W.bush.erase(i)
+	for b in m.breaks: b["dead"] = true      # crates and kegs off the strip too: shots here are about the kit
 	var home := Vector3(hx + 0.5, lv * World.LEVEL, hz + 0.5)
 	P.teleport(home); P.vel = Vector3.ZERO
 	P.set_arch(arch)
@@ -378,14 +379,14 @@ func _gunslinger() -> void:
 	var K: GunslingerKit = P.ak
 	var medium := Arch.weight("gunslinger") == "medium"
 	ok("venator: Quill Rifle in hand, medium, no R", P.wid == "quill_rifle" and medium and not Arch.def("gunslinger").has("r"))
-	# Fever: abilities stack lifesteal (4 x 5%)
+	# Fever: an ability that lands lights one flat 6% lifesteal
 	P.hp = 60.0
 	K.on_deal(T, 10.0, {"src": "abil", "ab": "utility"})
 	K.on_deal(T, 10.0, {"src": "abil", "ab": "k1"})
-	ok("venator passive: abilities build Fever", K.res >= 2.0)
+	ok("venator passive: abilities light Fever (one level, never stacked)", K.res == 1.0)
 	var hp0 := P.hp
 	K.on_deal(T, 100.0, {"src": "shot"})
-	ok("venator passive: Fever heals off damage", P.hp > hp0 + 8.0, "healed %.1f" % (P.hp - hp0))
+	ok("venator passive: Fever heals 6% off damage", absf(P.hp - hp0 - 6.0) < 0.5, "healed %.1f" % (P.hp - hp0))
 	K.res = 0.0
 	# Burr Charge: thrown past the foe, it blasts a cone back from the ground at the lane's end, Dazing
 	fresh(T); T2.teleport(home + Vector3(12, 0, 0)); P.teleport(home); T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0

@@ -286,6 +286,9 @@ static func merge(ms: MergeSpec, giant := false) -> Array:
 	if os != "": out.append(os.substr(0, 1).to_upper() + os.substr(1))
 	for st in ms.on_start: out.append("As it starts: " + stage(st))
 	for pl in ms.pulses: out.append("Every %ss: %s" % [n(float(pl["every"])), stage(pl["stage"])])
+	var fdash: Dictionary = MergeForm.data()["fallback"]["dash"]
+	out.append("%s, %s: your dash leaves your Boki type's trail (its rider on what you pass), then %ss of haste."
+		% [Settings.key_cap("dash"), String(fdash["name"]), n(float(fdash["haste_s"]))])
 	out.append("%s again: a basic burst that ends the merge." % Settings.key_cap("ultimate"))
 	for slot in ms.merged:
 		var pt: Dictionary = ms.merged[slot]

@@ -3,9 +3,9 @@
 
 _Generated from `content/gear`, `content/rules/gear.json`._
 
-Gear is found on expeditions: in chests, on the ground, from the Blight and from bosses. Five slots: an active glove (Q), a passive glove, armor, boots and a utility kit. A new piece replaces the one in its slot (the old one drops at your feet). Every piece has a rarity, Common to Legendary, that scales its numbers (x1, x1, x1.3, x1.6, x2). Extracted gear also breaks down into farm materials.
+Gear is found on expeditions: in chests, on the ground, from the Blight and from bosses. You wear two gloves (glove 1 on Q, glove 2 on V; each can be an active or a passive glove, never two of the same), armor and boots. Gloves never rank up: their rarity is their strength. A new piece replaces the one in its slot (a glove takes a free glove slot, else the weaker glove's; the old one drops at your feet). Gloves and boots can be brought from home (rarity capped by difficulty); armor is only found. Utility items (tonics, armor kits, smoke...) sit on the 1-4 belt, not in a gear slot. Every piece has a rarity, Common to Legendary, that scales its numbers (x1, x1, x1.3, x1.6, x2). Extracted gear also breaks down into farm materials.
 
-## Active gloves (Q)
+## Active gloves (Q or V)
 
 | Glove | Cooldown | What it does | Also gives |
 |---|---|---|---|
@@ -16,15 +16,11 @@ Gear is found on expeditions: in chests, on the ground, from the Blight and from
 | Hook Glove | 12s | Fire a hook 10m: it drags the first foe it catches to your feet (stunned 0.3s), or pulls you to the wall or rock it bites. | speed +0.03 |
 | Gust Glove | 16s | A burst of wind launches you up and forward and cools your glider. Saves falls, reaches high ground. | glide_speed +0.1 |
 | Hover Glove | 7s | A second jump in mid-air, and your glider is ready the moment you want it. | glide_speed +0.05 |
-| Springpad Glove | 22s | Throw down a jump pad. Anyone who steps on it is launched high. Lasts 20s. | speed +0.04 |
-| Mending Glove | 22s | Lob a mending orb at the cursor: you and teammates where it lands heal 35 and shake off slows, roots and poison. | armor +10 |
 | Ledge Glove | 40s | Pop a floating platform under your feet for 8s. Your rescue over the abyss. | heat +0.15 |
 | Fissure Glove | 14s | Crack the ground in an 8m line toward the cursor: it erupts end to end, throwing everyone on it into the air. | dmg +0.04 |
 | Rocket Glove | 16s | Blast straight up into the sky and cool your glider by half. Chain it into a glide to go high and far. | heat +0.1 |
-| Seeker Glove | 26s | Reveal every rival hunter within 26 tiles for 3s, through walls and grass. | cdr +0.05 |
 | Vortex Glove | 16s | Lob a gravity bomb at the cursor: for 1s it drags everyone within 3.5m into its centre, then pops (12 damage, thrown up). | dmg +0.05 |
 | Skyhook Glove | 14s | Hook a point toward the cursor and swing up to it: onto a ledge above you, or high into the air. | speed +0.03 |
-| Smoke Glove | 22s | A cloud that hides everyone inside it, like tall grass, for 8s. | speed +0.04 |
 | Decoy Glove | 18s | Leave a glowing copy of yourself where you stand and vanish for 1.5s, moving faster. Bots keep shooting the copy. | armor +8 |
 
 ## Passive gloves
@@ -58,8 +54,3 @@ Gear is found on expeditions: in chests, on the ground, from the Blight and from
 
 | Piece | What it does | Stats |
 |---|---|---|
-| Field Surgeon's Kit | Needle and thread: tonics heal more. | tonic +0.35 |
-| Magpie Pouch | Shiny things stick: gems you pick up are worth more. | gems +0.25 |
-| Wayfarer's Satchel | A deep bag: one more backpack slot (two from Epic). | pack +1 |
-| Brass Spyglass | See further through grass and gloom. | sight +0.12 |
-| Tinker's Roll | A roll of small tools: reloads faster. | reload +0.15 |

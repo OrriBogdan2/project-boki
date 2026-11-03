@@ -17,7 +17,7 @@
 		"color": "#bff7ef",
 		"sfx": "rime_shard",
 		"fire_slow": 0.9,
-		"desc": "A folding fan of ice slats. Hold for a steady stream of slow ice darts (one every 0.18s) that bow out and curve onto the foe nearest your cursor. Eight on one foe Shatter them. While skating they fly straight and thick and hit 1.6x.",
+		"desc": "A folding fan of ice slats. Hold for a steady stream of slow ice darts (one every 0.18s) that bow out and curve onto the foe nearest your cursor. Eight on one foe Shatter them. While skating they fly straight and thick.",
 		"kick": 0.04,
 		"bow_deg": 32.0,
 		"turn": 7.0,

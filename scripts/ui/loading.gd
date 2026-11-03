@@ -19,7 +19,7 @@ const TIPS := [
 	"Get knocked into a wall and you're stunned. Do it to them first.",
 	"Shots go exactly where you aim. Fast guns sway in the same small pattern every time, and firing slows your step.",
 	"Jump at a wall in the air to kick off it. Light hunters get two kicks.",
-	"Crates and barrels break when you shoot or dash through them. Some hide a better weapon.",
+	"One hit breaks a crate, pot or barrel. A red powder keg lights a fuse, then blows: get clear.",
 	"Weapons you find out here are stronger than your own, but only for this expedition.",
 	"Health and armor don't come back on their own. 1 drinks a tonic, 2 repairs your armor with a kit. You take more damage while you do either.",
 	"Fight alongside your Boki to fill the bond meter, then your Merge key calls its bond ultimate.",

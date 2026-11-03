@@ -1,9 +1,10 @@
 extends RefCounted
 ## --ashwick-combo-check: Linwick's (id ashwick) abilities and their interactions in the archetype check's
 ## flat strip (docs/heroes/ashwick.md, combinations and small-mechanics tables): the Torch Lance hose (pilot,
-## full reach past the cursor, lag on a sweep, narrow then billowing, +25% on a burning foe, stops at once,
+## full reach past the cursor, lag on a sweep, narrow then billowing, the burning-foe bonus and health chip,
+## stops at once,
 ## the 0.35s relight gap), the burn stages and their pips, the Cinder Shot lane and cursor landing, the
-## Soot Ram stopping on the first foe, two quick charges and a knock's single charge back, the rank-3 stoke,
+## Soot Ram stopping on the first foe, two quick charges and a knock's single charge back, the rank-3 speed and shield,
 ## the Furnace Cloak's 0.2s ring before the blast and its swirling shield, walls, Char rules, the merge drops,
 ## and the X ult, Flue Flight (tools/ashwick_ult_check.gd).
 
@@ -51,6 +52,17 @@ func _growth() -> void:
 		"growth: the Soot Ram's hit grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)),
 		d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01, "L1 %.2f L10 %.2f" % [d1, d10]
 	)
+
+## Holds the lance on a target.
+func _hold_at(hunter: Hunter, target: Hunter) -> void:
+	hunter.inp["fire"] = true
+	ak.aim_at(hunter, target.pos)
+
+## Holds the lance with the burn's own ticks and the Char held off, so only the hose counts.
+func _hold_bare(hunter: Hunter, target: Hunter, kit: AshwickKit) -> void:
+	_hold_at(hunter, target)
+	kit.chars = {}
+	target.burn_t = 0.0
 
 func _all() -> void:
 	var r: Array = ak.setup("ashwick", 4.0, "", true)
@@ -204,9 +216,35 @@ func _all() -> void:
 	t0 = K.flame_ticks
 	ak.step(m, 1.0, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); K.chars = {}; T.burn_t = 0.0)
 	var hot: float = (ak.dmg(T) - d0) / maxf(1.0, K.flame_ticks - t0)
+	var chip := T.max_hp * 0.015 * float(K.lmbd()["tick"])
 	ok(
-		"lance: +25% on a burning foe (per tick)", cold > 1.5 and hot > cold * 1.15 and hot < cold * 1.4,
-		"cold %.1f burning %.1f" % [cold, hot]
+		"lance: +25% and 1.5% of health a second on an Ablaze foe (per tick)",
+		cold > 1.5 and absf(hot - (cold * 1.25 + chip)) < cold * 0.12,
+		"cold %.2f burning %.2f expect %.2f" % [cold, hot, cold * 1.25 + chip]
+	)
+	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 2, "until": m.time + 99.0}
+	d0 = ak.dmg(T)
+	t0 = K.flame_ticks
+	ak.step(m, 1.0, func(): _hold_bare(P, T, K))
+	var flash: float = (ak.dmg(T) - d0) / maxf(1.0, K.flame_ticks - t0)
+	var chip2 := T.max_hp * 0.025 * float(K.lmbd()["tick"])
+	ok(
+		"lance: +40% and 2.5% of health a second on a Flashed-over foe (per tick)",
+		absf(flash - (cold * 1.4 + chip2)) < cold * 0.12, "flash %.2f expect %.2f" % [flash, cold * 1.4 + chip2]
+	)
+	# a burning foe builds Char as fast as a cold one (the old halving is gone)
+	reset.call()
+	K.relight_t = 0.0
+	ak.step(m, 0.7, func(): _hold_at(P, T))
+	var char_cold: float = K.char_of(T)
+	P.inp["fire"] = false
+	reset.call()
+	K.relight_t = 0.0
+	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 1, "until": m.time + 99.0}
+	ak.step(m, 0.7, func(): _hold_at(P, T))
+	ok(
+		"lance: a burning foe builds Char at the full rate", char_cold > 6.0 and K.char_of(T) >= char_cold * 0.9,
+		"cold %.1f burning %.1f" % [char_cold, K.char_of(T)]
 	)
 	P.inp["fire"] = false
 	# --- walls stop the lance and the cloak
@@ -269,7 +307,24 @@ func _all() -> void:
 		"cinder: a hit sets the foe Ablaze", K.burning(T) == 1 and ak.dmg(T) >= 10.0,
 		"burning %d took %.0f" % [K.burning(T), ak.dmg(T)]
 	)
+	ok(
+		"cinder: the hit slows the foe 30%", T.slow_t > 0.5 and absf(T.slow_k - 0.3) < 0.02,
+		"slow_t %.2f slow_k %.2f" % [T.slow_t, T.slow_k]
+	)
+	var cinder_cold: float = ak.dmg(T)
 	ak.step(m, 7.0)
+	reset.call()
+	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 1, "until": m.time + 99.0}
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	ak.aim_at(P, T.pos)
+	ak.tap(m, P)
+	ak.step(m, 0.8)
+	ok(
+		"cinder: 25% more on an Ablaze foe", ak.dmg(T) >= cinder_cold * 1.2,
+		"hot %.1f cold %.1f" % [ak.dmg(T), cinder_cold]
+	)
+	reset.call()
 	K.cd["rmb"] = 0.0
 	K.ch_rmb = 1.0
 	K.stoke(T)
@@ -295,8 +350,8 @@ func _all() -> void:
 		if K.fx.shown("skull%d" % P.get_instance_id()): skull = true
 	ok("ram: the flame skull wraps his front while it flies", skull)
 	ok(
-		"ram: stops on the first foe (doesn't pass through)",
-		K.bash_hits == 1 and P.pos.x < T.pos.x and P.flat_dist(T) < 2.2 and ak.dmg(T2) < 1.0,
+		"ram: stops on the first foe and shoves it hard (doesn't pass through)",
+		K.bash_hits == 1 and P.pos.x < T.pos.x and P.flat_dist(T) < 4.0 and T.pos.x - home.x > 3.4 and ak.dmg(T2) < 1.0,
 		"x %.1f foe x %.1f dist %.1f" % [P.pos.x - home.x, T.pos.x - home.x, P.flat_dist(T)]
 	)
 	ok(
@@ -349,17 +404,30 @@ func _all() -> void:
 	P.dashes = 0.0
 	K.on_knock(T, true)
 	ok("passive: a knock gives back one ram charge, not both", absf(P.dashes - 1.0) < 0.01, "charges %.2f" % P.dashes)
-	# --- rank 3: stokes at once (the lava carpet is the X ult now, not the ram)
+	# --- rank 3: more damage, a speed boost and a shield on a hit (the lava carpet is the X ult now, not the ram)
+	reset.call()
+	T.teleport(home + Vector3(4.2, 0, 0))
+	ak.aim_at(P, T.pos)
+	P.ak.on_dash(false)
+	ak.step(m, 0.6)
+	var ram1: float = ak.dmg(T)
 	reset.call()
 	P.slot_lv["dash"] = 3
 	T.teleport(home + Vector3(4.2, 0, 0))
 	ak.aim_at(P, T.pos)
 	P.ak.on_dash(false)
-	ak.step(m, 0.6)
+	ak.step(m, 0.5)
 	ok(
-		"ram rank 3: stokes at once, and lays no carpet", K.burning(T) >= 1 and K.jet.trail.is_empty(),
-		"burning %d" % K.burning(T)
+		"ram rank 3: +4.3 damage (before the rank's own +30%)", ak.dmg(T) > ram1 * 1.2,
+		"rank 1 %.1f rank 3 %.1f" % [ram1, ak.dmg(T)]
 	)
+	ok(
+		"ram rank 3: a hit gives +16% speed and a 11.6% shield, and no instant burn",
+		P.shield >= P.max_hp * 0.11 and absf(K.move_k() - 1.16) < 0.02 and K.burning(T) == 0,
+		"shield %.1f move_k %.2f burning %d" % [P.shield, K.move_k(), K.burning(T)]
+	)
+	ak.step(m, 2.5)
+	ok("ram rank 3: the boost ends after 2s", absf(K.move_k() - 1.0) < 0.02, "move_k %.2f" % K.move_k())
 	P.slot_lv["dash"] = 1
 	# --- Furnace Cloak: a 0.2s ring first, then the blast
 	reset.call()
@@ -391,18 +459,25 @@ func _all() -> void:
 		float(K.cd["e"]) <= 0.0 and K.resets >= 1 and P.hp > P.max_hp * 0.6,
 		"cd %.1f hp %.0f" % [float(K.cd["e"]), P.hp]
 	)
-	# --- rank 3 refunds when the ability stokes
+	# --- rank 3: the cloak's shield is 30% bigger on top of the rank's own gain; Cinder Shot holds two charges
 	reset.call()
+	T.teleport(home + Vector3(3.8, 0, 0))
+	K._cloak_blast()
+	var shield1: float = P.shield
+	reset.call()
+	T.teleport(home + Vector3(3.8, 0, 0))
 	P.slot_lv["kin"] = 3
-	P.slot_lv["sec"] = 3
-	K.stoke(T)
-	K.cd["e"] = 10.0
-	K.add_char(T, 20.0)
-	K._refund("e")
+	K._cloak_blast()
 	ok(
-		"rank 3: stoking refunds a quarter of the cooldown", float(K.cd["e"]) < 8.0 and K.refunds >= 1,
-		"cd %.1f" % float(K.cd["e"])
+		"cloak rank 3: shield +30%", shield1 > 5.0 and absf(P.shield / shield1 - 1.3) < 0.02,
+		"rank 1 %.1f rank 3 %.1f" % [shield1, P.shield]
 	)
+	ok("cloak: rank 3 no longer refunds on a stoke", not K.has_method("_refund"))
+	ok("cinder: one charge at rank 1", K.rmb_charges() == 1)
+	P.slot_lv["sec"] = 3
+	K.cd["rmb"] = 0.0
+	ak.step(m, 0.1)
+	ok("cinder: a second charge at rank 3", K.rmb_charges() == 2 and K.ch_rmb >= 2.0, "charges %.1f" % K.ch_rmb)
 	P.slot_lv["kin"] = 1
 	P.slot_lv["sec"] = 1
 	reset.call()
