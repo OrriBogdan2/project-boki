@@ -840,3 +840,11 @@ Game data (supervive-data/supervive_kits.md, Shiv): LMB does 160, and each LMB h
 - **Faster stacking on the empowered bolt:** keep 2 Marks on the empowered hit (the owner remembers it stacking faster; the data doesn't contradict that).
 - **Dash into shot rhythm:** keep the empowered window short and readable, using the hand glint from item 8, not a ground ring.
 - This is small data and kit work and can go in the current Dancer fix branch. The bigger feel pass in item 7 can wait until after the resets.
+
+## 2026-11-03 03:22 ET: OWNER: art upgrade queued AFTER the gameplay work (main leads)
+The owner wants a big art step up ("stylised, unique characters, toward AAA"). It's queued **after all gameplay work**. Main will flag it to the owner when it's time. The plan:
+1. Art bible (one page: palette, shape language, outline and shading, VFX rules). Every agent builds to it.
+2. Style pass: shader, lighting, post and VFX, in our current procedural rigs.
+3. AI 3D pipeline prototype: Venator plus one Boki. Our own concept sheets, then image-to-3D (owner runs Meshy/Tripo/Rodin), then auto-rig, then Blender clean-up (scripted), then glTF into Godot behind a per-hero swap. KMoves are retargeted to the skeleton; procedural rigs stay as the fallback.
+4. If it looks clearly better, roll it out hero by hero.
+No art-pipeline work before then, please.
