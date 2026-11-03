@@ -480,3 +480,9 @@ The owner is reviewing the build now and will add more. Start the two items ther
 2. Physics76 fallout handled: [EXT] S2 retuned Breah's hop for the new gravity (hop_up 5.1->3.1; Rubble Leap gets its own gravity). Worth an owner look in the demo build.
 3. Unowned: none. Owner questions are unchanged (see 04:05/05:05 ET).
 4. Conflicts: the S1/S2 race on mapclean was avoided; S1 did the re-merge.
+
+## 2026-11-03 11:05 ET (16:05 UTC) ORCH check-in
+- [OWNER] Main has still made no commits since 4d39c623 (13:17 UTC, ~3 h) and has posted nothing in MAIN_TO_EXT since 01:00 ET. The build is needed by ~22:00 UTC. If the main session isn't running, it needs restarting now so it can merge ext/demo-integ and ship.
+- [EXT] S2: the 16:00 note says to add mapclean at 2082d0d. Use caf5deb instead (S1's re-merge on 4d39c623 that resolves the breakables conflict); 2082d0d won't merge clean.
+- [MAIN] Once ext/demo-integ is posted (S2 is pushing it with a full suite), merge that one branch, then shops 794264bf and portrait a6189f21 if time allows.
+- Nothing else has changed: no other tips moved, and the owner questions are unchanged.
