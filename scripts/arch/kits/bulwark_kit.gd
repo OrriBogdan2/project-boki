@@ -587,9 +587,10 @@ func on_dash(use_ex: bool) -> bool:
 		if not spend_dash(false): return true
 		var dist := float(dd["charge"]) + (1.0 if rank("dash") >= 3 else 0.0)
 		var t := dist / float(dd["charge_speed"])
-		travel(dist, t, {"invuln": t + 0.08, "shove": true, "shove_kb": float(dd["charge_kb"]), "shove_dmg": float(dd["charge_dmg"]), "trail": "dust", "dir": h.aim_dir()})
-		front_t = t + 0.15
-		knock_until = m.time + t + 0.1
+		var t_felt := t * float(dash_feel()["time"])
+		travel(dist, t, {"invuln": t_felt + 0.08, "shove": true, "shove_kb": float(dd["charge_kb"]), "shove_dmg": float(dd["charge_dmg"]), "trail": "dust", "dir": h.aim_dir()})
+		front_t = t_felt + 0.15
+		knock_until = m.time + t_felt + 0.1
 		st["last_dash"] = "charge"
 		play("bul_charge")
 		m.fx.word(h.pos + Vector3(0, 2.3, 0), "SHIELD CHARGE", col_of(dd), false)
@@ -611,6 +612,7 @@ func on_dash(use_ex: bool) -> bool:
 	var t2 := dist2 / float(dd["whirl_speed"])
 	var wd := dash_dir()
 	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd}, use_ex)
+	t2 *= float(dash_feel()["time"])          # the spin lands when the (feel-scaled) dash arrives
 	st["last_dash"] = "whirl"
 	play("bul_whirl")
 	m.fx.burst(h.pos + Vector3(0, 0.2, 0), BjornFx.GOLD, 8, 3.0, 0.2, 2.0, 0.8)

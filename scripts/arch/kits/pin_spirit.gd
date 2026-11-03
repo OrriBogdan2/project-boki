@@ -1,8 +1,8 @@
 class_name PinSpirit
 extends RefCounted
-## Pin's Shift, Spirit Walk (hero sheet pin.md): a quick dodge roll in the move direction (the aim when
-## standing still), then "time" s walking as a spirit: rocks, trees, pillars and barriers don't stop her
-## (Hunter.spirit_t; terrain cliffs and ledges still do). Damage ends it. If it ends while she is inside
+## Pin's Shift, Spirit Walk (hero sheet pin.md): a quick dodge roll the plain-dash way (ArchKit.dash_dir: the
+## move direction, the aim when standing still or with the cursor setting), then "time" s walking as a
+## spirit: rocks, trees, pillars and barriers don't stop her (Hunter.spirit_t; terrain cliffs and ledges still do). Damage ends it. If it ends while she is inside
 ## something she loses "stuck_cost" Focus and is put back where she last stood clear. While she is inside
 ## something her own screen goes dark blue.
 
@@ -28,8 +28,7 @@ func active() -> bool:
 
 func start(use_ex: bool) -> void:
 	var dd := k.dash_def()
-	var mv: Vector2 = h.inp.get("move", Vector2.ZERO)
-	var dir := mv.normalized() if mv.length() > 0.1 else h.aim_dir()
+	var dir := k.dash_dir()
 	var roll := float(dd.get("roll", 2.6))
 	var rt := float(dd.get("roll_t", 0.16))
 	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll"}, use_ex)

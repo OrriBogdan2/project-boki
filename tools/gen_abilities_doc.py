@@ -5,15 +5,15 @@ def ab(i): return j(f"content/abilities/{i}.json")
 out = []
 w = out.append
 w("# Project Boki abilities\n")
-w("Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/abilities/*.json` (class dashes, weapon RMBs) and `content/gear/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities, dodge riders and merges (E, its auto active, the Shift rider and R) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.\n")
+w("Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/abilities/*.json` (class dashes, weapon RMBs) and `content/gear/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities, dodge riders and merges (E, its auto active, the Shift rider and the Merge) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.\n")
 w("This file is generated from the JSON by a script; the descriptions are the one-liners players see in the kit panel (K) and on hover.\n")
 w("## Archetypes (the kit you play)\n")
-w("Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `scripts/arch/arch_kit.gd` and `scripts/arch/kits/*`; design in docs/ARCHETYPES.md). The archetype owns RMB (with contextual variants), Shift (its dash shape), E (utility), R (ultimate, run level 6, rank 2 at 9) and a passive with its resource; the weapon owns LMB; Q is the glove; C is the kin's own ability (it hops out, casts, hops back) and G or middle mouse sends / recalls the kin. With a full bond meter, R is Bonded: the kin merges 0.2s after the ult. The kin's typing fills each ability's sockets (docs/ARCHETYPES.md §4).\n")
+w("Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `scripts/arch/arch_kit.gd` and `scripts/arch/kits/*`; design in docs/ARCHETYPES.md). The archetype owns RMB (with contextual variants), Shift (its dash shape), E (utility), X (the hunter ultimate, run level 6, rank 2 at 9; none yet) and a passive with its resource; the weapon owns LMB; Q is the glove; C is the kin's own ability (it hops out, casts, hops back) and G or middle mouse sends / recalls the kin. T is the Merge with your Boki (a full bond meter), R reloads. The kin's typing fills each ability's sockets (docs/ARCHETYPES.md §4).\n")
 w("| Archetype | Weight | Weapons | Dash | Passive | RMB | E | R |\n|---|---|---|---|---|---|---|---|")
 for a in ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark"]:
     d = j(f"content/archetypes/{a}.json")
     wn = j(f"content/weapons/{d['signature'] if 'signature' in d else d['weapons'][0]}.json")["name"]
-    w(f"| **{d['name']}** | {d['weight']} | {wn} | {d['dash']['name']} | {d['passive']['name']} | {d['rmb']['name']} | {d['e']['name']} ({d['e']['cooldown']:g}s) | {(d['r']['name'] + ' (%gs)' % d['r']['cooldown']) if 'r' in d else 'none (R is the Merge)'} |")
+    w(f"| **{d['name']}** | {d['weight']} | {wn} | {d['dash']['name']} | {d['passive']['name']} | {d['rmb']['name']} | {d['e']['name']} ({d['e']['cooldown']:g}s) | {(d['r']['name'] + ' (%gs)' % d['r']['cooldown']) if 'r' in d else 'none (T is the Merge)'} |")
 for a in ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark"]:
     d = j(f"content/archetypes/{a}.json")
     w(f"\n### {d['name']} ({d['weight']})\n")
@@ -25,7 +25,7 @@ for a in ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark"]:
     for v, lab in [("tap", "tap"), ("hold", "hold"), ("air", "in the air"), ("during_e", "with E"), ("full", "resource full")]:
         if v in r["variants"]: w(f"  - {lab}: {r['variants'][v]}")
     w(f"- **E: {d['e']['name']}** ({d['e']['cooldown']:g}s). {d['e']['desc']}")
-    if "r" in d: w(f"- **R: {d['r']['name']}** ({d['r']['cooldown']:g}s, level 6). {d['r']['desc']}")
+    if "r" in d: w(f"- **Hunter ultimate (X): {d['r']['name']}** ({d['r']['cooldown']:g}s, level 6). {d['r']['desc']}")
     w("- Level-up order (bots too): " + ", ".join({"sec": "RMB", "dash": "Dash", "kin": "E", "ult": "R", "gear": "Q"}[x] for x in d["order"]))
 w("")
 w("The old class dashes and weapon RMBs below are kept as data (the verbs return as gloves and other content); a hunter with no archetype still uses them.\n")
@@ -35,7 +35,7 @@ w("- damage +15% (`Effects.level_k`)")
 w("- cooldown 10% shorter (RMB, Q via `AbilityRunner`/`Hunter.rank_cd_k`, E via `KinRunner`); Shift dashes recharge 15% faster")
 w("- each verb grows the numbers that define it (`Effects.RANK_GROW`): walls +20% health, +15% time, +10% length; mirrors +20% time; tethers +15% time, +20% snap stun; traps +15% time and root; zones +15% time, +10% radius; fissures +10% length; shots +10% range and +15% stun/root/slow; pulls +15% strength; chains +1 hop per rank; yanks and swaps +25% stun; bridges +20% time; cloaks/decoys/reveals +20-25% time; shields and heals +15%; blinks +10% distance; blink-strike crit window +25%")
 w("- kin abilities grow through the core rank table `KinRules.RANK_GROW` (never through data), clamped to each part's bounds")
-w("- the merge (R) at rank 2 lasts 30% longer and its effects hit 15% harder")
+w("- the merge at rank 2 lasts 30% longer and its effects hit 15% harder")
 w("- dash and charge distances never grow: dashes stay short\n")
 w("An ability JSON can override any of these with `\"per_level\": {\"key\": flat amount per rank}`.\n")
 w("## Shift: class dashes\n")
@@ -94,8 +94,8 @@ for f in sorted(os.listdir(os.path.join(R, "content/gear"))):
     else:
         pas.append(g)
 w("\nPassive gloves (no Q, stats only): " + "; ".join(f"**{g['name']}** ({g['desc']})" for g in pas) + "\n")
-w("## E, the kin's own ability, and R, the merge\n")
-w("Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (C), a dodge rider and a merge (R, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.\n")
+w("## E, the kin's own ability, and the merge\n")
+w("Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (C), a dodge rider and a merge (the Merge key, T by default, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.\n")
 def a2(i): return j(f"content/abilities_v2/{i}.json")
 for kid, k in KV.items():
     w(f"### {k['name']} ({' + '.join(k['animals'])}, {k['carry']['style']})\n")
@@ -105,7 +105,7 @@ for kid, k in KV.items():
     if e2: w(f"- **Auto: {e2['name']}** ({e2['stages'][0]['delivery']['type']}, {e2.get('cooldown', 8)}s): {e2.get('flavor', '')}")
     if k.get("throw"): w(f"- **Throw (C)**: stuns what it hits; also {parts(k['throw']['effects'])}.")
     if k.get("dodge_rider"): w(f"- **Shift rider: {k['dodge_rider']['name']}**")
-    w(f"- **R: {u['name']}** ({u['duration']}s): {u.get('flavor', '')}\n")
+    w(f"- **Merge: {u['name']}** ({u['duration']}s): {u.get('flavor', '')}\n")
 w("## Element variants of shared verbs\n")
 w("Several verbs appear in more than one element, tuned to fit it:\n")
 w("- **Hook / yank**: Hook Glove (neutral, drags to your feet or zips you to terrain), Stinger Hook (venom: poisons and blights), Leash Bolt (tether that snaps back).")
