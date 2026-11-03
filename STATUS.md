@@ -1,12 +1,12 @@
 # S2 status (second server session)
-Updated: 2026-11-03 08:13 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
+Updated: 2026-11-03 08:15 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
 
 ## Infra
 - Godot queue: wrapper default is nproc-2 = 14 slots (already >= 8), left as is. S1: no change needed.
 - Agents (6 max per 07:30): ALL hero agents on Opus 5.5 medium per 08:00 (the Sonnet Breah/Ostra/Tamsin+Dredge agents were stopped at ~07:20 real UTC and replaced by Opus agents continuing from their commits), Breah, Ostra, Tamsin+Dredge, Zedran 21/22/35 (Opus 5.5 medium per owner), prologue-polish (Opus 5.5 medium, allowed by 07:45), dash-flow base (Opus 5.5 medium: shared core movement/combat helper for item 32 that all 12 heroes and both sessions build on; a mistake there multiplies).
 - Source data copy: /home/boki/briefs-s2/briefs (from ext/agent-briefs).
 
-## Item 32 shared base (for S1 too): READY TO MERGE, ext/dash-flow-base @ d4182fa (on main 801bfbf)
+## Item 32 shared base (for S1 too): READY TO MERGE, ext/dash-flow-base @ 40bc008 (on main 801bfbf; 40bc008 adds ArchKit.dash_left() so kits that run their own dash are tested on its real last step; suite above was on d4182fa, 40bc008 changes only the hook + check: dash-flow-check 0 failures, health OK)
 - Full suite (94 checks incl. --check and simtest seed 5): every failure also fails on plain main 801bfbf (abyss 2, blight 1, grammar-runtime 4, hitch/load timing on a busy box, perch 4 spires, train 1, pack-ui 2 slot drops); farm-start failed once on the branch and passed on 2 reruns (flaky); pack-ui's 'Wear' click also fails on main (3 of 3 runs, plus a 'Drop' click once), so not caused by the branch. Logs: /home/boki/suite-s2/boki-dash-flow, main baseline /home/boki/suite-s2/main-base.
 - One helper `scripts/arch/dash_flow.gd` (DashFlow) + one data file per hero `content/dash_flow/<hero>.json` + generated `docs/heroes/dash_interactions.md` (gen_wiki) + `--dash-flow-check` (iterates every hero x slot x ground/air from the data, so new rows are covered automatically). Decision doc docs/decisions/0010.
 - Row: `{"mode": "fire"|"buffer"|"cancel", "carry": bool, "variant": str, "source": "text"}` under `dash.ground|air.<lmb|rmb|e|x|q>`; missing row = buffer; reverse direction under `into_dash.<slot>`; `kit_owns` lists dashes the kit runs itself (Ostra swap, Tamsin Rink Run, Breah leap).
@@ -44,6 +44,8 @@ Updated: 2026-11-03 08:13 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (
 - Branch `ext/prologue-polish` from origin/ext/prologue5 54f8304, aae7ef6 local: per-slide eased camera with cuts, MOODS lighting table, Crown keep, Wyrm rise/roar/dive, Mantle lights scatter, slide 4 restaged in prologue_boki.gd (no clipping across all 492 frames, asserted), slide 3/4 owner text, new --prologue-check 7/0, class-unlock 137/0, health OK. Coordinator review: slide 4's wake beat (Boki touches relic, glow) is hidden behind the lead Boki in the close shot; restage in progress. Shots: /home/boki/shots-s2/prologue/.
   Owner Qs (prologue): slide 4 hunter wakes Venator's Mantle (orange, every player's starter) OK? hunter without his rifle in slide 4 OK? slide 3 Mantle lights are plain coloured spheres (glow washed out on the red sky) OK?
 
-## Queued new tasks (INBOX 07:55, 08:10)
-- Character concept pass phase 1 (`ext/concepts`, Opus): starts when a slot frees after the demo-critical branches; not for tonight.
+## Character concept pass phase 1 (INBOX 07:55): IN PROGRESS
+- Branch `ext/concepts` from origin/main 16dd7fa, Opus; SVG sheets + PNG renders (via Godot's SVG rasterizer) in docs/art/concepts/; Bjorn, Pin, Zedran, Cinder, Ostra, Tarek first. Not for tonight.
+
+## Queued (INBOX 08:10)
 - Mantle look + creator (item 45, `ext/mantle-look`, Opus): after the hero pairs and prologue are underway; not for tonight.
