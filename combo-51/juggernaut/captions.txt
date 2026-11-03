@@ -1,0 +1,3 @@
+zedran_combo_wave_rampage_strip.png: Zedran (item 51): the Searing Wave charging; Shift with it held, the Rampage's crouch; the drive, the charge kept; out of the drive, the wind-up pose back; let go, the wave leaves; the follow-through
+zedran_combo_slam_drive_strip.png: Zedran (item 51): the Slam winding up; Shift in it, the Slam Drive goes at once along the strike's aim, the overhead pose kept; driving in; the drive's end; the Slam lands where it arrived; recovery
+zedran_combo_meteor_airdash_strip.png: Zedran (item 51): the Meteor Drop's hang over its marker; Shift, the air dash goes in the gather pose; the dash's end, off to the side; the dive back onto the marker; the impact; the recovery

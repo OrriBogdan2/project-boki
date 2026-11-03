@@ -1,0 +1,1 @@
+row.png: twelve Wardens, two rows of six, on their hitbox circles. Reading order (hit_r m): Dancer 0.384, Pin 0.392, Vireo 0.400, Venator 0.416, Zedran 0.428, Bjorn 0.460, Dredge 0.452, Linwick 0.376, Moosh Moosh 0.340, Tamsin 0.380, Breah 0.388, Ostra 0.412.

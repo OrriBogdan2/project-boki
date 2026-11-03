@@ -1,0 +1,12 @@
+gameplay_match.png: Vex's 3D model (INTERIM, Godot-built .glb) in a real match on Duskmoor at the default match camera (centre, rifle out); procedural Wardens around her; the HUD portrait is rendered from the 3D model
+gameplay_match_zoom.png: the same frame, Vex's area enlarged x4 (nearest, true pixels): navy beret, rifle, scarf and plate read; the body is dark at dusk
+training_match.png: Vex in the training area at the match camera, mid right-click (Spike Grenade)
+closeup.png: head and shoulders, three-quarter front: beret, the eye-sigil slate plate over her mechanical left arm, scarf
+front_34.png: full length, front (mechanical right eye glowing) and three-quarter, hands on the rifle (rest pose)
+turnaround_close.png: front, 3/4, side, back, 3/4 back, close
+turnaround_game.png: the same five at the match camera (pitch 66, 23 m, fov 32): true pixels, then x3
+vs_sheet.png: her turnaround sheet (left) beside the model's front and 3/4 (right), the match-camera strip below. The sheet draws the mechanical arm on her right; the model puts it on her left as her Warden block and splash have it
+moves_close_1.png: run (two stride phases), shoot (gunslinger_lmb at 0.03 s), recoil (0.08 s)
+moves_close_2.png: Combat Slide dash at 0.1 s, 0.4 s (low) and 0.62 s (standing up), then the RMB throw at 0.07 s (the slide sinks into this flat test ground on the procedural model too)
+poses_game.png: idle, run, attack, cast, ult at the match camera
+procedural_fallback_front_34.png: the procedural fallback (Settings > Video > Warden models: off) with Vex's new proportions, for comparison

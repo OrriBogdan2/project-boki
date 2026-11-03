@@ -1,0 +1,12 @@
+01_stall_l1.png: Every farm-start island has its market stall from the start, set down near the portal: L1, a single vendor
+02_panel_l1.png: The stall panel at L1: the Vendor and the Exchange, and one line on what an upgrade opens
+03_stall_l2.png: The stall upgraded to L2: the shelter's hut and a trade sign (Shelter, your stall, search)
+04_stall_l3.png: The stall upgraded to L3: the auction bell, bunting and a gold-edged sign (Auction House)
+05_shelter.png: Shelter: strays and a Boki given up (raised by Orri); adopting burns the gems, giving pays nothing
+06_my_stall.png: Your stall: what's listed and what you could put up, with the lowest price on the market and the fee
+07_search.png: Market search: every good's lowest price across the stalls today, cheapest first, buy the best one
+08_search_dye.png: Search for 'dye': the lowest prices for each dye
+09_auctions.png: Auction House: NPC lots, your lot, your winning bid, and putting a piece up (12/24/48 h, friends only)
+10_black_market_ransom.png: Black Market, Ransom tab: a Boki nobody came for, its asking price, haggling and paying
+11_black_market_captured.png: Black Market, Captured: an offer and a message to the rival who has yours
+12_black_market_rare.png: Black Market, Rare stock: a few rare and epic pieces a day, priced as a gem sink

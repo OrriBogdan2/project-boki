@@ -1,0 +1,11 @@
+claire_rmb_strip_close.png: RMB Ice Spear as a push (owner 19:50), close-up at 0.7/0.84/0.92/1.05/1.32 s (held 0.3-0.8 s). 0.7: gathering, both palms in at her chest with the spear formed in front of them, pointing at the cursor. 0.84: the load. 0.92: palms fully out, the spear leaving them (it starts 0.9 m in front of her chest). 1.05: the spear driving out with its trail, the arms held through the recoil. 1.32: settled.
+claire_rmb_strip_game.png: the same at gameplay zoom: the landing ring on the dummy, the spear travelling out from her (0.92-1.05 s), then the slow zone where it lands (1.32 s). Travel time is distance / 18 m/s.
+claire_rmb_fly_game.png: full frame, the spear in flight from her toward the ring.
+claire_rmb_land_game.png: full frame, the spear landed: the slow zone at the cursor.
+claire_heavy_strip_close.png: LMB barrage, the large darts (5th-7th) at 0.98/1.02/1.06/1.1/1.2 s: the bigger ice shards and the two-handed fling (tm_dart_heavy), alternating with the plain one-hand flicks.
+claire_heavy_strip_game.png: the same at gameplay zoom.
+claire_e_strip_close.png: Rink Wall cast as a two-handed push (footage: both hands pushed forward), 0.34-0.9 s: the crouch with the palms back at the hips during the 0.2 s tell, then both palms shoved out low as the ice erupts.
+claire_e_strip_game.png: the same at gameplay zoom.
+claire_skatefire_strip_game.png: the owner's example: skating along her ice plates (heading right) while holding LMB; the beams leave straight at the cursor on the dummy (up), not along the skate.
+claire_skatefire_strip_close.png: the same, close-up.
+claire_skatefire_game.png: full frame of the skate firing at the dummy.

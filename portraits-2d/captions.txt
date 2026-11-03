@@ -1,0 +1,7 @@
+character_select.png: Mantle pick (Choose your second Hunter): each starter chip carries its Warden's painted face (Zedran, Pin, Linwick/Cinder art); the viewer's info column shows the 76 px portrait beside the name.
+hunter_viewer.png: Hunters screen: every tile shows its Warden's face cropped in on the face (36 px), new names Vex and Claire; the Hunter viewer shows the portrait beside the name (3D model stage kept for the ability playback).
+kit_card.png: Kit card (K) for Claire: her splash (128x72) beside the name in the header.
+hud_match.png: HUD in a match as Vex: the 112x132 portrait slot shows Vex's painted bust in her class-colour frame with the level coin in its notch; squad frames on the left show the teammates' Warden portraits.
+unlock_reveal.png: Unlock reveal (hold to unlock Zedran): the splash, square-cropped around him, scales in.
+practice_picker.png: Practice picker cards (84 px portraits).
+fallback_hud.png: Fallback test: with the art folder pointed at nothing, the HUD draws the rendered model portrait (procedural) in the same frame.

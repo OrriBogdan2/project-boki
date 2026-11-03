@@ -1,0 +1,10 @@
+ostra_ult_walkout_strip.png: Ostra's Nightwell, gameplay zoom, top to bottom at 0.6/0.8/1.3/1.56/1.9/2.5 s (X pressed at 0.5 s). 0.6-1.3: locked in the cast while the pale dome fills, arms spread, the dark orb swelling at her raised hands. 1.56: the well opens (stun on the dummy) and she clenches it in (ostra_well_snap) and is free. 1.9 and 2.5: she walks out west at full speed while the well keeps turning and holding the dummy (the well slides right in the crop because she is leaving it).
+tamsin_skate_ult_strip.png: Tamsin skate -> X, cropped round her at 0.7/0.8/0.9/1.05/1.3/2.2 s (skate from 0.3 s, X at 0.75 s). 0.7: skating with ice plates behind. 0.8-1.05: the bud's petals close over her while the skate's momentum carries her on (the dark post slides from her left to her right across these frames); 1.3 and 2.2: stopped, encased and ROOTED, the post no longer moves.
+tamsin_1_skating.png: full frame at 0.6 s: Tamsin skating inland, ice plates trailing.
+tamsin_2_carried_sealed.png: full frame at 1.3 s: sealed in the frost bud about 2.9 m further on, the 7.2 m rink centred where she stopped.
+tamsin_3_encased.png: full frame at 2.0 s: still encased and rooted in the same spot while the rink cracks build.
+moosh_ground_dash_strip.png: Moosh Moosh's ground hop (mm_skip), 0.31/0.35/0.41/0.47/0.53 s (Shift at 0.3 s): squash, the skip with the arms flung up, the tucked apex, the touchdown squash and the happy settle; 3.6 m in 0.2 s (Elluna's 2 bh). The teammate stands beside her (the demo's pass-through setup).
+moosh_air_glide_strip.png: her air glide (mm_float), 0.33/0.5/0.8/1.1/1.3 s (air dash at 0.3 s): tuck and somersault, the seated float with the arms out, then down at the island's rim; 13.3 m over 0.95 s (Elluna's measured glide).
+moosh_air_glide_1_start.png: full frame at 0.28 s, just before the glide (island centre).
+moosh_air_glide_2_float.png: full frame at 0.8 s, floating mid-glide.
+moosh_air_glide_3_land.png: full frame at 1.3 s: landed about 13 m away at the island rim.

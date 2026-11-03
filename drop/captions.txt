@@ -1,0 +1,8 @@
+drop_comet_sweep.png: Recording mode, 1.5 s off the ship: the squad's comet heading in over the Hollow Crown, its trail behind it, the islands spread out below through the cloud layer
+drop_comet_sweep2.png: Recording mode, a moment later: the jumpmaster turned the comet (A held), the trail shows the sweep
+drop_comet_hud.png: The same drop as the jumpmaster, with the HUD: 'Jumpmaster · 2 in your comet', Space to break away, P to pass the lead
+drop_burst.png: The comet near the ground, bursting, and the squad landed together on their own spots (spread out, on solid ground)
+drop_clouds.png: Diving into the cloud layer: the clouds part round you so you're never hidden; punching through flashes white with a whoosh
+drop_dive_full.png: Solo, diving (W held): speed lines and rising wind, the camera turned with your heading, the islands coming up
+drop_dive_float.png: Close-ups (the camera pulled in): float, no keys: spread flat, belly down; dive, W: head down, arms swept back, legs together
+drop_glider.png: Floating down; the glider opens by itself 12 m over the ground; the landing kick (dust rings, squash); the Boki leaps off your back

@@ -1,0 +1,2 @@
+pin_combo_draw_roll_strip.png: Pin (item 51): drawing; Shift mid-draw, the roll goes at once with the draw kept; still rolling, the reticle charging on; out of the roll, still drawn; let go, the arrow leaves; the follow-through
+pin_combo_draw_jump_flick_strip.png: Pin (item 51): drawing; a jump with the draw held; the air flick with it still held; let go in the air, the arrow leaves and she carries on with her speed; landing

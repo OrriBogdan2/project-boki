@@ -1,0 +1,3 @@
+dash_bar_strip.png: Dash bar over the hunter, gameplay zoom, a two-charge hunter. 1 full (both lit, long dash pale); 2 dash; 3 second dash (both spent, dimmed not hidden); 4 a charge sweeping back; 5 refill complete, the bright flash; 6 empty press, red flash and shake
+dash_bar_hud.png: Bottom-left HUD block with the dash bar under the dash slot, a charge half back
+dash_bar_cool.png: The long dash on cooldown: the bar tints cool blue and its own segment (right) sweeps back

@@ -1,0 +1,8 @@
+strip_thf_lmb_close.png: Dancer LMB, one bolt, close (anim_thf_lmb, zoom 0.3), frames at 0.49/0.51/0.54/0.62/0.76/0.95/1.20 s, bolt clicked at 0.49. The bolt leaves the right hand. The right blade, with the hand still on it, is whipped from cocked (out wide and high) to the aim in about 0.05 s while the torso unwinds about 30 degrees into the throw. It overshoots at 0.12 and settles by 0.26, and by 0.45 the torso is wound toward the left hand for the next bolt. With no next bolt she eases out by 0.7. Footage 0028-0039: one arm whipped from a wide low stance, 2-3 frames a shot.
+strip_thf_lmb_game.png: The same throw at gameplay zoom (zoom 1.0).
+strip_thf_lmb_held_close.png: LMB held, close, frames at 0.50/0.54/0.62/0.76/0.95/1.01 s. The right throw, then the left on the next bolt (0.47 s later). The string flows hand to hand with no pop between throws. Footage: left, then right.
+strip_thf_lmb_held_game.png: The held string at gameplay zoom.
+strip_thf_lmb_run_close.png: LMB while running down the screen and throwing east at the dummy, close. The legs keep running (the throw's stance legs drop out at a run) while the torso and the blades throw. Footage: "the torso snaps to the cursor while firing with either hand, and the legs keep running".
+strip_thf_lmb_run_game.png: The running throw at gameplay zoom.
+strip_thf_primed_close.png: The empowered bolt after a Vault, close (zoom 0.42), frames 0.99-1.55 s. Both blades are driven out together in a V (swing step 2) with the lunge and recoil of thf_primed. No screen shake on your own camera any more.
+strip_thf_primed_game.png: The empowered bolt at gameplay zoom.

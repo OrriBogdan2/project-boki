@@ -1,0 +1,8 @@
+strip_bul_smash_wind_close.png: LMB hold (sheet 0133-0145), close: standing, then the hammer dragged back low behind him over 0.15 s, side-on and crouched with the shield arm forward, the coil deepening, the glint on the head from 0.6 s growing to the full-charge flare (6); no whirl, no trail
+strip_bul_smash_wind_game.png: the same at gameplay zoom
+strip_bul_throw_close.png: LMB tap (sheet 0033-0036), close: the arm cocked back low behind with the hammer still in hand (2), the overhand throw as it leaves (3), flying to the cursor and hitting the dummy for 12, planted under the beacon (4-6)
+strip_bul_throw_game.png: the same at gameplay zoom
+strip_bul_smash_close.png: LMB release, close: the coil, the one-frame sweep into the flaming crescent, the impact, the step and the crouched recovery (no camera nudge any more)
+strip_bul_smash_game.png: the same at gameplay zoom: wind-up with the ring, crescent, impact on the dummy, step and recovery
+strip_bul_guard_close.png: RMB hold, close: the aegis rising 0.1 s into the hold (data: a 0.1 s cast), facing the cursor
+strip_bul_guard_game.png: the same at gameplay zoom

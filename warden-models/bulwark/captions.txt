@@ -1,0 +1,6 @@
+turnaround_game.png: Bjorn at the match camera (pitch 66, 23 m, fov 32), front, 3/4, side, back, 3/4 back; true pixels, then x3
+turnaround_close.png: Bjorn close, front, 3/4, side, back, 3/4 back
+front_34.png: Bjorn full length, front and three-quarter (as the sheet's two views)
+closeup.png: Bjorn head and shoulders, three-quarter front
+vs_sheet.png: the approved concept sheet (left), the model's front and 3/4 (right), the match-camera strip below
+poses_game.png: Bjorn at the match camera in idle, run, attack, cast, ult (true pixels, then x3)

@@ -1,0 +1,24 @@
+vireo_anim_dash.png: Shift: the charging crouch, the streak (her gold-teal after-images), re-forming on arrival
+vireo_dash_aim_mid.png: Shift held: rails out to max, the ticked end ring partway (the cursor plays no part)
+vireo_dash_aim_mid_close.png: Shift held: rails out to max, the ticked end ring partway (the cursor plays no part) (close-up)
+vireo_dash_aim_full.png: Shift held to full: the end ring at 8.5m, past the 3m cursor
+vireo_dash_aim_full_close.png: Shift held to full: the end ring at 8.5m, past the 3m cursor (close-up)
+vireo_dash_run.png: Shift released: a lightning streak, the body a trail of her own gold-teal after-images
+vireo_dash_run_close.png: Shift released: a lightning streak, the body a trail of her own gold-teal after-images (close-up)
+vireo_dash_arrive.png: Shift arrival (parity change): she re-forms with a dust puff; the old ring and spark spray are gone (owner: no rings or bursts on dashes)
+vireo_dash_arrive_close.png: Shift arrival: she re-forms with a dust puff (no ring or burst: the hits are along the way) (close-up)
+vireo_anim_dash_ex.png: Air dash (her base dash variant): the tuck, the forward tumble, her teal after-images, the landing
+vireo_dash_ex.png: Air dash: her own teal after-images (her silhouette, not a shared pill) and the teal streak
+vireo_dash_ex_close.png: Air dash: her own teal after-images (her silhouette, not a shared pill) and the teal streak (close-up)
+vireo_blowout.png: Payoff: Wirerun through a Live foe, BLOWOUT, the copper refund columns on her
+vireo_blowout_close.png: Payoff: Wirerun through a Live foe, BLOWOUT, the copper refund columns on her (close-up)
+vireo_anim_lmb_l.png: Vireo LMB (parity check, unchanged): left hand, torso twist and arm flung out at 0.03 s, settled by 0.35 s, inside the 0.8 s cadence. Footage 0003-0020.
+vireo_anim_lmb_r.png: Vireo LMB, the right hand (alternating).
+vireo_lmb_aim.png: LMB aim: the thin line through the cursor to full range with the arrow tick.
+vireo_lmb_aim_close.png: LMB aim (close-up).
+vireo_lmb_fire.png: LMB fire: the fingertip flash, gold sparks at her feet.
+vireo_lmb_fire_close.png: LMB fire (close-up).
+vireo_lmb_bolt.png: LMB bolt in flight (34 m/s, to 13 m past the cursor).
+vireo_lmb_bolt_close.png: LMB bolt (close-up).
+vireo_lmb_impact.png: LMB impact: splinters spray back toward her.
+vireo_lmb_impact_close.png: LMB impact (close-up).

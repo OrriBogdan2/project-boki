@@ -1,0 +1,3 @@
+picker.png: the Hunters picker (training, --overlay=hunters): class titles on every card with "Originally <base name>, <gender>" under each
+nameplate_and_feed.png: a Demo match (--demo-match --lost-demo): rival nameplate "Faelkys the Broken Abomination" and kill feed line "Brirris the Hired Gun is out"
+wiki_Class-Dark-Archer.png: docs/wiki/Class-Dark-Archer.md (raw markdown drawn in a Godot label; the generated profile table with class title, base character, personality)

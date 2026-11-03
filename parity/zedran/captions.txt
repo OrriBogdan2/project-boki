@@ -1,0 +1,7 @@
+jug_lunge_game.png: Zedran RMB held (parity, gameplay zoom): pressed; the sword raised over his head, the lane growing; at full the raised blade flashes white (the perfect window) and he lets go on it; the overhead chop drives him forward; the drive; the impact on the dummy (20)
+jug_lunge_close.png: Zedran RMB held (close): the blade swinging up; held overhead on the loaded back leg; the white flash on the blade at full; the chop down and out as he drives; the follow-through; the impact
+jug_wave_game.png: Zedran LMB held (Searing Wave, gameplay zoom, frames top to bottom): pressed; charging, a short red lane; full, the lane gold-hot and 14 m long (the wave it will throw); let go, the crescent leaves; it reaches the dummy (21, slowed); the follow-through
+jug_wave_close.png: Zedran LMB held (close): the blade dragged up behind the head as the ring fills; the release carving down and forward; the follow-through
+zedran_warchain_taut_strip.png: Zedran Warchain: hooked on the dummy; backing away, the chain pays out; still going, the links pulling straight; past 20 m, taut and glowing hot; at 24 m it holds: he walks but stays at its end; still held
+zedran_warchain_sling_strip.png: Zedran Warchain: hooked; backing away; still backing away, E: the slingshot (faster than a standing pull); flying in; slamming into the dummy; arrived, still moving
+zedran_warchain_steer_strip.png: Zedran Warchain: hooked; E with a strafe held: the pull swings out that way; curving round; coming in beside the dummy; arrived beside it; still moving

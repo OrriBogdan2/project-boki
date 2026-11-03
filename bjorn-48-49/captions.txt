@@ -1,0 +1,4 @@
+strip_bul_ult_walk.png: #48 Faultline: planted for the wind-up (1), the slam floods the near cell (2), then he walks off south across the lane at full speed while the cells erupt behind him where it was cast (3-5); the dummy on the lane is still thrown
+strip_bul_smash_late.png: #49 normal swing (let go after the perfect window): the coil at full charge with the hammer hauled back and the glint, then item 30's short grounded step (~1.8 m) with the crescent and a crouched recovery
+strip_bul_launch.png: #49 perfect swing (let go inside the window): the coil with the white-hot glint, the full-body heave, airborne over the 0.3 s launch (the body lifted clear of the ring at his feet, gold wake behind), ~4 m of travel, then the braced plant and skid; no ground burst
+strip_bul_launch_glide.png: #49 perfect swing at an island's edge: the launch carries him over the abyss and the glider opens by itself, keeping the launch's speed (75% via the shared dash-to-glide hand-off)

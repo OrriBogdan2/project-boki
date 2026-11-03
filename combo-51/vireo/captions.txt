@@ -1,0 +1,2 @@
+vireo_combo_kitefall_shift_strip.png: Vireo (item 51): Kitefall's crouch; Shift in it charges the Wirerun at once; the streak; out of it the crouch starts over; she launches from where the run ended; up, the ring round the new spot
+vireo_combo_kitefall_jump_strip.png: Vireo (item 51): Kitefall's crouch; a jump in it goes at once; the crouch finishing mid-jump; the launch from that height (no drop first); climbing; hanging

@@ -1,0 +1,6 @@
+strip_pin_roll_close.png: Pin Shift (parity): the dodge roll retimed to the footage's 0.27 s (3 m), from the press (0.5 s) through the forward roll into the crouched spirit walk; a dust puff, no burst or ring at the start. Close zoom.
+strip_pin_roll_game.png: The same roll at gameplay zoom.
+strip_arc_draw_close.png: Pin LMB draw (parity check, unchanged): side-on, bow arm out to the cursor, string hand back to the chest, held; the V reticle closing. Footage 0102-0105.
+strip_arc_draw_game.png: The same draw at gameplay zoom.
+strip_arc_loose_close.png: Pin LMB release (unchanged): a one-beat snap of the string hand, little recoil, back to the carry by 0.42 s. Footage: 1 frame. Next draw now 0.5 s after (card cooldown).
+strip_arc_loose_game.png: The same release at gameplay zoom.

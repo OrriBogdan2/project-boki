@@ -1,0 +1,5 @@
+strip_br_throw_close.png: Breah LMB tap (parity check, unchanged): a quick side hurl from the right gauntlet, no long wind-up (out at 0.07 s); boulder every 0.6 s at 20 m/s. Footage 0108.
+strip_br_throw_game.png: The same throw at gameplay zoom.
+strip_br_punch_close.png: Breah LMB hold (unchanged): the cocked gauntlet in a crouch with the lane and charge reticle, then the straight drive that steps her forward (~0.8 m), recovery. Footage 0118-0121.
+strip_br_punch_game.png: The same punch at gameplay zoom.
+glide_slam_strip.png: Tarek (dolm) Quakefall out of a glide (owner 23:00, per the source): gliding at 7 m; RMB pressed, the canopy folds (it finishes closing over ~0.08 s); the plunge at 32.5 m/s (the data's glider dive); the slam where she lands (0.25 s from 8 m); the crater.

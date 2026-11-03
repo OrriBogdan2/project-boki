@@ -1,0 +1,3 @@
+linwick_combo_lance_ram_strip.png: Linwick (item 51): the lance roaring; Shift with it held, the ram goes and the stream goes out; still ramming; the ram's end, the stream back at once (no pilot, no gap); roaring on; let go
+linwick_combo_flight_poof_strip.png: Linwick (item 51): flying over the carpet; Shift, a poof from the bellows (the air dash spent); the flight faster and bent its way; flying on; X again, landing; on foot, the carpet behind
+linwick_combo_flight_leap_strip.png: Linwick (item 51): flying; a jump leaps off the jet, its speed kept; rising; the glider opens with the flight's speed; gliding on; the carpet left behind

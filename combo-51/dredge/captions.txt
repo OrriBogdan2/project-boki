@@ -1,0 +1,2 @@
+dredge_combo_anchor_barge_strip.png: Dredge (item 51): the Anchor's wind-up, fist raised; Shift in it, the barge goes at once with the fist still up; arriving; the slam lands where he arrived; the dust; recovery
+dredge_combo_broadside_barge_strip.png: Dredge (item 51): the Broadside charging behind its fan; Shift, the barge goes at once in the bracing pose; arrived, the fan has followed him; the first wave; the second wave; done
