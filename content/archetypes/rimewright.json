@@ -54,7 +54,7 @@
 		"refund": 0.6,
 		"min_t": 0.2,
 		"rink_t": 0.0,
-		"desc": "Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly straight and thick. In the air this is your usual long dash.",
+		"desc": "Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly straight and thick. In the air, press it to buffer the skate: it starts the moment you land.",
 		"steer": 3.6,
 		"ice_gap": 0.2,
 		"ice_look": 2.0,
@@ -75,7 +75,7 @@
 		"charges": 2,
 		"hold": 0.2,
 		"lance": {
-			"speed": 45.0,
+			"speed": 18.0,
 			"range": 12.0,
 			"hit_r": 0.5,
 			"dmg": 4.0,
@@ -89,7 +89,7 @@
 			"encase_t": 1.5
 		},
 		"variants": {
-			"tap": "Hold to see the landing ring at the cursor (up to 12m); let go to throw. The spear lands at the cursor (4 damage to a foe in the way, where it then lands) and leaves a 2.2m slow zone (35% slower, Chill) for 1.8s, then detonates: 60 damage in 2.7m and a 0.5s freeze. 2 charges."
+			"tap": "Hold to see the landing ring at the cursor (up to 12m); let go and she draws back and throws it from her hand. The spear flies to the cursor and lands there (4 damage to a foe in the way, where it then lands) and leaves a 2.2m slow zone (35% slower, Chill) for 1.8s, then detonates: 60 damage in 2.7m and a 0.5s freeze. 2 charges."
 		},
 		"sockets": {
 			"hit": "add",
@@ -107,9 +107,9 @@
 		"cooldown": 17.0,
 		"hp": 70.0,
 		"slide": 4.5,
-		"time": 3.0,
+		"time": 4.5,
 		"push": 5.0,
-		"desc": "A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (3 to 10.8m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 3s. Press E again while it slides to freeze it in place for 6s.",
+		"desc": "A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.",
 		"sockets": {
 			"guard": "add",
 			"util": "add"
@@ -118,9 +118,9 @@
 		"reach": 1.8,
 		"length": 1.8,
 		"length_max": 4.5,
-		"travel": 10.8,
-		"travel_min": 3.0,
-		"grow_t": 2.4,
+		"travel": 16.2,
+		"travel_min": 4.5,
+		"grow_t": 3.6,
 		"frozen_t": 6.0
 	},
 	"order": [

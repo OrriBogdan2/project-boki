@@ -2,17 +2,25 @@
 	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash().",
 	"dash": {
 		"ground": {
-			"rmb": {"mode": "fire"},
-			"e": {"mode": "fire"},
-			"x": {"mode": "cancel", "carry": true},
-			"q": {"mode": "fire"}
+			"lmb": {"mode": "buffer", "source": "Data: Pyro Pounce is a short dash that stops on impact; no fire during it. Footage (245.53-245.9 s, 0159-0161): a head-first lunge, then he is upright with the nozzle already on the aim. Ours: the hose lights the step the ram ends (or the step it hits a foe)."},
+			"rmb": {"mode": "buffer", "source": "Data: Embry Bolt has no dash rule. Footage: never cast from the bash; the ram is one committed head-first beat with the arms swept back. Ours: the bolt goes the step the ram ends or hits, from where he stands."},
+			"e": {"mode": "buffer", "source": "Data: Heat Shield pulls in nearby foes; the kit's engage is bash in, then spin. Footage: not shown from a bash. Ours: E pressed in the ram goes the step it stops on the foe (pull and shield right at the impact) or ends."},
+			"x": {"mode": "cancel", "carry": true, "source": "Data: Flight of the Firefox flies forward; knockback impulses speed it up (momentum feeds it). Footage: not cast from a bash. Ours: X ends the ram at once and the flight takes over from where he is (the row ends the dash first; no kit code for it)."},
+			"q": {"mode": "fire", "source": "No source glove; it goes off from the ram like any glove."}
 		},
 		"air": {
-			"rmb": {"mode": "fire"},
-			"e": {"mode": "fire"},
-			"x": {"mode": "cancel", "carry": true},
-			"q": {"mode": "fire"}
+			"lmb": {"mode": "buffer", "source": "Data: no air bash in the source (the jetpack is his only air move). Owner note (23:40): the air dash is a fast poof, balled up for one roll. Ours: the hose lights as the poof ends (he can flame in the air; the 0.35s relight gap after a release still applies)."},
+			"rmb": {"mode": "fire", "source": "Data: no air bash; the jetpack allows the shield ability mid-flight. Ours: the bolt leaves from the poof (its speed is kept after it anyway)."},
+			"e": {"mode": "fire", "source": "Data (wiki): Heat Shield can be cast mid-flight in the jetpack, his one air move. Ours: likewise mid-poof."},
+			"x": {"mode": "cancel", "carry": true, "source": "Data: knockback impulses speed the flight up. Ours: X ends the poof and the flight takes over."},
+			"q": {"mode": "fire", "source": "No source glove; it goes off from the poof."}
 		}
 	},
-	"into_dash": {}
+	"into_dash": {
+		"lmb": {"mode": "fire", "source": "Data: the flamethrower is a hold with a 0.35s gap between uses. Footage: he walks while firing; no dash out of the hose shown. Ours: Shift rams at once and the stream stops (hold again to relight after the gap)."},
+		"rmb": {"mode": "fire", "source": "Footage: the aim lane shows about 0.4s while he keeps moving. Ours: Shift while aiming rams; the bolt still goes on release."},
+		"e": {"mode": "fire", "source": "Heat Shield is instant (owner item 11): there is no wind-up to dash out of."},
+		"x": {"mode": "buffer", "source": "Data: the flight is his movement; reactivating lands. Footage: no dash during the flight. Ours: Shift in the flight is held by the hunter's dash buffer and rams on landing."},
+		"q": {"mode": "fire", "source": "No source glove."}
+	}
 }

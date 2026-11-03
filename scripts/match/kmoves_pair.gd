@@ -91,28 +91,28 @@ const MOVES := {
 		}],
 		[0.22, {"p": -0.08, "sq": 0.05}],
 		[0.36, {}]]},
-	# Anchor Drop (E, 0.38 s to impact): f1 the free fist hauled back and the shoulder turned away; f2 a hop up
-	# and about a body height forward (the kit moves the body); f3 the fist drives down; f4-f5 a crouched
-	# follow-through, then recovery with a small rebound
+	# Anchor Drop (E, 0.38 s to impact, planted): the free fist raised high, the shoulder turned away; up on the
+	# toes at the top (0.3); the fist driven down into the ground in front (0.38, the slam frame); a recoil
+	# bounce (0.48), then a slow recovery
 	"dr_anchor": {"keys": [
 		[0.0, {}],
-		[0.14, {
-			"y": -0.75, "p": 0.3, "fl": Vector3(-0.2, 0.75, 0.3), "hw": 1.0, "fr": Vector3(0.3, 0.0, 0.1), "rw": 0.7,
-			"sq": 0.35, "lift": -0.1, "lw": 1.0, "legs": [0.9, -1.4, 0.7, -1.3]
+		[0.12, {
+			"y": -0.6, "p": 0.22, "fl": Vector3(-0.1, 1.0, 0.15), "hw": 1.0, "fr": Vector3(0.3, 0.1, 0.1), "rw": 0.7,
+			"sq": 0.2, "lw": 1.0, "legs": [0.9, -1.3, 0.7, -1.2]
 		}],
-		[0.26, {
-			"y": -0.45, "p": 0.1, "fl": Vector3(-0.1, 0.95, 0.05), "hw": 1.0, "fr": Vector3(0.3, 0.2, 0.0), "rw": 0.7,
-			"sq": -0.35, "lift": 0.38, "lw": 1.0, "legs": [1.2, -1.9, 1.0, -1.8]
+		[0.3, {
+			"y": -0.8, "p": 0.38, "fl": Vector3(-0.15, 1.2, 0.35), "hw": 1.0, "fr": Vector3(0.35, 0.2, 0.0), "rw": 0.7,
+			"sq": -0.15, "lift": 0.06, "lw": 1.0, "legs": [1.0, -1.5, 0.8, -1.4]
 		}],
 		[0.38, {
-			"y": 0.35, "p": -0.85, "fl": Vector3(0.1, -0.6, -0.75), "hw": 1.0, "fr": Vector3(0.25, -0.3, -0.3),
-			"rw": 0.7, "sq": 0.6, "lift": -0.22, "lw": 1.0, "legs": [1.15, -1.6, -0.45, -1.0]
+			"y": 0.35, "p": -0.9, "fl": Vector3(0.1, -0.65, -0.8), "hw": 1.0, "fr": Vector3(0.25, -0.3, -0.3),
+			"rw": 0.7, "sq": 0.65, "lift": -0.25, "lw": 1.0, "legs": [1.2, -1.7, -0.45, -1.0]
 		}],
-		[0.6, {
-			"y": 0.25, "p": -0.65, "fl": Vector3(0.1, -0.62, -0.7), "hw": 0.9, "sq": 0.3, "lift": -0.16, "lw": 1.0,
-			"legs": [1.05, -1.5, -0.4, -0.9]
+		[0.48, {
+			"y": 0.3, "p": -0.7, "fl": Vector3(0.1, -0.45, -0.7), "hw": 1.0, "fr": Vector3(0.25, -0.2, -0.25),
+			"rw": 0.7, "sq": 0.35, "lift": -0.14, "lw": 1.0, "legs": [1.1, -1.6, -0.4, -0.95]
 		}],
-		[0.82, {"p": 0.08, "sq": -0.08, "lift": 0.03}],
+		[0.75, {"p": -0.2, "fl": Vector3(0.05, 0.1, -0.3), "hw": 0.5, "sq": 0.1, "lift": -0.03}],
 		[1.0, {}]]},
 	# Anchor Drop in the air: both fists locked overhead, knees up, dropping like a stone (held to the ground)
 	"dr_dive": {"hold": true, "keys": [
@@ -140,35 +140,45 @@ const MOVES := {
 		}],
 		[0.55, {"p": 0.12, "sq": -0.12, "lift": 0.06}],
 		[0.75, {}]]},
-	# Barge (Shift, one fast 0.18 s shove of a run of them): hunched forward, head down, shoulder first through the
-	# dash, a squash on arrival and a quick recovery so the next barge can follow a beat later
-	"dr_barge": {"keys": [
-		[0.0, {"p": 0.15, "y": -0.3, "sq": 0.35, "lift": -0.08, "lw": 1.0, "legs": [0.9, -1.4, 0.6, -1.2]}],
+	# Barge (Shift, one fast 0.18 s lunge of a run of them): a monster's lunge, low to the ground, both hands
+	# reaching far ahead and clawing at the turf, then hauling the bulk along after them; he lands on his
+	# knuckles in a squat (0.18, the dash's end) and is back up by 0.38 for the next one
+	"dr_lunge": {"keys": [
+		[0.0, {
+			"p": -0.5, "sq": 0.35, "lift": -0.15, "fl": Vector3(-0.25, -0.2, -0.5), "hw": 1.0,
+			"fr": Vector3(0.25, -0.2, -0.5), "rw": 0.9, "lw": 1.0, "legs": [1.1, -1.6, 0.9, -1.5]
+		}],
 		[0.04, {
-			"p": -0.7, "y": 0.6, "sq": -0.3, "fr": Vector3(0.25, 0.0, 0.45), "rw": 0.9, "fl": Vector3(0.1, 0.1, -0.15),
-			"hw": 0.9, "lw": 1.0, "legs": [1.15, -0.6, -0.85, -0.15]
+			"p": -1.05, "sq": -0.2, "lift": -0.06, "fl": Vector3(-0.3, -0.55, -1.15), "hw": 1.0,
+			"fr": Vector3(0.3, -0.45, -0.95), "rw": 0.9, "lw": 1.0, "legs": [-0.6, -0.3, 0.7, -1.3]
+		}],
+		[0.11, {
+			"p": -0.95, "sq": -0.05, "lift": -0.1, "fl": Vector3(-0.25, -0.75, -0.55), "hw": 1.0,
+			"fr": Vector3(0.3, -0.6, -1.05), "rw": 0.9, "lw": 1.0, "legs": [0.9, -1.5, -0.6, -0.4]
 		}],
 		[0.18, {
-			"p": -0.7, "y": 0.6, "sq": -0.25, "fr": Vector3(0.25, 0.0, 0.45), "rw": 0.9, "fl": Vector3(0.1, 0.1, -0.15),
-			"hw": 0.9, "lw": 1.0, "legs": [0.6, -1.0, -0.4, -0.6]
+			"p": -0.6, "sq": 0.45, "lift": -0.2, "fl": Vector3(-0.3, -0.75, -0.4), "hw": 1.0,
+			"fr": Vector3(0.3, -0.7, -0.4), "rw": 0.9, "lw": 1.0, "legs": [1.2, -1.8, 1.0, -1.7]
 		}],
-		[0.23, {"p": -0.15, "y": 0.15, "sq": 0.35, "lift": -0.1, "lw": 1.0, "legs": [1.1, -1.7, 0.9, -1.6]}],
-		[0.32, {"p": 0.08, "sq": -0.08, "lift": 0.03}],
-		[0.42, {}]]},
-	# Dredge's air barge (the same quick shove, 35% further in the air): arms flung wide, legs pumping, a heavy
-	# drop onto his feet
-	"dr_hop": {"keys": [
-		[0.0, {"sq": 0.3, "p": 0.1, "lw": 1.0, "legs": [1.0, -1.5, 0.9, -1.4]}],
-		[0.04, {
-			"sq": -0.3, "p": -0.55, "fl": Vector3(-0.5, 0.25, 0.25), "hw": 1.0, "fr": Vector3(0.5, 0.25, 0.25),
-			"rw": 0.6, "lw": 1.0, "legs": [-0.3, -0.3, 0.8, -1.2]
+		[0.3, {"p": -0.15, "sq": 0.1, "lift": -0.03}],
+		[0.38, {}]]},
+	# The air barge (the same quick 0.18 s lunge, 35% further): a beast's pounce, arms cocked up, then raked
+	# forward with the claws out and dragged down through the air, legs tucked, a heavy drop onto his feet
+	"dr_pounce": {"keys": [
+		[0.0, {
+			"p": -0.3, "sq": 0.3, "fl": Vector3(-0.3, 0.4, -0.2), "hw": 1.0, "fr": Vector3(0.3, 0.4, -0.2), "rw": 0.9,
+			"lw": 1.0, "legs": [1.2, -1.8, 1.1, -1.8]
 		}],
-		[0.18, {
-			"sq": -0.2, "p": -0.5, "fl": Vector3(-0.5, 0.25, 0.3), "hw": 1.0, "fr": Vector3(0.5, 0.25, 0.3), "rw": 0.6,
-			"lw": 1.0, "legs": [0.8, -1.2, -0.3, -0.3]
+		[0.05, {
+			"p": -0.9, "sq": -0.3, "fl": Vector3(-0.35, 0.0, -1.15), "hw": 1.0, "fr": Vector3(0.35, 0.05, -1.1),
+			"rw": 0.9, "lw": 1.0, "legs": [-0.5, -0.4, -0.7, -0.3]
 		}],
-		[0.26, {"sq": 0.3, "p": -0.05, "lift": -0.08, "lw": 1.0, "legs": [1.0, -1.5, 0.9, -1.4]}],
-		[0.45, {}]]},
+		[0.14, {
+			"p": -0.8, "sq": -0.1, "fl": Vector3(-0.3, -0.35, -0.9), "hw": 1.0, "fr": Vector3(0.3, -0.3, -0.9),
+			"rw": 0.9, "lw": 1.0, "legs": [1.0, -1.6, 0.9, -1.6]
+		}],
+		[0.24, {"p": -0.4, "sq": 0.3, "lift": -0.08, "lw": 1.0, "legs": [1.0, -1.5, 0.9, -1.4]}],
+		[0.38, {}]]},
 	# Salvage (passive): a stack gained - chest out, both fists flexed high above the shoulders, a stomp
 	"dr_flex": {"keys": [
 		[0.0, {}],
@@ -265,9 +275,9 @@ const MOVES := {
 		}],
 		[0.3, {"p": -0.06, "y": 0.04, "sq": -0.04, "fr": Vector3(0.0, 0.05, -0.5), "rw": 0.5}],
 		[0.48, {}]]},
-	# Soot Ram (Shift, 0.33 s, fastest at the start): a quick coil, then head-first like a battering ram inside
-	# the flame skull, arms swept back and legs trailing, held through the dash; he snaps upright on arrival
-	# (a squash, the gun back on the aim) (hero-ref bash, body section 4)
+	# Soot Ram (Shift, 0.32 s, fastest at the start): a quick coil, then head-first like a battering ram, balled
+	# up compact inside the flame skull (arms swept back, knees folded up behind him), held through the dash;
+	# he snaps upright on arrival (a squash, the gun back on the aim) (hero-ref bash, body section 4)
 	"as_leap": {"keys": [
 		[0.0, {
 			"p": 0.2, "sq": 0.4, "lift": -0.12, "lw": 1.0, "legs": [1.1, -1.7, 1.0, -1.7], "fr": Vector3(0.2, 0.1, 0.3),
@@ -275,11 +285,11 @@ const MOVES := {
 		}],
 		[0.06, {
 			"p": -0.8, "sq": -0.4, "lift": 0.12, "fr": Vector3(0.25, 0.25, 0.55), "rw": 1.0,
-			"fl": Vector3(-0.25, 0.25, 0.55), "hw": 1.0, "lw": 1.0, "legs": [-0.5, -0.2, -0.9, -0.15]
+			"fl": Vector3(-0.25, 0.25, 0.55), "hw": 1.0, "lw": 1.0, "legs": [-0.2, -1.2, -0.5, -1.0]
 		}],
 		[0.3, {
 			"p": -0.75, "sq": -0.3, "lift": 0.1, "fr": Vector3(0.25, 0.25, 0.55), "rw": 1.0,
-			"fl": Vector3(-0.25, 0.25, 0.55), "hw": 1.0, "lw": 1.0, "legs": [-0.4, -0.3, -0.85, -0.2]
+			"fl": Vector3(-0.25, 0.25, 0.55), "hw": 1.0, "lw": 1.0, "legs": [-0.15, -1.25, -0.45, -1.05]
 		}],
 		[0.36, {
 			"p": -0.2, "sq": 0.45, "lift": -0.1, "fr": Vector3(0.1, 0.0, -0.3), "rw": 0.6,
@@ -287,28 +297,21 @@ const MOVES := {
 		}],
 		[0.42, {"p": 0.12, "sq": -0.1, "lift": 0.04}],
 		[0.55, {}]]},
-	# Furnace Cloak (E): 0.2 s curled in, arms crossed over the chest (the ring shows), then the flamer swings
-	# up over his shoulder on its strap (a long gun pointed down would hit the ground) and both arms fling wide
-	# with the blast (an overshoot up on the toes), held wide while the heat rolls out, and a settle back onto
-	# the grip
+	# Furnace Cloak (E, 0.24 s, fires on the press): a quick tuck (0.03 s), then chest out and both arms flung
+	# wide as the blast goes off (an overshoot up on the toes, the flamer swung up on its strap so the long gun
+	# clears the ground), held a beat while the shield swirls up, and a quick settle back onto the grip
 	"as_cloak": {"keys": [
-		[0.0, {}],
-		[0.12, {
-			"p": -0.4, "sq": 0.42, "lift": -0.14, "fr": Vector3(-0.25, 0.15, -0.25), "rw": 1.0,
-			"fl": Vector3(0.25, 0.15, -0.25), "hw": 1.0, "lw": 1.0, "legs": [0.8, -1.3, 0.7, -1.2], "gp": 0.5
+		[0.0, {"p": -0.15, "sq": 0.2, "lift": -0.05, "fr": Vector3(-0.15, 0.1, -0.2), "rw": 0.8,
+			"fl": Vector3(0.15, 0.1, -0.2), "hw": 0.8, "lw": 1.0, "legs": [0.5, -0.8, 0.45, -0.75], "gp": 0.4}],
+		[0.05, {
+			"p": 0.4, "sq": -0.35, "lift": 0.18, "fr": Vector3(0.85, 0.5, 0.1), "rw": 1.0,
+			"fl": Vector3(-0.85, 0.5, 0.1), "hw": 1.0, "lw": 1.0, "legs": [-0.1, -0.2, -0.1, -0.2], "gp": 1.45
 		}],
-		[0.2, {
-			"p": 0.4, "sq": -0.4, "lift": 0.22, "fr": Vector3(0.8, 0.5, 0.1), "rw": 1.0,
-			"fl": Vector3(-0.8, 0.5, 0.1), "hw": 1.0, "lw": 1.0, "legs": [-0.1, -0.2, -0.1, -0.2], "gp": 1.45
+		[0.13, {
+			"p": 0.28, "sq": -0.12, "lift": 0.07, "fr": Vector3(0.75, 0.45, 0.05), "rw": 1.0,
+			"fl": Vector3(-0.75, 0.45, 0.05), "hw": 1.0, "gp": 1.35
 		}],
-		[0.34, {
-			"p": 0.25, "sq": -0.12, "lift": 0.08, "fr": Vector3(0.72, 0.45, 0.05), "rw": 1.0,
-			"fl": Vector3(-0.72, 0.45, 0.05), "hw": 1.0, "gp": 1.4
-		}],
-		[0.6, {
-			"p": 0.12, "fr": Vector3(0.5, 0.3, 0.0), "rw": 0.9, "fl": Vector3(-0.5, 0.3, 0.0), "hw": 0.9, "gp": 0.9
-		}],
-		[0.8, {}]]},
+		[0.24, {}]]},
 	# Linwick's air poof (the air dash): balled up in the burst, one fast roll forward, then he sails out
 	# spread-eagled on the launch, arms and legs wide and the nozzle held out, until the speed bleeds off
 	"lw_hop": {"keys": [

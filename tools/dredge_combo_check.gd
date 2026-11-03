@@ -20,9 +20,273 @@ func run(main_node: Node) -> void:
 	ak = load("res://tools/archetype_check.gd").new()
 	ak.main = main
 	await _all()
+	await _hook_hold()
+	await _slam_tell()
+	await _dash_moves()
+	await _glide_wins()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	print("DREDGECHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Item 31 (CastHold): from the throw until the miss or the end of the reel he keeps his height mid-air (no
+## fall); while the hook flies out he walks at 15-25% of his walk; gravity is back once it ends.
+func _hook_hold() -> void:
+	var r: Array = ak.setup("dredge", 6.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var K: DredgeKit = P.ak
+	# on the ground: his walk, then the walk while a hook flies out at nobody
+	ak.aim_at(P, home + Vector3(0, 0, -10.0))
+	P.inp["move"] = Vector2(1, 0)
+	ak.step(m, 0.3)
+	var p0 := P.pos
+	ak.step(m, 0.2)
+	var walk := P.flat_dist(p0) / 0.2
+	ak.tap(m, P)
+	ak.step(m, 0.05)
+	p0 = P.pos
+	ak.step(m, 0.25)
+	var crawl := P.flat_dist(p0) / 0.25
+	var k := crawl / maxf(0.01, walk)
+	ok(
+		"hook hold: while the hook flies out he walks at 15-25% speed",
+		K.flying and k >= 0.15 and k <= 0.25, "%.2f of %.1f m/s" % [k, walk]
+	)
+	ak.step(m, 0.5)
+	P.inp["move"] = Vector2.ZERO
+	# mid-air, a hook that misses: no fall while it flies, gravity the moment it ends
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.teleport(home + Vector3(0, 3.0, 0))
+	P.vel = Vector3.ZERO
+	P.grounded = false
+	ak.tap(m, P)
+	var y0 := P.pos.y
+	var drift := 0.0
+	P.inp["move"] = Vector2(1, 0)
+	ak.step(m, 0.1)
+	var a0 := P.pos
+	ak.step(m, 0.2)
+	var air_k := P.flat_dist(a0) / 0.2 / maxf(0.01, walk)
+	P.inp["move"] = Vector2.ZERO
+	while K.flying:
+		ak.step(m, ak.DT)
+		drift = maxf(drift, absf(P.pos.y - y0))
+	drift = maxf(drift, absf(P.pos.y - y0))
+	var y_end := P.pos.y
+	ak.step(m, 0.25)
+	ok(
+		"hook hold: mid-air his height holds while the hook flies (a slow drift), and he falls once it misses",
+		drift <= 0.05 and y_end - P.pos.y > 0.2 and air_k >= 0.15 and air_k <= 0.25,
+		"drift %.3f, walk %.2f of his speed, then fell %.2f m" % [drift, air_k, y_end - P.pos.y]
+	)
+	# a knock during the hold still shoves him (only the height is held)
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.teleport(home + Vector3(0, 3.0, 0))
+	P.vel = Vector3.ZERO
+	P.grounded = false
+	ak.tap(m, P)
+	var k0 := P.pos
+	P.impulse(Vector2(0, 1) * 8.0 * P.mass())
+	ak.step(m, 0.2)
+	ok(
+		"hook hold: a knock during the hold still shoves him, height held",
+		K.flying and P.flat_dist(k0) > 0.6 and absf(P.pos.y - k0.y) <= 0.05,
+		"shoved %.2f m, height %+.3f" % [P.flat_dist(k0), P.pos.y - k0.y]
+	)
+	ak.step(m, 0.6)
+	# mid-air, a hook that catches: held from the throw to the end of the reel
+	P.teleport(home + Vector3(0, 1.0, 0))
+	P.vel = Vector3.ZERO
+	P.grounded = false
+	ak.fresh(T)
+	T.teleport(home + Vector3(6.0, 0, 0))
+	ak.aim_at(P, T.pos)
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	ak.tap(m, P)
+	y0 = P.pos.y
+	drift = 0.0
+	var tw := 0.0
+	while (K.flying or not K.pull.is_empty()) and tw < 4.0:
+		ak.step(m, ak.DT)
+		tw += ak.DT
+		drift = maxf(drift, absf(P.pos.y - y0))
+	ok(
+		"hook hold: mid-air his height holds from the throw to the end of the reel",
+		K.grapples >= 1 and K.arrivals >= 1 and drift <= 0.05, "grapples %d arrivals %d drift %.3f" % [
+			K.grapples, K.arrivals, drift]
+	)
+	await ak.done(m)
+
+## Item 33: through the wind-up the slam's area fills on the ground, for everyone, and it is the exact cone
+## the slam hits: a foe just inside its edge is hit, one just outside is not, and only on the slam frame.
+func _slam_tell() -> void:
+	var r: Array = ak.setup("dredge", 6.0, "", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var T2: Hunter = r[3]
+	var home: Vector3 = r[4]
+	var K: DredgeKit = P.ak
+	var ed: Dictionary = K.e_def()
+	var half := deg_to_rad(float(ed["angle"]) * 0.5)
+	var reach := float(ed["radius"])
+	# aim straight along +x; one foe inside the edge of the cone, one just past it (outside the angle)
+	ak.aim_at(P, home + Vector3(5.0, 0, 0))
+	T.teleport(home + Vector3(cos(half - 0.25), 0, sin(half - 0.25)) * (reach - 0.4))
+	T2.teleport(home + Vector3(cos(half + 0.35), 0, sin(half + 0.35)) * (reach - 0.4))
+	ak.fresh(T)
+	ak.fresh(T2)
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	ak.step(m, 0.2)
+	var tell: Dictionary = AimKit.entry(P, "e_tell")
+	var tdir: Vector2 = tell.get("dir", Vector2.ZERO)
+	var fill_mid := float(tell.get("fill", 0.0))
+	ok(
+		"anchor tell: the hit cone is drawn for everyone, the slam's own radius, angle and direction",
+		AimKit.shown(P, "e_tell") and bool(tell.get("all", false))
+			and absf(float(tell.get("len", 0.0)) - reach) < 0.01
+			and absf(float(tell.get("deg", 0.0)) - float(ed["angle"])) < 0.01 and tdir.distance_to(Vector2(1, 0)) < 0.02
+			and fill_mid > 0.3 and fill_mid < 0.8 and ak.dmg(T) == 0.0,
+		"len %.1f deg %.0f fill %.2f" % [float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), fill_mid]
+	)
+	ak.step(m, 0.3)
+	ok(
+		"anchor tell: the slam hits inside the drawn cone and nothing outside it",
+		K.anchors == 1 and ak.dmg(T) > 10.0 and ak.dmg(T2) == 0.0 and not AimKit.shown(P, "e_tell"),
+		"inside %.0f, outside %.0f" % [ak.dmg(T), ak.dmg(T2)]
+	)
+	await ak.done(m)
+
+## Item 35: his own dash moves, a low clawing lunge on the ground and a pounce in the air, used by no other
+## hero; each lands by the end of its 0.18 s dash and is over before the next barge of a run may start.
+func _dash_moves() -> void:
+	var r: Array = ak.setup("dredge", 8.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var home: Vector3 = r[4]
+	var K: DredgeKit = P.ak
+	ak.aim_at(P, home + Vector3(0, 0, -6.0))
+	P.do_dash()
+	var ground_move := K.anim_id
+	var dash_t := P.roll_t
+	ak.step(m, 0.6)
+	P.teleport(home + Vector3(0, 3.0, 0))
+	P.grounded = false
+	P.ex_cd = 0.0
+	ak.step(m, ak.DT)
+	P.do_dash()
+	var air_move := K.anim_id
+	ak.step(m, 0.6)
+	var others := {}
+	var viewer: Dictionary = Content.rules("hunter_viewer")["moves"]
+	for hero in viewer:
+		if hero != "dredge":
+			for mv in (viewer[hero] as Dictionary).get("dash", []):
+				others[mv] = hero
+	var gap := float(K.dash_def()["gap"])
+	var fits := true
+	for mv in [ground_move, air_move]:
+		var keys: Array = KMovesPair.MOVES.get(mv, {"keys": [[99.0, {}]]})["keys"]
+		var lands := 0.0
+		for kf in keys:
+			if float((kf[1] as Dictionary).get("sq", 0.0)) >= 0.3 and float(kf[0]) > 0.0:
+				lands = float(kf[0])          # the squash he lands in
+				break
+		fits = fits and lands > 0.0 and lands <= dash_t + 0.07 and float(keys[-1][0]) <= dash_t + gap
+	ok(
+		"dash moves: his own low lunge and air pounce, no other hero's, each fitting the dash",
+		ground_move == "dr_lunge" and air_move == "dr_pounce" and not others.has(ground_move)
+			and not others.has(air_move) and fits,
+		"%s / %s, dash %.2f s" % [ground_move, air_move, dash_t]
+	)
+	# into_dash e: buffer: Shift in the slam's wind-up is held and the barge goes the step the slam lands
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	ak.step(m, 0.3)
+	P.dashes = P.max_dashes()
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	ak.step(m, 0.1)
+	P.do_dash()
+	var held_now := K.dash_held and P.roll_t <= 0.0
+	var waited := 0.0
+	while P.roll_t <= 0.0 and waited < 1.0:
+		ak.step(m, ak.DT)
+		waited += ak.DT
+	ok(
+		"into dash: Shift in the slam is held, and he barges the step it lands",
+		held_now and K.anchors >= 1 and P.roll_t > 0.0 and waited < 0.35, "barged %.2f s after the press" % waited
+	)
+	await ak.done(m)
+
+## Bug 26 pattern: the glider wins over the Anchor Drop. A fresh glide press in the air smash ends it (no hit) and
+## he glides at the normal sink, never dragged down; after a ground slam a jump and glide is a normal glide.
+func _glide_wins() -> void:
+	var r: Array = ak.setup("dredge", 8.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var home: Vector3 = r[4]
+	var K: DredgeKit = P.ak
+	P.teleport(home + Vector3(0, 9.0, 0))
+	P.vel = Vector3.ZERO
+	P.grounded = false
+	ak.step(m, 0.1)
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	ak.step(m, 0.05)
+	var diving := not K.dive.is_empty()
+	var z0 := P.pos.y
+	var q0 := K.quakes
+	P.inp["jump"] = true
+	var low := z0
+	var t := 0.0
+	while t < 0.3:
+		P.inp["glide"] = true
+		P.inp["glide_btn"] = true
+		m.step(ak.DT)
+		t += ak.DT
+		low = minf(low, P.pos.y)
+	ok(
+		"glide wins: a glide press in the air smash ends it and he glides at the normal sink",
+		diving and K.dive.is_empty() and P.gliding and K.quakes == q0 and low >= z0 - Hunter.GLIDE_SINK * 0.3 - 0.35,
+		"fell %.2f m in 0.3 s" % (z0 - low)
+	)
+	P.inp["glide"] = false
+	P.inp["glide_btn"] = false
+	ak.step(m, 2.0)
+	# on the ground: the slam, then a jump and the glider at once
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	ak.step(m, 0.3)
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	ak.step(m, 0.42)
+	var zg := P.pos.y
+	P.inp["jump"] = true
+	m.step(ak.DT)
+	ak.step(m, 0.15)
+	P.inp["jump"] = true
+	var low_g := 99.0
+	t = 0.0
+	while t < 0.3:
+		P.inp["glide"] = true
+		P.inp["glide_btn"] = true
+		m.step(ak.DT)
+		t += ak.DT
+		low_g = minf(low_g, P.pos.y)
+	ok(
+		"glide wins: after the ground slam a jump and glide is a normal glide, not dragged down",
+		K.anchors >= 1 and P.gliding and low_g >= zg, "lowest %+.2f m from take-off" % (low_g - zg)
+	)
+	P.inp["glide"] = false
+	P.inp["glide_btn"] = false
+	await ak.done(m)
 
 func _all() -> void:
 	var r: Array = ak.setup("dredge", 8.0, "", true)
@@ -146,15 +410,16 @@ func _all() -> void:
 	ak.aim_at(P, T.pos)
 	K.cd["e"] = 0.0
 	var hp0: float = ak.dmg(T)
-	var hop0 := P.pos
+	var at0 := P.pos
 	P.ak.use_e()
 	ak.step(m, 0.3)
 	var early := K.anchors
+	var early_dmg: float = ak.dmg(T) - hp0
 	ak.step(m, 0.2)
 	ok(
-		"anchor: hop about a body length forward, the slam lands at ~0.38s",
-		early == 0 and K.anchors == 1 and P.flat_dist(hop0) > 1.2 and P.flat_dist(hop0) < 2.4,
-		"anchors at 0.3s %d, hop %.1f m" % [early, P.flat_dist(hop0)]
+		"anchor: planted, the damage lands on the slam frame (~0.38s), not at the cast",
+		early == 0 and early_dmg == 0.0 and K.anchors == 1 and P.flat_dist(at0) < 0.3,
+		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, P.flat_dist(at0)]
 	)
 	ok(
 		"combo: reel > Anchor Drop = damage, stun, Grounded",

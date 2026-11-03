@@ -114,6 +114,8 @@ func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
+## Does this kit have the class long dash (Shift in the air)? The HUD shows its segment only then.
+func has_long_dash() -> bool: return true
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_block(_dmg: float, _by) -> void: pass
@@ -729,6 +731,8 @@ func slot_info(slot: String) -> Dictionary:
 	return out
 
 func e_recastable() -> bool: return false
+## E fires on the key's press (a self-centred blast, e.on_press in data), never through the hold-to-aim preview.
+func e_on_press() -> bool: return bool(e_def().get("on_press", false))
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start
 var anim_at := -9.0
 

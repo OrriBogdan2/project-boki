@@ -58,9 +58,9 @@
 		"dist": 4.2,
 		"time": 0.16,
 		"invuln": 0.12,
-		"desc": "A quick 4.2m hop (in the air: your long dash).",
+		"desc": "A quick skip about 3.6m where you move; in the air, a floaty dash about three times as far.",
 		"air": {
-			"dist": 12.0,
+			"dist": 10.7,
 			"time": 0.8,
 			"ramp": 0.1,
 			"burst": 0.4,
@@ -116,7 +116,7 @@
 		"toss_speed": 45.0,
 		"latch_r": 1.0,
 		"boost": 0.5,
-		"desc": "A 2.6m ring of lantern light round you for 2.5s: it heals teammates inside 10 over its life, then flares for 22. Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.",
+		"desc": "A 2.6m ring of lantern light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.",
 		"sockets": {
 			"guard": "add",
 			"util": "add"

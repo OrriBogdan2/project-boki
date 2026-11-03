@@ -26,6 +26,13 @@ const MIN_GAP := {"break_wood": 40, "break_clay": 40, "break_metal": 40, "fuse_h
 const STACK_MAX := 3
 const STACK_MS := 90
 const STACK_DB := 3.5
+## The explosion category: the generic blast sounds (a Boki's burst or rider, an area hit, an ability blast) sit
+## this far under every call's own level, so a blast reads as a thump in the mix rather than the loudest thing
+## on screen. BLAST_PEAK_DB is the agreed ceiling for a blast's file peak plus this gain (checked in
+## --tender-combo-check).
+const BLAST := ["boom", "ab_blast", "ab_slam"]
+const BLAST_DB := -7.0
+const BLAST_PEAK_DB := -6.0
 ## Distance falloff: full volume within NEAR metres, then a gentle roll-off; muffled beyond FAR.
 const NEAR := 3.5
 const FAR := 9.0
@@ -356,7 +363,7 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	if sname.begins_with("step_"): gap = 25      # footsteps: several people can walk at once
 	if now - int(last_played.get(sname, -1000)) < gap:
 		return
-	var v := vol_db + _distance_db(pos)
+	var v := vol_db + _distance_db(pos) + (BLAST_DB if sname in BLAST else 0.0)
 	if is_nan(v):
 		return
 	var times: Array = recent.get(sname, [])

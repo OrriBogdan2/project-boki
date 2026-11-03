@@ -151,67 +151,67 @@ const MOVES := {
 					"fl": Vector3(-0.3, 0.0, 0.25), "hw": 0.9, "lw": 0.6, "legs": [0.4, -0.6, -0.3, -0.2]}],
 		[0.26, {"y": 0.4, "p": -0.2, "fr": Vector3(-0.02, 0.3, -0.5), "rw": 0.8}],
 		[0.5, {}]]},
-	# Relay Step (the base dash, 0.16 s): a crouch, a quick stretched hop with the knees tucked and the
-	# arms swept back, a landing squash and a settle
-	"mm_dash": {"keys": [
-		[0.0, {"sq": 0.3, "lift": -0.06, "p": -0.15}],
+	# Relay Step, the ground hop (0.18 s of dash): a quick squash, then a skip off one foot with the lead knee
+	# up and both arms flung up behind like little wings, a tucked apex, a squash on touchdown and a happy
+	# bounce with a wiggle of the shoulders (0.24 s in all)
+	"mm_skip": {"keys": [
+		[0.0, {"sq": 0.35, "lift": -0.08, "p": 0.1, "lw": 1.0, "legs": [0.9, -1.4, 0.8, -1.3]}],
 		[
-				0.05,
+				0.04,
 				{
-					"sq": -0.45, "lift": 0.3, "p": -0.5, "lw": 1.0, "legs": [1.0, -1.6, 0.7, -1.2],
-					"fl": Vector3(-0.2, 0.0, 0.4), "hw": 1.0, "fr": Vector3(0.2, 0.0, 0.4), "rw": 1.0}],
+					"sq": -0.45, "lift": 0.32, "p": -0.3, "r": 0.12, "lw": 1.0, "legs": [1.2, -1.8, -0.2, -0.3],
+					"fl": Vector3(-0.35, 0.35, 0.2), "hw": 1.0, "fr": Vector3(0.35, 0.35, 0.2), "rw": 1.0}],
 		[
-				0.14,
+				0.11,
 				{
-					"sq": -0.15, "lift": 0.18, "p": -0.35, "lw": 1.0, "legs": [0.7, -1.2, 0.5, -0.9],
-					"fl": Vector3(-0.25, 0.05, 0.3), "hw": 0.8, "fr": Vector3(0.25, 0.05, 0.3), "rw": 0.8}],
-		[0.2, {"sq": 0.45, "lift": -0.1, "p": -0.18, "lw": 1.0, "legs": [0.7, -1.1, 0.6, -1.0]}],
-		[0.4, {}]]},
-	# ... through a teammate: the same hop with a free-hand wave over them (the RELAY proc)
-	"mm_relay": {"keys": [
-		[0.0, {"sq": 0.3, "lift": -0.06, "p": -0.15}],
+					"sq": -0.1, "lift": 0.36, "p": -0.2, "r": -0.1, "lw": 1.0, "legs": [1.3, -2.0, 1.2, -1.9],
+					"fl": Vector3(-0.5, 0.25, 0.0), "hw": 1.0, "fr": Vector3(0.5, 0.25, 0.0), "rw": 1.0}],
 		[
-				0.05,
+				0.17,
 				{
-					"sq": -0.45, "lift": 0.34, "p": -0.42, "r": 0.18, "lw": 1.0, "legs": [1.0, -1.6, 0.7, -1.2],
-					"fl": Vector3(-0.05, 0.62, 0.0), "hw": 1.0, "fr": Vector3(0.2, 0.0, 0.35), "rw": 1.0}],
+					"sq": 0.45, "lift": -0.1, "p": 0.05, "lw": 1.0, "legs": [0.8, -1.3, 0.7, -1.2],
+					"fl": Vector3(-0.2, -0.1, -0.2), "hw": 0.8, "fr": Vector3(0.2, -0.1, -0.2), "rw": 0.8}],
 		[
-				0.14,
+				0.21,
 				{
-					"sq": -0.15, "lift": 0.2, "p": -0.25, "r": -0.15, "lw": 1.0, "legs": [0.7, -1.2, 0.5, -0.9],
-					"fl": Vector3(-0.3, 0.5, 0.1), "hw": 1.0}],
-		[0.2, {"sq": 0.45, "lift": -0.1, "p": -0.18, "lw": 1.0, "legs": [0.7, -1.1, 0.6, -1.0]}],
-		[0.45, {}]]},
-	# the long air glide (0.8 s): a head-first streak with the arms reaching ahead and the legs trailing,
-	# a seated float with the knees tucked and the arms out wide, then a soft touchdown
-	"mm_dash_air": {"keys": [
-		[0.0, {"sq": 0.15, "p": -0.2}],
+					"sq": -0.12, "lift": 0.06, "y": 0.15, "lw": 0.8, "legs": [0.4, -0.7, 0.35, -0.6],
+					"fl": Vector3(-0.3, 0.3, -0.1), "hw": 0.7, "fr": Vector3(0.3, 0.3, -0.1), "rw": 0.7}],
+		[0.24, {}]]},
+	# the air dash, her long float (0.92 s of dash): tucked into a ball for one forward somersault, then
+	# unfurled into a seated float, leaning back with the knees tucked up and both arms up in a happy V like
+	# a drifting seed, a little sway, the legs reaching down, and a soft squash on touchdown (fx stays a full
+	# turn: no unwind)
+	"mm_float": {"keys": [
+		[0.0, {"sq": 0.2, "p": 0.1, "lw": 1.0, "legs": [0.9, -1.4, 0.8, -1.3]}],
 		[
-				0.08,
+				0.06,
 				{
-					"fx": -1.15, "sq": -0.3, "lw": 1.0, "legs": [-0.35, -0.2, -0.45, -0.1],
-					"fl": Vector3(0.06, 0.15, -0.55), "hw": 1.0, "fr": Vector3(-0.06, 0.15, -0.55), "rw": 1.0}],
+					"fx": -1.6, "sq": 0.35, "lw": 1.0, "legs": [1.5, -2.2, 1.4, -2.2],
+					"fl": Vector3(-0.1, -0.15, -0.25), "hw": 1.0, "fr": Vector3(0.1, -0.15, -0.25), "rw": 1.0}],
 		[
-				0.24,
+				0.26,
 				{
-					"fx": -1.1, "sq": -0.28, "lw": 1.0, "legs": [-0.3, -0.2, -0.4, -0.1],
-					"fl": Vector3(0.04, 0.12, -0.55), "hw": 1.0, "fr": Vector3(-0.04, 0.12, -0.55), "rw": 1.0}],
+					"fx": -6.283, "sq": 0.3, "lw": 1.0, "legs": [1.5, -2.2, 1.4, -2.2],
+					"fl": Vector3(-0.1, -0.15, -0.25), "hw": 1.0, "fr": Vector3(0.1, -0.15, -0.25), "rw": 1.0}],
 		[
-				0.4,
+				0.36,
 				{
-					"fx": -0.1, "sq": 0.1, "lift": 0.05, "lw": 1.0, "legs": [1.4, -2.0, 1.3, -1.9],
-					"fl": Vector3(-0.45, 0.05, -0.02), "hw": 1.0, "fr": Vector3(0.45, 0.05, -0.02), "rw": 1.0}],
+					"fx": -6.283, "sq": -0.15, "lift": 0.05, "p": 0.22, "r": 0.1, "lw": 1.0,
+					"legs": [1.5, -2.0, 1.4, -1.9], "fl": Vector3(-0.45, 0.6, -0.05), "hw": 1.0,
+					"fr": Vector3(0.45, 0.6, -0.05), "rw": 1.0}],
 		[
-				0.72,
+				0.62,
 				{
-					"fx": -0.05, "sq": 0.12, "lift": 0.05, "r": 0.06, "lw": 1.0, "legs": [1.3, -1.9, 1.2, -1.8],
-					"fl": Vector3(-0.45, 0.12, 0.0), "hw": 1.0, "fr": Vector3(0.45, 0.12, 0.0), "rw": 1.0}],
+					"fx": -6.283, "sq": -0.08, "lift": 0.05, "p": 0.22, "r": -0.1, "lw": 1.0,
+					"legs": [1.5, -2.0, 1.4, -1.9], "fl": Vector3(-0.5, 0.55, 0.0), "hw": 1.0,
+					"fr": Vector3(0.5, 0.55, 0.0), "rw": 1.0}],
 		[
-				0.86,
+				0.8,
 				{
-					"sq": 0.12, "lw": 0.6, "legs": [0.4, -0.7, 0.3, -0.6],
-					"fl": Vector3(-0.35, 0.2, -0.05), "hw": 0.8, "fr": Vector3(0.35, 0.2, -0.05), "rw": 0.8}],
-		[1.0, {}]]},
+					"fx": -6.283, "sq": -0.05, "lw": 1.0, "legs": [0.4, -0.7, 0.3, -0.6],
+					"fl": Vector3(-0.45, 0.2, -0.05), "hw": 0.9, "fr": Vector3(0.45, 0.2, -0.05), "rw": 0.9}],
+		[0.88, {"fx": -6.283, "sq": 0.3, "lift": -0.08, "lw": 1.0, "legs": [0.9, -1.4, 0.8, -1.3]}],
+		[0.98, {"fx": -6.283}]]},
 	# Bearer: scooping a downed teammate up onto her back: a deep squat, then a heave with a lean back
 	"mm_pickup": {"keys": [
 		[0.0, {}],
@@ -295,8 +295,8 @@ const MOVES := {
 				{
 					"y": -0.75, "p": 0.35, "r": -0.12, "fl": Vector3(0.05, 0.6, 0.3), "hw": 1.0,
 					"wa": Vector3(-0.3, 0.5, 0), "wf": 0.5, "lw": 0.9, "legs": [-0.4, -0.3, 0.55, -0.8]}]]},
-	# ... let go: the coil deepens, then the whip through to the cursor and a long lunge after the spear
-	# at 0.11, the arm across the body, then up
+	# ... let go: the arm draws back deeper (0.1), then the whip through to the cursor, the spear leaving
+	# the hand at 0.16 (RimewrightKit.THROW_T), and a long lunge after it, the arm across the body, then up
 	"tm_spear": {"keys": [
 		[
 				0.0,
@@ -304,21 +304,21 @@ const MOVES := {
 					"y": -0.75, "p": 0.35, "r": -0.12, "fl": Vector3(0.05, 0.6, 0.3), "hw": 1.0,
 					"wa": Vector3(-0.3, 0.5, 0), "wf": 0.5, "lw": 0.9, "legs": [-0.4, -0.3, 0.55, -0.8]}],
 		[
-				0.05,
+				0.1,
 				{
-					"y": -0.9, "p": 0.42, "r": -0.16, "fl": Vector3(0.08, 0.62, 0.38), "hw": 1.0, "sq": -0.18,
+					"y": -0.95, "p": 0.42, "r": -0.16, "fl": Vector3(0.08, 0.62, 0.38), "hw": 1.0, "sq": -0.18,
 					"lw": 0.9, "legs": [-0.45, -0.3, 0.6, -0.85]}],
 		[
-				0.11,
+				0.16,
 				{
 					"y": 0.85, "p": -0.5, "r": 0.14, "fl": Vector3(0.05, 0.08, -0.64), "hw": 1.0, "sq": 0.28,
 					"lift": -0.08, "lw": 1.0, "legs": [1.05, -1.25, -0.6, -0.2]}],
 		[
-				0.28,
+				0.34,
 				{
 					"y": 0.6, "p": -0.4, "fl": Vector3(-0.1, -0.08, -0.5), "hw": 0.9, "sq": 0.08, "lift": -0.06,
 					"lw": 0.9, "legs": [0.95, -1.15, -0.55, -0.2]}],
-		[0.6, {}]]},
+		[0.65, {}]]},
 	# Rink Wall: the 0.2 s tell (a deep crouch over the feet, the sparkle), then both arms flung up and
 	# out as the ice erupts ahead, an overshoot up on the toes, a settle
 	"tm_wall": {"keys": [
@@ -408,26 +408,6 @@ const MOVES := {
 				{
 					"y": 1.0, "r": 0.3, "p": 0.12, "sq": 0.15, "lift": -0.08, "lw": 1.0, "legs": [0.7, -1.1, 0.2, -0.6],
 					"fl": Vector3(-0.35, 0.2, 0.0), "hw": 0.8, "wf": 0.8}],
-		[0.5, {}]]},
-	# the air dash: a stretched skater's glide (she never tumbles in the source): pitched forward, one
-	# leg trailing long, arms out wide like wings, held, then a light landing
-	"tm_dash_air": {"keys": [
-		[0.0, {"sq": 0.2, "p": -0.1}],
-		[
-				0.06,
-				{
-					"p": -0.7, "sq": -0.3, "r": 0.15, "lw": 1.0, "legs": [0.35, -0.3, -0.95, -0.15],
-					"fl": Vector3(-0.5, 0.12, 0.08), "hw": 1.0, "wa": Vector3(0.2, 0, 1.2),
-						"wo": Vector3(0.25, 0.1, 0.1),
-					"wf": 1.0}],
-		[
-				0.24,
-				{
-					"p": -0.65, "sq": -0.25, "r": 0.1, "lw": 1.0, "legs": [0.3, -0.3, -0.9, -0.15],
-					"fl": Vector3(-0.5, 0.15, 0.1), "hw": 1.0, "wa": Vector3(0.2, 0, 1.2),
-						"wo": Vector3(0.25, 0.1, 0.1),
-					"wf": 1.0}],
-		[0.32, {"p": -0.2, "sq": 0.2, "lift": -0.06, "lw": 1.0, "legs": [0.6, -1.0, 0.5, -0.9]}],
 		[0.5, {}]]},
 	# Shatter (payoff): the fan snapped shut in a big flourish, the free fist clenched and pulled in, a
 	# lean into it

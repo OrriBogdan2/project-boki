@@ -97,66 +97,66 @@ One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlo
 | Bjorn | E -> dash |  | the kit's own handling (no row yet) |
 | Bjorn | ult (X) -> dash |  | the kit's own handling (no row yet) |
 | Bjorn | Q glove -> dash |  | the kit's own handling (no row yet) |
-| Dredge | ground dash -> LMB |  | buffered to the dash's end |
-| Dredge | ground dash -> RMB |  | fires mid-dash |
-| Dredge | ground dash -> E |  | fires mid-dash |
-| Dredge | ground dash -> ult (X) |  | fires mid-dash |
-| Dredge | ground dash -> Q glove |  | fires mid-dash |
-| Dredge | air dash -> LMB |  | buffered to the dash's end |
-| Dredge | air dash -> RMB |  | fires mid-dash |
-| Dredge | air dash -> E |  | fires mid-dash |
-| Dredge | air dash -> ult (X) |  | fires mid-dash |
-| Dredge | air dash -> Q glove |  | fires mid-dash |
-| Dredge | LMB -> dash |  | the kit's own handling (no row yet) |
-| Dredge | RMB -> dash |  | the kit's own handling (no row yet) |
-| Dredge | E -> dash |  | the kit's own handling (no row yet) |
-| Dredge | ult (X) -> dash |  | the kit's own handling (no row yet) |
-| Dredge | Q glove -> dash |  | the kit's own handling (no row yet) |
-| Linwick | ground dash -> LMB |  | buffered to the dash's end |
-| Linwick | ground dash -> RMB |  | fires mid-dash |
-| Linwick | ground dash -> E |  | fires mid-dash |
-| Linwick | ground dash -> ult (X) |  | cancels the dash; dash momentum carries |
-| Linwick | ground dash -> Q glove |  | fires mid-dash |
-| Linwick | air dash -> LMB |  | buffered to the dash's end |
-| Linwick | air dash -> RMB |  | fires mid-dash |
-| Linwick | air dash -> E |  | fires mid-dash |
-| Linwick | air dash -> ult (X) |  | cancels the dash; dash momentum carries |
-| Linwick | air dash -> Q glove |  | fires mid-dash |
-| Linwick | LMB -> dash |  | the kit's own handling (no row yet) |
-| Linwick | RMB -> dash |  | the kit's own handling (no row yet) |
-| Linwick | E -> dash |  | the kit's own handling (no row yet) |
-| Linwick | ult (X) -> dash |  | the kit's own handling (no row yet) |
-| Linwick | Q glove -> dash |  | the kit's own handling (no row yet) |
-| Moosh Moosh | ground dash -> LMB |  | buffered to the dash's end |
-| Moosh Moosh | ground dash -> RMB |  | fires mid-dash |
-| Moosh Moosh | ground dash -> E |  | fires mid-dash |
-| Moosh Moosh | ground dash -> ult (X) |  | fires mid-dash |
-| Moosh Moosh | ground dash -> Q glove |  | fires mid-dash |
-| Moosh Moosh | air dash -> LMB |  | buffered to the dash's end |
-| Moosh Moosh | air dash -> RMB |  | fires mid-dash |
-| Moosh Moosh | air dash -> E |  | fires mid-dash |
-| Moosh Moosh | air dash -> ult (X) |  | fires mid-dash |
-| Moosh Moosh | air dash -> Q glove |  | fires mid-dash |
-| Moosh Moosh | LMB -> dash |  | the kit's own handling (no row yet) |
-| Moosh Moosh | RMB -> dash |  | the kit's own handling (no row yet) |
-| Moosh Moosh | E -> dash |  | the kit's own handling (no row yet) |
-| Moosh Moosh | ult (X) -> dash |  | the kit's own handling (no row yet) |
-| Moosh Moosh | Q glove -> dash |  | the kit's own handling (no row yet) |
-| Tamsin | ground dash -> LMB |  | the kit's own dash state: not routed yet |
-| Tamsin | ground dash -> RMB |  | the kit's own dash state: not routed yet |
-| Tamsin | ground dash -> E |  | the kit's own dash state: not routed yet |
-| Tamsin | ground dash -> ult (X) |  | the kit's own dash state: not routed yet |
-| Tamsin | ground dash -> Q glove |  | the kit's own dash state: not routed yet |
-| Tamsin | air dash -> LMB |  | buffered to the dash's end |
-| Tamsin | air dash -> RMB |  | fires mid-dash |
-| Tamsin | air dash -> E |  | fires mid-dash |
-| Tamsin | air dash -> ult (X) |  | fires mid-dash |
-| Tamsin | air dash -> Q glove |  | fires mid-dash |
-| Tamsin | LMB -> dash |  | the kit's own handling (no row yet) |
-| Tamsin | RMB -> dash |  | the kit's own handling (no row yet) |
-| Tamsin | E -> dash |  | the kit's own handling (no row yet) |
-| Tamsin | ult (X) -> dash |  | the kit's own handling (no row yet) |
-| Tamsin | Q glove -> dash |  | the kit's own handling (no row yet) |
+| Dredge | ground dash -> LMB | Data: Brute Dash is a plain dash. Footage (493.2-493.6 s): a near-blink of about 0.12 s; he lands, turns back to the aim within 1 frame and fires and walks by 493.6 s. Ours: the shot goes the step the 0.18 s lunge ends. | buffered to the dash's end |
+| Dredge | ground dash -> RMB | Data: Abyssal Grasp has no dash lock. Footage: not shown from a dash. Ours: the arm is thrown from the lunge (its range counts from where he is). | fires mid-dash |
+| Dredge | ground dash -> E | Data: Primal Slam has no dash lock; the dash-into-slam close-in is the hero's engage. Footage: not shown from a dash. Ours: the planted wind-up starts at once and the lunge finishes under it. | fires mid-dash |
+| Dredge | ground dash -> ult (X) | Data: Slugwave has no dash lock. Footage: not shown from a dash. Ours: the charge starts at once (he walks slowly through it). | fires mid-dash |
+| Dredge | ground dash -> Q glove | No source glove; it goes off from the lunge like his abilities. | fires mid-dash |
+| Dredge | air dash -> LMB | Data: Brute Dash (Air) is its own slot, further. Footage: not shown. Ours: as on the ground, the shot goes as the pounce ends. | buffered to the dash's end |
+| Dredge | air dash -> RMB | Data: no dash lock. Footage: not shown. Ours: the arm is thrown from the pounce, his height held while it is out (item 31). | fires mid-dash |
+| Dredge | air dash -> E | Data: Primal Slam slams down (it pushes you down, never over the abyss). Owner note: in the air E is a straight-down smash; from the pounce it drops at once. | fires mid-dash |
+| Dredge | air dash -> ult (X) | Data: no dash lock. Footage: not shown. Ours: the charge starts at once. | fires mid-dash |
+| Dredge | air dash -> Q glove | No source glove; it goes off from the pounce. | fires mid-dash |
+| Dredge | LMB -> dash | Footage: he walks and dashes between shots (0.5 s apart). Ours: the barge goes between shots. | the dash goes, the ability keeps running |
+| Dredge | RMB -> dash | Wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls; data: the arm pierces terrain. Ours: the barge goes during the hook's flight and the reel, and the reel continues. | the dash goes, the ability keeps running |
+| Dredge | E -> dash | Footage (0221-0236): the slam is one committed 0.4 s beat, no dash out of it. Ours: Shift in the planted wind-up (or the air smash) is held and the barge goes the step the slam lands. | the dash waits for the ability |
+| Dredge | ult (X) -> dash | Footage (ult f22-f43): he stands through the charge and both waves, no dash out of it. Ours: Shift is held and the barge goes when the Broadside ends. | the dash waits for the ability |
+| Dredge | Q glove -> dash | No source glove; the barge goes and the glove's effect stays. | the dash goes, the ability keeps running |
+| Linwick | ground dash -> LMB | Data: Pyro Pounce is a short dash that stops on impact; no fire during it. Footage (245.53-245.9 s, 0159-0161): a head-first lunge, then he is upright with the nozzle already on the aim. Ours: the hose lights the step the ram ends (or the step it hits a foe). | buffered to the dash's end |
+| Linwick | ground dash -> RMB | Data: Embry Bolt has no dash rule. Footage: never cast from the bash; the ram is one committed head-first beat with the arms swept back. Ours: the bolt goes the step the ram ends or hits, from where he stands. | buffered to the dash's end |
+| Linwick | ground dash -> E | Data: Heat Shield pulls in nearby foes; the kit's engage is bash in, then spin. Footage: not shown from a bash. Ours: E pressed in the ram goes the step it stops on the foe (pull and shield right at the impact) or ends. | buffered to the dash's end |
+| Linwick | ground dash -> ult (X) | Data: Flight of the Firefox flies forward; knockback impulses speed it up (momentum feeds it). Footage: not cast from a bash. Ours: X ends the ram at once and the flight takes over from where he is (the row ends the dash first; no kit code for it). | cancels the dash; dash momentum carries |
+| Linwick | ground dash -> Q glove | No source glove; it goes off from the ram like any glove. | fires mid-dash |
+| Linwick | air dash -> LMB | Data: no air bash in the source (the jetpack is his only air move). Owner note (23:40): the air dash is a fast poof, balled up for one roll. Ours: the hose lights as the poof ends (he can flame in the air; the 0.35s relight gap after a release still applies). | buffered to the dash's end |
+| Linwick | air dash -> RMB | Data: no air bash; the jetpack allows the shield ability mid-flight. Ours: the bolt leaves from the poof (its speed is kept after it anyway). | fires mid-dash |
+| Linwick | air dash -> E | Data (wiki): Heat Shield can be cast mid-flight in the jetpack, his one air move. Ours: likewise mid-poof. | fires mid-dash |
+| Linwick | air dash -> ult (X) | Data: knockback impulses speed the flight up. Ours: X ends the poof and the flight takes over. | cancels the dash; dash momentum carries |
+| Linwick | air dash -> Q glove | No source glove; it goes off from the poof. | fires mid-dash |
+| Linwick | LMB -> dash | Data: the flamethrower is a hold with a 0.35s gap between uses. Footage: he walks while firing; no dash out of the hose shown. Ours: Shift rams at once and the stream stops (hold again to relight after the gap). | the dash goes, the ability keeps running |
+| Linwick | RMB -> dash | Footage: the aim lane shows about 0.4s while he keeps moving. Ours: Shift while aiming rams; the bolt still goes on release. | the dash goes, the ability keeps running |
+| Linwick | E -> dash | Heat Shield is instant (owner item 11): there is no wind-up to dash out of. | the dash goes, the ability keeps running |
+| Linwick | ult (X) -> dash | Data: the flight is his movement; reactivating lands. Footage: no dash during the flight. Ours: Shift in the flight is held by the hunter's dash buffer and rams on landing. | the dash waits for the ability |
+| Linwick | Q glove -> dash | No source glove. | the dash goes, the ability keeps running |
+| Moosh Moosh | ground dash -> LMB | Data: Lunar Dash is a plain short dash. Footage: the ground dash is never shown cleanly. Ours: the ember goes the step the 0.18s skip ends. | buffered to the dash's end |
+| Moosh Moosh | ground dash -> RMB | Data: Darkside Binding has no dash rule. Footage: not cast from a dash. Ours: the seed is thrown from the skip (its own small hop and push). | fires mid-dash |
+| Moosh Moosh | ground dash -> E | Data: Moonlight Blessing is a zone on herself that follows her. Footage: not cast from a dash. Ours: the light goes up on her mid-skip and moves with her. | fires mid-dash |
+| Moosh Moosh | ground dash -> ult (X) | Data: the channel is cancelled only by stun, knock or range, not by moving. Footage (ult f41-f72): she walks while it runs. Ours: the tether starts mid-skip. | fires mid-dash |
+| Moosh Moosh | ground dash -> Q glove | No source glove. | fires mid-dash |
+| Moosh Moosh | air dash -> LMB | Data: Lunar Air Dash, further in the air. Footage (730.7-732.4 s): a streak then a seated float with the arms out; no shot during it, she walks out with the arms raised. Ours: the ember goes as the float ends. | buffered to the dash's end |
+| Moosh Moosh | air dash -> RMB | Data: no dash rule. Footage: not shown from the air dash. Ours: the seed leaves from the float. | fires mid-dash |
+| Moosh Moosh | air dash -> E | Data: the zone sits on her. Footage: not shown from the air dash. Ours: the light goes up on her mid-float. | fires mid-dash |
+| Moosh Moosh | air dash -> ult (X) | Data: moving doesn't cancel the channel. Ours: the tether starts mid-float. | fires mid-dash |
+| Moosh Moosh | air dash -> Q glove | No source glove. | fires mid-dash |
+| Moosh Moosh | LMB -> dash | Footage (716.3-717.6 s): she pushes embers while moving. Ours: Shift skips at once between embers. | the dash goes, the ability keeps running |
+| Moosh Moosh | RMB -> dash | Ours: Shift while aiming the seed skips; the throw still goes on release. | the dash goes, the ability keeps running |
+| Moosh Moosh | E -> dash | Data: the zone follows her (recast throws it). Ours: Shift goes at once, the light moves with her. | the dash goes, the ability keeps running |
+| Moosh Moosh | ult (X) -> dash | Data: cancelled only by stun, knock or moving too far. Footage: she walks through the channel. Ours: Shift goes at once and the tether holds while she stays in the ring. | the dash goes, the ability keeps running |
+| Moosh Moosh | Q glove -> dash | No source glove. | the dash goes, the ability keeps running |
+| Tamsin | ground dash -> LMB | Data: Skate is a held mode, released to stop. Footage (0239-0245, 0285-0290): she fires the whole skate and the darts become straight thick beams. Ours: darts fly as beams at normal damage (data pass); the skate goes on. | fires mid-dash; dash momentum carries; variant: beam |
+| Tamsin | ground dash -> RMB | Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the spear aim and throw go on while she keeps skating. | fires mid-dash; dash momentum carries |
+| Tamsin | ground dash -> E | Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the Rink Wall's tell and slide start while she keeps skating. | fires mid-dash; dash momentum carries |
+| Tamsin | ground dash -> ult (X) | Data: the ult makes her invulnerable inside a slowing zone; footage (ult f25-f55): she is rooted in the crystal. Ours: Rimelock ends the skate and roots her at once. | cancels the dash |
+| Tamsin | ground dash -> Q glove | No source glove; the skate is a held move, so a glove goes off from it like her abilities. | fires mid-dash; dash momentum carries |
+| Tamsin | air dash -> LMB | No air dash: Shift in the air buffers the Skate to the landing (owner item 12; the footage never starts a skate in the air). | the kit's own dash state: not routed yet |
+| Tamsin | air dash -> RMB | No air dash (see lmb). | the kit's own dash state: not routed yet |
+| Tamsin | air dash -> E | No air dash (see lmb). | the kit's own dash state: not routed yet |
+| Tamsin | air dash -> ult (X) | No air dash (see lmb). | the kit's own dash state: not routed yet |
+| Tamsin | air dash -> Q glove | No air dash (see lmb). | the kit's own dash state: not routed yet |
+| Tamsin | LMB -> dash | Footage: she starts skating while firing and keeps firing; the darts turn to beams. Ours: the same. | the dash goes, the ability keeps running; dash momentum carries; variant: beam |
+| Tamsin | RMB -> dash | Data: Skate can be held at any time. Ours: Shift during the spear aim or the throw's wind-up starts the skate and the throw still goes. | the dash goes, the ability keeps running; dash momentum carries |
+| Tamsin | E -> dash | Data: Skate can be held at any time. Ours: Shift during the wall's 0.2s tell starts the skate and the wall still erupts. | the dash goes, the ability keeps running; dash momentum carries |
+| Tamsin | ult (X) -> dash | Data: reactivating ends Chilling Finale early. Owner item 27: Shift ends Rimelock (as X again would; a late press still cracks it open) and she skates straight out at full speed. | the dash cancels its wind-up or recovery; dash momentum carries |
+| Tamsin | Q glove -> dash | No source glove; the skate starts and the glove's effect stays. | the dash goes, the ability keeps running; dash momentum carries |
 | Breah | ground dash -> LMB | Footage tip 'Punch to Extend Dash/RMB': a punch during Landslide goes off and carries her on. Ours: the boulder or punch goes off mid-leap and the leap's arc carries on (a punch's step pushes her a little further). | fires mid-dash; dash momentum carries |
 | Breah | ground dash -> RMB | Footage tip 'Dash -> RMB Dunk Combo' (0965-1010): Landslide shoves the foe out, then she leap-slams onto it. Ours: the charge starts mid-leap; let go in the air and the slam lands where the leap does. | fires mid-dash; dash momentum carries |
 | Breah | ground dash -> E | Card: Rockwave is only castable over ground; nothing on casting it mid-Landslide. Ours: held to the landing, then raised from there. | buffered to the dash's end |

@@ -3,10 +3,12 @@ extends RefCounted
 ## flat strip (docs/heroes/ashwick.md, combinations and small-mechanics tables): the Torch Lance hose (pilot,
 ## full reach past the cursor, lag on a sweep, narrow then billowing, the burning-foe bonus and health chip,
 ## stops at once,
-## the 0.35s relight gap), the burn stages and their pips, the Cinder Shot lane and cursor landing, the
+## the 0.35s relight gap), the burn stages and their pips, the Cinder Shot lane and its fixed full range, the
 ## Soot Ram stopping on the first foe, two quick charges and a knock's single charge back, the rank-3 speed and shield,
-## the Furnace Cloak's 0.2s ring before the blast and its swirling shield, walls, Char rules, the merge drops,
+## the Furnace Cloak on the press round him (no cursor) and its swirling shield, walls, Char rules, the merge drops,
 ## and the X ult, Flue Flight (tools/ashwick_ult_check.gd).
+
+const CARE := preload("res://tools/care_combo_check.gd")      # the shared dash-move rules (own ids, tail)
 
 var main: Node
 var fails := 0
@@ -53,6 +55,29 @@ func _growth() -> void:
 		d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01, "L1 %.2f L10 %.2f" % [d1, d10]
 	)
 
+## Owner item 35: the ram and the poof play his own moves (no shared charge pose under them), each covering its
+## dash and settling soon after, no other kit plays them, and neither leaves a ring.
+func _dash_moves(K: AshwickKit, ram_move: String, ram_t: float, poof_move: String, poof_t: float, rings: int) -> void:
+	ok(
+		"dash moves: the ram and the poof play his own moves, no shared pose under them",
+		ram_move == "as_leap" and poof_move == "lw_hop" and K.dodge_anim() == "kit", "%s / %s" % [ram_move, poof_move]
+	)
+	var ram_n := _move_len("as_leap")
+	var poof_n := _move_len("lw_hop")
+	ok(
+		"dash moves: each covers its dash and settles soon after",
+		_fits(ram_n, ram_t) and _fits(poof_n, poof_t),
+		"ram %.2f/%.2f poof %.2f/%.2f" % [ram_n, ram_t, poof_n, poof_t]
+	)
+	ok("dash moves: no other kit plays them", CARE.own_moves_only("ashwick_kit.gd", ["as_leap", "lw_hop"]))
+	ok("dash moves: no ring on the ram or the poof", rings == 0, "rings %d" % rings)
+
+static func _fits(move_t: float, dash_t: float) -> bool:
+	return move_t >= dash_t and move_t <= dash_t + CARE.MOVE_TAIL_MAX
+
+static func _move_len(id: String) -> float:
+	return float((KMovesPair.MOVES[id]["keys"] as Array)[-1][0])
+
 ## Holds the lance on a target.
 func _hold_at(hunter: Hunter, target: Hunter) -> void:
 	hunter.inp["fire"] = true
@@ -97,7 +122,6 @@ func _all() -> void:
 		K.drags = []
 		K.hose.clear()
 		K.relight_t = 0.0
-		K.cloak_t = 0.0
 		K.bash = {}
 		K.cd["rmb"] = 0.0
 		K.ch_rmb = 1.0
@@ -265,40 +289,40 @@ func _all() -> void:
 	)
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 2, hz + dz)] = lv
-	# --- Cinder Shot: hold shows the lane to the cursor, release fires; it lands at the cursor
+	# --- Cinder Shot: hold shows the full fixed lane, release fires; it always flies its max range
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	T2.teleport(home + Vector3(0, 0, -9.0))
-	ak.aim_at(P, home + Vector3(8.0, 0, 0))
+	var max_r := float(K.rmb_def()["range"])
+	ak.aim_at(P, home + Vector3(2.0, 0, 0))
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
-	ak.step(m, 0.3, func(): P.inp["sec_hold"] = true; ak.aim_at(P, home + Vector3(8.0, 0, 0)))
+	ak.step(m, 0.3, func(): P.inp["sec_hold"] = true; ak.aim_at(P, home + Vector3(2.0, 0, 0)))
 	var lane: Dictionary = AimKit.entry(P, "rmb")
 	ok(
-		"cinder: holding shows the aim lane out to the cursor",
-		not lane.is_empty() and absf(float(lane.get("len", 0.0)) - 8.0) < 0.6 and K.aiming and K.anim_id == "as_aim",
+		"cinder: holding shows the aim lane at its full fixed length (cursor at 2 m)",
+		not lane.is_empty() and absf(float(lane.get("len", 0.0)) - max_r) < 0.01 and K.aiming and K.anim_id == "as_aim",
 		"lane %s len %.1f" % [not lane.is_empty(), float(lane.get("len", 0.0))]
 	)
 	P.inp["sec_hold"] = false
-	ak.step(m, 0.7)
+	ak.step(m, 1.0)
 	var e1: Array = K.bolt_ends[-1] if not K.bolt_ends.is_empty() else [Vector3.ZERO, false]
+	var near_d := Vector2((e1[0] as Vector3).x - home.x, (e1[0] as Vector3).z - home.z).length()
 	ok(
-		"cinder: a miss lands at the cursor and fizzles there",
-		bool(e1[1]) and absf((e1[0] as Vector3).x - home.x - 8.0) < 0.9 and K.fizzles >= 1 and not AimKit.shown(
-			P, "rmb"
-		),
-		"end x %.1f expired %s" % [(e1[0] as Vector3).x - home.x, e1[1]]
+		"cinder: a miss flies its full length and fizzles at its end",
+		bool(e1[1]) and K.fizzles >= 1 and not AimKit.shown(P, "rmb"), "expired %s" % e1[1]
 	)
 	K.cd["rmb"] = 0.0
 	K.ch_rmb = 1.0
-	ak.aim_at(P, home + Vector3(25.0, 0, 0))
+	ak.aim_at(P, home + Vector3(20.0, 0, 0))
 	ak.tap(m, P)
-	ak.step(m, 0.25, func(): ak.aim_at(P, home + Vector3(25.0, 0, 0)))
+	ak.step(m, 0.25, func(): ak.aim_at(P, home + Vector3(20.0, 0, 0)))
 	ak.step(m, 0.8)
 	var e2: Array = K.bolt_ends[-1] if not K.bolt_ends.is_empty() else [Vector3.ZERO, false]
+	var far_d := Vector2((e2[0] as Vector3).x - home.x, (e2[0] as Vector3).z - home.z).length()
 	ok(
-		"cinder: a far cursor caps it at 14m", absf((e2[0] as Vector3).x - home.x - 14.0) < 1.2,
-		"end x %.1f" % ((e2[0] as Vector3).x - home.x)
+		"cinder: cursor at 2 m and at 20 m travel the same distance, the max",
+		absf(near_d - far_d) < 0.3 and absf(far_d - max_r) < 1.2, "2 m: %.1f, 20 m: %.1f" % [near_d, far_d]
 	)
 	reset.call()
 	ak.tap(m, P)
@@ -362,13 +386,18 @@ func _all() -> void:
 	T.teleport(home + Vector3(0, 0, 9.0))
 	T2.teleport(home + Vector3(0, 0, -9.0))
 	ak.aim_at(P, home + Vector3(8.0, 0, 0))
+	var rings := {"made": 0, "seen": m.fx.rings.size()}      # rings spawned (a lambda keeps a dict by reference)
+	var count_rings := func():
+		rings["made"] = int(rings["made"]) + maxi(0, m.fx.rings.size() - int(rings["seen"]))
+		rings["seen"] = m.fx.rings.size()
 	P.ak.on_dash(false)
+	var ram_move: String = K.anim_id
 	var feel: Dictionary = K.dash_feel()
 	var ram_d: float = float(K.dash_def()["dist"]) * float(feel["dist"])
 	var ram_t: float = float(K.dash_def()["time"]) * float(feel["time"])
-	ak.step(m, ram_t * 0.3)
+	ak.step(m, ram_t * 0.3, count_rings)
 	var d_front := P.pos.x - home.x
-	ak.step(m, ram_t * 0.7 + 0.05)
+	ak.step(m, ram_t * 0.7 + 0.05, count_rings)
 	var d1 := P.pos.x - home.x
 	ok(
 		"ram: quick and short, front-loaded (over 37% of it in the first 30%)",
@@ -391,9 +420,11 @@ func _all() -> void:
 	P.vel = Vector3.ZERO
 	P.ex_cd = 0.0
 	ak.aim_at(P, home + Vector3(12.0, 0, 0))
+	rings["seen"] = m.fx.rings.size()
 	P.ak.on_dash(true)
+	var poof_move: String = K.anim_id
 	var poof_t: float = float(K.dash_def()["air_time"]) * float(feel["time"])
-	ak.step(m, poof_t + 0.06)
+	ak.step(m, poof_t + 0.06, count_rings)
 	var poof_d := P.pos.x - home.x
 	var kept := Vector2(P.vel.x, P.vel.z).length()
 	ok(
@@ -401,6 +432,7 @@ func _all() -> void:
 		poof_d > ram_d * 2.0 and poof_t < 0.35 and kept > 8.0,
 		"poof %.1f m in %.2fs, ground %.1f, speed kept %.1f m/s" % [poof_d, poof_t, ram_d, kept]
 	)
+	_dash_moves(K, ram_move, ram_t, poof_move, poof_t, int(rings["made"]))
 	P.dashes = 0.0
 	K.on_knock(T, true)
 	ok("passive: a knock gives back one ram charge, not both", absf(P.dashes - 1.0) < 0.01, "charges %.2f" % P.dashes)
@@ -429,16 +461,31 @@ func _all() -> void:
 	ak.step(m, 2.5)
 	ok("ram rank 3: the boost ends after 2s", absf(K.move_k() - 1.0) < 0.02, "move_k %.2f" % K.move_k())
 	P.slot_lv["dash"] = 1
-	# --- Furnace Cloak: a 0.2s ring first, then the blast
+	# --- Furnace Cloak: fires on the press frame, centred on Linwick whatever the cursor
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
+	ak.aim_at(P, home + Vector3(-12.0, 0, 9.0))      # the cursor far off to the other side
 	var bl0: int = K.blasts
-	P.ak.use_e()
-	ak.step(m, 0.1)
+	P.inp["sig"] = true
+	ak.step(m, 1.0 / 60.0)
+	P.inp["sig"] = false
+	var ring: Dictionary = AimKit.entry(P, "e_ring")
+	var ring_at: Vector2 = ring.get("at", Vector2(INF, INF))
 	ok(
-		"cloak: the edge ring shows for 0.2s before the blast",
-		AimKit.shown(P, "e_ring") and K.blasts == bl0 and ak.dmg(T) == 0.0 and float(AimKit.entry(P, "e_ring").get("r", 0.0)) > 4.0,
-		"blasts %d" % K.blasts
+		"cloak: fires on the press frame (no hold-to-aim, no delay)",
+		K.e_on_press() and K.blasts == bl0 + 1 and ak.dmg(T) >= 6.0,
+		"blasts +%d dmg %.1f" % [K.blasts - bl0, ak.dmg(T)]
+	)
+	ok(
+		"cloak: the ring is centred on him at the blast's exact radius (cursor ignored)",
+		AimKit.shown(P, "e_ring") and ring_at.distance_to(Vector2(home.x, home.z)) < 0.05
+			and absf(float(ring.get("r", 0.0)) - float(K.e_def()["radius"])) < 0.001,
+		"at %.2f m off, r %.2f" % [ring_at.distance_to(Vector2(home.x, home.z)), float(ring.get("r", 0.0))]
+	)
+	var flare_t := float((KMovesPair.MOVES["as_cloak"]["keys"] as Array)[-1][0])
+	ok(
+		"cloak: a quick arms-out flare (0.15-0.25 s)", K.anim_id == "as_cloak" and flare_t >= 0.15 and flare_t <= 0.25,
+		"%s %.2f s" % [K.anim_id, flare_t]
 	)
 	ak.step(m, 0.7)
 	ok(
@@ -451,6 +498,16 @@ func _all() -> void:
 		"dist %.1f" % P.flat_dist(T)
 	)
 	ok("cloak: the swirling fire shield shows while it holds", K.fx.shown("swirl%d" % P.get_instance_id()))
+	var pulled_far: float = P.flat_dist(T)
+	reset.call()
+	T.teleport(home + Vector3(3.8, 0, 0))
+	ak.aim_at(P, T.pos)
+	K._cloak_blast()
+	ak.step(m, 0.7)
+	ok(
+		"cloak: no cursor dependence (cursor far away or on the foe: the same pull)",
+		absf(P.flat_dist(T) - pulled_far) < 0.1, "%.2f vs %.2f m" % [pulled_far, P.flat_dist(T)]
+	)
 	K.cd["e"] = 8.0
 	P.hp = P.max_hp * 0.5
 	K.on_knock(T, true)
@@ -510,17 +567,5 @@ func _all() -> void:
 	)
 	KinMerge.end(P, "test")
 	P.merge_cd = 0.0
-	reset.call()
-	T.teleport(home + Vector3(3.0, 0, 0))
-	P.ak.use_e()
-	ak.step(m, 0.05)
-	var b0: int = K.blasts
-	ok("merge hold: the cloak's ring is up before the merge", K.cloak_t > 0.0)
-	ok("merge hold: a merge is under way", ak.merge_now(P))
-	ak.step(m, 0.5)
-	ok(
-		"merge hold: linwick's cloak never goes off mid-merge", K.cloak_t <= 0.0 and K.blasts == b0,
-		"blasts +%d" % (K.blasts - b0)
-	)
 	m.queue_free()
 	await main.get_tree().process_frame

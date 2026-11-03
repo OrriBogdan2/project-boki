@@ -9,12 +9,12 @@ extends ArchKit
 ##   A burning foe takes more from the stream and the cinder (ignite_bonus), and the stream chips its health.
 ## - LMB, Torch Lance: hold for a hose of fire (a cyan pilot flame first); the stream keeps its own
 ##   velocity so a sweep bends it, narrow at the nozzle and billowing at the end.
-## - RMB, Cinder Shot: hold to aim down a lane, release: a cinder that lands at the cursor (max 14m);
+## - RMB, Cinder Shot: hold to aim down a lane, release: a cinder that always flies its full 14m;
 ##   it slows the foe and sets it Ablaze; on a burning foe it upgrades and spreads. Rank 3: a second charge.
 ## - Shift, Soot Ram: two charges of a short head-first dash toward the cursor that STOPS on the
 ##   first foe with a fiery impact and shoves it; rank 3: more damage, a speed boost and a shield on a hit.
-## - E, Furnace Cloak: a 0.2s edge ring, then the blast: scorch, Char, Anti-Heal, drag foes in (walls block),
-##   and a swirling shield for what it hit.
+## - E, Furnace Cloak: on the press, a blast round Linwick (a ring at its exact radius): scorch, Char,
+##   Anti-Heal, drag foes in (walls block), and a swirling shield for what it hit.
 ## - X, Flue Flight (level 6): a steerable flight that lays a burning, slowing lava carpet (AshwickJet).
 
 const FLAME_CYAN := Color("6fe8ff")    # the pilot flame: a cool nozzle against warm fire
@@ -28,8 +28,9 @@ const RAM_FRONT := 0.3                 # share of the ram spent at its burst spe
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
 const EMBER_EVERY := 0.035             # s between the ember puffs a ram or poof leaves behind
-const POOF_PUFFS := 8                  # smoke puffs in the ring where the air poof goes off
-const CLOAK_POSE_T := 0.7             # s the Furnace Cloak pose holds the flamer up off the aim (as_cloak)
+const POOF_PUFFS := 5                  # smoke puffs the bellows blow out behind him as the air poof goes off
+const CLOAK_POSE_T := 0.3             # s the Furnace Cloak flare holds the flamer up off the aim (as_cloak)
+const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
 const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the nozzle's tip from the feet in the aim pose: forward, up, right (m)
 
@@ -45,7 +46,6 @@ var relight_t := 0.0            # the lance can't relight until this runs out (0
 var was_held := false
 var ember_t := 0.0
 var trail_t := 0.0              # the next dash after-image puff
-var cloak_t := 0.0              # hold: the Furnace Cloak's 0.2s ring before the blast
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
@@ -181,13 +181,6 @@ func _tick(dt: float) -> void:
 	if not hose.puffs.is_empty():
 		hose.step(m.world, dt)
 		_hose_look()
-	if cloak_t > 0.0:
-		cloak_t -= dt
-		if h.stun_t > 0.0 or h.downed:
-			cloak_t = 0.0
-		elif cloak_t <= 0.0:
-			cloak_t = 0.0
-			_cloak_blast()
 	if not bash.is_empty(): _tick_bash(dt)
 	if not drags.is_empty(): _tick_drags(dt)
 	jet.tick(dt)
@@ -259,8 +252,7 @@ func pips_on(f: Ent) -> int:
 		if fx.shown("pip%d_%d" % [key, i]): n += 1
 	return n
 
-## A Boki merge ends the hose, a Furnace Cloak about to go off, a bash mid-flight and the Cinder Shot lane,
-## with nothing fired.
+## A Boki merge ends the hose, a bash mid-flight and the Cinder Shot lane, with nothing fired.
 func _drop_holds() -> void:
 	hose.clear()
 	if fx: fx.flame_off("hose%d" % h.get_instance_id())
@@ -269,7 +261,6 @@ func _drop_holds() -> void:
 	after_t = 0.0
 	flame_acc = 0.0
 	h.mel_hold = 0.0
-	cloak_t = 0.0
 	bash = {}
 	aiming = false
 	jet.drop()
@@ -365,7 +356,8 @@ func _flame_tick(tick: float) -> void:
 			)
 
 # ------------------------------------------------------------------ RMB: Cinder Shot
-## Held: a thin white lane to the cursor (clamped to 14m) with a small end ring, the gun hand cocked.
+## Held: a thin white lane of the shot's full, fixed length (the cursor distance doesn't matter), the gun hand
+## cocked.
 func rmb_hold_tick(_t: float) -> void:
 	if KinMerge.active(h) or not rmb_ready() or jet.running():
 		return
@@ -373,11 +365,10 @@ func rmb_hold_tick(_t: float) -> void:
 		aiming = true
 		play("as_aim")
 	var rdf := rmb_def()
-	var ln := AimMode.dist(h, float(rdf["range"]))
+	var ln := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)
 	AimKit.lane(
 		h, "rmb", {"len": ln, "width": 0.42, "col": Color("fff4e6"), "col2": BOLT_COL, "alpha": 0.9, "tip": true}
 	)
-	AimKit.circle(h, "rmb_end", {"at": h.pos + _fwd() * ln, "r": 0.55, "col": Color("bfe0ff")})
 
 func fire_rmb(c: Dictionary) -> void:
 	c["variant"] = "tap"
@@ -385,7 +376,6 @@ func fire_rmb(c: Dictionary) -> void:
 	var was_aiming := aiming
 	aiming = false
 	AimKit.hide(h, "rmb")
-	AimKit.hide(h, "rmb_end")
 	if jet.running():
 		h._ab_feedback("sec", "deny")          # both hands on the jet while flying
 		return
@@ -395,7 +385,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var rdf := rmb_def()
 	play("as_shot")
 	var amt := float(rdf["dmg"])
-	var rng := AimMode.dist(h, float(rdf["range"]))      # lands at the cursor, 14m at most (sheet 0133)
+	var rng := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)      # always its full length in the aim direction
 	var shot := {"type": "projectile", "speed": float(rdf["speed"]), "range": rng, "size": float(rdf["size"])}
 	var stg := stage("rmb", {"delivery": shot,
 		"effects": [
@@ -412,7 +402,7 @@ func fire_rmb(c: Dictionary) -> void:
 	m.sfx("lw_bolt", h.pos, -2.0, 1.0)
 	if h.is_local(): Oomph.punch_dir(m, -h.aim_dir(), 0.12)
 
-## A cinder that ran out at the cursor fizzles there in a small blue-white ring (sheet 0133).
+## A cinder that ran its full length without a hit fizzles there in a small blue-white ring (sheet 0133).
 func _bolt_end(at: Vector3, expired: bool) -> void:
 	bolt_ends.append([at, expired])
 	if bolt_ends.size() > 8: bolt_ends.pop_front()
@@ -472,8 +462,9 @@ func on_dash(use_ex: bool) -> bool:
 	bash = {"t": h.roll_t, "t0": h.roll_t, "speed": h.roll_speed, "dir": dir, "hit": false}
 	return true
 
-## The air dash, Linwick's way: a "poof" from the bellows that launches him far and fast (a ring of smoke and
-## flame where it goes off), and he keeps a share of the speed after it (the class long dash is replaced).
+## The air dash, Linwick's way: a "poof" from the bellows that launches him far and fast (a cloud of smoke and
+## flame blown out behind him, no blast), and he keeps a share of the speed after it (the class long dash is
+## replaced).
 func _poof(dd: Dictionary, dir: Vector2) -> void:
 	var feel := dash_feel()
 	var air_t := float(dd["air_time"]) * float(feel["time"])
@@ -483,12 +474,12 @@ func _poof(dd: Dictionary, dir: Vector2) -> void:
 	h.roll_speed = air_dist / air_t
 	play("lw_hop")
 	m.sfx("lw_hop", h.pos, -3.0, 1.0)
-	var at := h.pos + Vector3(0, 0.6, 0)
-	fx.sunburst(at, 1.3, Color("ff5a1a"), Color("ffc040"), 0.28, true)
+	var back := -Vector3(dir.x, 0, dir.y)
+	var side := Vector3(dir.y, 0, -dir.x)
 	for i in POOF_PUFFS:
-		var ang := TAU * float(i) / POOF_PUFFS
-		var off := Vector3(cos(ang), sin(ang) * 0.5, sin(ang)) * 0.8
-		fx.puff(at + off, LDFx.M_ORB, Color("3a2a2a"), Color("ff7a2a"), 0.9, 0.5)
+		var spread := float(i) / (POOF_PUFFS - 1) - 0.5
+		var at := h.pos + Vector3(0, 0.9 + 0.25 * absf(spread), 0) + back * (0.5 + 0.25 * i) + side * spread * 0.7
+		fx.puff(at, LDFx.M_ORB, Color("3a2a2a"), Color("ff7a2a"), 0.6 + 0.08 * i, 0.45)
 	# held a step past the burst, so the kept speed lands after the class's own small carry
 	bash = {"t": air_t + 0.04, "dir": dir, "hit": true, "hop": true, "speed": h.roll_speed}
 
@@ -541,6 +532,9 @@ func _ram_looks(dir: Vector2, dt: float) -> void:
 
 func own_dash_trail() -> bool: return true
 
+## His ram and poof moves are the whole dash pose (as_leap, lw_hop): no shared heavy charge under them.
+func dodge_anim() -> String: return "kit"
+
 func _bash_impact(f: Ent) -> void:
 	var dd := dash_def()
 	bash["hit"] = true
@@ -578,19 +572,18 @@ func _ram_reward() -> void:
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), "SPEED + SHIELD", col_of(dd), true)
 
 # ------------------------------------------------------------------ E: Furnace Cloak
-## The press: arms crossed, a thin orange ring at full radius for 0.2s (everyone sees it), then the blast.
+## The press: the blast goes off at once round Linwick (never at the cursor), with a quick arms-out flare
+## and a thin ring at the blast's exact radius that everyone sees.
 func cast_e() -> bool:
-	if cloak_t > 0.0:
-		return false
 	var ed := e_def()
 	cloaks += 1
-	cloak_t = float(ed["tele"])
 	play("as_cloak")
 	AimKit.circle(
 		h, "e_ring",
-		{"self": true, "r": float(ed["radius"]), "all": true, "dur": float(ed["tele"]), "col": col_of(ed), "hot": 0.3}
+		{"self": true, "r": float(ed["radius"]), "all": true, "dur": CLOAK_RING_T, "col": col_of(ed), "hot": 0.3}
 	)
 	m.sfx("lw_shield", h.pos, -1.0, 1.0)
+	_cloak_blast()
 	return true
 
 func _cloak_blast() -> void:
@@ -600,7 +593,7 @@ func _cloak_blast() -> void:
 	var hit := 0
 	var shield_k := float(ed["rank3_shield_k"]) if rank("kin") >= 3 else 1.0
 	var r := float(ed["radius"])
-	fx.sunburst(h.pos, r * 1.05, Color("ff5a1a"), Color("ffd060"), 0.4)
+	fx.sunburst(h.pos, r, Color("ff5a1a"), Color("ffd060"), 0.3)        # no wider than the blast reaches
 	fx.scorch(h.pos, r * 0.75, 1.6)
 	fx.wave(h.pos, r, col, 0.3)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 30, 6.0, 0.5, -2.0, 1.4)

@@ -111,7 +111,6 @@ save('rime_wall_tell', mix(scale(sparkle(6, 0.25, 3000, 6500, 0.03), 0.8), scale
 save('rime_wall', mix(scale(chirp(120, 80, 0.5, 0.01, 0.15), 0.9), scale(hiss(0.5, 600, 3500, 0.03, 0.15), 0.7), scale(bell(1400, 0.5, 0.15), 0.4), scale(mul(lp(noise(0.35), 300), env(N(0.35), 0.005, 0.12)), 0.8)), -16)
 save('rime_freeze', mix(bell(1900, 0.5, 0.14), scale(hiss(0.3, 3000, 8000, 0.002, 0.07), 0.6), scale(chirp(240, 120, 0.2, 0.002, 0.06), 0.5)), -19)
 # the air dash: a spinning whirl of cold air
-save('rime_flip', mix(scale(trem(hiss(0.3, 900, 5000, 0.03, 0.12), 14, 0.6), 0.8), scale(bell(3000, 0.2, 0.06), 0.3)), -22)
 # the frost shield on a teammate: a soft crystalline chime
 save('rime_ward', mix(bell(1568, 0.5, 0.16), scale(at(bell(2093, 0.45, 0.14), 0.05), 0.6), scale(sparkle(3, 0.3, 3000, 5000, 0.05), 0.4)), -21)
 # ---- the ultimates on X (appended last, so the random stream above is unchanged)
