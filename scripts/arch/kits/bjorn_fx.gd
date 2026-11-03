@@ -39,6 +39,14 @@ const ORBIT_SCALE := 1.6
 const ORBIT_RISE := 0.45
 const SPIN_SLOW := 15.7
 const SPIN_FAST := 25.1
+## the whirl's trail ribbon: inner and outer radius (m, before the orbit's scale), how far it reaches back
+## behind the head (rad; the arc runs from there to the head, so the streak's bright end rides the hammer),
+## its colour and its strength at the slowest turn rate
+const ORBIT_IN := 0.3
+const ORBIT_OUT := 1.35
+const ORBIT_ARC := 3.4
+const ORBIT_COL := Color(1.0, 0.56, 0.1)
+const ORBIT_POWER := 3.4
 ## the planted hammer's size, and its lean off vertical (rad)
 const PLANT_SCALE := 1.9
 const PLANT_LEAN := 0.25
@@ -97,8 +105,8 @@ func _ready() -> void:
 	flare = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", STAR_GOLD, true))
 	for star in [hammer_glow, glint, flare]:
 		KitShaders.param(star, "white", 0.25)
-	var orbit_mesh := KitMeshes.band(0.45, 1.15, 2.6, 0.0, 28)
-	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", Color(1.0, 0.66, 0.2), true))
+	var orbit_mesh := KitMeshes.band(ORBIT_IN, ORBIT_OUT, ORBIT_ARC, 0.0, 36)
+	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", ORBIT_COL, true))
 	var cres_mesh := KitMeshes.band(1.1, 2.9, -PI * 0.5, PI * 0.5, 40)
 	crescent = KitMeshes.inst(self, cres_mesh, KitShaders.mat("crescent", Color(1.0, 0.6, 0.12), true))
 	var swirl_mesh := KitMeshes.band(1.0, 2.4, 0.0, TAU, 48)
@@ -215,7 +223,7 @@ func _whirl(pv: Node3D) -> void:
 	orbit_trail.global_position = centre
 	orbit_trail.rotation = Vector3(0, spin, 0)
 	orbit_trail.scale = Vector3.ONE * orbit_size / ORBIT_SCALE
-	KitShaders.param(orbit_trail, "power", 2.6 * clampf(spin_v / SPIN_SLOW, 1.0, 1.4))
+	KitShaders.param(orbit_trail, "power", ORBIT_POWER * clampf(spin_v / SPIN_SLOW, 1.0, 1.4))
 	if glint.visible:
 		glint.global_position = pv.to_global(Vector3(0, 0, -0.62))
 		var pulse := 0.85 + 0.15 * sin(Time.get_ticks_msec() * 0.025)
