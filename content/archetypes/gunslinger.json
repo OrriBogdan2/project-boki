@@ -7,7 +7,7 @@
 	"weight": "medium",
 	"body": {"size": 0.965, "chest": 1.0, "head": 0.8, "legs": 1.55},
 	"color": "#ff9a5c",
-	"fantasy": "The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into his rifle, slides around while still shooting, and finishes with one long needle of light.",
+	"fantasy": "The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light.",
 	"silhouette": "the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle",
 	"card": {
 		"loop": "Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.",

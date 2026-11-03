@@ -16,16 +16,16 @@ const HOT := Color("fff1c8")
 const DEEP := Color("c43a2a")
 const BRONZE := Color("b9732f")
 const SMOKE := Color("d9c2a8")       # the Longneedle's recoil smoke ring: warm, not white
-const SCRAPE := Color("6b4a2e")      # the slide's dust scrape under him
+const SCRAPE := Color("6b4a2e")      # the slide's dust scrape under her
 const BURR_HIT_HEIGHT := 2.6         # m above a foe's feet the charge can still strike
 const SKID_LEN := 2.2                # m, the faint streaks at a slide's start
 const SKID_SPREAD := 0.28            # m off the path's centre line
 const SKID_WIDTH := 0.1
 const SKID_SECONDS := 0.45
-const ECHO_GAP := 0.05               # s between his after-images on a slide or the air dash
-const ECHO_ALPHA := 0.35             # see-through, so the trail never covers his live body
-const ECHO_BACK := 0.35              # m behind him along his travel: the echoes trail, not overlap
-const PIP_LIFT := 0.9                # m up the screen the Fever pips sit, clear of his cap and face
+const ECHO_GAP := 0.05               # s between her after-images on a slide or the air dash
+const ECHO_ALPHA := 0.35             # see-through, so the trail never covers her live body
+const ECHO_BACK := 0.35              # m behind her along her travel: the echoes trail, not overlap
+const PIP_LIFT := 0.9                # m up the screen the Fever pips sit, clear of her cap and face
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, wall, fuse, fuse0, range, out, y0}
@@ -43,8 +43,8 @@ var last_cone := {}            # tests: {at, dir, wall}
 var last_shot := 0
 var aim_marks := 0             # tests: foes marked inside the held lane
 var echo_t := 0.0
-var grenade: Node3D = null     # the Burr Charge cocked in his left hand while RMB is held
-var ult: GunslingerUlt         # Cinderfall, his ultimate on X
+var grenade: Node3D = null     # the Burr Charge cocked in her left hand while RMB is held
+var ult: GunslingerUlt         # Cinderfall, her ultimate on X
 
 func _setup() -> void:
 	ult = GunslingerUlt.new(self)
@@ -111,11 +111,11 @@ func _tick_trail() -> void:
 	if hand != null:
 		fx().trail("vn%d" % h.get_instance_id(), hand.global_position, EMBER, HOT, 0.24)
 
-## His after-image colour: a deeper ember, so the trail reads apart from his warm live body.
+## Her after-image colour: a deeper ember, so the trail reads apart from her warm live body.
 static func echo_col() -> Color:
 	return EMBER.lerp(DEEP, 0.5)
 
-## His own after-images on Slipstep and the air dash: his silhouette in ember, cooling to deep red.
+## Her own after-images on Slipstep and the air dash: her silhouette in ember, cooling to deep red.
 func _tick_echo(dt: float) -> void:
 	if h.roll_t <= 0.0 and slide.is_empty():
 		echo_t = 0.0
@@ -232,7 +232,7 @@ func on_dash(use_ex: bool) -> bool:
 	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"])})
 	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0}
 	play("gunslinger_dash")
-	# where it began: his ember after-image standing there (0.6 s), dust, and two faint skid streaks.
+	# where it began: her ember after-image standing there (0.6 s), dust, and two faint skid streaks.
 	# No rings or discs: those mean damage or an area in this game
 	fx().echo(h, echo_col(), 0.6, ECHO_ALPHA, ECHO_BACK)
 	_skid_streaks(start, h.roll_dir)
@@ -337,7 +337,7 @@ func _tick_aim() -> void:
 			var mark := {"at": f.pos, "r": 0.75, "col": Color("ff4fb0"), "col2": HOT, "alpha": 1.2}
 			AimKit.circle(h, "mark%d" % f.get_instance_id(), mark)
 
-## The charge cocked in his raised left hand while RMB is held (gone the moment it's thrown).
+## The charge cocked in her raised left hand while RMB is held (gone the moment it's thrown).
 func _tick_grenade() -> void:
 	var cocked := rmb_down and h.anim != null and h.anim.hand_l != null and not h.downed
 	if not cocked:
@@ -597,7 +597,7 @@ func _tick_needle(dt: float) -> void:
 		_end_needle()
 		_fire_needle()
 
-## Where the Longneedle leaves the rifle: ahead of him at the barrel's height.
+## Where the Longneedle leaves the rifle: ahead of her at the barrel's height.
 func _muzzle(d: Vector2) -> Vector3:
 	return h.pos + Vector3(d.x * 0.9, 1.1, d.y * 0.9)
 
@@ -619,14 +619,14 @@ func _fire_needle() -> void:
 	fx().beam(a, b, EMBER, HOT, 1.0, float(ed["linger"]), BRONZE)
 	fx().star(a, EMBER, HOT, 1.3, 0.16)
 	m.fx.flash(a, EMBER, 1.2, 0.08)
-	fx().ring(ground(h.pos), 1.6, SMOKE, EMBER, 0.4)              # the smoke ring round him
+	fx().ring(ground(h.pos), 1.6, SMOKE, EMBER, 0.4)              # the smoke ring round her
 	net_bolt(a, b, EMBER)
 	m.sfx("vn_ion_fire", h.pos, 1.0)
 	Feel.shake(m, "t3", h, h.pos)
 	if h.is_local():
 		Oomph.punch_dir(m, -d, 0.22)
 		if m.cam: m.cam.add_trauma(0.18)
-	h.impulse(-d * float(ed.get("recoil", 6.0)))                  # the recoil shoves him back a step
+	h.impulse(-d * float(ed.get("recoil", 6.0)))                  # the recoil shoves her back a step
 	var hits := 0
 	var dmg0: float = float(ed["dmg"]) * power("kin")
 	for f in m.foes_of(h.team):
