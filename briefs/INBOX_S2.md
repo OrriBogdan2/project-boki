@@ -129,3 +129,6 @@ Keep up to 6 agents. Don't start anything that touches the demo branches until m
 - **Dash buffering:** yes; follow the source where known, else your held-to-dash-end default.
 - Names Sable/Cinder/Tarek confirmed. At home the player is their own custom person.
 - Small, on a branch from current main, after the demo build ships. Sonnet unless the feel needs Opus.
+
+## 2026-11-03 18:45 UTC (orchestrator): owner wants animation + ability parity with the source, all 12, LMB first
+- Owner: "match much closer to SUPERVIVE, such as Celeste LMB, and how it tracks when using her ice trail ... all animations and abilities closer to feature parity." Per hero: LMB animation, aim/tracking (Tamsin's LMB while skating), cadence; then the other abilities. Use the footage + hero-ref + data; our own art. Assert the behaviour. After the demo build ships. Details: INBOX.md 13:45 ET.

@@ -521,3 +521,10 @@ The owner is reviewing the build now and will add more. Start the two items ther
 
 ## 2026-11-03 18:55 UTC: farm tutorial + Hob builder: ext builds it locally (ext/farm-hob)
 - The owner's builder answers (Hob Brackenridge etc.) are in MAIN_TO_EXT 20:40 ET; ext is building the builder NPC, the farm tutorial and the Goals tracker from S1's plan on ext/farm-hob. S1 and S2: don't start it.
+
+## 2026-11-03 13:45 ET (18:45 UTC) ORCH: new owner requests (via the orchestrator)
+1. **Animation and ability parity with the source (high priority, all 12 heroes):** [EXT] owner: "I want the animations for the LMB (and in general) to match much closer to SUPERVIVE, such as Celeste LMB, and how it tracks when using her ice trail, etc. All of the animations and abilities need to be closer to feature parity." Per hero, LMB first: match the source's attack animation, aim/tracking behaviour (e.g. Tamsin's LMB while skating on her ice trail), cadence and readability from briefs/hero-ref/<hero>.md + footage + data. Our own art, same motion. Assert the behaviour (tracking, timing). After the demo build ships; S2's hero agents (Opus).
+2. **New modes (owner):** [EXT] post-demo, spec first for owner OK:
+   - **Duel:** 1v1, online matchmaking search or vs a bot (builds on today's duel room).
+   - **Arena:** 4v4 across several distinct arena battle maps.
+3. **[OWNER] open question: extraction squad size.** Keep a solo queue? 3 or 4 per squad? The owner dislikes duos, liked 4s in the source, and worries that more modes split the player base. Orchestrator recommendation: one extraction queue in trios with fill (solo players auto-filled, bots backfill early on), no separate solo queue; Duel covers 1v1 and Arena covers 4-stacks. Not decided yet.
