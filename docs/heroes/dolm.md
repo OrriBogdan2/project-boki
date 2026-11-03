@@ -163,6 +163,17 @@ row again. The bridge is gone altogether (owner review item 15: no terrain over 
 | X | `breah_spine_aim` (hold), `breah_spine` | `anim_br_spine` |
 | Passive find | `breah_sense` | `anim_br_sense` |
 
+## Dash -> ability flow (owner review item 32; rows in content/dash_flow/dolm.json, table in docs/heroes/dash_interactions.md)
+- Rubble Leap is a dash DashFlow sees (`in_dash()` from the press until she lands, `dash_left()` the planned flight
+  left); it is no longer in `kit_owns`.
+- Ground (the leap): LMB fires mid-leap, the arc carries on (the guide's "Punch to Extend Dash"); RMB starts the charge
+  mid-leap, let go in the air and the slam lands with her (the guide's "Dash -> RMB Dunk Combo"); E waits for the
+  landing (Rockwave is ground-only); X and Q go mid-leap. Air (the long dash): LMB waits for its end (the shared dash
+  can't fire the weapon), RMB, X and Q go mid-dash, E never goes off in the air (ground-only, source-correct).
+- Shift during the punch's wind-up, the charge, Stone Row's flash or the Spine's aim leaps at once and the ability carries
+  on (into_dash rows). A second leap while the first one's rock is still coming down sends that rock on at once.
+- Stone Row from on top of one of her rocks measures from the ground just past it (it used to find no room).
+
 ## Dash moves (owner review item 35)
 - Ground (Rubble Leap, the owner's leap over the source's shove): `breah_dash`, crouched on the rock as it heaves up (0.06),
   kicked off it stretched long (0.12), tucked with both fists overhead (0.30), legs reaching down (0.46), the fists-high

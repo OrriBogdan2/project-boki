@@ -14,6 +14,7 @@ const ROCK_PAY := "ROCKFALL"
 const STONE := Color("d9a35b")
 const MOLTEN := Color("ff7a2a")
 const LANE_COL := Color("f4ead8")       # the punch lane: pale stone white, as bright as an aim reticle
+const ROCK_STEP_OFF := 1.0     # m: from atop a rock, Stone Row measures from the ground this far ahead
 const LEAP_CROUCH := 0.06      # s: the rock bursts up and she crouches on it before the leap
 const LEAP_ROCK_UP := 1.6      # m: how high the rock arcs after her
 
@@ -89,8 +90,13 @@ func rock_mid(w: Dictionary) -> Vector3:
 	var mid: Vector2 = ((w["a"] as Vector2) + (w["b"] as Vector2)) * 0.5
 	return Vector3(mid.x, float(w["y"]), mid.y)
 
+## The ground her rocks rise from: the terrain under her while she stands (on one of her rocks too), else
+## her own height (in the air nothing fits: Stone Row is ground-only).
+func _floor_y() -> float:
+	return m.world.ground_at(h.pos.x, h.pos.z) if h.grounded else h.pos.y
+
 func _new_rock(p: Vector3, dir: Vector2) -> bool:
-	if not HeroZones.fits(m, p, h.pos.y):
+	if not HeroZones.fits(m, p, _floor_y()):
 		return false
 	var mine := my_rocks()
 	while mine.size() >= _rock_cap():
@@ -513,8 +519,10 @@ func on_dash(use_ex: bool) -> bool:
 		)
 		m.sfx("br_shove", h.pos, -4.0, 1.0)
 		return true
-	if not leap.is_empty() or not spend_dash(false):
+	if in_dash() or not spend_dash(false):
 		return true
+	if not leap.is_empty():
+		_rock_down()       # the last leap's rock was still coming down: it rolls on now
 	var dd := dash_def()
 	var dir := h.aim_dir()
 	var to := leap_spot(dir)
@@ -584,10 +592,15 @@ func _tick_leap(dt: float) -> void:
 		KitLooks.of(m).hold_on("br_carry", "dashrock", h, rock_at)
 		return
 	if land_at >= 0.0:
-		var dir: Vector2 = leap["dir"]
-		leap = {}
-		AimKit.hide(h, "leap")
-		_landslide_launch(to, dir)
+		_rock_down()
+
+## The leap is over: its rock comes down at the landing spot and rolls on.
+func _rock_down() -> void:
+	var to: Vector3 = leap["to"]
+	var dir: Vector2 = leap["dir"]
+	leap = {}
+	AimKit.hide(h, "leap")
+	_landslide_launch(to, dir)
 
 func _leap_off() -> void:
 	var dd := dash_def()
@@ -635,6 +648,19 @@ func _landslide_launch(at: Vector3, dir: Vector2) -> void:
 func charge_orb() -> bool:
 	return false
 
+## Rubble Leap is her ground dash for DashFlow: from the press until she lands (the rock rolling on after is not).
+func in_dash() -> bool:
+	return super.in_dash() or _leaping()
+
+## Rubble Leap's time left until its planned landing (the shared dash's otherwise).
+func dash_left() -> float:
+	if _leaping():
+		return maxf(0.0, LEAP_CROUCH + float(leap["T"]) - float(leap["t"]))
+	return super.dash_left()
+
+func _leaping() -> bool:
+	return not leap.is_empty() and float(leap["land_at"]) < 0.0
+
 ## Her dash moves (breah_dash, breah_exdash) are the whole dash pose: no shared roll under them.
 func dodge_anim() -> String:
 	return "kit"
@@ -680,10 +706,14 @@ func row_spots(dir: Vector2) -> Array:
 	var side := Vector2(-dir.y, dir.x)
 	var rows := 2 if rank("kin") >= 3 else 1
 	var spots: Array = []
+	var from := h.pos
+	if h.grounded and h.pos.y - _floor_y() > 0.5:
+		# standing on one of her rocks: the row is measured along the ground from just past it
+		from = Vector3(h.pos.x + dir.x * ROCK_STEP_OFF, _floor_y(), h.pos.z + dir.y * ROCK_STEP_OFF)
 	for r in rows:
 		var dist := float(ed["dist"]) + float(ed["row_gap"]) * r
 		var base := h.pos + Vector3(dir.x, 0, dir.y) * dist
-		var wk := HeroZones.walk(m, h.pos, base, dist)
+		var wk := HeroZones.walk(m, from, base, dist)
 		if not wk["ok"] or wk["stopped"] == "wall" or wk["stopped"] == "abyss":
 			continue      # a wall or the abyss lies between you and the row
 		for i in [0, -1, 1]:
@@ -694,7 +724,7 @@ func row_spots(dir: Vector2) -> Array:
 			# the rock must be reachable in line from the caster (no building through a wall)
 			if m.world.los(
 				h.pos + Vector3(0, 0.5, 0), p + Vector3(0, 0.5, 0), h.pos.y + 0.5
-			) and HeroZones.fits(m, p, h.pos.y):
+			) and HeroZones.fits(m, p, _floor_y()):
 				spots.append([p, r])
 	return spots
 

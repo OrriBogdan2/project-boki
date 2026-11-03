@@ -53,8 +53,10 @@ func _slot(m: Match, hero: String, slot: String) -> void:
 			if owned or got == "n/a":
 				ok(owned == (got == "n/a"), "%s: %s, kit_owns %s" % [what, got, "lists it" if owned else "doesn't"])
 				continue
-			# on the dash's last step a cancel can't be told from a fire: the dash ends there either way
-			var at_end_same: bool = late and got in ["fire", "cancel"] and want in ["fire", "cancel"]
+			# on the dash's last step a cancel can't be told from a fire: the dash ends there either way; nor can a
+			# fire from a press that goes off on the very next step (a tap that fires on its release, like Breah's)
+			var next_step: bool = got == "buffer" and wait_s < Match.DT * 0.5
+			var at_end_same: bool = late and (got in ["fire", "cancel"] or next_step) and want in ["fire", "cancel"]
 			var waited := " %.2fs after the dash" % wait_s if got == "buffer" else ""
 			ok(got == want or at_end_same, "%s: %s%s (row: %s)" % [what, got, waited, want])
 
@@ -104,7 +106,8 @@ func _steps(m: Match, n: int) -> void:
 	for i in n:
 		m.step(Match.DT)
 
-## Waits out the last trial (its dash, E, R, ult, held RMB), then puts the hunter back home, everything ready.
+## Waits out the last trial (its dash, E, R, ult, held RMB), clears what it left standing (rocks, barriers), then
+## puts the hunter back home, everything ready.
 func _ready_up(m: Match) -> void:
 	var k := hunter.ak
 	for i in QUIET_MAX:
@@ -112,6 +115,8 @@ func _ready_up(m: Match) -> void:
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)
+	for wall in m.verbs.walls.duplicate():
+		m.verbs._break_wall(wall)          # (the last trial's rocks and barriers would block this one's)
 	hunter.teleport(get_meta("home"))
 	hunter.vel = Vector3.ZERO
 	hunter.hp = hunter.max_hp

@@ -157,20 +157,20 @@ One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlo
 | Tamsin | E -> dash |  | the kit's own handling (no row yet) |
 | Tamsin | ult (X) -> dash |  | the kit's own handling (no row yet) |
 | Tamsin | Q glove -> dash |  | the kit's own handling (no row yet) |
-| Breah | ground dash -> LMB |  | the kit's own dash state: not routed yet |
-| Breah | ground dash -> RMB |  | the kit's own dash state: not routed yet |
-| Breah | ground dash -> E |  | the kit's own dash state: not routed yet |
-| Breah | ground dash -> ult (X) |  | the kit's own dash state: not routed yet |
-| Breah | ground dash -> Q glove |  | the kit's own dash state: not routed yet |
-| Breah | air dash -> LMB |  | buffered to the dash's end |
-| Breah | air dash -> RMB |  | fires mid-dash |
-| Breah | air dash -> E |  | buffered to the dash's end |
-| Breah | air dash -> ult (X) |  | fires mid-dash |
-| Breah | air dash -> Q glove |  | fires mid-dash |
-| Breah | LMB -> dash |  | the kit's own handling (no row yet) |
-| Breah | RMB -> dash |  | the kit's own handling (no row yet) |
-| Breah | E -> dash |  | the kit's own handling (no row yet) |
-| Breah | ult (X) -> dash |  | the kit's own handling (no row yet) |
+| Breah | ground dash -> LMB | Footage tip 'Punch to Extend Dash/RMB': a punch during Landslide goes off and carries her on. Ours: the boulder or punch goes off mid-leap and the leap's arc carries on (a punch's step pushes her a little further). | fires mid-dash; dash momentum carries |
+| Breah | ground dash -> RMB | Footage tip 'Dash -> RMB Dunk Combo' (0965-1010): Landslide shoves the foe out, then she leap-slams onto it. Ours: the charge starts mid-leap; let go in the air and the slam lands where the leap does. | fires mid-dash; dash momentum carries |
+| Breah | ground dash -> E | Card: Rockwave is only castable over ground; nothing on casting it mid-Landslide. Ours: held to the landing, then raised from there. | buffered to the dash's end |
+| Breah | ground dash -> ult (X) | Not in the data or footage. Tetraform is placed at the cursor, not at her, so the aim starts mid-leap; the ridge rises on release. | fires mid-dash |
+| Breah | ground dash -> Q glove | Not in the data or footage (the glove is ours). It goes off mid-leap like any glove. | fires mid-dash |
+| Breah | air dash -> LMB | Not in the data or footage (the source shows no air dash). The shared air dash can't fire the weapon; the press goes at its end. | buffered to the dash's end |
+| Breah | air dash -> RMB | Not in the data or footage. Ours: the charge starts mid-dash; the air dive waits for the dash to end (it holds her height), then plunges to slam. | fires mid-dash |
+| Breah | air dash -> E | Card: Rockwave is only castable over ground, so it doesn't go off in the air at all (with or without a dash). | buffered to the dash's end |
+| Breah | air dash -> ult (X) | Not in the data or footage. The aim is placed at the cursor, so it starts mid-dash. | fires mid-dash |
+| Breah | air dash -> Q glove | Not in the data or footage (the glove is ours). It goes off mid-dash like any glove. | fires mid-dash |
+| Breah | LMB -> dash | Not in the data or footage. Shift during the punch's wind-up leaps at once; the hold carries on and the punch goes on release. | the dash goes, the ability keeps running |
+| Breah | RMB -> dash | Footage: jumping while charging leaps her forward with the circle; Shift during the charge does the same with Rubble Leap (the circle comes along, the charge carries on). | the dash goes, the ability keeps running |
+| Breah | E -> dash | Not in the data or footage. The rocks are already placed during the 0.2s flash; Shift leaps at once and they rise anyway. | the dash goes, the ability keeps running |
+| Breah | ult (X) -> dash | Not in the data or footage. Shift while aiming the ridge leaps at once; the aim carries on. | the dash goes, the ability keeps running |
 | Breah | Q glove -> dash |  | the kit's own handling (no row yet) |
 | Ostra | ground dash -> LMB |  | the kit's own dash state: not routed yet |
 | Ostra | ground dash -> RMB |  | the kit's own dash state: not routed yet |
