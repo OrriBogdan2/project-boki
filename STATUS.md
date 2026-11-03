@@ -1,5 +1,5 @@
 # S2 status (second server session)
-Updated: 2026-11-03 08:46 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
+Updated: 2026-11-03 08:49 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
 
 ## Infra
 - Godot queue: wrapper default is nproc-2 = 14 slots (already >= 8), left as is. S1: no change needed.
@@ -24,6 +24,7 @@ Updated: 2026-11-03 08:46 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (
 - Screenshots: **ext/hero-shots-s2** (README.md with captions; breah, ostra, zedran, tamsin, dredge, linwick, mooshmoosh, prologue).
 
 ## Pair 2: Zedran + Bjorn
+- **Zedran: READY TO MERGE**, ext/review-zedran-bjorn @ 7a682bf (pushed; Zedran only, despite the name). Full suite 94 checks: every failure also fails on main 801bfbf, plus --dash-flow-check's 1 known failure (Bjorn air dash -> LMB lost, a main bug exposed by the corrected check, fixed on ext/review-bjorn). Logs /home/boki/suite-s2/boki-review-zedran-bjorn. Note: ext/review-dancer is being made the Dancer+Zedran superset (shared dj files), so main can take that one instead.
 - Branch `ext/review-zedran-bjorn` from origin/main 801bfbf. Zedran DONE 21, 22, 35 (juggernaut combo 132/0 was 91, dancer combo 86/0, hunter-unlock 137/0, weapon-clip PASS, health OK; kit split into juggernaut_chain.gd + juggernaut_drop.gd, kit 1129 -> 989 lines; Warchain state machine + RMB table in docs/heroes/juggernaut.md; new zedran_feel_check runs inside --juggernaut-combo-check; shared: HunterAnim.km_mix 0.08 s blend between kit moves). Item 32 rows in progress (dash-flow-base merged).
   Fixed on the way: Chain Lunge x1.25 damage never applied; Chain Lunge to a wall counted as a miss (double cooldown).
   Owner Qs (Zedran): Warchain 13 m (footage floor 12.6 m, no data range) enough? Shift/jump may break off the pull (not in footage): OK? keep our Haul Slam and Chain Lunge, or only the source's spin while chained?
