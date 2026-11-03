@@ -410,10 +410,13 @@ func _vireo_owner1103() -> void:
 		if tt > 0.05:
 			_aim(home + Vector3(4.0, 0, 0))
 	var marks := []
-	marks.append([0.7, "full", "owner1103_e_count", "owner1103 #9: Skycall circle, radius 1.5 m (15-20% smaller), before the strike", _on_target])
-	marks.append([1.2, "full", "owner1103_e_slide_a", "owner1103 #9b: struck, the target starts a slow slide toward her", _on_target])
+	var count_cap := "owner1103 #9: Skycall circle, radius 1.5 m (15-20% smaller), before the strike"
+	marks.append([0.7, "full", "owner1103_e_count", count_cap, _on_target])
+	var a_cap := "owner1103 #9b: struck, the target starts a slow slide toward her"
+	marks.append([1.2, "full", "owner1103_e_slide_a", a_cap, _on_target])
 	marks.append([1.75, "full", "owner1103_e_slide_b", "owner1103 #9b: mid-slide, easing out", _on_target])
-	marks.append([2.4, "full", "owner1103_e_slide_c", "owner1103 #9b: the slide ends about 3.4 m from where it was hit", _on_target])
+	var c_cap := "owner1103 #9b: the slide ends about 3.4 m from where it was hit"
+	marks.append([2.4, "full", "owner1103_e_slide_c", c_cap, _on_target])
 	await _go(2.6, flick, marks)
 
 # ------------------------------------------------------------------ Venator
