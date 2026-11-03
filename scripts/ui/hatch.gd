@@ -258,7 +258,8 @@ var ship: Node3D
 
 func _build_ui() -> void:
 	ui = CanvasLayer.new(); add_child(ui)
-	root_ui = Control.new(); root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); root_ui.theme = UI.theme()
+	root_ui = Control.new()
+	root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(root_ui)
 	# a soft dark vignette pulls the eye to the middle, like a stage
@@ -458,8 +459,7 @@ func _show_create() -> void:
 		var i := int(look[key])
 		if opts[0] is Color:
 			var sw := Panel.new(); sw.custom_minimum_size = Vector2(170, 26)
-			var ssb := UI._box(opts[i], 13, Color(1, 1, 1, 0.25), 1)
-			sw.add_theme_stylebox_override("panel", ssb)
+			sw.add_theme_stylebox_override("panel", UI.frame(opts[i], 13, Color(1, 1, 1, 0.25)))
 			sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			hr.add_child(sw)
 		else:
@@ -662,11 +662,8 @@ func _start_hatch() -> void:
 	warm_bar = Control.new()
 	warm_bar.custom_minimum_size = Vector2(420, 16)
 	warm_bar.draw.connect(func():
-		var bg := StyleBoxFlat.new(); bg.bg_color = Color(0, 0, 0, 0.45); bg.set_corner_radius_all(8)
-		warm_bar.draw_style_box(bg, Rect2(Vector2.ZERO, warm_bar.size))
-		if warmth > 0.01:
-			var fg := StyleBoxFlat.new(); fg.bg_color = Color("ff9a5a").lerp(Color("ffd36a"), warmth); fg.set_corner_radius_all(8)
-			warm_bar.draw_style_box(fg, Rect2(Vector2.ZERO, Vector2(warm_bar.size.x * warmth, warm_bar.size.y))))
+		var warm := Color("ff9a5a").lerp(Color("ffd36a"), snappedf(warmth, 0.05))
+		UI.draw_bar(warm_bar, Rect2(Vector2.ZERO, warm_bar.size), warmth, warm, Color(0, 0, 0, 0.45), 8))
 	v.add_child(warm_bar)
 	bottom.add_child(card)
 	Sfx.play("whoosh")
