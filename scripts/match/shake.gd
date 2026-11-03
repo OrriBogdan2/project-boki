@@ -1,6 +1,6 @@
 class_name Shake
 extends RefCounted
-## The one door to camera shake (owner rule, item 50). Your own abilities, dashes, landings and hits
+## The one door to camera shake. Your own abilities, dashes, landings and hits
 ## never shake your screen: they read through hit-stop, flashes, sparks, debris and sound. The only shake
 ## left is a big thing that happens TO you (a boss slam, a heavy ult landing on or near you): low and
 ## <= MAX_SECS long, scaled by the Settings "Screen shake" slider (0 = off).

@@ -512,24 +512,14 @@ Rules:
 - The spike tier is a bit longer than SUPERVIVE-era Kinfall's current max of 75ms. It's still short
   of fighting-game values (8-16f), because a third player can act during it (Sakurai's free-for-all point).
 
-### 5.5 Camera: shake, kick, flash
+### 5.5 Camera: almost no shake (owner rule, replaces the old table)
 
-Shake uses the existing trauma camera (`cam.add_trauma`, shake ∝ trauma²) and falls off with
-distance (`Match.shake` already fades it over 14m). Kicks are directional `cam.punch`.
-
-| Event | You did it | It happened to you | Nearby (others' fight) |
-|---|---|---|---|
-| your dash | 0 trauma; 0.03 kick along the dash | — | 0 |
-| ability cast, tier 1 | 0.05 | — | 0 |
-| T2 hit | 0.08 | 0.12 | 0 |
-| T3 CC landed | 0.15 | 0.3 | 0 |
-| T4 payoff (spike, wall slam, exploit) | 0.25 | 0.35 | 0.05 within 8m |
-| knock (downing) | 0.35 + `_reward_moment` | — | 0.08 within 10m |
-| merge / bonded R start | 0.4 + 0.1 kick + HUD flash in the category colour, 0.2s | 0.15 if you're in its on_start | 0.1 within 12m |
-| leap landing / big area | 0.2 | 0.25 | 0.1 within 8m |
-
-Never shake for allies' or other fights' routine hits. HUD hurt-direction indicators and
-`hud.hurt_from()` carry the "from where" information instead of the camera.
+Your own abilities, dashes, landings and hits never shake or kick your camera: impact reads through
+hit-stop, flashes, sparks, debris, sound and the target's reaction. The only shake left is a big thing
+that happens TO you (a boss slam, a heavy ult or landing on or near you), through one door,
+`Shake.incoming_big(m, at, power, cause)` (scripts/match/shake.gd): at most 0.15 s, falling off over 14 m,
+never for whoever caused it, scaled by Settings "Screen shake" (0-100%, default 30%; 0 = off).
+`--shake-check` asserts it for all 12 hunters. HUD hurt-direction indicators carry the "from where".
 
 ### 5.6 Sound layering
 

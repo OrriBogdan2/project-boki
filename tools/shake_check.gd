@@ -1,5 +1,5 @@
 extends RefCounted
-## --shake-check (owner rule, OWNER_REVIEW item 50): your own actions never shake your camera, and the little shake
+## --shake-check: your own actions never shake your camera, and the little shake
 ## that is left comes only from big things happening to you.
 ##   1. all 12 hunters cast LMB / RMB / E / X / Q, dash, air dash, land from a height, all with a dummy in front to
 ##      hit: the caster's camera gets zero shake (Cam.shake_total never moves);
@@ -40,7 +40,7 @@ func _steps(m: Match, n: int) -> void:
 	for i in n:
 		m.step(Match.DT)
 
-## A dummy to hit: a bot that stands still 5 m north of the hunter (the way it aims).
+## A dummy to hit: a bot standing still 5 m north of the hunter.
 func _dummy(m: Match) -> void:
 	var h: Hunter = flow.hunter
 	for o in m.hunters:
@@ -100,11 +100,12 @@ func _boss_slam(main: Node) -> void:
 	boss.blast(h.pos, 3.0, 0.0)
 	_steps(m, 60)
 	var secs := _shake_of(m) - t0
-	ok(secs > 0.0 and secs <= Shake.MAX_SECS + 0.001, "a boss slam on you shakes %.3f s (0 < t <= %.2f s)" % [secs, Shake.MAX_SECS])
+	ok(secs > 0.0 and secs <= Shake.MAX_SECS + 0.001, "a boss slam on you shakes %.3f s" % secs)
 	var amp_30 := Shake.incoming_big(m, h.pos, 1.0)
 	Settings.v["screen_shake"] = 0.6
 	var amp_60 := Shake.incoming_big(m, h.pos, 1.0)
-	ok(amp_60 > amp_30 and is_equal_approx(amp_60, amp_30 * 2.0), "the slider scales it: 30%% %.3f, 60%% %.3f" % [amp_30, amp_60])
+	var scaled := amp_60 > amp_30 and is_equal_approx(amp_60, amp_30 * 2.0)
+	ok(scaled, "the slider scales it: 30%% %.3f, 60%% %.3f" % [amp_30, amp_60])
 	ok(Shake.incoming_big(m, h.pos + Vector3(40, 0, 0), 1.0) == 0.0, "a slam 40 m away is not felt")
 	ok(Shake.incoming_big(m, h.pos, 1.0, h) == 0.0, "a slam you caused yourself is not felt")
 	_steps(m, 30)
@@ -117,7 +118,7 @@ func _boss_slam(main: Node) -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
 
-## 60 s of a hunter casting its kit at a bot on the move, every hero in turn would be slow: three kit shapes.
+## 60 s of a hunter casting its kit at a bot; three kit shapes (all 12 would be slow).
 func _fight(main: Node) -> void:
 	Settings.v["screen_shake"] = 1.0
 	var total := 0.0

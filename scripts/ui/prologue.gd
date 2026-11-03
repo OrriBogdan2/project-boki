@@ -583,7 +583,8 @@ func _camera(moves: Array, delta: float) -> void:
 	look += sway * pos.distance_to(look) * 0.003
 	if rumble > 0.0:
 		# a slow low sway, not a shake: tiny, and scaled by the Screen shake setting (0 = still)
-		pos += Vector3(sin(t * 9.0), 0.6 * sin(t * 7.0 + 1.0), 0.0) * rumble * RUMBLE_AMP * float(Settings.get_v("screen_shake"))
+		var amp := rumble * RUMBLE_AMP * float(Settings.get_v("screen_shake"))
+		pos += Vector3(sin(t * 9.0), 0.6 * sin(t * 7.0 + 1.0), 0.0) * amp
 		rumble = maxf(0.0, rumble - delta * 1.2)
 	cam.position = pos
 	cam.look_at(look, Vector3.UP)
