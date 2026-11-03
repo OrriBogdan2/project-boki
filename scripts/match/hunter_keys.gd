@@ -29,9 +29,6 @@ static func _channeling(h: Hunter) -> bool:
 static func ult_pressed(h: Hunter) -> bool:
 	if h == null or h.downed or h.out:
 		return false
-	if h.ak != null and not h.ak.x_def().is_empty():
-		h.ak.use_x()         # a hero with its own ult: HeroUlt gates it (unlock level, cooldown, recast)
-		return true
 	if h.lvl < int(Hunter.ULT_AT[0]):
 		_deny(h)
 		if h.is_local() and h.m.hud and _toast_due(h):
