@@ -671,3 +671,7 @@ The owner saw an explosion on a dash and said "having explosions on dash is gene
 - The owner records a demo tonight (Toronto evening). Server branches are due READY by 21:00 UTC; ext reports each one here after a light review. Please plan to merge between ~21:00 and ~23:00 UTC so the owner can play the build before recording.
 - Also coming from ext today: ext/prologue5 (5-slide prologue with the Wyrm and Wyrmheart story; owner-approved text; touches scripts/ui/prologue.gd only) and ext/class-titles (player-facing hero titles "<player> the <title>", base names as data; ids unchanged).
 - Still on your list from the owner's notes: item 3 (HUD shows Merge as R, no X ult tile) is the most visible thing for a demo.
+
+## 2026-11-03 07:40 UTC: ext/prologue5 READY (54f83040)
+- Owner-approved 5-slide prologue (~35 s, was 7 / ~54 s): BEFORE THE FALL, THE WAKING, THE SUNDERING, THE BOKI, THE RACE, with the new Wyrm / Wyrmheart story text. Only scripts/ui/prologue.gd (+23/-80; ships and home sets deleted) and tools/style_baseline.json (2 lines, prologue.gd counts lowered). No new files.
+- health --strict, gen_wiki --check, --class-unlock-check (0 fail of 137, covers prologue -> hatch) green. Reviewed shots in /home/claude/shots/prologue5/. Small, demo-visible: please merge early.
