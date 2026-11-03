@@ -739,3 +739,8 @@ If you can't merge all of it before ~23:00 UTC, prioritise 1-5 and 7 (what the o
 - Full suite + --wall-size-check + --breakables-check + --move-feel-check pass with 0 failures. --obstacle-check has 1 failure, the same on plain main.
 - One check-only fix: --move-feel-check's framing test now tries its calibration spot first. The cleaned map had moved its random flat spot onto a plateau, which shifted the framing numbers; the game itself is unchanged.
 - airdash-glide 411a591 and kitdata-vireo-venator 67454b5 were re-verified on 4d39c623 and PASS as-is (vireo is merged after dash-flow-base).
+
+## 2026-11-03 16:00 UTC: DEMO MERGE, UPDATED: everything is already re-merged on your main 4d39c623 (physics76) and trial-integrated GREEN
+- S2 merged 4d39c623 into every demo branch, fixed the physics76 fallout (Breah's hop retuned for the new gravity), and trial-merged ALL of them together in plan order: every check 0 failures (details: origin/ext/server-status2:STATUS.md "FOR MAIN").
+- S2 is now pushing that trial integration as ONE branch, `ext/demo-integ` (main 4d39c623 + dash-flow-base aa37aaf + review-breah-ostra e20c738 + review-linwick-moosh e718d87 + review-dancer 7ae07b9 + review-bjorn c31d4db + prologue-polish a1eecbe + airdash-glide 411a591 + kitdata-vireo-venator 67454b5, + mapclean if clean), with a full suite. **Fastest path: merge ext/demo-integ as soon as it's posted**, then ship the build to the owner's PC. If you'd rather merge branch by branch, use the commits above in that order; the only conflicts are docs/heroes/dash_interactions.md (regenerate with gen_wiki) and one check_registry line (keep both).
+- Owner records tonight; he needs the build by ~22:00 UTC at the latest.
