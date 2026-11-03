@@ -26,12 +26,19 @@ const LUNGE_RED := Color("ff4a3a")     # the Lunge lane while charging
 const LUNGE_FULL := Color("ff3df0")    # ... at full
 const DROP_PURPLE := Color("b06aff")   # the Meteor Drop's landing disc
 const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
+const CHAIN_ORANGE := Color("ff8a2a")  # the Warchain's bright links (and its zig-zag in flight)
+const CHAIN_DARK := Color("3a2418")    # ... and its dark iron links
+const SWEET_RING := Color("ff5a2a")    # the sweet spot's shock ring
+const FLAME_ORANGE := Color("ff7a1a")  # Rampage's flame streaks
+const FLAME_HOT := Color("ffd04a")
+const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent
+const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
+const WAVE_FULL := Color("ffc23a")     # ... gold-hot at full charge
 # the Warchain pull bends this far sideways (tan of the angle) with A/D held across it
 const REEL_STEER := 0.5
 
 var enraged_t := 0.0
 var aura: Node3D = null        # the Enraged look: a red shell, a glow, the hunter grown bigger
-var heat: Node3D = null        # the heat glowing through the pauldrons as Rage builds
 var grow := 0.0                # 0..1 how far into the Enraged form the model is
 var lmb_t := -1.0              # how long the attack key has been held with the greatsword (-1: not)
 var lmb_was := false
@@ -60,6 +67,9 @@ var lunge_full := false        # the Lunge charge reached full (its flash played
 var drops := 0                 # (tests)
 var last_drop := Vector3.ZERO
 var knock_healed := 0.0        # (tests) health the knock heals gave back
+var rampage_wind := 0.0        # the Rampage's crouch still to go before the drive
+var rampage_n := 0             # Rampage presses (a merge starting mid-crouch cancels the drive)
+var trail_t := 0.0
 
 func _setup() -> void:
 	riposte = JuggernautUlt.new(self)
@@ -105,7 +115,7 @@ func _enrage_fx() -> void:
 	m.sfx("charge", h.pos, -3.0, 0.45)
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), "ENRAGED", rc, true)
 	m.fx.ring(h.pos, 2.8, rc, 0.45)
-	m.fx.ring(h.pos, 1.4, Color(1, 0.9, 0.8, 0.9), 0.25)
+	m.fx.ring(h.pos, 1.4, FLAME_HOT, 0.25)
 	m.fx.burst(h.pos + Vector3(0, 1.2, 0), rc, 30, 6.0, 0.6, -2.0, 1.4)
 	Feel.shake(m, "t3", h, h.pos)
 	if h.is_local():
@@ -118,26 +128,16 @@ func _make_aura() -> void:
 		return
 	aura = Node3D.new()
 	var rc := res_col()
+	# a red heat shell on the body (alpha blended, so it stays red on grass); no ground disc and no light
+	# pooling on the ground under him: the embers and drips carry the rest
 	var sh := MeshInstance3D.new()
 	sh.mesh = Models.sphere(0.95, 16)
-	sh.material_override = Models.glow_mat(Color(rc, 0.16))
+	sh.material_override = DJFx.solid(Color(rc.darkened(0.15), 0.2))
 	sh.scale = Vector3(1.0, 1.35, 1.0)
 	sh.position.y = 1.05
 	sh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	sh.name = "Shell"
 	aura.add_child(sh)
-	var ring := MeshInstance3D.new()
-	ring.mesh = Models.cyl(1.05, 1.05, 0.04, 24)
-	ring.material_override = Models.glow_mat(Color(rc, 0.45))
-	ring.position.y = 0.05
-	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	aura.add_child(ring)
-	var lt := OmniLight3D.new()
-	lt.light_color = rc
-	lt.light_energy = 1.6
-	lt.omni_range = 3.5
-	lt.position.y = 1.2
-	aura.add_child(lt)
 	h.add_child(aura)
 
 func _drop_aura() -> void:
@@ -156,33 +156,33 @@ func _tick_look(dt: float) -> void:
 	var want := 1.0 if enraged_t > 0.0 else 0.0
 	grow = move_toward(grow, want, dt * (6.0 if want > grow else 3.0))
 	if h.model:
-		h.model.scale = Vector3.ONE * (1.0 + 0.16 * grow)
+		# grow from the model's own size (class, body and the shared visual scale), never replace it
+		if not h.model.has_meta("base_scale"):
+			h.model.set_meta("base_scale", h.model.scale)
+		h.model.scale = (h.model.get_meta("base_scale") as Vector3) * (1.0 + 0.16 * grow)
 	if aura and is_instance_valid(aura):
 		var sh := aura.get_node_or_null("Shell") as MeshInstance3D
 		if sh: sh.scale = Vector3(1.0, 1.35, 1.0) * (1.0 + 0.06 * sin(m.time * 10.0))
 		if randf() < dt * 14.0:
 			for sx in [-0.45, 0.45]:
 				m.fx.burst(h.pos + Vector3(sx, 1.75, 0), res_col(), 2, 1.6, 0.5, -3.0, 0.9)
+			# dark red drips running off him
+			m.fx.burst(h.pos + Vector3(randf_range(-0.4, 0.4), 1.2, randf_range(-0.4, 0.4)), Color("8a1010"), 1, 0.4,
+					0.5, 6.0, 0.8)
 	if enraged_t <= 0.0 and aura:
 		_drop_aura()
-	# the heat: a red glow at the shoulders that grows with Rage (everyone sees how hot it is)
-	if heat == null or not is_instance_valid(heat):
-		heat = own_node()
-		var lt := OmniLight3D.new()
-		lt.light_color = res_col()
-		lt.omni_range = 2.4
-		heat.add_child(lt)
+	# the heat: embers off the shoulders that thicken with Rage (everyone sees how hot it is); no light,
+	# which pooled into a pale disc on the ground under him
 	var hk := heat_k()
-	heat.visible = hk > 0.15 and tells_visible() and enraged_t <= 0.0
-	if heat.visible:
-		heat.global_position = h.position + Vector3(0, 1.85 * float(h.cdat.get("scale", 1.0)), 0)
-		(heat.get_child(0) as OmniLight3D).light_energy = 0.4 + 1.6 * hk * (1.0 + 0.15 * sin(m.time * 7.0))
-		if hk >= 0.5 and randf() < dt * 6.0 * hk:
+	if hk > 0.15 and tells_visible() and enraged_t <= 0.0:
+		if randf() < dt * 6.0 * hk:
 			for sx in [-0.42, 0.42]:
 				m.fx.burst(h.pos + Vector3(sx, 1.7, 0), res_col(), 1, 1.0, 0.45, -3.0, 0.7)
 
 func _tick(dt: float) -> void:
 	_tick_look(dt)
+	_tick_trail(dt)
+	rampage_wind = maxf(0.0, rampage_wind - dt)
 	var rd := res_def()
 	if enraged_t > 0.0:
 		enraged_t -= dt
@@ -234,6 +234,7 @@ func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float:
 
 func move_k() -> float:
 	if riposte.running(): return riposte.move_k()
+	if rampage_wind > 0.0: return 0.0           # crouched for the Rampage
 	if not slam_w.is_empty(): return 0.6
 	return 0.55 if lmb_t > float(lmb_def().get("tap", 0.22)) else 1.0
 
@@ -301,6 +302,8 @@ func _wk() -> float:
 ## cleave). Nothing fires and nothing is left over.
 func _drop_holds() -> void:
 	riposte.drop()
+	rampage_wind = 0.0
+	rampage_n += 1
 	lmb_t = -1.0
 	lmb_buf = 0.0
 	h.mel_hold = 0.0
@@ -387,8 +390,10 @@ func _slash() -> void:
 	# the two-tone crescent (magenta edge, flame-yellow fill), sweeping the other way each swing, and a
 	# white star on anyone caught at the tip
 	var dv := h.aim_dir()
-	fx().crescent(h.pos + Vector3(0, 0.85, 0), dv, float(ld["arc"]), float(ld["reach"]) + 0.2, SLASH_OUT, SLASH_IN, 0.2,
-			0.0 if slash_n % 2 == 1 else PI)
+	# swept in 0.1s, then held whole at full strength for another 0.1s before it fades
+	var flip := 0.0 if slash_n % 2 == 1 else PI
+	fx().crescent(h.pos + Vector3(0, 0.85, 0), dv, float(ld["arc"]), float(ld["reach"]) - 0.8, SLASH_OUT, SLASH_IN, 0.3,
+			flip, 3.0)
 	for f in foes_in(h.pos, float(ld["reach"]) + 0.4):
 		var to := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z)
 		if to.length() >= float(ld["reach"]) * 0.7 and absf(dv.angle_to(to)) <= deg_to_rad(float(ld["arc"]) * 0.5):
@@ -431,9 +436,10 @@ func _wave() -> void:
 	# the fire rolling along its line: a red standing crescent of flame (pooled) riding the wave's shot
 	var dv := h.aim_dir()
 	var from := h.pos
-	var sd = _my_last_shot()
-	if sd != null: fx().ride(sd, "crescent_bolt", Color("ff3a2a"), Color("ffb070") if not full else Color("fff0b0"),
-			1.6, size * 2.2)
+	var sd: Variant = _my_last_shot()
+	if sd != null:
+		sd["col"] = WAVE_RED              # its sparks along the way are red too
+		fx().ride(sd, "crescent_bolt", WAVE_RED, WAVE_EDGE if not full else WAVE_FULL, 1.6, size * 2.2)
 	m.sfx("jug_wave", h.pos, -2.0, 1.0 - 0.15 * k)
 	var steps := int(rng / 1.2)
 	for s in steps:
@@ -467,22 +473,47 @@ func on_dash(use_ex: bool) -> bool:
 	if not spend_dash(false):
 		return true
 	var dd := dash_def()
+	var wind := float(dd.get("windup", 0.15))
+	var dir := dash_dir()
+	st["last_dash"] = "rampage"
+	rampage_wind = wind
+	rampage_n += 1
+	var mine := rampage_n
+	play("jug_dash")                 # the crouch with the blade cocked high behind, then the drive
+	m.sfx("jug_charge", h.pos, -8.0 if h.is_local() else -12.0, 1.4)
+	h.glide_cd = maxf(h.glide_cd, wind + float(dd["time"]) + 0.35)    # its wind-down: no glider straight out
+	m.later(wind, func():
+		if is_instance_valid(h) and mine == rampage_n and not h.downed and h.stun_t <= 0.0:
+			_rampage(dir))
+	return true
+
+## Rampage's drive after the crouch: the dash attack along `dir`, the tip at its end.
+func _rampage(dir: Vector2) -> void:
+	var dd := dash_def()
 	var t := float(dd["time"])
 	var pk := power("dash") / maxf(0.01, m.dmg_mult(h))
+	rampage_wind = 0.0
 	travel(float(dd["dist"]), t,
 			{"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk,
-					"trail": "dust", "dir": dash_dir()})
-	st["last_dash"] = "rampage"
-	play("jug_dash")
-	for i in 3:      # orange flame streaks behind him
-		m.later(t * 0.3 * i,
-				func(): if is_instance_valid(h): m.fx.spark(h.pos + Vector3(0, 0.9, 0),
-						Vector3(-h.aim_dir().x, 0.15, -h.aim_dir().y), Color("ff9a3a"), 10, 9.0, 25.0, 0.25, 0.0, 1.4))
+					"trail": "dust", "dir": dir})
 	m.sfx("jug_dash", h.pos, -4.0 if h.is_local() else -8.0, 1.0)
-	h.glide_cd = maxf(h.glide_cd, t + 0.35)    # the dash's wind-down: no glider straight out of it
 	m.later(t * 0.85, func(): if is_instance_valid(h) and not h.downed: _tip())
 	m.sfx("ab_whirr", h.pos, -4.0, 0.7)
+
+## His own after-images on a dash: orange flame streaks along the ground behind him, not the shared pill.
+func own_dash_trail() -> bool:
 	return true
+
+func _tick_trail(dt: float) -> void:
+	if h.roll_t <= 0.0 or not tells_visible():
+		return
+	trail_t -= dt
+	if trail_t > 0.0:
+		return
+	trail_t = 0.03
+	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
+	var side := Vector3(-dir.y, 0, dir.x) * randf_range(-0.35, 0.35)
+	fx().streak(h.pos + Vector3(0, randf_range(0.4, 1.3), 0) + side, dir, 1.8, 0.45, FLAME_ORANGE, FLAME_HOT, 0.32)
 
 ## The tip of the Rampage: the sweet spot, a short arc at the end of the dash.
 func _tip() -> void:
@@ -610,6 +641,7 @@ func _slam() -> void:
 			paid["x"] = true
 			sweet_spots += 1
 			payoff_fx(f.pos, "SWEET SPOT", res_col(), "pay_rage", dd, f)
+			_shock_ring(f.pos)
 		if sweet:
 			sweet_hit[f.get_instance_id()] = m.time}))
 	AimKit.hide(h, "slam")
@@ -622,6 +654,15 @@ func _slam() -> void:
 	if h.is_local(): Oomph.punch_dir(m, dd, 0.24)
 	m.sfx("cleave", h.pos, -1.0, 0.75)
 	m.sfx("ab_slam", h.pos, -3.0, 0.85)
+
+## The sweet spot's own mark on the ground: a 3m red-orange shock ring with dark cracks running out of it.
+func _shock_ring(at: Vector3) -> void:
+	m.fx.ring(at, 1.5, SWEET_RING, 0.4)
+	fx().crescent(at + Vector3(0, 0.1, 0), h.aim_dir(), 340.0, 1.6, SWEET_RING, Color("6a1a0a"), 0.45, 0.0, 4.0)
+	for i in 6:
+		var a := TAU * float(i) / 6.0 + randf_range(-0.3, 0.3)
+		fx().streak(at + Vector3(0, 0.06, 0), Vector2(-cos(a), -sin(a)), randf_range(1.4, 2.0), 0.16, Color("3a1208"),
+				SWEET_RING, 0.6)
 
 ## The hold: a charged dash attack into the first foe in its path; a miss doubles the cooldown.
 func _lunge(k: float) -> void:
@@ -665,7 +706,7 @@ func _tick_lunge() -> void:
 			KinExec.apply_foe(stg.effects, f, c, f.pos, stg)
 			m.fx.slash(h.pos + Vector3(0, 0.9, 0), atan2(dv.y, dv.x), deg_to_rad(60.0), 2.4, col_of(rmb_def()), true)
 			# the impact: a huge white burst and a horizontal red slash across them
-			fx().star(f.pos + Vector3(0, 1.1, 0), Color(1, 1, 1), 2.6 + 1.4 * k, 0.3, Color(1, 1, 1))
+			fx().star(f.pos + Vector3(0, 1.1, 0), LUNGE_FULL, 2.6 + 1.4 * k, 0.3, FLAME_HOT)
 			fx().crescent(f.pos + Vector3(0, 1.0, 0), dv.rotated(PI * 0.5), 120.0, 1.6, LUNGE_RED, Color(1, 0.6, 0.5),
 					0.2)
 			m.sfx("jug_lunge_hit", f.pos, -1.0, 1.0)
@@ -691,7 +732,7 @@ func _chain_lunge(k: float) -> void:
 	var t := dist / (float(ld["speed"]) * 1.25)
 	chain_lunges += 1
 	m.fx.bolt(h.pos + Vector3(0, 1.0, 0), dest + Vector3(0, 1.0, 0), Color("ffcf6a"))
-	m.fx.bolt(h.pos + Vector3(0, 0.7, 0), dest + Vector3(0, 0.7, 0), Color(1, 0.95, 0.8, 0.9))
+	m.fx.bolt(h.pos + Vector3(0, 0.7, 0), dest + Vector3(0, 0.7, 0), FLAME_HOT)
 	net_bolt(h.pos + Vector3(0, 1.0, 0), dest + Vector3(0, 1.0, 0), Color("ffcf6a"))
 	_drop_chain()
 	travel(dist, t, {"invuln": 0.0, "trail": "dust", "dir": dv.normalized()})
@@ -726,7 +767,7 @@ func _haul_land(k: float) -> void:
 	play("jug_haulslam")
 	m.fx.word(at + Vector3(0, 2.6, 0), "HAUL SLAM", Color("ffcf6a"), true)
 	m.fx.ring(at, float(hd["radius"]), Color("ffcf6a"), 0.35)
-	m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
+	m.fx.ring(at, 1.0, FLAME_HOT, 0.2)
 	m.fx.dust(at, 18)
 	m.fx.burst(at + Vector3(0, 0.4, 0), Color("ffcf6a"), 24, 6.0, 0.5, 6.0, 1.2)
 	m.sfx("ab_slam", at, 0.0, 0.65)
@@ -787,7 +828,7 @@ func _drop_hit(at: Vector3) -> void:
 					{"src": "abil", "ab": "utility", "tags": ["utility", "meteor_core"], "stun": float(dd["stun"]),
 							"dr": true})
 			m.fx.word(f.pos + Vector3(0, 2.3, 0), "CRUSHED", res_col(), false)}))
-	fx().star(at + Vector3(0, 0.6, 0), Color(1, 1, 1), 2.6, 0.3, Color(1, 1, 1))
+	fx().star(at + Vector3(0, 0.6, 0), DROP_PURPLE, 2.6, 0.3, Color("ffd0ff"))
 	fx().crescent(at + Vector3(0, 0.2, 0), h.aim_dir(), 330.0, float(dd["radius"]), DROP_PURPLE, Color("ffd0ff"), 0.3)
 	m.fx.spark(at, Vector3.UP, DROP_PURPLE, 16, 10.0, 70.0)
 	m.fx.dust(at, 18)
@@ -824,7 +865,7 @@ func _tick_tells() -> void:
 							"ticks": true})
 	if lmb_t > float(lmb_def()["tap"]):
 		var k := wave_k()
-		AimKit.circle(h, "wave", {"self": true, "r": 1.35, "fill": k, "col": Color(1, 1, 1)})
+		AimKit.circle(h, "wave", {"self": true, "r": 1.35, "fill": k, "col": WAVE_RED})
 		AimKit.charge(h, k, {"col": Color("ff6a4a")})
 
 ## During the Warchain's pull: a fiery spin around you that blights everyone it hits.
@@ -893,8 +934,12 @@ func cast_e() -> bool:
 			else:
 				_start_e_cd()      # hooked nothing: the chain breaks, its cooldown starts
 				m.fx.word(at + Vector3(0, 1.2, 0), "MISS", Color("c0b0a0"), false)}))
-	var sd = _my_last_shot()
-	if sd != null: fx().ride(sd, "hook", Color("ff9a3a"), Color("ffcf6a"), 0.6, 0.15)
+	var sd: Variant = _my_last_shot()
+	if sd != null:
+		fx().ride(sd, "hook", CHAIN_ORANGE, Color("ffcf6a"), 0.6, 0.15)
+		# the shared hook look and its thin pale rope would draw over the Warchain's own chain
+		if sd.has("deco") and is_instance_valid(sd["deco"]):
+			(sd["deco"] as Node3D).visible = false
 	m.sfx("jug_chain", h.pos, -3.0, 1.0)
 	m.sfx("ab_tether", h.pos, -6.0, 0.7)
 	return true
@@ -926,14 +971,14 @@ func _tick_chain(_dt: float) -> void:
 	if tells_visible() or f != null:
 		var a := h.pos + Vector3(0, 1.0, 0)
 		var b: Vector3 = (chain["pos"] as Vector3) + Vector3(0, 1.0 if f != null else 0.6, 0)
-		fx().chain("war%d" % h.get_instance_id(), a, b, 0.0, Color("ff9a3a"), Color("3a2a22"), 0.13)
+		fx().chain("war%d" % h.get_instance_id(), a, b, 0.0, CHAIN_ORANGE, CHAIN_DARK, 0.14)
 
 ## In flight: a loose orange zig-zag from the hand to the hook.
 func _tick_chain_flight() -> void:
 	for s in m.shots:
 		if s["by"] == h and (s["x"] as Dictionary).get("rope", false):
-			fx().chain("war%d" % h.get_instance_id(), h.pos + Vector3(0, 1.0, 0), s["pos"], 1.0, Color("ff9a3a"),
-					Color("ffcf6a"), 0.1)
+			fx().chain("war%d" % h.get_instance_id(), h.pos + Vector3(0, 1.0, 0), s["pos"], 1.0, CHAIN_ORANGE,
+					CHAIN_ORANGE, 0.12)
 			return
 
 func _drop_chain() -> void:

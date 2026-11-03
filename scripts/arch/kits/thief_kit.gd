@@ -26,9 +26,15 @@ const KNOCK_STAR := Color("ff2a48")
 const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is empowered
 const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
 const BOLT_TAIL := Color("ff8a2a")     # the bolt's short orange flame tail
+const KNIFE_VIOLET := Color("b07aff")  # the dagger's arrival circle
 const BOLA_HOT := Color("ffb02a")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
+## The ground Cartwheel's speed over its run (time share, speed as a share of its average): a quick burst
+## that peaks near 0.15s and runs down into the hasted run by the landing (the sheet's measured curve).
+const VAULT_CURVE := [[0.0, 0.4], [0.3, 1.9], [1.0, 0.55]]
+const VAULT_MEAN := 1.2025         # the mean of VAULT_CURVE, so the distance stays the data's
+const TRAIL_EVERY := 0.035         # s between two of her after-images on a dash
 
 var primed_t := 0.0            # Vault empowered the next bolt
 var haste_t := 0.0             # Vault's burst of speed (ends on the empowered hit)
@@ -51,6 +57,8 @@ var fizzles := 0               # bolts that ran out at the cursor
 var last_bolt_end := Vector3.ZERO
 var last_bolt_emp := false
 var blinks := 0
+var vault := {}                # the Cartwheel running: {t, dur, speed, air}
+var trail_t := 0.0
 
 func _setup() -> void:
 	res = 0.0
@@ -236,6 +244,8 @@ func _tick(dt: float) -> void:
 	if not bola_cast.is_empty(): _tick_bola_cast(dt)
 	if not bola.is_empty(): _tick_bola(dt)
 	encore.tick(dt)
+	_tick_vault(dt)
+	_tick_trail(dt)
 	_tick_wrapped(dt)
 	_tick_knife()
 	_tick_glint()
@@ -256,24 +266,19 @@ func _tick_aim_line() -> void:
 		AimKit.hide(h, "aim_glow")
 		AimKit.line(h, "aim", {"to": to, "col": AIM_LILAC, "alpha": 0.6})
 
-## The empowered tell: a gold glint and a light at the weapon hand (everyone sees it).
+## The empowered tell: a gold glint at the weapon hand (everyone sees it); no light, which pooled into a
+## pale disc on the ground.
 func _tick_glint() -> void:
 	if glint == null or not is_instance_valid(glint):
 		glint = own_node()
 		var ball := MeshInstance3D.new()
 		ball.mesh = Models.sphere(0.16, 10)
-		ball.material_override = Models.glow_mat(Color(res_col().lightened(0.3), 1.0))
+		ball.material_override = DJFx.solid(EMP_LINE)
 		ball.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		glint.add_child(ball)
-		var lt := OmniLight3D.new()
-		lt.light_color = res_col()
-		lt.omni_range = 2.6
-		lt.light_energy = 1.8
-		glint.add_child(lt)
 	glint.visible = primed_t > 0.0 and tells_visible()
 	if glint.visible:
-		var d := h.aim_dir()
-		glint.global_position = h.position + Vector3(d.x * 0.55, 1.0 * float(h.cdat.get("scale", 1.0)), d.y * 0.55)
+		glint.global_position = hand_pos(hand == 0)
 		var k := 1.3 + 0.3 * sin(m.time * 14.0)
 		glint.scale = Vector3.ONE * k
 		if randf() < 0.3: m.fx.burst(glint.global_position, res_col(), 1, 0.8, 0.25, -1.0, 0.6)
@@ -368,8 +373,10 @@ func on_dash(use_ex: bool) -> bool:
 	if not spend_dash(use_ex):
 		return true
 	if use_ex:
-		# the shared long dash, her way: a flick into a forward tumble with a violet streak
-		travel(float(h.cdat.get("ex_dist", 5.0)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1}, true)
+		# the long (air) dash is the Cartwheel from a jump: a crouched flick into a sideways cartwheel that
+		# carries its speed on (the sheet's ~8m over ~0.95s) and ends where she lands, with a cyan streak
+		travel(float(dd["air_dist"]), float(dd["air_time"]), {"invuln": 0.1}, true)
+		vault = {"t": 0.0, "dur": h.roll_t, "speed": h.roll_speed, "air": true}
 		play("thf_exdash")
 		for i in 3:
 			m.later(0.05 * i,
@@ -379,9 +386,52 @@ func on_dash(use_ex: bool) -> bool:
 				func(): if is_instance_valid(h): m.fx.ring(h.pos, 0.8, Arch.color(id), 0.18))
 		return true
 	else:
-		travel(float(dd["dist"]), float(dd["time"]), {"invuln": float(dd["invuln"]), "phase": 0.3})
+		# from a jump the cartwheel carries its speed to the landing and goes much further
+		var air := not h.grounded
+		var dist := float(dd["air_dist"] if air else dd["dist"])
+		travel(dist, float(dd["air_time"] if air else dd["time"]), {"invuln": float(dd["invuln"]), "phase": 0.3})
+		vault = {"t": 0.0, "dur": h.roll_t, "speed": h.roll_speed, "air": air}
 	_vaulted()
 	return true
+
+## The Cartwheel's speed curve on the ground; from the air it holds its speed and ends where she lands.
+func _tick_vault(dt: float) -> void:
+	if vault.is_empty():
+		return
+	vault["t"] = float(vault["t"]) + dt
+	var u := float(vault["t"]) / maxf(0.01, float(vault["dur"]))
+	if u >= 1.0 or h.roll_t <= 0.0:
+		vault = {}
+		return
+	if bool(vault["air"]):
+		if h.grounded and float(vault["t"]) > 0.12:
+			h.roll_t = 0.0
+		return
+	h.roll_speed = float(vault["speed"]) * _curve(VAULT_CURVE, u) / VAULT_MEAN
+
+static func _curve(pts: Array, u: float) -> float:
+	for i in pts.size() - 1:
+		var a: Array = pts[i]
+		var b: Array = pts[i + 1]
+		if u <= float(b[0]):
+			return lerpf(float(a[1]), float(b[1]), (u - float(a[0])) / maxf(0.001, float(b[0]) - float(a[0])))
+	return float(pts[-1][1])
+
+## Her own after-images on every dash: cyan streaks and a spinning cyan star where her hands were (not the
+## shared team-colour pill).
+func own_dash_trail() -> bool:
+	return true
+
+func _tick_trail(dt: float) -> void:
+	if h.roll_t <= 0.0 or not tells_visible():
+		return
+	trail_t -= dt
+	if trail_t > 0.0:
+		return
+	trail_t = TRAIL_EVERY
+	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
+	fx().streak(h.pos + Vector3(0, 0.7, 0), dir, 1.3, 0.5, GHOST, Color("e0fbff"), 0.3)
+	fx().star(h.pos + Vector3(0, 1.0, 0), GHOST, 0.5, 0.22, Color("c9a0ff"))
 
 ## After a Vault: the cartwheel (a side flip in the plane of travel, whichever way you go), the white
 ## arc its hands and feet trace, the speed, and the next bolt empowered.
@@ -399,13 +449,13 @@ func _vaulted() -> void:
 	m.sfx("dj_cartwheel", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
 	m.later(t, func():
 		if not is_instance_valid(h): return
-		m.fx.ring(h.pos, 0.9, Color(1, 1, 1, 0.8), 0.2)      # the white halo as she lands
+		m.fx.ring(h.pos, 0.9, AIM_LILAC, 0.2)      # the halo as she lands (the source's is white; ours lilac)
 		m.sfx("click", h.pos, -6.0 if h.is_local() else -10.0, 2.2))      # the bolt formed in the hand: empowered
 	if not was:
 		armed_fx("", "dash")                     # empowered: the ready ping, a ring everyone sees
 
 func _swoosh(dir: Vector2) -> void:
-	fx().crescent(h.pos + Vector3(0, 0.85, 0), dir, 300.0, 0.95, Color(1, 1, 1, 0.9), Color(0.82, 0.86, 1.0, 0.7), 0.28,
+	fx().crescent(h.pos + Vector3(0, 0.85, 0), dir, 300.0, 1.05, GHOST, AIM_LILAC, 0.3,
 			PI * 0.5)
 
 # ------------------------------------------------------------------ passive hooks
@@ -693,7 +743,7 @@ func _tick_knife() -> void:
 	if tells_visible() or f != null:
 		fx().place("knife%d" % h.get_instance_id(), "dagger", at + Vector3(0, 1.2 if f != null else 0.35, 0), dv * 0.01,
 				col_of(e_def()), Color("ffcf5a"), 0.2, 0.2)
-	AimKit.circle(h, "knife", {"at": at, "r": 1.6, "col": Color(1, 1, 1), "ticks": true, "alpha": 0.8})
+	AimKit.circle(h, "knife", {"at": at, "r": 1.6, "col": KNIFE_VIOLET, "ticks": true, "alpha": 1.0})
 
 func e_recast() -> bool:
 	if knife.is_empty():

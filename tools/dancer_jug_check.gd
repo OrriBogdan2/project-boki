@@ -78,7 +78,7 @@ func thief(a) -> void:
 	P.dashes = P.max_dashes()
 	P.inp["move"] = Vector2(0, 1)
 	P.do_dash()
-	A.step(m, 0.3)
+	A.step(m, 0.55)
 	P.inp["move"] = Vector2.ZERO
 	for b in m.breaks:
 		b["dead"] = true        # a crate in the long bolt's path would stop it short of 13.4 m
@@ -115,10 +115,11 @@ func thief(a) -> void:
 	P.inp["move"] = Vector2(0, 1)
 	P.do_dash()
 	var wheel := K.anim_id
-	A.step(m, 0.35)
+	A.step(m, 0.55)
 	P.inp["move"] = Vector2.ZERO
-	A.ok("dancer dash: Vault cartwheels about 2.4m, speeds, empowers",
-			P.flat_dist(home) > 1.8 and P.flat_dist(home) < 3.2 and K.primed_t > 0.0 and K.move_k() > 1.2
+	var far := 4.5 * float(K.dash_feel()["dist"])        # the sheet's 4.5m, after the global dash feel
+	A.ok("dancer dash: Vault cartwheels about 4.5m (x the dash feel), speeds +18%, empowers",
+			absf(P.flat_dist(home) - far) < 0.6 and K.primed_t > 0.0 and K.move_k() > 1.15
 			and P.dashes < d0 - 0.5 and wheel in ["thf_vault_l", "thf_vault_r"],
 		"moved %.1f primed %.2f anim %s" % [P.flat_dist(home), K.primed_t, wheel])
 	var gold: Dictionary = AimKit.entry(P, "aim")
@@ -143,6 +144,23 @@ func thief(a) -> void:
 			A.dmg(T) >= 30.0 and K.marks_on(T) == 2 and T.vuln_t > 0.0 and K.move_k() <= 1.0
 			and P.dashes >= P.max_dashes() - 0.01 and K.primed_t <= 0.0 and K.primed_hits == 1,
 		"dealt %.0f marks %d vuln %.1f dashes %.2f" % [A.dmg(T), K.marks_on(T), T.vuln_t, P.dashes])
+	# from a jump the cartwheel holds its speed to the landing: much further than on the ground
+	A.step(m, 0.5)
+	P.teleport(home)
+	P.dashes = P.max_dashes()
+	T.teleport(home + Vector3(0, 0, 5.0))
+	P.do_jump()
+	A.step(m, 0.1)
+	P.inp["move"] = Vector2(1, 0)
+	P.do_dash()
+	P.inp["move"] = Vector2.ZERO
+	A.step(m, 1.3)
+	A.ok("dancer dash: from a jump the cartwheel carries its speed to the landing (about 1.7x the ground one)",
+			P.flat_dist(home) > far * 1.35 and P.grounded and K.vault.is_empty(), "moved %.1f" % P.flat_dist(home))
+	K.primed_t = 0.0
+	K.haste_t = 0.0
+	P.teleport(home)
+	T.teleport(home + Vector3(6.0, 0, 0))
 	# RMB: a 0.4s wind-up with the lane showing, then the Bola grounds the first, flies on, tangles a second
 	A.fresh(T)
 	A.fresh(T2)
@@ -727,7 +745,7 @@ func combos(a) -> void:
 	A.aim_at(P, T.pos)
 	P.inp["move"] = Vector2(0, 1 if TK.primed_hits % 2 == 0 else -1)
 	P.do_dash()
-	A.step(m, 0.3)
+	A.step(m, 0.55)
 	P.inp["move"] = Vector2.ZERO
 	A.aim_at(P, T.pos)
 	P.fire_cd = 0.0
@@ -740,7 +758,7 @@ func combos(a) -> void:
 	# the loop: Vault again at once, empowered again, about 1.4s a loop while the hits land
 	P.inp["move"] = Vector2(0, 1 if TK.primed_hits % 2 == 0 else -1)
 	P.do_dash()
-	A.step(m, 0.3)
+	A.step(m, 0.55)
 	P.inp["move"] = Vector2.ZERO
 	A.aim_at(P, T.pos)
 	P.fire_cd = 0.0
@@ -753,7 +771,7 @@ func combos(a) -> void:
 	# an empowered bolt that misses is spent (no reset)
 	P.inp["move"] = Vector2(0, 1 if TK.primed_hits % 2 == 0 else -1)
 	P.do_dash()
-	A.step(m, 0.3)
+	A.step(m, 0.55)
 	P.inp["move"] = Vector2.ZERO
 	A.aim_at(P, home + Vector3(0, 0, -5.0))
 	P.fire_cd = 0.0

@@ -52,17 +52,24 @@ const MOVES := {
 		[0.2, {"blade": Vector3(0.0, -1.35, 0.0), "bw": 1.0, "rad": 0.5, "p": -0.7, "sq": 0.5, "lift": -0.15, "lw": 1.0,
 				"legs": [1.2, -1.7, -0.5, -1.2]}],
 		[0.55, {}]]},
-	# Rampage: a shoulder-down drive with the blade levelled ahead, the tip thrust out at the end
+	# Rampage (Quick Dash, 0372-0377): a 0.15s crouch with the blade cocked high behind, the drive flat and
+	# stretched along the ground with the blade levelled, the tip thrust out at its end, then a long low
+	# recovery with the blade dragging behind him (up by 0.9)
 	"jug_dash": {"keys": [
-		[0.0, {"blade": Vector3(0.0, -0.1, 0.0), "bw": 1.0, "rad": 0.3, "p": -0.35, "y": 0.45, "lw": 1.0,
-				"legs": [0.6, -1.0, -0.5, -0.4]}],
-		[0.16, {"blade": Vector3(0.0, -0.05, 0.0), "bw": 1.0, "rad": 0.35, "p": -0.5, "y": 0.4, "lw": 1.0,
-				"legs": [1.0, -0.6, -0.8, -0.2]}],
-		[0.22, {"blade": Vector3(0.0, 0.0, 0.0), "bw": 1.0, "rad": 0.85, "p": -0.6, "y": -0.3, "lw": 1.0,
-				"legs": [1.15, -0.6, -0.8, -0.15], "sq": -0.25}],
-		[0.42, {"blade": Vector3(0.0, -0.1, 0.0), "bw": 0.8, "rad": 0.6, "p": -0.3, "lw": 0.6,
-				"legs": [0.8, -0.8, -0.4, -0.3]}],
-		[0.65, {}]]},
+		[0.0, {}],
+		[0.07, {"blade": Vector3(0.0, 2.4, 0.0), "bw": 1.0, "p": 0.12, "y": 0.4, "sq": 0.3, "lift": -0.14, "lw": 1.0,
+				"legs": [0.9, -1.5, -0.4, -0.9]}],
+		[0.15, {"blade": Vector3(0.0, 2.6, 0.0), "bw": 1.0, "p": 0.18, "y": 0.5, "sq": 0.36, "lift": -0.18, "lw": 1.0,
+				"legs": [1.0, -1.6, -0.45, -1.0]}],
+		[0.21, {"blade": Vector3(0.0, -0.1, 0.0), "bw": 1.0, "rad": 0.4, "p": -0.7, "y": 0.4, "sq": -0.3, "lw": 1.0,
+				"legs": [1.15, -0.6, -0.85, -0.15]}],
+		[0.38, {"blade": Vector3(0.0, 0.0, 0.0), "bw": 1.0, "rad": 0.85, "p": -0.65, "y": -0.3, "sq": -0.25, "lw": 1.0,
+				"legs": [1.15, -0.6, -0.8, -0.15]}],
+		[0.5, {"blade": Vector3(-1.2, -0.4, 1.4), "bw": 1.0, "rad": 0.4, "p": -0.35, "sq": 0.28, "lift": -0.14,
+				"lw": 1.0, "legs": [0.95, -1.45, -0.4, -0.95]}],
+		[0.78, {"blade": Vector3(-1.1, -0.4, 1.3), "bw": 0.9, "rad": 0.35, "p": -0.25, "sq": 0.18, "lift": -0.08,
+				"lw": 0.9, "legs": [0.8, -1.2, -0.35, -0.8]}],
+		[0.9, {}]]},
 	# Warchain: the chain hand cocked back, then flung out ahead; the body twists into it
 	"jug_chain": {"keys": [
 		[0.0, {}],
@@ -133,21 +140,35 @@ const MOVES := {
 		[0.45, {}]]},
 	# ---------------------------------------------------------------- Dancer (thief)
 	# Arc Bolts, one per hand (footage 0028-0039: 2-3 frames a shot, one arm whipped forward from a wide
-	# low stance, the torso turned about 30 degrees into it, the legs keeping their stance). The arm
-	# itself is the twin-hold swing (combo 0 right, 1 left); this is the body: a coil, the release at
-	# 0.08, the follow-through to 0.22, back by 0.42
+	# low stance, the torso turned about 30 degrees into it, the legs keeping their stance): the throwing
+	# arm cocked back past the shoulder at 0.03, whipped to full reach at 0.08 with the torso twisting
+	# into it, an overshoot at 0.15, settled by 0.35; the other blade held out wide to the side
 	"thf_lmb_r": {"keys": [
-		[0.0, {"y": 0.30, "p": 0.08, "sq": 0.12, "lw": 0.6, "legs": [0.5, -0.95, -0.4, -0.65], "lift": -0.07}],
-		[0.08, {"y": -0.75, "p": -0.24, "sq": -0.16, "lw": 0.6, "legs": [0.6, -0.9, -0.5, -0.55], "lift": -0.03}],
-		[0.16, {"y": -0.62, "p": -0.2, "sq": -0.05, "lw": 0.5, "legs": [0.55, -0.9, -0.45, -0.6], "lift": -0.05}],
-		[0.28, {"y": -0.40, "p": -0.1, "sq": 0.04, "lw": 0.4, "legs": [0.45, -0.85, -0.35, -0.6], "lift": -0.05}],
-		[0.42, {}]]},
+		[0.0, {"y": 0.25, "p": 0.06, "sq": 0.1, "lw": 0.9, "legs": [0.75, -1.1, -0.65, -0.8], "lift": -0.08,
+				"fr": Vector3(0.18, 0.08, 0.12), "rw": 1.0, "fl": Vector3(-0.42, 0.12, -0.05), "hw": 0.8}],
+		[0.03, {"y": 0.50, "p": 0.12, "sq": 0.16, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9], "lift": -0.1,
+				"fr": Vector3(0.22, 0.14, 0.30), "rw": 1.0, "fl": Vector3(-0.42, 0.14, 0.00), "hw": 0.9}],
+		[0.08, {"y": -0.50, "p": -0.3, "sq": -0.2, "lw": 1.0, "legs": [0.95, -1.0, -0.8, -0.6], "lift": -0.04,
+				"fr": Vector3(0.02, 0.08, -0.60), "rw": 1.0, "fl": Vector3(-0.47, 0.10, 0.20), "hw": 0.9}],
+		[0.15, {"y": -0.62, "p": -0.34, "sq": -0.08, "lw": 1.0, "legs": [0.95, -1.05, -0.8, -0.65],
+				"lift": -0.05, "fr": Vector3(-0.04, 0.04, -0.68), "rw": 1.0, "fl": Vector3(-0.42, 0.10, 0.18),
+						"hw": 0.8}],
+		[0.35, {"y": -0.10, "p": -0.06, "lw": 0.6, "legs": [0.75, -1.0, -0.6, -0.75], "lift": -0.06,
+				"fr": Vector3(0.10, 0.04, -0.30), "rw": 0.4, "fl": Vector3(-0.42, 0.10, 0.00), "hw": 0.4}],
+		[0.45, {}]]},
 	"thf_lmb_l": {"keys": [
-		[0.0, {"y": -0.30, "p": 0.08, "sq": 0.12, "lw": 0.6, "legs": [0.5, -0.95, -0.4, -0.65], "lift": -0.07}],
-		[0.08, {"y": 0.75, "p": -0.24, "sq": -0.16, "lw": 0.6, "legs": [0.6, -0.9, -0.5, -0.55], "lift": -0.03}],
-		[0.16, {"y": 0.62, "p": -0.2, "sq": -0.05, "lw": 0.5, "legs": [0.55, -0.9, -0.45, -0.6], "lift": -0.05}],
-		[0.28, {"y": 0.40, "p": -0.1, "sq": 0.04, "lw": 0.4, "legs": [0.45, -0.85, -0.35, -0.6], "lift": -0.05}],
-		[0.42, {}]]},
+		[0.0, {"y": -0.25, "p": 0.06, "sq": 0.1, "lw": 0.9, "legs": [0.75, -1.1, -0.65, -0.8], "lift": -0.08,
+				"fl": Vector3(-0.18, 0.08, 0.12), "hw": 1.0, "fr": Vector3(0.42, 0.12, -0.05), "rw": 0.8}],
+		[0.03, {"y": -0.50, "p": 0.12, "sq": 0.16, "lw": 1.0, "legs": [0.85, -1.2, -0.75, -0.9], "lift": -0.1,
+				"fl": Vector3(-0.22, 0.14, 0.30), "hw": 1.0, "fr": Vector3(0.42, 0.14, 0.00), "rw": 0.9}],
+		[0.08, {"y": 0.50, "p": -0.3, "sq": -0.2, "lw": 1.0, "legs": [0.95, -1.0, -0.8, -0.6], "lift": -0.04,
+				"fl": Vector3(-0.02, 0.08, -0.60), "hw": 1.0, "fr": Vector3(0.47, 0.10, 0.20), "rw": 0.9}],
+		[0.15, {"y": 0.62, "p": -0.34, "sq": -0.08, "lw": 1.0, "legs": [0.95, -1.05, -0.8, -0.65],
+				"lift": -0.05, "fl": Vector3(0.04, 0.04, -0.68), "hw": 1.0, "fr": Vector3(0.42, 0.10, 0.18),
+						"rw": 0.8}],
+		[0.35, {"y": 0.10, "p": -0.06, "lw": 0.6, "legs": [0.75, -1.0, -0.6, -0.75], "lift": -0.06,
+				"fl": Vector3(-0.10, 0.04, -0.30), "hw": 0.4, "fr": Vector3(0.42, 0.10, 0.00), "rw": 0.4}],
+		[0.45, {}]]},
 	# the empowered bolt (0143): planted and stretched into it, then a hard recoil back on the heels
 	"thf_primed": {"keys": [
 		[0.0, {"p": -0.3, "sq": 0.15, "lw": 0.8, "legs": [0.8, -1.1, -0.5, -0.4], "lift": -0.08}],
@@ -168,23 +189,46 @@ const MOVES := {
 				"fl": Vector3(-0.42, 0.25, 0.0),
 				"hw": 1.0}], [0.33, {"fz": 6.283, "sq": 0.28, "lw": 0.8,
 						"legs": [0.7, -1.1, 0.4, -0.9]}], [0.55, {"fz": 6.283}]]},
-	# the Bola (0100-0102): whirled overhead in the free hand through the 0.4s lane, then slung with a
-	# forward lunge at 0.42
+	# the Bola (0100-0102): the right hand raised over the head and circled (three points every 0.13s)
+	# through the 0.4s lane, the weights whirling round it (DJFx), then slung with a long forward lunge
 	"thf_bola": {"keys": [
 		[0.0, {}],
-		[0.08, {"fl": Vector3(-0.15, 0.48, 0.05), "hw": 1.0, "y": -0.3, "p": 0.12}],
-		[0.2, {"fl": Vector3(0.12, 0.46, -0.1), "hw": 1.0, "y": -0.15, "p": 0.12}],
-		[0.32, {"fl": Vector3(-0.15, 0.48, 0.05), "hw": 1.0, "y": -0.3, "p": 0.12}],
-		[0.42, {"fl": Vector3(0.12, 0.1, -0.55), "hw": 1.0, "y": 0.55, "p": -0.35, "sq": -0.12, "lw": 0.9,
-				"legs": [0.95, -0.7, -0.5, -0.2], "lift": -0.06}],
-		[0.7, {}]]},
-	# the Shadow Knife (0222-0225): a spin into a side-arm throw, released at 0.12
+		[0.05, {"fr": Vector3(0.1, 0.62, 0.05), "rw": 1.0, "y": -0.25, "p": 0.14, "lw": 0.8,
+				"legs": [0.6, -1.0, -0.5, -0.7]}],
+		[0.093, {"fr": Vector3(0.26, 0.72, 0.06), "rw": 1.0, "y": -0.25, "p": 0.14, "lw": 0.8,
+				"legs": [0.6, -1.0, -0.5, -0.7]}],
+		[0.136, {"fr": Vector3(0.00, 0.78, -0.24), "rw": 1.0, "y": -0.25, "p": 0.14, "lw": 0.8,
+				"legs": [0.6, -1.0, -0.5, -0.7]}],
+		[0.179, {"fr": Vector3(-0.22, 0.72, 0.08), "rw": 1.0, "y": -0.25, "p": 0.14, "lw": 0.8,
+				"legs": [0.6, -1.0, -0.5, -0.7]}],
+		[0.222, {"fr": Vector3(0.26, 0.72, 0.06), "rw": 1.0, "y": -0.25, "p": 0.14, "lw": 0.8,
+				"legs": [0.6, -1.0, -0.5, -0.7]}],
+		[0.265, {"fr": Vector3(0.00, 0.78, -0.24), "rw": 1.0, "y": -0.25, "p": 0.14, "lw": 0.8,
+				"legs": [0.6, -1.0, -0.5, -0.7]}],
+		[0.308, {"fr": Vector3(-0.22, 0.72, 0.08), "rw": 1.0, "y": -0.25, "p": 0.14, "lw": 0.8,
+				"legs": [0.6, -1.0, -0.5, -0.7]}],
+		[0.351, {"fr": Vector3(0.26, 0.72, 0.06), "rw": 1.0, "y": -0.25, "p": 0.14, "lw": 0.8,
+				"legs": [0.6, -1.0, -0.5, -0.7]}],
+		[0.394, {"fr": Vector3(0.00, 0.78, -0.24), "rw": 1.0, "y": -0.25, "p": 0.14, "lw": 0.8,
+				"legs": [0.6, -1.0, -0.5, -0.7]}],
+		[0.42, {"fr": Vector3(0.08, 0.18, -0.66), "rw": 1.0, "y": 0.6, "p": -0.42, "sq": -0.15, "lift": -0.08,
+				"lw": 1.0, "legs": [1.15, -0.7, -0.75, -0.2]}],
+		[0.5, {"fr": Vector3(0.04, 0.1, -0.7), "rw": 1.0, "y": 0.5, "p": -0.38, "lw": 1.0,
+				"legs": [1.1, -0.75, -0.7, -0.25]}],
+		[0.75, {}]]},
+	# the Shadow Knife (0222-0225): a whole-body spin (about 250 degrees by 0.09) with the off hand cocked
+	# back, unwinding into a side-arm throw released at 0.12
 	"thf_knife": {"keys": [
-		[0.0, {}],
-		[0.07, {"fy": 1.6, "fl": Vector3(-0.35, 0.12, 0.2), "hw": 1.0, "p": 0.05}],
-		[0.12, {"fy": 0.0, "fl": Vector3(0.15, 0.08, -0.55), "hw": 1.0, "y": 0.55, "p": -0.25, "lw": 0.6,
-				"legs": [0.7, -0.8, -0.35, -0.25]}],
-		[0.42, {}]]},
+		[0.0, {"sq": 0.12, "lift": -0.04}],
+		[0.04, {"fy": -1.6, "fl": Vector3(-0.42, 0.2, 0.15), "hw": 1.0, "p": 0.08, "sq": 0.1, "lw": 0.8,
+				"legs": [0.5, -0.9, 0.3, -0.7]}],
+		[0.09, {"fy": -4.4, "fl": Vector3(-0.3, 0.26, 0.3), "hw": 1.0, "p": 0.12, "lift": 0.04, "lw": 0.8,
+				"legs": [0.4, -0.8, 0.5, -0.9]}],
+		[0.12, {"fy": -6.283, "fl": Vector3(0.18, 0.1, -0.66), "hw": 1.0, "y": 0.6, "p": -0.32, "sq": -0.15, "lw": 1.0,
+				"legs": [0.95, -0.8, -0.6, -0.3]}],
+		[0.24, {"fy": -6.283, "fl": Vector3(0.22, 0.06, -0.6), "hw": 1.0, "y": 0.5, "p": -0.26, "lw": 0.9,
+				"legs": [0.9, -0.85, -0.55, -0.35]}],
+		[0.45, {"fy": -6.283}]]},
 	# ... arriving at it: dropped in low out of the blink, then rising
 	"thf_arrive": {"keys": [
 		[0.0, {"lift": 0.2, "sq": -0.3, "lw": 1.0, "legs": [0.6, -0.9, 0.4, -0.8]}],
@@ -202,25 +246,36 @@ const MOVES := {
 		[0.38, {"fl": Vector3(-0.55, 0.35, 0.0), "hw": 1.0, "fr": Vector3(0.55, 0.35, 0.0), "rw": 1.0, "p": -0.1,
 				"sq": -0.2, "fy": 6.283}],
 		[0.55, {}]]},
-	# ... each volley (f33-f35): the torso snaps round as one arm flings a blade out, the other trailing
+	# ... each volley (f33-f35): the torso snaps round as one arm flings a blade straight out to its side,
+	# the other trailing; the volleys alternate, so the arms snap out left, right, left
 	"thf_encore_throw_r": {"keys": [
-		[0.0, {"y": -0.35, "fr": Vector3(0.2, 0.4, 0.2), "rw": 1.0, "sq": 0.08}],
-		[0.06, {"y": 0.6, "fr": Vector3(0.55, 0.15, -0.4), "rw": 1.0, "fl": Vector3(-0.3, 0.2, 0.25), "hw": 0.7,
-				"sq": -0.1}],
+		[0.0, {"y": -0.40, "fr": Vector3(0.20, 0.35, 0.2), "rw": 1.0, "sq": 0.1}],
+		[0.06, {"y": 0.65, "fr": Vector3(0.62, 0.12, -0.2), "rw": 1.0, "fl": Vector3(-0.30, 0.2, 0.25),
+				"hw": 0.7, "sq": -0.12}],
+		[0.16, {"y": 0.50, "fr": Vector3(0.58, 0.1, -0.1), "rw": 1.0}],
 		[0.3, {}]]},
 	"thf_encore_throw_l": {"keys": [
-		[0.0, {"y": 0.35, "fl": Vector3(-0.2, 0.4, 0.2), "hw": 1.0, "sq": 0.08}],
-		[0.06, {"y": -0.6, "fl": Vector3(-0.55, 0.15, -0.4), "hw": 1.0, "fr": Vector3(0.3, 0.2, 0.25), "rw": 0.7,
-				"sq": -0.1}],
+		[0.0, {"y": 0.40, "fl": Vector3(-0.20, 0.35, 0.2), "hw": 1.0, "sq": 0.1}],
+		[0.06, {"y": -0.65, "fl": Vector3(-0.62, 0.12, -0.2), "hw": 1.0, "fr": Vector3(0.30, 0.2, 0.25),
+				"rw": 0.7, "sq": -0.12}],
+		[0.16, {"y": -0.50, "fl": Vector3(-0.58, 0.1, -0.1), "hw": 1.0}],
 		[0.3, {}]]},
 	# ---------------------------------------------------------------- per-hero base dash (the long air dash)
-	# Dancer flicks into a forward tumble, tucked, then opens out to land light
+	# Dancer's long (air) dash is the Cartwheel from a jump (the sheet's air dash): a crouched flick, the body
+	# turned over sideways with the legs split and arms out, then carried flat and stretched on its speed,
+	# a low landing crouch; a cyan streak (ThiefKit)
 	"thf_exdash": {"keys": [
-		[0.0, {"sq": -0.2, "p": -0.3, "lw": 0.8, "legs": [0.9, -0.4, -0.6, -0.3]}],
-		[0.05, {"fx": -1.5, "lift": 0.15, "sq": 0.15, "lw": 1.0, "legs": [1.6, -2.1, 1.5, -2.0]}],
-		[0.2, {"fx": -6.283, "lift": 0.1, "lw": 1.0, "legs": [1.6, -2.1, 1.5, -2.0]}],
-		[0.28, {"fx": -6.283, "sq": 0.3, "lw": 0.9, "legs": [0.8, -1.3, 0.5, -1.0]}],
-		[0.45, {"fx": -6.283}]]},
+		[0.0, {"sq": 0.25, "lift": -0.1, "p": -0.25, "lw": 1.0, "legs": [0.8, -1.4, 0.5, -1.1]}],
+		[0.05, {"lift": 0.2, "sq": -0.15, "lw": 1.0, "legs": [1.15, -0.1, -1.15, -0.1], "fl": Vector3(-0.45, 0.2, 0.0),
+				"hw": 1.0, "fr": Vector3(0.45, 0.2, 0.0), "rw": 1.0}],
+		[0.38, {"fz": -6.283, "lift": 0.28, "lw": 1.0, "legs": [1.15, -0.1, -1.15, -0.1], "fl": Vector3(-0.45, 0.2, 0.0),
+				"hw": 1.0, "fr": Vector3(0.45, 0.2, 0.0), "rw": 1.0}],
+		[0.5, {"fz": -6.283, "p": -0.45, "sq": -0.2, "lift": 0.12, "lw": 1.0, "legs": [0.9, -0.3, -0.9, -0.3],
+				"fl": Vector3(-0.5, 0.05, 0.1), "hw": 1.0, "fr": Vector3(0.5, 0.05, 0.1), "rw": 1.0}],
+		[1.0, {"fz": -6.283, "p": -0.4, "sq": -0.15, "lift": 0.1, "lw": 1.0, "legs": [0.9, -0.3, -0.9, -0.3],
+				"fl": Vector3(-0.5, 0.05, 0.1), "hw": 1.0, "fr": Vector3(0.5, 0.05, 0.1), "rw": 1.0}],
+		[1.1, {"fz": -6.283, "sq": 0.32, "lift": -0.1, "lw": 1.0, "legs": [0.9, -1.5, 0.5, -1.2]}],
+		[1.25, {"fz": -6.283}]]},
 	# Juggernaut lumbers: head down, shoulder driven forward, a heavy stamp and settle at the end
 	"jug_exdash": {"keys": [
 		[0.0, {"p": -0.2, "sq": 0.2, "lw": 0.8, "legs": [0.6, -1.0, -0.4, -0.6], "lift": -0.06}],

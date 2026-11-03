@@ -229,6 +229,16 @@ func star(at: Vector3, col: Color, sz := 1.0, dur := 0.35, core := Color.WHITE) 
 	n.global_position = at
 	_play(n, "star", col, core, dur, Vector3.ONE * sz)
 
+## A streak lying along the ground behind `at` (pointing back from `dir`): a dash's own after-image (Dancer's
+## cyan, Zedran's orange flame). Hot `col2` at the head, `col` down the tail; it fades over `dur`.
+func streak(at: Vector3, dir: Vector2, length: float, width: float, col: Color, col2: Color, dur := 0.25) -> void:
+	var n := _fx("streak", M_COMET, _ribbon_mesh(), false)
+	n.global_position = at
+	var back := Vector3(-dir.x, 0, -dir.y)
+	if back.length() < 0.01: back = Vector3.BACK
+	n.basis = Basis.looking_at(-back.normalized(), Vector3.UP)
+	_play(n, "streak", col, col2, dur, Vector3(width, width, length))
+
 ## A soft ring that opens and fades where a bolt ran out (at the cursor).
 func puff(at: Vector3, col: Color, sz := 0.6, dur := 0.3, speck := Color.WHITE) -> void:
 	var n := _fx("puff", M_PUFF, _quad_mesh(), true)
@@ -244,7 +254,7 @@ func pillar(at: Vector3, col: Color, height := 3.2, radius := 0.55, dur := 0.7) 
 ## A two-tone blade arc in front of `at` facing `dir` (outer edge `col`, inner fill `col2`), swept over
 ## `dur`. `tilt` turns it about the facing (PI/2: a vertical arc, the Cartwheel's swoosh).
 func crescent(at: Vector3, dir: Vector2, arc_deg: float, reach: float, col: Color, col2: Color, dur := 0.22,
-		tilt := 0.0) -> void:
+		tilt := 0.0, sweep := 1.6) -> void:
 	var key := "cres%d" % int(round(arc_deg))
 	var n := _take(key, func(): return _mi(_crescent_mesh(arc_deg), _mat(M_CRESCENT, col, col2))) as MeshInstance3D
 	n.global_position = at
@@ -252,7 +262,7 @@ func crescent(at: Vector3, dir: Vector2, arc_deg: float, reach: float, col: Colo
 	if d3.length() < 0.01: d3 = Vector3.FORWARD
 	n.basis = Basis.looking_at(d3.normalized(), Vector3.UP) * Basis(Vector3.FORWARD, tilt)
 	_play(n, key, col, col2, dur, Vector3.ONE * reach)
-	live[-1]["sweep"] = true
+	live[-1]["sweep"] = sweep
 
 ## A chain of afterimages from `from` to `to` (Dancer's step to the dagger): `count` copies, the
 ## nearest to the start fading first.
@@ -360,6 +370,9 @@ func _rider(kind: String, col: Color, col2: Color) -> Node3D:
 func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, width := 0.3,
 		on_end := Callable()) -> void:
 	var n := _rider(kind, col, col2)
+	# this look replaces the shared shot mesh (a pale streak or blob that would show through it)
+	if sd.get("node") != null and is_instance_valid(sd["node"]):
+		(sd["node"] as Node3D).visible = false
 	riders.append({"node": n, "sd": sd, "kind": kind, "spin": randf() * TAU, "trail": trail, "width": width,
 			"on_end": on_end, "last": sd["pos"]})
 	_pose(n, kind, sd["pos"], sd["vel"], trail, width, 0.0)
@@ -478,7 +491,7 @@ func _process(delta: float) -> void:
 				mt.set_shader_parameter("life", u)
 			_:
 				mt.set_shader_parameter("life", u)
-				if e.get("sweep", false): mt.set_shader_parameter("progress", minf(1.0, u * 1.6))
+				if e.has("sweep"): mt.set_shader_parameter("progress", minf(1.0, u * float(e["sweep"])))
 				elif String(e["kind"]) == "star": n.scale = (e["s0"] as Vector3) * (0.6 + 0.6 * sqrt(u))
 		if u >= 1.0:
 			n.visible = false

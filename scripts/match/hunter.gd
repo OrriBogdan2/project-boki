@@ -3353,7 +3353,7 @@ func render(delta: float, alpha: float) -> void:
 	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
 	if roll_t > 0.0:
 		ghost_t -= delta
-		if ghost_t <= 0.0 and model.visible:
+		if ghost_t <= 0.0 and model.visible and not (ak and ak.own_dash_trail()):
 			ghost_t = 0.028
 			m.fx.ghost(position, face, tc, float(cdat["scale"]))
 	elif gliding:

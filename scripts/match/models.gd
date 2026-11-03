@@ -876,7 +876,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	root.set_meta("wid", weapon)
 	HunterAnim.rest_pose(root)       # hands on the weapon even where nothing animates it (portraits, galleries)
 	var rs := float(race["scale"])
-	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0))
+	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0)) * float(Arch.body(arch).get("size", 1.0))
 	root.scale = Vector3.ONE * float(Data.CLASSES[cls]["scale"]) * rs * ck
 	ring.scale = Vector3.ONE / (rs * ck)       # the ring under your feet shows the real hitbox, whatever your size
 	return root

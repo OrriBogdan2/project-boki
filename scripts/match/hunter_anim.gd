@@ -821,8 +821,9 @@ func update(dt: float, s: Dictionary) -> void:
 	var roll := -lean_s * (1.0 + glide_k * 0.6) - bank * 0.8 + wk * 0.05
 	var dz := 0.0
 	if arch == "thief":
-		pitch -= r1 * 0.12           # runs low, chest over the lead foot
+		pitch -= r1 * 0.35           # runs low and pitched far forward, chest over the lead foot
 	elif arch == "juggernaut":
+		pitch -= r1 * 0.25           # hunched, chest well forward over the knees
 		roll += sin(ph) * 0.06 * r1  # the shoulders roll over each heavy step
 	elif arch == "archer":
 		pitch += r1 * 0.04           # runs tall, eyes up

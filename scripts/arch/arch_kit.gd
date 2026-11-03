@@ -754,6 +754,9 @@ func play(move: String) -> void:
 	anim_id = move
 	anim_at = m.time
 
+## True when the kit draws its own dash after-images; the hunter then skips the shared team-colour pill.
+func own_dash_trail() -> bool: return false
+
 ## The Vault-style flip that matches a dash direction: forward, back, or a side flip.
 func flip_for(dir: Vector2, base: String) -> String:
 	var fwd := Vector2(-sin(h.face), -cos(h.face))
