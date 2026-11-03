@@ -960,3 +960,10 @@ I couldn't find this spelled out in item 21 or 22, so here it is:
 - **Tamsin (Celeste) RMB:** it is **a push, not a throw**. The spear or shard is driven forward from the body with both arms (a thrust or shove), with no overhead or wind-up throwing arc. Check hero-ref/tamsin footage for the exact pose.
 - **Venator (Ghost) RMB grenade:** **a side toss**, not an overhead throw. A low, sidearm or underhand flick from the side, quick, with little wind-up. Check hero-ref/venator.
 Update both KMoves and their animation strips, and put each in that hero's current feel branch.
+
+## 2026-11-03 17:19 UTC: OWNER: ability ranks in the Training Room (main, with the level-up choice, after the resets)
+- In the training area you can set your ranks freely to practise any build:
+  - **"Max all"** for testing.
+  - Or **choose which ability to fully max**, exactly as the real game allows (one max plus the normal ranks), so you can practise your real build.
+- **Easy reset:** one button or key puts ranks back to level 1 (and resets cooldowns).
+- This goes with main's level-up choice system and the planned connected Training Room. Ext: no action, just awareness. Kit max-rank bonuses must work when set this way, not only through levelling.
