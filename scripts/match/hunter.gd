@@ -1753,7 +1753,7 @@ func slot_info(slot: String) -> Dictionary:
 	var mki := MergeKit.slot_info(self, slot)
 	if not mki.is_empty():
 		return mki                       # merged: the form's slots
-	if ak and (slot in ["sec", "utility", "k1", "e", "kin", "dash", "dodge"] or KinCommand.class_ults()):
+	if ak and (slot in ["sec", "utility", "k1", "e", "kin", "dash", "dodge", "x"] or KinCommand.class_ults()):
 		return ak.slot_info(slot)
 	var out := {"name": "", "short": "", "icon": "", "col": Color.WHITE, "desc": "", "cd": 0.0, "cd_max": 0.0, "charges": 0, "max_charges": 0, "verb": "", "ready": false, "level": ability_level(slot)}
 	match slot:

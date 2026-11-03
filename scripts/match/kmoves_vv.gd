@@ -109,6 +109,37 @@ const MOVES := {
 		[0.07, {"p": 0.18, "fl": Vector3(0.05, 0.62, -0.1), "hw": 1.0, "sq": -0.2}],
 		[0.3, {"p": 0.1, "fl": Vector3(0.05, 0.55, -0.1), "hw": 0.8}],
 		[0.55, {}]]},
+	# Kitefall (X), on the sheet's 10 fps beats. The crouch (f28-f31, 0.3 s): knees deep, arms swept down and
+	# back, a squash that loads the launch
+	"mage_x": {"hold": true, "keys": [
+		[0.00, {"sq": -0.1}],
+		[0.1, {"p": -0.3, "lift": -0.12, "sq": 0.3, "legs": CROUCH, "lw": 1.0,
+			"fl": Vector3(-0.3, -0.25, 0.3), "hw": 1.0, "wo": Vector3(0.15, -0.3, 0.3), "gp": 0.6}],
+		[0.3, {"p": -0.42, "lift": -0.2, "sq": 0.5, "legs": TUCK, "lw": 1.0,
+			"fl": Vector3(-0.32, -0.3, 0.36), "hw": 1.0, "wo": Vector3(0.18, -0.32, 0.34), "gp": 0.7}]]},
+	# launched (f32-f46): a stretch up out of the crouch, then she hangs with both arms flung wide and up,
+	# legs trailing together, a slow float
+	"mage_x_air": {"hold": true, "keys": [
+		[0.00, {"p": 0.2, "sq": -0.5, "legs": [-0.2, -0.1, -0.15, -0.1], "lw": 1.0,
+			"fl": Vector3(-0.1, 0.62, -0.05), "hw": 1.0, "wo": Vector3(0.1, 0.6, 0.0), "gp": -1.2}],
+		[0.2, {"p": 0.1, "sq": -0.2, "legs": [0.3, -0.7, 0.1, -0.5], "lw": 1.0,
+			"fl": Vector3(-0.55, 0.35, 0.0), "hw": 1.0, "wo": Vector3(0.5, 0.35, 0.0), "gp": -0.5}],
+		[0.4, {"p": 0.05, "sq": -0.15, "legs": [0.35, -0.8, 0.15, -0.6], "lw": 1.0,
+			"fl": Vector3(-0.58, 0.4, 0.02), "hw": 1.0, "wo": Vector3(0.52, 0.4, 0.02), "gp": -0.55}]]},
+	# the strike (f47-f49): head first down the bolt, both fists driven down, stretched long
+	"mage_x_dive": {"hold": true, "keys": [
+		[0.00, {"p": 0.05, "fl": Vector3(-0.58, 0.4, 0.02), "hw": 1.0, "wo": Vector3(0.52, 0.4, 0.02)}],
+		[0.1, {"p": 0.9, "sq": -0.45, "legs": [-0.3, -0.1, -0.3, -0.1], "lw": 1.0,
+			"fl": Vector3(-0.05, -0.3, -0.5), "hw": 1.0, "wo": Vector3(0.05, -0.3, -0.5), "gp": 1.0}]]},
+	# the landing (f49-f51): a deep squash on one knee with a fist on the ground, then up into her stance
+	# with the arms out (she can attack again at once)
+	"mage_x_land": {"keys": [
+		[0.00, {"p": 0.55, "lift": -0.25, "sq": 0.6, "legs": [1.1, -1.8, 0.4, -1.3], "lw": 1.0,
+			"fl": Vector3(-0.1, -0.55, -0.35), "hw": 1.0, "wo": Vector3(0.12, -0.4, -0.3), "gp": 0.9}],
+		[0.1, {"p": 0.4, "lift": -0.2, "sq": 0.45, "legs": [1.0, -1.6, 0.4, -1.2], "lw": 1.0,
+			"fl": Vector3(-0.15, -0.5, -0.3), "hw": 1.0, "wo": Vector3(0.12, -0.35, -0.25), "gp": 0.7}],
+		[0.3, {"p": -0.1, "lift": 0.04, "sq": -0.15, "fl": Vector3(-0.4, 0.15, 0.0), "hw": 0.7}],
+		[0.5, {}]]},
 	# ---------------------------------------------------------------- Venator
 	# a rifle round: a 0.03 s snap of the shoulder kick, the muzzle flipped up, the stock pushed back
 	"gunslinger_lmb": {"keys": [
@@ -160,6 +191,17 @@ const MOVES := {
 			"legs": [0.1, -0.25, 0.3, -0.5], "lw": 1.0, "sq": -0.3}],
 		[0.8, {"p": 0.35, "gp": 0.25, "sq": 0.1, "legs": [0.15, -0.3, 0.2, -0.4], "lw": 0.8}],
 		[1.05, {}]]},
+	# Cinderfall (X, f29 on the sheet): the rifle snapped straight up over his head in 0.1 s, the shot kicks it
+	# and squashes him a little, held up a beat, then back down into his aim by 0.6 s
+	"gunslinger_x": {"keys": [
+		[0.00, {"sq": -0.1}],
+		[0.1, {"p": 0.3, "gp": 1.5, "wo": Vector3(0.0, 0.45, 0.1), "lift": 0.05, "sq": -0.25,
+			"fl": Vector3(0.05, 0.5, -0.05), "hw": 1.0, "legs": BRACE, "lw": 0.8}],
+		[0.14, {"p": 0.22, "gp": 1.25, "wo": Vector3(0.0, 0.32, 0.12), "lift": -0.06, "sq": 0.3,
+			"fl": Vector3(0.05, 0.42, -0.02), "hw": 1.0, "legs": BRACE, "lw": 1.0}],
+		[0.3, {"p": 0.26, "gp": 1.4, "wo": Vector3(0.0, 0.42, 0.1), "sq": 0.05,
+			"fl": Vector3(0.05, 0.48, -0.05), "hw": 1.0, "legs": BRACE, "lw": 0.8}],
+		[0.6, {}]]},
 	# a knock (the passive proc: Hot Streak): the rifle spun up onto the shoulder, chin up
 	"gunslinger_knock": {"keys": [
 		[0.00, {}],

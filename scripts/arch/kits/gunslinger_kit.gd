@@ -36,9 +36,19 @@ var last_shot := 0
 var aim_marks := 0             # tests: foes marked inside the held lane
 var echo_t := 0.0
 var grenade: Node3D = null     # the Burr Charge cocked in his left hand while RMB is held
+var ult: GunslingerUlt         # Cinderfall, his ultimate on X
+
+func _setup() -> void:
+	ult = GunslingerUlt.new(self)
 
 func fx() -> VVFx:
 	return VVFx.of(m)
+
+func cast_ult() -> bool:
+	return HeroUlt.press(self, ult.cast)
+
+func has_ult() -> bool:
+	return true
 
 func full_ready() -> bool:
 	return false
@@ -62,6 +72,8 @@ func _tick(dt: float) -> void:
 		_tick_burrs(dt)
 	if not needle.is_empty():
 		_tick_needle(dt)
+	if ult.running():
+		ult.tick(dt)
 	_tick_lmb()
 	_tick_echo(dt)
 	_tick_grenade()
@@ -109,6 +121,7 @@ func teardown() -> void:
 	for b in burrs:
 		if b["node"] != null and is_instance_valid(b["node"]): (b["node"] as Node3D).visible = false
 	burrs.clear()
+	ult.clear()
 	_end_needle()
 
 func fires_in_dash() -> bool:
@@ -589,6 +602,10 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if not needle.is_empty() or rmb_down:
 		h.inp["aim"] = aimp
 		return
+	if HeroUlt.ready(self) and tgt is Hunter and los and dist > 2.5 and randf() < 0.35:
+		h.inp["aim"] = aimp
+		if HunterKeys.ult_pressed(h):
+			return
 	var needle_ok := int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and los and dist > 4.0 and dist < 17.0
 	if needle_ok and (KitStatus.rattled(tgt) or randf() < 0.15):
 		h.inp["aim"] = aimp

@@ -37,9 +37,32 @@ var last_dash_kind := ""
 var last_strike := {}          # tests: the last Skycall's {at, dir}
 var last_push := 0.0           # tests: how hard the last rod knocked
 var echo_t := 0.0
+var ult: MageUlt               # Kitefall, her ultimate on X
+
+func _setup() -> void:
+	ult = MageUlt.new(self)
 
 func fx() -> VVFx:
 	return VVFx.of(m)
+
+func cast_ult() -> bool:
+	return HeroUlt.press(self, ult.cast)
+
+func has_ult() -> bool:
+	return true
+
+func ult_running() -> bool:
+	return ult.busy()
+
+func ult_recast() -> bool:
+	return ult.recast()
+
+## Kitefall holds her from the crouch to the strike: no other key works until she lands.
+func busy() -> bool:
+	return super.busy() or ult.busy()
+
+func fire_ok() -> bool:
+	return not ult.busy()
 
 func full_ready() -> bool:
 	for k in sparks:
@@ -127,6 +150,7 @@ func _tick(dt: float) -> void:
 	if h.wid == "coilcaster":
 		h.ammo = int(h.wpn.get("mag", h.ammo))      # a finger gun has no magazine: never an idle reload
 	_tick_sparks(dt)
+	ult.tick(dt)
 	_tick_echo(dt)
 	_tick_trail()
 	_tick_motes(dt)
@@ -178,6 +202,7 @@ func teardown() -> void:
 		_free_mote(mt, false)
 	motes.clear()
 	strikes.clear()
+	ult.drop()
 	_end_wire(false)
 	if run_t > 0.0 and h.model: h.model.visible = true
 	run_t = 0.0
@@ -198,7 +223,8 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 ## A new finger bolt left the hand: alternate hands (the bolt starts at that hand), a twist, a crackle
 ## at the fingertip and sparks at the feet; the round becomes a jagged bolt with a spark impact.
 func _tick_lmb() -> void:
-	if h.is_local() and wire.is_empty() and not rmb_down and run_t <= 0.0 and not h.downed:
+	var idle := wire.is_empty() and not rmb_down and run_t <= 0.0 and not ult.busy()
+	if h.is_local() and idle and not h.downed:
 		# the aim line runs through the cursor out to full range, an arrow tick at its end (always up)
 		AimKit.line(h, "lmb", {"len": float(h.wpn.get("range", 13.0)), "col": Color(1, 1, 1, 0.55), "alpha": 0.8})
 	if h.shot_n == last_shot:
@@ -266,6 +292,8 @@ func run_time(L: float) -> float:
 	return maxf(0.1, L / float(dd["speed"])) * float(dash_feel()["time"])
 
 func on_dash(use_ex: bool) -> bool:
+	if ult.busy():
+		return true
 	if use_ex and (h.dashes < 1.0 or wire.size() > 0 or run_t > 0.0):
 		# no charge left: the long air dash / extra dash, her base dash's own look (a tumble, a teal streak)
 		if not wire.is_empty() or run_t > 0.0 or not spend_dash(true):
@@ -292,10 +320,11 @@ func on_dash(use_ex: bool) -> bool:
 	m.sfx("vv_surge_charge", h.pos, -3.0)
 	return true
 
-## A Boki merge ends the Wirerun's charge (refunded: nothing ran), the Storm Rod's hold and a Skycall
-## still waiting for its flick, with nothing released.
+## A Boki merge ends the Wirerun's charge (refunded: nothing ran), the Storm Rod's hold, a Skycall
+## still waiting for its flick and a Kitefall in the air (she drops where she took off), with nothing released.
 func _drop_holds() -> void:
 	_end_wire(true)
+	ult.drop()
 	rmb_down = false
 	rmb_t = 0.0
 	if rod != null: rod.visible = false
@@ -796,9 +825,13 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
 	var aimp := tgt.pos + Vector3(0, 0.9, 0)
-	if not wire.is_empty() or rmb_down:
+	if not wire.is_empty() or rmb_down or ult.busy():
 		h.inp["aim"] = aimp
 		return
+	if HeroUlt.ready(self) and tgt is Hunter and los and dist < float(x_def()["range"]) and randf() < 0.35:
+		h.inp["aim"] = aimp
+		if HunterKeys.ult_pressed(h):
+			return
 	if float(cd["e"]) <= 0.0 and int(h.slot_lv["kin"]) > 0 and los and dist < 10.0 and randf() < 0.3:
 		h.inp["aim"] = aimp
 		h.inp["sig"] = true

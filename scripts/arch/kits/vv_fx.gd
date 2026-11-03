@@ -251,12 +251,20 @@ func ring(at: Vector3, r: float, col: Color, col2: Color, dur := 0.35) -> void:
 	_play(n, "ring", dur)
 
 ## A dark filled disc on the ground, radius r: a jagged crackling rim in `rim`, veins of col2 inside.
-func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE) -> void:
+## Returns the node, so a long one can be ended early with cut().
+func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE) -> Node3D:
 	var n := _take("disc", func(): return _mi(_quad_mesh(), _mat(M_DISC)))
 	_look(n, col, col2, rim)
 	n.global_position = at + Vector3(0, 0.08, 0)
 	n.scale = Vector3(r, 1.0, r)
 	_play(n, "disc", dur)
+	return n
+
+## Ends a running one-shot now (it is hidden on the next frame and goes back to its pool).
+func cut(n: Node3D) -> void:
+	for e in live:
+		if e["node"] == n:
+			e["t"] = float(e["dur"])
 
 ## A camera-facing 4-point crackle.
 func star(at: Vector3, col: Color, col2: Color, across := 0.4, dur := 0.12) -> void:

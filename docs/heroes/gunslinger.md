@@ -9,12 +9,17 @@ Palette: ember orange, bronze and hot white. Payoff word: SKEWERED.
 
 ## Kit card (L picker)
 - Role: Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.
-- LMB, RMB, E, Shift, passive: one plain line each in `content/archetypes/gunslinger.json` `card`.
+- LMB, RMB, E, Shift, passive and the ultimate: one plain line each in `content/archetypes/gunslinger.json` `card`
+  (the ultimate's line is `card.x`; the kit card's last tile shows it on the hunter-ultimate key).
 
 ## Scaling
 Our Medium has 145 HP against roughly 1.4k to 1.6k, about 1/10. Rifle 6 per round, decaying to half
 over a 10-round string; on a Dazed foe +90% (the source reads about 1.9x) with no decay. Grenade cone 16,
-Longneedle 36. Cooldowns follow the source ratio 5.4 : 7.5 : 10 at our pace 6.5 : 8.5 : 11.5. Ranges use
+Longneedle 36. Cooldowns follow the source ratio 5.4 : 7.5 : 10 at our pace 6.5 : 8.5 : 11.5. Cinderfall: the source's impact read 931 on a
+centred dummy (620 + 50%), about 62 at our scale; ours is 24 (36 in the centre) so that the ult straight into
+a merge cannot one-shot a full-health Light even at level 10 (growth +35%). The patch is 3 every 0.5 s for 3 s (the source's 144 a tick is
+about 14, held lower for the same cap) and slows 30%. Its cooldown follows the source's 37.5 s at our pace,
+42 s. Ranges use
 1 bh = 1.8 m: rifle 11 m, grenade lane 10.5 m (about 6 bh), cone 6 m (3.5 bh), Longneedle 18 m (10 bh),
 slide tap 4.6 m and hold 7 m.
 
@@ -26,7 +31,8 @@ slide tap 4.6 m and hold 7 m.
 | Shift Slipstep | tap / hold | where you move, not the aim | tap 4.6 m skid, hold 7 m slide; you shoot through either; early release refunds 30%; an air tap slides 2/3 of the hold distance | none (a white ring and an ember afterimage at the start) | `gunslinger_dash` (feet first, leaning back, rifle up); with no charge in the air `gunslinger_dash_ex` | `vn_slide` |
 | E Longneedle | press, stand still 0.6s | direction, a fixed 18 m line through terrain | a beam through everything in line: 36, +20% on a Dazed foe, a Dazed hunter is Skewered (payoff); a hunter hit takes 30% off the cooldown; the recoil shoves you back a step | a wide bright line narrowing to a thin core over the cast (everyone sees it); cursor charge ring; muzzle orb, flat flare, smoke ring | `gunslinger_e` (brace, recoil overshoot, settle) | `vn_ion_charge`, `vn_ion_fire`, `hero_skewer` |
 | Passive Hot Streak | | | a knock gives Slipstep back and heals 25%; abilities that land add Fever (4 x 5% lifesteal, 3.5s, all at once) | pips over the cap; a column and ring on a knock | `gunslinger_knock` (rifle spun up) | `vn_stim` |
-| R | | | the Boki Merge (dropped ult) | | | |
+| X Cinderfall (ultimate, level 6) | tap | at the cursor, clamped to 14 m; lands exactly there (no tracking) | the rifle snaps straight up and fires; 1.6 s later the shell lands: 24 to everyone within 3.4 m, +50% within 1.2 m of the centre; then the patch burns 3 s, 3 every 0.5 s and a 30% slow; he moves and shoots freely; 42 s cooldown | a 3.4 m ground disc with ticks that fills toward the impact, its hot red centre ring and a bronze rivet ring closing in (everyone sees all of it), a dark scorched disc, an ember light column; the shell (a big spiked charge) falls through the column for the last 0.8 s; impact: a white-hot column, ember shock rings, an ember spray, "DEAD CENTRE" on a centre hit; the patch: a scorched disc with a lit ember rim and flickering flames | `gunslinger_x` (rifle straight up, kick, back down by 0.6 s) | `vn_nuke_fire`, `vn_nuke_fall`, `vn_nuke_boom`, `vn_nuke_burn` |
+| R / T | | | the Boki Merge (the Boki system's key) | | | |
 
 ## Combinations
 | Combination | What fires | Check |
@@ -39,6 +45,9 @@ slide tap 4.6 m and hold 7 m.
 | Slipstep while firing | rounds keep going, the slide follows the keys | `--gunslinger-combo-check` |
 | Knock | Slipstep back, heal; rank 3 resets the grenade | `--gunslinger-combo-check` |
 | Stun during the Longneedle cast, or a Boki merge | cast cancelled, nothing fires | `--gunslinger-combo-check` |
+| Burr Charge cone (Dazed, shoved toward you), then Cinderfall on them | a slowed foe in the disc is hard to get out in 1.6 s | `--gunslinger-combo-check` (disc, impact, slow) |
+| Cinderfall on an enemy hunter, then the Merge | the impact fills the bond (KinBond.from_ult, a hit); the merge straight after never one-shots a full-health light hunter | `--gunslinger-combo-check` (burst) |
+| Stepping off the disc | no damage and no bond | `--gunslinger-combo-check` |
 
 ## Small mechanics
 | Mechanic | Source | Footage | Built and checked |
@@ -52,6 +61,10 @@ slide tap 4.6 m and hold 7 m.
 | The omnivamp stacks wear off all at once | [wiki](https://supervive.wiki.gg/wiki/Ghost) patch 05.03.25 | not shown | yes: "Fever wears off all at once" |
 | Railgun pierces terrain and every target | [wiki](https://supervive.wiki.gg/wiki/Ghost) | crosses a chasm | yes: through a wall, two targets |
 | The grenade sticks to dynamic objects (shields, barricades) | [wiki](https://supervive.wiki.gg/wiki/Ghost) patch 20.11.24 | not shown | partly: it sticks to terrain blocks; other heroes' walls that are blocks count |
+| Mini Nuke: lands where the cursor was at cast, 1.6 s after, no tracking | reference sheet (both casts) | f29 to f45 | yes: "it lands exactly at the cursor", "nothing lands before 1.6s" |
+| Mini Nuke: +50% damage in the centre | [thebackdash hunter list](https://thebackdash.com) (older "arcane napalm" wording) | red-orange core (f41) | yes: "+50% in the centre" |
+| Mini Nuke: the zone lasts 3 s, damages each second and slows | thebackdash | ticks about every 0.5 s (f48 to f60) | yes: "the patch burns and slows", gone after 3 s |
+| The caster keeps moving after the cast | reference sheet | jump pad at f103 | yes: "Venator moves and can shoot while it falls" |
 
 ## Assumptions (the video is silent or the owner overrode it; the owner can correct these)
 - **Owner rule:** the grenade never goes off on a person: it flies past people and sticks to a wall or the ground at the lane's end. The ground cone, like the wall cone, points back toward the thrower.
@@ -60,13 +73,25 @@ slide tap 4.6 m and hold 7 m.
 - Fever is toned down (4 stacks of 5%) rather than dropped: the footage build only had the knock reset, the later source keeps the omnivamp.
 - The Longneedle has no movement while charging (self_slow 1.0) and its recoil is a short shove.
 - A slide in the air spends a charge and stops short instead of carrying.
+- Cinderfall: the range is 14 m (the footage only shows 5 bh in range); the disc is 3.4 m (about 1.9 bh) with a
+  1.2 m centre; the zone ticks every 0.5 s (the footage; the older wording says per second) for 3 and slows 30%
+  for 0.6 s per tick. Allies are untouched (no friendly fire is mentioned). A cursor over the abyss still drops it
+  there. A Boki merge does not cancel a shell already fired (it is not a hold). Only the impact pays the bond;
+  the sheet's 0.8 for a centre hit or two hunters is not one of the bond kinds (hit, knock, kill), so every hit
+  pays the hit share (see the report's owner questions).
 
-## R (ultimate) choice
-Dropped: R is the Boki Merge. The source's placed zone is not needed for the loop.
+## Ultimate choice
+X is his own ultimate, Cinderfall (owner decision, SERVER_UPDATE6): the source's Mini Nuke, built from the
+reference sheet's "Ultimate (on X)" section. It was never folded into another slot during the kit pass, so no
+slot changes. R reloads and the Boki Merge is on its own key (T by default).
 
 ## Engine notes
 - Kit `scripts/arch/kits/gunslinger_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd`; moves
   `scripts/match/kmoves_vv.gd`; rifle model `scripts/match/hero_arms_vv.gd`; sounds `tools/gen_vv_sfx.py`.
 - Rattled ("Dazed" on screen) is a `KitStatus` status carried by the existing Net event. No Net change.
-- Merge cleanup: `_drop_holds()` ends `needle`, `slide` and the grenade hold (`rmb_down`/`rmb_t`).
+- Cinderfall: `scripts/arch/kits/gunslinger_ult.gd` (GunslingerUlt) on the shared ult base `scripts/arch/hero_ult.gd`
+  (HeroUlt); X reaches it through main's HunterKeys.ult_pressed and `GunslingerKit.cast_ult()`; numbers in
+  `gunslinger.json` `x`.
+- Merge cleanup: `_drop_holds()` ends `needle`, `slide` and the grenade hold (`rmb_down`/`rmb_t`). Cinderfall
+  has no hold or channel (a tap, then the shell is out), so it adds nothing there.
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=gunslinger`.

@@ -4,7 +4,8 @@ extends RefCounted
 ## the default gameplay zoom and again as a close-up crop round what it shows; every move also gets a
 ## 4-6 frame strip cropped round the hero (anticipation, release, follow-through, recovery). Files go
 ## straight into <dir> as <hero>_<name>.png, and <dir>/MANIFEST_<hero>.txt gets one line per file:
-## "<hero>/<tag>|<file>|<caption>". Uses only long-standing match and kit calls.
+## "<hero>/<tag>|<file>|<caption>". Uses only long-standing match and kit calls. With --vv-ult only the
+## ultimate's shots are taken (tools/vv_ult_shots.gd).
 
 const DT := 1.0 / 60.0
 const STRIP_CROP := Vector2i(120, 140)       # px round the hero for a strip frame (scaled 2.5x)
@@ -21,6 +22,7 @@ var hero_name := "vireo"
 var home := Vector3.ZERO
 var lines: Array = []
 var strips := {}               # strip file -> Array of Image
+var ult_only := false
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -32,10 +34,14 @@ func run(main_node: Node) -> void:
 			who = arg.substr(10)
 		if arg.begins_with("--vv-tag="):
 			tag = arg.substr(9)
+		if arg == "--vv-ult":
+			ult_only = true
 	hero_name = "vireo" if who == "mage" else "venator"
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
-	if who == "mage":
+	if ult_only:
+		await load("res://tools/vv_ult_shots.gd").new(self).run_for(who)
+	elif who == "mage":
 		await _vireo()
 	else:
 		await _venator()

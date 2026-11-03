@@ -8,7 +8,8 @@ coils at both wrists and a copper rod mast flying a pennant. Palette: teal, copp
 
 ## Kit card (L picker)
 - Role: Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.
-- LMB, RMB, E, Shift, passive: one plain line each in `content/archetypes/mage.json` `card`.
+- LMB, RMB, E, Shift, passive and the ultimate: one plain line each in `content/archetypes/mage.json` `card`
+  (the ultimate's line is `card.x`; the kit card's last tile shows it on the hunter-ultimate key).
 
 ## Scaling
 Source health is roughly 8 to 10 times ours (Light = 124 HP). Ratios kept against the basic attack:
@@ -16,7 +17,10 @@ bolt 12 every 0.8s (about 15 dps, unchanged from before); Storm Rod 18 to 30 (1.
 source is about 4, held lower because the rod also stuns and leaves an orb); Skycall 20 (source 2.5
 bolts, ours 1.7); Wirerun pass 10, doubled through a full-Static foe, plus a Blowout of 16 + 18% of
 their health (about 5.7 bolts on a Light; the source detonation is about 9). Cooldowns follow the
-source ratio spear : Surge : javelin = 7 : 6.7 : 9.2, at our pace 8 : 8 : 10.5. Ranges use 1 body
+source ratio spear : Surge : javelin = 7 : 6.7 : 9.2, at our pace 8 : 8 : 10.5. Kitefall (the source's
+landing is 40 + 22%, seen at about 115, so about 1 bolt at our scale; it is held at 22, 1.8 bolts, because
+its worth is the escape and the Static) knocks back about 1 bh and adds 1 Static. Its cooldown follows the
+source's 37.5 s at our pace, 42 s. Ranges use 1 body
 height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 5 to 8.5 m (main's lane; not scaled by the dash feel), Skycall circle 1.8 m radius.
 
 ## Per-slot table
@@ -27,7 +31,8 @@ height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 5 to 8.5 m (main'
 | Shift Wirerun | hold, release (full at 0.6s, auto at 0.9s) | direction from the cursor, length from the charge only | the charge is spent on the press; while held you can't steer, you keep your height and your momentum drifts you; release: a lightning streak (shots pass through) that carries the drift; every foe crossed takes 10, a 4-Static foe takes double and Blowout, Wirerun back at once (the only early reset) | rails to max range, a big ticked end ring with a star sliding out (everyone sees the ring); cursor charge ring | `mage_dash` (crouch), `mage_dash_go` (stretched streak), `mage_dash_land` (re-form, overshoot); air press with no charge: `mage_dash_ex` tumble | `vv_surge_charge`, `vv_surge_go` |
 | E Skycall | press, then flick | at the cursor (11 m) | drops a circle; for 0.3s the drag follows the cursor from the circle (toward you pulls in, away throws out; no flick = away); then 0.8s countdown; lightning: 20, 2 Static, everyone inside dragged about 7 m along the ground that way and Grounded 1.5s; flings orbs (steals a rival's) | ticked circle with a rim chevron + a drag arrow during the flick; then a dark violet disc with a crackling copper rim and a narrowing pillar (everyone sees it) | `mage_e` (one-arm sweep, snap down) | `vv_sky_place`, `vv_sky_count`, `vv_sky_strike` |
 | Passive Static | | | hits add Static (4 max, 4.5s); a marker over the head shows pips and the count, with sparks on the body that grow per stack; the 4th calls a sky bolt (Live); a knock heals 15% | marker, sky bolt, arcs to the ground while Live | `mage_live` (finger flicked to the sky) | `vv_static_full`, `hero_blowout` |
-| R | | | the Boki Merge (dropped ult, see below) | | | |
+| X Kitefall (ultimate, level 6) | press, then press again (X or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m; she is free to attack at once; 42 s cooldown | a gold range ring with ticks round the take-off (everyone sees it) over a dark violet disc with a gold rim, gold crackle on the rim; a small gold crown (ticked ring and star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
+| R / T | | | the Boki Merge (the Boki system's key, see below) | | | |
 
 Charge orb: hovers 4s, zaps the nearest foe within 2.6 m with 1 Static every second; a Wirerun through
 it bursts it for 2 Static on everyone near it. It does not give Wirerun back (owner rule).
@@ -45,6 +50,10 @@ it bursts it for 2 Static on everyone near it. It does not give Wirerun back (ow
 | Skycall over a rival's orb | flung, now yours | `--mage-combo-check` |
 | Skycall Grounded on you | no Wirerun | `--mage-combo-check` |
 | Boki merge mid-hold | Wirerun refunded, Rod and an unflicked Skycall dropped, nothing fires | `--mage-combo-check` |
+| Kitefall into a crowd, then Wirerun | 1 Static each plus the knockback; foes already at 3 go Live, so the Wirerun through them is a Blowout | `--mage-combo-check` (Static from the strike) |
+| Kitefall on an enemy hunter, then the Merge | the strike fills the bond (KinBond.from_ult, a hit); the merge straight after never one-shots a full-health light hunter | `--mage-combo-check` (burst) |
+| Kitefall as a dodge | invulnerable from the take-off to the strike; a strike on nobody pays no bond | `--mage-combo-check` |
+| Boki merge while she hangs | she drops where she took off, nothing strikes, the cooldown stays spent | `--mage-combo-check` |
 
 ## Small mechanics
 | Mechanic | Source | Footage | Built and checked |
@@ -58,6 +67,10 @@ it bursts it for 2 Static on everyone near it. It does not give Wirerun back (ow
 | Lightning Strike flings enemy orbs, which can then be stolen | [wiki](https://supervive.wiki.gg/wiki/Joule) (Lightning Strike) | orb flung (`0283`) | yes: "flings a rival's orb, now yours" |
 | Lightning Strike can launch Wisps | [wiki](https://supervive.wiki.gg/wiki/Joule) | not shown | not built (we have no wisps; Boki are not moved) |
 | Static Charged detonation restores mana | [wiki](https://supervive.wiki.gg/wiki/Joule) | not shown | not built (no mana) |
+| Eye of the Storm: invulnerable while in the air | [thebackdash hunter list](https://thebackdash.com) (pre-1.0 wording) | INVULNERABLE tag (f45) | yes: "invulnerable in the air" |
+| Eye of the Storm: landing spot at the cursor within a range ring, two presses | reference sheet (both casts) | ring f29, crown reticle f36 | yes: "clamped inside the ring", "the second press brings her down" |
+| Eye of the Storm: landing damage in an area, knockback, 1 Static stack each | thebackdash (pre-1.0 wording) | light pillar and shock ring f49 | yes: "a knockback and 1 Static each" |
+| Free to attack right after landing | reference sheet | LMB at f51 | yes: "free again at once" |
 
 ## Assumptions (the video is silent; the owner can correct these)
 - The throw comes on release; holding past full (1.2s) throws by itself. Charge scales the rod's damage and knock, not its range (the footage's fixed lane; the wiki's older text scales range).
@@ -69,16 +82,28 @@ it bursts it for 2 Static on everyone near it. It does not give Wirerun back (ow
 - Skycall: press places, a 0.3s flick window sets the drag; with no flick the drag is away from Vireo.
 - She can move while firing bolts and holding the rod (the footage only shows her standing).
 - Momentum: the drift during the Wirerun hold bleeds off at 6 m/s², and whatever is left is added to the streak.
+- Kitefall: the footage shows no auto-land; ours comes down at the cursor after 1.7 s of hanging (about 2 s in
+  the air with the climb), the sheet's build note. The 0.3 s crouch is not invulnerable (a fair window to punish
+  it); the climb, the hang and the drop are. She hangs over the take-off spot (no drifting). The attack key also
+  brings her down, but only a fresh press (a held attack from before the cast does not). A press during the
+  climb waits for the hang. The landing backs off a wall or a gap toward the take-off until it is standable
+  ground. No cancel and no ally effect (the sources mention neither). The knock is a push away from the centre
+  with a little lift (the sources say knockback, not knock-up). A Boki merge mid-cast drops her where she took
+  off with no strike.
 
-## R (ultimate) choice
-Dropped: R is the Boki Merge. The source ult (a long relocate that spreads Static and spawns orbs) is
-not needed for the loop.
+## Ultimate choice
+X is her own ultimate, Kitefall (owner decision, SERVER_UPDATE6): the source's Eye of the Storm, built from the
+reference sheet's "Ultimate (on X)" section. It was never folded into another slot during the kit pass, so no
+slot changes. R reloads and the Boki Merge is on its own key (T by default).
 
 ## Engine notes
 - Kit `scripts/arch/kits/mage_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd` + `shaders/vv_fx.gdshader`;
   moves `scripts/match/kmoves_vv.gd`; the finger-gun hold `"finger"` in `HunterAnim.HOLDS`; the wrist
   coil `scripts/match/hero_arms_vv.gd`; sounds `tools/gen_vv_sfx.py` (pure Python) listed in `VVSfx.NAMES`.
 - Telegraphs and cursor states through AimKit (docs/AIMKIT.md). No Net change.
-- Merge cleanup: `_drop_holds()` ends `wire` (refunded), `rmb_down`/`rmb_t` and the rod prop, and any
-  Skycall in `strikes` still in its `"flick"` phase.
+- Kitefall: `scripts/arch/kits/mage_ult.gd` (MageUlt), on the shared ult base `scripts/arch/hero_ult.gd` (HeroUlt: the
+  cooldown in `cd["x"]`, the recast, one bond id per cast, KinBond.from_ult on a land). X reaches
+  it through main's HunterKeys.ult_pressed (the level gate) and `MageKit.cast_ult()`; numbers in `mage.json` `x`.
+- Merge cleanup: `_drop_holds()` ends `wire` (refunded), `rmb_down`/`rmb_t` and the rod prop, any
+  Skycall in `strikes` still in its `"flick"` phase, and Kitefall's `ult.leap` (she drops at the take-off).
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=mage` (tools/vv_shots.gd).

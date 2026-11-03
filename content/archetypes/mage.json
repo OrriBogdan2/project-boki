@@ -12,6 +12,7 @@
 		"passive": "Static: every hit adds a stack (4 max, shown over their head). The 4th calls a sky bolt and makes them Live.",
 		"rmb": "Storm Rod: hold to summon a copper rod, let go to throw it to full range. It knocks the first foe back, stuns them on a wall and leaves a charge orb.",
 		"e": "Skycall: drop a circle at your cursor, then flick the mouse to pick the drag. 0.8s later lightning drags everyone inside that way and grounds them.",
+		"x": "Kitefall (ultimate, level 6): launch up out of reach, then strike down at your cursor anywhere in a wide ring. It knocks everyone round the landing back and adds Static.",
 		"weapons": {
 			"coilcaster": "Finger bolts every 0.8s, left hand then right, out to full range through everyone in line. Each hit adds 1 Static."
 		}
@@ -118,6 +119,27 @@
 		},
 		"flick": 0.3,
 		"stacks": 2
+	},
+	"x": {
+		"name": "Kitefall",
+		"short": "Fall",
+		"icon": "quake",
+		"col": "#ffd36a",
+		"cooldown": 42.0,
+		"windup": 0.3,
+		"rise": 0.3,
+		"height": 5.0,
+		"min_air": 0.25,
+		"hover": 1.7,
+		"drop": 0.2,
+		"after": 0.5,
+		"range": 14.4,
+		"radius": 2.7,
+		"dmg": 22.0,
+		"push": 8.0,
+		"lift": 0.4,
+		"stacks": 1,
+		"desc": "Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 22, is knocked back and gains 1 Static. Landing it on an enemy hunter fills your Boki bond."
 	},
 	"order": [
 		"sec",

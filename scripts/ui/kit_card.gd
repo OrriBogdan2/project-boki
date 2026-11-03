@@ -13,10 +13,12 @@ const TILE := Vector2(431, 116)
 const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r"]
 ## (The ultimate tile has no fixed key: _cap reads it from Settings.)
 const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": ""} 
-## The key cap on a slot's tile. The last tile is the Merge unless the class ultimates are on.
-static func _cap(slot: String) -> String:
+## The key cap on a slot's tile. The last tile is the Merge unless the class ultimates are on, or the hero's own
+## ultimate (its "x" data) for a hero with no class R.
+static func _cap(slot: String, arch_id := "") -> String:
 	if slot == "r":
-		return Settings.key_cap("hunter_ult" if KinCommand.class_ults() else "ultimate")
+		var own := arch_id != "" and Arch.def(arch_id).has("x") and not Arch.def(arch_id).has("r")
+		return Settings.key_cap("hunter_ult" if KinCommand.class_ults() or own else "ultimate")
 	return String(KEYS[slot])
 
 const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate"}
@@ -24,8 +26,8 @@ const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "R
 const PREVIEW := {
 	"thief": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "knife", "r": "lines"},
 	"archer": {"dash": "grapple", "passive": "meter", "rmb": "heavy", "e": "rainwall", "r": "arrows3"},
-	"mage": {"dash": "dash2", "passive": "marks", "rmb": "heavy", "e": "zone"},
-	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "lines"},
+	"mage": {"dash": "dash2", "passive": "marks", "rmb": "heavy", "e": "zone", "r": "leap"},
+	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "lines", "r": "zone"},
 	"juggernaut": {"dash": "dash2", "passive": "meter", "rmb": "charge", "e": "grapple", "r": "leap"},
 	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "r": "fissure"},
 	"dredge": {"dash": "dash2", "passive": "meter", "rmb": "grapple", "e": "charge"},
@@ -135,8 +137,8 @@ func _tile(slot: String) -> Control:
 	var dot := UI.IconDot.new(String(info["icon"]), col, 38.0)
 	dot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	ic.add_child(dot)
-	if _cap(slot) != "":
-		var kc := UI.keycap(_cap(slot), 11)
+	if _cap(slot, arch) != "":
+		var kc := UI.keycap(_cap(slot, arch), 11)
 		kc.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		kc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		ic.add_child(kc)
@@ -195,8 +197,8 @@ func _show_detail(slot: String) -> void:
 	top.add_theme_constant_override("separation", 10)
 	top.add_child(UI.IconDot.new(String(info["icon"]), col, 30.0))
 	top.add_child(UI.label(String(info["name"]), 24, UI.INK, UI.big))
-	if _cap(slot) != "":
-		var kc := UI.keycap(_cap(slot), 13)
+	if _cap(slot, arch) != "":
+		var kc := UI.keycap(_cap(slot, arch), 13)
 		kc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		top.add_child(kc)
 	v.add_child(top)
@@ -295,6 +297,8 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "%ss" % KinText.n(float(sd.get("cooldown", 14.0))), "line": String(cd.get("e", ""))}, true)
 			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "kin")
+		"r" when not d.has("r") and d.has("x"):
+			out = _hero_ult(d, out)
 		"r" when not d.has("r"):
 			# no hero ultimate: R is the Boki's Merge (the Boki system owns it)
 			out.merge({"name": "Boki Merge", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
@@ -310,6 +314,19 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 				["Boki out?", "It leaps back through anything in its way and merges you in mid-air."],
 				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
 				] + ([["Held back", "%s: %s (the class ultimate, off while the Merge is on %s)" % [String(sd["name"]), String(sd.get("desc", "")), Settings.key_cap("ultimate")]]] + _ranks(a, "ult") if not sd.is_empty() else [])
+	return out
+
+## The last tile for a hero whose ultimate is its own (the "x" data, on the hunter-ultimate key); the Merge, on its
+## own key, is a row of its detail page.
+static func _hero_ult(d: Dictionary, out: Dictionary) -> Dictionary:
+	var xd: Dictionary = d["x"]
+	var tag := "level %d · %ss" % [int(Hunter.ULT_AT[0]), KinText.n(float(xd.get("cooldown", 40.0)))]
+	out.merge({"name": String(xd["name"]), "icon": String(xd.get("icon", "")), "tag": tag}, true)
+	out["col"] = Color(String(xd.get("col", "#ffffff")))
+	out["line"] = String(d.get("card", {}).get("x", ""))
+	var merge_row := "%s is the Boki Merge: with a full bond meter your Boki fuses with you. Landing %s fills it."
+	out["detail"] = [["", String(xd.get("desc", ""))],
+		["Merge", merge_row % [Settings.key_cap("ultimate"), String(xd["name"])]]]
 	return out
 
 ## The ranks to come, in order (rank 2's concrete change first, then rank 3's special), as one row
@@ -389,7 +406,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		var dot := UI.IconDot.new(String(info["icon"]), info["col"], 26.0)
 		dot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		bv.add_child(dot)
-		var k := _cap(s) if _cap(s) != "" else "passive"
+		var k := _cap(s, a) if _cap(s, a) != "" else "passive"
 		var kl := UI.label(k, 10, UI.MUTED, UI.big)
 		kl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		kl.mouse_filter = Control.MOUSE_FILTER_IGNORE

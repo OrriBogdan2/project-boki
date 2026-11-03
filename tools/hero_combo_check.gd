@@ -19,10 +19,14 @@ func run(main_node: Node, who: String) -> void:
 	main = main_node
 	ac = load("res://tools/archetype_check.gd").new()
 	ac.main = main_node
+	var ults: RefCounted = load("res://tools/vv_ult_check.gd").new(self)
 	if who == "mage":
 		await _mage()
 		await _growth()
-	else: await _gunslinger()
+		await ults.mage()
+	else:
+		await _gunslinger()
+		await ults.gunslinger()
 	print("HCHECK DONE %s, %d checks, failures: %d" % [who, n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 

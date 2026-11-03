@@ -15,6 +15,9 @@ Vireo (electric, dry, crackling):
   vv_sky_place     Skycall placed: a low tick and a static breath
   vv_sky_count     Skycall committed: a rising tone under a crackle
   vv_sky_strike    Skycall lands: a thunder clap with a rumble
+  vv_ult_rise      Kitefall launch: a rising whoosh with a crackle
+  vv_ult_hum       Kitefall hanging in the air: an electric hum that swells and fades
+  vv_ult_slam      Kitefall strike: a sharp crack into a deep thunder boom
 Venator (mechanical, punchy, ember-hot):
   vn_rifle   an auto-rifle round: a tight crack, a mid thump, a metallic ring
   vn_cock    the grenade pin pulled: two metal clicks
@@ -25,6 +28,10 @@ Venator (mechanical, punchy, ember-hot):
   vn_ion_charge  Ion Cannon cast: a rising whine
   vn_ion_fire    Ion Cannon fire: a wide beam roar and a low kick
   vn_stim    a knock resets the slide: a quick rising two-note
+  vn_nuke_fire   Cinderfall fired: a hollow mortar thunk with a hiss upward
+  vn_nuke_fall   Cinderfall falling: a whistle that drops in pitch over 1.6 s
+  vn_nuke_boom   Cinderfall impact: a deep boom, a crack and a debris rattle
+  vn_nuke_burn   Cinderfall patch: a fire crackle that dies away over 3 s
 """
 import math, os, random, struct, wave
 
@@ -145,4 +152,31 @@ save('vn_ion_fire', mix(scale(mul(bp(noise(0.9), 200, 5000), env(N(0.9), 0.002, 
     scale(mul(tone(1200, 400, 0.7, 0.4, 0.5), env(N(0.7), 0.002, 0.25)), 0.35)), -13)
 save('vn_stim', mix(scale(mul(tone(660, 660, 0.08, 0.2), env(N(0.08), 0.002, 0.04)), 0.7),
     scale(at(mul(tone(990, 990, 0.12, 0.2), env(N(0.12), 0.002, 0.06)), 0.08), 0.7)), -19)
+# ------------------------------------------------------------ ultimates (appended: the sounds above keep their noise)
+n = N(0.55)
+save('vv_ult_rise', mix(scale(mul(bp(noise(0.55), 400, 3500), ramp(n, 0.45, 0.08)), 0.9),
+    scale(mul(tone(160, 900, 0.55, 0.3, 0.4), ramp(n, 0.5, 0.06)), 0.45),
+    scale(mul(hp(crackle(0.55, 220, 0.0015), 2000), ramp(n, 0.3, 0.06)), 0.6)), -16)
+n = N(1.8)
+swell = [math.sin(math.pi * i / n) ** 0.7 for i in range(n)]
+save('vv_ult_hum', mix(scale(mul(tone(110, 120, 1.8, 0.5, 0.6), swell), 0.6),
+    scale(mul(tone(221, 238, 1.8, 0.2), swell), 0.25),
+    scale(mul(hp(crackle(1.8, 90, 0.002), 1800), swell), 0.45)), -22)
+save('vv_ult_slam', mix(scale(mul(hp(noise(0.08), 2500), env(N(0.08), 0.0003, 0.012)), 1.8),
+    scale(mul(lp(noise(1.3), 180), env(N(1.3), 0.005, 0.45)), 1.9),
+    scale(mul(tone(95, 32, 0.7), env(N(0.7), 0.002, 0.25)), 1.1),
+    scale(mul(hp(crackle(0.7, 300, 0.0015), 1800), env(N(0.7), 0.002, 0.2)), 0.6)), -12)
+save('vn_nuke_fire', mix(scale(mul(tone(140, 60, 0.25), env(N(0.25), 0.001, 0.08)), 1.1),
+    scale(mul(bp(noise(0.5), 1500, 6000), env(N(0.5), 0.005, 0.18)), 0.6),
+    scale(mul(bp(noise(0.06), 600, 3000), env(N(0.06), 0.0005, 0.015)), 1.0)), -15)
+n = N(1.6)
+save('vn_nuke_fall', mix(scale(mul(tone(2200, 700, 1.6, 0.05), ramp(n, 1.2, 0.02)), 0.6),
+    scale(mul(bp(noise(1.6), 800, 4000), ramp(n, 1.4, 0.02)), 0.35)), -21)
+save('vn_nuke_boom', mix(scale(mul(lp(noise(1.6), 260), env(N(1.6), 0.003, 0.5)), 2.0),
+    scale(mul(tone(70, 26, 0.9), env(N(0.9), 0.002, 0.3)), 1.2),
+    scale(mul(hp(noise(0.12), 2000), env(N(0.12), 0.0005, 0.03)), 1.0),
+    scale(at(mul(bp(crackle(0.8, 140, 0.003), 500, 4000), env(N(0.8), 0.01, 0.3)), 0.1), 0.6)), -11)
+n = N(3.0)
+save('vn_nuke_burn', scale(mul(mix(scale(bp(crackle(3.0, 70, 0.004), 400, 5000), 1.0),
+    scale(lp(noise(3.0), 500), 0.5)), [min(1.0, (i / SR) / 0.05) * (1 - i / n) for i in range(n)]), 1.0), -22)
 print('vireo + venator sounds written')
