@@ -940,3 +940,12 @@ I couldn't find this spelled out in item 21 or 22, so here it is:
 ## 2026-11-03 17:10 UTC: OWNER: Zedran RMB perfect release (add to item 22) + Boki ability decision
 - **Zedran's held RMB (Fiery Lunge) has a perfect-timing release:** the owner says that releasing at the right moment sends you a bit further, the way Brall does it. It's not in supervive_kits.md, so check the footage (hero-ref/juggernaut.md, the hold and lunge frames) for the window and the tell. Build it with a clear "now" cue (a flash on the blade), a small extra distance and a distinct sound. Assert it: a release in the window goes further than one just outside it. This sits with the indefinite hold: hold as long as you want, and the perfect window recurs or holds at full charge per the source.
 - **Boki ability decision (for the C-into-G pass, main's part, after the resets):** the C key goes away. **The Boki decides when to use its abilities on its own.** The player doesn't need to control everything it does. If anything is manual, it's an entry on G's hold-wheel. Boki may get **more than one ability** later, so build the AI choice per ability, not around one key. Merge moves to C.
+
+## 2026-11-03 17:12 UTC: OWNER: Zedran LMB hold scales, and do DEEP research on Brall (item 22)
+- **Zedran's LMB hold (the Searing Wave, i.e. Brall's charged fireblast) grows with hold time:** the longer you hold, the bigger it gets (size, and per the source probably reach and damage). Today it doesn't scale. Read the scaling curve and its steps or cap from the footage and the data (supervive_kits.md: tap 43, hold 107). Show the growing size while charging.
+- **Before building, the Zedran agent must do a deep research pass on Brall:**
+  - every frame in hero-ref/juggernaut.md and the raw footage folder
+  - supervive_kits.md, kit_comparison.md and supervive_physics.md
+  - the owner's notes across OWNER_REVIEW and the INBOX files
+  
+  Then write a full mechanics sheet in docs/heroes/juggernaut.md before writing any code: every input (tap, hold, release timing, airborne, during the chain), its scaling, its windows, and its interactions. The owner's level of expectation is "the same craft as SUPERVIVE". Opus at medium effort, per item 22.
