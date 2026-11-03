@@ -7,6 +7,14 @@
 - Owner notes on the proposals: Dredge must look noticeably broken and oozing (torn plates, black ooze dripping, red rot-light). Vireo: whichever twist is cooler; IMG pick: her storm tattoo sleeve becomes glowing branching lightning scars (one read, not two). Venator: religious in behaviour and going insane, a battle between conservative morals and slipping sanity (prayer beads, scripture strips, a devout soldier's bearing with a cracked, too-wide stare). Gender to confirm: the item 39 table has Venator as F, the owner wrote "him". Rest of the proposals approved as written (Sable as the thief who reached the Wyrmheart, Pin's legs fading to smoke below the knee, Zedran's horns on his head).
 - Generation switches to the owner's Chrome (Claude in Chrome). Owner asked to talk through each Warden's look and lore before generating; per-Warden proposals are with the owner now.
 
+## 2026-11-03 20:50 UTC: deliverables 2 and 3 complete
+- **All 12 Wardens** have splash, portrait and turnaround in `docs/art/gen/wardens/` (2K originals): bjorn, zedran, dredge, ostra, pin, sable, tarek, claire, vireo, vex, cinder, moosh.
+- **Texture references** for all 12 in `docs/art/gen/textures/<name>_materials.png` (2x2 material close-ups).
+- Owner decisions this session: Tamsin renamed **Claire** (cuter, younger face); Venator renamed **Vex** (an East Asian woman, grizzled cocky vet, a bit crazy, ember aura); Vireo hotter with no red and no sidecut; Sable with a feminine face and loose outfit (wings read as wing-scale coat-tails, IMG's call); Cinder more dangerous; Zedran lean but jacked; Moosh Moosh made to fit the roster (adventurer gear, dramatic lighting).
+- Studio note: keep prompts under about 2,500 characters (Anthum flagged long prompts; long wide-format runs stalled).
+- Credits: about 1,228 at the start, about 980 now (see the studio balance).
+- **Push**: this session can't push (the repo wasn't attached when the task was created). The commits go to the owner as a git bundle in `Downloads\boki_imagegen_bundle`, for a repo-attached session to fetch and push.
+
 ## 2026-11-03 19:05 UTC: deliverable 2 at 11 of 12 Wardens
 - Done (2K originals in `docs/art/gen/wardens/<name>_{splash,portrait,turnaround}.png`, prompts in index.md): Bjorn, Zedran, Dredge, Ostra, Pin, Sable, Tarek, Claire (was Tamsin), Vireo, Cinder, Moosh Moosh.
 - Waiting: **Venator**. The item 39 table has her as F, the owner wrote "him". Owner's direction for the look: devout, religious and going insane, a fight between conservative morals and slipping sanity; part-machine marine (mechanical arm and eye).

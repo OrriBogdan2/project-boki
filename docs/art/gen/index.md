@@ -502,3 +502,12 @@ Portrait:
 
 Turnaround:
 > Turnaround reference sheet: the same character three times side by side at the same scale, FRONT, SIDE, BACK, neutral A-pose, full body, one ground line, flat even studio light, plain light grey background. Mechanical arm on the same side in every view, rifle hanging muzzle-down in the human hand in every view, shoulder plate on the other shoulder; ponytail, coat tails and scarf visible in the back view. No text, no labels, no logos.
+
+### Wide-shot updates, 2026-11-03
+| File | Studio image | Change |
+|---|---|---|
+| `wardens/moosh_splash.png` | 12872368 | Moosh Moosh fit-in redo: standing her ground on a storm-swept bridge at night, her lantern blazing and driving back shadow monsters; travelling cloak, bracers and pouches; dramatic lighting like the rest of the roster. |
+| `wardens/moosh_turnaround.png` | 251b7cd8 | Fit-in redo. Nit: the model drew each tail as a separate shape between the figures; the tail belongs to the figure on its right in the side view. |
+| `wardens/claire_turnaround.png` | bc61b7ff | Rework-2 face (young, warm), short-form prompt: "Turnaround reference sheet: the same character three times side by side at the same scale, FRONT, SIDE, BACK, neutral A-pose, full body, one ground line, flat even studio light, plain light grey background. Ice fan closed in the same hand in every view, skates on, ice patches only on shoulders and forearms, ponytail visible in side and back views. No text, no labels, no logos." |
+
+Studio note (owner): Anthum flagged "prompt too long" on some runs, and long 16:9/21:9 prompts stalled at "Finalizing details". Keep prompts under about 2,500 characters; a short style prefix ("Premium stylised fantasy hero art, hand-painted 3D look, rich painted textures, soft rim light, polished game-studio quality. Match the art style and rendering of the third reference image exactly, copying nothing else from it.") works as well as the long style line plus anchor line.
