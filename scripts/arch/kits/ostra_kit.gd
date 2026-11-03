@@ -578,7 +578,6 @@ func _pop(hit: bool) -> void:
 	)
 	m.fx.flash(p + Vector3(0, 0.8, 0), Color("f2eaff"), 1.0 + k, 0.1)
 	m.sfx("os_pop", p, -2.0, 1.0)
-	Feel.shake(m, "t3" if k > 0.6 else "t2", h, p)
 	net_ring(p, rad, TEAL)
 	var caught_hunter: Ent = null
 	for f in foes_in(p, rad):

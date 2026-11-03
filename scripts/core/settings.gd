@@ -20,7 +20,7 @@ const DEFAULTS := {
 	# sounds
 	"reset_cue": "a",
 	# accessibility
-	"shake": 1.0, "reduce_flashes": false,
+	"screen_shake": 0.3, "reduce_flashes": false,
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
@@ -28,7 +28,7 @@ const DEFAULTS := {
 }
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
-const REMOVED := ["dash_hold", "kin_auto", "hud_opacity"]
+const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 
 ## Graphics presets (Video → Quality). High is the game's full look; Low and Medium trade detail for
 ## speed, Ultra pushes draw distance, shadows and level of detail further. A preset sets the plain
@@ -132,7 +132,7 @@ func _ready() -> void:
 	else:
 		# older saves kept a few settings inside the save file
 		var old: Dictionary = Save.d.get("settings", {})
-		for pair in [["volume", "master"], ["music", "music"], ["shake", "shake"], ["cam_lead", "cam_lead"]]:
+		for pair in [["volume", "master"], ["music", "music"], ["cam_lead", "cam_lead"]]:
 			if old.has(pair[0]): v[pair[1]] = float(old[pair[0]])
 	if not cf.has_section_key("s", "keys_v") and String(v.get("cam_follow", "")) == "standard":
 		v["cam_follow"] = "supervive"     # the new Supervive-style cursor lean becomes everyone's default once

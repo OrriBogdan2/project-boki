@@ -280,7 +280,7 @@ func _strike_fx(at: Vector3, r: float) -> void:
 	kit.m.fx.flash(at + Vector3(0, 1.2, 0), MageKit.GOLD, 2.4, 0.12)
 	kit.net_bolt(at + Vector3(0, 12.0, 0), at, MageKit.GOLD)
 	kit.m.sfx("vv_ult_slam", at, 1.0)
-	Feel.shake(kit.m, "t4", kit.h, at)
+	Shake.incoming_big(kit.m, at, 0.6, kit.h)
 
 ## Orange-gold lightning stays at her feet for a moment after the strike (she is free to act).
 func _after_fx(dt: float) -> void:

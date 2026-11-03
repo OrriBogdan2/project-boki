@@ -151,9 +151,7 @@ func _impact(f: Ent, dir: Vector2, dealt: float) -> void:
 	k.m.fx.burst(f.pos + Vector3(0, 0.8, 0), Color(HOT, 0.85), 22, 3.0, 0.6, -1.0, 1.6)
 	k.m.fx.burst(f.pos + Vector3(0, 1.0, 0), GOLD, 12, 6.0, 0.35, 4.0, 1.0, Vector3(dir.x, 0.6, dir.y), 50.0)
 	Feel.hitstop(k.m, h, f, dealt, {"melee": true, "payoff": true, "heavy": true})
-	Feel.shake(k.m, "t4", h, f.pos, f)
-	if h.is_local():
-		Oomph.punch_dir(k.m, dir, 0.3)
+	Shake.incoming_big(k.m, f.pos, 0.6, h)
 
 ## A hunter knocked by the cleave: it is ready again at once.
 func _reset() -> void:

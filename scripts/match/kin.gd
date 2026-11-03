@@ -487,7 +487,6 @@ func merge_in(giant_form: bool) -> void:
 		hold_at = Vector3.INF
 		settle = 1.0
 		giant = {"scale": 1.8, "t0": m.time}
-		m.shake(0.6, owner_h.pos)
 		m.sfx("boom", owner_h.pos, 0.0, 0.6)
 	else:
 		state = "fused"
@@ -703,7 +702,6 @@ func _sim_fly(dt: float) -> void:
 				fire_trigger("on_throw", {"at": f.pos})
 				m.sfx("kinhit", pos, 0.0)
 				m.fx.burst(pos, sp["color"], 14, 4.0)
-				m.shake(0.25, pos)
 				if owner_h and owner_h.is_local():
 					m.freeze_frame(0.06)
 				target = f
@@ -730,7 +728,6 @@ func _sim_fly(dt: float) -> void:
 			KinStrike.land(self, hit_set, charged)       # a thrown Boki staggers what it lands on (a charging mount harder)
 		if not land.is_empty():
 			m.fx.dust(pos, 14)
-			m.shake(0.35, pos)
 			var c2 := lctx.duplicate(); c2["at"] = pos
 			Effects.run(land, self, c2)
 		if not rush_end.is_empty():
@@ -738,7 +735,6 @@ func _sim_fly(dt: float) -> void:
 			Effects.run(rush_end, self, c3)
 		if kx_land is Callable:
 			m.fx.dust(pos, 14)
-			m.shake(0.35, pos)
 			(kx_land as Callable).call(pos)
 		if kx_end is Callable:
 			(kx_end as Callable).call(pos)

@@ -376,7 +376,6 @@ func _bolt() -> void:
 		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
 		m.sfx("dj_bolt_emp", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
 		play("thf_primed")
-		if h.is_local() and m.cam: m.cam.add_trauma(0.12)
 	else:
 		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_GOLD, 0.9, 0.3)
 		fx().star(muzzle, BOLT_GOLD, 0.6, 0.1, BOLT_CORE)        # the gold muzzle star at the throwing hand
@@ -740,7 +739,6 @@ func _tangle(f, other: Ent) -> void:
 	m.fx.word(mid + Vector3(0, 2.6, 0), "TANGLED", col, true)
 	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("ff9be8"), 1.2, 0.3)
 	m.sfx("ab_stun", mid, -2.0, 1.1)
-	Feel.shake(m, "t3", h, mid, other)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
 
 # ------------------------------------------------------------------ E: Shadow Knife
@@ -865,9 +863,6 @@ func _blink(to: Vector3) -> void:
 	m.sfx("dj_blink", to, -3.0, 1.0)
 	m.fx.ring(to, 1.0, GHOST, 0.22)
 	net_bolt(from + Vector3(0, 0.9, 0), to + Vector3(0, 0.9, 0), GHOST)
-	if h.is_local():
-		Oomph.punch_dir(m, Vector2(to.x - from.x, to.z - from.z), 0.25)
-		if m.cam: m.cam.punch(0.03)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

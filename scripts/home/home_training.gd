@@ -294,7 +294,6 @@ func _step_shots(d: float) -> void:
 				if h.dashing(): _float_text(h.ppos + Vector3(0, 2.2, 0), "Dodged!", UI.GOOD)
 				else:
 					_float_text(h.ppos + Vector3(0, 2.2, 0), "Hit", Color("ff8a7a"))
-					h.cam.add_trauma(0.15)
 		else:
 			var dm := _dummy_at(p, 0.55)
 			if not dm.is_empty():

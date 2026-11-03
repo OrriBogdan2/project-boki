@@ -468,8 +468,6 @@ func _smash() -> void:
 	m.fx.dust(front, 8 + int(10 * k))
 	for f in foes_in(h.pos + Vector3(dv.x, 0, dv.y) * 1.2, float(md["smash_reach"]), 2.2):
 		_impact_trail(f, dv, k)
-	Feel.shake(m, "t3" if full else "t2", h, h.pos)
-	if h.is_local(): Oomph.punch_dir(m, dv, 0.15 + 0.25 * k)
 	m.sfx("bjorn_slam", h.pos, lerpf(-4.0, 0.0, k), lerpf(1.1, 0.85, k))
 	if full:
 		m.fx.ring(front, 2.2, Color("ffb04a"), 0.3)
@@ -662,8 +660,6 @@ func _shield_slam() -> void:
 	run(stg, cx("rmb", "shield_slam", aim(), {"no_floor": true, "hit_extra": {"heavy": true}}))
 	fx.bash(h.pos, dv, float(sl["radius"]), true)
 	m.sfx("bjorn_bash", h.pos, -1.0, 0.85)
-	Feel.shake(m, "t3", h, h.pos)
-	if h.is_local(): Oomph.punch_dir(m, dv, 0.3)
 
 func fire_ok_rmb() -> bool:
 	return lock_t <= 0.0
@@ -751,7 +747,6 @@ func _spin_hit(wd: Vector2) -> void:
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
 	fx.smash_ring(h.pos)
 	m.fx.dust(h.pos, 10)
-	Feel.shake(m, "t2", h, h.pos)
 	m.sfx("bjorn_whirl", h.pos, -2.0)
 	net_ring(h.pos, r, Color("ff7a3a"))
 

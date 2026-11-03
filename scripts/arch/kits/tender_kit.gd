@@ -371,7 +371,6 @@ func fire_rmb(c: Dictionary) -> void:
 	lk().burst("flare", h.pos, {"col": Color("9a6aff"), "rim": Color("ffd27a"), "r": 1.4, "dur": 0.25, "pattern": 3.0})
 	m.fx.flash(start, Color("c8e07a"), 0.9, 0.08)
 	m.sfx("tend_seed", h.pos, -2.0, 1.0)
-	Feel.shake(m, "cast", h, h.pos)
 
 ## The Burrseed's burst radius: rank 3 doubles it (the source's detonation-radius upgrade).
 func burst_radius() -> float:
@@ -424,7 +423,6 @@ func _burst(t: Ent) -> void:
 	m.fx.burst(at + Vector3(0, 0.5, 0), Color("c9a0ff"), 26, 5.0, 0.6, 3.0, 1.2)
 	m.fx.burst(at + Vector3(0, 0.2, 0), col, 14, 3.5, 0.5, 6.0, 1.0)
 	m.sfx("tend_root", at, 0.0, 1.0)
-	Feel.shake(m, "t3", h, at)
 	var root := float(sd["root"]) + (0.3 if rank("sec") >= 3 else 0.0)
 	for f in foes_in(at, rr):
 		f.hurt(

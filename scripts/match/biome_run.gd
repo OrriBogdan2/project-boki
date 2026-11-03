@@ -483,7 +483,6 @@ func _tick_hazards(dt: float) -> void:
 						_zap(p + Vector3(0, 3.3, 0), at2 + Vector3(0, 0.3, 0))
 						m.fx.burst(at2 + Vector3(0, 0.4, 0), Color("fff9c0"), 30, 7.0, 0.35, 2.0, 1.2)
 						m.sfx("boom", at2, -4.0, 1.5)
-						m.shake(0.35, at2)
 						_hit_area(at2, 1.8, 14.0, {"stun": 0.4, "sky": true})
 						hz["phase"] = "idle"; hz["t"] = rng.randf_range(5.0, 8.0)
 			"lava_vent":

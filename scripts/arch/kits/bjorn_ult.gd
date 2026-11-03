@@ -176,9 +176,6 @@ func _slam() -> void:
 	k.play("bul_ult_slam")
 	k.m.sfx("bjorn_ult_slam", origin, 0.0 if h.is_local() else -4.0)
 	k.m.sfx("bjorn_ult_rumble", origin + Vector3(dir.x, 0, dir.y) * cell_len() * cells.size() * 0.5, -3.0)
-	Feel.shake(k.m, "t3", h, origin)
-	if h.is_local() and k.m.cam:
-		k.m.cam.punch(0.12)
 	var strike: float = float(x.get("strike_dmg", 4.0)) * k.m.dmg_mult(h) * LevelGrowth.ap(h)
 	for f in _foes_in(0):
 		f.hurt(strike, h, {"src": "abil", "ab": "ultimate", "stun": float(x.get("strike_stun", 0.3)), "dr": true,
@@ -203,7 +200,6 @@ func _erupt(i: int) -> void:
 	k.m.fx.dust(mid, 10)
 	k.m.fx.burst(mid + Vector3(0, 0.6, 0), EMBER, 12, 6.0, 0.4, 6.0, 1.1, Vector3.UP, 30.0)
 	k.m.sfx("bjorn_slam", mid, -8.0, 0.7 + 0.08 * i)
-	Feel.shake(k.m, "t2", h, mid)
 	var dmg: float = float(x.get("dmg", 18.0)) * k.m.dmg_mult(h) * LevelGrowth.ap(h)
 	for f in _foes_in(i):
 		var key: int = f.get_instance_id()

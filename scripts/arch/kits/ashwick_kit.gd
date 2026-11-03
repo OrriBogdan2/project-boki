@@ -400,7 +400,6 @@ func fire_rmb(c: Dictionary) -> void:
 	fx.orb(mz, Color("ff6a3a"), BOLT_CORE, 0.8, 0.12)
 	m.fx.burst(mz, Color("ffb04a"), 10, 4.0, 0.3, -2.0, 1.2, _fwd(), 30.0)
 	m.sfx("lw_bolt", h.pos, -2.0, 1.0)
-	if h.is_local(): Oomph.punch_dir(m, -h.aim_dir(), 0.12)
 
 ## A cinder that ran its full length without a hit fizzles there in a small blue-white ring (sheet 0133).
 func _bolt_end(at: Vector3, expired: bool) -> void:
@@ -559,8 +558,6 @@ func _bash_impact(f: Ent) -> void:
 	m.fx.burst(at, Color("ff5a3a"), 26, 6.0, 0.45, 6.0, 1.3)
 	m.sfx("lw_bash_hit", f.pos, 0.0, 1.0)
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
-	Feel.shake(m, "t2", h, f.pos, f)
-	if h.is_local(): Oomph.punch_dir(m, dir, 0.25)
 	net_ring(f.pos, 1.4, SKULL_COL)
 
 ## Rank 3: a clean ram hit speeds Linwick up and wraps him in a short shield.
@@ -597,7 +594,6 @@ func _cloak_blast() -> void:
 	fx.scorch(h.pos, r * 0.75, 1.6)
 	fx.wave(h.pos, r, col, 0.3)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 30, 6.0, 0.5, -2.0, 1.4)
-	Feel.shake(m, "t2", h, h.pos)
 	for f in foes_in(h.pos, r):
 		if not sees(f):
 			continue

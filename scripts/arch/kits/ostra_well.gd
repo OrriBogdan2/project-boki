@@ -155,7 +155,6 @@ func _open() -> void:
 	k.m.sfx("os_well_hum", center, -3.0, 1.0)
 	k.m.fx.flash(center + Vector3(0, 0.6, 0), Color("e8d8ff"), 1.4, 0.1)
 	k.m.fx.ring(center, radius, DISC_COL, 0.25)
-	Feel.shake(k.m, "t2", k.h, center)
 
 func _tick_open(dt: float) -> void:
 	phase_t += dt

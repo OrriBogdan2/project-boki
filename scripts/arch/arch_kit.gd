@@ -337,9 +337,6 @@ func _fuse_start(bond: bool) -> void:
 	if String(fuse["guard"]) == "unstoppable":
 		h.fortify_t = maxf(h.fortify_t, T + 0.05)
 		m.fx.word(h.pos + Vector3(0, 2.2, 0), "UNSTOPPABLE", Color("ffe2a0"), false)
-	if h.is_local() and m.cam:
-		m.cam.punch(0.05)
-	Feel.shake(m, "cast", h, h.pos, null, 3)
 	# everyone else's game: a ring and a column of light where it's winding up (the existing fx path)
 	if m.net_on and not h.remote:
 		m.net_fx(["ring", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 2.4, col.to_html(false)])
@@ -402,7 +399,6 @@ func _fire_r(will_bond: bool) -> void:
 		if KinMerge.cast(h):
 			drop_holds()
 			Feel.hitstop(m, h, h, 0.0, {"bonded": true})
-			Feel.shake(m, "bonded", h, h.pos)
 			if h.is_local() and m.hud: m.hud.flash(Feel.cat_color("control"), 0.25)
 			Sfx.duck(0.3)
 
@@ -414,9 +410,8 @@ func _r_impact() -> void:
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 34, 7.0, 0.55, 2.0, 1.4)
 	m.fx.flash(h.pos + Vector3(0, 1.0, 0), col.lightened(0.4), 1.4, 0.12)
 	m.sfx("boom", h.pos, -2.0, 0.8)
-	Feel.shake(m, "t4", h, h.pos, null, 3)
+	Shake.incoming_big(m, h.pos, 0.6, h)
 	if h.is_local():
-		if m.cam: m.cam.punch(0.1)
 		if m.hud: m.hud.flash(col, 0.18)
 	if m.net_on and not h.remote:
 		m.net_fx(["ring", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 3.6, col.to_html(false)])
@@ -475,8 +470,6 @@ func travel(dist: float, t: float, extra := {}, use_ex := false) -> void:
 	Effects.run([e], h, {"slot": "dodge", "ability": String(dash_def().get("id", "dash")), "level": rank("dash")})
 	h._dash_rider(use_ex)
 	Feel.dash_sound(m, id, h.pos, h)
-	Feel.shake(m, "dash", h, h.pos)
-	if h.is_local() and m.cam: m.cam.punch(0.03)
 	CombatBus.ability_used.emit(h, String(dash_def().get("id", "dash")), "dodge")
 
 ## The kin's dodge rider on a dash that doesn't travel (a blink, a zip, a leap): on_start at the
@@ -923,10 +916,7 @@ func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector
 	m.fx.flash(at + Vector3(0, 1.0, 0), col.lightened(0.4), 1.3, 0.1)
 	if snd != "": m.sfx(snd, at, 0.0, 1.0)
 	m.sfx("crit", at, -7.0, 0.85)
-	Feel.shake(m, "t4", h, at, victim)
 	if h.is_local():
-		if dir.length() > 0.01: Oomph.punch_dir(m, dir, 0.32)
-		if m.cam: m.cam.punch(0.04)
 		if m.hud: m.hud.flash(col, 0.12)
 	net_ring(at, 2.4, col)
 	net_bolt(at + Vector3(0, 0.2, 0), at + Vector3(0, 3.6, 0), col)
@@ -1104,7 +1094,6 @@ func _charge_full_tick(col: Color) -> void:
 	var d := h.aim_dir()
 	m.fx.flash(h.pos + Vector3(d.x * 0.6, 1.05, d.y * 0.6), col.lightened(0.4), 0.9, 0.08)
 	m.fx.ring(h.pos, 1.5, Color(col, 0.95), 0.22)
-	if h.is_local() and m.cam: m.cam.punch(0.02)
 	net_ring(h.pos, 1.5, col)
 
 ## Let go: the ring and glow go, and the release punches in proportion to the charge.
@@ -1121,9 +1110,6 @@ func _charge_release() -> void:
 	chg = {}
 	if not is_instance_valid(h) or h.downed:
 		return
-	if h.is_local():
-		Oomph.punch_dir(m, h.aim_dir(), 0.06 + 0.26 * k)
-		if full and m.cam: m.cam.add_trauma(0.12)
 	if k > 0.5:
 		m.fx.burst(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), charge_color(), int(6 + 14 * k), 3.0 + 5.0 * k, 0.3, 0.0, 1.0, Vector3(h.aim_dir().x, 0.1, h.aim_dir().y), 35.0)
 

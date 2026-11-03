@@ -384,8 +384,6 @@ func fire_rmb(c: Dictionary) -> void:
 	burrs.append(burr)
 	play("gunslinger_rmb")
 	m.sfx("vn_throw", h.pos, -2.0)
-	if h.is_local():
-		Oomph.punch_dir(m, -d, 0.08)
 
 ## The charge: a bronze ball about 0.3 m across, a dark band round it, an ember heart showing through
 ## and eight hot spikes. Solid colours, so it reads bronze and ember on any ground.
@@ -522,7 +520,6 @@ func _detonate(b: Dictionary) -> void:
 	m.fx.flash(at, HOT, 1.6, 0.1)
 	fx().ring(ground(at), 1.8, EMBER, HOT, 0.35)
 	m.sfx("vn_blast", at, -1.0)
-	Feel.shake(m, "t3", h, at)
 	_cone(at, b["out"] as Vector2, bd, bool(b["wall"]))
 
 ## The blast: a cone back out of the stick point, shoving everything in it along the cone (toward the
@@ -622,10 +619,6 @@ func _fire_needle() -> void:
 	fx().ring(ground(h.pos), 1.6, SMOKE, EMBER, 0.4)              # the smoke ring round him
 	net_bolt(a, b, EMBER)
 	m.sfx("vn_ion_fire", h.pos, 1.0)
-	Feel.shake(m, "t3", h, h.pos)
-	if h.is_local():
-		Oomph.punch_dir(m, -d, 0.22)
-		if m.cam: m.cam.add_trauma(0.18)
 	h.impulse(-d * float(ed.get("recoil", 6.0)))                  # the recoil shoves him back a step
 	var hits := 0
 	var dmg0: float = float(ed["dmg"]) * power("kin")

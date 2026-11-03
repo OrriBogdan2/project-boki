@@ -339,7 +339,6 @@ func _arrow_hit(t: Ent) -> void:
 		fx.fletch_burst(at, 1.2, Color("a8ffe0"), 0.05, 0.15, 0.0, 5.0)
 		m.fx.burst(at, PinFx.TEAL, 18, 7.0, 0.35, 2.0, 1.2)
 		m.sfx("pin_super_hit", t.pos, -2.0)
-		Feel.shake(m, "t2", h, t.pos, t)
 	elif kind in ["arrow", "tap"]:
 		fx.star(at, 0.8, PinFx.GREEN, 0.1)
 
@@ -502,8 +501,7 @@ func _pin(a: Vector3, k: float) -> void:
 				if is_instance_valid(f) and not f.dead:
 					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
 					m.fx.word(f.pos + Vector3(0, 2.2, 0), "PINNED", Feel.cat_color("control"), true)
-					m.fx.dust(f.pos, 10)
-					Feel.shake(m, "t3", h, f.pos, f))
+					m.fx.dust(f.pos, 10))
 	run(stg, cx("rmb", "heavy_shot", a, extra))
 	m.sfx("pin_heavy", h.pos, lerpf(-6.0, 0.0, k), lerpf(1.15, 0.9, k))
 	m.sfx("pin_super", h.pos, lerpf(-8.0, -2.0, k), 0.6)           # a deep thump under it: heavier than the bow
@@ -512,9 +510,7 @@ func _pin(a: Vector3, k: float) -> void:
 	m.fx.slash(h.pos + Vector3(0, 0.15, 0), atan2(d.y, d.x), PI * 0.6, 1.1, Color("ff9ad8"), false)
 	# the release burst sits on the aim line at the bow, bigger than any bow cue, and a screen kick along the shot
 	fx.fletch_burst(draw.bow_at(), 1.4 + 0.8 * k, HEAVY_GOLD, 0.08, 0.14, 1.0, 5.0)
-	if h.is_local(): Oomph.punch_dir(m, d, 0.2 + 0.2 * k)
 	heavy_kicks += 1
-	if k >= 0.99: Feel.shake(m, "t2", h, h.pos)
 	h.vel.x -= d.x * (1.5 + 3.0 * k); h.vel.z -= d.y * (1.5 + 3.0 * k)
 
 func _wall_behind(f: Ent, dir: Vector2, reach: float) -> bool:

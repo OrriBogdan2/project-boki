@@ -604,12 +604,12 @@ func _no_blasts() -> void:
 	var hp0 := A.hp
 	rings["made"] = 0
 	rings["seen"] = m.fx.rings.size()
-	var trauma0: float = m.cam.trauma if m.cam else 0.0
+	var shake0: float = m.cam.shake_total if m.cam else 0.0
 	step(m, 0.2, each)
 	ok(
 			"mm E: the light's last heal blooms (heals, no ring, blast or shake; a quiet chime)",
 			not K.in_e() and A.hp > hp0 + 5.0 and int(rings["made"]) == 0
-				and (m.cam == null or m.cam.trauma <= trauma0) and TenderKit.BLOOM_DB <= -6.0,
+				and (m.cam == null or m.cam.shake_total <= shake0) and TenderKit.BLOOM_DB <= -6.0,
 			"healed %.1f rings %d" % [A.hp - hp0, int(rings["made"])])
 	var worst := -99.0
 	for sn in Sfx.BLAST:

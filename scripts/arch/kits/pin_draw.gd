@@ -106,7 +106,6 @@ func _perfect() -> void:
 	k.fx.fletch_burst(bow_at(), 1.1, PinFx.GOLD, 0.13, 0.07, 1.0)
 	AimKit.perfect(h)
 	k.m.sfx("pin_perfect", h.pos, -3.0 if h.is_local() else -8.0, 1.25)
-	if h.is_local(): Oomph.punch_dir(k.m, d, 0.2)
 
 func _sc() -> float:
 	return float(h.cdat.get("scale", 1.0))
