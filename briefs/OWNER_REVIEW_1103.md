@@ -226,3 +226,9 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - **The swing moves him:** when the held attack swings, Bjorn steps/lunges forward in his facing (the source distance; default ~1.5–2 m over the swing) and the hit **knocks enemies back** along the swing direction (source value; default ~2 m). Don't add a ground ring or burst for it; the body motion plus hit sparks carry it.
 - Assert: starting a mantle mid-hold ends the hold within one frame; the swing moves Bjorn ≥1.5 m forward; a dummy hit by it is pushed back.
 - Screenshots: a 5-frame strip of the forward swing hitting a dummy.
+
+## 31. Dredge's hook: hold his height, and let him move slowly while it's out (kit fix, Dredge branch)
+- **Keep z:** from the hook's cast until it finishes (it misses and retracts, or it hits and the pull completes), Dredge holds his current height. If he's over the abyss or mid-air, he doesn't fall or drop during the hook. Normal gravity and abyss rules resume the moment it ends.
+- **Slowed movement while it travels out:** same model as Ostra's Shift (item 17). He can walk at a reduced speed (default 15–25% of run speed; use the source value from `briefs/supervive-data/` for Kingpin if present) while the hook is going out. During the pull-back after a hit, follow the source; default: he stays rooted while he reels the target in.
+- Share one small helper with item 17 (for example `CastHold.hover_slow(h, slow, until)` in a new file under scripts/heroes/) instead of two copies.
+- Assert: z stays constant (±0.05) from cast to the end of the pull; planar speed during the out-flight is in the slow range; gravity resumes after.
