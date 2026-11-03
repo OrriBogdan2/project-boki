@@ -18,6 +18,11 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--shots-dir="):
+			await load("res://tools/shops_shots.gd").new().take(main, String(a).substr(12))
+			main.get_tree().quit()
+			return
 	_stock()
 	_never_sold()
 	var m: Match = await _build(11)

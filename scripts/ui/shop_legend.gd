@@ -3,7 +3,7 @@ extends RefCounted
 ## The full map's shop and area legend: each vendor's icon, name and stock theme (with its mark on
 ## the map), then each region's drop lean from BiomeRun (slot_lean_at / rarity_bonus_at data).
 
-const SLOT_WORDS := {"glove": "gloves", "passive": "passive gloves", "armor": "armour", "boots": "boots"}
+const SLOT_WORDS := {"glove": "gloves", "passive": "passives", "armor": "armour", "boots": "boots"}
 const ROW_H := 36.0
 const HEAD_H := 30.0
 
@@ -31,9 +31,9 @@ static func lean_text(def: Dictionary) -> String:
 			words.append(SLOT_WORDS[k])
 	var text := ""
 	if not words.is_empty():
-		text = " and ".join(words) + " more likely"
+		text = ", ".join(words) + " more likely"
 	if int(loot.get("rarity_bonus", 0)) > 0:
-		text += ("; " if text != "" else "") + "better rarity"
+		text += ("; " if text != "" else "") + "rarer loot"
 	return text if text != "" else "no particular lean"
 
 ## Marks every vendor on the map itself.

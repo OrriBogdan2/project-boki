@@ -74,14 +74,15 @@ static func _row(m, pc: PanelContainer, v: Dictionary, i: int, flash: bool) -> C
 	var label := why if why != "" else "%d" % cost
 	if flash:
 		label = "Bought!"
-	var buy := UI.button(label, func(): _click(m, pc, v, i), 96.0, "" if why != "" or flash else "gem")
+	var buy := UI.button(label, func(): buy_row(m, pc, v, i), 96.0, "" if why != "" or flash else "gem")
 	buy.disabled = why != ""
 	buy.tooltip_text = why
 	buy.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	line.add_child(buy)
 	return card
 
-static func _click(m, pc: PanelContainer, v: Dictionary, i: int) -> void:
+## One Buy click: the sale, the feedback and a green flash on the row.
+static func buy_row(m, pc: PanelContainer, v: Dictionary, i: int) -> void:
 	var why := Shops.buy(m, m.player, v, i)
 	if why != "":
 		m.hud.toast_small(why, Color("ff8a6a"))

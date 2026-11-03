@@ -272,6 +272,28 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | weights | {"brand_fire": 0.7, "brand_frost": 0.7, "brand_storm": 0.7, "brand_venom": 0.7, "brand_void": 0.7, "overcharge": 0.6, "remedy": 0.8} |
 | bot_want | {"default": 1.5, "brand_fire": 3.0, "brand_frost": 2.8, "brand_storm": 3.0, "brand_venom": 2.8, "brand_void": 2.6, "hotload": 2.6, "keen": 2.5, "quickfeed": 2.2, "toughskin": 2.4, "plating": 2.2, "secondwind": 2.0, "longreach": 1.8, "deepmag": 1.6, "quickhands": 1.7, "tinker_roll": 1.5, "magpie": 1.0, "scavenger": 1.0, "satchel": 0.8, "spyglass": 0.9, "overcharge": 1.2} |
 
+## shops (`content/rules/shops.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | In-match shops (scripts/match/shops.gd, shop_stock.gd). Vendors stand at the spots a hand-made map lists under islands[].shops ([x, z, theme]); each sells its theme's stock for the gems a hunter picked up this run, so spending means less to extract. Stock is rolled per match on the shops' own seeded stream (seed_add): `always` entries are in every roll, then distinct entries from `pool` until the count (stock) is reached. Entries: a utility item id (content/utility), repair (armor back to full), armor_up (the next armor tier), backpack (the next pack tier, priced by Equal backpack_shop), boots:<gear id> (rarity rolled in boots_rar), perk:<perk id> (Data.PERKS). left = how many of one entry a vendor has (the host keeps count online). Never sold: keys, shards and anything found only in matches; the never list is what --shops-check scans for. Prices are run gems: utility items use their content price times util_k. |
+| seed_add | 8803 |
+| use_radius | 2.8 |
+| stock | [3, 5] |
+| util_k | 1 |
+| repair_price | 20 |
+| armor_tier_price | [0, 45, 90, 150, 240] |
+| boots_price | [30, 50, 80, 130, 200] |
+| boots_rar | [1, 3] |
+| perk_price | {"weapon": 70, "kit": 55, "flat": 45} |
+| perk_stack_extra | 15 |
+| left | {"util": [2, 4], "repair": [2, 3], "armor_up": [1, 2], "backpack": [1, 2], "boots": [1, 1], "perk": [1, 2]} |
+| never | ["rift_key", "chest_key", "crown_shard", "sky_pearl", "kin_idol"] |
+| bot | {"reserve": 25, "range": 48.0, "wants": ["tonic", "armor_kit", "medkit", "shield_cell"], "repair_below": 0.5, "belt_below": 2} |
+| themes | {"armor": {"name": "Plate and Patch", "tag": "Armour and repairs", "icon": "anvil", "col": "dfe9f7", "always": ["armor_up", "armor_kit"], "pool": ["repair", "shield_cell", "tonic", "medkit"]}, "move": {"name": "Swift Stall", "tag": "Boots and backpacks", "icon": "dash", "col": "8fe3c8", "always": ["backpack", "boots:quickstep_boots"], "pool": ["boots:windstep_boots", "boots:skylark_boots", "stim", "jump_pad"]}, "gear": {"name": "Gadget Cart", "tag": "Utility items", "icon": "satchel", "col": "ffd27a", "always": [], "pool": ["tonic", "smoke", "scanner", "medkit", "stim", "shield_cell", "jump_pad", "armor_kit"]}, "perks": {"name": "Perk Peddler", "tag": "Weapon perks", "icon": "burst", "col": "ff9a5a", "always": [], "pool": ["perk:hotload", "perk:deepmag", "perk:quickfeed", "perk:longreach", "perk:brand_fire", "perk:brand_frost", "perk:brand_storm", "perk:brand_venom", "perk:brand_void"]}} |
+
 ## weapon_path (`content/rules/weapon_path.json`)
 
 
