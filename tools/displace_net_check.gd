@@ -6,6 +6,8 @@ extends RefCounted
 ## same flat training strip; the host plays each ability first on a local bot, then on the guest's hunter,
 ## and the guest reports where its own game put it. Cinder's cloak pull, Dredge's reel, Ostra's Trade,
 ## Vireo's Skycall drag, Bjorn's shield push; Zedran's Warchain pulls Zedran to the player (not the player).
+## Then the hit path: a hazard striking on both games hurts the player once; a knock's wall stun, a burn's
+## length and a slow's strength reach the player's own game.
 ## Lines: DISPNET ok|FAIL <what>; the guest prints DISPNET guest pid=<pid>.
 
 const GODOT := "/usr/local/bin/godot"
@@ -26,6 +28,8 @@ var m: Match = null
 var home := Vector3.ZERO
 var replies: Array = []      # what the guest said back: {"c", "pos"}
 var stop := false
+var stun_max := 0.0          # the longest stun seen on the watched body since its last place (guest: its own)
+var stun_on: Ent = null
 var watch: Ent = null         # the first tow on this body, as the host's mirror of it (seen)
 var seen := {}
 
@@ -94,6 +98,8 @@ func _host() -> void:
 	await _case(G, B, "mage", Vector3(7.0, 0, 0), _vireo, 2.4, "Vireo's Skycall drag", "slide")
 	await _case(G, B, "bulwark", Vector3(1.7, 0, 0), _bjorn, 1.2, "Bjorn's shield push", "push")
 	await _zedran(G)
+	await _hazard(G, B)
+	await _knock_extras(G, B)
 	_finish()
 
 func _finish() -> void:
@@ -204,17 +210,81 @@ func _zedran(G: Hunter) -> void:
 	await _place(G, start)
 	_aim(G.pos)
 	var K: JuggernautKit = P.ak
+	Displace.capture = true
+	Displace.sent.clear()
 	P.ak.use_e()
 	await _run(0.3)
 	var hooked := K.warchain.hooked() and K.warchain.target == G
 	P.ak.use_e()
 	await _run(1.2)
-	var own: Vector3 = await _ask()
+	Displace.capture = false
+	var moves := Displace.sent.filter(func(e): return String(e[2]) == G.nid).size()
+	await _ask()
 	ok(hooked and K.warchain.arrivals == 1, "Zedran's Warchain: it hooks the player and pulls Zedran in",
 		"hooked %s arrivals %d" % [hooked, K.warchain.arrivals])
-	ok(P.flat_dist(G) < 2.6 and Vector2(own.x - start.x, own.z - start.z).length() < 0.3,
-		"Zedran's Warchain: he lands beside the player, who isn't moved",
-		"gap %.1f, the player moved %.2f" % [P.flat_dist(G), Vector2(own.x - start.x, own.z - start.z).length()])
+	ok(P.flat_dist(G) < 2.6 and moves == 0,
+		"Zedran's Warchain: he lands beside the player; the chain sends no move for them",
+		"gap %.1f, moves %d" % [P.flat_dist(G), moves])
+
+## A hazard strikes on both games (each game runs its own hazards): the player is hurt once, by
+## their own game, exactly as much as a bot beside them is hurt by the host's.
+func _hazard(G: Hunter, B: Hunter) -> void:
+	var at := home + Vector3(4.0, 0, -3.0)
+	_fresh(B)
+	B.teleport(at + Vector3(0, 0, 0.6))
+	await _run(0.2)
+	var b_hp := B.hp
+	_strike(at)          # one strike on one game: what a strike does
+	await _run(0.8)
+	var single := b_hp - B.hp
+	_fresh(B)
+	await _place(G, at + Vector3(0, 0, -0.6))
+	await _ask()
+	var hp0 := _got("hp")
+	var bot0 := B.hp
+	Net.lobby_emit("dn", {"c": "strike", "at": [at.x, at.y, at.z]})
+	await _run(0.7)          # (each game's hazards keep their own clock: the host's goes off a little later)
+	_strike(at)
+	await _run(0.8)
+	await _ask()
+	var lost := hp0 - _got("hp")
+	var bot_lost := bot0 - B.hp
+	ok(single > 1.0 and absf(lost - single) < 0.5 and absf(bot_lost - single) < 0.5,
+		"hazard: a strike on both games hurts the player and the bot once each (no hit from the other game)",
+		"player %.1f, bot %.1f, one strike %.1f" % [lost, bot_lost, single])
+	B.teleport(home + Vector3(-6.0, 0, 9.0))
+	await _place(G, home + PARK)
+
+## Hit options beyond damage and the impulse travel with a hit on a player: a knock into a wall with a long
+## wall stun stuns them that long on their own game; a burn's length and a slow's strength hold.
+func _knock_extras(G: Hunter, B: Hunter) -> void:
+	var P := m.player
+	var at := home + Vector3(4.0, 0, 5.0)
+	var o := {"kb": Vector2(0, 16.0), "wallstun": 2.0, "src": "abil", "ab": "lmb", "melee": true}
+	_fresh(B)
+	B.teleport(at)
+	await _run(0.2)
+	stun_on = B
+	stun_max = 0.0
+	B.hurt(1.0, P, o.duplicate())
+	await _run(1.0)
+	var bot_stun := stun_max
+	stun_on = null
+	B.teleport(home + Vector3(-6.0, 0, 9.0))
+	await _place(G, at)
+	G.hurt(1.0, P, o.duplicate())
+	await _run(1.2)
+	await _ask()
+	ok(bot_stun >= 1.9 and absf(_got("stun_max") - bot_stun) < 0.15,
+		"knock: a wall stun of 2 s slams the player into the cliff for 2 s on their own game, like the bot",
+		"player %.2f, bot %.2f" % [_got("stun_max"), bot_stun])
+	await _place(G, home + PARK)
+	G.hurt(1.0, P, {"burn": 5.0, "burn_for": 4.0, "slow": 2.0, "slow_k": 0.4, "src": "abil"})
+	await _run(0.3)
+	await _ask()
+	ok(_got("burn") > 3.3 and absf(_got("slow_k") - 0.4) < 0.01,
+		"hit: the burn's length and the slow's strength reach the player (4 s, 40%)",
+		"burn %.2f slow_k %.2f" % [_got("burn"), _got("slow_k")])
 
 func _kit(arch: String) -> void:
 	var P := m.player
@@ -259,8 +329,11 @@ func _reply() -> Vector3:
 		t += 0.1
 	if replies.is_empty():
 		return Vector3.INF
-	var a: Array = replies[0]["pos"]
-	return Vector3(a[0], a[1], a[2])
+	return _v(replies[0]["pos"])
+
+## The guest's own numbers from its last reply (hp, stun_max, burn, slow_k).
+func _got(k: String) -> float:
+	return float(replies[0].get(k, -1.0)) if not replies.is_empty() else -1.0
 
 # ------------------------------------------------------------------ the guest
 func _guest() -> void:
@@ -294,11 +367,13 @@ func _on_msg(topic: String, data, _from: String) -> void:
 				m.player.teleport(Vector3(a[0], a[1], a[2]))
 				_say()
 		"ask": _say()
+		"strike": _strike(_v(data["at"]))
 
 func _say() -> void:
 	if m and m.player:
-		var p := m.player.pos
-		Net.lobby_emit("dn_r", {"pos": [p.x, p.y, p.z]})
+		var P := m.player
+		Net.lobby_emit("dn_r", {
+			"pos": [P.pos.x, P.pos.y, P.pos.z], "hp": P.hp, "stun_max": stun_max, "burn": P.burn_t, "slow_k": P.slow_k})
 
 # ------------------------------------------------------------------ both
 func _connect() -> bool:
@@ -335,6 +410,9 @@ func _build(d: Dictionary) -> void:
 				tiles.erase(i)
 	for b in nm.breaks: b["dead"] = true
 	home = Vector3(hx + 0.5, lv * World.LEVEL, hz + 0.5)
+	for dx in range(1, 8):      # a cliff face along z = home + 7: a knock north slams into it
+		for dz in range(7, 10):
+			W.level[W.idx(hx + dx, hz + dz)] = lv + 3
 	for h in nm.hunters:
 		if h.kin:
 			h.kin.dead = true
@@ -348,6 +426,7 @@ func _build(d: Dictionary) -> void:
 	m = nm
 
 func _fresh(T: Hunter) -> void:
+	stun_max = 0.0
 	T.max_hp = 10000.0
 	T.hp = T.max_hp
 	T.armor = 0.0
@@ -368,7 +447,18 @@ func _run(secs: float) -> void:
 		m.step(DT)
 		t += DT
 		if watch and seen.is_empty(): seen = m.displace.towing(watch)
+		var sb: Ent = stun_on if stun_on else m.player
+		if sb: stun_max = maxf(stun_max, sb.stun_t)
 		await main.get_tree().process_frame
+
+## A lightning rod's strike (BiomeRun._hit_area) at `at` on this game. Hazards run on every game.
+func _strike(at: Vector3) -> void:
+	var b := BiomeRun.new(m)
+	b._hit_area(at, 1.8, 14.0, {"stun": 0.4, "sky": true})
+	b.free_up()
+
+static func _v(a) -> Vector3:
+	return Vector3(float(a[0]), float(a[1]), float(a[2]))
 
 static func _s(v: Vector3) -> String:
 	return "(%.1f, %.1f)" % [v.x, v.z]

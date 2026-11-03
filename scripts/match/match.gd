@@ -5871,7 +5871,7 @@ func net_send_hit(target: Ent, dmg: float, by: Ent, o: Dictionary) -> bool:
 	var kb: Vector2 = o.get("kb", Vector2.ZERO)
 	Net.hit(target.nid, [_r(dmg), _r(kb.x), _r(kb.y), _r(float(o.get("lift", -1.0))), 1 if o.get("crit", false) else 0,
 		_r(float(o.get("stun", 0.0))), _r(float(o.get("burn", 0.0))), _r(float(o.get("slow", 0.0))), _r(float(o.get("root", 0.0))),
-		by.nid if by else "", String(o.get("src", "")), String(o.get("ab", ""))])
+		by.nid if by else "", String(o.get("src", "")), String(o.get("ab", "")), Displace.hit_extra(o)])
 	return true
 
 func _flags(h: Hunter) -> int:
@@ -6103,6 +6103,7 @@ func _net_hit_in(x) -> void:
 	if float(x[8]) > 0.0: o["slow"] = float(x[8])
 	if float(x[9]) > 0.0: o["root"] = float(x[9])
 	if x.size() > 12 and String(x[12]) != "": o["ab"] = String(x[12])
+	if x.size() > 13: Displace.apply_hit_extra(o, x[13])      # wall stun, steer, burn time, slow strength
 	e.hurt(float(x[1]), by, o)
 
 func _net_ev(x, from: String) -> void:

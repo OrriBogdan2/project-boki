@@ -185,7 +185,6 @@ func _shield_push() -> void:
 		if in_front and p.distance_to(q) < reach and gap_ok:
 			pushed_at[key] = m.time
 			_shove(f, n, push, float(sd.get("push_speed", 14.0)))
-			if "roll_t" in f: f.set("roll_t", 0.0)
 			pushes += 1
 			flash = true
 	fx.push_hint(wall, n, push, flash)
@@ -205,6 +204,7 @@ func _tick_glove() -> void:
 ## online slides on their own game).
 func _shove(f: Ent, dir: Vector2, dist: float, speed: float) -> void:
 	var push := {"mode": "push", "dir": [dir.x, dir.y], "dist": dist, "spd": speed, "dur": dist / speed + 0.1}
+	push["unroll"] = true          # a hunter dashing into it is stopped
 	m.displace.tow(f, null, push)
 
 func _tick_crest() -> void:

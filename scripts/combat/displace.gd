@@ -25,6 +25,11 @@ const MAX_SPD := 40.0        # m/s: the fastest
 const ARRIVE := 0.05         # m: a tow toward an anchor has arrived this close to its gap
 const MIRROR_GRACE := 0.4    # s a mirror waits past its time for the owner's "end" (the reply's trip)
 
+## What a hit's options carry beyond the fixed hit fields (Match.net_send_hit), so a knock on a body another
+## game owns lands the same there: its wall-slam stun, steer, weight, diminishing returns, burn time, slow
+## strength and Blight. Numbers only (heavy and dr travel as 1).
+const HIT_EXTRAS := ["kbi", "wallstun", "heavy", "dr", "slow_k", "burn_for", "blight"]
+
 ## Tests read what would go out over Net without a connection.
 static var capture := false
 static var sent: Array = []
@@ -69,7 +74,8 @@ func yank_remote(e: Ent, to: Vector3, dur: float, hop: float) -> void:
 ##         "glide" toward the anchor at spd, nothing in the way; hold: it stays on (idle) once there
 ##         "push"  along dir for dist at spd; a block or a step up stops it
 ##         "slide" along dir: dist over dur, easing out to a stop (its own physics carry it)
-##   dur (s), spd (m/s), gap (m), to ([x, y, z]: the anchor when there is no `by`), dir ([x, z]), dist (m)
+##   dur (s), spd (m/s), gap (m), to ([x, y, z]: the anchor when there is no `by`), dir ([x, z]), dist (m),
+##   unroll (true: a dash it was in ends)
 func tow(e: Ent, by: Ent, p: Dictionary) -> Dictionary:
 	_drop(towing(e))
 	var rec := {"e": e, "by": by, "p": p, "left": float(p["dur"]), "t": 0.0, "v": Vector2.ZERO, "gone": 0.0,
@@ -77,6 +83,8 @@ func tow(e: Ent, by: Ent, p: Dictionary) -> Dictionary:
 	tows.append(rec)
 	if e.remote:
 		_send(["tow", e.nid, by.nid if by else "", p])
+	elif p.get("unroll", false) and e is Hunter:
+		(e as Hunter).roll_t = 0.0
 	return rec
 
 func towing(e: Ent) -> Dictionary:
@@ -256,6 +264,19 @@ func _drop(rec: Dictionary) -> void:
 		tows.erase(rec)
 
 # ------------------------------------------------------------------ Net
+static func hit_extra(o: Dictionary) -> Dictionary:
+	var out := {}
+	for k in HIT_EXTRAS:
+		if o.has(k):
+			out[k] = snappedf(float(o[k]), 0.01)
+	return out
+
+static func apply_hit_extra(o: Dictionary, x) -> void:
+	if typeof(x) != TYPE_DICTIONARY:
+		return
+	for k in HIT_EXTRAS:
+		if (x as Dictionary).has(k):
+			o[k] = float(x[k]) if k not in ["heavy", "dr"] else float(x[k]) > 0.0
 func _send(x: Array) -> void:
 	var e := ["disp"] + x
 	if capture:
