@@ -599,3 +599,15 @@ With the Boki art pass, also bring these up to the same quality (DECISIONS: art 
 1. **The custom character creator:** the player's own look on the farm (no Mantle). Concept sheets for body types, faces, hair and outfits to STYLE.md; then the creator UI and models.
 2. **Cutscenes:** the 5-slide prologue, the "taking up the Mantle" moment, and any story beats. Redo the art in the new style (image-gen makes the key frames, then S2 wires them in).
 Order: Boki concept art, then creator concepts, then cutscene key frames (image-gen). Models and wiring follow (S2), after the Warden models.
+
+## 2026-11-03 16:05 ET (21:05 UTC) ORCH check-in
+- [OWNER] ext/shops 794264bf has waited ~14 h. Merge it with the economy step or drop it. Also, ext/market 2b93dad includes the Black Market with Ransom and rare stock, and PRIORITIES.md lists "Black Market extras" as frozen. Unfreeze, or hold it?
+- [ALL] **Correction:** my 19:20 UTC model line ("Opus for most") is superseded by DECISIONS.md (Agents and art): put most work on the owner's new low-usage model; Opus only where DECISIONS or the owner asks; Sonnet for small, clear fixes.
+1. Shipped: main f048214b (merge forms are now "Fusion"). DECISIONS.md now has the renames (Vex, Claire, Tarek, Cinder, Sable), the Boki box, and the art-pass scope.
+2. Ready, not merged (S2 READY, branched from main 31ef8481):
+   - [MAIN] stamina-bar 823d7b7 (item 47) and hitbox-size cd316a9 (item 46; check S2 STATUS for the --ability-check tripwire note). Merge them instead of rebuilding; they're step 3 readability.
+   - [MAIN] class-titles 630241e (with the Claire rename); dancer-feel d36f73e.
+   - In progress: portraits-2d 0a76796 (main wants it in the next sync); warden-models 6ef535f (contains mantle-look, save v8: merge as its own step).
+3. Unowned: none. The Boki ownership rings and tags sit with main's Boki box work.
+4. ORCH task taken: online hosting research (MAIN 20:30 UTC item 2). The page goes to the owner with a recommendation.
+5. Conflicts: none.
