@@ -61,7 +61,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Ashwick](Class-Ashwick.md) | Heavy | Torch Lance | Flashover | Spark Leap | Cinder Shot | Furnace Cloak | none (Boki Merge) |
 | [Linnet](Class-Linnet.md) | Medium | Lantern Crook | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
 | [Tamsin](Class-Tamsin.md) | Light | Hoar Fan | Hoarfrost | Rinkrun | Sleet Lance | Rink Wall | none (Boki Merge) |
-| [Breah](Class-Breah.md) | Medium | Rubble Fists | Tremor Sense | Rubble Leap | Quakefall | Stone Row | none (Boki Merge) |
+| [Breah](Class-Breah.md) | Medium | Rubble Fists | Molten Guard | Rubble Leap | Quakefall | Stone Row | none (Boki Merge) |
 | [Ostra](Class-Ostra.md) | Medium | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Merge) |
 
 ### Weight classes
