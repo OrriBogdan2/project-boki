@@ -2,8 +2,8 @@ class_name PinSpirit
 extends RefCounted
 ## Pin's Shift, Spirit Walk (hero sheet pin.md): a quick dodge roll the plain-dash way (ArchKit.dash_dir: the
 ## move direction, the aim when standing still or with the cursor setting), then "time" s walking as a
-## spirit: rocks, trees, pillars and barriers don't stop her (Hunter.spirit_t; terrain cliffs and ledges still do). Damage ends it. If it ends while she is inside
-## something she loses "stuck_cost" Focus and is put back where she last stood clear. While she is inside
+## spirit: rocks, trees, pillars and barriers don't stop her (Hunter.spirit_t; terrain cliffs and ledges
+## still do). Damage ends it. If it ends while she is inside something she loses "stuck_cost" Focus and is put back where she last stood clear. While she is inside
 ## something her own screen goes dark blue.
 
 var k: ArcherKit
