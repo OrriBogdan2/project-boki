@@ -19,7 +19,8 @@ var shots: Array = []
 var pickups: Array = []     # {pos, vel, kind:"gem"|"seed"|"tonic", v, key, node, t}
 var boxes: Array = []       # deathboxes, see Life
 var beacons: Array = []     # revive beacons, see Life
-var chests: Array = []      # {pos, open, prog, node, tier}
+var chests: Array = []      # {pos, open, prog, node}: the one locked chest (KeyChest); "free" ones need no key
+var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (host / offline)
 var shrines: Array = []     # {pos, used, prog, node}
 var breaks: Array = []      # {i, pos, kind, hp, node, dead}
 var ring_n := 0
@@ -784,6 +785,9 @@ func _start(o: Dictionary) -> void:
 		blight.setup()
 	if rolling:
 		rolling.after_setup()      # the map as picked over as the session is old
+	if not (opts.get("duel", false) or opts.get("arena", false) or opts.get("tutorial", false)):
+		keys = KeyRun.new(self)
+		keys.setup()               # who carries the chest keys, and the Shrublings
 	await _slice()
 	_trim_shadows(self)
 	for list in [mobs, kins, chests, breaks, shrines, wpicks]:
@@ -1476,7 +1480,7 @@ func _clear_spot(at: Vector3) -> Vector3:
 func _spawn_chests() -> void:
 	for cs in world.chest_spots:
 		await _slice()
-		add_chest(cs["pos"], int(cs["tier"]))
+		add_chest(cs["pos"])
 	for sp in world.shrine_spots:
 		await _slice()
 		var n := Models.shrine()
@@ -1492,12 +1496,13 @@ func _spawn_chests() -> void:
 # ------------------------------------------------------------------ breakables and found weapons
 const BREAK_HP := {"pot": 6.0, "crate": 22.0, "barrel": 12.0}
 
-func add_chest(p: Vector3, t: int) -> Dictionary:
-	var n := Models.chest(t)
+func add_chest(p: Vector3) -> Dictionary:
+	var n := Models.chest()
 	n.position = p
 	n.rotation.y = rng.randf() * TAU
 	add_child(n)
-	var c := {"pos": p, "open": false, "prog": 0.0, "node": n, "tier": t}
+	KeyChest.dress(n)
+	var c := {"pos": p, "open": false, "prog": 0.0, "node": n}
 	chests.append(c)
 	return c
 
@@ -1908,6 +1913,7 @@ func _break(b: Dictionary, by: Ent, from_net := false) -> void:
 	fx.burst(at + Vector3(0, 0.4, 0), col, 16, 4.0, 0.5, 9.0, 0.8)
 	sfx("knock" if kind_s == "crate" else "hit", at, -4.0, 0.7 if kind_s == "crate" else 1.3)
 	var loot := float(T["loot"])
+	if not from_net: KeyBonus.on_break(self, at, kind_s)      # a rare chest key
 	match kind_s:
 		"pot":
 			for i in randi_range(1, 2):
@@ -2726,6 +2732,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		tut_kills += 1
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
+	KeyCarry.on_mob_dead(self, mb)
 	if lairs: lairs.on_mob_dead(mb, credit)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
 	sfx("die_big" if big_mob else "die_small", mb.pos, -5.0, randf_range(0.9, 1.15))
@@ -3136,6 +3143,7 @@ func drop(kind_s: String, at: Vector3, v: int, key := "", pid := "", vel0 = null
 		"tonic": n = Models.tonic()
 		"armor": n = Models.armor_shard()
 		"key": n = ExitModels.rift_key()
+		"ckey": n = KeyModels.pickup()
 		_: n = Models.gem()
 	add_child(n)
 	n.position = at
@@ -3161,6 +3169,8 @@ func _update_pickups(dt: float) -> void:
 					continue
 				if net_on and not is_host and h != player:
 					continue
+				if p["kind"] == "ckey" and not KeyChest.has_room(h):
+					continue      # a full key stack leaves the key on the ground, glinting
 				var d: float = Vector2(h.pos.x - pos.x, h.pos.z - pos.z).length()
 				if d < 2.2 and absf(h.pos.y - pos.y) < 2.0:
 					var dir: Vector3 = (h.pos + Vector3(0, 0.6, 0) - pos)
@@ -3198,6 +3208,7 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 		"armor":
 			h.armor_kits = mini(3, h.armor_kits + 1)
 			if h == player: hud.toast_small("+1 armor kit", Color("dfe9f7"))
+		"ckey": KeyRun.on_pickup(self, h)
 		"key":
 			h.rift_keys += 1
 			if h == player:
@@ -3701,6 +3712,7 @@ func _process(delta: float) -> void:
 		BokiDemo.frame(self)
 	elif opts.has("arch_demo"):
 		ArchDemo.frame(self)       # screenshot tooling: one part of an archetype kit, timed to the shot
+	KeysDemo.frame(self)           # screenshot tooling: --keys-demo=thicket|chest|glint|shrub
 	_update_vision()
 	SeeThrough.for_match(self)     # trees and pillars over your hunter or Boki thin out
 	_vprof("vision")
@@ -4490,7 +4502,7 @@ func _separate() -> void:
 	for h in hunters:
 		if h.hittable() and h.grap.is_empty(): bodies.append(h)
 	for mb in mobs:
-		if not mb.dead: bodies.append(mb)
+		if not mb.dead and not Shrubling.hidden(mb): bodies.append(mb)      # (you walk into a disguised Shrubling like any bush)
 	for k in kins:
 		if k.state in ["active", "wild", "dazed", "returning"] and not k.dead and not KinLoss.cradled(k): bodies.append(k)
 	# only bodies in the same or a neighbouring 4m cell can touch (radii are well under 2m): a grid
@@ -4774,7 +4786,7 @@ func _update_interact(dt: float) -> void:
 		if best.is_empty():
 			for c in chests:
 				if not c["open"] and h.flat_dist(c["pos"]) < 1.6:
-					best = {"kind": "chest", "chest": c, "label": ["Hold " + Settings.key_cap("interact") + " to open", "Hold " + Settings.key_cap("interact") + " to open the rare chest", "Hold " + Settings.key_cap("interact") + " to open the vault"][int(c.get("tier", 0))]}
+					best = KeyChest.prompt(h, c)
 					break
 		# 4. pray at a shrine
 		if best.is_empty():
@@ -4786,7 +4798,7 @@ func _update_interact(dt: float) -> void:
 		if exits:
 			# (using an exit beats picking up a weapon or opening a chest that happens to be there)
 			var ex := exits.interact_for(h)
-			if best.is_empty() or (ex.has("act") and String(best.get("kind", "")) in ["weapon", "chest", "shrine"]): best = ex
+			if best.is_empty() or (ex.has("act") and String(best.get("kind", "")) in ["weapon", "chest", "locked", "shrine"]): best = ex
 		# 6. the lairs: work a gate's dial, light a rune
 		if lairs:
 			var lx := lairs.interact_for(h)
@@ -4857,9 +4869,11 @@ func _update_interact(dt: float) -> void:
 			"chest":
 				var c: Dictionary = best["chest"]
 				h.set_hold("chest")
-				c["prog"] += dt / (0.7 + 0.4 * int(c.get("tier", 0)))
+				c["prog"] += dt / float(ChestLoot.R()["hold_s"])
 				if c["prog"] >= 1.0:
 					_open_chest(h, c)
+			"locked":
+				KeyChest.deny(self, h, best["chest"])
 			"shrine":
 				var sh: Dictionary = best["shrine"]
 				h.set_hold("shrine")
@@ -4912,65 +4926,15 @@ func _catch(h: Hunter, k: Kin) -> void:
 			player.kin.bark("caught")
 
 func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
-	if c["open"]:
-		return
+	if c["open"] or (not from_net and not KeyChest.spend(h, c)):
+		return      # (opening costs exactly one key; another game's open already paid in that game)
 	c["open"] = true
 	if blight: blight.noise(c["pos"], "chest", h)      # a chest lid is loud
 	if net_on and not from_net:
 		net_event(["chest", chests.find(c), h.nid if h else ""])
-	var t := int(c.get("tier", 0))
 	if h == player:
 		tut_flag = tut_flag or tut_id() == "chest"
-	var lid: Node3D = c["node"].get_node("Body/Lid")
-	if lid.has_meta("hinged"):
-		# the lid springs open on its hinge
-		create_tween().tween_property(lid, "rotation:x", 1.9, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	else:
-		lid.rotation.x = -1.1
-		lid.position.y = 0.62
-		lid.position.z = 0.2
-	var beacon: Node3D = c["node"].get_node_or_null("Beacon")
-	if beacon: beacon.visible = false
-	sfx("pickup", c["pos"], 0.0, 0.8 - t * 0.1)
-	var cc: Array = Models.CHEST_COLS[t]
-	fx.burst(c["pos"] + Vector3(0, 0.6, 0), cc[1], 20 + t * 10, 4.0 + t, 0.6)
-	if t >= 1:
-		fx.ring(c["pos"], 2.0 + t, Color(cc[1], 0.9), 0.4)
-	if not from_net:
-		PerkOrbs.drop(self, "chest", c["pos"], 1, h)      # one perk orb beside the chest
-	var n_gems: int = [randi_range(4, 6), randi_range(7, 9), randi_range(11, 14)][t]
-	var n_pick := pickups.size(); var n_w := wpicks.size()
-	# a crate on the sky train pops its loot gently, so it lands on the car and rides along
-	var soft = Vector3(randf_range(-0.8, 0.8), 4.5, randf_range(-0.8, 0.8)) if c.has("ride") else null
-	for i in n_gems:
-		drop("gem", c["pos"] + Vector3(0, 0.8, 0), int(round((3 + t) * float(T["loot"]))), "", "", soft)
-	var seeds_n: int = [1 if randf() < 0.6 else 0, 1, 2][t]
-	for i in seeds_n:
-		drop("seed", c["pos"] + Vector3(0, 0.8, 0), randi_range(1, 2), Data.pick_seed(), "", soft)
-	if not from_net:
-		# gear and weapon tunings (content/rules/gear.json), leaning toward what this region is known for
-		GearDrops.run_table(self, "chest%d" % t, c["pos"], rng, {"h": h, "bonus": biomes.rarity_bonus_at(c["pos"]) if biomes else 0, "lean": biomes.slot_lean_at(c["pos"]) if biomes else {}})
-	if not from_net and randf() < [0.3, 0.7, 1.0][t]:
-		# treasure for the backpack; the vault sometimes holds a Soul Ember
-		var a3 := randf() * TAU
-		spawn_val(Loot.valuable(Loot.roll_valuable(rng, t)), c["pos"] + Vector3(cos(a3) * 1.0, 0, sin(a3) * 1.0))
-		if t == 2 and rng.randf() < 0.3:
-			spawn_val(Loot.valuable("soul_ember"), c["pos"] + Vector3(-cos(a3) * 1.0, 0, -sin(a3) * 1.0))
-	# vaults sometimes hold a Rift Key
-	if not from_net and exits and not exits.list.is_empty() and t == 2 and rng.randf() < 0.35:
-		exits.drop_key(c["pos"])
-	if h and not h.remote and h.tonics < 5 and randf() < [0.35, 0.7, 1.0][t]:
-		h.tonics += 1
-		if h == player: hud.toast("+1 tonic", Color("8ff0a0"))
-	if c.has("ride"):
-		for i in range(n_pick, pickups.size()): pickups[i]["ride"] = int(c["ride"])
-		for i in range(n_w, wpicks.size()):
-			# weapons and gear land on the deck, close to the crate
-			var wp: Dictionary = wpicks[i]
-			var off := Vector3(randf_range(-0.7, 0.7), 0.0, randf_range(-1.2, 1.2))
-			var t3: Transform3D = skytrain.cur[int(c["ride"])]
-			wp["pos"] = t3 * off; wp["ride"] = int(c["ride"])
-			(wp["node"] as Node3D).position = wp["pos"]
+	ChestLoot.open(self, h, c, from_net)
 
 func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 	if sh["used"]:
@@ -5322,10 +5286,10 @@ func _tut_enter(step_i: int) -> void:
 				if not mb.dead: mb.dead = true; mb.visible = false
 			var at := _tut_spot(4.5, 1.0)
 			if at != Vector3.INF:
-				var n := Models.chest(1)
+				var n := Models.chest()
 				n.position = at
 				add_child(n)
-				chests.append({"pos": at, "open": false, "prog": 0.0, "node": n, "tier": 1, "tut": true})
+				chests.append({"pos": at, "open": false, "prog": 0.0, "node": n, "free": true, "tut": true})
 				ping(at, Color("dfe8f2"))
 		"goexit":
 			# the map's outpost (one is made close by if the map has none): the marker leads there
@@ -6079,6 +6043,8 @@ func _ser(e: Ent) -> Array:
 		# the Blight: where a Warden's light points, how close it is to shrieking, and its strength
 		var bb: Blight = mb
 		ms.append_array([_r(bb.cone_a), _r(bb.spot), _r(bb.lvl), 1 if bb.tgt != null else 0])
+	else:
+		ms.append_array(KeyCarry.mob_extra(mb))      # key carrier flag, Shrubling pose (Net 0.15.3)
 	return ms
 
 ## Snapshot of what this game owns: its player (mine=true), or the host's world (mine=false).
@@ -6168,6 +6134,9 @@ func _net_make(it: Array) -> Ent:
 				var bl := Blight.new()
 				bl.init_blight(self, nid, mk, Vector3(it[2], it[3], it[4]), float(it[19]) if it.size() > 19 else 0.1, blight)
 				mb = bl
+			elif mk == "shrubling":
+				mb = Shrubling.new()
+				(mb as Shrubling).init_shrub(self, nid, Vector3(it[2], it[3], it[4]))
 			else:
 				mb = Mob.new()
 				mb.init_mob(self, nid, mk, Vector3(it[2], it[3], it[4]))
@@ -6236,6 +6205,8 @@ func _net_apply(e: Ent, it: Array) -> void:
 			mb.net_vel = Vector3(it[13], 0, it[14])
 			if it.size() > 16:
 				mb.stag_open = float(it[15]); mb.stagger_t = float(it[16])
+			if not (mb is Blight) and it.size() > 18:
+				KeyCarry.apply_mob(mb, it)
 			if mb is Blight and it.size() > 20:
 				var bb: Blight = mb
 				bb.cone_a = float(it[17]); bb.spot = float(it[18]); bb.lvl = float(it[19])

@@ -87,6 +87,7 @@ func _drops() -> void:
 	else:
 		var c: Dictionary = m.chests[0]
 		P.teleport(c["pos"] + Vector3(1, 0, 0))
+		P.chest_keys = 1      # chests are locked: opening one spends a key (decision 0007)
 		m._open_chest(P, c)
 		ok("opening a chest drops exactly one orb", PerkOrbs.list(m).size() == before + 1, str(PerkOrbs.list(m).size()))
 		var o: Dictionary = PerkOrbs.list(m)[0]

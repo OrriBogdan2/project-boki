@@ -468,7 +468,7 @@ def gen_maps():
         isl = m.get("islands", [])
         if isl:
             dz = {0: "quiet", 1: "contested", 2: "dangerous"}
-            body += "### Islands\n\n" + table(["Island", "Role", "Biome", "Danger", "Named spots"], [[i.get("name", i["id"]), i.get("role", ""), i.get("biome", "").title(), dz.get(i.get("danger"), str(i.get("danger", ""))), ", ".join(a[2] for a in i.get("areas", []))] for i in isl]) + "\n\n"
+            body += "### Islands\n\n" + table(["Island", "Role", "Biome", "Danger", "Tall grass clumps", "Named spots"], [[i.get("name", i["id"]), i.get("role", ""), i.get("biome", "").title(), dz.get(i.get("danger"), str(i.get("danger", ""))), str(len(i.get("bush", []))), ", ".join(a[2] for a in i.get("areas", []))] for i in isl]) + "\n\n"
         if m.get("lairs"):
             bn = {"colossus": "Stone Colossus", "serpent": "Stormcoil", "brood": "Brood Mother"}
             en = {"dial": "lock dial", "runes": "three rune pylons", "wards": "three ward stones"}

@@ -19,6 +19,10 @@ Full numbers: [Weapons](Weapons.md) and [Gloves](Gloves.md).
 - **Elements.** Some found weapons carry an element whose hits burn, chill, arc or poison.
 - **Named weapons.** Always Legendary and elemental, with a perk of their own. Wardens and vaults drop them, rarely.
 - **Gloves**, **tonics**, **armor kits** and **armor shards**.
+- **Chest keys.** One opens one chest. Carried by monsters and Shrublings; they drop with them, lie on the
+  ground and go into your deathbox if you fall. Sometimes a spare drops from an elite, a boss, any
+  monster, a pot, a barrel or a crate. Never sold in shops. They sit in your utility belt, up to 3; with
+  a full stack a key stays on the ground for later.
 - **Rift Keys.** Rare. Open a rift hatch (see [Expeditions](Expeditions.md#getting-out)). Lost to your deathbox if you die.
 - **Valuables** to sell at home: Old Coin, Sky Pearl, Boki Idol, Crown Shard, and the **Soul Ember**
   the Soul Shrine needs.
