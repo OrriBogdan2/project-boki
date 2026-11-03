@@ -9,14 +9,8 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | Key | Was | Why |
 |---|---|---|
 | `dash_hold` | Gameplay: "Hold Shift for the long dash" | Hold-dashes are per hunter now (`inp["dash_down"]`, Slide, Rampage). The option only stretched the old non-hero dash into an "ex" dash. Its read in `match.gd` and the stretch in `hunter.gd` are gone. |
-| `kin_auto` | Gameplay: "Boki also use your E ability on their own" | E is the hunter's utility now. The Boki's own active is on C (cast from where the Boki stands), you send and call it with G, and the Merge is on R. A switch that lets the Boki spend your C cooldown fights all of that, so it is off for everyone. One read is left in `kin_tactics.gd` (reserved; see the note below). |
+| `kin_auto` | Gameplay: "Boki also use your E ability on their own" | E is the hunter's utility now. The Boki's own ability is ordered by you (G), and the Merge is on T. A switch that lets the Boki spend that cooldown on its own fights all of that, so it is off for everyone. |
 | `hud_opacity` | (no row in the menu) | Nothing has read it since the HUD rework. |
-
-**Note for the main session (`scripts/combat/kin_tactics.gd`, reserved):** line ~106 still reads
-`Settings.get_v("kin_auto")`. With the key gone `get_v` returns null, so the guard behaves like the old
-default (your own Boki never auto-casts k1) and nothing changes in play. Please replace the line with
-`if slot == "k1" and k.owner_h.is_local(): continue` and fix the comments at lines ~89 and in
-`docs/KIN_GRAMMAR.md` (lines ~248 and ~289) that mention "kin_auto".
 
 ## Kept, with where they now live
 
@@ -31,7 +25,7 @@ default (your own Boki never auto-casts k1) and nothing changes in play. Please 
 | `cast_on_press` | Controls > How keys behave | `match.gd` | moved from Gameplay: it's about how a key press acts |
 | `dash_to_cursor` | Controls > How keys behave | `hunter.gd` | moved from Gameplay |
 | `crouch_toggle` | Controls > How keys behave | `match.gd`, `home.gd` | moved from Gameplay, renamed "Tap to sneak" (the action is Sneak) |
-| `keys`, `keys_v`, `keys2_v` | Controls (bindings) | `settings.gd` | internal version markers stay |
+| `keys`, `keys_v`, `keys2_v`, `keys3_v` | Controls (bindings) | `settings.gd` | internal version markers stay |
 | `cam_style` | Camera | `cam.gd`, `match.gd` | new Camera tab (was a Gameplay group) |
 | `cam_follow` | Camera | `cam.gd`, `match.gd` | |
 | `cam_lead` | Camera | `match.gd` -> `cam.gd` | |
@@ -48,7 +42,7 @@ default (your own Boki never auto-casts k1) and nothing changes in play. Please 
 ## Looked for and not found
 
 No settings remain for taming, the shoulder-start Boki, the old kit or loaner, the 1/2/3 perk prompt
-or class ultimates. The key bindings for the Boki (C ability, G orders, R Merge) were already current;
+or class ultimates. The key bindings for the Boki (C ability, G orders, T Merge) were already current;
 the X ultimate is the main session's (ultbond).
 
 ## Tab order
