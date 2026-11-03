@@ -555,11 +555,11 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return
 	add_mark(t, 1)
 
-## The empowered bolt landed: a Mark like any bolt, and the Vault comes back on the spot (its damage was on the
-## bolt itself). Weight without a blast: a blue blade flash on them, a T4 shake, and the reset snap on her.
+## The empowered bolt landed: two Marks (the owner's faster stacking), and the Vault comes back on the spot (its
+## damage was on the bolt itself). Weight without a blast: a blue blade flash on them and the reset snap on her.
 func _primed_hit(t: Ent) -> void:
 	primed_hits += 1
-	add_mark(t, 1, true)
+	add_mark(t, int(dash_def()["prime_marks"]), true)
 	h.dashes = h.max_dashes()
 	DashReset.cue(h)
 	_reset_fx(t)
@@ -644,8 +644,7 @@ func _throw_bola() -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(bd["speed"]),
 			"range": float(bd["range"]), "size": 0.3},
-		"effects": [{"type": "damage", "amount": float(bd["dmg"])},
-				{"type": "slow", "duration": _ground_t(), "strength": float(bd["slow"])}]})
+		"effects": [{"type": "damage", "amount": float(bd["dmg"])}]})
 	var dv := h.aim_dir()
 	bola = {"pos": h.pos + Vector3(dv.x * 0.5, 1.0, dv.y * 0.5), "dir": dv, "left": float(bd["range"]), "first": null,
 			"bounces": int(bd["bounces"]), "stg": stg}
@@ -894,7 +893,6 @@ func _blink(to: Vector3) -> void:
 	blinks += 1
 	fx().puff(to + Vector3(0, 0.9, 0), GHOST, 1.2, 0.3)
 	m.sfx("dj_blink", to, -3.0, 1.0)
-	m.fx.ring(to, 1.0, GHOST, 0.22)
 	net_bolt(from + Vector3(0, 0.9, 0), to + Vector3(0, 0.9, 0), GHOST)
 	if h.is_local():
 		Oomph.punch_dir(m, Vector2(to.x - from.x, to.z - from.z), 0.25)

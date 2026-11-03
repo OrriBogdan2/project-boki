@@ -5,7 +5,7 @@
 		"light"
 	],
 	"primary": {
-		"dmg": 9.0,
+		"dmg": 13.0,
 		"rate": 0.45,
 		"speed": 34,
 		"mag": 99,

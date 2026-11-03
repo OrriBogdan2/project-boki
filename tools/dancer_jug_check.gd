@@ -162,8 +162,8 @@ func thief(a) -> void:
 	A.ok("dancer empowered bolt: the big look rides it",
 			K.last_bolt_emp and DJFx.of(m).free_pools.has("ride_chakram_big"))
 	A.step(m, 0.5)
-	A.ok("dancer empowered bolt: a big hit, 1 Mark like any bolt, no Shred, speed ends, Vault back",
-			A.dmg(T) >= 18.0 and K.marks_on(T) == 1 and T.vuln_t <= 0.0 and K.move_k() <= 1.0
+	A.ok("dancer empowered bolt: a big hit, 2 Marks (the owner's faster stacking), no Shred, speed ends, Vault back",
+			A.dmg(T) >= 18.0 and K.marks_on(T) == 2 and T.vuln_t <= 0.0 and K.move_k() <= 1.0
 			and P.dashes >= P.max_dashes() - 0.01 and K.primed_t <= 0.0 and K.primed_hits == 1,
 		"dealt %.0f marks %d vuln %.1f dashes %.2f" % [A.dmg(T), K.marks_on(T), T.vuln_t, P.dashes])
 	# from a jump the cartwheel holds its speed to the landing: much further than on the ground

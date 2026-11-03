@@ -190,7 +190,9 @@ const MOVES := {
 	# Vault, the ground Cartwheel (sheet: body 0176-0178, 0134-0137), inside the 0.48s dash: a 0.05s crouch with
 	# the arms swung up and the body leaning into the side, a push-off into a star (legs split, arms wide), one
 	# full turn over the top in the plane of travel, a low two-beat landing crouch at 0.36, upright by 0.48
-	"thf_vault_r": {"keys": [
+	# (a bolt thrown mid-flip whips both blades out in a V, swing step 2: footage 0193, the Cartwheel and the
+	# empowered shot on one frame with a blade flash at her hands)
+	"thf_vault_r": {"swing": 2, "keys": [
 		[0.0, {}],
 		[0.05, {"sq": 0.24, "lift": -0.08, "p": 0.12, "r": 0.32, "lw": 1.0, "legs": [0.8, -1.3, 0.6, -1.1],
 				"fl": Vector3(-0.25, 0.6, 0.05), "hw": 1.0, "fr": Vector3(0.25, 0.6, 0.05), "rw": 1.0}],
@@ -201,7 +203,7 @@ const MOVES := {
 		[0.36, {"fz": -6.283, "sq": 0.3, "lift": -0.1, "p": 0.18, "lw": 1.0, "legs": [0.9, -1.4, 0.5, -1.2],
 				"fl": Vector3(-0.5, 0.0, 0.15), "hw": 1.0, "fr": Vector3(0.5, 0.0, 0.15), "rw": 1.0}],
 		[0.48, {"fz": -6.283}]]},
-	"thf_vault_l": {"keys": [
+	"thf_vault_l": {"swing": 2, "keys": [
 		[0.0, {}],
 		[0.05, {"sq": 0.24, "lift": -0.08, "p": 0.12, "r": -0.32, "lw": 1.0, "legs": [0.8, -1.3, 0.6, -1.1],
 				"fl": Vector3(-0.25, 0.6, 0.05), "hw": 1.0, "fr": Vector3(0.25, 0.6, 0.05), "rw": 1.0}],
@@ -288,7 +290,7 @@ const MOVES := {
 	# the air Cartwheel (sheet: 0129-0134, 303.8-304.5s): a tucked flick, the star turned over sideways (0.08 to
 	# 0.34), then carried flat and stretched on its speed, legs split and arms swept back, held until she lands
 	# (ThiefKit plays thf_land then); the whole air dash runs up to 1.09s, the keys end at 0.5
-	"thf_exdash": {"hold": true, "keys": [
+	"thf_exdash": {"hold": true, "swing": 2, "keys": [
 		[0.0, {}],
 		[0.05, {"sq": 0.28, "lift": -0.04, "p": 0.25, "lw": 1.0, "legs": [1.1, -1.6, 0.9, -1.4],
 				"fl": Vector3(-0.2, 0.15, 0.25), "hw": 1.0, "fr": Vector3(0.2, 0.15, 0.25), "rw": 1.0}],
