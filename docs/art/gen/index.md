@@ -222,3 +222,26 @@ Portrait:
 
 Turnaround:
 > Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. In her usual low crouch in every view, the long tail fully visible in the side and back views, the still on her back, the flame-lance in the same hand in every view. No text, no labels, no logos.
+
+### Moosh Moosh (tender), Fox Cub
+Owner direction: small and cute (about 0.6 of a standard hunter); lore: a courier carrying the last hearth-flame between the isles.
+
+Warden block:
+> Redesign the character from the first two reference images at full production quality, keeping her design (fox-folk girl, big black-tipped ears, a huge fluffy tail whose tip burns like a flame, red-orange fur with a cream face, a little red flame mark on her forehead and red cheek stripes, big amber eyes, a cream courier's tunic, moss-green scarf, satchel stamped with a hearth symbol, a crook taller than she is with a hanging lantern, a pet flame in her palm), and make her even cuter, rounder and more charming than the reference: Moosh Moosh, the Fox Cub, a tiny courier who carries the last hearth-flame between the broken isles. VERY SMALL: about 1 metre tall, only about three and a half heads tall, a big round head as wide as her shoulders, stubby little limbs, a round bell-shaped tunic, chubby cheeks, huge sparkling amber eyes, an open happy grin with one tiny fang. Her tail is bigger than the rest of her and curls up like a flame. The lantern crook is much taller than she is. A tiny friendly flame spirit with two dot eyes sits in her palm. Bouncy, warm and adorable; still a capable little hero.
+
+| File | Size | Studio image | Notes |
+|---|---|---|---|
+| `wardens/moosh_splash.png` | 2752x1536 | c4828c1d | |
+| `wardens/moosh_portrait.png` | 2048x2048 | 12dc9c5f | |
+| `wardens/moosh_turnaround.png` | 3168x1344 | feb03291 | |
+
+All take 1. Known issue: the turnaround's back view shrinks the tail and drops its burning tip; S2 should follow the side view.
+
+Splash:
+> Splash art, 16:9 widescreen: a cosy little floating isle at golden sunset with a rope bridge, paper lanterns, a tiny homestead and a sea of clouds; Moosh Moosh bounds across the rope bridge mid-hop, lantern crook held high, its warm light glowing, her flaming tail swishing, the little flame spirit riding on her head, fireflies and embers drifting, a big happy grin, full figure. Warm golden and orange light with soft pink sky. Palette: fox orange fur, cream, black ear tips and boots, cream tunic, moss green scarf, satchel brown, hearth light gold. No text, no logos.
+
+Portrait:
+> Portrait bust, square 1:1, for a game hero picker: head and shoulders, three-quarter view, the big round fox head with huge sparkling amber eyes, big black-tipped ears up, the red flame mark on her forehead and red cheek stripes, an open happy grin with one tiny fang, the moss scarf, the tiny flame spirit sitting on her shoulder, the burning tail tip curling into frame. Simple warm golden gradient background, soft rim light. Palette: fox orange, cream, black ear tips, moss green, warm gold. No text, no logos.
+
+Turnaround:
+> Character turnaround reference sheet for a 3D modeller: the same character shown three times side by side at the same scale on one sheet, left to right: FRONT view, SIDE view (profile), BACK view. Neutral relaxed A-pose standing straight, arms held slightly away from the body, full body head to toe in every view, all three figures exactly the same height and aligned on one ground line. Flat even studio lighting, no dramatic shadows, plain flat light grey background, no scenery. Any held weapon hangs down beside the leg in the same hand in every view and is visible in all three views. She is very small and round, about three and a half heads tall, in every view; the lantern crook in the same hand in every view; the big tail fully visible in the side and back views. No text, no labels, no logos.
