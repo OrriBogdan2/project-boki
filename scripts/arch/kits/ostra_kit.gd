@@ -331,7 +331,6 @@ func _trade_bodies(land: Vector3, from: Vector3, r: float) -> void:
 		if body.team != h.team:
 			swapped_foes += 1
 			KitStatus.apply(body, "dsr", float(dd["slow_t"]), float(dd["slow"]))
-			m.fx.word(body.pos + Vector3(0, 2.3, 0), "SLOWED", Color("b8a8ff"), false)
 		elif body is Kin:
 			swapped_boki += 1
 		else:
@@ -423,7 +422,6 @@ func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 	s["x"]["stun"] = stun
 	s["x"]["dr"] = true
 	KitLooks.of(m).crown(e, stun)
-	m.fx.word(e.pos + Vector3(0, 2.3, 0), "STUNNED", Color("fff27a"), false)
 	m.sfx("os_snap_hit", at, -2.0, 1.0)
 
 # ------------------------------------------------------------------ E: Brimseed
