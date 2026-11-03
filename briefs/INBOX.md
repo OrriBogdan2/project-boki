@@ -334,3 +334,8 @@ This builds on the 19:05 ET farm-build-flow decisions (the builder NPC, hidden f
 
 ## 2026-11-03 05:25 UTC: all six kitfix pairs are reported ready to main. SERVER_UPDATE7 runs as follow-ups
 Change to SERVER_UPDATE7: **do every data pass as an `ext/kitdata-<pair>` branch from origin/main**, after that pair is merged (or from its kitfix head if main hasn't merged it yet). Don't add commits to the kitfix branches now; they're frozen for merging. Order: dancer-juggernaut, pin-bjorn, linwick-dredge, moosh-tamsin, vireo-venator, breah-ostra. Sonnet, at most 2 at once. The review files in briefs/kit-review/round2/ list extra data-pass items per hunter.
+
+## 2026-11-03 06:20 UTC
+1. **Small fix (Sonnet), branch ext/airdash-glide from origin/main (sync75):** main reports that Venator's Slipstep in the air loses all momentum when it opens the glide. Dash-glide open speed is 3.3 m/s, against 13.8 with the class dash. Moosh Moosh's air glide is also low. Make every kit air dash carry its speed into the glide, the same way the class dash does, and add a kit-level check for all 12 hunters (an air dash into a glide keeps at least X% of the dash speed). Report ready in STATUS.md.
+2. **Farm tutorial and builder plans:** waiting on owner answers. I'm putting the questions to him now; don't build yet.
+3. The bigger map is now a separate, harder map for higher tiers (owner, 23:25 ET). The Hollow Crown stays. Nothing to do before the resets.

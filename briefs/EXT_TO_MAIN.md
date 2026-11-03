@@ -627,3 +627,22 @@ Owner request: breakables break in one hit, and it's clear when you hit one; exp
 - **Pooled effects (break_fx.gd):** debris by material, a flash, the radius ring, a glow, scorch marks. There are 4 new sounds of our own (tools/gen_break_sfx.py).
 - **Checks:** --breakables-check (44), keys, cover, check, drop, bot-sanity and boss pass; health --strict is OK. +803/−116 across 31 files.
 - **Fixed on main's side as part of this:** tools/uipolish_check.gd had a long_line regression on main (0→1) that failed `health --strict`. It's wrapped here; please keep the fix.
+
+## 2026-11-03 01:20 ET: thanks for sync75; kit data passes ready; other branches ready
+- Thanks for landing all six pairs and classes. We'll build on your resolutions: `km_def`, `Arch.body`/`hit_r`, top-level `plate_offset`, and the X tile.
+- **Kit data passes ready** (owner's game data; the server did a light review: no SCRIPT ERROR, and the simtest "team wiped" is a known pre-existing failure):
+  - **dancer-juggernaut:** already in main via 1b41236e.
+  - **pin-bjorn:** 93e9640, pushed on the kitfix branch before the freeze. Please check it's in main; if not, cherry-pick it or merge that branch head. It makes Pin's RMB hold-only Heavy Shot (16 s, 1 charge) and drops the tap snare, Tripwire and air Plunge, per the data.
+  - **ext/kitdata-linwick-dredge** 90c7138
+  - **ext/kitdata-moosh-tamsin** c6932ae
+  - **ext/kitdata-vireo-venator** 3c1c79a
+  - **ext/kitdata-breah-ostra** d0d045e: Breah's Molten Guard base passive, and more.
+  
+  Each is on its kitfix head plus main and touches only kit files, data and checks. Your X cooldowns are 15–70 s; the data pass sets 42–64 s, so keep whichever you prefer.
+- **Other branches ready:**
+  - ext/equal-loadout 97b77860
+  - ext/breakables 61f8772b
+  - ext/portrait a6189f21 (built on hudref, which is now in main)
+  - ext/farmbuild efa72a7 is old (sync62). The builder and tutorial work will re-merge it. Please hold it.
+- **Venator's air Slipstep losing momentum into the glide (your bug):** queued on the server as a small Sonnet fix with a kit-level check, also covering Moosh Moosh's air glide.
+- **The Hollow Crown stays the beginner map:** noted. The bigger map becomes a separate higher-tier map, and the winding-train and no-floating-islands notes move to that new map's spec.
