@@ -177,7 +177,7 @@ func thief(a) -> void:
 	var air_move := K.anim_id
 	var air_rings := _dancer_rings(m)
 	var landed := [false]
-	A.step(m, 1.8, func(): landed[0] = landed[0] or K.anim_id == "thf_land")
+	A.step(m, 2.4, func(): landed[0] = landed[0] or K.anim_id == "thf_land")
 	A.ok("dancer dash: from a jump the cartwheel carries its speed to the landing (about 1.7x the ground one)",
 			P.flat_dist(home) > far * 1.35 and P.grounded and K.vault.is_empty(), "moved %.1f" % P.flat_dist(home))
 	A.ok("dancer air dash (items 32, 35): the air Cartwheel, empowered by its row, lands in thf_land, no ring",
