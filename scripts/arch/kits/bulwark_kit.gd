@@ -183,7 +183,8 @@ func _shield_push() -> void:
 		var reach: float = f.r + Verbs.WALL_TH + PUSH_REACH
 		var key: int = f.get_instance_id()
 		var in_front: bool = (p - q).dot(n) > 0.0 and absf(f.pos.y - float(wall["y"])) < 2.2
-		if in_front and p.distance_to(q) < reach and m.time - float(pushed_at.get(key, -9.0)) >= float(sd.get("push_gap", 0.6)):
+		var gap_ok: bool = m.time - float(pushed_at.get(key, -9.0)) >= float(sd.get("push_gap", 0.6))
+		if in_front and p.distance_to(q) < reach and gap_ok:
 			pushed_at[key] = m.time
 			shoved[key] = {"foe": f, "dir": n, "left": push}
 			if "roll_t" in f: f.set("roll_t", 0.0)
@@ -687,8 +688,8 @@ func on_dash(use_ex: bool) -> bool:
 		m.sfx("ab_whirr", h.pos, -6.0, 0.9)
 		return true
 	if not wall.is_empty() and h.grounded:
-		# Shield Charge (into_dash.rmb): behind the raised shield, on its own cooldown (the RMB slot's), invulnerable for its
-		# length, a heavier knock; with 50 Guard it ends in a Shield Slam
+		# Shield Charge (into_dash.rmb): behind the raised shield, on its own cooldown (the RMB
+		# slot's), invulnerable for its length, a heavier knock; with 50 Guard it ends in a Shield Slam
 		if not spend_rmb(): return true
 		var dist := float(dd["charge"]) + (1.0 if rank("dash") >= 3 else 0.0)
 		var t := dist / float(dd["charge_speed"])
