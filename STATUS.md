@@ -1,4 +1,4 @@
-2026-11-03T18:50:18Z
+2026-11-03T19:00:36Z
 
 == S1 BRANCH TABLE (current; older detail further down) ==
 branch | commit | state | Net | checks
@@ -18,10 +18,10 @@ DASH TABLE: converged on DashFlow. ext/kitdata-vireo-venator @ 67454b5 has no Da
 Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on over drops and the abyss (gameplay change) OK? 2 m shield push and 4.2 m wall OK (no source numbers)? The aegis plates read like planks from top-down.
 
 Running now: none on S1.
-Queued: none on S1 (Dancer handed to S2). Farm tutorial build waits for owner answers.
-Last INBOX entry handled: 2026-11-03 18:20 UTC ORCH OWNER DECISIONS (all routed to S2/main; nothing for S1). mapclean-fix c36f6ea still merges clean on main a3fc5b95 (18:50 UTC check).
+Queued: none on S1. Farm tutorial/builder moved to ext (ext/farm-hob, INBOX 18:55 UTC).
+Last INBOX entry handled: 2026-11-03 18:55 UTC (farm tutorial + Hob builder + Goals tracker are built locally by ext on ext/farm-hob from S1's plan; S1 does not start it).
 Watcher: received 19:06 UTC entry
-Questions for the owner: farm is top priority after the demo (18:20 UTC). The farm tutorial plan and farm builder plan (in this STATUS, below) still need your answers before S1 builds them: tracker meaning, house cost, player hammer help, first-day gems, step order, builder name, pen in starter set, decor at start, items per tier, hide vs "Talk to Dunna" tabs, builder in world or portrait-only. Also see the ext/classes line.
+Questions for the owner: none from S1 (farm plan questions answered in MAIN_TO_EXT 20:40 ET; ext builds it). Also see the ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
 
 Hold state for MergeKit.drop_class_holds:
