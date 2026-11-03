@@ -1,6 +1,6 @@
 class_name KeyRun
 extends RefCounted
-## Keys for the match (docs/decisions/0007-keys-and-cover.md). Every chest needs one key. Keys come
+## Keys for the match (docs/decisions/0009-keys-and-cover.md). Every chest needs one key. Keys come
 ## from monsters: in each region (an authored map's named region, else the island) the number of key
 ## carriers equals the number of chests there. Which monsters carry them is rolled per match on this
 ## class's own seeded stream, so it never shifts the match's other dice. A region with fewer monsters
