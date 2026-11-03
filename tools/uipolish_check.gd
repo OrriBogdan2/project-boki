@@ -15,8 +15,6 @@ var n := 0
 ## Files that may still build their own boxes: the HUD and its style module HudStyle (ext/hudref owns
 ## the in-match look) and reserved files.
 const ALLOWED := ["scripts/ui/hud.gd", "scripts/ui/hud_style.gd", "scripts/ui/kin_reveal.gd"]
-## Reserved files that still name a removed setting (handed to the main session, SETTINGS_AUDIT.md).
-const REMOVED_READ_OK := ["scripts/combat/kin_tactics.gd"]
 const STYLE_MODULE := ["scripts/ui/ui.gd", "scripts/ui/ui_theme.gd", "scripts/ui/ui_frame.gd"]
 
 func ok(what: String, cond: bool, info := "") -> void:
@@ -80,7 +78,7 @@ func _settings_read(src: Dictionary) -> void:
 func _removed(src: Dictionary) -> void:
 	for k in Settings.REMOVED:
 		var reads: Array = _uses(src, String(k)).filter(func(p):
-			return not p in REMOVED_READ_OK and p != "scripts/core/settings.gd")
+			return p != "scripts/core/settings.gd")
 		var gone := not Settings.DEFAULTS.has(k) and not Settings.v.has(k)
 		ok("removed '%s': not a setting, nothing reads it" % k, gone and reads.is_empty(), str(reads))
 		ok("removed '%s': get_v gives nothing (off)" % k, Settings.get_v(String(k)) == null)

@@ -445,9 +445,13 @@ func kin(uid: String) -> Dictionary:
 
 func active_kin() -> Dictionary:
 	var k := kin(str(d.get("active", "")))
-	if k.is_empty() and d["roster"].size() > 0:
-		k = d["roster"][0]
-		d["active"] = k["uid"]
+	if k.is_empty() or not KinLoss.selectable(k):     # (a held Boki stays home: KinLoss)
+		k = {}
+		for r in d["roster"]:
+			if KinLoss.selectable(r):
+				k = r
+				d["active"] = k["uid"]
+				break
 	return k
 
 ## The kin you bring as your second (benched, swapped in with X). "none" means bring only one.
@@ -458,11 +462,11 @@ func second_kin() -> Dictionary:
 	if b == "none":
 		return {}
 	var k := kin(b)
-	if not k.is_empty() and b != a:
+	if not k.is_empty() and b != a and KinLoss.selectable(k):
 		return k
 	var best: Dictionary = {}
 	for r in d["roster"]:
-		if r["uid"] == a: continue
+		if r["uid"] == a or not KinLoss.selectable(r): continue
 		# kin out on the farm first; one asleep in the Kin Burrow only if nobody else is around
 		var better: bool = best.is_empty() or (best.get("boxed", false) and not r.get("boxed", false)) \
 			or (best.get("boxed", false) == r.get("boxed", false) and float(r.get("trust", 0.0)) > float(best.get("trust", 0.0)))

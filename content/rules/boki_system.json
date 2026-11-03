@@ -25,6 +25,12 @@
 		"stun": 0.35,
 		"kb": 5.0
 	},
+	"loss": {
+		"desc": "Losing a Boki (docs/decisions/0008). loss_min_tier: tiers below it are safe (your Boki goes home with you when you die); from it up, a Boki drops dazed when its hunter dies, guards the spot, and can be scanned by an enemy. bond_ping_s: seconds between map pings of the hunter carrying a captured Boki. guard_r: metres from the deathbox a dropped Boki stands.",
+		"loss_min_tier": 2,
+		"bond_ping_s": 15.0,
+		"guard_r": 1.4
+	},
 	"regen": {
 		"carried_pct_s": 0.06,
 		"out_pct_s": 0.015,
@@ -38,11 +44,10 @@
 		"rescue_hp": 0.6,
 		"rescue_s": 3.5,
 		"rescue_r": 1.5,
-		"rescue_drain_s": 2.0,
 		"rescue_block_s": 0.6,
-		"rescue_slack": 0.7,
 		"contest_r": 1.2,
-		"rescue_kneel_frac": 0.12,
+		"carry_speed_k": 0.9,
+		"carry_lift_s": 0.3,
 		"rescue_done_s": 0.45
 	},
 	"follow": {
