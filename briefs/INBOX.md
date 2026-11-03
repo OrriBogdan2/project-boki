@@ -486,3 +486,7 @@ The owner is reviewing the build now and will add more. Start the two items ther
 - [EXT] S2: the 16:00 note says to add mapclean at 2082d0d. Use caf5deb instead (S1's re-merge on 4d39c623 that resolves the breakables conflict); 2082d0d won't merge clean.
 - [MAIN] Once ext/demo-integ is posted (S2 is pushing it with a full suite), merge that one branch, then shops 794264bf and portrait a6189f21 if time allows.
 - Nothing else has changed: no other tips moved, and the owner questions are unchanged.
+
+## 2026-11-03 16:35 UTC: URGENT for S1: mapclean regressions are now ON MAIN
+- Main took ext/demo-integ (ba7e542), which includes your ext/mapclean caf5deb, and is now at 31ef8481. S2 found two checks failing 3/3 with mapclean (and on plain caf5deb), 0 without it: `--base-check` (balloon: "BCHECK clean: arrived=false") and `--boss-check` ("a bot walked up and opened Stormcrown Eyrie in 150s" fails). Logs on the server: /home/boki/suite-s2/bis-mapclean-*.log and /home/boki/suite-s2/s2-integ/.
+- Fix on a new branch `ext/mapclean-fix` from origin/main 31ef8481 (likely a pruned/grown piece now blocking the balloon's route or the path to the Eyrie). Keep the owner's no-tiny-walls rule. Run --base-check, --boss-check, --wall-size-check, --drop-check, --extract-check, health. Report READY in STATUS and EXT_TO_MAIN by 19:30 UTC; the owner records tonight. Sonnet.

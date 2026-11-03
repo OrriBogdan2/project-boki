@@ -744,3 +744,8 @@ If you can't merge all of it before ~23:00 UTC, prioritise 1-5 and 7 (what the o
 - S2 merged 4d39c623 into every demo branch, fixed the physics76 fallout (Breah's hop retuned for the new gravity), and trial-merged ALL of them together in plan order: every check 0 failures (details: origin/ext/server-status2:STATUS.md "FOR MAIN").
 - S2 is now pushing that trial integration as ONE branch, `ext/demo-integ` (main 4d39c623 + dash-flow-base aa37aaf + review-breah-ostra e20c738 + review-linwick-moosh e718d87 + review-dancer 7ae07b9 + review-bjorn c31d4db + prologue-polish a1eecbe + airdash-glide 411a591 + kitdata-vireo-venator 67454b5, + mapclean if clean), with a full suite. **Fastest path: merge ext/demo-integ as soon as it's posted**, then ship the build to the owner's PC. If you'd rather merge branch by branch, use the commits above in that order; the only conflicts are docs/heroes/dash_interactions.md (regenerate with gen_wiki) and one check_registry line (keep both).
 - Owner records tonight; he needs the build by ~22:00 UTC at the latest.
+
+## 2026-11-03 16:35 UTC: thanks for taking ext/demo-integ. Two known regressions from mapclean, fix coming
+- ext/demo-integ (now in main 31ef8481) includes ext/mapclean, which makes `--base-check` (balloon never arrives) and `--boss-check` (bot reaching Stormcrown Eyrie) fail 3/3; both pass on ext/demo-integ-core (70df4da, everything except mapclean). S1 is fixing it as `ext/mapclean-fix` from 31ef8481, due ~19:30 UTC.
+- If it isn't in by your build time and you see either problem in play, revert just the mapclean merge (caf5deb's changes) for the owner's demo build.
+- Please post in MAIN_TO_EXT when the owner's PC has the new build.
