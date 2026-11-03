@@ -35,6 +35,23 @@ Anchor does double damage on a foe over the abyss and adds 0.2s of stun (on top 
 Mismatch: the source's tiers 2 and 3 are each -2.5s on the Grapnel (-1.25s on the barge, -2.5s +20% damage +0.1s stun on the
 Anchor), and ours has one shared step, so rank 3 stands for the source's tiers 3 and 4 together.
 
+## Parity pass (owner 18:45, PARITY_BRIEF)
+
+Source (Kingpin) vs ours per slot, LMB first. [D] game data (supervive_kits.md), [F] footage (hero-ref/dredge.md,
+5 fps), [O] owner notes. The parity asserts are `_parity_gun` in `tools/dredge_combo_check.gd` ("parity gun ...");
+the rest are the existing asserts named in "Combinations".
+
+| Slot | Beat | Source | Ours | Status |
+|---|---|---|---|---|
+| LMB | animation | [F] 0041-0045, 0080: one-handed hip fire, a 1-frame white-hot muzzle flash, the barrel kicks up, the torso rocks back side-on, back on the aim in ~1 frame (0.2 s) | `dr_shot`: kick at 0.05 s (pitch back, yaw side-on, gun up), back on the aim by 0.24 s, settled 0.36 s, inside the 0.5 s cycle; a white muzzle flash | matches |
+| LMB | tracking | [F] he turns to the cursor and walks between shots | each volley is fanned on the cursor's direction at its shot; he walks on at the shared firing walk (0.8 of run) | matches ([D] has no firing slow for him; the shared rule stays) |
+| LMB | cadence | [F] shots 2-3 frames apart; card 0.5 s | a volley every 0.5 s while held | matches |
+| LMB | shape | [F] ~7 slugs in a ~30 degree fan (20 rested) that stop at ~3.5 bh whatever the cursor distance and hang as violet dots 0.2-0.4 s; two cone-edge lines, one aim line when idle | 7 slugs, 30 degrees + bloom to 15, stop at 6.3 m (cursor at 2 m asserted), hang 0.26 s as violet dots; the edge lines, folding to one line idle | matches |
+| RMB | all | [D] pierces terrain, first target (ally too), scoops wisps; [F] caster Grounded while reeling | as the source (item 31: height held from the throw) | matches |
+| E | all | [F] 0221-0236: wind-up, a hop ~1 bh forward, the slam at ~0.4 s, stun ~1.1 s; ~1.8x a volley | 0.38 s wind-up with the hop, stun 1.1 s, 25 against a 14 volley (1.8x) | matches |
+| Dash | all | [O] 23:40: short, fast, visible dashes in a row (not a blink) | 3.2 m in 0.16 s, a short gap between charges | matches the owner note |
+| X | all | [F] f22-f43: a 1.1 s charge behind a 105 degree fan, two waves 0.6 s apart; [O] item 36: a slow walk through it | as the source with the owner's walk | matches |
+
 ## Ultimate on X: Brass Broadside
 Built as its own ultimate on X (owner decision, SERVER_UPDATE6). It was never folded into another slot, so nothing is unfolded.
 - Cooldown 21s against the Grapnel's 12s (source 20.8s : 11.7s).

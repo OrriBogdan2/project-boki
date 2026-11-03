@@ -38,6 +38,23 @@ of 11.6% health for 2s; the Furnace Cloak's shield is 30% bigger. Mismatch: the 
 damage on the bolt (-0.75s on the ram, -2s and +25% on the cloak), and ours has one shared step, so rank 3 stands for the source's
 tiers 3 and 4 together and the in-between numbers differ.
 
+## Parity pass (owner 18:45, PARITY_BRIEF)
+
+Source (Felix) vs ours per slot, LMB first. [D] game data (supervive_kits.md, the wiki), [F] footage
+(hero-ref/linwick.md, 5 fps), [O] owner notes. Asserts: the "lance ..." rows of `--ashwick-combo-check` named in
+"Combinations".
+
+| Slot | Beat | Source | Ours | Status |
+|---|---|---|---|---|
+| LMB | animation | [F] 0021-0047: a one-frame cyan pilot at the nozzle, then the roar; the body barely moves, nozzle at the hip; the fire stops at once on release, the pilot staying | `as_lance`: braced at the hip, kicked back by the roar, bucking at 8 Hz while held; the cyan pilot for 0.2 s first; the stream snuffs within 0.08 s on release, `as_lance_end` recoils off the hose | matches |
+| LMB | tracking | [F] 0016: the stream lags a sweep and curves (puffs keep their own velocity) | puffs leave along the aim every 0.033 s and keep their velocity (half of his own carried), so a sweep bends the stream | matches |
+| LMB | cadence / reach | [F] ~4 bh past a close cursor; narrow at the nozzle, billowing at the end; [D] a hold, 0.35 s between uses | 7 m past any cursor, 0.5 -> 2.2 m wide, 10 ticks a second, 0.35 s relight after a release (not after a dash: item 51) | matches |
+| LMB | walk | [F] no slow visible at 5 fps; [D] the wiki's self-slow | 0.8 while firing, 0.6 for 0.35 s after | kept ([D] over [F]) |
+| RMB | all | [F] a white aim lane ~0.4 s, a quick forward arm thrust; [O] item 19: always flies its full range | `as_aim` / `as_shot`, the 14 m lane, always 14 m | matches the owner note |
+| E | all | [F] arms flung wide ~0.2 s, then the blast; [O] item 11: instant, centred on him | instant, centred, `as_cloak` arms flung wide | matches the owner note |
+| Dash | all | [F] head-first ~3.4 m in 0.33 s, stops on the first foe | 3.4 m in 0.28 s, stops on the first foe, flame skull | matches |
+| X | all | [F] f25-f139: low steerable flight ~7 bh/s, lava behind, recast lands; [O] item 20: a bit longer | 12.6 m/s for 1.8 s, steering 120 deg/s, carpet 5.2 s, recast lands | matches |
+
 ## Ultimate on X: Flue Flight
 The source's flight is back as its own ultimate on X (owner decision, SERVER_UPDATE6), so the rank-3 Soot Ram no longer lays the
 carpet: that fold would have duplicated the X ult, and the ram's rank 3 follows the owner's data (more damage, speed and a shield).

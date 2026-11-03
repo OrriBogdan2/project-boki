@@ -24,6 +24,7 @@ func run(main_node: Node) -> void:
 	await _slam_tell()
 	await _dash_moves()
 	await _glide_wins()
+	await _parity_gun()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
@@ -864,3 +865,59 @@ func _all() -> void:
 	)
 	m.queue_free()
 	await main.get_tree().process_frame
+
+## Parity pass (docs/heroes/dredge.md): the hold-to-fire gun against the footage (0040-0080): he walks between
+## shots (at the shared firing walk), each volley is fanned on the cursor's direction at its shot, the slugs stop
+## at 6.3 m whatever the cursor distance, and the recoil settles in ~0.2 s, inside the 0.5 s cycle.
+func _parity_gun() -> void:
+	var r: Array = ak.setup("dredge", 9.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var K: DredgeKit = P.ak
+	T.teleport(home + Vector3(-9.0, 0, 9.0))
+	var from := P.pos
+	var v0 := K.volleys
+	var t := 0.0
+	var heads: Array = []            # the mean flight direction of each volley, as it leaves
+	var reach := 0.0
+	var seen := {}
+	while t < 1.02:
+		var east := t < 0.5
+		ak.aim_at(P, P.pos + (Vector3(2.0, 0, 0) if east else Vector3(0, 0, -2.0)))
+		P.inp["fire"] = true
+		P.inp["move"] = Vector2(0, 1)
+		m.step(ak.DT)
+		t += ak.DT
+		var sum := Vector2.ZERO
+		for sd in m.shots:
+			if sd["by"] != P:
+				continue
+			var at: Vector3 = sd["pos"]
+			var st: Vector3 = sd["start"]
+			reach = maxf(reach, Vector2(at.x - st.x, at.z - st.z).length())
+			if not seen.has(int(sd["sid"])):
+				seen[int(sd["sid"])] = true
+				sum += (sd["vel"] as Vector2).normalized()
+		if sum.length() > 0.1:
+			heads.append(sum.normalized())
+	P.inp["fire"] = false
+	P.inp["move"] = Vector2.ZERO
+	var walk := P.flat_dist(from) / 1.02
+	ok(
+		"parity gun: he walks on while firing, at the shared firing walk (0.8), two or three volleys in 1s",
+		K.volleys - v0 >= 2 and walk >= P.base_speed * 0.8 * 0.9,
+		"%d volleys, %.1f m/s of %.1f" % [K.volleys - v0, walk, P.base_speed]
+	)
+	var turned: bool = heads.size() >= 2 and (heads[0] as Vector2).x > 0.9 and (heads[-1] as Vector2).y < -0.9
+	ok("parity gun: each volley is fanned on the cursor's direction at its shot (east, then north)", turned,
+			str(heads))
+	ok("parity gun: the slugs stop at 6.3 m with the cursor at 2 m", absf(reach - 6.3) < 0.5, "%.2f m" % reach)
+	var keys: Array = KMovesPair.MOVES["dr_shot"]["keys"]
+	ok(
+		"parity gun: the recoil kicks at 0.05s and is back on the aim by ~0.25s, inside the 0.5s cycle",
+		absf(float(keys[1][0]) - 0.05) < 0.01 and float(keys[-2][0]) <= 0.3 and float(keys[-1][0]) < 0.5,
+		"%.2f / %.2f / %.2f" % [float(keys[1][0]), float(keys[-2][0]), float(keys[-1][0])]
+	)
+	await ak.done(m)
