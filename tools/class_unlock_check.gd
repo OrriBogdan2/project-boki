@@ -1,14 +1,14 @@
 extends RefCounted
 ## --hunter-unlock-check (alias --class-unlock-check): Hunter unlocks and mastery (docs/decisions/0005,
 ## content/rules/class_unlock.json, content/rules/hunter_viewer.json).
-##   1. the data: Venator first, 3 starters and a pick of 1, one challenge per other Hunter with its tier,
+##   1. the data: Vex first, 3 starters and a pick of 1, one challenge per other Hunter with its tier,
 ##      3-5 mastery goals each that mix kinds, every stat measurable, the viewer's kit moves
 ##   2. mastery rewards are cosmetic only; gliders change no handling
-##   3. Venator is always owned; pick exactly 1 of exactly the 3 starters; challenge-only Hunters can't be
+##   3. Vex is always owned; pick exactly 1 of exactly the 3 starters; challenge-only Hunters can't be
 ##      picked
 ##   4. challenge progress makes a Hunter ready (never open by itself); mastery counts per Hunter
 ##   5. the feats HunterFeats records from the combat signals
-##   6. save migration keeps every Hunter a save had unlocked or played, and adds Venator
+##   6. save migration keeps every Hunter a save had unlocked or played, and adds Vex
 ##   7. the new-game flow (one card, then the egg pick) and the Hunter pick in the viewer, picking 1
 ##   8. the viewer cycling abilities on the real model, keys from the bindings
 ##   9. the Hunters screen: challenge progress, mastery, the glider pick, hold to unlock and the reveal
@@ -361,7 +361,7 @@ func _migration() -> void:
 	Save.d = old
 	ok(ClassUnlock.all_open() and Arch.ids().all(func(a): return ClassUnlock.status(String(a)) == "open")
 			and not ClassUnlock.needs_starters(), "all twelve open, no starter pick")
-	# a save from the pick-2-of-4 flow keeps both picks and gains Venator
+	# a save from the pick-2-of-4 flow keeps both picks and gains Vex
 	new_save()
 	Save.d["classes"] = {"all": false, "picks": ["archer", "thief"], "open": ["archer", "thief"], "told": 0,
 			"reveal": [], "seen": ["archer", "thief"], "stats": {}, "hunters": {}}
@@ -595,7 +595,7 @@ func _save_strip(frames: Array, path: String) -> void:
 # ---------------------------------------------------------------- 9. the Hunters screen and the hold
 func _home(tree: SceneTree) -> void:
 	new_save(["archer"])
-	# some play: Zedran's challenge done (ready to hold), Dancer's half way, Pin's ring goal done
+	# some play: Zedran's challenge done (ready to hold), Sable's half way, Pin's ring goal done
 	var jt := int(ClassUnlock.challenge("juggernaut")["target"])
 	var gt := int(ClassUnlock.challenge("thief")["target"])
 	Game.apply_result(result("archer", true, {"slams": jt, "air_hits": gt / 2, "rings": 8, "stuns": 5}))

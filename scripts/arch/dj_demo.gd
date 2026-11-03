@@ -1,6 +1,6 @@
 class_name DJDemo
 extends RefCounted
-## Animation strips of Dancer (thief) and Juggernaut for the owner's review (used by ArenaDemo):
+## Animation strips of Sable (thief) and Juggernaut for the owner's review (used by ArenaDemo):
 ## --arena-demo=anim_<move> --arena-shot=<png>. Each is 6 frames: anticipation, release, follow-through,
 ## recovery. The move is triggered at 0.5s unless noted. --arena-demo=dj_<moment> is one frame at the
 ## moment itself (STILLS); add --demo-zoom=1.0 for the gameplay zoom.
@@ -49,7 +49,7 @@ const STILLS := {
 	"pull_steer": ["juggernaut", Vector3(-10.0, 0, 0)],
 }
 
-const STRIP_SLOW := 0.15     # Engine.time_scale while Zedran's strips and Dancer's dash strips play
+const STRIP_SLOW := 0.15     # Engine.time_scale while Zedran's strips and Sable's dash strips play
 
 static func at(t: float, dt: float, when: float) -> bool:
 	return ArenaDemo._at(t, dt, when)

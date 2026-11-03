@@ -1,6 +1,9 @@
 {
 	"id": "ostra",
-	"name": "Ostra",
+	"title": "Void Jester",
+	"base_name": "Ostra",
+	"gender": "male",
+	"personality": "A sinister, grinning jester who floats a little above the ground and plays with the dark.\nMenacing and gleeful, he treats every fight as a joke only he gets.",
 	"weight": "medium",
 	"color": "#7fe0d0",
 	"fantasy": "The lamplighter who floats. Pulls the fight to her, then lets it fall in.",

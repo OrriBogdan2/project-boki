@@ -1,6 +1,6 @@
 class_name KMovesVV
 extends RefCounted
-## Keyed full-body moves of Vireo (mage) and Venator (gunslinger): same format and channels as
+## Keyed full-body moves of Vireo (mage) and Vex (gunslinger): same format and channels as
 ## HunterAnim.KMOVES, looked up by HunterAnim.km_sample. Each is timed to the reference sheet's beats
 ## (briefs/hero-ref/vireo.md, venator.md; 1 frame = 0.2 s there): anticipation, an exaggerated key pose
 ## on the release (squash or stretch), an overshoot past it, then the settle. fl / fr place a free hand
@@ -140,7 +140,7 @@ const MOVES := {
 			"fl": Vector3(-0.15, -0.5, -0.3), "hw": 1.0, "wo": Vector3(0.12, -0.35, -0.25), "gp": 0.7}],
 		[0.3, {"p": -0.1, "lift": 0.04, "sq": -0.15, "fl": Vector3(-0.4, 0.15, 0.0), "hw": 0.7}],
 		[0.5, {}]]},
-	# ---------------------------------------------------------------- Venator
+	# ---------------------------------------------------------------- Vex
 	# a rifle round: a 0.03 s snap of the shoulder kick, the muzzle flipped up, the stock pushed back
 	"gunslinger_lmb": {"keys": [
 		[0.00, {"p": 0.02}],

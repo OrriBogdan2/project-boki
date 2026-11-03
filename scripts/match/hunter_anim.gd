@@ -73,7 +73,7 @@ const ARCH_STANCE := {
 		"knee": 0.22, "lean": 0.14, "width": 0.1, "bounce": 0.4, "breath": 2.4, "arm": 1.25, "cadence": 1.4},
 	"dolm": {"lean": 0.1, "width": 0.2, "knee": 0.3, "bounce": 0.0, "breath": 1.6, "arm": 0.7},
 	"ostra": {"lean": 0.0, "width": 0.05, "knee": 0.05, "bounce": 0.0, "breath": 1.4, "arm": 0.8},
-	# cadence scales the step rate, stride the step length: Linwick scurries in short quick steps, Dredge
+	# cadence scales the step rate, stride the step length: Cinder scurries in short quick steps, Dredge
 	# plants wide, slower, longer ones (hero-ref "Body, scale and movement feel")
 	"ashwick": {
 		"knee": 0.2, "lean": 0.02, "width": 0.12, "bounce": 0.6, "breath": 2.4, "arm": 0.9, "cadence": 1.8,
@@ -107,7 +107,7 @@ const HOLDS := {
 	"palm": {
 		"pos": Vector3(0.14, -0.25, -0.1), "low": Vector2.ZERO, "gr": Vector3.ZERO, "gl": Vector3.INF,
 		"kick": 0.0, "push": 0.0, "shake": 0.0},
-	# a gauntlet on each fist (Breah): carried like a gun, but it rides the hand wherever a move sends it
+	# a gauntlet on each fist (Tarek): carried like a gun, but it rides the hand wherever a move sends it
 	"fist": {
 		"pos": Vector3(0.14, -0.2, -0.26), "low": Vector2(-0.35, 0.2), "gr": Vector3(0, -0.02, 0.0), "gl": Vector3.INF,
 		"kick": 0.1, "push": 0.05, "shake": 0.0, "fist": true
@@ -261,7 +261,7 @@ var slam_k := 0.0
 var was_rolling := false
 var dash_t := 9.0
 var dash_kind := ""
-const SKATE_LEAN_MAX := 0.4    # radians: the most Tamsin's skate leans forward, all leans together
+const SKATE_LEAN_MAX := 0.4    # radians: the most Claire's skate leans forward, all leans together
 var dash_loc := Vector2(0, -1) # dash direction in the model's own frame (x right, y back)
 var dash_k := 0.0
 

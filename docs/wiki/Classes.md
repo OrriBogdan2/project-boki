@@ -51,37 +51,37 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 | Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| [Dancer](Class-Dancer.md) | 124 / 1 | Arc Bolts | Marks | Vault | Bola | Shadow Knife | none (Boki Merge) |
-| [Pin](Class-Pin.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Merge) |
-| [Vireo](Class-Vireo.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Merge) |
-| [Vex](Class-Vex.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
-| [Zedran](Class-Zedran.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Merge) |
-| [Bjorn](Class-Bjorn.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Merge) |
-| [Dredge](Class-Dredge.md) | 193 / 2 | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |
-| [Linwick](Class-Linwick.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Merge) |
-| [Moosh Moosh](Class-Moosh-Moosh.md) | 145 / 1 | Ember Cast | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
-| [Claire](Class-Claire.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Merge) |
-| [Breah](Class-Breah.md) | 145 / 1 | Rubble Fists | Molten Guard | Rubble Leap | Quakefall | Stone Row | none (Boki Merge) |
-| [Ostra](Class-Ostra.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Merge) |
+| [Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Bolts | Marks | Vault | Bola | Shadow Knife | none (Boki Merge) |
+| [Dark Archer](Class-Dark-Archer.md) | 124 / 1 | Longbow | Focus | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Merge) |
+| [Storm Slayer](Class-Storm-Slayer.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Merge) |
+| [Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
+| [Arena King](Class-Arena-King.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Merge) |
+| [Frozen Bulwark](Class-Frozen-Bulwark.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Merge) |
+| [Broken Abomination](Class-Broken-Abomination.md) | 193 / 2 | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |
+| [Mad Pyromancer](Class-Mad-Pyromancer.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Merge) |
+| [Fox Cub](Class-Fox-Cub.md) | 145 / 1 | Ember Cast | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
+| [Icy Dancer](Class-Icy-Dancer.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Merge) |
+| [Rock Elementalist](Class-Rock-Elementalist.md) | 145 / 1 | Rubble Fists | Molten Guard | Rubble Leap | Quakefall | Stone Row | none (Boki Merge) |
+| [Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Merge) |
 
 ### How Hunters unlock
 
-Every save starts with Vex. In the new-game flow you pick 1 of 3 more (Zedran, Pin, Linwick). Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for 1.6s, and letting go early cancels it. Tiers: easy is about 1-2 expeditions, medium a handful of expeditions, hard real effort, once other Hunters are open. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.
+Every save starts with Hired Gun. In the new-game flow you pick 1 of 3 more (Arena King, Dark Archer, Mad Pyromancer). Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for 1.6s, and letting go early cancels it. Tiers: easy is about 1-2 expeditions, medium a handful of expeditions, hard real effort, once other Hunters are open. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.
 
 | Hunter | Tier | Challenge | Target |
 |---|---|---|---|
-| [Dancer](Class-Dancer.md) | medium | Land 12 hits while in the air | 12 |
-| [Pin](Class-Pin.md) | pick at the start, else easy | Stun 4 enemies | 4 |
-| [Vireo](Class-Vireo.md) | medium | Stagger 6 monsters with abilities | 6 |
-| [Vex](Class-Vex.md) | yours from the start | none | - |
-| [Zedran](Class-Zedran.md) | pick at the start, else easy | Knock 3 enemies into walls | 3 |
-| [Bjorn](Class-Bjorn.md) | medium | Knock down 2 hunters while under half health | 2 |
-| [Dredge](Class-Dredge.md) | medium | Make it out carrying 8 items | 8 |
-| [Linwick](Class-Linwick.md) | pick at the start, else easy | Hit 3 enemies at once with one ability | 1 |
-| [Moosh Moosh](Class-Moosh-Moosh.md) | hard | Revive 4 teammates, once 6 Hunters are open | 4 |
-| [Claire](Class-Claire.md) | medium | Slow 20 enemies | 20 |
-| [Breah](Class-Breah.md) | hard | Hit 3 enemies at once with one ability, 5 times, once 6 Hunters are open | 5 |
-| [Ostra](Class-Ostra.md) | hard | Knock down 3 hunters while merged with your Boki, once 8 Hunters are open | 3 |
+| [Silver Thief](Class-Silver-Thief.md) | medium | Land 12 hits while in the air | 12 |
+| [Dark Archer](Class-Dark-Archer.md) | pick at the start, else easy | Stun 4 enemies | 4 |
+| [Storm Slayer](Class-Storm-Slayer.md) | medium | Stagger 6 monsters with abilities | 6 |
+| [Hired Gun](Class-Hired-Gun.md) | yours from the start | none | - |
+| [Arena King](Class-Arena-King.md) | pick at the start, else easy | Knock 3 enemies into walls | 3 |
+| [Frozen Bulwark](Class-Frozen-Bulwark.md) | medium | Knock down 2 hunters while under half health | 2 |
+| [Broken Abomination](Class-Broken-Abomination.md) | medium | Make it out carrying 8 items | 8 |
+| [Mad Pyromancer](Class-Mad-Pyromancer.md) | pick at the start, else easy | Hit 3 enemies at once with one ability | 1 |
+| [Fox Cub](Class-Fox-Cub.md) | hard | Revive 4 teammates, once 6 Hunters are open | 4 |
+| [Icy Dancer](Class-Icy-Dancer.md) | medium | Slow 20 enemies | 20 |
+| [Rock Elementalist](Class-Rock-Elementalist.md) | hard | Hit 3 enemies at once with one ability, 5 times, once 6 Hunters are open | 5 |
+| [Void Jester](Class-Void-Jester.md) | hard | Knock down 3 hunters while merged with your Boki, once 8 Hunters are open | 3 |
 
 ### Mastery
 
@@ -89,56 +89,56 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 
 | Hunter | Goal | Target | Reward |
 |---|---|---|---|
-| Dancer | Land 25 hits while in the air | 25 | Colourway: Midnight Silk |
-| Dancer | Stun 6 enemies | 6 | Emote: Twirl |
-| Dancer | Make it out carrying 6 items | 6 | Title: Light Fingers |
-| Dancer | Knock down a hunter while merged | 1 | Glider: Dusk Moth |
-| Pin | Stun 12 enemies | 12 | Colourway: Fletcher Green |
-| Pin | Your Boki lands 40 hits | 40 | Emote: Quiver Spin |
-| Pin | Fly through 8 air rings | 8 | Glider: Paper Crane |
-| Pin | Make it out after being knocked down | 1 | Title: Last Arrow |
-| Vireo | Stagger 10 monsters with abilities | 10 | Colourway: Storm Violet |
-| Vireo | Land 15 hits while in the air | 15 | Trail: Static |
-| Vireo | Fly through 12 air rings | 12 | Banner: Thunderhead |
-| Vireo | Your Boki lands 50 hits | 50 | Title: Live Wire |
-| Vex | Land 30 hits from 12 m or more | 30 | Colourway: Dust Rider |
-| Vex | Revive 2 teammates | 2 | Emote: Hat Tip |
-| Vex | Fly through 10 air rings | 10 | Trail: Spent Brass |
-| Vex | Make it out of 3 expeditions | 3 | Title: Long Shot |
-| Zedran | Knock 10 enemies into walls | 10 | Colourway: Forge Red |
-| Zedran | Knock down 2 hunters while merged | 2 | Emote: Chest Thump |
-| Zedran | Open 8 chests | 8 | Banner: Broken Chain |
-| Zedran | Make it out after being knocked down | 1 | Title: the Unbowed |
-| Bjorn | Revive 3 teammates | 3 | Colourway: Oathsteel |
-| Bjorn | Knock 8 enemies into walls | 8 | Emote: Shield Rap |
-| Bjorn | Make it out after being knocked down | 1 | Title: Still Standing |
-| Bjorn | Open 6 chests | 6 | Banner: Iron Oath |
-| Dredge | Make it out carrying 10 items | 10 | Glider: Patchwork Wing |
-| Dredge | Stun 10 enemies | 10 | Colourway: Rust and Brine |
-| Dredge | Open 10 chests | 10 | Title: Salvager |
-| Dredge | Bring 2 wild Boki home | 2 | Emote: Heave Ho |
-| Linwick | Set 25 enemies burning | 25 | Colourway: Coal and Cinder |
-| Linwick | Hit 3 enemies at once with one ability, 3 times | 3 | Trail: Ash Drift |
-| Linwick | Open 6 chests | 6 | Banner: Lantern Flame |
-| Linwick | Scan a wild Boki and bring it home | 1 | Glider: Ember Leaf |
-| Moosh Moosh | Revive 5 teammates | 5 | Skin: Moonbeam |
-| Moosh Moosh | Root 10 enemies | 10 | Emote: Big Hug |
-| Moosh Moosh | Bring 3 wild Boki home | 3 | Glider: Puffball Wings |
-| Moosh Moosh | Make it out of 5 expeditions | 5 | Title: Wisp Keeper |
-| Moosh Moosh | Open 8 chests | 8 | Banner: Moon Lantern |
-| Claire | Slow 40 enemies | 40 | Colourway: Hoarfrost |
-| Claire | Fly through 10 air rings | 10 | Glider: Frost Kite |
-| Claire | Revive 2 teammates | 2 | Emote: Snow Angel |
-| Claire | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
-| Breah | Hit 3 enemies at once with one ability, 5 times | 5 | Skin: Slate and Moss |
-| Breah | Knock 12 enemies into walls | 12 | Emote: Ground Pound |
-| Breah | Open 10 chests | 10 | Glider: Slate Kite |
-| Breah | Make it out after being knocked down, twice | 2 | Title: Bedrock |
-| Ostra | Knock down 4 hunters while merged | 4 | Skin: Void Bloom |
-| Ostra | Stun 15 enemies | 15 | Trail: Lantern Motes |
-| Ostra | Make it out carrying 8 items | 8 | Title: Swapkeeper |
-| Ostra | Fly through 15 air rings | 15 | Glider: Lantern Moth |
-| Ostra | Revive 3 teammates | 3 | Banner: Tidelight |
+| Silver Thief | Land 25 hits while in the air | 25 | Colourway: Midnight Silk |
+| Silver Thief | Stun 6 enemies | 6 | Emote: Twirl |
+| Silver Thief | Make it out carrying 6 items | 6 | Title: Light Fingers |
+| Silver Thief | Knock down a hunter while merged | 1 | Glider: Dusk Moth |
+| Dark Archer | Stun 12 enemies | 12 | Colourway: Fletcher Green |
+| Dark Archer | Your Boki lands 40 hits | 40 | Emote: Quiver Spin |
+| Dark Archer | Fly through 8 air rings | 8 | Glider: Paper Crane |
+| Dark Archer | Make it out after being knocked down | 1 | Title: Last Arrow |
+| Storm Slayer | Stagger 10 monsters with abilities | 10 | Colourway: Storm Violet |
+| Storm Slayer | Land 15 hits while in the air | 15 | Trail: Static |
+| Storm Slayer | Fly through 12 air rings | 12 | Banner: Thunderhead |
+| Storm Slayer | Your Boki lands 50 hits | 50 | Title: Live Wire |
+| Hired Gun | Land 30 hits from 12 m or more | 30 | Colourway: Dust Rider |
+| Hired Gun | Revive 2 teammates | 2 | Emote: Hat Tip |
+| Hired Gun | Fly through 10 air rings | 10 | Trail: Spent Brass |
+| Hired Gun | Make it out of 3 expeditions | 3 | Title: Long Shot |
+| Arena King | Knock 10 enemies into walls | 10 | Colourway: Forge Red |
+| Arena King | Knock down 2 hunters while merged | 2 | Emote: Chest Thump |
+| Arena King | Open 8 chests | 8 | Banner: Broken Chain |
+| Arena King | Make it out after being knocked down | 1 | Title: the Unbowed |
+| Frozen Bulwark | Revive 3 teammates | 3 | Colourway: Oathsteel |
+| Frozen Bulwark | Knock 8 enemies into walls | 8 | Emote: Shield Rap |
+| Frozen Bulwark | Make it out after being knocked down | 1 | Title: Still Standing |
+| Frozen Bulwark | Open 6 chests | 6 | Banner: Iron Oath |
+| Broken Abomination | Make it out carrying 10 items | 10 | Glider: Patchwork Wing |
+| Broken Abomination | Stun 10 enemies | 10 | Colourway: Rust and Brine |
+| Broken Abomination | Open 10 chests | 10 | Title: Salvager |
+| Broken Abomination | Bring 2 wild Boki home | 2 | Emote: Heave Ho |
+| Mad Pyromancer | Set 25 enemies burning | 25 | Colourway: Coal and Cinder |
+| Mad Pyromancer | Hit 3 enemies at once with one ability, 3 times | 3 | Trail: Ash Drift |
+| Mad Pyromancer | Open 6 chests | 6 | Banner: Lantern Flame |
+| Mad Pyromancer | Scan a wild Boki and bring it home | 1 | Glider: Ember Leaf |
+| Fox Cub | Revive 5 teammates | 5 | Skin: Moonbeam |
+| Fox Cub | Root 10 enemies | 10 | Emote: Big Hug |
+| Fox Cub | Bring 3 wild Boki home | 3 | Glider: Puffball Wings |
+| Fox Cub | Make it out of 5 expeditions | 5 | Title: Wisp Keeper |
+| Fox Cub | Open 8 chests | 8 | Banner: Moon Lantern |
+| Icy Dancer | Slow 40 enemies | 40 | Colourway: Hoarfrost |
+| Icy Dancer | Fly through 10 air rings | 10 | Glider: Frost Kite |
+| Icy Dancer | Revive 2 teammates | 2 | Emote: Snow Angel |
+| Icy Dancer | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
+| Rock Elementalist | Hit 3 enemies at once with one ability, 5 times | 5 | Skin: Slate and Moss |
+| Rock Elementalist | Knock 12 enemies into walls | 12 | Emote: Ground Pound |
+| Rock Elementalist | Open 10 chests | 10 | Glider: Slate Kite |
+| Rock Elementalist | Make it out after being knocked down, twice | 2 | Title: Bedrock |
+| Void Jester | Knock down 4 hunters while merged | 4 | Skin: Void Bloom |
+| Void Jester | Stun 15 enemies | 15 | Trail: Lantern Motes |
+| Void Jester | Make it out carrying 8 items | 8 | Title: Swapkeeper |
+| Void Jester | Fly through 15 air rings | 15 | Glider: Lantern Moth |
+| Void Jester | Revive 3 teammates | 3 | Banner: Tidelight |
 
 ### Run levels
 

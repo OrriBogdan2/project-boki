@@ -1,6 +1,6 @@
 class_name RimewrightKit
 extends ArchKit
-## Tamsin, the Rimewright (light ice controller). docs/heroes/rimewright.md. Copies her source as it
+## Claire, the Rimewright (light ice controller). docs/heroes/rimewright.md. Copies her source as it
 ## plays: ice damage, control and a wall, no healing or shields for the squad.
 ## Passive Hoarfrost: damage Chills; a knock on a Chilled foe, or 8 darts on one foe, Shatters them.
 ## LMB Ice Dart: hold for a steady stream of slow homing shards that bow out and curve onto the foe

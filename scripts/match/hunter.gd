@@ -3174,7 +3174,7 @@ var _anim_dt := 0.0
 var _anim_n := 0
 const DODGE_ANIM := {"light": "phase", "medium": "roll", "heavy": "charge"}
 
-## The dodge pose HunterAnim plays. Tamsin's skate has its own, so the light-dash lean does not stack
+## The dodge pose HunterAnim plays. Claire's skate has its own, so the light-dash lean does not stack
 ## on the skate move's lean and tip her over.
 func _dash_anim_kind() -> String:
 	if not strike_at_end.is_empty():

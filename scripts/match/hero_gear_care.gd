@@ -3,7 +3,7 @@ class_name HeroGearCare
 ##   Moosh Moosh (tender, small): a courier. A flap cap, a small satchel and bedroll low on the back, a
 ##   long ember-tipped tail that swings as she scurries, ember light cupped in both palms (she holds
 ##   nothing), a rope coil, a tin cup and a cream poncho with an ochre hem.
-##   Tamsin (rimewright, light): a rink-keeper. An ear-flap cap with a fur band, a huge fluffy collar,
+##   Claire (rimewright, light): a rink-keeper. An ear-flap cap with a fur band, a huge fluffy collar,
 ##   two long teal scarf tails, blade skates, a cluster of ice shards on one shoulder and a quilted
 ##   short coat. Neither design borrows from any hero in another game.
 
@@ -115,7 +115,7 @@ static func _palms(c: Dictionary) -> void:
 		var glow := _p(hand, Models.sphere(0.05, 8), Models.glow_mat(Color("ffd890", 0.85)), Vector3(0, -0.05, -0.04))
 		glow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
-# ------------------------------------------------------------------------------------------ Tamsin
+# ------------------------------------------------------------------------------------------ Claire
 static func _rime(c: Dictionary) -> void:
 	var m: Dictionary = c["m"]
 	var t: Node3D = c["torso"]

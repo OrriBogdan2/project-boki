@@ -1,20 +1,20 @@
 class_name HeroGearPair
 extends RefCounted
-## The gear of Dredge and Linwick (id ashwick) (HeroGear.dress hands these two over; same contract, see hero_gear.gd).
+## The gear of Dredge and Cinder (id ashwick) (HeroGear.dress hands these two over; same contract, see hero_gear.gd).
 ##
 ## Dredge, the harbour hauler: a round brass diving-bell helm with a single dark porthole, a heavy
 ## ochre slicker, a big rope drum on the left shoulder (the team colour), a cross harness, a steel
 ## anchor on the back and rubber gauntlets. From the match camera: a brass ball, one huge wound drum.
-## Linwick, the flue sweep: a tall sooty stovepipe hat with a brass band and team-colour cloth, cyan
+## Cinder, the flue sweep: a tall sooty stovepipe hat with a brass band and team-colour cloth, cyan
 ## goggles, a long sooty tailcoat, a leather bellows pack with a brass pipe over the shoulder and a
 ## lantern at the hip. From the match camera: a tall black chimney of a hat and a pleated pack.
 
 const HC := Vector3(0, 0.86, 0)
 
-## Each hero's body against the class: Linwick small and round (0.76 of a heavy, a little broad), Dredge
+## Each hero's body against the class: Cinder small and round (0.76 of a heavy, a little broad), Dredge
 ## as tall as a heavy but 1.3x as broad across the chest and shoulders (hero-ref body sections).
 ## Neither sets a nameplate height (no plate_offset in their archetype JSON): both sheets measure the
-## shared height (the plate floats clear of Linwick's hat and touches Dredge's helm, as in the source).
+## shared height (the plate floats clear of Cinder's hat and touches Dredge's helm, as in the source).
 const BODY := {
 	"ashwick": {"size": 0.76, "bulk": 1.05}, "dredge": {"size": 1.0, "bulk": 1.3}
 }

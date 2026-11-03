@@ -213,7 +213,15 @@ def kname(kid):
 
 # ------------------------------------------------------------------ classes
 def class_page_name(aid):
-    return "Class-" + ARCH[aid]["name"].replace(" ", "-")
+    return "Class-" + ARCH[aid]["title"].replace(" ", "-")
+
+def class_profile(d):
+    gender = "a robot" if d["gender"] == "robot" else d["gender"]
+    return table(["", ""], [
+        ["Class title", d["title"]],
+        ["Base character", "%s, %s" % (d["base_name"], gender)],
+        ["Personality", d["personality"].replace("\n", " ")],
+    ])
 
 def gen_classes():
     xp = gd_const("match/hunter.gd", "XP_TO") or []
@@ -224,7 +232,7 @@ def gen_classes():
         d = ARCH.get(aid)
         if not d: continue
         cs = CLASSES.get(d["weight"], {})
-        rows.append([link(class_page_name(aid), d["name"]), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
+        rows.append([link(class_page_name(aid), d["title"]), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
                      d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none (Boki Merge)"])
     cu = json.load(open(os.path.join(ROOT, "content", "rules", "class_unlock.json"), encoding="utf-8"))
     kinds = cu["reward_kinds"]
@@ -236,13 +244,13 @@ def gen_classes():
         when = "pick at the start, else " if aid in cu["starters"] else ""
         after = ", once %d Hunters are open" % ch["after"] if ch.get("after") else ""
         if aid == cu["first"]:
-            cu_rows.append([link(class_page_name(aid), ARCH[aid]["name"]), "yours from the start", "none", "-"])
+            cu_rows.append([link(class_page_name(aid), ARCH[aid]["title"]), "yours from the start", "none", "-"])
         else:
-            cu_rows.append([link(class_page_name(aid), ARCH[aid]["name"]), when + ch.get("tier", "?"), ch.get("text", "") + after, num(ch.get("target", "?"))])
+            cu_rows.append([link(class_page_name(aid), ARCH[aid]["title"]), when + ch.get("tier", "?"), ch.get("text", "") + after, num(ch.get("target", "?"))])
         for g in cu["mastery"].get(aid, []):
-            m_rows.append([ARCH[aid]["name"], g["text"], num(g["target"]), "%s: %s" % (kinds.get(g["reward"]["kind"], g["reward"]["kind"]), g["reward"]["name"])])
-    starters = ", ".join(ARCH[a]["name"] for a in cu["starters"] if a in ARCH)
-    unlock = "### How Hunters unlock\n\nEvery save starts with %s. In the new-game flow you pick %d of %d more (%s). " % (ARCH[cu["first"]]["name"], cu["starter_picks"], len(cu["starters"]), starters)
+            m_rows.append([ARCH[aid]["title"], g["text"], num(g["target"]), "%s: %s" % (kinds.get(g["reward"]["kind"], g["reward"]["kind"]), g["reward"]["name"])])
+    starters = ", ".join(ARCH[a]["title"] for a in cu["starters"] if a in ARCH)
+    unlock = "### How Hunters unlock\n\nEvery save starts with %s. In the new-game flow you pick %d of %d more (%s). " % (ARCH[cu["first"]]["title"], cu["starter_picks"], len(cu["starters"]), starters)
     unlock += "Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for %s, and letting go early cancels it. " % secs(cu.get("hold_s", 1.6))
     unlock += "Tiers: easy is %s, medium %s, hard %s. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.\n\n" % (cu["tiers"]["easy"], cu["tiers"]["medium"], cu["tiers"]["hard"])
     unlock += table(["Hunter", "Tier", "Challenge", "Target"], cu_rows)
@@ -264,6 +272,7 @@ def gen_classes():
         if not d: continue
         c = d.get("card", {})
         cs = CLASSES.get(d["weight"], {})
+        block(class_page_name(aid) + ".md", "profile", class_profile(d))
         b = []
         b.append(table(["", ""], [
             ["Body", "%s health, %s m/s, %s dash charge%s" % (num(cs.get("hp", "?")), num(cs.get("speed", "?")), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
@@ -443,7 +452,7 @@ def gen_gear():
     rows = []
     for wid, w in WEAPONS.items():
         p = w.get("primary", {})
-        users = [ARCH[a]["name"] for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
+        users = [ARCH[a]["title"] for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
         rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p.get("mag", "")), secs(p.get("reload", "")), "%sm" % num(p.get("range", "")), p.get("desc", "")])
     body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (Zedran's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
     body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Reload", "Range", "Notes"], rows)

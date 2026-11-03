@@ -37,7 +37,7 @@ static func weight(id: String) -> String:
 	return String(def(id).get("weight", ""))
 
 static func name_of(id: String) -> String:
-	return String(def(id).get("name", id.capitalize()))
+	return String(def(id).get("title", id.capitalize()))
 
 ## The Hunter's display name, or "Hunter" for a body with no Hunter kit (dummies, old saves).
 static func label(id: String) -> String:

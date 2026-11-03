@@ -1,9 +1,9 @@
 shader_type spatial;
-// Linwick's lava carpet (Flue Flight, LDFx.lava). Alpha-blended, not additive, so the dark charred rim and the
+// Cinder's lava carpet (Flue Flight, LDFx.lava). Alpha-blended, not additive, so the dark charred rim and the
 // deep orange read as colour on bright ground instead of washing out to beige; only the hot cracks glow.
 // UV.x runs along the strip, UV.y across; life 0 -> 1 over the carpet's 4s; progress is the strip length (m).
 render_mode unshaded, shadows_disabled, depth_draw_never, blend_mix, cull_disabled, fog_disabled;
-uniform vec4 color : source_color = vec4(1.0, 0.48, 0.16, 1.0);    // the molten body (Linwick's orange)
+uniform vec4 color : source_color = vec4(1.0, 0.48, 0.16, 1.0);    // the molten body (Cinder's orange)
 uniform vec4 color2 : source_color = vec4(0.29, 0.07, 0.22, 1.0);  // the charred rim
 uniform float life = 0.0;
 uniform float progress = 1.0;

@@ -11,18 +11,18 @@ static var _cache := {}
 ## The six archetypes, two per weight class (docs/ARCHETYPES.md). Until the archetype system exists
 ## each class wears its default; any of the six can be asked for (galleries, the creator preview).
 const ARCHES := {
-	"thief": {"name": "Dancer", "cls": "light"},
-	"archer": {"name": "Pin", "cls": "light"},
-	"mage": {"name": "Vireo", "cls": "light"},
-	"gunslinger": {"name": "Vex", "cls": "medium"},
-	"juggernaut": {"name": "Zedran", "cls": "heavy"},
-	"bulwark": {"name": "Bjorn", "cls": "heavy"},
-	"dredge": {"name": "Dredge", "cls": "heavy"},
-	"ashwick": {"name": "Linwick", "cls": "heavy"},
-	"tender": {"name": "Moosh Moosh", "cls": "medium"},
-	"rimewright": {"name": "Claire", "cls": "light"},
-	"dolm": {"name": "Breah", "cls": "medium"},
-	"ostra": {"name": "Ostra", "cls": "medium"},
+	"thief": {"cls": "light"},
+	"archer": {"cls": "light"},
+	"mage": {"cls": "light"},
+	"gunslinger": {"cls": "medium"},
+	"juggernaut": {"cls": "heavy"},
+	"bulwark": {"cls": "heavy"},
+	"dredge": {"cls": "heavy"},
+	"ashwick": {"cls": "heavy"},
+	"tender": {"cls": "medium"},
+	"rimewright": {"cls": "light"},
+	"dolm": {"cls": "medium"},
+	"ostra": {"cls": "medium"},
 }
 const ARCH_ORDER := ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark", "dredge", "ashwick", "tender", "rimewright", "dolm", "ostra"]
 const ARCH_DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut"}

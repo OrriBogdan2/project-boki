@@ -1,6 +1,6 @@
 class_name LDFx
 extends Node3D
-## Linwick's and Dredge's own effects, pooled (one node per match, LDFx.of(m)). Every node is made once
+## Cinder's and Dredge's own effects, pooled (one node per match, LDFx.of(m)). Every node is made once
 ## and reused; nothing is created per frame. One shader (shaders/ld_fx.gdshader, a mode per look) plus
 ## the see-through rope shader (shaders/ld_rope.gdshader).
 ##

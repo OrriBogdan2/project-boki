@@ -1,7 +1,7 @@
 class_name ClassUnlock
 extends RefCounted
 ## Hunter unlocks and mastery (docs/decisions/0005; player-facing these are "Hunters", internally
-## archetypes and the save key "classes"). A new save owns the first Hunter (Venator, also the tutorial
+## archetypes and the save key "classes"). A new save owns the first Hunter (Vex, also the tutorial
 ## Hunter) and picks 1 of 3 starters in the new-game flow. The 2 starters it did not pick are easy
 ## challenges. Every other Hunter opens through its own challenge (content/rules/class_unlock.json "unlock"), counted
 ## across every expedition whoever you play. A done challenge never opens a Hunter by itself: it is

@@ -222,6 +222,7 @@ func _info(col: Color) -> Control:
 	var names := UI.vbox(2)
 	names.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	names.add_child(UI.title(Arch.name_of(id), 30, col))
+	names.add_child(HeroTitle.intro_block(id, 390.0))
 	names.add_child(UI.label(stat_line(id), 13, UI.MUTED))
 	head.add_child(names)
 	v.add_child(head)

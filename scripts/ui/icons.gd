@@ -121,7 +121,7 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 			O.call(0.82, 0.0, 0.18)
 			F.call([[-0.3, 0.25], [-0.05, 0.25], [-0.15, 0.65], [-0.4, 0.65]])
 		"arc_bolts":
-			# Dancer's bolts: a four-point chakram with a comet tail
+			# Sable's bolts: a four-point chakram with a comet tail
 			F.call([[0.35, -0.75], [0.48, -0.32], [0.9, -0.2], [0.48, -0.08], [0.35, 0.35], [0.22, -0.08], [-0.2, -0.2],
 					[0.22, -0.32]])
 			L.call([[0.05, -0.05], [-0.85, 0.65]], maxf(1.5, s * 0.07))

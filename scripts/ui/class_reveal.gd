@@ -83,6 +83,8 @@ func _ready() -> void:
 	var nm := UI.title(Arch.name_of(id), 54, col)
 	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(nm)
+	var origin := HeroTitle.intro_block(id, 520.0, true)
+	v.add_child(origin)
 	var wl := UI.label(HunterViewer.stat_line(id), UI.T_SMALL, UI.MUTED)
 	wl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(wl)
@@ -107,7 +109,7 @@ func _ready() -> void:
 	var tw := create_tween().set_parallel(true)
 	tw.tween_property(tex, "modulate:a", 1.0, 0.25)
 	tw.tween_property(tex, "scale", Vector2.ONE, 0.55).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	for c in [kick, nm, wl, fan, loop, btns]:
+	for c in [kick, nm, origin, wl, fan, loop, btns]:
 		(c as Control).modulate.a = 0.0
 		tw.tween_property(c, "modulate:a", 1.0, 0.4).set_delay(0.35)
 	play.call_deferred("grab_focus")

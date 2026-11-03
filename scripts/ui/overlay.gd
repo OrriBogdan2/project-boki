@@ -123,6 +123,10 @@ func shot_demo(which: PackedStringArray) -> void:
 			inv_tab = "Field Book"
 			open_inventory()
 			open_dex(arg if arg != "" else "cindle")
+		"hunters":
+			var psc = Game.main.screen_node() if Game.main else null
+			if psc is Match and Practice.of(psc):
+				PracticeHero.open(Practice.of(psc))      # the Hunters picker (class titles)
 		"confirm":
 			open_pause(ctx)
 			UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.",
