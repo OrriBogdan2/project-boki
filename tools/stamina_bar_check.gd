@@ -53,7 +53,7 @@ func run(main: Node) -> void:
 		for i in int(secs / Match.DT):
 			P.dashes = minf(P.max_dashes(), P.dashes + Match.DT / P.dash_regen())     # (Hunter's tick)
 		var fr: float = float(StaminaBar.fills(P)[0])
-		var want_fr := secs / regen
+		var want_fr: float = secs / regen
 		var msg := "%.1fs into %.1fs: %.0f%% full (want %.0f%%)" % [secs, regen, fr * 100.0, want_fr * 100.0]
 		ok(absf(fr - want_fr) < 0.02, msg)
 	P.dashes = 0.0
