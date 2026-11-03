@@ -38,7 +38,7 @@ func thief(a) -> void:
 			P.wid)
 	A.ok("dancer: her moves are keyed (KMovesDJ)",
 			["thf_lmb_r", "thf_lmb_l", "thf_primed", "thf_vault_r", "thf_vault_l", "thf_bola", "thf_knife",
-					"thf_arrive", "thf_encore", "thf_encore_throw_r", "thf_encore_throw_l"]
+					"thf_arrive", "thf_encore", "thf_encore_throw_r", "thf_encore_throw_l", "thf_exdash", "thf_land"]
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty()))
 	# LMB: a bolt every 0.45s from alternating hands, each one to the cursor
 	P.fire_cd = 0.0
@@ -124,11 +124,18 @@ func thief(a) -> void:
 	P.dashes = P.max_dashes()
 	A.aim_at(P, T.pos)
 	var d0 := P.dashes
+	var rings0 := _dancer_rings(m)
 	P.inp["move"] = Vector2(0, 1)
 	P.do_dash()
 	var wheel := K.anim_id
-	A.step(m, 0.55)
+	var pop := [0.0]           # an Array: a lambda can't assign a captured local
+	A.step(m, 0.55, func(): pop[0] = maxf(pop[0], K.glint_pop))
 	P.inp["move"] = Vector2.ZERO
+	A.ok("dancer dash (item 8): no ring on the cartwheel or its landing; the glint in the throwing hand flares",
+			_dancer_rings(m) == rings0 and pop[0] > 0.5 and K.glint != null and K.glint.visible
+			and K.glint.global_position.distance_to(K.hand_pos(K.hand == 0)) < 0.15,
+			"rings %d -> %d pop %.2f glint %s" % [rings0, _dancer_rings(m), pop[0],
+					K.glint.global_position.distance_to(K.hand_pos(K.hand == 0)) if K.glint else -1.0])
 	var far := 4.5 * float(K.dash_feel()["dist"])        # the sheet's 4.5m, after the global dash feel
 	A.ok("dancer dash: Vault cartwheels about 4.5m (x the dash feel), speeds +18%, empowers",
 			absf(P.flat_dist(home) - far) < 0.6 and K.primed_t > 0.0 and K.move_k() > 1.15
@@ -166,9 +173,16 @@ func thief(a) -> void:
 	P.inp["move"] = Vector2(1, 0)
 	P.do_dash()
 	P.inp["move"] = Vector2.ZERO
-	A.step(m, 1.3)
+	var air_move := K.anim_id
+	var air_rings := _dancer_rings(m)
+	var landed := [false]
+	A.step(m, 1.8, func(): landed[0] = landed[0] or K.anim_id == "thf_land")
 	A.ok("dancer dash: from a jump the cartwheel carries its speed to the landing (about 1.7x the ground one)",
 			P.flat_dist(home) > far * 1.35 and P.grounded and K.vault.is_empty(), "moved %.1f" % P.flat_dist(home))
+	A.ok("dancer air dash (items 32, 35): the air Cartwheel, empowered by its row, lands in thf_land, no ring",
+			air_move == "thf_exdash" and landed[0] and K.primed_t > 0.0
+			and _dancer_rings(m) == air_rings, "move %s landed %s primed %.2f" % [air_move, landed[0], K.primed_t])
+	_dancer_dash_moves(K)
 	K.primed_t = 0.0
 	K.haste_t = 0.0
 	P.teleport(home)
@@ -291,10 +305,99 @@ func thief(a) -> void:
 	var capped := DJFx.of(m).free_pools.values().all(func(arr): return (arr as Array).size() <= DJFx.POOL_CAP)
 	A.ok("dancer fx: pooled (every kind capped, a handful of nodes at most per burst)",
 			capped and DJFx.of(m).made <= made + 6, "made %d -> %d" % [made, DJFx.of(m).made])
+	await _dancer_dash_flow(m, P, K, T, home)
 	await A.done(m)
 	await _growth()
 	await ULT.new().dancer(A)
 
+
+## Rings in Dancer's own colours alive now (the shared team-colour dash ring is Hunter's, not hers).
+func _dancer_rings(m: Match) -> int:
+	var res_col := Color(Arch.def("thief")["resource"]["col"])
+	var cols := [ThiefKit.AIM_LILAC, ThiefKit.EMP_LINE, Arch.color("thief"), res_col]
+	var n := 0
+	for rg in m.fx.rings:
+		for c in cols:
+			if (rg["col"] as Color).is_equal_approx(c): n += 1
+	return n
+
+## Item 35: her dash moves are her own (no other table has them) and fit inside their dashes.
+func _dancer_dash_moves(K: ThiefKit) -> void:
+	var dd: Dictionary = Arch.def("thief")["dash"]
+	var feel_t := float(K.dash_feel()["time"])
+	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, KMovesStone.MOVES, MergeMoves.MOVES,
+			KMovesCare.MOVES, KMovesPinBjorn.MOVES]
+	var own := true
+	for mv in ThiefKit.CARTWHEELS:
+		own = own and KMovesDJ.MOVES.has(mv) and others.all(func(t): return not (t as Dictionary).has(mv))
+	var ground_len := maxf(_move_len("thf_vault_r"), _move_len("thf_vault_l"))
+	var air_len := _move_len("thf_exdash")
+	A.ok("dancer dash moves (item 35): her own ids; the ground and air cartwheels fit inside their dashes",
+			own and ground_len <= float(dd["time"]) * feel_t + 0.005 and air_len <= float(dd["air_time"]) * feel_t,
+			"ground %.2f / %.2f air %.2f / %.2f" % [ground_len, float(dd["time"]) * feel_t, air_len,
+					float(dd["air_time"]) * feel_t])
+
+func _move_len(mv: String) -> float:
+	var keys: Array = KMovesDJ.MOVES[mv]["keys"]
+	return float(keys[-1][0])
+
+## Item 32: a bolt pressed mid-cartwheel goes at once, empowered, and the cartwheel isn't cut; Shift in the Bola's
+## wind-up cartwheels and the Bola still flies; the dagger's blink ends a cartwheel.
+func _dancer_dash_flow(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
+	K.primed_t = 0.0
+	K.haste_t = 0.0
+	A.step(m, 0.3)
+	P.teleport(home)
+	A.fresh(T)
+	T.teleport(home + Vector3(-6.0, 0, 0))
+	A.aim_at(P, T.pos)
+	P.dashes = P.max_dashes()
+	P.fire_cd = 0.0
+	var bolts0 := K.bolts
+	P.inp["move"] = Vector2(0, 1)
+	P.do_dash()
+	A.step(m, 0.08)
+	P.inp["fire"] = true
+	m.step(A.DT)
+	P.inp["fire"] = false
+	A.ok("dancer dash -> LMB (row: fire, empowered): the bolt leaves mid-flip, empowered; the cartwheel plays on",
+			K.bolts == bolts0 + 1 and K.last_bolt_emp and P.roll_t > 0.0 and K.anim_id in ThiefKit.CARTWHEELS,
+			"bolts %d emp %s roll %.2f anim %s" % [K.bolts - bolts0, K.last_bolt_emp, P.roll_t, K.anim_id])
+	A.step(m, 0.6)
+	P.inp["move"] = Vector2.ZERO
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	P.dashes = P.max_dashes()
+	A.tap(m, P)
+	A.step(m, 0.1)
+	P.inp["move"] = Vector2(0, 1)
+	P.do_dash()
+	var wound := not K.bola_cast.is_empty() and P.roll_t > 0.0
+	var thrown := [false]
+	A.step(m, 0.4, func(): thrown[0] = thrown[0] or not K.bola.is_empty())
+	P.inp["move"] = Vector2.ZERO
+	A.ok("dancer RMB -> dash (into_dash row: fire): Shift in the wind-up cartwheels, the Bola still flies",
+			wound and thrown[0], "wound %s thrown %s" % [wound, thrown[0]])
+	A.step(m, 1.0)
+	P.teleport(home)
+	K.cd["e"] = 0.0
+	A.aim_at(P, home + Vector3(4.0, 0, -2.0))
+	K.use_e()
+	A.step(m, 0.4)
+	var blinks0 := K.blinks
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(0, 1)
+	P.do_dash()
+	A.step(m, 0.06)
+	K.use_e()
+	m.step(A.DT)
+	P.inp["move"] = Vector2.ZERO
+	A.ok("dancer dash -> E recast: the blink ends the cartwheel (she arrives standing)",
+			K.blinks == blinks0 + 1 and P.roll_t <= 0.0 and K.vault.is_empty(),
+			"blinks +%d roll %.2f vault %s" % [K.blinks - blinks0, P.roll_t, K.vault])
+	K.primed_t = 0.0
+	K.haste_t = 0.0
+	A.step(m, 0.5)
 
 ## An Encore blade's damage on the first foe with the hunter at level `lvl`.
 func _blade(lvl: int) -> float:
