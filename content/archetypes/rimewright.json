@@ -13,13 +13,13 @@
 	"card": {
 		"role": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
 		"loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
-		"lmb": "Ice Dart: hold for a stream of slow darts that curve onto the foe at your cursor.",
+		"lmb": "Ice Dart: hold for a barrage of slow darts that curve onto the foe at your cursor; every fifth to seventh is a large one.",
 		"rmb": "Ice Spear: lands at the cursor, slows there, and bursts and freezes 1.8s later.",
 		"e": "Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it.",
 		"dash": "Skate: hold the dash key to skate where you move; your darts fly straight and thick.",
 		"passive": "Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them.",
 		"weapons": {
-			"hoar_fan": "Hold for a stream of slow darts that curve onto the foe at your cursor."
+			"hoar_fan": "Hold for a barrage of slow darts that curve onto the foe at your cursor, ending in three large ones."
 		},
 		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
 	},

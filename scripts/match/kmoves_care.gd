@@ -275,6 +275,17 @@ const MOVES := {
 		[0.03, {"fl": Vector3(0.22, 0.15, 0.1), "hw": 1.0, "y": 0.3, "wa": Vector3(0, -0.3, 0), "wf": 0.6}],
 		[0.07, {"fl": Vector3(0.1, 0.1, -0.6), "hw": 1.0, "y": -0.35, "p": -0.1, "sq": 0.08}],
 		[0.16, {}]]},
+	# a large dart at the end of the barrage: a bigger, two-handed fling. The torso winds away with both hands
+	# drawn back to the hip (0.04), then whips round and both arms sling forward, the fan snapping open, the
+	# weight thrown onto the front foot (0.08), and a settle back (0.18, the barrage's cadence)
+	"tm_dart_heavy": {"keys": [
+		[0.0, {}],
+		[0.04, {"y": -0.55, "p": 0.12, "sq": 0.14, "fl": Vector3(0.25, -0.15, 0.25), "hw": 1.0,
+			"wa": Vector3(0.3, -1.0, 0.6), "wf": 1.0, "lw": 0.7, "legs": [-0.3, -0.4, 0.45, -0.7]}],
+		[0.08, {"y": 0.5, "p": -0.25, "sq": -0.12, "fl": Vector3(0.12, 0.12, -0.62), "hw": 1.0,
+			"wa": Vector3(-0.4, 0.9, -0.5), "wo": Vector3(0, 0, -0.16), "wf": 1.0, "lw": 0.8,
+			"legs": [0.8, -1.0, -0.45, -0.25]}],
+		[0.18, {}]]},
 	# a dart while skating: both hands driven straight out ahead, a stiff lean into it (the straight beam)
 	"tm_beam": {"keys": [
 		[0.0, {}],
@@ -325,31 +336,35 @@ const MOVES := {
 					"fr": Vector3(-0.14, 0.02, -0.6), "rw": 0.9, "wf": 0.8, "lw": 0.9,
 					"legs": [0.95, -1.15, -0.55, -0.2]}],
 		[0.55, {}]]},
-	# Rink Wall: the 0.2 s tell (a deep crouch over the feet, the sparkle), then both arms flung up and
-	# out as the ice erupts ahead, an overshoot up on the toes, a settle
+	# Rink Wall (footage: both hands pushed forward): the 0.2 s tell, a deep crouch with both palms drawn back
+	# to the hips and the sparkle at her feet; then both palms shoved out low and wide along the ground as the
+	# ice erupts ahead (0.27), the body driving after them, held while it starts to slide, then a settle
 	"tm_wall": {"keys": [
 		[0.0, {}],
 		[
 				0.1,
 				{
-					"p": -0.45, "lift": -0.15, "sq": 0.45, "fl": Vector3(0.15, -0.45, -0.25), "hw": 1.0,
-					"wa": Vector3(-0.7, 0, 0), "wf": 1.0, "lw": 1.0, "legs": [1.1, -1.7, 1.0, -1.6]}],
+					"p": -0.2, "lift": -0.15, "sq": 0.4, "fl": Vector3(0.3, -0.45, 0.25), "hw": 1.0,
+					"fr": Vector3(-0.3, -0.45, 0.25), "rw": 1.0, "wf": 1.0, "lw": 1.0,
+					"legs": [1.1, -1.7, 1.0, -1.6]}],
 		[
 				0.2,
 				{
-					"p": -0.5, "lift": -0.16, "sq": 0.48, "fl": Vector3(0.15, -0.46, -0.28), "hw": 1.0,
-					"wa": Vector3(-0.75, 0, 0), "wf": 1.0, "lw": 1.0, "legs": [1.15, -1.75, 1.05, -1.65]}],
+					"p": -0.15, "lift": -0.17, "sq": 0.46, "fl": Vector3(0.32, -0.46, 0.3), "hw": 1.0,
+					"fr": Vector3(-0.32, -0.46, 0.3), "rw": 1.0, "wf": 1.0, "lw": 1.0,
+					"legs": [1.15, -1.75, 1.05, -1.65]}],
 		[
 				0.27,
 				{
-					"p": 0.1, "lift": 0.12, "sq": -0.35, "fl": Vector3(-0.35, 0.55, -0.2), "hw": 1.0,
-					"wa": Vector3(1.0, 0, -0.6), "wo": Vector3(0.1, 0.25, -0.05), "wf": 1.0, "lw": 0.6,
-					"legs": [0.2, -0.3, -0.2, -0.1]}],
+					"p": -0.5, "lift": -0.08, "sq": -0.2, "fl": Vector3(0.32, -0.3, -0.68), "hw": 1.0,
+					"fr": Vector3(-0.32, -0.3, -0.68), "rw": 1.0, "wf": 1.0, "lw": 1.0,
+					"legs": [1.05, -1.25, -0.6, -0.2]}],
 		[
 				0.42,
 				{
-					"p": 0.05, "sq": -0.1, "lift": 0.05, "fl": Vector3(-0.3, 0.48, -0.2), "hw": 0.9,
-					"wa": Vector3(0.8, 0, -0.5), "wo": Vector3(0.08, 0.2, -0.05), "wf": 1.0}],
+					"p": -0.4, "lift": -0.06, "sq": -0.05, "fl": Vector3(0.34, -0.28, -0.6), "hw": 0.9,
+					"fr": Vector3(-0.34, -0.28, -0.6), "rw": 0.9, "wf": 0.9, "lw": 0.9,
+					"legs": [0.95, -1.15, -0.55, -0.2]}],
 		[0.7, {}]]},
 	# the wall frozen (E again): a stamp of the skate blade with a fist pulled down
 	"tm_freeze": {"keys": [

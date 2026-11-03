@@ -16,6 +16,7 @@ var fan_hits := {}             # target instance id -> {n: int, left: float, t: 
 var darts: Array = []          # homing shards in flight: {s: Dictionary, side: float, passed}
 var dart_n := 0                # darts thrown (alternates the bow side and the hand)
 var seq_next := 0.0            # when the next dart may leave
+var burst_i := 0               # darts so far in this hold: after wpn.burst plain ones come wpn.heavy.n large ones
 var rinkrun := {}              # the running Skate: {t, dir, loop, slab}
 var air_skate := false         # Shift pressed in the air: the skate starts on landing
 var ice_t := 0.0               # s until the rank-3 Skate may lay its next span of ice
@@ -28,7 +29,9 @@ var zone_n := 0
 var splinter_log := 0          # Shatters fired (tests)
 var look: CareLook
 var chip_t := 0.0
-var stats := {"darts": 0, "beams": 0, "spears": 0, "detonations": 0, "rimes": 0, "crashes": 0, "cancels": 0}   # tests
+var stats := {      # counters for the checks
+	"darts": 0, "heavies": 0, "beams": 0, "spears": 0, "detonations": 0, "rimes": 0, "crashes": 0, "cancels": 0,
+}
 var rime := {}                 # Rimelock running: {t, at, slow: {instance id: seconds in the rink}, creak}
 var last_stunned := 0          # foes the last Rimelock crash stunned (tests)
 var glide_held := false        # the glide key was down last step (Rimelock refuses each new press once)
@@ -178,6 +181,8 @@ func _tick(dt: float) -> void:
 
 # ------------------------------------------------------------------ LMB: Ice Dart
 func lmb_override(held: bool, _dt: float) -> bool:
+	if not held:
+		burst_i = 0
 	if not h.can_fire() or not rime.is_empty():
 		return true
 	if not held or h.fire_cd > 0.0 or m.time < seq_next:
@@ -185,43 +190,69 @@ func lmb_override(held: bool, _dt: float) -> bool:
 	_throw_dart()
 	return true
 
+## The barrage's rhythm (the source's data): wpn.burst plain darts, then wpn.heavy.n larger ones (double damage,
+## faster, longer reach), then round again while the button stays down.
+func _heavy_now() -> bool:
+	var wd: Dictionary = h.wpn
+	var plain := int(wd.get("burst", 4))
+	var cycle := plain + int((wd.get("heavy", {}) as Dictionary).get("n", 0))
+	return cycle > plain and burst_i % cycle >= plain
+
 func _throw_dart() -> void:
 	var wd: Dictionary = h.wpn
 	var skating := in_dash() and String(flow.row("lmb")["variant"]) == "beam"
+	var heavy := _heavy_now()
 	var dir := h.aim_dir()
+	burst_i += 1
 	dart_n += 1
 	var side := 1.0 if dart_n % 2 == 0 else -1.0
 	# a dart leaves bowed out to one side and curves back in; a skating dart flies straight
 	var bow := 0.0 if skating else deg_to_rad(float(wd.get("bow_deg", 18.0))) * side
 	var v := dir.rotated(bow)
 	var start := Vector3(h.pos.x + v.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + v.y * 0.6)
-	var dmg: float = float(wd["dmg"]) * float(m.dmg_mult(h))
-	var spd := float(wd.get("skate_speed", 30.0)) if skating else float(wd["speed"])
-	var rng := float(wd["range"]) * h.shot_range_k
+	var dmg: float = float(wd["dmg"]) * float(m.dmg_mult(h)) * _heavy_k("dmg_k", heavy)
+	var spd := (float(wd.get("skate_speed", 30.0)) if skating else float(wd["speed"])) * _heavy_k("speed_k", heavy)
+	var rng := float(wd["range"]) * h.shot_range_k * _heavy_k("range_k", heavy)
 	h.shot_range_k = 1.0
-	var extra := {"src": "shot", "ab": "fan", "kb": float(wd["kb"]), "tracer": 1.0}
+	var extra := {"src": "shot", "ab": "fan", "kb": float(wd["kb"]), "tracer": 1.0, "heavy": heavy}
 	m.spawn_shot(
 			h, start, v * spd, dmg, rng / spd * (1.0 if skating else 1.15),
-			float(wd["size"]) * (1.6 if skating else 1.0), wd["color"], extra)
+			float(wd["size"]) * (1.6 if skating else 1.0) * _heavy_k("size_k", heavy), wd["color"], extra)
 	var s := lk().last_shot()
 	if not s.is_empty():
-		lk().skin(s, "beam" if skating else "shard")
+		lk().skin(s, "beam" if skating else "shard", {}, _heavy_k("size_k", heavy))
 		if not skating:
 			darts.append({"s": s, "side": side, "passed": false})
-	m.fx.flash(start, Color("9af0ff"), 0.3 if not skating else 0.5, 0.05)
-	m.sfx("rime_beam" if skating else String(wd["sfx"]), h.pos, -2.0, 1.0 + 0.06 * side)
+	m.fx.flash(start, Color("9af0ff"), (0.3 if not skating else 0.5) * _heavy_k("size_k", heavy), 0.05)
+	var pitch := (1.0 + 0.06 * side) * (0.8 if heavy else 1.0)
+	var loud := 0.0 if heavy else -2.0
+	m.sfx("rime_beam" if skating else String(wd["sfx"]), h.pos, loud, pitch)
+	if heavy:
+		stats["heavies"] += 1
 	if skating:
 		stats["beams"] += 1
 		play("tm_beam")
 	else:
 		stats["darts"] += 1
-		if not spear_aim:
-			play("tm_dart_r" if side > 0.0 else "tm_dart_l")
+		_play_dart(heavy, side)
 	h.recoil = 0.4
 	h.muzzle_t = 0.05
 	h.reveal_t = maxf(h.reveal_t, 1.2)
 	h.idle_fire = 0.0
 	seq_next = m.time + float(wd.get("rate", 0.18))
+
+## A large dart's multiplier `key` (wpn.heavy), 1 for a plain one.
+func _heavy_k(key: String, heavy: bool) -> float:
+	return float((h.wpn.get("heavy", {}) as Dictionary).get(key, 1.0)) if heavy else 1.0
+
+## A dart's own flick (a large one flings both hands); none while the spear is held between her palms.
+func _play_dart(heavy: bool, side: float) -> void:
+	if spear_aim:
+		return
+	if heavy:
+		play("tm_dart_heavy")
+	else:
+		play("tm_dart_r" if side > 0.0 else "tm_dart_l")
 
 ## Homing: each dart turns hard toward the foe nearest the cursor (or, with none there, the nearest
 ## one ahead of it, or else the cursor point itself), so the bowed darts curve in.

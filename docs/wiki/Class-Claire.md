@@ -56,11 +56,11 @@ What the in-game kit card (K) says.
 | Loop | Ice controller: homing darts, a freezing spear and a sliding ice wall. |
 | Passive: Hoarfrost | Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them. |
 | Dash: Skate | Skate: hold the dash key to skate where you move; your darts fly straight and thick. |
-| LMB | Ice Dart: hold for a stream of slow darts that curve onto the foe at your cursor. |
+| LMB | Ice Dart: hold for a barrage of slow darts that curve onto the foe at your cursor; every fifth to seventh is a large one. |
 | RMB: Ice Spear | Ice Spear: lands at the cursor, slows there, and bursts and freezes 1.8s later. |
 | E: Rink Wall | Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it. |
 | Hunter ultimate: Rimelock | Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun. |
-| Weapon: Hoar Fan | Hold for a stream of slow darts that curve onto the foe at your cursor. |
+| Weapon: Hoar Fan | Hold for a barrage of slow darts that curve onto the foe at your cursor, ending in three large ones. |
 
 ### Abilities in full
 

@@ -64,6 +64,26 @@ func _skate_feel() -> void:
 	ok(
 			"tm Shift: LMB keeps firing (straight beams) the whole skate",
 			int(K.stats["beams"]) - b0 >= 3, "%d beams in 0.6 s" % (int(K.stats["beams"]) - b0))
+	# the owner's parity example: on her ice trail she turns to the cursor and fires at it (footage
+	# 0239-0245): swing the cursor round mid-skate and the next beams leave straight at it, whatever the skate's way
+	var aim_to := P.pos + Vector3(-6.0, 0, -6.0)
+	sc.aim_at(P, aim_to)
+	var seen_beams := {}
+	for s0 in _mine(m, P):
+		seen_beams[s0["sid"]] = true
+	var off_deg := -1.0
+	for i in 18:
+		step(m, 1.0 / 60.0)
+		for s1 in _mine(m, P):
+			if not seen_beams.has(s1["sid"]) and off_deg < 0.0:
+				var want := Vector2(aim_to.x - P.pos.x, aim_to.z - P.pos.z)
+				off_deg = rad_to_deg(absf((s1["vel"] as Vector2).angle_to(want)))
+	var skate_dir: Vector2 = K.rinkrun.get("dir", Vector2.ZERO)
+	ok(
+			"tm Shift: skating, the beams track the cursor: a beam after the cursor swings leaves at it (within 6 deg)",
+			K.rinkrunning() and off_deg >= 0.0 and off_deg < 6.0
+				and rad_to_deg(absf(skate_dir.angle_to(Vector2(-1, -1)))) > 30.0,
+			"%.1f deg off the cursor" % off_deg)
 	P.inp["fire"] = false
 	P.inp["dash_down"] = false
 	step(m, 0.2)
@@ -798,7 +818,7 @@ func rimewright() -> void:
 			Sfx.streams.has("rime_shard") and Sfx.streams.has("rime_wall_tell") and Sfx.streams.has("rime_zone"))
 	step(m, 0.05)
 	ok("tm: the thin aim line to the cursor is always up", AimKit.shown(P, "aim"))
-	# --- a steady stream (no heavy phase, no pause) of slow darts that bow out and home
+	# --- a steady stream (no pause) of slow darts that bow out and home, 4 plain then 3 large
 	var times: Array = []
 	var dmgs: Array = []
 	var bows: Array = []
@@ -821,16 +841,23 @@ func rimewright() -> void:
 	ok(
 			"tm LMB: a steady stream, one dart every 0.18 s with no pause", times.size() >= 7 and maxgap < 0.22,
 			"%d darts, longest gap %.2f" % [times.size(), maxgap])
-	ok("tm LMB: every dart the same (no heavy phase)", not dmgs.is_empty() and dmgs.max() - dmgs.min() < 0.01)
+	var base_dmg := float(P.wpn["dmg"]) * float(m.dmg_mult(P))
+	var pattern := dmgs.slice(0, 7).map(func(d): return "H" if float(d) > base_dmg * 1.5 else "p")
+	ok(
+			"tm LMB: the source's barrage: 4 darts, then 3 larger ones at double damage (game data), then round again",
+			"".join(pattern) == "ppppHHH" and dmgs.size() >= 8 and float(dmgs[7]) < base_dmg * 1.5
+				and K.stats["heavies"] >= 3,
+			"".join(pattern))
 	ok(
 			"tm LMB: darts come out slowly (16 m/s) and bowed out to the side",
 			float(P.wpn["speed"]) <= 18.0 and not bows.is_empty() and float(bows[0]) > 12.0,
 			"first bow %.0f deg" % (float(bows[0]) if not bows.is_empty() else 0.0))
 	step(m, 0.8)
+	var thrown_dmg: float = dmgs.reduce(func(a, d): return a + float(d), 0.0)
 	ok(
 			"tm LMB: the bowed darts curve back onto the foe at the cursor",
-			T.max_hp - T.hp >= float(P.wpn["dmg"]) * times.size() * 0.75,
-			"dealt %.0f of %.0f" % [T.max_hp - T.hp, float(P.wpn["dmg"]) * times.size()])
+			T.max_hp - T.hp >= thrown_dmg * 0.75,
+			"dealt %.0f of %.0f" % [T.max_hp - T.hp, thrown_dmg])
 	ok("tm LMB: darts alternate hands with their own flick moves", K.stats["darts"] >= 7)
 	ok(
 			"tm passive: the frost glow on the foe shows the stacks",
