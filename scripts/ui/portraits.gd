@@ -5,6 +5,7 @@ extends RefCounted
 ## rendered once into a texture. A greyed copy is made on demand for teammates who are out.
 
 const SIZE := 96
+const HEAD_MID := Vector3(0, 0.18, 0)      # the head's middle above its neck pivot (Models.hunter)
 
 ## A viewport holding a portrait of this look. Add it to the tree; its texture fills in next frame.
 ## `body`: the whole hunter with their weapon, standing (the reveal), instead of head and shoulders;
@@ -46,7 +47,7 @@ static func make(cls: String, team_col: Color, wid: String, look: Dictionary, ar
 		(gun as Node3D).visible = false
 	# the face looks down -Z; frame the head from a little off to one side
 	var s := mdl.scale.y
-	var head := Vector3(0, (0.42 + 0.86) * s, 0)
+	var head := head_at(mdl)
 	var cam := Camera3D.new()
 	cam.fov = 26.0
 	vp.add_child(cam)
@@ -58,6 +59,14 @@ static func make(cls: String, team_col: Color, wid: String, look: Dictionary, ar
 		cam.transform = Transform3D(Basis(), eye).looking_at(head + Vector3(0, -0.13 * s, 0), Vector3.UP)
 	cam.current = true
 	return vp
+
+## The middle of the hunter's head, from the model's feet (scaled with it): each Warden carries its head
+## at its own height.
+static func head_at(mdl: Node3D) -> Vector3:
+	var pv := mdl.get_node("Rig/Torso/HeadPivot") as Node3D
+	var torso := pv.get_parent() as Node3D
+	var rig := torso.get_parent() as Node3D
+	return mdl.transform.basis * (rig.transform * torso.transform * pv.transform * HEAD_MID)
 
 ## A desaturated, darkened copy of a rendered portrait (null until the portrait has been drawn).
 static func grey(tex: Texture2D) -> ImageTexture:

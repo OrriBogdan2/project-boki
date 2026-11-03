@@ -1,0 +1,197 @@
+extends RefCounted
+## --warden-model-check (concept phase 2: the in-engine Warden models, scripts/heroes/warden_*.gd). For
+## each Warden built from its concept sheet: the rig keeps every node the animation and the kits look
+## up (and the hero's own weapon anchors); HunterAnim binds every part and each of the hero's keyed
+## moves still moves the body; the hit radius and the ring that shows it are the class's, frozen here;
+## the true height (sole to the top of the head) and the width sit on the hero sheet's scale against a
+## medium hunter; at both ends of every MantleLook slider the height moves no more than the clamps
+## allow, the anchors stay and the hit ring doesn't change; the portrait frames the head.
+
+const MANTLE_CHECK := preload("res://tools/mantle_look_check.gd")
+const EPS := 0.0005
+## Per Warden: the hit radius it must keep (m), its height against a medium hunter (hero sheets, "Body,
+## scale and movement feel"), its width against a medium (from, to), and the prefix of its keyed moves.
+const WARDENS := {
+	"bulwark": {"hit_r": 0.5, "height": 1.15, "width": [1.3, 2.2], "moves": "bul_"},
+	"archer": {"hit_r": 0.37, "height": 0.98, "width": [0.7, 1.15], "moves": "arc_"},
+}
+const HEIGHT_TOL := 0.04       # the true height within 4% of the sheet's
+const ANCHORS := ["Rig/Legs/LegL/Knee", "Rig/Legs/LegR/Knee", "Rig/Torso/HeadPivot/Head", "Rig/Torso/Aim/Gun/Muzzle",
+	"Rig/Torso/ArmLPivot/Elbow/Hand", "Rig/Torso/ArmRPivot/Elbow/Hand", "Rig/Torso/PauldronL", "Rig/Torso/PauldronR",
+	"Rig/Torso/Skirt", "Rig/Torso/Shoulder", "Rig/Torso/Glider", "TeamRing"]
+## Nodes a hero's own kit or weapon code finds by name (BjornFx: the hammer pivot under Gun; the prow).
+const HERO_ANCHORS := {"bulwark": ["Rig/Torso/ArmLPivot/Elbow/Hand/Shield"]}
+const SKIP := ["Glider", "Gun", "Shield", "TeamRing"]     # not part of the body's silhouette
+
+var bad := 0
+var n := 0
+var holder: Node3D
+
+func ok(cond: bool, what: String) -> void:
+	n += 1
+	print("WARDEN %s %s" % ["ok  " if cond else "FAIL", what])
+	if not cond: bad += 1
+
+func run(main: Node) -> void:
+	holder = Node3D.new()
+	main.add_child(holder)
+	var ref := _model("gunslinger", PlayerLook.neutral())
+	var ref_h := _head_top(ref)
+	var ref_w := _body_box(ref).size.x
+	print("WARDEN medium reference: head top %.3f m, body %.3f m wide" % [ref_h, ref_w])
+	for id in WARDENS:
+		_anchors(id)
+		_anim(id)
+		_hitbox(id)
+		_scale(id, ref_h, ref_w)
+		_sliders(id)
+		_portrait(id)
+	print("WARDEN %d checks, %d failed" % [n, bad])
+	print("WARDEN_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
+	main.get_tree().quit()
+
+func _model(id: String, look: Dictionary) -> Node3D:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", look, id)
+	holder.add_child(m)
+	return m
+
+func _anchors(id: String) -> void:
+	var m := _model(id, PlayerLook.neutral())
+	var want: Array = ANCHORS + HERO_ANCHORS.get(id, [])
+	var missing := want.filter(func(p): return not m.has_node(p))
+	ok(missing.is_empty(), "%s keeps every node the animation and kits look up (missing %s)" % [id, str(missing)])
+	if id == "bulwark":
+		var pv: Node3D = null
+		for ch in m.get_node("Rig/Torso/Aim/Gun").get_children():
+			if ch.has_meta("hammer_pivot"): pv = ch
+		ok(
+			pv != null and _box(pv).has_point(Vector3(0, 0, -0.62)),
+			"%s: the oar's ice head is where BjornFx looks for the hammer head" % id
+		)
+	m.free()
+
+func _anim(id: String) -> void:
+	var m := _model(id, PlayerLook.neutral())
+	var an := HunterAnim.new(m)
+	var parts := {"head": an.head, "aim": an.aim, "gun": an.gun, "hand_l": an.hand_l, "hand_r": an.hand_r,
+		"pad_l": an.pad_l, "pad_r": an.pad_r, "skirt": an.skirt}
+	var unbound := parts.keys().filter(func(k): return parts[k] == null)
+	ok(unbound.is_empty(), "%s: HunterAnim binds every part (unbound %s)" % [id, str(unbound)])
+	var rest := _pose(an, m, "", 0.0)
+	var still: Array = []
+	var moves: Array = []
+	for t in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES]:
+		for mv in t:
+			if String(mv).begins_with(WARDENS[id]["moves"]): moves.append(mv)
+	for mv in moves:
+		var keys: Array = HunterAnim.km_def(mv)["keys"]
+		var most := 0.0
+		for k in keys:
+			var p := _pose(an, m, mv, float(k[0]))
+			for i in p.size():
+				most = maxf(most, (p[i] as Vector3).distance_to(rest[i]))
+		if most < 0.02:
+			still.append(mv)
+	ok(
+		not moves.is_empty() and still.is_empty(),
+		"%s: each of its %d keyed moves moves the hands or the body (still: %s)"
+			% [id, moves.size(), str(still)])
+	m.free()
+
+## The hands, the head and the torso after driving the move to time tt.
+func _pose(an: HunterAnim, m: Node3D, mv: String, tt: float) -> Array:
+	for k in 30:
+		an.update(1.0 / 60.0, {"fired": 99.0, "face": 0.0, "grounded": true, "kmove": mv, "kmove_t": tt})
+	var torso := m.get_node("Rig/Torso") as Node3D
+	return [an.hand_l.global_position, an.hand_r.global_position, an.head.global_position,
+		torso.global_transform.basis * Vector3.FORWARD]
+
+func _hitbox(id: String) -> void:
+	var cdat: Dictionary = Data.CLASSES[Arch.weight(id)]
+	var hr := Arch.hit_r(id, cdat)
+	ok(
+		absf(hr - float(WARDENS[id]["hit_r"])) < EPS,
+		"%s: hit radius %.2f m, the class's (%.2f)" % [id, hr, WARDENS[id]["hit_r"]]
+	)
+	var m := _model(id, PlayerLook.neutral())
+	var ring := m.get_node("TeamRing") as Node3D
+	ok(absf(ring.global_transform.basis.get_scale().x - float(cdat["scale"]) * hr / float(cdat["hit_r"])) < 0.01,
+			"%s: the ring under its feet shows that radius" % id)
+	m.free()
+
+func _scale(id: String, ref_h: float, ref_w: float) -> void:
+	var m := _model(id, PlayerLook.neutral())
+	var h := _head_top(m) / ref_h
+	var w := _body_box(m).size.x / ref_w
+	var want := float(WARDENS[id]["height"])
+	ok(absf(h - want) <= HEIGHT_TOL, "%s stands %.3fx a medium hunter (sheet %.2fx)" % [id, h, want])
+	var span: Array = WARDENS[id]["width"]
+	ok(
+		w >= float(span[0]) and w <= float(span[1]),
+		"%s is %.2fx a medium hunter's width (%.2f to %.2f)" % [id, w, span[0], span[1]]
+	)
+	m.free()
+
+func _sliders(id: String) -> void:
+	var w := MantleLook.warden(id)
+	var m0 := _model(id, PlayerLook.neutral())
+	var h0 := _head_top(m0)
+	var ring0 := (m0.get_node("TeamRing") as Node3D).global_transform.basis.get_scale().x
+	# the height slider scales the whole model; leg length scales the legs' share of it, head size and
+	# jaw the head's (and a bigger head sits a little higher on its pivot: the small margin)
+	var leg_share := ((m0.get_node("Rig/Torso") as Node3D).global_position.y - m0.global_position.y) / h0
+	var head := m0.get_node("Rig/Torso/HeadPivot/Head") as MeshInstance3D
+	var head_share := (head.global_transform * head.mesh.get_aabb()).size.y / h0
+	m0.free()
+	var c: Dictionary = w["clamp"]
+	var grow := 1.0 + float(c["limbs"]) * leg_share + (float(c["head"]) + float(c["jaw"])) * head_share
+	var reach := (1.0 + float(c["height"])) * grow - 1.0 + 0.012
+	for v in [0.0, 1.0]:
+		var m := _model(id, MANTLE_CHECK.flat(v))
+		var h := _head_top(m) / h0
+		var ring := (m.get_node("TeamRing") as Node3D).global_transform.basis.get_scale().x
+		var missing := ANCHORS.filter(func(p): return not m.has_node(p))
+		ok(absf(h - 1.0) <= reach and absf(ring - ring0) < EPS and missing.is_empty(),
+				"%s: sliders at %d keep the height in the clamps (%.3fx, at most ±%.3f), the hit ring, the anchors"
+				% [id, int(v), h, reach])
+		m.free()
+
+## Portraits frame the head (Portraits.head_at); the point must sit inside the head itself.
+func _portrait(id: String) -> void:
+	var m := _model(id, PlayerLook.neutral())
+	var at := Portraits.head_at(m)
+	var head := m.get_node("Rig/Torso/HeadPivot/Head") as MeshInstance3D
+	var hb := head.global_transform * head.mesh.get_aabb()
+	ok(hb.grow(0.02).has_point(m.global_position + at), "%s: the portrait frames its head" % id)
+	m.free()
+
+func _head_top(m: Node3D) -> float:
+	var head := m.get_node("Rig/Torso/HeadPivot/Head") as MeshInstance3D
+	return (head.global_transform * head.mesh.get_aabb()).end.y - m.global_position.y
+
+## The body's bounds in world space, leaving out the weapon, the shield, the glider and the ring.
+func _body_box(m: Node3D) -> AABB:
+	var out := AABB()
+	var first := true
+	var stack: Array = [m]
+	while not stack.is_empty():
+		var nd: Node = stack.pop_back()
+		if String(nd.name) in SKIP:
+			continue
+		if nd is MeshInstance3D and (nd as MeshInstance3D).mesh != null and (nd as Node3D).is_visible_in_tree():
+			var b := (nd as MeshInstance3D).global_transform * (nd as MeshInstance3D).mesh.get_aabb()
+			out = b if first else out.merge(b)
+			first = false
+		stack.append_array(nd.get_children())
+	return out
+
+## A node's meshes' bounds in its own space.
+func _box(nd: Node3D) -> AABB:
+	var out := AABB()
+	var first := true
+	for ch in nd.get_children():
+		if ch is MeshInstance3D:
+			var b := (ch as MeshInstance3D).transform * (ch as MeshInstance3D).mesh.get_aabb()
+			out = b if first else out.merge(b)
+			first = false
+	return out

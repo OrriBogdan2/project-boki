@@ -675,7 +675,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		part(knee, HeroKit.boot(boot_k), m_leather, Vector3.ZERO)
 		part(knee, HeroKit.sole(boot_k), m_dark, Vector3.ZERO)
 		part(knee, HeroKit.cuff(0.074, 0.088, 0.06), m_steel if heavy_gear else (m_trim if arch != "thief" else m_leather), Vector3(0, -0.06, 0.005))
-	legs.scale.y = lk["limbs"]
+	legs.scale.y = lk["limbs"] * float(Arch.body(arch).get("legs", 1.0))      # the Warden's leg length
 	var torso := Node3D.new(); torso.name = "Torso"; torso.position = Vector3(0, 0.42 * legs.scale.y, 0); rig.add_child(torso)
 	root.set_meta("hip_y", torso.position.y)      # HunterAnim keeps the torso on the legs at this height
 	var chest_w := bw * (0.92 if fem else 1.12) * float(lk["shoulders"])
@@ -747,7 +747,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		torso.add_child(pd)
 		pads["L" if sx < 0.0 else "R"] = pd
 	var ctx := {"torso": torso, "skirt": skirt_n, "gear": gear, "pl": pads["L"], "pr": pads["R"], "arms": arms, "knees": knees, "bw": bw, "cw": chest_w,
-		"fem": fem, "rid": rid, "hk": hk, "bare": bare,
+		"fem": fem, "rid": rid, "hk": hk, "bare": bare, "arch": arch, "hero_col": hero_col,
 		"m": {"body": m_body, "shirt": m_shirt, "pants": m_pants, "leather": m_leather, "skin": m_skin, "hair": m_hair, "dark": m_dark, "acc": m_acc,
 			"gold": m_gold, "gun": m_gun, "hero": m_hero, "trim": m_trim, "steel": m_steel, "glow": m_glow, "glow_soft": m_glow_soft, "bone": m_bone,
 			"wood": m_wood, "fur": m_fur, "feather": m_feather, "cloak": m_cloak, "hat": m_hat}}
@@ -807,10 +807,10 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		merge_static(gun)      # (the twin blades' second dagger is handed to the left hand by HunterAnim)
 	# the race's proportions: head size, how broad the body is, overall height
 	var hkk := float(race["head"]) * (1.06 if arch == "thief" else 1.12)    # big-headed like a hero brawler (faces read from the match camera), heroic not chibi; the thief leaner
-	hkk *= float(lk["head"])
+	hkk *= float(lk["head"]) * float(Arch.body(arch).get("head", 1.0))      # the Warden's head size
 	var bk := float(race["bulk"]) * float(HeroGearPair.body(arch)["bulk"])
 	head.scale = Vector3(hkk * float(lk["face_w"]), hkk * float(lk["jaw"]), hkk)
-	head.position.y += (hkk - 1.0) * 0.05
+	head.position.y += (hkk - 1.0) * 0.05 + float(Arch.body(arch).get("neck", 0.0))      # (a Warden can stand taller in the neck)
 	if bk != 1.0:
 		for ch in torso.get_children():
 			if ch is MeshInstance3D and not String(ch.name).begins_with("Tail") and ch.name != "Wings":

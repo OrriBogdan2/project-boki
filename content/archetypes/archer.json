@@ -4,8 +4,11 @@
 	"weight": "light",
 	"color": "#9fe0a8",
 	"body": {
-		"size": 1.15,
-		"hit_r": 0.37
+		"size": 1.04,
+		"hit_r": 0.37,
+		"head": 0.72,
+		"legs": 1.62,
+		"neck": 0.03
 	},
 	"fantasy": "The warden of high ground. Climbs, reads the field, pins people to walls.",
 	"silhouette": "the long weapon over the shoulder",

@@ -1004,10 +1004,11 @@ func update(dt: float, s: Dictionary) -> void:
 	var sq := float(s.get("squash", 0.0)) + land_k * 0.12 + slam_k * 0.1 + (float(km["sq"]) * 0.35 if not km.is_empty() else 0.0)
 	var stretch := float(s.get("stretch", 0.0))
 	var scl := Vector3(1.0 + sq * 0.35 - stretch * 0.3, 1.0 - sq * 0.4 + stretch * 0.15, 1.0 + sq * 0.35 + stretch * 0.5)
-	# feet on the ground: drop the hips by however much the standing leg is bent
+	# feet on the ground: drop the hips by however much the standing leg is bent (the legs' own length:
+	# a Warden's and the leg-length slider's)
 	var dl2 := (THIGH * cos(hl) + SHIN * cos(hl + kl)) * cos(wl)
 	var dr2 := (THIGH * cos(hr) + SHIN * cos(hr + kr)) * cos(wr)
-	var drop := (LEG - maxf(dl2, dr2)) * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - down_k) * (1.0 - dive_k) * (1.0 if roll_t < 0.0 else 0.0)
+	var drop := (LEG - maxf(dl2, dr2)) * legs.scale.y * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - down_k) * (1.0 - dive_k) * (1.0 if roll_t < 0.0 else 0.0)
 	var off := Vector3(wk * 0.028 * still, -drop + bounce * 0.008, 0.0)
 	if arch == "juggernaut":
 		off.y -= absf(cos(ph)) * 0.035 * r1        # each footfall lands with weight
