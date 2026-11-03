@@ -348,7 +348,8 @@ func _vireo_dash() -> void:
 			"full",
 			"dash_run",
 			"Shift released: a lightning streak, the body a trail of her own gold-teal after-images"])
-	run.append([0.46, "full", "dash_arrive", "Shift arrival: a ring burst with spark needles"])
+	run.append([0.46, "full", "dash_arrive",
+			"Shift arrival: she re-forms with a dust puff (no ring or burst: the hits are along the way)"])
 	await _go(0.8, Callable(), run, 6.0)
 	# the base air dash (her own variant): a tumble with teal after-images in her silhouette
 	await _reset(6.0, 6.0)

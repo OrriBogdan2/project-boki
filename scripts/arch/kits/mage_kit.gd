@@ -336,7 +336,6 @@ func on_dash(use_ex: bool) -> bool:
 	play("mage_dash")
 	# a bolt slams down onto her: the charging tell
 	fx().arc(h.position + Vector3(0, 8.0, 0), h.position + Vector3(0, 0.3, 0), col_of(dash_def()), GOLD, 0.8, 0.22)
-	m.fx.flash(h.position + Vector3(0, 1.0, 0), GOLD, 0.9, 0.08)
 	m.sfx("vv_surge_charge", h.pos, -3.0)
 	return true
 
@@ -441,8 +440,7 @@ func _arrive() -> void:
 	if not is_instance_valid(h): return
 	run_t = 0.0
 	if h.model: h.model.visible = true
-	fx().ring(ground(h.pos), 2.7, col_of(dash_def()), GOLD, 0.4)
-	m.fx.spark(h.position + Vector3(0, 0.5, 0), Vector3.UP, GOLD, 10, 8.0, 90.0, 0.25, 4.0, 1.1)
+	m.fx.dust(h.pos, 5)           # a quiet arrival: no ring or burst on a dash, the hits are on the way
 	if ult.phase() != MageUlt.CROUCH:
 		play("mage_dash_land")      # (a run out of Kitefall's crouch lands in the crouch: it plays that instead)
 
