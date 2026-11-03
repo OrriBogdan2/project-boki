@@ -21,6 +21,7 @@ const ROCK_R := 0.5                  # a rock's footprint when it asks the world
 const ROCK_TOP := 1.25
 const ROCK_TH := 0.42                # m: half its depth (wider than a barrier so a body fits on top)
 const STEP := 0.25                   # the walk along a cast, metres
+const CRACK_T := 0.6                 # s: a fresh rock's ground cracks cool off
 
 ## Tests read what would go out over the network without a connection (--zone-check).
 static var capture := false
@@ -85,32 +86,61 @@ static func walk(m: Node, from: Vector3, aim: Vector3, reach: float) -> Dictiona
 	return out
 
 # ------------------------------------------------------------------ rocks
-## Breah's rock: a cluster of basalt columns with flat tops (you stand on them), molten cracks that glow
-## hottest at the base (shaders/molten_rock.gdshader) and a ring of embers where it broke the ground.
+## Breah's rock: a cluster of jagged basalt columns, tapering to broken tops and leaning apart, with
+## molten cracks in the stone (shaders/molten_rock.gdshader) and thin glowing cracks in the ground at
+## its foot that cool off over CRACK_T. The tallest column tops out at ROCK_TOP (you stand there).
 ## No other wall in the game looks like it.
 static func rock_node() -> Node3D:
 	var n := Node3D.new()
+	# [x, z, base radius, height, lean]
 	var cols := [
-		[Vector3(-0.32, 0, 0.05), 0.34, ROCK_TOP], [Vector3(0.12, 0, -0.1), 0.38, ROCK_TOP - 0.06],
-		[Vector3(0.42, 0, 0.12), 0.28, ROCK_TOP - 0.18], [Vector3(-0.02, 0, 0.22), 0.26, ROCK_TOP - 0.3]
+		[-0.3, 0.04, 0.36, ROCK_TOP, -0.08], [0.12, -0.12, 0.34, ROCK_TOP - 0.12, 0.1],
+		[0.4, 0.14, 0.26, ROCK_TOP + 0.12, 0.16], [-0.05, 0.24, 0.24, ROCK_TOP - 0.4, -0.14],
+		[0.55, -0.16, 0.18, ROCK_TOP - 0.55, 0.22]
 	]
 	for c in cols:
-		var hgt: float = c[2]
-		var col := Models.part(
-			n, Models.cyl(float(c[1]) * 0.92, float(c[1]), hgt, 6),
-			KitLooks.rock_mat(0.35, KitLooks.vis_rng.randf() * 10.0), (c[0] as Vector3) + Vector3(0, hgt * 0.5, 0),
-			Vector3.ONE, Vector3(0, KitLooks.vis_rng.randf(), 0)
-		)
-		col.name = "Col"
+		_column(n, Vector3(float(c[0]), 0, float(c[1])), float(c[2]), float(c[3]), float(c[4]))
+	var cracks := Node3D.new()
+	cracks.name = "Cracks"
+	n.add_child(cracks)
+	for i in 7:
+		var a := TAU * i / 7.0 + KitLooks.vis_rng.randf() * 0.4
+		var len_ := 0.35 + KitLooks.vis_rng.randf() * 0.45
 		Models.part(
-			n, Models.cyl(float(c[1]) * 0.8, float(c[1]) * 0.92, 0.06, 6), Models.toon(Color("6e5444"), false, 0.0),
-			(c[0] as Vector3) + Vector3(0, hgt + 0.02, 0)
+			cracks, Models.box(0.035, 0.012, len_), KitLooks.shade_mat(Color(1.0, 0.45, 0.1, 0.95)),
+			Vector3(cos(a), 0.02, sin(a)) * (0.55 + len_ * 0.5), Vector3.ONE, Vector3(0, -a + PI * 0.5, 0)
 		)
-	var base := Models.part(
-		n, Models.cyl(0.78, 0.86, 0.05, 10), Models.glow_mat(Color(1.0, 0.42, 0.12, 0.55)), Vector3(0, 0.03, 0)
-	)
-	base.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	for mi in cracks.get_children():
+		(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return n
+
+## One basalt column: six-sided, tapering to about half its width, leaning by `lean` (rad) away from the
+## middle, with a broken cap tilted on top.
+static func _column(n: Node3D, at: Vector3, r: float, hgt: float, lean: float) -> void:
+	var tip := r * (0.45 + KitLooks.vis_rng.randf() * 0.2)
+	var tilt := Vector3(lean * 0.6, KitLooks.vis_rng.randf() * TAU, lean)
+	var col := Node3D.new()
+	col.name = "Col"
+	col.position = at
+	col.rotation = tilt
+	n.add_child(col)
+	var stone := KitLooks.rock_mat(0.35, KitLooks.vis_rng.randf() * 10.0)
+	Models.part(col, Models.cyl(tip, r, hgt, 6), stone, Vector3(0, hgt * 0.5, 0))
+	Models.part(
+		col, Models.cyl(tip * 0.7, tip * 1.05, 0.14, 5), Models.toon(Color("4e3a30"), false, 0.0),
+		Vector3(0, hgt + 0.05, 0), Vector3.ONE, Vector3(0.35, 0.0, -0.25)
+	)
+
+## The ground cracks at a fresh rock's foot cool and fade out.
+static func _cool(n: Node3D) -> void:
+	var cracks := n.get_node_or_null("Cracks") as Node3D
+	if cracks == null:
+		return
+	var tw := n.create_tween().set_parallel()
+	for mi in cracks.get_children():
+		var mat := (mi as MeshInstance3D).material_override as StandardMaterial3D
+		tw.tween_property(mat, "albedo_color:a", 0.0, CRACK_T).set_ease(Tween.EASE_IN)
+	tw.chain().tween_callback(func(): cracks.visible = false)
 
 ## Builds a rock (a movement-blocking Verbs wall wearing a rock's look). send: tell the other games.
 static func rock(
@@ -123,6 +153,7 @@ static func rock(
 	var n := rock_node()
 	n.scale = Vector3(len_ / 1.15, 1.0, 1.0)
 	m.add_child(n)
+	_cool(n)
 	w["node"] = n
 	w["rock"] = true
 	w["rid"] = rid
@@ -177,21 +208,21 @@ static func bridge(
 	return n
 
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
-## The seed: a pale translucent drum on the ground filled with a slow indigo swirl (shaders/void_glass),
-## growing to its full width, with a bright rim ring. Ostra's own shape; no other zone looks like it.
+## The seed: a dark indigo glass drum on the ground with a slow violet swirl (shaders/void_glass),
+## growing to its full width, with a teal rim ring. Ostra's own shape; no other zone looks like it.
 static func seed_visual(m: Node, sid: String, at: Vector3, rmax: float, grow: float, col: Color) -> Node3D:
 	var n := Node3D.new()
 	var core := MeshInstance3D.new()
 	core.name = "Core"
 	core.mesh = Models.cyl(1.0, 1.0, 1.0, 28)
-	core.material_override = KitLooks.glass_mat(Color("1a0636"), Color(col.lightened(0.25), 1.0), 0.75)
+	core.material_override = KitLooks.glass_mat(Color("1a0636"), Color("7a5cff"), 0.8, 0.55)
 	core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	core.position = Vector3(0, 0.5, 0)
 	n.add_child(core)
 	var ring := MeshInstance3D.new()
 	ring.name = "Ring"
 	ring.mesh = Models.cyl(1.0, 1.0, 0.04, 28)
-	ring.material_override = Models.glow_mat(Color(col.lightened(0.3), 0.35))
+	ring.material_override = KitLooks.shade_mat(Color(col, 0.75))
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(ring)
 	m.add_child(n)

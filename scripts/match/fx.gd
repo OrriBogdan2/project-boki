@@ -3,6 +3,10 @@ extends Node3D
 ## Pooled visual effects: particle bursts, damage numbers, ground rings, attack telegraphs, lightning.
 
 const TELEGRAPH: Shader = preload("res://shaders/telegraph.gdshader")
+## a word that would land on another stacks this far above it (m along the camera's up), at most this
+## many times
+const WORD_STEP := 0.62
+const WORD_STACK_MAX := 4
 var font: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 
 var bursts: Array[CPUParticles3D] = []
@@ -296,10 +300,33 @@ func word(at: Vector3, txt: String, col: Color, big := false) -> void:
 	l.text = txt
 	l.modulate = col
 	l.font_size = 58 if big else 40
-	l.global_position = at
+	l.global_position = _clear_spot(at)
 	l.visible = true
 	l.scale = Vector3.ONE * (1.5 if big else 1.1)
 	nums.append({"node": l, "t": 0.0, "vel": Vector3(0, 2.4, 0)})
+
+## Where a new word goes so it doesn't print over a word or number still rising near `at`: stepped up
+## the screen (along the camera's up) above whatever is there.
+func _clear_spot(at: Vector3) -> Vector3:
+	var cam := get_viewport().get_camera_3d() if get_viewport() else null
+	if cam == null:
+		return at
+	var up := cam.global_basis.y
+	var across := cam.global_basis.x
+	var spot := at
+	for i in WORD_STACK_MAX:
+		var clash := false
+		for n in nums:
+			var other: Label3D = n["node"]
+			var gap := other.global_position - spot
+			var overlaps := absf(gap.dot(across)) < 1.8 and absf(gap.dot(up)) < WORD_STEP
+			if other.visible and float(n["t"]) < 0.6 and overlaps:
+				clash = true
+				break
+		if not clash:
+			return spot
+		spot += up * WORD_STEP
+	return spot
 
 func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
 	var mi := MeshInstance3D.new()

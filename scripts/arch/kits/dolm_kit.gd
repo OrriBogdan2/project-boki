@@ -1,7 +1,7 @@
 class_name DolmKit
 extends ArchKit
-## Breah (id dolm, medium): Tremor Sense, Rubble Fists (tap boulder / hold punch), Landslide, Quakefall,
-## Stone Row, and Basalt Spine on X (breah_spine.gd). docs/heroes/dolm.md. The loop: raise rocks (Stone Row, or the rock Landslide pushes),
+## Breah (id dolm, medium): Tremor Sense, Rubble Fists (tap boulder / hold punch), Rubble Leap, Quakefall,
+## Stone Row, and Basalt Spine on X (breah_spine.gd). docs/heroes/dolm.md. The loop: raise rocks (Stone Row),
 ## then launch them with a held punch (every rock in the lane flies, a whole row one after another),
 ## a slam or a dash into the enemy. Rocks are low walls you can stand on and climb (StoneStand).
 ## A slam that knocks or kills resets itself.
@@ -14,6 +14,8 @@ const ROCK_PAY := "ROCKFALL"
 const STONE := Color("d9a35b")
 const MOLTEN := Color("ff7a2a")
 const LANE_COL := Color("f4ead8")       # the punch lane: pale stone white, as bright as an aim reticle
+const LEAP_CROUCH := 0.06      # s: the rock bursts up and she crouches on it before the leap
+const LEAP_ROCK_UP := 1.6      # m: how high the rock arcs after her
 
 var lmb_t := -1.0              # how long the attack key has been down (-1: not pressed)
 var lmb_was := false
@@ -29,7 +31,8 @@ var shield_stacks := 0
 var shield_at := -99.0
 var launch_pay := 0            # launched rocks that hit a hunter (payoff counter)
 var rock_hits := {}            # foe instance id -> last time a rock burst on it (repeat bursts deal less)
-var carry := {}                # Landslide's rock riding ahead: {t, dir, hit}
+# Rubble Leap in flight: {t, wait, T, from, to, dir, land_at (-1 until she lands)}
+var leap := {}
 var slam: BreahSlam
 var spine: BreahSpine
 # counters for the checks
@@ -42,11 +45,12 @@ var wall_stuns := 0
 var qf_resets := 0
 var rocks_made := 0
 var sight_pings := 0
-var landslides := 0
+var landslides := 0            # leap rocks that came down and rolled on
+var leap_lands := 0            # leaps that landed
+var leap_hits := 0             # foes the landing crash caught
 var sweeps := 0                # punches that launched 2+ rocks in a stream
 var last_sweep := 0            # rocks the last punch launched
 var splashes := 0              # boulder splash hits
-var carried_shoves := 0        # foes the Landslide rock shoved on its way
 
 func rock_def() -> Dictionary: return d.get("rock", {})
 func slam_def() -> Dictionary: return rmb_def()["slam"]
@@ -139,9 +143,9 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 	var blast := float(rd["blast"])
 	m.fx.ring(at, blast, Color("ff5a2a"), 0.3)
 	m.fx.ring(at, blast * 0.55, Color("ffd08a"), 0.18)
-	m.fx.burst(at + Vector3(0, 0.4, 0), Color("ff9a3c"), 22, 6.0, 0.5, 8.0, 1.1)
-	m.fx.spark(at + Vector3(0, 0.3, 0), Vector3.UP, Color("3a2a22"), 12, 8.0, 70.0, 0.45, 16.0, 1.2)      # shrapnel
-	m.fx.flash(at + Vector3(0, 0.6, 0), Color("ffc070"), 1.1, 0.08)
+	m.fx.burst(at + Vector3(0, 0.4, 0), Color(1.0, 0.5, 0.15, 0.9), 22, 6.0, 0.5, 8.0, 1.2)
+	KitLooks.of(m).impact(AimMode.ground(m, at), blast * 0.8, 0.4, 0.6)
+	m.fx.flash(at + Vector3(0, 0.6, 0), Color("ff9a3c"), 0.7, 0.08)
 	m.sfx("br_burst", at, -3.0, 1.0)
 	Feel.shake(m, "t2", h, at)
 	net_ring(at, blast, Color("ff5a2a"))
@@ -204,8 +208,8 @@ func _tick(dt: float) -> void:
 				slam.land(dive_k)
 		else:
 			h.vel.y = minf(h.vel.y, -float(slam_def()["dive_speed"]))
-	if not carry.is_empty():
-		_tick_carry(dt)
+	if not leap.is_empty():
+		_tick_leap(dt)
 	slam.tick(dt)
 	spine.tick(dt)
 	_tick_sight(dt)
@@ -234,11 +238,11 @@ func sight_deg() -> float:
 	return lerpf(float(pd["deg"][0]), float(pd["deg"][1]), clampf(sneak_t / float(pd["grow"]), 0.0, 1.0))
 
 ## A Boki merge cancels the air Quakefall's dive, the Quake Fist's charge, the charge leap and
-## Landslide's carried rock (AimKit's telegraphs go with them through drop_holds).
+## Rubble Leap (AimKit's telegraphs go with them through drop_holds).
 func _drop_holds() -> void:
 	dive = false
 	dive_k = 0.0
-	carry = {}
+	leap = {}
 	if slam: slam.drop()
 	if spine: spine.drop()
 	if lmb_t >= 0.0:
@@ -306,7 +310,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			if anim_id != "breah_wind" or m.time - anim_at > 3.0: play("breah_wind")
 			_punch_tele(k)
 			if not KitLooks.of(m).holding("br_fist"): m.sfx("br_wind", h.pos, -6.0, 1.0)
-			KitLooks.of(m).hold_on("br_fist", "hand", h, _fist_at(), 0.6 + 0.8 * k, MOLTEN.lerp(Color("ffe2a0"), k))
+			KitLooks.of(m).hold_on("br_fist", "mote", h, _fist_at(), 0.9 + 1.0 * k, MOLTEN.lerp(Color("ffc23a"), k))
 		if lmb_t >= float(ld["full"]) + float(ld["auto"]):
 			_punch(punch_k())
 			lmb_auto = true
@@ -364,8 +368,8 @@ func _boulder_end(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var bd: Dictionary = lmb_def()["boulder"]
 	var g := AimMode.ground(m, at)
 	m.fx.ring(g, float(bd["splash"]), Color("ff3a2a"), 0.28)
-	m.fx.burst(at, Color("ffb050"), 12, 4.0, 0.3, 4.0, 1.0)
-	m.fx.flash(at, Color("ffd090"), 0.7, 0.06)
+	m.fx.burst(at, Color(1.0, 0.5, 0.15, 0.9), 12, 4.0, 0.3, 4.0, 1.1)
+	m.fx.flash(at, Color("ff9a3c"), 0.5, 0.06)
 	m.sfx("br_boulder_hit", at, -4.0, 1.0)
 	for f in foes_in(at, float(bd["splash"])):
 		if f == e: continue
@@ -394,6 +398,7 @@ func _punch(k: float) -> void:
 	m.fx.burst(fp, Color("e8c07a"), int(8 + 10 * k), 4.0 + 4.0 * k, 0.3, 4.0, 1.0, Vector3(dir.x, 0.1, dir.y), 40.0)
 	m.fx.spark(fp, Vector3(dir.x, 0.05, dir.y), MOLTEN, int(8 + 8 * k), 9.0 + 6.0 * k, 22.0, 0.22, 2.0, 1.2)
 	m.fx.slash(h.pos + Vector3(0, 1.0, 0), atan2(dir.y, dir.x), 0.5, float(pd["len"]) * 0.8, MOLTEN, k > 0.6)
+	_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 	m.sfx("br_punch", h.pos, -1.0, 1.0)
 	Feel.shake(m, "t3" if k > 0.6 else "t2", h, fp)
 	var swept := sweep_rocks(dir)
@@ -421,6 +426,16 @@ func _punch(k: float) -> void:
 			m.fx.word(f.pos + Vector3(0, 2.0, 0), "WALLED", Color("ffb36a"), false)
 			KitLooks.of(m).crown(f, float(pd["wall_stun"]))
 		if f.hp < hp0 and h.is_local() and m.cam: m.cam.punch(0.03)
+
+## The fist's blow landing at the lane's end on the hit frame: a ring of dust, a molten spray thrown on
+## along the punch and a hot chip burst, bigger the longer she held.
+func _punch_impact(at: Vector3, dir: Vector2, k: float) -> void:
+	var fwd := Vector3(dir.x, 0.25, dir.y)
+	m.fx.ring(at, 1.0 + 0.6 * k, Color(0.62, 0.47, 0.32, 0.95), 0.3)
+	m.fx.burst(at + Vector3(0, 0.5, 0), Color(1.0, 0.45, 0.1, 0.9), int(8 + 10 * k), 5.0, 0.35, 6.0, 1.3, fwd, 60.0)
+	m.fx.burst(at + Vector3(0, 0.2, 0), Color(0.66, 0.52, 0.38, 0.9), int(6 + 6 * k), 3.0, 0.45, 3.0, 1.6)
+	m.fx.spark(at + Vector3(0, 0.6, 0), fwd, Color("ffb347"), int(6 + 6 * k), 8.0, 50.0, 0.25, 8.0, 1.1)
+	m.fx.flash(at + Vector3(0, 0.7, 0), Color("ff8a2c"), 0.5 + 0.3 * k, 0.07)
 
 ## Every rock of her team the punch reaches, nearest first: the ones in the lane, then any lined up
 ## further along the aim with no gap wider than `sweep_gap` (punching along a Stone Row sweeps it).
@@ -461,9 +476,12 @@ func _lunge(dist: float, t: float, dir: Vector2) -> void:
 	h.roll_t = t
 	h.move_kind = "rush"
 
-# ------------------------------------------------------------------ dash: Landslide
+# ------------------------------------------------------------------ dash: Rubble Leap
+## Shift on the ground: a rock bursts up under her, she leaps in an arc to the cursor (up to `dist`, with
+## the global dash feel on top like every dash), lands with a crash that shoves everyone beside her, and
+## the rock she leapt from comes down right after her and rolls on (the source's odd dash and thrown
+## rock, built as a leap: docs/heroes/dolm.md). In the air it is her long dash.
 func on_dash(use_ex: bool) -> bool:
-	var dd := dash_def()
 	if use_ex:
 		if not spend_dash(true): return true
 		play("breah_exdash")
@@ -472,47 +490,132 @@ func on_dash(use_ex: bool) -> bool:
 		)
 		m.sfx("br_shove", h.pos, -4.0, 1.0)
 		return true
-	if not spend_dash(false):
+	if not leap.is_empty() or not spend_dash(false):
 		return true
-	var dist := float(dd["dist"]) * (float(dd["speed_k"]) if rank("dash") >= 3 else 1.0)
-	var t := float(dd["time"]) * (float(dd["speed_k"]) if rank("dash") >= 3 else 1.0)
-	var dir := dash_dir()
+	var dd := dash_def()
+	var dir := h.aim_dir()
+	var to := leap_spot(dir)
+	var flight := float(dd["time"]) * float(dash_feel()["time"])
+	leap = {"t": 0.0, "wait": LEAP_CROUCH, "T": flight, "from": h.pos, "to": to, "dir": dir, "land_at": -1.0}
 	play("breah_dash")
-	# the rock bursts up just in front of her, a puff behind, then rides ahead of her for the dash
-	var front := h.pos + Vector3(dir.x, 0, dir.y) * 0.9
-	m.fx.burst(front + Vector3(0, 0.4, 0), Color("c9a27a"), 14, 5.0, 0.4, 9.0, 1.1)
-	m.fx.spark(front, Vector3.UP, MOLTEN, 8, 6.0, 25.0, 0.25, 8.0, 1.0)
-	m.fx.dust(h.pos - Vector3(dir.x, 0, dir.y) * 0.6, 8)
-	m.sfx("br_rise", front, -4.0, 1.2)
-	travel(dist, t, {"invuln": float(dd["invuln"]), "trail": "roll", "dir": dir})
-	carry = {"t": t, "dir": dir, "hit": {}}
+	# the rock bursts up under her first; she crouches on it, then leaps
+	m.fx.burst(h.pos + Vector3(0, 0.4, 0), Color("a8805a"), 14, 5.0, 0.4, 9.0, 1.2)
+	m.fx.burst(h.pos + Vector3(0, 0.2, 0), MOLTEN, 8, 4.0, 0.3, 6.0, 0.9)
+	m.fx.dust(h.pos, 10)
+	m.sfx("br_rise", h.pos, -4.0, 1.2)
+	AimKit.circle(
+		h, "leap",
+		{"at": to, "r": float(dd["land_r"]), "fill": 0.0, "all": true, "col": Color("ff5a2a"), "dur": flight + 0.3}
+	)
+	CombatBus.ability_used.emit(h, String(dd.get("id", "dash")), "dodge")
 	return true
 
-func _tick_carry(dt: float) -> void:
-	var dir: Vector2 = carry["dir"]
-	var at := h.pos + Vector3(dir.x, 0, dir.y) * 1.0 + Vector3(0, 0.5, 0)
-	KitLooks.of(m).hold_on("br_carry", "dashrock", h, at)
-	# the rock shoves whoever it runs into ahead of her (the setup for the dunk)
-	for f in foes_in(at, 1.1):
-		if carry["hit"].has(f.get_instance_id()): continue
-		carry["hit"][f.get_instance_id()] = true
-		carried_shoves += 1
-		f.hurt(
-			2.0 * power("dash"), h, {"src": "abil", "ab": "dash", "kb": dir * float(dash_def()["kb"]), "heavy": true}
-		)
-	carry["t"] = float(carry["t"]) - dt
-	if float(carry["t"]) <= 0.0 or h.downed:
-		var go := not h.downed
-		carry = {}
-		if go: _landslide_launch(dir)
+## Where the leap lands: the cursor, clamped between `min` and `dist` (times the dash feel; a third
+## further at rank 3), pulled back toward her until it is ground a body fits on.
+func leap_spot(dir: Vector2) -> Vector3:
+	var dd := dash_def()
+	var far := float(dd["dist"]) * float(dash_feel()["dist"]) * (float(dd["speed_k"]) if rank("dash") >= 3 else 1.0)
+	var to_aim := Vector2(aim().x - h.pos.x, aim().z - h.pos.z).length()
+	var want := clampf(to_aim, float(dd["min"]), far)
+	while want > 0.3:
+		var p := h.pos + Vector3(dir.x, 0, dir.y) * want
+		var g: float = m.world.ground_at(p.x, p.z)
+		if g > World.VOID + 1.0 and g - h.pos.y < 2.5 and m.world.occupy(p.x, p.z, h.r, g, false) == 0.0:
+			return Vector3(p.x, g, p.z)
+		want -= 0.25
+	return h.pos
 
-func _landslide_launch(dir: Vector2) -> void:
+func _tick_leap(dt: float) -> void:
+	var dd := dash_def()
+	leap["t"] = float(leap["t"]) + dt
+	if h.downed:
+		leap = {}
+		AimKit.hide(h, "leap")
+		return
+	var from: Vector3 = leap["from"]
+	var to: Vector3 = leap["to"]
+	if float(leap["wait"]) > 0.0:
+		leap["wait"] = float(leap["wait"]) - dt
+		KitLooks.of(m).hold_on("br_carry", "dashrock", h, from + Vector3(0, 0.35, 0))
+		if float(leap["wait"]) <= 0.0:
+			_leap_off()
+		return
+	var flown := float(leap["t"]) - LEAP_CROUCH
+	var flight := float(leap["T"])
+	AimKit.circle(
+		h, "leap",
+		{
+			"at": to, "r": float(dd["land_r"]), "fill": clampf(flown / flight, 0.0, 1.0), "all": true,
+			"col": Color("ff5a2a")
+		}
+	)
+	# the rock follows her arc a beat behind, tumbling
+	var lag := float(dd["rock_lag"])
+	var ur := clampf((flown - lag) / flight, 0.0, 1.0)
+	var rock_at := from.lerp(to, ur) + Vector3(0, 0.5 + sin(ur * PI) * LEAP_ROCK_UP, 0)
+	var land_at := float(leap["land_at"])
+	if land_at < 0.0 and flown > 0.08 and (h.grounded or flown > flight + 0.5):
+		_leap_land()
+		land_at = flown
+		leap["land_at"] = flown
+	var rock_down := maxf(flight, land_at) + lag
+	if flown < rock_down:
+		KitLooks.of(m).hold_on("br_carry", "dashrock", h, rock_at)
+		return
+	if land_at >= 0.0:
+		var dir: Vector2 = leap["dir"]
+		leap = {}
+		AimKit.hide(h, "leap")
+		_landslide_launch(to, dir)
+
+func _leap_off() -> void:
+	var dd := dash_def()
+	h.launch_to(leap["to"], float(leap["T"]))
+	h.inv_t = maxf(h.inv_t, float(dd["invuln"]))
+	h.dash_at = m.time
+	m.fx.burst(h.pos + Vector3(0, 0.2, 0), Color("c9a27a"), 12, 4.0, 0.35, 6.0, 1.2)
+	m.sfx("br_leap", h.pos, -3.0, 1.0)
+	Feel.dash_sound(m, id, h.pos, h)
+	Feel.shake(m, "dash", h, h.pos)
+	if h.is_local() and m.cam: m.cam.punch(0.03)
+
+## The landing: a crash ring that shoves everyone beside her (the first of the leap's two hits).
+func _leap_land() -> void:
+	var dd := dash_def()
+	leap_lands += 1
+	var at := h.pos
+	var r := float(dd["land_r"])
+	play("breah_leap_land")
+	KitLooks.of(m).impact(at, r, 0.5)
+	m.fx.dust(at, 14)
+	m.sfx("br_slam", at, -5.0, 1.15)
+	Feel.shake(m, "t2", h, at)
+	net_ring(at, r, Color("ff5a2a"))
+	rider_points(leap["from"], at)
+	for f in foes_in(at, r, 2.0):
+		leap_hits += 1
+		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
+		away = away.normalized() if away.length() > 0.05 else h.aim_dir()
+		f.hurt(
+			float(dd["land_dmg"]) * power("dash"), h,
+			{"src": "abil", "ab": "dash", "kb": away * float(dd["kb"]), "lift": 2.0, "heavy": true}
+		)
+
+## The rock comes down just ahead of where she landed and rolls on (the leap's second hit).
+func _landslide_launch(at: Vector3, dir: Vector2) -> void:
 	var dd := dash_def()
 	landslides += 1
-	var start := h.pos + Vector3(dir.x * 0.9, 0.5, dir.y * 0.9)
-	m.fx.burst(start, Color("e8c07a"), 14, 5.0, 0.4, 6.0, 1.1, Vector3(dir.x, 0.1, dir.y), 35.0)
+	var start := at + Vector3(dir.x * 0.9, 0.5, dir.y * 0.9)
+	m.fx.burst(start, Color("a8805a"), 14, 5.0, 0.4, 6.0, 1.2, Vector3(dir.x, 0.3, dir.y), 50.0)
+	m.fx.dust(start, 8)
 	_fire_rock(start, dir, float(dd["dmg"]) * power("dash"), "dash", "dashrock", float(dd["rock_range"]))
-	m.sfx("br_roll", h.pos, -3.0, 1.0)
+	m.sfx("br_roll", start, -3.0, 1.0)
+
+## Her dash after-image: a puff of quarry dust and a few embers, not the shared pill.
+func dash_afterimage() -> bool:
+	m.fx.burst(h.pos + Vector3(0, 0.5, 0), Color(0.62, 0.48, 0.34, 0.8), 3, 1.2, 0.4, -1.0, 1.6)
+	m.fx.burst(h.pos + Vector3(0, 0.9, 0), MOLTEN, 1, 1.5, 0.3, 2.0, 0.8)
+	return true
 
 # ------------------------------------------------------------------ RMB: Quakefall (BreahSlam)
 func rmb_charge_full() -> float:
@@ -621,6 +724,6 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["sec"] = true
 		bot_hold["rmb"] = float(rmb_def()["hold"]) + float(slam_def()["time"]) * randf_range(0.3, 1.0)
 		return
-	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and dist > 5.0 and dist < 9.0 and los and randf() < 0.2:
+	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and dist > 2.5 and dist < 6.0 and los and randf() < 0.2:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["dash"] = true

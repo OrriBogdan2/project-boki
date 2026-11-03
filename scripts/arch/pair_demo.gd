@@ -13,7 +13,7 @@ const ANIM := {
 	"br_leap": ["dolm", "rubble_fists", [0.85, 1.0, 1.12, 1.28, 1.5, 1.9]],
 	"br_lunge": ["dolm", "rubble_fists", [0.85, 0.93, 0.98, 1.06, 1.25]],
 	"br_dive": ["dolm", "rubble_fists", [0.5, 0.62, 0.75, 0.9, 1.05, 1.4]],
-	"br_dash": ["dolm", "rubble_fists", [0.5, 0.55, 0.62, 0.74, 0.86, 1.15]],
+	"br_dash": ["dolm", "rubble_fists", [0.53, 0.63, 0.8, 0.98, 1.13, 1.3]],
 	"br_exdash": ["dolm", "rubble_fists", [0.5, 0.56, 0.64, 0.76, 0.86, 1.1]],
 	"br_raise": ["dolm", "rubble_fists", [0.5, 0.58, 0.7, 0.86, 1.05, 1.4]],
 	"br_sense": ["dolm", "rubble_fists", [0.45, 0.62, 0.72, 0.85, 1.05]],
@@ -21,7 +21,7 @@ const ANIM := {
 	"os_orb_hot": ["ostra", "tether_lantern", [1.56, 1.62, 1.67, 1.73, 1.85, 2.1]],
 	"os_snap": ["ostra", "tether_lantern", [0.5, 0.6, 0.7, 0.75, 0.82, 1.05]],
 	"os_swap": ["ostra", "tether_lantern", [0.7, 0.9, 0.97, 1.05, 1.25, 1.5]],
-	"os_arrive": ["ostra", "tether_lantern", [2.5, 2.6, 2.66, 2.72, 2.85, 3.1]],
+	"os_arrive": ["ostra", "tether_lantern", [2.6, 2.73, 2.77, 2.82, 2.9, 3.2]],
 	"os_seed": ["ostra", "tether_lantern", [0.5, 0.56, 0.62, 0.72, 0.9, 1.2]],
 	"os_pop": ["ostra", "tether_lantern", [2.0, 2.06, 2.12, 2.2, 2.4, 2.65]],
 	"os_empower": ["ostra", "tether_lantern", [0.5, 0.6, 0.75, 0.9, 1.05, 1.35]],
@@ -39,9 +39,22 @@ static func _rmb_hold(K: ArchKit, t: float, dt: float, from: float, secs: float)
 		K.bot_hold["rmb"] = secs
 		K.press_rmb()
 
+## A clean frame for the owner: no hover cards or dev text (recording mode), no hero caption toast, and
+## the camera at --zoom=<z> when given (1.0 is the gameplay zoom; the default is a close-up).
+static func stage(m: Node, t: float) -> void:
+	if t > 0.1:
+		return
+	Record.set_level(maxi(Record.level, 1))
+	if m.hud: m.hud.toasts.clear()
+	var z := float(m.opts.get("zoom_hold", 0.0))
+	if z > 0.0 and m.cam:
+		m.set_meta("zoom_hold", z)
+		m.cam.zoom = z
+
 ## The scripted input of one strip (called every step).
 static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
+	stage(P.m, t)
 	match mv:
 		"br_throw":
 			P.inp["fire"] = t > 0.5 and t < 0.54
@@ -67,10 +80,14 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				K.cd["rmb"] = 0.0
 				K.press_rmb()
 		"br_dash":
+			# a leap that lands just short of the dummy: the crash catches it at the edge, the rock rolls into it
+			if t < 0.45: P.teleport(Vector3(D.pos.x - 6.0, P.pos.y, D.pos.z))
+			P.inp["aim"] = D.pos + Vector3(-1.9, 0.9, 0.0)
 			if at(t, dt, 0.5):
 				P.dashes = P.max_dashes()
 				P.do_dash()
 		"br_exdash":
+			P.inp["aim"] = P.pos + Vector3(0.0, 0.0, 5.0)      # (across the arena, clear of the dummy)
 			if at(t, dt, 0.45):
 				P.teleport(P.pos + Vector3(0, 1.4, 0))
 				P.grounded = false
@@ -93,8 +110,8 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				K.cd["rmb"] = 0.0
 				K.press_rmb()
 		"os_swap", "os_arrive":
-			P.inp["dash_down"] = t > 0.5 and t < 0.92
 			if at(t, dt, 0.5):
+				K.bot_hold["dash"] = 0.42      # Shift held to aim, let go at 0.92 (the local keys would read up)
 				P.dashes = P.max_dashes()
 				P.do_dash()
 		"os_seed":
@@ -138,7 +155,8 @@ const SHOTS := {
 	"pair_breah_slam_tele": ["br_slam", 1.75, -2.6], "pair_breah_slam_key": ["br_slam", 1.99, -2.6],
 	"pair_breah_slam_hit": ["br_slam", 2.07, -2.6],
 	"pair_breah_leap_key": ["br_leap", 1.15, -5.0], "pair_breah_lunge_key": ["br_lunge", 0.98, -5.0],
-	"pair_breah_dash_key": ["br_dash", 0.62, -6.5], "pair_breah_dash_hit": ["br_dash", 0.95, -9.0],
+	"pair_breah_dash_tele": ["br_dash", 0.62, -6.0], "pair_breah_dash_key": ["br_dash", 0.82, -6.0],
+	"pair_breah_dash_hit": ["br_dash", 1.12, -6.0], "pair_breah_dash_rock": ["br_dash", 1.3, -6.0],
 	"pair_breah_row_tele": ["br_raise", 0.56, -4.2], "pair_breah_row_key": ["br_raise", 0.74, -4.2],
 	"pair_breah_row_hit": ["br_raise", 1.2, -4.2],
 	"pair_breah_sense_tele": ["br_sense", 1.4, -6.0], "pair_breah_sense_hit": ["br_sense", 0.75, -6.0],
@@ -148,7 +166,7 @@ const SHOTS := {
 	"pair_ostra_snap_tele": ["os_snap", 0.6, -4.5], "pair_ostra_snap_key": ["os_snap", 0.73, -4.5],
 	"pair_ostra_snap_hit": ["os_snap", 1.0, -4.5],
 	"pair_ostra_swap_tele": ["os_swap", 0.85, -4.5], "pair_ostra_swap_key": ["os_swap", 1.75, -4.5],
-	"pair_ostra_swap_hit": ["os_arrive", 2.66, -4.5],
+	"pair_ostra_swap_hit": ["os_arrive", 2.76, -4.5],
 	"pair_ostra_seed_tele": ["os_seed", 1.3, -4.5], "pair_ostra_seed_key": ["os_pop", 1.95, -4.5],
 	"pair_ostra_seed_hit": ["os_pop", 2.1, -4.5],
 	"pair_ostra_swollen_key": ["os_empower", 0.8, -4.2],
@@ -163,7 +181,7 @@ static func tick(A: Arena, P: Hunter, D: Hunter, t: float, dt: float, w: String)
 	var who := "ostra" if "ostra" in w else "dolm"
 	var sh: Array = SHOTS.get(w, [])
 	var at_t := 1.2
-	if t < 0.05:
+	if t < 0.05 and P.arch != who:
 		A.set_arch(who)
 		A.set_kin("puddlet")
 		if not w.begins_with("pair_card"):
@@ -176,9 +194,10 @@ static func tick(A: Arena, P: Hunter, D: Hunter, t: float, dt: float, w: String)
 	ArenaDemo._aim(P, D)
 	P.inp["move"] = Vector2.ZERO
 	var K: ArchKit = P.ak
+	stage(A.m, t)
 	if not sh.is_empty():
 		var mv := String(sh[0])
-		if not (mv in ["br_punch", "br_slam"] and t < 0.45):
+		if not (mv in ["br_punch", "br_slam", "br_dash"] and t < 0.45):
 			trigger(P, D, mv, t, dt)      # (the strip's own start teleport is skipped; the shot keeps its start)
 		if w == "pair_breah_row_hit" and t > 1.0:
 			_climb(P, K as DolmKit)

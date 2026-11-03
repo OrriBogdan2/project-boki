@@ -67,8 +67,8 @@ const ARCH_STANCE := {
 	"bulwark": {"lean": 0.0, "width": 0.24, "knee": 0.3, "breath": 1.5, "arm": 0.7},
 	"tender": {"lean": 0.04, "knee": 0.14, "width": 0.08, "breath": 2.2, "arm": 0.9},
 	"rimewright": {"knee": 0.3, "lean": 0.12, "width": 0.07, "bounce": 1.3, "breath": 2.8, "arm": 1.15},
-	"dolm": {"lean": 0.08, "width": 0.2, "knee": 0.3, "breath": 1.6, "arm": 0.8},
-	"ostra": {"lean": -0.05, "width": 0.07, "knee": 0.1, "breath": 1.7, "arm": 0.8},
+	"dolm": {"lean": 0.1, "width": 0.2, "knee": 0.3, "bounce": 0.0, "breath": 1.6, "arm": 0.7},
+	"ostra": {"lean": 0.0, "width": 0.05, "knee": 0.05, "bounce": 0.0, "breath": 1.4, "arm": 0.8},
 }
 ## How far the shoulder pieces turn with the arm (the rest is left behind, so a raised arm slides
 ## under the plate instead of through it).
@@ -88,6 +88,11 @@ const HOLDS := {
 	"sword": {"gr": Vector3(0, 0, 0.06), "gl": Vector3.INF},
 	"great": {"gr": Vector3(0, 0, 0.02), "gl": Vector3(0, 0, 0.15)},
 	"twin": {"gr": Vector3(0.06, 0, -0.02), "gl": Vector3(-0.1, -0.06, -0.08)},
+	# a gauntlet on each fist (Breah): carried like a gun, but it rides the hand wherever a move sends it
+	"fist": {
+		"pos": Vector3(0.14, -0.2, -0.26), "low": Vector2(-0.35, 0.2), "gr": Vector3(0, -0.02, 0.0), "gl": Vector3.INF,
+		"kick": 0.1, "push": 0.05, "shake": 0.0, "fist": true
+	},
 }
 
 ## Melee swings per combo step: the blade's yaw (left +), pitch (up +) and roll around the swing
@@ -350,6 +355,7 @@ func _setup_weapon(w: String) -> void:
 		"greatsword": hold = "great"
 		"twin_blades": hold = "twin"
 		"tower_shield": hold = "sword"
+		"rubble_fists": hold = "fist"
 		_: hold = w if HOLDS.has(w) else "_gun"
 	hd = HOLDS[hold]
 	mag = null
@@ -365,6 +371,10 @@ func _setup_weapon(w: String) -> void:
 			mag = ch; mag_base = mag.position
 		elif sentinel == 0 and ch.name != "Muzzle" and not ch.is_queued_for_deletion():
 			sentinel = ch.get_instance_id()
+	if hold == "fist" and aim:
+		offhand = gun.duplicate()      # the second gauntlet, on the left fist
+		offhand.name = "Offhand"
+		aim.add_child(offhand)
 	if hold == "twin" and aim:
 		offhand = Node3D.new(); offhand.name = "Offhand"
 		aim.add_child(offhand)
@@ -647,7 +657,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var ph0 := ph
 	if moving:
 		ph += dt * spd * (2.15 if cls != "heavy" else 1.95)
-		if int(floor(ph / PI)) != int(floor(ph0 / PI)):
+		if int(floor(ph / PI)) != int(floor(ph0 / PI)) and KMovesStone.gait(arch) > 0.5:
 			stepped = true
 	# strafing and backpedalling: the legs turn toward where you're going; backwards they swing the other way
 	var want_yaw := 0.0
@@ -693,13 +703,14 @@ func update(dt: float, s: Dictionary) -> void:
 	var phl := ph
 	var phr := ph + PI
 	var stride := 0.62 + 0.28 * minf(run_k, 1.3)
-	var hl := sin(phl) * stride * r1 * back
-	var hr := sin(phr) * stride * r1 * back
+	var r_leg := r1 * KMovesStone.gait(arch)      # how much the legs walk (a hoverer's barely do)
+	var hl := sin(phl) * stride * r_leg * back
+	var hr := sin(phr) * stride * r_leg * back
 	# the knee folds most while the leg swings through, a little at foot strike
 	var sw_l := maxf(0.0, cos(phl - 0.35 * back))
 	var sw_r := maxf(0.0, cos(phr - 0.35 * back))
-	var kl := -(knee0 * 0.6 + (0.25 + 1.05 * minf(run_k, 1.3)) * pow(sw_l, 1.3) + 0.18 * maxf(0.0, -sin(phl)) ) * r1
-	var kr := -(knee0 * 0.6 + (0.25 + 1.05 * minf(run_k, 1.3)) * pow(sw_r, 1.3) + 0.18 * maxf(0.0, -sin(phr)) ) * r1
+	var kl := -(knee0 * 0.6 + (0.25 + 1.05 * minf(run_k, 1.3)) * pow(sw_l, 1.3) + 0.18 * maxf(0.0, -sin(phl)) ) * r_leg
+	var kr := -(knee0 * 0.6 + (0.25 + 1.05 * minf(run_k, 1.3)) * pow(sw_r, 1.3) + 0.18 * maxf(0.0, -sin(phr)) ) * r_leg
 	# standing: knees soft, the free leg bent and turned out, the weight leg straighter
 	var idle_w := 1.0 - r1
 	var free_l := clampf(wk, 0.0, 1.0)       # the left leg is the free one when the weight is on the right
@@ -977,6 +988,9 @@ func update(dt: float, s: Dictionary) -> void:
 		off.y -= absf(cos(ph)) * 0.025 * r1        # heavy, even steps
 	elif arch == "mage":
 		off.y += still * (0.012 + sin(t * 1.4 + seed_ph) * 0.008)       # light on its feet, half floating
+	elif arch == "dolm":
+		off.y -= absf(cos(ph)) * 0.03 * r1         # wide, grounded stomps
+	off.y += KMovesStone.hover(arch, t)
 	off.y += down_k * 0.15 + base_k * (0.04 + sin(t * 2.0) * 0.015) * smoothstep(0.0, 0.3, base_p)
 	off.y -= revive_k * 0.02
 	if not km.is_empty():
@@ -1655,6 +1669,9 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	var fl := sh_l + Vector3(-0.05 - 0.03 * elbow, -hang + 0.12 * r1, -0.04 - 0.06 * r1) + Vector3(0, absf(swing_l) * 0.05, swing_l * 0.2 * arm_amp)
 	var fr := sh_r + Vector3(0.05 + 0.03 * elbow, -hang + 0.12 * r1, -0.04 - 0.06 * r1) + Vector3(0, absf(swing_r) * 0.05, swing_r * 0.2 * arm_amp)
 	fl += Vector3(0, breath * 0.004 * still, 0)
+	if hd.get("fist", false):
+		# the off fist carried low and forward, ready (a brawler, not a shooter's hanging hand)
+		fl = sh_l + Vector3(-0.1, -0.3 + 0.06 * r1, -0.2 + swing_l * 0.12 * arm_amp)
 	# dodges: arms back (phase lunge), tucked (roll), shoulder guard (charge)
 	if dash_k > 0.01:
 		match dash_kind:
@@ -1798,6 +1815,8 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	var bsh := Vector3(0, breath * 0.005 * still, 0)
 	_ik(arm_l, el_l, sh_l + bsh, tl2, pole_l)
 	_ik(arm_r, el_r, sh_r + bsh, tr2, pole_r)
+	if hd.get("fist", false):
+		_fists_to_hands(grip_r)
 	# the flask in the left hand
 	if drink_k > 0.0 and flask == null and hand_l:
 		flask = Node3D.new(); flask.name = "Flask"
@@ -1913,6 +1932,15 @@ func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
 	return [sh_l, sh_r, 0.0]
 
 ## A support hand that can't reach its grip slides back along the weapon toward the trigger hand.
+## Gauntlets are the fists: each one sits in its hand wherever the hand went (a kit move's reach, a heave
+## overhead), so a move's pose is never held back by the weapon's aim.
+func _fists_to_hands(grip: Vector3) -> void:
+	var to_aim := aim.transform.affine_inverse()
+	if gun and hand_r:
+		gun.position = to_aim * (arm_r.transform * (el_r.transform * hand_r.position)) - gun.basis * grip
+	if offhand and hand_l:
+		offhand.position = to_aim * (arm_l.transform * (el_l.transform * hand_l.position)) - offhand.basis * grip
+
 static func _reachable(sh: Vector3, want: Vector3, back_to: Vector3, reach: float) -> Vector3:
 	if sh.distance_to(want) <= reach:
 		return want

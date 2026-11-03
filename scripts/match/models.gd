@@ -681,7 +681,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var rig := Node3D.new(); rig.name = "Rig"; root.add_child(rig)
 	var legs := Node3D.new(); legs.name = "Legs"; rig.add_child(legs)
 	var bw: float = [0.88, 1.0, 1.15][clampi(int(lk["body"]), 0, 2)]
-	bw *= float(CLASS_LOOK.get(cls, {}).get("build", 1.0))
+	bw *= float(CLASS_LOOK.get(cls, {}).get("build", 1.0)) * float(Arch.body(arch).get("build", 1.0))
 	var boot_k := float(CLASS_LOOK.get(cls, {}).get("boots", 1.0))
 	var gender := int(lk["gender"])
 	var fem := gender == 0
@@ -876,7 +876,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	root.set_meta("wid", weapon)
 	HunterAnim.rest_pose(root)       # hands on the weapon even where nothing animates it (portraits, galleries)
 	var rs := float(race["scale"])
-	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0))
+	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0)) * float(Arch.body(arch).get("size", 1.0))
 	root.scale = Vector3.ONE * float(Data.CLASSES[cls]["scale"]) * rs * ck
 	ring.scale = Vector3.ONE / (rs * ck)       # the ring under your feet shows the real hitbox, whatever your size
 	return root

@@ -11,13 +11,14 @@
 		"lmb": "Tether Lantern: quick orbs to full range; pause and the next one is a fast bright bolt that slows.",
 		"rmb": "Shard Snap: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew.",
 		"e": "Brimseed: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew.",
-		"dash": "Lantern Trade: lob a lantern to the cursor; when it lands you swap places with whoever stands there.",
+		"dash": "Lantern Trade: lob a lantern to the cursor and hover where you are; when it lands, everyone in its circle goes to your spot and you go to theirs.",
 		"passive": "Swell: your hits fill Swell (much faster on hunters); full, you are Swollen for 9s and everything grows.",
 		"weapons": {
 			"tether_lantern": "Quick orbs to full range; pause 1.4s and the next one is a fast bright bolt that slows."
 		},
 		"x": "Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle."
 	},
+	"body": {"size": 0.9},
 	"signature": "tether_lantern",
 	"no_hold": true,
 	"resource": {
@@ -50,14 +51,14 @@
 		"col": "#b8f5ea",
 		"cd": 9.0,
 		"reach": 12.0,
-		"time": 1.7,
+		"time": 1.8,
 		"time_swollen": 1.25,
 		"radius": 1.5,
 		"slow": 0.4,
 		"slow_t": 3.0,
 		"ally_shield": 20.0,
 		"ally_r": 3.0,
-		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern up to 12m to the cursor. 1.7s later you are there, keeping your height and momentum, and anyone standing in the spot is sent to where you were (foes slowed 40% for 3s). Over the abyss you land on the last solid ground. Swollen: 1.25s.",
+		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern up to 12m to the cursor. You hover where you stand until it lands, even over the abyss, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you were, each keeping its place in the circle (foes slowed 40% for 3s). Over the abyss the lantern lands on the last solid ground. Swollen: 1.25s.",
 		"lob": 4.5,
 		"aim_max": 1.5,
 		"keep_h": 3.0

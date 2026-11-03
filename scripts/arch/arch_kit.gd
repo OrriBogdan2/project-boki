@@ -984,6 +984,11 @@ func charge_now() -> Array:
 func charge_k() -> float:
 	return float(chg.get("k", -1.0)) if not chg.is_empty() else -1.0
 
+## Called on each after-image tick of a dash: a kit with its own after-image draws it and returns true;
+## false leaves the shared one.
+func dash_afterimage() -> bool:
+	return false
+
 func _tick_charge(dt: float) -> void:
 	var cn := charge_now()
 	var src := String(cn[0]); var k := float(cn[1])

@@ -30,6 +30,7 @@ func _breah() -> void:
 		P.roll_t = 0.0
 		P.inp["crouch"] = false
 		fresh(T)
+		T.inv_t = 0.0
 		T.teleport(home + Vector3(5.0, 0, 0))
 		aim_at(P, T.pos)
 		K.cd["e"] = 0.0
@@ -96,9 +97,9 @@ func _breah() -> void:
 	step(m, 0.42, func(): P.inp["fire"] = true)
 	k_at[1] = K.punch_k()
 	ok(
-		"lmb hold: the punch lane shows from the hold (3.2m by 1.4m, chevrons)",
-		AimKit.shown(P, "punch") and absf(float(lane_at.get("len", 0.0)) - 3.2) < 0.05 and absf(
-			float(lane_at.get("width", 0.0)) - 1.4
+		"lmb hold: the punch lane shows from the hold (4.2m by 1.8m, chevrons)",
+		AimKit.shown(P, "punch") and absf(float(lane_at.get("len", 0.0)) - 4.2) < 0.05 and absf(
+			float(lane_at.get("width", 0.0)) - 1.8
 		) < 0.05 and int(lane_at.get("chevrons", 0)) == 3,
 		str(lane_at.get("len"))
 	)
@@ -172,7 +173,7 @@ func _breah() -> void:
 		"wall stuns %d stun %.2f" % [K.wall_stuns, T.stun_t]
 	)
 	W.kind[W.idx(bx, bz)] = World.T_GROUND
-	# ---- Stone Row: the red tell first, then a slight curve of three rocks 2.2m ahead
+	# ---- Stone Row: the red tell first, then a slight curve of three rocks 3.4m ahead
 	reset.call()
 	T.teleport(home + Vector3(9.0, 0, 0))
 	aim_at(P, T.pos)
@@ -189,9 +190,15 @@ func _breah() -> void:
 	along.sort()
 	ok("e: Stone Row raises three rocks after the tell", rs.size() == 3, "rocks %d" % rs.size())
 	ok(
-		"e: the row is a slight curve 2.2m ahead (outer rocks 0.3m back)",
-		rs.size() == 3 and absf(float(along[2]) - 2.2) < 0.2 and absf(float(along[2]) - float(along[0]) - 0.3) < 0.1,
+		"e: the row is a slight curve 3.4m ahead (outer rocks 0.45m back, spanning about 3 body heights)",
+		rs.size() == 3 and absf(float(along[2]) - 3.4) < 0.2 and absf(float(along[2]) - float(along[0]) - 0.45) < 0.1,
 		str(along)
+	)
+	var zs0: Array = rs.map(func(w): return K.rock_mid(w).z)
+	zs0.sort()
+	ok(
+		"e: the row spans about 5m (3 body heights) across the aim", float(zs0[2]) - float(zs0[0]) > 4.6,
+		"%.2f" % (float(zs0[2]) - float(zs0[0]))
 	)
 	ok("anim: Stone Row plays breah_raise", K.anim_id == "breah_raise")
 	# ---- verticality: stand on a rock, climb it with a jump, walking into it is blocked
@@ -232,10 +239,10 @@ func _breah() -> void:
 	var rs2 := rocks(m)
 	var zs: Array = rs2.map(func(w): return K.rock_mid(w).z)
 	zs.sort()
-	var lx := K.rock_mid(rs2[1]).x if rs2.size() > 1 else home.x + 2.2
+	var lx := K.rock_mid(rs2[1]).x if rs2.size() > 1 else home.x + 3.4
 	P.teleport(Vector3(lx - 0.25, home.y, float(zs[0]) - 1.6))
 	P.vel = Vector3.ZERO
-	T.teleport(Vector3(lx, home.y, float(zs[2]) + 6.0))
+	T.teleport(Vector3(lx, home.y, float(zs[2]) + 4.0))
 	aim_at(P, Vector3(lx - 0.25, home.y, float(zs[0]) + 10.0))
 	P.fire_cd = 0.0
 	var l0 := K.launches
@@ -282,7 +289,7 @@ func _breah() -> void:
 	ok(
 		"rmb hold: the slam circle shows for everyone, a hop ahead",
 		AimKit.shown(P, "rmb") and bool(e1.get("all", false)) and absf(
-			(e1.get("at", Vector2.ZERO) as Vector2).x - (home.x + 1.3)
+			(e1.get("at", Vector2.ZERO) as Vector2).x - (home.x + 2.0)
 		) < 0.3,
 		str(e1.get("at"))
 	)
@@ -292,7 +299,7 @@ func _breah() -> void:
 	var e2 := AimKit.entry(P, "rmb")
 	ok(
 		"rmb hold: circle and sweet spot grow to full at 1.4s (0.2 + 1.2)",
-		absf(float(e2.get("r", 0.0)) - 3.0) < 0.01 and absf(
+		absf(float(e2.get("r", 0.0)) - 4.5) < 0.01 and absf(
 			float(e2.get("core", 0.0)) - 1.8
 		) < 0.01 and float(e2.get("core", 9.0)) > float(e1.get("core", 0.0)) + 0.5,
 		"core %.2f -> %.2f r %.2f -> %.2f" % [
@@ -305,7 +312,12 @@ func _breah() -> void:
 	)
 	var hx := P.pos.x
 	P.inp["sec_hold"] = false
-	step(m, 0.6)
+	step(m, 0.28)
+	var looks := KitLooks.of(m)
+	var slam_looks := ["burst", "shard", "crater"].all(
+		func(kind): return looks.timed.any(func(e): return e["kind"] == kind)
+	)
+	step(m, 0.32)
 	ok(
 		"rmb: let go = a hop forward into the circle, then the slam", P.pos.x - hx > 0.9 and K.slams == 1,
 		"hop %.2f slams %d" % [P.pos.x - hx, K.slams]
@@ -314,7 +326,10 @@ func _breah() -> void:
 		"rmb: a full charge in the centre stuns, with stars", T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
 		"stun %.2f" % T.stun_t
 	)
-	ok("rmb: the crater lingers about 1s", KitLooks.of(m).timed.any(func(e): return e["kind"] == "scorch"))
+	ok(
+		"rmb: a molten starburst, rock chips flying, and the dark red crater lingering about 1s",
+		slam_looks and looks.timed.any(func(e): return e["kind"] == "crater")
+	)
 	var d_full := dmg(T)
 	reset.call()
 	T.teleport(home + Vector3(2.4, 0, 0))
@@ -420,38 +435,8 @@ func _breah() -> void:
 		"rmb: a foe in the air is dunked", K.dunks == dn0 + 1 and T.vel.y < -10.0,
 		"dunks %d vy %.1f" % [K.dunks, T.vel.y]
 	)
-	# ---- Rubble Rush: the rock rides ahead, shoves, then rolls on and slows
-	reset.call()
-	T.teleport(home + Vector3(2.2, 0, 0))
-	aim_at(P, home + Vector3(10, 0, 0))
-	P.ak.on_dash(false)
-	m.step(DT)
-	ok(
-		"dash: the rock rides ahead of her through the dash",
-		not K.carry.is_empty() and KitLooks.of(m).holding("br_carry")
-	)
-	ok("anim: Rubble Rush plays breah_dash", K.anim_id == "breah_dash")
-	step(m, 0.9)
-	ok(
-		"small: the rock shoves a foe in its path during the dash", K.carried_shoves >= 1,
-		"shoves %d" % K.carried_shoves
-	)
-	reset.call()
-	T.teleport(home + Vector3(8.0, 0, 0))
-	aim_at(P, T.pos)
-	P.ak.on_dash(false)
-	step(m, 0.9)
-	ok(
-		"dash: at the end the rock rolls on and hits: shred and a slow",
-		K.landslides >= 1 and dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t > 0.0,
-		"took %.1f slow %.2f" % [dmg(T), T.slow_t]
-	)
-	reset.call()
-	T.teleport(home + Vector3(14.0, 0, 0))
-	aim_at(P, T.pos)
-	P.ak.on_dash(false)
-	step(m, 1.2)
-	ok("dash: the rolling rock goes about 6m, not 12", dmg(T) == 0.0, "took %.1f" % dmg(T))
+	# ---- Rubble Leap: the rock bursts up, she leaps to the cursor, lands with a crash, the rock follows
+	await _leap(m, P, T, home, K, reset)
 	# the base dash (in the air): her own heavy shove move
 	reset.call()
 	P.pos.y += 1.5
@@ -517,6 +502,7 @@ func _breah() -> void:
 	reset.call()
 	P.ak.on_dash(false)
 	m.step(DT)
+	var leaping := not K.leap.is_empty()
 	K.lmb_t = 0.5
 	K.dive = true
 	K.slam.leapt = true
@@ -525,15 +511,16 @@ func _breah() -> void:
 	step(m, 0.4, func(): P.inp["sec_hold"] = true)
 	K.drop_holds()
 	ok(
-		"merge hold: the dive, the charge, the leap and the carried rock all drop",
-		not K.dive and K.lmb_t < 0.0 and K.carry.is_empty() and not K.slam.leapt and not AimKit.shown(P, "rmb")
+		"merge hold: the dive, the charge, its leap and Rubble Leap all drop",
+		leaping and not K.dive and K.lmb_t < 0.0 and K.leap.is_empty() and not K.slam.leapt
+		and not AimKit.shown(P, "rmb")
 	)
 	P.inp["sec_hold"] = false
 	step(m, 0.5)
 	# ---- every move, sound and look exists
 	var moves := [
 		"breah_throw", "breah_wind", "breah_punch", "breah_crouch", "breah_leap", "breah_slam", "breah_dive",
-		"breah_slam_land", "breah_lunge", "breah_dash", "breah_exdash", "breah_raise", "breah_sense"
+		"breah_slam_land", "breah_lunge", "breah_dash", "breah_leap_land", "breah_exdash", "breah_raise", "breah_sense"
 	]
 	ok(
 		"anim: every Breah move is keyed (KMovesStone)",
@@ -546,3 +533,74 @@ func _breah() -> void:
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)
+
+## Rubble Leap (owner's dash note: a leap, not the source's odd dash): the rock first, an arc to the cursor
+## clamped by the dash feel, the landing marker for everyone, the landing crash, then the rock's roll-on hit.
+func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
+	var dd := K.dash_def()
+	reset.call()
+	T.teleport(home + Vector3(0, 0, 9.0))
+	aim_at(P, home + Vector3(3.0, 0, 0))
+	P.ak.on_dash(false)
+	m.step(DT)
+	ok(
+		"dash: the rock bursts up first; she crouches on it before the leap",
+		P.grounded and KitLooks.of(m).holding("br_carry") and K.anim_id == "breah_dash"
+	)
+	ok(
+		"dash: the landing spot shows for everyone through the leap",
+		AimKit.shown(P, "leap") and bool(AimKit.entry(P, "leap").get("all", false))
+	)
+	var peak := [0.0]
+	step(m, 0.9, func(): peak[0] = maxf(peak[0], P.pos.y - home.y))
+	var land_off := Vector2(P.pos.x - home.x - 3.0, P.pos.z - home.z).length()
+	ok(
+		"dash: an arc (a clear take-off and landing) that lands at the cursor",
+		peak[0] > 0.6 and land_off < 0.45 and P.grounded and K.leap_lands == 1,
+		"peak %.2f off %.2f" % [peak[0], land_off]
+	)
+	ok("anim: the landing plays breah_leap_land", K.anim_id == "breah_leap_land")
+	reset.call()
+	aim_at(P, home + Vector3(20.0, 0, 0))
+	P.ak.on_dash(false)
+	step(m, 0.9)
+	var far := float(dd["dist"]) * float(K.dash_feel()["dist"])
+	ok(
+		"dash: a far cursor clamps the leap to its reach, with the dash feel on top (5m x 0.85)",
+		absf(P.pos.x - home.x - far) < 0.4, "%.2f want %.2f" % [P.pos.x - home.x, far]
+	)
+	# the landing crash catches whoever is beside the spot
+	reset.call()
+	T.teleport(home + Vector3(4.0, 0, 0.9))
+	aim_at(P, home + Vector3(3.0, 0, 0))
+	var hits0 := K.leap_hits
+	var lands0 := K.leap_lands
+	var rolls0 := K.landslides
+	var t_at := T.pos
+	P.ak.on_dash(false)
+	var rock_first := [false]
+	step(m, 0.75, func(): if K.leap_lands > lands0 and K.landslides == rolls0: rock_first[0] = true)
+	ok(
+		"dash: the landing crash hits and shoves a foe beside the spot",
+		K.leap_hits == hits0 + 1 and dmg(T) >= float(dd["land_dmg"]) * 0.9 and T.pos.distance_to(t_at) > 0.5,
+		"hits %d took %.1f" % [K.leap_hits - hits0, dmg(T)]
+	)
+	ok("dash: the rock comes down after her landing (two hits, not one)", rock_first[0])
+	# the rock rolls on from the landing and hits: shred and a slow
+	reset.call()
+	T.teleport(home + Vector3(7.5, 0, 0))
+	aim_at(P, home + Vector3(3.0, 0, 0))
+	P.ak.on_dash(false)
+	step(m, 1.2)
+	ok(
+		"dash: the rock rolls on from the landing and hits: shred and a slow",
+		K.landslides >= 1 and dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t > 0.0,
+		"took %.1f slow %.2f" % [dmg(T), T.slow_t]
+	)
+	reset.call()
+	T.teleport(home + Vector3(13.0, 0, 0))
+	aim_at(P, home + Vector3(3.0, 0, 0))
+	P.ak.on_dash(false)
+	step(m, 1.4)
+	ok("dash: the rolling rock goes about 6m, not 12", dmg(T) == 0.0, "took %.1f" % dmg(T))
+

@@ -204,7 +204,7 @@ func _ostra() -> void:
 	var done_at := [0.0]
 	step(m, 2.0, func(): if K.swaps == 1 and done_at[0] == 0.0: done_at[0] = m.time)
 	ok(
-		"dash: the lob takes about 1.7s (1.25s Swollen)",
+		"dash: the lob takes about 1.8s (1.25s Swollen)",
 		absf(done_at[0] - t_cast - float(dd["time"])) < 0.08 and absf(float(dd["time_swollen"]) - 1.25) < 0.01,
 		"%.2f s" % (done_at[0] - t_cast)
 	)
@@ -213,6 +213,10 @@ func _ostra() -> void:
 		"dash: Trade trades places and slows the foe",
 		K.swaps == 1 and P.pos.x - home.x > 6.0 and T.pos.x - home.x < 2.0 and T.slow_t > 0.0,
 		"me %.1f foe %.1f" % [P.pos.x - home.x, T.pos.x - home.x]
+	)
+	ok(
+		"status: the traded foe reads SLOWED (the Trade's effect), not DIZZY",
+		m.fx.nums.any(func(e): return (e["node"] as Label3D).text == "SLOWED" and (e["node"] as Label3D).visible)
 	)
 	# owner: spamming Shift never sends her off in another direction
 	reset.call()
@@ -249,41 +253,13 @@ func _ostra() -> void:
 		).length() < 0.6,
 		"moved %.2f" % Vector2(P.pos.x - home.x, P.pos.z - home.z).length()
 	)
-	# owner: Shift keeps her height; and she keeps her momentum
-	reset.call()
-	aim_at(P, home + Vector3(7.0, 0, 0))
-	P.ak.on_dash(false)
-	step(m, 1.5)
-	P.teleport(P.pos + Vector3(0, 2.0, 0))
-	P.grounded = false
-	P.vel = Vector3(3.0, 0.0, 0.0)
-	var dy := P.pos.y - P.ground()
-	K.swap["t"] = 0.0
-	K._tick_swap(DT)
-	ok(
-		"owner: the Trade keeps her height over the ground", absf((P.pos.y - P.ground()) - dy) < 0.1 and dy > 1.9,
-		"before %.2f after %.2f" % [dy, P.pos.y - P.ground()]
-	)
-	ok("small: the Trade keeps her momentum", absf(P.vel.x - 3.0) < 0.01, "vx %.2f" % P.vel.x)
-	ok("anim: arriving plays ostra_arrive", K.anim_id == "ostra_arrive")
-	step(m, 1.0)
+	# owner: while the lantern flies she hovers where she cast it, even over the abyss, and keeps that height
+	await _hover(m, P, home, K)
 	reset.call()
 	K.swollen_t = 5.0
 	ok("combo: Swollen Trade is quicker", absf(K.swap_time() - 1.25) < 0.01, "%.2f" % K.swap_time())
-	# an ally at the landing goes back to where she stood
-	reset.call()
-	var A: Hunter = m.make_hunter(
-		"A", P.team, "medium", "Ally", "idle", {}, home + Vector3(7.0, 0, 0), {"arch": "none"}
-	)
-	aim_at(P, A.pos)
-	P.ak.on_dash(false)
-	step(m, 2.0)
-	ok(
-		"small: Trade swaps any unit at the landing, allies too", K.swapped_allies >= 1 and A.pos.x - home.x < 2.0,
-		"ally x %.1f" % (A.pos.x - home.x)
-	)
-	A.queue_free()
-	m.hunters.erase(A)
+	# owner: everyone in the landing circle goes to where she stood (two units both end up at the origin)
+	await _multi(m, P, T, home, K)
 	# ---- E: the seed drops at the cursor, grows 6.5s, light column near full, the 0.3s recast floor
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0))
@@ -467,3 +443,94 @@ func _ostra() -> void:
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)
+
+## The owner's swap note: she hovers in place in the air while the lantern flies, over the abyss too, and
+## arrives keeping that height.
+func _hover(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
+	var W = m.world
+	var gap := home + Vector3(-3.0, 0, 0)
+	for dx in range(-1, 2):
+		for dz in range(-1, 2):
+			W.kind[W.idx(int(floor(gap.x)) + dx, int(floor(gap.z)) + dz)] = World.T_VOID
+	K._drop_holds()
+	P.teleport(gap + Vector3(0, 1.5, 0))
+	P.grounded = false
+	P.vel = Vector3.ZERO
+	P.dashes = P.max_dashes()
+	aim_at(P, home + Vector3(5.0, 0, 0))
+	P.ak.on_dash(false)
+	m.step(DT)
+	m.step(DT)
+	var y0 := P.pos.y
+	var low := [y0]
+	var drift := [0.0]
+	var arrived := [Vector3.INF]
+	var swaps0 := K.swaps
+	var flying := not K.swap.is_empty()
+	step(m, 1.5, func():
+		if not K.swap.is_empty():
+			low[0] = minf(low[0], P.pos.y)
+			drift[0] = maxf(drift[0], Vector2(P.pos.x - gap.x, P.pos.z - gap.z).length()))
+	ok(
+		"owner: over the abyss she hovers in place while the lantern flies (no fall, no drift)",
+		flying and y0 - low[0] < 0.1 and drift[0] < 0.1 and not P.out,
+		"fell %.2f drifted %.2f" % [y0 - low[0], drift[0]]
+	)
+	step(m, 0.6, func(): if K.swaps > swaps0 and arrived[0] == Vector3.INF: arrived[0] = P.pos)
+	var got: Vector3 = arrived[0]
+	ok(
+		"owner: she arrives at the landing keeping the height she hovered at",
+		got != Vector3.INF and absf(got.x - home.x - 5.0) < 0.6 and got.y >= y0 - 0.15,
+		"at %s (hovered %.2f)" % [str(got - home), y0]
+	)
+	ok("anim: arriving plays ostra_arrive", K.anim_id == "ostra_arrive")
+	for dx in range(-1, 2):
+		for dz in range(-1, 2):
+			W.kind[W.idx(int(floor(gap.x)) + dx, int(floor(gap.z)) + dz)] = World.T_GROUND
+	step(m, 1.0)
+
+## Everyone in the landing circle goes back to where she stood, each keeping its place in the circle; a body
+## another game owns is sent its move over Net (bots and online use the same path).
+func _multi(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
+	var land := home + Vector3(7.0, 0, 0)
+	K._drop_holds()
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.grounded = true
+	P.dashes = P.max_dashes()
+	fresh(T)
+	T.teleport(land + Vector3(0.0, 0, 0.8))
+	var none := {"arch": "none"}
+	var A: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, land + Vector3(0.0, 0, -0.8), none)
+	var R: Hunter = m.make_hunter("R", 5, "medium", "Remote", "idle", {}, land + Vector3(0.9, 0, 0.0), none)
+	R.remote = true
+	R.nid = "r1"
+	var r_at := R.pos
+	aim_at(P, land)
+	ok("small: the Trade's circle holds all three", K.trade_bodies(land, float(K.dash_def()["radius"])).size() == 3)
+	HeroZones.capture = true
+	HeroZones.sent.clear()
+	var foes0 := K.swapped_foes
+	var allies0 := K.swapped_allies
+	P.ak.on_dash(false)
+	step(m, 2.1)
+	HeroZones.capture = false
+	var t_off := Vector2(T.pos.x - home.x, T.pos.z - home.z).length()
+	var a_off := Vector2(A.pos.x - home.x, A.pos.z - home.z).length()
+	ok(
+		"owner: two units in the circle (a foe and an ally) both end up at her origin",
+		t_off < 1.3 and a_off < 1.3 and K.swapped_foes == foes0 + 2 and K.swapped_allies == allies0 + 1,
+		"foe %.2f ally %.2f" % [t_off, a_off]
+	)
+	ok(
+		"small: each keeps its place in the circle (they don't stack on one spot)",
+		Vector2(T.pos.x - A.pos.x, T.pos.z - A.pos.z).length() > 1.0
+	)
+	ok(
+		"net: a body another game owns is sent its move to her origin, not moved here",
+		HeroZones.sent.any(func(e): return e[1] == "tp" and e[2] == "r1" and absf(float(e[3]) - home.x - 0.9) < 0.3)
+		and R.pos.distance_to(r_at) < 0.05
+	)
+	for x in [A, R]:
+		x.queue_free()
+		m.hunters.erase(x)

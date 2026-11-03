@@ -3356,7 +3356,8 @@ func render(delta: float, alpha: float) -> void:
 		ghost_t -= delta
 		if ghost_t <= 0.0 and model.visible:
 			ghost_t = 0.028
-			m.fx.ghost(position, face, tc, float(cdat["scale"]))
+			if ak == null or not ak.dash_afterimage():
+				m.fx.ghost(position, face, tc, float(cdat["scale"]))
 	elif gliding:
 		# while dropping in, a ring on the ground shows where you'll land
 		if dropping and is_local():
