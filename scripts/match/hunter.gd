@@ -984,7 +984,6 @@ var used := {}                  # slot -> times you pressed it and it went off (
 var hit_heat_t := 0.0           # a moment after being hit while gliding, the glider heats twice as fast
 var ex_next := false
 var dash_is_ex := false
-var dash_held := 0.0
 ## Movement chains (Supervive): Shift during a glove rush cancels it into the dash; during a dash
 ## or a ledge climb it's buffered and fires the moment that ends; off a jump pad (after the first
 ## beat of the launch) it breaks the pad flight into a dash. Jump out of a ground dash keeps half
@@ -1239,7 +1238,6 @@ func dash_with(e: Dictionary) -> void:
 	roll_t = float(e.get("time", DASH_TIME))
 	move_kind = String(e.get("kind", "dash"))
 	dash_is_ex = ex_next
-	dash_held = 0.0
 	if ex_next:
 		# the long dash: the class's own distance and time (light 7m, medium 6m, heavy 5m)
 		ex_next = false
@@ -2262,15 +2260,6 @@ func _physics(dt: float) -> void:
 	var cur := hv.length()
 	if roll_t > 0.0:
 		roll_t -= dt
-		# the "hold for the long dash" option: keep Shift down and the short dash stretches into
-		# the long one, which then goes on its own cooldown
-		if inp.get("dash_hold", false) and not dash_is_ex and ex_cd <= 0.0:
-			dash_held += dt
-			if dash_held >= 0.12:
-				dash_is_ex = true
-				ex_cd = float(cdat.get("ex_cd", EX_DASH_CD))
-				roll_t += 0.08
-				roll_speed *= 1.2
 		hv = roll_dir * roll_speed
 		if not shove.is_empty():
 			_shove_along()
