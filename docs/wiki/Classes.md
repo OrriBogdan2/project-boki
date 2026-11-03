@@ -1,12 +1,12 @@
 # Classes
 
 A class is a whole character: its own dash, a passive with a resource it builds, a weapon (left
-click), a right-click ability with several variants, a utility on E and an ultimate on R. There are
+click), a right-click ability with several variants, a utility on E and an ultimate on X. There are
 twelve, four in each weight class:
 
-- **Light:** [Dancer](Class-Dancer.md) (stay on one target from range, cartwheel and reset), [Archer](Class-Archer.md) (pin people, then the big shot), [Vireo](Class-Vireo.md) (load Sparks, then Wirerun through them) and [Tamsin](Class-Tamsin.md) (chill foes, shelter the squad behind ice).
-- **Medium:** [Marlowe](Class-Marlowe.md) (burr charges and one long needle), [Linnet](Class-Linnet.md) (heal, carry the downed), [Dolm](Class-Dolm.md) (raise rocks, punch them into the fight) and [Ostra](Class-Ostra.md) (swell, plant a seed, trade places).
-- **Heavy:** [Zedran](Class-Zedran.md) (rage, chain in, crush), [Bulwark](Class-Bulwark.md) (block, then smash them into walls), [Dredge](Class-Dredge.md) (haul a foe in, drop the anchor) and [Ashwick](Class-Ashwick.md) (build Char, flash foes over).
+- **Light:** [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset), [Pin](Class-Dark-Archer.md) (pin people, then the big shot), [Vireo](Class-Storm-Slayer.md) (load Sparks, then Wirerun through them) and [Claire](Class-Icy-Dancer.md) (skate on ice, chill foes, shelter the squad behind ice).
+- **Medium:** [Vex](Class-Hired-Gun.md) (burr charges and one long needle), [Moosh Moosh](Class-Fox-Cub.md) (heal, carry the downed), [Tarek](Class-Rock-Elementalist.md) (raise rocks, punch them into the fight) and [Ostra](Class-Void-Jester.md) (swell, plant a seed, trade places).
+- **Heavy:** [Zedran](Class-Arena-King.md) (rage, chain in, crush), [Bjorn](Class-Frozen-Bulwark.md) (block, then smash them into walls), [Dredge](Class-Broken-Abomination.md) (haul a foe in, drop the anchor) and [Cinder](Class-Mad-Pyromancer.md) (build Char, flash foes over).
 
 The weight class sets health, speed, mass (how far hits push you) and how many dash charges you get.
 Everything else comes from the class kit.

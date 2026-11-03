@@ -882,7 +882,8 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var bulk := float(body.get("bulk", 1.0))
 	root.scale = Vector3(bulk, 1.0, bulk) * float(Data.CLASSES[cls]["scale"]) * rs * ck * size_k
 	# the ring under your feet is the real hitbox: its world radius is hit_r, whatever your size
-	ring.scale = Vector3(1.0 / bulk, 1.0, 1.0 / bulk) * 2.0 * Arch.hit_r(arch, Data.CLASSES[cls]) / (float(Data.CLASSES[cls]["scale"]) * rs * ck * size_k)
+	var ring_k := 2.0 * Arch.hit_r(arch, Data.CLASSES[cls]) / (float(Data.CLASSES[cls]["scale"]) * rs * ck * size_k)
+	ring.scale = Vector3(1.0 / bulk, 1.0, 1.0 / bulk) * ring_k
 	var torso_node := root.find_child("Torso", true, false) as Node3D
 	if torso_node != null:
 		torso_node.scale.x *= float(body.get("chest", 1.0))
