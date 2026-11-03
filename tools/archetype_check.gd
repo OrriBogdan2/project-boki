@@ -280,7 +280,8 @@ func _archer() -> void:
 	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
 	step(m, 0.5)
 	if "--ak-debug" in OS.get_cmdline_user_args(): print("DEADEYE dd0 %.1f now %.1f" % [dd0, dmg(T)])
-	ok("archer Deadeye: Focus shot into a pinned foe", K.deadeyes == de0 + 1 and dmg(T) - dd0 >= 70.0, "deadeyes %d dealt %.0f" % [K.deadeyes - de0, dmg(T) - dd0])
+	# (audit: a full Focus no longer skips the draw, so this tapped arrow is a 15 tap plus the gold Deadeye hit)
+	ok("archer Deadeye: Focus shot into a pinned foe", K.deadeyes == de0 + 1 and dmg(T) - dd0 >= 30.0, "deadeyes %d dealt %.0f" % [K.deadeyes - de0, dmg(T) - dd0])
 	# ... and not into a free one
 	fresh(T); K.res = K.res_max(); de0 = K.deadeyes
 	step(m, 0.9)      # (past the pin's grace)
@@ -288,7 +289,7 @@ func _archer() -> void:
 	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
 	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
 	step(m, 0.5)
-	ok("archer Deadeye: none without a pin", K.deadeyes == de0 and dmg(T) >= 50.0, "dealt %.0f" % dmg(T))
+	ok("archer Deadeye: none without a pin", K.deadeyes == de0 and dmg(T) >= 10.0 and dmg(T) < 30.0, "dealt %.0f" % dmg(T))
 	# Spirit Walk: a dodge roll, then walking through a rock column (terrain still blocks)
 	P.teleport(home); P.vel = Vector3.ZERO; P.dashes = P.max_dashes()
 	P.inp["move"] = Vector2(0, 1)
@@ -345,13 +346,13 @@ func _mage() -> void:
 	P.inp["dash_down"] = false
 	step(m, 0.5)
 	ok("vireo Wirerun through Live: Blowout + dash back", K.blowouts == 1 and not K.live(T) and P.dashes >= 1.0 and dmg(T) >= 17.0, "blowouts %d took %.0f dashes %.1f" % [K.blowouts, dmg(T), P.dashes])
-	# a knock heals 15%
+	# no knock heal (audit: the data's passive is Static only)
 	P.hp = 20.0
 	var kt := P.hp
 	T2.hp = 1.0
 	K.on_deal(T2, 5.0, {"src": "shot"}); T2.hp = 0.0
 	K.on_deal(T2, 5.0, {"src": "shot"})
-	ok("vireo passive: a knock heals", P.hp > kt + 10.0, "hp %.0f" % P.hp)
+	ok("vireo passive: a knock heals nothing (data)", P.hp <= kt + 0.01, "hp %.0f" % P.hp)
 	T2.hp = T2.max_hp
 	# Coilshot hold: damage, a throw, a mote that gives the dash back
 	P.teleport(home); fresh(T); fresh(T2); T2.teleport(home + Vector3(12, 0, 0)); step(m, 0.2); aim_at(P, T.pos); P.dashes = 0.0
