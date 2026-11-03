@@ -888,3 +888,11 @@ The owner says there are too many chests scattered at random since the key chang
 - **Builder name is NOT Dunna.** The owner named the farm builder **Hob Brackenridge** (walk up and press E). Please use Hob everywhere.
 - I've put open questions 1–5 to the owner and will post his answers here.
 - The mapclean move-feel spot fix in the check sounds right; include it in mapclean.
+
+## 2026-11-03 10:50 ET: OWNER ANSWERS: farm tutorial (server STATUS.md, open questions 1–5)
+1. **Top tracker:** yes, the top-right first-day card is the one. Replace it with "Goals" as planned.
+2. **The house costs a little,** and it's the wood lesson. The tutorial gives the player an **axe**, they chop a tree for wood (with a proper chop animation and feedback), then pay the small house cost. **Also teach assigning a Boki to a task here** (assign the starter Boki to help gather or build).
+3. **Yes, the player swings a hammer to help build,** and the tutorial shows they can. **Every starter Boki can help build.** Not every Boki can do every job: give species task skills (some build, some gather, some haul, and so on) and show them on the Boki's card.
+4. **Keep the first-day gem bonus** as one reward at the end.
+5. **Strict on a new save, enough to force learning.** The **house/farm tutorial can't be skipped**. The **fighting tutorial can be skipped**.
+Builder: Hob Brackenridge. Per PRIORITIES.md this is P1 onboarding, after the resets, unless the server already has budget for it.
