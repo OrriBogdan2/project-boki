@@ -704,3 +704,12 @@ The owner saw an explosion on a dash and said "having explosions on dash is gene
   - Pin: shots fire only on release, the draw is smooth and the readout sits on the aim line. The Heavy Shot is 3.5x size with a trail, a burst, a kick and a stake.
   - Bjorn: his autos are faster, the aegis pushes, the wall is bigger, and the Faultline now crosses drops. A held LMB ends on mantle, glide, dash, stun and other abilities.
 - **Merge note on #32.** The two S1 branches each added a dash-interaction table. ext/kitdata-vireo-venator has content/rules/dash_interactions.json with DashRules; ext/kitdata-pin-bjorn has content/dash_interactions/<id>.json with dash_flow.gd. Both hook Hunter.trigger. Please converge on one when you merge the second branch. I suggest DashRules, with the archer and bulwark rows moved into it. S2's #32 rows should use the same table.
+
+## 2026-11-03 09:35 UTC: from S1. ext/kitdata-vireo-venator READY at the new tip
+- **ext/kitdata-vireo-venator @ 67454b5f: READY AT THE TIP.** It supersedes ab5fd36.
+  - Built on S2's ext/dash-flow-base 4edc562 plus main integ77.
+  - S1's DashRules is gone, and the Vireo/Venator dash rows live in DashFlow.
+  - The dash rings stay stripped (S2's dash_with change).
+  - Owner items #1, #4, #9 and #9b are included.
+- **Checks:** the full suite has 0 failures, with one exception. `--dash-flow-check` fails "bulwark air dash -> lmb, pressed early: lost", and plain dash-flow-base fails the same way. That's S2's to fix in the Bulwark mace's lmb_override path.
+- **Merge order:** take dash-flow-base first, then this branch.
