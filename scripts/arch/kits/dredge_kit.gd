@@ -558,9 +558,8 @@ func _anchor() -> void:
 	m.sfx("dr_anchor", h.pos, -1.0, 1.0)
 	Feel.shake(m, "t3", h, at)
 	if h.is_local(): Oomph.punch_dir(m, dd, 0.25)
-	if not h.grounded and not over_void:
-		h.gliding = false
-		h.vel.y = -float(ed["dive"])          # a low air cast still drives you down (never over the abyss)
+	if not h.grounded and not over_void and not h.gliding:
+		h.vel.y = -float(ed["dive"])          # a low air cast still drives you down (never over the abyss or a glider)
 	st["dive_vy"] = h.vel.y               # (tests) what the Anchor left your fall speed at
 	lock_until = m.time + float(dash_def()["lock_t"])
 	net_ring(at, float(ed["radius"]) * 0.6, col_of(ed))
@@ -598,7 +597,8 @@ func _slammed(f: Ent, stun: float, amt: float) -> void:
 ## In the air: smash straight down, the anchor falling with you; the landing ring shows where you'll hit.
 func _start_dive(height: float) -> void:
 	var ed := e_def()
-	dive = {"h0": height, "y0": h.pos.y, "t": 0.0}
+	# a glide key already held when he smashes doesn't reopen the glider; a fresh press does (and wins)
+	dive = {"h0": height, "y0": h.pos.y, "t": 0.0, "held": bool(h.inp.get("glide", false))}
 	h.gliding = false
 	h.vel = Vector3(0, -float(ed["dive"]), 0)
 	st["dive_vy"] = h.vel.y
@@ -611,10 +611,19 @@ func _tick_dive(dt: float) -> void:
 	if h.stun_t > 0.0 or h.downed:
 		dive = {}
 		return
+	if bool(dive["held"]):
+		dive["held"] = bool(h.inp.get("glide", false))
+		h.glide_cd = maxf(h.glide_cd, 0.05)
+	if h.gliding:
+		# the glider wins: opening it ends the smash (no landing hit) and he glides on, never dragged down
+		dive = {}
+		h.vel.y = maxf(h.vel.y, -Hunter.GLIDE_SINK)       # a normal glide from here, none of the smash's speed
+		AimKit.hide(h, "e_land")
+		play("")
+		return
 	h.vel.x = 0.0
 	h.vel.z = 0.0
 	h.vel.y = minf(h.vel.y, -float(ed["dive"]))
-	h.gliding = false
 	var gy: float = m.world.ground_at(h.pos.x, h.pos.z)
 	if gy <= World.VOID + 1.0:
 		dive = {}                 # drifted over the abyss: no smash, no push

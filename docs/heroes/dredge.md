@@ -82,6 +82,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 - Hook hold (owner item 31): the source data has no number for walking while the arm is out, so the out-flight walk is the owner's default band (20%). During the reel he keeps full walking, as the source's physics pull does (walking swings the body), rather than the owner's fallback of rooting him. His height is held only while he is off the ground (on the ground there is nothing to hold); only his vertical speed is held, so a mid-air drift is the same 20% walk and knocks still shove him.
 - The grab's hitbox is the hook's own size; with no target it flies its full 11.5m.
 - An ally caught by the hook is neither damaged, stunned nor Grounded; a wisp is pulled like an ally.
+- The glider wins over the Anchor Drop (owner bug 26 pattern): a fresh glide press during the air smash ends it with no landing hit (the source has no slam-then-glide, so the smash is dropped rather than kept) and he glides on at the normal sink; a glide key already held when he casts it doesn't reopen the glider. A low ground cast never pushes down an open glider.
 - The air smash needs at least 1.2m of height; lower casts use the ground slam (with the old small downward push).
 - Owner (23:40): several short, fast barges in a row, each a visible burst, not a blink. Three charges with a 0.22s gap.
   The air barge is the same quick shove with 35% more distance (faster, not longer); the footage doesn't show it. Out of

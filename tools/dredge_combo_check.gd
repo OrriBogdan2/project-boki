@@ -23,6 +23,7 @@ func run(main_node: Node) -> void:
 	await _hook_hold()
 	await _slam_tell()
 	await _dash_moves()
+	await _glide_wins()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	print("DREDGECHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -222,6 +223,69 @@ func _dash_moves() -> void:
 		"into dash: Shift in the slam is held, and he barges the step it lands",
 		held_now and K.anchors >= 1 and P.roll_t > 0.0 and waited < 0.35, "barged %.2f s after the press" % waited
 	)
+	await ak.done(m)
+
+## Bug 26 pattern: the glider wins over the Anchor Drop. A fresh glide press in the air smash ends it (no hit) and
+## he glides at the normal sink, never dragged down; after a ground slam a jump and glide is a normal glide.
+func _glide_wins() -> void:
+	var r: Array = ak.setup("dredge", 8.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var home: Vector3 = r[4]
+	var K: DredgeKit = P.ak
+	P.teleport(home + Vector3(0, 9.0, 0))
+	P.vel = Vector3.ZERO
+	P.grounded = false
+	ak.step(m, 0.1)
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	ak.step(m, 0.05)
+	var diving := not K.dive.is_empty()
+	var z0 := P.pos.y
+	var q0 := K.quakes
+	P.inp["jump"] = true
+	var low := z0
+	var t := 0.0
+	while t < 0.3:
+		P.inp["glide"] = true
+		P.inp["glide_btn"] = true
+		m.step(ak.DT)
+		t += ak.DT
+		low = minf(low, P.pos.y)
+	ok(
+		"glide wins: a glide press in the air smash ends it and he glides at the normal sink",
+		diving and K.dive.is_empty() and P.gliding and K.quakes == q0 and low >= z0 - Hunter.GLIDE_SINK * 0.3 - 0.35,
+		"fell %.2f m in 0.3 s" % (z0 - low)
+	)
+	P.inp["glide"] = false
+	P.inp["glide_btn"] = false
+	ak.step(m, 2.0)
+	# on the ground: the slam, then a jump and the glider at once
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	ak.step(m, 0.3)
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	ak.step(m, 0.42)
+	var zg := P.pos.y
+	P.inp["jump"] = true
+	m.step(ak.DT)
+	ak.step(m, 0.15)
+	P.inp["jump"] = true
+	var low_g := 99.0
+	t = 0.0
+	while t < 0.3:
+		P.inp["glide"] = true
+		P.inp["glide_btn"] = true
+		m.step(ak.DT)
+		t += ak.DT
+		low_g = minf(low_g, P.pos.y)
+	ok(
+		"glide wins: after the ground slam a jump and glide is a normal glide, not dragged down",
+		K.anchors >= 1 and P.gliding and low_g >= zg, "lowest %+.2f m from take-off" % (low_g - zg)
+	)
+	P.inp["glide"] = false
+	P.inp["glide_btn"] = false
 	await ak.done(m)
 
 func _all() -> void:
