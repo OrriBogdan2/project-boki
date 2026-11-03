@@ -204,6 +204,24 @@ func _dash_moves() -> void:
 			and not others.has(air_move) and fits,
 		"%s / %s, dash %.2f s" % [ground_move, air_move, dash_t]
 	)
+	# into_dash e: buffer: Shift in the slam's wind-up is held and the barge goes the step the slam lands
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	ak.step(m, 0.3)
+	P.dashes = P.max_dashes()
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	ak.step(m, 0.1)
+	P.do_dash()
+	var held_now := K.dash_held and P.roll_t <= 0.0
+	var waited := 0.0
+	while P.roll_t <= 0.0 and waited < 1.0:
+		ak.step(m, ak.DT)
+		waited += ak.DT
+	ok(
+		"into dash: Shift in the slam is held, and he barges the step it lands",
+		held_now and K.anchors >= 1 and P.roll_t > 0.0 and waited < 0.35, "barged %.2f s after the press" % waited
+	)
 	await ak.done(m)
 
 func _all() -> void:

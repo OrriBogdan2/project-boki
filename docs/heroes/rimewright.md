@@ -110,4 +110,5 @@ Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|shatter|payoff|skatefir
 - Merge-start hold fields: `rinkrun` (the skate), `spear_aim` and `rmb_down` (the spear aim), `wall_cast` (the wall's tell) and `rime` (the X seal).
 - X: main's `HunterKeys.ult_pressed` takes the `hunter_ult` key (the level gate) and calls the kit's `cast_ult`, which returns `HeroUlt.press(self, _start_rime)` (the ult's own cooldown in `cd["x"]`, the recast, a cast id); the kit also overrides `has_ult`, `ult_running`, `ult_recast`. Numbers are under `"x"` in `content/archetypes/rimewright.json`. Invulnerability is the hunter's `inv_t`, the root its `root_t`.
 - The wall is the shared `Verbs.add_wall` (blocking, the touch shove); the kit grows it, slides it, carries foes on its face and draws it.
+- Dash flow (item 32): the skate is her dash for `DashFlow` (`in_dash()`); `content/dash_flow/rimewright.json` says LMB fires from it as beams (`variant: beam`, read by `fires_in_dash` and the dart throw), RMB/E/Q fire, X cancels it; she has no air dash.
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check`.

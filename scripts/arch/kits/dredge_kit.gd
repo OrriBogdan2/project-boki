@@ -50,6 +50,7 @@ var barge_t := 0.0              # the barge's trail is showing
 var trail_t := 0.0              # the next barge after-image
 var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
 var next_barge := -9.0          # the short gap between barges in a run
+var dash_held := false          # Shift pressed in the slam or the Broadside, waiting for its end
 var shot_seen := 0              # the last weapon volley the kit dressed
 var shot_at := -9.0
 var stunned: Array = []         # foes the Anchor stunned: {e, until} (the spiral over them)
@@ -168,6 +169,7 @@ func _tick(dt: float) -> void:
 	if not pull.is_empty(): _tick_pull(dt)
 	_tick_hook_hold()
 	broadside.tick(dt)
+	_tick_held_dash()
 	_tick_gun()
 	_tick_looks(dt)
 	KMovesPair.air_moves(self, "dr_jump", "dr_land")
@@ -177,6 +179,7 @@ func _tick(dt: float) -> void:
 ## hook in the air (it grabs nothing).
 func _drop_holds() -> void:
 	wind = 0.0
+	dash_held = false
 	AimKit.hide(h, "e_tell")
 	dive = {}
 	flying = false
@@ -669,7 +672,12 @@ func _quake(at: Vector3, fell: float) -> void:
 
 # ------------------------------------------------------------------ dash: Barge
 func on_dash(use_ex: bool) -> bool:
-	if wind > 0.0 or not dive.is_empty() or broadside.running() or m.time < next_barge:
+	var busy_slot := _committed_slot()
+	if busy_slot != "":
+		# Shift in the slam or the Broadside: held for its end when its into_dash row says buffer
+		dash_held = String(DashFlow.into_dash_of(id, busy_slot).get("mode", "")) == "buffer"
+		return true
+	if m.time < next_barge:
 		return true
 	var dd := dash_def()
 	var dir := dash_dir()
@@ -699,6 +707,18 @@ func on_dash(use_ex: bool) -> bool:
 	stop_t = h.roll_t + 0.02
 	next_barge = m.time + h.roll_t + float(dd["gap"])
 	return true
+
+## The ability he is committed to now ("e": the slam's wind-up or the air smash, "x": the Broadside), else "".
+func _committed_slot() -> String:
+	if wind > 0.0 or not dive.is_empty():
+		return "e"
+	return "x" if broadside.running() else ""
+
+## A Shift held through the slam or the Broadside barges the step it ends (its into_dash row: buffer).
+func _tick_held_dash() -> void:
+	if dash_held and _committed_slot() == "":
+		dash_held = false
+		h.do_dash()
 
 ## In the air (the class air dash slot): the same quick shove 35% further, so it is faster, not longer (the
 ## class long dash would otherwise take over its distance and time).

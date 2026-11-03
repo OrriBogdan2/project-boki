@@ -175,4 +175,5 @@ reads to let it fly over rocks (one condition in `match.gd`). Grounded on the ca
 reeling Dredge barge anyway (`DredgeKit.reeling`). A foe owned by another player's game (remote) takes the hit and Grounded only.
 Holds dropped on a merge (`_drop_holds`): `wind`, `dive`, `flying`, `hook_sd`, `scoop`, `pull` (with the caster's own Grounded),
 and `broadside.blast` (Brass Broadside's charge and waves).
+Dash flow (item 32): `content/dash_flow/dredge.json`; LMB waits for the lunge's end, the rest fire from it; Shift during the slam or the Broadside is held (`dash_held`) and barges the step it ends (its `into_dash` rows).
 The slugs are ordinary shots (`Match.spawn_shot` with a `kx` callback for the hit). No new sync shape.

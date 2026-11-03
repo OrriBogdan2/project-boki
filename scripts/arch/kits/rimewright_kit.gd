@@ -183,7 +183,7 @@ func lmb_override(held: bool, _dt: float) -> bool:
 
 func _throw_dart() -> void:
 	var wd: Dictionary = h.wpn
-	var skating := not rinkrun.is_empty()
+	var skating := in_dash() and String(flow.row("lmb")["variant"]) == "beam"
 	var dir := h.aim_dir()
 	dart_n += 1
 	var side := 1.0 if dart_n % 2 == 0 else -1.0
@@ -266,8 +266,13 @@ func _tick_darts(dt: float) -> void:
 			s["vel"] = v.rotated(ang)
 
 # ------------------------------------------------------------------ Shift: Skate
-func fires_in_dash() -> bool:
+## The skate is her dash (DashFlow sees it); its rows (content/dash_flow/rimewright.json) say what fires from it.
+func in_dash() -> bool:
 	return not rinkrun.is_empty()
+
+## LMB from the skate: her row says fire, with the "beam" variant (straight thick darts).
+func fires_in_dash() -> bool:
+	return in_dash() and String(flow.row("lmb")["mode"]) == "fire"
 
 ## No class long dash: Shift is only ever the skate (the HUD shows no long-dash segment for her).
 func has_long_dash() -> bool: return false
