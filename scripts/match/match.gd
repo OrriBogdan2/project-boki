@@ -692,6 +692,7 @@ func _start(o: Dictionary) -> void:
 		layout = World.load_layout("arena")     # the practice arena (scripts/match/arena.gd)
 	map_name = String(layout.get("name", ""))
 	T = MapThreat.apply(T, layout)      # a harder map's own threat on top of the tier (map_threat.gd)
+	mob_sleep = MobSleep.new(layout)    # far idle monsters sleep on a streamed map (mob_sleep.gd)
 	if _stage_cb.is_valid(): world.stage_cb = _world_step
 	if not layout.is_empty():
 		await world.generate_authored(layout, seed_val)
@@ -1017,6 +1018,7 @@ func kin_seed(tag: String) -> int:
 	return hash("%d|%s|%d" % [seed_val, tag, _kin_seed_n]) & 0x7fffffff
 
 var map_name := ""     # the authored map's name, for where a kin was caught
+var mob_sleep := MobSleep.new({})
 ## Where a point is, for a caught kin's record: {map, island, biome, tier, tier_name}.
 func where_at(p: Vector3) -> Dictionary:
 	var w := {"map": map_name, "tier": tier, "tier_name": String(T.get("name", ""))}
@@ -4284,7 +4286,7 @@ func step(dt: float) -> void:
 	_prof("drop")
 	for k in kins: k.sim(dt)
 	_prof("kins")
-	for mb in mobs: mb.sim(dt)
+	mob_sleep.sim_all(self, dt)
 	if blight: blight.tick(dt)
 	_prof("mobs")
 	_separate()
@@ -4373,7 +4375,7 @@ func _separate() -> void:
 	for h in hunters:
 		if h.hittable() and h.grap.is_empty(): bodies.append(h)
 	for mb in mobs:
-		if not mb.dead and not Shrubling.hidden(mb): bodies.append(mb)      # (you walk into a disguised Shrubling like any bush)
+		if not mb.dead and not mb.asleep and not Shrubling.hidden(mb): bodies.append(mb)      # (you walk into a disguised Shrubling like any bush)
 	for k in kins:
 		if k.state in ["active", "wild", "dazed", "returning"] and not k.dead and not KinLoss.cradled(k): bodies.append(k)
 	# only bodies in the same or a neighbouring 4m cell can touch (radii are well under 2m): a grid

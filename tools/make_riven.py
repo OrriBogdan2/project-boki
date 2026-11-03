@@ -60,6 +60,10 @@ class Frame:
         ux, uz = self.u
         return ("e" if ux > 0 else "w") if abs(ux) >= abs(uz) else ("s" if uz > 0 else "n")
 
+def boulder(p, w, h):
+    """A boulder block w x h tiles (whole tiles, map axes) from p: wall_size_check wants every piece 3+ tiles."""
+    return [p[0], p[1], p[0] + w - 1, p[1] + h - 1]
+
 def auto_ramp(shape, lv0, lv1, d, w, run=1):
     """A flight climbing `d` onto a plateau: its top row is the plateau's first full row from the side it
     is climbed from, along the line through the plateau's middle."""
@@ -124,7 +128,7 @@ def region(spec, index):
              shapes=[blob(c[0], c[1], REGION_R, wob, 0, deg + 15), plat],
              sheer=[[(deg + 140) % 360, (deg + 200) % 360]],
              ramps=[auto_ramp(plat, 0, 4, {"n": "s", "s": "n", "e": "w", "w": "e"}[F.axis_in()], 4)],
-             rocks=rocks(tuple(F.at(4, -20) + F.at(5, -19)), tuple(F.at(-28, 2) + F.at(-27, 3)), tuple(F.at(18, 18) + F.at(19, 19))),
+             rocks=[boulder(F.at(4, -20), 2, 2), boulder(F.at(-28, 2), 2, 3), boulder(F.at(18, 18), 3, 2)],
              landings=[F.at(-26, 16), F.at(6, -27)],
              chests=[F.at(-18, -9), F.at(21, -8), F.at(1, -18), F.at(-25, 6)],
              camps=[F.at(12, 2, "heavy"), F.at(-16, -4, "normal"), F.at(15, -18, "light")],
@@ -176,7 +180,7 @@ def outer_isle(spec, index):
     d = dict(id=iid, name=nm, role="landing", region=7 + index, biome=biome, danger=0, poi=[int(c[0]), int(c[1])], noise=0.08,
              shapes=[blob(c[0], c[1], OUTER_R, wob, 0, deg)],
              sheer=[[(deg + 120) % 360, (deg + 170) % 360]],
-             rocks=rocks(tuple(F.at(2, 9) + F.at(3, 9))),
+             rocks=[boulder(F.at(2, 9), 3, 2)],
              landings=[F.at(8, -10), F.at(8, 10), F.at(-3, 15)],
              chests=[F.at(-4, -14), F.at(13, 2)],
              camps=[F.at(-2, 6, "light")],
@@ -235,10 +239,16 @@ M = mapkit.Map(SIZE, islands)
 regions = [dict(id="rift", name="The Rift", biome="gloom", islands=["rift"],
                 purpose="Contested core: the vault on the Sanctum, the richest loot and the most Blight. Two land bridges "
                         "(north and south); glide in from the four diagonal regions.")]
+PURPOSE = {
+    "rimeholt": "Northern frost ridge: the Keep's plateau looks down the Rime Span into the Rift; no lair, the vault's favourite.",
+    "galewrack": "Storm-lashed tableland with the Thunderwell (the Sky Serpent) and the longest glide into the Rift.",
+    "slagmarch": "Ember country: the Kilnworks plateau over the Slag Forge (the Colossus); the train's Rift run starts at its feet.",
+    "briarmaw": "Thick bramble wood, ambush country: a Boki nest, the Briar Hive (the Brood Mother) and the Briar Span to the Rift.",
+    "fallowmere": "Long-grass meadow with a Boki nest, Haystack Rise and the Barrowdeep (the Colossus).",
+    "gloamwood": "Dim wood round the shrine on Shrine Hill, with the Gloam Nest (the Brood Mother).",
+}
 for d, _ in ring:
-    regions.append(dict(id=d["id"], name=d["name"], biome=d["biome"], islands=[d["id"]],
-                        purpose="A ring region: one plateau up its stairs, three camps, a boss lair (most of them), bridges to "
-                                "its neighbours and out to an outer isle."))
+    regions.append(dict(id=d["id"], name=d["name"], biome=d["biome"], islands=[d["id"]], purpose=PURPOSE[d["id"]]))
 for d, _ in outer:
     regions.append(dict(id=d["id"], name=d["name"], biome=d["biome"], islands=[d["id"]] + [c[1] for c in CORNERS if c[4] == d["id"]],
                         purpose="Quiet outer landing with a sky-train stop and a way out."))
@@ -291,7 +301,8 @@ for d, _ in outer:          # each outer isle to the other region beside it
 lairs = LAIRS
 docks = DOCKS
 outposts = OUTPOSTS + [RF["briarmaw"].at(20, 10, 1), RF["gloamwood"].at(20, 10, 1)]
-hatches = HATCHES + [[C - 22, C + 8], [C + 22, C - 8]] + [RF[r[1]].at(17, -26) for r in RING]
+# (in opening order: the Rift's two first, so the first hatch is never beside a landing)
+hatches = [[C - 22, C + 8], [C + 22, C - 8]] + [RF[r[1]].at(17, -26) for r in RING] + HATCHES
 
 spawn_points = {
     "rare_kin": dict(pick=[4, 4], points=[d["poi"][:2] + [d["name"]] for d, _ in outer] +
@@ -420,7 +431,7 @@ def main():
                      "A raised core (the Rift and its Sanctum), a ring of six regions each with one plateau up its stairs and "
                      "most with a boss lair, six outer isles with the landings and exits, four corner rocks, and a winding sky "
                      "train between the ring and the outer isles. Every height is walked up: no perches or jump pads.",
-               threat=THREAT, regions=regions, islands=islands, bridges=bridges, glides=glides, pads=[], updrafts=[],
+               threat=THREAT, stream=True, regions=regions, islands=islands, bridges=bridges, glides=glides, pads=[], updrafts=[],
                winds=[], train=T, docks=docks, outposts=outposts, hatches=hatches, lairs=lairs, spawn_points=spawn_points)
     print("wrote", mapkit.write("riven", out), "problems:", len(probs))
 

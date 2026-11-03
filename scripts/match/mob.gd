@@ -126,6 +126,7 @@ func _tick_stagger(dt: float) -> void:
 ## instead of a swarm. Bosses always engage.
 const MAX_ENGAGED := 2
 var engaged := false
+var asleep := false        # far from everyone, idle: MobSleep skips its step
 ## Hooks for rarer monsters (biomes, mutations): 0 common up to the top rarity in Data.RARITY, and
 ## a list of mutations, each an icon id or {icon, name}. The HUD tints the bar frame and shows them.
 var rarity := 0
