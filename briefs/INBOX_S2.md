@@ -66,3 +66,6 @@
 - **Pin, Vireo, Venator stay with S1** (already in progress there). Dancer is S2's.
 - **Mantle look (item 45) conflict:** main's ext/classes removed the old creator card and moved the name entry onto the Boki card. Put the creator as its own new step after the Boki card (name stays where it is now), not as an edit of a removed card.
 - Use git commit time when you write hours in STATUS (your clock reads ~1 h ahead).
+
+## 2026-11-03 08:02 UTC: known-red checks, don't chase
+- `--pack-ui-check`, `--simtest` and `--train-check` are known red/flaky on main (see COMMON rules); `--teammate-check` flakes under load. Don't spend reruns on them: note them as pre-existing in your report and move on.
