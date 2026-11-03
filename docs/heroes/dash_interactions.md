@@ -52,16 +52,16 @@ One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlo
 | Vireo | E -> dash |  | the kit's own handling (no row yet) |
 | Vireo | ult (X) -> dash |  | the kit's own handling (no row yet) |
 | Vireo | Q glove -> dash |  | the kit's own handling (no row yet) |
-| Venator | ground dash -> LMB |  | fires mid-dash |
-| Venator | ground dash -> RMB |  | fires mid-dash |
-| Venator | ground dash -> E |  | fires mid-dash |
-| Venator | ground dash -> ult (X) |  | fires mid-dash |
-| Venator | ground dash -> Q glove |  | fires mid-dash |
-| Venator | air dash -> LMB |  | fires mid-dash |
-| Venator | air dash -> RMB |  | fires mid-dash |
-| Venator | air dash -> E |  | fires mid-dash |
-| Venator | air dash -> ult (X) |  | fires mid-dash |
-| Venator | air dash -> Q glove |  | fires mid-dash |
+| Venator | ground dash -> LMB | Footage briefs/hero-ref/venator.md:88 ('fires the rifle during the slide', 0149-0151), :90 and :308 (slides up-left while firing up-right; 'he can fire throughout'), :189 ('fires during any slide'). | fires mid-dash |
+| Venator | ground dash -> RMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| Venator | ground dash -> E | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| Venator | ground dash -> ult (X) | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| Venator | ground dash -> Q glove | Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| Venator | air dash -> LMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| Venator | air dash -> RMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| Venator | air dash -> E | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| Venator | air dash -> ult (X) | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| Venator | air dash -> Q glove | Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
 | Venator | LMB -> dash |  | the kit's own handling (no row yet) |
 | Venator | RMB -> dash |  | the kit's own handling (no row yet) |
 | Venator | E -> dash |  | the kit's own handling (no row yet) |
