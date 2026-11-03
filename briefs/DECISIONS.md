@@ -78,6 +78,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 
 ## Agents and art
 - Agent models: the owner says the new model costs only about 15% of the usage, so **push most work onto the new low-usage model**. Use Opus only where the owner or DECISIONS asks for it (feel-critical parity, e.g. Zedran item 22). Sonnet for small, clear fixes.
+- Art pass scope (owner, Nov 3): the Boki art pass also brings the **custom character creator** (you on the farm: face, body, hair, outfits, to the new STYLE.md quality) and the **cutscenes** (prologue and story moments, incl. the 'taking up the Mantle' moment) up to the same standard. Plan them together so everything matches.
 - Art pipeline: the image-gen session makes concept sheets on ext/imagegen. S2 builds the 3D models from them (Vex first, for the owner's review). 2D portraits go into the menus early (ext/portraits-2d).
 - Portraits come from the art pass; ext/portrait keeps only its frame and HUD side.
 

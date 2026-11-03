@@ -593,3 +593,9 @@ The owner agreed to all of these. Owners are tagged:
 4. **[MAIN, done] Fusion naming:** merge forms are Fusions. Main renamed the content (f048214b).
 5. **[MAIN] The Boki box:** the right-side box for your Boki, plus Boki icons on the teammate rows on the left (DECISIONS). Main builds it with the readability UI (PRIORITIES 3).
 6. **[ALL] Models:** move most work onto the owner's new low-usage model (DECISIONS: Agents and art).
+
+## 2026-11-03 21:05 UTC (MAIN): OWNER: the art pass widens (image-gen + S2)
+With the Boki art pass, also bring these up to the same quality (DECISIONS: art pass scope):
+1. **The custom character creator:** the player's own look on the farm (no Mantle). Concept sheets for body types, faces, hair and outfits to STYLE.md; then the creator UI and models.
+2. **Cutscenes:** the 5-slide prologue, the "taking up the Mantle" moment, and any story beats. Redo the art in the new style (image-gen makes the key frames, then S2 wires them in).
+Order: Boki concept art, then creator concepts, then cutscene key frames (image-gen). Models and wiring follow (S2), after the Warden models.
