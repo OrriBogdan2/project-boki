@@ -281,7 +281,12 @@ func _zones() -> void:
 	P.inp["aim"] = home + Vector3(9, 0.9, 0)
 	P.ak.on_dash(false)
 	step(m, 1.9)
-	ok("swap: lands on solid ground when aimed over the abyss", not m.world.is_void(P.pos.x, P.pos.z) and P.pos.x < home.x + 5.0, "x %.1f" % (P.pos.x - home.x))
+	# item 42: the target is the cursor (or full reach along it), the abyss included; no ground or walk clamp
+	ok(
+		"swap: aimed over the abyss, it lands at the cursor, over the abyss (item 42)",
+		m.world.is_void(P.pos.x, P.pos.z) and absf(P.pos.x - home.x - 9.0) < 0.3 and absf(P.pos.z - home.z) < 0.3,
+		"x %.1f" % (P.pos.x - home.x)
+	)
 	await done(m)
 	r = setup("ostra", 9.0)
 	m = r[0]; P = r[1]; home = r[3]
@@ -290,7 +295,12 @@ func _zones() -> void:
 	P.inp["aim"] = home + Vector3(10, 0.9, 0)
 	P.ak.on_dash(false)
 	step(m, 1.9)
-	ok("swap: stops before a rock in the way", P.pos.x < home.x + 4.0, "x %.1f" % (P.pos.x - home.x))
+	# the lantern is a high lob (footage: it climbs well above the field and lands exactly at the cursor), so a rock
+	# in the way doesn't stop it
+	ok(
+		"swap: a rock in the way is lobbed over, it lands at the cursor (item 42)",
+		absf(P.pos.x - home.x - 10.0) < 0.3 and absf(P.pos.z - home.z) < 0.3, "x %.1f" % (P.pos.x - home.x)
+	)
 	await done(m)
 	# ---- Net: a Trade on a body another game owns is sent, and that body's own game moves it
 	ok("net: Net.VERSION is at least 0.14.0 (carry and zone events)", int(Net.VERSION.split(".")[0]) > 0 or int(Net.VERSION.split(".")[1]) >= 14, Net.VERSION)
