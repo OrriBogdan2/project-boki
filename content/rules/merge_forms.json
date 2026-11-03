@@ -12,7 +12,7 @@
 	},
 	"damage_cap": 0.2,
 	"window_note": "warn_s: the last seconds of the window flash, tick and pulse; release_rest_s: how long the Boki rests beside you after you release with the ultimate (no C, no orders, carried bonuses on); a merge that times out has no rest. afterglow: after a release the hunter gets secs seconds of move_speed (x) and a shield of shield_frac of max health. damage_cap: the most the stat-based damage bonus can total while merged (x); gear and perks you already had are never cut.",
-	"xform_note": "seconds: the transformation lasts 0.7 and you are invulnerable for all of it; the Boki lands in you at 0.45 (flash, shockwave, the silhouette pops in); R again unlocks 1.5s after the form appears",
+	"xform_note": "seconds: the transformation lasts 0.7 and you are invulnerable for all of it; the Boki lands in you at 0.45 (flash, shockwave, the silhouette pops in); the Merge key again unlocks 1.5s after the form appears",
 	"fallback": {
 		"haste": 0.12,
 		"size": 1.0,

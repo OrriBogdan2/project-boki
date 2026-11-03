@@ -34,6 +34,9 @@ func _fresh() -> Hunter:
 	m.mobs.clear()
 	return m.player
 
+func _glowing(h: Hunter) -> bool:
+	return float(h.get_meta("afterglow_t", 0.0)) > 0.0
+
 func _run_for(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
@@ -65,6 +68,7 @@ func _keys() -> void:
 		"T alone is Merge by default (%s)" % str(Settings.slots("ultimate")))
 	ok(Settings.key_cap("ultimate") == "T" and Settings.key_cap("reload") == "R",
 		"the key caps follow the binds (%s, %s)" % [Settings.key_cap("ultimate"), Settings.key_cap("reload")])
+	ok(Settings.slots("emote")[0] == _key(KEY_Y), "the Emote wheel moved to Y (%s)" % str(Settings.slots("emote")))
 	ok(Settings.conflicts(_ev(KEY_T), "ultimate").is_empty(),
 		"nothing else in a match is on T (%s)" % str(Settings.conflicts(_ev(KEY_T), "ultimate")))
 	ok(Settings.conflicts(_ev(KEY_R), "reload").is_empty(), "R is shared only with the build-mode rotate")
@@ -97,6 +101,23 @@ func _migration() -> void:
 	KeyMigrate.run(r_taken)
 	ok(r_taken["keys"]["reload"] == [] and r_taken["keys"]["dash"] == [_key(KEY_R)],
 		"R custom-bound to another action: Reload starts unbound")
+	var t_taken := {"keys": {"base": [_key(KEY_T)]}, "keys2_v": 1, "keys3_v": 0}
+	KeyMigrate.run(t_taken)
+	ok(t_taken["keys"]["ultimate"] == [] and t_taken["keys"]["base"] == [_key(KEY_T)],
+		"T custom-bound to another action: Merge starts unbound, no clash (%s)" % str(t_taken["keys"]))
+	var y_taken := {"keys": {"map": [_key(KEY_Y)]}, "keys2_v": 1, "keys3_v": 0}
+	KeyMigrate.run(y_taken)
+	var yk: Dictionary = y_taken["keys"]
+	ok(yk["emote"] == [] and yk["map"] == [_key(KEY_Y)] and not yk.has("ultimate"),
+		"Y custom-bound to another action: Emote starts unbound (%s)" % str(y_taken["keys"]))
+	var merge_y := {"keys": {"ultimate": [_key(KEY_Y)]}, "keys2_v": 1, "keys3_v": 0}
+	KeyMigrate.run(merge_y)
+	ok(merge_y["keys"]["ultimate"] == [_key(KEY_Y)] and merge_y["keys"]["emote"] == [],
+		"Merge saved on exactly Y: Merge keeps it, Emote starts unbound (%s)" % str(merge_y["keys"]))
+	var emote_t := {"keys": {"emote": [_key(KEY_T)]}, "keys2_v": 1, "keys3_v": 0}
+	KeyMigrate.run(emote_t)
+	var ek: Dictionary = emote_t["keys"]
+	ok(not ek.has("emote") and not ek.has("ultimate"), "a saved old-default Emote on T moves to Y")
 	var twice := custom.duplicate(true)
 	KeyMigrate.run(twice)
 	ok(twice == custom, "the migration runs once")
@@ -135,7 +156,6 @@ func _reload() -> void:
 func _bond() -> void:
 	var P := _fresh()
 	P.kin.stow()
-	KinBond.reset()
 	var rules := KinBond.rules()
 	var shares_ok := is_equal_approx(float(rules["hit"]), 0.6) and is_equal_approx(float(rules["knock"]), 0.7)
 	shares_ok = shares_ok and is_equal_approx(float(rules["kill"]), 0.8)
@@ -151,6 +171,7 @@ func _bond() -> void:
 	ok(KinBond.add(P, 0.1, "test") == 0.0 and KinBond.add(P, -1.0, "test") == 0.0,
 		"a full bar or a negative share adds nothing")
 	P.ult = 0.0
+	ok(KinBond.from_ult(P, "hit", "") == 0.0 and P.ult == 0.0, "a cast with no id pays nothing")
 	KinBond.from_ult(P, "hit", "c1")
 	KinBond.from_ult(P, "hit", "c1")
 	ok(is_equal_approx(P.ult, 0.6), "a second hit of the same cast adds nothing (%.2f)" % P.ult)
@@ -187,7 +208,7 @@ func _merged() -> Hunter:
 func _release() -> void:
 	var P := _merged()
 	var k: Kin = P.kin
-	ok(KinMerge.active(P) and not MergeRelease.glowing(P), "setup: merged, no afterglow yet")
+	ok(KinMerge.active(P) and not _glowing(P), "setup: merged, no afterglow yet")
 	var kit := MergeKit.of(P)
 	kit.age = 2.0
 	P.shield = 0.0
@@ -200,7 +221,7 @@ func _release() -> void:
 	ok(glow_ok,
 		
 		"afterglow data: 3s, +15% speed, 8%% max health shield (%s)" % str(ag))
-	ok(MergeRelease.glowing(P) and P.buff("move_speed") >= 0.15 - 0.001,
+	ok(_glowing(P) and P.buff("move_speed") >= 0.15 - 0.001,
 		"the hunter has the afterglow: +%.0f%% speed" % (P.buff("move_speed") * 100.0))
 	ok(P.shield >= P.max_hp * 0.08 - 0.5 and P.shield_t > 0.0,
 		"...and a shield of 8%% max health (%.1f of %.1f)" % [P.shield, P.max_hp])
@@ -209,7 +230,7 @@ func _release() -> void:
 		"...landed beside you, following, not stowed (state %s, %.1fm)" % [k.state, k.flat_dist(P)])
 	ok(P.merge_cd >= 5.0, "Merge waits for the rest (%.1fs)" % P.merge_cd)
 	_run_for(3.3)
-	ok(not MergeRelease.glowing(P) and P.buff("move_speed") == 0.0, "the afterglow lasts about 3s")
+	ok(not _glowing(P) and P.buff("move_speed") == 0.0, "the afterglow lasts about 3s")
 	_run_for(3.0)
 	ok(not k.resting(), "the Boki is rested after the short rest")
 	# a timeout: no burst, no afterglow, no pumped rest
@@ -217,7 +238,7 @@ func _release() -> void:
 	k = P.kin
 	P.merge_st["t"] = 0.05
 	_run_for(0.3)
-	ok(not KinMerge.active(P) and not MergeRelease.glowing(P) and P.buff("move_speed") == 0.0,
+	ok(not KinMerge.active(P) and not _glowing(P) and P.buff("move_speed") == 0.0,
 		"a timeout ends without the afterglow")
 	ok(not k.resting() and k.cmd == "follow",
 		"...and the Boki is out beside you, not pumped or resting (state %s)" % k.state)
@@ -234,7 +255,7 @@ func _cap() -> void:
 		"merged with a +35%% buff: the stat bonus stays at +%.0f%% (%.2f)" % [cap * 100.0, P.gear_stat("dmg")])
 	ok(is_equal_approx(KinMerge.cap_damage(P, 0.05, 0.3), cap), "gear +5% plus +30% from the merge caps at +20%")
 	ok(is_equal_approx(KinMerge.cap_damage(P, 0.25, 0.1), 0.25), "gear and perks you had on their own are never cut")
-	ok(KinParts.OWNER_STATS["damage"][3] <= cap + 0.0001, "a merge's damage passive cannot be written above the cap")
+	ok(float(KinParts.OWNER_STATS["damage"][3]) >= 0.35, "a Boki's own damage passive roll is not shrunk by the cap")
 	var Q := _fresh()
 	Q.add_buff("damage", 0.35, 5.0)
 	ok(Q.gear_stat("dmg") > cap, "outside a merge the buff is not capped (%.2f)" % Q.gear_stat("dmg"))

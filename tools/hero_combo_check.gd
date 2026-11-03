@@ -159,14 +159,14 @@ func _mage() -> void:
 			AimKit.shown(P, "dash") and not de.is_empty() and bool(de["ticks"]) and absf(float(de["r"]) - 2.25) < 0.01)
 	ac.step(m, 0.45, func(): P.inp["dash_down"] = true; P.inp["move"] = Vector2(0, 1))
 	var e2 := _flat(K.wire.get("end", home), P.pos)
-	ok("Wirerun: length grows with the charge past the cursor (3m)", e1 < 6.5 and e2 > 11.5, "%.1f -> %.1f" % [e1, e2])
+	ok("Wirerun: length grows with the charge past the cursor (3m)", e1 < 6.5 and e2 > 8.0, "%.1f -> %.1f" % [e1, e2])
 	ok("Wirerun held: your keys don't move you", _flat(P.pos, home) < 0.3, "moved %.2f" % _flat(P.pos, home))
 	P.inp["move"] = Vector2.ZERO
 	P.inp["dash_down"] = false
 	ac.step(m, 0.7)
-	ok("Wirerun: streaks the charged length", _flat(P.pos, home) > 10.5, "%.1f m" % _flat(P.pos, home))
-	var short_v := 4.5 / K.run_time(4.5)
-	var long_v := 12.6 / K.run_time(12.6)
+	ok("Wirerun: streaks the charged length", _flat(P.pos, home) > 8.0, "%.1f m" % _flat(P.pos, home))
+	var short_v := 5.0 / K.run_time(5.0)
+	var long_v := 8.5 / K.run_time(8.5)
 	ok("Wirerun: a constant speed (32 m/s under the global dash feel), so a short run is quicker",
 			absf(short_v - long_v) < 0.5 and long_v > 25.0 and long_v < 36.0, "%.1f / %.1f m/s" % [short_v, long_v])
 	# 4. height holds while charging in the air; drift carries into the run

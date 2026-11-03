@@ -806,7 +806,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if live(tgt) and h.dashes >= 1.0 and dist < 11.0 and los:
 		h.inp["aim"] = aimp
 		h.inp["dash"] = true
-		bot_hold["dash"] = clampf((dist + 1.5 - 4.5) / 8.1, 0.05, 1.0) * float(dash_def()["hold"]) + 0.05
+		bot_hold["dash"] = clampf((dist + 1.5 - 5.0) / 3.5, 0.05, 1.0) * float(dash_def()["hold"]) + 0.05
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 12.5 and randf() < 0.4:
 		h.inp["aim"] = aimp

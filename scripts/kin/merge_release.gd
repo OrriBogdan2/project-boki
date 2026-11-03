@@ -29,10 +29,6 @@ static func afterglow(h: Hunter) -> void:
 		h.m.fx.word(h.pos + Vector3(0, 2.6, 0), "AFTERGLOW", col, true)
 		h.m.sfx("unlock", h.pos, -3.0, 1.35)
 
-## Is the afterglow running on this hunter?
-static func glowing(h: Hunter) -> bool:
-	return float(h.get_meta("afterglow_t", 0.0)) > 0.0
-
 ## Every step: counts the afterglow down and sparkles while it lasts.
 static func tick(h: Hunter, dt: float) -> void:
 	var t := float(h.get_meta("afterglow_t", 0.0))

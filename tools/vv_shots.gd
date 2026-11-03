@@ -327,7 +327,7 @@ func _vireo_dash() -> void:
 			"full",
 			"dash_aim_mid",
 			"Shift held: rails out to max, the ticked end ring partway (the cursor plays no part)"])
-	marks.append([0.6, "full", "dash_aim_full", "Shift held to full: the end ring at 12.6m, past the 3m cursor"])
+	marks.append([0.6, "full", "dash_aim_full", "Shift held to full: the end ring at 8.5m, past the 3m cursor"])
 	await _go(0.62, hold_d, marks)
 	P.inp["dash_down"] = false
 	var run := _strip("anim_dash", "", [0.06, 0.42, 0.6])

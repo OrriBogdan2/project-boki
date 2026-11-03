@@ -1642,7 +1642,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var rc: Color = Loot.ELEMENTS[p.welem]["col"] if p.welem != "" else Color("e6dccb")
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12, Color(rc, 0.45), 1)
 	hover_spots.append([r, "weapon"])
-	AmmoDeny.draw(self, r)
+	AmmoDeny.draw(self, r, p)
 	BokiHud.aug_mark(self, p, Rect2(r.position + Vector2(6, 4), Vector2(18, 18)), "lmb")
 	c.draw_rect(Rect2(r.position + Vector2(0, 10), Vector2(3, r.size.y - 20)), rc)
 	Icons.draw(c, p.wid, r.position + Vector2(40, 34), 26.0, Color(rc, 0.9))

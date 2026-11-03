@@ -8,8 +8,6 @@ extends RefCounted
 const FIGHT := "fight"            # the reason Bond uses; no extra blocks and no flash (it is a constant trickle)
 const KINDS := ["hit", "knock", "kill"]
 
-static var _casts := {}            # hunter instance id -> {id, got}: what one cast has already paid into the bar
-
 static func rules() -> Dictionary:
 	return Content.rules("boki_system").get("bond_from_ult", {})
 
@@ -33,28 +31,21 @@ static func add(h: Hunter, amount: float, reason: String) -> float:
 	return gained
 
 ## A kit calls this when its ultimate hits / knocks / kills (kind = "hit", "knock", "kill"). Per cast only the best
-## event counts (not per target, not additive): a hit then a kill pays the kill's share once. `cast_id` identifies the
-## cast; kits that have none leave it empty and the hunter's last cast time is used.
-static func from_ult(h: Hunter, kind: String, cast_id := "") -> float:
-	if h == null or not KINDS.has(kind):
+## event counts (not per target, not additive): a hit then a kill pays the kill's share once. `cast_id` is the kit's
+## own id for this cast (required: a new id starts a new cast); what a cast has paid is kept on the hunter.
+static func from_ult(h: Hunter, kind: String, cast_id: String) -> float:
+	if h == null or h.remote or cast_id == "" or not KINDS.has(kind):
 		return 0.0
 	var share := float(rules().get(kind, 0.0))
-	var id := cast_id if cast_id != "" else "t%.3f" % h.cast_at
-	var key := h.get_instance_id()
-	var c: Dictionary = _casts.get(key, {})
-	if String(c.get("id", "")) != id:
-		c = {"id": id, "got": 0.0}
+	var c: Dictionary = h.get_meta("bond_cast", {})
+	if String(c.get("id", "")) != cast_id:
+		c = {"id": cast_id, "got": 0.0}
 	var extra := share - float(c["got"])
 	if extra <= 0.0:
-		_casts[key] = c
 		return 0.0
 	c["got"] = share
-	_casts[key] = c
+	h.set_meta("bond_cast", c)
 	return add(h, extra, "ult_" + kind)
-
-## Forget the per-cast bookkeeping (a new match / a check).
-static func reset() -> void:
-	_casts.clear()
 
 static func _flash(h: Hunter, gained: float) -> void:
 	if gained <= 0.0 or not h.is_local():
