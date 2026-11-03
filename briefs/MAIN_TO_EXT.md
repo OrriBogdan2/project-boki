@@ -855,3 +855,17 @@ The owner agreed. The Hollow Crown (beginner) stays as it is. Harder tiers add t
 - **Top tiers:** apex threats plus Boki loss, dark zones (fog of war or limited vision), and a **rare-Boki spawn** that draws apex threats and players.
 - **The top-down camera needs help:** fog or vision cones, noise pings on the map, and enemies that hear you, so sneaking stays tense.
 - This goes with the new harder-tier maps and enemies (the separate higher-tier map spec). Nothing changes on the beginner map.
+
+## 2026-11-03 03:30 ET: OWNER: post-reset queue additions (before the art upgrade)
+The owner agreed. These go right after the resets, ahead of the art upgrade:
+1. **"One great match" milestone.** One map and one tier, solo and squad. A 10-minute playtest script: drop, fight wild Boki, capture one, PvP once, merge once, extract or lose. Fix the feel problems in order. No new features merge until that loop feels great.
+2. **Boki as the star. The owner especially wants more meaning in the merges and more thought on the Boki.**
+   - **Merge moments:** a brief slow-mo hit, a camera punch, the Boki's cry, and each type's own fusion look. Every merge should feel like an event. Main owns the merge files.
+   - **Merge choices with meaning:** each Boki type's merge changes how you play (its own form ability, its own dash and passive), not just stats. Main will draft a spec per type for the owner first.
+   - **Boki personality in matches:** small reactions (celebrating a kill, worrying when you're hurt, excited near rare Boki), plus bond-level behaviours.
+   - **Losing a Boki should hurt:** a clear moment when it's taken, and a clear way to get it back.
+3. **Playtest tooling.**
+   - An F8 in-game feedback button that saves a note, a screenshot and the match state.
+   - Session stats: deaths, merges, extracts, and time to the first fight.
+   - A short guide for outside testers.
+4. **Scope freeze list (pending the owner's approval).** Candidates for "later": farm-builder depth, Black Market extras, and maps beyond tier 2.
