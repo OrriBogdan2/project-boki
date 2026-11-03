@@ -5,3 +5,21 @@ jug_wave_close.png: Zedran LMB held (close): the blade dragged up behind the hea
 zedran_warchain_taut_strip.png: Zedran Warchain: hooked on the dummy; backing away, the chain pays out; still going, the links pulling straight; past 20 m, taut and glowing hot; at 24 m it holds: he walks but stays at its end; still held
 zedran_warchain_sling_strip.png: Zedran Warchain: hooked; backing away; still backing away, E: the slingshot (faster than a standing pull); flying in; slamming into the dummy; arrived, still moving
 zedran_warchain_steer_strip.png: Zedran Warchain: hooked; E with a strafe held: the pull swings out that way; curving round; coming in beside the dummy; arrived beside it; still moving
+zedran_warchain_taut_1.png: Zedran Warchain: hooked on the dummy 8 m away, he starts backing off
+zedran_warchain_taut_1_close.png: Zedran Warchain: hooked on the dummy 8 m away, he starts backing off (close-up)
+zedran_warchain_taut_2.png: Zedran Warchain: ~17 m, the chain paying out after him
+zedran_warchain_taut_2_close.png: Zedran Warchain: ~17 m, the chain paying out after him (close-up)
+zedran_warchain_taut_3.png: Zedran Warchain: at 24 m it is taut and hot and holds: he keeps walking but stays at its end
+zedran_warchain_taut_3_close.png: Zedran Warchain: at 24 m it is taut and hot and holds: he keeps walking but stays at its end (close-up)
+zedran_warchain_sling_1.png: Zedran Warchain: hooked, backing away
+zedran_warchain_sling_1_close.png: Zedran Warchain: hooked, backing away (close-up)
+zedran_warchain_sling_2.png: Zedran Warchain: E while backing away: the slingshot, flying in faster
+zedran_warchain_sling_2_close.png: Zedran Warchain: E while backing away: the slingshot, flying in faster (close-up)
+zedran_warchain_sling_3.png: Zedran Warchain: arrived on the dummy, still moving
+zedran_warchain_sling_3_close.png: Zedran Warchain: arrived on the dummy, still moving (close-up)
+zedran_warchain_steer_1.png: Zedran Warchain: E with a strafe held: the pull swings out that way
+zedran_warchain_steer_1_close.png: Zedran Warchain: E with a strafe held: the pull swings out that way (close-up)
+zedran_warchain_steer_2.png: Zedran Warchain: curving round toward the dummy
+zedran_warchain_steer_2_close.png: Zedran Warchain: curving round toward the dummy (close-up)
+zedran_warchain_steer_3.png: Zedran Warchain: arriving beside it, not on its line
+zedran_warchain_steer_3_close.png: Zedran Warchain: arriving beside it, not on its line (close-up)
