@@ -1,9 +1,9 @@
 # S2 status (second server session)
-Updated: 2026-11-03 08:05 UTC. Last INBOX_S2 entry handled: 07:50 UTC (prologue text).
+Updated: 2026-11-03 08:20 UTC. Last INBOX_S2 entry handled: 08:10 UTC (mantle look).
 
 ## Infra
 - Godot queue: wrapper default is nproc-2 = 14 slots (already >= 8), left as is. S1: no change needed.
-- Agents (6 max per 07:30): Breah (Sonnet), Ostra (Sonnet), Tamsin+Dredge (Sonnet), Zedran 21/22/35 (Opus 5.5 medium per owner), prologue-polish (Opus 5.5 medium, allowed by 07:45), dash-flow base (Opus 5.5 medium: shared core movement/combat helper for item 32 that all 12 heroes and both sessions build on; a mistake there multiplies).
+- Agents (6 max per 07:30): ALL hero agents on Opus 5.5 medium per 08:00 (the Sonnet Breah/Ostra/Tamsin+Dredge agents were stopped at ~08:15 and replaced by Opus agents continuing from their commits), Breah, Ostra, Tamsin+Dredge, Zedran 21/22/35 (Opus 5.5 medium per owner), prologue-polish (Opus 5.5 medium, allowed by 07:45), dash-flow base (Opus 5.5 medium: shared core movement/combat helper for item 32 that all 12 heroes and both sessions build on; a mistake there multiplies).
 - Source data copy: /home/boki/briefs-s2/briefs (from ext/agent-briefs).
 
 ## Item 32 shared base (for S1 too)
@@ -28,3 +28,7 @@ Updated: 2026-11-03 08:05 UTC. Last INBOX_S2 entry handled: 07:50 UTC (prologue 
 
 ## Prologue polish
 - Branch `ext/prologue-polish` from origin/ext/prologue5 54f8304. In progress (Opus): framing/camera/animation/lighting per slide, THE BOKI clipping fix, slide 3/4 text per 07:50, slide 4 Mantle-wake staging.
+
+## Queued new tasks (INBOX 07:55, 08:10)
+- Character concept pass phase 1 (`ext/concepts`, Opus): starts when a slot frees after the demo-critical branches; not for tonight.
+- Mantle look + creator (item 45, `ext/mantle-look`, Opus): after the hero pairs and prologue are underway; not for tonight.
