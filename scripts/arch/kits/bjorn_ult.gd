@@ -53,13 +53,14 @@ func _ready() -> void:
 		var shards: Array = []
 		for j in SHARDS:
 			shards.append(KitMeshes.inst(self, Models.crystal(0.55, 1.0, 5), rock_mat))
-		var seam := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", EMBER))
-		seam.material_override.set_shader_parameter("tail", 0.0)
+		var seam := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", EMBER, true))
+		KitShaders.param(seam, "tail", 0.0)
 		_slabs.append({"shards": shards, "seam": seam, "t": 0.0})
-	_streak = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", Color(1.0, 0.75, 0.35)))
+	var streak_mat := KitShaders.mat("streak", Color(1.0, 0.75, 0.35), true)
+	_streak = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), streak_mat)
 	_flood = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("panel", GOLD))
-	_scar = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", EMBER))
-	_scar.material_override.set_shader_parameter("tail", 0.0)
+	_scar = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", EMBER, true))
+	KitShaders.param(_scar, "tail", 0.0)
 
 func xd() -> Dictionary:
 	return k.d.get("x", {})
@@ -265,7 +266,7 @@ func _process(delta_in: float) -> void:
 	if _flood_t > 0.0:
 		_flood_t -= delta
 		_flood.visible = _flood_t > 0.0
-		_flood.material_override.set_shader_parameter("power", 2.0 * clampf(_flood_t / 0.3, 0.0, 1.0))
+		KitShaders.param(_flood, "power", 2.0 * clampf(_flood_t / 0.3, 0.0, 1.0))
 	if _streak_t > 0.0:
 		_streak_t -= delta
 		var total := maxf(0.05, float(xd().get("cell_t", 0.15)) * cells.size() + float(xd().get("lead", 0.2)))
@@ -276,7 +277,7 @@ func _process(delta_in: float) -> void:
 		_streak.visible = _streak_t > 0.0
 	if _scar.visible and not scar.is_empty():
 		var fade := clampf(float(scar["t"]), 0.0, 1.0)
-		_scar.material_override.set_shader_parameter("power", (1.0 + 0.35 * sin(Time.get_ticks_msec() * 0.012)) * fade)
+		KitShaders.param(_scar, "power", (1.0 + 0.35 * sin(Time.get_ticks_msec() * 0.012)) * fade)
 
 ## Each cell's basalt spikes heave up out of the ground fast, hang, then sink back; the molten seam under
 ## them glows then cools.
@@ -305,4 +306,4 @@ func _tick_slabs(delta: float) -> void:
 			shard.rotation = Vector3(spot.z * rise, atan2(-dir.y, dir.x) + j, -spot.z * 0.6 * rise)
 			shard.scale = Vector3(1.0, tall, 1.0)
 		_place_flat(seam, at + Vector3(0, 0.1, 0), Vector2(cell_len() * 0.95, w * 0.85))
-		seam.material_override.set_shader_parameter("power", 2.2 * clampf(float(s["t"]) / 0.9, 0.0, 1.0))
+		KitShaders.param(seam, "power", 2.2 * clampf(float(s["t"]) / 0.9, 0.0, 1.0))

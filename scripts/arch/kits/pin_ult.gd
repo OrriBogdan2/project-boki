@@ -40,16 +40,16 @@ func _init(kit: ArcherKit) -> void:
 
 func _ready() -> void:
 	for i in BEAMS:
-		var rib := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", TEAL))
-		var core := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", CORE))
-		rib.material_override.set_shader_parameter("tail", 0.0)
-		core.material_override.set_shader_parameter("tail", 0.0)
+		var rib := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", TEAL, true))
+		var core := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", CORE, true))
+		KitShaders.param(rib, "tail", 0.0)
+		KitShaders.param(core, "tail", 0.0)
 		_beams.append({"node": rib, "core": core, "t": 0.0})
 	for i in 3:
-		var pip := KitMeshes.inst(self, KitMeshes.quad(0.7, 0.7), KitShaders.mat("star", TEAL))
-		pip.material_override.set_shader_parameter("power", 2.4)
+		var pip := KitMeshes.inst(self, KitMeshes.quad(0.7, 0.7), KitShaders.mat("star", TEAL, true))
+		KitShaders.param(pip, "power", 2.4)
 		_pips.append(pip)
-	_bow = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", TEAL))
+	_bow = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", TEAL, true))
 
 func xd() -> Dictionary:
 	return k.d.get("x", {})
@@ -227,7 +227,7 @@ func _tells(on: bool) -> void:
 		var nk := clampf(nock_t / float(xd().get("nock", 0.3)), 0.0, 1.0) if nock_t >= 0.0 else 0.0
 		_bow.global_position = h.position + Vector3(d.x * 0.6, 1.1 * float(h.cdat.get("scale", 1.0)), d.y * 0.6)
 		_bow.scale = Vector3.ONE * lerpf(0.7, 1.6, nk)
-		_bow.material_override.set_shader_parameter("power", lerpf(0.8, 2.2, nk))
+		KitShaders.param(_bow, "power", lerpf(0.8, 2.2, nk))
 
 func _process(delta_in: float) -> void:
 	var delta := minf(delta_in, 1.0 / 30.0)
@@ -239,4 +239,4 @@ func _process(delta_in: float) -> void:
 		for key in ["node", "core"]:
 			var n: MeshInstance3D = slot[key]
 			n.visible = life > 0.0
-			n.material_override.set_shader_parameter("power", 1.8 * life)
+			KitShaders.param(n, "power", 1.8 * life)
