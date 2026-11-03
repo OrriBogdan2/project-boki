@@ -7,6 +7,7 @@ extends RefCounted
 const AKCheck := preload("res://tools/archetype_check.gd")
 const ULT := preload("res://tools/dj_ult_check.gd")      # both heroes' ultimates on X, and the burst cap
 const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Zedran's chain, RMB rows, Meteor Drop and dashes
+const DFEEL := preload("res://tools/dancer_feel_check.gd")   # Dancer's Cartwheel, empowered bolt and reset (item 7)
 var A: AKCheck
 
 ## Standalone: one hero's sections (both for "all"). Prints AKCHECK lines like --archetype-check.
@@ -137,8 +138,8 @@ func thief(a) -> void:
 			and K.glint.global_position.distance_to(K.hand_pos(K.hand == 0)) < 0.15,
 			"rings %d -> %d pop %.2f glint %s" % [rings0, _dancer_rings(m), pop[0],
 					K.glint.global_position.distance_to(K.hand_pos(K.hand == 0)) if K.glint else -1.0])
-	var far := 4.5 * float(K.dash_feel()["dist"])        # the sheet's 4.5m, after the global dash feel
-	A.ok("dancer dash: Vault cartwheels about 4.5m (x the dash feel), speeds +18%, empowers",
+	var far := 4.5        # the sheet's measured 4.5m (she is off the global dash feel)
+	A.ok("dancer dash: Vault cartwheels about 4.5m, speeds +18%, empowers",
 			absf(P.flat_dist(home) - far) < 0.6 and K.primed_t > 0.0 and K.move_k() > 1.15
 			and P.dashes < d0 - 0.5 and wheel in ["thf_vault_l", "thf_vault_r"],
 		"moved %.1f primed %.2f anim %s" % [P.flat_dist(home), K.primed_t, wheel])
@@ -160,8 +161,8 @@ func thief(a) -> void:
 	A.ok("dancer empowered bolt: the big look rides it",
 			K.last_bolt_emp and DJFx.of(m).free_pools.has("ride_chakram_big"))
 	A.step(m, 0.5)
-	A.ok("dancer empowered bolt: 3.5x, 2 Marks, Shred, speed ends, Vault back",
-			A.dmg(T) >= 30.0 and K.marks_on(T) == 2 and T.vuln_t > 0.0 and K.move_k() <= 1.0
+	A.ok("dancer empowered bolt: a big hit, 1 Mark like any bolt, no Shred, speed ends, Vault back",
+			A.dmg(T) >= 18.0 and K.marks_on(T) == 1 and T.vuln_t <= 0.0 and K.move_k() <= 1.0
 			and P.dashes >= P.max_dashes() - 0.01 and K.primed_t <= 0.0 and K.primed_hits == 1,
 		"dealt %.0f marks %d vuln %.1f dashes %.2f" % [A.dmg(T), K.marks_on(T), T.vuln_t, P.dashes])
 	# from a jump the cartwheel holds its speed to the landing: much further than on the ground
@@ -307,6 +308,7 @@ func thief(a) -> void:
 	A.ok("dancer fx: pooled (every kind capped, a handful of nodes at most per burst)",
 			capped and DJFx.of(m).made <= made + 6, "made %d -> %d" % [made, DJFx.of(m).made])
 	await _dancer_dash_flow(m, P, K, T, home)
+	await DFEEL.new().run(A, m, P, K, T, home)
 	await A.done(m)
 	await _growth()
 	await ULT.new().dancer(A)
