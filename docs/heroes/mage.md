@@ -1,75 +1,116 @@
 # Vireo (archetype id `mage`, Light)
 
 Internal design note. This file may name the source hero for traceability; nothing in the game does.
-Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md. Our hero is an original character, the storm-kite
-runner: flight goggles, a cropped jacket, copper coils on both forearms and a copper rod mast flying a
-pennant. Palette: teal and copper. Payoff word: BLOWOUT.
+Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (reference
+sheet: briefs/hero-ref/vireo.md, from gameplay footage; owner playtest notes override the footage).
+Our hero is an original character, the storm-kite runner: flight goggles, a cropped jacket, copper
+coils at both wrists and a copper rod mast flying a pennant. Palette: teal, copper and gold. Payoff word: BLOWOUT.
 
-## Research summary
-Sources (gameplay only):
-- The reference hero's public kit page and guides (see the Inspired-by table in docs/ARCHETYPES.md)
-
-Where they disagreed: the guides rank the Q (lightning strike) and RMB (spear) priorities differently
-(Q first in team fights, spear first in duels); the spear's cast time was raised to 0.33s and the ult's to
-0.3s in later patches, the dash blast radius shrank (200 to 160). We took the latest wiki values
-(spear cast 0.33s, dash radius reduced) and built the kit around the dash-through-charged-target loop.
-
-Version chosen: the wiki page values after the Leveling Rework patch, taking the later number wherever
-a patch page and the ability page differ. Rank 4 source upgrades are mapped onto our rank 3.
+## Kit card (L picker)
+- Role: Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.
+- LMB, RMB, E, Shift, passive and the ultimate: one plain line each in `content/archetypes/mage.json` `card`
+  (the ultimate's line is `card.x`; the kit card's last tile shows it on the hunter-ultimate key).
 
 ## Scaling
-Source health is roughly 8 to 10 times ours (Light = 124 HP). Damage numbers were scaled by about 1/9 and
-rounded; cooldown ratios, ranges (units to metres at about 1/100) and the Spark count (4) were kept.
-Coilcaster bolt 8 (about 19 dps), Coilshot 9 to 15, Wirerun pass 10, Skycall 14, Blowout 8 + 15% of
-their max health (about 30 on a Light, 30 on a Medium).
+Source health is roughly 8 to 10 times ours (Light = 124 HP). Ratios kept against the basic attack:
+bolt 12 every 0.8s (about 15 dps, unchanged from before); Storm Rod 18 to 30 (1.5 to 2.5 bolts; the
+source is about 4, held lower because the rod also stuns and leaves an orb); Skycall 20 (source 2.5
+bolts, ours 1.7); Wirerun pass 10, doubled through a full-Static foe, plus a Blowout of 16 + 18% of
+their health (about 5.7 bolts on a Light; the source detonation is about 9). Cooldowns follow the
+source ratio spear : Surge : javelin = 7 : 6.7 : 9.2, at our pace 8 : 8 : 10.5. Kitefall (the source's
+landing is 40 + 22%, seen at about 115, so about 1 bolt at our scale; it is held at 22, 1.8 bolts, because
+its worth is the escape and the Static) knocks back about 1 bh and adds 1 Static. Its cooldown follows the
+source's 37.5 s at our pace, 42 s. Ranges use 1 body
+height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 5 to 8.5 m (main's lane; not scaled by the dash feel), Skycall circle 1.8 m radius.
+
+## Ranks (kit data pass)
+Rank 2 is the shared step (cooldown -10%, damage +15%). Rank 3 is the hero's own: Storm Rod throw +50% damage
+(`rmb.rank3_mult`; the source's rank IV is +50%), Wirerun's own hit doubles (`dash.rank3_mult`; the source's rank IV is
++100% on the non-passive dash damage, so the Blowout does not grow), Skycall cooldown -3s. The source has three
+upgrades before the last one (+20% damage and -1s on the spear, -0.75s on Surge, +25% on the strike); our rank system has
+one shared step and one special, so those collapse into the shared step.
 
 ## Per-slot table
-| Slot | Input | Our text | Source behaviour | Difference and why |
-|---|---|---|---|---|
-| LMB | hold | **Coilcaster**: a copper forearm coil spits piercing bolts, 8 damage, each hit loads a Spark. | Jolt: piercing bolt, 1 Static stack | Same. Fixed signature weapon (`coilcaster`). |
-| Passive | | **Sparks**: bolts, Coilshot and Skycall load Sparks (max 4, 4.5s, refreshed). 4 = Live: crackling pips everyone sees. Wirerun through a Live foe is a **Blowout**: 8 + 15% of their health, a T4 payoff, Sparks spent, dash back at once. A knock heals 15% of your health. | Static Charge: 4 stacks; Surge through = big damage, full Surge reset, mana; knock restores health | No mana in Boki, so the mana refund is dropped. Knock heal is 15% (source 250 HP of about 1.2k). |
-| RMB | hold, release | **Coilshot**: wind up 0.33 to 1.0s; 9 to 15 damage, 6 to 13m, a throw of 8 to 14. A foe thrown into a wall or another foe is stunned 0.8s (so is the one it hits). A hit on a hunter drops a charge mote 0.5s later; collecting it refills Wirerun. | Voltaic Spear: hold 1s max, first-hit knockback, stun on collision, Lightning Orb after 0.5s resets Surge | Stun is an instant check along the throw (no travelling collision). Orb is a mote (6s life). |
-| Shift | hold, release | **Wirerun**: a lane grows 4 to 7m over 0.45s (everyone sees it); let go to streak. Shots pass through you for the run, every foe crossed takes 10 (double at rank 3). Stun, root or Grounded cancel it. Air press: plain long dash that also lets shots through. | Surge: hold-release dash, projectile-immune, damage on pass, reset on a charged foe or an orb | Same. Not reset by a knock (as source). |
-| E | tap | **Skycall**: marks a spot up to 9m (a filling ring), 0.55s later lightning: 14 damage, a Spark, everyone inside is flung along your aim and **Grounded** 1.2s (no dashing). Catches a charge mote and steals a rival's. | Lightning Strike (Q): hold to place, delayed bolt, launch, grounded, orb stealing | Placement is the cursor on the press (our E has no hold-to-place). |
-| R | | none | Thunderstorm | See below. |
+| Slot | Input | Aim | What it does | Telegraph / reticle | Move (KMovesVV) | Sound |
+|---|---|---|---|---|---|---|
+| LMB Coilcaster (finger gun) | hold, 0.8s per bolt | max range (13 m) past the cursor, `"aim": "max"` | a jagged bolt from the fingertip, left hand then right; pierces; 1 Static per hit | a thin line through the cursor to full range with an arrow tick (always up) | `mage_lmb_l` / `mage_lmb_r`: twist, arm flung out, snap, settle | `vv_bolt` |
+| RMB Storm Rod | hold, release (full at 1.0s, throws itself at 1.2s, 0.33s minimum) | max range, a fixed 13 m lane | summons a copper rod; the throw knocks the first foe back about 1 bh (stun on a wall or another foe), 1 Static, leaves a charge orb at the impact at once | double-rail lane with chevrons for the whole hold; cursor charge ring; a white body flash and flare at full | `mage_rmb_hold` (rod by the shoulder), `mage_rmb` (overarm) | `vv_rod_summon`, `vv_rod_full`, `vv_rod_throw` |
+| Shift Wirerun | hold, release (full at 0.6s, auto at 0.9s) | direction from the cursor, length from the charge only | the charge is spent on the press; while held you can't steer, you keep your height and your momentum drifts you; release: a lightning streak (shots pass through) that carries the drift; every foe crossed takes 10, a 4-Static foe takes double and Blowout, Wirerun back at once (the only early reset) | rails to max range, a big ticked end ring with a star sliding out (everyone sees the ring); cursor charge ring | `mage_dash` (crouch), `mage_dash_go` (stretched streak), `mage_dash_land` (re-form, overshoot); air press with no charge: `mage_dash_ex` tumble | `vv_surge_charge`, `vv_surge_go` |
+| E Skycall | press, then flick | at the cursor (11 m) | drops a circle; for 0.3s the drag follows the cursor from the circle (toward you pulls in, away throws out; no flick = away); then 0.8s countdown; lightning: 20, 2 Static, everyone inside dragged about 7 m along the ground that way and Grounded 1.5s; flings orbs (steals a rival's) | ticked circle with a rim chevron + a drag arrow during the flick; then a dark violet disc with a crackling copper rim and a narrowing pillar (everyone sees it) | `mage_e` (one-arm sweep, snap down) | `vv_sky_place`, `vv_sky_count`, `vv_sky_strike` |
+| Passive Static | | | hits add Static (4 max, 4.5s); a marker over the head shows pips and the count, with sparks on the body that grow per stack; the 4th calls a sky bolt (Live); a knock heals 15% | marker, sky bolt, arcs to the ground while Live | `mage_live` (finger flicked to the sky) | `vv_static_full`, `hero_blowout` |
+| X Kitefall (ultimate, level 6) | press, then press again (X or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m; she is free to attack at once; 42 s cooldown | a gold range ring with ticks round the take-off (everyone sees it) over a dark violet disc with a gold rim, gold crackle on the rim; a small gold crown (ticked ring and star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
+| R / T | | | the Boki Merge (the Boki system's key, see below) | | | |
 
-## R (ultimate) choice
-Dropped. In the source the storm is a stack applier and a mobility tool, not the loop itself: the loop
-(Jolt, Q or spear to 4 stacks, then dash through) is complete without it. Q already applies a stack and
-the spear's mote already resets the dash. If Merge later wants a stack-spreading effect, Sparks has
-`add_spark(f, n)` ready.
+Charge orb: hovers 4s, zaps the nearest foe within 2.6 m with 1 Static every second; a Wirerun through
+it bursts it for 2 Static on everyone near it. It does not give Wirerun back (owner rule).
 
 ## Combinations
 | Combination | What fires | Check |
 |---|---|---|
-| 3 weapon Sparks + Coilshot | the 4th Spark: foe is Live | `--mage-combo-check` |
-| Wirerun through a Live foe | Blowout (payoff), Sparks spent, dash refunded | `--mage-combo-check` |
-| Wirerun through a foe with fewer than 4 Sparks | plain pass hit, no reset | `--mage-combo-check` |
-| Wirerun while shots fly | shots pass through; stun/root/Grounded cancel it | `--mage-combo-check` |
-| Coilshot into a wall | stun 0.8s | `--mage-combo-check` |
-| Coilshot into another foe | both stunned | `--mage-combo-check` |
-| Coilshot on a hunter, then pick up the mote | Wirerun refunded | `--mage-combo-check` |
-| Skycall over a rival's mote | the mote is flung and becomes yours | `--mage-combo-check` |
-| Skycall as the 4th Spark, then Wirerun | the chain: Live then Blowout | `--mage-combo-check` |
-| Skycall Grounded on a foe, or on you | no dashing; Wirerun cannot start | `--mage-combo-check` |
-| Knock | heal 15% | `--archetype-check` |
+| 3 bolts + Storm Rod / Skycall | the 4th Static: sky bolt, Live | `--mage-combo-check` |
+| Wirerun through a Live foe | double hit + Blowout, Static spent, Wirerun back | `--mage-combo-check` |
+| Wirerun through a foe under 4 Static | plain hit, no reset | `--mage-combo-check` |
+| Storm Rod, then an orb next to the foe | the orb zaps them toward Live | `--mage-combo-check` |
+| Wirerun through an orb | 2 Static on everyone near it, no reset | `--mage-combo-check` |
+| Storm Rod into a wall / another foe | stun (both) | `--mage-combo-check` |
+| Skycall flicked toward you | foes pulled in, Grounded (no dashing), 2 Static | `--mage-combo-check` |
+| Skycall over a rival's orb | flung, now yours | `--mage-combo-check` |
+| Skycall Grounded on you | no Wirerun | `--mage-combo-check` |
+| Boki merge mid-hold | Wirerun refunded, Rod and an unflicked Skycall dropped, nothing fires | `--mage-combo-check` |
+| Kitefall into a crowd, then Wirerun | 1 Static each plus the knockback; foes already at 3 go Live, so the Wirerun through them is a Blowout | `--mage-combo-check` (Static from the strike) |
+| Kitefall on an enemy hunter, then the Merge | the strike fills the bond (KinBond.from_ult, a hit); the merge straight after never one-shots a full-health light hunter | `--mage-combo-check` (burst) |
+| Kitefall as a dodge | invulnerable from the take-off to the strike; a strike on nobody pays no bond | `--mage-combo-check` |
+| Boki merge while she hangs | she drops where she took off, nothing strikes, the cooldown stays spent | `--mage-combo-check` |
 
-## Animation moves (`HunterAnim.KMOVES`)
-| Ability | Move id | Look |
-|---|---|---|
-| LMB Coilcaster | none (stock firing pose) | the bolts and forearm glow carry it |
-| RMB Coilshot | `mage_rmb` | coil drawn back, lunge and palm thrust, recover |
-| Shift Wirerun (lane growing) | `mage_dash` (held) | sprinter's crouch, both arms back |
-| Shift Wirerun (released) | `mage_dash_go` | flat-out streak, arms trailing, easing to stride |
-| E Skycall | `mage_e` | one hand to the sky, slammed down at the mark |
-Frame strips: `strip_mage_*.png` in the pair's shots folder.
+## Small mechanics
+| Mechanic | Source | Footage | Built and checked |
+|---|---|---|---|
+| The bolt passes through every target it strikes | [wiki: Joule](https://supervive.wiki.gg/wiki/Joule) (Jolt) | not shown | yes: "a finger bolt passes through everyone in line" |
+| Surge passes through targets and hits each one | [wiki](https://supervive.wiki.gg/wiki/Joule) (Surge) | shown (pass hit 146) | yes: "Wirerun hits every foe it passes" |
+| Surge ignores projectiles; stuns, roots, grounds cancel it | [wiki](https://supervive.wiki.gg/wiki/Joule) patch 05.03.25 | INVULNERABLE label shown | yes: phase while running; "a stun mid-hold cancels Wirerun" |
+| Knocking an enemy does not reset Surge | [wiki](https://supervive.wiki.gg/wiki/Joule) (Surge) | not shown | the kit adds no knock reset; since sync65 the game-wide takedown reset (DashReset) gives every hero their dash back on a knock, which overrides this |
+| Spear has a minimum cast time (0.33 to 0.4s) | [wiki](https://supervive.wiki.gg/wiki/Joule) patch notes 20.11.24, 05.03.25 | only 1.2s casts seen | yes: "Storm Rod's 0.33s minimum cast" |
+| Spear stuns on terrain or another target | [wiki](https://supervive.wiki.gg/wiki/Joule) (Voltaic Spear) | stun on a pillar | yes: wall and foe stuns |
+| Lightning Strike flings enemy orbs, which can then be stolen | [wiki](https://supervive.wiki.gg/wiki/Joule) (Lightning Strike) | orb flung (`0283`) | yes: "flings a rival's orb, now yours" |
+| Lightning Strike can launch Wisps | [wiki](https://supervive.wiki.gg/wiki/Joule) | not shown | not built (we have no wisps; Boki are not moved) |
+| Static Charged detonation restores mana | [wiki](https://supervive.wiki.gg/wiki/Joule) | not shown | not built (no mana) |
+| Eye of the Storm: invulnerable while in the air | [thebackdash hunter list](https://thebackdash.com) (pre-1.0 wording) | INVULNERABLE tag (f45) | yes: "invulnerable in the air" |
+| Eye of the Storm: landing spot at the cursor within a range ring, two presses | reference sheet (both casts) | ring f29, crown reticle f36 | yes: "clamped inside the ring", "the second press brings her down" |
+| Eye of the Storm: landing damage in an area, knockback, 1 Static stack each | thebackdash (pre-1.0 wording) | light pillar and shock ring f49 | yes: "a knockback and 1 Static each" |
+| Free to attack right after landing | reference sheet | LMB at f51 | yes: "free again at once" |
+
+## Assumptions (the video is silent; the owner can correct these)
+- The throw comes on release; holding past full (1.2s) throws by itself. Charge scales the rod's damage and knock, not its range (the footage's fixed lane; the wiki's older text scales range).
+- The rod applies 1 Static.
+- Orbs: 4s life, zap 1 Static per second within 2.6 m, burst for 2 Static when Wirerun crosses them. **Owner rule: only a full-Static foe resets Wirerun**, so orbs no longer refund it (the footage and wiki show orb refunds). Open question for the owner.
+- Static lasts 4.5s, refreshed by every hit.
+- Wirerun: a stun, root or Grounded mid-hold cancels it and the charge stays spent (cooldown started on the press); a Boki merge refunds it.
+- An airborne Shift with a charge is a Wirerun too (height held); with no charge left it is the plain air dash.
+- Skycall: press places, a 0.3s flick window sets the drag; with no flick the drag is away from Vireo.
+- She can move while firing bolts and holding the rod (the footage only shows her standing).
+- Momentum: the drift during the Wirerun hold bleeds off at 6 m/s², and whatever is left is added to the streak.
+- Kitefall: the footage shows no auto-land; ours comes down at the cursor after 1.7 s of hanging (about 2 s in
+  the air with the climb), the sheet's build note. The 0.3 s crouch is not invulnerable (a fair window to punish
+  it); the climb, the hang and the drop are. She hangs over the take-off spot (no drifting). The attack key also
+  brings her down, but only a fresh press (a held attack from before the cast does not). A press during the
+  climb waits for the hang. The landing backs off a wall or a gap toward the take-off until it is standable
+  ground. No cancel and no ally effect (the sources mention neither). The knock is a push away from the centre
+  with a little lift (the sources say knockback, not knock-up). A Boki merge mid-cast drops her where she took
+  off with no strike.
+
+## Ultimate choice
+X is her own ultimate, Kitefall (owner decision, SERVER_UPDATE6): the source's Eye of the Storm, built from the
+reference sheet's "Ultimate (on X)" section. It was never folded into another slot during the kit pass, so no
+slot changes. R reloads and the Boki Merge is on its own key (T by default).
 
 ## Engine notes
-- Grounded and Rattled are `KitStatus` statuses carried by the Net event `["kst", nid, kind, seconds, k]`
-  (Net 0.7.0, already on main): the body's own game runs the rules, every game shows the look. Remote
-  players do not run the kit, so they see the Live pips only as the Net ring pulse, not the per-target pips.
-- No new Net events or state keys: this branch keeps main's Net version.
-- Kit: `scripts/arch/kits/mage_kit.gd`, data `content/archetypes/mage.json`, weapon `content/weapons/coilcaster.json`.
-  Look: `scripts/match/hero_gear.gd`. Gallery and screenshot hook: `scripts/arch/hero_demo.gd` (`--hero-demo`).
-- Blowout has its own sound `hero_blowout` (`tools/gen_hero_sfx.py`, pure Python).
-- `scripts/arch/hex.gd` is unused by this kit now; it is filed in `docs/DEBT.md` for removal with the `"hex"` event.
+- Kit `scripts/arch/kits/mage_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd` + `shaders/vv_fx.gdshader`;
+  moves `scripts/match/kmoves_vv.gd`; the finger-gun hold `"finger"` in `HunterAnim.HOLDS`; the wrist
+  coil `scripts/match/hero_arms_vv.gd`; sounds `tools/gen_vv_sfx.py` (pure Python) listed in `VVSfx.NAMES`.
+- Telegraphs and cursor states through AimKit (docs/AIMKIT.md). No Net change.
+- Kitefall: `scripts/arch/kits/mage_ult.gd` (MageUlt), on the shared ult base `scripts/arch/hero_ult.gd` (HeroUlt: the
+  cooldown in `cd["x"]`, the recast, one bond id per cast, KinBond.from_ult on a land). X reaches
+  it through main's HunterKeys.ult_pressed (the level gate) and `MageKit.cast_ult()`; numbers in `mage.json` `x`.
+- Merge cleanup: `_drop_holds()` ends `wire` (refunded), `rmb_down`/`rmb_t` and the rod prop, any
+  Skycall in `strikes` still in its `"flick"` phase, and Kitefall's `ult.leap` (she drops at the take-off).
+- Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=mage` (tools/vv_shots.gd).

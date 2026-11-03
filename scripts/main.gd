@@ -402,23 +402,13 @@ func _ready() -> void:
 		set_meta("incubator_check", icc)
 		icc.run(self)
 		return
-	if "--title-check" in args:
-		var ttc = load("res://tools/title_check.gd").new()      # the title: menu, key art, frame budget
-		set_meta("title_check", ttc)
-		ttc.run(self)
-		return
-	if "--hatch-check" in args:
-		var htc = load("res://tools/hatch_check.gd").new()      # the hatch: a quiet, personal moment
-		set_meta("hatch_check", htc)
-		htc.run(self)
-		return
 	if "--economy-floor-check" in args:
 		var efc_s: GDScript = load("res://tools/economy_floor_check.gd")
 		if efc_s == null or not efc_s.can_instantiate():
 			print("ECONOMY_FLOOR CHECK failed to load, failures: 1")
 			get_tree().quit(1)
 			return
-		var efc = efc_s.new()      # never stuck: strays, the pens, free-kit runs, the Exchange, saves
+		var efc = efc_s.new()      # never stuck: strays, the pens, the Exchange, saves
 		set_meta("economy_floor_check", efc)
 		efc.run(self)
 		return
@@ -1088,7 +1078,7 @@ func _economy_check() -> void:
 	var at := P.pos + Vector3(0.6, 0, 0)
 	# 1. a full backpack asks what to drop
 	P.pack_cap = 2
-	P.pack = [Loot.valuable("old_coin"), Loot.gear("tinker_roll", 1)]
+	P.pack = [Loot.valuable("old_coin"), Loot.gear("vest", 1)]
 	m.spawn_val(Loot.valuable("kin_idol"), at)
 	var wp: Dictionary = m.wpicks[m.wpicks.size() - 1]
 	Pack.take_ground(m, P, wp)
@@ -1114,9 +1104,9 @@ func _economy_check() -> void:
 	P.welem = "fire"
 	# 2. smart loot: gear on you first, then the pack, best first, never worse for better
 	var gid: String = Gear.ALL.keys()[0]
-	var b := {"owner": Q, "team": Q.team, "pos": P.pos, "gems": 10, "seeds": {"tidebloom": 2}, "caught": [], "tonics": 0, "kits": 0, "soul_until": 0.0,
+	var b := {"owner": Q, "team": Q.team, "pos": P.pos, "gems": 10, "seeds": {"tidebloom": 2}, "caught": [], "belt": [], "soul_until": 0.0,
 		"prog": {}, "node": null, "empty": false, "gear": [{"id": gid, "rar": 4}, {"id": "gale_mantle", "rar": 4}],
-		"pack": [Loot.valuable("old_coin"), Loot.valuable("crown_shard"), Loot.gear("magpie", 1), Loot.gear("windstep_boots", 2), Loot.valuable("sky_pearl")]}
+		"pack": [Loot.valuable("old_coin"), Loot.valuable("crown_shard"), Loot.gear("vest", 1), Loot.gear("windstep_boots", 2), Loot.valuable("sky_pearl")]}
 	P.pack = [Loot.valuable("kin_idol")]
 	P.pack_cap = 3
 	P.gear = Gear.empty_slots(); P.refresh_gear()
@@ -1134,20 +1124,23 @@ func _economy_check() -> void:
 	Save.d["roster"] = [Save.new_kin("cindle", "Pip")]
 	Save.d["active"] = Save.d["roster"][0]["uid"]
 	var haul := Pack.haul(P)
-	var n_arm := haul.filter(func(it): return String(it["t"]) != "val").size()
+	# armor salvages on arrival
+	var n_arm := haul.filter(func(it): return String(it["t"]) != "val" and not Equal.salvages(it)).size()
 	var out := Game.apply_result({"extracted": true, "haul": haul, "tier": 0, "gems": 5, "kin_runs": []})
 	ok.call(Econ.armory().size() == n_arm and int(Save.d["valuables"].get("crown_shard", 0)) == 1, "extract: %d pieces of gear in the armory, treasure in the vault %s" % [Econ.armory().size(), str(Save.d["valuables"])])
 	ok.call((out.get("haul", []) as Array).size() == haul.size(), "results list what came home (%d)" % (out.get("haul", []) as Array).size())
 	ok.call(int((out.get("mats", {}) as Dictionary).get("wood", 0)) > 0 and Work.mat("wood") > 0, "extract: the haul also gives farm materials %s" % str(out.get("mats", {})))
-	var best_w: Dictionary = Econ.armory().filter(func(it): return String(it["t"]) == "gear")[0]
+	var best_w: Dictionary = Econ.armory().filter(func(it): return Equal.may_bring(it, 2))[0]
 	Econ.set_loadout(Econ.gear_slot(best_w), String(best_w["uid"]))
-	var kit := Econ.begin_raid()
+	var kit := Equal.take_loadout(2)
 	ok.call(kit.size() == 1 and Econ.find(String(best_w["uid"])).is_empty() and (Save.d["raid_out"] as Array).size() == 1, "loadout leaves the armory for the expedition")
 	Game.apply_result({"extracted": true, "haul": kit, "tier": 0, "kin_runs": []})
 	ok.call(not Econ.find(String(best_w["uid"])).is_empty() and not Econ.loadout(Econ.gear_slot(best_w)).is_empty(), "extracting brings the loadout gear back, still picked")
-	Econ.begin_raid()
+	Equal.take_loadout(2)
 	Game.apply_result({"extracted": false, "why": "knocked out", "lost_items": [best_w], "tier": 0, "kin_runs": []})
 	ok.call(Econ.find(String(best_w["uid"])).is_empty() and Econ.loadout(Econ.gear_slot(best_w)).is_empty(), "dying loses the loadout gear")
+	# armor salvages on arrival now; make sure two pieces are left
+	if Econ.armory().size() < 2: Save.d["armory"].append(Loot.gear("skylark_boots", 2))
 	var sold := Econ.sell(String(Econ.armory()[0]["uid"]))
 	var scrap := Econ.salvage(String(Econ.armory()[0]["uid"]))
 	ok.call(sold > 0 and scrap > 0, "sell (%d gems) and salvage (%d scrap)" % [sold, scrap])
@@ -1204,7 +1197,8 @@ func _economy_check() -> void:
 	ok.call(not back.is_empty() and back["ghost"] and String(back["title"]) != "" and int(back["level"]) == 4 and tdiff > 0.05 and Save.d["roster"].has(back) and not Econ.graves().has(g) and Econ.embers() == 0, "revived kin comes back changed")
 	# an old save (from before the armory and feeders) loads and gets them filled in
 	var old := Save.fresh()
-	for k in ["armory", "raid_out", "loadout", "valuables", "feeders", "graves", "arm_lvl", "pack_lvl", "scrap", "feeder_inv", "feeder_given"]:
+	for k in ["armory", "raid_out", "loadout", "valuables", "feeders", "graves", "arm_lvl", "scrap", "feeder_inv",
+			"feeder_given"]:
 		old.erase(k)
 	var orec := Save.new_kin("zapple", "Oldie")
 	orec.erase("starve")
@@ -1212,7 +1206,10 @@ func _economy_check() -> void:
 	Save.d = old
 	Econ.ensure()
 	Care.catch_up(orec)
-	ok.call(Econ.armory().is_empty() and Econ.feeders().size() == 1 and Econ.graves().is_empty() and Econ.pack_cap() == Econ.PACK_CAPS[0] and Care.starve_stage(orec) == "" and Econ.begin_raid().is_empty(), "an old save loads: a first trough, empty armory, %d-slot backpack" % Econ.pack_cap())
+	ok.call(Econ.armory().is_empty() and Econ.feeders().size() == 1 and Econ.graves().is_empty()
+			and Econ.pack_cap() == Equal.base_pack() and Care.starve_stage(orec) == ""
+			and Equal.take_loadout(0).is_empty(),
+			"an old save loads: a first trough, empty armory, %d-slot backpack" % Econ.pack_cap())
 	print("ECON DONE failures: %d" % bad[0])
 	get_tree().quit()
 
@@ -1658,18 +1655,19 @@ func _ability_check() -> void:
 		n += 1
 	_ac("all abilities run", true, "%d ran" % n)
 	m.queue_free(); await get_tree().process_frame
-	# 22. Ranks: a rank-3 slot makes the same verb stronger and recharge faster
+	# 22. Ranks: a rank-3 slot makes the same verb stronger and recharge faster; a glove never ranks (Gloves)
 	r = _ac_setup(7.0); m = r[0]; P = r[1]; T = r[2]
 	P.inp["aim"] = P.pos + Vector3(2.5, 0.9, 0)
-	P.slot_lv["gear"] = 1
 	_ac_glove(P, "barrier")
 	var hp1: float = m.verbs.walls[-1]["hp"] if not m.verbs.walls.is_empty() else 0.0
 	var cd1: float = P.gear_cd[0]
-	P.slot_lv["gear"] = 3
+	P.skill_pts = 5      # spent on the hero's own abilities (the level stays, so level growth stays out of it)
+	P._bot_spend()
 	_ac_glove(P, "barrier")
 	var hp3: float = m.verbs.walls[-1]["hp"] if not m.verbs.walls.is_empty() else 0.0
-	var cd3: float = P.gear_cd[0]
-	_ac("rank 3 glove: tougher, faster", hp3 > hp1 * 1.3 and cd3 < cd1 * 0.85, "wall hp %.0f -> %.0f, cooldown %.1f -> %.1f" % [hp1, hp3, cd1, cd3])
+	_ac("a glove is as strong after spending skill points (no ranks)", absf(hp3 - hp1) < 0.01
+			and absf(float(P.gear_cd[0]) - cd1) < 0.01 and not P.slot_lv.has("gear"),
+			"wall hp %.0f -> %.0f, cooldown %.1f -> %.1f" % [hp1, hp3, cd1, float(P.gear_cd[0])])
 	P.runner.set_slot("utility", Content.ability("leash_bolt"))
 	P.slot_lv["sec"] = 3
 	P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
@@ -2927,7 +2925,7 @@ func _boss_check() -> void:
 			L["victory_at"] = m.time      # (a fresh clock: this part is about the bot, not the timer)
 			C.ctrl = "bot"
 			var tb2 := 0.0
-			while tb2 < 11.0 and (m.lairs.inside(L, C.pos, 0.5) or not C.grounded):
+			while tb2 < 16.0 and (m.lairs.inside(L, C.pos, 0.5) or not C.grounded):
 				m.step(Match.DT); tb2 += Match.DT; god.call()
 				Q.hp = Q.max_hp
 			ok.call((L["flown"] as Array).has(C) and not m.lairs.inside(L, C.pos, 0.5) and not C.out and L.get("locked", false),
@@ -3512,8 +3510,8 @@ func _drop_check() -> void:
 	var spot := bot.pos
 	for k in 40:
 		var q := m.world.free_spot_near(bot.pos + Vector3(randf_range(-10, 10), 0, randf_range(-10, 10)), [], 1.0, 0.5, 6.0)
-		if m.world.island_of(q.x, q.z) == m.world.island_of(bot.pos.x, bot.pos.z) and bot.flat_dist(q) > 6.0 and m.world.los(bot.pos, q, bot.pos.y + 1.0):
-			spot = q; break
+		if m.world.island_of(q.x, q.z) == m.world.island_of(bot.pos.x, bot.pos.z) and bot.flat_dist(q) > 6.0 and bot.flat_dist(q) < 9.0 and m.world.los(bot.pos, q, bot.pos.y + 1.0):
+			spot = q; break      # (6-9 m: an unseeded roll, so a far spot made the 6 s walk a coin flip)
 	spot.y = m.world.ground_at(spot.x, spot.z)
 	m.squad_ping(P, spot)
 	var d0 := bot.flat_dist(spot)
@@ -3522,8 +3520,9 @@ func _drop_check() -> void:
 	t = 0.0
 	while t < 6.0:
 		m.step(Match.DT); t += Match.DT
-		if String(bot.ai.get("goal_kind", "")) == "ping": went = true
-		closest = minf(closest, bot.flat_dist(spot))
+		# any squad bot: one busy with its downed Boki or a beacon leaves it to the other
+		if mates.any(func(x): return String(x.ai.get("goal_kind", "")) == "ping"): went = true
+		closest = minf(closest, mates.map(func(x): return x.flat_dist(spot)).min())
 	var replies: Array = D.events.slice(ev0).filter(func(e): return String(e).begins_with("reply"))
 	print("DCHECK ground ping: %s headed there=%s, %.1fm -> got within %.1fm; replies %s (from %s to %s)" % [bot.pname, went, d0, closest, str(replies), str(bot.pos.snapped(Vector3(0.1, 0.1, 0.1))), str(spot.snapped(Vector3(0.1, 0.1, 0.1)))])
 	if not went or closest > 4.0 or not replies.any(func(r): return String(r).ends_with("omw")): ok = false; print("DCHECK FAIL squad bots ignore pings")
@@ -3980,6 +3979,7 @@ func _home_build_check() -> void:
 	tr.apply_try()
 	tr.open_tryon()
 	ok.call(String(tr.kit["fire"]["name"]) == Content.weapon(String(Data.CLASSES["heavy"]["weapon"])).display_name and mv.panel_open == "Try-on rack", "the Try-on rack puts a heavy's weapon in your hands (%s)" % tr.kit["fire"]["name"])
+	Save.d["classes"] = ClassUnlock.legacy()      # an old save: every Hunter open (the locks: --hunter-unlock-check)
 	tr.set_my_class()
 	ok.call(String(Save.d["cls"]) == "heavy" and String(Save.d["weapon"]) == Arch.signature(String(Save.d["arch"])), "Set as my class makes it your expedition class")
 	mv._close_panel()

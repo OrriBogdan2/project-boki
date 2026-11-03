@@ -66,14 +66,17 @@ func _setup_input() -> void:
 	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the archetype's ability, Shift the archetype's
 	# dash, Space jump and glide (Mouse 5 glides too), Q your active glove, E the archetype's utility,
 	# R reload, X the hunter's ultimate, T merge with your Boki (a full bond meter), C your kin's own ability (it
-	# cast from where it is), G (or middle mouse) throw / recall your kin, hold G to hold or follow, 1 tonic, 2 armor kit, F interact.
+	# cast from where it is), G (or middle mouse) throw / recall your kin, hold G to hold or follow, 1-4 the utility belt,
+	# F interact.
 	_key("signature", [KEY_E])                # the archetype's utility (E)
 	_key("kin_ability", [KEY_C])              # the kin's own ability: cast from wherever the Boki is
 	_key("kin_skill", [])                     # a kin's second ability: retired from the kit (data kept)
 	_key("interact", [KEY_F])                 # catch, open, pick up, finish a downed enemy (Supervive: F)
-	_key("armor_kit", [KEY_2])                # repair armor with an armor kit (the anvil); tonics are on 1
-	_key("gear1", [KEY_Q])                    # your active glove
-	_key("gear2", [])                         # the second glove slot is passive: no key
+	_key("util2", [KEY_2])                    # utility belt slot 2 (an armor kit to start)
+	_key("util3", [KEY_3])                    # utility belt slot 3
+	_key("util4", [KEY_4])                    # utility belt slot 4
+	_key("gear1", [KEY_Q])                    # glove 1 (Q)
+	_key("gear2", [KEY_V])                    # glove 2 (V; in a match only, so it shares V with "play" at home)
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
 	_key("throw", [KEY_G], MOUSE_BUTTON_MIDDLE)  # send your kin out to fight on its own, or recall it (G or middle mouse)
 	_key("base", [KEY_B])                     # base to a teammate: a 3s channel (squads only)
@@ -85,7 +88,7 @@ func _setup_input() -> void:
 	_key("reload", [KEY_R])                   # reload by hand (it also reloads on its own after a short idle)
 	_key("hunter_ult", [KEY_X])               # the hunter's own ultimate (level 6; none yet, see ArchKit.cast_ult)
 	_key("ultimate", [KEY_T])                 # Merge with your Boki (level 6, a full bond meter); T again releases
-	_key("tonic", [KEY_1])
+	_key("util1", [KEY_1])                    # utility belt slot 1 (a tonic to start)
 	_key("scores", [KEY_TAB])
 	_key("menu", [KEY_ESCAPE])
 	_key("play", [KEY_V])                     # at home: play fetch with a kin
@@ -125,11 +128,6 @@ func apply_result(r: Dictionary) -> Dictionary:
 	var d := Save.d
 	var out := {"gems": 0, "seeds": {}, "caught": [], "kin_lines": [], "levelup": false, "crops_ready": 0}
 	d["matches"] = int(d["matches"]) + 1
-	# a free-kit run (Loaner): the stipend on an extract; the loaner itself never touches the save
-	out["stipend"] = Loaner.settle(r)
-	if r.get("loaner", false):
-		out["loaner"] = true
-		r["kin_runs"] = []; r.erase("kin_events"); r.erase("kin_trust"); r.erase("lost_kin")
 	var won: bool = r.get("extracted", false)
 	# lifetime counts for challenges
 	var ms: Dictionary = r.get("stats", {})
@@ -184,15 +182,13 @@ func apply_result(r: Dictionary) -> Dictionary:
 			KinBox.route_new(nk)      # the farm if there's room; a repeat species goes to the Kin Burrow
 			Care.dex_got(nk)
 			out["caught"].append(nk)
-	d["items"]["tonic"] = int(r.get("tonics", d["items"].get("tonic", 0)))
-	if r.has("rift_keys"):
-		d["items"]["rift_key"] = int(r["rift_keys"])     # carried keys come home with you, or stay in your deathbox
+	Equal.settle_belt(r)       # the utility you brought and found comes home with you, or is gone (equal.gd)
+	Backpacks.settle(r)        # and the backpack you wore out
 	var treat: String = d.get("treat", "")
-	if not r.get("loaner", false):
-		d["treat"] = ""      # (a free-kit run never used it, so it keeps)
+	d["treat"] = ""
 	# every kin you brought remembers the match
 	var runs: Array = r.get("kin_runs", [])
-	if runs.is_empty() and not Save.active_kin().is_empty() and not r.get("loaner", false):
+	if runs.is_empty() and not Save.active_kin().is_empty():
 		runs = [{"uid": Save.active_kin()["uid"], "events": r.get("kin_events", []), "trust": r.get("kin_trust", Save.active_kin()["trust"]), "stats": r.get("kin_stats", {})}]
 	var k := Save.active_kin()
 	var brought: Array = []
@@ -297,6 +293,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 				p["wet"] = 0
 			if int(p["stage"]) == grow:
 				out["crops_ready"] += 1
+	out["class_unlock"] = ClassUnlock.after_match(r)     # Hunter challenges and mastery
 	# the floor: nobody is left with no Boki and no way to play (Lifeline)
 	out["floor"] = Lifeline.check()
 	Save.save_game()

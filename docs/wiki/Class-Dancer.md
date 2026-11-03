@@ -45,7 +45,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 
 |  |  |
 |---|---|
-| Weight class | Light (124 health, 4.4 m/s, 1 dash charge) |
+| Body | 124 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Arc Bolts (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The duelist. Sticks to one mark from range, cartwheels past them, never lets go. |
 | Silhouette | the hood tail and cape |
@@ -58,18 +58,18 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Ranged duelist: stay on one foe, cartwheel, and land the big shot. |
-| Passive: Marks | Each hit on the same foe adds a Mark: +12% damage, up to 8. Knocks heal you. |
+| Passive: Marks | Each hit on the same foe adds a Mark: +10% damage, with no cap. Knocks heal you. |
 | Dash: Vault | Cartwheel a short way. Your next bolt is a big empowered shot; land it and you get the Vault back. |
 | RMB: Bola | A short wind-up, then a Bola down the lane: it grounds the first foe and flies on. Catch a second and both are stunned. |
 | E: Shadow Knife | Throw a dagger to your cursor or into a foe. Press E again to blink to it. |
-| X: Encore | A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge. |
+| Hunter ultimate: Encore | A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge. |
 | Weapon: Arc Bolts | Bolts from alternating hands every 0.45s. Each one lands at your cursor. |
 
 ### Abilities in full
 
-**Marks (passive).** Every bolt that hits puts a Mark on the target (up to 8, each lasting 4s and refreshed by the next): your bolts on them deal +12% per Mark. The empowered shot adds 2, the Bola 1. A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
+**Marks (passive).** Every bolt that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your bolts on them deal +10% per Mark. The empowered shot adds 2, the Bola 1. A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
 
-**Vault (dash, Shift, 4.5s cooldown).** A sideways cartwheel of about 4m the way you move (about 7m from a jump, its speed carried to the landing; shots pass through it) and +18% speed until your next hit (2s at most). Your next bolt within 3s is empowered: it flies 12% further for 3.5 times the damage, 2 Marks and Shred; firing it ends the speed (+15% damage taken for 3s). Landing it gives the Vault back.
+**Vault (dash, Shift, 4.5s cooldown).** A sideways cartwheel of about 4m the way you move (about 7m from a jump, its speed carried to the landing; shots pass through it) and +18% speed until your next hit (2s at most; half as much again at rank 3). Your next bolt within 3s is empowered: it flies 12% further for 3.5 times the damage, 2 Marks and Shred; firing it ends the speed (+15% damage taken for 3s). Landing it gives the Vault back. Rank 2: empowered shots +20%; rank 3: +40%.
 
 **Bola (RMB, 7s cooldown).**
 
@@ -78,7 +78,7 @@ What the in-game kit card (K) says.
 
 **Shadow Knife (E, 15s cooldown).** Throw a dagger to your cursor (14m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press E again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
 
-**Encore (X, hero ultimate from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; for 2s a blade flies every 0.4s at each foe inside it (5 at most): 8 each, 12 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
+**Encore (hunter ultimate, from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; for 2s a blade flies every 0.4s at each foe inside it (5 at most): 8 each, 12 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
 
 ### Ranks
 
@@ -87,8 +87,8 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
 | RMB | cooldown 7s -> 6.3s, damage +15%. | cooldown 7s -> 5.6s, damage +30%; flies 1m further after the first foe, and two foes caught pool their Marks. |
-| Dash (Shift) | recharge 4.5s -> 3.8s per charge. | recharge 4.5s -> 3.2s; empowered shots +20%, and a Shadow Knife that sticks in a foe gives the Vault back. |
-| E | cooldown 15s -> 13.5s, damage +15%. | cooldown 15s -> 12s, damage +30%; sticking refunds 25% of the cooldown (50% in a foe). |
+| Dash (Shift) | recharge 4.5s -> 3.8s per charge; empowered shots +20%. | recharge 4.5s -> 3.2s; empowered shots +40% in all, and the speed boost is half again as big. |
+| E | cooldown 15s -> 13.5s, damage +15%. | cooldown 15s -> 12s, damage +30%; sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 
@@ -97,7 +97,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Moment | Tell |
 |---|---|
 | Building up | gold Mark diamonds over the target, one per stack |
-| Armed / full | eight diamonds spinning fast; a gold glint in the hand and a gold aim line while the next bolt is empowered; a violet ring round her and blades circling her while Encore runs |
+| Armed / full | a full ring of eight diamonds spinning fast (more Marks still count); a gold glint in the hand and a gold aim line while the next bolt is empowered; a violet ring round her and blades circling her while Encore runs |
 | Dash spent | a white cartwheel arc, dash pip dark |
 
 <!-- /gen:kit -->

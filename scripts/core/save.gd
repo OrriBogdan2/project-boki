@@ -8,12 +8,13 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 5
+const VERSION := 7
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
-const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5"}
+const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
+		5: "_migrate_5_to_6", 6: "_migrate_6_to_7"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -68,6 +69,7 @@ func fresh() -> Dictionary:
 		"name": "Hunter",
 		"gems": 60,
 		"cls": "medium",
+		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
 		"active": "",
 		"roster": [],
 		"seeds": {"tidebloom": 2, "emberberry": 1},
@@ -91,7 +93,9 @@ func fresh() -> Dictionary:
 		"offers": [],         # rivals asking to buy back kin you took from them
 		"ransom_log": [],     # what happened at the Ransom House, newest last
 		"armory": [],         # gear brought home (Loot items); see Econ
-		"arm_lvl": 0, "pack_lvl": 0, "scrap": 0,
+		"arm_lvl": 0, "scrap": 0,
+		"belt_pick": ["tonic", "armor_kit", "", ""],   # the utility for the next expedition, one per belt slot (Equal)
+		"raid_belt": {},      # utility charges out on an expedition right now (put back if it never ended)
 		"loadout": {},        # what you take on the next expedition: slot -> armory uid
 		"valuables": {},      # treasure to sell, and Soul Embers
 		"raid_out": [],       # loadout pieces out on an expedition right now
@@ -263,6 +267,16 @@ func migrate(data: Dictionary) -> bool:
 		v += 1
 		data["v"] = v
 	return true
+
+## v5 -> v6: Hunter unlocks. A save that predates them had every Hunter, so it keeps them all (ClassUnlock).
+func _migrate_5_to_6(data: Dictionary) -> void:
+	ClassUnlock.migrate(data)
+
+## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
+## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,
+## and a one-time notice lists it all (EqualMigrate).
+func _migrate_6_to_7(data: Dictionary) -> void:
+	EqualMigrate.migrate(data)
 
 ## v4 -> v5: the gear model. Stored weapons become scrap, gloves become gear items, the loadout
 ## moves to five gear slots (GearSave).

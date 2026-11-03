@@ -1,37 +1,38 @@
 # Tamsin, the Rimewright (light)
 
-A rink-keeper who slows and splinters. Everything she hits Chills; knock a Chilled foe and they
-splinter for area damage. She shelters the squad behind a sliding wall of ice. She has no ultimate; R is
-your Boki's Merge.
+An ice controller. Everything she hits Chills; her darts home onto whoever is under the cursor, her spear
+freezes where it lands, and her sliding wall of ice shoves foes where she wants them. She has no ultimate;
+R is your Boki's Merge.
 
 ## How it plays
 
-1. **Hold left click** for the Hoar Fan: four light homing shards, then three heavy ones. Eight shards on
-   one foe make them splinter.
-2. **Shift** (Rinkrun): hold to glide fast; your fan does double damage while you do. Let go early to
+1. **Hold left click** for a steady stream of slow Ice Darts that curve onto the foe nearest your cursor.
+   Eight on one foe Shatter them.
+2. **Shift** (Skate): hold to skate where you move; your darts fly straight and hit 1.6x. Let go early to
    get part of the charge back.
-3. **RMB** throws a Sleet Lance (two charges): it lands, slows (more up close) and goes off a second time.
-4. **E** raises the Rink Wall, which slides forward, stops shots and shoves foes. Press E again to freeze
-   it in place. Teammates who touch it get a frost shield.
-5. **Hoarfrost** (passive): damaging abilities Chill for 4s. Knocking a Chilled foe splinters them
-   after a beat.
+3. **Hold RMB** to see where the Ice Spear lands, let go to throw (two charges). It lands at the cursor,
+   slows everyone in its zone, and 1.8s later detonates and freezes them.
+4. **E** raises the Rink Wall just ahead after a short tell. It slides toward the cursor, widening, stops
+   shots and shoves foes. Press E again to freeze it in place for 6s.
+5. **Hoarfrost** (passive): damaging abilities Chill for 4s. Knocking a Chilled foe Shatters them after a
+   beat.
 
 ## Combos and interactions
 
 | Do this | And you get |
 |---|---|
-| Fan shards | Chill, so the foe is slower |
-| Rinkrun while firing | Double fan damage |
-| Eight shards on one foe | They splinter: 20 damage in 2.4m |
-| Knock a Chilled foe | They splinter 0.4s later: 30 damage within 3m, more Chill |
-| Sleet Lance up close | Stronger slow, then a second burst |
-| Teammate touches the Rink Wall | An 18 point frost shield, once per wall |
+| Darts | Chill, so the foe is slower, and a frost glow that grows |
+| Skate while firing | Straight darts at 1.6x |
+| Eight darts on one foe | They Shatter: 60 damage in 2.4m |
+| Knock a Chilled foe | They Shatter 0.4s later: 30 damage within 3m, more Chill |
+| Ice Spear under a foe | Slowed in the zone, then the detonation and a freeze |
+| Wall into a foe | It carries them along its path |
 
 ## Tips
 
-- Open with a lance, then Rinkrun in with the fan.
-- Slide the wall into a doorway, then freeze it there.
-- Finish a Chilled foe next to their friends for the splinter.
+- Shove a foe with the wall, then drop a spear where it stops.
+- Skate in and fire for the 1.6x darts.
+- Finish a Chilled foe next to their friends for the Shatter.
 
 ## Kit
 
@@ -40,9 +41,9 @@ your Boki's Merge.
 
 |  |  |
 |---|---|
-| Weight class | Light (124 health, 4.4 m/s, 1 dash charge) |
+| Body | 124 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Hoar Fan (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | A rink-keeper from the high frosts. She runs the fight on the ice, chills everything she touches, and raises a sliding rink-wall that her squad can shelter behind. |
+| Fantasy | A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that freezes where it lands, and a sliding wall of ice that shoves foes where she wants them. |
 | Silhouette | the big furred collar and the long trailing scarf, on blade skates |
 | Resource | Chill (max 8) |
 
@@ -52,25 +53,28 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Every hit Chills. Knock a Chilled foe and they splinter for area damage. Rinkrun to double your fan's darts, and shelter the squad behind the Rink Wall. |
-| Passive: Hoarfrost | Hoarfrost: damage Chills for 4s. Knock a Chilled foe and it splinters, hurting those near it. |
-| Dash: Rinkrun | Rinkrun: hold Shift to glide fast; let go early to get some of the cooldown back. |
-| LMB | Hoar Fan: hold for a flurry of homing shards ending in three heavy ones; eight on one foe makes them splinter. Double damage during a Rinkrun. |
-| RMB: Sleet Lance | Sleet Lance: lands, slows, then goes off again. Close hits slow more, far hits hurt more. 2 charges. |
-| E: Rink Wall | Rink Wall: a sliding ice wall that stops shots and shoves foes; press again to freeze it. Friends get a shield. |
-| Weapon: Hoar Fan | A flurry of 4 light shards then 3 heavy ones. Eight shards on one foe splinter them. |
+| Loop | Ice controller: homing darts, a freezing spear and a sliding ice wall. |
+| Passive: Hoarfrost | Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them. |
+| Dash: Skate | Skate: hold the dash key to skate where you move; your darts fly straight and thick. |
+| LMB | Ice Dart: hold for a stream of slow darts that curve onto the foe at your cursor. |
+| RMB: Ice Spear | Ice Spear: lands at the cursor, slows there, and bursts and freezes 1.8s later. |
+| E: Rink Wall | Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it. |
+| Hunter ultimate: Rimelock | Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun. |
+| Weapon: Hoar Fan | Hold for a stream of slow darts that curve onto the foe at your cursor. |
 
 ### Abilities in full
 
-**Hoarfrost (passive).** Your damaging abilities Chill foes for 4s (a Chilled foe is a little slower and shows frost). Knocking a Chilled hunter, or felling a Chilled monster, makes them Splinter 0.4s later: 30 damage to everyone within 3m of them, plus Chill. Eight shards of your fan on the same foe Splinter them too, for 20.
+**Hoarfrost (passive).** Your damaging abilities Chill foes for 4s (a Chilled foe is a little slower and shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 30 damage to everyone within 3m, plus Chill.
 
-**Rinkrun (dash, Shift, 11s cooldown).** Hold Shift to Rinkrun at 11 m/s in the direction you face, for up to 1.6s, steering gently. Let go and you stop; stopping early gives back a share of the cooldown. Your fan does double damage during a Rinkrun. In the air this is your usual long dash.
+**Skate (dash, Shift, 8.5s cooldown).** Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly straight and thick. In the air this is your usual long dash.
 
-**Sleet Lance (RMB, 4.5s cooldown, 2 charges).**
+**Ice Spear (RMB, 10.2s cooldown, 2 charges).**
 
-- *Tap:* Throw a lance 12m. It bursts where it lands (12 damage, Chill, a slow that is stronger up close while the damage is stronger from far), then goes off again 0.7s later for 15 in 1.8m.
+- *Tap:* Hold to see the landing ring at the cursor (up to 12m); let go to throw. The spear lands at the cursor (4 damage to a foe in the way, where it then lands) and leaves a 2.2m slow zone (35% slower, Chill) for 1.8s, then detonates: 60 damage in 2.7m and a 0.5s freeze. 2 charges.
 
-**Rink Wall (E, 20s cooldown).** A 4.2m ice wall appears ahead and slides forward for 4s, stopping shots and shoving foes it touches. Press E again to freeze it where it stands (it then lasts 8s). Teammates who touch it get an 18 point frost shield for 6s, once per wall.
+**Rink Wall (E, 17s cooldown).** A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (3 to 10.8m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 3s. Press E again while it slides to freeze it in place for 6s.
+
+**Rimelock (hunter ultimate, from level 6, 47s cooldown).** Cast it: you are sealed in a frost shell, invulnerable and rooted, and a 7.2m (4 body heights) rink snaps out round you. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun.
 
 ### Ranks
 
@@ -78,9 +82,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 4.5s -> 3.9s, damage +15%. | cooldown 4.5s -> 3.4s, damage +30%; the second burst is 45% larger. |
-| Dash (Shift) | recharge 11s -> 9.9s. | recharge 11s -> 8.8s; a Rinkrun over open sky lays a short ice bridge. |
-| E | cooldown 20s -> 18s, wall strength +15%. | cooldown 20s -> 16s, wall strength +30%; +40 wall strength and a doubled frost shield. |
+| RMB | cooldown 10.2s -> 9.2s, damage +15%. | cooldown 10.2s -> 8.2s, damage +30%; the detonation hits 45% harder. |
+| Dash (Shift) | recharge 8.5s -> 7.7s. | recharge 8.5s -> 6.8s; a Skate over the Abyss lays ice underfoot that holds for 5s. |
+| E | cooldown 17s -> 15.3s, wall strength +15%. | cooldown 17s -> 13.6s, wall strength +30%; +40 wall strength. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).
 
@@ -88,8 +92,8 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Moment | Tell |
 |---|---|
-| Building up | frost mist on Chilled foes |
-| Armed / full | a foe with 6+ fan shards on them glitters; Splinter rings white |
+| Building up | a frost glow on foes that grows with each dart |
+| Armed / full | at 8 darts the foe Shatters in ice spikes; a landed spear shows its slow zone and fill to everyone |
 | Dash spent | skate blades dark, dash pip dark |
 
 <!-- /gen:kit -->

@@ -14,11 +14,15 @@ static func def(id: String) -> Dictionary:
 	return Content._load("archetypes", id)
 
 ## A hero's own body over its class (content "body"): size and build multiply the class look, hit_r
-## replaces the class hit radius, plate is the nameplate height (m). Empty for none.
+## replaces the class hit radius. Empty for none.
 static func body(id: String) -> Dictionary:
 	if id == "" or not exists(id):
 		return {}
 	return def(id).get("body", {})
+
+## The hitbox radius of a hunter of this archetype and class (the body's hit_r, else the class's).
+static func hit_r(id: String, cdat: Dictionary) -> float:
+	return float(body(id).get("hit_r", cdat.get("hit_r", 0.38 * float(cdat["scale"]))))
 
 static func ids() -> Array:
 	var out: Array = []
@@ -34,6 +38,10 @@ static func weight(id: String) -> String:
 
 static func name_of(id: String) -> String:
 	return String(def(id).get("name", id.capitalize()))
+
+## The Hunter's display name, or "Hunter" for a body with no Hunter kit (dummies, old saves).
+static func label(id: String) -> String:
+	return name_of(id) if exists(id) else "Hunter"
 
 static func color(id: String) -> Color:
 	return Color(String(def(id).get("color", "#ffffff")))

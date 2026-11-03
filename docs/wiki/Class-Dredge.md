@@ -6,24 +6,27 @@ grows with every knock.
 ## How it plays
 
 1. **Salvage** builds from knocks and assists (+2.5% health each, up to 10). Hits on a hunter's back deal 50% more.
-2. **Grapnel** (RMB): a rope-hook that stops at the first foe or wall and reels the foe in. Only the barge works while you reel.
-3. **Anchor Drop** (E): a short wind-up, then a stunning, slamming cone. In the air it drives you down too.
-4. **Barge** (Shift, 2 charges): a shoulder dash; just after the Anchor it can't turn much.
+2. **Scattergun** (LMB): seven slugs in a tight fan, a shot every half second. The fan's edges show on the ground while you fire.
+3. **Grapnel** (RMB): a rope-hook that flies over rocks to the first foe and reels them to your feet, stunned. Strafe while you reel to swing them. It also pulls an ally to safety. Only the barge works while you reel.
+4. **Anchor Drop** (E): hop forward and slam a giant anchor down in front of you for a long stun. In the air you smash straight down, and the higher you fall the harder it hits.
+5. **Barge** (Shift, 2 charges): a shoulder dash toward the cursor, further in the air; just after the Anchor it can't turn much.
 
 ## Combos and interactions
 
 | Do this | And you get |
 |---|---|
-| Grapnel, then Anchor Drop on the Grounded foe | the core combo: damage, stun, slam |
+| Grapnel, then Anchor Drop on the arriving foe | the core combo: damage, a long stun, slam |
 | Barge while reeling | works; the reel carries on |
-| Grapnel into a wall | the hook stops there |
+| Grapnel past a rock | the foe is dragged over it |
+| Grapnel at a cliff face | the hook stops there |
 | A reel over a gap | the foe falls (the abyss rules) |
+| Jump, then Anchor Drop | a straight-down smash with a ring of damage |
 | Anchor over the abyss | no downward push |
 
 ## Tips
 
-- Hit from behind: a hooked foe lands facing you, so reel past a corner and use the shotgun on their back.
-- Anchor from a height (rank 3) for up to +75% damage.
+- Hit from behind: reel a foe past you while strafing and use the scattergun on their back.
+- Anchor from a height for up to +50% damage (+75% at rank 3).
 
 ## Kit
 
@@ -32,7 +35,7 @@ grows with every knock.
 
 |  |  |
 |---|---|
-| Weight class | Heavy (193 health, 4.4 m/s, 2 dash charges) |
+| Body | 193 health, 4.4 m/s, 2 dash charges |
 | Signature weapon | Shotgun (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The harbour hauler. Reels you in on a rope, drops an anchor on you, and grows with every knock. |
 | Silhouette | the round brass helm and the rope drum on one shoulder |
@@ -44,24 +47,27 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Haul a foe in on the Grapnel, drop the Anchor on them, finish with the scattergun from behind. Every knock makes you bigger. |
-| Passive: Salvage | Knocks and assists pile up Salvage (+2.5% health each, up to 10). Hits from behind hurt 50% more. A knock heals you. |
-| Dash: Barge | Two charges of a shoulder barge. Turning is clumsy right after the Anchor. |
-| RMB: Grapnel | Throw a rope-hook through the first foe it meets (walls stop it) and reel them in; they land Grounded. Only the barge works while you reel. |
-| E: Anchor Drop | Drop the Anchor in front of you: stun and slam. In the air it drives you down too. |
-| Weapon: Shotgun | Seven slugs that stop at 5m; spread grows with each shot and the barge resets it. |
+| Loop | Brawler who reels you in: hook a foe to your feet, smash them, finish them up close. |
+| Passive: Salvage | Salvage: knocks and assists add health, up to 10 stacks. A knock heals you. |
+| Dash: Barge | A short shoulder barge toward the cursor, further in the air. It works while you reel. |
+| RMB: Grapnel | Throw a rope-hook through rocks and cliffs at the first body it meets and reel it to your feet, stunned. Strafe to swing them. |
+| E: Anchor Drop | Hop forward and drop the anchor in front of you: damage and a long stun. In the air you smash straight down. |
+| Hunter ultimate: Brass Broadside | Brass Broadside (level 6): plant and charge a fan, then two waves of heavy brass slugs with Anti-Heal. |
+| Weapon: Shotgun | Seven slugs in a tight fan that stop 6m out, a shot every half second. Hits from behind hurt more. |
 
 ### Abilities in full
 
 **Salvage (passive).** Each knock or assist adds a Salvage stack (+2.5% health, 10 at most); being downed costs one. Hits on a hunter's back deal 50% more. Knocking a hunter heals you 16% of your health.
 
-**Barge (dash, Shift, 12s cooldown).** A 4.6m shoulder barge (2 charges): shoves foes along it for 5. It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees.
+**Barge (dash, Shift, 10s cooldown).** A quick, short shoulder barge toward the cursor; three charges chain a beat apart: a burst where you set off, and it shoves foes along it (no damage). In the air it goes 35% further. It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees.
 
-**Grapnel (RMB, 14s cooldown).**
+**Grapnel (RMB, 12s cooldown).**
 
-- *Tap:* Throw a rope-hook 11.5m: it stops at the first foe or wall. A foe is reeled to you (until it arrives or 3s pass) and lands Grounded for 1s. A swung body bends round you if you move; walls block the reel and the abyss takes whoever is pulled over it.
+- *Tap:* Throw a rope-hook 11.5m through rocks, props and cliff faces at the first body it meets (a placed wall stops it). The foe is reeled to you, stunned, dragged over rocks and cliffs (until it arrives or 3s pass); strafe and the body swings round you. You are Grounded while you reel (no jump or glide; the barge still works). It also pulls an ally to safety and scoops up wisps on the way. Rank 3: a foe it hits takes half the cooldown off. The abyss takes whoever is pulled over it.
 
-**Anchor Drop (E, 10s cooldown).** A 0.22s wind-up, then the anchor smashes down in a 3m cone: 25 damage, stun 0.45s, slammed to the ground and Grounded. You are driven downward after it, unless you are over the abyss.
+**Anchor Drop (E, 7s cooldown).** Hop a body length forward (0.38s), then the anchor smashes down in a 3m cone: 25 damage, stun 1.1s, slammed to the ground and Grounded. In the air you smash straight down and the anchor lands with you: a 3.2m ring, up to +50% damage by height. Over the abyss it slams where you are instead. Rank 3: double damage on a foe over the abyss and +0.2s stun.
+
+**Brass Broadside (hunter ultimate, from level 6, 21s cooldown).** Plant your feet and charge for 1.1s while a 105 degree fan grows on the ground ahead (everyone sees it: it is the exact area). Then two waves 0.6s apart, six heavy brass slugs each, out to 5.9m: 4 damage a slug and Anti-Heal for 3s. Up close every slug lands. A stun during the charge stops it (back in 8s). 21s.
 
 ### Ranks
 
@@ -69,9 +75,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 14s -> 11.5s. | cooldown 14s -> 9s; hitting a foe refunds 33% of it. |
-| Dash (Shift) | recharge 12s -> 10.2s per charge. | recharge 12s -> 8.4s; pellet hits trim 0.25s off the recharge. |
-| E | cooldown 10s -> 8.5s, damage +15%, stun +0.1s. | cooldown 10s -> 7s, damage +30%; cast in the air, up to +75% damage by height. |
+| RMB | cooldown 12s -> 10.8s. | cooldown 12s -> 9.6s; hitting a foe takes half of it off. |
+| Dash (Shift) | recharge 10s -> 8.5s per charge. | recharge 10s -> 7s; pellet hits trim 0.25s off the recharge, and a dash resets the gun's spread. |
+| E | cooldown 7s -> 6.3s, damage +15%, stun +0.1s. | cooldown 7s -> 5.6s, damage +30%, stun +0.2s; double damage on a foe over the abyss and +0.2s stun more. |
 
 **Suggested level-up order** (what bots follow): RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > Glove (Q).
 

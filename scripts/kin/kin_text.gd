@@ -286,6 +286,9 @@ static func merge(ms: MergeSpec, giant := false) -> Array:
 	if os != "": out.append(os.substr(0, 1).to_upper() + os.substr(1))
 	for st in ms.on_start: out.append("As it starts: " + stage(st))
 	for pl in ms.pulses: out.append("Every %ss: %s" % [n(float(pl["every"])), stage(pl["stage"])])
+	var fdash: Dictionary = MergeForm.data()["fallback"]["dash"]
+	out.append("%s, %s: your dash leaves your Boki type's trail (its rider on what you pass), then %ss of haste."
+		% [Settings.key_cap("dash"), String(fdash["name"]), n(float(fdash["haste_s"]))])
 	out.append("%s again: a basic burst that ends the merge." % Settings.key_cap("ultimate"))
 	for slot in ms.merged:
 		var pt: Dictionary = ms.merged[slot]
@@ -299,7 +302,7 @@ static func merge(ms: MergeSpec, giant := false) -> Array:
 static func form_lines(ms: MergeSpec, fd: Dictionary) -> Array:
 	var f := MergeForm.kit_form(ms.id)
 	var out: Array = []
-	out.append("You become %s for %ss. A shell (%s hp by weight class) takes damage first; if it breaks, the merge ends." % [fd["name"], n(ms.duration), "/".join([n(MergeShell.size_for("light", f)), n(MergeShell.size_for("medium", f)), n(MergeShell.size_for("heavy", f))])])
+	out.append("You become %s for %ss. A shell (%s hp, from the lightest Hunter to the sturdiest) takes damage first; if it breaks, the merge ends." % [fd["name"], n(ms.duration), "/".join([n(MergeShell.size_for("light", f)), n(MergeShell.size_for("medium", f)), n(MergeShell.size_for("heavy", f))])])
 	var a: Dictionary = fd["aug"]
 	out.append("You keep your own abilities and they get stronger:")
 	out.append("Left click, %s: %s" % [a["lmb"]["name"], a["lmb"]["desc"]])

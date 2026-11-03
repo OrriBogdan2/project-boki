@@ -5,6 +5,7 @@ extends RefCounted
 ##   3. armour (a strip under health) and shields (past the end of health) are drawn
 ##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
 ##   5. an ability cooling down shows its countdown on the slot
+##   6. key caps come from Settings.key_cap, one Merge slot, an X tile for the hunter ultimate
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -150,10 +151,11 @@ func run(main_node: Node) -> void:
 	await frames_until(m, m.time + HudPlate.LVL_POP_T + 0.2)
 	ok(float(_shown(hud, R).get("lvl_pop", 1.0)) == 0.0, "... and the pulse settles")
 	# ---------------------------------------------------------------- 4c. plate height per hunter
+	var arch_was := P.arch
+	P.arch = "gunslinger"
 	var no_offset := not Arch.def(P.arch).has("plate_offset")
 	ok(no_offset and HudPlate.plate_offset(P) == HudPlate.PLATE_OFFSET and HudPlate.PLATE_OFFSET == 2.35,
 		"an archetype without plate_offset puts the plate at the 2.35 m fallback (%.2f)" % HudPlate.plate_offset(P))
-	var arch_was := P.arch
 	P.arch = ""
 	ok(HudPlate.plate_offset(P) == HudPlate.PLATE_OFFSET, "a hunter with no archetype falls back too")
 	P.arch = arch_was
@@ -168,7 +170,44 @@ func run(main_node: Node) -> void:
 		"E cooling down shows its seconds on the slot ('%s' for %.2fs)" % [txt, float(ei["cd"])])
 	ok(HudSlot.cd_text(0.42) == "0.4" and HudSlot.cd_text(3.2) == "4", "whole seconds, tenths under one second")
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
+	await _check_keys(P)
 	_done()
+
+## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
+## right-side Boki box); every hunter has an X tile with a lock until level 6 and a cooldown after a cast.
+func _check_keys(P: Hunter) -> void:
+	var hud = P.m.hud
+	var all_x := Arch.ids().all(func(id): return Arch.def(id).has("x"))
+	ok(all_x, "every hunter has an ultimate on X (%d)" % Arch.ids().size())
+	var actions := {"sec": "secondary", "dash": "dash", "k1": "signature", "x": "hunter_ult", "r": "ultimate",
+		"kin_ab": "kin_ability", "throw": "throw", "base": "base", "gear0": "gear1", "gear1": "gear2"}
+	P.lvl = 1
+	HudSlot.shown_keys.clear()
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	var x_key := String(HudSlot.shown_keys.get("x", ""))
+	ok(bool(P.slot_info("x")["locked"]) and x_key == Settings.key_cap("hunter_ult"),
+		"level 1: the X tile is drawn locked, with the hunter ultimate key '%s'" % x_key)
+	var wrong := []
+	for id in HudSlot.shown_keys:
+		if actions.has(id) and String(HudSlot.shown_keys[id]) != Settings.key_cap(actions[id]):
+			wrong.append(id)
+	var drawn: Array = HudSlot.shown_keys.keys()
+	var said := "every key cap on the bar is its action's Settings.key_cap (%s, wrong: %s)" % [drawn, wrong]
+	ok(wrong.is_empty() and drawn.size() >= 4, said)
+	var merge_key := String(HudSlot.shown_keys.get("r", ""))
+	ok(merge_key == Settings.key_cap("ultimate") and merge_key != Settings.key_cap("reload"),
+		"the Merge shows the Merge key '%s', not reload's '%s'" % [merge_key, Settings.key_cap("reload")])
+	var merge_slots: Array = hud.hover_spots.filter(func(x): return String(x[1]) == "r")
+	ok(merge_slots.size() == 1, "one Merge slot only (the Boki box on the right)")
+	P.lvl = int(Hunter.ULT_AT[0])
+	P.ak.cd["x"] = 12.3
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	var xt := String(hud.slot_text.get("x", ""))
+	ok(not bool(P.slot_info("x")["locked"]) and xt == HudSlot.cd_text(float(P.ak.cd["x"])),
+		"level %d: the X tile shows its cooldown ('%s')" % [P.lvl, xt])
+	P.ak.cd["x"] = 0.0
 
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:

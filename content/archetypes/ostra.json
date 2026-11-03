@@ -5,25 +5,175 @@
 	"color": "#7fe0d0",
 	"fantasy": "The lamplighter who floats. Pulls the fight to her, then lets it fall in.",
 	"silhouette": "the hovering lantern and the long trailing hem",
-	"card": {"loop": "Damage fills Swell. Swollen, everything you cast is bigger and quicker. Seed, Fan, Trade, then pop it.", "dash": "Lob a lantern and trade places with whatever stands where it lands.", "passive": "Hits fill Swell, ten times faster on hunters. A knock heals you.", "rmb": "Fire a cluster of shards: the first foe is stunned, longer the further it flew.", "e": "Plant a seed that swells for up to 5s. Press again to pop it: bigger and harder the longer it grew.", "weapons": {"tether_lantern": "Slow drifting orbs. Pause 1.4s and the next one is Settled: harder, faster, and it slows."}},
+	"card": {
+		"role": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
+		"loop": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
+		"lmb": "Tether Lantern: quick orbs to full range; pause and the next one is a fast bright bolt that slows.",
+		"rmb": "Shard Snap: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew.",
+		"e": "Brimseed: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew.",
+		"dash": "Lantern Trade: lob a lantern to the cursor and hover where you are; when it lands, everyone in its circle goes to your spot and you go to theirs.",
+		"passive": "Swell: your hits fill Swell (much faster on hunters); full, you are Swollen for 9s and everything grows. You float, so ground hazards pass you by.",
+		"weapons": {
+			"tether_lantern": "Quick orbs to full range; pause 1.4s and the next one is a fast bright bolt that slows."
+		},
+		"x": "Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle."
+	},
+	"body": {"size": 0.9},
 	"signature": "tether_lantern",
 	"no_hold": true,
-	"resource": {"id": "swell", "name": "Swell", "max": 100, "kind": "meter", "wait": 4.0, "drain": 12.0, "hunter_k": 10.0, "per_dmg": 0.045, "swollen_t": 7.0, "col": "#7fe0d0"},
-	"passive": {"name": "Swell", "desc": "Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 7s: your seed grows larger and faster, Trade lands sooner, your snap hits 40% harder. A knock heals you 20% of your health."},
-	"lmb": {"idle": 1.4, "prime_dmg": 0.3, "prime_speed": 1.4, "prime_slow": 0.1, "prime_slow_t": 1.5},
-	"dash": {"id": "swap", "name": "Lantern Trade", "icon": "shadowstep", "col": "#b8f5ea", "cd": 9.0,
-		"reach": 12.0, "time": 1.0, "time_swollen": 0.72, "radius": 1.5, "slow": 0.4, "slow_t": 3.0, "ally_shield": 20.0, "ally_r": 3.0,
-		"desc": "Lob a lantern up to 12m at your aim. After 1s you are there, and any foe standing in the spot is sent to where you were, slowed 40% for 3s. Over the abyss you land on the last solid ground. Swollen: 0.72s."},
-	"rmb": {"delivery": "projectile", "name": "Shard Fan", "short": "Fan", "icon": "skypierce", "col": "#9be8dc", "cooldown": 9.0, "charges": 1, "hold": 0.0,
-		"snap": {"range": 12.0, "speed": 38.0, "dmg": 11.0, "side_dmg": 6.0, "fan_deg": 9.0, "stun": [0.3, 1.0], "swollen_k": 0.4, "boost": 0.0},
-		"variants": {"tap": "Three shards in a tight fan, 12m. The middle one stuns the first foe it hits, from 0.3s up to 1s the further it flew. Swollen: +40% damage."},
-		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "mod": "add"}},
-	"e": {"delivery": "burst", "name": "Brimseed", "short": "Seed", "icon": "blaze_mantle", "col": "#6fd0c6", "cooldown": 11.0, "reach": 9.0, "grow": 5.0, "rmax": 3.0, "rmax_swollen": 3.9, "dmg": 12.0, "dmg_max_k": 3.0, "ground": 1.0, "pull": 2.4,
-		"desc": "Plant a seed up to 9m away (on ground, short of walls). It swells for 5s up to 3m wide, then pops by itself; press E again to pop it sooner. Damage 12 up to 3.5 times that by how long it grew, and everyone it catches is Grounded for 1s. Swollen: larger and quicker.",
-		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add"}},
-	"order": ["sec", "dash", "kin", "sec", "dash", "kin", "sec", "kin", "dash", "gear"],
-	"rank3": {"sec": "+20% damage", "dash": "allies close to where you land get a shield", "kin": "the pop pulls everything inside 1.3x its radius to the middle first, and the seed burns foes inside while it grows"},
-	"rank2": {"sec": "Rank 2: cooldown 9s -> 8.1s, damage +15%.", "dash": "Rank 2: recharge 9s -> 7.6s per charge.", "kin": "Rank 2: cooldown 11s -> 9.9s, damage +15%."},
-	"rank_next": {"sec": "Rank 3: cooldown 9s -> 7.2s, damage +30%.", "kin": "Rank 3: cooldown 11s -> 8.8s; the pop pulls foes in first and the growing seed burns.", "dash": "Rank 3: recharge 9s -> 6.3s; allies near your landing get a 20 shield for 3s."},
-	"tells": {"half": "a ring of teal motes closes around her", "full": "the lantern burns white and the hem lifts", "dash_spent": "a pale ripple where she stood"}
+	"resource": {
+		"id": "swell",
+		"name": "Swell",
+		"max": 100,
+		"kind": "meter",
+		"wait": 4.0,
+		"drain": 12.0,
+		"hunter_k": 10.0,
+		"per_dmg": 0.045,
+		"swollen_t": 9.0,
+		"col": "#7fe0d0"
+	},
+	"passive": {
+		"name": "Swell",
+		"desc": "Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 9s, wrapped in a pink sphere: your seed grows larger and faster, Trade lands sooner, your Snap hits 44% harder. You float: lava, spore pods and other ground hazards pass you by."
+	},
+	"lmb": {
+		"idle": 1.4,
+		"prime_dmg": 0.34,
+		"prime_speed": 1.4,
+		"prime_slow": 0.1,
+		"prime_slow_t": 1.5
+	},
+	"dash": {
+		"id": "swap",
+		"name": "Lantern Trade",
+		"icon": "shadowstep",
+		"col": "#b8f5ea",
+		"cd": 9.5,
+		"reach": 12.0,
+		"time": 1.8,
+		"time_swollen": 1.25,
+		"radius": 1.5,
+		"slow": 0.4,
+		"slow_t": 3.0,
+		"ally_shield": 26.0,
+		"ally_r": 3.0,
+		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern up to 12m to the cursor. You hover where you stand until it lands, even over the abyss, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you were, each keeping its place in the circle (foes slowed 40% for 3s). Over the abyss the lantern lands on the last solid ground. Swollen: 1.25s.",
+		"lob": 4.5,
+		"aim_max": 1.5,
+		"keep_h": 3.0
+	},
+	"rmb": {
+		"delivery": "projectile",
+		"name": "Shard Snap",
+		"short": "Snap",
+		"icon": "skypierce",
+		"col": "#9be8dc",
+		"cooldown": 10.0,
+		"charges": 1,
+		"hold": 0.0,
+		"snap": {
+			"range": 13.0,
+			"speed": 38.0,
+			"dmg": 9.5,
+			"size": 0.35,
+			"width": 0.7,
+			"wind": 0.2,
+			"cast_slow": 0.25,
+			"stun": [
+				0.8,
+				1.8
+			],
+			"swollen_k": 0.44,
+			"boost": {
+				"cast": 0.108,
+				"hit": 0.215,
+				"t": 2.0
+			}
+		},
+		"variants": {
+			"tap": "A 0.2s wind-up, then one tight bundle of shards to 13m. It stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. Swollen: +44% damage. Rank 3: you speed up 11% on the cast and 22% on a hit, for 2s."
+		},
+		"sockets": {
+			"hit": "add",
+			"ctrl": "add",
+			"ctrl_cap": "soft",
+			"mod": "add"
+		}
+	},
+	"e": {
+		"delivery": "burst",
+		"name": "Brimseed",
+		"short": "Seed",
+		"icon": "blaze_mantle",
+		"col": "#6fd0c6",
+		"cooldown": 10.0,
+		"reach": 9.0,
+		"grow": 6.5,
+		"rmax": 3.2,
+		"rmax_swollen": 4.2,
+		"dmg": 12.5,
+		"dmg_max_k": 3.0,
+		"burn": 8.2,
+		"burn_every": 0.5,
+		"desc": "Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, then pops by itself; press E again (from 0.3s) to pop it sooner. Damage 12.5 up to 3.5 times that by how long it grew. Swollen: larger and quicker.",
+		"sockets": {
+			"hit": "add",
+			"ctrl": "add",
+			"ctrl_cap": "soft",
+			"util": "add"
+		},
+		"grow_swollen_k": 0.75,
+		"min_recast": 0.3,
+		"drop": 0.25,
+		"tell_k": 0.68,
+		"linger": 0.5
+	},
+	"x": {
+		"name": "Nightwell",
+		"short": "Well",
+		"icon": "blaze_mantle",
+		"col": "#b06bff",
+		"cooldown": 64.0,
+		"range": 10.0,
+		"tell": 1.0,
+		"time": 3.5,
+		"r": 3.6,
+		"r_swollen": 5.1,
+		"tick_dmg": 0.16,
+		"pull": 12.0,
+		"desc": "Tap: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched, and you are free to act. Swollen: 5.1m wide. 64s."
+	},
+	"order": [
+		"sec",
+		"dash",
+		"kin",
+		"sec",
+		"dash",
+		"kin",
+		"sec",
+		"kin",
+		"dash",
+		"gear"
+	],
+	"rank3": {
+		"sec": "+20% damage, and a burst of speed when you cast and when it hits",
+		"dash": "allies beside you when you leave, or where you land, get a shield",
+		"kin": "the seed burns foes inside while it grows (8 a second)"
+	},
+	"rank2": {
+		"sec": "Rank 2: cooldown 10s -> 9s, damage +15%.",
+		"dash": "Rank 2: recharge 9.5s -> 8.1s per charge.",
+		"kin": "Rank 2: cooldown 10s -> 9s, damage +15%."
+	},
+	"rank_next": {
+		"sec": "Rank 3: cooldown 10s -> 8s, damage +30%; you speed up 11% on the cast and 22% when it hits, for 2s.",
+		"kin": "Rank 3: cooldown 10s -> 8s; the growing seed burns foes inside for 8 a second.",
+		"dash": "Rank 3: recharge 9.5s -> 6.7s; allies beside you or at your landing get a 26 shield for 3s."
+	},
+	"tells": {
+		"half": "a ring of teal motes closes around her",
+		"full": "the lantern burns white and the hem lifts",
+		"dash_spent": "a pale ripple where she stood"
+	}
 }

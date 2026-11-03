@@ -10,7 +10,7 @@
   - [Marlowe](Class-Marlowe.md)
   - [Zedran](Class-Zedran.md)
   - [Bulwark](Class-Bulwark.md)
-  - [Linnet](Class-Linnet.md)
+  - [Moosh Moosh](Class-Moosh-Moosh.md)
   - [Tamsin](Class-Tamsin.md)
 - [Boki](Boki.md)
   - [Species](Boki-Species.md)

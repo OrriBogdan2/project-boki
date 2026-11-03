@@ -3,7 +3,7 @@
     python3 tools/gen_hero_sfx.py      (then: godot --headless --import)
 
 hero_blowout : Vireo's payoff. A dry thunder crack, a falling thump and a rising zap with a spark ring on top.
-hero_skewer  : Marlowe's payoff. A thin needle sweep, a metal tick on arrival and a short low thud.
+hero_skewer  : Venator's payoff. A thin needle sweep, a metal tick on arrival and a short low thud.
 """
 import math, os, random, struct, wave
 
@@ -58,7 +58,7 @@ save('hero_blowout', mix(
     scale(at(mul(tone(500, 2400, 0.22), env(N(0.22), 0.01, 0.07)), 0.05), 0.55),
     scale(at(bell(2900, 0.45, 0.09), 0.1), 0.35)), -15)
 
-# ---- Marlowe: Skewered
+# ---- Venator: Skewered
 save('hero_skewer', mix(
     scale(mul(tone(900, 3200, 0.14), env(N(0.14), 0.002, 0.05)), 0.6),
     scale(at(bell(2100, 0.35, 0.07), 0.12), 0.7),

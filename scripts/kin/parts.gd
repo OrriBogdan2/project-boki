@@ -355,7 +355,7 @@ const OWNER_STATS := {
 	"fire_rate": ["offence", "float", 0.2, 0.3, "x", "faster firing"],
 	"reload": ["offence", "float", 0.2, 0.3, "x", "faster reloads"],
 	"reveal_radius": ["senses", "float", 0.0, 20.0, "m", "rivals this near are revealed"],
-	"cooldown": ["offence", "float", 0.0, 0.5, "x", "every class ability recharges this much faster (set by the merge form, content/rules/merge_forms.json)"],
+	"cooldown": ["offence", "float", 0.0, 0.5, "x", "every Hunter ability recharges this much faster (set by the merge form, content/rules/merge_forms.json)"],
 }
 
 ## Riders on the owner's shots (carry passive and merge). Hard CC is never allowed on every shot.

@@ -11,22 +11,22 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 |---|---|---|---|---|---|---|---|---|
 | Arc Bolts | Dancer | light | 9 | 0.45s | 99 | 0.5s | 12m | A spinning bolt from alternating hands every 0.45s. It flies to your cursor (12m at most) and fizzles there if it hits nothing. |
 | Burst Rifle | none | medium | 7 | 0.45s | 27 | 1.5s | 10.5m | Three rounds per pull. Accurate at range. |
-| Coilcaster | Vireo | light | 8 | 0.42s | 12 | 1.3s | 9m | A copper coil worn on the forearm. Each bolt crackles through everyone in a line. |
-| Torch Lance | Ashwick | heavy | 2.7 | 0.1s | 80 | 1.6s | 6m | Hold to roar out a cone of fire 6m long: 8 seconds of fuel, then a short refill. It builds Char; at full Char the foe ignites. |
+| Coilcaster | Vireo | light | 12 | 0.8s | 99 | 1s | 13m | No gun: a copper coil at each wrist. She points and a jagged bolt cracks from her fingertip, left hand then right, out to full range. |
+| Torch Lance | Linwick | heavy | 2.7 | 0.1s | 80 | 1.6s | 7m | Hold to hose fire 7m ahead: the stream trails behind a sweep, narrow at the nozzle and billowing at the end. 8 seconds of fuel, then a short refill. It builds Char; at full Char the foe goes Ablaze. |
 | Greatsword | Zedran | heavy | 11 | 0.5s | 1 | 0.1s | 3.4m | A slow, huge 3-hit combo, strongest on the tip. Hold 1s for a slam that stuns and throws people far. |
-| Hoar Fan | Tamsin | light | 3.4 | 0.5s | 99 | 1s | 10m | A folding fan of ice slats. Hold to throw a flurry of 4 homing shards, then 3 heavy ones that fly faster and further. Eight shards on one foe Splinter them. Double damage during a Rinkrun. |
-| Lantern Crook | Linnet | medium | 8 | 0.4s | 18 | 1.3s | 9m | A shepherd's crook with a lantern on its hook: it flicks an ember every 0.4s, 9m. Embers Kindle what they hit (up to 5); hold fire for a second and the next one flies 40% further. |
+| Hoar Fan | Tamsin | light | 4 | 0.18s | 99 | 1s | 10m | A folding fan of ice slats. Hold for a steady stream of slow ice darts (one every 0.18s) that bow out and curve onto the foe nearest your cursor. Eight on one foe Shatter them. While skating they fly straight and thick. |
+| Ember Cast | Moosh Moosh | medium | 8 | 0.4s | 18 | 1.3s | 12m | Nothing held: she pushes an ember out of one hand, then the other, every 0.4s; it flies its full 12m, past the cursor. Embers Kindle what they hit (up to 5); hold fire for a second and the next one flies 40% further. |
 | Longbow | Pin | light | 30 | 0.35s | 1 | 0.25s | 12m | Hold to draw, let go to loose. 0.6s Empowered: 30 damage, lands at the cursor (up to 12m). 1.15s Supercharged: 60 damage, flies past the cursor to 16m. Let go right as a stage comes up and your next draw is 60% faster; hold 0.5s past Supercharged and the arrow is overdrawn (half damage). Let go early for 15 at the cursor. You walk slower while drawing. |
 | Longsword | none | medium | 8.2 | 0.36s | 1 | 0.1s | 2.7m | A wide 3-hit combo, stronger on the tip of the blade. Hold 0.8s for a long-reaching thrust. |
 | Minigun | none | heavy | 3.8 | 0.1s | 90 | 3s | 10m | Spins up for 0.7s, then fires a stream that tightens the longer you hold it. Slows you while firing. |
-| Quill Rifle | Marlowe | medium | 6 | 0.12s | 24 | 1.7s | 9.5m | A steady auto rifle fed from a drum. Long strings of fire lose half their punch after ten rounds, and Rattled foes take more. |
+| Quill Rifle | Venator | medium | 6 | 0.12s | 24 | 1.7s | 11m | A long-shrouded auto rifle fed from a drum, firing out to full range. Long strings of fire lose half their punch after ten rounds; Dazed foes take 90% more. |
 | Rifle | none | medium | 6 | 0.13s | 20 | 1.8s | 9.5m | Steady and accurate. Long strings of fire lose some damage, so fire in bursts. |
-| Rubble Fists | Dolm | medium | 9 | 0.6s | 1 | 0.1s | 11m | Tap to hurl a boulder 11m. Hold and let go to punch: it throws foes back, stuns them against a wall and sends rocks flying. |
-| Shotgun | Dredge | heavy | 4 | 1s | 6 | 1.8s | 5m | Seven slugs that slow and stop at 5m. One slug landing still hurts. Spread grows with each shot; dashing resets it. |
+| Rubble Fists | Breah | medium | 9 | 0.6s | 1 | 0.1s | 11m | Tap to hurl a boulder 11m. Hold and let go to punch: it throws foes back, stuns them against a wall and sends rocks flying. |
+| Shotgun | Dredge | heavy | 2 | 0.5s | 12 | 1.8s | 6.3m | Seven slugs in a tight fan that slow and stop at 6.3m, a shot every half second. One slug landing still hurts. Spread grows with each shot and settles when you stop. |
 | SMG | none | light | 4.6 | 0.12s | 22 | 1.4s | 7m | Fast and loose. Spread grows the longer you hold it, and damage drops off at the far end. |
 | Sniper | none | light | 36 | 1.5s | 5 | 2.2s | 16m | Winds up for 0.6s with a laser showing, then hits hard. Weak point-blank, full damage from half range. |
 | Spellstaff | none | medium | 9.5 | 0.55s | 12 | 1.4s | 10m | An orb bolt every 0.45s, 10m. Every 4th bolt hits 50% harder. |
-| Tether Lantern | Ostra | medium | 9 | 0.6s | 12 | 1.5s | 14m | A slow drifting orb every 0.6s, 14m. Pause for 1.4s and the next one is Settled: harder, faster and it slows. |
+| Tether Lantern | Ostra | medium | 9 | 0.6s | 12 | 1.5s | 14m | A quick violet orb every 0.6s, flying its full 14m. Pause for 1.4s and the next one is Settled: a long bright bolt, harder, faster, and it slows. |
 | War Hammer & Aegis | Bjorn | heavy | 11 | 0.55s | 1 | 0.1s | 2.4m | Tap to throw the hammer: it flies to the cursor (up to 9m), passes through foes, stays planted under a gold beacon (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to spin it up into a Crushing Blow (full at 1.25s: 66 damage, a big knock, stun 0.4): a flaming crescent in front that carries you forward. Right click raises the aegis. |
 | Twin Blades | none | light | 7 | 0.3s | 1 | 0.1s | 2.3m | Tap for a quick 3-hit combo. Hold 0.5s for a spinning double slash all around you. |
 
@@ -102,7 +102,7 @@ Found as glowing perk orbs during an expedition: walk into one to take it. Chest
 
 ## Without a class kit
 
-Every player and bot now plays a class, whose kit owns Shift and right click. A hunter without one falls back to these: the weight class's dodge and the weapon's own right-click utility.
+Every player and bot now plays a class, whose kit owns Shift and right click. A hunter without one falls back to these: the weight's dodge and the weapon's own right-click utility.
 
 | Weight | Dodge | Cooldown | What it does |
 |---|---|---|---|

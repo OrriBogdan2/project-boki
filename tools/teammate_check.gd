@@ -84,12 +84,13 @@ func _follow() -> void:
 	_fresh()
 	var P := m.player
 	var k: Kin = P.kin
+	var p0 := P.pos
 	ok(k != null and k.comp != null, "the player's Boki has a companion")
 	if k == null: return
 	# (nothing to fight: a Boki out at your side takes on whatever is near, which is not what this part measures)
 	for mb in m.mobs: mb.dead = true; mb.visible = false
 	for h in m.hunters:
-		if h != P: h.teleport(m.world.random_ground())
+		if h != P: h.teleport(_far_ground(m, P))
 	for kk in m.kins:
 		if kk != k and kk.team != k.team: kk.dead = true; kk.visible = false
 	var st := {"max": 0.0, "steady": 0, "heel": 0, "glide": 0, "glide_up": 0}
@@ -126,11 +127,15 @@ func _follow() -> void:
 	# (training dummies and anything else nearby are cleared: with an archetype the kin's C is open, so it would fight them)
 	for mb in m.mobs: mb.dead = true; mb.visible = false
 	for h in m.hunters:
-		if h != P: h.teleport(m.world.random_ground())
+		if h != P: h.teleport(_far_ground(m, P))
 	for kk in m.kins:
 		if kk != k and kk.team != k.team: kk.dead = true; kk.visible = false
 	k.target = null
-	k.throw_to(P.pos + Vector3(5, 0, 0))
+	# (back to where the walk began: how far the walk carried you depends on the hero's dash, and an
+	# island edge nearby would drop the Boki into the abyss before it could come back)
+	P.teleport(p0)
+	for i in 30: m.step(Match.DT)
+	k.throw_to(_solid_spot(m, P.pos, 5.0))      # (onto ground: where the walk ends depends on the hero's dash length)
 	for i in 60: m.step(Match.DT)
 	var was := k.state
 	# sent out with nothing to fight: it walks back to your side (Follow), it does not wait where it landed
@@ -164,7 +169,10 @@ func _follow() -> void:
 ## normalised INF is NaN): tries a few random spots.
 func _open_ground_for(p: Hunter, kin: Kin) -> void:
 	for i in 40:
-		if kin.comp.heel_spot() != Vector3.INF and m.world.ground_at(p.pos.x + 6.0, p.pos.z) > World.VOID + 1.0:
+		# level ground where it steps toward the rival, and ground under the rival
+		var step_ok := absf(m.world.ground_at(p.pos.x + 1.25, p.pos.z) - p.pos.y) < 0.5
+		var rival_ok := m.world.ground_at(p.pos.x + 6.0, p.pos.z) > World.VOID + 1.0
+		if kin.comp.heel_spot() != Vector3.INF and step_ok and rival_ok:
 			return
 		p.teleport(m.world.random_ground())
 		for j in 5:
@@ -371,3 +379,27 @@ func _tutorial() -> void:
 	ok(led.has("chest") and led.has("goexit"), "it leads you to (or gets to) the chest and the outpost")
 	ok(hints.keys().filter(func(x): return String(x).begins_with("tut_")).size() >= 6, "a hint in its own voice for each step")
 	ok(hints.has("demo_dash") and hints.has("demo_jump"), "it shows you a dash and a jump")
+
+## Random ground well away from the player (40 m+), so a roaming bot can't wander into range and down the
+## Boki mid-check (where random_ground lands depends on every earlier roll of the global RNG).
+func _far_ground(m: Match, P: Hunter) -> Vector3:
+	var best: Vector3 = m.world.random_ground()
+	for i in 40:
+		var g: Vector3 = m.world.random_ground()
+		if P.flat_dist(g) > P.flat_dist(best):
+			best = g
+		if P.flat_dist(best) >= 40.0:
+			break
+	return best
+
+## A spot `d` m from `at` on solid ground (east first), so a throw never lands the Boki in the abyss.
+func _solid_spot(m: Match, at: Vector3, d: float) -> Vector3:
+	for v in [Vector3(1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 0, 1), Vector3(0, 0, -1)]:
+		var ok_all := true
+		for k in range(1, int(d) + 2):
+			var q: Vector3 = at + v * float(k)
+			if m.world.is_void(q.x, q.z) or m.world.is_block(q.x, q.z):
+				ok_all = false
+				break
+		if ok_all: return at + v * d
+	return at + Vector3(d, 0, 0)

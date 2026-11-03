@@ -64,29 +64,32 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | A / Left | Move left | `left` | yes |
 | D / Right | Move right | `right` | yes |
 | Left click | Weapon attack | `fire` | yes |
-| Right click | Archetype ability (right click) | `secondary` | yes |
-| E | Archetype utility (E) | `signature` | yes |
+| Right click | Hunter ability (right click) | `secondary` | yes |
+| E | Hunter utility (E) | `signature` | yes |
 | C | Boki ability (cast from where your Boki is) | `kin_ability` | yes |
 | F | Use, scan, revive, pet | `interact` | yes |
-| 2 | Repair armor (armor kit) | `armor_kit` | yes |
-| Q | Glove active | `gear1` | yes |
+| 2 | Utility belt slot 2 (an armor kit to start) | `util2` | yes |
+| 3 | Utility belt slot 3 | `util3` | yes |
+| 4 | Utility belt slot 4 | `util4` | yes |
+| Q | Glove 1 | `gear1` | yes |
+| V | Glove 2 (in a match; V plays fetch at home) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |
 | G / Middle mouse | Boki orders: tap to Sic or Call back, hold for the order wheel | `throw` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
-| Shift | Archetype dash | `dash` | yes |
+| Shift | Hunter dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |
 | Mouse 5 / Mouse 4 | Glide (hold in the air) | `glide` | yes |
 | R | Reload | `reload` | yes |
 | X | Hunter ultimate | `hunter_ult` | yes |
 | T | Merge with your Boki (needs a full bond meter) | `ultimate` | yes |
-| 1 | Heal (tonic, or armor kit when health is full) | `tonic` | yes |
+| 1 | Utility belt slot 1 (a tonic to start) | `util1` | yes |
 | Tab | Scoreboard | `scores` | yes |
 | Esc | Menu | `menu` | no |
 | V | Play fetch with a Boki | `play` | yes |
 | T | Talk to a Boki | `talk` | yes |
 | C | A Boki's details | `details` | yes |
 | H | Whistle | `whistle` | no |
-| J | Change hero (at home and in practice areas) | `hero` | yes |
+| J | Hunters: change Hunter (at home and in practice areas) | `hero` | yes |
 | I | Inventory | `inventory` | yes |
 | B | Build mode at home / decorate indoors | `build` | yes |
 | R | Turn a piece (build mode) | `rotate` | yes |

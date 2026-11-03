@@ -717,8 +717,9 @@ func slot_info(slot: String) -> Dictionary:
 		"dash", "dodge":
 			var sd := dash_def()
 			var dmax := h.max_dashes()
+			var owed := floorf(maxf(h.dashes, 0.0)) + 1.0 - h.dashes        # charges owed: over 1 after a long slide
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("name", "")).split(" ")[0], "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
-				"cd": (1.0 - fposmod(h.dashes, 1.0)) * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": int(floor(h.dashes)), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
+				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
 
 func e_recastable() -> bool: return false
@@ -770,8 +771,16 @@ func flip_for(dir: Vector2, base: String) -> String:
 	if absf(r) > absf(f): return base + ("_r" if r > 0.0 else "_l")
 	return base + ("_f" if f >= 0.0 else "_b")
 
-## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 3).
+## Whether the shared charge ball glows at the hand (false: the kit shows its own held prop or orb).
+func shows_charge_ball() -> bool: return true
+## The rig's dodge pose for this kit's dash right now ("" = the class's own: phase, roll or charge).
+func dodge_anim() -> String: return ""
+## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 2).
 func extra_dashes() -> float: return 0.0
+
+## A shot dodged through this hero's dash (kits that feed on it override).
+func on_perfect_dodge() -> void: pass
+
 ## The payoff lives on the dash (the Thief's Primed shot into 3 Marks): the dash slot gets the gold dot.
 func dash_payoff_ready() -> bool: return false
 
@@ -910,8 +919,9 @@ func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
 ## The kit's pips floating over the hunter's head (everyone sees them): `n` diamonds on a small ring,
-## `lit` of them bright, spinning and swelling while `armed`. Call every tick.
-func self_pips(n: int, lit: int, armed: bool, dt: float) -> void:
+## `lit` of them bright, spinning and swelling while `armed`; `lift` m further up the screen and `grow`
+## times as big where the default would sit over the face. Call every tick.
+func self_pips(n: int, lit: int, armed: bool, dt: float, lift := 0.0, grow := 1.0) -> void:
 	if spips.is_empty():
 		var node := own_node()
 		var ds: Array = []
@@ -936,16 +946,18 @@ func self_pips(n: int, lit: int, armed: bool, dt: float) -> void:
 	spips["lit"] = lit
 	spips["pop"] = maxf(0.0, float(spips["pop"]) - dt * 4.0)
 	var top := 2.35 * float(h.cdat.get("scale", 1.0)) + 0.25
-	node.global_position = h.position + Vector3(0, top, 0)
+	var cam := m.get_viewport().get_camera_3d() if m.is_inside_tree() else null
+	var screen_up := cam.global_basis.y if cam != null else Vector3.UP
+	node.global_position = h.position + Vector3(0, top, 0) + screen_up * lift
 	var a: float = m.time * (5.0 if armed else 1.4)
 	var ds: Array = spips["d"]
-	var rad := 0.22 + 0.06 * ds.size()
+	var rad := (0.22 + 0.06 * ds.size()) * grow
 	for i in ds.size():
 		var d: MeshInstance3D = ds[i]
 		var ang := a + TAU * i / float(ds.size())
 		d.position = Vector3(cos(ang) * rad, 0.0, sin(ang) * rad)
 		var on := i < lit
-		var s := (1.0 + float(spips["pop"]) * 0.6) if on else 0.6
+		var s := grow * ((1.0 + float(spips["pop"]) * 0.6) if on else 0.6)
 		if armed: s *= 1.2 + 0.12 * sin(m.time * 10.0 + i)
 		d.scale = Vector3.ONE * s
 		var c := res_col().lightened(0.2) if armed else res_col()
@@ -1053,7 +1065,7 @@ func _tick_charge(dt: float) -> void:
 	var g2: Node3D = chg.get("glow")
 	if g2 and is_instance_valid(g2):
 		var d := h.aim_dir()
-		g2.visible = tells_visible()
+		g2.visible = tells_visible() and shows_charge_ball()
 		g2.global_position = h.position + Vector3(d.x * 0.6, 1.05 * float(h.cdat.get("scale", 1.0)), d.y * 0.6)
 		var full_pulse := (0.3 * sin(m.time * 30.0)) if bool(chg["full"]) else 0.0
 		g2.scale = Vector3.ONE * (0.25 + 1.35 * k + full_pulse)

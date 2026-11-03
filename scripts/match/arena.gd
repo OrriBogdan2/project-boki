@@ -8,12 +8,12 @@ extends RefCounted
 ##   one that stands and watches you, one that strafes, a heavy one by a pillar to slam into; each
 ##   shows its damage per second, last hit and total over its head, and heals up when left alone
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
-## - a reset (Backspace; X is the ultimate's second key), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
+## - a reset (Backspace; X is the hero ultimate), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
 ## - a quick swap without leaving: 2-9 pick one of the first eight archetypes (the loadout lists all); L opens the loadout (archetype, weapon,
 ##   Boki, glove, toggles), K the kit card
 ## Nobody dies here: a downed player or bot is back up after a beat.
 
-const KEYS_HINT := "K kit card   ·   L loadout   ·   2-9 first eight archetypes (L: all)   ·   Backspace reset   ·   N bot   ·   O cooldowns   ·   U ultimate"
+const KEYS_HINT := "K kit card   ·   L loadout   ·   2-9 first eight Hunters (L: all)   ·   Backspace reset   ·   N bot   ·   O cooldowns   ·   U ultimate"
 const BOT_MODES := ["off", "idle", "moving", "fighting"]
 const BOT_NAMES := {"off": "Off", "idle": "Idle", "moving": "Moving", "fighting": "Fights back"}
 const DUMMY_HP := 3000.0
@@ -68,7 +68,7 @@ func setup(match_node: Match, which: String) -> void:
 	m.add_child(keys_node)
 	if m.hud:
 		m.hud.guide_hidden = true
-		m.hud.toast(("Arena" if layout == "arena" else "Training") + "  ·  K kit card  ·  L loadout  ·  2-9 first eight archetypes", Color("f3eee2"))
+		m.hud.toast(("Arena" if layout == "arena" else "Training") + "  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
 
 func teardown() -> void:
 	if _cb.is_valid() and CombatBus.hit_landed.is_connected(_cb):
@@ -93,7 +93,7 @@ func _spawn_dummies() -> void:
 	for sp in spots:
 		var at: Vector3 = sp[1]
 		at = _arena_point(at) if layout == "arena" else _free_near(at)
-		var D: Hunter = m.make_hunter(m.next_id("dummy"), TEAM, String(sp[2]), {"still": "Dummy", "strafe": "Strafer", "heavy": "Heavy dummy"}[sp[0]], "idle", {}, at, {"arch": "none"})
+		var D: Hunter = m.make_hunter(m.next_id("dummy"), TEAM, String(sp[2]), {"still": "Dummy", "strafe": "Strafer", "heavy": "Training dummy"}[sp[0]], "idle", {}, at, {"arch": "none"})
 		D.max_hp = DUMMY_HP; D.hp = DUMMY_HP
 		D.armor = 0.0; D.max_armor = 0.0
 		D.lives = 99
@@ -188,7 +188,7 @@ func tick(dt: float) -> void:
 			hs.pop_front()
 		var lb: Label3D = dm["label"]
 		var dps := dps_of(hs, m.time)
-		lb.text = "DPS %d   ·   last %d\ntotal %d" % [int(round(dps)), int(round(float(dm["last"]))), int(round(float(dm["total"])))] if float(dm["total"]) > 0.0 else {"still": "DUMMY", "strafe": "STRAFER", "heavy": "HEAVY  ·  slam me into the pillar"}[dm["kind"]]
+		lb.text = "DPS %d   ·   last %d\ntotal %d" % [int(round(dps)), int(round(float(dm["last"]))), int(round(float(dm["total"])))] if float(dm["total"]) > 0.0 else {"still": "DUMMY", "strafe": "STRAFER", "heavy": "TRAINING DUMMY  ·  slam me into the pillar"}[dm["kind"]]
 	while not hits_all.is_empty() and m.time - float(hits_all[0][0]) > 6.0:
 		hits_all.pop_front()
 	# the sparring bot and you always see each other (the view cone never hides a sparring partner)
@@ -384,7 +384,7 @@ func _update_ui() -> void:
 ## A sign by your start: where the kit card and the loadout are.
 func _sign() -> void:
 	var lb := Label3D.new()
-	lb.text = "K  ·  KIT CARD\nL  ·  LOADOUT (archetype, Boki, glove)\nX  ·  RESET"
+	lb.text = "K  ·  KIT CARD\nL  ·  LOADOUT (Hunter, Boki, glove)\nX  ·  RESET"
 	lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	lb.font = UI.big
 	lb.font_size = 44
@@ -479,12 +479,12 @@ func _fill_menu(v: VBoxContainer) -> void:
 	left.add_theme_constant_override("separation", 8)
 	left.custom_minimum_size = Vector2(470, 0)
 	cols.add_child(left)
-	left.add_child(UI.section("Archetype  (keys 2-9 pick the first eight)"))
+	left.add_child(UI.section("Hunter  (keys 2-9 pick the first eight)"))
 	var ag := GridContainer.new(); ag.columns = 3
 	ag.add_theme_constant_override("h_separation", 6); ag.add_theme_constant_override("v_separation", 6)
 	for a in Arch.ids():
 		var aa: String = a
-		var b := UI.choice("%s  ·  %s" % [Arch.name_of(a), String(Arch.weight(a)).substr(0, 1).to_upper()], P.arch == a, func(): set_arch(aa); _fill_menu(v), 150)
+		var b := UI.choice(Arch.name_of(a), P.arch == a, func(): set_arch(aa); _fill_menu(v), 150)
 		b.tooltip_text = String(Arch.def(a).get("card", {}).get("loop", ""))
 		ag.add_child(b)
 	left.add_child(ag)
@@ -540,7 +540,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 		br.add_child(UI.choice(BOT_NAMES[md], bot_mode == md, func(): bot_mode = mm; _spawn_bot(); _fill_menu(v), 96))
 	right.add_child(br)
 	var ba := HBoxContainer.new(); ba.add_theme_constant_override("separation", 6)
-	ba.add_child(UI.label("Bot archetype", 14, UI.MUTED))
+	ba.add_child(UI.label("Bot Hunter", 14, UI.MUTED))
 	var ids := Arch.ids()
 	ba.add_child(UI.button("‹", func(): set_bot_arch(String(ids[(ids.find(bot_arch) - 1 + ids.size()) % ids.size()])); _fill_menu(v), 44))
 	var bl := UI.label(Arch.name_of(bot_arch), 16, Arch.color(bot_arch), UI.big)

@@ -1,8 +1,8 @@
 extends RefCounted
-## --support-check: the support pair (Linnet the Tender, Tamsin the Rimewright). Ally heals, downed
-## teammates (heal, carry, drop, revive), the dash through a teammate, the Rink Wall's frost shield.
-## --tender-combo-check and --rimewright-combo-check script each cross-ability interaction in
-## docs/heroes. Mode: "all" | "tender" | "rimewright". Prints SUPPORT PASS/FAIL.
+## --support-check: the support pair (Moosh Moosh the Tender, Tamsin the Rimewright). Ally heals, downed
+## teammates (heal, carry, drop, revive), the dash through a teammate, and that the Rink Wall gives the
+## squad nothing (no heal or shield). --tender-combo-check and --rimewright-combo-check also run each
+## hero's combos (tools/care_combo_check.gd). Mode: "all" | "tender" | "rimewright". Prints SUPPORT PASS/FAIL.
 
 var main: Node
 var fails := 0
@@ -16,11 +16,16 @@ func ok(name: String, cond: bool, info := "") -> void:
 	if not cond: fails += 1
 
 ## A flat strip, the player as `arch` on team T, an ally (bot, idle) 3m behind, a rival dummy `dist` ahead.
-func setup(arch: String, dist := 6.0) -> Array:
+## kin_species gives the player that Boki (the merge checks); otherwise the player has none.
+func setup(arch: String, dist := 6.0, kin_species := "") -> Array:
 	var cls := Arch.weight(arch)
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "cls": cls, "arch": arch, "weapon": Arch.signature(arch)})
+	var opts := {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
+		"cls": cls, "arch": arch, "weapon": Arch.signature(arch)}
+	if kin_species != "":
+		opts["demo_kin"] = kin_species
+	m.start(opts)
 	m.set_process(false)
 	var P: Hunter = m.player
 	for mb in m.mobs: mb.queue_free()
@@ -35,13 +40,14 @@ func setup(arch: String, dist := 6.0) -> Array:
 			var i: int = W.idx(hx + dx, hz + dz)
 			W.kind[i] = World.T_GROUND; W.level[i] = lv; W.island[i] = W.island[hi]
 			W.stairs.erase(i); W.walls.erase(i); W.props.erase(i); W.bush.erase(i)
+	for b in m.breaks: b["dead"] = true      # crates and kegs off the strip too: shots here are about the kit
 	var home := Vector3(hx + 0.5, lv * World.LEVEL, hz + 0.5)
 	P.teleport(home); P.vel = Vector3.ZERO
 	P.set_arch(arch)
 	P.unlock_all()
 	P.lvl = 6
 	P.dashes = P.max_dashes()
-	if P.kin:
+	if P.kin and kin_species == "":
 		var o: Kin = P.kin
 		o.dead = true; m.kins.erase(o); o.queue_free(); P.kin = null
 	var A: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, home + Vector3(-2.5, 0, 1.5), {"arch": "none"})
@@ -74,12 +80,19 @@ func run(mn: Node, md := "all") -> void:
 	main = mn
 	mode = md
 	Save.no_write = true
+	var combos = load("res://tools/care_combo_check.gd").new()
+	combos.sc = self
+	var ults = load("res://tools/care_ult_check.gd").new()
+	ults.sc = self
 	if mode in ["all", "tender"]:
 		await _tender_support()
-		await _tender_combos()
+		await combos.tender()
+		await ults.tender()
 	if mode in ["all", "rimewright"]:
 		await _rime_support()
-		await _rime_combos()
+		await combos.rimewright()
+		await ults.rimewright()
+		await ults.burst_cap()
 	print("SUPPORT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -108,11 +121,11 @@ func _tender_support() -> void:
 	K.cd["e"] = 0.0
 	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false; step(m, 3.0)
 	ok("Hearthlight: heals you at a third", P.hp > p0 and (P.hp - p0) < 22.0, "+%.1f" % (P.hp - p0))
-	# --- stun puts it out
+	# --- a stun does not put it out (only the ultimate's channel breaks on a stun)
 	K.cd["e"] = 0.0
 	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false
 	P.stun_t = 0.5; step(m, 0.1)
-	ok("Hearthlight: a stun on you puts it out", not K.in_e())
+	ok("Hearthlight: a stun on you does not put it out", K.in_e())
 	# --- toss latches on the first teammate it passes
 	K.cd["e"] = 0.0; P.stun_t = 0.0
 	A.teleport(P.pos + Vector3(4, 0, 0)); step(m, 0.05)
@@ -134,7 +147,7 @@ func _tender_support() -> void:
 	A.down_hp = 60.0
 	A.teleport(P.pos + Vector3(0.6, 0, 0)); step(m, 0.1)
 	ok("Bearer: running into a downed teammate carries them", CareUtil.is_carried(A) and K.carrying().size() == 1)
-	ok("Bearer: shield up and 30% slower while carrying", P.shield > 30.0 and absf(K.move_k() - 0.7) < 0.01, "shield %.0f k %.2f" % [P.shield, K.move_k()])
+	ok("Bearer: shield up and no slow while carrying", P.shield > 30.0 and absf(K.move_k() - 1.0) < 0.01, "shield %.0f k %.2f" % [P.shield, K.move_k()])
 	var dh := A.down_hp
 	P.teleport(P.pos + Vector3(5, 0, 0)); step(m, 2.0)
 	ok("Bearer: the carried teammate rides along and does not bleed", A.flat_dist(P) < 1.0 and A.down_hp >= dh - 0.5, "dist %.2f down_hp %.1f -> %.1f" % [A.flat_dist(P), dh, A.down_hp])
@@ -149,12 +162,34 @@ func _tender_support() -> void:
 	ok("Relay Step rank 3: picking up a teammate refreshes the air dash", carried_again and P.ex_cd < 0.01, "ex_cd %.2f" % P.ex_cd)
 	P.stun_t = 0.5; step(m, 0.1)
 	ok("Bearer: a stun drops them and locks pickup", carried_again and not CareUtil.is_carried(A) and K.lock_t > 3.0, "again %s lock %.1f" % [str(carried_again), K.lock_t])
-	# --- revive from the flare at rank 3
-	P.stun_t = 0.0; P.slot_lv["kin"] = 3; K.lock_t = 99.0; K.cd["e"] = 0.0
-	A.teleport(P.pos + Vector3(1.0, 0, 0)); step(m, 0.05)
+	# --- a broken shield drops them too, and costs you no stun of your own
+	P.stun_t = 0.0; K.lock_t = 0.0
+	A.teleport(P.pos + Vector3(0.4, 0, 0)); step(m, 0.1)
+	var carried_third := CareUtil.is_carried(A)
+	P.shield = 0.0; step(m, 0.1)
+	ok("Bearer: a broken shield drops them with a 4s lock and no stun on you",
+		carried_third and not CareUtil.is_carried(A) and K.lock_t > 3.0 and P.stun_t <= 0.0,
+		"lock %.1f stun %.2f" % [K.lock_t, P.stun_t])
+	# --- rank 3 flare: the revive went back to Hearth Call (X); the flare tops the bleed-out bar up instead
+	P.stun_t = 0.0
+	P.slot_lv["kin"] = 3
+	K.lock_t = 99.0
+	K.cd["e"] = 0.0
+	A.teleport(P.pos + Vector3(1.0, 0, 0))
+	step(m, 0.05)
 	ok("rank 3: ally is downed before the flare", A.downed)
-	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false; step(m, 3.2)
-	ok("Hearthlight rank 3: the flare stands a downed teammate up", not A.downed and A.hp > 5.0, "hp %.0f" % A.hp)
+	A.down_hp = 10.0
+	P.inp["sig"] = true
+	step(m, 0.05)
+	P.inp["sig"] = false
+	step(m, 3.2)
+	ok("Hearthlight rank 3: the flare no longer revives (Hearth Call does), it heals the downed", A.downed and A.down_hp > 40.0,
+		"down_hp %.0f" % A.down_hp)
+	var boost3 := K.throw_boost()
+	P.slot_lv["kin"] = 1
+	ok("Hearthlight rank 3: the thrown light's healing boost doubles (50% -> 100%, still 1s)",
+		absf(boost3 - 1.0) < 0.01 and absf(K.throw_boost() - 0.5) < 0.01 and float(K.e_def().get("boost_t", 1.0)) == 1.0,
+		"r3 %.2f r1 %.2f" % [boost3, K.throw_boost()])
 	m.queue_free()
 	# --- the dash through a teammate
 	r = setup("tender"); m = r[0]; P = r[1]; A = r[2]; T = r[3]; K = P.ak
@@ -163,44 +198,7 @@ func _tender_support() -> void:
 	P.inp["move"] = Vector2(1, 0); aim_at(P, P.pos + Vector3(5, 0, 0))
 	P.dashes = P.max_dashes()
 	P.inp["dash"] = true; step(m, 0.05); P.inp["dash"] = false
-	ok("Relay Step: through a teammate refunds half a dash and 1s of Hearthlight", K.last_dash_pass and P.dashes >= P.max_dashes() - 0.55 and K.cd["e"] < 7.2, "dashes %.2f e %.1f" % [P.dashes, K.cd["e"]])
-	m.queue_free()
-
-func _tender_combos() -> void:
-	var r := setup("tender", 6.0)
-	var m: Match = r[0]; var P: Hunter = r[1]; var A: Hunter = r[2]; var T: Hunter = r[3]
-	var K: TenderKit = P.ak
-	# embers Kindle and wind Hearthlight back
-	K.cd["e"] = 8.0
-	P.inp["fire"] = true
-	step(m, 1.6)
-	P.inp["fire"] = false
-	ok("combo: embers Kindle a foe", K.kindle_on(T) >= 2, "kindle %d" % K.kindle_on(T))
-	ok("combo: ember into a Kindled foe winds Hearthlight back", K.cd["e"] < 7.0, "e %.2f" % K.cd["e"])
-	ok("combo: Kindle adds damage to embers", T.max_hp - T.hp > 8.0 * 2, "dealt %.0f" % (T.max_hp - T.hp))
-	# an idle gun: the next ember is empowered (longer range flag)
-	step(m, 1.3)
-	ok("combo: an idle crook empowers the next ember", m.time < K.emp_until and P.shot_range_k > 1.3, "k %.2f" % P.shot_range_k)
-	# Burrseed: sticks, bursts, roots, Kindles
-	K.kind.clear(); T.hp = T.max_hp
-	aim_at(P, T.pos)
-	K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
-	P.inp["sec"] = true; step(m, 0.05); P.inp["sec"] = false
-	step(m, 0.7)
-	ok("combo: Burrseed sticks to the first foe", K.burrs.size() >= 1 or T.hp < T.max_hp, "burrs %d" % K.burrs.size())
-	var h1 := T.hp
-	step(m, 2.2)
-	ok("combo: Burrseed bursts into roots and Kindles", T.root_t > 0.0 and T.hp < h1 - 20.0 and K.kindle_on(T) >= 1, "root %.2f dmg %.0f kindle %d" % [T.root_t, h1 - T.hp, K.kindle_on(T)])
-	# a burst root can't be re-rooted at once (diminishing returns): check separately via second seed? skip
-	m.queue_free()
-	# Hearthlight on a carried teammate (the toss lands on them)
-	r = setup("tender"); m = r[0]; P = r[1]; A = r[2]; T = r[3]; K = P.ak
-	down(m, A); A.teleport(P.pos + Vector3(0.5, 0, 0)); step(m, 0.1)
-	K.cd["e"] = 0.0
-	aim_at(P, P.pos + Vector3(0.5, 0, 0))
-	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false; step(m, 0.2)
-	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false; step(m, 0.3)
-	ok("combo: Hearthlight tossed at yourself lands on the one you carry", String(K.hearth.get("mode", "")) == "latched" and K.hearth.get("who") == A)
+	ok("Relay Step: through a teammate refunds nothing", P.dashes <= P.max_dashes() - 0.95 and K.cd["e"] > 7.9, "dashes %.2f e %.1f" % [P.dashes, K.cd["e"]])
 	m.queue_free()
 
 # ------------------------------------------------------------------ Rimewright
@@ -215,72 +213,7 @@ func _rime_support() -> void:
 	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false
 	step(m, 0.5)
 	ok("Rink Wall: raised ahead", not K.wall.is_empty() and m.verbs.walls.size() >= 1)
+	A.hp = A.max_hp * 0.5; var ah := A.hp
 	step(m, 1.5)
-	ok("Rink Wall: a teammate touching it gets a frost shield", A.shield >= 17.0, "shield %.1f" % A.shield)
-	m.queue_free()
-
-func _rime_combos() -> void:
-	var r := setup("rimewright", 6.0)
-	var m: Match = r[0]; var P: Hunter = r[1]; var A: Hunter = r[2]; var T: Hunter = r[3]
-	var K: RimewrightKit = P.ak
-	# the fan Chills; the flurry ends with heavier shards
-	P.inp["fire"] = true
-	step(m, 1.0)
-	P.inp["fire"] = false
-	ok("combo: fan darts Chill", K.chilled(T), "dealt %.0f" % (T.max_hp - T.hp))
-	var base_dmg := T.max_hp - T.hp
-	# rinkrunning doubles the fan
-	T.hp = T.max_hp; K.seq_i = 0; K.seq_next = 0.0
-	P.dashes = P.max_dashes()
-	P.inp["move"] = Vector2(0, 1); P.inp["dash"] = true; P.inp["dash_down"] = true; step(m, 0.05); P.inp["dash"] = false
-	ok("combo: Shift held starts a rinkrun", K.rinkrunning() and P.roll_t > 0.0)
-	aim_at(P, T.pos)
-	P.inp["fire"] = true
-	step(m, 0.9)
-	P.inp["fire"] = false; P.inp["dash_down"] = false; step(m, 0.3)
-	var sk_dmg := T.max_hp - T.hp
-	ok("combo: rinkrunning doubles the fan's damage", sk_dmg > base_dmg * 1.4, "%.1f vs %.1f" % [sk_dmg, base_dmg])
-	ok("combo: letting go early stops the rinkrun and refunds charge", not K.rinkrunning() and P.dashes > 0.1, "dashes %.2f" % P.dashes)
-	m.queue_free()
-	# eight shards on one foe Splinter them
-	r = setup("rimewright", 5.0); m = r[0]; P = r[1]; A = r[2]; T = r[3]; K = P.ak
-	var T2: Hunter = m.make_hunter("T2", T.team, "medium", "Target2", "idle", {}, T.pos + Vector3(1.2, 0, 0), {"arch": "none"})
-	T2.max_hp = 10000.0; T2.hp = 10000.0; T2.armor = 0.0; T2.max_armor = 0.0
-	var s0 := K.splinter_log
-	P.inp["fire"] = true
-	step(m, 3.2)
-	P.inp["fire"] = false
-	ok("combo: eight shards on one foe Splinter them", K.splinter_log > s0 and T2.hp < T2.max_hp, "splinters %d, neighbour -%.0f" % [K.splinter_log - s0, T2.max_hp - T2.hp])
-	# Sleet Lance: Chills, slows more up close, goes off twice
-	T.hp = T.max_hp; T2.hp = T2.max_hp
-	T.teleport(P.pos + Vector3(3.0, 0, 0)); T2.teleport(P.pos + Vector3(30, 0, 0)); step(m, 0.05)
-	aim_at(P, T.pos)
-	K.ch_rmb = 2.0
-	P.inp["sec"] = true; step(m, 0.05); P.inp["sec"] = false
-	step(m, 0.25)
-	var near_k := T.slow_k
-	var first := T.max_hp - T.hp
-	step(m, 1.0)
-	var second := T.max_hp - T.hp
-	ok("combo: Sleet Lance hits, slows up close, and goes off a second time", first > 5.0 and second > first + 8.0 and near_k >= 0.4, "first %.1f total %.1f slow %.2f" % [first, second, near_k])
-	# Splinter on a knock: a Chilled foe at low health
-	T.hp = 8.0; K.add_chill(T); T2.teleport(T.pos + Vector3(1.5, 0, 0)); T2.hp = T2.max_hp; step(m, 0.05)
-	var s1 := K.splinter_log
-	var hh := T2.hp
-	aim_at(P, T.pos)
-	P.inp["fire"] = true; step(m, 0.6); P.inp["fire"] = false
-	step(m, 0.8)
-	ok("combo: knocking a Chilled foe Splinters them after a beat", T.downed and K.splinter_log > s1 and T2.hp < hh, "downed %s splinters %d neighbour -%.0f" % [str(T.downed), K.splinter_log - s1, hh - T2.hp])
-	m.queue_free()
-	# the wall stops a foe's shot, and E again freezes it
-	r = setup("rimewright", 8.0); m = r[0]; P = r[1]; A = r[2]; T = r[3]; K = P.ak
-	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false; step(m, 0.3)
-	var w0: Vector2 = (K.wall["w"]["a"] as Vector2)
-	step(m, 0.5)
-	var w1: Vector2 = (K.wall["w"]["a"] as Vector2)
-	ok("combo: the Rink Wall slides forward", w1.distance_to(w0) > 0.8, "moved %.2f" % w1.distance_to(w0))
-	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false; step(m, 0.1)
-	var w2: Vector2 = (K.wall["w"]["a"] as Vector2)
-	step(m, 0.5)
-	ok("combo: E again freezes the wall in place", not bool(K.wall["sliding"]) and (K.wall["w"]["a"] as Vector2).distance_to(w2) < 0.01)
+	ok("Rink Wall: no squad shield or heal (she copies her source: ice control only)", A.shield < 0.5 and A.hp <= ah + 0.01, "shield %.1f hp %.1f -> %.1f" % [A.shield, ah, A.hp])
 	m.queue_free()

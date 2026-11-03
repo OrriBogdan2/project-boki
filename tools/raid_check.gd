@@ -117,10 +117,10 @@ func _looks(main: Node) -> void:
 	m5.queue_free()
 
 func _kit(main: Node) -> void:
-	var evs := InputMap.action_get_events("armor_kit")
+	var evs := InputMap.action_get_events("util2")
 	var on2 := evs.any(func(ev): return ev is InputEventKey and ((ev as InputEventKey).physical_keycode == KEY_2 or (ev as InputEventKey).keycode == KEY_2))
-	ok(on2, "the armor kit is on 2 (tonics on 1)")
-	ok(Settings.key_cap("armor_kit") == "2", "the key cap reads 2 (%s)" % Settings.key_cap("armor_kit"))
+	ok(on2, "the armor kit is on 2 (belt slot 2; tonics on 1)")
+	ok(Settings.key_cap("util2") == "2", "the key cap reads 2 (%s)" % Settings.key_cap("util2"))
 	var m := _match(main, {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 5103, "no_drop": true, "raid": "clear"})
 	var P := m.player
 	P.ctrl = "idle"
@@ -128,15 +128,15 @@ func _kit(main: Node) -> void:
 		if x != P: x.ctrl = "idle"
 	for mb in m.mobs:
 		mb.dead = true; mb.visible = false      # (nothing hits you mid-repair but the test's own hit)
-	ok(P.armor_kits == Hunter.KIT_START and Hunter.KIT_START == 2, "every hunter sets out with %d armor kits" % P.armor_kits)
+	ok(P.armor_kits == 2, "every hunter sets out with %d armor kits" % P.armor_kits)
 	ok(m.hunters.all(func(x): return x.armor_kits >= 1), "bots carry kits too")
 	# 2 with full armor: nothing happens
-	P.inp["kit"] = true
+	P.inp["util2"] = true
 	m.step(Match.DT)
 	ok(P.kit_t <= 0.0 and P.armor_kits == 2, "with full armor the key does nothing")
 	# 2 with broken armor: a channel, and you're vulnerable while it runs
 	P.armor = 0.0
-	P.inp["kit"] = true
+	P.inp["util2"] = true
 	m.step(Match.DT)
 	ok(P.kit_t > 0.0, "with broken armor, 2 starts a repair")
 	var hp0 := P.hp
@@ -144,7 +144,7 @@ func _kit(main: Node) -> void:
 	ok(P.kit_t <= 0.0 and P.armor_kits == 2, "a hit spills the repair and you keep the kit")
 	ok(hp0 - P.hp >= 10.0 * Hunter.CONSUME_VULN * 0.99, "... and the hit lands harder (%.1f from 10)" % (hp0 - P.hp))
 	P.inv_t = 99.0           # (no stray hit from the map spills this one)
-	P.inp["kit"] = true
+	P.inp["util2"] = true
 	m.step(Match.DT)
 	var k0 := P.kit_t
 	for i in int((Hunter.KIT_TIME + 0.2) / Match.DT): m.step(Match.DT)

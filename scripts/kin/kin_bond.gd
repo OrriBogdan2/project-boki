@@ -50,5 +50,5 @@ static func from_ult(h: Hunter, kind: String, cast_id: String) -> float:
 static func _flash(h: Hunter, gained: float) -> void:
 	if gained <= 0.0 or not h.is_local():
 		return
-	h.set_meta("bond_flash_at", h.m.time)          # (the bond ring in the Boki HUD brightens for a moment, BokiHud)
+	h.set_meta("bond_flash_at", h.m.time)          # (the bond ring on the Merge box brightens for a moment, GripHud)
 	h.m.fx.word(h.pos + Vector3(0, 2.3, 0), "BOND +%d%%" % int(round(gained * 100.0)), Color("ffd23f"))

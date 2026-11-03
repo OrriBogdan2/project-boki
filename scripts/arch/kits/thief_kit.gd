@@ -6,7 +6,7 @@ extends ArchKit
 ## - LMB, Arc Bolts: a spinning bolt from alternating hands every 0.45s that flies to the cursor (clamped
 ##   to 12m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
 ## - Passive, Marks: every bolt that hits stacks a Mark on the target (gold diamonds over their head, up
-##   to 8): each makes your bolts on them stronger. A knock or an assist heals you.
+##   to 8 shown, no cap): each makes your bolts on them stronger. A knock or an assist heals you.
 ## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
 ##   harder from the outer band, refreshing every Mark; the Vault comes back. The Boki Merge has its own key.
 ## - Dash, Vault: a short cartwheel; the next bolt is empowered (3.5x, 2 Marks, Shred) and landing it
@@ -106,16 +106,16 @@ func add_mark(t: Ent, n := 1, force := false) -> void:
 	var mk: Dictionary = t.get_meta("marks", {})
 	var e: Array = mk.get(h.nid, [0, 0.0])
 	var had := int(e[0]) if float(e[1]) > 0.0 else 0
-	var c := mini(mark_max(), had + n)
+	var c := had + n
 	mk[h.nid] = [c, float(res_def().get("dur", 4.0))]
 	t.set_meta("marks", mk)
 	t.set_meta("marks_t", now)
 	_pip_pop(t, c)
 	_on_marks(t, had, c)
 
-## Reaching the cap (8) chimes.
+## Filling the diamonds over the target chimes. Marks have no cap, so they keep climbing past it.
 func _on_marks(t: Ent, had: int, c: int) -> void:
-	if had < mark_max() and c >= mark_max():
+	if had < pip_count() and c >= pip_count():
 		m.sfx("unlock", t.pos, -6.0, 1.7)
 
 func clear_marks(t: Ent) -> void:
@@ -123,7 +123,8 @@ func clear_marks(t: Ent) -> void:
 	mk.erase(h.nid)
 	t.set_meta("marks", mk)
 
-func mark_max() -> int:
+## How many diamonds the readout draws; the Marks themselves are uncapped.
+func pip_count() -> int:
 	return int(res_def().get("max", 8))
 
 ## Sets a target's Marks outright (the Bola pooling two foes' Marks at rank 3).
@@ -133,10 +134,10 @@ func set_marks(t: Ent, n: int) -> void:
 	var mk: Dictionary = t.get_meta("marks", {})
 	var e: Array = mk.get(h.nid, [0, 0.0])
 	var had := int(e[0]) if float(e[1]) > 0.0 else 0
-	mk[h.nid] = [mini(mark_max(), n), float(res_def().get("dur", 4.0))]
+	mk[h.nid] = [n, float(res_def().get("dur", 4.0))]
 	t.set_meta("marks", mk)
 	_pip_pop(t, n)
-	_on_marks(t, had, mini(mark_max(), n))
+	_on_marks(t, had, n)
 
 ## Every Mark we have on anyone back to its full time (each Encore blade).
 func refresh_marks() -> void:
@@ -156,7 +157,7 @@ func _pip_node(t: Ent) -> Dictionary:
 	n.top_level = true
 	var gold := res_col()
 	var ds: Array = []
-	for i in mark_max():
+	for i in pip_count():
 		var d := MeshInstance3D.new()
 		d.mesh = Models.box(0.24, 0.24, 0.24)
 		d.material_override = Models.glow_mat(Color(gold, 0.95))
@@ -205,10 +206,10 @@ func best_marks() -> int:
 	return b
 
 func res_frac() -> float:
-	return float(best_marks()) / float(mark_max())
+	return clampf(float(best_marks()) / float(pip_count()), 0.0, 1.0)
 
 func res_text() -> String:
-	return "%d/%d" % [best_marks(), mark_max()]
+	return "%d" % best_marks()
 
 ## The payoff is armed: the next bolt is empowered.
 func full_ready() -> bool:
@@ -287,7 +288,16 @@ func _tick_glint() -> void:
 		if randf() < 0.3: m.fx.burst(glint.global_position, res_col(), 1, 0.8, 0.25, -1.0, 0.6)
 
 func move_k() -> float:
-	return 1.0 + (float(dash_def().get("haste", 0.3)) if haste_t > 0.0 else 0.0)
+	return 1.0 + (vault_haste() if haste_t > 0.0 else 0.0)
+
+## Vault's speed boost; the last rank makes it half again as big.
+func vault_haste() -> float:
+	var boost := float(dash_def().get("haste", 0.3))
+	return boost * (float(dash_def().get("haste_r3", 1.5)) if rank("dash") >= 3 else 1.0)
+
+## The empowered bolt's extra damage: +20% at rank 2 and again at rank 3.
+func prime_rank_k() -> float:
+	return 1.0 + float(dash_def().get("prime_rank", 0.2)) * float(clampi(rank("dash") - 1, 0, 2))
 
 # ------------------------------------------------------------------ LMB: Arc Bolts
 func lmb_override(held: bool, _dt: float) -> bool:
@@ -340,7 +350,7 @@ func _bolt() -> void:
 		var dd := dash_def()
 		primed_t = 0.0
 		haste_t = 0.0
-		sd["dmg"] = float(sd["dmg"]) * float(dd.get("prime_k", 3.5)) * (1.2 if rank("dash") >= 3 else 1.0)
+		sd["dmg"] = float(sd["dmg"]) * float(dd.get("prime_k", 3.5)) * prime_rank_k()
 		sd["r"] = 0.3
 		x["kb"] = 3.0
 		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 2.6, 0.55)
@@ -470,7 +480,7 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	var weapon := String(o.get("src", "")) == "shot" and String(o.get("ab", "")) == ""
 	if not weapon:
 		return dmg
-	return dmg * (1.0 + float(res_def().get("per_mark", 0.12)) * float(marks_on(t)))
+	return dmg * (1.0 + float(res_def().get("per_mark", 0.1)) * float(marks_on(t)))
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team or t.dead:
@@ -604,7 +614,7 @@ func _tick_bola(dt: float) -> void:
 			# a crate or barrel counts as the first catch: the Bola breaks on it and flies on
 			for b in m.breaks:
 				if not b["dead"] and Vector2(b["pos"].x - p.x, b["pos"].z - p.z).length() < 0.7:
-					m.hit_break(b, float(bd["dmg"]) * 3.0, h)
+					m.brk.hit(b, h)
 					bola["broke"] = true
 					bola["left"] = float(bd["after"]) + (float(bd["after_r3"]) if rank("sec") >= 3 else 0.0)
 					bola_breaks += 1
@@ -729,8 +739,8 @@ func _stick(f: Ent, at: Vector3) -> void:
 	e_t = float(ed["time"])
 	if rank("kin") >= 3:
 		cd["e"] = float(cd["e"]) * (1.0 - float(ed["refund_foe"] if f else ed["refund_wall"]))
-	if f and rank("dash") >= 3:
-		h.dashes = h.max_dashes()           # Vault rank 3: a knife in a foe resets it
+	if f and rank("kin") >= 3:
+		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
 		DashReset.cue(h)
 	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("ffcf5a"), 0.8, 0.2)
 	m.sfx("ab_plant", at, -6.0, 1.8)

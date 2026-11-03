@@ -14,7 +14,7 @@ extends ArchKit
 ##   wind-up, a lane that grows and turns magenta at full, a rising whine; you can jump while charging;
 ##   release flings you forward, a miss doubles the cooldown), in the air a Meteor Drop onto a disc at
 ##   the cursor (slows; the centre stunned), during the Warchain's pull a Cinder Spin.
-## - Dash, Rampage (Flame Step): 3 charges of a dash attack the way you face, the tip hits double.
+## - Dash, Rampage (Flame Step): 2 charges (3 at rank 2) of a dash attack the way you face, the tip hits double.
 ## - E, Warchain (Feysteel Chain): a chain to a foe (blighted) or a wall; recast to pull yourself in.
 ## - X, Gilded Riposte (JuggernautUlt, level 6): a 0.65s gold guard that blocks everything, then a lunging
 ##   upward cleave that heals 80% of its damage; a knock with it makes it ready again. The Boki Merge has its own key.
@@ -74,6 +74,7 @@ var trail_t := 0.0
 
 func _setup() -> void:
 	riposte = JuggernautUlt.new(self)
+	cd["air"] = 0.0             # the Meteor Drop's own cooldown slot
 
 func full_ready() -> bool:
 	return false               # no resource-full Smash: Enraged buffs everything instead
@@ -105,9 +106,21 @@ func gain_rage(v: float) -> void:
 		res = res_max()
 		_enrage_fx()
 
-## Three Rampage charges from rank 1 (the source's Quick Dash has 3).
+## Two Rampage charges, a third at rank 2.
 func extra_dashes() -> float:
-	return 1.0
+	return 1.0 if rank("dash") >= 2 else 0.0
+
+## The Rampage's dodge at the last rank: a shot dodged through it feeds Rage.
+func on_perfect_dodge() -> void:
+	if rank("dash") >= 3:
+		add_res(float(dash_def().get("dodge_rage", 15.0)))
+		m.fx.word(h.pos + Vector3(0, 2.4, 0), "RAGE", res_col(), false)
+
+## Warchain cooldown per rank: 12.5% off at rank 2, 37.5% in all at rank 3 (the data's -2s three times).
+func cd_k(slot: String) -> float:
+	if slot != "kin":
+		return super.cd_k(slot)
+	return 1.0 - float(e_def().get("rank_cut", 0.125)) * float([0, 1, 3][clampi(rank("kin") - 1, 0, 2)])
 
 func _enrage_fx() -> void:
 	var rc := res_col()
@@ -183,7 +196,7 @@ func _tick(dt: float) -> void:
 			res = 0.0
 			_drop_aura()
 		# Enraged: cooldowns and dash charges come back faster
-		for k in ["rmb", "e"]:
+		for k in ["rmb", "e", "air"]:
 			cd[k] = maxf(0.0, float(cd[k]) - dt * float(rd.get("ab_haste", 0.2)))
 		if h.dashes < h.max_dashes():
 			h.dashes = minf(h.max_dashes(), h.dashes + dt / h.dash_regen() * float(rd.get("dash_haste", 0.12)))
@@ -516,9 +529,9 @@ func _tip() -> void:
 	var hit := false
 	for f in foes_in(at, float(dd["tip_r"])):
 		hit = true
-		f.hurt(float(dd["tip_dmg"]) * power("dash") * (1.25 if rank("dash") >= 3 else 1.0), h,
+		f.hurt(float(dd["tip_dmg"]) * power("dash"), h,
 				{"src": "abil", "ab": "dodge", "tags": ["dodge", "tip"], "kb": dv * float(dd["tip_kb"]),
-						"wallstun": float(dd["tip_stun"]), "melee": true, "crit": true})
+						"melee": true, "crit": true})
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "TIP", res_col(), false)
 	fx().crescent(h.pos + Vector3(0, 0.9, 0), dv, 100.0, 2.2, FLAME_ORANGE, FLAME_HOT, 0.25, 0.0, 3.0)
 	if hit:
@@ -567,15 +580,44 @@ func lunge_k(t: float) -> float:
 	var sd := rmb_def()
 	return clampf((t - float(sd["hold"])) / maxf(0.05, float(sd["full_t"]) - float(sd["hold"])), 0.0, 1.0)
 
-## Every Smash's damage: its rank, and +20% at rank 3.
+## Every Smash's damage: its rank, and +20% more at rank 2 and again at rank 3.
 func smash_k() -> float:
-	return 1.2 if rank("sec") >= 3 else 1.0
+	return 1.0 + 0.2 * float(clampi(rank("sec") - 1, 0, 2))
+
+## The Meteor Drop's own cooldown, 2.4s shorter at rank 3.
+func air_cooldown() -> float:
+	var dd: Dictionary = rmb_def()["drop"]
+	return float(dd["cooldown"]) - (float(dd["r3_cut"]) if rank("sec") >= 3 else 0.0)
+
+## Spends the Meteor Drop's slot (the Smash's charge stays ready). False, with the deny buzz, while it rests.
+func spend_air() -> bool:
+	if float(cd["air"]) > 0.0:
+		h._ab_feedback("sec", "deny")
+		return false
+	cd["air"] = air_cooldown()
+	h.used["utility"] = int(h.used.get("utility", 0)) + 1
+	h._ab_feedback("sec", "cast")
+	CombatBus.ability_used.emit(h, id + "_rmb", "secondary")
+	return true
+
+## While airborne the secondary slot shows the Meteor Drop's own cooldown.
+func slot_info(slot: String) -> Dictionary:
+	var out := super.slot_info(slot)
+	if slot in ["sec", "utility"] and not h.grounded:
+		out["cd"] = float(cd["air"])
+		out["cd_max"] = air_cooldown()
+		out["ready"] = float(cd["air"]) <= 0.0
+	return out
 
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
 	if not slam_w.is_empty() or not lunge.is_empty():
 		return
-	if not spend_rmb(): return
+	var dropping: bool = c.get("air", false) and not c.get("e", false)
+	if dropping:
+		if not spend_air(): return
+	elif not spend_rmb():
+		return
 	if c.get("e", false):
 		# pressed while the Warchain pulls you: a tap spins (Cinder Spin), a held one slams on arrival
 		if c.get("hold", false): _haul_slam(lunge_k(float(c.get("t", 0.0))))
@@ -941,13 +983,12 @@ func cast_e() -> bool:
 func _hook(f: Ent, at: Vector3) -> void:
 	var ed := e_def()
 	chain_flying = false
-	chain = {"target": f, "pos": at, "node": null, "refund": 0.0}
+	chain = {"target": f, "pos": at, "node": null}
 	fx().star(at + Vector3(0, 1.0 if f else 0.5, 0), Color("ffd84a"), 0.9, 0.18)      # the spark at the anchor
 	e_t = float(ed["time"])
 	if f:
 		KitStatus.apply(f, "blt", float(ed["time"]))
 		m.fx.word(f.pos + Vector3(0, 2.3, 0), "CHAINED", col_of(ed), true)
-		if rank("kin") >= 3: chain["refund"] = float(ed["refund_foe"])
 	else:
 		m.fx.word(at + Vector3(0, 1.4, 0), "ANCHORED", col_of(ed), false)
 	m.fx.ring(at, 0.9, col_of(ed), 0.25)
@@ -980,11 +1021,9 @@ func _drop_chain() -> void:
 	if n and is_instance_valid(n):
 		self_nodes.erase(n)
 		n.queue_free()
-	var refund := float(chain.get("refund", 0.0))
 	chain = {}
 	e_t = 0.0
 	_start_e_cd()
-	if refund > 0.0: cd["e"] = float(cd["e"]) * (1.0 - refund)
 
 func _break_chain() -> void:
 	if chain.is_empty():

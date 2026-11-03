@@ -35,38 +35,28 @@
 "semicolon": 2
 },
 "scripts/arch/kits/archer_kit.gd": {
-"long_line": 17,
+"long_line": 13,
 "semicolon": 3,
 "shadow": 1
 },
-"scripts/arch/kits/ashwick_kit.gd": {
-"long_line": 9,
-"nested_ternary": 1,
-"semicolon": 7
-},
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 18,
-"nested_ternary": 2,
-"semicolon": 11
+"long_line": 13,
+"nested_ternary": 1,
+"semicolon": 10
 },
 "scripts/arch/kits/dolm_kit.gd": {
 "long_line": 9,
 "nested_ternary": 1,
 "semicolon": 2
 },
-"scripts/arch/kits/dredge_kit.gd": {
-"long_line": 7,
-"nested_ternary": 1,
-"semicolon": 5
-},
 "scripts/arch/kits/gunslinger_kit.gd": {
 "long_line": 8,
 "semicolon": 4
 },
 "scripts/arch/kits/juggernaut_kit.gd": {
-"long_line": 6,
-"semicolon": 1,
-"shadow": 1
+"long_line": 25,
+"semicolon": 12,
+"shadow": 2
 },
 "scripts/arch/kits/mage_kit.gd": {
 "long_line": 4,
@@ -86,7 +76,8 @@
 "semicolon": 1
 },
 "scripts/arch/kits/thief_kit.gd": {
-"long_line": 3
+"long_line": 14,
+"nested_ternary": 1
 },
 "scripts/arch/oomph.gd": {
 "long_line": 1,
@@ -304,9 +295,9 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 252,
-"nested_ternary": 38,
-"semicolon": 272,
+"long_line": 248,
+"nested_ternary": 37,
+"semicolon": 271,
 "shadow": 4
 },
 "scripts/home/home_build.gd": {
@@ -331,7 +322,7 @@
 "semicolon": 29
 },
 "scripts/home/home_hero.gd": {
-"long_line": 4
+"long_line": 2
 },
 "scripts/home/home_incubator.gd": {
 "long_line": 4,
@@ -350,8 +341,8 @@
 "semicolon": 21
 },
 "scripts/home/home_training.gd": {
-"long_line": 38,
-"semicolon": 28,
+"long_line": 34,
+"semicolon": 26,
 "shadow": 3
 },
 "scripts/home/home_water.gd": {
@@ -484,15 +475,12 @@
 "semicolon": 14
 },
 "scripts/match/arena.gd": {
-"long_line": 23,
+"long_line": 22,
 "nested_ternary": 2,
 "semicolon": 37
 },
 "scripts/match/arena_demo.gd": {
 "long_line": 2
-},
-"scripts/match/arena_demo_pair.gd": {
-"semicolon": 4
 },
 "scripts/match/biome_run.gd": {
 "long_line": 25,
@@ -613,8 +601,7 @@
 "semicolon": 5
 },
 "scripts/match/hero_gear_pair.gd": {
-"long_line": 25,
-"semicolon": 2
+"long_line": 2
 },
 "scripts/match/hero_hair.gd": {
 "long_line": 20
@@ -626,14 +613,14 @@
 "shadow": 1
 },
 "scripts/match/hunter.gd": {
-"history_comment": 38,
-"long_line": 99,
-"nested_ternary": 20,
+"history_comment": 44,
+"long_line": 100,
+"nested_ternary": 21,
 "semicolon": 56,
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
-"long_line": 78,
+"long_line": 128,
 "nested_ternary": 6,
 "semicolon": 102
 },
@@ -694,9 +681,6 @@
 },
 "scripts/match/kin_wheel.gd": {
 "semicolon": 1
-},
-"scripts/match/kmoves_pair.gd": {
-"long_line": 17
 },
 "scripts/match/lairs.gd": {
 "long_line": 49,
@@ -768,7 +752,7 @@
 "long_line": 2
 },
 "scripts/match/practice_hero.gd": {
-"long_line": 4,
+"long_line": 2,
 "semicolon": 2
 },
 "scripts/match/prop_anim.gd": {
@@ -893,12 +877,12 @@
 "long_line": 3
 },
 "scripts/ui/hatch.gd": {
-"long_line": 35,
+"long_line": 34,
 "nested_ternary": 2,
-"semicolon": 72
+"semicolon": 71
 },
 "scripts/ui/hero_grid.gd": {
-"long_line": 3,
+"long_line": 2,
 "semicolon": 3
 },
 "scripts/ui/hold_skip.gd": {
@@ -918,6 +902,10 @@
 },
 "scripts/ui/hud_tip.gd": {
 "shadow": 1
+},
+"scripts/ui/icons.gd": {
+"long_line": 25,
+"semicolon": 34
 },
 "scripts/ui/incubator_view.gd": {
 "long_line": 15,
@@ -971,9 +959,6 @@
 "long_line": 32,
 "semicolon": 24,
 "shadow": 1
-},
-"scripts/ui/portraits.gd": {
-"long_line": 1
 },
 "scripts/ui/prologue.gd": {
 "long_line": 39,
@@ -1042,12 +1027,12 @@
 "semicolon": 2
 },
 "tools/archer_bulwark_combo_check.gd": {
-"long_line": 2,
-"semicolon": 19
+"long_line": 8,
+"semicolon": 20
 },
 "tools/archetype_check.gd": {
-"long_line": 68,
-"semicolon": 72,
+"long_line": 139,
+"semicolon": 135,
 "shadow": 1
 },
 "tools/arena_check.gd": {
@@ -1056,8 +1041,8 @@
 "shadow": 1
 },
 "tools/ashwick_combo_check.gd": {
-"long_line": 19,
-"semicolon": 17,
+"long_line": 2,
+"semicolon": 9,
 "shadow": 1
 },
 "tools/balloon_check.gd": {
@@ -1088,9 +1073,7 @@
 "long_line": 1
 },
 "tools/dredge_combo_check.gd": {
-"history_comment": 1,
-"long_line": 18,
-"semicolon": 17,
+"long_line": 2,
 "shadow": 1
 },
 "tools/economy_floor_check.gd": {
@@ -1125,7 +1108,7 @@
 "shadow": 1
 },
 "tools/hero_check.gd": {
-"long_line": 6,
+"long_line": 3,
 "semicolon": 3
 },
 "tools/hero_combo_check.gd": {
@@ -1196,7 +1179,7 @@
 "semicolon": 20
 },
 "tools/move_feel_check.gd": {
-"history_comment": 1,
+"history_comment": 2,
 "long_line": 32,
 "semicolon": 67
 },
