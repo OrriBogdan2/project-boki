@@ -25,7 +25,7 @@ const LEAVE_META := "leave"   # on a Boki put down on purpose: no automatic pick
 const ENEMY_NEAR := 6.0   # m: with a foe this close, running into the Boki does not pick it up (press interact)
 const F_EDGE_S := 0.1     # s: an interact press this recent counts as a fresh press
 const BLOCKED_INPUTS := ["jump", "glide", "fire", "sig", "sec", "sec_hold", "skill", "ult", "kin_ab", "gear1", "gear2",
-	"throw", "reload", "tonic", "kit", "swap", "dash_down", "dash_hold"]    # off while carrying (movement and aim stay)
+	"throw", "reload", "tonic", "kit", "swap", "dash_down"]    # off while carrying (movement and aim stay)
 
 static func rules() -> Dictionary:
 	return KinCommand.rules()["down"]
