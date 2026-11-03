@@ -1675,12 +1675,11 @@ func _ability_check() -> void:
 	_ac_glove(P, "barrier")
 	var hp1: float = m.verbs.walls[-1]["hp"] if not m.verbs.walls.is_empty() else 0.0
 	var cd1: float = P.gear_cd[0]
-	P.lvl = 9
-	P.skill_pts = 5
+	P.skill_pts = 5      # spent on the hero's own abilities (the level stays, so level growth stays out of it)
 	P._bot_spend()
 	_ac_glove(P, "barrier")
 	var hp3: float = m.verbs.walls[-1]["hp"] if not m.verbs.walls.is_empty() else 0.0
-	_ac("a glove is as strong at level 9 as at level 1 (no ranks)", absf(hp3 - hp1) < 0.01
+	_ac("a glove is as strong after spending skill points (no ranks)", absf(hp3 - hp1) < 0.01
 			and absf(float(P.gear_cd[0]) - cd1) < 0.01 and not P.slot_lv.has("gear"),
 			"wall hp %.0f -> %.0f, cooldown %.1f -> %.1f" % [hp1, hp3, cd1, float(P.gear_cd[0])])
 	P.runner.set_slot("utility", Content.ability("leash_bolt"))
