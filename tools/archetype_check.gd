@@ -209,7 +209,7 @@ func _thief() -> void:
 ## An ultimate's data: no generic fuse, a 15-40s cooldown, opening at level 6.
 func _ult_shaped(rd: Dictionary) -> bool:
 	var cd := float(rd["cooldown"])
-	return float(rd.get("fuse", 0.0)) <= 0.0 and cd >= 15.0 and cd <= 70.0 and int(rd.get("unlock", 0)) == 6
+	return float(rd.get("fuse", 0.0)) <= 0.0 and cd >= 15.0 and cd <= 70.0 and int(rd.get("unlock", 6)) == 6
 
 ## The hero has its own ultimate on X: "r" data opening at level 6, and a card line for it.
 func _has_ult(arch: String) -> bool:
