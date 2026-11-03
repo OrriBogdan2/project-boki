@@ -145,7 +145,7 @@
 "semicolon": 9
 },
 "scripts/core/data.gd": {
-"long_line": 55
+"long_line": 58
 },
 "scripts/core/econ.gd": {
 "long_line": 10,
@@ -233,7 +233,7 @@
 "semicolon": 1
 },
 "scripts/core/settings.gd": {
-"long_line": 19,
+"long_line": 20,
 "nested_ternary": 1,
 "semicolon": 4
 },
@@ -306,15 +306,15 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 252,
+"long_line": 253,
 "nested_ternary": 38,
-"semicolon": 272,
+"semicolon": 275,
 "shadow": 4
 },
 "scripts/home/home_build.gd": {
-"long_line": 79,
+"long_line": 80,
 "nested_ternary": 6,
-"semicolon": 87,
+"semicolon": 89,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -368,9 +368,9 @@
 "shadow": 2
 },
 "scripts/home/interior.gd": {
-"long_line": 15,
+"long_line": 16,
 "nested_ternary": 1,
-"semicolon": 30
+"semicolon": 31
 },
 "scripts/home/kin_brain.gd": {
 "long_line": 8,
@@ -486,7 +486,7 @@
 "semicolon": 14
 },
 "scripts/match/arena.gd": {
-"long_line": 23,
+"long_line": 24,
 "nested_ternary": 2,
 "semicolon": 37
 },
@@ -660,7 +660,7 @@
 "semicolon": 15
 },
 "scripts/match/kin_downed.gd": {
-"long_line": 7,
+"long_line": 12,
 "nested_ternary": 1,
 "semicolon": 1,
 "shadow": 1
@@ -715,22 +715,22 @@
 "long_line": 1
 },
 "scripts/match/life.gd": {
-"long_line": 18,
+"long_line": 22,
 "nested_ternary": 1,
-"semicolon": 8
+"semicolon": 10
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 240,
+"long_line": 241,
 "nested_ternary": 23,
-"semicolon": 163,
+"semicolon": 169,
 "shadow": 9
 },
 "scripts/match/merge_look.gd": {
 "long_line": 6
 },
 "scripts/match/merge_moves.gd": {
-"long_line": 5
+"long_line": 7
 },
 "scripts/match/merge_parts.gd": {
 "long_line": 23
@@ -859,9 +859,9 @@
 "semicolon": 4
 },
 "scripts/social/town.gd": {
-"long_line": 25,
+"long_line": 26,
 "nested_ternary": 1,
-"semicolon": 41,
+"semicolon": 42,
 "shadow": 1
 },
 "scripts/ui/about_view.gd": {
@@ -883,7 +883,7 @@
 "scripts/ui/dex_view.gd": {
 "long_line": 11,
 "nested_ternary": 2,
-"semicolon": 16
+"semicolon": 18
 },
 "scripts/ui/egg_hatch.gd": {
 "long_line": 10,
@@ -899,9 +899,9 @@
 "long_line": 3
 },
 "scripts/ui/hatch.gd": {
-"long_line": 35,
+"long_line": 37,
 "nested_ternary": 2,
-"semicolon": 72
+"semicolon": 75
 },
 "scripts/ui/hero_grid.gd": {
 "long_line": 3,
@@ -937,7 +937,7 @@
 "scripts/ui/iv_view.gd": {
 "long_line": 10,
 "nested_ternary": 1,
-"semicolon": 16,
+"semicolon": 19,
 "shadow": 1
 },
 "scripts/ui/kin_portrait.gd": {
@@ -952,34 +952,35 @@
 "scripts/ui/kinbox_view.gd": {
 "long_line": 16,
 "nested_ternary": 4,
-"semicolon": 30,
+"semicolon": 33,
 "shadow": 1
 },
 "scripts/ui/kit_card.gd": {
 "long_line": 32,
 "nested_ternary": 5,
-"semicolon": 5
+"semicolon": 7
 },
 "scripts/ui/level_pop.gd": {
 "long_line": 1
 },
 "scripts/ui/loading.gd": {
 "long_line": 27,
-"semicolon": 10,
+"semicolon": 15,
 "shadow": 2
 },
 "scripts/ui/lobby.gd": {
 "long_line": 12,
 "nested_ternary": 2,
-"semicolon": 4
+"semicolon": 5
 },
 "scripts/ui/map_paint.gd": {
 "long_line": 1,
 "semicolon": 5
 },
 "scripts/ui/overlay.gd": {
-"long_line": 32,
-"semicolon": 24,
+"long_line": 39,
+"nested_ternary": 1,
+"semicolon": 31,
 "shadow": 1
 },
 "scripts/ui/portraits.gd": {
@@ -988,7 +989,7 @@
 "scripts/ui/prologue.gd": {
 "long_line": 39,
 "nested_ternary": 1,
-"semicolon": 60,
+"semicolon": 61,
 "shadow": 1
 },
 "scripts/ui/reset_pop.gd": {
@@ -1013,18 +1014,18 @@
 "scripts/ui/title.gd": {
 "long_line": 22,
 "nested_ternary": 2,
-"semicolon": 41
+"semicolon": 42
 },
 "scripts/ui/ui.gd": {
-"long_line": 25,
+"long_line": 35,
 "nested_ternary": 3,
-"semicolon": 25,
+"semicolon": 86,
 "shadow": 9
 },
 "scripts/ui/work_view.gd": {
-"long_line": 19,
+"long_line": 20,
 "nested_ternary": 4,
-"semicolon": 9,
+"semicolon": 11,
 "shadow": 3
 },
 "scripts/ui/wyrm.gd": {
@@ -1083,13 +1084,13 @@
 "semicolon": 16
 },
 "tools/boki_system_check.gd": {
-"long_line": 33,
-"semicolon": 15,
+"long_line": 35,
+"semicolon": 17,
 "shadow": 1
 },
 "tools/capture_check.gd": {
-"long_line": 29,
-"semicolon": 9
+"long_line": 30,
+"semicolon": 10
 },
 "tools/check.gd": {
 "semicolon": 1
@@ -1104,7 +1105,7 @@
 "shadow": 1
 },
 "tools/economy_floor_check.gd": {
-"long_line": 72,
+"long_line": 73,
 "semicolon": 37
 },
 "tools/farm_start_check.gd": {
