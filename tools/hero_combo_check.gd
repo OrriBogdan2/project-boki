@@ -352,7 +352,18 @@ func _mage() -> void:
 			K.spark_n(T) >= 2 and KitStatus.grounded(T) and ac.dmg(T) >= 15.0 and T.pos.x < tx0 - 0.5,
 			"sparks %d moved %.1f" % [K.spark_n(T), T.pos.x - tx0])
 	ac.step(m, 0.9)
-	ok("Skycall: the drag slides them several metres", T.pos.x < tx0 - 3.0, "%.1f m" % (tx0 - T.pos.x))
+	ok("Skycall: the drag is a modest slide (about 3.4 m)",
+			absf((tx0 - T.pos.x) - 3.4) < 0.5, "%.1f m" % (tx0 - T.pos.x))
+	var e_d: Dictionary = K.e_def()
+	ok("Skycall: radius 1.5 m, slide 3.4 m over 1.1 s",
+			absf(float(e_d["radius"]) - 1.5) < 0.001 and absf(float(e_d["slide_dist"]) - 3.4) < 0.001
+			and absf(float(e_d["slide_t"]) - 1.1) < 0.001)
+	var sl_d := float(e_d["slide_dist"])
+	var sl_t := float(e_d["slide_t"])
+	ok("Skycall: the speed eases out (6.2 m/s peak, half at the midpoint, zero at the end)",
+			absf(K.slide_speed(sl_d, sl_t, 0.0) - 6.18) < 0.05 and absf(K.slide_speed(sl_d, sl_t, sl_t * 0.5) - 3.09) < 0.05
+			and K.slide_speed(sl_d, sl_t, sl_t) == 0.0 and K.slide_speed(sl_d, sl_t, 0.0) < 8.0,
+			"%.2f" % K.slide_speed(sl_d, sl_t, 0.0))
 	ok("Skycall: the strike direction is the flick", (K.last_strike.get("dir", Vector2.ZERO) as Vector2).x < -0.9)
 	# no flick: thrown away from you; it steals a rival's orb
 	ac.fresh(T)
@@ -366,9 +377,47 @@ func _mage() -> void:
 	K.cd["e"] = 0.0
 	tx0 = T.pos.x
 	P.ak.use_e()
-	ac.step(m, 1.6)
-	ok("Skycall without a flick: thrown away from you", T.pos.x > tx0 + 2.0, "%.1f" % (T.pos.x - tx0))
+	ac.step(m, 2.2)
+	ok("Skycall without a flick: thrown away from you, within 3.9 m",
+			T.pos.x > tx0 + 2.5 and T.pos.x < tx0 + 3.9, "%.1f" % (T.pos.x - tx0))
 	ok("Skycall: flings a rival's orb, now yours", K.motes.size() >= 1 and K.motes[0]["owner"] == P)
+	# 9c. dash -> ability (content/dash_flow/mage.json): a bolt tapped inside Wirerun
+	# is buffered and goes off at its end, E starts mid-dash, nothing is dropped
+	ac.fresh(T)
+	K.strikes.clear()
+	P.teleport(home)
+	T.teleport(home + Vector3(30, 0, 8))
+	ac.step(m, 0.3)
+	P.dashes = P.max_dashes()
+	P.fire_cd = 0.0
+	K.cd["e"] = 0.0
+	P.inp["move"] = Vector2.ZERO
+	P.inp["aim"] = home + Vector3(8, 0.9, 0)
+	var n_di := P.shot_n
+	P.do_dash()
+	m.step(DT)
+	ok("dash table: Wirerun is rolling and DashFlow says LMB buffers, E fires",
+			P.roll_t > 0.0 and String(DashFlow.row_of("mage", "lmb", false)["mode"]) == "buffer" and String(DashFlow.row_of("mage", "e", false)["mode"]) == "fire"
+			and absf(DashFlow.BUFFER_S - 0.15) < 0.001)
+	P.inp["fire"] = true
+	m.step(DT)
+	P.inp["fire"] = false
+	P.ak.use_e()
+	ok("dash table: E is cast mid-dash (not dropped)", not K.strikes.is_empty())
+	ok("dash table: the tapped bolt does not fire inside the dash", P.shot_n == n_di and P.roll_t > 0.0)
+	ac.step(m, 0.9)
+	ok("dash table: the bolt tapped inside the dash goes off when it ends", P.shot_n == n_di + 1, "%d -> %d" % [n_di, P.shot_n])
+	P.inp["fire"] = false       # DashFlow's replayed tap leaves the key down in this harness (a real frame rewrites it)
+	var n_di2 := P.shot_n
+	ac.step(m, 0.9)
+	ok("dash table: and only once", P.shot_n == n_di2)
+	K.strikes.clear()
+	# dash animation: Wirerun and Slipstep keep their own moves, none shared
+	var dm := HunterAnim.km_def("mage_dash_go")
+	var dg := HunterAnim.km_def("gunslinger_dash")
+	ok("dash anim: Wirerun and Slipstep each have their own move; neither is a shared roll",
+			not dm.is_empty() and not dg.is_empty() and not HunterAnim.km_def("mage_dash_ex").is_empty()
+			and not HunterAnim.km_def("gunslinger_dash_ex").is_empty() and not K.dash_def().is_empty())
 	# small mechanics (the wiki's fine print, docs/heroes/mage.md "Small mechanics")
 	ac.fresh(T)
 	ac.fresh(T2)
@@ -539,12 +588,24 @@ func _gunslinger() -> void:
 			K.anim_id)
 	P.inp["sec_hold"] = false
 	m.step(DT)
-	# 3. it flies past the person, lands at the lane's end on the ground, shows the cone back toward you, blasts
+	# 3a. a direct hit: the foe in the lane is hurt and Dazed on the spot, the charge is spent, no cone
 	ac.step(m, 0.2)
-	ok("RMB: passes the person in its way (no blast on a person)",
-			not KitStatus.rattled(T) and K.rattles == 0 and not K.burrs.is_empty() and float(K.burrs[0]["fuse"]) < 0.0,
-			"took %.1f rattles %d burrs %s" % [ac.dmg(T), K.rattles, K.burrs])
-	ac.step(m, 0.3)
+	ok("RMB direct hit: damage + Dazed, no cone, the charge is spent",
+			K.direct_hits == 1 and ac.dmg(T) >= 20.0 and KitStatus.rattled(T) and K.rattles == 0 and K.burrs.is_empty(),
+			"took %.1f hits %d rattles %d burrs %d" % [ac.dmg(T), K.direct_hits, K.rattles, K.burrs.size()])
+	var rifle := {"src": "shot"}
+	ok("RMB direct hit: the Dazed foe takes the rifle's +90%", is_equal_approx(K.outgoing(T, 10.0, rifle), 19.0))
+	# 3b. thrown with the foe off the lane: it lands at the lane's end on the ground, shows the cone, blasts
+	ac.fresh(T)
+	KitStatus.clear_rattled(T)
+	T.teleport(home + Vector3(4, 0, 6))
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.teleport(home)
+	ac.step(m, 0.1)
+	P.inp["aim"] = home + Vector3(2.0, 0.9, 0)
+	ac.tap(m, P)
+	ac.step(m, 0.5)
 	var b0: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
 	ok("RMB: sticks on the ground at the lane's end",
 			not b0.is_empty() and float(b0["fuse"]) >= 0.0 and not bool(b0["wall"]) and absf(_flat(b0["pos"], home) - 10.5) < 1.2,
@@ -577,11 +638,18 @@ func _gunslinger() -> void:
 	K.cd["rmb"] = 0.0
 	K.ch_rmb = 1.0
 	var ws0 := K.wall_slams
+	ac.fresh(T2)
+	KitStatus.clear_rattled(T2)
+	T2.teleport(home + Vector3(7.0, 0, -1.5))
+	ac.step(m, 0.1)
+	T2.inv_t = 0.0
 	ac.tap(m, P)
 	ac.step(m, 0.5)
 	var bw: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
 	ok("RMB on a wall: sticks to the wall", not bw.is_empty() and bool(bw["wall"]), str(bw.get("pos", "")))
 	ac.step(m, 1.1)
+	ok("RMB wall cone: a second foe in the cone is hurt and Dazed too",
+			KitStatus.rattled(T2) and ac.dmg(T2) >= 12.0, "took %.0f at %s" % [ac.dmg(T2), str(T2.pos - home)])
 	ok("RMB wall cone: hits, Dazes, shoves into terrain = stun, the cooldown is not shaved",
 			ac.dmg(T) >= 12.0 and KitStatus.rattled(T) and K.wall_slams == ws0 + 1 and float(K.cd["rmb"]) > 6.5 * 0.7,
 			"took %.0f slams %d cd %.1f" % [ac.dmg(T), K.wall_slams - ws0, float(K.cd["rmb"])])
@@ -681,6 +749,31 @@ func _gunslinger() -> void:
 			K.last_dash_kind == "slide" and P.dashes < -0.2 and absf(float(K.dash_def()["hold_cost"]) - 0.4) < 0.001,
 			"dashes %.2f" % P.dashes)
 	P.inp["move"] = Vector2.ZERO
+	# dash -> ability: the ground slide fires the rifle and E / RMB start mid-slide
+	P.teleport(home)
+	ac.step(m, 0.3)
+	P.dashes = P.max_dashes()
+	P.fire_cd = 0.0
+	K.cd["e"] = 0.0
+	P.inp["move"] = Vector2(0, 1)
+	P.inp["aim"] = home + Vector3(8, 0.9, 0)
+	var n_gd := P.shot_n
+	P.do_dash()
+	m.step(DT)
+	ok("dash table: the slide and the air roll fire LMB, DashFlow says so",
+			String(DashFlow.row_of("gunslinger", "lmb", false)["mode"]) == "fire" and String(DashFlow.row_of("gunslinger", "lmb", true)["mode"]) == "fire" and K.fires_in_dash())
+	P.inp["fire"] = true
+	m.step(DT)
+	P.inp["fire"] = false
+	ok("dash table: a shot tapped mid-slide fires at once", P.shot_n == n_gd + 1, "%d -> %d" % [n_gd, P.shot_n])
+	ac.fresh(T)
+	P.ak.use_e()
+	ok("dash table: E (Longneedle) starts mid-slide", not K.needle.is_empty())
+	P.inp["move"] = Vector2.ZERO
+	ac.step(m, 0.8)
+	var gk: Array = (HunterAnim.km_def("gunslinger_dash")["keys"] as Array)
+	ok("dash anim: Slipstep's move runs about 0.85 s, its own id (not Wirerun's)",
+			absf(float((gk[-1] as Array)[0]) - 0.85) < 0.2 and "gunslinger_dash" != "mage_dash_go", "%.2f" % float((gk[-1] as Array)[0]))
 	# small mechanics (the wiki's fine print, docs/heroes/gunslinger.md "Small mechanics")
 	P.teleport(home)
 	ac.step(m, 0.3)
