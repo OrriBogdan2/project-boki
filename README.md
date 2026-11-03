@@ -3194,6 +3194,38 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 
 ![round2: LMB release (close-up): teal fingertip crackle and bolt, no white glow ball](vireo/v2/polish/r2_vireo_lmb_fire_close.png)
 
+**owner1103 #9: Skycall circle, radius 1.5 m (15-20% smaller), before the strike**
+
+![owner1103 #9: Skycall circle, radius 1.5 m (15-20% smaller), before the strike](vireo/v2/polish/vireo_owner1103_e_count.png)
+
+**owner1103 #9: Skycall circle, radius 1.5 m (15-20% smaller), before the strike (close-up)**
+
+![owner1103 #9: Skycall circle, radius 1.5 m (15-20% smaller), before the strike (close-up)](vireo/v2/polish/vireo_owner1103_e_count_close.png)
+
+**owner1103 #9b: struck, the target starts a slow slide toward her**
+
+![owner1103 #9b: struck, the target starts a slow slide toward her](vireo/v2/polish/vireo_owner1103_e_slide_a.png)
+
+**owner1103 #9b: struck, the target starts a slow slide toward her (close-up)**
+
+![owner1103 #9b: struck, the target starts a slow slide toward her (close-up)](vireo/v2/polish/vireo_owner1103_e_slide_a_close.png)
+
+**owner1103 #9b: mid-slide, easing out**
+
+![owner1103 #9b: mid-slide, easing out](vireo/v2/polish/vireo_owner1103_e_slide_b.png)
+
+**owner1103 #9b: mid-slide, easing out (close-up)**
+
+![owner1103 #9b: mid-slide, easing out (close-up)](vireo/v2/polish/vireo_owner1103_e_slide_b_close.png)
+
+**owner1103 #9b: the slide ends about 3.4 m from where it was hit**
+
+![owner1103 #9b: the slide ends about 3.4 m from where it was hit](vireo/v2/polish/vireo_owner1103_e_slide_c.png)
+
+**owner1103 #9b: the slide ends about 3.4 m from where it was hit (close-up)**
+
+![owner1103 #9b: the slide ends about 3.4 m from where it was hit (close-up)](vireo/v2/polish/vireo_owner1103_e_slide_c_close.png)
+
 ## venator/v2/polish (venator/v2/polish)
 
 **LMB, one round: rest, the 0.03s shoulder kick with the muzzle flipped up, recovering, ready**
