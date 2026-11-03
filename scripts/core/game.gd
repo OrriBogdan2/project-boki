@@ -219,21 +219,25 @@ func apply_result(r: Dictionary) -> Dictionary:
 	out["exchange_fills"] = Exchange.tick()
 	# going down leaves your kin behind; where they end up was settled in the match
 	var lost_news: Array = []
-	if not won and r.get("why", "") != "left":
-		for lk in r.get("lost_kin", []):
+	var lost_list: Array = r.get("lost_kin", [])
+	if not won or not lost_list.is_empty():
+		for lk in lost_list:
 			var kk := Save.kin(String(lk.get("uid", "")))
 			if kk.is_empty():
 				continue
 			var fate := String(lk.get("fate", "ransom"))
-			if fate == "squad":
+			if fate in ["squad", "self"]:
+				KinLoss.after_match(d, kk, "home")
 				Save.remember(kk, "carried_home", "was carried home by %s after you fell" % lk.get("holder", "your squad"), 1.0)
 				lost_news.append({"kin": kk, "fate": "squad", "holder": lk.get("holder", "")})
 				continue
 			if float(kk["trust"]) >= 90.0 and randf() < 0.5:
 				# soulbound kin sometimes find their own way back to you
+				KinLoss.after_match(d, kk, "home")
 				Save.remember(kk, "found_home", "found its own way home after you fell", 2.0)
 				lost_news.append({"kin": kk, "fate": "home", "holder": ""})
 				continue
+			KinLoss.after_match(d, kk, KinLoss.outcome_of(fate, String(lk.get("holder", ""))))
 			Ransom.lose(kk, fate, String(lk.get("holder", "")), int(r.get("tier", last_tier)))
 			lost_news.append({"kin": kk, "fate": fate, "holder": lk.get("holder", "")})
 		if d["roster"].is_empty() and not d["lost_kin"].is_empty():

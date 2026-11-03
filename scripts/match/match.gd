@@ -19,7 +19,8 @@ var shots: Array = []
 var pickups: Array = []     # {pos, vel, kind:"gem"|"seed"|"tonic", v, key, node, t}
 var boxes: Array = []       # deathboxes, see Life
 var beacons: Array = []     # revive beacons, see Life
-var chests: Array = []      # {pos, open, prog, node, tier}
+var chests: Array = []      # {pos, open, prog, node}: the one locked chest (KeyChest); "free" ones need no key
+var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (host / offline)
 var shrines: Array = []     # {pos, used, prog, node}
 var breaks: Array = []      # {i, pos, kind, hp, node, dead}
 var ring_n := 0
@@ -785,6 +786,9 @@ func _start(o: Dictionary) -> void:
 		blight.setup()
 	if rolling:
 		rolling.after_setup()      # the map as picked over as the session is old
+	if not (opts.get("duel", false) or opts.get("arena", false) or opts.get("tutorial", false)):
+		keys = KeyRun.new(self)
+		keys.setup()               # who carries the chest keys, and the Shrublings
 	await _slice()
 	_trim_shadows(self)
 	for list in [mobs, kins, chests, breaks, shrines, wpicks]:
@@ -1477,7 +1481,7 @@ func _clear_spot(at: Vector3) -> Vector3:
 func _spawn_chests() -> void:
 	for cs in world.chest_spots:
 		await _slice()
-		add_chest(cs["pos"], int(cs["tier"]))
+		add_chest(cs["pos"])
 	for sp in world.shrine_spots:
 		await _slice()
 		var n := Models.shrine()
@@ -1493,12 +1497,13 @@ func _spawn_chests() -> void:
 # ------------------------------------------------------------------ breakables and found weapons
 const BREAK_HP := {"pot": 6.0, "crate": 22.0, "barrel": 12.0}
 
-func add_chest(p: Vector3, t: int) -> Dictionary:
-	var n := Models.chest(t)
+func add_chest(p: Vector3) -> Dictionary:
+	var n := Models.chest()
 	n.position = p
 	n.rotation.y = rng.randf() * TAU
 	add_child(n)
-	var c := {"pos": p, "open": false, "prog": 0.0, "node": n, "tier": t}
+	KeyChest.dress(n)
+	var c := {"pos": p, "open": false, "prog": 0.0, "node": n}
 	chests.append(c)
 	return c
 
@@ -1909,6 +1914,7 @@ func _break(b: Dictionary, by: Ent, from_net := false) -> void:
 	fx.burst(at + Vector3(0, 0.4, 0), col, 16, 4.0, 0.5, 9.0, 0.8)
 	sfx("knock" if kind_s == "crate" else "hit", at, -4.0, 0.7 if kind_s == "crate" else 1.3)
 	var loot := float(T["loot"])
+	if not from_net: KeyBonus.on_break(self, at, kind_s)      # a rare chest key
 	match kind_s:
 		"pot":
 			for i in randi_range(1, 2):
@@ -2291,11 +2297,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 				if "--simtest" in OS.get_cmdline_user_args(): print("ARMOR %s -> %s" % [credit.pname, Hunter.ARMOR_TIERS[lv][0]])
 	var mine := credit == player or (target == player)
 	var armor_hit: bool = o.get("armor", false) or (target is Hunter and (target as Hunter).armor > 0.5)
-	var col := Color("fff4d6")
-	if armor_hit: col = Color("7ac8ff")
-	if crit: col = Color("ffd23f") if not armor_hit else Color("b0e4ff")
-	if target == player: col = Color("ff6a5a")
-	elif target is Kin and target.owner_h == player: col = Color("ffa08a")
+	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player)
 	# only numbers that involve you: other fights nearby don't spray digits over yours
 	if mine:
 		fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, crit)
@@ -2334,6 +2336,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	cancel_abilities(h)
 	h.downed = true
 	h.downs += 1
+	KinTrack.drop_carried(self, h, h.pos)
 	if by is Blight: kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
 	h.down_hp = Data.MATCH["down_hp"]
 	h.hp = 0.0
@@ -2489,6 +2492,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)
 	var waiting := false
+	if net_on: KinTrack.drop_carried(self, h, h.pos)       # (offline, Life.drop_box does it at the box)
 	if not net_on and not h.remote:
 		# everything they carried goes into a deathbox where they fell. While a teammate is still
 		# in the fight they can bring them back at it (or at a revive beacon)
@@ -2729,6 +2733,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		tut_kills += 1
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
+	KeyCarry.on_mob_dead(self, mb)
 	if lairs: lairs.on_mob_dead(mb, credit)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
 	sfx("die_big" if big_mob else "die_small", mb.pos, -5.0, randf_range(0.9, 1.15))
@@ -2873,47 +2878,12 @@ func _update_tracking(dt: float) -> void:
 		note_sound(null, at, "kin")
 		add_feed("You sense %s %s. %s has it." % [k.rec.get("name", "your Boki"), direction_word(player.pos, at), h.pname])
 
-## Kin left behind where a hunter went down. They wait, dazed, for someone to collect them.
+## Online: the Boki a hunter brought stay behind (KinLoss: safe tiers send them home, the others drop them to guard).
 func _leave_kin(h: Hunter) -> void:
 	for kk in [h.kin, h.kin2]:
 		if kk == null or not is_instance_valid(kk) or Loaner.is_loaner((kk as Kin).rec):
 			continue
-		_leave_one_kin(h, kk)
-
-## One kin left behind where it was, dazed, for anyone to capture.
-func _leave_one_kin(h: Hunter, k: Kin) -> void:
-	if true:
-		giant_free(k)
-		var at: Vector3 = k.pos if k.state in ["active", "downed", "returning", "reviving"] else h.pos
-		var bx := Life.box_of(self, h)
-		if k.state == "away" and not bx.is_empty() and bx["pos"] != Vector3.INF:
-			at = bx["pos"]
-		var leave: bool = not h.remote and not opts.get("training", false) and not opts.get("tutorial", false)
-		if leave:
-			if world.is_void(at.x, at.z):
-				# it flutters to the nearest solid ground
-				at = world.free_spot_near(at, [], 1.0, 0.4, 40.0)
-			if not world.is_void(at.x, at.z):
-				var rec: Dictionary = k.rec.duplicate(true)
-				var w := spawn_wild(rec, at + Vector3(rng.randf_range(-0.6, 0.6), 0, rng.randf_range(-0.6, 0.6)), true)
-				# whose it really is: yours (even if a rival was carrying it), or the hunter who brought it
-				w.lost_from = "you" if (h == player or k.lost_from == "you") else h.pname
-				w.lost_uid = String(rec.get("uid", ""))
-				w.lost_owner = h
-				w.dazed_t = 1e9
-				kstat["left"] += 1
-				if h == player:
-					player_lost.append({"uid": w.lost_uid, "kin": w, "holder": null, "rec": rec})
-					add_feed("%s was left behind" % rec.get("name", "Your Boki"))
-				elif k.lost_from == "you" and player and not player.out:
-					add_feed("%s dropped %s! Get to it and extract to bring it home." % [h.pname, rec.get("name", "your Boki")])
-					ping(w.pos, Color("ffd23f"))
-				elif player and not player.out and player.flat_dist(w.pos) < 40.0:
-					# a rival's Boki left near you: the chance the game is built round, so call it out
-					add_feed("%s's %s was left behind. Tame it before someone else does." % [h.pname, rec.get("name", "Boki")])
-					ping(w.pos, Color("ffb36a"))
-		k.dead = true
-		k.visible = false
+		KinLoss.on_owner_out(self, h, kk, Vector3.INF)
 
 ## The Demo match (title screen): your bot squadmate leads the drop and picks the spot between a
 ## live boss lair and the nearest outpost uplink, so you glide down in formation and land right by both.
@@ -2952,7 +2922,7 @@ func giant_free(k: Kin) -> bool:
 ## shoulder, or onto the bench if you already have one out.
 func give_kin(h: Hunter, rec: Dictionary) -> Kin:
 	var k := Kin.new()
-	k.init_kin(self, next_id(h.nid + "k"), rec["species"], rec, h)
+	k.init_kin(self, KinLoss.kin_id(self, h), rec["species"], rec, h)
 	add_child(k)
 	k.teleport(h.pos + Vector3(1.0, 0, 0.7))
 	kins.append(k)
@@ -2977,13 +2947,9 @@ func kin_stolen(thief: Hunter, rec: Dictionary) -> void:
 	if hud:
 		hud.toast("%s took %s! Chase them down: they're marked, and you're faster heading their way" % [thief.pname, rec.get("name", "your Boki")], Color("ffd23f"))
 
-## Who has one of your kin right now (a rival still in the match), or null.
+## Who has one of your squad's Boki right now (an enemy still in the match), or null (KinTrack).
 func kin_thief() -> Hunter:
-	for L in player_lost:
-		var hh = L.get("holder")
-		if hh is Hunter and (hh as Hunter).team != player.team and not (hh as Hunter).out and not (hh as Hunter).extracted:
-			return hh
-	return null
+	return KinTrack.captor_for(self, player.team) if player else null
 
 func _tick_chase() -> void:
 	if player == null:
@@ -2991,54 +2957,12 @@ func _tick_chase() -> void:
 	var th := kin_thief()
 	player.chase = th
 	if th:
-		# the thief can't hide: always visible, and pinged on the map every few seconds
-		th.reveal_t = maxf(th.reveal_t, 0.5)
-		if int(time * 60.0) % 240 == 0:
-			pings.append({"pos": th.pos, "col": Color("ffd23f"), "t": 0.0})
+		th.reveal_t = maxf(th.reveal_t, 0.5)     # the captor can't hide (their map spot pings every bond_ping_s: KinTrack.tick)
+	KinTrack.tick(self, Match.DT)
 
-## Where each of your lost kin ends up when the match is over.
+## Where each of your lost kin ends up when the match is over (KinLoss.resolve).
 func _resolve_lost() -> Array:
-	var out: Array = []
-	for L in player_lost:
-		var w: Kin = L["kin"]
-		var holder = L.get("holder")
-		if w == null:
-			# still in your deathbox (nobody looted it): it ends up at the Ransom House
-			var fate0 := "ransom"; var who0 := ""
-			if holder is Hunter:
-				var hh0: Hunter = holder
-				if hh0 == player: fate0 = "self"
-				elif hh0.team == player.team: fate0 = "squad" if not hh0.out else "ransom"; who0 = hh0.pname
-				elif not hh0.out: fate0 = "rival"; who0 = hh0.pname
-			out.append({"uid": L["uid"], "fate": fate0, "holder": who0, "rec": L["rec"]})
-			continue
-		var fate := "ransom"
-		var who := ""
-		if holder is Hunter:
-			var hh: Hunter = holder
-			if hh == player:
-				fate = "self"
-			elif hh.team == player.team:
-				fate = "squad" if not hh.out else "ransom"
-				who = hh.pname
-			elif not hh.out:
-				fate = "rival"; who = hh.pname
-		elif not w.dead:
-			# nobody grabbed it before the match ended for you: maybe someone close by will
-			var best: Hunter = null; var bd := 26.0
-			for o in hunters:
-				if o.out or o == player: continue
-				var d: float = o.flat_dist(w)
-				if d < bd: bd = d; best = o
-			if best and rng.randf() < 0.75 * (1.0 - bd / 26.0) + 0.15:
-				if best.team == player.team:
-					fate = "squad"
-				else:
-					fate = "rival"
-				who = best.pname
-		out.append({"uid": L["uid"], "fate": fate, "holder": who, "rec": L["rec"]})
-	return out
-
+	return KinLoss.resolve(self)
 
 func on_wild_dazed(k: Kin) -> void:
 	if player and k.flat_dist(player) < 10.0:
@@ -3220,6 +3144,7 @@ func drop(kind_s: String, at: Vector3, v: int, key := "", pid := "", vel0 = null
 		"tonic": n = Models.tonic()
 		"armor": n = Models.armor_shard()
 		"key": n = ExitModels.rift_key()
+		"ckey": n = KeyModels.pickup()
 		_: n = Models.gem()
 	add_child(n)
 	n.position = at
@@ -3245,6 +3170,8 @@ func _update_pickups(dt: float) -> void:
 					continue
 				if net_on and not is_host and h != player:
 					continue
+				if p["kind"] == "ckey" and not KeyChest.has_room(h):
+					continue      # a full key stack leaves the key on the ground, glinting
 				var d: float = Vector2(h.pos.x - pos.x, h.pos.z - pos.z).length()
 				if d < 2.2 and absf(h.pos.y - pos.y) < 2.0:
 					var dir: Vector3 = (h.pos + Vector3(0, 0.6, 0) - pos)
@@ -3282,6 +3209,7 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 		"armor":
 			h.armor_kits = mini(3, h.armor_kits + 1)
 			if h == player: hud.toast_small("+1 armor kit", Color("dfe9f7"))
+		"ckey": KeyRun.on_pickup(self, h)
 		"key":
 			h.rift_keys += 1
 			if h == player:
@@ -3785,6 +3713,7 @@ func _process(delta: float) -> void:
 		BokiDemo.frame(self)
 	elif opts.has("arch_demo"):
 		ArchDemo.frame(self)       # screenshot tooling: one part of an archetype kit, timed to the shot
+	KeysDemo.frame(self)           # screenshot tooling: --keys-demo=thicket|chest|glint|shrub
 	_update_vision()
 	SeeThrough.for_match(self)     # trees and pillars over your hunter or Boki thin out
 	_vprof("vision")
@@ -4529,6 +4458,7 @@ func step(dt: float) -> void:
 		_hold_demo()
 	if opts.get("plate_demo", false) and player:
 		_plate_demo()
+	if opts.has("hudref_demo"): HudRefDemo.tick(self)
 	if lairs:
 		lairs.bot_pickups()
 		lairs.tick(dt)
@@ -4573,9 +4503,9 @@ func _separate() -> void:
 	for h in hunters:
 		if h.hittable() and h.grap.is_empty(): bodies.append(h)
 	for mb in mobs:
-		if not mb.dead: bodies.append(mb)
+		if not mb.dead and not Shrubling.hidden(mb): bodies.append(mb)      # (you walk into a disguised Shrubling like any bush)
 	for k in kins:
-		if k.state in ["active", "wild", "dazed", "returning"] and not k.dead: bodies.append(k)
+		if k.state in ["active", "wild", "dazed", "returning"] and not k.dead and not KinLoss.cradled(k): bodies.append(k)
 	# only bodies in the same or a neighbouring 4m cell can touch (radii are well under 2m): a grid
 	# instead of every pair, in the same pair order as before
 	var grid := {}
@@ -4839,7 +4769,7 @@ func _update_interact(dt: float) -> void:
 		# 2. scan a knocked-out wild kin (Capture; not in training: practice kin go home with nobody)
 		if best.is_empty() and not opts.get("training", false):
 			for k in kins:
-				if k.state == "dazed" and not k.dead and h.flat_dist(k) < float(Capture.rules()["range"]):
+				if KinLoss.scannable_by(h, k) and h.flat_dist(k) < float(Capture.rules()["range"]):
 					best = {"kind": "catch", "ent": k, "label": CaptureHud.prompt(h, k)}
 					break
 		# 3. wear gear lying on the ground (tunings are taken by walking over them)
@@ -4857,7 +4787,7 @@ func _update_interact(dt: float) -> void:
 		if best.is_empty():
 			for c in chests:
 				if not c["open"] and h.flat_dist(c["pos"]) < 1.6:
-					best = {"kind": "chest", "chest": c, "label": ["Hold " + Settings.key_cap("interact") + " to open", "Hold " + Settings.key_cap("interact") + " to open the rare chest", "Hold " + Settings.key_cap("interact") + " to open the vault"][int(c.get("tier", 0))]}
+					best = KeyChest.prompt(h, c)
 					break
 		# 4. pray at a shrine
 		if best.is_empty():
@@ -4869,7 +4799,7 @@ func _update_interact(dt: float) -> void:
 		if exits:
 			# (using an exit beats picking up a weapon or opening a chest that happens to be there)
 			var ex := exits.interact_for(h)
-			if best.is_empty() or (ex.has("act") and String(best.get("kind", "")) in ["weapon", "chest", "shrine"]): best = ex
+			if best.is_empty() or (ex.has("act") and String(best.get("kind", "")) in ["weapon", "chest", "locked", "shrine"]): best = ex
 		# 6. the lairs: work a gate's dial, light a rune
 		if lairs:
 			var lx := lairs.interact_for(h)
@@ -4940,9 +4870,11 @@ func _update_interact(dt: float) -> void:
 			"chest":
 				var c: Dictionary = best["chest"]
 				h.set_hold("chest")
-				c["prog"] += dt / (0.7 + 0.4 * int(c.get("tier", 0)))
+				c["prog"] += dt / float(ChestLoot.R()["hold_s"])
 				if c["prog"] >= 1.0:
 					_open_chest(h, c)
+			"locked":
+				KeyChest.deny(self, h, best["chest"])
 			"shrine":
 				var sh: Dictionary = best["shrine"]
 				h.set_hold("shrine")
@@ -4966,8 +4898,6 @@ func _catch(h: Hunter, k: Kin) -> void:
 			k.catch_prog = 5.0
 			net_event(["catch", k.nid, h.nid])
 		return
-	if net_on:
-		net_event(["caught", k.nid, h.nid, k.rec])
 	k.dead = true
 	k.visible = false
 	var rec: Dictionary = k.rec.duplicate(true)
@@ -4988,72 +4918,25 @@ func _catch(h: Hunter, k: Kin) -> void:
 		rec["trust"] = 20.0
 		rec["memory"] = []
 	h.caught.append(rec)
+	if net_on:
+		net_event(["caught", k.nid, h.nid, rec, (k.lost_owner as Hunter).nid if k.lost_owner is Hunter else ""])
+	KinTrack.on_caught(self, h, k, rec)
 	if h == player:
 		add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN[k.species]["name"], h.caught.size(), Capture.box_cap()])
 		if player.kin and player.kin.state != "downed":
 			player.kin.bark("caught")
 
 func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
-	if c["open"]:
-		return
+	if c["open"] or (not from_net and not KeyChest.spend(h, c)):
+		return      # (opening costs exactly one key; another game's open already paid in that game)
 	c["open"] = true
 	if blight: blight.noise(c["pos"], "chest", h)      # a chest lid is loud
 	if h: h.add_stat("chests")
 	if net_on and not from_net:
 		net_event(["chest", chests.find(c), h.nid if h else ""])
-	var t := int(c.get("tier", 0))
 	if h == player:
 		tut_flag = tut_flag or tut_id() == "chest"
-	var lid: Node3D = c["node"].get_node("Body/Lid")
-	if lid.has_meta("hinged"):
-		# the lid springs open on its hinge
-		create_tween().tween_property(lid, "rotation:x", 1.9, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	else:
-		lid.rotation.x = -1.1
-		lid.position.y = 0.62
-		lid.position.z = 0.2
-	var beacon: Node3D = c["node"].get_node_or_null("Beacon")
-	if beacon: beacon.visible = false
-	sfx("pickup", c["pos"], 0.0, 0.8 - t * 0.1)
-	var cc: Array = Models.CHEST_COLS[t]
-	fx.burst(c["pos"] + Vector3(0, 0.6, 0), cc[1], 20 + t * 10, 4.0 + t, 0.6)
-	if t >= 1:
-		fx.ring(c["pos"], 2.0 + t, Color(cc[1], 0.9), 0.4)
-	if not from_net:
-		PerkOrbs.drop(self, "chest", c["pos"], 1, h)      # one perk orb beside the chest
-	var n_gems: int = [randi_range(4, 6), randi_range(7, 9), randi_range(11, 14)][t]
-	var n_pick := pickups.size(); var n_w := wpicks.size()
-	# a crate on the sky train pops its loot gently, so it lands on the car and rides along
-	var soft = Vector3(randf_range(-0.8, 0.8), 4.5, randf_range(-0.8, 0.8)) if c.has("ride") else null
-	for i in n_gems:
-		drop("gem", c["pos"] + Vector3(0, 0.8, 0), int(round((3 + t) * float(T["loot"]))), "", "", soft)
-	var seeds_n: int = [1 if randf() < 0.6 else 0, 1, 2][t]
-	for i in seeds_n:
-		drop("seed", c["pos"] + Vector3(0, 0.8, 0), randi_range(1, 2), Data.pick_seed(), "", soft)
-	if not from_net:
-		# gear and weapon tunings (content/rules/gear.json), leaning toward what this region is known for
-		GearDrops.run_table(self, "chest%d" % t, c["pos"], rng, {"h": h, "bonus": biomes.rarity_bonus_at(c["pos"]) if biomes else 0, "lean": biomes.slot_lean_at(c["pos"]) if biomes else {}})
-	if not from_net and randf() < [0.3, 0.7, 1.0][t]:
-		# treasure for the backpack; the vault sometimes holds a Soul Ember
-		var a3 := randf() * TAU
-		spawn_val(Loot.valuable(Loot.roll_valuable(rng, t)), c["pos"] + Vector3(cos(a3) * 1.0, 0, sin(a3) * 1.0))
-		if t == 2 and rng.randf() < 0.3:
-			spawn_val(Loot.valuable("soul_ember"), c["pos"] + Vector3(-cos(a3) * 1.0, 0, -sin(a3) * 1.0))
-	# vaults sometimes hold a Rift Key
-	if not from_net and exits and not exits.list.is_empty() and t == 2 and rng.randf() < 0.35:
-		exits.drop_key(c["pos"])
-	if h and not h.remote and h.tonics < 5 and randf() < [0.35, 0.7, 1.0][t]:
-		h.tonics += 1
-		if h == player: hud.toast("+1 tonic", Color("8ff0a0"))
-	if c.has("ride"):
-		for i in range(n_pick, pickups.size()): pickups[i]["ride"] = int(c["ride"])
-		for i in range(n_w, wpicks.size()):
-			# weapons and gear land on the deck, close to the crate
-			var wp: Dictionary = wpicks[i]
-			var off := Vector3(randf_range(-0.7, 0.7), 0.0, randf_range(-1.2, 1.2))
-			var t3: Transform3D = skytrain.cur[int(c["ride"])]
-			wp["pos"] = t3 * off; wp["ride"] = int(c["ride"])
-			(wp["node"] as Node3D).position = wp["pos"]
+	ChestLoot.open(self, h, c, from_net)
 
 func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 	if sh["used"]:
@@ -5405,10 +5288,10 @@ func _tut_enter(step_i: int) -> void:
 				if not mb.dead: mb.dead = true; mb.visible = false
 			var at := _tut_spot(4.5, 1.0)
 			if at != Vector3.INF:
-				var n := Models.chest(1)
+				var n := Models.chest()
 				n.position = at
 				add_child(n)
-				chests.append({"pos": at, "open": false, "prog": 0.0, "node": n, "tier": 1, "tut": true})
+				chests.append({"pos": at, "open": false, "prog": 0.0, "node": n, "free": true, "tut": true})
 				ping(at, Color("dfe8f2"))
 		"goexit":
 			# the map's outpost (one is made close by if the map has none): the marker leads there
@@ -6037,7 +5920,7 @@ func _finish() -> void:
 			var k0: Kin = player.kin
 			r["kin_events"] = k0.events.duplicate(true)
 			r["kin_trust"] = k0.trust
-		if not player_lost.is_empty() and not result.get("extracted", false):
+		if not player_lost.is_empty():
 			r["lost_kin"] = (_resolve_lost() as Array).filter(func(L): return not Loaner.is_loaner(L.get("rec", {})))
 		r["rivals"] = hunters.filter(func(x): return x.ctrl == "bot" and x.team != player.team).map(func(x): return x.pname)
 	var placed := 1
@@ -6150,7 +6033,7 @@ func _ser(e: Ent) -> Array:
 	if e is Hunter:
 		var h: Hunter = e
 		return ["h", h.nid, _r(h.pos.x), _r(h.pos.y), _r(h.pos.z), _r(h.vel.x), _r(h.vel.y), _r(h.vel.z), _r(h.face), _r(h.hp), h.max_hp, _flags(h),
-			_r(h.down_hp), _r(h.revive), h.team, h.cls, h.pname, _r(h.shield), _r(h.extract_prog), h.kills, h.knocks, int(h.dmg_done), _r(h.armor), h.max_armor, h.arch, h.wid] + KinNet.hunter_extra(h) + ArchKit.net_move(h)
+			_r(h.down_hp), _r(h.revive), h.team, h.cls, h.pname, _r(h.shield), _r(h.extract_prog), h.kills, h.knocks, int(h.dmg_done), _r(h.armor), h.max_armor, h.arch, h.wid] + KinNet.hunter_extra(h) + ArchKit.net_move(h) + HunterNet.extra(h)
 	if e is Kin:
 		var k: Kin = e
 		return ["k", k.nid, _r(k.pos.x), _r(k.pos.y), _r(k.pos.z), _r(k.face), _r(k.hp), _r(k.max_hp), KIN_STATES.find(k.state), k.species,
@@ -6163,6 +6046,8 @@ func _ser(e: Ent) -> Array:
 		# the Blight: where a Warden's light points, how close it is to shrieking, and its strength
 		var bb: Blight = mb
 		ms.append_array([_r(bb.cone_a), _r(bb.spot), _r(bb.lvl), 1 if bb.tgt != null else 0])
+	else:
+		ms.append_array(KeyCarry.mob_extra(mb))      # key carrier flag, Shrubling pose (Net 0.15.3)
 	return ms
 
 ## Snapshot of what this game owns: its player (mine=true), or the host's world (mine=false).
@@ -6241,6 +6126,7 @@ func _net_make(it: Array) -> Ent:
 			if owner and owner.kin == null:
 				owner.kin = k
 			_net_seen_rec[nid] = rec
+			KinLoss.apply_pending(self, k)
 			return k
 		"m":
 			var mk := String(it[9])
@@ -6251,6 +6137,9 @@ func _net_make(it: Array) -> Ent:
 				var bl := Blight.new()
 				bl.init_blight(self, nid, mk, Vector3(it[2], it[3], it[4]), float(it[19]) if it.size() > 19 else 0.1, blight)
 				mb = bl
+			elif mk == "shrubling":
+				mb = Shrubling.new()
+				(mb as Shrubling).init_shrub(self, nid, Vector3(it[2], it[3], it[4]))
 			else:
 				mb = Mob.new()
 				mb.init_mob(self, nid, mk, Vector3(it[2], it[3], it[4]))
@@ -6295,12 +6184,15 @@ func _net_apply(e: Ent, it: Array) -> void:
 				h.armor = float(it[22]); h.max_armor = float(it[23])
 			KinNet.apply_hunter(h, it)
 			ArchKit.apply_net_move(h, it)
+			HunterNet.apply(h, it)
 		"k":
 			var k: Kin = e
 			k.face = it[5]; k.hp = it[6]; k.max_hp = it[7]
 			var st: int = int(it[8])
 			if st >= 0 and st < KIN_STATES.size():
 				k.state = KIN_STATES[st]
+			if k.dead:
+				k.catch_prog = 0.0       # (it stood up again: a new scan may be asked for)
 			k.catch_prog = maxf(k.catch_prog, float(it[13])) if k.catch_prog >= 5.0 else float(it[13])
 			k.net_vel = Vector3(it[14], 0, it[15])
 			k.dead = false
@@ -6316,6 +6208,8 @@ func _net_apply(e: Ent, it: Array) -> void:
 			mb.net_vel = Vector3(it[13], 0, it[14])
 			if it.size() > 16:
 				mb.stag_open = float(it[15]); mb.stagger_t = float(it[16])
+			if not (mb is Blight) and it.size() > 18:
+				KeyCarry.apply_mob(mb, it)
 			if mb is Blight and it.size() > 20:
 				var bb: Blight = mb
 				bb.cone_a = float(it[17]); bb.spot = float(it[18]); bb.lvl = float(it[19])
@@ -6538,7 +6432,7 @@ func _net_ev(x, from: String) -> void:
 			if is_host:
 				var k: Kin = ents_by_id.get(String(x[1]), null)
 				var h: Hunter = ents_by_id.get(String(x[2]), null)
-				if k and h and not k.dead and k.state == "dazed":
+				if k and h and not k.dead and KinLoss.scannable_by(h, k) and not KinLoss.cradled(k):
 					_catch(h, k)
 		"caught":
 			var k: Kin = ents_by_id.get(String(x[1]), null)
@@ -6550,6 +6444,14 @@ func _net_ev(x, from: String) -> void:
 				player.caught.append(rec)
 				sfx("scan_pop", player.pos, 0.0)
 				add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"], mini(player.caught.size(), Capture.box_cap()), Capture.box_cap()])
+			var cap = ents_by_id.get(String(x[2]), null)
+			var own = ents_by_id.get(String(x[4]), null) if x.size() > 4 else null
+			if cap is Hunter and own is Hunter and typeof(x[3]) == TYPE_DICTIONARY:
+				KinTrack.on_caught_net(self, cap, x[3], own)      # the captor and the owner learn of the bond
+		"guard":
+			KinLoss.on_guard_net(self, x)
+		"gdrop":
+			KinLoss.on_gdrop(self, String(x[1]), x[5], Vector3(x[2], x[3], x[4]))      # a captor fell: its Boki stands up again (owner's game)
 
 func _process_net_revives() -> void:
 	if _rev_out.is_empty():

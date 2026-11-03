@@ -39,7 +39,7 @@ downed friends out of danger and roots foes that chase them. She has no ultimate
 
 |  |  |
 |---|---|
-| Body | 145 health, 4.8 m/s, 1 dash charge |
+| Weight class | Medium (145 health, 4.4 m/s, 1 dash charge) |
 | Signature weapon | Lantern Crook (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with lantern light, pins chasers with burr-seeds. |
 | Silhouette | the tall pack-frame with its lantern above the head |

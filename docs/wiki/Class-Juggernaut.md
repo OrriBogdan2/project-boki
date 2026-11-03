@@ -43,7 +43,7 @@ every knock.
 
 |  |  |
 |---|---|
-| Body | 193 health, 4.55 m/s, 2 dash charges |
+| Weight class | Heavy (193 health, 4.4 m/s, 2 dash charges) |
 | Signature weapon | Greatsword (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The wrecking ball. Burns hotter with every hit, chains you in, and finishes it. |
 | Silhouette | the horned pauldrons |
@@ -87,7 +87,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Dash (Shift) | recharge 9s -> 7.6s per charge. | recharge 9s -> 6.3s; a third charge. |
 | E | cooldown 13s -> 11.7s, damage +15%. | cooldown 13s -> 10.4s, damage +30%; hooking a foe refunds 33% of the cooldown. |
 
-**Suggested level-up order** (what bots follow): Dash (Shift) > RMB > E > RMB > Dash (Shift) > R (ultimate) > RMB > E > R (ultimate) > Glove (Q).
+**Suggested level-up order** (what bots follow): Dash (Shift) > RMB > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 
 ### What enemies can read
 

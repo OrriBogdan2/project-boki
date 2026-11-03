@@ -142,6 +142,7 @@ func _ready() -> void:
 			Save.d["roster"][0]["recall"] = {"kind": "carried_out", "text": "was carried out of the Ember Quarry by you", "place": "the Ember Quarry", "boss": "", "m": 1}
 		if a.begins_with("--lair-demo="): opts["lair_demo"] = a.substr(12); opts["no_drop"] = true
 		if a.begins_with("--lair-boss="): opts["demo_boss"] = a.substr(12)
+		if a.begins_with("--hudref-demo="): opts.merge(HudRefDemo.opts(a), true)
 		if a == "--plate-demo": opts["plate_demo"] = true; opts["no_drop"] = true; opts["teams"] = 3; opts["squad"] = 3
 		if a == "--hold-demo": opts["hold_demo"] = true; opts["no_drop"] = true; opts["teams"] = 4; opts["squad"] = 3
 		if a == "--no-plan": opts["no_plan"] = true
@@ -367,8 +368,6 @@ func _ready() -> void:
 		return
 	if "--farm-start-check" in args:
 		set_meta("farm_start_check", load("res://tools/farm_start_check.gd").new()); get_meta("farm_start_check").run(self); return      # a new farm: empty island, placing, chopping, stations, old saves (kept in meta: the check awaits, so it must stay referenced)
-	if Array(args).any(func(a): return String(a).begins_with("--farmbuild")):
-		set_meta("farmbuild_check", load("res://tools/farmbuild_check.gd").new()); get_meta("farmbuild_check").run(self); return      # the farm building pass: --farmbuild-check, or --farmbuild-shots=<dir> for screenshots (kept in meta: the check awaits, so it must stay referenced)
 	if "--work-check" in args:
 		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
 		set_meta("work_check", wkc)
@@ -1024,22 +1023,24 @@ func _life_check() -> void:
 	run.call(Match.DT)
 	print("LCHECK stomp lock: committed=%s still after letting go=%s broken by knock=%s wisp alive=%s" % [committed, still, foe.stomp.is_empty(), not W2.out])
 	print("LCHECK beacons=%d boxes=%d" % [m.beacons.size(), m.boxes.size()])
-	# 7. Dusk Isles rules: the kin on you go into the box; an enemy looting it takes them
-	m.T = Data.TIERS[1]
+	# 7. Hollow rules: the Boki on you drops dazed beside the box and guards it; an enemy looting the box takes none of it
+	m.tier = 2
+	m.T = Data.TIERS[2]
 	var rec := Save.new_kin("zapple")
 	A.kin = null; A.kin2 = null
 	m.give_kin(A, rec)
 	spot.call(A, home); spot.call(B, home + Vector3(-8, 0, 0)); spot.call(C, home + Vector3(-8, 0, 1))
 	m.eliminate(A, foe, "knocked out")
 	var ab := Life.box_of(m, A)
-	print("LCHECK dusk: kin in box=%d" % (ab.get("kin", []) as Array).size())
+	print("LCHECK hollow: kin guarding=%s" % KinLoss.guarding(A.kin))
 	spot.call(foe, ab["pos"])
 	t0 = m.time
 	while not ab["empty"] and m.time - t0 < 4.0:
 		foe.inp["interact"] = true
 		run.call(Match.DT)
-	print("LCHECK dusk loot: foe caught=%d box kin=%d" % [foe.caught.size(), (ab.get("kin", []) as Array).size()])
+	print("LCHECK hollow loot: foe caught=%d guard still dazed=%s" % [foe.caught.size(), KinLoss.guarding(A.kin)])
 	# 8. Meadow: kin stay safe (hidden) on death and come back on revive
+	m.tier = 0
 	m.T = Data.TIERS[0]
 	spot.call(foe, m.world.random_ground())
 	var B2: Hunter = B
@@ -1047,7 +1048,7 @@ func _life_check() -> void:
 	m.give_kin(B2, Save.new_kin("zapple"))
 	spot.call(B2, home + Vector3(-6, 0, 0))
 	m.eliminate(B2, foe, "knocked out")
-	print("LCHECK meadow: kin state=%s box kin=%d" % [B2.kin.state, (Life.box_of(m, B2).get("kin", []) as Array).size()])
+	print("LCHECK meadow: kin state=%s lost=%d" % [B2.kin.state, m.player_lost.size()])
 	# 9. the deathbox loot window: a box with a rare glove and some gems; take one by hand, smart loot the rest
 	var lb: Dictionary = {}
 	for b0 in m.boxes:
@@ -2198,7 +2199,8 @@ func _extract_check() -> void:
 	# a key in a deathbox: the teammate dies carrying one, the player loots it
 	mate.rift_keys = 1
 	mate.lives = 1
-	mate.teleport(hp + Vector3(3.0, 0, 0))
+	# its box lands clear of the hatch: a revive prompt there would beat the hatch's
+	mate.teleport(m.world.free_spot_near(hp + Vector3(6.0, 0, 0), [], 0.5, 0.4, 6.0))
 	m.eliminate(mate, R, "knocked out", true)
 	var bx := Life.box_of(m, mate)
 	print("EXCHECK hatch: teammate died with a key: their keys=%d box keys=%d" % [mate.rift_keys, int(bx.get("keys", -1))])
@@ -2231,6 +2233,7 @@ func _extract_check() -> void:
 	print("EXCHECK hatch: opened after %.1fs, %d uses" % [m.time - t0, int(hx.get("uses", 0))])
 	if hx["state"] != "open" or absf(m.time - t0 - 10.0) > 0.6 or int(hx.get("uses", 0)) != 3: ok = false; print("EXCHECK FAIL hatch didn't open after 10s with 3 uses")
 	# three drop through: the player by pressing, a rival and his teammate by walking in
+	P.teleport(hp + Vector3(1.0, 0, 0.0))      # (back at the hatch: something may have nudged you while it opened)
 	press.call(P, 0.2)
 	var u1 := int(hx["uses"])
 	var R2: Hunter = rivals[1]
@@ -2858,7 +2861,13 @@ func _boss_check() -> void:
 		var outL := Vector3(L["out"].x, 0, L["out"].y)
 		var vic: bool = L.get("victory", false)
 		if L == F:
-			# the lever: a press away from it does nothing; at it, the gate opens
+			# the lever: a press away from it does nothing; at it, the gate opens (pressed well clear of the loot
+			# and the egg: beside them it would pick them up, and where they land follows the fight)
+			var clear := func(q: Vector3) -> float:
+				return m.wpicks.reduce(func(d, wp): return minf(d, q.distance_to(wp["pos"])), 99.0)
+			var spots: Array = [-3.0, 0.0, 3.0].map(func(d): return L["c"] + outL * d)
+			spots.sort_custom(func(a, c): return clear.call(a) > clear.call(c))
+			spot.call(P, spots[0])
 			P.inp["interact"] = true; run.call(Match.DT); P.inp["interact"] = false; run.call(Match.DT)
 			var held: bool = L.get("locked", false)
 			spot.call(P, L["lever"] - outL * 0.8)

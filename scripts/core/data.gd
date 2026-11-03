@@ -10,19 +10,19 @@ const MATCH_PLAYERS := 20
 
 const CLASSES := {
 	"light": {
-		"name": "Light", "color": Color("c9bcff"), "hp": 124, "speed": 5.0, "dashes": 1, "mass": 0.85, "scale": 0.9, "hit_r": 0.35,
+		"name": "Light", "color": Color("c9bcff"), "hp": 124, "speed": 4.4, "dashes": 1, "mass": 0.85, "scale": 0.9, "hit_r": 0.35,
 		"ex_dist": 5.0, "ex_time": 0.2, "ex_cd": 12.0, "glide_cap": 1.2,
 		"weapon": "smg", "weapons": ["smg", "sniper", "twin_blades", "longbow", "coilcaster"],
 		"desc": "Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest.",
 	},
 	"medium": {
-		"name": "Medium", "color": Color("9ee2a0"), "hp": 145, "speed": 4.8, "dashes": 1, "mass": 1.0, "scale": 1.0, "hit_r": 0.40,
+		"name": "Medium", "color": Color("9ee2a0"), "hp": 145, "speed": 4.4, "dashes": 1, "mass": 1.0, "scale": 1.0, "hit_r": 0.40,
 		"ex_dist": 4.6, "ex_time": 0.2, "ex_cd": 13.0, "glide_cap": 1.0,
 		"weapon": "rifle", "weapons": ["rifle", "burst_rifle", "longsword", "spellstaff", "quill_rifle"],
 		"desc": "The all-rounder: middle health, speed, dash and glide.",
 	},
 	"heavy": {
-		"name": "Heavy", "color": Color("e6dbc4"), "hp": 193, "speed": 4.55, "dashes": 2, "mass": 1.35, "scale": 1.14, "hit_r": 0.50,
+		"name": "Heavy", "color": Color("e6dbc4"), "hp": 193, "speed": 4.4, "dashes": 2, "mass": 1.35, "scale": 1.14, "hit_r": 0.50,
 		"ex_dist": 4.2, "ex_time": 0.21, "ex_cd": 15.0, "glide_cap": 0.85,
 		"weapon": "shotgun", "weapons": ["shotgun", "minigun", "greatsword", "tower_shield"],
 		"desc": "Slow and tough. Two short dashes, the most health, and very hard to push off a ledge.",
@@ -227,6 +227,10 @@ const MOBS := {
 		"r": 0.55, "gems": 4, "color": Color("5ab0c8"), "attack": "volley", "stag": true},
 	"glimmer": {"name": "Glimmerkin", "hp": 110.0, "speed": 5.9, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 99.0,
 		"r": 0.45, "gems": 22, "color": Color("ffd25a"), "attack": "none", "flee": true, "stag": true},
+	# the bush mimic (scripts/match/shrubling.gd): a clump of tall grass you can hide in; hit it and it runs.
+	# It always carries a chest key.
+	"shrubling": {"name": "Shrubling", "hp": 26.0, "speed": 6.5, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 99.0,
+		"r": 0.4, "gems": 6, "color": Color("5f9a46"), "attack": "none", "mimic": true},
 	"warden": {"name": "The Warden", "hp": 820.0, "speed": 3.3, "dmg": 30.0, "range": 2.8, "windup": 0.95, "cd": 2.1,
 		"r": 1.3, "gems": 30, "color": Color("5a4a7a"), "attack": "slam", "slam_r": 3.3, "stag": true},
 	# lair bosses (scripts/match/boss.gd runs them; Lairs wakes them): each drops a Rare Egg of its own kin
@@ -333,15 +337,15 @@ func kin_title(kname: String, species_name: String) -> String:
 ## Expedition tiers: deeper islands are harder and richer, and in the Hollow your partner can be lost.
 const TIERS := [
 	{"name": "The Meadow", "desc": "Gentle islands. Your Boki are always safe here: lose your loot, never your Boki.",
-		"mob": 1.0, "loot": 1.0, "kin_lvl": [1, 3], "unlock": 0, "risk_kin": false, "kin_drop": false, "loose_capture": false, "lives": 1,
+		"mob": 1.0, "loot": 1.0, "kin_lvl": [1, 3], "unlock": 0, "lives": 1,
 		"biome": {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Color("8b6d52"), "deep": Color("3a3140"), "leaf": Color("5a9a4f")},
 		"sky": Color("10131f"), "ambient": Color("b9c4e6"), "sun": Color("fff1dc"), "clouds": [Color(0.06, 0.07, 0.13), Color(0.22, 0.24, 0.38)]},
-	{"name": "Dusk Isles", "desc": "Tougher monsters, more loot, rarer Boki. Boki you have on you drop into your deathbox when you die, and anyone can loot them. Boki out of your hands escape.",
-		"mob": 1.45, "loot": 1.75, "kin_lvl": [2, 5], "unlock": 2, "risk_kin": true, "kin_drop": true, "loose_capture": false, "lives": 1,
+	{"name": "Dusk Isles", "desc": "Tougher monsters, more loot, rarer Boki. Your Boki is always safe here: it goes home with you if you fall.",
+		"mob": 1.45, "loot": 1.75, "kin_lvl": [2, 5], "unlock": 2, "lives": 1,
 		"biome": {"top": Color("56688a"), "top2": Color("465576"), "side": Color("6d5a74"), "deep": Color("2a2440"), "leaf": Color("8a6fb8")},
 		"sky": Color("150f22"), "ambient": Color("c9b4e6"), "sun": Color("ffc9a8"), "clouds": [Color(0.09, 0.05, 0.14), Color(0.32, 0.2, 0.4)]},
-	{"name": "The Hollow", "desc": "Brutal and rich. Boki on you drop into your deathbox and can be looted, and a Boki left out in the world can be scanned and taken (knock it out, then hold the interact key).",
-		"mob": 2.0, "loot": 2.75, "kin_lvl": [4, 8], "unlock": 5, "risk_kin": true, "kin_drop": true, "loose_capture": true, "lives": 1,
+	{"name": "The Hollow", "desc": "Brutal and rich. If you fall your Boki drops dazed beside your deathbox and guards it. Get revived and run into it to pick it up, or a rival can scan it and take it (knock it out, then hold the interact key).",
+		"mob": 2.0, "loot": 2.75, "kin_lvl": [4, 8], "unlock": 5, "lives": 1,
 		"biome": {"top": Color("4f6b5e"), "top2": Color("3d5650"), "side": Color("5a4a44"), "deep": Color("1e1a22"), "leaf": Color("c25a4a")},
 		"sky": Color("0d0b10"), "ambient": Color("d0a0a0"), "sun": Color("ffb090"), "clouds": [Color(0.07, 0.03, 0.04), Color(0.3, 0.12, 0.12)]},
 ]

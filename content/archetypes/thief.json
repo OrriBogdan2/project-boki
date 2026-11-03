@@ -21,7 +21,7 @@
 	"e": {"delivery": "projectile", "name": "Shadow Knife", "short": "Knife", "icon": "shadowstep", "col": "#c8f0ff", "cooldown": 18.0, "range": 12.0, "speed": 40.0, "dmg": 8.0, "slow": 0.5, "slow_t": 2.5, "time": 5.0, "refund_wall": 0.25, "refund_foe": 0.5,
 		"desc": "Throw a dagger 12m that sticks in the first foe (8 damage, slowed 50% for 2.5s) or in a wall or the ground where it stops. Press E again to step to it at once; after 5s you step to it anyway.",
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add"}},
-	"order": ["sec", "dash", "kin", "sec", "dash", "ult", "sec", "kin", "ult", "gear"],
+	"order": ["sec", "dash", "kin", "sec", "dash", "sec", "kin", "gear"],
 	"rank3": {"sec": "flies 1m further after the first foe, and two foes caught pool their Marks", "dash": "Primed hits +20%, and a Shadow Knife that sticks in a foe resets Vault", "kin": "sticking refunds 25% of the cooldown (50% in a foe)"},
 	"rank2": {"sec": "Rank 2: cooldown 12s -> 10.8s, damage +15%.", "dash": "Rank 2: recharge 6.5s -> 5.5s per charge.", "kin": "Rank 2: cooldown 18s -> 16.2s, damage +15%."},
 	"rank_next": {"sec": "Rank 3: cooldown 12s -> 9.6s, damage +30%; flies 1m further after the first foe, and two foes caught pool their Marks.", "kin": "Rank 3: cooldown 18s -> 14.4s, damage +30%; sticking refunds 25% of the cooldown (50% in a foe).", "dash": "Rank 3: recharge 6.5s -> 4.6s; Primed hits +20%, and a Shadow Knife that sticks in a foe resets Vault."},

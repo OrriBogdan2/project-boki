@@ -110,6 +110,6 @@ static func demo(m) -> void:
 	rng.seed = 31
 	var base: Vector3 = P.pos + Vector3(0, 0, -3.2)
 	run_table(m, "boss", base, rng, {"r": 1.7, "net": false})
-	run_table(m, "chest1", base + Vector3(-5.0, 0, 1.0), rng, {"net": false, "h": P})
-	run_table(m, "chest2", base + Vector3(5.0, 0, 1.0), rng, {"net": false, "h": P})
+	run_table(m, "chest", base + Vector3(-5.0, 0, 1.0), rng, {"net": false, "h": P})
+	run_table(m, "chest", base + Vector3(5.0, 0, 1.0), rng, {"net": false, "h": P, "bonus": 2})
 	m.spawn_val(Loot.rare_egg("zapple", "Ember Brute"), base + Vector3(0, 0, -3.0))
