@@ -4,7 +4,7 @@ extends RefCounted
 ## "LV 6" tag and a dark face until it unlocks, and a ring while it runs. Returns the next free x.
 
 static func draw(hud, p: Hunter, x: float, y: float, s: float, gap: float) -> float:
-	if p.ak == null or p.ak.x_def().is_empty():
+	if p.ak == null or not p.ak.has_ult():
 		return x
 	var xi := p.slot_info("x")
 	var r := Rect2(Vector2(x, y), Vector2(s, s))

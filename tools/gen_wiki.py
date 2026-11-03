@@ -286,7 +286,7 @@ def gen_classes():
         if "x" in d:
             xu = d["x"]
             b.append("**%s (X, hero ultimate from level %s, %s cooldown).** %s\n" % (
-                xu["name"], num(xu.get("unlock", 6)), secs(xu.get("cooldown")), xu.get("desc", "")))
+                xu["name"], num(6), secs(xu.get("cooldown")), xu.get("desc", "")))
         b.append("### Ranks\n\nRank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.\n")
         rk = []
         for s in ("sec", "dash", "kin", "ult"):

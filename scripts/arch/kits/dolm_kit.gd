@@ -56,7 +56,8 @@ func _setup() -> void:
 	spine = BreahSpine.new(self)
 
 # ------------------------------------------------------------------ X: Basalt Spine (BreahSpine)
-func start_ult() -> bool: return spine.start()
+func cast_ult() -> bool: return HeroUlt.cast(self, spine.start)
+func has_ult() -> bool: return true
 func ult_running() -> bool: return spine.running()
 
 ## The id prefix of her rocks (unique per hunter, the same on every game).
@@ -610,7 +611,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		return
 	if HeroUlt.unlocked(self) and float(cd["x"]) <= 0.0 and dist > 3.0 and dist < 9.0 and los and randf() < 0.1:
 		h.inp["aim"] = tgt.pos
-		cast_ult()
+		HunterKeys.ult_pressed(h)
 		return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 4.0 and dist < 9.0 and los and randf() < 0.25:
 		h.inp["sig"] = true
