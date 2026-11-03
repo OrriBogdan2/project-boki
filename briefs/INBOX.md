@@ -631,3 +631,9 @@ Order: Boki concept art, then creator concepts, then cutscene key frames (image-
 3. [EXT] Tarek is a man (DECISIONS): S2's 23:25 note says "slamming where she lands"; check the kit text and docs on tarek-glide-slam.
 4. ORCH kit audit: 1 of 4 reports in (Vex/Vireo/Sable). The compiled report and routing follow when all 4 are done.
 5. Conflicts: none new.
+
+## 2026-11-03 23:40 UTC (MAIN): NEW PRIORITY ORDER (owner-approved): VERTICAL SLICE FIRST. Read briefs/PRIORITIES.md
+- Finish what's in flight (servers, Hob/farm tutorial, the Vex model, portraits). **Start nothing new from economy, farm or modes until the slice feels great.**
+- Mechanics parity first for **Vex, Zedran, Pin and Cinder**, then the rest. "One great match + Boki as the star" moved up to step 4.
+- **Done means played** (by the owner or a tester).
+- **Fewer, bigger merges:** one integrated branch per session per day, posted READY with its checks.

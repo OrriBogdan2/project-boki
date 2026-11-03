@@ -1,14 +1,17 @@
-# Project Boki: priority order (owner-approved, 2026-11-03 20:05 UTC; replaces the earlier P0-P4)
-Work top-down. Art and concepts run in parallel throughout. Frozen until the owner unfreezes: farm-builder depth, maps beyond tier 2. (Black Market extras unfrozen Nov 3.)
+# Project Boki: priority order (owner-approved, 2026-11-03 23:40 UTC; replaces the 20:05 order)
+**Vertical slice first:** one great match on the Hollow Crown with the starter Wardens and Boki. Work top-down.
+**Finish what's in flight** (servers, the farm tutorial/Hob, the Vex model, the 2D portraits), but start NOTHING new from steps 6–8 until the slice feels great to the owner and outside testers.
+Art and concepts run in parallel. Frozen: farm-builder depth, maps beyond tier 2.
 
-1. **Now:** land and ship the demo build (done as sync78/79, including mapclean-fix c36f6ea).
-2. **Character mechanics to source parity (Opus):** every hero's abilities, cancels, dash buffering (as the source does it) and animations, LMB first. This includes today's decisions on Ostra, Claire, Moosh Moosh and Zedran.
-3. **Readability UI, alongside 2 (clarity, not polish):** Boki ownership rings and tags (own, ally, enemy, wild); the hitbox ground circle under every hunter (item 46); the dash refill bar (item 47); a general HUD clarity pass. Main owns the HUD files; ext components wire in only.
-4. **Final Boki controls:** fold C into G, then Merge on C (before any tutorial records keys).
-5. **Economy:** loot and gem flow, then the Black Market (ext/market). In-match shops move to step 8 with the map work.
-6. **Farm:** the Hob builder and tutorial (ext/farm-hob), then islands and bridges.
-7. **One great match:** the core-loop playtest; the Boki as the star (merge spec, merge moments, the Boki box, personality, loss and recovery); playtest tools.
-8. **Modes and maps:** Duel online, Arena 4v4 with compact maps, the online launcher, then the tier maps (apex threats, stealth) and in-match shops (ext/shops). Servers are live (stage 1). Steam is not planned for now.
+1. **Ship the demo.** (Done: sync78–81.)
+2. **Warden mechanics parity (Opus where feel-critical):** abilities, cancels, buffering (as the source does it) and animations, LMB first, plus every owner hero note in DECISIONS. **Slice Wardens first: Vex, Zedran, Pin, Cinder** (what every new player touches) to full parity; then the other 8.
+3. **Readability UI:** hitbox circles (done), the dash bar (done), Boki ownership rings and tags, the right-side Boki box with teammate Boki icons, a HUD clarity pass. (Main.)
+4. **One great match + Boki as the star:** the 10-minute core-loop playtest on the Hollow Crown; the per-type Fusion spec (owner approves) and merge moments; Boki personality and reactions; Boki loss that hurts and can be recovered; playtest tools (F8 feedback, session stats, a tester guide); 2–3 outside testers on itch.
+5. **Final Boki controls:** fold C into G, then Merge on C; the key layout settled before any tutorial records keys.
+6. **Economy:** loot and gem flow, then the Black Market (ext/market merged).
+7. **Farm:** Hob and the farm tutorial (in flight), then islands and bridges.
+8. **Modes and maps:** Duel online, Arena 4v4 with compact maps, the online launcher, the tier maps (apex threats, stealth), in-match shops.
 
-Onboarding (new-game flow, tutorials, Mantle intro) follows once 4 is final.
-After all of that: the art upgrade (art bible, style pass, AI 3D prototype), with concepts running in parallel already.
+Onboarding (new-game flow, tutorials, Mantle intro) follows once step 5 is final.
+After the slice: the art upgrade roll-out (all Warden and Boki models, the creator, cutscenes).
+**Done means played:** nothing counts as done until the owner or a tester has played it.
