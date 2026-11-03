@@ -430,7 +430,7 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	fresh(T)
 	aim_at(P, T.pos)
 	step(m, 0.5)
-	step(m, float(K.lmb_def()["full"]) + 0.05, aim)
+	step(m, float(K.lmb_def()["full"]) + 0.3, aim)      # past the perfect window (#49): the normal step
 	var p0 := P.pos
 	var t0 := T.pos
 	P.inp["fire"] = false

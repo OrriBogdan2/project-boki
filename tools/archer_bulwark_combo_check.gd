@@ -13,6 +13,8 @@ func run(main_node: Node) -> void:
 	ult.main = main_node
 	var own = load("res://tools/pin_bjorn_owner_check.gd").new()
 	own.main = main_node
+	var launch = load("res://tools/bjorn_launch_check.gd").new()
+	launch.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		await ult.pin()
@@ -22,8 +24,9 @@ func run(main_node: Node) -> void:
 		await _growth()
 		await ult.bjorn()
 		await own.bjorn()
-	n += ult.n + own.n
-	fails += ult.fails + own.fails
+		await launch.bjorn()
+	n += ult.n + own.n + launch.n
+	fails += ult.fails + own.fails + launch.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -771,7 +774,7 @@ func _bulwark_combos() -> void:
 		K.fx.glint.visible and float(AimKit.reticle(P).get("charge", 0.0)) > 0.4,
 		"glint %s charge %.2f" % [K.fx.glint.visible, float(AimKit.reticle(P).get("charge", 0.0))]
 	)
-	step(m, 0.62, func(): P.inp["fire"] = true; aim_at(P, T.pos))
+	step(m, 0.75, func(): P.inp["fire"] = true; aim_at(P, T.pos))      # past the perfect window: a normal swing
 	ok("bjorn LMB held: the full-charge flare at 1.25s", K.flared and K.smash_k() >= 0.99, "k %.2f" % K.smash_k())
 	var px0 := P.pos.x
 	var sl0 := K.slams
@@ -972,7 +975,7 @@ func _bulwark_combos() -> void:
 	step(m, 1.0)
 	reset.call()
 	c0 = K.crushes
-	step(m, 1.3, func(): P.inp["fire"] = true; aim_at(P, T.pos))
+	step(m, 1.55, func(): P.inp["fire"] = true; aim_at(P, T.pos))      # past the perfect window
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok(
