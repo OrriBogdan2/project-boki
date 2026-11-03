@@ -983,7 +983,7 @@ func _bulwark_combos() -> void:
 		K.crushes == c0 + 1 and K.anim_id == "bul_smash",
 		"crushes %d anim %s" % [K.crushes - c0, K.anim_id]
 	)
-	# Shift while winding up the blow: it ends the wind-up, with a short plain dash for half a charge
+	# Shift while winding up the blow: a short plain dash for half a charge, the swing still charging (item 51)
 	step(m, 1.5)
 	reset.call()
 	_clear_wall(m, home, lv, 3)
@@ -993,14 +993,17 @@ func _bulwark_combos() -> void:
 	var d0 := P.dashes
 	var p0 := P.pos
 	P.do_dash()
-	step(m, 0.15, func(): P.inp["fire"] = true)
+	m.step(DT)
+	var short_anim := K.anim_id
+	step(m, 0.2, func(): P.inp["fire"] = true)
 	ok(
-		"combo bulwark: hold LMB > Shift = short dash, half a charge, the wind-up ends",
+		"combo bulwark: hold LMB > Shift = short dash, half a charge, the swing still charging",
 		K.st.get(
 			"last_dash"
-		) == "short" and K.lmb_t < 0.0 and d0 - P.dashes < 0.8 and P.flat_dist(p0) > 0.8 and K.anim_id == "bul_short",
+		) == "short" and K.lmb_t > 0.6 and d0 - P.dashes < 0.8 and P.flat_dist(p0) > 0.8 and short_anim == "bul_short",
 		"dash %s lmb %.2f spent %.2f moved %.1f" % [str(K.st.get("last_dash")), K.lmb_t, d0 - P.dashes, P.flat_dist(p0)]
 	)
+	ok("anim bulwark: out of the short dash he is back in the spin's pose", K.anim_id == "bul_smash_wind", K.anim_id)
 	P.inp["fire"] = false
 	step(m, 1.0)
 	# Mending Ground mends the shield only while it is raised

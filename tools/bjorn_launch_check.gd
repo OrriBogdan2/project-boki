@@ -1,7 +1,8 @@
 extends "res://tools/pin_bjorn_owner_check.gd"
-## Owner items #48 and #49 for Bjorn (briefs/OWNER_REVIEW_1103.md), run from --bulwark-combo-check
+## Owner items #48, #49 and #51 for Bjorn (briefs/OWNER_REVIEW_1103.md), run from --bulwark-combo-check
 ## (tools/archer_bulwark_combo_check.gd adds the counts): the Faultline plants him only for the wind-up and
-## the slam, and the held swing's perfect window launches him, into a glide off a ledge. Prints AKCHECK lines.
+## the slam, the held swing's perfect window launches him, into a glide off a ledge, and the hold pairs with a
+## jump and a Shift dash (a perfect release out of either still launches). Prints AKCHECK lines.
 
 const FAR := Vector3(30.0, 0, 6.0)      # the dummy parked out of the way
 ## s after the plant ends from which he must be at 90% of his run speed: a frame for the plant to lift, then
@@ -13,6 +14,7 @@ func bjorn() -> void:
 	await _window()
 	await _launch_flat()
 	await _launch_glide()
+	await _combo_moves()
 
 func _planar(P: Hunter) -> float:
 	return Vector2(P.vel.x, P.vel.z).length()
@@ -248,4 +250,95 @@ func _launch_glide() -> void:
 	ok("bjorn #49: launched off a ledge he glides straight away at >= 70% of the launch's speed",
 		open >= K.launch.speed * 0.7 and P.pos.x - home.x > 3.0,
 		"glide opens at %.1f of %.1f m/s, %.1f m out" % [open, K.launch.speed, P.pos.x - home.x])
+	await done(m)
+
+# ------------------------------------------------------------------ #51: the hold with a jump and a Shift dash
+const ACT_S := 0.1             # s: owner #51, a jump or Shift out of the swing's step or launch acts within this
+
+## One step with `key` pressed (a jump or a Shift), the swing still held on `at`.
+func _tap_key(m: Match, P: Hunter, key: String, at: Vector3) -> void:
+	P.inp[key] = true
+	press_at(P, at)
+	m.step(DT)
+	P.inp[key] = false
+
+## #51: the held swing keeps charging through a jump and a Shift dash and swings on the release there (in the
+## air keeping his speed); a perfect release out of a jump or a dash still launches him; a jump or Shift in
+## the swing's step or the launch acts within ACT_S.
+func _combo_moves() -> void:
+	var r := setup("bulwark", 7.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var K: BulwarkKit = P.ak
+	var at := home + Vector3(9.0, 0, 0)
+	var full := float(K.lmb_def()["full"])
+	var hold := press_at.bind(P, at)
+	# a jump: still charging at the top, let go in the air it swings and he keeps his speed
+	_ready_swing(m, P, T, home)
+	P.inp["move"] = Vector2(1, 0)
+	step(m, 0.6, hold)
+	var t0 := K.lmb_t
+	_tap_key(m, P, "jump", at)
+	step(m, 0.2, hold)
+	var charged := K.lmb_t - t0
+	var up := not P.grounded
+	var v0 := _planar(P)
+	var s0 := K.slams
+	P.inp["fire"] = false
+	step(m, 0.05)
+	ok("bjorn #51 hold > jump: it charges on through the jump and swings on the release in the air, keeping speed",
+		up and charged >= 0.18 and K.slams == s0 + 1 and not P.grounded and _planar(P) >= v0 * 0.9,
+		"charged %.2f in air %s slams %d speed %.1f -> %.1f" % [charged, up, K.slams - s0, v0, _planar(P)])
+	# a Shift dash: the short dash goes, the swing charges on through it, and a release in the dash swings there
+	_ready_swing(m, P, T, home)
+	step(m, 0.6, hold)
+	_tap_key(m, P, "dash", at)
+	var short := String(K.st.get("last_dash")) == "short" and K.in_dash()
+	m.step(DT)
+	s0 = K.slams
+	P.inp["fire"] = false
+	m.step(DT)
+	ok("bjorn #51 hold > Shift: the short dash goes, the swing charges on in it, let go there it swings at once",
+		short and K.lmb_t < 0.0 and K.slams == s0 + 1, "short %s slams %d" % [short, K.slams - s0])
+	P.inp["move"] = Vector2.ZERO
+	# a perfect release out of a jump and out of a Shift dash: he launches from there
+	for key in ["jump", "dash"]:
+		_ready_swing(m, P, T, home)
+		step(m, full - 0.3, hold)
+		_tap_key(m, P, key, at)
+		while K.lmb_t < full + 0.06:
+			press_at(P, at)
+			m.step(DT)
+		var x0 := P.pos.x
+		var air := not P.grounded
+		var l0 := K.launch.launches
+		P.inp["fire"] = false
+		step(m, 0.6)
+		ok("bjorn #51 perfect out of a %s: let go in the window %s, he launches >= 3.5 m" % [key,
+				"in the air" if air else "after it"],
+			K.launch.launches == l0 + 1 and P.pos.x - x0 >= 3.5 and (key == "dash" or air),
+			"launches %d moved %.2f air %s" % [K.launch.launches - l0, P.pos.x - x0, air])
+	# a jump or Shift in the swing's step or the launch acts within ACT_S
+	for perfect in [false, true]:
+		for key in ["jump", "dash"]:
+			_ready_swing(m, P, T, home)
+			K.st["last_dash"] = ""
+			step(m, full + (0.06 if perfect else 0.3), hold)
+			P.inp["fire"] = false
+			m.step(DT)
+			var stepping := P.roll_t > 0.0
+			P.inp[key] = true
+			var took := -1.0
+			for i in 12:
+				m.step(DT)
+				P.inp[key] = false
+				var went := P.vel.y > 0.5 if key == "jump" else String(K.st.get("last_dash")) != ""
+				if went:
+					took = (i + 1) * DT
+					break
+			ok("bjorn #51 %s in the %s acts within %.1f s" % ["a jump" if key == "jump" else "Shift",
+					"perfect launch" if perfect else "swing's step", ACT_S],
+				stepping and took > 0.0 and took <= ACT_S + 0.001, "in it %s took %.2f s" % [stepping, took])
 	await done(m)
