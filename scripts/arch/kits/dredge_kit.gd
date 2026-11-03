@@ -37,6 +37,7 @@ const SWING := 6.0                     # 1/s: how fast a reeled body turns onto 
 const CLIFF := 1.2
 
 var pull := {}                  # hold: the reel {t (the foe), left}
+var hook_hold: CastHold         # throw to the end of the reel or the miss: height held, a slow walk in flight
 var flying := false             # hold: the hook is in the air
 var hook_sd := {}               # the hook's shot while it flies
 var hauled := 0                 # (tests) times a reeled body was hauled over a rock
@@ -142,6 +143,8 @@ func can_shoot() -> bool:
 func move_k() -> float:
 	if broadside.running():
 		return 0.0               # planted for the charge and the waves
+	if flying and hook_hold != null:
+		return hook_hold.slow_k           # a slow walk while the hook flies out
 	return 0.7 if wind > 0.0 else 1.0
 
 # ------------------------------------------------------------------ tick
@@ -165,6 +168,7 @@ func _tick(dt: float) -> void:
 	if not dive.is_empty(): _tick_dive(dt)
 	if flying: _tick_hook()
 	if not pull.is_empty(): _tick_pull(dt)
+	_tick_hook_hold()
 	broadside.tick(dt)
 	_tick_gun()
 	_tick_looks(dt)
@@ -179,6 +183,7 @@ func _drop_holds() -> void:
 	flying = false
 	hook_sd = {}
 	scoop = []
+	hook_hold = null
 	if not pull.is_empty():
 		_end_pull(false)
 	broadside.drop()
@@ -261,6 +266,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var rdf := rmb_def()
 	flying = true
 	scoop = []
+	hook_hold = CastHold.hover_slow(h, float(rdf["fly_slow"]))
 	play("dr_throw")
 	var hook := {"type": "projectile", "speed": float(rdf["speed"]), "range": float(rdf["range"]), "size": 0.24}
 	var stg := stage("rmb", {"delivery": hook,
@@ -272,6 +278,8 @@ func fire_rmb(c: Dictionary) -> void:
 		"on_shot_end": func(at: Vector3, why: String, e: Ent):
 			flying = false
 			hook_sd = {}
+			if pull.is_empty():
+				hook_hold = null          # a miss: gravity is back the moment it ends
 			if e == null and pull.is_empty():
 				fx.orb(at, ROPE_COL, BRASS_HOT, 0.6, 0.15)
 				m.fx.word(at + Vector3(0, 1.2, 0), "SNAGGED" if why == "wall" else "MISS", Color("c0b0a0"), false)}))
@@ -315,9 +323,11 @@ func _grab(f: Ent, ally := false) -> void:
 	flying = false
 	hook_sd = {}
 	if KinMerge.transforming(h) or KinMerge.active(h):
+		hook_hold = null
 		return
 	var rdf := rmb_def()
 	if f.mass() >= 6.0:
+		hook_hold = null
 		m.fx.word(f.pos + Vector3(0, 2.4, 0), "TOO HEAVY", Color("c0b0a0"), false)
 		return
 	grapples += 1
@@ -392,6 +402,12 @@ func _tick_pull(dt: float) -> void:
 		var tw := Vector2(h.pos.x - w.pos.x, h.pos.z - w.pos.z)
 		if tw.length() > gap: _drag(w, tw.normalized(), minf(float(rdf["pull_speed"]) * dt, tw.length() - gap))
 
+## Off the ground, from the throw until the miss or the end of the reel, he keeps his height (no fall, even
+## over the abyss); on the ground there is nothing to hold.
+func _tick_hook_hold() -> void:
+	if hook_hold != null and not h.grounded:
+		hook_hold.tick(m.world)
+
 ## The rope's thickness while reeling: it swells taut on each hand-over-hand haul.
 func _rope_thick() -> float:
 	var since := fposmod(m.time - anim_at - 0.18, HAUL_T)
@@ -449,6 +465,7 @@ func _end_pull(arrived: bool) -> void:
 	var wisp: bool = pull.get("wisp", false)
 	pull = {}
 	scoop = []
+	hook_hold = null
 	if st.get("self_gnd", false):
 		st["self_gnd"] = false
 		h.set_meta("gnd_until", minf(float(h.get_meta("gnd_until", 0.0)), m.time))

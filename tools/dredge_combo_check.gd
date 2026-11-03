@@ -20,9 +20,80 @@ func run(main_node: Node) -> void:
 	ak = load("res://tools/archetype_check.gd").new()
 	ak.main = main
 	await _all()
+	await _hook_hold()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	print("DREDGECHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Item 31 (CastHold): from the throw until the miss or the end of the reel he keeps his height mid-air (no
+## fall); while the hook flies out he walks at 15-25% of his walk; gravity is back once it ends.
+func _hook_hold() -> void:
+	var r: Array = ak.setup("dredge", 6.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var K: DredgeKit = P.ak
+	# on the ground: his walk, then the walk while a hook flies out at nobody
+	ak.aim_at(P, home + Vector3(0, 0, -10.0))
+	P.inp["move"] = Vector2(1, 0)
+	ak.step(m, 0.3)
+	var p0 := P.pos
+	ak.step(m, 0.2)
+	var walk := P.flat_dist(p0) / 0.2
+	ak.tap(m, P)
+	ak.step(m, 0.05)
+	p0 = P.pos
+	ak.step(m, 0.25)
+	var crawl := P.flat_dist(p0) / 0.25
+	var k := crawl / maxf(0.01, walk)
+	ok(
+		"hook hold: while the hook flies out he walks at 15-25% speed",
+		K.flying and k >= 0.15 and k <= 0.25, "%.2f of %.1f m/s" % [k, walk]
+	)
+	ak.step(m, 0.5)
+	P.inp["move"] = Vector2.ZERO
+	# mid-air, a hook that misses: no fall while it flies, gravity the moment it ends
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.teleport(home + Vector3(0, 3.0, 0))
+	P.vel = Vector3.ZERO
+	P.grounded = false
+	ak.tap(m, P)
+	var y0 := P.pos.y
+	var drift := 0.0
+	while K.flying:
+		ak.step(m, ak.DT)
+		drift = maxf(drift, absf(P.pos.y - y0))
+	var y_end := P.pos.y
+	ak.step(m, 0.25)
+	ok(
+		"hook hold: mid-air his height holds while the hook flies, and he falls once it misses",
+		drift <= 0.05 and y_end - P.pos.y > 0.2, "drift %.3f, then fell %.2f m" % [drift, y_end - P.pos.y]
+	)
+	# mid-air, a hook that catches: held from the throw to the end of the reel
+	P.teleport(home + Vector3(0, 1.0, 0))
+	P.vel = Vector3.ZERO
+	P.grounded = false
+	ak.fresh(T)
+	T.teleport(home + Vector3(6.0, 0, 0))
+	ak.aim_at(P, T.pos)
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	ak.tap(m, P)
+	y0 = P.pos.y
+	drift = 0.0
+	var tw := 0.0
+	while (K.flying or not K.pull.is_empty()) and tw < 4.0:
+		ak.step(m, ak.DT)
+		tw += ak.DT
+		drift = maxf(drift, absf(P.pos.y - y0))
+	ok(
+		"hook hold: mid-air his height holds from the throw to the end of the reel",
+		K.grapples >= 1 and K.arrivals >= 1 and drift <= 0.05, "grapples %d arrivals %d drift %.3f" % [
+			K.grapples, K.arrivals, drift]
+	)
+	await ak.done(m)
 
 func _all() -> void:
 	var r: Array = ak.setup("dredge", 8.0, "", true)
