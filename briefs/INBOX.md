@@ -508,3 +508,13 @@ The owner is reviewing the build now and will add more. Start the two items ther
 2. Ready, not merged: mapclean-fix c36f6ea (<1 h); shops 794264bf (~11 h); portrait a6189f21 (~14 h).
 3. New owner items 48 (Bjorn: rooted only for the wind-up and slam) and 49 (perfect LMB launch into a glide): both routed to S2 on one Bjorn branch. 49 is an owner override of the source and is allowed.
 4. Conflicts: none.
+
+## 2026-11-03 13:20 ET (18:20 UTC) ORCH: OWNER DECISIONS (from the owner, via the orchestrator)
+- **Focus after the demo:** economy, farm, and character mechanics per the owner's requests are the top priority. The art/concept pass is already under way and doesn't need extra pushing.
+- **Portrait (ext/portrait a6189f21):** [MAIN][EXT] an art pass is coming for every portrait (items 34, 39, concepts). Merge only the frame/HUD side, if it's still useful, and make sure it takes the new art-pass portraits without rework. Don't polish the old portrait art.
+- **Base names:** [EXT] the owner confirmed Sable / Cinder / Tarek (and says he confirmed with main). class-titles can finish.
+- **Dash buffering (item 32):** [EXT] owner: yes, buffer presses made during a dash. Match the source where briefs/supervive-data or footage shows it; otherwise keep S2's default (held to the dash end).
+- **Ostra ult (overrides item 16):** [EXT] he's animation-locked for ~1 s at the start (as Void is), then free to move/leave while Nightwell keeps going. Update the asserts.
+- **Tamsin ult (refines item 27):** [EXT] owner: "should not continue sliding but should maintain momentum, so shift -> ult should send her forward a decent amount. Her ult should encase her in ice and not let her move while she's in ult, unless she cancels it early." So: skating into the ult carries her forward a decent distance as she seals; then she's encased and rooted (no slide on the ice) until it ends or she cancels it early.
+- **Moosh Moosh (overrides item 24's 3x rule):** [EXT] "copy Elluna": ground dash, air glide and their distances and timings from the source data/footage.
+- **Home look (item 45):** [EXT] confirmed: at home the player is their fully custom created person.

@@ -121,3 +121,11 @@ Keep up to 6 agents. Don't start anything that touches the demo branches until m
 ## 2026-11-03 18:30 UTC: ext takes items 46 and 47 locally
 - **Skip OWNER_REVIEW items 46 (hitbox by size + ground circle) and 47 (dash/stamina fill-up bar)**: ext is building them on its own account (branches ext/hitbox-ring and ext/stamina-bar from main a3fc5b95). If you already started either, say so in STATUS and ext will stop its copy.
 - For 46, ext uses default sizes; when concepts 1b settles the heights, post the per-Warden size order in STATUS and ext tunes hit_r.
+
+## 2026-11-03 18:20 UTC (orchestrator): owner decisions for your hero branches. Full text in INBOX.md 13:20 ET
+- **Ostra ult:** ~1 s cast lock (like Void), then free to move while Nightwell runs (replaces the full 4.5 s lock).
+- **Tamsin ult:** skating into the ult carries her forward a decent distance; then she's encased in ice and rooted (no sliding) until it ends or she cancels early.
+- **Moosh Moosh:** copy Elluna's dash and glide (source values); drop the 3x rule.
+- **Dash buffering:** yes; follow the source where known, else your held-to-dash-end default.
+- Names Sable/Cinder/Tarek confirmed. At home the player is their own custom person.
+- Small, on a branch from current main, after the demo build ships. Sonnet unless the feel needs Opus.
