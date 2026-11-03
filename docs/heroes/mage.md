@@ -30,6 +30,21 @@ Rank 2 is the shared step (cooldown -10%, damage +15%). Rank 3 is the hero's own
 upgrades before the last one (+20% damage and -1s on the spear, -0.75s on Surge, +25% on the strike); our rank system has
 one shared step and one special, so those collapse into the shared step.
 
+## Parity pass (owner 18:45: animation and ability parity, LMB first)
+Source vs ours per slot; [data] = the game data, [footage] = hero-ref/vireo.md at 5 fps. Asserted in `--mage-combo-check`
+(`parity vireo: ...`, tools/parity_pvb.gd, plus the existing `LMB: ...` lines).
+
+| Slot | Source | Ours | Status |
+|---|---|---|---|
+| LMB beats | alternating hands: a torso twist and one arm flung out, back to the wide arms-out stance; gold sparks at the feet [footage 0003-0020] | `mage_lmb_l` / `mage_lmb_r`: out at 0.03 s, settled by 0.35 s; sparks at the feet; a fan of splinters back toward her on impact | matches; asserted |
+| LMB tracking | faces the cursor [footage] | each bolt leaves along the cursor of its step and the body faces it, while walking and with the cursor sweeping 60 deg/s | matches; asserted |
+| LMB cadence | one bolt every 0.8 s held, no magazine [data card, footage] | 0.8 s, mag 99 | matches; asserted |
+| LMB range and speed | always to max range (about 7.5 bh) past the cursor, about 18 bh/s [footage]; passes through targets [wiki] | 13 m past the cursor, 34 m/s, pierces | matches; asserted |
+| RMB spear | hold, summoned spear by the shoulder, body flash at full, overarm throw; fixed lane [footage] | Storm Rod: the same beats, fixed 13 m lane | matches |
+| E Lightning Strike | place, then pick the pull direction; 0.8 s countdown; Grounded slide [footage] | Skycall: place, 0.3 s flick, 0.8 s countdown, slide and Grounded 1.5 s | matches |
+| Shift Surge | hold crouch, a streak at a constant ~32 m/s, an arrival burst [footage] | Wirerun: the same; **the arrival ring and spark spray and the press flash are gone** (owner: no rings or bursts on dashes; the hits are along the way), a dust puff instead | owner rule over footage |
+| X Eye of the Storm | launch, hang, reactivate to crash at the cursor [footage] | Kitefall: the same | matches |
+
 ## Per-slot table
 | Slot | Input | Aim | What it does | Telegraph / reticle | Move (KMovesVV) | Sound |
 |---|---|---|---|---|---|---|

@@ -24,6 +24,11 @@ func run(main_node: Node, who: String) -> void:
 		await _mage()
 		await _growth()
 		await ults.mage()
+		var parity = load("res://tools/parity_pvb.gd").new()
+		parity.main = main
+		await parity.vireo()
+		n += parity.n
+		fails += parity.fails
 	else:
 		await _gunslinger()
 		await ults.gunslinger()

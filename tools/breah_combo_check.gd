@@ -15,6 +15,11 @@ func run(main_node: Node) -> void:
 	var bad: int = await flow.combos_of(main, "dolm")
 	ok("item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; holds go through every move",
 		bad == 0, "%d failing (the DASHFLOW lines)" % bad)
+	var parity = load("res://tools/parity_pvb.gd").new()
+	parity.main = main
+	await parity.breah()
+	n += parity.n
+	fails += parity.fails
 	print("PAIRCHECK dolm DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 

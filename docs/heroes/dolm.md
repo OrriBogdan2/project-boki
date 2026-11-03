@@ -34,6 +34,21 @@ sounds from `tools/gen_stone_sfx.py` (names in `scripts/core/sfx_kits.gd`).
 - Rubble Leap: up to 5m in 0.45s in the kit numbers (2.5-3 bh in about 0.45s, the body study), with the global dash feel
   on top like every dash (x0.85 distance, x1.15 time: about 4.25m in 0.52s).
 
+## Parity pass (owner 18:45: animation and ability parity, LMB first)
+Source vs ours per slot; [data] = the game data, [footage] = hero-ref/breah.md at 5 fps. Asserted in `--dolm-combo-check`
+(`parity breah: ...`, tools/parity_pvb.gd, plus the existing `lmb: ...` lines).
+
+| Slot | Source | Ours | Status |
+|---|---|---|---|
+| LMB tap beats | an underarm or side hurl from the right gauntlet, no long wind-up [footage 0108] | `breah_throw`: out at 0.07 s | matches; asserted |
+| LMB tap cadence, speed, range | 0.6 s [data card; footage 1 per 2-3 frames]; a slow molten boulder, about 10-12 bh/s; a small burst with a red ground ring [footage] | 0.6 s, 20 m/s, 11 m, a red ring and a 0.9 m splash | matches; asserted |
+| LMB hold beats | the gauntlet drawn back in a deep crouch, a straight drive that steps her about 0.5 bh; about 0.75 s hold [footage 0118-0121] | `breah_wind` (held) then `breah_punch`, out at 0.05 s; a 0.6 m step (0.8 m measured) | matches; asserted |
+| LMB hold tracking | the lane points at the cursor, fixed length [footage] | the lane and her body follow a moved cursor during the hold; 4.2 m by 1.8 m | matches; asserted |
+| RMB Volcano Crusher | hold, crouch with glowing fists, hop forward and smash; jump while charging leaps forward [data, footage] | Quakefall: the same (Quakefall review, item 14) | matches |
+| E Rockwave | three rocks about 2 bh ahead, a slight curve, a red flash first [footage] | Stone Row: the same | matches |
+| X Tetraform | tap or hold-drag, rocks centre-out, slow [data, footage] | Basalt Spine: the same, rocks only (owner item 15) | owner rule over data |
+| Shift Landslide | a rock ahead, a shove dash, the rock launched [footage] | Rubble Leap (owner's leap), dust only (no ring or blast) | owner design |
+
 ## Per-slot table
 | Slot | Input | Aim and telegraph | What it does (ours) | Anim (KMovesStone) | Sound |
 |---|---|---|---|---|---|
