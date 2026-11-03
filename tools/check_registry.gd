@@ -54,6 +54,9 @@ const CHECKS := {
 	"--wall-size-check": ["res://tools/wall_size_check.gd", "wall_size_check", null],  # no lone posts
 	"--farmbuild": ["res://tools/farmbuild_check.gd", "farmbuild_check", null],      # also --farmbuild-shots=<dir>
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],      # also --shots-dir=<dir>
+	"--server-check": ["res://tools/server_check.gd", "server_check", null],      # a match server, players, refusals
+	"--server-e2e-check": ["res://tools/server_e2e_check.gd", "server_e2e_check", null],      # matchmaker + server
+	"--join-server": ["res://tools/join_client.gd", "join_client", null],      # a headless player (also --join-queue=)
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
