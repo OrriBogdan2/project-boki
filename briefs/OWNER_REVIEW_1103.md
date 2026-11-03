@@ -126,3 +126,7 @@ The owner sees Breah move forward in an animation on RMB, and thinks it creates 
 - Update his portrait framing if the head shape changes (`portrait` override in ostra.json). Keep the hitbox at ground level, as specced, so hovering can't dodge low shots.
 - **Screenshots:** before and after, gameplay zoom plus close-up, and the portrait.
 - This is a one-off ahead of the full character concept pass, at the owner's request.
+
+## 19. Linwick's RMB (Cinder Shot) always flies to max range (kit fix)
+- The shot ignores cursor distance and always travels its full length in the aim direction. Remove any cursor clamp (AimKit "at cursor" mode); use the "max range in aim direction" mode. The aim lane shows the full fixed length.
+- **Assert:** casting with the cursor at 2 m and at 20 m gives the same travel distance, the max.
