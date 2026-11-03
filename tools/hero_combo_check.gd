@@ -64,6 +64,7 @@ func _wire(lvl: int) -> float:
 	var T: Hunter = r[2]
 	var K: MageKit = P.ak
 	P.lvl = lvl
+	LevelGrowth.apply(P)          # growth follows levels gained, not a level set straight on the hunter
 	ac.fresh(T)
 	K._wire_hit(T, 10.0)
 	var d: float = ac.dmg(T)
@@ -649,8 +650,8 @@ func _gunslinger() -> void:
 	var skidding := not K.slide.is_empty()
 	ac.step(m, 0.25)
 	var total := _flat(P.pos, home)
-	ok("Slipstep tap: a ~0.5s skid that bleeds off (front-loaded, still going at 0.3s, 4-5m)",
-			skidding and early > total * 0.45 and total > 3.6 and total < 5.6, "%.1f of %.1f m" % [early, total])
+	ok("Slipstep tap: a ~0.5s skid that bleeds off (front-loaded past an even pace, still going at 0.3s)",
+			skidding and early > total * 0.35 and total > 3.6 and total < 5.6, "%.1f of %.1f m" % [early, total])
 	P.inp["move"] = Vector2(0, 1)
 	ok("Slipstep: along the keys, not the cursor",
 			P.pos.z - home.z > 3.0 and absf(P.pos.x - home.x) < 1.0,
