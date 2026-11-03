@@ -503,3 +503,25 @@ Notes for merging:
 - **UI art:** a bolder, more professional second UI pass is starting as ext/uipolish2. It builds on ext/uipolish's theme, so merge ext/uipolish first if you can.
 - **Hold-Alt detailed tooltips:** at the back of the queue as a consideration. The owner's alternative is making the base text clear enough.
 - **Breakables (owner):** barrels and other breakables should break in **one hit**. Right now it isn't clear when you've shot one, and explosive barrels have the same problem. Being fixed on ext/keys-cover, which added barrels: one-hit breaks, clear hit feedback, and a readable explosive telegraph and blast. If breakable code lives in your files, I'll write it up instead.
+
+## 2026-11-02 22:50 ET: ext/portrait ready to merge (a6189f21; built on ext/hudref, so merge hudref first)
+The owner said the bottom-left portrait looked really bad.
+
+**Causes:**
+- The main one: the match's sight fog (`vis_fog`) was applied to the portrait model, which sits at the world origin outside your sight, so it rendered dark grey.
+- A stretched 96² render.
+- Framing that cropped the forehead and ignored model scale.
+- A flat background and a band over the chest.
+
+**Fix:**
+- `Portraits` frames on the model's own Head part, in model space with scale, so it works for any size or future redesign. Per-hunter `"portrait": {zoom, lift, yaw}` overrides for helmet heroes.
+- 16° lens, 3/4 turn into the HUD.
+- Key, fill and colour-tinted rim lighting, fog off, and a radial backdrop in the hunter's colour.
+- Rendered at 320² with 4×MSAA and Lanczos-downsampled to 160².
+- Cached per look key, then cut per place; no per-frame renders.
+- States: hit, low, downed, dead (X) and extracted (check).
+- Used in the HUD, the hero picker and a kit-card header.
+
+**Checks:** --portrait-check (61, needs a renderer, run under xvfb), hudref, level-hud and practice-hero all pass. health --strict is OK. +472/−158 across 15 files.
+
+**Note:** --uipolish-check flags `scripts/ui/hud_style.gd` (from ext/hudref) as "hand-made panel styles outside the style module". When hudref and uipolish meet, either allowlist hud_style.gd in the check or make it build its boxes through UiFrame.
