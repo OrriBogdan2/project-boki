@@ -23,7 +23,11 @@ static func run(home: Node, prefix: String) -> void:
 		steps.append(["settings_" + tab_name.to_lower(), open_tab])
 	steps.append(["tooltip", func(): Overlay.shot_demo(PackedStringArray(["tooltip"]))])
 	steps.append(["confirm", func(): Overlay.shot_demo(PackedStringArray(["confirm"]))])
-	steps.append(["hub", func(): Overlay.close()])
+	steps.append(["hub", func():
+		for ch in Overlay.root.get_children():
+			if ch.has_meta("modal"):
+				ch.queue_free()
+		Overlay.close()])
 	steps.append(["hero", func(): HomeHero.open(home)])
 	steps.append(["shop", func(): home.call("_open_shop")])
 	await tree.create_timer(3.0).timeout

@@ -226,7 +226,6 @@ func tip_frame(alpha: float) -> UiFrame:
 		var g := UI.frame(Color(UI.SURFACE, alpha * 0.86), 14, Color(0, 0, 0, 0), 0, 0.0, 0.0, alpha * 0.06)
 		g.leather(Color(UI.STITCH, UI.STITCH.a * alpha), 0.05 * alpha, 6.0)
 		g.trim = Color(UI.BRASS, 0.3 * alpha)
-		g.guards = Color(UI.BRASS, alpha)
 		_glass_at[alpha] = g
 	return _glass_at[alpha]
 

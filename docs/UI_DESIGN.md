@@ -4,81 +4,60 @@ How Kinfall's menus look and behave, and the helpers in `scripts/ui/ui.gd` that 
 in-match HUD (`scripts/ui/hud.gd`) has its own Supervive-style layout and isn't covered here; it
 shares the colours and fonts.
 
-## 1. Audit (October 2026, before this pass)
+## 1. The look: a hunter's field kit
 
-What made the menus feel blocky, samey and hard to get through:
+The first pass (October 2026) made the menus clean and consistent but quiet: one dark sheet, thin
+type, nothing that said *this* game. The second pass gives them an identity of their own.
 
-**Everything looked the same.**
-- Every panel was the same night-blue box with a heavy gilded border and a gold ornament under the
-  title. Cards inside panels were more boxes, often with their own borders (save slots, challenge
-  cards, armory tiles, results notes). Boxes in boxes in boxes.
-- Every button was the same chunky raised slab with a dark lip, so "Close", "Delete", "Sell", "Hear
-  it" and the one thing you came to do all had the same weight. Only the orange Primary stood out,
-  and some screens had two or three of them (shrine, feeders, armory).
-- Selected tabs and selected options used the same "Chosen" slab as any other button, so a tab row
-  looked like a row of actions.
+**Tooled leather, stitched seams and brass hardware**, like the satchel, journal and kit a hunter
+carries out to the islands. Why this and not paper or wood:
+- It *is* the game's world: you pack a kit, carry a Field Book, bring your Boki home in a satchel.
+  Leather and brass say "gear you trust", warm and hand-made, not sci-fi chrome or fantasy gold.
+- It stays dark, so light text reads at AA on every panel and the bright, playful world behind a
+  menu still pops. Parchment would have flipped every text colour and fought the world.
+- It scales from a big panel (grain, burnished edge, seam, brass corner guards) down to a chip
+  (just a brass trim) without changing material, so every box reads as one set.
 
-**Unclear hierarchy.**
-- Titles were big but had nothing under them; context ("what is this screen for?") was a paragraph
-  in the body or missing.
-- Body text came in five or six sizes (12, 13, 14, 15, 16, 17, 18) with no rule, and a lot of it was
-  long muted sentences (settings rows like "Abilities fire the moment you press them (off: hold to
-  aim, release to cast)" as the row label).
-- The kin card crammed three dense columns of bars, labels and ten buttons into one page.
-- The results screen showed eight separate stat boxes of equal weight.
-
-**Navigation was inconsistent.**
-- Closing was a "Close" or "Back" text button in the title row on some panels, "Back to the farm" on
-  the lobby, nothing visible on others. Esc worked in most places but nothing said so.
-- Actions were scattered: the expedition panel's Start sat at the bottom left among Training, Duel
-  and Online; the rack's Equip/Buy sat beside the preview; the shop's page arrows were jammed into
-  the tab row; the armory's upgrades shared a row with currency counters.
-- Settings tabs were part of the scrolling body; long Gameplay and Controls lists scrolled their own
-  tabs away.
-- Nothing had keyboard or pad focus by default, focus rings showed on mouse clicks, and arrow keys
-  only did anything on the title screen.
-- At home, every panel was reached by walking to a thing in the world. There was no quick way to
-  open your kin, your bag or the expedition panel.
-
-**Panels popped in without context.**
-- Home panels appeared over the farm with no dimming: the world kept competing with the menu.
-- Overlay menus used a flat 60% black rectangle.
-- Destructive things (delete a save, leave a match, sell an Epic weapon, reset all settings) either
-  had an inline "Really delete?" swap or no confirmation at all, while harmless toggles rebuilt the
-  whole panel.
-
-**Things didn't fit.**
-- The Esc menu at home had ten full-size buttons and split into "Page 1 of 2", so Save files and
-  Quit were on a second page behind Next.
-- The kin card and the market both paged their content, and the market then had its own page
-  arrows as well.
-- A shop page was a grid of six orange buttons, so "the main action" meant nothing.
-
-**Small things.**
-- Empty lists were a single grey sentence.
-- Arrows were "‹" and "›" characters in full-size buttons.
-- Key bindings in Controls were gold text, not keycaps.
-- The loading bar was a hard-edged rectangle with a dot; the tip floated without a container.
+Where each piece goes:
+- **Panels and modals** (`UiTheme.panel_frame`): saddle leather with a fine grain, a burnished
+  darker edge, a stitched seam 8 px in, brass corner guards with rivets, a long soft shadow, and
+  light along the top tinted with the panel's **section colour**.
+- **Cards and tiles**: lighter leather with a faint seam; tiles light their brass trim on hover, and
+  the picked one wears an edge in its colour with a glow inside.
+- **Buttons**: tan leather slabs with a brass trim on a darker lip (secondary), the amber primary
+  stitched in dark thread, a red danger, a brass-edged "chosen". Round icon buttons are brass rings.
+- **Wells** (tab tracks, inputs, bars, the results strip): recessed, lit from below, brass rim.
+- **Bone keycaps** with dark ink, always from `Settings.key_cap` for rebindable actions.
+- **Smoked leather** (`glass`) for things over the world: the hub, prompts, hover cards, toasts.
 
 ## 2. Rules
 
-1. **One strong title per panel**, with at most one short subtitle line under it (what the screen is
-   for, or the one number that matters). No ornaments.
-2. **Three type sizes.** `T_TITLE` 30 (Lilita One) for the panel title, `T_HEAD` 19 (Lilita One) for
-   card and item names, `T_BODY` 15 (Rubik) for everything you read, `T_SMALL` 13 for secondary
-   lines. Section eyebrows are `section()` (12, bold, spaced caps).
-3. **Fewer boxes, one frame.** Every box is a `UiFrame` (`scripts/ui/ui_frame.gd`): a soft drop shadow
-   and a tight contact shadow, a dark rim, the fill, light falling from the top with a lit bevel line,
-   and a shade along the bottom. Wells and tracks are the same frame reversed (`UiFrame.sunk`).
+1. **One strong title per panel**, pressed into the leather (a dark drop under it), after the
+   panel's **section emblem** (a brass-rimmed medallion in the section colour), with at most one
+   short subtitle line under it. A stitched rule separates the header from the body.
+2. **A type scale.** Display `T_DISPLAY` 46 (a screen's one headline: results, loading), title
+   `T_TITLE` 30, head `T_HEAD` 19 (all Lilita One), label `T_LABEL` 15 (Rubik 560, buttons and row
+   labels), body `T_BODY` 15, hint `T_SMALL` 13 (Rubik), caps `T_CAPS` 12 (Rubik 700, tight, no
+   extra letter-spacing). Numbers that count or line up use `UI.num` (tabular figures); big stats
+   use `T_STAT` 30 Lilita (`UiSkin.stat`). Section eyebrows are `section()`: a brass diamond, the
+   caps words, a hairline to the end of the row.
+3. **Fewer boxes, one frame.** Every box is a `UiFrame` (`scripts/ui/ui_frame.gd`): drop and
+   contact shadows, a dark rim, the fill, grain, light from the top (tinted), a bevel line and a
+   bottom shade, a burnished edge, a brass trim, the stitched seam, brass corner guards, an inner
+   glow and an edge, each optional. `leather(thread)` turns on grain, burnish and seam together.
+   Wells and tracks are the same frame reversed (`UiFrame.sunk`).
    Radii come from `R_PANEL` 18, `R_CARD` 12, `R_CTRL` 10, `R_SMALL` 6, `R_PILL`. Cards have no
    outline unless they are *selected*. Group with spacing and eyebrows before reaching for a card.
 4. **Three button tiers.** `primary()` (filled accent, dark text): the one thing the screen is for,
    at most one per screen, usually in the footer. `button()` (outline): normal actions.
    `ghost()` (text only): rare or small actions. `danger()` (red outline) for things that can't be
    undone, always behind `confirm()`.
-5. **Colour roles.** `ACCENT` (amber) means "act here" and "selected". `GOLD` means gems and rewards.
-   `GOOD` owned/ready/success, `BAD` danger/loss/locked, `TEAL` info and extraction. Item rarity uses
-   `rarity_col(r)`. Never use ACCENT for decoration.
+5. **Colour roles.** `ACCENT` (amber) means "act here" and focus. `GOLD` means gems and rewards.
+   `GOOD` owned/ready/success, `BAD` danger/loss/locked, `TEAL` info and extraction. `BRASS` is
+   hardware and decoration only (trims, guards, emblem rims, eyebrows). Item rarity uses
+   `rarity_col(r)`. **Section colours** (`UiSkin`: expedition teal, kin rose, gear blue, market gold,
+   farm green, system lavender) mark where you are: the emblem, the picked tab's underline and the
+   light along the panel's top. `UiSkin.section_of(title)` picks one from the panel title.
 6. **Same shell everywhere.** Title (+subtitle) top left, extras (chips, tags) and a close X top
    right, tabs under the title, body, footer actions bottom right with the primary last and an Enter
    keycap on it. Esc always closes or goes back.
@@ -88,14 +67,21 @@ What made the menus feel blocky, samey and hard to get through:
    tab you used, and the current choice highlighted.
 9. **Confirm only what can't be undone** (delete a save, leave a match, sell or salvage an Epic or
    Legendary, reset all settings). Everything else happens immediately.
-10. **Motion is short, and nothing grows.** Hover lights a button or card, never makes it bigger.
-    Raised buttons stand on a darker lip and sink onto it when pressed, the label moving with the face,
-    so the button's size never changes. Panels fade and rise in (140-220 ms), toasts drop in (240 ms).
-    Modals blur the screen behind them (160 ms). Nothing bounces.
-11. **Icons next to labels** where they help scanning (hub, pause menu, footers, empty states), drawn
-    with `draw_icon` so they stay crisp at any size.
+10. **Motion is quick and purposeful, and nothing grows** (`UiMotion`). Hover lights a trim and a
+    glow, never resizes (every tier's states have equal margins; the check enforces it). Panels fade
+    and slide up 18 px (200 ms); a pressed button dips to 95% and springs back with a small overshoot
+    (240 ms, scaled about its centre); the picked tab's underline glides to the new tab (220 ms);
+    switch knobs ease across (180 ms); toasts slide down in and lift away. Modals blur the screen
+    behind them (160 ms). With **Fewer flashes** on, all of it becomes plain fades and snaps.
+11. **Icons next to labels** where they help scanning (tabs, hub, pause menu, footers, empty states),
+    from one original set (`UiIcons`, drawn with lines and shapes so they stay crisp at any interface
+    size): tabs (compass, pad, camera, speaker, monitor, access, film, shield, boot, glove, kit, chest,
+    bowl, hat, sprout, coin), sections, currencies and buttons. Known tab names get theirs
+    automatically (`UiSkin.TAB_ICONS`).
 12. **Keyboard and pad.** Every panel has something focused; arrows, Enter and Esc work; focus rings
     show for keyboard and pad only (`gui/common/show_focus_state_on_pointer_event=false`).
+13. **Contrast.** Text colours meet WCAG AA (4.5:1) on panels, cards, button faces and smoked glass
+    over a bright world; `--uipolish-check` computes it from the tokens.
 
 ## 3. Home flow
 
@@ -114,10 +100,16 @@ gets the look. Screens never set a theme themselves; `--uipolish-check` fails if
 script outside the style module builds its own `StyleBoxFlat`.
 
 ### Colours and sizes
-`INK MUTED FAINT BG SURFACE CARD RAISED RIM WELL LINE ACCENT ACCENT_HI GOOD BAD GOLD TEAL INFO DARK_INK`,
-`R_PANEL R_CARD R_CTRL R_SMALL R_PILL`, `T_TITLE T_HEAD T_BODY T_SMALL T_CAPS`, `GAP GAP_BIG PAD`,
-`rarity_col(r)`. The in-match HUD's `HudStyle` uses the same INK and MUTED and the same two fonts. Fonts: `UI.big` (Lilita
-One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700, spaced).
+`INK MUTED FAINT BG SURFACE CARD RAISED RIM WELL LINE BRASS BRASS_HI STITCH ACCENT ACCENT_HI GOOD BAD
+GOLD TEAL INFO DARK_INK`, `R_PANEL R_CARD R_CTRL R_SMALL R_PILL`,
+`T_DISPLAY T_TITLE T_STAT T_HEAD T_LABEL T_BODY T_SMALL T_CAPS`, `GAP GAP_BIG PAD`, `rarity_col(r)`.
+Fonts: `UI.big` (Lilita One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700),
+`UI.num` (Rubik 560, tabular figures). Section colours and tab icons live in `UiSkin`.
+
+**The in-match HUD** keeps its own widgets (`HudStyle`, ext/hudref) and matches the menus through
+shared tokens: the same INK and the two fonts, and for frames the field-kit tokens `UI.BRASS`
+(slot and plate trims), `UI.STITCH` and `UI.SURFACE`/`UI.RIM` (frame backing and outline).
+HudStyle should read these rather than copy them, the way it already shares INK (see §5).
 
 ### Text
 - `title(text, size=34, col=INK)` - Lilita One, one line.
@@ -189,3 +181,16 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
   instead of the partner's card. Hide the bar with `hub.visible = false` while a mode (build mode)
   owns the bottom of the screen.
 - New home panels: `var v := _new_panel("Kin Box", 900)` then fill `v` with the helpers above.
+
+## 5. Hand-off: HudStyle (ext/hudref)
+
+ext/hudref isn't merged yet, so this pass doesn't touch its widgets. When it lands, extend its
+tokens to point at the menu's (no widget restyling):
+```gdscript
+const INK := UI.INK
+const TRIM := Color(UI.BRASS, 0.55)      # new: a 1 px brass line inside slot_frame and plate_frame
+const KEY_BG := Color(UI.SURFACE, 0.95)  # keycap pills on the leather tone
+```
+and draw `TRIM` one pixel inside the existing `slot_frame` and `plate_frame` edges. MUTED stays
+HUD-cool (it reads over the world, not on leather).
+

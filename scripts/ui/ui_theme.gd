@@ -223,7 +223,8 @@ static func _front_menu(t: Theme) -> void:
 	main_h.glow = Color(1, 0.97, 0.85, 0.3)
 	_states(t, "MenuMain", main_n, main_h, _menu_main(a.darkened(0.06), 0.14, true), main_n)
 	var main_f := ring(17)
-	main_f.edge = Color(1, 0.95, 0.85, 0.9)
+	main_f.edge = Color(1, 0.95, 0.85, 0.6)
+	main_f.glow = Color(0, 0, 0, 0)
 	main_f.grow = 4.0
 	t.set_stylebox("focus", "MenuMain", main_f)
 	t.set_font("font", "MenuMain", UI.big)
@@ -268,8 +269,8 @@ static func _inputs(t: Theme) -> void:
 	t.set_color("font_hover_color", "PopupMenu", Color.WHITE)
 	t.set_font_size("font_size", "PopupMenu", UI.T_BODY)
 	t.set_constant("v_separation", "PopupMenu", 8)
-	var tp := UiFrame.raised(UI.CARD, UI.R_CTRL, 12, UI.RIM)
-	tp.trim = Color(UI.BRASS, 0.5)
+	var tp := UiFrame.raised(UI.CARD.lightened(0.06), UI.R_CTRL, 12, UI.RIM)
+	tp.trim = Color(UI.BRASS, 0.75)
 	tp.grain = 0.05
 	tp.padded(12, 8)
 	t.set_stylebox("panel", "TooltipPanel", tp)

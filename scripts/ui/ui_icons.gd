@@ -137,8 +137,11 @@ static func _things(c: CanvasItem, id: String, at: Vector2, s: float, col: Color
 			var ink := Color(0, 0, 0, 0.4)
 			c.draw_line(at + Vector2(-0.15, -0.35) * s, at + Vector2(0.5, -0.35) * s, ink, w * 0.6, true)
 		"compass":
-			c.draw_arc(at, 0.86 * s, 0, TAU, 24, col, w, true)
-			_fill(c, at, s, [[0, -0.62], [0.2, 0], [0, 0.62], [-0.2, 0]], col)
+			c.draw_arc(at, 0.9 * s, 0, TAU, 24, col, w * 0.7, true)
+			_fill(c, at, s, [[0, -0.78], [0.24, -0.1], [-0.24, -0.1]], col)
+			_fill(c, at, s, [[0, 0.78], [0.24, 0.1], [-0.24, 0.1]], Color(col, col.a * 0.55))
+			_fill(c, at, s, [[-0.78, 0], [-0.1, -0.2], [-0.1, 0.2]], Color(col, col.a * 0.55))
+			_fill(c, at, s, [[0.78, 0], [0.1, -0.2], [0.1, 0.2]], Color(col, col.a * 0.55))
 		_:
 			return false
 	return true

@@ -213,7 +213,7 @@ func open_pause(where: String) -> void:
 		if key != "": UI.with_key(b, key)
 		v.add_child(b)
 		return b
-	var res: Button = item.call("Resume", "next", close, "Esc", "Primary")
+	var res: Button = item.call("Resume", "play", close, "Esc", "Primary")
 	var psc = Game.main.screen_node() if where == "match" and Game.main else null
 	var practice: Practice = Practice.of(psc) if psc is Match else null
 	if practice:
@@ -223,9 +223,9 @@ func open_pause(where: String) -> void:
 	item.call("Settings", "gear", func():
 		if tab == "Controls": tab = "Gameplay"
 		open_settings())
-	item.call("Controls", "dash", func(): tab = "Controls"; open_settings())
+	item.call("Controls", "pad", func(): tab = "Controls"; open_settings())
 	if where != "match":
-		item.call("Save files", "satchel", open_saves)
+		item.call("Save files", "book", open_saves)
 	# the rarely used ones: quiet text links in a row
 	var minor := HFlowContainer.new()
 	minor.add_theme_constant_override("h_separation", 4); minor.add_theme_constant_override("v_separation", 2)

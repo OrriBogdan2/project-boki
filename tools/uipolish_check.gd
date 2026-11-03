@@ -260,7 +260,7 @@ func _steady_hover() -> void:
 
 ## The shell wears its section emblem and colour; tabs get icons.
 func _shell_ok(panel: Control) -> bool:
-	return panel.has_meta("sec_col") and not panel.find_children("*", "Emblem", true, false).is_empty()
+	return panel.has_meta("sec_col") and panel.has_meta("emblem") and is_instance_valid(panel.get_meta("emblem"))
 
 ## "Fewer flashes" off: a panel slides in. On: it only fades, a press doesn't scale, toggles snap.
 func _motion() -> void:

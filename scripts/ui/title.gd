@@ -492,14 +492,14 @@ func _build_ui() -> void:
 	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
 	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
-	items.append(["Arena", func(): Game.start_match(Match.arena_opts()), "knock"])
+	items.append(["Arena", func(): Game.start_match(Match.arena_opts()), "shield"])
 	if has:
 		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
 		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
-		items.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "updraft"])
+		items.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "film"])
 	if Net.available():
 		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
-	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
+	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "book"])
 	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
 	if not OS.has_feature("web"):
 		items.append(["Quit", func(): get_tree().quit(), "close"])

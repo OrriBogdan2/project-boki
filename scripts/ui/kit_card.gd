@@ -56,11 +56,11 @@ static func make(arch_id: String, kin_species := "", close_cb := Callable()) -> 
 func _build() -> void:
 	custom_minimum_size = SIZE
 	size = SIZE
-	# the hunter's own frame: lighter leather stitched in the hunter's colour, brass corner guards
+	# the hunter's own frame: lighter leather stitched in the hunter's colour
 	var frame := UiFrame.raised(UI.CARD, UI.R_PANEL, 30, UI.RIM).leather(Color(Arch.color(arch), 0.5), 0.07, 7.0)
 	frame.edge = Color(Arch.color(arch), 0.6)
 	frame.edge_w = 2
-	frame.guards = UI.BRASS
+	frame.trim = Color(UI.BRASS, 0.35)
 	frame.tint = Arch.color(arch)
 	frame.lit = 0.1
 	add_theme_stylebox_override("panel", frame.padded(18, 16))

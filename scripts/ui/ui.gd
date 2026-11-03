@@ -8,7 +8,7 @@ class_name UI
 ## The in-match HUD (HudStyle) shares these colour and font tokens.
 
 # ---------------------------------------------------------------- colour roles
-const INK := Color("f6efe2")                        # text
+const INK := Color("f3eee2")                        # text
 const MUTED := Color("cbbca6")                      # secondary text (warm, AA on every surface)
 const FAINT := Color("a8987f")                      # hints and fine print (AA on panels); disabled
 const BG := Color("1a120e")                         # full-screen menu background
@@ -747,7 +747,9 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 		bb.focus_mode = Control.FOCUS_NONE
 		bb.name = "Close"
 		head.add_child(bb)
-	head.add_child(UiSkin.emblem(String(sec["icon"]), sec["col"], 44.0))
+	var badge_e := UiSkin.emblem(String(sec["icon"]), sec["col"], 44.0)
+	head.add_child(badge_e)
+	p.set_meta("emblem", badge_e)
 	var tcol := vbox(0)
 	tcol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tcol.alignment = BoxContainer.ALIGNMENT_CENTER

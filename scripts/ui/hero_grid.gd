@@ -41,7 +41,15 @@ static func _card(ak: String, cls: String, cur: String, on_pick: Callable, on_ki
 	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(tex)
+	# the portrait sits in a recess in the hunter's colour, trimmed in brass
+	var mount := PanelContainer.new()
+	var well := UiFrame.sunk(Arch.color(ak).darkened(0.72), UI.R_CTRL).padded(3, 3)
+	well.trim = Color(UI.BRASS, 0.7)
+	mount.add_theme_stylebox_override("panel", well)
+	mount.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	mount.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mount.add_child(tex)
+	row.add_child(mount)
 	var col := UI.vbox(2); col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(col)
