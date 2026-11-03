@@ -434,7 +434,15 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	var p0 := P.pos
 	var t0 := T.pos
 	P.inp["fire"] = false
-	step(m, 0.8)
+	m.step(DT)
+	var on_hit := _crescent_ahead(P, K)
+	step(m, 0.15)
+	var in_carry := _crescent_ahead(P, K)
+	ok("bjorn hold: the swing's crescent sweeps in front of him, inside its reach, on the hit and through the carry",
+		on_hit.x > 0.0 and on_hit.y <= float(K.lmb_def()["smash_reach"]) and in_carry.x > 0.0
+			and in_carry.y <= float(K.lmb_def()["smash_reach"]),
+		"hit: ahead %.2f out %.2f; carry: ahead %.2f out %.2f" % [on_hit.x, on_hit.y, in_carry.x, in_carry.y])
+	step(m, 0.65)
 	var lunge := Vector2(P.pos.x - p0.x, P.pos.z - p0.z).dot(Vector2(1, 0))
 	var knock := Vector2(T.pos.x - t0.x, T.pos.z - t0.z).dot(Vector2(1, 0))
 	ok("bjorn hold: the swing moves him forward at least 1.5 m", lunge >= 1.5, "lunge %.2f" % lunge)
@@ -445,6 +453,12 @@ func _glove_q(P: Hunter) -> void:
 	P.gear[0] = {"id": "barrier", "rar": 1}
 	P.gear_cd[0] = 0.0
 	P.inp["gear1"] = true
+
+## The swing crescent's centre against him: x = how far it lies along his facing, y = how far it is from him.
+func _crescent_ahead(P: Hunter, K: BulwarkKit) -> Vector2:
+	var c := K.fx.crescent_centre()
+	var off := Vector2(c.x - P.pos.x, c.z - P.pos.z)
+	return Vector2(off.dot(P.aim_dir()), off.length())
 
 ## #29: the Faultline's trail keeps drawing over the abyss, at his height.
 func _bjorn_abyss() -> void:

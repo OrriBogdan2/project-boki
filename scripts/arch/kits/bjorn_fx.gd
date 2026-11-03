@@ -25,6 +25,10 @@ const FLARE_T := 0.15
 ## s the slam's crescent stays at full strength, then s it burns away over
 const CRES_HOLD := 0.1
 const CRES_FADE := 0.2
+## m: the crescent's band (inner, outer radius) and its height over his feet
+const CRES_IN := 1.1
+const CRES_OUT := 2.9
+const CRES_Y := 0.45
 const SWIRL_T := 0.45
 const BASH_T := 0.2
 ## the dash's after-image: a gold chevron wake left behind at chest height, how long each lasts (s), how
@@ -120,7 +124,7 @@ func _ready() -> void:
 		KitShaders.param(star, "white", 0.25)
 	var orbit_mesh := KitMeshes.band(ORBIT_IN, ORBIT_OUT, ORBIT_ARC, 0.0, 36)
 	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", ORBIT_COL, true))
-	var cres_mesh := KitMeshes.band(1.1, 2.9, -PI * 0.5, PI * 0.5, 40)
+	var cres_mesh := KitMeshes.band(CRES_IN, CRES_OUT, -PI * 0.5, PI * 0.5, 40)
 	crescent = KitMeshes.inst(self, cres_mesh, KitShaders.mat("crescent", Color(1.0, 0.6, 0.12), true))
 	var swirl_mesh := KitMeshes.band(1.0, 2.4, 0.0, TAU, 48)
 	swirl = KitMeshes.inst(self, swirl_mesh, KitShaders.mat("swirl", Color("e8301a"), true))
@@ -285,13 +289,26 @@ func _whirl(pv: Node3D) -> void:
 		KitShaders.param(glint, "power", lerpf(0.8, 1.5, glint_k))
 
 # ------------------------------------------------------------------ slam crescent and smash swirl
-## The Crushing Blow's crescent: 180 degrees in front of `at` toward `dir`, bigger with the charge k.
-func slam(at: Vector3, dir: Vector2, k: float) -> void:
+## The Crushing Blow's crescent: 180 degrees in front of him toward `dir` (the blow's hit area), bigger with the
+## charge k. It rides with him through the slam's carry, so it stays in front instead of being left behind.
+func slam(dir: Vector2, k: float) -> void:
 	crescent.visible = true
-	crescent.global_position = at + Vector3(0, 0.45, 0)
+	crescent.global_position = _cres_at()
 	crescent.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
 	crescent.scale = Vector3.ONE * lerpf(0.85, 1.0, k)
 	cres_t = CRES_HOLD + CRES_FADE
+
+## Where the crescent is drawn this frame: on him, so it rides through the carry.
+func _cres_at() -> Vector3:
+	return h.pos + Vector3(0, CRES_Y, 0)
+
+## Where the crescent's area centres on the ground as drawn now (the centroid of its half band), for checks.
+func crescent_centre() -> Vector3:
+	var r3 := pow(CRES_OUT, 3) - pow(CRES_IN, 3)
+	var r2 := CRES_OUT * CRES_OUT - CRES_IN * CRES_IN
+	var reach := 4.0 / (3.0 * PI) * r3 / r2 * crescent.scale.x
+	var ahead := -crescent.basis.z.normalized()
+	return _cres_at() + ahead * reach - Vector3(0, CRES_Y, 0)
 
 func smash_ring(at: Vector3) -> void:
 	swirl.visible = true
@@ -479,6 +496,7 @@ func _tick_flare(delta: float) -> void:
 func _tick_slam(delta: float) -> void:
 	if cres_t > 0.0:
 		cres_t -= delta
+		crescent.global_position = _cres_at()
 		KitShaders.param(crescent, "life", clampf(cres_t / CRES_FADE, 0.0, 1.0))
 		crescent.visible = cres_t > 0.0
 	if bash_t > 0.0:

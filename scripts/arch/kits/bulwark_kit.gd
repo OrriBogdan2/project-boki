@@ -463,7 +463,7 @@ func _smash() -> void:
 		var carry := lerpf(float(cr[0]), float(cr[1]), k)          # m carried over CARRY_T
 		h.dash_with({"type": "dash", "speed": carry / CARRY_T, "time": CARRY_T, "invuln": 0.0, "dir": dv, "trail": "dust"})
 	var front := h.pos + Vector3(dv.x, 0, dv.y) * 1.6
-	fx.slam(h.pos, dv, k)
+	fx.slam(dv, k)
 	m.fx.dust(front, 8 + int(10 * k))
 	for f in foes_in(h.pos + Vector3(dv.x, 0, dv.y) * 1.2, float(md["smash_reach"]), 2.2):
 		_impact_trail(f, dv, k)
