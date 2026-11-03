@@ -18,7 +18,10 @@ const SPEC := {
 	"tender_e": {"strip": [0.36, 0.4, 0.48, 0.6, 1.06, 1.14], "keys": {"e": 0.5, "e_thrown": 1.3}},
 	"tender_dash": {"strip": [0.31, 0.35, 0.41, 0.47, 0.53], "keys": {"dash": 0.41}},
 	"tender_air": {
-		"strip": [0.33, 0.5, 0.8, 1.1, 1.3], "keys": {"air_start": 0.28, "air": 0.46, "air_float": 0.8, "air_land": 1.3}},
+		"strip": [0.33, 0.5, 0.8, 1.1, 1.3],
+		"keys": {"air_start": 0.28, "air": 0.46, "air_float": 0.8, "air_land": 1.3}},
+	"tender_airsteer": {
+		"strip": [0.33, 0.6, 0.85, 1.1, 1.3], "keys": {"steer_start": 0.3, "steer_mid": 0.85, "steer_end": 1.3}},
 	"tender_carry": {"strip": [0.3, 0.45, 0.6, 1.0, 1.5, 2.0], "keys": {"carry": 1.5}},
 	"tender_payoff": {"strip": [2.6, 2.75, 2.82, 2.9, 3.0, 3.2], "keys": {"payoff": 2.82}},
 	"tender_walk": {"strip": [0.6, 0.68, 0.76, 0.84, 0.92, 1.0], "keys": {"walk": 0.8}},
@@ -161,7 +164,7 @@ static func _script(
 		A: Arena, P: Hunter, D: Hunter, Al: Hunter, arch: String, what: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	var go := 0.3
-	if t < 0.2 and (what in ["skateult", "skatefire"] or (arch == "tender" and what in ["dash", "air"])):
+	if t < 0.2 and (what in ["skateult", "skatefire"] or (arch == "tender" and what in ["dash", "air", "airsteer"])):
 		_open_lane(A, P, Al)
 	match what:
 		"rmb":
@@ -183,8 +186,10 @@ static func _script(
 				K.use_e()
 		"dash":
 			_dash(A, P, arch, t, dt)
-		"air":
+		"air", "airsteer":
 			P.inp["move"] = A.get_meta("care_right", Vector2(1, 0))
+			if what == "airsteer" and t > 0.55:
+				P.inp["move"] = A.get_meta("care_fwd", Vector2(0, -1))      # steer the glide round mid-flight
 			if _at(t, dt, 0.2):
 				P.vel.y = 6.0
 				if arch == "rimewright":
