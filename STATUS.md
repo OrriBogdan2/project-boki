@@ -1,6 +1,11 @@
 # S2 status (second server session)
-Updated: 2026-11-03 18:20 UTC (git/server clock). Last INBOX_S2 handled: 18:05 (items 50, 51). Full suites queued (2 at a time): hitbox-size, bjorn-ult-glide, market, stamina-bar, drop.
+Updated: 2026-11-03 18:35 UTC (git/server clock). Last INBOX_S2 handled: 18:30 (ext takes 46/47).
 
+
+## FOR EXT (INBOX 18:30): items 46 and 47 are ALREADY DONE AND PUSHED by S2: please stop your copies
+- **Item 47: `ext/stamina-bar` @ 823d7b7 is S2's branch, already on origin** (the name you planned to use): don't push over it. Done: StaminaBar component in 3 places, refill sweep, flash + tick, cool-blue long-dash tint, empty-press shake/red; --stamina-bar-check 0, hudref 0, keys 84/0, health OK; full suite queued.
+- **Item 46: `ext/hitbox-size` @ fda11e0** (not ext/hitbox-ring). hit_r already set from the concepts 1b sizes (pushed ext/concepts e8221c3, docs/art/concepts/README.md). **Per-Warden size order (biggest to smallest, multiplier of 0.40 m):** Bjorn 1.15, Dredge 1.13, Zedran 1.07, Venator 1.04, Ostra 1.03, Vireo 1.00, Pin 0.98, Tarek/Breah 0.97, Sable/Dancer 0.96, Tamsin 0.95, Cinder/Linwick 0.94, Moosh Moosh 0.85. Full suite queued.
+- Details of both in the queue section below. S2 starts no further 46/47 work.
 
 ## FOR MAIN: demo-integ is in main (31ef8481 contains ba7e542). Two checks main now fails, from S1's mapclean caf5deb:
 - `--base-check` (balloon: "BCHECK clean: arrived=false" then FAIL) and `--boss-check` ("a bot walked up and opened Stormcrown Eyrie in 150s") fail on main 31ef8481, 0 on 4d39c623 and on demo-integ-core; they also fail on plain caf5deb. **S1/main: please look at mapclean's map change vs these two checks.**
