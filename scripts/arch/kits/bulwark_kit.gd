@@ -50,6 +50,7 @@ var shoved := {}               # foe id -> {foe, dir, left}: foes sliding back o
 var pushed_at := {}            # foe id -> when the aegis last pushed it (one push per "push_gap")
 var pushes := 0                # (checks) foes the raised aegis has pushed back
 var dash_after_plant := false  # Shift came in while planted for Faultline: the dash goes when the plant ends
+var step_until := 0.0          # the swing's step or the perfect launch runs until this time
 var glove_cd_seen := [0.0, 0.0] # each glove slot's cooldown last step: a jump means a glove just went off
 ## s after a slam or a spin hit before he can open the glider (wiki: wind-down frames keep the momentum)
 const WINDDOWN := 0.3
@@ -155,6 +156,8 @@ func _tick(dt: float) -> void:
 	_tick_glove()
 	_tick_mace(dt)
 	ult.tick(dt)
+	if h.dash_buf > 0.0 and m.time < step_until:
+		h.roll_t = 0.0         # Shift in the swing's step or launch: the dash goes now (item 51), not at its end
 	launch.tick(dt)
 	if dash_after_plant and not ult.planted():
 		dash_after_plant = false
@@ -360,7 +363,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return true
 	if hold_blocked:
 		return true
-	if not h.can_fire() or h.fire_cd > 0.0:
+	# a hold carried through a dash (hold rows: keep) charges on in it and swings on the release
+	var rides_dash := lmb_t >= 0.0 and flow.move_now() in ["ground", "air"]
+	if not rides_dash and (not h.can_fire() or h.fire_cd > 0.0):
 		return true
 	var md := lmb_def()
 	if not mace.is_empty():
@@ -393,12 +398,20 @@ func lmb_override(held: bool, dt: float) -> bool:
 		lmb_t = maxf(lmb_t, 0.0) + dt
 		h.mel_hold = lmb_t
 		_hold_tell()
+		_resume_wind()
 		if lmb_t >= float(md["full"]) + 0.4:
 			_smash()           # held well past full: it goes off by itself
 	elif lmb_t >= 0.0:
 		if lmb_t < float(md["tap"]): _throw()
 		else: _smash()
 	return true
+
+## Out of a dash with the swing still held: back into the spin's pose at the point the charge has reached (the
+## kit move eases over from the dash's).
+func _resume_wind() -> void:
+	if anim_id in ["bul_short", "bul_lumber", "bul_whirl"] and h.roll_t <= 0.0 and lmb_t >= float(lmb_def()["tap"]):
+		play("bul_smash_wind")
+		anim_at = m.time - (lmb_t - float(lmb_def()["tap"]))
 
 ## True while something else has him: a move whose hold row ends the hold (content/dash_flow/bulwark.json: a
 ## mantle), a glide, a stun, a launch or a hard knock. The held Crushing Blow ends the moment one starts, and the
@@ -448,7 +461,8 @@ const CARRY_T := 0.24          # s the slam's forward step lasts
 
 ## The Crushing Blow let go: the hammer sweeps round from behind into a 180 degree flaming crescent in
 ## front and the slam steps him forward ("carry" m); let go in the perfect window it launches him instead
-## (BjornLaunch), knocks harder ("perfect.kb_k") and lands with a heavier hit-stop and shake.
+## (BjornLaunch), knocks harder ("perfect.kb_k") and lands with a heavier hit-stop. His own swing never shakes his
+## screen (item 50, the owner's rule): the hit-stop, the crescent, the dust and the sound carry it.
 func _smash() -> void:
 	var md := lmb_def()
 	var k := smash_k()
@@ -479,26 +493,21 @@ func _smash() -> void:
 		_impact_trail(f, dv, k)
 		if perfect:
 			Feel.hitstop(m, h, f, dmg, {"melee": true, "heavy": true, "payoff": true})
-	var tier := "t2"
-	if perfect:
-		tier = "t4"
-	elif full:
-		tier = "t3"
-	Feel.shake(m, tier, h, h.pos)
 	var heavier := 1.0 if perfect else 0.0
 	if h.is_local(): Oomph.punch_dir(m, dv, 0.15 + 0.25 * k + 0.15 * heavier)
 	m.sfx("bjorn_slam", h.pos, lerpf(-4.0, 0.0, k) + 2.0 * heavier, lerpf(1.1, 0.85, k) - 0.1 * heavier)
 
 ## The normal swing's step: "carry" m (more with the charge) over CARRY_T, on the ground only, then a short
-## wind-down before the glider can open.
+## wind-down before the glider can open. Let go in the air or in a dash, the swing rides the move he's in.
 func _carry(dv: Vector2, k: float) -> void:
 	play("bul_smash")
 	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
-	if not h.grounded:
+	if not h.grounded or h.roll_t > 0.0:
 		return
 	var cr: Array = lmb_def().get("carry", [1.5, 1.8])
 	var carry := lerpf(float(cr[0]), float(cr[1]), k)
 	h.dash_with({"type": "dash", "speed": carry / CARRY_T, "time": CARRY_T, "invuln": 0.0, "dir": dv, "trail": "dust"})
+	step_until = m.time + CARRY_T
 
 ## A foe the slam caught: a white dust puff on them, then a debris trail as they fly back.
 func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
@@ -699,13 +708,13 @@ func on_dash(use_ex: bool) -> bool:
 		dash_after_plant = true          # planted for the slam: Shift goes when the plant ends (into_dash.x)
 		return true
 	var dd := dash_def()
-	var dash_ends_hold := flow.ends_hold("lmb", flow.dash_move())
-	var winding := lmb_t > float(lmb_def().get("tap", 0.2)) and dash_ends_hold
-	if dash_ends_hold:
+	var winding := lmb_t > float(lmb_def().get("tap", 0.2))
+	if flow.ends_hold("lmb", flow.dash_move()):
 		cancel_hold()
+		winding = false
 	if winding and h.grounded and mace.is_empty():
-		# Shift while winding up the Crushing Blow (into_dash.lmb): it ends, with a short plain dash (no spin) for
-		# half a charge
+		# Shift while winding up the Crushing Blow: a short plain dash (no spin: the hammer is busy) for half a
+		# charge, the swing still charging through it (hold.lmb.ground)
 		if not spend_dash(false): return true
 		h.dashes = minf(h.max_dashes(), h.dashes + 0.5)       # (half the charge comes back: the reduced cooldown)
 		var sd2 := float(dd.get("short", 2.6))

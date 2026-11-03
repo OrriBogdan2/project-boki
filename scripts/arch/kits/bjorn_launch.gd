@@ -31,17 +31,17 @@ func in_window(held_t: float) -> bool:
 func running() -> bool:
 	return left > 0.0
 
-## The perfect swing let go: the launch along `dir` (on the ground; in the air the swing stays put).
+## The perfect swing let go: the launch along `dir`, from the ground or the air (out of a jump or a dash: in the
+## air it holds his height like an air dash, then the glider takes its speed or he falls on).
 func start(dir: Vector2) -> void:
 	launches += 1
 	k.play("bul_launch")
-	if not h.grounded:
-		return
 	var t := float(pd().get("time", 0.3))
 	speed = float(pd().get("dist", 4.0)) / t
 	left = t
 	glide_was = bool(h.inp.get("glide", false))
 	h.dash_with({"type": "dash", "speed": speed, "time": t, "invuln": 0.0, "dir": dir, "trail": ""})
+	k.step_until = k.m.time + t
 
 ## Every step: a mantle ends it; a fresh glide or jump press jumps out into a glide; past its end, off a drop the
 ## glider opens by itself, and on the ground his feet plant in a scuff of dust (the skid is bul_launch's).
