@@ -2618,6 +2618,62 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 
 ![Walk cycle at 1.4x cadence (gameplay zoom)](tamsin/v2/polish/rimewright_walk_strip_game.png)
 
+**round2: skate strip with the lean capped at about 23 deg (own 'skate' dash pose, no stacked light-dash lean): upright on her blades; the close-up's last frames run off the arena edge (demo framing) (gameplay zoom)**
+
+![round2: skate strip with the lean capped at about 23 deg (own 'skate' dash pose, no stacked light-dash lean): upright on her blades; the close-up's last frames run off the arena edge (demo framing) (gameplay zoom)](tamsin/v2/polish/r2_rimewright_dash_strip_game.png)
+
+**round2: skate strip with the lean capped at about 23 deg (own 'skate' dash pose, no stacked light-dash lean): upright on her blades; the close-up's last frames run off the arena edge (demo framing) (close-up)**
+
+![round2: skate strip with the lean capped at about 23 deg (own 'skate' dash pose, no stacked light-dash lean): upright on her blades; the close-up's last frames run off the arena edge (demo framing) (close-up)](tamsin/v2/polish/r2_rimewright_dash_strip_close.png)
+
+**round2: skating at 11.5 m/s, lean capped at about 23 deg (gameplay zoom)**
+
+![round2: skating at 11.5 m/s, lean capped at about 23 deg (gameplay zoom)](tamsin/v2/polish/r2_rimewright_dash_game.png)
+
+**round2: skating at 11.5 m/s, lean capped at about 23 deg (close-up)**
+
+![round2: skating at 11.5 m/s, lean capped at about 23 deg (close-up)](tamsin/v2/polish/r2_rimewright_dash_close.png)
+
+**round2: firing while skating, upright with the capped lean (gameplay zoom)**
+
+![round2: firing while skating, upright with the capped lean (gameplay zoom)](tamsin/v2/polish/r2_rimewright_skatefire_strip_game.png)
+
+**round2: firing while skating, upright with the capped lean (close-up)**
+
+![round2: firing while skating, upright with the capped lean (close-up)](tamsin/v2/polish/r2_rimewright_skatefire_strip_close.png)
+
+**round2: firing while skating, upright with the capped lean (gameplay zoom)**
+
+![round2: firing while skating, upright with the capped lean (gameplay zoom)](tamsin/v2/polish/r2_rimewright_skatefire_game.png)
+
+**round2: firing while skating, upright with the capped lean (close-up)**
+
+![round2: firing while skating, upright with the capped lean (close-up)](tamsin/v2/polish/r2_rimewright_skatefire_close.png)
+
+**round2: Ice Spear held: ice-blue 9af0ff crystal with dark teal edges, white only at the tip glint (gameplay zoom)**
+
+![round2: Ice Spear held: ice-blue 9af0ff crystal with dark teal edges, white only at the tip glint (gameplay zoom)](tamsin/v2/polish/r2_rimewright_rmb_aim_game.png)
+
+**round2: Ice Spear held: ice-blue 9af0ff crystal with dark teal edges, white only at the tip glint (close-up)**
+
+![round2: Ice Spear held: ice-blue 9af0ff crystal with dark teal edges, white only at the tip glint (close-up)](tamsin/v2/polish/r2_rimewright_rmb_aim_close.png)
+
+**round2: Ice Spear in flight: ice-blue body and a blue trail, white only at the tip glint and a short frost streak (gameplay zoom)**
+
+![round2: Ice Spear in flight: ice-blue body and a blue trail, white only at the tip glint and a short frost streak (gameplay zoom)](tamsin/v2/polish/r2_rimewright_rmb_fly_game.png)
+
+**round2: Ice Spear in flight: ice-blue body and a blue trail, white only at the tip glint and a short frost streak (close-up)**
+
+![round2: Ice Spear in flight: ice-blue body and a blue trail, white only at the tip glint and a short frost streak (close-up)](tamsin/v2/polish/r2_rimewright_rmb_fly_close.png)
+
+**round2: Ice Spear aim and throw with the ice-blue spear (gameplay zoom)**
+
+![round2: Ice Spear aim and throw with the ice-blue spear (gameplay zoom)](tamsin/v2/polish/r2_rimewright_rmb_strip_game.png)
+
+**round2: Ice Spear aim and throw with the ice-blue spear (close-up)**
+
+![round2: Ice Spear aim and throw with the ice-blue spear (close-up)](tamsin/v2/polish/r2_rimewright_rmb_strip_close.png)
+
 ## moosh-moosh/v2/polish (moosh-moosh/v2/polish)
 
 **Air glide: the head-first streak with ember motes (close-up)**
@@ -2876,6 +2932,30 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 
 ![Walk cycle at 1.25x cadence: per-step bob and tail swing (gameplay zoom)](moosh-moosh/v2/polish/tender_walk_strip_game.png)
 
+**round2: Ember Cast in flight (0.52 m head, 2 m amber tail, stronger halo), frame retimed to mid-flight (gameplay zoom)**
+
+![round2: Ember Cast in flight (0.52 m head, 2 m amber tail, stronger halo), frame retimed to mid-flight (gameplay zoom)](moosh-moosh/v2/polish/r2_tender_lmb_fly_game.png)
+
+**round2: Ember Cast in flight (0.52 m head, 2 m amber tail, stronger halo), frame retimed to mid-flight (close-up)**
+
+![round2: Ember Cast in flight (0.52 m head, 2 m amber tail, stronger halo), frame retimed to mid-flight (close-up)](moosh-moosh/v2/polish/r2_tender_lmb_fly_close.png)
+
+**round2: air glide at the source distance, 12 m (measured 12.4 m in the check); runs past the arena edge in this demo (gameplay zoom)**
+
+![round2: air glide at the source distance, 12 m (measured 12.4 m in the check); runs past the arena edge in this demo (gameplay zoom)](moosh-moosh/v2/polish/r2_tender_air_strip_game.png)
+
+**round2: air glide at the source distance, 12 m (measured 12.4 m in the check); runs past the arena edge in this demo (close-up)**
+
+![round2: air glide at the source distance, 12 m (measured 12.4 m in the check); runs past the arena edge in this demo (close-up)](moosh-moosh/v2/polish/r2_tender_air_strip_close.png)
+
+**round2: air glide at 12 m (gameplay zoom)**
+
+![round2: air glide at 12 m (gameplay zoom)](moosh-moosh/v2/polish/r2_tender_air_game.png)
+
+**round2: air glide at 12 m (close-up)**
+
+![round2: air glide at 12 m (close-up)](moosh-moosh/v2/polish/r2_tender_air_close.png)
+
 ## vireo/v2/polish (vireo/v2/polish)
 
 **Run: upright, both arms held out wide, short quick steps**
@@ -3090,6 +3170,18 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 
 ![E strike: lightning, the target dragged toward her, Grounded with shackle rings (close-up)](vireo/v2/polish/vireo_e_strike_close.png)
 
+**round2: LMB right-hand strip (close-up crop): no white ball at the hand on the first firing frame (the stock round is hidden before that frame is drawn)**
+
+![round2: LMB right-hand strip (close-up crop): no white ball at the hand on the first firing frame (the stock round is hidden before that frame is drawn)](vireo/v2/polish/r2_vireo_anim_lmb_r.png)
+
+**round2: LMB release at gameplay zoom: teal fingertip crackle and bolt, no white glow ball**
+
+![round2: LMB release at gameplay zoom: teal fingertip crackle and bolt, no white glow ball](vireo/v2/polish/r2_vireo_lmb_fire.png)
+
+**round2: LMB release (close-up): teal fingertip crackle and bolt, no white glow ball**
+
+![round2: LMB release (close-up): teal fingertip crackle and bolt, no white glow ball](vireo/v2/polish/r2_vireo_lmb_fire_close.png)
+
 ## venator/v2/polish (venator/v2/polish)
 
 **LMB, one round: rest, the 0.03s shoulder kick with the muzzle flipped up, recovering, ready**
@@ -3243,6 +3335,22 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Hot Streak: the knock gives Slipstep back: +KNOCK, the ember column and ring on him (close-up)**
 
 ![Hot Streak: the knock gives Slipstep back: +KNOCK, the ember column and ring on him (close-up)](venator/v2/polish/venator_knock_close.png)
+
+**round2: Slipstep strip (close-up crop): his body stays clear; the deep-ember after-images are translucent (0.35 alpha fading out), sit behind him in depth and show only once he is off them, as a trail behind**
+
+![round2: Slipstep strip (close-up crop): his body stays clear; the deep-ember after-images are translucent (0.35 alpha fading out), sit behind him in depth and show only once he is off them, as a trail behind](venator/v2/polish/r2_venator_anim_dash.png)
+
+**round2: Slipstep at gameplay zoom, 0.12 s in: no salmon blob over his body**
+
+![round2: Slipstep at gameplay zoom, 0.12 s in: no salmon blob over his body](venator/v2/polish/r2_venator_dash.png)
+
+**round2: Slipstep (close-up), 0.12 s in: no salmon blob over his body**
+
+![round2: Slipstep (close-up), 0.12 s in: no salmon blob over his body](venator/v2/polish/r2_venator_dash_close.png)
+
+**round2: air dash strip: the same translucent trailing after-images (fainter than before)**
+
+![round2: air dash strip: the same translucent trailing after-images (fainter than before)](venator/v2/polish/r2_venator_anim_dash_ex.png)
 
 ## pin/v2/polish (pin/v2/polish)
 
