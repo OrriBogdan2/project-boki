@@ -177,6 +177,7 @@ func _trial(m: Match, slot: String, in_air: bool, late: bool) -> String:
 		if not dashing and ended < 0:
 			ended = i
 		m.step(Match.DT)
+		hunter.inp["fire"] = false      # DashFlow's replayed LMB is a tap: let go, or a hold-to-charge weapon charges
 		if _went_off(before, slot):
 			wait_s = float(i - ended) * Match.DT
 			return "fire" if dashing else "buffer"
