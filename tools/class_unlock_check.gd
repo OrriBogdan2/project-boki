@@ -439,8 +439,8 @@ func _new_game_flow(tree: SceneTree) -> void:
 	for i in 6: await tree.process_frame
 	if hx.stage == "pick": screens += 1
 	ok(hx.stage == "pick" and screens <= 2, "Enter takes it to the egg pick: screen %d after the intro" % screens)
-	ok(hx.create_box == null and hx.preview == null and Save.d.has("look"),
-			"no hunter creator on the way (a default look is set; Change your look is in the farm's menu)")
+	ok(hx.creator == null and hx.preview == null and Save.d.has("look"),
+			"no creator before the egg pick (a neutral look is set; you make yourself after naming the Boki)")
 	ok(hx.get_script().source_code.find("night after the storm") < 0, "the three story lines are deleted, not skipped")
 	await shot(tree, "egg_pick", 30)
 	hx.queue_free()
