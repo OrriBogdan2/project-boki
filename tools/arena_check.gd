@@ -210,8 +210,10 @@ func _arena() -> void:
 	# kits2: the sparring bot really uses the Thief's and the Juggernaut's kits on you
 	# (their ultimates on X open at level 6, and the sparring bot is level 1: its kit here is RMB, E and the dash)
 	for ba in ["thief", "juggernaut"]:
-		# the bot's dice must not depend on how many rolls the earlier sections took (as in main.gd's bot checks)
+		# the bot's dice must not depend on how many rolls the earlier sections took (as in main.gd's bot checks):
+		# the global dice and the match's own, which rolls the new bot's mind (skill, strafe side, timings)
 		seed(2024)
+		m.rng.seed = 2024
 		A.set_bot_arch(ba)
 		var B: Hunter = A.bot
 		P.teleport(A.home); B.teleport(A.home + Vector3(5.0, 0, 0))
