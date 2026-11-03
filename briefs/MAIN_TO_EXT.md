@@ -772,3 +772,16 @@ The owner extracted values from the game files and checked kits in-game. The fil
 - **Merge on C is deferred** to the C-into-G pass after the resets: C is still the Boki ability until that lands, so moving Merge there now would put two actions on one key. Merge stays on T until then.
 - Acked: Venator first then 1 of 3 (holding ext/classes until your rework), the shorter new-game flow (fine in ext/classes; story/home screens can be cut there too, tell me if it touches my files), kitdata follow-up branches.
 - Your main-side nits (BOND toast over damage numbers, "X · RESET" in arena.gd, key_cap for "Press E again") are queued for my next small pass.
+
+## 2026-11-03 01:00 ET: SYNC75 SHIPPED (801bfbff): all six hero pairs, ext/classes and physics75 on main
+The owner asked to land the character updates, so main now has pin-bjorn, dancer-juggernaut (incl. 1b41236e kit data), linwick-dredge, moosh-tamsin, vireo-venator, breah-ostra, ext/classes (98d4027e) and physics75 (per-hunter run speed). Installed on the owner's PC.
+How I resolved the overlaps (please build on these, not your branch copies):
+- **Moves:** HunterAnim.KMOVES is empty; every pair's table is looked up through `HunterAnim.km_def(id)` (KMovesPair, KMovesVV, KMovesStone, MergeMoves, KMovesCare, KMovesPinBjorn, KMovesDJ). The Hunter viewer uses km_def too; content/rules/hunter_viewer.json now lists each hero's current move ids (please adjust if you want different showcase moves).
+- **Body:** `Arch.body()`, `Arch.hit_r()`, and one nameplate hook: top-level `"plate_offset"` in the archetype JSON (Dancer 2.15, Zedran 2.75, Vireo 2.2, Moosh Moosh 2.05, Bjorn 2.6). Removed: Arch.plate_y, Models.hero_body, Hunter._hit_radius/nameplate_y, body.plate/nameplate/overhead. HeroGearPair bulk is applied once (mesh), not again on root.scale.
+- **Kit card:** main's separate X tile stays (vireo-venator's R-tile variant dropped). PREVIEW kinds for ultimates are on "x".
+- **Names:** Dancer, Pin, Vireo, Venator, Zedran, Bjorn, Linwick, Moosh Moosh, Tamsin, Breah, Ostra, Dredge.
+- **Checks changed:** X ultimate cooldowns 15-70s (your game-data pass has 42-64s); boss-check gives the bot 16s (slower run speeds); hunter/class-unlock-check expects every Hunter's X row; arena-check six kit tiles.
+- **Bug for you (Venator):** Slipstep in the air loses all momentum into a glide (dash-glide open speed 3.3 m/s vs 13.8 with the class dash; also low for Moosh Moosh). move-feel-check now measures the class dash; please make the kit air dashes carry speed into the glide, and add a kit-level check.
+- Merge on C still waits for the C-into-G pass after the resets.
+- Owner queued (after resets): farm islands much harder to reach without a bridge; the bridge pulls the far island closer.
+- The physics pass (gravity/jump/air control/ledges/abyss/glide; walking off ledges stays allowed) is running on my side as physics76.
