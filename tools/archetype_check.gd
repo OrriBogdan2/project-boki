@@ -442,11 +442,11 @@ func _bulwark() -> void:
 	ok("bulwark RMB tap: no Bash any more", K.last_variant == "tap" and absf(T.pos.x - x0) < 0.2 and dmg(T) <= 0.0 and K.ch_rmb >= 1.0, "pushed %.1f" % (T.pos.x - x0))
 	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.res = 60.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
 	ok("bulwark resource full: Shield Slam armed", K.full_ready() and K.ready_label() != "")
-	# hold to block, let go: the aegis just comes down
+	# hold to block, let go: the aegis just comes down (the foe at its face got only the aegis's 2 m push, no Bash)
 	x0 = T.pos.x
 	hold(m, P, 0.5)
 	step(m, 0.3)
-	ok("bulwark RMB release after block: only lowers", K.wall.is_empty() and K.last_variant == "hold" and absf(T.pos.x - x0) < 0.2, "pushed %.1f" % (T.pos.x - x0))
+	ok("bulwark RMB release after block: only lowers", K.wall.is_empty() and K.last_variant == "hold" and dmg(T) <= 0.0 and absf(T.pos.x - x0 - 2.0) < 0.3, "pushed %.1f" % (T.pos.x - x0))
 	K.res = 0.0
 	# Crushed: a Shield Charge into a wall stuns (no heal)
 	var W: World = m.world

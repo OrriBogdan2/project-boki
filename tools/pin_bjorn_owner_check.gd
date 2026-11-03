@@ -19,7 +19,7 @@ func rmb_at(P: Hunter, at: Vector3) -> void:
 	aim_at(P, at)
 
 ## Casts E at once with its cooldown cleared.
-func cast_e_at(P: Hunter, K: ArcherKit, at: Vector3) -> void:
+func cast_e_at(P: Hunter, K: ArchKit, at: Vector3) -> void:
 	K.cd["e"] = 0.0
 	P.inp["aim"] = at
 	P.ak.use_e()
