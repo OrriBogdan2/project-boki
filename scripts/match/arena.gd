@@ -352,7 +352,6 @@ func _build_ui() -> void:
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.theme = UI.theme()
 	layer.add_child(root)
 	hint = UI.label(KEYS_HINT, 13, Color(1, 1, 1, 0.8), UI.big)
 	hint.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -409,7 +408,6 @@ func _open_card() -> void:
 	m.add_child(card_layer)
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.theme = UI.theme()
 	card_layer.add_child(root)
 	var shade := ColorRect.new(); shade.color = Color(0, 0, 0, 0.35)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -446,7 +444,6 @@ func open_menu() -> void:
 	m.add_child(menu_layer)
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.theme = UI.theme()
 	menu_layer.add_child(root)
 	var shade := ColorRect.new(); shade.color = Color(0, 0, 0, 0.4)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -455,7 +452,7 @@ func open_menu() -> void:
 	root.add_child(center)
 	var pn := PanelContainer.new()
 	pn.custom_minimum_size = MENU
-	pn.add_theme_stylebox_override("panel", KitCard._box(Color(0.055, 0.06, 0.09, 0.97), 16, Color(1, 1, 1, 0.12), 1, 18, 14))
+	pn.add_theme_stylebox_override("panel", UI.frame(UI.SURFACE, UI.R_PANEL, Color(1, 1, 1, 0.12), 1, 18, 14))
 	center.add_child(pn)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 10)

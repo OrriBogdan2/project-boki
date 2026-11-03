@@ -53,10 +53,12 @@ static func make(arch_id: String, kin_species := "", close_cb := Callable()) -> 
 	return c
 
 func _build() -> void:
-	theme = UI.theme()
 	custom_minimum_size = SIZE
 	size = SIZE
-	add_theme_stylebox_override("panel", _box(Color(0.055, 0.06, 0.09, 0.96), 16, Color(Arch.color(arch), 0.55), 2))
+	var frame := UiFrame.raised(UI.SURFACE, UI.R_PANEL, 30, UI.RIM)
+	frame.edge = Color(Arch.color(arch), 0.55)
+	frame.edge_w = 2
+	add_theme_stylebox_override("panel", frame.padded(14, 12))
 	var d := Arch.def(arch)
 	var cd: Dictionary = d.get("card", {})
 	var col := Arch.color(arch)
@@ -78,7 +80,7 @@ func _build() -> void:
 		hd.add_child(UI.ghost("Close  (K)", on_close, 120))
 	# how the kit fits together: one line
 	var lp := PanelContainer.new()
-	lp.add_theme_stylebox_override("panel", _box(Color(col, 0.14), 10, Color(0, 0, 0, 0), 0, 12, 8))
+	lp.add_theme_stylebox_override("panel", UI.frame(Color(col, 0.14), UI.R_CTRL, Color(0, 0, 0, 0), 0, 12, 8))
 	var ll := UI.label(String(cd.get("loop", d.get("fantasy", ""))), 17, UI.INK, UI.big)
 	ll.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lp.add_child(ll)
@@ -112,8 +114,8 @@ func _tile(slot: String) -> Control:
 	t.custom_minimum_size = TILE
 	t.focus_mode = Control.FOCUS_NONE
 	t.flat = true
-	var n := _box(Color(1, 1, 1, 0.045), 12, Color(col, 0.35), 1)
-	var hv := _box(Color(1, 1, 1, 0.085), 12, Color(col, 0.8), 2)
+	var n := UI.frame(Color(1, 1, 1, 0.045), UI.R_CARD, Color(col, 0.35), 1, 14, 12)
+	var hv := UI.frame(Color(1, 1, 1, 0.085), UI.R_CARD, Color(col, 0.8), 2, 14, 12)
 	t.add_theme_stylebox_override("normal", n)
 	t.add_theme_stylebox_override("hover", hv)
 	t.add_theme_stylebox_override("pressed", hv)
@@ -208,7 +210,7 @@ func _show_detail(slot: String) -> void:
 ## The Boki strip: its own C ability and how its type changes this kit.
 func _kin_strip() -> Control:
 	var p := PanelContainer.new()
-	p.add_theme_stylebox_override("panel", _box(Color(1, 1, 1, 0.04), 10, Color(1, 1, 1, 0.08), 1, 12, 8))
+	p.add_theme_stylebox_override("panel", UI.frame(Color(1, 1, 1, 0.04), UI.R_CTRL, Color(1, 1, 1, 0.08), 1, 12, 8))
 	p.custom_minimum_size = Vector2(0, 92)
 	var ks: KinSpec = KinLib.kin(kin_sp) if kin_sp != "" else null
 	var v := VBoxContainer.new()
@@ -357,16 +359,6 @@ static func _first(t: String, n: int) -> String:
 	var s := t.split(". ")[0]
 	return s if s.length() <= n else s.substr(0, n - 1) + "…"
 
-static func _box(bg: Color, rad := 10, border := Color(0, 0, 0, 0), bw := 0, ph := 14, pv := 12) -> StyleBoxFlat:
-	var b := StyleBoxFlat.new()
-	b.bg_color = bg
-	b.set_corner_radius_all(rad)
-	b.border_color = border
-	b.set_border_width_all(bw)
-	b.content_margin_left = ph; b.content_margin_right = ph
-	b.content_margin_top = pv; b.content_margin_bottom = pv
-	return b
-
 # ------------------------------------------------------------------ the compact row (loadout)
 ## A one-row summary for the expedition loadout: six small tiles (icon, key, name) and the kit's
 ## one-line loop; clicking anywhere calls open_cb (which shows the full card).
@@ -382,9 +374,11 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		b.custom_minimum_size = Vector2(64, 70)
 		b.focus_mode = Control.FOCUS_NONE
 		b.tooltip_text = "%s: %s" % [String(info["name"]), String(info["line"])]
-		b.add_theme_stylebox_override("normal", _box(Color(1, 1, 1, 0.05), 10, Color(info["col"], 0.35), 1, 4, 4))
-		b.add_theme_stylebox_override("hover", _box(Color(1, 1, 1, 0.1), 10, Color(info["col"], 0.85), 2, 4, 4))
-		b.add_theme_stylebox_override("pressed", _box(Color(1, 1, 1, 0.1), 10, Color(info["col"], 0.85), 2, 4, 4))
+		var lit_box := UI.frame(Color(1, 1, 1, 0.1), UI.R_CTRL, Color(info["col"], 0.85), 2, 4, 4)
+		var rest_box := UI.frame(Color(1, 1, 1, 0.05), UI.R_CTRL, Color(info["col"], 0.35), 1, 4, 4)
+		b.add_theme_stylebox_override("normal", rest_box)
+		b.add_theme_stylebox_override("hover", lit_box)
+		b.add_theme_stylebox_override("pressed", lit_box)
 		b.pressed.connect(open_cb)
 		b.set_meta("slot", s)
 		var bv := VBoxContainer.new()
