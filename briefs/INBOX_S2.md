@@ -109,3 +109,5 @@ Keep up to 6 agents. Don't start anything that touches the demo branches until m
   - rig with a shared humanoid armature (Rigify or our own) so HunterAnim moves map onto bones; export glTF (.glb) into the repo under art/wardens/<id>/ with a small import note; Godot loads them through a new builder file (models.gd wiring only).
   - Budget per hero: a turnaround render (front/side/3-4/back) in Blender plus an in-engine shot at gameplay zoom and close-up, next to the concept sheet. Ext reviews Bjorn's before the others go ahead.
 - Keep the old procedural model as the fallback until a hero's .glb passes review. Hitbox and FX anchors unchanged.
+
+## 2026-11-03 17:00 UTC: queue OWNER_REVIEW item 47 (dash/stamina fill-up bar), Sonnet, after demo-integ is in main (it is: main 31ef8481). Small UI job; build it on a branch from current main.
