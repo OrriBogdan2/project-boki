@@ -263,3 +263,7 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - While the ult charges (the "loading" phase) and while it fires, Dredge can walk at a reduced speed instead of being rooted. Use the source's move-speed values for Kingpin's ult in `briefs/supervive-data/`; default ~30% of run speed while charging and ~20% while firing. He keeps turning to aim at the cursor throughout.
 - Reuse item 31's slowed-cast helper.
 - Assert: planar speed during charge and fire is in the slow range (> 0, below run speed); the aim follows the cursor.
+
+## 37. NOTE for the concept pass: stronger personality and differentiation for every hero
+- Owner: some heroes don't look differentiated enough; give them all a stronger personality. They're all built on the same main-character base, and that shows.
+- In CONCEPT_PASS.md scope: each hero gets a distinct silhouette that reads at gameplay zoom (body proportions, height and bulk, posture, signature headwear or shape), plus their own idle stance, walk, colour identity and attitude in every animation (e.g. Dredge hulking and bestial, Moosh Moosh small and bouncy, Ostra floating and eerie). Allow per-hero body proportions on the shared rig rather than one body for all. Test: the 12 silhouettes filled black, side by side, should each be identifiable.
