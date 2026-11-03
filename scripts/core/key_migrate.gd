@@ -6,6 +6,9 @@ extends RefCounted
 ##   step 2  Merge was R and X: it is T now. R reloads and X is the hunter's ultimate, unless the player had put
 ##           R or X on something else (then that action keeps it and the new action starts unbound). The Emote wheel
 ##           moved from T to Y, and Merge/Emote start unbound the same way if T/Y is already someone's custom key.
+##   step 4  Fuse (Merge) is X and the hunter ultimate is R. Reload and the Boki ability key are gone. An action still
+##           on its old default moves to the new one; a custom key is kept, and the moved action starts unbound
+##           if its new key is already a custom key of another action.
 
 static func _code(k: int) -> String:
 	return "key:%d" % k
@@ -32,6 +35,12 @@ static func _merge_binding(ks: Dictionary) -> void:
 ## Brings `s` (the settings dictionary: keys, keys2_v, keys3_v) up to date.
 static func run(s: Dictionary) -> void:
 	var ks: Dictionary = s["keys"]
+	_steps_one_to_three(s, ks)
+	if int(s.get("keys4_v", 0)) < 1:
+		_fuse_on_x(ks)
+		s["keys4_v"] = 1
+
+static func _steps_one_to_three(s: Dictionary, ks: Dictionary) -> void:
 	if int(s.get("keys2_v", 0)) < 1:
 		if ks.has("separate") and (ks["separate"] as Array).has(_code(KEY_X)):
 			ks["separate"] = [_code(KEY_Z)]
@@ -46,6 +55,21 @@ static func run(s: Dictionary) -> void:
 		ks["hunter_ult"] = []
 	_emote_and_merge_keys(ks)
 	s["keys3_v"] = 1
+
+## The final kit: R hunter ultimate, X Fuse; "reload" and "kin_ability" no longer exist.
+static func _fuse_on_x(ks: Dictionary) -> void:
+	ks.erase("reload")
+	ks.erase("kin_ability")
+	_move_default(ks, "hunter_ult", KEY_X, KEY_R, ["rotate"])
+	_move_default(ks, "ultimate", KEY_T, KEY_X, [])
+
+## An action on its old default key (or unsaved) takes the new default; unbound if another action already holds it.
+static func _move_default(ks: Dictionary, action: String, old_key: int, new_key: int, shares: Array) -> void:
+	if ks.get(action, [_code(old_key)]) != [_code(old_key)]:
+		return
+	ks.erase(action)
+	if _used_elsewhere(ks, _code(new_key), shares + [action]):
+		ks[action] = []
 
 ## Emote moved T -> Y and Merge took T: a default that lands on a key another saved action uses starts unbound.
 static func _emote_and_merge_keys(ks: Dictionary) -> void:

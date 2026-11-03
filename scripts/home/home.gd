@@ -3545,8 +3545,7 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 			var ad := KinLib.ability(String(aid))
 			if ad: names.append(ad.display_name)
 		var ud := KinLib.merge(String(sp.get("ultimate", "")))
-		# (its ability is on C now: E and R are your archetype's)
-		var keys := Settings.key_cap("kin_ability") if key == "active" else ("swap in with %s" % Settings.key_cap("swap_kin"))
+		var keys := "auto" if key == "active" else ("swap in with %s" % Settings.key_cap("swap_kin"))
 		var al := UI.label("%s  ·  %s  ·  bond: %s" % [keys, ", ".join(names), ud.display_name if ud else "-"], 12, UI.MUTED)
 		al.autowrap_mode = TextServer.AUTOWRAP_OFF
 		al.clip_text = true

@@ -15,7 +15,7 @@ const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r", "x"]
 ## (The ultimate tiles have no fixed key: _cap reads them from Settings.)
 const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "", "x": ""}
 ## The key cap on a slot's tile: the Merge tile unless the class ultimates are on, the hunter's own
-## ultimate on its X tile.
+## ultimate on its "x" tile.
 static func _cap(slot: String) -> String:
 	if slot == "x":
 		return Settings.key_cap("hunter_ult")
@@ -224,8 +224,8 @@ func _kin_strip() -> Control:
 	v.add_theme_constant_override("separation", 4)
 	p.add_child(v)
 	if ks == null:
-		var no_boki := "No Boki: bring one and its type infuses this kit (and gives you its own %s ability)."
-		v.add_child(UI.label(no_boki % Settings.key_cap("kin_ability"), 14, UI.MUTED))
+		var no_boki := "No Boki: bring one and its type infuses this kit (and gives you its own ability)."
+		v.add_child(UI.label(no_boki, 14, UI.MUTED))
 		return p
 	var kc: Color = Data.KIN.get(kin_sp, {}).get("color", Color.WHITE)
 	var top := HBoxContainer.new()
@@ -234,7 +234,7 @@ func _kin_strip() -> Control:
 	top.add_child(UI.label(String(ks.theme).capitalize(), 13, UI.MUTED, UI.big))
 	var ab := KinLib.ability(ks.active)
 	if ab:
-		var kk := UI.keycap(Settings.key_cap("kin_ability"), 11)
+		var kk := UI.keycap("AUTO", 11)
 		kk.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		top.add_child(kk)
 		var an := UI.label("%s:  %s" % [ab.display_name, _first(KinText.ability(ab), 78)], 14, UI.INK)
@@ -313,11 +313,11 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 				["Bond", "Landing it on a hunter fills your Boki bond a long way, ready for the Merge on %s."
 					% Settings.key_cap("ultimate")]]
 		"r" when not d.has("r"):
-			# no hero ultimate: R is the Boki's Merge (the Boki system owns it)
+			# no hero ultimate: the Merge key is the Boki's Merge
 			out.merge({"name": "Boki Merge", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
 			out["detail"] = [["", "%s is not a Hunter ability here: it is the Boki Merge. Your Boki fuses with you and its kind sets the merged form." % Settings.key_cap("ultimate")]]
 		"r":
-			# R is the Merge for every class (docs/decisions/0001); the class's own ultimate is held back behind
+			# the Merge key is the Merge for every class; the class's own ultimate is held back behind
 			# boki_system.json class_ults until the hero-port work folds it into the kits
 			var sd: Dictionary = d.get("r", {})        # (a hero with no class R: only the Merge shows)
 			var on := KinCommand.class_ults() and not sd.is_empty()

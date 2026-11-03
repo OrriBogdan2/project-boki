@@ -23,7 +23,7 @@ and passive build-ups.
 | **Weight class** (light, medium, heavy) | HP, run speed, mass and knockback, glide heat, **dash charges and recharge**, air dash | `Data.CLASSES` (unchanged) |
 | **Archetype** (2 per weight) | silhouette, **weapon family (LMB + RMB)**, **passive** (and its resource, if any), **E**, **R**, **dash shape** | new core data `content/archetypes/<id>.json` (reviewed, not community-authored) |
 | **Weapon** (2 per archetype) | LMB firing pattern, and the RMB's flavour within the archetype's verb | `content/weapons/*.json` (+ a `archetype` field) |
-| **Kin** | **modifies** archetype abilities through sockets (§4), plus its own throw (C), owner bonus, carry mode (shoulder, perch, mount), auto ability, dodge rider and **merge** | `content/kin_v2/*.json` (+ an optional `infusion` field) |
+| **Kin** | **modifies** archetype abilities through sockets (§4), plus its own throw (G), owner bonus, carry mode (shoulder, perch, mount), auto ability, dodge rider and **merge** | `content/kin_v2/*.json` (+ an optional `infusion` field) |
 | **Glove** (loot) | Q active, or passive stats | `content/gear` (unchanged) |
 
 | Weight | Archetypes | Charges / recharge (from the class) |
@@ -44,8 +44,8 @@ Current binds are in `scripts/core/game.gd` `_setup_input()`.
 | Space / Mouse 5 | jump / glide | unchanged |
 | Q | active glove (`gear1`) | **unchanged**: gloves stay the run's loot layer, so Q is still the glove |
 | E | the kin's ability (`signature`) | the **archetype's E** (usually utility). The kin's old E becomes the kin's **infusion source** (§4) |
-| C / middle mouse | throw / recall the kin | unchanged (the kin keeps its throw) |
-| R | (then) bond ultimate (the merge), when the bond meter is full. **Now: T is Merge, R reloads, X is the hunter ultimate** | the **archetype's ultimate**, from run level 6. When the bond meter is full, R casts **bonded**: the kin merges as it fires (§5) |
+| G / middle mouse | throw / recall the kin | unchanged (the kin keeps its throw, and casts its own ability itself) |
+| R | (then) bond ultimate (the merge), when the bond meter is full. **Now: X is Merge, R is the hunter ultimate, there is no reload key** | the **archetype's ultimate**, from run level 6. When the bond meter is full, R casts **bonded**: the kin merges as it fires (§5) |
 | 1 · F · B · Ctrl · T · M · Tab | tonic · interact · base · sneak · emote · map · scores | unchanged |
 | Alt + key | rank up that slot with a skill point (`match.gd`) | unchanged |
 | G | folds the training guide (training/duel only, `hud.gd`) | unchanged. Note: G is **not** the throw today; the throw is C or middle mouse |
@@ -817,8 +817,8 @@ hitstop and shake tiers, category colours, sound layers). Test: `--archetype-che
   the class (`Arch.of_save`). Bots pick an archetype of their class and a weapon from its family. The model
   always gets the real archetype (`Models.hunter(..., arch)`): looks never carry gear, remote players come
   with theirs (lobby presence, host snapshots), so nobody can look like an archetype they aren't.
-- **Controls (keys_v 3; since then T is Merge, R reload, X hunter ultimate):** E archetype utility, R archetype ultimate, C kin ability (tap: hops out, casts its
-  own active, hops back; a mount lends it), G / middle mouse send-recall, Shift archetype dash, Q glove,
+- **Controls (keys_v 3; final kit keys4_v 1: R hunter ultimate, X Merge, no reload key):** E archetype utility, the kin casts its
+  own active by itself (a mount lends it), G / middle mouse send-recall, Shift archetype dash, Q glove,
   RMB archetype. The training guide moved from G to H.
 - **Weapons:** families narrow `Loot.usable` (others still pack and go home). Thief twin blades / SMG;
   Archer Longbow (new: hold-to-draw stages 0.4s/0.9s, Focus draws it instantly) / sniper; Mage Spellstaff

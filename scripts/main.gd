@@ -1937,7 +1937,7 @@ func _grammar_runtime_check() -> void:
 		if k.runner.charges("k2") < c2: used["k2"] += 1
 		k.runner.reset()
 		_grt_out(k, home + Vector3(1.0, 0, 0)); k.target = T
-	_grt("E auto-cast off for you; auto active on", int(used["k1"]) == 0 and int(used["k2"]) > 0, "E %d, auto %d" % [used["k1"], used["k2"]])
+	_grt("your out Boki casts both its abilities itself", int(used["k1"]) > 0 and int(used["k2"]) > 0, "ability %d, auto %d" % [used["k1"], used["k2"]])
 	_ac_run(m, 1.0); _grt_reset(T)
 	# ---- 6. carry modes
 	k = _grt_kin(m, P, "pebbit")

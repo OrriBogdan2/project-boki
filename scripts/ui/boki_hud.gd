@@ -139,7 +139,7 @@ static func _chip(H, ur: Rect2, text: String, col: Color) -> void:
 	H._rounded(btr, Color(0.03, 0.03, 0.05, 0.95), 5, Color(col, 0.9), 1)
 	H._ctext(btr.get_center() + Vector2(0, 4), text, 10, col, H.big)
 
-## C and G, the small badges after R. Returns the x where the next badge starts.
+## The Boki ability and G badges, after the ultimate tiles. Returns the x where the next badge starts.
 static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	var k: Kin = p.kin
 	if k == null or k.runner == null or k.runner.def_of("k1") == null:
@@ -148,10 +148,10 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	var down := k.state == "downed"
 	var cr := Rect2(Vector2(x, y + s - 38.0), Vector2(38, 38))
 	var cd_left: float = k.runner.cd_left("k1") if not k.runner.is_ready("k1") else 0.0
-	H._ab_slot("kin_ab", cr, KinText.icon(kd), Settings.key_cap("kin_ability"), KinText.color(kd), k.runner.cd_frac("k1"), cd_left, k.runner.is_ready("k1") and k.ready_to_fight())
+	H._ab_slot("kin_ab", cr, KinText.icon(kd), "AUTO", KinText.color(kd), k.runner.cd_frac("k1"), cd_left, k.runner.is_ready("k1") and k.ready_to_fight())
 	var in_form := KinMerge.in_form(p)
 	if in_form:
-		H._rounded(cr, Color(0.04, 0.04, 0.06, 0.72), 8)          # (the Boki is part of you: C waits)
+		H._rounded(cr, Color(0.04, 0.04, 0.06, 0.72), 8)          # (the Boki is part of you)
 	var from_txt := "from Boki" if k.state in ["active", "flying", "returning", "flying_home"] else ("DOWN" if down else "through you")
 	if in_form:
 		from_txt = "MERGED"

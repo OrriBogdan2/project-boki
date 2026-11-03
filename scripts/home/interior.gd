@@ -578,7 +578,7 @@ func _build_deco_bar() -> void:
 	bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	bar.offset_left = 232; bar.offset_right = -16; bar.offset_top = -170; bar.offset_bottom = -16
 	var col := UI.vbox(6); bar.add_child(col)
-	deco_hint = UI.label("Pick something to place. Click a piece in the room to move it.   Left click place  ·  Right click or R turn  ·  Del put away  ·  Esc cancel", 13, UI.MUTED)
+	deco_hint = UI.label("Pick something to place. Click a piece in the room to move it.   Left click place  ·  Right click or %s turn  ·  Del put away  ·  Esc cancel" % Settings.key_cap("rotate"), 13, UI.MUTED)
 	deco_hint.autowrap_mode = TextServer.AUTOWRAP_OFF
 	col.add_child(deco_hint)
 	# no scrolling: the catalog shows a page at a time

@@ -83,8 +83,8 @@ func _arena() -> void:
 	P.teleport(P.pos + Vector3(3, 0, 0)); P.hp = 10.0
 	var bk := InputEventKey.new(); bk.physical_keycode = KEY_BACKSPACE; bk.keycode = KEY_BACKSPACE; bk.pressed = true
 	var xk := InputEventKey.new(); xk.physical_keycode = KEY_X; xk.keycode = KEY_X; xk.pressed = true
-	A.keys_node._unhandled_input(xk)      # X is the hero ultimate's key: it must not reset the arena
-	ok("X doesn't reset the arena (it is the hero ultimate's key)", P.flat_dist(A.home) > 1.0)
+	A.keys_node._unhandled_input(xk)      # X is the Merge key: it must not reset the arena
+	ok("X doesn't reset the arena (it is the Merge key)", P.flat_dist(A.home) > 1.0)
 	A.keys_node._unhandled_input(bk)      # Backspace resets
 	ok("Backspace resets the arena", P.flat_dist(A.home) < 0.2)
 	P.teleport(P.pos + Vector3(3, 0, 0)); P.hp = 10.0

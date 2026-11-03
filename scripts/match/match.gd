@@ -85,7 +85,7 @@ var blight: BlightDir = null       # the Blight: its spawns, its scaling and wha
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
-var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "reload": false, "util1": false, "util2": false, "util3": false, "util4": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false, "kin_ab": false}
+var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
 var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
@@ -3765,7 +3765,7 @@ func _gather_input() -> void:
 	if Input.is_action_just_pressed("base") and not paused and duel == null and not opts.get("arena", false):
 		pending_input["base"] = true
 	var slot_of := {"dash": "dash", "secondary": "sec", "signature": "kin", "ultimate": "ult"}      # (gloves don't rank)
-	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"], ["kin_ability", "kin_ab"]]:
+	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
 		if a[0] in ["util2", "util3", "util4"] and arena != null:
 			continue       # the Arena's 2-7 swap archetypes (and nothing wears out there)
 		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
@@ -4245,7 +4245,7 @@ func step(dt: float) -> void:
 		if pending_input["base"]:
 			pending_input["base"] = false
 			player.start_base(base_target(player))
-		for k in ["dash", "jump", "sig", "reload", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap", "kin_ab"]:
+		for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
 			if pending_input.get(k, false):
 				player.inp[k] = true
 				pending_input[k] = false
@@ -6394,7 +6394,7 @@ func _tips() -> void:
 	_tip("move", "WASD to move, aim with the mouse, hold left click to shoot. Shift dashes, Space jumps. Hold Space in the air to glide.")
 	if _tip_t > 14.0:
 		if player.ak:
-			_tip("ability", "%s is your Boki's ability, cast from wherever it stands. %s sics it at a foe (tap), calls it back when it is away, and opens the order wheel (hold). Fighting together fills the bond meter, and a full one lets you press %s to merge." % [Settings.key_cap("kin_ability"), Settings.key_cap("throw"), Settings.key_cap("ultimate")])
+			_tip("ability", "Your Boki uses its own ability by itself. %s sends it at a foe (tap), calls it back when it is away, and opens the order wheel (hold). Fighting together fills the bond meter, and a full one lets you press %s to merge." % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
 		else:
 			_tip("ability", "%s is your Boki's ability. Fighting together fills the bond meter, and %s calls your Boki's bond ultimate." % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
 	if player.ult >= 1.0 and player.kin:
@@ -6415,7 +6415,7 @@ func _tips() -> void:
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
-		_tip("skill", "%s uses %s's %s. Stun or root a foe with your Boki, then shoot it for a combo. %s sends it at a foe, and calls it back to your side when it is away." % [Settings.key_cap("kin_ability" if player.ak else "signature"), k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability", Settings.key_cap("throw")])
+		_tip("skill", "%s uses %s's %s. Stun or root a foe with your Boki, then shoot it for a combo. %s sends it at a foe, and calls it back to your side when it is away." % ["Your Boki" if player.ak else Settings.key_cap("signature"), k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability", Settings.key_cap("throw")])
 	if not interact.is_empty() and interact["kind"] == "catch":
 		_tip("catch", "Hold %s to scan it. The scan runs 4 seconds on its own: you can't move or shoot, rivals can see and hear it, and a dash cancels it. A Boki you catch only comes home if you extract." % Settings.key_cap("interact"))
 	if exits and not interact.is_empty() and interact["kind"] == "exit":

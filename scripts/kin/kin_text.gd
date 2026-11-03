@@ -310,7 +310,7 @@ static func form_lines(ms: MergeSpec, fd: Dictionary) -> Array:
 	out.append("E, %s: %s" % [a["e"]["name"], a["e"]["desc"]])
 	out.append("Shift, %s: %s" % [a["dash"]["name"], a["dash"]["desc"]])
 	out.append("%s again, %s: %s It ends the merge with a burst of speed and a shield, and your Boki rests %ss. Ready %ss in." % [Settings.key_cap("ultimate"), fd["r"]["name"], fd["r"]["desc"], n(float(MergeForm.data()["release_rest_s"])), n(float(MergeForm.data()["ult_lock_s"]))])
-	out.append("C is off while merged. Your Boki is part of you until it ends.")
+	out.append("Your Boki's own ability is off while merged. Your Boki is part of you until it ends.")
 	return out
 
 ## The aiming shape shown while E is held (Match._update_indicators): [kind, reach, size(, "front")].

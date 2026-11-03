@@ -37,7 +37,7 @@ static func drop_class_holds(hunter: Hunter) -> void:
 		hunter.ak.rmb_down = false
 
 ## Hunter._tick, once a step after the inputs are gated. Mid-transformation: untouchable, and nothing fires.
-## Live: your abilities work as the hero's own; only C stays off while the Boki is inside you.
+## Live: your abilities work as the hero's own; only the Boki's own ability stays off while the Boki is inside you.
 static func route(h: Hunter) -> void:
 	if not KinMerge.active(h):
 		return
@@ -47,9 +47,7 @@ static func route(h: Hunter) -> void:
 		h.inp["sig"] = false
 		h.inp["sec"] = false
 		h.inp["kin_ab"] = false
-	elif KinMerge.in_form(h) and bool(h.inp.get("kin_ab", false)):
-		if h.is_local():
-			KinCommand.say(h, "C is unavailable while merged: your Boki is part of you", Color("a2a8bb"))
+	elif KinMerge.in_form(h):
 		h.inp["kin_ab"] = false
 
 # ------------------------------------------------------------------ LMB
