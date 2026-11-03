@@ -87,6 +87,7 @@ func run(m: Node) -> void:
 	hb.cat = "Buildings"; hb._build_bar()
 	var items: Array = hb._tab_items()
 	ok(items.any(func(it): return String(it["t"]).begins_with("House")) and items.any(func(it): return String(it["t"]).begins_with("Crop patch")), "build mode's Buildings tab offers the house and the essentials")
+	Work.add_mat("wood", 3)      # the house costs a little wood
 	hb.take("house")
 	ok(hb.held.get("id", "") == "house" and is_instance_valid(hb.ghost), "taking the house holds a ghost of it")
 	var land := HomeLayout.LANDING

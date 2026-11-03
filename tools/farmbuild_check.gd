@@ -166,14 +166,17 @@ func run(m: Node) -> void:
 	var house_it: Dictionary = {}
 	for it in bi:
 		if String(it["t"]).begins_with("House"): house_it = it
-	ok(bi.size() >= 3 and house_it.has("cost") and int(house_it["cost"].get("gems", 0)) == 0 and int(house_it["cost"].get("labour", 0)) == 8 and bi.all(func(it): return not it.get("lock", false)),
-			"the Buildings tab shows the free house (8 swings of work) and nothing locked")
+	var hc_cost: Dictionary = house_it.get("cost", {})
+	var priced: bool = int(hc_cost.get("gems", 0)) == 0 and int(hc_cost.get("wood", 0)) == 3 and int(hc_cost.get("labour", 0)) == 8
+	ok(bi.size() >= 3 and priced and bi.all(func(it): return not it.get("lock", false)),
+			"the Buildings tab shows the house for a little wood and 8 swings, and nothing locked")
 	var chips := 0
 	for ch in hb.bar.find_children("*", "Control", true, false):
 		if ch is FarmIcon: chips += 1
 	ok(chips >= 1, "the cost icons are on the bar (%d)" % chips)
 	# the starters go up at once
 	var land := HomeLayout.LANDING
+	_mats(3, 0, 0, 0)      # the house costs a little wood
 	hb.take("house")
 	var hc := _spot(hb, land + Vector3(0, 0, -8))
 	ok(_put(hb, hc) and FarmSites.is_site(_entry(L, "house")) and HomeLayout.fixtures(Save.d, "house").is_empty(),
