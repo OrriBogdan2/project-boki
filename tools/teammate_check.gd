@@ -169,7 +169,10 @@ func _follow() -> void:
 ## normalised INF is NaN): tries a few random spots.
 func _open_ground_for(p: Hunter, kin: Kin) -> void:
 	for i in 40:
-		if kin.comp.heel_spot() != Vector3.INF and m.world.ground_at(p.pos.x + 6.0, p.pos.z) > World.VOID + 1.0:
+		# level ground where it steps toward the rival, and ground under the rival
+		var step_ok := absf(m.world.ground_at(p.pos.x + 1.25, p.pos.z) - p.pos.y) < 0.5
+		var rival_ok := m.world.ground_at(p.pos.x + 6.0, p.pos.z) > World.VOID + 1.0
+		if kin.comp.heel_spot() != Vector3.INF and step_ok and rival_ok:
 			return
 		p.teleport(m.world.random_ground())
 		for j in 5:

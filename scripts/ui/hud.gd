@@ -390,6 +390,7 @@ func _draw_world_labels() -> void:
 		if cam.is_position_behind(h.position):
 			continue
 		_nameplate(sp, h)
+		if not h.downed: GripOverhead.draw(self, sp, h)      # their two gloves and Boki type, under the plate
 		BokiHud.form_overhead(self, sp, h)
 	if m.player and not m.player.out and m.player.model and not cam.is_position_behind(m.player.position):
 		var own_head := m.player.position + Vector3(0, HudPlate.plate_offset(m.player), 0)
@@ -477,7 +478,7 @@ func _draw_world_labels() -> void:
 		if is_gear:
 			# a piece of gear: its name, rarity and which slot it goes in
 			_ctext(sp, nm, 15, r["color"], big)
-			_ctext(sp + Vector2(0, 14), Gear.slot_name(String(wp["gear"])) + ((" · " + Settings.key_cap("gear1")) if Gear.active(String(wp["gear"])) else ""), 11, Color(INK, 0.75))
+			_ctext(sp + Vector2(0, 14), Gear.slot_name(String(wp["gear"])) + ((" · %s / %s" % [Gloves.key_cap(0), Gloves.key_cap(1)]) if Gear.active(String(wp["gear"])) else ""), 11, Color(INK, 0.75))
 		elif is_tune:
 			var pd: Dictionary = Data.PERKS[String(wp["tune"])]
 			_ctext(sp, nm, 15, pd["col"], big)
@@ -1183,7 +1184,7 @@ func _draw_glider_heat(p: Hunter) -> void:
 	if hot:
 		c.draw_arc(cpt, 17.0 + 2.0 * sin(m.time * 14.0), 0.0, TAU, 32, Color(1.0, 0.3, 0.2, 0.6), 2.0, true)
 
-## The ability row under the bars: right click, Q glove, Shift dash, E kin, R bond ultimate. Every
+## The ability row under the bars: right click, Shift dash, E kin, R bond ultimate (gloves: GripHud). Every
 ## one starts the run locked; rank pips sit above each, a gold border means a point can unlock it
 ## (just press its key), and a gold + means Alt + its key will rank it up.
 func _draw_abilities(sz: Vector2, p: Hunter) -> void:
@@ -1197,22 +1198,10 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	var y := o.y + 66.0
 	var k: Kin = p.kin
 	var util: AbilityDef = p.runner.def_of("utility") if p.runner else null
-	var g0: Dictionary = p.gear[0]
-	var g1: Dictionary = p.gear[1]
 	# right click: the weapon's ability
 	var sr := Rect2(Vector2(x, y), Vector2(s, s))
 	if util:
 		_skill_slot("sec", "sec", sr, util.icon, Settings.key_cap("secondary"), util.color, p.runner.cd_frac("utility"), p.runner.cd_left("utility") if not p.runner.is_ready("utility") else 0.0, p.runner.is_ready("utility"), p.runner.charges("utility") if util.charges > 1 else -1, util.charges if util.charges > 1 else 0)
-	x += s + gap
-	# Q: the active glove (an empty slot shows dim, so you know to look for one)
-	var qr := Rect2(Vector2(x, y), Vector2(s, s))
-	if not g0.is_empty() and Gear.ALL.has(String(g0["id"])):
-		var gd: Dictionary = Gear.ALL[String(g0["id"])]
-		var gcd := float(p.gear_cd[0])
-		_skill_slot("gear", "gear0", qr, Gear.icon_of(String(g0["id"])), Settings.key_cap("gear1"), gd["col"], gcd / float(gd["cd"]) if gcd > 0.0 else 0.0, gcd, gcd <= 0.0)
-	else:
-		_skill_slot("gear", "gear0", qr, "glove", Settings.key_cap("gear1"), Color(MUTED, 0.8), 0.0, 0.0, false)
-		if int(p.slot_lv["gear"]) > 0: _ctext(qr.get_center() + Vector2(0, 16), "no glove", 9, Color(MUTED, 0.7))
 	x += s + gap
 	# Shift: your dash
 	var dmax := p.max_dashes()
@@ -1230,27 +1219,15 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 				_rounded(er, Color(0, 0, 0, 0.45), 10)
 	BokiHud.aug_mark(self, p, er, "e")
 	x += s + gap
-	# R: the Merge (the bond meter), a little bigger; then C and G
-	var us := 58.0
-	var ur := Rect2(Vector2(x, y - (us - s)), Vector2(us, us))
-	BokiHud.r_slot(self, p, ur, us)
-	x += us + gap + 4.0
+	# C and G (the Merge sits on the right: GripHud)
 	x = BokiHud.cg_slots(self, p, x, y, s)
-	# the passive glove and B (base to a teammate) as small badges at the end of the row
-	if not g1.is_empty() and Gear.ALL.has(String(g1["id"])):
-		var pg: Dictionary = Gear.ALL[String(g1["id"])]
-		var pr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
-		_rounded(pr, Color(0.05, 0.06, 0.09, 0.85), 9, Color(pg["col"], 0.75), 1)
-		Icons.draw(c, Gear.icon_of(String(g1["id"])), pr.get_center(), 10.0, pg["col"])
-		hover_spots.append([pr, "gear1"])
-		x += 42.0
+	# B (base to a teammate) as a small badge at the end of the row (the gloves sit on the right: GripHud)
 	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / Hunter.BASE_CD if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
-## The archetype row: RMB, Q glove, Shift dash, E utility, R ultimate (a big "6" until level 6,
-## filling at level 5, "UNLOCK" at 6, BONDED in the kin's colour when the bond is full), then the
-## kin's own ability (C) and send/recall (G) as small badges.
+## The archetype row: RMB, Shift dash, E utility, X the hero's ultimate (locked until level 6), then the
+## kin's own ability (C) and send/recall (G) as small badges. The Merge is the Boki box on the right (GripHud).
 func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	var o := _hud_origin(sz)
 	var s := 50.0
@@ -1258,8 +1235,6 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	var x := o.x + HUD_PORTRAIT.x + 16.0
 	var y := o.y + 74.0
 	var k: Kin = p.kin
-	var g0: Dictionary = p.gear[0]
-	var g1: Dictionary = p.gear[1]
 	var info := p.slot_info("sec")
 	var sr := Rect2(Vector2(x, y), Vector2(s, s))
 	_skill_slot("sec", "sec", sr, String(info["icon"]), Settings.key_cap("secondary"), info["col"], float(info["cd"]) / maxf(0.01, float(info["cd_max"])) if float(info["cd"]) > 0.0 else 0.0, float(info["cd"]), bool(info["ready"]), int(info["charges"]) if int(info["max_charges"]) > 1 else -1, int(info["max_charges"]) if int(info["max_charges"]) > 1 else 0)
@@ -1274,15 +1249,6 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 		var hk := clampf(p.ak.rmb_t / maxf(0.05, hfull), 0.0, 1.0)
 		c.draw_arc(sr.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * hk, 32, Color(info["col"], 0.9), 3.0, true)
 	BokiHud.aug_mark(self, p, sr, "rmb")
-	x += s + gap
-	var qr := Rect2(Vector2(x, y), Vector2(s, s))
-	if not g0.is_empty() and Gear.ALL.has(String(g0["id"])):
-		var gd: Dictionary = Gear.ALL[String(g0["id"])]
-		var gcd := float(p.gear_cd[0])
-		_skill_slot("gear", "gear0", qr, Gear.icon_of(String(g0["id"])), Settings.key_cap("gear1"), gd["col"], gcd / float(gd["cd"]) if gcd > 0.0 else 0.0, gcd, gcd <= 0.0)
-	else:
-		_skill_slot("gear", "gear0", qr, "glove", Settings.key_cap("gear1"), Color(MUTED, 0.8), 0.0, 0.0, false)
-		if int(p.slot_lv["gear"]) > 0: _ctext(qr.get_center() + Vector2(0, 16), "no glove", 9, Color(MUTED, 0.7))
 	x += s + gap
 	var di := p.slot_info("dash")
 	var dmax := int(di["max_charges"])
@@ -1301,20 +1267,10 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	if float(ei.get("up", 0.0)) > 0.0:
 		c.draw_arc(er.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * clampf(float(ei["up"]) / maxf(0.1, float(p.ak.e_def().get("time", 5.0))), 0.0, 1.0), 32, Color(ei["col"], 0.9), 3.0, true)
 	x += s + gap
-	# R: the Merge (the bond meter), a little bigger
-	var us := 58.0
-	var ur := Rect2(Vector2(x, y - (us - s)), Vector2(us, us))
-	BokiHud.r_slot(self, p, ur, us)
-	x += us + gap + 4.0
+	# X: the hero's own ultimate (the Merge sits on the right: GripHud)
+	x = HunterUltTile.draw(self, p, x, y, s, gap)
 	# C: the Boki's own ability, G: throw / recall (hold: hold the spot or follow)
 	x = BokiHud.cg_slots(self, p, x, y, s)
-	if not g1.is_empty() and Gear.ALL.has(String(g1["id"])):
-		var pg: Dictionary = Gear.ALL[String(g1["id"])]
-		var pr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
-		_rounded(pr, Color(0.05, 0.06, 0.09, 0.85), 9, Color(pg["col"], 0.75), 1)
-		Icons.draw(c, Gear.icon_of(String(g1["id"])), pr.get_center(), 10.0, pg["col"])
-		hover_spots.append([pr, "gear1"])
-		x += 42.0
 	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / Hunter.BASE_CD if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
@@ -1382,7 +1338,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var rc: Color = Loot.ELEMENTS[p.welem]["col"] if p.welem != "" else Color("e6dccb")
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12, Color(rc, 0.45), 1)
 	hover_spots.append([r, "weapon"])
-	AmmoDeny.draw(self, r, p)
+	AmmoDeny.draw(self, r)
 	BokiHud.aug_mark(self, p, Rect2(r.position + Vector2(6, 4), Vector2(18, 18)), "lmb")
 	c.draw_rect(Rect2(r.position + Vector2(0, 10), Vector2(3, r.size.y - 20)), rc)
 	Icons.draw(c, p.wid, r.position + Vector2(40, 34), 26.0, Color(rc, 0.9))
@@ -1414,17 +1370,9 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var y := r.position.y - s - 22.0
 	var x := r.end.x - s
 	var k: Kin = p.kin
-	# 1: heal (a tonic for health; an armor kit once health is full), 2: the armor kit (anvil)
-	var hurt := p.hp < p.max_hp - 0.5
-	var heal_ready := (p.tonics > 0 and hurt) or (p.armor_kits > 0 and p.armor < p.max_armor - 0.5)
-	var hr := Rect2(Vector2(x, y), Vector2(s, s))
-	_ab_slot("tonic", hr, "tonic", Settings.key_cap("tonic"), GOOD, 0.0, 0.0, p.tonics > 0 and hurt)
-	_ctext(Vector2(hr.get_center().x, hr.position.y - 5), "%d" % p.tonics, 12, Color(GOOD, 0.95), big)
-	x -= s + gap
-	var kr := Rect2(Vector2(x, y), Vector2(s, s))
-	_ab_slot("kit", kr, "anvil", Settings.key_cap("armor_kit"), ARMOR_COL, 0.0, 0.0, p.armor_kits > 0 and p.armor < p.max_armor - 0.5)
-	_ctext(Vector2(kr.get_center().x, kr.position.y - 5), "%d" % p.armor_kits, 12, Color(ARMOR_COL, 0.95), big)
-	x -= s + gap
+	# 1 2 3: the utility belt (tonic, armor kit and gadgets: BeltHud); Q V C: the gloves and the Boki (GripHud)
+	x = BeltHud.draw(self, p, x, y)
+	GripHud.draw(self, p, r)
 	# C: throw / recall your kin
 	if k:
 		var kc: Color = Data.KIN[k.species]["color"]
@@ -1435,20 +1383,22 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	# what you're carrying home, as a counter
 	var seeds := 0
 	for sd in p.seeds: seeds += int(p.seeds[sd])
-	var gx := r.position.x + 4.0
-	Icons.draw(c, "gem", Vector2(gx + 8, y + s - 10), 7.0, GOLD)
-	_text(Vector2(gx + 20, y + s - 4), "%d" % p.gems, 18, GOLD if p.gems > 0 else MUTED, big)
-	_text(Vector2(gx + 2, y + 14), "%d seeds · %s" % [seeds, CaptureHud.box_text(p)], 10, CaptureHud.box_col(p, MUTED), big)
+	# (inside the weapon card on the right: the slot row above is full with the four-slot belt)
+	var gx := r.end.x - 112.0
+	var cy := r.position.y + 6.0
+	Icons.draw(c, "gem", Vector2(gx + 8, cy + s - 10), 7.0, GOLD)
+	_text(Vector2(gx + 20, cy + s - 4), "%d" % p.gems, 18, GOLD if p.gems > 0 else MUTED, big)
+	_text(Vector2(gx + 2, cy + 14), "%d seeds · %s" % [seeds, CaptureHud.box_text(p)], 10, CaptureHud.box_col(p, MUTED), big)
 	if not m.opts.get("training", false):
 		# the backpack: slots used (red when full); the key opens it
 		var full := p.pack.size() >= p.pack_cap
 		var pcol := Color("ffb0a0") if full else (INK if p.pack.size() > 0 else MUTED)
 		var gw := big.get_string_size("%d" % p.gems, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
 		var px := gx + 30.0 + gw
-		Icons.draw(c, "satchel", Vector2(px + 8, y + s - 10), 8.0, pcol)
-		_text(Vector2(px + 20, y + s - 4), "%d/%d" % [p.pack.size(), p.pack_cap], 14, pcol, big)
+		Icons.draw(c, "satchel", Vector2(px + 8, cy + s - 10), 8.0, pcol)
+		_text(Vector2(px + 20, cy + s - 4), "%d/%d" % [p.pack.size(), p.pack_cap], 14, pcol, big)
 		var pw := big.get_string_size("%d/%d" % [p.pack.size(), p.pack_cap], HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
-		hover_spots.append([Rect2(Vector2(px, y + s - 22), Vector2(24 + pw, 24)), "pack"])
+		hover_spots.append([Rect2(Vector2(px, cy + s - 22), Vector2(24 + pw, 24)), "pack"])
 
 ## Your squadmates down the left side.
 ## A teammate's state, for the squad frames, markers and arrows: [label, colour, where to point,
@@ -1964,12 +1914,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
 	var dsi := p.slot_info("dash")
 	lines.append([Settings.key_cap("dash"), String(dsi["name"]) + ((" + " + String(dsi["rider"])) if String(dsi.get("rider", "")) != "" else ""), String(dsi["desc"]), dsi["col"]])
-	var g0: Dictionary = p.gear[0]
-	if not g0.is_empty() and Gear.ALL.has(String(g0["id"])):
-		var gdd: Dictionary = Gear.ALL[String(g0["id"])]
-		lines.append([Settings.key_cap("gear1"), String(gdd["name"]), Gear.desc_of(String(g0["id"]), int(g0.get("rar", 1))), gdd["col"]])
-	else:
-		lines.append([Settings.key_cap("gear1"), "Glove (empty)", "Find gloves in chests, vaults and on bosses. An active glove goes here.", MUTED])
+	lines.append_array(GripHud.kit_lines(p))
 	var w := 356.0
 	# each row: the key and name, then the description wrapped to the panel
 	var hs: Array = []
@@ -2407,14 +2352,8 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 				var ob := KinText.owner_bonus(p.kin_bonus)
 				if ob != "":
 					out.append(["Owner bonus for the run: " + ob, GOLD, 13])
-		"gear0", "gear1":
-			var g: Dictionary = p.gear[int(id.substr(4))]
-			if g.is_empty(): return []
-			var gd: Dictionary = Gear.ALL[String(g["id"])]
-			out.append([gd["name"], gd["col"]])
-			out.append(["Active glove  ·  %s" % Settings.key_cap("gear1") if int(id.substr(4)) == 0 else "Passive glove", MUTED, 12])
-			out.append([Gear.desc_of(String(g["id"]), int(g.get("rar", 1))), INK, 14])
-			out.append([Gear.stat_text(String(g["id"]), int(g.get("rar", 1))), MUTED, 13])
+		"gear0", "gear1": out = GripHud.tip(p, int(id.substr(4)))
+		"x": out = HunterUltTile.tip(p)
 		"throw": return BokiHud.order_tip(self, p)
 		"dash":
 			var dd: AbilityDef = p.dodge_def
@@ -2425,23 +2364,18 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			if not rd.is_empty():
 				out.append([String(rd.get("name", "")) + ":  " + String(rd.get("desc", "")), Color(String(rd.get("color", "#ffffff"))), 13])
 			out.append(["%d of %d charges. One comes back every %s." % [int(floor(p.dashes)), int(p.max_dashes()), _secs(p.dash_regen())], MUTED, 13])
-		"kit":
-			out.append(["Armor kit", ARMOR_COL])
-			out.append(["Item  ·  %s  (or %s when your health is full)" % [Settings.key_cap("armor_kit"), Settings.key_cap("tonic")], MUTED, 12])
-			out.append(["Repairs your armor to full. Armor takes 20%% off every hit while it lasts, and doesn't come back on its own. You're open while you repair, like drinking. You're carrying %d." % p.armor_kits, INK, 14])
+		"util1", "util2", "util3", "util4": out = BeltHud.tip(p, int(id.substr(4)) - 1)
+		"armor_level": out = ArmorHud.tip(p)
 		"base":
 			out.append(["Base to a teammate", Color("8fe3c8")])
 			out.append(["Squads  ·  %s" % Settings.key_cap("base"), MUTED, 12])
 			out.append(["A 3s channel to the teammate nearest your cursor. Stand still: moving, attacking or any damage interrupts it. You arrive weakened for 3s: half damage, and your crowd control, healing and shields are halved.", INK, 14])
 			out.append(["Cooldown %ds%s" % [int(Hunter.BASE_CD), ("  ·  ready in %ds" % int(ceil(p.base_cd))) if p.base_cd > 0.0 else "  ·  ready"], MUTED, 13])
-		"tonic":
-			out.append(["Heal", GOOD])
-			out.append(["Item  ·  %s" % Settings.key_cap("tonic"), MUTED, 12])
-			out.append(["Drinks a tonic (40%% of your health) when you're hurt; with full health it uses an armor kit instead. Neither comes back on its own. Carrying %d tonics and %d kits." % [p.tonics, p.armor_kits], INK, 14])
 		"pack":
-			out.append(["Backpack  %d/%d" % [p.pack.size(), p.pack_cap], INK])
+			var pack_tip := Backpacks.tip(p)
+			out.append(pack_tip[0])
 			out.append(["Open  ·  %s" % Settings.key_cap("inventory"), MUTED, 12])
-			out.append(["Gear and treasure you're carrying home. Extract to keep it all in your armory; die and it stays in your deathbox. Bigger backpacks at the armory.", INK, 14])
+			out.append(pack_tip[1])
 		"weapon":
 			var wp: Dictionary = p.wpn
 			out.append([wp["name"], Color("e6dccb")])

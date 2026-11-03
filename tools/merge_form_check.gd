@@ -331,6 +331,23 @@ func _aug() -> void:
 	# a Boki without a form file: the type's fallback augments
 	P = merged("cindle")
 	ok(not MergeForm.aug_of(MergeForm.of(P)).is_empty() and not MergeAugment.mark(P, "lmb").is_empty(), "a Boki without a form yet has fallback augments from its type")
+	var fdash: Dictionary = MergeForm.aug_of(MergeForm.of(P))["dash"]
+	ok(String(fdash["kind"]) == "trail" and not fdash.has("radius"), "the fallback form dash is a trail, no area burst")
+	var dash_said := String(fdash["desc"])
+	ok(dash_said.contains("trail") and dash_said.contains("haste"), "...and its text says so: %s" % dash_said)
+	Rt = foe(P.pos + Vector3(0, 0, 3.5))
+	hp0 = Rt.hp
+	P.haste_t = 0.0
+	P.roll_dir = Vector2(1, 0)
+	CombatBus.ability_used.emit(P, "test_dash", "dodge")
+	ok(P.haste_t > 0.0, "the fallback dash gives a short haste")
+	run_for(0.5, func(): P.pos.x += 0.1)
+	ok(Rt.hp >= hp0, "...and nothing beside the path is hit, no burst around you (hp %.0f -> %.0f)" % [hp0, Rt.hp])
+	Rt = foe(P.pos + Vector3(2.5, 0, 0))
+	hp0 = Rt.hp
+	CombatBus.ability_used.emit(P, "test_dash", "dodge")
+	run_for(0.4, func(): P.pos.x += 0.1)
+	ok(Rt.hp < hp0, "...what it passes through takes the type's trail (hp %.0f -> %.0f)" % [hp0, Rt.hp])
 	# after the merge: all back to normal
 	_fresh("pebbit")
 	P = m.player

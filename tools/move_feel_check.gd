@@ -110,7 +110,7 @@ func _hv(h: Hunter) -> Vector2:
 	return Vector2(h.vel.x, h.vel.z)
 
 func _clear_inp() -> void:
-	for k in ["sec", "sig", "ult", "tonic", "kit", "gear1", "gear2", "glide", "glide_btn", "jump", "dash", "fire", "crouch", "throw", "reload", "skill", "swap"]:
+	for k in ["sec", "sig", "ult", "util1", "util2", "util3", "util4", "gear1", "gear2", "glide", "glide_btn", "jump", "dash", "fire", "crouch", "throw", "reload", "skill", "swap"]:
 		P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
 
@@ -170,6 +170,7 @@ func run(main: Node) -> void:
 	_jump()
 	_glide()
 	_dash_glide()
+	_plain_dash()
 	_abyss_updraft()
 	_feather()
 	_ledge()
@@ -415,6 +416,26 @@ func _dash_glide() -> void:
 # ---------------------------------------------------------------- abyss lift, updrafts
 var _rim := {}
 ## A rim tile with open sky beyond it: {at: ground point, dir: outward}.
+## Owner rule: explosions are for blasts that do something. A plain dash on the ground and one in the air spawn
+## no particle burst and no ring (Fx.radial), only a dust puff and after-images.
+func _plain_dash() -> void:
+	var biomes := m.biomes
+	m.biomes = null          # (the map's own hazards spark and ring on their own clock)
+	for airborne in [false, true]:
+		_reset(flat + Vector3(0, 2.0 if airborne else 0.0, 0), not airborne)
+		var radial0: int = m.fx.radial
+		P.inp["move"] = Vector2(1, 0)
+		P.inp["dash"] = true
+		var dashed := false
+		for i in 30:
+			m.step(DT)
+			P.inp["dash"] = false
+			dashed = dashed or P.roll_t > 0.0
+		var spawned: int = m.fx.radial - radial0
+		var where := "air" if airborne else "ground"
+		ok(dashed and spawned == 0, "a plain %s dash spawns no burst or ring (%d)" % [where, spawned])
+	m.biomes = biomes
+
 func _find_rim() -> Dictionary:
 	if not _rim.is_empty(): return _rim
 	var edge := {}

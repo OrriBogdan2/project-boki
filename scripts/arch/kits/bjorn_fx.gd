@@ -316,6 +316,14 @@ func purify(at: Vector3, r: float, u: float) -> void:
 		column.scale = Vector3(r / 1.4, 1.0, r / 1.4) * lerpf(0.5, 1.0, u)
 		column.material_override.set_shader_parameter("power", 0.4 + 0.6 * u)
 
+## The zone standing (called every step while it lasts): the disc stays lit at a steady glow.
+func purify_hold(at: Vector3, r: float) -> void:
+	column.visible = false
+	disc.visible = true
+	disc.global_position = AimMode.ground(h.m, at) + Vector3(0, 0.07, 0)
+	disc_r = r
+	disc_t = 0.45
+
 func purify_burst(at: Vector3, r: float) -> void:
 	column.visible = false
 	disc.visible = true

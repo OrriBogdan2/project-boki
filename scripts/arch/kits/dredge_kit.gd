@@ -8,14 +8,15 @@ extends ArchKit
 ## - LMB: the scattergun (the weapon's own firing): a tight fan of slugs that stop and hang at 6.3m; the
 ##   two cone-edge lines on the ground while firing, one aim line when idle; the body rocks back on each
 ##   shot. At dash rank 3 pellet hits trim the barge recharge.
-## - RMB, Grapnel: a braided rope-hook that stops at the first foe or wall (on purpose: walls stop it),
-##   then reels the foe in stunned; you are Grounded while you reel (chain ring at your feet), and only
-##   the barge works. They land Grounded.
+## - RMB, Grapnel: a braided rope-hook that pierces terrain and stops at the first body (a placed wall still
+##   stops it), then reels it in stunned, over rocks and cliffs; you are Grounded while you reel (chain ring at
+##   your feet), and only the barge works. Rank 3: a foe hit takes half the cooldown off.
 ## - E, Anchor Drop: hop a body length forward, then a giant ghost anchor slams the cone in front: a long
 ##   stun. In the air you smash straight down, the anchor lands with you, a ring at the landing, and the
-##   height adds damage. Just after it the barge turns badly.
-## - Dash, Barge: a shoulder barge toward the cursor that shoves, with a burst where it sets off; further
-##   in the air.
+##   height adds damage. Rank 3: double damage on a foe over the abyss and a longer stun. Just after it the
+##   barge turns badly.
+## - Dash, Barge: a shoulder barge toward the cursor that shoves (no damage), with a burst where it sets off;
+##   further in the air. Rank 3: it resets the gun's bloom.
 ## - X, Brass Broadside (level 6): a planted 1.1s charge behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
@@ -32,7 +33,7 @@ const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); th
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
 const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
-# m: a rise a reeled body can't be dragged up (a cliff face; rocks are hauled over)
+# m: a rise past which a reeled body is lifted onto the ground ahead instead of walking up
 const CLIFF := 1.2
 
 var pull := {}                  # hold: the reel {t (the foe), left}
@@ -56,6 +57,7 @@ var fx: LDFx
 var broadside: DredgeBlast      # X, Brass Broadside (its charge and waves are a hold: broadside.blast)
 var grapples := 0               # (tests) foes reeled in
 var anchors := 0
+var abyss_dunks := 0           # (tests) foes the rank-3 Anchor hit over the abyss
 var quakes := 0
 var backstabs := 0
 var snags := 0                  # reels ended by a wall
@@ -275,8 +277,8 @@ func fire_rmb(c: Dictionary) -> void:
 				m.fx.word(at + Vector3(0, 1.2, 0), "SNAGGED" if why == "wall" else "MISS", Color("c0b0a0"), false)}))
 	if m.shots.size() > n0:
 		hook_sd = m.shots[-1]
-		# the hook flies over rocks and props (cliff faces still stop it)
-		(hook_sd["x"] as Dictionary)["rocks"] = true
+		# the hook pierces terrain: rocks, props and cliff faces
+		(hook_sd["x"] as Dictionary)["pierce_terrain"] = true
 		var sn = hook_sd.get("node")
 		if sn is Node3D and is_instance_valid(sn):
 			(sn as Node3D).visible = false          # the claw and the rope are drawn by the kit
@@ -346,7 +348,7 @@ func _grab_word(wisp: bool, ally: bool) -> String:
 
 ## The reel: the body is hauled toward wherever Dredge is now, with weight (it carries its sideways speed and
 ## eases into the new heading), so walking sideways while reeling swings it round you (the source's physics
-## pull). It is dragged over rocks and props; a cliff face or a placed wall stops it; the abyss takes it.
+## pull). It is dragged over rocks, props and cliff faces; only a placed wall stops it; the abyss takes it.
 func _tick_pull(dt: float) -> void:
 	var f = pull["t"]
 	var gone: bool = not is_instance_valid(f) or (f as Ent).dead
@@ -395,8 +397,8 @@ func _rope_thick() -> float:
 	var since := fposmod(m.time - anim_at - 0.18, HAUL_T)
 	return 0.32 * (1.0 + 0.8 * (1.0 - smoothstep(0.0, 0.12, since)))
 
-## Moves a body `dist` along `dir` in small steps: over rocks and props (lifted onto them), never up a cliff
-## face (a rise past CLIFF) or through a placed wall. Returns how far it went. Over the void it just goes on.
+## Moves a body `dist` along `dir` in small steps: over rocks and props and up cliff faces (lifted onto them),
+## never through a placed wall. Returns how far it went. Over the void it just goes on.
 func _drag(fe: Ent, dir: Vector2, dist: float) -> float:
 	var moved := 0.0
 	var W = m.world
@@ -406,8 +408,14 @@ func _drag(fe: Ent, dir: Vector2, dist: float) -> float:
 		var nz := fe.pos.z + dir.y * s
 		var gy: float = W.ground_at(nx, nz)
 		var wall: bool = not W.dyn_walls.is_empty() and Verbs.wall_blocks(W.dyn_walls, nx, nz, fe.r, fe.pos.y) > 0.0
-		if wall or (gy > World.VOID + 1.0 and gy - fe.pos.y > CLIFF):
+		if wall:
 			break
+		var face: float = W.ground_at(nx + dir.x * fe.r, nz + dir.y * fe.r)
+		# a body already falling into the abyss isn't saved
+		var standing: bool = gy > World.VOID + 1.0 and fe.pos.y > gy - 0.5
+		if standing and face > World.VOID + 1.0 and face - fe.pos.y > CLIFF:
+			fe.pos.y = face + 0.5          # hauled up a cliff face
+			fe.vel.y = maxf(fe.vel.y, 5.0)
 		if W.occupy(nx, nz, fe.r, fe.pos.y, false) != 0.0 and gy > World.VOID + 1.0:
 			# a rock or a prop in the way: haul the body up and over it to the first clear spot beyond
 			var k := s
@@ -453,7 +461,6 @@ func _end_pull(arrived: bool) -> void:
 		if ally:
 			if not wisp: m.fx.word((f as Ent).pos + Vector3(0, 2.4, 0), "SAVED", col_of(rdf), true)
 			return
-		KitStatus.apply(f, "gnd", float(rdf["ground_t"]))
 		payoff_fx((f as Ent).pos, "HAULED", col_of(rdf), "pay_salvage", h.aim_dir(), f)
 
 # ------------------------------------------------------------------ E: Anchor Drop
@@ -516,10 +523,10 @@ func _anchor() -> void:
 	var gy: float = m.world.ground_at(h.pos.x, h.pos.z)
 	var over_void := gy <= World.VOID + 1.0
 	var amt := float(ed["dmg"])
-	var stun := float(ed["stun"]) + 0.1 * float(maxi(0, rank("kin") - 1))
+	var stun := _stun_t()
 	var stg := stage("e", {"delivery": {"type": "cone", "radius": float(ed["radius"]), "angle": float(ed["angle"])},
 		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
-	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun)
+	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt)
 	run(stg, cx("e", "anchor_drop", aim(), {"no_floor": true, "on_foe": on_foe}))
 	var at := h.pos + Vector3(dd.x, 0, dd.y) * 1.7
 	if not drop_fx.is_empty(): drop_fx["at"] = ground(at)
@@ -550,9 +557,22 @@ func _anchor_dust(at: Vector3) -> void:
 	m.fx.dust(at, 26)
 	fx.wave(ground(at), 1.8, ANCHOR_COL, 0.35, Color(IRON, 0.5))
 
-func _slammed(f: Ent, stun: float) -> void:
+## The Anchor's stun: +0.1s a rank, and rank 3 adds its own 0.2s.
+func _stun_t() -> float:
+	var ed := e_def()
+	var bonus := float(ed["rank3_stun"]) if rank("kin") >= 3 else 0.0
+	return float(ed["stun"]) + 0.1 * float(maxi(0, rank("kin") - 1)) + bonus
+
+## True when the foe stands over the abyss.
+func over_abyss(f: Ent) -> bool:
+	return m.world.ground_at(f.pos.x, f.pos.z) <= World.VOID + 1.0
+
+func _slammed(f: Ent, stun: float, amt: float) -> void:
 	var ed := e_def()
 	if not is_instance_valid(f) or f.dead: return
+	if rank("kin") >= 3 and over_abyss(f):
+		abyss_dunks += 1
+		f.hurt(amt * power("kin") * float(ed["abyss_k"]), h, {"src": "abil", "ab": "k1", "tags": ["anchor"]})
 	f.vel.y = minf(f.vel.y, -16.0)
 	# ANCHORED says it all: no separate GROUNDED word over the stun
 	KitStatus.apply(f, "gnd", float(ed["gnd_t"]), 0.0, true, "anchored: no dash, jump or glide")
@@ -612,13 +632,13 @@ func _quake(at: Vector3, fell: float) -> void:
 	var ed := e_def()
 	anchors += 1
 	quakes += 1
-	var mx := float(ed["air_max3"] if rank("kin") >= 3 else ed["air_max"])
-	last_quake_k = 1.0 + mx * clampf(fell / float(ed["air_h"]), 0.0, 1.0)
-	var stun := float(ed["stun"]) + 0.1 * float(maxi(0, rank("kin") - 1))
+	last_quake_k = 1.0 + float(ed["air_max"]) * clampf(fell / float(ed["air_h"]), 0.0, 1.0)
+	var stun := _stun_t()
+	var amt := float(ed["dmg"]) * last_quake_k
 	var r := float(ed["quake_r"])
 	var stg := stage("e", {"delivery": {"type": "burst", "radius": r},
-		"effects": [{"type": "damage", "amount": float(ed["dmg"]) * last_quake_k}, {"type": "stun", "duration": stun}]})
-	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun)
+		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
+	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt)
 	run(stg, cx("e", "anchor_drop", at, {"at_fixed": at, "no_floor": true, "on_foe": on_foe}))
 	var d2 := h.aim_dir()
 	fx.anchor_drop(at + Vector3(d2.x, 0, d2.y) * 0.6, 0.0, 1.0)
@@ -654,16 +674,14 @@ func on_dash(use_ex: bool) -> bool:
 	else:
 		if not spend_dash(false):
 			return true
-		var pk := power("dash") / maxf(0.01, m.dmg_mult(h))
-		var shove := {
-			"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk,
-			"trail": "", "dir": dir
-		}
+		var shove := {"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "trail": "", "dir": dir}
 		travel(float(dd["dist"]), float(dd["time"]), shove)
 		st["last_dash"] = "barge"
 		play("dr_barge")
 		h.glide_cd = maxf(h.glide_cd, h.roll_t + 0.35)
 		m.sfx("dr_barge", h.pos, -2.0, 1.0)
+	if rank("dash") >= 3:
+		h.wbloom = 0.0                # rank 3: a dash resets the gun's bloom
 	_barge_burst(dir)
 	barge_t = h.roll_t
 	stop_t = h.roll_t + 0.02

@@ -200,8 +200,16 @@ func beam(a: Vector3, b: Vector3, col: Color, width := 0.45, dur := 0.28) -> voi
 ## burying the fight under confetti.
 const PARTICLES := 0.6
 var particles := PARTICLES     # times the quality preset's particle amount (Settings q("fx"))
+var radial := 0                # bursts and rings spawned so far (dust puffs don't count; checks read it)
 
-func burst(at: Vector3, col: Color, amount := 14, speed := 4.0, life := 0.5, grav := 12.0, size := 1.0, dir := Vector3.UP, spread := 180.0) -> void:
+## A particle burst: an effect that marks a hit or a blast, never plain movement (dust is for that).
+func burst(at: Vector3, col: Color, amount := 14, speed := 4.0, life := 0.5, grav := 12.0, size_k := 1.0,
+		dir := Vector3.UP, spread := 180.0) -> void:
+	radial += 1
+	_emit(at, col, amount, speed, life, grav, size_k, dir, spread)
+
+func _emit(at: Vector3, col: Color, amount: int, speed: float, life: float, grav: float, size_k: float, dir: Vector3,
+		spread: float) -> void:
 	var p := bursts[bi]
 	bi = (bi + 1) % bursts.size()
 	p.global_position = at
@@ -212,21 +220,21 @@ func burst(at: Vector3, col: Color, amount := 14, speed := 4.0, life := 0.5, gra
 	p.initial_velocity_min = speed * 0.5
 	p.initial_velocity_max = speed
 	p.gravity = Vector3(0, -grav, 0)
-	p.scale_amount_min = 0.6 * size
-	p.scale_amount_max = 1.4 * size
+	p.scale_amount_min = 0.6 * size_k
+	p.scale_amount_max = 1.4 * size_k
 	p.direction = dir
 	p.spread = spread
 	p.restart()
 	p.emitting = true
 
+## A low puff of dust at the feet: the cue for movement (dashes, landings, jumps).
 func dust(at: Vector3, n := 8) -> void:
-	burst(at + Vector3(0, 0.1, 0), Color(0.82, 0.8, 0.72, 0.9), n, 2.2, 0.45, 2.0, 1.3, Vector3.UP, 80.0)
+	_emit(at + Vector3(0, 0.1, 0), Color(0.82, 0.8, 0.72, 0.9), n, 2.2, 0.45, 2.0, 1.3, Vector3.UP, 80.0)
 
+## The shared dash cue: a dust puff where it sets off (the after-images follow in Hunter.render). No ring or
+## burst: those are kept for blasts that do something.
 func dash_trail(h) -> void:
-	var c: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
-	burst(h.pos + Vector3(0, 0.6, 0), Color(c, 0.7), 12, 1.2, 0.3, 0.0, 1.6)
 	dust(h.pos, 7)
-	ring(h.pos, 1.3, Color(c, 0.8), 0.22)
 
 var ghosts: Array = []
 var _ghost_mesh: Mesh
@@ -342,6 +350,7 @@ func _clear_spot(at: Vector3) -> Vector3:
 	return spot
 
 func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
+	radial += 1
 	var mi := MeshInstance3D.new()
 	mi.mesh = Models.flat_quad(2.0)
 	mi.material_override = Models.ring_mat(col, 0.12)
