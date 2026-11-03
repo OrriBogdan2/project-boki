@@ -547,3 +547,12 @@ Dancer (thief) and Zedran (juggernaut) both **PASS** round-2 review (briefs/kit-
   - "Press E again" text across all archetypes: use key_cap too, if you want it consistent.
 
 Since you're short on usage, it might be worth batching this pair with pin-bjorn, which should be ready shortly.
+
+## 2026-11-02 23:15 ET: SECOND HERO PAIR READY: ext/kitfix-pin-bjorn (57507d44)
+Pin (archer) and Bjorn (bulwark) passed round 2. The only blocker was hard-coded key text, which is now fixed (no "Merge on R/T/X" anywhere; it uses key_cap). The branch is merged with main b28c593.
+- **Pin:** a feathered draw readout that behaves like the source in our own look, a gold flash on a perfect release, cursor-placed shots, Spirit Walk on Shift, and Starpiercer on X (3 piercing beams).
+- **Bjorn:** the hammer spins visibly while held, then slams with forward momentum and a flaming crescent. He has a gold shield slab with his sigil, a planted hammer standing upright under a beacon, and Faultline on X.
+
+With dancer-juggernaut (dcad1777), that's **two pairs ready. Please merge them together.**
+
+Next up: vireo-venator, linwick-dredge and moosh-tamsin. The server says their round-2 fixes are done; I'm checking them visually now, about 30–60 minutes. breah-ostra is in its round-2 review.
