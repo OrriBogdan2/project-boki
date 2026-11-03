@@ -8,14 +8,14 @@ extends RefCounted
 ## allow, the anchors stay and the hit ring doesn't change; the portrait frames the head.
 
 const MANTLE_CHECK := preload("res://tools/mantle_look_check.gd")
+const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
 const EPS := 0.0005
 ## Per Warden: the hit radius it must keep (m), its height against a medium hunter (hero sheets, "Body,
-## scale and movement feel"), its width against a medium (from, to), and the prefix of its keyed moves ("": it
-## has none of its own; a Warden's 3D model plays every table's in --warden-glb-check).
+## scale and movement feel"), its width against a medium (from, to), and the prefix of its keyed moves.
 const WARDENS := {
 	"bulwark": {"hit_r": 0.5, "height": 1.15, "width": [1.3, 2.2], "moves": "bul_"},
 	"archer": {"hit_r": 0.37, "height": 0.98, "width": [0.7, 1.15], "moves": "arc_"},
-	"gunslinger": {"hit_r": 0.4, "height": 1.04, "width": [0.85, 1.3], "moves": ""},
+	"gunslinger": {"hit_r": 0.4, "height": 1.04, "width": [0.85, 1.3], "moves": "gunslinger_"},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured
@@ -88,13 +88,10 @@ func _anim(id: String) -> void:
 		"pad_l": an.pad_l, "pad_r": an.pad_r, "skirt": an.skirt}
 	var unbound := parts.keys().filter(func(k): return parts[k] == null)
 	ok(unbound.is_empty(), "%s: HunterAnim binds every part (unbound %s)" % [id, str(unbound)])
-	if String(WARDENS[id]["moves"]) == "":
-		m.free()
-		return
 	var rest := _pose(an, m, "", 0.0)
 	var still: Array = []
 	var moves: Array = []
-	for t in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES]:
+	for t in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES]:
 		for mv in t:
 			if String(mv).begins_with(WARDENS[id]["moves"]): moves.append(mv)
 	for mv in moves:
@@ -196,27 +193,11 @@ func _head_top(m: Node3D) -> float:
 
 ## The top of a .glb Warden as skinned in its current pose (every vertex through its bones), above its feet.
 func _glb_top(m: Node3D) -> float:
+	(m.get_node("Warden/Sync") as WardenGlb.Sync).apply()
 	var top := -INF
 	for nd in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
-		var mi := nd as MeshInstance3D
-		var sk := mi.get_node(mi.skeleton) as Skeleton3D
-		(m.get_node("Warden/Sync") as WardenGlb.Sync).apply()
-		var to_bone: Array = []
-		for bi in mi.skin.get_bind_count():
-			var bone := mi.skin.get_bind_bone(bi)
-			if bone < 0:
-				bone = sk.find_bone(mi.skin.get_bind_name(bi))
-			to_bone.append(sk.global_transform * sk.get_bone_global_pose(bone) * mi.skin.get_bind_pose(bi))
-		for si in mi.mesh.get_surface_count():
-			var arr := mi.mesh.surface_get_arrays(si)
-			var pos: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
-			var bones: PackedInt32Array = arr[Mesh.ARRAY_BONES]
-			var ws: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
-			for vi in pos.size():
-				var p := Vector3.ZERO
-				for k in 4:
-					p += ((to_bone[bones[vi * 4 + k]] as Transform3D) * pos[vi]) * ws[vi * 4 + k]
-				top = maxf(top, p.y)
+		for p in WARDEN_SKIN.points(nd as MeshInstance3D):
+			top = maxf(top, p.y)
 	return top - m.global_position.y
 
 ## The body's bounds in world space, leaving out the weapon, the shield, the glider and the ring.
