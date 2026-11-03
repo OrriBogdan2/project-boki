@@ -79,3 +79,13 @@ The owner saw an explosion when Dancer dashed, **while not merged**. His rule: "
   
   Our own look, pooled effects. It has to be obvious she's skating on ice she makes, not sliding or dashing.
 - **Assert:** Tamsin has no dash besides the skate (no `travel()` dash on Shift tap), the air press doesn't dash, and the trail emits while skating.
+
+## 13. Tamsin's RMB (Ice Spear) and her wall (kit fix, same branch as item 12)
+- **The RMB is too fast and doesn't feel impactful.**
+  - Slow the spear's flight so you can see it travel; check the speed against briefs/hero-ref/tamsin.md and the data.
+  - Give it weight: a wind-up pose (raise the spear, then throw), a heavier throw sound, and a big ice-blue spear with a frosty trail.
+  - On landing: a shard burst, the slow-zone ring appearing (the real radius), a chill puff, a small screen kick if it's near, and the delayed detonation as the big hit, with a strong shatter effect and sound.
+  - Use our own look.
+- **The wall doesn't go out far enough.** Increase how far Rink Wall travels or slides out (distance and time). Match the source data if it exists; otherwise about +40–60%. It should still start close and widen as it slides, as specced.
+- **Assert:** spear speed, wall travel distance, and the detonation timing.
+- **Screenshots:** the spear in flight, the landing, the detonation, and the wall at full extension.
