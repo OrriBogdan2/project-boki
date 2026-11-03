@@ -214,42 +214,41 @@ func _breah() -> void:
 		"rock: dropped onto a rock, she stands on its top", P.grounded and absf(P.pos.y - top) < 0.05,
 		"y %.2f top %.2f" % [P.pos.y, top]
 	)
-	P.teleport(home)
-	P.grounded = true
-	P.vel = Vector3.ZERO
-	var tgt := Vector3(mid0.x, home.y, mid0.z)
-	step(m, 0.8, func(): P.inp["move"] = Vector2(tgt.x - P.pos.x, tgt.z - P.pos.z).normalized())
+	# item 25: only the caster climbs her rocks: she walks up and over hers, no jump; anyone else is stopped
+	var cross := _walk_over(m, P, home, w0)
 	ok(
-		"rock: walking into a rock is blocked (no climbing without a jump)",
-		P.pos.y < home.y + 0.1 and Vector2(P.pos.x - mid0.x, P.pos.z - mid0.z).length() > 0.45,
-		"y %.2f" % (P.pos.y - home.y)
+		"rock (item 25): walking into her own rock lifts her onto it and over, no jump, in 0.6s or less",
+		float(cross["t"]) > 0.0 and float(cross["t"]) <= 0.6 and float(cross["peak"]) >= top - home.y - 0.05
+			and not bool(cross["jumped"]),
+		"cross %.2fs peak %.2f top %.2f" % [float(cross["t"]), float(cross["peak"]), top - home.y]
 	)
-	var climbed := [false]
-	P.inp["jump"] = true
-	step(m, 0.9, func():
-		P.inp["move"] = Vector2(tgt.x - P.pos.x, tgt.z - P.pos.z).normalized()
-		if P.grounded and P.pos.y > top - 0.05: climbed[0] = true)
-	P.inp["jump"] = false
-	P.inp["move"] = Vector2.ZERO
-	ok("rock: jump into a rock and you climb onto it", climbed[0], "y %.2f top %.2f" % [P.pos.y, top])
-	# data pass: an ally can hop onto your rocks too (the rock is a low wall for everyone)
-	var A: Hunter = m.make_hunter(
-		"Ally", P.team, "medium", "Ally", "idle", {}, Vector3(home.x, home.y, home.z + 2.0), {"arch": "none"}
-	)
-	A.max_hp = 10000.0
-	A.hp = A.max_hp
+	var tgt := Vector3(mid0.x, home.y, mid0.z)
 	P.teleport(home + Vector3(0, 0, -6.0))
-	var a_climbed := [false]
-	step(m, 0.8, func(): A.inp["move"] = Vector2(tgt.x - A.pos.x, tgt.z - A.pos.z).normalized())
-	A.inp["jump"] = true
-	step(m, 0.9, func():
-		A.inp["move"] = Vector2(tgt.x - A.pos.x, tgt.z - A.pos.z).normalized()
-		if A.grounded and A.pos.y > top - 0.05: a_climbed[0] = true)
-	A.inp["jump"] = false
-	A.inp["move"] = Vector2.ZERO
-	ok("data: an ally jumping into your rock climbs onto it", a_climbed[0], "y %.2f top %.2f" % [A.pos.y, top])
-	A.queue_free()
-	m.hunters.erase(A)
+	for team in [P.team, 5]:
+		var B: Hunter = m.make_hunter("B", team, "medium", "Other", "idle", {}, home, {"arch": "none"})
+		var walk := _walk_over(m, B, home, w0)
+		B.teleport(home)
+		B.vel = Vector3.ZERO
+		var jump_peak := [0.0]
+		step(m, 0.3, func(): B.inp["move"] = Vector2(tgt.x - B.pos.x, tgt.z - B.pos.z).normalized())
+		B.inp["jump"] = true
+		step(m, 0.9, func():
+			B.inp["move"] = Vector2(tgt.x - B.pos.x, tgt.z - B.pos.z).normalized()
+			jump_peak[0] = maxf(jump_peak[0], B.pos.y - home.y))
+		var near_side := (B.pos - mid0).dot((mid0 - home).normalized()) < 0.0
+		ok(
+			"rock (item 25): %s walking or jumping into her rock is stopped (only the caster climbs)" % (
+				"an ally" if team == P.team else "a foe"
+			),
+			float(walk["t"]) < 0.0 and float(walk["peak"]) < 0.1 and jump_peak[0] > 0.8 and near_side
+				and B.pos.y < top - 0.5,
+			"walk cross %.2f peak %.2f, jump peak %.2f, y %.2f" % [
+				float(walk["t"]), float(walk["peak"]), jump_peak[0], B.pos.y - home.y
+			]
+		)
+		B.queue_free()
+		m.hunters.erase(B)
+		m.step(DT)
 	# ---- punch along the row: every rock flies, one after another (Rocksweeping)
 	reset.call()
 	K.use_e()
@@ -648,6 +647,33 @@ func _breah() -> void:
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)
+
+## Walks `h` from `home` straight at rock `w` and on past it for 1.6s: how long the crossing took (from
+## touching the near face to clearing the far one; -1 if it never got past), the highest the feet got
+## above `home`, and whether a jump was ever pressed.
+func _walk_over(m: Match, h: Hunter, home: Vector3, w: Dictionary) -> Dictionary:
+	var mid2: Vector2 = ((w["a"] as Vector2) + (w["b"] as Vector2)) * 0.5
+	var mid := Vector3(mid2.x, float(w["y"]), mid2.y)
+	var dir := (mid - home).normalized()
+	var face := float(w["th"]) + h.r * 0.8
+	h.teleport(home)
+	h.vel = Vector3.ZERO
+	var out := {"t": -1.0, "peak": 0.0, "jumped": false}
+	var touch := -1.0
+	var t := 0.0
+	while t < 1.6:
+		h.inp["move"] = Vector2(dir.x, dir.z)
+		out["jumped"] = bool(out["jumped"]) or bool(h.inp.get("jump", false))
+		m.step(DT)
+		t += DT
+		out["peak"] = maxf(float(out["peak"]), h.pos.y - home.y)
+		var along := (h.pos - mid).dot(dir)
+		if touch < 0.0 and along >= -face - 0.05:
+			touch = t
+		if touch >= 0.0 and float(out["t"]) < 0.0 and along > face:
+			out["t"] = t - touch
+	h.inp["move"] = Vector2.ZERO
+	return out
 
 ## Steps until the slam lands: where she came down, the hop's peak above the take-off and its time.
 func _hop(m: Match, P: Hunter, K: DolmKit) -> Dictionary:

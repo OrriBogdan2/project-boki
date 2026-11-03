@@ -43,7 +43,7 @@ sounds from `tools/gen_stone_sfx.py` (names in `scripts/core/sfx_kits.gd`).
 | LMB hold: punch | hold, release | from the hold: a pale lane 4.2m by 1.8m with 3 chevrons toward the cursor, filling; the cursor charge ring; the fist glows molten orange, hotter with the charge | 12-24 dmg to foes in the lane, knockback 6-11, a 0.6m step, a dust ring and molten spray at the lane's end on the hit; into a wall = 0.9s stun (stars); every rock of the team in the lane flies, and rocks lined up further along the aim (gaps up to 2.8m, to 12m) follow one after another, 0.08s apart. Held past full +0.5s it punches by itself and winds the next one | `breah_wind` (hold), `breah_punch` | `br_wind`, `br_punch`, `br_launch`, `br_burst` |
 | RMB Quakefall | hold to charge, release | everyone sees a red circle a hop (2m) ahead, radius 3.6-4.5m, its sweet spot growing 0.9-1.8m; the cursor charge ring and full flare; both fists glow molten | release: a short hop (a real 0.35s jump arc, about 2m: 1.1 body heights, 0.4m up) into the centre, then the slam as she lands: 14-30, centre x1.2 and stun 0.5-1.2s (stars), rocks in the ring fly outward, foes in the air are dunked (+40%, +20 over the abyss); a molten starburst, rock chips flying, a dust ring at the edge and a dark red cracked crater for 1s. While charging: walk at 55%, jump = a real leap 3.2m forward, about 1.2m up (circle comes along; let go in the air = the arc carries on, slam on landing), a punch = a 1.5m lunge. In the air: dive and slam on landing. The hop and the leap are real jump arcs (not dashes, which hold your height), so glide works out of them: opening or holding the glider drops the pending slam and the glider takes over, never dragged down | `breah_crouch` (hold), `breah_leap`, `breah_lunge`, `breah_slam`, `breah_dive`, `breah_slam_land` | `br_leap`, `br_shove`, `br_slam` |
 | Shift Rubble Leap | tap | to the cursor (1.2m to about 4.25m); everyone sees the landing circle (1.8m) filling through the flight | the rock bursts up under her (0.06s crouch), she leaps in an arc to the spot (0.52s), lands with a crash: 8 dmg and a shove to everyone within 1.8m, then the rock comes down 0.14s after her and rolls on 6m: 12 dmg, Shred, 1.5s slow. In the air: the class long dash, her own heavy shove with a dust after-image | `breah_dash`, `breah_leap_land`, `breah_exdash` | `br_rise`, `br_leap`, `br_slam`, `br_roll`, `br_shove` |
-| E Stone Row | tap | a 0.2s red-orange flash on the ground at each spot (everyone sees it) | three rocks of jagged basalt columns (tapered, broken tops, leaning apart) in a slight curve 3.4m ahead (outer two 0.45m back, 2.4m apart), thin molten cracks in the ground at their feet cooling over 0.6s; 9s, 45 hp; they block bodies and enemy shots; you stand on them and climb them with a jump; any punch, slam or dash-launch sends them flying | `breah_raise` | `br_crack`, `br_raise` |
+| E Stone Row | tap | a 0.2s red-orange flash on the ground at each spot (everyone sees it) | three rocks of jagged basalt columns (tapered, broken tops, leaning apart) in a slight curve 3.4m ahead (outer two 0.45m back, 2.4m apart), thin molten cracks in the ground at their feet cooling over 0.6s; 9s, 45 hp; they block bodies and enemy shots; only she climbs them (walking into one lifts her onto it, no jump) and stands on them; any punch, slam or dash-launch sends them flying | `breah_raise` | `br_crack`, `br_raise` |
 | X Basalt Spine (level 6, 45s) | tap, or hold and drag, release | while X is held (yours only): a pale line 19.8m long with inward chevrons and a centre ring, at the cursor (up to 11m), across the aim; dragging the cursor 0.8m+ from the centre swings it round the centre toward the cursor. On release everyone sees molten cracks along it for 0.2s | 13 rocks of hers erupt from the centre outward over 0.4s with flame bursts: foes within 1.6m are slowed 35% for 1s (1 damage), bodies on the line are moved to their side of it. The rocks stand 7s, block foes and their shots, carry and climb like hers, and fly when punched, slammed or dashed into (a punch along the ridge sweeps it); one cast's rocks deal at most 40 to any one hunter. They are Stone Row's own rocks (same length, top and thickness), lying along the line, one rock deep. Only solid ground takes a rock: the line is clipped where it crosses the abyss (no walkway, no bridge), and a line with no ground under it is refused with a small "No ground for the ridge" note and a puff of grit, unspent. A stun, knock or merge while aiming cancels it unspent | `breah_spine_aim` (hold), `breah_spine` | `br_spine` |
 | Merge (the `ultimate` action; its key from Settings.key_cap) | (Boki Merge) | | | | |
 
@@ -78,7 +78,7 @@ row again. The bridge is gone altogether (owner review item 15: no terrain over 
 |---|---|---|
 | Stone Row, then punch along it | every rock flies in a stream (first at once, the rest 0.08s apart), bursts, shreds, slows, ROCKFALL | `combo: a punch along a row launches every rock in a stream`, `combo: launched rocks burst on the foe...` |
 | Stone Row, then slam | rocks in the ring fly outward | `combo: Stone Row > slam launches the rocks` |
-| Stone Row, then jump into a rock | she climbs on top and stands there | `rock: jump into a rock and you climb onto it`, `rock: dropped onto a rock, she stands on its top` |
+| Stone Row, then walk into a rock | she rises onto it and walks over (0.53s to cross, no jump); anyone else is stopped | `rock (item 25): walking into her own rock lifts her...`, `rock (item 25): an ally / a foe walking or jumping into her rock is stopped`, `rock: dropped onto a rock, she stands on its top` |
 | Punch into a wall | 0.9s stun with stars | `combo: punch into a wall = stun, with stars over the head` |
 | Charge, jump, let go | a real leap forward with the circle, slam on landing | `rmb: jump while charging is a real leap...`, `rmb: the circle comes with her`, `rmb: let go mid-leap = the leap's arc carries on...` |
 | Quakefall (hop, leap or air press), then glide | the glider opens and the slam is dropped; she keeps her height (item 26) | `glide (item 26, hop/leap/air): ...` |
@@ -105,7 +105,7 @@ row again. The bridge is gone altogether (owner review item 15: no terrain over 
 | Jump while charging leaps forward | wiki (Volcano Crusher) | yes (frames 0938-0958) | built |
 | Punch to extend the charge | footage tip title "Punch to Extend Dash/RMB" | yes | built (one lunge per charge) |
 | Slam resets on knock or kill | wiki | yes | removed in the data pass: the owner's tooltip data has no reset |
-| Allies hop over friendly rock walls by jumping against them | wiki (Rockwave), patch 1.01 | no | built more broadly: anyone can climb a rock with a jump and stand on it (owner note); asserted for an ally in the data pass |
+| Allies hop over friendly rock walls by jumping against them | wiki (Rockwave), patch 1.01 | no | not built: the owner wants only the rock's own caster to climb it (review item 25 overrides the source and the data pass's ally climb); allies and foes are stopped, walking or jumping |
 | Tetraform: tap places it across the aim; hold and drag sets the angle | card (patch 1.01 notes), wiki | yes (ult f35-f44) | built on X; asserted `ult drag: ...` |
 | Tetraform rocks spawn after a short delay, centre-out, and slow nearby foes | card, wiki | yes (ult f45-f55) | built: 0.2s cracks, 0.4s rise, 35% slow 1s; asserted `ult beats: ...`, `ult: the rise slows ...` |
 | Tetraform over the abyss makes temporary terrain | card, wiki | yes (guide 161-169s) | not built: the owner wants rocks only, never land over the abyss (review item 15); the line is clipped at the edges |
@@ -122,7 +122,8 @@ row again. The bridge is gone altogether (owner review item 15: no terrain over 
 - The leap rests 12s (was 9s; durations match directly); rank 2 recharges in 10.2s (the shared -15% step; the data's -2s), rank 3
   adds the second charge (the data's +1 charge) and the third-further reach (its +33%) on top of the shared step (8.4s per
   charge, faster than the data's 10s: the shared rank step cannot be switched off for one hunter).
-- Allies climbing the rocks: any hunter can already jump onto a rock (StoneStand does not look at teams); asserted.
+- Allies climbing the rocks: the data pass let any hunter jump onto a rock; owner review item 25 replaced that: only the
+  rock's caster climbs it (see Rock ownership).
 - Not touched: the X wiring and numbers (45s as in the data), the slam and Stone Row cooldowns (9s and 13s against the
   data's 11s and 12.5s, within the ratio the other hunters use).
 
@@ -132,7 +133,7 @@ row again. The bridge is gone altogether (owner review item 15: no terrain over 
 - One punch-lunge per charge.
 - Rocks last 9s (the footage only shows 5s or more).
 - The KNOCK beam on the dunk is our DUNKED word plus a vertical light (a generic knock look in the source, it seems).
-- Anyone (not only allies) can climb a rock; the owner asked for verticality, and enemies standing on her rocks is fair play.
+- Anyone dropped onto a rock from above (a glide, a knock) stands on it and can walk off; only climbing is the caster's.
 - Rubble Leap (the owner's leap, see Research summary): the landing crash deals 8 and shoves within 1.8m; the rock comes
   down 0.14s after her landing, just ahead of her, and rolls on 6m. It lands at the cursor, pulled back to the nearest ground
   a body fits on (it never leaps her into the abyss or a wall). In the air Shift stays the class long dash.
@@ -162,9 +163,20 @@ row again. The bridge is gone altogether (owner review item 15: no terrain over 
 | X | `breah_spine_aim` (hold), `breah_spine` | `anim_br_spine` |
 | Passive find | `breah_sense` | `anim_br_sense` |
 
+## Rock ownership (owner review item 25)
+- A rock belongs to the Breah who raised it (Stone Row, Basalt Spine): the wall's `by`. Only she climbs it: walking into
+  its face (moving into it, no jump) lifts her at 5 m/s with her walk carried on, so she rises onto the top and walks
+  over it in about half a second (asserted at most 0.6s). Everyone else, allies included, and every bot and Boki is
+  stopped by it as by a full wall, walking or jumping; another Breah's rocks are a wall to her too. A body that lands on
+  a rock from above still stands on it and can walk off.
+- This replaces the data pass's ally climb (the source lets allies hop friendly walls); the owner's call wins.
+- Code: StoneStand.top_for (the height a rock blocks the body moving now: its top for its caster, a full wall for others),
+  StoneStand.mover (set and cleared by Hunter around its move step), StoneStand.climb (caster only).
+
 ## Engine notes
-- Rocks are Verbs walls with `top` 1.25m and `th` 0.42 (HeroZones.rock). Verbs.wall_blocks lets feet at the top walk over a
-  wall with a `top`; Ent.ground reads StoneStand.top_under; Hunter's move step calls StoneStand.climb (one line).
+- Rocks are Verbs walls with `top` 1.25m and `th` 0.42 (HeroZones.rock). Verbs.wall_blocks asks StoneStand.top_for how
+  tall a rock is for the body moving (Rock ownership above); Ent.ground reads StoneStand.top_under; Hunter's move step
+  sets StoneStand.mover and calls StoneStand.climb.
 - Every projectile is an ordinary Match shot (spawn_shot), so the height rules and Net behave as for every shot; KitLooks only
   replaces the shared sphere with a pooled skin.
 - Net: rocks travel as `["zone", ...]` events (the Spine's too); `top` is a constant. The Spine's old `"bridge"` event is

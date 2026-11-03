@@ -2382,6 +2382,7 @@ func _physics(dt: float) -> void:
 	# rocks and trees: slide round them. Where you're heading is pushed straight out of any blocker
 	# it overlaps, and the part of your speed going into it is dropped (no bounce, no catch on a
 	# corner); the axis moves below then only meet terrain, edges and walls.
+	StoneStand.mover = self         # (rocks: only their caster climbs them)
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
 	var po: Vector2 = tgt if spirit_t > 0.0 else m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
 	var block_n := Vector2.ZERO     # out of the rock you met this step (its face's normal)
@@ -2478,7 +2479,8 @@ func _physics(dt: float) -> void:
 			and rock_b - pos.y < World.BLOCK_H - 0.1 and m.time - kb_t > 0.4:
 		vel.y = sqrt(2.0 * H_GRAV * (rock_b - pos.y + 0.3))
 		mantle_cd = 0.45
-	StoneStand.climb(self, maxf(b1, b2))      # a jump into a standable rock carries you onto it
+	StoneStand.climb(self, maxf(b1, b2))      # the caster walking into her own rock rises onto it
+	StoneStand.mover = null
 	var g := ground()
 	if grounded and g < pos.y - 0.05:
 		grounded = false
