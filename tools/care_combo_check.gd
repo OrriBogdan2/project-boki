@@ -626,6 +626,7 @@ func _dashes_cute() -> void:
 	K.on_dash(true)
 	P.inp["move"] = Vector2.ZERO
 	var air_t := P.roll_t
+	var glide_cd := P.ex_cd
 	var air_move := K.anim_id
 	var peak := {"v": 0.0}
 	step(m, air_t + 0.05, func(): peak["v"] = maxf(float(peak["v"]), P.roll_speed))
@@ -636,6 +637,10 @@ func _dashes_cute() -> void:
 				and float(peak["v"]) <= 22.0,
 			"%.2f m in %.2f s, peak %.1f m/s" % [air_d, air_t, float(peak["v"])])
 	var ratio := air_d / maxf(0.01, ground_d)
+	ok(
+			"mm dashes: Elluna's cooldowns: the glide 14 s, a hop charge 7 s (separate)",
+			absf(glide_cd - 14.0) < 0.05 and absf(P.dash_regen() - 7.0) < 0.01,
+			"glide %.2f s, hop %.2f s" % [glide_cd, P.dash_regen()])
 	ok(
 			"mm dashes: the glide goes 3-4x the hop's distance and about 5x its time (source)",
 			ratio >= 3.0 and ratio <= 4.0 and air_t / ground_t >= 4.0 and air_t / ground_t <= 6.0,

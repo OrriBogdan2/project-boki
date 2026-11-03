@@ -63,9 +63,9 @@ Item 24's "air about 3x the ground" rule is dropped; both dashes copy the source
 | Air speed curve | a 0.1 s ramp, a flat burst at about 19-22 m/s (the 731.1 s dash averages 18.5) for 0.4-0.6 s, a float out at 40-65% for 0.2-0.5 s, a dead stop on touchdown | footage | `ramp` 0.1, `burst` 0.4, `out_k` 0.45 | peak 17.1 m/s for 0.4 s, then easing from 100% to 45% (72% on average) over 0.45 s; she leaves it at about 7.7 m/s, so a glide opened from it keeps the shared 70% hand-off (`--airdash-glide-check`) |
 | Air height | flat, held up for about 0.6 s, dropping in the last 0.15 s | footage | `float_fall` 1.2 | held to a 1.2 m/s sink until the last 0.15 s |
 | Air vs ground | 3-4x the distance, about 5x the time | footage | | 3.8x, 4.75x |
-| Cooldowns | ground 7 s, air 14 s (separate) | data | `dash.cd` 7.5; air: the class long-dash cooldown | not changed here (an owner question) |
+| Cooldowns | ground 7 s, air 14 s (separate) | data | `dash.cd` 7.0, `dash.air.cd` 14.0 (`ArchKit.long_dash_cd`) | 7 s per hop charge, 14 s for the glide (owner: copy Elluna) |
 
-Asserted in `--tender-combo-check` ("mm dashes: the ground hop is Elluna's ...", "... the air glide is Elluna's ...", "... 3-4x the hop's distance and about 5x its time").
+Asserted in `--tender-combo-check` ("mm dashes: Elluna's cooldowns ...", "mm dashes: the ground hop is Elluna's ...", "... the air glide is Elluna's ...", "... 3-4x the hop's distance and about 5x its time").
 
 ## Combinations
 | Interaction | Implemented in | Check (`--tender-combo-check` unless noted) |

@@ -24,7 +24,8 @@ static func draw(hud, r: Rect2, p: Hunter) -> void:
 		var is_long := has_long and i == n - 1
 		var sw := long_w if is_long else seg_w
 		var sr := Rect2(Vector2(x, r.position.y), Vector2(sw, r.size.y))
-		var long_fill := clampf(1.0 - p.ex_cd / maxf(0.01, Hunter.EX_DASH_CD), 0.0, 1.0)
+		var long_max := p.ak.long_dash_cd() if p.ak else Hunter.EX_DASH_CD
+		var long_fill := clampf(1.0 - p.ex_cd / maxf(0.01, long_max), 0.0, 1.0)
 		var fill := long_fill if is_long else clampf(p.dashes - float(i), 0.0, 1.0)
 		var col: Color = Color("bfe6ff") if is_long else hud.STAMINA_COL
 		var full := fill >= 0.999
