@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult), [tamsin/v2/polish](#tamsin/v2/polish-tamsin/v2/polish), [moosh-moosh/v2/polish](#moosh-moosh/v2/polish-moosh-moosh/v2/polish), [vireo/v2/polish](#vireo/v2/polish-vireo/v2/polish), [venator/v2/polish](#venator/v2/polish-venator/v2/polish)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult), [tamsin/v2/polish](#tamsin/v2/polish-tamsin/v2/polish), [moosh-moosh/v2/polish](#moosh-moosh/v2/polish-moosh-moosh/v2/polish), [vireo/v2/polish](#vireo/v2/polish-vireo/v2/polish), [venator/v2/polish](#venator/v2/polish-venator/v2/polish), [pin/v2/polish](#pin/v2/polish-pin/v2/polish), [bjorn/v2/polish](#bjorn/v2/polish-bjorn/v2/polish)
 
 ## Vireo (mage)
 
@@ -3231,3 +3231,711 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Hot Streak: the knock gives Slipstep back: +KNOCK, the ember column and ring on him (close-up)**
 
 ![Hot Streak: the knock gives Slipstep back: +KNOCK, the ember column and ring on him (close-up)](venator/v2/polish/venator_knock_close.png)
+
+## pin/v2/polish (pin/v2/polish)
+
+**Draw toward Empowered: the feathered V closing on the cursor from the bow, the cursor ring filling, no glint yet (gameplay zoom)**
+
+![Draw toward Empowered: the feathered V closing on the cursor from the bow, the cursor ring filling, no glint yet (gameplay zoom)](pin/v2/polish/pin_draw_v.png)
+
+**Draw toward Empowered: the feathered V closing on the cursor from the bow, the cursor ring filling, no glint yet (close-up)**
+
+![Draw toward Empowered: the feathered V closing on the cursor from the bow, the cursor ring filling, no glint yet (close-up)](pin/v2/polish/pin_draw_v_close.png)
+
+**Empowered ready: the lines merged into one bright line, the leaf glint riding out, a green fletch burst at the bow (gameplay zoom)**
+
+![Empowered ready: the lines merged into one bright line, the leaf glint riding out, a green fletch burst at the bow (gameplay zoom)](pin/v2/polish/pin_draw_empowered.png)
+
+**Empowered ready: the lines merged into one bright line, the leaf glint riding out, a green fletch burst at the bow (close-up)**
+
+![Empowered ready: the lines merged into one bright line, the leaf glint riding out, a green fletch burst at the bow (close-up)](pin/v2/polish/pin_draw_empowered_close.png)
+
+**Supercharged held: the thick feathered mint line past the cursor to max range, the mint fletch glint at the bow hand, the dummy ringed at its feet (gameplay zoom)**
+
+![Supercharged held: the thick feathered mint line past the cursor to max range, the mint fletch glint at the bow hand, the dummy ringed at its feet (gameplay zoom)](pin/v2/polish/pin_draw_super.png)
+
+**Supercharged held: the thick feathered mint line past the cursor to max range, the mint fletch glint at the bow hand, the dummy ringed at its feet (close-up)**
+
+![Supercharged held: the thick feathered mint line past the cursor to max range, the mint fletch glint at the bow hand, the dummy ringed at its feet (close-up)](pin/v2/polish/pin_draw_super_close.png)
+
+**Supercharged comes up: the body flash, a mint fletch burst at the bow, the feathered line past the cursor (gameplay zoom)**
+
+![Supercharged comes up: the body flash, a mint fletch burst at the bow, the feathered line past the cursor (gameplay zoom)](pin/v2/polish/pin_super_ready.png)
+
+**Supercharged comes up: the body flash, a mint fletch burst at the bow, the feathered line past the cursor (close-up)**
+
+![Supercharged comes up: the body flash, a mint fletch burst at the bow, the feathered line past the cursor (close-up)](pin/v2/polish/pin_super_ready_close.png)
+
+**Quick draw after a perfect release: the next Empowered comes up in 0.38 s (merged line, leaf glint) (gameplay zoom)**
+
+![Quick draw after a perfect release: the next Empowered comes up in 0.38 s (merged line, leaf glint) (gameplay zoom)](pin/v2/polish/pin_quick_draw.png)
+
+**Quick draw after a perfect release: the next Empowered comes up in 0.38 s (merged line, leaf glint) (close-up)**
+
+![Quick draw after a perfect release: the next Empowered comes up in 0.38 s (merged line, leaf glint) (close-up)](pin/v2/polish/pin_quick_draw_close.png)
+
+**Overdrawn: the line and the bow glint dim, the draw arm shakes (gameplay zoom)**
+
+![Overdrawn: the line and the bow glint dim, the draw arm shakes (gameplay zoom)](pin/v2/polish/pin_overdraw.png)
+
+**Overdrawn: the line and the bow glint dim, the draw arm shakes (close-up)**
+
+![Overdrawn: the line and the bow glint dim, the draw arm shakes (close-up)](pin/v2/polish/pin_overdraw_close.png)
+
+**Perfect release: Pin's gold fletch burst with its ring at the bow hand (0.13 s), the cursor star (gameplay zoom)**
+
+![Perfect release: Pin's gold fletch burst with its ring at the bow hand (0.13 s), the cursor star (gameplay zoom)](pin/v2/polish/pin_perfect.png)
+
+**Perfect release: Pin's gold fletch burst with its ring at the bow hand (0.13 s), the cursor star (close-up)**
+
+![Perfect release: Pin's gold fletch burst with its ring at the bow hand (0.13 s), the cursor star (close-up)](pin/v2/polish/pin_perfect_close.png)
+
+**Empowered arrow in flight: a solid green arrow with a teal head and a green trail, heading for the cursor (gameplay zoom)**
+
+![Empowered arrow in flight: a solid green arrow with a teal head and a green trail, heading for the cursor (gameplay zoom)](pin/v2/polish/pin_arrow_flight.png)
+
+**Empowered arrow in flight: a solid green arrow with a teal head and a green trail, heading for the cursor (close-up)**
+
+![Empowered arrow in flight: a solid green arrow with a teal head and a green trail, heading for the cursor (close-up)](pin/v2/polish/pin_arrow_flight_close.png)
+
+**No target: the arrow stuck in the ground at the cursor, glowing teal (gameplay zoom)**
+
+![No target: the arrow stuck in the ground at the cursor, glowing teal (gameplay zoom)](pin/v2/polish/pin_spent_arrow.png)
+
+**No target: the arrow stuck in the ground at the cursor, glowing teal (close-up)**
+
+![No target: the arrow stuck in the ground at the cursor, glowing teal (close-up)](pin/v2/polish/pin_spent_arrow_close.png)
+
+**Supercharged arrow: the thick mint-teal bolt and its wide 5 m trail past the cursor (gameplay zoom)**
+
+![Supercharged arrow: the thick mint-teal bolt and its wide 5 m trail past the cursor (gameplay zoom)](pin/v2/polish/pin_super_flight.png)
+
+**Supercharged arrow: the thick mint-teal bolt and its wide 5 m trail past the cursor (close-up)**
+
+![Supercharged arrow: the thick mint-teal bolt and its wide 5 m trail past the cursor (close-up)](pin/v2/polish/pin_super_flight_close.png)
+
+**Supercharged hit: the teal X-star and a mint fletch burst on the dummy (gameplay zoom)**
+
+![Supercharged hit: the teal X-star and a mint fletch burst on the dummy (gameplay zoom)](pin/v2/polish/pin_super_hit.png)
+
+**Supercharged hit: the teal X-star and a mint fletch burst on the dummy (close-up)**
+
+![Supercharged hit: the teal X-star and a mint fletch burst on the dummy (close-up)](pin/v2/polish/pin_super_hit_close.png)
+
+**Heavy Shot held (1.0 s, before full): the gold V closing and the gold bar growing from the bow; no white orb at the hand (gameplay zoom)**
+
+![Heavy Shot held (1.0 s, before full): the gold V closing and the gold bar growing from the bow; no white orb at the hand (gameplay zoom)](pin/v2/polish/pin_heavy_hold.png)
+
+**Heavy Shot held (1.0 s, before full): the gold V closing and the gold bar growing from the bow; no white orb at the hand (close-up)**
+
+![Heavy Shot held (1.0 s, before full): the gold V closing and the gold bar growing from the bow; no white orb at the hand (close-up)](pin/v2/polish/pin_heavy_hold_close.png)
+
+**Heavy Shot: the gold arrow (1.5x) with violet fins and a gold trail, the pink crescent at her feet (gameplay zoom)**
+
+![Heavy Shot: the gold arrow (1.5x) with violet fins and a gold trail, the pink crescent at her feet (gameplay zoom)](pin/v2/polish/pin_heavy_flight.png)
+
+**Heavy Shot: the gold arrow (1.5x) with violet fins and a gold trail, the pink crescent at her feet (close-up)**
+
+![Heavy Shot: the gold arrow (1.5x) with violet fins and a gold trail, the pink crescent at her feet (close-up)](pin/v2/polish/pin_heavy_flight_close.png)
+
+**Heavy Shot impact: a red star and red-white burst, dust as the dummy is driven back, the white ring (gameplay zoom)**
+
+![Heavy Shot impact: a red star and red-white burst, dust as the dummy is driven back, the white ring (gameplay zoom)](pin/v2/polish/pin_heavy_hit.png)
+
+**Heavy Shot impact: a red star and red-white burst, dust as the dummy is driven back, the white ring (close-up)**
+
+![Heavy Shot impact: a red star and red-white burst, dust as the dummy is driven back, the white ring (close-up)](pin/v2/polish/pin_heavy_hit_close.png)
+
+**Snare tap: the snare arrow flying (gameplay zoom)**
+
+![Snare tap: the snare arrow flying (gameplay zoom)](pin/v2/polish/pin_snare.png)
+
+**Snare tap: the snare arrow flying (close-up)**
+
+![Snare tap: the snare arrow flying (close-up)](pin/v2/polish/pin_snare_close.png)
+
+**Spirit Walk: the dodge roll and its green burst (gameplay zoom)**
+
+![Spirit Walk: the dodge roll and its green burst (gameplay zoom)](pin/v2/polish/pin_spirit_roll.png)
+
+**Spirit Walk: the dodge roll and its green burst (close-up)**
+
+![Spirit Walk: the dodge roll and its green burst (close-up)](pin/v2/polish/pin_spirit_roll_close.png)
+
+**Spirit Walk inside a rock: the green shell, her screen tinted dark blue (gameplay zoom)**
+
+![Spirit Walk inside a rock: the green shell, her screen tinted dark blue (gameplay zoom)](pin/v2/polish/pin_spirit_inside.png)
+
+**Spirit Walk inside a rock: the green shell, her screen tinted dark blue (close-up)**
+
+![Spirit Walk inside a rock: the green shell, her screen tinted dark blue (close-up)](pin/v2/polish/pin_spirit_inside_close.png)
+
+**Hail Wall cast: the bow raised high, green arrows lobbed up, the curved arc at the cursor distance (gameplay zoom)**
+
+![Hail Wall cast: the bow raised high, green arrows lobbed up, the curved arc at the cursor distance (gameplay zoom)](pin/v2/polish/pin_hail_tell.png)
+
+**Hail Wall cast: the bow raised high, green arrows lobbed up, the curved arc at the cursor distance (close-up)**
+
+![Hail Wall cast: the bow raised high, green arrows lobbed up, the curved arc at the cursor distance (close-up)](pin/v2/polish/pin_hail_tell_close.png)
+
+**Hail Wall: seven green panels with fletch posts, arrows streaking down, blue burn flames on the dummy (gameplay zoom)**
+
+![Hail Wall: seven green panels with fletch posts, arrows streaking down, blue burn flames on the dummy (gameplay zoom)](pin/v2/polish/pin_hail_rain.png)
+
+**Hail Wall: seven green panels with fletch posts, arrows streaking down, blue burn flames on the dummy (close-up)**
+
+![Hail Wall: seven green panels with fletch posts, arrows streaking down, blue burn flames on the dummy (close-up)](pin/v2/polish/pin_hail_rain_close.png)
+
+**Starpiercer up: the beam's lane to 18 m, the ticked ring at her feet, three pips (gameplay zoom)**
+
+![Starpiercer up: the beam's lane to 18 m, the ticked ring at her feet, three pips (gameplay zoom)](pin/v2/polish/ult_pin_telegraph.png)
+
+**Starpiercer up: the beam's lane to 18 m, the ticked ring at her feet, three pips (close-up)**
+
+![Starpiercer up: the beam's lane to 18 m, the ticked ring at her feet, three pips (close-up)](pin/v2/polish/ult_pin_telegraph_close.png)
+
+**Key frame: the 0.3 s nock, string to the cheek, the bow glowing, the lane filling (gameplay zoom)**
+
+![Key frame: the 0.3 s nock, string to the cheek, the bow glowing, the lane filling (gameplay zoom)](pin/v2/polish/ult_pin_nock.png)
+
+**Key frame: the 0.3 s nock, string to the cheek, the bow glowing, the lane filling (close-up)**
+
+![Key frame: the 0.3 s nock, string to the cheek, the bow glowing, the lane filling (close-up)](pin/v2/polish/ult_pin_nock_close.png)
+
+**Impact: the beam through the target, a white burst cloud and a teal star (gameplay zoom)**
+
+![Impact: the beam through the target, a white burst cloud and a teal star (gameplay zoom)](pin/v2/polish/ult_pin_impact.png)
+
+**Impact: the beam through the target, a white burst cloud and a teal star (close-up)**
+
+![Impact: the beam through the target, a white burst cloud and a teal star (close-up)](pin/v2/polish/ult_pin_impact_close.png)
+
+**The last beam: a wider beam, a bigger burst, the hard kick (gameplay zoom)**
+
+![The last beam: a wider beam, a bigger burst, the hard kick (gameplay zoom)](pin/v2/polish/ult_pin_final.png)
+
+**The last beam: a wider beam, a bigger burst, the hard kick (close-up)**
+
+![The last beam: a wider beam, a bigger burst, the hard kick (close-up)](pin/v2/polish/ult_pin_final_close.png)
+
+**After: Gap 1 (aim): an Empowered arrow with the cursor at 5 m (gameplay zoom)**
+
+![After: Gap 1 (aim): an Empowered arrow with the cursor at 5 m (gameplay zoom)](pin/v2/polish/after_gap1_cursor_landing.png)
+
+**After: Gap 1 (aim): an Empowered arrow with the cursor at 5 m (close-up)**
+
+![After: Gap 1 (aim): an Empowered arrow with the cursor at 5 m (close-up)](pin/v2/polish/after_gap1_cursor_landing_close.png)
+
+**After: Gap 2 (reticle): the bow mid-draw (gameplay zoom)**
+
+![After: Gap 2 (reticle): the bow mid-draw (gameplay zoom)](pin/v2/polish/after_gap2_draw_reticle.png)
+
+**After: Gap 2 (reticle): the bow mid-draw (close-up)**
+
+![After: Gap 2 (reticle): the bow mid-draw (close-up)](pin/v2/polish/after_gap2_draw_reticle_close.png)
+
+**After: Gap 3 (perfect release): the frame after letting go on the stage (gameplay zoom)**
+
+![After: Gap 3 (perfect release): the frame after letting go on the stage (gameplay zoom)](pin/v2/polish/after_gap3_perfect.png)
+
+**After: Gap 3 (perfect release): the frame after letting go on the stage (close-up)**
+
+![After: Gap 3 (perfect release): the frame after letting go on the stage (close-up)](pin/v2/polish/after_gap3_perfect_close.png)
+
+**Draw: hard side-on, leaning back, bow arm out at full reach by Empowered, string hand past the chest, a tremble toward Supercharged (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Draw: hard side-on, leaning back, bow arm out at full reach by Empowered, string hand past the chest, a tremble toward Supercharged (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_arc_draw_close.png)
+
+**Draw: hard side-on, leaning back, bow arm out at full reach by Empowered, string hand past the chest, a tremble toward Supercharged (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Draw: hard side-on, leaning back, bow arm out at full reach by Empowered, string hand past the chest, a tremble toward Supercharged (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_arc_draw_game.png)
+
+**Tap shot: the snap of the bow hand with an overshoot and settle (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Tap shot: the snap of the bow hand with an overshoot and settle (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_arc_tap_close.png)
+
+**Tap shot: the snap of the bow hand with an overshoot and settle (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Tap shot: the snap of the bow hand with an overshoot and settle (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_arc_tap_game.png)
+
+**Empowered release: the one-frame string snap (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Empowered release: the one-frame string snap (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_arc_loose_close.png)
+
+**Empowered release: the one-frame string snap (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Empowered release: the one-frame string snap (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_arc_loose_game.png)
+
+**Supercharged release: the hard kick back, half step (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Supercharged release: the hard kick back, half step (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_arc_super_close.png)
+
+**Supercharged release: the hard kick back, half step (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Supercharged release: the hard kick back, half step (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_arc_super_game.png)
+
+**Perfect release: the gold fletch burst at the bow hand, the flourish, overshoot and settle (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Perfect release: the gold fletch burst at the bow hand, the flourish, overshoot and settle (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_arc_perfect_close.png)
+
+**Perfect release: the gold fletch burst at the bow hand, the flourish, overshoot and settle (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Perfect release: the gold fletch burst at the bow hand, the flourish, overshoot and settle (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_arc_perfect_game.png)
+
+**Overdrawn: the draw arm shakes and sags (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Overdrawn: the draw arm shakes and sags (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_arc_over_close.png)
+
+**Overdrawn: the draw arm shakes and sags (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Overdrawn: the draw arm shakes and sags (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_arc_over_game.png)
+
+**Overdrawn release: the droop (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Overdrawn release: the droop (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_arc_over_loose_close.png)
+
+**Overdrawn release: the droop (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Overdrawn release: the droop (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_arc_over_loose_game.png)
+
+**Heavy Shot draw: sunk low, shoulders turned, the gold glint at full (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Heavy Shot draw: sunk low, shoulders turned, the gold glint at full (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_arc_heavy_wind_close.png)
+
+**Heavy Shot draw: sunk low, shoulders turned, the gold glint at full (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Heavy Shot draw: sunk low, shoulders turned, the gold glint at full (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_arc_heavy_wind_game.png)
+
+**Heavy Shot release: thrown back, a gold fletch burst at the bow, then planting (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Heavy Shot release: thrown back, a gold fletch burst at the bow, then planting (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_arc_heavy_close.png)
+
+**Heavy Shot release: thrown back, a gold fletch burst at the bow, then planting (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Heavy Shot release: thrown back, a gold fletch burst at the bow, then planting (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_arc_heavy_game.png)
+
+**Snare tap: a big flick and lunge step, overshoot, settle (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Snare tap: a big flick and lunge step, overshoot, settle (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_arc_snare_close.png)
+
+**Snare tap: a big flick and lunge step, overshoot, settle (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Snare tap: a big flick and lunge step, overshoot, settle (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_arc_snare_game.png)
+
+**Plunge (air RMB): folded over the bow (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Plunge (air RMB): folded over the bow (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_arc_plunge_close.png)
+
+**Plunge (air RMB): folded over the bow (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Plunge (air RMB): folded over the bow (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_arc_plunge_game.png)
+
+**Hail Wall: the bow raised high overhead, green arrows lobbed up (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Hail Wall: the bow raised high overhead, green arrows lobbed up (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_arc_hail_close.png)
+
+**Hail Wall: the bow raised high overhead, green arrows lobbed up (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Hail Wall: the bow raised high overhead, green arrows lobbed up (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_arc_hail_game.png)
+
+**Spirit Walk: the dodge roll about her centre, green fletch after-images, ending in the crouched spirit run (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Spirit Walk: the dodge roll about her centre, green fletch after-images, ending in the crouched spirit run (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_pin_roll_close.png)
+
+**Spirit Walk: the dodge roll about her centre, green fletch after-images, ending in the crouched spirit run (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Spirit Walk: the dodge roll about her centre, green fletch after-images, ending in the crouched spirit run (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_pin_roll_game.png)
+
+**Spirit Walk: crouched, leaning forward, arms trailing (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Spirit Walk: crouched, leaning forward, arms trailing (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_pin_walk_close.png)
+
+**Spirit Walk: crouched, leaning forward, arms trailing (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Spirit Walk: crouched, leaning forward, arms trailing (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_pin_walk_game.png)
+
+**Long (air) dash: flick and tumble, her green fletch after-images (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Long (air) dash: flick and tumble, her green fletch after-images (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_pin_flick_close.png)
+
+**Long (air) dash: flick and tumble, her green fletch after-images (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Long (air) dash: flick and tumble, her green fletch after-images (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_pin_flick_game.png)
+
+**Deadeye payoff: locked low, bow thrust out (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Deadeye payoff: locked low, bow thrust out (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_pin_deadeye_close.png)
+
+**Deadeye payoff: locked low, bow thrust out (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Deadeye payoff: locked low, bow thrust out (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_pin_deadeye_game.png)
+
+**Knock run down: pumped fist and skip (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Knock run down: pumped fist and skip (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_pin_rundown_close.png)
+
+**Knock run down: pumped fist and skip (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Knock run down: pumped fist and skip (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_pin_rundown_game.png)
+
+**Starpiercer cast (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Starpiercer cast (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_pin_ult_cast_close.png)
+
+**Starpiercer cast (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Starpiercer cast (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_pin_ult_cast_game.png)
+
+**Starpiercer: the nock (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Starpiercer: the nock (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_pin_ult_nock_close.png)
+
+**Starpiercer: the nock (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Starpiercer: the nock (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_pin_ult_nock_game.png)
+
+**Starpiercer: a beam loosed (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Starpiercer: a beam loosed (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_pin_ult_loose_close.png)
+
+**Starpiercer: a beam loosed (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Starpiercer: a beam loosed (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_pin_ult_loose_game.png)
+
+**Starpiercer: the last beam, the hard kick (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Starpiercer: the last beam, the hard kick (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](pin/v2/polish/anim_pin_ult_final_close.png)
+
+**Starpiercer: the last beam, the hard kick (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Starpiercer: the last beam, the hard kick (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](pin/v2/polish/anim_pin_ult_final_game.png)
+
+## bjorn/v2/polish (bjorn/v2/polish)
+
+**Hammer thrown: tumbling, gold-orange glow and trail, flying to the cursor (gameplay zoom)**
+
+![Hammer thrown: tumbling, gold-orange glow and trail, flying to the cursor (gameplay zoom)](bjorn/v2/polish/bjorn_throw_flight.png)
+
+**Hammer thrown: tumbling, gold-orange glow and trail, flying to the cursor (close-up)**
+
+![Hammer thrown: tumbling, gold-orange glow and trail, flying to the cursor (close-up)](bjorn/v2/polish/bjorn_throw_flight_close.png)
+
+**Planted at the cursor: standing head-down in the ground (1.5x) under the upright gold beacon ray (gameplay zoom)**
+
+![Planted at the cursor: standing head-down in the ground (1.5x) under the upright gold beacon ray (gameplay zoom)](bjorn/v2/polish/bjorn_planted.png)
+
+**Planted at the cursor: standing head-down in the ground (1.5x) under the upright gold beacon ray (close-up)**
+
+![Planted at the cursor: standing head-down in the ground (1.5x) under the upright gold beacon ray (close-up)](bjorn/v2/polish/bjorn_planted_close.png)
+
+**Recall: the hammer flying back (gameplay zoom)**
+
+![Recall: the hammer flying back (gameplay zoom)](bjorn/v2/polish/bjorn_recall.png)
+
+**Recall: the hammer flying back (close-up)**
+
+![Recall: the hammer flying back (close-up)](bjorn/v2/polish/bjorn_recall_close.png)
+
+**LMB held: the hammer whirled round over his shoulder in a wide circle with a gold-orange trail, the gold ring at his feet (gameplay zoom)**
+
+![LMB held: the hammer whirled round over his shoulder in a wide circle with a gold-orange trail, the gold ring at his feet (gameplay zoom)](bjorn/v2/polish/bjorn_spin.png)
+
+**LMB held: the hammer whirled round over his shoulder in a wide circle with a gold-orange trail, the gold ring at his feet (close-up)**
+
+![LMB held: the hammer whirled round over his shoulder in a wide circle with a gold-orange trail, the gold ring at his feet (close-up)](bjorn/v2/polish/bjorn_spin_close.png)
+
+**LMB held past 0.6 s: the gold glint riding the whirling hammer head (gameplay zoom)**
+
+![LMB held past 0.6 s: the gold glint riding the whirling hammer head (gameplay zoom)](bjorn/v2/polish/bjorn_glint.png)
+
+**LMB held past 0.6 s: the gold glint riding the whirling hammer head (close-up)**
+
+![LMB held past 0.6 s: the gold glint riding the whirling hammer head (close-up)](bjorn/v2/polish/bjorn_glint_close.png)
+
+**Full charge: the big gold star flare on the hammer head and the cursor flare (gameplay zoom)**
+
+![Full charge: the big gold star flare on the hammer head and the cursor flare (gameplay zoom)](bjorn/v2/polish/bjorn_flare.png)
+
+**Full charge: the big gold star flare on the hammer head and the cursor flare (close-up)**
+
+![Full charge: the big gold star flare on the hammer head and the cursor flare (close-up)](bjorn/v2/polish/bjorn_flare_close.png)
+
+**Release: the flaming 180 degree crescent (2.7 m), carried forward, the body upright (gameplay zoom)**
+
+![Release: the flaming 180 degree crescent (2.7 m), carried forward, the body upright (gameplay zoom)](bjorn/v2/polish/bjorn_slam.png)
+
+**Release: the flaming 180 degree crescent (2.7 m), carried forward, the body upright (close-up)**
+
+![Release: the flaming 180 degree crescent (2.7 m), carried forward, the body upright (close-up)](bjorn/v2/polish/bjorn_slam_close.png)
+
+**Slam impact: the damage number and white dust on the dummy, the debris trail (gameplay zoom)**
+
+![Slam impact: the damage number and white dust on the dummy, the debris trail (gameplay zoom)](bjorn/v2/polish/bjorn_slam_hit.png)
+
+**Slam impact: the damage number and white dust on the dummy, the debris trail (close-up)**
+
+![Slam impact: the damage number and white dust on the dummy, the debris trail (close-up)](bjorn/v2/polish/bjorn_slam_hit_close.png)
+
+**RMB held: his aegis, a solid pale-gold slab with ribs, a bright rim and his hammer sigil (gameplay zoom)**
+
+![RMB held: his aegis, a solid pale-gold slab with ribs, a bright rim and his hammer sigil (gameplay zoom)](bjorn/v2/polish/bjorn_aegis.png)
+
+**RMB held: his aegis, a solid pale-gold slab with ribs, a bright rim and his hammer sigil (close-up)**
+
+![RMB held: his aegis, a solid pale-gold slab with ribs, a bright rim and his hammer sigil (close-up)](bjorn/v2/polish/bjorn_aegis_close.png)
+
+**Aegis blocking: the whole slab flashes, gold sparks off its face (gameplay zoom)**
+
+![Aegis blocking: the whole slab flashes, gold sparks off its face (gameplay zoom)](bjorn/v2/polish/bjorn_aegis_block.png)
+
+**Aegis blocking: the whole slab flashes, gold sparks off its face (close-up)**
+
+![Aegis blocking: the whole slab flashes, gold sparks off its face (close-up)](bjorn/v2/polish/bjorn_aegis_block_close.png)
+
+**Aegis broken: gold shards, SHIELD BROKEN, rocked back on his feet (gameplay zoom)**
+
+![Aegis broken: gold shards, SHIELD BROKEN, rocked back on his feet (gameplay zoom)](bjorn/v2/polish/bjorn_aegis_break.png)
+
+**Aegis broken: gold shards, SHIELD BROKEN, rocked back on his feet (close-up)**
+
+![Aegis broken: gold shards, SHIELD BROKEN, rocked back on his feet (close-up)](bjorn/v2/polish/bjorn_aegis_break_close.png)
+
+**360 Smash: the hard 0.17 s run-up, upright, the gold chevron wake behind (gameplay zoom)**
+
+![360 Smash: the hard 0.17 s run-up, upright, the gold chevron wake behind (gameplay zoom)](bjorn/v2/polish/bjorn_smash_dash.png)
+
+**360 Smash: the hard 0.17 s run-up, upright, the gold chevron wake behind (close-up)**
+
+![360 Smash: the hard 0.17 s run-up, upright, the gold chevron wake behind (close-up)](bjorn/v2/polish/bjorn_smash_dash_close.png)
+
+**360 Smash: the one spin hit, the red-orange-gold spiral ring, sliding on (gameplay zoom)**
+
+![360 Smash: the one spin hit, the red-orange-gold spiral ring, sliding on (gameplay zoom)](bjorn/v2/polish/bjorn_smash_spin.png)
+
+**360 Smash: the one spin hit, the red-orange-gold spiral ring, sliding on (close-up)**
+
+![360 Smash: the one spin hit, the red-orange-gold spiral ring, sliding on (close-up)](bjorn/v2/polish/bjorn_smash_spin_close.png)
+
+**Mending Ground with the hammer in hand: the green column coming down on him, the ring filling (gameplay zoom)**
+
+![Mending Ground with the hammer in hand: the green column coming down on him, the ring filling (gameplay zoom)](bjorn/v2/polish/bjorn_purify_column.png)
+
+**Mending Ground with the hammer in hand: the green column coming down on him, the ring filling (close-up)**
+
+![Mending Ground with the hammer in hand: the green column coming down on him, the ring filling (close-up)](bjorn/v2/polish/bjorn_purify_column_close.png)
+
+**Mending Ground lands: the green ring bloom (gameplay zoom)**
+
+![Mending Ground lands: the green ring bloom (gameplay zoom)](bjorn/v2/polish/bjorn_purify_burst.png)
+
+**Mending Ground lands: the green ring bloom (close-up)**
+
+![Mending Ground lands: the green ring bloom (close-up)](bjorn/v2/polish/bjorn_purify_burst_close.png)
+
+**Bash: the shield shove and its gold fan of force (gameplay zoom)**
+
+![Bash: the shield shove and its gold fan of force (gameplay zoom)](bjorn/v2/polish/bjorn_bash.png)
+
+**Bash: the shield shove and its gold fan of force (close-up)**
+
+![Bash: the shield shove and its gold fan of force (close-up)](bjorn/v2/polish/bjorn_bash_close.png)
+
+**Passive payoff: a full Crushing Blow drives the dummy into a rock: CRUSHED, stunned, Bjorn healed (gameplay zoom)**
+
+![Passive payoff: a full Crushing Blow drives the dummy into a rock: CRUSHED, stunned, Bjorn healed (gameplay zoom)](bjorn/v2/polish/bjorn_crushed.png)
+
+**Passive payoff: a full Crushing Blow drives the dummy into a rock: CRUSHED, stunned, Bjorn healed (close-up)**
+
+![Passive payoff: a full Crushing Blow drives the dummy into a rock: CRUSHED, stunned, Bjorn healed (close-up)](bjorn/v2/polish/bjorn_crushed_close.png)
+
+**Faultline wind-up: four cells to 16 m shown to everyone, the hammer overhead (gameplay zoom)**
+
+![Faultline wind-up: four cells to 16 m shown to everyone, the hammer overhead (gameplay zoom)](bjorn/v2/polish/ult_bjorn_telegraph.png)
+
+**Faultline wind-up: four cells to 16 m shown to everyone, the hammer overhead (close-up)**
+
+![Faultline wind-up: four cells to 16 m shown to everyone, the hammer overhead (close-up)](bjorn/v2/polish/ult_bjorn_telegraph_close.png)
+
+**Key frame: the slam, gold light flooding the near cell, the streak setting off (gameplay zoom)**
+
+![Key frame: the slam, gold light flooding the near cell, the streak setting off (gameplay zoom)](bjorn/v2/polish/ult_bjorn_slam.png)
+
+**Key frame: the slam, gold light flooding the near cell, the streak setting off (close-up)**
+
+![Key frame: the slam, gold light flooding the near cell, the streak setting off (close-up)](bjorn/v2/polish/ult_bjorn_slam_close.png)
+
+**Impact: slabs heaving up cell by cell, the target thrown (gameplay zoom)**
+
+![Impact: slabs heaving up cell by cell, the target thrown (gameplay zoom)](bjorn/v2/polish/ult_bjorn_impact.png)
+
+**Impact: slabs heaving up cell by cell, the target thrown (close-up)**
+
+![Impact: slabs heaving up cell by cell, the target thrown (close-up)](bjorn/v2/polish/ult_bjorn_impact_close.png)
+
+**After: the ember scar along the lane (10 s, slows foes on it) (gameplay zoom)**
+
+![After: the ember scar along the lane (10 s, slows foes on it) (gameplay zoom)](bjorn/v2/polish/ult_bjorn_scar.png)
+
+**After: the ember scar along the lane (10 s, slows foes on it) (close-up)**
+
+![After: the ember scar along the lane (10 s, slows foes on it) (close-up)](bjorn/v2/polish/ult_bjorn_scar_close.png)
+
+**After: Gap 1 (aim): the hammer thrown with the cursor at 6 m (gameplay zoom)**
+
+![After: Gap 1 (aim): the hammer thrown with the cursor at 6 m (gameplay zoom)](bjorn/v2/polish/after_gap1_throw_cursor.png)
+
+**After: Gap 1 (aim): the hammer thrown with the cursor at 6 m (close-up)**
+
+![After: Gap 1 (aim): the hammer thrown with the cursor at 6 m (close-up)](bjorn/v2/polish/after_gap1_throw_cursor_close.png)
+
+**After: Gap 2 (numbers) and 4 (swing VFX): a full swing on the dummy (gameplay zoom; the 53 shows on the close-up and in bjorn_slam_hit)**
+
+![After: Gap 2 (numbers) and 4 (swing VFX): a full swing on the dummy (gameplay zoom; the 53 shows on the close-up and in bjorn_slam_hit)](bjorn/v2/polish/after_gap2_slam_numbers.png)
+
+**After: Gap 2 (numbers) and 4 (swing VFX): a full swing on the dummy (close-up)**
+
+![After: Gap 2 (numbers) and 4 (swing VFX): a full swing on the dummy (close-up)](bjorn/v2/polish/after_gap2_slam_numbers_close.png)
+
+**After: Gap 3 (hold): the swing held 0.9 s (gameplay zoom)**
+
+![After: Gap 3 (hold): the swing held 0.9 s (gameplay zoom)](bjorn/v2/polish/after_gap3_hold_glint.png)
+
+**After: Gap 3 (hold): the swing held 0.9 s (close-up)**
+
+![After: Gap 3 (hold): the swing held 0.9 s (close-up)](bjorn/v2/polish/after_gap3_hold_glint_close.png)
+
+**Hammer throw: cocked far back for one frame, overhand throw, overshoot past the front (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Hammer throw: cocked far back for one frame, overhand throw, overshoot past the front (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_throw_close.png)
+
+**Hammer throw: cocked far back for one frame, overhand throw, overshoot past the front (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Hammer throw: cocked far back for one frame, overhand throw, overshoot past the front (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_throw_game.png)
+
+**Recall: hand out, the catch (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Recall: hand out, the catch (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_recall_close.png)
+
+**Recall: hand out, the catch (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Recall: hand out, the catch (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_recall_game.png)
+
+**LMB held: the hammer whirled round over his shoulder with its gold-orange trail, the gold glint growing (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![LMB held: the hammer whirled round over his shoulder with its gold-orange trail, the gold glint growing (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_smash_wind_close.png)
+
+**LMB held: the hammer whirled round over his shoulder with its gold-orange trail, the gold glint growing (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![LMB held: the hammer whirled round over his shoulder with its gold-orange trail, the gold glint growing (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_smash_wind_game.png)
+
+**Crushing Blow: the hammer arm sweeps round, the flaming crescent, carried forward on his feet (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Crushing Blow: the hammer arm sweeps round, the flaming crescent, carried forward on his feet (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_smash_close.png)
+
+**Crushing Blow: the hammer arm sweeps round, the flaming crescent, carried forward on his feet (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Crushing Blow: the hammer arm sweeps round, the flaming crescent, carried forward on his feet (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_smash_game.png)
+
+**Aegis raised: braced low behind the gold slab (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Aegis raised: braced low behind the gold slab (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_guard_close.png)
+
+**Aegis raised: braced low behind the gold slab (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Aegis raised: braced low behind the gold slab (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_guard_game.png)
+
+**Bash: shoulder shove with the gold fan of force (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Bash: shoulder shove with the gold fan of force (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_bash_close.png)
+
+**Bash: shoulder shove with the gold fan of force (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Bash: shoulder shove with the gold fan of force (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_bash_game.png)
+
+**Shield Slam: 0.3 s wind-up, full-body drive (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Shield Slam: 0.3 s wind-up, full-body drive (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_slamshield_close.png)
+
+**Shield Slam: 0.3 s wind-up, full-body drive (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Shield Slam: 0.3 s wind-up, full-body drive (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_slamshield_game.png)
+
+**Aegis broken: rocked back on his feet, arm flung wide (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Aegis broken: rocked back on his feet, arm flung wide (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_break_close.png)
+
+**Aegis broken: rocked back on his feet, arm flung wide (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Aegis broken: rocked back on his feet, arm flung wide (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_break_game.png)
+
+**360 Smash: the hard 0.17 s run-up, one full turn with the hammer out while he slides on, the low recovery (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![360 Smash: the hard 0.17 s run-up, one full turn with the hammer out while he slides on, the low recovery (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_whirl_close.png)
+
+**360 Smash: the hard 0.17 s run-up, one full turn with the hammer out while he slides on, the low recovery (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![360 Smash: the hard 0.17 s run-up, one full turn with the hammer out while he slides on, the low recovery (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_whirl_game.png)
+
+**Shield Charge: head down behind the shield, a ram (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Shield Charge: head down behind the shield, a ram (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_charge_close.png)
+
+**Shield Charge: head down behind the shield, a ram (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Shield Charge: head down behind the shield, a ram (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_charge_game.png)
+
+**Short dash out of the spin (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Short dash out of the spin (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_short_close.png)
+
+**Short dash out of the spin (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Short dash out of the spin (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_short_game.png)
+
+**Long (air) dash: lumbering shoulder shove, his gold chevron wake (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Long (air) dash: lumbering shoulder shove, his gold chevron wake (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_lumber_close.png)
+
+**Long (air) dash: lumbering shoulder shove, his gold chevron wake (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Long (air) dash: lumbering shoulder shove, his gold chevron wake (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_lumber_game.png)
+
+**Mending Ground: hammer to the sky, driven down (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Mending Ground: hammer to the sky, driven down (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_mend_close.png)
+
+**Mending Ground: hammer to the sky, driven down (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Mending Ground: hammer to the sky, driven down (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_mend_game.png)
+
+**Crushed payoff: hammer raised in triumph (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Crushed payoff: hammer raised in triumph (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_crush_close.png)
+
+**Crushed payoff: hammer raised in triumph (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Crushed payoff: hammer raised in triumph (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_crush_game.png)
+
+**Guard pip: a shrug of the shield (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Guard pip: a shrug of the shield (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_armed_close.png)
+
+**Guard pip: a shrug of the shield (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Guard pip: a shrug of the shield (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_armed_game.png)
+
+**Faultline wind-up: the hammer overhead (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Faultline wind-up: the hammer overhead (held) (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_ult_wind_close.png)
+
+**Faultline wind-up: the hammer overhead (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Faultline wind-up: the hammer overhead (held) (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_ult_wind_game.png)
+
+**Faultline: the slam down through the lane (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)**
+
+![Faultline: the slam down through the lane (6-frame strip: anticipation, release, follow-through, recovery; close-up, 0.42 zoom)](bjorn/v2/polish/anim_bul_ult_slam_close.png)
+
+**Faultline: the slam down through the lane (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)**
+
+![Faultline: the slam down through the lane (6-frame strip: anticipation, release, follow-through, recovery; default gameplay zoom)](bjorn/v2/polish/anim_bul_ult_slam_game.png)
