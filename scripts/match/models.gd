@@ -1762,7 +1762,7 @@ static func breakable(kind_s: String) -> Node3D:
 	if kind_s == "crate":
 		var pc := Assets.prop("dungeon/box_small", 0.78, false, {"bright": 1.1})
 		if pc: return pc
-	elif kind_s == "barrel":
+	elif kind_s in ["barrel", "keg"]:
 		# the red powder keg: the barrel's wood painted red, its fuse still glowing on top
 		var pb := Assets.prop("dungeon/barrel_small", 0.85, true, {"band": Assets.BAND_WOOD, "paint": Color("d8483a"), "bright": 1.1})
 		if pb:
@@ -1782,7 +1782,7 @@ static func breakable(kind_s: String) -> Node3D:
 			part(root, sphere(0.3, 14), clay, Vector3(0, 0.3, 0), Vector3(1, 1.05, 1))
 			part(root, cyl(0.14, 0.18, 0.14, 12), clay, Vector3(0, 0.62, 0))
 			part(root, cyl(0.31, 0.31, 0.05, 14), toon(Color("e8c07a")), Vector3(0, 0.36, 0))
-		"barrel":
+		"barrel", "keg":
 			var red := toon(Color("c8483a"), true, 0.15); var band := toon(Color("3a3440"))
 			part(root, cyl(0.3, 0.3, 0.75, 14), red, Vector3(0, 0.375, 0))
 			for y in [0.12, 0.62]:

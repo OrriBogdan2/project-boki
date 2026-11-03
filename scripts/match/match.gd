@@ -22,7 +22,8 @@ var beacons: Array = []     # revive beacons, see Life
 var chests: Array = []      # {pos, open, prog, node}: the one locked chest (KeyChest); "free" ones need no key
 var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (host / offline)
 var shrines: Array = []     # {pos, used, prog, node}
-var breaks: Array = []      # {i, pos, kind, hp, node, dead}
+var breaks: Array = []      # {i, pos, kind, node, dead}
+var brk: Breakables
 var ring_n := 0
 var pellet_hits := {}        # shotgun volley + target -> slugs landed
 var air_rings: Array = []   # {pos, dir, node, cd: {hunter nid: time}}
@@ -700,6 +701,7 @@ func _start(o: Dictionary) -> void:
 	RaidLook.tune_world(world, raid)
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
+	brk = Breakables.new(self)
 	fields = Fields.new(self)
 	verbs = Verbs.new(self)
 	if world.layout_id != "" and not o.get("tutorial", false):
@@ -755,7 +757,7 @@ func _start(o: Dictionary) -> void:
 		# test: stand by some breakables with two found weapons on the ground
 		var b0: Vector3 = breaks[0]["pos"]
 		for b in breaks:
-			if b["kind"] == "barrel": b0 = b["pos"]; break
+			if b["kind"] == "keg": b0 = b["pos"]; break
 		player.teleport(b0 + Vector3(2.2, 0, 0.6))
 		spawn_gear("quickstep_boots", 3, b0 + Vector3(1.6, 0, 1.8), "", false)
 		spawn_gear("bastion_plate", 4, b0 + Vector3(3.0, 0, 1.6), "", false)
@@ -1494,8 +1496,6 @@ func _spawn_chests() -> void:
 			add_child(n)
 
 # ------------------------------------------------------------------ breakables and found weapons
-const BREAK_HP := {"pot": 6.0, "crate": 22.0, "barrel": 12.0}
-
 func add_chest(p: Vector3) -> Dictionary:
 	var n := Models.chest()
 	n.position = p
@@ -1573,7 +1573,7 @@ func _add_break(kind_s: String, at: Vector3) -> void:
 	n.position = at
 	n.rotation.y = rng.randf() * TAU
 	add_child(n)
-	breaks.append({"i": breaks.size(), "pos": at, "kind": kind_s, "hp": BREAK_HP[kind_s], "node": n, "dead": false})
+	breaks.append({"i": breaks.size(), "pos": at, "kind": kind_s, "node": n, "dead": false})
 
 ## Motes drifting off a pickup in a colour (a Brand tuning, a Soul Ember), so you can spot it from afar.
 func _element_motes(n: Node3D, col: Color, unique: bool) -> void:
@@ -1887,83 +1887,6 @@ func _update_wpicks(dt: float) -> void:
 				take_pick(h, wp)
 				break
 
-## Damage a crate, pot or barrel. Breaking it is shared online; whoever broke it rolls for a weapon.
-func hit_break(b: Dictionary, dmg: float, by: Ent) -> void:
-	if b["dead"]:
-		return
-	b["hp"] = float(b["hp"]) - dmg
-	var n: Node3D = b["node"]
-	n.scale = Vector3(1.12, 0.9, 1.12)
-	create_tween().tween_property(n, "scale", Vector3.ONE, 0.12)
-	if float(b["hp"]) <= 0.0:
-		_break(b, by)
-
-func _break(b: Dictionary, by: Ent, from_net := false) -> void:
-	if b["dead"]:
-		return
-	b["dead"] = true
-	if net_on and not from_net:
-		net_event(["brk", b["i"], by.nid if by else ""])
-	if by == player:
-		train["_smash"] = true
-	var at: Vector3 = b["pos"]
-	var kind_s: String = b["kind"]
-	(b["node"] as Node3D).queue_free()
-	var col: Color = {"pot": Color("c9825a"), "crate": Color("a07448"), "barrel": Color("c8483a")}[kind_s]
-	fx.burst(at + Vector3(0, 0.4, 0), col, 16, 4.0, 0.5, 9.0, 0.8)
-	sfx("knock" if kind_s == "crate" else "hit", at, -4.0, 0.7 if kind_s == "crate" else 1.3)
-	var loot := float(T["loot"])
-	if not from_net: KeyBonus.on_break(self, at, kind_s)      # a rare chest key
-	match kind_s:
-		"pot":
-			for i in randi_range(1, 2):
-				drop("gem", at + Vector3(0, 0.5, 0), maxi(1, int(round(2 * loot))))
-			if randf() < 0.2:
-				drop("seed", at + Vector3(0, 0.5, 0), 1, Data.pick_seed())
-		"crate":
-			for i in randi_range(2, 4):
-				drop("gem", at + Vector3(0, 0.5, 0), maxi(1, int(round(2 * loot))))
-			if randf() < 0.3:
-				drop("tonic", at + Vector3(0, 0.5, 0), 1)
-			if randf() < 0.4:
-				drop("armor", at + Vector3(0, 0.5, 0), 25)
-			if not from_net:
-				GearDrops.run_table(self, "crate", at, rng, {"h": by if by is Hunter else null})
-		"barrel":
-			_barrel_boom(at, by, from_net)
-
-## An exploding barrel: hurts and throws everyone nearby, its breaker included.
-func _barrel_boom(at: Vector3, by: Ent, from_net := false) -> void:
-	var radius := 2.6
-	var c := at + Vector3(0, 0.4, 0)
-	fx.ring(c, radius, Color("ff8a4a"), 0.35)
-	fx.burst(c, Color("ffb070"), 34, 7.0, 0.6, 6.0, 1.5)
-	fx.flash(c, Color("ffd9a0"), radius * 0.5, 0.1)
-	sfx("boom", c, 2.0, 0.85)
-	shake(0.6, c)
-	var bodies: Array = []
-	for h in hunters:
-		if h.hittable(): bodies.append(h)
-	for mb in mobs:
-		if not mb.dead: bodies.append(mb)
-	for k in kins:
-		if k.hittable(): bodies.append(k)
-	for e in bodies:
-		if e.remote:
-			continue
-		var d := Vector2(e.pos.x - c.x, e.pos.z - c.z).length()
-		if d < radius + e.r and absf(e.pos.y + 0.5 - c.y) < 2.0:
-			var f := 1.0 - 0.5 * minf(1.0, d / radius)
-			var dir := Vector2(e.pos.x - c.x, e.pos.z - c.z).normalized()
-			var credit: Ent = by if by and by.team != e.team else null
-			e.hurt(22.0 * f, credit, {"src": "boom", "kb": dir * 10.0 * f, "lift": 7.5 * f})
-	# chain into other barrels nearby
-	for b in breaks:
-		if not b["dead"] and Vector2(b["pos"].x - c.x, b["pos"].z - c.z).length() < radius + 0.4 and absf(b["pos"].y - at.y) < 2.0:
-			# every peer sees the same chain, so only the one that set it off rolls for loot
-			if from_net: _break(b, by, true)
-			else: hit_break(b, 30.0, by)
-
 ## Air rings: anyone flying through one gets thrown forward along their own heading, the glider
 ## pops open and gets a little fuel back, so a chain of rings carries you across a long gap.
 func _update_rings(dt: float) -> void:
@@ -2044,7 +1967,7 @@ func _collide_breaks() -> void:
 			if l >= mind:
 				continue
 			if e is Hunter and (e as Hunter).roll_t > 0.0 and not e.remote:
-				_break(b, e)
+				brk.hit(b, e)
 				continue
 			var nrm := d / l if l > 0.0001 else Vector2(1, 0)
 			var push := nrm * (mind - l)
@@ -3418,7 +3341,7 @@ func _update_shots(dt: float) -> void:
 			var bh := _shot_break(s, p)
 			if not bh.is_empty():
 				if not s["x"].get("cos", false) and not s["x"].has("boom") and not s["x"].get("mob", false):
-					hit_break(bh, float(s["dmg"]), s["by"])
+					brk.hit(bh, s["by"])
 				_shot_end(s, p, null)
 				hit = true; break
 			for e in _shot_targets(s):
@@ -3756,7 +3679,7 @@ func _boom(s: Dictionary, at: Vector3) -> void:
 	if not x.get("mob", false):
 		for b in breaks:
 			if not b["dead"] and Vector2(b["pos"].x - at.x, b["pos"].z - at.z).length() < radius + 0.36 and absf(float(b["pos"].y) + 0.4 - at.y) < 2.0:
-				hit_break(b, float(s["dmg"]), by)
+				brk.hit(b, by)
 	for e in _shot_targets(s):
 		var d := Vector2(e.pos.x - at.x, e.pos.z - at.z).length()
 		if d < radius + e.r and absf(e.pos.y + 0.5 - at.y) < 2.0:
@@ -4503,6 +4426,7 @@ func step(dt: float) -> void:
 	_prof("mobs")
 	_separate()
 	_collide_breaks()
+	brk.tick(dt)
 	_prof("separate")
 	_update_rings(dt)
 	_update_shots(dt)
@@ -5819,7 +5743,7 @@ func _meteor_hit(at: Vector3) -> void:
 	if not net_on or is_host:
 		for b in breaks:
 			if not b["dead"] and Vector2(b["pos"].x - at.x, b["pos"].z - at.z).length() < 1.9:
-				hit_break(b, 30.0, null)
+				brk.hit(b, null)
 	if rng.randf() < 0.6:
 		drop("gem", at + Vector3(0, 0.6, 0), maxi(1, int(round(3 * float(T["loot"])))))
 
@@ -6462,7 +6386,7 @@ func _net_ev(x, from: String) -> void:
 		"brk":
 			var bi := int(x[1])
 			if bi >= 0 and bi < breaks.size():
-				_break(breaks[bi], ents_by_id.get(String(x[2]), null), true)
+				brk.smash(breaks[bi], ents_by_id.get(String(x[2]), null), true)
 		"wdrop":
 			var seen := false
 			for wp in wpicks:
