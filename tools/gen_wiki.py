@@ -623,7 +623,41 @@ def gen_controls():
 DASH_SLOTS = [("lmb", "LMB"), ("rmb", "RMB"), ("e", "E"), ("x", "ult (X)"), ("q", "Q glove")]
 DASH_MODE = {"fire": "fires mid-dash", "buffer": "buffered to the dash's end", "cancel": "cancels the dash"}
 INTO_DASH_MODE = {"fire": "the dash goes, the ability keeps running", "buffer": "the dash waits for the ability",
-                  "cancel": "the dash cancels its wind-up or recovery"}
+                  "cancel": "the dash cancels its wind-up or recovery", "lock": "the dash is refused while it runs"}
+
+JUMP_MODE = {"fire": "fires mid-jump", "buffer": "buffered to the landing"}
+INTO_MOVE_MODE = {"fire": "the move goes at once, the ability keeps running", "cancel": "the move cancels it at once",
+                  "buffer": "the move waits for the ability's end", "lock": "the move is refused while it runs"}
+HOLD_MODE = {"keep": "the hold carries through and lets go there", "cancel": "the move ends the hold"}
+HOLD_MOVES = [("ground", "a ground dash"), ("air", "an air dash"), ("jump", "a jump"), ("mantle", "a mantle")]
+
+def _combo_ours(row, modes, default):
+    """A combo row (docs/decisions/0015-combo-flow.md): its mode, and the reason when it's an exception (a mode
+    that doesn't combine: anything but the default, or a cancel that moves you out at once)."""
+    mode = row.get("mode", default)
+    if mode in (default, "cancel") and not row.get("reason"):
+        return modes[mode] + ("" if row else " (default)")
+    return "**exception:** %s (%s)" % (modes[mode], row.get("reason", "no reason given"))
+
+def _combo_rows(hero, f):
+    """The item 51 rows of one hero: jump -> slot, slot -> jump, slot -> air dash, holds through each move."""
+    rows = []
+    for slot, label in DASH_SLOTS:
+        row = f.get("jump", {}).get(slot, {})
+        rows.append([hero, "jump -> %s" % label, row.get("source", ""), _combo_ours(row, JUMP_MODE, "fire")])
+    for slot, label in DASH_SLOTS:
+        row = f.get("into_jump", {}).get(slot, {})
+        rows.append([hero, "%s -> jump" % label, row.get("source", ""), _combo_ours(row, INTO_MOVE_MODE, "fire")])
+        air = f.get("into_dash", {}).get(slot, {}).get("air")
+        if air:
+            rows.append([hero, "%s -> air dash" % label, air.get("source", ""), _combo_ours(air, INTO_MOVE_MODE, "fire")])
+    for slot, label in DASH_SLOTS:
+        held = f.get("hold", {}).get(slot)
+        for move, name in HOLD_MOVES if held is not None else []:
+            if move in held:
+                rows.append([hero, "hold %s through %s" % (label, name), held[move].get("source", ""),
+                             _combo_ours(held[move], HOLD_MODE, "keep")])
+    return rows
 
 def _dash_ours(row, modes):
     out = modes[row.get("mode", "buffer")]
@@ -631,6 +665,8 @@ def _dash_ours(row, modes):
         out += "; dash momentum carries"
     if row.get("variant"):
         out += "; variant: %s" % row["variant"]
+    if row.get("reason"):
+        out = "**exception:** %s (%s)" % (out, row["reason"])
     return out
 
 def gen_dash_flow():
@@ -652,11 +688,15 @@ def gen_dash_flow():
             row = f.get("into_dash", {}).get(slot)
             ours = _dash_ours(row, INTO_DASH_MODE) if row else "the kit's own handling (no row yet)"
             rows.append([hero, "%s -> dash" % label, (row or {}).get("source", ""), ours])
+        rows += _combo_rows(hero, f)
     body = ("One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlow` "
             "(`scripts/arch/dash_flow.gd`, docs/decisions/0010-dash-ability-flow.md). A dash pair with no row buffers the "
-            "press to the dash's end. \"Source\" is what the source hero does; \"Ours\" is what the game does now.\n\n")
+            "press to the dash's end. \"Source\" is what the source hero does; \"Ours\" is what the game does now.\n\n"
+            "The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions/0015-combo-flow.md): every "
+            "ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot "
+            "with no hold row keeps through every move.\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
-    write("dash_interactions.md", "%s\n# Dash and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
+    write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 
 # ------------------------------------------------------------------ main
