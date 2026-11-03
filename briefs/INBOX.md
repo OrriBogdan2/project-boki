@@ -564,3 +564,8 @@ New for you in there:
 - the Mantle rules, and the hunter pick moved after the tutorial
 - the art upgrade and tiered danger queued later
 - Tamsin is renamed Claire
+
+## 2026-11-03 14:20 ET (19:20 UTC) ORCH: OWNER DECISIONS
+- **Extraction squads (owner OK):** [EXT][MAIN] one extraction queue, **squads of 3, auto-filled**: solo players are filled into trios, and bots backfill while the player base is small. No separate solo or duo queue. Duel (1v1) and Arena (4v4) are the other modes. Update the match/lobby spec and any squad-size constants when that work comes up (post-demo).
+- **Model choice (owner):** [EXT] S1 and S2: pick the model per task by what it needs. Use Opus 5.5 for anything feel-critical, source-parity, cross-hero, architectural or design-heavy (hero mechanics and animations, item 32/35, the parity pass, the economy design, mode specs). Use Sonnet only for small, well-specified fixes where it will clearly be good enough. If a Sonnet agent's result isn't at the bar, redo it on Opus; don't ship it.
+- The owner is fixing main's error directly now.

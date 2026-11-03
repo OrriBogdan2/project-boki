@@ -141,3 +141,7 @@ The answers are in briefs/DECISIONS.md ("Farm and onboarding") and MAIN_TO_EXT 2
 - **Strict.** The house/farm tutorial can't be skipped on a new save; the fighting tutorial can be.
 - **Yes,** the top-right day-1 card becomes "Goals".
 Every agent: read briefs/DECISIONS.md before asking the owner anything.
+
+## 2026-11-03 19:20 UTC (orchestrator): model choice + squad decision
+- Owner: use Opus 5.5 for anything feel-critical, source-parity, cross-hero or design-heavy; Sonnet only for small, clear fixes it will get right. Redo on Opus rather than ship below the bar.
+- Extraction is one queue of auto-filled trios (no solo/duo queue). Details: INBOX.md 14:20 ET.
