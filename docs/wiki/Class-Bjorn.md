@@ -56,29 +56,29 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them and heal. |
-| Passive: Guard | Blocking builds Guard (50 = Shield Slam); knocking a foe into a wall or a foe stuns it and heals you. |
-| Dash: 360 Smash | 360 Smash: a short dash that ends in one spinning hit around you; with the aegis up, a Shield Charge. |
+| Loop | Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them. |
+| Passive: Guard | Blocking builds Guard (50 turns your Shield Charge into a Shield Slam); knocking a foe into a wall or another foe stuns it. |
+| Dash: 360 Smash | 360 Smash: a short dash that ends in one spinning hit around you; with the aegis up, a Shield Charge (its own 6s cooldown). |
 | LMB | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward. |
-| RMB: Aegis | Hold to raise your aegis and block shots from the front; let go or tap to Bash. |
-| E: Mending Ground | A green light comes down on your planted hammer (or on you), then heals allies there. |
+| RMB: Aegis | Hold to raise your aegis and block shots from the front. With it up, Shift is a Shield Charge on its own cooldown. |
+| E: Mending Ground | A green light comes down on your hammer (or on you), then a healing zone round it ticks and ends in a burst. |
 | Hunter ultimate: Faultline | Faultline (level 6): plant, slam, and the ground erupts down a long lane, throwing every foe on it up. |
 | Weapon: War Hammer & Aegis | Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward. |
 
 ### Abilities in full
 
-**Guard (passive).** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Bash is a Shield Slam (push 12, stun 0.6, spends 50). Crushed: a Bash, Shield Charge or full Crushing Blow that knocks a foe into a wall or another foe stuns it 0.5 (8 damage) and heals you 24.
+**Guard (passive).** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage).
 
-**360 Smash (dash, Shift, 9s cooldown).** 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge: 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
+**360 Smash (dash, Shift, 9s cooldown).** 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
 
 **Aegis (RMB, 6s cooldown).**
 
-- *Hold:* Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower.
-- *Tap:* Bash: a 2.6m cone, 12 damage, push 9 (into a wall or a foe: Crushed). Letting go after a block bashes too.
+- *Hold:* Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
+- *Tap:* A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.
 - *In the air:* Shield Surf: hold to block from the front while gliding.
-- *Resource full:* Guard 50+: Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
+- *Resource full:* Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
 
-**Mending Ground (E, 11s cooldown).** A green light column comes down for 1s on your planted hammer (on you with the hammer in hand), then it heals allies inside 26; if your aegis is raised it mends 60. Foes inside are slowed. A downed teammate inside is a third of the way back up.
+**Mending Ground (E, 12s cooldown).** A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 
 **Faultline (hunter ultimate, from level 6, 33s cooldown).** Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam: the near cell is struck (4, a brief stun) and the ground erupts cell by cell to the far end, throwing each foe up once (18, stun 0.5, slowed 50% for 1.5s). A wall or a drop stops it. A glowing scar stays 10s and slows foes on it 20%.
 
@@ -88,9 +88,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 6s -> 5.4s, damage +15%. | cooldown 6s -> 4.8s, damage +30%; shield HP +60. |
-| Dash (Shift) | recharge 9s -> 7.7s per charge. | recharge 9s -> 6.3s; 360 Smash and Shield Charge +1m. |
-| E | cooldown 16s -> 14.4s, healing +25%. | cooldown 16s -> 12.8s, healing +25%; Mending Ground +0.5m and heals 10 more. |
+| RMB | shield HP +25% (160 -> 200), damage +15%. | shield HP +50% (240), damage +30%; regen 20 -> 30 per second, back up in 1.4s and 2s when broken. |
+| Dash (Shift) | recharge 9s -> 7.7s per charge; the Shield Charge cooldown 6s -> 4.5s. | recharge 9s -> 6.3s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it. |
+| E | healing +25% (burst 18 -> 22), damage +15%. | cooldown 12s -> 8s, healing +50% in all. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > Glove (Q).
 

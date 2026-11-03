@@ -61,7 +61,7 @@ static func on_mob_dead(m: Match, mb: Mob) -> void:
 	m.keys.bonus_given += n
 	KeyCarry.drop_keys(m, KeyCarry.drop_spot(m, mb), n)
 
-## A breakable broke (kind "pot", "crate" or "barrel"), or a sky-train crate was opened ("train_crate").
+## A breakable broke (kind "pot", "crate", "barrel" or "keg"), or a sky-train crate was opened ("train_crate").
 static func on_break(m: Match, at: Vector3, source: String) -> void:
 	var n := roll(m, source)
 	if n <= 0:
@@ -79,7 +79,7 @@ static func surplus(m: Match) -> Dictionary:
 		if not mb.dead:
 			sources.append(mob_source(mb))
 	for b in m.breaks:
-		if not b["dead"] and String(b["kind"]) in ["pot", "crate", "barrel"]:
+		if not b["dead"] and String(b["kind"]) in ["pot", "crate", "barrel", "keg"]:
 			sources.append(String(b["kind"]))
 	var locked := 0
 	for c in m.chests:

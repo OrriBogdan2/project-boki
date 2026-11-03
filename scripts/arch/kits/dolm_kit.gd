@@ -4,7 +4,7 @@ extends ArchKit
 ## Stone Row, and Basalt Spine on X (breah_spine.gd). docs/heroes/dolm.md. The loop: raise rocks (Stone Row),
 ## then launch them with a held punch (every rock in the lane flies, a whole row one after another),
 ## a slam or a dash into the enemy. Rocks are low walls you can stand on and climb (StoneStand).
-## A slam that knocks or kills resets itself.
+## Molten Guard: a punch that sends your own rocks flying gives a shield stack (a slam at rank 3 adds more).
 ##
 ## Rocks are Verbs walls that block movement (HeroZones.rock), so they respect collision, placement
 ## legality and the abyss edge; they are synced over Net as ["zone", ...] events.
@@ -22,12 +22,11 @@ var lmb_was := false
 # the hold punched by itself: keep holding and the next wind-up starts, a release throws nothing
 var lmb_auto := false
 var rid_n := 0
-var slam_hit := {}             # foe instance id -> time our slam hit it (a knock inside 6s resets Quakefall)
 var dive := false              # the air Quakefall: slam on landing
 var dive_k := 0.0              # ...with this much charge
 var sight_t := 0.0
 var sneak_t := 0.0             # how long she has been sneaking (the cone widens)
-var shield_stacks := 0
+var shield_stacks := 0         # Molten Guard stacks
 var shield_at := -99.0
 var launch_pay := 0            # launched rocks that hit a hunter (payoff counter)
 var rock_hits := {}            # foe instance id -> last time a rock burst on it (repeat bursts deal less)
@@ -42,7 +41,7 @@ var launches := 0
 var slams := 0
 var dunks := 0
 var wall_stuns := 0
-var qf_resets := 0
+var guard_punches := 0         # punches that launched a rock of ours and gave a Molten Guard stack
 var rocks_made := 0
 var sight_pings := 0
 var landslides := 0            # leap rocks that came down and rolled on
@@ -197,7 +196,7 @@ func _tick(dt: float) -> void:
 	res = float(n)
 	self_pips(6, mini(6, n), false, dt)
 	tell = "full" if n >= 6 else ("half" if n > 0 else "")
-	if shield_stacks > 0 and m.time - shield_at > float(slam_def()["shield_t"]):
+	if shield_stacks > 0 and m.time - shield_at > float(d["passive"]["guard"]["t"]):
 		shield_stacks = 0
 	if shield_stacks > 0 and h.shield > 0.0 and fmod(m.time, 0.3) < dt:
 		m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.0, Color("ffd24a"), 0.28)      # the Molten Guard ring
@@ -403,6 +402,9 @@ func _punch(k: float) -> void:
 	var swept := sweep_rocks(dir)
 	last_sweep = swept.size()
 	if swept.size() >= 2: sweeps += 1
+	if not swept.is_empty():
+		guard_punches += 1
+		guard_stack()
 	for i in swept.size():
 		var w: Dictionary = swept[i]
 		if i == 0:
@@ -481,6 +483,10 @@ func _lunge(dist: float, t: float, dir: Vector2) -> void:
 	h.move_kind = "rush"
 
 # ------------------------------------------------------------------ dash: Rubble Leap
+## A second charge at rank 3.
+func extra_dashes() -> float:
+	return 1.0 if rank("dash") >= 3 else 0.0
+
 ## Shift on the ground: a rock bursts up under her, she leaps in an arc to the cursor (up to `dist`, with
 ## the global dash feel on top like every dash), lands with a crash that shoves everyone beside her, and
 ## the rock she leapt from comes down right after her and rolls on (the source's odd dash and thrown
@@ -644,16 +650,14 @@ func fire_rmb(c: Dictionary) -> void:
 func _slam(k: float, at_feet: bool) -> void:
 	slam.slam(k, at_feet)
 
-func _reset_quake() -> void:
-	qf_resets += 1
-	cd["rmb"] = 0.0
-	ch_rmb = float(rmb_charges())
-	armed_fx("QUAKE RESET", "sec")
-
-func on_knock(t: Hunter, mine: bool) -> void:
-	if mine and slam_hit.has(t.get_instance_id()) and m.time - float(slam_hit[t.get_instance_id()]) < 6.0:
-		slam_hit.erase(t.get_instance_id())
-		_reset_quake()
+## Molten Guard: one more stack (each is a shield, up to the cap, all expiring together).
+func guard_stack() -> void:
+	var gd: Dictionary = d["passive"]["guard"]
+	shield_stacks = mini(int(gd["cap"]), shield_stacks + 1)
+	shield_at = m.time
+	h.shield = maxf(h.shield, float(gd["shield"]) * shield_stacks)
+	h.shield_t = float(gd["t"])
+	m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.2, Color("ffd24a"), 0.35)
 
 # ------------------------------------------------------------------ E: Stone Row
 ## The row's spots: 3 rocks in a slight curve across the aim (the outer two set back), and at rank 3 an

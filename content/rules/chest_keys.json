@@ -7,5 +7,6 @@
  "pot":     0.02,
  "crate":   0.04,
  "barrel":  0.02,
+ "keg":     0.02,
  "train_crate": 0.04
 }

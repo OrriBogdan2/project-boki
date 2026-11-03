@@ -81,11 +81,10 @@ const DEPLOY_POP := -1.6       # the canopy catching: your fall checks to this, 
 const DEPLOY_H := 8.0         # the glider opens by itself this high above the ground
 ## Armor, as in Supervive: it takes a flat share off every hit (ARMOR_DR) for as long as it has
 ## durability left; what gets through hurts your health and wears the durability down by the same
-## amount. Neither comes back on its own: tonics (1) heal, armor kits (2) repair.
+## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
 const ARMOR_DR := 0.2
 const ARMOR_DUR := 2.2        # durability as a multiple of max health
 const ARMOR_WAIT := 4.0
-const KIT_TIME := 1.6
 const CONSUME_VULN := 1.2     # you take this much more damage while drinking or repairing
 
 var pname := "Hunter"
@@ -95,7 +94,7 @@ var wid := "rifle"
 var wpn: Dictionary = {}
 var ctrl := "bot"             # local | bot | remote
 var inp := {"move": Vector2.ZERO, "aim": Vector3.ZERO, "fire": false, "dash": false, "jump": false,
-	"throw": false, "skill": false, "sig": false, "interact": false, "reload": false, "tonic": false, "kit": false, "glide": false, "ult": false,
+	"throw": false, "skill": false, "sig": false, "interact": false, "reload": false, "util1": false, "util2": false, "util3": false, "util4": false, "glide": false, "ult": false,
 	"sec": false, "sec_hold": false, "crouch": false, "gear1": false, "gear2": false, "swap": false}
 var base_speed := 5.4
 var ground_accel := GROUND_ACCEL     # per hunter (HunterMove)
@@ -175,13 +174,19 @@ var air_dashed := false         # the merge's dodge in the air, used this airtim
 var _kst: Dictionary = {}       # owner stats from your kin this step (carry passives + merge), see owner_stat
 var gems := 0
 var lost_gems := 0
-var free_tonics := 0          # the guild forge's tonic: used first, never taken home
 var seeds := {}
 var caught: Array = []        # kin records caught this match
 var kills := 0
 var knocks := 0
 var dmg_done := 0.0
-var tonics := 0
+var belt: Array = UtilityBelt.empty()    # the utility belt on 1-4: four slots of {id, n, cd} (UtilityBelt)
+var belt_free: Dictionary = {}                # issued charges, used first and never taken home
+var tonics: int:                              # (the belt's tonics and armor kits, for the code that counts them)
+	get: return UtilityBelt.count(self, "tonic")
+	set(v): UtilityBelt.set_count(self, "tonic", v)
+var armor_kits: int:
+	get: return UtilityBelt.count(self, "armor_kit")
+	set(v): UtilityBelt.set_count(self, "armor_kit", v)
 var ai: Dictionary = {}
 var muzzle_t := 0.0
 var regen_wait := 0.0
@@ -238,6 +243,7 @@ var welem := ""               # its element ("fire", "frost", ...) from a Brand 
 var el_n := 0                 # attacks made with the element, for "every Nth hit" riders
 var pack: Array = []          # the backpack: gear and valuables to carry home (Loot items)
 var pack_cap := 6
+var backpack := 0              # the backpack tier worn (Backpacks): 0 is the Pouch everyone has
 var swap_hold := false
 var dash_at := -9.0           # when the last dash started, for perfect dodges
 var dodged := false        # F has to be let go between weapon swaps
@@ -277,6 +283,9 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 		bot_look = Models.random_look()
 	max_hp = cdat["hp"]; hp = max_hp
 	max_armor = round(max_hp * ARMOR_DUR); armor = max_armor; base_armor = max_armor
+	# the belt issue and the equal pack size (Equal.pack_slots)
+	UtilityBelt.issue(self)
+	pack_cap = Equal.base_pack()
 	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
 	base_speed = cdat["speed"]
 	runner = AbilityRunner.new(self)
@@ -808,7 +817,7 @@ func do_jump() -> void:
 		# a merge's double jump
 		air_jumps += 1
 		vel.y = JUMP_V
-		m.fx.burst(pos + Vector3(0, 0.2, 0), Color("f3eee2"), 10, 3.0, 0.3, 0.0)
+		m.fx.dust(pos, 4)
 		m.sfx("jump", pos, -4.0, 1.2)
 		return
 	if wall_moves.try_kick(self):
@@ -917,7 +926,6 @@ func _open_glider() -> void:
 		hv = hv.lerp(dirv * GLIDE_SPEED, 0.5)
 		vel.x = hv.x; vel.z = hv.y
 	_glider_sfx("open")
-	m.fx.burst(pos + Vector3(0, 1.7, 0), Color("f3eee2"), 8, 2.0, 0.35, 0.0)
 	_take_glide_handoff()
 	glide_lift.open_kick(self)
 
@@ -963,15 +971,13 @@ func _take_glide_handoff() -> void:
 	# the burst's own line, bent a little toward where you're steering
 	var bd := dir.lerp(heading, 0.35).normalized()
 	vel.x = bd.x * boost; vel.z = bd.y * boost
-	_glide_boost_fx(bd)
+	_glide_boost_fx()
 
-## Reads as a boost: a loud whoosh, a burst of air off the glider, a trail that stays while you're
-## fast (see render), and for you a brief camera pull-back.
-func _glide_boost_fx(d: Vector2) -> void:
+## Reads as a boost: a loud whoosh, a trail that stays while you're fast (see render), and for you a brief
+## camera pull-back.
+func _glide_boost_fx() -> void:
 	m.sfx("whoosh", pos, -1.0 if is_local() else -9.0, 1.2)
 	m.sfx("glide", pos, -6.0 if is_local() else -14.0, 1.6)
-	m.fx.burst(pos + Vector3(0, 1.6, 0), Color("dff3ff"), 22, 6.0, 0.45, 0.0, 1.0, Vector3(-d.x, 0.1, -d.y), 28.0)
-	m.fx.ring(pos + Vector3(0, 1.2, 0), 1.8, Color(0.85, 0.95, 1.0, 0.75), 0.28)
 	boost_fx_t = 1.6
 	if is_local() and m.cam:
 		m.cam.pull_back(0.12)
@@ -1166,9 +1172,8 @@ func _dash_rider(ex: bool) -> void:
 			if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
 				best = Vector3(q.x, m.world.ground_at(q.x, q.z), q.z); break
 			kk -= 0.5
-		m.fx.burst(pos + Vector3(0, 0.8, 0), col, 14, 3.0, 0.3)
+		m.fx.ghost(position, face, col, float(cdat["scale"]))
 		teleport(best)
-		m.fx.burst(best + Vector3(0, 0.8, 0), col, 14, 3.0, 0.3)
 		vel.x = roll_dir.x * 3.0; vel.z = roll_dir.y * 3.0
 		phase_t = maxf(phase_t, 0.15)
 	if not (rd.get("on_start", []) as Array).is_empty():
@@ -1199,7 +1204,6 @@ func _dash_rider(ex: bool) -> void:
 					roll_t = t0 * float(pr["falloff"])
 					move_kind = "dash"
 					inv_t = maxf(inv_t, roll_t)
-					m.fx.ring(pos, 0.9, col, 0.25)
 					m.fx.dash_trail(self)
 					m.sfx("dash", pos, -6.0, 1.4))
 
@@ -1274,7 +1278,6 @@ func dash_with(e: Dictionary) -> void:
 			m.fx.dust(pos, 6)
 		"dust":
 			m.fx.dust(pos, 10)
-			m.fx.burst(pos + Vector3(0, 0.5, 0), Color("ffd8a8"), 10, 3.0, 0.3, 4.0, 1.0, Vector3(roll_dir.x, 0.2, roll_dir.y), 30.0)
 	if not shove.is_empty():
 		fortify_t = maxf(fortify_t, roll_t + 0.1)     # nothing knocks you back mid-charge
 	dash_at = m.time
@@ -1739,7 +1742,7 @@ func ability_level(slot: String) -> int:
 
 ## The rank line on an ability's hover panel ("" for things that don't rank).
 func rank_text(slot: String) -> String:
-	var s := String({"sec": "sec", "k1": "kin", "gear0": "gear", "dash": "dash", "r": "ult"}.get(slot, ""))
+	var s := String({"sec": "sec", "k1": "kin", "dash": "dash", "r": "ult"}.get(slot, ""))
 	if s == "":
 		return ""
 	var lv := int(slot_lv.get(s, 0))
@@ -1780,12 +1783,13 @@ func slot_info(slot: String) -> Dictionary:
 				"desc": (d.desc if d else "") + (("  " + String(rd.get("desc", ""))) if not rd.is_empty() else ""), "rider": String(rd.get("name", "")),
 				"cd": (1.0 - fposmod(dashes, 1.0)) * dash_regen() if dashes < dmax - 0.001 else 0.0, "cd_max": dash_regen(), "charges": int(floor(dashes)), "max_charges": int(dmax),
 				"verb": d.verb if d else "dash", "ready": dashes >= 1.0}, true)
-		"gear", "gear0", "q":
-			var g: Dictionary = gear[0]
+		"gear", "gear0", "q", "gear1", "v":
+			var gi := 1 if slot in ["gear1", "v"] else 0      # glove 1 (Q) or glove 2 (V); gloves never rank (Gloves)
+			var g: Dictionary = gear[gi]
 			if g.is_empty() or not Gear.ALL.has(String(g["id"])): return out
 			var gd: Dictionary = Gear.ALL[String(g["id"])]
 			out.merge({"name": String(gd["name"]), "short": String(gd.get("short", gd["name"])), "icon": Gear.icon_of(String(g["id"])), "col": gd["col"], "desc": Gear.desc_of(String(g["id"]), int(g["rar"])),
-				"cd": float(gear_cd[0]), "cd_max": Gear.cd_of(String(g["id"]), int(g["rar"])) * rank_cd_k("gear"), "charges": 1 if float(gear_cd[0]) <= 0.0 else 0, "max_charges": 1, "verb": String(gd.get("verb", "")), "ready": float(gear_cd[0]) <= 0.0 and Gear.active(String(g["id"]))}, true)
+				"cd": float(gear_cd[gi]), "cd_max": Gear.cd_of(String(g["id"]), int(g["rar"])), "charges": 1 if float(gear_cd[gi]) <= 0.0 else 0, "max_charges": 1, "verb": String(gd.get("verb", "")), "ready": float(gear_cd[gi]) <= 0.0 and Gear.active(String(g["id"]))}, true)
 		"k1", "e":
 			var k: Kin = kin
 			if k == null or k.runner == null: return out
@@ -1922,79 +1926,16 @@ func heal(n: float) -> void:
 	if hp - before > 1.0:
 		m.fx.number(pos + Vector3(0, 1.6, 0), hp - before, Color("8ff0a0"), false, "+")
 
-## Drinking a tonic takes a moment: you slow down, lower your gun and drink. Dashing, getting
-## stunned or going down spills it (you keep the tonic). It heals when you finish.
+## Drinking a tonic and repairing with an armor kit take a moment: you slow down, lower your gun and
+## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).
+## The belt and what each item does: UtilityBelt, UtilityUse.
 const DRINK_TIME := 1.1
+const KIT_TIME := 1.6
 var drink_t := 0.0
+var kit_t := 0.0
 var vuln_fx_t := 0.0            # paces the pulsing "vulnerable" tell while drinking or repairing
-func use_tonic() -> void:
-	if tonics <= 0 or downed or hp >= max_hp or drink_t > 0.0:
-		return
-	_fold_for_action()
-	drink_t = DRINK_TIME
-	vuln_fx_t = 0.0
-	m.sfx("pickup", pos, -6.0, 0.7)
-	m.fx.word(pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
-
-## 1: heal. One key for both consumables: a tonic when you're hurt, otherwise an armor kit when
-## your armor is down. Pressing it with nothing to fix (or nothing to use) buzzes.
-func use_heal() -> void:
-	if drink_t > 0.0 or kit_t > 0.0:
-		return
-	if tonics > 0 and hp < max_hp - 0.5:
-		use_tonic()
-	elif armor_kits > 0 and armor < max_armor - 0.5:
-		use_kit()
-	else:
-		_ab_feedback("tonic", "deny")
-		return
-	_ab_feedback("tonic", "cast")
-
-## Repairing armor with a kit (2): the same kind of short channel as a tonic, with the same
-## vulnerability. Every hunter sets out with a small stack (KIT_START).
-const KIT_START := 2
-var armor_kits := KIT_START
 var finish_t := 0.0             # holding interact over a downed enemy (until the stomp commits)
 var stomp: Dictionary = {}      # committed stomp on an enemy wisp: {o, t, hits} (see Life)
-var kit_t := 0.0
-func use_kit() -> void:
-	if armor_kits <= 0 or downed or armor >= max_armor - 0.5 or kit_t > 0.0 or drink_t > 0.0:
-		return
-	_fold_for_action()
-	kit_t = KIT_TIME
-	vuln_fx_t = 0.0
-	m.sfx("build", pos, -6.0, 1.3)
-	m.fx.word(pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
-
-func _tick_kit(dt: float) -> void:
-	if kit_t <= 0.0:
-		return
-	if downed or stun_t > 0.0 or roll_t > 0.0 or gliding or out:
-		kit_t = 0.0
-		return
-	kit_t -= dt
-	if kit_t <= 0.0:
-		kit_t = 0.0
-		armor_kits -= 1
-		armor = max_armor
-		m.sfx("shield", pos, -2.0, 1.2)
-		m.fx.burst(pos + Vector3(0, 1.2, 0), Color("dfe9f7"), 16, 2.5, 0.5, -3.0)
-
-func _tick_drink(dt: float) -> void:
-	if drink_t <= 0.0:
-		return
-	if downed or stun_t > 0.0 or roll_t > 0.0 or gliding or out:
-		drink_t = 0.0
-		return
-	drink_t -= dt
-	if drink_t <= 0.0:
-		drink_t = 0.0
-		if tonics > 0:
-			tonics -= 1
-			free_tonics = maxi(0, free_tonics - 1)
-			heal(max_hp * 0.4 * (1.0 + 0.4 * float(perk_n("remedy")) + gear_stat("tonic")))
-			m.sfx("heal", pos, -2.0)
-			m.fx.burst(pos + Vector3(0, 1.2, 0), Color("8ff0a0"), 14, 2.5, 0.5, -3.0)
 
 ## Channelling a deathbox revive right now (Match._update_interact keeps box_rev_at fresh).
 func box_reviving() -> bool:
@@ -2037,7 +1978,7 @@ func sim(dt: float) -> void:
 			vel = Vector3.ZERO
 			if ctrl == "local" and inp["jump"]:
 				m.ship_jump(self)
-			for k in ["jump", "dash", "sig", "reload", "tonic", "ult", "fire", "skill", "swap"]:
+			for k in ["jump", "dash", "sig", "reload", "util1", "util2", "util3", "util4", "ult", "fire", "skill", "swap"]:
 				inp[k] = false
 		return
 	tick_status(dt)
@@ -2099,21 +2040,24 @@ func sim(dt: float) -> void:
 	# bringing a teammate back at their deathbox: kneeling over it, locked in place (let go of
 	# interact to stop)
 	if box_reviving():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "tonic", "kit", "gear1", "gear2", "fire", "throw", "kin_ab"]:
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "util1", "util2", "util3", "util4",
+				"gear1", "gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# mid-stomp you're committed: none of your own buttons do anything until it ends
 	if not stomp.is_empty():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "tonic", "kit", "gear1", "gear2", "fire", "throw", "kin_ab"]:
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "util1", "util2", "util3", "util4",
+				"gear1", "gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
 	KinDowned.commit(self)           # carrying your Boki: Shift or interact puts it down; no jump, glide or firing
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
-	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["gear1", "gear", "gear0"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
+	# gloves need no point: Gloves
+	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
 		_gate(gk[0], gk[1], gk[2])
 	if dropping and not grounded and ctrl != "bot":
-		for bk in ["sec", "sig", "ult", "tonic", "kit", "gear1", "gear2"]:
+		for bk in ["sec", "sig", "ult", "util1", "util2", "util3", "util4", "gear1", "gear2"]:
 			if inp.get(bk, false):
 				_break_drop()
 				break
@@ -2167,18 +2111,9 @@ func sim(dt: float) -> void:
 	if not abil_charge.is_empty():
 		_tick_charge(dt)
 	if inp["reload"]: HunterKeys.reload_pressed(self)
-	if inp["tonic"]: use_heal()
-	if inp.get("kit", false):
-		# 2: the anvil. Nothing to repair (or no kit) buzzes, like the heal key
-		if kit_t > 0.0 or drink_t > 0.0:
-			pass
-		elif armor_kits > 0 and armor < max_armor - 0.5 and not downed:
-			use_kit()
-			_ab_feedback("kit", "cast")
-		else:
-			_ab_feedback("kit", "deny")
-	_tick_drink(dt)
-	_tick_kit(dt)
+	for ui in UtilityBelt.SLOTS:
+		if inp[UtilityBelt.KEYS[ui]]: UtilityBelt.press(self, ui)
+	UtilityBelt.tick(self, dt)
 	_tick_burst(dt)
 	_tick_weapon(dt)
 	swing_t = maxf(0.0, swing_t - dt)
@@ -2187,8 +2122,8 @@ func sim(dt: float) -> void:
 		else: use_ultimate()
 	trigger(dt)
 	inp["kin_ab"] = false
-	inp["dash"] = false; inp["jump"] = false; inp["sig"] = false; inp["reload"] = false; inp["tonic"] = false; inp["kit"] = false; inp["ult"] = false; inp["sec"] = false; inp["gear1"] = false; inp["gear2"] = false
-	inp["skill"] = false; inp["swap"] = false
+	for k in ["dash", "jump", "sig", "reload", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
+		inp[k] = false
 	_physics(dt)
 	var ad := aim_dir()
 	var want := atan2(-ad.x, -ad.y)
@@ -2524,9 +2459,8 @@ func _physics(dt: float) -> void:
 				m.fx.dust(pos, 2 if fv > -8.0 else 4)
 				m.sfx("land", pos, (-16.0 if fv > -8.0 else -12.0) + (0.0 if is_local() else -6.0))
 			if fv < -17.0:
-				# a long drop lands hard: a thud, a ring of dust and a short stagger
+				# a long drop lands hard: a thud, a puff of dust and a short stagger
 				m.fx.dust(pos, 12)
-				m.fx.ring(pos + Vector3(0, 0.05, 0), 1.4, Color(1, 1, 1, 0.5), 0.3)
 				squash = 0.25
 				land_t = 0.32
 				if is_local(): m.shake(0.18, pos)
@@ -2604,8 +2538,6 @@ func _deploy() -> void:
 	vel.y = maxf(vel.y, DEPLOY_POP)
 	m.sfx("glide", pos, -2.0)
 	_glider_sfx("open")
-	m.fx.burst(pos + Vector3(0, 1.7, 0), Color("f3eee2"), 14, 3.5, 0.4, 0.0)
-	m.fx.ring(pos + Vector3(0, 1.4, 0), 1.6, Color(1, 1, 1, 0.55), 0.25)
 	if is_local() and m.cam:
 		m.cam.punch(0.05)
 
@@ -2621,7 +2553,6 @@ func _break_drop() -> void:
 	glide_fuel = 1.0
 	glide_cd = 0.25
 	_glider_sfx("close")
-	m.fx.burst(pos + Vector3(0, 1.7, 0), Color("f3eee2"), 10, 2.5, 0.35, 0.0)
 
 ## Using a heal in the air: out of the drop if you were in it, and the glider folds (it can't be
 ## held while you drink; holding glide again opens it after a beat and spills what's left).
@@ -2710,11 +2641,9 @@ func _update_glide(dt: float) -> void:
 		gliding = true
 		_take_glide_handoff()
 		if below_lip:
-			m.fx.burst(pos + Vector3(0, 1.2, 0), Color("cfeaff"), 12, 3.5, 0.4, -2.0, 0.8)
 			m.sfx("glide", pos, -2.0, 1.4)
 			add_stat("feathers")
 		_glider_sfx("open")
-		m.fx.burst(pos + Vector3(0, 1.7, 0), Color("f3eee2"), 8, 2.0, 0.35, 0.0)
 		glide_lift.open_kick(self)
 
 # Ledge float: touch the side of any ground above you while you're still alive and you float
@@ -2830,7 +2759,6 @@ func _try_ledge_grab(dt: float) -> void:
 	gliding = false
 	roll_t = 0.0
 	m.sfx("grab", pos, -8.0, 1.2)
-	m.fx.burst(pos + Vector3(0, 0.6, 0), Color("cfeaff"), 6, 2.0, 0.3, 0.0)
 	m.on_ledge_grab(self)
 
 ## (ledge rise) One step of rising up a ledge: sets vel.y and returns true while it lasts. Your
@@ -2930,7 +2858,7 @@ func _ledge_fling() -> void:
 	m.sfx("jump", pos, -6.0)
 	if timed:
 		m.sfx("whoosh", pos, -6.0 if is_local() else -12.0, 1.3)
-		m.fx.burst(pos + Vector3(0, 0.8, 0), Color("e6f6ff"), 10, 3.5, 0.35, 0.0, 0.8, Vector3(-d.x, 0.2, -d.y), 30.0)
+		m.fx.ghost(position, face, Color("e6f6ff"), float(cdat["scale"]))
 
 ## Floating up the side: rise to the lip, drift onto it, then a small hop onto the top.
 func _grapple(dt: float) -> void:
@@ -2961,21 +2889,21 @@ var bot_look: Dictionary = {}  # how a bot hunter looks (random)
 var runner: AbilityRunner     # weapon utility now; kin abilities later
 var dodge_def: AbilityDef     # the class's dodge
 var stats := {}                # this match's counts for challenges (the local player's)
-var gear: Array = Gear.empty_slots()     # five slots of found gear (Gear.SLOTS): {id, rar}
-var gear_cd: Array = [0.0, 0.0, 0.0, 0.0, 0.0]
+var gear: Array = Gear.empty_slots()     # four slots of found gear (Gear.SLOTS): {id, rar}
+var gear_cd: Array = [0.0, 0.0, 0.0, 0.0]
 
 # ---- run levels: like Supervive, you start each run at level 1 with one skill point and every
 # ability locked. XP comes from fighting (damage, knocks) and a slow trickle; each level gives a
 # point to unlock or strengthen an ability. The ultimate opens at level 6 (rank 2 at 9).
 const XP_TO := [0.0, 70.0, 170.0, 300.0, 460.0, 650.0, 870.0, 1120.0, 1400.0, 1710.0]   # total XP to reach level i+1
-const SLOTS := ["sec", "gear", "dash", "kin", "ult"]
-const SLOT_MAX := {"sec": 3, "gear": 3, "dash": 3, "kin": 3, "ult": 2}
+const SLOTS := ["sec", "dash", "kin", "ult"]                  # the hero's own abilities; gloves never rank (Gloves)
+const SLOT_MAX := {"sec": 3, "dash": 3, "kin": 3, "ult": 2}
 const ULT_AT := [6, 9]
 var lvl := 1
 var xp := 0.0
 var skill_pts := 1
 var level_ups := 0          # how many times this run the local level-up moment played (tests)
-var slot_lv := {"sec": 0, "gear": 0, "dash": 0, "kin": 0, "ult": 0}
+var slot_lv := {"sec": 0, "dash": 0, "kin": 0, "ult": 0}
 
 func gain_xp(x: float) -> void:
 	if lvl >= XP_TO.size() or x <= 0.0:
@@ -3009,7 +2937,7 @@ func xp_frac() -> float:
 	return clampf((xp - a) / (b - a), 0.0, 1.0)
 
 func can_level(slot: String) -> bool:
-	if skill_pts <= 0 or int(slot_lv.get(slot, 0)) >= int(SLOT_MAX.get(slot, 3)):
+	if skill_pts <= 0 or not SLOT_MAX.has(slot) or int(slot_lv.get(slot, 0)) >= int(SLOT_MAX[slot]):
 		return false
 	if slot == "ult":
 		return lvl >= int(ULT_AT[mini(int(slot_lv["ult"]), ULT_AT.size() - 1)])
@@ -3026,16 +2954,17 @@ func level_slot(slot: String) -> bool:
 		ult = 1.0
 		if m and m.has_method("on_bond_ready"): m.on_bond_ready(self)
 	if is_local() and m and m.hud:
-		m.hud.ability_feedback({"sec": "sec", "gear": "gear0", "dash": "dash", "kin": "k1", "ult": "r"}[slot], "cast")
+		m.hud.ability_feedback({"sec": "sec", "dash": "dash", "kin": "k1", "ult": "r"}[slot], "cast")
 		m.sfx("unlock", null, -8.0, 1.0 + 0.1 * float(slot_lv[slot]))
 	return true
 
 ## Bots (and anyone skipping the choice) spend points in a sensible order.
 func _bot_spend() -> void:
-	var order := ["sec", "dash", "kin", "gear", "sec", "kin", "dash", "gear", "sec", "kin", "dash", "gear"]
+	var order := ["sec", "dash", "kin", "sec", "kin", "dash", "sec", "kin", "dash"]
 	if ak:
-		# the archetype's recommended order (ARCHETYPES §6); the R is not ranked with points
-		order = (ak.d.get("order", []) as Array) + ["gear", "gear", "kin", "dash", "sec"]
+		# the archetype's recommended order (ARCHETYPES §6), which skips the R until it opens (and
+		# any "gear" left in it: gloves don't rank)
+		order = (ak.d.get("order", []) as Array).filter(func(x): return x != "ult" and SLOT_MAX.has(x)) + ["kin", "dash", "sec"]
 	while skill_pts > 0:
 		if can_level("ult"):
 			level_slot("ult"); continue

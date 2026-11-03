@@ -21,26 +21,27 @@ hook, a brass-caged lantern with a teal flame round a void-glass core, two viole
 pearl and sea teal `#7fe0d0`, with void violet `#b06bff` for what she throws and pink `#ff4fd8` for Swollen. Payoff COLLAPSE.
 
 ## Scaling used (ratios from the source)
-- Orb 9 dmg / 0.6s, 30 m/s, full 14m range; Settled +30% (source 280 vs 212), x1.4 speed, 10% slow 1.5s (wiki).
-- Snap 12.5, about 1.4x an orb (source 190 vs 140), stun 0.8-1.8s by distance (card), one charge, 9s.
+- Orb 9 dmg / 0.6s, 30 m/s, full 14m range; Settled +34% (owner's data 353 vs 263; was +30%), x1.4 speed, 10% slow 1.5s (wiki).
+- Snap 9.5, about 1.05x an orb (data pass: owner's data 277 vs the orb's 263), stun 0.8-1.8s by distance (card), one charge, 10s.
 - Trade 1.8s (the owner's "about 1.8-2s per the sheet"; wiki 1.7), 1.25s Swollen, 12m, slow 40% for 3s (wiki).
-- Seed grows 6.5s (card) to 3.2m (4.2m Swollen, +30% as the wiki's Empowered size), damage up to 3.5x (wiki), Grounded 1s.
+- Seed grows 6.5s (card) to 3.2m (4.2m Swollen, +30% as the wiki's Empowered size), damage 12.5 up to 3.5x (wiki; data pass: 365 vs the orb's 263 is 1.39x of 9), no Ground on the pop.
 - Swollen 9s (the footage showed about 9s).
 
 ## Per-slot table
 | Slot | Input | Aim and telegraph | What it does (ours) | Anim (KMovesStone) | Sound |
 |---|---|---|---|---|---|
 | Reticle | always | a thin pale line with an arrowhead from her to the cursor | | | |
-| Passive Swell | builds | the pink sphere round her while Swollen | hits fill Swell (x10 on hunters); full = Swollen 9s: seed larger and quicker, Trade 1.25s, Snap +40%; a knock heals 20% | `ostra_empower` (a full turn in the air) | `os_empower` |
+| Passive Swell | builds | the pink sphere round her while Swollen | hits fill Swell (x10 on hunters); full = Swollen 9s: seed larger and quicker, Trade 1.25s, Snap +44% (data 399 vs 277); no knock heal (data pass); she floats, so ground hazards (lava, spore pods, puddles) do nothing to her, but a sky strike does | `ostra_empower` (a full turn in the air) | `os_empower` |
 | LMB Tether Lantern | tap or hold | the aim line; orbs fly their full range (`"aim": "max"`) | 9 dmg violet glass teardrop orbs (0.28m, 0.8m long, a 1.2m magenta tail) every 0.6s; after a 1.4s pause the next is Settled: a 1.6m blue-violet bolt with a white core, +30%, x1.4 speed, slows 10% for 1.5s; the charge shows as a blue-violet mote at her hand | `ostra_orb`, `ostra_orb_hot` | `os_orb`, `os_orb_hot`, `os_prime` |
-| RMB Shard Snap | tap (1 charge) | holding RMB, or during the wind-up, the line becomes two rails the bundle's width (0.7m) | a 0.2s wind-up (an opaque black orb with a thin pale rim at her hand; she slows 25%), then one 2.7m bundle of dark violet crystal prisms with bright rims to 13m: 12.5 dmg, stuns the first foe 0.8s up close to 1.8s at range, stars over its head and STUNNED, on anyone including the training dummy | `ostra_snap_wind` (hold), `ostra_snap` | `os_snap_wind`, `os_snap`, `os_snap_hit` |
+| RMB Shard Snap | tap (1 charge) | holding RMB, or during the wind-up, the line becomes two rails the bundle's width (0.7m) | a 0.2s wind-up (an opaque black orb with a thin pale rim at her hand; she slows 25%), then one 2.7m bundle of dark violet crystal prisms with bright rims to 13m: 9.5 dmg, stuns the first foe 0.8s up close to 1.8s at range, stars over its head and STUNNED, on anyone including the training dummy | `ostra_snap_wind` (hold), `ostra_snap` | `os_snap_wind`, `os_snap`, `os_snap_hit` |
 | Shift Lantern Trade | hold to aim, release (a tap casts at once) | while held: both ends (her ring, the landing ring at the cursor and the link); in flight: both ends for everyone, each with a rune sigil (teal at her, violet at the circle) whose ring lights segment by segment and whose hexagram brightens | a dark indigo star-orb lobbed high (over 4m up) to the cursor with a violet trail, 1.8s; meanwhile she hovers where she cast it, at that height, even over the abyss (no fall, no drift); then she is there (an implosion and her appear-pop), keeping her height, and everyone in the 1.5m circle (foes, allies, Boki off the shoulder) goes to where she stood, each keeping its place in the circle; foes are slowed 40% 3s (SLOWED). It never travels by itself: a press in flight is ignored, a press with no charge is refused | `ostra_swap_aim` (hold), `ostra_swap`, `ostra_arrive` | `os_swap_lob`, `os_swap` |
-| E Brimseed | tap, recast | at the cursor (9m), a ring everyone sees growing, dashed until full | a small violet mote drops onto the spot; a dark indigo glass drum with a violet swirl and a teal rim grows 6.5s to 3.2m; a light column rises from 68%; E again (from 0.3s) pops it: an implosion, 12 dmg up to 3.5x, Grounded 1s; left alone it pops 0.5s after full (COLLAPSE on a hunter at full) | `ostra_seed`, `ostra_pop` | `os_seed`, `os_full`, `os_pop` |
+| E Brimseed | tap, recast | at the cursor (9m), a ring everyone sees growing, dashed until full | a small violet mote drops onto the spot; a dark indigo glass drum with a violet swirl and a teal rim grows 6.5s to 3.2m; a light column rises from 68%; E again (from 0.3s) pops it: an implosion, 12.5 dmg up to 3.5x; left alone it pops 0.5s after full (COLLAPSE on a hunter at full) | `ostra_seed`, `ostra_pop` | `os_seed`, `os_full`, `os_pop` |
 | X Nightwell (level 6, 64s) | tap | at the cursor, clamped to 10m (on ground short of walls, like the seed): a pale dome of the well's exact size that everyone sees, filling over 1.0s (with a pink core when Swollen) | it opens into a turning violet disc for 3.5s, 3.6m wide (5.1m Swollen): every foe inside in sight of its centre, or who walks in, is stunned until it closes and drawn to the middle (12 m/s), taking 0.16 every 0.1s. Allies are untouched; Ostra acts freely; it closes with no blast. A merge or a knock on her doesn't end the placed well | `ostra_well`, `ostra_well_snap` (on opening) | `os_well`, `os_well_hum` |
 | Merge (the `ultimate` action; its key from Settings.key_cap) | (Boki Merge) | | | | |
 
-Rank 3: Snap +30%; Trade shields allies beside her when she leaves or at the landing (20, 3s); the growing seed burns foes
-inside (the source's level-4 damage over time).
+Rank 3: Snap +30% and a burst of speed (+11% on the cast, +22% on a hit, 2s: the data's +50 and +100 of 465); Trade shields
+allies beside her when she leaves or at the landing (26, 3s: the data's 375 shield as a share of a level-15 hunter's health,
+on 145); the growing seed burns foes inside for 8.2 a second (the data's 250 against a 365 bomb) and rests 8s.
 
 **Unfolded:** the kit pass had folded the source's Black Hole into Brimseed rank 3 (the pop dragging foes from 1.3x its radius
 to the middle). Now that Black Hole is Nightwell on X, the pull is gone from the pop; the burn stays, as it is the source's own
@@ -51,7 +52,7 @@ level-4 bonus.
 |---|---|---|
 | Snap, then the seed on the stunned foe, then pop | the foe can't leave before the pop | `combo: Snap > seed on the stunned foe > pop` |
 | Seed under you, Trade through the foe | the foe lands in the seed | `combo: Seed > Trade puts the foe inside it` |
-| Swollen Snap / Trade | +40% / 1.25s | `combo: Swollen Snap hits 40% harder`, `combo: Swollen Trade is quicker` |
+| Swollen Snap / Trade | +44% / 1.25s | `combo: Swollen Snap hits 44% harder`, `combo: Swollen Trade is quicker` |
 | Pause, then fire | a Settled bolt that slows, then plain again | `lmb: the Settled orb hits harder and slows`, `small: the charge is stepped` |
 | Spam Shift | no travel, no second lob; no charge = refused | `owner: spamming Shift in flight never dashes`, `owner: with no charge Shift is refused` |
 | Trade in the air, over the abyss | she hovers in place until it lands, then arrives at that height | `owner: over the abyss she hovers in place ...`, `owner: she arrives at the landing keeping the height she hovered at` |
@@ -62,12 +63,28 @@ level-4 bonus.
 | Swollen, then Nightwell | the bigger 5.1m well | `ult Swollen: ...` |
 | Nightwell, then the merge | the target lives (burst cap) | `ult burst: the well, merge and its ultimate leave a full-health light hunter standing` |
 
+## Data pass (SERVER_UPDATE7, owner's tooltip data)
+Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 9.5, Settled 353 -> +34%, Swollen Snap 399 ->
++44%, the seed 365 -> 12.5, its damage over time 250 a second -> 8.2. Durations and cooldowns match directly: Snap 10s, Trade
+9.5s, seed 10s. Speed bursts as a share of the data's 465: +50 -> 10.8%, +100 -> 21.5%. The ally shield by health: 375 of a
+2074-hp hunter (level 15) -> 26 of 145.
+- Done: the pop no longer Grounds; the knock heal is gone; ground hazards pass her by (`incoming`; the lightning rod's sky
+  strike still hits); Snap's speed bursts at rank 3 (the data's rank IV); the seed's burn at rank 3 is 8.2 a second and its
+  cooldown is 10s -> 8s at rank 3 through the shared rank step (the data's -2s at rank IV).
+- Kept, not in the data: the seed still pops by itself at full growth (the data only says "reactivate to detonate"; one of the
+  open questions); the Snap's distance-scaled stun (the owner's note: RMB visibly stuns); the Trade's 1.8s (no number in the
+  data).
+- Not done: the Settled orb passing through terrain (our shots stop on terrain); items in the swap circle (the data says "all
+  units"; pickups are each game's own copies); an ice patch's slide still takes her (ground grip is not hers to change).
+- Rank paths that do not fit: the data's Snap +20% damage at ranks 2 and 3, the seed's +10% each and the Trade's -1.5s twice go
+  through the shared rank step (+15%/+30% damage, -10%/-20% cooldown on RMB and E, -15%/-30% recharge on the dash).
+
 ## Small mechanics
 | Mechanic | Source | Footage | Ours |
 |---|---|---|---|
 | The orb charge is binary (charged or not), since 05.02.25 | patch notes, wiki | yes (the bolt) | built (one Settled orb, then plain) |
 | Charged orb: faster, slows 10% for 1.5s | wiki | yes (SLOWED) | built |
-| Charged orb passes through terrain | wiki | no | not built (our shots stop on terrain; a pierce would read as a bug on our islands) |
+| Charged orb passes through terrain | wiki, owner's data | no | not built (our shots stop on terrain; a pierce would read as a bug on our islands) |
 | Snap slows Void while casting (25% less since Jan 2025) | patch notes | no | built: 25% slower during the 0.2s wind-up |
 | Snap stun grows with distance | wiki, card | yes | built 0.8-1.8s |
 | Swap swaps whoever is at the destination; they go to the origin | wiki | partly (0193 is ambiguous) | built, allies included ("any units") |
@@ -75,7 +92,7 @@ level-4 bonus.
 | Over the abyss she hovers and keeps her previous momentum; Swap preserves momentum | wiki | no | changed by the owner's dash note: she hovers in place (no momentum) while the lantern flies and keeps her height; the lantern lands on solid ground |
 | Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies beside her when she leaves or at the landing |
 | Anomaly grows 6.5s, up to 3.5x; recast to detonate | wiki | yes | built, recast from 0.3s (sheet) |
-| Empowered builds 10x faster on hunters; +30% Singularity size; knock heals | wiki | | built (Swollen); Swollen seed +30% size |
+| Empowered builds 10x faster on hunters; +30% Singularity size; knock heals | wiki | | built (Swollen); Swollen seed +30% size; the knock heal is removed (the owner's tooltip data has none) |
 | Black Hole stuns and pulls enemies to its centre for 3.5s, small damage every 0.1s | card, wiki | yes (ult f33-f66) | built on X; asserted `ult open`, `drawn to the middle`, `small ticks` |
 | A dome telegraph of the final size before it opens | footage | yes (f23-f32, 1.0s) | built, everyone sees it; asserted |
 | Enemies who enter during the 3.5s are caught too ("for 3.5s") | card | no | built; asserted `a foe who walks in later is caught too` |

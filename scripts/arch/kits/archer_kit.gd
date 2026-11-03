@@ -1,14 +1,13 @@
 class_name ArcherKit
 extends ArchKit
-## Pin (id archer, light; docs/heroes/archer.md, hero sheet pin.md). Spirit Walk (Shift), Focus, Snare
-## (tap: a rooting snare / Tripwire; hold: a charged Heavy Shot that pierces, knocks back and stuns into
-## a wall; Plunge in the air), Hail Wall (E, a curved arc of rain at the cursor distance), and on X
+## Pin (id archer, light; docs/heroes/archer.md, hero sheet pin.md). Spirit Walk (Shift), Focus, the Heavy Shot
+## (RMB, hold only: a charged arrow that pierces, knocks back and stuns into a wall), Hail Wall (E, a curved arc of rain at the cursor distance), and on X
 ## Starpiercer (level 6, PinUlt: three empowered piercing beams). R is the Merge.
 ## The bow (PinDraw): hold to draw through two stages with a V reticle that closes at each; tap and
 ## Empowered shots land at the cursor, Supercharged ones fly past it to max range; let go right as a stage
 ## comes up (a gold fletch burst) and the next draw is faster; hold too long and the arrow is overdrawn (half).
 ##
-## The loop: snares root (Pin) and feed Focus -> full Focus arms the Deadeye (a lens glint and
+## The loop: pins and standing still feed Focus -> full Focus arms the Deadeye (a lens glint and
 ## a thin aim line everyone sees, crosshairs over every pinned foe) -> the next shot is drawn at once,
 ## and into a rooted or stunned foe it's a Deadeye: a gold payoff hit with T4 hitstop and its own sound.
 
@@ -19,7 +18,6 @@ var fx: PinFx                  # Pin's pooled effects
 var ult: PinUlt                # X: Starpiercer
 var perfects: int:
 	get: return draw.perfects if draw else 0
-var trips: Array = []          # our live Tripwires (verbs trap dictionaries)
 var pin_aim := false           # the Heavy Shot is being held (its gold V and growing bar show)
 var high_t := 0.0              # re-checks high ground now and then
 var on_high := false
@@ -54,7 +52,7 @@ func res_text() -> String:
 func ready_label() -> String:
 	return "DEADEYE READY" if full_ready() else ""
 
-## Focus from play (a snare that roots, a Pin): the out-of-combat clock doesn't apply to Focus.
+## Focus from play (a Pin): the out-of-combat clock doesn't apply to Focus.
 func add_focus(v: float) -> void:
 	add_res(v)
 
@@ -147,7 +145,6 @@ func _tick(dt: float) -> void:
 	_tick_glint(dt)
 	_tick_reticles()
 	net_pulse(dt, full)
-	trips = trips.filter(func(t): return m.verbs.traps.has(t))
 	if pin_aim and rmb_down:
 		_heavy_tele()
 	if not rain.is_empty():
@@ -188,7 +185,7 @@ func draw_bonus(t: float) -> float:
 	return draw.bonus(t)
 
 ## Our shots the match just spawned get Pin's own look (PinFx): the bow's arrows by the kind PinDraw
-## loosed, the Heavy Shot's gold arrow, the snare.
+## loosed, the Heavy Shot's gold arrow.
 func _tag_shots() -> void:
 	for s in m.shots:
 		if s["by"] != h or (s["x"] as Dictionary).has("pin"):
@@ -198,7 +195,7 @@ func _tag_shots() -> void:
 			continue
 		var kind := "arrow"
 		if String(x.get("src", "")) == "abil":
-			kind = "heavy" if float(s["r"]) >= 0.2 else "snare"
+			kind = "heavy"
 		elif draw.pending != "":
 			kind = draw.pending
 		fx.skin(s, kind)
@@ -363,20 +360,38 @@ func on_dash(use_ex: bool) -> bool:
 	spirit.start(use_ex)
 	return true
 
-## While walking as a spirit she moves a little quicker.
-## While walking as a spirit she moves quicker, quicker still inside something (wiki: +50 move speed in
-## terrain); a draw right after a perfect release slows her less (wiki: perfect shots ease the self-slow).
+## While walking as a spirit she moves quicker; at rank 3 inside something she starts faster still and
+## that fades with the walk. A draw right after a perfect release slows her less (wiki: perfect shots ease
+## the self-slow).
 func move_k() -> float:
 	var k := 1.0
 	if spirit and spirit.active():
-		k = float(dash_def().get("inside_k", 1.35)) if spirit.inside else float(dash_def().get("walk_k", 1.15))
+		k = float(dash_def().get("walk_k", 1.1)) + spirit.inside_boost()
 	if draw and draw.quick and h.draw_t >= 0.0:
 		k *= float(h.wpn.get("perfect_slow", 0.85)) / maxf(0.05, float(h.wpn.get("draw_slow", 0.7)))
 	return k
 
-# ------------------------------------------------------------------ RMB: Snare
+# ------------------------------------------------------------------ RMB: Heavy Shot
+## The Heavy Shot's cooldown drops by a flat "cd_per_rank" seconds a rank; the other slots keep the shared rule.
+func cd_k(slot: String) -> float:
+	if slot != "sec":
+		return super.cd_k(slot)
+	var cut := float(rmb_def().get("cd_per_rank", 3.0)) * float(rank("sec") - 1)
+	return 1.0 - cut / float(rmb_def()["cooldown"])
+
+## The press always starts a draw (in the air too): the Heavy Shot has no tap and no air variant.
+func press_rmb() -> void:
+	if busy():
+		h._ab_feedback("sec", "deny")
+		return
+	if rmb_down:
+		return
+	rmb_down = true
+	rmb_t = 0.0
+	rmb_ctx = {"air": false, "e": in_e(), "r": false, "full": full_ready()}
+
 func rmb_hold_tick(t: float) -> void:
-	if t > 0.15 and not pin_aim and not rmb_ctx.get("air", false):
+	if t > 0.15 and not pin_aim:
 		# the Heavy Shot's draw: the gold V and a gold bar growing from the bow (its own creak)
 		play("arc_heavy_wind")
 		pin_aim = true
@@ -404,6 +419,11 @@ func heavy_k() -> float:
 	var hold_t := float(rmb_def()["hold"])
 	return clampf((rmb_t - hold_t) / maxf(0.05, float(pd["full"]) - hold_t), 0.0, 1.0)
 
+## How far the Heavy Shot flies uncharged; rank 3 adds "range_rank3" metres.
+func heavy_reach() -> float:
+	var pd: Dictionary = rmb_def()["pin"]
+	return float(pd["range"]) + (float(pd["range_rank3"]) if rank("sec") >= 3 else 0.0)
+
 ## The Heavy Shot can be held up to 3 s after it's full before it looses by itself (wiki patch 20.11.24).
 func rmb_auto_t() -> float:
 	return float(rmb_def()["pin"].get("max_hold", 3.0))
@@ -429,64 +449,28 @@ func _drop_tele() -> void:
 func fire_rmb(c: Dictionary) -> void:
 	_drop_tele()
 	last_variant = String(c["variant"])
+	if not c.get("hold", false):
+		return                     # a tap before the draw starts looses nothing and costs nothing
 	if not spend_rmb(): return
-	var sd := rmb_def()
-	if c.get("air", false):
-		play("arc_plunge")
-		_plunge()
-		return
-	var target_aim := aim()
-	if c.get("hold", false):
-		play("arc_heavy")
-		_pin(target_aim, clampf((float(c["t"]) - float(sd["hold"])) / maxf(0.05, float(sd["pin"]["full"]) - float(sd["hold"])), 0.0, 1.0))
-		return
-	play("arc_snare")
-	var sn: Dictionary = sd["snare"]
-	# full Focus, or with your Hail Wall falling: the snare roots for longer
-	var root := float(sn["root_full"]) if c.get("full", false) or c.get("e", false) else float(sn["root"])
-	# the arrow comes down at the cursor (up to 11m): a miss plants the Tripwire there
-	var srange := clampf(Vector2(target_aim.x - h.pos.x, target_aim.z - h.pos.z).length() + 0.5, 2.5, float(sn["range"]))
-	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(sn["speed"]), "range": srange, "size": 0.16},
-		"effects": [{"type": "damage", "amount": float(sn["dmg"])}, {"type": "root", "duration": root}]})
-	run(stg, cx("rmb", "snare", target_aim, {"on_foe": func(_f: Ent, _c: Dictionary): add_focus(float(res_def().get("snare_gain", 40.0))),
-		"on_shot_end": func(at: Vector3, why: String, e):
-		if why != "hit" and e == null:
-			_tripwire(at)}))
-	Feel.cast_sound(m, "projectile", "control", h.pos, h)
-
-func _tripwire(at: Vector3) -> void:
-	var tr := res_def()
-	var td: Dictionary = rmb_def()["trip"]
-	var g := ground(at - Vector3(h.aim_dir().x, 0, h.aim_dir().y) * 0.3)
-	if m.world.is_void(g.x, g.z):
-		return
-	var maxn := int(td["max"]) + (1 if rank("sec") >= 3 else 0)
-	while trips.size() >= maxn:
-		var old: Dictionary = trips.pop_front()
-		if m.verbs.traps.has(old): m.verbs._drop_trap(old)
-	var n0: int = m.verbs.traps.size()
-	# the trigger: a 0.15s click, then root, reveal and damage (the trap rule, DASHES §5.3)
-	var stg := stage("rmb", {"delivery": {"type": "trap", "origin": "here", "radius": 1.0, "arm": float(td["arm"]), "duration": float(td["time"])},
-		"then": {"on_trigger": [{"delivery": {"type": "burst", "origin": "here", "radius": 1.3},
-			"effects": [{"type": "damage", "amount": float(td["dmg"])}, {"type": "root", "duration": float(td["root"])}, {"type": "mark", "mode": "reveal", "duration": float(td["reveal"])}],
-			"modifiers": [{"type": "delay", "time": 0.15}]}]}}, {"hit": "add"})
-	run(stg, cx("rmb", "tripwire", g, {"at": g}))
-	for i in range(n0, m.verbs.traps.size()):
-		trips.append(m.verbs.traps[i])
+	var pd: Dictionary = rmb_def()["pin"]
+	play("arc_heavy")
+	_pin(aim(), clampf((float(c["t"]) - float(rmb_def()["hold"])) / maxf(0.05, float(pd["full"]) - float(rmb_def()["hold"])), 0.0, 1.0))
 
 ## The Heavy Shot: a held, charged arrow (0.5s -> full at 1.1s) that pierces, knocks back by its
 ## charge and, driven into a wall within 3m, stuns (PINNED). Full charge is a heavy hit.
 func _pin(a: Vector3, k: float) -> void:
 	var pd: Dictionary = rmb_def()["pin"]
+	var reach := heavy_reach()
+
 	var dmg := lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k)
 	var push := lerpf(float(pd["push"][0]), float(pd["push"][1]), k)
-	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(pd["speed"]), "range": float(pd["range"]) * (1.0 + 0.2 * k), "size": lerpf(0.2, 0.34, k)},
+	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(pd["speed"]), "range": reach * (1.0 + 0.2 * k), "size": lerpf(0.2, 0.34, k)},
 		"effects": [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}],
 		"modifiers": [{"type": "pierce", "count": int(pd["pierce"])}]})
 	var dir := Vector2(a.x - h.pos.x, a.z - h.pos.z).normalized()
 	var extra := {"hit_extra": {"heavy": true}} if k >= 0.99 else {}
 	extra["on_foe"] = func(f: Ent, _c: Dictionary):
-		add_focus(float(res_def().get("snare_gain", 40.0)))
+		add_focus(float(res_def().get("pin_gain", 40.0)))
 		# the impact: a red-white burst, a white dust cloud as it's driven back, a white ring round it
 		var at := f.pos + Vector3(0, 1.0, 0)
 		fx.note_hit(f.pos)
@@ -507,6 +491,8 @@ func _pin(a: Vector3, k: float) -> void:
 		if _wall_behind(f, dir, float(pd["wall"])):
 			pins += 1
 			add_focus(res_max())
+			if rank("sec") >= 3:
+				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)       # rank 3: a wall stun gives a dash charge
 			f.hurt(float(pd.get("wall_dmg", 12.0)) * k * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "pin"], "heavy": true})
 			m.later(0.12, func():
 				if is_instance_valid(f) and not f.dead:
@@ -532,19 +518,6 @@ func _wall_behind(f: Ent, dir: Vector2, reach: float) -> bool:
 			return true
 		k += 0.3
 	return false
-
-func _plunge() -> void:
-	var pd: Dictionary = rmb_def()["plunge"]
-	var at := h.pos
-	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(pd["radius"])},
-		"effects": [{"type": "push", "strength": float(pd["push"])}]}, {"hit": "add"})
-	run(stg, cx("rmb", "plunge", at))
-	h.vel.y = maxf(h.vel.y, float(pd["lift"]))
-	h.gliding = false
-	h.grounded = false
-	h.glide_fuel = minf(1.0, h.glide_fuel + float(pd["cool"]))
-	m.fx.bolt(at + Vector3(0, 1.0, 0), ground(at) + Vector3(0, 0.1, 0), Color("e8f7c0"))
-	m.sfx("whoosh", at, -3.0, 1.3)
 
 # ------------------------------------------------------------------ E: Hail Wall
 ## A wall of falling arrows on a curved arc round you (hero sheet: Rain of Arrows): centred on your aim at
@@ -629,11 +602,11 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	# Hail Wall across their path (lead them a little), from mid range
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < float(e_def()["reach"]) + 1.0 and dist > 3.0 and randf() < 0.35:
 		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * 0.4; h.inp["sig"] = true; return
-	# snare first: a root pins them (and feeds Focus) for the Deadeye
+	# a full Heavy Shot first: a wall pin feeds Focus for the Deadeye
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 13.0 and not pinned(tgt):
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
-		if dist > 9.0 or randf() < 0.35: bot_hold["rmb"] = float(rmb_def()["hold"]) + 0.15
+		bot_hold["rmb"] = float(rmb_def()["pin"]["full"]) + 0.1
 	# Spirit Walk away from a brawler
 	if dist < 3.0 and h.dashes >= 1.0 and randf() < 0.2:
 		h.inp["aim"] = h.pos - Vector3(h.dir_to(tgt).x, 0, h.dir_to(tgt).y) * 4.0

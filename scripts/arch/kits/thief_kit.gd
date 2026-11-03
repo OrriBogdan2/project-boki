@@ -658,7 +658,7 @@ func _tick_bola(dt: float) -> void:
 			# a crate or barrel counts as the first catch: the Bola breaks on it and flies on
 			for b in m.breaks:
 				if not b["dead"] and Vector2(b["pos"].x - p.x, b["pos"].z - p.z).length() < 0.7:
-					m.hit_break(b, float(bd["dmg"]) * 3.0, h)
+					m.brk.hit(b, h)
 					bola["broke"] = true
 					bola["left"] = float(bd["after"]) + (float(bd["after_r3"]) if rank("sec") >= 3 else 0.0)
 					bola_breaks += 1

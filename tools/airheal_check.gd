@@ -25,7 +25,7 @@ func _start_drop(m: Match, P: Hunter, at: Vector3) -> void:
 	P.dropping = true
 	P.diving = false
 	P.gliding = true
-	for k in ["sec", "sig", "ult", "tonic", "kit", "gear1", "gear2", "glide", "jump", "dash", "fire"]:
+	for k in ["sec", "sig", "ult", "util1", "util2", "util3", "gear1", "gear2", "glide", "jump", "dash", "fire"]:
 		P.inp[k] = false
 	_steps(m, 3)
 
@@ -52,7 +52,7 @@ func run(main: Node) -> void:
 	P.hp = P.max_hp * 0.5
 	P.tonics = 2
 	var hp0 := P.hp
-	P.inp["tonic"] = true
+	P.inp["util1"] = true
 	_steps(m, 1)
 	ok(not P.dropping and not P.gliding, "a heal mid-drop breaks out of it and folds the glider")
 	ok(P.drink_t > 0.0, "and the drink starts in the air")
@@ -67,7 +67,7 @@ func run(main: Node) -> void:
 	_steps(m, 1)
 	ok(not P.dropping, "an ability press mid-drop breaks out of it too")
 	# ---- 3. gliding normally: a heal folds the glider and keeps drinking
-	for k in ["sec", "sig", "ult", "tonic", "kit", "gear1", "gear2", "glide", "jump", "dash", "fire"]:
+	for k in ["sec", "sig", "ult", "util1", "util2", "util3", "gear1", "gear2", "glide", "jump", "dash", "fire"]:
 		P.inp[k] = false
 	P.teleport(g0 + Vector3(0, 30, 0))
 	P.fly_t = 0.0; P.roll_t = 0.0; P.knock_t = 0.0; P.vel = Vector3.ZERO
@@ -85,7 +85,7 @@ func run(main: Node) -> void:
 	P.drink_t = 0.0
 	_steps(m, 2)
 	ok(P.gliding, "gliding (normal, not the drop)")
-	P.inp["tonic"] = true
+	P.inp["util1"] = true
 	_steps(m, 5)
 	ok(not P.gliding and P.drink_t > 0.0, "a heal while gliding folds the glider and drinks")
 	P.inp["glide"] = false
@@ -106,7 +106,7 @@ func run(main: Node) -> void:
 	P.hp = P.max_hp * 0.6
 	P.armor = 0.0
 	P.tonics = 2
-	P.inp["tonic"] = true
+	P.inp["util1"] = true
 	_steps(m, 2)
 	ok(P.drink_t > 0.0, "drinking on the ground")
 	var h2 := P.hp
@@ -120,7 +120,7 @@ func run(main: Node) -> void:
 	P.armor_kits = 1
 	P.hp = P.max_hp * 0.6
 	_steps(m, 2)
-	P.inp["kit"] = true
+	P.inp["util2"] = true
 	_steps(m, 2)
 	ok(P.kit_t > 0.0, "repairing armor")
 	P.hurt(6.0, Q, {"src": "abil"})

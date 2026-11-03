@@ -3,8 +3,8 @@ extends RefCounted
 ## Breah's Quakefall (RMB): hold to gather, let go to hop a short way forward and smash both fists down.
 ## While charging, everyone sees the big circle a hop ahead of her with its sweet spot growing from the
 ## centre; she can walk slowly, jump to leap forward (the circle comes with her) and punch to lunge
-## further. The centre stuns, foes in the air are dunked, rocks inside fly outward, a knock or kill
-## resets it, and at rank 3 each slam that catches something adds a Molten Guard shield stack.
+## further. The centre stuns, foes in the air are dunked, rocks inside fly outward, and at rank 3
+## each slam that catches something adds a Molten Guard shield stack (DolmKit.guard_stack).
 
 var k: DolmKit
 var leapt := false             # jumped during this charge (the leap forward)
@@ -163,14 +163,11 @@ func slam(c: float, at_feet: bool) -> void:
 			k.dunks += 1
 			m.fx.word(f.pos + Vector3(0, 2.0, 0), "DUNKED", Color("ffb36a"), true)
 			m.fx.beam(f.pos, f.pos + Vector3(0, 6.0, 0), Color("ffe08a"), 0.5, 0.3)
-		k.slam_hit[f.get_instance_id()] = m.time
 		f.hurt(d2, h, o)
 		if in_core: KitLooks.of(m).crown(f, float(o["stun"]))
 		if air:
 			f.vel.y = minf(f.vel.y, -22.0)      # spiked down (after the hit, which would lift it)
 		gained = true
-		if f.dead or (f is Hunter and (f as Hunter).downed):
-			k._reset_quake()
 	for w in m.verbs.walls.duplicate():
 		if not w.get("rock", false) or int(w["team"]) != h.team: continue
 		var mid := k.rock_mid(w)
@@ -179,8 +176,4 @@ func slam(c: float, at_feet: bool) -> void:
 			k.launch(w, rel.normalized() if rel.length() > 0.2 else h.aim_dir(), "slam")
 			gained = true
 	if gained and k.rank("sec") >= 3:
-		k.shield_stacks = mini(int(s["shield_cap"]), k.shield_stacks + 1)
-		k.shield_at = m.time
-		h.shield = maxf(h.shield, float(s["shield"]) * k.shield_stacks)
-		h.shield_t = float(s["shield_t"])
-		m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.2, Color("ffd24a"), 0.35)
+		k.guard_stack()

@@ -57,6 +57,7 @@ static func slot_info(k: ArchKit) -> Dictionary:
 		"name": String(xd.get("name", "")), "short": String(xd.get("short", "")), "icon": String(xd.get("icon", "")),
 		"col": k.col_of(xd), "desc": String(xd.get("desc", "")), "cd": cd_left, "cd_max": cooldown(k),
 		"charges": 1 if cd_left <= 0.0 else 0, "max_charges": 1, "verb": "x", "level": 1,
-		"ready": cd_left <= 0.0 and k.h.lvl >= unlock, "locked": k.h.lvl < unlock, "unlock": unlock,
+		"ready": cd_left <= 0.0 and k.h.lvl >= unlock and not KinMerge.active(k.h),
+		"locked": k.h.lvl < unlock, "unlock": unlock,
 		"up": k.ult_running(),
 	}

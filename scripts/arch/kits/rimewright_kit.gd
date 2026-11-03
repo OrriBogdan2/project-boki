@@ -4,7 +4,7 @@ extends ArchKit
 ## plays: ice damage, control and a wall, no healing or shields for the squad.
 ## Passive Hoarfrost: damage Chills; a knock on a Chilled foe, or 8 darts on one foe, Shatters them.
 ## LMB Ice Dart: hold for a steady stream of slow homing shards that bow out and curve onto the foe
-## nearest the cursor; while skating they fly straight and thick and hit 1.6x. RMB Ice Spear: hold to
+## nearest the cursor; while skating they fly straight and thick. RMB Ice Spear: hold to
 ## see the landing ring, let go: it lands at the cursor, leaves a slow zone and detonates 1.8s later.
 ## Shift Skate (hold). E Rink Wall: a 0.2s tell, then a narrow block of ice that slides toward the
 ## cursor, widening, shoving foes; E again freezes it. X Rimelock (level 6): sealed in ice, invulnerable,
@@ -17,6 +17,7 @@ var darts: Array = []          # homing shards in flight: {s: Dictionary, side: 
 var dart_n := 0                # darts thrown (alternates the bow side and the hand)
 var seq_next := 0.0            # when the next dart may leave
 var rinkrun := {}              # the running Skate: {t, dir, loop}
+var ice_t := 0.0               # s until the rank-3 Skate may lay its next span of ice
 var wall := {}                 # the Rink Wall: {w, dir, sliding, t, slide_t, hp0, hit}
 var wall_cast := {}            # the wall's 0.2 s tell before it erupts: {t, dir, travel}
 var spear_aim := false         # RMB held: the landing ring and the raised spear are up
@@ -179,8 +180,7 @@ func _throw_dart() -> void:
 	var bow := 0.0 if skating else deg_to_rad(float(wd.get("bow_deg", 18.0))) * side
 	var v := dir.rotated(bow)
 	var start := Vector3(h.pos.x + v.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + v.y * 0.6)
-	var dmg: float = float(wd["dmg"]) * float(m.dmg_mult(h)) * (
-			float(dash_def().get("dart_k", 1.6)) if skating else 1.0)
+	var dmg: float = float(wd["dmg"]) * float(m.dmg_mult(h))
 	var spd := float(wd.get("skate_speed", 30.0)) if skating else float(wd["speed"])
 	var rng := float(wd["range"]) * h.shot_range_k
 	h.shot_range_k = 1.0
@@ -313,8 +313,26 @@ func _tick_rinkrun(dt: float) -> void:
 	if float(rinkrun["loop"]) <= 0.0 and stride_free:
 		rinkrun["loop"] = KMovesCare.length("tm_skate")
 		play("tm_skate")
-	if rank("dash") >= 3 and h.over_void():
-		m.fx.burst(h.pos + Vector3(0, -0.2, 0), res_col(), 4, 1.0, 0.4, 0.0, 1.0)
+	_lay_ice(cur, dt)
+
+## Rank 3: skating over the Abyss lays ice underfoot, a short span just ahead of her every `ice_gap`
+## seconds, which stays a few seconds so she (and anyone after her) can land on it.
+func _lay_ice(dir: Vector2, dt: float) -> void:
+	if rank("dash") < 3:
+		return
+	ice_t -= dt
+	if ice_t > 0.0:
+		return
+	var dd := dash_def()
+	var ahead := Vector2(h.pos.x, h.pos.z) + dir * float(dd.get("ice_look", 2.0))
+	if not h.over_void() and not m.world.is_void(ahead.x, ahead.y):
+		return
+	ice_t = float(dd.get("ice_gap", 0.2))
+	var laid := HeroZones.bridge(
+			m, h, h.pos, dir, float(dd.get("ice_len", 3.6)), float(dd.get("ice_width", 1.6)),
+			float(dd.get("ice_time", 5.0)), true, String(dd.get("ice_col", "#bff0ff")))
+	if laid > 0:
+		m.fx.burst(h.pos + Vector3(0, -0.2, 0), res_col(), 6, 1.5, 0.4, 0.0, 1.0)
 
 ## A Boki merge ends the Skate (its refund is the same as letting go), drops the spear aim and a wall
 ## still in its tell (no wall comes up).
@@ -473,7 +491,8 @@ func _tick_zones(dt: float) -> void:
 
 func _detonate(at: Vector3) -> void:
 	var ld: Dictionary = rmb_def()["lance"]
-	var rr := float(ld["burst_r"]) * (1.3 if rank("sec") >= 3 else 1.0)
+	var rr := float(ld["burst_r"])
+	var blast_k := float(ld.get("r3_dmg_k", 1.45)) if rank("sec") >= 3 else 1.0
 	stats["detonations"] += 1
 	lk().burst("dome", at, {"r": rr, "dur": 0.45})
 	lk().burst("spikes", at, {"r": rr * 0.6, "dur": 0.5})
@@ -483,7 +502,7 @@ func _detonate(at: Vector3) -> void:
 	play_soft("tm_clench")
 	for f in foes_in(at, rr):
 		f.hurt(
-				float(ld["burst_dmg"]) * power("sec"), h,
+				float(ld["burst_dmg"]) * power("sec") * blast_k, h,
 				{
 					"src": "abil", "ab": "utility", "tags": ["utility", "lance"], "root": float(ld["freeze"]),
 					"dr": true, "slow": 0.8, "slow_k": 0.3, "payoff": true})
