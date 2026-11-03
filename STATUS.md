@@ -1,4 +1,4 @@
-2026-11-03T17:21:56Z
+2026-11-03T18:50:18Z
 
 == S1 BRANCH TABLE (current; older detail further down) ==
 branch | commit | state | Net | checks
@@ -19,9 +19,9 @@ Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on o
 
 Running now: none on S1.
 Queued: none on S1 (Dancer handed to S2). Farm tutorial build waits for owner answers.
-Last INBOX entry handled: 2026-11-03 17:05 UTC ORCH. ext/mapclean-fix READY at c36f6ea (17:21 UTC), ahead of the 19:30 deadline.
+Last INBOX entry handled: 2026-11-03 18:20 UTC ORCH OWNER DECISIONS (all routed to S2/main; nothing for S1). mapclean-fix c36f6ea still merges clean on main a3fc5b95 (18:50 UTC check).
 Watcher: received 19:06 UTC entry
-Questions for the owner: see ext/classes line.
+Questions for the owner: farm is top priority after the demo (18:20 UTC). The farm tutorial plan and farm builder plan (in this STATUS, below) still need your answers before S1 builds them: tracker meaning, house cost, player hammer help, first-day gems, step order, builder name, pen in starter set, decor at start, items per tier, hide vs "Talk to Dunna" tabs, builder in world or portrait-only. Also see the ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
 
 Hold state for MergeKit.drop_class_holds:
