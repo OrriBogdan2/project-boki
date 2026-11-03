@@ -265,9 +265,9 @@ const MOVES := {
 		}],
 		[0.3, {"p": -0.06, "y": 0.04, "sq": -0.04, "fr": Vector3(0.0, 0.05, -0.5), "rw": 0.5}],
 		[0.48, {}]]},
-	# Soot Ram (Shift, 0.33 s, fastest at the start): a quick coil, then head-first like a battering ram inside
-	# the flame skull, arms swept back and legs trailing, held through the dash; he snaps upright on arrival
-	# (a squash, the gun back on the aim) (hero-ref bash, body section 4)
+	# Soot Ram (Shift, 0.32 s, fastest at the start): a quick coil, then head-first like a battering ram, balled
+	# up compact inside the flame skull (arms swept back, knees folded up behind him), held through the dash;
+	# he snaps upright on arrival (a squash, the gun back on the aim) (hero-ref bash, body section 4)
 	"as_leap": {"keys": [
 		[0.0, {
 			"p": 0.2, "sq": 0.4, "lift": -0.12, "lw": 1.0, "legs": [1.1, -1.7, 1.0, -1.7], "fr": Vector3(0.2, 0.1, 0.3),
@@ -275,11 +275,11 @@ const MOVES := {
 		}],
 		[0.06, {
 			"p": -0.8, "sq": -0.4, "lift": 0.12, "fr": Vector3(0.25, 0.25, 0.55), "rw": 1.0,
-			"fl": Vector3(-0.25, 0.25, 0.55), "hw": 1.0, "lw": 1.0, "legs": [-0.5, -0.2, -0.9, -0.15]
+			"fl": Vector3(-0.25, 0.25, 0.55), "hw": 1.0, "lw": 1.0, "legs": [-0.2, -1.2, -0.5, -1.0]
 		}],
 		[0.3, {
 			"p": -0.75, "sq": -0.3, "lift": 0.1, "fr": Vector3(0.25, 0.25, 0.55), "rw": 1.0,
-			"fl": Vector3(-0.25, 0.25, 0.55), "hw": 1.0, "lw": 1.0, "legs": [-0.4, -0.3, -0.85, -0.2]
+			"fl": Vector3(-0.25, 0.25, 0.55), "hw": 1.0, "lw": 1.0, "legs": [-0.15, -1.25, -0.45, -1.05]
 		}],
 		[0.36, {
 			"p": -0.2, "sq": 0.45, "lift": -0.1, "fr": Vector3(0.1, 0.0, -0.3), "rw": 0.6,

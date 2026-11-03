@@ -431,10 +431,10 @@ func _dashes_cute() -> void:
 	ok("mm dashes: no other kit plays her dash moves", own_moves_only("tender_kit.gd", ["mm_skip", "mm_float"]))
 	await _free(m)
 
-## True when no kit file other than `own` names any of `ids` (a dash move is one hero's own).
+## True when no hero kit (a *_kit.gd) other than `own` names any of `ids` (a dash move is one hero's own).
 static func own_moves_only(own: String, ids: Array) -> bool:
 	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
-		if not f.ends_with(".gd") or f == own:
+		if not f.ends_with("_kit.gd") or f == own:
 			continue
 		var src := FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)
 		for id in ids:

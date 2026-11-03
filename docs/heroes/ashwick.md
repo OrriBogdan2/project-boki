@@ -95,11 +95,14 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 - Only enemy hunters count for the bond (the carpet still burns monsters and Boki).
 - Body and movement (hero-ref "Body, scale and movement feel"): 0.76 of a heavy's size and a little broad, the tall hat kept;
   quick short steps (1.8x the step rate, stride 0.45); the hitbox stays the heavy 0.5 (the ring under him shows it).
-- Owner (23:40): the air dash is a long, fast "poof" (8m in 0.24s before the global dash feel) from a ring of smoke and flame,
-  balled up for one roll, then sailing spread-eagled; he keeps half its speed after it.
+- Owner (23:40): the air dash is a long, fast "poof" (8m in 0.24s before the global dash feel) from a cloud of smoke and
+  flame blown out behind him (no blast: owner review item 35), balled up for one roll, then sailing spread-eagled; he
+  keeps half its speed after it.
 - Not in the footage, built from his character:
   a plain jump is a quick crouch and a springy tuck, landing on a light squash (`lw_land`); the idle fidgets are a restless
-  bounce, a bob and a check of the nozzle. His dashes leave ember puffs that burn out behind him instead of the shared pill.
+  bounce, a bob and a check of the nozzle. His dashes leave ember puffs that burn out behind him instead of the shared pill, burst and ring
+  (`own_dash_trail`), and his ram and poof moves are the whole dash pose (`dodge_anim` "kit": no shared heavy charge pose
+  under them; owner review item 35).
 
 ## Combinations (all scripted in `--ashwick-combo-check`)
 | Do this | You get | Asserted by (check line) |
@@ -116,6 +119,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | Cinder Shot on a burning foe | 25% more damage, upgrade + spread at the old level | "cinder: 25% more on an Ablaze foe"; "combo: lance burn > Cinder Shot = upgrade + spread" |
 | Cinder Shot rank 3 | a second charge | "cinder: one charge at rank 1"; "cinder: a second charge at rank 3" |
 | Soot Ram into a foe | stops on them with the flame skull: damage, 17 Char | "ram: the flame skull wraps his front while it flies"; "ram: stops on the first foe and shoves it hard (doesn't pass through)"; "ram: impact damage and 17 Char" |
+| Ram, then the air poof | his own moves (no shared pose), each covering its dash, no ring | "dash moves: the ram and the poof play his own moves, no shared pose under them"; "dash moves: each covers its dash and settles soon after"; "dash moves: no other kit plays them"; "dash moves: no ring on the ram or the poof" |
 | Two rams in a row | chained within 0.4s | "ram: toward the cursor, two charges chain within 0.4s" |
 | Knock with no charges | one ram charge back | "passive: a knock gives back one ram charge, not both" |
 | Soot Ram rank 3 | +4.3 damage; a hit gives +16% speed and an 11.6% health shield for 2s; no instant burn, no carpet (that is the X ult) | "ram rank 3: +4.3 damage (before the rank's own +30%)"; "ram rank 3: a hit gives +16% speed and a 11.6% shield, and no instant burn"; "ram rank 3: the boost ends after 2s" |
@@ -146,8 +150,8 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
 |---|---|---|
 | Torch Lance (LMB, held) | `as_lance` (hold, looped), `as_lance_end` | sets his feet and drops the nozzle to the right hip during the 0.2s pilot, kicked back hard as the roar starts, then braced leaning in with the hose bucking (an 8 Hz loop); a little recoil off the hose on release |
 | Cinder Shot (RMB) | `as_aim` (hold), `as_shot` | gun hand cocked at the shoulder sighting down the lane; release: the arm thrusts out (overshoot), the body kicked back by the shot |
-| Soot Ram (Shift) | `as_leap` | a coil, then head first like a battering ram, arms swept back, legs trailing; squashes on impact, springs upright |
-| Air poof (the air dash) | `lw_hop` | balled up in the smoke-and-flame burst, one fast roll forward, then sailing out spread-eagled while the speed bleeds off |
+| Soot Ram (Shift) | `as_leap` (0.55s over a 0.32s ram) | a coil, then head first like a battering ram, balled up compact in the flame skull (arms swept back, knees folded up behind), held through the ram; squashes on impact, springs upright with the gun on the aim (footage 0159-0161) |
+| Air poof (the air dash) | `lw_hop` (0.7s over a 0.28s poof, then the kept speed) | balled up as the bellows blow a cloud of smoke and flame out behind him (no blast), one fast roll forward, then sailing out spread-eagled while the speed bleeds off |
 | Furnace Cloak (E) | `as_cloak` | 0.24s on the press: a quick tuck, then chest out and the arms flung wide with the blast (up on his toes, the flamer swung up on its strap), held a beat, settle |
 | Flashover payoff, a knock | `lw_stoke`, `lw_stoke_lance` (mid-roar) | the off fist punches up over his head, a lean back, a bounce; mid-roar the nozzle stays on the foe and the hold goes on |
 | Plain jump / landing | `lw_jump`, `lw_land` | a quick crouch and a springy tuck; a light squash |

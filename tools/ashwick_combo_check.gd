@@ -8,6 +8,8 @@ extends RefCounted
 ## the Furnace Cloak on the press round him (no cursor) and its swirling shield, walls, Char rules, the merge drops,
 ## and the X ult, Flue Flight (tools/ashwick_ult_check.gd).
 
+const CARE := preload("res://tools/care_combo_check.gd")      # the shared dash-move rules (own ids, tail)
+
 var main: Node
 var fails := 0
 var n := 0
@@ -52,6 +54,29 @@ func _growth() -> void:
 		"growth: the Soot Ram's hit grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)),
 		d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01, "L1 %.2f L10 %.2f" % [d1, d10]
 	)
+
+## Owner item 35: the ram and the poof play his own moves (no shared charge pose under them), each covering its
+## dash and settling soon after, no other kit plays them, and neither leaves a ring.
+func _dash_moves(K: AshwickKit, ram_move: String, ram_t: float, poof_move: String, poof_t: float, rings: int) -> void:
+	ok(
+		"dash moves: the ram and the poof play his own moves, no shared pose under them",
+		ram_move == "as_leap" and poof_move == "lw_hop" and K.dodge_anim() == "kit", "%s / %s" % [ram_move, poof_move]
+	)
+	var ram_n := _move_len("as_leap")
+	var poof_n := _move_len("lw_hop")
+	ok(
+		"dash moves: each covers its dash and settles soon after",
+		_fits(ram_n, ram_t) and _fits(poof_n, poof_t),
+		"ram %.2f/%.2f poof %.2f/%.2f" % [ram_n, ram_t, poof_n, poof_t]
+	)
+	ok("dash moves: no other kit plays them", CARE.own_moves_only("ashwick_kit.gd", ["as_leap", "lw_hop"]))
+	ok("dash moves: no ring on the ram or the poof", rings == 0, "rings %d" % rings)
+
+static func _fits(move_t: float, dash_t: float) -> bool:
+	return move_t >= dash_t and move_t <= dash_t + CARE.MOVE_TAIL_MAX
+
+static func _move_len(id: String) -> float:
+	return float((KMovesPair.MOVES[id]["keys"] as Array)[-1][0])
 
 ## Holds the lance on a target.
 func _hold_at(hunter: Hunter, target: Hunter) -> void:
@@ -361,13 +386,18 @@ func _all() -> void:
 	T.teleport(home + Vector3(0, 0, 9.0))
 	T2.teleport(home + Vector3(0, 0, -9.0))
 	ak.aim_at(P, home + Vector3(8.0, 0, 0))
+	var rings := {"made": 0, "seen": m.fx.rings.size()}      # rings spawned (a lambda keeps a dict by reference)
+	var count_rings := func():
+		rings["made"] = int(rings["made"]) + maxi(0, m.fx.rings.size() - int(rings["seen"]))
+		rings["seen"] = m.fx.rings.size()
 	P.ak.on_dash(false)
+	var ram_move: String = K.anim_id
 	var feel: Dictionary = K.dash_feel()
 	var ram_d: float = float(K.dash_def()["dist"]) * float(feel["dist"])
 	var ram_t: float = float(K.dash_def()["time"]) * float(feel["time"])
-	ak.step(m, ram_t * 0.3)
+	ak.step(m, ram_t * 0.3, count_rings)
 	var d_front := P.pos.x - home.x
-	ak.step(m, ram_t * 0.7 + 0.05)
+	ak.step(m, ram_t * 0.7 + 0.05, count_rings)
 	var d1 := P.pos.x - home.x
 	ok(
 		"ram: quick and short, front-loaded (over 37% of it in the first 30%)",
@@ -390,9 +420,11 @@ func _all() -> void:
 	P.vel = Vector3.ZERO
 	P.ex_cd = 0.0
 	ak.aim_at(P, home + Vector3(12.0, 0, 0))
+	rings["seen"] = m.fx.rings.size()
 	P.ak.on_dash(true)
+	var poof_move: String = K.anim_id
 	var poof_t: float = float(K.dash_def()["air_time"]) * float(feel["time"])
-	ak.step(m, poof_t + 0.06)
+	ak.step(m, poof_t + 0.06, count_rings)
 	var poof_d := P.pos.x - home.x
 	var kept := Vector2(P.vel.x, P.vel.z).length()
 	ok(
@@ -400,6 +432,7 @@ func _all() -> void:
 		poof_d > ram_d * 2.0 and poof_t < 0.35 and kept > 8.0,
 		"poof %.1f m in %.2fs, ground %.1f, speed kept %.1f m/s" % [poof_d, poof_t, ram_d, kept]
 	)
+	_dash_moves(K, ram_move, ram_t, poof_move, poof_t, int(rings["made"]))
 	P.dashes = 0.0
 	K.on_knock(T, true)
 	ok("passive: a knock gives back one ram charge, not both", absf(P.dashes - 1.0) < 0.01, "charges %.2f" % P.dashes)

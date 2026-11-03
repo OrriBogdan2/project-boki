@@ -28,7 +28,7 @@ const RAM_FRONT := 0.3                 # share of the ram spent at its burst spe
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
 const EMBER_EVERY := 0.035             # s between the ember puffs a ram or poof leaves behind
-const POOF_PUFFS := 8                  # smoke puffs in the ring where the air poof goes off
+const POOF_PUFFS := 5                  # smoke puffs the bellows blow out behind him as the air poof goes off
 const CLOAK_POSE_T := 0.3             # s the Furnace Cloak flare holds the flamer up off the aim (as_cloak)
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
@@ -462,8 +462,9 @@ func on_dash(use_ex: bool) -> bool:
 	bash = {"t": h.roll_t, "t0": h.roll_t, "speed": h.roll_speed, "dir": dir, "hit": false}
 	return true
 
-## The air dash, Linwick's way: a "poof" from the bellows that launches him far and fast (a ring of smoke and
-## flame where it goes off), and he keeps a share of the speed after it (the class long dash is replaced).
+## The air dash, Linwick's way: a "poof" from the bellows that launches him far and fast (a cloud of smoke and
+## flame blown out behind him, no blast), and he keeps a share of the speed after it (the class long dash is
+## replaced).
 func _poof(dd: Dictionary, dir: Vector2) -> void:
 	var feel := dash_feel()
 	var air_t := float(dd["air_time"]) * float(feel["time"])
@@ -473,12 +474,12 @@ func _poof(dd: Dictionary, dir: Vector2) -> void:
 	h.roll_speed = air_dist / air_t
 	play("lw_hop")
 	m.sfx("lw_hop", h.pos, -3.0, 1.0)
-	var at := h.pos + Vector3(0, 0.6, 0)
-	fx.sunburst(at, 1.3, Color("ff5a1a"), Color("ffc040"), 0.28, true)
+	var back := -Vector3(dir.x, 0, dir.y)
+	var side := Vector3(dir.y, 0, -dir.x)
 	for i in POOF_PUFFS:
-		var ang := TAU * float(i) / POOF_PUFFS
-		var off := Vector3(cos(ang), sin(ang) * 0.5, sin(ang)) * 0.8
-		fx.puff(at + off, LDFx.M_ORB, Color("3a2a2a"), Color("ff7a2a"), 0.9, 0.5)
+		var spread := float(i) / (POOF_PUFFS - 1) - 0.5
+		var at := h.pos + Vector3(0, 0.9 + 0.25 * absf(spread), 0) + back * (0.5 + 0.25 * i) + side * spread * 0.7
+		fx.puff(at, LDFx.M_ORB, Color("3a2a2a"), Color("ff7a2a"), 0.6 + 0.08 * i, 0.45)
 	# held a step past the burst, so the kept speed lands after the class's own small carry
 	bash = {"t": air_t + 0.04, "dir": dir, "hit": true, "hop": true, "speed": h.roll_speed}
 
@@ -530,6 +531,9 @@ func _ram_looks(dir: Vector2, dt: float) -> void:
 		fx.puff(h.pos + Vector3(0, 0.9, 0) - f3 * 0.3, LDFx.M_FLAME, SKULL_COL, SKULL_COL, 0.75, 0.35)
 
 func own_dash_trail() -> bool: return true
+
+## His ram and poof moves are the whole dash pose (as_leap, lw_hop): no shared heavy charge under them.
+func dodge_anim() -> String: return "kit"
 
 func _bash_impact(f: Ent) -> void:
 	var dd := dash_def()
