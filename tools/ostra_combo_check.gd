@@ -264,6 +264,7 @@ func _ostra() -> void:
 	)
 	# owner: while the lantern flies she hovers where she cast it, even over the abyss, and keeps that height
 	await _hover(m, P, home, K)
+	_far_cast(m, P, home, K)
 	reset.call()
 	K.swollen_t = 5.0
 	ok("combo: Swollen Trade is quicker", absf(K.swap_time() - 1.25) < 0.01, "%.2f" % K.swap_time())
@@ -596,3 +597,48 @@ func _multi(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	for x in [A, R]:
 		x.queue_free()
 		m.hunters.erase(x)
+
+## Item 42: the Trade is castable anywhere in reach, over the abyss too; past the reach it goes to full reach.
+func _far_cast(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
+	var W = m.world
+	var reach := float(K.dash_def()["reach"])
+	var cells: Array = []
+	for dx in range(-2, 3):
+		for dz in range(-2, 3):
+			cells.append(W.idx(int(floor(home.x + reach * 0.5)) + dx, int(floor(home.z)) + dz))
+	for c in cells:
+		W.kind[c] = World.T_VOID
+	K._drop_holds()
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.grounded = true
+	P.dashes = P.max_dashes()
+	aim_at(P, home + Vector3(reach * 0.5, 0, 0))
+	var near := K.swap_spot()
+	ok(
+		"far cast: a cursor at 0.5x reach over the abyss is the target",
+		absf(near.x - home.x - reach * 0.5) < 0.01 and absf(near.z - home.z) < 0.01
+	)
+	K.on_dash(false)
+	step(m, 0.3)
+	ok("far cast: an abyss target is accepted (the lantern flies)", not K.swap.is_empty() or K.swaps > 0)
+	K._drop_holds()
+	P.teleport(home)
+	P.grounded = true
+	aim_at(P, home + Vector3(2.0 * reach, 0, 0))
+	var far := K.swap_spot()
+	ok(
+		"far cast: a cursor at 2x reach goes to exactly full reach in that direction",
+		absf(Vector2(far.x - home.x, far.z - home.z).length() - reach) < 0.01 and absf(far.z - home.z) < 0.01
+	)
+	aim_at(P, home + Vector3(0, 0, -2.0 * reach))
+	var up := K.swap_spot()
+	ok(
+		"far cast: the same along another direction",
+		absf(Vector2(up.x - home.x, up.z - home.z).length() - reach) < 0.01 and absf(up.x - home.x) < 0.01
+	)
+	for c in cells:
+		W.kind[c] = World.T_GROUND
+	P.teleport(home)
+	P.dashes = P.max_dashes()
+	step(m, 0.5)

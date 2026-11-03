@@ -39,7 +39,7 @@ What the in-game kit card (K) says.
 
 **Swell (passive).** Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 9s, wrapped in a pink sphere: your seed grows larger and faster, Trade lands sooner, your Snap hits 44% harder. You float: lava, spore pods and other ground hazards pass you by.
 
-**Lantern Trade (dash, Shift, 9.5s cooldown).** Hold Shift to see both ends, let go (or tap) to lob a lantern up to 12m to the cursor. You hover where you stand until it lands, even over the abyss, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you were, each keeping its place in the circle (foes slowed 40% for 3s). Over the abyss the lantern lands on the last solid ground. Swollen: 1.25s.
+**Lantern Trade (dash, Shift, 9.5s cooldown).** Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover where you stand until it lands, even over the abyss, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you were, each keeping its place in the circle (foes slowed 40% for 3s). Swollen: 1.25s.
 
 **Shard Snap (RMB, 10s cooldown).**
 

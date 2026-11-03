@@ -211,7 +211,7 @@ func _tick_swap_aim(dt: float) -> void:
 	var dd := dash_def()
 	if (held("dash") and swap_aim < float(dd["aim_max"])) and not h.downed and h.stun_t <= 0.0:
 		var spot := swap_spot()
-		AimKit.swap(h, "swap", {"b": spot if spot != Vector3.INF else h.pos, "r": float(dd["radius"]), "col": TEAL})
+		AimKit.swap(h, "swap", {"b": spot, "r": float(dd["radius"]), "col": TEAL})
 		return
 	swap_aim = -1.0
 	if h.downed or h.stun_t > 0.0:
@@ -221,9 +221,6 @@ func _tick_swap_aim(dt: float) -> void:
 func _swap_cast() -> void:
 	var dd := dash_def()
 	var land := swap_spot()
-	if land == Vector3.INF:
-		h._ab_feedback("dash", "deny")
-		return
 	if not spend_dash(false):
 		return
 	swap = {"t": swap_time(), "T": swap_time(), "land": land, "from": h.pos, "over_void": h.over_void()}
@@ -235,25 +232,19 @@ func _swap_cast() -> void:
 	net_bolt(h.pos + Vector3(0, 1.2, 0), land + Vector3(0, 0.6, 0), Color("b8f5ea"))
 	CombatBus.ability_used.emit(h, String(dd.get("id", "swap")), "dodge")
 
-## Where the lantern lands: walked out from her toward the cursor (short of walls and the abyss edge). Cast
-## while hovering over the abyss, the walk can't start, so it lands on the first solid ground back from
-## the cursor. Vector3.INF: nowhere.
+## Where the lantern lands: the cursor if it is within reach, else the point at full reach along the cursor
+## direction. No ground, wall or abyss check limits it; over the abyss it keeps her current height.
 func swap_spot() -> Vector3:
 	var reach := float(dash_def()["reach"])
-	var pw := HeroZones.walk(m, h.pos, aim(), reach)
-	if pw["ok"]:
-		return pw["pos"]
-	if not h.over_void():
-		return Vector3.INF
-	var dir: Vector2 = pw["dir"]
-	var want := minf(Vector2(aim().x - h.pos.x, aim().z - h.pos.z).length(), reach)
-	while want > 0.5:
-		var p := h.pos + Vector3(dir.x, 0, dir.y) * want
-		p.y = m.world.ground_at(p.x, p.z)
-		if p.y > World.VOID + 1.0 and HeroZones.fits(m, p, p.y, false):
-			return p
-		want -= HeroZones.STEP
-	return Vector3.INF
+	var a := aim()
+	var dv := Vector2(a.x - h.pos.x, a.z - h.pos.z)
+	if dv.length() > reach:
+		dv = dv.normalized() * reach
+	var p := Vector3(h.pos.x + dv.x, h.pos.y, h.pos.z + dv.y)
+	var g: float = m.world.ground_at(p.x, p.z)
+	if g > World.VOID + 1.0:
+		p.y = g
+	return p
 
 func _tick_swap(dt: float) -> void:
 	var dd := dash_def()
@@ -366,12 +357,12 @@ func trade_bodies(land: Vector3, r: float) -> Array:
 	return out
 
 ## She appears at the landing spot: at her height over the ground (over the abyss: the height she hovered
-## at, if that is higher), with an implosion and her appear pose.
+## at, if that is higher; landing over the abyss also keeps it), with an implosion and her appear pose.
 func _arrive(land: Vector3, from: Vector3, from_void: bool) -> void:
 	var dd := dash_def()
 	var gy: float = m.world.ground_at(land.x, land.z)
 	var dy := clampf(from.y - h.ground(), 0.0, float(dd["keep_h"])) if not from_void else 0.0
-	var arrive_y := maxf(gy + dy, from.y) if from_void else gy + dy
+	var arrive_y := maxf(gy + dy, from.y) if from_void or gy <= World.VOID + 1.0 else gy + dy
 	h.teleport(Vector3(land.x, arrive_y, land.z))
 	h.vel.y = 0.0
 	if arrive_y - gy > 0.05: h.grounded = false
