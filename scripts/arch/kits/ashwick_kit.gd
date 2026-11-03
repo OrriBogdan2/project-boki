@@ -9,7 +9,7 @@ extends ArchKit
 ##   A burning foe takes more from the stream and the cinder (ignite_bonus), and the stream chips its health.
 ## - LMB, Torch Lance: hold for a hose of fire (a cyan pilot flame first); the stream keeps its own
 ##   velocity so a sweep bends it, narrow at the nozzle and billowing at the end.
-## - RMB, Cinder Shot: hold to aim down a lane, release: a cinder that lands at the cursor (max 14m);
+## - RMB, Cinder Shot: hold to aim down a lane, release: a cinder that always flies its full 14m;
 ##   it slows the foe and sets it Ablaze; on a burning foe it upgrades and spreads. Rank 3: a second charge.
 ## - Shift, Soot Ram: two charges of a short head-first dash toward the cursor that STOPS on the
 ##   first foe with a fiery impact and shoves it; rank 3: more damage, a speed boost and a shield on a hit.
@@ -365,7 +365,8 @@ func _flame_tick(tick: float) -> void:
 			)
 
 # ------------------------------------------------------------------ RMB: Cinder Shot
-## Held: a thin white lane to the cursor (clamped to 14m) with a small end ring, the gun hand cocked.
+## Held: a thin white lane of the shot's full, fixed length (the cursor distance doesn't matter), the gun hand
+## cocked.
 func rmb_hold_tick(_t: float) -> void:
 	if KinMerge.active(h) or not rmb_ready() or jet.running():
 		return
@@ -373,11 +374,10 @@ func rmb_hold_tick(_t: float) -> void:
 		aiming = true
 		play("as_aim")
 	var rdf := rmb_def()
-	var ln := AimMode.dist(h, float(rdf["range"]))
+	var ln := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)
 	AimKit.lane(
 		h, "rmb", {"len": ln, "width": 0.42, "col": Color("fff4e6"), "col2": BOLT_COL, "alpha": 0.9, "tip": true}
 	)
-	AimKit.circle(h, "rmb_end", {"at": h.pos + _fwd() * ln, "r": 0.55, "col": Color("bfe0ff")})
 
 func fire_rmb(c: Dictionary) -> void:
 	c["variant"] = "tap"
@@ -385,7 +385,6 @@ func fire_rmb(c: Dictionary) -> void:
 	var was_aiming := aiming
 	aiming = false
 	AimKit.hide(h, "rmb")
-	AimKit.hide(h, "rmb_end")
 	if jet.running():
 		h._ab_feedback("sec", "deny")          # both hands on the jet while flying
 		return
@@ -395,7 +394,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var rdf := rmb_def()
 	play("as_shot")
 	var amt := float(rdf["dmg"])
-	var rng := AimMode.dist(h, float(rdf["range"]))      # lands at the cursor, 14m at most (sheet 0133)
+	var rng := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)      # always its full length in the aim direction
 	var shot := {"type": "projectile", "speed": float(rdf["speed"]), "range": rng, "size": float(rdf["size"])}
 	var stg := stage("rmb", {"delivery": shot,
 		"effects": [
@@ -412,7 +411,7 @@ func fire_rmb(c: Dictionary) -> void:
 	m.sfx("lw_bolt", h.pos, -2.0, 1.0)
 	if h.is_local(): Oomph.punch_dir(m, -h.aim_dir(), 0.12)
 
-## A cinder that ran out at the cursor fizzles there in a small blue-white ring (sheet 0133).
+## A cinder that ran its full length without a hit fizzles there in a small blue-white ring (sheet 0133).
 func _bolt_end(at: Vector3, expired: bool) -> void:
 	bolt_ends.append([at, expired])
 	if bolt_ends.size() > 8: bolt_ends.pop_front()

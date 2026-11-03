@@ -3,7 +3,7 @@ extends RefCounted
 ## flat strip (docs/heroes/ashwick.md, combinations and small-mechanics tables): the Torch Lance hose (pilot,
 ## full reach past the cursor, lag on a sweep, narrow then billowing, the burning-foe bonus and health chip,
 ## stops at once,
-## the 0.35s relight gap), the burn stages and their pips, the Cinder Shot lane and cursor landing, the
+## the 0.35s relight gap), the burn stages and their pips, the Cinder Shot lane and its fixed full range, the
 ## Soot Ram stopping on the first foe, two quick charges and a knock's single charge back, the rank-3 speed and shield,
 ## the Furnace Cloak's 0.2s ring before the blast and its swirling shield, walls, Char rules, the merge drops,
 ## and the X ult, Flue Flight (tools/ashwick_ult_check.gd).
@@ -265,40 +265,40 @@ func _all() -> void:
 	)
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 2, hz + dz)] = lv
-	# --- Cinder Shot: hold shows the lane to the cursor, release fires; it lands at the cursor
+	# --- Cinder Shot: hold shows the full fixed lane, release fires; it always flies its max range
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	T2.teleport(home + Vector3(0, 0, -9.0))
-	ak.aim_at(P, home + Vector3(8.0, 0, 0))
+	var max_r := float(K.rmb_def()["range"])
+	ak.aim_at(P, home + Vector3(2.0, 0, 0))
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
-	ak.step(m, 0.3, func(): P.inp["sec_hold"] = true; ak.aim_at(P, home + Vector3(8.0, 0, 0)))
+	ak.step(m, 0.3, func(): P.inp["sec_hold"] = true; ak.aim_at(P, home + Vector3(2.0, 0, 0)))
 	var lane: Dictionary = AimKit.entry(P, "rmb")
 	ok(
-		"cinder: holding shows the aim lane out to the cursor",
-		not lane.is_empty() and absf(float(lane.get("len", 0.0)) - 8.0) < 0.6 and K.aiming and K.anim_id == "as_aim",
+		"cinder: holding shows the aim lane at its full fixed length (cursor at 2 m)",
+		not lane.is_empty() and absf(float(lane.get("len", 0.0)) - max_r) < 0.01 and K.aiming and K.anim_id == "as_aim",
 		"lane %s len %.1f" % [not lane.is_empty(), float(lane.get("len", 0.0))]
 	)
 	P.inp["sec_hold"] = false
-	ak.step(m, 0.7)
+	ak.step(m, 1.0)
 	var e1: Array = K.bolt_ends[-1] if not K.bolt_ends.is_empty() else [Vector3.ZERO, false]
+	var near_d := Vector2((e1[0] as Vector3).x - home.x, (e1[0] as Vector3).z - home.z).length()
 	ok(
-		"cinder: a miss lands at the cursor and fizzles there",
-		bool(e1[1]) and absf((e1[0] as Vector3).x - home.x - 8.0) < 0.9 and K.fizzles >= 1 and not AimKit.shown(
-			P, "rmb"
-		),
-		"end x %.1f expired %s" % [(e1[0] as Vector3).x - home.x, e1[1]]
+		"cinder: a miss flies its full length and fizzles at its end",
+		bool(e1[1]) and K.fizzles >= 1 and not AimKit.shown(P, "rmb"), "expired %s" % e1[1]
 	)
 	K.cd["rmb"] = 0.0
 	K.ch_rmb = 1.0
-	ak.aim_at(P, home + Vector3(25.0, 0, 0))
+	ak.aim_at(P, home + Vector3(20.0, 0, 0))
 	ak.tap(m, P)
-	ak.step(m, 0.25, func(): ak.aim_at(P, home + Vector3(25.0, 0, 0)))
+	ak.step(m, 0.25, func(): ak.aim_at(P, home + Vector3(20.0, 0, 0)))
 	ak.step(m, 0.8)
 	var e2: Array = K.bolt_ends[-1] if not K.bolt_ends.is_empty() else [Vector3.ZERO, false]
+	var far_d := Vector2((e2[0] as Vector3).x - home.x, (e2[0] as Vector3).z - home.z).length()
 	ok(
-		"cinder: a far cursor caps it at 14m", absf((e2[0] as Vector3).x - home.x - 14.0) < 1.2,
-		"end x %.1f" % ((e2[0] as Vector3).x - home.x)
+		"cinder: cursor at 2 m and at 20 m travel the same distance, the max",
+		absf(near_d - far_d) < 0.3 and absf(far_d - max_r) < 1.2, "2 m: %.1f, 20 m: %.1f" % [near_d, far_d]
 	)
 	reset.call()
 	ak.tap(m, P)

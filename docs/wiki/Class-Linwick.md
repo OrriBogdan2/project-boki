@@ -50,8 +50,8 @@ What the in-game kit card (K) says.
 | Loop | Close-range burner: soak foes in fire until they blaze, then finish them in the flames. |
 | Passive: Flashover | Flashover: your fire sets foes Ablaze, then Flashes them over. A knock heals you and readies the cloak. |
 | Dash: Soot Ram | Ram head first toward the cursor; you stop on the first foe with a fiery hit. 2 charges. |
-| RMB: Cinder Shot | Hold to aim, release: a cinder that lands at your cursor, slows the foe and spreads the burn. |
-| E: Furnace Cloak | A ring flashes, then a blast of heat drags nearby foes in and wraps you in a fire shield. |
+| RMB: Cinder Shot | Hold to aim, release: a cinder that flies its full 14m, slows the foe and spreads the burn. |
+| E: Furnace Cloak | On the press, a blast of heat round you drags nearby foes in and wraps you in a fire shield. |
 | Hunter ultimate: Flue Flight | Flue Flight (level 6): fly toward the cursor and steer, laying a lava carpet that slows and burns; press it again to land. |
 | Weapon: Torch Lance | Hold to hose fire 7m ahead; the stream trails behind a sweep and hits harder on a burning foe and chips its health. |
 
@@ -63,7 +63,7 @@ What the in-game kit card (K) says.
 
 **Cinder Shot (RMB, 7s cooldown).**
 
-- *Tap:* Hold to aim down a lane, release: a cinder that lands at your cursor (14m at most): 14 damage, a 30% slow for 1.5s, and it sets the foe Ablaze. On a foe that is already burning it hits 25% harder (40% on a Flashed-over one), upgrades the burn and spreads the burn to foes within 4m. A miss fizzles at the cursor.
+- *Tap:* Hold to aim down a lane, release: a cinder that always flies its full 14m: 14 damage, a 30% slow for 1.5s, and it sets the foe Ablaze. On a foe that is already burning it hits 25% harder (40% on a Flashed-over one), upgrades the burn and spreads the burn to foes within 4m. A miss fizzles at the end of its flight.
 
 **Furnace Cloak (E, 10.5s cooldown).** A thin ring flashes at 4.5m for 0.2s, then a blast of heat: 7 damage, 16 Char and Anti-Heal for 3s, and foes in sight are dragged toward you (walls stop them). Hit anyone and you wear a swirling 3s shield of 6.4% health plus 5.1% per foe. A knock resets it.
 
