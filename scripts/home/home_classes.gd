@@ -24,8 +24,9 @@ static func open(home: Node, sel := "") -> void:
 	home.set_meta("hunters_sel", sel)
 	home.set_meta("hero_hover", sel)          # (K opens its kit card)
 	var v: VBoxContainer = home._new_panel(TITLE, 1210, true)
-	UI.subtitle(v, "Who you play. Each Hunter opens with its own challenge; when one is done, hold to unlock it. "
-			+ "K: the full kit card.")
+	var first_name := Arch.name_of(ClassUnlock.first_hunter())
+	UI.subtitle(v, "Who you play. %s and your starter pick are yours from the start; " % first_name
+			+ "every other Hunter opens with its own challenge, then hold to unlock it. K: the full kit card.")
 	var cols := UI.hbox(16)
 	v.add_child(cols)
 	var left := UI.vbox(10)

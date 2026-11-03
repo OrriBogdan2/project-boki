@@ -1,8 +1,9 @@
 class_name ClassUnlock
 extends RefCounted
 ## Hunter unlocks and mastery (docs/decisions/0005; player-facing these are "Hunters", internally
-## archetypes and the save key "classes"). A new save picks 2 of the 4 starters at character creation.
-## Every other Hunter opens through its own challenge (content/rules/class_unlock.json "unlock"), counted
+## archetypes and the save key "classes"). A new save owns the first Hunter (Venator, also the tutorial
+## Hunter) and picks 1 of 3 starters in the new-game flow. The 2 starters it did not pick are easy
+## challenges. Every other Hunter opens through its own challenge (content/rules/class_unlock.json "unlock"), counted
 ## across every expedition whoever you play. A done challenge never opens a Hunter by itself: it is
 ## unlocked by holding the button on the Hunters screen (HoldUnlock calls unlock()). Each Hunter also has
 ## mastery goals, counted only while you play it; each one done is a mastery level and a cosmetic reward.
@@ -22,10 +23,14 @@ static func rules() -> Dictionary:
 		_rules = parsed if typeof(parsed) == TYPE_DICTIONARY else {}
 	return _rules
 
-## A new save: nothing picked yet. The default Hunter is open so nothing is ever empty-handed.
+## A new save: the first Hunter is yours, the starter pick is still to make.
 static func fresh() -> Dictionary:
-	return {"all": false, "picks": [], "open": [Arch.default_for("medium")], "told": 0, "reveal": [], "seen": [],
+	return {"all": false, "picks": [], "open": [first_hunter()], "told": 0, "reveal": [], "seen": [],
 			"stats": {}, "hunters": {}}
+
+## The Hunter every save owns, and the tutorial Hunter.
+static func first_hunter() -> String:
+	return String(rules().get("first", "gunslinger"))
 
 ## A save from before Hunter unlocks had every Hunter, so it keeps them all.
 static func legacy() -> Dictionary:
@@ -71,17 +76,17 @@ static func all_open() -> bool:
 	return c.is_empty() or bool(c.get("all", false)) or Game.modding()
 
 static func is_open(id: String) -> bool:
-	return all_open() or (state().get("open", []) as Array).has(id)
+	return id == first_hunter() or all_open() or (state().get("open", []) as Array).has(id)
 
 static func open_ids() -> Array:
 	return Arch.ids().filter(func(a): return is_open(a))
 
-# ---- the creation pick: 2 of the 4 starters
+# ---- the starter pick: 1 of 3 (the first Hunter is already yours)
 static func starters() -> Array:
 	return (rules().get("starters", []) as Array).filter(func(a): return Arch.exists(String(a)))
 
 static func picks_needed() -> int:
-	return int(rules().get("starter_picks", 2))
+	return int(rules().get("starter_picks", 1))
 
 ## A new save still has to make its creation pick.
 static func needs_starters() -> bool:
@@ -90,7 +95,8 @@ static func needs_starters() -> bool:
 static func picks() -> Array:
 	return (state().get("picks", []) as Array).duplicate()
 
-## Makes the creation pick (once): exactly picks_needed() different starters. Anything else is refused.
+## Makes the starter pick (once): exactly picks_needed() different starters. Anything else is refused.
+## The first Hunter stays open beside it.
 static func choose_starters(ids: Array) -> bool:
 	if not needs_starters() or ids.size() != picks_needed():
 		return false
@@ -102,8 +108,8 @@ static func choose_starters(ids: Array) -> bool:
 		return false
 	var c := state()
 	c["picks"] = unique.duplicate()
-	c["open"] = unique.duplicate()
-	c["seen"] = unique.duplicate()
+	c["open"] = [first_hunter()] + unique
+	c["seen"] = c["open"].duplicate()
 	c["reveal"] = []
 	return true
 

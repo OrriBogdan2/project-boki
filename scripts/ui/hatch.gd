@@ -1,6 +1,7 @@
 extends Node3D
-## The first thing a new player sees: a short story, then three eggs on a little island. Pick one,
-## keep it warm until it hatches, name what comes out, then head into the tutorial match together.
+## The first thing a new player sees after the prologue: one short card, then three eggs on a little
+## island. Pick one, pick your second Hunter (Venator is already yours), knock on the shell until it
+## hatches, name what comes out and yourself, then head into the tutorial match together.
 
 ## The three starter eggs plus a mystery one. Names, tempers and blurbs come from each species'
 ## "egg" block in content/kin/<id>.json, so every egg is named for its element (Venom Egg, ...).
@@ -19,20 +20,15 @@ static func starter_eggs() -> Array:
 	out.append(MYSTERY.duplicate())
 	return out
 
-const STORY := [
-	"The night after the storm, the old shrine on your island\nstarted to glow.",
-	"When you went to look, there were eggs waiting in the light.\nThree of them, still warm.",
-	"Boki choose their hunters.\nToday, one of them is going to choose you.",
-]
+const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
+const CARD_BUTTON := "Choose your Boki"
 
 var cam: Camera3D
 var fx: Fx
 var eggs: Array = []          # {node, base, data}
 var chosen := -1
-var stage := "intro"          # intro | class (pick 2 Hunters) | create | pick | warm | hatching | name
-var story_i := 0
-var story_lbl: Label
-var story_box: Control
+var stage := "intro"          # intro (the card) | pick (eggs) | class (your second Hunter) | warm | hatching | name
+var card_box: Control
 var warmth := 0.0
 var warm_bar: Control
 var hover := -1
@@ -108,7 +104,7 @@ func _ready() -> void:
 	elif "--skip-intro" in OS.get_cmdline_user_args() or Save.d["tutorial"].get("intro", false):
 		_end_intro()
 	else:
-		_show_story()
+		_show_card()
 	if "--hatch-pick" in OS.get_cmdline_user_args():
 		# test: straight to choosing an egg
 		if not Save.d.has("look"): Save.d["look"] = Models.default_look()
@@ -119,6 +115,9 @@ func _ready() -> void:
 			if not Save.d.has("look"): Save.d["look"] = Models.default_look()
 			_end_intro()
 			_pick(i); _pick(i)
+			if stage == "class":
+				starter_picks = [ClassUnlock.starters()[0]]
+				_confirm_starters()
 			auto_warm = true
 
 ## The set for a new game: a carved stone dais floating at dusk, a rune circle glowing under your
@@ -300,8 +299,8 @@ func _build_ui() -> void:
 	holder.add_child(bottom)
 	_show_pick()
 
-# ---- the story
-func _show_story() -> void:
+# ---- the card
+func _show_card() -> void:
 	stage = "intro"
 	_clear_bottom()
 	title.get_parent().visible = false
@@ -309,65 +308,43 @@ func _show_story() -> void:
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	shade.name = "Shade"
 	root_ui.add_child(shade)
-	story_box = UI.vbox(18)
-	story_box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	story_box.alignment = BoxContainer.ALIGNMENT_CENTER
-	story_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	story_lbl = UI.title("", 30, UI.INK)
-	story_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	story_lbl.add_theme_constant_override("outline_size", 10)
-	story_lbl.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.07))
-	story_box.add_child(story_lbl)
-	var hint := UI.key_hints([["Space", "continue"]], 12, Color(1, 1, 1, 0.55))
-	hint.alignment = BoxContainer.ALIGNMENT_CENTER
-	story_box.add_child(hint)
-	root_ui.add_child(story_box)
-	var skip := HoldSkip.new()
-	skip.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	skip.offset_left = -196; skip.offset_right = -24; skip.offset_top = 18; skip.offset_bottom = 62
-	skip.skipped.connect(_end_intro)
-	skip.name = "SkipIntro"
-	root_ui.add_child(skip)
-	_story_line()
-
-func _story_line() -> void:
-	story_lbl.text = STORY[story_i]
-	story_lbl.modulate.a = 0.0
-	var tw := create_tween()
-	tw.tween_property(story_lbl, "modulate:a", 1.0, 0.8)
+	card_box = UI.vbox(22)
+	card_box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	card_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	card_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var line := UI.title(CARD_TEXT, 30, UI.INK)
+	line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	line.custom_minimum_size.x = 640
+	line.add_theme_constant_override("outline_size", 10)
+	line.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.07))
+	card_box.add_child(line)
+	var go := UI.primary(CARD_BUTTON, _end_intro, 260)
+	go.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	card_box.add_child(go)
+	root_ui.add_child(card_box)
 	Sfx.play("whoosh", null, -16.0)
-	# the camera drifts closer with each line
-	var k := float(story_i + 1) / STORY.size()
-	cam_to = Vector3(-9, 7.5, 16).lerp(Vector3(0, 3.6, 6.4), k * 0.85)
-
-func _next_story() -> void:
-	story_i += 1
-	if story_i >= STORY.size():
-		_end_intro()
-	else:
-		_story_line()
 
 func _end_intro() -> void:
 	if stage != "intro":
 		return
 	stage = "pick"
 	Save.d["tutorial"]["intro"] = true
-	for n in ["Shade", "SkipIntro"]:
-		var c := root_ui.get_node_or_null(n)
-		if c: c.queue_free()
-	if story_box: story_box.queue_free()
+	var shade := root_ui.get_node_or_null("Shade")
+	if shade: shade.queue_free()
+	if card_box: card_box.queue_free()
 	title.get_parent().visible = true
-	if ClassUnlock.needs_starters() and not edit_only:
-		_show_class_pick()
-	elif not Save.d.has("look") or edit_only or "--create" in OS.get_cmdline_user_args():
+	if edit_only or "--create" in OS.get_cmdline_user_args():
 		_show_create()
 	else:
+		if not Save.d.has("look"):
+			Save.d["look"] = Models.default_look()      # (change it later: Settings, Change your look)
 		cam_to = Vector3(0, 3.6, 6.4)
 		_show_pick()
 
 var turning := false
 func _unhandled_input(event: InputEvent) -> void:
-	if (stage == "create" or stage == "class") and preview:
+	if stage == "create" and preview:
 		# drag with the mouse (or hold A / D) to turn your hunter round
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 			turning = event.pressed
@@ -378,8 +355,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_tap_egg()
 		return
 	if stage == "intro":
-		if (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or event.is_action_pressed("jump") or event.is_action_pressed("ui_accept"):
-			_next_story()
+		if event.is_action_pressed("jump") or event.is_action_pressed("ui_accept"):
+			_end_intro()
 		return
 	if stage == "pick" and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and hover >= 0:
 		_pick(hover)
@@ -399,22 +376,15 @@ func _clear_bottom() -> void:
 	for ch in bottom.get_children():
 		ch.queue_free()
 
-# ---- your Hunters (a new save picks 2 of the 4 starters in the Hunter viewer; ClassUnlock, ClassPick)
+# ---- your second Hunter (the first is yours already; ClassUnlock, ClassPick)
 var starter_picks: Array = []
 
 func _show_class_pick(on := "") -> void:
 	stage = "class"
 	if on == "" or not ClassUnlock.starters().has(on):
 		on = String(ClassUnlock.starters()[0])
-	Save.d["arch"] = on
-	Save.d["cls"] = Arch.weight(on)
-	Save.d["weapon"] = Arch.signature(on)
-	title.text = "Choose your Hunters"
 	top_box.visible = false      # (the pick panel carries its own heading: the viewer needs the height)
-	if sub_lbl: sub_lbl.text = "Who you play in a match. Your Boki comes next."
-	_top_over(0.5)
 	_clear_bottom()
-	look_at_t = Vector3(0, 0.25, 0.5)
 	cam_to = Vector3(-3.5, 4.2, 9.0)
 	bottom.add_child(ClassPick.row(on, starter_picks, _chip_clicked))
 	var go := UI.primary(_start_text(), _confirm_starters, 300)
@@ -423,36 +393,26 @@ func _show_class_pick(on := "") -> void:
 
 func _start_text() -> String:
 	if starter_picks.size() != ClassUnlock.picks_needed():
-		return "Pick %d Hunters" % ClassUnlock.picks_needed()
-	return "Start with %s" % " and ".join(starter_picks.map(func(a): return Arch.name_of(String(a))))
+		return "Pick one of the three"
+	return "Take %s" % Arch.name_of(String(starter_picks[0]))
 
+## Venator is the Hunter of the tutorial; the pick opens on the farm.
 func _confirm_starters() -> void:
 	if not ClassUnlock.choose_starters(starter_picks):
 		return
-	var first := String(starter_picks[0])
+	var first := ClassUnlock.first_hunter()
 	Save.d["arch"] = first
 	Save.d["cls"] = Arch.weight(first)
 	Save.d["weapon"] = Arch.signature(first)
 	Save.save_game()
 	Sfx.play("click")
-	if sub_lbl: sub_lbl.text = "Every Boki is different. It will remember how you treat it."
-	_end_class_pick()
+	top_box.visible = true
+	_start_hatch()
 
 func _chip_clicked(id: String) -> void:
 	Sfx.play("hover", null, -6.0)
 	starter_picks = ClassPick.toggle(starter_picks, id)
 	_show_class_pick(id)
-
-## After the Hunter: make your look if you have not, else straight to the eggs.
-func _end_class_pick() -> void:
-	top_box.visible = true
-	if not Save.d.has("look") or "--create" in OS.get_cmdline_user_args():
-		_show_create()
-	else:
-		stage = "pick"
-		title.text = "Choose your first Boki"
-		cam_to = Vector3(0, 3.6, 6.4)
-		_show_pick()
 
 # ---- your hunter
 const LOOK_ROWS := [["race", "Race", Models.LOOK_RACES], ["gender", "Gender", Models.LOOK_GENDERS], ["body", "Body", Models.LOOK_BODIES], ["face", "Face", Models.LOOK_FACES],
@@ -669,7 +629,10 @@ func _pick(i: int) -> void:
 	if stage != "pick":
 		return
 	if chosen == i:
-		_start_hatch()
+		if ClassUnlock.needs_starters():
+			_show_class_pick()
+		else:
+			_start_hatch()
 		return
 	chosen = i
 	Sfx.play("click")
@@ -752,7 +715,7 @@ func _process(delta: float) -> void:
 	if ship:
 		ship.position.x += delta * 1.6
 		if ship.position.x > 60.0: ship.position.x = -60.0
-	if stage == "create" or stage == "class":
+	if stage == "create":
 		cam.look_at(look_at_t)
 		if preview and not (get_viewport().gui_get_focus_owner() is LineEdit):
 			preview.rotation.y += (Input.get_axis("left", "right")) * delta * 2.5
@@ -854,8 +817,6 @@ func _show_name() -> void:
 	var ye := LineEdit.new(); ye.text = Save.d.get("name", "Hunter"); ye.max_length = 16; ye.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	you_row.add_child(ye)
 	v.add_child(you_row)
-	# you already told us your name in the hunter creator; don't ask twice
-	you_row.visible = not Save.d.has("look")
 	var btns := UI.hbox(10)
 	btns.add_child(UI.primary("Head out together", func(): _finish(sp_id, ne.text, ye.text, true), 240))
 	var skip := UI.button("Skip the tutorial", func(): _finish(sp_id, ne.text, ye.text, false), 180)

@@ -1,7 +1,8 @@
 {
-	"desc": "Hunter unlocks and mastery (docs/decisions/0005). A new save picks `starter_picks` Hunters from `starters` at character creation. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.",
-	"starters": ["juggernaut", "gunslinger", "archer", "ashwick"],
-	"starter_picks": 2,
+	"desc": "Hunter unlocks and mastery (docs/decisions/0005). A new save starts owning `first` and picks `starter_picks` Hunter from `starters` in the new-game flow. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.",
+	"first": "gunslinger",
+	"starters": ["juggernaut", "archer", "ashwick"],
+	"starter_picks": 1,
 	"hold_s": 1.6,
 	"tiers": {
 		"easy": "about 1-2 expeditions",
@@ -42,7 +43,6 @@
 	},
 	"unlock": {
 		"juggernaut": {"tier": "easy", "stat": "slams", "target": 3, "text": "Knock 3 enemies into walls"},
-		"gunslinger": {"tier": "easy", "stat": "far_hits", "target": 8, "text": "Land 8 hits from 12 m or more"},
 		"archer": {"tier": "easy", "stat": "stuns", "target": 4, "text": "Stun 4 enemies"},
 		"ashwick": {"tier": "easy", "stat": "multi3", "target": 1, "text": "Hit 3 enemies at once with one ability"},
 		"thief": {"tier": "medium", "stat": "air_hits", "target": 12, "text": "Land 12 hits while in the air"},

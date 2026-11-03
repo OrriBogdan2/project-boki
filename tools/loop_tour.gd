@@ -174,28 +174,21 @@ func _front() -> void:
 	var pr2 := cur()
 	if pr2 and pr2.has_method("_finish"): pr2._finish()
 	await wait(3.5)
-	await shot("story")
+	await shot("card")
 	var hx := cur()
-	if hx == null or not hx.has_method("_next_story"):
+	if hx == null or not hx.has_method("_end_intro"):
 		note_bad("not on the hatch screen after the prologue"); return
-	for i in 3:
-		hx._next_story()
-		await wait(0.4)
-	await wait(1.5)
-	await shot("creator")
-	var guard := 0
-	while Arch.of_save() != arch and guard < 8:
-		hx._step_arch(1); guard += 1
-		await wait(0.3)
-	await wait(1.2)
-	await shot("creator_" + arch)
-	press("Looks good")
+	hx._end_intro()
 	await wait(2.0)
 	await shot("egg_pick")
 	hx._pick(0)
 	await wait(0.8)
 	await shot("egg_chosen")
 	press("Hatch it")
+	await wait(1.5)
+	await shot("hunter_pick")
+	hx.starter_picks = [ClassUnlock.starters()[0]]
+	hx._confirm_starters()
 	await wait(1.0)
 	for i in 7:
 		hx._tap_egg()
