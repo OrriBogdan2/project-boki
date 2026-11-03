@@ -548,6 +548,28 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	ok("pin dash > RMB and E: both start during the dash", rolling and rmb_ok and e_ok, "rmb %s e %s" % [rmb_ok, e_ok])
 	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.18, "pin_flick": 0.22})
 
+## into_dash.x for Bjorn: Shift while planted for Faultline isn't lost, it goes when the plant ends.
+func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:
+	step(m, 1.5)
+	P.lvl = 6
+	K.cd["x"] = 0.0
+	P.dashes = P.max_dashes()
+	K.st["last_dash"] = ""
+	press_x(m, P)
+	step(m, 0.1)
+	P.do_dash()
+	var held_back := K.ult.planted() and P.roll_t <= 0.0
+	var waited := 0.0
+	while K.ult.planted() and waited < 1.0:
+		m.step(DT)
+		waited += DT
+	step(m, 0.1)
+	ok("bjorn plant > Shift: the dash waits through the plant (row: %s) and goes when it ends" %
+			String(DashFlow.into_dash_of("bulwark", "x").get("mode")),
+		held_back and String(K.st.get("last_dash")) == "whirl" and P.dashes < P.max_dashes(),
+		"held %s last %s dashes %.2f" % [held_back, str(K.st.get("last_dash")), P.dashes])
+	step(m, 2.5)
+
 ## #32 / #35 for Bjorn.
 func _bjorn_dash(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -> void:
 	ok("bjorn dash table: LMB buffers, RMB / E fire, a held swing is cancelled by a dash",
@@ -600,5 +622,6 @@ func _bjorn_dash(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	step(m, 0.5)
 	ok("bjorn dash > RMB and E: both start during the dash", rolling and rmb_ok and e_ok, "rmb %s e %s" % [rmb_ok,
 		e_ok])
+	_bjorn_plant_dash(m, P, K)
 	_dash_moves(["bul_whirl", "bul_charge", "bul_lumber", "bul_short"],
 		{"bul_whirl": 0.2, "bul_charge": 0.27, "bul_lumber": 0.3, "bul_short": 0.15})

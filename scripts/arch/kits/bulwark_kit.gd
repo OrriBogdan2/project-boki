@@ -47,6 +47,7 @@ var hold_blocked := false      # the Crushing Blow was cut short: the button mus
 var shoved := {}               # foe id -> {foe, dir, left}: foes sliding back off the raised aegis
 var pushed_at := {}            # foe id -> when the aegis last pushed it (one push per "push_gap")
 var pushes := 0                # (checks) foes the raised aegis has pushed back
+var dash_after_plant := false  # Shift came in while planted for Faultline: the dash goes when the plant ends
 ## s after a slam or a spin hit before he can open the glider (wiki: wind-down frames keep the momentum)
 const WINDDOWN := 0.3
 
@@ -149,6 +150,9 @@ func _tick(dt: float) -> void:
 	_tick_shoved(dt)
 	_tick_mace(dt)
 	ult.tick(dt)
+	if dash_after_plant and not ult.planted():
+		dash_after_plant = false
+		h.dash_buf = Hunter.DASH_BUFFER
 	if not mend.is_empty():
 		_tick_mend(dt)
 	# Guard: three rune pips over the helm (33 / 66 / 100), a gold crest light when a Slam is armed
@@ -609,6 +613,7 @@ func _drop_holds() -> void:
 	if not wall.is_empty():
 		_lower()
 	rmb_down = false
+	dash_after_plant = false
 	if ult: ult.drop()
 	if anim_id in ["bul_smash_wind", "bul_guard", "bul_ult_wind"]:
 		anim_id = ""
@@ -654,12 +659,14 @@ func fire_ok_rmb() -> bool:
 # ------------------------------------------------------------------ dash: Whirl / Shield Charge
 func on_dash(use_ex: bool) -> bool:
 	if ult.planted():
-		return true          # planted for the slam: Shift waits
+		dash_after_plant = true          # planted for the slam: Shift goes when the plant ends (into_dash.x)
+		return true
 	var dd := dash_def()
 	var winding := lmb_t > float(lmb_def().get("tap", 0.2))
 	cancel_hold()
 	if winding and h.grounded and mace.is_empty():
-		# Shift while winding up the Crushing Blow: it ends, with a short plain dash (no spin) for half a charge
+		# Shift while winding up the Crushing Blow (into_dash.lmb): it ends, with a short plain dash (no spin) for
+		# half a charge
 		if not spend_dash(false): return true
 		h.dashes = minf(h.max_dashes(), h.dashes + 0.5)       # (half the charge comes back: the reduced cooldown)
 		var sd2 := float(dd.get("short", 2.6))
@@ -669,7 +676,7 @@ func on_dash(use_ex: bool) -> bool:
 		m.sfx("ab_whirr", h.pos, -6.0, 0.9)
 		return true
 	if not wall.is_empty() and h.grounded:
-		# Shield Charge: behind the raised shield, on its own cooldown (the RMB slot's), invulnerable for its
+		# Shield Charge (into_dash.rmb): behind the raised shield, on its own cooldown (the RMB slot's), invulnerable for its
 		# length, a heavier knock; with 50 Guard it ends in a Shield Slam
 		if not spend_rmb(): return true
 		var dist := float(dd["charge"]) + (1.0 if rank("dash") >= 3 else 0.0)
@@ -709,7 +716,7 @@ func on_dash(use_ex: bool) -> bool:
 	play("bul_whirl")
 	m.fx.burst(h.pos + Vector3(0, 0.2, 0), BjornFx.GOLD, 8, 3.0, 0.2, 2.0, 0.8)
 	m.later(t2, func():
-		if is_instance_valid(h) and not h.downed and not KinMerge.active(h): _spin_hit(wd))
+		if is_instance_valid(h) and not h.downed and not KinMerge.active(h) and not ult.planted(): _spin_hit(wd))
 	return true
 
 ## m/s he keeps sliding forward with through the 360 Smash's spin (about 1 m)

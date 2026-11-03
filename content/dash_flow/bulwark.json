@@ -2,21 +2,25 @@
 	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash().",
 	"dash": {
 		"ground": {
-			"lmb": {"mode": "buffer", "source": "the hammer is busy with the spin: the throw or the swing starts when the dash ends"},
-			"rmb": {"mode": "fire", "source": "Brightshield can be raised at once"},
-			"e": {"mode": "fire", "source": "Regen Field can be cast at once"},
-			"x": {"mode": "fire"},
-			"q": {"mode": "fire"}
+			"lmb": {"mode": "buffer", "source": "data: Spin Dash dashes forward and hits round him; footage 0371: one hammer spin on arrival. The hammer is busy in the spin, so a throw, recall or swing goes when the dash ends (no footage of the pair)"},
+			"rmb": {"mode": "fire", "source": "data: Brightshield is a 0.1 s hold, nothing locks it out in the Spin Dash: the aegis rises mid-dash (Shift with it already up is the Shield Bash, see RMB -> dash)"},
+			"e": {"mode": "fire", "source": "data: Regen Field drops round the hammer wherever it is and doesn't move him, so it goes mid-dash (no footage of the pair)"},
+			"x": {"mode": "cancel", "source": "data: Abyssalbreaker sends a fissure from where he stands; footage f25-f31: he is planted for the slam. It ends the dash where he is (no footage of the pair)"},
+			"q": {"mode": "fire", "source": "gloves are our own (no source)"}
 		},
 		"air": {
-			"lmb": {"mode": "buffer", "source": "as the ground dash: the throw or the swing starts when the shove ends"},
-			"rmb": {"mode": "fire"},
-			"e": {"mode": "fire"},
-			"x": {"mode": "fire"},
-			"q": {"mode": "fire"}
+			"lmb": {"mode": "buffer", "source": "footage section 5: no air dash shown; as the ground dash, the hammer goes when the shove ends"},
+			"rmb": {"mode": "fire", "source": "no air dash in the footage; as the ground dash"},
+			"e": {"mode": "fire", "source": "no air dash in the footage; as the ground dash"},
+			"x": {"mode": "cancel", "source": "no air dash in the footage; as the ground dash, the slam plants him where he is"},
+			"q": {"mode": "fire", "source": "gloves are our own (no source)"}
 		}
 	},
 	"into_dash": {
-		"lmb": {"mode": "cancel", "source": "the charged swing ends on a dash"}
+		"lmb": {"mode": "cancel", "variant": "short", "source": "wiki (Spin Dash): Shift while charging the Hammer Smash ends it in a short dash without the spin, on a reduced cooldown (ours: half a charge back)"},
+		"rmb": {"mode": "fire", "variant": "charge", "source": "data: Brightshield + Shift is the Shield Bash (6 s, its own cooldown), the shield briefly invulnerable; the aegis stays up through it"},
+		"e": {"mode": "fire", "source": "data: Regen Field stays round the hammer; the dash doesn't touch it"},
+		"x": {"mode": "buffer", "source": "footage f25-f31: planted through the wind-up and the slam; Shift there goes when the plant ends"},
+		"q": {"mode": "fire", "source": "gloves are our own (no source)"}
 	}
 }
