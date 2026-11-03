@@ -5,7 +5,7 @@ click), a right-click ability with several variants, a utility on E and an ultim
 twelve, four in each weight class:
 
 - **Light:** [Thief](Class-Thief.md) (stick to one target, flip and reset), [Archer](Class-Archer.md) (pin people, then the big shot), [Vireo](Class-Vireo.md) (load Sparks, then Wirerun through them) and [Tamsin](Class-Tamsin.md) (chill foes, shelter the squad behind ice).
-- **Medium:** [Marlowe](Class-Marlowe.md) (burr charges and one long needle), [Linnet](Class-Linnet.md) (heal, carry the downed), [Breah](Class-Breah.md) (raise rocks, climb them, punch them into the fight) and [Ostra](Class-Ostra.md) (swell, plant a seed, trade places).
+- **Medium:** [Marlowe](Class-Marlowe.md) (burr charges and one long needle), [Linnet](Class-Linnet.md) (heal, carry the downed), [Dolm](Class-Dolm.md) (raise rocks, punch them into the fight) and [Ostra](Class-Ostra.md) (swell, plant a seed, trade places).
 - **Heavy:** [Juggernaut](Class-Juggernaut.md) (rage, chain in, crush), [Bulwark](Class-Bulwark.md) (block, then smash them into walls), [Dredge](Class-Dredge.md) (haul a foe in, drop the anchor) and [Ashwick](Class-Ashwick.md) (build Char, flash foes over).
 
 The weight class sets health, speed, mass (how far hits push you) and how many dash charges you get.
@@ -70,9 +70,9 @@ The weight class sets health, speed, mass and dash charges; the class kit sits o
 
 | Weight | Health | Speed (m/s) | Dash charges | Mass | Glide cap | Classes | In short |
 |---|---|---|---|---|---|---|---|
-| Light | 124 | 5 | 1 | 0.85 | 1.2 | Thief, Archer, Vireo, Tamsin | Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest. |
-| Medium | 145 | 4.8 | 1 | 1 | 1 | Marlowe, Linnet, Breah, Ostra | The all-rounder: middle health, speed, dash and glide. |
-| Heavy | 193 | 4.55 | 2 | 1.35 | 0.85 | Juggernaut, Bulwark, Dredge, Ashwick | Slow and tough. Two short dashes, the most health, and very hard to push off a ledge. |
+| Light | 124 | 4.4 | 1 | 0.85 | 1.2 | Thief, Archer, Vireo, Tamsin | Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest. |
+| Medium | 145 | 4.4 | 1 | 1 | 1 | Marlowe, Linnet, Breah, Ostra | The all-rounder: middle health, speed, dash and glide. |
+| Heavy | 193 | 4.4 | 2 | 1.35 | 0.85 | Juggernaut, Bulwark, Dredge, Ashwick | Slow and tough. Two short dashes, the most health, and very hard to push off a ledge. |
 
 ### Run levels
 

@@ -182,7 +182,8 @@ func _ostra() -> void:
 		) < 0.01 and absf(float(K.e_def()["cooldown"]) - 10.0) < 0.01
 	)
 	ok(
-		"data: a Settled orb is 34% harder (353 vs 263)", absf(float(K.lmb_def()["prime_dmg"]) - (353.0 / 263.0 - 1.0)) < 0.01
+		"data: a Settled orb is 34% harder (353 vs 263)",
+		absf(float(K.lmb_def()["prime_dmg"]) - (353.0 / 263.0 - 1.0)) < 0.01
 	)
 	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
 	# ---- Shift: hold to see both ends, let go to lob; the foe at the landing goes to where she was
@@ -401,7 +402,8 @@ func _ostra() -> void:
 	step(m, 1.2)
 	ok(
 		"rank 3: the growing seed burns a foe inside it, about 8 a second (250 vs a 365 bomb of 12.5)",
-		dmg(T) / K.power("kin") > 11.0 and dmg(T) / K.power("kin") < 14.0, "dmg %.1f over 1.2s (power %.2f)" % [dmg(T), K.power("kin")]
+		dmg(T) / K.power("kin") > 11.0 and dmg(T) / K.power("kin") < 14.0,
+		"dmg %.1f over 1.2s (power %.2f)" % [dmg(T), K.power("kin")]
 	)
 	step(m, 4.8)
 	var sp: Vector3 = K.seed["pos"] if not K.seed.is_empty() else T.pos

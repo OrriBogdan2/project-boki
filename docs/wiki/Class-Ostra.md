@@ -14,7 +14,7 @@ The lamplighter who floats. Stuns from range, drops a growing bomb on the stunne
 
 |  |  |
 |---|---|
-| Weight class | Medium (145 health, 4.8 m/s, 1 dash charge) |
+| Weight class | Medium (145 health, 4.4 m/s, 1 dash charge) |
 | Signature weapon | Tether Lantern (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The lamplighter who floats. Pulls the fight to her, then lets it fall in. |
 | Silhouette | the hovering lantern and the long trailing hem |

@@ -247,7 +247,7 @@ func _breah() -> void:
 		if A.grounded and A.pos.y > top - 0.05: a_climbed[0] = true)
 	A.inp["jump"] = false
 	A.inp["move"] = Vector2.ZERO
-	ok("data: an ally jumping into your rock climbs onto it", a_climbed[0], "y %.2f top %.2f at %s rock %s" % [A.pos.y, top, A.pos, mid0])
+	ok("data: an ally jumping into your rock climbs onto it", a_climbed[0], "y %.2f top %.2f" % [A.pos.y, top])
 	A.queue_free()
 	m.hunters.erase(A)
 	# ---- punch along the row: every rock flies, one after another (Rocksweeping)
@@ -523,7 +523,8 @@ func _breah() -> void:
 	)
 	ok(
 		"data rank 3: a second leap charge, recharging in 8.4s (12s x 0.7 on the shared rank step)",
-		P.max_dashes() == 2.0 and absf(P.dash_regen() - 8.4) < 0.05, "charges %.0f regen %.2f" % [P.max_dashes(), P.dash_regen()]
+		P.max_dashes() == 2.0 and absf(P.dash_regen() - 8.4) < 0.05,
+		"charges %.0f regen %.2f" % [P.max_dashes(), P.dash_regen()]
 	)
 	reset.call()
 	aim_at(P, home + Vector3(30.0, 0, 0))
