@@ -468,6 +468,8 @@ func is_local() -> bool:
 	return ctrl == "local"
 
 func aim_dir() -> Vector2:
+	if ak and ak.aim_lock() != Vector2.ZERO:
+		return ak.aim_lock()
 	var d := Vector2(inp["aim"].x - pos.x, inp["aim"].z - pos.z)
 	return d.normalized() if d.length() > 0.05 else Vector2(sin(face), cos(face)) * -1.0
 
@@ -782,7 +784,7 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 
 # ------------------------------------------------------------------ actions
 func do_jump() -> void:
-	if downed or stun_t > 0.0 or grap.size() > 0 or out or KitStatus.grounded(self):
+	if downed or stun_t > 0.0 or grap.size() > 0 or out or KitStatus.grounded(self) or (ak and ak.cast_locked()):
 		return
 	KinFollow.on_jump(self)         # riding a mount: you come off it into the jump
 	if not lfloat.is_empty():
@@ -2078,7 +2080,7 @@ func sim(dt: float) -> void:
 	for gi in 2:
 		gear_cd[gi] = maxf(0.0, float(gear_cd[gi]) - dt)
 		if inp.get("gear%d" % (gi + 1), false):
-			if Hex.active(self):
+			if Hex.active(self) or (ak and ak.cast_locked()):
 				_ab_feedback("gear%d" % gi, "deny")
 			elif (gear[gi] as Dictionary).is_empty() or float(gear_cd[gi]) > 0.0 or not Gear.active(String(gear[gi].get("id", ""))):
 				_ab_feedback("gear%d" % gi, "deny")
@@ -2090,7 +2092,7 @@ func sim(dt: float) -> void:
 		ak.tick(dt)
 		if inp["sig"]: ak.use_e()
 		if inp["sec"]: ak.press_rmb()
-		if inp.get("kin_ab", false) and not Hex.active(self): use_boki_c()
+		if inp.get("kin_ab", false) and not Hex.active(self) and not ak.cast_locked(): use_boki_c()
 	elif inp["sig"]: use_kin_ability("k1")
 	if inp.get("kin_ab", false) and ak == null: use_kin_ability("k1")
 	# (a kin's second ability and mid-fight kin swaps are retired from the kit; bots don't press them)
@@ -2308,6 +2310,7 @@ func _physics(dt: float) -> void:
 	# rocks and trees: slide round them. Where you're heading is pushed straight out of any blocker
 	# it overlaps, and the part of your speed going into it is dropped (no bounce, no catch on a
 	# corner); the axis moves below then only meet terrain, edges and walls.
+	StoneStand.mover = self         # (rocks: only their caster climbs them)
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
 	var po: Vector2 = tgt if spirit_t > 0.0 else m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
 	var block_n := Vector2.ZERO     # out of the rock you met this step (its face's normal)
@@ -2404,7 +2407,8 @@ func _physics(dt: float) -> void:
 			and rock_b - pos.y < World.BLOCK_H - 0.1 and m.time - kb_t > 0.4:
 		vel.y = sqrt(2.0 * H_GRAV * (rock_b - pos.y + 0.3))
 		mantle_cd = 0.45
-	StoneStand.climb(self, maxf(b1, b2))      # a jump into a standable rock carries you onto it
+	StoneStand.climb(self, maxf(b1, b2))      # the caster walking into her own rock rises onto it
+	StoneStand.mover = null
 	var g := ground()
 	if grounded and g < pos.y - 0.05:
 		grounded = false

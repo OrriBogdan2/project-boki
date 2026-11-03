@@ -14,6 +14,7 @@ const ROCK_PAY := "ROCKFALL"
 const STONE := Color("d9a35b")
 const MOLTEN := Color("ff7a2a")
 const LANE_COL := Color("f4ead8")       # the punch lane: pale stone white, as bright as an aim reticle
+const ROCK_STEP_OFF := 1.0     # m: from atop a rock, Stone Row measures from the ground this far ahead
 const LEAP_CROUCH := 0.06      # s: the rock bursts up and she crouches on it before the leap
 const LEAP_ROCK_UP := 1.6      # m: how high the rock arcs after her
 
@@ -22,8 +23,9 @@ var lmb_was := false
 # the hold punched by itself: keep holding and the next wind-up starts, a release throws nothing
 var lmb_auto := false
 var rid_n := 0
-var dive := false              # the air Quakefall: slam on landing
+var dive := false              # a Quakefall in the air (the hop, a leap, an air press): slam on landing
 var dive_k := 0.0              # ...with this much charge
+var dive_fall := false         # ...plunging straight down (pressed in the air), not riding an arc
 var sight_t := 0.0
 var sneak_t := 0.0             # how long she has been sneaking (the cone widens)
 var shield_stacks := 0         # Molten Guard stacks
@@ -88,8 +90,13 @@ func rock_mid(w: Dictionary) -> Vector3:
 	var mid: Vector2 = ((w["a"] as Vector2) + (w["b"] as Vector2)) * 0.5
 	return Vector3(mid.x, float(w["y"]), mid.y)
 
+## The ground her rocks rise from: the terrain under her while she stands (on one of her rocks too), else
+## her own height (in the air nothing fits: Stone Row is ground-only).
+func _floor_y() -> float:
+	return m.world.ground_at(h.pos.x, h.pos.z) if h.grounded else h.pos.y
+
 func _new_rock(p: Vector3, dir: Vector2) -> bool:
-	if not HeroZones.fits(m, p, h.pos.y):
+	if not HeroZones.fits(m, p, _floor_y()):
 		return false
 	var mine := my_rocks()
 	while mine.size() >= _rock_cap():
@@ -201,17 +208,28 @@ func _tick(dt: float) -> void:
 	if shield_stacks > 0 and h.shield > 0.0 and fmod(m.time, 0.3) < dt:
 		m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.0, Color("ffd24a"), 0.28)      # the Molten Guard ring
 	if dive:
-		if h.grounded or h.downed:
-			dive = false
-			if h.grounded and not h.downed:
-				slam.land(dive_k)
-		else:
-			h.vel.y = minf(h.vel.y, -float(slam_def()["dive_speed"]))
+		_tick_dive()
 	if not leap.is_empty():
 		_tick_leap(dt)
 	slam.tick(dt)
 	spine.tick(dt)
 	_tick_sight(dt)
+
+## The pending air slam: it lands with her, or plunges if pressed in the air. The glider always wins:
+## holding glide (or the glider opening) drops the slam and hands the arc over, never dragging her down.
+func _tick_dive() -> void:
+	if h.downed:
+		dive = false
+	elif h.gliding or bool(h.inp.get("glide", false)):
+		dive = false
+		h.fly_t = 0.0
+		if dive_fall:
+			h.vel.y = maxf(h.vel.y, 0.0)      # the canopy takes the plunge's speed at once
+	elif h.grounded:
+		dive = false
+		slam.land(dive_k)
+	elif dive_fall:
+		h.vel.y = minf(h.vel.y, -float(slam_def()["dive_speed"]))
 
 ## Tremor Sense: sneaking shows a narrow cone ahead that widens the longer you sneak, and the foes in
 ## it through walls and fog.
@@ -241,6 +259,7 @@ func sight_deg() -> float:
 func _drop_holds() -> void:
 	dive = false
 	dive_k = 0.0
+	dive_fall = false
 	leap = {}
 	if slam: slam.drop()
 	if spine: spine.drop()
@@ -500,17 +519,17 @@ func on_dash(use_ex: bool) -> bool:
 		)
 		m.sfx("br_shove", h.pos, -4.0, 1.0)
 		return true
-	if not leap.is_empty() or not spend_dash(false):
+	if in_dash() or not spend_dash(false):
 		return true
+	if not leap.is_empty():
+		_rock_down()       # the last leap's rock was still coming down: it rolls on now
 	var dd := dash_def()
 	var dir := h.aim_dir()
 	var to := leap_spot(dir)
 	var flight := float(dd["time"]) * float(dash_feel()["time"])
 	leap = {"t": 0.0, "wait": LEAP_CROUCH, "T": flight, "from": h.pos, "to": to, "dir": dir, "land_at": -1.0}
 	play("breah_dash")
-	# the rock bursts up under her first; she crouches on it, then leaps
-	m.fx.burst(h.pos + Vector3(0, 0.4, 0), Color("a8805a"), 14, 5.0, 0.4, 9.0, 1.2)
-	m.fx.burst(h.pos + Vector3(0, 0.2, 0), MOLTEN, 8, 4.0, 0.3, 6.0, 0.9)
+	# the rock heaves up under her first (dust, no blast: no explosions on a dash); she crouches on it, then leaps
 	m.fx.dust(h.pos, 10)
 	m.sfx("br_rise", h.pos, -4.0, 1.2)
 	AimKit.circle(
@@ -564,6 +583,8 @@ func _tick_leap(dt: float) -> void:
 	var ur := clampf((flown - lag) / flight, 0.0, 1.0)
 	var rock_at := from.lerp(to, ur) + Vector3(0, 0.5 + sin(ur * PI) * LEAP_ROCK_UP, 0)
 	var land_at := float(leap["land_at"])
+	if land_at < 0.0 and not h.grounded and h.pad.is_empty():
+		h.vel.y -= _leap_pull() * dt
 	if land_at < 0.0 and flown > 0.08 and (h.grounded or flown > flight + 0.5):
 		_leap_land()
 		land_at = flown
@@ -573,34 +594,43 @@ func _tick_leap(dt: float) -> void:
 		KitLooks.of(m).hold_on("br_carry", "dashrock", h, rock_at)
 		return
 	if land_at >= 0.0:
-		var dir: Vector2 = leap["dir"]
-		leap = {}
-		AimKit.hide(h, "leap")
-		_landslide_launch(to, dir)
+		_rock_down()
+
+## The leap is over: its rock comes down at the landing spot and rolls on.
+func _rock_down() -> void:
+	var to: Vector3 = leap["to"]
+	var dir: Vector2 = leap["dir"]
+	leap = {}
+	AimKit.hide(h, "leap")
+	_landslide_launch(to, dir)
 
 func _leap_off() -> void:
 	var dd := dash_def()
 	h.launch_to(leap["to"], float(leap["T"]))
+	if h.pad.is_empty():
+		h.vel.y += 0.5 * _leap_pull() * float(leap["T"])     # a heavy rock leap: a higher arc, same landing time
 	h.inv_t = maxf(h.inv_t, float(dd["invuln"]))
 	h.dash_at = m.time
-	m.fx.burst(h.pos + Vector3(0, 0.2, 0), Color("c9a27a"), 12, 4.0, 0.35, 6.0, 1.2)
+	m.fx.dust(h.pos, 6)
 	m.sfx("br_leap", h.pos, -3.0, 1.0)
 	Feel.dash_sound(m, id, h.pos, h)
 	Feel.shake(m, "dash", h, h.pos)
 	if h.is_local() and m.cam: m.cam.punch(0.03)
 
-## The landing: a crash ring that shoves everyone beside her (the first of the leap's two hits).
+## Rubble Leap falls at its own leap_grav (a heavy arc that still lands on time): the pull on top of gravity.
+func _leap_pull() -> float:
+	return maxf(0.0, float(dash_def().get("leap_grav", Hunter.H_GRAV)) - Hunter.H_GRAV)
+
+## The landing: a crash that shoves everyone beside her (the first of the leap's two hits).
 func _leap_land() -> void:
 	var dd := dash_def()
 	leap_lands += 1
 	var at := h.pos
 	var r := float(dd["land_r"])
 	play("breah_leap_land")
-	KitLooks.of(m).impact(at, r, 0.5)
-	m.fx.dust(at, 14)
+	m.fx.dust(at, 14)      # the hit area was the landing circle all through the flight: no ring or blast here
 	m.sfx("br_slam", at, -5.0, 1.15)
 	Feel.shake(m, "t2", h, at)
-	net_ring(at, r, Color("ff5a2a"))
 	rider_points(leap["from"], at)
 	for f in foes_in(at, r, 2.0):
 		leap_hits += 1
@@ -625,6 +655,23 @@ func _landslide_launch(at: Vector3, dir: Vector2) -> void:
 ## Her own hand tell (the molten fists) replaces the shared white charge orb.
 func charge_orb() -> bool:
 	return false
+
+## Rubble Leap is her ground dash for DashFlow: from the press until she lands (the rock rolling on after is not).
+func in_dash() -> bool:
+	return super.in_dash() or _leaping()
+
+## Rubble Leap's time left until its planned landing (the shared dash's otherwise).
+func dash_left() -> float:
+	if _leaping():
+		return maxf(0.0, LEAP_CROUCH + float(leap["T"]) - float(leap["t"]))
+	return super.dash_left()
+
+func _leaping() -> bool:
+	return not leap.is_empty() and float(leap["land_at"]) < 0.0
+
+## Her dash moves (breah_dash, breah_exdash) are the whole dash pose: no shared roll under them.
+func dodge_anim() -> String:
+	return "kit"
 
 func dash_afterimage() -> bool:
 	m.fx.burst(h.pos + Vector3(0, 0.5, 0), Color(0.62, 0.48, 0.34, 0.8), 3, 1.2, 0.4, -1.0, 1.6)
@@ -667,10 +714,14 @@ func row_spots(dir: Vector2) -> Array:
 	var side := Vector2(-dir.y, dir.x)
 	var rows := 2 if rank("kin") >= 3 else 1
 	var spots: Array = []
+	var from := h.pos
+	if h.grounded and h.pos.y - _floor_y() > 0.5:
+		# standing on one of her rocks: the row is measured along the ground from just past it
+		from = Vector3(h.pos.x + dir.x * ROCK_STEP_OFF, _floor_y(), h.pos.z + dir.y * ROCK_STEP_OFF)
 	for r in rows:
 		var dist := float(ed["dist"]) + float(ed["row_gap"]) * r
 		var base := h.pos + Vector3(dir.x, 0, dir.y) * dist
-		var wk := HeroZones.walk(m, h.pos, base, dist)
+		var wk := HeroZones.walk(m, from, base, dist)
 		if not wk["ok"] or wk["stopped"] == "wall" or wk["stopped"] == "abyss":
 			continue      # a wall or the abyss lies between you and the row
 		for i in [0, -1, 1]:
@@ -681,7 +732,7 @@ func row_spots(dir: Vector2) -> Array:
 			# the rock must be reachable in line from the caster (no building through a wall)
 			if m.world.los(
 				h.pos + Vector3(0, 0.5, 0), p + Vector3(0, 0.5, 0), h.pos.y + 0.5
-			) and HeroZones.fits(m, p, h.pos.y):
+			) and HeroZones.fits(m, p, _floor_y()):
 				spots.append([p, r])
 	return spots
 

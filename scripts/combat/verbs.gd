@@ -94,7 +94,7 @@ static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> 
 		if absf(y - float(w["y"])) > 1.9:
 			continue
 		# a low wall you can stand on (a rock, "top" m tall): feet at its top walk over it (StoneStand)
-		var top := float(w.get("top", 3.0))
+		var top := StoneStand.top_for(w) if w.has("top") else 3.0
 		if y >= float(w["y"]) + top - World.STEP:
 			continue
 		var p := Vector2(x, z)

@@ -1,9 +1,9 @@
 extends "res://tools/hero_pair_check.gd"
 ## Ostra's ultimate on X, Nightwell, for --ostra-combo-check (docs/heroes/ostra.md): the level gate, the well at
 ## the cursor clamped to 10m, the 1.0s dome everyone sees, the opening, the catch (stunned until it closes and
-## drawn to the middle), a foe walking in later, a foe behind a wall, allies untouched, Ostra free to act, the
-## small ticks, the quiet close, the Swollen size, the bond once per cast and only on a catch, the cooldown, the
-## merge (the placed well stays) and the burst cap.
+## drawn to the middle), a foe walking in later, a foe behind a wall, allies untouched, Ostra locked in the
+## cast pose (item 16), the small ticks, the quiet close, the Swollen size, the bond once per cast and only on a
+## catch, the cooldown, the merge (the placed well stays) and the burst cap.
 
 const BURST := preload("res://tools/ult_burst.gd")
 
@@ -13,6 +13,7 @@ func ult(main_node: Node) -> void:
 	await _cast_and_dome()
 	await _catch_and_hold()
 	await _swollen_and_merge()
+	await _lock_breaks()
 	await _burst()
 
 ## The pair check's strip and dummy, with a Boki ready at her side (the bond only fills with one).
@@ -134,12 +135,7 @@ func _catch_and_hold() -> void:
 	late.teleport(c + Vector3(0, 0, 3.0))
 	step(m, 0.3)
 	ok("ult: a foe who walks in later is caught too", late.stun_t > 1.0, "stun %.2f" % late.stun_t)
-	K.ch_rmb = 1.0
-	K.cd["rmb"] = 0.0
-	aim_at(P, home + Vector3(0, 0, -6))
-	tap(m, P)
-	step(m, 0.4)
-	ok("ult: Ostra is free to act while it holds (a Snap)", K.snaps == 1, "snaps %d" % K.snaps)
+	_lock_asserts(m, P, K, W, home)
 	paid0 = paid(P)
 	step(m, 2.0)
 	ok("ult bond: paid once per cast, never per tick", paid(P) == paid0)
@@ -178,6 +174,33 @@ func _swollen_and_merge() -> void:
 	)
 	await done(m)
 
+## Item 16: a hard CC frees her early (a stun, then a knock); the placed well goes on either way.
+func _lock_breaks() -> void:
+	var r := setup_ult("ostra", 7.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var home: Vector3 = r[3]
+	var K: OstraKit = P.ak
+	var W := K.well
+	_press(m, P, home + Vector3(6, 0, 0))
+	step(m, 0.5)
+	P.stun_t = 0.4
+	m.step(DT)
+	ok("lock: a stun frees her early, the well goes on", not W.locked and W.running(), "phase '%s'" % W.phase)
+	step(m, 5.0)
+	K.cd["x"] = 0.0
+	_press(m, P, home + Vector3(6, 0, 0))
+	step(m, 1.5)
+	var at := P.pos
+	P.impulse(Vector2(8.0, 0) * P.mass())
+	step(m, 0.3)
+	ok(
+		"lock: a knock frees her (and moves her), the well goes on",
+		not W.locked and W.is_open() and P.pos.distance_to(at) > 0.8,
+		"moved %.2f" % P.pos.distance_to(at)
+	)
+	await done(m)
+
 ## Burst cap: the well's full 3.5s on a light hunter, then straight into the merge and the merged form's
 ## ultimate, leaves that hunter standing.
 func _burst() -> void:
@@ -196,3 +219,50 @@ func _burst() -> void:
 		standing,
 		"ult %.1f total %.1f of %.0f" % [float(out["ult"]), float(out["total"]), float(Data.CLASSES["light"]["hp"])]
 	)
+
+## Item 16: from the press until the well closes Ostra can't walk, jump, dash, use another ability or attack, or
+## turn once the wind-up is over; she is free right after, and a stun frees her early.
+func _lock_asserts(m: Match, P: Hunter, K: OstraKit, W: OstraWell, home: Vector3) -> void:
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	P.fire_cd = 0.0
+	var at := P.pos
+	var snaps0 := K.snaps
+	aim_at(P, home + Vector3(0, 0, -6))
+	var face0 := P.aim_dir()
+	P.inp["move"] = Vector2(1, 0)
+	tap(m, P)
+	P.inp["fire"] = true
+	P.dashes = P.max_dashes()
+	K.on_dash(false)
+	var seeds0 := K.seed.size()
+	K.use_e()
+	step(m, 0.4)
+	aim_at(P, home + Vector3(6, 0, 0))
+	step(m, 0.1)
+	P.inp["fire"] = false
+	P.inp["move"] = Vector2.ZERO
+	ok("lock: movement input doesn't move her", Vector2(P.pos.x - at.x, P.pos.z - at.z).length() < 0.05)
+	ok("lock: an RMB press and an attack are ignored", K.snaps == snaps0 and K.snap.is_empty() and P.shot_n == 0)
+	ok("lock: a Shift press is ignored (no Trade)", K.swap.is_empty() and K.swap_aim < 0.0)
+	ok("lock: an E press is ignored (no seed)", K.seed.size() == seeds0 and K.seed.is_empty())
+	ok("lock: the glove and the Boki's C are held too (the cast_locked hook)", K.cast_locked())
+	ok("lock: she cannot turn once committed", P.aim_dir().distance_to(face0) < 0.01 and W.locked)
+	ok("lock: the cast pose is held (ostra_well_snap while it pulls)", K.anim_id == "ostra_well_snap")
+	P.inp["move"] = Vector2.ZERO
+	var left := float(W.xd()["time"]) - W.phase_t
+	step(m, maxf(left - 0.08, 0.0))
+	P.dashes = P.max_dashes()
+	K.on_dash(false)
+	ok("dash flow: Shift in the lock's last 0.15s is held (no Trade yet)", W.locked and K.swap_aim < 0.0)
+	step(m, 0.1)
+	ok("lock: free again when the well closes", not W.running() and not W.locked and not K.busy())
+	ok(
+		"dash flow: ... and goes the step she is freed (into_dash.x buffer)",
+		K.swap_aim >= 0.0 or not K.swap.is_empty()
+	)
+	step(m, 0.3)
+	aim_at(P, home + Vector3(0, 0, -6))
+	tap(m, P)
+	step(m, 0.4)
+	ok("lock: she can act right after (a Snap)", K.snaps == snaps0 + 1, "snaps %d" % K.snaps)

@@ -4,9 +4,10 @@ extends RefCounted
 ## centred at the cursor, across her aim; hold X and drag the cursor to swing it round that centre, let go
 ## to cast. Everyone then sees a 0.2s line of molten cracks, and the rocks erupt from the centre outward
 ## over 0.4s, slowing whoever stands beside them and shoving anyone on the line aside. They are ordinary
-## rocks of hers (block foes and their shots, stand on them, punch them into foes); over the abyss the
-## stretch becomes a walkway. Bond: a hunter slowed by the rise, or hit by one of its rocks while the
-## bond window is open, counts as a land (HeroUlt.landed).
+## rocks of hers, one rock deep (block foes and their shots, stand on them, punch them into foes). Only
+## solid ground takes a rock: the line is clipped where it crosses the abyss (no walkway), and a line with
+## no ground under it is refused with a small "no ground" cue, unspent. Bond: a hunter slowed by the rise,
+## or hit by one of its rocks while the bond window is open, counts as a land (HeroUlt.landed).
 
 const CRACK_COL := Color("ff4a1f")
 const PREVIEW_COL := Color("f4ead8")
@@ -20,7 +21,7 @@ var phase_t := 0.0
 var center := Vector3.ZERO
 var press_aim := Vector3.ZERO           # the cursor at the press (the centre may sit short of it, clamped)
 var axis := Vector2.RIGHT               # along the ridge
-var spots: Array = []                   # [{at: Vector3, delay: float, over_void: bool, done: bool}]
+var spots: Array = []                   # [{at: Vector3, delay: float, done: bool}], solid ground only
 var cast_n := 0
 var erupt_at := -99.0
 var rock_dmg_taken := {}                # target instance id -> damage this cast's rocks dealt it
@@ -28,7 +29,7 @@ var rock_dmg_taken := {}                # target instance id -> damage this cast
 var casts := 0
 var rocks_raised := 0
 var slowed := 0
-var bridges := 0
+var refused := 0
 var shoved := 0
 var first_rise_t := -1.0
 var last_rise_t := -1.0
@@ -100,16 +101,21 @@ func _held() -> bool:
 		return true
 	return k.h.is_local() and Input.is_action_pressed("hunter_ult")
 
-## Release: the cracks show for everyone, the rocks are scheduled centre-out.
+## Release: the cracks show for everyone, the rocks are scheduled centre-out. With no ground anywhere on
+## the line the cast is refused and the ult stays ready.
 func _erupt() -> void:
 	var h := k.h
 	AimKit.hide(h, "x")
+	var plan := _plan()
+	if plan.is_empty():
+		_refuse()
+		return
 	cast_n += 1
 	casts += 1
 	rock_dmg_taken = {}
 	phase = "tell"
 	phase_t = 0.0
-	spots = _plan()
+	spots = plan
 	k.play("breah_spine")
 	k.m.sfx("br_spine", center, -1.0, 1.0)
 	for s in spots:
@@ -118,19 +124,35 @@ func _erupt() -> void:
 		k.m.fx.spark(p, Vector3.UP, Color("ffb347"), 3, 3.0, 30.0, 0.2, 2.0, 0.8)
 	k.net_ring(center, 1.2, CRACK_COL)
 
-## The rock spots along the ridge, nearest the centre first, each with its rise delay.
+## The whole line is over the abyss: a puff of grit where it would have been and a small "no ground" note.
+func _refuse() -> void:
+	refused += 1
+	phase = ""
+	k.cd["x"] = 0.0
+	k.anim_id = ""
+	k.m.fx.burst(center + Vector3(0, 0.3, 0), Color(0.55, 0.45, 0.35, 0.8), 8, 2.0, 0.35, -1.0, 0.8)
+	if k.h.is_local() and k.m.hud:
+		k.m.hud.toast_small("No ground for the ridge", k.col_of(xd()))
+
+## The rock spots along the ridge on solid ground (the rock's middle and both ends), nearest the centre
+## first, each with its rise delay.
 func _plan() -> Array:
 	var n := int(xd()["rocks"])
 	var half := float(xd()["len"]) * 0.5
+	var reach := float(k.rock_def()["len"]) * 0.5
+	var along := Vector3(axis.x, 0, axis.y)
 	var out: Array = []
 	for i in n:
 		var off := lerpf(-half, half, float(i) / float(n - 1))
-		var p := AimMode.ground(k.m, center + Vector3(axis.x, 0, axis.y) * off)
-		var over_void: bool = k.m.world.is_void(p.x, p.z)
-		var delay := float(xd()["rise"]) * absf(off) / half
-		out.append({"at": p, "delay": delay, "over_void": over_void, "done": false})
+		var p := AimMode.ground(k.m, center + along * off)
+		if not (_solid(p) and _solid(p - along * reach) and _solid(p + along * reach)):
+			continue
+		out.append({"at": p, "delay": float(xd()["rise"]) * absf(off) / half, "done": false})
 	out.sort_custom(func(a, b): return float(a["delay"]) < float(b["delay"]))
 	return out
+
+func _solid(p: Vector3) -> bool:
+	return not k.m.world.is_void(p.x, p.z) and k.m.world.ground_at(p.x, p.z) > World.VOID + 1.0
 
 func _tick_tell(dt: float) -> void:
 	phase_t += dt
@@ -146,26 +168,13 @@ func _tick_tell(dt: float) -> void:
 		phase = "up"
 		phase_t = 0.0
 		erupt_at = k.m.time
-		_bridge()
-
-## Over the abyss the ridge's line becomes a walkway for as long as the rocks stand.
-func _bridge() -> void:
-	if not spots.any(func(s): return bool(s["over_void"])):
-		return
-	var half := float(xd()["len"]) * 0.5
-	var from := center - Vector3(axis.x, 0, axis.y) * (half + 0.6)
-	from.y = center.y
-	var len_ := float(xd()["len"]) + 1.2
-	if HeroZones.bridge(k.m, k.h, from, axis, len_, float(xd()["bridge_w"]), float(xd()["time"])) > 0:
-		bridges += 1
 
 func _tick_up(dt: float) -> void:
 	phase_t += dt
 	for s in spots:
 		if not bool(s["done"]) and phase_t >= float(s["delay"]):
 			s["done"] = true
-			if not bool(s["over_void"]):
-				_raise(s["at"])
+			_raise(s["at"])
 	if phase_t >= float(xd()["rise"]) + float(xd()["time"]):
 		phase = ""
 

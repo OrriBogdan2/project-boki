@@ -214,42 +214,41 @@ func _breah() -> void:
 		"rock: dropped onto a rock, she stands on its top", P.grounded and absf(P.pos.y - top) < 0.05,
 		"y %.2f top %.2f" % [P.pos.y, top]
 	)
-	P.teleport(home)
-	P.grounded = true
-	P.vel = Vector3.ZERO
-	var tgt := Vector3(mid0.x, home.y, mid0.z)
-	step(m, 0.8, func(): P.inp["move"] = Vector2(tgt.x - P.pos.x, tgt.z - P.pos.z).normalized())
+	# item 25: only the caster climbs her rocks: she walks up and over hers, no jump; anyone else is stopped
+	var cross := _walk_over(m, P, home, w0)
 	ok(
-		"rock: walking into a rock is blocked (no climbing without a jump)",
-		P.pos.y < home.y + 0.1 and Vector2(P.pos.x - mid0.x, P.pos.z - mid0.z).length() > 0.45,
-		"y %.2f" % (P.pos.y - home.y)
+		"rock (item 25): walking into her own rock lifts her onto it and over, no jump, in 0.6s or less",
+		float(cross["t"]) > 0.0 and float(cross["t"]) <= 0.6 and float(cross["peak"]) >= top - home.y - 0.05
+			and not bool(cross["jumped"]),
+		"cross %.2fs peak %.2f top %.2f" % [float(cross["t"]), float(cross["peak"]), top - home.y]
 	)
-	var climbed := [false]
-	P.inp["jump"] = true
-	step(m, 0.9, func():
-		P.inp["move"] = Vector2(tgt.x - P.pos.x, tgt.z - P.pos.z).normalized()
-		if P.grounded and P.pos.y > top - 0.05: climbed[0] = true)
-	P.inp["jump"] = false
-	P.inp["move"] = Vector2.ZERO
-	ok("rock: jump into a rock and you climb onto it", climbed[0], "y %.2f top %.2f" % [P.pos.y, top])
-	# data pass: an ally can hop onto your rocks too (the rock is a low wall for everyone)
-	var A: Hunter = m.make_hunter(
-		"Ally", P.team, "medium", "Ally", "idle", {}, Vector3(home.x, home.y, home.z + 2.0), {"arch": "none"}
-	)
-	A.max_hp = 10000.0
-	A.hp = A.max_hp
+	var tgt := Vector3(mid0.x, home.y, mid0.z)
 	P.teleport(home + Vector3(0, 0, -6.0))
-	var a_climbed := [false]
-	step(m, 0.8, func(): A.inp["move"] = Vector2(tgt.x - A.pos.x, tgt.z - A.pos.z).normalized())
-	A.inp["jump"] = true
-	step(m, 0.9, func():
-		A.inp["move"] = Vector2(tgt.x - A.pos.x, tgt.z - A.pos.z).normalized()
-		if A.grounded and A.pos.y > top - 0.05: a_climbed[0] = true)
-	A.inp["jump"] = false
-	A.inp["move"] = Vector2.ZERO
-	ok("data: an ally jumping into your rock climbs onto it", a_climbed[0], "y %.2f top %.2f" % [A.pos.y, top])
-	A.queue_free()
-	m.hunters.erase(A)
+	for team in [P.team, 5]:
+		var B: Hunter = m.make_hunter("B", team, "medium", "Other", "idle", {}, home, {"arch": "none"})
+		var walk := _walk_over(m, B, home, w0)
+		B.teleport(home)
+		B.vel = Vector3.ZERO
+		var jump_peak := [0.0]
+		step(m, 0.3, func(): B.inp["move"] = Vector2(tgt.x - B.pos.x, tgt.z - B.pos.z).normalized())
+		B.inp["jump"] = true
+		step(m, 0.9, func():
+			B.inp["move"] = Vector2(tgt.x - B.pos.x, tgt.z - B.pos.z).normalized()
+			jump_peak[0] = maxf(jump_peak[0], B.pos.y - home.y))
+		var near_side := (B.pos - mid0).dot((mid0 - home).normalized()) < 0.0
+		ok(
+			"rock (item 25): %s walking or jumping into her rock is stopped (only the caster climbs)" % (
+				"an ally" if team == P.team else "a foe"
+			),
+			float(walk["t"]) < 0.0 and float(walk["peak"]) < 0.1 and jump_peak[0] > 0.8 and near_side
+				and B.pos.y < top - 0.5,
+			"walk cross %.2f peak %.2f, jump peak %.2f, y %.2f" % [
+				float(walk["t"]), float(walk["peak"]), jump_peak[0], B.pos.y - home.y
+			]
+		)
+		B.queue_free()
+		m.hunters.erase(B)
+		m.step(DT)
 	# ---- punch along the row: every rock flies, one after another (Rocksweeping)
 	reset.call()
 	K.use_e()
@@ -329,16 +328,33 @@ func _breah() -> void:
 		float(AimKit.reticle(P)["flare"]) > 0.0 or float(AimKit.reticle(P)["charge"]) >= 0.99
 	)
 	var hx := P.pos.x
+	var walls0: int = m.verbs.walls.size()
 	P.inp["sec_hold"] = false
-	step(m, 0.28)
+	var hop := _hop(m, P, K)
 	var looks := KitLooks.of(m)
 	var slam_looks := ["burst", "shard", "crater"].all(
 		func(kind): return looks.timed.any(func(e): return e["kind"] == kind)
 	)
-	step(m, 0.32)
+	step(m, 0.3)
 	ok(
-		"rmb: let go = a hop forward into the circle, then the slam", P.pos.x - hx > 0.9 and K.slams == 1,
-		"hop %.2f slams %d" % [P.pos.x - hx, K.slams]
+		"rmb (item 14): let go = a short hop, 1-1.5 body heights (1.8-2.7m) forward, off the ground, slam on landing",
+		hop["x"] - hx >= 1.8 and hop["x"] - hx <= 2.7 and hop["peak"] > 0.3 and hop["peak"] < 0.9 and K.slams == 1
+			and hop["t"] > 0.25 and hop["t"] < 0.45,
+		"hop %.2fm up %.2fm in %.2fs slams %d" % [hop["x"] - hx, hop["peak"], hop["t"], K.slams]
+	)
+	var hit_key := 0.0
+	var deepest := -9.0
+	for key in KMovesStone.MOVES["breah_slam"]["keys"]:
+		if float((key[1] as Dictionary).get("sq", 0.0)) > deepest:
+			deepest = float((key[1] as Dictionary).get("sq", 0.0))
+			hit_key = float(key[0])
+	ok(
+		"anim (item 14): breah_slam smashes down (its deepest squash) on the hop's landing frame",
+		absf(hit_key - float(hop["t"])) < 0.05, "key %.2f landing %.2f" % [hit_key, float(hop["t"])]
+	)
+	ok(
+		"rmb (item 14): no rock comes from Quakefall (rocks come from E, the dash and X)",
+		m.verbs.walls.size() == walls0 and rocks(m).is_empty(), "walls %d -> %d" % [walls0, m.verbs.walls.size()]
 	)
 	ok(
 		"rmb: a full charge in the centre stuns, with stars", T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
@@ -360,6 +376,18 @@ func _breah() -> void:
 		"took %.1f stun %.2f" % [d_tap, T.stun_t]
 	)
 	ok("rmb: a full charge hits harder", d_full > d_tap + 8.0, "tap %.1f full %.1f" % [d_tap, d_full])
+	ok("rmb (item 14): the tap's slam raises no rock either", rocks(m).is_empty())
+	# the sweet spot: a foe in the ring but outside the centre is hit, not stunned
+	reset.call()
+	T.teleport(home + Vector3(5.2, 0, 0))
+	aim_at(P, home + Vector3(8, 0, 0))
+	hold(m, P, 1.4)
+	step(m, 0.6)
+	ok(
+		"rmb (item 14): only the sweet spot stuns (a foe 3.2m from the centre takes the outer hit, no stun)",
+		dmg(T) >= 13.0 and T.stun_t <= 0.0,
+		"took %.1f stun %.2f" % [dmg(T), T.stun_t]
+	)
 	# jump while charging: she leaps forward, the circle with her
 	reset.call()
 	aim_at(P, home + Vector3(10, 0, 0))
@@ -371,14 +399,22 @@ func _breah() -> void:
 	m.step(DT)
 	step(m, 0.35, func(): P.inp["sec_hold"] = true)
 	var e3 := AimKit.entry(P, "rmb")
-	ok(
-		"rmb: jump while charging leaps her forward", K.slam.leaps == 1 and P.pos.x - lx0 > 2.0,
-		"leaps %d moved %.2f" % [K.slam.leaps, P.pos.x - lx0]
-	)
+	var ly_mid := P.pos.y - home.y
 	ok("rmb: the circle comes with her", (e3.get("at", Vector2.ZERO) as Vector2).x - lx0 > 2.5, str(e3.get("at")))
 	P.inp["sec_hold"] = false
-	step(m, 1.2)
-	ok("rmb: let go mid-leap = slam where she lands", K.slams >= 1 and P.grounded, "slams %d" % K.slams)
+	var sl0 := K.slams
+	step(m, 0.05)
+	var leap_dive_vy := P.vel.y
+	step(m, 1.15)
+	ok(
+		"rmb: jump while charging is a real leap, longer than the hop (up off the ground, about 3m forward)",
+		K.slam.leaps == 1 and ly_mid > 0.6 and P.pos.x - lx0 > 2.8,
+		"leaps %d up %.2f moved %.2f" % [K.slam.leaps, ly_mid, P.pos.x - lx0]
+	)
+	ok(
+		"rmb: let go mid-leap = the leap's arc carries on (no plunge), slam where she lands",
+		K.slams == sl0 + 1 and P.grounded and leap_dive_vy > -12.0, "slams %d vy %.1f" % [K.slams - sl0, leap_dive_vy]
+	)
 	# punch during the charge: a lunge
 	reset.call()
 	aim_at(P, home + Vector3(10, 0, 0))
@@ -454,6 +490,7 @@ func _breah() -> void:
 		"rmb: a foe in the air is dunked", K.dunks == dn0 + 1 and T.vel.y < -10.0,
 		"dunks %d vy %.1f" % [K.dunks, T.vel.y]
 	)
+	await _hop_glide(m, P, home, K, reset)
 	# ---- data pass: Landslide is 12s with one charge; Molten Guard is the base passive
 	ok(
 		"data: the leap rests 12s per charge and starts with one charge (a second at rank 3)",
@@ -507,6 +544,7 @@ func _breah() -> void:
 	P.do_dash()
 	ok("anim: her long air dash plays breah_exdash", K.anim_id == "breah_exdash")
 	step(m, 0.8)
+	await _dash_moves(m, P, T, home, K, reset)
 	# ---- rank 3
 	P.slot_lv["sec"] = 3
 	P.slot_lv["kin"] = 3
@@ -610,6 +648,140 @@ func _breah() -> void:
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)
+
+## Walks `h` from `home` straight at rock `w` and on past it for 1.6s: how long the crossing took (from
+## touching the near face to clearing the far one; -1 if it never got past), the highest the feet got
+## above `home`, and whether a jump was ever pressed.
+func _walk_over(m: Match, h: Hunter, home: Vector3, w: Dictionary) -> Dictionary:
+	var mid2: Vector2 = ((w["a"] as Vector2) + (w["b"] as Vector2)) * 0.5
+	var mid := Vector3(mid2.x, float(w["y"]), mid2.y)
+	var dir := (mid - home).normalized()
+	var face := float(w["th"]) + h.r * 0.8
+	h.teleport(home)
+	h.vel = Vector3.ZERO
+	var out := {"t": -1.0, "peak": 0.0, "jumped": false}
+	var touch := -1.0
+	var t := 0.0
+	while t < 1.6:
+		h.inp["move"] = Vector2(dir.x, dir.z)
+		out["jumped"] = bool(out["jumped"]) or bool(h.inp.get("jump", false))
+		m.step(DT)
+		t += DT
+		out["peak"] = maxf(float(out["peak"]), h.pos.y - home.y)
+		var along := (h.pos - mid).dot(dir)
+		if touch < 0.0 and along >= -face - 0.05:
+			touch = t
+		if touch >= 0.0 and float(out["t"]) < 0.0 and along > face:
+			out["t"] = t - touch
+	h.inp["move"] = Vector2.ZERO
+	return out
+
+## Steps until the slam lands: where she came down, the hop's peak above the take-off and its time.
+func _hop(m: Match, P: Hunter, K: DolmKit) -> Dictionary:
+	var y0 := P.pos.y
+	var out := {"x": P.pos.x, "peak": 0.0, "t": 0.0}
+	var s0 := K.slams
+	while K.slams == s0 and float(out["t"]) < 1.0:
+		m.step(DT)
+		out["t"] = float(out["t"]) + DT
+		out["peak"] = maxf(float(out["peak"]), P.pos.y - y0)
+	out["x"] = P.pos.x
+	return out
+
+## Item 26: Quakefall then the glider. Glide held from the hop, or pressed after a charge leap or an air
+## press: the glider opens, she never drops below where she took off (for the first 0.3s), and it sinks
+## like a normal glide.
+func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
+	for mode in ["hop", "leap", "air"]:
+		reset.call()
+		aim_at(P, home + Vector3(8, 0, 0))
+		var z0 := P.pos.y
+		if mode == "hop":
+			tap(m, P)
+		elif mode == "leap":
+			P.inp["sec_hold"] = true
+			P.ak.press_rmb()
+			step(m, 0.4, func(): P.inp["sec_hold"] = true)
+			P.inp["jump"] = true
+			step(m, 0.15, func(): P.inp["sec_hold"] = true)
+			P.inp["sec_hold"] = false
+			m.step(DT)
+		else:
+			P.inp["jump"] = true
+			step(m, 0.2)
+			tap(m, P)
+			z0 = P.pos.y
+		var dove := K.dive
+		var floor_z := -Hunter.GLIDE_SINK * 0.3 - 0.02 if mode == "air" else -0.01     # (in the air: a glide's sink)
+		var low := 99.0
+		var sink := 0.0
+		var t := 0.0
+		P.inp["jump"] = true
+		while t < 0.3:
+			P.inp["glide"] = true
+			m.step(DT)
+			t += DT
+			low = minf(low, P.pos.y - z0)
+			if P.gliding: sink = minf(sink, P.vel.y)
+		ok(
+			"glide (item 26, %s): Quakefall, then glide opens the glider; height kept, a normal glide" % mode,
+			dove and P.gliding and not K.dive and low >= floor_z and sink >= -Hunter.GLIDE_SINK - 0.05,
+			"gliding %s dive %s low %.2f sink %.2f" % [P.gliding, K.dive, low, sink]
+		)
+		P.inp["glide"] = false
+		step(m, 0.8)
+
+## Item 35: her own ground (Rubble Leap) and air (the long dash) moves, ids no other hero's table has, each one
+## keyed to end with its dash (the leap's crouch and flight; the air dash's time with the dash feel), and
+## neither dash draws a ground ring or a blast (the leap's hit area is its landing circle, shown in flight).
+func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
+	var ids := ["breah_dash", "breah_exdash"]
+	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
+		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
+	ok(
+		"item 35: her ground and air dash moves are two distinct ids, hers alone (KMovesStone, no other table)",
+		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("breah_"))
+			and not others.any(func(t): return ids.any(func(id): return (t as Dictionary).has(id)))
+	)
+	var feel_t := float(K.dash_feel()["time"])
+	var ground_t := DolmKit.LEAP_CROUCH + float(K.dash_def()["time"]) * feel_t
+	var air_t := float(P.cdat["ex_time"]) * feel_t
+	var lengths: Array = ids.map(func(id): return float((KMovesStone.MOVES[id]["keys"] as Array)[-1][0]))
+	ok(
+		"item 35: each dash move ends with its dash (ground %.2fs, air %.2fs)" % [ground_t, air_t],
+		absf(float(lengths[0]) - ground_t) <= 0.03 and float(lengths[1]) <= air_t + 0.005 and float(lengths[1]) > 0.15,
+		str(lengths)
+	)
+	for air in [false, true]:
+		reset.call()
+		T.teleport(home + Vector3(0, 0, 12.0))
+		aim_at(P, home + Vector3(3.0, 0, 0))
+		if air:
+			P.pos.y += 1.5
+			P.grounded = false
+			P.ex_cd = 0.0
+			P.do_dash()
+		else:
+			P.ak.on_dash(false)
+		if air:
+			m.step(DT)
+			P.render(DT, 1.0)
+			ok(
+				"item 35: her air dash plays breah_exdash as the whole pose (no shared roll under it)",
+				K.anim_id == "breah_exdash" and String(P.anim_s.get("dash_kind", "")) == "kit",
+				"anim %s kind %s roll %.2f" % [K.anim_id, str(P.anim_s.get("dash_kind")), P.roll_t]
+			)
+		var seen: Array = m.fx.rings.duplicate() + KitLooks.of(m).timed.duplicate()
+		var blasts := [0]
+		step(m, 0.9, func():
+			for e in m.fx.rings + KitLooks.of(m).timed.filter(func(e): return e["kind"] in ["burst", "crater"]):
+				if not seen.any(func(o): return is_same(o, e)):
+					seen.append(e)
+					blasts[0] += 1)
+		ok(
+			"item 35: her %s dash draws no ground ring and no blast" % ("air" if air else "ground"),
+			blasts[0] == 0, "rings/blasts %d" % blasts[0]
+		)
 
 ## Rubble Leap (owner's dash note: a leap, not the source's odd dash): the rock first, an arc to the cursor
 ## clamped by the dash feel, the landing marker for everyone, the landing crash, then the rock's roll-on hit.

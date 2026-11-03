@@ -205,7 +205,9 @@ func run(m: Node) -> void:
 	var drip: Dictionary = ent.call("puddlet")
 	var f: Dictionary = Econ.feeders()[0] if not Econ.feeders().is_empty() else {}
 	if not f.is_empty():
-		f["food"] = ["kibble", "kibble", "kibble", "kibble"]
+		# a food Drip eats: its hated food is drawn from its random uid (Care.ensure), and 1 kin in ~14 hates kibble
+		var meal := "sweetbun" if String(drip["rec"]["likes"]["hates"]) == "kibble" else "kibble"
+		f["food"] = [meal, meal, meal, meal]
 		H.hecon.refresh_feeder(f)
 	Save.d["plots"][0] = {"crop": "sunroot", "stage": 0, "care": 0, "wt": 0.0}
 	hw.scan()

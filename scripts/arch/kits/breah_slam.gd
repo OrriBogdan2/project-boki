@@ -75,8 +75,7 @@ func hold_tick(t: float) -> void:
 	if not leapt and was_ground and not h.grounded and h.vel.y > 0.5:
 		leapt = true
 		leaps += 1
-		k._lunge(float(sd()["leap"]), float(sd()["leap_t"]), dd)
-		h.vel.y = maxf(h.vel.y, float(sd()["leap_up"]))
+		arc(float(sd()["leap"]), maxf(h.vel.y, float(sd()["leap_up"])), dd)
 		k.play("breah_leap")
 		k.m.sfx("br_leap", h.pos, -3.0, 1.0)
 		k.m.fx.dust(h.pos, 8)
@@ -96,31 +95,43 @@ func fire(c: Dictionary) -> void:
 	var h := k.h
 	k.last_variant = String(c["variant"])
 	AimKit.hide(h, "rmb")
+	if h.gliding:
+		k.anim_id = ""      # (the held pose ends) the glider wins: no dive out of an open glider
+		return
 	if not k.spend_rmb():
-		k.anim_id = ""      # (the held pose ends)
+		k.anim_id = ""
 		return
 	var ck := charge_k(float(c["t"])) if c.get("hold", false) else 0.0
+	k.dive = true
+	k.dive_k = ck
 	if c.get("air", false) or not h.grounded:
-		# in the air (pressed there, or let go mid-leap): dive, slam where you land
-		k.dive = true
-		k.dive_k = ck
-		k.play("breah_dive")
+		# pressed in the air: dive and slam where you land; let go mid-leap: the leap's arc carries on
+		k.dive_fall = h.fly_t <= 0.0
+		k.play("breah_dive" if k.dive_fall else "breah_leap")
 		k.m.sfx("br_leap", h.pos, -2.0, 0.8)
 		return
-	# the hop into the circle's centre, then both fists down
+	# a short hop into the circle's centre, both fists coming down as she lands there
 	hops += 1
+	k.dive_fall = false
 	k.play("breah_slam")
-	k._lunge(float(sd()["reach"]), float(sd()["hop_t"]), h.aim_dir())
-	h.vel.y = maxf(h.vel.y, float(sd()["hop_up"]))
+	k.m.fx.dust(h.pos, 8)                # the push-off kicks up the ground she leaves
+	k.m.sfx("br_leap", h.pos, -6.0, 1.15)
+	arc(float(sd()["reach"]), float(sd()["hop_up"]), h.aim_dir())
+
+## A real jump arc (not a dash, which holds your height): `dist` along `dir`, leaving the ground at
+## `up` m/s, so the glider can still open from it (DolmKit._tick hands the arc over when glide is held).
+func arc(dist: float, up: float, dir: Vector2) -> void:
+	var h := k.h
+	var flight := 2.0 * up / Hunter.H_GRAV
+	var v := dir.normalized() * dist / flight
+	h.vel = Vector3(v.x, up, v.y)
 	h.grounded = false
-	k.m.later(
-		float(sd()["delay"]),
-		func(): if is_instance_valid(h) and not h.downed and not KinMerge.active(h): slam(ck, true)
-	)
+	h.fly_t = flight
 
 ## The air dive's landing.
 func land(ck: float) -> void:
-	k.play("breah_slam_land")
+	if k.anim_id != "breah_slam":
+		k.play("breah_slam_land")
 	slam(ck, true)
 
 func slam(c: float, at_feet: bool) -> void:

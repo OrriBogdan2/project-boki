@@ -3,7 +3,9 @@ extends RefCounted
 ## Ostra's ultimate on X, Nightwell (HeroUlt): tap X to set a well at the cursor (clamped, on ground short of
 ## walls). A pale dome of its exact size shows to everyone for 1.0s, then it opens into a turning violet
 ## disc for 3.5s: every foe inside (or who walks in) is stunned until it closes and drawn to its centre,
-## taking a small tick every 0.1s. Allies pass through untouched, and Ostra is free to act the whole time.
+## taking a small tick every 0.1s. Allies pass through untouched. Ostra is locked in the cast pose from the press
+## until it closes: no moving, no other abilities or attacks, and no turning once the short wind-up (data x.wind)
+## is over. A hard CC or a merge frees her.
 ## Swollen, it is larger. It closes quietly, with no blast. Bond: each hunter it catches counts as a land
 ## (HeroUlt.landed), paid on the catch, never per tick. Its looks hang on the match, not on Ostra, so a
 ## merge or a knock on her doesn't take the placed well down.
@@ -13,6 +15,8 @@ const DISC_COL := Color("b06bff")
 const PINK := Color("ff4fd8")
 const TICK := 0.1                       # s between damage ticks
 const HOLD_R := 0.25                    # m from the centre where a caught body stops being drawn in
+const GATHER_Y := 2.4                   # m over her ground point: the orb above her raised hands
+const PULL_Y := 1.1                     # m: the mote at her chest while it pulls
 
 var k: OstraKit
 var phase := ""                         # "" | "tell" (the dome) | "open" (the well)
@@ -22,6 +26,10 @@ var radius := 0.0
 var swollen := false
 var tick_left := 0.0
 var caught := {}                        # instance id -> the body, for this cast
+var locked := false                     # Ostra is held in the cast pose
+var aim_lock := Vector2.ZERO            # the facing kept after the wind-up (ZERO until then)
+var lock_t := 0.0                       # s since the press
+var dash_held := false                  # Shift pressed in the lock's last DashFlow.BUFFER_S: it goes when she is freed
 # counters for the checks
 var casts := 0
 var opens := 0
@@ -53,6 +61,9 @@ func start() -> bool:
 	caught = {}
 	phase = "tell"
 	phase_t = 0.0
+	locked = true
+	aim_lock = Vector2.ZERO
+	lock_t = 0.0
 	casts += 1
 	k.play("ostra_well")
 	k.m.sfx("os_well", center, -2.0, 1.0)
@@ -60,11 +71,65 @@ func start() -> bool:
 	return true
 
 func tick(dt: float) -> void:
+	_tick_lock(dt)
 	match phase:
 		"tell":
 			_tick_tell(dt)
 		"open":
 			_tick_open(dt)
+
+## The lock: facing is kept once the wind-up is over; a stun or a knock frees her (the well itself goes on).
+func _tick_lock(dt: float) -> void:
+	if not locked:
+		return
+	if k.h.downed or k.h.out or k.h.stun_t > 0.0 or k.h.knock_t > 0.0:
+		unlock()
+		return
+	lock_t += dt
+	if aim_lock == Vector2.ZERO and lock_t >= float(xd()["wind"]):
+		aim_lock = k.h.aim_dir()
+	_hand_looks()
+
+## What she holds while locked: a black orb swelling over her raised hands as the dome fills, then, while it
+## pulls, a violet mote clenched at her chest.
+func _hand_looks() -> void:
+	var looks := KitLooks.of(k.m)
+	if phase == "tell":
+		var grown := clampf(phase_t / float(xd()["tell"]), 0.0, 1.0)
+		var ahead := k.h.aim_dir() * 0.35
+		var over := k.h.pos + Vector3(ahead.x, GATHER_Y, ahead.y)
+		looks.hold_on("os_well_gather", "dark", k.h, over, lerpf(0.5, 1.6, grown))
+	else:
+		looks.release("os_well_gather")
+		looks.hold_on("os_well_pull", "mote", k.h, k._hand(PULL_Y), 1.4, DISC_COL)
+
+## Shift during the lock (content/dash_flow/ostra.json into_dash.x, "buffer"): pressed in its last
+## DashFlow.BUFFER_S it is held for the step she is freed; earlier it is refused with the deny cue.
+func press_dash() -> void:
+	if lock_left() <= DashFlow.BUFFER_S:
+		dash_held = true
+	else:
+		k.h._ab_feedback("dash", "deny")
+
+## s until the well closes and frees her.
+func lock_left() -> float:
+	var open_t := float(xd()["time"])
+	return float(xd()["tell"]) - phase_t + open_t if phase == "tell" else open_t - phase_t
+
+## Frees Ostra from the cast pose (the well stays); a merge, a CC or the close ends it. A Shift held for the
+## close goes now (a merge drops it: `go_dash` false).
+func unlock(go_dash := true) -> void:
+	if not locked:
+		return
+	locked = false
+	aim_lock = Vector2.ZERO
+	k.play("ostra_well_end")
+	KitLooks.of(k.m).release("os_well_gather")
+	KitLooks.of(k.m).release("os_well_pull")
+	var go := dash_held and go_dash
+	dash_held = false
+	if go:
+		k.on_dash(false)
 
 ## The dome: everyone sees the well's exact size filling over the 1.0s before it opens.
 func _tick_tell(dt: float) -> void:
@@ -151,5 +216,6 @@ func _floor(p: Vector3) -> Vector3:
 ## It just stops: the disc folds in on itself, nothing bursts.
 func _close() -> void:
 	phase = ""
+	unlock()
 	k.m.fx.ring(center, radius * 0.4, DISC_COL, 0.2)
 	k.m.fx.burst(center + Vector3(0, 0.3, 0), Color("2a0a3a"), 10, -3.0, 0.3, 0.0, 0.9)
