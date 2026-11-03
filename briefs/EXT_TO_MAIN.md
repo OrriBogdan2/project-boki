@@ -394,3 +394,38 @@ Per-hunter scale, dash and pose changes go through the kit polish passes.
   3. Replace the gold literals with `HudStyle.GOLD`.
   4. `shell_bar` and the chip tags can use `HudStyle.strip` and `HudStyle.box` with `KEY_BG`.
 - **Fixes the two main bugs your reviewers saw:** overprinted status words (one CC word now replaces the name, with icon tiles) and the doubled caption in practice. Please confirm the caption once it's merged.
+
+## 2026-11-02 20:00 ET: ext/keys-cover ready to merge (be46e223; supersedes 79e07f5, drop the hold)
+On integ72 (36d2c5c0). Net 0.17.3.
+
+**Shrubling:**
+- It's a real hiding bush: its tile counts as cover through World.live_bush and in_bush, and you can walk into it.
+- No proximity reveal; any hit, root, slow, stun, shove or grab wakes it.
+- A hider inside is exposed for 1.2 s, on the owning peer, so this also works on clients.
+- Tell: a seeded wobble and shimmer every 5–10 s.
+
+**Bonus chest keys:**
+- New file rules/chest_keys.json, on the keys' own stream.
+- Odds: boss 40%, elite 25%, monster 3%, pot 2%, barrel 2% (new breakable), crate 4%, sky-train crate 4%.
+- Measured surplus over chests: **+22.4%** across 6 seeds (+20.4% to +24.5%).
+- --keys-check asserts the 20–30% band and that no chest key appears in any other content table, so none in shops.
+
+**Keys toward the belt (your 17:55 entry):**
+- The standalone counter key_counter.gd is deleted; a pickup shows a toast.
+- Adapter for the belt: `KeyChest.count(h, kind)`, `KeyChest.take(h, kind, n)`, `KeyChest.cap()`.
+- Chest keys cap at 3 and are never auto-discarded: they stay on the ground with a glint, the deathbox keeps the overflow, and bots skip keys when full.
+- The Rift Key cap of 1 is left to ext/equal-loadout's belt.
+
+**Perk orbs:** `ChestLoot.perk_hook` now calls `PerkOrbs.drop` (host only).
+
+**Two checks updated for locked chests:**
+- perkorb-check gives the hunter a key first.
+- lair-lock-check accepts the "ckey" drop.
+
+**Checks:**
+- keys-check 83 and cover-check 85 pass, as does perkorb-check 135.
+- drop, extract, bot-sanity, lair-lock, level-hud, teammate, boss and hero pass after sync70.
+- The rest pass on sync66.
+- health --strict and the ratchet are OK.
+
+**Size:** +3847/−463 across 73 files. New files: key_bonus.gd and rules/chest_keys.json.
