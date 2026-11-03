@@ -2,7 +2,7 @@
 
 Review shots for each hero: kit card, each ability, the payoff, animation frame strips and a neutral full-body portrait. PNGs are downscaled to at most 1280 px wide. Captions come from the shot manifests.
 
-Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult), [tamsin/v2/polish](#tamsin/v2/polish-tamsin/v2/polish), [moosh-moosh/v2/polish](#moosh-moosh/v2/polish-moosh-moosh/v2/polish), [vireo/v2/polish](#vireo/v2/polish-vireo/v2/polish), [venator/v2/polish](#venator/v2/polish-venator/v2/polish), [pin/v2/polish](#pin/v2/polish-pin/v2/polish), [bjorn/v2/polish](#bjorn/v2/polish-bjorn/v2/polish), [linwick/v2/polish](#linwick/v2/polish-linwick/v2/polish), [dredge/v2/polish](#dredge/v2/polish-dredge/v2/polish)
+Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-tender), [Tamsin](#tamsin-rimewright), [Dredge](#dredge-dredge), [Ashwick](#ashwick-ashwick), [Dolm](#dolm-dolm), [Ostra](#ostra-ostra), [Archer](#archer-archer), [Bulwark](#bulwark-bulwark), [Thief](#thief-thief), [Juggernaut](#juggernaut-juggernaut), [Farm building](#farm-building-farmbuild), [classes](#classes-classes), [aimkit](#aimkit-aimkit), [moosh-moosh/v2](#moosh-moosh/v2-moosh-moosh/v2), [moosh-moosh/v2/anim](#moosh-moosh/v2/anim-moosh-moosh/v2/anim), [tamsin/v2](#tamsin/v2-tamsin/v2), [tamsin/v2/anim](#tamsin/v2/anim-tamsin/v2/anim), [dancer/v2](#dancer/v2-dancer/v2), [dancer/v2/before](#dancer/v2/before-dancer/v2/before), [zedran/v2](#zedran/v2-zedran/v2), [zedran/v2/before](#zedran/v2/before-zedran/v2/before), [dancer/v2/anim](#dancer/v2/anim-dancer/v2/anim), [zedran/v2/anim](#zedran/v2/anim-zedran/v2/anim), [linwick/v2](#linwick/v2-linwick/v2), [linwick/v2/anim](#linwick/v2/anim-linwick/v2/anim), [linwick/v2/before](#linwick/v2/before-linwick/v2/before), [linwick/v2/after](#linwick/v2/after-linwick/v2/after), [dredge/v2](#dredge/v2-dredge/v2), [dredge/v2/anim](#dredge/v2/anim-dredge/v2/anim), [dredge/v2/before](#dredge/v2/before-dredge/v2/before), [dredge/v2/after](#dredge/v2/after-dredge/v2/after), [pin/v2](#pin/v2-pin/v2), [bjorn/v2](#bjorn/v2-bjorn/v2), [pin/v2/anim](#pin/v2/anim-pin/v2/anim), [bjorn/v2/anim](#bjorn/v2/anim-bjorn/v2/anim), [vireo/v2](#vireo/v2-vireo/v2), [vireo/v2/anim](#vireo/v2/anim-vireo/v2/anim), [venator/v2/anim](#venator/v2/anim-venator/v2/anim), [venator/v2](#venator/v2-venator/v2), [breah/v2](#breah/v2-breah/v2), [ostra/v2](#ostra/v2-ostra/v2), [breah/v2/anim](#breah/v2/anim-breah/v2/anim), [ostra/v2/anim](#ostra/v2/anim-ostra/v2/anim), [linwick/v2/ult](#linwick/v2/ult-linwick/v2/ult), [dredge/v2/ult](#dredge/v2/ult-dredge/v2/ult), [hunters](#hunters-hunters), [pin/v2/ult](#pin/v2/ult-pin/v2/ult), [bjorn/v2/ult](#bjorn/v2/ult-bjorn/v2/ult), [mooshmoosh/v2/ult](#mooshmoosh/v2/ult-mooshmoosh/v2/ult), [tamsin/v2/ult](#tamsin/v2/ult-tamsin/v2/ult), [dancer/v2/ult](#dancer/v2/ult-dancer/v2/ult), [zedran/v2/ult](#zedran/v2/ult-zedran/v2/ult), [tamsin/v2/polish](#tamsin/v2/polish-tamsin/v2/polish), [moosh-moosh/v2/polish](#moosh-moosh/v2/polish-moosh-moosh/v2/polish), [vireo/v2/polish](#vireo/v2/polish-vireo/v2/polish), [venator/v2/polish](#venator/v2/polish-venator/v2/polish), [pin/v2/polish](#pin/v2/polish-pin/v2/polish), [bjorn/v2/polish](#bjorn/v2/polish-bjorn/v2/polish), [linwick/v2/polish](#linwick/v2/polish-linwick/v2/polish), [dredge/v2/polish](#dredge/v2/polish-dredge/v2/polish), [breah/v2/ult](#breah/v2/ult-breah/v2/ult), [ostra/v2/ult](#ostra/v2/ult-ostra/v2/ult)
 
 ## Vireo (mage)
 
@@ -4171,3 +4171,39 @@ Heroes: [Vireo](#vireo-mage), [Marlowe](#marlowe-gunslinger), [Linnet](#linnet-t
 **Brass Broadside wave at gameplay zoom: the brass fan and burst after the blend change**
 
 ![Brass Broadside wave at gameplay zoom: the brass fan and burst after the blend change](dredge/v2/polish/dr_ult_wave_game.png)
+
+## breah/v2/ult (breah/v2/ult)
+
+**Basalt Spine telegraph while X is held: the pale 19.8m line with inward chevrons and a centre ring at the cursor, already dragged round its centre to a diagonal (only Breah sees it); the X slot shows the 45s cooldown**
+
+![Basalt Spine telegraph while X is held: the pale 19.8m line with inward chevrons and a centre ring at the cursor, already dragged round its centre to a diagonal (only Breah sees it); the X slot shows the 45s cooldown](breah/v2/ult/breah_ult_telegraph.png)
+
+**Basalt Spine key frame just after the release: both fists driven into the ground, the first basalt rock erupting at the ridge's centre beside the dummy (it takes the 1-damage slow hit)**
+
+![Basalt Spine key frame just after the release: both fists driven into the ground, the first basalt rock erupting at the ridge's centre beside the dummy (it takes the 1-damage slow hit)](breah/v2/ult/breah_ult_key.png)
+
+**Basalt Spine impact: the full ridge of molten-cracked basalt rocks standing along the dragged line, the dummy shoved off the line and slowed, the Boki bond meter on R at 61% from the land**
+
+![Basalt Spine impact: the full ridge of molten-cracked basalt rocks standing along the dragged line, the dummy shoved off the line and slowed, the Boki bond meter on R at 61% from the land](breah/v2/ult/breah_ult_impact.png)
+
+**Basalt Spine animation strip (breah_spine_aim, breah_spine): wide low crouch while aiming, fists swung up on release, slammed into the ground, held down through the rise, the heave up as the ridge stands, settle**
+
+![Basalt Spine animation strip (breah_spine_aim, breah_spine): wide low crouch while aiming, fists swung up on release, slammed into the ground, held down through the rise, the heave up as the ridge stands, settle](breah/v2/ult/breah_ult_strip.png)
+
+## ostra/v2/ult (ostra/v2/ult)
+
+**Nightwell telegraph: the pale dome of the well's exact size (3.6m) at the cursor beside the dummy, filling over 1.0s (everyone sees it); the lantern thrust toward it; X slot at 64s**
+
+![Nightwell telegraph: the pale dome of the well's exact size (3.6m) at the cursor beside the dummy, filling over 1.0s (everyone sees it); the lantern thrust toward it; X slot at 64s](ostra/v2/ult/ostra_ult_telegraph.png)
+
+**Nightwell key frame as it opens: the dark violet disc with turning light arms and black orbs on the rim, the dummy caught (one STUNNED word), the bond meter on R at 61%**
+
+![Nightwell key frame as it opens: the dark violet disc with turning light arms and black orbs on the rim, the dummy caught (one STUNNED word), the bond meter on R at 61%](ostra/v2/ult/ostra_ult_key.png)
+
+**Nightwell impact 1s in: the dummy drawn from 2.1m out to the middle and held stunned, small ticks adding up (total 2), Ostra free and standing aside**
+
+![Nightwell impact 1s in: the dummy drawn from 2.1m out to the middle and held stunned, small ticks adding up (total 2), Ostra free and standing aside](ostra/v2/ult/ostra_ult_impact.png)
+
+**Nightwell animation strip (ostra_well, ostra_well_snap): rest, the lantern hand thrust up and out at the spot, held while the dome shows, the hand clenching down as the well opens, settle**
+
+![Nightwell animation strip (ostra_well, ostra_well_snap): rest, the lantern hand thrust up and out at the spot, held while the dome shows, the hand clenching down as the well opens, settle](ostra/v2/ult/ostra_ult_strip.png)
