@@ -303,7 +303,7 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 | bulwark | Frozen Bulwark | Bjorn | M | ice themed; a massive shield; a big man dressed for the cold, frozen outfit |
 | mage | Storm Slayer | Vireo | F | badass and revolutionary: tattoos, shows skin, leather jacket, jewellery |
 | gunslinger | Hired Gun | Venator | F | marine-like, but a cool marine |
-| ashwick | Mad Pyromancer | *Cinder* (new, owner 06:53 UTC: Linwick becomes a woman with a fiery name) | F | chemist-looking outfit (goggles, apron, flasks) |
+| ashwick | Mad Pyromancer | *Cinder* (new, owner 06:53 UTC: Linwick becomes a woman with a fiery name) | F | salamander-folk woman (owner pick): slim lizard woman with ember-speckled scales, a frilled crest that flares when she casts, a long tail, slit pupils behind cracked goggles; mad-chemist outfit (goggles, apron, bandoliers of flasks) |
 | dredge | Broken Abomination | Dredge | robot | a broken robot with corruption and evil energy leaking out; creepy, haunted machine |
 | tender | Fox Cub | Moosh Moosh | F | small and fiery like a fox; if another race, a small version of it with red markings and fox features (ears, tail) |
 | rimewright | Icy Dancer | Tamsin | F | (no change requested beyond the ice-skater theme) |
