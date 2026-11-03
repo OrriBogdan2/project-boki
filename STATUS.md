@@ -1,4 +1,4 @@
-2026-11-03T03:13:29Z
+2026-11-03T04:00:10Z
 
 ext/classes | 133574d | READY TO MERGE (rework per INBOX 01:55 + 02:00, on main b8dbfb0) | 0.16.0 (no new sync; save stays v6, adds early_used/told) | full suite 0 failures; --hunter-unlock-check (alias --class-unlock-check) 90 checks; simtest seed-5 wipe same as main. Hunters wording everywhere, weight labels gone, pick 1 at creation + 2 early free picks, HunterViewer (turntable + looping ability moves), hold-to-unlock (1.6 s) with reveal. X row shows only when hero data has "x". Expect wiki conflicts with kitfix renames (Classes.md, sidebar). Owner Qs: all 12 as starters or fewer? early goals (placeholder: play 1, extract 1)? keep per-Hunter goals/levels? 1.6 s hold OK? merge_forms text still says "weight class" (reserved); Arena "Heavy dummy".
 ext/hero-shots | 3bd0520 | done: 12 heroes + farm building + classes; all portraits show signature weapons | - | -
