@@ -3166,9 +3166,10 @@ func _update_shots(dt: float) -> void:
 			# terrain and rocks
 			var gp := world.ground_at(p.x, p.z)
 			var over_ok: bool = sx.has("dy") and gp <= float(sx["gmax"]) + 0.05
-			# rocks: a Grapnel flies over rocks and props
-			var rock_hit: bool = world.is_block(p.x, p.z) and gp + World.BLOCK_H > p.y and not sx.get("rocks", false)
-			if rock_hit or (gp > p.y and not over_ok):
+			# a Grapnel pierces terrain: it flies over rocks and props and through cliff faces
+			var pierces: bool = sx.get("pierce_terrain", false)
+			var rock_hit: bool = world.is_block(p.x, p.z) and gp + World.BLOCK_H > p.y and not pierces
+			if rock_hit or (gp > p.y and not over_ok and not pierces):
 				if int(sx.get("bounce", 0)) > 0:
 					# ricochet: flip whichever way took it into the wall and keep going
 					var back := p - step / n
