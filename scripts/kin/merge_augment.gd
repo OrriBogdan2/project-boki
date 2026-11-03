@@ -135,7 +135,6 @@ static func _dash(h: Hunter) -> void:
 		h.haste_t = maxf(h.haste_t, float(d["haste_s"]))
 		h.m.sfx("whoosh", h.pos, -4.0, 1.3)
 		return
-	h.m.fx.ring(h.pos, 1.6, Color(col, 0.8), 0.25)
 	h.m.fx.word(h.pos + Vector3(0, 2.6, 0), String(d.get("name", "")).to_upper(), col)
 	match kind:
 		"sweep":
@@ -146,7 +145,6 @@ static func _dash(h: Hunter) -> void:
 			h.m.fx.dust(h.pos, 8)
 		"reflect":
 			st["dash"]["mirror"] = h.m.verbs.add_mirror(h, {"arc": float(d["arc"]), "radius": float(d["radius"]), "time": float(d["window"]), "dmg_k": float(d["dmg_k"]), "color": col.to_html(false)})
-	_announce(h, "e", 1.6)
 
 static func _apply(h: Hunter, t: Ent, dmg: float, r: Dictionary) -> void:
 	if r.has("burn"):
