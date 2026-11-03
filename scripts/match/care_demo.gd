@@ -52,7 +52,10 @@ static func tick(A: Arena, dt: float, w: String) -> void:
 	var arch := String(parts[1])
 	var what := String(parts[2])
 	var spec: Dictionary = SPEC.get(arch + "_" + what, {})
-	if spec.is_empty(): return
+	if spec.is_empty():
+		push_error("care demo: no SPEC for %s_%s" % [arch, what])
+		A.m.get_tree().quit()
+		return
 	var m := A.m
 	var P: Hunter = m.player
 	var t := float(A.get_meta("care_t", 0.0)) + dt

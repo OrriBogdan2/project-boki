@@ -224,7 +224,7 @@
 "semicolon": 1
 },
 "scripts/core/settings.gd": {
-"long_line": 20,
+"long_line": 19,
 "nested_ternary": 1,
 "semicolon": 4
 },
@@ -622,7 +622,7 @@
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
-"long_line": 128,
+"long_line": 127,
 "nested_ternary": 6,
 "semicolon": 102
 },
