@@ -8,8 +8,8 @@ _Generated from `scripts/core/data.gd`, `scripts/match/life.gd`, `content/rules`
 | Tier | Monsters | Loot | Wild Boki levels | Unlocks after | Boki at risk | What happens |
 |---|---|---|---|---|---|---|
 | The Meadow | x1 | x1 | 1 to 3 | 0 extractions | no | Gentle islands. Your Boki are always safe here: lose your loot, never your Boki. |
-| Dusk Isles | x1.45 | x1.75 | 2 to 5 | 2 extractions | in your deathbox | Tougher monsters, more loot, rarer Boki. Boki you have on you drop into your deathbox when you die, and anyone can loot them. Boki out of your hands escape. |
-| The Hollow | x2 | x2.75 | 4 to 8 | 5 extractions | can be captured | Brutal and rich. Boki on you drop into your deathbox and can be looted, and a Boki left out in the world can be scanned and taken (knock it out, then hold the interact key). |
+| Dusk Isles | x1.45 | x1.75 | 2 to 5 | 2 extractions | no | Tougher monsters, more loot, rarer Boki. Your Boki is always safe here: it goes home with you if you fall. |
+| The Hollow | x2 | x2.75 | 4 to 8 | 5 extractions | dropped dazed, can be scanned | Brutal and rich. If you fall your Boki drops dazed beside your deathbox and guards it. Get revived and run into it to pick it up, or a rival can scan it and take it (knock it out, then hold the interact key). |
 
 ## Match
 
@@ -64,8 +64,9 @@ The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, 
 | merge_leap_range | 32 |
 | land_stagger | {"radius": 1.7, "stun": 0.7, "kb": 3.0, "dmg_k": 0.8} |
 | recall_hit | {"width": 0.9, "dmg_k": 1.0, "stun": 0.35, "kb": 5.0} |
+| loss | {"desc": "Losing a Boki (docs/decisions/0008). loss_min_tier: tiers below it are safe (your Boki goes home with you when you die); from it up, a Boki drops dazed when its hunter dies, guards the spot, and can be scanned by an enemy. bond_ping_s: seconds between map pings of the hunter carrying a captured Boki. guard_r: metres from the deathbox a dropped Boki stands.", "loss_min_tier": 2, "bond_ping_s": 15.0, "guard_r": 1.4} |
 | regen | {"carried_pct_s": 0.06, "out_pct_s": 0.015, "out_delay_s": 6.0, "desc": "Health a Boki wins back on its own, as a share of max health per second: on you (Return, settled) 6%/s; out beside you 1.5%/s once it has gone out_delay_s without taking damage. A downed Boki never regenerates (rescue it). Kin.regen_quiet counts the seconds since it last lost health; Blight cuts it like any healing."} |
-| down | {"recover_s_trusting": 15.0, "recover_s_wary": 20.0, "recover_hp": 0.2, "rescue_hp": 0.6, "rescue_s": 3.5, "rescue_r": 1.5, "rescue_drain_s": 2.0, "rescue_block_s": 0.6, "rescue_slack": 0.7, "contest_r": 1.2, "rescue_kneel_frac": 0.12, "rescue_done_s": 0.45} |
+| down | {"recover_s_trusting": 15.0, "recover_s_wary": 20.0, "recover_hp": 0.2, "rescue_hp": 0.6, "rescue_s": 3.5, "rescue_r": 1.5, "rescue_block_s": 0.6, "contest_r": 1.2, "carry_speed_k": 0.9, "carry_lift_s": 0.3, "rescue_done_s": 0.45} |
 | follow | {"separation_r": 1.2, "path_every_s": 0.45, "path_goal_moved": 3, "path_fail_backoff_s": 1.5, "path_lookahead": 8, "path_window": 12, "stuck_s": 1.0, "hop_dur": 0.38, "hop_height": 1.1, "hop_on_air_s": 0.4, "hop_off_steady_s": 0.35, "away_dist": 8.0, "combat_radius": 12.0, "hesitate_s": 0.3, "sic_cd": 1.0, "sic_speed": 18.0, "engage_range": 9.0, "disengage_range": 4.0, "guard_leash": 24.0, "chase_leash": 30.0} |
 | follow_doc | stuck_s: seconds without progress before the hop back. hop_on_air_s: seconds you are off the ground before it hops on (when it cannot walk where you land). hop_off_steady_s: seconds steady on the ground before it hops off again. disengage_range: m; after an explicit Follow in a fight, a foe hitting the Boki or you from this close sends it back into the fight. away_dist: farther than this and a G tap is Call back (else Sic). combat_radius: a foe this close to you or the target means a fight (orders are never refused). path_window: tiles of margin round the trip for the A* search. path_every_s: seconds between searches; path_goal_moved: tiles the goal may move before it searches early; path_fail_backoff_s: wait after a search that found nothing; path_lookahead: path tiles checked ahead for a straight line. separation_r: m it keeps from you. |
 | wheel | {"deadzone_px": 30, "pop_s": 0.14, "radius_px": 92} |
@@ -105,6 +106,22 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 | rise_pitch | [0.8, 1.6] |
 | sight_range | 24 |
 | sight_places_kept | 3 |
+
+## chest_keys (`content/rules/chest_keys.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Bonus chest keys on top of the carrier quota (docs/decisions/0007-keys-and-cover.md, scripts/match/key_bonus.gd). Odds are chances per source; a {odds, two} source gives 2 keys on 'two' of its hits. Low on purpose, so a spare key feels like luck. Rolled on the keys' own seeded stream (seed_add), so no other loot shifts. Target: 20-30% more keys than chests on an average match (--keys-check measures it). Keys are never sold in shops. |
+| seed_add | 977 |
+| boss | {"odds": 0.4, "two": 0.25} |
+| elite | {"odds": 0.25, "two": 0.15} |
+| monster | 0.03 |
+| pot | 0.02 |
+| crate | 0.04 |
+| barrel | 0.02 |
+| train_crate | 0.04 |
 
 ## dash_feel (`content/rules/dash_feel.json`)
 
@@ -148,13 +165,25 @@ The farm building pass (docs/decisions/0004-farm-building.md). Farm level is poi
 
 | Setting | Value |
 |---|---|
-| _doc | Drop tables for gear and weapon tunings (scripts/match/gear_drops.gd). Each table is a list of rolls: kind gear (a piece for one of the five slots) or tune (a weapon upgrade pickup, brand = an element one). chance = odds the roll happens; bonus = rarity steps up; min_rar = the lowest rarity it can be (0 Common .. 4 Legendary); slot = force a slot (glove, passive, armor, boots, kit). Bosses drop fewer, higher-value items. extract_mats: farm materials an extracted piece of gear also gives, by rarity (Common..Legendary). |
+| _doc | Drop tables for gear and weapon tunings (scripts/match/gear_drops.gd). Each table is a list of rolls: kind gear (a piece for one of the five slots) or tune (a weapon upgrade pickup, brand = an element one). chance = odds the roll happens; bonus = rarity steps up; min_rar = the lowest rarity it can be (0 Common .. 4 Legendary); slot = force a slot (glove, passive, armor, boots, kit). Bosses drop fewer, higher-value items. extract_mats: farm materials an extracted piece of gear also gives, by rarity (Common..Legendary). The chest table is the one chest type (all chests are locked, see content/rules/keys.json). |
 | rarity_weights | [30, 36, 22, 9, 3] |
 | slot_weights | {"glove": 3.0, "passive": 1.5, "armor": 2.0, "boots": 2.0, "kit": 1.5} |
 | ground_spacing | 1.25 |
-| tables | {"ground": [{"kind": "gear", "chance": 1.0}], "cache": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}], "crate": [{"kind": "gear", "chance": 0.12}, {"kind": "tune", "chance": 0.08}], "chest0": [{"kind": "gear", "chance": 0.55}, {"kind": "tune", "chance": 0.3}], "chest1": [{"kind": "gear", "chance": 0.9, "bonus": 1}, {"kind": "gear", "chance": 0.3}, {"kind": "tune", "chance": 0.55}], "chest2": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}, {"kind": "gear", "chance": 0.5, "bonus": 1}, {"kind": "tune", "chance": 0.9}, {"kind": "tune", "chance": 0.35, "brand": true}], "brute": [{"kind": "gear", "chance": 0.4}, {"kind": "tune", "chance": 0.3}], "sentinel": [{"kind": "gear", "chance": 0.4}, {"kind": "tune", "chance": 0.2}], "warden": [{"kind": "gear", "chance": 1.0, "bonus": 2, "min_rar": 2}, {"kind": "tune", "chance": 1.0, "brand": true}], "glimmer": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}, {"kind": "tune", "chance": 0.7}], "bl_skitter": [{"kind": "tune", "chance": 0.07}, {"kind": "gear", "chance": 0.05}], "bl_warden": [{"kind": "gear", "chance": 0.55, "bonus": 1}, {"kind": "tune", "chance": 0.7}], "boss": [{"kind": "gear", "chance": 1.0, "min_rar": 3, "legendary": 0.3}, {"kind": "tune", "chance": 1.0, "brand": true}]} |
+| tables | {"ground": [{"kind": "gear", "chance": 1.0}], "cache": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}], "crate": [{"kind": "gear", "chance": 0.12}, {"kind": "tune", "chance": 0.08}], "brute": [{"kind": "gear", "chance": 0.4}, {"kind": "tune", "chance": 0.3}], "sentinel": [{"kind": "gear", "chance": 0.4}, {"kind": "tune", "chance": 0.2}], "warden": [{"kind": "gear", "chance": 1.0, "bonus": 2, "min_rar": 2}, {"kind": "tune", "chance": 1.0, "brand": true}], "glimmer": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}, {"kind": "tune", "chance": 0.7}], "bl_skitter": [{"kind": "tune", "chance": 0.07}, {"kind": "gear", "chance": 0.05}], "bl_warden": [{"kind": "gear", "chance": 0.55, "bonus": 1}, {"kind": "tune", "chance": 0.7}], "boss": [{"kind": "gear", "chance": 1.0, "min_rar": 3, "legendary": 0.3}, {"kind": "tune", "chance": 1.0, "brand": true}], "chest": [{"kind": "gear", "chance": 0.9, "bonus": 1}, {"kind": "gear", "chance": 0.3}, {"kind": "tune", "chance": 0.55}]} |
 | bot_start | {"easy": {"slots": 0, "bonus": 0}, "medium": {"slots": 1, "bonus": 0}, "hard": {"slots": 2, "bonus": 0}, "expert": {"slots": 3, "bonus": 1}} |
 | extract_mats | [{"wood": 1}, {"wood": 1}, {"wood": 1, "stone": 1}, {"stone": 2, "scrap": 1}, {"stone": 3, "scrap": 3}] |
+
+## keys (`content/rules/keys.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Chests, keys and the bush mimic (docs/decisions/0007-keys-and-cover.md; scripts/match/key_run.gd, chest_loot.gd, shrubling.gd). There is one chest type. It is locked: opening it costs one key. Keys come from monsters: in every region the number of key carriers equals the number of chests there. Which monsters carry them is rolled per match on its own seeded stream (seed_mul / seed_add). |
+| chest | {"hold_s": 1.1, "gems": [7, 9], "gem_base": 4, "seed_odds": 0.85, "valuable_odds": 0.7, "valuable_tier": 1, "tonic_odds": 0.7, "table": "chest", "tier_bonus": [0, 0, 1], "rift_key_min_bonus": 2, "rift_key_odds": 0.35, "soul_ember_odds": 0.3} |
+| keys | {"seed_mul": 7717, "seed_add": 31, "no_carry": ["ward", "glimmer", "warden", "sentinel"], "glint_h": 1.9, "pickup_pull": 2.2, "cap": 3, "cap_doc": "Chest keys one hunter can hold (a belt stack). Past it a key stays on the ground, glinting."} |
+| shrubling | {"count": [1, 3], "biomes": ["bloom", "meadow", "gloom", "storm"], "min_patches": 3, "sprint_r": 18.0, "min_gap": 22.0, "landing_clear": 14.0, "exit_clear": 10.0, "hp": 26.0, "tier_hp": 0.5, "relax_r": 7.0, "alert_t": 0.4, "flee_speed": 6.5, "weave_amp": 0.5, "weave_amp_seen": 0.95, "weave_hz": 1.7, "repath_s": 0.7, "hide_clear_r": 8.5, "hide_los_r": 5.0, "dive_t": 0.35, "expose_s": 1.2, "tell_s": [5.0, 10.0], "grounded_speed": 0.55, "gems": 6} |
+| cover | {"biome_targets": {"bloom": [0.15, 0.2], "meadow": [0.085, 0.12], "gloom": [0.04, 0.075], "storm": [0.02, 0.04], "ember": [0.015, 0.032], "frost": [0.0, 0.01]}} |
 
 ## How Boki fight (`content/rules/kin_ai.json`)
 
@@ -197,9 +226,10 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | ult_lock_s | 1.5 |
 | warn_s | 3 |
 | release_rest_s | 6 |
+| timeout_rest_s | 10 |
 | afterglow | {"secs": 3.0, "move_speed": 0.15, "shield_frac": 0.08} |
 | damage_cap | 0.2 |
-| window_note | warn_s: the last seconds of the window flash, tick and pulse; release_rest_s: how long the Boki rests beside you after you release with the ultimate (no C, no orders, carried bonuses on); a merge that times out has no rest. afterglow: after a release the hunter gets secs seconds of move_speed (x) and a shield of shield_frac of max health. damage_cap: the most the stat-based damage bonus can total while merged (x); gear and perks you already had are never cut. |
+| window_note | warn_s: the last seconds of the window flash, tick and pulse; release_rest_s: how long the Boki rests beside you after you release with the ultimate (no C, no orders, carried bonuses on); timeout_rest_s: a merge that runs out of time instead (no release) leaves the Boki resting this long, so releasing is always the better play. afterglow: after a release the hunter gets secs seconds of move_speed (x) and a shield of shield_frac of max health. damage_cap: the most the stat-based damage bonus can total while merged (x); gear and perks you already had are never cut. |
 | xform_note | seconds: the transformation lasts 0.7 and you are invulnerable for all of it; the Boki lands in you at 0.45 (flash, shockwave, the silhouette pops in); the Merge key again unlocks 1.5s after the form appears |
 | fallback | {"haste": 0.12, "size": 1.0, "ult_s": 0.5, "burst": {"radius": 4.0, "dmg": 24, "kb": 8.0}, "note": "haste = faster class-ability cooldowns (x); burst = the basic ultimate of a Boki without a form: m radius, hp damage, knockback; ult_s = its wind-up in seconds"} |
 | surge | {"name": "Surge", "duration": 3.0, "color": "#e8f4ff", "passives": [["damage", 0.1], ["move_speed", 0.1]], "haste": 0.12, "flavor": "No Boki at your side: a weak burst of resolve. 3s of 10% more damage, speed and faster abilities."} |

@@ -2,7 +2,7 @@ class_name MergeMoves
 extends RefCounted
 ## Keyed full-body poses of the merged forms and of the rescue (HunterAnim.km_sample reads MOVES after its own KMOVES).
 ## Same channels as HunterAnim.KMOVES (p y r lift fx fz fy sq lw hw rw legs fl fr): "mf_*" are the forms' moves
-## (transformation, ultimate), "rs_*" the rescue (kneel, cradle, stand up).
+## (transformation, ultimate), "rs_*" the rescue (carry, stand up).
 ## A move with "hold": true stays on its last key until another replaces it. Forward is -z in the hand keys.
 
 const UP_L := Vector3(-0.12, 0.6, -0.1)
@@ -22,13 +22,10 @@ const MOVES := {
 	"mf_ult": {"hold": true, "keys": [
 		[0.0, {}],
 		[0.2, {"p": 0.35, "lift": 0.18, "sq": -0.25, "fl": UP_L, "fr": UP_R, "hw": 1.0, "rw": 1.0, "lw": 1.0, "legs": [-0.2, -0.3, -0.2, -0.3]}]]},
-	# the rescue: down on a knee, then the Boki lifted and cradled; a pop to stand up
-	"rs_kneel": {"hold": true, "keys": [
+	# the rescue: the Boki lifted into the arms and carried (the legs keep running)
+	"rs_carry": {"hold": true, "keys": [
 		[0.0, {}],
-		[0.3, {"p": 0.5, "lift": -0.32, "sq": 0.3, "lw": 1.0, "legs": [1.2, -1.9, 0.2, -1.3], "fl": Vector3(-0.1, -0.1, -0.5), "fr": Vector3(0.1, -0.1, -0.5), "hw": 1.0, "rw": 1.0}]]},
-	"rs_cradle": {"hold": true, "keys": [
-		[0.0, {"p": 0.5, "lift": -0.32, "sq": 0.3, "lw": 1.0, "legs": [1.2, -1.9, 0.2, -1.3], "fl": Vector3(-0.1, -0.1, -0.5), "fr": Vector3(0.1, -0.1, -0.5), "hw": 1.0, "rw": 1.0}],
-		[0.6, {"p": 0.3, "lift": -0.16, "sq": 0.15, "lw": 1.0, "legs": [0.7, -1.1, 0.1, -0.7], "fl": Vector3(-0.12, 0.3, -0.4), "fr": Vector3(0.12, 0.3, -0.4), "hw": 1.0, "rw": 1.0}]]},
+		[0.3, {"p": 0.2, "lift": -0.05, "fl": Vector3(-0.12, 0.3, -0.4), "fr": Vector3(0.12, 0.3, -0.4), "hw": 1.0, "rw": 1.0}]]},
 	"rs_done": {"keys": [
 		[0.0, {"p": 0.3, "lift": -0.16, "fl": Vector3(-0.12, 0.3, -0.4), "fr": Vector3(0.12, 0.3, -0.4), "hw": 1.0, "rw": 1.0}],
 		[0.15, {"p": -0.2, "lift": 0.15, "sq": -0.25, "fl": UP_L, "fr": UP_R, "hw": 1.0, "rw": 1.0}],

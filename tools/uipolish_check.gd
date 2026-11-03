@@ -20,9 +20,8 @@ var n := 0
 
 ## Files that may still build their own boxes: the HUD (ext/hudref owns its look) and reserved files.
 const ALLOWED := ["scripts/ui/hud.gd", "scripts/ui/kin_reveal.gd"]
-## Reserved files that still name a removed setting (handed to the main session, SETTINGS_AUDIT.md).
-const REMOVED_READ_OK := ["scripts/combat/kin_tactics.gd"]
-const STYLE_MODULE := ["scripts/ui/ui.gd", "scripts/ui/ui_theme.gd", "scripts/ui/ui_frame.gd", "scripts/ui/ui_skin.gd"]
+const STYLE_MODULE := ["scripts/ui/ui.gd", "scripts/ui/ui_theme.gd", "scripts/ui/ui_frame.gd", "scripts/ui/ui_skin.gd",
+	"scripts/ui/hud_style.gd"]
 const AA := 4.5          # WCAG AA for body text
 const AA_LARGE := 3.0    # ... for large text (titles, stat numbers)
 
@@ -91,7 +90,7 @@ func _settings_read(src: Dictionary) -> void:
 func _removed(src: Dictionary) -> void:
 	for k in Settings.REMOVED:
 		var reads: Array = _uses(src, String(k)).filter(func(p):
-			return not p in REMOVED_READ_OK and p != "scripts/core/settings.gd")
+			return p != "scripts/core/settings.gd")
 		var gone := not Settings.DEFAULTS.has(k) and not Settings.v.has(k)
 		ok("removed '%s': not a setting, nothing reads it" % k, gone and reads.is_empty(), str(reads))
 		ok("removed '%s': get_v gives nothing (off)" % k, Settings.get_v(String(k)) == null)

@@ -23,7 +23,7 @@ static func class_ults() -> bool:
 ## else "". A press held past g_hold_s opens the wheel (KinWheel), and letting go picks. `blocked`: a menu
 ## or map is up (the press is ignored).
 static func poll(h: Hunter, dt: float, blocked: bool) -> String:
-	if blocked:
+	if blocked or KinLoss.rescuing(h) != null:
 		h.inp["g_t"] = 0.0; h.inp["g_fired"] = true      # swallow the rest of this press: no tap on release
 		h.inp.erase("wheel")
 		return ""
@@ -155,7 +155,7 @@ static func chase_pick(h: Hunter) -> Ent:
 	var best: Ent = null
 	var bd := 1e9
 	for f in h.m.foes_of(h.team):
-		if f.dead or not f.hittable() or (f is Hunter and f.downed):
+		if f.dead or not f.hittable() or (f is Hunter and f.downed) or Shrubling.hidden(f):
 			continue
 		if f.flat_dist(h) > float(rules()["follow"]["engage_range"]) * 2.0:
 			continue

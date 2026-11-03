@@ -3643,13 +3643,13 @@ func _open_expedition() -> void:
 		var td: Dictionary = Data.TIERS[i]
 		var locked := ex < int(td["unlock"])
 		var ti := i
-		var tc := UI.tile_card(exp_tier == i and not locked, (func(): exp_tier = ti; _open_expedition()) if not locked else Callable(), 12, UI.BAD if td["risk_kin"] else UI.ACCENT)
+		var tc := UI.tile_card(exp_tier == i and not locked, (func(): exp_tier = ti; _open_expedition()) if not locked else Callable(), 12, UI.BAD if KinLoss.at_risk(i) else UI.ACCENT)
 		var th := UI.hbox(12); tc.add_child(th)
 		var tv := UI.vbox(2); tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		th.add_child(tv)
 		var nrow := UI.hbox(8)
 		nrow.add_child(UI.label(String(td["name"]), UI.T_HEAD, UI.INK if not locked else UI.MUTED, UI.big))
-		if td["risk_kin"]: nrow.add_child(UI.tag("Boki at risk", UI.BAD))
+		if KinLoss.at_risk(i): nrow.add_child(UI.tag("Boki at risk", UI.BAD))
 		tv.add_child(nrow)
 		if locked:
 			var need := int(td["unlock"]) - ex
@@ -3659,7 +3659,7 @@ func _open_expedition() -> void:
 			tc.focus_mode = Control.FOCUS_NONE
 			tc.mouse_default_cursor_shape = Control.CURSOR_ARROW
 		elif exp_tier == i:
-			tv.add_child(UI.para(String(td["desc"]), UI.T_SMALL, Color("ffb3a8") if td["risk_kin"] else UI.MUTED))
+			tv.add_child(UI.para(String(td["desc"]), UI.T_SMALL, Color("ffb3a8") if KinLoss.at_risk(i) else UI.MUTED))
 		right.add_child(tc)
 	HomeFreeKit.card(right)      # the free-kit run (home_freekit.gd)
 	right.add_child(UI.spacer(2))
@@ -3911,7 +3911,7 @@ func _confirm_start() -> void:
 		wv.add_child(wr)
 		return
 	var td: Dictionary = Data.TIERS[exp_tier]
-	if not td.get("risk_kin", false):
+	if not KinLoss.at_risk(exp_tier):
 		_start_match()
 		return
 	var v := _new_panel("Your Boki can be lost", 640)
@@ -3920,10 +3920,8 @@ func _confirm_start() -> void:
 		if rec.get("uid", "") in [Save.d.get("active", ""), Save.d.get("active2", "")]:
 			names.append(String(rec.get("name", "your Boki")))
 	var who := " and ".join(names) if not names.is_empty() else "the Boki you bring"
-	var lines := ["In %s, if you die, %s drop into your deathbox. Anyone who loots it takes them, and a rival who gets them out keeps them." % [td["name"], who]]
-	if td.get("loose_capture", false):
-		lines.append("Boki out of your hands (thrown or fighting) can also be captured while you're dead.")
-	lines.append("If a rival takes your Boki you can chase them down in the match (they're marked and you're faster heading their way), get a teammate to bring you back at your box, or ask for them back after the run.")
+	var lines := ["In %s, if you die, %s drops dazed beside your deathbox and guards it. Get revived and run into it to pick it up. A rival can scan it and take it." % [td["name"], who]]
+	lines.append("If a rival takes your Boki you feel its pull: an arrow points at them and their spot pings on your map. Knock them out and it drops, and you can pick it up. If they get out with it, or nobody picks it up, it is lost to the Ransom House.")
 	for ln in lines:
 		var l := UI.label(ln, 15, UI.INK)
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
