@@ -185,7 +185,7 @@ func _find_threat() -> void:
 	var o := h()
 	var bd := 10.0
 	for f in m.foes_of(o.team):
-		if f == k or (f is Kin and (f as Kin).owner_h == o):
+		if f == k or (f is Kin and (f as Kin).owner_h == o) or Shrubling.hidden(f):
 			continue
 		if f is Mob and not ((f as Mob).tgt == o or (f as Mob).tgt == k or o.flat_dist(f) < 5.0):
 			continue

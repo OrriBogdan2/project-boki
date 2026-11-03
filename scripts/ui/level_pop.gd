@@ -1,7 +1,7 @@
 class_name LevelPop
 extends RefCounted
 ## The level-up pop: a banner under the top of the screen that says which level you reached and what
-## got better (the weapon step on even levels, the skill point on every level). It fades after a few
+## got better (the weapon step on even levels; odd levels get a toast, see Hud.level_up). It fades after a few
 ## seconds. State lives on the Hud as `lvl_note` ({lvl, info, t0}).
 
 const HOLD := 3.4         # seconds on screen, fades included

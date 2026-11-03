@@ -1120,6 +1120,8 @@ func level_up(lv: int, info := {}) -> void:
 	if lv % 2 == 0:      # only even levels, where the weapon takes its step, get the banner and the gold wash
 		LevelPop.start(self, lv, info)
 		flash(Color("ffd27a"), 0.16)
+	else:
+		toast("LEVEL %d  ·  +1 skill point" % lv, Color("ffd27a"))
 
 ## The archetype resource under the health bar, with its name and tells (ARCHETYPES §3.2).
 func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:

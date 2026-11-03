@@ -1,5 +1,5 @@
 extends RefCounted
-## --cover-check: the Hollow Crown's hiding cover (docs/decisions/0007-keys-and-cover.md; the map is
+## --cover-check: the Hollow Crown's hiding cover (docs/decisions/0009-keys-and-cover.md; the map is
 ## built by tools/make_hollowcrown.py). For several match seeds it builds the real world and checks:
 ##   1. the share of walkable ground in tall grass, per biome, against content/rules/keys.json "cover",
 ##      and the order bloom > meadow > gloom > storm and ember > frost (the shares are printed)
