@@ -1,12 +1,13 @@
 # S2 status (second server session)
-Updated: 2026-11-03 07:54 UTC (git/server clock; earlier S2 entries were ~1 h ahead, sorry). Last INBOX_S2 entry handled: 08:10 UTC (mantle look).
+Updated: 2026-11-03 08:00 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
 
 ## Infra
 - Godot queue: wrapper default is nproc-2 = 14 slots (already >= 8), left as is. S1: no change needed.
 - Agents (6 max per 07:30): ALL hero agents on Opus 5.5 medium per 08:00 (the Sonnet Breah/Ostra/Tamsin+Dredge agents were stopped at ~07:20 real UTC and replaced by Opus agents continuing from their commits), Breah, Ostra, Tamsin+Dredge, Zedran 21/22/35 (Opus 5.5 medium per owner), prologue-polish (Opus 5.5 medium, allowed by 07:45), dash-flow base (Opus 5.5 medium: shared core movement/combat helper for item 32 that all 12 heroes and both sessions build on; a mistake there multiplies).
 - Source data copy: /home/boki/briefs-s2/briefs (from ext/agent-briefs).
 
-## Item 32 shared base (for S1 too): PUSHED, ext/dash-flow-base @ d4182fa (on main 801bfbf), full suite running
+## Item 32 shared base (for S1 too): READY TO MERGE, ext/dash-flow-base @ d4182fa (on main 801bfbf)
+- Full suite (94 checks incl. --check and simtest seed 5): every failure also fails on plain main 801bfbf (abyss 2, blight 1, grammar-runtime 4, hitch/load timing on a busy box, perch 4 spires, train 1, pack-ui 2 slot drops); farm-start and one pack-ui 'Wear' click failed once on the branch and passed on rerun (flaky). Logs: /home/boki/suite-s2/boki-dash-flow, main baseline /home/boki/suite-s2/main-base.
 - One helper `scripts/arch/dash_flow.gd` (DashFlow) + one data file per hero `content/dash_flow/<hero>.json` + generated `docs/heroes/dash_interactions.md` (gen_wiki) + `--dash-flow-check` (iterates every hero x slot x ground/air from the data, so new rows are covered automatically). Decision doc docs/decisions/0010.
 - Row: `{"mode": "fire"|"buffer"|"cancel", "carry": bool, "variant": str, "source": "text"}` under `dash.ground|air.<lmb|rmb|e|x|q>`; missing row = buffer; reverse direction under `into_dash.<slot>`; `kit_owns` lists dashes the kit runs itself (Ostra swap, Tamsin Rink Run, Breah leap).
 - Behaviour today is unchanged except presses that were LOST during a dash now buffer to the dash end (e.g. LMB taps for every hero but Venator, Vireo X, Zedran early air RMB). Wiring: hunter.gd +1, hunter_keys.gd +2, arch_kit.gd +4.
@@ -20,7 +21,7 @@ Updated: 2026-11-03 07:54 UTC (git/server clock; earlier S2 entries were ~1 h ah
 
 ## Pair 2: Zedran + Bjorn
 - Branch `ext/review-zedran-bjorn` from origin/main 801bfbf. Zedran 21, 22, 35 in progress (Opus).
-- Bjorn 10/29/30 (+ his 32/35 rows): S1 has them committed locally (c550b21a on ext/kitdata-pin-bjorn, not pushed). Proposal: S1 pushes and finishes Bjorn there (it's done); S2 does not touch Bjorn. If S1's 32 rows don't use ext/dash-flow-base, S2 will port them into content/dash_flow/bulwark.json after both land.
+- Bjorn (INBOX_S2 08:00): S1 finishes what it began (c550b21a local on ext/kitdata-pin-bjorn); S2 owns the rest of Bjorn (incl. 32/35 rows) on top of S1's push when it lands.
 
 ## Pair 3: Tamsin + Dredge
 - Branch `ext/review-tamsin-dredge` = origin/main + ext/kitdata-moosh-tamsin + ext/kitdata-linwick-dredge (both unmerged kit data passes; merge notes: hero_zones.gd bridge() kept main's formatting + kitdata's colour arg; ashwick.json took kitdata's RMB row, which drops main's `refund: 0.25` on Cinder Shot (kitdata removed it per data), wiki regenerated). Health OK.
