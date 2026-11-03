@@ -1,0 +1,16 @@
+{
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash().",
+	"dash": {
+		"ground": {
+			"rmb": {"mode": "fire"},
+			"e": {"mode": "fire"},
+			"q": {"mode": "fire"}
+		},
+		"air": {
+			"rmb": {"mode": "fire"},
+			"e": {"mode": "fire"},
+			"q": {"mode": "fire"}
+		}
+	},
+	"into_dash": {}
+}
