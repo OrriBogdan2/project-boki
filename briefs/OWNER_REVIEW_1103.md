@@ -381,3 +381,22 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - **Into a glide:** if the perfect launch carries him off a ledge or he presses glide/jump during it, he goes straight into a glide keeping the launch speed (use the same hand-off as the airdash-glide fix: GLIDE_HANDOFF rules), so it's a movement tool.
 - Mantle/ability cancels from item 30 still apply.
 - Assert: a release inside the window moves him ≥3.5 m; outside it, ≤2 m; a perfect launch off a ledge enters the glide at ≥70% of launch speed. Screenshots: normal vs perfect swing strips, and the swing-into-glide strip.
+
+## 50. RULE: almost no screen shake, and none from your own actions (owner, 18:04 UTC)
+- Owner: "I don't like screen shake in general; it should be used very little, especially self-caused."
+- **Your own abilities, dashes, landings and hits never shake your screen.** Show impact with hit-stop (a few frames), hit flashes, sparks, debris, sound and the target's reaction instead.
+- Shake only for rare, big things that happen **to** you: a boss slam or a heavy ult landing on/near you, at low strength and very short (≤0.15 s). Everything else: none.
+- Add a Settings slider "Screen shake" (0–100%, default 30%) that scales all remaining shake; 0 turns it off.
+- This overrides earlier items that asked for shake (33 Dredge E, 49 Bjorn perfect swing, 13 Tamsin spear, the prologue's "screen shake" beat: make that a subtle camera rumble or none).
+- Audit: main has ~188 shake references (feel.gd, oomph.gd, effects.gd, ability_fx.gd and most kit files). Route all of them through one helper that knows who caused it, and delete self-caused calls. Assert: no shake on the caster's own camera from any ability of all 12 hunters; total shake time in a scripted 60 s fight stays under a small budget.
+
+## 51. RULE: every ability combos, especially with Shift and jump (owner, 18:04 UTC; extends item 32)
+- Owner: "make sure you can jump while using this LMB hold and pair it together; in general I want all the abilities in the game to be able to be combo'd / paired together, especially with Shift or jumping."
+- **Default for every hunter and every ability: combine, don't cancel.**
+  - Holds and charges (Bjorn's LMB hold, Pin's draw, Breah's charge...) keep charging through a **jump** and a **Shift** dash; release in the air works and keeps your momentum.
+  - Any ability can be cast mid-jump and mid-dash, and jump/Shift can be pressed mid-ability to move out of its recovery (where the source allows a cancel, keep that; where the source is silent, allow it).
+  - Momentum carries: a jump or dash into an ability keeps its speed; an ability's lunge or launch into a jump or glide keeps its speed (same hand-off as the airdash-glide fix).
+  - Only cancel where the source game clearly cancels or it breaks something (a mantle still ends Bjorn's hold, per item 30). Record every exception, with its reason, in the DashFlow data.
+- **This supersedes item 30's "dash ends the hold"**: a Shift dash now keeps Bjorn's hold; mantling still ends it.
+- Build on item 32's DashFlow: extend its table with `jump` and `hold` rows (jump -> ability, ability -> jump, hold through jump/dash) so it covers every hero × slot × {ground dash, air dash, jump}. --dash-flow-check iterates all of it.
+- Assert: for every hunter, every held ability survives a jump and a dash and releases in the air; every ability can be cast mid-jump; jump/Shift during any ability's recovery acts within 0.1 s unless an exception is recorded.
