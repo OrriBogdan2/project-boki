@@ -39,7 +39,7 @@ static func _load() -> void:
 ## 3 boots; either kind of glove fits either glove slot.
 const SLOTS := ["glove", "passive", "armor", "boots"]
 const SLOT_NAMES := ["Active glove", "Passive glove", "Armor", "Boots"]
-const WORN_NAMES := ["Glove (Q)", "Glove (V)", "Armor", "Boots"]
+const WORN_NAMES := ["Glove 1", "Glove 2", "Armor", "Boots"]
 
 static func is_glove(id: String) -> bool:
 	return ALL.has(id) and slot_of(id) < 2
