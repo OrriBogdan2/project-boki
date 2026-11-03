@@ -616,7 +616,7 @@
 },
 "scripts/match/hunter.gd": {
 "history_comment": 44,
-"long_line": 102,
+"long_line": 101,
 "nested_ternary": 21,
 "semicolon": 56,
 "shadow": 4

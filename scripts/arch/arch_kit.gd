@@ -263,6 +263,14 @@ func use_e() -> void:
 	else:
 		h._ab_feedback("k1", "deny")
 
+## X: the hero's own ultimate. No hero has one yet; a kit that does overrides both. Returns true when it went off.
+func cast_ult() -> bool:
+	return false
+
+## Does this hero have an ultimate on X (the HUD shows the slot only then)?
+func has_ult() -> bool:
+	return false
+
 ## R: the archetype's ultimate. With the bond meter full the cast is Bonded (§5 option C): the ult's
 ## own tell, then 0.2s later the kin merges (its on_start), one T5 moment for the caster.
 func use_r() -> void:
