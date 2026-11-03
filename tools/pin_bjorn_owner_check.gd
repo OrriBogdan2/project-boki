@@ -574,6 +574,17 @@ func _bjorn_dash(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	ok("bjorn dash > LMB: a tap during the dash is not lost, the hammer goes when it ends",
 		rolling and K.throws == t0 + 1, "rolling %s throws %d" % [rolling, K.throws - t0])
 	step(m, 1.0)
+	K.mace = {}
+	P.fire_cd = 0.0
+	P.dashes = P.max_dashes()
+	P.do_dash()
+	var pressed_in_dash := P.roll_t > 0.0
+	P.inp["fire"] = true
+	step(m, 0.5)
+	ok("bjorn dash > LMB held: a press made in the dash and held through it winds up the swing when the dash ends",
+		pressed_in_dash and K.lmb_t > 0.0, "in dash %s hold %.2f" % [pressed_in_dash, K.lmb_t])
+	P.inp["fire"] = false
+	step(m, 1.0)
 	P.dashes = P.max_dashes()
 	K.cd["e"] = 0.0
 	K.cd["rmb"] = 0.0

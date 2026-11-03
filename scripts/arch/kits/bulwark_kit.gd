@@ -333,8 +333,10 @@ func lmb_override(held: bool, dt: float) -> bool:
 	if not held:
 		hold_blocked = false
 	if _hold_interrupted():
-		if lmb_t >= 0.0 or pressed:
+		if lmb_t >= 0.0:
 			cancel_hold()
+		elif pressed:
+			lmb_was = false    # a fresh press while he's busy waits: still held when he's free, it goes then
 		return true
 	if hold_blocked:
 		return true
@@ -483,12 +485,14 @@ func _throw() -> void:
 	m.sfx("bjorn_throw", h.pos, -2.0)
 	Oomph.on_fire(h, true)
 	net_bolt(at, at + Vector3(mace["dir"].x, 0, mace["dir"].y) * dist, Color("ffd27a"))
+	CombatBus.ability_used.emit(h, id + "_throw", "primary")
 
 func _recall() -> void:
 	play("bul_recall")
 	mace["st"] = "back"
 	mace["hit"] = {}
 	m.sfx("bjorn_recall", mace["pos"], -4.0)
+	CombatBus.ability_used.emit(h, id + "_recall", "primary")       # a press with the hammer out is the recall
 
 func _mace_hit(f: Ent, dmg: float, dir: Vector2) -> void:
 	f.hurt(dmg * _wk(), h, {"src": "abil", "ab": "primary", "tags": ["primary", "mace"], "kb": dir * 3.0, "melee": true})
