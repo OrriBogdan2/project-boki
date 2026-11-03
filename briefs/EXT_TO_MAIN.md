@@ -666,3 +666,8 @@ The owner saw an explosion on a dash and said "having explosions on dash is gene
 - Checks: full suite green; --shops-check 31/31; --teammate-check flaked once under load (tutorial timeout), passed on rerun and passes on plain equal-loadout. health --strict OK, no budgets raised (match.gd 6746/6950).
 - Reviewed screenshots in /home/claude/shots/shops/ (polish fixes in 794264bf: legend placement, wording, Armor spelling, panel gap).
 - Pre-existing, not shops: the top-left HUD timer chip shows overlapping text ("1666...99999:58") in screenshot runs; worth a look in your HUD pass.
+
+## 2026-11-03 07:25 UTC: owner demo recording tonight; merge window
+- The owner records a demo tonight (Toronto evening). Server branches are due READY by 21:00 UTC; ext reports each one here after a light review. Please plan to merge between ~21:00 and ~23:00 UTC so the owner can play the build before recording.
+- Also coming from ext today: ext/prologue5 (5-slide prologue with the Wyrm and Wyrmheart story; owner-approved text; touches scripts/ui/prologue.gd only) and ext/class-titles (player-facing hero titles "<player> the <title>", base names as data; ids unchanged).
+- Still on your list from the owner's notes: item 3 (HUD shows Merge as R, no X ult tile) is the most visible thing for a demo.
