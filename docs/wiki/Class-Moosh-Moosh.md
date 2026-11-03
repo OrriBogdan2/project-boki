@@ -41,7 +41,7 @@ downed friends out of danger and roots foes that chase them. She has no ultimate
 
 |  |  |
 |---|---|
-| Weight class | Medium (145 health, 4.8 m/s, 1 dash charge) |
+| Body | 145 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Ember Cast (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with lantern light, pins chasers with burr-seeds. |
 | Silhouette | small and low: a tiny courier with a trailing ember tail, casting light from her hands |
@@ -59,7 +59,7 @@ What the in-game kit card (K) says.
 | LMB | Ember Cast: hold to push embers from alternating hands; they fly past the cursor and each hit on a foe adds Kindle. |
 | RMB: Burrseed | Burrseed: hold to aim the lane, let go to throw; it sticks to a foe and roots them 0.7s later. |
 | E: Hearthlight | Hearthlight: a healing ring on you; press again to throw it to the cursor. |
-| X: Hearth Call | Hearth Call (hunter ultimate, level 6): tether a teammate for 5s of healing while you walk; a downed one is pulled to you and stood up at the end. |
+| Hunter ultimate: Hearth Call | Hearth Call (hunter ultimate, level 6): tether a teammate for 5s of healing while you walk; a downed one is pulled to you and stood up at the end. |
 | Weapon: Ember Cast | Hold to push embers from alternating hands that fly past the cursor; each hit on a foe adds Kindle. |
 
 ### Abilities in full
@@ -74,7 +74,7 @@ What the in-game kit card (K) says.
 
 **Hearthlight (E, 11s cooldown).** A 2.6m ring of lantern light round you for 2.5s: it heals teammates inside 10 over its life, then flares for 22. Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over. A stun while it's on you puts it out.
 
-**Hearth Call (X, hero ultimate from level 6, 46s cooldown).** Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a lantern tether heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you.
+**Hearth Call (hunter ultimate, from level 6, 46s cooldown).** Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a lantern tether heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you.
 
 ### Ranks
 

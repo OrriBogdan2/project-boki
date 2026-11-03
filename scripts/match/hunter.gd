@@ -296,7 +296,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 ## right click and the class dodge.
 func set_arch(a: String) -> void:
 	arch = "" if a == "" or a == "none" else Arch.fix(a, cls)
-	r = _hit_radius()
+	r = Arch.hit_r(arch, cdat)
 	if ak: ak.teardown()
 	ak = ArchKit.make(self, arch) if arch != "" else null
 	HunterMove.apply(self)

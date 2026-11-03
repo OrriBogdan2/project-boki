@@ -45,7 +45,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 
 |  |  |
 |---|---|
-| Weight class | Light (124 health, 4.4 m/s, 1 dash charge) |
+| Body | 124 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Arc Bolts (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The duelist. Sticks to one mark from range, cartwheels past them, never lets go. |
 | Silhouette | the hood tail and cape |
@@ -62,7 +62,7 @@ What the in-game kit card (K) says.
 | Dash: Vault | Cartwheel a short way. Your next bolt is a big empowered shot; land it and you get the Vault back. |
 | RMB: Bola | A short wind-up, then a Bola down the lane: it grounds the first foe and flies on. Catch a second and both are stunned. |
 | E: Shadow Knife | Throw a dagger to your cursor or into a foe. Press E again to blink to it. |
-| X: Encore | A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge. |
+| Hunter ultimate: Encore | A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge. |
 | Weapon: Arc Bolts | Bolts from alternating hands every 0.45s. Each one lands at your cursor. |
 
 ### Abilities in full
@@ -78,7 +78,7 @@ What the in-game kit card (K) says.
 
 **Shadow Knife (E, 15s cooldown).** Throw a dagger to your cursor (14m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press E again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
 
-**Encore (X, hero ultimate from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; for 2s a blade flies every 0.4s at each foe inside it (5 at most): 8 each, 12 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
+**Encore (hunter ultimate, from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; for 2s a blade flies every 0.4s at each foe inside it (5 at most): 8 each, 12 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
 
 ### Ranks
 

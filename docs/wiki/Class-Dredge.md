@@ -52,7 +52,7 @@ What the in-game kit card (K) says.
 | Dash: Barge | A short shoulder barge toward the cursor, further in the air. It works while you reel. |
 | RMB: Grapnel | Throw a rope-hook over rocks at the first foe and reel them to your feet, stunned. Strafe to swing them. |
 | E: Anchor Drop | Hop forward and drop the anchor in front of you: damage and a long stun. In the air you smash straight down. |
-| X: Brass Broadside | Brass Broadside (level 6): plant and charge a fan, then two waves of heavy brass slugs with Anti-Heal. |
+| Hunter ultimate: Brass Broadside | Brass Broadside (level 6): plant and charge a fan, then two waves of heavy brass slugs with Anti-Heal. |
 | Weapon: Shotgun | Seven slugs in a tight fan that stop 6m out, a shot every half second. Hits from behind hurt more. |
 
 ### Abilities in full
@@ -67,7 +67,7 @@ What the in-game kit card (K) says.
 
 **Anchor Drop (E, 7s cooldown).** Hop a body length forward (0.38s), then the anchor smashes down in a 3m cone: 25 damage, stun 1.1s, slammed to the ground and Grounded. In the air you smash straight down and the anchor lands with you: a 3.2m ring, up to +50% damage by height. Over the abyss it slams where you are instead.
 
-**Brass Broadside (X, hero ultimate from level 6, 21s cooldown).** Plant your feet and charge for 1.1s while a 105 degree fan grows on the ground ahead (everyone sees it: it is the exact area). Then two waves 0.6s apart, six heavy brass slugs each, out to 5.9m: 4 damage a slug and Anti-Heal for 3s. Up close every slug lands. A stun during the charge stops it (back in 8s). 21s.
+**Brass Broadside (hunter ultimate, from level 6, 21s cooldown).** Plant your feet and charge for 1.1s while a 105 degree fan grows on the ground ahead (everyone sees it: it is the exact area). Then two waves 0.6s apart, six heavy brass slugs each, out to 5.9m: 4 damage a slug and Anti-Heal for 3s. Up close every slug lands. A stun during the charge stops it (back in 8s). 21s.
 
 ### Ranks
 

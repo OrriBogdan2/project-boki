@@ -53,7 +53,7 @@ What the in-game kit card (K) says.
 | Dash: Wirerun | Wirerun: hold to charge a lane (length grows with the hold), let go to streak; through a 4-Static foe it hits double and comes back at once. |
 | RMB: Storm Rod | Storm Rod: hold to summon a copper rod, let go to throw it to full range. It knocks the first foe back, stuns them on a wall and leaves a charge orb. |
 | E: Skycall | Skycall: drop a circle at your cursor, then flick the mouse to pick the drag. 0.8s later lightning drags everyone inside that way and grounds them. |
-| X: Kitefall | Kitefall (ultimate, level 6): launch up out of reach, then strike down at your cursor anywhere in a wide ring. It knocks everyone round the landing back and adds Static. |
+| Hunter ultimate: Kitefall | Kitefall (ultimate, level 6): launch up out of reach, then strike down at your cursor anywhere in a wide ring. It knocks everyone round the landing back and adds Static. |
 | Weapon: Coilcaster | Finger bolts every 0.8s, left hand then right, out to full range through everyone in line. Each hit adds 1 Static. |
 
 ### Abilities in full
@@ -69,7 +69,7 @@ What the in-game kit card (K) says.
 
 **Skycall (E, 10.5s cooldown).** Press to drop a circle at your cursor (up to 11m), then flick the mouse within 0.3s to set the drag: toward you pulls them in, away throws them out (no flick: away from you). A pillar of light narrows over it for 0.8s, then lightning strikes: 20 damage, 2 Static, and everyone inside is dragged along the ground about 7m that way and Grounded for 1.5s (no dashing). Charge orbs it catches are flung the same way and become yours.
 
-**Kitefall (X, hero ultimate from level 6, 42s cooldown).** Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 22, is knocked back and gains 1 Static. Landing it on an enemy hunter fills your Boki bond.
+**Kitefall (hunter ultimate, from level 6, 42s cooldown).** Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 22, is knocked back and gains 1 Static. Landing it on an enemy hunter fills your Boki bond.
 
 ### Ranks
 

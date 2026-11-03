@@ -47,7 +47,7 @@ every knock.
 
 |  |  |
 |---|---|
-| Weight class | Heavy (193 health, 4.4 m/s, 2 dash charges) |
+| Body | 193 health, 4.4 m/s, 2 dash charges |
 | Signature weapon | Greatsword (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The wrecking ball. Burns hotter with every hit, chains you in, and finishes it. |
 | Silhouette | the horned pauldrons |
@@ -64,7 +64,7 @@ What the in-game kit card (K) says.
 | Dash: Rampage | Two charges (a third at rank 2) of a short dash attack the way you face. Its tip hits twice as hard. |
 | RMB: Smash | Tap: a heavy slam, harder on the wounded; a knock after its sweet spot resets your ultimate. Hold: charge, then fling yourself forward. In the air: slam down at your cursor. |
 | E: Warchain | Throw a chain at a foe or a wall. Press E again to pull yourself to it. |
-| X: Gilded Riposte | Guard for 0.65s, taking nothing, then lunge into a cleave that heals you; a knock with it resets it. |
+| Hunter ultimate: Gilded Riposte | Guard for 0.65s, taking nothing, then lunge into a cleave that heals you; a knock with it resets it. |
 | Weapon: Greatsword | Wide slashes, double at the tip. Hold to throw a Searing Wave. |
 
 ### Abilities in full
@@ -82,7 +82,7 @@ What the in-game kit card (K) says.
 
 **Warchain (E, 9.5s cooldown).** Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 
-**Gilded Riposte (X, hero ultimate from level 6, 22s cooldown).** Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 34, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once.
+**Gilded Riposte (hunter ultimate, from level 6, 22s cooldown).** Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 34, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once.
 
 ### Ranks
 

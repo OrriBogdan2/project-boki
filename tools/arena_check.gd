@@ -72,10 +72,13 @@ func _arena() -> void:
 	var tot0 := float(A.dummies[0]["total"])
 	P.inp["sec_hold"] = false; P.ak.press_rmb()
 	step(m, 0.75)          # (the Bola's 0.4s wind-up with the lane, then its flight)
-	ok("thief Bola hits a dummy, Grounds and Marks it", float(A.dummies[0]["total"]) > tot0 and (P.ak as ThiefKit).marks_on(D) >= 1, "total %.0f marks %d" % [float(A.dummies[0]["total"]), (P.ak as ThiefKit).marks_on(D)])
+	var tk := P.ak as ThiefKit
+	ok("thief Bola hits a dummy, Grounds and Marks it", float(A.dummies[0]["total"]) > tot0 and tk.marks_on(D) >= 1,
+		"total %.0f marks %d" % [float(A.dummies[0]["total"]), tk.marks_on(D)])
 	(P.ak as ThiefKit).add_mark(D, 4, true)
 	step(m, 0.05)
-	ok("five Marks: diamonds over the dummy", (P.ak as ThiefKit).pips.size() >= 1 and (P.ak as ThiefKit).marks_on(D) >= 5, "marks %d pips %d" % [(P.ak as ThiefKit).marks_on(D), (P.ak as ThiefKit).pips.size()])
+	ok("five Marks: diamonds over the dummy", tk.pips.size() >= 1 and tk.marks_on(D) >= 5,
+		"marks %d pips %d" % [tk.marks_on(D), tk.pips.size()])
 	# reset: everyone back, healed, meters cleared
 	P.teleport(P.pos + Vector3(3, 0, 0)); P.hp = 10.0
 	var bk := InputEventKey.new(); bk.physical_keycode = KEY_BACKSPACE; bk.keycode = KEY_BACKSPACE; bk.pressed = true
@@ -134,7 +137,7 @@ func _arena() -> void:
 		P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = float(P.ak.rmb_charges()); P.fire_cd = 0.0
 		step(m, 0.1)
 		if float(P.ak.rmb_def().get("hold", 0.0)) <= 0.0:
-			continue            # no RMB hold variant (Dredge, Linwick: their hold is the lance, see --ashwick-combo-check)
+			continue      # no RMB hold variant (Dredge, Linwick: their hold is the lance, see --ashwick-combo-check)
 		var f0: int = P.ak.charge_fulls
 		var mid := -1.0
 		var ring_ok := false
@@ -192,9 +195,12 @@ func _arena() -> void:
 	for i in 14:
 		JK.on_deal(D, 16.0, {"src": "shot"})
 	step(m, 0.3)
-	ok("juggernaut: Rage fills to Enraged, the form grows", JK.enraged_t > 0.0 and JK.aura != null and P.model.scale.x > 1.05, "enraged %.1f scale %.2f" % [JK.enraged_t, P.model.scale.x])
+	ok("juggernaut: Rage fills to Enraged, the form grows",
+		JK.enraged_t > 0.0 and JK.aura != null and P.model.scale.x > 1.05,
+		"enraged %.1f scale %.2f" % [JK.enraged_t, P.model.scale.x])
 	# X is Zedran's own ultimate (the Arena opens it with the ult toggle at level 6); R stays the Merge
-	ok("juggernaut: his own ultimate is on X (Gilded Riposte)", String(Arch.def("juggernaut")["x"]["name"]) == "Gilded Riposte")
+	ok("juggernaut: his own ultimate is on X (Gilded Riposte)",
+		String(Arch.def("juggernaut")["x"]["name"]) == "Gilded Riposte")
 	# the sparring bot
 	A.cycle_bot()
 	ok("bot: idle", A.bot != null and A.bot_mode == "idle")

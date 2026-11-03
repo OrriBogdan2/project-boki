@@ -35,7 +35,7 @@ head first, and hits back harder after every knock.
 
 |  |  |
 |---|---|
-| Weight class | Heavy (193 health, 4.4 m/s, 2 dash charges) |
+| Body | 193 health, 4.4 m/s, 2 dash charges |
 | Signature weapon | Torch Lance (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The flue sweep. Hoses foes down with fire until they blaze, rams them head first, and hits back harder after every knock. |
 | Silhouette | the tall sooty top hat and the bellows on the back |
@@ -52,7 +52,7 @@ What the in-game kit card (K) says.
 | Dash: Soot Ram | Ram head first toward the cursor; you stop on the first foe with a fiery hit. 2 charges. |
 | RMB: Cinder Shot | Hold to aim, release: a cinder that lands at your cursor and spreads the burn. |
 | E: Furnace Cloak | A ring flashes, then a blast of heat drags nearby foes in and wraps you in a fire shield. |
-| X: Flue Flight | Flue Flight (level 6): fly toward the cursor and steer, laying a lava carpet that slows and burns; press it again to land. |
+| Hunter ultimate: Flue Flight | Flue Flight (level 6): fly toward the cursor and steer, laying a lava carpet that slows and burns; press it again to land. |
 | Weapon: Torch Lance | Hold to hose fire 7m ahead; the stream trails behind a sweep and hits harder on a burning foe. |
 
 ### Abilities in full
@@ -67,7 +67,7 @@ What the in-game kit card (K) says.
 
 **Furnace Cloak (E, 10.5s cooldown).** A thin ring flashes at 4.5m for 0.2s, then a blast of heat: 7 damage, 16 Char and Anti-Heal for 3s, and foes in sight are dragged toward you (walls stop them). Hit anyone and you wear a swirling 3s shield of 6.4% health plus 5.1% per foe. A knock resets it.
 
-**Flue Flight (X, hero ultimate from level 6, 32s cooldown).** Lift off in a ring of embers and fly 1.4s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 4s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. The Furnace Cloak works mid-flight and a knockback speeds you up. The carpet never forms over the abyss. 32s.
+**Flue Flight (hunter ultimate, from level 6, 32s cooldown).** Lift off in a ring of embers and fly 1.4s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 4s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. The Furnace Cloak works mid-flight and a knockback speeds you up. The carpet never forms over the abyss. 32s.
 
 ### Ranks
 
