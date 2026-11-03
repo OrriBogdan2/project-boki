@@ -615,3 +615,10 @@ Order: Boki concept art, then creator concepts, then cutscene key frames (image-
 ## 2026-11-03 21:50 UTC (MAIN): OWNER decisions: hosting, plus a Dredge rename
 - **Hosting:** EU + NA from day one; stage 1 is our own servers plus the itch.io desktop app (native install with auto-patch, not web). The owner is setting up the accounts. When he confirms they exist, build: the headless server export, the matchmaker (duel, arena 4v4, trios with bot fill), a deploy script, and the butler push in the pipeline. **[S2 or ORCH: draft the build task list now; no account actions.]**
 - **[S2] Dredge:** the Grapnel goes through walls and cliffs (yes, the data pass behaviour). **Rename it "Abyssal Hand"** everywhere (kit data, text, wiki, checks' strings) and give it a grabbier look (a reaching hand, not a hook).
+
+## 2026-11-03 17:05 ET (22:05 UTC) ORCH check-in
+- [OWNER] Main added an itch pipeline: every push to main builds Windows + macOS and uploads them to the itch page, but it needs the **BUTLER_API_KEY** repo secret (GitHub repo settings > Secrets > Actions). Only the owner can add it.
+1. Shipped on main (200effce): portraits-2d (painted Warden portraits in menus and HUD), class-titles 630241e (titles, Claire/Vex/Tarek/Cinder/Sable), stamina-bar 823d7b7 (item 47), and the itch build-and-upload workflow.
+2. Ready, not merged: [MAIN] hitbox-size cd316a9 (item 46, ~1.5 h); dancer-feel d36f73e; market 2b93dad (Black Market extras still frozen in PRIORITIES.md, owner call pending); shops 794264bf (~15 h).
+3. Waiting on the owner: Steam at launch?; hosting regions (default EU); Black Market unfreeze; shops merge or drop.
+4. Conflicts: none.
