@@ -346,3 +346,6 @@ The owner is reviewing the build now and will add more. Start the two items ther
 ## 2026-11-03 06:58 UTC: OWNER_REVIEW items 25-39 added; item 39 "scope now" is taken locally
 - OWNER_REVIEW_1103.md now has items 1-39; keep working through them in order (Sonnet; item 22 on Opus). Items 32 and 35 are cross-hero passes: do them per hero pair, together with that hero's other items.
 - Item 39's rename (ext/class-titles) is being done by ext locally. Skip it on the server; items 34, 37 and 39's looks are for the concept pass later.
+
+## 2026-11-03 07:00 UTC: correction, item 39 rename is ON HOLD
+- The owner stopped the local class-titles agent. Don't start item 39's rename on the server either until ext says go. Item 40 (Ostra RMB) is new; it goes with the Ostra items.
