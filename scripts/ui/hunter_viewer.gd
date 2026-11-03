@@ -49,7 +49,7 @@ var _melee := false
 ## The abilities shown, in order. "x" (the Hunter's own ultimate on X, coming back later) shows only
 ## once a Hunter's data has an "x" entry; R, the Boki Merge, is always last.
 static func slots_for(hunter_id: String) -> Array:
-	var out: Array = KitCard.slots_of(hunter_id).filter(func(s): return s != "r")
+	var out: Array = KitCard.slots_of(hunter_id).filter(func(s): return s != "r" and s != "x")
 	if Arch.def(hunter_id).has("x"): out.append("x")
 	out.append("r")
 	return out
@@ -83,7 +83,7 @@ static func moves_for(hunter_id: String, slot: String) -> Array:
 
 ## How long a kit move runs (its last key), 0 for an id the animation doesn't have. Held poses get 0.9 s.
 static func move_len(mv: String) -> float:
-	var d: Dictionary = HunterAnim.KMOVES.get(mv, KMovesPair.MOVES.get(mv, {}))
+	var d := HunterAnim.km_def(mv)
 	if d.is_empty() or (d.get("keys", []) as Array).is_empty():
 		return 0.0
 	return 0.9 if d.get("hold", false) else float((d["keys"] as Array)[-1][0])

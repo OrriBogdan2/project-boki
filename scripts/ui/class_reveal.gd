@@ -43,7 +43,6 @@ static func show_for(home: Node, hunter_id: String) -> ClassReveal:
 func _ready() -> void:
 	root = Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.theme = UI.theme()
 	root.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(root)
 	var dim := ColorRect.new()

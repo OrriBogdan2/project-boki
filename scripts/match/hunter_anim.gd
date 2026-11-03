@@ -1092,12 +1092,17 @@ var km := {}                   # the kit move's channels this frame (empty: none
 var km_id := ""
 var km_prev_t := 99.0
 
+## A kit move's keys, from whichever pair's table has it (scripts/match/kmoves_*.gd); empty if none.
+static func km_def(id: String) -> Dictionary:
+	for t in [KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, KMovesStone.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
+			KMovesPinBjorn.MOVES, KMovesDJ.MOVES]:
+		if (t as Dictionary).has(id):
+			return t[id]
+	return {}
+
 ## Samples the kit move at time `tt`: each channel eased between the keys around it.
 static func km_sample(id: String, tt: float) -> Dictionary:
-	var kit_mv: Dictionary = KMovesVV.MOVES.get(id, KMovesStone.MOVES.get(id, MergeMoves.MOVES.get(id, KMovesCare.MOVES.get(id, {}))))
-	var mv: Dictionary = KMOVES.get(id, KMovesPair.MOVES.get(id, kit_mv))
-	if mv.is_empty():      # Pin and Bjorn, then Dancer and Zedran (kmoves_pin_bjorn.gd, kmoves_dj.gd)
-		mv = KMovesPinBjorn.MOVES.get(id, KMovesDJ.MOVES.get(id, {}))
+	var mv := km_def(id)
 	if mv.is_empty():
 		return {}
 	var keys: Array = mv["keys"]

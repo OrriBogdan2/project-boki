@@ -384,6 +384,8 @@ func _glide() -> void:
 
 # ---------------------------------------------------------------- dash into glide
 func _dash_glide() -> void:
+	var kit_was := P.arch
+	P.set_arch("")      # the class dash: core physics (each kit's own air dash is its combo check's job)
 	_glide_at(30.0)
 	P.inp["jump"] = true
 	for i in 90:
@@ -408,6 +410,7 @@ func _dash_glide() -> void:
 	rec("dashglide_open_speed", open_v)
 	rec("dashglide_1s_speed", v1)
 	rec("dashglide_2s_speed", v2)
+	P.set_arch(kit_was)
 
 # ---------------------------------------------------------------- abyss lift, updrafts
 var _rim := {}

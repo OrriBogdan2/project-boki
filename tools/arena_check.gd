@@ -319,7 +319,7 @@ func _loadout() -> void:
 	var tiles := 0
 	for ch in (st.get_child(0) as HBoxContainer).get_children():
 		if ch is Button: tiles += 1
-	ok("loadout strip: five kit tiles (main's kit card has no hunter-ultimate tile)", tiles == 5, str(tiles))
+	ok("loadout strip: six kit tiles (the hunter ultimate has its own X tile)", tiles == 6, str(tiles))
 	st.queue_free()
 	# the real expedition panel at home carries the strip
 	var Home = load("res://scripts/home/home.gd")

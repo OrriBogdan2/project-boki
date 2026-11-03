@@ -136,7 +136,7 @@ func _rules() -> void:
 			for id in mv[a][slot]:
 				if HunterViewer.move_len(String(id)) <= 0.0: missing.append("%s.%s:%s" % [a, slot, id])
 	ok(missing.is_empty(),
-			"every viewer move is a real kit move (HunterAnim.KMOVES / KMovesPair); missing: %s" % str(missing))
+			"every viewer move is a real kit move (HunterAnim.km_def); missing: %s" % str(missing))
 
 # ---------------------------------------------------------------- 2. cosmetic only
 func _cosmetic_only() -> void:
@@ -517,16 +517,10 @@ func _viewer(tree: SceneTree) -> void:
 	host.add_child(v)
 	for i in 4: await tree.process_frame
 	v.set_process(false)       # (stepped by hand below)
-	var want: Array = KitCard.slots_of("juggernaut").filter(func(x): return x != "r") + ["r"]
+	var want: Array = KitCard.slots_of("juggernaut").filter(func(x): return x != "r" and x != "x") + ["x", "r"]
 	ok(HunterViewer.slots_for("juggernaut") == want
-			and Arch.ids().all(func(a): return not HunterViewer.slots_for(String(a)).has("x")),
-					"no X slot while no Hunter has an X ultimate in data (nothing is bound to X)")
-	var jd := Arch.def("juggernaut")
-	jd["x"] = {"name": "(check)"}      # room for the X ultimate: a Hunter whose data gains one gets an X row before R
-	var with_x := HunterViewer.slots_for("juggernaut")
-	jd.erase("x")
-	ok(with_x.size() == want.size() + 1 and with_x[-2] == "x" and with_x[-1] == "r",
-			"an X ultimate in data shows as its own row, before R (%s)" % str(with_x))
+			and Arch.ids().all(func(a): return HunterViewer.slots_for(String(a)).slice(-2) == ["x", "r"]),
+					"every Hunter's X ultimate shows as its own row, then R last")
 	ok(v.slots == want, "the viewer shows every ability in order: %s" % str(v.slots))
 	var keyed := true
 	for b in v.rows:
