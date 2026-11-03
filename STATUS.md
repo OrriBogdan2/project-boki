@@ -1,6 +1,6 @@
-2026-11-03T04:21:05Z
+2026-11-03T04:44:22Z
 
-ext/classes | 133574d | REOPENED per INBOX 04:25 + 04:30 (Venator owned by every new save + tutorial hunter; pick 1 of Zedran/Pin/Linwick; new-game flow: intro, one card, egg pick, hunter pick, farm; delete the 3 in-between screens); rework running (Sonnet) | 0.16.0 (no new sync; save stays v6, adds early_used/told) | full suite 0 failures; --hunter-unlock-check (alias --class-unlock-check) 90 checks; simtest seed-5 wipe same as main. Hunters wording everywhere, weight labels gone, pick 1 at creation + 2 early free picks, HunterViewer (turntable + looping ability moves), hold-to-unlock (1.6 s) with reveal. X row shows only when hero data has "x". Expect wiki conflicts with kitfix renames (Classes.md, sidebar). Owner Qs: all 12 as starters or fewer? early goals (placeholder: play 1, extract 1)? keep per-Hunter goals/levels? 1.6 s hold OK? merge_forms text still says "weight class" (reserved); Arena "Heavy dummy".
+ext/classes | 98d4027 | READY TO MERGE (Venator owned by every new save + tutorial hunter; pick 1 of Zedran/Pin/Linwick; new-game flow intro -> one card -> egg pick -> hunter pick -> hatch/name -> tutorial or farm; the 3 story screens and the creator are gone from the new-save path, name moved to the Boki-naming card, look editing stays in the farm menu) | main 0.17.0, no new sync | full suite 0 failures, --hunter-unlock-check 138 incl. new-game "egg pick is screen 2". Display names come from hero data, so Venator/Pin/Zedran show once the kitfix renames merge.
 ext/hero-shots | 3bd0520 | done: 12 heroes + farm building + classes; all portraits show signature weapons | - | -
 ext/kits2-nor | 4b1214b | ready to merge (on sync62 4f82978; main now 18fab56) | 0.15.0 (kit move id on hunter snapshot idx 31) | full suite 0 failures except --teammate-check 1 ("steps between you and a rival", dot -nan), identical on plain main 4f82978; simtest seed-5 known wipe. Note: no class R left on any hero now.
 ext/farmbuild | efa72a7 | ready to merge (on sync62 4f82978; main has moved on) | 0.14.0 (no new sync) | full suite + farmbuild/farm-start/work/incubator 0 failures; simtest seed-5 known wipe. Merge note: docs/decisions/0004-farm-building.md collides with main's 0004-merge-augments.md, renumber one; main.gd at 4098/4100.
@@ -55,24 +55,16 @@ Model policy (from 02:45): new agents on Sonnet; currently running Opus agents (
 ext/classes rework (133574d): pick 2 of 4 starters (Zedran, Venator, Pin, Linwick); every other Hunter unlocks by one kit-themed challenge then hold-to-unlock; Ostra/Moosh Moosh/Breah never at creation and last; cosmetic-only mastery (3-5 goals per Hunter, rewards: gliders, skins, colourways, emotes, titles, banners, trails); 10 new original glider designs (look/trail/sound only) with a glider pick; "Training dummy"; saves keep every Hunter they had. New hunter_feats.gd measures feats from CombatBus. Full suite 0 failures (--hunter-unlock-check 123, asserts cosmetic-only rewards and handling-free gliders). Net 0.17.0.
 For the main session: "weight class" text remains in reserved content/rules/merge_forms.json (shell_note) and content/merge_forms/stormwing.json, tidal_shell.json, titan.json; docs/wiki/Classes.md still says "R is the Merge"; every run prints a startup ERROR from main ui_theme.gd:55 ("OptionButton" type variation).
 Owner Qs (classes): all numbers are placeholders; revive/Boki goals need squads or a Boki (OK for solo players?); only gliders are wired in game, other cosmetics are earned and listed but not shown yet (follow-up branch?); hard Hunters gated at 6/8 Hunters open, right?
-
-CHALLENGE LIST (placeholders for the owner to tune; full list with mastery goals and gliders: ext/hero-shots:hunters/CHALLENGES.md)
-Easy (the 2 unpicked starters, 1-2 expeditions):
-- Zedran: knock 3 enemies into walls
-- Venator: 8 hits from 12 m or more
-- Pin: stun 4 enemies
-- Linwick: hit 3 enemies with one ability
-Medium:
-- Dancer: 12 hits while in the air
-- Bjorn: 2 knocks while under half health
-- Vireo: stagger 6 monsters
-- Dredge: extract carrying 8 items
-- Tamsin: slow 20 enemies
-Hard (last):
-- Moosh Moosh: revive 4 teammates (needs 6 Hunters open)
-- Breah: hit 3 enemies at once, 5 times (needs 6 open)
-- Ostra: 3 knocks while merged (needs 8 open)
-Polish breah-ostra (d1a7bdb): review items done except one shot (Rocksweeping punch-down-a-row not captured). Breah: source-scale distances, molten slam impact, unfrozen moves ("fist" hold), jagged basalt Stone Row, opaque boulder with trail; owner 23:40 Rubble Leap built (rock bursts first, arc to cursor, landing crash + rock 0.14 s later; recorded as a deliberate change from source). Ostra: visible violet projectiles (shader was additive), no white elements, rune sigils on Trade, SLOWED replaces DIZZY; owner 23:40 hover swap built (hovers in place even over abyss, everyone in the circle goes to origin, asserted). Bodies per sheets. No hard-coded keys. Full suite 0 failures (dolm combo 98, ostra 88, zone, dash-dir). Shots: ext\/hero-shots breah\/v2\/polish, ostra\/v2\/polish (136). Owner Qs: Rubble Leap numbers (8 dmg, 1.8 m, rock 0.14 s behind)? Trade does not move loose pickups OK? Ostra run speed ~4.1 m\/s is main's global call.
-Round-2 moosh-tamsin + vireo-venator: all FIX items done. Tamsin skate lean capped at ~23 deg (own "skate" pose), ice-blue spear; Moosh glide 12 m (exempt from dash_feel distance, check 11-15 m), brighter ember; Venator slide trail translucent and behind him; Vireo first-frame white orb hidden; kit_card key text via Settings.key_cap (incl. a hard-coded "C" for the Boki ability). Full suite 0 failures on both. FOR MAIN: (1) vireo-venator edited main tools/boki_system_check.gd (+4 lines: clear root/stun before the interact step; a rival Boki Puffcap mine can root the player there) - needs sign-off or a main-side fix; (2) merge note: moosh-tamsin and vireo-venator both replace the s["dash_kind"] line in hunter.gd - keep rinkrun -> "skate" and the ak.dodge_anim() hook; (3) main arena hint still says "X - RESET"; (4) plate_offset not on main, per-branch nameplate hooks remain.
-Round-2 pin-bjorn + linwick-dredge: all FIX items done (key text via key_cap or "the ultimate" wording; Bjorn stronger spin trail, ult slam pitch capped 0.4; Dredge Broadside waves now big brass/violet orbs readable at gameplay zoom, saturated fan). Nameplates switched to main HudPlate.plate_offset (hudref is on main). Reel nit partly (hands hide under helmet top-down). All checks 0 failures. FOR MAIN: health.py --strict fails on main itself (tools/uipolish_check.gd:17 > 120 chars), so every branch inherits it; engine "Invalid polygon data" from main scripts/ui/hud_slot.gd:96 sweep(); worktrees need godot --import after merges that add class_names (KinLoss). Other heroes JSON still says "Press E again" (not hunter-ult keys, left).
-SUMMARY: all six kitfix pairs have kit + ult (ult base v2) + polish; round-2 fixes done for pin-bjorn, linwick-dredge, moosh-tamsin, vireo-venator. dancer-juggernaut and breah-ostra await their round-2 review. Kit data pass (SERVER_UPDATE7) now adds one more commit per kitfix branch before it lands. ext/classes reopened for Venator-first + new-game flow. Farm builder plan awaits owner answers.
+CHALLENGE LIST (final for this round; placeholders for the owner to tune; full list with mastery and gliders: ext/hero-shots:hunters/CHALLENGES.md)
+- Venator: none, owned from the start (old far-hits feat lives on as a mastery goal)
+- Zedran (easy if unpicked): knock 3 enemies into walls
+- Pin (easy if unpicked): stun 4 enemies
+- Linwick (easy if unpicked): hit 3 enemies at once with one ability
+- Dancer (medium): 12 hits while in the air
+- Bjorn (medium): knock down 2 hunters while under half health
+- Vireo (medium): stagger 6 monsters with abilities
+- Dredge (medium): make it out carrying 8 items
+- Tamsin (medium): slow 20 enemies
+- Moosh Moosh (hard, after 6 open): revive 4 teammates
+- Breah (hard, after 6 open): hit 3 at once with one ability, 5 times
+- Ostra (hard, after 8 open): knock down 3 hunters while merged
