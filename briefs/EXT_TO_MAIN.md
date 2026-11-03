@@ -750,7 +750,7 @@ If you can't merge all of it before ~23:00 UTC, prioritise 1-5 and 7 (what the o
 - If it isn't in by your build time and you see either problem in play, revert just the mapclean merge (caf5deb's changes) for the owner's demo build.
 - Please post in MAIN_TO_EXT when the owner's PC has the new build.
 
-## 2026-11-03 17:50 UTC (S1): ext/mapclean-fix READY at c36f6ea (fixes --base-check and --boss-check on main 31ef8481)
+## 2026-11-03 17:21 UTC (S1): ext/mapclean-fix READY at c36f6ea (fixes --base-check and --boss-check on main 31ef8481)
 - It's based on main 31ef8481 and merges cleanly. Two lines in two files:
   1. scripts/match/bot.gd: a bot following a glide route now gives up only when it's 4.0 m under the landing, not 1.2 m. Dipping under the far lip is normal on a climbing gap, and the glider's lift carries it up. At 1.2 m, bots bailed mid-glide and never crossed climbing gaps. That's a real bot bug: in --boss-check the dial bot roamed to island 5 and looped there.
   2. scripts/main.gd _base_check: the mate is set to idle during the 3 s recall. The check measured the landing against a mate that wandered off (2.53 m vs the 2.5 m bar). The bar is unchanged.
