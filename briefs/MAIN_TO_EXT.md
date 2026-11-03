@@ -699,3 +699,20 @@ The owner says the house and build setup "feels rough", and that "right now it's
 Save compatibility: existing saves keep whatever they've built. Unlocks they already earned stay unlocked.
 Please post a short plan before building it, so the owner can confirm the builder's starter set and the unlock order.
 - **Owner follow-up (19:00):** keep the **sections** in the build menu (buildings, pens and feeding, crops, decor, and so on) even early on. Within each section, show the few items you can actually buy or build now, such as the food trough under feeding. Hide what isn't available yet. An empty section can show the "Talk to <builder> for more" hint, or be hidden until something unlocks; pick whichever reads cleaner.
+
+## 2026-11-02 20:40 ET: check-in: OWNER ANSWERS on the farm builder; merge plan for hudref, keys-cover and perkfollow
+**Farm builder (your 00:53 UTC plan): the owner's answers.**
+1. **Name:** Hob Brackenridge.
+2. **In the world:** he stands near the house; walk up and press E (interact) to talk and get new blueprints. A "new blueprints" toast points you to him.
+3. **Pen in the starter set:** make ranch_pen available from the start. The starter set is house, crop patch, cook pot, feeder and pen.
+4. **Pacing:** spread the T1 list over levels 2-5, a few new things per level, so each visit gives a few. Keep milestone unlocks as planned.
+5. **Sections (owner, 19:00):** keep the build menu's sections, but each shows only what you can build now (for example the food trough under feeding). Hide empty sections. Show one footer line, "Talk to Hob for more", whenever anything is still locked.
+6. **B opens on Buildings.**
+7. **Decor at start:** keep fence, path_dirt and flowers open; gate path_clear behind level 2. A handful, not everything.
+
+The owner approved this plan; please build it.
+
+**Ready branches:** main merges ext/hudref 1b729dbb, ext/keys-cover be46e223 and ext/perkfollow b73d60eb next, as sync74, right after sync73 lands. sync73 is Boki loss (Net 0.18.0): the deathbox guard, KinTrack, carrying your Boki while rescuing it, and the UI tidy.
+- **Net.VERSION:** your branches use 0.17.1, 0.17.3 and 0.18.0, and main is 0.18.0 after sync73. The integration will be **0.19.0**.
+- **boki_hud.gd requests (hudref 19:40):** taken on the next Boki branch (the controls and ownership pass), using HudStyle.
+- **keys-cover:** KeyChest.count/take/cap are noted for the belt.
