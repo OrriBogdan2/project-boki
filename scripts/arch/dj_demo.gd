@@ -34,13 +34,13 @@ const ANIM := {
 
 ## The stills: hero, weapon, where the hunter starts from the dummy.
 const STILLS := {
-	"lmb": ["thief", Vector3(-6.0, 0, 0)], "fizzle": ["thief", Vector3(-6.0, 0, 0)],
+	"lmb": ["thief", Vector3(-11.0, 0, 0)], "fizzle": ["thief", Vector3(-6.0, 0, 0)],
 	"primed": ["thief", Vector3(-6.0, 0, 0)], "bola_whirl": ["thief", Vector3(-4.5, 0, 0)],
 	"bola": ["thief", Vector3(-3.4, 0, 0.2)], "knife": ["thief", Vector3(-6.0, 0, 0)],
 	"blink": ["thief", Vector3(-6.0, 0, 0)], "knock": ["thief", Vector3(-3.0, 0, 0)],
 	"exdash": ["thief", Vector3(-10.0, 0, 3.0)], "vault": ["thief", Vector3(-5.0, 0, 0)],
 	"slash": ["juggernaut", Vector3(-2.6, 0, 0)], "wave": ["juggernaut", Vector3(-8.0, 0, 0)],
-	"chain_fly": ["juggernaut", Vector3(-7.0, 0, 0)], "chain": ["juggernaut", Vector3(-7.0, 0, 0)],
+	"chain_fly": ["juggernaut", Vector3(-9.5, 0, 0)], "chain": ["juggernaut", Vector3(-7.0, 0, 0)],
 	"rampage": ["juggernaut", Vector3(-6.5, 0, 0)], "enraged": ["juggernaut", Vector3(-3.0, 0, 1.5)],
 	"sweet": ["juggernaut", Vector3(-3.3, 0, 0)], "lunge_air": ["juggernaut", Vector3(-7.5, 0, 0)],
 	"exec": ["juggernaut", Vector3(-3.0, 0, 0)],
@@ -215,11 +215,11 @@ static func _still_dancer(A: Arena, P: Hunter, D: Hunter, K: ThiefKit, w: String
 	match w:
 		"lmb":
 			P.inp["fire"] = t > 0.4 and t < 0.43
-			return 0.445
+			return 0.47
 		"fizzle":
 			P.inp["aim"] = P.pos + Vector3(3.5, 0.9, -1.5)
 			P.inp["fire"] = t > 0.4 and t < 0.43
-			return 0.4 + 3.8 / 45.0 + 0.1
+			return 0.4 + 3.8 / 45.0 + 0.06
 		"primed", "vault":
 			if at(t, dt, 0.4):
 				P.dashes = P.max_dashes()
@@ -242,7 +242,7 @@ static func _still_dancer(A: Arena, P: Hunter, D: Hunter, K: ThiefKit, w: String
 				K.cd["e"] = 0.0
 				K.use_e()
 			if w == "blink" and at(t, dt, 1.0): K.use_e()
-			return 0.95 if w == "knife" else 1.0 + 0.04
+			return 0.95 if w == "knife" else 1.0 + 0.16
 		"knock":
 			if at(t, dt, 0.4): K.on_knock(D, true)
 			return 0.52
@@ -268,7 +268,7 @@ static func _still_zedran(A: Arena, P: Hunter, D: Hunter, K: JuggernautKit, w: S
 			if at(t, dt, 0.4):
 				K.cd["e"] = 0.0
 				K.use_e()
-			return 0.44 if w == "chain_fly" else 1.1
+			return 0.5 if w == "chain_fly" else 1.1
 		"rampage":
 			if at(t, dt, 0.4):
 				P.dashes = P.max_dashes()

@@ -6838,6 +6838,8 @@ func _update_aim(alpha: float) -> void:
 		return
 	var p := player
 	var show := p != null and not p.out and not p.extracted and not p.downed and not paused
+	if show and p.ak != null and p.ak.own_aim_line():
+		show = false          # the kit draws its own (two lines read as two aims)
 	aim_line.visible = show
 	aim_ring.visible = false
 	muzzle_light.light_energy = 0.0

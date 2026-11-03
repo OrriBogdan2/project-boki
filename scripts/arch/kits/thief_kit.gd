@@ -19,7 +19,7 @@ extends ArchKit
 const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
 const BOLT_GOLD := Color("ffc04a")
 const BOLT_CORE := Color("fff2c0")
-const FIZZLE := Color("8a7aff")    # a bolt running out at the cursor: a blue-violet puff
+const FIZZLE := Color("6a48ff")    # a bolt running out at the cursor: a blue-violet puff
 const EMP_BLUE := Color("4ab8ff")  # the empowered shot's chakram
 const GHOST := Color("7af0ff")     # the blink's afterimages
 const KNOCK_STAR := Color("ff2a48")
@@ -265,6 +265,9 @@ func _tick_aim_line() -> void:
 	else:
 		AimKit.hide(h, "aim_glow")
 		AimKit.line(h, "aim", {"to": to, "col": AIM_LILAC, "alpha": 0.6})
+
+func own_aim_line() -> bool:
+	return h.wid == "arc_bolts"
 
 ## The empowered tell: a gold glint at the weapon hand (everyone sees it); no light, which pooled into a
 ## pale disc on the ground.

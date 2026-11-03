@@ -10,7 +10,7 @@ extends RefCounted
 
 const GOLD := Color("ffc94a")          # the guard's glow and the cleave's outer edge (the source's is red)
 const HOT := Color("ffe39a")           # the cleave's inner fill and the impact cloud: his gold, run hot
-const LANE_COL := Color("ffd98a")      # the strip ahead: a pale gold
+const LANE_COL := Color("ffb820")      # the strip ahead: his gold
 const BLOCK_GAP := 0.08                # s: hits closer together than this (one shotgun blast) count once
 
 var k: JuggernautKit
@@ -89,7 +89,7 @@ func _tick_guard(d: Dictionary) -> void:
 		st["dir"] = aim.normalized()
 	var gk := clampf(float(st["t"]) / float(d["guard"]), 0.0, 1.0)
 	AimKit.lane(h, "ult", {"dir": st["dir"], "len": float(d["len"]), "width": float(d["width"]), "fill": gk,
-			"col": LANE_COL, "col2": GOLD, "all": true, "alpha": 1.1, "hot": 0.4 * gk})
+			"col": LANE_COL, "col2": GOLD, "all": true, "alpha": 1.3})
 	if randf() < 0.5:
 		k.m.fx.spark(h.pos + Vector3(randf_range(-0.4, 0.4), 0.6 + randf() * 1.2, randf_range(-0.4, 0.4)), Vector3.UP,
 				GOLD, 2, 2.5, 40.0, 0.3, -2.0, 0.8)
