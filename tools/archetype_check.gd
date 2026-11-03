@@ -649,25 +649,21 @@ func _bulwark() -> void:
 	P.inp["sec_hold"] = false
 	step(m, 0.1)
 	ok("bulwark RMB release: lowered", K.wall.is_empty())
-	# tap: Bash; at 50 Guard, Shield Slam stuns
+	# tap: no Bash (it is Shift behind the shield); at 50 Guard the Shield Charge ends in a Shield Slam
 	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	var x0 := T.pos.x
 	tap(m, P)
 	step(m, 0.3)
-	ok("bulwark RMB tap: Bash pushes", K.last_variant == "tap" and T.pos.x - x0 > 1.0 and dmg(T) >= 9.0, "pushed %.1f" % (T.pos.x - x0))
+	ok("bulwark RMB tap: no Bash any more", K.last_variant == "tap" and absf(T.pos.x - x0) < 0.2 and dmg(T) <= 0.0 and K.ch_rmb >= 1.0, "pushed %.1f" % (T.pos.x - x0))
 	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.res = 60.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
 	ok("bulwark resource full: Shield Slam armed", K.full_ready() and K.ready_label() != "")
-	tap(m, P)
-	var early := T.stun_t
-	step(m, 0.5)
-	ok("bulwark RMB full: Shield Slam (0.3s tell) stuns", K.last_variant == "full" and early <= 0.0 and T.stun_t > 0.0 and K.res < 15.0, "stun %.2f guard %.0f" % [T.stun_t, K.res])
-	# hold to block, let go: the Bash comes out of the block
-	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.res = 0.0; step(m, 0.8); fresh(T)
+	# hold to block, let go: the aegis just comes down
 	x0 = T.pos.x
 	hold(m, P, 0.5)
 	step(m, 0.3)
-	ok("bulwark RMB release after block: Bash", K.wall.is_empty() and K.last_variant == "hold" and T.pos.x - x0 > 1.0, "pushed %.1f" % (T.pos.x - x0))
-	# Crushed: a Bash into a wall stuns and heals
+	ok("bulwark RMB release after block: only lowers", K.wall.is_empty() and K.last_variant == "hold" and absf(T.pos.x - x0) < 0.2, "pushed %.1f" % (T.pos.x - x0))
+	K.res = 0.0
+	# Crushed: a Shield Charge into a wall stuns (no heal)
 	var W: World = m.world
 	var lv: int = r[5]
 	var wk: PackedByteArray = W.kind; var wl: PackedByteArray = W.level
@@ -680,10 +676,16 @@ func _bulwark() -> void:
 	T.teleport(home + Vector3(2.2, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.crushed_at = {}
 	P.teleport(home); aim_at(P, T.pos); P.hp = P.max_hp - 40.0
 	var c0 := K.crushes; var hp0 := P.hp
+	K.lock_t = 0.0; P.dashes = P.max_dashes()
 	step(m, 0.2)
-	tap(m, P)
-	step(m, 0.3)
-	ok("bulwark payoff: Bash into a wall Crushes (stun + heal)", K.crushes == c0 + 1 and T.stun_t > 0.0 and P.hp > hp0, "crushes %d stun %.2f hp %.0f -> %.0f" % [K.crushes - c0, T.stun_t, hp0, P.hp])
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.3, func(): P.inp["sec_hold"] = true)
+	P.do_dash()
+	step(m, 0.35, func(): P.inp["sec_hold"] = true)
+	P.inp["sec_hold"] = false
+	step(m, 0.2)
+	ok("bulwark payoff: Shield Charge into a wall Crushes (stun, no heal)", K.crushes == c0 + 1 and T.stun_t > 0.0 and P.hp <= hp0 + 1.0, "crushes %d stun %.2f hp %.0f -> %.0f" % [K.crushes - c0, T.stun_t, hp0, P.hp])
 	for dz in range(-3, 4):
 		for dx in range(0, 3):
 			wl[W.idx(int(home.x) + 3 + dx, int(home.z) + dz)] = lv
@@ -711,7 +713,7 @@ func _bulwark() -> void:
 	P.do_dash()
 	step(m, 0.3)
 	ok("bulwark dash: Whirl", K.st.get("last_dash") == "whirl" and P.flat_dist(home) > 2.5, "moved %.1f" % P.flat_dist(home))
-	P.teleport(home); P.dashes = P.max_dashes(); K.lock_t = 0.0; K.shield_hp = K.shield_max()
+	P.teleport(home); P.dashes = P.max_dashes(); K.lock_t = 0.0; K.shield_hp = K.shield_max(); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
@@ -721,14 +723,14 @@ func _bulwark() -> void:
 	P.inp["sec_hold"] = false; P.inp["move"] = Vector2.ZERO
 	step(m, 0.1)
 	ok("bulwark dash with the shield up: Shield Charge", K.st.get("last_dash") == "charge" and inv > 0.15 and P.flat_dist(home) > 3.0, "inv %.2f moved %.1f" % [inv, P.flat_dist(home)])
-	# E: Mending Ground bursts after 1s and heals
-	P.teleport(home); P.hp = P.max_hp - 50.0; hp0 = P.hp
+	# E: Mending Ground: the column comes down for 1s, then the zone heals over time and ends in a burst
+	P.teleport(home); P.hp = P.max_hp - 100.0; hp0 = P.hp
 	P.inp["aim"] = home + Vector3(1, 0, 0)
 	P.ak.use_e()
 	step(m, 0.5)
 	var mid := P.hp
-	step(m, 0.8)
-	ok("bulwark E: Mending Ground heals after its delay", mid <= hp0 + 1.0 and P.hp >= hp0 + 20.0, "hp %.0f -> %.0f -> %.0f" % [hp0, mid, P.hp])
+	step(m, 4.8)
+	ok("bulwark E: Mending Ground heals after its delay, over its zone", mid <= hp0 + 1.0 and P.hp >= hp0 + 30.0, "hp %.0f -> %.0f -> %.0f" % [hp0, mid, P.hp])
 	await done(m)
 
 # ------------------------------------------------------------------ levels and the Bonded R

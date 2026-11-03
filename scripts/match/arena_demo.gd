@@ -76,7 +76,6 @@ const ANIM_DEMO := {
 	"bul_recall": ["bulwark", "tower_shield", [0.98, 1.05, 1.12, 1.2, 1.3, 1.5]],
 	"bul_smash_wind": ["bulwark", "tower_shield", [0.5, 0.7, 0.9, 1.1, 1.4, 1.7]],
 	"bul_smash": ["bulwark", "tower_shield", [1.1, 1.2, 1.25, 1.3, 1.4, 1.65]],
-	"bul_bash": ["bulwark", "tower_shield", [0.5, 0.54, 0.58, 0.64, 0.76, 0.95]],
 	"bul_whirl": ["bulwark", "tower_shield", [0.5, 0.58, 0.7, 0.76, 0.84, 1.0]],
 	"bul_charge": ["bulwark", "tower_shield", [0.7, 0.75, 0.82, 0.9, 1.0, 1.2]],
 	"bul_short": ["bulwark", "tower_shield", [0.85, 0.92, 0.98, 1.05, 1.15, 1.35]],
@@ -487,7 +486,7 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 				K.cd["rmb"] = 0.0
 				P.inp["sec_hold"] = false
 				K.press_rmb()
-		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_hail", "pin_roll", "arc_super", "arc_tap", "arc_perfect", "arc_over", "arc_over_loose", "pin_walk", "pin_flick", "pin_deadeye", "pin_rundown", "bul_guard", "bul_crush", "bul_slamshield", "bul_break", "bul_armed", "bul_lumber", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_bash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
+		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_hail", "pin_roll", "arc_super", "arc_tap", "arc_perfect", "arc_over", "arc_over_loose", "pin_walk", "pin_flick", "pin_deadeye", "pin_rundown", "bul_guard", "bul_crush", "bul_slamshield", "bul_break", "bul_armed", "bul_lumber", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
 			_anim_hero(A, P, mv, t, dt)
 		"pin_ult_cast", "pin_ult_nock", "pin_ult_loose", "pin_ult_final", "bul_ult_wind", "bul_ult_slam":
 			_anim_ult(P, mv, t, dt)
@@ -529,12 +528,6 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 		"bul_recall": fire = (t > 0.4 and t < 0.43) or (t > 1.0 and t < 1.03)
 		"bul_smash_wind": fire = t > 0.4 and t < 2.0
 		"bul_smash": fire = t > 0.4 and t < 1.2
-		"bul_bash":
-			if _at(t, dt, 0.5):
-				K.ch_rmb = 1.0
-				K.cd["rmb"] = 0.0
-				P.inp["sec_hold"] = false
-				K.press_rmb()
 		"bul_whirl":
 			if _at(t, dt, 0.5):
 				P.dashes = P.max_dashes()
@@ -578,12 +571,15 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 				K.set("lock_t", 0.0)
 				K.press_rmb()
 		"bul_slamshield":
-			if _at(t, dt, 0.5):
-				K.res = 60.0
+			K.res = maxf(K.res, 60.0)
+			if _at(t, dt, 0.3):
 				K.ch_rmb = 1.0
 				K.cd["rmb"] = 0.0
-				P.inp["sec_hold"] = false
+				K.bot_hold["rmb"] = 3.0
 				K.press_rmb()
+			if _at(t, dt, 0.7):
+				P.dashes = P.max_dashes()
+				P.do_dash()
 	P.inp["fire"] = fire
 
 ## The X ultimates' strips: Starpiercer cast at 0.5 (its beams from a press at 0.5 after a cast at 0.3, the

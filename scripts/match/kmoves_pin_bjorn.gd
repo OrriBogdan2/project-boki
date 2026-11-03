@@ -376,23 +376,6 @@ const MOVES := {
 				"fl": Vector3(0.0, 0.15, -0.48)
 			}
 		]]},
-	# the Bash: a short-stepped shoulder shove behind the shield
-	"bul_bash": {"keys": [
-		[0.0, {"p": 0.15, "y": 0.3, "lw": 1.0, "legs": [0.2, -0.4, -0.1, -0.2]}],
-		[
-			0.07,
-			{
-				"p": -0.45,
-				"y": -0.2,
-				"sq": 0.3,
-				"lw": 1.0,
-				"legs": [0.9, -0.9, -0.5, -0.4],
-				"hw": 1.0,
-				"fl": Vector3(0.0, 0.1, -0.6)
-			}
-		],
-		[0.28, {"p": -0.2, "lw": 0.7}],
-		[0.5, {}]]},
 	# 360 Smash: a hard 0.17 s run-up (the dash's own lean tips him forward, so the move adds none), ONE full
 	# turn in 0.16 s with the hammer held out at arm's length while he slides on, then a low crouched
 	# recovery to 0.58 s

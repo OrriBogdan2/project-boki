@@ -261,7 +261,6 @@ const SHOTS := [
 		"Mending Ground with the hammer in hand: the green column coming down on him, the ring filling"
 	],
 	["bjorn_purify_burst", "bulwark", "purify", 1.62, 1.0, "Mending Ground lands: the green ring bloom"],
-	["bjorn_bash", "bulwark", "bash", 0.58, 2.0, "Bash: the shield shove and its gold fan of force"],
 	[
 		"bjorn_crushed",
 		"bulwark",
@@ -609,12 +608,6 @@ func _input(what: String, t: float) -> void:
 				T.teleport(crush_rock - Vector3(1.4, 0, 0))
 			_aim(crush_rock - Vector3(1.4, 0, 0))
 			P.inp["fire"] = t > 0.3 and t < 1.72
-		"bash":
-			T.teleport(home + Vector3(2.0, 0, 0))
-			_aim(T.pos)
-			if at.call(0.5):
-				P.inp["sec_hold"] = false
-				K.press_rmb()
 
 func _shot(s: Array, pair: bool) -> void:
 	var stem := String(s[0])
