@@ -7,6 +7,7 @@ extends RefCounted
 
 const CHECKS := {
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
+	"--drop-check": ["res://tools/drop_check.gd", "drop_check", null],      # the opening drop and the squad comet
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],      # backpack tiers, at risk
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
