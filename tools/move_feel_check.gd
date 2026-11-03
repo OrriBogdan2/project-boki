@@ -165,6 +165,9 @@ func _flat_spot(r: float) -> Vector3:
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
+	# the framing targets were measured on the procedural medium hunter: keep it (a 3D Warden's one skinned
+	# mesh gives coarser bounds, not a different size on screen)
+	WardenGlb.set_model("gunslinger", false)
 	m = Match.new()
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true})
