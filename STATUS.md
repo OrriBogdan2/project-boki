@@ -1,5 +1,5 @@
 # S2 status (second server session)
-Updated: 2026-11-03 08:55 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
+Updated: 2026-11-03 08:56 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
 
 ## Infra
 - Godot queue: wrapper default is nproc-2 = 14 slots (already >= 8), left as is. S1: no change needed.
@@ -54,7 +54,8 @@ Updated: 2026-11-03 08:55 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (
 - **Item 8 audit of other heroes' cosmetic dash bursts (main 801bfbf lines; most already fixed on our pair branches):** Pin archer_kit.gd:360, pin_spirit.gd:42-44/119/122; Venator gunslinger_kit.gd:233-235, :123, :247; Vireo mage_kit.gd:441 ring(2.7); Bjorn bulwark_kit.gd:611, :621. **S1: Pin/Venator/Vireo lines are yours.** Shared hunter.gd:1277 dust burst, :1169/1171 and :1202/1203 kin rider bursts (rider ones touch reserved Boki behaviour; main's call).
   Owner Qs (Dancer): the air Cartwheel now empowers the next bolt (data Quickflip + footage say so), but our air dash is the shared long dash on its own 12.5 s cooldown, so it's an extra empowered bolt: keep, or make it spend a Vault charge? Dash->LMB fires at once mid-flip (footage 0193): OK, or buffer to landing? RMB/E/X during a flip not in footage, kept 'fire': OK?
 
-## Prologue polish
+## Prologue polish: **READY TO MERGE**, ext/prologue-polish @ a9afdaf (pushed; on top of ext/prologue5 54f8304, merge prologue5 first)
+- Full suite 94 checks: every failure also fails on main 801bfbf (farm-start even passed). Logs /home/boki/suite-s2/boki-prologue-polish. Shots for ext review: ext/hero-shots-s2 prologue/ (25 frames, 1280x720).
 - Branch `ext/prologue-polish` from origin/ext/prologue5 54f8304, aae7ef6 local: per-slide eased camera with cuts, MOODS lighting table, Crown keep, Wyrm rise/roar/dive, Mantle lights scatter, slide 4 restaged in prologue_boki.gd (no clipping across all 492 frames, asserted), slide 3/4 owner text, new --prologue-check 7/0, class-unlock 137/0, health OK. Slide 4 final (a9afdaf): touch in silhouette (kneeling, relic held at chest height in both hands, lead Boki rears up to nose it), relic wakes with hot core, outlined pulsing ring and warm light on the pair, then hangs above them. HunterAnim gained an 'offer' interact pose (4 lines). Pushed; full suite running. Shots: ext/hero-shots-s2 prologue/. Shots: /home/boki/shots-s2/prologue/.
   Owner Qs (prologue): slide 4 hunter wakes Venator's Mantle (orange, every player's starter) OK? hunter without his rifle in slide 4 OK? slide 3 Mantle lights are plain coloured spheres (glow washed out on the red sky) OK?
 
