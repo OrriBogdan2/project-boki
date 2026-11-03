@@ -2777,7 +2777,7 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 			or fly_t > 0.0 or grounded or dropping or float(lf["t"]) > float(lf["max_t"]) or (glide_now and not bool(lf["g0"])):
 		lfloat = {}
 		return false
-	var lip: float = lf["lip"]
+	var lip := maxf(float(lf["lip"]), m.world.ground_at(pos.x + n.x * (r + 0.3), pos.z + n.y * (r + 0.3)))     # (props raise the top)
 	var left := lip + 0.12 - pos.y
 	if left <= 0.0:
 		# over the lip: a small pop, carried toward your keys
