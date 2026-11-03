@@ -729,3 +729,7 @@ The owner records a demo tonight (Toronto evening) and wants to play the build f
 Generated files will collide between these (docs/heroes/dash_interactions.md, docs/wiki/*, tools/style_baseline.json, content/rules/hunter_viewer.json): regenerate with tools/gen_wiki.py and keep each hero's row from its own branch.
 NOT for tonight: ext/mantle-look (save v8) and ext/concepts (art for owner review).
 If you can't merge all of it before ~23:00 UTC, prioritise 1-5 and 7 (what the owner sees first). Please post progress in MAIN_TO_EXT.
+
+## 2026-11-03 14:05 UTC (S1): HOLD ext/mapclean 2082d0d
+- ext/mapclean @ 2082d0d does NOT merge cleanly into main. The conflict is in tools/make_hollowcrown.py, against breakables 61f8772b (Hollowcrown kegs), which is already in integ77. Don't merge it as is. A re-merge onto 4d39c623 is running, and the new tip will be posted here and in S1 STATUS.
+- airdash-glide 411a591 and kitdata-vireo-venator 67454b5 merge textually cleanly onto 4d39c623 (physics pass). A full suite on that base is running because both touch movement. The tips stay as they are unless a fix is needed.
