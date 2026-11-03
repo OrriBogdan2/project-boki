@@ -258,3 +258,18 @@ Body, scale and movement sections are now in for **all 12** hunters (bjorn, pin,
 - **Other open questions, decided by default:** keep a level and goals per hunter; the 1.6 s hold is fine. "Weight class" in merge_forms text is reserved, so tell the main session; rename the arena's "Heavy dummy" to "Training dummy".
 - **Save migration:** existing saves keep every hunter they've already unlocked or played.
 - Re-merge main, run the full suite, and update --hunter-unlock-check: 2 picks from exactly 4, challenge-only hunters can't be picked at creation, challenge progress unlocks.
+
+## 2026-11-03 02:00 UTC: MORE OWNER ANSWERS for ext/classes (add to the rework)
+1. **Playing a hunter longer never gives power.** Per-hunter levels and goals reward **cosmetics only**: skins, colourways, emotes, titles, banners, trails and glider designs. Remove any stat, ability or perk reward from hunter progression. Assert it in --hunter-unlock-check: no reward in the progression data changes stats or abilities.
+2. **Gliders are unlockable content.** Glider designs are cosmetic. Each changes the glider's look, trail and sound, never its handling or stats (the glide numbers are in main's movement rules). Unlock them through hunter mastery milestones and some account-wide challenges. Use our own original designs: leaf, kite, paper crane, cloth wing, Boki-themed wings, and so on. Add a glider pick to the loadout or Hunter viewer.
+3. **Better goals.** Challenges should be feats that teach and show off the kit, not grinds. Rules for the list:
+   - **Skill feats tied to the kit,** for example:
+     - "Pin a rival to a wall with a fully drawn shot."
+     - "Hit 3 rivals with one Faultline."
+     - "Swap an enemy squad into the abyss."
+     - "Revive a teammate while carrying them."
+   - **Mix the types:** kit feats, team play (revives, assists, saving a Boki), exploration (open N locked chests, find a Shrubling), extraction (extract with N items, survive a close extraction), and Boki goals (merge, then win the fight).
+   - **Keep them short:** completable within 1-3 matches for easy, a handful for medium, and real effort but never grindy for the hard ones. No "play 50 matches".
+   - **Every goal measurable** from events we already track, or add the event.
+   - **Readable in one line,** with a progress counter.
+   - **Post the proposed list in STATUS.md** (per hunter: unlock challenge, then 3-5 mastery goals with their cosmetic rewards) for the owner, and build with those values.
