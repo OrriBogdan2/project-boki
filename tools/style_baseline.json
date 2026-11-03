@@ -305,9 +305,9 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 252,
-"nested_ternary": 38,
-"semicolon": 272,
+"long_line": 248,
+"nested_ternary": 37,
+"semicolon": 271,
 "shadow": 4
 },
 "scripts/home/home_build.gd": {
@@ -332,7 +332,7 @@
 "semicolon": 29
 },
 "scripts/home/home_hero.gd": {
-"long_line": 4
+"long_line": 2
 },
 "scripts/home/home_incubator.gd": {
 "long_line": 4,
@@ -351,8 +351,8 @@
 "semicolon": 21
 },
 "scripts/home/home_training.gd": {
-"long_line": 38,
-"semicolon": 28,
+"long_line": 34,
+"semicolon": 26,
 "shadow": 3
 },
 "scripts/home/home_water.gd": {
@@ -485,7 +485,7 @@
 "semicolon": 14
 },
 "scripts/match/arena.gd": {
-"long_line": 23,
+"long_line": 22,
 "nested_ternary": 2,
 "semicolon": 37
 },
@@ -770,7 +770,7 @@
 "long_line": 2
 },
 "scripts/match/practice_hero.gd": {
-"long_line": 4,
+"long_line": 2,
 "semicolon": 2
 },
 "scripts/match/prop_anim.gd": {
@@ -895,12 +895,12 @@
 "long_line": 3
 },
 "scripts/ui/hatch.gd": {
-"long_line": 35,
+"long_line": 34,
 "nested_ternary": 2,
-"semicolon": 72
+"semicolon": 71
 },
 "scripts/ui/hero_grid.gd": {
-"long_line": 3,
+"long_line": 2,
 "semicolon": 3
 },
 "scripts/ui/hold_skip.gd": {
@@ -977,9 +977,6 @@
 "long_line": 32,
 "semicolon": 24,
 "shadow": 1
-},
-"scripts/ui/portraits.gd": {
-"long_line": 1
 },
 "scripts/ui/prologue.gd": {
 "long_line": 39,
@@ -1131,7 +1128,7 @@
 "shadow": 1
 },
 "tools/hero_check.gd": {
-"long_line": 6,
+"long_line": 3,
 "semicolon": 3
 },
 "tools/hero_combo_check.gd": {

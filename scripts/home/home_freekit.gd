@@ -13,7 +13,7 @@ static func card(right: Control) -> void:
 	fkr.add_child(UI.IconDot.new("egg", UI.GOLD, 20.0))
 	var fkv := UI.vbox(1); fkv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	fkv.add_child(UI.label("Or a free-kit run: nothing at risk", 15, UI.GOLD, UI.semi))
-	var fkl := UI.para("A loaner Boki (a fresh starter, lent for one run), your class's plain weapon and two tonics. Your Boki, armory and stash stay home. Keep whatever you extract with; an extract pays at least %d gems." % Loaner.MIN_PAY, 12, UI.MUTED)
+	var fkl := UI.para("A loaner Boki (a fresh starter, lent for one run), your Hunter's plain weapon and two tonics. Your Boki, armory and stash stay home. Keep whatever you extract with; an extract pays at least %d gems." % Loaner.MIN_PAY, 12, UI.MUTED)
 	fkl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	fkv.add_child(fkl)
 	fkr.add_child(fkv)

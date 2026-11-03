@@ -714,6 +714,7 @@ func _start(o: Dictionary) -> void:
 	_combo_cb = func(t, st, by, dur): Combos.record(t, st, by, dur)
 	CombatBus.hit_landed.connect(_bond_cb)
 	CombatBus.status_applied.connect(_combo_cb)
+	add_child(HunterFeats.new(self))      # the feats Hunter challenges count
 	cam = CamRig.new(); cam.name = "Cam"; add_child(cam)
 	cam.lead = float(Settings.get_v("cam_lead"))
 	cam_style = String(Settings.get_v("cam_style"))
@@ -4930,6 +4931,7 @@ func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
 		return      # (opening costs exactly one key; another game's open already paid in that game)
 	c["open"] = true
 	if blight: blight.noise(c["pos"], "chest", h)      # a chest lid is loud
+	if h: h.add_stat("chests")
 	if net_on and not from_net:
 		net_event(["chest", chests.find(c), h.nid if h else ""])
 	if h == player:
@@ -5893,6 +5895,7 @@ func _finish() -> void:
 		if not opts.get("tutorial", false) and not opts.get("loaner", false):
 			r["rift_keys"] = player.rift_keys if result.get("extracted", false) else 0
 		r["stats"] = player.stats.duplicate()
+		r["lvl"] = player.lvl      # (class unlock goals: best level in a match)
 		# weapons, gloves and treasure: home to the armory if you made it out, else what stayed behind
 		if result.get("extracted", false):
 			r["haul"] = Pack.haul(player)

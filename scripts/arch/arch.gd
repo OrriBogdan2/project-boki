@@ -35,6 +35,10 @@ static func weight(id: String) -> String:
 static func name_of(id: String) -> String:
 	return String(def(id).get("name", id.capitalize()))
 
+## The Hunter's display name, or "Hunter" for a body with no Hunter kit (dummies, old saves).
+static func label(id: String) -> String:
+	return name_of(id) if exists(id) else "Hunter"
+
 static func color(id: String) -> Color:
 	return Color(String(def(id).get("color", "#ffffff")))
 

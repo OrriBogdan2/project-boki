@@ -102,7 +102,7 @@ Found as glowing perk orbs during an expedition: walk into one to take it. Chest
 
 ## Without a class kit
 
-Every player and bot now plays a class, whose kit owns Shift and right click. A hunter without one falls back to these: the weight class's dodge and the weapon's own right-click utility.
+Every player and bot now plays a class, whose kit owns Shift and right click. A hunter without one falls back to these: the weight's dodge and the weapon's own right-click utility.
 
 | Weight | Dodge | Cooldown | What it does |
 |---|---|---|---|

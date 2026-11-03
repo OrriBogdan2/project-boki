@@ -1,5 +1,7 @@
 # Archetypes
 
+Naming: players see these as **classes** ("archetype" is the internal word: ids, files and save keys keep it, and the weight (Light, Medium, Heavy) is what used to be called the class).
+
 Status: **built** (branch `archetypes`; see "Implementation status" at the end for what's in, what's
 a subset and the gaps). It describes six archetypes, two per weight class. Each one is a
 whole character: a dash, a passive, LMB, RMB with contextual variants, E (usually utility) and R

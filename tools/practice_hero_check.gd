@@ -20,6 +20,7 @@ func run(main: Node) -> void:
 	var k := Save.new_kin("zapple", "Pip"); d["roster"].append(k); d["active"] = k["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
 	d["cls"] = "medium"; d["arch"] = "gunslinger"
+	d["classes"] = ClassUnlock.legacy()      # an old save, every Hunter open (the locks: --hunter-unlock-check)
 	Save.d = d
 	var areas := {
 		"training": {"training": true, "practice": true},
@@ -92,7 +93,7 @@ func _area(main: Node, m: Match, area: String) -> void:
 	Overlay.open_pause("match")
 	await tree.process_frame
 	var labels: Array = Overlay.host.find_children("*", "Button", true, false).map(func(b): return String((b as Button).text))
-	ok(labels.any(func(t): return t.contains("Change hero")), "%s: the Esc menu has Change hero" % area)
+	ok(labels.any(func(t): return t.contains("Change Hunter")), "%s: the Esc menu has Change Hunter" % area)
 	Overlay.close()
 	main.set("current", was)
 	await tree.process_frame
