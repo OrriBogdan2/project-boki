@@ -56,15 +56,16 @@ gloves), plus a swift draught and a shield cell. Everyone is issued two tonics a
 more are brought (capped), found and bought. The whole belt goes in the deathbox. API:
 `UtilityBelt.grant(h, id, n)` (returns how many fit), `count`, `take`, `has_room`, `use_id`.
 
-**Keys on the belt (owner, 17:55).** Rift Keys and chest keys are belt items (`rift_key`, `chest_key`),
-one slot per type, stacked up to their "max" (1 and 3, in `content/utility/`), so you always see
-whether you carry one and carrying one costs a slot. A full belt leaves the key on the ground and
-prompts a swap: pressing a slot's key drops that slot's items and takes the key (bots drop their
-cheapest stack); nothing is thrown away. F at a hatch or chest still opens it; the key's own slot
-opens the lock beside you, or elsewhere pings the nearest matching lock on your map (`BeltKeys`).
-Keys go in the deathbox, and are never brought in, sold or taken home, so the market's Rift Key is
-gone (stash keys in an old save are refunded at its price, 140 gems). `h.rift_keys` and
-`h.chest_keys` read and write the belt.
+**Keys on the belt (owner, 17:55).** A Rift Key and a chest key each take one belt slot while you
+carry any, with the count on the icon, so you always see whether you carry one and carrying one costs
+a slot. The counts stay the truth (`h.rift_keys`; `h.chest_keys` through `KeyChest`); `BeltKeys.sync`
+shows them on the belt and spends through `KeyChest.take`. Caps: Rift Keys 1 (`content/utility/rift_key.json`),
+chest keys `KeyChest.cap()` (3). A key that doesn't fit stays on the ground and a prompt offers a swap:
+pressing a slot's key drops that slot's items and takes the key (bots drop their cheapest stack);
+nothing is thrown away. F at a hatch or chest still opens it; the key's slot opens the lock beside
+you, or elsewhere pings the nearest one on your map. Keys go in the deathbox, and are never brought
+in, sold or taken home, so the market's Rift Key is gone (stash keys in an old save are refunded at
+its price, 140 gems).
 
 **Removed.** The free-kit loaner, its extract-minimum top-up, text and checks. The economy floor (a
 stray common Boki) and the last-Boki guard stay.
@@ -96,9 +97,8 @@ old minor glove-like items map to charms then).
   (`Equal`), gloves (`Gloves`, `GripHud`, `GripOverhead`, `GripNet`) and the migration.
 - perkorbs owns the perk pool; it frees keys 1/2/3 by deleting the perk prompt (until then the belt
   keys yield to an open prompt, `Match._gather_input`).
-- keys-cover owns chests, key carriers and cover. Its chest keys live on the belt: it reads and writes
-  `h.chest_keys`, drops pickups of kind "chest_key", and registers its chests with
-  `BeltKeys.register_lock("chest_key", near, open, spots, col)`; its own key counter goes.
+- keys-cover owns chests, key carriers and cover, and `KeyChest.count / take / give / cap`, which the
+  belt reads and spends through; its own key counter is gone (merged in here at be46e223).
 - the shop pass calls `UtilityBelt.grant` / `price_of`, `Backpacks.shop_price(h)` / `shop_upgrade(h)`,
   and reads `Equal.rules()`.
 
