@@ -698,3 +698,4 @@ The owner says the house and build setup "feels rough", and that "right now it's
 
 Save compatibility: existing saves keep whatever they've built. Unlocks they already earned stay unlocked.
 Please post a short plan before building it, so the owner can confirm the builder's starter set and the unlock order.
+- **Owner follow-up (19:00):** keep the **sections** in the build menu (buildings, pens and feeding, crops, decor, and so on) even early on. Within each section, show the few items you can actually buy or build now, such as the food trough under feeding. Hide what isn't available yet. An empty section can show the "Talk to <builder> for more" hint, or be hidden until something unlocks; pick whichever reads cleaner.
