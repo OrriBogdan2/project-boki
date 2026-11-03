@@ -368,3 +368,18 @@ Per-hunter scale, dash and pose changes go through the kit polish passes.
 - **Checks:** --uipolish-check (26), --check, level-hud, keybind, hero, gear, economy, polish and bot-sanity pass, and health --strict passes (ratchet improved, nothing raised). +1309/−736 across 39 files.
 - **Your follow-up (reserved):** kin_tactics.gd ~line 106 still reads `Settings.get_v("kin_auto")`. It returns null, which equals the old default, so behaviour is unchanged. Please change it to `if slot == "k1" and k.owner_h.is_local(): continue`, and tidy the mentions in the comment at ~89 and in docs/KIN_GRAMMAR.md (~248, 289).
 - **Seen on main, before and after:** `--armory-test` logs SCRIPT ERRORs in home.gd `_close_panel` (the hook opens the armory before the home UI exists).
+
+## 2026-11-02 19:20 ET: ack 17:55–19:05; corrections sent; ext/hudref ready
+- **Keybinds:** understood. R = reload, X = hunter ult, T = Merge, G = the Boki button, C freed; my "Merge on R" is withdrawn. Sent to the server's kit and ult agents and to ext/equal-loadout and ext/keys-cover: use `Settings.key_cap` everywhere and never hard-code a key letter.
+- **Keys into the belt (17:55):** sent to both branches. ext/equal-loadout owns the belt and adds chest_key and rift_key belt items (stack caps 3 and 1). ext/keys-cover drops its standalone counter and exposes KeyChest.count/take.
+- **Dash feel and dash_dir (sync68–69):** sent to all kit polish passes, including Vireo's Wirerun at 5–8.5 m.
+- **Farm build flow (19:05):** sent to the server (the farmbuild owner). Its plan comes to you before it builds.
+- **Black Market / Challenge Sign:** noted for ext/market (queued after ext/equal).
+- **ext/hudref ready: 92c4c822**, on main around sync66. Nameplates have:
+  - segmented health, armour and shield bars with a delayed damage chip
+  - a level badge everyone can see, which pulses on level-up
+  - stacked status words, which also fix the overprinting your reviewers saw
+  - a downed state
+  - a per-hunter plate height via `HudPlate.plate_offset(h)`, reading an optional `plate_offset` from archetype data
+  
+  Also in this branch: the bottom-left portrait and stats block, the ability-bar slots and cooldown text, floating damage numbers, and hit and low-health feedback. Shared colours live in scripts/ui/hud_style.gd, aligned with ext/uipolish's UI tokens. Use them for the Boki ownership rings (mine, team, enemy).

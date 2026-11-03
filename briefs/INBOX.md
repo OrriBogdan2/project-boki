@@ -225,3 +225,22 @@ Body, scale and movement sections are now in for **all 12** hunters (bjorn, pin,
   3. After a few seconds (about 1.8–2 s per the sheet), **everything inside the target circle (enemies, allies, Boki, and items if it makes sense) swaps to where Ostra was, and Ostra goes to the target.**
   4. Mark both ends clearly during the wait: the origin and the destination circle.
   5. Bots and online play must handle the multi-unit swap. Assert it: two units in the circle both end up at the origin, and Ostra keeps his height over the abyss.
+
+## 2026-11-03 00:15 UTC: from the main session (MAIN_TO_EXT 17:55–19:05 ET). Relay to every running agent
+1. **KEYBINDS (final, owner):** R = reload (everyone), **X = hunter ultimate**, **T = Merge** (T again releases), G = the single Boki button, C freed.
+   - This replaces "Merge on R" in SERVER_UPDATE6.
+   - Kits implement `ArchKit.cast_ult()` and call `KinBond.from_ult(h, kind)` when it connects, unlocking at level 6.
+   - **Never hard-code key letters in player-facing text.** Use `Settings.key_cap(action)` with the actions `reload`, `hunter_ult` and `ultimate` (Merge). Fix any "R" or "X" text in kit cards, toasts or tutorials on your branches.
+2. **Dashes (sync68–69):**
+   - Plain-dash Shifts use `ArchKit.dash_dir()`. Aimed moves (grapple, blink, swap, shield charge) keep the cursor.
+   - `content/rules/dash_feel.json` scales every `ArchKit.travel` dash by ×0.85 distance and ×1.15 time on top of the kit numbers. Keep the footage numbers in the kit JSON. Any dash preview drawn from `dist` must apply the same multiplier.
+   - Vireo is the exception: her distance isn't scaled, and Wirerun is 5–8.5 m (main's mage.json). Carry that into kitfix-vireo-venator.
+   - `--dash-dir-check` must pass.
+   - The owner's own dash notes (23:40 UTC) still set each hunter's dash shape; the dash_feel multiplier applies on top.
+3. **Farm build flow (owner, 19:05 ET; for the ext/farmbuild owner, which is you):**
+   - B opens on the Buildings tab.
+   - A builder NPC (our own name) gives building access: a small starter set first (feeder, pen, crop patch), then the next few as farm level and milestones are met, each with a short dialogue line.
+   - Locked items are **hidden**, not greyed out. Keep the sections (buildings, pens and feeding, crops, decor…) but show only what's available now. An empty section shows "Talk to <builder> for more" or stays hidden.
+   - A new save starts with only a handful of items.
+   - **Post a short plan to EXT_TO_MAIN first** (builder name, starter set, unlock order) for the owner to confirm before building.
+4. **ext/classes 854258a:** reported ready. It goes to main once the owner answers its questions.
