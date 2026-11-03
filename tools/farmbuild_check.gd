@@ -227,14 +227,14 @@ func run(m: Node) -> void:
 	# undo restores everything, fibre and coals included
 	_stats(0, 0, 0, 24)
 	_mats(10, 10, 10, 2)
-	hb.take("market_stall")
-	var st_cost := FarmSites.build_cost("market_stall")
+	hb.take("storage_chest")
+	var st_cost := FarmSites.build_cost("storage_chest")
 	var stc := _spot(hb, home.spots["house"] + Vector3(-6, 0, 4))
 	var f0 := Work.mat("fibre"); var gg := int(Save.d["gems"])
-	ok(_put(hb, stc) and Work.mat("fibre") == f0 - int(st_cost["fibre"]), "the Market stall site paid fibre as well (%s)" % FarmSites.cost_text(st_cost))
+	ok(_put(hb, stc) and Work.mat("fibre") == f0 - int(st_cost["fibre"]), "the storage chest site paid fibre as well (%s)" % FarmSites.cost_text(st_cost))
 	hb.undo_last()
 	L = HomeLayout.of(Save.d)      # (undo puts the saved layout back)
-	ok(Work.mat("fibre") == f0 and int(Save.d["gems"]) == gg and _entry(L, "market_stall").is_empty(), "undo takes the site back and returns gems, wood and fibre")
+	ok(Work.mat("fibre") == f0 and int(Save.d["gems"]) == gg and _entry(L, "storage_chest").is_empty(), "undo takes the site back and returns gems, wood and fibre")
 	hb.toggle()
 	# ---------------------------------------------------------------- 4. Boki build it
 	_stats(0, 0, 0, 40)          # farm level 2 (10 points)
