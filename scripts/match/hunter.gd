@@ -1088,8 +1088,9 @@ const DASH_JUMP_CARRY := 0.55
 func do_dash() -> void:
 	if downed or stun_t > 0.0 or root_t > 0.0 or out or Hex.active(self):
 		return
-	if KitStatus.grounded(self):
-		_ab_feedback("dash", "deny")      # Grounded (a Thief's Bola): no dash, jump or glide
+	if KitStatus.grounded(self) and not DredgeKit.reeling(self):
+		# Grounded (a Thief's Bola): no dash, jump or glide (a reeling Dredge still barges)
+		_ab_feedback("dash", "deny")
 		return
 	if roll_t > 0.0 and move_kind == "rush":
 		roll_t = 0.0            # a glove/ability rush cancels straight into the dash

@@ -27,8 +27,9 @@ static func grounded(e: Ent) -> bool:
 	return e != null and is_instance_valid(e) and e.has_meta("gnd_until") and e.m != null and float(e.m.time) < float(e.get_meta("gnd_until"))
 
 ## Puts `kind` on `e` for `secs` (refreshes a running one). `send`: tell the other games when the
-## body belongs to one of them.
-static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true) -> void:
+## body belongs to one of them. `toast`: the caster shows its own tell, so no overhead word, and the
+## player's toast reads this instead (what Grounded takes away from a Dredge reeling, say).
+static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toast := "") -> void:
 	if e == null or not is_instance_valid(e) or e.dead or secs <= 0.0:
 		return
 	var m: Node = e.m
@@ -45,7 +46,7 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true) -> 
 			e.set_meta("gnd_until", maxf(float(e.get_meta("gnd_until", 0.0)), float(m.time) + secs))
 			if e is Hunter:
 				(e as Hunter).gliding = false
-			if not was: _show(e, kind, secs)
+			if not was: _show(e, kind, secs, toast)
 		"blt":
 			e.blight_t = maxf(e.blight_t, secs)
 			e.blight_k = maxf(0.6, k) if k > 0.0 else 0.6
@@ -67,7 +68,7 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true) -> 
 			_show(e, kind, secs)
 
 ## What everyone sees: Grounded wraps cords round the legs for its length; Shred cracks a red ring.
-static func _show(e: Ent, kind: String, secs: float) -> void:
+static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 	var m: Node = e.m
 	match kind:
 		"gnd":
@@ -86,9 +87,11 @@ static func _show(e: Ent, kind: String, secs: float) -> void:
 				n.add_child(c)
 			e.add_child(n)
 			m.later(secs, func(): if is_instance_valid(n): n.queue_free())
-			m.fx.word(e.pos + Vector3(0, 2.0, 0), "GROUNDED", GROUND_COL, false)
+			if toast == "":
+				m.fx.word(e.pos + Vector3(0, 2.0, 0), "GROUNDED", GROUND_COL, false)
 			m.fx.ring(e.pos, 1.1, GROUND_COL, 0.3)
-			if e == m.get("player") and m.hud: m.hud.toast_small("GROUNDED  ·  no dash, jump or glide", GROUND_COL)
+			var line := toast if toast != "" else "no dash, jump or glide"
+			if e == m.get("player") and m.hud: m.hud.toast_small("GROUNDED  ·  " + line, GROUND_COL)
 		"rat":
 			var old2 := e.get_node_or_null("Rattled")
 			if old2: old2.queue_free(); old2.name = "RattledGone"

@@ -69,6 +69,16 @@ const ARCH_STANCE := {
 	"rimewright": {"knee": 0.3, "lean": 0.12, "width": 0.07, "bounce": 1.3, "breath": 2.8, "arm": 1.15},
 	"dolm": {"lean": 0.08, "width": 0.2, "knee": 0.3, "breath": 1.6, "arm": 0.8},
 	"ostra": {"lean": -0.05, "width": 0.07, "knee": 0.1, "breath": 1.7, "arm": 0.8},
+	# cadence scales the step rate, stride the step length: Linwick scurries in short quick steps, Dredge
+	# plants wide, slower, longer ones (hero-ref "Body, scale and movement feel")
+	"ashwick": {
+		"knee": 0.2, "lean": 0.02, "width": 0.12, "bounce": 0.6, "breath": 2.4, "arm": 0.9, "cadence": 1.8,
+		"stride": 0.45, "fidgets": ["bounce", "bob", "weapon"]
+	},
+	"dredge": {
+		"knee": 0.24, "lean": 0.06, "width": 0.22, "bounce": 0.0, "breath": 1.5, "arm": 0.75, "cadence": 0.9,
+		"stride": 0.7, "fidgets": ["shoulders", "neck", "stretch"]
+	},
 }
 ## How far the shoulder pieces turn with the arm (the rest is left behind, so a raised arm slides
 ## under the plate instead of through it).
@@ -646,7 +656,7 @@ func update(dt: float, s: Dictionary) -> void:
 	# ---------------------------------------------------------------- the walk phase and footsteps
 	var ph0 := ph
 	if moving:
-		ph += dt * spd * float(STRIDE.get(arch, 2.15 if cls != "heavy" else 1.95))
+		ph += dt * spd * float(STRIDE.get(arch, 2.15 if cls != "heavy" else 1.95)) * float(st.get("cadence", 1.0))
 		if int(floor(ph / PI)) != int(floor(ph0 / PI)):
 			stepped = true
 	# strafing and backpedalling: the legs turn toward where you're going; backwards they swing the other way
@@ -692,7 +702,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var width: float = st["width"]
 	var phl := ph
 	var phr := ph + PI
-	var stride := 0.62 + 0.28 * minf(run_k, 1.3)
+	var stride := float(st.get("stride", 0.62)) + 0.28 * minf(run_k, 1.3)
 	var hl := sin(phl) * stride * r1 * back
 	var hr := sin(phr) * stride * r1 * back
 	# the knee folds most while the leg swings through, a little at foot strike
@@ -1037,7 +1047,8 @@ func update(dt: float, s: Dictionary) -> void:
 ## turns about the hips: forward flip, side flip, spin), sq (squash; negative stretches), legs
 ## [hl kl hr kr] with lw (their weight), fl / fr (a free hand's place from its shoulder) with hw / rw,
 ## blade (the greatsword's yaw, pitch, roll, like SWINGS) with bw, rad (the blade's reach), gp (a
-## gun's extra pitch). A move with "hold": true stays on its last key until another replaces it.
+## gun's extra pitch). A move with "hold": true stays on its last key until another replaces it; with
+## "loop": t as well it cycles from t to the last key instead (a recoil wobble, hand over hand).
 const KMOVES := {
 	# ---------------------------------------------------------------- Vireo (mage) and Marlowe (gunslinger)
 	# Coilshot: the coil drawn back with the shoulders turned, then the lunge and palm thrust on release
@@ -1203,7 +1214,7 @@ static func km_sample(id: String, tt: float) -> Dictionary:
 	if tt >= float(last[0]):
 		if not mv.get("hold", false):
 			return {}
-		tt = float(last[0])
+		tt = _km_held_t(mv, tt, float(last[0]))
 	var i := 0
 	while i < keys.size() - 2 and tt >= float(keys[i + 1][0]):
 		i += 1
@@ -1229,6 +1240,14 @@ static func km_sample(id: String, tt: float) -> Dictionary:
 		var va2: Vector3 = pa.get(c, pb.get(c)); var vb2: Vector3 = pb.get(c, pa.get(c))
 		out[c] = va2.lerp(vb2, u)
 	return out
+
+## Where a held move samples past its last key: the last key, or with "loop" (the time it loops back to)
+## round and round from there, for a held move that keeps moving (a recoil wobble, hand over hand).
+static func _km_held_t(mv: Dictionary, tt: float, end_t: float) -> float:
+	var loop_from := float(mv.get("loop", -1.0))
+	if loop_from < 0.0 or loop_from >= end_t:
+		return end_t
+	return loop_from + fmod(tt - loop_from, end_t - loop_from)
 
 # ==================================================================== melee helpers
 ## How far into the current swing's strike we are, 0..1 then back to 0 (for leaning into it).
@@ -1836,6 +1855,7 @@ func _tick_fidget(dt: float, still: float, s: Dictionary) -> void:
 	var opts := ["look", "shoulders", "weapon", "stretch", "look"]
 	if cls == "light": opts.append("bounce")
 	if cls == "heavy": opts.append("neck"); opts.append("shoulders")
+	opts.append_array(st.get("fidgets", []))
 	if bool(s.get("kin_on_shoulder", false)): opts.append("kin"); opts.append("kin")
 	match race:
 		"owlet": opts.append("owl")

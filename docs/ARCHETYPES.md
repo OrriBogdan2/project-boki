@@ -1221,7 +1221,7 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 | `bulwark` | Bulwark | [Oath](https://supervive.wiki.gg/wiki/Oath) | Accuracy pass: `docs/heroes/bulwark.md` |
 | `mage` | Vireo | [Joule](https://supervive.wiki.gg/wiki/Joule) | `docs/heroes/mage.md` |
 | `gunslinger` | Marlowe | [Ghost](https://supervive.wiki.gg/wiki/Ghost) | `docs/heroes/gunslinger.md` |
-| `ashwick` | Ashwick | [Felix](https://supervive.wiki.gg/wiki/Felix) | `docs/heroes/ashwick.md` |
+| `ashwick` | Linwick (was Ashwick) | [Felix](https://supervive.wiki.gg/wiki/Felix) | `docs/heroes/ashwick.md` |
 | `dredge` | Dredge | [Kingpin](https://supervive.wiki.gg/wiki/Kingpin) | `docs/heroes/dredge.md` |
 | `tender` | Linnet, the Tender | [Elluna](https://supervive.wiki.gg/wiki/Elluna) | `docs/heroes/tender.md` |
 | `rimewright` | Tamsin, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
