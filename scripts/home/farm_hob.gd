@@ -113,6 +113,7 @@ func use(it: Dictionary) -> void:
 		return
 	swing_cd = float(FarmTutorial.option("swing_cooldown_s"))
 	FarmSites.player_swing(h.hw, e)
+	FarmTutorial.event("swing")
 	h._refresh_top()
 
 func talk() -> void:
@@ -150,35 +151,47 @@ func _part(shape: Mesh, col: Color, at: Vector3, parent: Node3D) -> MeshInstance
 func _make_model() -> Node3D:
 	var root := Node3D.new()
 	root.name = "Hob"
+	root.scale = Vector3.ONE * 1.25
 	var body := CapsuleMesh.new()
-	body.radius = 0.36
-	body.height = 1.25
-	_part(body, Color("b5683a"), Vector3(0, 0.85, 0), root)
+	body.radius = 0.42
+	body.height = 1.3
+	_part(body, Color("b8432c"), Vector3(0, 0.85, 0), root)
+	var apron := BoxMesh.new()
+	apron.size = Vector3(0.55, 0.7, 0.08)
+	_part(apron, Color("e9dcc0"), Vector3(0, 0.8, -0.38), root)
 	var belt := CylinderMesh.new()
-	belt.top_radius = 0.38
-	belt.bottom_radius = 0.38
-	belt.height = 0.12
-	_part(belt, Color("4a3322"), Vector3(0, 0.75, 0), root)
+	belt.top_radius = 0.44
+	belt.bottom_radius = 0.44
+	belt.height = 0.1
+	_part(belt, Color("2e2118"), Vector3(0, 0.72, 0), root)
 	var head := SphereMesh.new()
-	head.radius = 0.27
-	head.height = 0.54
+	head.radius = 0.28
+	head.height = 0.56
 	_part(head, Color("e8bf98"), Vector3(0, 1.7, 0), root)
 	var brim := CylinderMesh.new()
-	brim.top_radius = 0.42
-	brim.bottom_radius = 0.42
+	brim.top_radius = 0.6
+	brim.bottom_radius = 0.6
 	brim.height = 0.05
-	_part(brim, Color("d9b24a"), Vector3(0, 1.88, 0), root)
+	_part(brim, Color("4a3220"), Vector3(0, 1.9, 0), root)
 	var crown := CylinderMesh.new()
-	crown.top_radius = 0.2
-	crown.bottom_radius = 0.28
-	crown.height = 0.22
-	_part(crown, Color("d9b24a"), Vector3(0, 2.0, 0), root)
+	crown.top_radius = 0.24
+	crown.bottom_radius = 0.32
+	crown.height = 0.26
+	_part(crown, Color("4a3220"), Vector3(0, 2.02, 0), root)
+	var band := CylinderMesh.new()
+	band.top_radius = 0.325
+	band.bottom_radius = 0.325
+	band.height = 0.06
+	_part(band, Color("e7b53c"), Vector3(0, 1.94, 0), root)
 	var beard := SphereMesh.new()
-	beard.radius = 0.2
-	beard.height = 0.34
-	_part(beard, Color("8a5a36"), Vector3(0, 1.52, -0.14), root)
+	beard.radius = 0.22
+	beard.height = 0.36
+	_part(beard, Color("d8d4cc"), Vector3(0, 1.5, -0.14), root)
+	var shoulders := BoxMesh.new()
+	shoulders.size = Vector3(1.1, 0.22, 0.4)
+	_part(shoulders, Color("8f3220"), Vector3(0, 1.3, 0), root)
 	arm = Node3D.new()
-	arm.position = Vector3(0.42, 1.25, 0)
+	arm.position = Vector3(0.6, 1.25, 0)
 	root.add_child(arm)
 	var haft := CylinderMesh.new()
 	haft.top_radius = 0.04

@@ -61,8 +61,13 @@ func run(m: Node, out_dir: String) -> void:
 	Save.no_write = true
 	# 1. the first tutorial prompt, before the house
 	await _new_home({"extracts": 0, "bosses": 0, "caught": 0, "harvested": 0, "hatched": 1, "fb_built": 0})
+	HomeGather.give_tool("axe")
+	Work.add_mat("wood", 3)
+	FarmTutorial.detect()
+	home.guide.refresh()
 	var spot: Vector3 = home.guide.house_spot()
-	_look(spot, Vector3(0, 0, 8), 1.0)
+	_look(spot, Vector3(0, 0, 4.5), 1.0)
+	home.cam.snap(spot + Vector3(0, 0, 2.0))
 	await main.get_tree().create_timer(1.0).timeout
 	await _shot("01_tutorial_prompt", "Tutorial step 1: house marker, hint with the real key and Skip, Goals", true)
 	# 2. the starter build menu

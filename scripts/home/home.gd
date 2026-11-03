@@ -2550,11 +2550,6 @@ func _close_panel() -> void:
 	if was.ends_with(" evolved") or was.ends_with(" is changing") or was == "Welcome home":
 		_play_evolutions.call_deferred()
 
-# ---- the farm tutorial hears about the first things you do (FarmTutorial); the Goals card is FarmGuide
-func _day1(step: String) -> void:
-	if visit.is_empty():
-		FarmTutorial.event(step)
-
 func _open_welcome() -> void:
 	# shown once: marked seen as soon as it opens, however it's closed
 	Save.d["tutorial"]["home"] = true
@@ -2641,7 +2636,6 @@ func _water(arr: String, i: int, who = "you") -> void:
 	d["wet"] = 1 if who == "rain" else 2
 	var pn: Node3D = _plot_node(arr, i)
 	if who == "you":
-		_day1("water")
 		Sfx.play("plant", null, -6.0, 0.1, 1.4)
 		fx.burst(pn.position + Vector3(0, 0.8, 0), Color("7ac8ff"), 14, 2.0)
 		if already:
@@ -2687,7 +2681,6 @@ func _open_plot(arr: String, i: int) -> void:
 			Save.d["seeds"][sk] = int(Save.d["seeds"][sk]) - 1
 			d["crop"] = sk; d["stage"] = 0; d["care"] = 0; d["wt"] = 0.0
 			Sfx.play("plant")
-			_day1("plant")
 			fx.dust(pn.position, 10)
 			_refresh_plot(arr, i)
 			Save.save_game()
@@ -3040,7 +3033,6 @@ func _pet_kin(k: Dictionary) -> void:
 	if loves_pet and Care.discover(rec, "play"): _toast("%s loves scratches" % rec["name"])
 	k["hold_t"] = 1.0
 	k["joy_t"] = 0.9
-	_day1("pet")
 	_face(k["pos"])
 	_emote(k, "♥", true)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
@@ -3100,7 +3092,6 @@ func _fetch_step(k: Dictionary, d: float) -> void:
 				f["life"] = -1.0
 				_emote(k, "★")
 				k["joy_t"] = 0.8
-				_day1("fetch")
 				Sfx.play("kin_happy", null, -6.0)
 				var rec: Dictionary = k["rec"]
 				var loves_fetch: bool = rec["likes"]["play"] == "fetch"
@@ -3534,7 +3525,7 @@ func _weapon() -> String:
 	return Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", "")))
 
 func _open_expedition() -> void:
-	_day1("portal")
+	FarmTutorial.event("portal")
 	var v := _new_panel("Expedition", 940, true)
 	UI.subtitle(v, "Pick your kit and where to drop. Everything here is saved as you change it.")
 	var cols := UI.hbox(UI.GAP_BIG + 8)

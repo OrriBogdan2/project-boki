@@ -332,8 +332,6 @@ func _pet_kin(k: Dictionary) -> void:
 		rec["pet_m"] = int(Save.d["matches"])
 		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
 	Save.save_game()
-	if visit.is_empty():
-		FarmTutorial.event("pet")
 
 func _leave() -> void:
 	if decorating: _toggle_decorate()

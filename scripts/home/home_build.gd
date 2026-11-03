@@ -1833,7 +1833,8 @@ func _tab_items() -> Array:
 			for b in h.lots:
 				var bb: String = b
 				var nm: String = Data.BUILDINGS[b]["name"]
-				if not HomeLayout.placed(b, h._d()) and not FarmUnlocks.open(b):
+				var unplaced := not HomeLayout.placed(b, h._d())
+				if unplaced and (not FarmUnlocks.open(b) or FarmBuilder.not_yet_arrived(b, h._has_b(b))):
 					continue
 				if not HomeLayout.placed(b, h._d()):
 					var cost := "free" if bool(Data.BUILDINGS[b].get("free", false)) or h._has_b(b) else "%d gems" % int(Data.BUILDINGS[b]["cost"])
@@ -1842,6 +1843,8 @@ func _tab_items() -> Array:
 					continue
 				var isl: int = h.world.island_of(h.lots[b]["at"].x, h.lots[b]["at"].z)
 				var open: bool = isl >= 0 and _isle_ok(h.world.idx(int(floor(h.lots[b]["at"].x)), int(floor(h.lots[b]["at"].z))))
+				if FarmUnlocks.gated() and not open:
+					continue      # a lot that cannot be reached yet is not shown at all
 				out.append({"t": "%s\n%s" % [nm, "Move" if h._has_b(b) else "Move the lot"], "cb": func(): take_building(bb), "off": not open,
 					"on": held.get("kind", "") == "b" and String(held.get("id", "")) == b, "tip": "" if open else "Build the bridge to its isle first"})
 		"Upgrades":

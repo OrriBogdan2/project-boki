@@ -10,7 +10,7 @@
 		"scan3": {"name": "Three scanned", "stat": "caught", "n": 3, "text": "Scan and bring home 3 wild Boki"}
 	},
 	"starter": ["crop_patch", "cook_pot"],
-	"starter_doc": "Placed at once, no site. The house is not here: it goes up as a site your Boki build (build.house), free on a new save.",
+	"starter_doc": "Placed at once, no site. The house is not here: it goes up as a site your Boki build (build.house), a little wood on a new save.",
 	"start_doc": "What Hob offers from the first minute is every item with no entry in unlock: house, crop_patch, cook_pot, ranch_pen, fence, path_dirt, flowers (and the feeder in storage). Everything in unlock opens by farm level or milestone and is then drawn up when you talk to Hob (scripts/home/farm_builder.gd).",
 	"unlock": {
 		"path_clear": {"level": 2}, "picket": {"level": 2}, "path_stone": {"level": 2}, "bush": {"level": 2}, "job_board": {"level": 2}, "lumber_camp": {"level": 2}, "quarry": {"level": 2}, "storage_chest": {"level": 2},
@@ -22,7 +22,7 @@
 	"cradles": {"6": 4, "7": 5, "8": 6},
 	"cradles_doc": "Incubator cradle number -> farm level that lets you buy it.",
 	"build": {
-		"house": {"labour": 8},
+		"house": {"wood": 3, "labour": 8},
 		"market_stall": {"gems": 10, "wood": 6, "fibre": 4, "labour": 4},
 		"nesting_nook": {"gems": 15, "wood": 10, "fibre": 6, "labour": 6},
 		"boki_burrow": {"gems": 12, "wood": 8, "stone": 5, "fibre": 4, "labour": 6},

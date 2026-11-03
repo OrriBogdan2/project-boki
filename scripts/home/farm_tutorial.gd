@@ -1,7 +1,7 @@
 class_name FarmTutorial
 extends RefCounted
-## The guided farm tutorial (content/rules/farm_tutorial.json; the screen side is FarmGuide). Six short
-## steps on a new farm: house, feed, crop, pet, meet Hob, head out. State is Save.d.tutorial.ft:
+## The guided farm tutorial (content/rules/farm_tutorial.json; the screen side is FarmGuide). Short steps
+## on a new farm: axe, chop a tree, house, hammer, a job for your Boki, feed, crop, meet Hob, head out. State is Save.d.tutorial.ft:
 ##   did      step id -> true for the steps done
 ##   done / skipped   finished, or skipped (nothing is granted or taken away)
 ##   gift     the starter food was handed out
@@ -45,18 +45,26 @@ static func did(id: String) -> bool:
 static func done_count() -> int:
 	return (state()["did"] as Dictionary).size()
 
-## Can this step be the active one yet? House first, the last step after everything, strict order if asked.
+## Can this step be the active one yet? Its "needs" are done; the last step waits for everything;
+## "after_built" waits for the house to stand (a pinned Boki would stop building); without the
+## free_order option each step also waits for the one before it.
 static func available(id: String) -> bool:
 	var list := steps()
 	for i in list.size():
-		if String(list[i]["id"]) != id:
+		var def: Dictionary = list[i]
+		if String(def["id"]) != id:
 			continue
-		if bool(list[i].get("needs_all", false)):
-			return list.slice(0, i).all(func(s): return did(String(s["id"])))
-		if bool(option("strict_order")):
-			return list.slice(0, i).all(func(s): return did(String(s["id"])))
-		return id == "house" or did("house") or not bool(option("house_first"))
+		var before := list.slice(0, i)
+		if bool(def.get("needs_all", false)) or not bool(option("free_order")):
+			return before.all(func(s): return did(String(s["id"])))
+		if bool(def.get("after_built", false)) and not house_built():
+			return false
+		return (def.get("needs", []) as Array).all(func(n): return did(String(n)))
 	return false
+
+static func house_built() -> bool:
+	var e := FarmHob.house_entry()
+	return not e.is_empty() and not FarmSites.has_site(e)
 
 ## The step to show: the first one not done that can be done now ("" when none is left).
 static func current() -> String:
@@ -103,21 +111,31 @@ static func world_text(id: String) -> String:
 	return "" if s.is_empty() else String((s["world"] as Dictionary).get(stage(id), ""))
 
 # ------------------------------------------------------------------ progress
-## A thing happened on the farm (home.gd's _day1 hook and Hob): pet, fetch, portal, hob.
+## A thing happened on the farm: swing (a hammer), task (a Boki pinned to a job), hob (talked), portal.
 static func event(what: String) -> void:
 	if not active():
 		return
-	var id := {"pet": "pet", "fetch": "pet", "hob": "hob", "portal": "expedition"}.get(what, "") as String
+	var id := {"swing": "hammer", "task": "task", "hob": "hob", "portal": "expedition"}.get(what, "") as String
 	detect()
 	if id != "" and available(id):
 		mark(id)
 
-## Looks at the farm for steps that need no hook: the house down, food in a trough, a crop picked.
+## Looks at the farm for steps that need no hook. A later step done means the earlier ones are too.
 static func detect() -> void:
 	if not active():
 		return
+	var wood := int(FarmSites.build_cost("house").get("wood", 0))
+	if HomeGather.has_tool("axe"):
+		mark("axe")
+	if FarmSites.have("wood") >= wood and wood > 0:
+		mark("axe")
+		mark("chop")
 	if not FarmHob.house_entry().is_empty():
+		mark("axe")
+		mark("chop")
 		mark("house")
+	if house_built():
+		mark("hammer")
 	if Econ.feeders().any(func(f): return Econ.fill(f) > 0):
 		mark("feed")
 	if Progress.stat("harvested") > 0 and not HomeLayout.fixtures(Save.d, "farm").is_empty():

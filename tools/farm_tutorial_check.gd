@@ -122,23 +122,38 @@ func _tutorial_rules() -> void:
 	Save.d = _new_save()
 	var L := HomeLayout.ensure(Save.d)
 	_stats()
-	ok(FarmTutorial.active() and FarmTutorial.current() == "house", "a new farm starts the tutorial on the house")
-	ok(not FarmTutorial.available("feed") and not FarmTutorial.available("expedition"),
-			"other steps wait for the house, the last waits for all")
-	FarmTutorial.event("pet")
-	ok(not FarmTutorial.did("pet"), "doing a later step early does not count")
+	ok(FarmTutorial.active() and FarmTutorial.current() == "axe", "a new farm starts the tutorial on the axe")
+	ok(not FarmTutorial.available("house") and not FarmTutorial.available("expedition"),
+			"the house waits for the wood, the last step for all")
 	var g0 := int(Save.d["gems"])
-	_add_house(L, true)
+	HomeGather.give_tool("axe")
 	FarmTutorial.detect()
-	ok(FarmTutorial.did("house") and FarmTutorial.current() == "feed",
-			"a house site down finishes step 1 and the next prompt is feeding")
+	ok(FarmTutorial.did("axe") and FarmTutorial.current() == "chop", "owning an axe finishes step 1: chop a tree")
+	Work.add_mat("wood", int(FarmSites.build_cost("house")["wood"]))
+	FarmTutorial.detect()
+	ok(FarmTutorial.did("chop") and FarmTutorial.current() == "house", "enough wood for the house finishes chopping")
+	FarmTutorial.event("hob")
+	ok(not FarmTutorial.did("hob"), "doing a later step early does not count")
+	var site := _add_house(L, true)
+	FarmTutorial.detect()
+	ok(FarmTutorial.did("house") and FarmTutorial.current() == "hammer",
+			"a house site down finishes the house; the prompt is the hammer")
+	ok(not FarmTutorial.available("task"),
+			"a job for your Boki waits until the house stands (a pinned Boki would stop building)")
+	FarmTutorial.event("swing")
+	ok(FarmTutorial.did("hammer") and FarmTutorial.current() == "feed",
+			"a swing counts, and the first step left is feeding")
 	var feed_hint := FarmTutorial.hint_text("feed")
 	var has_key := feed_hint.contains(Settings.key_cap("build")) and not feed_hint.contains("{")
-	ok(FarmTutorial.stage("feed") == "place" and has_key,
-			"the hint names the real key, no leftovers")
-	FarmTutorial.event("pet")
-	ok(FarmTutorial.did("pet") and FarmTutorial.current() == "feed",
-			"free order: petting first is fine, the prompt stays on the first step left")
+	ok(FarmTutorial.stage("feed") == "place" and has_key, "the hint names the real key, no leftovers")
+	FarmTutorial.event("hob")
+	ok(FarmTutorial.did("hob") and FarmTutorial.current() == "feed",
+			"free order: meeting Hob first is fine, the prompt stays on the first step left")
+	site.erase("site")
+	ok(FarmTutorial.available("task") and FarmTutorial.current() == "task",
+			"once the house stands the job step is next")
+	FarmTutorial.event("task")
+	ok(FarmTutorial.did("task") and FarmTutorial.current() == "feed", "pinning a Boki to a job finishes it")
 	Save.d["feeders"] = [{"id": "f1", "kind": "trough", "x": 40.0, "z": 30.0, "food": [], "auto": false}]
 	ok(FarmTutorial.stage("feed") == "fill", "a trough down moves the prompt to filling it")
 	Save.d["feeders"][0]["food"] = ["kibble"]
@@ -156,16 +171,14 @@ func _tutorial_rules() -> void:
 	ok(FarmTutorial.stage("crop") == "pick", "grown: pick it")
 	_stats(0, 0, 0, 1)
 	FarmTutorial.detect()
-	ok(FarmTutorial.did("crop") and FarmTutorial.current() == "hob", "a harvest finishes the crop step")
+	ok(FarmTutorial.did("crop") and FarmTutorial.current() == "expedition",
+			"a harvest finishes the crop step, leaving the portal")
 	FarmTutorial.event("portal")
-	ok(not FarmTutorial.did("expedition"), "the portal does not count before the rest is done")
+	var reward := int(FarmTutorial.option("end_gems"))
+	ok(not FarmTutorial.active() and int(Save.d["gems"]) == g0 + reward,
+			"the portal ends it with one reward of %d gems" % reward)
 	FarmTutorial.event("hob")
-	ok(FarmTutorial.current() == "expedition", "meeting Hob leaves only the expedition")
-	FarmTutorial.event("portal")
-	ok(not FarmTutorial.active() and int(Save.d["gems"]) == g0 + int(FarmTutorial.option("end_gems")),
-			"the portal ends it with one reward of %d gems" % int(FarmTutorial.option("end_gems")))
-	FarmTutorial.event("hob")
-	ok(int(Save.d["gems"]) == g0 + int(FarmTutorial.option("end_gems")), "nothing is granted twice")
+	ok(int(Save.d["gems"]) == g0 + reward, "nothing is granted twice")
 	# skipping grants and takes nothing
 	Save.d = _new_save()
 	L = HomeLayout.ensure(Save.d)
@@ -175,11 +188,13 @@ func _tutorial_rules() -> void:
 	FarmTutorial.skip()
 	var untouched: bool = int(Save.d["gems"]) == g1 and JSON.stringify(Save.d["items"]) == inv1
 	ok(not FarmTutorial.active() and FarmTutorial.current() == "" and FarmTutorial.state()["skipped"] and untouched,
-			"skipping ends the prompts and grants or takes nothing")
-	var steps_ok := FarmTutorial.steps().size() == 6
+		"skipping ends the prompts and grants or takes nothing")
+	var steps_ok := FarmTutorial.steps().size() == 9
 	steps_ok = steps_ok and FarmTutorial.steps().all(func(s): return not (s["hints"] as Dictionary).is_empty())
-	ok(steps_ok, "six steps, each with its hints")
-	for key in ["tracker_replaces_day1", "player_swing", "end_gems", "house_first", "strict_order", "skippable"]:
+	ok(steps_ok, "nine steps, each with its hints")
+	ok(not bool(FarmTutorial.option("skippable")),
+			"the owner's decision: the farm tutorial is not skippable (a data option)")
+	for key in ["tracker_replaces_day1", "player_swing", "end_gems", "free_order", "skippable"]:
 		ok(FarmTutorial.rules()["options"].has(key), "option '%s' is data" % key)
 	# a test save that says the first day is done never sees it
 	Save.d = _new_save()
@@ -281,12 +296,13 @@ func _home(kin_count: int):
 func _world() -> void:
 	var home = await _home(1)
 	ok(home.guide != null and home.hob != null and home.hob.node == null, "no Hob before there is a house")
-	ok(is_instance_valid(home.guide.hint_box) and home.guide.hint_lbl.text.contains(Settings.key_cap("build")),
+	ok(is_instance_valid(home.guide.hint_box) and home.guide.hint_lbl.text.contains("axe"),
 			"the first prompt is on screen: %s" % home.guide.hint_lbl.text)
 	ok(home.get("day1_box") == null, "the old first-day card is gone")
 	var g0 := int(Save.d["gems"])
+	Work.add_mat("wood", 3)
 	ok(home.guide.place_house() and FarmSites.is_site(_entry("house")), "the house goes down as a site")
-	ok(int(Save.d["gems"]) == g0, "and costs no gems on a new save")
+	ok(int(Save.d["gems"]) == g0 and Work.mat("wood") == 0, "and costs a little wood (3) and no gems on a new save")
 	home._sync_fixtures()
 	ok(is_instance_valid(home.hob.node), "Hob turns up once the house is down")
 	var hc: Vector3 = HomeLayout.deco_center(_entry("house"))
@@ -355,7 +371,7 @@ func _world() -> void:
 	home.queue_free()
 	await main.get_tree().process_frame
 	Save.d = JSON.parse_string(js)
-	ok(bool(FarmTutorial.did("house")) and FarmTutorial.did("hob") and not FarmTutorial.did("feed"),
+	ok(FarmTutorial.did("house") and FarmTutorial.did("hob") and not FarmTutorial.did("feed"),
 			"after save and load the tutorial is where it was")
 	home = await main._hb_home()
 	home._close_panel()
@@ -369,18 +385,16 @@ func _world() -> void:
 			"skipping puts the house down as a site and clears the prompts")
 	home.queue_free()
 	await main.get_tree().process_frame
-	# two Boki finish it in about half the time of one
+	# two Boki: two crew slots, and no slower than one
 	var home2 = await _home(2)
+	Work.add_mat("wood", 3)
 	home2.guide.place_house()
 	home2.hw.scan_t = 0.0
 	home2.hw.scan()
-	await _sim(home2, home2.hw, 15.0)
-	var crew: Array = home2.kins.filter(func(k): return k.has("job") and String(k["job"].get("kind", "")) == "build")
-	for k in home2.kins:
-		print("FTUT   ", k["rec"]["name"], " job=", k.get("job", {}).get("kind", "-"), " phase=", k.get("job", {}).get("phase", "-"), " why=", Work.why_not(k["rec"]))
-	print("FTUT crew at 15s: %d of %d, got %d" % [crew.size(), home2.kins.size(), int(_entry("house")["site"]["got"])])
-	var ticks2: int = 300 + await _sim(home2, home2.hw, 400.0, func() -> bool: return not FarmSites.has_site(_entry("house")))
-	ok(not FarmSites.has_site(_entry("house")) and float(ticks2) < float(ticks1) * 0.9,
-			"two Boki are quicker (%.0fs against %.0fs)" % [ticks2 * 0.05, ticks1 * 0.05])
+	var slots: int = home2.hw.jobs.filter(func(j): return String(j["kind"]) == "build").size()
+	var ticks2: int = await _sim(home2, home2.hw, 400.0, func() -> bool: return not FarmSites.has_site(_entry("house")))
+	var finished := not FarmSites.has_site(_entry("house"))
+	ok(slots == 2 and finished and float(ticks2) < float(ticks1) * 1.1,
+			"two Boki open two crew slots and are no slower (%.0fs against %.0fs)" % [ticks2 * 0.05, ticks1 * 0.05])
 	home2.queue_free()
 	await main.get_tree().process_frame

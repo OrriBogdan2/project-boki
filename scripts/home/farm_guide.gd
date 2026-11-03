@@ -15,6 +15,8 @@ var sig := ""
 var t := 0.0
 var detect_t := 0.0
 var asking := false
+var tree_t := 0.0
+var tree_at := Vector3.INF
 
 func _init(home) -> void:
 	h = home
@@ -97,10 +99,9 @@ func _site_progress() -> String:
 func _make_hint() -> void:
 	hint_box = UI.card(Color(0.06, 0.07, 0.11, 0.9), 10, 14)
 	UI.set_card_border(hint_box, Color(UI.GOLD, 0.5), 1)
-	hint_box.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	hint_box.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	hint_box.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	hint_box.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	hint_box.offset_bottom = -92
+	hint_box.offset_top = 66      # under the top chips
 	var row := UI.hbox(14)
 	hint_box.add_child(row)
 	hint_lbl = UI.label("", 16, UI.INK, UI.semi)
@@ -142,12 +143,16 @@ func house_spot() -> Vector3:
 	var sp: Dictionary = FarmTutorial.rules()["house_spot"]
 	return HomeLayout.LANDING + Vector3(float(sp["x"]), 0, float(sp["z"]))
 
-## Puts the house down as a construction site on the free ground nearest the suggested spot.
+## Puts the house down as a construction site on the free ground nearest the suggested spot (paying its
+## cost; a skipper who cannot is handed just that).
 func place_house() -> bool:
 	var hb: HomeBuild = h.hb
 	var was_active := hb.active
 	if not was_active:
 		hb.active = true
+	var cost := FarmSites.build_cost("house")
+	if not FarmSites.can_pay(cost):
+		FarmSites.refund(cost)      # a skipped tutorial: the house goes down anyway, with the wood it needs
 	hb.take("house")
 	var found := false
 	var p := house_spot()
@@ -167,28 +172,49 @@ func place_house() -> bool:
 			break
 	hb._drop_held()
 	hb.active = was_active
+	if not was_active and is_instance_valid(hb.bar):
+		hb.bar.queue_free()
+		hb.bar = null
 	return found
 
 # ------------------------------------------------------------------ the world prompt
 func _target(id: String) -> Vector3:
 	match id:
+		"chop":
+			return _nearest_tree()
 		"house":
 			var e := FarmHob.house_entry()
 			return house_spot() if e.is_empty() else HomeLayout.deco_center(e)
+		"hammer":
+			return HomeLayout.deco_center(FarmHob.house_entry())
 		"feed":
 			var fs := Econ.feeders()
 			return Vector3(float(fs[0]["x"]), 0, float(fs[0]["z"])) if not fs.is_empty() else Vector3.INF
 		"crop":
 			return h.plots[0].position if not h.plots.is_empty() and FarmTutorial.stage(id) != "patch" else Vector3.INF
-		"pet":
-			for k in h.kins:
-				if String(k["rec"]["uid"]) == String(Save.d["active"]):
-					return k["pos"]
 		"hob":
 			return h.hob.pos
 		"expedition":
 			return h.spots["portal"]
 	return Vector3.INF
+
+## The wild tree nearest the player (the tutorial's chop marker); looked up twice a second at most.
+func _nearest_tree() -> Vector3:
+	if tree_t > t:
+		return tree_at
+	tree_t = t + 0.5
+	tree_at = Vector3.INF
+	var best := INF
+	var w: World = h.world
+	for i in h.hb.wild_t:
+		if String(h.hb.wild_t[i]) != "tree":
+			continue
+		var at := Vector3(int(i) % w.w + 0.5, 0, int(i) / w.w + 0.5)
+		var d := Vector2(at.x - h.ppos.x, at.z - h.ppos.z).length()
+		if d < best:
+			best = d
+			tree_at = at
+	return tree_at
 
 func _update_marker() -> void:
 	var id := FarmTutorial.current()
