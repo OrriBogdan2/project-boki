@@ -78,7 +78,8 @@ static func kit_tip(id: String) -> String:
 	var names := [Arch.name_of(id)]
 	for slot in ["dash", "passive", "rmb", "e"]:
 		names.append(String(adf[slot]["name"]))
-	return "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  R: Boki Merge" % names
+	names.append(Settings.key_cap("ultimate"))
+	return "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  %s: Boki Merge" % names
 
 ## The results screen's account line: XP gained, the level bar, and a Hunter unlock that became ready.
 static func results_strip(s: Dictionary) -> Control:

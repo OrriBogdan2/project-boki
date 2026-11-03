@@ -45,7 +45,7 @@ Current binds are in `scripts/core/game.gd` `_setup_input()`.
 | Q | active glove (`gear1`) | **unchanged**: gloves stay the run's loot layer, so Q is still the glove |
 | E | the kin's ability (`signature`) | the **archetype's E** (usually utility). The kin's old E becomes the kin's **infusion source** (§4) |
 | C / middle mouse | throw / recall the kin | unchanged (the kin keeps its throw) |
-| R | bond ultimate (the merge), when the bond meter is full | the **archetype's ultimate**, from run level 6. When the bond meter is full, R casts **bonded**: the kin merges as it fires (§5) |
+| R | (then) bond ultimate (the merge), when the bond meter is full. **Now: T is Merge, R reloads, X is the hunter ultimate** | the **archetype's ultimate**, from run level 6. When the bond meter is full, R casts **bonded**: the kin merges as it fires (§5) |
 | 1 · F · B · Ctrl · T · M · Tab | tonic · interact · base · sneak · emote · map · scores | unchanged |
 | Alt + key | rank up that slot with a skill point (`match.gd`) | unchanged |
 | G | folds the training guide (training/duel only, `hud.gd`) | unchanged. Note: G is **not** the throw today; the throw is C or middle mouse |
@@ -817,7 +817,7 @@ hitstop and shake tiers, category colours, sound layers). Test: `--archetype-che
   the class (`Arch.of_save`). Bots pick an archetype of their class and a weapon from its family. The model
   always gets the real archetype (`Models.hunter(..., arch)`): looks never carry gear, remote players come
   with theirs (lobby presence, host snapshots), so nobody can look like an archetype they aren't.
-- **Controls (keys_v 3):** E archetype utility, R archetype ultimate, C kin ability (tap: hops out, casts its
+- **Controls (keys_v 3; since then T is Merge, R reload, X hunter ultimate):** E archetype utility, R archetype ultimate, C kin ability (tap: hops out, casts its
   own active, hops back; a mount lends it), G / middle mouse send-recall, Shift archetype dash, Q glove,
   RMB archetype. The training guide moved from G to H.
 - **Weapons:** families narrow `Loot.usable` (others still pack and go home). Thief twin blades / SMG;

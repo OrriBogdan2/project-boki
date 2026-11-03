@@ -50,7 +50,7 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Every hit loads a Spark onto the target; at 4 they're Live. Wirerun through a Live foe for a Blowout: big damage and your dash back at once. |
 | Passive: Sparks | Sparks: your hits stack up to 4 on a foe (Live). Wirerun through a Live foe: Blowout, and the dash resets. A knock heals you. |
-| Dash: Wirerun | Wirerun: hold to stretch it (4 to 7m), let go to streak forward; shots pass through you and anyone you cross takes a hit. |
+| Dash: Wirerun | Wirerun: hold to stretch it (5 to 8.5m), let go to streak forward; shots pass through you and anyone you cross takes a hit. |
 | RMB: Coilshot | Coilshot: hold to charge a heavy round that throws the first foe back; slammed into a wall or another foe, they're stunned. |
 | E: Skycall | Skycall: mark a spot; a moment later lightning flings everyone there along your aim and pins them to the ground (no dashing). |
 | Weapon: Coilcaster | A copper coil on the forearm that spits bolts which pass through everyone in a line; each hit loads a Spark. |
@@ -59,7 +59,7 @@ What the in-game kit card (K) says.
 
 **Sparks (passive).** Your bolts, Coilshot and Skycall each load a Spark onto what they hit (up to 4, 4.5s, refreshed by every hit). At 4 the foe is Live: a ring of crackling pips over them that everyone sees. Wirerun through a Live foe for a Blowout: 8 damage plus 15% of their health, a T4 hit, their Sparks spent and your dash recharged on the spot. Knocking a hunter down heals you for 15% of your health.
 
-**Wirerun (dash, Shift, 9s cooldown).** Press and hold: a lane grows from 4 to 7m over 0.45s for everyone to see; let go and you streak along it. Shots pass straight through you for the whole run, and every foe you cross takes 10. Crossing a Live foe is a Blowout and gives the dash straight back. Picking up a charge mote also gives it back.
+**Wirerun (dash, Shift, 9s cooldown).** Press and hold: a lane grows from 5 to 8.5m over 0.45s for everyone to see; let go and you streak along it. Shots pass straight through you for the whole run, and every foe you cross takes 10. Crossing a Live foe is a Blowout and gives the dash straight back. Picking up a charge mote also gives it back.
 
 **Coilshot (RMB, 10s cooldown).**
 

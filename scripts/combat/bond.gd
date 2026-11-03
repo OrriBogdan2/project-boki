@@ -10,12 +10,9 @@ static func rules() -> Dictionary:
 static func add(h: Hunter, amount: float) -> void:
 	if h == null or h.out or amount <= 0.0:
 		return
-	var was := h.ult
 	# IVS: the active kin's Bond IV fills the meter up to 10% faster (Care.iv_mult)
 	if h.kin is Kin: amount *= Care.iv_mult((h.kin as Kin).rec, "bond")
-	h.ult = minf(1.0, h.ult + amount * (1.3 if h.perk_n("overcharge") > 0 else 1.0))
-	if was < 1.0 and h.ult >= 1.0:
-		h.m.on_bond_ready(h)
+	KinBond.add(h, amount * (1.3 if h.perk_n("overcharge") > 0 else 1.0), KinBond.FIGHT)
 
 ## Connected to CombatBus.hit_landed by the match.
 static func on_hit(attacker: Node, target: Node, amount: float, _tags: Array) -> void:

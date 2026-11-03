@@ -286,7 +286,7 @@ static func merge(ms: MergeSpec, giant := false) -> Array:
 	if os != "": out.append(os.substr(0, 1).to_upper() + os.substr(1))
 	for st in ms.on_start: out.append("As it starts: " + stage(st))
 	for pl in ms.pulses: out.append("Every %ss: %s" % [n(float(pl["every"])), stage(pl["stage"])])
-	out.append("R again: a basic burst that ends the merge.")
+	out.append("%s again: a basic burst that ends the merge." % Settings.key_cap("ultimate"))
 	for slot in ms.merged:
 		var pt: Dictionary = ms.merged[slot]
 		var bits := PackedStringArray()
@@ -306,7 +306,7 @@ static func form_lines(ms: MergeSpec, fd: Dictionary) -> Array:
 	out.append("Right click, %s: %s" % [a["rmb"]["name"], a["rmb"]["desc"]])
 	out.append("E, %s: %s" % [a["e"]["name"], a["e"]["desc"]])
 	out.append("Shift, %s: %s" % [a["dash"]["name"], a["dash"]["desc"]])
-	out.append("R again, %s: %s It ends the merge and drains your Boki for %ss. Ready %ss in." % [fd["r"]["name"], fd["r"]["desc"], n(float(MergeForm.data()["rest_s"])), n(float(MergeForm.data()["ult_lock_s"]))])
+	out.append("%s again, %s: %s It ends the merge with a burst of speed and a shield, and your Boki rests %ss. Ready %ss in." % [Settings.key_cap("ultimate"), fd["r"]["name"], fd["r"]["desc"], n(float(MergeForm.data()["release_rest_s"])), n(float(MergeForm.data()["ult_lock_s"]))])
 	out.append("C is off while merged. Your Boki is part of you until it ends.")
 	return out
 

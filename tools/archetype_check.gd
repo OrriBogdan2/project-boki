@@ -154,7 +154,8 @@ func _has_mouse(action: String, b: int) -> bool:
 
 func _controls() -> void:
 	ok("keys: E archetype utility", _has_key("signature", KEY_E))
-	ok("keys: R archetype ultimate", _has_key("ultimate", KEY_R))
+	ok("keys: T merge, R reload, X hunter ultimate",
+		_has_key("ultimate", KEY_T) and _has_key("reload", KEY_R) and _has_key("hunter_ult", KEY_X))
 	ok("keys: C kin ability", _has_key("kin_ability", KEY_C))
 	ok("keys: G send/recall + MMB alt", _has_key("throw", KEY_G) and _has_mouse("throw", MOUSE_BUTTON_MIDDLE))
 	ok("keys: Q glove, Shift dash, RMB", _has_key("gear1", KEY_Q) and _has_key("dash", KEY_SHIFT) and _has_mouse("secondary", MOUSE_BUTTON_RIGHT))
@@ -570,10 +571,10 @@ func _juggernaut() -> void:
 	P.ak.press_rmb()
 	step(m, 0.5)
 	ok("juggernaut RMB air: Meteor Drop slows, centre stunned", K.last_variant == "air" and dmg(T) >= 24.0 and T.slow_t > 0.0 and T.stun_t > 0.0, "took %.0f slow %.2f stun %.2f" % [dmg(T), T.slow_t, T.stun_t])
-	# Rampage (Flame Step): a dash attack the way you face; the tip hits double; rank 3 adds a charge
+	# Rampage (Flame Step): a dash attack, aimed like any dash (Settings); the tip hits double; rank 3 adds a charge
 	step(m, 1.0)
 	P.teleport(home); fresh(T); T.teleport(home + Vector3(4.3, 0, 0)); aim_at(P, T.pos); P.dashes = 2.0
-	P.inp["move"] = Vector2(0, 1)        # (moving sideways: it still goes the way you face)
+	P.inp["move"] = Vector2(1, 0)        # (Rampage follows the dash setting: WASD by default, here toward the target)
 	P.do_dash()
 	step(m, 0.5)
 	P.inp["move"] = Vector2.ZERO

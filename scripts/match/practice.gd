@@ -56,7 +56,6 @@ func _build_bar() -> void:
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.theme = UI.theme()
 	_layer.add_child(root)
 	var mc := MarginContainer.new()
 	mc.mouse_filter = Control.MOUSE_FILTER_IGNORE

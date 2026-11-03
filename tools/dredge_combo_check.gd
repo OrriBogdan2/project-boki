@@ -28,7 +28,7 @@ func _all() -> void:
 	var home: Vector3 = r[4]; var lv: int = r[5]
 	var K: DredgeKit = P.ak
 	var reset := func():
-		P.teleport(home); P.vel = Vector3.ZERO; P.hp = P.max_hp; P.stun_t = 0.0
+		P.teleport(home); P.vel = Vector3.ZERO; P.roll_t = 0.0; P.hp = P.max_hp; P.stun_t = 0.0
 		ak.fresh(T); T.out = false; T.downed = false; T.dead = false; T.teleport(home + Vector3(8.0, 0, 0)); T.face = PI / 2.0     # facing away (west is +PI/2 away from P: east-looking is -PI/2)
 		K.cd["rmb"] = 0.0; K.ch_rmb = 1.0; K.cd["e"] = 0.0; K.pull = {}; K.flying = false; K.wind = 0.0
 		P.dashes = P.max_dashes(); P.fire_cd = 0.0

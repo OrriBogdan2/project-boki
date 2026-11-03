@@ -5,6 +5,8 @@ extends CanvasLayer
 
 signal closed
 
+const SETTINGS_TABS := ["Gameplay", "Controls", "Camera", "Audio", "Video", "Accessibility", "Demo"]
+
 var root: Control
 var dim: ColorRect              # the blurred backdrop (UI.backdrop)
 var host: CenterContainer
@@ -12,7 +14,7 @@ var fps_lbl: Label
 var page := ""                  # "" when nothing is open
 var ctx := ""                   # title | home | town | match
 var stack: Array = []           # pages to go back to with Esc
-var tab := "Audio"
+var tab := "Gameplay"
 var listening := ""             # an action waiting for its new key
 var listening_slot := 0         # ...in which slot (0 primary, 1 secondary)
 var listen_lbl: Label = null
@@ -25,7 +27,6 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	root = Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.theme = UI.theme()
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 	# behind every overlay menu: the screen blurred and darkened, fading in and out
@@ -98,6 +99,46 @@ func _input(event: InputEvent) -> void:
 	if page != "" and (event.is_action_pressed("menu") or (event is InputEventJoypadButton and event.is_action_pressed("ui_cancel"))):
 		back()
 		get_viewport().set_input_as_handled()
+
+## Screenshots (--overlay=<which>[:arg]): opens one menu, or a confirm box, tooltip or toast over it.
+func shot_demo(which: PackedStringArray) -> void:
+	ctx = ctx_now()
+	var arg := which[1] if which.size() > 1 else ""
+	match which[0]:
+		"pause":
+			open_pause(ctx)
+		"settings":
+			if arg != "":
+				tab = arg
+			open_settings()
+		"admin":
+			open_admin()
+		"saves":
+			open_saves()
+		"inventory":
+			if arg != "":
+				inv_tab = arg
+			open_inventory()
+		"dex":
+			inv_tab = "Field Book"
+			open_inventory()
+			open_dex(arg if arg != "" else "cindle")
+		"confirm":
+			open_pause(ctx)
+			UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.",
+				"Leave", close)
+		"tooltip":
+			tab = "Controls"
+			open_settings()
+			var tip := PanelContainer.new()
+			tip.add_theme_stylebox_override("panel", UI.theme().get_stylebox("panel", "TooltipPanel"))
+			var tl := Label.new()
+			tl.text = "Main key: click, then press a key or mouse button"
+			tl.theme_type_variation = "TooltipLabel"
+			tip.add_child(tl)
+			tip.top_level = true
+			tip.position = Vector2(700, 300)
+			host.get_child(host.get_child_count() - 1).add_child(tip)
 
 func ctx_now() -> String:
 	var s = Game.main.screen_node() if Game.main else null
@@ -180,7 +221,7 @@ func open_pause(where: String) -> void:
 	if where != "match":
 		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 	item.call("Settings", "gear", func():
-		if tab == "Controls": tab = "Audio"
+		if tab == "Controls": tab = "Gameplay"
 		open_settings())
 	item.call("Controls", "dash", func(): tab = "Controls"; open_settings())
 	if where != "match":
@@ -233,103 +274,17 @@ func open_settings() -> void:
 
 func _show_settings() -> void:
 	var v := _page("settings", "Settings", 720, true)
-	UI.shell_tabs(v, ["Audio", "Video", "Controls", "Gameplay", "Accessibility", "Demo"], tab, func(t):
-		tab = t; UI._page_of.erase("Settings"); _show_settings())
+	UI.shell_tabs(v, SETTINGS_TABS, tab, func(t):
+		tab = t
+		_show_settings())
 	match tab:
-		"Audio":
-			_group(v, "Volume")
-			_slider(v, "Master", "master", 0.0, 1.0)
-			_slider(v, "Music", "music", 0.0, 1.0)
-			_slider(v, "Sound effects", "sfx", 0.0, 1.0)
-			_slider(v, "Ambience (wind, rain)", "ambience", 0.0, 1.0)
-			_group(v, "Window")
-			_toggle(v, "Mute when the window isn't focused", "mute_unfocused")
-		"Video":
-			_group(v, "Display")
-			_toggle(v, "Fullscreen", "fullscreen")
-			if not OS.has_feature("web"):
-				_toggle(v, "V-sync", "vsync")
-			_choice(v, "Frame rate limit", "max_fps", [[0, "None"], [30, "30"], [60, "60"], [120, "120"], [144, "144"]])
-			_group(v, "Quality")
-			var qopts := [["auto", "Auto (%s)" % String(Settings.QUALITY[Settings.quality() if String(Settings.get_v("quality")) == "auto" else Settings.detect_quality()]["name"])]]
-			for qk in Settings.QUALITY_ORDER: qopts.append([qk, String(Settings.QUALITY[qk]["name"])])
-			_choice(v, "Graphics quality", "quality", qopts, func(): _refresh_settings.call_deferred())
-			_note(v, "Grass, draw distance, cloud layers and particles change from your next expedition.")
-			_choice(v, "Anti-aliasing", "msaa", [[0, "Off"], [2, "2x"], [4, "4x"]])
-			_toggle(v, "Shadows", "shadows")
-			_toggle(v, "Show frame rate", "show_fps")
-		"Controls":
-			UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
-			var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
-				["Fighting", ["fire", "secondary", "gear1", "signature", "throw", "ultimate", "tonic", "armor_kit", "base"]],
-				["Squad and map", ["map", "scores", "emote", "pass_lead", "separate"]],
-				["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
-			var named := {}
-			for a in Settings.ACTIONS: named[String(a[0])] = String(a[1])
-			var shown := {}
-			for g in groups:
-				_group(v, String(g[0]))
-				for an in g[1]:
-					if not named.has(an): continue
-					shown[an] = true
-					_bind_row(v, an, named[an])
-			var rest: Array = Settings.ACTIONS.filter(func(a): return not shown.has(String(a[0])))
-			if not rest.is_empty():
-				_group(v, "Other")
-				for a in rest: _bind_row(v, String(a[0]), String(a[1]))
-			v.add_child(UI.para("Esc always opens the menu. Reloading is automatic."))
-		"Gameplay":
-			_group(v, "You")
-			var name_row := _row(v, "Your name")
-			var ne := LineEdit.new(); ne.text = Save.d.get("name", "Hunter"); ne.max_length = 16
-			ne.custom_minimum_size.x = 280
-			ne.text_changed.connect(func(t):
-				Save.d["name"] = t.strip_edges() if t.strip_edges() != "" else "Hunter"
-				Save.save_game())
-			name_row.add_child(ne)
-			_group(v, "Camera")
-			_choice(v, "Camera", "cam_style", CamRig.STYLES.keys().map(func(k): return [k, CamRig.STYLES[k]["name"]]))
-			_choice(v, "Camera follow", "cam_follow", [["supervive", "Cursor lean (leans toward the cursor)"], ["standard", "Standard Dynamic"], ["dynamic", "Fully Dynamic"], ["locked", "Locked"]])
-			_slider(v, "Lean toward the cursor", "cam_lead", 0.0, 1.5)
-			_group(v, "Combat")
-			_toggle(v, "Hold Shift for the long dash", "dash_hold", "Tap Shift for the short one")
-			_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: you dash the way you're moving (WASD), or toward the cursor when standing still")
-			_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
-			_toggle(v, "Tap to crouch", "crouch_toggle", "Instead of holding the crouch key")
-			_toggle(v, "Damage numbers", "damage_numbers")
-			_choice(v, "Reset cue sound", "reset_cue", [["a", "A: rising bell pair"], ["b", "B: bell with a glide and sparkle"], ["c", "C: soft whoomp and a crystal ping"]], func(): Sfx.play_reset_cue())
-			_toggle(v, "Tips during matches", "tips")
-			_group(v, "Kin")
-			_toggle(v, "Boki also use your E ability on their own", "kin_auto", "They can spend cooldowns you wanted (their own auto ability is always on)")
-			_choice(v, "Boki chattiness", "kin_chatter", [["quiet", "Quiet (only danger and your health)"], ["normal", "Normal"], ["chatty", "Chatty (points out everything)"]])
-			if admin_allowed():
-				_group(v, "Admin")
-				_choice(v, "Bot difficulty", "bot_diff", [["auto", "Auto (by tier)"]] + Data.BOT_ORDER.map(func(k): return [k, Data.BOT_DIFF[k]["name"]]))
-				_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (F1)")
-		"Accessibility":
-			_group(v, "Readability")
-			_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05)
-			_group(v, "Comfort")
-			_slider(v, "Screen shake", "shake", 0.0, 1.5)
-			_toggle(v, "Fewer flashes", "reduce_flashes")
-		"Demo":
-			# for filming: kept between launches, applied when the next match starts (offline matches)
-			_group(v, "Recording")
-			var rec_row := _row(v, "Recording mode", "Clean HUD hides tips and debug text and smooths the camera. %s cycles it in a match, %s orbits the camera with No HUD" % [Settings.key_cap("record"), Settings.key_cap("record_orbit")])
-			var rec_ob := OptionButton.new()
-			rec_ob.custom_minimum_size.x = 280
-			rec_ob.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-			for i in Record.NAMES.size(): rec_ob.add_item(String(Record.NAMES[i]), i)
-			rec_ob.selected = Record.level
-			rec_ob.item_selected.connect(func(i):
-				Record.set_level(i)
-				Settings.set_v("rec_level", i))
-			rec_row.add_child(rec_ob)
-			_group(v, "Next match")
-			_choice(v, "Weather", "demo_weather", [["random", "Random"], ["clear", "Always clear"]])
-			_choice(v, "Blight", "demo_blight", [[true, "On"], [false, "Off"]])
-			_choice(v, "Bots leave you be after landing", "demo_fresh", [["normal", "Normal (%d s)" % int(Bot.FRESH_T)], ["long", "Longer (%d s)" % int(Settings.DEMO_FRESH_T)]])
-			_note(v, "These apply from the next match you start, offline only. Online matches play the host's rules.")
+		"Gameplay": _tab_gameplay(v)
+		"Controls": _tab_controls(v)
+		"Camera": _tab_camera(v)
+		"Audio": _tab_audio(v)
+		"Video": _tab_video(v)
+		"Accessibility": _tab_access(v)
+		"Demo": _tab_demo(v)
 	UI.footer_left(v).add_child(UI.ghost("Reset to defaults", func():
 		UI.confirm(root, "Reset every setting?", "Volume, video, gameplay and every key binding go back to how the game ships.", "Reset", func():
 			Settings.reset_all()
@@ -337,6 +292,126 @@ func _show_settings() -> void:
 	var done := UI.with_key(UI.primary("Done", back, 120), "Esc")
 	UI.footer(v).add_child(done)
 	(v.get_meta("shell") as Control).set_meta("primary", done)
+
+func _tab_gameplay(v: VBoxContainer) -> void:
+	_group(v, "You")
+	var name_row := _row(v, "Your name", "What other hunters and your Boki call you")
+	var ne := LineEdit.new()
+	ne.text = Save.d.get("name", "Hunter")
+	ne.max_length = 16
+	ne.custom_minimum_size.x = 280
+	ne.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	ne.text_changed.connect(func(t):
+		Save.d["name"] = t.strip_edges() if t.strip_edges() != "" else "Hunter"
+		Save.save_game())
+	name_row.add_child(ne)
+	_group(v, "Expeditions")
+	_toggle(v, "Damage numbers", "damage_numbers", "Numbers pop up where your hits land")
+	_toggle(v, "Tips during expeditions", "tips", "Short hints about what's around you")
+	_group(v, "Boki")
+	var talk := [["quiet", "Quiet"], ["normal", "Normal"], ["chatty", "Chatty"]]
+	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger and your health. Chatty: everything it notices")
+	if admin_allowed():
+		_group(v, "Admin")
+		_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (F1)")
+
+func _tab_controls(v: VBoxContainer) -> void:
+	_group(v, "How keys behave")
+	_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
+	_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: you dash the way you're moving, or toward the cursor when standing still")
+	_toggle(v, "Tap to sneak", "crouch_toggle", "Tap the sneak key to start and stop, instead of holding it")
+	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
+	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
+		["Fighting", [
+			"fire", "reload", "secondary", "gear1", "signature", "throw", "ultimate", "hunter_ult",
+			"tonic", "armor_kit", "base",
+		]],
+		["Squad and map", ["map", "scores", "emote", "pass_lead", "separate"]],
+		["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
+	var named := {}
+	for a in Settings.ACTIONS:
+		named[String(a[0])] = String(a[1])
+	var shown := {}
+	for g in groups:
+		_group(v, String(g[0]))
+		for an in g[1]:
+			if not named.has(an):
+				continue
+			shown[an] = true
+			_bind_row(v, an, named[an])
+	var rest: Array = Settings.ACTIONS.filter(func(a): return not shown.has(String(a[0])))
+	if not rest.is_empty():
+		_group(v, "Other")
+		for a in rest:
+			_bind_row(v, String(a[0]), String(a[1]))
+	_note(v, "Esc always opens the menu. Your gun also reloads by itself when you stop shooting.")
+
+func _tab_camera(v: VBoxContainer) -> void:
+	_group(v, "View")
+	var styles: Array = CamRig.STYLES.keys().map(func(k): return [k, CamRig.STYLES[k]["name"]])
+	_choice(v, "Camera", "cam_style", styles, Callable(), "How high and how wide the camera looks down on you")
+	var follow := [["supervive", "Cursor lean"], ["standard", "Standard dynamic"], ["dynamic", "Fully dynamic"], ["locked", "Locked"]]
+	_choice(v, "Camera follow", "cam_follow", follow, Callable(), "Cursor lean: the view slides toward where you aim")
+	_slider(v, "Lean toward the cursor", "cam_lead", 0.0, 1.5)
+
+func _tab_audio(v: VBoxContainer) -> void:
+	_group(v, "Volume")
+	_slider(v, "Master", "master", 0.0, 1.0)
+	_slider(v, "Music", "music", 0.0, 1.0)
+	_slider(v, "Sound effects", "sfx", 0.0, 1.0)
+	_slider(v, "Ambience", "ambience", 0.0, 1.0, 0.05, "Wind, rain and the sea")
+	_group(v, "Sounds")
+	var cues := [["a", "Rising bells"], ["b", "Bell with a glide"], ["c", "Soft whoomp and ping"]]
+	_choice(v, "Ability ready again", "reset_cue", cues, func(): Sfx.play_reset_cue(), "Plays when a kill resets your cooldowns")
+	_group(v, "Window")
+	_toggle(v, "Mute when the window isn't focused", "mute_unfocused")
+
+func _tab_video(v: VBoxContainer) -> void:
+	_group(v, "Display")
+	_toggle(v, "Fullscreen", "fullscreen")
+	if not OS.has_feature("web"):
+		_toggle(v, "V-sync", "vsync", "Stops tearing; can add a little input delay")
+	var fps := [[0, "None"], [30, "30"], [60, "60"], [120, "120"], [144, "144"]]
+	_choice(v, "Frame rate limit", "max_fps", fps)
+	_group(v, "Quality")
+	var auto_pick := Settings.quality() if String(Settings.get_v("quality")) == "auto" else Settings.detect_quality()
+	var qopts := [["auto", "Auto (%s)" % String(Settings.QUALITY[auto_pick]["name"])]]
+	for qk in Settings.QUALITY_ORDER:
+		qopts.append([qk, String(Settings.QUALITY[qk]["name"])])
+	_choice(v, "Graphics quality", "quality", qopts, func(): _show_settings.call_deferred(),
+		"Grass, draw distance, cloud layers and particles change from your next expedition")
+	_choice(v, "Anti-aliasing", "msaa", [[0, "Off"], [2, "2x"], [4, "4x"]], Callable(), "Smooths jagged edges")
+	_toggle(v, "Shadows", "shadows")
+	_toggle(v, "Show frame rate", "show_fps", "In the top right corner")
+
+func _tab_access(v: VBoxContainer) -> void:
+	_group(v, "Readability")
+	_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05, "Menus and the HUD, on top of fitting your window")
+	_group(v, "Comfort")
+	_slider(v, "Screen shake", "shake", 0.0, 1.5)
+	_toggle(v, "Fewer flashes", "reduce_flashes", "Softer full-screen flashes when you're hit or level up")
+
+## Filming: kept between launches, applied when the next offline match starts.
+func _tab_demo(v: VBoxContainer) -> void:
+	_group(v, "Recording")
+	var rec_hint := "Clean HUD hides tips and debug text and smooths the camera. %s cycles it in a match, %s orbits the camera with No HUD"
+	var rec_row := _row(v, "Recording mode", rec_hint % [Settings.key_cap("record"), Settings.key_cap("record_orbit")])
+	var rec_ob := OptionButton.new()
+	rec_ob.custom_minimum_size.x = 280
+	rec_ob.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	for i in Record.NAMES.size():
+		rec_ob.add_item(String(Record.NAMES[i]), i)
+	rec_ob.selected = Record.level
+	rec_ob.item_selected.connect(func(i):
+		Record.set_level(i)
+		Settings.set_v("rec_level", i))
+	rec_row.add_child(rec_ob)
+	_group(v, "Next match")
+	_choice(v, "Weather", "demo_weather", [["random", "Random"], ["clear", "Always clear"]])
+	_choice(v, "Blight", "demo_blight", [[true, "On"], [false, "Off"]])
+	var fresh := [["normal", "Normal (%d s)" % int(Bot.FRESH_T)], ["long", "Longer (%d s)" % int(Settings.DEMO_FRESH_T)]]
+	_choice(v, "Bots leave you be after landing", "demo_fresh", fresh)
+	_note(v, "These apply from the next match you start, offline only. Online matches play the host's rules.")
 
 ## A small heading over a group of settings rows.
 func _group(v: VBoxContainer, txt: String) -> void:
@@ -347,13 +422,13 @@ func _group(v: VBoxContainer, txt: String) -> void:
 ## One settings row: the name on the left (with an optional hint under it), the control on the right.
 func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
 	var r := UI.hbox(16)
-	r.custom_minimum_size.y = 38
-	var lc := UI.vbox(0); lc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	r.custom_minimum_size.y = 40
+	var lc := UI.vbox(1)
+	lc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	lc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	lc.add_child(UI.label(label_txt, UI.T_BODY))
+	lc.add_child(UI.label(label_txt, UI.T_BODY, UI.INK, UI.semi))
 	if hint != "":
-		var h := UI.para(hint, 12, UI.MUTED)
-		lc.add_child(h)
+		lc.add_child(UI.para(hint, UI.T_SMALL - 1, UI.MUTED))
 	r.add_child(lc)
 	v.add_child(r)
 	return r
@@ -366,9 +441,10 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 		var cell := UI.hbox(2)
 		cell.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		var code: String = sl[slot]
-		var b := UI.button(Settings.code_text(code) if code != "" else ("Not set" if slot == 0 else "+ second key"), Callable(), 132)
+		var b := UI.button(_bind_text(code, slot), Callable(), 132)
 		b.tooltip_text = ("Main key" if slot == 0 else "Second key") + ": click, then press a key or mouse button"
-		if code == "" and slot == 1: b.modulate = Color(1, 1, 1, 0.55)
+		if code == "" and slot == 1:
+			b.modulate = Color(1, 1, 1, 0.55)
 		b.pressed.connect(func():
 			listening = an
 			listening_slot = slot
@@ -376,7 +452,9 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 			b.theme_type_variation = "Chosen"
 			listen_lbl = null)
 		cell.add_child(b)
-		var x := UI.ghost("x", func(): Settings.clear_bind(an, slot); _show_settings())
+		var x := UI.ghost("x", func():
+			Settings.clear_bind(an, slot)
+			_show_settings())
 		x.custom_minimum_size.x = 26
 		x.tooltip_text = "Clear this key"
 		x.disabled = code == ""
@@ -384,20 +462,30 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 		cell.add_child(x)
 		r.add_child(cell)
 
-func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: float, step := 0.05) -> void:
-	var r := _row(v, label_txt)
-	var sl := HSlider.new(); sl.min_value = lo; sl.max_value = hi; sl.step = step
+func _bind_text(code: String, slot: int) -> String:
+	if code != "":
+		return Settings.code_text(code)
+	return "Not set" if slot == 0 else "+ second key"
+
+func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: float, step := 0.05, hint := "") -> void:
+	var r := _row(v, label_txt, hint)
+	var sl := HSlider.new()
+	sl.min_value = lo
+	sl.max_value = hi
+	sl.step = step
 	sl.value = float(Settings.get_v(key))
 	sl.custom_minimum_size.x = 228
 	sl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var pct := UI.label("%d%%" % int(round(sl.value * 100.0)), UI.T_SMALL, UI.MUTED, UI.semi); pct.custom_minimum_size.x = 44
+	var pct := UI.label("%d%%" % int(round(sl.value * 100.0)), UI.T_SMALL, UI.MUTED, UI.semi)
+	pct.custom_minimum_size.x = 44
 	pct.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	if key == "ui_scale":
 		# applies when you let go (or click the track), so the slider doesn't run away from the mouse
 		sl.drag_ended.connect(func(_c): Settings.set_v(key, sl.value))
 		sl.value_changed.connect(func(val):
 			pct.text = "%d%%" % int(round(val * 100.0))
-			if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT): Settings.set_v(key, val))
+			if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+				Settings.set_v(key, val))
 	else:
 		sl.value_changed.connect(func(val):
 			pct.text = "%d%%" % int(round(val * 100.0))
@@ -414,30 +502,24 @@ func _toggle(v: VBoxContainer, label_txt: String, key: String, hint := "") -> vo
 	cb.toggled.connect(func(on): Settings.set_v(key, on))
 	r.add_child(cb)
 
-func _refresh_settings() -> void:
-	UI._page_of.erase("Settings")
-	_show_settings()
-
+## A quiet line of fine print under a group.
 func _note(v: VBoxContainer, txt: String) -> void:
-	var l := Label.new()
-	l.text = txt
-	l.add_theme_font_size_override("font_size", 13)
-	l.modulate = Color(1, 1, 1, 0.6)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	v.add_child(l)
+	v.add_child(UI.para(txt, UI.T_SMALL, UI.FAINT))
 
-func _choice(v: VBoxContainer, label_txt: String, key: String, opts: Array, then := Callable()) -> void:
-	var r := _row(v, label_txt)
+func _choice(v: VBoxContainer, label_txt: String, key: String, opts: Array, then := Callable(), hint := "") -> void:
+	var r := _row(v, label_txt, hint)
 	var ob := OptionButton.new()
 	ob.custom_minimum_size.x = 280
 	ob.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var cur = Settings.get_v(key)
 	for i in opts.size():
 		ob.add_item(String(opts[i][1]), i)
-		if opts[i][0] == cur: ob.select(i)
+		if opts[i][0] == cur:
+			ob.select(i)
 	ob.item_selected.connect(func(i):
 		Settings.set_v(key, opts[i][0])
-		if then.is_valid(): then.call())
+		if then.is_valid():
+			then.call())
 	r.add_child(ob)
 
 func _finish_rebind(ev: InputEvent) -> void:
@@ -500,11 +582,7 @@ func open_inventory() -> void:
 		c.custom_minimum_size = Vector2(222, 0)
 		var cv := UI.vbox(6); c.add_child(cv)
 		var top := UI.hbox(10)
-		var dot := PanelContainer.new()
-		var dsb := UI._box(Color(col, 0.16), 10); UI._pad(dsb, 6, 6)
-		dot.add_theme_stylebox_override("panel", dsb)
-		dot.add_child(UI.IconDot.new(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 20.0))
-		dot.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		var dot := UI.badge(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 36.0, UI.R_CTRL)
 		top.add_child(dot)
 		var tc := UI.vbox(0); tc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var tl := UI.label(title_txt, UI.T_BODY, UI.INK, UI.semi); tl.clip_text = true

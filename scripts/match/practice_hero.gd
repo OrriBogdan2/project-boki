@@ -73,7 +73,6 @@ static func _show(p: Practice, title: String, width: float, on_close: Callable, 
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.theme = UI.theme()
 	p.picker.add_child(root)
 	var shade := ColorRect.new(); shade.color = Color(0, 0, 0, 0.4)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

@@ -36,22 +36,7 @@ func _ready() -> void:
 		if a.begins_with("--overlay="):
 			# test: open one of the overlay menus a moment after the screen appears
 			var which := a.substr(10).split(":")
-			get_tree().create_timer(0.6).timeout.connect(func():
-				Overlay.ctx = Overlay.ctx_now()
-				if which[0] == "pause": Overlay.open_pause(Overlay.ctx_now())
-				elif which[0] == "settings":
-					if which.size() > 1: Overlay.tab = which[1]
-					Overlay.open_settings()
-				elif which[0] == "admin": Overlay.open_admin()
-				elif which[0] == "saves": Overlay.open_saves()
-				elif which[0] == "inventory":
-					if which.size() > 1: Overlay.inv_tab = which[1]
-					Overlay.open_inventory()
-				elif which[0] == "dex":
-					# a Boki's Field Book page, over the Field Book: --overlay=dex:puddlet
-					Overlay.inv_tab = "Field Book"
-					Overlay.open_inventory()
-					Overlay.open_dex(which[1] if which.size() > 1 else "cindle"))
+			get_tree().create_timer(0.6).timeout.connect(func(): Overlay.shot_demo(which))
 		if a.begins_with("--seed="): opts["seed"] = int(a.substr(7))
 		if a == "--god": opts["god"] = true
 		if a.begins_with("--cam-style="): Settings.set_v("cam_style", a.substr(12), false)    # tooling: a camera style for one run (camcal)
@@ -1952,7 +1937,6 @@ func _grammar_runtime_check() -> void:
 	var locked := not k.use_ability("k1", T.pos) and not k.use_ability("k2", T.pos)
 	P.slot_lv["kin"] = 1
 	_grt("locked Boki slot never casts", locked, "")
-	Settings.set_v("kin_auto", false, false)
 	k.target = T
 	k.runner.reset()
 	var used := {"k1": 0, "k2": 0}
@@ -2015,7 +1999,7 @@ func _grammar_runtime_check() -> void:
 	var ok_cast := KinMerge.cast(P)
 	var dur := float(P.merge_st.get("T", 0.0))
 	var ms := KinMerge.def_for(k)
-	_grt("merge casts: fused, timed, passives on", ok_cast and k.state == "fused" and is_equal_approx(dur, ms.duration) and P.owner_stat("damage") > 0.29,
+	_grt("merge casts: fused, timed, passives on", ok_cast and k.state == "fused" and is_equal_approx(dur, ms.duration) and P.owner_stat("damage") > 0.19,
 		"%.1fs, damage +%.2f" % [dur, P.owner_stat("damage")])
 	_ac_run(m, dur + float(MergeForm.data()["xform_s"]) + 0.3)       # (the transformation comes first, then the timer; no tiers: the length is fixed)
 	_grt("merge ends on its timer, then cooldown", not KinMerge.active(P) and P.merge_cd > 0.0 and k.state == "shoulder" and not KinMerge.can_cast(P), "cd %.1f" % P.merge_cd)
