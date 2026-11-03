@@ -1,10 +1,12 @@
 extends RefCounted
-## --warden-shots --shots-dir=<dir> [--wardens=bulwark,archer,juggernaut] [--sheets=<dir>]: the in-engine
-## Warden models next to their concept sheets (concept phase 2). Per Hunter, under <dir>/<id>/:
+## --warden-shots --shots-dir=<dir> [--wardens=bulwark,archer,juggernaut] [--sheets=<dir>] [--procedural]: the
+## in-engine Warden models next to their concept sheets (concept phase 2). Per Hunter, under <dir>/<id>/:
 ## turnaround_game.png (front, 3/4, side, back, 3/4 back at the match camera: the true pixels, then
 ## enlarged 3x), poses_game.png (idle, run, attack, cast, ult at the match camera), turnaround_close.png,
-## closeup.png (head and shoulders) and vs_sheet.png (the concept sheet beside the close turnaround),
-## plus captions.txt. --sheets names the folder holding the concept PNGs (<id>.png). Needs a renderer.
+## closeup.png (head and shoulders), vs_sheet.png (the concept sheet beside the close turnaround) and
+## moves_close_N.png (the run and the hero's own kit moves, frame by frame), plus captions.txt.
+## --procedural shoots the procedural models of Wardens that have a 3D one (Settings: Warden models).
+## --sheets names the folder holding the concept PNGs (<id>.png). Needs a renderer.
 
 const YAWS := [PI, PI * 0.75, PI * 0.5, 0.0, -PI * 0.25]
 const YAW_NAMES := ["front", "3/4", "side", "back", "3/4 back"]
@@ -15,6 +17,7 @@ const CAM_DIST := 23.0
 const CAM_FOV := 32.0
 const ENLARGE := 3            # the gameplay strip enlarged this many times (nearest, so the pixels stay honest)
 const OUT_W := 1280
+const MOVES_PER_STRIP := 4    # kit-move frames side by side in one close strip
 
 var holder: Node3D
 var cam: Camera3D
@@ -26,13 +29,17 @@ func run(main: Node) -> void:
 	var out := ""
 	var sheets := ""
 	var wardens := ["bulwark", "archer", "juggernaut"]
+	var procedural := false
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--sheets="): sheets = a.substr(9)
 		if a.begins_with("--wardens="): wardens = Array(a.substr(10).split(","))
+		if a == "--procedural": procedural = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	_stage(main)
+	for id in wardens:
+		WardenGlb.set_model(String(id), not procedural)
 	for id in wardens:
 		await _hero(String(id), out.path_join(String(id)), sheets)
 	print("WARDEN_SHOTS_DONE")
@@ -97,6 +104,19 @@ func _hero(id: String, dir: String, sheets: String) -> void:
 	caps.append("poses_game.png: %s at the match camera in %s (true pixels, then x%d)"
 			% [title, ", ".join(POSES), ENLARGE])
 	_clear()
+	# 5. her own kit moves, frame by frame, close
+	var frames := _move_frames(id)
+	for part in range(0, frames.size(), MOVES_PER_STRIP):
+		var some := frames.slice(part, part + MOVES_PER_STRIP)
+		row = _row(id, some.size())
+		for i in row.size():
+			(row[i] as Node3D).rotation.y = PI * 0.7
+			_frame(anims[i][0], row[i], some[i])
+		var moves := await _close_strip(row, false)
+		var nm := "moves_close_%d.png" % (part / MOVES_PER_STRIP + 1)
+		moves.save_png(dir.path_join(nm))
+		caps.append("%s: %s, left to right: %s" % [nm, title, ", ".join(some.map(func(f): return f[0]))])
+		_clear()
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	f.store_string("\n".join(caps) + "\n")
 	f.close()
@@ -160,13 +180,13 @@ func _game_strip(row: Array, animate := true) -> Image:
 	out.blit_rect(big, Rect2i(Vector2i.ZERO, big.get_size()), Vector2i(0, crop.get_height() + 8))
 	return _fit(out)
 
-func _close_strip(row: Array) -> Image:
+func _close_strip(row: Array, animate := true) -> Image:
 	var span := (row.size() - 1) * GAP + 1.6
 	cam.fov = 30.0
 	var half_h := atan(tan(deg_to_rad(cam.fov * 0.5)) * 16.0 / 9.0)
 	cam.position = Vector3(0, 1.1, span * 0.5 / tan(half_h))
 	cam.rotation = Vector3(-0.03, 0, 0)
-	await _settle(4)
+	await _settle(4, animate)
 	var img := await _grab()
 	var top := int(cam.unproject_position(Vector3(0, 2.9, 0)).y)
 	var bottom := int(cam.unproject_position(Vector3(0, -0.15, 0.6)).y)
@@ -221,6 +241,29 @@ func _fit(img: Image) -> Image:
 	if img.get_width() > OUT_W:
 		img.resize(OUT_W, int(img.get_height() * float(OUT_W) / img.get_width()), Image.INTERPOLATE_LANCZOS)
 	return img
+
+## The run cycle at two phases, then the hero's own kit moves (<id>_lmb, _dash, _rmb) at key moments: [label,
+## kit move, its time, running]. A hero without its own moves gets the run only.
+func _move_frames(id: String) -> Array:
+	var out: Array = [["run", "", 0.0, 0], ["run, other foot", "", 0.0, 9]]
+	for f in [["shoot", "_lmb", 0.03], ["recoil", "_lmb", 0.08], ["dash", "_dash", 0.1], ["dash, low", "_dash", 0.4],
+			["dash, up", "_dash", 0.62], ["RMB throw", "_rmb", 0.07]]:
+		if not HunterAnim.km_def(id + String(f[1])).is_empty():
+			out.append([f[0], id + String(f[1]), f[2], -1])
+	return out
+
+## Plays one move frame and holds it: a run (its extra steps set the stride's phase) or a kit move at its time.
+func _frame(an: HunterAnim, h: Node3D, f: Array) -> void:
+	var fwd := Vector3(-sin(h.rotation.y), 0, -cos(h.rotation.y))
+	var running := int(f[3]) >= 0
+	for k in 60 + maxi(0, int(f[3])):
+		var s := {"fired": 99.0, "face": h.rotation.y, "grounded": true}
+		if running:
+			s["vel"] = fwd * 4.6
+		else:
+			s["kmove"] = f[1]
+			s["kmove_t"] = float(f[2])
+		an.update(1.0 / 60.0, s)
 
 ## Runs the animation into a pose and holds it (as tests/arch_gallery.gd's showcase does).
 func _pose(an: HunterAnim, h: Node3D, pose: String, id: String) -> void:
