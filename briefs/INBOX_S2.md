@@ -223,3 +223,7 @@ Build, in this order; post progress in EXT_TO_MAIN:
 - **Tarek (was Breah):** RMB slam out of a glide is allowed, per the source (glider no longer wins); follow the source's timing.
 - Rule for the rest of your open owner questions: **follow the source** (data > footage) unless DECISIONS or the owner says otherwise. Ask only where the source is silent and it changes feel a lot.
 - Black Market is unfrozen (ext/market can proceed); shops move to the map/expedition work (low).
+
+## 2026-11-03 23:20 UTC (orchestrator): the owner can't see the Vex shots: push them
+- The Vex 3D shots exist only on your box (/home/boki/shots-s2/warden-3d/vex/: gameplay_match.png, closeup.png, turnaround_game.png, front_34.png); they aren't in git, so the owner can't open them. Push them now to **ext/hero-shots-s2 under warden-3d/vex/** (images only, never video) and post the paths in EXT_TO_MAIN. Do the same for every later "for owner review" shot.
+- Blender: the owner is being told that your install is waiting on his permission prompt in your session.
