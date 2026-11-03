@@ -267,3 +267,25 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 ## 37. NOTE for the concept pass: stronger personality and differentiation for every hero
 - Owner: some heroes don't look differentiated enough; give them all a stronger personality. They're all built on the same main-character base, and that shows.
 - In CONCEPT_PASS.md scope: each hero gets a distinct silhouette that reads at gameplay zoom (body proportions, height and bulk, posture, signature headwear or shape), plus their own idle stance, walk, colour identity and attitude in every animation (e.g. Dredge hulking and bestial, Moosh Moosh small and bouncy, Ostra floating and eerie). Allow per-hero body proportions on the shared rig rather than one body for all. Test: the 12 silhouettes filled black, side by side, should each be identifiable.
+
+## 38. DECISION: hunters go by a descriptive class title, not a personal name (rename pass; titles are a draft for owner OK)
+- Owner: players name their own character, so drop the hunters' personal names (Dancer, Zedran, Pin...). Use class titles, but not bare generic ones, so there's room for future related hunters (more archers, more gunmen): the pattern is **"<descriptor> <class>"**, like "Green Archer".
+- Draft titles (owner to confirm or edit before the rename lands):
+
+  | id | old name | new title |
+  |---|---|---|
+  | thief | Dancer | Silver Thief |
+  | juggernaut | Zedran | Iron Juggernaut |
+  | archer | Pin | Teal Archer |
+  | bulwark | Bjorn | Oak Bulwark |
+  | mage | Vireo | Storm Mage |
+  | gunslinger | Venator | Dust Gunslinger |
+  | ashwick | Linwick | Ash Pyromancer |
+  | dredge | Dredge | Hook Brute |
+  | tender | Moosh Moosh | Fox Tender |
+  | rimewright | Tamsin | Rime Skater |
+  | dolm | Breah | Stone Warden |
+  | ostra | Ostra | Void Jester |
+
+- Scope once confirmed: every player-facing string (archetype JSON display names, hero picker, HUD, kit cards, tooltips, gen_wiki output, docs/heroes pages, new-game flow text). Internal ids stay. The player's chosen name labels their hunter in a match; the title shows in the picker and on cards. Save migration isn't needed (ids unchanged). Assert: no old personal name remains in any player-facing string (grep check in tools/).
+- Hold the rename until the owner confirms the titles; it's cheap and doesn't block the kit items.
