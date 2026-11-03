@@ -80,7 +80,7 @@ const DEPLOY_POP := -1.6       # the canopy catching: your fall checks to this, 
 const DEPLOY_H := 8.0         # the glider opens by itself this high above the ground
 ## Armor, as in Supervive: it takes a flat share off every hit (ARMOR_DR) for as long as it has
 ## durability left; what gets through hurts your health and wears the durability down by the same
-## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 2 3).
+## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
 const ARMOR_DR := 0.2
 const ARMOR_DUR := 2.2        # durability as a multiple of max health
 const ARMOR_WAIT := 4.0
@@ -93,7 +93,7 @@ var wid := "rifle"
 var wpn: Dictionary = {}
 var ctrl := "bot"             # local | bot | remote
 var inp := {"move": Vector2.ZERO, "aim": Vector3.ZERO, "fire": false, "dash": false, "jump": false,
-	"throw": false, "skill": false, "sig": false, "interact": false, "reload": false, "util1": false, "util2": false, "util3": false, "glide": false, "ult": false,
+	"throw": false, "skill": false, "sig": false, "interact": false, "reload": false, "util1": false, "util2": false, "util3": false, "util4": false, "glide": false, "ult": false,
 	"sec": false, "sec_hold": false, "crouch": false, "gear1": false, "gear2": false, "swap": false}
 var base_speed := 5.4
 var ammo := 12
@@ -155,7 +155,12 @@ func set_hold(kind: String, dur := 0.15) -> void:
 
 func holding() -> String:
 	return hold_kind if m.time < hold_until else ""
-var rift_keys := 0               # Rift Keys carried: each opens a rift hatch once (see Exits); they go in your deathbox
+var rift_keys: int:              # Rift Keys carried, on the belt (BeltKeys): each opens a rift hatch once (Exits)
+	get: return UtilityBelt.count(self, "rift_key")
+	set(v): BeltKeys.set_keys(self, "rift_key", v)
+var chest_keys: int:             # chest keys carried, on the belt (BeltKeys)
+	get: return UtilityBelt.count(self, "chest_key")
+	set(v): BeltKeys.set_keys(self, "chest_key", v)
 var kin: Ent = null             # the active kin: its abilities are on Q and V, its ultimate on R
 var kin2: Ent = null            # the benched kin, swapped in with X
 var swap_cd := 0.0
@@ -176,7 +181,7 @@ var caught: Array = []        # kin records caught this match
 var kills := 0
 var knocks := 0
 var dmg_done := 0.0
-var belt: Array = UtilityBelt.empty()    # the 1/2/3 utility belt: three slots of {id, n, cd} (UtilityBelt)
+var belt: Array = UtilityBelt.empty()    # the utility belt on 1-4: four slots of {id, n, cd} (UtilityBelt)
 var belt_free: Dictionary = {}                # issued charges, used first and never taken home
 var tonics: int:                              # (the belt's tonics and armor kits, for the code that counts them)
 	get: return UtilityBelt.count(self, "tonic")
@@ -1972,7 +1977,7 @@ func sim(dt: float) -> void:
 			vel = Vector3.ZERO
 			if ctrl == "local" and inp["jump"]:
 				m.ship_jump(self)
-			for k in ["jump", "dash", "sig", "reload", "util1", "util2", "util3", "ult", "fire", "skill", "swap"]:
+			for k in ["jump", "dash", "sig", "reload", "util1", "util2", "util3", "util4", "ult", "fire", "skill", "swap"]:
 				inp[k] = false
 		return
 	tick_status(dt)
@@ -2034,14 +2039,14 @@ func sim(dt: float) -> void:
 	# bringing a teammate back at their deathbox: kneeling over it, locked in place (let go of
 	# interact to stop)
 	if box_reviving():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "util1", "util2", "util3", "gear1",
-				"gear2", "fire", "throw", "kin_ab"]:
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "util1", "util2", "util3", "util4",
+				"gear1", "gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# mid-stomp you're committed: none of your own buttons do anything until it ends
 	if not stomp.is_empty():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "util1", "util2", "util3", "gear1",
-				"gear2", "fire", "throw", "kin_ab"]:
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "util1", "util2", "util3", "util4",
+				"gear1", "gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
@@ -2051,7 +2056,7 @@ func sim(dt: float) -> void:
 		_gate(gk[0], gk[1], gk[2])
 	KinDowned.commit(self)           # rescuing your Boki: rooted, nothing fires (a dash still cancels it)
 	if dropping and not grounded and ctrl != "bot":
-		for bk in ["sec", "sig", "ult", "util1", "util2", "util3", "gear1", "gear2"]:
+		for bk in ["sec", "sig", "ult", "util1", "util2", "util3", "util4", "gear2"]:
 			if inp.get(bk, false):
 				_break_drop()
 				break
@@ -2115,7 +2120,7 @@ func sim(dt: float) -> void:
 		else: use_ultimate()
 	trigger(dt)
 	inp["kin_ab"] = false
-	for k in ["dash", "jump", "sig", "reload", "util1", "util2", "util3", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
+	for k in ["dash", "jump", "sig", "reload", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
 		inp[k] = false
 	_physics(dt)
 	var ad := aim_dir()

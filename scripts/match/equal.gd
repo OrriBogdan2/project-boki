@@ -104,9 +104,9 @@ static func take_belt(tier: int) -> Array:
 static func stash_of(id: String) -> int:
 	return int(Save.d.get("items", {}).get(id, 0))
 
-## The picks as the belt slots will hold them: which item sits in 1, 2 and 3.
+## The picks as the belt slots will hold them: which item sits in 1 to 4.
 static func picks() -> Array:
-	var p: Array = (Save.d.get("belt_pick", ["tonic", "armor_kit", ""]) as Array).duplicate()
+	var p: Array = (Save.d.get("belt_pick", ["tonic", "armor_kit", "", ""]) as Array).duplicate()
 	while p.size() < UtilityBelt.SLOTS:
 		p.append("")
 	return p
@@ -129,7 +129,7 @@ static func start(m, h) -> void:
 		if may_bring(it, tier):
 			# gloves: Q first, then V
 			h.gear[Gear.slot_on(h, String(it["id"]))] = {"id": it["id"], "rar": int(it["rar"])}
-	# the belt: what you picked, in the order you picked it (slots 1 2 3)
+	# the belt: what you picked, in the order you picked it (slots 1 to 4)
 	if m.opts.has("belt_items"):
 		h.belt = UtilityBelt.empty()
 		h.belt_free = {}
@@ -142,7 +142,7 @@ static func start(m, h) -> void:
 	if m.opts.get("equal_demo", false):
 		_demo(m, h)
 
-## --equal-demo (screenshots): a belt of three kinds, armor on its way to Epic, a little hurt.
+## --equal-demo (screenshots): a full belt (two chest keys in slot 4), armor on its way to Epic, a little hurt.
 static func _demo(m, h) -> void:
 	h.gear[0] = {"id": "grapple", "rar": 3}
 	h.gear[1] = {"id": "quake", "rar": 2}
@@ -156,6 +156,7 @@ static func _demo(m, h) -> void:
 	UtilityBelt.grant(h, "tonic", 3)
 	UtilityBelt.grant(h, "armor_kit", 2)
 	UtilityBelt.grant(h, "smoke", 2)
+	UtilityBelt.grant(h, "chest_key", 2)
 	h.armor_gain(780.0)
 	h.hp = h.max_hp * 0.62
 	h.armor = h.max_armor * 0.55

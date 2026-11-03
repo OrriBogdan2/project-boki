@@ -25,6 +25,7 @@ func run(host: Node, which := "all") -> void:
 		await _bots()
 		await _gloves()
 		_drops()
+		await load("res://tools/equal_keys_check.gd").new().run(self)      # keys on the belt
 	_migration()
 	print("EQUAL DONE, failures: %d" % bad)
 	host.get_tree().quit(1 if bad > 0 else 0)
@@ -78,15 +79,15 @@ func _drop(m: Match) -> void:
 
 # ------------------------------------------------------------------ keys
 func _keys() -> void:
-	for pair in [["util1", KEY_1], ["util2", KEY_2], ["util3", KEY_3]]:
+	for pair in [["util1", KEY_1], ["util2", KEY_2], ["util3", KEY_3], ["util4", KEY_4]]:
 		var evs := InputMap.action_get_events(String(pair[0]))
 		var code: int = pair[1]
 		var on_key := evs.any(func(ev): return ev is InputEventKey and (ev as InputEventKey).physical_keycode == code)
 		ok(on_key, "%s is on key %s" % [pair[0], OS.get_keycode_string(pair[1])])
 	ok(not InputMap.has_action("tonic") and not InputMap.has_action("armor_kit"),
 			"the old heal and armor-kit actions are gone")
-	ok(UtilityBelt.KEYS == ["util1", "util2", "util3"] and Hunter.new().inp.has("util3")
-			and not Hunter.new().inp.has("kit"), "hunters take util1..3 as inputs")
+	ok(UtilityBelt.KEYS == ["util1", "util2", "util3", "util4"] and Hunter.new().inp.has("util4")
+			and not Hunter.new().inp.has("kit"), "hunters take util1..4 as inputs")
 
 # ------------------------------------------------------------------ equal base
 func _equal_base() -> void:
@@ -116,7 +117,7 @@ func _equal_base() -> void:
 				and bool(rich["armor_gear"]),
 				"tier %d: base pack %d, armor level 0, no perks, no armor piece" % [tier, Equal.base_pack()])
 		var bare := poor_gear.all(func(g): return (g as Dictionary).is_empty())
-		ok(bare and poor_belt == ["tonic", "armor_kit", ""],
+		ok(bare and poor_belt == ["tonic", "armor_kit", "", ""],
 				"tier %d: the poor farm brings nothing but the everyday issue (%s)" % [tier, str(poor_belt)])
 		var worn: Array = P.gear.filter(func(g): return not (g as Dictionary).is_empty())
 		var worn_text: Array = worn.map(func(g): return "%s r%d" % [g["id"], g["rar"]])
@@ -191,10 +192,11 @@ func _belt() -> void:
 	ok(UtilityBelt.grant(h, "smoke", 2) == 2 and UtilityBelt.grant(h, "smoke", 5) == 1
 			and UtilityBelt.count(h, "smoke") == 3, "grant stacks onto one slot up to its max (smoke 3)")
 	ok(UtilityBelt.grant(h, "tonic", 1) == 1 and UtilityBelt.grant(h, "scanner", 1) == 1
-			and UtilityBelt.grant(h, "stim", 1) == 0, "three slots hold three kinds; a fourth kind does not fit")
+			and UtilityBelt.grant(h, "medkit", 1) == 1 and UtilityBelt.grant(h, "stim", 1) == 0,
+			"four slots hold four kinds; a fifth kind does not fit")
 	ok(UtilityBelt.take(h, "smoke", 5) == 3 and h.belt[0].is_empty(), "an emptied slot frees up")
 	h.free()
-	# 1/2/3 with charges
+	# the belt keys with charges
 	P.belt = UtilityBelt.empty()
 	P.belt_free = {}
 	UtilityBelt.grant(P, "tonic", 3)
@@ -262,6 +264,7 @@ func _belt() -> void:
 	UtilityBelt.grant(P, "tonic", 5)
 	UtilityBelt.grant(P, "armor_kit", 4)
 	UtilityBelt.grant(P, "smoke", 3)
+	UtilityBelt.grant(P, "medkit", 1)
 	ok(not UtilityBelt.can_take(P, "scanner") and not UtilityBelt.can_take(P, "tonic")
 			and UtilityBelt.can_take(P, "gem"),
 			"a full belt cannot take another kind or more of a full stack (gems always can)")
@@ -281,7 +284,7 @@ func _belt() -> void:
 	var bare_belt := P.belt.all(func(slot): return (slot as Dictionary).is_empty())
 	ok(bare_belt and P.tonics == 0, "...and you have nothing left on you")
 	var rows: Array = Life.box_items(m, foe, bx).filter(func(it): return it["key"] == "belt")
-	ok(rows.size() == 3, "a looter sees it item by item (%d rows)" % rows.size())
+	ok(rows.size() == 4, "a looter sees it item by item (%d rows)" % rows.size())
 	foe.belt = UtilityBelt.empty()
 	foe.belt_free = {}
 	Life.loot_box(m, foe, bx)

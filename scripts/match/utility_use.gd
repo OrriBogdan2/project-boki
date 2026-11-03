@@ -8,6 +8,7 @@ extends RefCounted
 ##   smoke   a cloud that hides everyone in it
 ##   pad     a launch pad on the ground
 ##   scan    reveal rival hunters nearby
+##   key     a Rift Key or chest key: open the lock beside you, or ping the nearest one (BeltKeys)
 ##   fx      run the item's "effects" list through Effects (haste, shield, ...)
 ## The drink and repair take time and spill if you are hit (Hunter._interrupt_consume): nothing is
 ## spent unless they finish. The rest take effect at once and spend one charge.
@@ -34,6 +35,8 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 	var m = h.m
 	var d: Dictionary = UtilityBelt.def(id)
 	var col: Color = d.get("col", Color.WHITE)
+	if use_of(id) == "key":
+		return BeltKeys.use(h, id)       # the lock spends the key when it opens
 	match use_of(id):
 		"drink":
 			h._fold_for_action()

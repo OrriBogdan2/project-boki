@@ -2844,10 +2844,8 @@ func _open_shop() -> void:
 				var fk: String = f
 				goods.append(["food:" + f, fd["name"], fd["desc"], int(fd["price"]), Color("ffb36a"), func(): Save.add_item(fk, 1), "have %d" % int(Save.d["items"].get(f, 0))])
 			goods.append(["tonic", "Tonic", "Heals 40%% in a match (belt key %s)." % Settings.key_cap("util1"), 30, Color("8fe0a0"), func(): Save.add_item("tonic", 1), "have %d" % int(Save.d["items"].get("tonic", 0))])
-			for uid in UtilityBelt.ids():      # the rest of the utility belt (HomeBelt picks what to take)
+			for uid in UtilityBelt.stock_ids():      # the rest of the utility belt (HomeBelt picks what to take)
 				if uid != "tonic": goods.append([uid, UtilityBelt.name_of(uid), UtilityBelt.def(uid)["desc"], UtilityBelt.price_of(uid), UtilityBelt.col_of(uid), func(): Save.add_item(uid, 1), "have %d" % Equal.stash_of(uid)])
-			var kl := Exits.keys_left_today()
-			goods.append(["rift_key", "Rift Key", "Opens any rift hatch on an expedition: a quiet way out, any time. Lost if you go down. %d a day." % Exits.KEYS_PER_DAY, Exits.KEY_PRICE if kl > 0 else -1, ExitModels.HATCH, func(): Exits.buy_key(), "have %d%s" % [int(Save.d["items"].get("rift_key", 0)), "" if kl > 0 else "  ·  sold out today"]])
 		"Wear":
 			var owned: Array = Save.d.get("accs", [])
 			for a in Data.ACCS:

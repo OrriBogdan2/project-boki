@@ -5,7 +5,7 @@ extends RefCounted
 ##   Q   glove 1: its icon, a frame in its rarity colour, the cooldown sweep, the key cap
 ##   V   glove 2: the same
 ##   C   your Boki: its type badge in the type colour, the C ability's cooldown sweep, a thin ring
-##       for the bond meter (full = Merge ready on R), grey with a "down" mark while it's knocked out
+##       for the bond meter (full = Merge ready, Settings "ultimate"), grey with a "down" mark while it's knocked out
 ## Gloves never rank, so there are no pips. Reads the hunter and Boki through their own getters
 ## (Hunter.gear / gear_cd, Kin.runner, Kin.state, KinMerge.ready); draws on the HUD's canvas.
 

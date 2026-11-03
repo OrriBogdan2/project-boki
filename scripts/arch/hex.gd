@@ -45,7 +45,7 @@ static func tick(h: Hunter, _dt: float) -> void:
 		return
 	if not h.remote:
 		h.gliding = false
-		for k in ["fire", "sec", "sig", "ult", "dash", "gear1", "gear2", "kin_ab", "util1", "util2", "util3", "throw"]:
+		for k in ["fire", "sec", "sig", "ult", "dash", "gear1", "gear2", "kin_ab", "throw"] + UtilityBelt.KEYS:
 			if h.inp.has(k): h.inp[k] = false
 		h.inp["sec_hold"] = false
 	var c: Node3D = h.get_node_or_null("HexCritter")

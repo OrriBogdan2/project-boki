@@ -1,11 +1,14 @@
 class_name UtilityBelt
 extends RefCounted
-## The utility belt (docs/decisions/0005-equal-footing.md): three slots on keys 1, 2 and 3, each
+## The utility belt (docs/decisions/0005-equal-footing.md): four slots on keys 1 to 4, each
 ## holding one kind of item with charges. It replaces the old "kit" gear slot and the heal / armor
 ## kit keys. Items live in content/utility/*.json (name, icon, col, desc, use, cd, max charges per
 ## slot, bring[] = the most you can bring in by difficulty tier, price).
 ##
-## What a hunter holds: h.belt = three slots, each {} or {id, n, cd}; h.belt_free = {id: n} charges
+## Keys (Rift Keys, chest keys) are belt items too: one slot per key type, found in the match only,
+## never brought or sold (BeltKeys).
+##
+## What a hunter holds: h.belt = four slots, each {} or {id, n, cd}; h.belt_free = {id: n} charges
 ## issued to everyone (used first, never taken home). The belt is brought in (Equal), found in the
 ## match (pickups, chests), bought (shops) and lost on death (it goes in the deathbox, Life).
 ##
@@ -13,8 +16,8 @@ extends RefCounted
 ## returns how many fit; count(h, id), take(h, id, n), has_room(h, id) and press(h, slot) do the rest.
 ## Using an item (the effects) is UtilityUse.
 
-const SLOTS := 3
-const KEYS := ["util1", "util2", "util3"]
+const SLOTS := 4
+const KEYS := ["util1", "util2", "util3", "util4"]
 
 static var ALL: Dictionary = {}
 
@@ -49,9 +52,19 @@ static func ids() -> Array:
 static func is_item(id: String) -> bool:
 	return ALL.has(id)
 
-## The pickup kinds the match already used for the two basics ("armor" was the armor kit).
+## The pickup kinds the match already used ("armor" was the armor kit, "key" is a Rift Key).
 static func item_of(kind: String) -> String:
-	return "armor_kit" if kind == "armor" else kind
+	return String(OLD_KINDS.get(kind, kind))
+
+const OLD_KINDS := {"armor": "armor_kit", "key": "rift_key"}
+
+## Keys sit on the belt but are never brought in, bought or taken home.
+static func is_key(id: String) -> bool:
+	return bool(def(id).get("key", false))
+
+## The belt items a player can stock up on at home (everything but keys).
+static func stock_ids() -> Array:
+	return ids().filter(func(id): return not is_key(id))
 
 static func def(id: String) -> Dictionary:
 	return ALL.get(id, {})
@@ -75,7 +88,7 @@ static func bring_cap(id: String, tier: int) -> int:
 	return mini(max_of(id), int(b[clampi(tier, 0, b.size() - 1)]))
 
 static func empty() -> Array:
-	return [{}, {}, {}]
+	return [{}, {}, {}, {}]
 
 # ------------------------------------------------------------------ what a hunter holds
 ## The everyday issue: the same two tonics and two armor kits for everyone (content/rules/equal.json).
@@ -173,7 +186,7 @@ static func keepers(h) -> Dictionary:
 			continue
 		var id := String(s["id"])
 		var n := maxi(0, int(s["n"]) - int(h.belt_free.get(id, 0)))
-		if n > 0:
+		if n > 0 and not is_key(id):
 			out[id] = n
 	return out
 
@@ -188,8 +201,10 @@ static func clear(h) -> Array:
 	return out
 
 # ------------------------------------------------------------------ using it
-## Key 1, 2 or 3 (slot 0..2).
+## Key 1 to 4 (slot 0..3). Beside a belt item that doesn't fit, the press swaps this slot for it.
 static func press(h, i: int) -> void:
+	if BeltKeys.swap(h, i):
+		return
 	var s: Dictionary = h.belt[i]
 	var fb: String = KEYS[i]
 	if s.is_empty() or h.downed or h.out or h.riding:

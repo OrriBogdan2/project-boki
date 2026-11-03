@@ -83,7 +83,7 @@ var blight: BlightDir = null       # the Blight: its spawns, its scaling and wha
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
-var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "reload": false, "util1": false, "util2": false, "util3": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false, "kin_ab": false}
+var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "reload": false, "util1": false, "util2": false, "util3": false, "util4": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false, "kin_ab": false}
 var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
@@ -1124,8 +1124,6 @@ func _spawn_hunters() -> void:
 					at.y = world.ground_at(at.x, at.z)
 				if opts.has("zoom_hold"): set_meta("zoom_hold", float(opts["zoom_hold"]))
 				player.teleport(at)
-				if not opts.get("tutorial", false) and not opts.get("training", false):
-					player.rift_keys = int(Save.d["items"].get("rift_key", 0))     # your Rift Keys come with you (and go in your box if you die)
 				Equal.start(self, player)       # gloves, boots and utility from home, capped by tier; nothing else (equal.gd)
 				if player.kin:
 					_apply_treat(player.kin)
@@ -3215,12 +3213,8 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 		"gem": h.gems += int(round(float(p["v"]) * PerkOrbs.gem_mult(h)))
 		"seed": h.seeds[p["key"]] = int(h.seeds.get(p["key"], 0)) + int(p["v"])
 		"tonic", "armor": UtilityBelt.pickup(h, UtilityBelt.item_of(p["kind"]), 1)
+		"key", "chest_key": BeltKeys.picked(self, h, UtilityBelt.item_of(p["kind"]))
 		_: if UtilityBelt.is_item(String(p["kind"])): UtilityBelt.pickup(h, String(p["kind"]), int(p["v"]))
-		"key":
-			h.rift_keys += 1
-			if h == player:
-				hud.toast("+1 Rift Key: opens any rift hatch, quietly, any time", ExitModels.HATCH)
-				sfx("unlock", null, -6.0, 1.2)
 	if h == player:
 		sfx("pickup", null, -8.0, 1.0 + minf(0.4, h.gems * 0.004))
 		if p["kind"] == "seed":
@@ -3906,8 +3900,8 @@ func _gather_input() -> void:
 	if Input.is_action_just_pressed("base") and not paused and duel == null and not opts.get("arena", false):
 		pending_input["base"] = true
 	var slot_of := {"dash": "dash", "secondary": "sec", "signature": "kin", "ultimate": "ult"}      # (gloves don't rank)
-	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"], ["kin_ability", "kin_ab"]]:
-		if a[0] in ["util2", "util3"] and arena != null:
+	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["reload", "reload"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"], ["kin_ability", "kin_ab"]]:
+		if a[0] in ["util2", "util3", "util4"] and arena != null:
 			continue       # the Arena's 2-7 swap archetypes (and nothing wears out there)
 		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
 			continue       # right click takes your ping down while the map is up (and casts nothing over a window)
@@ -4384,7 +4378,7 @@ func step(dt: float) -> void:
 		if pending_input["base"]:
 			pending_input["base"] = false
 			player.start_base(base_target(player))
-		for k in ["dash", "jump", "sig", "reload", "util1", "util2", "util3", "ult", "sec", "gear1", "gear2", "skill", "swap", "kin_ab"]:
+		for k in ["dash", "jump", "sig", "reload", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap", "kin_ab"]:
 			if pending_input.get(k, false):
 				player.inp[k] = true
 				pending_input[k] = false
@@ -4432,6 +4426,7 @@ func step(dt: float) -> void:
 	_update_shots(dt)
 	_prof("shots")
 	_update_pickups(dt)
+	BeltKeys.tick(self)      # a full belt beside a key: the swap prompt (bots make room)
 	_update_wpicks(dt)
 	PerkOrbs.update(self, dt)
 	_update_gear_fx(dt)
@@ -5943,8 +5938,6 @@ func _finish() -> void:
 		r["armor_tier"] = player.armor_tier
 		r["belt"] = Equal.belt_home(player, result.get("extracted", false))
 		r["backpack"] = Backpacks.home_tier(player, result.get("extracted", false))
-		if not opts.get("tutorial", false):
-			r["rift_keys"] = player.rift_keys if result.get("extracted", false) else 0
 		r["stats"] = player.stats.duplicate()
 		# weapons, gloves and treasure: home to the armory if you made it out, else what stayed behind
 		if result.get("extracted", false):

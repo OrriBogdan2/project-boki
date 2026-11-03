@@ -183,8 +183,6 @@ func apply_result(r: Dictionary) -> Dictionary:
 			out["caught"].append(nk)
 	Equal.settle_belt(r)       # the utility you brought and found comes home with you, or is gone (equal.gd)
 	Backpacks.settle(r)        # and the backpack you wore out
-	if r.has("rift_keys"):
-		d["items"]["rift_key"] = int(r["rift_keys"])     # carried keys come home with you, or stay in your deathbox
 	var treat: String = d.get("treat", "")
 	d["treat"] = ""
 	# every kin you brought remembers the match

@@ -93,7 +93,7 @@ func fresh() -> Dictionary:
 		"ransom_log": [],     # what happened at the Ransom House, newest last
 		"armory": [],         # gear brought home (Loot items); see Econ
 		"arm_lvl": 0, "scrap": 0,
-		"belt_pick": ["tonic", "armor_kit", ""],   # the utility for the next expedition, one item per belt slot (Equal)
+		"belt_pick": ["tonic", "armor_kit", "", ""],   # the utility for the next expedition, one per belt slot (Equal)
 		"raid_belt": {},      # utility charges out on an expedition right now (put back if it never ended)
 		"loadout": {},        # what you take on the next expedition: slot -> armory uid
 		"valuables": {},      # treasure to sell, and Soul Embers

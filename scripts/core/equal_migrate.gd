@@ -6,6 +6,7 @@ extends RefCounted
 ##   smoke / spring pad / seeker / mending gloves   became utility items: charges in the stash
 ##   gloves and boots              stay (the second glove slot, V, starts empty in the loadout)
 ##   bought backpack levels        the backpack of that level (Backpacks), the levels below refunded
+##   Rift Keys in the stash        refunded at the market price (keys are found in the match only now)
 ## A one-time notice (data["equal_notice"], shown on the farm) lists everything that converted.
 ##
 ## The rate, per piece: gems = its full item value (Common 3, Fine 8, Rare 18, Epic 36, Legendary 70)
@@ -16,6 +17,7 @@ const KIT_IDS := ["field_kit", "magpie", "satchel", "spyglass", "tinker_roll"]
 const MOVED_IDS := ["smoke", "jump_pad", "scanner", "medkit"]       # gloves that became utility items
 const GEAR_VALUE := [3, 8, 18, 36, 70]                               # Loot.GEAR_VALUE, as it was
 const PACK_REFUND := [[120, 4], [260, 10], [450, 20]]  # what the three backpack upgrades cost [gems, scrap]
+const RIFT_KEY_PRICE := 140                              # what a Rift Key cost at the market
 const OLD_NAMES := {"field_kit": "Field Surgeon's Kit", "magpie": "Magpie Pouch", "satchel": "Wayfarer's Satchel",
 	"spyglass": "Brass Spyglass", "tinker_roll": "Tinker's Roll", "smoke": "Smoke Glove", "jump_pad": "Springpad Glove",
 	"scanner": "Seeker Glove", "medkit": "Mending Glove"}
@@ -120,11 +122,16 @@ static func migrate(data: Dictionary) -> Array:
 	data["gems"] = int(data["gems"]) + refund[0]
 	data["scrap"] = int(data["scrap"]) + refund[1]
 	data.erase("pack_lvl")
-	data["belt_pick"] = ["tonic", "armor_kit", ""]
+	# Rift Keys bought at the market: keys are found in the match only now, so they come back as gems
+	var old_keys := int(items.get("rift_key", 0))
+	items.erase("rift_key")
+	data.erase("key_buys")
+	data["gems"] = int(data["gems"]) + old_keys * RIFT_KEY_PRICE
+	data["belt_pick"] = ["tonic", "armor_kit", "", ""]
 	data["raid_belt"] = {}
 	# the notice
 	var lines: Array = []
-	if n_armor + n_kit + moved.size() + plvl > 0 or had_g1:
+	if n_armor + n_kit + moved.size() + plvl + old_keys > 0 or had_g1:
 		lines.append("Matches changed: everyone drops on equal footing now.")
 		lines.append("You keep your gloves and boots. Nothing was deleted:")
 		if n_armor + n_kit > 0:
@@ -140,6 +147,9 @@ static func migrate(data: Dictionary) -> Array:
 			if refund[0] > 0:
 				pack_line += "; the smaller upgrades refunded: %d gems, %d scrap" % [refund[0], refund[1]]
 			lines.append(pack_line + ".")
+		if old_keys > 0:
+			lines.append("%d Rift Key%s refunded: %d gems (keys are found in matches now)." % [old_keys,
+				"" if old_keys == 1 else "s", old_keys * RIFT_KEY_PRICE])
 		for i in mini(listed.size(), MAX_LISTED):
 			lines.append("  " + String(listed[i]))
 		if listed.size() > MAX_LISTED:

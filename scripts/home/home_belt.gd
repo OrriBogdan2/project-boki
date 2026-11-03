@@ -9,7 +9,7 @@ extends RefCounted
 static func choices() -> Array:
 	var out: Array = [""]
 	var iss: Dictionary = Equal.rules().get("issue", {})
-	for id in UtilityBelt.ids():
+	for id in UtilityBelt.stock_ids():
 		if int(iss.get(id, 0)) > 0 or Equal.stash_of(id) > 0:
 			out.append(id)
 	return out
@@ -35,7 +35,9 @@ static func slot_text(id: String, tier: int) -> String:
 
 ## "Utility belt" rows for the expedition panel: one per slot, ‹ › to change what it holds.
 static func rows(parent: VBoxContainer, reopen: Callable, tier: int) -> void:
-	parent.add_child(UI.section("Utility belt  (keys 1 2 3)"))
+	var first := Settings.key_cap(UtilityBelt.KEYS[0])
+	var last := Settings.key_cap(UtilityBelt.KEYS[UtilityBelt.SLOTS - 1])
+	parent.add_child(UI.section("Utility belt  (keys %s-%s)" % [first, last]))
 	var ch := choices()
 	for i in UtilityBelt.SLOTS:
 		var id := _pick_at(i)
@@ -74,7 +76,7 @@ static func _cap_text(tier: int) -> String:
 
 ## The armory's Utility tab: your stash, and the most each item can be brought at each difficulty.
 static func stash(v: VBoxContainer) -> void:
-	for id in UtilityBelt.ids():
+	for id in UtilityBelt.stock_ids():
 		var r := UI.hbox(10)
 		r.add_child(Icons.Glyph.new(UtilityBelt.icon_of(id), UtilityBelt.col_of(id), 26.0))
 		var info := UI.vbox(1)
@@ -90,7 +92,7 @@ static func stash(v: VBoxContainer) -> void:
 			caps.append(str(UtilityBelt.bring_cap(id, t)))
 		r.add_child(UI.label("brings up to " + " / ".join(caps), 12, UI.FAINT))
 		v.add_child(r)
-	var tip_text := "Pick what goes on keys 1 2 3 on the expedition board. Buy more at the market; what you find "
+	var tip_text := "Pick what goes on the belt on the expedition board. Buy more at the market; what you find "
 	tip_text += "and bring home is kept."
 	var tip := UI.para(tip_text, 12, UI.FAINT)
 	v.add_child(tip)

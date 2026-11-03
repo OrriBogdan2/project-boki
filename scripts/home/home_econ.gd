@@ -951,7 +951,7 @@ func _preview(it: Dictionary) -> Control:
 
 func _utility_n() -> int:
 	var n := 0
-	for id in UtilityBelt.ids(): n += Equal.stash_of(id)
+	for id in UtilityBelt.stock_ids(): n += Equal.stash_of(id)
 	return n
 
 func _treasure_n() -> int:
