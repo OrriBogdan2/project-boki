@@ -1,5 +1,5 @@
 # S2 status (second server session)
-Updated: 2026-11-03 08:02 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
+Updated: 2026-11-03 08:03 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (git time) ownership.
 
 ## Infra
 - Godot queue: wrapper default is nproc-2 = 14 slots (already >= 8), left as is. S1: no change needed.
@@ -29,7 +29,9 @@ Updated: 2026-11-03 08:02 UTC (git/server clock). Last INBOX_S2 handled: 08:00 (
 
 ## Pair 3: Tamsin + Dredge
 - Branch `ext/review-tamsin-dredge` = origin/main + ext/kitdata-moosh-tamsin + ext/kitdata-linwick-dredge (both unmerged kit data passes; merge notes: hero_zones.gd bridge() kept main's formatting + kitdata's colour arg; ashwick.json took kitdata's RMB row, which drops main's `refund: 0.25` on Cinder Shot (kitdata removed it per data), wiki regenerated). Health OK.
-- In progress: Tamsin 12, 13+28, 27, 35; Dredge 33, 36, 35, then 31 (shares the `CastHold` helper with Ostra 17; one copy, cherry-picked).
+- DONE (Opus): Tamsin 12 (skate only, air press starts skate on landing, ice plates, no long-dash pip), 28+13 (thrown spear from her hand at 0.16 s, 18 m/s, landing/detonation at 1.8 s, Rink Wall +50% travel and 4.5 s), 27 (no glide while sealed, Shift-out at full skate speed); Dredge 31 (CastHold, height held, 20% walk while hook flies), 33 (planted fist slam, exact cone telegraph, damage on the 0.38 s slam frame), 36 (30% walk charging / 20% firing), 35 both (dr_lunge/dr_pounce, tm_skate_go/tm_skate). rimewright combo 68/0, dredge combo 83/0, class-unlock 137/0, health OK. DEBT: rimewright_kit.gd ~970 lines, split Ice Spear next. Item 32 rows in progress (dash-flow-base merged).
+  **Shared change, S1 please note:** Hunter.dash_with (2-line wiring) skips the shared team-colour dash puff and ring for any kit with own_dash_trail(); that also removes the ring for Thief (Dancer), Gunslinger (Venator) and Mage (Vireo), in line with item 8.
+  Owner Qs (Tamsin/Dredge): Rimelock roots her (source), so "speed just before Shift" is 0; Shift-out starts at full skate speed instead: or should she slide on the ice while sealed? Rink Wall still stops when its middle reaches the cursor (range +50%): always slide full distance unless frozen with E? Dredge E: footage forward hop dropped so the telegraph is exact; want the hop back (telegraph moves with him)? Dredge's clawing hands partly hidden by gun/helmet top-down.
 
 ## Pair 4: Linwick + Moosh Moosh
 - Branch `ext/review-linwick-moosh` at 133a25c (same base as pair 3: main + both kitdata). In progress (Opus): Linwick 11, 19, 20, 35; Moosh Moosh 23, 24, 35.
