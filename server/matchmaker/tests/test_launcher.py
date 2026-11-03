@@ -36,7 +36,8 @@ class LauncherTest(unittest.TestCase):
     def test_version_probe(self):
         os.environ["FAKE_VERSION"] = "1.2.3"
         self.assertEqual(self.launcher.probe_version(), "1.2.3")
-        self.assertEqual(Launcher([sys.executable, "-c", "print('no version here')"], self.tmp.name).probe_version(), "")
+        silent = Launcher([sys.executable, "-c", "print('no version here')"], self.tmp.name)
+        self.assertEqual(silent.probe_version(), "")
         self.assertEqual(Launcher(["/nonexistent/server"], self.tmp.name).probe_version(), "")
 
     def test_start_writes_tokens_and_reports_ready_joins_and_exit(self):

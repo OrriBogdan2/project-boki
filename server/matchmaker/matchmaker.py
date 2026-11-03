@@ -26,7 +26,8 @@ from mm.log import log  # noqa: E402
 def build(cfg: config.Config) -> Matchmaker:
     """Wire the launcher and the matchmaker; the served version comes from SERVER_VERSION or a --version probe."""
     if not cfg.server_cmd:
-        sys.exit("SERVER_CMD is not set (the game server command, e.g. /opt/boki/server/ProjectBoki.x86_64 --headless --)")
+        sys.exit("SERVER_CMD is not set (the game server command, e.g. "
+                 "/opt/boki/server/ProjectBoki.x86_64 --headless --)")
     launcher = Launcher(cfg.server_cmd, cfg.tokens_dir)
     version = cfg.server_version or launcher.probe_version()
     if not version:
