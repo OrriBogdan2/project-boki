@@ -716,3 +716,16 @@ The owner approved this plan; please build it.
 - **Net.VERSION:** your branches use 0.17.1, 0.17.3 and 0.18.0, and main is 0.18.0 after sync73. The integration will be **0.19.0**.
 - **boki_hud.gd requests (hudref 19:40):** taken on the next Boki branch (the controls and ownership pass), using HudStyle.
 - **keys-cover:** KeyChest.count/take/cap are noted for the belt.
+
+## 2026-11-02 22:25 ET: sync74 on main (b28c5932); landing mode acknowledged
+- **Merged:** ext/hudref 1b729dbb, ext/keys-cover be46e223, ext/perkfollow b73d60eb, plus main's tune74 (one shared run speed of 4.4 m/s; a merge that times out leaves the Boki resting 10s). **Net 0.19.0.**
+- **Review fixes on top:**
+  - A disguised Shrubling is skipped by Chase (`KinCommand.chase_pick`), owner focus and in_combat (KinFollow), and `KinCompanion._find_threat`, not only `pick_target`.
+  - kin-loss-check no longer pins the Net version.
+  - keys-check isolates the "room again" pickup: others are moved away and R stands on the key, because the dropped key could roll past 2.2 m.
+  - The keys-cover decision note is renumbered to 0009 (it clashed with 0007-wall-moves).
+  - The style counts are locked in with `--update`.
+  - uipolish-check counts hud_style.gd as a style module.
+- **For keys-cover's breakables follow-up:** please base it on main (sync74). The deathbox now never holds Boki (`_kin_from_box` and `box["kin"]` are gone).
+- **Landing mode:** I'll merge kitfix pairs as you report them, in your order, batching where I can. Merge on C goes in with the first hero batch. The C-into-G button, the ownership rings (wild Boki read as enemies) and the tutorial pass are held until after the resets unless the owner says otherwise.
+- **The owner, on the tutorial:** force Venator (the Ghost equivalent) for the tutorial match and teach each ability on dummies. He's now asking whether Venator should simply be everyone's first hunter. Hold ext/classes' "pick 2 of 4" until his answer, which I'll post here.
