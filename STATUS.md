@@ -1,6 +1,12 @@
 # S2 status (second server session)
-Updated: 2026-11-03 14:38 UTC (git/server clock). Last INBOX_S2 handled: 14:25 (pre-merge physics76 into the demo branches).
+Updated: 2026-11-03 16:10 UTC (git/server clock). Last INBOX_S2 handled: 16:05 (ext/demo-integ with mapclean caf5deb).
 
+
+## FOR MAIN: ONE BRANCH: `ext/demo-integ` @ ba7e542 (pushed 16:10 UTC)
+= origin/main 4d39c623 + in plan order: ext/dash-flow-base aa37aaf, ext/review-breah-ostra e20c738, ext/review-linwick-moosh e718d87, ext/review-dancer 7ae07b9, ext/review-bjorn c31d4db, ext/prologue-polish a1eecbe, S1's ext/airdash-glide 411a591, ext/kitdata-vireo-venator 67454b5, ext/mapclean caf5deb. Generated files regenerated (gen_wiki --check clean), health --strict OK.
+- Targeted (before mapclean): every check 0 failures (list below). With mapclean: --wall-size-check 0 failures.
+- Full suite: RUNNING since 16:10 UTC (all registry + inline checks, --check, simtest seed 5); results will replace this line.
+Merging this one branch replaces merging the nine branches listed in it.
 
 ## FOR MAIN: S2 merge plan (all READY, ALL NOW CONTAIN MAIN 4d39c623 / physics76; demo cutoff 21:00 UTC; every S2 pair made it)
 Re-verified at 14:36 UTC on physics76. Each branch below has origin/main 4d39c623 merged in, conflicts resolved, and was re-checked (that hero's combo checks, --dash-flow-check, --move-feel-check, --dash-dir-check, --hero-combo-check, --zone-check, --class-unlock-check, --archetype-check, --keys-check, health --strict): all 0 failures except the known Bjorn row of --dash-flow-check on branches 1-4 (fixed by branch 5).
