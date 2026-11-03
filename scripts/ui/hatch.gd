@@ -1,7 +1,8 @@
 extends Node3D
 ## The first thing a new player sees after the prologue: one short card, then three eggs on a little
 ## island. Pick one, pick your second Hunter (Venator is already yours), knock on the shell until it
-## hatches, name what comes out and yourself, then head into the tutorial match together.
+## hatches, name what comes out and yourself, make yourself (CreatorPanel), then head into the
+## tutorial match together.
 
 ## The three starter eggs plus a mystery one. Names, tempers and blurbs come from each species'
 ## "egg" block in content/kin/<id>.json, so every egg is named for its element (Venom Egg, ...).
@@ -27,7 +28,7 @@ var cam: Camera3D
 var fx: Fx
 var eggs: Array = []          # {node, base, data}
 var chosen := -1
-var stage := "intro"          # intro (the card) | pick (eggs) | class (your second Hunter) | warm | hatching | name
+var stage := "intro"          # intro (the card) | pick (eggs) | class (your second Hunter) | warm | hatching | name | create (you)
 var card_box: Control
 var warmth := 0.0
 var warm_bar: Control
@@ -46,9 +47,8 @@ var egg_defs: Array = []      # EGGS with the mystery egg's species decided
 var look: Dictionary = {}
 var preview: Node3D
 var look_at_t := Vector3(0, 0.25, 0.5)
-var edit_only := false
-var create_box: Control
-var sub_lbl: Label        # opened from the menu just to change how you look
+var edit_only := false       # opened from the farm's menu just to change how you look
+var sub_lbl: Label
 var top_box: VBoxContainer    # the title and its line: centred, or over the preview while you make your hunter
 var cam_to := Vector3(0, 3.6, 6.4)
 
@@ -107,12 +107,12 @@ func _ready() -> void:
 		_show_card()
 	if "--hatch-pick" in OS.get_cmdline_user_args():
 		# test: straight to choosing an egg
-		if not Save.d.has("look"): Save.d["look"] = Models.default_look()
+		if not Save.d.has("look"): Save.d["look"] = PlayerLook.neutral()
 		_end_intro()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--hatch-auto="):
 			var i := int(a.substr(13))
-			if not Save.d.has("look"): Save.d["look"] = Models.default_look()
+			if not Save.d.has("look"): Save.d["look"] = PlayerLook.neutral()
 			_end_intro()
 			_pick(i); _pick(i)
 			if stage == "class":
@@ -335,10 +335,10 @@ func _end_intro() -> void:
 	if card_box: card_box.queue_free()
 	title.get_parent().visible = true
 	if edit_only or "--create" in OS.get_cmdline_user_args():
-		_show_create()
+		_show_creator(func(): Game.goto("home"))
 	else:
 		if not Save.d.has("look"):
-			Save.d["look"] = Models.default_look()      # (change it later: Settings, Change your look)
+			Save.d["look"] = PlayerLook.neutral()      # (the creator comes after the Boki is named)
 		cam_to = Vector3(0, 3.6, 6.4)
 		_show_pick()
 
@@ -414,121 +414,54 @@ func _chip_clicked(id: String) -> void:
 	starter_picks = ClassPick.toggle(starter_picks, id)
 	_show_class_pick(id)
 
-# ---- your hunter
-const LOOK_ROWS := [["race", "Race", Models.LOOK_RACES], ["gender", "Gender", Models.LOOK_GENDERS], ["body", "Body", Models.LOOK_BODIES], ["face", "Face", Models.LOOK_FACES],
-	["detail", "Details", Models.LOOK_DETAILS], ["skin", "Skin", Models.LOOK_SKIN], ["hair", "Hair", Models.LOOK_HAIRS], ["hair_col", "Hair colour", Models.LOOK_HAIR], ["outfit", "Outfit", Models.LOOK_OUTFITS]]
+# ---- you (CreatorPanel): right after the Boki is named, and from the farm's "Change your look"
+var creator: CreatorPanel
+var creator_then: Callable
+var preview_arch := ""        # "" shows you as yourself; a Hunter id shows you in its Mantle
 
-func _show_create() -> void:
+## The creator step. then: where to go once the look is saved.
+func _show_creator(then: Callable) -> void:
 	stage = "create"
-	if look.is_empty():
-		look = Models.clean_look(Save.d.get("look", {}))
-		for a in OS.get_cmdline_user_args():
-			if a.begins_with("--create-race="):   # test: open the creator on a race
-				look["race"] = int(a.substr(14)); look["skin"] = int(Models.RACES[int(look["race"])]["skin"])
-	look["hair"] = clampi(int(look.get("hair", 0)), 0, Models.hair_styles(int(look["race"])).size() - 1)
-	title.text = "Make your hunter"
+	creator_then = then
+	look = PlayerLook.clean(Save.d.get("look", {}))
+	title.text = "Make yourself"
+	if sub_lbl: sub_lbl.text = "Drag yourself (or hold A / D) to turn round. You can change this later at home."
 	_clear_bottom()
-	if create_box: create_box.queue_free()
-	_rebuild_preview()
 	for e in eggs: (e["holder"] as Node3D).visible = false
-	if sub_lbl: sub_lbl.text = "Drag your hunter (or hold A / D) to turn them round."
-	_top_over(0.73)       # over your hunter, clear of the tall creator card on the left
-	# framed to the hunter's height: a big Juggernaut (or a tall race) used to run off the top
+	if kin_node: kin_node.visible = false
+	_rebuild_preview()
+	_top_over(0.73)       # over you, clear of the creator card on the left
+	_frame_preview()
+	creator = CreatorPanel.make(look, ClassUnlock.open_ids())
+	creator.changed.connect(func(lk: Dictionary):
+		look = lk
+		_rebuild_preview())
+	creator.view_changed.connect(func(a: String):
+		preview_arch = a
+		_rebuild_preview()
+		_frame_preview())
+	creator.done.connect(_creator_done)
+	root_ui.add_child(creator)
+	creator.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
+	creator.offset_top += 46
+	creator.offset_bottom += 46       # clear of the title
+
+func _creator_done(lk: Dictionary) -> void:
+	Save.d["look"] = lk.duplicate(true)
+	Save.save_game()
+	Sfx.play("click")
+	if preview: preview.queue_free()
+	preview = null
+	creator.queue_free()
+	creator = null
+	stage = "done"
+	creator_then.call()
+
+## Frames the camera to the preview's height (a tall Warden used to run off the top).
+func _frame_preview() -> void:
 	var hk := clampf(_model_top(preview) / 1.6, 1.0, 1.8) if preview else 1.0
 	cam_to = Vector3(0, 1.5 * hk, 1.6 + 3.0 * hk)
 	look_at_t = Vector3(0.0, 0.9 * hk, 1.6)
-	var card := UI.card(UI.CARD, 14, 16)
-	card.custom_minimum_size = Vector2(500, 0)
-	create_box = card
-	var v := UI.vbox(8); card.add_child(v)
-	# the Hunter: who you are in a match (its silhouette, gear and weapon family always read true). Only
-	# the open ones are in the stepper (a new save has just its starter)
-	var cur_a := Arch.of_save()
-	var ar := UI.hbox(8)
-	var al := UI.label("Hunter", UI.T_BODY, UI.MUTED)
-	al.custom_minimum_size.x = 120
-	al.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	ar.add_child(al)
-	if ClassUnlock.open_ids().size() > 1:
-		ar.add_child(UI.icon_button("back", func(): _step_arch(-1), "Previous", 12.0))
-	var av := UI.label(Arch.name_of(cur_a), UI.T_BODY, Arch.color(cur_a), UI.semi); av.custom_minimum_size.x = 170
-	av.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	av.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ar.add_child(av)
-	if ClassUnlock.open_ids().size() > 1:
-		ar.add_child(UI.icon_button("next", func(): _step_arch(1), "Next", 12.0))
-	v.add_child(ar)
-	var ad := Arch.def(cur_a)
-	var wnames := " / ".join(Arch.weapons(cur_a).map(func(w): return String(Data.weapon_stats(w)["name"])))
-	var adl := UI.label("%s\n%s" % [wnames, String(ad.get("fantasy", ""))], UI.T_SMALL, UI.ACCENT_HI)
-	adl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	adl.custom_minimum_size.x = 380
-	var am := MarginContainer.new(); am.add_theme_constant_override("margin_left", 128); am.add_child(adl)
-	v.add_child(am)
-	for row in LOOK_ROWS:
-		var key: String = row[0]
-		var opts: Array = row[2]
-		if key == "hair":
-			opts = Models.hair_styles(int(look["race"]))    # each race has its own styles
-		var hr := UI.hbox(8)
-		var l := UI.label(row[1], UI.T_BODY, UI.MUTED); l.custom_minimum_size.x = 120
-		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		hr.add_child(l)
-		hr.add_child(UI.icon_button("back", func(): _step_look(key, -1, opts.size()), "Previous", 12.0))
-		var val := UI.label("", UI.T_BODY, UI.INK, UI.semi); val.custom_minimum_size.x = 170
-		val.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		var i := int(look[key])
-		if opts[0] is Color:
-			var sw := Panel.new(); sw.custom_minimum_size = Vector2(170, 26)
-			sw.add_theme_stylebox_override("panel", UI.frame(opts[i], 13, Color(1, 1, 1, 0.25)))
-			sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-			hr.add_child(sw)
-		else:
-			val.text = String(opts[i])
-			hr.add_child(val)
-		hr.add_child(UI.icon_button("next", func(): _step_look(key, 1, opts.size()), "Next", 12.0))
-		v.add_child(hr)
-		if key == "race":
-			var rd := UI.label(String(Models.RACES[int(look["race"])]["desc"]), UI.T_SMALL, UI.ACCENT_HI)
-			rd.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			rd.custom_minimum_size.x = 380
-			var rm := MarginContainer.new(); rm.add_theme_constant_override("margin_left", 128); rm.add_child(rd)
-			v.add_child(rm)
-	var nr := UI.hbox(8)
-	var nl := UI.label("Your name", UI.T_BODY, UI.MUTED); nl.custom_minimum_size.x = 120
-	nr.add_child(nl)
-	var ne := LineEdit.new(); ne.text = Save.d.get("name", "Hunter"); ne.max_length = 16; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	ne.text_changed.connect(func(t): Save.d["name"] = t.strip_edges() if t.strip_edges() != "" else "Hunter")
-	nr.add_child(ne)
-	v.add_child(nr)
-	var br := UI.hbox(10)
-	br.alignment = BoxContainer.ALIGNMENT_END
-	br.add_child(UI.ghost("Random", func():
-		look = Models.random_look()
-		_show_create(), 120, "swap"))
-	br.add_child(UI.primary("Looks good", func():
-		Save.d["look"] = look.duplicate()
-		Save.save_game()
-		Sfx.play("click")
-		if preview: preview.queue_free()
-		preview = null
-		if create_box: create_box.queue_free()
-		create_box = null
-		for e in eggs: (e["holder"] as Node3D).visible = true
-		if sub_lbl: sub_lbl.text = "Every Boki is different. It will remember how you treat it."
-		_top_over(0.5)
-		if edit_only or Save.d.get("tutorial", {}).get("hatched", false):
-			Game.goto("home")
-			return
-		stage = "pick"
-		title.text = "Choose your first Boki"
-		cam_to = Vector3(0, 3.6, 6.4)
-		_show_pick(), 200))
-	v.add_child(br)
-	root_ui.add_child(card)
-	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
-	card.offset_top += 46; card.offset_bottom += 46       # clear of the title
 
 ## The highest point of a model (its meshes' bounds), in world metres.
 func _model_top(n: Node3D) -> float:
@@ -548,36 +481,18 @@ func _top_over(x_frac: float) -> void:
 		top_box.anchor_left = x_frac
 		top_box.anchor_right = x_frac
 
-## Steps through the open Hunters; the weight and weapon follow it.
-func _step_arch(d: int) -> void:
-	var ids := ClassUnlock.open_ids()
-	var i := posmod(ids.find(Arch.of_save()) + d, ids.size())
-	var a := String(ids[i])
-	Save.d["arch"] = a
-	Save.d["cls"] = Arch.weight(a)
-	Save.d["weapon"] = Arch.signature(a)
-	Sfx.play("hover", null, -6.0)
-	_show_create()
-
-func _step_look(key: String, d: int, n: int) -> void:
-	look[key] = posmod(int(look[key]) + d, n)
-	Sfx.play("hover", null, -6.0)
-	if key == "race":
-		# each race starts in its own colouring; you can still change the skin after
-		look["skin"] = int(Models.RACES[int(look["race"])]["skin"])
-		look["hair"] = 0      # ... and its own head styles: start on its first one, keep the colour
-		look["hair_v"] = 2
-	_show_create()
-
 var preview_yaw := PI
 var preview_anim: HunterAnim
+## You on the dais: yourself (with your Hunter's weapon), or in the Mantle you're looking at.
 func _rebuild_preview() -> void:
 	if preview:
 		preview_yaw = preview.rotation.y
 		preview.queue_free()
-	var pa := Arch.of_save()
-	look.erase("arch")      # the class's gear is never part of the look
-	preview = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(pa, Data.class_of_save(), String(Save.d.get("weapon", ""))), "", look, pa)
+	var pa := preview_arch if preview_arch != "" else Arch.of_save()
+	var cls := Arch.weight(pa)
+	var wid := Arch.signature(pa) if preview_arch != "" else Arch.weapon_for(pa, cls, String(Save.d.get("weapon", "")))
+	var shown := look if preview_arch != "" else MantleLook.at_home(look)
+	preview = Models.hunter(cls, Data.TEAM_COLORS[0], wid, "", shown, pa)
 	preview.position = Vector3(0.8, 0, 1.6)
 	preview.rotation.y = preview_yaw
 	add_child(preview)
@@ -717,7 +632,8 @@ func _process(delta: float) -> void:
 		if ship.position.x > 60.0: ship.position.x = -60.0
 	if stage == "create":
 		cam.look_at(look_at_t)
-		if preview and not (get_viewport().gui_get_focus_owner() is LineEdit):
+		var focus := get_viewport().gui_get_focus_owner()
+		if preview and not (focus is LineEdit or focus is Slider):
 			preview.rotation.y += (Input.get_axis("left", "right")) * delta * 2.5
 		# the preview stands at ease (breathing, shifting its weight, glancing round); drag it to turn
 		# it (see _unhandled_input)
@@ -832,6 +748,9 @@ func _show_name() -> void:
 	ne.select_all()
 
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
+	if stage != "name":
+		return         # (Enter in both name boxes, or a second click)
+	stage = "named"
 	var rec := Save.new_kin(sp_id, kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id))
 	rec["trust"] = 55.0
 	Save.remember(rec, "hatched", "hatched from an egg you chose")
@@ -844,6 +763,10 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	Save.d["tutorial"]["hatched"] = true
 	Save.save_game()
 	Sfx.play("click")
+	_show_creator(func(): _head_out(tutorial))
+
+## Off into the tutorial match with your new Boki, or straight to the farm.
+func _head_out(tutorial: bool) -> void:
 	if tutorial:
 		Game.start_match({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0})
 	else:
