@@ -252,7 +252,7 @@ func _breah() -> void:
 		var walk_stopped := float(walk["t"]) < 0.0 and float(walk["peak"]) < 0.1
 		if team == P.team:
 			var over := not near_side or B.pos.y >= top - 0.1
-			ok("rock (owner 23:55, data): an ally walking into his rock is stopped, jumping against it hops onto it",
+			ok("rock (the data, the owner's 23:55 answer): an ally walking into his rock is stopped, jumping hops on",
 				walk_stopped and over, "walk cross %.2f peak %.2f, jump peak %.2f, y %.2f top %.2f" % [
 					float(walk["t"]), float(walk["peak"]), jump_peak[0], B.pos.y, top
 				])

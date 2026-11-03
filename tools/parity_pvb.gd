@@ -249,7 +249,8 @@ func _tarek_audit(m: Match, P: Hunter, K: DolmKit, home: Vector3) -> void:
 	K.cd["e"] = 0.0
 	K.use_e()
 	step(m, 0.5)
-	var ally: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, home + Vector3(0, 0, -8), {"arch": "none"})
+	var at := home + Vector3(0, 0, -8)
+	var ally: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, at, {"arch": "none"})
 	for w in K.my_rocks():
 		w["by"] = ally
 	K.shield_stacks = 0
