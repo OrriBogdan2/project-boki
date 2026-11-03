@@ -58,6 +58,10 @@ const ANIM_DEMO := {
 	"bul_recall": ["bulwark", "tower_shield", [0.98, 1.05, 1.12, 1.2, 1.3, 1.5]],
 	"bul_smash_wind": ["bulwark", "tower_shield", [0.5, 0.7, 0.9, 1.1, 1.4, 1.7]],
 	"bul_smash": ["bulwark", "tower_shield", [1.1, 1.2, 1.25, 1.3, 1.4, 1.65]],
+	"bul_smash_late": ["bulwark", "tower_shield", [1.75, 1.97, 2.03, 2.1, 2.2, 2.45]],
+	"bul_launch": ["bulwark", "tower_shield", [1.68, 1.74, 1.8, 1.88, 1.98, 2.15]],
+	"bul_launch_glide": ["bulwark", "tower_shield", [1.68, 1.76, 1.86, 1.98, 2.15, 2.5]],
+	"bul_ult_walk": ["bulwark", "tower_shield", [0.75, 0.92, 1.25, 1.45, 1.65]],
 	"bul_whirl": ["bulwark", "tower_shield", [0.5, 0.58, 0.7, 0.76, 0.84, 1.0]],
 	"bul_charge": ["bulwark", "tower_shield", [0.7, 0.75, 0.82, 0.9, 1.0, 1.2]],
 	"bul_short": ["bulwark", "tower_shield", [0.85, 0.92, 0.98, 1.05, 1.15, 1.35]],
@@ -397,6 +401,8 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 			_anim_hero(A, P, mv, t, dt)
 		"pin_ult_cast", "pin_ult_nock", "pin_ult_loose", "pin_ult_final", "bul_ult_wind", "bul_ult_slam":
 			_anim_ult(P, mv, t, dt)
+		"bul_smash_late", "bul_launch", "bul_launch_glide", "bul_ult_walk":
+			_anim_bjorn(A, P, mv, t, dt)
 
 ## The scripted input for the Archer's and Bulwark's kit moves (the accuracy pass).
 static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> void:
@@ -503,15 +509,64 @@ static func _anim_ult(P: Hunter, mv: String, t: float, dt: float) -> void:
 			(K as ArcherKit).ult.left = 1
 	P.inp["fire"] = mv.begins_with("pin_ult_") and mv != "pin_ult_cast" and t > 0.5 and t < 0.6
 
+## Bjorn's owner-review strips (#48, #49): a full swing let go after the perfect window, one let go in it, one
+## in it at an island's edge (it carries him over and he glides), and Faultline cast with him walking off
+## across the lane after the plant.
+static func _anim_bjorn(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> void:
+	P.ak.res = 0.0
+	if mv in ["bul_smash_late", "bul_launch"]:
+		if _at(t, dt, 0.1):
+			P.teleport(P.pos + Vector3(-1.0, 0, 3.0))      # a lane south of the dummy: the travel reads clear of it
+			A.home = P.pos
+		P.inp["aim"] = P.pos + Vector3(8.0, 0.9, 0)
+	match mv:
+		"bul_smash_late": P.inp["fire"] = t > 0.4 and t < 1.95
+		"bul_launch": P.inp["fire"] = t > 0.4 and t < 1.7
+		"bul_launch_glide":
+			if _at(t, dt, 0.1):
+				P.teleport(_edge_spot(A.m, P.pos))
+				A.home = P.pos
+			P.inp["aim"] = P.pos + Vector3(8.0, 0.9, 0)
+			P.inp["fire"] = t > 0.4 and t < 1.7
+		"bul_ult_walk":
+			_anim_ult(P, "bul_ult_wind", t, dt)
+			P.inp["move"] = Vector2(0, 1) if t > 0.5 else Vector2.ZERO
+
+## A spot 2.5 m back from an island's east edge (flat ground behind, the abyss in front), nearest `near`.
+static func _edge_spot(m: Match, near: Vector3) -> Vector3:
+	var W: World = m.world
+	var best := near
+	var best_d := INF
+	for z in range(4, W.h - 4):
+		for x in range(8, W.w - 12):
+			var lv := int(W.level[W.idx(x, z)])
+			var ok := true
+			for dz in range(-2, 3):
+				for dx in range(-5, 11):
+					var i := W.idx(x + dx, z + dz)
+					var want_ground := dx <= 0
+					if (W.kind[i] == World.T_GROUND) != want_ground or (want_ground and int(W.level[i]) != lv):
+						ok = false
+						break
+				if not ok:
+					break
+			var q := Vector3(x - 2.0, lv * World.LEVEL, z + 0.5)
+			if ok and q.distance_to(near) < best_d:
+				best = q
+				best_d = q.distance_to(near)
+	return best
+
 ## One frame of the strip: a square round the hunter (--strip-w=<px> widens it toward the dummy, east, so a
-## shot's flight and impact fit, and the frames then stack top to bottom); the last one writes the strip, at
+## shot's flight and impact fit, and the frames then stack top to bottom; --strip-fixed holds it on the spot
+## the move started from, so the hunter's travel shows); the last one writes the strip, at
 ## most STRIP_MAX_W wide, and quits.
 static func _grab(A: Arena, P: Hunter, last: bool) -> void:
 	var m := A.m
 	var img := m.get_viewport().get_texture().get_image()
 	var cam := m.get_viewport().get_camera_3d()
 	var c := Vector2(img.get_width() * 0.5, img.get_height() * 0.5)
-	if cam: c = cam.unproject_position(P.position + Vector3(0, 0.9, 0))
+	var anchor := A.home if "--strip-fixed" in OS.get_cmdline_user_args() else P.position
+	if cam: c = cam.unproject_position(anchor + Vector3(0, 0.9, 0))
 	var S := 300
 	var wide := S
 	for a in OS.get_cmdline_user_args():
