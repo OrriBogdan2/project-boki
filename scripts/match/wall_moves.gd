@@ -7,7 +7,7 @@ extends RefCounted
 ## wall at an angle with speed in the air (a dash, a glide, a boosted jump) rebounds you off it;
 ## head-on you just stop, as ever, and a jump there kicks.
 
-const KICK_RISE := 0.9          # m of extra jump height, about one terrace (World.LEVEL 0.8)
+const KICK_RISE := 0.8          # m of extra jump height: one terrace (World.LEVEL)
 const KICK_PRESS := 0.4         # keys this far into the wall (dot, ~66 degrees) climb it
 const KICK_AWAY := 0.4          # keys this far away from the wall (dot) push off it
 const KICK_KEYS_MIN := 0.3      # stick deflection that counts as pressing a direction

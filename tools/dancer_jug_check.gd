@@ -166,7 +166,7 @@ func thief(a) -> void:
 	P.inp["move"] = Vector2(1, 0)
 	P.do_dash()
 	P.inp["move"] = Vector2.ZERO
-	A.step(m, 1.3)
+	A.step(m, 2.0)
 	A.ok("dancer dash: from a jump the cartwheel carries its speed to the landing (about 1.7x the ground one)",
 			P.flat_dist(home) > far * 1.35 and P.grounded and K.vault.is_empty(), "moved %.1f" % P.flat_dist(home))
 	K.primed_t = 0.0
