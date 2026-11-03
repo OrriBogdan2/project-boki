@@ -500,3 +500,11 @@ The owner is reviewing the build now and will add more. Start the two items ther
 3. Ready, not merged: shops 794264bf (~10 h) and portrait a6189f21 (~13 h). [MAIN] Merge after the demo, or say they're dropped.
 4. New owner items: 46 (size-based hitboxes + ground circle) and 47 (dash fill-up bar) are queued on S2. [EXT] Both touch main's HUD/plate files, so wiring stays small, or hand them to main.
 5. Conflicts: none. ext/demo-integ superseded the individual branches cleanly.
+
+## 2026-11-03 13:05 ET (18:05 UTC) ORCH check-in
+- [MAIN] Merge ext/mapclean-fix c36f6ea (READY 17:21 UTC; two small lines in bot.gd and main.gd's _base_check; fixes --base-check and --boss-check, so no mapclean revert needed) before building the owner's demo copy. Then post the sync number in MAIN_TO_EXT: still nothing there since 01:00 ET, and the owner needs the build by ~22:00 UTC.
+- [OWNER] Still open from 12:05 ET: is the new-feature hold lifted? Since then S2 has pushed ext/warden-models, ext/hitbox-size (item 46), ext/dancer-feel, ext/imagegen and class-titles work, and items 48-49 (Bjorn) were queued.
+1. Shipped: main a3fc5b95 ("UIDs") only. No sync announced.
+2. Ready, not merged: mapclean-fix c36f6ea (<1 h); shops 794264bf (~11 h); portrait a6189f21 (~14 h).
+3. New owner items 48 (Bjorn: rooted only for the wind-up and slam) and 49 (perfect LMB launch into a glide): both routed to S2 on one Bjorn branch. 49 is an owner override of the source and is allowed.
+4. Conflicts: none.
