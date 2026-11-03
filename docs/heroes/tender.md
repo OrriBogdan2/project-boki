@@ -17,6 +17,21 @@ Body: a very small hunter (`body` in tender.json): model 0.74 of a medium, nothi
 
 Scaling: HP 145 (medium). Hearth Call heals 35 over 5s (7/s, about a quarter of a medium health bar); cooldown 46s against Hearthlight's 11s (source card 41.6 : 10). Ratios kept: an ember is 8, rising to about 11.6 at 5 Kindle (+45%; footage 64 -> 93). The seed burst is 32 (4x an ember). Hearthlight is 10 + 22 per squadmate. Cooldown ratio: Burrseed 8s against Hearthlight 11s (source about 7.2 : 10).
 
+## Parity pass (owner 18:45: LMB first, then the rest by distance from the source)
+Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Elluna), [footage] = briefs/hero-ref/mooshmoosh.md.
+
+| Slot | Source | Ours | Asserted (`--tender-combo-check`) |
+|---|---|---|---|
+| LMB cadence and reach | a shot every 0.4s (card); flies to max range past the cursor [footage] | 0.4s, the full 12m past the cursor | `mm LMB: a shot every 0.4 s ...`, `... flies its full range ...` |
+| LMB ramp, Empowered | more damage on each later hit; after not firing briefly the next shot is Empowered [data] | Kindle on the foe (+45% at 5); Empowered after 1s idle | `mm passive: Kindle ramps ...`, `mm LMB: after a pause ...` |
+| LMB animation and tracking | a straight-arm push from alternating hands, the torso unwinding 45-60 degrees; she strafes and backpedals with the torso on the cursor [footage 716.3-717.6s, 729.3-730.5s] | `mm_shot_r` / `mm_shot_l`: the torso turns 0.8 rad (46 degrees), a straight push; legs go with the movement, every ember leaves at the cursor as it swings round her | `mm LMB: each ember leaves at the cursor ...`, `... unwinds the torso ...` |
+| RMB | a small hop (about half her height, 0.3s) with a forward push of both arms [footage]; root after a delay [data] | `mm_seed`: the coil, a hop with a two-handed push; root 0.7s after it sticks | `mm RMB: ...` |
+| E | both arms straight up for about 0.3s [footage]; the zone follows her, recast throws it [data] | `mm_hearth`; follows her, recast throws it to the cursor | `mm E: ...` |
+| Shift / air dash | Elluna's numbers (see "Dashes: Elluna's numbers and ours") | copied: 3.6m / 0.2s, 13.3m / 0.95s, cooldowns 7s / 14s | `mm dashes: ...` |
+| X | channel a heal on an ally while walking, one hand raised [footage] | `mm_call` then `mm_call_hold`, walking freely | `--support-check`, care ult rows |
+
+Nothing in her LMB was off the source beyond what the earlier passes fixed; this pass adds the asserts.
+
 ## Small mechanics
 | Mechanic | Source | Footage confirms | Built | Check |
 |---|---|---|---|---|

@@ -372,6 +372,45 @@ func _free(m: Match) -> void:
 	await sc.main.get_tree().process_frame
 
 ## The shots in flight from P.
+## Elluna's Moon Shot (parity pass): held, a shot every 0.4 s (card) from alternating hands, each a straight-arm
+## push with a big torso unwind (footage: about +-45 degrees); she strafes freely and every ember leaves at the
+## cursor as it moves round her.
+func _moon_shot_parity(m: Match, P: Hunter, K: TenderKit) -> void:
+	var seen := {}
+	for s0 in _mine(m, P):
+		seen[s0["sid"]] = true
+	var times: Array = []
+	var worst := 0.0
+	var moves := {}
+	P.inp["fire"] = true
+	P.inp["move"] = Vector2(0, 1)
+	var t := 0.0
+	while t < 1.3:
+		var swing := Vector3(cos(t * 2.0), 0, sin(t * 2.0)) * 6.0
+		sc.aim_at(P, P.pos + swing)
+		step(m, 1.0 / 60.0)
+		t += 1.0 / 60.0
+		moves[K.anim_id] = true
+		for s1 in _mine(m, P):
+			if seen.has(s1["sid"]):
+				continue
+			seen[s1["sid"]] = true
+			times.append(t)
+			worst = maxf(worst, rad_to_deg(absf((s1["vel"] as Vector2).angle_to(Vector2(swing.x, swing.z)))))
+	P.inp["fire"] = false
+	P.inp["move"] = Vector2.ZERO
+	var gaps: Array = []
+	for i in range(1, times.size()):
+		gaps.append(float(times[i]) - float(times[i - 1]))
+	var cadence: float = gaps.reduce(func(a, g): return a + float(g), 0.0) / maxf(1.0, gaps.size())
+	ok(
+			"mm LMB: a shot every 0.4 s (card) from alternating hands while strafing",
+			absf(cadence - 0.4) < 0.03 and moves.has("mm_shot_r") and moves.has("mm_shot_l"),
+			"%d shots, %.2f s apart" % [times.size(), cadence])
+	ok("mm LMB: each ember leaves at the cursor as it swings round her (within 8 deg)", worst < 8.0, "%.1f deg" % worst)
+	var unwind := absf(float(KMovesCare.MOVES["mm_shot_r"]["keys"][2][1]["y"]))
+	ok("mm LMB: the push unwinds the torso about 45 degrees (footage)", unwind >= 0.7, "%.2f rad" % unwind)
+
 func _mine(m: Match, P: Hunter) -> Array:
 	return m.shots.filter(func(s): return s["by"] == P)
 
@@ -405,6 +444,7 @@ func tender() -> void:
 			K.stats["swirls"] >= 1 and K.lk().skins.size() >= 1 and K.anim_id in ["mm_shot_r", "mm_shot_l"],
 			"%s %d" % [K.anim_id, K.stats["swirls"]])
 	step(m, 0.6)
+	_moon_shot_parity(m, P, K)
 	# --- Kindle ramp and its foot glow; nodes stay pooled while firing
 	sc.aim_at(P, T.pos)
 	K.cd["e"] = 8.0
