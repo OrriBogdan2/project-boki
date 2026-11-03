@@ -3869,7 +3869,11 @@ func _gather_input() -> void:
 			player.inp["move"] = Vector2(best.x - player.pos.x, best.z - player.pos.z).normalized()
 	player.inp["aim"] = _mouse_aim()
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
-	player.inp["fire"] = Input.is_action_pressed("fire") and not paused and not (hud and hud.mouse_on_ui())
+	# a bow draw in hand ignores the mouse drifting over a panel: only the button coming up looses it
+	var over_ui: bool = hud != null and hud.mouse_on_ui() and player.draw_t < 0.0
+	player.inp["fire"] = Input.is_action_pressed("fire") and not paused and not over_ui
+	if paused and player.draw_t >= 0.0:
+		player.draw_t = -1.0           # a menu opened mid-draw: the draw is dropped, nothing is loosed
 	var map_up: bool = hud != null and hud.map_open()      # the map takes the mouse buttons
 	var on_panel: bool = hud != null and hud.mouse_on_panel()      # ... and so do the item windows under the cursor
 	if paused:
