@@ -47,7 +47,6 @@
 "semicolon": 11
 },
 "scripts/arch/kits/dolm_kit.gd": {
-"long_line": 1,
 "nested_ternary": 1
 },
 "scripts/arch/kits/dredge_kit.gd": {
@@ -69,7 +68,6 @@
 "semicolon": 1
 },
 "scripts/arch/kits/ostra_kit.gd": {
-"long_line": 1,
 "nested_ternary": 1
 },
 "scripts/arch/kits/rimewright_kit.gd": {
