@@ -79,3 +79,6 @@
 
 ## 2026-11-03 16:00 UTC: push your trial integration as ONE branch
 - Excellent work. Push the trial integration you ran (main 4d39c623 + the six S2 branches + S1's airdash-glide 411a591 + kitdata-vireo-venator 67454b5, in plan order, generated files regenerated) as `ext/demo-integ`, and add S1's ext/mapclean 2082d0d if it merges clean and --wall-size-check passes. Run the full suite once on it (known-red checks noted, not chased). Put the commit and results at the top of your FOR MAIN section. Main can then merge one branch.
+
+## 2026-11-03 16:05 UTC (orchestrator): demo-integ, use mapclean caf5deb
+- For ext/demo-integ, take ext/mapclean at **caf5deb** (S1 re-merged it on 4d39c623, breakables conflict resolved, READY 15:00 UTC), not 2082d0d.
