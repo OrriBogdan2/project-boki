@@ -912,7 +912,8 @@ def feet_forward(ob, rig, min_dot=0.8):
 def repaint(body, rules):
     """Recolours the body atlas's texels of faces picked in the fitted frame (box [x0, x1, y0, y1, z0, z1], a hue
     range [h0, h1] wrapping past 1, sat_min): Breaker's beard paint on the back of his neck to his skin. Keeps each
-    texel's value against the new colour (warm mode)."""
+    texel's value against the new colour (warm mode); sat_max / val_min pick pale texels (the rags' white fringe),
+    `flat` sets them to the colour outright."""
     import colorsys
     me = body.data
     img = None
@@ -951,8 +952,9 @@ def repaint(body, rules):
             sat = (mx - rgb.min(axis=1)) / np.maximum(mx, 1e-6)
             hue = np.array([colorsys.rgb_to_hsv(*c3)[0] for c3 in rgb]) if len(rgb) else np.zeros(0)
             hue_ok = (hue >= h0) & (hue <= h1) if h0 <= h1 else (hue >= h0) | (hue <= h1)
-            sel = hue_ok & (sat >= float(r.get("sat_min", 0.0)))
-            val = (mx[sel] / max(float(col.max()), 1e-3))[:, None]
+            sel = hue_ok & (sat >= float(r.get("sat_min", 0.0))) & (sat <= float(r.get("sat_max", 1.0))) & \
+                (mx >= float(r.get("val_min", 0.0)))
+            val = (mx[sel] / max(float(col.max()), 1e-3))[:, None] if not r.get("flat") else 1.0
             px[yy[sel], xx[sel], :3] = np.clip(col[None] * val, 0, 1)
             n += int(sel.sum())
         log("repaint %s: %d texels" % (r["colour"], n))
@@ -966,11 +968,21 @@ def stuck(specs, body, arm):
     each rides `bone` rigidly. specs: [{kind, bone, from, ray, dir, len, r}]."""
     from mathutils.bvhtree import BVHTree
     bvh = WP.body_bvh([body])
-    at = Atlas(2, 64)
+    def compass_face(u, v):
+        d = np.sqrt((u - 0.5) ** 2 + (v - 0.5) ** 2)
+        col = np.where((d < 0.36)[..., None], hexcol("efe6cf")[None, None], hexcol("b8903e")[None, None])
+        needle = (np.abs(u - 0.5) < 0.05) & (d < 0.3)
+        col = np.where((needle & (v > 0.5))[..., None], hexcol("b32a22")[None, None], col)
+        col = np.where((needle & (v <= 0.5))[..., None], hexcol("2c3e60")[None, None], col)
+        return col
+    at = Atlas(3, 64)
     cells = {"ice": at.cell("ice", ice_paint),
-             "kelp": at.cell("kelp", lambda u, v: hexcol("3f5a2a")[None, None] * (0.75 + 0.45 * v[..., None]))}
+             "kelp": at.cell("kelp", lambda u, v: hexcol("3f5a2a")[None, None] * (0.75 + 0.45 * v[..., None])),
+             "brass": at.cell("brass", flat("b8903e", 0.06, 5)),
+             "face": at.cell("face", compass_face),
+             "barnacle": at.cell("barnacle", lambda u, v: hexcol("cfd2cc")[None, None] * (0.7 + 0.3 * noise(u, v, 20.0, 4))[..., None])}
     out = []
-    for kind in ("icicle", "kelp"):
+    for kind in ("icicle", "kelp", "compass", "barnacle"):
         group = [sp for sp in specs if sp["kind"] == kind]
         if not group:
             continue
@@ -988,6 +1000,26 @@ def stuck(specs, body, arm):
             v0 = len(bld.v)
             if kind == "icicle":
                 spike(bld, base - d * r * 0.5, base + d * ln, r, 5, cells["ice"], "ice")
+            elif kind == "compass":
+                # a brass case with a cream face and a red needle, its face along the surface normal
+                nrm = np.array(hit[1][:])
+                bld.prism(base, base + nrm * ln, r, 16, cells["brass"], "brass", 0.0)
+                face0 = len(bld.v)
+                bld.prism(base + nrm * ln, base + nrm * (ln + 0.002), r * 0.86, 16, cells["face"], "face", 0.0)
+                upv = np.array([0.0, 0.0, 1.0]) - nrm * nrm[2]
+                upv /= max(np.linalg.norm(upv), 1e-6)
+                sidev = np.cross(nrm, upv)
+                fu0, fv0, fu1, fv1 = cells["face"]
+                for vi in range(face0, len(bld.v)):
+                    q = bld.v[vi] - base
+                    bld.uv[vi] = (fu0 + (fu1 - fu0) * (0.5 + 0.5 * float(q @ sidev) / r),
+                                  fv0 + (fv1 - fv0) * (0.5 + 0.5 * float(q @ upv) / r))
+                bld.torus(base + nrm * ln, nrm, r * 0.9, r * 0.12, 16, 4, cells["brass"], "brass", 0.0)
+            elif kind == "barnacle":
+                nrm = np.array(hit[1][:])
+                rings = [base - nrm * r * 0.3, base + nrm * r * 0.35, base + nrm * r * 0.6]
+                bld.tube(rings, [r, r * 0.8, r * 0.35], 7, *cells["barnacle"][0::2], *cells["barnacle"][1::2],
+                         "barnacle", [0.0] * 3, cap_end=True)
             else:
                 side = np.cross(d, [0.0, 1.0, 0.0])
                 side = side / max(np.linalg.norm(side), 1e-6) if np.linalg.norm(side) > 1e-6 else np.array([1.0, 0, 0])
@@ -1002,9 +1034,9 @@ def stuck(specs, body, arm):
             bones.append((sp["bone"], v0, len(bld.v)))
         if not bones:
             continue
-        ob = finish(bld, "Icicles" if kind == "icicle" else "Kelp")
+        ob = finish(bld, {"icicle": "Icicles", "kelp": "Kelp", "compass": "Compass", "barnacle": "Barnacles"}[kind])
         img = at.image("stuck_atlas")
-        material(ob, "ice" if kind == "icicle" else "cloth", "stuck", img)
+        material(ob, {"icicle": "ice", "kelp": "cloth", "compass": "metal", "barnacle": "skin"}[kind], "stuck", img)
         for bone, a, b in bones:
             g = ob.vertex_groups.get(bone) or ob.vertex_groups.new(name=bone)
             g.add(list(range(a, b)), 1.0, "REPLACE")
