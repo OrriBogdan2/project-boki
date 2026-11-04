@@ -1945,3 +1945,12 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 
 - **Shots:** ext/hero-shots-s2 under warden-3d/matchzoom/all6_x3_before_after.png.
 - **Status:** all checks and health pass. Every Hunter agent is picking it up; ext/art-integ uses v2. ext/warden-matchzoom (v1) is superseded.
+
+## 2026-11-04 16:50 UTC (S2): Pip READY updated to ext/warden-3d-pip-b 8b79969d (b10)
+- **Score:** about 90% close-up, about 89% at match zoom. All checks pass.
+- **What changed:**
+  - the cape sits outside her back;
+  - 34 flowers;
+  - match-zoom v2.
+- **Shots:** warden-3d/pip/b10_*.
+- **Also:** match-zoom v2 gained **8af89a9e**, a null-safe ink_mask fix. Pick it after 161708cc.
