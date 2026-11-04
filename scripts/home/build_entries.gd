@@ -88,7 +88,7 @@ func tab(tab_name: String) -> Array:
 			add_island_entries(out)
 		_:
 			for id in HomeLayout.CATALOG:
-				if String(HomeLayout.CATALOG[id]["cat"]) == tab and FarmUnlocks.open(id):
+				if String(HomeLayout.CATALOG[id]["cat"]) == tab_name and FarmUnlocks.open(id):
 					var iid: String = id
 					out.append(catalog_entry(id, func(): hb.take(iid)))
 	return out

@@ -53,6 +53,7 @@ const BASE_BIOME := {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Co
 
 func _init(home) -> void:
 	h = home
+	entries = BuildEntries.new(self)
 
 func L() -> Dictionary:
 	return HomeLayout.of(h._d())
@@ -1626,11 +1627,11 @@ func _set_sweep(on: bool) -> void:
 func open_menu(tag: String) -> void:
 	_close_menu()
 	var title := occ_name(tag)
-	var entries: Array = [{"label": "Move", "key": "", "cb": func(): pick_up_tag(tag)}]
+	var rows: Array = [{"label": "Move", "key": "", "cb": func(): pick_up_tag(tag)}]
 	if _tag_turns(tag):
-		entries.append({"label": "Rotate", "key": Settings.key_cap("rotate"), "cb": func(): rotate_placed(tag)})
+		rows.append({"label": "Rotate", "key": Settings.key_cap("rotate"), "cb": func(): rotate_placed(tag)})
 	if not tag.begins_with("b:"):
-		entries.append({"label": "Store", "key": Settings.key_cap("store"), "cb": func(): store_placed(tag)})
+		rows.append({"label": "Store", "key": Settings.key_cap("store"), "cb": func(): store_placed(tag)})
 	var colours: Array = []
 	var current := ""
 	if tag.begins_with("d:"):
@@ -1639,7 +1640,7 @@ func open_menu(tag: String) -> void:
 		if c.get("colour", false) or String(e["id"]) == "banner":
 			colours = HomeLayout.COLOURS
 			current = String(e.get("c", ""))
-	menu = BuildMenu.open(h.root_ui, h.get_viewport().get_mouse_position(), title, entries, colours, current,
+	menu = BuildMenu.open(h.root_ui, h.get_viewport().get_mouse_position(), title, rows, colours, current,
 		func(hex: String): paint_placed(tag, hex))
 
 func _close_menu() -> void:
