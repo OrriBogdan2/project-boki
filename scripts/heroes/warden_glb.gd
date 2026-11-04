@@ -43,8 +43,8 @@ const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
+const GUM_TAG := "gum"         # a bubble drawn with the gloss pass (gum_gloss.gdshader) instead of an ink shell
 const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline shell
-const NO_INK_TAGS := ["gum"]   # small round pieces an outline turns into a cartoon ball (Ryzz's gum bubble)
 ## The `void` slot is no lit surface but a window onto the Void (shaders/hero_void.gdshader: a drifting
 ## starfield over its painted colour, Ostra's coat tears); "<void>-<tag>" with a SOFT_TAGS tag also fades
 ## out toward its tip and edges (a body that dissolves into smoke: Ostra's wisp).
@@ -86,6 +86,7 @@ const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (Hunte
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
 static var _ink: ShaderMaterial  # the painted atlas's ink shell (INK_WIDTH), shared
+static var _gloss_m: ShaderMaterial
 static var _measuring := false  # building that neutral model: no .glb on it
 static var _variants = null     # art name -> the design variant the command line picks (variant())
 static var _look = null         # content/rules/warden_look.json, read once (look())
@@ -309,8 +310,7 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 				(mi as MeshInstance3D).set_surface_override_material(si, vm)
 				out.append(vm)
 				continue
-			var ink := (not slot in NO_INK or tag in INK_TAGS) and not tag in NO_INK_TAGS
-			var m := Models.toon(src.albedo_color if src else Color.WHITE, ink)
+			var m := Models.toon(src.albedo_color if src else Color.WHITE, not slot in NO_INK or tag in INK_TAGS)
 			# (a Meshy model's vertex colour holds the ink room, not baked AO)
 			m.set_shader_parameter("vertex_ao", false)
 			m.set_shader_parameter("surface", int(SLOTS.get(slot, 1)))
@@ -335,6 +335,8 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 				m.set_shader_parameter("emit", EMIT)
 				m.set_shader_parameter("emit_flicker", EMIT_FLICKER)
 				_emit_colour(m, arch)
+			if tag == GUM_TAG:
+				m.next_pass = _gloss()      # (a gum bubble: a glossy see-through skin over its toon pass, no ink)
 			var per_slot: Dictionary = (own.get("slots", {}) as Dictionary).get(slot, {})
 			var over: Dictionary = (own.get("painted", {}) as Dictionary).merged(per_slot, true)
 			for k in over:
@@ -372,6 +374,12 @@ static func _emit_colour(m: ShaderMaterial, arch: String) -> void:
 	var g: Dictionary = Arch.def(arch).get("model_glow", {}) if arch != "" else {}
 	if g.has("core"):
 		m.set_shader_parameter("emit_tint", Color(String(g["core"])))
+
+static func _gloss() -> ShaderMaterial:
+	if _gloss_m == null:
+		_gloss_m = ShaderMaterial.new()
+		_gloss_m.shader = load("res://shaders/gum_gloss.gdshader")
+	return _gloss_m
 
 static func _painted_ink() -> ShaderMaterial:
 	if _ink == null:

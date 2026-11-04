@@ -13,9 +13,12 @@ Each set has its own small atlas: flat colour cells (the loader wants every surf
 hair, a root-to-tip gradient. All in the fitted frame: Blender, +Z up, her front +Y, her right +X, soles on Z = 0.
 """
 import math
+import os
+import sys
 
 import bpy
 import numpy as np
+from mathutils import Matrix, Vector
 
 import warden_parts as WP
 
@@ -531,7 +534,7 @@ def bands(body, arm, rig, K, sp):
     px = np.ones((ATLAS, ATLAS, 4), np.float32)
     yy, xx = np.mgrid[0:ATLAS, 0:ATLAS]
     n = int(sp.get("stripes", 10))
-    st = ((xx / ATLAS * n + yy / ATLAS * float(sp.get("slant", 1.2))) % 1.0) < 0.5
+    st = ((xx / ATLAS * n + yy / ATLAS * float(sp.get("slant", 1.2))) % 1.0) < float(sp.get("yellow_k", 0.45))
     px[..., :3] = np.where(st[..., None], WP.hexcol(sp.get("yellow", "ffd21e"))[None, None],
                            WP.hexcol(sp.get("black", "151214"))[None, None])
     img.pixels = px.ravel()
@@ -564,6 +567,61 @@ def bands(body, arm, rig, K, sp):
     return ob
 
 
+def keyhole(body, arm, rig, K, sp):
+    """The corset's neon piping as thin glowing geometry (crisper than the atlas at every distance): the art's neon
+    pixels in `box` (Meshy frame, the front view's registration as emit_art) sampled on a `cell` grid, each cell a
+    small flat disc on the body's surface just off it, on the glow slot (the archetype's model_glow colour), rigid
+    on the hips."""
+    sys_path = os.path.dirname(os.path.abspath(__file__))
+    if sys_path not in sys.path:
+        sys.path.insert(0, sys_path)
+    import imgio
+    art = imgio.load(os.path.expanduser(sp["image"]))
+    ah, aw = art.shape[:2]
+    M = Matrix([body["meshy_to_fit"][i * 4:(i + 1) * 4] for i in range(4)])
+    k_px, c0, r0 = float(sp["px_per_m"]), float(sp["col_at"]), float(sp["row_at"])
+    x0, x1, z0, z1 = sp["box"]
+    cell = float(sp.get("cell", 0.005))
+    rgb = art
+    mx, mn = rgb.max(axis=2), rgb.min(axis=2)
+    d = np.maximum(mx - mn, 1e-6)
+    r_, g_, b_ = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+    hh = np.where(mx == r_, ((g_ - b_) / d) % 6.0, np.where(mx == g_, (b_ - r_) / d + 2.0, (r_ - g_) / d + 4.0)) / 6.0
+    ss = (mx - mn) / np.maximum(mx, 1e-4)
+    neon = np.zeros(mx.shape, bool)
+    for q in sp["hsv"]:
+        neon |= (hh >= q[0]) & (hh <= q[1]) & (ss >= q[2]) & (ss <= q[3]) & (mx >= q[4]) & (mx <= q[5])
+    bvh = WP.body_bvh([body])
+    bld = WP.Builder()
+    n = 0
+    r = float(sp.get("r", 0.0035))
+    for x in np.arange(x0, x1, cell):
+        for z in np.arange(z0, z1, cell):
+            ca, cb = int(c0 + x * k_px), int(c0 + (x + cell) * k_px)
+            ra, rb = int(r0 - (z + cell) * k_px), int(r0 - z * k_px)
+            win = neon[max(ra, 0):min(rb + 1, ah), max(ca, 0):min(cb + 1, aw)]
+            if win.size == 0 or win.mean() < float(sp.get("fill", 0.25)):
+                continue
+            p = M @ Vector((x + cell * 0.5, 0.0, z + cell * 0.5))      # (the front view: her front is +Y fitted)
+            hit = bvh.ray_cast((p.x, 1.0, p.z), (0.0, -1.0, 0.0))
+            if hit[0] is None:
+                continue
+            nrm = np.array(hit[1][:])
+            c = np.array(hit[0][:]) + nrm * float(sp.get("lift", 0.0015))
+            WP._disc(bld, c, nrm, r, "neon", (0, 0, 1, 1), sides=6, dome=0.1)
+            n += 1
+    ob = bld.object("Keyhole")
+    img = _atlas("keyhole_atlas", [sp.get("colour", "ff4fb4")])
+    _material(ob, "glow-keyhole", img)
+    _uv_flat(ob, bld, {"neon": 0})
+    g = ob.vertex_groups.new(name="hips")
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    ob.modifiers.new("Armature", "ARMATURE").object = arm
+    log("keyhole piping: %d discs, %d tris" % (n, sum(len(f) - 2 for f in bld.f)))
+    return ob
+
+
 def build(body, arm, rig, K, spec):
     """fit_warden's `scripted` hook: every piece in spec, as skinned meshes."""
     out = []
@@ -573,6 +631,8 @@ def build(body, arm, rig, K, spec):
         out.append(rods(body, arm, rig, K, spec["rods"]))
     if spec.get("bands"):
         out.append(bands(body, arm, rig, K, spec["bands"]))
+    if spec.get("keyhole"):
+        out.append(keyhole(body, arm, rig, K, spec["keyhole"]))
     if spec.get("gum"):
         out.append(gum(body, arm, rig, K, spec["gum"]))
     if spec.get("nose_ring"):

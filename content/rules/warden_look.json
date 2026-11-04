@@ -54,7 +54,7 @@
 			"hair": {
 				"top_light": 0.6,
 				"fres": 0.8,
-				"far_lift": 0.45,
+				"far_lift": 0.3,
 				"glow": 0.14,
 				"shadow_tint": [
 					0.88,
@@ -83,6 +83,9 @@
 				"sheen": 0.0,
 				"shade": 0.9
 			}
-		}
+		},
+		"no_ink": [
+			"gum"
+		]
 	}
 }

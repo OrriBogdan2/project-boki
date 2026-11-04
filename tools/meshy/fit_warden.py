@@ -1831,6 +1831,61 @@ def paint_art(ob, img, pa):
 spec_emit_atlas = []
 
 
+def net_paint(ob, img, nt):
+    """A fishnet over skin (Ryzz's thighs; the scan paints it as a tan blur): skin texels of faces in `box` (Meshy
+    frame) darkened along a diamond lattice in surface space, lines `line` m wide every `pitch` m on the two
+    diagonals of (x or y, z), to `colour`."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    me = ob.data
+    me.calc_loop_triangles()
+    uvl = me.uv_layers.active.data
+    co = np.array([v.co[:] for v in me.vertices])
+    x0, x1, z0, z1 = nt["box"]
+    pitch, line = float(nt.get("pitch", 0.018)), float(nt.get("line", 0.0035))
+    col = np.array(K.hexcol(nt.get("colour", "1c1418")), np.float32)
+    kk = float(nt.get("k", 0.85))
+    n = 0
+    for tri in me.loop_triangles:
+        P = co[list(tri.vertices)]
+        c = P.mean(axis=0)
+        if not (x0 <= c[0] <= x1 and z0 <= c[2] <= z1):
+            continue
+        m = me.materials[me.polygons[tri.polygon_index].material_index]
+        if m is None or not m.name.startswith("skin"):
+            continue
+        q = np.array([[uvl[li].uv.x * w, uvl[li].uv.y * h] for li in tri.loops])
+        lo = np.maximum(np.floor(q.min(axis=0)).astype(int) - 1, 0)
+        hi = np.minimum(np.ceil(q.max(axis=0)).astype(int) + 1, [w - 1, h - 1])
+        if (hi < lo).any():
+            continue
+        xs, ys = np.meshgrid(np.arange(lo[0], hi[0] + 1), np.arange(lo[1], hi[1] + 1))
+        t = np.stack([xs.ravel() + 0.5, ys.ravel() + 0.5], axis=1)
+        a_, b_, c_ = q
+        d = (b_[1] - c_[1]) * (a_[0] - c_[0]) + (c_[0] - b_[0]) * (a_[1] - c_[1])
+        if abs(d) < 1e-12:
+            continue
+        l1 = ((b_[1] - c_[1]) * (t[:, 0] - c_[0]) + (c_[0] - b_[0]) * (t[:, 1] - c_[1])) / d
+        l2 = ((c_[1] - a_[1]) * (t[:, 0] - c_[0]) + (a_[0] - c_[0]) * (t[:, 1] - c_[1])) / d
+        l3 = 1 - l1 - l2
+        ins = (l1 >= -0.02) & (l2 >= -0.02) & (l3 >= -0.02)
+        if not ins.any():
+            continue
+        pos = np.outer(l1[ins], P[0]) + np.outer(l2[ins], P[1]) + np.outer(l3[ins], P[2])
+        # (round the leg: its angle about the leg's own axis, so the net wraps the thigh, not just the front)
+        cx = np.where(pos[:, 0] > 0, float(nt.get("leg_x", 0.08)), -float(nt.get("leg_x", 0.08)))
+        u = np.arctan2(pos[:, 1], pos[:, 0] - cx) * float(nt.get("leg_r", 0.065))
+        on = np.zeros(len(pos), bool)
+        for dd in (pos[:, 2] + u, pos[:, 2] - u):
+            f = (dd / pitch) % 1.0
+            on |= f < line / pitch
+        ty, tx = t[ins, 1].astype(int), t[ins, 0].astype(int)
+        px[ty[on], tx[on], :3] = px[ty[on], tx[on], :3] * (1 - kk) + col * kk
+        n += int(on.sum())
+    img.pixels = px.ravel()
+    log("fishnet: %d texels" % n)
+
+
 def emit_attach(ob, img, mask, parts=()):
     """The emission mask (from emit_art, at the bake's size) down to the atlas's size, as every body material's
     emission texture: WardenGlb puts it on the toon shader's emit layer, in the archetype's model_glow colour."""
@@ -1962,6 +2017,8 @@ def main():
         pad(img, ids, int(spec.get("pad", 6)))
     for pa in spec.get("paint_art", []):
         paint_art(ob, img, pa)
+    if spec.get("fishnet"):
+        net_paint(ob, img, spec["fishnet"])
     emask = emit_art(ob, img, spec["emit_art"]) if spec.get("emit_art") else None
     head = None
     if "head" in spec:
@@ -1984,6 +2041,7 @@ def main():
         k = K.bone_head(rig, "thigh.L").z / (hip_mid.z - sole)
     m = Matrix.Scale(k, 4) @ turn @ Matrix.Translation(Vector((-hip_mid.x, -hip_mid.y, -sole)))
     transform(ob, m)
+    ob["meshy_to_fit"] = [x for row in m for x in row]     # (scripted pieces placed from the art's views)
     if head:
         transform(head, m)
     joints = {n: snap(ob, m @ p, spec.get("snap_r", 0.045), not spec.get("snap_y", True)) for n, p in joints.items()}

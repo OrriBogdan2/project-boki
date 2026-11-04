@@ -4,7 +4,7 @@
  "out": "art/wardens/ryzz/ryzz.glb",
  "blend": "~/meshy/ryzz/fit.blend",
  "turn": 180,
- "max_tris": 28500,
+ "max_tris": 26500,
  "floater_verts": 8,
  "snap_r": 0.045,
  "scale_joints": [
@@ -488,15 +488,15 @@
    ],
    "flick_every": 0,
    "streak_every": 5,
-   "sides": 6,
+   "sides": 8,
    "streak_w": 0.5,
    "body_len": 0.7,
    "v_k": 0.85,
    "ends": {
     "locks": 6,
-    "width": 0.052,
+    "width": 0.068,
     "thick": 0.85,
-    "sides": 7,
+    "sides": 8,
     "samples": 22,
     "body_len": 1.0,
     "v_k": 1.0,
@@ -563,12 +563,12 @@
   },
   "gum": {
    "r": 0.017,
-   "side": -0.038,
-   "below": 0.078
+   "side": -0.018,
+   "below": 0.076
   },
   "bands": {
    "h": 0.045,
-   "stripes": 9,
+   "stripes": 6,
    "at": [
     {
      "bone": "thigh.L",
@@ -599,6 +599,33 @@
      "rigid": "forearm.R"
     }
    ]
+  },
+  "keyhole": {
+   "image": "~/meshy/ryzz/in/front.png",
+   "px_per_m": 676.0,
+   "col_at": 715.4,
+   "row_at": 731.6,
+   "box": [
+    -0.2,
+    0.2,
+    0.2,
+    0.47
+   ],
+   "cell": 0.005,
+   "r": 0.0034,
+   "fill": 0.22,
+   "lift": 0.0015,
+   "hsv": [
+    [
+     0.8,
+     0.97,
+     0.05,
+     0.65,
+     0.9,
+     1.0
+    ]
+   ],
+   "colour": "ff4fb4"
   }
  },
  "smooth": {
@@ -866,11 +893,11 @@
     1.0
    ],
    "ramp": [
-    "2a2030",
-    "3a2e42",
-    "4a3c52",
-    "5e4e68",
-    "857694"
+    "342a3a",
+    "483c50",
+    "5c4e66",
+    "74657e",
+    "9a8ca4"
    ]
   },
   {
@@ -887,11 +914,11 @@
     1.0
    ],
    "ramp": [
-    "2a2030",
-    "3a2e42",
-    "4a3c52",
-    "5e4e68",
-    "857694"
+    "342a3a",
+    "483c50",
+    "5c4e66",
+    "74657e",
+    "9a8ca4"
    ]
   },
   {
@@ -1113,10 +1140,10 @@
     -0.07
    ],
    "ramp": [
-    "241416",
     "4a2c30",
     "8a5a5a",
-    "c08a84"
+    "c08a84",
+    "e0aa9c"
    ]
   },
   {
@@ -1192,5 +1219,19 @@
    ]
   ],
   "gain": 0.35
+ },
+ "fishnet": {
+  "box": [
+   -0.32,
+   0.32,
+   -0.3,
+   -0.075
+  ],
+  "pitch": 0.02,
+  "line": 0.0042,
+  "colour": "1a1216",
+  "k": 0.8,
+  "leg_x": 0.12,
+  "leg_r": 0.07
  }
 }
