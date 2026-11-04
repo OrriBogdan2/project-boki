@@ -50,3 +50,6 @@ Stage 2 round 3:
 - **Pigtails:** 18 rounder locks a side (no top spikes), each coiling round its own path over its lower half.
 - **Rods:** seated flush between her shoulder blades (the collar above doesn't push them off), leaning back.
 - **Stance:** her right hand on her hip, the left hanging. Body bake 30k triangles (44.1k in all).
+- Round 4: pink streaks through the upper pigtails (`streak_every`), the bunches 15% narrower, the scan's pink
+  highlights on her upper arms and shoulders painted as skin; the emission brighter and more saturated at the match
+  camera only (hero_toon `far_emit`, ryzz look 1.2), the metal (bands, copper) and corset lifted further there.

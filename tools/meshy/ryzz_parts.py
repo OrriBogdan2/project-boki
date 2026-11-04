@@ -254,7 +254,8 @@ def pigtails(body, arm, rig, K, sp):
                     tri = 2.0 * abs(((f - 0.75) / 0.25 * 1.5) % 1.0 - 0.5) - 0.5
                     p[i] = p[i] + side_v * tri * zz * 2 * min(1.0, (f - 0.75) * 8)
             w0 = float(sp.get("width", 0.024)) * rng.uniform(0.8, 1.2)
-            part = "lock" if k % 4 else "lock_dk"
+            se = int(sp.get("streak_every", 0))
+            part = "lock_pk" if se and k % se == 2 else ("lock" if k % 4 else "lock_dk")
             v0 = len(bld.v)
             _lock(bld, p, w0, w0 * float(sp.get("thick", 0.5)), off if flick else out, part)
             locks.append((p, v0, len(bld.v), flick))
@@ -262,12 +263,13 @@ def pigtails(body, arm, rig, K, sp):
     ob = bld.object("Pigtails")
     img = _atlas("pigtail_atlas", ["b87333", "8a5228"],
                  [[(0.0, "5f8fd4"), (0.5, "84b4ee"), (0.68, "c878d0"), (0.85, "f060b0"), (1.0, "ff7ec4")],
-                  [(0.0, "4c78bc"), (0.5, "6c9cdc"), (0.68, "b464bc"), (0.85, "e04c9e"), (1.0, "f46ab4")]])
+                  [(0.0, "4c78bc"), (0.5, "6c9cdc"), (0.68, "b464bc"), (0.85, "e04c9e"), (1.0, "f46ab4")],
+                  [(0.0, "e45aa8"), (0.35, "f078bc"), (0.6, "c870cc"), (0.85, "f060b0"), (1.0, "ff7ec4")]])
     mh = _material(ob, "hair-pigtail", img)
     mm = _material(ob, "metal-pigtail", img)
     for p in ob.data.polygons:
         p.material_index = mm if bld.part[p.vertices[0]] == "copper" else mh
-    _uv_flat(ob, bld, {"copper": 0}, {"lock": 0, "lock_dk": 1})
+    _uv_flat(ob, bld, {"copper": 0}, {"lock": 0, "lock_dk": 1, "lock_pk": 2})
     nb = int(sp.get("bones", 3))
     for side, locks in chains:
         falls = [lk for lk in locks if not lk[3]]

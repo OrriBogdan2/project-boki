@@ -49,6 +49,9 @@ uniform float top_light = 0.0;     // surfaces facing up (what the match camera 
 // a painted atlas (WardenGlb) at the match camera (~23 m): its colours this much brighter and richer, fading in
 // from 8 to 18 m away (close-ups keep the paint's own values)
 uniform float far_lift = 0.0;
+// the emission layer brighter and more saturated at the match camera (8 to 18 m away; a Warden's own look: Ryzz's
+// pink scar, charm and piping pop against her blacks at match zoom)
+uniform float far_emit = 0.0;
 // a painted atlas (WardenGlb) carries the art's own colours, and the scene's light leans cool: its ambient (Look:
 // c4cbe6, the biomes' lavender and blue) is about half the light on such a model and turned skin lilac. ambient_cut
 // takes the scene's ambient off (through AO, which only scales ambient light) and own_ambient puts a warm-neutral
@@ -182,7 +185,13 @@ void fragment() {
 		+ fcol * fr * fres * 0.55 + c * up * top_light * 0.18 * (1.0 - fog);
 	if (use_emit) {
 		float fl = vnoise(vec2(TIME * 7.0 + lpos.y * 5.0, lpos.x * 3.0 + lpos.z * 3.0));
-		EMISSION += emit_c * emit * (1.0 - emit_flicker * (1.0 - smoothstep(0.25, 0.6, fl)));
+		vec3 ec = emit_c;
+		if (far_emit > 0.0) {
+			float fe = far_emit * smoothstep(8.0, 18.0, length(VERTEX));
+			float el = dot(ec, vec3(0.3, 0.59, 0.11));
+			ec = max(mix(vec3(el), ec, 1.0 + fe * 0.5), vec3(0.0)) * (1.0 + fe);
+		}
+		EMISSION += ec * emit * (1.0 - emit_flicker * (1.0 - smoothstep(0.25, 0.6, fl)));
 	}
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
