@@ -1991,6 +1991,13 @@ def lengthen(ob, img, ln):
     k = float(ln["k"]) + (float(ln.get("k_back", ln["k"])) - float(ln["k"])) * back + float(ln.get("k_tail", 0.0)) * tail * back
     drop = (z0 - co[:, 2]) * k
     co[sel, 2] = np.maximum(co[sel, 2] - drop[sel], float(ln.get("floor", 0.12)))     # (the coat only)
+    fl = float(ln.get("flare", 0.0))
+    if fl > 0.0:
+        # (the hem flares out from the body's axis as it falls: the art's long coat swings wide below the knees)
+        rad = np.hypot(co[sel, 0], co[sel, 1])
+        k_out = 1.0 + fl * drop[sel] / np.maximum(rad, 0.05)
+        co[sel, 0] *= k_out
+        co[sel, 1] *= k_out
     me.vertices.foreach_set("co", co.ravel())
     me.update()
     log("lengthened the coat: %d vertices" % int(sel.sum()))
@@ -2131,6 +2138,12 @@ def main():
             parts.append(WP.hoses([ob], arm, [_rel(arm, h, ("path",)) for h in spec["hoses"]], spec["hose_colours"]))
     for pc in spec.get("pieces", []):
         parts.append(split_piece(ob, img, pc))
+    if spec.get("shears") or spec.get("lapel_needle"):
+        import hem_parts
+        if spec.get("shears"):
+            parts.append(hem_parts.shears(arm, spec["shears"]))
+        if spec.get("lapel_needle"):
+            parts.append(hem_parts.lapel_needle(arm, spec["lapel_needle"]))
     if spec.get("thimbles"):
         import hem_parts
         parts.append(hem_parts.thimbles(ob, arm, spec["thimbles"]))

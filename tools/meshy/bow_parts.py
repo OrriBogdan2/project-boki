@@ -139,8 +139,9 @@ def build_bow(height=1.25, depth=0.13, string_y=0.06, x=0.0):
 
     def sec(i):
         u = min(abs(dense[i][0]) / h, 1.05)
-        w = 0.022 * (1.0 - 0.55 * u) + 0.006
-        d = 0.016 * (1.0 - 0.5 * u) + 0.005
+        # (thick enough to hold a silhouette from the match camera: x1.4 the r2 limbs)
+        w = (0.022 * (1.0 - 0.55 * u) + 0.006) * 1.4
+        d = (0.016 * (1.0 - 0.5 * u) + 0.005) * 1.4
         return (w, d, 6)
     b.loft(pts, sec, "lacquer")
     # the hooked horn tips past the string's knot
@@ -171,7 +172,7 @@ def build_bow(height=1.25, depth=0.13, string_y=0.06, x=0.0):
     b.loft([c0 + Vector((-0.019, 0, 0)), c0 + Vector((-0.055, 0, 0))], lambda i: (0.03, 0.03, 12), "spool_thread")
     # the string, tip knot to tip knot
     knot = h * 0.97
-    b.loft([pt(-knot, 0.0), pt(knot, 0.0)], lambda i: (0.0095, 0.0095, 6), "string")
+    b.loft([pt(-knot, 0.0), pt(knot, 0.0)], lambda i: (0.012, 0.012, 6), "string")
     return b.obj()
 
 

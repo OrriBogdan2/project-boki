@@ -13,7 +13,7 @@ import bpy
 import numpy as np
 from mathutils import Vector
 
-COL = {"needle": ("metal", "5e6068"), "needle_dk": ("metal", "3a3c42"), "thread": ("glow", "e0180e")}
+COL = {"needle": ("metal", "c9ccd2"), "needle_dk": ("metal", "9a9ea6"), "thread": ("glow", "e0180e")}
 ATLAS = 128
 
 
@@ -197,4 +197,71 @@ def thimbles(body, arm, sp):
     ob.parent = arm
     ob.modifiers.new("Armature", "ARMATURE").object = arm
     print("HEMPARTS thimbles: %d on %s, %d tris" % (len(groups), sp.get("bone", "hand.R"), sum(len(f) - 2 for f in bld.f)), flush=True)
+    return ob
+
+
+COL.update({"shears": ("metal", "b8bcc4"), "shears_dk": ("metal", "4a4c52")})
+
+
+def shears(arm, sp):
+    """Tailor's shears hanging at her hip (the turnaround: at her right hip, the image's left in the front view):
+    two long tapering blades crossed at a pivot, two oval finger rings above it; rigid on the hips.
+    sp: at [x, y, z] (fitted frame: her right +X, front +Y), tilt (deg, the blades' lean outward), length."""
+    bld = _B()
+    at = np.array(sp["at"], float)
+    L = float(sp.get("length", 0.2))
+    tl = math.radians(float(sp.get("tilt", 12.0)))
+    down = np.array([math.sin(tl), 0.0, -math.cos(tl)])
+    side = np.array([math.cos(tl), 0.0, math.sin(tl)])
+    for s in (-1, 1):
+        # a blade: flat, tapering to its point from the pivot, a little apart from the other
+        tip = at + down * L + side * s * 0.006
+        mid = at + down * L * 0.5 + side * s * 0.01
+        bld.tube([at, mid, tip], [0.008, 0.006, 0.0008], 4, "shears")
+        # a finger ring above the pivot
+        rc = at - down * 0.04 + side * s * 0.022
+        ring = [rc + side * 0.018 * math.cos(a) - down * 0.022 * math.sin(a) for a in np.linspace(0, 2 * math.pi, 13)]
+        bld.tube(ring, [0.0035] * len(ring), 5, "shears_dk", cap=False)
+        bld.tube([at, at - down * 0.02 + side * s * 0.012], [0.004, 0.004], 5, "shears_dk")
+    return _finish(bld, arm, "Shears", sp.get("bone", "hips"))
+
+
+def lapel_needle(arm, sp):
+    """Her calling card (HEM_KIT): a red-threaded needle pinned through her left lapel, aslant; rigid on the hips."""
+    bld = _B()
+    a, b = np.array(sp["from"], float), np.array(sp["to"], float)
+    ax = (b - a) / np.linalg.norm(b - a)
+    bld.tube([a, a + (b - a) * 0.15, b], [0.0006, 0.0028, 0.0028], 6, "needle")
+    side = np.cross(ax, [0.0, 1.0, 0.0])
+    side /= np.linalg.norm(side)
+    th = [b, b + side * 0.01 - ax * 0.005, b + side * 0.016 - ax * 0.03 + np.array([0, 0, -0.02]),
+          b + side * 0.012 - ax * 0.05 + np.array([0, 0, -0.045])]
+    bld.tube(th, [0.0018] * len(th), 5, "thread")
+    return _finish(bld, arm, "LapelNeedle", sp.get("bone", "hips"))
+
+
+def _finish(bld, arm, name, bone):
+    me2 = bpy.data.meshes.new(name)
+    me2.from_pydata([tuple(x) for x in bld.v], [], bld.f)
+    me2.update()
+    names = []
+    for p in bld.part:
+        if p not in names:
+            names.append(p)
+    for nm in names:
+        me2.materials.append(_mat(nm))
+    lay = me2.uv_layers.new(name="UVMap")
+    for poly in me2.polygons:
+        part = bld.part[poly.vertices[0]]
+        poly.material_index = names.index(part)
+        poly.use_smooth = True
+        for li in poly.loop_indices:
+            lay.data[li].uv = _uv(part)
+    ob = bpy.data.objects.new(name, me2)
+    bpy.context.scene.collection.objects.link(ob)
+    vg = ob.vertex_groups.new(name=bone)
+    vg.add(list(range(len(me2.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    ob.modifiers.new("Armature", "ARMATURE").object = arm
+    print("HEMPARTS %s: %d tris" % (name, sum(len(f) - 2 for f in bld.f)), flush=True)
     return ob
