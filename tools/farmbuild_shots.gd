@@ -13,7 +13,7 @@ func _shot(name: String, caption: String) -> void:
 	await main.get_tree().create_timer(0.25).timeout
 	if hm:
 		hm._close_panel()      # the welcome card
-		if hm.day1_box: hm.day1_box.visible = false
+		if hm.guide and hm.guide.tracker: hm.guide.tracker.visible = false
 		await main.get_tree().process_frame
 		hm.set_process(false)      # (the hover card and the prompt come back every frame otherwise)
 		if hm.hover_box: hm.hover_box.visible = false

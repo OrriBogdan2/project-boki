@@ -1,12 +1,12 @@
 {
-	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Claire's dash is the held Skate (RimewrightKit.in_dash); she has no air dash at all (Shift in the air waits for the landing), so 'air' is listed as never in DashFlow's sight.",
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Claire's dash is the held Skate (RimewrightKit.in_dash); she has no air dash at all (Shift in the air waits for the landing), so 'air' is listed as never in DashFlow's sight. Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
 	"kit_owns": ["air"],
 	"dash": {
 		"ground": {
 			"lmb": {"mode": "fire", "carry": true, "variant": "beam", "source": "Data: Skate is a held mode, released to stop. Footage (0239-0245, 0285-0290): she fires the whole skate and the darts become straight thick beams. Ours: darts fly as beams at normal damage (data pass); the skate goes on."},
 			"rmb": {"mode": "fire", "carry": true, "source": "Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the spear aim and throw go on while she keeps skating."},
 			"e": {"mode": "fire", "carry": true, "source": "Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the Rink Wall's tell and slide start while she keeps skating."},
-			"x": {"mode": "cancel", "carry": false, "source": "Data: the ult makes her invulnerable inside a slowing zone; footage (ult f25-f55): she is rooted in the crystal. Ours: Rimelock ends the skate and roots her at once."},
+			"x": {"mode": "cancel", "carry": true, "source": "Data: the ult makes her invulnerable inside a slowing zone; footage (ult f25-f55): she is rooted in the crystal. Owner (18:20): skating into it keeps her momentum. Ours: Rimelock ends the skate and the skate's speed carries her on as the shell closes (x.carry_t 0.5 s, easing to a stop: 11.5 m/s gives 2.9 m), then she is rooted."},
 			"q": {"mode": "fire", "carry": true, "source": "No source glove; the skate is a held move, so a glove goes off from it like her abilities."}
 		},
 		"air": {
@@ -18,10 +18,17 @@
 		}
 	},
 	"into_dash": {
-		"lmb": {"mode": "fire", "carry": true, "variant": "beam", "source": "Footage: she starts skating while firing and keeps firing; the darts turn to beams. Ours: the same."},
-		"rmb": {"mode": "fire", "carry": true, "source": "Data: Skate can be held at any time. Ours: Shift during the spear aim or the throw's wind-up starts the skate and the throw still goes."},
-		"e": {"mode": "fire", "carry": true, "source": "Data: Skate can be held at any time. Ours: Shift during the wall's 0.2s tell starts the skate and the wall still erupts."},
-		"x": {"mode": "cancel", "carry": true, "source": "Data: reactivating ends Chilling Finale early. Owner item 27: Shift ends Rimelock (as X again would; a late press still cracks it open) and she skates straight out at full speed."},
-		"q": {"mode": "fire", "carry": true, "source": "No source glove; the skate starts and the glove's effect stays."}
+		"lmb": {"mode": "fire", "carry": true, "variant": "beam", "source": "Footage: she starts skating while firing and keeps firing; the darts turn to beams. Ours: the same.", "air": {"mode": "buffer", "reason": "owner item 12: she has no air dash; Shift in the air waits for the landing", "source": "No air dash in the source (owner item 12)."}},
+		"rmb": {"mode": "fire", "carry": true, "source": "Data: Skate can be held at any time. Ours: Shift during the spear aim or the throw's wind-up starts the skate and the throw still goes.", "air": {"mode": "buffer", "reason": "owner item 12: she has no air dash; Shift in the air waits for the landing", "source": "No air dash in the source (owner item 12)."}},
+		"e": {"mode": "fire", "carry": true, "source": "Data: Skate can be held at any time. Ours: Shift during the wall's 0.2s tell starts the skate and the wall still erupts.", "air": {"mode": "buffer", "reason": "owner item 12: she has no air dash; Shift in the air waits for the landing", "source": "No air dash in the source (owner item 12)."}},
+		"x": {"mode": "cancel", "carry": true, "source": "Data: reactivating ends Chilling Finale early. Owner item 27: Shift ends Rimelock (as X again would; a late press still cracks it open) and she skates straight out at full speed.", "air": {"mode": "buffer", "reason": "owner item 12: she has no air dash; Shift in the air waits for the landing", "source": "No air dash in the source (owner item 12)."}},
+		"q": {"mode": "fire", "carry": true, "source": "No source glove; the skate starts and the glove's effect stays.", "air": {"mode": "buffer", "reason": "owner item 12: she has no air dash; Shift in the air waits for the landing", "source": "No air dash in the source (owner item 12)."}}
+	},
+	"hold": {
+		"rmb": {
+			"ground": {"mode": "keep"},
+			"air": {"mode": "keep"},
+			"jump": {"mode": "keep"}
+		}
 	}
 }

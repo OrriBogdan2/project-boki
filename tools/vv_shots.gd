@@ -1,5 +1,5 @@
 extends RefCounted
-## --vv-shots --shots-dir=<dir> [--vv-hero=mage|gunslinger] [--vv-tag=v2/polish]: screenshots of Vireo's
+## --vv-shots --shots-dir=<dir> [--vv-hero=mage|gunslinger] [--vv-tag=v2/polish]: screenshots of Ryzz's
 ## and Vex's abilities in a live Arena match (run under xvfb with a renderer). Each moment is taken at
 ## the default gameplay zoom and again as a close-up crop round what it shows; every move also gets a
 ## 4-6 frame strip cropped round the hero (anticipation, release, follow-through, recovery). Files go
@@ -215,7 +215,7 @@ func _on_target() -> Vector3:
 func _above_target() -> Vector3:
 	return T.position + Vector3(0, 2.4, 0)
 
-# ------------------------------------------------------------------ Vireo
+# ------------------------------------------------------------------ Ryzz
 func _vireo() -> void:
 	await _vireo_run()
 	await _vireo_lmb()
@@ -348,7 +348,8 @@ func _vireo_dash() -> void:
 			"full",
 			"dash_run",
 			"Shift released: a lightning streak, the body a trail of her own gold-teal after-images"])
-	run.append([0.46, "full", "dash_arrive", "Shift arrival: a ring burst with spark needles"])
+	run.append([0.46, "full", "dash_arrive",
+			"Shift arrival: she re-forms with a dust puff (no ring or burst: the hits are along the way)"])
 	await _go(0.8, Callable(), run, 6.0)
 	# the base air dash (her own variant): a tumble with teal after-images in her silhouette
 	await _reset(6.0, 6.0)
@@ -430,16 +431,26 @@ func _venator() -> void:
 func _venator_lmb() -> void:
 	await _reset(8.0)
 	_aim(home + Vector3(3.0, 0, 0))
-	var hold_fire := func(_t: float): P.inp["fire"] = true
+	var string := func(tt: float): P.inp["fire"] = tt < 0.6
 	var marks := _strip("anim_lmb",
-			"LMB, one round: rest, the 0.03s shoulder kick with the muzzle flipped up, recovering, ready",
-			[0.005, 0.03, 0.06, 0.1, 0.118])
+			"LMB: shouldered in the aim crouch, a round's kick (gun up and back at 0.025s), back on the shoulder; "
+			+ "after the last round the rifle stays up a beat and he eases out",
+			[0.36, 0.385, 0.42, 0.47, 0.8, 1.15])
 	marks.append([0.31,
 			"full",
 			"lmb_aim",
-			"LMB: ember tracers through a near cursor out to full range, the bronze muzzle star"])
-	await _go(0.6, hold_fire, marks)
+			"LMB: ember tracers through a near cursor out to full range, the bronze muzzle star, the firing brackets"])
+	await _go(1.2, string, marks)
 	P.inp["fire"] = false
+	await _reset(8.0)
+	var run_fire := func(_t: float):
+		P.inp["fire"] = true
+		P.inp["move"] = Vector2(0, 1)
+	await _go(0.9, run_fire, _strip("anim_lmb_walk",
+			"LMB while walking: the upper body stays on the cursor, the legs keep walking (no crouch at a run)",
+			[0.3, 0.42, 0.54, 0.66, 0.78]))
+	P.inp["fire"] = false
+	P.inp["move"] = Vector2.ZERO
 	await _reset(7.0)
 	KitStatus.apply(T, "rat", 3.0)
 	var burst := func(tt: float): P.inp["fire"] = tt < 0.45
@@ -471,18 +482,18 @@ func _venator_rmb() -> void:
 	K.press_rmb()
 	var hold_r := func(_t: float): P.inp["sec_hold"] = true
 	var marks := _strip("anim_rmb_hold",
-			"RMB held: the spiked charge raised over his shoulder in the left hand, the rifle kept forward",
+			"RMB held: the spiked charge drawn low at his left hip, the torso turned a little away, the rifle forward",
 			[0.02, 0.06, 0.12, 0.5])
 	marks.append([0.5,
 			"full",
 			"rmb_aim",
-			"RMB held: the charge cocked by his head, a fixed lane with an arrow tip; the target in it marked"])
+			"RMB held: the charge low at his hip, a fixed lane with an arrow tip; the target in it marked"])
 	await _go(0.6, hold_r, marks)
 	P.inp["sec_hold"] = false
 	T.teleport(home + Vector3(8.5, 0, 0))
 	var throw := _strip("anim_rmb_throw",
-			"RMB throw: the overhand whip, the stretch at the release, follow-through, recover",
-			[0.01, 0.05, 0.1, 0.2, 0.45])
+			"RMB throw, the side toss: from the hip, the sidearm flick out at 0.05, across the body, back on the rifle",
+			[0.01, 0.05, 0.13, 0.25, 0.45])
 	throw.append([0.2,
 			"full",
 			"rmb_flight",

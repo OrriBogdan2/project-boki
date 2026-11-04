@@ -6,22 +6,22 @@
 	"personality": "A sinister, grinning jester who floats a little above the ground and plays with the dark.\nMenacing and gleeful, he treats every fight as a joke only he gets.",
 	"weight": "medium",
 	"color": "#7fe0d0",
-	"fantasy": "The lamplighter who floats. Pulls the fight to her, then lets it fall in.",
-	"silhouette": "the hovering lantern and the long trailing hem",
+	"fantasy": "The Void Jester who never touches the ground. Pulls the fight to him, then lets it fall in.",
+	"silhouette": "a floating jester in a three-tailed cap, his smoky tail trailing below",
 	"card": {
 		"role": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
 		"loop": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
-		"lmb": "Tether Lantern: quick orbs to full range; pause and the next one is a fast bright bolt that slows.",
+		"lmb": "Tether Lantern: quick orbs to full range; pause and the next one is a fast bright bolt that slows and goes through terrain.",
 		"rmb": "Shard Snap: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew.",
 		"e": "Brimseed: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew.",
 		"dash": "Lantern Trade: lob a lantern to the cursor and hover where you are; when it lands, everyone in its circle goes to your spot and you go to theirs.",
 		"passive": "Swell: your hits fill Swell (much faster on hunters); full, you are Swollen for 9s and everything grows. You float, so ground hazards pass you by.",
 		"weapons": {
-			"tether_lantern": "Quick orbs to full range; pause 1.4s and the next one is a fast bright bolt that slows."
+			"tether_lantern": "Quick orbs to full range; pause 1.4s and the next one is a fast bright bolt that slows and goes through terrain."
 		},
 		"x": "Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle."
 	},
-	"body": {"size": 0.9},
+	"body": {"size": 0.9, "build": 0.65, "legs": 1.8, "hit_r": 0.412},
 	"signature": "tether_lantern",
 	"no_hold": true,
 	"resource": {
@@ -57,11 +57,9 @@
 		"time": 1.8,
 		"time_swollen": 1.25,
 		"radius": 1.5,
-		"slow": 0.4,
-		"slow_t": 3.0,
 		"ally_shield": 26.0,
 		"ally_r": 3.0,
-		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 20% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle (foes slowed 40% for 3s). Swollen: 1.25s.",
+		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 20% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.",
 		"lob": 4.5,
 		"aim_max": 1.5,
 		"keep_h": 3.0,
@@ -121,7 +119,7 @@
 		"dmg_max_k": 3.0,
 		"burn": 8.2,
 		"burn_every": 0.5,
-		"desc": "Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, then pops by itself; press E again (from 0.3s) to pop it sooner. Damage 12.5 up to 3.5 times that by how long it grew. Swollen: larger and quicker.",
+		"desc": "Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, and waits there for you: press E again (from 0.3s) to pop it. Left unpopped 10s at full size, it fizzles out harmlessly. Damage 12.5 up to 3.5 times that by how long it grew. Swollen: larger and quicker.",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",
@@ -132,14 +130,14 @@
 		"min_recast": 0.3,
 		"drop": 0.25,
 		"tell_k": 0.68,
-		"linger": 0.5
+		"hold_full": 10.0
 	},
 	"x": {
 		"name": "Nightwell",
 		"short": "Well",
 		"icon": "blaze_mantle",
 		"col": "#b06bff",
-		"cooldown": 64.0,
+		"cooldown": 70.0,
 		"range": 10.0,
 		"tell": 1.0,
 		"time": 3.5,
@@ -148,7 +146,7 @@
 		"r_swollen": 5.1,
 		"tick_dmg": 0.16,
 		"pull": 12.0,
-		"desc": "Tap: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched. You are locked in the cast pose, unable to move, turn after the first 0.25s, or use anything else, from the press until it closes (a stun or knock frees you). Swollen: 5.1m wide. 64s."
+		"desc": "Tap: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched. You are locked in the cast while the dome fills (no moving, no turning after the first 0.25s, nothing else); when it opens you are free to move, fight or leave while it keeps pulling (a stun or knock frees you early). Swollen: 5.1m wide. 70s."
 	},
 	"order": [
 		"sec",
@@ -178,8 +176,8 @@
 		"dash": "Rank 3: recharge 9.5s -> 6.7s; allies beside you or at your landing get a 26 shield for 3s."
 	},
 	"tells": {
-		"half": "a ring of teal motes closes around her",
-		"full": "the lantern burns white and the hem lifts",
-		"dash_spent": "a pale ripple where she stood"
+		"half": "a ring of teal motes closes around him",
+		"full": "the lantern burns white and his ribbons lift",
+		"dash_spent": "a pale ripple where he stood"
 	}
 }

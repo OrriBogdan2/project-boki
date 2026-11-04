@@ -27,8 +27,8 @@ The lamplighter who floats. Stuns from range, drops a growing bomb on the stunne
 |---|---|
 | Body | 145 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Tether Lantern (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The lamplighter who floats. Pulls the fight to her, then lets it fall in. |
-| Silhouette | the hovering lantern and the long trailing hem |
+| Fantasy | The Void Jester who never touches the ground. Pulls the fight to him, then lets it fall in. |
+| Silhouette | a floating jester in a three-tailed cap, his smoky tail trailing below |
 | Resource | Swell (max 100) |
 
 ### Kit card
@@ -40,25 +40,25 @@ What the in-game kit card (K) says.
 | Loop | Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up. |
 | Passive: Swell | Swell: your hits fill Swell (much faster on hunters); full, you are Swollen for 9s and everything grows. You float, so ground hazards pass you by. |
 | Dash: Lantern Trade | Lantern Trade: lob a lantern to the cursor and hover where you are; when it lands, everyone in its circle goes to your spot and you go to theirs. |
-| LMB | Tether Lantern: quick orbs to full range; pause and the next one is a fast bright bolt that slows. |
+| LMB | Tether Lantern: quick orbs to full range; pause and the next one is a fast bright bolt that slows and goes through terrain. |
 | RMB: Shard Snap | Shard Snap: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew. |
 | E: Brimseed | Brimseed: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew. |
 | Hunter ultimate: Nightwell | Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle. |
-| Weapon: Tether Lantern | Quick orbs to full range; pause 1.4s and the next one is a fast bright bolt that slows. |
+| Weapon: Tether Lantern | Quick orbs to full range; pause 1.4s and the next one is a fast bright bolt that slows and goes through terrain. |
 
 ### Abilities in full
 
 **Swell (passive).** Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 9s, wrapped in a pink sphere: your seed grows larger and faster, Trade lands sooner, your Snap hits 44% harder. You float: lava, spore pods and other ground hazards pass you by.
 
-**Lantern Trade (dash, Shift, 9.5s cooldown).** Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 20% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle (foes slowed 40% for 3s). Swollen: 1.25s.
+**Lantern Trade (dash, Shift, 9.5s cooldown).** Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 20% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.
 
 **Shard Snap (RMB, 10s cooldown).**
 
 - *Tap:* A 0.32s wind-up, then one tight bundle of shards to 13m. It stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. Swollen: +44% damage. Rank 3: you speed up 11% on the cast and 22% on a hit, for 2s.
 
-**Brimseed (E, 10s cooldown).** Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, then pops by itself; press E again (from 0.3s) to pop it sooner. Damage 12.5 up to 3.5 times that by how long it grew. Swollen: larger and quicker.
+**Brimseed (E, 10s cooldown).** Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, and waits there for you: press E again (from 0.3s) to pop it. Left unpopped 10s at full size, it fizzles out harmlessly. Damage 12.5 up to 3.5 times that by how long it grew. Swollen: larger and quicker.
 
-**Nightwell (hunter ultimate, from level 6, 64s cooldown).** Tap: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched. You are locked in the cast pose, unable to move, turn after the first 0.25s, or use anything else, from the press until it closes (a stun or knock frees you). Swollen: 5.1m wide. 64s.
+**Nightwell (hunter ultimate, from level 6, 70s cooldown).** Tap: a pale dome of the well's exact size appears at the cursor (up to 10m away, on ground short of walls) and everyone sees it for 1.0s. Then the well opens for 3.5s, 3.6m wide: every foe inside, or who walks in, is stunned until it closes and drawn to its middle, taking a small hit every 0.1s. Allies are untouched. You are locked in the cast while the dome fills (no moving, no turning after the first 0.25s, nothing else); when it opens you are free to move, fight or leave while it keeps pulling (a stun or knock frees you early). Swollen: 5.1m wide. 70s.
 
 ### Ranks
 
@@ -76,8 +76,8 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Moment | Tell |
 |---|---|
-| Building up | a ring of teal motes closes around her |
-| Armed / full | the lantern burns white and the hem lifts |
-| Dash spent | a pale ripple where she stood |
+| Building up | a ring of teal motes closes around him |
+| Armed / full | the lantern burns white and his ribbons lift |
+| Dash spent | a pale ripple where he stood |
 
 <!-- /gen:kit -->

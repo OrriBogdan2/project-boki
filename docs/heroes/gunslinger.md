@@ -29,11 +29,57 @@ Burr Charge resets on a knock, Slipstep gives a speed burst when a slide ends, L
 for every hunter it hits (the base is 20% once). The source's earlier upgrades (-1.5s twice on the grenade and the
 slide, +20% twice on the beam) collapse into the shared step.
 
+## Audit (Nov 3 23:40)
+
+The kit audit (briefs/specs/kit-audit/vex_vireo_sable.md, Vex rows, against main 200effce), row by row: (a) already
+done on this branch, (b) fixed now, (c) not applicable or disagree, with the source. Asserts are in
+`--gunslinger-combo-check` (tools/venator_parity_check.gd and tools/hero_combo_check.gd).
+
+| Row (sev) | Call | What and where |
+|---|---|---|
+| RMB animation, side toss (HIGH) | (a) | 3ad081dd, 899102f9: held low and out wide at the hip, a sidearm flick at 0.05s, leaving 1.05m up. Assert `Vex parity RMB: a side toss ...` |
+| Slide scrape disc every 0.05s (HIGH) | (b) | Dropped from `_tick_echo`; the after-images, dust and skid streaks stay. Assert `Vex audit: no ground ring, disc or column on a slide, its rank-3 end or a knock` |
+| Self shake on E, the blast and the throw (HIGH) | (a) / (c) | The direct `add_trauma` calls went in 3ad081dd. `Feel.shake`'s caster share and `Oomph.punch_dir` belong to ext/no-shake (item 50); nothing added here |
+| Rank-3 slide-end ring, knock ring and column (MED) | (b) | Removed; the knock keeps +KNOCK, its sound, the rifle flourish and the HUD reset cue. Same assert as the disc |
+| Longneedle's ground smoke ring and cast ring (MED) | (b) | The recoil smoke now puffs up as a short column round her, and the cast's online ring is gone (everyone already sees the narrowing line) |
+| LMB magazine and refill (MED) | (a) | 3ad081dd: 30 rounds, refilling at 40/s after 0.35s off the trigger. Assert `Vex parity LMB: a 30-round drum ...` |
+| Dazed's 35% slow (MED) | (b) | Removed from KitStatus "rat": the data's Daze is only extra rifle and Railgun damage. Assert `Vex audit: Dazed is a damage window only` |
+| Dash-flow sources and into_dash rows (MED) | (a) / (b) | Sources: 731ca7b9, from the dash-buffering finding. into_dash: all "fire" (item 51: every move combos with Shift), measured: Shift in the Longneedle charge slides and the beam fires; with the lane held, the charge throws on release. Assert `Vex audit: Shift in the Longneedle charge ...`. Jump rows: DashFlow has no jump rows; jumping already keeps every hold |
+| Wall slam: Dazed longer (LOW) | (b) | `wall_daze` 0.6s on top of the cone's 1.4s (data: "Dazed longer and Stunned"). Assert `RMB wall slam: the walled foe is Dazed longer` |
+| RMB cooldown and damage (LOW) | (c) | 6.5s follows the footage (5.4s at level 9) at our pace; the data's 9s is level 1. Owner pacing call, unchanged |
+| Shift cooldown (LOW) | (c) | 8.5s sits between the data (11.5) and the footage (7.5) |
+| Air dash barrel roll; LMB during it (LOW) | (b) | `fires_in_dash` reads the dash's LMB row (fire), so the rifle keeps going through the air roll too. The roll itself is ours (the source never shows an air dash). Assert `Vex audit: the rifle fires through her air roll` |
+| Dash -> E (LOW) | (c) | Kept "fire" (item 51); the footage's braced stand is the plain cast |
+| Passive, E numbers, X (-) | (c) | Match the data |
+| She/her in the shown text (LOW) | (b) | `gunslinger.json` fantasy ("her rifle"), this page and the kit comments |
+| Stale `dash_spent` tell (LOW) | (b) | "an ember afterimage and faint skid streaks" |
+
+## Parity pass (LMB first)
+
+The owner's parity request (INBOX 13:45 ET): the attack animations, how the aim tracks, and the cadence, slot by
+slot against the source. [game data] is briefs/supervive-data (Ghost; the shared rotation rate from
+supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner notes override both. Asserted in
+`--gunslinger-combo-check` (tools/venator_parity_check.gd, lines `Venator parity ...`).
+
+| Slot | Beat | Source | Ours before | Ours now |
+|---|---|---|---|---|
+| LMB | pose | the rifle shouldered at the chest on the cursor, a low wide aim crouch; the recoil shows in the gun and the muzzle, the body stays still [footage 0007-0036, body 7] | a 0.14s torso kick restarted every round (a jitter at 8 rounds a second), no stance | a shouldered pose (chest over the front knee, stock in, a wide crouch standing); each round kicks the gun up and back by 0.025s, back on the shoulder by 0.09; after the last round it stays up a beat and eases out by 0.55 |
+| LMB | legs | the upper body turns to the cursor and the legs keep walking [footage] | free | the crouch is a stance: none at a run |
+| LMB | tracking | direction only, rounds to max range past the cursor; yaw 1280 deg/s [footage, game data] | the same | unchanged; asserted with the cursor sweeping round her at 6 rad/s while she walks: every round leaves on its own step's aim; 180 degrees in 0.15s |
+| LMB | cadence | a string of about 10 rounds in about 1.4s [footage] | 0.12s | unchanged; asserted held |
+| LMB | slow while firing | "no visible slow while firing" [footage] | the shared 80% | none (`fire_slow` 1.0) |
+| LMB | magazine | a 30-round magazine that "rapidly reloads when not firing"; the first 10 rounds of each hit harder [game data]; no reload is seen in the footage | 24 rounds, then a 1.7s reload | 30 rounds; after 0.35s with no round leaving it refills at 40 rounds a second (a string after a pause starts full, as its first 10 rounds do). No reload exists (owner decision 23:45 UTC): run dry, the trigger is dead until the drum is full again (about 1.1s, held or not), then the string picks up |
+| LMB | reticle | two arcs "( )" bracket the hunter left and right while firing, about 0.7 bh [footage 0026, 0099] | none | two thin arcs 1.25m out either side, on your screen only, while the rifle fires |
+| RMB | throw | the owner: a side toss, a low sidearm or underhand flick, quick, little wind-up (over the footage's overhand) [owner 17:17 UTC] | cocked over the shoulder, an overhand whip, leaving 1.6m up | held low at the left hip (torso turned a little away) while aiming; a sidearm flick released at 0.05, across the body on the follow-through, back on the rifle by 0.5; it leaves from the hip (1.05m); the legs a stance, so she walks through the hold |
+| E | recoil | a ~0.5 bh shove back on fire [footage] | the shove, and a screen shake on your own camera | the shove; no screen shake (owner rule 50) |
+| X | cast | the rifle raised straight up and fired [footage] | the same, and a screen shake on your own camera | no screen shake (owner rule 50) |
+| Shift | | a front-loaded 0.45s skid, firing through it [footage] | already the source's (kit data pass) | unchanged |
+
 ## Per-slot table
 | Slot | Input | Aim | What it does | Telegraph / reticle | Move (KMovesVV) | Sound |
 |---|---|---|---|---|---|---|
-| LMB Quill Rifle | hold | max range (11 m) past the cursor, `"aim": "max"` | auto rifle; a string loses half its punch over 10 rounds; a Dazed foe takes +90% in big gold numbers and the string doesn't decay | the aim line runs to full range; ember tracers with a cooling tail, a bronze muzzle star | `gunslinger_lmb` (shoulder kick per round) | `vn_rifle` |
-| RMB Burr Charge | hold to aim, release to throw | max range, a fixed 10.5 m lane | goes off on the first foe it strikes (22 damage, Dazed 1.4s, no cone); otherwise it flies the lane and sticks to a wall or the ground at the lane's end; a 6 m, 100° cone back toward you for 0.9s, then the blast on everyone in it: 16, a big shove along the cone, Dazed 1.4s; a hunter shoved into more terrain is stunned 0.7s | while held: a white lane with an arrow tip, foes inside it marked with a magenta ring; when stuck: the filling cone (everyone sees it); the blast front and a Dazed swirl | `gunslinger_rmb_hold` (cocked overhead), `gunslinger_rmb` (overhand) | `vn_cock`, `vn_throw`, `vn_stick`, `vn_blast` |
+| LMB Quill Rifle | hold | max range (11 m) past the cursor, `"aim": "max"` | auto rifle, a 30-round drum that refills fast whenever the trigger rests (no reload; run dry, it fires again once full, about 1.1s); a string loses half its punch over 10 rounds; a Dazed foe takes +90% in big gold numbers and the string doesn't decay | the aim line runs to full range; two firing brackets either side of her; ember tracers with a cooling tail, a bronze muzzle star | `gunslinger_lmb` (shouldered, the gun kicks per round) | `vn_rifle` |
+| RMB Burr Charge | hold to aim, release to throw | max range, a fixed 10.5 m lane | goes off on the first foe it strikes (22 damage, Dazed 1.4s, no cone); otherwise it flies the lane and sticks to a wall or the ground at the lane's end; a 6 m, 100° cone back toward you for 0.9s, then the blast on everyone in it: 16, a big shove along the cone, Dazed 1.4s; a hunter shoved into more terrain is stunned 0.7s | while held: a white lane with an arrow tip, foes inside it marked with a magenta ring; when stuck: the filling cone (everyone sees it); the blast front and a Dazed swirl | `gunslinger_rmb_hold` (low at the hip), `gunslinger_rmb` (a sidearm side toss) | `vn_cock`, `vn_throw`, `vn_stick`, `vn_blast` |
 | Shift Slipstep | tap / hold | where you move, not the aim | tap 4.8 m skid, hold 7 m slide that is owed 40% more cooldown (the kit-data pass: no refund for releasing early); you shoot through either; an air tap slides 2/3 of the hold distance | none (a white ring and an ember afterimage at the start) | `gunslinger_dash` (feet first, leaning back, rifle up); with no charge in the air `gunslinger_dash_ex` | `vn_slide` |
 | E Longneedle | press, stand still 0.6s | direction, a fixed 18 m line through terrain | a beam through everything in line: 36, +20% on a Dazed foe, a Dazed hunter is Skewered (payoff); a hunter hit takes 20% off the cooldown (rank 3: 30% for every hunter hit); the recoil shoves you back a step | a wide bright line narrowing to a thin core over the cast (everyone sees it); cursor charge ring; muzzle orb, flat flare, smoke ring | `gunslinger_e` (brace, recoil overshoot, settle) | `vn_ion_charge`, `vn_ion_fire`, `hero_skewer` |
 | Passive Hot Streak | | | a knock gives Slipstep back (the takedown heal is DashReset's 5%, the kit adds none); an ability that lands lights Fever (one flat 6% lifesteal, 3.5s) | one pip over the bar; a column and ring on a knock | `gunslinger_knock` (rifle spun up) | `vn_stim` |
@@ -75,6 +121,13 @@ slide, +20% twice on the beam) collapse into the shared step.
 ## Assumptions (the video is silent or the owner overrode it; the owner can correct these)
 - **Owner rule (1103 playtest):** a direct hit on a hunter hurts and Dazes them; the grenade no longer passes through people. A wall or the ground at the lane's end still gives the cone, which Dazes everyone in it. Dazed raises the rifle by 90% and Longneedle by 20% (the source's reference ratios).
 - The throw comes on release of RMB (hold to aim); in the air it throws on the press.
+- **The drum, with no reload in the game (owner decision 23:45 UTC):** the data gives Ghost's rifle a 30-round
+  magazine that "rapidly reloads when not firing", and the footage never shows a reload. Ours: after 0.35 s with no
+  round leaving, the drum refills at 40 rounds a second (the data says only "rapidly"). Run dry, nothing fires until
+  the drum is full again, whether the trigger is held or not (0.35 s + 0.75 s); that full refill is the only pause a
+  long string has. No key, timer or animation reloads it. Data: `refill_after`, `refill_rate` in
+  content/weapons/quill_rifle.json; rule: `GunslingerKit._tick_mag`.
+  The firing brackets are a firing tell only; our rifle's spread doesn't bloom, so they don't move.
 - Dazed is our Rattled status (slow plus the damage window); it now applies to the training dummy too.
 - Fever follows the kit data: a flat +6% omnivamp for 3.5s from any ability hit (no stacks). The footage build only had the knock reset.
 - The Longneedle has no movement while charging (self_slow 1.0) and its recoil is a short shove.
@@ -89,7 +142,7 @@ slide, +20% twice on the beam) collapse into the shared step.
 ## Ultimate choice
 X is her own ultimate, Cinderfall (owner decision, SERVER_UPDATE6): the source's Mini Nuke, built from the
 reference sheet's "Ultimate (on X)" section. It was never folded into another slot during the kit pass, so no
-slot changes. R reloads and the Boki Merge is on its own key (T by default).
+slot changes. The Boki Merge is on its own key.
 
 ## Engine notes
 - Kit `scripts/arch/kits/gunslinger_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd`; moves

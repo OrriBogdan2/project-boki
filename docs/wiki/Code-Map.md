@@ -48,6 +48,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `ent.gd` | Base for everything that moves and takes damage |
 | `hunter.gd` (3.4k lines) | A player or bot: movement, glide, ledge rise, abyss lift, weapon, levels and ranks, armor |
 | `hunter_anim.gd` | Procedural hunter animation and the kits' keyed moves |
+| `warden_stance.gd` | Each Warden's signature stance and idle cycle (content/rules/warden_stance.json) as pose offsets on the rig |
 | `bot.gd` | Bot hunters: fight, farm, loot, catch, revive, extract |
 | `kin.gd` | A Boki in a match: shoulder, thrown, fighting, dazed, fused |
 | `kin_companion.gd` | A Boki as a teammate: callouts, caring, keeping close |
@@ -118,7 +119,6 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `home_gather.gd` | Chopping and mining |
 | `home_econ.gd`, `econ_models.gd` | Armory, feeders, graveyard, Soul Shrine |
 | `home_incubator.gd`, `kin_burrow.gd` | The Incubator and the Burrow on the island |
-| `home_training.gd` | The Training Grounds isle |
 | `interior.gd` | Inside buildings, decorating |
 | `kin_brain.gd` | Chat intents for talking to a Boki |
 

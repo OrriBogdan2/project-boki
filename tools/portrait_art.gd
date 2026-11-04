@@ -1,6 +1,7 @@
 extends SceneTree
 ## Brings the Wardens' painted portraits and splashes into the game (Portraits): reads the art pass's
-## 2K sources (docs/art/gen/wardens/<name>_portrait.png and <name>_splash.png on ext/imagegen) and
+## 2K sources (docs/art/gen/wardens_r3 and wardens_r2 on ext/imagegen, newest of each, in one dir:
+## <name>_portrait.webp and <name>_splash.webp) and
 ## writes art/portraits/<archetype>.jpg (PORTRAIT_PX square) and <archetype>_splash.jpg (SPLASH_W wide).
 ## Re-run it when the art pass updates a Warden:
 ##   godot --headless --script tools/portrait_art.gd -- --src=<dir with the wardens' PNGs>
@@ -11,13 +12,10 @@ const SPLASH_W := 960         # px: the kit card's banner is 862 px wide
 const QUALITY := 0.88         # JPEG quality: no visible banding on the painted gradients
 ## The art pass names each Warden; the game knows them by archetype id (docs/art/concepts/README.md).
 const ART_NAMES := {
-	"bulwark": "bjorn", "archer": "pin", "juggernaut": "zedran", "thief": "sable", "mage": "vireo",
-	"dolm": "tarek", "ostra": "ostra", "ashwick": "cinder", "gunslinger": "vex", "tender": "moosh",
+	"bulwark": "breaker", "archer": "hem", "juggernaut": "kael", "thief": "sable", "mage": "ryzz",
+	"dolm": "tarek", "ostra": "ostra", "ashwick": "cinder", "gunslinger": "vex", "tender": "pip",
 	"rimewright": "claire", "dredge": "dredge",
 }
-## Splashes that no longer match their Warden's portrait (redrawn, a new splash queued): the
-## portrait stands in until the new one lands.
-const STALE_SPLASH := ["tender"]
 
 func _init() -> void:
 	var src := ""
@@ -31,9 +29,9 @@ func _init() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
 	for ak in ART_NAMES:
 		var art: String = ART_NAMES[ak]
-		_write(src.path_join(art + "_portrait.png"), OUT + ak + ".jpg", Vector2i(PORTRAIT_PX, PORTRAIT_PX))
-		var splash := src.path_join(art + "_splash.png")
-		if not STALE_SPLASH.has(ak) and FileAccess.file_exists(splash):
+		_write(src.path_join(art + "_portrait.webp"), OUT + ak + ".jpg", Vector2i(PORTRAIT_PX, PORTRAIT_PX))
+		var splash := src.path_join(art + "_splash.webp")
+		if FileAccess.file_exists(splash):
 			_write(splash, OUT + ak + "_splash.jpg", Vector2i(SPLASH_W, SPLASH_W * 9 / 16))
 	quit()
 

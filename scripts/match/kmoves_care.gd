@@ -1,17 +1,17 @@
 class_name KMovesCare
 extends RefCounted
-## Keyed full-body moves of Moosh Moosh (tender, "mm_") and Claire (rimewright, "tm_"): same format and
+## Keyed full-body moves of Pip (tender, "mm_") and Claire (rimewright, "tm_"): same format and
 ## channels as HunterAnim.KMOVES, looked up by HunterAnim.km_sample. Timed to the reference sheets'
 ## beats (docs/heroes/tender.md, rimewright.md: Animation moves): anticipation, the release on the
 ## kit's hit time, an overshoot past the key pose, then the settle. Channels used here besides the
 ## body ones: fl / fr (a free hand from its shoulder, x right, y up, z back), hw / rw their weights,
 ## wa (the held fan's extra pitch, yaw, roll about its grip), wo (its offset, m) and wf (how far the
-## fan turns with the torso instead of staying on the aim). Moosh Moosh holds nothing: both hands are
+## fan turns with the torso instead of staying on the aim). Pip holds nothing: both hands are
 ## hers to cast from, so her moves key fl and fr.
 ## A move whose first and last keys match can loop: the kit replays it (the skate stride).
 
 const MOVES := {
-	# ================================================================ Moosh Moosh
+	# ================================================================ Pip
 	# Ember Cast, right hand (every 0.4 s, alternating): the fist pulled back to the hip with the torso
 	# twisted away, then a straight-arm punch-push at the cursor with the torso unwound ~45 deg past
 	# square and the stance dropped; held out 0.1 s, then the left hand rises open for the next one
@@ -151,7 +151,7 @@ const MOVES := {
 					"fl": Vector3(-0.3, 0.0, 0.25), "hw": 0.9, "lw": 0.6, "legs": [0.4, -0.6, -0.3, -0.2]}],
 		[0.26, {"y": 0.4, "p": -0.2, "fr": Vector3(-0.02, 0.3, -0.5), "rw": 0.8}],
 		[0.5, {}]]},
-	# Relay Step, the ground hop (0.18 s of dash): a quick squash, then a skip off one foot with the lead knee
+	# Relay Step, the ground hop (0.2 s of dash): a quick squash, then a skip off one foot with the lead knee
 	# up and both arms flung up behind like little wings, a tucked apex, a squash on touchdown and a happy
 	# bounce with a wiggle of the shoulders (0.24 s in all)
 	"mm_skip": {"keys": [
@@ -177,7 +177,7 @@ const MOVES := {
 					"sq": -0.12, "lift": 0.06, "y": 0.15, "lw": 0.8, "legs": [0.4, -0.7, 0.35, -0.6],
 					"fl": Vector3(-0.3, 0.3, -0.1), "hw": 0.7, "fr": Vector3(0.3, 0.3, -0.1), "rw": 0.7}],
 		[0.24, {}]]},
-	# the air dash, her long float (0.92 s of dash): tucked into a ball for one forward somersault, then
+	# the air dash, her long float (0.95 s of glide, Elluna's): tucked into a ball for one forward somersault, then
 	# unfurled into a seated float, leaning back with the knees tucked up and both arms up in a happy V like
 	# a drifting seed, a little sway, the legs reaching down, and a soft squash on touchdown (fx stays a full
 	# turn: no unwind)
@@ -206,12 +206,12 @@ const MOVES := {
 					"legs": [1.5, -2.0, 1.4, -1.9], "fl": Vector3(-0.5, 0.55, 0.0), "hw": 1.0,
 					"fr": Vector3(0.5, 0.55, 0.0), "rw": 1.0}],
 		[
-				0.8,
+				0.85,
 				{
 					"fx": -6.283, "sq": -0.05, "lw": 1.0, "legs": [0.4, -0.7, 0.3, -0.6],
 					"fl": Vector3(-0.45, 0.2, -0.05), "hw": 0.9, "fr": Vector3(0.45, 0.2, -0.05), "rw": 0.9}],
-		[0.88, {"fx": -6.283, "sq": 0.3, "lift": -0.08, "lw": 1.0, "legs": [0.9, -1.4, 0.8, -1.3]}],
-		[0.98, {"fx": -6.283}]]},
+		[0.95, {"fx": -6.283, "sq": 0.3, "lift": -0.08, "lw": 1.0, "legs": [0.9, -1.4, 0.8, -1.3]}],
+		[1.05, {"fx": -6.283}]]},
 	# Bearer: scooping a downed teammate up onto her back: a deep squat, then a heave with a lean back
 	"mm_pickup": {"keys": [
 		[0.0, {}],
@@ -275,6 +275,17 @@ const MOVES := {
 		[0.03, {"fl": Vector3(0.22, 0.15, 0.1), "hw": 1.0, "y": 0.3, "wa": Vector3(0, -0.3, 0), "wf": 0.6}],
 		[0.07, {"fl": Vector3(0.1, 0.1, -0.6), "hw": 1.0, "y": -0.35, "p": -0.1, "sq": 0.08}],
 		[0.16, {}]]},
+	# a large dart at the end of the barrage: a bigger, two-handed fling. The torso winds away with both hands
+	# drawn back to the hip (0.04), then whips round and both arms sling forward, the fan snapping open, the
+	# weight thrown onto the front foot (0.08), and a settle back (0.18, the barrage's cadence)
+	"tm_dart_heavy": {"keys": [
+		[0.0, {}],
+		[0.04, {"y": -0.55, "p": 0.12, "sq": 0.14, "fl": Vector3(0.25, -0.15, 0.25), "hw": 1.0,
+			"wa": Vector3(0.3, -1.0, 0.6), "wf": 1.0, "lw": 0.7, "legs": [-0.3, -0.4, 0.45, -0.7]}],
+		[0.08, {"y": 0.5, "p": -0.25, "sq": -0.12, "fl": Vector3(0.12, 0.12, -0.62), "hw": 1.0,
+			"wa": Vector3(-0.4, 0.9, -0.5), "wo": Vector3(0, 0, -0.16), "wf": 1.0, "lw": 0.8,
+			"legs": [0.8, -1.0, -0.45, -0.25]}],
+		[0.18, {}]]},
 	# a dart while skating: both hands driven straight out ahead, a stiff lean into it (the straight beam)
 	"tm_beam": {"keys": [
 		[0.0, {}],
@@ -286,64 +297,74 @@ const MOVES := {
 					"wo": Vector3(-0.04, 0.04, -0.26), "p": -0.35, "sq": -0.15}],
 		[0.14, {"fl": Vector3(0.18, 0.05, -0.58), "hw": 1.0, "wo": Vector3(0, 0.03, -0.22), "p": -0.3}],
 		[0.22, {}]]},
-	# Ice Spear held: the spear raised high behind her head in the free hand, the body turned away and
-	# leaning well back, the fan hand pointing the way
+	# Ice Spear held: she gathers it, both palms drawn in to her chest round the forming spear, elbows back,
+	# the weight settling onto the back foot and the body squared to the cursor, a slight crouch
 	"tm_spear_aim": {"hold": true, "keys": [
 		[0.0, {}],
 		[
 				0.12,
 				{
-					"y": -0.75, "p": 0.35, "r": -0.12, "fl": Vector3(0.05, 0.6, 0.3), "hw": 1.0,
-					"wa": Vector3(-0.3, 0.5, 0), "wf": 0.5, "lw": 0.9, "legs": [-0.4, -0.3, 0.55, -0.8]}]]},
-	# ... let go: the arm draws back deeper (0.1), then the whip through to the cursor, the spear leaving
-	# the hand at 0.16 (RimewrightKit.THROW_T), and a long lunge after it, the arm across the body, then up
+					"p": 0.18, "sq": 0.14, "lift": -0.05, "fl": Vector3(0.14, 0.12, -0.2), "hw": 1.0,
+					"fr": Vector3(-0.14, 0.12, -0.2), "rw": 1.0, "wf": 1.0, "lw": 0.9,
+					"legs": [-0.35, -0.4, 0.5, -0.75]}]]},
+	# ... let go: a push, not a throw. A quick load deeper into the back foot (0.05), then both palms drive
+	# straight out at the cursor and the spear leaves them at full extension (0.1, RimewrightKit.PUSH_T), the
+	# body lunging after it; the arms hold out through the recoil, then settle
 	"tm_spear": {"keys": [
 		[
 				0.0,
 				{
-					"y": -0.75, "p": 0.35, "r": -0.12, "fl": Vector3(0.05, 0.6, 0.3), "hw": 1.0,
-					"wa": Vector3(-0.3, 0.5, 0), "wf": 0.5, "lw": 0.9, "legs": [-0.4, -0.3, 0.55, -0.8]}],
+					"p": 0.18, "sq": 0.14, "lift": -0.05, "fl": Vector3(0.14, 0.12, -0.2), "hw": 1.0,
+					"fr": Vector3(-0.14, 0.12, -0.2), "rw": 1.0, "wf": 1.0, "lw": 0.9,
+					"legs": [-0.35, -0.4, 0.5, -0.75]}],
+		[
+				0.05,
+				{
+					"p": 0.26, "sq": 0.24, "lift": -0.09, "fl": Vector3(0.12, 0.1, -0.14), "hw": 1.0,
+					"fr": Vector3(-0.12, 0.1, -0.14), "rw": 1.0, "wf": 1.0, "lw": 1.0,
+					"legs": [-0.45, -0.45, 0.6, -0.85]}],
 		[
 				0.1,
 				{
-					"y": -0.95, "p": 0.42, "r": -0.16, "fl": Vector3(0.08, 0.62, 0.38), "hw": 1.0, "sq": -0.18,
-					"lw": 0.9, "legs": [-0.45, -0.3, 0.6, -0.85]}],
+					"p": -0.42, "sq": -0.22, "lift": 0.02, "fl": Vector3(0.1, 0.06, -0.7), "hw": 1.0,
+					"fr": Vector3(-0.1, 0.06, -0.7), "rw": 1.0, "wf": 1.0, "lw": 1.0,
+					"legs": [1.05, -1.25, -0.6, -0.2]}],
 		[
-				0.16,
+				0.28,
 				{
-					"y": 0.85, "p": -0.5, "r": 0.14, "fl": Vector3(0.05, 0.08, -0.64), "hw": 1.0, "sq": 0.28,
-					"lift": -0.08, "lw": 1.0, "legs": [1.05, -1.25, -0.6, -0.2]}],
-		[
-				0.34,
-				{
-					"y": 0.6, "p": -0.4, "fl": Vector3(-0.1, -0.08, -0.5), "hw": 0.9, "sq": 0.08, "lift": -0.06,
-					"lw": 0.9, "legs": [0.95, -1.15, -0.55, -0.2]}],
-		[0.65, {}]]},
-	# Rink Wall: the 0.2 s tell (a deep crouch over the feet, the sparkle), then both arms flung up and
-	# out as the ice erupts ahead, an overshoot up on the toes, a settle
+					"p": -0.3, "sq": 0.06, "lift": -0.04, "fl": Vector3(0.14, 0.02, -0.6), "hw": 0.9,
+					"fr": Vector3(-0.14, 0.02, -0.6), "rw": 0.9, "wf": 0.8, "lw": 0.9,
+					"legs": [0.95, -1.15, -0.55, -0.2]}],
+		[0.55, {}]]},
+	# Rink Wall (footage: both hands pushed forward): the 0.2 s tell, a deep crouch with both palms drawn back
+	# to the hips and the sparkle at her feet; then both palms shoved out low and wide along the ground as the
+	# ice erupts ahead (0.27), the body driving after them, held while it starts to slide, then a settle
 	"tm_wall": {"keys": [
 		[0.0, {}],
 		[
 				0.1,
 				{
-					"p": -0.45, "lift": -0.15, "sq": 0.45, "fl": Vector3(0.15, -0.45, -0.25), "hw": 1.0,
-					"wa": Vector3(-0.7, 0, 0), "wf": 1.0, "lw": 1.0, "legs": [1.1, -1.7, 1.0, -1.6]}],
+					"p": -0.2, "lift": -0.15, "sq": 0.4, "fl": Vector3(0.3, -0.45, 0.25), "hw": 1.0,
+					"fr": Vector3(-0.3, -0.45, 0.25), "rw": 1.0, "wf": 1.0, "lw": 1.0,
+					"legs": [1.1, -1.7, 1.0, -1.6]}],
 		[
 				0.2,
 				{
-					"p": -0.5, "lift": -0.16, "sq": 0.48, "fl": Vector3(0.15, -0.46, -0.28), "hw": 1.0,
-					"wa": Vector3(-0.75, 0, 0), "wf": 1.0, "lw": 1.0, "legs": [1.15, -1.75, 1.05, -1.65]}],
+					"p": -0.15, "lift": -0.17, "sq": 0.46, "fl": Vector3(0.32, -0.46, 0.3), "hw": 1.0,
+					"fr": Vector3(-0.32, -0.46, 0.3), "rw": 1.0, "wf": 1.0, "lw": 1.0,
+					"legs": [1.15, -1.75, 1.05, -1.65]}],
 		[
 				0.27,
 				{
-					"p": 0.1, "lift": 0.12, "sq": -0.35, "fl": Vector3(-0.35, 0.55, -0.2), "hw": 1.0,
-					"wa": Vector3(1.0, 0, -0.6), "wo": Vector3(0.1, 0.25, -0.05), "wf": 1.0, "lw": 0.6,
-					"legs": [0.2, -0.3, -0.2, -0.1]}],
+					"p": -0.5, "lift": -0.08, "sq": -0.2, "fl": Vector3(0.32, -0.3, -0.68), "hw": 1.0,
+					"fr": Vector3(-0.32, -0.3, -0.68), "rw": 1.0, "wf": 1.0, "lw": 1.0,
+					"legs": [1.05, -1.25, -0.6, -0.2]}],
 		[
 				0.42,
 				{
-					"p": 0.05, "sq": -0.1, "lift": 0.05, "fl": Vector3(-0.3, 0.48, -0.2), "hw": 0.9,
-					"wa": Vector3(0.8, 0, -0.5), "wo": Vector3(0.08, 0.2, -0.05), "wf": 1.0}],
+					"p": -0.4, "lift": -0.06, "sq": -0.05, "fl": Vector3(0.34, -0.28, -0.6), "hw": 0.9,
+					"fr": Vector3(-0.34, -0.28, -0.6), "rw": 0.9, "wf": 0.9, "lw": 0.9,
+					"legs": [0.95, -1.15, -0.55, -0.2]}],
 		[0.7, {}]]},
 	# the wall frozen (E again): a stamp of the skate blade with a fist pulled down
 	"tm_freeze": {"keys": [
@@ -459,6 +480,20 @@ const MOVES := {
 			"wa": Vector3(-0.6, 0, 0.8), "wf": 1.0,
 			"lw": 1.0, "legs": [-0.1, -0.2, 0.1, -0.2]}],
 		[0.2, {"p": 0.35, "sq": 0.2, "lift": -0.08, "fl": Vector3(0.28, 0.1, -0.22), "hw": 1.0,
+			"wa": Vector3(0.5, 0, -0.4), "wf": 1.0,
+			"lw": 1.0, "legs": [0.7, -1.1, 0.6, -1.0]}]]},
+	# skated into the seal (x.carry_t): the momentum carries her as the shell closes. She whips side-on into a
+	# braced hockey stop, leaning back hard over the blades with the arms flung out as the rink snaps (0.08),
+	# grinds on low with the arms swinging in (0.28), and sinks into the sealed crouch as she stops (0.5)
+	"tm_rime_carry": {"keys": [
+		[0.0, {"p": -0.45, "lw": 1.0, "legs": [0.85, -1.4, -0.6, -0.3]}],
+		[0.08, {"y": 1.15, "r": 0.5, "p": 0.15, "sq": 0.3, "lift": -0.16, "lw": 1.0,
+			"legs": [0.9, -1.35, 0.35, -0.85], "fl": Vector3(-0.45, 0.6, 0.05), "hw": 1.0,
+			"wa": Vector3(-0.6, 0, 0.9), "wf": 1.0}],
+		[0.28, {"y": 0.8, "r": 0.32, "p": 0.3, "sq": 0.28, "lift": -0.14, "lw": 1.0,
+			"legs": [0.85, -1.3, 0.55, -1.0], "fl": Vector3(0.1, 0.3, -0.25), "hw": 1.0,
+			"wa": Vector3(0.2, 0, 0.1), "wf": 1.0}],
+		[0.5, {"p": 0.35, "sq": 0.2, "lift": -0.08, "fl": Vector3(0.28, 0.1, -0.22), "hw": 1.0,
 			"wa": Vector3(0.5, 0, -0.4), "wf": 1.0,
 			"lw": 1.0, "legs": [0.7, -1.1, 0.6, -1.0]}]]},
 	# sealed in (f27-f55): hunched over, arms crossed on the chest, the fan folded in, knees bent

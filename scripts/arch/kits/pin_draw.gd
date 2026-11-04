@@ -1,6 +1,6 @@
 class_name PinDraw
 extends RefCounted
-## Pin's longbow draw (docs/heroes/archer.md, hero sheet pin.md): the reticle, the stages, the perfect
+## Hem's longbow draw (docs/heroes/archer.md, hero sheet pin.md): the reticle, the stages, the perfect
 ## release and the overdraw. ArcherKit owns one and forwards Hunter's draw hooks to it.
 ##
 ## - Stages (content/weapons/longbow.json "draw"): a tap shot before stage 1, Empowered at stage 1,
@@ -16,8 +16,6 @@ extends RefCounted
 ##   until its stage 1 (no extra damage), a brief gold fletch burst with a ring at the bow hand.
 ## - Overdraw: held overdraw_t past the last stage, the arrow does overdraw_k of its damage.
 
-## the draw time Hunter._loose reports for a full-Focus shot (it is drawn at once, so no stage clock applies)
-const FOCUS_T := 9.0
 const LINE_A := 0.35           # the faint resting aim line's strength
 const MERGE_T := 0.12          # s the merged bright line holds at stage 1 before the V re-opens
 const SUPER_COL := Color("a8ffe0")
@@ -75,13 +73,6 @@ func bonus(t: float) -> float:
 	quick = false
 	quick_used = false
 	perfect_now = false
-	if t >= FOCUS_T:
-		# a full Focus shot: drawn at once, the Supercharged line
-		h.shot_aim = AimMode.MAX
-		pending = "super"
-		last_kind = "super"
-		supers += 1
-		return 1.0
 	var kind := "tap"
 	if t >= s.y: kind = "super"
 	elif t >= s.x: kind = "arrow"
@@ -106,7 +97,6 @@ func _perfect() -> void:
 	k.fx.fletch_burst(bow_at(), 1.1, PinFx.GOLD, 0.13, 0.07, 1.0)
 	AimKit.perfect(h)
 	k.m.sfx("pin_perfect", h.pos, -3.0 if h.is_local() else -8.0, 1.25)
-	if h.is_local(): Oomph.punch_dir(k.m, d, 0.2)
 
 func _sc() -> float:
 	return float(h.cdat.get("scale", 1.0))
@@ -122,7 +112,7 @@ func tick() -> void:
 	var t := h.draw_t
 	var drawing := t >= 0.0 and h.wpn.has("draw")
 	var s := stage_t()
-	var col := Color(String(k.d.get("color", "#9fe0a8")))
+	var col := Color(String(k.d.get("color", "#e8483e")))
 	if h.wpn.has("draw") and not drawing and k.tells_visible() and h.can_fire():
 		AimKit.line(h, "draw_rest", {"alpha": LINE_A, "col": col, "fletch": FLETCH * 0.6})
 	if drawing:

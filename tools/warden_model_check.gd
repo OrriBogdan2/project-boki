@@ -12,10 +12,25 @@ const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
 const EPS := 0.0005
 ## Per Warden: the hit radius it must keep (m), its height against a medium hunter (hero sheets, "Body,
 ## scale and movement feel"), its width against a medium (from, to), and the prefix of its keyed moves.
+## height_3d: the 3D model's top where something stands over the head the procedural one doesn't have.
 const WARDENS := {
-	"bulwark": {"hit_r": 0.5, "height": 1.15, "width": [1.3, 2.2], "moves": "bul_"},
-	"archer": {"hit_r": 0.37, "height": 0.98, "width": [0.7, 1.15], "moves": "arc_"},
-	"gunslinger": {"hit_r": 0.4, "height": 1.04, "width": [0.7, 1.3], "moves": "gunslinger_"},     # (slim, per her art)
+	"bulwark": {"hit_r": 0.46, "height": 1.5, "width": [1.3, 2.2], "moves": "bul_"},     # (1.5x, owner)
+	"archer": {"hit_r": 0.392, "height": 0.98, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
+	"gunslinger": {"hit_r": 0.416, "height": 1.04, "width": [0.7, 1.3], "moves": "gunslinger_"},   # (slim)
+	"mage": {"hit_r": 0.4, "height": 1.04, "width": [0.6, 1.3], "moves": "mage_"},     # (slim and long-legged)
+	# (Sable's feather plumes stand ~0.2 m over her head)
+	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.05, "width": [0.6, 1.3], "moves": "thf_"},
+	"dolm": {"hit_r": 0.388, "height": 1.19, "width": [0.7, 1.5], "moves": "breah_"},     # (lean, the locs: his art)
+	# (Ostra: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
+	"ostra": {"hit_r": 0.412, "height": 1.33, "height_3d": 1.31, "width": [0.5, 1.3], "moves": "ostra_"},
+	"rimewright": {"hit_r": 0.38, "height": 1.11, "width": [0.6, 1.1], "moves": "tm_"},     # (tall and slim)
+	# (Cinder's fin-crest stands over her head)
+	"ashwick": {"hit_r": 0.376, "height": 1.02, "height_3d": 1.11, "width": [0.7, 1.5], "moves": "as_"},
+	# (Kael: body size 1.06, owner Nov 4: 9% bigger; juggernaut.md's 1.12x was at 1.0)
+	"juggernaut": {"hit_r": 0.428, "height": 1.26, "height_3d": 1.19, "width": [1.0, 2.0], "moves": "jug"},
+	"dredge": {"hit_r": 0.452, "height": 1.28, "width": [1.3, 2.4], "moves": "dr_"},     # (~2.25 m, very broad)
+	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
+	"tender": {"hit_r": 0.34, "height": 0.74, "height_3d": 0.84, "width": [0.5, 1.5], "moves": "mm_"},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured
@@ -26,6 +41,8 @@ const ANCHORS := ["Rig/Legs/LegL/Knee", "Rig/Legs/LegR/Knee", "Rig/Torso/HeadPiv
 ## Nodes a hero's own kit or weapon code finds by name (BjornFx: the hammer pivot under Gun; the prow).
 const HERO_ANCHORS := {"bulwark": ["Rig/Torso/ArmLPivot/Elbow/Hand/Shield"]}
 const SKIP := ["Glider", "Gun", "Shield", "TeamRing"]     # not part of the body's silhouette
+## a .glb's floating pieces (warden_parts.crescent, Ostra's void orb held up by his head): not headwear
+const FLOATING := ["Halo", "Orb"]
 
 var bad := 0
 var n := 0
@@ -91,7 +108,8 @@ func _anim(id: String) -> void:
 	var rest := _pose(an, m, "", 0.0)
 	var still: Array = []
 	var moves: Array = []
-	for t in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES]:
+	for t in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
+			KMovesCare.MOVES, KMovesPair.MOVES]:
 		for mv in t:
 			if String(mv).begins_with(WARDENS[id]["moves"]): moves.append(mv)
 	for mv in moves:
@@ -125,9 +143,9 @@ func _hitbox(id: String) -> void:
 		"%s: hit radius %.2f m, the class's (%.2f)" % [id, hr, WARDENS[id]["hit_r"]]
 	)
 	var m := _model(id, PlayerLook.neutral())
-	var ring := m.get_node("TeamRing") as Node3D
-	ok(absf(ring.global_transform.basis.get_scale().x - float(cdat["scale"]) * hr / float(cdat["hit_r"])) < 0.01,
-			"%s: the ring under its feet shows that radius" % id)
+	var ring := m.get_node("TeamRing") as MeshInstance3D
+	var drawn := (ring.mesh as PlaneMesh).size.x * 0.5 * ring.global_transform.basis.x.length()
+	ok(absf(drawn - hr) < 0.005, "%s: the ring under its feet shows that radius (%.3f)" % [id, drawn])
 	m.free()
 
 func _scale(id: String, ref_h: float, ref_w: float) -> void:
@@ -138,8 +156,9 @@ func _scale(id: String, ref_h: float, ref_w: float) -> void:
 	ok(absf(h - want) <= HEIGHT_TOL, "%s stands %.3fx a medium hunter (sheet %.2fx)" % [id, h, want])
 	if m.has_node("Warden"):
 		var hg := _glb_top(m) / ref_h
-		ok(absf(hg - want) <= HEIGHT_TOL, "%s's 3D model stands %.3fx a medium hunter, headwear and all (sheet %.2fx)"
-				% [id, hg, want])
+		var want3 := float(WARDENS[id].get("height_3d", want))
+		ok(absf(hg - want3) <= HEIGHT_TOL, "%s's 3D model stands %.3fx a medium hunter, headwear and all (sheet %.2fx)"
+				% [id, hg, want3])
 	var span: Array = WARDENS[id]["width"]
 	ok(
 		w >= float(span[0]) and w <= float(span[1]),
@@ -196,6 +215,8 @@ func _glb_top(m: Node3D) -> float:
 	(m.get_node("Warden/Sync") as WardenGlb.Sync).apply()
 	var top := -INF
 	for nd in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		if String(nd.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX) or String(nd.name) in FLOATING:
+			continue        # (floating props, Tarek's stones and Ostra's halo: not the height)
 		for p in WARDEN_SKIN.points(nd as MeshInstance3D):
 			top = maxf(top, p.y)
 	return top - m.global_position.y

@@ -178,16 +178,16 @@ func run(main_node: Node) -> void:
 func _check_keys(P: Hunter) -> void:
 	var hud = P.m.hud
 	var all_x := Arch.ids().all(func(id): return Arch.def(id).has("x"))
-	ok(all_x, "every hunter has an ultimate on X (%d)" % Arch.ids().size())
+	ok(all_x, "every hunter has a hunter ultimate tile (%d)" % Arch.ids().size())
 	var actions := {"sec": "secondary", "dash": "dash", "k1": "signature", "x": "hunter_ult", "r": "ultimate",
-		"kin_ab": "kin_ability", "throw": "throw", "base": "base", "gear0": "gear1", "gear1": "gear2"}
+		"throw": "throw", "base": "base", "gear0": "gear1", "gear1": "gear2"}
 	P.lvl = 1
 	HudSlot.shown_keys.clear()
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	var x_key := String(HudSlot.shown_keys.get("x", ""))
 	ok(bool(P.slot_info("x")["locked"]) and x_key == Settings.key_cap("hunter_ult"),
-		"level 1: the X tile is drawn locked, with the hunter ultimate key '%s'" % x_key)
+		"level 1: the ultimate tile is drawn locked, with the hunter ultimate key '%s'" % x_key)
 	var wrong := []
 	for id in HudSlot.shown_keys:
 		if actions.has(id) and String(HudSlot.shown_keys[id]) != Settings.key_cap(actions[id]):
@@ -196,8 +196,8 @@ func _check_keys(P: Hunter) -> void:
 	var said := "every key cap on the bar is its action's Settings.key_cap (%s, wrong: %s)" % [drawn, wrong]
 	ok(wrong.is_empty() and drawn.size() >= 4, said)
 	var merge_key := String(HudSlot.shown_keys.get("r", ""))
-	ok(merge_key == Settings.key_cap("ultimate") and merge_key != Settings.key_cap("reload"),
-		"the Merge shows the Merge key '%s', not reload's '%s'" % [merge_key, Settings.key_cap("reload")])
+	ok(merge_key == Settings.key_cap("ultimate") and merge_key != Settings.key_cap("hunter_ult"),
+		"the Merge shows the Merge key '%s', not '%s'" % [merge_key, Settings.key_cap("hunter_ult")])
 	var merge_slots: Array = hud.hover_spots.filter(func(x): return String(x[1]) == "r")
 	ok(merge_slots.size() == 1, "one Merge slot only (the Boki box on the right)")
 	P.lvl = int(Hunter.ULT_AT[0])

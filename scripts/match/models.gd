@@ -476,6 +476,7 @@ const LOOK_SKIN := [Color("f6d3b0"), Color("f1c9a0"), Color("e0ac7e"), Color("c6
 const LOOK_HAIR := [Color("2b2124"), Color("5a3a26"), Color("9a6a3a"), Color("e8c87a"), Color("d8d2c8"), Color("c4462e"), Color("6a8aff"), Color("ff8ac8"),
 	Color("f6efd8"), Color("8a2e2a"), Color("3ac8c0"), Color("8a4ad8"), Color("5ac85a"), Color("ff8a2a"), Color("c8a8ff"), Color("9af0c8"),
 	Color("d81e3c"), Color("2a3a7a"), Color("fbfbfb"), Color("ffd84a")]
+const LOOK_BODIES := ["Slim", "Average", "Sturdy"]
 const LOOK_GENDERS := ["Female", "Male"]
 const LOOK_FACES := ["Bright eyes", "Calm", "Sleepy", "Cheerful", "Fierce", "Wink", "Starry", "Determined", "Smug"]
 const LOOK_HAIRS := ["Short", "Long", "Ponytail", "Bun", "Spiky", "Buzzed", "Bob", "Pigtails", "Braid", "Mohawk", "Afro", "Curly", "Swoop", "Bald"]
@@ -529,6 +530,35 @@ const RACES := [
 		"desc": "Wide-eyed bird folk with ear tufts and a feather tail."},
 ]
 const LOOK_RACES := ["Human", "Vulpin", "Stoneborn", "Sprig", "Scalefolk", "Owlet"]
+
+static func default_look() -> Dictionary:
+	return {"race": 0, "body": 1, "gender": 1, "face": 0, "skin": 1, "hair": 0, "hair_v": 2, "hair_col": 0, "detail": 0, "outfit": 3}
+
+## A random look for bots and background hunters: any race, any style, the race's own colouring
+## most of the time.
+static func random_look(rng: RandomNumberGenerator = null) -> Dictionary:
+	var R := func(n: int) -> int: return (rng.randi() if rng else randi()) % n
+	var race := int(R.call(RACES.size()))
+	var skin: int = int(RACES[race]["skin"]) if int(R.call(3)) > 0 else int(R.call(LOOK_SKIN.size()))
+	if race == 0: skin = int(R.call(8))
+	var gl := "classic" if int(R.call(5)) < 3 else String(Gliders.LIST[int(R.call(Gliders.LIST.size()))]["id"])
+	return {"glider": gl, "race": race, "body": R.call(3), "gender": R.call(2), "face": R.call(LOOK_FACES.size()), "skin": skin,
+		"hair": R.call(hair_styles(race).size()), "hair_v": 2, "hair_col": R.call(LOOK_HAIR.size()), "detail": R.call(LOOK_DETAILS.size()),
+		"outfit": R.call(LOOK_OUTFITS.size())}
+
+## A saved look with every value inside its list (older saves had a third gender option).
+static func clean_look(lk: Dictionary) -> Dictionary:
+	var out := default_look()
+	out.merge(lk, true)
+	var lists := {"race": LOOK_RACES, "body": LOOK_BODIES, "gender": LOOK_GENDERS, "face": LOOK_FACES, "skin": LOOK_SKIN, "hair_col": LOOK_HAIR, "detail": LOOK_DETAILS, "outfit": LOOK_OUTFITS}
+	for k in lists:
+		out[k] = clampi(int(out[k]), 0, (lists[k] as Array).size() - 1)
+	var rid := String(RACES[int(out["race"])]["id"])
+	if not lk.has("hair_v") and HAIR_FROM_OLD.has(rid):
+		out["hair"] = HAIR_FROM_OLD[rid][clampi(int(out["hair"]), 0, LOOK_HAIRS.size() - 1)]
+	out["hair_v"] = 2
+	out["hair"] = clampi(int(out["hair"]), 0, hair_styles(int(out["race"])).size() - 1)
+	return out
 
 ## How each class reads at a glance from the match camera, whatever the race or outfit (purely
 ## visual): overall size on top of the class scale (about 0.88 / 1.0 / 1.18 in all), build, boots,
@@ -591,12 +621,23 @@ static func torso_mesh() -> ArrayMesh:
 ## person for a look from MantleLook.at_home(). outfit names a colourway that replaces the palette
 ## (galleries); "bare" leaves the head uncovered. arch "" takes the look's "arch", else the class default.
 static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", appearance := {}, arch := "") -> Node3D:
-	arch = HeroKit.arch_for(cls, arch, appearance)
-	var lk: Dictionary = MantleLook.params(arch, appearance)
-	if lk["own"]:
-		arch = ""            # your own person at home: no Warden's gear, shape or class size
-		cls = "medium"
-	var race: Dictionary = RACES[int(lk["race"])]
+	var um := Unmasked.is_look(appearance)       # your own character: the hunter rig without a hunter's gear
+	var lk: Dictionary
+	var race: Dictionary
+	if um:
+		# the Unmasked as MantleLook's own-person params (every slider neutral), its build and colour
+		lk = MantleLook.own(PlayerLook.clean(Unmasked.legacy(appearance)))
+		lk["build"] = float(Unmasked.BUILD_WIDTH[int(Unmasked.clean(appearance)["build"])])
+		lk["skin_col"] = Unmasked.colour(appearance)
+		race = Unmasked.race(appearance)
+		arch = "unmasked"
+	else:
+		arch = HeroKit.arch_for(cls, arch, appearance)
+		lk = MantleLook.params(arch, appearance)
+		if lk["own"]:
+			arch = ""            # your own person at home: no Warden's gear, shape or class size
+			cls = "medium"
+		race = RACES[int(lk["race"])]
 	var rid: String = race["id"]
 	var root := Node3D.new()
 	var bare := outfit == "bare"
@@ -696,11 +737,12 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	# head: the sculpted head (jaw, cheeks, brow, chin per race and gender) with its face
 	var hk := HeroKit.head_key(rid, fem)
 	part(torso, HeroKit.head(hk), m_skin, Vector3(0, 0.86, 0), Vector3.ONE, Vector3.ZERO, "Head")
-	if rid == "human":
+	if rid == "human" and not um:
 		for sx in [-1.0, 1.0]:
 			var ear := HeroKit.loft("ear", [Vector3(0, -0.035, 0), Vector3(0, 0.0, 0.008), Vector3(0, 0.035, 0.02)], [Vector2(0.03, 0.012), Vector2(0.04, 0.014), Vector2(0.022, 0.01)], 10, Vector3.RIGHT, 0.75)
 			part(torso, ear, m_skin, Vector3(0.226 * sx * (1.03 if not fem else 0.98), 0.85, 0.012), Vector3.ONE, Vector3(0, 0.25 * sx, 0))
-	_face(torso, lk, m_dark, m_skin, team_col)
+	if um: Unmasked.face(torso, appearance, skin_c)
+	else: _face(torso, lk, m_dark, m_skin, team_col)
 	# what the archetype wears on its head decides how much hair shows (a hat: all but the crown; a
 	# hood or helm: only what spills out below)
 	var cov := HeroGear.cover(arch, bare)
@@ -751,7 +793,8 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		"m": {"body": m_body, "shirt": m_shirt, "pants": m_pants, "leather": m_leather, "skin": m_skin, "hair": m_hair, "dark": m_dark, "acc": m_acc,
 			"gold": m_gold, "gun": m_gun, "hero": m_hero, "trim": m_trim, "steel": m_steel, "glow": m_glow, "glow_soft": m_glow_soft, "bone": m_bone,
 			"wood": m_wood, "fur": m_fur, "feather": m_feather, "cloak": m_cloak, "hat": m_hat}}
-	HeroGear.dress(arch, ctx)
+	if um: Unmasked.dress(ctx, appearance)
+	else: HeroGear.dress(arch, ctx)
 	gun_parts(gun, weapon, m_gun, m_dark, m_acc)
 	gun.scale = Vector3.ONE * float(CLASS_LOOK.get(cls, {}).get("weapon", 1.0))     # heavies carry big guns
 	if not gun.has_node("Mag"):
@@ -810,14 +853,15 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	hkk *= float(lk["head"]) * float(Arch.body(arch).get("head", 1.0))      # the Warden's head size
 	var bk := float(race["bulk"]) * float(HeroGearPair.body(arch)["bulk"])
 	head.scale = Vector3(hkk * float(lk["face_w"]), hkk * float(lk["jaw"]), hkk)
-	head.position.y += (hkk - 1.0) * 0.05 + float(Arch.body(arch).get("neck", 0.0))      # (a Warden can stand taller in the neck)
+	# (a Warden can stand taller in the neck)
+	head.position.y += (hkk - 1.0) * 0.05 + float(Arch.body(arch).get("neck", 0.0))
 	if bk != 1.0:
 		for ch in torso.get_children():
 			if ch is MeshInstance3D and not String(ch.name).begins_with("Tail") and ch.name != "Wings":
 				(ch as Node3D).scale = Vector3(bk, 1.0 + (bk - 1.0) * 0.35, bk)
 		aim.scale = Vector3(lerpf(1.0, bk, 0.75), 1.0, 1.0)
 		shoulder.position.x *= bk
-		legs.scale = Vector3(bk, 1.0, bk)
+		legs.scale = Vector3(bk, legs.scale.y, bk)      # (keeps the leg length set above)
 		var bks := Vector3(bk, 1.0 + (bk - 1.0) * 0.35, bk)
 		for nm in ["Skirt", "Cape", "Scarf"]:
 			var pv := torso.get_node_or_null(nm) as Node3D
@@ -858,9 +902,9 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var bulk := float(body.get("bulk", 1.0))
 	var look_k := rs * ck * size_k * float(lk["height"])
 	root.scale = Vector3(bulk, 1.0, bulk) * float(Data.CLASSES[cls]["scale"]) * look_k
-	# the ring under your feet shows the real hitbox, whatever your size
-	var hit_k := Arch.hit_r(arch, Data.CLASSES[cls]) / float(Data.CLASSES[cls]["hit_r"])
-	ring.scale = Vector3(1.0 / bulk, 1.0, 1.0 / bulk) * hit_k / look_k
+	# the ring under your feet is the real hitbox: its world radius is hit_r, whatever your size
+	var ring_k := 2.0 * Arch.hit_r(arch, Data.CLASSES[cls]) / (float(Data.CLASSES[cls]["scale"]) * look_k)
+	ring.scale = Vector3(1.0 / bulk, 1.0, 1.0 / bulk) * ring_k
 	var torso_node := root.find_child("Torso", true, false) as Node3D
 	if torso_node != null:
 		torso_node.scale.x *= float(body.get("chest", 1.0))
@@ -1318,7 +1362,8 @@ static func _face(torso: Node3D, lk: Dictionary, m_dark: Material, m_skin: Mater
 	iris.set_shader_parameter("gloss", 0.85)
 	iris.set_shader_parameter("sss", 0.0)
 	var y := 0.868
-	var es: float = (1.3 if fem else 1.1) * float(lk["eye_size"])     # big readable eyes; rounder for her, narrower for him
+	# big readable eyes; rounder for her, narrower for him
+	var es: float = (1.3 if fem else 1.1) * float(lk["eye_size"])
 	var eh := float(lk["eye_shape"])        # taller (rounder) or flatter (narrower) eyes
 	var brow_up := float(lk["brow"])        # how high the brows sit over the eyes
 	var m_hairf := toon(hair_c.darkened(0.15), false)
@@ -1637,9 +1682,9 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			merge_static(spin)
 			part(gun, box(0.08, 0.18, 0.14), m_dark, Vector3(0, -0.17, 0.0))
 		"longbow", "tower_shield":
-			PinBjornWeapons.build(gun, weapon, m_dark, m_acc)      # Pin's recurve, Bjorn's war hammer and aegis
+			PinBjornWeapons.build(gun, weapon, m_dark, m_acc)      # Hem's recurve, Breaker's war hammer and aegis
 		"coilcaster":
-			# Vireo's forearm coil: a copper tube wound in rings with a glowing mouth and a bracer grip
+			# Ryzz's forearm coil: a copper tube wound in rings with a glowing mouth and a bracer grip
 			var cop := shiny(Color("c8793c"), 0.7)
 			part(gun, cyl(0.04, 0.05, 0.5, 12), m_dark, Vector3(0, 0.0, -0.22), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			for k in 6:
@@ -1986,7 +2031,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 			part(body, sphere(0.035, 6), toon(Color("fff6c0"), false, 1.6), Vector3(cos(a) * 0.42, 0.62 + i * 0.08, sin(a) * 0.42), Vector3.ONE, Vector3.ZERO, "Spark%d" % i)
 	var acc: String = rec.get("acc", "")
 	if acc != "" and Data.ACCS.has(acc):
-		accessory(body, acc)
+		accessory(body, acc, Goods.wear_col(rec))
 	var pup: Node = KinPuppet.new(); pup.set("species", species)
 	root.add_child(pup)
 	if int(rec.get("level", 1)) < 4 and (rec.get("forms", []) as Array).is_empty() and not rec.is_empty():
@@ -2003,9 +2048,8 @@ static func _repivot(n: Node3D, at: Vector3) -> void:
 	for ch in n.get_children():
 		(ch as Node3D).position -= at
 
-## Something a kin wears, on its body at head height.
-static func accessory(body: Node3D, id: String) -> void:
-	var c: Color = Data.ACCS[id]["col"]
+## Something a kin wears, on its body at head height, in colour c (its own, or a dye's).
+static func accessory(body: Node3D, id: String, c: Color) -> void:
 	var m := toon(c)
 	match id:
 		"bell":
@@ -2036,6 +2080,8 @@ static func accessory(body: Node3D, id: String) -> void:
 			part(body, cyl(0.17, 0.17, 0.03, 14), m, Vector3(0, 0.68, 0))
 			part(body, cyl(0.11, 0.11, 0.2, 14), m, Vector3(0, 0.79, 0))
 			part(body, cyl(0.113, 0.113, 0.04, 14), toon(Color("d9604a")), Vector3(0, 0.72, 0))
+		_:
+			BokiWear.build(body, id, c)
 
 ## An air ring: fly through it for a burst of speed.
 static func air_ring() -> Node3D:
@@ -2045,28 +2091,6 @@ static func air_ring() -> Node3D:
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var disc := part(root, cyl(1.2, 1.2, 0.02, 24), glow_mat(Color(0.55, 0.9, 1.0, 0.12)), Vector3.ZERO, Vector3.ONE, Vector3(PI / 2, 0, 0), "Disc")
 	disc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	return root
-
-## A thought bubble over a kin's head with what it wants in it.
-static func want_bubble() -> Node3D:
-	var root := Node3D.new()
-	var white := toon(Color("f6f2ea"), true)
-	part(root, sphere(0.22, 14), white, Vector3(0, 0, 0), Vector3(1.15, 0.95, 0.5))
-	part(root, sphere(0.06, 8), white, Vector3(-0.17, -0.24, 0))
-	part(root, sphere(0.035, 6), white, Vector3(-0.25, -0.34, 0))
-	var food := Node3D.new(); food.name = "food"; root.add_child(food)
-	part(food, sphere(0.085, 10), toon(Color("ff6a4a"), false, 0.2), Vector3(0, -0.01, -0.1))
-	part(food, sphere(0.04, 6), toon(Color("5aa84a"), false), Vector3(0.03, 0.08, -0.1), Vector3(1.4, 0.6, 0.6))
-	var energy := Label3D.new(); energy.name = "energy"; energy.text = "z z"; energy.font = UI.big; energy.font_size = 36
-	energy.pixel_size = 0.006; energy.modulate = Color("5a7ae0"); energy.outline_size = 0; energy.position = Vector3(0, 0, -0.12)
-	energy.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	root.add_child(energy)
-	var clean := Node3D.new(); clean.name = "clean"; root.add_child(clean)
-	part(clean, sphere(0.07, 10), toon(Color("5ab8f0"), false, 0.4), Vector3(0, -0.03, -0.1), Vector3(1, 1.25, 1))
-	part(clean, cyl(0.0, 0.05, 0.08, 8), toon(Color("5ab8f0"), false, 0.4), Vector3(0, 0.08, -0.1))
-	var joy := Node3D.new(); joy.name = "joy"; root.add_child(joy)
-	part(joy, sphere(0.08, 10), toon(Color("ff6a5a"), false, 0.2), Vector3(0, 0, -0.1))
-	part(joy, cyl(0.081, 0.081, 0.025, 12), toon(Color("f6f2ea"), false), Vector3(0, 0, -0.1), Vector3.ONE, Vector3(0, 0, 0.5))
 	return root
 
 ## The training yard: a straw dummy on a post, a mat and a couple of hoops.

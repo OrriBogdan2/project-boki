@@ -57,6 +57,20 @@ Each bone's head sits on its rig node's origin, Y along the limb.
 | `tail` | `Rig/Torso/Tail` (optional) | a tail (Cinder, Moosh Moosh) |
 | `wings` | `Rig/Torso/Wings` (optional) | wings |
 
+### Variant bones (a Warden's own extra bones)
+A Warden may carry extra bones of its own, declared in `WardenGlb.EXTRA` (`<archetype>: {bone: parent}`), on top of
+the table above. For that Warden they are part of its contract: `WardenSkeleton.mismatches` refuses a .glb that lacks
+one or hangs it on another parent. They are skinned like the rest and follow their parent bone through the retarget
+(the loader never writes them), and only that Warden's kit poses them, on their rest, with
+`WardenGlb.pose_extra(model, bone, rot, scale)` (`rot` about the bone's head, its axis in model space as the model
+rests; a zero scale hides what rides the bone). On a procedural model the call does nothing.
+- **Dredge** (`dredge`): `eye` (head); the grab-claw's three fingers `claw1.L`..`claw3.L` (hand.L), each with a
+  `claw<n>_tip.L`; the winch drum `winch` (hips, its head on the drum's axle, which runs side to side); the rope
+  `rope1` (hips) > `rope2` > `hook`; the tar pool `pool` (root, at his feet). DredgeKit spreads the claw for the Grapnel throw and clenches it while he
+  reels, spins the drum out while the hook flies and in while he reels, and hides the hanging rope and hook while
+  the kit draws them in flight, and spreads the pool only while he stands on the ground. Anchors `anchor_claw` (the throw's rope leaves from it), `anchor_hook`,
+  `anchor_winch`, `anchor_eye`.
+
 The kit moves (`kmoves_*.gd`) only key channels on these nodes (`p` pitch, `y` yaw, `r` roll, `lift`, `sq`
 squash, `fx`/`fy`/`fz` whole-body turns, `legs` [hip, knee, hip, knee], `fl`/`fr` free-hand targets, `gp` weapon
 pitch, `blade`/`wa`/`wo` the weapon's swing), so a .glb that follows these bones gets every move for free.
@@ -67,7 +81,22 @@ each is the next one's parent, and the last is the tip (no skin of its own; its 
 loader (`WardenGlb.Springs`, run by Sync after the contract bones) swings every chain as a damped rope in world
 space, pulled back toward the shape it has riding its parent rigidly (firmer at the root than at the tip), so it
 trails behind a run, swings out of a turn and settles. Nothing in the kit moves or the checks depends on them.
-`tools/meshy/warden_parts.py` builds Vex r3b's two braids this way.
+`tools/meshy/warden_parts.py` builds Vex r3b's two braids this way; `fit_warden.py`'s `hair_springs` puts a scan's own
+fused hair on such chains (Tarek's locs: the vertices of the hair slot in a box handed from the head to the chain by
+how far down it they hang).
+
+### Orbits (props that circle a bone)
+An empty named `orbit_<name>` parented to a bone, its rest upright (identity rotation in the model frame), carries
+unskinned props (Tarek's three seeing-stones round his head, each built facing out from the orbit's centre, its
+iris out and its plain back in). `WardenGlb.Orbits` (run by Sync) turns the empty round its own up axis
+(`ORBIT_HZ`) and bobs each prop on its own phase, so the orbit is data in the loader, never baked.
+`tools/meshy/warden_parts.py` `orbit_props()` builds them (fit spec `orbits`). They count as skinned for
+`--warden-glb-check` and stay out of `--warden-model-check`'s height.
+
+### Hovering bodies
+A body with no feet (Ostra) is built with its ground below its hem (fit spec `sole_z`); the rig's own hover
+(`KMovesStone.hover`, which lifts `Rig`, so the `root` bone) floats it and keeps the gap above the shadow. Its
+lower body is a `void` wisp on a `spring_wisp_*` chain under `hips` (`warden_parts.wisp()`).
 
 ### Design variants
 Another design of the same Warden can sit beside the shipped model while the owner compares them:
@@ -82,7 +111,8 @@ Whichever design the owner picks ships as `<art>/<art>.glb`.
   head at (0, 0, -0.62) in its space), the twin blades' `Offhand`. A .glb may carry its weapon as a separate,
   unskinned mesh named `weapon`, modelled in the Gun node's space (forward -Z, the Muzzle where shots leave),
   with its magazine as a child `weapon_mag`: the loader puts it under `Gun`, hides the procedural weapon and
-  makes the magazine the Gun's `Mag` (Vex does).
+  makes the magazine the Gun's `Mag` (Vex does). An empty `weapon_muzzle` under the weapon, on its mouth, moves the
+  Gun's `Muzzle` there, for a weapon shorter or longer than the procedural one (Dredge's horn).
 - `Rig/Torso/ArmLPivot/Elbow/Hand/Shield`: Bjorn's prow rides his left hand.
 - `Rig/Torso/Glider` (the paraglider; `meta skin`), `Rig/Torso/Shoulder` (a Boki's perch), `Rig/Torso/Halo`,
   `Rig/Torso/Focus`, `TeamRing` (the hit ring), and the root metas `cls`, `arch`, `race`, `wid`, `hip_y`, `mats`.
@@ -121,6 +151,21 @@ the vertex colour (`vertex_ao`):
 | `eyes` | — (unshaded iris) | the eye pick (`eye_col`) |
 | `team` | 1 | the team colour (keep it on one strong shape: a cuff, a cap, the stem's band) |
 | `glow` | emissive | — (Bjorn's crack, Zedran's fuller) |
+| `void` | — (shaders/hero_void.gdshader: a drifting starfield over the paint, unlit) | — (Ostra's coat tears; `void-wisp` also fades out toward its tip: `WardenGlb.SOFT_TAGS`) |
+
+A material with an emissive texture (glTF `emissiveTexture`) gets the toon shader's emission layer (`use_emit`,
+`WardenGlb.EMIT`, crackling by `EMIT_FLICKER`): Ryzz's veins, Tarek's bracer cracks. The fit's `split` parts are
+pieces cut off the body as their own skinned mesh on one "<slot>-<name>" material (Tarek's `bracers`, Ostra's
+`mask`), with such a layer painted from the atlas (`emit`: the dark cracks between plates, or a colour range).
+With a `model_glow.core` colour in the archetype JSON the layer is a mask drawn in that colour (`emit_tint`), its
+texels' paint too, so a Warden's glow switches without a rebake (Ryzz's pink scar, charm, piping and veins: the
+fit's `emit_art` projects that layer from the art's neon onto the body's own materials).
+A .glb whose weapon is part of the body carries an empty `weapon` node (fit spec `weapon_empty`): the loader
+hides the procedural weapon and the Gun node and its Muzzle stay (Tarek's fists).
+
+A **flat-painted** model (hand-modelled, one colour a material and no atlas: Dredge) names its materials the same way
+("<slot>-<what>": `metal-brass`, `leather-tar`); the loader shades each in its slot with its own base colour and the
+procedural heroes' clean painted settings (little brushwork, the cool shadow and warm light tints), ink shell on.
 
 Every material must end up in the root's `mats` meta (the loader does it) so hit flashes and mutations reach it.
 A model's own shading (content/rules/warden_look.json, keyed by its art name; `WardenGlb.look`) goes on last:
@@ -141,6 +186,8 @@ The armature and its meshes sit at the .glb's origin (no offset on the scene roo
 ## Budget and checks
 - About 30–45k triangles per Warden (a Meshy model baked to a clean low mesh: ~10k of them on the head, the
   weapon included; `--warden-glb-check` holds 45k), one 2048² atlas; no more than 8 material slots.
+  A hand-made model may be flat-painted instead (one colour a material, no atlas) or use a 2048² atlas with
+  its ageing painted in (Dredge); slots, not materials, count (Dredge's ten materials use four).
 - `--warden-glb-check`: the bone table covers every part HunterAnim binds; a Warden without a .glb builds the
   procedural model (the fallback); a .glb present loads with the contract armature, every kit move of every
   table retargets exactly and each keyed channel moves its bones, the anchors ride bone attachments, every

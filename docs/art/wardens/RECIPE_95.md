@@ -302,5 +302,5 @@ to ignore):
 | The face small and gaunt | the head grown about the neck only | `chunk.head` 1.21, `chunk.head_x` 1.04 (wider) (r3h) |
 | She goes dark at night | tattoos on the skin slot have no emission | `glow_key` on the skin slot (r3h) |
 | The hair pale cyan at the match camera | hair far_lift 0.7, fres 0.6 and the mint signature rim | hair far_lift 0.5, fres 0.3, rim_far 0 (step 7) |
-| A caption or a plant over the hero in the match frame | the Arena's tips and its spawn props | `--arena-demo=pose_clear` (recipe.py shots; spec `demo_at` still picks the spot) |
+| A caption or a plant over the hero in the match frame | the Arena's tips and its spawn props | `--arena-demo=pose_clear` (recipe.py shots) |
 | White/dark speckle fringe at match zoom | per-pixel fresnel, gloss and light rims on a dense mesh; a sub-pixel ink shell; stray texels; edge-on alpha cards | the shared far_* look (ext/warden-matchzoom); `no_ink` for thin parts |

@@ -258,9 +258,12 @@ func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 
 # ------------------------------------------------------------------ forced movement
 ## Pull a body to a spot over `dur` seconds in a low arc. Hunters fly there with their own physics;
-## monsters and kin are carried.
+## monsters and kin are carried. A body another game owns is yanked there by its own game.
 func yank(ent: Ent, to: Vector3, dur: float, hop := 1.2) -> void:
 	if ent == null or ent.dead:
+		return
+	if ent.remote:
+		m.displace.yank_remote(ent, to, dur, hop)      # its own game runs this same yank (Displace)
 		return
 	if ent is Hunter:
 		var h := ent as Hunter
@@ -387,6 +390,11 @@ func _take_shot(s: Dictionary, v: Vector2, by, team: int, k: float) -> void:
 	s["x"] = x
 	if s["node"]:
 		(s["node"] as MeshInstance3D).material_override.set_shader_parameter("color", Color("ffffff").lerp(s["col"], 0.4))
+
+## A hit that a wall's owner says it took (a raised shield blocking a blow from the front): as a shot on it.
+func absorb(w: Dictionary, dmg: float) -> void:
+	if walls.has(w):
+		_hit_wall(w, dmg, Color.WHITE)
 
 func _hit_wall(w: Dictionary, dmg: float, _col: Color) -> void:
 	# a Bulwark's shield (or any wall an archetype raised) turns what it blocks into Guard

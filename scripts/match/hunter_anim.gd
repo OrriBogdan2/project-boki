@@ -41,6 +41,7 @@ const LEG := THIGH + SHIN
 const UPPER := 0.21
 const FORE := 0.235
 const REACH := UPPER + FORE
+const WEAPON_SLACK := 0.02     # m: the trigger hand may sit this far off its grip before the weapon is pulled to it
 const BODY_C := Vector3(0, 0.62, 0)      # whole-body turns (flips, rolls) go about the hips
 const G_UP := Hunter.H_GRAV                # for guessing how long a jump stays up
 const FLIP_MIN := 0.8                     # total airtime that earns a trick
@@ -53,64 +54,34 @@ const STANCE := {
 	"medium": {"knee": 0.17, "width": 0.09, "lean": 0.05, "bounce": 0.0, "breath": 2.2, "arm": 1.0, "elbow": 0.75},
 	"heavy": {"knee": 0.24, "width": 0.17, "lean": 0.03, "bounce": 0.0, "breath": 1.7, "arm": 0.8, "elbow": 1.0},
 }
-## Each archetype's own stance on top of its class (Models.hunter's "arch" meta): the thief hunched
-## low and forward, springing on the balls of its feet, the archer tall and upright, the mage chest
-## up with a slow breath (its robe and orb do the moving), the gunslinger loose with a cocked hip,
-## the juggernaut low and wide over planted feet with a slow heavy breath, the bulwark wide and
-## square like a wall.
-const ARCH_STANCE := {
-	"thief": {"knee": 0.38, "lean": 0.22, "width": 0.085, "bounce": 1.7, "breath": 3.1, "arm": 1.35},
-	"archer": {"knee": 0.16, "lean": 0.0, "width": 0.1, "breath": 2.3},
-	"mage": {"lean": -0.03, "knee": 0.12, "width": 0.07, "breath": 1.8, "arm": 0.8},
-	"gunslinger": {"lean": 0.03, "width": 0.13, "knee": 0.2, "breath": 2.0},
-	"juggernaut": {"lean": 0.1, "width": 0.25, "knee": 0.34, "breath": 1.35, "arm": 0.7},
-	"bulwark": {"lean": 0.0, "width": 0.24, "knee": 0.3, "breath": 1.5, "arm": 0.7},
-	# tender: small, low and forward with the arms out, quick short steps; rimewright: a tall skater, arms
-	# held out, long strides
-	"tender": {
-		"lean": 0.24, "knee": 0.32, "width": 0.1, "bounce": 1.1, "breath": 2.9, "arm": 1.3, "cadence": 1.25},
-	"rimewright": {
-		"knee": 0.22, "lean": 0.14, "width": 0.1, "bounce": 0.4, "breath": 2.4, "arm": 1.25, "cadence": 1.4},
-	"dolm": {"lean": 0.1, "width": 0.2, "knee": 0.3, "bounce": 0.0, "breath": 1.6, "arm": 0.7},
-	"ostra": {"lean": 0.0, "width": 0.05, "knee": 0.05, "bounce": 0.0, "breath": 1.4, "arm": 0.8},
-	# cadence scales the step rate, stride the step length: Cinder scurries in short quick steps, Dredge
-	# plants wide, slower, longer ones (hero-ref "Body, scale and movement feel")
-	"ashwick": {
-		"knee": 0.2, "lean": 0.02, "width": 0.12, "bounce": 0.6, "breath": 2.4, "arm": 0.9, "cadence": 1.8,
-		"stride": 0.45, "fidgets": ["bounce", "bob", "weapon"]
-	},
-	"dredge": {
-		"knee": 0.24, "lean": 0.06, "width": 0.22, "bounce": 0.0, "breath": 1.5, "arm": 0.75, "cadence": 0.9,
-		"stride": 0.7, "fidgets": ["shoulders", "neck", "stretch"]
-	},
-}
 ## How far the shoulder pieces turn with the arm (the rest is left behind, so a raised arm slides
 ## under the plate instead of through it).
 const PAD_FOLLOW := 0.55
 
 ## Where each kind of weapon sits under Aim while aimed (pos), the relaxed carry (low: pitch, yaw),
 ## and where the hands go on it (gr: the trigger hand, gl: the support hand; Vector3.INF = free).
-## Recoil: kick (pitch), push (back), shake.
+## Recoil: kick (pitch), push (back), jitter (the gun wobbles in the hand).
+const EMPTY_HAND := Vector3(0.09, -0.45, 0.03)     # m from the shoulder: an empty right hand, hanging loose
 const HOLDS := {
-	"rifle": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.38), "gr": Vector3(0, -0.07, 0.04), "gl": Vector3(0, -0.06, -0.2), "kick": 0.12, "push": 0.05, "shake": 0.2},
-	"burst_rifle": {"pos": Vector3(0.12, -0.14, -0.3), "low": Vector2(-0.48, 0.36), "gr": Vector3(0, -0.08, 0.0), "gl": Vector3(0, -0.06, -0.16), "kick": 0.14, "push": 0.05, "shake": 0.15},
-	"smg": {"pos": Vector3(0.12, -0.13, -0.32), "low": Vector2(-0.45, 0.32), "gr": Vector3(0, -0.09, -0.02), "gl": Vector3(0, -0.07, -0.16), "kick": 0.07, "push": 0.03, "shake": 0.5},
-	"sniper": {"pos": Vector3(0.12, -0.12, -0.26), "low": Vector2(-0.55, 0.42), "gr": Vector3(0, -0.06, 0.04), "gl": Vector3(0, -0.05, -0.22), "kick": 0.42, "push": 0.12, "shake": 0.0},
-	"shotgun": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.38), "gr": Vector3(0, -0.07, 0.04), "gl": Vector3(0, -0.08, -0.22), "kick": 0.3, "push": 0.1, "shake": 0.0},
-	"minigun": {"pos": Vector3(0.17, -0.28, -0.3), "low": Vector2(-0.22, 0.14), "gr": Vector3(0, -0.15, 0.04), "gl": Vector3(-0.05, 0.11, -0.1), "kick": 0.03, "push": 0.02, "shake": 1.0},
-	"finger": {"pos": Vector3(0.14, -0.02, -0.46), "low": Vector2(-0.35, 0.2), "gr": Vector3(0, 0, 0.0), "gl": Vector3.INF, "kick": 0.3, "push": 0.08, "shake": 0.0},   # Vireo: no gun, the arm out, a finger pointed
-	"_gun": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.36), "gr": Vector3(0, -0.08, 0.02), "gl": Vector3(0, -0.06, -0.18), "kick": 0.15, "push": 0.05, "shake": 0.2},
+	"rifle": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.38), "gr": Vector3(0, -0.07, 0.04), "gl": Vector3(0, -0.06, -0.2), "kick": 0.12, "push": 0.05, "jitter": 0.2},
+	"burst_rifle": {"pos": Vector3(0.12, -0.14, -0.3), "low": Vector2(-0.48, 0.36), "gr": Vector3(0, -0.08, 0.0), "gl": Vector3(0, -0.06, -0.16), "kick": 0.14, "push": 0.05, "jitter": 0.15},
+	"smg": {"pos": Vector3(0.12, -0.13, -0.32), "low": Vector2(-0.45, 0.32), "gr": Vector3(0, -0.09, -0.02), "gl": Vector3(0, -0.07, -0.16), "kick": 0.07, "push": 0.03, "jitter": 0.5},
+	"sniper": {"pos": Vector3(0.12, -0.12, -0.26), "low": Vector2(-0.55, 0.42), "gr": Vector3(0, -0.06, 0.04), "gl": Vector3(0, -0.05, -0.22), "kick": 0.42, "push": 0.12, "jitter": 0.0},
+	"shotgun": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.38), "gr": Vector3(0, -0.07, 0.04), "gl": Vector3(0, -0.08, -0.22), "kick": 0.3, "push": 0.1, "jitter": 0.0},
+	"minigun": {"pos": Vector3(0.17, -0.28, -0.3), "low": Vector2(-0.22, 0.14), "gr": Vector3(0, -0.15, 0.04), "gl": Vector3(-0.05, 0.11, -0.1), "kick": 0.03, "push": 0.02, "jitter": 1.0},
+	"finger": {"pos": Vector3(0.14, -0.02, -0.46), "low": Vector2(-0.35, 0.2), "gr": Vector3(0, 0, 0.0), "gl": Vector3.INF, "kick": 0.3, "push": 0.08, "jitter": 0.0},   # Ryzz: no gun, the arm out, a finger pointed
+	"_gun": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.36), "gr": Vector3(0, -0.08, 0.02), "gl": Vector3(0, -0.06, -0.18), "kick": 0.15, "push": 0.05, "jitter": 0.2},
 	"sword": {"gr": Vector3(0, 0, 0.06), "gl": Vector3.INF},
 	"great": {"gr": Vector3(0, 0, 0.02), "gl": Vector3(0, 0, 0.15)},
 	"twin": {"gr": Vector3(0.06, 0, -0.02), "gl": Vector3(-0.1, -0.06, -0.08)},
-	# nothing held: both hands are free and the kit's moves cast from them (Moosh Moosh)
+	# nothing held: both hands are free and the kit's moves cast from them (Pip)
 	"palm": {
 		"pos": Vector3(0.14, -0.25, -0.1), "low": Vector2.ZERO, "gr": Vector3.ZERO, "gl": Vector3.INF,
-		"kick": 0.0, "push": 0.0, "shake": 0.0},
+		"kick": 0.0, "push": 0.0, "jitter": 0.0},
 	# a gauntlet on each fist (Tarek): carried like a gun, but it rides the hand wherever a move sends it
 	"fist": {
 		"pos": Vector3(0.14, -0.2, -0.26), "low": Vector2(-0.35, 0.2), "gr": Vector3(0, -0.02, 0.0), "gl": Vector3.INF,
-		"kick": 0.1, "push": 0.05, "shake": 0.0, "fist": true
+		"kick": 0.1, "push": 0.05, "jitter": 0.0, "fist": true
 	},
 }
 
@@ -126,6 +97,15 @@ const SWINGS := {
 		{"a": Vector3(-1.6, 1.0, 1.2), "b": Vector3(1.3, -0.65, 1.2), "tw": Vector2(-0.6, 0.55), "hand": "b"},
 		{"a": Vector3(1.25, -0.75, -1.5), "b": Vector3(-1.6, 0.65, -1.5), "tw": Vector2(0.55, -0.6), "hand": "b"},
 		{"a": Vector3(0.0, 2.5, 0.0), "b": Vector3(0.0, -1.2, 0.0), "tw": Vector2(-0.1, 0.1), "hand": "b", "drop": 0.2},
+	],
+	# Sable's Arc Bolts (by weapon id, over the twin hold's slashes): each blade whipped from cocked out
+	# wide and high to straight at the aim, the right, then the left; both at once in a V (the empowered
+	# bolt). The torso's turn comes from her kit moves (thf_lmb_r / _l, thf_primed), so no twist here; the
+	# ends lean 0.45 against the torso's 0.5 turn into the throw, so the blade points at the aim.
+	"arc_bolts": [
+		{"a": Vector3(-1.1, 0.45, 0.5), "b": Vector3(0.45, 0.0, 0.0), "tw": Vector2.ZERO, "hand": "r"},
+		{"a": Vector3(1.1, 0.45, -0.5), "b": Vector3(-0.45, 0.0, 0.0), "tw": Vector2.ZERO, "hand": "l"},
+		{"a": Vector3(-0.9, 0.5, 0.4), "b": Vector3(-0.14, 0.02, 0.0), "tw": Vector2.ZERO, "hand": "x"},
 	],
 	"twin": [
 		{"a": Vector3(-1.4, 0.05, 1.5), "b": Vector3(1.2, -0.25, 1.5), "tw": Vector2(-0.45, 0.5), "hand": "r"},
@@ -185,7 +165,8 @@ var race := "human"
 var wid := ""
 var hold := "rifle"
 var hd: Dictionary = {}        # HOLDS entry
-var st: Dictionary = {}        # STANCE entry
+var st: Dictionary = {}        # STANCE entry, with the Warden's gait over it
+var ws: WardenStance           # the Warden's signature stance and idle cycle
 var snap := false              # rest_pose: jump straight to the targets
 
 var ph := 0.0                  # walk phase, advances with distance travelled
@@ -342,7 +323,9 @@ func _init(m: Node3D) -> void:
 	race = String(m.get_meta("race", "human"))
 	arch = String(m.get_meta("arch", ""))
 	st = (STANCE.get(cls, STANCE["medium"]) as Dictionary).duplicate()
-	st.merge(ARCH_STANCE.get(arch, {}), true)
+	var stance := String(m.get_meta("stance", arch))      # the Empty's own stance by sex (Unmasked)
+	st.merge(WardenStance.gait(stance), true)
+	ws = WardenStance.new(stance)
 	rng = int(m.get_meta("anim_seed", m.get_instance_id())) & 0x7fffffff
 	seed_ph = _rand() * TAU
 	weight = 1.0 if _rand() < 0.5 else -1.0
@@ -429,7 +412,8 @@ static func _collect_pts(n: Node, xf: Transform3D, out: PackedVector3Array) -> v
 		if not (ch is Node3D) or ch.is_queued_for_deletion():
 			continue
 		var cx := xf * (ch as Node3D).transform
-		if ch is MeshInstance3D and (ch as MeshInstance3D).mesh:
+		# (a procedural weapon a Warden's .glb replaced doesn't count: WardenGlb hid it for good)
+		if ch is MeshInstance3D and (ch as MeshInstance3D).mesh and not ch.has_meta("glb_hidden"):
 			var bb := (ch as MeshInstance3D).mesh.get_aabb()
 			for i in 8:
 				out.append(cx * bb.get_endpoint(i))
@@ -580,6 +564,7 @@ func update(dt: float, s: Dictionary) -> void:
 		idle_t = 0.0
 	else:
 		idle_t += dt
+	ws.tick(dt, self, s)
 	# ---------------------------------------------------------------- signals
 	var vy := vel.y
 	acc_f = lerpf(acc_f, (mf - mf_prev) / dt, 1.0 - exp(-12.0 * dt))
@@ -670,6 +655,9 @@ func update(dt: float, s: Dictionary) -> void:
 	was_rolling = rolling
 	dash_t += dt
 	dash_k = _ease(dash_k, 1.0 if rolling and dash_kind != "roll" else 0.0, 22.0 if rolling else 9.0, dt)
+	# a 3D model's wings fold back while she skates (WardenGlb.Springs, the root's WING_FOLD meta)
+	if dash_kind == "skate" or model.has_meta(WardenGlb.WING_FOLD):
+		model.set_meta(WardenGlb.WING_FOLD, dash_k if dash_kind == "skate" else 0.0)
 	var roll_k := 0.0
 	var roll_ang := 0.0
 	if roll_t >= 0.0:
@@ -722,6 +710,7 @@ func update(dt: float, s: Dictionary) -> void:
 	if weight_t <= 0.0:
 		weight_t = 4.0 + _rand() * 7.0
 		weight_to = -weight_to if _rand() < 0.75 else weight_to
+	weight_to = ws.weight_side(weight_to)
 	weight = _ease(weight, weight_to, 1.6, dt)
 	var wk := weight * still * (1.0 - crouch_k) * (1.0 - revive_k) * (1.0 - stomp_k)
 	_tick_fidget(dt, still, s)
@@ -811,7 +800,7 @@ func update(dt: float, s: Dictionary) -> void:
 	# a kit move's legs
 	if not km.is_empty() and km.has("legs") and float(km["lw"]) > 0.0:
 		var kl4: Array = km["legs"]
-		var lw := clampf(float(km["lw"]), 0.0, 1.0)
+		var lw := clampf(float(km["lw"]), 0.0, 1.0) * stance_leg_k(km_stance, run_k)
 		hl = lerpf(hl, kl4[0], lw); kl = lerpf(kl, kl4[1], lw)
 		hr = lerpf(hr, kl4[2], lw); kr = lerpf(kr, kl4[3], lw)
 	# pulling up a ledge or vaulting: one knee comes up onto it
@@ -850,6 +839,13 @@ func update(dt: float, s: Dictionary) -> void:
 	if sw_k > 0.0:
 		hl += sw_k * 0.32 * idle_w; kl -= sw_k * 0.3 * idle_w
 		hr -= sw_k * 0.22 * idle_w; kr -= sw_k * 0.12 * idle_w
+	# the Warden's stance: the knees, the free leg, the feet apart
+	hl += ws.hip_l.x
+	kl += ws.hip_l.y
+	hr += ws.hip_r.x
+	kr += ws.hip_r.y
+	wl -= ws.spread
+	wr += ws.spread
 	# ================================================================ BODY
 	var breath := sin(t * float(st["breath"]) + seed_ph)
 	var pitch := -float(st["lean"]) * (1.0 - down_k) - lean_f - r1 * 0.06 - crouch_k * 0.3 - land_k * 0.32 - slam_k * 0.35
@@ -868,8 +864,6 @@ func update(dt: float, s: Dictionary) -> void:
 		pitch += r1 * 0.04           # runs tall, eyes up
 	elif arch == "mage":
 		pitch += r1 * 0.05 + still * sin(t * 0.9 + seed_ph) * 0.02    # glides upright; a slow sway standing
-	elif arch == "gunslinger":
-		roll += still * 0.05         # a cocked hip at rest
 	elif arch == "bulwark":
 		yaw *= 0.5                   # the shoulders stay square, a moving wall...
 		pitch -= r1 * 0.32 * (1.0 - dash_k)      # ...pitched far forward at a run (a dash leans by itself),
@@ -974,6 +968,9 @@ func update(dt: float, s: Dictionary) -> void:
 	# fidgets that move the whole upper body
 	var fid := _fidget_body()
 	pitch += fid.x; yaw += fid.y; roll += fid.z
+	pitch += ws.body.x
+	yaw += ws.body.y
+	roll += ws.body.z
 	# skating: the skate move owns the lean, capped so she stays up on her blades (about 23 degrees)
 	if dash_k > 0.01 and dash_kind == "skate":
 		pitch = maxf(pitch, -SKATE_LEAN_MAX)
@@ -1014,7 +1011,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var dl2 := (THIGH * cos(hl) + SHIN * cos(hl + kl)) * cos(wl)
 	var dr2 := (THIGH * cos(hr) + SHIN * cos(hr + kr)) * cos(wr)
 	var drop := (LEG - maxf(dl2, dr2)) * legs.scale.y * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - down_k) * (1.0 - dive_k) * (1.0 if roll_t < 0.0 else 0.0)
-	var off := Vector3(wk * 0.028 * still, -drop + bounce * 0.008, 0.0)
+	var off := Vector3(wk * 0.028 * still, -drop + bounce * 0.008, 0.0) + ws.hip
 	if arch == "juggernaut":
 		off.y -= absf(cos(ph)) * 0.035 * r1        # each footfall lands with weight
 	elif arch == "thief":
@@ -1045,7 +1042,7 @@ func update(dt: float, s: Dictionary) -> void:
 	if knee_l: knee_l.rotation.x = kl
 	if knee_r: knee_r.rotation.x = kr
 	# torso: bobs with the stride, breathes
-	var tb := breath * still * (1.0 - emote_k * 0.5)
+	var tb := breath * still * (1.0 - emote_k * 0.5) * ws.breath_k
 	torso.position.y = hip_y + tb * 0.006 + glide_k * 0.02
 	torso.scale = Vector3(1.0 - tb * 0.006, 1.0 + tb * 0.012, 1.0 - tb * 0.006)
 	torso.rotation = Vector3(pitch + dz, yaw, roll)
@@ -1064,6 +1061,7 @@ func update(dt: float, s: Dictionary) -> void:
 		head.rotation.y = head_look + fh.y + eh.y - yaw * lock - legs_yaw * 0.0
 		head.rotation.x = -pitch * 0.55 * (1.0 - tuck) + sin(ph * 2.0 + 0.6) * 0.03 * r1 + down_k * 0.25 - drink_k * 0.35 + fh.x + eh.x - tuck * 0.4 + flinch.x * 0.1
 		head.rotation.z = -roll * 0.5 + sin(t * 0.9 + seed_ph) * 0.03 * still + fh.z + eh.z + stun_k * sin(t * 3.1 + 1.2) * 0.2
+		head.rotation += ws.head
 	# ================================================================ SHOULDER PIECES
 	if pad_l and arm_l:
 		pad_l.quaternion = Quaternion.IDENTITY.slerp(arm_l.basis.get_rotation_quaternion(), PAD_FOLLOW)
@@ -1087,7 +1085,9 @@ func update(dt: float, s: Dictionary) -> void:
 ## blade (the greatsword's yaw, pitch, roll, like SWINGS) with bw, rad (the blade's reach), gp (a
 ## gun's extra pitch), wa / wo (a held weapon's extra pitch, yaw, roll and offset).
 ## A move with "hold": true stays on its last key until another replaces it; with
-## "loop": t as well it cycles from t to the last key instead (a recoil wobble, hand over hand).
+## "loop": t as well it cycles from t to the last key instead (a recoil wobble, hand over hand). A move with
+## "stance": true keys its legs as a planted stance, used only standing (stance_leg_k); with "swing": n the
+## weapon swing it starts plays step n of the weapon's SWINGS (one blade or the other, or both).
 const KMOVES := {
 }
 ## Stride rate (walk phase per metre) of heroes whose step differs from their class: quick, short steps
@@ -1100,6 +1100,8 @@ var km_id := ""
 var km_prev_t := 99.0
 var km_from := {}              # the pose the last kit move left the body in, eased out over KM_BLEND
 var km_blend := KM_BLEND
+var km_stance := false         # the move's legs are a standing stance: running, the legs keep running
+var km_swing := -1             # the weapon swing the move throws (its "swing" key), -1: the weapon's combo step
 const KM_BLEND := 0.08         # s: one kit move eases into the next (or back to none), so no pose pops
 
 ## The kit move's channels this frame; a new move (or the same one restarted) blends in from the last pose.
@@ -1107,11 +1109,19 @@ func _update_km(id: String, tt: float, dt: float) -> void:
 	if id != km_id or tt < km_prev_t - 0.001:
 		km_from = km
 		km_blend = 0.0
+	if id != km_id:
+		km_stance = bool(km_def(id).get("stance", false))
+		km_swing = int(km_def(id).get("swing", -1))
 	km_id = id
 	km_prev_t = tt
 	var now := km_sample(id, tt) if id != "" else {}
 	km_blend += dt
 	km = now if km_blend >= KM_BLEND or km_from.is_empty() else km_mix(km_from, now, km_blend / KM_BLEND)
+
+## How much of a kit move's legs to use: all of them, or for a move keyed "stance": true (a throw or a shot
+## from a planted stance) none at a run, so the legs keep running while the arms and torso play the move.
+static func stance_leg_k(stance: bool, run: float) -> float:
+	return 1.0 - clampf(run, 0.0, 1.0) if stance else 1.0
 
 ## Two kit-move poses mixed (u = 0: `a`, 1: `b`); a side without a channel counts as the rest pose, and the
 ## whole-body turns take the short way round.
@@ -1206,14 +1216,18 @@ var sw_hand := "r"
 var sw_drop := 0.0
 var sw_rad := -1.0
 var sw_b2 := Vector3.INF
+## How far along its arc a swing is (0 to 1) at `p`, the share of its time gone: a fast start that settles.
+static func swing_ease(p: float) -> float:
+	var u := clampf((p - 0.03) / 0.3, 0.0, 1.0)
+	return 1.0 - pow(1.0 - u, 3.0)
+
 func _swing_pose() -> void:
 	sw_w = 0.0; sw_tw = 0.0; sw_drop = 0.0; sw_rad = -1.0; sw_b2 = Vector3.INF; sw_hand = "r"
 	if swing_t >= swing_dur or not SWINGS.has(hold):
 		return
 	var p := swing_t / swing_dur
 	sw_w = smoothstep(0.0, 0.05, p) * (1.0 - smoothstep(0.6, 1.0, p))
-	var u := clampf((p - 0.03) / 0.3, 0.0, 1.0)
-	var e := 1.0 - pow(1.0 - u, 3.0)
+	var e := swing_ease(p)
 	if swing_step < 0:
 		# charged: a thrust (sword), an overhead slam (greatsword), a spin with both blades out
 		match hold:
@@ -1224,7 +1238,7 @@ func _swing_pose() -> void:
 			_:
 				sw_a = Vector3(-1.4, 0.0, 1.5); sw_b2 = Vector3(1.4, 0.0, -1.5); sw_hand = "x"
 		return
-	var sws: Array = SWINGS[hold]
+	var sws: Array = SWINGS.get(wid, SWINGS[hold])
 	var d: Dictionary = sws[swing_step % sws.size()]
 	sw_a = (d["a"] as Vector3).lerp(d["b"], e)
 	var tw: Vector2 = d["tw"]
@@ -1256,7 +1270,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if sn != swing_prev:
 		swing_prev = sn
 		swing_t = 0.0
-		swing_step = int(s.get("combo", 0))
+		swing_step = km_swing if km_swing >= 0 else int(s.get("combo", 0))
 		var base_d: float = {"twin": 0.3, "sword": 0.36, "great": 0.5}.get(hold, 0.36)
 		swing_dur = base_d * (1.25 if swing_step == 2 else 1.0) * (1.35 if swing_step < 0 else 1.0)
 	swing_t += dt
@@ -1298,7 +1312,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		ay = lerpf(ay, 0.1, carry_k)
 		var carry_at := Vector3(0.22, -0.3, -0.1 - sin(ph) * 0.06)
 		if hold == "finger":
-			carry_at = Vector3(0.36, -0.1, -0.12)     # Vireo runs upright with her arms held out wide
+			carry_at = Vector3(0.36, -0.1, -0.12)     # Ryzz runs upright with her arms held out wide
 		gpos = gpos.lerp(carry_at, carry_k)
 		free_l = carry_k
 		# recoil: the muzzle kicks up and the gun pushes back
@@ -1306,7 +1320,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		if not km.is_empty(): ap += float(km["gp"])
 		gpos.z += kick / maxf(0.01, float(hd.get("kick", 0.15))) * float(hd.get("push", 0.05)) * 0.6
 		if shake_t > 0.0 or (hold == "minigun" and fired < 0.15):
-			var sh := float(hd.get("shake", 0.2)) * 0.012
+			var sh := float(hd.get("jitter", 0.2)) * 0.012
 			gpos += Vector3(sin(t * 91.0) * sh, cos(t * 77.0) * sh, 0.0)
 		# keep the gun on target while the body leans and twists
 		var lock := lerpf(0.5, 0.95, aim_k) * (1.0 - carry_k) * (1.0 - float(km.get("wf", 0.0)))
@@ -1440,6 +1454,11 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		if km.has("wo"): gpos += km["wo"] as Vector3
 		gbas = Basis.from_euler(Vector3(ap, ay, ar))
 		ap = lp; ay = ly; ar = 0.0
+	# the Warden's signature carry while standing (it comes up to the aim the moment they fire)
+	var carried := ws.carry(Transform3D(gbas, gpos))
+	gbas = carried.basis
+	gpos = carried.origin
+	free_l = maxf(free_l, ws.carry_free_l())
 	# emotes: the weapon goes away, the hands do the talking
 	var gvs := gun_vis * gun_scl
 	aim.rotation = Vector3(ap, ay, ar)
@@ -1458,7 +1477,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	var at := aim.transform
 	var grip_r: Vector3 = hd["gr"]
 	var grip_l: Vector3 = hd["gl"]
-	var tr := at * (gun.transform * grip_r) if gun else sh_r + Vector3(0, -0.4, 0)
+	var tr := at * (gun.transform * grip_r) if gun else sh_r + EMPTY_HAND      # (no weapon: it hangs at the side)
 	var tl := Vector3.INF
 	if hold == "twin" and offhand:
 		tl = at * (offhand.transform * Vector3.ZERO)
@@ -1482,6 +1501,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if hd.get("fist", false):
 		# the off fist carried low and forward, ready (a brawler, not a shooter's hanging hand)
 		fl = sh_l + Vector3(-0.1, -0.3 + 0.06 * r1, -0.2 + swing_l * 0.12 * arm_amp)
+	fl += ws.arm_l
 	# dodges: arms back (phase lunge), tucked (roll), shoulder guard (charge)
 	if dash_k > 0.01:
 		match dash_kind:
@@ -1607,6 +1627,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		flag.visible = false
 	# the gun goes when it's stowed: the right hand is free then (and always with nothing held)
 	free_r = maxf(free_r, 1.0 - gun_vis)
+	free_r = maxf(free_r, ws.carry_free_r())
 	if hold == "palm":
 		free_r = 1.0
 	free_l = maxf(free_l, 1.0 - gun_vis)
@@ -1629,6 +1650,8 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	_ik(arm_r, el_r, sh_r + bsh, tr2, pole_r)
 	if hd.get("fist", false):
 		_fists_to_hands(grip_r)
+	elif gun and free_r < 0.5:
+		_weapon_to_hand(grip_r)
 	# the flask in the left hand
 	if drink_k > 0.0 and flask == null and hand_l:
 		flask = Node3D.new(); flask.name = "Flask"
@@ -1756,6 +1779,14 @@ func _fists_to_hands(grip: Vector3) -> void:
 	if offhand and hand_l:
 		offhand.position = to_aim * (arm_l.transform * (el_l.transform * hand_l.position)) - offhand.basis * grip
 
+## A weapon whose trigger-hand grip is out of the arm's reach (a flip, a long lunge) comes to the hand: it never
+## detaches (RIG_STANDARD: the weapon stays in the hand in every state).
+func _weapon_to_hand(grip: Vector3) -> void:
+	var hand := aim.transform.affine_inverse() * (arm_r.transform * (el_r.transform * hand_r.position))
+	var off := hand - gun.transform * grip
+	if off.length() > WEAPON_SLACK:
+		gun.position += off
+
 static func _reachable(sh: Vector3, want: Vector3, back_to: Vector3, reach: float) -> Vector3:
 	if sh.distance_to(want) <= reach:
 		return want
@@ -1822,7 +1853,7 @@ func _tick_fidget(dt: float, still: float, s: Dictionary) -> void:
 			fidget = ""
 			fidget_wait = 4.0 + _rand() * 7.0
 		return
-	if idle_t < 2.5 or still < 0.9 or kit_pose:
+	if idle_t < 2.5 or still < 0.9 or kit_pose or ws.fidgeting():
 		return
 	fidget_wait -= dt
 	if fidget_wait > 0.0:

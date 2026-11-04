@@ -213,7 +213,14 @@ static func level(rec: Dictionary, j: Dictionary) -> int:
 static func swing(hw, k: Dictionary, J: Dictionary) -> void:
 	var e := entry(int(J["u"]))
 	if e.is_empty() or not has_site(e): return
-	var at: Vector3 = J["look"]
+	land(hw, e, J["look"], String(k["rec"]["name"]))
+
+## The player's own swing (FarmHob): the same as a Boki's.
+static func player_swing(hw, e: Dictionary) -> void:
+	if has_site(e):
+		land(hw, e, HomeLayout.deco_center(e), "You")
+
+static func land(hw, e: Dictionary, at: Vector3, who: String) -> void:
 	var up := is_upgrading(e)
 	hw.h.fx.dust(at + Vector3(randf_range(-0.6, 0.6), 0.2, randf_range(-0.6, 0.6)), 6)
 	Sfx.play("build", at, -8.0, 0.15)
@@ -221,7 +228,7 @@ static func swing(hw, k: Dictionary, J: Dictionary) -> void:
 		Sfx.play("unlock", at, -4.0)
 		hw.h.fx.burst(at + Vector3(0, 1.4, 0), UI.GOLD, 22, 5.0, 0.8, 8.0, 1.2)
 		hw.h.fx.ring(at, 3.0, Color(UI.GOLD, 0.9), 0.5)
-		hw.produced(at, "%s %s the %s" % [k["rec"]["name"], "upgraded" if up else "finished", HomeLayout.CATALOG[String(e["id"])]["name"].to_lower()], "craft", "")
+		hw.produced(at, "%s %s the %s" % [who, "upgraded" if up else "finished", HomeLayout.CATALOG[String(e["id"])]["name"].to_lower()], "craft", "")
 		Work.count("built", 1)
 		if hw.h.hb: hw.h.hb.apply(false)
 		hw.scan_t = 0.0

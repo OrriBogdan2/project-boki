@@ -289,28 +289,28 @@ static func merge(ms: MergeSpec, giant := false) -> Array:
 	var fdash: Dictionary = MergeForm.data()["fallback"]["dash"]
 	out.append("%s, %s: your dash leaves your Boki type's trail (its rider on what you pass), then %ss of haste."
 		% [Settings.key_cap("dash"), String(fdash["name"]), n(float(fdash["haste_s"]))])
-	out.append("%s again: a basic burst that ends the merge." % Settings.key_cap("ultimate"))
+	out.append("%s again: a basic burst that ends the Fusion." % Settings.key_cap("ultimate"))
 	for slot in ms.merged:
 		var pt: Dictionary = ms.merged[slot]
 		var bits := PackedStringArray()
 		for k in pt.get("scale", {}): bits.append("%s x%s" % [k, n(float(pt["scale"][k]))])
 		for mp in pt.get("add_modifiers", []): bits.append(modifier(mp))
-		out.append("Merged %s: %s" % ["E" if slot == "active" else "auto ability", ", ".join(bits)])
+		out.append("Fused %s: %s" % ["E" if slot == "active" else "auto ability", ", ".join(bits)])
 	return out
 
 ## A merge with a form (content/merge_forms): what you become, its shell, what it adds to your own abilities, its ultimate (the same for everyone).
 static func form_lines(ms: MergeSpec, fd: Dictionary) -> Array:
 	var f := MergeForm.kit_form(ms.id)
 	var out: Array = []
-	out.append("You become %s for %ss. A shell (%s hp, from the lightest Hunter to the sturdiest) takes damage first; if it breaks, the merge ends." % [fd["name"], n(ms.duration), "/".join([n(MergeShell.size_for("light", f)), n(MergeShell.size_for("medium", f)), n(MergeShell.size_for("heavy", f))])])
+	out.append("You become %s for %ss. A shell (%s hp, from the lightest Hunter to the sturdiest) takes damage first; if it breaks, the Fusion ends." % [fd["name"], n(ms.duration), "/".join([n(MergeShell.size_for("light", f)), n(MergeShell.size_for("medium", f)), n(MergeShell.size_for("heavy", f))])])
 	var a: Dictionary = fd["aug"]
 	out.append("You keep your own abilities and they get stronger:")
 	out.append("Left click, %s: %s" % [a["lmb"]["name"], a["lmb"]["desc"]])
 	out.append("Right click, %s: %s" % [a["rmb"]["name"], a["rmb"]["desc"]])
 	out.append("E, %s: %s" % [a["e"]["name"], a["e"]["desc"]])
 	out.append("Shift, %s: %s" % [a["dash"]["name"], a["dash"]["desc"]])
-	out.append("%s again, %s: %s It ends the merge with a burst of speed and a shield, and your Boki rests %ss. Ready %ss in." % [Settings.key_cap("ultimate"), fd["r"]["name"], fd["r"]["desc"], n(float(MergeForm.data()["release_rest_s"])), n(float(MergeForm.data()["ult_lock_s"]))])
-	out.append("C is off while merged. Your Boki is part of you until it ends.")
+	out.append("%s again, %s: %s It ends the Fusion with a burst of speed and a shield, and your Boki rests %ss. Ready %ss in." % [Settings.key_cap("ultimate"), fd["r"]["name"], fd["r"]["desc"], n(float(MergeForm.data()["release_rest_s"])), n(float(MergeForm.data()["ult_lock_s"]))])
+	out.append("Your Boki's own ability is off while fused. Your Boki is part of you until it ends.")
 	return out
 
 ## The aiming shape shown while E is held (Match._update_indicators): [kind, reach, size(, "front")].
