@@ -39,9 +39,10 @@ static func shorts(h: Hunter) -> int:
 static func has_long(h: Hunter) -> bool:
 	return h.ak == null or h.ak.has_long_dash()
 
-## How long the long dash takes to come back for this hunter (its class data).
+## How long the long dash takes to come back for this hunter (the kit's dash.air.cd, else its class data).
 static func long_cd(h: Hunter) -> float:
-	return maxf(0.01, float(h.cdat.get("ex_cd", Hunter.EX_DASH_CD)))
+	var cd: float = h.ak.long_dash_cd() if h.ak else float(h.cdat.get("ex_cd", Hunter.EX_DASH_CD))
+	return maxf(0.01, cd)
 
 ## Moves one hunter's bar state to `now` (seconds, any steady clock): spots completed segments and
 ## starts their flash and tick (`audible`: your own bar only). Safe to call twice in one frame.

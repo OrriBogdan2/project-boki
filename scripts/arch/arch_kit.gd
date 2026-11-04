@@ -427,13 +427,18 @@ func _bond_tell() -> void:
 	m.sfx("bond", h.pos, -2.0, 1.2)
 
 # ------------------------------------------------------------------ dash helpers
+## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's.
+func long_dash_cd() -> float:
+	var air: Dictionary = dash_def().get("air", {})
+	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD)))
+
 ## Spends a dash charge (or the long air dash). False when neither is there.
 func spend_dash(use_ex: bool) -> bool:
 	if use_ex:
 		if h.ex_cd > 0.0:
 			h._ab_feedback("dash", "deny")
 			return false
-		h.ex_cd = float(h.cdat.get("ex_cd", Hunter.EX_DASH_CD))
+		h.ex_cd = long_dash_cd()
 		h.ex_next = true
 		h.gliding = false
 	else:

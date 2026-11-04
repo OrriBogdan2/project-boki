@@ -315,10 +315,10 @@ func _give(kind: String, n: Node3D) -> void:
 # ------------------------------------------------------------------ shots
 ## Rides a pooled look on a shot (the shared round shrinks to nothing, its hit radius stays). `lob`: the look
 ## arcs from the shot's height down to lob.y over lob.dist metres (a thrown spear), peaking lob.h above the line.
-func skin(s: Dictionary, kind: String, lob := {}) -> void:
+func skin(s: Dictionary, kind: String, lob := {}, look_scale := 1.0) -> void:
 	s["vr"] = 0.001
 	var n := _take(kind)
-	n.scale = Vector3.ONE
+	n.scale = Vector3.ONE * look_scale
 	n.global_position = s["pos"]
 	var tail := n.get_node_or_null("Tail") as Node3D
 	if tail: tail.visible = true
