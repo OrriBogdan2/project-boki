@@ -756,6 +756,23 @@ def gun_arm(ob, ga, m):
     return split_off(ob, pick, "weapon"), e, t
 
 
+def reglow(ob, img, glow_min):
+    """Faces painted bright enough (the gun's vents) onto the piece's glow material, with a threshold of its own."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    uv = ob.data.uv_layers.active.data
+    gi = next(i for i, m in enumerate(ob.data.materials) if m.name.startswith("glow"))
+    n = 0
+    for p in ob.data.polygons:
+        u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
+        v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
+        c = px[min(h - 1, max(0, int(v * h))), min(w - 1, max(0, int(u * w))), :3]
+        if c[0] >= glow_min[0] and c[1] >= glow_min[1] and c[2] <= glow_min[2]:
+            p.material_index = gi
+            n += 1
+    log("reglow: %d faces" % n)
+
+
 def gun_weapon(gun, e, t, rig, ga):
     """The cut-off gun-arm into the Gun node's space (Blender: forward +Y, her right +X, up +Z): its axis along
     +Y, the side that faced out from her body to her right, the barrels' end on the Muzzle and the back end
@@ -888,6 +905,8 @@ def main():
     if "gun_arm" in spec:
         gun, ge, gt = gun_arm(ob, spec["gun_arm"], m)
         drop_floaters(ob, int(spec["gun_arm"].get("loose_verts", 1500)))     # (bits the cut left hanging)
+        if "glow_min" in spec["gun_arm"]:
+            reglow(gun, img, spec["gun_arm"]["glow_min"])
     joints["pelvis"] = (joints["hip.L"] + joints["hip.R"]) * 0.5
     log("scale %.3f; joints:" % k, {n: tuple(round(x, 3) for x in p) for n, p in joints.items()})
     # into the contract's rest pose
