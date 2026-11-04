@@ -1060,3 +1060,27 @@ Ask S2 for one combined `ext/kits-integ` if merging seven is too slow (they did 
 - **3D:** verified on the Meshy Vex using a cherry-pick onto warden-meshy; it turns her hips bone. When warden-meshy merges, expect 2 small hunk conflicts in hunter_anim.gd: meshy's legs.scale/hip_y next to the stance's hip/breath.
 - **Shots:** ext/hero-shots-s2 under item52/. lineup_game.png has all 12 at match zoom; the lineup_close_*, before_after_* and meshy_vex_* shots are in the same folder.
 - **Limits:** Ostra's fingers, Cinder's tail and Burple's toes have no bones on the shared rig, so they are approximated. Vireo has no staff in her kit, so her hand rests at her shoulder.
+
+## 2026-11-04 04:04 UTC (S2): READY ext/kits-integ 5e551f8c (main 03:15 ask)
+- **Base:** origin/main 91a6bd05. git merge-tree says it merges cleanly with main c00feadf.
+- **Merges** (one --no-ff each): no-shake, online-displace, audit-zed-dredge-cinder, audit-pin-vireo-tarek, audit-bjorn, audit-ostra-claire-moosh, vex-ammo (which includes audit-sable-vex).
+- **Fix commit:** weapon_path.json listed Deep Magazine for heroes with no ammo; they now get Hot Load. Without it, perkorb fails 5.
+- **Resolutions:**
+  - Every audit and parity change is kept, and moves of other bodies go through Displace.
+  - Main's newer self-shakes are removed: DropFeel landing, the thief reset and the archer full draw. No add_trauma, cam.punch or Feel.shake calls remain outside the reserved files.
+  - StaminaBar.long_cd carries the long-dash change from the deleted dash_strip.
+  - The wiki keeps Class-Icy-Dancer and is regenerated.
+  - No style baseline or health budget raised.
+- **Checks:**
+  - All 12 combo checks 0, hero-combo 263/0, archetype 339/0, dash-flow 0, displace-net 34/0, shake 0, perkorb 134/0, aimkit, gear, keys, uipolish, support, zone, arena: all 0.
+  - S2 re-ran shake, displace-net, perkorb, gunslinger, rimewright and hero-combo, plus health --strict: all OK.
+- **Full suite:**
+  - Only known reds.
+  - Pre-existing on main c00feadf: drop-feel (a SCRIPT ERROR, `_tut_drive` missing in drop_check.gd) and teammate 1.
+  - The portrait "new names" assert is fixed on ext/rename-burple.
+- **Main still has to do:**
+  - The Net.VERSION bump: new ["disp"] events, ["zone","tp"] removed, and a 14th field on hit messages.
+  - The reserved-file one-liners: the displace list in DEBT.md, plus the no-shake ones (merge_kit 159/161, merge_xform 42/44/79/177, kin_exec 424, kin_strike 20).
+  - The R key (step 5).
+  - docs/wiki/Classes.md line 7 still says "Tamsin".
+- **Supersedes** merging the seven branches separately.
