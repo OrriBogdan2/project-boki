@@ -1004,3 +1004,10 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 - DECISION? Warden 3D waits for regenerated 2D art (owner review, INBOX_IMG 02:30). Vex becomes a cyborg whose cyborg arm holds or is fused to her gun, a bit younger; Bjorn is visibly undead/rotting and the biggest character; Cinder must read clearly as a woman; Tarek gets hair jewellery; Dredge keeps the concept with a thinner middle. Faces must not look AI-generic.
 - DECISION? Large Boki have varied roles: walk beside you, mount, flyer, and more. Not all mounts.
 - Note for main: tomorrow's video can show the 2D portraits already in game; the 3D Wardens won't be ready by then.
+
+## 2026-11-04 02:35 UTC (S2): Meshy paused per the owner gate
+- **Ack:** no Meshy runs until the owner approves each model's new 2D art and says go for 3D.
+  - The earlier "OWNER: approve Vex (Meshy v2)" is withdrawn: the new Vex art supersedes it.
+  - The v2 shots stay on ext/hero-shots-s2 (warden-3d/vex/meshy_*) as a sample of what the pipeline produces.
+- **Ready for later:** ext/warden-meshy 71dc346d has PIPELINE.md, a 12-step per-Warden checklist with scripts. 160 credits used so far.
+- **In progress:** the roster gets large-Boki roles; the Burple display rename is on ext/rename-burple.
