@@ -78,3 +78,8 @@ r3l_dredge_turnaround.png | r3l_dredge_front_34.png | r3l_dredge_back.png | r3l_
 r3l_dredge_closeup_front.png: portrait | r3k | r3l (the porthole).
 r3l_dredge_match.png: portrait | the Arena on pose_clear | x4 on DEMO_HERO_RECT. r3l_dredge_night.png: --raid=night | x4.
 r3l_dredge_vs_r3k.png: r3k turnaround over r3l. r3l_dredge_vs_r3k_match.png: r3k x4 | r3l x4.
+
+r3m (credit-free, ORCH's r3l review): seven heavy tar runs (r 13-19 mm, each ending in a drop) from the porthole's lip, the grille and the side port down the front, the back two; three bigger torn holes (two on the pods' outer edges, one low on the belly; 6-7 thick teeth each) in place of five small ones; smoke ribbons over both shoulders and the stack in turn; the pupil pink-red with a white heart; a dark grille with six brass slats under the porthole; the hull's top softer at the match camera (top light 0.55, a darker painted highlight).
+r3m_dredge_turnaround.png | r3m_dredge_front_34.png | r3m_dredge_back.png | r3m_dredge_closeup.png | r3m_dredge_moves.png: as for r3.
+r3m_dredge_closeup_front.png: portrait | r3l | r3m. r3m_dredge_match.png: portrait | the Arena on pose_clear | x4. r3m_dredge_night.png: --raid=night | x4.
+r3m_dredge_vs_r3l.png: r3l turnaround over r3m. r3m_dredge_vs_r3l_match.png: r3l x4 | r3m x4.
