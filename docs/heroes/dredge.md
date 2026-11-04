@@ -169,11 +169,12 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
   sunburst at the fists and a crescent sweep across the fan per wave, a violet flicker rising from each target.
 
 ## Engine notes
-The reel moves the body in small steps toward wherever Dredge is now, with a weighted velocity (`SWING`), so it swings when he
-moves. It is hauled over rock tiles (`World.T_BLOCK`) and props to the first clear spot, stopped by a cliff rise (`CLIFF`) or a
-placed wall (`Verbs.wall_blocks`); the void is not special. The hook's shot carries `"rocks": true`, which the match's shot step
+The reel is a Displace "haul" tow (`scripts/combat/displace.gd`, decision 0016): the body moves in small steps toward wherever
+Dredge is now, with a weighted velocity (`SWING`), so it swings when he moves. It is hauled over rock tiles (`World.T_BLOCK`) and
+props to the first clear spot, stopped by a cliff rise (`Displace.CLIFF`) or a placed wall (`Verbs.wall_blocks`); the void is not
+special. A player online is reeled on their own game the same way; the kit ends the reel when that game says it arrived. The hook's shot carries `"rocks": true`, which the match's shot step
 reads to let it fly over rocks (one condition in `match.gd`). Grounded on the caster uses `KitStatus` "gnd"; `Hunter.do_dash` lets a
-reeling Dredge barge anyway (`DredgeKit.reeling`). A foe owned by another player's game (remote) takes the hit and Grounded only.
+reeling Dredge barge anyway (`DredgeKit.reeling`).
 Holds dropped on a merge (`_drop_holds`): `wind`, `dive`, `flying`, `hook_sd`, `scoop`, `pull` (with the caster's own Grounded),
 and `broadside.blast` (Brass Broadside's charge and waves).
 Dash flow (item 32): `content/dash_flow/dredge.json`; LMB waits for the lunge's end, the rest fire from it; Shift during the slam or the Broadside is held (`dash_held`) and barges the step it ends (its `into_dash` rows).

@@ -366,9 +366,9 @@ func _mage() -> void:
 	var sl_d := float(e_d["slide_dist"])
 	var sl_t := float(e_d["slide_t"])
 	ok("Skycall: the speed eases out (6.2 m/s peak, half at the midpoint, zero at the end)",
-			absf(K.slide_speed(sl_d, sl_t, 0.0) - 6.18) < 0.05 and absf(K.slide_speed(sl_d, sl_t, sl_t * 0.5) - 3.09) < 0.05
-			and K.slide_speed(sl_d, sl_t, sl_t) == 0.0 and K.slide_speed(sl_d, sl_t, 0.0) < 8.0,
-			"%.2f" % K.slide_speed(sl_d, sl_t, 0.0))
+			absf(Displace.slide_speed(sl_d, sl_t, 0.0) - 6.18) < 0.05 and absf(Displace.slide_speed(sl_d, sl_t, sl_t * 0.5) - 3.09) < 0.05
+			and Displace.slide_speed(sl_d, sl_t, sl_t) == 0.0 and Displace.slide_speed(sl_d, sl_t, 0.0) < 8.0,
+			"%.2f" % Displace.slide_speed(sl_d, sl_t, 0.0))
 	ok("Skycall: the strike direction is the flick", (K.last_strike.get("dir", Vector2.ZERO) as Vector2).x < -0.9)
 	# no flick: thrown away from you; it steals a rival's orb
 	ac.fresh(T)

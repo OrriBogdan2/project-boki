@@ -119,7 +119,7 @@ func _all() -> void:
 		T2.teleport(home + Vector3(5.5, 0, 1.5))
 		K.chars = {}
 		K.ignites = {}
-		K.drags = []
+		m.displace.tows.clear()
 		K.hose.clear()
 		K.relight_t = 0.0
 		K.bash = {}

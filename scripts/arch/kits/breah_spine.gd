@@ -214,7 +214,7 @@ func _shove_off_line(p: Vector3, across: Vector2) -> void:
 			continue
 		var sgn := 1.0 if side_off >= 0.0 else -1.0
 		var dest: Vector3 = e.pos + Vector3(across.x, 0, across.y) * (clear - absf(side_off)) * sgn
-		HeroZones.move_body(k.m, e, dest)
+		k.m.displace.teleport(e, dest)
 		shoved += 1
 
 ## Is this rock one of the ult's, inside the window where its hits still fill the bond?

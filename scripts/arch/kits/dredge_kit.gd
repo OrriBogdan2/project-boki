@@ -33,10 +33,8 @@ const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); th
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
 const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
-# m: a rise past which a reeled body is lifted onto the ground ahead instead of walking up
-const CLIFF := 1.2
 
-var pull := {}                  # hold: the reel {t (the foe), left}
+var pull := {}                  # hold: the reel {t (the foe), tow (its Displace record), ally, wisp, from, scoop}
 var hook_hold: CastHold         # throw to the end of the reel or the miss: height held, a slow walk in flight
 var flying := false             # hold: the hook is in the air
 var hook_sd := {}               # the hook's shot while it flies
@@ -337,12 +335,22 @@ func _grab(f: Ent, ally := false) -> void:
 		cd["rmb"] = float(cd["rmb"]) * (1.0 - float(rdf["refund"]))
 	var wisp: bool = f is Hunter and (f as Hunter).downed
 	ally = ally or wisp           # a wisp caught head-on is reeled in like an ally: no stun, no Grounded
-	pull = {"t": f, "left": float(rdf["pull_max"]), "v": Vector2.ZERO, "ally": ally, "wisp": wisp, "from": f.pos}
+	# the reel (Displace: a player online is hauled on their own game, the same way); wisps it scooped on the
+	# way come along without the swing
+	var drag := {"mode": "haul", "spd": float(rdf["pull_speed"]), "gap": float(rdf["gap"])}
+	drag["dur"] = float(rdf["pull_max"])
+	var tow := drag.duplicate()
+	tow["swing"] = SWING
+	if not ally:
+		tow["stun"] = 0.2      # carried, stunned: they can't act or walk off the rope
+	pull = {"t": f, "tow": m.displace.tow(f, h, tow), "ally": ally, "wisp": wisp, "from": f.pos, "scoop": []}
+	scoop.erase(f)
+	for w in scoop:
+		(pull["scoop"] as Array).append(m.displace.tow(w, h, drag.duplicate()))
 	# the caster is Grounded while he reels (sheet gap 5); the chain ring at his feet is the tell, and the barge
 	# still works
 	KitStatus.apply(h, "gnd", float(rdf["pull_max"]), 0.0, true, "reeling: no jump or glide (the barge still works)")
 	st["self_gnd"] = true
-	if not ally: f.stun_t = maxf(f.stun_t, 0.3)
 	m.fx.word(
 		f.pos + Vector3(0, 2.4, 0), _grab_word(wisp, ally), col_of(rdf), true
 	)
@@ -350,8 +358,6 @@ func _grab(f: Ent, ally := false) -> void:
 	m.sfx("dr_grab", f.pos, -1.0, 1.0)
 	m.sfx("dr_reel", h.pos, -5.0, 1.0)
 	play("dr_reel")
-	if f.remote:
-		_end_pull(not ally)           # their body belongs to another game: the hit and Grounded still land
 
 func _grab_word(wisp: bool, ally: bool) -> String:
 	if wisp:
@@ -361,7 +367,8 @@ func _grab_word(wisp: bool, ally: bool) -> String:
 ## The reel: the body is hauled toward wherever Dredge is now, with weight (it carries its sideways speed and
 ## eases into the new heading), so walking sideways while reeling swings it round you (the source's physics
 ## pull). It is dragged over rocks, props and cliff faces; only a placed wall stops it; the abyss takes it.
-func _tick_pull(dt: float) -> void:
+## Displace moves it ("haul"); here the rope follows it and the reel ends with it.
+func _tick_pull(_dt: float) -> void:
 	var f = pull["t"]
 	var gone: bool = not is_instance_valid(f) or (f as Ent).dead
 	var state_changed: bool = not gone and f is Hunter and (f as Hunter).downed != bool(pull.get("wisp", false))
@@ -369,40 +376,24 @@ func _tick_pull(dt: float) -> void:
 		_end_pull(false)
 		return
 	var fe := f as Ent
-	pull["left"] = float(pull["left"]) - dt
-	var rdf := rmb_def()
-	var to := Vector2(h.pos.x - fe.pos.x, h.pos.z - fe.pos.z)
-	var dist := to.length()
-	var gap := float(rdf["gap"])
 	if tells_visible():
 		var id := h.get_instance_id()
 		var b := fe.pos + Vector3(0, 0.95, 0)
 		fx.rope("rope%d" % id, _hand(), b, ROPE_COL, _rope_thick())
-		fx.place("claw%d" % id, "claw", b, BRASS, BRASS_HOT, 1.5, atan2(to.x, to.y))
-	if dist <= gap + 0.05:
-		_end_pull(true)
-		return
-	if float(pull["left"]) <= 0.0:
-		_end_pull(false)
-		return
-	if not pull.get("ally", false):
-		fe.stun_t = maxf(fe.stun_t, 0.2)        # carried, stunned: they can't act or walk off the rope
-	var want := to / dist * float(rdf["pull_speed"])
-	var v: Vector2 = (pull["v"] as Vector2).lerp(want, 1.0 - exp(-SWING * dt))
-	pull["v"] = v
-	var left := minf(v.length() * dt, dist - gap)
-	var dir := v.normalized() if v.length() > 0.01 else to / dist
-	var moved := _drag(fe, dir, left)
-	if moved < left - 0.001 and moved < 0.001 and v.length() > 1.0:
-		snags += 1
-		m.fx.word(fe.pos + Vector3(0, 2.2, 0), "WALLED", Color("c0b0a0"), false)
-		_end_pull(false)
+		fx.place("claw%d" % id, "claw", b, BRASS, BRASS_HOT, 1.5, atan2(h.pos.x - fe.pos.x, h.pos.z - fe.pos.z))
 	for w in scoop.duplicate():
 		if not is_instance_valid(w) or not (w as Hunter).downed or (w as Hunter).out:
 			scoop.erase(w)
-			continue
-		var tw := Vector2(h.pos.x - w.pos.x, h.pos.z - w.pos.z)
-		if tw.length() > gap: _drag(w, tw.normalized(), minf(float(rdf["pull_speed"]) * dt, tw.length() - gap))
+			if is_instance_valid(w): m.displace.stop(m.displace.towing(w))
+	var tow: Dictionary = pull["tow"]
+	match String(tow.get("end", "")):
+		"arrived": _end_pull(true)
+		"walled":
+			snags += 1
+			m.fx.word(fe.pos + Vector3(0, 2.2, 0), "WALLED", Color("c0b0a0"), false)
+			_end_pull(false)
+		"": pass
+		_: _end_pull(false)
 
 ## Off the ground, from the throw until the miss or the end of the reel, he keeps his height (no fall, even
 ## over the abyss); on the ground there is nothing to hold.
@@ -415,56 +406,15 @@ func _rope_thick() -> float:
 	var since := fposmod(m.time - anim_at - 0.18, HAUL_T)
 	return 0.32 * (1.0 + 0.8 * (1.0 - smoothstep(0.0, 0.12, since)))
 
-## Moves a body `dist` along `dir` in small steps: over rocks and props and up cliff faces (lifted onto them),
-## never through a placed wall. Returns how far it went. Over the void it just goes on.
-func _drag(fe: Ent, dir: Vector2, dist: float) -> float:
-	var moved := 0.0
-	var W = m.world
-	while moved < dist - 0.001:
-		var s := minf(0.2, dist - moved)
-		var nx := fe.pos.x + dir.x * s
-		var nz := fe.pos.z + dir.y * s
-		var gy: float = W.ground_at(nx, nz)
-		var wall: bool = not W.dyn_walls.is_empty() and Verbs.wall_blocks(W.dyn_walls, nx, nz, fe.r, fe.pos.y) > 0.0
-		if wall:
-			break
-		var face: float = W.ground_at(nx + dir.x * fe.r, nz + dir.y * fe.r)
-		# a body already falling into the abyss isn't saved
-		var standing: bool = gy > World.VOID + 1.0 and fe.pos.y > gy - 0.5
-		if standing and face > World.VOID + 1.0 and face - fe.pos.y > CLIFF:
-			fe.pos.y = face + 0.5          # hauled up a cliff face
-			fe.vel.y = maxf(fe.vel.y, 5.0)
-		if W.occupy(nx, nz, fe.r, fe.pos.y, false) != 0.0 and gy > World.VOID + 1.0:
-			# a rock or a prop in the way: haul the body up and over it to the first clear spot beyond
-			var k := s
-			var clear := false
-			while k < 5.0:
-				k += 0.2
-				var qx := fe.pos.x + dir.x * k
-				var qz := fe.pos.z + dir.y * k
-				var qy: float = W.ground_at(qx, qz)
-				if qy - fe.pos.y > CLIFF: break
-				if W.occupy(qx, qz, fe.r, maxf(fe.pos.y, qy), false) == 0.0:
-					fe.pos.x = qx
-					fe.pos.z = qz
-					fe.pos.y = maxf(fe.pos.y, qy) + 0.5
-					fe.vel.y = maxf(fe.vel.y, 5.0)      # a little toss as it clears the top
-					clear = true
-					break
-			if not clear:
-				break
-			hauled += 1
-			moved += k
-			continue
-		fe.pos.x = nx
-		fe.pos.z = nz
-		moved += s
-	return moved
-
 func _end_pull(arrived: bool) -> void:
 	var f = pull.get("t")
 	var ally: bool = pull.get("ally", false)
 	var wisp: bool = pull.get("wisp", false)
+	var tow: Dictionary = pull.get("tow", {})
+	hauled += int(tow.get("hauled", 0))
+	m.displace.stop(tow)
+	for rec in pull.get("scoop", []):
+		m.displace.stop(rec)
 	pull = {}
 	scoop = []
 	hook_hold = null
@@ -475,8 +425,6 @@ func _end_pull(arrived: bool) -> void:
 	if arrived and is_instance_valid(f) and not (f as Ent).dead:
 		arrivals += 1
 		var rdf := rmb_def()
-		(f as Ent).vel.x = 0.0
-		(f as Ent).vel.z = 0.0
 		if ally:
 			if not wisp: m.fx.word((f as Ent).pos + Vector3(0, 2.4, 0), "SAVED", col_of(rdf), true)
 			return
@@ -585,7 +533,7 @@ func _slammed(f: Ent, stun: float, amt: float) -> void:
 	if rank("kin") >= 3 and over_abyss(f):
 		abyss_dunks += 1
 		f.hurt(amt * power("kin") * float(ed["abyss_k"]), h, {"src": "abil", "ab": "k1", "tags": ["anchor"]})
-	f.vel.y = minf(f.vel.y, -16.0)
+	m.displace.spike(f, -16.0)
 	# ANCHORED says it all: no separate GROUNDED word over the stun
 	KitStatus.apply(f, "gnd", float(ed["gnd_t"]), 0.0, true, "anchored: no dash, jump or glide")
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})

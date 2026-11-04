@@ -451,9 +451,11 @@ func _near_hunter(p: Vector3, d: float) -> Hunter:
 		if dd < bd: bd = dd; best = h
 	return best
 
+## Hazards run on every game, each on its own clock: a game only hurts, pulls or slows the bodies it owns, so
+## a player online is hit once (by their own game), not once per game.
 func _hit_area(at: Vector3, r: float, dmg: float, o: Dictionary) -> void:
 	for f in m.foes_of(-3):
-		if Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < 1.8:
+		if not f.remote and Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < 1.8:
 			var oo := o.duplicate(); oo["tags"] = ["mut", "hazard"]; oo["src"] = "hazard"
 			f.hurt(dmg * float(m.T.get("mob", 1.0)), null, oo)
 
@@ -500,7 +502,7 @@ func _tick_hazards(dt: float) -> void:
 						m.fx.burst(p + Vector3(0, 0.6, 0), Color("ff9a3a"), 34, 7.5, 0.7, 9.0, 1.4)
 						m.sfx("boom", p, -4.0, 0.8)
 						_hit_area(p, 2.2, 10.0, {"burn": 3.0, "kb": Vector2.ZERO, "lift": 5.0})
-						m.fields.add(hz_ent, p, {"radius": 1.6, "color": "#ff7a3a", "time": 2.5, "every": 0.5, "dmg": 2.0, "burn": 2.0}, {"slot": "lava", "ability": "lava"}, float(m.T.get("mob", 1.0)))
+						m.fields.add(hz_ent, p, {"radius": 1.6, "color": "#ff7a3a", "time": 2.5, "every": 0.5, "dmg": 2.0, "burn": 2.0, "own": true}, {"slot": "lava", "ability": "lava"}, float(m.T.get("mob", 1.0)))
 						if core: core.scale = Vector3.ONE
 						hz["phase"] = "idle"; hz["t"] = rng.randf_range(5.0, 8.0)
 			"spore_pod":
@@ -519,7 +521,7 @@ func _tick_hazards(dt: float) -> void:
 						m.fx.end_telegraph(hz["tele"]); hz["tele"] = null
 						m.fx.burst(p + Vector3(0, 0.6, 0), Color("d88aff"), 28, 4.0, 0.8, -1.0, 1.4)
 						m.sfx("thump", p, -4.0, 0.7)
-						m.fields.add(hz_ent, p, {"radius": 2.6, "color": "#b06ad0", "time": 4.0, "every": 0.5, "dmg": 3.0, "slow": 0.6}, {"slot": "spore", "ability": "spore"}, float(m.T.get("mob", 1.0)))
+						m.fields.add(hz_ent, p, {"radius": 2.6, "color": "#b06ad0", "time": 4.0, "every": 0.5, "dmg": 3.0, "slow": 0.6, "own": true}, {"slot": "spore", "ability": "spore"}, float(m.T.get("mob", 1.0)))
 						if pod: pod.visible = false
 						hz["phase"] = "spent"; hz["t"] = 14.0
 				else:
@@ -548,7 +550,7 @@ func _tick_hazards(dt: float) -> void:
 						m.fx.burst(p + Vector3(0, 0.3, 0), Color("b08aff"), 8, -3.0, 0.4, 0.0, 1.0)
 						for f in m.foes_of(-3):
 							var to := Vector2(p.x - f.pos.x, p.z - f.pos.z)
-							if to.length() < 4.5 + f.r and absf(f.pos.y - p.y) < 2.0:
+							if not f.remote and to.length() < 4.5 + f.r and absf(f.pos.y - p.y) < 2.0:
 								if to.length() > 0.6: f.impulse(to.normalized() * 3.2, 0.0)
 								if to.length() < 1.3: f.hurt(3.0 * float(m.T.get("mob", 1.0)), null, {"src": "hazard", "tags": ["mut", "hazard"]})
 					if float(hz["t"]) <= 0.0:

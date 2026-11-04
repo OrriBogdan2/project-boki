@@ -20,6 +20,7 @@ var rinkrun := {}              # the running Skate: {t, dir, loop, slab}
 var air_skate := false         # Shift pressed in the air: the skate starts on landing
 var ice_t := 0.0               # s until the rank-3 Skate may lay its next span of ice
 var wall := {}                 # the Rink Wall: {w, dir, sliding, t, slide_t, hp0, hit}
+var carried := {}              # foe id -> its Displace tow: bodies the sliding Rink Wall carries
 var wall_cast := {}            # the wall's 0.2 s tell before it erupts: {t, dir, travel}
 var spear_aim := false         # RMB held: the landing ring and the raised spear are up
 var throw_t := -1.0            # s left of the throw's wind-up before the spear leaves her hand (-1: none)
@@ -686,6 +687,8 @@ func _freeze_wall() -> void:
 ## Sliding toward the cursor and widening from a narrow block to its full width; it stops at the
 ## cursor distance, at a cliff or a wall, then stands until its time runs out.
 func _tick_wall(dt: float) -> void:
+	if not carried.is_empty() and (wall.is_empty() or not bool(wall["sliding"]) or not m.verbs.walls.has(wall["w"])):
+		_drop_carried()
 	if wall.is_empty():
 		return
 	var w: Dictionary = wall["w"]
@@ -705,7 +708,7 @@ func _tick_wall(dt: float) -> void:
 			wall["sliding"] = false          # it stops where it got to and stands for the rest of its time
 		else:
 			mid = nmid
-			_carry(w, dir, dir * float(ed["slide"]) * dt)
+			_carry(w, dir, float(ed["slide"]))
 	var gk := clampf(float(wall["t"]) / maxf(0.1, minf(float(ed["grow_t"]), float(wall["slide_t"]))), 0.0, 1.0)
 	var ln := lerpf(float(ed["length"]), float(ed["length_max"]), gk)
 	var side := Vector2(-(wall["dir"] as Vector2).y, (wall["dir"] as Vector2).x)
@@ -724,19 +727,24 @@ func _tick_wall(dt: float) -> void:
 	if is_instance_valid(w["node"]):
 		(w["node"] as Node3D).visible = false
 
-## A foe on the wall's front face rides along with it (it pushes and carries, it never passes through).
-func _carry(w: Dictionary, dir: Vector2, step: Vector2) -> void:
+## A foe on the wall's front face rides along with it (it pushes and carries, it never passes through):
+## Displace pushes it at the wall's speed until the wall stops (a player online, on their own game).
+func _carry(w: Dictionary, dir: Vector2, speed: float) -> void:
 	for f in m.foes_of(h.team):
-		if f.dead or absf(f.pos.y - float(w["y"])) > 2.0:
+		if f.dead or absf(f.pos.y - float(w["y"])) > 2.0 or carried.has(f.get_instance_id()):
 			continue
 		var p2 := Vector2(f.pos.x, f.pos.z)
-		var c := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
-		var off := p2 - c
+		var off := p2 - Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
 		if off.length() < f.r + 0.55 and off.dot(dir) > -0.1:
-			var ahead: float = (f.r + 0.55) - off.dot(dir)
-			var nd := p2 + step + dir * maxf(0.0, ahead * 0.5)
-			if not m.world.is_block(nd.x, nd.y):
-				f.teleport(Vector3(nd.x, f.pos.y, nd.y))
+			var left := float(wall["slide_t"]) - float(wall["t"])
+			carried[f.get_instance_id()] = m.displace.tow(f, null, {
+				"mode": "push", "dir": [dir.x, dir.y], "spd": speed, "dist": speed * left, "dur": left + 0.1})
+
+## The wall stopped sliding (or is gone): whoever it carried stays where it got to.
+func _drop_carried() -> void:
+	for rec in carried.values():
+		m.displace.stop(rec)
+	carried = {}
 
 func in_e() -> bool: return not wall.is_empty() or not wall_cast.is_empty()
 

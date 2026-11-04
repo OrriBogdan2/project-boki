@@ -258,9 +258,12 @@ func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 
 # ------------------------------------------------------------------ forced movement
 ## Pull a body to a spot over `dur` seconds in a low arc. Hunters fly there with their own physics;
-## monsters and kin are carried.
+## monsters and kin are carried. A body another game owns is yanked there by its own game.
 func yank(ent: Ent, to: Vector3, dur: float, hop := 1.2) -> void:
 	if ent == null or ent.dead:
+		return
+	if ent.remote:
+		m.displace.yank_remote(ent, to, dur, hop)      # its own game runs this same yank (Displace)
 		return
 	if ent is Hunter:
 		var h := ent as Hunter

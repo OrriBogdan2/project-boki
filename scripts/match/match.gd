@@ -82,6 +82,7 @@ var pending_input := {"base": false, "dash": false, "jump": false, "sig": false,
 var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
+var displace: Displace = null     # abilities moving someone else's body (online too: its owner's game moves it)
 var _later: Array = []     # [due time, Callable]: delayed ability steps, on match time (not wall-clock timers)
 
 ## Run cb after `delay` seconds of match time: delayed effects, echoes, landing blasts. Unlike a
@@ -698,6 +699,7 @@ func _start(o: Dictionary) -> void:
 	brk = Breakables.new(self)
 	fields = Fields.new(self)
 	verbs = Verbs.new(self)
+	displace = Displace.new(self)
 	if world.layout_id != "" and not o.get("tutorial", false):
 		biomes = BiomeRun.new(self)
 		if biomes.active():
@@ -4314,6 +4316,7 @@ func step(dt: float) -> void:
 	_update_zones(dt)
 	fields.tick(dt)
 	verbs.tick(dt)
+	displace.tick(dt)
 	_run_later()
 	if biomes: biomes.tick(dt)
 	_update_tracking(dt)
@@ -5499,7 +5502,7 @@ func net_send_hit(target: Ent, dmg: float, by: Ent, o: Dictionary) -> bool:
 	var kb: Vector2 = o.get("kb", Vector2.ZERO)
 	Net.hit(target.nid, [_r(dmg), _r(kb.x), _r(kb.y), _r(float(o.get("lift", -1.0))), 1 if o.get("crit", false) else 0,
 		_r(float(o.get("stun", 0.0))), _r(float(o.get("burn", 0.0))), _r(float(o.get("slow", 0.0))), _r(float(o.get("root", 0.0))),
-		by.nid if by else "", String(o.get("src", "")), String(o.get("ab", ""))])
+		by.nid if by else "", String(o.get("src", "")), String(o.get("ab", "")), Displace.hit_extra(o)])
 	return true
 
 func _flags(h: Hunter) -> int:
@@ -5731,6 +5734,7 @@ func _net_hit_in(x) -> void:
 	if float(x[8]) > 0.0: o["slow"] = float(x[8])
 	if float(x[9]) > 0.0: o["root"] = float(x[9])
 	if x.size() > 12 and String(x[12]) != "": o["ab"] = String(x[12])
+	if x.size() > 13: Displace.apply_hit_extra(o, x[13])      # wall stun, steer, burn time, slow strength
 	e.hurt(float(x[1]), by, o)
 
 func _net_ev(x, from: String) -> void:
@@ -5740,6 +5744,8 @@ func _net_ev(x, from: String) -> void:
 	match String(x[0]):
 		"zone":
 			HeroZones.net_in(self, x)
+		"disp":
+			displace.net_in(x)
 		"kcmd":
 			KinNet.on_event(self, x)       # a Boki command or a merge going off in another game
 		"kst":

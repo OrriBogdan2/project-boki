@@ -268,7 +268,7 @@ func pick_up(o: Hunter) -> void:
 func drop_all(broken: bool) -> void:
 	for o in carrying():
 		CareUtil.set_carry(m, o, "")
-		o.teleport(Vector3(h.pos.x, h.pos.y, h.pos.z) + Vector3(0.9, 0, 0))
+		m.displace.teleport(o, Vector3(h.pos.x, h.pos.y, h.pos.z) + Vector3(0.9, 0, 0))
 		o.vel = Vector3.ZERO
 	h.shield = 0.0
 	h.shield_t = 0.0
@@ -777,20 +777,14 @@ func _call_end(done: bool) -> void:
 	play("mm_call_end")
 
 
-## Pulls a downed teammate to her side and stands them up. An online teammate rides there on the
-## existing "carry" event, then the "rev" event stands them up a beat later.
+## Pulls a downed teammate to her side and stands them up (Displace and the "rev" event: an online
+## teammate is moved and stood up on their own game).
 func _call_home(who: Hunter) -> void:
 	stats["rescues"] += 1
 	var side := Vector2(cos(h.face), -sin(h.face)) * float(x_def().get("land_r", 0.9))
 	var to := Vector3(h.pos.x + side.x, h.pos.y, h.pos.z + side.y)
 	lk().burst("plus", who.pos + Vector3(0, 1.2, 0), {"r": 0.8, "dur": 0.3})
-	if who.remote:
-		CareUtil.set_carry(m, who, h.nid)
-		m.later(0.15, func():
-			CareUtil.revive(m, who, h)
-			CareUtil.set_carry(m, who, ""))
-		return
-	who.teleport(to)
+	m.displace.teleport(who, to)
 	who.vel = Vector3.ZERO
 	CareUtil.revive(m, who, h)
 

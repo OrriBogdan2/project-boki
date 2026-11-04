@@ -26,6 +26,7 @@ var radius := 0.0
 var swollen := false
 var tick_left := 0.0
 var caught := {}                        # instance id -> the body, for this cast
+var draws: Array = []                   # the Displace tows drawing the caught in
 var locked := false                     # Ostra is held in the cast pose
 var aim_lock := Vector2.ZERO            # the facing kept after the wind-up (ZERO until then)
 var lock_t := 0.0                       # s since the press
@@ -167,7 +168,6 @@ func _tick_open(dt: float) -> void:
 	if tick_left <= 0.0:
 		tick_left += TICK
 		_tick_catch(left)
-	_draw_in(dt)
 	if left <= 0.0:
 		_close()
 
@@ -188,26 +188,16 @@ func _tick_catch(left: float) -> void:
 		if first:
 			_on_catch(f)
 
+## A caught body is drawn to the centre (Displace: online, its own game draws it in), held there until it closes.
 func _on_catch(f: Ent) -> void:
 	KitLooks.of(k.m).crown(f, float(xd()["time"]))
-	if f.remote:
-		HeroZones.move_body(k.m, f, _floor(center))
+	var c := _floor(center)
+	draws.append(k.m.displace.tow(f, null, {
+		"mode": "glide", "to": [c.x, c.y, c.z], "spd": float(xd()["pull"]), "gap": HOLD_R, "hold": true,
+		"dur": maxf(float(xd()["time"]) - phase_t, TICK)}))
 	if f is Hunter:
 		caught_hunters += 1
 		HeroUlt.landed(k, f)
-
-## Caught bodies this game owns slide to the centre (a remote one was moved there on the catch).
-func _draw_in(dt: float) -> void:
-	var pull := float(xd()["pull"]) * dt
-	for key in caught.keys():
-		var f: Ent = caught[key]
-		if not is_instance_valid(f) or f.dead or f.remote:
-			continue
-		var to := Vector2(center.x - f.pos.x, center.z - f.pos.z)
-		if to.length() <= HOLD_R:
-			continue
-		var stepv := to.normalized() * minf(pull, to.length() - HOLD_R)
-		f.teleport(Vector3(f.pos.x + stepv.x, f.pos.y, f.pos.z + stepv.y))
 
 func _floor(p: Vector3) -> Vector3:
 	return Vector3(p.x, k.m.world.ground_at(p.x, p.z), p.z)
@@ -215,6 +205,9 @@ func _floor(p: Vector3) -> Vector3:
 ## It just stops: the disc folds in on itself, nothing bursts.
 func _close() -> void:
 	phase = ""
+	for rec in draws:
+		k.m.displace.stop(rec)
+	draws = []
 	unlock()
 	k.m.fx.ring(center, radius * 0.4, DISC_COL, 0.2)
 	k.m.fx.burst(center + Vector3(0, 0.3, 0), Color("2a0a3a"), 10, -3.0, 0.3, 0.0, 0.9)

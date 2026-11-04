@@ -27,6 +27,7 @@ const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange 
 const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
+const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull_speed, stopping gap m away)
 const EMBER_EVERY := 0.035             # s between the ember puffs a ram or poof leaves behind
 const POOF_PUFFS := 5                  # smoke puffs the bellows blow out behind him as the air poof goes off
 const CLOAK_POSE_T := 0.3             # s the Furnace Cloak flare holds the flamer up off the aim (as_cloak)
@@ -36,7 +37,6 @@ const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the nozzle's tip from the feet in the
 
 var chars := {}                 # foe id -> {e, n, t}
 var ignites := {}               # foe id -> {e, lvl, until}
-var drags: Array = []           # foes being dragged in by the shield blast: {e, left}
 var hose := AshwickHose.new()   # the Torch Lance stream
 var flame_acc := 0.0
 var spool := 0.0                # how long the hose has been held
@@ -182,7 +182,6 @@ func _tick(dt: float) -> void:
 		hose.step(m.world, dt)
 		_hose_look()
 	if not bash.is_empty(): _tick_bash(dt)
-	if not drags.is_empty(): _tick_drags(dt)
 	jet.tick(dt)
 	KMovesPair.air_moves(self, "lw_jump", "lw_land")
 	if h.shield_t > 0.0 and h.shield > 0.5 and st.get("shield_on", false):
@@ -605,8 +604,10 @@ func _cloak_blast() -> void:
 		m.fx.burst(
 			f.pos + Vector3(0, 1.4, 0), Color("6a4a5a"), 8, 1.5, 0.6, -1.0, 1.6
 		)
-		if f.mass() < 6.0 and not f.remote:
-			drags.append({"e": f, "left": 0.45})
+		if f.mass() < 6.0:
+			# dragged in toward her (Displace: a player online is pulled on their own game)
+			var drag := {"mode": "step", "spd": float(ed["pull_speed"]), "gap": float(ed["gap"]), "dur": DRAG_T}
+			m.displace.tow(f, h, drag)
 			pulled += 1
 	if hit > 0:
 		h.shield = maxf(h.shield, h.max_hp * (float(ed["shield_base"]) + float(ed["shield_each"]) * hit) * shield_k)
@@ -614,30 +615,6 @@ func _cloak_blast() -> void:
 		st["shield_on"] = true
 		m.sfx("shield", h.pos, -5.0, 0.9)
 	net_ring(h.pos, r, col)
-
-func _tick_drags(dt: float) -> void:
-	var ed := e_def()
-	for dg in drags.duplicate():
-		var fe = dg["e"]
-		dg["left"] = float(dg["left"]) - dt
-		if not is_instance_valid(fe) or (fe as Ent).dead or float(dg["left"]) <= 0.0:
-			drags.erase(dg)
-			continue
-		var e := fe as Ent
-		var to := Vector2(h.pos.x - e.pos.x, h.pos.z - e.pos.z)
-		var dist := to.length()
-		if dist <= float(ed["gap"]):
-			drags.erase(dg)
-			continue
-		var step := minf(float(ed["pull_speed"]) * dt, dist - float(ed["gap"]))
-		var dir := to / dist
-		var nx := e.pos.x + dir.x * step
-		var nz := e.pos.z + dir.y * step
-		var bx: float = m.world.occupy(nx, e.pos.z, e.r, e.pos.y, false)
-		var bz: float = m.world.occupy(e.pos.x, nz, e.r, e.pos.y, false)
-		if bx == 0.0: e.pos.x = nx
-		if bz == 0.0: e.pos.z = nz
-		if bx != 0.0 and bz != 0.0: drags.erase(dg)
 
 # ------------------------------------------------------------------ X: Flue Flight
 func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
