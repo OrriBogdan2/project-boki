@@ -69,3 +69,6 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 
 ## 2026-11-04 08:45 UTC (orchestrator): Pin is renamed "Hem"
 - Name her new files hem_*. Her redesign prompt (the Mask-Stitcher) is in briefs/specs/REDESIGN_PROMPTS_R3.md.
+
+## 2026-11-04 09:55 UTC (orchestrator): terms
+- In any text on art (posters, kit files): say Hunter, not Warden; the people without Masks are "the Empty".

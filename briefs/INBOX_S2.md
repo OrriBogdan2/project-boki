@@ -438,3 +438,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 09:20 UTC (orchestrator): canonical Mask lore
 - briefs/LORE_MASKS.md: each Warden's relic (the visible signature prop) and their current story. When you render the Mask put-on beat or a hero's idle, the relic is the hero prop to feature (e.g. Breaker's compass, Ryzz's bolt jar, Tarek's seeing-stone).
+
+## 2026-11-04 09:55 UTC (orchestrator): terms changed (player text)
+- "Warden" is gone from player-facing text: the Masks hold **fallen Hunters**; you at home are **the Empty** (not "the Unmasked"). Code/file names (warden_*, WardenSkeleton, unmasked) can stay. Any new kit text, tooltips or docs: follow briefs/LORE_MASKS.md "Terms".
