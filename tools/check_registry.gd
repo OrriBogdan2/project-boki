@@ -59,6 +59,8 @@ const CHECKS := {
 	"--farmbuild": ["res://tools/farmbuild_check.gd", "farmbuild_check", null],      # also --farmbuild-shots=<dir>
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],      # also --shots-dir=<dir>
 	"--mantle-look-check": ["res://tools/mantle_look_check.gd", "mantle_look_check", null],      # Mantle look, creator
+	"--warden-stance-check": ["res://tools/warden_stance_check.gd", "warden_stance_check", null],
+	"--warden-stance-shots": ["res://tools/warden_stance_shots.gd", "warden_stance_shots", null],
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
