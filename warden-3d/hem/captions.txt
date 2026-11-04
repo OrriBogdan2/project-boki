@@ -28,3 +28,9 @@ s4_closeup_vs_art.png, s4_34_vs_art.png, s4_back_vs_art.png, s4_match_vs_art.png
 s4_vs_turnaround_close.png / s4_vs_turnaround_game.png, s4_moves_close_1/2.png, s4_poses_game.png
 s4_vs_s3.png: stage 3 (top) against stage 4 (bottom)
 Self-score (RECIPE_95 rubric): close-up 83 (silhouette 13/15, face 17/20, hair 9/10, props 16/20, palette 13/15, clean paint 7/10, outfit 8/10); match zoom 74 (silhouette 20/25, signature colours 18/25, values 16/20, props 12/20, artefacts 8/10)
+
+Stage 5 (RECIPE_95 face rules + ORCH 14:10; credit-free):
+s5_closeup_vs_art.png, s5_34_vs_art.png, s5_back_vs_art.png, s5_match_vs_art.png / s5_match.png: the face painted from hem_face by an 18-landmark thin-plate warp (residual 0.5 px), masked inside the face and inpainted outside it; deep crimson coat, black corset and trousers; arm-length silver needles with eyes and drooping red thread; a split coat tail at the back; shears at her right hip, the lapel needle, bigger thimble claws; a thicker black bow and string; the match crop tighter on the hero (the Arena's caption and palm are props of the frame, not the model)
+s5_vs_turnaround_close.png / s5_vs_turnaround_game.png, s5_moves_close_1/2.png, s5_poses_game.png
+s5_vs_s4.png: stage 4 (top) against stage 5 (bottom)
+Self-score (RECIPE_95 rubric): close-up 85 (silhouette 13/15, face 18/20, hair 9/10, props 17/20, palette 13/15, clean paint 7/10, outfit 8/10); match zoom 68 (silhouette 18/25, signature colours 17/25, values 15/20, props 10/20, artefacts 8/10)
