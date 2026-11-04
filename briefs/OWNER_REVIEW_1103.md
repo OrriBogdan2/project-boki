@@ -584,3 +584,14 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
   3. **Look:** match the weapon's texture density, colours and the Hunter shader/outline to the body, so it reads as one model (re-texture from the art where it's muddy, like the faces pass).
   4. Verify across every kit move: idle, run, aim, fire, the signature attacks (Breaker's spin, Kael's lunge, Hem's draw), so it never clips through the body or detaches.
 - Assert: for each Hunter, the weapon's grip point stays within ~3 cm of the hand bone through all KMOVES; two-handed weapons keep the off-hand within tolerance. Screenshots: per Hunter, a close-up of the hands on the weapon (before/after) at idle and mid-attack.
+
+## 76b. Weapons are part of each Warden's design: keep them ON the model, don't pin a separate copy (owner, 19:35 UTC Nov 4; refines item 76)
+- Owner: "in some cases the weapon is part of the kit, like with Vex and Kael, actually most of them, so it looks off now. Can you fix this?"
+- For most Wardens the weapon is designed as part of the character (Vex's gun on her mechanical arm and shoulder rig, Kael's chained demon blade, Breaker's hammer and shield, Hem's bow, Sable's twin crossbows, Cinder's flame chamber and hose, Ryzz's rod mast, Dredge's hook and claws, Ostra's lantern/props). Pulling it off the Meshy model and pinning it to the old gun node is what makes it look wrong.
+- New approach (warden_glb.gd + the Blender step):
+  1. **Keep the weapon in the character's .glb, skinned to the bones it belongs to** (the hand and forearm for held weapons; the arm/shoulder for built-in ones like Vex's), so it moves exactly with the body in every animation, at the art's size and angle. Don't re-parent it to `Rig/Torso/Aim/Gun`.
+  2. The procedural gun node stays only as an invisible aim/FX reference: kit FX read their points from **empties on the skinned weapon** (muzzle, blade tip, bow string, hook mouth), so shots and trails leave the weapon you see.
+  3. Two-handed weapons: weight the weapon to the main hand and keep the off-hand on it with the off-hand target from item 76.
+  4. Only weapons that truly change at runtime (Hem's drawn arrow, Breaker's thrown hammer while in flight, Kael's chain while extended) are separate pieces, attached at the skinned weapon's socket for the duration and returned after.
+  5. One weapon only: hide the procedural weapon meshes everywhere (already hidden) and make sure no second copy shows in any mode (Fused, Masks screen, portraits).
+- Assert: per Hunter, through all KMOVES the weapon stays attached to its bone (no drift, no float), FX spawn within a few cm of the visible muzzle/tip, and only one weapon is drawn. Screenshots: per Hunter, idle + signature attack close-ups, old vs new.
