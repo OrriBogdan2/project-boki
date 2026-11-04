@@ -480,6 +480,10 @@
     0.6,
     0.5
    ]
+  ],
+  "orbit_ring": [
+   0.24,
+   0.006
   ]
  },
  "smooth": {
@@ -644,22 +648,22 @@
     {
      "angle": 20,
      "height": -0.004,
-     "size": 0.1
+     "size": 0.16
     },
     {
      "angle": 110,
      "height": -0.07,
-     "size": 0.1
+     "size": 0.16
     },
     {
      "angle": 200,
      "height": 0.008,
-     "size": 0.1
+     "size": 0.16
     },
     {
      "angle": 290,
      "height": -0.058,
-     "size": 0.1
+     "size": 0.16
     }
    ],
    "rock": "1a0c2e",
@@ -669,8 +673,9 @@
    "iris": "7a3ae0",
    "iris_hot": "9a5aff",
    "slot": "glow",
-   "string_r": 0.006,
-   "anchors": true
+   "string_r": 0.008,
+   "anchors": true,
+   "card_tilt": 40
   }
  ],
  "claws": {
