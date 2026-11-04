@@ -209,7 +209,8 @@
   "bone": "head",
   "core": "e6dcff",
   "crack_w": 1.3,
-  "cracks": 9
+  "cracks": 9,
+  "atlas": 256
  },
  "wisp": {
   "path": [

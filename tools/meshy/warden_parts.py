@@ -866,13 +866,14 @@ def crescent(arm, spec, tag="halo"):
         d = np.asarray(v) - c
         bld.v[i] = c + d - nrm * d.dot(nrm) * (1.0 - float(spec.get("flat", 0.35)))
     ob = bld.object(tag.capitalize())
-    img = bpy.data.images.new(tag + "_atlas", 64, 64, alpha=False)
-    px = np.ones((64, 64, 4), np.float32)
-    yy, xx = np.mgrid[0:64, 0:64]
+    n = int(spec.get("atlas", 64))
+    img = bpy.data.images.new(tag + "_atlas", n, n, alpha=False)
+    px = np.ones((n, n, 4), np.float32)
+    yy, xx = np.mgrid[0:n, 0:n] * (64.0 / n)
     base, crack = hexcol(spec.get("colour", "d9b8ff")), hexcol(spec.get("crack", "8a4ad8"))
     # a few dark crack lines across the moon (u around the tube, v along the arc)
     lines = (np.abs(((yy * 0.37 + xx * 0.11) % 13) - 6.5) < float(spec.get("crack_w", 0.6))) & (xx % 21 < 15)
-    col = np.broadcast_to(base, (64, 64, 3)).copy()
+    col = np.broadcast_to(base, (n, n, 3)).copy()
     if spec.get("core"):
         # (the glow's falloff: a pale core along the moon's faces, deepening to the violet rim at its edges)
         f = (0.5 + 0.5 * np.cos(xx / 63.0 * 4.0 * math.pi))[..., None] ** 1.5
@@ -881,19 +882,20 @@ def crescent(arm, spec, tag="halo"):
         # (jagged cracks across the moon, each from one edge toward the other with a fork, as the cap_halo sheet
         # draws them; v along the arc is the atlas's rows, u round the flattened tube its columns)
         rng = np.random.default_rng(int(spec.get("seed", 5)))
-        lines = np.zeros((64, 64), bool)
+        lines = np.zeros((n, n), bool)
+        sc = n / 64.0
         for k in range(int(spec["cracks"])):
-            v0 = (k + 0.5 + rng.uniform(-0.25, 0.25)) * 64.0 / int(spec["cracks"])
-            y = v0
-            for x in range(64):
-                y += rng.uniform(-1.1, 1.1)
-                lines[int(y) % 64, x] = True
-                lines[int(y + 1) % 64, x] |= rng.uniform() < 0.5
-                if x == 30:
+            y = (k + 0.5 + rng.uniform(-0.25, 0.25)) * n / int(spec["cracks"])
+            fy = y
+            for x in range(n):
+                y += rng.uniform(-1.1, 1.1) * sc
+                for t in range(max(1, int(sc * 0.8))):
+                    lines[int(y + t) % n, x] = True
+                if x == int(30 * sc):
                     fy = y
-                if x > 30 and x < 48:
-                    fy += rng.uniform(0.2, 1.4)
-                    lines[int(fy) % 64, x] = True
+                if int(30 * sc) < x < int(48 * sc):
+                    fy += rng.uniform(0.2, 1.4) * sc
+                    lines[int(fy) % n, x] = True
     px[..., :3] = np.where(lines[..., None], crack, col)
     img.pixels = px.ravel()
     img.pack()

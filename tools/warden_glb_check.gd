@@ -354,6 +354,9 @@ func _own_look(a: String) -> void:
 				seen += 1
 				var same: bool = got.is_equal_approx(want) if want is Color else is_equal_approx(float(got),
 						float(want))
+				if k == "albedo" and want is Color:
+					# (a look's albedo composes with the player's pick: the look's colour x a tint within TINT_MAX)
+					same = _within_tint(got as Color, want as Color)
 				if not same:
 					wrong.append("%s.%s" % [slot, k])
 	ok(seen > 0 and wrong.is_empty(), "%s: its own look (warden_look.json) is on its surfaces (%d values, wrong %s)"
@@ -380,6 +383,11 @@ func _halo(main: Node, a: String) -> void:
 		if mi:
 			rest[mi] = mi.global_position
 	(m.get_node("Rig/Torso/HeadPivot") as Node3D).rotation.x = 0.4
+	# (and the arms swing: a halo can ride a hand, Ostra's void orb)
+	for arm in ["Rig/Torso/ArmRPivot", "Rig/Torso/ArmLPivot"]:
+		var ap := m.get_node_or_null(arm) as Node3D
+		if ap:
+			ap.rotation.x = 0.4
 	sync.apply()
 	await main.get_tree().process_frame
 	for hs in hl:
@@ -393,9 +401,18 @@ func _halo(main: Node, a: String) -> void:
 		off = maxf(off, mi.global_position.distance_to(an.global_position))
 		moved = maxf(moved, mi.global_position.distance_to(rest[mi]))
 	ok(found == hl.size() and inside == 0 and off < 0.001 and moved > 0.01,
-			"%s: %d glow halos on their anchors (off %.4f m), outside the .glb, follow a nod (%.3f m)"
+			"%s: %d glow halos on their anchors (off %.4f m), outside the .glb, follow a nod and an arm swing (%.3f m)"
 			% [a, found, off, moved])
 	m.free()
+
+func _within_tint(got: Color, want: Color) -> bool:
+	var lo := 1.0 - WardenGlb.TINT_MAX - 0.001
+	var hi := 1.0 + WardenGlb.TINT_MAX + 0.001
+	for i in 3:
+		var r: float = got[i] / maxf(want[i], 1e-4)
+		if r < lo or r > hi:
+			return false
+	return true
 
 ## The largest distance of a spring chain's tip from where it rides its parent rigidly.
 func _spring_off(sk: Skeleton3D, sync: WardenGlb.Sync) -> float:
