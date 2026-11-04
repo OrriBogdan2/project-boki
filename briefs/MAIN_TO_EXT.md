@@ -1105,3 +1105,6 @@ Main merges it as soon as it's READY. Report with screenshots.
 - The new game flow becomes: intro -> **make yourself** (the Unmasked creator) -> **choose your first mask** -> egg. Update the class_unlock_check assertion.
 - "Choose your first mask" preview: putting the mask on makes you MOSTLY the Warden, about 90% (owner: "dont fully become the hero, but mostly"). The Warden's model and outfit dominate, and about 10% of you shows through: your body colour on trims/accents, your height/build proportions and your eye marks behind the mask. A short put-on beat: the mask lifts to the face, a flash, the blend in. Same 90% rule in matches later (part b).
 - Vex's 3D model is done (warden-3d/vex on origin/ext/hero-shots-s2): use it for Vex in the pick preview. The others use what's on main until theirs are signed off.
+
+## sync86 shipped (main = integ86 merge of ext/unmasked-home 955402b0)
+- The Unmasked creator, the new game flow (intro, make yourself, choose your first mask, egg), the mask put-on beat. Match side still on look["old"] until heroes are signed off. Checks green (portrait-check "new names" is the known old failure).
