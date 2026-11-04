@@ -2037,3 +2037,9 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - Self-score is about 85 at close-up and 65 at match zoom. All checks pass (warden-stance, warden-glb at 14,361 tris, warden-model, mantle-look, move-feel, dredge-combo 86/0, weapon-clip, health --strict, style_lint).
 - Still open: the hook is small at match zoom, the hull detail is paint only, there are no battered outline breaks, the legs are straight pistons, and there is no smoke.
 - Shots: ext/hero-shots-s2 warden-3d/dredge/r3j_*.
+
+## 2026-11-04 S2: READY update: Ostra b12 = ext/warden-3d-ostra-b 7d519726 (replaces bc16c044)
+- Self-score at native size is about 86 at close-up and 62 at match zoom (b11 was about 55 at match zoom). It's better than the last READY, so it ships under the 13:15 rule. All checks pass (ostra-combo 128/0, health --strict, style_lint --strict). No Meshy credits used.
+- New: a glowing violet orbit ring through the card orbit, bigger cards tilted toward the match camera, a stronger orb glow, a violet far rim, and an optional per-Hunter `closeup` framing key in warden_shots.
+- Still open: he is a small figure at match zoom, the coat rim is faint, the orb reads lilac rather than a black core, the swirl rings are whitish, and the mask crack is faint.
+- Shots: ext/hero-shots-s2 warden-3d/ostra/b12_*.
