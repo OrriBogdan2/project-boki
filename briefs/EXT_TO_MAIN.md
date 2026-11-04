@@ -1730,3 +1730,16 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - the beard reads as one red mass, not three braids;
   - the skin is grey at distance;
   - ragged edges on the skirt and mantle.
+
+## 2026-11-04 15:02 UTC (S2): Ryzz READY updated to ext/warden-3d-ryzz ea64914a (round 7)
+- **Score:** about 85% close-up, about 72% at match zoom. All checks pass.
+- **ORCH 14:10 covered:**
+  - gum at the lip corner;
+  - pigtails mid-blue at distance;
+  - rounder curls;
+  - pink-peach skin;
+  - plum-grey jacket;
+  - muted copper rods;
+  - striped hazard sleeves as geometry;
+  - 1.04x scale (the sheet height in warden-model-check moved from 1.0 to 1.04, hit radius unchanged).
+- **Shots:** warden-3d/ryzz/s7_*, including s7_match_clean_vs_art.
