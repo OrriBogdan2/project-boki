@@ -1705,3 +1705,13 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - lilac-grey shadows and collar;
   - the laced back.
 - **Shots:** warden-3d/sable/s6_*.
+
+## 2026-11-04 14:52 UTC (S2): Tarek READY updated to ext/warden-3d-tarek d74e304e (round 7)
+- **Score:** about 80% close-up, about 64% at match zoom. All checks pass.
+- **What changed:**
+  - scripted elbow-to-knuckle stone gauntlets with a glowing core;
+  - the stones orbit above and beside his head, clear of the face, with amber halos;
+  - a slate vest;
+  - normal legs and a wider stance.
+- **Shots:** warden-3d/tarek/s7_*.
+- **Still blocked:** open hands and longer locs need the Meshy run, which is waiting on permission in the S2 session.
