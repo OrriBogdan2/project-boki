@@ -421,8 +421,8 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | Setting | Value |
 |---|---|
 | doc | Framing for the Wardens' painted portraits and splashes (Portraits, art/portraits). face: where the face's centre sits in the portrait, as fractions of its width and height; a small frame crops in on it. splash: the point a splash is cropped around (the Warden's head and shoulders), same units. |
-| face | {"bulwark": [0.37, 0.27], "archer": [0.32, 0.3], "juggernaut": [0.42, 0.3], "thief": [0.4, 0.31], "mage": [0.42, 0.32], "dolm": [0.47, 0.27], "ostra": [0.46, 0.33], "ashwick": [0.36, 0.3], "gunslinger": [0.42, 0.34], "tender": [0.4, 0.32], "rimewright": [0.43, 0.32], "dredge": [0.5, 0.28]} |
-| splash | {"bulwark": [0.46, 0.25], "archer": [0.26, 0.2], "juggernaut": [0.6, 0.16], "thief": [0.42, 0.2], "mage": [0.35, 0.22], "dolm": [0.6, 0.18], "ostra": [0.54, 0.34], "ashwick": [0.55, 0.2], "rimewright": [0.52, 0.18], "dredge": [0.45, 0.38]} |
+| face | {"bulwark": [0.45, 0.28], "archer": [0.32, 0.3], "juggernaut": [0.42, 0.3], "thief": [0.4, 0.31], "mage": [0.43, 0.35], "dolm": [0.53, 0.2], "ostra": [0.46, 0.33], "ashwick": [0.46, 0.28], "gunslinger": [0.4, 0.27], "tender": [0.5, 0.34], "rimewright": [0.43, 0.32], "dredge": [0.6, 0.42]} |
+| splash | {"bulwark": [0.61, 0.18], "archer": [0.28, 0.2], "juggernaut": [0.4, 0.22], "thief": [0.44, 0.4], "mage": [0.68, 0.18], "dolm": [0.55, 0.22], "ostra": [0.4, 0.2], "ashwick": [0.41, 0.18], "rimewright": [0.61, 0.22], "dredge": [0.31, 0.22], "gunslinger": [0.29, 0.22], "tender": [0.64, 0.15]} |
 
 ## tutorial (`content/rules/tutorial.json`)
 

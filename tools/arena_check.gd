@@ -295,7 +295,7 @@ func _cards() -> void:
 		var c := KitCard.make(a, "cindle")
 		host.add_child(c)
 		await main.get_tree().process_frame
-		var slots_built := c.grid != null and c.grid.get_child_count() == KitCard.slots_of(a).size()
+		var slots_built := c.grid != null and c.grid.get_child_count() == KitCard.card_slots(a).size()
 		ok(
 			"kit card builds: %s" % a,
 			slots_built and c.size.x <= KitCard.SIZE.x + 1.0,
