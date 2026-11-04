@@ -529,3 +529,10 @@ ext/imagegen fb503983. The owner made flat-lit face/head sheets, prop sheets and
 - Owner: "upgrade dredge - I want them all looking as good as possible."
 - Dredge (ext/warden-dredge-friend acb501fd): KEEP the friend's rig, bones (claw x3, winch, rope, hook) and all 184 retargeted moves. Replace only the hull/shoulder shell with a Meshy-built (or Blender-sculpted) version that matches the art: angular, dented, layered and torn brass plates instead of smooth domes; brass shifted to the art's duller olive-gold (not copper-orange); keep the cracked-lens red orb eye and the thick tar drips. Check the horn arm's size and hold against the art (it reads very big and low). Budget ~80-150 credits (balance 4,327). Post r3 shots vs the art as usual.
 - Quality bar for every Hunter in stage 2: match the art as closely as the recipe allows, using the new reference sheets (13:40 list above). Spend credits where they clearly improve the result; tell ORCH if any Hunter needs more than ~150.
+
+## 2026-11-04 12:15 UTC (ORCH): OWNER: iterate every Hunter to the best you can make them, then ship ASAP
+- Owner (verbatim): "keep fixing these until they're as good as you can possibly make them - if we run out of meshy credits that's fine ... try to get them all live and ready to ship as soon as possible."
+- So: no per-Hunter credit cap. Keep iterating (stage 2, then 3+, more Meshy runs, paint-overs, Blender fixes) until each Hunter matches its art and reference sheets as closely as you can, at close-up AND at match zoom. Use Opus agents (design/feel work).
+- Ship as you go: the moment a Hunter is good, mark its ext/warden-3d-<id> branch READY TO MERGE in EXT_TO_MAIN (commit, checks, shots), don't wait for the whole roster. Order: Vex, then whichever are closest.
+- Credits: if the balance runs low, STOP that Hunter and post "OWNER: buy credits" with the amount needed (no agent buys anything). Running out is acceptable to the owner.
+- Ryzz s1 gaps first: hue (blue hair, less magenta overall, read at match zoom), soft full pigtails, rods flush to the harness, round charm glow.

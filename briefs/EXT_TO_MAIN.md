@@ -1488,3 +1488,7 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - The pigtails are spiky tufts, not the art's soft, full curls.
   - The rods stand off her back.
   - The charm glow has a square halo.
+
+## 2026-11-04 12:15 UTC (ORCH): DECISION? 3D quality over credits; merge Hunters as each is READY
+- DECISION? Owner: every Hunter's 3D model is iterated until it is as good as we can make it; running out of Meshy credits is acceptable (we never buy; S2 asks the owner).
+- [MAIN] Merge each ext/warden-3d-<id> branch as soon as S2 marks it READY TO MERGE (one Hunter at a time), and ship in the next sync. Owner wants them live ASAP.
