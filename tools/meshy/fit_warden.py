@@ -336,7 +336,8 @@ def slot_rules(ob, img, rules, glow_min, tag, default="skin", vote="island"):
     """The toon slots by body region and painted colour (rules: first match wins; else `default`), then every
     UV island takes its area's majority slot, so neighbouring triangles of one part never land on different
     slots (a tinted slot beside an untinted one read as a patchwork of facets). A rule: slot, box [x0, x1, y0,
-    y1, z0, z1] in the Meshy frame (null: open; "absx": |x|), hsv [h0, h1, s0, s1, v0, v1] (null: any).
+    y1, z0, z1] in the Meshy frame (null: open; "absx": |x|), circle [x, z, r] (within r of x, z), hsv
+    [h0, h1, s0, s1, v0, v1] (null: any).
     vote N (a number) instead: each face takes its neighbours' majority N times (a baked low mesh's UV islands
     are whole parts, too big to vote on: the face and the hair would share one)."""
     w, h = img.size
@@ -368,6 +369,8 @@ def slot_rules(ob, img, rules, glow_min, tag, default="skin", vote="island"):
                 x = abs(cen.x) if r.get("absx") else cen.x
                 if not (b[0] <= x <= b[1] and b[2] <= cen.y <= b[3] and b[4] <= cen.z <= b[5]):
                     continue
+                if r.get("circle") and not _in_ellipse(cen.x, cen.z, r["circle"]):
+                    continue                    # (a round part seen from the front: the eye plate)
                 q = r.get("hsv")
                 if q:
                     q = [(0.0, 1.0)[i % 2] if x is None else x for i, x in enumerate(q)]
@@ -437,7 +440,18 @@ def project(ob, img, pj):
     Orthographic, in the Meshy frame (front = -Y): pj["view"] "front" maps x to the sheet's columns, "side"
     (her left side, facing the sheet's left) maps y; z to the rows. pj: image, box [a0, a1, z0, z1] on the
     mapped axis and z, facing (the least turned normal kept), col0 (a column near the part) and head_z (the
-    height whose silhouette lines the columns up), sole_row (the ground line)."""
+    height whose silhouette lines the columns up), sole_row (the ground line).
+    Options for a face from a portrait (Face rules, PIPELINE.md):
+    - warp {"mesh": [[a, z], ...], "art": [[col, row], ...], "smooth"}: a thin-plate spline through landmarks
+      (the eyes, brows, nose, mouth corners, chin) instead of the one scale and offset, so a portrait drawn with
+      its own tilt and proportions lands on the mesh's features;
+    - feather [f0, f1]: the art blends in from facing f0 to full at f1 (no hard edge where faces turn away);
+    - mask {"skin": hsv, "box": [c0, r0, c1, r1], "close", "erode", "blur"} (art pixels): the art is taken only
+      inside its own face, eroded past its ink outline (a projected contour line is the jaw "seam"), blurred
+      into a soft edge;
+    - slots [names]: only faces of these toon slots; exclude_circles [[a, z, r]]: never inside these (the eye
+      plate); skip_art: one [h0, h1, sat_min, val_max] or a list; skip_art_box [[c0, r0, c1, r1]]: art pixels
+      never taken (the portrait's plate and its bracket)."""
     view = pj.get("view", "front")
     side = view == "side"
     ax = 1 if side else 0
@@ -452,25 +466,64 @@ def project(ob, img, pj):
     me.calc_loop_triangles()
     uv = me.uv_layers.active.data
     x0, x1, z0, z1 = pj["box"]
-    if "k" in pj:
+    warp = None
+    if "warp" in pj:
+        warp = _tps_fit(pj["warp"]["mesh"], pj["warp"]["art"], float(pj["warp"].get("smooth", 1e-3)))
+        vco = np.array([v.co[:] for v in me.vertices])
+        vcr = warp(np.stack([vco[:, ax], vco[:, 2]], axis=1))
+        res = warp(np.array(pj["warp"]["mesh"], float)) - np.array(pj["warp"]["art"], float)
+        log("warp: %d landmarks, residual %.2f px max" % (len(res), float(np.abs(res).max())))
+    elif "k" in pj:
         # (a registration measured on the mesh's own render, tools: the figure-height guess can be cm off)
         k, col0, row0 = float(pj["k"]), float(pj["col0_at"]), float(pj["row0_at"])
     else:
         k, col0, row0 = _register(me, src, pj, ax, sgn, pj.get("register_on"))
     keep = pj.get("keep_hue")        # [h0, h1, sat_min]: texels already painted this colour keep it (hair)
-    # skip_art [h0, h1, sat_min, val_max]: art pixels of this colour are not projected
+    # skip_art [h0, h1, sat_min, val_max] (or a list of them): art pixels of this colour are not projected
+    skips = pj.get("skip_art") or []
+    if skips and not isinstance(skips[0], (list, tuple)):
+        skips = [skips]
+    mask = _art_mask(src, pj["mask"]) if "mask" in pj else None
+    if pj.get("inpaint"):
+        # the art's own hair across the face and the plate's bracket filled from the skin around them (skipping
+        # them left patches of the old paint inside the new face); "outside": past the face's eroded outline too,
+        # fading to the skin's mid tone, so the art's edge never lands on the cheek (the jaw seam) and the blend
+        # into the body's skin happens under the hair; then nothing is skipped and only the box's edge fades
+        out = mask < 0.5 if (pj["inpaint"] == "outside" and mask is not None) else None
+        src = _inpaint_art(src, pj["mask"]["box"], skips, pj.get("skip_art_box") or [], out, int(pj.get("hole_open", 0)),
+                           pj.get("skip_art_poly"), int(pj.get("poly_grow", 6)))
+        skips = []
+        if out is not None:
+            mask = _box_fade(src.shape[:2], pj["mask"]["box"], int(pj["mask"].get("edge", 24)))
+    feather = pj.get("feather")
+    f_min = float(feather[0]) if feather else float(pj["facing"])
+    slots = pj.get("slots")
+    names = [m.name for m in me.materials]
+    circles = pj.get("exclude_circles") or []
     bg = src[ah - 1 - 5, 5, :3]
     painted = 0
     for t in me.loop_triangles:
         n = t.normal
         facing = n.x * sgn if side else (n.y if view == "back" else -n.y)
-        if facing < float(pj["facing"]):
+        if facing < f_min:
+            continue
+        if slots and not any(names[t.material_index].startswith(sl + "-") for sl in slots):
             continue
         ps = [me.vertices[i].co for i in t.vertices]
         if not all(x0 <= p[ax] <= x1 and z0 <= p.z <= z1 for p in ps):
             continue
+        ca, cz = sum(p[ax] for p in ps) / 3.0, sum(p.z for p in ps) / 3.0
+        if any(_in_ellipse(ca, cz, c) for c in circles):
+            continue
+        wf = 1.0
+        if feather:
+            f = min(1.0, max(0.0, (facing - feather[0]) / max(feather[1] - feather[0], 1e-6)))
+            wf = f * f * (3.0 - 2.0 * f)
         uvs = np.array([[uv[li].uv.x * w, uv[li].uv.y * h] for li in t.loops])
-        cr = np.array([[col0 + sgn * p[ax] / k, row0 - p.z / k] for p in ps])
+        if warp is not None:
+            cr = vcr[list(t.vertices)]
+        else:
+            cr = np.array([[col0 + sgn * p[ax] / k, row0 - p.z / k] for p in ps])
         lo = np.floor(uvs.min(axis=0)).astype(int)
         hi = np.ceil(uvs.max(axis=0)).astype(int)
         xs, ys = np.meshgrid(np.arange(lo[0], hi[0] + 1), np.arange(lo[1], hi[1] + 1))
@@ -492,11 +545,14 @@ def project(ob, img, pj):
         ty = np.clip(pts[inside, 1].astype(int), 0, h - 1)
         got = src[ah - 1 - row, col]
         art_px = np.abs(got[:, :3] - bg).sum(axis=1) > 0.12               # (the sheet's grey keeps Meshy's paint)
-        if pj.get("skip_art"):
-            # (art pixels of this colour stay off: the hair's dark shadows under the bangs onto the brow)
+        if skips:
+            # (art pixels of these colours stay off: the hair's shadows, the portrait's own hair and brass)
             ha, sa, va = _hsv_px(got[:, :3])
-            sk = pj["skip_art"]
-            art_px &= ~((ha >= sk[0]) & (ha <= sk[1]) & (sa >= sk[2]) & (va <= sk[3]))
+            for sk in skips:
+                art_px &= ~((ha >= sk[0]) & (ha <= sk[1]) & (sa >= sk[2]) & (va <= sk[3]) &
+                            (va >= (sk[4] if len(sk) > 4 else 0.0)))
+        for bx in ([] if pj.get("inpaint") else pj.get("skip_art_box") or []):
+            art_px &= ~((col >= bx[0]) & (col <= bx[2]) & (row >= bx[1]) & (row <= bx[3]))
         if pj.get("only_art"):
             # (only art pixels of these colours go on: the mask's violet mouth, eyes, tear and crack over Meshy's
             # porcelain, which keeps its own paint)
@@ -508,10 +564,193 @@ def project(ob, img, pj):
             cur = dst[ty, tx, :3]
             hh, ss, _vv = _hsv_px(cur)
             art_px &= ~((hh >= keep[0]) & (hh <= keep[1]) & (ss >= keep[2]))
-        dst[ty[art_px], tx[art_px]] = got[art_px]
+        wt = np.full(len(col), wf, np.float32)
+        if mask is not None:
+            wt *= mask[row, col]
+        art_px &= wt > 1e-3
+        if not art_px.any():
+            continue
+        wv = wt[art_px][:, None]
+        cur = dst[ty[art_px], tx[art_px], :3]
+        dst[ty[art_px], tx[art_px], :3] = cur * (1.0 - wv) + got[art_px, :3] * wv
         painted += 1
     img.pixels = dst.ravel()
     log("projected the art onto %d faces" % painted)
+
+
+def _in_polys(shape, polys, r0=0, c0=0):
+    """(h, w bool) pixels inside any polygon [[col, row], ...] (even-odd rule), for a region at (r0, c0)."""
+    hh, ww = shape
+    yy, xx = np.mgrid[r0:r0 + hh, c0:c0 + ww]
+    xx = xx + 0.5
+    yy = yy + 0.5
+    out = np.zeros(shape, bool)
+    for poly in polys:
+        q = np.asarray(poly, float)
+        inside = np.zeros(shape, bool)
+        for (x1, y1), (x2, y2) in zip(q, np.roll(q, -1, axis=0)):
+            if y1 == y2:
+                continue
+            cross = ((y1 > yy) != (y2 > yy)) & (xx < x1 + (yy - y1) * (x2 - x1) / (y2 - y1))
+            inside ^= cross
+        out |= inside
+    return out
+
+
+def _inpaint_art(src, box, skips, boxes, outside=None, hole_open=0, polys=None, poly_grow=0):
+    """The art (Blender rows, bottom up) with its pixels of the skip colours inside box [c0, r0, c1, r1] (rows top
+    down), and inside the skip boxes, filled from the pixels around them: grown in from the edges (each hole
+    pixel the mean of its filled neighbours), then smoothed inside the holes. outside (rows top down, the whole
+    art): pixels to fill as well; there the fill fades to the kept pixels' mid tone with its distance (a long
+    grown fill streaks)."""
+    ah, aw = src.shape[:2]
+    out = src.copy()
+    td = out[::-1]                                          # (a view: rows top down)
+    c0, r0, c1, r1 = box
+    reg = td[r0:r1, c0:c1, :3].copy()
+    hue, sat, val = _hsv_px(reg)
+    hole = np.zeros(reg.shape[:2], bool)
+    for sk in skips:
+        hole |= (hue >= sk[0]) & (hue <= sk[1]) & (sat >= sk[2]) & (val <= sk[3]) & (val >= (sk[4] if len(sk) > 4 else 0.0))
+    if hole_open > 0:
+        # (an opening: the hair's strands are thick, the circuit lines, dots and trims of the same hue thin)
+        full = (2 * hole_open + 1) ** 2
+        core = _box_sum(hole.astype(np.float64), hole_open) > full - 0.5
+        hole = _box_sum(core.astype(np.float64), hole_open + 5) > 0.5
+    for bx in boxes:
+        hole[max(0, bx[1] - r0):max(0, bx[3] - r0), max(0, bx[0] - c0):max(0, bx[2] - c0)] = True
+    if polys:
+        # (parts of the art left out by outline: Vex's jaw panels, a faint line at the model's scale)
+        pm = _in_polys(hole.shape, polys, r0, c0)
+        if poly_grow > 0:
+            pm = _box_sum(pm.astype(np.float64), poly_grow) > 0.5
+        hole |= pm
+    if outside is not None:
+        hole |= outside[r0:r1, c0:c1]
+    known = ~hole
+    keep = reg[known]
+    lum = keep @ np.array([0.3, 0.59, 0.11], np.float32)
+    mid_sel = (lum >= np.percentile(lum, 35)) & (lum <= np.percentile(lum, 75))
+    mid = np.median(keep[mid_sel], axis=0) if mid_sel.any() else keep.mean(axis=0)
+    dist = np.zeros(hole.shape, np.float32)
+    acc_rgb = reg
+    for _it in range(600):
+        if known.all():
+            break
+        acc = np.zeros_like(acc_rgb)
+        cnt = np.zeros(known.shape + (1,), np.float32)
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            k = np.roll(np.roll(known, dy, 0), dx, 1)
+            acc += np.roll(np.roll(acc_rgb, dy, 0), dx, 1) * k[..., None]
+            cnt += k[..., None]
+        grow = ~known & (cnt[..., 0] > 0)
+        if not grow.any():
+            break
+        acc_rgb[grow] = acc[grow] / cnt[grow]
+        dist[grow] = _it + 1
+        known |= grow
+    if outside is not None:
+        f = np.exp(-dist / 14.0)[..., None]
+        acc_rgb[hole] = (acc_rgb * f + mid[None, None] * (1.0 - f))[hole]
+    for _it in range(10 if outside is not None else 6):
+        b = acc_rgb.copy()
+        for ax_ in (0, 1):                  # (a separable 7-px box, twice over: no streaks left)
+            b = sum(np.roll(b, k, ax_) for k in range(-3, 4)) / 7.0
+        acc_rgb[hole] = b[hole]
+    td[r0:r1, c0:c1, :3] = acc_rgb
+    log("art inpainted: %d pixels" % int(hole.sum()))
+    return out
+
+
+def _in_ellipse(a, z, c):
+    """Inside a circle [a, z, r] or an ellipse [a, z, ra, rz] (an eye plate taller than it is wide)."""
+    ra, rz = (c[2], c[2]) if len(c) < 4 else (c[2], c[3])
+    return ((a - c[0]) / ra) ** 2 + ((z - c[1]) / rz) ** 2 <= 1.0
+
+
+def _box_fade(shape, box, edge):
+    """0..1 over the art (rows top down): 1 inside box [c0, r0, c1, r1], fading to 0 over `edge` px at its sides."""
+    hh, ww = shape
+    c0, r0, c1, r1 = box
+    yy, xx = np.mgrid[0:hh, 0:ww]
+    d = np.minimum.reduce([xx - c0, c1 - xx, yy - r0, r1 - yy]).astype(np.float32)
+    f = np.clip(d / max(edge, 1), 0.0, 1.0)
+    return (f * f * (3.0 - 2.0 * f)).astype(np.float32)
+
+
+def _tps_fit(src, dst, smooth):
+    """A thin-plate spline from src points (n x 2) to dst (n x 2) with `smooth` regularisation (landmarks read
+    off renders are a few pixels off; an exact fit would wiggle): returns f(points m x 2) -> m x 2."""
+    src = np.asarray(src, float)
+    dst = np.asarray(dst, float)
+    mu = src.mean(axis=0)
+    sd = float(src.std(axis=0).mean()) or 1.0
+    s = (src - mu) / sd
+    n = len(s)
+
+    def kern(d2):
+        return np.where(d2 > 1e-12, 0.5 * d2 * np.log(np.maximum(d2, 1e-12)), 0.0)      # r^2 log r
+    a = np.zeros((n + 3, n + 3))
+    a[:n, :n] = kern(((s[:, None] - s[None]) ** 2).sum(-1)) + smooth * np.eye(n)
+    pm = np.hstack([np.ones((n, 1)), s])
+    a[:n, n:] = pm
+    a[n:, :n] = pm.T
+    rhs = np.zeros((n + 3, 2))
+    rhs[:n] = dst
+    coef = np.linalg.solve(a, rhs)
+
+    def f(p):
+        q = (np.asarray(p, float) - mu) / sd
+        out = np.empty((len(q), 2))
+        for i0 in range(0, len(q), 20000):
+            qq = q[i0:i0 + 20000]
+            out[i0:i0 + 20000] = kern(((qq[:, None] - s[None]) ** 2).sum(-1)) @ coef[:n] + \
+                np.hstack([np.ones((len(qq), 1)), qq]) @ coef[n:]
+        return out
+    return f
+
+
+def _box_sum(m, r):
+    """The sum over a (2r+1)^2 box around every pixel (zeros outside), by an integral image."""
+    hh, ww = m.shape
+    ii = np.zeros((hh + 1, ww + 1))
+    ii[1:, 1:] = np.cumsum(np.cumsum(m, axis=0), axis=1)
+    y0 = np.clip(np.arange(hh) - r, 0, hh)
+    y1 = np.clip(np.arange(hh) + r + 1, 0, hh)
+    x0 = np.clip(np.arange(ww) - r, 0, ww)
+    x1 = np.clip(np.arange(ww) + r + 1, 0, ww)
+    return ii[y1][:, x1] - ii[y0][:, x1] - ii[y1][:, x0] + ii[y0][:, x0]
+
+
+def _art_mask(src, mk):
+    """Where the art's face may be taken from (rows top down, the art's own pixels): its skin, closed over the
+    features it encloses (eyes, brows, lips), eroded past its ink outline, blurred into a 0..1 soft edge."""
+    ah, aw = src.shape[:2]
+    rgb = src[::-1, :, :3]
+    hue, sat, val = _hsv_px(rgb)
+    def in_range(q):
+        hue_ok = (hue >= q[0]) & (hue <= q[1]) if q[0] <= q[1] else (hue >= q[0]) | (hue <= q[1])
+        return hue_ok & (sat >= q[2]) & (sat <= q[3]) & (val >= q[4]) & (val <= q[5])
+    if "exclude" in mk:
+        # (everything but these: a face sheet whose plate and jaw panels belong to the face)
+        m = np.ones((ah, aw), bool)
+        for q in mk["exclude"]:
+            m &= ~in_range(q)
+    else:
+        m = in_range(mk["skin"])
+    c0, r0, c1, r1 = mk["box"]
+    box = np.zeros((ah, aw), bool)
+    box[r0:r1, c0:c1] = True
+    m = (m & box).astype(np.float64)
+    full = lambda r: (2 * r + 1) ** 2
+    rc, re, rb = int(mk.get("close", 24)), int(mk.get("erode", 6)), int(mk.get("blur", 10))
+    m = (_box_sum(m, rc) > 0.5).astype(np.float64)                       # close: dilate ...
+    m = (_box_sum(m, rc) > full(rc) - 0.5).astype(np.float64)            # ... then erode
+    m = (_box_sum(m, re) > full(re) - 0.5).astype(np.float64)            # past the outline
+    m = _box_sum(m, rb) / full(rb)
+    m = _box_sum(m, rb) / full(rb)                                       # (two box blurs: a soft edge)
+    log("art mask: %.0f%% of its box" % (100.0 * (m > 0.5).sum() / max(box.sum(), 1)))
+    return m.astype(np.float32)
 
 
 def _register(me, src, pj, ax, sgn=1.0, other=None):
@@ -1253,6 +1492,8 @@ def touch_up(ob, img, rules):
                 return False      # (the face's own front: the art projected there stays)
             if "front" in r and poly.normal.y > -float(r["front"]):
                 return False
+            if "side_only" in r and poly.normal.y < -float(r["side_only"]):
+                return False        # (faces turned away from the front only: a front projection's glancing smears)
             if "skip_hue" in r:
                 # (keeps a piece of another colour in the box: the brass bolt in the bun)
                 u = sum(uv[i].uv.x for i in poly.loop_indices) / poly.loop_total
@@ -1260,6 +1501,12 @@ def touch_up(ob, img, rules):
                 q = px[min(h - 1, int(v * h)), min(w - 1, int(u * w)), :3]
                 sk = r["skip_hue"]
                 if sk[0] <= _hue(q) <= sk[1] and (q.max() - q.min()) / max(q.max(), 1e-6) >= sk[2] and q.max() > 0.35:
+                    return False
+            if "val_max" in r:
+                # (dark texels only: a crease's old paint where the projection did not reach)
+                u = sum(uv[i].uv.x for i in poly.loop_indices) / poly.loop_total
+                v = sum(uv[i].uv.y for i in poly.loop_indices) / poly.loop_total
+                if px[min(h - 1, int(v * h)), min(w - 1, int(u * w)), :3].max() > float(r["val_max"]):
                     return False
             if "sat_max" in r:
                 # (the grey parts only: a gunmetal gain leaves the brass bands alone)
@@ -1783,6 +2030,9 @@ def main():
         for pj in spec["project_late"]:
             project(ob, img, pj)
         pad(img, ids, int(spec.get("pad", 6)))
+    if spec.get("touch_up_late"):
+        touch_up(ob, img, spec["touch_up_late"])
+        pad(img, ids, int(spec.get("pad", 6)))
     head = None
     if "head" in spec:
         decimate(ob, spec["max_tris"] - int(spec["head"]["tris"]))
@@ -1876,6 +2126,8 @@ def main():
             if lens_s.get("cut_r"):
                 _cut_lens(ob, lens_s)
             parts.append(WP.lens(arm, lens_s))
+            # (an anchor on the lens: the game hangs the lens's match-zoom halo on it, warden_look.json "halos")
+            K.anchor(arm, "head", "anchor_" + lens_s.get("anchor", "lens"), tuple(lens_s["centre"]))
         if spec.get("braids"):
             parts.append(WP.braids([ob], arm, [_rel(arm, b, ("path",)) for b in spec["braids"]], spec["braid_colours"]))
         if spec.get("hoses"):
