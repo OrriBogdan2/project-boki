@@ -10,4 +10,4 @@
 - review/ryzz_back_4rods_WRONG.webp: the earlier back view with four rods; ignore it.
 - ryzz_head_sheet.webp: head front + side, sides correct. It adds extra copper rings down the pigtails: ignore those, only one coil tie at each pigtail base (as in the full body). review/ryzz_head_sheet_WRONG_SIDES.webp is the old wrong-eye version.
 - review/ryzz_rooftop_alt.webp: alt art only (its modern skyscraper skyline is off-world).
-- ryzz_splash.webp: ult splash (square; a 16:9 version may replace it). Ignore the diagonal thigh bands; the bands sit straight at the boot tops.
+- ryzz_splash.webp: ult splash, 16:9 (head back laughing as the bolt strikes her rods over the old town). Ignore the diagonal thigh bands; the bands sit straight at the boot tops. Older square version: review/ryzz_splash_square.webp.

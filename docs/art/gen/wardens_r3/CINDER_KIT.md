@@ -7,4 +7,4 @@
 - Weapon: brass-and-glass flamethrower lance with a live flame in the glass chamber, in her LEFT hand in every view, joined to the copper back tank by a ribbed copper hose. (cinder_front.webp shows the chamber empty: give it the flame.)
 - Body: black skin with glowing orange spots, orange belly and throat, long tail with a fin, leather vest/corset with a bandolier of glowing skull-labelled vials, a torn red apron, a scorched recipe notebook on a chain.
 - Emissive: the spots, the crest edge, the lance flame and the vials (switchable, like Kael's).
-- cinder_portrait.webp and cinder_splash.webp (burning lab, lance spraying fire; square for now, a 16:9 version can replace it).
+- cinder_portrait.webp and cinder_splash.webp (16:9: burning lab, side angle, lance sweeping fire, skull flask raised). The older square splash is review/cinder_splash_square.webp.
