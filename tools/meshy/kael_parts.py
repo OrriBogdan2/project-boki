@@ -29,7 +29,7 @@ from mathutils import Vector
 import warden_parts as WP
 
 COL = {  # name: (slot, hex)
-    "blade": ("metal", "5f5c58"), "blade_dk": ("metal", "3e3c3a"), "band": ("metal", "4c4c52"),
+    "blade": ("metal", "6e6a66"), "blade_dk": ("metal", "4a4744"), "band": ("metal", "4c4c52"),
     "guard": ("metal", "6c6a65"), "grip": ("leather", "5e2c25"), "pommel": ("metal", "6c6a65"),
     "chain": ("metal", "6e7075"), "hook": ("metal", "616368"),
     "sword": ("glow", "fffaf0"), "sword_edge": ("glow", "f2d48a"),
@@ -139,10 +139,10 @@ def _outline(L0, L1, hw, seed=3, chip=0.012, teeth=0):
             y = L0 + (yt - L0) * i / n
             d = rng.uniform(-chip, 0.0) if 0 < i < n else 0.0
             pts.append((y, sgn * (hw + d)))
-            if teeth and 0 < i < n and i % 2 == 1:
-                # a notch: straight in, then out again a little further up
-                dy = (yt - L0) / n * rng.uniform(0.25, 0.45)
-                pts.append((y + dy, sgn * (hw - chip * rng.uniform(1.0, 1.8))))
+            if teeth and 0 < i < n and rng.random() < 0.45:
+                # a broken-off chip: straight in, then out again a little further up, of uneven depth and length
+                dy = (yt - L0) / n * rng.uniform(0.3, 0.8)
+                pts.append((y + dy, sgn * (hw - chip * rng.uniform(0.7, 2.0))))
         return pts
     top, bot = edge(1), edge(-1)
     tip = [(yt + 0.03 * q, hw * 1.08), (yt + 0.07 * q, hw * 1.02), (yt + 0.08 * q, hw * 0.74), (yt + 0.115 * q, hw * 0.8),
@@ -697,9 +697,11 @@ def shards(body, arm, rig, K, sp):
         left = [(rng.uniform(-0.08, 0.12) * (pc.get("broken", [1, 1])[0]), 1 - (k + 1) / (jag + 1)) for k in range(jag)]
         outline = top + right + bot + left
 
+        dz0, dz1 = pc.get("dz", [0.0, 0.0])
+
         def at(u, w, rr):
             a = a0 + (a1 - a0) * u
-            z = zt - h * w
+            z = zt - h * w - (dz0 + (dz1 - dz0) * u)
             r = rr + flare * h * w
             return Vector((neck[0] + math.sin(a) * r, neck[1] + math.cos(a) * r, z))
         fo = [bm.verts.new(at(u, w, r0 + t)) for u, w in outline]

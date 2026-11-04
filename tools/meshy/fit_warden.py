@@ -2129,6 +2129,11 @@ def main():
         parts.append(kael_parts.chains(ob, arm, rig, K, spec["kael"]["chain"]))
         if spec["kael"].get("meshy_mane"):
             parts.append(kael_parts.meshy_mane(ob, arm, rig, K, spec["kael"]["meshy_mane"], import_glb, decimate, log))
+            if spec["kael"].get("under_mane"):
+                # (chunky opaque locks under the head run's stringy hair, back and sides only: its gaps show hair)
+                under = kael_parts.mane(ob, arm, rig, K, spec["kael"]["under_mane"])
+                under.name = under.data.name = "ManeUnder"
+                parts.append(under)
         else:
             parts.append(kael_parts.mane(ob, arm, rig, K, spec["kael"]["mane"]))
         if spec["kael"].get("cap"):
