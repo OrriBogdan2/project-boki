@@ -36,6 +36,23 @@ def save(px, path):
     img.save()
 
 
+def drop_ground_line(sq, bg):
+    """The sheet's ground line (a thin dark rule under the boots) painted out with the sheet's grey: Meshy reads it
+    as a floor slab. Rows where a third of the pixels are line-dark; only pixels with grey 4 rows above and below."""
+    dark = np.abs(sq[..., :3] - bg[:3]).sum(axis=2) > 0.45
+    grey = np.abs(sq[..., :3] - bg[:3]).sum(axis=2) < 0.06
+    n = len(sq)
+    for r in np.nonzero(dark.mean(axis=1) > 0.33)[0]:
+        if r < 4 or r + 4 >= n:
+            continue
+        line = dark[r] & grey[max(r - 4, 0)] & grey[min(r + 4, n - 1)]
+        sq[r, line] = bg
+        for d in (-2, -1, 1, 2):         # (its anti-aliased edge)
+            rr = r + d
+            edge = ~grey[rr] & grey[max(rr - 4, 0)] & grey[min(rr + 4, n - 1)] & line
+            sq[rr, edge] = bg
+
+
 def main():
     a = sys.argv[sys.argv.index("--") + 1:]
     sheet, out = load(a[0]), a[1]
@@ -56,6 +73,7 @@ def main():
         sq[:] = bg
         ox, oy = (n - w) // 2, (n - h) // 2
         sq[oy:oy + h, ox:ox + w] = crop
+        drop_ground_line(sq, bg)
         sq = np.repeat(np.repeat(sq, scale, 0), scale, 1)
         save(sq, os.path.join(out, "view%d.png" % i))
         boxes[name] = {"file": "view%d.png" % i, "sheet_x0": x0 - ox, "sheet_y0": top - oy, "scale": scale, "sheet_k": f}

@@ -554,7 +554,6 @@ func open(L: Dictionary, by: Hunter, how: String) -> void:
 	m.sfx("boom", L["gate_c"], 0.0, 0.5)
 	m.fx.burst(L["gate_c"] + Vector3(0, 1.5, 0), color_of(L), 40, 6.0, 0.7, 4.0, 1.4)
 	m.fx.ring(L["c"], float(L["half"]) + 1.0, color_of(L), 0.8)
-	m.shake(0.4, L["gate_c"])
 	var how_s: String = {"dial": "cracked the lock of", "runes": "lit the runes of", "wards": "broke the wards of"}.get(how, "opened")
 	m.add_feed("%s %s %s" % [by.pname if by else "Someone", how_s, L["name"]])
 	if m.player and not m.player.out:
@@ -576,7 +575,7 @@ func wake(L: Dictionary, by: Ent) -> void:
 	lbl.text = "%s\n%s" % [L["name"], b.md["name"]]
 	m.sfx("horn", L["c"], 4.0, 0.55)
 	m.sfx("v_warden", L["c"], 6.0, 0.45)
-	m.shake(0.6, L["c"])
+	Shake.incoming_big(m, L["c"], 0.6)
 	m.fx.burst(b.pos + Vector3(0, 2.0, 0), color_of(L), 50, 7.0, 0.8, 0.0, 1.6)
 	m.add_feed("%s has woken in %s" % [b.md["name"], L["name"]])
 	lock_in(L)

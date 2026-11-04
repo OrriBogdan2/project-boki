@@ -88,14 +88,19 @@ const CALL_ACT := {
 const TUT_HINT := {
 	"land": ["Over there looks quiet!", "(peeks over your shoulder at the ground below)"],
 	"move": ["Come on, let's look around!", "(runs a little circle and looks back at you)"],
-	"dash": ["Quick, like this!", "(zips off to the side and back, showing you)"],
+	"dash": ["Dash across, like this!", "(zips off to the side and back, showing you)"],
 	"glide": ["Jump, then glide! Like me!", "(hops high and spreads out, showing you)"],
 	"exdash": ["Jump, then dash in the air!", "(leaps and darts forward in the air)"],
 	"shoot": ["A monster! Get it!", "(growls at the monster)"],
-	"utility": ["Try your weapon trick!", "(watches your hands, tail going)"],
-	"kin1": ["Let me help! Use my power!", "(bounces, ready to use its power)"],
+	"utility": ["Right click! Use your power!", "(watches your hands, tail going)"],
+	"orders": ["Hold %T and tell me what to do!", "(sits up, ears forward, waiting for orders)"],
+	"sig": ["Use your power on them all!", "(bounces, ready for the group)"],
+	"fight": ["Together! Get them all!", "(bristles, ready to fight)"],
+	"crouch": ["Get low and look far!", "(flattens itself against the ground)"],
+	"kin1": ["Watch this!", "(bounces, ready to use its power)"],
 	"throw": ["Throw me! I'm ready!", "(crouches on your shoulder, ready to jump)"],
 	"chest": ["A chest! Over here!", "(runs to a chest and paws at the lid)"],
+	"pickup": ["Something shiny! Grab it!", "(noses at the thing on the ground)"],
 	"goexit": ["Follow me, the outpost is this way!", "(runs ahead toward the outpost and waits)"],
 	"uplink": ["That mast! Turn it on!", "(sniffs the uplink mast)"],
 	"defend": ["Here they come! Stay inside!", "(bristles at the walls)"],
@@ -162,7 +167,8 @@ static func tut_hint(k, id: String) -> String:
 	if not TUT_HINT.has(id):
 		return ""
 	var stage := Care.speech(k.rec) if k.rec.size() > 0 else 3
+	var key := Settings.key_cap("throw")
 	if stage >= 2:
-		return String(TUT_HINT[id][0])
+		return String(TUT_HINT[id][0]).replace("%T", key)
 	var rc: Dictionary = k.rec if k.rec.size() > 0 else {"species": k.species}
-	return KinSpeak.bark(rc, "tut") + " " + String(TUT_HINT[id][1])
+	return KinSpeak.bark(rc, "tut") + " " + String(TUT_HINT[id][1]).replace("%T", key)

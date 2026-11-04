@@ -10,7 +10,7 @@ import json
 import bpy
 from mathutils import Matrix, Vector
 
-SLOTS = ["skin", "hair", "cloth", "leather", "metal", "eyes", "team", "glow"]
+SLOTS = ["skin", "hair", "cloth", "leather", "metal", "eyes", "team", "glow", "ice"]
 BONE_LEN = {"root": 0.12, "hips": 0.2, "head": 0.25, "pauldron.L": 0.1, "pauldron.R": 0.1, "skirt": 0.1,
             "scarf": 0.12, "hand.L": 0.08, "hand.R": 0.08, "shin.L": 0.3, "shin.R": 0.3}
 
@@ -104,11 +104,13 @@ def tris(objs):
     return n
 
 
-def export(path, objs, image_format="AUTO"):
+def export(path, objs, image_format="AUTO", colors=False):
+    """colors: each mesh's active colour attribute goes out as COLOR_0 (fit_warden's ink room)."""
     bpy.ops.object.select_all(action="DESELECT")
     for ob in objs:
         ob.select_set(True)
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=False,
                               export_animations=False, export_skins=True, export_yup=True,
                               export_materials="EXPORT", export_image_format=image_format,
-                              export_jpeg_quality=92, export_extras=False)
+                              export_jpeg_quality=92, export_extras=False,
+                              export_vertex_color="ACTIVE" if colors else "MATERIAL")

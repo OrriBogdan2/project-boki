@@ -1,9 +1,9 @@
-"""Synthesizes Vireo's and Vex's ability sounds into audio/vv_*.wav and audio/vn_*.wav (pure Python,
+"""Synthesizes Ryzz's and Vex's ability sounds into audio/vv_*.wav and audio/vn_*.wav (pure Python,
 its own random stream, so the other generators' output is untouched). No samples from anywhere.
 
     python3 tools/gen_vv_sfx.py      (then: godot --headless --import)
 
-Vireo (electric, dry, crackling):
+Ryzz (electric, dry, crackling):
   vv_bolt          finger snap + a short crackle zap (the finger-gun bolt)
   vv_static_full   a 4th Static stack: a high sky crack and a sizzle tail
   vv_surge_charge  Wirerun held: a rising buzz with crackle
@@ -97,7 +97,7 @@ def save(name, x, db=-19.0, tail=0.03):
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
         w.writeframes(b''.join(struct.pack('<h', int(max(-1, min(1, v)) * 32767)) for v in x))
 
-# ------------------------------------------------------------ Vireo
+# ------------------------------------------------------------ Ryzz
 snap = mul(bp(noise(0.03), 1800, 6000), env(N(0.03), 0.0005, 0.006))
 save('vv_bolt', mix(scale(snap, 1.3),
     scale(at(mul(hp(crackle(0.16, 420, 0.0015), 1500), env(N(0.16), 0.002, 0.06)), 0.01), 0.9),

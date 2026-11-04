@@ -13,7 +13,7 @@ static func portrait(id: String, px := 84.0, body := false) -> Control:
 		var pic := Portraits.Pic.new(id, Vector2(px, px), Arch.color(id), body)
 		pic.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		return pic
-	var vp := Portraits.make(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), Save.d.get("look", {}), id,
+	var vp := Portraits.make(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), Unmasked.mask_look(), id,
 			body, int(px * 2.0) if body else Portraits.SIZE)
 	var tex := TextureRect.new()
 	tex.texture = vp.get_texture()
@@ -44,7 +44,7 @@ static func challenge_block(id: String, width := 190.0) -> VBoxContainer:
 	var needed := ClassUnlock.open_needed(id)
 	var tier_line := "%s challenge" % ClassUnlock.tier(id).capitalize()
 	if needed > ClassUnlock.open_ids().size():
-		tier_line += "  ·  opens once %d Hunters are open" % needed
+		tier_line += "  ·  opens once %d Masks are open" % needed
 	v.add_child(UI.label(tier_line, 12, UI.MUTED))
 	return v
 
@@ -92,7 +92,7 @@ static func kit_tip(id: String) -> String:
 	for slot in ["dash", "passive", "rmb", "e"]:
 		names.append(String(adf[slot]["name"]))
 	names.append(Settings.key_cap("ultimate"))
-	return "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  %s: Boki Merge" % names
+	return "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  %s: Boki Fusion" % names
 
 ## The results screen's Hunter line: mastery goals this expedition finished, and a Hunter unlock that
 ## became ready.
@@ -106,7 +106,7 @@ static func results_strip(s: Dictionary) -> Control:
 		ml.set_meta("mastery_done", String(m["id"]))
 		v.add_child(ml)
 	if int(cu.get("new", 0)) > 0:
-		var nl := UI.label("Hunter challenge done! Hold to unlock it on the Hunters screen at home.", UI.T_SMALL,
+		var nl := UI.label("Mask challenge done! Hold to unlock it on the Masks screen at home.", UI.T_SMALL,
 				GOAL_COL, UI.semi)
 		nl.set_meta("hunter_unlock_ready", int(cu["new"]))
 		v.add_child(nl)

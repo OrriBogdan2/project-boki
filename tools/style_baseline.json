@@ -32,12 +32,12 @@
 "semicolon": 2
 },
 "scripts/arch/kits/archer_kit.gd": {
-"long_line": 13,
-"semicolon": 3,
+"long_line": 12,
+"semicolon": 2,
 "shadow": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 13,
+"long_line": 10,
 "nested_ternary": 1,
 "semicolon": 8
 },
@@ -89,10 +89,6 @@
 "semicolon": 5,
 "shadow": 1
 },
-"scripts/core/boki_pens.gd": {
-"long_line": 6,
-"semicolon": 2
-},
 "scripts/core/bridge.gd": {
 "long_line": 13,
 "semicolon": 1
@@ -120,7 +116,7 @@
 "semicolon": 5
 },
 "scripts/core/game.gd": {
-"long_line": 10,
+"long_line": 9,
 "nested_ternary": 1,
 "semicolon": 4
 },
@@ -172,9 +168,7 @@
 "shadow": 2
 },
 "scripts/core/progress.gd": {
-"long_line": 5,
-"nested_ternary": 1,
-"semicolon": 5
+"long_line": 2
 },
 "scripts/core/ransom.gd": {
 "long_line": 10,
@@ -187,7 +181,7 @@
 "semicolon": 1
 },
 "scripts/core/settings.gd": {
-"long_line": 17,
+"long_line": 16,
 "nested_ternary": 1,
 "semicolon": 4
 },
@@ -202,7 +196,7 @@
 "shadow": 2
 },
 "scripts/core/social.gd": {
-"long_line": 15,
+"long_line": 13,
 "semicolon": 1
 },
 "scripts/core/synth.gd": {
@@ -243,7 +237,7 @@
 "shadow": 2
 },
 "scripts/home/farm_build_ui.gd": {
-"long_line": 5,
+"long_line": 3,
 "semicolon": 9
 },
 "scripts/home/farm_icons.gd": {
@@ -260,13 +254,13 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 248,
-"nested_ternary": 36,
-"semicolon": 271,
-"shadow": 4
+"long_line": 221,
+"nested_ternary": 33,
+"semicolon": 248,
+"shadow": 3
 },
 "scripts/home/home_build.gd": {
-"long_line": 79,
+"long_line": 78,
 "nested_ternary": 6,
 "semicolon": 87,
 "shadow": 1
@@ -292,19 +286,14 @@
 },
 "scripts/home/home_layout.gd": {
 "history_comment": 1,
-"long_line": 41,
+"long_line": 42,
 "nested_ternary": 6,
 "semicolon": 41,
 "shadow": 1
 },
 "scripts/home/home_market.gd": {
-"long_line": 14,
-"semicolon": 21
-},
-"scripts/home/home_training.gd": {
-"long_line": 34,
-"semicolon": 26,
-"shadow": 3
+"long_line": 13,
+"semicolon": 4
 },
 "scripts/home/home_water.gd": {
 "long_line": 3,
@@ -401,9 +390,9 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 401,
+"long_line": 392,
 "nested_ternary": 7,
-"semicolon": 420,
+"semicolon": 408,
 "shadow": 3
 },
 "scripts/match/abilities.gd": {
@@ -476,7 +465,7 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 26,
+"long_line": 25,
 "nested_ternary": 1,
 "semicolon": 49
 },
@@ -567,7 +556,7 @@
 },
 "scripts/match/hunter.gd": {
 "history_comment": 38,
-"long_line": 98,
+"long_line": 95,
 "nested_ternary": 19,
 "semicolon": 53,
 "shadow": 4
@@ -592,7 +581,7 @@
 "semicolon": 2
 },
 "scripts/match/kin_companion.gd": {
-"long_line": 9,
+"long_line": 8,
 "nested_ternary": 1,
 "semicolon": 15
 },
@@ -652,9 +641,9 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 235,
+"long_line": 232,
 "nested_ternary": 21,
-"semicolon": 158,
+"semicolon": 146,
 "shadow": 9
 },
 "scripts/match/merge_look.gd": {
@@ -682,7 +671,7 @@
 "scripts/match/models.gd": {
 "long_line": 283,
 "nested_ternary": 12,
-"semicolon": 281,
+"semicolon": 277,
 "shadow": 3
 },
 "scripts/match/music_dir.gd": {
@@ -790,7 +779,7 @@
 "semicolon": 4
 },
 "scripts/social/town.gd": {
-"long_line": 25,
+"long_line": 23,
 "nested_ternary": 1,
 "semicolon": 41,
 "shadow": 1
@@ -826,9 +815,9 @@
 "long_line": 2
 },
 "scripts/ui/hatch.gd": {
-"long_line": 30,
+"long_line": 31,
 "nested_ternary": 2,
-"semicolon": 59
+"semicolon": 66
 },
 "scripts/ui/hero_grid.gd": {
 "long_line": 2,
@@ -844,8 +833,8 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 205,
-"nested_ternary": 42,
+"long_line": 199,
+"nested_ternary": 41,
 "semicolon": 56,
 "shadow": 2
 },
@@ -915,7 +904,7 @@
 "long_line": 1
 },
 "scripts/ui/results.gd": {
-"long_line": 27,
+"long_line": 26,
 "nested_ternary": 6,
 "semicolon": 43,
 "shadow": 1
@@ -976,7 +965,7 @@
 "semicolon": 20
 },
 "tools/archetype_check.gd": {
-"long_line": 67,
+"long_line": 65,
 "semicolon": 71,
 "shadow": 1
 },
@@ -1021,16 +1010,25 @@
 "shadow": 1
 },
 "tools/economy_floor_check.gd": {
-"long_line": 60,
-"semicolon": 32
+"long_line": 35,
+"semicolon": 19
+},
+"tools/farm_hob_shots.gd": {
+"long_line": 7,
+"semicolon": 2
 },
 "tools/farm_start_check.gd": {
-"long_line": 52,
+"long_line": 49,
 "nested_ternary": 6,
 "semicolon": 29
 },
+"tools/farm_tutorial_check.gd": {
+"history_comment": 1,
+"long_line": 23,
+"semicolon": 2
+},
 "tools/farmbuild_check.gd": {
-"long_line": 52,
+"long_line": 28,
 "semicolon": 15
 },
 "tools/farmbuild_shots.gd": {
@@ -1056,7 +1054,7 @@
 "semicolon": 3
 },
 "tools/hero_combo_check.gd": {
-"long_line": 13,
+"long_line": 12,
 "semicolon": 7
 },
 "tools/hero_pair_check.gd": {
@@ -1106,7 +1104,7 @@
 "tools/loop_tour.gd": {
 "long_line": 23,
 "nested_ternary": 1,
-"semicolon": 40
+"semicolon": 39
 },
 "tools/mantle_check.gd": {
 "long_line": 18,

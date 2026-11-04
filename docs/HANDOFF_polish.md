@@ -10,7 +10,7 @@ merged, then the commits below. Godot runs go through `/home/claude/gq`; my runn
 | Item | Commit | What |
 |---|---|---|
 | 1 + 2 | 9cf9ffb | See-through trees and pillars: `shaders/see.gdshaderinc` (sphere-vs-line-of-sight test per instance, stipple discard), used by `flora.gdshader` and a new `outline_see.gdshader`. `scripts/match/see_through.gd` (SeeThrough) sets globals `see_cam`/`see_a`/`see_b` (added to project.godot) from Match._process and Home._process; off on exit. `--no-see` disables it, `--see-demo[=style]` puts the hunter behind a tree. Out-of-sight dimming in `vis.gdshaderinc` lightened (42%/60% grey to 70%/40%); motes 0.75 to 0.6. Recording mode doesn't touch it. |
-| 3 | 7900572 | Farm Boki drawn 1.7x (`Home.FARM_BOKI_SCALE`, eases to 1.0 on the Training Grounds isle). Presentation only. |
+| 3 | 7900572 | Farm Boki drawn 1.7x (`Home.FARM_BOKI_SCALE`). Presentation only. |
 | 4 | d525471 | Lair escape updraft: the 12 m "Air" column is hidden from your view while you're outside the lair on its far side from the camera (`Lairs._updraft_view`). New `--lair-demo=updraft` rides it (prints LAIRDEMO timings). |
 | 5 | 9eb9bfc | Training: glove rack laid out 2.6 m apart in staggered rows within 6.2 m (skips void/blocked/other-terrace spots); practice sniper moved; HUD pickup tags declutter (step up when overlapping); DUEL ROOM label higher with render_priority 100. |
 | 6 | 1a943fb | Loading: "Solo · 20 hunters" (squads still counted for duos/trios); `finish()` now covers with ScreenFade ink, frees itself, then reveals, so it never fades over the planning map. Only `finish()` and the mode line touched (loadsmooth owns the rest). |

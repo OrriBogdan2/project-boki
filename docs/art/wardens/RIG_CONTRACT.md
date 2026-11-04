@@ -75,6 +75,36 @@ The kit moves (`kmoves_*.gd`) only key channels on these nodes (`p` pitch, `y` y
 squash, `fx`/`fy`/`fz` whole-body turns, `legs` [hip, knee, hip, knee], `fl`/`fr` free-hand targets, `gp` weapon
 pitch, `blade`/`wa`/`wo` the weapon's swing), so a .glb that follows these bones gets every move for free.
 
+### Spring chains (hair, braids, tails that swing)
+Bones named `spring_<name>_<i>` form a chain: the first is a child of a contract bone (a braid hangs from `head`),
+each is the next one's parent, and the last is the tip (no skin of its own; its head is the chain's end). The
+loader (`WardenGlb.Springs`, run by Sync after the contract bones) swings every chain as a damped rope in world
+space, pulled back toward the shape it has riding its parent rigidly (firmer at the root than at the tip), so it
+trails behind a run, swings out of a turn and settles. Nothing in the kit moves or the checks depends on them.
+`tools/meshy/warden_parts.py` builds Vex r3b's two braids this way; `fit_warden.py`'s `hair_springs` puts a scan's own
+fused hair on such chains (Tarek's locs: the vertices of the hair slot in a box handed from the head to the chain by
+how far down it they hang).
+
+### Orbits (props that circle a bone)
+An empty named `orbit_<name>` parented to a bone, its rest upright (identity rotation in the model frame), carries
+unskinned props (Tarek's three seeing-stones round his head, each built facing out from the orbit's centre, its
+iris out and its plain back in). `WardenGlb.Orbits` (run by Sync) turns the empty round its own up axis
+(`ORBIT_HZ`) and bobs each prop on its own phase, so the orbit is data in the loader, never baked.
+`tools/meshy/warden_parts.py` `orbit_props()` builds them (fit spec `orbits`). They count as skinned for
+`--warden-glb-check` and stay out of `--warden-model-check`'s height.
+
+### Hovering bodies
+A body with no feet (Ostra) is built with its ground below its hem (fit spec `sole_z`); the rig's own hover
+(`KMovesStone.hover`, which lifts `Rig`, so the `root` bone) floats it and keeps the gap above the shadow. Its
+lower body is a `void` wisp on a `spring_wisp_*` chain under `hips` (`warden_parts.wisp()`).
+
+### Design variants
+Another design of the same Warden can sit beside the shipped model while the owner compares them:
+`art/wardens/<art>_<tag>/<art>_<tag>.glb` (e.g. `vex_r3b`), built on the same rig. `--warden-variant=vex_r3b`
+picks it for the session (comma-separated for several), and a Settings `warden_models` value of `vex_r3b` for
+that Warden picks it in the save; with neither, or with the file missing, the Warden's own `<art>.glb` loads.
+Whichever design the owner picks ships as `<art>/<art>.glb`.
+
 ## Nodes the game keeps from the procedural rig (do not model these into the body)
 - `Rig/Torso/Aim/Gun` and its children: the held weapon (`Models.gun_parts`, `PinBjornWeapons`), its `Muzzle`
   (shots leave from it), `Mag` (reload anim), Bjorn's `Hammer` pivot (meta `hammer_pivot`; BjornFx finds the
@@ -116,16 +146,37 @@ the vertex colour (`vertex_ao`):
 | `cloth` | 1 (cloth) | the outfit pick (`outfit_col`, within the Warden's range) |
 | `leather` | 2 | — |
 | `metal` | 3 (metal: cool shadows, gloss) | — |
+| `brass` | 3 (as metal) | — (metal split off by its colour, so the model's look can lift it alone at the match camera: Vex's bronze) |
 | `fur` | 5 | — |
 | `eyes` | — (unshaded iris) | the eye pick (`eye_col`) |
 | `team` | 1 | the team colour (keep it on one strong shape: a cuff, a cap, the stem's band) |
 | `glow` | emissive | — (Bjorn's crack, Zedran's fuller) |
+| `void` | — (shaders/hero_void.gdshader: a drifting starfield over the paint, unlit) | — (Ostra's coat tears; `void-wisp` also fades out toward its tip: `WardenGlb.SOFT_TAGS`) |
+
+A material with an emissive texture (glTF `emissiveTexture`) gets the toon shader's emission layer (`use_emit`,
+`WardenGlb.EMIT`, crackling by `EMIT_FLICKER`): Ryzz's veins, Tarek's bracer cracks. The fit's `split` parts are
+pieces cut off the body as their own skinned mesh on one "<slot>-<name>" material (Tarek's `bracers`, Ostra's
+`mask`), with such a layer painted from the atlas (`emit`: the dark cracks between plates, or a colour range).
+With a `model_glow.core` colour in the archetype JSON the layer is a mask drawn in that colour (`emit_tint`), its
+texels' paint too, so a Warden's glow switches without a rebake (Ryzz's pink scar, charm, piping and veins: the
+fit's `emit_art` projects that layer from the art's neon onto the body's own materials).
+A .glb whose weapon is part of the body carries an empty `weapon` node (fit spec `weapon_empty`): the loader
+hides the procedural weapon and the Gun node and its Muzzle stay (Tarek's fists).
 
 A **flat-painted** model (hand-modelled, one colour a material and no atlas: Dredge) names its materials the same way
 ("<slot>-<what>": `metal-brass`, `leather-tar`); the loader shades each in its slot with its own base colour and the
 procedural heroes' clean painted settings (little brushwork, the cool shadow and warm light tints), ink shell on.
 
 Every material must end up in the root's `mats` meta (the loader does it) so hit flashes and mutations reach it.
+A model's own shading (content/rules/warden_look.json, keyed by its art name; `WardenGlb.look`) goes on last:
+`painted` sets hero-toon parameters on all of its surfaces, `slots` per slot, e.g. Vex's skin and gunmetal
+with less top light and rim than the shared painted look, her lens and collar seams brighter on `glow`.
+Materials tagged `braid` ("hair-braid") take the ink line on the hair slot (clean geometry, no ragged strands).
+`halos` in the same file hang a glow disc of a constant size on screen on an anchor empty of the model (Vex:
+`anchor_lens`, exported by the fit with its lens): a lens a pixel wide at the match camera still reads; the disc is
+outside the .glb (a RemoteTransform3D on the anchor carries it), so the skin, bounds and slot checks never see it.
+A painted (Meshy) atlas is shaded by `WardenGlb.PAINTED` (soft, near-white toon light, a light rim, brighter at
+the match camera) with a thin ink shell that never grows past the fit's ink room, the vertex colour's alpha.
 The loader puts each material's base-colour texture (the atlas) on `hero_toon.gdshader`'s `albedo_tex`
 (`use_tex`), with `albedo` as a tint: the player's skin, hair and eye picks move the `skin`, `hair` and `eyes`
 slots at most ±35% per channel from the Warden's own colours. Bone names may come through as `upper_arm_L`
@@ -133,9 +184,10 @@ slots at most ±35% per channel from the Warden's own colours. Bone names may co
 The armature and its meshes sit at the .glb's origin (no offset on the scene root), so skeleton space is model space.
 
 ## Budget and checks
-- About 8–15k triangles per Warden (the held `weapon` counted apart), one 1024² atlas (2048² for a hand-made model
-  whose ageing is painted into one: Dredge) or flat colours; no more than 8
-  material slots (slots, not materials: Dredge's ten materials use four).
+- About 30–45k triangles per Warden (a Meshy model baked to a clean low mesh: ~10k of them on the head, the
+  weapon included; `--warden-glb-check` holds 45k), one 2048² atlas; no more than 8 material slots.
+  A hand-made model may be flat-painted instead (one colour a material, no atlas) or use a 2048² atlas with
+  its ageing painted in (Dredge); slots, not materials, count (Dredge's ten materials use four).
 - `--warden-glb-check`: the bone table covers every part HunterAnim binds; a Warden without a .glb builds the
   procedural model (the fallback); a .glb present loads with the contract armature, every kit move of every
   table retargets exactly and each keyed channel moves its bones, the anchors ride bone attachments, every

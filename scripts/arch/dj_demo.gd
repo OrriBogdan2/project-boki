@@ -6,10 +6,13 @@ extends RefCounted
 ## moment itself (STILLS); add --demo-zoom=1.0 for the gameplay zoom.
 
 const ANIM := {
-	"thf_lmb": ["thief", "arc_bolts", [0.48, 0.52, 0.57, 0.62, 0.68, 0.85]],
-	"thf_primed": ["thief", "arc_bolts", [0.86, 0.89, 0.93, 1.0, 1.12, 1.35]],
+	"thf_lmb": ["thief", "arc_bolts", [0.49, 0.51, 0.54, 0.62, 0.76, 0.95, 1.2]],
+	"thf_lmb_held": ["thief", "arc_bolts", [0.5, 0.54, 0.62, 0.76, 0.95, 1.01]],
+	"thf_lmb_run": ["thief", "arc_bolts", [0.5, 0.54, 0.62, 0.76, 0.95, 1.01]],
+	"thf_primed": ["thief", "arc_bolts", [0.99, 1.02, 1.05, 1.11, 1.24, 1.38, 1.55]],
 	"thf_vault": ["thief", "arc_bolts", [0.55, 0.62, 0.69, 0.86, 0.98]],
 	"thf_exdash": ["thief", "arc_bolts", [0.55, 0.7, 0.95, 1.4, 1.7]],
+	"thf_loop": ["thief", "arc_bolts", [0.53, 0.68, 0.86, 0.97, 1.03, 1.1, 1.22, 1.28, 1.36, 1.49, 1.65, 1.8]],
 	"thf_bola": ["thief", "arc_bolts", [0.5, 0.6, 0.7, 0.8, 0.92, 1.05]],
 	"thf_knife": ["thief", "arc_bolts", [0.5, 0.54, 0.58, 0.62, 0.72, 0.92]],
 	"thf_blink": ["thief", "arc_bolts", [0.99, 1.01, 1.04, 1.1, 1.25, 1.5]],
@@ -20,7 +23,7 @@ const ANIM := {
 	"jug_wave": ["juggernaut", "greatsword", [0.5, 0.9, 1.4, 1.46, 1.55, 1.85]],
 	"jug_slam": ["juggernaut", "greatsword", [0.6, 0.85, 1.08, 1.12, 1.25, 1.6]],
 	"jug_riposte": ["juggernaut", "greatsword", [0.6, 1.0, 1.16, 1.22, 1.32, 1.55]],
-	"jug_lunge": ["juggernaut", "greatsword", [0.7, 1.2, 1.4, 1.45, 1.52, 1.8]],
+	"jug_lunge": ["juggernaut", "greatsword", [0.65, 1.0, 1.31, 1.42, 1.5, 1.8]],
 	"jug_meteor": ["juggernaut", "greatsword", [0.53, 0.62, 0.7, 0.82, 0.98, 1.3]],
 	"jug_dash": ["juggernaut", "greatsword", [0.55, 0.64, 0.74, 0.9, 1.2]],
 	"jug_exdash": ["juggernaut", "greatsword", [0.5, 0.54, 0.62, 0.72, 0.9]],
@@ -49,7 +52,7 @@ const STILLS := {
 	"pull_steer": ["juggernaut", Vector3(-10.0, 0, 0)],
 }
 
-const STRIP_SLOW := 0.15     # Engine.time_scale while Zedran's strips and Sable's dash strips play
+const STRIP_SLOW := 0.15     # Engine.time_scale while Kael's strips and Sable's dash strips play
 
 static func at(t: float, dt: float, when: float) -> bool:
 	return ArenaDemo._at(t, dt, when)
@@ -58,23 +61,30 @@ static func at(t: float, dt: float, when: float) -> bool:
 static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	if P.ammo < 3: P.ammo = int(P.wpn["mag"])
-	if t < 0.05 and (mv.begins_with("jug_") or mv in ["thf_vault", "thf_exdash"]):
+	if t < 0.05 and (mv.begins_with("jug_") or mv in ["thf_vault", "thf_exdash", "thf_loop", "thf_primed"]):
 		Engine.time_scale = STRIP_SLOW       # (a slow software render must not skip the frames a strip asks for)
 	match mv:
 		"thf_lmb":
 			P.inp["fire"] = t > 0.49 and t < 0.52
+		"thf_lmb_held":
+			P.inp["fire"] = t > 0.49 and t < 1.0
+		"thf_lmb_run":
+			P.inp["move"] = Vector2(0, 1) if t > 0.15 else Vector2.ZERO
+			P.inp["fire"] = t > 0.49 and t < 1.0
 		"thf_primed":
 			if at(t, dt, 0.5):
 				P.dashes = P.max_dashes()
 				P.inp["move"] = Vector2(0, 1)
 				P.do_dash()
-			P.inp["fire"] = t > 0.85 and t < 0.88
+			P.inp["fire"] = t > 1.0 and t < 1.03          # once she is up from the cartwheel (0.98)
 		"thf_vault":
 			if at(t, dt, 0.5):
 				P.dashes = P.max_dashes()
 				P.inp["move"] = Vector2(0, 1)
 				P.do_dash()
 			if t > 0.5 and t < 0.8: P.inp["move"] = Vector2(0, 1)
+		"thf_loop":
+			loop(P, t, dt)
 		"thf_exdash":
 			# sideways, away from the dummy (toward it the hunter ends up inside its model, which filled
 			# the old strips' last frames with a big pink blur)
@@ -185,6 +195,18 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				K.cd["rmb"] = 0.0
 				P.inp["sec_hold"] = false
 				K.press_rmb()
+
+## Sable's reset loop (footage 0137-0143 and 0187-0194): a Vault at 0.5 (away from the dummy), the empowered bolt
+## thrown once she is up (1.0), its hit gives the Vault back, then a Vault at 1.3 with the bolt thrown mid-flip.
+static func loop(P: Hunter, t: float, dt: float) -> void:
+	if (t > 0.45 and t < 0.9) or (t > 1.25 and t < 1.7):
+		P.inp["move"] = Vector2(-1 if t < 1.0 else 1, 0)       # away from the dummy, then back: it stays in frame
+	if at(t, dt, 0.5):
+		P.dashes = P.max_dashes()
+	if at(t, dt, 0.5) or at(t, dt, 1.3):
+		P.do_dash()
+	# the second click comes while the first bolt still cools: it is kept and goes mid-flip (ThiefKit.bolt_buf)
+	P.inp["fire"] = (t > 1.0 and t < 1.03) or (t > 1.36 and t < 1.39)
 
 ## The Warchain's pull with a steer: hooked from 10m, pulled in while holding a sideways key.
 static func pull_steer(P: Hunter, K: ArchKit, D: Hunter, t: float, dt: float) -> void:

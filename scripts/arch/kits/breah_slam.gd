@@ -95,12 +95,16 @@ func fire(c: Dictionary) -> void:
 	var h := k.h
 	k.last_variant = String(c["variant"])
 	AimKit.hide(h, "rmb")
-	if h.gliding:
-		k.anim_id = ""      # (the held pose ends) the glider wins: no dive out of an open glider
-		return
 	if not k.spend_rmb():
 		k.anim_id = ""
 		return
+	k.dive_glide = h.gliding
+	if h.gliding:
+		# the source's slam out of a glide: the glider folds at once and she plunges at its dive speed
+		h.gliding = false
+		h.fly_t = 0.0
+		h.vel = Vector3(h.vel.x * 0.25, minf(h.vel.y, 0.0), h.vel.z * 0.25)
+		k.m.sfx("glide", h.pos, -6.0, 0.7)
 	var ck := charge_k(float(c["t"])) if c.get("hold", false) else 0.0
 	k.dive = true
 	k.dive_k = ck
@@ -154,7 +158,6 @@ func slam(c: float, at_feet: bool) -> void:
 	m.fx.flash(at + Vector3(0, 0.5, 0), Color("ff8a2c"), 0.6 + 0.3 * c, 0.08)
 	KitLooks.of(m).impact(at, r, c, float(s["scorch_t"]))
 	m.sfx("br_slam", at, 0.0, 1.0)
-	Feel.shake(m, "t3" if c > 0.5 else "t2", h, at)
 	k.net_ring(at, r, Color("ff5a2a"))
 	var gained := false
 	for f in k.foes_in(at, r, 3.2):
@@ -177,7 +180,7 @@ func slam(c: float, at_feet: bool) -> void:
 		f.hurt(d2, h, o)
 		if in_core: KitLooks.of(m).crown(f, float(o["stun"]))
 		if air:
-			f.vel.y = minf(f.vel.y, -22.0)      # spiked down (after the hit, which would lift it)
+			m.displace.spike(f, -22.0)      # spiked down (after the hit, which would lift it)
 		gained = true
 	for w in m.verbs.walls.duplicate():
 		if not w.get("rock", false) or int(w["team"]) != h.team: continue

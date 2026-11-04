@@ -1,8 +1,8 @@
 extends RefCounted
 ## --ultbond-check: the keys and the bond/merge loop.
-##   keys     R reload, X hunter ultimate, T merge are the defaults; old saves move (merge R/X -> T, R -> reload,
-##            X -> hunter ultimate) and genuine custom binds stay
-##   reload   R reloads a part-empty magazine; a weapon with no magazine answers with the deny tick
+##   keys     R hunter ultimate and X merge are the defaults; old saves move (merge R/X/T -> X, X -> R for the
+##            hunter ultimate; reload and the Boki ability key are dropped) and genuine custom binds stay
+##   press    R casts the hunter ultimate, X merges, G sends out and calls back, nothing is bound to reload
 ##   bond     KinBond.add clamps to a full bar; from_ult pays the best event of one cast, not per event or target
 ##   release  the second merge press fires the ultimate: afterglow for the hunter, the Boki lands pumped and rests
 ##            the short time; a timeout has neither
@@ -51,7 +51,7 @@ func run(mn: Node) -> void:
 	Save.no_write = true
 	_keys()
 	_migration()
-	_reload()
+	await _presses()
 	_bond()
 	_release()
 	_cap()
@@ -61,17 +61,21 @@ func run(mn: Node) -> void:
 # ------------------------------------------------------------------ keys
 func _keys() -> void:
 	Settings.reset_all()
-	ok(Settings.slots("reload")[0] == _key(KEY_R), "R reloads by default (%s)" % str(Settings.slots("reload")))
-	ok(Settings.slots("hunter_ult")[0] == _key(KEY_X),
-		"X is the hunter ultimate by default (%s)" % str(Settings.slots("hunter_ult")))
-	ok(Settings.slots("ultimate") == [_key(KEY_T), ""],
-		"T alone is Merge by default (%s)" % str(Settings.slots("ultimate")))
-	ok(Settings.key_cap("ultimate") == "T" and Settings.key_cap("reload") == "R",
-		"the key caps follow the binds (%s, %s)" % [Settings.key_cap("ultimate"), Settings.key_cap("reload")])
+	var gone := ["reload", "kin_ability"]
+	ok(not gone.any(InputMap.has_action) and not Settings.ACTIONS.any(func(a): return a[0] in gone),
+		"no action is bound to reload, and the Boki ability has no key")
+	ok(Settings.slots("hunter_ult")[0] == _key(KEY_R),
+		"R is the hunter ultimate by default (%s)" % str(Settings.slots("hunter_ult")))
+	ok(Settings.slots("ultimate") == [_key(KEY_X), ""],
+		"X alone is Merge by default (%s)" % str(Settings.slots("ultimate")))
+	ok(Settings.key_cap("hunter_ult") == "R" and Settings.key_cap("ultimate") == "X",
+		"the key caps follow the binds (%s, %s)" % [Settings.key_cap("hunter_ult"), Settings.key_cap("ultimate")])
 	ok(Settings.slots("emote")[0] == _key(KEY_Y), "the Emote wheel moved to Y (%s)" % str(Settings.slots("emote")))
-	ok(Settings.conflicts(_ev(KEY_T), "ultimate").is_empty(),
-		"nothing else in a match is on T (%s)" % str(Settings.conflicts(_ev(KEY_T), "ultimate")))
-	ok(Settings.conflicts(_ev(KEY_R), "reload").is_empty(), "R is shared only with the build-mode rotate")
+	ok(Settings.slots("talk")[0] == _key(KEY_T) and Settings.slots("details")[0] == _key(KEY_C),
+		"the home keys Talk and Details stay on T and C")
+	ok(Settings.conflicts(_ev(KEY_X), "ultimate").is_empty(),
+		"nothing else in a match is on X (%s)" % str(Settings.conflicts(_ev(KEY_X), "ultimate")))
+	ok(Settings.conflicts(_ev(KEY_R), "hunter_ult").is_empty(), "R is shared only with the build-mode rotate")
 
 func _ev(k: int) -> InputEventKey:
 	var e := InputEventKey.new()
@@ -82,29 +86,35 @@ func _ev(k: int) -> InputEventKey:
 func _migration() -> void:
 	var old := {"keys": {"ultimate": [_key(KEY_R), _key(KEY_X)]}, "keys2_v": 1, "keys3_v": 0}
 	KeyMigrate.run(old)
-	ok(not old["keys"].has("ultimate") and not old["keys"].has("reload") and not old["keys"].has("hunter_ult"),
-		"old default merge [R, X] goes back to the defaults (T, R reload, X hunter ult): %s" % str(old["keys"]))
+	ok(old["keys"].is_empty() and int(old["keys4_v"]) == 1,
+		"old default merge [R, X] goes back to the defaults (X merge, R hunter ult): %s" % str(old["keys"]))
+	var old_kit := {"ultimate": [_key(KEY_T)], "hunter_ult": [_key(KEY_X)], "reload": [_key(KEY_R)],
+		"kin_ability": [_key(KEY_C)]}
+	var saved_old := {"keys": old_kit, "keys2_v": 1, "keys3_v": 1, "keys4_v": 0}
+	KeyMigrate.run(saved_old)
+	ok(saved_old["keys"].is_empty(), "the old default kit moves to the new one: %s" % str(saved_old["keys"]))
 	var pinned := {"keys": {"ultimate": [_key(KEY_R)], "tonic": [_key(KEY_X)]}, "keys2_v": 1, "keys3_v": 0}
 	KeyMigrate.run(pinned)
 	var pk: Dictionary = pinned["keys"]
-	ok(not pk.has("ultimate") and pk["hunter_ult"] == [] and pk["tonic"] == [_key(KEY_X)],
-		
-		"X bound elsewhere stays there and the hunter ultimate starts unbound: %s" % str(pinned["keys"]))
-	var custom_keys := {"ultimate": [_key(KEY_F)], "dash": [_key(KEY_R)], "reload": [_key(KEY_Q)]}
+	ok(pk["ultimate"] == [] and pk["hunter_ult"] == [] and pk["tonic"] == [_key(KEY_X)],
+		"X bound elsewhere stays there and Merge starts unbound: %s" % str(pinned["keys"]))
+	var custom_keys := {"ultimate": [_key(KEY_F)], "hunter_ult": [_key(KEY_Z)], "dash": [_key(KEY_R)],
+		"reload": [_key(KEY_Q)]}
 	var custom := {"keys": custom_keys, "keys2_v": 1, "keys3_v": 0}
 	KeyMigrate.run(custom)
 	var ck: Dictionary = custom["keys"]
-	ok(ck["ultimate"] == [_key(KEY_F)] and ck["dash"] == [_key(KEY_R)] and ck["reload"] == [_key(KEY_Q)],
-		
-		"custom binds are kept: %s" % str(custom["keys"]))
+	var kept: bool = ck["ultimate"] == [_key(KEY_F)] and ck["hunter_ult"] == [_key(KEY_Z)]
+	kept = kept and ck["dash"] == [_key(KEY_R)]
+	ok(kept and not ck.has("reload"),
+		"custom binds are kept, the reload bind is dropped: %s" % str(custom["keys"]))
 	var r_taken := {"keys": {"dash": [_key(KEY_R)]}, "keys2_v": 1, "keys3_v": 0}
 	KeyMigrate.run(r_taken)
-	ok(r_taken["keys"]["reload"] == [] and r_taken["keys"]["dash"] == [_key(KEY_R)],
-		"R custom-bound to another action: Reload starts unbound")
-	var t_taken := {"keys": {"base": [_key(KEY_T)]}, "keys2_v": 1, "keys3_v": 0}
-	KeyMigrate.run(t_taken)
-	ok(t_taken["keys"]["ultimate"] == [] and t_taken["keys"]["base"] == [_key(KEY_T)],
-		"T custom-bound to another action: Merge starts unbound, no clash (%s)" % str(t_taken["keys"]))
+	ok(r_taken["keys"]["hunter_ult"] == [] and r_taken["keys"]["dash"] == [_key(KEY_R)],
+		"R custom-bound to another action: the hunter ultimate starts unbound")
+	var x_taken := {"keys": {"base": [_key(KEY_X)]}, "keys2_v": 1, "keys3_v": 0}
+	KeyMigrate.run(x_taken)
+	ok(x_taken["keys"]["ultimate"] == [] and x_taken["keys"]["base"] == [_key(KEY_X)],
+		"X custom-bound to another action: Merge starts unbound, no clash (%s)" % str(x_taken["keys"]))
 	var y_taken := {"keys": {"map": [_key(KEY_Y)]}, "keys2_v": 1, "keys3_v": 0}
 	KeyMigrate.run(y_taken)
 	var yk: Dictionary = y_taken["keys"]
@@ -126,32 +136,58 @@ func _migration() -> void:
 	ok(oldsep["keys"]["separate"] == [_key(KEY_Z)] and not oldsep["keys"].has("hunter_ult"),
 		"Separate still moves from X to Z")
 
-# ------------------------------------------------------------------ reload
-func _reload() -> void:
+# ------------------------------------------------------------------ what the keys do
+func _press(action: String) -> void:
+	Input.action_press(action)
+	m._gather_input()
+	await main.get_tree().process_frame
+	Input.action_release(action)
+	await main.get_tree().process_frame
+
+func _presses() -> void:
 	var P := _fresh()
-	var mag := int(P.wpn["mag"])
-	P.ammo = maxi(0, mag - 3)
-	P.reload_t = 0.0
-	HunterKeys.reload_pressed(P)
-	ok(P.reload_t > 0.0, "R reloads a part-empty magazine (%d/%d, reload %.2fs)" % [P.ammo, mag, P.reload_t])
-	P.reload_t = 0.0
-	P.ammo = mag
-	HunterKeys.reload_pressed(P)
-	ok(P.reload_t == 0.0, "R on a full magazine does nothing")
-	P.wpn = P.wpn.duplicate()
-	P.wpn["melee"] = true
-	P.ammo = 0
-	m.hud.slot_fx.erase("reload")
-	HunterKeys.reload_pressed(P)
-	var fx: Dictionary = m.hud.slot_fx.get("reload", {})
-	ok(P.reload_t == 0.0 and String(fx.get("kind", "")) == "deny",
-		"R on a weapon with no ammo is a deny tick, no reload (%s)" % str(fx))
-	P.lvl = 1
-	ok(not HunterKeys.ult_pressed(P), "X before level %d does nothing" % int(Hunter.ULT_AT[0]))
+	P.kin.stow()
+	P.lvl = int(Hunter.ULT_AT[0])
+	P.ult = 1.0
+	await _press("ultimate")
+	ok(bool(m.pending_input["ult"]), "X queues the Merge")
+	_run_for(float(MergeForm.data()["xform_s"]) + 0.12)
+	ok(KinMerge.active(P), "X merges you with your Boki")
+	P = _fresh()
 	P.lvl = int(Hunter.ULT_AT[0])
 	var has_own := P.ak != null and P.ak.has_ult()        # the default medium (Vex) has one: Cinderfall
-	ok(HunterKeys.ult_pressed(P) == has_own,
-		"X at level %d goes off only through a hero's own ultimate (cast_ult; has one: %s)" % [P.lvl, has_own])
+	P.lvl = 1
+	ok(not HunterKeys.ult_pressed(P), "R before level %d does nothing" % int(Hunter.ULT_AT[0]))
+	P.lvl = int(Hunter.ULT_AT[0])
+	P.ak.cd["x"] = 0.0
+	await _press("hunter_ult")
+	ok(has_own and float(P.ak.cd["x"]) > 0.0 and not m.pending_input["ult"] and not KinMerge.active(P),
+		"R casts the hunter ultimate, not the Merge (cooldown %.1f)" % float(P.ak.cd.get("x", 0.0)))
+	P = _fresh()
+	Input.action_press("throw")
+	m._gather_input()
+	await main.get_tree().process_frame
+	Input.action_release("throw")
+	m._gather_input()
+	ok(bool(m.pending_input["throw"]), "a G tap queues the send-out / call-back order")
+	var k: Kin = P.kin
+	KinCommand.tap(P)
+	var sent := k.state != "shoulder"
+	k.state = "active"        # landed and out (the test arena aim can drop it in the void)
+	k.global_position = P.global_position + Vector3(8, 0, 0)
+	KinCommand.tap(P)
+	var back := ["returning", "flying_home", "shoulder"]
+	ok(sent and k.state in back, "G sends the Boki out, and calls it back (%s)" % k.state)
+	k.state = "active"
+	Input.action_press("throw")
+	for i in 10:
+		KinCommand.poll(P, 0.05, false)
+	var wheel_open := KinWheel.is_open(P)
+	Input.action_release("throw")
+	KinCommand.poll(P, 0.05, false)
+	ok(wheel_open and not KinWheel.is_open(P) and P.inp.has("wheel_pick"),
+		"holding G opens the order wheel, letting go picks")
+	ok(KinCommand.order(P, "guard") and k.cmd == "guard", "a wheel order is applied (the Boki is told to guard)")
 
 # ------------------------------------------------------------------ the bond hook
 func _bond() -> void:

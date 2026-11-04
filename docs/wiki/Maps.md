@@ -10,7 +10,7 @@ Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `
 | The Arena | `content/maps/arena.json` | 52 x 52 | 2 | The practice arena. |
 | The Hollow Crown | `content/maps/hollowcrown.json` | 216 x 216 | 12 | Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). |
 | Skyreach | `content/maps/skyreach.json` | 216 x 216 | 17 | Hand-made expedition map. |
-| First Flight | `content/maps/tutorial.json` | 80 x 80 | 3 | The tutorial island group. |
+| First Flight | `content/maps/tutorial.json` | 80 x 80 | 6 | The tutorial course, one island per skill. |
 
 ## The Arena
 
@@ -136,19 +136,22 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 
 ## First Flight
 
-The tutorial island group: a flat starter meadow, a low rise across a wide bridge (one clean step up, for climbing), and the gate isle you glide or walk to, with a small walled outpost whose uplink is the way home. No rocks, no hazards, nothing random.
+The tutorial course, one island per skill: a landing meadow, a dash gap, a ledge (jump plus air dash), a long wind crossing to glide, a low lookout rise, one step up (crouch to scout the range island), a range island for the fights and the chest, and the walled outpost isle. 'course' holds each step's stop: at = the marker's spot, pad = the glowing edge to leave from, pos for the rest. No rocks, no hazards, nothing random.
 
 ### Islands
 
 | Island | Role | Biome | Danger | Tall grass clumps | Named spots |
 |---|---|---|---|---|---|
-| Lookout Rise | grove | Meadow | quiet | 1 |  |
-| Starter Meadow | grove | Meadow | quiet | 1 |  |
+| Landing Meadow | grove | Meadow | quiet | 0 |  |
+| Dash Isle | grove | Meadow | quiet | 0 |  |
+| Ledge Isle | grove | Meadow | quiet | 0 |  |
+| Lookout Isle | grove | Meadow | quiet | 0 |  |
+| Training Range | grove | Meadow | quiet | 0 |  |
 | Gate Isle | grove | Meadow | quiet | 0 |  |
 
 **Exits:** 1 uplink outposts.
 
-**Getting around:** 2 bridges, 1 updrafts, 1 wind roads.
+**Getting around:** 2 bridges, 1 wind roads.
 
 
 

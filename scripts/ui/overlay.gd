@@ -224,6 +224,10 @@ func open_pause(where: String) -> void:
 		item.call("Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
 	if where != "match":
 		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
+	if where == "home" and Game.main:
+		item.call("Training area", "jump", func():
+			close()
+			Game.main.screen_node()._start_training())
 	item.call("Settings", "gear", func():
 		if tab == "Controls": tab = "Gameplay"
 		open_settings())
@@ -327,7 +331,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
 	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
 		["Fighting", [
-			"fire", "reload", "secondary", "gear1", "gear2", "signature", "throw", "ultimate", "hunter_ult",
+			"fire", "secondary", "gear1", "gear2", "signature", "throw", "hunter_ult", "ultimate",
 			"util1", "util2", "util3", "util4", "base",
 		]],
 		["Squad and map", ["map", "scores", "emote", "pass_lead", "separate"]],
@@ -404,7 +408,7 @@ func _tab_access(v: VBoxContainer) -> void:
 	_group(v, "Readability")
 	_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05, "Menus and the HUD, on top of fitting your window")
 	_group(v, "Comfort")
-	_slider(v, "Screen shake", "shake", 0.0, 1.5)
+	_slider(v, "Screen shake", "screen_shake", 0.0, 1.0, 0.05, "Only big hits on you shake the view; 0 turns it off")
 	_toggle(v, "Fewer flashes", "reduce_flashes", "Softer full-screen flashes when you're hit or level up")
 
 ## Filming: kept between launches, applied when the next offline match starts.
@@ -427,6 +431,7 @@ func _tab_demo(v: VBoxContainer) -> void:
 	_choice(v, "Blight", "demo_blight", [[true, "On"], [false, "Off"]])
 	var fresh := [["normal", "Normal (%d s)" % int(Bot.FRESH_T)], ["long", "Longer (%d s)" % int(Settings.DEMO_FRESH_T)]]
 	_choice(v, "Bots leave you be after landing", "demo_fresh", fresh)
+	_toggle(v, "All masks open (offline only)", "demo_all_masks", "Every Mask is pickable. Unlocks are untouched")
 	_note(v, "These apply from the next match you start, offline only. Online matches play the host's rules.")
 
 ## A small heading over a group of settings rows.
@@ -581,8 +586,6 @@ func open_dex(spk: String) -> void:
 	DexView.detail(v, spk, get_tree())
 
 func open_inventory() -> void:
-	if Progress.day1_mark("inventory") != "":
-		Sfx.play("unlock", null, -8.0)
 	var v := _page("inventory", "Inventory", 760)
 	UI.hold(v, INV_H)          # every tab the same size: switching tabs never resizes the panel
 	if inv_tab == "Items":      # one currency, and only where it matters

@@ -1,5 +1,5 @@
 extends RefCounted
-## --keybind-check: two keys per action (Settings > Controls). Merge ships on T, reload on R, the hunter ultimate on X; a
+## --keybind-check: two keys per action (Settings > Controls). Merge ships on X, the hunter ultimate on R, and there is no reload key; a
 ## second key can be set, cleared and saved; a key already in use is caught and can be swapped;
 ## nothing else is on X in a match (the arena/duel reset is Backspace, separating from the drop is
 ## Z); glove 2 and play share V on purpose (a match key and a home key). With --shots-dir=<dir>, screenshots of
@@ -19,9 +19,9 @@ func run(main: Node) -> void:
 	var tree := main.get_tree()
 	var S = Settings
 	S.reset_all()
-	ok(S.slots("ultimate") == ["key:%d" % KEY_T, ""], "Merge ships on T (%s, prompt '%s')" % [str(S.slots("ultimate")), S.key_caps("ultimate")])
+	ok(S.slots("ultimate") == ["key:%d" % KEY_X, ""], "Merge ships on X (%s, prompt '%s')" % [str(S.slots("ultimate")), S.key_caps("ultimate")])
 	ok(S.slots("separate")[0] == "key:%d" % KEY_Z, "separating from the drop moved to Z")
-	var xs: Array = S.conflicts(_key(KEY_X), "hunter_ult")
+	var xs: Array = S.conflicts(_key(KEY_X), "ultimate")
 	ok(xs.is_empty(), "nothing else rebindable is on X (%s)" % str(xs))
 	# a second key: set, saved, cleared
 	S.rebind("util1", _key(KEY_KP_1), 1)
@@ -50,7 +50,7 @@ func run(main: Node) -> void:
 	var cf: Array = S.conflicts(_key(KEY_F), "ultimate")
 	ok(cf.size() == 1 and cf[0][0] == "interact", "giving the ultimate F is caught: it's Interact's (%s)" % str(cf))
 	S.swap_bind("ultimate", 0, _key(KEY_F), "interact", 0)
-	ok(S.slots("ultimate")[0] == "key:%d" % KEY_F and S.slots("interact")[0] == "key:%d" % KEY_T, "swapping gives Interact the ultimate's old key (ult %s, interact %s)" % [S.binding_text("ultimate"), S.binding_text("interact")])
+	ok(S.slots("ultimate")[0] == "key:%d" % KEY_F and S.slots("interact")[0] == "key:%d" % KEY_X, "swapping gives Interact the ultimate's old key (ult %s, interact %s)" % [S.binding_text("ultimate"), S.binding_text("interact")])
 	S.reset_all()
 	# (the move of old saves to the new defaults is --ultbond-check)
 	# the arena and duel resets are on Backspace now

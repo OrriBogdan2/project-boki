@@ -1,5 +1,5 @@
 extends "res://tools/pin_bjorn_ult_check.gd"
-## Owner playtest items of 2026-11-03 for Pin and Bjorn (briefs/OWNER_REVIEW_1103.md #5, #6, #10, #29, #30),
+## Owner playtest items of 2026-11-03 for Hem and Breaker (briefs/OWNER_REVIEW_1103.md #5, #6, #10, #29, #30),
 ## run from --archer-combo-check and --bulwark-combo-check (tools/archer_bulwark_combo_check.gd adds the
 ## counts). Prints AKCHECK lines like --archetype-check.
 
@@ -33,7 +33,7 @@ func off_line(from: Vector3, dir: Vector2, p: Vector3) -> float:
 	var d := Vector2(p.x - from.x, p.z - from.z)
 	return absf(d.x * dir.y - d.y * dir.x)
 
-## The first visible fletch burst of Pin's pool (its world place and width), or null.
+## The first visible fletch burst of Hem's pool (its world place and width), or null.
 func burst_node(K: ArcherKit) -> MeshInstance3D:
 	for b in K.fx.bursts:
 		var node: MeshInstance3D = b["node"]
@@ -57,10 +57,18 @@ func pin() -> void:
 	_pin_heavy(m, P, T, K, home, lv)
 	_pin_dash(m, P, T, K)
 	await done(m)
+	var flow = load("res://tools/dash_flow_check.gd").new()
+	var bad: int = await flow.combos_of(main, "archer")
+	ok("pin item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; holds go through every move",
+		bad == 0, "%d failing (the DASHFLOW lines)" % bad)
+	var parity = load("res://tools/parity_pvb.gd").new()
+	parity.main = main
+	await parity.pin()
+	n += parity.n
+	fails += parity.fails
 
 func ready_bow(P: Hunter) -> void:
 	P.fire_cd = 0.0
-	P.ammo = maxi(P.ammo, 1)
 	P.reload_t = 0.0
 	P.draw_t = -1.0
 
@@ -77,32 +85,33 @@ func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void
 		m.step(DT)
 		t += DT
 		early += arrows(m, P)
-	ok("pin early release: 5 s on the button looses nothing", early == 0 and K.draw.loosed_at < 0.0 and P.ammo == 1,
-		"arrows %d ammo %d" % [early, P.ammo])
+	ok("pin early release: 5 s on the button looses nothing", early == 0 and K.draw.loosed_at < 0.0,
+		"arrows %d" % early)
 	P.inp["fire"] = false
 	m.step(DT)
 	m.step(DT)
 	ok("pin early release: letting go looses exactly one arrow (an overdrawn one)",
 		arrows(m, P) == 1 and K.draw.last_kind == "over", "arrows %d kind %s" % [arrows(m, P), K.draw.last_kind])
 	step(m, 1.0)
-	# a full Focus is drawn at once but waits for the button to come up (it used to loose on the press)
+	# audit (Nov 3): a full Focus no longer skips the draw: the stages run as always and it is spent on the arrow
 	ready_bow(P)
 	K.res = K.res_max()
 	early = 0
 	t = 0.0
-	while t < 2.0:
+	while t < 0.8:
 		aim.call()
 		m.step(DT)
 		t += DT
 		early += arrows(m, P)
-	ok("pin early release: a full Focus held 2 s waits for the release (drawn at the top stage)",
-		early == 0 and P.focus_draw and P.draw_t > 0.0,
-		"arrows %d focus_draw %s draw_t %.2f" % [early, P.focus_draw, P.draw_t])
+	ok("pin early release: with full Focus the draw still runs its stages (no instant Supercharged)",
+		early == 0 and P.draw_t > 0.6 and P.draw_t < 1.0 and K.full_ready(),
+		"arrows %d draw_t %.2f" % [early, P.draw_t])
 	P.inp["fire"] = false
 	m.step(DT)
 	m.step(DT)
-	ok("pin early release: the Focus shot goes on release, Supercharged and aimed at once",
-		arrows(m, P) == 1 and K.draw.last_kind == "super", "arrows %d kind %s" % [arrows(m, P), K.draw.last_kind])
+	ok("pin early release: the arrow spends the Focus (an Empowered one, armed for a Deadeye)",
+		arrows(m, P) == 1 and K.draw.last_kind == "arrow" and K.res < 10.0 and K.loosed > 0.0,
+		"arrows %d kind %s focus %.0f" % [arrows(m, P), K.draw.last_kind, K.res])
 	step(m, 1.0)
 	# a cooldown running mid-draw never looses it
 	ready_bow(P)
@@ -118,14 +127,27 @@ func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void
 		early += arrows(m, P)
 	ok("pin early release: a cooldown mid-draw does not loose it", early == 0 and P.draw_t > 0.5,
 		"arrows %d draw_t %.2f" % [early, P.draw_t])
-	# a dash cancels the draw with no shot, and holding on does not start a new one by itself being a shot
+	# item 51: a dash keeps the draw (it charges on through the roll) and still looses only on the release
+	P.inp["fire"] = false
+	step(m, 1.0)
+	ready_bow(P)
+	var dry := press_dry.bind(P, K, T.pos)
+	step(m, 0.3, dry)
+	var drawn := P.draw_t
 	P.dashes = P.max_dashes()
 	P.do_dash()
-	step(m, 0.4, aim)
-	ok("pin early release: a dash cancels the draw with no arrow", arrows(m, P) == 0
-		and K.draw.loosed_at < m.time - 0.3,
-		"arrows %d" % arrows(m, P))
+	var rolling := P.roll_t > 0.0
+	step(m, 0.12, dry)
+	ok("pin early release: a dash keeps the draw, charging on through the roll, and looses nothing",
+		rolling and arrows(m, P) == 0 and P.draw_t > drawn + 0.08, "draw %.2f -> %.2f arrows %d" % [drawn, P.draw_t,
+		arrows(m, P)])
+	step(m, 0.4, dry)
 	P.inp["fire"] = false
+	m.step(DT)
+	m.step(DT)
+	ok("pin early release: letting go after the dash looses one arrow from the carried draw",
+		arrows(m, P) == 1 and K.draw.last_kind in ["arrow", "super"], "arrows %d kind %s" % [arrows(m, P),
+		K.draw.last_kind])
 	step(m, 1.0)
 
 ## #5: the readout sits on the aim line.
@@ -139,7 +161,7 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var ve := AimKit.entry(P, "draw")
 	var from: Vector2 = ve.get("from", Vector2(-99, -99))
 	var vd: Vector2 = ve.get("dir", Vector2.ZERO)
-	ok("pin readout: the V leaves Pin along the aim line and is symmetric about it",
+	ok("pin readout: the V leaves Hem along the aim line and is symmetric about it",
 		String(ve.get("kind", "")) == "vee" and from.distance_to(Vector2(P.pos.x, P.pos.z)) < 0.01
 		and vd.distance_to(d) < 0.01 and float(ve.get("half", 0.0)) > 0.0,
 		"from %s dir %s aim %s" % [str(from), str(vd), str(d)])
@@ -154,7 +176,7 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var le := AimKit.entry(P, "draw")
 	var to: Vector2 = le.get("to", Vector2.ZERO)
 	var cursor := Vector2(T.pos.x - P.pos.x, T.pos.z - P.pos.z).length()
-	ok("pin readout: full draw runs one line from Pin along the aim line, past the cursor, to max range",
+	ok("pin readout: full draw runs one line from Hem along the aim line, past the cursor, to max range",
 		String(le.get("kind", "")) == "line" and to.distance_to(le.get("from", Vector2.ZERO)) > cursor + 3.0
 		and off_line(P.pos, d, Vector3(to.x, P.pos.y, to.y)) < 0.05,
 		"len %.1f cursor %.1f" % [to.distance_to(le.get("from", Vector2.ZERO)), cursor])
@@ -223,8 +245,8 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	var arrow_look: Array = PinFx.LOOK["arrow"]
 	var heavy_look: Array = PinFx.LOOK["heavy"]
 	var ratio := float(heavy_look[6]) / float(arrow_look[6])
-	ok("pin heavy: the arrow is 3-4 times a normal arrow with a long trail",
-		ratio >= 3.0 and ratio <= 4.0 and float(heavy_look[4]) >= 2.0 * float(arrow_look[4]),
+	ok("pin heavy: the arrow is the bow's arrow made much bigger (PinFx.HEAVY_SCALE) with a long trail",
+		is_equal_approx(ratio, PinFx.HEAVY_SCALE) and float(heavy_look[4]) >= 2.0 * float(arrow_look[4]),
 		"scale x%.1f trail %.1f vs %.1f" % [ratio, float(heavy_look[4]), float(arrow_look[4])])
 	fresh(T)
 	T.teleport(home + Vector3(7.0, 0, 0))
@@ -240,8 +262,8 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	step(m, 0.8, rmb_at.bind(P, T.pos))
 	var bar := AimKit.entry(P, "rmb_bar")
 	var d := P.aim_dir()
-	ok("pin heavy: the telegraph while held is a thick gold lane with a tip, from Pin along the aim line",
-		AimKit.shown(P, "rmb_bar") and AimKit.shown(P, "rmb_v") and float(bar.get("width", 0.0)) >= 0.45
+	ok("pin heavy: the telegraph while held is a thick gold lane with a tip, from Hem along the aim line",
+		AimKit.shown(P, "rmb_bar") and not AimKit.shown(P, "rmb_v") and float(bar.get("width", 0.0)) >= 0.45
 		and bool(bar.get("tip", false)) and (bar.get("dir", Vector2.ZERO) as Vector2).distance_to(d) < 0.01,
 		"width %.2f tip %s" % [float(bar.get("width", 0.0)), str(bar.get("tip"))])
 	step(m, 0.5, rmb_at.bind(P, T.pos))
@@ -261,7 +283,7 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 		elif kind != "":
 			lmb_kinds += 1
 	ok("pin heavy: it spawns its own projectile type (heavy), never an LMB arrow type",
-		heavy >= 1 and lmb_kinds == 0 and node != null and (node.get_node("Core") as Node3D).visible,
+		heavy >= 1 and lmb_kinds == 0 and node != null and not (node.get_node("Core") as Node3D).visible,
 		"heavy %d lmb %d" % [heavy, lmb_kinds])
 	var burst := burst_node(K)
 	ok("pin heavy: a release burst at the bow, on the aim line, wider than the bow cues, with a screen kick",
@@ -406,10 +428,9 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	m.step(DT)
 	step(m, 0.5, aim)
 	ok("bjorn hold: letting go and pressing again starts a fresh hold", K.lmb_t > 0.2, "lmb_t %.2f" % K.lmb_t)
-	# a glide, a dash, a knock, another ability (E or a Q glove) each end it too
+	# a glide, a knock, another ability (E or a Q glove) each end it too (a dash no longer does: item 51)
 	var cases := {
 		"glide": func(): P.gliding = true,
-		"dash": func(): P.do_dash(),
 		"knock": func(): P.impulse(Vector2(40.0, 0.0)),
 		"ability": cast_e_at.bind(P, K, home),
 		"a Q glove": _glove_q.bind(P),
@@ -430,7 +451,7 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	fresh(T)
 	aim_at(P, T.pos)
 	step(m, 0.5)
-	step(m, float(K.lmb_def()["full"]) + 0.05, aim)
+	step(m, float(K.lmb_def()["full"]) + 0.3, aim)      # past the perfect window (#49): the normal step
 	var p0 := P.pos
 	var t0 := T.pos
 	P.inp["fire"] = false
@@ -532,13 +553,15 @@ func _let_go(P: Hunter) -> void:
 func _mode(hero: String, slot: String, in_air: bool) -> String:
 	return String(DashFlow.row_of(hero, slot, in_air)["mode"])
 
-## #32 / #35 for Pin: a press during the roll is carried, RMB / E / X work at once, a draw ends on a dash.
+## #32 / #35 for Hem: a press during the roll is carried, RMB / E / X work at once; item 51: a draw carries
+## through a dash (Shift mid-draw rolls at once).
 func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
-	ok("pin dash table: LMB buffers, RMB / E / X fire, a draw is cancelled by a dash",
+	ok("pin dash table: LMB buffers, RMB / E / X fire, a draw carries through a dash",
 		_mode("archer", "lmb", false) == "buffer" and _mode("archer", "lmb", true) == "buffer"
 		and _mode("archer", "rmb", false) == "fire" and _mode("archer", "e", false) == "fire"
 		and _mode("archer", "x", false) == "fire"
-		and DashFlow.into_dash_of("archer", "lmb").get("mode") == "cancel")
+		and DashFlow.into_dash_of("archer", "lmb").get("mode") == "fire"
+		and ["ground", "air", "jump"].all(func(mv): return DashFlow.hold_row_of("archer", "lmb", mv)["mode"] == "keep"))
 	step(m, 1.5)
 	ready_bow(P)
 	K.res = 0.0
@@ -567,9 +590,9 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	P.inp["sec_hold"] = false
 	step(m, 0.5)
 	ok("pin dash > RMB and E: both start during the dash", rolling and rmb_ok and e_ok, "rmb %s e %s" % [rmb_ok, e_ok])
-	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.18, "pin_flick": 0.22})
+	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.28, "pin_flick": 0.22})
 
-## into_dash.x for Bjorn: Shift while planted for Faultline isn't lost, it goes when the plant ends.
+## into_dash.x for Breaker: Shift while planted for Faultline isn't lost, it goes when the plant ends.
 func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:
 	step(m, 1.5)
 	P.lvl = 6
@@ -591,12 +614,12 @@ func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:
 		"held %s last %s dashes %.2f" % [held_back, str(K.st.get("last_dash")), P.dashes])
 	step(m, 2.5)
 
-## #32 / #35 for Bjorn.
+## #32 / #35 for Breaker.
 func _bjorn_dash(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -> void:
-	ok("bjorn dash table: LMB buffers, RMB / E fire, a held swing is cancelled by a dash",
+	ok("bjorn dash table: LMB buffers, RMB / E fire, a held swing is kept through a dash (item 51)",
 		_mode("bulwark", "lmb", false) == "buffer" and _mode("bulwark", "lmb", true) == "buffer"
 		and _mode("bulwark", "rmb", false) == "fire" and _mode("bulwark", "e", false) == "fire"
-		and DashFlow.into_dash_of("bulwark", "lmb").get("mode") == "cancel")
+		and DashFlow.into_dash_of("bulwark", "lmb").get("mode") == "fire")
 	step(m, 1.5)
 	P.teleport(home)
 	T.teleport(home + Vector3(30.0, 0, 6.0))

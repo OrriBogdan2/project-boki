@@ -34,6 +34,8 @@ func run(main: Node) -> void:
 	var box := AABB()
 	var first := true
 	for mi in gun.find_children("*", "MeshInstance3D", true, false):
+		if (mi as MeshInstance3D).mesh == null:
+			continue      # (a .glb weapon modelled whole empties the procedural Mag)
 		var b := WardenGlb.model_xf(gun, mi) * (mi as MeshInstance3D).mesh.get_aabb()
 		box = b if first else box.merge(b)
 		first = false

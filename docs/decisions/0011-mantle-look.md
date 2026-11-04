@@ -25,3 +25,9 @@ A player's saved look (folk, gender, Slim/Average/Sturdy body, face, colours, ou
 - Changed: `save.gd` (v8), `models.gd` (wiring; the old look helpers moved to `PlayerLook`), `hunter_anim.gd` (hip height), `hatch.gd` (the old discrete creator replaced by the step), home/interior/town call sites (`MantleLook.at_home`), bot looks (`PlayerLook.random`).
 - Every Hunter now wears its class colour (the Warden's palette) instead of the player's outfit. Warden genders follow item 39 (`robot` builds on the male body). Once ext/class-titles lands, gender lives in the archetype JSON as well; `--mantle-look-check` fails if the two disagree (DEBT: keep one home).
 - No voice pitch slider: the hunters have no voice lines yet.
+
+## At the art integ (ext/art-integ, Nov 4)
+Main had moved on before this landed: the saved look is now the Unmasked (`scripts/match/unmasked.gd`, its own creator in the new-game flow and Change your look), and a match builds the Warden from `Unmasked.mask_look()`. So the merge keeps main's save and creator and takes the Mantle look's model side only:
+- **Save:** no new step. The v8 -> v9 slot that was kept for this stays an empty placeholder (`PlayerLook.migrate` is not run: it would drop the old `body` pick before `Unmasked.migrate` reads it). Sliders are not saved yet, so in a match every slider is neutral and a Bearer is exactly the Warden.
+- **Models.hunter:** a non-Unmasked look goes through `MantleLook.params` (the Warden's likeness, the 3D model's sliders via `WardenGlb.dress`); an Unmasked look is `MantleLook.own` of `Unmasked.legacy` with the Unmasked build and colour, on main's Unmasked body and face.
+- **CreatorPanel** (the slider creator) is not in any flow; `--mantle-look-check` checks it on its own. Wiring it into the Unmasked creator (and saving the sliders, with a new save step) is for the mask-look rules.

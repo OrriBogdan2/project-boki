@@ -1,8 +1,8 @@
 {
-	"desc": "Hunter unlocks and mastery (docs/decisions/0005). A new save starts owning `first` and picks `starter_picks` Hunter from `starters` in the new-game flow. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.",
-	"first": "gunslinger",
-	"starters": ["juggernaut", "archer", "ashwick"],
+	"desc": "Hunter unlocks and mastery (docs/decisions/0005). A new save wears Vex first (`starters`, picked on the first-Mask screen, free at the first portal) and plays the tutorial as Vex. After its first finished expedition the player picks one of `second_picks` as the second Mask; the other two open through their own challenges, like Hem. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.",
+	"starters": ["gunslinger"],
 	"starter_picks": 1,
+	"second_picks": ["juggernaut", "tender", "ashwick"],
 	"hold_s": 1.6,
 	"tiers": {
 		"easy": "about 1-2 expeditions",
@@ -38,7 +38,7 @@
 		"far_hits": "hits from 12 m or more",
 		"air_hits": "hits landed in the air",
 		"kin_hits": "hits by your Boki",
-		"merged_knocks": "knocks while merged",
+		"merged_knocks": "knocks while fused",
 		"lowhp_knocks": "knocks under half health"
 	},
 	"unlock": {
@@ -52,12 +52,12 @@
 		"rimewright": {"tier": "medium", "stat": "slows", "target": 20, "text": "Slow 20 enemies"},
 		"tender": {"tier": "hard", "after": 6, "stat": "revives", "target": 4, "text": "Revive 4 teammates"},
 		"dolm": {"tier": "hard", "after": 6, "stat": "multi3", "target": 5, "text": "Hit 3 enemies at once with one ability, 5 times"},
-		"ostra": {"tier": "hard", "after": 8, "stat": "merged_knocks", "target": 3, "text": "Knock down 3 hunters while merged with your Boki"}
+		"ostra": {"tier": "hard", "after": 8, "stat": "merged_knocks", "target": 3, "text": "Knock down 3 hunters while fused with your Boki"}
 	},
 	"mastery": {
 		"juggernaut": [
 			{"stat": "slams", "target": 10, "text": "Knock 10 enemies into walls", "reward": {"kind": "colourway", "id": "forge_red", "name": "Forge Red"}},
-			{"stat": "merged_knocks", "target": 2, "text": "Knock down 2 hunters while merged", "reward": {"kind": "emote", "id": "chest_thump", "name": "Chest Thump"}},
+			{"stat": "merged_knocks", "target": 2, "text": "Knock down 2 hunters while fused", "reward": {"kind": "emote", "id": "chest_thump", "name": "Chest Thump"}},
 			{"stat": "chests", "target": 8, "text": "Open 8 chests", "reward": {"kind": "banner", "id": "broken_chain", "name": "Broken Chain"}},
 			{"stat": "close_out", "target": 1, "text": "Make it out after being knocked down", "reward": {"kind": "title", "id": "unbowed", "name": "the Unbowed"}}
 		],
@@ -83,7 +83,7 @@
 			{"stat": "air_hits", "target": 25, "text": "Land 25 hits while in the air", "reward": {"kind": "colourway", "id": "midnight_silk", "name": "Midnight Silk"}},
 			{"stat": "stuns", "target": 6, "text": "Stun 6 enemies", "reward": {"kind": "emote", "id": "twirl", "name": "Twirl"}},
 			{"stat": "best_haul", "target": 6, "text": "Make it out carrying 6 items", "reward": {"kind": "title", "id": "light_fingers", "name": "Light Fingers"}},
-			{"stat": "merged_knocks", "target": 1, "text": "Knock down a hunter while merged", "reward": {"kind": "glider", "id": "dusk_moth", "name": "Dusk Moth"}}
+			{"stat": "merged_knocks", "target": 1, "text": "Knock down a hunter while fused", "reward": {"kind": "glider", "id": "dusk_moth", "name": "Dusk Moth"}}
 		],
 		"bulwark": [
 			{"stat": "revives", "target": 3, "text": "Revive 3 teammates", "reward": {"kind": "colourway", "id": "oathsteel", "name": "Oathsteel"}},
@@ -123,7 +123,7 @@
 			{"stat": "close_out", "target": 2, "text": "Make it out after being knocked down, twice", "reward": {"kind": "title", "id": "bedrock", "name": "Bedrock"}}
 		],
 		"ostra": [
-			{"stat": "merged_knocks", "target": 4, "text": "Knock down 4 hunters while merged", "reward": {"kind": "skin", "id": "void_bloom", "name": "Void Bloom"}},
+			{"stat": "merged_knocks", "target": 4, "text": "Knock down 4 hunters while fused", "reward": {"kind": "skin", "id": "void_bloom", "name": "Void Bloom"}},
 			{"stat": "stuns", "target": 15, "text": "Stun 15 enemies", "reward": {"kind": "trail", "id": "lantern_motes", "name": "Lantern Motes"}},
 			{"stat": "best_haul", "target": 8, "text": "Make it out carrying 8 items", "reward": {"kind": "title", "id": "swapkeeper", "name": "Swapkeeper"}},
 			{"stat": "rings", "target": 15, "text": "Fly through 15 air rings", "reward": {"kind": "glider", "id": "lantern_moth", "name": "Lantern Moth"}},

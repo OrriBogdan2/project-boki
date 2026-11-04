@@ -1,11 +1,11 @@
 extends "res://tools/vv_shots.gd"
 ## --breah-shots --shots-dir=<dir> [--breah-only=<part>]: Tarek's review screenshots in a live Arena match
-## (xvfb with a renderer), reusing the Vireo/Vex shot rig (tools/vv_shots.gd). Strips are a 3-wide grid
+## (xvfb with a renderer), reusing the Ryzz/Vex shot rig (tools/vv_shots.gd). Strips are a 3-wide grid
 ## of crops round her at gameplay zoom; <dir>/captions.txt gets "file: caption" per file.
 
 const GRID_CROP := Vector2i(280, 200)    # px round the hero per strip frame (scaled 1.5x)
 const GRID_COLS := 3
-const PARTS := ["rmb", "dash", "spine", "climb"]
+const PARTS := ["rmb", "dash", "spine", "climb", "glide"]
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -50,7 +50,8 @@ func _take(kind: String, file: String, caption: String, focus: Callable) -> void
 		super._take(kind, file, caption, focus)
 		return
 	var img := main.get_viewport().get_texture().get_image()
-	var crop := _crop(img, P.position + Vector3(0, 0.9, 0), GRID_CROP, 1.5)
+	var at: Vector3 = focus.call() if focus.is_valid() else P.position + Vector3(0, 0.9, 0)
+	var crop := _crop(img, at, GRID_CROP, 1.5)
 	var strip_file := "%s_%s.png" % [hero_name, kind]
 	if not strips.has(strip_file):
 		strips[strip_file] = []
@@ -155,3 +156,22 @@ func _breah_climb() -> void:
 	)
 	await _go(1.1, walk, marks)
 	P.inp["move"] = Vector2.ZERO
+
+## Quakefall out of a glide (the owner's 23:00 answer): gliding, the press folds the glider, the plunge, the
+## slam on landing.
+func _breah_glide() -> void:
+	await _reset(9.0)
+	P.pos.y += 8.0
+	P.grounded = false
+	var glide := func(t: float):
+		P.inp["glide"] = true
+		if t >= 0.6 and t < 0.6 + DT:
+			P.ak.press_rmb()
+	var marks := _strip(
+		"glide_slam_strip",
+		"Quakefall out of a glide (per the source and the owner): gliding; the press folds the glider at once; the"
+			+ " plunge at the glider's dive speed (32.5 m/s); the two-fist slam where she lands; the crater",
+		[0.4, 0.62, 0.68, 0.75, 0.85, 1.2]
+	)
+	await _go(1.4, glide, marks)
+	P.inp["glide"] = false

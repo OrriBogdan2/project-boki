@@ -2,10 +2,10 @@ extends RefCounted
 ## --warden-shots --shots-dir=<dir> [--wardens=bulwark,archer,juggernaut] [--sheets=<dir>] [--procedural]: the
 ## in-engine Warden models next to their concept sheets (concept phase 2). Per Hunter, under <dir>/<id>/:
 ## turnaround_game.png (front, 3/4, side, back, 3/4 back at the match camera: the true pixels, then
-## enlarged 3x), poses_game.png (idle, run, attack, cast, ult at the match camera), turnaround_close.png,
-## closeup.png and closeup_front.png (head and shoulders, 3/4 and front), vs_sheet.png (the concept sheet
-## beside the close turnaround) and
-## moves_close_N.png (the run and the hero's own kit moves, frame by frame), plus captions.txt.
+## enlarged 3x), front_34.png and back_34.png (full length), poses_game.png (idle, run, attack, cast, ult at the
+## match camera), turnaround_close.png, closeup.png and closeup_front.png (head and shoulders, 3/4 and front),
+## vs_sheet.png (the concept sheet beside the close turnaround) and moves_close_N.png (the run and the hero's own
+## kit moves, frame by frame), plus captions.txt.
 ## --procedural shoots the procedural models of Wardens that have a 3D one (Settings: Warden models).
 ## --sheets names the folder holding the concept PNGs (<id>.png). Needs a renderer.
 
@@ -24,6 +24,7 @@ var holder: Node3D
 var cam: Camera3D
 var anims: Array = []
 var tree: SceneTree
+var close_cfg := {}           # a Warden's warden_look "closeup" {fov, up}: a wider head shot (Ostra's raised orb)
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -68,6 +69,7 @@ func _hero(id: String, dir: String, sheets: String) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var caps: Array = []
 	var title := String(Arch.def(id).get("name", id))
+	close_cfg = WardenGlb.look(WardenGlb.art(id)).get("closeup", {})
 	# 1. the turnaround at the match camera, then close
 	var row := _row(id, YAWS.size())
 	for i in row.size():
@@ -80,9 +82,12 @@ func _hero(id: String, dir: String, sheets: String) -> void:
 	var close := await _close_strip(row)
 	close.save_png(dir.path_join("turnaround_close.png"))
 	caps.append("turnaround_close.png: %s close, %s" % [title, ", ".join(YAW_NAMES)])
-	var pair := await _front_pair(row)
+	var pair := await _pair(row, 0, 1)
 	pair.save_png(dir.path_join("front_34.png"))
 	caps.append("front_34.png: %s full length, front and three-quarter (as the sheet's two views)" % title)
+	var back := await _pair(row, 3, 4)
+	back.save_png(dir.path_join("back_34.png"))
+	caps.append("back_34.png: %s full length, back and three-quarter back" % title)
 	# 2. head and shoulders, three-quarter front
 	var head := await _head(row[1])
 	head.save_png(dir.path_join("closeup.png"))
@@ -188,21 +193,35 @@ func _close_strip(row: Array, animate := true) -> Image:
 	var span := (row.size() - 1) * GAP + 1.6
 	cam.fov = 30.0
 	var half_h := atan(tan(deg_to_rad(cam.fov * 0.5)) * 16.0 / 9.0)
-	cam.position = Vector3(0, 1.1, span * 0.5 / tan(half_h))
+	await _settle(1, animate)
+	var tall := maxf(_top(row), 1.8)          # (the tallest piece, a hammer held high included, stays in)
+	var dist := maxf(span * 0.5 / tan(half_h), (tall * 0.5 + 0.35) / tan(deg_to_rad(cam.fov * 0.5)))
+	cam.position = Vector3(0, maxf(1.1, tall * 0.5), dist)
 	cam.rotation = Vector3(-0.03, 0, 0)
 	await _settle(4, animate)
 	var img := await _grab()
-	var top := int(cam.unproject_position(Vector3(0, 2.9, 0)).y)
+	var top := int(cam.unproject_position(Vector3(0, maxf(2.9, tall + 0.15), 0)).y)
 	var bottom := int(cam.unproject_position(Vector3(0, -0.15, 0.6)).y)
 	return _fit(img.get_region(Rect2i(0, maxi(top, 0), img.get_width(), mini(bottom, img.get_height()) - maxi(top, 0))))
 
-## The front and three-quarter hunters each filling half the frame, side by side.
-func _front_pair(row: Array) -> Image:
+## The highest point of the hunters' visible meshes (m), so a tall model and its raised weapon stay in frame.
+func _top(row: Array) -> float:
+	var top := 0.0
+	for h in row:
+		for vi in (h as Node).find_children("*", "VisualInstance3D", true, false):
+			var v := vi as VisualInstance3D
+			if v.is_visible_in_tree() and not (v is Light3D):
+				top = maxf(top, (v.global_transform * v.get_aabb()).end.y)
+	return top
+
+## Two hunters of the turnaround row (front and 3/4, or back and 3/4 back), each filling half the frame.
+func _pair(row: Array, a: int, b: int) -> Image:
 	var out := Image.create(OUT_W, 720, false, Image.FORMAT_RGBA8)
 	for i in 2:
-		var h := row[i] as Node3D
+		var h := row[[a, b][i]] as Node3D
 		cam.fov = 30.0
-		cam.position = Vector3(h.position.x, 1.15, h.position.z + 1.3 / tan(deg_to_rad(15.0)))
+		var tall := maxf(_top([h]), 2.2)
+		cam.position = Vector3(h.position.x, tall * 0.52, h.position.z + (tall * 0.5) / tan(deg_to_rad(15.0)))
 		cam.rotation = Vector3(-0.04, 0, 0)
 		await _settle(4)
 		var img := await _grab()
@@ -214,9 +233,20 @@ func _front_pair(row: Array) -> Image:
 
 func _head(h: Node3D) -> Image:
 	var hp := (h.get_node("Rig/Torso/HeadPivot") as Node3D).global_position + Vector3(0, 0.12 * h.scale.y, 0)
-	cam.fov = 24.0
-	cam.position = Vector3(h.position.x, hp.y + 0.1, hp.z + 1.8)
-	cam.look_at(hp + Vector3(0, -0.08, 0))
+	var back := 1.8
+	# (a big chibi head, Pip's with its ears and flower ring: the frame centres between the neck and the head's
+	# top and backs off, so the crown and ears stay in it)
+	var top := WardenGlb.anchor(h, "anchor_head_top")
+	var pivot := (h.get_node("Rig/Torso/HeadPivot") as Node3D).global_position
+	if top and top.global_position.y - pivot.y > 0.32:
+		var span := top.global_position.y - pivot.y
+		hp.y = pivot.y + span * 0.5
+		back *= span / 0.32
+	# (a Warden's warden_look "closeup" {fov, up} frames its head shot: Ostra's raised orb)
+	var up := float(close_cfg.get("up", 0.0))
+	cam.fov = float(close_cfg.get("fov", 24.0))
+	cam.position = Vector3(h.position.x, hp.y + 0.1 + up, hp.z + back)
+	cam.look_at(hp + Vector3(0, -0.08 + up, 0))
 	await _settle(4)
 	var img := await _grab()
 	var w := img.get_height()
@@ -246,15 +276,38 @@ func _fit(img: Image) -> Image:
 		img.resize(OUT_W, int(img.get_height() * float(OUT_W) / img.get_width()), Image.INTERPOLATE_LANCZOS)
 	return img
 
+## Kit moves keyed under their own names (not <id>_lmb / _dash / _rmb): [caption, move, time (s)].
+const OWN_MOVES := {
+	"ashwick": [["Torch Lance", "as_lance", 0.2], ["Soot Ram", "as_leap", 0.08], ["Soot Ram, late", "as_leap", 0.2],
+		["Cinder Shot aim", "as_aim", 0.3], ["Cinder Shot", "as_shot", 0.12], ["Furnace Cloak", "as_cloak", 0.15]],
+}
+
 ## The run cycle at two phases, then the hero's own kit moves (<id>_lmb, _dash, _rmb) at key moments: [label,
 ## kit move, its time, running]. A hero without its own moves gets the run only.
 func _move_frames(id: String) -> Array:
 	var out: Array = [["run", "", 0.0, 0], ["run, other foot", "", 0.0, 9]]
+	for f in OWN_MOVES.get(id, []):
+		if not HunterAnim.km_def(String(f[1])).is_empty():
+			out.append([f[0], f[1], f[2], -1])
 	for f in [["shoot", "_lmb", 0.03], ["recoil", "_lmb", 0.08], ["dash", "_dash", 0.1], ["dash, low", "_dash", 0.4],
 			["dash, up", "_dash", 0.62], ["RMB throw", "_rmb", 0.07]]:
 		if not HunterAnim.km_def(id + String(f[1])).is_empty():
 			out.append([f[0], id + String(f[1]), f[2], -1])
+	for f in KIT_FRAMES.get(id, []):
+		if not HunterAnim.km_def(String(f[1])).is_empty():
+			out.append([f[0], f[1], f[2], -1])
 	return out
+
+## Heroes whose kit moves aren't named <id>_lmb / _dash / _rmb (KMovesStone, Hem's bow): [label, kit move, its time
+## (s), arena_demo.gd's timings].
+const KIT_FRAMES := {
+	"archer": [["draw", "arc_draw", 0.8], ["loose", "arc_loose", 0.94], ["Spirit Walk roll", "pin_roll", 0.58],
+		["Heavy Shot", "arc_heavy", 1.42]],
+	"dolm": [["punch", "breah_punch", 0.12], ["throw", "breah_throw", 0.2], ["leap", "breah_leap", 0.2],
+		["slam", "breah_slam", 0.1], ["sense", "breah_sense", 0.3], ["dash", "breah_dash", 0.15]],
+	"ostra": [["orb", "ostra_orb", 0.1], ["snap", "ostra_snap", 0.1], ["swap", "ostra_swap", 0.3],
+		["seed", "ostra_seed", 0.2], ["well", "ostra_well", 0.3], ["empower", "ostra_empower", 0.4]],
+}
 
 ## Plays one move frame and holds it: a run (its extra steps set the stride's phase) or a kit move at its time.
 func _frame(an: HunterAnim, h: Node3D, f: Array) -> void:
