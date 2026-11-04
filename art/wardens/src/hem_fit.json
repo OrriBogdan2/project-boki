@@ -522,11 +522,15 @@
     0.56,
     0.79
    ],
-   "facing": 0.0,
+   "facing": 0.1,
    "k": 0.000367,
    "col0_at": 499.04,
    "row0_at": 2472.87,
-   "feather": 0.015
+   "box_feather": 0.015,
+   "feather": [
+    0.1,
+    0.45
+   ]
   },
   {
    "view": "front",
@@ -541,11 +545,15 @@
     0.26,
     0.44
    ],
-   "facing": 0.2,
+   "facing": 0.3,
    "k": 0.001852,
    "col0_at": 670.01,
    "row0_at": 626.02,
-   "feather": 0.025
+   "box_feather": 0.025,
+   "feather": [
+    0.3,
+    0.65
+   ]
   }
  ],
  "cut_strands": {
