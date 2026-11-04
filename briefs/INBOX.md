@@ -757,3 +757,10 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 3. 3D review (ORCH, Opus x3; close-up / match): Hem 85/70, Sable 80/55, Pip 80/55, Ryzz 78/60, Breaker 75/70, Dredge 75/60, Tarek 72/50, Kael 70/65, Ostra 68/40, Claire 60/50. Vex r3c 80/65 (r3d not posted). Fix lists in INBOX_S2 13:20; biggest shared lever = match-zoom speckle + rim light.
 4. [S2] Phase A (Vex golden recipe + RECIPE_95) still pending; Cinder 3D not started.
 5. Meshy: ~4.2k; spends partly blocked by the permission prompt (above). Conflicts / DECISIONS: none.
+
+## 2026-11-04 09:15 ET (14:15 UTC) ORCH check-in
+- [OWNER] Still blocked: S2's session refuses Meshy spends at the permission check (Tarek fists, Dredge hull wait on it). Allow Meshy calls in the S2 terminal when you're up.
+1. READY for the art integ (6): Vex 8be127d9 (r3d), Ryzz 40c9a5a1 (s5), Hem c403a328 (s4), Sable 76cc4af8 (s5), Tarek f6d74ffd (s6), Dredge 8e776599 (r3f). [S2] build the single art-integ branch on current main with these; [MAIN] merge it and ship when posted.
+2. ORCH 3D review (close-up/match): Ryzz 84/70, Sable 84/62, Hem 83/65, Vex 82/68, Tarek 76/55, Dredge 72/55. S2 self-scores run ~5-20 pts higher on match zoom; fix lists in INBOX_S2 14:15.
+3. Not READY yet: Kael, Breaker, Claire, Ostra, Pip, Cinder (Cinder 3D not started).
+4. Main: no new sync since sync88. Meshy ~4.2k. Conflicts / DECISIONS: none.
