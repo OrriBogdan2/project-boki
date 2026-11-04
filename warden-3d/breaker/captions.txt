@@ -6,3 +6,13 @@ s1_poses_game.png: idle, run, attack, cast, ult at the match camera
 s1_moves_1.png: the run, frame by frame, close
 s1_match.png: Arena match frame (--arena=bulwark --record=2 --arena-demo=pose --demo-zoom=1.0)
 s1_match_x4.png: the match frame cropped round him, x4 (nearest)
+s2_closeup_vs_art.png: stage 2: the owner's head sheet, the portrait, then the model's head and shoulders front and 3/4
+s2_34_vs_art.png: breaker_front (the owner's hold sheet) beside the model full length, front and 3/4
+s2_back_vs_art.png: the turnaround's back view beside the model's back and 3/4 back
+s2_match_vs_art.png: breaker_front (the owner's hold sheet) beside the Arena match frame cropped round the hero, x4 (nearest)
+s2_vs_turnaround.png: the turnaround above, the stage-2 model close below (front, 3/4, side, back, 3/4 back)
+s2_vs_turnaround_game.png: the turnaround above, the model at the match camera (true pixels, then x3)
+s2_poses_game.png: idle, run, attack, cast, ult at the match camera
+s2_moves_1.png: the run, frame by frame, close
+s2_vs_s1.png: stage 1 above, stage 2 below (close turnaround)
+s2_match.png: Arena match frame (--arena=<id> --record=2 --arena-demo=pose --demo-zoom=1.0)
