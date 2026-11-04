@@ -260,3 +260,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
   - Vex r3b is done (ext/warden-vex-r3b 6e9284d5) and the comparison with r3 is posted. Waiting on the owner to pick r3 or r3b, then "go" for the other Wardens.
   - ext/rename-breaker 07ef436b now has the titles Red Stitch, Brass Abomination and Cliff Runner.
   - Balance 4,993.
+- 2026-11-04 08:54 UTC: the owner picked r3b. It ships as Vex, then gets the r3c polish pass (texture, a per-Warden shader override, longer legs, hoses, braids, stance, match read) from the r3b agent. The other 11 wait for the owner's OK on r3c.
