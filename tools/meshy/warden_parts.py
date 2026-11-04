@@ -1088,6 +1088,12 @@ def face_marks(target, arm, spec):
     if not bld.v:
         return None
     ob = bld.object(spec.get("name", "marks").capitalize())
+    # (an open ribbon has no inside for recalc_face_normals to go by: turn every face toward the viewer, else the
+    # back-face cull hides half the marks)
+    for poly in ob.data.polygons:
+        if poly.normal.y < 0.0:
+            poly.flip()
+    ob.data.update()
     img = bpy.data.images.new(spec.get("name", "marks") + "_atlas", 8, 8, alpha=False)
     px = np.ones((8, 8, 4), np.float32)
     px[..., :3] = hexcol(spec.get("colour", "b070ff"))
