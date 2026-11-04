@@ -217,8 +217,17 @@ func _pair(row: Array, a: int, b: int) -> Image:
 
 func _head(h: Node3D) -> Image:
 	var hp := (h.get_node("Rig/Torso/HeadPivot") as Node3D).global_position + Vector3(0, 0.12 * h.scale.y, 0)
+	var back := 1.8
+	# (a big chibi head, Pip's with its ears and flower ring: the frame centres between the neck and the head's
+	# top and backs off, so the crown and ears stay in it)
+	var top := WardenGlb.anchor(h, "anchor_head_top")
+	var pivot := (h.get_node("Rig/Torso/HeadPivot") as Node3D).global_position
+	if top and top.global_position.y - pivot.y > 0.32:
+		var span := top.global_position.y - pivot.y
+		hp.y = pivot.y + span * 0.5
+		back *= span / 0.32
 	cam.fov = 24.0
-	cam.position = Vector3(h.position.x, hp.y + 0.1, hp.z + 1.8)
+	cam.position = Vector3(h.position.x, hp.y + 0.1, hp.z + back)
 	cam.look_at(hp + Vector3(0, -0.08, 0))
 	await _settle(4)
 	var img := await _grab()
