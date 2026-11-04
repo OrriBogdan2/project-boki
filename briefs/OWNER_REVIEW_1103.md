@@ -785,3 +785,13 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
   - Unspent points stay banked; a gentle pulse on the "+" reminds you.
 - Assert: after N level-ups you can put all points into E up to its max; the ranks' effects apply; bots still rank automatically. Screenshots: the ability bar with "+" markers and tier pips.
 - Main's HUD files are wiring-only; logged for whoever has budget, after items 94/96.
+
+## 96b. Combat clarity when someone is downed (owner, 23:19 UTC Nov 4; part of item 96)
+- Owner: "especially when someone is downed, it's hard to tell what's happening with their Boki and your Boki and everything."
+- Add to the item 96 pass:
+  - **Downed Hunter:** an unmistakable downed state, with a ground ring in their team colour, a bleed-out timer arc over them and a "Revive (hold F)" prompt for allies in range.
+  - **Their Boki:** shows clearly what it is doing while its Hunter is down (guarding / fleeing / downed too), with a small icon above it and a tether line to its Hunter in the team colour.
+  - **Your Boki:** always has a distinct own-team ring + tether to you, so it never gets lost in a fight.
+  - **One rule of colour across all of it:** you = one colour, allies = team colour, enemies = red. Boki inherit their Hunter's colour.
+  - **Kill feed / edge markers:** a short line ("Kael downed by Vex"); an off-screen arrow for a downed ally.
+- Assert / screenshots: a 2v2 fight with one Hunter downed, showing both Boki, before and after.
