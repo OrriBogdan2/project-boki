@@ -109,7 +109,16 @@
    0.85,
    0.38,
    0.3
-  ]
+  ],
+  "glow_colour": "ffa040",
+  "vents": {
+   "y": [
+    0.01,
+    0.22
+   ],
+   "val_max": 0.26,
+   "colour": "e05a18"
+  }
  },
  "chunk": {
   "head": 1.12,
@@ -154,6 +163,24 @@
     0.98
    ],
    "facing": 0.45
+  },
+  {
+   "view": "front",
+   "image": "~/meshy/vex_r2/prep2k/view0.png",
+   "col0": 444.7448979591837,
+   "sole_row": 769,
+   "head_z": 0.7,
+   "head_box": [
+    -0.2,
+    0.42
+   ],
+   "box": [
+    -0.03,
+    0.22,
+    0.53,
+    0.76
+   ],
+   "facing": -0.3
   }
  ],
  "palette": [
@@ -220,5 +247,52 @@
   0.45
  ],
  "normal_smooth": 6,
- "pad": 6
+ "pad": 6,
+ "touch_up": [
+  {
+   "mode": "warm",
+   "slot": "skin",
+   "colour": "d9a284",
+   "k": 0.6
+  },
+  {
+   "mode": "flat",
+   "slot": "hair",
+   "box": [
+    -0.25,
+    0.45,
+    0.5,
+    1.0
+   ],
+   "hue": [
+    0.02,
+    0.11
+   ],
+   "sat_min": 0.45,
+   "colour": "f07a30"
+  },
+  {
+   "mode": "flat",
+   "slot": "hair",
+   "box": [
+    0.13,
+    0.27,
+    0.66,
+    0.92
+   ],
+   "front": 0.3,
+   "colour": "f07a30",
+   "val_lo": 0.9
+  }
+ ],
+ "delete_boxes": [
+  [
+   0.25,
+   1.0,
+   -1.0,
+   1.0,
+   0.55,
+   0.95
+  ]
+ ]
 }

@@ -74,6 +74,15 @@ def import_glb(path):
     return ob
 
 
+def base_image_of(ob):
+    """The texture of an object whose materials are the slot materials (one image)."""
+    for m in ob.data.materials:
+        for n in m.node_tree.nodes:
+            if n.type == "TEX_IMAGE" and n.image:
+                return n.image
+    return None
+
+
 def base_image(ob):
     mat = ob.data.materials[0]
     bsdf = next(n for n in mat.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
@@ -773,6 +782,116 @@ def reglow(ob, img, glow_min):
     log("reglow: %d faces" % n)
 
 
+def face_mask(ob, img, pick):
+    """Texels (h, w bool) covered by the faces pick(polygon, centre, material name) accepts."""
+    w, h = img.size
+    ids = np.full((h, w), -1, np.int32)
+    me = ob.data
+    uv = me.uv_layers.active.data
+    me.calc_loop_triangles()
+    names = [m.name for m in me.materials]
+    for t in me.loop_triangles:
+        poly = me.polygons[t.polygon_index]
+        if not pick(poly, poly.center, names[poly.material_index] if names else ""):
+            continue
+        _raster(ids, [uv[li].uv for li in t.loops], 1, w, h)
+    return ids > 0
+
+
+def touch_up(ob, img, rules):
+    """The cleanup pass on the atlas, by geometry (credit-free; the owner's 04:20 notes): each rule picks faces by
+    material slot, a box (Meshy frame) and their painted colour, then recolours their texels: "warm" moves them
+    toward a colour keeping their value (skin to the art's tan), "flat" sets the colour with a little of their own
+    value (the hair streak's band), "paint" sets it outright (the vents' glow)."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    uv = ob.data.uv_layers.active.data
+    for r in rules:
+        box = r.get("box")
+        col = np.array(K.hexcol(r["colour"]), np.float32)
+
+        def pick(poly, c, mat, r=r, box=box):
+            if r.get("slot") and not mat.startswith(r["slot"]):
+                return False
+            if box and not (box[0] <= c.x <= box[1] and box[2] <= c.z <= box[3]):
+                return False
+            if "front" in r and poly.normal.y > -float(r["front"]):
+                return False
+            if "hue" in r:
+                u = sum(uv[i].uv.x for i in poly.loop_indices) / poly.loop_total
+                v = sum(uv[i].uv.y for i in poly.loop_indices) / poly.loop_total
+                q = px[min(h - 1, int(v * h)), min(w - 1, int(u * w)), :3]
+                mx, mn = q.max(), q.min()
+                sat = (mx - mn) / max(mx, 1e-6)
+                hue = _hue(q)
+                if not (r["hue"][0] <= hue <= r["hue"][1] and sat >= r.get("sat_min", 0.0)):
+                    return False
+            return True
+        m = face_mask(ob, img, pick)
+        rgb = px[m, :3]
+        val = rgb.max(axis=1, keepdims=True) / max(float(col.max()), 1e-3)
+        if r["mode"] == "warm":
+            out = rgb * (1 - r["k"]) + np.clip(col * val, 0, 1) * r["k"]
+        elif r["mode"] == "flat":
+            v = np.clip(val, r.get("val_lo", 0.85), r.get("val_hi", 1.05))
+            out = np.clip(col * v, 0, 1)
+        else:
+            out = np.broadcast_to(col, rgb.shape)
+        px[m, :3] = out
+        log("touch-up %s %s: %d texels" % (r["mode"], r["colour"], int(m.sum())))
+    img.pixels = px.ravel()
+
+
+def _hue(q):
+    mx, mn = q.max(), q.min()
+    d = max(mx - mn, 1e-6)
+    if mx == q[0]:
+        hh = ((q[1] - q[2]) / d) % 6
+    elif mx == q[1]:
+        hh = (q[2] - q[0]) / d + 2
+    else:
+        hh = (q[0] - q[1]) / d + 4
+    return hh / 6
+
+
+def delete_boxes(ob, boxes):
+    """Faces whose centre is inside a box [x0, x1, y0, y1, z0, z1] go: the ammo belt's loop, left dangling once the gun-arm is
+    cut off (it ran from the back drum to the gun)."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    gone = [f for f in bm.faces if any(b[0] <= f.calc_center_median().x <= b[1] and b[2] <= f.calc_center_median().y
+                                       <= b[3] and b[4] <= f.calc_center_median().z <= b[5] for b in boxes)]
+    bmesh.ops.delete(bm, geom=gone, context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(ob.data)
+    bm.free()
+    log("deleted %d faces in %d boxes" % (len(gone), len(boxes)))
+
+
+def vents(gun, img, vt):
+    """The gun's vents: the dark recessed faces along its housing (y band in the Gun's frame) onto the glow slot,
+    painted the art's ember orange (Meshy paints them dull grey)."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    uv = gun.data.uv_layers.active.data
+    gi = next(i for i, m in enumerate(gun.data.materials) if m.name.startswith("glow"))
+    y0, y1 = vt["y"]
+
+    def pick(poly, c, _mat):
+        if not (y0 <= c.y <= y1):
+            return False
+        u = sum(uv[i].uv.x for i in poly.loop_indices) / poly.loop_total
+        v = sum(uv[i].uv.y for i in poly.loop_indices) / poly.loop_total
+        if px[min(h - 1, int(v * h)), min(w - 1, int(u * w)), :3].max() > vt["val_max"]:
+            return False
+        poly.material_index = gi
+        return True
+    m = face_mask(gun, img, pick)
+    px[m, :3] = np.array(K.hexcol(vt["colour"]), np.float32)
+    img.pixels = px.ravel()
+    log("vents: %d texels" % int(m.sum()))
+
+
 def gun_weapon(gun, e, t, rig, ga):
     """The cut-off gun-arm into the Gun node's space (Blender: forward +Y, her right +X, up +Z): its axis along
     +Y, the side that faced out from her body to her right, the barrels' end on the Muzzle and the back end
@@ -790,6 +909,8 @@ def gun_weapon(gun, e, t, rig, ga):
     m = Matrix.Translation(Vector((0, back, muzzle.z))) @ Matrix.Scale(k, 4) @ rot @ Matrix.Translation(-e)
     transform(gun, m)
     decimate(gun, int(ga.get("tris", 6000)))
+    if "vents" in ga:
+        vents(gun, base_image_of(gun), ga["vents"])
     sp = float(ga.get("spin", 0.62))
     cut_y = back + sp * (muzzle.y - back)
     spin = split_off(gun, lambda co: co.y > cut_y, "weapon_spin")
@@ -885,6 +1006,8 @@ def main():
         project(ob, img, pj)
     pad(img, ids, int(spec.get("pad", 6)))
     slot_split(ob, img, spec["palette"], spec["glow_min"], "body")
+    if spec.get("touch_up"):
+        touch_up(ob, img, spec["touch_up"])
     head = None
     if "head" in spec:
         decimate(ob, spec["max_tris"] - int(spec["head"]["tris"]))
@@ -904,9 +1027,14 @@ def main():
     gun = None
     if "gun_arm" in spec:
         gun, ge, gt = gun_arm(ob, spec["gun_arm"], m)
+        if spec.get("delete_boxes"):
+            delete_boxes(ob, spec["delete_boxes"])      # (the fitted frame: her right +X, front +Y, soles on 0)
         drop_floaters(ob, int(spec["gun_arm"].get("loose_verts", 1500)))     # (bits the cut left hanging)
         if "glow_min" in spec["gun_arm"]:
             reglow(gun, img, spec["gun_arm"]["glow_min"])
+            if "glow_colour" in spec["gun_arm"]:
+                touch_up(gun, img, [{"mode": "paint", "slot": "glow", "colour": spec["gun_arm"]["glow_colour"]}])
+
     joints["pelvis"] = (joints["hip.L"] + joints["hip.R"]) * 0.5
     log("scale %.3f; joints:" % k, {n: tuple(round(x, 3) for x in p) for n, p in joints.items()})
     # into the contract's rest pose

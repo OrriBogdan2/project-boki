@@ -42,6 +42,7 @@ const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
+const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline shell
 const PAINTED_SHADE := 0.72     # a painted atlas's shadow floor (the hero shader's own is 0.37)
 const PAINTED_RAMP := 2.6       # and its terminator, softer than the hero shader's 0.5
 const GLOW := 1.6              # emission of the glow slot (mechanical eyes, cracks), x its painted colour
@@ -176,8 +177,9 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 		for si in mesh.get_surface_count():
 			var src := mesh.surface_get_material(si) as BaseMaterial3D
 			var slot := String(src.resource_name).get_slice("-", 0) if src else ""      # ("<slot>-<texture>")
-			# (no ink shell: it pokes through the scan's thin hair strands as lines)
-			var m := Models.toon(src.albedo_color if src else Color.WHITE, false)
+			# the ink shell on the body's silhouette only: on the scan's thin hair strands it poked through as
+			# lines across the face
+			var m := Models.toon(src.albedo_color if src else Color.WHITE, not slot in NO_INK)
 			# (no baked AO in a Meshy model's vertex colour: the array is absent and would read as noise)
 			m.set_shader_parameter("vertex_ao", false)
 			m.set_shader_parameter("surface", int(SLOTS.get(slot, 1)))
