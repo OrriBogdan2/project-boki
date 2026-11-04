@@ -277,3 +277,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - 2026-11-04 09:54 UTC: Vex r3c is done (ext/warden-vex-r3b 296ac07d) and 'OWNER: review Vex r3c' is posted. Stance carry aa3345b6. Balance 4,327. Stage 1 is running for 8 Wardens.
 - 2026-11-04 10:08 UTC: stage 1 is done for Hem, Kael, Breaker and Claire, with shots and review posts up; Sable+Pip and Tarek+Ostra are still running. Owner Q: Breaker's height (1.32x now, the kit says about 1.5x).
 - 2026-11-04 10:27 UTC: STAGE 1 complete for 8 heroes (Hem, Kael, Breaker, Claire, Sable, Pip, Tarek, Ostra). All posted for owner review; balance 4327. Stage 2 waits for the owner's OK on Vex r3c. No agents running.
+- 2026-11-04 11:01 UTC: Ryzz's art is locked (11:00). Her stage 1 is running on ext/warden-3d-ryzz: pink fern scar over the right eye, short twin pigtails, 3 copper back rods as her relic, and a switchable pink emissive.
