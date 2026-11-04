@@ -474,6 +474,7 @@ No Meshy. The model's own rigid skin and extra bones are kept; the script rename
    another bone by where they sit), `fit` (limbs turned and stretched joint to joint, or moved), `carry`, `skin`,
    `extra` (variant bones, also listed in `WardenGlb.EXTRA`), `weapon` (a group cut into the Gun's space with a
    `weapon_muzzle`), `materials` ("<slot>-<what>" and a colour from the art), `max_tris`, `anchors`.
+   Give thin parts (rods, fingers, ropes) their own decimation share (`protect`): at the body's ratio they vanish.
 4. `blender -b --factory-startup --python tools/blender/fit_rigged.py -- art/wardens/src/<name>_fit.json`, import,
    the checks, the shots: as steps 9 to 12 above.
 
@@ -491,6 +492,9 @@ No Meshy. The model's own rigid skin and extra bones are kept; the script rename
 | Dredge r3f | 2026-11-04 16:40 | none (credit-free) | - | ORCH's r3d review: one riveted brass helm and the grilled port, hairline lens cracks, thin crimson-sheened tar, glowing gashes, warm tarnished brass with rust streaks, the eye lifted; the match-zoom fix (f4b59cb3) | 0 | Kept |
 | Dredge r3g | 2026-11-04 17:30 | none (credit-free) | - | ORCH's r3f review: tarnished bronze, rivet rows, a smaller cracked orb, helm drips, smoother hull, brass grille, upright stance | 0 | Kept |
 | Dredge r3h | 2026-11-04 18:20 | none (credit-free) | - | ORCH's r3g review: no spec ovals, brighter eye and far rim, cracked glowing orb, bronze with seams and rivet rows, smoother lames, shards stripped | 0 | Kept |
+| Dredge r3i | 2026-11-04 19:10 | none (credit-free) | - | ORCH's r3h review: a small orb in a wide brass ring, no flap shards, smoother pods, shoulder joints, the horn seated | 0 | Kept |
+| Dredge r3i + v2 | 2026-11-04 19:40 | none (credit-free) | - | the shared match-zoom fix v2 ported by hand (outline + hero_toon from the branch, FAR_LOOK and _far_look in the loader) | 0 | Kept |
+| Dredge r3j | 2026-11-04 20:30 | none (credit-free) | - | r3i limb loss fixed (per-part decimation budgets, `protect`), shards dropped, smaller pods, warm gold, darker pool | 0 | Kept |
 
 ## Blender-driven modelling (vs Meshy)
 The owner's friend made Dredge in Blender, probably by driving it through a Blender MCP server (an LLM sends bpy

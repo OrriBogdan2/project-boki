@@ -901,10 +901,10 @@
 		"painted": {
 			"gloss": 0.0,
 			"sheen": 0.0,
-			"rim_far": 0.5,
+			"rim_far": 0.35,
 			"rim_far_color": [
 				1.0,
-				0.68,
+				0.78,
 				0.3
 			]
 		},
@@ -918,7 +918,8 @@
 		"no_ink": [
 			"tar",
 			"crack",
-			"glass"
+			"glass",
+			"gash"
 		]
 	},
 	"pip": {
