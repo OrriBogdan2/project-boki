@@ -305,8 +305,16 @@ func _spring_off(sk: Skeleton3D, sync: WardenGlb.Sync) -> float:
 		var tip := int(ids[ids.size() - 1])
 		var par := sk.get_bone_parent(int(ids[0]))
 		var base := sk.get_bone_global_pose(par) * sk.get_bone_global_rest(par).affine_inverse()
-		var rigid := base * sk.get_bone_global_rest(tip)
-		worst = maxf(worst, rigid.origin.distance_to(sk.get_bone_global_pose(tip).origin))
+		var at := (base * sk.get_bone_global_rest(tip)).origin
+		if ch.get("hang", false):
+			# (a hanging chain settles straight down from its root, whichever way its parent points)
+			var root := (base * sk.get_bone_global_rest(int(ids[0]))).origin
+			var ln := 0.0
+			for j in range(1, ids.size()):
+				ln += sk.get_bone_global_rest(int(ids[j])).origin.distance_to(
+						sk.get_bone_global_rest(int(ids[j - 1])).origin)
+			at = root + (sk.global_transform.basis.inverse() * Vector3.DOWN).normalized() * ln
+		worst = maxf(worst, at.distance_to(sk.get_bone_global_pose(tip).origin))
 	return worst
 
 func _weapon(a: String) -> void:

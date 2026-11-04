@@ -1,0 +1,341 @@
+{
+ "body_glb": "~/meshy/zedran/bake/low.glb",
+ "rig": "art/wardens/src/kael_rig.json",
+ "out": "art/wardens/kael/kael.glb",
+ "blend": "~/meshy/zedran/fit.blend",
+ "turn": 180,
+ "max_tris": 30000,
+ "floater_verts": 8,
+ "snap_r": 0.05,
+ "scale_joints": [
+  "hip.L",
+  "shoulder.L"
+ ],
+ "joints": {
+  "crown": [
+   0,
+   0,
+   0.89
+  ],
+  "neck": [
+   0,
+   0,
+   0.67
+  ],
+  "shoulder.L": [
+   0.23,
+   0,
+   0.57
+  ],
+  "shoulder.R": [
+   -0.23,
+   0,
+   0.57
+  ],
+  "elbow.L": [
+   0.33,
+   0,
+   0.27
+  ],
+  "elbow.R": [
+   -0.33,
+   0,
+   0.27
+  ],
+  "hand.L": [
+   0.356,
+   0,
+   0.06
+  ],
+  "hand.R": [
+   -0.35,
+   0,
+   0.06
+  ],
+  "fingers.L": [
+   0.36,
+   0,
+   -0.12
+  ],
+  "fingers.R": [
+   -0.35,
+   0,
+   -0.12
+  ],
+  "hip.L": [
+   0.11,
+   0,
+   -0.06
+  ],
+  "hip.R": [
+   -0.11,
+   0,
+   -0.06
+  ],
+  "knee.L": [
+   0.17,
+   0,
+   -0.52
+  ],
+  "knee.R": [
+   -0.17,
+   0,
+   -0.52
+  ],
+  "ankle.L": [
+   0.2,
+   0,
+   -0.87
+  ],
+  "ankle.R": [
+   -0.2,
+   0,
+   -0.87
+  ]
+ },
+ "chunk": {
+  "head": 1.12,
+  "hand": 1.2,
+  "girth": 1.06
+ },
+ "lift": [
+  1.0,
+  1.0,
+  1.0
+ ],
+ "glow_min": [
+  2.0,
+  2.0,
+  -1.0
+ ],
+ "normal_smooth": 8,
+ "pad": 6,
+ "cap_holes": 0.3,
+ "cap_flat": true,
+ "ink_room": 0.02,
+ "slot_rules": [
+  {
+   "slot": "hair",
+   "absx": true,
+   "box": [
+    0,
+    0.22,
+    null,
+    null,
+    0.66,
+    null
+   ],
+   "hsv": [
+    null,
+    null,
+    0.0,
+    0.18,
+    0.6,
+    1.0
+   ]
+  },
+  {
+   "slot": "cloth",
+   "absx": true,
+   "box": [
+    0.24,
+    0.6,
+    null,
+    null,
+    -0.2,
+    0.1
+   ],
+   "hsv": [
+    0.06,
+    0.14,
+    0.12,
+    0.4,
+    0.45,
+    0.85
+   ]
+  },
+  {
+   "slot": "leather",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    0.07,
+    0.17
+   ],
+   "hsv": [
+    0.0,
+    0.12,
+    0.25,
+    0.75,
+    0.08,
+    0.4
+   ]
+  },
+  {
+   "slot": "leather",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    -0.84
+   ],
+   "hsv": [
+    0.0,
+    0.12,
+    0.2,
+    0.75,
+    0.05,
+    0.45
+   ]
+  },
+  {
+   "slot": "metal",
+   "hsv": [
+    null,
+    null,
+    0.0,
+    0.15,
+    0.3,
+    0.97
+   ]
+  },
+  {
+   "slot": "metal",
+   "hsv": [
+    0.09,
+    0.17,
+    0.4,
+    1.0,
+    0.5,
+    1.0
+   ]
+  },
+  {
+   "slot": "cloth",
+   "hsv": [
+    0.93,
+    0.025,
+    0.5,
+    1.0,
+    0.15,
+    1.0
+   ]
+  }
+ ],
+ "slot_vote": 4,
+ "hot_boxes": [
+  {
+   "box": [
+    -0.62,
+    -0.22,
+    -0.4,
+    0.4,
+    0.07,
+    0.68
+   ],
+   "slots": [
+    "skin",
+    "cloth",
+    "leather",
+    "metal",
+    "glow"
+   ]
+  }
+ ],
+ "fit_weights": true,
+ "kael": {
+  "sword": {
+   "scale": 0.55
+  },
+  "chain": {
+   "turns": 2.6,
+   "drop": 0.45,
+   "bones": 5,
+   "wrap_gap": 0.01
+  },
+  "mane": {
+   "bones": 4,
+   "groups": [
+    {
+     "name": "mane_back",
+     "az": [
+      128,
+      232
+     ],
+     "locks": 12,
+     "length": 0.62,
+     "width": 0.05,
+     "el": [
+      0,
+      40
+     ],
+     "spread": 0.02
+    },
+    {
+     "name": "mane_l",
+     "az": [
+      232,
+      288
+     ],
+     "locks": 5,
+     "length": 0.55,
+     "width": 0.045,
+     "el": [
+      0,
+      35
+     ],
+     "spread": 0.04
+    },
+    {
+     "name": "mane_r",
+     "az": [
+      72,
+      128
+     ],
+     "locks": 5,
+     "length": 0.55,
+     "width": 0.045,
+     "el": [
+      0,
+      35
+     ],
+     "spread": 0.04
+    },
+    {
+     "name": "mane_fl",
+     "az": [
+      292,
+      318
+     ],
+     "locks": 2,
+     "length": 0.4,
+     "width": 0.04,
+     "el": [
+      0,
+      20
+     ],
+     "spread": 0.05
+    },
+    {
+     "name": "mane_fr",
+     "az": [
+      42,
+      68
+     ],
+     "locks": 2,
+     "length": 0.4,
+     "width": 0.04,
+     "el": [
+      0,
+      20
+     ],
+     "spread": 0.05
+    }
+   ]
+  }
+ }
+}

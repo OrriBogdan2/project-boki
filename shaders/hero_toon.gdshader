@@ -22,6 +22,13 @@ uniform vec4 flash_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float rim_amount = 0.35;
 uniform vec4 rim_color : source_color = vec4(1.0, 0.96, 0.88, 1.0);
 uniform float glow = 0.0;
+// a painted atlas's glow slot (WardenGlb): only its hot texels glow (the cracks), not the dark skin or rock painted
+// between them
+uniform bool glow_key = false;
+// a Warden's glow colours (WardenGlb, the archetype's "model_glow"; alpha 0: the painted colour): the hot texels and
+// flat glow pieces take the core colour, their soft edges the edge colour, so the glow can change without a rebake
+uniform vec4 glow_core : source_color = vec4(1.0, 1.0, 1.0, 0.0);
+uniform vec4 glow_edge : source_color = vec4(1.0, 1.0, 1.0, 0.0);
 uniform float shade = 0.42;
 uniform bool no_fog = false;
 uniform vec4 shadow_tint : source_color = vec4(0.66, 0.62, 0.9, 1.0);   // shadows lean cool and violet
@@ -68,7 +75,19 @@ void vertex() {
 
 void fragment() {
 	vec3 c = albedo.rgb;
-	if (use_tex) { c *= texture(albedo_tex, UV).rgb; }
+	float heat = 1.0;
+	if (use_tex) {
+		vec3 tx = texture(albedo_tex, UV).rgb;
+		c *= tx;
+		if (glow_key) {
+			// (the cracks' red-orange rims count too: in a white-hot glow they take the edge colour, not the paint)
+			heat = smoothstep(0.42, 0.66, tx.r) * smoothstep(0.14, 0.32, tx.r - tx.b) * smoothstep(-0.04, 0.01, tx.g - tx.b);
+		}
+	}
+	if (glow_core.a > 0.0 && glow > 0.0) {
+		vec3 hot = mix(glow_edge.a > 0.0 ? glow_edge.rgb : glow_core.rgb, glow_core.rgb, smoothstep(0.35, 0.9, heat));
+		c = mix(c, hot, glow_key ? heat : 1.0);
+	}
 	if (use_vertex_color || vertex_ao) { c *= COLOR.rgb; }
 	// hand-painted variation: soft blotches of slightly lighter and darker paint
 	float n = vnoise(lpos.xz * 7.0 + lpos.y * 4.0) * 0.6 + vnoise(lpos.xy * 15.0 + 3.1) * 0.4;
@@ -124,7 +143,7 @@ void fragment() {
 	float fr = smoothstep(0.62, 0.84, 1.0 - nv) * mix(0.55, 1.0, side) * (1.0 - fog);
 	vec3 fcol = mix(fres_color.rgb, min(c * 1.7 + vec3(0.12), vec3(1.4)), fres_tint);
 	float up = smoothstep(0.35, 0.95, wnorm.y);
-	EMISSION = flash_color.rgb * flash * 0.9 + c * glow + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
+	EMISSION = flash_color.rgb * flash * 0.9 + c * glow * heat + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
 		+ fcol * fr * fres * 0.55 + c * up * top_light * 0.18 * (1.0 - fog);
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;

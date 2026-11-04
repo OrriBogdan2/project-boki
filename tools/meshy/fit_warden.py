@@ -158,8 +158,50 @@ def auto_weights(ob, arm):
     arm.select_set(True)
     bpy.context.view_layer.objects.active = arm
     bpy.ops.object.parent_set(type="ARMATURE_AUTO")
+    if not any(sum(x.weight for x in v.groups) > 1e-4 for v in ob.data.vertices):
+        _proxy_weights(ob, arm)
     _fill_weights(ob, arm)
     log("auto weights on %s: %d groups" % (arm.name, len(ob.vertex_groups)))
+
+
+def _proxy_weights(ob, arm, voxel=0.012):
+    """Bone heat found no solution on the whole scan (Kael: the skirt's plates and the scarf pass through each
+    other): it runs on a watertight voxel remesh of the body instead, and the weights come back onto the scan
+    from the nearest proxy face (interpolated)."""
+    px = ob.copy()
+    px.data = ob.data.copy()
+    px.vertex_groups.clear()
+    px.modifiers.clear()
+    px.parent = None
+    bpy.context.scene.collection.objects.link(px)
+    rm = px.modifiers.new("Remesh", "REMESH")
+    rm.mode = "VOXEL"
+    rm.voxel_size = voxel
+    bpy.ops.object.select_all(action="DESELECT")
+    bpy.context.view_layer.objects.active = px
+    px.select_set(True)
+    bpy.ops.object.modifier_apply(modifier="Remesh")
+    arm.select_set(True)
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.parent_set(type="ARMATURE_AUTO")
+    for g in px.vertex_groups:
+        if ob.vertex_groups.get(g.name) is None:
+            ob.vertex_groups.new(name=g.name)
+    dt = ob.modifiers.new("WeightsFromProxy", "DATA_TRANSFER")
+    dt.object = px
+    dt.use_vert_data = True
+    dt.data_types_verts = {"VGROUP_WEIGHTS"}
+    dt.vert_mapping = "POLYINTERP_NEAREST"
+    dt.layers_vgroup_select_src = "ALL"
+    dt.layers_vgroup_select_dst = "NAME"
+    bpy.ops.object.select_all(action="DESELECT")
+    bpy.context.view_layer.objects.active = ob
+    ob.select_set(True)
+    while ob.modifiers[0].name != dt.name:
+        bpy.ops.object.modifier_move_up(modifier=dt.name)
+    bpy.ops.object.modifier_apply(modifier=dt.name)
+    log("bone heat on a %.3f m voxel proxy (%d verts), weights transferred" % (voxel, len(px.data.vertices)))
+    bpy.data.objects.remove(px)
 
 
 def _fill_weights(ob, arm):
@@ -1542,6 +1584,31 @@ def _rig_joint(rig, name):
 
 
 
+def hot_faces(ob, hb):
+    """Faces inside a box (the Meshy frame) whose atlas has hot texels (Kael's magma cracks, his right arm only) move
+    to a copy of their material named "<slot>-<tag>-hot": the game lights only that material's hot texels, keyed per
+    texel (hero_toon glow_key), in the Warden's glow colour; the skin round the cracks stays skin."""
+    me = ob.data
+    b = hb["box"]
+    hot = {}
+    n = 0
+    for p in me.polygons:
+        c = p.center
+        if not (b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]):
+            continue
+        m = me.materials[p.material_index]
+        if m is None or m.name.split("-")[0] not in hb.get("slots", ["skin"]):
+            continue
+        if m.name not in hot:
+            h = m.copy()
+            h.name = m.name + "-hot"
+            me.materials.append(h)
+            hot[m.name] = len(me.materials) - 1
+        p.material_index = hot[m.name]
+        n += 1
+    log("hot faces: %d in %s" % (n, b))
+
+
 def main():
     spec_path = sys.argv[sys.argv.index("--") + 1]
     spec = json.load(open(spec_path))
@@ -1561,6 +1628,8 @@ def main():
         slot_rules(ob, img, spec["slot_rules"], spec["glow_min"], "body", vote=spec.get("slot_vote", "island"))
     else:
         slot_split(ob, img, spec["palette"], spec["glow_min"], "body")
+    for hb in spec.get("hot_boxes", []):
+        hot_faces(ob, hb)
     if spec.get("touch_up"):
         touch_up(ob, img, spec["touch_up"])
         pad(img, ids, int(spec.get("pad", 6)))       # (the touched islands' new colour into their margins too)
@@ -1656,6 +1725,12 @@ def main():
             parts.append(WP.lens(arm, spec["lens"]))
         if spec.get("braids"):
             parts.append(WP.braids([ob], arm, spec["braids"], spec["braid_colours"]))
+    if spec.get("kael"):
+        # Kael's scripted pieces (tools/meshy/kael_parts.py): the Warchain, the left cuff's chain, the mane
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import kael_parts
+        parts.append(kael_parts.chains(ob, arm, rig, K, spec["kael"]["chain"]))
+        parts.append(kael_parts.mane(ob, arm, rig, K, spec["kael"]["mane"]))
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
@@ -1664,6 +1739,9 @@ def main():
     spin = None
     if gun is not None:
         gun, spin = gun_weapon(gun, ge, gt, rig, spec["gun_arm"])
+    elif spec.get("kael"):
+        gun = kael_parts.sword(spec["kael"].get("sword", {}))     # (the greatsword, scripted)
+        gun["built"] = 1
     else:
         gun = weapon(spec, rig)
     crown = rig["land"]["crown"]
@@ -1671,6 +1749,8 @@ def main():
     K.anchor(arm, "hips", "anchor_chest", (0, 0.1, K.bone_head(rig, "upper_arm.L").z - 0.14))
     for o in [x for x in (ob, gun, spin) if x]:
         # Meshy's own split normals don't survive the decimation (facets): clear them, shade smooth
+        if o.get("built"):
+            continue                  # (a scripted piece: its facets are drawn on purpose)
         bpy.context.view_layer.objects.active = o
         if o.data.has_custom_normals:
             bpy.ops.mesh.customdata_custom_splitnormals_clear()

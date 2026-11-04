@@ -8,7 +8,7 @@ extends RefCounted
 
 const DIR := "res://art/wardens"
 ## Each Warden's art name, as in docs/art/gen/wardens/<name>_turnaround.png: the folder and file its .glb has.
-const ART := {"bulwark": "bjorn", "archer": "pin", "juggernaut": "zedran", "gunslinger": "vex", "ostra": "ostra",
+const ART := {"bulwark": "bjorn", "archer": "pin", "juggernaut": "kael", "gunslinger": "vex", "ostra": "ostra",
 	"mage": "vireo", "dolm": "tarek", "thief": "sable", "rimewright": "claire", "ashwick": "cinder",
 	"tender": "moosh", "dredge": "dredge"}
 ## Armature bone -> the rig node it follows (paths under the model root).
@@ -45,7 +45,7 @@ const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most th
 const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline shell
 ## Pieces built as clean geometry (tools/meshy/warden_parts.py), "<slot>-<tag>": they take the ink line even on
 ## an inkless slot (the hair goes without it for a scan's ragged strands, not for a woven braid).
-const INK_TAGS := ["braid"]
+const INK_TAGS := ["braid", "mane", "mane_dk"]
 ## The hero toon shader on a painted atlas, which carries its own light and shade: the toon light on top stays
 ## soft and near white (no violet shadow, no warm terminator band, no sun self-shadow, no procedural
 ## brushwork), a light-coloured rim and top light lift its edges off the ground, and far_lift brightens it at
@@ -153,7 +153,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
 	var mats: Array = root.get_meta("mats", [])
-	mats.append_array(_toon(glb, lk, MantleLook.warden(arch)))
+	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), arch))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
 	_hold_weapon(root, glb)
@@ -167,6 +167,7 @@ static func _hold_weapon(root: Node3D, glb: Node3D) -> void:
 		return
 	for mi in gun.find_children("*", "MeshInstance3D", true, false):
 		(mi as MeshInstance3D).visible = false
+		mi.set_meta("glb_hidden", true)      # (HunterAnim keeps the .glb weapon's own bounds off the ground)
 	weapon.get_parent().remove_child(weapon)
 	weapon.owner = null
 	gun.add_child(weapon)
@@ -208,7 +209,7 @@ static func _hide_body(n: Node) -> void:
 
 ## Every surface onto a hero-toon material for its slot: the baked atlas as its albedo, the baked AO in the
 ## vertex colour, tinted by the player's pick where the slot takes one.
-static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
+static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, arch := "") -> Array:
 	var out: Array = []
 	for mi in glb.find_children("*", "MeshInstance3D", true, false):
 		var mesh := (mi as MeshInstance3D).mesh
@@ -231,11 +232,27 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 					m.set_shader_parameter(k, PAINTED[k])
 				if m.next_pass:
 					m.next_pass = _painted_ink()
-			if slot == "glow":
+			var hot := String(src.resource_name).ends_with("-hot") if src else false
+			if slot == "glow" or hot:
 				m.set_shader_parameter("glow", GLOW)
+				# ("<slot>-<texture>-hot": only the atlas's hot texels glow, keyed per texel: Kael's arm cracks)
+				m.set_shader_parameter("glow_key", hot)
+				_glow_colours(m, arch, tag)
 			(mi as MeshInstance3D).set_surface_override_material(si, m)
 			out.append(m)
 	return out
+
+## A Warden's glow colours from its archetype's "model_glow" {core, edge} (hex): the cracks and glowing pieces take
+## them instead of their painted colour, so the glow can change without a rebake. A flat piece tagged "edge"
+## (glow-<name>_edge) takes the edge colour.
+static func _glow_colours(m: ShaderMaterial, arch: String, tag: String) -> void:
+	var g: Dictionary = Arch.def(arch).get("model_glow", {}) if arch != "" else {}
+	if g.is_empty():
+		return
+	var core := Color(String(g.get("core", "ffffff")))
+	var edge := Color(String(g.get("edge", g.get("core", "ffffff"))))
+	m.set_shader_parameter("glow_core", core if not tag.ends_with("_edge") else edge)
+	m.set_shader_parameter("glow_edge", edge)
 
 static func _painted_ink() -> ShaderMaterial:
 	if _ink == null:
@@ -324,7 +341,10 @@ class Springs:
 				cur = int(kids[0])
 				ids.append(cur)
 			if ids.size() >= 2:
-				chains.append({"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array()})
+				# (a "hang" chain, spring_hang<name>_<i>: a chain or rope whose rest shape is straight down from its
+				# root, not riding its parent: Kael's Warchain hangs from his fist whichever way the arm points)
+				chains.append({"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array(),
+					"hang": skel.get_bone_name(bi).begins_with(PREFIX + "hang")})
 
 	func _spring(bi: int) -> bool:
 		return skel.get_bone_name(bi).begins_with(PREFIX)
@@ -347,6 +367,11 @@ class Springs:
 				rest.append(r)
 				want.append(xf * r.origin)
 			var n := want.size()
+			if ch["hang"]:
+				for i in range(1, n):
+					var seg := (xf * (rest[i] as Transform3D).origin).distance_to(
+							xf * (rest[i - 1] as Transform3D).origin)
+					want[i] = want[i - 1] + Vector3.DOWN * seg
 			var pts: PackedVector3Array = ch["pts"]
 			var prev: PackedVector3Array = ch["prev"]
 			if pts.size() != n or pts[0].distance_to(want[0]) > 1.5:      # (the first frame, or a teleport)
