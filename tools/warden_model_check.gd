@@ -26,6 +26,7 @@ const WARDENS := {
 	# (Cinder's fin-crest stands over her head)
 	"ashwick": {"hit_r": 0.376, "height": 1.02, "height_3d": 1.11, "width": [0.7, 1.5], "moves": "as_"},
 	"juggernaut": {"hit_r": 0.428, "height": 1.12, "width": [1.0, 2.0], "moves": "jug"},     # (juggernaut.md)
+	"dredge": {"hit_r": 0.452, "height": 1.28, "width": [1.3, 2.4], "moves": "dr_"},     # (~2.25 m, very broad)
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured

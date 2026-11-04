@@ -443,3 +443,65 @@ Breaker total: 6 tasks, 116 credits (the body's two attempts used).
 | Breaker r3 edits | 13:20-13:30 | edit_front (9:16, dropped: clipped arms), edit_front2, edit_side, edit_back, edit_tq (dropped: a copy of the front) | nano-banana-pro | breaker_front: hammer and shield out, arms down; the r3 side/back redrawn in the new outfit | 45 | front2, side (teddy painted out), back kept |
 | Breaker C | 13:31 | 01a1a688-d08d-74e2-9e69-9015055e4130 | meshy-7.1 | front, side, back edited; texture refs the same; 2k, meshy-7 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the art's bare belly, sash, skirt, bare feet, braids, closed fists |
 | Breaker D | 13:31 | 01a1a688-d0b4-738f-bed8-df735492629b | meshy-7.1 | as C, enhancement on | 40 | Dropped: open splayed hands |
+
+## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
+No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.
+1. **Inspect** it in Blender: bones (names, parents, heads), each vertex group's bounds, loose parts, materials,
+   the clip. Render front, 3/4, side and back (Workbench renders headless; EEVEE prints EGL errors here). Check the
+   materials' base colours in the .glb itself: the friend's exports came out white (node colours don't export).
+2. **Body:** set the archetype `body` so the rig's joints land on the model's own: `legs` from the hip height,
+   the scale from the shoulder height (shoulders sit 0.5 above the hips in the rig), `build` from the shoulder
+   and hip spacing, `neck` to put the head pivot where the head turns (Dredge: the hull's centre). Then `size` for
+   the sheet height. Run `--warden-rig-json` after each change.
+3. **Spec** (`art/wardens/src/<name>_fit.json`): `groups` (source group -> part), `split` (loose parts onto
+   another bone by where they sit), `fit` (limbs turned and stretched joint to joint, or moved), `carry`, `skin`,
+   `extra` (variant bones, also listed in `WardenGlb.EXTRA`), `weapon` (a group cut into the Gun's space with a
+   `weapon_muzzle`), `materials` ("<slot>-<what>" and a colour from the art), `max_tris`, `anchors`.
+4. `blender -b --factory-startup --python tools/blender/fit_rigged.py -- art/wardens/src/<name>_fit.json`, import,
+   the checks, the shots: as steps 9 to 12 above.
+
+| Warden | Date (UTC) | Source | Credits | Result |
+|---|---|---|---|---|
+| Dredge | 2026-11-04 07:30 | friend's Blender model (ext/imagegen ff552657), fit_rigged.py | 0 | Kept: 14.1k tris + 3.2k horn, contract + 11 variant bones, all checks pass |
+| Dredge r2b | 2026-11-04 09:40 | the same + warden_paint.py: aged-brass atlas (2048, Cycles bake), orb eye, 24 tar drips | 0 | Kept: darker, patina, dents, glowing eye; all checks pass |
+| Dredge r3 hull edits | 2026-11-04 13:20 | front 01a1a66a-ceec-75d1-96a8-dbb2b573f7d8, side 01a1a66a-ceff-7642-b000-0f167116e4a6, back 01a1a66a-cede-70a0-b459-b93ed0579a88 | nano-banana-pro image-to-image | the turnaround's front and back and the side sheet, edited to the hull alone | 27 | Front kept (projected); side dropped (turned to a 3/4 front view), back dropped (grew a porthole) |
+| Dredge r3 hull edits 2 | 2026-11-04 13:25 | side2, back2 (meshy_task.py edit, view-locked prompts) | nano-banana-pro image-to-image | the same, the view and "no porthole on the back" spelled out | 18 | Kept: both projected onto the scripted hull |
+| Dredge r3 hull | 2026-11-04 13:30 | none (the Meshy 3D run and a third front edit were not run: the session's auto-mode permission check refused the credit spend) | - | Blender fallback: warden_hull.py, a scripted dented sphere, plate bands and faceted lames, the three edits projected on it | 0 | Kept: r3 (balance 4,175 -> 4,130, 45 credits) |
+| Dredge r3b | 2026-11-04 14:10 | none (credit-free) | - | modelled tears and peeled flaps, three big curved lames a shoulder, the doubled porthole masked, brass porthole rings | 0 | Kept |
+| Dredge r3c | 2026-11-04 14:40 | none (credit-free) | - | the shared painted-look fix (16c18b4f) merged; the hull's projection lift x1.15 | 0 | Kept |
+| Dredge r3d | 2026-11-04 15:20 | none (credit-free) | - | the stance; deeper dents and tears, flared lames, sharp lens cracks and a glint, tar strands and pool, red core | 0 | Kept |
+| Dredge r3e | 2026-11-04 15:50 | none (credit-free) | - | tar runs over the hull, the back hatch and pipe as geometry, stronger lens cracks, a soft warm hull highlight | 0 | Kept |
+| Dredge r3f | 2026-11-04 16:40 | none (credit-free) | - | ORCH's r3d review: one riveted brass helm and the grilled port, hairline lens cracks, thin crimson-sheened tar, glowing gashes, warm tarnished brass with rust streaks, the eye lifted; the match-zoom fix (f4b59cb3) | 0 | Kept |
+| Dredge r3g | 2026-11-04 17:30 | none (credit-free) | - | ORCH's r3f review: tarnished bronze, rivet rows, a smaller cracked orb, helm drips, smoother hull, brass grille, upright stance | 0 | Kept |
+| Dredge r3h | 2026-11-04 18:20 | none (credit-free) | - | ORCH's r3g review: no spec ovals, brighter eye and far rim, cracked glowing orb, bronze with seams and rivet rows, smoother lames, shards stripped | 0 | Kept |
+
+## Blender-driven modelling (vs Meshy)
+The owner's friend made Dredge in Blender, probably by driving it through a Blender MCP server (an LLM sends bpy
+code to a running Blender and looks at viewport screenshots). What his file shows:
+- **How it was built:** 3,440 loose pieces joined into one mesh, every one a low-poly primitive (cylinders, UV
+  spheres, tori, cones: rivets of 24 to 100 triangles, six stacked dome shells per shoulder, ten torus windings on
+  the drum, tar drips as stretched cones). The skin is rigid, exactly one bone a vertex: each piece was parented to
+  its bone as it was made, not weight-painted. Clean bone and material names (`Dredge_Brass`, `Claw2.1.L`), one
+  hand-keyed 4 s showcase clip (two keys a channel). This is code, piece by piece: what an agent writing bpy produces.
+- **Can we do it here:** yes, and without a GUI. Everything an MCP server does is bpy, and Blender 4.5 runs
+  headless on this box. The "live viewport" becomes a render loop: one persistent `.blend`, each step a short script
+  (`blender -b scene.blend --python step.py`, add or fix parts, save), then Workbench renders of the front, 3/4, side
+  and back next to the turnaround crops, which the agent looks at (about 5 to 10 s a round). An MCP server is not
+  needed (the common add-on is started from Blender's UI, which would need Blender under Xvfb; not tried here).
+- **What it would take:** (1) extend tools/blender/warden_kit.py with part helpers that make a primitive already
+  bevelled, named, on its slot material ("metal-brass", a colour from the sheet) and bound rigidly to its contract
+  bone, so the model is built on the rig JSON from the start and needs no fit; (2) a per-Warden build script
+  (`tools/blender/<name>.py`) and the render-beside-the-art harness above; (3) a detail pass: Dredge passes because
+  of density (layered plates, rivet rows, drips, seaweed) and true proportions. Our earlier scripted-primitive
+  Wardens were coarse, and the owner rejected them ("made of shapes", 00:30), so the bar is hundreds of parts, not tens.
+- **Time:** an estimated 2 to 4 agent-hours a Warden (40 to 80 render rounds), against about 1 to 2 hours for a
+  Meshy run plus the fit. Rigging is close to free (parts are bound as they are made), the budget is exact, and there
+  are no credits.
+- **Quality vs Meshy:** better on hard surfaces and machines: crisp silhouettes, flat clean colour (the owner's
+  ask; Meshy's textures came out mottled), every asymmetric piece where we put it, no bone-heat failures. Worse on
+  organic forms: faces, hair, cloth folds, muscle and fur come out toy-like from primitives. So use it for Dredge-like
+  Wardens, armour, shields and weapons (Bjorn's prow, Zedran's blade, Cinder's pack), and Meshy (or a Meshy head on a
+  scripted body) for faces and soft shapes (Vex, Moosh/Burple, Ostra's wisp).
+- **Watch:** keep colours on the Principled base colour (the friend's node colours exported as white). A collapse
+  decimate keeps primitives' shapes well (Dredge 43.7k -> 14.5k: no loss at match zoom, some faceting on the hull
+  close up; the planar pass only took 300). Build to the budget instead of decimating where you can.

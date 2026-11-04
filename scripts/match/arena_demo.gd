@@ -319,15 +319,25 @@ static func tick(A: Arena, dt: float) -> void:
 					var last := i == times.size() - 1
 					m.get_tree().process_frame.connect(func(): _grab(A, P, last), CONNECT_ONE_SHOT)
 			at_t = 99.0
-		"pose":
+		"pose", "pose_clear":
 			# the Hunter standing at the match camera, turned three-quarters toward it (Warden model shots);
-			# --demo-at=dx,dz first moves it onto clear ground (review shots: no prop over the hero)
+			# --demo-at=dx,dz first moves it onto clear ground (review shots: no prop over the hero); pose_clear: the
+			# same with the arena's sign and the HUD off (review frames)
 			if t < 0.05:
 				for a in OS.get_cmdline_user_args():
 					if String(a).begins_with("--demo-at="):
 						var at := String(a).get_slice("=", 1).split(",")
 						P.teleport(P.pos + Vector3(float(at[0]), 0.0, float(at[1])))
 						A.home = P.pos
+			if w == "pose_clear":
+				if t < 0.05:
+					P.teleport(P.pos + Vector3(-1.6, 0, -1.2))      # (off the fern at the spawn)
+					for l in m.find_children("*", "Label3D", true, false):
+						if String((l as Label3D).text).contains("KIT CARD"): (l as Label3D).visible = false
+				if m.hud:
+					m.hud.set("visible", false)
+					for c in m.hud.get_children():
+						if c is CanvasItem or c is CanvasLayer: c.set("visible", false)
 			P.inp["move"] = Vector2.ZERO
 			P.inp["aim"] = P.pos + Vector3(-5.0, 0.9, 3.5)
 			at_t = 2.0

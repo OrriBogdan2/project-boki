@@ -66,6 +66,9 @@ var arrivals := 0
 var stacks_lost := 0
 var volleys := 0
 var last_quake_k := 0.0         # (tests) the height bonus of the last air smash
+var winch_a := 0.0              # the 3D model's winch drum turn (rad)
+var pool_k := 0.0               # the 3D model's tar pool at his feet (0 gone, 1 spread)
+var claw_k := 0.0               # the 3D model's grab-claw: 1 spread for the throw, -1 clenched on the rope, 0 rest
 var _down_seen := false
 var _stab_at := -9.0
 
@@ -85,6 +88,10 @@ static func reeling(hn: Hunter) -> bool:
 	return hn.ak is DredgeKit and not (hn.ak as DredgeKit).pull.is_empty()
 
 func _hand() -> Vector3:
+	# the 3D model throws from its grab-claw (anchor_claw, between the finger tips)
+	var claw := WardenGlb.anchor(h.model, "anchor_claw") if h.model else null
+	if claw and claw.is_inside_tree():
+		return claw.global_position
 	var d2 := h.aim_dir()
 	var f := Vector3(d2.x, 0, d2.y)
 	return h.pos + Vector3(0, 1.15, 0) + f * 0.45 - f.cross(Vector3.UP) * 0.25
@@ -171,6 +178,7 @@ func _tick(dt: float) -> void:
 	broadside.tick(dt)
 	_tick_gun()
 	_tick_looks(dt)
+	_tick_model(dt)
 	KMovesPair.air_moves(self, "dr_jump", "dr_land")
 	net_pulse(dt, res >= res_max(), 1.8)
 
@@ -253,6 +261,56 @@ func _tick_looks(dt: float) -> void:
 			"spiral%d" % (f as Ent).get_instance_id(), "spiral", (f as Ent).pos + Vector3(0, 2.4, 0), ANCHOR_COL,
 			Color("1a5a6a"), 0.6
 		)
+
+## Dredge's 3D model (WardenGlb.EXTRA; nothing on the procedural one): the winch drum pays the rope out while the
+## hook flies and winds it in while he reels; the rope and the cargo hook hanging from the drum are gone while the
+## kit draws them out on the throw; the grab-claw spreads for the throw and clenches on the rope while he reels.
+func _tick_model(dt: float) -> void:
+	var sk := WardenGlb.extra_skeleton(h.model)
+	if sk == null:
+		return
+	var out := flying or not pull.is_empty()
+	var spin := 0.0
+	var want := 0.0
+	if flying:
+		spin = -16.0
+		want = 1.0
+	elif not pull.is_empty():
+		spin = 10.0
+		want = -1.0
+	elif anim_id == "dr_throw":
+		want = 1.0
+	winch_a += dt * spin
+	claw_k = move_toward(claw_k, want, dt * 9.0)
+	WardenGlb.pose_extra(h.model, "winch", Quaternion(Vector3.RIGHT, wrapf(winch_a, -PI, PI)))
+	WardenGlb.pose_extra(h.model, "rope1", Quaternion.IDENTITY, Vector3.ONE * (0.001 if out else 1.0))
+	# the tar pool spreads under him while he stands, and is gone the moment he moves or leaves the ground
+	var still := h.grounded and Vector2(h.vel.x, h.vel.z).length() < 0.6
+	if still:
+		pool_k = move_toward(pool_k, 1.0, dt * 0.5)
+	else:
+		pool_k = move_toward(pool_k, 0.0, dt * 6.0)
+	var spread := maxf(pool_k, 0.001)
+	WardenGlb.pose_extra(h.model, "pool", Quaternion.IDENTITY, Vector3(spread, 1.0 if pool_k > 0.01 else 0.001, spread))
+	# each finger turns out from the claw's middle (spread) or in toward it (clench), about its knuckle
+	var mid := Vector3.ZERO
+	var heads: Array = []
+	for i in [1, 2, 3]:
+		var bi := WardenSkeleton.find(sk, "claw%d.L" % i)
+		if bi < 0:
+			return
+		heads.append(sk.get_bone_global_rest(bi))
+		mid += (heads[-1] as Transform3D).origin / 3.0
+	for i in 3:
+		var hx: Transform3D = heads[i]
+		var along := hx.basis.y.normalized()
+		var away := hx.origin - mid
+		away = (away - along * away.dot(along)).normalized()
+		var axis := along.cross(away).normalized()
+		if axis.length() < 0.5:
+			continue
+		WardenGlb.pose_extra(h.model, "claw%d.L" % (i + 1), Quaternion(axis, 0.5 * claw_k))
+		WardenGlb.pose_extra(h.model, "claw%d_tip.L" % (i + 1), Quaternion(axis, 0.35 * minf(claw_k, 0.0)))
 
 # ------------------------------------------------------------------ RMB: Abyssal Hand
 func fire_rmb(c: Dictionary) -> void:

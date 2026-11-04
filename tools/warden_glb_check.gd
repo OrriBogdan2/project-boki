@@ -112,9 +112,10 @@ func _skel(m: Node3D) -> Skeleton3D:
 func _contract(a: String) -> void:
 	var m := _model(a)
 	var sk := _skel(m)
-	var bad_bones: Array = WardenSkeleton.mismatches(sk, WardenGlb.neutral_rest(a))
-	ok(bad_bones.is_empty(), "%s: the .glb's armature is the contract's: names, parents, each bone on its rig node %s"
-			% [a, str(bad_bones)])
+	var bad_bones: Array = WardenSkeleton.mismatches(sk, WardenGlb.neutral_rest(a), WardenGlb.EXTRA.get(a, {}))
+	ok(bad_bones.is_empty(),
+			"%s: the .glb's armature is the contract's (+ variant bones %s): names, parents, bones on rig nodes %s"
+			% [a, str(WardenGlb.EXTRA.get(a, {}).keys()), str(bad_bones)])
 	var tris := 0
 	var slots := {}
 	var unskinned := 0
@@ -254,18 +255,28 @@ func _shading(a: String) -> void:
 	var mats: Array = m.get_meta("mats", [])
 	var wrong := 0
 	var surfaces := 0
+	var textured := 0
 	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		for si in (mi as MeshInstance3D).mesh.get_surface_count():
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
-			# (the void slot is the starfield shader, RIG_CONTRACT "Materials")
+			var src := (mi as MeshInstance3D).mesh.surface_get_material(si) as BaseMaterial3D
+			var atlas := src != null and src.albedo_texture != null
+			if atlas:
+				textured += 1
+			# a textured surface shows its atlas; a flat-painted one (hand-modelled, no atlas) its own colour
+			var shows := false
+			if sm and atlas:
+				shows = bool(sm.get_shader_parameter("use_tex")) and sm.get_shader_parameter("albedo_tex") != null
+			elif sm and src:
+				shows = (sm.get_shader_parameter("albedo") as Color).is_equal_approx(src.albedo_color)
+			# (the void slot is the starfield shader, the card slot its own: RIG_CONTRACT "Materials")
 			var shader_ok := sm != null and sm.shader in [Models.HERO, WardenGlb.VOID, WardenGlb.CARD]
-			if not shader_ok or not sm.get_shader_parameter("use_tex") \
-					or sm.get_shader_parameter("albedo_tex") == null or not sm in mats:
+			if not shader_ok or not shows or not sm in mats:
 				wrong += 1
 	ok(surfaces > 0 and wrong == 0,
-			"%s: all %d surfaces on the hero toon shader (or the void's) with the atlas, in the hit flash (%d not)"
-			% [a, surfaces, wrong])
+			"%s: all %d surfaces on the hero toon shader (%d with an atlas, rest flat), in the hit flash (%d not)" \
+			% [a, surfaces, textured, wrong])
 	m.free()
 
 ## The hit radius and the ring that shows it are the same with the .glb as without, and the .glb brings no

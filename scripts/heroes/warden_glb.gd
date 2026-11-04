@@ -35,6 +35,15 @@ const BONES := {
 	"wings": "Rig/Torso/Wings",
 }
 const OPTIONAL := ["cape", "scarf", "tail", "wings"]
+## A Warden's variant of the contract (RIG_CONTRACT "Variant bones"): its own extra bones -> their parents. A .glb of
+## that Warden must carry them (WardenSkeleton.mismatches); they are skinned like the rest and follow their parent
+## bone, and the Warden's kit poses them on top of that (pose_extra): Dredge's grab-claw fingers, the eye, the winch
+## drum, the rope and cargo hook that hang from it, and the tar pool at his feet.
+const EXTRA := {
+	"dredge": {"eye": "head", "claw1.L": "hand.L", "claw1_tip.L": "claw1.L", "claw2.L": "hand.L",
+		"claw2_tip.L": "claw2.L", "claw3.L": "hand.L", "claw3_tip.L": "claw3.L", "winch": "hips", "rope1": "hips",
+		"rope2": "rope1", "hook": "rope2", "pool": "root"},
+}
 ## Procedural pieces that stay when the .glb dresses the hunter (the contract's "nodes the game keeps").
 const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus"]
 ## glTF material name -> the toon shader's painted surface (RIG_CONTRACT "Materials").
@@ -44,7 +53,9 @@ const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
 const NO_INK := ["hair", "eyes", "glow", "card"]   # slots drawn without the ink outline shell
-const NO_INK_TAGS := ["gum"]   # small round pieces an outline turns into a cartoon ball (Ryzz's gum bubble)
+## Materials "<slot>-<tag>" drawn without the ink line: small round pieces it turns into a cartoon ball (Ryzz's gum
+## bubble), Dredge's thin ooze (it read as planks), cracks and the lens's glass (the line cut the orb).
+const NO_INK_TAGS := ["gum", "tar", "crack", "glass"]
 ## The `void` slot is no lit surface but a window onto the Void (shaders/hero_void.gdshader: a drifting
 ## starfield over its painted colour, Ostra's coat tears); "<void>-<tag>" with a SOFT_TAGS tag also fades
 ## out toward its tip and edges (a body that dissolves into smoke: Ostra's wisp).
@@ -94,6 +105,7 @@ const WEAPON_OFF := "weapon_offhand"
 const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
 ## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire).
 const WING_FOLD := "wing_fold"
+const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
 static var _ink: ShaderMaterial  # the painted atlas's ink shell (INK_WIDTH), shared
@@ -174,7 +186,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	var scene := load(path(arch)) as PackedScene
 	var glb: Node3D = scene.instantiate() as Node3D if scene else null
 	var skel := skeleton(glb)
-	var bad: Array = WardenSkeleton.mismatches(skel, rest) if skel else ["no armature"]
+	var bad: Array = WardenSkeleton.mismatches(skel, rest, EXTRA.get(arch, {})) if skel else ["no armature"]
 	if not bad.is_empty():
 		push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [path(arch), str(bad)])
 		if glb:
@@ -309,6 +321,11 @@ static func _hold_weapon(root: Node3D, glb: Node3D) -> void:
 		off.owner = null
 		gun.add_child(off)
 		off.transform = at
+	# its mouth (WEAPON_MUZZLE) becomes where the Gun's Muzzle sits (a weapon shorter or longer than the procedural one)
+	var mouth := weapon.find_child(WEAPON_MUZZLE, true, false) as Node3D
+	var muzzle := gun.get_node_or_null("Muzzle") as Node3D
+	if mouth and muzzle:
+		muzzle.transform = WardenGlb.model_xf(weapon, mouth)
 	# its magazine (WEAPON_MAG) becomes the Gun's Mag, which the reload drops out and slaps back in
 	var mag := weapon.find_child(WEAPON_MAG, true, false) as Node3D
 	var old := gun.get_node_or_null("Mag")
@@ -337,6 +354,25 @@ static func _hold_shield(root: Node3D, glb: Node3D) -> void:
 	shield.owner = null
 	holder.add_child(shield)
 	shield.transform = Transform3D.IDENTITY
+
+## Poses one of the Warden's variant bones (EXTRA) on its rest, riding its parent: turned by `rot` about its head
+## (an axis in model space as the model rests: Vector3.RIGHT turns a drum about its side-to-side axle), scaled by `scl`
+## (zero hides what rides it). False on a procedural model or a bone the .glb lacks.
+static func pose_extra(root: Node3D, bone: String, rot := Quaternion.IDENTITY, scl := Vector3.ONE) -> bool:
+	var sk := extra_skeleton(root)
+	var bi := WardenSkeleton.find(sk, bone) if sk else -1
+	if bi < 0:
+		return false
+	var g := sk.get_bone_global_rest(bi).basis.get_rotation_quaternion()
+	sk.set_bone_pose_rotation(bi, sk.get_bone_rest(bi).basis.get_rotation_quaternion() * (g.inverse() * rot * g))
+	sk.set_bone_pose_scale(bi, scl)
+	return true
+
+## The armature of a hunter drawn from its .glb (null on a procedural one), for its kit's variant bones.
+static func extra_skeleton(root: Node3D) -> Skeleton3D:
+	if root == null or not bool(root.get_meta("glb", false)):
+		return null
+	return skeleton(root.get_node_or_null("Warden"))
 
 ## The rig rest of the Warden's model in the neutral look (built once a session).
 static func neutral_rest(arch: String) -> Dictionary:
@@ -463,6 +499,12 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 					m.set_shader_parameter(k, PAINTED[k])
 				if m.next_pass:
 					m.next_pass = _painted_ink()
+			else:
+				# a flat-painted model (hand-modelled, one colour a material, no atlas): the procedural heroes'
+				# clean painted look (Models.hunter), the slot's surface shading on top
+				m.set_shader_parameter("paint", 0.012)
+				m.set_shader_parameter("shadow_tint", Color(0.6, 0.6, 0.86))
+				m.set_shader_parameter("light_tint", Color(1.08, 1.0, 0.9))
 			var hot := String(src.resource_name).ends_with("-hot") if src else false
 			if slot == "glow" or hot:
 				m.set_shader_parameter("glow", GLOW)
