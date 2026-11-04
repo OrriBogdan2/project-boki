@@ -5,7 +5,7 @@
  "blend": "~/meshy/dredge_friend/fit.blend",
  "scale": 0.665,
  "turn": 180,
- "max_tris": 4600,
+ "max_tris": 3650,
  "dissolve_deg": 1.0,
  "sharp_deg": 50,
  "groups": {
@@ -256,10 +256,10 @@
   "bone": "eye",
   "at": [
    0.0,
-   0.468,
+   0.462,
    1.3766
   ],
-  "r": 0.025,
+  "r": 0.023,
   "depth": 0.75,
   "material": "glow-eye",
   "colour": "ff2418"
@@ -411,10 +411,10 @@
   "samples": 24,
   "looks": {
    "metal-brass": {
-    "colour": "544228",
-    "patina": "5f7a5a",
+    "colour": "4a3c26",
+    "patina": "4f6a52",
     "patina_at": 0.6,
-    "patina_k": 0.5,
+    "patina_k": 0.6,
     "dents": 1.6,
     "dent_scale": 4.5,
     "scratch": "b8a66e",
@@ -448,15 +448,15 @@
    },
    "metal-glass": {
     "glass": true,
-    "colour": "2a0a08",
+    "colour": "5a1008",
     "crack": "e8ecf0",
-    "halo": "a01c12",
+    "halo": "e0301a",
     "eye_at": [
      0.0,
      0.468,
      1.3766
     ],
-    "eye_r": 0.02,
+    "eye_r": 0.03,
     "crack_scale": 15.0,
     "crack_k": 0.55
    },
@@ -488,9 +488,9 @@
    "metal-hull": {
     "colour": "7d6c3e",
     "grime": "1a160c",
-    "grime_k": 0.6,
+    "grime_k": 0.7,
     "ao_dist": 0.05,
-    "gain": 0.95,
+    "gain": 1.0,
     "mask": {
      "at": [
       0.0,
@@ -501,27 +501,60 @@
     },
     "highlight": "b89a5c",
     "highlight_at": 0.62,
-    "highlight_k": 0.22,
+    "highlight_k": 0.15,
     "tint": [
-     0.84,
-     0.78,
-     0.64
+     0.76,
+     0.73,
+     0.62
     ],
     "rust": "7a3e1e",
     "rust_at": 0.52,
     "rust_k": 0.9,
     "rust_crevice": true,
-    "rust_streak": true
+    "rust_streak": true,
+    "patina": "4f6a52",
+    "patina_at": 0.6,
+    "patina_k": 0.7,
+    "patina_crevice": true,
+    "seams": {
+     "centre": [
+      0.0,
+      0.02,
+      1.35
+     ],
+     "n": 10,
+     "w": 0.05,
+     "colour": "241a10",
+     "k": 0.75,
+     "z": [
+      1.4700000000000002,
+      1.25
+     ]
+    }
    },
    "metal-helm": {
-    "colour": "7a5e36",
+    "colour": "6c5432",
     "highlight": "c8a462",
     "highlight_at": 0.5,
-    "highlight_k": 0.45,
+    "highlight_k": 0.35,
     "edge": "f0d088",
     "grime": "2a1c10",
     "grime_k": 0.6,
     "ao_dist": 0.02
+   },
+   "glow-eye": {
+    "glass": true,
+    "colour": "ff2a14",
+    "crack": "4a0806",
+    "crack_k": 0.7,
+    "crack_scale": 45.0,
+    "halo": "ff7038",
+    "eye_at": [
+     0.0,
+     0.475,
+     1.3766
+    ],
+    "eye_r": 0.005
    }
   }
  },
@@ -536,7 +569,7 @@
    "r": 0.53,
    "z": [
     1.0,
-    1.63
+    1.8
    ],
    "materials": [
     "Dredge_Brass",
@@ -596,8 +629,8 @@
   ],
   "r": 0.3,
   "res": [
-   24,
-   40
+   22,
+   36
   ],
   "dents": 12,
   "bands": [
@@ -630,7 +663,8 @@
      88
     ],
     "lon": 122,
-    "facets": 9
+    "facets": 11,
+    "rows": 2
    },
    {
     "r": 0.228,
@@ -639,7 +673,8 @@
      34
     ],
     "lon": 116,
-    "facets": 9
+    "facets": 11,
+    "rows": 2
    },
    {
     "r": 0.245,
@@ -648,7 +683,8 @@
      4
     ],
     "lon": 106,
-    "facets": 8
+    "facets": 11,
+    "rows": 2
    },
    {
     "r": 0.252,
@@ -657,7 +693,8 @@
      -16
     ],
     "lon": 100,
-    "facets": 8
+    "facets": 11,
+    "rows": 2
    }
   ],
   "project": {
@@ -797,20 +834,7 @@
   }
  },
  "extras": {
-  "shines": [
-   {
-    "at": [
-     -0.009,
-     0.489,
-     1.387
-    ],
-    "r": 0.005,
-    "depth": 1.0,
-    "bone": "eye",
-    "material": "glow-shine",
-    "colour": "ffffff"
-   }
-  ],
+  "shines": [],
   "glows": [
    {
     "at": [
@@ -1087,7 +1111,7 @@
    "R": 0.082,
    "lip": 0.09,
    "inner": 0.064,
-   "rivets": 10,
+   "rivets": 12,
    "rivet_r": 0.006,
    "bone": "head",
    "material": "metal-helm",
@@ -1110,25 +1134,51 @@
   "rivet_rows": [
    {
     "lat": -27,
-    "n": 18,
+    "n": 24,
     "off": 0.04,
     "r": 0.008
    },
    {
     "lat": 44,
-    "n": 16,
+    "n": 22,
     "off": 0.035,
     "r": 0.008
    },
    {
     "lat": 5,
-    "n": 12,
+    "n": 18,
     "off": 0.0,
     "r": 0.007,
     "lon": [
      60,
      300
     ]
+   },
+   {
+    "lat": 20,
+    "n": 14,
+    "off": 0.0,
+    "r": 0.006,
+    "lon": [
+     100,
+     260
+    ]
+   },
+   {
+    "lat": -10,
+    "n": 14,
+    "off": 0.0,
+    "r": 0.006,
+    "lon": [
+     100,
+     260
+    ]
+   },
+   {
+    "lat": 62,
+    "n": 14,
+    "off": 0.0,
+    "r": 0.006
    }
   ]
  }

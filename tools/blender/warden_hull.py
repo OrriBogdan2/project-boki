@@ -150,7 +150,8 @@ def build(ob, spec, seed=1):
         mid = 90.0 if sx > 0 else 270.0
         for lm in spec["lames"]:
             WP._append(ob, _sphere_patch(sc, lm["r"], lm["lat"][0], lm["lat"][1], mid - lm["lon"], mid + lm["lon"],
-                                         1, lm.get("facets", 7), lm.get("thick", 0.02), dents=dents[:4]), bone, mat)
+                                         lm.get("rows", 1), lm.get("facets", 7), lm.get("thick", 0.02), dents=dents[:4]),
+                       bone, mat)
     for t in spec.get("tears", []):
         _tear(ob, c, r, t, mat, WP._mat_index(ob, spec.get("gash_material", "cloth-flesh"), "5a1a1c"), spec["bone"],
               rnd)
@@ -366,7 +367,7 @@ def extras(ob, spec, seed=1):
         for k in range(int(row["n"])):
             lo = lo0 + (lo1 - lo0) * (k + 0.5) / row["n"]
             bm = bmesh.new()
-            bmesh.ops.create_icosphere(bm, subdivisions=1, radius=row["r"])
+            bmesh.ops.create_icosphere(bm, subdivisions=int(row.get("subdiv", 0)), radius=row["r"])
             for v in bm.verts:
                 v.co.z *= 0.6
             p0 = on(row["lat"], lo, row["off"] + 0.01)
@@ -428,7 +429,7 @@ def _helm(ob, hm, hc, hr):
         a = 2 * math.pi * (k + 0.5) / n
         p = c + Vector((math.cos(a), 0, math.sin(a))) * (R * 0.5 + lip * 0.5) + Vector((0, y1 - c.y + 0.008, 0))
         bm = bmesh.new()
-        bmesh.ops.create_icosphere(bm, subdivisions=1, radius=hm.get("rivet_r", 0.006))
+        bmesh.ops.create_icosphere(bm, subdivisions=0, radius=hm.get("rivet_r", 0.006))
         for v in bm.verts:
             v.co += p
         WP._append(ob, bm, hm["bone"], brass)

@@ -79,4 +79,10 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   lower rim and thicker strands over the ribs; a smoother hull (28x46 -> 24x40 segments with fewer, shallower
   dents); the grille port brass with dark slots; the stance upright (spine 0.04, head 0.02, knee 0, gait knee
   0.1, lean 0). Review match frames: `--arena-demo=pose_clear` (the arena's sign hidden, off the spawn fern).
+- **r3h (credit-free, ORCH's r3g review):** the hull's spec ovals gone (WardenGlb.LOOK dredge: gloss 0, sheen 0)
+  and a stronger warm rim at the match camera (rim_far 0.5); the eye's slot glows brighter (LOOK_SLOT glow 3.2);
+  the orb (r 0.023) painted cracked, red with a hot core (`glow-eye` on the atlas), its white glint gone, in a
+  lit red lens; the brass toward tarnished bronze with verdigris in the crevices, painted plate seams (ten
+  meridians and two latitudes) and six rivet rows over the hull (cheaper rivet heads); smoother shoulder lames
+  (two rows, eleven facets); the loose iron shards over the shoulders stripped. Body 14,920 at fit.
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.

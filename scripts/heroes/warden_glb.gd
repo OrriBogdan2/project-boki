@@ -55,7 +55,9 @@ const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline
 ## Materials "<slot>-<tag>" so tagged go without it too (thin ooze read as planks; the lens's line cut the orb).
 const NO_INK_TAGS := ["tar", "crack", "glass"]
 ## A Warden's own settings for its painted atlas, on top of the shared ones (Dredge: tarnished brass, rough spec).
-const LOOK := {"dredge": {"gloss": 0.18, "sheen": 0.02, "rim_far": 0.3, "rim_far_color": Color(1.0, 0.72, 0.32)}}
+const LOOK := {"dredge": {"gloss": 0.0, "sheen": 0.0, "rim_far": 0.5, "rim_far_color": Color(1.0, 0.68, 0.3)}}
+## And per slot of a Warden's painted atlas (Dredge: the eye glows brighter, so it shows at the match camera).
+const LOOK_SLOT := {"dredge": {"glow": {"glow": 3.2, "rim_far": 0.0}}}
 const PAINTED_SHADE := 0.72     # a painted atlas's shadow floor (the hero shader's own is 0.37)
 const PAINTED_RAMP := 2.6       # and its terminator, softer than the hero shader's 0.5
 ## The scene's light leans cool and violet (Look: a c4cbe6 ambient, about half the light on a painted model, and a
@@ -254,7 +256,8 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, arch := "") -> 
 					m.set_shader_parameter(k, PAINTED_LOOK[k])
 				if m.next_pass:
 					m.next_pass = _painted_ink()
-				var own: Dictionary = LOOK.get(arch, {})
+				var own: Dictionary = LOOK.get(arch, {}).duplicate()
+				own.merge(LOOK_SLOT.get(arch, {}).get(slot, {}), true)
 				for k in own:
 					m.set_shader_parameter(k, own[k])
 			else:
@@ -264,7 +267,7 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, arch := "") -> 
 				m.set_shader_parameter("shadow_tint", Color(0.6, 0.6, 0.86))
 				m.set_shader_parameter("light_tint", Color(1.08, 1.0, 0.9))
 			if slot == "glow":
-				m.set_shader_parameter("glow", GLOW)
+				m.set_shader_parameter("glow", float(LOOK_SLOT.get(arch, {}).get("glow", {}).get("glow", GLOW)))
 				m.set_shader_parameter("shade", 1.0)      # (a light source: no shadow side, which read as a dark claw)
 			(mi as MeshInstance3D).set_surface_override_material(si, m)
 			out.append(m)

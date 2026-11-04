@@ -360,6 +360,23 @@ def _bake_tree(m, look, img):
         hn.inputs[1].default_value = LIGHT
         band = ramp(hn.outputs["Value"], look.get("highlight_at", 0.55), look.get("highlight_at", 0.55) + 0.3)
         col = mix(math_("MULTIPLY", band, look.get("highlight_k", 0.7)), col, rgb(look["highlight"]))
+    # plate seams: dark lines at even longitudes (and any latitudes) about a centre, with a thin bright edge
+    sm = look.get("seams")
+    if sm:
+        rel = N.new("ShaderNodeVectorMath")
+        rel.operation = "SUBTRACT"
+        L.new(co, rel.inputs[0])
+        rel.inputs[1].default_value = sm["centre"]
+        sp = N.new("ShaderNodeSeparateXYZ")
+        L.new(rel.outputs[0], sp.inputs[0])
+        lines = None
+        lon = math_("MULTIPLY", math_("ARCTAN2", sp.outputs[0], sp.outputs[1]), float(sm["n"]) / (2 * math.pi))
+        dist = math_("ABSOLUTE", math_("SUBTRACT", math_("FRACT", lon), 0.5))
+        lines = math_("SUBTRACT", 1.0, ramp(math_("SUBTRACT", 0.5, dist), float(sm["w"]) * 0.5, float(sm["w"])))
+        for z in sm.get("z", []):
+            dz = math_("ABSOLUTE", math_("SUBTRACT", sp.outputs[2], z))
+            lines = math_("MAXIMUM", lines, math_("SUBTRACT", 1.0, ramp(dz, 0.003, 0.007)))
+        col = mix(math_("MULTIPLY", lines, float(sm.get("k", 0.7))), col, rgb(sm["colour"]))
     # grime last: the crevices darkened toward the grime colour
     col = mix(math_("MULTIPLY", grime, look.get("grime_k", 0.75)), col, rgb(look.get("grime", "1c1612")))
     L.new(col, emi.inputs["Color"])
