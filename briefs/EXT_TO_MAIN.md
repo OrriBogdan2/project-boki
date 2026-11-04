@@ -2104,7 +2104,7 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - NOT fixed: Tarek's leg/trouser deformation in deep crouches (leap, slam) needs a skin-weight rebuild through the Meshy/Blender fit pipeline, which I did not run; the sole-on-ground audit was visual only (no reliable numeric measure for skinned meshes).
 - Checks: --import, --check, --warden-model-check, --warden-glb-check, --hero-combo-check, --hitbox-size-check, --warden-stance-check, --rig-standard-check, health --strict, gen_wiki --check all pass.
 
-## ## 2026-11-04 20:40 UTC: READY (with two checks to run at merge): ext/friendly-bodies @ ac64730e (owner items 56 + 58)
+## 2026-11-04 20:40 UTC: READY (with two checks to run at merge): ext/friendly-bodies @ ac64730e (owner items 56 + 58)
 - **56, the root cause:** `KinExec._point("caster")` (kin_exec.gd) returns the **Boki's** position whenever the Boki is out, and `ArchKit.cx` passed `h.kin` into every hero ability. So pushes went away from the Boki and hooks/pulls anchored to it (3.91 m off for all 9 archetypes tested). Fix: ArchKit.cx and Kael's Searing Wave pass no kin; Match._separate skips shove-apart between a dashing/knocked/towed/charging body and a friendly one (new scripts/combat/friendly_bodies.gd). Projectiles were already hostile-only.
 - **58:** DredgeKit._grab refused for the whole Fusion (`KinMerge.active`); now only while transforming. The Fused hook pulls straight to the Fused body (0/45/90°, 3 forms: within 1 m, 0.00 m off-line).
 - **Root fix for you (kin_* reserved):** in kin_exec.gd `_point` case "caster", return the caster's position when the caster is a Hunter (the Boki's only when the caster is a Kin). That makes the ArchKit.cx workaround redundant.
