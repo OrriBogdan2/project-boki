@@ -1341,3 +1341,7 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 
 ## 2026-11-04 09:30 UTC (orchestrator): DECISION? rename Zedran to KAEL + four title changes
 - DECISION? **Zedran is renamed "Kael"** (id juggernaut unchanged). Titles: Kael **"The Unbroken"** (was Arena King); Claire **"Frost Siren"** (was Icy Dancer); Pip **"Little Lantern"** (was Fox Cub); Ryzz **"Storm Chaser"** (was Storm Slayer). Main: fold into DECISIONS.md. Second-Mask picks are Kael/Hem/Cinder.
+
+## 2026-11-04 09:45 UTC (orchestrator): DECISION? second-Mask picks are Kael, Pip, Cinder (Pip replaces Hem)
+- DECISION? After the Vex tutorial, the second Mask is one of **Kael (melee), Pip (healer), Cinder (area)**. Hem becomes an early unlock. Main: update the new-game second-pick data + DECISIONS.md.
+- Pending the owner's look test: Kael's magma may change to white-hot (to leave orange fire to Cinder). [EXT/S2] hold Kael's 3D texture colour until the owner decides.

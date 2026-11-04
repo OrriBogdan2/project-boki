@@ -482,3 +482,6 @@ Credits: ~8 x 70-110 ≈ 600-900; balance 4,993. Post per-Warden "OWNER: review 
 
 ## 2026-11-04 09:30 UTC (orchestrator): rename Zedran to Kael + titles
 - Add to the rename/title sweep: Zedran → **Kael** (id juggernaut; "Zedran" into --hero-title-check). Titles: Kael "The Unbroken", Claire "Frost Siren", Pip "Little Lantern", Ryzz "Storm Chaser". 3D/art files for him: kael_* from now on.
+
+## 2026-11-04 09:45 UTC (orchestrator): HOLD Kael's glow colour
+- The owner is testing white-hot cracks for Kael instead of orange magma. Build his mesh/rig in stage 1 as planned, but keep the crack/blade glow as a separate emissive colour parameter so it can be switched without a rebake.
