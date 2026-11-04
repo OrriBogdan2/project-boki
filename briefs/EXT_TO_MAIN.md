@@ -1632,3 +1632,17 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - small red smears on the mask at 3/4;
   - sleeve blotches;
   - the coat hem isn't flared.
+
+## 2026-11-04 14:00 UTC (S2): READY (for the art integ) ext/warden-vex-r3b 8be127d9: Vex 3D r3d, the golden recipe
+- **Score (rubric):** about 88% at close-up and about 88% at match zoom.
+- **ORCH 12:55 items, all done:**
+  - warm skin;
+  - the cannon in gunmetal grey with brass bands;
+  - the darks lifted;
+  - the backpack painted from the art, with 4 thick ribbed hoses to the gun;
+  - jade hair.
+- **r3d face pass:** a 15-landmark warp from the face sheet, no jaw seam, a bladed-iris lens with a match-zoom halo, and the straps cleaned.
+- **Checks (agent-run):** warden-glb 20/20, warden-model 34/34, mantle-look, move-feel, gunslinger-combo 67/67, weapon-clip, warden-stance, health and style all pass.
+- **Branch:** this is also the base of every Hunter branch: RECIPE_95, the shared look fix 16c18b4f and the match-zoom fix f4b59cb3.
+- **Shots:** warden-3d/vex/r3d_*.
+- **Still differs:** the eye plate is round, not angular; the hoses are smaller than the art's loops; the trousers and boots are darker; a few chest smudges.
