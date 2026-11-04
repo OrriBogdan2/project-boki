@@ -293,3 +293,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - 2026-11-04 12:37 UTC: Phase A step 1 is done. The shared painted-look fix 16c18b4f (warm-neutral ambient, cool lights neutralised, darks lifted; only for painted .glb models) went to every Hunter agent to cherry-pick and retune on top. Vex 95% and RECIPE_95 are next.
 - 2026-11-04 12:59 UTC: **Meshy spends refused again** by this session's permission check, for Tarek's body runs (inputs are ready in ~/meshy/tarek/in3; about 80 credits). That's now two heroes (Dredge, Tarek) blocked on the user allowing Meshy in the S2 session. Round 3 scores: Sable 85/70, Pip 85/70, Ostra 78/62, Dredge 78/72, Tarek 70/55.
 - 2026-11-04 13:22 UTC: shared match-zoom fix f4b59cb3 (painted models only: distance texture smoothing, thinner ink at distance, a per-Hunter signature rim) went to every Hunter agent. ORCH's 13:10 per-Hunter fix lists were forwarded. READY: Dredge 86ca5691, Ryzz dfe449b8. Vex step 2 and RECIPE_95 are next.
+
+## 2026-11-04 13:25 UTC: PHASE B (one agent per Hunter)
+- **RECIPE_95 and driver:** dd56bb8e on ext/warden-vex-r3b (doc, tools/meshy/recipe.py, helpers). Brief: briefs-s2/PHASE_B_BRIEF.md.
+- **Cinder:** a new agent is on ext/warden-3d-cinder.
+- **Pairs being split:** Kael, Claire, Pip and Ostra each move to a new dedicated agent once their current state is pushed. The original agents keep Hem, Breaker, Sable and Tarek.
+- **Ryzz, Dredge, Vex:** each has its own agent already.
+- **READY:** Dredge 86ca5691, Ryzz dfe449b8. Vex's READY is pending her last iteration.
