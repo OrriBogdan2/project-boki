@@ -557,3 +557,9 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Owner: "hitting someone with stacks with the ult should spread those stacks to everyone."
 - Kitefall: when the landing strike hits at least one foe carrying Static, every foe hit by the strike gets the highest Static count among the hit foes (then the ult's own +Static on top, capped at 4 as usual; reaching 4 triggers the sky bolt/Live as normal). Show it: arcs of lightning jump from the stacked foe to the others on impact.
 - Assert: ult landing on foes with {3, 0, 1} stacks leaves all three at ≥3 (+ the ult's own stack, capped at 4); with no stacked foe, nothing spreads.
+
+## 73. BUG: Ryzz's Skycall doesn't always push in the dragged direction (owner, 19:09 UTC Nov 4)
+- Owner: "E also doesn't always push in the right direction."
+- The committed drag direction (the arrow shown when you let go) must be the exact direction everyone inside is moved, every time. Likely causes: the direction re-read from the cursor at the strike (0.8 s later) instead of stored at commit; a tap's "away from you" default computed from Ryzz's position at the strike instead of at commit; small drags (near-zero length) giving a random/unstable direction (needs a minimum length, else use the tap default); per-target directions computed as "away from the circle centre" instead of the shared drag vector; Displace collision bending it (item 56, friendly bodies) or wall slides.
+- Fix: store the drag vector at commit; show it as a clear arrow inside the circle for the 0.8 s; apply the same vector to every foe and orb inside; ignore friendly bodies in the displacement.
+- Assert: for drags at 8 angles (and a tap), every dummy inside moves within 5° of the committed direction, even if Ryzz moves or the cursor sweeps during the 0.8 s. Same Ryzz branch as items 70–72.

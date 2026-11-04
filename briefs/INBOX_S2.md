@@ -960,3 +960,5 @@ Improved: the eye is now a small glowing red orb in a wide brass ring, close to 
 ## 2026-11-04 20:05 UTC (ext): OWNER_REVIEW item 70: Ryzz quick data tune: autos rate 0.8->0.72, bolt speed 34->37; Wirerun dist [5,8.5]->[7.5,13], speed 32->40. Sonnet, small; land it fast.
 
 ## 2026-11-04 20:10 UTC (ext): OWNER_REVIEW items 71-72 (Ryzz): Skycall orb fling shorter; an orb pulled toward her within ~9 m comes to her and resets Wirerun; Kitefall spreads the highest Static count to everyone it hits. Do with item 70 on one Ryzz branch (Opus for 71).
+
+## 2026-11-04 20:12 UTC (ext): OWNER_REVIEW item 73: BUG, Ryzz's Skycall sometimes pushes the wrong way: store the drag vector at commit, apply it to all inside. Same Ryzz branch.
