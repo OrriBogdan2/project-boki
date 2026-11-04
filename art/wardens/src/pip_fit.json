@@ -96,7 +96,7 @@
  "snap_y": false,
  "chunk": {
   "head": 1.06,
-  "girth": 1.04
+  "girth": 1.12
  },
  "lift": [
   0.88,
@@ -183,16 +183,16 @@
     0.95
    ],
    "tip": [
-    0.5448000000000001,
-    -0.3016,
-    1.346
+    0.64776,
+    -0.33592,
+    1.4252
    ],
    "across": [
     0,
     0,
     1
    ],
-   "width": 0.26,
+   "width": 0.312,
    "bow": [
     0,
     -0.02,
@@ -209,16 +209,16 @@
     0.95
    ],
    "tip": [
-    -0.5448000000000001,
-    -0.3016,
-    1.346
+    -0.64776,
+    -0.33592,
+    1.4252
    ],
    "across": [
     0,
     0,
     1
    ],
-   "width": 0.26,
+   "width": 0.312,
    "bow": [
     0,
     -0.02,
@@ -235,16 +235,16 @@
     0.88
    ],
    "tip": [
-    0.42600000000000005,
-    -0.24880000000000002,
-    0.5367999999999999
+    0.5052,
+    -0.27256,
+    0.46815999999999997
    ],
    "across": [
     0,
     0,
     1
    ],
-   "width": 0.195,
+   "width": 0.234,
    "bow": [
     0,
     -0.02,
@@ -261,16 +261,16 @@
     0.88
    ],
    "tip": [
-    -0.42600000000000005,
-    -0.24880000000000002,
-    0.5367999999999999
+    -0.5052,
+    -0.27256,
+    0.46815999999999997
    ],
    "across": [
     0,
     0,
     1
    ],
-   "width": 0.195,
+   "width": 0.234,
    "bow": [
     0,
     -0.02,
@@ -281,56 +281,47 @@
  ],
  "wing_look": {
   "up": {
-   "base": "ffd8ee",
+   "base": "ffc8e4",
    "tints": [
-    "fff2ff",
-    "d6efff",
-    "ffe2f2",
-    "e8fff4"
+    "ffd8f0",
+    "ffe0f4",
+    "f8d0ff"
    ],
-   "tint_k": 0.45,
-   "alpha": 0.58,
-   "rim": "ffc8e6",
-   "rim_alpha": 0.85,
+   "tint_k": 0.3,
+   "alpha": 0.5,
+   "rim": "ffe8f6",
+   "rim_alpha": 0.9,
    "edge": 0.9,
-   "edge_col": "e46aa6",
-   "edge_alpha": 0.95,
+   "edge_col": "ff9ccc",
+   "edge_alpha": 0.9,
    "vein": "ffffff",
    "vein_w": 0.004,
    "vein_alpha": 0.9,
-   "veins": 5,
-   "cells": [
-    0.35,
-    0.58,
-    0.8
-   ],
+   "veins": 0,
+   "cells": [],
    "power": 0.5,
    "skew": 0.55,
    "root_w": 0.06
   },
   "lo": {
-   "base": "ffd8ee",
+   "base": "ffc8e4",
    "tints": [
-    "fff2ff",
-    "d6efff",
-    "ffe2f2",
-    "e8fff4"
+    "ffd8f0",
+    "ffe0f4",
+    "f8d0ff"
    ],
-   "tint_k": 0.45,
-   "alpha": 0.58,
-   "rim": "ffc8e6",
-   "rim_alpha": 0.85,
+   "tint_k": 0.3,
+   "alpha": 0.5,
+   "rim": "ffe8f6",
+   "rim_alpha": 0.9,
    "edge": 0.9,
-   "edge_col": "e46aa6",
-   "edge_alpha": 0.95,
+   "edge_col": "ff9ccc",
+   "edge_alpha": 0.9,
    "vein": "ffffff",
    "vein_w": 0.004,
    "vein_alpha": 0.9,
-   "veins": 4,
-   "cells": [
-    0.4,
-    0.7
-   ],
+   "veins": 0,
+   "cells": [],
    "power": 0.55,
    "skew": 0.6,
    "root_w": 0.06
@@ -342,9 +333,9 @@
    0.0,
    0.6
   ],
-  "size": 1.75,
+  "size": 2.2,
   "parent": "hand.L",
-  "name": "lantern"
+  "name": "hang_lantern"
  },
  "lantern_look": {
   "colours": {
@@ -358,9 +349,9 @@
  },
  "weight_rules": [],
  "smooth": {
-  "iterations": 2,
-  "sigma_s": 2.5,
-  "sigma_r": 0.06
+  "iterations": 3,
+  "sigma_s": 3.0,
+  "sigma_r": 0.1
  },
  "ramps": [
   {
@@ -377,11 +368,11 @@
     1.0
    ],
    "ramp": [
-    "6e3442",
-    "8e4a58",
-    "a95e69",
-    "c87882",
-    "e8a0a4"
+    "6c4452",
+    "8c5a6a",
+    "a87282",
+    "c48e9c",
+    "dcb0ba"
    ]
   },
   {
@@ -511,7 +502,7 @@
   ],
   "base": "c87882",
   "tip": "fbe8d8",
-  "shade": "8e4a58",
+  "shade": "b07884",
   "tip_from": 0.62,
   "bones": 5,
   "clumps": 8,
@@ -521,18 +512,17 @@
   "fluff": 0.32
  },
  "flower_crown": {
+  "ring": true,
   "centre": [
    0.0,
    -0.02,
-   1.38
+   1.43
   ],
   "r": 0.32,
-  "a0": 25,
-  "a1": 155,
-  "tilt": 28,
-  "n": 11,
+  "tilt": 12,
+  "n": 18,
   "size": 0.03,
-  "out": 0.006,
+  "out": 0.016,
   "bone": "head"
  }
 }

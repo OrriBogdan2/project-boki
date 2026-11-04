@@ -228,13 +228,14 @@ def crossbow(bld, cells, g, look):
     """One hand crossbow, its grip at g (Gun frame: forward +Y, up +Z, right +X)."""
     g = np.asarray(g, float)
     L = float(look.get("length", 0.3))
+    th = float(look.get("thick", 1.0))     # the parts' thickness (reads at the match camera)
     span = float(look.get("span", 0.3))
     top = g + np.array([0, 0, 0.045])
     # the pistol grip (leather) under the tiller, raked back
     _arc(bld, [g + np.array([0, -0.015, -0.05]), g + np.array([0, 0.0, 0.0]), top + np.array([0, 0.01, -0.01])],
-         [0.017, 0.018, 0.017], cells.box["grip"], "grip")
+         [0.017 * th, 0.018 * th, 0.017 * th], cells.box["grip"], "grip")
     # the tiller (silver): a long slim box, a butt behind the grip
-    _box(bld, top + np.array([0, L * 0.5 - 0.06, 0.0]), (0.016, L * 0.5, 0.017),
+    _box(bld, top + np.array([0, L * 0.5 - 0.06, 0.0]), (0.016 * th, L * 0.5, 0.017 * th),
          cells.box["scroll" if "scroll" in cells.box else "silver"], "tiller")
     _box(bld, top + np.array([0, L * 0.5 - 0.06, 0.02]), (0.007, L * 0.45, 0.005), cells.box["dark"], "rail")
     front = top + np.array([0, L - 0.07, 0.0])
@@ -246,7 +247,7 @@ def crossbow(bld, cells, g, look):
             x = sx * f * span * 0.5
             y = -0.07 * f ** 2 + 0.025 * max(0.0, f - 0.8) / 0.2
             pts.append(front + np.array([x, y, 0.004 * math.sin(f * math.pi)]))
-            rad.append(0.011 * (1 - 0.55 * f))
+            rad.append(0.011 * th * (1 - 0.55 * f))
         _arc(bld, pts, rad, cells.box["silver"], "limb")
         tipp = pts[-1]
         nock = top + np.array([0, L * 0.22, 0.02])
@@ -490,6 +491,14 @@ def gem(arm, body, spec, tag="gem"):
         poly.material_index = mats["glow"] if bld.part[poly.vertices[0]] == "gem" else mats["metal"]
         poly.use_smooth = False
     _skin(ob, arm, {spec.get("bone", "hips"): range(len(ob.data.vertices))})
+    # an empty at the gem, riding its bone: the look's light gives it a glowing halo
+    e = bpy.data.objects.new("anchor_" + tag, None)
+    bpy.context.scene.collection.objects.link(e)
+    e.parent = arm
+    e.parent_type = "BONE"
+    e.parent_bone = spec.get("bone", "hips")
+    bpy.context.view_layer.update()
+    e.matrix_world = Matrix.Translation(Vector((c + np.array([0, 0.03, 0])).tolist()))
     log("gem at %s: %d tris" % (tuple(round(float(v), 3) for v in c), sum(len(f) - 2 for f in bld.f)))
     return ob
 
@@ -587,8 +596,14 @@ def flower_crown(arm, body, spec, tag="flowers"):
     rng = np.random.default_rng(3)
     placed = 0
     for i in range(n):
-        a = math.radians(float(spec["a0"]) + (float(spec["a1"]) - float(spec["a0"])) * i / max(n - 1, 1))
-        d = Vector((math.cos(a), -math.sin(tilt) * math.sin(a), math.cos(tilt) * math.sin(a)))
+        if spec.get("ring"):
+            # a ring round the head (on the goggles' strap): a full circle in the horizontal plane, its front
+            # tipped `tilt` deg down
+            a = 2 * math.pi * i / n
+            d = Vector((math.cos(a), math.sin(a), -math.sin(tilt) * math.sin(a))).normalized()
+        else:
+            a = math.radians(float(spec["a0"]) + (float(spec["a1"]) - float(spec["a0"])) * i / max(n - 1, 1))
+            d = Vector((math.cos(a), -math.sin(tilt) * math.sin(a), math.cos(tilt) * math.sin(a)))
         hit = bvh.ray_cast(c + d * rad, -d)
         if hit[0] is None:
             continue
