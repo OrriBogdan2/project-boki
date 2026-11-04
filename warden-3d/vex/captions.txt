@@ -102,3 +102,14 @@ r3d_vs_r3c.png: the close turnaround, r3d over r3c
 r3d_vs_r3c_closeup.png: head and shoulders, left to right: r3d front, r3c front, r3d 3/4, r3c 3/4
 r3d_vs_r3c_match.png: the match frame around Vex, x4: r3d (left), r3c (right)
 r3d self-score (RECIPE_95 rubric, side by side with the face sheet, portrait and turnaround): see the report; close-up and match zoom scored line by line
+r3e_closeup_vs_art.png: Vex r3e (the shipped vex.glb, RECIPE_95's reference) head and shoulders from the front, beside the flat-lit face sheet (wardens_r3/vex_face) and the portrait: the face painted from the face sheet through a 15-landmark warp; the angular bronze eye plate and its glowing ringed lens are the face sheet's own, as a decal (lens on the glow slot)
+r3e_closeup_34_vs_art.png: the portrait and the head sheet's profile beside the in-game 3/4 close-up: the plate and lens from the side, the gorget, the braid's copper ties, the chest skin cleaned
+r3e_match_vs_art.png: the face sheet beside the Arena match frame around her, x4 (--arena=gunslinger --record=2 --no-tips --arena-demo=pose --demo-zoom=1.0 --demo-at=-4.5,0: clear grass, no caption or plant): black + toxic green + bronze, not khaki
+r3e_gameplay_match.png / r3e_gameplay_match_x4.png: that Arena frame uncropped, and around her x4 (nearest)
+r3e_closeup.png / r3e_closeup_34.png: in game, head and shoulders, front and 3/4
+r3e_vs_turnaround.png: the r3 turnaround over the in-game close turnaround (front, 3/4, side, back, 3/4 back): the backpack's bronze plate and cogs, the hose loops to the gun, gunmetal barrels with bronze bands, solid braids
+r3e_back_34.png: in game, back and 3/4 back
+r3e_vs_r3d.png: the close turnaround, r3e over r3d
+r3e_vs_r3d_closeup.png: head and shoulders, left to right: r3e front, r3d front, r3e 3/4, r3d 3/4
+r3e_vs_r3d_match.png: the match frame around Vex, x4: r3e (left), r3d (right)
+r3e self-score (RECIPE_95 rubric, beside the face sheet, portrait and turnaround): close-up 79 (silhouette 13/15, face 17/20, hair and braids 8.5/10, props 13.5/20, palette 12.5/15, clean paint 6/10, outfit details 8/10); match zoom 78 (silhouette 21/25, signature colours 18/25, values 17/20, props 14/20, artefacts 8/10). Costs: the lens reads as a green blob with a dark crescent, not the sheet's clean rings; green smears along the crop top's top edge (faces Meshy coloured as hair); the gorget's seams and the ammo belt's brass cartridges don't read; the bronze is lost at the match camera
