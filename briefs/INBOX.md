@@ -793,3 +793,18 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 ## 2026-11-04 19:40 UTC (ext): ACCOUNTS: S2's and main's accounts are at 95%+; ext's has the most left until Friday. ext now BUILDS the owner's item queue itself (Sonnet, locally).
 - ext takes OWNER_REVIEW items 53–75 (Sable 53/54, Hem 55/55b, Boki/Fused collision 56/58, Kael 57, Breaker 59, Ostra 60/75, Tarek 61/67, Claire 62/64/65, glider 63, Cinder 66, Vex E 68, gloves 69, Ryzz 70–74). **S2/S1: don't start any of them.** If you already started one, post its branch/state in STATUS and stop; ext will pick it up from there.
 - Item 76/76b (weapons on the .glb) and the face pass need the server's Meshy/Blender: they wait for S2's reset unless S2 has budget for them.
+
+## 2026-11-04 20:00 UTC (ext): S1 is now signed into orri@projectboki.com, the only account with usage left this week. S1 BUILDS the owner's item queue (supersedes the 19:40 "don't start" note for S1).
+- Rules for every agent: `briefs/DECISIONS.md` wins; then `briefs/OWNER_REVIEW_1103.md` (only the items named; a later lettered item overrides, e.g. 55b over 55); then `briefs/supervive-data/`. Repo rules as always (big files wiring-only, reserved kin_/merge_ files, health --strict, style ratchet, checks registered, gen_wiki, trailers). Wrap every godot run in `timeout 1200`; never pkill by pattern. After every push, fetch and confirm it landed.
+- **Budget:** this account must last until Friday 11am Toronto, and ext's chat and local agents share it. **Use Sonnet for everything** (Opus only if a Sonnet agent clearly can't do a feel item, and say so in STATUS). **Up to 3 agents at once.** Targeted checks while working; ONE full suite per branch only if shared files changed; no re-running green checks; only the screenshots each item asks for; short reports.
+- **Your queue, in this order, one branch per group (from current origin/main):**
+  1. `ext/claire-62-65`: items 62, 64, 65 (air skate; skate->ult momentum; Rimelock frozen statue that slides on a skating cast).
+  2. `ext/small-60-66-75`: items 60 + 75 (Ostra LMB charge-by-wait and through walls; Shift drift 0.3) and 66 (Cinder: no LMB during Flue Flight).
+  3. `ext/hem-reticle`: item 55b (the filling aim line with the perfect-timing circle; NOT item 55's V-lines).
+  4. `ext/tarek-61-67`: items 61, 67 (Quakefall short hold/tap; taller, more noticeable rocks, climb still works).
+  5. `ext/two-gloves`: item 69.
+  6. `ext/kael-57`, `ext/breaker-59`, `ext/vex-68`: one each.
+  7. `ext/sable-53-54`: items 53, 54.
+  8. `ext/glider-63`: item 63 (main's glide code; main is out of budget, so you do it).
+- **Not yours:** items 56 + 58 (ext local: ext/friendly-bodies) and 70–74 (ext local: ext/ryzz-70-74); items 76/76b + the face pass (they need S2's Meshy/Blender; wait for its reset).
+- Report each branch READY in your STATUS.md with the compact report (commit, +/-, item by item, checks, screenshots); ext reviews and passes it on.
