@@ -56,10 +56,12 @@
 				"light_neutral": 1.0,
 				"shade": 0.78,
 				"albedo": [
+					0.95,
 					0.88,
-					0.8,
-					0.8
-				]
+					0.86
+				],
+				"light_neutral_warm": 0.85,
+				"desat": 0.45
 			},
 			"hair": {
 				"far_lift": 0.1,
