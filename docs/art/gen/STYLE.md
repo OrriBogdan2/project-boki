@@ -42,3 +42,13 @@ Same model, settings, references and character text for every option; only the s
 1. Approve the big-shield Bjorn (`style/bjorn_bigshield_revision.jpg`) as his look for the splash/portrait/turnaround.
 2. For the files we keep, download the full-resolution 2K originals from the studio into this branch? The previews committed now are captures from the studio's viewer (772x959).
 3. Anthum's terms (s. 10.4, 8A) give Anthum a licence to show uploads and outputs as platform examples and to train its internal systems on Platform activity. That covers the concept sheets we upload as references and the art we generate. OK for unreleased game art?
+
+
+## Round 2 rules (owner review, Nov 4)
+- **References:** only the approved Bjorn frame as a style anchor. Don't attach the old concept crops; they pull the faces and costumes back to the generic look the owner rejected.
+- **Faces:** describe a specific person: asymmetry, one or two odd features (a broken nose, a chipped tooth, a scar through the lip, heavy lids), age, expression, and add "her/his face must look like a specific, memorable person with personality, not a generic pretty AI face".
+- **Signature pose (item 52):** every splash, portrait and turnaround shows the Warden's stance (lean, hip shift, weapon carry), never straight and symmetrical. In turnarounds, pick a stance that keeps every limb and weapon readable (e.g. a weapon hanging at the side beats one up on the shoulder, which the model duplicates).
+- **Mobile readability:** splashes are "big, close, cinematic: the character fills most of the frame from the knees up".
+- **Turnarounds for Meshy:** four views (FRONT, 3/4, SIDE, BACK), no overlap, flat light, one ground line, and "exactly ONE <weapon> per figure".
+- **Prompt length:** under about 2,300 characters (Anthum flags long prompts).
+- **No real-world religious symbols** anywhere (the first Vex splash put a cross on a chapel).

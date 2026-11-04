@@ -520,3 +520,21 @@ Back to the full style line + style-anchor line (the short prefix looked lower q
 | `wardens/vex_splash.png` | 73685a15 | Striding and firing from the hip in the chapel. Generated just before "big" was added, so the SMG is mid-sized; the portrait and turnaround show the big one. Take bc6e8c57 (big-SMG wording) came out with a smaller gun and drifted off her face, so it's not kept. |
 | `wardens/vex_portrait.png` | 86fc91ff | Big SMG held up beside her face. |
 | `wardens/vex_turnaround.png` | b0984b60 | Big SMG in the human hand in every view. |
+
+
+## Round 2: owner review redo (INBOX_IMG 2026-11-04 02:30 UTC, OWNER_REVIEW item 52)
+Common: anthum.ai Studio, Nano Banana 2.1, 2K, references = **only** the Bjorn style frame (the old concept crops pulled every Warden back to the generic look). New rules: STYLE.md "Round 2". Files in `wardens_r2/` replace `wardens/` once the owner approves. Before/after review images are in `review/<name>_before_after.jpg`.
+**Resolution note:** the session's link to the owner's PC was down, so the files committed here are full-viewport captures of the studio images (portrait 1021x1021, splash 1457x812, turnaround 1568x666), not the 2K originals. The 2K originals are in the owner's Downloads (`r2_<name>_*.png`) and in the studio library (IDs below); swap them in when the link is back or when a repo-attached agent picks them up.
+
+### Vex (gunslinger), round 2
+Owner: a cyborg whose arm holds or is fused to the gun, a bit younger, the same general look; signature pose; a non-generic face.
+Prompt = style prefix + block + face line + shot. Style prefix: "Premium stylised fantasy hero art, hand-painted 3D look, rich painted textures, soft rim light, polished game-studio quality. Match the art style and rendering of the reference image exactly, but copy nothing else from it." Face line: "Her face must look like a specific, memorable person with personality, not a generic pretty AI face: asymmetric features, real character lines, expressive."
+Block:
+> Vex, the Hired Gun: a cyborg marine gunner in her late twenties, cocky, devout and a little unhinged. East Asian woman, lean and athletic, smooth young skin apart from her scars. Distinctive face: a once-broken slightly crooked nose, one heavy-lidded dark eye with a mocking look, her right eye replaced by a round brass lens glowing orange set in a small riveted plate, a thin scar through her lip, a lopsided smirk, a line of small handwritten prayer script tattooed down the side of her neck. Black hair in one tight high braid. GUN-ARM: her left arm is a heavy cyborg arm of gunmetal and brass with exposed pistons and cables, and it has NO HAND: below the elbow the forearm itself IS a big submachine gun, built into the arm as one piece, a fat cylindrical barrel shroud with glowing orange vents ending in a muzzle where the hand would be, a long curved magazine hanging under the forearm, ammo cables running from the forearm to a drum on her back. Her right arm is human and holds nothing. Dark wooden prayer beads wrapped around the cyborg shoulder, red-sealed scripture strips tied to it. Fitted battle-worn dark slate armour vest, a cropped dark high-collared jacket with no left sleeve, orange signal scarf, dog tags, cargo trousers, heavy boots, an open-eye sigil on her chest plate. No real-world religious symbols.
+
+| File | Studio image | Notes |
+|---|---|---|
+| `wardens_r2/vex_portrait.png` | 68da5c09 | The cyborg hand grips the gun, with ammo cables from the forearm (a "holds" read rather than "fused"). |
+| `wardens_r2/vex_splash.png` | 739d7d68 | "a big, close, cinematic shot: she fills most of the frame from the knees up"; walking away from a burning chapel (no crosses), gun-arm fused. Nit: a second barrel rests on her other shoulder. |
+| `wardens_r2/vex_turnaround.png` | c80c9857 | FRONT / 3/4 / SIDE / BACK, one gun per figure fused to the forearm, hand on hip, hip cocked. The gun-arm is consistently her RIGHT arm (the prompt said left; consistency across views is what Meshy needs). |
+Discarded: c34070d9, abf59780, 0801565e (separate gun in her human hand); 232d9357 (too small in frame, a cross on the chapel); 34e37133 (an extra gun on the shoulder in the side view).

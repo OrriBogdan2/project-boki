@@ -1,5 +1,12 @@
 # IMG status (image-gen agent)
 
+## 2026-11-04 03:15 UTC: ROUND 2 (owner review redo), Vex ready for approval; STOPPED
+- Doing the INBOX_IMG 02:30 list in the owner's order (Vex, Zedran, Pin, Cinder, then the rest), one Warden at a time, stopping for owner approval after each. No 3D until each is approved.
+- **Vex**: cyborg gun-arm (the forearm is the SMG, with ammo cables), late twenties, a characterful face (crooked nose, brass eye plate, neck prayer tattoo, smirk), hip-cocked signature stance. Files: `docs/art/gen/wardens_r2/vex_{splash,portrait,turnaround}.png`; before/after for phone review: `docs/art/gen/review/vex_before_after.jpg`. Prompts in index.md "Round 2".
+- The link to the owner's PC was down, so the committed files are viewport captures, not 2K; the 2K originals are in the owner's Downloads (`r2_vex_*`) and the studio library.
+- Push: this session still can't push; the commits go to the owner as a bundle.
+
+
 ## 2026-11-03 (new session): deliverable 2 starting
 - Owner decisions: Q2 yes, download the 2K originals of kept images into the repo; Q3 OK, Anthum's display/training licence is accepted.
 - Bjorn's look approved: `docs/art/gen/style/bjorn_optA_epic_bigshield.png` (sleeveless, very muscular, enormous prow-shield).
