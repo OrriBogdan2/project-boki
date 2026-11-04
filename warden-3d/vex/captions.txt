@@ -45,3 +45,18 @@ r2_gameplay_match.png: the Arena at the match camera (zoom 1, HUD off with --rec
 r2_gameplay_zoom.png: that frame around her, x4 (nearest): no bubbles or nameplates over her
 r2_moves_run_fire.png: run (two phases), firing (the gun-arm comes up to aim; the barrels spin while firing)
 r2_moves_dash_throw.png: Combat Slide at three moments, the RMB throw
+
+Vex r3 (Meshy 7.1 at its best settings, baked to a clean 40k mesh; one kept run, I; stance from ext/warden-stance 4f9487a0):
+r3_vs_r2.png: r2 (left of each pair) vs r3: close-up front and 3/4, full length front and 3/4, the five-angle turnaround, the match camera x4
+r3_vs_turnaround.png: the r2 turnaround (top) over the in-game r3 model close, front, 3/4, side, back, 3/4 back (in her stance: gun-arm hanging barrel-down, left hand on the hip)
+r3_vs_turnaround_gameplay.png: the turnaround over the same five angles at the match camera (true pixels, then x3)
+r3_vs_portrait.png: the portrait (left), the in-game head and shoulders from the front and at 3/4: monocle on her left eye, the orange streak, the bolt in the bun, the plaster
+r3_front_34_vs_art.png: the turnaround's front and 3/4 (left) beside the in-game front and 3/4, full length
+r3_back_vs_art.png: the turnaround's back (left) beside the in-game back and 3/4 back: the drum, the feed belt to the waist, the vest's back symbols
+r3_closeup.png / r3_closeup_34.png: in game, head and shoulders, front and 3/4
+r3_front_34.png / r3_back_34.png: in game, full length, front and 3/4, back and 3/4 back
+r3_gameplay_match.png: the Arena at the match camera (zoom 1, HUD off with --record=2, --arena-demo=pose), Vex centre, uncropped
+r3_gameplay_zoom.png: that frame around her, x4 (nearest)
+r3_moves_run_fire.png: run (two phases), firing (the gun-arm comes up; the barrels spin while firing), recoil
+r3_moves_dash_throw.png: Combat Slide at three moments, the RMB throw
+r3_meshy_variants.png: the nine r3 Meshy runs, flat colour, head and full front: A 4 views 8k, B N1 texture, C one image 4k geometry, D old side view, E new side view, F image enhancement off, G and H arm-down edits with the new side view, I (kept) arm-down edits with the turnaround's near profile
