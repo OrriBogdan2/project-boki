@@ -95,6 +95,18 @@ func _levels() -> void:
 	var hm := HomeMarket.new(null, Callable())
 	ok(FarmUnlocks.gated() and Stalls.level() == 1 and hm.tabs() == ["Vendor", "Exchange"],
 		"L1: the vendor (and the Exchange) only: %s" % str(hm.tabs()))
+	var keys := func(tab: String) -> Array:
+		hm.vendor_tab = tab
+		var out: Array = []
+		for sec in hm._vendor_sections():
+			for g in sec[1]: out.append(String(g[0]))
+		return out
+	var boki: Array = keys.call("Boki")
+	var hunter: Array = keys.call("Hunter")
+	ok(boki.has("food:kibble") and not boki.has("tonic") and not boki.has("armor_kit") and hunter.has("tonic")
+		and not hunter.any(func(k): return k.begins_with("food:") or k.begins_with("acc:")),
+		"Vendor: Boki food and wear under Boki, the tonic and the belt items under Hunter")
+	ok(not hm.VENDOR_TABS.has("Kin food") and hm.VENDOR_TABS.has("Hunter"), "Vendor tabs name who the goods are for")
 	# an upgrade is a site: Boki labour, materials and a few gems, like other buildings
 	Save.d["gems"] = 500
 	Work.ensure()

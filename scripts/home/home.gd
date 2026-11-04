@@ -1905,21 +1905,22 @@ func _whistle_ring() -> void:
 ## Kin inside the house heard you: a "!" pops over the roof, the house rattles with little feet,
 ## then they tumble out of the door one after another and run over.
 func _house_alert(inside: Array) -> void:
+	var at: Vector3 = spots["house"] if spots["house"].x > -100.0 else _house_door()      # no house yet: the landing
 	var names: Array = inside.map(func(k): return String(k["rec"]["name"]))
 	var bub := Label3D.new()
 	bub.text = "!"
-	bub.font = UI.big; bub.font_size = 150; bub.pixel_size = 0.012; bub.outline_size = 26
+	bub.font = UI.big; bub.font_size = 64; bub.pixel_size = 0.012; bub.outline_size = 14
 	bub.modulate = UI.GOLD; bub.outline_modulate = Color(0.12, 0.06, 0.1)
 	bub.billboard = BaseMaterial3D.BILLBOARD_ENABLED; bub.no_depth_test = true
-	bub.position = spots["house"] + Vector3(0, 4.6, 0)
+	bub.position = at + Vector3(0, 3.4, 0)
 	bub.scale = Vector3.ONE * 0.1
 	add_child(bub)
 	var who := Label3D.new()
 	who.text = ("%s heard you!" % names[0]) if names.size() == 1 else ("%s and %s heard you!" % [", ".join(names.slice(0, names.size() - 1)), names[-1]])
-	who.font = UI.big; who.font_size = 46; who.pixel_size = 0.012; who.outline_size = 12
+	who.font = UI.big; who.font_size = 40; who.pixel_size = 0.012; who.outline_size = 12
 	who.modulate = UI.INK
 	who.billboard = BaseMaterial3D.BILLBOARD_ENABLED; who.no_depth_test = true
-	who.position = spots["house"] + Vector3(0, 3.7, 0)
+	who.position = at + Vector3(0, 2.7, 0)
 	who.modulate.a = 0.0
 	add_child(who)
 	var tw := bub.create_tween()
@@ -1935,7 +1936,7 @@ func _house_alert(inside: Array) -> void:
 	wt.tween_interval(2.0)
 	wt.tween_property(who, "modulate:a", 0.0, 0.3)
 	wt.tween_callback(who.queue_free)
-	Sfx.play("kin_alert", spots["house"], -6.0, 0.1, 1.15)
+	Sfx.play("kin_alert", at, -6.0, 0.1, 1.15)
 	# the house might be off screen: say it on the HUD as well
 	_toast(who.text.replace("heard you!", "heard you from the house and are on their way") if names.size() > 1 else who.text.replace("heard you!", "heard you from the house and is on its way"))
 	# the house rattles: little feet scurrying for the door
@@ -1947,7 +1948,7 @@ func _house_alert(inside: Array) -> void:
 			ht.tween_property(house_node, "scale", base, 0.09)
 			ht.tween_interval(0.08)
 	for j in 5:
-		get_tree().create_timer(0.15 + j * 0.16).timeout.connect(func(): Sfx.play("step%d" % (j % 3), spots["house"], -8.0, 0.2, 1.5))
+		get_tree().create_timer(0.15 + j * 0.16).timeout.connect(func(): Sfx.play("step%d" % (j % 3), at, -8.0, 0.2, 1.5))
 	for j in inside.size():
 		var k: Dictionary = inside[j]
 		k["exiting"] = true
