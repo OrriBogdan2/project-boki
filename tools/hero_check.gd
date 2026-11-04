@@ -31,7 +31,7 @@ func run(main: Node) -> void:
 	var ev := InputEventAction.new(); ev.action = "hero"; ev.pressed = true
 	hm._unhandled_input(ev)
 	await tree.process_frame
-	ok(hm.panel_open == "Hunters", "J opens the Hunters screen on the farm")
+	ok(hm.panel_open == "Masks", "J opens the Masks screen on the farm")
 	var grid: GridContainer = hm.get_meta("hero_grid")
 	var cards: Array = grid.get_children()
 	var archs: Array = cards.map(func(c): return String(c.get_meta("arch", "")))

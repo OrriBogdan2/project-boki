@@ -4,6 +4,8 @@ extends RefCounted
 
 const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Tamsin", "Linwick", "Dredge",
 	"Moosh Moosh", "Burple", "Breah", "Ostra"]
+## Words retired from player text (Hunter / Mask / the Empty / Fusion replace them; ids and code names may keep them).
+const RETIRED_TERMS := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|unmasked)\\b"
 const GENDERS := ["male", "female", "robot"]
 
 var bad := 0
@@ -34,6 +36,8 @@ func run(main: Node) -> void:
 		for text in shown:
 			var found_old := _old_name_in(String(text))
 			ok(found_old == "", "%s: no old name in a player-facing label (%s)" % [id, found_old])
+		var retired := RegEx.create_from_string(RETIRED_TERMS).search(_plain_text(data))
+		ok(retired == null, "%s: no retired term in its text (%s)" % [id, retired.get_string() if retired else ""])
 		var intro := HeroTitle.intro_block(id, 300.0)
 		var has_origin: bool = intro.get_child_count() == 2 and intro.get_meta("hero_intro") == id
 		ok(has_origin, "%s class intro has origin and story" % id)

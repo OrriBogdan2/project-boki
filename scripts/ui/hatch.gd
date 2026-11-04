@@ -382,7 +382,7 @@ func _after_create() -> void:
 	else:
 		_show_pick()
 
-# ---- your first mask: 1 of the starters, before the egg (ClassUnlock, ClassPick). The tutorial plays as it.
+# ---- your first Mask: Vex, before the egg (ClassUnlock, ClassPick). The tutorial plays as Vex.
 var starter_picks: Array = []
 
 func _show_hunter_pick() -> void:
@@ -390,6 +390,8 @@ func _show_hunter_pick() -> void:
 	top_box.visible = false      # (the pick panel carries its own heading: the viewer needs the height)
 	_clear_bottom()
 	cam_to = Vector3(-3.5, 4.2, 9.0)
+	if ClassUnlock.starters().size() == ClassUnlock.picks_needed():
+		starter_picks.assign(ClassUnlock.starters())      # (Vex, already chosen)
 	bottom.add_child(ClassPick.row(starter_picks, _take_hunter))
 
 func _take_hunter(ids: Array) -> void:

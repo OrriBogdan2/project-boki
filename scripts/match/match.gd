@@ -1400,7 +1400,7 @@ func on_blight_shriek(b: Mob) -> void:
 	blight_ping(b.pos, "shriek")
 	if player and not player.out and player.flat_dist(b) < 26.0 and hud:
 		var lv: float = (b as Blight).lvl
-		hud.toast("A Warden shrieked  ·  the Blight is coming" if lv >= 0.35 else "A Warden spotted you  ·  get out of its light", Color("ff7a3a"))
+		hud.toast("A Watcher shrieked  ·  the Blight is coming" if lv >= 0.35 else "A Watcher spotted you  ·  get out of its light", Color("ff7a3a"))
 
 ## The Blight on the minimap: a mark where you hear something you can't see.
 func blight_ping(at: Vector3, kind := "blight") -> void:
@@ -2670,7 +2670,7 @@ func on_merge(h: Hunter, k: Kin, u: MergeSpec) -> void:
 
 func on_merge_end(h: Hunter, why: String) -> void:
 	if h == player and hud and why in ["time", "throw"]:
-		hud.toast_small("MERGE ENDED", Color("ffd84a"))
+		hud.toast_small("FUSION ENDED", Color("ffd84a"))
 
 func on_combo(target: Ent, own: Node, c: Dictionary) -> void:
 	kstat["combo"] += 1
@@ -4806,7 +4806,7 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 # ---- training area
 ## [id, what to do, the action whose key it uses ("" for none)]
 const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then hold Mouse 5 or Space in the air to glide", "jump"],
-	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Merge with your Boki (%s: open from the start here)", "ultimate"],
+	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
 	["secondary", "Use your right click (tap it, then hold it)", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
 	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
 	["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal with a tonic (belt slot 1)", "util1"],
@@ -5175,8 +5175,8 @@ func _update_events() -> void:
 	sfx("warn", null, 0.0, 0.6)
 	ping(world.heart_spot, Color("c9a0ff"))
 	if player and not player.out:
-		add_feed("The Warden has woken on the center island")
-		hud.toast("The Warden wakes", Color("c9a0ff"))
+		add_feed("The Watcher has woken on the center island")
+		hud.toast("The Watcher wakes", Color("c9a0ff"))
 
 # ---- mid-match events
 ## A meteor shower partway through: falling stars hit the ground where hunters are, knock them
@@ -6031,14 +6031,14 @@ func _tips() -> void:
 	_tip("move", "WASD to move, aim with the mouse, hold left click to shoot. Shift dashes, Space jumps. Hold Space in the air to glide.")
 	if _tip_t > 14.0:
 		if player.ak:
-			_tip("ability", "Your Boki uses its own ability by itself. %s sends it at a foe (tap), calls it back when it is away, and opens the order wheel (hold). Fighting together fills the bond meter, and a full one lets you press %s to merge." % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
+			_tip("ability", "Your Boki uses its own ability by itself. %s sends it at a foe (tap), calls it back when it is away, and opens the order wheel (hold). Fighting together fills the bond meter, and a full one lets you press %s to fuse." % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
 		else:
 			_tip("ability", "%s is your Boki's ability. Fighting together fills the bond meter, and %s calls your Boki's bond ultimate." % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
 	if player.ult >= 1.0 and player.kin:
 		var ud := KinMerge.def_for(player.kin)
-		if ud and player.ak == null: _tip("ult", "Your bond is full. %s merges you with your Boki: %s." % [Settings.key_cap("ultimate"), ud.display_name])
+		if ud and player.ak == null: _tip("ult", "Your bond is full. %s fuses you with your Boki: %s." % [Settings.key_cap("ultimate"), ud.display_name])
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
-			_tip("ult", "Your bond is full: your next %s is bonded, and merges you with your Boki (%s) as it goes off." % [Settings.key_cap("ultimate"), ud.display_name])
+			_tip("ult", "Your bond is full: your next %s is bonded, and fuses you with your Boki (%s) as it goes off." % [Settings.key_cap("ultimate"), ud.display_name])
 	var k: Kin = player.kin
 	if k == null:
 		return

@@ -1825,7 +1825,7 @@ func slot_info(slot: String) -> Dictionary:
 			var u := KinMerge.def_for(k) if k and KinMerge.boki_with_you(self) else null
 			var f := MergeForm.for_boki(k) if u else MergeForm.surge_form()
 			var txt: String = " ".join(KinText.merge(u, k.carry_style() == "mount")) if u else String(MergeForm.data()["surge"]["flavor"])
-			out.merge({"name": "Merge", "short": "Merge", "icon": "bond", "col": f["glow"], "desc": txt, "form": f, "bond": ult,
+			out.merge({"name": "Fusion", "short": "Fusion", "icon": "bond", "col": f["glow"], "desc": txt, "form": f, "bond": ult,
 				"plan": KinMerge.plan(self), "cd": merge_cd, "cd_max": maxf(KinParts.MERGE_SPENT_TIME, MergeRelease.rest_s()) if kin != null and kin.resting() else KinParts.MERGE_SPENT_TIME, "charges": 1 if ult >= 1.0 else 0, "max_charges": 1,
 				"ready": KinMerge.plan(self) in ["merge", "leap", "surge"]}, true)
 	return out

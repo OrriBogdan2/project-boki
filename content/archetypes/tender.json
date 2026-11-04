@@ -21,7 +21,7 @@
 		"rmb": "Burrseed: hold to aim the lane, let go to throw; it sticks to a foe and roots them 0.7s later.",
 		"e": "Hearthlight: a healing ring on you; press again to throw it to the cursor.",
 		"dash": "Relay Step: a quick hop where you move; in the air, a long floaty glide.",
-		"passive": "Bearer: run into a downed teammate to carry up to 2 behind a shield.",
+		"passive": "Carrier: run into a downed teammate to carry up to 2 behind a shield.",
 		"weapons": {
 			"lantern_crook": "Hold to push embers from alternating hands that fly past the cursor; each hit on a foe adds Kindle."
 		},
@@ -43,8 +43,8 @@
 		"col": "#ffb347"
 	},
 	"passive": {
-		"name": "Bearer",
-		"desc": "Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). You carry a Bearer shield (40, +6 a level) that refills each time you pick someone up. While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If the shield breaks or you're stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).",
+		"name": "Carrier",
+		"desc": "Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). You carry a Carrier shield (40, +6 a level) that refills each time you pick someone up. While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If the shield breaks or you're stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).",
 		"shield": 40.0,
 		"shield_lv": 6.0,
 		"max": 2,

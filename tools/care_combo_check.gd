@@ -675,7 +675,7 @@ func tender() -> void:
 			absf(P.r - 0.34) < 0.001 and P.model.scale.y < 0.9,
 			"r %.2f scale %.2f" % [P.r, P.model.scale.y])
 	step(m, 1.0)
-	# --- Bearer: a teammate being stomped can't be picked up (small mechanic), else a pickup move
+	# --- Carrier: a teammate being stomped can't be picked up (small mechanic), else a pickup move
 	sc.down(m, A)
 	A.teleport(P.pos + Vector3(0.5, 0, 0))
 	T.teleport(A.pos)

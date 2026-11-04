@@ -78,7 +78,7 @@ static func tap(h: Hunter) -> void:
 		say(h, resting_text(k), Color("a2a8bb"))
 		return
 	if KinMerge.in_form(h):
-		say(h, "%s is part of you while you are merged" % k.rec.get("name", "Your Boki"), Color("a2a8bb"))
+		say(h, "%s is part of you while you are fused" % k.rec.get("name", "Your Boki"), Color("a2a8bb"))
 		return
 	if KinMerge.active(h) and not h.merge_st.get("surge", false):
 		KinMerge.end(h, "throw")        # sending your Boki ends the merge, and it goes

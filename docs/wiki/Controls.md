@@ -79,7 +79,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Space | Jump (hold to glide) | `jump` | yes |
 | Mouse 5 / Mouse 4 | Glide (hold in the air) | `glide` | yes |
 | R | Hunter ultimate | `hunter_ult` | yes |
-| X | Merge with your Boki (needs a full bond meter) | `ultimate` | yes |
+| X | Fuse with your Boki (needs a full bond meter) | `ultimate` | yes |
 | 1 | Utility belt slot 1 (a tonic to start) | `util1` | yes |
 | Tab | Scoreboard | `scores` | yes |
 | Esc | Menu | `menu` | no |
@@ -87,7 +87,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | T | Talk to a Boki | `talk` | yes |
 | C | A Boki's details | `details` | yes |
 | H | Whistle | `whistle` | no |
-| J | Hunters: change Hunter (at home and in practice areas) | `hero` | yes |
+| J | Masks: change Mask (at home and in practice areas) | `hero` | yes |
 | I | Inventory | `inventory` | yes |
 | B | Build mode at home / decorate indoors | `build` | yes |
 | R | Turn a piece (build mode) | `rotate` | yes |

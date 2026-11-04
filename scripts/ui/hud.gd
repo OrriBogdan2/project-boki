@@ -1889,7 +1889,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var kd1: AbilitySpec = k.runner.def_of("k1")
 		if kd1: lines.append([Settings.key_cap("signature"), kd1.display_name, KinText.ability(k.effective("k1")), KinText.color(kd1)])
 		var ud := KinMerge.def_for(k)
-		if ud: lines.append([Settings.key_caps("ultimate"), ud.display_name + " (merge)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Merge: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
+		if ud: lines.append([Settings.key_caps("ultimate"), ud.display_name + " (Fusion)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Fusion: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
 		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
 	var dsi := p.slot_info("dash")
 	lines.append([Settings.key_cap("dash"), String(dsi["name"]) + ((" + " + String(dsi["rider"])) if String(dsi.get("rider", "")) != "" else ""), String(dsi["desc"]), dsi["col"]])
@@ -2297,7 +2297,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			if ud == null: return []
 			var giant: bool = (p.kin as Kin).carry_style() == "mount"
 			out.append([ud.display_name, GOLD])
-			out.append(["Merge  ·  %s  ·  %s" % [Settings.key_caps("ultimate"), "your mount grows giant" if giant else "you take its colour and power"], MUTED, 12])
+			out.append(["Fusion  ·  %s  ·  %s" % [Settings.key_caps("ultimate"), "your mount grows giant" if giant else "you take its colour and power"], MUTED, 12])
 			for ln in KinText.merge(ud, giant):
 				out.append([String(ln), INK, 13])
 			out.append(["Unlocks at level %d with a full meter. The bond fills as your Boki lands hits, as you hit what it marked, and on combos. Boki out? It comes back to you first. No Boki: a weak surge. Then %ss before it can go again." % [int(Hunter.ULT_AT[0]), KinText.n(KinParts.MERGE_SPENT_TIME)], GOLD, 12])

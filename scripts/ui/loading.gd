@@ -22,7 +22,7 @@ const TIPS := [
 	"One hit breaks a crate, pot or barrel. A red powder keg lights a fuse, then blows: get clear.",
 	"Weapons you find out here are stronger than your own, but only for this expedition.",
 	"Health and armor don't come back on their own. 1 drinks a tonic, 2 repairs your armor with a kit. You take more damage while you do either.",
-	"Fight alongside your Boki to fill the bond meter, then your Merge key calls its bond ultimate.",
+	"Fight alongside your Boki to fill the bond meter, then your Fuse key calls its bond ultimate.",
 	"Every Boki has a different ability, and it uses it by itself. Q fires the active glove you found out here.",
 	"Your Boki stuns or roots a foe? Shoot it right away for a combo.",
 	"In a squad, B bases you to the teammate nearest your cursor: 3s standing still, broken by any hit, and you arrive weakened for 3s.",
@@ -31,12 +31,12 @@ const TIPS := [
 	"A rival took your Boki? You'll sense it when they're nearby. Take it back.",
 	"Knock a wild Boki out, then hold the use key beside it to scan it. Your box holds three capsules.",
 	"Jump off the skyship over an island nobody else picked. Space opens your glider early for a longer, slower last stretch.",
-	"Falling all the way into the abyss is death. Glide (hold Mouse 5 or Space) below the edge to catch an updraft back up, or touch the cliff to mantle onto it.",
+	"Falling all the way into the abyss is death. Glide (hold Mouse 5 or Space) below the edge to catch an updraft back up, or touch the cliff to climb onto it.",
 	"A teammate is down? Stand on their wisp to bring them back. Stand on an enemy's to stomp it, or hold F to finish them.",
 	"Dash through a shot at the last moment and you take nothing.",
 	"Shrines on the islands give a short power-up. Stand by one and hold F.",
 	"The Blight hunts by noise and light. Gunfire, blasts, opened chests and dashing draw it in; sneaking doesn't.",
-	"A Warden's light sweeps the ground. Stay in it and it shrieks, and the Blight nearby comes running. Crouch to stay out of its reach.",
+	"A Watcher's light sweeps the ground. Stay in it and it shrieks, and the Blight nearby comes running. Crouch to stay out of its reach.",
 	"The Blight starts weak and grows the longer your squad is out, the deeper you go, and at night.",
 ]
 ## What's being worked on, set by whoever builds the match (Main.show_screen, Match): shown by the spinner.

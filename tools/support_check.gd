@@ -146,13 +146,13 @@ func _tender_support() -> void:
 	K.lock_t = 0.0; K.cd["e"] = 99.0
 	A.down_hp = 60.0
 	A.teleport(P.pos + Vector3(0.6, 0, 0)); step(m, 0.1)
-	ok("Bearer: running into a downed teammate carries them", CareUtil.is_carried(A) and K.carrying().size() == 1)
-	ok("Bearer: shield up and no slow while carrying", P.shield > 30.0 and absf(K.move_k() - 1.0) < 0.01, "shield %.0f k %.2f" % [P.shield, K.move_k()])
+	ok("Carrier: running into a downed teammate carries them", CareUtil.is_carried(A) and K.carrying().size() == 1)
+	ok("Carrier: shield up and no slow while carrying", P.shield > 30.0 and absf(K.move_k() - 1.0) < 0.01, "shield %.0f k %.2f" % [P.shield, K.move_k()])
 	var dh := A.down_hp
 	P.teleport(P.pos + Vector3(5, 0, 0)); step(m, 2.0)
-	ok("Bearer: the carried teammate rides along and does not bleed", A.flat_dist(P) < 1.0 and A.down_hp >= dh - 0.5, "dist %.2f down_hp %.1f -> %.1f" % [A.flat_dist(P), dh, A.down_hp])
+	ok("Carrier: the carried teammate rides along and does not bleed", A.flat_dist(P) < 1.0 and A.down_hp >= dh - 0.5, "dist %.2f down_hp %.1f -> %.1f" % [A.flat_dist(P), dh, A.down_hp])
 	P.inp["crouch"] = true; step(m, 0.1); P.inp["crouch"] = false; step(m, 0.1)
-	ok("Bearer: crouch (never F) sets them down", not CareUtil.is_carried(A) and K.carrying().is_empty())
+	ok("Carrier: crouch (never F) sets them down", not CareUtil.is_carried(A) and K.carrying().is_empty())
 	# --- carry then a stun drops them
 	T.teleport(P.pos + Vector3(14, 0, 0))
 	P.shield = 0.0
@@ -161,13 +161,13 @@ func _tender_support() -> void:
 	var carried_again := CareUtil.is_carried(A)
 	ok("Relay Step rank 3: picking up a teammate refreshes the air dash", carried_again and P.ex_cd < 0.01, "ex_cd %.2f" % P.ex_cd)
 	P.stun_t = 0.5; step(m, 0.1)
-	ok("Bearer: a stun drops them and locks pickup", carried_again and not CareUtil.is_carried(A) and K.lock_t > 3.0, "again %s lock %.1f" % [str(carried_again), K.lock_t])
+	ok("Carrier: a stun drops them and locks pickup", carried_again and not CareUtil.is_carried(A) and K.lock_t > 3.0, "again %s lock %.1f" % [str(carried_again), K.lock_t])
 	# --- a broken shield drops them too, and costs you no stun of your own
 	P.stun_t = 0.0; K.lock_t = 0.0
 	A.teleport(P.pos + Vector3(0.4, 0, 0)); step(m, 0.1)
 	var carried_third := CareUtil.is_carried(A)
 	P.shield = 0.0; step(m, 0.1)
-	ok("Bearer: a broken shield drops them with a 4s lock and no stun on you",
+	ok("Carrier: a broken shield drops them with a 4s lock and no stun on you",
 		carried_third and not CareUtil.is_carried(A) and K.lock_t > 3.0 and P.stun_t <= 0.0,
 		"lock %.1f stun %.2f" % [K.lock_t, P.stun_t])
 	# --- rank 3 flare: the revive went back to Hearth Call (X); the flare tops the bleed-out bar up instead

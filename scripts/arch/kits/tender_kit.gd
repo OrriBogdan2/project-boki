@@ -2,7 +2,7 @@ class_name TenderKit
 extends ArchKit
 ## Pip, the Tender (a small support on medium stats). docs/heroes/tender.md. Looks are pooled in
 ## CareLook; the moves are KMovesCare "mm_" entries.
-## Passive Bearer: run into a downed teammate to carry them. LMB Ember Cast: embers pushed from
+## Passive Carrier: run into a downed teammate to carry them. LMB Ember Cast: embers pushed from
 ## alternating hands Kindle foes.
 ## RMB Burrseed sticks, then roots. Shift Relay Step. E Hearthlight heals; press again to toss it.
 ## X Hearth Call (level 6): a 5 s healing tether to a teammate; a downed one is pulled home and stood up.
@@ -224,7 +224,7 @@ func _tick_carry(dt: float) -> void:
 		if h.stun_t > 0.0 or h.root_t > 0.0 or Hex.active(h) or h.shield <= 0.01:
 			drop_all(true)
 			return
-		h.shield_t = maxf(h.shield_t, 2.0)      # the Bearer shield stays up while you carry
+		h.shield_t = maxf(h.shield_t, 2.0)      # the Carrier shield stays up while you carry
 		var down := bool(h.inp.get(SETDOWN, false))
 		if down and not setdown_was:
 			drop_all(false)

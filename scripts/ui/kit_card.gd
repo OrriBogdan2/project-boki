@@ -310,23 +310,23 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out.merge({"name": String(xd["name"]), "icon": String(xd.get("icon", "")), "col": xcol,
 				"tag": tag, "line": String(cd.get("x", ""))}, true)
 			out["detail"] = [["", String(xd.get("desc", ""))],
-				["Bond", "Landing it on a hunter fills your Boki bond a long way, ready for the Merge on %s."
+				["Bond", "Landing it on a hunter fills your Boki bond a long way, ready for the Fusion on %s."
 					% Settings.key_cap("ultimate")]]
 		"r" when not d.has("r"):
 			# no hero ultimate: the Merge key is the Boki's Merge
-			out.merge({"name": "Boki Merge", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
-			out["detail"] = [["", "%s is not a Hunter ability here: it is the Boki Merge. Your Boki fuses with you and its kind sets the merged form." % Settings.key_cap("ultimate")]]
+			out.merge({"name": "Boki Fusion", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
+			out["detail"] = [["", "%s is not a Hunter ability here: it is the Boki Fusion. Your Boki fuses with you and its kind sets the Fusion form." % Settings.key_cap("ultimate")]]
 		"r":
 			# the Merge key is the Merge for every class; the class's own ultimate is held back behind
 			# boki_system.json class_ults until the hero-port work folds it into the kits
 			var sd: Dictionary = d.get("r", {})        # (a hero with no class R: only the Merge shows)
 			var on := KinCommand.class_ults() and not sd.is_empty()
-			out.merge({"name": String(sd["name"]) if on else "Merge", "icon": String(sd.get("icon", "")) if on else "bond", "col": Color(String(sd.get("col", "#ffffff"))) if on else Color("ffd27a"),
+			out.merge({"name": String(sd["name"]) if on else "Fusion", "icon": String(sd.get("icon", "")) if on else "bond", "col": Color(String(sd.get("col", "#ffffff"))) if on else Color("ffd27a"),
 				"tag": ("level 6 · %ss · %ss fuse" % [KinText.n(float(sd.get("cooldown", 100.0))), KinText.n(float(sd.get("fuse", 0.45)))]) if on else "level 6 · full bond meter", "line": String(cd.get("r", "")) if on else "You and your Boki become one: its colour, its type, your abilities changed."}, true)
-			out["detail"] = [["Merge", "Press %s with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the merge by its type and power." % Settings.key_cap("ultimate")],
-				["Boki out?", "It leaps back through anything in its way and merges you in mid-air."],
+			out["detail"] = [["Fusion", "Press %s with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the Fusion by its type and power." % Settings.key_cap("ultimate")],
+				["Boki out?", "It leaps back through anything in its way and fuses you in mid-air."],
 				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
-				] + ([["Held back", "%s: %s (the Hunter's own ultimate, off while the Merge is on %s)" % [String(sd["name"]), String(sd.get("desc", "")), Settings.key_cap("ultimate")]]] + _ranks(a, "ult") if not sd.is_empty() else [])
+				] + ([["Held back", "%s: %s (the Hunter's own ultimate, off while the Fusion is on %s)" % [String(sd["name"]), String(sd.get("desc", "")), Settings.key_cap("ultimate")]]] + _ranks(a, "ult") if not sd.is_empty() else [])
 	return out
 
 ## The ranks to come, in order (rank 2's concrete change first, then rank 3's special), as one row

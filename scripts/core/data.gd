@@ -240,7 +240,7 @@ const MOBS := {
 	# It always carries a chest key.
 	"shrubling": {"name": "Shrubling", "hp": 26.0, "speed": 6.5, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 99.0,
 		"r": 0.4, "gems": 6, "color": Color("5f9a46"), "attack": "none", "mimic": true},
-	"warden": {"name": "The Warden", "hp": 820.0, "speed": 3.3, "dmg": 30.0, "range": 2.8, "windup": 0.95, "cd": 2.1,
+	"warden": {"name": "The Watcher", "hp": 820.0, "speed": 3.3, "dmg": 30.0, "range": 2.8, "windup": 0.95, "cd": 2.1,
 		"r": 1.3, "gems": 30, "color": Color("5a4a7a"), "attack": "slam", "slam_r": 3.3, "stag": true},
 	# lair bosses (scripts/match/boss.gd runs them; Lairs wakes them): each drops a Rare Egg of its own kin
 	"colossus": {"name": "The Stone Colossus", "hp": 1500.0, "speed": 2.5, "dmg": 26.0, "range": 3.2, "windup": 1.1, "cd": 1.9,
@@ -257,7 +257,7 @@ const MOBS := {
 	# minutes, outer islands) to full (late, the core, night). "lvl" 1 is full strength.
 	"bl_skitter": {"name": "Blight Skitter", "hp": 30.0, "speed": 5.4, "dmg": 8.0, "range": 1.15, "windup": 0.5, "cd": 1.35,
 		"r": 0.4, "gems": 1, "color": Color("3e3634"), "attack": "lunge", "blight": true},
-	"bl_warden": {"name": "Blight Warden", "hp": 150.0, "speed": 1.3, "dmg": 12.0, "range": 9.0, "windup": 1.1, "cd": 2.8,
+	"bl_warden": {"name": "Blight Watcher", "hp": 150.0, "speed": 1.3, "dmg": 12.0, "range": 9.0, "windup": 1.1, "cd": 2.8,
 		"r": 0.8, "gems": 4, "color": Color("4a4240"), "attack": "spit", "blight": true},
 	# a lair's ward stones: break all three (guards come out as you do) and its seal fails
 	"ward": {"name": "Ward Stone", "hp": 150.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,

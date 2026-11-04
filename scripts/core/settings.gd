@@ -22,7 +22,7 @@ const DEFAULTS := {
 	# accessibility
 	"screen_shake": 0.3, "reduce_flashes": false,
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
-	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "rec_level": 0,
+	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
 	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0,
 }
@@ -103,14 +103,14 @@ const ACTIONS := [
 	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
-	["hunter_ult", "Hunter ultimate"], ["ultimate", "Merge with your Boki (needs a full bond meter)"],
+	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
 	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],
 	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
 	["util3", "Utility belt slot 3"], ["util4", "Utility belt slot 4"], ["scores", "Scoreboard"],
 	["emote", "Emote wheel (hold, in a match)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
-	["build", "Build mode at home / decorate indoors"], ["hero", "Hunters: change Hunter (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
+	["build", "Build mode at home / decorate indoors"], ["hero", "Masks: change Mask (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
 ]
