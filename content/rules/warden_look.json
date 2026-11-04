@@ -65,7 +65,7 @@
 			"hair": {
 				"far_lift": 0.5,
 				"fres": 0.6,
-				"glow": 0.1
+				"glow": 0.12
 			},
 			"fur": {
 				"far_lift": 0.4,
@@ -81,16 +81,18 @@
 				"irid": 0.05
 			}
 		},
-		"lights": [
+		"halos": [
 			{
 				"anchor": "anchor_gem",
-				"colour": [
+				"color": [
 					1.0,
-					0.3,
-					0.45
+					0.45,
+					0.6
 				],
-				"energy": 0.8,
-				"range": 0.45
+				"strength": 2.0,
+				"px": 3.0,
+				"near_d": 0.0,
+				"far_d": 3.0
 			}
 		]
 	}

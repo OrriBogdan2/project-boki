@@ -314,13 +314,13 @@
  ],
  "braid_colours": {
   "strand": [
-   "f2f2f8",
-   "8e90a4",
+   "e6e8f6",
+   "8a90ae",
    "ffffff"
   ],
   "tuft": [
-   "f2f2f8",
-   "8e90a4",
+   "e6e8f6",
+   "8a90ae",
    "ffffff"
   ],
   "copper": [
@@ -575,7 +575,7 @@
   "stirrup": true,
   "scroll": true,
   "scroll_line": "3c3f4c",
-  "thick": 1.9
+  "thick": 1.5
  },
  "atlas_px": 2048,
  "smooth": {
@@ -730,15 +730,39 @@
     0.48,
     0.645
    ],
-   "facing": 0.1,
-   "feather": 0.03,
-   "feather_turn": 0.45,
+   "facing": 0.12,
+   "feather": [
+    0.12,
+    0.5
+   ],
    "k": 0.0001765,
    "col0_at": 1005.0,
    "row0_at": 4492.6,
    "col0": 1005,
    "head_z": 0.58,
-   "sole_row": 4400
+   "sole_row": 4400,
+   "slots": [
+    "skin"
+   ],
+   "mask": {
+    "skin": [
+     0.62,
+     0.98,
+     0.06,
+     0.5,
+     0.22,
+     0.97
+    ],
+    "box": [
+     380,
+     640,
+     1620,
+     1990
+    ],
+    "close": 26,
+    "erode": 6,
+    "blur": 10
+   }
   }
  ],
  "gem": {
