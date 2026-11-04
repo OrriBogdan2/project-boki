@@ -27,6 +27,7 @@ const ANCHORS := ["Rig/Legs/LegL/Knee", "Rig/Legs/LegR/Knee", "Rig/Torso/HeadPiv
 ## Nodes a hero's own kit or weapon code finds by name (BjornFx: the hammer pivot under Gun; the prow).
 const HERO_ANCHORS := {"bulwark": ["Rig/Torso/ArmLPivot/Elbow/Hand/Shield"]}
 const SKIP := ["Glider", "Gun", "Shield", "TeamRing"]     # not part of the body's silhouette
+const FLOATING := ["Halo"]     # a .glb's floating pieces (warden_parts.crescent): not headwear
 
 var bad := 0
 var n := 0
@@ -197,8 +198,8 @@ func _glb_top(m: Node3D) -> float:
 	(m.get_node("Warden/Sync") as WardenGlb.Sync).apply()
 	var top := -INF
 	for nd in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
-		if String(nd.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX):
-			continue        # (props floating on an orbit, Tarek's seeing-stones: not the body's height)
+		if String(nd.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX) or String(nd.name) in FLOATING:
+			continue        # (floating props, Tarek's stones and Ostra's halo: not the height)
 		for p in WARDEN_SKIN.points(nd as MeshInstance3D):
 			top = maxf(top, p.y)
 	return top - m.global_position.y

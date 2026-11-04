@@ -687,6 +687,42 @@ def _quads_uv(size, cells, name="cells"):
 
 
 # ------------------------------------------------------------------------------------------------ orbiting props
+def _stone_cells(size, spec, name):
+    """A seeing-stone's atlas (the _quads_uv cells): mottled rock, a crystal ring of radial facets, an iris that
+    glows hot at its middle, a black pupil."""
+    img = bpy.data.images.new(name, size, size, alpha=False)
+    px = np.ones((size, size, 4), np.float32)
+    hl = size // 2
+    rng = np.random.default_rng(3)
+    yy, xx = np.mgrid[0:hl, 0:hl] / float(hl - 1)
+    # rock: value noise (two octaves), darker in its crevices
+    n = np.zeros((hl, hl), np.float32)
+    for oc, amp in ((6, 0.6), (14, 0.4)):
+        g = rng.random((oc + 1, oc + 1)).astype(np.float32)
+        gx, gy = xx * oc, yy * oc
+        x0, y0 = np.floor(gx).astype(int), np.floor(gy).astype(int)
+        fx, fy = gx - x0, gy - y0
+        x1, y1 = np.minimum(x0 + 1, oc), np.minimum(y0 + 1, oc)
+        n += amp * ((g[y0, x0] * (1 - fx) + g[y0, x1] * fx) * (1 - fy) + (g[y1, x0] * (1 - fx) + g[y1, x1] * fx) * fy)
+    rock, rock_dk = hexcol(spec.get("rock", "8a7a66")), hexcol(spec.get("rock_dark", "4e4236"))
+    px[:hl, :hl, :3] = rock_dk + (rock - rock_dk) * np.clip(n * 1.3 - 0.15, 0, 1)[..., None]
+    # crystal ring: radial facets about the cell's middle, light and dark
+    cx, cy = xx - 0.5, yy - 0.5
+    ang = np.arctan2(cy, cx)
+    fac = (np.sin(ang * 22.0) * 0.5 + 0.5) * np.clip(np.hypot(cx, cy) * 2.0, 0, 1)
+    rim, rim_dk = hexcol(spec.get("rim", "c9b4c4")), hexcol(spec.get("rim_dark", "5a3f5e"))
+    px[:hl, hl:, :3] = rim_dk + (rim - rim_dk) * fac[..., None]
+    # iris: hot yellow at its middle to deep orange at its edge
+    d = np.clip(np.hypot(cx, cy) * 2.0, 0, 1)[..., None]
+    hot, iris = hexcol(spec.get("iris_hot", "ffe27a")), hexcol(spec.get("iris", "ff8a1c"))
+    px[hl:, :hl, :3] = hot * (1 - d) + iris * d
+    px[hl:, hl:, :3] = hexcol(spec.get("pupil", "2a0d04"))
+    img.pixels = px.ravel()
+    img.pack()
+    return img
+
+
+
 def _lumpy(bld, centre, frame, radii, part, uv_box, seed, rings=7, sides=12, lump=0.18):
     """A rough rock: a squashed sphere (radii along the frame's axes) with lumpy noise, as a tube capped at both
     poles (u around, v pole to pole)."""
@@ -749,8 +785,7 @@ def orbit_props(arm, spec):
     e.parent_bone = spec.get("bone", "head")
     bpy.context.view_layer.update()
     e.matrix_world = Matrix.Translation(c)
-    img = _quads_uv(64, [spec.get("rock", "8a7a66"), spec.get("rim", "b9a3a8"), spec.get("iris", "ff9a2a"),
-                         spec.get("pupil", "2a0d04")], spec["name"] + "_cells")
+    img = _stone_cells(128, spec, spec["name"] + "_cells")
     out = [e]
     for i, it in enumerate(spec["items"]):
         a = math.radians(float(it["angle"]))           # 0: in front of the face (+Y), counter-clockwise from above
@@ -763,10 +798,14 @@ def orbit_props(arm, spec):
         bld = Builder()
         # (the rock: flat along the outward axis, so its face meets the eye; its rim and iris on the front)
         # (the cells of _quads_uv: rock bottom-left, rim bottom-right, iris top-left, pupil top-right)
-        _lumpy(bld, p, (side, up, -out_dir), (r, r * 1.08, r * 0.62), "rock", (0.05, 0.05, 0.45, 0.45), 7 + i)
-        _disc(bld, p + out_dir * r * 0.6, out_dir, r * 0.72, "rim", (0.55, 0.05, 0.95, 0.45), dome=0.1)
-        _disc(bld, p + out_dir * r * 0.68, out_dir, r * 0.46, "iris", (0.05, 0.55, 0.45, 0.95), dome=0.15)
-        bld.prism(p + out_dir * r * 0.72 - up * r * 0.3, p + out_dir * r * 0.72 + up * r * 0.3, r * 0.07, 4,
+        # (a geode: the rough rock, a raised rim round its cut face, a ring of crystals sunk inside it, and the
+        # eye's domed iris standing out of the crystals)
+        _lumpy(bld, p, (side, up, -out_dir), (r, r * 1.08, r * 0.66), "rock", (0.05, 0.05, 0.45, 0.45), 7 + i,
+               rings=9, sides=16, lump=0.26)
+        bld.torus(p + out_dir * r * 0.5, out_dir, r * 0.62, r * 0.13, 18, 6, (0.05, 0.05, 0.45, 0.45), "rock", 0.0)
+        _disc(bld, p + out_dir * r * 0.5, out_dir, r * 0.62, "rim", (0.55, 0.05, 0.95, 0.45), dome=-0.18)
+        _disc(bld, p + out_dir * r * 0.46, out_dir, r * 0.4, "iris", (0.05, 0.55, 0.45, 0.95), dome=0.45)
+        bld.prism(p + out_dir * r * 0.66 - up * r * 0.24, p + out_dir * r * 0.66 + up * r * 0.24, r * 0.06, 4,
                   (0.55, 0.55, 0.95, 0.95), "pupil", 0.0)
         ob = bld.object("%s_%d" % (spec["name"], i))
         mi = {"rock": _flat_material(ob, spec.get("slot", "leather"), spec["name"], img, "Closest")}
@@ -934,4 +973,36 @@ def studs(body, arm, spec):
     mod = ob.modifiers.new("Armature", "ARMATURE")
     mod.object = arm
     log("studs %s: %d on %s" % (spec["name"], len(pick), spec.get("on", "hair")))
+    return ob
+
+
+# ------------------------------------------------------------------------------------------------ orb
+def orb(arm, spec, tag="orb"):
+    """A hand-held orb (Ostra's swirling void orb): a sphere on the `void` slot (the starfield, opaque) inside a
+    thin glowing ring (glow), or with style "glow" one glowing sphere, at `centre`, riding `bone` rigidly."""
+    c = np.array(spec["centre"], np.float64)
+    r = float(spec.get("r", 0.05))
+    bld = Builder()
+    k = 10
+    rings = [c + np.array([0.0, 0.0, -r + 2.0 * r * i / (k - 1)]) for i in range(k)]
+    radii = [max(1e-4, r * math.sin(math.pi * i / (k - 1))) for i in range(k)]
+    glow_ball = spec.get("style") == "glow"     # (one glowing sphere: what reads at the match camera)
+    bld.tube(rings, radii, 14, *((0.55, 0.95, 0.05, 0.95) if glow_ball else (0.05, 0.45, 0.05, 0.95)), "ring" if glow_ball
+             else "ball", [0.0] * k, cap_end=True, cap_start=True)
+    if not glow_ball:
+        nrm = np.array(spec.get("normal", [0.0, 1.0, 0.0]), np.float64)
+        bld.torus(c, nrm / np.linalg.norm(nrm), r * 1.12, r * 0.1, 24, 6, (0.55, 0.05, 0.95, 0.95), "ring", 0.0)
+    ob = bld.object(tag.capitalize())
+    img = bpy.data.images.new(tag + "_atlas", 32, 32, alpha=False)
+    px = np.ones((32, 32, 4), np.float32)
+    px[:, :16, :3] = hexcol(spec.get("colour", "1a0c2e"))
+    px[:, 16:, :3] = hexcol(spec.get("colour" if glow_ball else "ring", "b07cff"))
+    img.pixels = px.ravel()
+    img.pack()
+    vi = _flat_material(ob, "void", tag, img)
+    gi = _flat_material(ob, "glow", tag, img)
+    for poly in ob.data.polygons:
+        poly.material_index = gi if bld.part[poly.vertices[0]] == "ring" else vi
+    _rigid(ob, arm, spec.get("bone", "hand.R"))
+    log("%s on %s, r %.3f" % (tag, spec.get("bone", "hand.R"), r))
     return ob

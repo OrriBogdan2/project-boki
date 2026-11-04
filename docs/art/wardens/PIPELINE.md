@@ -235,3 +235,5 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Tarek edit back | 09:07 | 01a1a5cf-f280-7465-ad2f-2aaf9ea36676 | nano-banana-pro | same | 9 | Kept |
 | Tarek edit 3/4 2 | 09:09 | 01a1a5d1-c105-7402-acba-02323e255f37 | nano-banana-pro | as 3/4, "BOTH forearms wear stone bracers" | 9 | Dropped: kept the fist raised (the run went without a 3/4) |
 | Tarek A | 09:10 | 01a1a5d2-9348-76b2-bd28-bb946e03b9b0 | meshy-7.1 | 3 edited views (front, side, back) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: blindfold, grin, chunky locs with copper beads, vest, sash, harness, both bracers, wrapped feet (the bracers' glowing cracks not painted: added as an emission layer) |
+
+### Tarek stage 2 (2026-11-04): no Meshy runs (0 credits); the r3c recipe on the stage 1 scan, see art/wardens/tarek/IMPORT.md.

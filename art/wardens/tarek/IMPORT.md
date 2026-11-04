@@ -1,4 +1,4 @@
-# Tarek (dolm): import note (stage 1, 2026-11-04)
+# Tarek (dolm): import note (stage 2, 2026-11-04)
 
 `tarek.glb` is stage 1 of the round-2 Tarek (ext/imagegen docs/art/gen/wardens_r2/tarek_* and TAREK_KIT.md):
 Meshy generation, the bake, the rig fit. No hand polish yet (stage 2 applies the Vex r3c recipe). Built by script,
@@ -24,3 +24,18 @@ nothing hand-edited in Blender; run log in docs/art/wardens/PIPELINE.md.
 - **Weapon:** an empty `weapon` node: the procedural rock fists are hidden (his fists and bracers are the weapon).
 - Ground ripples: VFX only, not in the model.
 - Imports: atlases lossless (`compress/mode=0`); `tarek.glb.import`: `generate_lods=false`, `force_disable_compression=true`.
+
+## Stage 2 (the Vex r3c recipe; owner refs tarek_front, tarek_head_sheet, tarek_stone_sheet on ext/imagegen fb503983)
+- **Proportions:** the art's lean, long-legged build: archetype body legs 3.2 (was 1.6), head 1.0 (was 1.2), size 0.73
+  (was 0.97) so he still stands 1.2x a medium hunter; no head chunk, girth 1.0. The hit radius is the class's.
+- **Paint-over:** an edge-preserving smooth within the UV islands, then ramps of the art's colours per slot and hue
+  (warm brown skin, black locs, copper beads, slate vest, terracotta sash, khaki trousers, beige wraps, the harness's
+  leather and steel), despeckled. The art's face is not projected: on this mesh its registration drifted (the new
+  front sheet's head is smaller than the scan's), and the projected bandana edge crossed his cheek.
+- **Locs on springs:** three `spring_locs_*` chains under the head (back, left, right; fit spec `hair_springs`): the
+  locs' ends hang on them and swing; the scalp stays on the head.
+- **Seeing-stones:** a geode now (tarek_stone_sheet): lumpy mottled rock, a raised rim, a sunk ring of pale crystals,
+  a domed iris glowing hot at its middle with a slit pupil; the plain rock back.
+- **Look:** content/rules/warden_look.json `tarek` (skin rim and top light down, the locs lifted at the match camera,
+  the bracers' crack emission and the glow brighter). **Stance:** content/rules/warden_stance.json `dolm` stands tall
+  and narrow (the stage 1 deep-knee gait read bow-legged on the long legs), the free hand hanging.

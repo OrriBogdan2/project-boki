@@ -19,7 +19,7 @@
 		"passive": "Molten Guard: punching your own rocks gives you a shield. Tremor Sense: sneak to see enemies in a cone ahead through walls; it widens as you sneak.",
 		"weapons": {"rubble_fists": "Tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies."}
 	},
-	"body": {"size": 0.97, "build": 1.2, "head": 1.2, "legs": 1.6, "neck": -0.02},
+	"body": {"size": 0.73, "build": 1.2, "head": 1.0, "legs": 3.2, "neck": -0.02},
 	"signature": "rubble_fists",
 	"resource": {"id": "rocks", "name": "Rocks", "max": 6, "kind": "count", "col": "#d9a35b"},
 	"passive": {"name": "Molten Guard", "len": 16.0, "deg": [25.0, 40.0], "grow": 2.0, "guard": {"shield": 18.0, "cap": 4, "t": 6.0},
