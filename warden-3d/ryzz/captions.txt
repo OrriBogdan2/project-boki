@@ -37,3 +37,9 @@ s6_34_vs_art.png, s6_back_vs_art.png, s6_head_vs_sheet.png: 3/4, back and head v
 s6_match_vs_art.png, s6_gameplay_match.png: the match frame: the body's value lifted at distance (leather and skin far_lift), the electric-blue far rim at 0.36, the hazard bands' yellow emission.
 s6_vs_turnaround.png, s6_vs_turnaround_game.png, s6_moves_1.png, s6_moves_2.png, s6_poses_game.png: turnaround, moves and poses.
 s6_vs_s5.png: round 5 (rows 1, 3) vs round 6 (rows 2, 4): close-ups and match zoom.
+s7_closeup_vs_art.png: round 7 (ORCH 14:10 + round-7 list): the gum bubble moved down to the corner of her lips, glossy (a light-to-dark gradient, no ink); rounder pigtail locks with pink through the outer half; pink-peach skin (no orange-tan); copper rods toned down; plum-grey leather; the charm's halo square off.
+s7_34_vs_art.png, s7_back_vs_art.png, s7_head_vs_sheet.png: 3/4, back and head vs the art; the striped hazard sleeves on the wrists and thighs.
+s7_match_clean_vs_art.png: a clean match-camera crop (from --warden-shots at the gameplay camera: no HUD caption, no palm plant) beside the art front.
+s7_match_vs_art.png, s7_gameplay_match.png: the Arena match frame as before (HUD and plant in it).
+s7_vs_turnaround.png, s7_vs_turnaround_game.png, s7_moves_1.png, s7_moves_2.png, s7_poses_game.png: turnaround, moves and poses.
+s7_vs_s6.png: round 6 vs round 7.
