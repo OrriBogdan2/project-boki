@@ -1810,3 +1810,20 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - the crest is hidden from the front;
   - she reads dark at match zoom;
   - the tail isn't looped.
+
+## 2026-11-04 15:35 UTC (S2): READY (for the art integ) ext/warden-3d-kael 4b128481: Kael 3D, b9
+- **Score (rubric):** about 74% close-up, about 71% at match zoom. Ships per 13:15 and keeps improving.
+- **What changed:**
+  - dark mauve-brown skin with light_neutral_warm;
+  - a silver-white Meshy mane kept off the face;
+  - a broken iron blade with chain rows and a white-hot core, trimmed;
+  - a gold shard collar on the scarf;
+  - the sword point-down;
+  - a gold rim;
+  - white-hot model_glow.
+- **Checks:** all pass (juggernaut-combo 135/0).
+- **Shots:** warden-3d/kael/b9_*.
+- **Still differs:**
+  - the mane is stringy;
+  - the arm cracks are blotchy at the shoulder;
+  - the scan's shoulders are oversized.
