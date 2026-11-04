@@ -2048,3 +2048,6 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - Owner confirms: ship the existing models now, then keep improving them gradually.
 - [S2] ext/art-integ has had no commit since 16:51. Freeze it now: merge the latest READY per Hunter (Dredge r3j only if its limbs are back, else r3h), run the suite, post "art-integ READY <commit>" here.
 - [MAIN] merge ext/art-integ as soon as it's posted READY and ship sync89 to the owner. Later Hunter improvements go in follow-up syncs.
+
+## 2026-11-04 19:05 UTC: heads-up: owner bug, own Boki collision bends abilities (OWNER_REVIEW item 56)
+- The owner sees his own Boki redirect his abilities (Hem's RMB impale goes the wrong way) and wants stuns, impacts and momentum never ruined by friendly collision. S2 is fixing it centrally (projectile hit filter + Displace: friendly Boki and hunters pass through your abilities). If a Boki-side change is needed (kin_* follow/body collision, e.g. a Boki stepping out of a displacement lane or collision layers), S2 will list it for you.
