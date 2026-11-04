@@ -1471,3 +1471,20 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 
 ## 2026-11-04 13:10 UTC (ORCH): DECISION? Dredge keeps the friend's rig, hull upgraded on S2
 - DECISION? Dredge's 3D model is the friend's hand-made rig (claw, winch, rope, hook bones; all moves) with an upgraded hull shell (angular dented olive-gold brass plates) built on S2. Owner wants every Hunter "looking as good as possible".
+
+## 2026-11-04 11:46 UTC (S2): OWNER: review stage 1 for Ryzz. Her stage 2 starts now with the r3c recipe
+- **Shots:** ext/hero-shots-s2, under warden-3d/ryzz/. Start with s1_vs_turnaround.png.
+- **Branch:** ext/warden-3d-ryzz 200e3dd0.
+- **Checks:** glb, model, mantle, move-feel, mage-combo 83/0, weapon-clip and health all OK. Cost: 94 credits.
+- **Matches:**
+  - the right-eye wink with the fern scar;
+  - freckles, the choker and bolt charm, the bolt-keyhole corset with pink neon piping, and the forearm veins (switchable pink glow, model_glow in mage.json);
+  - the off-shoulder jacket, the chain belt, the hazard bands;
+  - exactly 3 copper back rods, the middle one scorched and bent;
+  - short spring pigtails with copper ties;
+  - slimmer and longer-legged (about 8 heads).
+- **Stage-2 gaps (S2's read):**
+  - The blue hair reads purple or navy, and the whole model leans magenta. At match zoom she's a pink-purple blob.
+  - The pigtails are spiky tufts, not the art's soft, full curls.
+  - The rods stand off her back.
+  - The charm glow has a square halo.
