@@ -136,3 +136,9 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 - docs/art/gen/wardens_r3/: vex_{turnaround,side,portrait,splash}.webp + VEX_KIT.md (the design summary and rules from the image-gen session); review/vex_r3_before_after.jpg.
 - A green-haired cyborg gunslinger: a six-barrel gun-arm as her RIGHT forearm, two long green braids with copper wire and bolts, a brass cyber eye-plate with a green lens over her RIGHT eye, brass neck plating with green seams, circuit/tally tattoos, black and green outfit. No candle.
 - Known nit (from the kit): the splash mirrors the cyber eye to her left; model it on her RIGHT (portrait + turnaround).
+
+## 2026-11-04 07:30 UTC: Claire round 2 (owner-approved) from the owner's uploads (orchestrator)
+- wardens_r2/claire_{turnaround,side,portrait,splash}.webp + CLAIRE_KIT.md; review/claire_before_after.jpg.
+- A frost demoness figure-skater: dark ice ram horns, frost bat wings, a spaded tail, long dark wavy hair in low pigtails with ice clips, glowing pale-blue eyes, a sculpted ice costume, ice-bladed skates, ONE ice spear in her right hand.
+- Kit nit: the turnaround's 3/4 view is missing the spear; she always has it in her right hand.
+- Roster note (for the owner): winged heroes are now Sable, Pip and Claire; horns also on Zedran (ram).
