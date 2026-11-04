@@ -1530,6 +1530,22 @@ def ramp_paint(ob, img, rules):
     img.pixels = px.ravel()
 
 
+def _rel(arm, sp, keys):
+    """A part spec whose points are given relative to a bone's head ("rel": bone name, the fitted frame) moved
+    onto that bone: the lens and the braids ride the head, the hoses the hips, wherever the rig puts them."""
+    if not sp or "rel" not in sp:
+        return sp
+    o = arm.data.bones[sp["rel"]].head_local
+    out = dict(sp)
+    for k in keys:
+        v = sp[k]
+        if v and isinstance(v[0], (list, tuple)):
+            out[k] = [[p[0] + o.x, p[1] + o.y, p[2] + o.z] for p in v]
+        else:
+            out[k] = [v[0] + o.x, v[1] + o.y, v[2] + o.z]
+    return out
+
+
 def _rig_joint(rig, name):
     """A fit joint's place on the rig (fit spec joint names: hip.L, shoulder.L, neck, ...)."""
     bone = {"hip": "thigh", "shoulder": "upper_arm", "elbow": "forearm", "hand": "hand", "knee": "shin"}
@@ -1572,6 +1588,12 @@ def main():
         for _i in range(int(spec.get("despeckle", 0))):
             # (lone texels the ramps left, a green fleck on a black edge: a 3x3 median within each island)
             flatten(img, np.zeros((1, 3), np.float32), 0.0, ids=ids)
+        pad(img, ids, int(spec.get("pad", 6)))
+    if spec.get("project_late"):
+        # the art painted over the finished atlas (the face, the chest's straps and tattoos): after the ramps,
+        # so its colours stay the art's; each with a registration measured on the mesh's own render
+        for pj in spec["project_late"]:
+            project(ob, img, pj)
         pad(img, ids, int(spec.get("pad", 6)))
     head = None
     if "head" in spec:
@@ -1647,15 +1669,18 @@ def main():
     if "chunk" in spec:
         chunk(ob, rig, spec["chunk"])
     parts = []
-    if spec.get("lens") or spec.get("braids"):
+    if spec.get("lens") or spec.get("braids") or spec.get("hoses"):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import warden_parts as WP
-        if spec.get("lens"):
-            if spec["lens"].get("cut_r"):
-                _cut_lens(ob, spec["lens"])
-            parts.append(WP.lens(arm, spec["lens"]))
+        lens_s = _rel(arm, spec.get("lens"), ("centre",))
+        if lens_s:
+            if lens_s.get("cut_r"):
+                _cut_lens(ob, lens_s)
+            parts.append(WP.lens(arm, lens_s))
         if spec.get("braids"):
-            parts.append(WP.braids([ob], arm, spec["braids"], spec["braid_colours"]))
+            parts.append(WP.braids([ob], arm, [_rel(arm, b, ("path",)) for b in spec["braids"]], spec["braid_colours"]))
+        if spec.get("hoses"):
+            parts.append(WP.hoses([ob], arm, [_rel(arm, h, ("path",)) for h in spec["hoses"]], spec["hose_colours"]))
     built = {"weapon": None, "extra": []}
     if spec.get("parts"):
         # scripted pieces (tools/meshy/hard_parts.py): a held weapon or shield, wing cards, a tail, the feet check

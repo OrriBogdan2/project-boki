@@ -90,7 +90,62 @@ Ryzz's emissive layer `use_emit`/`emit_tex` (ext/warden-meshy-ryzz). Already her
 - `MESHY_API_KEY` lives only in `~/.config/boki/secrets.env` (chmod 600) on the build box, or in the environment.
   Never in the repo, logs or shots. tools/meshy/meshy_task.py reads it and never prints it.
 
+## The reference recipe (Vex r3c, 2026-11-04): per-Warden checklist for the other 11
+Vex r3c is the model the owner reviews as the recipe; the others wait for his OK. Worktree on a branch of
+ext/warden-vex-r3b. B = `~/tools/blender-4.5.15-linux-x64/blender -b --factory-startup --python`. Raw files in
+~/meshy/<name>/ (never in git). Files: art/wardens/src/<name>_bake.json, <name>_fit.json; content/rules/
+warden_look.json; content/archetypes/<id>.json `body`; content/rules/warden_stance.json (ext/warden-stance).
+1. **Read the art and its kit note** (wardens_r3 or r2 on ext/imagegen: turnaround, side, portrait, KIT.md). Note the
+   side of every asymmetric piece (never mirror) and everything that hangs loose: braids, tails, hoses, cords,
+   capes, held props, a hand on the hip.
+2. **Edit the inputs, not the mesh** (Meshy image-to-image, nano-banana-pro, 9 credits a view; `meshy_task.py edit`,
+   `--aspect 9:16` on a 9:16 crop so the figure fills the frame):
+   - take out what hangs loose (it fuses to the body; it is built as geometry in step 7) and free hands that rest on
+     the body; say "hidden behind her body" for a limb a side view should not show;
+   - look at every edit beside its crop; redo a view rather than accept a changed design; paint small invented
+     details out by hand (Vex: a green lens on the back ring).
+3. **Meshy** (`meshy_task.py create`, its defaults: meshy-7.1, geometry 2k, meshy-7 texture 8k, PBR, no remesh,
+   a-pose): the four edited views, padded square, as images and texture refs. Two runs, enhancement off and on
+   (80 credits); keep the one whose face is closest to the portrait. Log both in the run log.
+4. **Bake** (`B tools/meshy/bake_warden.py -- <name>_bake.json`): ~36k triangles (9k on the head), a 4096 atlas.
+5. **Measure** on gridded orthographic renders of the dense mesh (front and side): the joints (Meshy frame, +Z up,
+   facing -Y) and, for a weapon fused to an arm, its elbow and tip. Body proportions:
+   - `scale_joints: ["hip.L", "shoulder.L"]`: the torso keeps the art's size;
+   - set the archetype's `body.legs` (and `size`, to keep the sheet height within 4%) so the rig's hips land near
+     the art's: `godot --headless -- --warden-rig-json --warden=<id>`; the hit radius never changes.
+6. **Fit** (`B tools/meshy/fit_warden.py -- <name>_fit.json`): `snap_y: false` with measured depths; a fused weapon cut
+   by direction (`r_in` toward the body, `r_side`, `r` outward, `r_elbow`), `cap_flat`; slot rules that claim metal
+   parts by box before the skin test; `fit_weights`, `chunk` (head ~1.12-1.16, hand 1.2, girth 1.06).
+7. **Pieces as geometry** (tools/meshy/warden_parts.py, positions `rel` to a bone so they follow the rig):
+   - braids / tails / cords: `braids` (woven strands, wraps, bolts, a tuft) on `spring_` chains that swing;
+   - hoses and cables between body and weapon: `hoses`, weighted along their length from one bone to another
+     (Vex: hips -> upper_arm.R -> forearm.R) so both ends stay on while the arm aims;
+   - eyes, lenses, gems: `lens` (a glowing dome on the glow slot); cut the scan's own one first (`cut_r`).
+8. **Paint-over, credit-free**:
+   - `smooth` (edge-preserving, within UV islands), then `ramps` of the art's own colours per slot and texel hue
+     (sample them from the art: hair, trims and tattoos, blacks, leather, skin, gunmetal, brass), `despeckle`;
+   - `project_late`: the art's face, chest and belly painted over the finished atlas from the edited front view,
+     each with a registration measured on the mesh's own render (`tools: register.py`, ~20 px better than the
+     figure-height guess); `keep_hue` keeps the scan's hair, `skip_art` keeps the art's hair shadows off the skin;
+     the body's skin ramp uses the art's skin so there is no seam where the projection ends.
+9. **Godot**: import; the extracted atlases lossless (`compress/mode=0`, `detect_3d/compress_to=0`); the .glb's
+   `generate_lods=false`, `force_disable_compression=true`.
+10. **Shading** (content/rules/warden_look.json, keyed by the art name): where the shared painted look washes a
+    colour out (light skin under the top light and rim, dark metal under the rim), turn those down per slot; glow
+    slots brighter for match-zoom reads.
+11. **Stance** (content/rules/warden_stance.json on ext/warden-stance): the carry of the model's weapon, checked
+    idle and in the run blend (`--warden-shots` poses_game, moves).
+12. **Checks** (godot queue wrapper, fresh XDG, real output only): --warden-glb-check (incl. the spring chains),
+    --warden-model-check, --mantle-look-check, --move-feel-check, --<id>-combo-check, --weapon-clip-check,
+    --warden-stance-check (on the stance branch), `python3 tools/health.py --strict`, `python3 tools/style_lint.py
+    --strict`.
+13. **Shots** (`--warden-shots`, the Arena match frame `--arena=<id> --record=2 --arena-demo=pose --demo-zoom=1.0
+    --arena-shot=<png>`), composited beside the turnaround and portrait; look at every one and redo what does not
+    look like the art. Then the secret grep, commit, push; S2 reviews the shots before hero-shots-s2.
+
 ## r3b (Vex redesign, 2026-11-04): what changed
+(The owner picked r3b at 09:00: it ships as art/wardens/vex/vex.glb with vex_fit.json / vex_bake.json; r3c
+is its polish pass, above.)
 The owner-approved redesign (ext/imagegen wardens_r3: green braids, cyber eye, minigun forearm) built beside the
 shipped Vex as the design variant `vex_r3b` (RIG_CONTRACT "Design variants"). Files: `art/wardens/src/vex_r3b_bake.json`,
 `vex_r3b_fit.json`; raw files in ~/meshy/vex_r3b/.

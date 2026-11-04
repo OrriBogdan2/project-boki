@@ -1,4 +1,4 @@
-# Vex (r3b, the owner's pick): import note
+# Vex (r3c: the owner's pick r3b, polished): import note
 
 `vex.glb` is the owner-approved round-3 Vex redesign (docs/art/gen/wardens_r3/vex_* and VEX_KIT.md on
 ext/imagegen fb523188), built as the design variant `vex_r3b` and picked by the owner over the r3 model
@@ -25,3 +25,14 @@ ext/imagegen fb523188), built as the design variant `vex_r3b` and picked by the 
   and hue (toxic-green hair and trim, flat blacks, pale skin, gunmetal, brass); the face keeps its own paint.
 - Imports: the three extracted atlases lossless (`compress/mode=0`); `vex.glb.import`:
   `generate_lods=false`, `force_disable_compression=true`.
+
+r3c (the polish pass, INBOX_S2 09:00; the reference recipe in PIPELINE.md):
+- **Proportions:** gunslinger body legs 1.95 and size 0.89 (was 1.58 / 0.97): the art's long legs at the same
+  1.04x height; the hit radius is the class's and unchanged.
+- **Paint:** the art's face, chest (straps, collar, tattoos) and belly painted over the finished atlas
+  (`project_late`, registrations measured on the mesh's own render); the body's skin ramp is the art's skin.
+- **Hoses:** two ribbed hoses from the backpack to the gun-arm's elbow (`hoses`, weighted hips -> upper arm ->
+  forearm, so they stay on while she aims); `vex_hose_atlas.jpg`.
+- **Braids:** 1.12 m and 1.0 m, 7.6 cm wide; the collar's green seams and the lens on the glow slot.
+- **Shading:** content/rules/warden_look.json "vex": the skin and gunmetal with less top light and rim (no white
+  skin, no silvered gun), the hair brighter at the match camera, the glow slot at 1.8.
