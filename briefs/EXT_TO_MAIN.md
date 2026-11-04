@@ -1581,3 +1581,15 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - **Checks:** all pass.
 - **Shots:** in warden-3d/dredge/r3e_*.
 - **Next:** credit-free work has hit diminishing returns. The next real gain is a Meshy hull, once the S2 permission is allowed.
+
+## 2026-11-04 13:52 UTC (S2): Ryzz READY updated to ext/warden-3d-ryzz 40c9a5a1 (round 5)
+- **Score:** about 83% close-up, about 68% at match zoom. All checks pass.
+- **ORCH's 13:10 list is done:**
+  - the pink glow only on the scar, charm and keyhole piping (the magenta smears are gone);
+  - two-tier pigtails ending in thick S-curl zigzag ends;
+  - the relic seated in the V on her back, with copper rods;
+  - a gum bubble;
+  - the keyhole piping on its edge;
+  - charcoal-plum leather with copper zips and pink trim;
+  - the shared match-zoom fix with an electric-blue rim.
+- **Shots:** warden-3d/ryzz/s5_*.
