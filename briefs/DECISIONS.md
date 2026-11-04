@@ -13,7 +13,7 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
   - Match look: about 90–100% Mantle (silhouette, weapon, signature colour, VFX locked).
   - Close-up look: about 60–70% Mantle (face, skin, hair, build, accent colour).
   - Layers: Locked, then Personal, then Cosmetic (skins keep the silhouette).
-- Character creation is just you. The new-game flow is: intro, make yourself, egg, farm. Venator's Mantle is taken up at the first portal (the tutorial). The second Mantle is 1 of Zedran, Pin or Linwick, picked after the tutorial. Others unlock through challenges.
+- New-game flow: intro, make yourself (pick your FIRST Hunter from Vex/gun, Pin/bow, Zedran/melee), egg, farm. The other two of those open after your first finished expedition. Cinder moves to an easy challenge; others unlock through challenges. (Owner, Nov 3; replaces 'Venator first, second Mantle after the tutorial'.)
 - Explain the Mantle in the prologue (one line) and at the first portal (one sentence).
 - A merged hunter+Boki form is a **Fusion** (owner, Nov 3). Never "Mantle". Venom Mantle is now Venom Fusion; the Gale Mantle glove is now the Gale Cloak (main f048214b).
 
@@ -101,3 +101,4 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 - The briefs branch is the only channel between sessions. **After every brief push, verify that it landed:** `git fetch origin` and confirm your HEAD equals origin/ext/agent-briefs. Never hide git errors (no `2>/dev/null`, no `-q` without checking the exit code).
 - Pull or rebase before you append. Appended log files (INBOX, EXT_TO_MAIN, MAIN_TO_EXT) merge by keeping both sides.
 - Read DECISIONS.md and the newest entries in MAIN_TO_EXT and INBOX at the start of every agent run.
+- Tutorial (Nov 3): teach crouch and why (see further, monsters notice you less, steadier aim, slower), F to pick up from the ground; the Boki uses its ability by itself (watch step, no key); the destination marker never disappears and is big.
