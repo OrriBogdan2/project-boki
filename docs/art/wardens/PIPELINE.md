@@ -235,3 +235,9 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Sable edit back 2 | 09:10 | 01a1a5d3-47b8-72ca-b79b-67cde2de6c30 | nano-banana-pro | crossbows, wings, braid out; nothing else | 9 | Kept |
 | Sable edit side 2 | 09:10 | 01a1a5d3-47c0-7739-a9b7-f67259a99aa6 | nano-banana-pro | crossbow, wing, braid out; fur collar in the standing collar; left arm bare | 9 | Kept (came back mirrored: flipped back to the art's side) |
 | Sable A | 09:12 | 01a1a5d5-1d78-72f9-b867-a9bff45038eb | meshy-7.1 | edited front, side, back (+ texture refs), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** |
+
+### Stage 2: Sable (thief), 2026-11-04: credit-free (0 Meshy tasks)
+The r3c recipe on the stage-1 body: art ramps, sable_face.png projected over the face (registered on the eyes and
+mouth, feathered: `project_late` `feather` / `feather_turn`), the mask on metal, a glowing pendant (warden_props
+`gem`), bigger crossbows with a stirrup, the fur collar pulled in (fit `shrink`), warden_look.json `sable`, the
+thief stance squared up. IMPORT.md "Stage 2".

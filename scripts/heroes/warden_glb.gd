@@ -162,6 +162,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	glb.add_child(sync)
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch))))
+	_lights(glb, look(art(arch)))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
 	_hold_weapon(root, glb)
@@ -231,6 +232,21 @@ static func look(nm: String) -> Dictionary:
 		_look = parsed if typeof(parsed) == TYPE_DICTIONARY else {}
 	return (_look as Dictionary).get(nm, {})
 
+## The look's "lights": a small OmniLight3D on each named anchor empty of the model (Pip's lantern glow), so a
+## prop that glows also lights what is round it: {"anchor", "colour" [r, g, b], "energy", "range"}.
+static func _lights(glb: Node, own: Dictionary) -> void:
+	for l in own.get("lights", []):
+		var at := glb.find_child(String(l.get("anchor", "")), true, false) as Node3D
+		if at == null:
+			continue
+		var om := OmniLight3D.new()
+		om.name = "Light"
+		om.light_color = _param(l.get("colour", [1.0, 0.8, 0.5]))
+		om.light_energy = float(l.get("energy", 1.0))
+		om.omni_range = float(l.get("range", 2.0))
+		om.shadow_enabled = false
+		at.add_child(om)
+
 ## A warden_look value as a shader parameter: [r, g, b(, a)] is a colour.
 static func _param(v: Variant) -> Variant:
 	if v is Array and (v as Array).size() >= 3:
@@ -252,6 +268,9 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}) -> A
 				if src and src.albedo_texture:
 					cm.set_shader_parameter("albedo_tex", src.albedo_texture)
 				cm.set_shader_parameter("use_tex", src != null and src.albedo_texture != null)
+				var card_look: Dictionary = (own.get("slots", {}) as Dictionary).get("card", {})
+				for k in card_look:
+					cm.set_shader_parameter(k, _param(card_look[k]))
 				(mi as MeshInstance3D).set_surface_override_material(si, cm)
 				(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 				out.append(cm)

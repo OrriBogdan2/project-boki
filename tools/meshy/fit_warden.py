@@ -499,7 +499,20 @@ def project(ob, img, pj):
             cur = dst[ty, tx, :3]
             hh, ss, _vv = _hsv_px(cur)
             art_px &= ~((hh >= keep[0]) & (hh <= keep[1]) & (ss >= keep[2]))
-        dst[ty[art_px], tx[art_px]] = got[art_px]
+        fe = float(pj.get("feather", 0.0))
+        if fe > 0.0:
+            # (the art fades in over `feather` m from the box's edges: no seam where the projection ends)
+            pt = \
+                l1[inside] * ps[0][ax] + l2[inside] * ps[1][ax] + l3[inside] * ps[2][ax]
+            pz = l1[inside] * ps[0].z + l2[inside] * ps[1].z + l3[inside] * ps[2].z
+            edge = np.minimum(np.minimum(pt - x0, x1 - pt), np.minimum(pz - z0, z1 - pz))
+            # (and over the faces turning away: no edge where the jaw turns down past `facing`)
+            wf = min(1.0, max(0.0, (facing - float(pj["facing"])) / float(pj.get("feather_turn", 0.3))))
+            wgt = (np.clip(edge / fe, 0.0, 1.0) * wf)[:, None]
+            sel = art_px
+            dst[ty[sel], tx[sel], :3] = dst[ty[sel], tx[sel], :3] * (1 - wgt[sel]) + got[sel, :3] * wgt[sel]
+        else:
+            dst[ty[art_px], tx[art_px]] = got[art_px]
         painted += 1
     img.pixels = dst.ravel()
     log("projected the art onto %d faces" % painted)
@@ -1394,6 +1407,31 @@ def chunk(ob, rig, ck):
     ob.data.update()
 
 
+def shrink_box(ob, sb):
+    """A bulky piece pulled in (fitted frame, the rest pose): the vertices of `slots` (all without) inside `box`
+    [x0, x1, y0, y1, z0, z1] move toward the vertical axis through `centre` [x, y] by `k` of their distance
+    (Sable's fur collar standing out behind her neck), fading over `fade` m from the box's edges."""
+    b = [(-1e9 if x is None else x) if i % 2 == 0 else (1e9 if x is None else x) for i, x in enumerate(sb["box"])]
+    slots = sb.get("slots")
+    on = np.zeros(len(ob.data.vertices), bool)
+    for p in ob.data.polygons:
+        if slots is None or any(ob.data.materials[p.material_index].name.startswith(x + "-") for x in slots):
+            on[list(p.vertices)] = True
+    co = np.array([v.co[:] for v in ob.data.vertices])
+    inside = on & (co[:, 0] >= b[0]) & (co[:, 0] <= b[1]) & (co[:, 1] >= b[2]) & (co[:, 1] <= b[3]) \
+        & (co[:, 2] >= b[4]) & (co[:, 2] <= b[5])
+    fade = float(sb.get("fade", 0.03))
+    dz = np.minimum(co[:, 2] - b[4], b[5] - co[:, 2])
+    w = np.clip(dz / max(fade, 1e-4), 0.0, 1.0) * inside
+    cx, cy = sb["centre"]
+    k = float(sb["k"])
+    co[:, 0] = cx + (co[:, 0] - cx) * (1.0 - (1.0 - k) * w)
+    co[:, 1] = cy + (co[:, 1] - cy) * (1.0 - (1.0 - k) * w)
+    ob.data.vertices.foreach_set("co", co.ravel())
+    ob.data.update()
+    log("shrink: %d vertices toward (%.2f, %.2f) x%.2f" % (int(inside.sum()), cx, cy, k))
+
+
 def _close_gaps(w):
     """Loose pieces along the rifle (the stock the hand hid in the sheet comes back apart and at an angle): each
     is turned onto the rifle's axis and slid forward until it meets the rest, on the axis line."""
@@ -1668,6 +1706,8 @@ def main():
         release(ob, spec["gun_arm"].get("bones", ["forearm.R", "hand.R"]))
     if "chunk" in spec:
         chunk(ob, rig, spec["chunk"])
+    for sb in spec.get("shrink", []):
+        shrink_box(ob, sb)
     parts = []
     if spec.get("lens") or spec.get("braids") or spec.get("hoses"):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -1682,7 +1722,7 @@ def main():
         if spec.get("hoses"):
             parts.append(WP.hoses([ob], arm, [_rel(arm, h, ("path",)) for h in spec["hoses"]], spec["hose_colours"]))
     props = []
-    if any(k in spec for k in ("wings", "lantern", "springs", "crossbows")):
+    if any(k in spec for k in ("wings", "lantern", "springs", "crossbows", "gem")):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import warden_props as WPR
         for sr in spec.get("springs", []):
@@ -1693,6 +1733,8 @@ def main():
             parts.append(WPR.lantern(arm, spec["lantern"], spec["lantern_look"]))
         if spec.get("crossbows"):
             props = list(WPR.crossbows(spec["crossbows"], spec["crossbows"]))
+        if spec.get("gem"):
+            parts.append(WPR.gem(arm, ob, spec["gem"]))
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")

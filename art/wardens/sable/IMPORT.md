@@ -34,3 +34,23 @@ Built by script, nothing hand-edited in Blender; run log in docs/art/wardens/PIP
   procedural Arc Bolts' left ring blade. The Gun's Muzzle (bolts' origin) is unchanged.
 - Imports: the extracted atlases lossless (`compress/mode=0`); `sable.glb.import`: `generate_lods=false`,
   `force_disable_compression=true`.
+
+## Stage 2 (the Vex r3c recipe, INBOX_S2 11:25; refs sable_face / sable_head_sheet / sable_crossbow_sheet, 12:40)
+Credit-free: the same Meshy body and bake, refitted.
+- **Paint-over:** `smooth`, then `ramps` of the art's own colours per slot (white hair and fur, lavender skin, the
+  purple jacket, the blacks, the boots and gloves, silver); the back of the fur collar is the jacket's purple (the
+  turnaround's back draws the standing collar). `project_late`: sable_face.png painted over the face, registered
+  on the eyes and mouth against a front render of the mesh (k 0.0001765 m/px), feathered 3 cm at the box edges
+  and over the faces turning away (no portrait-edge seam): her almond, half-lidded dark eyes with the winged liner
+  and the beauty mark under her right eye, not Meshy's round pale orbs.
+- **Slots:** the domino mask on `metal` (a box over the brow before the hair test).
+- **Pendant:** a faceted red crystal on the `glow` slot (warden_props.gem), set on the chest's surface, riding the
+  hips.
+- **Crossbows:** 0.42 m long, a 0.44 m prod (sable_crossbow_sheet against her hand), a wooden grip and the front
+  stirrup.
+- **Collar:** the fur behind the neck pulled in 28% (fit `shrink`); the braids' paths moved out over the
+  shoulders (no kink, clear of the pendant).
+- **Wings:** a stronger iridescent drift in the atlas, more opaque; content/rules/warden_look.json `sable` card
+  sheen and glow.
+- **Look** (warden_look.json `sable`): skin and cloth rims, top light and match-camera lift, silver rim, glow 2.0.
+- **Stance** (warden_stance.json thief): squarer to the front with the legs spread, as the turnaround stands.

@@ -95,7 +95,7 @@
  },
  "snap_y": false,
  "chunk": {
-  "head": 1.08,
+  "head": 1.12,
   "girth": 1.04
  },
  "lift": [
@@ -130,6 +130,25 @@
     0.45,
     1.0,
     0.45,
+    1.0
+   ]
+  },
+  {
+   "slot": "metal",
+   "box": [
+    -0.13,
+    0.13,
+    null,
+    -0.075,
+    0.66,
+    0.8
+   ],
+   "hsv": [
+    null,
+    null,
+    0.0,
+    0.2,
+    0.3,
     1.0
    ]
   },
@@ -227,32 +246,32 @@
    "name": "braid_R",
    "path": [
     [
-     0.07,
+     0.075,
      -0.06,
      1.47
     ],
     [
-     0.11,
-     -0.04,
-     1.36
+     0.13,
+     -0.02,
+     1.37
     ],
     [
-     0.15,
-     0.02,
-     1.25
+     0.18,
+     0.04,
+     1.27
     ],
     [
-     0.17,
-     0.07,
-     1.12
+     0.205,
+     0.08,
+     1.15
     ],
     [
-     0.175,
+     0.215,
      0.09,
-     0.98
+     1.0
     ],
     [
-     0.175,
+     0.215,
      0.09,
      0.85
     ]
@@ -263,7 +282,7 @@
     1.0,
     0.0
    ],
-   "clear": 0.03,
+   "clear": 0.036,
    "width": 0.058,
    "strand_r": 0.0135,
    "period": 0.15,
@@ -296,32 +315,32 @@
    "name": "braid_L",
    "path": [
     [
-     -0.07,
+     -0.075,
      -0.06,
      1.47
     ],
     [
-     -0.11,
-     -0.04,
-     1.36
+     -0.13,
+     -0.02,
+     1.37
     ],
     [
-     -0.15,
-     0.02,
-     1.25
+     -0.18,
+     0.04,
+     1.27
     ],
     [
-     -0.17,
-     0.07,
-     1.12
+     -0.205,
+     0.08,
+     1.15
     ],
     [
-     -0.175,
+     -0.215,
      0.09,
-     0.98
+     1.0
     ],
     [
-     -0.175,
+     -0.215,
      0.09,
      0.85
     ]
@@ -332,7 +351,7 @@
     1.0,
     0.0
    ],
-   "clear": 0.03,
+   "clear": 0.036,
    "width": 0.058,
    "strand_r": 0.0135,
    "period": 0.15,
@@ -492,13 +511,14 @@
   "fore": {
    "base": "e6e3f0",
    "tints": [
-    "c6d6ff",
-    "ffd2ee",
-    "cdf7ec",
-    "e0ccff"
+    "b8ccff",
+    "ffc4ea",
+    "bff5e2",
+    "d8bfff",
+    "fff0c8"
    ],
-   "tint_k": 0.4,
-   "alpha": 0.55,
+   "tint_k": 0.6,
+   "alpha": 0.62,
    "rim": "f4f2fa",
    "rim_alpha": 0.8,
    "edge": 0.95,
@@ -548,13 +568,14 @@
   "hind": {
    "base": "e6e3f0",
    "tints": [
-    "c6d6ff",
-    "ffd2ee",
-    "cdf7ec",
-    "e0ccff"
+    "b8ccff",
+    "ffc4ea",
+    "bff5e2",
+    "d8bfff",
+    "fff0c8"
    ],
-   "tint_k": 0.4,
-   "alpha": 0.55,
+   "tint_k": 0.6,
+   "alpha": 0.62,
    "rim": "f4f2fa",
    "rim_alpha": 0.8,
    "edge": 0.94,
@@ -608,15 +629,206 @@
    0.08,
    -0.06
   ],
-  "length": 0.3,
-  "span": 0.32,
+  "length": 0.42,
+  "span": 0.44,
   "colours": {
    "silver": "c9ccd6",
    "dark": "3a3444",
-   "grip": "2c2532",
+   "grip": "5e4030",
    "string": "8f63cf",
    "bolt": "c77dff"
-  }
+  },
+  "stirrup": true
  },
- "atlas_px": 2048
+ "atlas_px": 2048,
+ "smooth": {
+  "iterations": 2,
+  "sigma_s": 2.5,
+  "sigma_r": 0.06
+ },
+ "ramps": [
+  {
+   "name": "hair",
+   "slots": [
+    "hair"
+   ],
+   "ramp": [
+    "6e6a7c",
+    "9894a8",
+    "c4c2d0",
+    "e2e0ea",
+    "f8f8ff"
+   ]
+  },
+  {
+   "name": "collar back (the standing purple collar, the turnaround's back view)",
+   "slots": [
+    "fur"
+   ],
+   "box": [
+    null,
+    null,
+    0.03,
+    null,
+    0.36,
+    0.6
+   ],
+   "ramp": [
+    "160f24",
+    "241a38",
+    "35285a",
+    "4c3d7a",
+    "6a5a9a"
+   ]
+  },
+  {
+   "name": "fur",
+   "slots": [
+    "fur"
+   ],
+   "ramp": [
+    "8a8496",
+    "b4aec0",
+    "d4cfdc",
+    "ece8f2",
+    "ffffff"
+   ]
+  },
+  {
+   "name": "skin",
+   "slots": [
+    "skin"
+   ],
+   "ramp": [
+    "50435f",
+    "6d5e7e",
+    "8c7c9c",
+    "a99bb8",
+    "c4b9d2"
+   ]
+  },
+  {
+   "name": "jacket",
+   "slots": [
+    "cloth"
+   ],
+   "hsv": [
+    0.6,
+    0.85,
+    0.3,
+    1.0,
+    0.0,
+    1.0
+   ],
+   "ramp": [
+    "1c1430",
+    "2c2148",
+    "413266",
+    "5a4a8c",
+    "7a6aae"
+   ]
+  },
+  {
+   "name": "blacks",
+   "slots": [
+    "cloth"
+   ],
+   "hsv": [
+    0.0,
+    1.0,
+    0.0,
+    0.3,
+    0.0,
+    1.0
+   ],
+   "ramp": [
+    "0c0b10",
+    "15141a",
+    "201e27",
+    "2e2b37",
+    "45414f"
+   ]
+  },
+  {
+   "name": "leather",
+   "slots": [
+    "leather"
+   ],
+   "ramp": [
+    "1d1a24",
+    "2d2836",
+    "3e3849",
+    "555066",
+    "716b82"
+   ]
+  },
+  {
+   "name": "silver",
+   "slots": [
+    "metal"
+   ],
+   "ramp": [
+    "3c3948",
+    "5e5b6e",
+    "8c8a9c",
+    "b8b6c4",
+    "e2e2ea"
+   ]
+  }
+ ],
+ "despeckle": 1,
+ "project_late": [
+  {
+   "view": "front",
+   "image": "~/meshy/sable_r2/art/sable_face.png",
+   "name": "face (sable_face.png, registered on the eyes and mouth)",
+   "box": [
+    -0.085,
+    0.085,
+    0.48,
+    0.645
+   ],
+   "facing": 0.1,
+   "feather": 0.03,
+   "feather_turn": 0.45,
+   "k": 0.0001765,
+   "col0_at": 1005.0,
+   "row0_at": 4492.6,
+   "col0": 1005,
+   "head_z": 0.58,
+   "sole_row": 4400
+  }
+ ],
+ "gem": {
+  "at": [
+   0.0,
+   1.205
+  ],
+  "out": 0.016,
+  "length": 0.075,
+  "r": 0.018,
+  "colour": "b0001a",
+  "bone": "hips"
+ },
+ "shrink": [
+  {
+   "box": [
+    -0.25,
+    0.25,
+    -0.4,
+    -0.02,
+    1.22,
+    1.5
+   ],
+   "slots": [
+    "fur"
+   ],
+   "centre": [
+    0.0,
+    0.0
+   ],
+   "k": 0.72,
+   "fade": 0.04
+  }
+ ]
 }

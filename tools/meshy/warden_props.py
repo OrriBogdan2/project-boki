@@ -10,6 +10,7 @@ in Blender 4.5. Pieces a Meshy scan can't give cleanly, or that must move on the
 - lantern(): Pip's hearth lantern (a copper cage, glowing panes, a bail) hanging from her right hand on a short
   spring chain, so it swings as she runs.
 - spring_region(): body vertices in a box (a fluffy tail) re-skinned onto a spring chain along a path.
+- gem(): a faceted glowing crystal (Sable's red pendant) set on the body's surface, riding a bone.
 
 Frames: the body parts are in the fitted frame (Blender, +Z up, her front +Y, her right +X, soles on Z = 0); the
 weapon in the Gun node's (forward +Y, up +Z, right +X).
@@ -18,7 +19,7 @@ import math
 
 import bpy
 import numpy as np
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 import warden_parts as WP
 
@@ -256,6 +257,12 @@ def crossbow(bld, cells, g, look):
     head = [b1, b1 + np.array([0, 0.02, 0]), b1 + np.array([0, 0.06, 0])]
     bld.tube(head, [0.013, 0.011, 0.0005], 6, *[cells.box["bolt"][i] for i in (0, 2, 1, 3)], "bolt", [0.0] * 3,
              cap_start=True)
+    if look.get("stirrup"):
+        # the stirrup: a trapezoid loop past the prod (sable_crossbow_sheet)
+        a0, a1 = front + np.array([-0.022, 0.0, 0.0]), front + np.array([0.022, 0.0, 0.0])
+        b0, b1 = front + np.array([-0.035, 0.07, 0.0]), front + np.array([0.035, 0.07, 0.0])
+        for p0, p1 in ((a0, b0), (b0, b1), (b1, a1)):
+            bld.prism(p0, p1, 0.006, 4, cells.box["silver"], "stirrup", 0.0, rot=math.pi / 4)
     for sx in (-1.0, 1.0):     # the fletching
         _box(bld, b0 + np.array([sx * 0.008, 0.02, 0.0]), (0.006, 0.02, 0.0015), cells.box["string"], "fletch")
 
@@ -292,7 +299,9 @@ def crossbows(rig_grips, look):
 def lantern(arm, spec, look, tag="lantern"):
     """A small caged lantern hanging under the paw `hand` bone's grip point `at` (fitted frame), on a spring
     chain spring_<name>_0..1 under the hand: it swings as she moves."""
-    cells = Cells(look["colours"])
+    cells = Cells(look["colours"], n=2, size=256)
+    if look.get("arch"):
+        _arch_panes(cells, look)
     img = cells.image(tag + "_atlas")
     at = np.array(spec["at"], float)               # the bail's top, in the paw
     s = float(spec.get("size", 1.0))
@@ -308,7 +317,7 @@ def lantern(arm, spec, look, tag="lantern"):
     body0 = cap0 - np.array([0, 0, 0.025 * s])
     body1 = body0 - np.array([0, 0, h])
     # the glowing panes (a square column) and the copper posts at its corners
-    bld.prism(body0, body1, r * 0.95, 4, cells.box["glass"], "glass", 0.0, rot=math.pi / 4)
+    bld.prism(body1, body0, r * 0.95, 4, cells.box["glass"], "glass", 0.0, rot=math.pi / 4)
     for k in range(4):
         ang = math.pi / 4 + k * math.pi / 2
         off = np.array([math.cos(ang), math.sin(ang), 0]) * r * 1.02
@@ -331,8 +340,43 @@ def lantern(arm, spec, look, tag="lantern"):
     p = np.stack([at + (bottom - at) * k / 10.0 for k in range(11)])
     names, _spans = WP.chain_bones(arm, spec.get("name", "lantern"), spec.get("parent", "hand.R"), p, float(np.linalg.norm(bottom - at)), 1, bottom)
     _skin(ob, arm, {names[0]: range(len(ob.data.vertices))})
+    # an empty at the flame, riding the lantern's bone: WardenGlb's look puts its light there
+    e = bpy.data.objects.new("anchor_" + spec.get("name", "lantern"), None)
+    bpy.context.scene.collection.objects.link(e)
+    e.parent = arm
+    e.parent_type = "BONE"
+    e.parent_bone = names[0]
+    bpy.context.view_layer.update()
+    e.matrix_world = Matrix.Translation(Vector(((body0 + body1) * 0.5).tolist()))
     log("lantern: %d tris, %.2f m" % (sum(len(f) - 2 for f in bld.f), float(np.linalg.norm(bottom - at))))
     return ob
+
+
+def _arch_panes(cells, look):
+    """The glass cell painted as four pointed-arch windows side by side (one per face of the square lantern, the
+    portrait's): a dark copper frame round each arch, a warm flame inside, brightest at its heart."""
+    u0, v0, u1, v1 = cells.box["glass"]
+    n = cells.size
+    x0, x1, y0, y1 = int(u0 * n), int(u1 * n), int(v0 * n), int(v1 * n)
+    frame = hexcol(look.get("frame", "4a2410"))
+    glass = hexcol(look["colours"]["glass"])
+    core = hexcol(look.get("core", "fff4c8"))
+    w = (x1 - x0) / 4.0
+    for py in range(y0, y1):
+        for px in range(x0, x1):
+            f = ((px - x0) % w) / w                  # 0..1 across this face
+            t = (py - y0) / max(1, (y1 - y0) - 1)    # 0 bottom .. 1 top of the face
+            ax = abs(f - 0.5) * 2.0                  # 0 middle .. 1 edge
+            # the arch: straight sides up to 0.6, then a pointed top to 0.92
+            half = 0.72 if t < 0.6 else 0.72 * max(0.0, 1.0 - ((t - 0.6) / 0.32)) ** 0.8
+            inside = ax < half and 0.08 < t < 0.92
+            if not inside:
+                c = frame
+            else:
+                r = math.hypot((f - 0.5) * 1.4, (t - 0.4) * 1.0)
+                k = max(0.0, 1.0 - r / float(look.get("core_r", 0.45)))
+                c = glass * (1 - k) + core * k
+            cells.px[py, px, :3] = c
 
 
 # ------------------------------------------------------------------------------------------------ a tail
@@ -373,3 +417,42 @@ def spring_region(ob, arm, spec):
         for gi in np.nonzero(w > 1e-3)[0]:
             groups[gi].add([int(vi)], float(w[gi]), "REPLACE")
     log("spring region %s: %d verts on %d bones, %.2f m" % (spec["name"], len(idx), len(names), L))
+
+
+# ------------------------------------------------------------------------------------------------ a gem
+def gem(arm, body, spec, tag="gem"):
+    """A long faceted crystal on the `glow` slot, its middle `out` m in front of the body's surface where a ray
+    from the front (+Y) at `at` [x, z] meets it, hanging point down, riding `bone` rigidly (the pendant on the
+    chest). A small `metal` cap and bail on top."""
+    from mathutils.bvhtree import BVHTree
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = body.evaluated_get(dg)
+    me = ev.to_mesh()
+    bvh = BVHTree.FromPolygons([body.matrix_world @ v.co for v in me.vertices], [list(p.vertices) for p in me.polygons])
+    ev.to_mesh_clear()
+    x, z = spec["at"]
+    hit = bvh.ray_cast(Vector((x, 1.0, z)), Vector((0, -1, 0)))
+    y = (hit[0].y if hit[0] is not None else 0.1) + float(spec.get("out", 0.012))
+    c = np.array([x, y, z], float)
+    L, r = float(spec.get("length", 0.05)), float(spec.get("r", 0.012))
+    cells = Cells({"gem": spec.get("colour", "ff2a48"), "cap": spec.get("cap", "c8ccd6"), "core": spec.get("core", "ffd0d8")})
+    img = cells.image(tag + "_atlas")
+    bld = WP.Builder()
+    top = c + np.array([0, 0, L * 0.45])
+    bot = c - np.array([0, 0, L * 0.55])
+    bld.tube([top, top - np.array([0, 0, L * 0.2]), c - np.array([0, 0, L * 0.1]), bot],
+             [r * 0.35, r, r * 0.9, 0.0005], 6, *[cells.box["gem"][i] for i in (0, 2, 1, 3)], "gem", [0.0] * 4,
+             cap_start=True)
+    bld.prism(top, top + np.array([0, 0, 0.008]), r * 0.45, 6, cells.box["cap"], "cap", 0.0)
+    bld.torus(top + np.array([0, 0, 0.014]), [1, 0, 0], 0.005, 0.0015, 10, 4, cells.box["cap"], "cap", 0.0)
+    ob = bld.object("Gem")
+    mats = {}
+    for slot in ("glow", "metal"):
+        ob.data.materials.append(_mat("%s-%s" % (slot, tag), img, closest=True))
+        mats[slot] = len(ob.data.materials) - 1
+    for poly in ob.data.polygons:
+        poly.material_index = mats["glow"] if bld.part[poly.vertices[0]] == "gem" else mats["metal"]
+        poly.use_smooth = False
+    _skin(ob, arm, {spec.get("bone", "hips"): range(len(ob.data.vertices))})
+    log("gem at %s: %d tris" % (tuple(round(float(v), 3) for v in c), sum(len(f) - 2 for f in bld.f)))
+    return ob

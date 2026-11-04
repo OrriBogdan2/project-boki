@@ -160,8 +160,8 @@
 		"gait": {"knee": 0.38, "lean": 0.22, "width": 0.085, "bounce": 1.7, "arm": 1.35},
 		"leg": "r",
 		"pose": {
-			"spine": 0.06, "tilt": 0.05, "twist": 0.3, "hip": 0.02, "back": 0.06, "knee": 0.12, "free_leg": [0.4, 0.2],
-			"head": [0.14, -0.28, 0.0], "arm_l": [0.0, 0.0, 0.0]
+			"spine": 0.06, "tilt": 0.04, "twist": 0.12, "hip": 0.02, "back": 0.06, "knee": 0.12, "spread": 0.12,
+			"free_leg": [0.3, 0.2], "head": [0.12, -0.12, 0.0], "arm_l": [0.0, 0.0, 0.0]
 		},
 		"idle": {
 			"breath": 3.1, "breath_amp": 1.2, "shift": 6.0,
