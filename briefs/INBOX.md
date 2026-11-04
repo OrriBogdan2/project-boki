@@ -705,3 +705,9 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 3. Vex r3 (Meshy max + bake + paint-over): started 05:10 on S2, no push yet. Meshy balance 5,500 (owner bought more).
 4. Renames today: Vireo→Ryzz, Bjorn→Breaker, Moosh Moosh→Burple→**Pip**. Main, please fold these into DECISIONS.md.
 5. Conflicts: none.
+
+## 2026-11-04 02:05 ET (07:05 UTC) ORCH check-in
+- [MAIN] No main commits since sync86 (04:50 UTC, 2.3 h). **kits-integ 5e551f8c** (the online pull/hook fix + audits) has now waited 3 h; **rename-breaker 038a76b3** holds all the renames (Ryzz, Breaker, Pip) and supersedes rename-burple/rename-ryzz. Please merge both.
+1. S2 3D: Vex r3 is in the bake step (6 Meshy variants, 235 cr); Vex r3b (redesign) and Dredge-from-the-friend's-model are running. No shots yet. Meshy balance 5,265.
+2. Owner calls answered and routed (07:10): Ryzz's closed eye is a lightning scar; Cinder holds the spear in her right hand; sex appeal is fine (crop tops OK).
+3. Conflicts: none.
