@@ -795,3 +795,24 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
   - **One rule of colour across all of it:** you = one colour, allies = team colour, enemies = red. Boki inherit their Hunter's colour.
   - **Kill feed / edge markers:** a short line ("Kael downed by Vex"); an off-screen arrow for a downed ally.
 - Assert / screenshots: a 2v2 fight with one Hunter downed, showing both Boki, before and after.
+
+## 99. Looting with a full inventory (owner, 23:22 UTC Nov 4)
+- Owner: "If I smart-loot a box it says 'taken 3 things' even if my inventory is full, and if I try to grab something it just clicks like I took it but didn't. It should go to my inventory and have drop / replace options in this instance."
+- Fix:
+  - Smart loot only reports what actually moved ("Took 1 of 3, inventory full").
+  - A click on an item that doesn't fit never fakes success: the loot panel opens your inventory beside the box with the clicked item held, so you can **swap** it with one of yours (the swapped item goes into the box) or **drop** one of yours to make room.
+  - A clear "inventory full" cue on the item (red outline + a short sound).
+  - Same flow for chests, death boxes and ground items.
+- Assert: with a full inventory, smart loot takes nothing and says so; swap puts the old item in the box; the counts stay right.
+
+## 100. Middle mouse = ping (owner)
+- Owner: "Middle mouse button should default to pinging teammates / making pings on the map, same when the drop is happening."
+- MMB is the default ping key: in a match (on the world at the cursor; on enemies / items / boxes it gives a contextual ping such as "Enemy here" or "Loot here"), on the full map, and during the drop / jump phase.
+- Teammates see the ping in the world, on the minimap and as an edge arrow when off-screen. Rebindable in settings.
+- Assert: MMB places a ping in each of the three contexts; the bot teammate receives it.
+
+## 101. Whose box is it + reviving from a teammate's box (owner)
+- Owner: "It's unclear if a box is a teammate's box vs an enemy's box. I should be able to tell on the map, and if I see a box, if it's a teammate's, be able to revive it."
+- Death boxes are tinted by owner: ally boxes in team colour with the teammate's name + portrait; enemy boxes red/neutral. The same marker shows on the minimap and the full map (ally boxes always visible to the team).
+- At an ally's box: "Hold F: take their [soul/token]" brings them back (follow the source's respawn rule; if it needs a respawn point, show the path there). Their Boki comes back with them.
+- Assert / screenshots: an ally box vs an enemy box in the world and on the map; a revive from an ally box restores the teammate.
