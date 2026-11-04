@@ -597,7 +597,7 @@ func tut(id: String, to: Vector3) -> void:
 		guide = {"id": id, "to": to, "t": 0.0, "said": false, "demo_t": 0.4}
 		lead_dir = Vector2.ZERO
 		lead_t = 0.0
-		if to != Vector3.INF and h() and id in ["chest", "goexit", "uplink", "extract"]:
+		if to != Vector3.INF and h() and id in ["chest", "pickup", "goexit", "uplink", "extract"]:
 			# off it goes straight away, the straight way first (the walked path comes on the next look)
 			guide["dir"] = Vector2(to.x - h().pos.x, to.z - h().pos.z).normalized()
 			lead_dir = guide["dir"]
@@ -611,7 +611,7 @@ func _tut_tick() -> void:
 	guide["t"] = float(guide["t"]) + 0.4
 	# which way to go: straight there, or the way a bot would walk it (bridges, gaps)
 	lead_dir = Vector2.ZERO
-	if to != Vector3.INF and o.flat_dist(to) > 2.5 and id in ["chest", "goexit", "uplink", "extract"]:
+	if to != Vector3.INF and o.flat_dist(to) > 2.5 and id in ["chest", "pickup", "goexit", "uplink", "extract"]:
 		lead_t -= 0.4
 		if lead_t <= 0.0:
 			lead_t = 0.8
@@ -628,7 +628,7 @@ func _tut_tick() -> void:
 			m.kin_bark(k, txt, "tut", 4.0)
 		if to != Vector3.INF:
 			look = to; look_t = 2.0
-			pose = "point" if id in ["chest", "goexit", "uplink", "extract"] else ("growl" if id in ["shoot", "throw", "kin1"] else "beckon")
+			pose = "point" if id in ["chest", "pickup", "goexit", "uplink", "extract"] else ("growl" if id in ["shoot", "throw", "kin1"] else "beckon")
 			pose_t = 1.6
 	# showing you how: a dash, a jump
 	guide["demo_t"] = float(guide["demo_t"]) - 0.4

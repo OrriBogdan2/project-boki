@@ -367,8 +367,8 @@ func _draw_world_labels() -> void:
 			_ctext(bp, "%s's box" % o.pname if o != m.player else "Your box", 12, Life.box_color(b), big)
 	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
-	if m.opts.get("tutorial", false) and m.tut_target != Vector3.INF and m.player and not m.player.out and not m.tut_kin_leading():
-		_draw_waypoint(m.tut_target, m.tut_label, Color("8fe3c8"))     # (your Boki leading the way replaces it)
+	if m.opts.get("tutorial", false) and m.tut_target != Vector3.INF and m.player and not m.player.out:
+		_draw_waypoint(m.tut_target, m.tut_label, Color("8fe3c8"))     # (always drawn, even with your Boki leading)
 	_draw_exit_labels()
 	_draw_lair_labels()
 	_draw_truce_marks()
@@ -911,14 +911,14 @@ func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 	var on := not behind and Rect2(Vector2(40, 110), sz - Vector2(80, 230)).has_point(tp)
 	if on:
 		var p := tp + Vector2(0, bob)
-		c.draw_circle(p, 13.0, Color(0, 0, 0, 0.45))
-		c.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -11), p + Vector2(9, 0), p + Vector2(0, 11), p + Vector2(-9, 0)]), col)
-		c.draw_colored_polygon(PackedVector2Array([p + Vector2(-7, 15), p + Vector2(7, 15), p + Vector2(0, 26)]), col)
-		_ctext(p + Vector2(0, 44), "%s  ·  %dm" % [label, dist], 15, col, big)
+		c.draw_circle(p, 24.0, Color(0, 0, 0, 0.5))
+		c.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -20), p + Vector2(16, 0), p + Vector2(0, 20), p + Vector2(-16, 0)]), col)
+		c.draw_colored_polygon(PackedVector2Array([p + Vector2(-12, 27), p + Vector2(12, 27), p + Vector2(0, 46)]), col)
+		_ctext(p + Vector2(0, 70), "%s  ·  %dm" % [label, dist], 22, col, big)
 		# a ring on the ground under it
 		if not behind:
 			var gp := cam.unproject_position(at + Vector3(0, 0.05, 0))
-			c.draw_arc(gp, 16.0 + bob, 0, TAU, 28, Color(col, 0.7), 2.5, true)
+			c.draw_arc(gp, 28.0 + bob, 0, TAU, 28, Color(col, 0.85), 4.0, true)
 	else:
 		var ctr := sz * 0.5
 		var d := (tp - ctr).normalized() if not behind else (ctr - tp).normalized()
@@ -930,9 +930,9 @@ func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 		var t := minf(hx / maxf(0.001, absf(d.x)), hy / maxf(0.001, absf(d.y)))
 		var edge := ctr + d * t + d * bob * 0.5
 		var perp := Vector2(-d.y, d.x)
-		c.draw_colored_polygon(PackedVector2Array([edge + d * 24.0, edge - d * 8.0 + perp * 15.0, edge - d * 8.0 - perp * 15.0]), Color(0, 0, 0, 0.5))
-		c.draw_colored_polygon(PackedVector2Array([edge + d * 20.0, edge - d * 6.0 + perp * 12.0, edge - d * 6.0 - perp * 12.0]), col)
-		_ctext(edge - d * 34.0, "%s  %dm" % [label, dist], 15, col, big)
+		c.draw_colored_polygon(PackedVector2Array([edge + d * 44.0, edge - d * 12.0 + perp * 28.0, edge - d * 12.0 - perp * 28.0]), Color(0, 0, 0, 0.5))
+		c.draw_colored_polygon(PackedVector2Array([edge + d * 38.0, edge - d * 9.0 + perp * 23.0, edge - d * 9.0 - perp * 23.0]), col)
+		_ctext(edge - d * 62.0, "%s  %dm" % [label, dist], 22, col, big)
 
 ## An exit on the minimap: a little boat for a skiff dock, a diamond for a rift hatch, a walled square
 ## with a mast for an outpost. Bright when it's usable, grey when not; a pulsing ring while it's going.

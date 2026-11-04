@@ -364,18 +364,25 @@ func _tutorial() -> void:
 	var hints := {}
 	var t := 0.0
 	var last_step := -1
+	var no_marker := 0
 	while t < 420.0 and not m.player.extracted:
-		m._tut_drive()
+		Tutorial.drive(m)
 		m.step(Match.DT); t += Match.DT
 		var id := m.tut_id() if m.tut_step >= 0 and m.tut_step < Match.TUT.size() else ""
 		if m.player.kin and (m.player.kin.comp.leading() or m.player.kin.comp.guide.get("to", Vector3.INF) != Vector3.INF and m.player.kin.seen_pos().distance_to(m.player.kin.comp.guide["to"]) < 2.2):
 			led[id] = true
+		var goes_somewhere := id in ["chest", "pickup", "goexit", "uplink", "defend", "extract"]
+		if m.tut_step == last_step and goes_somewhere and m.tut_target == Vector3.INF:
+			no_marker += 1
+			print("TMDBG nomarker ", id, " wait=", m.tut_wait, " t=", snapped(t, 0.1))
 		if m.tut_step != last_step:
 			last_step = m.tut_step
+			print("TMDBG step ", id, " t=", snapped(t, 0.1), " kin=", m.player.kin.state if m.player.kin else "-", " led=", led.keys())
 	for e in m.player.kin.comp.history:
 		hints[String(e["cat"])] = true
 	print("  tutorial: %.0fs, led on %s, hints %s" % [t, str(led.keys()), str(hints.keys().filter(func(x): return String(x).begins_with("tut_") or String(x).begins_with("demo_")))])
 	ok(m.player.extracted, "the tutorial still finishes (extracted at %.0fs)" % t)
+	ok(no_marker == 0, "the marker is up on every destination step frame (%d without)" % no_marker)
 	ok(led.has("chest") and led.has("goexit"), "it leads you to (or gets to) the chest and the outpost")
 	ok(hints.keys().filter(func(x): return String(x).begins_with("tut_")).size() >= 6, "a hint in its own voice for each step")
 	ok(hints.has("demo_dash") and hints.has("demo_jump"), "it shows you a dash and a jump")
