@@ -1,26 +1,21 @@
-# Vex: import note
+# Vex (r2): import note
 
-`vex.glb` is a Meshy image-to-3D model fitted to the Warden contract in Blender by script, nothing hand-edited.
-The steps, settings and run log are in docs/art/wardens/PIPELINE.md.
+`vex.glb` is the r2 Vex (owner-approved art: docs/art/gen/wardens_r2/vex_* on ext/imagegen): one Meshy
+image-to-3D run fitted to the Warden contract in Blender by script, nothing hand-edited. Steps and run log:
+docs/art/wardens/PIPELINE.md.
 
-    blender -b --factory-startup --python tools/meshy/vex_inputs.py -- ~/meshy/vex ~/meshy/vex/prep2
-    python3 -I tools/meshy/meshy_task.py create ~/meshy/vex/run3 <prep2 front, side, back> --polycount 30000
-    python3 -I tools/meshy/meshy_task.py create ~/meshy/vex/run2_rifle <rifle_front, rifle_back> --polycount 6000 --pose ""
-    python3 -I tools/meshy/meshy_task.py create ~/meshy/vex/run5_head <prep2 head_portrait> --polycount 20000 --pose ""
+    blender -b --factory-startup --python tools/meshy/vex_inputs.py -- ~/meshy/vex_r2/vex_turnaround.png ~/meshy/vex_r2/prep
+    blender -b --factory-startup --python tools/meshy/vex_inputs.py -- ~/meshy/vex_r2/vex_turnaround_2k.png ~/meshy/vex_r2/prep2k
+    python3 -I tools/meshy/meshy_task.py create ~/meshy/vex_r2/run1 prep/view0.png prep/view1.png prep/view2.png prep/view3.png --polycount 30000
     godot --headless -- --warden-rig-json --warden=gunslinger      # -> art/wardens/src/vex_rig.json
     blender -b --factory-startup --python tools/meshy/fit_warden.py -- art/wardens/src/vex_fit.json
 
-- **Body:** Meshy multi-image-to-3D from her turnaround's front, side and back (rifle painted out), as drawn:
-  mechanical RIGHT arm, the sigil plate on her right shoulder. Posed into the contract rest pose.
-- **Head:** a separate Meshy run from the portrait (her face, eye, smile and beret badge), mirrored so the lens is
-  on her right eye as the turnaround and her Warden block have it (the portrait draws it on her left), fitted onto
-  the body's beret; the turnaround's back view is painted onto the back of the head.
-- **Texture:** Meshy's base colour, flattened toward the sheet's own colours (median, then halfway to the nearest
-  of the sheet's 18 colours), lifted a step; the scarf's orange made flat; the profile projected onto the plate.
-  Materials are named "<slot>-<texture>" after the toon slots; the game shades them with the hero toon shader
-  (albedo only, no PBR maps, no procedural brushwork).
-- **Weapon:** a separate Meshy run of the rifle alone, fitted to the Gun node's space (`weapon`, muzzle at the
-  Gun's Muzzle). It has no separate magazine, so the procedural Mag node is emptied.
-- **Armature:** the shared contract skeleton; body auto-weighted, the head rigid on `head`. 14.3k triangles in
-  the body and head, 5.8k in the rifle. Anchors: `anchor_head_top`, `anchor_chest`.
-- `vex.glb.import` has `generate_lods=false` (the LODs collapsed her face at the match camera).
+- **Body:** from the turnaround's four views as drawn: minigun RIGHT arm, monocle on her left eye. Posed into the
+  contract rest pose; head x1.12, free hand x1.2, girth x1.06 over the art (game proportions); 15k triangles.
+- **Gun-arm:** the minigun cut from her right forearm into `weapon` (the Gun node's space, its muzzle on the
+  Gun's Muzzle; 5.8k triangles), its barrels the child `weapon_spin`, which HunterAnim spins while firing; the
+  vents on the glow slot. Her stance (ext/warden-stance) hangs it barrel-down at her side.
+- **Texture:** Meshy's base colour, filtered and flattened toward the sheet's colours within each UV island
+  only, lifted; the 2000 px art projected on her face, hair, vest (front) and back. Materials named
+  "<slot>-<texture>"; the game shades the atlas with a soft light toon ramp (no self-shadow, AO or ink shell).
+- `vex.glb.import`: `generate_lods=false`, `force_disable_compression=true`.

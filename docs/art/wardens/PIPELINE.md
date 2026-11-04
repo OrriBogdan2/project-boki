@@ -116,6 +116,24 @@ profile views before any run.
    - a match frame with a x4 crop;
    - the move strips.
 
+## r2 additions (Vex, 2026-11-04): use these for the other 11
+- **Crops:** a four-view turnaround goes in as all four views (front, 3/4, near profile, back), each padded square and
+  enlarged to >= 1024 px (tools/meshy/vex_inputs.py takes the sheet and writes view0..3 plus views.json).
+  The 2000 px sheet is for the texture projection.
+- **Weapon fused to an arm** (`gun_arm` in the fit spec): elbow and tip points in the Meshy frame, radius r.
+  The fit cuts it off the body into the `weapon` mesh in the Gun node's space. Its barrels past `spin` become
+  `weapon_spin` (HunterAnim spins them while firing), and `glow_min` puts its vents on the glow slot.
+- **Game proportions** (`chunk`): head x1.12 and the free hand x1.2 grown on the mesh, girth x1.06.
+  The archetype body (head 0.72, legs 1.58, build 1.05, size 0.97) puts the rig's joints on them.
+- **Texture:** never filter or project across Meshy's UV crumbs. The fit maps every UV island, filters within one
+  island only, and pads islands into the gaps; v2's patchy facets were cross-island bleed. Turn Meshy's
+  inward-wound triangles outward and neighbour-average the shading normals (`normal_smooth`). Don't use a
+  smoothed copy: its normals flip on thin hair strands.
+- **Godot shading of a painted atlas** (WardenGlb): soft and light toon ramp (`shade` 0.72, `ramp` 2.6), no
+  self-shadow from the sun's shadow map (`self_shadow` 0), no vertex AO, no ink shell, no procedural brushwork.
+- **Stance:** the Warden's carry in content/rules/warden_stance.json (ext/warden-stance) must suit the model:
+  Vex r2's gun-arm hangs barrel-down at her right side.
+
 ## Commercial terms (checked 2026-11-04, meshy.ai/terms-of-use section 3.2)
 - **Paid plans:** the customer owns the output ("to the extent possible under applicable law") and can keep it private.
 - **Free plans:** CC BY 4.0 with attribution to Meshy. **Use the owner's paid key only.**
@@ -133,7 +151,6 @@ profile views before any run.
 
 | Vex retexture | 2026-11-04 02:12 | 01a1a454-5cdc-703c-ab73-b40134e4661b | meshy-7 retexture | run-3 body, multiview front/side/back (prep2), original UVs, remove_lighting, no PBR | 10 | Dropped: nearly identical to v2 after the fit's flatten; no clear gain on the vest or plate |
 
-Vex total: 6 tasks, 160 credits.
 
 
 ## Owner direction for the next Warden runs (2026-11-04 02:45 UTC)
@@ -141,3 +158,7 @@ Vex total: 6 tasks, 160 credits.
 - Colour: aim for **flat, clean, bright painted colour with no mottled grain**. Vex v2's baked speckle was the main complaint.
 - Proportions: use **slightly chunkier game proportions**: a bigger head and hands and a thicker silhouette, so each Warden reads at match zoom. Do this through the archetype `body` (step 7) and the fit, even where the art is slimmer.
 - Pose: item 52 adds a signature stance and idle per Warden as data on the shared rig (content/rules/warden_stance.json). The fit keeps the A-pose rest; the stance is applied at runtime.
+| Vex r2 | 2026-11-04 03:29 | 01a1a49a-5239-71e0-9906-570cbfd9715e | latest | r2 turnaround (2x enlarged): front, 3/4, near profile (her right), back; 30k, PBR, A-pose | 30 | Kept: one run; gun-arm, monocle, streak, bun and bolt, candles, vest, tights all came through. The later side view (ponytail) was not needed |
+
+Vex total: 7 tasks, 190 credits (balance before r2: 940).
+
