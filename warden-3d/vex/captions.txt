@@ -31,3 +31,17 @@ meshy_gameplay_match.png: a real match at the default camera, Vex at the centre
 meshy_gameplay_zoom.png: that frame around her, x4 (nearest)
 meshy_moves_run_fire.png: run (two stride phases), shoot, recoil
 meshy_moves_dash_throw.png: Combat Slide at three moments, the RMB throw
+
+meshy_v3_retexture_vs_v2_closeup.png: v2 (left) vs the Meshy retexture of the body from the clean sheet views (right): no clear gain, not adopted
+meshy_v3_retexture_vs_v2_turnaround.png: v2 (top) vs the retexture (bottom), five angles: nearly identical
+
+Vex r2 (owner-approved punk cyborg art; one Meshy run from the r2 turnaround's 4 views; stance from ext/warden-stance with the r2 gun-arm carry):
+r2_vs_turnaround.png: the r2 turnaround (top) over the in-game model close, five angles: gun-arm on her RIGHT, monocle on her left eye, black hair with the orange streak, the bolt in the bun, candles on the shoulder; hip cocked, left hand on the hip, gun-arm hanging
+r2_vs_turnaround_gameplay.png: the r2 turnaround over the same five angles at the match camera (true pixels, then x3)
+r2_vs_portrait.png: the r2 portrait (left), the in-game head and shoulders from the front and at 3/4
+r2_closeup.png / r2_closeup_34.png: in game, front and 3/4
+r2_front_34.png: full length, front and 3/4
+r2_gameplay_match.png: a training match at the default camera (Vex centre, next to a staggerable brute)
+r2_gameplay_zoom.png: that frame around her, x4 (nearest)
+r2_moves_run_fire.png: run (two phases), firing (the gun-arm comes up to aim; the barrels spin while firing)
+r2_moves_dash_throw.png: Combat Slide at three moments, the RMB throw
