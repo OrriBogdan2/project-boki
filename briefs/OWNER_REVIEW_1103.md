@@ -668,3 +668,12 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
   - explain G (the single Boki button), with one try;
   - explain levelling up and unlocking abilities, and the keys or commands involved.
 - Keys: "Oh look, there's a key! Grab it so you can open a chest", making clear that chests need keys.
+
+## 86. Outposts: a clear physical structure instead of a VFX circle, with less clutter (owner, 23:04 UTC Nov 4)
+- Owner: "the outpost needs to look more clear, not just be a circle with VFX, and it shouldn't cause visual clutter."
+- Make each outpost a readable built object: a small stone or timber structure (a waystone, a beacon post, or a little shrine with a banner) whose silhouette you recognise from the top-down camera. It shows its state through the object itself: unlit or neutral, being captured (the beacon fills or lights up), and owned (lit in the team colour, banner raised).
+- Keep the capture area as a subtle ground edge, a thin ring line or a change in the ground tint, only while it matters (when you're inside or it's contested). A ground ring means gameplay, so keep it but make it quiet.
+- Remove the always-on particles and big VFX discs. Keep motion minimal (a flag stirring, a soft glow) so several outposts on screen don't add clutter.
+- Check against the minimap and full-map icons so they match the new look.
+- Screenshots: an outpost at match zoom in its neutral, capturing and owned states, plus a view with 2–3 outposts and a fight nearby to check the clutter.
+- Logged for whoever has budget (map/world art).
