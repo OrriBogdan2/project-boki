@@ -126,6 +126,9 @@ A model's own shading (content/rules/warden_look.json, keyed by its art name; `W
 `painted` sets hero-toon parameters on all of its surfaces, `slots` per slot, e.g. Vex's skin and gunmetal
 with less top light and rim than the shared painted look, her lens and collar seams brighter on `glow`.
 Materials tagged `braid` ("hair-braid") take the ink line on the hair slot (clean geometry, no ragged strands).
+`halos` in the same file hang a glow disc of a constant size on screen on an anchor empty of the model (Vex:
+`anchor_lens`, exported by the fit with its lens): a lens a pixel wide at the match camera still reads; the disc is
+outside the .glb (a RemoteTransform3D on the anchor carries it), so the skin, bounds and slot checks never see it.
 A painted (Meshy) atlas is shaded by `WardenGlb.PAINTED` (soft, near-white toon light, a light rim, brighter at
 the match camera) with a thin ink shell that never grows past the fit's ink room, the vertex colour's alpha.
 The loader puts each material's base-colour texture (the atlas) on `hero_toon.gdshader`'s `albedo_tex`

@@ -68,7 +68,7 @@ const GLOW := 1.6              # emission of the glow slot (mechanical eyes, cra
 ## 4 mm line close up), and never more than the fit's ink room at a vertex (outline.gdshader ink_mask). At the
 ## match camera a full-width line round every belt, buckle and candle of a scanned model added up to a smudge.
 const INK_WIDTH := 0.0006
-const INK_FAR_THIN := 0.8       # the ink this much thinner at the match camera (outline.gdshader far_thin)
+const INK_FAR_THIN := 0.8      # the ink this much thinner at the match camera (outline.gdshader far_thin)
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
 ## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model (or a design
@@ -87,6 +87,7 @@ static var _measuring := false  # building that neutral model: no .glb on it
 static var _variants = null     # art name -> the design variant the command line picks (variant())
 static var _look = null         # content/rules/warden_look.json, read once (look())
 const LOOK_PATH := "res://content/rules/warden_look.json"
+const HALO := preload("res://shaders/warden_halo.gdshader")
 
 static func path(arch: String) -> String:
 	var nm := art(arch)
@@ -171,6 +172,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch))))
 	_lights(glb, look(art(arch)))
+	_halos(root, glb, look(art(arch)))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
 	_hold_weapon(root, glb)
@@ -254,6 +256,36 @@ static func _lights(glb: Node, own: Dictionary) -> void:
 		om.omni_range = float(l.get("range", 2.0))
 		om.shadow_enabled = false
 		at.add_child(om)
+
+## The model's glow halos (warden_look.json "halos": anchor, color, px, near, far, strength): a lens that is a
+## pixel wide at the match camera reads as a glow there (shaders/warden_halo.gdshader). Each halo is a small quad
+## under the model root, carried by a RemoteTransform3D on its anchor (so nothing walking the .glb's meshes, the
+## skin or the bounds, sees it); meta "halo".
+static func _halos(root: Node3D, glb: Node3D, own: Dictionary) -> void:
+	for hs in own.get("halos", []):
+		var anchor_node := glb.find_child(String(hs["anchor"]), true, false) as Node3D
+		if anchor_node == null:
+			continue
+		var mi := MeshInstance3D.new()
+		mi.name = "Halo_" + String(hs["anchor"])
+		var quad := QuadMesh.new()
+		quad.size = Vector2(0.04, 0.04)
+		mi.mesh = quad
+		mi.extra_cull_margin = 0.5
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var m := ShaderMaterial.new()
+		m.shader = HALO
+		for k in hs:
+			if k != "anchor":
+				m.set_shader_parameter(k, _param(hs[k]))
+		mi.material_override = m
+		mi.set_meta("halo", true)
+		root.add_child(mi)
+		var follow := RemoteTransform3D.new()
+		follow.name = "HaloFollow"
+		follow.update_scale = false
+		anchor_node.add_child(follow)
+		follow.remote_path = follow.get_path_to(mi)
 
 ## A warden_look value as a shader parameter: [r, g, b(, a)] is a colour.
 static func _param(v: Variant) -> Variant:
