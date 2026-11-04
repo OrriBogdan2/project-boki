@@ -56,16 +56,19 @@ const INK_TAGS := ["braid"]
 ## The scene's light leans cool and violet (Look: a c4cbe6 ambient, about half the light on a painted model, and a
 ## blue fill), which turned a painted atlas's skin lilac and its blacks muddy: ambient_cut and own_ambient swap the
 ## scene's ambient for a warm-neutral one a step brighter, light_neutral takes the hue out of the cool fill (the
-## warm key keeps its warmth), dark_lift raises near-black paint one step; the shadow tint is warm.
+## warm key keeps its warmth), dark_lift raises near-black paint one step; the shadow tint is warm. At the match
+## camera far_smooth takes the atlas's fine detail out (no speckle) and the ink thins (INK_FAR_THIN); a Hunter's
+## signature rim there is rim_far / rim_far_color in its warden_look.json "painted".
 const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(1.0, 0.95, 0.91), "shadow_sat": 0.0, "sss": 0.0,
 	"sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3, "fres_tint": 0.95, "rim_amount": 0.5,
 	"top_light": 1.0, "far_lift": 0.35, "ambient_cut": 1.0, "own_ambient": Vector3(0.58, 0.54, 0.5),
-	"light_neutral": 0.9, "dark_lift": 0.07}
+	"light_neutral": 0.9, "dark_lift": 0.07, "far_smooth": 0.7, "far_smooth_bias": 1.0}
 const GLOW := 1.6              # emission of the glow slot (mechanical eyes, cracks), x its painted colour
 ## The ink shell on a painted atlas: half the procedural heroes' width per metre of camera distance (the same
 ## 4 mm line close up), and never more than the fit's ink room at a vertex (outline.gdshader ink_mask). At the
 ## match camera a full-width line round every belt, buckle and candle of a scanned model added up to a smudge.
 const INK_WIDTH := 0.0006
+const INK_FAR_THIN := 0.8       # the ink this much thinner at the match camera (outline.gdshader far_thin)
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
 ## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model (or a design
@@ -312,6 +315,7 @@ static func _painted_ink() -> ShaderMaterial:
 		_ink.shader = Models.OUTLINE
 		_ink.set_shader_parameter("width", INK_WIDTH)
 		_ink.set_shader_parameter("ink_mask", true)
+		_ink.set_shader_parameter("far_thin", INK_FAR_THIN)
 	return _ink
 
 ## How far the player's colour pick moves a painted slot from the Warden's own colour (white: not at all).
