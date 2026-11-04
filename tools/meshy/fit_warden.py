@@ -1481,7 +1481,7 @@ def touch_up(ob, img, rules):
     uv = ob.data.uv_layers.active.data
     for r in rules:
         box = r.get("box")
-        col = np.array(K.hexcol(r["colour"]), np.float32)
+        col = np.array(K.hexcol(r.get("colour", "808080")), np.float32)
 
         def pick(poly, c, mat, r=r, box=box):
             if r.get("slot") and not mat.startswith(r["slot"]):
@@ -1539,6 +1539,10 @@ def touch_up(ob, img, rules):
             n_bad = _fill_texels(px, m, r["fill_hsv"], int(r.get("iterations", 80)), col, int(r.get("erode", 0)))
             log("touch-up fill %s: %d of %d texels" % (r.get("name", ""), n_bad, int(m.sum())))
             continue
+        if r["mode"] in ("cap", "desat"):
+            n_t = _texel_tone(px, m, r)
+            log("touch-up %s %s: %d of %d texels" % (r["mode"], r.get("name", ""), n_t, int(m.sum())))
+            continue
         rgb = px[m, :3]
         val = rgb.max(axis=1, keepdims=True) / max(float(col.max()), 1e-3)
         if r["mode"] == "warm":
@@ -1555,6 +1559,29 @@ def touch_up(ob, img, rules):
         px[m, :3] = out
         log("touch-up %s %s: %d texels" % (r["mode"], r["colour"], int(m.sum())))
     img.pixels = px.ravel()
+
+
+def _texel_tone(px, m, r):
+    """Texel by texel inside the picked faces' texels `m`: "cap" compresses values above `cap` (by `k`: a skin's
+    blown highlights, Vex's upper chest), "desat" takes `k` of the saturation out of texels whose hue is within
+    `hue` [h0, h1] (h0 > h1 wraps) and saturation at least `sat_min` (her eyeshadow's magenta to the face sheet's
+    smoky plum). Returns the texels changed."""
+    rgb = px[..., :3]
+    hq, sq, vq = _hsv_px(rgb)
+    k = float(r.get("k", 0.4))
+    if r["mode"] == "cap":
+        t = float(r["cap"])
+        sel = m & (vq > t)
+        nv = t + (vq[sel] - t) * k
+        rgb[sel] = rgb[sel] * (nv / np.maximum(vq[sel], 1e-6))[:, None]
+    else:
+        h0, h1 = r["hue"]
+        hue_ok = (hq >= h0) & (hq <= h1) if h0 <= h1 else (hq >= h0) | (hq <= h1)
+        sel = m & hue_ok & (sq >= float(r.get("sat_min", 0.0)))
+        grey = rgb[sel].mean(axis=1, keepdims=True)
+        rgb[sel] = rgb[sel] * (1.0 - k) + grey * k
+    px[..., :3] = rgb
+    return int(sel.sum())
 
 
 def _fill_texels(px, m, q, iterations, col, erode=0):
@@ -1647,10 +1674,15 @@ def stamp_lines(ob, img, sp):
             e &= np.roll(e, 1, 0) & np.roll(e, -1, 0) & np.roll(e, 1, 1) & np.roll(e, -1, 1)
         for _i in range(op + 1):
             e |= np.roll(e, 1, 0) | np.roll(e, -1, 0) | np.roll(e, 1, 1) | np.roll(e, -1, 1)
+        wide = on & e
         on &= ~e
     sk = _thin(on)
     ri, ci = np.nonzero(sk)
     pts = [(c0 + c, r0 + r) for r, c in zip(ri, ci)]
+    if op and sp.get("keep_wide"):
+        # (the wide parts stamped whole: the round nodes of a face's circuit, where no hair is in the box)
+        wr, wc = np.nonzero(wide)
+        pts += [(c0 + c, r0 + r) for r, c in zip(wr, wc)]
     skset = set(zip(ri.tolist(), ci.tolist()))
     for r, c in zip(ri.tolist(), ci.tolist()):
         for dr, dc in ((0, 1), (1, -1), (1, 0), (1, 1)):
@@ -1810,10 +1842,13 @@ def chunk(ob, rig, ck):
             continue
         piv = np.array(K.bone_head(rig, bone)[:])
         kk = float(ck[key]) - 1.0
+        # (head_x: the head a little wider than that again, a face that read small and gaunt: Vex r3h)
+        kx = float(ck.get("head_x", 1.0)) - 1.0 if bone == "head" else 0.0
         for v in ob.data.vertices:
             w = next((x.weight for x in v.groups if x.group == g.index), 0.0)
             if w > 0.0:
                 co[v.index] = piv + (co[v.index] - piv) * (1.0 + kk * w)
+                co[v.index, 0] = piv[0] + (co[v.index, 0] - piv[0]) * (1.0 + kx * w)
     gk = float(ck.get("girth", 1.0))
     co[:, 0] *= gk
     co[:, 1] *= gk

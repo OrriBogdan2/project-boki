@@ -51,6 +51,11 @@ uniform float ambient_cut = 0.0;
 uniform vec3 own_ambient = vec3(0.0);
 uniform float light_neutral = 0.0;
 uniform float light_neutral_warm = 0.0;   // the same for warm lights (per model: black cloth under an orange sun)
+// a painted colour that glows (per model: Vex's circuit tattoos on her skin read at night): texels within
+// glow_key_width of glow_key_color take glow_key x their colour as emission; 0 = none
+uniform float glow_key = 0.0;
+uniform vec4 glow_key_color : source_color = vec4(0.3, 0.76, 0.37, 1.0);
+uniform float glow_key_width = 0.12;
 // near-black paint lifted to this linear floor (jacket, trousers and gun no longer merge to black at the match
 // camera); mid and light colours keep their value and saturation
 uniform float dark_lift = 0.0;
@@ -211,6 +216,10 @@ void fragment() {
 			+ rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog) * (far_spec - 1.0) * far_p
 			- rim_far_color.rgb * fr * rim_far * far_k * far_rim_soft + rim_far_color.rgb * frs * 0.6
 			+ (gf - gc) * step(0.0001, glow);
+	}
+	if (glow_key > 0.0) {
+		float gk = 1.0 - smoothstep(glow_key_width, glow_key_width * 2.0, distance(c, glow_key_color.rgb));
+		EMISSION += c * glow_key * gk;
 	}
 }
 

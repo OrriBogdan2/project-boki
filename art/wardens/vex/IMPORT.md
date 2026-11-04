@@ -96,3 +96,14 @@ r3g (the r3f report's next steps; credit-free):
 - **Gun mount:** the whole block on metal (a value rule had split it with the black jacket: dark blotches) and
   flattened to gunmetal.
 - **Halo:** lime [0.7, 1.0, 0.25], a hue apart from the hair's green (it was lost in the hair at the match camera).
+
+r3h (ORCH's 17:10 review of r3f; credit-free):
+- **Face:** the eyeshadow's magenta taken to the face sheet's smoky plum (`desat`); the head a little larger and
+  wider (chunk head 1.21, head_x 1.04: it read small and gaunt); the cheek and temple circuits stamped from the
+  face sheet, their round nodes whole.
+- **Chest and belly:** the upper chest's blown highlights capped (`cap`), more of the strap streaks filled; the
+  belly's Meshy green filled further down in saturation before its circuit strokes.
+- **Gorget:** its grey plates taken to bronze (`warm`), its seams stamped green on the glow slot.
+- **Gun mount and left sleeve:** the mount a darker flat gunmetal, the left sleeve flat black leather.
+- **Night:** the circuit tattoos glow (`glow_key` on the skin slot, hero_toon); the lens and the gorget's seams
+  were on the glow slot already. The lens halo is lifted 3.5 cm toward the camera, in front of her fringe.
