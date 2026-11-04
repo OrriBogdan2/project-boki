@@ -1,0 +1,10 @@
+Dredge (r2), the friend's hand-made Blender model fitted to the Warden contract (ext/warden-dredge-friend). No Meshy credits.
+"stance" = with ext/warden-stance 4f9487a0 cherry-picked on a scratch branch (item 52: hunched, arms low, the horn hanging); "as built" = this branch alone (the horn held in the shotgun's two-handed grip).
+r2_dredge_front.png: turnaround FRONT | portrait | in game, front close-up, stance | in game, front, as built.
+r2_dredge_34.png: turnaround 3/4 | portrait | in game, 3/4 close-up, stance | in game, 3/4, as built.
+r2_dredge_back.png: turnaround BACK | portrait | in game, back, stance | in game, back, as built (cut from the 256 px close turnaround, so soft).
+r2_dredge_turnaround.png: the art's turnaround | in game, front, 3/4, side, back, 3/4 back, close camera, stance.
+r2_dredge_closeup.png: portrait | in game, the porthole helm front | 3/4 (head close-ups, stance).
+r2_dredge_game_turnaround.png: the match camera, true pixels (top) and enlarged x3 (bottom), stance.
+r2_dredge_match.png: the Arena at match zoom (--arena=dredge --record=2 --arena-demo=pose --demo-zoom=1.0), stance | the same frame enlarged around him.
+r2_dredge_moves.png: kit moves on the 3D model, one row each (Arena demo pr_<move>, stance): Grapnel throw (the claw spreads, the rope leaves from the claw, the hanging rope and hook gone in flight) | reel (claw clenched, drum winding) | Anchor Drop | barge lunge | scattergun shot | air smash (dive) | Brass Broadside.
