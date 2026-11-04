@@ -59,3 +59,16 @@ r3i (credit-free, ORCH's r3h review): a small glowing orb in a wide brass ring; 
 r3i_dredge_turnaround.png | r3i_dredge_front_34.png | r3i_dredge_back.png | r3i_dredge_closeup.png | r3i_dredge_match.png | r3i_dredge_moves.png: as for r3.
 r3i_dredge_vs_r3h.png: portrait | r3h front | r3i front | r3h helm | r3i helm | r3h match | r3i match.
 (r3i shots are on the shared match-zoom v2 port: no speckle fringe at the match camera, the eye a red halo.)
+
+r3j (credit-free, ORCH 17:10/17:15): the r3i limb loss fixed (the thin rods, claw, rope and hook collapsed in the decimation; now each gets its own share); collapse shards dropped; smaller shoulder pods; warmer gold; a bright gold rim at match zoom; a smaller, darker tar pool. Match frames on matchzoom-v2's pose_clear (no aim line, props or overlays).
+r3j_dredge_turnaround.png | r3j_dredge_front_34.png | r3j_dredge_back.png | r3j_dredge_closeup.png | r3j_dredge_match.png | r3j_dredge_moves.png: as for r3.
+r3j_dredge_vs_r3i.png: turnaround front | r3i front | r3j front | r3i match | r3j match.
+r3j_dredge_cause.png: the r3h (left) and r3i (right) .glb rendered in Blender, no game shaders: the limbs already gone in the mesh.
+r3j_dredge_match.png: turnaround front | the Arena at match zoom on pose_clear | x4 on DEMO_HERO_RECT (575,265,128,170): every leg rod, the claw arm and the rope read.
+r3j_dredge_night.png: the splash (night) | the Arena with --raid=night on pose_clear | x4 on the hero. (The arena's night is only mildly darker than day.)
+
+r3k (credit-free, on main sync91 fe51b43b's rig standard): the cargo hook x1.9; deeper dents (18, 5-11% of the radius) breaking the hull's outline; jointed legs (knee balls, bent knees standing and walking); faint smoke wisps off the shoulders (kit fx, not in the turnaround tool's frames); a brighter hull and brass, lighter iron limbs against the grass, a stronger gold far rim. Limbs kept by the r3j per-part budgets (protect + drop_small).
+r3k_dredge_turnaround.png: the art | front, 3/4, side, back, 3/4 back. r3k_dredge_front_34.png | r3k_dredge_back.png | r3k_dredge_closeup.png | r3k_dredge_closeup_front.png | r3k_dredge_moves.png: as for r3.
+r3k_dredge_match.png: portrait | the Arena at match zoom on pose_clear | x4 on DEMO_HERO_RECT (575,265,128,170).
+r3k_dredge_night.png: the Arena with --raid=night on pose_clear | x4 on the hero.
+r3k_dredge_vs_r3j.png: r3j turnaround over r3k turnaround. r3k_dredge_vs_r3j_match.png: r3j x4 | r3k x4.
