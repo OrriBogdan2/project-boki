@@ -573,8 +573,6 @@ func open_dex(spk: String) -> void:
 	DexView.detail(v, spk, get_tree())
 
 func open_inventory() -> void:
-	if Progress.day1_mark("inventory") != "":
-		Sfx.play("unlock", null, -8.0)
 	var v := _page("inventory", "Inventory", 760)
 	UI.hold(v, INV_H)          # every tab the same size: switching tabs never resizes the panel
 	if inv_tab == "Items":      # one currency, and only where it matters

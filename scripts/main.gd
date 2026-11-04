@@ -663,7 +663,7 @@ func _ready() -> void:
 			# test: pet a kin indoors and show that it counted
 			get_tree().create_timer(0.5).timeout.connect(func():
 				current._pet_kin(current.kins[0])
-				print("PET day1=", Save.d["tutorial"].get("day1"), " box=", is_instance_valid(current.day1_box), " gems=", Save.d["gems"]))
+				print("PET gems=", Save.d["gems"]))
 		if "--decorate" in args:
 			get_tree().create_timer(0.5).timeout.connect(func():
 				current._toggle_decorate()

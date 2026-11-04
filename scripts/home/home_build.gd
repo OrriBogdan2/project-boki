@@ -985,9 +985,7 @@ func toggle() -> void:
 	if not can_build():
 		return
 	active = true
-	var opened := FarmUnlocks.announce()
-	if not opened.is_empty():
-		h._toast("New to build: %s" % ", ".join(opened.slice(0, 3).map(func(i): return FarmUnlocks.name_of(String(i)))))
+	cat = "Buildings"      # B always opens on Buildings
 	h.prompt_box.visible = false
 	h.cam.zoom_to = maxf(h.cam.zoom_to, 1.35)
 	h.set_build_ui(true)
@@ -1397,7 +1395,15 @@ func _draw_cells() -> void:
 			post.material_override = good; post.position = Vector3(t.x + 0.5, 0.35, t.y + 0.5)
 			ghost_cells.add_child(post)
 	FarmBuildUi.outline(ghost_cells, cells, ghost_ok)
-	FarmBuildUi.note(ghost_cells, cells, "" if ghost_ok else why)
+	if ghost_ok and held["kind"] == "deco" and String(held["id"]) == "crop_patch":
+		# a patch by water waters itself: say so in green, or that it won't
+		var wet := FarmWater.near_cells(h._d(), cells)
+		if wet:
+			FarmBuildUi.note(ghost_cells, cells, "Near water: waters itself", Color("5ff07f"))
+		else:
+			FarmBuildUi.note(ghost_cells, cells, "No water within %d tiles" % FarmWater.reach(), Color("e8e2c8"))
+	else:
+		FarmBuildUi.note(ghost_cells, cells, "" if ghost_ok else why)
 	if held["kind"] == "b" and not cells.is_empty():
 		# where the door ends up
 		var door := HomeLayout.door_at(id, cells[0].x, cells[0].y, int(held["r"]))
@@ -1713,6 +1719,8 @@ func _build_bar() -> void:
 	var tabs := UI.hbox(5)
 	col.add_child(tabs)
 	for ct in HomeLayout.CATS:
+		if not FarmBuilder.tab_shown(self, ct):
+			continue
 		var cc: String = ct
 		var tb := UI.choice(ct, ct == cat, func(): cat = cc; page = 0; _build_bar())
 		tb.add_theme_font_size_override("font_size", 14)
@@ -1773,6 +1781,7 @@ func _build_bar() -> void:
 	hint_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hint_lbl.clip_text = true
 	foot.add_child(hint_lbl)
+	FarmBuilder.add_footer(foot)
 	foot.add_child(UI.key_hints([["LMB", "place / pick up"], [Settings.key_cap("rotate"), "turn"], ["X", "store"], ["Ctrl Z", "undo"], ["Esc", "cancel"], [Settings.key_cap("build"), "done"]], 12, Color(1, 1, 1, 0.75)))
 	h.root_ui.add_child(card)
 	bar = card
@@ -1813,7 +1822,6 @@ func _tab_items() -> Array:
 					var mx := HomeLayout.max_of(id, h._d())
 					var full: bool = mx > 0 and int(lay["inv"].get(id, 0)) == 0 and HomeLayout.count_of(id, h._d()) >= mx
 					if not full and not FarmUnlocks.open(id):
-						out.append(FarmBuildUi.locked_entry(id))
 						continue
 					var bc := _entry_cost(id)
 					var en := {"t": "%s\n%s" % [fc["name"], ("built" if mx == 1 else "all placed") if full else ("" if not bc.is_empty() else price_text(id))], "cb": func(): take(iid),
@@ -1828,16 +1836,23 @@ func _tab_items() -> Array:
 			for b in h.lots:
 				var bb: String = b
 				var nm: String = Data.BUILDINGS[b]["name"]
-				if not HomeLayout.placed(b, h._d()) and not FarmUnlocks.open(b):
-					out.append(FarmBuildUi.locked_entry(b))
+				var unplaced := not HomeLayout.placed(b, h._d())
+				if unplaced and (not FarmUnlocks.open(b) or FarmBuilder.not_yet_arrived(b, h._has_b(b))):
 					continue
 				if not HomeLayout.placed(b, h._d()):
-					var cost := "free" if bool(Data.BUILDINGS[b].get("free", false)) or h._has_b(b) else "%d gems" % int(Data.BUILDINGS[b]["cost"])
+					var lcost := FarmBuilder.lot_cost(b)
+					var cost := "%d gems" % int(Data.BUILDINGS[b]["cost"])
+					if not lcost.is_empty():
+						cost = FarmSites.cost_text(lcost)
+					if h._has_b(b) or (bool(Data.BUILDINGS[b].get("free", false)) and lcost.is_empty()):
+						cost = "free"
 					out.append({"t": "%s\n%s" % [nm, "Place it" if h._has_b(b) else "Mark a lot · %s" % cost], "cb": func(): take_building(bb),
 						"on": held.get("kind", "") == "b" and String(held.get("id", "")) == b, "tip": String(Data.BUILDINGS[b]["desc"])})
 					continue
 				var isl: int = h.world.island_of(h.lots[b]["at"].x, h.lots[b]["at"].z)
 				var open: bool = isl >= 0 and _isle_ok(h.world.idx(int(floor(h.lots[b]["at"].x)), int(floor(h.lots[b]["at"].z))))
+				if FarmUnlocks.gated() and not open:
+					continue      # a lot that cannot be reached yet is not shown at all
 				out.append({"t": "%s\n%s" % [nm, "Move" if h._has_b(b) else "Move the lot"], "cb": func(): take_building(bb), "off": not open,
 					"on": held.get("kind", "") == "b" and String(held.get("id", "")) == b, "tip": "" if open else "Build the bridge to its isle first"})
 		"Upgrades":
@@ -1869,7 +1884,6 @@ func _tab_items() -> Array:
 				if String(c["cat"]) != cat: continue
 				var iid: String = id
 				if not FarmUnlocks.open(id):
-					out.append(FarmBuildUi.locked_entry(id))
 					continue
 				var pc := cost_of(id, 1)
 				var bc := _entry_cost(id)

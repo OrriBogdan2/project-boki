@@ -90,6 +90,7 @@ func run(m: Node) -> void:
 	hb.cat = "Buildings"; hb._build_bar()
 	var items: Array = hb._tab_items()
 	ok(items.any(func(it): return String(it["t"]).begins_with("House")) and items.any(func(it): return String(it["t"]).begins_with("Crop patch")), "build mode's Buildings tab offers the house and the essentials")
+	Work.add_mat("wood", 3)      # the house costs a little wood
 	hb.take("house")
 	ok(hb.held.get("id", "") == "house" and is_instance_valid(hb.ghost), "taking the house holds a ghost of it")
 	var land := HomeLayout.LANDING
@@ -108,7 +109,13 @@ func run(m: Node) -> void:
 		if mi is MeshInstance3D and ((mi as MeshInstance3D).material_override as StandardMaterial3D).albedo_color.g < 0.9: green = false
 	ok(green, "on open meadow it tints green")
 	var g0 := int(Save.d["gems"])
-	ok(hb.place_held() and int(Save.d["gems"]) == g0 - 90 + 5 and Progress.day1_steps().has("house"), "the house goes down where you chose and costs 90 gems (and ticks off the first day's first step, +5)")
+	ok(hb.place_held() and int(Save.d["gems"]) == g0 and FarmSites.is_site(HomeLayout.of(Save.d)["deco"][-1]),
+		"the house goes down where you chose as a free construction site")
+	var house_site: Dictionary = HomeLayout.of(Save.d)["deco"][-1]
+	while FarmSites.has_site(house_site):
+		FarmSites.add_swing(house_site)
+	hb.apply(false)
+	home._sync_fixtures()
 	ok(home.spots["house"].x > 0.0 and home.spots["house"].distance_to(HomeLayout.rect_center([hc[0].x, hc[0].y, hc[14].x, hc[14].y])) < 0.6 and is_instance_valid(home.house_node), "the farm knows where its house is now (%s)" % str(home.spots["house"]))
 	var dp: Vector3 = home._house_door()
 	ok(not w.is_block(dp.x, dp.z) and not w.is_void(dp.x, dp.z), "its door step is open ground (%s)" % str(dp))
@@ -122,7 +129,8 @@ func run(m: Node) -> void:
 	ok(_put(hb, pp) and home.spots["pot"].x > 0.0, "the cooking pot goes down beside it")
 	var v2 := hb.validate()
 	ok(bool(v2["ok"]), "the house door, the plots, the pot and the portal can all be walked to (%d places missed; %d of %d open reached)" % [(v2["missing"] as Array).size(), int(v2["reached"]), int(v2["open"])])
-	ok(int(Save.d["gems"]) == HomeLayout.FS_GEMS - ess + 10, "%d gems left after the essentials (with the first day's +5 for the house and the patch)" % int(Save.d["gems"]))
+	var house_gems := int(HomeLayout.CATALOG["house"]["gems"])
+	ok(int(Save.d["gems"]) == HomeLayout.FS_GEMS - ess + house_gems, "%d gems left after the patch and the pot (the house is free)" % int(Save.d["gems"]))
 	# the house can be picked up and moved again
 	var he: Dictionary = HomeLayout.fixtures(Save.d, "house")[0]
 	hb.pick_up_at(Vector2i(int(he["x"]) + 1, int(he["z"]) + 1))

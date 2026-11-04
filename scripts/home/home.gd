@@ -54,6 +54,8 @@ var petted := {}
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
+var hob: FarmHob = null            # Hob the builder: blueprints, and a hammer for sites (farm_hob.gd)
+var guide: FarmGuide = null        # the Goals card and the farm tutorial on screen (farm_guide.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
 var hmk: HomeMarket = null         # the market stall's panel (home_market.gd)
@@ -127,9 +129,7 @@ func _ready() -> void:
 		ek["level"] = 8
 		Game._evolve(ek, {})
 		Save.d["tutorial"]["home"] = true
-	# the Challenge House comes with the farm
-	if visit.is_empty() and not Save.d.get("buildings", []).has("board"):
-		Save.d["buildings"].append("board")
+	# (the Challenge House is no longer given: Hob draws it up after the first expedition and you build it, FarmBuilder)
 	# so does Old Pell's Black Market
 	if visit.is_empty() and not Save.d.get("buildings", []).has("ransom"):
 		Save.d["buildings"].append("ransom")
@@ -162,6 +162,9 @@ func _ready() -> void:
 	hb = HomeBuild.new(self)
 	hg = HomeGather.new(self)
 	hw = HomeWork.new(self)
+	if visit.is_empty():
+		hob = FarmHob.new(self)
+		guide = FarmGuide.new(self)
 	if visit.is_empty(): Work.ensure()
 	var path_col := Color("9c7a52")
 	spots["portal"] = Vector3(38.0, 0, 39.0)
@@ -258,15 +261,9 @@ func _sync_fixtures() -> void:
 	if not fs:
 		return
 	_fixture_spots()
-	if visit.is_empty() and Progress.day1_active():
-		# the first day's farm-start steps tick off as they go down
-		var r1 := Progress.day1_mark("house") if spots["house"].x > -100.0 else ""
-		var r2 := Progress.day1_mark("patch") if not HomeLayout.fixtures(_d(), "farm").is_empty() else ""
-		if (r1 != "" or r2 != "") and is_instance_valid(top_chips):
-			_refresh_day1.call_deferred()
-			_refresh_top.call_deferred()
 	var e := _fx1("house")
 	house_node = (hb.nodes.get(int(e["u"])) as Node3D) if hb and not e.is_empty() else null
+	if hob: hob.sync()
 	e = _fx1("burrow")
 	var bn: Node3D = (hb.nodes.get(int(e["u"])) as Node3D) if hb and not e.is_empty() else null
 	burrow_node = bn.get_node_or_null("Burrow") as Node3D if is_instance_valid(bn) else null
@@ -295,6 +292,7 @@ func _fs_arrivals() -> bool:
 	if int(Save.d.get("matches", 0)) < 1:
 		return false
 	var any := false
+	var put: Array = []
 	var w: World = world
 	for b in ["board", "ransom"]:
 		if HomeLayout.placed(b, _d()) or not _has_b(b):
@@ -312,8 +310,10 @@ func _fs_arrivals() -> bool:
 			hb._apply_blockers()
 			hb._reach_cache.clear()
 			any = true
+			put.append(Data.BUILDINGS[b]["name"])
 	if any:
-		HomeBuild.pending_toast = "Old Pell set up the Black Market and the Challenge House near the portal (move them in build mode)"
+		var them := "them" if put.size() > 1 else "it"
+		HomeBuild.pending_toast = "Old Pell set up the %s near the portal (move %s in build mode)" % [" and the ".join(put), them]
 	return any
 
 ## The rest of setting the island up (after the classic farm's fixed parts, or none on a farm-start island).
@@ -642,7 +642,7 @@ func _ready_rest() -> void:
 	await _slice()
 	_build_ui()
 	_refresh_top()
-	_refresh_day1()
+	if guide: guide.build_ui()
 	if building:
 		building = false
 		set_process(true)
@@ -707,7 +707,8 @@ func _build_lots() -> void:
 			n = Models.building(b)
 		else:
 			var sz := HomeLayout.base_size(b)
-			n = Models.lot(sz.x, sz.y, bd["name"], "%d gems" % int(bd["cost"]))
+			var lcost := FarmBuilder.lot_cost(b)
+			n = Models.lot(sz.x, sz.y, bd["name"], FarmSites.cost_text(lcost) if not lcost.is_empty() else "%d gems" % int(bd["cost"]))
 		holder.add_child(n)
 		lots[b] = {"node": holder, "built": built, "at": at, "door": HomeLayout.door_at(b, int(pl["x"]), int(pl["z"]), int(pl["r"]))}
 		if not HomeLayout.placed(b, _d()):
@@ -1009,6 +1010,7 @@ func _process(delta: float) -> void:
 		_keep_off_hub(root_ui.get_node_or_null("Hints") if root_ui else null)
 	_move_player(d)
 	_move_kin(d)
+	if guide: guide.tick(d)
 	_care_tick(d)
 	if hecon: hecon.tick(d)
 	_update_bubbles(d)
@@ -1983,6 +1985,11 @@ func _find_interact() -> void:
 	for i in gh_plots.size():
 		var d := p2.distance_to(Vector2(gh_plots[i].position.x, gh_plots[i].position.z))
 		if d < bd: bd = d; best = {"kind": "plot", "arr": "gh_plots", "i": i}
+	if hob:
+		var near_hob := hob.find(p2)
+		if not near_hob.is_empty():
+			bd = 0.5
+			best = near_hob
 	for nm in ["pot", "stall", "portal", "house", "ferry", "rack"]:
 		if not spots.has(nm) or (nm == "rack" and not visit.is_empty()): continue
 		var sp: Vector3 = spots[nm]
@@ -2142,6 +2149,8 @@ func _label_for(it: Dictionary) -> String:
 			if d["crop"] == "": return "Plant something"
 			var cd: Dictionary = Data.CROPS[d["crop"]]
 			if int(d["stage"]) >= int(cd["grow"]): return "Harvest the %s" % cd["name"]
+			if it["arr"] == "plots" and FarmWater.plot_near(Save.d, it["i"]):
+				return "%s: the water nearby tends it (%s)" % [cd["name"], _grow_left(it["arr"], d)]
 			if float(d.get("wt", 0.0)) <= 0.0: return "Water the %s" % cd["name"]
 			if int(d.get("wet", 2)) < 2: return "Water the %s (the rain only soaked it)" % cd["name"]
 			return "%s: watered, growing (%s)" % [cd["name"], _grow_left(it["arr"], d)]
@@ -2163,6 +2172,7 @@ func _label_for(it: Dictionary) -> String:
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
+		"hob", "site": return hob.label(it)
 		"feeder", "grave", "graveyard", "place": return hecon.label(it)
 		"station": return "Job Board" if it["id"] == "job_board" else "%s: assign a Boki" % HomeLayout.CATALOG[it["id"]]["name"]
 		"wild": return hg.label(it)
@@ -2198,6 +2208,7 @@ func _use(it: Dictionary) -> void:
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
 		"burrow": _open_burrow()
+		"hob", "site": hob.use(it)
 		"feeder", "grave", "graveyard", "place": hecon.use(it)
 		"station":
 			if it["id"] == "job_board" or not hw: open_job_board()
@@ -2496,36 +2507,6 @@ func _close_panel() -> void:
 	if was.ends_with(" evolved") or was.ends_with(" is changing") or was == "Welcome home":
 		_play_evolutions.call_deferred()
 
-# ---- your first day: the checklist lives in Progress so the house rooms can show and tick it too
-const DAY1 := Progress.DAY1
-var day1_box: PanelContainer = null
-
-func _day1_active() -> bool:
-	return visit.is_empty() and Progress.day1_active()
-
-func _day1(step: String) -> void:
-	if not visit.is_empty():
-		return
-	var r := Progress.day1_mark(step)
-	if r == "":
-		return
-	Sfx.play("unlock", null, -8.0)
-	if r == "all":
-		_toast("First day done! +30 gems")
-	_refresh_day1()
-	_refresh_top()
-
-func _refresh_day1() -> void:
-	if is_instance_valid(day1_box):
-		day1_box.queue_free()
-	day1_box = null
-	if not _day1_active():
-		return
-	day1_box = Progress.day1_box()
-	root_ui.add_child(day1_box)
-	if is_instance_valid(panel_host):
-		root_ui.move_child(day1_box, panel_host.get_index())     # menus open on top of it
-
 func _open_welcome() -> void:
 	# shown once: marked seen as soon as it opens, however it's closed
 	Save.d["tutorial"]["home"] = true
@@ -2561,19 +2542,6 @@ func _grow_left(arr: String, d: Dictionary) -> String:
 func _farm_tick() -> void:
 	if not visit.is_empty():
 		return
-	# steps done elsewhere (inside the house, the inventory) show up here
-	if _day1_active() and typeof(Save.d["tutorial"].get("day1")) == TYPE_DICTIONARY:
-		var dd: Dictionary = Save.d["tutorial"]["day1"]
-		if dd.size() >= Progress.day1_list().size():
-			Save.d["tutorial"]["day1_done"] = true
-			Save.d["gems"] = int(Save.d["gems"]) + 30
-			_toast("First day done! +30 gems")
-			Save.save_game()
-			_refresh_day1()
-			_refresh_top()
-		elif is_instance_valid(day1_box) and int(day1_box.get_meta("n", -1)) != dd.size():
-			_refresh_day1()
-			if is_instance_valid(day1_box): day1_box.set_meta("n", dd.size())
 	var now := Time.get_unix_time_from_system()
 	for arr in ["plots", "gh_plots"]:
 		var nodes: Array = plots if arr == "plots" else gh_plots
@@ -2585,8 +2553,9 @@ func _farm_tick() -> void:
 			if int(d["stage"]) >= int(cd["grow"]):
 				continue
 			var wt := float(d.get("wt", 0.0))
-			if wt <= 0.0 and raining:
-				_water(arr, i, "rain")
+			var by_water: bool = arr == "plots" and FarmWater.plot_near(Save.d, i)
+			if (wt <= 0.0 or (by_water and int(d.get("wet", 2)) < 2)) and (raining or by_water):
+				_water(arr, i, "stream" if by_water else "rain")
 				continue
 			if wt > 0.0 and now - wt >= Data.WATER_TIME * (0.5 if arr == "gh_plots" else 1.0):
 				d["stage"] = int(d["stage"]) + 1
@@ -2608,7 +2577,9 @@ func _dry_plot() -> Array:
 		var nodes: Array = plots if arr == "plots" else gh_plots
 		for i in mini(nodes.size(), Save.d[arr].size()):
 			var d: Dictionary = Save.d[arr][i]
-			if d["crop"] != "" and (float(d.get("wt", 0.0)) <= 0.0 or int(d.get("wet", 2)) < 2) and int(d["stage"]) < int(Data.CROPS[d["crop"]]["grow"]):
+			var by_water: bool = arr == "plots" and FarmWater.plot_near(Save.d, i)
+			var dry: bool = float(d.get("wt", 0.0)) <= 0.0 or int(d.get("wet", 2)) < 2
+			if d["crop"] != "" and dry and int(d["stage"]) < int(Data.CROPS[d["crop"]]["grow"]) and not by_water:
 				if arr == "plots" or _isle_open("orchard"):
 					return [arr, i]
 	return []
@@ -2625,7 +2596,6 @@ func _water(arr: String, i: int, who = "you") -> void:
 	d["wet"] = 1 if who == "rain" else 2
 	var pn: Node3D = _plot_node(arr, i)
 	if who == "you":
-		_day1("water")
 		Sfx.play("plant", null, -6.0, 0.1, 1.4)
 		fx.burst(pn.position + Vector3(0, 0.8, 0), Color("7ac8ff"), 14, 2.0)
 		if already:
@@ -2647,6 +2617,8 @@ func _open_plot(arr: String, i: int) -> void:
 			_water(arr, i)
 			return
 		var v := _new_panel(cd["name"], 440)
+		if arr == "plots" and FarmWater.plot_near(Save.d, i):
+			v.add_child(UI.label("This patch is by the water, so it waters itself.", 14, UI.GOOD))
 		v.add_child(UI.label("Watered. It grows a stage in %s while you're home, or after your next expedition." % _grow_left(arr, d), 16))
 		v.add_child(UI.label("Stage %d of %d. Tended %d time%s: %s" % [int(d["stage"]), grow, int(d.get("care", 0)), "" if int(d.get("care", 0)) == 1 else "s",
 			"water it every stage for a bigger harvest, and maybe a seed back." if int(d.get("care", 0)) < grow else "it'll be a big harvest."], 14, UI.MUTED))
@@ -2671,7 +2643,6 @@ func _open_plot(arr: String, i: int) -> void:
 			Save.d["seeds"][sk] = int(Save.d["seeds"][sk]) - 1
 			d["crop"] = sk; d["stage"] = 0; d["care"] = 0; d["wt"] = 0.0
 			Sfx.play("plant")
-			_day1("plant")
 			fx.dust(pn.position, 10)
 			_refresh_plot(arr, i)
 			Save.save_game()
@@ -2865,7 +2836,6 @@ func _pet_kin(k: Dictionary) -> void:
 	if loves_pet and Care.discover(rec, "play"): _toast("%s loves scratches" % rec["name"])
 	k["hold_t"] = 1.0
 	k["joy_t"] = 0.9
-	_day1("pet")
 	_face(k["pos"])
 	_emote(k, "♥", true)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
@@ -2925,7 +2895,6 @@ func _fetch_step(k: Dictionary, d: float) -> void:
 				f["life"] = -1.0
 				_emote(k, "★")
 				k["joy_t"] = 0.8
-				_day1("fetch")
 				Sfx.play("kin_happy", null, -6.0)
 				var rec: Dictionary = k["rec"]
 				var loves_fetch: bool = rec["likes"]["play"] == "fetch"
@@ -3359,7 +3328,7 @@ func _weapon() -> String:
 	return Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", "")))
 
 func _open_expedition() -> void:
-	_day1("portal")
+	FarmTutorial.event("portal")
 	var v := _new_panel("Expedition", 940, true)
 	UI.subtitle(v, "Pick your kit and where to drop. Everything here is saved as you change it.")
 	var cols := UI.hbox(UI.GAP_BIG + 8)
@@ -3700,16 +3669,22 @@ func _open_lot(b: String) -> void:
 		return
 	var v := _new_panel("Build a %s" % bd["name"], 500)
 	v.add_child(UI.label(bd["desc"], 16))
+	var lc := FarmBuilder.lot_cost(b)       # a farm under the building pass pays some lots in wood and stone
 	var cost := int(bd["cost"])
-	v.add_child(UI.label("Costs %d gems. You have %d." % [cost, int(Save.d["gems"])], 15, UI.GOLD if int(Save.d["gems"]) >= cost else UI.BAD))
+	var can := FarmSites.can_pay(lc) if not lc.is_empty() else int(Save.d["gems"]) >= cost
+	var cost_line := "Costs %d gems. You have %d." % [cost, int(Save.d["gems"])]
+	if not lc.is_empty():
+		cost_line = "Costs %s. You have %s." % [FarmSites.cost_text(lc), FarmSites.mats_text()]
+	v.add_child(UI.label(cost_line, 15, UI.GOLD if can else UI.BAD))
 	var btn := UI.button("Build it", func():
-		if int(Save.d["gems"]) < cost or Save.has_building(b): return
-		Save.d["gems"] = int(Save.d["gems"]) - cost
+		if Save.has_building(b) or not (FarmSites.can_pay(lc) if not lc.is_empty() else int(Save.d["gems"]) >= cost): return
+		if lc.is_empty(): Save.d["gems"] = int(Save.d["gems"]) - cost
+		else: FarmSites.pay(lc)
 		Save.d["buildings"].append(b)
 		Save.save_game()
 		_close_panel()
 		_construct(b), 200)
-	btn.disabled = int(Save.d["gems"]) < cost
+	btn.disabled = not can
 	v.add_child(btn)
 
 var wedge_t := 0.0
@@ -3805,7 +3780,7 @@ func _build_bridge_now(k: String) -> void:
 		_toast("%s is open" % Data.ISLES[k]["name"]))
 
 func _toast(txt: String) -> void:
-	UI.toast(root_ui, txt)
+	UI.toast(root_ui, txt, UI.GOLD, 100.0 + (52.0 if guide and guide.hint_visible() else 0.0))
 
 func _open_hall() -> void:
 	var v := _new_panel("Trophy Hall", 560)
