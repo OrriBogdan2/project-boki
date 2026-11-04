@@ -398,9 +398,9 @@
     1.2,
     null
    ],
-   "count": 24,
-   "size": 0.02,
-   "spacing": 0.05,
+   "count": 14,
+   "size": 0.024,
+   "spacing": 0.08,
    "seed": 4,
    "colour": "ffa020",
    "tip": 0.8
@@ -766,9 +766,9 @@
  ],
  "gauntlets": {
   "r": 0.058,
-  "rows": 5,
-  "per_row": 6,
-  "plate": 0.66,
+  "rows": 4,
+  "per_row": 5,
+  "plate": 0.74,
   "fist": 0.1,
   "seed": 5,
   "slot": "leather",
