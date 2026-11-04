@@ -123,13 +123,16 @@ func _menus() -> void:
 	ok("the Hunter viewer shows Vex's portrait by the name", _first_pic(viewer) == Portraits.art_path("gunslinger"))
 	viewer.queue_free()
 	var pick := ClassPick.row([], func(_a): pass)
+	var second_pick := ClassPick.row([], func(_a): pass, true)
 	var chips: Array = []
 	_collect(pick, "starter_chip", chips)
+	_collect(second_pick, "starter_chip", chips)
 	var chip_art := chips.map(func(b): return String(b.get_meta("portrait_art", "")))
 	var chip_want := chips.map(func(b): return Portraits.art_path(String(b.get_meta("arch"))))
 	var iconed := chips.all(func(b): return b.icon != null) or DisplayServer.get_name() == "headless"
-	ok("the Mantle pick: each starter's chip shows its Warden", chips.size() == 3 and chip_art == chip_want
-			and not chip_want.has("") and iconed)
+	ok("the Mask picks: each chip shows its Hunter's face (Vex, then Kael, Pip, Cinder)",
+			chips.size() == 4 and chip_art == chip_want and not chip_want.has("") and iconed)
+	second_pick.free()
 	pick.free()
 	var card := KitCard.make("rimewright", "", func(): pass)
 	host.add_child(card)
