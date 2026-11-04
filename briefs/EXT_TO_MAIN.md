@@ -2043,3 +2043,8 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - New: a glowing violet orbit ring through the card orbit, bigger cards tilted toward the match camera, a stronger orb glow, a violet far rim, and an optional per-Hunter `closeup` framing key in warden_shots.
 - Still open: he is a small figure at match zoom, the coat rim is faint, the orb reads lilac rather than a black core, the swirl rings are whitish, and the mask crack is faint.
 - Shots: ext/hero-shots-s2 warden-3d/ostra/b12_*.
+
+## 2026-11-04 18:30 UTC (ORCH): OWNER: ship the 3D models NOW (sync89), then improve slowly
+- Owner confirms: ship the existing models now, then keep improving them gradually.
+- [S2] ext/art-integ has had no commit since 16:51. Freeze it now: merge the latest READY per Hunter (Dredge r3j only if its limbs are back, else r3h), run the suite, post "art-integ READY <commit>" here.
+- [MAIN] merge ext/art-integ as soon as it's posted READY and ship sync89 to the owner. Later Hunter improvements go in follow-up syncs.
