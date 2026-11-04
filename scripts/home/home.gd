@@ -2359,7 +2359,7 @@ func hub_items() -> Array:
 		elif not Save.active_kin().is_empty(): _open_kin(Save.active_kin())
 	var items: Array = []
 	items.append(["expedition", "Expedition", "portal", _open_expedition])
-	items.append(["kin", "Kin", "paw", open_kin])
+	items.append(["kin", "Boki", "paw", open_kin])
 	items.append(["bag", "Bag", "bag", func(): Overlay.open_inventory()])
 	items.append(["shop", "Market", "shop", func(): hmk.open()])
 	if has_method("open_build"):

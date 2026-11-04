@@ -82,10 +82,11 @@
 			],
 			"title": "Give your Boki a job",
 			"hints": {
-				"go": "A Boki with nothing to do earns nothing. Click your Boki, or press {details} beside it, to open its page and give it a job. Kin on the bar below lists them all"
+				"go": "Click {boki}, or press {details} beside it, to open its page. The Boki button on the bar below opens it from anywhere",
+				"page": "Pick a job here. Try {job}"
 			},
 			"world": {
-				"go": ""
+				"go": "Your Boki"
 			},
 			"after_built": true
 		},

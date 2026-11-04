@@ -94,7 +94,7 @@ const TUT_HINT := {
 	"shoot": ["A monster! Get it!", "(growls at the monster)"],
 	"utility": ["Right click! Use your power!", "(watches your hands, tail going)"],
 	"orders": ["Hold %T and tell me what to do!", "(sits up, ears forward, waiting for orders)"],
-	"sig": ["%X Line them all up!", "(bounces, ready for the group)"],
+	"sig": ["Press %E for %N! Line them all up, then fire!", "(bounces, ready for the group)"],
 	"gkey": ["Press %T and I'll charge in! Press it again and I come back.", "(wiggles on your shoulder, waiting for the button)"],
 	"rank": ["You levelled up! Hold Alt and press %E to rank up!", "(bounces and points at the gold plus)"],
 	"key": ["Oh look, there's a key! Grab it so you can open a chest.", "(points its nose at a shiny key)"],

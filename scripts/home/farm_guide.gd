@@ -53,6 +53,7 @@ func tick(dt: float) -> void:
 		detect_t = 0.5
 		_poll()
 	_update_marker()
+	FarmTaskGuide.hub_hint(h, FarmTutorial.current() == "task" and FarmTutorial.stage("task") == "go" and h.panel_open == "")
 
 func _poll() -> void:
 	var was_done := bool(FarmTutorial.state()["done"])
@@ -220,6 +221,9 @@ func _target(id: String) -> Vector3:
 				return _water_spot()      # the patch goes by the water
 			var planted: bool = not h.plots.is_empty() and FarmTutorial.stage(id) != "patch_dry"
 			return h.plots[0].position if planted else Vector3.INF
+		"task":
+			var ke: Dictionary = h._kin_entry(Save.active_kin())
+			return (ke["node"] as Node3D).position if not ke.is_empty() else Vector3.INF
 		"hob":
 			return h.hob.pos
 		"expedition":

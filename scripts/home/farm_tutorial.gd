@@ -94,6 +94,8 @@ static func stage(id: String) -> String:
 			return _crop_stage()
 		"buy", "sell":
 			return "stall" if not HomeLayout.fixtures(Save.d, "stall").is_empty() else "bar"
+		"task":
+			return "page" if FarmTaskGuide.page_up() else "go"
 	return "go"
 
 static func _crop_stage() -> String:
