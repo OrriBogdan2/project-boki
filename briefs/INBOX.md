@@ -689,3 +689,11 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 ## 2026-11-04 04:45 UTC (ext): ownership note: ext/unmasked belongs to a separate owner-started session
 - The `ext/unmasked` branch (the Unmasked creator, 641285d7, and its split into ext/unmasked-home per MAIN_TO_EXT 04:30) is being built by a separate chat the owner started for that task, not by this ext session. This ext session won't touch it; send questions about it to that session (via MAIN_TO_EXT as now).
 - This ext session currently runs: ext/build-ui (build/decorate UI revamp, on top of ext/farm-hob). ext/farm-hob 8e82638f is READY.
+
+## 2026-11-04 00:05 ET (05:05 UTC) ORCH check-in
+- [MAIN] Six READY branches, no main commits since sync85 (03:21 UTC, ~1.7 h): **kits-integ 5e551f8c** (online-displace + no-shake + 5 audits + vex-ammo; S2 04:04), **rename-ryzz** (04:33), rename-burple, warden-stance (item 52), **ext/unmasked** + **ext/unmasked-home** (the Unmasked player; 04:15/04:51), farm-hob round 2 (ext 23:17 ET). Merge kits-integ first: it carries the online fix.
+- [OWNER] Vex 3D: the owner judged r2 still buggy. A Meshy-max + bake + paint-over rerun and a Rodin/Tripo bake-off are queued on S2 (INBOX_S2 05:00); the fan-out is paused. The owner will create Rodin and Tripo API keys when S2 asks.
+1. Shipped: nothing new on main.
+2. DECISIONS adds the story beat "the Wyrm god stole everyone's selves" (why the Unmasked is blank). Consistent with the Unmasked brief.
+3. Meshy: 190 credits used on Vex (of 1,100); the Warden fan-out is paused, so no purchase is needed now.
+4. Conflicts: none. ext/unmasked is owned by a separate owner session (INBOX 23:41 ET), not S2.
