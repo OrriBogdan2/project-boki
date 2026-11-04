@@ -1016,17 +1016,36 @@ def crescent(arm, spec, tag="halo"):
         d = np.asarray(v) - c
         bld.v[i] = c + d - nrm * d.dot(nrm) * (1.0 - float(spec.get("flat", 0.35)))
     ob = bld.object(tag.capitalize())
-    img = bpy.data.images.new(tag + "_atlas", 64, 64, alpha=False)
-    px = np.ones((64, 64, 4), np.float32)
-    yy, xx = np.mgrid[0:64, 0:64]
+    n = int(spec.get("atlas", 64))
+    img = bpy.data.images.new(tag + "_atlas", n, n, alpha=False)
+    px = np.ones((n, n, 4), np.float32)
+    yy, xx = np.mgrid[0:n, 0:n] * (64.0 / n)
     base, crack = hexcol(spec.get("colour", "d9b8ff")), hexcol(spec.get("crack", "8a4ad8"))
     # a few dark crack lines across the moon (u around the tube, v along the arc)
-    lines = (np.abs(((yy * 0.37 + xx * 0.11) % 13) - 6.5) < 0.6) & (xx % 21 < 15)
-    col = np.broadcast_to(base, (64, 64, 3)).copy()
+    lines = (np.abs(((yy * 0.37 + xx * 0.11) % 13) - 6.5) < float(spec.get("crack_w", 0.6))) & (xx % 21 < 15)
+    col = np.broadcast_to(base, (n, n, 3)).copy()
     if spec.get("core"):
         # (the glow's falloff: a pale core along the moon's faces, deepening to the violet rim at its edges)
         f = (0.5 + 0.5 * np.cos(xx / 63.0 * 4.0 * math.pi))[..., None] ** 1.5
         col = base * (1 - f) + hexcol(spec["core"]) * f
+    if spec.get("cracks"):
+        # (jagged cracks across the moon, each from one edge toward the other with a fork, as the cap_halo sheet
+        # draws them; v along the arc is the atlas's rows, u round the flattened tube its columns)
+        rng = np.random.default_rng(int(spec.get("seed", 5)))
+        lines = np.zeros((n, n), bool)
+        sc = n / 64.0
+        for k in range(int(spec["cracks"])):
+            y = (k + 0.5 + rng.uniform(-0.25, 0.25)) * n / int(spec["cracks"])
+            fy = y
+            for x in range(n):
+                y += rng.uniform(-1.1, 1.1) * sc
+                for t in range(max(1, int(sc * 0.8))):
+                    lines[int(y + t) % n, x] = True
+                if x == int(30 * sc):
+                    fy = y
+                if int(30 * sc) < x < int(48 * sc):
+                    fy += rng.uniform(0.2, 1.4) * sc
+                    lines[int(fy) % n, x] = True
     px[..., :3] = np.where(lines[..., None], crack, col)
     img.pixels = px.ravel()
     img.pack()
@@ -1145,6 +1164,77 @@ def studs(body, arm, spec):
     return ob
 
 
+def claws(body, arm, spec):
+    """Long claws on a scanned glove (Ostra's clawed fingers; Meshy rounds them off): for each hand in `sides`
+    the body's fingertips are its vertices furthest along the hand bone (weighted to it), `count` of them at
+    least `spacing` apart; on each a tapering curved spike `length` long (base radius `r`) carries the finger
+    on outward and `curl`s toward the palm. Skinned rigidly to the hand bone. Material "<slot>-claws"."""
+    bld = Builder()
+    groups = {}
+    for side in spec.get("sides", ["L", "R"]):
+        bn = "hand." + side
+        b = arm.data.bones[bn]
+        h, t = np.array(b.head_local[:]), np.array(b.tail_local[:])
+        d = (t - h) / max(np.linalg.norm(t - h), 1e-9)
+        vg = body.vertex_groups.get(bn)
+        if vg is None:
+            continue
+        pts = []
+        for vx in body.data.vertices:
+            for gr in vx.groups:
+                if gr.group == vg.index and gr.weight > float(spec.get("min_w", 0.5)):
+                    pts.append(np.array(vx.co[:]))
+        if not pts:
+            log("claws: no vertices on %s" % bn)
+            continue
+        pts = np.array(pts)
+        proj = (pts - h) @ d
+        centroid = pts.mean(axis=0)
+        order = np.argsort(-proj)
+        picks = []
+        lim = proj.max() - float(spec.get("depth", 0.06))
+        for i in order:
+            if proj[i] < lim:
+                break
+            if all(np.linalg.norm(pts[i] - q) > float(spec.get("spacing", 0.018)) for q in picks):
+                picks.append(pts[i])
+            if len(picks) >= int(spec.get("count", 5)):
+                break
+        L, r0, curl = float(spec.get("length", 0.08)), float(spec.get("r", 0.006)), float(spec.get("curl", 0.35))
+        m = 7
+        start = len(bld.v)
+        for tip in picks:
+            out = tip - h
+            out /= max(np.linalg.norm(out), 1e-9)
+            fwd = 0.6 * d + 0.4 * out
+            fwd /= np.linalg.norm(fwd)
+            palm = centroid - tip
+            palm -= fwd * palm.dot(fwd)
+            palm /= max(np.linalg.norm(palm), 1e-9)
+            rings = [tip - fwd * r0 * 1.5 + fwd * L * (i / (m - 1)) + palm * curl * L * (i / (m - 1)) ** 2
+                     for i in range(m)]
+            radii = [max(r0 * 0.06, r0 * (1.0 - i / (m - 1)) ** 0.8) for i in range(m)]
+            bld.tube(rings, radii, 6, 0.1, 0.9, 0.1, 0.9, "claw", [0.0] * m, cap_start=True, cap_end=True)
+        groups[bn] = (start, len(bld.v))
+        log("claws on %s: %d" % (bn, len(picks)))
+    if not bld.v:
+        return None
+    ob = bld.object("Claws")
+    img = bpy.data.images.new("claws_atlas", 8, 8, alpha=False)
+    px = np.ones((8, 8, 4), np.float32)
+    px[..., :3] = hexcol(spec.get("colour", "120d18"))
+    img.pixels = px.ravel()
+    img.pack()
+    _flat_material(ob, spec.get("slot", "leather"), "claws", img, "Closest")
+    for bn, (a, z) in groups.items():
+        g = ob.vertex_groups.new(name=bn)
+        g.add(list(range(a, z)), 1.0, "REPLACE")
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    return ob
+
+
 def orb(arm, spec, tag="orb"):
     """A hand-held orb (Ostra's swirling void orb): a sphere on the `void` slot (the starfield, opaque) inside a
     thin glowing ring (glow), or with style "glow" one glowing sphere, at `centre`, riding `bone` rigidly."""
@@ -1155,6 +1245,8 @@ def orb(arm, spec, tag="orb"):
     rings = [c + np.array([0.0, 0.0, -r + 2.0 * r * i / (k - 1)]) for i in range(k)]
     radii = [max(1e-4, r * math.sin(math.pi * i / (k - 1))) for i in range(k)]
     glow_ball = spec.get("style") == "glow"     # (one glowing sphere: what reads at the match camera)
+    if spec.get("style") == "vortex":
+        return _vortex(arm, spec, tag, c, r)
     bld.tube(rings, radii, 14, *((0.55, 0.95, 0.05, 0.95) if glow_ball else (0.05, 0.45, 0.05, 0.95)), "ring" if glow_ball
              else "ball", [0.0] * k, cap_end=True, cap_start=True)
     if not glow_ball:
@@ -1185,4 +1277,51 @@ def orb(arm, spec, tag="orb"):
         poly.material_index = gi if bld.part[poly.vertices[0]] == "ring" else vi
     _rigid(ob, arm, spec.get("bone", "hand.R"))
     log("%s on %s, r %.3f" % (tag, spec.get("bone", "hand.R"), r))
+    return ob
+
+
+def _vortex(arm, spec, tag, c, r):
+    """Ostra's void orb as the art draws it: a black core (`core` x r) with `arms` glowing violet spiral arms
+    winding into it (log spirals in the plane facing `normal`, each a tapering tube, dim at its outer end and hot
+    where it falls into the core), a little out of the plane by turns so it reads from the side too."""
+    bld = Builder()
+    rc = r * float(spec.get("core", 0.62))
+    k = 10
+    rings = [c + np.array([0.0, 0.0, -rc + 2.0 * rc * i / (k - 1)]) for i in range(k)]
+    radii = [max(1e-4, rc * math.sin(math.pi * i / (k - 1))) for i in range(k)]
+    bld.tube(rings, radii, 14, 0.05, 0.45, 0.05, 0.95, "ball", [0.0] * k, cap_end=True, cap_start=True)
+    nrm = np.array(spec.get("normal", [0.0, 0.8, 0.6]), np.float64)
+    nrm /= np.linalg.norm(nrm)
+    e1 = np.cross(nrm, [0.0, 0.0, 1.0]) if abs(nrm[2]) < 0.95 else np.array([1.0, 0.0, 0.0])
+    e1 /= np.linalg.norm(e1)
+    e2 = np.cross(nrm, e1)
+    n_arms, sweep = int(spec.get("arms", 3)), float(spec.get("sweep", 1.5)) * math.pi
+    r_out, r_in, th = r * float(spec.get("reach", 1.55)), rc * 0.92, r * float(spec.get("arm_r", 0.13))
+    m = 18
+    for a in range(n_arms):
+        a0 = 2.0 * math.pi * a / n_arms
+        pts, rad = [], []
+        for i in range(m):
+            t = i / (m - 1)
+            rr = r_out * (r_in / r_out) ** t                     # (a log spiral: out -> in)
+            ang = a0 + sweep * t
+            lift = 0.25 * r * math.sin(math.pi * t) * (1 if a % 2 else -1)
+            pts.append(c + rr * (math.cos(ang) * e1 + math.sin(ang) * e2) + lift * nrm)
+            rad.append(max(th * 0.15, th * math.sin(math.pi * min(1.0, 0.15 + t)) * (0.45 + 0.55 * t)))
+        bld.tube(pts, rad, 6, 0.55, 0.95, 0.05, 0.95, "ring", [0.0] * m, cap_end=True, cap_start=True)
+    ob = bld.object(tag.capitalize())
+    img = bpy.data.images.new(tag + "_atlas", 64, 64, alpha=False)
+    px = np.ones((64, 64, 4), np.float32)
+    px[:, :32, :3] = hexcol(spec.get("colour", "05020a"))
+    v = (np.arange(64) / 63.0)[:, None, None]
+    dim, hot = hexcol(spec.get("ring", "6a32c0")), hexcol(spec.get("hot", "e0c0ff"))
+    px[:, 32:, :3] = dim[None, None] * (1 - v ** 1.5) + hot[None, None] * v ** 1.5
+    img.pixels = px.ravel()
+    img.pack()
+    vi = _flat_material(ob, spec.get("core_slot", "void"), tag, img)
+    gi = _flat_material(ob, "glow", tag, img)
+    for poly in ob.data.polygons:
+        poly.material_index = gi if bld.part[poly.vertices[0]] == "ring" else vi
+    _rigid(ob, arm, spec.get("bone", "hand.R"))
+    log("%s vortex on %s, r %.3f, %d arms" % (tag, spec.get("bone", "hand.R"), r, n_arms))
     return ob

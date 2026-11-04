@@ -84,19 +84,6 @@ A body with no feet (Ostra) is built with its ground below its hem (fit spec `so
 (`KMovesStone.hover`, which lifts `Rig`, so the `root` bone) floats it and keeps the gap above the shadow. Its
 lower body is a `void` wisp on a `spring_wisp_*` chain under `hips` (`warden_parts.wisp()`).
 
-### Orbits (props that circle a bone)
-An empty named `orbit_<name>` parented to a bone, its rest upright (identity rotation in the model frame), carries
-unskinned props (Tarek's three seeing-stones round his head, each built facing out from the orbit's centre, its
-iris out and its plain back in). `WardenGlb.Orbits` (run by Sync) turns the empty round its own up axis
-(`ORBIT_HZ`) and bobs each prop on its own phase, so the orbit is data in the loader, never baked.
-`tools/meshy/warden_parts.py` `orbit_props()` builds them (fit spec `orbits`). They count as skinned for
-`--warden-glb-check` and stay out of `--warden-model-check`'s height.
-
-### Hovering bodies
-A body with no feet (Ostra) is built with its ground below its hem (fit spec `sole_z`); the rig's own hover
-(`KMovesStone.hover`, which lifts `Rig`, so the `root` bone) floats it and keeps the gap above the shadow. Its
-lower body is a `void` wisp on a `spring_wisp_*` chain under `hips` (`warden_parts.wisp()`).
-
 ### Design variants
 Another design of the same Warden can sit beside the shipped model while the owner compares them:
 `art/wardens/<art>_<tag>/<art>_<tag>.glb` (e.g. `vex_r3b`), built on the same rig. `--warden-variant=vex_r3b`

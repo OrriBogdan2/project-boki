@@ -21,6 +21,7 @@ const WARDENS := {
 	# (Sable's feather plumes stand ~0.2 m over her head)
 	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.05, "width": [0.6, 1.3], "moves": "thf_"},
 	"dolm": {"hit_r": 0.388, "height": 1.18, "width": [0.7, 1.5], "moves": "breah_"},     # (lean, the locs: his art)
+	"ostra": {"hit_r": 0.412, "height": 1.09, "width": [0.5, 1.3], "moves": "ostra_"},     # (tall and thin, the cap)
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured

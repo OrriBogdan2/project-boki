@@ -393,5 +393,82 @@
 				"glow": 1.2
 			}
 		}
+	},
+	"ostra": {
+		"painted": {
+			"rim_far": 0.45,
+			"rim_far_color": [
+				0.62,
+				0.3,
+				1.0
+			]
+		},
+		"slots": {
+			"cloth": {
+				"fres": 0.3,
+				"fres_tint": 0.0,
+				"fres_color": [
+					0.6,
+					0.3,
+					0.95
+				],
+				"far_lift": 0.3,
+				"top_light": 0.1,
+				"own_ambient": [
+					0.5,
+					0.46,
+					0.62
+				],
+				"dark_lift": 0.02,
+				"albedo": [
+					1.0,
+					0.92,
+					1.0
+				]
+			},
+			"leather": {
+				"emit": 3.6,
+				"fres": 0.9,
+				"fres_tint": 0.0,
+				"fres_color": [
+					0.72,
+					0.4,
+					1.0
+				],
+				"dark_lift": 0.02,
+				"albedo": [
+					0.96,
+					0.9,
+					1.08
+				],
+				"top_light": 0.1
+			},
+			"glow": {
+				"glow": 1.4,
+				"fres": 0.8,
+				"top_light": 0.0,
+				"far_lift": 0.0,
+				"fres_tint": 0.0,
+				"fres_color": [
+					0.62,
+					0.32,
+					1.0
+				]
+			}
+		},
+		"halos": [
+			{
+				"anchor": "anchor_orb",
+				"color": [
+					0.66,
+					0.36,
+					1.0
+				],
+				"strength": 2.2,
+				"px": 3.2,
+				"near_d": 7.0,
+				"far_d": 14.0
+			}
+		]
 	}
 }

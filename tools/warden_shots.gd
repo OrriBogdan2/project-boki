@@ -19,9 +19,6 @@ const CAM_FOV := 32.0
 const ENLARGE := 3            # the gameplay strip enlarged this many times (nearest, so the pixels stay honest)
 const OUT_W := 1280
 const MOVES_PER_STRIP := 4    # kit-move frames side by side in one close strip
-## Kit moves not named <id>_lmb/_dash/_rmb: [label, kit move, its time (s)] (scripts/match/arena_demo.gd's timings).
-const KIT_FRAMES := {"archer": [["draw", "arc_draw", 0.8], ["loose", "arc_loose", 0.94],
-	["Spirit Walk roll", "pin_roll", 0.58], ["Heavy Shot", "arc_heavy", 1.42]]}
 
 var holder: Node3D
 var cam: Camera3D
@@ -270,10 +267,6 @@ func _fit(img: Image) -> Image:
 ## kit move, its time, running]. A hero without its own moves gets the run only.
 func _move_frames(id: String) -> Array:
 	var out: Array = [["run", "", 0.0, 0], ["run, other foot", "", 0.0, 9]]
-	if KIT_FRAMES.has(id):
-		for f in KIT_FRAMES[id]:
-			out.append([f[0], f[1], f[2], -1])
-		return out
 	for f in [["shoot", "_lmb", 0.03], ["recoil", "_lmb", 0.08], ["dash", "_dash", 0.1], ["dash, low", "_dash", 0.4],
 			["dash, up", "_dash", 0.62], ["RMB throw", "_rmb", 0.07]]:
 		if not HunterAnim.km_def(id + String(f[1])).is_empty():
@@ -283,8 +276,11 @@ func _move_frames(id: String) -> Array:
 			out.append([f[0], f[1], f[2], -1])
 	return out
 
-## Heroes whose kit moves aren't named <id>_lmb / _dash / _rmb (KMovesStone): [label, kit move, its time].
+## Heroes whose kit moves aren't named <id>_lmb / _dash / _rmb (KMovesStone, Hem's bow): [label, kit move, its time
+## (s), arena_demo.gd's timings].
 const KIT_FRAMES := {
+	"archer": [["draw", "arc_draw", 0.8], ["loose", "arc_loose", 0.94], ["Spirit Walk roll", "pin_roll", 0.58],
+		["Heavy Shot", "arc_heavy", 1.42]],
 	"dolm": [["punch", "breah_punch", 0.12], ["throw", "breah_throw", 0.2], ["leap", "breah_leap", 0.2],
 		["slam", "breah_slam", 0.1], ["sense", "breah_sense", 0.3], ["dash", "breah_dash", 0.15]],
 	"ostra": [["orb", "ostra_orb", 0.1], ["snap", "ostra_snap", 0.1], ["swap", "ostra_swap", 0.3],
