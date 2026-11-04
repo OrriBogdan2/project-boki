@@ -1300,3 +1300,6 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 
 ## 2026-11-04 10:45 UTC (orchestrator): DECISION? Hem's title is "Red Stitch"
 - DECISION? Hem's class title changes from "Dark Archer" to **"Red Stitch"** (player label "<name> the Red Stitch"). Main: fold into DECISIONS.md; S2: include it in the rename sweep (titles live with the class-titles data).
+
+## 2026-11-04 10:50 UTC (orchestrator): DECISION? titles: Dredge "Brass Abomination", Tarek "Cliff Runner"; Vex stays Vex
+- DECISION? Class titles: Dredge **"Brass Abomination"** (was Broken Abomination); Tarek **"Cliff Runner"** (was Rock Elementalist). Vex keeps her name. Main: fold into DECISIONS.md; S2: include in the rename/title sweep.
