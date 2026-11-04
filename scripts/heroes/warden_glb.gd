@@ -53,9 +53,10 @@ const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
 const NO_INK := ["hair", "eyes", "glow", "card"]   # slots drawn without the ink outline shell
-## Materials "<slot>-<tag>" drawn without the ink line: small round pieces it turns into a cartoon ball (Ryzz's gum
-## bubble), Dredge's thin ooze (it read as planks), cracks and the lens's glass (the line cut the orb).
-const NO_INK_TAGS := ["gum", "tar", "crack", "glass"]
+## Materials "<slot>-<tag>" drawn without the ink line whatever their slot: small round pieces it turns into a
+## cartoon ball (Ryzz's gum bubble), thin pieces it turns into speckle at the match camera (Sable's crossbows and
+## braid), Dredge's thin ooze (it read as planks), cracks and the lens's glass (the line cut the orb).
+const NO_INK_TAGS := ["gum", "crossbow", "silkbraid", "tar", "crack", "glass"]
 ## The `void` slot is no lit surface but a window onto the Void (shaders/hero_void.gdshader: a drifting
 ## starfield over its painted colour, Ostra's coat tears); "<void>-<tag>" with a SOFT_TAGS tag also fades
 ## out toward its tip and edges (a body that dissolves into smoke: Ostra's wisp).

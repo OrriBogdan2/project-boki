@@ -327,6 +327,12 @@ def crossbows(rig_grips, look):
             poly.use_smooth = False
         obs.append(ob)
         log("%s: %d tris" % (name, sum(len(f) - 2 for f in bld.f)))
+    pitch = float(look.get("pitch", 0.0))
+    if pitch:
+        # (the crossbow tipped about its grip: the twin hold's rest points it down by the thigh as the art holds it)
+        rot = Matrix.Translation(gr) @ Matrix.Rotation(pitch, 4, "X") @ Matrix.Translation(-gr)
+        for ob in obs:
+            ob.data.transform(rot)
     w, off = obs
     off.parent = w
     off.location = gl - gr        # (HunterAnim's twin hold hands a mesh at x < -0.04 to the left hand)
