@@ -1,0 +1,622 @@
+{
+ "body_glb": "~/meshy/sable_r2/bake/low.glb",
+ "rig": "art/wardens/src/sable_rig.json",
+ "out": "art/wardens/sable/sable.glb",
+ "blend": "~/meshy/sable_r2/fit.blend",
+ "turn": 180,
+ "max_tris": 34000,
+ "floater_verts": 8,
+ "snap_r": 0.045,
+ "scale_joints": [
+  "hip.L",
+  "shoulder.L"
+ ],
+ "joints": {
+  "crown": [
+   0,
+   0,
+   0.76
+  ],
+  "neck": [
+   0,
+   0,
+   0.45
+  ],
+  "shoulder.L": [
+   0.15,
+   0,
+   0.34
+  ],
+  "shoulder.R": [
+   -0.15,
+   0,
+   0.34
+  ],
+  "elbow.L": [
+   0.29,
+   0,
+   0.09
+  ],
+  "elbow.R": [
+   -0.29,
+   0,
+   0.09
+  ],
+  "hand.L": [
+   0.34,
+   -0.03,
+   -0.14
+  ],
+  "hand.R": [
+   -0.34,
+   -0.03,
+   -0.14
+  ],
+  "fingers.L": [
+   0.38,
+   -0.05,
+   -0.25
+  ],
+  "fingers.R": [
+   -0.38,
+   -0.05,
+   -0.25
+  ],
+  "hip.L": [
+   0.09,
+   0,
+   -0.12
+  ],
+  "hip.R": [
+   -0.09,
+   0,
+   -0.12
+  ],
+  "knee.L": [
+   0.21,
+   0,
+   -0.48
+  ],
+  "knee.R": [
+   -0.21,
+   0,
+   -0.48
+  ],
+  "ankle.L": [
+   0.33,
+   0.03,
+   -0.8
+  ],
+  "ankle.R": [
+   -0.33,
+   0.03,
+   -0.8
+  ]
+ },
+ "snap_y": false,
+ "chunk": {
+  "head": 1.08,
+  "girth": 1.04
+ },
+ "lift": [
+  0.88,
+  1.05,
+  1.1
+ ],
+ "glow_min": [
+  2.0,
+  2.0,
+  -1.0
+ ],
+ "normal_smooth": 8,
+ "pad": 6,
+ "cap_holes": true,
+ "cap_flat": true,
+ "ink_room": 0.02,
+ "slot_rules": [
+  {
+   "slot": "glow",
+   "box": [
+    -0.12,
+    0.12,
+    null,
+    null,
+    0.1,
+    0.42
+   ],
+   "hsv": [
+    0.93,
+    0.06,
+    0.45,
+    1.0,
+    0.45,
+    1.0
+   ]
+  },
+  {
+   "slot": "leather",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    -0.6
+   ]
+  },
+  {
+   "slot": "hair",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    0.5,
+    null
+   ],
+   "hsv": [
+    null,
+    null,
+    0.0,
+    0.075,
+    0.55,
+    1.0
+   ]
+  },
+  {
+   "slot": "fur",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    0.28,
+    0.5
+   ],
+   "hsv": [
+    null,
+    null,
+    0.0,
+    0.075,
+    0.6,
+    1.0
+   ]
+  },
+  {
+   "slot": "skin",
+   "hsv": [
+    0.68,
+    0.97,
+    0.06,
+    0.36,
+    0.33,
+    0.92
+   ]
+  },
+  {
+   "slot": "metal",
+   "hsv": [
+    null,
+    null,
+    0.0,
+    0.075,
+    0.45,
+    1.0
+   ]
+  },
+  {
+   "slot": "leather",
+   "absx": true,
+   "box": [
+    0.27,
+    null,
+    null,
+    null,
+    -0.32,
+    -0.06
+   ]
+  },
+  {
+   "slot": "cloth"
+  }
+ ],
+ "slot_vote": 4,
+ "fit_weights": true,
+ "braids": [
+  {
+   "name": "braid_R",
+   "path": [
+    [
+     0.07,
+     -0.06,
+     1.47
+    ],
+    [
+     0.11,
+     -0.04,
+     1.36
+    ],
+    [
+     0.15,
+     0.02,
+     1.25
+    ],
+    [
+     0.17,
+     0.07,
+     1.12
+    ],
+    [
+     0.175,
+     0.09,
+     0.98
+    ],
+    [
+     0.175,
+     0.09,
+     0.85
+    ]
+   ],
+   "length": 0.7,
+   "side": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "clear": 0.03,
+   "width": 0.058,
+   "strand_r": 0.0135,
+   "period": 0.15,
+   "depth": 0.5,
+   "samples": 70,
+   "sides": 5,
+   "bones": 5,
+   "wraps": [
+    {
+     "at": 0.03,
+     "rings": 2
+    },
+    {
+     "at": 0.42,
+     "rings": 3
+    },
+    {
+     "at": 0.92,
+     "rings": 3
+    }
+   ],
+   "tuft": {
+    "locks": 9,
+    "length": 0.11,
+    "spread": 24,
+    "r": 0.013
+   }
+  },
+  {
+   "name": "braid_L",
+   "path": [
+    [
+     -0.07,
+     -0.06,
+     1.47
+    ],
+    [
+     -0.11,
+     -0.04,
+     1.36
+    ],
+    [
+     -0.15,
+     0.02,
+     1.25
+    ],
+    [
+     -0.17,
+     0.07,
+     1.12
+    ],
+    [
+     -0.175,
+     0.09,
+     0.98
+    ],
+    [
+     -0.175,
+     0.09,
+     0.85
+    ]
+   ],
+   "length": 0.7,
+   "side": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "clear": 0.03,
+   "width": 0.058,
+   "strand_r": 0.0135,
+   "period": 0.15,
+   "depth": 0.5,
+   "samples": 70,
+   "sides": 5,
+   "bones": 5,
+   "wraps": [
+    {
+     "at": 0.03,
+     "rings": 2
+    },
+    {
+     "at": 0.42,
+     "rings": 3
+    },
+    {
+     "at": 0.92,
+     "rings": 3
+    }
+   ],
+   "tuft": {
+    "locks": 9,
+    "length": 0.11,
+    "spread": 24,
+    "r": 0.013
+   }
+  }
+ ],
+ "braid_colours": {
+  "strand": [
+   "eceaf2",
+   "8c889c",
+   "ffffff"
+  ],
+  "tuft": [
+   "eceaf2",
+   "8c889c",
+   "ffffff"
+  ],
+  "copper": [
+   "d0d4dc",
+   "5c606c"
+  ],
+  "steel": [
+   "d0d4dc",
+   "5c606c"
+  ]
+ },
+ "wings": [
+  {
+   "name": "wing_fore_R",
+   "kind": "fore",
+   "root": [
+    0.05,
+    -0.13,
+    1.12
+   ],
+   "tip": [
+    0.2,
+    -0.3,
+    0.3
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ],
+   "width": 0.24,
+   "bow": [
+    0.0,
+    -0.03,
+    0.0
+   ],
+   "bones": 3
+  },
+  {
+   "name": "wing_fore_L",
+   "kind": "fore",
+   "root": [
+    -0.05,
+    -0.13,
+    1.12
+   ],
+   "tip": [
+    -0.2,
+    -0.3,
+    0.3
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ],
+   "width": 0.24,
+   "bow": [
+    0.0,
+    -0.03,
+    0.0
+   ],
+   "bones": 3
+  },
+  {
+   "name": "wing_hind_R",
+   "kind": "hind",
+   "root": [
+    0.035,
+    -0.12,
+    0.95
+   ],
+   "tip": [
+    0.1,
+    -0.2,
+    0.36
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ],
+   "width": 0.17,
+   "bow": [
+    0.0,
+    -0.02,
+    0.0
+   ],
+   "bones": 3
+  },
+  {
+   "name": "wing_hind_L",
+   "kind": "hind",
+   "root": [
+    -0.035,
+    -0.12,
+    0.95
+   ],
+   "tip": [
+    -0.1,
+    -0.2,
+    0.36
+   ],
+   "across": [
+    1,
+    0,
+    0
+   ],
+   "width": 0.17,
+   "bow": [
+    0.0,
+    -0.02,
+    0.0
+   ],
+   "bones": 3
+  }
+ ],
+ "wing_look": {
+  "fore": {
+   "base": "e6e3f0",
+   "tints": [
+    "c6d6ff",
+    "ffd2ee",
+    "cdf7ec",
+    "e0ccff"
+   ],
+   "tint_k": 0.4,
+   "alpha": 0.55,
+   "rim": "f4f2fa",
+   "rim_alpha": 0.8,
+   "edge": 0.95,
+   "edge_col": "7d7593",
+   "edge_alpha": 0.95,
+   "vein": "9890ad",
+   "vein_w": 0.0035,
+   "veins": 6,
+   "power": 0.6,
+   "skew": 0.85,
+   "root_w": 0.1,
+   "eyes": [
+    [
+     0.55,
+     0.045,
+     1.25
+    ],
+    [
+     0.8,
+     0.04,
+     1.25
+    ]
+   ],
+   "eye_rings": [
+    [
+     1.0,
+     "cfcade",
+     0.9
+    ],
+    [
+     0.8,
+     "4a4258",
+     0.95
+    ],
+    [
+     0.55,
+     "ebe8f2",
+     0.95
+    ],
+    [
+     0.32,
+     "2a2434",
+     1.0
+    ]
+   ]
+  },
+  "hind": {
+   "base": "e6e3f0",
+   "tints": [
+    "c6d6ff",
+    "ffd2ee",
+    "cdf7ec",
+    "e0ccff"
+   ],
+   "tint_k": 0.4,
+   "alpha": 0.55,
+   "rim": "f4f2fa",
+   "rim_alpha": 0.8,
+   "edge": 0.94,
+   "edge_col": "7d7593",
+   "edge_alpha": 0.95,
+   "vein": "9890ad",
+   "vein_w": 0.0035,
+   "veins": 4,
+   "power": 0.6,
+   "skew": 0.9,
+   "root_w": 0.1,
+   "eyes": [
+    [
+     0.68,
+     0.035,
+     1.25
+    ]
+   ],
+   "eye_rings": [
+    [
+     1.0,
+     "cfcade",
+     0.9
+    ],
+    [
+     0.8,
+     "4a4258",
+     0.95
+    ],
+    [
+     0.55,
+     "ebe8f2",
+     0.95
+    ],
+    [
+     0.32,
+     "2a2434",
+     1.0
+    ]
+   ]
+  }
+ },
+ "crossbows": {
+  "gr": [
+   0.06,
+   0.02,
+   0.0
+  ],
+  "gl": [
+   -0.1,
+   0.08,
+   -0.06
+  ],
+  "length": 0.3,
+  "span": 0.32,
+  "colours": {
+   "silver": "c9ccd6",
+   "dark": "3a3444",
+   "grip": "2c2532",
+   "string": "8f63cf",
+   "bolt": "c77dff"
+  }
+ },
+ "atlas_px": 2048
+}

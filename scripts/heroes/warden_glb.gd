@@ -38,11 +38,14 @@ const OPTIONAL := ["cape", "scarf", "tail", "wings"]
 ## Procedural pieces that stay when the .glb dresses the hunter (the contract's "nodes the game keeps").
 const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus"]
 ## glTF material name -> the toon shader's painted surface (RIG_CONTRACT "Materials").
-const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur": 5, "eyes": 0, "team": 1, "glow": 0}
+const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur": 5, "eyes": 0, "team": 1, "glow": 0,
+	"card": 0}
+## The "card" slot: see-through alpha cards (wings) on their own shader, both sides drawn, no ink.
+const CARD: Shader = preload("res://shaders/warden_card.gdshader")
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
-const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline shell
+const NO_INK := ["hair", "eyes", "glow", "card"]   # slots drawn without the ink outline shell
 ## Pieces built as clean geometry (tools/meshy/warden_parts.py), "<slot>-<tag>": they take the ink line even on
 ## an inkless slot (the hair goes without it for a scan's ragged strands, not for a woven braid).
 const INK_TAGS := ["braid"]
@@ -66,6 +69,9 @@ const SETTING := "warden_models"
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
 const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
 const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (HunterAnim spins them while firing)
+## the second weapon of a twin hold (Sable's left crossbow), a child of WEAPON placed so that HunterAnim's twin
+## hold hands it to the left hand (its node x < -0.04: _setup_weapon moves it into the Offhand)
+const WEAPON_OFF := "weapon_offhand"
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
 static var _ink: ShaderMaterial  # the painted atlas's ink shell (INK_WIDTH), shared
@@ -171,6 +177,13 @@ static func _hold_weapon(root: Node3D, glb: Node3D) -> void:
 	weapon.owner = null
 	gun.add_child(weapon)
 	weapon.transform = Transform3D.IDENTITY
+	var off := weapon.find_child(WEAPON_OFF, true, false) as Node3D
+	if off:
+		var at := WardenGlb.model_xf(gun, off)
+		off.get_parent().remove_child(off)
+		off.owner = null
+		gun.add_child(off)
+		off.transform = at
 	# its magazine (WEAPON_MAG) becomes the Gun's Mag, which the reload drops out and slaps back in
 	var mag := weapon.find_child(WEAPON_MAG, true, false) as Node3D
 	var old := gun.get_node_or_null("Mag")
@@ -215,6 +228,16 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 		for si in mesh.get_surface_count():
 			var src := mesh.surface_get_material(si) as BaseMaterial3D
 			var slot := String(src.resource_name).get_slice("-", 0) if src else ""      # ("<slot>-<texture>")
+			if slot == "card":
+				var cm := ShaderMaterial.new()
+				cm.shader = CARD
+				if src and src.albedo_texture:
+					cm.set_shader_parameter("albedo_tex", src.albedo_texture)
+				cm.set_shader_parameter("use_tex", src != null and src.albedo_texture != null)
+				(mi as MeshInstance3D).set_surface_override_material(si, cm)
+				(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				out.append(cm)
+				continue
 			# the ink shell on the body's silhouette only: on the scan's thin hair strands it poked through as
 			# lines across the face
 			var tag := String(src.resource_name).get_slice("-", 1) if src else ""

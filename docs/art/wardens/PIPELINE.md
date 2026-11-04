@@ -170,3 +170,13 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Vex r3b edit side 2 | 06:44 | 01a1a54c-f974-7239-9ea4-5a714210e1a8 | nano-banana-pro | as side, "her left arm hidden behind her body" | 9 | Kept |
 | Vex r3b A | 06:46 | 01a1a54f-35bf-734c-9ee7-55f81be998e5 | meshy-7.1 | 4 edited views (front, 3/4, side, back), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Kept: the face's smirk, chunky hair, eye plate on her right eye, gun-arm, backpack |
 | Vex r3b B | 06:46 | 01a1a54f-35c4-73d2-9fd2-ab8f7e9f5bce | meshy-7.1 | as A, enhancement on | 40 | Dropped: rounder cuter face, stringy hair; a cleaner lens (A's is replaced by geometry) |
+
+### Stage 1: Sable (thief), 2026-11-04 (balance 4921 before; 85 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Sable edit front | 09:08 | 01a1a5d1-7e41-7040-9f50-609ff1c60f5f | nano-banana-pro (image-to-image) | 3:4 crop; crossbows, wings, both braids, ground line out; hands empty | 9 | Kept |
+| Sable edit back | 09:08 | 01a1a5d1-7e3a-728b-a2b1-09e9f433952f | nano-banana-pro | as front, plus both sleeves long | 9 | Dropped: drew the pendant on her back; the sleeves were wrong (the turnaround's left arm is bare) |
+| Sable edit side | 09:08 | 01a1a5d1-7e5a-7775-a872-46e7339c4da9 | nano-banana-pro | crossbow, wing, braid out; long sleeves and fur collar | 9 | Dropped: no mask or plumes, a ground line |
+| Sable edit back 2 | 09:10 | 01a1a5d3-47b8-72ca-b79b-67cde2de6c30 | nano-banana-pro | crossbows, wings, braid out; nothing else | 9 | Kept |
+| Sable edit side 2 | 09:10 | 01a1a5d3-47c0-7739-a9b7-f67259a99aa6 | nano-banana-pro | crossbow, wing, braid out; fur collar in the standing collar; left arm bare | 9 | Kept (came back mirrored: flipped back to the art's side) |
+| Sable A | 09:12 | 01a1a5d5-1d78-72f9-b867-a9bff45038eb | meshy-7.1 | edited front, side, back (+ texture refs), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** |
