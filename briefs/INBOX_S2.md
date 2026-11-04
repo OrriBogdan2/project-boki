@@ -485,3 +485,6 @@ Credits: ~8 x 70-110 ≈ 600-900; balance 4,993. Post per-Warden "OWNER: review 
 
 ## 2026-11-04 09:45 UTC (orchestrator): HOLD Kael's glow colour
 - The owner is testing white-hot cracks for Kael instead of orange magma. Build his mesh/rig in stage 1 as planned, but keep the crack/blade glow as a separate emissive colour parameter so it can be switched without a rebake.
+
+## 2026-11-04 10:00 UTC (orchestrator): Kael glow = WHITE-HOT (owner)
+- Set Kael's emissive (arm cracks, blade cracks, hook tip) to white-hot: a near-white core, a faint pale-gold edge, white-gold sparks, black demon smoke. No orange or red. New art files are coming to ext/imagegen as kael_*.

@@ -1352,3 +1352,5 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 - **"The" fix:** the label code now drops a leading "The", so it reads "Orri the Unbroken", never "Orri the The Unbroken". hero-title-check asserts this.
 - **Checks (S2):** hero-title 0, portrait 107/0, archetype 307/0, class-unlock 149/0, hero 0, juggernaut-combo 135/0, title 0, health OK, style OK.
 - **One merge** gets every rename and title: Pip, Ryzz, Breaker, Hem, Kael, plus the 7 titles.
+
+## 2026-11-04 10:00 UTC (orchestrator): DECISION? Kael's glow is white-hot (not orange magma); orange fire stays Cinder's alone
