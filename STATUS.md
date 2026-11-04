@@ -291,3 +291,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
   - **Phase A:** the Vex agent is on the shared look fix, Vex 95% and RECIPE_95.
   - **Still iterating:** Hem+Kael (s3), Breaker+Claire, Sable+Pip, Tarek+Ostra and Ryzz.
 - 2026-11-04 12:37 UTC: Phase A step 1 is done. The shared painted-look fix 16c18b4f (warm-neutral ambient, cool lights neutralised, darks lifted; only for painted .glb models) went to every Hunter agent to cherry-pick and retune on top. Vex 95% and RECIPE_95 are next.
+- 2026-11-04 12:59 UTC: **Meshy spends refused again** by this session's permission check, for Tarek's body runs (inputs are ready in ~/meshy/tarek/in3; about 80 credits). That's now two heroes (Dredge, Tarek) blocked on the user allowing Meshy in the S2 session. Round 3 scores: Sable 85/70, Pip 85/70, Ostra 78/62, Dredge 78/72, Tarek 70/55.
