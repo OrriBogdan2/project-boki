@@ -121,3 +121,8 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 
 ## 2026-11-04 06:15 UTC: Dredge full set (owner uploads; orchestrator)
 - wardens_r2/dredge_turnaround.webp is now the **unlabelled** turnaround (clean for Meshy); the labelled one moved to review/dredge_turnaround_labelled.webp. Added dredge_portrait, dredge_side (a true profile), the splash, and review/dredge_before_after.jpg. Owner-locked design.
+
+## 2026-11-04 06:35 UTC: Breaker (was Bjorn) round 2, from the owner's uploads (orchestrator)
+- wardens_r2/breaker_{turnaround,side,portrait,splash}.webp; review/breaker_before_after.jpg. The old bjorn_side.webp (05:30, superseded) is removed.
+- Meets the owner's notes: towering (dwarfs the villagers in the splash), visibly undead (white eyes, frost-pale skin, rotting gashes with bone on the arms) yet warm and grinning, a detailed vest (harness, lantern, teddy-bear trinket, tags, hook, tooth necklace), a prow shield with a scroll top and ice, and an ice-block hammer with an anchor fluke.
+- Note: the turnaround order is back / side / 3-4 / front (reversed); the side profile is the separate breaker_side.
