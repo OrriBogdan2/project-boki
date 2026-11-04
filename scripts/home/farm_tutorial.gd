@@ -117,8 +117,8 @@ static func hint_text(id: String) -> String:
 	if s.is_empty():
 		return ""
 	var raw := String((s["hints"] as Dictionary).get(stage(id), ""))
-	return FarmTaskGuide.fill(raw).replace("{build}", Settings.key_cap("build")).replace("{interact}", Settings.key_cap("interact")) \
-			.replace("{details}", Settings.key_cap("details"))
+	var txt := FarmTaskGuide.fill(raw).replace("{build}", Settings.key_cap("build"))
+	return txt.replace("{interact}", Settings.key_cap("interact")).replace("{details}", Settings.key_cap("details"))
 
 static func world_text(id: String) -> String:
 	var s := step_def(id)

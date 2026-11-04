@@ -95,7 +95,7 @@ const TUT_HINT := {
 	"utility": ["Use your power! Right click!", "(watches your hands, tail going)"],
 	"orders": ["Hold %T and tell me what to do!", "(sits up, ears forward, waiting for orders)"],
 	"sig": ["Press %E for %N! Line them all up, then fire!", "(bounces, ready for the group)"],
-	"gkey": ["Press %T and I'll charge in! Press it again and I come back.", "(wiggles on your shoulder, waiting for the button)"],
+	"gkey": ["Press %T and I'll charge in! Again and I'm back.", "(wiggles, waiting for the button)"],
 	"rank": ["Level up! Hold Alt and press %E to make your power stronger!", "(bounces and points at the gold plus)"],
 	"key": ["Oh look, there's a key! Grab it so you can open a chest.", "(points its nose at a shiny key)"],
 	"fight": ["Together! Get them all!", "(bristles, ready to fight)"],
@@ -105,7 +105,8 @@ const TUT_HINT := {
 	"chest": ["A chest! It needs a key to open. Use the one you found!", "(runs to a chest and paws at the lock)"],
 	"pickup": ["Something shiny! Grab it!", "(noses at the thing on the ground)"],
 	"goexit": ["Follow me, the outpost is this way!", "(runs ahead toward the outpost and waits)"],
-	"uplink": ["Stand in the circle until it's yours. Step out and it starts slipping back!", "(sits in the circle and looks back at you)"],
+	"uplink": ["Stay in the circle till it's yours. Step out and it slips back!",
+		"(sits in the circle, looking at you)"],
 	"defend": ["Here they come! Stay inside the circle!", "(bristles at the walls)"],
 	"extract": ["We did it! Into the light!", "(bounces toward the light)"],
 }

@@ -2,7 +2,8 @@ class_name TutorialText
 extends RefCounted
 ## The tutorial's longer words: the second line under a step's banner (content/rules/tutorial.json
 ## "detail") and the Boki's hints, filled in from the player's own keys and the hunter's ability data.
-## %E the E key, %U the ultimate's level, %F interact, %T the Boki key, %R rank-up combo, %N the E ability's name, %X the E ability in
+## %E the E key, %U the ultimate's level, %F interact, %T the Boki key, %R rank-up combo,
+## %N the E ability's name, %X the E ability in
 ## plain words (key included).
 
 ## "Press E: Longneedle. Stand still ..." built from the hunter's card text (any Hunter).
@@ -33,20 +34,20 @@ static func fill(txt: String, h: Hunter) -> String:
 
 ## Word-wraps a line to a pixel width, shrinking the type until it fits `max_lines`. Returns {lines, px}.
 static func wrap(font: Font, txt: String, px: int, width: float, max_lines: int) -> Dictionary:
-	var size := px
+	var fit_px := px
 	var lines: Array = []
 	while true:
 		lines = []
 		var cur := ""
 		for w in txt.split(" "):
 			var trial: String = w if cur == "" else cur + " " + w
-			if cur != "" and font.get_string_size(trial, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x > width:
+			if cur != "" and font.get_string_size(trial, HORIZONTAL_ALIGNMENT_LEFT, -1, fit_px).x > width:
 				lines.append(cur)
 				cur = w
 			else:
 				cur = trial
 		lines.append(cur)
-		if lines.size() <= max_lines or size <= 10:
+		if lines.size() <= max_lines or fit_px <= 10:
 			break
-		size -= 1
-	return {"lines": lines, "px": size}
+		fit_px -= 1
+	return {"lines": lines, "px": fit_px}

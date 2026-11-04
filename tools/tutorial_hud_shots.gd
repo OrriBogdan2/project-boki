@@ -9,7 +9,8 @@ var m: Match
 var dir := "/tmp/tuthud_shots"
 var n := 0
 
-const WATCHED := ["dash", "exdash", "crouch", "gkey", "rank", "shoot", "sig", "utility", "throw", "key", "chest", "uplink", "fight"]
+const WATCHED := ["dash", "exdash", "crouch", "gkey", "rank", "shoot", "sig", "utility", "throw", "key", "chest",
+		"uplink", "fight"]
 
 func run(main_node: Node) -> void:
 	main = main_node

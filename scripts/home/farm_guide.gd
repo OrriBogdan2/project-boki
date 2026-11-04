@@ -54,7 +54,8 @@ func tick(dt: float) -> void:
 		detect_t = 0.5
 		_poll()
 	_update_marker()
-	FarmTaskGuide.hub_hint(h, FarmTutorial.current() == "task" and FarmTutorial.stage("task") == "go" and h.panel_open == "")
+	var want_page: bool = FarmTutorial.current() == "task" and FarmTutorial.stage("task") == "go"
+	FarmTaskGuide.hub_hint(h, want_page and h.panel_open == "")
 
 func _poll() -> void:
 	var was_done := bool(FarmTutorial.state()["done"])
