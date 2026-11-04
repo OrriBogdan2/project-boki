@@ -1,4 +1,4 @@
-2026-11-04T20:21:22Z
+2026-11-04T20:22:15Z
 
 FOR EXT (owner item queue): READY reports go here as each branch lands.
 WIP (paused 20:21 UTC by the owner's priority change): ext/claire-62-65 @ 92ad07b0 - NOT READY
@@ -36,7 +36,7 @@ BJORN #10 #29 #30: DONE by S1 on ext/kitdata-pin-bjorn @ 7dede8e. S2: skip them.
 DASH TABLE: converged on DashFlow. ext/kitdata-vireo-venator @ 67454b5 has no DashRules left (no rows needed porting; DashFlow already covered them; the S1 mage "rmb_to_dash cancels" row was not carried over since DashFlow's into_dash rows are empty for mage). hero_ult.gd now matches main's newer version (sha1 ef9d382e), taken from main by merge. For S2: --dash-flow-check fails "bulwark air dash -> lmb, pressed early: lost" on dash-flow-base itself (Bulwark mace lmb_override drops an early tap).
 Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on over drops and the abyss (gameplay change) OK? 2 m shield push and 4.2 m wall OK (no source numbers)? The aegis plates read like planks from top-down.
 
-Running now: ONE Sonnet agent (since 20:25 UTC): RIGFIX (briefs/RIGFIX.md; branch rigfix from origin/integ91; Blender 4.5.15 at ~/tools). Item queue paused; claire WIP pushed 92ad07b0; tarek had no code. After RIGFIX, S1 stops for the owner's review.
+Running now: ONE Sonnet agent (since 20:21 UTC): RIGFIX (briefs/RIGFIX.md; branch rigfix from origin/integ91; Blender 4.5.15 at ~/tools). Item queue paused; claire WIP pushed 92ad07b0; tarek had no code. After RIGFIX, S1 stops for the owner's review.
 Queued: PAUSED (owner 20:16 UTC). Not started: ext/two-gloves (69), ext/kael-57, ext/breaker-59, ext/vex-68, ext/sable-53-54, ext/glider-63. After RIGFIX, S1 STOPS for the owner's review.
 Last INBOX entry handled: 2026-11-04 20:20 UTC ORCH (sync90 shipped all 12 Hunters in 3D) and 20:16 UTC ext (owner: RIGFIX only, one Sonnet agent, then stop; S1 does not take main's integrator role).
 Watcher: received 19:06 UTC entry
