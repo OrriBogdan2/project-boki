@@ -111,7 +111,7 @@ func run(m: Node) -> void:
 func _rules() -> void:
 	ok(ClassUnlock.starters() == STARTERS, "exactly the 3 starters, by id: %s" % str(ClassUnlock.starters()))
 	ok(ClassUnlock.picks_needed() == 1, "the starter pick is 1 of them")
-	ok(ClassUnlock.starters() == ["gunslinger", "archer", "juggernaut"], "Vex, Hem and Zedran are the starters")
+	ok(ClassUnlock.starters() == ["gunslinger", "archer", "juggernaut"], "Vex, Hem and Kael are the starters")
 	ok(CHALLENGE_ONLY.all(func(a): return not ClassUnlock.starters().has(a)),
 			"%s are challenge-only" % str(CHALLENGE_ONLY.map(func(a): return Arch.name_of(a))))
 	var stats: Dictionary = ClassUnlock.rules()["stats"]
@@ -121,7 +121,7 @@ func _rules() -> void:
 	ok(ClassUnlock.challenge(FIRST).is_empty(), "%s has no unlock challenge (it is a starter)" % Arch.name_of(FIRST))
 	var easy := ["ashwick", "archer", "juggernaut"].all(func(a): return ClassUnlock.tier(a) == "easy")
 	ok(easy,
-			"Cinder is an easy challenge; Hem and Zedran keep theirs for saves that picked before")
+			"Cinder is an easy challenge; Hem and Kael keep theirs for saves that picked before")
 	var others := Arch.ids().filter(func(a):
 		return not STARTERS.has(a) and a != "ashwick" and not CHALLENGE_ONLY.has(a))
 	ok(others.all(func(a): return ClassUnlock.tier(String(a)) == "medium"), "the other Hunters are medium")
@@ -654,7 +654,7 @@ func _save_strip(frames: Array, path: String) -> void:
 # ---------------------------------------------------------------- 9. the Hunters screen and the hold
 func _home(tree: SceneTree) -> void:
 	new_save(["archer"])
-	# some play: Zedran's challenge done (ready to hold), Sable's half way, Hem's ring goal done
+	# some play: Kael's challenge done (ready to hold), Sable's half way, Hem's ring goal done
 	var jt := int(ClassUnlock.challenge("juggernaut")["target"])
 	var gt := int(ClassUnlock.challenge("thief")["target"])
 	Game.apply_result(result("archer", true, {"slams": jt, "air_hits": gt / 2, "rings": 8, "stuns": 5}))

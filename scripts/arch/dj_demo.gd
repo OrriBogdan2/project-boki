@@ -50,7 +50,7 @@ const STILLS := {
 	"pull_steer": ["juggernaut", Vector3(-10.0, 0, 0)],
 }
 
-const STRIP_SLOW := 0.15     # Engine.time_scale while Zedran's strips and Sable's dash strips play
+const STRIP_SLOW := 0.15     # Engine.time_scale while Kael's strips and Sable's dash strips play
 
 static func at(t: float, dt: float, when: float) -> bool:
 	return ArenaDemo._at(t, dt, when)

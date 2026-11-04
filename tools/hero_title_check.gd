@@ -28,7 +28,8 @@ func run(main: Node) -> void:
 		var story_lines := String(data.get("personality", "")).split("\n").size()
 		ok(story_lines <= 3, "%s personality is three lines at most" % id)
 		var label := HeroTitle.label("Orri", id)
-		ok(label == "Orri the %s" % HeroTitle.title(id), "%s label reads '%s'" % [id, label])
+		var bare := HeroTitle.title(id).trim_prefix("The ")   # "Orri the Unbroken", never "the The"
+		ok(label == "Orri the %s" % bare and not label.contains("the The"), "%s label reads '%s'" % [id, label])
 		var shown: Array = [Arch.name_of(id), Arch.label(id), label, _plain_text(data)]
 		for text in shown:
 			var found_old := _old_name_in(String(text))
@@ -47,7 +48,7 @@ func _plain_text(data: Dictionary) -> String:
 	copy.erase("base_name")
 	return JSON.stringify(copy)
 
-## The first old personal name found in text once the class titles (Icy Dancer ...) are taken out.
+## The first old personal name found in text once the class titles (Frost Siren ...) are taken out.
 func _old_name_in(text: String) -> String:
 	var rest := text
 	for title in _all_titles():

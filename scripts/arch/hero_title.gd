@@ -19,7 +19,10 @@ static func personality(archetype: String) -> String:
 static func label(player_name: String, archetype: String) -> String:
 	if not Arch.exists(archetype):
 		return player_name
-	return "%s the %s" % [player_name, title(archetype)]
+	var t := title(archetype)
+	if t.begins_with("The "):   # "Orri the Unbroken", not "Orri the The Unbroken"
+		t = t.substr(4)
+	return "%s the %s" % [player_name, t]
 
 static func of_hunter(hunter: Hunter) -> String:
 	return label(hunter.pname, hunter.arch)

@@ -5,17 +5,17 @@ _Generated from `content/weapons`, `content/abilities`, `content/classes`, `scri
 
 ## Weapons
 
-Numbers are per shot or swing before any upgrades. Class kits that run their own weapon (Zedran's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.
+Numbers are per shot or swing before any upgrades. Class kits that run their own weapon (Kael's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.
 
 | Weapon | Carried by | Weight | Damage | Fire interval | Magazine | Reload | Range | Notes |
 |---|---|---|---|---|---|---|---|---|
 | Arc Bolts | Silver Thief | light | 9 | 0.45s | 99 | 0.5s | 12m | A spinning bolt from alternating hands every 0.45s. It flies to your cursor (12m at most) and fizzles there if it hits nothing. |
 | Burst Rifle | none | medium | 7 | 0.45s | 27 | 1.5s | 10.5m | Three rounds per pull. Accurate at range. |
-| Coilcaster | Storm Slayer | light | 12 | 0.8s | 99 | 1s | 13m | No gun: a copper coil at each wrist. She points and a jagged bolt cracks from her fingertip, left hand then right, out to full range. |
+| Coilcaster | Storm Chaser | light | 12 | 0.8s | 99 | 1s | 13m | No gun: a copper coil at each wrist. She points and a jagged bolt cracks from her fingertip, left hand then right, out to full range. |
 | Torch Lance | Mad Pyromancer | heavy | 2.7 | 0.1s | 80 | 1.6s | 7m | Hold to hose fire 7m ahead: the stream trails behind a sweep, narrow at the nozzle and billowing at the end. 8 seconds of fuel, then a short refill. It builds Char; at full Char the foe goes Ablaze. |
-| Greatsword | Arena King | heavy | 11 | 0.5s | 1 | 0.1s | 3.4m | A slow, huge 3-hit combo, strongest on the tip. Hold 1s for a slam that stuns and throws people far. |
-| Hoar Fan | Icy Dancer | light | 4 | 0.18s | 99 | 1s | 10m | A folding fan of ice slats. Hold for a steady stream of slow ice darts (one every 0.18s) that bow out and curve onto the foe nearest your cursor. Eight on one foe Shatter them. While skating they fly straight and thick. |
-| Ember Cast | Fox Cub | medium | 8 | 0.4s | 18 | 1.3s | 12m | Nothing held: she pushes an ember out of one hand, then the other, every 0.4s; it flies its full 12m, past the cursor. Embers Kindle what they hit (up to 5); hold fire for a second and the next one flies 40% further. |
+| Greatsword | The Unbroken | heavy | 11 | 0.5s | 1 | 0.1s | 3.4m | A slow, huge 3-hit combo, strongest on the tip. Hold 1s for a slam that stuns and throws people far. |
+| Hoar Fan | Frost Siren | light | 4 | 0.18s | 99 | 1s | 10m | A folding fan of ice slats. Hold for a steady stream of slow ice darts (one every 0.18s) that bow out and curve onto the foe nearest your cursor. Eight on one foe Shatter them. While skating they fly straight and thick. |
+| Ember Cast | Little Lantern | medium | 8 | 0.4s | 18 | 1.3s | 12m | Nothing held: she pushes an ember out of one hand, then the other, every 0.4s; it flies its full 12m, past the cursor. Embers Kindle what they hit (up to 5); hold fire for a second and the next one flies 40% further. |
 | Longbow | Red Stitch | light | 30 | 0.5s | 1 | 0.25s | 12m | Hold to draw, let go to loose. 0.6s Empowered: 30 damage, lands at the cursor (up to 12m). 1.15s Supercharged: 60 damage, flies past the cursor to 16m. Let go right as a stage comes up and your next draw is 60% faster; hold 0.5s past Supercharged and the arrow is overdrawn (half damage). Let go early for 15 at the cursor. You walk slower while drawing. |
 | Longsword | none | medium | 8.2 | 0.36s | 1 | 0.1s | 2.7m | A wide 3-hit combo, stronger on the tip of the blade. Hold 0.8s for a long-reaching thrust. |
 | Minigun | none | heavy | 3.8 | 0.1s | 90 | 3s | 10m | Spins up for 0.7s, then fires a stream that tightens the longer you hold it. Slows you while firing. |

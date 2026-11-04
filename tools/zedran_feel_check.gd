@@ -1,5 +1,5 @@
 extends RefCounted
-## Zedran's feel: the Warchain, the RMB variants, the Meteor Drop and his dash moves. Runs inside
+## Kael's feel: the Warchain, the RMB variants, the Meteor Drop and his dash moves. Runs inside
 ## --juggernaut-combo-check (tools/dancer_jug_check.gd). One assert per row of docs/heroes/juggernaut.md
 ## "Warchain: the state machine" and "RMB: the interaction table", the Meteor Drop's phases and timings
 ## against the footage, and his two dash moves. A is tools/archetype_check.gd.

@@ -1,7 +1,7 @@
 class_name ClassUnlock
 extends RefCounted
 ## Hunter unlocks and mastery (docs/decisions/0005; player-facing these are "Hunters", internally
-## archetypes and the save key "classes"). A new save picks 1 of 3 starters (Vex, Hem, Zedran) before the egg
+## archetypes and the save key "classes"). A new save picks 1 of 3 starters (Vex, Hem, Kael) before the egg
 ## pick, and plays the tutorial as it. The other two open by themselves after the first finished expedition
 ## (the tutorial). Every other Hunter opens through its own challenge (content/rules/class_unlock.json "unlock"),
 ## counted
@@ -128,7 +128,7 @@ static func open_bonus() -> Array:
 	c["fresh"] = ids.duplicate()
 	return ids
 
-## "Hem and Zedran are open now" for starters opened and not yet announced ("" when none); marks them told.
+## "Hem and Kael are open now" for starters opened and not yet announced ("" when none); marks them told.
 static func take_fresh() -> String:
 	var c := state()
 	var names: Array = (c.get("fresh", []) as Array).map(func(a): return Arch.name_of(String(a)))

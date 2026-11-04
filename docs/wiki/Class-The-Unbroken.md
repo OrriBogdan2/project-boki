@@ -1,6 +1,6 @@
-# Arena King
+# The Unbroken
 
-Zedran is a heavy brawler who burns hotter the longer the fight goes. Chains in, slams down, and heals off
+Kael is a heavy brawler who burns hotter the longer the fight goes. Chains in, slams down, and heals off
 every knock.
 
 <!-- gen:profile -->
@@ -8,8 +8,8 @@ every knock.
 
 |  |  |
 |---|---|
-| Class title | Arena King |
-| Base character | Zedran, male |
+| Class title | The Unbroken |
+| Base character | Kael, male |
 | Personality | A proud champion in a spartan kit, mostly bare skin and gilded armour. He fights like the crowd is watching. He loves a duel and never backs down from one. |
 
 <!-- /gen:profile -->

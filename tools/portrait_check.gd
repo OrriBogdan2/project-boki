@@ -62,7 +62,8 @@ func _art() -> void:
 	var names_ok: bool = HeroTitle.base_name("gunslinger") == "Vex" and HeroTitle.base_name("rimewright") == "Claire"
 	var names2: bool = HeroTitle.base_name("tender") == "Pip" and HeroTitle.base_name("mage") == "Ryzz"
 	var names3: bool = HeroTitle.base_name("bulwark") == "Breaker" and HeroTitle.base_name("archer") == "Hem"
-	ok("the new names", names_ok and names2 and names3)
+	var names4: bool = HeroTitle.base_name("juggernaut") == "Kael"
+	ok("the new names", names_ok and names2 and names3 and names4)
 
 # ------------------------------------------------------------------ 2. framing
 func _framing() -> void:

@@ -8,7 +8,7 @@ Changing a hero's hit radius is one line (`body.hit_r`). The creator's look slid
 |---|---|---|---|---|
 | bulwark | Breaker | 1.15 | 0.460 | tallest and widest |
 | dredge | Dredge | 1.13 | 0.452 | hulking |
-| juggernaut | Zedran | 1.07 | 0.428 | broad |
+| juggernaut | Kael | 1.07 | 0.428 | broad |
 | gunslinger | Venator | 1.04 | 0.416 | broad |
 | ostra | Ostra | 1.03 | 0.412 | tall and thin; hitbox stays at ground level (item 18) |
 | mage | Ryzz | 1.00 | 0.400 | average |

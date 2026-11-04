@@ -1,6 +1,6 @@
 class_name JuggernautUlt
 extends RefCounted
-## Zedran's ultimate on X, Gilded Riposte (his "x" data in content/archetypes/juggernaut.json; the source's
+## Kael's ultimate on X, Gilded Riposte (his "x" data in content/archetypes/juggernaut.json; the source's
 ## Retaliation, briefs/hero-ref/juggernaut.md "Ultimate (on X)"). Press: he plants in a guard for 0.65s,
 ## blade upright and his body flaring gold, taking no damage and no crowd control (each hit he blocks rings
 ## out and makes the answer harder, up to two). Then he lunges 1.8m and cleaves up through the strip ahead

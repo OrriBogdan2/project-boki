@@ -1,6 +1,6 @@
 class_name JuggernautDrop
 extends RefCounted
-## Zedran's airborne Smash, the Meteor Drop (`rmb.drop` in content/archetypes/juggernaut.json; the source's air
+## Kael's airborne Smash, the Meteor Drop (`rmb.drop` in content/archetypes/juggernaut.json; the source's air
 ## slam, briefs/hero-ref/juggernaut.md "Air Slam" and "Jump and landing": ~0.85s airborne, ~0.5s recovery).
 ## Press in the air: a short hang at the top while he gathers (the blade hauled overhead, a tuck and a half
 ## flip) over a landing marker everyone sees at the clamped cursor, then a visible dive onto it with flame

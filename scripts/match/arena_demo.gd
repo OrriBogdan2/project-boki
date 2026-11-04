@@ -8,7 +8,7 @@ extends RefCounted
 ##   juggernaut  greatsword slashes fill Rage (the shoulder glow), the Enraged form
 ##   sweetspot   then a Finishing Slam winds up and lands its sweet spot (--hold-shot: the wind-up)
 ##   encore / encorehit   Sable's X: the ring growing (the telegraph), then a volley landing (the impact)
-##   riposte / ripostehit Zedran's X: the guard with its strip (the telegraph), then the cleave landing
+##   riposte / ripostehit Kael's X: the guard with its strip (the telegraph), then the cleave landing
 ##   wave        the greatsword held into a Searing Wave (--hold-shot: at full charge)
 ##   archer      a rooted dummy, full Focus: the lens glint, the aim line, crosshairs over it
 ##   deadeye     the same, ending on the Deadeye payoff
@@ -210,7 +210,7 @@ static func tick(A: Arena, dt: float) -> void:
 			if _at(t, dt, 0.3): DJDemo.cast_ult(P)
 			at_t = 0.55 if w == "encore" else 1.24
 		"riposte", "ripostehit":
-			# Zedran's Gilded Riposte: the guard with the strip toward the dummy, then the cleave through it
+			# Kael's Gilded Riposte: the guard with the strip toward the dummy, then the cleave through it
 			if t < 0.05:
 				if P.arch != "juggernaut" or P.wid != "greatsword": A.set_arch("juggernaut", "greatsword")
 				A.set_kin("cindle")
@@ -283,7 +283,7 @@ static func tick(A: Arena, dt: float) -> void:
 					P.ak.press_rmb()
 				at_t = go + 0.7 if "--hold-shot" in OS.get_cmdline_user_args() else go + 1.05
 		_ when w.begins_with("dj_"):
-			at_t = DJDemo.still(A, P, D, w.substr(3), t, dt)      # Sable and Zedran stills (scripts/arch/dj_demo.gd)
+			at_t = DJDemo.still(A, P, D, w.substr(3), t, dt)      # Sable and Kael stills (scripts/arch/dj_demo.gd)
 			if m.hud: m.hud.toasts.clear()
 		_ when w.begins_with("pair_"):
 			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Tarek and Ostra (scripts/arch/pair_demo.gd)

@@ -198,7 +198,7 @@ func _data() -> void:
 		if (sd2["rmb"] as Dictionary).get("variants", {}).is_empty() or String(sd2["e"].get("desc", "")).length() < 40: sup_ok = false
 	ok("data: support heroes complete, no R", sup_ok)
 	var dj_ults := _has_ult("thief") and _has_ult("juggernaut")
-	ok("data: Sable and Zedran have their own ultimate (X, level 6); no Jackpot fold, no crash fold",
+	ok("data: Sable and Kael have their own ultimate (X, level 6); no Jackpot fold, no crash fold",
 			dj_ults and not Arch.def("thief").has("jackpot") and not Arch.def("juggernaut")["rmb"].has("crash"))
 	ok("weapons: fix keeps the class", Arch.fix("thief", "heavy") == "juggernaut" and Arch.fix("bulwark", "heavy") == "bulwark")
 

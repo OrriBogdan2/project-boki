@@ -26,7 +26,7 @@ Last updated: 2026-11-02 18:40 ET, sync69.
 
 | Branch | Built by | What | Expected |
 |---|---|---|---|
-| ext/fidelity | other session (server, Opus) | Every hunter rebuilt from the owner's footage: ext/aimkit (shared aim modes and reticles) then six kitfix branches. New names: Dancer, Hem, Breaker, Vex, Linwick, Pip, Breah, Zedran. | branch by branch |
+| ext/fidelity | other session (server, Opus) | Every hunter rebuilt from the owner's footage: ext/aimkit (shared aim modes and reticles) then six kitfix branches. New names: Dancer, Hem, Breaker, Vex, Linwick, Pip, Breah, Kael. | branch by branch |
 | ext/kits2-nor, ext/farmbuild | other session | Thief and Juggernaut follow-ups; the farm building pass | re-merging onto sync62+ |
 | ext/classes | other session | "Hunters" terminology, pick 1 at creation then 2 more early, a hunter viewer with ability previews, hold-to-unlock | after fidelity |
 | Boki loss (kinloss, main) | main session | Higher tiers: your Boki guards your deathbox, can be captured; bond-pull arrow and pings; Ransom House or "captured by" after the match | sync67, after online fixes |
