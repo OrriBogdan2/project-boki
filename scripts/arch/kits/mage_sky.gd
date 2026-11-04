@@ -101,7 +101,8 @@ func _chevron(at: Vector3, d: Vector2, r: float) -> void:
 	var tip := at + Vector3(d.x, 0, d.y) * (r + 0.55) + Vector3(0, 0.15, 0)
 	for side in [-1.0, 1.0]:
 		var wing := d.rotated(side * 2.4)
-		kit.fx().smear(tip + Vector3(wing.x, 0, wing.y) * 0.55, tip, MageKit.GOLD, MageKit.GOLD.lightened(0.4), 0.2, 0.05)
+		var start := tip + Vector3(wing.x, 0, wing.y) * 0.55
+		kit.fx().smear(start, tip, MageKit.GOLD, MageKit.GOLD.lightened(0.4), 0.2, 0.05)
 
 func _strike(s: Dictionary) -> void:
 	var ed := kit.e_def()
@@ -117,7 +118,8 @@ func _strike(s: Dictionary) -> void:
 	for f in kit.foes_in(at, float(ed["radius"])):
 		kit.add_spark(f, int(ed.get("stacks", 1)))
 		# every body inside is moved along the one committed vector, pinned there for a moment
-		var slide := {"mode": "slide", "dir": [dir.x, dir.y], "dur": float(ed["slide_t"]), "dist": float(ed["slide_dist"])}
+		var slide := {"mode": "slide", "dir": [dir.x, dir.y], "dur": float(ed["slide_t"])}
+		slide["dist"] = float(ed["slide_dist"])
 		kit.m.displace.tow(f, null, slide)
 		if f is Hunter:
 			KitStatus.apply(f, "gnd", float(ed["grounded"]))
@@ -148,5 +150,7 @@ func _fling_orb(mt: Dictionary, dir: Vector2, ed: Dictionary) -> void:
 	var land := from + Vector3(dir.x, 0, dir.y) * float(ed["fling_dist"])
 	mt["owner"] = kit.h
 	mt["t"] = float(kit.rmb_def()["coil"]["mote_life"])
-	mt["fly"] = {"from": from, "to": kit.ground(kit.h.pos) if homing else kit.ground(land), "t": 0.0, "home": homing}
-	kit.fx().arc(from + Vector3(0, 0.55, 0), (mt["fly"]["to"] as Vector3) + Vector3(0, 0.55, 0), MageKit.TEAL, MageKit.GOLD, 0.6, 0.25)
+	var dest := kit.ground(kit.h.pos) if homing else kit.ground(land)
+	mt["fly"] = {"from": from, "to": dest, "t": 0.0, "home": homing}
+	var lift := Vector3(0, 0.55, 0)
+	kit.fx().arc(from + lift, dest + lift, MageKit.TEAL, MageKit.GOLD, 0.6, 0.25)

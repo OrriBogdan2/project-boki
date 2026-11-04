@@ -302,7 +302,8 @@ func _share_static(f: Ent, shared: int, struck: Array) -> void:
 	kit.add_spark(f, shared - have)
 	for src in struck:
 		if kit.spark_n(src) == shared and src != f:
-			kit.fx().arc(src.position + Vector3(0, 1.0, 0), f.position + Vector3(0, 1.0, 0), MageKit.TEAL, MageKit.GOLD, 0.6, 0.2)
+			var chest := Vector3(0, 1.0, 0)
+			kit.fx().arc(src.position + chest, f.position + chest, MageKit.TEAL, MageKit.GOLD, 0.6, 0.2)
 			return
 
 ## A pillar of gold light slams onto the spot out of the sky, a shock ring and a spray of sparks.

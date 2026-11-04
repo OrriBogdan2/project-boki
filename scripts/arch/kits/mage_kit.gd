@@ -719,7 +719,7 @@ func _grab_mote(mt: Dictionary) -> void:
 	h.dashes = h.max_dashes()
 	h.dash_buf = 0.0
 	if was_spent:
-		m.fx.flash(h.position + Vector3(0, 1.0, 0), GOLD, 1.6, 0.1)
+		m.fx.flash(h.position + Vector3(0, 1.0, 0), GOLD, 2.4, 0.16)
 		m.fx.flash(h.position + Vector3(0, 1.6, 0), TEAL, 0.9, 0.08)
 		DashReset.cue(h, "orb")
 	_free_mote(mt, false)
