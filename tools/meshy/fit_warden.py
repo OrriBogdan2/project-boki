@@ -1990,8 +1990,7 @@ def lengthen(ob, img, ln):
     tail = np.clip(co[:, 0] * float(ln.get("tail", 1.0)) / 0.15, 0.0, 1.0)
     k = float(ln["k"]) + (float(ln.get("k_back", ln["k"])) - float(ln["k"])) * back + float(ln.get("k_tail", 0.0)) * tail * back
     drop = (z0 - co[:, 2]) * k
-    co[sel, 2] -= drop[sel]
-    co[:, 2] = np.maximum(co[:, 2], float(ln.get("floor", 0.12)))
+    co[sel, 2] = np.maximum(co[sel, 2] - drop[sel], float(ln.get("floor", 0.12)))     # (the coat only)
     me.vertices.foreach_set("co", co.ravel())
     me.update()
     log("lengthened the coat: %d vertices" % int(sel.sum()))
