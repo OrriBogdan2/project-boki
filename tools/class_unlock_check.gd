@@ -487,7 +487,7 @@ func _creation(tree: SceneTree) -> void:
 	var panel: Node = _pick_panel(hx)
 	var chip_ids := _chips(panel).map(func(c): return String(c.get_meta("arch")))
 	ok(chip_ids == STARTERS, "a chip for each of the 3 starters and nothing else (%s)" % str(chip_ids))
-	ok(panel != null and _any_text(panel, "Pick your Hunter") and _any_text(panel, ClassPick.HINT)
+	ok(panel != null and _any_text(panel, "Choose your first mask") and _any_text(panel, ClassPick.HINT)
 			and not _any_text(panel, "yours already"), "the pick reads plainly")
 	ok(panel != null and _no_weight(panel) and _hunter_words(panel), "the pick says Hunter with no weight labels")
 	var go: Button = panel.get_meta("go")

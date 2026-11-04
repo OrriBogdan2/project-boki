@@ -1,6 +1,6 @@
 extends Node3D
 ## The first thing a new player sees after the prologue: one short card, then three eggs on a little
-## island. Pick your Hunter, pick an egg, knock on the shell until it
+## island. Choose your first mask, pick an egg, knock on the shell until it
 ## hatches, name what comes out and yourself, then head into the tutorial match together.
 
 ## The three starter eggs plus a mystery one. Names, tempers and blurbs come from each species'
@@ -27,7 +27,7 @@ var cam: Camera3D
 var fx: Fx
 var eggs: Array = []          # {node, base, data}
 var chosen := -1
-var stage := "intro"          # intro (the card) | hunter (your Hunter) | pick (eggs) | warm | hatching | name
+var stage := "intro"          # intro (the card) | hunter (your first mask) | pick (eggs) | warm | hatching | name
 var card_box: Control
 var warmth := 0.0
 var warm_bar: Control
@@ -49,7 +49,7 @@ var look_at_t := Vector3(0, 0.25, 0.5)
 var edit_only := false
 var create_box: Control
 var sub_lbl: Label        # opened from the menu just to change how you look
-var top_box: VBoxContainer    # the title and its line: centred, or over the preview while you make your hunter
+var top_box: VBoxContainer    # the title and its line: centred, or over the preview while you make yourself
 var cam_to := Vector3(0, 3.6, 6.4)
 
 func _ready() -> void:
@@ -107,13 +107,13 @@ func _ready() -> void:
 		_show_card()
 	if "--hatch-pick" in OS.get_cmdline_user_args():
 		# test: straight to choosing an egg
-		if not Save.d.has("look"): Save.d["look"] = Models.default_look()
+		if not Save.d.has("look"): Save.d["look"] = Unmasked.default_look()
 		_end_intro()
 		if stage == "hunter": _take_hunter([ClassUnlock.starters()[0]])
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--hatch-auto="):
 			var i := int(a.substr(13))
-			if not Save.d.has("look"): Save.d["look"] = Models.default_look()
+			if not Save.d.has("look"): Save.d["look"] = Unmasked.default_look()
 			_end_intro()
 			if stage == "hunter": _take_hunter([ClassUnlock.starters()[0]])
 			_pick(i); _pick(i)
@@ -337,7 +337,7 @@ func _end_intro() -> void:
 		_show_create()
 	else:
 		if not Save.d.has("look"):
-			Save.d["look"] = Models.default_look()      # (change it later: Settings, Change your look)
+			Save.d["look"] = Unmasked.default_look()      # (change it later: Settings, Change your look)
 		cam_to = Vector3(0, 3.6, 6.4)
 		if ClassUnlock.needs_starters():
 			_show_hunter_pick()
@@ -347,7 +347,7 @@ func _end_intro() -> void:
 var turning := false
 func _unhandled_input(event: InputEvent) -> void:
 	if stage == "create" and preview:
-		# drag with the mouse (or hold A / D) to turn your hunter round
+		# drag with the mouse (or hold A / D) to turn yourself round
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 			turning = event.pressed
 		elif event is InputEventMouseMotion and turning:
@@ -378,7 +378,7 @@ func _clear_bottom() -> void:
 	for ch in bottom.get_children():
 		ch.queue_free()
 
-# ---- your Hunter: 1 of the starters, before the egg (ClassUnlock, ClassPick). The tutorial plays as it.
+# ---- your first mask: 1 of the starters, before the egg (ClassUnlock, ClassPick). The tutorial plays as it.
 var starter_picks: Array = []
 
 func _show_hunter_pick() -> void:
@@ -402,26 +402,18 @@ func _take_hunter(ids: Array) -> void:
 	cam_to = Vector3(0, 3.6, 6.4)
 	_show_pick()
 
-# ---- your hunter
-const LOOK_ROWS := [["race", "Race", Models.LOOK_RACES], ["gender", "Gender", Models.LOOK_GENDERS], ["body", "Body", Models.LOOK_BODIES], ["face", "Face", Models.LOOK_FACES],
-	["detail", "Details", Models.LOOK_DETAILS], ["skin", "Skin", Models.LOOK_SKIN], ["hair", "Hair", Models.LOOK_HAIRS], ["hair_col", "Hair colour", Models.LOOK_HAIR], ["outfit", "Outfit", Models.LOOK_OUTFITS]]
-
+# ---- yourself: the Unmasked (Unmasked)
 func _show_create() -> void:
 	stage = "create"
 	if look.is_empty():
-		look = Models.clean_look(Save.d.get("look", {}))
-		for a in OS.get_cmdline_user_args():
-			if a.begins_with("--create-race="):   # test: open the creator on a race
-				look["race"] = int(a.substr(14)); look["skin"] = int(Models.RACES[int(look["race"])]["skin"])
-	look["hair"] = clampi(int(look.get("hair", 0)), 0, Models.hair_styles(int(look["race"])).size() - 1)
-	title.text = "Make your hunter"
+		look = Unmasked.clean(Save.d.get("look", {}))
+	title.text = "Make yourself"
 	_clear_bottom()
 	if create_box: create_box.queue_free()
 	_rebuild_preview()
 	for e in eggs: (e["holder"] as Node3D).visible = false
-	if sub_lbl: sub_lbl.text = "Drag your hunter (or hold A / D) to turn them round."
-	_top_over(0.73)       # over your hunter, clear of the tall creator card on the left
-	# framed to the hunter's height: a big Juggernaut (or a tall race) used to run off the top
+	if sub_lbl: sub_lbl.text = "Drag yourself (or hold A / D) to turn round. The masks fill in the rest."
+	_top_over(0.73)       # over you, clear of the tall creator card on the left
 	var hk := clampf(_model_top(preview) / 1.6, 1.0, 1.8) if preview else 1.0
 	cam_to = Vector3(0, 1.5 * hk, 1.6 + 3.0 * hk)
 	look_at_t = Vector3(0.0, 0.9 * hk, 1.6)
@@ -429,43 +421,14 @@ func _show_create() -> void:
 	card.custom_minimum_size = Vector2(500, 0)
 	create_box = card
 	var v := UI.vbox(8); card.add_child(v)
-	# the Hunter: who you are in a match (its silhouette, gear and weapon family always read true). Only
-	# the open ones are in the stepper (a new save has just its starter)
-	var cur_a := Arch.of_save()
-	var ar := UI.hbox(8)
-	var al := UI.label("Hunter", UI.T_BODY, UI.MUTED)
-	al.custom_minimum_size.x = 120
-	al.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	ar.add_child(al)
-	if ClassUnlock.open_ids().size() > 1:
-		ar.add_child(UI.icon_button("back", func(): _step_arch(-1), "Previous", 12.0))
-	var av := UI.label(Arch.name_of(cur_a), UI.T_BODY, Arch.color(cur_a), UI.semi); av.custom_minimum_size.x = 170
-	av.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	av.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ar.add_child(av)
-	if ClassUnlock.open_ids().size() > 1:
-		ar.add_child(UI.icon_button("next", func(): _step_arch(1), "Next", 12.0))
-	v.add_child(ar)
-	var ad := Arch.def(cur_a)
-	var wnames := " / ".join(Arch.weapons(cur_a).map(func(w): return String(Data.weapon_stats(w)["name"])))
-	var adl := UI.label("%s\n%s" % [wnames, String(ad.get("fantasy", ""))], UI.T_SMALL, UI.ACCENT_HI)
-	adl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	adl.custom_minimum_size.x = 380
-	var am := MarginContainer.new(); am.add_theme_constant_override("margin_left", 128); am.add_child(adl)
-	v.add_child(am)
-	for row in LOOK_ROWS:
+	for row in Unmasked.ROWS:
 		var key: String = row[0]
 		var opts: Array = row[2]
-		if key == "hair":
-			opts = Models.hair_styles(int(look["race"]))    # each race has its own styles
 		var hr := UI.hbox(8)
 		var l := UI.label(row[1], UI.T_BODY, UI.MUTED); l.custom_minimum_size.x = 120
 		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		hr.add_child(l)
 		hr.add_child(UI.icon_button("back", func(): _step_look(key, -1, opts.size()), "Previous", 12.0))
-		var val := UI.label("", UI.T_BODY, UI.INK, UI.semi); val.custom_minimum_size.x = 170
-		val.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		var i := int(look[key])
 		if opts[0] is Color:
 			var sw := Panel.new(); sw.custom_minimum_size = Vector2(170, 26)
@@ -473,16 +436,12 @@ func _show_create() -> void:
 			sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			hr.add_child(sw)
 		else:
-			val.text = String(opts[i])
+			var val := UI.label(String(opts[i]), UI.T_BODY, UI.INK, UI.semi); val.custom_minimum_size.x = 170
+			val.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			hr.add_child(val)
 		hr.add_child(UI.icon_button("next", func(): _step_look(key, 1, opts.size()), "Next", 12.0))
 		v.add_child(hr)
-		if key == "race":
-			var rd := UI.label(String(Models.RACES[int(look["race"])]["desc"]), UI.T_SMALL, UI.ACCENT_HI)
-			rd.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			rd.custom_minimum_size.x = 380
-			var rm := MarginContainer.new(); rm.add_theme_constant_override("margin_left", 128); rm.add_child(rd)
-			v.add_child(rm)
 	var nr := UI.hbox(8)
 	var nl := UI.label("Your name", UI.T_BODY, UI.MUTED); nl.custom_minimum_size.x = 120
 	nr.add_child(nl)
@@ -493,7 +452,7 @@ func _show_create() -> void:
 	var br := UI.hbox(10)
 	br.alignment = BoxContainer.ALIGNMENT_END
 	br.add_child(UI.ghost("Random", func():
-		look = Models.random_look()
+		look = Unmasked.random_look()
 		_show_create(), 120, "swap"))
 	br.add_child(UI.primary("Looks good", func():
 		Save.d["look"] = look.duplicate()
@@ -536,25 +495,9 @@ func _top_over(x_frac: float) -> void:
 		top_box.anchor_left = x_frac
 		top_box.anchor_right = x_frac
 
-## Steps through the open Hunters; the weight and weapon follow it.
-func _step_arch(d: int) -> void:
-	var ids := ClassUnlock.open_ids()
-	var i := posmod(ids.find(Arch.of_save()) + d, ids.size())
-	var a := String(ids[i])
-	Save.d["arch"] = a
-	Save.d["cls"] = Arch.weight(a)
-	Save.d["weapon"] = Arch.signature(a)
-	Sfx.play("hover", null, -6.0)
-	_show_create()
-
 func _step_look(key: String, d: int, n: int) -> void:
 	look[key] = posmod(int(look[key]) + d, n)
 	Sfx.play("hover", null, -6.0)
-	if key == "race":
-		# each race starts in its own colouring; you can still change the skin after
-		look["skin"] = int(Models.RACES[int(look["race"])]["skin"])
-		look["hair"] = 0      # ... and its own head styles: start on its first one, keep the colour
-		look["hair_v"] = 2
 	_show_create()
 
 var preview_yaw := PI
@@ -563,9 +506,8 @@ func _rebuild_preview() -> void:
 	if preview:
 		preview_yaw = preview.rotation.y
 		preview.queue_free()
-	var pa := Arch.of_save()
-	look.erase("arch")      # the class's gear is never part of the look
-	preview = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(pa, Data.class_of_save(), String(Save.d.get("weapon", ""))), "", look, pa)
+	preview = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", ""))), "", look)
+	(preview.find_child("Gun", true, false) as Node3D).visible = false      # (you carry nothing here)
 	preview.position = Vector3(0.8, 0, 1.6)
 	preview.rotation.y = preview_yaw
 	add_child(preview)

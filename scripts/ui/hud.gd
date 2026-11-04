@@ -1419,7 +1419,7 @@ func portrait(h: Hunter) -> Texture2D:
 		(portraits[h.nid] as Node).queue_free()
 		portraits.erase(h.nid); portraits_grey.erase(h.nid)
 	if not portraits.has(h.nid):
-		var look: Dictionary = Save.d.get("look", {}) if h.ctrl == "local" else h.bot_look
+		var look: Dictionary = Unmasked.mask_look() if h.ctrl == "local" else h.bot_look
 		var vp := Portraits.make(h.cls, Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], h.wid, look, h.arch)
 		vp.set_meta("pkey", pkey)
 		add_child(vp)

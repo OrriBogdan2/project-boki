@@ -7,14 +7,14 @@ extends RefCounted
 
 const STAGE := Vector2(300, 300)
 const CHIP_FACE := 40         # px: the Warden's face on each starter's chip
-const HINT := "Pick who you play first. The other two open after your first expedition."
+const HINT := "Pick the mask you wear first. The other two open after your first expedition."
 
 static func row(picked: Array, done: Callable) -> Control:
 	var back := UI.card(Color(0.06, 0.04, 0.11, 0.94), 14, 12)
 	back.set_meta("starter_pick", true)
 	var v := UI.vbox(6)
 	back.add_child(v)
-	var head := UI.title("Pick your Hunter", 26, UI.ACCENT)
+	var head := UI.title("Choose your first mask", 26, UI.ACCENT)
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(head)
 	var hint := UI.para(HINT, UI.T_SMALL, UI.MUTED)

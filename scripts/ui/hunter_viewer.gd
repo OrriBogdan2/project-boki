@@ -244,7 +244,7 @@ func _build_world(col: Color) -> void:
 
 ## The Hunter's model on the turntable, with its animation.
 func _build_model() -> void:
-	model = Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", Save.d.get("look", {}), id)
+	model = Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", Unmasked.mask_look(), id)
 	var ring := model.get_node_or_null("TeamRing")
 	if ring: (ring as Node3D).visible = false
 	pivot.add_child(model)

@@ -33,7 +33,7 @@ static func has_art(ak: String) -> bool:
 
 ## The archetype whose face a hunter shows (the one its model wears).
 static func arch_of(h: Hunter) -> String:
-	var look: Dictionary = Save.d.get("look", {}) if h.ctrl == "local" else h.bot_look
+	var look: Dictionary = Unmasked.mask_look() if h.ctrl == "local" else h.bot_look
 	return HeroKit.arch_for(h.cls, h.arch, look)
 
 ## Corner radius of a portrait drawn at this size.

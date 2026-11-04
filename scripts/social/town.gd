@@ -52,7 +52,7 @@ func _ready() -> void:
 		_build_hub()
 		Sfx.play_music("hub")
 	Sfx.play_ambience("home")
-	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Save.d.get("look", {}), Arch.of_save())
+	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Unmasked.worn(), Arch.of_save())
 	add_child(player)
 	player.position = ppos
 	for a in OS.get_cmdline_user_args():
