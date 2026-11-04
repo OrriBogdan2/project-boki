@@ -51,7 +51,7 @@ const VOID := preload("res://shaders/hero_void.gdshader")
 const SOFT_TAGS := ["wisp"]
 ## Pieces built as clean geometry (tools/meshy/warden_parts.py), "<slot>-<tag>": they take the ink line even on
 ## an inkless slot (the hair goes without it for a scan's ragged strands, not for a woven braid).
-const INK_TAGS := ["braid", "mane", "mane_dk", "pigtail"]
+const INK_TAGS := ["braid", "mane", "mane_dk"]
 ## The hero toon shader on a painted atlas, which carries its own light and shade: the toon light on top stays
 ## soft and near white (no violet shadow, no warm terminator band, no sun self-shadow, no procedural
 ## brushwork), a light-coloured rim and top light lift its edges off the ground, and far_lift brightens it at

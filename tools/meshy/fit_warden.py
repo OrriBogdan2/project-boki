@@ -1699,6 +1699,10 @@ def emit_art(ob, img, el):
     boxes = [[(-inf, inf)[i % 2] if x is None else x for i, x in enumerate(bx)] for bx in el["boxes"]]
     co = np.array([v.co[:] for v in me.vertices])
     out = np.zeros((h, w, 3), np.float32)
+    # (`strict`: regions, in Meshy's frame, with their own tighter hsv: the charm's core, not the art's glow
+    # halo on the skin round it)
+    strict = el.get("strict", [])
+    reg = np.full((h, w), -1, np.int16)
     k_px, c0, r0 = float(el["px_per_m"]), float(el["col_at"]), float(el["row_at"])
     face_min = float(el.get("facing", 0.2))
     nt = 0
@@ -1731,16 +1735,26 @@ def emit_art(ob, img, el):
         col = np.clip((c0 + pos[:, 0] * k_px).astype(int), 0, aw - 1)
         row = np.clip((r0 - pos[:, 2] * k_px).astype(int), 0, ah - 1)
         out[t[ins, 1].astype(int), t[ins, 0].astype(int)] = art[row, col]
+        for si, st in enumerate(strict):
+            b = st["box"]
+            inb = ((pos[:, 0] >= b[0]) & (pos[:, 0] <= b[1]) & (pos[:, 1] >= b[2]) & (pos[:, 1] <= b[3])
+                   & (pos[:, 2] >= b[4]) & (pos[:, 2] <= b[5]))
+            reg[t[ins, 1].astype(int)[inb], t[ins, 0].astype(int)[inb]] = si
     rgb = out
     mx, mn = rgb.max(axis=2), rgb.min(axis=2)
     ss = (mx - mn) / np.maximum(mx, 1e-4)
     dd = np.maximum(mx - mn, 1e-6)
     r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
     hh = np.where(mx == r, ((g - b) / dd) % 6.0, np.where(mx == g, (b - r) / dd + 2.0, (r - g) / dd + 4.0)) / 6.0
-    k = np.zeros((h, w), np.float32)
-    for q in el["hsv"]:
-        hue_ok = (hh >= q[0]) & (hh <= q[1]) if q[0] <= q[1] else (hh >= q[0]) | (hh <= q[1])
-        k = np.maximum(k, (hue_ok & (ss >= q[2]) & (ss <= q[3]) & (mx >= q[4]) & (mx <= q[5])).astype(np.float32))
+    def neon(qs):
+        k = np.zeros((h, w), np.float32)
+        for q in qs:
+            hue_ok = (hh >= q[0]) & (hh <= q[1]) if q[0] <= q[1] else (hh >= q[0]) | (hh <= q[1])
+            k = np.maximum(k, (hue_ok & (ss >= q[2]) & (ss <= q[3]) & (mx >= q[4]) & (mx <= q[5])).astype(np.float32))
+        return k
+    k = neon(el["hsv"])
+    for si, st in enumerate(strict):
+        k = np.where(reg == si, neon(st["hsv"]), k)
     mask = k[..., None] * np.clip(rgb * float(el.get("gain", 1.2)), 0.0, 1.0)
     # (Blender images run bottom up, as the UVs)
     log("emit from the art: %d triangles in the boxes, %d texels lit" % (nt, int((k > 0).sum())))

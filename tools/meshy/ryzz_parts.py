@@ -164,8 +164,26 @@ def _coil(bld, c, d, r, length, turns, wire, part):
         bld.torus(c + d * length * end, d, r, wire * 1.25, 18, 5, (0, 0, 1, 1), part, 0.0)
 
 
+def _squash_knot(body, c, R, k):
+    """The scan's hair knot pulled in toward its centre (the tie and the locks' roots hide what is left)."""
+    n = 0
+    for v in body.data.vertices:
+        d = (np.asarray(v.co[:]) - c)
+        r = float(np.linalg.norm(d))
+        if r < R:
+            f = k + (1.0 - k) * (r / R) ** 2
+            v.co = tuple(c + d * f)
+            n += 1
+    body.data.update()
+    return n
+
+
 def pigtails(body, arm, rig, K, sp):
     neck, crown = _head_centre(rig, K, sp)
+    for side in ("L", "R"):
+        if sp.get("knot_r"):
+            log("pigtail %s: knot squashed (%d verts)" % (side, _squash_knot(
+                body, neck + np.asarray(sp[side]["root"], float), float(sp["knot_r"]), float(sp.get("knot_k", 0.5)))))
     bvh = WP.body_bvh([body])
     rng = np.random.default_rng(11)
     bld = WP.Builder()
@@ -178,33 +196,39 @@ def pigtails(body, arm, rig, K, sp):
         d, e1, e2 = _frame(ss.get("dir", [0.6 * sx, -0.1, 0.8]))
         cr = float(sp.get("coil_r", 0.026))
         cl = float(sp.get("coil_len", 0.028))
+        # (the tie sits round the scan's hair knot, which it and the locks' roots hide)
         _coil(bld, root + d * cl * 0.5, d, cr, cl, float(sp.get("coil_turns", 4.0)), float(sp.get("wire", 0.0042)),
               "copper")
-        start = root + d * cl * 0.85
+        start = root + d * cl * 0.7
         out = np.array([sx, 0.0, 0.0])
+        up = np.array([0.0, 0.0, 1.0])
         locks = []
         nl = int(sp.get("locks", 14))
+        S = np.asarray(sp.get("curl", [[0.04, 0.0, 0.0], [0.07, 0.0, 0.045], [0.105, 0.0, -0.02],
+                                        [0.085, 0.0, -0.1], [0.115, 0.0, -0.155], [0.09, 0.0, -0.19]]), float)
         for k in range(nl):
             ang = 2 * math.pi * k / nl + rng.uniform(-0.25, 0.25)
-            rad = cr * rng.uniform(0.15, 0.75)
+            rad = cr * rng.uniform(0.2, 0.8)
             off = (e1 * math.cos(ang) + e2 * math.sin(ang))
             s0 = start + off * rad
-            flick = k % 4 == 0                         # (the art's upper tips that spike up and out)
-            ln = L * (rng.uniform(0.45, 0.6) if flick else rng.uniform(0.85, 1.1))
+            flick = k % 5 == 0                         # (the art's few tips that spike up out of the puff)
             spread = off * float(sp.get("spread", 0.03))
+            yk = rng.uniform(-1.0, 1.0) * float(sp.get("depth", 0.025))     # (front to back across the mass)
+            sk = rng.uniform(0.85, 1.1)
             if flick:
-                ctrl = [s0, s0 + d * ln * 0.45 + spread, s0 + d * ln * 0.75 + out * ln * 0.25 + spread * 1.6,
-                        s0 + d * ln * 0.8 + out * ln * 0.55 + spread * 2 + np.array([0, 0, 0.01])]
+                ln = L * rng.uniform(0.4, 0.55)
+                ctrl = [s0, s0 + d * ln * 0.4 + spread, s0 + d * ln * 0.75 + out * ln * 0.3 + spread * 1.6,
+                        s0 + d * ln * 0.85 + out * ln * 0.65 + spread * 2 + up * 0.01]
             else:
-                # up and out off the knot, then over and down in a short wave
-                ctrl = [s0, s0 + d * 0.05 + spread, s0 + d * 0.07 + out * 0.06 + spread * 1.5 + np.array([0, 0, -0.01]),
-                        s0 + out * 0.09 + spread * 1.8 + np.array([0, 0, -ln * 0.45]),
-                        s0 + out * 0.075 + spread * 2.0 + np.array([0, 0, -ln * 0.8])]
+                # the S-curl: up and out off the tie into a puff, over and down outside, in, out, and in at the jaw
+                ctrl = [s0, s0 + d * S[0][0] + spread * 0.5]
+                for q in S[1:]:
+                    ctrl.append(s0 + out * q[0] * sk + up * q[2] * sk + np.array([0.0, yk + q[1], 0.0]) + spread * 1.4)
             p, _ = WP.resample(ctrl, int(sp.get("samples", 14)))
             # smooth the control polyline into a curve
-            for _it in range(6):
+            for _it in range(int(sp.get("smooth", 2))):
                 p[1:-1] = p[1:-1] * 0.5 + (p[:-2] + p[2:]) * 0.25
-            p = WP.drape(bvh, [tuple(c) for c in p], len(p), float(sp.get("clear", 0.02)), iters=20, length=None)
+            p = WP.drape(bvh, [tuple(c) for c in p], len(p), float(sp.get("clear", 0.02)), iters=6, smooth=0.05, length=None)
             # the zigzag ends: a sawtooth across the lock over its last third
             s_arr = WP.arclen(p)
             Lp = s_arr[-1]
@@ -213,9 +237,9 @@ def pigtails(body, arm, rig, K, sp):
             side_v /= max(np.linalg.norm(side_v), 1e-9)
             for i in range(len(p)):
                 f = s_arr[i] / Lp
-                if f > 0.62:
-                    tri = 2.0 * abs(((f - 0.62) / 0.38 * 2.5) % 1.0 - 0.5) - 0.5
-                    p[i] = p[i] + side_v * tri * zz * 2 * min(1.0, (f - 0.62) * 6)
+                if f > 0.75:
+                    tri = 2.0 * abs(((f - 0.75) / 0.25 * 1.5) % 1.0 - 0.5) - 0.5
+                    p[i] = p[i] + side_v * tri * zz * 2 * min(1.0, (f - 0.75) * 8)
             w0 = float(sp.get("width", 0.024)) * rng.uniform(0.8, 1.2)
             part = "lock" if k % 4 else "lock_dk"
             v0 = len(bld.v)
@@ -224,8 +248,8 @@ def pigtails(body, arm, rig, K, sp):
         chains.append((side, locks))
     ob = bld.object("Pigtails")
     img = _atlas("pigtail_atlas", ["b87333", "8a5228"],
-                 [[(0.0, "5a8fdc"), (0.45, "79aef0"), (0.72, "d070d0"), (1.0, "ff5fb8")],
-                  [(0.0, "4a7cc8"), (0.45, "6698dc"), (0.72, "bc5cbc"), (1.0, "f04ca6")]])
+                 [[(0.0, "5f8fd4"), (0.5, "84b4ee"), (0.68, "c878d0"), (0.85, "f060b0"), (1.0, "ff7ec4")],
+                  [(0.0, "4c78bc"), (0.5, "6c9cdc"), (0.68, "b464bc"), (0.85, "e04c9e"), (1.0, "f46ab4")]])
     mh = _material(ob, "hair-pigtail", img)
     mm = _material(ob, "metal-pigtail", img)
     for p in ob.data.polygons:
@@ -252,9 +276,9 @@ def pigtails(body, arm, rig, K, sp):
 
 
 # ------------------------------------------------------------------------------------------------ the rods
-ROD_COL = ["c07a45", "8f5530", "2f2a30", "1c1816", "4a3a30", "d08c55", "6b4a3a"]
-# copper, copper_dk, sleeve, scorch, scorch_mid, tip, plate (the riveted mount)
-ROD_CELL = {"copper": 0, "copper_dk": 1, "sleeve": 2, "scorch": 3, "scorch_mid": 4, "tip": 5, "plate": 6}
+ROD_COL = ["e0904e", "a8602e", "2f2a30", "1c1816", "4a3a30", "f0a868", "b8784a", "2a2226"]
+# copper, copper_dk, sleeve, scorch, scorch_mid, tip, plate (the riveted mount), strap
+ROD_CELL = {"copper": 0, "copper_dk": 1, "sleeve": 2, "scorch": 3, "scorch_mid": 4, "tip": 5, "plate": 6, "strap": 7}
 
 
 def _back_point(bvh, x, z, y_front=0.3):
@@ -303,18 +327,37 @@ def rods(body, arm, rig, K, sp):
             bld.prism(c, c + [0, -0.006, 0], 0.0055, 6, (0, 0, 1, 1), "copper", 0.0)
     r = float(sp.get("r", 0.0095))
     bottom_z = pz - float(sp.get("below", 0.2))
-    # (the rods stand clear of the furthest point of her back and the jacket over their span, not just the mount's)
-    back_y = min(float(_back_point(bvh, x, z)[1]) for x in (-0.1, -0.05, 0.0, 0.05, 0.1)
-                 for z in np.linspace(bottom_z, sh_z + 0.1, 14))
-    rod_y = min(py - pt, back_y) - r - gap * 0.3
+    seat = float(sp.get("seat", 0.004))
     top_z = crown + float(sp.get("mid_top", 0.02))
     side_top = sh_z + float(sp.get("side_top", 0.32))
     side_x = float(sp.get("side_x", 0.17))
+
+    def seated(x0, x1, z0, z1, n=30):
+        """A straight rod from (x0, z0) to (x1, z1) seated on her back: its depth follows the back's slope and is
+        pushed out just enough that it clears the back, the jacket and the mount everywhere along it."""
+        zs = np.linspace(z0, z1, n)
+        xs = np.linspace(x0, x1, n)
+        lim = []
+        for x, z in zip(xs, zs):
+            y = float(_back_point(bvh, x, z)[1]) if z < sh_z + 0.12 else 1.0      # (above her shoulders: free)
+            if abs(x) <= pw * 0.5 + r and abs(z - pz) <= ph * 0.5 + r:
+                y = min(y, py - pt * 0.5)
+            lim.append(y - r - seat)
+        lim = np.array(lim)
+        z_lo, z_hi = z0, min(z1, sh_z + 0.05)
+        y_lo = float(np.interp(z_lo, zs, lim))
+        y_hi = float(np.interp(z_hi, zs, lim))
+        slope = (y_hi - y_lo) / max(z_hi - z_lo, 1e-3)
+        line = y_lo + (zs - z_lo) * slope
+        line -= max(0.0, float((line - lim).max()))
+        return np.stack([xs, line, zs], axis=1)
+
+    rod_ys = []
     # the outer rods: from low on the back, through the mount, up past each shoulder
     for sx in (-1.0, 1.0):
-        a = np.array([sx * 0.025, rod_y, bottom_z])
-        b = np.array([sx * side_x, rod_y - 0.03, side_top])
-        p, _ = WP.resample([a, b], 30)
+        p = seated(sx * 0.025, sx * side_x, bottom_z, side_top)
+        a, b = p[0], p[-1]
+        rod_ys.append(float(np.interp(pz, p[:, 2], p[:, 1])))
         _rod(bld, p, r, [(0.0, 0.08, "copper"), (0.08, 0.36, "sleeve"), (0.36, 0.4, "copper_dk"),
                          (0.4, 0.62, "copper"), (0.62, 0.66, "copper_dk"), (0.66, 1.0, "copper")])
         t = (b - a) / np.linalg.norm(b - a)
@@ -323,16 +366,32 @@ def rods(body, arm, rig, K, sp):
             bld.torus(c, t, r * 1.25, r * 0.55, 14, 5, (0, 0, 1, 1), "copper_dk", 0.0)
         _spear(bld, b, t, r, "tip")
     # the middle rod, the relic: straight through the mount, then bent where the bolt struck and scorched black
-    a = np.array([0.0, rod_y - 0.005, bottom_z - 0.02])
-    ctrl = [a, a + [0, 0, 0.3], a + [0.03, -0.01, 0.38], a + [-0.03, -0.02, 0.46], a + [0.025, -0.03, 0.55],
-            np.array([-0.01, rod_y - 0.04, top_z])]
-    p, _ = WP.resample(ctrl, 60)
-    for _it in range(4):
+    base = seated(0.0, -0.01, bottom_z - 0.02, top_z, 60)
+    rod_ys.append(float(np.interp(pz, base[:, 2], base[:, 1])))
+    L0 = top_z - (bottom_z - 0.02)
+    bend = np.zeros_like(base)
+    for i, z in enumerate(base[:, 2]):
+        f = (z - (bottom_z - 0.02)) / L0
+        if f > 0.5:       # (a kinked S over its upper half, bent back a little)
+            g = (f - 0.5) / 0.5
+            bend[i] = [0.03 * math.sin(g * math.pi * 2.2), -0.025 * g, 0.0]
+    p = base + bend
+    for _it in range(3):
         p[1:-1] = p[1:-1] * 0.5 + (p[:-2] + p[2:]) * 0.25
     _rod(bld, p, r * 0.95, [(0.0, 0.08, "copper_dk"), (0.08, 0.36, "sleeve"), (0.36, 0.5, "scorch_mid"),
                             (0.5, 1.0, "scorch")])
     t = (p[-1] - p[-3]) / np.linalg.norm(p[-1] - p[-3])
     _spear(bld, p[-1], t, r * 0.95, "scorch", bent=True)
+    # two leather straps across the mount, over the rods, riveted at their ends
+    sy = min(rod_ys) - r * 1.4 - 0.004
+    for dz in (-0.3, 0.3):
+        z = pz + dz * ph
+        a_, b_ = np.array([-pw * 0.55, sy, z]), np.array([pw * 0.55, sy, z])
+        bld.prism(a_, b_, float(sp.get("strap_w", 0.012)), 4, (0, 0, 1, 1), "strap", 0.0, rot=math.pi / 4)
+        for sx in (-1.0, 1.0):
+            c = np.array([sx * pw * 0.5, sy - 0.008, z])
+            bld.prism(c, c + [0, -0.004, 0], 0.005, 6, (0, 0, 1, 1), "copper", 0.0)
+    rod_y = min(rod_ys)
     ob = bld.object("Rods")
     img = _atlas("rods_atlas", ROD_COL)
     _material(ob, "metal-rods", img)
@@ -372,6 +431,32 @@ def _spear(bld, base, t, r, part, bent=False):
     bld.f.append(tuple(base_i + j for j in (3, 2, 1, 0)))
 
 
+def nose_ring(body, arm, rig, K, sp):
+    """The septum ring (a small copper hoop under the nose tip, rigid on the head): the scan smeared its own into a
+    checker, which the fit paints over as skin."""
+    bvh = WP.body_bvh([body])
+    x, z = float(sp.get("x", 0.012)), float(sp.get("z", 1.62))
+    best = None
+    for dz in np.linspace(-0.03, 0.03, 25):           # (the nose tip: the face's frontmost point near there)
+        hit = bvh.ray_cast((x, 1.0, z + dz), (0.0, -1.0, 0.0))
+        if hit[0] is not None and (best is None or hit[0].y > best[1]):
+            best = np.array(hit[0][:])
+    c = best + np.array([0.0, -float(sp.get("back", 0.006)), -float(sp.get("below", 0.011))])
+    bld = WP.Builder()
+    bld.torus(c, [1.0, 0.0, 0.0], float(sp.get("r", 0.0075)), float(sp.get("wire", 0.0016)), 20, 6, (0, 0, 1, 1),
+              "copper", 0.0)
+    ob = bld.object("NoseRing")
+    img = _atlas("ring_atlas", ["d08c55"])
+    _material(ob, "metal-ring", img)
+    _uv_flat(ob, bld, {"copper": 0})
+    g = ob.vertex_groups.new(name="head")
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    ob.modifiers.new("Armature", "ARMATURE").object = arm
+    log("nose ring at %s (tip %s)" % (tuple(round(float(v), 3) for v in c), tuple(round(float(v), 3) for v in best)))
+    return ob
+
+
 def build(body, arm, rig, K, spec):
     """fit_warden's `scripted` hook: every piece in spec, as skinned meshes."""
     out = []
@@ -379,4 +464,6 @@ def build(body, arm, rig, K, spec):
         out.append(pigtails(body, arm, rig, K, spec["pigtails"]))
     if spec.get("rods"):
         out.append(rods(body, arm, rig, K, spec["rods"]))
+    if spec.get("nose_ring"):
+        out.append(nose_ring(body, arm, rig, K, spec["nose_ring"]))
     return out

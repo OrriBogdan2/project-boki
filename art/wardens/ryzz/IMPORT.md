@@ -25,3 +25,19 @@ Built by script, nothing hand-edited in Blender; run log in docs/art/wardens/PIP
   hides the procedural one.
 - Imports: the extracted atlases lossless (`compress/mode=0`); `ryzz.glb.import`: `generate_lods=false`,
   `force_disable_compression=true`.
+
+Stage 2 (round 2, the r3c recipe; credit-free):
+- **Paint-over:** smoothed within UV islands, then ramps of the art's colours per slot (sky-blue hair with hot-pink
+  ends, peach skin, hot-pink corset, near-black leather, copper, hazard yellow); the scan's smeared nose ring painted
+  over as skin and rebuilt as a copper septum ring (geometry on the head).
+- **Hair hue:** content/rules/mantle_look.json "mage" now carries the art's colours and a `tint` block with no hue
+  pull on hair or skin (the player's pick pulled her blue hair toward violet in the toon shader's tint).
+- **Pigtails:** 22 locks a side in an S-fall from a puff at the tie down to the jaw; the scan's hair knots squashed
+  under the ties (`knot_r`); no ink shell on them.
+- **Rods:** seated on her back along its slope (clear by 4 mm), two riveted straps across the mount, a V from the
+  mount up past her shoulders; brighter copper.
+- **Glow:** the charm's art halo kept off the emission mask (`strict` region); emission 2.6, flicker 0.12.
+- **Look:** content/rules/warden_look.json "ryzz" (skin warmer with no sky tint or match lift, hair brighter at the
+  match camera, copper and hazard yellow on the metal slot lifted at distance).
+- **Stance:** content/rules/warden_stance.json "mage": weight on her right hip, hips 9 cm over, shoulders tilted,
+  her hands on her hips (she holds nothing).
