@@ -54,6 +54,13 @@ const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most th
 const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline shell
 const PAINTED_SHADE := 0.72     # a painted atlas's shadow floor (the hero shader's own is 0.37)
 const PAINTED_RAMP := 2.6       # and its terminator, softer than the hero shader's 0.5
+## The scene's light leans cool and violet (Look: a c4cbe6 ambient, about half the light on a painted model, and a
+## blue fill), which turned a painted atlas's skin lilac and its blacks muddy: ambient_cut and own_ambient swap the
+## scene's ambient for a warm-neutral one a step brighter, light_neutral takes the hue out of the cool fill (the
+## warm key keeps its warmth), dark_lift raises near-black paint one step; the shadow tint is warm.
+## (The shared fix, ext/warden-vex-r3b 16c18b4f.)
+const PAINTED_LOOK := {"shadow_tint": Color(1.0, 0.95, 0.91), "ambient_cut": 1.0,
+	"own_ambient": Vector3(0.58, 0.54, 0.5), "light_neutral": 0.9, "dark_lift": 0.07}
 const GLOW := 1.6              # emission of the glow slot (mechanical eyes, cracks), x its painted colour
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
@@ -232,6 +239,8 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 				m.set_shader_parameter("ramp", PAINTED_RAMP)
 				m.set_shader_parameter("shadow_sat", 0.0)
 				m.set_shader_parameter("self_shadow", 0.0)
+				for k in PAINTED_LOOK:
+					m.set_shader_parameter(k, PAINTED_LOOK[k])
 			else:
 				# a flat-painted model (hand-modelled, one colour a material, no atlas: Dredge): the procedural
 				# heroes' clean painted look (Models.hunter), the slot's surface shading on top
