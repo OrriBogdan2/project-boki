@@ -28,4 +28,4 @@ The Tyrant's former royal mask-stitcher, now an assassin-archer who hunts his lo
 - hem_face.webp: flat-lit front face with the mask on. The truth for eyes, brows, liner, skin tone, bun and needles.
 - hem_mask_sheet.webp: the porcelain half-mask on its own, front / side / back (inside). Use it for the separate mask mesh: cracked white porcelain, red-thread stitches, gold top rim, painted red smile.
 - hem_weapons_sheet.webp: the black recurve bow (red glowing thread string, spool at the grip), a needle-arrow (clean, smooth, red thread through the eye; stage 1's needles were ragged), the thimble claw-tips.
-- hem_head_sheet.webp: use ONLY for the side profile of the bun, the needles and the collar. Its mask is wrong (flat cel style, baseball-style stitches, no painted smile); follow hem_mask_sheet / hem_face for the mask.
+- hem_head_sheet.webp: front + side head (redone): bun and needles, mask with cracks, gold rim, red stitches and painted smile, the high collar. Good for everything. (The older flat version is review/hem_head_sheet_flat_OLD.webp; ignore it.)
