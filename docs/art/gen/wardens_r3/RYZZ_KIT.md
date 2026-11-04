@@ -6,7 +6,8 @@
 - Back: three copper lightning rods; the middle one scorched and bent = her relic (the first rod she climbed).
 - Power: hot-pink lightning straight from her hands (finger-gun cast pose); pink veins on the forearms. No weapon, no jars.
 - 3D notes: slimmer, longer-legged proportions than the art (~8 heads); scar, wink and relic rod on the same side in every view.
-- 3D views (separate runs): ryzz_front.webp (A-pose, use this), ryzz_34.webp, ryzz_back.webp. Side view: still to come.
-- ryzz_back.webp draws FOUR rods with two bent: wrong. She has THREE, only the middle one scorched and bent.
-- review/ryzz_head_sheet_WRONG_SIDES.webp: face reference only; its front view winks the wrong eye. Correct: her RIGHT eye (viewer's left in front view) is closed, and the scar runs through that same eye.
+- 3D views (separate runs): ryzz_front.webp (A-pose, use this), ryzz_34.webp, ryzz_back.webp (exactly 3 rods, scorched bent one in the middle), ryzz_side.webp (true profile; the jacket sits on the shoulders there: follow the front view, it is off the shoulders).
+- review/ryzz_back_4rods_WRONG.webp: the earlier back view with four rods; ignore it.
+- ryzz_head_sheet.webp: head front + side, sides correct. It adds extra copper rings down the pigtails: ignore those, only one coil tie at each pigtail base (as in the full body). review/ryzz_head_sheet_WRONG_SIDES.webp is the old wrong-eye version.
+- review/ryzz_rooftop_alt.webp: alt art only (its modern skyscraper skyline is off-world).
 - ryzz_splash.webp: ult splash (square; a 16:9 version may replace it). Ignore the diagonal thigh bands; the bands sit straight at the boot tops.
