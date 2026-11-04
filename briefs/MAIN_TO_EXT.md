@@ -1188,3 +1188,5 @@ Pending, each to be merged to main once green (pushing main triggers the itch bu
 Also open: Tarek legs / Breaker weapon (19:30 entry), Vex RMB tap-only (S2), the flaky farm checks, the Boki art pass (S1, Gravidillo pilot).
 
 - Handoff update: **spine92 f2b60dc7 DONE** (Tarek ult standable over abyss, 25 deg arc, span 19.8m -> 12m with 9 rocks; owner to confirm "narrower" meant the span). **integ91 also fails 2 hero-combo rows** from main's Hem change ("pin heavy: arrow is 3-4x" because HEAVY_SCALE is now 6.0, and "pin heavy: own projectile type" because the core is hidden): update those assertions to the owner's new spec (the bow arrow, much bigger, red) when merging. **empty90 4648b712 DONE** (shots in briefs/unmasked/empty90/).
+
+- Handoff update: **kitui93 40ce04af DONE**: the newest portraits (ext/imagegen wardens_r3/r2) everywhere incl. the Esc picker and HUD, plus the simplified K kit card. Vex RMB text still says "hold to see its lane": fix it with the S2 tap-only change. All four branches (integ91, spine92, kitui93, empty90) are now ready for the integrator.
