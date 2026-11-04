@@ -395,6 +395,10 @@ static func bridge_span(world: World, k: String, bad := {}) -> Dictionary:
 				if world.island[i] == ii and world.kind[i] != World.T_VOID:
 					last_isle = a
 				elif world.kind[i] != World.T_VOID:
+					var nx: int = at.call(a + int(dir), b)
+					if world.island[i] == 0 and last_isle >= 0 and nx >= 0 and world.kind[nx] == World.T_VOID:
+						a += int(dir)      # (a one-tile spur: carry on past it)
+						continue
 					if world.island[i] == 0 and last_isle >= 0: first_main = a
 					break
 				elif last_isle >= 0 and absf(a - last_isle) > 24:
