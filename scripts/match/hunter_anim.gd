@@ -61,6 +61,7 @@ const PAD_FOLLOW := 0.55
 ## Where each kind of weapon sits under Aim while aimed (pos), the relaxed carry (low: pitch, yaw),
 ## and where the hands go on it (gr: the trigger hand, gl: the support hand; Vector3.INF = free).
 ## Recoil: kick (pitch), push (back), jitter (the gun wobbles in the hand).
+const EMPTY_HAND := Vector3(0.09, -0.45, 0.03)     # m from the shoulder: an empty right hand, hanging loose
 const HOLDS := {
 	"rifle": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.38), "gr": Vector3(0, -0.07, 0.04), "gl": Vector3(0, -0.06, -0.2), "kick": 0.12, "push": 0.05, "jitter": 0.2},
 	"burst_rifle": {"pos": Vector3(0.12, -0.14, -0.3), "low": Vector2(-0.48, 0.36), "gr": Vector3(0, -0.08, 0.0), "gl": Vector3(0, -0.06, -0.16), "kick": 0.14, "push": 0.05, "jitter": 0.15},
@@ -322,8 +323,9 @@ func _init(m: Node3D) -> void:
 	race = String(m.get_meta("race", "human"))
 	arch = String(m.get_meta("arch", ""))
 	st = (STANCE.get(cls, STANCE["medium"]) as Dictionary).duplicate()
-	st.merge(WardenStance.gait(arch), true)
-	ws = WardenStance.new(arch)
+	var stance := String(m.get_meta("stance", arch))      # the Empty's own stance by sex (Unmasked)
+	st.merge(WardenStance.gait(stance), true)
+	ws = WardenStance.new(stance)
 	rng = int(m.get_meta("anim_seed", m.get_instance_id())) & 0x7fffffff
 	seed_ph = _rand() * TAU
 	weight = 1.0 if _rand() < 0.5 else -1.0
@@ -1475,7 +1477,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	var at := aim.transform
 	var grip_r: Vector3 = hd["gr"]
 	var grip_l: Vector3 = hd["gl"]
-	var tr := at * (gun.transform * grip_r) if gun else sh_r + Vector3(0, -0.4, 0)
+	var tr := at * (gun.transform * grip_r) if gun else sh_r + EMPTY_HAND      # (no weapon: it hangs at the side)
 	var tl := Vector3.INF
 	if hold == "twin" and offhand:
 		tl = at * (offhand.transform * Vector3.ZERO)

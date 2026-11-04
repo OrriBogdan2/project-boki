@@ -55,6 +55,7 @@ var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and 
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
 var hob: FarmHob = null            # Hob the builder: blueprints, and a hammer for sites (farm_hob.gd)
+var masks: MaskOffer = null         # the second Mask, waiting by the portal (mask_offer.gd)
 var guide: FarmGuide = null        # the Goals card and the farm tutorial on screen (farm_guide.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
@@ -1020,7 +1021,8 @@ func _process(delta: float) -> void:
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
 	_apply_cam_settings()
-	cam.follow(Vector3(ppos.x, minf(py, 0.0), ppos.z), d, panel_open == "" and train.is_empty())
+	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
+	cam.follow(masks.frame(focus) if masks else focus, d, panel_open == "" and train.is_empty())
 	_see_through()
 	_abyss_tint(d)
 	_find_interact()
@@ -2026,6 +2028,7 @@ func _find_interact() -> void:
 	if hecon:
 		var hb: Dictionary = hecon.find(p2, bd if not best.is_empty() else 9.0)
 		if not hb.is_empty(): best = hb
+	if masks and not masks.find(p2).is_empty(): best = masks.find(p2)
 	if hg and visit.is_empty() and (best.is_empty() or bd > 1.2):
 		# a wild tree or boulder in reach: chop or mine it (with the right tool)
 		var wt := hg.find(p2)
@@ -2174,6 +2177,7 @@ func _label_for(it: Dictionary) -> String:
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
 		"hob", "site": return hob.label(it)
 		"feeder", "grave", "graveyard", "place": return hecon.label(it)
+		"mask": return masks.label(it)
 		"station": return "Job Board" if it["id"] == "job_board" else "%s: assign a Boki" % HomeLayout.CATALOG[it["id"]]["name"]
 		"wild": return hg.label(it)
 	return ""
@@ -2210,6 +2214,7 @@ func _use(it: Dictionary) -> void:
 		"burrow": _open_burrow()
 		"hob", "site": hob.use(it)
 		"feeder", "grave", "graveyard", "place": hecon.use(it)
+		"mask": masks.use(it)
 		"station":
 			if it["id"] == "job_board" or not hw: open_job_board()
 			else: hw.open_station(it["e"])

@@ -1022,6 +1022,11 @@ static func badge(icon: String, col: Color, px := 44.0, rad := R_PILL) -> PanelC
 ## A short note that drops in at the top centre of `host`, holds a moment and fades out
 ## ("Bramble Isle is open"). Never more than one line. One at a time per host: the rest queue (up to
 ## TOAST_QUEUE) and slide in as each fades; the same text showing or waiting counts up ("x2").
+## True while a toast is on show (or waiting) over `host`.
+static func toast_busy(host: Control) -> bool:
+	var st: Dictionary = _toasts.get(host.get_instance_id(), {})
+	return not st.is_empty() and (not (st["cur"] as Dictionary).is_empty() or not (st["wait"] as Array).is_empty())
+
 static func toast(host: Control, txt: String, col := GOLD, y := 100.0) -> void:
 	var hid := host.get_instance_id()
 	for k in _toasts.keys():

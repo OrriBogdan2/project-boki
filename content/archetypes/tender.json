@@ -15,6 +15,7 @@
 		"neck": -0.16
 	},
 	"color": "#ffc46a",
+	"clip": {"lines": {"dash": "A quick hop, a long glide in the air.", "lmb": "Embers from both hands mark foes.", "rmb": "A seed that roots its target.", "e": "A healing ring for you and your team.", "x": "Tether a teammate and heal them as you go."}, "fx": {"e": "heal", "x": "tether"}},
 	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with lantern light, pins chasers with burr-seeds.",
 	"silhouette": "small and low: a tiny courier with a trailing ember tail, casting light from her hands",
 	"card": {

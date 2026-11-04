@@ -1,7 +1,7 @@
 extends Node3D
-## The first thing a new player sees after the prologue: one short card, then three eggs on a little
-## island. Choose your first mask, pick an egg, knock on the shell until it
-## hatches, name what comes out and yourself, then head into the tutorial match together.
+## The first thing a new player sees after the prologue: one short card, then making yourself (one of the
+## Empty), then three eggs on a little island. Pick an egg, knock on the shell until it hatches, name what
+## comes out; then your first Mask drifts to you (MaskMoment) and you head into the tutorial together.
 
 ## The three starter eggs plus a mystery one. Names, tempers and blurbs come from each species'
 ## "egg" block in content/kin/<id>.json, so every egg is named for its element (Venom Egg, ...).
@@ -22,12 +22,14 @@ static func starter_eggs() -> Array:
 
 const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
 const CARD_BUTTON := "Choose your Boki"
+const CREATE_CAM := Vector3(0.05, 1.2, 4.75)     # m: the creator's fixed camera, the whole body in frame
+const CREATE_LOOK := Vector3(0.2, 0.98, 1.6)
 
 var cam: Camera3D
 var fx: Fx
 var eggs: Array = []          # {node, base, data}
 var chosen := -1
-var stage := "intro"          # intro (the card) | hunter (your first mask) | pick (eggs) | warm | hatching | name
+var stage := "intro"          # intro (the card) | create (yourself) | pick (eggs) | warm | hatching | name | mask
 var card_box: Control
 var warmth := 0.0
 var warm_bar: Control
@@ -109,13 +111,11 @@ func _ready() -> void:
 		# test: straight to choosing an egg
 		if not Save.d.has("look"): Save.d["look"] = Unmasked.default_look()
 		_end_intro()
-		if stage == "hunter": _take_hunter([ClassUnlock.starters()[0]])
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--hatch-auto="):
 			var i := int(a.substr(13))
 			if not Save.d.has("look"): Save.d["look"] = Unmasked.default_look()
 			_end_intro()
-			if stage == "hunter": _take_hunter([ClassUnlock.starters()[0]])
 			_pick(i); _pick(i)
 			auto_warm = true
 
@@ -372,43 +372,14 @@ func _clear_bottom() -> void:
 	for ch in bottom.get_children():
 		ch.queue_free()
 
-## After making yourself: choose your first mask, then the eggs (a save that has its masks goes straight on).
+## After making yourself: the eggs. (Your first Mask comes after you name your Boki: MaskMoment.)
 func _after_create() -> void:
 	stage = "pick"
 	title.text = "Choose your first Boki"
 	cam_to = Vector3(0, 3.6, 6.4)
-	if ClassUnlock.needs_starters():
-		_show_hunter_pick()
-	else:
-		_show_pick()
-
-# ---- your first Mask: Vex, before the egg (ClassUnlock, ClassPick). The tutorial plays as Vex.
-var starter_picks: Array = []
-
-func _show_hunter_pick() -> void:
-	stage = "hunter"
-	top_box.visible = false      # (the pick panel carries its own heading: the viewer needs the height)
-	_clear_bottom()
-	cam_to = Vector3(-3.5, 4.2, 9.0)
-	if ClassUnlock.starters().size() == ClassUnlock.picks_needed():
-		starter_picks.assign(ClassUnlock.starters())      # (Vex, already chosen)
-	bottom.add_child(ClassPick.row(starter_picks, _take_hunter))
-
-func _take_hunter(ids: Array) -> void:
-	if not ClassUnlock.choose_starters(ids):
-		return
-	var first := String(ids[0])
-	Save.d["arch"] = first
-	Save.d["cls"] = Arch.weight(first)
-	Save.d["weapon"] = Arch.signature(first)
-	Save.save_game()
-	Sfx.play("click")
-	top_box.visible = true
-	stage = "pick"
-	cam_to = Vector3(0, 3.6, 6.4)
 	_show_pick()
 
-# ---- yourself: the Unmasked (Unmasked)
+# ---- yourself: the Empty (Unmasked)
 func _show_create() -> void:
 	stage = "create"
 	if look.is_empty():
@@ -418,16 +389,18 @@ func _show_create() -> void:
 	if create_box: create_box.queue_free()
 	_rebuild_preview()
 	for e in eggs: (e["holder"] as Node3D).visible = false
-	if sub_lbl: sub_lbl.text = "Drag yourself (or hold A / D) to turn round. The masks fill in the rest."
+	if sub_lbl: sub_lbl.text = "You are one of the Empty. Drag (or hold A / D) to turn round."
 	_top_over(0.73)       # over you, clear of the tall creator card on the left
-	var hk := clampf(_model_top(preview) / 1.6, 1.0, 1.8) if preview else 1.0
-	cam_to = Vector3(0, 1.5 * hk, 1.6 + 3.0 * hk)
-	look_at_t = Vector3(0.0, 0.9 * hk, 1.6)
+	cam_to = CREATE_CAM          # fixed, so a change of height or build shows as one
+	look_at_t = CREATE_LOOK
 	var card := UI.card(UI.CARD, 14, 16)
 	card.custom_minimum_size = Vector2(500, 0)
 	create_box = card
 	var v := UI.vbox(8); card.add_child(v)
-	for row in Unmasked.ROWS:
+	for r in Unmasked.ROWS.size():
+		var row: Array = Unmasked.ROWS[r]
+		if r == 0 or r == Unmasked.HOLLOW_ROW:
+			v.add_child(UI.label("Body" if r == 0 else "The hollow", 12, UI.ACCENT, UI.caps))
 		var key: String = row[0]
 		var opts: Array = row[2]
 		var hr := UI.hbox(8)
@@ -482,18 +455,6 @@ func _looks_good() -> void:
 		return
 	_after_create()
 
-## The highest point of a model (its meshes' bounds), in world metres.
-func _model_top(n: Node3D) -> float:
-	var top := 0.0
-	var st: Array = [n]
-	while not st.is_empty():
-		var nd: Node = st.pop_back()
-		if nd is MeshInstance3D and (nd as MeshInstance3D).visible and nd.is_inside_tree():
-			var gi := nd as MeshInstance3D
-			top = maxf(top, (gi.global_transform * gi.get_aabb()).end.y)
-		for ch in nd.get_children(): st.append(ch)
-	return top
-
 ## Centres the title block at this fraction of the window's width.
 func _top_over(x_frac: float) -> void:
 	if top_box:
@@ -511,7 +472,8 @@ func _rebuild_preview() -> void:
 	if preview:
 		preview_yaw = preview.rotation.y
 		preview.queue_free()
-	preview = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", ""))), "", look)
+	preview = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], "", "", look)      # empty-handed: just you
+	preview.get_node("Rig/Torso/Aim/Gun").free()
 	preview.position = Vector3(0.8, 0, 1.6)
 	preview.rotation.y = preview_yaw
 	add_child(preview)
@@ -632,9 +594,10 @@ func _start_hatch() -> void:
 
 func _process(delta: float) -> void:
 	t += delta
-	cam.position = cam.position.lerp(cam_to, minf(1.0, delta * 2.0))
-	# a slow breathing drift so the shot is never quite still
-	cam.position += Vector3(sin(t * 0.37) * 0.004, sin(t * 0.51) * 0.003, 0)
+	if stage != "mask":
+		cam.position = cam.position.lerp(cam_to, minf(1.0, delta * 2.0))
+		# a slow breathing drift so the shot is never quite still
+		cam.position += Vector3(sin(t * 0.37) * 0.004, sin(t * 0.51) * 0.003, 0)
 	for rn in runes:
 		(rn[0] as Node3D).rotation.y += delta * float(rn[1])
 	if orbit: orbit.rotation.y += delta * 0.04
@@ -644,7 +607,9 @@ func _process(delta: float) -> void:
 	if ship:
 		ship.position.x += delta * 1.6
 		if ship.position.x > 60.0: ship.position.x = -60.0
-	if stage == "create":
+	if stage == "mask":
+		pass       # (MaskMoment moves the camera)
+	elif stage == "create":
 		cam.look_at(look_at_t)
 		if preview and not (get_viewport().gui_get_focus_owner() is LineEdit):
 			preview.rotation.y += (Input.get_axis("left", "right")) * delta * 2.5
@@ -770,6 +735,27 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	Save.d["tutorial"]["hatched"] = true
 	Save.save_game()
 	Sfx.play("click")
+	if ClassUnlock.needs_starters():
+		_mask_moment(func(): _head_out(tutorial))
+		return
+	_head_out(tutorial)
+
+## Your first Mask, in the world: Vex drifts to you and you put her on (MaskMoment), then `then`.
+func _mask_moment(then: Callable) -> void:
+	stage = "mask"
+	_clear_bottom()
+	top_box.visible = false
+	var first := String(ClassUnlock.starters()[0])
+	ClassUnlock.choose_starters([first])
+	Save.d["arch"] = first
+	Save.d["cls"] = Arch.weight(first)
+	Save.d["weapon"] = Arch.signature(first)
+	Save.save_game()
+	var moment := MaskMoment.make(self, cam, kin_node, first)
+	moment.finished.connect(then)
+	add_child(moment)
+
+func _head_out(tutorial: bool) -> void:
 	if tutorial:
 		Game.start_match({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0})
 	else:

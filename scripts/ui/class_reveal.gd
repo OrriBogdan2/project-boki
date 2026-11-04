@@ -16,13 +16,14 @@ var host: Node
 var root: Control
 var glow: Control
 var t := 0.0
+const CLIP := Vector2(200, 112)      # px: each ability clip beside the Hunter
 
 ## Shows the reveal for the first waiting Hunter, if any. Returns the overlay (or null). With none
 ## waiting, a Hunter unlock that became ready since you were last told gets a toast instead.
 static func maybe_show(home: Node) -> ClassReveal:
 	if home == null or not home.is_inside_tree():
 		return null
-	if ClassPick.offer(home):
+	if MaskOffer.offer(home):
 		return null
 	var waiting := ClassUnlock.pending_reveal()
 	if waiting.is_empty():
@@ -74,11 +75,14 @@ func _ready() -> void:
 	var kick := UI.label("NEW MASK", UI.T_HEAD, UI.GOLD, UI.caps)
 	kick.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(kick)
-	# the ring of light, with the Hunter standing in it
+	# the ring of light, with the Hunter standing in it, beside its name and its abilities working
+	var row := UI.hbox(18)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_child(row)
 	var stage := Control.new()
-	stage.custom_minimum_size = Vector2(340, 310)
-	stage.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	v.add_child(stage)
+	stage.custom_minimum_size = Vector2(320, 310)
+	stage.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(stage)
 	glow = Control.new()
 	glow.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -94,22 +98,21 @@ func _ready() -> void:
 	tex.scale = Vector2(0.2, 0.2)
 	tex.modulate.a = 0.0
 	stage.add_child(tex)
-	var nm := UI.title(Arch.name_of(id), 54, col)
-	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(nm)
-	var origin := HeroTitle.intro_block(id, 520.0, true)
-	v.add_child(origin)
+	var right := UI.vbox(8)
+	right.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(right)
+	var nm := UI.title(HunterViewer.display_name(id), 44, col)
+	right.add_child(nm)
 	var wl := UI.label(HunterViewer.stat_line(id), UI.T_SMALL, UI.MUTED)
-	wl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(wl)
-	var fan := UI.para(String(Arch.def(id).get("fantasy", "")), UI.T_BODY, UI.INK)
-	fan.custom_minimum_size.x = 520
-	fan.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(fan)
-	var loop := UI.para(String(Arch.def(id).get("card", {}).get("loop", "")), UI.T_SMALL, UI.MUTED)
-	loop.custom_minimum_size.x = 520
-	loop.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(loop)
+	right.add_child(wl)
+	var clips := GridContainer.new()
+	clips.columns = 3
+	clips.add_theme_constant_override("h_separation", 8)
+	clips.add_theme_constant_override("v_separation", 8)
+	for slot in HunterViewer.CLIP_SLOTS:
+		if slot in HunterViewer.slots_for(id):
+			clips.add_child(AbilityClip.make(id, slot, CLIP))
+	right.add_child(clips)
 	var btns := UI.hbox(12)
 	btns.alignment = BoxContainer.ALIGNMENT_CENTER
 	btns.add_child(UI.ghost("Later", func(): _finish(false), 140))
@@ -123,7 +126,7 @@ func _ready() -> void:
 	var tw := create_tween().set_parallel(true)
 	tw.tween_property(tex, "modulate:a", 1.0, 0.25)
 	tw.tween_property(tex, "scale", Vector2.ONE, 0.55).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	for c in [kick, nm, origin, wl, fan, loop, btns]:
+	for c in [kick, right, btns]:
 		(c as Control).modulate.a = 0.0
 		tw.tween_property(c, "modulate:a", 1.0, 0.4).set_delay(0.35)
 	play.call_deferred("grab_focus")
