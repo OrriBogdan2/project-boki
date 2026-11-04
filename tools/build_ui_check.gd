@@ -22,6 +22,7 @@ func run(m: Node) -> void:
 	await _farm()
 	await _house()
 	_migration()
+	_card_clamp()
 	printerr("BUILDUI DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -85,7 +86,7 @@ func _farm() -> void:
 		"Rotate turns the ghost a quarter turn over several frames, not in one pop (%.2f)" % yaw1)
 	for i in 40: hb.tick(0.016)
 	ok(absf(hb.ghost.rotation.y - PI * 0.5) < 0.02, "and it settles on the quarter turn")
-	ok(hb.keys.tag.visible and hb.keys.strip.get_child_count() > 0, "the key hints show while something is held")
+	ok(hb.keys.tag.visible, "the key card shows while something is held")
 	# place: one thing, then build mode ends
 	var g0 := int(Save.d["gems"])
 	var cs := _spot(hb, hb.held, HomeLayout.size_of("bench", 1))
@@ -294,3 +295,19 @@ func _migration() -> void:
 	Save.migrate(fresh_old)
 	ok(int(fresh_old["furniture"]["journal"]) == 1 and not fresh_old["decor"].has("house"),
 		"a v10 save with no Boki yet starts with an empty house")
+
+## The cursor card and the piece menu never cover the catalog bar, the top band or the Goals card.
+func _card_clamp() -> void:
+	var vp := Vector2(1280, 720)
+	var blocked := [Rect2(16, 620, 1248, 88), Rect2(0, 0, 1280, BuildKeys.TOP_BAND), Rect2(1000, 60, 270, 160)]
+	var card := Vector2(190, 120)
+	var clear := true
+	for cursor in [Vector2(640, 360), Vector2(1270, 710), Vector2(10, 10), Vector2(640, 600), Vector2(1200, 260),
+			Vector2(1270, 360), Vector2(640, 700)]:
+		var at := BuildKeys.place_card(card, cursor, BuildKeys.TAG_OFFSET, blocked, vp)
+		var rect := Rect2(at, card)
+		var inside := Rect2(Vector2.ZERO, vp).encloses(rect)
+		if not inside or blocked.any(func(r: Rect2) -> bool: return r.intersects(rect)):
+			clear = false
+			printerr("BUILDUI card at %s lands on %s" % [cursor, rect])
+	ok(clear, "the cursor card keeps off the bar, the top band and the Goals card at every edge")
