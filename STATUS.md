@@ -207,3 +207,12 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - 2026-11-04 03:15 UTC: READY ext/warden-stance 91d7e239 (item 52). Shots in hero-shots-s2 item52/. Checks re-run by S2.
 - 2026-11-04 03:16 UTC: ext/kits-integ in progress (main 03:15). It is origin/main 91a6bd05 + no-shake + online-displace + the five audit tips + vex-ammo; an Opus agent is merging, then the full suite.
 - 2026-11-04 04:04 UTC: **READY ext/kits-integ 5e551f8c**: main + no-shake + online-displace + 5 audits + vex-ammo. Checks re-verified by S2; full suite shows only known or pre-existing reds. Details in EXT_TO_MAIN.
+
+## 2026-11-04 04:18 UTC: Warden r2 3D fan-out (owner approved all, 04:15)
+- **Batch 1 (video):**
+  - Vex: r2 is in the game (ext/warden-meshy 1d1a4543); a credit-free cleanup pass is in progress (face strands, skin tone, streak, vents, outline).
+  - Zedran, Pin and Cinder: one Opus agent each, on ext/warden-meshy-<name>.
+  - Brief: briefs-s2/WARDEN_R2_BRIEF.md. Round-2 art only, the 01:10 bar, item 52 stance, at most 4 runs each.
+- **Credits:** about 910 left; the 3 agents use 360 at most. Each agent stops if the balance is under 250.
+- **Next:** the other 8 Wardens, as their r2 turnaround and side views land (watching IMG_STATUS.md). After that, one READY integration for batch 1.
+- **Stance:** ext/warden-stance 4f9487a0 is pushed (Vex's gun-arm carry).
