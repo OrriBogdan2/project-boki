@@ -104,11 +104,13 @@ def tris(objs):
     return n
 
 
-def export(path, objs, image_format="AUTO"):
+def export(path, objs, image_format="AUTO", colors=False):
+    """colors: each mesh's active colour attribute goes out as COLOR_0 (fit_warden's ink room)."""
     bpy.ops.object.select_all(action="DESELECT")
     for ob in objs:
         ob.select_set(True)
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=False,
                               export_animations=False, export_skins=True, export_yup=True,
                               export_materials="EXPORT", export_image_format=image_format,
-                              export_jpeg_quality=92, export_extras=False)
+                              export_jpeg_quality=92, export_extras=False,
+                              export_vertex_color="ACTIVE" if colors else "MATERIAL")

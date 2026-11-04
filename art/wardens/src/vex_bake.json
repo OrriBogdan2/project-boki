@@ -1,0 +1,23 @@
+{
+ "high": "~/meshy/vex_r3/runI_armdown_prof_noenh/glb.glb",
+ "out": "~/meshy/vex_r3/bake/low.glb",
+ "tris": 40000,
+ "tex": 4096,
+ "head": {
+  "centre": [
+   0.12,
+   -0.08,
+   0.72
+  ],
+  "r": 0.21
+ },
+ "head_uv": 2.5,
+ "uv_smooth": 30,
+ "uv_angle": 66,
+ "uv_margin": 0.0008,
+ "cage": 0.008,
+ "ray": 0.03,
+ "margin_px": 16,
+ "floater_verts": 60,
+ "head_tris": 10000
+}

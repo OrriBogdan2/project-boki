@@ -1,11 +1,11 @@
 {
- "body_glb": "~/meshy/vex_r2/run1/glb.glb",
+ "body_glb": "~/meshy/vex_r3/bake/low.glb",
  "rig": "art/wardens/src/vex_rig.json",
  "out": "art/wardens/vex/vex.glb",
- "blend": "~/meshy/vex_r2/fit.blend",
+ "blend": "~/meshy/vex_r3/fit.blend",
  "turn": 180,
- "max_tris": 15000,
- "floater_verts": 40,
+ "max_tris": 40000,
+ "floater_verts": 8,
  "snap_r": 0.045,
  "joints": {
   "shoulder.R": [
@@ -14,9 +14,9 @@
    0.4125
   ],
   "shoulder.L": [
-   0.2625,
+   0.27,
    0,
-   0.4375
+   0.44
   ],
   "elbow.R": [
    -0.2125,
@@ -24,9 +24,9 @@
    0.2
   ],
   "elbow.L": [
-   0.4875,
+   0.4,
    0,
-   0.2375
+   0.16
   ],
   "hand.R": [
    -0.3125,
@@ -34,9 +34,9 @@
    -0.125
   ],
   "hand.L": [
-   0.3125,
+   0.435,
    0,
-   0.0875
+   -0.04
   ],
   "fingers.R": [
    -0.425,
@@ -44,9 +44,9 @@
    -0.5
   ],
   "fingers.L": [
-   0.25,
+   0.45,
    0,
-   0.075
+   -0.19
   ],
   "hip.R": [
    -0.03125,
@@ -104,226 +104,50 @@
   "from": -0.15,
   "back": 0.14,
   "spin": 0.66,
-  "tris": 6000,
+  "tris": 12000,
   "glow_min": [
    0.85,
    0.38,
    0.3
   ],
-  "glow_colour": "ffa040",
-  "vents": {
-   "y": [
-    0.01,
-    0.22
+  "loose_verts": 300,
+  "slot": "metal",
+  "trim_boxes": [
+   [
+    -0.2,
+    0.2,
+    -0.4,
+    -0.08,
+    -0.3,
+    -0.11
    ],
-   "val_max": 0.26,
-   "colour": "e05a18"
-  }
+   [
+    0.115,
+    0.2,
+    0.12,
+    0.26,
+    -0.12,
+    0.0
+   ]
+  ]
  },
  "chunk": {
   "head": 1.12,
-  "hand": 1.2,
-  "girth": 1.06
+  "hand": 1.25,
+  "girth": 1.14
  },
- "palette_from": "~/meshy/vex_r2/prep2k/view0.png",
- "snap": 0.6,
  "lift": [
-  0.95,
-  1.02
- ],
- "project": [
-  {
-   "view": "front",
-   "image": "~/meshy/vex_r2/prep2k/view0.png",
-   "col0": 444.7448979591837,
-   "sole_row": 769,
-   "head_z": 0.7,
-   "box": [
-    -0.2,
-    0.42,
-    0.2,
-    0.98
-   ],
-   "facing": 0.45
-  },
-  {
-   "view": "back",
-   "image": "~/meshy/vex_r2/prep2k/view3.png",
-   "col0": 362.3163265306123,
-   "sole_row": 769,
-   "head_z": 0.7,
-   "head_box": [
-    -0.25,
-    0.35
-   ],
-   "box": [
-    -0.2,
-    0.42,
-    0.1,
-    0.98
-   ],
-   "facing": 0.45
-  },
-  {
-   "view": "front",
-   "image": "~/meshy/vex_r2/prep2k/view0.png",
-   "col0": 444.7448979591837,
-   "sole_row": 769,
-   "head_z": 0.7,
-   "head_box": [
-    -0.2,
-    0.42
-   ],
-   "box": [
-    -0.03,
-    0.22,
-    0.53,
-    0.76
-   ],
-   "facing": -0.3
-  }
- ],
- "palette": [
-  [
-   "skin",
-   "e8b294"
-  ],
-  [
-   "skin",
-   "c08a70"
-  ],
-  [
-   "hair",
-   "1e1e28"
-  ],
-  [
-   "hair",
-   "e8743a"
-  ],
-  [
-   "cloth",
-   "2e3a58"
-  ],
-  [
-   "cloth",
-   "f07a30"
-  ],
-  [
-   "cloth",
-   "4a5a68"
-  ],
-  [
-   "cloth",
-   "efe4c8"
-  ],
-  [
-   "cloth",
-   "3a2c2c"
-  ],
-  [
-   "metal",
-   "8a8e96"
-  ],
-  [
-   "metal",
-   "4a4c50"
-  ],
-  [
-   "metal",
-   "c09a50"
-  ],
-  [
-   "leather",
-   "5a4030"
-  ],
-  [
-   "leather",
-   "2a2220"
-  ]
+  0.9,
+  1.03,
+  1.12
  ],
  "glow_min": [
   0.95,
   0.6,
   0.45
  ],
- "normal_smooth": 6,
+ "normal_smooth": 8,
  "pad": 6,
- "touch_up": [
-  {
-   "mode": "warm",
-   "slot": "skin",
-   "colour": "d9a284",
-   "k": 0.6
-  },
-  {
-   "mode": "flat",
-   "slots": [
-    "hair",
-    "cloth",
-    "leather",
-    "metal"
-   ],
-   "box": [
-    -0.12,
-    0.36,
-    0.6,
-    1.0
-   ],
-   "colour": "1e1e28",
-   "val_lo": 0.9,
-   "val_hi": 1.15,
-   "not_box": [
-    -0.04,
-    0.23,
-    0.5,
-    0.77
-   ],
-   "skip_hue": [
-    0.08,
-    0.17,
-    0.35
-   ]
-  },
-  {
-   "mode": "flat",
-   "slots": [
-    "hair",
-    "cloth",
-    "leather",
-    "metal"
-   ],
-   "box": [
-    0.1,
-    0.36,
-    0.6,
-    1.0
-   ],
-   "sector": {
-    "centre": [
-     0.11,
-     -0.06
-    ],
-    "az": [
-     10,
-     72
-    ]
-   },
-   "colour": "f07a30",
-   "val_lo": 0.9,
-   "val_hi": 1.05,
-   "not_box": [
-    -0.04,
-    0.23,
-    0.5,
-    0.77
-   ],
-   "skip_hue": [
-    0.08,
-    0.17,
-    0.35
-   ]
-  }
- ],
  "delete_boxes": [
   [
    0.25,
@@ -332,6 +156,213 @@
    1.0,
    0.55,
    0.95
+  ],
+  [
+   0.1,
+   0.3,
+   -0.5,
+   -0.17,
+   0.6,
+   0.96
   ]
- ]
+ ],
+ "cap_holes": 0.3,
+ "slot_rules": [
+  {
+   "slot": "glow",
+   "box": [
+    0.132,
+    0.172,
+    -0.3,
+    -0.215,
+    0.652,
+    0.7
+   ],
+   "hsv": [
+    0.04,
+    0.14,
+    0.6,
+    1.0,
+    0.55,
+    1.0
+   ]
+  },
+  {
+   "slot": "hair",
+   "box": [
+    -0.15,
+    0.36,
+    null,
+    null,
+    0.55,
+    null
+   ],
+   "hsv": [
+    null,
+    null,
+    null,
+    null,
+    0.0,
+    0.3
+   ]
+  },
+  {
+   "slot": "hair",
+   "box": [
+    -0.15,
+    0.36,
+    null,
+    null,
+    0.55,
+    null
+   ],
+   "hsv": [
+    0.0,
+    0.09,
+    0.6,
+    1.0,
+    0.45,
+    1.0
+   ]
+  },
+  {
+   "slot": "metal",
+   "box": [
+    -0.15,
+    0.36,
+    null,
+    null,
+    0.55,
+    null
+   ],
+   "hsv": [
+    0.085,
+    0.2,
+    0.3,
+    1.0,
+    0.3,
+    1.0
+   ]
+  },
+  {
+   "slot": "metal",
+   "box": [
+    null,
+    -0.08,
+    null,
+    null,
+    0.1,
+    0.62
+   ],
+   "hsv": [
+    null,
+    null,
+    0.0,
+    0.7,
+    0.32,
+    1.0
+   ]
+  },
+  {
+   "slot": "skin",
+   "hsv": [
+    0.0,
+    0.085,
+    0.15,
+    0.6,
+    0.5,
+    1.0
+   ]
+  },
+  {
+   "slot": "leather",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    -0.68
+   ]
+  },
+  {
+   "slot": "cloth"
+  }
+ ],
+ "slot_vote": 4,
+ "fit_weights": true,
+ "ink_room": 0.02,
+ "touch_up": [
+  {
+   "mode": "warm",
+   "slot": "skin",
+   "colour": "d9a284",
+   "k": 0.45
+  },
+  {
+   "mode": "warm",
+   "slot": "glow",
+   "box": [
+    0.13,
+    0.175,
+    0.65,
+    0.705
+   ],
+   "colour": "6a2a06",
+   "k": 1.0
+  }
+ ],
+ "cut_boxes": [
+  [
+   0.095,
+   0.135,
+   -0.3,
+   -0.245,
+   0.6,
+   0.71
+  ]
+ ],
+ "weight_rules": [
+  {
+   "bone": "hips",
+   "box": [
+    -0.15,
+    0.19,
+    -0.45,
+    -0.03,
+    0.84,
+    1.27
+   ]
+  },
+  {
+   "bone": "hips",
+   "box": [
+    -0.15,
+    0.19,
+    -0.45,
+    -0.1,
+    0.66,
+    0.84
+   ],
+   "hsv": [
+    [
+     0.0,
+     0.2,
+     0.0,
+     1.0,
+     0.0,
+     1.0
+    ],
+    [
+     0.0,
+     1.0,
+     0.0,
+     0.3,
+     0.0,
+     0.25
+    ]
+   ]
+  }
+ ],
+ "atlas_px": 2048
 }

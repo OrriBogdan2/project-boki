@@ -5,7 +5,7 @@
 	"gender": "female",
 	"personality": "A sharp, professional soldier in marine-style gear. She takes the contract and finishes the job.\nCalm under fire, and always has a plan for the way out.",
 	"weight": "medium",
-	"body": {"size": 0.97, "chest": 1.0, "head": 0.72, "legs": 1.58, "neck": -0.02, "build": 1.05},
+	"body": {"size": 0.97, "chest": 1.0, "head": 0.72, "legs": 1.58, "neck": -0.02, "build": 1.12},
 	"color": "#ff9a5c",
 	"fantasy": "The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light.",
 	"silhouette": "the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle",

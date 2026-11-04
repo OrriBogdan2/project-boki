@@ -39,6 +39,9 @@ uniform float fres = 0.0;          // coloured fresnel rim, independent of the l
 uniform vec4 fres_color : source_color = vec4(0.75, 0.86, 1.0, 1.0);
 uniform float fres_tint = 0.5;     // 0 = fres_color, 1 = a lightened version of the surface's own colour
 uniform float top_light = 0.0;     // surfaces facing up (what the match camera sees most) lift a little     // a soft broad highlight on every surface facing the light
+// a painted atlas (WardenGlb) at the match camera (~23 m): its colours this much brighter and richer, fading in
+// from 8 to 18 m away (close-ups keep the paint's own values)
+uniform float far_lift = 0.0;
 // Imported low-poly models carry each corner's averaged (smooth) normal in TANGENT (Assets.mesh).
 // Blending toward it rounds off their facets in the shading while the silhouette stays crisp.
 uniform float soften = 0.0;
@@ -103,6 +106,11 @@ void fragment() {
 			vec3 r = (INV_VIEW_MATRIX * vec4(reflect(-VIEW, NORMAL), 0.0)).xyz;
 			c *= 0.8 + 0.6 * smoothstep(0.1, 0.8, r.y);
 		}
+	}
+	if (far_lift > 0.0) {
+		float far_k = far_lift * smoothstep(8.0, 18.0, length(VERTEX));
+		float lum = dot(c, vec3(0.3, 0.59, 0.11));
+		c = max(mix(vec3(lum), c, 1.0 + far_k * 0.6), vec3(0.0)) * (1.0 + far_k);
 	}
 	float fog = no_fog ? 0.0 : vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
 	c = vis_apply(c, fog);
