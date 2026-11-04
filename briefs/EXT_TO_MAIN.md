@@ -1918,3 +1918,30 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - toxic-green hair at match zoom;
   - the gun-side jacket black.
 - **Shared match-zoom fix:** both branches carry v1 (f0ad9f60). They switch to v2 (ext/warden-matchzoom-v2 161708cc) next round. **Main:** the art integ uses v2.
+
+## 2026-11-04 16:41 UTC (S2): shared match-zoom fix v2 (ORCH 15:15 ask): ext/warden-matchzoom-v2
+- **Commits:**
+  - 161708cc: code, in hero_toon, outline, warden_glb and arena_demo.
+  - 0170c7df: the wing-card far fade.
+  - c89a5273 / a466972f: recipe and docs.
+- **The fix:** at match-camera size it scales by on-screen size, not distance:
+  - fresnel down, gloss, sheen and light rims off;
+  - mip-clamped specks;
+  - a broad saturated signature rim;
+  - ink cut from about 13.5 m;
+  - a 1.4 px glow halo on glow pieces;
+  - edge-on wing cards fade.
+  Procedural heroes are unchanged (all new uniforms default off). New per-Hunter keys: no_ink, ink, glow_shell. Plus `--arena-demo=pose_clear` for clean review frames (no HUD, sign, aim line or covering props).
+- **Speckle (share of hero pixels):**
+
+  | Hunter | Before | After |
+  |---|---|---|
+  | Vex | 6.4% | 3.3% |
+  | Sable | 7.2% | 4.9% |
+  | Ryzz | 6.7% | 3.4% |
+  | Tarek | 7.7% | 3.4% |
+  | Hem | 6.0% | 4.0% |
+  | Ostra | 7.5% | 2.8% |
+
+- **Shots:** ext/hero-shots-s2 under warden-3d/matchzoom/all6_x3_before_after.png.
+- **Status:** all checks and health pass. Every Hunter agent is picking it up; ext/art-integ uses v2. ext/warden-matchzoom (v1) is superseded.
