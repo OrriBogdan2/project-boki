@@ -124,6 +124,14 @@ Copy `vex_fit.json` -> `<name>_fit.json` and set, in this order of importance:
    A `line` pass copies the art's soft edges and its blobs; a stroke does not. A face's circuits (r3h: Vex's cheek
    and temple, from the face sheet by its warp, 1.4 mm): `open_px` 4 with `keep_wide` stamps the round nodes whole,
    in an `art_box` that leaves the hair out.
+11. The scan's strands across the face (r3i): `smooth_hair` {box, iterations, k} moves the hair slot's vertices in
+   that box toward their neighbours (4 x 0.4 for Vex), keeping their roots: no jagged slivers over the cheeks.
+   `chunk.face_x` widens the lower face (`face_z` above the head bone, in front of it by `face_y`) toward the face
+   sheet without widening the hair (Vex 1.05).
+12. A glowing paint that must read at the match camera at night (r3i): `glow_anchors` [{name, bone, x, dz, out}]
+   puts an anchor on the body's front by a ray (Vex: two on her belly's circuits), and a `halos` entry with
+   `night` 1 on each (only in the dark: by vis_dark, none in clear light). Thin strokes average away into the
+   skin at a pixel per 2 cm; a halo keeps its size on screen.
 `recipe.py SPEC fit` writes `art/wardens/<name>/<name>.glb` and imports it (atlases lossless, LODs off).
 
 ## 7. Look (10 min)
@@ -287,6 +295,9 @@ to ignore):
 | The gorget's seams faint | thin seams from a projection, few faces on the glow slot | `stamp` the face sheet's seams (warp), then `reslot_late` to glow (r3g) |
 | The gun mount pale with dark blotches | a value rule split the block between metal and the black jacket | a metal rule by box for the whole block before it, a `flat` gunmetal touch-up (r3g) |
 | The lens halo lost in the hair at the match camera | the halo in the hair's own green | a halo of another hue (Vex lime) (r3g) |
+| Pale patches on the upper chest | the chest's skin paler and greyer than the face's | `warm` to the mid skin, then `cap` 0.72 (r3i) |
+| A pale jacket on the gun-side shoulder | the gun mount's metal rule reached the jacket | that rule's box to the mount only, a `flat` black on the jacket (r3i) |
+| Tattoos dark at night at the match camera | 2 mm strokes average into the skin there | `glow_anchors` and `night` halos (r3i) |
 | The eyeshadow oversaturated magenta | the toon light on the face sheet's plum | `desat` touch-up on the eye's box (r3h) |
 | The face small and gaunt | the head grown about the neck only | `chunk.head` 1.21, `chunk.head_x` 1.04 (wider) (r3h) |
 | She goes dark at night | tattoos on the skin slot have no emission | `glow_key` on the skin slot (r3h) |

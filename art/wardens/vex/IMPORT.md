@@ -107,3 +107,11 @@ r3h (ORCH's 17:10 review of r3f; credit-free):
 - **Gun mount and left sleeve:** the mount a darker flat gunmetal, the left sleeve flat black leather.
 - **Night:** the circuit tattoos glow (`glow_key` on the skin slot, hero_toon); the lens and the gorget's seams
   were on the glow slot already. The lens halo is lifted 3.5 cm toward the camera, in front of her fringe.
+
+r3i (the r3h report's next steps; credit-free):
+- **Upper chest and gun-side shoulder:** the chest's pale skin toned toward the face's (`warm` to the mid skin,
+  then `cap` 0.72); the gun-side jacket off the gun mount's metal rule and flattened to black leather.
+- **Face:** the hair strands across the face smoothed (fit spec `smooth_hair`: the hair's vertices there moved
+  toward their neighbours, their roots kept); the lower face 5% wider (chunk `face_x`), toward the face sheet.
+- **Night:** two halos on the belly's circuits (fit spec `glow_anchors`, warden_look.json halos with `night`: only
+  in the dark), so the tattoos' glow reads at the match camera at night.

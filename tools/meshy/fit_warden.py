@@ -1849,11 +1849,59 @@ def chunk(ob, rig, ck):
             if w > 0.0:
                 co[v.index] = piv + (co[v.index] - piv) * (1.0 + kk * w)
                 co[v.index, 0] = piv[0] + (co[v.index, 0] - piv[0]) * (1.0 + kx * w)
+    if "face_x" in ck:
+        # (the lower face a little wider than the head, toward the face sheet's: Vex r3i) head-weighted vertices in
+        # front of the head bone by face_y m and between face_z [z0, z1] above it, faded over 2-3 cm
+        g = ob.vertex_groups.get("head")
+        piv = np.array(K.bone_head(rig, "head")[:])
+        kx = float(ck["face_x"]) - 1.0
+        z0, z1 = ck.get("face_z", [0.0, 0.16])
+        fy = float(ck.get("face_y", 0.03))
+        for v in ob.data.vertices:
+            w = next((x.weight for x in v.groups if x.group == g.index), 0.0) if g else 0.0
+            if w <= 0.0:
+                continue
+            d = co[v.index] - piv
+            wy = min(1.0, max(0.0, (d[1] - fy) / 0.03))
+            wz = min(1.0, max(0.0, (d[2] - z0 + 0.02) / 0.02)) * min(1.0, max(0.0, (z1 + 0.03 - d[2]) / 0.03))
+            co[v.index, 0] = piv[0] + d[0] * (1.0 + kx * w * wy * wz)
     gk = float(ck.get("girth", 1.0))
     co[:, 0] *= gk
     co[:, 1] *= gk
     ob.data.vertices.foreach_set("co", co.ravel())
     ob.data.update()
+
+
+def smooth_slot(ob, slot, sp):
+    """The scan's strands of one slot inside a box smoothed (Vex r3i: the hair across her face read jagged): its
+    vertices there moved `k` of the way to their neighbours' mean, `iterations` times; vertices it shares with
+    another slot stay, so the strands keep their roots. sp: box [x0, x1, y0, y1, z0, z1] (Meshy frame, null
+    open), iterations, k."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bm.verts.ensure_lookup_table()
+    names = [m.name for m in ob.data.materials]
+    inf = float("inf")
+    b = [(-inf if x is None else x) if i % 2 == 0 else (inf if x is None else x) for i, x in enumerate(sp["box"])]
+
+    def inside(co):
+        return b[0] <= co.x <= b[1] and b[2] <= co.y <= b[3] and b[4] <= co.z <= b[5]
+    move = [v for v in bm.verts if v.link_faces and inside(v.co)
+            and all(names[f.material_index].startswith(slot + "-") for f in v.link_faces)]
+    k = float(sp.get("k", 0.5))
+    for _i in range(int(sp.get("iterations", 4))):
+        new = {}
+        for v in move:
+            nb = [e.other_vert(v).co for e in v.link_edges]
+            if nb:
+                mean = sum(nb, Vector()) / len(nb)
+                new[v] = v.co.lerp(mean, k)
+        for v, c in new.items():
+            v.co = c
+    bm.to_mesh(ob.data)
+    bm.free()
+    ob.data.update()
+    log("smoothed %d %s vertices" % (len(move), slot))
 
 
 def _close_gaps(w):
@@ -2268,6 +2316,8 @@ def main():
         slot_rules(ob, img, spec["slot_rules"], spec["glow_min"], "body", vote=spec.get("slot_vote", "island"))
     else:
         slot_split(ob, img, spec["palette"], spec["glow_min"], "body")
+    if spec.get("smooth_hair"):
+        smooth_slot(ob, "hair", spec["smooth_hair"])
     if spec.get("touch_up"):
         touch_up(ob, img, spec["touch_up"])
         pad(img, ids, int(spec.get("pad", 6)))       # (the touched islands' new colour into their margins too)
@@ -2391,6 +2441,19 @@ def main():
             parts.append(WP.braids([ob], arm, [_rel(arm, b, ("path",)) for b in spec["braids"]], spec["braid_colours"]))
         if spec.get("hoses"):
             parts.append(WP.hoses([ob], arm, [_rel(arm, h, ("path",)) for h in spec["hoses"]], spec["hose_colours"]))
+    for ga in spec.get("glow_anchors", []):
+        # (an anchor on a glowing paint, for its halo at the match camera at night: Vex's belly circuits), found on
+        # the body's front by a ray at x, a bone's height + dz, `out` m off the skin
+        from mathutils.bvhtree import BVHTree
+        tree = BVHTree.FromPolygons([v.co.copy() for v in ob.data.vertices], [p.vertices[:] for p in ob.data.polygons])
+        z = K.bone_head(rig, ga.get("bone", "hips")).z + float(ga.get("dz", 0.0))
+        hit = tree.ray_cast(Vector((float(ga["x"]), 1.0, z)), Vector((0.0, -1.0, 0.0)), 2.0)
+        if hit[0] is None:
+            log("glow anchor %s: no body there" % ga["name"])
+            continue
+        at = hit[0] + Vector((0.0, float(ga.get("out", 0.006)), 0.0))
+        K.anchor(arm, ga.get("bone", "hips"), "anchor_" + ga["name"], tuple(at))
+        log("glow anchor %s at %s" % (ga["name"], tuple(round(c, 3) for c in at)))
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
