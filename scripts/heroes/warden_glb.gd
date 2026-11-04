@@ -290,6 +290,56 @@ static func _param(v: Variant) -> Variant:
 		return Color(float(v[0]), float(v[1]), float(v[2]), float(v[3]) if (v as Array).size() > 3 else 1.0)
 	return v
 
+## The match-zoom read (ext/warden-matchzoom; hero_toon.gdshader far_*, outline.gdshader far_cut and glow_shell),
+## on a painted atlas: from 8 to 18 m (by size on screen) the pale fresnel drops to a third, the gloss, sheen and
+## light rims go, the rest is anti-aliased, stray texels are clamped to their coarser mip, rim_far becomes a broad
+## band in the signature colour and whatever glows is a step brighter. A Hunter's warden_look.json "painted" or
+## "slots" set any of these keys to tune them.
+const FAR_LOOK := {"far_fres": 0.35, "far_spec": 0.0, "far_aa": 1.0, "far_clamp": 0.8, "far_rim_soft": 1.0,
+	"far_glow": 0.6}
+const INK_FAR_CUT := 0.55      # the ink gone from ~13.5 m (outline.gdshader far_cut): a sub-pixel line is dark dots
+## The glow slot's halo shell at the match camera (outline.gdshader glow_shell): eyes, lenses and cracks read as a
+## glow there, not a pixel. A Hunter's "glow_shell" overrides these ({"glow_px": 0}: none).
+const GLOW_SHELL := {"glow_px": 1.4, "glow_k": 1.3, "glow_near": 7.0, "glow_far": 14.0}
+static var _far_inks := {}       # [ink shell, the Hunter's "ink" as JSON] -> that shell with its far_cut
+
+## A surface's match-zoom read (FAR_LOOK), after its own look; and the Hunter's warden_look.json keys:
+## "no_ink" (material tags or slots without the ink shell: thin crossbows, a gum bubble), "ink" {"far_cut",
+## "far_thin", "color"} for its ink shell, "glow_shell" for the glow pieces' halo.
+static func _far_look(m: ShaderMaterial, src: BaseMaterial3D, slot: String, tag: String, own: Dictionary) -> void:
+	if m.shader != Models.HERO or not (src and src.albedo_texture):
+		return
+	var set_by: Dictionary = (own.get("painted", {}) as Dictionary).merged(
+			(own.get("slots", {}) as Dictionary).get(slot, {}), true)
+	for k in FAR_LOOK:
+		if not set_by.has(k):
+			m.set_shader_parameter(k, FAR_LOOK[k])
+	var ink := m.next_pass as ShaderMaterial
+	if ink and bool(ink.get_shader_parameter("ink_mask")):
+		var no_ink: Array = own.get("no_ink", [])
+		if tag in no_ink or slot in no_ink:
+			m.next_pass = null
+		else:
+			var own_ink: Dictionary = own.get("ink", {})
+			var key := [ink, JSON.stringify(own_ink)]
+			if not _far_inks.has(key):
+				var far := ink.duplicate() as ShaderMaterial
+				far.set_shader_parameter("far_cut", INK_FAR_CUT)
+				for k in own_ink:
+					far.set_shader_parameter(k, _param(own_ink[k]))
+				_far_inks[key] = far
+			m.next_pass = _far_inks[key]
+	if slot == "glow" and m.next_pass == null:
+		var cfg: Dictionary = GLOW_SHELL.merged(own.get("glow_shell", {}), true)
+		if float(cfg["glow_px"]) > 0.0:
+			var sh := ShaderMaterial.new()
+			sh.shader = Models.OUTLINE
+			sh.set_shader_parameter("glow_shell", true)
+			sh.set_shader_parameter("glow_tex", src.albedo_texture)
+			for k in cfg:
+				sh.set_shader_parameter(k, _param(cfg[k]))
+			m.next_pass = sh
+
 ## Every surface onto a hero-toon material for its slot: the baked atlas as its albedo, the baked AO in the
 ## vertex colour, tinted by the player's pick where the slot takes one; the model's own look (look()) last.
 static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}) -> Array:
@@ -325,6 +375,7 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}) -> A
 			for k in over:
 				m.set_shader_parameter(k, _param(over[k]))
 			(mi as MeshInstance3D).set_surface_override_material(si, m)
+			_far_look(m, src, slot, tag, own)
 			out.append(m)
 	return out
 
