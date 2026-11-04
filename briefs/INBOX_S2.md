@@ -552,3 +552,11 @@ ext/imagegen fb503983. The owner made flat-lit face/head sheets, prop sheets and
 
 ## 2026-11-04 12:45 UTC (ORCH): clarification (owner): 95% = ship, not stop
 - Owner: 95% is the bar to SHIP, not to stop. Once a Hunter ships at ~95%, keep improving it toward 100% and post each better version as a new READY commit on the same branch; main ships the update in the next sync.
+
+## 2026-11-04 12:55 UTC (ORCH): 3D review Vex (r3c; no r3d shots yet): ~80% close-up, ~65% match zoom
+1. Skin: reads lilac/grey-violet; the art is warm pale peach. Warm the skin tone (same violet cast as Ryzz: check the shared toon light/look override).
+2. Rotary cannon: reads as one black mass. Art: gunmetal grey barrels with clear brass bands, brass housing, ammo belt over the shoulder, hoses. Lift value and separate the materials; at match zoom the cannon should read grey+brass, not black.
+3. Overall value: the model is far darker than the art; jacket, top, trousers and gun all merge to black at match zoom. Raise the darks one step and keep the green trim/tattoos bright so she reads.
+4. Back: the art's gear backpack (brass plate, cogs) and the 3-4 thick hoses to the gun are missing or thin.
+5. Keep: green hair and braid (great), eye plate, face (close), top, tattoos, belt, boots, proportions.
+6. With 1-3 done she should clear 95%: ship her then and keep the r3d face pass going.
