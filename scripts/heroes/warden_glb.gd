@@ -698,7 +698,9 @@ class Springs:
 				var r1: Transform3D = base * skel.get_bone_global_rest(int(ids[ids.size() - 1]))
 				var out := signf(r1.origin.x - r0.origin.x)
 				var tip_in := Basis(Vector3.UP, -out * TUCK * fold)
-				turn = Transform3D(Basis(Vector3.RIGHT, FOLD * fold) * tip_in, Vector3.ZERO)
+				# (a wing hanging down from its root, Sable's moth wings, tips the other way to go back too)
+				var up := 1.0 if r1.origin.y >= r0.origin.y else -1.0
+				turn = Transform3D(Basis(Vector3.RIGHT, up * FOLD * fold) * tip_in, Vector3.ZERO)
 				turn = Transform3D(Basis.IDENTITY, r0.origin) * turn * Transform3D(Basis.IDENTITY, -r0.origin)
 			for bi in ids:
 				var r: Transform3D = turn * base * skel.get_bone_global_rest(int(bi))
