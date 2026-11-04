@@ -319,3 +319,22 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
   The -b branches continue the paired agents' WIP. When most are READY, S2 builds one art integ branch on main.
 - 2026-11-04 14:16 UTC: ORCH's 14:10 reviews of the 6 READY Hunters went to their agents: Vex 82/68, Ryzz 84/70, Hem 83/65, Sable 84/62, Tarek 76/55, Dredge 72/55. Shared gaps: match zoom, yellow brass, clean review frames. READY lines stay until better commits land.
+- 2026-11-04 15:18 UTC: **9 READY** for the art integ:
+
+  | Hunter | Branch | Commit |
+  |---|---|---|
+  | Vex | warden-vex-r3b | 047f8724 |
+  | Dredge | warden-dredge-friend | b9daa472 |
+  | Ryzz | warden-3d-ryzz | ea64914a |
+  | Sable | warden-3d-sable | 4d1f9221 |
+  | Hem | warden-3d-hem | 45d859ae |
+  | Tarek | warden-3d-tarek | d74e304e |
+  | Breaker | warden-3d-breaker | 7e5f1bc1 |
+  | Ostra | warden-3d-ostra-b | 814601b2 |
+  | Claire | warden-3d-claire-b | cdf23bfa |
+
+  Per ORCH 15:15:
+  - an agent is building **ext/art-integ** on main d365cea8 with all the READY Hunters;
+  - another agent owns the **shared match-zoom fix** on ext/warden-matchzoom (edge speckle, rim, clean frames).
+
+  Still iterating: Kael, Pip, Cinder.
