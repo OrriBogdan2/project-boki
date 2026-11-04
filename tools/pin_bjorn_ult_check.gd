@@ -1,5 +1,5 @@
 extends "res://tools/archer_bulwark_combo_check.gd"
-## The X ultimates of Pin (Starpiercer) and Bjorn (Faultline), run from --archer-combo-check and
+## The X ultimates of Hem (Starpiercer) and Breaker (Faultline), run from --archer-combo-check and
 ## --bulwark-combo-check (tools/archer_bulwark_combo_check.gd adds its counts): the level gate, the cast,
 ## the telegraph, the payoff, the cooldown, bond sent only on a land, the small mechanics, a merge
 ## dropping the holds, and the burst cap (the whole ult, then a merge, never takes a full-health light
@@ -229,7 +229,7 @@ func bjorn() -> void:
 		AimKit.shown(P, "x0") and AimKit.shown(P, "x3") and bool(c0.get("all", false))
 			and absf(float(c0.get("len", 0.0)) - 4.0) < 0.01,
 		str(c0.keys()))
-	ok("bjorn ult cooldown: 33s from the cast",
+	ok("bjorn ult cooldown: 40 s from the cast (0.8 x the data's 50 s)",
 		absf(float(K.cd["x"]) - float(xd["cooldown"])) < 0.2,
 		"%.1f" % float(K.cd["x"]))
 	ok("bjorn ult bond: nothing for the cast alone", best(P) <= 0.0 and P.ult < 0.05, "%.3f" % P.ult)
@@ -241,9 +241,11 @@ func bjorn() -> void:
 	ok("bjorn ult anim: the slam (bul_ult_slam) at 0.4s", K.ult.slams == 1 and K.anim_id == "bul_ult_slam", K.anim_id)
 	step(m, 0.35)
 	var hit_t := T.stun_t > 0.0 and T.slow_t > 0.0
+	ok("bjorn ult: the racing fissure struck every foe on the lane before its cell erupts (data: stuns struck targets)",
+		K.ult.hit.size() >= 2, "struck %d" % K.ult.hit.size())
 	step(m, 0.3)
-	var want := float(xd["dmg"]) * ap
-	ok("bjorn ult payoff: each foe on the lane thrown once (18, a stun, a heavy slow)",
+	var want := (float(xd["dmg"]) + float(xd["strike_dmg"])) * ap
+	ok("bjorn ult payoff: each foe on the lane struck (stun) and thrown once (4 + 18, a heavy slow)",
 		hit_t and absf(dmg(T) - want) < want * 0.35 and dmg(T2) > want * 0.6,
 		"took %.0f / %.0f (want %.0f) stunned %s" % [dmg(T), dmg(T2), want, hit_t])
 	ok("bjorn ult bond: two hunters thrown, the cast pays its best event once (hit, 0.6)",

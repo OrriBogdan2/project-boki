@@ -315,7 +315,6 @@ func _strike() -> void:
 			m.fx.ring(atk_at, rad, Color("ffb070"), 0.35)
 			m.net_fx(["ring", m._r(atk_at.x), m._r(atk_at.y), m._r(atk_at.z), rad, "ffb070"])
 			m.fx.burst(atk_at + Vector3(0, 0.5, 0), Color("ffb070"), 28, 6.5, 0.55, 6.0, 1.3)
-			m.shake(0.5, atk_at)
 			m.sfx("boom", atk_at, 0.0, 1.1)
 			for e in m.foes_of(team):
 				var to := Vector2(e.pos.x - atk_at.x, e.pos.z - atk_at.z)
@@ -329,7 +328,6 @@ func _strike() -> void:
 			m.fx.ring(atk_at, float(md.get("slam_r", 2.3)), Color("ffb090"), 0.3)
 			m.net_fx(["ring", m._r(atk_at.x), m._r(atk_at.y), m._r(atk_at.z), float(md.get("slam_r", 2.3)), "ffb090"])
 			m.fx.dust(atk_at, 16)
-			m.shake(0.4, atk_at)
 			m.sfx("k_gravity", atk_at, -2.0, 0.9)  # a heavy stone slam
 			for e in m.foes_of(team):
 				var to := Vector2(e.pos.x - atk_at.x, e.pos.z - atk_at.z)

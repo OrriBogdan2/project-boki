@@ -31,7 +31,7 @@
 			"skin": "f1c9a0", "hair_col": "d8d2c8", "eyes": "7a6a9a", "outfit": "c9a0ff",
 			"tint": {"hair": {"sat": 0.08, "val": 0.1}}},
 		"archer": {"gender": "female", "race": "human", "face": "Fierce", "hair": "Bob", "detail": "None",
-			"skin": "cfa08b", "hair_col": "2b233a", "eyes": "8a2a34", "outfit": "9fe0a8"},
+			"skin": "cfa08b", "hair_col": "2b233a", "eyes": "8a2a34", "outfit": "e8483e"},
 		"juggernaut": {"gender": "male", "race": "human", "face": "Fierce", "hair": "Buzzed", "detail": "Beard",
 			"skin": "c68a5c", "hair_col": "2b2124", "eyes": "4a3a2a", "outfit": "ff8a6a"},
 		"bulwark": {"gender": "male", "race": "human", "face": "Bright eyes", "hair": "Bald", "detail": "None",

@@ -22,13 +22,14 @@ const STYLES := {
 
 var focus := Vector3.ZERO
 var target: Node3D = null
-var trauma := 0.0
+var shake_amp := 0.0          # a shake in progress (see Shake: only big hits on you)
+var shake_left := 0.0
+var shake_total := 0.0        # seconds of shake run so far (the shake check reads it)
 var zoom := 1.0
 var zoom_to := 1.0
 var user_zoom := 1.0           # the mouse wheel in the practice areas (Practice); multiplies the match's own zoom
 var lead := 1.0
-var kick := 0.0               # a quick zoom-in punch on big moments
-var pull := 0.0               # (movefeel) a quick pull-back (a dash into a glide), the opposite of kick
+var pull := 0.0               # (movefeel) a quick pull-back (a dash into a glide), a dash into a glide
 var top := 0.0                # 0 = the usual angle, 1 = looking straight down (the opening drop)
 var top_to := 0.0
 var pitch := deg_to_rad(57.0)  # how steeply the camera looks down
@@ -104,15 +105,17 @@ func snap(p: Vector3) -> void:
 	lead_off = Vector3.ZERO
 	_apply(Vector3.ZERO)
 
-func punch(a: float) -> void:
-	kick = maxf(kick, a)
-
 ## A brief pull-back that eases in fast and settles over ~0.6s (speed bursts).
 func pull_back(a: float) -> void:
 	pull = maxf(pull, a)
 
-func add_trauma(a: float) -> void:
-	trauma = minf(1.0, trauma + a * float(Settings.get_v("shake")))
+## No-op: camera punches are gone (item 50). Kept only so the reserved merge files, which still call it, compile.
+func punch(_a: float) -> void:
+	pass
+
+func rumble(amp: float, secs: float) -> void:
+	shake_amp = maxf(shake_amp, amp)
+	shake_left = maxf(shake_left, minf(secs, Shake.MAX_SECS))
 
 func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	# recording mode (Record): softer follow, a slower lean, no zoom pops, much less shake
@@ -165,19 +168,19 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	chase = move_toward(chase, chase_to, delta * 0.7)
 	yaw = lerp_angle(yaw, yaw_to, minf(1.0, delta * 1.6))
 	var shake := Vector3.ZERO
-	if trauma > 0.0:
-		var s := trauma * trauma * 0.6 * float(rr[4])
+	if shake_left > 0.0:
+		var s := shake_amp * float(rr[4])
 		shake = Vector3(Sfx.rng.randf_range(-s, s), Sfx.rng.randf_range(-s, s) * 0.5, Sfx.rng.randf_range(-s, s))
-		trauma = maxf(0.0, trauma - delta * 1.8)
+		shake_total += minf(delta, shake_left)
+		shake_left = maxf(0.0, shake_left - delta)
+		if shake_left <= 0.0:
+			shake_amp = 0.0
 	_apply(shake)
 	Sfx.listener = focus
 
 func _apply(shake: Vector3) -> void:
-	kick = maxf(0.0, kick - get_process_delta_time() * 0.5)
-	if Record.clean():
-		kick = 0.0          # (recording: no zoom punches)
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
-	var z := zoom * (1.0 - kick) * (1.0 + pull)
+	var z := zoom * (1.0 + pull)
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)

@@ -200,7 +200,7 @@ func _squad() -> void:
 		var lk: Dictionary = looks[i]
 		var weapon := String(WEAPONS[arch])
 		if i == 0 and Save.d.has("look"):
-			lk = Save.d["look"]          # you lead the squad, as you look
+			lk = Unmasked.mask_look()          # you lead the squad, as a Warden
 			weapon = Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", "")))
 			cls = Data.class_of_save()
 		var h := Models.hunter(cls, Data.TEAM_COLORS[0], weapon, "", lk, arch)
@@ -525,7 +525,7 @@ func _build_ui() -> void:
 	news.offset_right = -28; news.offset_top = 28
 	var nv := UI.vbox(4); news.add_child(nv)
 	nv.add_child(UI.label("PLAYTEST  ·  BUILD %s" % Net.VERSION, 11, Color("e9b48a"), UI.caps))
-	nv.add_child(UI.label("Twelve Hunters, one Boki each", UI.T_HEAD, UI.INK, UI.big))
+	nv.add_child(UI.label("Twelve Masks, one Boki each", UI.T_HEAD, UI.INK, UI.big))
 	var nl := UI.label("Bring your Boki on a run, bring it home. Tell us what broke.", 13, UI.MUTED)
 	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; nl.custom_minimum_size.x = 280
 	nv.add_child(nl)
