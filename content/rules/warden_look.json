@@ -46,7 +46,7 @@
 				"top_light": 0.45
 			},
 			"leather": {
-				"emit": 2.6,
+				"emit": 3.6,
 				"fres": 0.9,
 				"fres_tint": 0.0,
 				"fres_color": [
