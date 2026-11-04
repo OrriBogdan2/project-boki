@@ -75,3 +75,19 @@ r3b_vs_r3_closeup.png: head and shoulders, left to right: r3b front, r3 front, r
 r3b_vs_r3_match.png: the match frame around Vex, x4: r3b (left), r3 (right)
 r3b_inputs.png: the r3 turnaround's views (top) and the Meshy inputs edited from them with nano-banana-pro (bottom): her left hand off her hip, both braids and the backpack hoses out (built as geometry / left out), the side view's hidden arm
 r3b_meshy_variants.png: the two Meshy meshy-7.1 runs, flat colour, front, 3/4, back and the face: A image enhancement off (kept: the art's sultry smirk, chunky hair), B enhancement on (rounder face, stringy hair)
+r3c_vs_turnaround.png: Vex r3c (r3b, the owner's pick, polished; now the shipped vex.glb) under the r3 turnaround: in game, close, front, 3/4, side, back, 3/4 back, in her stance with the -1.05 carry (aa3345b6 on ext/warden-stance)
+r3c_vs_turnaround_game.png: the same five views at the match camera (pitch 66, 23 m, fov 32): true pixels, then x3
+r3c_closeup_vs_art.png: the portrait and the turnaround's front beside the in-game head and shoulders (front): the art's face and chest painted over the atlas, the lens on her right eye
+r3c_closeup_34_vs_art.png: the portrait and the turnaround's 3/4 beside the in-game 3/4 close-up
+r3c_closeup.png / r3c_closeup_34.png: in game, head and shoulders, front and 3/4
+r3c_front_34_vs_art.png: the turnaround's front and 3/4 beside the in-game full length, front and 3/4 (legs 1.95: the art's long legs, the same 1.04x height)
+r3c_back_vs_art.png: the turnaround's back beside the in-game back and 3/4 back: the restored hoses from the backpack to the gun-arm, the longer braids
+r3c_match_vs_art.png: the portrait and the turnaround's front beside the match frame around her, x4
+r3c_gameplay_match.png: the Arena at the match camera (--arena=gunslinger --record=2 --arena-demo=pose --demo-zoom=1.0), Vex centre, uncropped; no variant flag (she is the shipped Vex)
+r3c_gameplay_match_x4.png: that frame around her, x4 (nearest)
+r3c_poses_game.png: at the match camera in idle, run, attack, cast, ult (true pixels, then x3)
+r3c_moves_run_fire.png: run (two phases; the carry blends into the run, the braids trail), shoot, recoil
+r3c_moves_dash_throw.png: the dash at three moments, the RMB throw
+r3c_vs_r3b.png: the same shots of r3c over r3b: close turnaround r3c, r3b; match camera r3c, r3b
+r3c_vs_r3b_closeup.png: head and shoulders, left to right: r3c front, r3b front, r3c 3/4, r3b 3/4
+r3c_vs_r3b_match.png: the match frame around Vex, x4: r3c (left), r3b (right)
