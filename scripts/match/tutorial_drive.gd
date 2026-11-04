@@ -55,13 +55,21 @@ static func drive(m: Match) -> void:
 				p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
 		"shoot", "sig", "utility", "throw", "kin1", "fight":
 			_fight(m, tu, goto)
+		"orders":
+			if fmod(m.time, 1.0) < Match.DT:
+				KinCommand.order(p, "guard" if p.kin and p.kin.cmd != "guard" else "follow")
 		"chest":
 			goto.call(tu.stop("chest"), 0.4)
 			p.inp["interact"] = true
 		"goexit", "uplink", "defend", "extract":
 			_outpost(m, tu, goto)
-	if still_t > 1.5 and p.inp["move"] != Vector2.ZERO:
-		p.inp["jump"] = true       # (stuck against something: hop)
+	var go: Vector2 = p.inp["move"]
+	if p.grounded and go != Vector2.ZERO:
+		var ahead := p.pos + Vector3(go.x, 0.0, go.y).normalized() * 0.9
+		if m.world.ground_at(ahead.x, ahead.z) > p.pos.y + 0.3 and not m.world.is_void(ahead.x, ahead.z):
+			p.inp["jump"] = true       # a ledge in the way: jump it, as a player would
+	if still_t > 1.5 and go != Vector2.ZERO and sid != "crouch":
+		p.inp["jump"] = true       # (stuck against something: hop, but never on the lookout: it is climbed plainly)
 
 static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var p := m.player
@@ -80,13 +88,15 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if p.flat_dist(best) > 3.0: goto.call(best.pos)
 	if sid in ["shoot", "fight"]: p.inp["fire"] = true
 	if sid in ["sig", "fight"]: p.inp["sig"] = int(m.time * 2.0) % 2 == 0
-	if sid in ["throw", "fight"] and p.kin and p.kin.state in ["shoulder", "active"]:
+	if sid == "throw" and fmod(m.time, 1.5) < Match.DT and p.kin:
+		KinCommand.tap(p)       # a tap calls it back when it is out, a tap sends it when it is beside you
+	elif sid == "fight" and p.kin and p.kin.state in ["shoulder", "active"]:
 		p.kin.throw_to(best.pos)
 
-## Right click: a tap, then a hold.
+## Right click: taps, and a hold after them when the kit has a hold variant.
 static func _rmb(m: Match, tu: Tutorial) -> void:
 	var ph := fmod(tu.t, 2.0)
-	m.player.inp["sec"] = ph < 0.1 or (ph > 0.6 and ph < 1.5)
+	m.player.inp["sec"] = ph < 0.1 or (ph > 0.6 and ph < (1.5 if tu.rmb_has_hold() else 0.7))
 	m.player.inp["sec_hold"] = m.player.inp["sec"]
 
 static func _outpost(m: Match, tu: Tutorial, goto: Callable) -> void:

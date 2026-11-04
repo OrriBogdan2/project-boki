@@ -30,7 +30,7 @@ func _watch_boki(secs: float, steer := Vector2.ZERO) -> String:
 		var planning: bool = m.skydrop != null and m.skydrop.planning
 		m.player.inp["move"] = steer
 		if m.opts.get("tutorial", false):
-			m._tut_drive()
+			m.tut.ack()      # (the intro card waits for a key)
 		if t > 1.0 and m.player.riding:
 			m.ship_jump(m.player, true)      # off the ship early, so the drop and landing fall inside the window
 		m.step(Match.DT)

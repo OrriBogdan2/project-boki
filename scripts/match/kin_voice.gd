@@ -92,7 +92,8 @@ const TUT_HINT := {
 	"glide": ["Jump, then glide! Like me!", "(hops high and spreads out, showing you)"],
 	"exdash": ["Jump, then dash in the air!", "(leaps and darts forward in the air)"],
 	"shoot": ["A monster! Get it!", "(growls at the monster)"],
-	"utility": ["Right click! Tap it, then hold it!", "(watches your hands, tail going)"],
+	"utility": ["Right click! Use your power!", "(watches your hands, tail going)"],
+	"orders": ["Hold %T and tell me what to do!", "(sits up, ears forward, waiting for orders)"],
 	"sig": ["Use your power on them all!", "(bounces, ready for the group)"],
 	"fight": ["Together! Get them all!", "(bristles, ready to fight)"],
 	"crouch": ["Get low and look far!", "(flattens itself against the ground)"],
@@ -166,7 +167,8 @@ static func tut_hint(k, id: String) -> String:
 	if not TUT_HINT.has(id):
 		return ""
 	var stage := Care.speech(k.rec) if k.rec.size() > 0 else 3
+	var key := Settings.key_cap("throw")
 	if stage >= 2:
-		return String(TUT_HINT[id][0])
+		return String(TUT_HINT[id][0]).replace("%T", key)
 	var rc: Dictionary = k.rec if k.rec.size() > 0 else {"species": k.species}
-	return KinSpeak.bark(rc, "tut") + " " + String(TUT_HINT[id][1])
+	return KinSpeak.bark(rc, "tut") + " " + String(TUT_HINT[id][1]).replace("%T", key)
