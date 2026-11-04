@@ -91,11 +91,11 @@
 				"anchor": "halo_bow_top",
 				"color": [
 					1.0,
-					0.22,
-					0.16
+					0.18,
+					0.12
 				],
-				"strength": 1.8,
-				"px": 2.0,
+				"strength": 2.6,
+				"px": 4.5,
 				"near_d": 7.0,
 				"far_d": 14.0
 			},
@@ -103,11 +103,11 @@
 				"anchor": "halo_bow_mid",
 				"color": [
 					1.0,
-					0.22,
-					0.16
+					0.18,
+					0.12
 				],
-				"strength": 1.8,
-				"px": 2.0,
+				"strength": 2.6,
+				"px": 4.5,
 				"near_d": 7.0,
 				"far_d": 14.0
 			},
@@ -115,11 +115,11 @@
 				"anchor": "halo_bow_low",
 				"color": [
 					1.0,
-					0.22,
-					0.16
+					0.18,
+					0.12
 				],
-				"strength": 1.8,
-				"px": 2.0,
+				"strength": 2.6,
+				"px": 4.5,
 				"near_d": 7.0,
 				"far_d": 14.0
 			}

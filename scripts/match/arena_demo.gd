@@ -93,6 +93,16 @@ static func zoom_or(close: float) -> float:
 		if String(a).begins_with("--demo-zoom="): return float(String(a).substr(12))
 	return close
 
+## The pose demo's facing: --demo-face=dx,dz turns the Hunter toward that offset (default: 3/4 toward the camera,
+## her right side to it; Hem's review uses 5,3.5 so the bow in her left hand is on the camera's side).
+static func _face(fallback: Vector3) -> Vector3:
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--demo-face="):
+			var f := String(a).get_slice("=", 1).split(",")
+			if f.size() == 2:
+				return Vector3(float(f[0]), 0.9, float(f[1]))
+	return fallback
+
 static func tick(A: Arena, dt: float) -> void:
 	var w := what()
 	if w == "":
@@ -323,7 +333,7 @@ static func tick(A: Arena, dt: float) -> void:
 						P.teleport(P.pos + Vector3(float(at[0]), 0.0, float(at[1])))
 						A.home = P.pos
 			P.inp["move"] = Vector2.ZERO
-			P.inp["aim"] = P.pos + Vector3(-5.0, 0.9, 3.5)
+			P.inp["aim"] = P.pos + _face(Vector3(-5.0, 0.9, 3.5))
 			at_t = 2.0
 		"bulwark", "crushed":
 			var H: Hunter = A.dummies[2]["h"]
