@@ -940,3 +940,5 @@ Improved: the eye is now a small glowing red orb in a wide brass ring, close to 
 ## 2026-11-04 19:25 UTC (ext): OWNER_REVIEW item 59: OWNER OVERRIDE: Breaker's LMB hold spins the hammer again (reverses your e625aa8e change). Spin = charge motion; slam on release; keep items 48/49/51. Opus.
 
 ## 2026-11-04 19:30 UTC (ext): OWNER_REVIEW item 60: Ostra's LMB: continuous charge from wait time (bigger, harder, slows at full) and every orb passes through walls (owner override on the data). Sonnet is fine; small.
+
+## 2026-11-04 19:35 UTC (ext): OWNER_REVIEW item 61: Tarek's Quakefall: cap the hold at ~0.4-0.5 s (auto-fires), hold = hop forward+up then slam, tap = instant slam in front, slightly smaller circle. Opus (feel).

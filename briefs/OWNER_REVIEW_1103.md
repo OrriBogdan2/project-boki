@@ -476,3 +476,13 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Make it a **continuous build-up**: the time since the last shot charges the next orb smoothly from normal to full over the source window (default 1.4 s; check `briefs/supervive-data` Void: 263 -> 353 at full, plus Slow). The orb grows visibly in size and brightness with the charge, its damage scales with it, and at full it also slows. A charge glow on Ostra's hand (or the lantern) shows the build-up, with a soft chime at full.
 - **Through walls:** the source data says the strengthened orb goes through terrain. The owner says the LMB goes through walls: follow the owner: every LMB orb passes through walls/terrain (damage still only on hunters, Boki and breakables per the usual rules).
 - Assert: damage is monotonic in wait time from 0 to the window and capped after; orb scale tracks the charge; orbs pass a wall between Ostra and a dummy at any charge; a full orb slows. Screenshots: a quick shot vs a full-charge orb side by side, and one passing through a wall.
+
+## 61. Tarek (Cliff Runner) RMB Quakefall: a short hold or a tap, not a long charge (owner, 19:00 UTC Nov 4)
+- Owner: "Cliff Runner shouldn't be able to hold RMB that long (it's a short hold or tap). If you hold, it should carry you forward and upwards a bit before slamming. If you tap, it should just stun/hit in front of you in the same circle, but slightly smaller."
+- Today (dolm.json rmb): hold up to 1.2 s (`slam.time`), growing radius 3.6–4.5 m, damage 14–30, stun 0.5–1.2 s; tap is a quick hop and slam just ahead.
+- New shape:
+  - **Tap:** no hop; an immediate slam just in front of him: the same circle as the hold version but slightly smaller (default ~85% of the hold radius), hitting and stunning at the centre. Fast and snappy.
+  - **Short hold** (cap the charge at ~0.4–0.5 s; past the cap it fires automatically, no long holding): he hops **forward and up** (default ~2.5 m forward, a modest arc), carrying his run momentum, then slams down at the landing: the full circle, full damage and stun. Movement input during the hop nudges the landing.
+  - Keep: jump while holding = the bigger forward leap (data: "Jump while charging to leap forward"), air press = dive slam, spikes/dunks over the abyss, Molten Guard stacks, items 51 combos.
+- Update the card, the variants text and docs/heroes/dolm.md (owner override on hold length).
+- Assert: the charge never exceeds the cap; tap radius ≈ 0.85 × hold radius with no vertical motion; the hold carries Tarek ≥2 m forward with a rise before the slam. Screenshots: tap strip vs hold strip.
