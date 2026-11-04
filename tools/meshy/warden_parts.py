@@ -588,6 +588,68 @@ def lens(arm, spec, tag="lens"):
     return ob
 
 
+# ------------------------------------------------------------------------------------------------ the hoses
+def hoses(body_obs, arm, specs, colours, tag="hose", size=64):
+    """Armoured hoses (Vex: from the backpack to her gun-arm): ribbed tubes along a path draped against the body,
+    brass fittings at both ends. Each hose rides a chain of bones along its length (`bones`: [[bone, t], ...],
+    t from 0 at its start to 1 at its end; weights blend linearly between neighbours), so its ends stay on the
+    backpack and on the gun-arm while the arm aims and the middle follows between them."""
+    bvh = body_bvh(body_obs)
+    bld = Builder()
+    chains = []
+    for i, sp in enumerate(specs):
+        n = int(sp.get("samples", 40))
+        p = drape(bvh, [tuple(c) for c in sp["path"]], n, float(sp.get("clear", 0.024)))
+        s_arr = arclen(p)
+        L = s_arr[-1]
+        r = float(sp.get("r", 0.013))
+        rib, ribk = float(sp.get("rib", 0.014)), float(sp.get("rib_k", 0.2))
+        m = max(8, int(L / (rib / 3.0)))
+        ss = np.linspace(0.0, L, m)
+        rings = at(p, s_arr, ss)
+        radii = [r * (1.0 + ribk * (0.5 + 0.5 * math.cos(2.0 * math.pi * s / rib))) for s in ss]
+        v0 = len(bld.v)
+        bld.tube(rings, radii, int(sp.get("sides", 8)), 0.02, 0.46, 0.02, 0.98, "hose", list(ss / L), cap_start=True,
+                 cap_end=True)
+        # brass fittings: a short collar at each end
+        for t0, t1 in ((0.0, 0.035), (1.0 - 0.035, 1.0)):
+            cs = np.linspace(t0 * L, t1 * L, 4)
+            bld.tube(at(p, s_arr, cs), [r * 1.55] * 4, 10, 0.54, 0.98, 0.02, 0.98, "fitting", list(cs / L),
+                     cap_start=True, cap_end=True)
+        chains.append((sp, v0, len(bld.v)))
+    ob = bld.object("Hoses")
+    img = bpy.data.images.new(tag + "_atlas", size, size, alpha=False)
+    px = np.ones((size, size, 4), np.float32)
+    px[:, :size // 2, :3] = hexcol(colours.get("hose", "2e2e34"))
+    px[:, size // 2:, :3] = hexcol(colours.get("fitting", "a08050"))
+    img.pixels = px.ravel()
+    img.pack()
+    m = bpy.data.materials.new("metal-%s" % tag)
+    m.use_nodes = True
+    bsdf = m.node_tree.nodes.get("Principled BSDF")
+    tex = m.node_tree.nodes.new("ShaderNodeTexImage")
+    tex.image = img
+    m.node_tree.links.new(tex.outputs[0], bsdf.inputs["Base Color"])
+    ob.data.materials.append(m)
+    for sp, v0, v1 in chains:
+        anchors = sp.get("bones", [["hips", 0.0], ["forearm.R", 1.0]])
+        groups = {b: (ob.vertex_groups.get(b) or ob.vertex_groups.new(name=b)) for b, _t in anchors}
+        ts = [float(t) for _b, t in anchors]
+        for vi in range(v0, v1):
+            t = min(1.0, max(0.0, bld.s[vi]))
+            k = max(0, min(len(ts) - 2, int(np.searchsorted(ts, t, side="right")) - 1))
+            f = (t - ts[k]) / max(ts[k + 1] - ts[k], 1e-6)
+            f = min(1.0, max(0.0, f))
+            f = f * f * (3.0 - 2.0 * f)
+            groups[anchors[k][0]].add([vi], 1.0 - f, "ADD")
+            groups[anchors[k + 1][0]].add([vi], f, "ADD")
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("hoses: %d, %d tris" % (len(specs), sum(len(f) - 2 for f in bld.f)))
+    return ob
+
+
 # ------------------------------------------------------------------------------------------------ simple materials
 def _flat_material(ob, slot, tag, img, interp="Linear"):
     m = bpy.data.materials.new("%s-%s" % (slot, tag))
