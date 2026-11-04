@@ -362,7 +362,11 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 			var per_slot: Dictionary = (own.get("slots", {}) as Dictionary).get(slot, {})
 			var over: Dictionary = (own.get("painted", {}) as Dictionary).merged(per_slot, true)
 			for k in over:
-				m.set_shader_parameter(k, _param(over[k]))
+				var v = _param(over[k])
+				# (a look's albedo is a correction on top of the player's colour pick, never in place of it)
+				if k == "albedo" and v is Color and src and src.albedo_texture:
+					v = (v as Color) * _tint(slot, lk, warden)
+				m.set_shader_parameter(k, v)
 			(mi as MeshInstance3D).set_surface_override_material(si, m)
 			out.append(m)
 	return out

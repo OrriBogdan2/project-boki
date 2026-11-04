@@ -1,5 +1,5 @@
 {
-	"doc": "A Warden 3D model's own shading over the shared painted look (WardenGlb.look), keyed by the model's art name (art/wardens/<art>/<art>.glb; a design variant has its own key). painted: hero_toon.gdshader parameters on all of its surfaces, set after WardenGlb.PAINTED. slots: the same per toon slot (skin, hair, cloth, leather, metal, eyes, glow), after painted. Colours are [r, g, b]. A model without an entry keeps the shared look. Useful keys: rim_far and rim_far_color (a rim in the Hunter's signature colour at the match camera), top_light (surfaces facing up lift), fres and fres_tint (the coloured rim; 1 = lightened own colour), far_lift (brighter and richer at the match camera), shade and shadow_tint (the shadow floor and its tint), sheen, glow (emission x the painted colour), light_neutral_warm (takes the hue out of warm lights too: black cloth and gunmetal stay black and grey under an orange sun). halos: glow discs of a constant size on screen on the model's anchors (a lens a pixel wide at the match camera): anchor, color, strength, px (radius on screen), near and far (m: none this close, full from there; close-ups keep the lens itself).",
+	"doc": "A Warden 3D model's own shading over the shared painted look (WardenGlb.look), keyed by the model's art name (art/wardens/<art>/<art>.glb; a design variant has its own key). painted: hero_toon.gdshader parameters on all of its surfaces, set after WardenGlb.PAINTED. slots: the same per toon slot (skin, hair, cloth, leather, metal, eyes, glow), after painted. Colours are [r, g, b]. A model without an entry keeps the shared look. Useful keys: rim_far and rim_far_color (a rim in the Hunter's signature colour at the match camera), top_light (surfaces facing up lift), fres and fres_tint (the coloured rim; 1 = lightened own colour), far_lift (brighter and richer at the match camera), shade and shadow_tint (the shadow floor and its tint), sheen, glow (emission x the painted colour), light_neutral_warm (takes the hue out of warm lights too: black cloth and gunmetal stay black and grey under an orange sun). halos: glow discs of a constant size on screen on the model's anchors (a lens a pixel wide at the match camera): anchor, color, strength, px (radius on screen), near and far (m: none this close, full from there; close-ups keep the lens itself). albedo: a colour multiplier on the slot's atlas, applied on top of the player's colour pick (it never replaces the pick).",
 	"vex": {
 		"painted": {
 			"rim_far": 0.35,
@@ -237,5 +237,116 @@
 				"glow": 2.8
 			}
 		}
+	},
+	"tarek": {
+		"painted": {
+			"rim_far": 0.3,
+			"rim_far_color": [
+				1.0,
+				0.62,
+				0.15
+			],
+			"far_smooth": 1.0
+		},
+		"slots": {
+			"skin": {
+				"top_light": 0.0,
+				"fres": 0.15,
+				"rim_amount": 0.15,
+				"far_lift": 0.05,
+				"sheen": 0.0,
+				"light_tint": [
+					0.9,
+					0.86,
+					0.86
+				],
+				"light_neutral": 1.0,
+				"shade": 0.78,
+				"albedo": [
+					0.88,
+					0.8,
+					0.8
+				]
+			},
+			"hair": {
+				"far_lift": 0.1,
+				"fres": 0.55
+			},
+			"cloth": {
+				"far_lift": 0.3
+			},
+			"leather": {
+				"emit": 5.0,
+				"far_lift": 0.2
+			},
+			"glow": {
+				"glow": 1.8,
+				"fres": 0.0,
+				"top_light": 0.0,
+				"far_lift": 0.1
+			}
+		},
+		"halos": [
+			{
+				"anchor": "anchor_stones_0",
+				"color": [
+					1.0,
+					0.62,
+					0.18
+				],
+				"strength": 3.0,
+				"px": 3.4,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_stones_1",
+				"color": [
+					1.0,
+					0.62,
+					0.18
+				],
+				"strength": 3.0,
+				"px": 3.4,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_stones_2",
+				"color": [
+					1.0,
+					0.62,
+					0.18
+				],
+				"strength": 3.0,
+				"px": 3.4,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_gauntlet_L",
+				"color": [
+					1.0,
+					0.62,
+					0.18
+				],
+				"strength": 3.0,
+				"px": 4.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_gauntlet_R",
+				"color": [
+					1.0,
+					0.62,
+					0.18
+				],
+				"strength": 3.0,
+				"px": 4.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			}
+		]
 	}
 }

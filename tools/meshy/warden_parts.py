@@ -708,6 +708,81 @@ def _lens_atlas(spec, n):
     return px
 
 
+def gauntlets(arm, spec, tag="gauntlet"):
+    """Stone gauntlets grown round both forearms (Tarek), elbow to knuckle: a glowing amber core (glow slot)
+    wrapped in rough stone plates (`slot`, leather) set a little apart, so the core shows through the gaps as
+    bright cracks; the plates past the wrist ride the hand bone, the rest the forearm. An empty
+    anchor_<tag>_<L|R> on each forearm's middle carries a glow halo at the match camera (warden_look.json).
+    Returns [mesh, anchors...]."""
+    rng = np.random.default_rng(int(spec.get("seed", 5)))
+    img = _stone_cells(128, spec, tag + "_cells")
+    bld = Builder()
+    owners = []           # per vertex: (bone, weight) via ranges
+    spans = []
+    for sd in ("L", "R"):
+        e = np.array(arm.data.bones["forearm." + sd].head_local[:])
+        w = np.array(arm.data.bones["hand." + sd].head_local[:])
+        ax = w - e
+        L = float(np.linalg.norm(ax))
+        ax /= L
+        k = w + ax * float(spec.get("fist", 0.1))
+        ref = np.array([0.0, 1.0, 0.0]) if abs(ax[1]) < 0.9 else np.array([1.0, 0.0, 0.0])
+        e1 = np.cross(ax, ref)
+        e1 /= np.linalg.norm(e1)
+        e2 = np.cross(ax, e1)
+        r_arm = float(spec.get("r", 0.06))
+        v0 = len(bld.v)
+        # the core: a tube elbow -> knuckle, thicker toward the fist
+        rings = [e + (k - e) * f for f in np.linspace(0.0, 1.0, 8)]
+        radii = [r_arm * (0.8 + 0.25 * f) for f in np.linspace(0.0, 1.0, 8)]
+        bld.tube(rings, radii, 12, 0.05, 0.45, 0.55, 0.95, "core", [0.0] * 8, cap_end=True, cap_start=True)
+        # the plates: rows along the arm, each a lumpy rock on the surface, slightly apart
+        rows = int(spec.get("rows", 5))
+        per = int(spec.get("per_row", 5))
+        for i in range(rows):
+            t = (i + 0.5) / rows
+            c = e + (k - e) * t
+            rr = r_arm * (0.85 + 0.3 * t)
+            for j in range(per):
+                a = 2.0 * math.pi * (j + 0.5 * (i % 2)) / per + rng.uniform(-0.15, 0.15)
+                out_d = math.cos(a) * e1 + math.sin(a) * e2
+                p = c + out_d * rr * 1.02
+                s = rr * float(spec.get("plate", 0.62)) * rng.uniform(0.85, 1.15)
+                side = np.cross(ax, out_d)
+                _lumpy(bld, p, (side, ax, -out_d), (s, s * 1.25, s * 0.45), "rock", (0.05, 0.05, 0.45, 0.45),
+                       int(rng.integers(1, 9999)), rings=5, sides=8, lump=0.3)
+        spans.append((sd, v0, len(bld.v), e, w, ax, L))
+    ob = bld.object(tag.capitalize() + "s")
+    mi = {"rock": _flat_material(ob, spec.get("slot", "leather"), tag, img, "Closest")}
+    mi["core"] = _flat_material(ob, "glow", tag, img, "Closest")
+    for poly in ob.data.polygons:
+        poly.material_index = mi[bld.part[poly.vertices[0]]]
+    anchors = []
+    for sd, v0, v1, e, w, ax, L in spans:
+        gf = ob.vertex_groups.new(name="forearm." + sd)
+        gh = ob.vertex_groups.new(name="hand." + sd)
+        for vi in range(v0, v1):
+            t = float((np.asarray(bld.v[vi]) - e) @ ax) / L
+            f = min(1.0, max(0.0, (t - 0.9) / 0.15))     # (past the wrist: the hand's)
+            if f < 1.0:
+                gf.add([vi], 1.0 - f, "REPLACE")
+            if f > 0.0:
+                gh.add([vi], f, "REPLACE")
+        an = bpy.data.objects.new("anchor_%s_%s" % (tag, sd), None)
+        bpy.context.scene.collection.objects.link(an)
+        an.parent = arm
+        an.parent_type = "BONE"
+        an.parent_bone = "forearm." + sd
+        bpy.context.view_layer.update()
+        an.matrix_world = Matrix.Translation(Vector(e + ax * L * 0.6))
+        anchors.append(an)
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("gauntlets: %d tris" % sum(len(f) - 2 for f in bld.f))
+    return [ob] + anchors
+
+
 # ------------------------------------------------------------------------------------------------ simple materials
 def _flat_material(ob, slot, tag, img, interp="Linear"):
     m = bpy.data.materials.new("%s-%s" % (slot, tag))
@@ -739,6 +814,41 @@ def _quads_uv(size, cells, name="cells"):
     for i, c in enumerate(cells):
         y, x = divmod(i, 2)
         px[y * hlf:(y + 1) * hlf, x * hlf:(x + 1) * hlf, :3] = hexcol(c)
+    img.pixels = px.ravel()
+    img.pack()
+    return img
+
+
+def _stone_cells(size, spec, name):
+    """A seeing-stone's atlas (the _quads_uv cells): mottled rock, a crystal ring of radial facets, an iris that
+    glows hot at its middle, a black pupil."""
+    img = bpy.data.images.new(name, size, size, alpha=False)
+    px = np.ones((size, size, 4), np.float32)
+    hl = size // 2
+    rng = np.random.default_rng(3)
+    yy, xx = np.mgrid[0:hl, 0:hl] / float(hl - 1)
+    # rock: value noise (two octaves), darker in its crevices
+    n = np.zeros((hl, hl), np.float32)
+    for oc, amp in ((6, 0.6), (14, 0.4)):
+        g = rng.random((oc + 1, oc + 1)).astype(np.float32)
+        gx, gy = xx * oc, yy * oc
+        x0, y0 = np.floor(gx).astype(int), np.floor(gy).astype(int)
+        fx, fy = gx - x0, gy - y0
+        x1, y1 = np.minimum(x0 + 1, oc), np.minimum(y0 + 1, oc)
+        n += amp * ((g[y0, x0] * (1 - fx) + g[y0, x1] * fx) * (1 - fy) + (g[y1, x0] * (1 - fx) + g[y1, x1] * fx) * fy)
+    rock, rock_dk = hexcol(spec.get("rock", "8a7a66")), hexcol(spec.get("rock_dark", "4e4236"))
+    px[:hl, :hl, :3] = rock_dk + (rock - rock_dk) * np.clip(n * 1.3 - 0.15, 0, 1)[..., None]
+    # crystal ring: radial facets about the cell's middle, light and dark
+    cx, cy = xx - 0.5, yy - 0.5
+    ang = np.arctan2(cy, cx)
+    fac = (np.sin(ang * 22.0) * 0.5 + 0.5) * np.clip(np.hypot(cx, cy) * 2.0, 0, 1)
+    rim, rim_dk = hexcol(spec.get("rim", "c9b4c4")), hexcol(spec.get("rim_dark", "5a3f5e"))
+    px[:hl, hl:, :3] = rim_dk + (rim - rim_dk) * fac[..., None]
+    # iris: hot yellow at its middle to deep orange at its edge
+    d = np.clip(np.hypot(cx, cy) * 2.0, 0, 1)[..., None]
+    hot, iris = hexcol(spec.get("iris_hot", "ffe27a")), hexcol(spec.get("iris", "ff8a1c"))
+    px[hl:, :hl, :3] = hot * (1 - d) + iris * d
+    px[hl:, hl:, :3] = hexcol(spec.get("pupil", "2a0d04"))
     img.pixels = px.ravel()
     img.pack()
     return img
@@ -807,8 +917,7 @@ def orbit_props(arm, spec):
     e.parent_bone = spec.get("bone", "head")
     bpy.context.view_layer.update()
     e.matrix_world = Matrix.Translation(c)
-    img = _quads_uv(64, [spec.get("rock", "8a7a66"), spec.get("rim", "b9a3a8"), spec.get("iris", "ff9a2a"),
-                         spec.get("pupil", "2a0d04")], spec["name"] + "_cells")
+    img = _stone_cells(128, spec, spec["name"] + "_cells")
     out = [e]
     for i, it in enumerate(spec["items"]):
         a = math.radians(float(it["angle"]))           # 0: in front of the face (+Y), counter-clockwise from above
@@ -821,10 +930,38 @@ def orbit_props(arm, spec):
         bld = Builder()
         # (the rock: flat along the outward axis, so its face meets the eye; its rim and iris on the front)
         # (the cells of _quads_uv: rock bottom-left, rim bottom-right, iris top-left, pupil top-right)
-        _lumpy(bld, p, (side, up, -out_dir), (r, r * 1.08, r * 0.62), "rock", (0.05, 0.05, 0.45, 0.45), 7 + i)
-        _disc(bld, p + out_dir * r * 0.6, out_dir, r * 0.72, "rim", (0.55, 0.05, 0.95, 0.45), dome=0.1)
-        _disc(bld, p + out_dir * r * 0.68, out_dir, r * 0.46, "iris", (0.05, 0.55, 0.45, 0.95), dome=0.15)
-        bld.prism(p + out_dir * r * 0.72 - up * r * 0.3, p + out_dir * r * 0.72 + up * r * 0.3, r * 0.07, 4,
+        kind = spec.get("kind", "eye")
+        if kind == "card":
+            # (a playing-card shard: a thin flat slab facing out, on a glowing string back to the orbit's centre)
+            bld.prism(p - up * r * 0.7, p + up * r * 0.7, r * 0.5, 4, (0.55, 0.05, 0.95, 0.45), "rim", 0.0, rot=0.785)
+            for q in range(len(bld.v) - 12, len(bld.v)):
+                d = np.asarray(bld.v[q]) - p
+                bld.v[q] = p + d - out_dir * d.dot(out_dir) * 0.85
+            bld.tube([np.array(c[:]), p], [0.0025, 0.0025], 4, 0.05, 0.45, 0.55, 0.95, "iris", [0.0, 0.0])
+        if kind != "card":
+            # (a geode: the rough rock, a raised rim round its cut face, a ring of crystals sunk inside it, and the
+            # eye's domed iris standing out of the crystals; "rock": the rough rock alone, a shard)
+            _lumpy(bld, p, (side, up, -out_dir), (r, r * 1.08, r * 0.66), "rock", (0.05, 0.05, 0.45, 0.45), 7 + i,
+                   rings=9, sides=16, lump=0.26)
+        if kind != "eye":
+            ob = bld.object("%s_%d" % (spec["name"], i))
+            mi = {"rock": _flat_material(ob, spec.get("slot", "leather"), spec["name"], img, "Closest")}
+            mi["rim"] = mi["rock"]
+            mi["iris"] = _flat_material(ob, "glow", spec["name"], img, "Closest")
+            for poly in ob.data.polygons:
+                poly.material_index = mi[bld.part[poly.vertices[0]]]
+            ob.data.transform(Matrix.Translation(-Vector(p)))
+            ob.matrix_world = Matrix.Translation(Vector(p))
+            mw = ob.matrix_world.copy()
+            ob.parent = e
+            ob.matrix_world = mw
+            out.append(ob)
+            continue
+        bld.torus(p + out_dir * r * 0.5, out_dir, r * 0.62, r * 0.13, 18, 6, (0.05, 0.05, 0.45, 0.45), "rock", 0.0)
+        _disc(bld, p + out_dir * r * 0.5, out_dir, r * 0.62, "rim", (0.55, 0.05, 0.95, 0.45), dome=-0.18)
+        _disc(bld, p + out_dir * r * 0.46, out_dir, r * float(spec.get("iris_r", 0.4)), "iris", (0.05, 0.55, 0.45, 0.95),
+              dome=0.45)
+        bld.prism(p + out_dir * r * 0.66 - up * r * 0.24, p + out_dir * r * 0.66 + up * r * 0.24, r * 0.06, 4,
                   (0.55, 0.55, 0.95, 0.95), "pupil", 0.0)
         ob = bld.object("%s_%d" % (spec["name"], i))
         mi = {"rock": _flat_material(ob, spec.get("slot", "leather"), spec["name"], img, "Closest")}
@@ -840,6 +977,13 @@ def orbit_props(arm, spec):
         ob.parent = e
         ob.matrix_world = mw
         out.append(ob)
+        if spec.get("anchors"):
+            # (an empty on the eye, anchor_<name>_<i>, for a glow halo at the match camera; it rides the stone)
+            an = bpy.data.objects.new("anchor_%s_%d" % (spec["name"].replace("orbit_", ""), i), None)
+            bpy.context.scene.collection.objects.link(an)
+            an.parent = ob
+            an.location = Vector(out_dir * r * 0.7)
+            out.append(an)
     log("orbit %s: %d props round %s" % (spec["name"], len(spec["items"]), tuple(round(x, 3) for x in c)))
     return out
 
@@ -878,7 +1022,12 @@ def crescent(arm, spec, tag="halo"):
     base, crack = hexcol(spec.get("colour", "d9b8ff")), hexcol(spec.get("crack", "8a4ad8"))
     # a few dark crack lines across the moon (u around the tube, v along the arc)
     lines = (np.abs(((yy * 0.37 + xx * 0.11) % 13) - 6.5) < 0.6) & (xx % 21 < 15)
-    px[..., :3] = np.where(lines[..., None], crack, base)
+    col = np.broadcast_to(base, (64, 64, 3)).copy()
+    if spec.get("core"):
+        # (the glow's falloff: a pale core along the moon's faces, deepening to the violet rim at its edges)
+        f = (0.5 + 0.5 * np.cos(xx / 63.0 * 4.0 * math.pi))[..., None] ** 1.5
+        col = base * (1 - f) + hexcol(spec["core"]) * f
+    px[..., :3] = np.where(lines[..., None], crack, col)
     img.pixels = px.ravel()
     img.pack()
     _flat_material(ob, spec.get("slot", "glow"), tag, img)
@@ -968,7 +1117,8 @@ def studs(body, arm, spec):
         e1 /= np.linalg.norm(e1)
         e2 = np.cross(nrm, e1)
         base = len(bld.v)
-        for d in (nrm * r * 1.6, -nrm * r * 0.4, e1 * r, -e1 * r, e2 * r * 0.7, -e2 * r * 0.7):
+        tip = float(spec.get("tip", 1.6))       # (how far it stands out: 1.6 a crystal spike, ~0.8 a round bead)
+        for d in (nrm * r * tip, -nrm * r * 0.4, e1 * r, -e1 * r, e2 * r * 0.7, -e2 * r * 0.7):
             bld.v.append(c + d)
             bld.uv.append((0.5, 0.5))
             bld.part.append("stud")
@@ -992,4 +1142,47 @@ def studs(body, arm, spec):
     mod = ob.modifiers.new("Armature", "ARMATURE")
     mod.object = arm
     log("studs %s: %d on %s" % (spec["name"], len(pick), spec.get("on", "hair")))
+    return ob
+
+
+def orb(arm, spec, tag="orb"):
+    """A hand-held orb (Ostra's swirling void orb): a sphere on the `void` slot (the starfield, opaque) inside a
+    thin glowing ring (glow), or with style "glow" one glowing sphere, at `centre`, riding `bone` rigidly."""
+    c = np.array(spec["centre"], np.float64)
+    r = float(spec.get("r", 0.05))
+    bld = Builder()
+    k = 10
+    rings = [c + np.array([0.0, 0.0, -r + 2.0 * r * i / (k - 1)]) for i in range(k)]
+    radii = [max(1e-4, r * math.sin(math.pi * i / (k - 1))) for i in range(k)]
+    glow_ball = spec.get("style") == "glow"     # (one glowing sphere: what reads at the match camera)
+    bld.tube(rings, radii, 14, *((0.55, 0.95, 0.05, 0.95) if glow_ball else (0.05, 0.45, 0.05, 0.95)), "ring" if glow_ball
+             else "ball", [0.0] * k, cap_end=True, cap_start=True)
+    if not glow_ball:
+        # (a black hole: the dark ball inside bright rings; several crossed rings read as a glowing rim from any side)
+        for k_i, nv in enumerate(spec.get("rings", [spec.get("normal", [0.0, 1.0, 0.0])])):
+            nrm = np.array(nv, np.float64)
+            bld.torus(c, nrm / np.linalg.norm(nrm), r * (1.1 + 0.06 * k_i), r * 0.16, 24, 6, (0.55, 0.05, 0.95, 0.95),
+                      "ring", 0.0)
+    ob = bld.object(tag.capitalize())
+    img = bpy.data.images.new(tag + "_atlas", 64, 64, alpha=False)
+    px = np.ones((64, 64, 4), np.float32)
+    px[:, :32, :3] = hexcol(spec.get("colour", "1a0c2e"))
+    px[:, 32:, :3] = hexcol(spec.get("colour" if glow_ball else "ring", "b07cff"))
+    if spec.get("swirl"):
+        # (a swirl on the glowing ball: bright violet arms winding into a dark core, u round it, v pole to pole)
+        yy, xx = np.mgrid[0:64, 0:32]
+        u, v = xx / 31.0, yy / 63.0
+        spiral = 0.5 + 0.5 * np.sin(u * 2.0 * math.pi * 3.0 + v * 14.0)
+        core = np.exp(-((v - 0.5) / 0.18) ** 2)
+        k = np.clip(spiral * (1.0 - 0.8 * core), 0.0, 1.0)[..., None]
+        dark, lit = hexcol(spec.get("dark", "12081f")), hexcol(spec["swirl"])
+        px[:, 32:, :3] = dark * (1 - k) + lit * k
+    img.pixels = px.ravel()
+    img.pack()
+    vi = _flat_material(ob, "void", tag, img)
+    gi = _flat_material(ob, "glow", tag, img)
+    for poly in ob.data.polygons:
+        poly.material_index = gi if bld.part[poly.vertices[0]] == "ring" else vi
+    _rigid(ob, arm, spec.get("bone", "hand.R"))
+    log("%s on %s, r %.3f" % (tag, spec.get("bone", "hand.R"), r))
     return ob

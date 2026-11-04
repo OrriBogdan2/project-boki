@@ -620,6 +620,13 @@ def project(ob, img, pj):
                             (va >= (sk[4] if len(sk) > 4 else 0.0)))
         for bx in ([] if pj.get("inpaint") else pj.get("skip_art_box") or []):
             art_px &= ~((col >= bx[0]) & (col <= bx[2]) & (row >= bx[1]) & (row <= bx[3]))
+        if pj.get("only_art"):
+            # (only art pixels of these colours go on: the mask's violet mouth, eyes, tear and crack over Meshy's
+            # porcelain, which keeps its own paint)
+            ha, sa, va = _hsv_px(got[:, :3])
+            oa = pj["only_art"]
+            hue_ok = (ha >= oa[0]) & (ha <= oa[1]) if oa[0] <= oa[1] else (ha >= oa[0]) | (ha <= oa[1])
+            art_px &= hue_ok & (sa >= oa[2]) & (sa <= oa[3]) & (va >= oa[4]) & (va <= oa[5])
         if keep:
             cur = dst[ty, tx, :3]
             hh, ss, _vv = _hsv_px(cur)
@@ -1709,6 +1716,29 @@ def chunk(ob, rig, ck):
             w = next((x.weight for x in v.groups if x.group == g.index), 0.0)
             if w > 0.0:
                 co[v.index] = piv + (co[v.index] - piv) * (1.0 + kk * w)
+    if "fingers" in ck:
+        # (long spidery fingers: both hands stretched down from the wrist by their skin weight, Ostra's claws)
+        fk = float(ck["fingers"]) - 1.0
+        for bone in ("hand.L", "hand.R"):
+            g = ob.vertex_groups.get(bone)
+            if g is None:
+                continue
+            pz = K.bone_head(rig, bone).z
+            for v in ob.data.vertices:
+                w = next((x.weight for x in v.groups if x.group == g.index), 0.0)
+                if w > 0.0 and co[v.index, 2] < pz:
+                    co[v.index, 2] = pz + (co[v.index, 2] - pz) * (1.0 + fk * w)
+    if "feet" in ck:
+        # (the feet grown about each ankle's ground point, with a fade up the shin: the art's big wrapped feet)
+        fk, top = float(ck["feet"]) - 1.0, float(ck.get("feet_top", 0.16))
+        for side in (-1.0, 1.0):
+            m = (co[:, 2] < top) & (co[:, 0] * side > 0.0)
+            if not m.any():
+                continue
+            cx, cy = float(np.median(co[m, 0])), float(np.median(co[m, 1]))
+            w = np.clip(1.0 - co[m, 2] / top, 0.0, 1.0)[:, None]
+            piv = np.array([cx, cy, 0.0])
+            co[m] = piv + (co[m] - piv) * (1.0 + fk * w)
     gk = float(ck.get("girth", 1.0))
     co[:, 0] *= gk
     co[:, 1] *= gk
@@ -1981,6 +2011,56 @@ def split_part(ob, arm, img, sp):
         bsdf.inputs["Emission Strength"].default_value = 1.0
     log("split %s: %d faces, %d emission texels" % (sp["name"], len(pick), lit))
     return part
+
+
+def hair_spring(ob, arm, hs):
+    """Hair the scan fused into one mass, on a spring chain after all (Tarek's locs): a chain of `bones`
+    spring_<name>_<i> bones from `top` straight to `bottom` under `parent` (the head), and every vertex of the
+    `slot` (hair) faces inside the box [box_lo, box_hi] handed from the parent to the chain by how far down the
+    chain it hangs: wholly the parent's at the roots (the first `root` share of the length), wholly the chain's
+    below, so the locs' ends trail and swing while the scalp stays put (WardenGlb.Springs)."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import warden_parts as WP
+    top, bot = np.array(hs["top"], np.float64), np.array(hs["bottom"], np.float64)
+    pts = np.array([top + (bot - top) * f for f in np.linspace(0.0, 1.0, 8)])
+    L = float(np.linalg.norm(bot - top))
+    names, spans = WP.chain_bones(arm, hs["name"], hs.get("parent", "head"), pts, L, int(hs.get("bones", 3)), bot)
+    lo, hi = hs["box_lo"], hs["box_hi"]
+    slot = hs.get("slot", "hair")
+    on = {i for i, m in enumerate(ob.data.materials) if m and m.name.split("-")[0] == slot}
+    verts = set()
+    for p in ob.data.polygons:
+        if p.material_index in on:
+            verts.update(p.vertices)
+    groups = [ob.vertex_groups.get(n) or ob.vertex_groups.new(name=n) for n in names]
+    mids = np.array([(a + b) * 0.5 for a, b in spans])
+    lens = np.array([max(b - a, 1e-3) for a, b in spans])
+    ax = (bot - top) / max(L, 1e-6)
+    root = float(hs.get("root", 0.15)) * L
+    moved = 0
+    for vi in verts:
+        co = np.array(ob.data.vertices[vi].co[:])
+        if not all(lo[i] <= co[i] <= hi[i] for i in range(3)):
+            continue
+        sv = float(np.clip((co - top) @ ax, 0.0, L))
+        f = min(1.0, max(0.0, (sv - root) / max(root, 1e-6)))
+        f = f * f * (3.0 - 2.0 * f)
+        if f <= 0.0:
+            continue
+        w = np.clip(1.0 - np.abs(sv - mids) / lens, 0.0, 1.0)
+        if sv <= mids[0]:
+            w[:] = 0.0
+            w[0] = 1.0
+        if sv >= mids[-1]:
+            w[:] = 0.0
+            w[-1] = 1.0
+        w = w / max(w.sum(), 1e-6)
+        for x in ob.data.vertices[vi].groups:
+            ob.vertex_groups[x.group].add([vi], x.weight * (1.0 - f), "REPLACE")
+        for gi in np.nonzero(w > 1e-3)[0]:
+            groups[gi].add([vi], float(w[gi] * f), "ADD")
+        moved += 1
+    log("hair spring %s: %d bones, %d vertices" % (hs["name"], len(names), moved))
 
 
 def emit_art(ob, img, el):
@@ -2679,6 +2759,8 @@ def main():
         # (the fitted rest pose: a piece the scan has that is rebuilt as geometry, Pip's tail)
         delete_boxes(ob, spec["cut_fitted"])
         drop_floaters(ob, int(spec.get("cut_floaters", 60)))
+    for hs in spec.get("hair_springs", []):
+        hair_spring(ob, arm, _rel(arm, hs, ("top", "bottom", "box_lo", "box_hi")))
     parts = []
     extras = []         # (empties: an orbit's pivot, an empty weapon)
     if spec.get("weapon_empty"):
@@ -2688,7 +2770,7 @@ def main():
         bpy.context.scene.collection.objects.link(we)
         we.parent = arm
         extras.append(we)
-    if any(spec.get(k) for k in ("lens", "braids", "hoses", "orbits", "halo", "wisp", "studs")):
+    if any(spec.get(k) for k in ("lens", "braids", "hoses", "orbits", "halo", "wisp", "studs", "orb", "gauntlets")):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import warden_parts as WP
         lens_s = _rel(arm, spec.get("lens"), ("centre",))
@@ -2705,11 +2787,18 @@ def main():
         if spec.get("hoses"):
             parts.append(WP.hoses([ob], arm, [_rel(arm, h, ("path",)) for h in spec["hoses"]], spec["hose_colours"]))
         for o in spec.get("orbits", []):
-            got = WP.orbit_props(arm, o)
+            got = WP.orbit_props(arm, _rel(arm, o, ("centre",)))
             extras.append(got[0])
-            parts += got[1:]
+            parts += [x for x in got[1:] if x.type == "MESH"]
+            extras += [x for x in got[1:] if x.type != "MESH"]
+        if spec.get("gauntlets"):
+            got = WP.gauntlets(arm, spec["gauntlets"])
+            parts.append(got[0])
+            extras += got[1:]
         if spec.get("halo"):
-            parts.append(WP.crescent(arm, spec["halo"]))
+            parts.append(WP.crescent(arm, _rel(arm, spec["halo"], ("centre",))))
+        if spec.get("orb"):
+            parts.append(WP.orb(arm, _rel(arm, spec["orb"], ("centre",))))
         if spec.get("wisp"):
             parts.append(WP.wisp(arm, spec["wisp"]))
         for sd in spec.get("studs", []):
@@ -2807,7 +2896,11 @@ def main():
     if "atlas_px" in spec:
         shrink(img, int(spec["atlas_px"]))
     for sp in spec.get("split", []):
-        parts.append(split_part(ob, arm, img, sp))
+        got = split_part(ob, arm, img, sp)
+        if sp.get("drop"):
+            bpy.data.objects.remove(got)     # (cut off the body and not exported: a rebuilt part replaces it)
+        else:
+            parts.append(got)
     if emask is not None:
         if spec.get("emit_atlas"):
             spec_emit_atlas.append(spec["emit_atlas"])

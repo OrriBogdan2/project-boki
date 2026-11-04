@@ -67,7 +67,22 @@ each is the next one's parent, and the last is the tip (no skin of its own; its 
 loader (`WardenGlb.Springs`, run by Sync after the contract bones) swings every chain as a damped rope in world
 space, pulled back toward the shape it has riding its parent rigidly (firmer at the root than at the tip), so it
 trails behind a run, swings out of a turn and settles. Nothing in the kit moves or the checks depends on them.
-`tools/meshy/warden_parts.py` builds Vex r3b's two braids this way.
+`tools/meshy/warden_parts.py` builds Vex r3b's two braids this way; `fit_warden.py`'s `hair_springs` puts a scan's own
+fused hair on such chains (Tarek's locs: the vertices of the hair slot in a box handed from the head to the chain by
+how far down it they hang).
+
+### Orbits (props that circle a bone)
+An empty named `orbit_<name>` parented to a bone, its rest upright (identity rotation in the model frame), carries
+unskinned props (Tarek's three seeing-stones round his head, each built facing out from the orbit's centre, its
+iris out and its plain back in). `WardenGlb.Orbits` (run by Sync) turns the empty round its own up axis
+(`ORBIT_HZ`) and bobs each prop on its own phase, so the orbit is data in the loader, never baked.
+`tools/meshy/warden_parts.py` `orbit_props()` builds them (fit spec `orbits`). They count as skinned for
+`--warden-glb-check` and stay out of `--warden-model-check`'s height.
+
+### Hovering bodies
+A body with no feet (Ostra) is built with its ground below its hem (fit spec `sole_z`); the rig's own hover
+(`KMovesStone.hover`, which lifts `Rig`, so the `root` bone) floats it and keeps the gap above the shadow. Its
+lower body is a `void` wisp on a `spring_wisp_*` chain under `hips` (`warden_parts.wisp()`).
 
 ### Orbits (props that circle a bone)
 An empty named `orbit_<name>` parented to a bone, its rest upright (identity rotation in the model frame), carries

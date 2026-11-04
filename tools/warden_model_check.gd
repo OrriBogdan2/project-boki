@@ -20,6 +20,7 @@ const WARDENS := {
 	"mage": {"hit_r": 0.4, "height": 1.04, "width": [0.6, 1.3], "moves": "mage_"},     # (slim and long-legged)
 	# (Sable's feather plumes stand ~0.2 m over her head)
 	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.05, "width": [0.6, 1.3], "moves": "thf_"},
+	"dolm": {"hit_r": 0.388, "height": 1.18, "width": [0.7, 1.5], "moves": "breah_"},     # (lean, the locs: his art)
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured
@@ -30,6 +31,7 @@ const ANCHORS := ["Rig/Legs/LegL/Knee", "Rig/Legs/LegR/Knee", "Rig/Torso/HeadPiv
 ## Nodes a hero's own kit or weapon code finds by name (BjornFx: the hammer pivot under Gun; the prow).
 const HERO_ANCHORS := {"bulwark": ["Rig/Torso/ArmLPivot/Elbow/Hand/Shield"]}
 const SKIP := ["Glider", "Gun", "Shield", "TeamRing"]     # not part of the body's silhouette
+const FLOATING := ["Halo"]     # a .glb's floating pieces (warden_parts.crescent): not headwear
 
 var bad := 0
 var n := 0
@@ -201,8 +203,8 @@ func _glb_top(m: Node3D) -> float:
 	(m.get_node("Warden/Sync") as WardenGlb.Sync).apply()
 	var top := -INF
 	for nd in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
-		if String(nd.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX):
-			continue        # (props floating on an orbit, Tarek's seeing-stones: not the body's height)
+		if String(nd.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX) or String(nd.name) in FLOATING:
+			continue        # (floating props, Tarek's stones and Ostra's halo: not the height)
 		for p in WARDEN_SKIN.points(nd as MeshInstance3D):
 			top = maxf(top, p.y)
 	return top - m.global_position.y

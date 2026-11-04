@@ -284,6 +284,17 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Hem edit back | 09:08 | 01a1a5d1-1406-776c-a6c5-797a2b85363e | nano-banana-pro | same | 9 | Kept |
 | Hem A | 09:09 | 01a1a5d2-5a3a-759f-b819-13c6f8aa159d | meshy-7.1 | 4 edited views (front, 3/4, side, back) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** (first run): clean face and porcelain mask, bun and hair needles, coat tails, quiver, thimble claws |
 
+### Tarek (dolm) stage 1 runs, 2026-11-04 (balance 4993 before the fan-out; 85 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Tarek edit front | 09:07 | 01a1a5cf-f284-72dc-9f40-fcfd21bee436 | nano-banana-pro (image-to-image) | 9:16 crop; right fist lowered; stones, shards, ripples and ground line out | 9 | Kept |
+| Tarek edit 3/4 | 09:07 | 01a1a5cf-f279-714c-b8d1-bc7c41d2a765 | nano-banana-pro | same | 9 | Dropped: the lowered arm lost its stone bracer |
+| Tarek edit side | 09:07 | 01a1a5cf-f222-72f3-ba19-4041e00d0d94 | nano-banana-pro | same, the far arm hanging behind his body | 9 | Kept |
+| Tarek edit back | 09:07 | 01a1a5cf-f280-7465-ad2f-2aaf9ea36676 | nano-banana-pro | same | 9 | Kept |
+| Tarek edit 3/4 2 | 09:09 | 01a1a5d1-c105-7402-acba-02323e255f37 | nano-banana-pro | as 3/4, "BOTH forearms wear stone bracers" | 9 | Dropped: kept the fist raised (the run went without a 3/4) |
+| Tarek A | 09:10 | 01a1a5d2-9348-76b2-bd28-bb946e03b9b0 | meshy-7.1 | 3 edited views (front, side, back) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: blindfold, grin, chunky locs with copper beads, vest, sash, harness, both bracers, wrapped feet (the bracers' glowing cracks not painted: added as an emission layer) |
+
+### Tarek stage 2 (2026-11-04): no Meshy runs (0 credits); the r3c recipe on the stage 1 scan, see art/wardens/tarek/IMPORT.md.
 ### Vex r3c and r3d (2026-11-04): credit-free
 r3c (09:00-10:30) and r3d (11:25-13:30) used no Meshy credits: every change is in the fit spec, the parts tools, the
 paint-over, the shared look (16c18b4f) and warden_look.json. Recipe: RECIPE_95.md.

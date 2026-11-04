@@ -19,7 +19,7 @@ uniform float stars = 1.0;         // star brightness
 uniform float star_scale = 46.0;   // star cells across the screen's height
 uniform vec2 drift = vec2(0.012, -0.02);   // the star layers' scroll, screen heights a second
 uniform bool soft = false;
-uniform float fade_from = 0.35;    // soft: opaque up to this v, gone by v = 1
+uniform float fade_from = 0.72;    // soft: opaque up to this v, gone by v = 1
 uniform float edge_soft = 0.6;     // soft: how much the silhouette thins out
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"

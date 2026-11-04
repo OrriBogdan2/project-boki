@@ -358,12 +358,23 @@ func _own_look(a: String) -> void:
 				seen += 1
 				var same: bool = got.is_equal_approx(want) if want is Color else is_equal_approx(float(got),
 						float(want))
+				if k == "albedo" and want is Color:
+					# (a look's albedo composes with the player's pick: the look's colour x a tint within TINT_MAX)
+					same = _within_tint(got as Color, want as Color)
 				if not same:
 					wrong.append("%s.%s" % [slot, k])
 	ok(seen > 0 and wrong.is_empty(), "%s: its own look (warden_look.json) is on its surfaces (%d values, wrong %s)"
 			% [a, seen, str(wrong)])
 	m.free()
 
+func _within_tint(got: Color, want: Color) -> bool:
+	var lo := 1.0 - WardenGlb.TINT_MAX - 0.001
+	var hi := 1.0 + WardenGlb.TINT_MAX + 0.001
+	for i in 3:
+		var r: float = got[i] / maxf(want[i], 1e-4)
+		if r < lo or r > hi:
+			return false
+	return true
 ## A model's glow halos (warden_look.json "halos") hang on their anchors outside the .glb (the skin, the bounds
 ## and the slot checks never see them) and follow the head when it nods.
 func _halo(main: Node, a: String) -> void:
