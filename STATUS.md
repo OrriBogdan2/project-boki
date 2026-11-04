@@ -205,3 +205,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Meshy:** still no credits on the other 11. S2 waits for the improved base art (watching ext/imagegen IMG_STATUS.md) and the per-Warden "go for 3D". The owner's direction (flat, clean, bright colour; chunkier game proportions) is in PIPELINE.md (ext/warden-meshy 1111d843).
 - **Item 52 (signature stance and idle per Warden):** an Opus agent is on ext/warden-stance (from main ca4305c1). Data goes in content/rules/warden_stance.json as pose offsets on the shared rig, with --warden-stance-check. It will be verified on Vex's Meshy model through a scratch merge.
 - 2026-11-04 03:15 UTC: READY ext/warden-stance 91d7e239 (item 52). Shots in hero-shots-s2 item52/. Checks re-run by S2.
+- 2026-11-04 03:16 UTC: ext/kits-integ in progress (main 03:15). It is origin/main 91a6bd05 + no-shake + online-displace + the five audit tips + vex-ammo; an Opus agent is merging, then the full suite.
