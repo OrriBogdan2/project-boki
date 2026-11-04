@@ -67,6 +67,8 @@ const CHECKS := {
 	"--drop-feel-check": ["res://tools/drop_check.gd", "drop_feel_check", null],      # the opening drop
 	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],      # --market-shots=<dir>
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],     # 2 games, relay
+	"--warden-stance-check": ["res://tools/warden_stance_check.gd", "warden_stance_check", null],
+	"--warden-stance-shots": ["res://tools/warden_stance_shots.gd", "warden_stance_shots", null],
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
