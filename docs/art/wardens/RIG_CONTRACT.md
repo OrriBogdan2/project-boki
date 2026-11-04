@@ -66,9 +66,9 @@ one or hangs it on another parent. They are skinned like the rest and follow the
 rests; a zero scale hides what rides the bone). On a procedural model the call does nothing.
 - **Dredge** (`dredge`): `eye` (head); the grab-claw's three fingers `claw1.L`..`claw3.L` (hand.L), each with a
   `claw<n>_tip.L`; the winch drum `winch` (hips, its head on the drum's axle, which runs side to side); the rope
-  `rope1` (hips) > `rope2` > `hook`. DredgeKit spreads the claw for the Grapnel throw and clenches it while he
+  `rope1` (hips) > `rope2` > `hook`; the tar pool `pool` (root, at his feet). DredgeKit spreads the claw for the Grapnel throw and clenches it while he
   reels, spins the drum out while the hook flies and in while he reels, and hides the hanging rope and hook while
-  the kit draws them in flight. Anchors `anchor_claw` (the throw's rope leaves from it), `anchor_hook`,
+  the kit draws them in flight, and spreads the pool only while he stands on the ground. Anchors `anchor_claw` (the throw's rope leaves from it), `anchor_hook`,
   `anchor_winch`, `anchor_eye`.
 
 The kit moves (`kmoves_*.gd`) only key channels on these nodes (`p` pitch, `y` yaw, `r` roll, `lift`, `sq`

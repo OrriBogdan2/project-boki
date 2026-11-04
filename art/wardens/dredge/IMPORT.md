@@ -16,7 +16,7 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   colours (every base colour came out white or grey): the colours here are picked from the art.
 - **Scale and body:** x0.665 into rig space, turned to face +Y. The archetype body (`legs` 1.738, `build` 1.07,
   `neck` -0.066) puts the rig's hips, shoulders, elbows, the shoulder and hip spacing and the head (on the hull's
-  centre) on his own joints (within 5 mm); `size` 0.95 makes him 1.28x a medium hunter (the art's ~2.25 m). Needed
+  centre) on his own joints (within 5 mm); `size` 0.99 makes him 1.28x a medium hunter in his hunched stance (the art's ~2.25 m; 0.95 before the stance). Needed
   the one-line fix in Models.hunter: a bulky hero's leg length (and the limbs slider) was reset by its bulk.
 - **Bones:** his bones renamed onto the contract (Hips, Spine and Chest -> `hips`; Head -> `head`; arms and legs
   one to one; the boots ride `shin`); the shoulder domes split off the Chest onto `pauldron.L/R`; `root` and `skirt`
@@ -53,4 +53,11 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   peeled 20-28 degrees out about it: right of the porthole, lower front, his left side, two on the back); the
   shoulders three big curved lames each (wider, hanging lower) in place of four bands; the front image's own
   porthole faded where the model has its porthole (`mask`); the porthole's iron rings moved to brass (`remat`).
+- **r3d (credit-free):** the stance on the branch (ext/warden-stance's four commits: hunched, the horn hanging
+  low); deeper dents (22, 4-8.5% of the radius) and seven tears with flaps peeled 36-44 degrees out; a fourth,
+  wider lame flaring each shoulder's lower edge; the lens's crazed paint replaced by six sharp crack strips over
+  the dome (`cloth-crack`) and a white glint on the orb (`glow-shine`); six tar strands sagging from the hull to
+  the pelvis; a red core glowing inside the ribs (`glow-core`); a tar pool at his feet on the new variant bone
+  `pool` (root), which DredgeKit spreads while he stands and takes away when he moves or leaves the ground. The
+  projections' grey backgrounds filled with the hull's own colour (plate undersides were grey).
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.

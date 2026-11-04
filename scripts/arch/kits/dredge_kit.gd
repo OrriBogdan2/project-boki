@@ -67,6 +67,7 @@ var stacks_lost := 0
 var volleys := 0
 var last_quake_k := 0.0         # (tests) the height bonus of the last air smash
 var winch_a := 0.0              # the 3D model's winch drum turn (rad)
+var pool_k := 0.0               # the 3D model's tar pool at his feet (0 gone, 1 spread)
 var claw_k := 0.0               # the 3D model's grab-claw: 1 spread for the throw, -1 clenched on the rope, 0 rest
 var _down_seen := false
 var _stab_at := -9.0
@@ -285,6 +286,14 @@ func _tick_model(dt: float) -> void:
 	claw_k = move_toward(claw_k, want, dt * 9.0)
 	WardenGlb.pose_extra(h.model, "winch", Quaternion(Vector3.RIGHT, wrapf(winch_a, -PI, PI)))
 	WardenGlb.pose_extra(h.model, "rope1", Quaternion.IDENTITY, Vector3.ONE * (0.001 if out else 1.0))
+	# the tar pool spreads under him while he stands, and is gone the moment he moves or leaves the ground
+	var still := h.grounded and Vector2(h.vel.x, h.vel.z).length() < 0.6
+	if still:
+		pool_k = move_toward(pool_k, 1.0, dt * 0.5)
+	else:
+		pool_k = move_toward(pool_k, 0.0, dt * 6.0)
+	var spread := maxf(pool_k, 0.001)
+	WardenGlb.pose_extra(h.model, "pool", Quaternion.IDENTITY, Vector3(spread, 1.0 if pool_k > 0.01 else 0.001, spread))
 	# each finger turns out from the claw's middle (spread) or in toward it (clench), about its knuckle
 	var mid := Vector3.ZERO
 	var heads: Array = []

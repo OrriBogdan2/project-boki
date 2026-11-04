@@ -38,11 +38,11 @@ const OPTIONAL := ["cape", "scarf", "tail", "wings"]
 ## A Warden's variant of the contract (RIG_CONTRACT "Variant bones"): its own extra bones -> their parents. A .glb of
 ## that Warden must carry them (WardenSkeleton.mismatches); they are skinned like the rest and follow their parent
 ## bone, and the Warden's kit poses them on top of that (pose_extra): Dredge's grab-claw fingers, the eye, the winch
-## drum, and the rope and cargo hook that hang from it.
+## drum, the rope and cargo hook that hang from it, and the tar pool at his feet.
 const EXTRA := {
 	"dredge": {"eye": "head", "claw1.L": "hand.L", "claw1_tip.L": "claw1.L", "claw2.L": "hand.L",
 		"claw2_tip.L": "claw2.L", "claw3.L": "hand.L", "claw3_tip.L": "claw3.L", "winch": "hips", "rope1": "hips",
-		"rope2": "rope1", "hook": "rope2"},
+		"rope2": "rope1", "hook": "rope2", "pool": "root"},
 }
 ## Procedural pieces that stay when the .glb dresses the hunter (the contract's "nodes the game keeps").
 const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus"]

@@ -255,7 +255,7 @@ def _bake_tree(m, look, img):
         d.inputs[1].default_value = look["eye_at"]
         halo = math_("SUBTRACT", 1.0, ramp(d.outputs["Value"], look["eye_r"] * 0.6, look["eye_r"] * 3.2))
         col = mix(halo, col, rgb(look["halo"]))
-        col = mix(math_("MULTIPLY", crack, 0.85), col, rgb(look["crack"]))
+        col = mix(math_("MULTIPLY", crack, float(look.get("crack_k", 0.85))), col, rgb(look["crack"]))
         L.new(col, emi.inputs["Color"])
         return
     if look.get("tar"):
@@ -389,6 +389,17 @@ def _projected(N, L, co, proj, math_, fallback):
             L.new(acc, add.inputs[0])
             L.new(part.outputs[0], add.inputs[1])
             acc, wsum = add.outputs[0], math_("ADD", wsum, w)
+    # faces looking up or down (no view sees them: plate undersides) take the plain colour
+    wz = math_("POWER", math_("ABSOLUTE", nrm.outputs[2]), 4.0)
+    part = N.new("ShaderNodeVectorMath")
+    part.operation = "SCALE"
+    L.new(fallback, part.inputs[0])
+    L.new(wz, part.inputs["Scale"])
+    add = N.new("ShaderNodeVectorMath")
+    add.operation = "ADD"
+    L.new(acc, add.inputs[0])
+    L.new(part.outputs[0], add.inputs[1])
+    acc, wsum = add.outputs[0], math_("ADD", wsum, wz)
     div = N.new("ShaderNodeVectorMath")
     div.operation = "SCALE"
     L.new(acc, div.inputs[0])

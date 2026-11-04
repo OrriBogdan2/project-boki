@@ -135,7 +135,8 @@ def build(ob, spec, seed=1):
         la, lo = rnd.uniform(-60, 70), rnd.uniform(0, 360)
         d = Vector((math.cos(math.radians(la)) * math.sin(math.radians(lo)),
                     math.cos(math.radians(la)) * math.cos(math.radians(lo)), math.sin(math.radians(la))))
-        dents.append((d, math.radians(rnd.uniform(7, 15)), rnd.uniform(0.02, 0.05)))
+        dd = spec.get("dent_depth", [0.02, 0.05])
+        dents.append((d, math.radians(rnd.uniform(7, 15)), rnd.uniform(dd[0], dd[1])))
     nl, nb = spec.get("res", [26, 44])
     WP._append(ob, _sphere_patch(c, r, -88, 88, 0, 360, nl, nb, 0.0, dents=dents), spec["bone"], mat)
     for b in spec.get("bands", []):
@@ -215,7 +216,14 @@ def image_box(path, tol=0.06):
     w, h = im.size
     px = np.array(im.pixels[:], dtype=np.float32).reshape(h, w, 4)[:, :, :3]
     grey = px[5:25, 5:25].reshape(-1, 3).mean(axis=0)
-    ys, xs = np.nonzero(np.abs(px - grey).max(axis=2) > tol)
+    fg = np.abs(px - grey).max(axis=2) > tol
+    ys, xs = np.nonzero(fg)
+    # the background filled with the hull's own middle colour: a face no view quite covers (a plate's underside,
+    # an edge past the drawn outline) takes plain brass, not the sheet's grey
+    full = np.array(im.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    full[~fg, :3] = np.median(px[fg], axis=0) * 0.85
+    im.pixels = full.ravel()
+    im.pack()
     return im, (xs.min() / w, ys.min() / h, xs.max() / w, ys.max() / h)
 
 
@@ -238,3 +246,88 @@ def projection(ob, spec):
         cz = (v1 - v0) / (hi[2] - lo[2])
         out[view] = {"image": img, "axis": axis, "u": (a, b), "v": (cz, v0 - lo[2] * cz)}
     return out
+
+
+def _tube(pts, r, segs=6):
+    """A thin tube through the points (a tar strand)."""
+    bm = bmesh.new()
+    rings = []
+    for i, p in enumerate(pts):
+        t = (pts[min(i + 1, len(pts) - 1)] - pts[max(i - 1, 0)]).normalized()
+        u = t.cross(Vector((0, 0, 1)))
+        if u.length < 1e-3:
+            u = t.cross(Vector((1, 0, 0)))
+        u.normalize()
+        v = t.cross(u)
+        k = 1.0 - 0.45 * math.sin(math.pi * i / (len(pts) - 1))      # (thinner in the middle, as tar stretches)
+        rings.append([bm.verts.new(p + (u * math.cos(2 * math.pi * j / segs) + v * math.sin(2 * math.pi * j / segs))
+                                   * r * k) for j in range(segs)])
+    for a, b in zip(rings, rings[1:]):
+        for j in range(segs):
+            bm.faces.new((a[j], a[(j + 1) % segs], b[(j + 1) % segs], b[j]))
+    bmesh.ops.triangulate(bm, faces=bm.faces[:])
+    return bm
+
+
+def extras(ob, spec, seed=1):
+    """The rest of the dressing (fit frame), each piece rigid on its bone:
+    - `cracks`: sharp cracks over a lens dome (centre, radius R, the crack ends' radial reach [from, to]),
+      zig-zag strips lying just over the glass;
+    - `shines`: small glossy highlights (a sphere on a glow slot);
+    - `strands`: tar strands sagging between two points;
+    - `pool`: a puddle of tar on the ground (on its own bone, which the kit hides off the ground);
+    - `glows`: emissive cores (the red light inside the hull)."""
+    rnd = random.Random(seed)
+    cr = spec.get("cracks")
+    if cr:
+        C, R = Vector(cr["centre"]), float(cr["R"])
+        mat = WP._mat_index(ob, cr["material"], cr["colour"])
+        bm = bmesh.new()
+        for k in range(int(cr["n"])):
+            ang = 2 * math.pi * k / cr["n"] + rnd.uniform(-0.35, 0.35)
+            r0, r1 = cr["reach"]
+            prev = None
+            steps = 5
+            for s in range(steps + 1):
+                d = r0 + (r1 - r0) * s / steps
+                a = ang + rnd.uniform(-0.18, 0.18)
+                x, z = math.cos(a) * d, math.sin(a) * d
+                y = C.y + math.sqrt(max(R * R - x * x - z * z, 0.0)) + 0.0015
+                w = cr["w"] * (1.0 - 0.7 * s / steps)
+                side = Vector((-math.sin(a), 0, math.cos(a))) * w
+                p = Vector((C.x + x, y, C.z + z))
+                cur = (bm.verts.new(p + side), bm.verts.new(p - side))
+                if prev:
+                    bm.faces.new((prev[0], prev[1], cur[1], cur[0]))
+                prev = cur
+        for f in bm.faces:
+            if f.normal.y < 0:
+                f.normal_flip()
+        bmesh.ops.triangulate(bm, faces=bm.faces[:])
+        WP._append(ob, bm, cr["bone"], mat)
+    for sh in spec.get("shines", []):
+        WP.add_orb(ob, sh)
+    for g in spec.get("glows", []):
+        WP.add_orb(ob, g)
+    tar = None
+    for st in spec.get("strands", []):
+        tar = WP._mat_index(ob, st["material"], st.get("colour", "1a1416"))
+        a, b = Vector(st["a"]), Vector(st["b"])
+        pts = [a.lerp(b, i / 8) + Vector((0, 0, -st["sag"] * 4 * (i / 8) * (1 - i / 8))) for i in range(9)]
+        WP._append(ob, _tube(pts, st["r"]), st["bone"], tar)
+    pl = spec.get("pool")
+    if pl:
+        mat = WP._mat_index(ob, pl["material"], pl.get("colour", "1a1416"))
+        bm = bmesh.new()
+        n = int(pl.get("segs", 28))
+        mid = bm.verts.new((pl["at"][0], pl["at"][1], pl.get("z", 0.004)))
+        ring = []
+        for i in range(n):
+            a = 2 * math.pi * i / n
+            rr = pl["r"] * (0.75 + 0.25 * math.sin(3 * a + 1.3) + rnd.uniform(-0.08, 0.08))
+            ring.append(bm.verts.new((pl["at"][0] + math.cos(a) * rr, pl["at"][1] + math.sin(a) * rr * 0.8,
+                                      pl.get("z", 0.004))))
+        for i in range(n):
+            bm.faces.new((mid, ring[i], ring[(i + 1) % n]))
+        WP._append(ob, bm, pl["bone"], mat)
+    print("HULL extras: %d tris in all" % sum(len(p.vertices) - 2 for p in ob.data.polygons))

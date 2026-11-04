@@ -314,6 +314,15 @@ def main():
     # the contract armature, plus the variant bones
     arm = K.build_armature(rig)
     add_extra(arm, spec.get("extra", {}), heads)
+    # variant bones with no source bone (the tar pool), built where the spec puts them
+    if spec.get("extra_new"):
+        bpy.context.view_layer.objects.active = arm
+        bpy.ops.object.mode_set(mode="EDIT")
+        for name, b in spec["extra_new"].items():
+            e = arm.data.edit_bones.new(name)
+            e.head, e.tail = Vector(b["head"]), Vector(b["tail"])
+            e.parent = arm.data.edit_bones[b["parent"]]
+        bpy.ops.object.mode_set(mode="OBJECT")
     missing = [g.name for g in ob.vertex_groups if g.name not in arm.data.bones]
     assert not missing, "groups with no bone: %s" % missing
     ob.parent = arm
@@ -352,6 +361,8 @@ def main():
         if spec["orb"].get("replace"):
             WP.remove_group(ob, spec["orb"]["replace"])
         WP.add_orb(ob, spec["orb"])
+    if spec.get("extras"):          # (after the orb: it clears the eye bone's old pieces)
+        WH.extras(ob, spec["extras"], int(spec.get("seed", 1)))
     if spec.get("drips"):
         WP.add_drips(ob, spec["drips"], int(spec.get("seed", 1)))
     if paint:
