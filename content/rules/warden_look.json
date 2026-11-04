@@ -107,8 +107,8 @@
 			},
 			"hair": {
 				"top_light": 0.6,
-				"fres": 0.8,
-				"far_lift": 0.3,
+				"fres": 0.45,
+				"far_lift": 0.15,
 				"glow": 0.14,
 				"shadow_tint": [
 					0.88,

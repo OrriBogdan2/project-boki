@@ -101,7 +101,7 @@ def _head_centre(rig, K, sp):
 
 
 # ------------------------------------------------------------------------------------------------ pigtails
-def _lock(bld, p, w0, th0, out_dir, part, s_off=0.0, flat_k=1.0, sides=6, vk=1.0):
+def _lock(bld, p, w0, th0, out_dir, part, s_off=0.0, flat_k=1.0, sides=6, vk=1.0, root=0.0):
     """A chunky lock: a flattened tapered tube along p, wide across (perpendicular to out_dir), thin along it;
     UV u around, v root (0) to tip (1)."""
     s_arr = WP.arclen(p)
@@ -118,6 +118,8 @@ def _lock(bld, p, w0, th0, out_dir, part, s_off=0.0, flat_k=1.0, sides=6, vk=1.0
         u = s_arr[i] / L
         # (chunky to the end: the zigzag tips stay a lock's width, not a thread, and close in a point)
         k = max((1.0 - u) ** 0.6, 0.35 * (1.0 - u) / 0.15 if u > 0.85 else 0.35) * (0.8 + 0.35 * math.sin(math.pi * min(1.0, u * 1.6)))
+        if root > 0.0:              # (narrow into the tie: no open rings stacked at the root)
+            k *= min(1.0, 0.35 + 0.65 * u / root)
         w = max(w0 * k, 0.0015)
         th = max(th0 * k * flat_k, 0.0012)
         for j in range(sides + 1):
@@ -267,12 +269,12 @@ def pigtails(body, arm, rig, K, sp):
                     p = np.stack([np.interp(tq, s_b, p[:, i]) for i in range(3)], axis=1)
                 w0 = float(T.get("width", 0.024)) * rng.uniform(0.8, 1.2)
                 se = int(T.get("streak_every", 0))
-                part = "lock_pk" if se and k % se == 2 else ("lock" if k % 4 else "lock_dk")
+                part = "lock_pk" if (se and k % se == 2) or flick else ("lock" if k % 4 else "lock_dk")
                 v0 = len(bld.v)
                 if part == "lock_pk":
                     w0 *= float(T.get("streak_w", 1.0))       # (the streaks: thinner pink locks among the blue)
                 _lock(bld, p, w0, w0 * float(T.get("thick", 0.5)), off if flick else out, part, sides=int(T.get("sides", 6)),
-                      vk=float(T.get("v_k", 1.0)))
+                      vk=float(T.get("v_k", 1.0)), root=float(T.get("root_taper", 0.0)))
                 locks.append((p, v0, len(bld.v), flick))
         chains.append((side, locks))
     ob = bld.object("Pigtails")
@@ -595,6 +597,28 @@ def keyhole(body, arm, rig, K, sp):
     bld = WP.Builder()
     n = 0
     r = float(sp.get("r", 0.0035))
+    if sp.get("path_px"):
+        # (the outline traced on the front view as one polyline, [col, row] px: one clean neon tube along the
+        # sweetheart edge and down the bolt, where sampling the art's neon pixels by cell gave scattered specks)
+        q = np.array([[(c - c0) / k_px, (r0 - rw) / k_px] for c, rw in sp["path_px"]], float)
+        s = np.concatenate([[0.0], np.cumsum(np.linalg.norm(np.diff(q, axis=0), axis=1))])
+        ts = np.linspace(0.0, s[-1], max(2, int(s[-1] / float(sp.get("step", 0.003)))))
+        q = np.stack([np.interp(ts, s, q[:, 0]), np.interp(ts, s, q[:, 1])], axis=1)
+        pts = []
+        # (`offset` [dx, dz] m in the fitted frame: the body's pose fit moves the torso off the plain transform)
+        ox, oz = sp.get("offset", [0.0, 0.0])
+        for x, z in q:
+            p = M @ Vector((float(x), 0.0, float(z)))
+            hit = bvh.ray_cast((p.x + ox, 1.0, p.z + oz), (0.0, -1.0, 0.0))
+            if hit[0] is not None:
+                pts.append(np.array(hit[0][:]) + np.array(hit[1][:]) * float(sp.get("lift", 0.0015)))
+        pts = np.array(pts)
+        for _it in range(2):
+            pts[1:-1] = pts[1:-1] * 0.5 + (pts[:-2] + pts[2:]) * 0.25
+        bld.tube(pts, [r] * len(pts), int(sp.get("sides", 6)), 0, 1, 0, 1, "neon", [0.0] * len(pts),
+                 cap_start=True, cap_end=True)
+        n = len(pts)
+        x1 = x0           # (no cells)
     for x in np.arange(x0, x1, cell):
         for z in np.arange(z0, z1, cell):
             ca, cb = int(c0 + x * k_px), int(c0 + (x + cell) * k_px)
