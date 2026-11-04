@@ -1299,9 +1299,34 @@ def cut_straddle(ob, spec):
     bm.faces.ensure_lookup_table()
     cut = [f for f in bm.faces if f.calc_center_median().z < zmax and len({ch[v.index] for v in f.verts}) > 1]
     bmesh.ops.delete(bm, geom=cut, context="FACES")
+    # (and the slivers the cut leaves hanging: small islands below the shoulder)
+    small = int(spec.get("min_island", 0))
+    dropped = 0
+    if small:
+        bm.faces.ensure_lookup_table()
+        seen = set()
+        gone = []
+        for f0 in bm.faces:
+            if f0.index in seen:
+                continue
+            isl, stack = [], [f0]
+            seen.add(f0.index)
+            while stack:
+                f = stack.pop()
+                isl.append(f)
+                for e in f.edges:
+                    for g in e.link_faces:
+                        if g.index not in seen:
+                            seen.add(g.index)
+                            stack.append(g)
+            if len(isl) < small and all(f.calc_center_median().z < zmax for f in isl):
+                gone += isl
+        dropped = len(gone)
+        bmesh.ops.delete(bm, geom=gone, context="FACES")
+        bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
     bm.to_mesh(ob.data)
     bm.free()
-    log("cut straddle: %d faces between the arms and the body below z %.2f" % (len(cut), zmax))
+    log("cut straddle: %d faces between the arms and the body below z %.2f, %d sliver faces" % (len(cut), zmax, dropped))
 
 
 def keep_weights(ob):
