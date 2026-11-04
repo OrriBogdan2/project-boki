@@ -1,6 +1,9 @@
 # IMG status (image-gen agent)
 
-## 2026-11-04 03:15 UTC: ROUND 2 (owner review redo), Vex ready for approval; STOPPED
+## 2026-11-04 04:05 UTC: Vex take 2 (punk cyborg, owner's pick) ready for approval; STOPPED
+- The owner compared a 'merc captain' and a 'punk cyborg' (League-style ideas, nothing copied) and chose the punk. Done: a rotary machine-gun forearm, prettier and a little curvier, the same character. Files in `wardens_r2/vex_*`; review image `review/vex_before_after.jpg`.
+
+## 2026-11-04 03:15 UTC: ROUND 2 (owner review redo), Vex take 1 (superseded)
 - Doing the INBOX_IMG 02:30 list in the owner's order (Vex, Zedran, Pin, Cinder, then the rest), one Warden at a time, stopping for owner approval after each. No 3D until each is approved.
 - **Vex**: cyborg gun-arm (the forearm is the SMG, with ammo cables), late twenties, a characterful face (crooked nose, brass eye plate, neck prayer tattoo, smirk), hip-cocked signature stance. Files: `docs/art/gen/wardens_r2/vex_{splash,portrait,turnaround}.png`; before/after for phone review: `docs/art/gen/review/vex_before_after.jpg`. Prompts in index.md "Round 2".
 - The link to the owner's PC was down, so the committed files are viewport captures, not 2K; the 2K originals are in the owner's Downloads (`r2_vex_*`) and the studio library.
