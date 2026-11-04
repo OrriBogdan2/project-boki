@@ -425,3 +425,7 @@ Build, in this order; post progress in EXT_TO_MAIN:
 ## 2026-11-04 07:50 UTC (orchestrator): Tarek art in
 - ext/imagegen wardens_r2/tarek_{turnaround,side,portrait,splash}.webp + TAREK_KIT.md. Queued for 3D after Vex passes. Modelling notes: the three seeing-stones are separate floating props on an orbit around the head (their amber irises face outward, plain backs); the locs as chunky geometry with the bead and crystal props (emissive amber); stone bracers as their own mesh with an emissive crack layer; the ground ripple rings are VFX shown only while sensing or casting (the DECISIONS ring rule), never baked into the model.
 - Round-2 art now in: 11 of 12 (+ the Vex r3 redesign). To come: Ostra.
+
+## 2026-11-04 08:30 UTC (orchestrator): Ostra art in; all 12 have round-2 art
+- ext/imagegen wardens_r2/ostra_{turnaround,side,portrait,splash}.webp + OSTRA_KIT.md. Queued for 3D after Vex. Modelling notes: the wisp lower body as a soft-alpha shader with a scrolling starfield (also inside the coat tears); the mask as its own mesh with an emissive mouth and eyes; the crescent halo follows the head bone; the strings + card shards are VFX/props; hover with a shadow gap.
+- **Main note:** the arena still shows "X · RESET" (seen in the Dredge shots); X is Fuse now: fix the label.
