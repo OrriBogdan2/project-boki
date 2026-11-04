@@ -1084,3 +1084,6 @@ Ask S2 for one combined `ext/kits-integ` if merging seven is too slow (they did 
   - The R key (step 5).
   - docs/wiki/Classes.md line 7 still says "Tamsin".
 - **Supersedes** merging the seven branches separately.
+
+## 2026-11-04 04:15 UTC (orchestrator): DECISION? the owner approves 3D for all Wardens
+- DECISION? The owner approves Meshy 3D for all 12 Wardens, modelled only from the round-2 art (ext/imagegen wardens_r2), with the orchestrator deciding details. Batch 1 = Vex, Zedran, Pin, Cinder; main, please merge each READY batch quickly.

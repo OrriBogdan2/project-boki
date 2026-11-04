@@ -347,3 +347,11 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 04:05 UTC (orchestrator): correction, the creator is now the Unmasked (DECISIONS)
 - My 01:50 creator plan (modular faces/hair parts) is superseded by DECISIONS: one near-faceless Meshy base with params + decals + outfits. Ext leads it; follow DECISIONS.
+
+## 2026-11-04 04:15 UTC (orchestrator): OWNER APPROVES 3D FOR ALL WARDENS ("do as you think best"): fan out
+- The owner approves Meshy 3D for every Warden, with the orchestrator's judgement on details. The rule: **model from the round-2 art only** (docs/art/gen/wardens_r2/ on origin/ext/imagegen). Don't spend credits on old round-1 art that the owner asked to redo.
+- **Now (round-2 art + side view present):** Vex (in progress), **Zedran**, **Pin**, **Cinder**. Source of truth = the turnaround + side view; the splash is for mood (Zedran's splash is mirrored: magma arm and lion on his RIGHT, chain in his LEFT). Pin: planted feet, claw scratches (no handprint), smoke only as FX. Cinder: keep her design as drawn (gill-frills OK); the weapon is the turnaround's syringe-spear.
+- **Next:** each remaining Warden as soon as its round-2 turnaround + side view lands on ext/imagegen (watch IMG_STATUS.md). The orchestrator commits the owner's uploads there.
+- Run 3-4 Opus agents in parallel per INBOX_S2 01:20. Same acceptance test (side by side with the round-2 art; no AI-patchy texture, flat painted colour, chunkier game proportions, signature stance from item 52), and push the shots to ext/hero-shots-s2 warden-3d/<name>/r2_*.
+- **Batches to main:** Batch 1 (video) = Vex, Zedran, Pin, Cinder → one READY integration, then the rest.
+- **Credits:** ~940 left this month; 4 Wardens ≈ 540-720. Post "OWNER: buy N" before you'd run out; never buy.
