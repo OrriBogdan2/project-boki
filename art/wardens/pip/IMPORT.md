@@ -29,3 +29,20 @@ WardenGlb.ART: tender -> pip. Built by script, nothing hand-edited in Blender; r
   the Gun: it rides the hand, and the Gun, its Muzzle and the hit ring are unchanged.
 - Imports: the extracted atlases lossless (`compress/mode=0`); `pip.glb.import`: `generate_lods=false`,
   `force_disable_compression=true`.
+
+## Stage 2 (the Vex r3c recipe, INBOX_S2 11:25; refs pip_front / pip_head_sheet / pip_lantern_sheet, 12:40)
+- **Arms free (the stage-1 gap):** a new Meshy body (run B, 58 credits): the front and back edits redrawn with
+  both arms out in an A-pose, a clear gap to the flanks and the cape hanging behind them (pip_front.webp), the
+  side view as before; baked and refitted (new joints, the tail path and box). The arms swing clear of the flanks
+  and cape; no skin flap.
+- **Proportions:** body.legs 1.45 (was 1.2) so the rig's hips land on the new body's; size 0.84 keeps her 0.74 of
+  a medium; hit radius 0.34.
+- **Paint-over:** `smooth` and `ramps` of pip_front's colours (dusty pink fur, cream belly and tail tip, teal cape,
+  brown leather, brass). The face is the scan's own (it matches the head sheet; no projection).
+- **Lantern:** in her LEFT paw now (pip_front and the portrait), head-sized (1.75x), the portrait's look: a copper
+  box whose four faces are pointed-arch windows round a warm flame (glow slot), and it casts light: an
+  OmniLight3D on `anchor_lantern` (warden_look.json `pip` lights; WardenGlb._lights).
+- **Wings:** more opaque cards with a stronger pink outline, white veins and rim, card glow 0.4, so they read on
+  bright ground.
+- **Look** (warden_look.json `pip`): skin and cloth rims and match-camera lift, glow 2.4, the lantern light.
+- **Stance** (warden_stance.json tender): the left paw out, holding the lantern clear of her leg.

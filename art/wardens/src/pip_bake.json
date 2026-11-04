@@ -1,7 +1,7 @@
 {
- "high": "~/meshy/pip_r2/runA/glb.glb",
- "out": "~/meshy/pip_r2/bake/low.glb",
- "blend": "~/meshy/pip_r2/bake/bake.blend",
+ "high": "~/meshy/pip_r2/runB/glb.glb",
+ "out": "~/meshy/pip_r2/bakeB/low.glb",
+ "blend": "~/meshy/pip_r2/bakeB/bake.blend",
  "tris": 36000,
  "tex": 4096,
  "head": {

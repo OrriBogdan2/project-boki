@@ -235,3 +235,13 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Pip edit back 2 | 09:14 | 01a1a5d6-d524-74d8-851c-bc3b92eee529 | nano-banana-pro | back edit: the tail out to the side, no back leaf | 9 | Kept (the tail goes to her right here, to her left in the front view; Meshy followed the front) |
 | Pip edit back 3 | 09:15 | 01a1a5d7-a0aa-77c4-821c-77445f689102 | nano-banana-pro | back edit 2: the tail to the other side | 9 | Dropped: unchanged |
 | Pip A | 09:18 | 01a1a5da-06f4-75c9-9568-ec9702d633a6 | meshy-7.1 | edited front, side, back 2 (+ texture refs), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** |
+
+### Stage 2: Pip (tender), 2026-11-04 (58 credits; balance 4233 before, 4130 after with other agents' spend)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Pip edit front 2 | 11:21 | 01a1a64a-95d2-7529-9e37-9c7c911e62ce | nano-banana-pro (image-to-image) | the stage-1 front edit: arms out in an A-pose, clear of the flanks; the cape behind them | 9 | Kept |
+| Pip edit back 2b | 11:21 | 01a1a64a-95c5-7404-a3ab-1bf17187f7a5 | nano-banana-pro | the stage-1 back edit 2, the same | 9 | Kept |
+| Pip B | 11:23 | 01a1a64c-58ac-7471-8a83-4ef99eb35c66 | meshy-7.1 | edited front 2, the stage-1 side, edited back 2b (+ texture refs); as A | 40 | **Kept**: the arms free of the flanks and cape |
+Then the r3c recipe: re-baked (art/wardens/src/pip_bake.json) and refitted (new joints, body.legs 1.45, size 0.78),
+ramps of pip_front's colours, the lantern in her left paw with arched panes and a light, stronger wing cards,
+warden_look.json `pip`, the tender stance's left paw out. IMPORT.md "Stage 2".

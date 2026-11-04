@@ -18,7 +18,7 @@ const WARDENS := {
 	"archer": {"hit_r": 0.37, "height": 0.98, "width": [0.7, 1.15], "moves": "arc_"},
 	"gunslinger": {"hit_r": 0.4, "height": 1.04, "width": [0.7, 1.3], "moves": "gunslinger_"},     # (slim, per her art)
 	# (Pip's tall fox ears stand over her head)
-	"tender": {"hit_r": 0.34, "height": 0.74, "height_3d": 0.8, "width": [0.5, 1.3], "moves": "mm_"},
+	"tender": {"hit_r": 0.34, "height": 0.74, "height_3d": 0.84, "width": [0.5, 1.3], "moves": "mm_"},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured

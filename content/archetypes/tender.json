@@ -8,10 +8,10 @@
 	"weight": "medium",
 	"plate_offset": 2.05,
 	"body": {
-		"size": 0.84,
+		"size": 0.78,
 		"hit_r": 0.34,
 		"head": 0.78,
-		"legs": 1.2,
+		"legs": 1.45,
 		"neck": -0.1
 	},
 	"color": "#ffc46a",

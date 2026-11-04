@@ -30,5 +30,52 @@
 				"glow": 1.8
 			}
 		}
+	},
+	"pip": {
+		"painted": {},
+		"slots": {
+			"skin": {
+				"top_light": 0.35,
+				"fres": 0.45,
+				"far_lift": 0.25,
+				"shade": 0.84,
+				"shadow_tint": [
+					0.97,
+					0.9,
+					0.92
+				]
+			},
+			"cloth": {
+				"far_lift": 0.45,
+				"fres": 0.5
+			},
+			"leather": {
+				"far_lift": 0.35
+			},
+			"metal": {
+				"fres": 0.5,
+				"fres_tint": 0.8,
+				"far_lift": 0.3
+			},
+			"glow": {
+				"glow": 2.4
+			},
+			"card": {
+				"sheen": 0.6,
+				"glow": 0.4
+			}
+		},
+		"lights": [
+			{
+				"anchor": "anchor_lantern",
+				"colour": [
+					1.0,
+					0.72,
+					0.35
+				],
+				"energy": 1.6,
+				"range": 2.2
+			}
+		]
 	}
 }
