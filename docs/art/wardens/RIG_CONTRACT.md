@@ -61,6 +61,21 @@ The kit moves (`kmoves_*.gd`) only key channels on these nodes (`p` pitch, `y` y
 squash, `fx`/`fy`/`fz` whole-body turns, `legs` [hip, knee, hip, knee], `fl`/`fr` free-hand targets, `gp` weapon
 pitch, `blade`/`wa`/`wo` the weapon's swing), so a .glb that follows these bones gets every move for free.
 
+### Spring chains (hair, braids, tails that swing)
+Bones named `spring_<name>_<i>` form a chain: the first is a child of a contract bone (a braid hangs from `head`),
+each is the next one's parent, and the last is the tip (no skin of its own; its head is the chain's end). The
+loader (`WardenGlb.Springs`, run by Sync after the contract bones) swings every chain as a damped rope in world
+space, pulled back toward the shape it has riding its parent rigidly (firmer at the root than at the tip), so it
+trails behind a run, swings out of a turn and settles. Nothing in the kit moves or the checks depends on them.
+`tools/meshy/warden_parts.py` builds Vex r3b's two braids this way.
+
+### Design variants
+Another design of the same Warden can sit beside the shipped model while the owner compares them:
+`art/wardens/<art>_<tag>/<art>_<tag>.glb` (e.g. `vex_r3b`), built on the same rig. `--warden-variant=vex_r3b`
+picks it for the session (comma-separated for several), and a Settings `warden_models` value of `vex_r3b` for
+that Warden picks it in the save; with neither, or with the file missing, the Warden's own `<art>.glb` loads.
+Whichever design the owner picks ships as `<art>/<art>.glb`.
+
 ## Nodes the game keeps from the procedural rig (do not model these into the body)
 - `Rig/Torso/Aim/Gun` and its children: the held weapon (`Models.gun_parts`, `PinBjornWeapons`), its `Muzzle`
   (shots leave from it), `Mag` (reload anim), Bjorn's `Hammer` pivot (meta `hammer_pivot`; BjornFx finds the
@@ -114,7 +129,8 @@ slots at most ±35% per channel from the Warden's own colours. Bone names may co
 The armature and its meshes sit at the .glb's origin (no offset on the scene root), so skeleton space is model space.
 
 ## Budget and checks
-- About 8–15k triangles per Warden, one 1024² atlas; no more than 8 material slots.
+- At most 45k triangles on the model (the owner's 30-40k for the top-down camera, INBOX_S2 2026-11-04 05:00,
+  with braids); the weapon is counted on its own. A baked 4096² atlas (lossless import); no more than 8 slots.
 - `--warden-glb-check`: the bone table covers every part HunterAnim binds; a Warden without a .glb builds the
   procedural model (the fallback); a .glb present loads with the contract armature, every kit move of every
   table retargets exactly and each keyed channel moves its bones, the anchors ride bone attachments, every

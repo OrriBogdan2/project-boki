@@ -43,12 +43,25 @@ const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
 const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline shell
-const PAINTED_SHADE := 0.72     # a painted atlas's shadow floor (the hero shader's own is 0.37)
-const PAINTED_RAMP := 2.6       # and its terminator, softer than the hero shader's 0.5
+## Pieces built as clean geometry (tools/meshy/warden_parts.py), "<slot>-<tag>": they take the ink line even on
+## an inkless slot (the hair goes without it for a scan's ragged strands, not for a woven braid).
+const INK_TAGS := ["braid"]
+## The hero toon shader on a painted atlas, which carries its own light and shade: the toon light on top stays
+## soft and near white (no violet shadow, no warm terminator band, no sun self-shadow, no brushwork), so the
+## model reads as bright as its paint, as the art does; the shadow floor is 0.37 on a procedural hero.
+const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(0.97, 0.94, 0.95), "shadow_sat": 0.0, "sss": 0.0,
+	"sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.7, "fres_tint": 0.8, "rim_amount": 0.6,
+	"top_light": 1.6, "far_lift": 0.3}
 const GLOW := 1.6              # emission of the glow slot (mechanical eyes, cracks), x its painted colour
+## The ink shell on a painted atlas: half the procedural heroes' width per metre of camera distance (the same
+## 4 mm line close up). At the match camera a full-width line round every belt, buckle and candle of a scanned
+## model added up to a dark smudge.
+const INK_WIDTH := 0.0006
+static var _ink: ShaderMaterial
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
-## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model.
+## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model (or a design
+## variant's name, art()).
 const SETTING := "warden_models"
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
 const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
@@ -56,10 +69,34 @@ const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (Hunte
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
 static var _measuring := false  # building that neutral model: no .glb on it
+static var _variants = null     # art name -> the design variant the command line picks (variant())
 
 static func path(arch: String) -> String:
-	var nm := String(ART.get(arch, arch))
+	var nm := art(arch)
 	return "%s/%s/%s.glb" % [DIR, nm, nm]
+
+## The folder and file name of a Warden's model: its art name, or a design variant picked for it. A variant is
+## another design of the same Warden, built on the same rig and kept beside the shipped model so the two can be
+## compared in game (art/wardens/<art>_<tag>/<art>_<tag>.glb, e.g. vex_r3b): `--warden-variant=vex_r3b`
+## (comma-separated for several) picks it for the session, and a Settings warden_models value of "vex_r3b"
+## for that Warden picks it in the save. A variant whose file is missing falls back to the shipped model.
+static func art(arch: String) -> String:
+	var nm := String(ART.get(arch, arch))
+	var v := variant(nm)
+	if v == "":
+		var pick := String((Settings.get_v(SETTING) as Dictionary).get(arch, ""))
+		v = pick if pick.begins_with(nm + "_") else ""
+	return v if v != "" and ResourceLoader.exists("%s/%s/%s.glb" % [DIR, v, v]) else nm
+
+## The variant `--warden-variant=` picks for an art name ("" for none).
+static func variant(nm: String) -> String:
+	if _variants == null:
+		_variants = {}
+		for a in OS.get_cmdline_user_args():
+			if String(a).begins_with("--warden-variant="):
+				for v in String(a).get_slice("=", 1).split(",", false):
+					_variants[v.get_slice("_", 0)] = v
+	return String((_variants as Dictionary).get(nm, ""))
 
 static func has_model(arch: String) -> bool:
 	return arch != "" and ResourceLoader.exists(path(arch))
@@ -179,7 +216,8 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 			var slot := String(src.resource_name).get_slice("-", 0) if src else ""      # ("<slot>-<texture>")
 			# the ink shell on the body's silhouette only: on the scan's thin hair strands it poked through as
 			# lines across the face
-			var m := Models.toon(src.albedo_color if src else Color.WHITE, not slot in NO_INK)
+			var tag := String(src.resource_name).get_slice("-", 1) if src else ""
+			var m := Models.toon(src.albedo_color if src else Color.WHITE, not slot in NO_INK or tag in INK_TAGS)
 			# (no baked AO in a Meshy model's vertex colour: the array is absent and would read as noise)
 			m.set_shader_parameter("vertex_ao", false)
 			m.set_shader_parameter("surface", int(SLOTS.get(slot, 1)))
@@ -188,21 +226,24 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 				m.set_shader_parameter("albedo_tex", src.albedo_texture)
 				m.set_shader_parameter("use_tex", true)
 				m.set_shader_parameter("albedo", _tint(slot, lk, warden))
-				# the atlas is painted already: no procedural brushwork on top (it is scaled per triangle,
-				# so on a scanned mesh's long thin triangles it shows as facets); metal keeps its gloss and rim
-				m.set_shader_parameter("surface", 0)
-				m.set_shader_parameter("paint", 0.0)
-				# and its light and shade are painted in too: a soft, light toon ramp on top, so the scan's
-				# small bumps don't break into hard light/shadow facets (STYLE.md's flat painted read)
-				m.set_shader_parameter("shade", PAINTED_SHADE)
-				m.set_shader_parameter("ramp", PAINTED_RAMP)
-				m.set_shader_parameter("shadow_sat", 0.0)
-				m.set_shader_parameter("self_shadow", 0.0)
+				# (metal keeps its gloss and rim)
+				for k in PAINTED:
+					m.set_shader_parameter(k, PAINTED[k])
+				if m.next_pass:
+					m.next_pass = _painted_ink()
 			if slot == "glow":
 				m.set_shader_parameter("glow", GLOW)
 			(mi as MeshInstance3D).set_surface_override_material(si, m)
 			out.append(m)
 	return out
+
+static func _painted_ink() -> ShaderMaterial:
+	if _ink == null:
+		_ink = ShaderMaterial.new()
+		_ink.shader = Models.OUTLINE
+		_ink.set_shader_parameter("width", INK_WIDTH)
+		_ink.set_shader_parameter("ink_mask", true)      # (the fit's ink room in the vertex colour)
+	return _ink
 
 ## How far the player's colour pick moves a painted slot from the Warden's own colour (white: not at all).
 static func _tint(slot: String, lk: Dictionary, warden: Dictionary) -> Color:
@@ -232,6 +273,7 @@ class Sync extends Node:
 	var root: Node3D
 	var skel: Skeleton3D
 	var links: Array = []       # [bone index, rig node, node rest (model space) inverse, bone rest (skeleton space)]
+	var springs := Springs.new()  # the spring_ bone chains (braids) swinging on top
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -244,10 +286,91 @@ class Sync extends Node:
 				continue
 			links.append([bi, nd, (rest[b] as Transform3D).affine_inverse(), skel.get_bone_global_rest(bi)])
 		links.sort_custom(func(a, c): return int(a[0]) < int(c[0]))     # parents before children
+		springs.setup(skel)
 
-	func _process(_dt: float) -> void:
+	func _process(dt: float) -> void:
 		apply()
+		springs.step(dt)
 
 	func apply() -> void:
 		for l in links:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
+
+## Hanging pieces on bone chains (RIG_CONTRACT "Spring chains"): bones named spring_<name>_<i>, each the next
+## one's parent, the first a child of a contract bone (a braid hangs from the head). Each chain is a rope of its
+## joints in world space: it keeps its momentum (damped), is pulled back toward the shape it has riding its parent
+## rigidly (firmer at the root than at the tip), and keeps its links' lengths, so a braid trails behind a run,
+## swings out of a turn and settles when she stands. The last bone is the tip (no skin of its own).
+class Springs:
+	const PREFIX := "spring_"
+	const PULL := 0.2           # the share of the way back to the rest shape per 1/60 s, at the root
+	const PULL_TIP := 0.07      # and at the tip
+	const DAMP := 0.84          # the velocity kept per 1/60 s
+	var skel: Skeleton3D
+	var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world)}
+
+	func setup(skeleton: Skeleton3D) -> void:
+		skel = skeleton
+		for bi in skel.get_bone_count():
+			var par := skel.get_bone_parent(bi)
+			if not _spring(bi) or par < 0 or _spring(par):
+				continue
+			var ids: Array = [bi]
+			var cur := bi
+			while true:
+				var kids: Array = Array(skel.get_bone_children(cur)).filter(func(c): return _spring(c))
+				if kids.is_empty():
+					break
+				cur = int(kids[0])
+				ids.append(cur)
+			if ids.size() >= 2:
+				chains.append({"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array()})
+
+	func _spring(bi: int) -> bool:
+		return skel.get_bone_name(bi).begins_with(PREFIX)
+
+	func step(dt: float) -> void:
+		if chains.is_empty() or not skel.is_inside_tree():
+			return
+		var xf := skel.global_transform
+		var inv := xf.affine_inverse()
+		var k := clampf(dt * 60.0, 0.0, 3.0)
+		for ch in chains:
+			var ids: Array = ch["ids"]
+			var par := skel.get_bone_parent(int(ids[0]))
+			# each joint riding the parent rigidly: its rest relative to the parent's
+			var base := skel.get_bone_global_pose(par) * skel.get_bone_global_rest(par).affine_inverse()
+			var rest: Array = []
+			var want := PackedVector3Array()
+			for bi in ids:
+				var r: Transform3D = base * skel.get_bone_global_rest(int(bi))
+				rest.append(r)
+				want.append(xf * r.origin)
+			var n := want.size()
+			var pts: PackedVector3Array = ch["pts"]
+			var prev: PackedVector3Array = ch["prev"]
+			if pts.size() != n or pts[0].distance_to(want[0]) > 1.5:      # (the first frame, or a teleport)
+				pts = want.duplicate()
+				prev = want.duplicate()
+			for i in range(1, n):
+				var p := pts[i]
+				var v := (p - prev[i]) * pow(DAMP, k)
+				prev[i] = p
+				p += v
+				var pull := lerpf(PULL, PULL_TIP, float(i) / float(n - 1))
+				pts[i] = p.lerp(want[i], 1.0 - pow(1.0 - pull, k))
+			pts[0] = want[0]
+			prev[0] = want[0]
+			for i in range(1, n):
+				var d := pts[i] - pts[i - 1]
+				var ln := want[i].distance_to(want[i - 1])
+				pts[i] = pts[i - 1] + d.normalized() * ln if d.length() > 1e-5 else want[i]
+			ch["pts"] = pts
+			ch["prev"] = prev
+			for j in n - 1:
+				var r: Transform3D = rest[j]
+				var a := inv * pts[j]
+				var from := ((rest[j + 1] as Transform3D).origin - r.origin).normalized()
+				var to := (inv * pts[j + 1] - a).normalized()
+				var q := Quaternion(from, to) if from.dot(to) < 0.99999 and from.dot(to) > -0.999 else Quaternion.IDENTITY
+				skel.set_bone_global_pose(int(ids[j]), Transform3D(Basis(q) * r.basis, a))

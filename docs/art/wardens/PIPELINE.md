@@ -134,6 +134,41 @@ profile views before any run.
 - **Stance:** the Warden's carry in content/rules/warden_stance.json (ext/warden-stance) must suit the model:
   Vex r2's gun-arm hangs barrel-down at her right side.
 
+## r3b (Vex redesign, 2026-11-04): what changed
+The owner-approved redesign (ext/imagegen wardens_r3: green braids, cyber eye, minigun forearm) built beside the
+shipped Vex as the design variant `vex_r3b` (RIG_CONTRACT "Design variants"). Files: `art/wardens/src/vex_r3b_bake.json`,
+`vex_r3b_fit.json`; raw files in ~/meshy/vex_r3b/.
+1. **Inputs, edited before Meshy** (Meshy image-to-image, nano-banana-pro, 9 credits each, 9:16 crops of the turnaround
+   so the figure fills the frame): her left hand comes off her hip and hangs (Meshy fuses a hand on a hip), and
+   everything that hangs loose is taken out: **both braids** (built as geometry, step 5) and the hoses from the
+   backpack to the gun (Meshy fuses them to the hip). The side view had to say "her left arm is hidden behind her
+   body" (the first edit drew it hanging behind her back). A green lens the edit invented on the back ring was
+   painted dark by hand. Then each view is padded square on its own grey.
+2. **Meshy at max** (meshy-7.1, geometry 2k, meshy-7 texture 8k, PBR, should_remesh false, a-pose, the four views
+   front / 3-4 / side / back as images and texture references). Two runs, image enhancement off and on: off kept
+   (its face has the art's sultry smirk; on gave a rounder, cuter face and stringy hair cards).
+3. **Bake** (bake_warden.py): 1.15M -> 36k triangles (head 9k), new UVs, 4096 atlas baked from the dense mesh.
+4. **Fit** (fit_warden.py), new options:
+   - `scale_joints`: the body is scaled so the hip-to-shoulder span is the rig's (the redesign is long-legged:
+     scaling by the hips' height stretched her torso 30% and her upper arms 40%; now only the legs shorten, the
+     chunkier game build). `snap_y: false` keeps the measured depths (hair behind the neck moved the neck 11 cm).
+   - The gun-arm cut by direction: `r_in` toward her body, `r_side`, `r` on its outer side, `r_elbow` near the
+     elbow (the hip is 9 cm from the gun's axis; one radius either left the housing on the body or cut her side).
+   - `cap_flat`: a cut's cap takes one rim texel (rims across UV islands smeared unrelated paint over caps).
+   - **Paint-over** (`smooth`, `ramps`): an edge-preserving filter within UV islands takes out Meshy's grain, then
+     every texel is recoloured by a ramp of the art's colours by slot and by its own hue (hair, the green trim and
+     tattoos, the blacks, leather, the body's skin, gunmetal, brass); the face keeps its own paint (smoothed).
+   - Slot rules claim her mechanical side, the backpack and the collar as metal before the skin test (tan brass
+     read as skin).
+5. **Braids and eye as geometry** (tools/meshy/warden_parts.py, fit spec `braids`, `lens`):
+   - Each braid: three strand tubes woven round a path that is draped against the body (never through it), copper
+     wire wraps, steel bolts through some of them and a tuft of locks; its own small atlas (flat colours darkened by
+     an AO bake where the strands cross). It rides a chain of `spring_braid_*` bones under the head, which the game
+     swings (RIG_CONTRACT "Spring chains").
+   - The cyber eye: a brass rim and a glowing lens dome (the `glow` slot) on the eye plate; the scan's own lens and
+     the spike Meshy gave it are cut out first.
+6. **Godot:** the extracted atlases imported lossless (compress/mode 0); generate_lods off.
+
 ## Commercial terms (checked 2026-11-04, meshy.ai/terms-of-use section 3.2)
 - **Paid plans:** the customer owns the output ("to the extent possible under applicable law") and can keep it private.
 - **Free plans:** CC BY 4.0 with attribution to Meshy. **Use the owner's paid key only.**
@@ -162,3 +197,14 @@ profile views before any run.
 
 Vex total: 7 tasks, 190 credits (balance before r2: 940).
 
+
+### Vex r3b (redesign) runs, 2026-11-04 (balance 5118 before, 4993 after: 125 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Vex r3b edit front | 06:41 | 01a1a54a-4297-7610-aaf7-f5f4946778bb | nano-banana-pro (image-to-image) | 9:16 crop; left arm down, both braids out | 9 | Kept |
+| Vex r3b edit 3/4 | 06:41 | 01a1a54a-429a-762a-9fd6-9efd0c74b5b4 | nano-banana-pro | same | 9 | Kept |
+| Vex r3b edit side | 06:41 | 01a1a54a-4285-77f9-b4cd-592d713874ab | nano-banana-pro | braid and hoses out, arm down | 9 | Dropped: drew her left sleeve hanging behind her back |
+| Vex r3b edit back | 06:41 | 01a1a54a-42ac-71ee-afa0-70927fae1a0e | nano-banana-pro | arm down, braids and hoses out | 9 | Kept (a green lens it drew on the back ring painted dark) |
+| Vex r3b edit side 2 | 06:44 | 01a1a54c-f974-7239-9ea4-5a714210e1a8 | nano-banana-pro | as side, "her left arm hidden behind her body" | 9 | Kept |
+| Vex r3b A | 06:46 | 01a1a54f-35bf-734c-9ee7-55f81be998e5 | meshy-7.1 | 4 edited views (front, 3/4, side, back), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Kept: the face's smirk, chunky hair, eye plate on her right eye, gun-arm, backpack |
+| Vex r3b B | 06:46 | 01a1a54f-35c4-73d2-9fd2-ab8f7e9f5bce | meshy-7.1 | as A, enhancement on | 40 | Dropped: rounder cuter face, stringy hair; a cleaner lens (A's is replaced by geometry) |

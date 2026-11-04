@@ -124,14 +124,16 @@ def transform(ob, m):
     ob.data.update()
 
 
-def snap(ob, p, r):
-    """The middle of the mesh near joint p (vertices within r in the side view, at any depth)."""
+def snap(ob, p, r, keep_y=False):
+    """The middle of the mesh near joint p (vertices within r in the side view, at any depth). keep_y: the
+    given depth stays (hair hanging behind the neck or a backpack behind the shoulders move a depth midpoint)."""
     co = np.array([v.co[:] for v in ob.data.vertices])
     d = np.hypot(co[:, 0] - p.x, co[:, 2] - p.z)
     near = co[d < r]
     if len(near) < 8:
         return p
-    return Vector((float(near[:, 0].mean()), float((near[:, 1].min() + near[:, 1].max()) * 0.5), float(near[:, 2].mean())))
+    y = p.y if keep_y else float((near[:, 1].min() + near[:, 1].max()) * 0.5)
+    return Vector((float(near[:, 0].mean()), y, float(near[:, 2].mean())))
 
 
 def fit_armature(joints):
@@ -286,6 +288,147 @@ def slot_split(ob, img, palette, glow_min, tag):
     log("slots (%s):" % tag, counts)
 
 
+def _face_islands(ob):
+    """Each face's UV island (faces joined across edges whose UVs match on both sides)."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    lay = bm.loops.layers.uv.active
+    bm.faces.ensure_lookup_table()
+    island = [-1] * len(bm.faces)
+    n = 0
+    for f in bm.faces:
+        if island[f.index] >= 0:
+            continue
+        stack = [f]
+        island[f.index] = n
+        while stack:
+            g = stack.pop()
+            for lp in g.loops:
+                e = lp.edge
+                for other in e.link_faces:
+                    if island[other.index] >= 0:
+                        continue
+                    lo = next(x for x in other.loops if x.edge == e)
+                    a0, a1 = lp[lay].uv, lp.link_loop_next[lay].uv
+                    b0, b1 = lo[lay].uv, lo.link_loop_next[lay].uv
+                    if ((a0 - b1).length < 1e-5 and (a1 - b0).length < 1e-5) or \
+                            ((a0 - b0).length < 1e-5 and (a1 - b1).length < 1e-5):
+                        island[other.index] = n
+                        stack.append(other)
+        n += 1
+    bm.free()
+    return np.array(island)
+
+
+def _hsv(c):
+    mx, mn = float(c.max()), float(c.min())
+    d = max(mx - mn, 1e-6)
+    if mx == c[0]:
+        h = ((c[1] - c[2]) / d) % 6
+    elif mx == c[1]:
+        h = (c[2] - c[0]) / d + 2
+    else:
+        h = (c[0] - c[1]) / d + 4
+    return h / 6.0, (mx - mn) / mx if mx > 0 else 0.0, mx
+
+
+def slot_rules(ob, img, rules, glow_min, tag, default="skin", vote="island"):
+    """The toon slots by body region and painted colour (rules: first match wins; else `default`), then every
+    UV island takes its area's majority slot, so neighbouring triangles of one part never land on different
+    slots (a tinted slot beside an untinted one read as a patchwork of facets). A rule: slot, box [x0, x1, y0,
+    y1, z0, z1] in the Meshy frame (null: open; "absx": |x|), hsv [h0, h1, s0, s1, v0, v1] (null: any).
+    vote N (a number) instead: each face takes its neighbours' majority N times (a baked low mesh's UV islands
+    are whole parts, too big to vote on: the face and the hair would share one)."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    uv = ob.data.uv_layers.active.data
+    mats = slot_materials(img, [s for s in K.SLOTS if s != "team"] + ["fur"], tag)
+    ob.data.materials.clear()
+    order = list(mats)
+    for sl in order:
+        ob.data.materials.append(mats[sl])
+    inf = float("inf")
+    slot = []
+    area = []
+    for p in ob.data.polygons:
+        u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
+        v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
+        c = px[min(h - 1, max(0, int(v * h))), min(w - 1, max(0, int(u * w))), :3]
+        cen = p.center
+        got = default
+        if c[0] >= glow_min[0] and c[1] >= glow_min[1] and c[2] <= glow_min[2]:
+            got = "glow"
+        else:
+            hh, ss, vv = _hsv(c)
+            for r in rules:
+                b = [(-inf if x is None else x) if i % 2 == 0 else (inf if x is None else x)
+                     for i, x in enumerate(r.get("box") or [None] * 6)]
+                x = abs(cen.x) if r.get("absx") else cen.x
+                if not (b[0] <= x <= b[1] and b[2] <= cen.y <= b[3] and b[4] <= cen.z <= b[5]):
+                    continue
+                q = r.get("hsv")
+                if q:
+                    q = [(0.0, 1.0)[i % 2] if x is None else x for i, x in enumerate(q)]
+                    hue_ok = q[0] <= hh <= q[1] if q[0] <= q[1] else (hh >= q[0] or hh <= q[1])
+                    if not (hue_ok and q[2] <= ss <= q[3] and q[4] <= vv <= q[5]):
+                        continue
+                got = r["slot"]
+                break
+        slot.append(got)
+        area.append(p.area)
+    if vote != "island":
+        slot = _neighbour_vote(ob, slot, area, int(vote))
+        counts = {}
+        for p, sl in zip(ob.data.polygons, slot):
+            p.material_index = order.index(sl)
+            counts[sl] = counts.get(sl, 0) + 1
+        log("slots by rule (%s, neighbour vote x%d):" % (tag, int(vote)), counts)
+        return None
+    isl = _face_islands(ob)
+    votes = {}
+    for i, (sl, a) in enumerate(zip(slot, area)):
+        d = votes.setdefault(int(isl[i]), {})
+        d[sl] = d.get(sl, 0.0) + a
+    counts = {}
+    for i, p in enumerate(ob.data.polygons):
+        d = votes[int(isl[i])]
+        sl = slot[i] if slot[i] == "glow" and d.get("glow", 0.0) > 0.25 * sum(d.values()) else max(d, key=d.get)
+        p.material_index = order.index(sl)
+        counts[sl] = counts.get(sl, 0) + 1
+    log("slots by rule (%s, %d islands):" % (tag, int(isl.max()) + 1), counts)
+    return {k: max(d, key=d.get) for k, d in votes.items()}
+
+
+def _neighbour_vote(ob, slot, area, iterations):
+    """A mode filter on the faces: each takes the slot with the most area among itself and its edge neighbours,
+    `iterations` times (a lone face or a thin run of faces joins what surrounds it); glow stays where it is."""
+    names = sorted(set(slot))
+    lab = np.array([names.index(x) for x in slot])
+    ar = np.array(area)
+    glow = lab == names.index("glow") if "glow" in names else np.zeros(len(lab), bool)
+    pairs = np.array([e for e in _face_pairs(ob)], dtype=np.int64).reshape(-1, 2)
+    for _i in range(iterations):
+        votes = np.zeros((len(lab), len(names)))
+        votes[np.arange(len(lab)), lab] += ar
+        np.add.at(votes, (pairs[:, 0], lab[pairs[:, 1]]), ar[pairs[:, 1]])
+        np.add.at(votes, (pairs[:, 1], lab[pairs[:, 0]]), ar[pairs[:, 0]])
+        if "glow" in names:
+            votes[:, names.index("glow")] = -1.0
+        lab = np.where(glow, lab, votes.argmax(axis=1))
+    return [names[i] for i in lab]
+
+
+def _face_pairs(ob):
+    """The faces sharing each edge, as (face, face) pairs."""
+    by_edge = {}
+    for p in ob.data.polygons:
+        for k in p.edge_keys:
+            by_edge.setdefault(k, []).append(p.index)
+    for fs in by_edge.values():
+        if len(fs) == 2:
+            yield fs
+
+
 def project(ob, img, pj):
     """Paints one of the art's views straight onto the faces turned toward it inside a box (the face and beret
     from the front, the sigil plate from the side): Meshy's own texture there is softer than the art.
@@ -307,7 +450,12 @@ def project(ob, img, pj):
     me.calc_loop_triangles()
     uv = me.uv_layers.active.data
     x0, x1, z0, z1 = pj["box"]
-    k, col0, row0 = _register(me, src, pj, ax, sgn, pj.get("register_on"))
+    if "k" in pj:
+        # (a registration measured on the mesh's own render, tools: the figure-height guess can be cm off)
+        k, col0, row0 = float(pj["k"]), float(pj["col0_at"]), float(pj["row0_at"])
+    else:
+        k, col0, row0 = _register(me, src, pj, ax, sgn, pj.get("register_on"))
+    keep = pj.get("keep_hue")        # [h0, h1, sat_min]: texels already painted this colour keep it (hair)
     bg = src[ah - 1 - 5, 5, :3]
     painted = 0
     for t in me.loop_triangles:
@@ -341,6 +489,10 @@ def project(ob, img, pj):
         ty = np.clip(pts[inside, 1].astype(int), 0, h - 1)
         got = src[ah - 1 - row, col]
         art_px = np.abs(got[:, :3] - bg).sum(axis=1) > 0.12               # (the sheet's grey keeps Meshy's paint)
+        if keep:
+            cur = dst[ty, tx, :3]
+            hh, ss, _vv = _hsv_px(cur)
+            art_px &= ~((hh >= keep[0]) & (hh <= keep[1]) & (ss >= keep[2]))
         dst[ty[art_px], tx[art_px]] = got[art_px]
         painted += 1
     img.pixels = dst.ravel()
@@ -549,11 +701,14 @@ def pad(img, ids, steps):
     img.pixels = px.ravel()
 
 
-def lift(img, gamma, gain):
+def lift(img, gamma, gain, sat=1.0):
     """Meshy's albedo is a shade darker than the painted art and the toon shader darkens again: lift its values
-    (a gamma and a gain on the stored colour) so the model reads as light as the turnaround in game."""
+    (a gamma and a gain on the stored colour) so the model reads as light as the turnaround in game, and its
+    colours `sat` x as far from their grey (the art's orange and navy pop at the match camera)."""
     px = np.array(img.pixels[:], dtype=np.float32).reshape(-1, 4)
-    px[:, :3] = np.clip(np.power(px[:, :3], gamma) * gain, 0.0, 1.0)
+    rgb = np.power(px[:, :3], gamma) * gain
+    grey = rgb.mean(axis=1, keepdims=True)
+    px[:, :3] = np.clip(grey + (rgb - grey) * sat, 0.0, 1.0)
     img.pixels = px.ravel()
     img.pack()
 
@@ -618,20 +773,78 @@ def head_pass(body, spec):
 
 def outward(ob):
     """Consistent outward winding: Meshy's triangles come wound either way (about 8% inward), which Blender's
-    double-sided render hides but the game's back-face culling shows as dark triangle holes."""
+    double-sided render hides but the game's back-face culling shows as dark triangle holes. A piece cut open
+    (the gun-arm) can come out of the recalculation inside out: each part whose signed volume about its own
+    middle is negative is turned over (the game culls its outside and draws the ink shell over it, black)."""
     bm = bmesh.new()
     bm.from_mesh(ob.data)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    flipped = 0
+    for part in _face_parts(bm):
+        c = sum((v.co for f in part for v in f.verts), Vector()) / sum(len(f.verts) for f in part)
+        vol = 0.0
+        for f in part:
+            p = [v.co - c for v in f.verts]
+            for k in range(1, len(p) - 1):
+                vol += p[0].dot(p[k].cross(p[k + 1]))
+        if vol < 0.0:
+            bmesh.ops.reverse_faces(bm, faces=part)
+            flipped += 1
     bm.to_mesh(ob.data)
     bm.free()
     ob.data.update()
+    if flipped:
+        log("%s: %d inside-out parts turned over" % (ob.name, flipped))
+
+
+def _face_parts(bm):
+    seen = set()
+    for f in bm.faces:
+        if f.index in seen:
+            continue
+        part, stack = [], [f]
+        seen.add(f.index)
+        while stack:
+            g = stack.pop()
+            part.append(g)
+            for e in g.edges:
+                for o in e.link_faces:
+                    if o.index not in seen:
+                        seen.add(o.index)
+                        stack.append(o)
+        yield part
+
+
+def cap_holes(ob, flat=False):
+    """Closes the openings a cut leaves (the forearm the gun-arm came off, the gun's back end, a deleted belt
+    loop): the game's ink shell is drawn from the inside of a grown copy, so through an opening it shows as a
+    black hole. Each cap's corners take the UVs of the rim's own faces (the rim's paint carries across); flat:
+    the whole cap takes one rim texel (a rim across several UV islands smeared unrelated paint over the cap)."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    lay = bm.loops.layers.uv.active
+    rim = [e for e in bm.edges if e.is_boundary]
+    rim_uv = {v.index: v.link_loops[0][lay].uv.copy() for e in rim for v in e.verts if v.link_loops}
+    res = bmesh.ops.holes_fill(bm, edges=rim, sides=0)
+    caps = res["faces"]
+    for f in caps:
+        one = next((rim_uv[lp.vert.index] for lp in f.loops if lp.vert.index in rim_uv), None) if flat else None
+        for lp in f.loops:
+            if one is not None:
+                lp[lay].uv = one
+            elif lp.vert.index in rim_uv:
+                lp[lay].uv = rim_uv[lp.vert.index]
+    bmesh.ops.triangulate(bm, faces=caps)
+    bm.to_mesh(ob.data)
+    bm.free()
+    log("%s: %d openings capped" % (ob.name, len(caps)))
 
 
 def soft_normals(ob, iterations):
-    """Meshy's surface is lumpy at this density (a triangle's three vertex normals ~50 degrees apart), and the
-    toon shader's light/shadow split shows every lump as a facet: the shading normals are the vertex normals
-    averaged with their neighbours' `iterations` times (the shape itself stays; a smoothed copy's normals
-    flipped on thin parts like hair strands)."""
+    """Meshy's surface is lumpy at this density, and the toon shader's light/shadow split shows every lump as a
+    facet: the shading normals are the vertex normals averaged with their neighbours' `iterations` times (the
+    shape itself stays). Each neighbour counts by how much it faces the same way (squared): across a thin hair
+    strand or a candle the two sides face apart and don't mix, so their normals never cancel or flip."""
     if iterations <= 0:
         return
     me = ob.data
@@ -639,11 +852,41 @@ def soft_normals(ob, iterations):
     nrm = np.array([v.normal[:] for v in me.vertices], dtype=np.float64)
     ed = np.array([e.vertices[:] for e in me.edges], dtype=np.int64)
     for _i in range(iterations):
+        w = np.clip((nrm[ed[:, 0]] * nrm[ed[:, 1]]).sum(axis=1), 0.0, 1.0)[:, None] ** 2
         acc = nrm.copy()
-        np.add.at(acc, ed[:, 0], nrm[ed[:, 1]])
-        np.add.at(acc, ed[:, 1], nrm[ed[:, 0]])
+        np.add.at(acc, ed[:, 0], nrm[ed[:, 1]] * w)
+        np.add.at(acc, ed[:, 1], nrm[ed[:, 0]] * w)
         nrm = acc / np.maximum(np.linalg.norm(acc, axis=1, keepdims=True), 1e-9)
     me.normals_split_custom_set_from_vertices([tuple(x) for x in nrm[:nv]])
+
+
+def ink_room(ob, full):
+    """How far the game's ink shell may grow out of each vertex without poking through the model: half the
+    room along its shading normal, inward (a hair strand's, a frayed hem's or a candle's thickness) or outward
+    (a fold or the gap to the next part), as a fraction of `full` m in the vertex colour's red (Godot's
+    outline shader with ink_mask: thin and folded parts get a thin line instead of a ragged black fringe)."""
+    from mathutils.bvhtree import BVHTree
+    me = ob.data
+    tree = BVHTree.FromPolygons([v.co.copy() for v in me.vertices], [p.vertices[:] for p in me.polygons])
+    nrm = np.zeros((len(me.vertices), 3))
+    for lp in me.loops:
+        nrm[lp.vertex_index] += lp.normal[:]
+    nrm /= np.maximum(np.linalg.norm(nrm, axis=1, keepdims=True), 1e-9)
+    room = np.empty(len(me.vertices), np.float32)
+    for v in me.vertices:
+        n = Vector(nrm[v.index])
+        best = full * 2.0
+        for d in (n, -n):
+            hit = tree.ray_cast(v.co + d * 1e-4, d, best)
+            if hit[0] is not None:
+                best = min(best, hit[3])
+        room[v.index] = min(1.0, best * 0.5 / full)
+    attr = me.color_attributes.new("ink", "FLOAT_COLOR", "POINT")
+    col = np.ones((len(me.vertices), 4), np.float32)
+    col[:, 0] = room
+    attr.data.foreach_set("color", col.ravel())
+    me.color_attributes.active_color = attr
+    log("%s: ink room, %d%% of vertices with less than a full line" % (ob.name, int(100 * (room < 0.999).mean())))
 
 
 def rigid(ob, arm, bone):
@@ -664,12 +907,103 @@ def join(a, b):
     return a
 
 
+def _cut_lens(ob, ls):
+    """The scan's own lens under the geometry one (lens()): faces within cut_r of its axis and in front of
+    `cut_back` m behind its centre go (Meshy's lens came out with a spike)."""
+    c, n = Vector(ls["centre"]), Vector(ls["normal"]).normalized()
+    r, back = float(ls["cut_r"]), float(ls.get("cut_back", 0.004))
+
+    def drop(co):
+        d = co - c
+        a = d.dot(n)
+        return a > -back and (d - n * a).length < r
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    gone = [f for f in bm.faces if all(drop(v.co) for v in f.verts) or drop(f.calc_center_median())]
+    bmesh.ops.delete(bm, geom=gone, context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(ob.data)
+    bm.free()
+    log("lens cut: %d faces" % len(gone))
+
+
 def _cut(ob, drop):
     bm = bmesh.new()
     bm.from_mesh(ob.data)
     bmesh.ops.delete(bm, geom=[v for v in bm.verts if drop(v.co)], context="VERTS")
     bm.to_mesh(ob.data)
     bm.free()
+
+
+def weight_rules(ob, img, rules):
+    """Pieces bone heat gives to the wrong bone where two parts touch in Meshy's pose (Vex's left hand rests on
+    her hip: the belt, the shorts and the scroll under it went with the hand when the arm was lowered): every
+    vertex inside a rule's box (the fitted frame: her right +X, front +Y, soles on 0) whose painted colour
+    matches one of its hsv ranges [h0, h1, s0, s1, v0, v1] goes wholly to the rule's bone."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    uv = ob.data.uv_layers.active.data
+    col = np.zeros((len(ob.data.vertices), 3))
+    cnt = np.zeros(len(ob.data.vertices))
+    for lp in ob.data.loops:
+        u, v = uv[lp.index].uv
+        col[lp.vertex_index] += px[min(h - 1, max(0, int(v * h))), min(w - 1, max(0, int(u * w))), :3]
+        cnt[lp.vertex_index] += 1
+    col /= np.maximum(cnt, 1)[:, None]
+    for r in rules:
+        b = r["box"]
+        g = ob.vertex_groups.get(r["bone"]) or ob.vertex_groups.new(name=r["bone"])
+        moved = 0
+        for vx in ob.data.vertices:
+            c = vx.co
+            if not (b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]):
+                continue
+            hh, ss, vv = _hsv(col[vx.index])
+            if not any(q[0] <= hh <= q[1] and q[2] <= ss <= q[3] and q[4] <= vv <= q[5] for q in r["hsv"]):
+                continue
+            for x in vx.groups:
+                ob.vertex_groups[x.group].add([vx.index], 0.0, "REPLACE")
+            g.add([vx.index], 1.0, "REPLACE")
+            moved += 1
+        log("weight rule %s: %d vertices" % (r["bone"], moved))
+
+
+def keep_weights(ob):
+    """The fit's weights (bone heat on the A-pose, arms clear of the body) kept as point attributes "w_<bone>"
+    through the pose and the decimation: on the contract's rest pose the hanging arms touch the hips, and bone
+    heat there hands the flank to the upper arm (a skin flap from elbow to knee whenever the arm lifts)."""
+    groups = {g.index: g.name for g in ob.vertex_groups}
+    n = len(ob.data.vertices)
+    w = {name: np.zeros(n, np.float32) for name in groups.values()}
+    for v in ob.data.vertices:
+        for x in v.groups:
+            w[groups[x.group]][v.index] = x.weight
+    for name, arr in w.items():
+        a = ob.data.attributes.new("w_" + name, "FLOAT", "POINT")
+        a.data.foreach_set("value", arr)
+
+
+def fit_weights(ob, arm):
+    """The contract skin from the kept fit weights (keep_weights), normalised; bones the fit has no group for
+    (root, the pauldrons, skirt, tail) get none here."""
+    names = [a.name[2:] for a in ob.data.attributes if a.name.startswith("w_")]
+    n = len(ob.data.vertices)
+    ws = {}
+    for nm in names:
+        arr = np.empty(n, np.float32)
+        ob.data.attributes["w_" + nm].data.foreach_get("value", arr)
+        ws[nm] = np.clip(arr, 0.0, 1.0)
+    tot = np.maximum(sum(ws.values()), 1e-6)
+    ob.vertex_groups.clear()
+    for nm, arr in ws.items():
+        if arm.data.bones.get(nm) is None:
+            continue
+        g = ob.vertex_groups.new(name=nm)
+        arr = arr / tot
+        for i in np.nonzero(arr > 1e-3)[0]:
+            g.add([int(i)], float(arr[i]), "REPLACE")
+    _fill_weights(ob, arm)
+    log("contract skin from the fit's weights: %d groups" % len(ob.vertex_groups))
 
 
 def contract_skin(ob, rig):
@@ -755,14 +1089,40 @@ def gun_arm(ob, ga, m):
     ax = t - e
     n = ax.length
     ax.normalize()
-    r = float(ga["r"]) * m.to_scale().x
+    sc = m.to_scale().x
+    r = float(ga["r"]) * sc
+    # (a gun that hangs by the waist and hip: its reach toward her body (r_in) and to the front and back (r_side)
+    # is less than on its outer side (r), and near the elbow it is slenderer still: r_elbow over the first `taper`)
+    r_in = float(ga.get("r_in", ga["r"])) * sc
+    r_side = float(ga.get("r_side", ga["r"])) * sc
+    r0 = float(ga.get("r_elbow", ga["r"])) * sc
+    taper = float(ga.get("taper", 0.4))
     start = float(ga.get("from", 0.0))
+    inward = Vector((-1.0, 0.0, 0.0))           # (her right arm: her body is toward -X in the fitted frame)
+    inward = (inward - ax * inward.dot(ax)).normalized()
 
     def pick(co):
         d = co - e
         u = d.dot(ax) / n
-        return start - 0.02 <= u <= 1.06 and (d - ax * d.dot(ax)).length < r
+        if not start - 0.02 <= u <= 1.06:
+            return False
+        rv = d - ax * d.dot(ax)
+        dist = rv.length
+        c = rv.dot(inward) / max(dist, 1e-9)
+        rr = r_in if c > 0.5 else (r if c < -0.3 else r_side)
+        rr = min(rr, r0 + (rr - r0) * min(1.0, max(0.0, u / taper)))
+        return dist < rr
     return split_off(ob, pick, "weapon"), e, t
+
+
+def one_slot(ob, slot):
+    """Every face but the glowing ones onto one slot (the gun-arm is all metal: no skin or hair tint on it)."""
+    names = [m.name for m in ob.data.materials]
+    si = next(i for i, n in enumerate(names) if n.startswith(slot + "-"))
+    gi = [i for i, n in enumerate(names) if n.startswith("glow")]
+    for p in ob.data.polygons:
+        if p.material_index not in gi:
+            p.material_index = si
 
 
 def reglow(ob, img, glow_min):
@@ -837,6 +1197,13 @@ def touch_up(ob, img, rules):
                 sk = r["skip_hue"]
                 if sk[0] <= _hue(q) <= sk[1] and (q.max() - q.min()) / max(q.max(), 1e-6) >= sk[2] and q.max() > 0.35:
                     return False
+            if "sat_max" in r:
+                # (the grey parts only: a gunmetal gain leaves the brass bands alone)
+                u = sum(uv[i].uv.x for i in poly.loop_indices) / poly.loop_total
+                v = sum(uv[i].uv.y for i in poly.loop_indices) / poly.loop_total
+                q = px[min(h - 1, int(v * h)), min(w - 1, int(u * w)), :3]
+                if (q.max() - q.min()) / max(q.max(), 1e-6) > float(r["sat_max"]):
+                    return False
             if "hue" in r:
                 u = sum(uv[i].uv.x for i in poly.loop_indices) / poly.loop_total
                 v = sum(uv[i].uv.y for i in poly.loop_indices) / poly.loop_total
@@ -855,6 +1222,10 @@ def touch_up(ob, img, rules):
         elif r["mode"] == "flat":
             v = np.clip(val, r.get("val_lo", 0.85), r.get("val_hi", 1.05))
             out = np.clip(col * v, 0, 1)
+        elif r["mode"] == "gain":
+            # (darker or lighter, keeping the paint's own shading; k of the way to the colour's hue)
+            g = np.clip(rgb * float(r["gain"]), 0, 1)
+            out = g * (1 - r.get("k", 0.0)) + np.clip(col * (g.max(axis=1, keepdims=True) / max(float(col.max()), 1e-3)), 0, 1) * r.get("k", 0.0)
         else:
             out = np.broadcast_to(col, rgb.shape)
         px[m, :3] = out
@@ -1012,6 +1383,105 @@ def _close_gaps(w):
     bm.free()
 
 
+def smooth_atlas(img, ids, it, sigma_s, sigma_r):
+    """Edge-preserving smoothing of the atlas within UV islands (a bilateral filter): Meshy's painted grain and
+    speckle go, the edges between colours (a trim, a tattoo line, the eye) stay. The flat painted read of the art."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    rgb = px[..., :3].copy()
+    rad = int(math.ceil(sigma_s * 2))
+    offs = [(dy, dx) for dy in range(-rad, rad + 1) for dx in range(-rad, rad + 1) if dy * dy + dx * dx <= rad * rad]
+    for _i in range(it):
+        out = np.empty_like(rgb)
+        for y0 in range(0, h, 512):
+            y1 = min(h, y0 + 512)
+            ya, yb = max(0, y0 - rad), min(h, y1 + rad)
+            blk = rgb[ya:yb]
+            bid = ids[ya:yb]
+            acc = np.zeros((y1 - y0, w, 3), np.float32)
+            wsum = np.zeros((y1 - y0, w, 1), np.float32)
+            c = rgb[y0:y1]
+            ci = ids[y0:y1]
+            for dy, dx in offs:
+                sh = np.roll(blk, (-dy, -dx), axis=(0, 1))[y0 - ya:y0 - ya + (y1 - y0)]
+                si = np.roll(bid, (-dy, -dx), axis=(0, 1))[y0 - ya:y0 - ya + (y1 - y0)]
+                d2 = ((sh - c) ** 2).sum(axis=2, keepdims=True)
+                wt = np.exp(-(dy * dy + dx * dx) / (2 * sigma_s * sigma_s) - d2 / (2 * sigma_r * sigma_r))
+                wt = wt * (si == ci)[..., None]
+                acc += sh * wt
+                wsum += wt
+            out[y0:y1] = acc / np.maximum(wsum, 1e-6)
+        rgb = np.where((ids >= 0)[..., None], out, rgb)
+    px[..., :3] = rgb
+    img.pixels = px.ravel()
+    log("smoothed the atlas: %d passes, sigma %.1f px / %.2f" % (it, sigma_s, sigma_r))
+
+
+def _hsv_px(rgb):
+    mx = rgb.max(axis=-1)
+    mn = rgb.min(axis=-1)
+    d = np.maximum(mx - mn, 1e-6)
+    r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+    hue = np.where(mx == r, ((g - b) / d) % 6, np.where(mx == g, (b - r) / d + 2, (r - g) / d + 4)) / 6.0
+    sat = np.where(mx > 1e-6, (mx - mn) / np.maximum(mx, 1e-6), 0.0)
+    return hue, sat, mx
+
+
+def ramp_paint(ob, img, rules):
+    """The paint-over by colour ramps (owner: flat, clean, bright painted colour): each rule takes the texels of
+    its slots' faces whose own colour passes its hsv filter [h0, h1, s0, s1, v0, v1] (h0 > h1 wraps), and maps
+    their brightness (between the rule's `lum` or its own 3rd and 97th percentiles) onto a ramp of the art's
+    colours, dark to light: the shading Meshy painted stays, the colours become the art's."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    rgb = px[..., :3]
+    hue, sat, val = _hsv_px(rgb)
+    lum = rgb @ np.array([0.3, 0.59, 0.11], np.float32)
+    for r in rules:
+        slots = r.get("slots")
+        box = r.get("box")          # [x0, x1, y0, y1, z0, z1] on the face's centre, null for open
+
+        def pick(poly, c, mat, slots=slots, box=box):
+            if slots is not None and not any(mat.startswith(x + "-") for x in slots):
+                return False
+            if box:
+                b = [(-1e9 if x is None else x) if i % 2 == 0 else (1e9 if x is None else x) for i, x in enumerate(box)]
+                return b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]
+            return True
+        m = face_mask(ob, img, pick)
+        q = r.get("hsv")
+        if q:
+            h0, h1, s0, s1, v0, v1 = q
+            hue_ok = (hue >= h0) & (hue <= h1) if h0 <= h1 else (hue >= h0) | (hue <= h1)
+            m &= hue_ok & (sat >= s0) & (sat <= s1) & (val >= v0) & (val <= v1)
+        if not m.any():
+            log("ramp %s: no texels" % r.get("name", "?"))
+            continue
+        lo, hi = r.get("lum") or (float(np.percentile(lum[m], 3)), float(np.percentile(lum[m], 97)))
+        t = np.clip((lum[m] - lo) / max(hi - lo, 1e-3), 0.0, 1.0) ** float(r.get("gamma", 1.0))
+        cols = np.array([K.hexcol(c) for c in r["ramp"]], np.float32)
+        x = t * (len(cols) - 1)
+        i0 = np.clip(np.floor(x).astype(int), 0, len(cols) - 2)
+        f = (x - i0)[:, None]
+        new = cols[i0] * (1 - f) + cols[i0 + 1] * f
+        k = float(r.get("k", 1.0))
+        rgb[m] = rgb[m] * (1 - k) + new * k
+        log("ramp %s: %d texels, lum %.3f..%.3f" % (r.get("name", "?"), int(m.sum()), lo, hi))
+    px[..., :3] = rgb
+    img.pixels = px.ravel()
+
+
+def _rig_joint(rig, name):
+    """A fit joint's place on the rig (fit spec joint names: hip.L, shoulder.L, neck, ...)."""
+    bone = {"hip": "thigh", "shoulder": "upper_arm", "elbow": "forearm", "hand": "hand", "knee": "shin"}
+    if name == "neck":
+        return K.bone_head(rig, "head")
+    if name == "pelvis":
+        return K.bone_head(rig, "hips")
+    part, side = name.split(".")
+    return K.bone_head(rig, "%s.%s" % (bone[part], side))
+
+
 def main():
     spec_path = sys.argv[sys.argv.index("--") + 1]
     spec = json.load(open(spec_path))
@@ -1025,9 +1495,21 @@ def main():
     for pj in spec.get("project", []):
         project(ob, img, pj)
     pad(img, ids, int(spec.get("pad", 6)))
-    slot_split(ob, img, spec["palette"], spec["glow_min"], "body")
+    if "slot_rules" in spec:
+        slot_rules(ob, img, spec["slot_rules"], spec["glow_min"], "body", vote=spec.get("slot_vote", "island"))
+    else:
+        slot_split(ob, img, spec["palette"], spec["glow_min"], "body")
     if spec.get("touch_up"):
         touch_up(ob, img, spec["touch_up"])
+    if spec.get("smooth"):
+        sm = spec["smooth"]
+        smooth_atlas(img, ids, int(sm.get("iterations", 2)), float(sm.get("sigma_s", 2.0)), float(sm.get("sigma_r", 0.07)))
+    if spec.get("ramps"):
+        ramp_paint(ob, img, spec["ramps"])
+        for _i in range(int(spec.get("despeckle", 0))):
+            # (lone texels the ramps left, a green fleck on a black edge: a 3x3 median within each island)
+            flatten(img, np.zeros((1, 3), np.float32), 0.0, ids=ids)
+        pad(img, ids, int(spec.get("pad", 6)))
     head = None
     if "head" in spec:
         decimate(ob, spec["max_tris"] - int(spec["head"]["tris"]))
@@ -1038,12 +1520,19 @@ def main():
     co = np.array([v.co[:] for v in ob.data.vertices])
     sole = float(co[:, 2].min())
     hip_mid = (joints["hip.L"] + joints["hip.R"]) * 0.5
-    k = K.bone_head(rig, "thigh.L").z / (hip_mid.z - sole)
+    if "scale_joints" in spec:
+        # (a body whose proportions differ from the rig's: the span between two joints, e.g. hip to shoulder, gets
+        # the rig's length, and the pose compresses or stretches the rest; scaling by the hips' height instead
+        # would stretch a long-legged body's torso and arms)
+        a, b = spec["scale_joints"]
+        k = (_rig_joint(rig, b).z - _rig_joint(rig, a).z) / (joints[b].z - joints[a].z)
+    else:
+        k = K.bone_head(rig, "thigh.L").z / (hip_mid.z - sole)
     m = Matrix.Scale(k, 4) @ turn @ Matrix.Translation(Vector((-hip_mid.x, -hip_mid.y, -sole)))
     transform(ob, m)
     if head:
         transform(head, m)
-    joints = {n: snap(ob, m @ p, spec.get("snap_r", 0.045)) for n, p in joints.items()}
+    joints = {n: snap(ob, m @ p, spec.get("snap_r", 0.045), not spec.get("snap_y", True)) for n, p in joints.items()}
     gun = None
     if "gun_arm" in spec:
         gun, ge, gt = gun_arm(ob, spec["gun_arm"], m)
@@ -1054,6 +1543,8 @@ def main():
             reglow(gun, img, spec["gun_arm"]["glow_min"])
             if "glow_colour" in spec["gun_arm"]:
                 touch_up(gun, img, [{"mode": "paint", "slot": "glow", "colour": spec["gun_arm"]["glow_colour"]}])
+        if "slot" in spec["gun_arm"]:
+            one_slot(gun, spec["gun_arm"]["slot"])
 
     joints["pelvis"] = (joints["hip.L"] + joints["hip.R"]) * 0.5
     log("scale %.3f; joints:" % k, {n: tuple(round(x, 3) for x in p) for n, p in joints.items()})
@@ -1072,6 +1563,10 @@ def main():
         rj["fingers." + sd] = rj["hand." + sd] + Vector((0, 0, -0.08))
     fit = fit_armature(joints)
     auto_weights(ob, fit)
+    if spec.get("weight_rules"):
+        weight_rules(ob, img, spec["weight_rules"])
+    if spec.get("fit_weights"):
+        keep_weights(ob)
     if head:
         rigid(head, fit, "head")
     pose_to_rig(fit, rj)
@@ -1082,8 +1577,20 @@ def main():
     ob.name = "Body"
     ob.data.name = "Body"
     arm = contract_skin(ob, rig)
+    if spec.get("fit_weights"):
+        fit_weights(ob, arm)
     if "chunk" in spec:
         chunk(ob, rig, spec["chunk"])
+    parts = []
+    if spec.get("lens") or spec.get("braids"):
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import warden_parts as WP
+        if spec.get("lens"):
+            if spec["lens"].get("cut_r"):
+                _cut_lens(ob, spec["lens"])
+            parts.append(WP.lens(arm, spec["lens"]))
+        if spec.get("braids"):
+            parts.append(WP.braids([ob], arm, spec["braids"], spec["braid_colours"]))
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
@@ -1102,14 +1609,24 @@ def main():
         bpy.context.view_layer.objects.active = o
         if o.data.has_custom_normals:
             bpy.ops.mesh.customdata_custom_splitnormals_clear()
+        if spec.get("cap_holes"):
+            cap_holes(o, spec.get("cap_flat", False))
         outward(o)
         for p in o.data.polygons:
             p.use_smooth = True
         soft_normals(o, spec.get("normal_smooth", 8))
+        if "ink_room" in spec:
+            ink_room(o, float(spec["ink_room"]))
+    for o in parts:
+        if "ink_room" in spec:
+            ink_room(o, float(spec["ink_room"]))
     out = os.path.join(ROOT, os.path.expanduser(spec["out"]))
     log("tris: body %d, weapon %d" % (K.tris([ob]), K.tris([x for x in (gun, spin) if x])))
     # (JPEG: Meshy's painted textures, a third of the PNG's size)
-    K.export(out, [arm, ob] + [x for x in (gun, spin) if x] + [o for o in bpy.data.objects if o.name.startswith("anchor_")], "JPEG")
+    if parts:
+        log("tris: parts %s" % {o.name: K.tris([o]) for o in parts})
+    K.export(out, [arm, ob] + parts + [x for x in (gun, spin) if x] + [o for o in bpy.data.objects if o.name.startswith("anchor_")], "JPEG",
+             colors="ink_room" in spec)
     log("wrote", out)
     if spec.get("blend"):
         bpy.ops.wm.save_as_mainfile(filepath=os.path.expanduser(spec["blend"]))

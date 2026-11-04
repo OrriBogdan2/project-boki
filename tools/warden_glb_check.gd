@@ -34,7 +34,7 @@ const SLOT_MAX := 8
 const MOTION_BONES := ["hips", "thigh.L", "shin.L", "thigh.R", "shin.R", "upper_arm.L", "forearm.L", "upper_arm.R",
 	"forearm.R", "head"]
 const OWN_MOTION := 0.05       # rad: two Wardens' idle or run joint angles differ by more than this on average
-const TRIS_MAX := 15000
+const TRIS_MAX := 45000         # the owner's 30-40k for the top-down camera (INBOX_S2 05:00), with braids
 
 var bad := 0
 var n := 0
@@ -51,9 +51,12 @@ func run(main: Node) -> void:
 	var mapped := WardenGlb.BONES.values()
 	var unmapped := ANIM_PARTS.filter(func(p): return not p in mapped)
 	ok(unmapped.is_empty(), "every rig node HunterAnim poses has a bone (unmapped %s)" % str(unmapped))
+	var vex := WardenGlb.art("gunslinger")
 	ok(
-		WardenGlb.path("gunslinger") == "res://art/wardens/vex/vex.glb",
-		"a Warden's file is art/wardens/<name>/<name>.glb, named as its art (Vex)"
+		WardenGlb.path("gunslinger") == "res://art/wardens/%s/%s.glb" % [vex, vex]
+				and (vex == "vex" or vex.begins_with("vex_") and WardenGlb.variant("vex") == vex),
+		"a Warden's file is art/wardens/<name>/<name>.glb, named as its art (Vex: %s), a design variant only when picked"
+				% vex
 	)
 	ok(
 		not WardenGlb.has_model("") and not WardenGlb.has_model("no_such_warden"),
