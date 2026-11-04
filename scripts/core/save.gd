@@ -438,6 +438,7 @@ func load_from(p: String) -> void:
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	for k in parsed:
 		d[k] = parsed[k]
+	Unmasked.migrate(d)      # an old detailed look becomes the closest Unmasked
 	# JSON numbers come back as floats; plots and roster are fine with that.
 	register_all()
 

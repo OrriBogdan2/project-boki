@@ -57,7 +57,8 @@ func _ready() -> void:
 		decor = (visit.get("decor", []) as Array).duplicate(true) if room == "house" else []
 	dec = Decorate.new(self)
 	_rebuild_decor()
-	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Save.d.get("look", {}), Arch.of_save())
+	var went_in := Progress.day1_mark("inside") if visit.is_empty() else ""
+	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Unmasked.worn(), Arch.of_save())
 	add_child(player)
 	ppos = Vector3(W * 0.5, 0, D - 0.9)
 	player.position = ppos

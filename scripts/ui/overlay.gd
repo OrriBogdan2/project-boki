@@ -224,6 +224,10 @@ func open_pause(where: String) -> void:
 		item.call("Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
 	if where != "match":
 		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
+	if where == "home" and Game.main:
+		item.call("Training area", "jump", func():
+			close()
+			Game.main.screen_node()._start_training())
 	item.call("Settings", "gear", func():
 		if tab == "Controls": tab = "Gameplay"
 		open_settings())

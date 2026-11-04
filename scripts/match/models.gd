@@ -620,10 +620,11 @@ static func torso_mesh() -> ArrayMesh:
 ## inside it, and the outfit the colourway of the gear. arch "" takes the look's "arch", else the
 ## class default. outfit "bare" leaves the head uncovered (galleries).
 static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", appearance := {}, arch := "") -> Node3D:
-	var lk: Dictionary = clean_look(appearance)
-	var race: Dictionary = RACES[int(lk["race"])]
+	var um := Unmasked.is_look(appearance)       # your own character: the hunter rig without a hunter's gear
+	var lk: Dictionary = clean_look(Unmasked.legacy(appearance) if um else appearance)
+	var race: Dictionary = Unmasked.race(appearance) if um else RACES[int(lk["race"])]
 	var rid: String = race["id"]
-	arch = HeroKit.arch_for(cls, arch, appearance)
+	arch = "unmasked" if um else HeroKit.arch_for(cls, arch, appearance)
 	var root := Node3D.new()
 	var bare := outfit == "bare"
 	var oi: int = OUTFIT_KEYS.find(outfit) if not outfit in ["", "bare", "plain"] else int(lk["outfit"])
@@ -643,6 +644,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var m_leather := toon(Color("6b4330").lerp(hero_col, 0.06))
 	var skin_c: Color = LOOK_SKIN[clampi(int(lk["skin"]), 0, LOOK_SKIN.size() - 1)]
 	var hair_c: Color = LOOK_HAIR[clampi(int(lk["hair_col"]), 0, LOOK_HAIR.size() - 1)]
+	if um: skin_c = Unmasked.colour(appearance)
 	var m_skin := toon(skin_c)
 	var m_hair := toon(hair_c)
 	var m_dark := toon(Color("2b2a33"))
@@ -722,11 +724,12 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	# head: the sculpted head (jaw, cheeks, brow, chin per race and gender) with its face
 	var hk := HeroKit.head_key(rid, fem)
 	part(torso, HeroKit.head(hk), m_skin, Vector3(0, 0.86, 0), Vector3.ONE, Vector3.ZERO, "Head")
-	if rid == "human":
+	if rid == "human" and not um:
 		for sx in [-1.0, 1.0]:
 			var ear := HeroKit.loft("ear", [Vector3(0, -0.035, 0), Vector3(0, 0.0, 0.008), Vector3(0, 0.035, 0.02)], [Vector2(0.03, 0.012), Vector2(0.04, 0.014), Vector2(0.022, 0.01)], 10, Vector3.RIGHT, 0.75)
 			part(torso, ear, m_skin, Vector3(0.226 * sx * (1.03 if not fem else 0.98), 0.85, 0.012), Vector3.ONE, Vector3(0, 0.25 * sx, 0))
-	_face(torso, int(lk["face"]), gender, m_dark, m_skin, skin_c, int(lk["detail"]), hair_c, team_col)
+	if um: Unmasked.face(torso, appearance, skin_c)
+	else: _face(torso, int(lk["face"]), gender, m_dark, m_skin, skin_c, int(lk["detail"]), hair_c, team_col)
 	# what the archetype wears on its head decides how much hair shows (a hat: all but the crown; a
 	# hood or helm: only what spills out below)
 	var cov := HeroGear.cover(arch, bare)
@@ -777,7 +780,8 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		"m": {"body": m_body, "shirt": m_shirt, "pants": m_pants, "leather": m_leather, "skin": m_skin, "hair": m_hair, "dark": m_dark, "acc": m_acc,
 			"gold": m_gold, "gun": m_gun, "hero": m_hero, "trim": m_trim, "steel": m_steel, "glow": m_glow, "glow_soft": m_glow_soft, "bone": m_bone,
 			"wood": m_wood, "fur": m_fur, "feather": m_feather, "cloak": m_cloak, "hat": m_hat}}
-	HeroGear.dress(arch, ctx)
+	if um: Unmasked.dress(ctx, appearance)
+	else: HeroGear.dress(arch, ctx)
 	gun_parts(gun, weapon, m_gun, m_dark, m_acc)
 	gun.scale = Vector3.ONE * float(CLASS_LOOK.get(cls, {}).get("weapon", 1.0))     # heavies carry big guns
 	if not gun.has_node("Mag"):
@@ -2060,28 +2064,6 @@ static func air_ring() -> Node3D:
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var disc := part(root, cyl(1.2, 1.2, 0.02, 24), glow_mat(Color(0.55, 0.9, 1.0, 0.12)), Vector3.ZERO, Vector3.ONE, Vector3(PI / 2, 0, 0), "Disc")
 	disc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	return root
-
-## A thought bubble over a kin's head with what it wants in it.
-static func want_bubble() -> Node3D:
-	var root := Node3D.new()
-	var white := toon(Color("f6f2ea"), true)
-	part(root, sphere(0.22, 14), white, Vector3(0, 0, 0), Vector3(1.15, 0.95, 0.5))
-	part(root, sphere(0.06, 8), white, Vector3(-0.17, -0.24, 0))
-	part(root, sphere(0.035, 6), white, Vector3(-0.25, -0.34, 0))
-	var food := Node3D.new(); food.name = "food"; root.add_child(food)
-	part(food, sphere(0.085, 10), toon(Color("ff6a4a"), false, 0.2), Vector3(0, -0.01, -0.1))
-	part(food, sphere(0.04, 6), toon(Color("5aa84a"), false), Vector3(0.03, 0.08, -0.1), Vector3(1.4, 0.6, 0.6))
-	var energy := Label3D.new(); energy.name = "energy"; energy.text = "z z"; energy.font = UI.big; energy.font_size = 36
-	energy.pixel_size = 0.006; energy.modulate = Color("5a7ae0"); energy.outline_size = 0; energy.position = Vector3(0, 0, -0.12)
-	energy.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	root.add_child(energy)
-	var clean := Node3D.new(); clean.name = "clean"; root.add_child(clean)
-	part(clean, sphere(0.07, 10), toon(Color("5ab8f0"), false, 0.4), Vector3(0, -0.03, -0.1), Vector3(1, 1.25, 1))
-	part(clean, cyl(0.0, 0.05, 0.08, 8), toon(Color("5ab8f0"), false, 0.4), Vector3(0, 0.08, -0.1))
-	var joy := Node3D.new(); joy.name = "joy"; root.add_child(joy)
-	part(joy, sphere(0.08, 10), toon(Color("ff6a5a"), false, 0.2), Vector3(0, 0, -0.1))
-	part(joy, cyl(0.081, 0.081, 0.025, 12), toon(Color("f6f2ea"), false), Vector3(0, 0, -0.1), Vector3.ONE, Vector3(0, 0, 0.5))
 	return root
 
 ## The training yard: a straw dummy on a post, a mat and a couple of hoops.

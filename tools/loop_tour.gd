@@ -149,7 +149,7 @@ func _process(_d: float) -> void:
 			get_viewport().warp_mouse(c3.unproject_position(p + Vector3(0, 0.6, 0)))
 
 func _fake_save() -> void:
-	Save.d["look"] = Models.default_look()
+	Save.d["look"] = Unmasked.default_look()
 	Save.d["arch"] = arch; Save.d["cls"] = Arch.weight(arch); Save.d["weapon"] = Arch.signature(arch)
 	var rec := Save.new_kin("cindle", "Ember")
 	rec["trust"] = 55.0; rec["starter"] = true
@@ -274,15 +274,6 @@ func _home() -> void:
 		await shot("loadout_bottom")
 	h._close_panel()
 	await wait(0.4)
-	# the Training Grounds isle at home
-	if h.training:
-		h.ppos = HomeTraining.STILL + Vector3(1.6, 0, 0.4)
-		h.cam.snap(h.ppos)
-		await wait(1.0)
-		for i in 4:
-			h.training.cds.clear(); h.training.cast("fire")
-			await wait(0.3)
-		await shot("farm_training_grounds")
 	# the training area (a match)
 	h._start_training()
 	await _wait_match(600.0)

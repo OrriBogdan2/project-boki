@@ -9,7 +9,7 @@ extends RefCounted
 ## unlocked by holding the button on the Hunters screen (HoldUnlock calls unlock()). Each Hunter also has
 ## mastery goals, counted only while you play it; each one done is a mastery level and a cosmetic reward.
 ## Nothing here ever changes stats or abilities. Locked Hunters stay playable in the Arena and the
-## Training Grounds; only the pickers that set your expedition Hunter ask this file.
+## training area; only the pickers that set your expedition Hunter ask this file.
 ##
 ## Save.d["classes"] = {all: bool, picks: [the creation pick], open: [ids], bonus: [starters that open after the
 ## first expedition], fresh: [just opened, not announced], told: int (ready unlocks

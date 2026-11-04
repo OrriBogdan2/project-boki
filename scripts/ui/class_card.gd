@@ -13,7 +13,7 @@ static func portrait(id: String, px := 84.0, body := false) -> Control:
 		var pic := Portraits.Pic.new(id, Vector2(px, px), Arch.color(id), body)
 		pic.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		return pic
-	var vp := Portraits.make(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), Save.d.get("look", {}), id,
+	var vp := Portraits.make(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), Unmasked.mask_look(), id,
 			body, int(px * 2.0) if body else Portraits.SIZE)
 	var tex := TextureRect.new()
 	tex.texture = vp.get_texture()

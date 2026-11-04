@@ -3925,7 +3925,7 @@ func _home_build_check() -> void:
 	ok.call(home4.world.island_id(home4.lots["greenhouse"]["at"].x, home4.lots["greenhouse"]["at"].z) == "orchard" and home4.world.is_block(home4.lots["greenhouse"]["at"].x, home4.lots["greenhouse"]["at"].z), "its greenhouse stands on the (moved) Orchard Isle")
 	ok.call(not home4.world.is_void(float(f1["x"]), float(f1["z"])), "a feeder left out where there's no land now is moved to open ground (%.1f, %.1f)" % [float(f1["x"]), float(f1["z"])])
 	ok.call(home4.lots["workshop"]["at"].distance_to(HomeLayout.rect_center(Data.BUILDINGS["workshop"]["rect"])) < 0.01, "its Workshop stays on its old lot")
-	# moving at home: dash, glide, falling off, and the Training Grounds
+	# moving at home: dash, glide, falling off
 	var mv: Node = home4
 	mv.ppos = Vector3(38.0, 0, 34.5); mv.py = 0.0; mv.pvy = 0.0
 	var x0: float = mv.ppos.x
@@ -3951,71 +3951,10 @@ func _home_build_check() -> void:
 		mv._move_player(0.05)
 	mv.panel_open = ""
 	ok.call(mv.ppos.distance_to(safe) < 0.01 and mv.py >= -0.01, "falling off the island puts you back where you last stood")
-	var tr: HomeTraining = mv.training
-	# (the zone only changes while you're standing, so stand them on the ground each time)
-	mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.gliding = false; tr.tick(0.05)
-	ok.call(not tr.in_zone and not tr.cast("fire"), "outside the Training Grounds attacks are off")
-	mv.ppos = Vector3(HomeTraining.STILL.x + 1.5, 0, HomeTraining.STILL.z); mv.py = mv._ground_h(mv.ppos.x, mv.ppos.z); tr.tick(0.05)
-	ok.call(tr.in_zone and tr.kit.has("fire"), "inside them your kit is on: %s" % str(tr.kit.keys()))
-	var dm: Dictionary = tr.dummies[0]
-	tr.hit(dm, 12.0)
-	tr.cds.clear()
-	var cast_ok := tr.cast("signature") or tr.cast("gear1") or tr.cast("ultimate")
-	ok.call((dm["hits"] as Array).size() >= 1 and cast_ok, "dummies count hits and an ability fires in the zone")
-	for k in tr.cds: tr.cds[k] = 5.0
-	mv.ppos = HomeTraining.PAD; tr.pad_t = 0.0; tr.tick(0.05)
-	ok.call(tr.cds.values().all(func(v): return float(v) <= 0.05), "the pad resets cooldowns")
-	mv.ppos = HomeTraining.RACK + Vector3(0, 0, 1.0); tr.tick(0.05)
-	tr.try = {"cls": "heavy"}
-	tr.apply_try()
-	tr.open_tryon()
-	ok.call(String(tr.kit["fire"]["name"]) == Content.weapon(String(Data.CLASSES["heavy"]["weapon"])).display_name and mv.panel_open == "Try-on rack", "the Try-on rack puts a heavy's weapon in your hands (%s)" % tr.kit["fire"]["name"])
 	Save.d["classes"] = ClassUnlock.legacy()      # an old save: every Hunter open (the locks: --hunter-unlock-check)
-	tr.set_my_class()
-	ok.call(String(Save.d["cls"]) == "heavy" and String(Save.d["weapon"]) == Arch.signature(String(Save.d["arch"])), "Set as my class makes it your expedition class")
-	mv._close_panel()
-	# the climbing wall: walk up to it, jump, and you're stood on top
-	await get_tree().process_frame      # (a fresh frame: the glide test's Space press above still counts as "just pressed" in this one)
-	var wtop: float = mv._ground_h(34.5, 56.5)
-	var wbase: float = mv._ground_h(36.7, 56.9)
-	mv.ppos = Vector3(36.7, 0, 56.9); mv.py = wbase; mv.pvy = 0.0; mv.pvel = Vector3.ZERO; mv.gliding = false; mv.dash_t = 0.0
-	Input.action_press("left")
-	mv.pvy = Hunter.JUMP_V        # a running jump at it
-	var on_top := false
-	for i in 90:
-		mv._move_player(1.0 / 60.0)
-		if mv.pvy == 0.0 and absf(mv.py - wtop) < 0.05 and absf(mv._ground_h(mv.ppos.x, mv.ppos.z) - wtop) < 0.05:
-			on_top = true; break
-	Input.action_release("left")
-	ok.call(wtop - wbase > 1.0 and on_top, "jumping at the climbing wall gets you on top of it (%.1fm up; at %.1f, %.1f, height %.2f)" % [wtop - wbase, mv.ppos.x, mv.ppos.z, mv.py])
-	# gliding the gap to the islet: you never leave the Training Grounds on the way
-	var gs := Vector3(46.8, 0, 56.3)
-	for gz in [56.3, 55.8, 56.8, 55.3]:
-		if mv.world.occupy(46.8, gz, 0.38, mv._ground_h(46.8, gz), true) == 0.0:
-			gs = Vector3(46.8, 0, gz); break
-	mv.ppos = gs; mv.py = mv._ground_h(gs.x, gs.z); mv.pvy = 0.0; mv.pvel = Vector3.ZERO; mv.gliding = false
-	tr.tick(0.05)
-	var left_zone := false
-	var over_gap := false
-	Input.action_press("right")
-	for i in 12:
-		mv._move_player(1.0 / 60.0); tr.tick(1.0 / 60.0)
-	mv.pvy = 8.5
-	Input.action_press("jump")
-	for i in 300:
-		mv._move_player(1.0 / 60.0); tr.tick(1.0 / 60.0)
-		if not tr.in_zone: left_zone = true
-		if mv.world.is_void(mv.ppos.x, mv.ppos.z): over_gap = true
-		if over_gap and mv.world.island_id(mv.ppos.x, mv.ppos.z) == "training_gap":
-			Input.action_release("jump"); Input.action_release("right")     # over the islet: fold the glider and drop on it
-		if mv.world.island_id(mv.ppos.x, mv.ppos.z) == "training_gap" and mv.pvy == 0.0 and not mv.gliding: break
-	Input.action_release("jump"); Input.action_release("right")
-	ok.call(over_gap and mv.world.island_id(mv.ppos.x, mv.ppos.z) == "training_gap" and not left_zone, "gliding the gap lands you on the islet without leaving the Training Grounds (crossed: %s, left: %s, at %.1f, %.1f)" % [over_gap, left_zone, mv.ppos.x, mv.ppos.z])
 	# dashing at home: the match's charges and recharge for each class, then the long dash
 	var cls0 := String(Save.d.get("cls", "medium"))
-	tr.try = {}
 	mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.gliding = false
-	tr.tick(0.01)
 	for ck in ["light", "medium", "heavy"]:
 		Save.d["cls"] = ck
 		var dg: Dictionary = mv._dodge()

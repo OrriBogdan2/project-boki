@@ -183,7 +183,7 @@ Other checks:
   - The movefeel framing stays available as "Supervive (wider lens)" (`supervive_wide`). `--cam-style=<id>` picks a style for one tooling run.
 - **Settings:**
   - "Expedition camera" is now "Camera".
-  - The style and follow mode also apply at home (`CamRig.apply_settings`). The farm keeps its own wider framing (`Home._apply_cam_settings`). On the Training Grounds isle the view eases to exactly the expedition framing and hunter size.
+  - The style and follow mode also apply at home (`CamRig.apply_settings`). The farm keeps its own wider framing (`Home._apply_cam_settings`).
 
 ## Move pass: wall moves, ledges that answer, a springier abyss (`--wallmove-check`)
 

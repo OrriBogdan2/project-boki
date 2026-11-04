@@ -54,7 +54,6 @@ var petted := {}
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
-var training: HomeTraining = null  # the Training Grounds isle, where your combat kit works (home_training.gd)
 var hob: FarmHob = null            # Hob the builder: blueprints, and a hammer for sites (farm_hob.gd)
 var guide: FarmGuide = null        # the Goals card and the farm tutorial on screen (farm_guide.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
@@ -91,7 +90,7 @@ const DAY_LEN := 300.0          # seconds for a full day at home
 var env_res: Environment
 var sun_l: DirectionalLight3D
 var p_anim: HunterAnim = null
-var p_fired := 99.0             # seconds since you last attacked (the Training Grounds), for the animation
+var p_fired := 99.0             # seconds since you last swung a tool (gathering), for the animation
 var crouch_on := false          # crouching (the match's crouch key and its tap-to-toggle setting)
 var p_crouch_k := 0.0           # the crouched pose, eased in and out
 const CROUCH_SPEED := 0.55      # walking speed crouched (the same as in a match)
@@ -162,7 +161,6 @@ func _ready() -> void:
 	await _slice()
 	hb = HomeBuild.new(self)
 	hg = HomeGather.new(self)
-	training = HomeTraining.new(self)
 	hw = HomeWork.new(self)
 	if visit.is_empty():
 		hob = FarmHob.new(self)
@@ -325,7 +323,6 @@ func _ready_rest() -> void:
 	# a few trees around the rim of every island, kept away from paths, lots and bridges
 	world.add_trees_on_rim(54)
 	var keep_clear: Array = [[36, 34, 40, 44], [42, 28, 50, 40], [41, 20, 47, 26], [22, 28, 28, 32], [46, 26, 62, 30], [27, 23, 31, 30], [32, 41, 36, 47]]
-	keep_clear.append_array(training_reserved())
 	for b in Data.BUILDINGS:
 		var rc: Array = HomeLayout.rect_of(b, _d())
 		keep_clear.append([rc[0] - 1, rc[1] - 1, rc[2] + 1, rc[3] + 2])
@@ -343,7 +340,6 @@ func _ready_rest() -> void:
 		bridges[k] = {"tiles": world.bridge_tiles(HomeLayout.isle_bridge(world, k)["rect"]), "built": _has_br(k)}
 		if bridges[k]["built"]:
 			world.open_bridge(bridges[k]["tiles"])
-	training.prepare()
 	if visit.is_empty():
 		HomeLayout.rescue_feeders(world)
 	# the layout's buildings, decorations, paths, ponds and colour theme
@@ -368,7 +364,7 @@ func _ready_rest() -> void:
 	fx = Fx.new(); add_child(fx)
 	cam = CamRig.new(); add_child(cam)
 	cam.zoom_to = HOME_ZOOM; cam.zoom = HOME_ZOOM; cam.lead = 0.2
-	_apply_cam_settings(0.0)
+	_apply_cam_settings()
 	if "--home-wide" in OS.get_cmdline_user_args():
 		cam.zoom_to = 2.6; cam.zoom = 2.6     # test: the whole farm in one shot
 	if not fs:
@@ -405,7 +401,7 @@ func _ready_rest() -> void:
 	_build_bridges()
 	_build_plots()
 	await _slice()
-	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], _weapon(), "", Save.d.get("look", {}), Arch.of_save())
+	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], _weapon(), "", Unmasked.worn(), Arch.of_save())
 	add_child(player)
 	ppos = Vector3(38.0, 0, 34.5) if not fs else HomeLayout.LANDING
 	if spawn == "house":
@@ -492,14 +488,6 @@ func _ready_rest() -> void:
 		if a == "--home-act=run":
 			# test: run to the right (for animation shots)
 			get_tree().create_timer(1.0).timeout.connect(func(): Input.action_press("right"))
-		if a == "--home-act=swing":
-			# test: attack over and over at the Training Grounds
-			get_tree().create_timer(0.3).timeout.connect(func():
-				ppos = HomeTraining.STILL + Vector3(1.6, 0, 0.4); py = _ground_h(ppos.x, ppos.z); cam.snap(ppos))
-			for k in 12:
-				get_tree().create_timer(1.0 + k * 0.45).timeout.connect(func():
-					if training:
-						training.cds.clear(); training.cast("fire"))
 		if a.begins_with("--home-build="):
 			var bk := a.substr(13)
 			Save.d["bridges"].append(bk)
@@ -544,7 +532,7 @@ func _ready_rest() -> void:
 		if a.begins_with("--drill="):
 			var dstat := a.substr(8)
 			get_tree().create_timer(0.4).timeout.connect(func(): _start_drill(Save.active_kin(), dstat))
-		if a in ["--build-demo", "--decor-demo", "--training-demo", "--overview-demo", "--tryon-demo"]:
+		if a in ["--build-demo", "--decor-demo", "--overview-demo"]:
 			Save.no_write = true
 			var which: String = a
 			get_tree().create_timer(0.05).timeout.connect(func(): _build_demo(which))
@@ -635,8 +623,6 @@ func _ready_rest() -> void:
 	if visit.is_empty():
 		hecon.build()
 	await _slice()
-	training.build()
-	await _slice()
 	hb.build_visuals()
 	_sync_fixtures()
 	await _slice()
@@ -705,15 +691,7 @@ func _rect_center(rc: Array) -> Vector3:
 	return Vector3((rc[0] + rc[2] + 1) * 0.5, 0, (rc[1] + rc[3] + 1) * 0.5)
 
 func _isle_open(isle: String) -> bool:
-	return isle == "main" or isle == "training" or _has_br(isle)
-
-## Tile rects [x0, z0, x1, z1] the Training Grounds keep clear (none until it's built).
-func training_reserved() -> Array:
-	return HomeTraining.reserved()
-
-## Spots on the Training Grounds that must stay reachable.
-func training_targets() -> Array:
-	return training.targets() if training else []
+	return isle == "main" or _has_br(isle)
 
 # ---- buildings and building sites
 func _build_lots() -> void:
@@ -931,6 +909,7 @@ func _spawn_kin() -> void:
 	for k in kins:
 		k["node"].queue_free()
 	kins.clear()
+	KinIndoors.inside.clear()
 	var open_isles: Array = [0]
 	for i in world.islands.size():
 		if i > 0 and _isle_open(world.islands[i]["id"]):
@@ -1029,7 +1008,6 @@ func _process(delta: float) -> void:
 	if _hub_room_t <= 0.0:
 		_hub_room_t = 0.2
 		_keep_off_hub(root_ui.get_node_or_null("Hints") if root_ui else null)
-		if training: _keep_off_hub(training.hud)
 	_move_player(d)
 	_move_kin(d)
 	if guide: guide.tick(d)
@@ -1041,8 +1019,7 @@ func _process(delta: float) -> void:
 	if hg: hg.tick(d)
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
-	if training: training.tick(d)
-	_apply_cam_settings(d)
+	_apply_cam_settings()
 	cam.follow(Vector3(ppos.x, minf(py, 0.0), ppos.z), d, panel_open == "" and train.is_empty())
 	_see_through()
 	_abyss_tint(d)
@@ -1074,32 +1051,15 @@ const MANTLE := 1.5            # ledges this far above your feet pop you up when
 const MANTLE_ABYSS := 3.5   # falling past an island's side, you catch its edge from this far below (pinned: the expedition reach grew to 4.5 in movefeel)
 const FALL_RESPAWN := -40.0    # (a backstop: the abyss takes you a few metres under the island, World.abyss_floor)
 ## (movefeel) The Settings camera at home too, so you can try it here: the style's angle and lens and
-## your follow mode everywhere. The farm keeps its own wider framing (the same ground across as the
-## old home camera, whatever the style, so every zoom and panel shot here still frames the same);
-## on the Training Grounds isle the view eases to exactly the expedition's framing and your hunter
-## to its expedition size (Hunter.VIS_SCALE), so movement and combat there look as they will out there.
+## your follow mode. The farm keeps its own wider framing (the same ground across as the old home
+## camera, whatever the style, so every zoom and panel shot here still frames the same).
 const HOME_ACROSS_REF := "classic"   # the style the home's zooms were framed with
-var cam_zone_k := 0.0                # 0 on the farm, 1 on the Training Grounds (eased)
-var cam_home_zoom := HOME_ZOOM       # your farm zoom, kept while you're on the Training Grounds
-var cam_in_train := false
-func _apply_cam_settings(d: float) -> void:
+func _apply_cam_settings() -> void:
 	cam.apply_settings()
-	var in_train: bool = training != null and training.in_zone
-	if in_train != cam_in_train:
-		cam_in_train = in_train
-		if in_train:
-			cam_home_zoom = cam.zoom_to
-			cam.zoom_to = 1.0
-		else:
-			cam.zoom_to = cam_home_zoom
-	var k_to := 1.0 if in_train else 0.0
-	cam_zone_k = k_to if d <= 0.0 else move_toward(cam_zone_k, k_to, d * 2.5)
-	var home_mul := CamRig.style_across(HOME_ACROSS_REF) / CamRig.style_across(cam.style_id)
-	var e := cam_zone_k * cam_zone_k * (3.0 - 2.0 * cam_zone_k)
-	cam.dist_mul = lerpf(home_mul, 1.0, e)
+	cam.dist_mul = CamRig.style_across(HOME_ACROSS_REF) / CamRig.style_across(cam.style_id)
 	if player and is_instance_valid(player):
-		# (the base is always 1: a hero swap's pop rides on top as "pop", so it can't get stuck stretched)
-		player.scale = (player.get_meta("pop", Vector3.ONE) as Vector3) * lerpf(1.0, Hunter.VIS_SCALE, e)
+		# (a hero swap's pop rides on the base scale of 1, so it can't get stuck stretched)
+		player.scale = player.get_meta("pop", Vector3.ONE) as Vector3
 
 ## Trees between the camera and you (or your active Boki) thin out, as in a match (SeeThrough).
 func _see_through() -> void:
@@ -1119,12 +1079,8 @@ func _exit_tree() -> void:
 
 ## Boki on the farm are drawn bigger than in a match: the farm's camera sits much further back than the
 ## expedition's (HOME_ACROSS_REF framing at HOME_ZOOM), and at match size a Boki was a speck beside
-## your hunter there. Presentation only (the farm has no hitboxes; a match's Boki keep their size);
-## back to match size on the Training Grounds, where the view eases to the expedition's framing.
+## your hunter there. Presentation only (the farm has no hitboxes; a match's Boki keep their size).
 const FARM_BOKI_SCALE := 1.7
-func _farm_boki_k() -> float:
-	var e := cam_zone_k * cam_zone_k * (3.0 - 2.0 * cam_zone_k)
-	return lerpf(FARM_BOKI_SCALE, 1.0, e)
 
 var climb := {}                # (unused since the ledge float; kept for anything that clears it)
 ## Floating up a ledge, as in a match (Hunter._ledge_float): {lip, n (into the wall), t, at, g0}.
@@ -1134,7 +1090,7 @@ var _mv := Vector2.ZERO
 
 ## Your class's dodge with the match's numbers: its charges and recharge (Hunter.max_dashes and
 ## dash_regen at rank 1), and the class's long dash (ex_dist, ex_time, ex_cd; Hunter.EX_DASH_CD).
-## The key hints and the Training Grounds bar sit centred at the bottom, and on a 1280-wide window
+## The key hints sit centred at the bottom, and on a 1280-wide window
 ## they ran under the hub's buttons (Settings covered the start of each): slide one right of the hub
 ## when it would overlap, centred in the room that's left.
 var _hub_room_t := 0.0
@@ -1152,7 +1108,7 @@ func _keep_off_hub(c) -> void:
 		cc.global_position.x = want
 
 func _dodge() -> Dictionary:
-	var ck := training._cls() if training and training.in_zone else Data.class_of_save()
+	var ck := Data.class_of_save()
 	var dd := Content.class_dodge(ck)
 	var cdat: Dictionary = Data.CLASSES.get(ck, {})
 	var out := {"charges": float(cdat.get("dashes", 2)), "cd": Hunter.DASH_REGEN, "speed": Hunter.DASH_SPEED, "time": Hunter.DASH_TIME,
@@ -1383,8 +1339,7 @@ func _move_kin(d: float) -> void:
 			continue
 		if k.has("indoors"):
 			# inside the house: out of sight until it fancies coming out (or hears you whistle)
-			k["indoors"] = float(k["indoors"]) - d
-			if float(k["indoors"]) <= 0.0 and not k.has("exiting"):
+			if KinIndoors.step(k, d, ppos, _house_door(), KinIndoors.has_house(spots)) and not k.has("exiting"):
 				_kin_exit_house(k, false)
 			continue
 		if k.has("leap"):
@@ -1454,14 +1409,19 @@ func _move_kin(d: float) -> void:
 					# some sleep indoors
 					k["going_in"] = true
 					k["goal"] = _house_door()
+				elif not KinIndoors.has_house(spots) and randf() < 0.5:
+					KinIndoors.nap_outside(k)      # no house: it curls up where it is
 				else:
 					# at night they head for bed and doze
 					k["goal"] = k.get("bed", world.random_ground(maxi(here, 0)))
 				if randf() < 0.5: _emote(k, "z")
-			elif not night and randf() < 0.05 and here == world.island_of(spots["house"].x, spots["house"].z):
-				# pops inside for a nap now and then
-				k["going_in"] = true
-				k["goal"] = _house_door()
+			elif not night and randf() < 0.05:
+				# a short nap now and then: inside if there is a house, otherwise curled up outside
+				if here == world.island_of(spots["house"].x, spots["house"].z):
+					k["going_in"] = true
+					k["goal"] = _house_door()
+				elif not KinIndoors.has_house(spots):
+					KinIndoors.nap_outside(k)
 			elif friends.size() > 0 and randf() < float(pers.get("social", 0.22)):
 				var f: Dictionary = friends[randi() % friends.size()]
 				k["chase"] = f; k["chase_t"] = 4.0
@@ -1506,7 +1466,7 @@ func _move_kin(d: float) -> void:
 		if k.get("going_in", false) and Vector2(pos.x - _house_door().x, pos.z - _house_door().z).length() < 0.6:
 			k.erase("going_in")
 			var night_now := sin((day_t - 0.25) * TAU) < -0.2
-			k["indoors"] = randf_range(70.0, 140.0) if night_now else randf_range(20.0, 55.0)
+			KinIndoors.enter(k, night_now)
 			n.visible = false
 			Sfx.play("thump", pos, -16.0, 0.1, 1.3)
 			continue
@@ -1526,7 +1486,7 @@ func _move_kin(d: float) -> void:
 		if k.has("say"):
 			k["say_t"] = float(k.get("say_t", 0.0)) - d
 			(k["say"] as Label3D).visible = k["say_t"] > 0.0
-		n.scale = Vector3.ONE * (1.05 if rec["uid"] == _d().get("active", "") else 0.9) * float(n.get_meta("evo_scale", 1.0)) * _farm_boki_k()
+		n.scale = Vector3.ONE * (1.05 if rec["uid"] == _d().get("active", "") else 0.9) * float(n.get_meta("evo_scale", 1.0)) * FARM_BOKI_SCALE
 		if k["emote_t"] > 0.0:
 			k["emote_t"] -= d
 			var lbl: Label3D = k["emote"]
@@ -1960,6 +1920,7 @@ func _house_alert(inside: Array) -> void:
 ## Out of the front door (with a little pop), and on to wherever it was going.
 func _kin_exit_house(k: Dictionary, called: bool) -> void:
 	k.erase("indoors"); k.erase("exiting")
+	KinIndoors.left(k)
 	var door := _house_door() + Vector3(randf_range(-0.4, 0.4), 0, 0.2)
 	k["pos"] = door
 	k["vel"] = Vector3(0, 0, 2.5)
@@ -2062,8 +2023,6 @@ func _find_interact() -> void:
 		best = {"kind": "incubator"}
 	if p2.distance_to(Vector2(YARD_AT.x, YARD_AT.z)) < 1.6 and best.is_empty():
 		best = {"kind": "yard"}
-	if training and visit.is_empty() and training.near_rack(ppos):
-		best = {"kind": "tryon"}
 	if hecon:
 		var hb: Dictionary = hecon.find(p2, bd if not best.is_empty() else 9.0)
 		if not hb.is_empty(): best = hb
@@ -2084,8 +2043,7 @@ func _find_interact() -> void:
 	prompt_box.visible = true
 	var pairs: Array = []
 	if best["kind"] == "kin" and visit.is_empty():
-		var nm: String = best["k"]["rec"]["name"]
-		pairs = [[Settings.key_cap("interact"), "Pet " + nm], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"]]
+		pairs = [[Settings.key_cap("interact"), KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"]]
 	else:
 		pairs = [[Settings.key_cap("interact"), _label_for(best)]]
 	# the prompt is keycaps and words, rebuilt only when what it says changes
@@ -2110,8 +2068,6 @@ func _find_interact() -> void:
 	prompt_box.reset_size()
 	var vp := get_viewport().get_visible_rect().size
 	var py_at := vp.y - 110.0
-	if training and is_instance_valid(training.hud) and training.hud.is_visible_in_tree():
-		py_at = minf(py_at, training.hud.global_position.y - prompt_box.size.y - 6.0)     # (it sat on the Training Grounds bar)
 	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, py_at)
 	_keep_off_hub(prompt_box)
 
@@ -2213,7 +2169,6 @@ func _label_for(it: Dictionary) -> String:
 			return "Spend time with %s" % rec["name"]
 		"egg": return ("Help the %s hatch!" if _egg_ready() else "Warm the %s") % _egg_label()
 		"yard": return "Train your partner"
-		"tryon": return "Try on a Hunter, weapon, glove or Boki"
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2238,7 +2193,7 @@ func _use(it: Dictionary) -> void:
 		"stall": hmk.open()
 		"portal": _open_expedition()
 		"house": Game.goto("interior", {"room": "house"})
-		"kin": _pet_kin(it["k"])
+		"kin": _kin_act(it["k"])
 		"egg":
 			if _egg_ready():
 				_hatch_nest_egg()
@@ -2252,7 +2207,6 @@ func _use(it: Dictionary) -> void:
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
-		"tryon": training.open_tryon()
 		"burrow": _open_burrow()
 		"hob", "site": hob.use(it)
 		"feeder", "grave", "graveyard", "place": hecon.use(it)
@@ -2274,9 +2228,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 	elif hb and event.is_action_pressed("build") and hb.can_build():
 		hb.toggle()
-		get_viewport().set_input_as_handled()
-		return
-	elif training and training.in_zone and panel_open == "" and not chat_open and train.is_empty() and not Overlay.is_open() and training.input(event):
 		get_viewport().set_input_as_handled()
 		return
 	if not train.is_empty():
@@ -2451,7 +2402,6 @@ func set_build_ui(on: bool) -> void:
 	if is_instance_valid(build_btn): build_btn.visible = not on
 	var hub_bar = get("hub")         # the menus branch's bottom-left hub bar, when it's merged
 	if hub_bar is CanvasItem: (hub_bar as CanvasItem).visible = not on
-	if training and is_instance_valid(training.hud): training.hud.visible = not on
 
 ## Opens build mode (for a Build entry in the home's hub bar).
 func open_build() -> void:
@@ -2862,6 +2812,16 @@ func _kin_entry(rec: Dictionary) -> Dictionary:
 func _face(at: Vector3) -> void:
 	pface = atan2(-(at.x - ppos.x), -(at.z - ppos.z))
 	player.rotation.y = pface
+
+## The interact key on a Boki: do something about what it wants, otherwise pet it.
+func _kin_act(k: Dictionary) -> void:
+	var rec: Dictionary = k["rec"]
+	match KinWants.action(rec, POND_EDGE.x > -100.0):
+		"feed": _care_feed(rec, KinWants.best_food(rec))
+		"nap": _care_nap(rec)
+		"bath": _care_bath(rec)
+		"brush": _care_brush(rec)
+		_: _pet_kin(k)
 
 func _pet_kin(k: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
@@ -3849,7 +3809,7 @@ func _refresh_player_model() -> void:
 	var rot := player.rotation
 	player.queue_free()
 	var w := _weapon()
-	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], w, "", Save.d.get("look", {}), Arch.of_save())
+	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], w, "", Unmasked.worn(), Arch.of_save())
 	player.position = at; player.rotation = rot
 	add_child(player)
 
@@ -4182,38 +4142,14 @@ func _care_tick(d: float) -> void:
 		var sh: Node3D = nest.get_node("Shell")
 		sh.rotation.z = sin(Time.get_ticks_msec() / 90.0) * 0.12 * (1.0 if fmod(Time.get_ticks_msec() / 1000.0, 3.0) < 0.6 else 0.0)
 
-## The thought bubble over each kin: what it wants, shown now and then rather than all the time.
+## The thought bubble over each kin that wants something (KinWants), and the sleeping badge by the door.
 func _update_bubbles(d: float) -> void:
 	var now := Time.get_ticks_msec() / 1000.0
-	var shown: Array = []
+	KinWants.update(self, d, now)
+	KinIndoors.badge(self, _house_door(), KinIndoors.names(kins), ppos)
 	for k in kins:
 		var rec: Dictionary = k["rec"]
-		if not k.has("bubble"):
-			var b := Models.want_bubble()
-			b.position = Vector3(0.25, 1.45, 0)
-			b.visible = false
-			(k["node"] as Node3D).add_child(b)
-			k["bubble"] = b
-		var bub: Node3D = k["bubble"]
-		if not is_instance_valid(bub):
-			k.erase("bubble")
-			continue
 		var w := Care.want(rec) if visit.is_empty() else ""
-		var cyc := fmod(now + float(absi(String(rec["uid"]).hash()) % 97) * 0.1, 9.0) < 3.6
-		var show: bool = w != "" and cyc and not k.get("busy", false) and not k.has("fetch") and float(k.get("nap_t", 0.0)) <= 0.0 and float(k.get("say_t", 0.0)) <= 0.0
-		if show:
-			for p in shown:
-				if Vector2(p.x - k["pos"].x, p.z - k["pos"].z).length() < 2.6 or _talking_near(k, 2.6):
-					show = false; break
-		if show: shown.append(k["pos"])
-		bub.visible = show
-		if show:
-			for nm in ["food", "energy", "clean", "joy"]:
-				(bub.get_node(nm) as Node3D).visible = nm == w
-			bub.position.y = 1.45 + sin(now * 2.2) * 0.04
-			# face the camera like a cartoon thought bubble
-			bub.look_at(cam.global_position, Vector3.UP)
-			bub.scale = Vector3.ONE * 1.4
 		# dusty kin shed a little dust as they go
 		if visit.is_empty() and Care.need(rec, "clean") < 22.0 and randf() < d * 0.4:
 			fx.dust(k["pos"], 3)
@@ -5327,7 +5263,7 @@ func _quirk(k: Dictionary, n: Node3D, moving: bool, d: float) -> void:
 
 # ------------------------------------------------------------------ build mode screenshots
 ## --build-demo: build mode open with a bench's ghost by the farm; --decor-demo: an island decorated
-## through the layout; --training-demo: you on the Training Grounds, firing at the dummies.
+## through the layout.
 func _build_demo(which: String) -> void:
 	Save.no_write = true
 	Save.d["gems"] = maxi(int(Save.d["gems"]), 9999); Save.d["scrap"] = 99
@@ -5366,23 +5302,6 @@ func _build_demo(which: String) -> void:
 			ppos = Vector3(46.0, 0, 37.0) if which == "--overview-demo" else Vector3(55.0, 0, 39.0)
 			player.position = ppos
 			cam.zoom_to = 3.3 if which == "--overview-demo" else 1.5; cam.zoom = cam.zoom_to; cam.snap(ppos))
-	if which == "--tryon-demo":
-		# screenshots: your hunter at the Try-on rack, the camera in close
-		get_tree().create_timer(0.3).timeout.connect(func():
-			ppos = HomeTraining.RACK + Vector3(0, 0, 1.0); player.position = ppos
-			training.tick(0.05)
-			cam.zoom_to = 0.55; cam.zoom = cam.zoom_to; cam.snap(ppos)
-			for k in 8:
-				get_tree().create_timer(0.2 + k * 0.4).timeout.connect(func(): _close_panel()))
-	if which == "--training-demo":
-		get_tree().create_timer(0.3).timeout.connect(func():
-			ppos = Vector3(39.5, 0, 57.5); player.position = ppos; cam.snap(ppos)
-			for i in 6:
-				get_tree().create_timer(0.4 + i * 0.25).timeout.connect(func():
-					if training.in_zone:
-						training.cds["fire"] = 0.0
-						training.cast("fire")
-						training.hit(training.dummies[i % 3], 6.0 + i)))
 
 # ------------------------------------------------------------------ test hooks for the economy
 ## --armory-test, --feeder-test, --grave-test, --shrine-test: set up a save and open the thing,
