@@ -486,6 +486,7 @@
 				"fres": 0.5,
 				"fres_tint": 0.7
 			},
+			"leather-prow": {"far_lift": 0.05, "fres": 0.25, "fres_tint": 0.4},
 			"metal": {
 				"fres": 0.3,
 				"fres_tint": 0.6,

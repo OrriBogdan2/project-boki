@@ -1062,15 +1062,17 @@ def stuck(specs, body, arm):
     bvh = WP.body_bvh([body])
     def compass_face(u, v):
         d = np.sqrt((u - 0.5) ** 2 + (v - 0.5) ** 2)
-        col = np.where((d < 0.36)[..., None], hexcol("efe6cf")[None, None], hexcol("b8903e")[None, None])
-        needle = (np.abs(u - 0.5) < 0.05) & (d < 0.3)
-        col = np.where((needle & (v > 0.5))[..., None], hexcol("b32a22")[None, None], col)
-        col = np.where((needle & (v <= 0.5))[..., None], hexcol("2c3e60")[None, None], col)
+        col = np.where((d < 0.36)[..., None], hexcol("ddd2b4")[None, None], hexcol("9a7632")[None, None])
+        # a thin four-point star (the art's compass rose), its north point red
+        au, av = np.abs(u - 0.5), np.abs(v - 0.5)
+        star = ((au < 0.06 * (1 - av / 0.3)) & (av < 0.3)) | ((av < 0.06 * (1 - au / 0.3)) & (au < 0.3))
+        col = np.where(star[..., None], hexcol("2c3e60")[None, None], col)
+        col = np.where((star & (v > 0.5) & (au < 0.05))[..., None], hexcol("9e2a22")[None, None], col)
         return col
     at = Atlas(3, 64)
     cells = {"ice": at.cell("ice", ice_paint),
              "kelp": at.cell("kelp", lambda u, v: hexcol("3f5a2a")[None, None] * (0.75 + 0.45 * v[..., None])),
-             "brass": at.cell("brass", flat("b8903e", 0.06, 5)),
+             "brass": at.cell("brass", flat("9a7632", 0.06, 5)),
              "face": at.cell("face", compass_face),
              "barnacle": at.cell("barnacle", lambda u, v: hexcol("cfd2cc")[None, None] * (0.7 + 0.3 * noise(u, v, 20.0, 4))[..., None])}
     out = []
