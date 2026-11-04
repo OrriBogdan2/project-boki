@@ -268,17 +268,17 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | rimewright | ground dash -> LMB | Data: Skate is a held mode, released to stop. Footage (0239-0245, 0285-0290): she fires the whole skate and the darts become straight thick beams. Ours: darts fly as beams at normal damage (data pass); the skate goes on. | fires mid-dash; dash momentum carries; variant: beam |
 | rimewright | ground dash -> RMB | Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the spear aim and throw go on while she keeps skating. | fires mid-dash; dash momentum carries |
 | rimewright | ground dash -> E | Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the Rink Wall's tell and slide start while she keeps skating. | fires mid-dash; dash momentum carries |
-| rimewright | ground dash -> ult (X) | Data: the ult makes her invulnerable inside a slowing zone; footage (ult f25-f55): she is rooted in the crystal. Owner (18:20): skating into it keeps her momentum. Ours: Rimelock ends the skate and the skate's speed carries her on as the shell closes (x.carry_t 0.5 s, easing to a stop: 11.5 m/s gives 2.9 m), then she is rooted. | cancels the dash; dash momentum carries |
+| rimewright | ground dash -> ult (X) | Data: the ult makes her invulnerable inside a slowing zone; footage (ult f25-f55): she is rooted in the crystal. Owner items 64/65: the skate's velocity and direction go on into the ult as a frozen statue that slides on its ice (x.carry_t 0.8 s, easing to a stop, no steering or turning), then she is rooted. Symmetric with item 27 (Shift out of the ult keeps momentum). | fires mid-dash; dash momentum carries |
 | rimewright | ground dash -> Q glove | No source glove; the skate is a held move, so a glove goes off from it like her abilities. | fires mid-dash; dash momentum carries |
-| rimewright | air dash -> LMB | No air dash: Shift in the air buffers the Skate to the landing (owner item 12; the footage never starts a skate in the air). | the kit's own dash state: not routed yet |
-| rimewright | air dash -> RMB | No air dash (see lmb). | the kit's own dash state: not routed yet |
-| rimewright | air dash -> E | No air dash (see lmb). | the kit's own dash state: not routed yet |
-| rimewright | air dash -> ult (X) | No air dash (see lmb). | the kit's own dash state: not routed yet |
-| rimewright | air dash -> Q glove | No air dash (see lmb). | the kit's own dash state: not routed yet |
+| rimewright | air dash -> LMB | Same as the ground skate: the air skate is the same held mode (owner item 62), the darts turn to beams while she skates in the air too. | fires mid-dash; dash momentum carries; variant: beam |
+| rimewright | air dash -> RMB | Same as the ground skate (owner item 62). | fires mid-dash; dash momentum carries |
+| rimewright | air dash -> E | Same as the ground skate (owner item 62). | fires mid-dash; dash momentum carries |
+| rimewright | air dash -> ult (X) | Same as the ground skate (owner items 62/64): an ult cast from the air skate keeps its velocity and direction as the sliding statue. | fires mid-dash; dash momentum carries |
+| rimewright | air dash -> Q glove | Same as the ground skate (owner item 62). | fires mid-dash; dash momentum carries |
 | rimewright | LMB -> dash | Footage: she starts skating while firing and keeps firing; the darts turn to beams. Ours: the same. | the dash goes, the ability keeps running; dash momentum carries; variant: beam |
 | rimewright | RMB -> dash | Data: Skate can be held at any time. Ours: Shift during the spear aim or the throw's wind-up starts the skate and the throw still goes. | the dash goes, the ability keeps running; dash momentum carries |
 | rimewright | E -> dash | Data: Skate can be held at any time. Ours: Shift during the wall's 0.2s tell starts the skate and the wall still erupts. | the dash goes, the ability keeps running; dash momentum carries |
-| rimewright | ult (X) -> dash | Data: reactivating ends Chilling Finale early. Owner item 27: Shift ends Rimelock (as X again would; a late press still cracks it open) and she skates straight out at full speed. | the dash cancels its wind-up or recovery; dash momentum carries |
+| rimewright | ult (X) -> dash | Data: reactivating ends Chilling Finale early. Owner item 27: Shift ends Rimelock (as X again would; a late press still cracks it open) and she skates straight out at full speed, in the air too (item 62). | the dash cancels its wind-up or recovery; dash momentum carries |
 | rimewright | Q glove -> dash | No source glove; the skate starts and the glove's effect stays. | the dash goes, the ability keeps running; dash momentum carries |
 | rimewright | jump -> LMB |  | fires mid-jump (default) |
 | rimewright | jump -> RMB |  | fires mid-jump (default) |
@@ -286,15 +286,10 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | rimewright | jump -> ult (X) |  | fires mid-jump (default) |
 | rimewright | jump -> Q glove |  | fires mid-jump (default) |
 | rimewright | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| rimewright | LMB -> air dash | No air dash in the source (owner item 12). | **exception:** the move waits for the ability's end (owner item 12: she has no air dash; Shift in the air waits for the landing) |
 | rimewright | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| rimewright | RMB -> air dash | No air dash in the source (owner item 12). | **exception:** the move waits for the ability's end (owner item 12: she has no air dash; Shift in the air waits for the landing) |
 | rimewright | E -> jump |  | the move goes at once, the ability keeps running (default) |
-| rimewright | E -> air dash | No air dash in the source (owner item 12). | **exception:** the move waits for the ability's end (owner item 12: she has no air dash; Shift in the air waits for the landing) |
 | rimewright | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
-| rimewright | ult (X) -> air dash | No air dash in the source (owner item 12). | **exception:** the move waits for the ability's end (owner item 12: she has no air dash; Shift in the air waits for the landing) |
 | rimewright | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
-| rimewright | Q glove -> air dash | No air dash in the source (owner item 12). | **exception:** the move waits for the ability's end (owner item 12: she has no air dash; Shift in the air waits for the landing) |
 | rimewright | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | rimewright | hold RMB through an air dash |  | the hold carries through and lets go there |
 | rimewright | hold RMB through a jump |  | the hold carries through and lets go there |

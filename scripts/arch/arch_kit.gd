@@ -830,6 +830,10 @@ func fires_in_dash() -> bool: return false
 func in_dash() -> bool: return h.roll_t > 0.0 and h.move_kind == "dash"
 ## s left in that dash (0 when not in one); a kit that overrides in_dash() overrides this too.
 func dash_left() -> float: return h.roll_t if in_dash() else 0.0
+## The vertical speed a dash in the air holds while it runs (0: it holds the height); a skate sinks gently.
+func dash_vy() -> float: return 0.0
+## True while the model's facing is frozen (a statue): Hunter keeps `face` as it is, whatever the cursor does.
+func face_locked() -> bool: return false
 func fire_ok_rmb() -> bool: return true
 
 # ------------------------------------------------------------------ payoffs and state tells (shared)

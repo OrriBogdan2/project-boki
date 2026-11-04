@@ -139,22 +139,118 @@ func _skate_only() -> void:
 	step(m, 0.1)
 	P.inp["dash"] = true
 	P.inp["dash_down"] = true
-	step(m, 0.05)
+	step(m, 1.0 / 60.0)
 	P.inp["dash"] = false
 	ok(
-			"tm Shift: pressed in the air she does not dash; the skate waits for the landing",
-			not P.grounded and K.air_skate and not K.rinkrunning() and P.roll_t <= 0.0 and P.ex_cd <= 0.0)
-	var t := 0.0
-	while not K.rinkrunning() and t < 3.0:
-		step(m, 0.05)
-		t += 0.05
-	ok(
-			"tm Shift: on landing the buffered skate starts",
-			K.rinkrunning() and P.grounded and not K.air_skate, "after %.2f s" % t)
+			"tm Shift (item 62): pressed in the air the skate starts at once at skate speed (no buffer)",
+			not P.grounded and K.rinkrunning() and absf(P.roll_speed - float(dd["speed"])) < 0.01 and P.roll_t > 0.0,
+			"roll %.1f m/s of %.1f" % [P.roll_speed, float(dd["speed"])])
 	step(m, 0.7)
 	var slabs := K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size()
 	ok("tm Shift: ice plates form under her while she skates", slabs >= 5, "%d plates" % slabs)
 	P.inp["dash_down"] = false
+	await _free(m)
+
+## Item 62: Shift pressed in the air skates through the air at once (no buffer), sinking at most air_fall, carries
+## her over a 6 m gap, goes on along the ground if she lands mid-skate, and an ult cast from it keeps the skate's
+## velocity (item 64).
+func _air_skate() -> void:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	var W = m.world
+	var hx := int(floor(P.pos.x))
+	var hz := int(floor(P.pos.z))
+	var gy := P.pos.y
+	var fall := float(K.dash_def()["air_fall"])
+	var skate_v := float(K.dash_def()["speed"])
+	for dx in range(3, 9):          # a 6 m gap, tiles hx+3 .. hx+8
+		for dz in range(-6, 7):
+			if W.inb(hx + dx, hz + dz):
+				W.kind[W.idx(hx + dx, hz + dz)] = World.T_VOID
+	step(m, 0.1)
+	# a real jump off the near edge, Shift at the top of it
+	P.teleport(Vector3(hx + 0.5, gy, hz + 0.5))
+	P.vel = Vector3.ZERO
+	P.grounded = true
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["jump"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["jump"] = false
+	step(m, 0.15)
+	var jumped := not P.grounded
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	var started := K.rinkrunning() and P.roll_speed >= skate_v - 0.01
+	var worst_fall := 0.0
+	var crossed := false
+	var over_void := false
+	for i in 90:
+		step(m, 1.0 / 60.0)
+		worst_fall = maxf(worst_fall, -P.vel.y)
+		over_void = over_void or P.over_void()
+		crossed = crossed or P.pos.x >= hx + 9.5
+		if crossed:
+			break
+	ok(
+			"tm Shift (item 62): a Shift at the top of a jump skates within a frame at skate speed",
+			jumped and started, "jumped %s, skating %s, %.1f m/s" % [jumped, started, P.roll_speed])
+	ok(
+			"tm Shift (item 62): over a 6 m abyss gap she skates across, sinking no faster than air_fall",
+			over_void and crossed and not P.out and P.pos.y > gy - 3.0 and worst_fall <= fall + 0.05,
+			"void %s, crossed %s, y %.2f, sink %.2f of %.2f m/s" % [over_void, crossed, P.pos.y - gy, worst_fall, fall])
+	P.inp["dash_down"] = false
+	P.inp["move"] = Vector2.ZERO
+	await _free(m)
+	# landing mid-skate carries straight on along the ground; an ult cast from the air skate carries the velocity
+	r = sc.setup("rimewright", 30.0)
+	m = r[0]
+	P = r[1]
+	K = P.ak
+	K.cd["x"] = 0.0
+	P.lvl = 6
+	P.dashes = P.max_dashes()
+	P.teleport(P.pos + Vector3(0, 0.7, 0))
+	P.grounded = false
+	step(m, 0.05)
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	var in_air := not P.grounded and K.rinkrunning()
+	var t := 0.0
+	while not P.grounded and t < 2.0:
+		step(m, 0.02)
+		t += 0.02
+	ok(
+			"tm Shift (item 62): landing mid-skate goes straight on along the ground (no stop, no restart)",
+			in_air and P.grounded and K.rinkrunning() and P.roll_speed >= skate_v - 0.01,
+			"in air %s, landed after %.2f s, skating %s" % [in_air, t, K.rinkrunning()])
+	P.teleport(P.pos + Vector3(0, 3.0, 0))
+	P.grounded = false
+	step(m, 1.0 / 60.0)
+	var v := P.roll_speed
+	var dir0 := Vector2(P.roll_dir)
+	HunterKeys.ult_pressed(P)
+	P.inp["dash_down"] = false
+	var slowest := 99.0
+	var worst_dot := 1.0
+	for i in 18:
+		var q := P.pos
+		step(m, 1.0 / 60.0)
+		var dv := Vector2(P.pos.x - q.x, P.pos.z - q.z)
+		slowest = minf(slowest, dv.length() * 60.0)
+		worst_dot = minf(worst_dot, dv.normalized().dot(dir0))
+	ok(
+			"tm X (item 64): an ult cast from the air skate keeps >= 80% of its speed for 0.3 s, same direction",
+			K.ult_running() and slowest >= 0.8 * v and worst_dot > 0.99,
+			"slowest %.1f of %.1f m/s, dot %.3f" % [slowest, v, worst_dot])
+	P.inp["move"] = Vector2.ZERO
 	await _free(m)
 
 ## Item 27: no glide while sealed in Rimelock (she falls; each press is refused), and Shift ends it and
@@ -211,8 +307,9 @@ func _rime_glide_skate() -> void:
 	P.inp["dash_down"] = false
 	await _free(m)
 
-## Skating into Rimelock: the skate's momentum carries her on as the shell closes (x.carry_t, easing to a stop:
-## skate speed * carry_t / 2), the rink riding with her; then she is rooted (no slide on the ice) until it ends,
+## Skating into Rimelock (items 64/65): the skate's momentum carries the frozen statue on as the shell closes
+## (x.carry_t, easing to a stop: skate speed * carry_t * 2/3), the rink riding with her, her facing locked; then
+## she is rooted (no slide on the ice) until it ends,
 ## and an early recast frees her.
 func _rime_skate_in() -> void:
 	var r: Array = sc.setup("rimewright", 30.0)
@@ -234,12 +331,31 @@ func _rime_skate_in() -> void:
 	P.inp["dash_down"] = false
 	var sealed := K.ult_running() and not K.rinkrunning() and K.anim_id == "tm_rime_carry"
 	var carry_t := float(K.x_def()["carry_t"])
-	step(m, carry_t + 0.1)
+	var face0 := P.face
+	var dir0 := Vector2(P.roll_dir)
+	var slowest := 99.0
+	var worst_dot := 1.0
+	var face_dev := 0.0
+	var frames := int(round((carry_t + 0.1) * 60.0))
+	for i in frames:
+		P.inp["aim"] = P.pos + Vector3(cos(i * 0.12), 0.0, sin(i * 0.12)) * 6.0     # the cursor sweeps round her
+		var q := P.pos
+		step(m, 1.0 / 60.0)
+		var dv := Vector2(P.pos.x - q.x, P.pos.z - q.z)
+		if i < 18:
+			slowest = minf(slowest, dv.length() * 60.0)
+			if dv.length() > 0.001:
+				worst_dot = minf(worst_dot, dv.normalized().dot(dir0))
+		face_dev = maxf(face_dev, absf(angle_difference(P.face, face0)))
 	var carried := Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length()
-	var want := v * carry_t * 0.5
+	var want := v * carry_t * 2.0 / 3.0
 	ok(
-			"tm X: skating into it carries her on as the shell closes (skate speed x carry_t / 2)",
-			sealed and absf(carried - want) < want * 0.15 and carried > 2.0,
+			"tm X (item 64): skating into it keeps >= 80% of the skate's speed for 0.3 s, same direction",
+			sealed and slowest >= 0.8 * v and worst_dot > 0.99,
+			"slowest %.1f of %.1f m/s, direction dot %.3f" % [slowest, v, worst_dot])
+	ok(
+			"tm X (item 65): the statue slides on along the skate (speed x carry_t x 2/3, >= 2 m), easing to a stop",
+			absf(carried - want) < want * 0.15 and carried >= 2.0,
 			"%.2f m (want %.2f from %.1f m/s over %.1fs)" % [carried, want, v, carry_t])
 	var rink_at: Vector3 = K.rime["at"]
 	ok(
@@ -254,6 +370,17 @@ func _rime_skate_in() -> void:
 			"tm X: then encased and rooted: zero planar speed with the move key held, no slide on the ice",
 			K.ult_running() and fastest < 0.01 and Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length() < 0.01,
 			"fastest %.3f m/s" % fastest)
+	var yaw0 := P.model.global_transform.basis.get_euler().y
+	var yaw_dev := 0.0
+	for i in 85:
+		P.inp["aim"] = P.pos + Vector3(cos(i * 0.1), 0.0, sin(i * 0.1)) * 6.0
+		step(m, 1.0 / 60.0)
+		face_dev = maxf(face_dev, absf(angle_difference(P.face, face0)))
+		yaw_dev = maxf(yaw_dev, absf(angle_difference(P.model.global_transform.basis.get_euler().y, yaw0)))
+	ok(
+			"tm X (item 65): her facing and model rotation hold while the cursor sweeps 360 deg round the seal",
+			K.ult_running() and face_dev < 0.001 and yaw_dev < 0.01 and K.face_locked(),
+			"face off by %.4f rad, model %.4f rad" % [face_dev, yaw_dev])
 	HunterKeys.ult_pressed(P)
 	step(m, 0.4)
 	ok(
@@ -1123,6 +1250,7 @@ func rimewright() -> void:
 	await _free(m)
 	await _skate_feel()
 	await _skate_only()
+	await _air_skate()
 	await _rime_glide_skate()
 	await _rime_skate_in()
 	await _skate_ice()
