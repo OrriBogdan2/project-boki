@@ -712,6 +712,276 @@ def _lens_atlas(spec, n):
     return px
 
 
+def dorsal(body, arm, spec, atlas_spec, tag="dorsal"):
+    """The crest's fin carried down her back to the tail (Cinder r3): a fin along the back at `x` (the fitted
+    frame; beside the spine so a back tank isn't in the way) from height z0 down to z1, its base found by rays at
+    the body from behind, leaning back and up; same atlas as the crest; rides `bone`."""
+    bvh = body_bvh([body])
+    x = float(spec["x"])
+    z0, z1 = spec["z"]
+    n = int(spec.get("samples", 40))
+    base, ups = [], []
+    for z in np.linspace(z0, z1, n):
+        loc, nrm, _i, _d = bvh.ray_cast(Vector((x, -1.5, z)), Vector((0.0, 1.0, 0.0)))
+        if loc is None:
+            continue
+        up = np.array([0.0, -1.0, float(spec.get("lean", 0.35))])
+        up /= np.linalg.norm(up)
+        base.append(np.array(loc[:]) - up * float(spec.get("sink", 0.01)))
+        ups.append(up)
+    base = np.array(base)
+    bld = Builder()
+    ribbon_fin(bld, base, np.array(ups), arclen(base), spec)
+    ob = bld.object("Dorsal")
+    img = bpy.data.images.new(tag + "_atlas", MEM_TEX, MEM_TEX, alpha=False)
+    img.pixels = membrane_atlas(atlas_spec).ravel()
+    img.pack()
+    mi = _mats(ob, img, ("fur", "glow"), tag)
+    for poly in ob.data.polygons:
+        poly.material_index = mi["glow"] if all(bld.part[v] == "edge" for v in poly.vertices) else mi["fur"]
+    g = ob.vertex_groups.new(name=spec.get("bone", "hips"))
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("dorsal fin: %d points, %d tris" % (len(base), sum(len(f) - 2 for f in bld.f)))
+    return ob
+
+
+def vials(body, arm, spec, tag="vials"):
+    """Cinder's bandolier vials, bigger than Meshy's: n glass vials (glow, each its colour) with cork tops
+    (leather), one on each stretch of the body's own glow faces (Meshy's small vial caps) along the strap,
+    standing out from the chest along its normal; they ride `bone`."""
+    me = body.data
+    names = [m.name for m in me.materials]
+    cen, nrm = [], []
+    for p in me.polygons:
+        if names[p.material_index].startswith("glow-"):
+            cen.append(p.center[:])
+            nrm.append(p.normal[:])
+    cen, nrm = np.array(cen), np.array(nrm)
+    mu = cen.mean(axis=0)
+    _u, _s, vt = np.linalg.svd(cen - mu, full_matrices=False)
+    ax = vt[0]
+    t = (cen - mu) @ ax
+    n = len(spec["colours"])
+    edges = np.quantile(t, np.linspace(0, 1, n + 1))
+    bld = Builder()
+    for k in range(n):
+        sel = (t >= edges[k]) & (t <= edges[k + 1])
+        c = cen[sel].mean(axis=0)
+        nv = nrm[sel].mean(axis=0)
+        nv /= max(np.linalg.norm(nv), 1e-9)
+        up = np.cross(nv, ax)
+        up /= max(np.linalg.norm(up), 1e-9)
+        if up[2] < 0:
+            up = -up
+        r, h = float(spec.get("r", 0.017)), float(spec.get("h", 0.056))
+        mid = c + nv * (r + float(spec.get("out", 0.004)))
+        a, b = mid - up * h * 0.5, mid + up * h * 0.5
+        u0 = k / n
+        bld.prism(a, b, r, 10, (u0 + 0.01, 0.02, u0 + 1.0 / n - 0.01, 0.48), "glass%d" % k, 0.0)
+        bld.prism(b - up * 0.002, b + up * float(spec.get("cork_h", 0.016)), r * 0.7, 8,
+                  (u0 + 0.01, 0.52, u0 + 1.0 / n - 0.01, 0.98), "cork", 0.0)
+    ob = bld.object("Vials")
+    size = 64
+    img = bpy.data.images.new(tag + "_atlas", size, size, alpha=False)
+    px = np.ones((size, size, 4), np.float32)
+    for k, col in enumerate(spec["colours"]):
+        x0, x1 = int(size * k / n), int(size * (k + 1) / n)
+        px[: size // 2, x0:x1, :3] = hexcol(col)
+        px[size // 2:, x0:x1, :3] = hexcol(spec.get("cork", "7a4a2a"))
+    img.pixels = px.ravel()
+    img.pack()
+    mi = _mats(ob, img, ("glow", "leather"), tag)
+    for poly in ob.data.polygons:
+        poly.material_index = mi["leather"] if bld.part[poly.vertices[0]] == "cork" else mi["glow"]
+    g = ob.vertex_groups.new(name=spec.get("bone", "hips"))
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("vials: %d along %.2f m of strap" % (n, float(t.max() - t.min())))
+    return ob
+
+
+def ribbon_fin(bld, base, up, s_arr, spec):
+    """A fin along a ridge (Cinder's tail): `base` points (n x 3) with `up` directions, heights rising from 0 to
+    `height` and back to 0 over the run, a spiky edge between `rays` rays; s_arr the arc length at each base."""
+    n = len(base)
+    rows = int(spec.get("rows", 5))
+    nr = int(spec["rays"])
+    H = float(spec["height"])
+    grid = np.zeros((rows, n, 3))
+    nrm = np.zeros((rows, n, 3))
+    uvg = np.zeros((rows, n, 2))
+    sg = np.zeros((rows, n))
+    v0, v1 = spec.get("v", [0.5, 1.0])
+    tang = np.gradient(base, axis=0)
+    for j in range(n):
+        u = j / (n - 1)
+        h = H * math.sin(math.pi * min(1.0, u * 1.25)) ** 0.6 if u < 0.8 else H * 0.4 * (1.0 - (u - 0.8) / 0.2) + 0.002
+        ph = abs((u * nr) % 1.0 - 0.5) * 2.0
+        h *= 1.0 - float(spec.get("spike", 0.3)) * ph ** 1.5
+        side = np.cross(tang[j], up[j])
+        side /= max(np.linalg.norm(side), 1e-9)
+        for i in range(rows):
+            t = i / (rows - 1)
+            grid[i, j] = base[j] + up[j] * h * t
+            nrm[i, j] = side
+            uvg[i, j] = (u, v0 + (v1 - v0) * (0.02 + 0.96 * t))
+            sg[i, j] = s_arr[j]
+    part = ["edge" if i >= rows - 2 else "mem" for i in range(rows)]
+    _sheet(bld, grid, nrm, float(spec.get("th", 0.002)), part, sg, uvg)
+    return bld
+
+
+MEM_TEX = 512
+
+def fins(arm, specs, atlas_spec, tag="fin"):
+    """The crest fan(s) as one mesh on the head bone, with their atlas (membrane on fur, the edge on glow)."""
+    bld = Builder()
+    for sp in specs:
+        fan(arm, sp, bld)
+    ob = bld.object("Fins")
+    img = bpy.data.images.new(tag + "_atlas", MEM_TEX, MEM_TEX, alpha=False)
+    img.pixels = membrane_atlas(atlas_spec).ravel()
+    img.pack()
+    mi = _mats(ob, img, ("fur", "glow"), tag)
+    parts = bld.part
+    for poly in ob.data.polygons:
+        poly.material_index = mi["glow"] if all(parts[v] == "edge" for v in poly.vertices) else mi["fur"]
+    g = ob.vertex_groups.new(name=specs[0].get("bone", "head"))
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("fins: %d, %d tris" % (len(specs), sum(len(f) - 2 for f in bld.f)))
+    return ob, img
+
+
+def fan(arm, spec, bld=None):
+    """A fin-crest fanned round the back of the skull (Cinder r3: a newt's sail that reads from the front as a
+    halo of rays): `rays` rays from angle a0 to a1 (degrees: 0 straight up, + to her right), their roots on a
+    ring of radius `r_base` about `centre` (the fitted frame, rel the head bone), tilted `tilt` degrees back,
+    `length` long at the top and `side_k` x that at the ends, a spiky edge (`spike` deep between the rays).
+    Rides the head bone. Rows: `rows` from the root to the edge (the last `edge_rows` on the glow slot); `yaw`
+    degrees turns the fan about the vertical (behind a head that Meshy turned)."""
+    bld = bld or Builder()
+    c = np.array(spec["centre"], np.float64)
+    nr = int(spec["rays"])
+    per = int(spec.get("per_ray", 6))
+    cols = nr * per + 1
+    rows = int(spec.get("rows", 7))
+    a0, a1 = math.radians(spec["a0"]), math.radians(spec["a1"])
+    tilt = math.radians(spec.get("tilt", 30.0))
+    back = float(spec.get("back", 0.03))
+    grid = np.zeros((rows, cols, 3))
+    nrm = np.zeros((rows, cols, 3))
+    uvg = np.zeros((rows, cols, 2))
+    sg = np.zeros((rows, cols))
+    v0, v1 = spec.get("v", [0.0, 0.5])
+    for j in range(cols):
+        u = j / (cols - 1)
+        a = a0 + (a1 - a0) * u
+        radial = np.array([math.sin(a), 0.0, math.cos(a)])
+        d = radial * math.cos(tilt) + np.array([0.0, -1.0, 0.0]) * math.sin(tilt)
+        d /= np.linalg.norm(d)
+        root = c + radial * float(spec["r_base"]) + np.array([0.0, -back, 0.0])
+        k = float(spec.get("side_k", 0.8))
+        L = float(spec["length"]) * (k + (1.0 - k) * math.cos(a) ** 2 if abs(a) < math.pi / 2 else k * 0.9)
+        ph = abs((u * nr) % 1.0 - 0.5) * 2.0
+        L *= 1.0 - float(spec.get("spike", 0.16)) * ph ** 1.5
+        side = np.cross(d, radial)
+        side /= max(np.linalg.norm(side), 1e-9)
+        for i in range(rows):
+            t = i / (rows - 1)
+            tt = t if i < rows - 1 else 1.0
+            grid[i, j] = root + d * L * tt
+            nrm[i, j] = side
+            uvg[i, j] = (u, v0 + (v1 - v0) * (0.02 + 0.96 * t))
+            sg[i, j] = 0.0
+    yaw = math.radians(float(spec.get("yaw", 0.0)))         # (+ toward her right: behind a head Meshy turned)
+    if yaw:
+        cz, sz = math.cos(yaw), math.sin(yaw)
+        rz = np.array([[cz, -sz, 0.0], [sz, cz, 0.0], [0.0, 0.0, 1.0]])
+        grid = (grid - c) @ rz.T + c
+        nrm = nrm @ rz.T
+    ne = int(spec.get("edge_rows", 1))
+    part = ["edge" if i >= rows - 1 - ne else "mem" for i in range(rows)]
+    _sheet(bld, grid, nrm, float(spec.get("th", 0.0016)), part, sg, uvg)
+    return bld
+
+
+def _mats(ob, img, slots, tag):
+    out = {}
+    for slot in slots:
+        m = bpy.data.materials.new("%s-%s" % (slot, tag))
+        m.use_nodes = True
+        bsdf = m.node_tree.nodes.get("Principled BSDF")
+        tex = m.node_tree.nodes.new("ShaderNodeTexImage")
+        tex.image = img
+        m.node_tree.links.new(tex.outputs[0], bsdf.inputs["Base Color"])
+        bsdf.inputs["Roughness"].default_value = 0.8
+        ob.data.materials.append(m)
+        out[slot] = len(ob.data.materials) - 1
+    return out
+
+
+def membrane_atlas(spec, size=MEM_TEX):
+    """The fins' atlas: v from the base (0) to the tip (1) inside each fin's band, the membrane's ramp along it,
+    dark fin rays at the ray columns (stronger at the base), the last `edge` share the glowing orange edge."""
+    px = np.ones((size, size, 4), np.float32)
+    for band in spec["bands"]:
+        v0, v1 = band["v"]
+        r0, r1 = int(v0 * size), int(v1 * size)
+        t = (np.arange(r1 - r0) + 0.5) / max(1, r1 - r0)
+        cols = np.array([hexcol(c) for c in band["ramp"]], np.float32)
+        x = np.clip(t, 0, 1) * (len(cols) - 1)
+        i0 = np.clip(np.floor(x).astype(int), 0, len(cols) - 2)
+        f = (x - i0)[:, None]
+        mem = cols[i0] * (1 - f) + cols[i0 + 1] * f                     # (rows, 3)
+        img = np.repeat(mem[:, None, :], size, axis=1)
+        u = (np.arange(size) + 0.5) / size
+        nr = int(band["rays"])
+        ph = np.abs((u * nr) % 1.0 - 0.5) * 2.0                           # 1 between rays, 0 on a ray
+        ray = np.clip(1.0 - ph / float(band.get("ray_w", 0.22)), 0, 1)[None, :] * (1.0 - 0.6 * t[:, None])
+        img = img * (1 - ray[..., None]) + hexcol(band["ray"])[None, None, :] * ray[..., None]
+        e = float(band.get("edge", 0.12))
+        edge = np.clip((t - (1.0 - e)) / 0.03, 0, 1)[:, None, None]
+        img = img * (1 - edge) + hexcol(band["edge_col"])[None, None, :] * edge
+        px[r0:r1, :, :3] = img
+    return px
+
+
+def _sheet(bld, grid, nrm, th, part, s_grid, uv_grid):
+    """A thin closed sheet through a grid of points (rows x cols x 3) with per-point normals: a front and a back
+    layer `th` apart and their rims joined, so it reads from both sides under back-face culling."""
+    rows, cols = grid.shape[:2]
+    base = len(bld.v)
+    for side in (1.0, -1.0):
+        for i in range(rows):
+            for j in range(cols):
+                bld.v.append(grid[i, j] + nrm[i, j] * th * side)
+                bld.uv.append(tuple(uv_grid[i, j]))
+                bld.part.append(part[i])
+                bld.s.append(s_grid[i, j])
+    n = rows * cols
+
+    def vid(side, i, j):
+        return base + (0 if side > 0 else n) + i * cols + j
+    for i in range(rows - 1):
+        for j in range(cols - 1):
+            bld.f.append((vid(1, i, j), vid(1, i, j + 1), vid(1, i + 1, j + 1), vid(1, i + 1, j)))
+            bld.f.append((vid(-1, i, j), vid(-1, i + 1, j), vid(-1, i + 1, j + 1), vid(-1, i, j + 1)))
+    for i in range(rows - 1):
+        for j in (0, cols - 1):
+            bld.f.append((vid(1, i, j), vid(1, i + 1, j), vid(-1, i + 1, j), vid(-1, i, j)))
+    for j in range(cols - 1):
+        for i in (0, rows - 1):
+            bld.f.append((vid(1, i, j), vid(-1, i, j), vid(-1, i, j + 1), vid(1, i, j + 1)))
+
+
 def gauntlets(arm, spec, tag="gauntlet"):
     """Stone gauntlets grown round both forearms (Tarek), elbow to knuckle: a glowing amber core (glow slot)
     wrapped in rough stone plates (`slot`, leather) set a little apart, so the core shows through the gaps as

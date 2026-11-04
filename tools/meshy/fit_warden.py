@@ -2740,6 +2740,11 @@ def tail_chain(ob, arm, ts):
         if len(m):
             pts.append(co[m].mean(axis=0))
     p = np.array(pts)
+    pj = np.linspace(0.0, L, len(p))           # (each centreline point's marked arc length)
+    rot = None
+    if ts.get("curl"):
+        p, rot = _curl(ob, sel, s, co, p, pj, ts["curl"])
+        co = np.array([v.co[:] for v in ob.data.vertices])
     tip = co[sel[np.argmax(s[sel])]]
     names, spans = WP.chain_bones(arm, "tail", "hips", p, L, nb, tip)
     for g in ob.vertex_groups:
@@ -2758,6 +2763,105 @@ def tail_chain(ob, arm, ts):
             gi[x.group].add([int(vi)], x.weight * t, "REPLACE")
         hips.add([int(vi)], 1.0 - t, "ADD")
     log("tail chain: %d bones over %.2f m, %d vertices" % (nb, Lp, len(sel)))
+    if not ts.get("fin"):
+        return None
+    # a fin along the tail's ridge (the crest's rays carried on: Cinder r3), on the same chain
+    fs = ts["fin"]
+    f0, f1 = fs.get("span", [0.15, 0.97])
+    ks = [i for i in range(len(p)) if f0 * L <= pj[i] <= f1 * L]
+    base, ups, sa = [], [], []
+    for i in ks:
+        up = rot[i] @ np.array([0.0, 0.0, 1.0]) if rot is not None else np.array([0.0, 0.0, 1.0])
+        m = sel[np.abs(s[sel] - pj[i]) < L / k]
+        if not len(m):
+            continue
+        top = float(((co[m] - p[i]) @ up).max())
+        base.append(p[i] + up * (top - float(fs.get("sink", 0.012))))
+        ups.append(up)
+        sa.append(pj[i] * Lp / L)
+    bld = WP.Builder()
+    WP.ribbon_fin(bld, WP.resample(np.array(base), int(fs.get("samples", 90)))[0],
+                  _resample_dirs(np.array(ups), int(fs.get("samples", 90))),
+                  np.linspace(sa[0], sa[-1], int(fs.get("samples", 90))), fs)
+    fin = bld.object("TailFin")
+    img = bpy.data.images.new("tailfin_atlas", WP.MEM_TEX, WP.MEM_TEX, alpha=False)
+    img.pixels = WP.membrane_atlas(ts["fin_atlas"]).ravel()
+    img.pack()
+    mi = WP._mats(fin, img, ("fur", "glow"), "tailfin")
+    for poly in fin.data.polygons:
+        poly.material_index = mi["glow"] if all(bld.part[v] == "edge" for v in poly.vertices) else mi["fur"]
+    WP.weights(fin, [(vi, bld.s[vi]) for vi in range(len(bld.v))], names, spans)
+    fin.parent = arm
+    mod = fin.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("tail fin: %d tris" % sum(len(f) - 2 for f in bld.f))
+    return fin
+
+
+def drop_slot(ob, rule):
+    """The faces of slot `slot` whose centre is inside `box` (Meshy's frame) removed: a part rebuilt as geometry
+    (Cinder's fin-crest on the head: a fan of rays now, fit spec "fins")."""
+    names = [m.name for m in ob.data.materials]
+    b = [(-1e9 if x is None else x) if i % 2 == 0 else (1e9 if x is None else x) for i, x in enumerate(rule["box"])]
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    gone = [f for f in bm.faces if names[f.material_index].startswith(rule["slot"] + "-")
+            and b[0] <= f.calc_center_median().x <= b[1] and b[2] <= f.calc_center_median().y <= b[3]
+            and b[4] <= f.calc_center_median().z <= b[5]]
+    bmesh.ops.delete(bm, geom=gone, context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(ob.data)
+    bm.free()
+    ob.data.update()
+    log("drop %s: %d faces" % (rule["slot"], len(gone)))
+
+
+def _curl(ob, sel, s, co, p, pj, cs):
+    """The tail curled up into a loop (Cinder's art): from arc length `from` on, the centreline bends about the
+    horizontal axis across it there by 1/`radius` a metre, up to `turn` degrees, and every tail vertex goes with
+    its stretch of the centreline (its offset turned the same). Returns the new centreline and each point's turn."""
+    s0, rho, turn = float(cs["from"]), float(cs["radius"]), math.radians(float(cs["turn"]))
+    i0 = int(np.searchsorted(pj, s0))
+    t0 = p[min(i0 + 1, len(p) - 1)] - p[max(i0 - 1, 0)]
+    t0[2] = 0.0
+    t0 /= max(np.linalg.norm(t0), 1e-9)
+    axis = np.cross(t0, np.array([0.0, 0.0, 1.0]))          # (the tangent turns from t0 toward up)
+    th = np.clip((pj - s0) / rho, 0.0, turn)
+    rot = [_rotm(axis, a) for a in th]
+    q = p.copy()
+    for i in range(1, len(p)):
+        q[i] = q[i - 1] + rot[i] @ (p[i] - p[i - 1])
+    lift = float(cs.get("lift", 0.0))
+    for i in range(len(q)):
+        q[i, 2] += lift * min(1.0, max(0.0, (pj[i] - s0) / max(rho, 1e-6)))
+    # each vertex: its offset from the old centreline at its arc length, turned and put on the new one
+    for vi in sel:
+        x = float(s[vi])
+        i = int(np.clip(np.searchsorted(pj, x), 1, len(p) - 1))
+        f = (x - pj[i - 1]) / max(pj[i] - pj[i - 1], 1e-9)
+        old = p[i - 1] * (1 - f) + p[i] * f
+        new = q[i - 1] * (1 - f) + q[i] * f
+        a = th[i - 1] * (1 - f) + th[i] * f
+        ob.data.vertices[int(vi)].co = Vector(new + _rotm(axis, a) @ (co[vi] - old))
+    ob.data.update()
+    log("tail curl: from %.2f m, radius %.2f m, %.0f degrees" % (s0, rho, math.degrees(float(th.max()))))
+    return q, rot
+
+
+def _rotm(axis, ang):
+    axis = axis / np.linalg.norm(axis)
+    x, y, z = axis
+    c, s_, C = math.cos(ang), math.sin(ang), 1 - math.cos(ang)
+    return np.array([[c + x * x * C, x * y * C - z * s_, x * z * C + y * s_],
+                     [y * x * C + z * s_, c + y * y * C, y * z * C - x * s_],
+                     [z * x * C - y * s_, z * y * C + x * s_, c + z * z * C]])
+
+
+def _resample_dirs(d, n):
+    """Unit directions resampled evenly along their index to n."""
+    x = np.linspace(0, len(d) - 1, n)
+    out = np.stack([np.interp(x, np.arange(len(d)), d[:, i]) for i in range(3)], axis=1)
+    return out / np.maximum(np.linalg.norm(out, axis=1, keepdims=True), 1e-9)
 
 
 def tail_to_hips(ob):
@@ -3323,10 +3427,11 @@ def main():
         drop_floaters(ob, int(spec.get("cut_floaters", 60)))
     for hs in spec.get("hair_springs", []):
         hair_spring(ob, arm, _rel(arm, hs, ("top", "bottom", "box_lo", "box_hi")))
+    tail_fin = None
     if "tail" in spec:
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        tail_chain(ob, arm, spec["tail"])
-    parts = []
+        tail_fin = tail_chain(ob, arm, spec["tail"])
+    parts = [tail_fin] if tail_fin else []
     extras = []         # (empties: an orbit's pivot, an empty weapon)
     if spec.get("weapon_empty"):
         # (a Warden whose weapon is part of the body, Tarek's stone bracers: an empty `weapon`, so WardenGlb hides
@@ -3445,6 +3550,16 @@ def main():
             parts.append(kael_parts.collar(ob, arm, rig, K, spec["kael"]["collar"]))
         if spec["kael"].get("shards"):
             parts.append(kael_parts.shards(ob, arm, rig, K, spec["kael"]["shards"]))
+    if spec.get("fins") or spec.get("vials") or spec.get("dorsal"):
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import warden_parts as WP
+        if spec.get("fins"):
+            parts.append(WP.fins(arm, [_rel(arm, f, ("centre",)) for f in spec["fins"]], spec["fin_atlas"])[0])
+        if spec.get("vials"):
+            parts.append(WP.vials(ob, arm, spec["vials"]))
+    if spec.get("dorsal"):
+        import warden_parts as WP
+        parts.append(WP.dorsal(ob, arm, spec["dorsal"], spec["fin_atlas"]))
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
