@@ -1,0 +1,10 @@
+s1_vs_turnaround.png: Pip stage 1: the r2 turnaround (top), the model close (front, 3/4, side, back, 3/4 back), and at the match camera (true pixels x3)
+s1_vs_sheet.png: the turnaround beside the model's front and 3/4, the match-camera strip below (warden-shots)
+s1_vs_portrait.png: the r2 portrait beside the model's head and shoulders, 3/4 and front
+s1_closeup.png: head and shoulders, three-quarter front: face, goggles, ears, cape, a fairy-wing card
+s1_front_34.png: full length, front and 3/4: the lantern hanging from her right paw, tail, wings
+s1_back_34.png: full length, back and 3/4 back: cape, tail on its spring chain, four wing cards
+s1_poses_game.png: idle, run, attack, cast, ult at the match camera (true pixels x3)
+s1_moves_1.png: run frames close (tail, wings and lantern on their springs; note the left arm/cape flap)
+s1_match.png: the Arena, --arena=tender --arena-demo=pose --demo-zoom=1.0 (the real match camera)
+s1_match_x4.png: s1_match cropped round her, x4 nearest
