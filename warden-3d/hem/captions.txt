@@ -22,3 +22,9 @@ Stage 3 (after the shared painted-look fix 16c18b4f; credit-free):
 s3_closeup_vs_art.png, s3_34_vs_art.png, s3_back_vs_art.png, s3_match_vs_art.png / s3_match.png: as s2, on the s3 model: the cheek strands cut, the mask flush with no side shards, thimble claws on her right fingertips (hem_weapons_sheet), a lighter bow with a thicker glowing string, no needle sticking forward off the bow
 s3_vs_turnaround_close.png / s3_vs_turnaround_game.png, s3_moves_close_1/2.png, s3_poses_game.png
 s3_vs_s2.png: stage 2 (top) against stage 3 (bottom)
+
+Stage 4 (RECIPE_95 base dd56bb8e + the match-zoom fix f4b59cb3; credit-free):
+s4_closeup_vs_art.png, s4_34_vs_art.png, s4_back_vs_art.png, s4_match_vs_art.png / s4_match.png: a true black recurve with a bright glowing red string and spool, angled out at her left side as the turnaround; every quiver needle threaded red with a drifting end; the coat to mid-calf with a longer back tail; the mask shaded smooth; a red rim at the match camera
+s4_vs_turnaround_close.png / s4_vs_turnaround_game.png, s4_moves_close_1/2.png, s4_poses_game.png
+s4_vs_s3.png: stage 3 (top) against stage 4 (bottom)
+Self-score (RECIPE_95 rubric): close-up 83 (silhouette 13/15, face 17/20, hair 9/10, props 16/20, palette 13/15, clean paint 7/10, outfit 8/10); match zoom 74 (silhouette 20/25, signature colours 18/25, values 16/20, props 12/20, artefacts 8/10)
