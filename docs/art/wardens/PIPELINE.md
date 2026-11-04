@@ -135,3 +135,9 @@ profile views before any run.
 
 Vex total: 6 tasks, 160 credits.
 
+
+## Owner direction for the next Warden runs (2026-11-04 02:45 UTC)
+- Wait for the improved base art: watch ext/imagegen IMG_STATUS.md. Each Warden also needs the owner's explicit "go for 3D" first (02:40 gate).
+- Colour: aim for **flat, clean, bright painted colour with no mottled grain**. Vex v2's baked speckle was the main complaint.
+- Proportions: use **slightly chunkier game proportions**: a bigger head and hands and a thicker silhouette, so each Warden reads at match zoom. Do this through the archetype `body` (step 7) and the fit, even where the art is slimmer.
+- Pose: item 52 adds a signature stance and idle per Warden as data on the shared rig (content/rules/warden_stance.json). The fit keeps the A-pose rest; the stance is applied at runtime.
