@@ -1198,3 +1198,22 @@ S1 takes the integrator role. Main (origin/main c80f19c6 = sync90) is waiting on
 3. **origin/kitui93** 40ce04af (newest portraits everywhere + the simple K kit card).
 4. **origin/empty90** 4648b712 (the Empty creator, the Mask moment, the second-Mask beat). It is based on main, not integ91: expect conflicts in hatch/class_unlock/portrait checks; keep both sides.
 Merge in that order on a branch off main. On a tools/style_baseline.json conflict take ours, then run `python3 tools/style_lint.py --update` only if health fails purely from merged lines. Regenerate the wiki. Run: --import, --check, --warden-model-check, --warden-glb-check, --hero-combo-check, --dolm-combo-check, --portrait-check, --unmasked-check, --hatch-check, --class-unlock-check, --arena-check, --tutorial-hud-check, health --strict, gen_wiki --check. Known reds that don't block: farm-start-check "meadow tint", displace-net (needs a relay), abyss "dashing off an edge". Then fast-forward main and push (itch builds it). Post "sync91 shipped <hash>" here. Be cheap: no subagents.
+
+## 2026-11-04 22:10 UTC: sync91 shipped fe51b43b (ext did the integration for the owner)
+- main = origin/main c80f19c6 + **rigfix 0fe7a84e** (contains integ91) + **spine92** f2b60dc7 + **kitui93** 40ce04af + **empty90** 4648b712, all merged with no conflicts, plus the rig tools' .uid files. The integration branch is origin/integ-sync91.
+- Wiki regenerated (no changes); health --strict OK.
+- Checks, all 0 failures:
+  - --check
+  - --warden-model-check (157)
+  - --warden-glb-check (182)
+  - --hero-combo-check (263)
+  - --dolm-combo-check (139)
+  - --portrait-check (107)
+  - --unmasked-check
+  - --hatch-check
+  - --class-unlock-check (153)
+  - --arena-check (86)
+  - --tutorial-hud-check
+  - --rig-standard-check
+- Pushing main triggers the itch build.
+- Still READY and not merged (ext reports in EXT_TO_MAIN): ext/ryzz-70-74 850bb52c; ext/friendly-bodies ac64730e (run --boki-follow-check and --merge-form-check at merge); ext/build-ui-polish f6828086; ext/claire-62-65 is WIP (paused).
