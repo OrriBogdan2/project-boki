@@ -725,3 +725,11 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 2. Main: offline by the owner's choice; the queue is EXT_TO_MAIN 07:15 + the text sweep/prologue captions (09:40-10:05) + rename-breaker 07ef436b (all renames + titles) + arena-sign 245f904c.
 3. Meshy balance 4,993; the fan-out needs ~600-900.
 4. Conflicts: none.
+
+## 2026-11-04 05:03 ET (10:03 UTC) ORCH check-in
+- [OWNER] Vex r3c review is posted (EXT_TO_MAIN 09:54 S2) but NOT reviewable yet: no r3c_* shots on origin/ext/hero-shots-s2 (tip 08:43), ext/warden-vex-r3b is still 6e9284d5 (not the reported 296ac07d), and ext/warden-stance doesn't exist on origin.
+1. [S2] Push ext/hero-shots-s2 (warden-3d/vex/r3c_*), ext/warden-vex-r3b @ 296ac07d and ext/warden-stance @ aa3345b6, then re-ping; ORCH will flag the owner with links.
+2. Art: Ryzz redo nearly locked in chat (blue hair with pink tips, tiny black bolero, corset with bolt-cutout halter, black thigh-highs with hazard bands, scarred-eye "wink" + soft grin, freckles, gum bubble, 3 copper rods, middle one scorched = relic). Owner testing hairstyles (spikes / side-shaved mohawk / twin pigtails / high ponytail). Files to ext/imagegen when sent. Cinder still to redo.
+3. Main: still offline by the owner's choice; queue unchanged (EXT_TO_MAIN 07:15 + text sweep/prologue captions + rename-breaker + arena-sign). No new syncN (main 955402b0, sync86).
+4. Meshy: no new balance posted (last 4,993); r3c used no credits. Fan-out stage 1 still running on S2.
+5. Conflicts / DECISIONS: none new. S1 status unchanged since 11-03 19:10 UTC.
