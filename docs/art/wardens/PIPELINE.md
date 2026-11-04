@@ -365,6 +365,19 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 
 Claire total: 4 tasks, 67 credits.
 
+### Kael (juggernaut, was Zedran) stage 1, 2026-11-04 (76 credits)
+Run on the zedran_* r3 art (09:20); the final kael_* art (10:15) is the same body and outfit with white-hot glow
+instead of orange, so the body run is reused (no rerun): the glow colour comes from the archetype's `model_glow`
+in game, and the blade, chains, hook and mane are scripted.
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Kael edit front | 09:12 | 01a1a5d3-2333-7482-a441-4a36831e5dd7 | nano-banana-pro (image-to-image) | 9:16 crop; greatsword, every chain and both hooks out, right hand hanging empty, the long mane cut to the nape | 9 | Kept |
+| Kael edit 3/4 | 09:12 | 01a1a5d3-2346-73a9-ae0b-7f099ecc6b7e | nano-banana-pro | same | 9 | Kept |
+| Kael edit side | 09:12 | 01a1a5d3-2359-70eb-9e32-74e30a939557 | nano-banana-pro | same | 9 | Kept (belt plate drawn as tally marks only) |
+| Kael edit back | 09:12 | 01a1a5d3-2361-7357-b09f-45cc9d92e736 | nano-banana-pro | same; back and harness shown where the mane was | 9 | Kept (a gold collar ring added at the nape) |
+| Kael A | 09:13 | 01a1a5d4-e913-74be-9dfd-20019f630127 | meshy-7.1 | 4 edited views as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** (first run): build, scarf over the face, collar, harness, magma right arm only, skirt, greaves |
+| Kael mane (stage 4) | 13:20 | 01a1a6a8-42c4-73c7-bbd5-d327f5d1b9fd | meshy-7.1 | kael_head_sheet front + side (padded square) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, no pose, enhancement off | 40 | **Kept**: its hair cut out and fitted on the body as the mane (kael_parts.meshy_mane) |
+
 ### Vex r3c and r3d (2026-11-04): credit-free
 r3c (09:00-10:30) and r3d (11:25-13:30) used no Meshy credits: every change is in the fit spec, the parts tools, the
 paint-over, the shared look (16c18b4f) and warden_look.json. Recipe: RECIPE_95.md.

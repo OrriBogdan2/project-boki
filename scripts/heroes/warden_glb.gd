@@ -195,6 +195,93 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	_hold_weapon(root, glb)
 	_hold_shield(root, glb)
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
+	_smoke(root, look(art(arch)))
+
+## A model's wisps of smoke off its held weapon (warden_look.json "smoke": colour [r, g, b, a], amount, life (s),
+## size (m), rise (m/s); Kael's demon blade): dark soft puffs from along the weapon's length that drift up and
+## fade, in world space so they trail behind a swing.
+static func _smoke(root: Node3D, own: Dictionary) -> void:
+	var sm: Dictionary = own.get("smoke", {})
+	var gun := root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
+	var weapon := gun.get_node_or_null(WEAPON) as Node3D if gun else null
+	if sm.is_empty() or weapon == null:
+		return
+	var box := AABB()
+	var meshes: Array = []
+	if weapon is MeshInstance3D:
+		meshes.append(weapon)
+	meshes.append_array(weapon.find_children("*", "MeshInstance3D", true, false))
+	for mi in meshes:
+		var a := (mi as MeshInstance3D).get_aabb()
+		box = a if box.size == Vector3.ZERO else box.merge(a)
+	var p := CPUParticles3D.new()
+	p.name = "Smoke"
+	p.amount = int(sm.get("amount", 16))
+	p.lifetime = float(sm.get("life", 1.4))
+	p.local_coords = false
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	# (along the blade only: the weapon's box past its grip end, `from` of its length)
+	var k := float(sm.get("from", 0.3))
+	var ax := 0
+	for i in 3:
+		if box.size[i] > box.size[ax]:
+			ax = i
+	var c := box.get_center()
+	var ext := box.size * 0.5
+	c[ax] += ext[ax] * k
+	ext[ax] *= 1.0 - k
+	p.position = c
+	p.emission_box_extents = ext * 0.8
+	p.direction = Vector3.UP
+	p.spread = 25.0
+	p.gravity = Vector3(0, float(sm.get("rise", 0.5)), 0)
+	p.initial_velocity_min = 0.05
+	p.initial_velocity_max = 0.2
+	p.scale_amount_min = 0.6
+	p.scale_amount_max = 1.2
+	var curve := Curve.new()
+	curve.add_point(Vector2(0.0, 0.4))
+	curve.add_point(Vector2(0.4, 1.0))
+	curve.add_point(Vector2(1.0, 1.4))
+	p.scale_amount_curve = curve
+	var col := _param(sm.get("color", [0.05, 0.04, 0.05, 0.45])) as Color
+	var ramp := Gradient.new()
+	ramp.set_color(0, Color(col, 0.0))
+	ramp.set_color(1, Color(col, 0.0))
+	ramp.add_point(0.25, col)
+	ramp.add_point(0.6, Color(col, col.a * 0.6))
+	p.color_ramp = ramp
+	var q := QuadMesh.new()
+	var sz := float(sm.get("size", 0.12))
+	q.size = Vector2(sz, sz)
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	m.vertex_color_use_as_albedo = true
+	m.albedo_texture = _puff()
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	q.material = m
+	p.mesh = q
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	weapon.add_child(p)
+
+static var _puff_tex: Texture2D
+## A soft round puff (a radial fall-off), made once.
+static func _puff() -> Texture2D:
+	if _puff_tex == null:
+		var g := Gradient.new()
+		g.set_color(0, Color(1, 1, 1, 1))
+		g.set_color(1, Color(1, 1, 1, 0))
+		var t := GradientTexture2D.new()
+		t.gradient = g
+		t.fill = GradientTexture2D.FILL_RADIAL
+		t.fill_from = Vector2(0.5, 0.5)
+		t.fill_to = Vector2(1.0, 0.5)
+		t.width = 64
+		t.height = 64
+		_puff_tex = t
+	return _puff_tex
 
 ## The .glb's own weapon (a mesh named WEAPON, modelled in the Gun node's space) goes into the hands in place
 ## of the procedural one; the Gun node and its Muzzle stay, so shots and grips are unchanged.
@@ -413,8 +500,9 @@ static func _void(src: BaseMaterial3D, soft: bool) -> ShaderMaterial:
 	m.set_shader_parameter("soft", soft)
 	return m
 
-## A Warden's glow colours from its archetype's "model_glow" {core, edge} (hex): the cracks and glowing pieces take
-## them instead of their painted colour, so the glow can change without a rebake. A flat piece tagged "edge"
+## A Warden's glow colours from its archetype's "model_glow" {core, edge (hex), strength (the emission)}: the
+## cracks and glowing pieces take them instead of their painted colour, so the glow can change without a
+## rebake. A flat piece tagged "edge"
 ## (glow-<name>_edge) takes the edge colour.
 static func _glow_colours(m: ShaderMaterial, arch: String, tag: String) -> void:
 	var g: Dictionary = Arch.def(arch).get("model_glow", {}) if arch != "" else {}
@@ -422,8 +510,15 @@ static func _glow_colours(m: ShaderMaterial, arch: String, tag: String) -> void:
 		return
 	var core := Color(String(g.get("core", "ffffff")))
 	var edge := Color(String(g.get("edge", g.get("core", "ffffff"))))
+	# (a halo layer, glow-<name>_halo*, keeps its own dimmer painted colour: the bloom's fall-off)
+	if tag.contains("_halo"):
+		m.set_shader_parameter("glow_core", Color(edge, 0.0))
+		m.set_shader_parameter("glow_edge", Color(edge, 0.0))
+		return
 	m.set_shader_parameter("glow_core", core if not tag.ends_with("_edge") else edge)
 	m.set_shader_parameter("glow_edge", edge)
+	if g.has("strength"):
+		m.set_shader_parameter("glow", float(g["strength"]))
 
 ## The emission layer in the archetype's "model_glow" core colour (Ryzz's pink scar, charm, piping and veins): the
 ## layer is a mask then, so the colour can change without a rebake.
