@@ -429,10 +429,9 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	m.step(DT)
 	step(m, 0.5, aim)
 	ok("bjorn hold: letting go and pressing again starts a fresh hold", K.lmb_t > 0.2, "lmb_t %.2f" % K.lmb_t)
-	# a glide, a dash, a knock, another ability (E or a Q glove) each end it too
+	# a glide, a knock, another ability (E or a Q glove) each end it too (a dash no longer does: item 51)
 	var cases := {
 		"glide": func(): P.gliding = true,
-		"dash": func(): P.do_dash(),
 		"knock": func(): P.impulse(Vector2(40.0, 0.0)),
 		"ability": cast_e_at.bind(P, K, home),
 		"a Q glove": _glove_q.bind(P),
@@ -453,7 +452,7 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	fresh(T)
 	aim_at(P, T.pos)
 	step(m, 0.5)
-	step(m, float(K.lmb_def()["full"]) + 0.05, aim)
+	step(m, float(K.lmb_def()["full"]) + 0.3, aim)      # past the perfect window (#49): the normal step
 	var p0 := P.pos
 	var t0 := T.pos
 	P.inp["fire"] = false
@@ -618,10 +617,10 @@ func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:
 
 ## #32 / #35 for Bjorn.
 func _bjorn_dash(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -> void:
-	ok("bjorn dash table: LMB buffers, RMB / E fire, a held swing is cancelled by a dash",
+	ok("bjorn dash table: LMB buffers, RMB / E fire, a held swing is kept through a dash (item 51)",
 		_mode("bulwark", "lmb", false) == "buffer" and _mode("bulwark", "lmb", true) == "buffer"
 		and _mode("bulwark", "rmb", false) == "fire" and _mode("bulwark", "e", false) == "fire"
-		and DashFlow.into_dash_of("bulwark", "lmb").get("mode") == "cancel")
+		and DashFlow.into_dash_of("bulwark", "lmb").get("mode") == "fire")
 	step(m, 1.5)
 	P.teleport(home)
 	T.teleport(home + Vector3(30.0, 0, 6.0))

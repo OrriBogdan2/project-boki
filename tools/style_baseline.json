@@ -37,7 +37,7 @@
 "shadow": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 13,
+"long_line": 11,
 "nested_ternary": 1,
 "semicolon": 8
 },

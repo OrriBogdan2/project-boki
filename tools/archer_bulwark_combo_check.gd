@@ -13,6 +13,8 @@ func run(main_node: Node) -> void:
 	ult.main = main_node
 	var own = load("res://tools/pin_bjorn_owner_check.gd").new()
 	own.main = main_node
+	var launch = load("res://tools/bjorn_launch_check.gd").new()
+	launch.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		await ult.pin()
@@ -22,8 +24,9 @@ func run(main_node: Node) -> void:
 		await _growth()
 		await ult.bjorn()
 		await own.bjorn()
-	n += ult.n + own.n
-	fails += ult.fails + own.fails
+		await launch.bjorn()
+	n += ult.n + own.n + launch.n
+	fails += ult.fails + own.fails + launch.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -733,7 +736,7 @@ func _bulwark_combos() -> void:
 	P.inp["fire"] = false
 	ok(
 		"bjorn small: a recall in the first 0.25 s is ignored",
-		String(K.mace.get("st", "")) == "fly",
+		String(K.mace.get("st", "")) in ["wind", "fly"],
 		str(K.mace.get("st"))
 	)
 	step(m, 0.6)
@@ -748,16 +751,16 @@ func _bulwark_combos() -> void:
 	m.step(DT)
 	P.inp["fire"] = false
 	step(m, 1.0)
-	# LMB held: the hammer spins in his hand, the glint from 0.6 s, the flare at full; let go: the slam
+	# LMB held: the hammer dragged back behind him, the glint from 0.6 s, the flare at full; let go: the slam
 	# carries him forward with a flaming crescent
 	reset.call()
 	_clear_wall(m, home, lv, 3)
 	T.teleport(home + Vector3(2.4, 0, 0))
 	step(m, 0.4, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok(
-		"bjorn LMB held: the hammer spins, no glint yet",
-		K.fx.spin_on and not K.fx.glint.visible and K.anim_id == "bul_smash_wind",
-		"spin %s glint %s anim %s" % [K.fx.spin_on, K.fx.glint.visible, K.anim_id]
+		"bjorn LMB held: the hammer dragged back behind him (no spin), no glint yet",
+		K.fx.held and not K.fx.glint.visible and K.anim_id == "bul_smash_wind",
+		"held %s glint %s anim %s" % [K.fx.held, K.fx.glint.visible, K.anim_id]
 	)
 	step(m, 0.4, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok(
@@ -765,7 +768,7 @@ func _bulwark_combos() -> void:
 		K.fx.glint.visible and float(AimKit.reticle(P).get("charge", 0.0)) > 0.4,
 		"glint %s charge %.2f" % [K.fx.glint.visible, float(AimKit.reticle(P).get("charge", 0.0))]
 	)
-	step(m, 0.62, func(): P.inp["fire"] = true; aim_at(P, T.pos))
+	step(m, 0.75, func(): P.inp["fire"] = true; aim_at(P, T.pos))      # past the perfect window: a normal swing
 	ok("bjorn LMB held: the full-charge flare at 1.25s", K.flared and K.smash_k() >= 0.99, "k %.2f" % K.smash_k())
 	var px0 := P.pos.x
 	var sl0 := K.slams
@@ -776,7 +779,7 @@ func _bulwark_combos() -> void:
 	step(m, 0.32)
 	ok(
 		"combo bjorn: the full slam = a 180 crescent, carries him forward, hits hard (5x the throw)",
-		K.slams == sl0 + 1 and K.slam_k >= 0.99 and P.pos.x - px0 >= 1.0 and dmg(T) >= 55.0 and not K.fx.spin_on,
+		K.slams == sl0 + 1 and K.slam_k >= 0.99 and P.pos.x - px0 >= 1.0 and dmg(T) >= 55.0 and not K.fx.held,
 		"carry %.2f took %.0f" % [P.pos.x - px0, dmg(T)]
 	)
 	ok("bjorn anim: the slam plays bul_smash", K.anim_id == "bul_smash", K.anim_id)
@@ -966,7 +969,7 @@ func _bulwark_combos() -> void:
 	step(m, 1.0)
 	reset.call()
 	c0 = K.crushes
-	step(m, 1.3, func(): P.inp["fire"] = true; aim_at(P, T.pos))
+	step(m, 1.55, func(): P.inp["fire"] = true; aim_at(P, T.pos))      # past the perfect window
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok(
@@ -974,7 +977,7 @@ func _bulwark_combos() -> void:
 		K.crushes == c0 + 1 and K.anim_id == "bul_smash",
 		"crushes %d anim %s" % [K.crushes - c0, K.anim_id]
 	)
-	# Shift while winding up the blow: it ends the wind-up, with a short plain dash for half a charge
+	# Shift while winding up the blow: a short plain dash on a full charge, the swing still charging (item 51)
 	step(m, 1.5)
 	reset.call()
 	_clear_wall(m, home, lv, 3)
@@ -984,14 +987,17 @@ func _bulwark_combos() -> void:
 	var d0 := P.dashes
 	var p0 := P.pos
 	P.do_dash()
-	step(m, 0.15, func(): P.inp["fire"] = true)
+	m.step(DT)
+	var short_anim := K.anim_id
+	step(m, 0.2, func(): P.inp["fire"] = true)
 	ok(
-		"combo bulwark: hold LMB > Shift = short dash, half a charge, the wind-up ends",
+		"combo bulwark: hold LMB > Shift = short dash, a full charge, the swing still charging",
 		K.st.get(
 			"last_dash"
-		) == "short" and K.lmb_t < 0.0 and d0 - P.dashes < 0.8 and P.flat_dist(p0) > 0.8 and K.anim_id == "bul_short",
+		) == "short" and K.lmb_t > 0.6 and d0 - P.dashes > 0.9 and P.flat_dist(p0) > 0.8 and short_anim == "bul_short",
 		"dash %s lmb %.2f spent %.2f moved %.1f" % [str(K.st.get("last_dash")), K.lmb_t, d0 - P.dashes, P.flat_dist(p0)]
 	)
+	ok("anim bulwark: out of the short dash he is back in the spin's pose", K.anim_id == "bul_smash_wind", K.anim_id)
 	P.inp["fire"] = false
 	step(m, 1.0)
 	# Mending Ground mends the shield only while it is raised

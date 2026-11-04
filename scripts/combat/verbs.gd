@@ -391,6 +391,11 @@ func _take_shot(s: Dictionary, v: Vector2, by, team: int, k: float) -> void:
 	if s["node"]:
 		(s["node"] as MeshInstance3D).material_override.set_shader_parameter("color", Color("ffffff").lerp(s["col"], 0.4))
 
+## A hit that a wall's owner says it took (a raised shield blocking a blow from the front): as a shot on it.
+func absorb(w: Dictionary, dmg: float) -> void:
+	if walls.has(w):
+		_hit_wall(w, dmg, Color.WHITE)
+
 func _hit_wall(w: Dictionary, dmg: float, _col: Color) -> void:
 	# a Bulwark's shield (or any wall an archetype raised) turns what it blocks into Guard
 	var by = w.get("by")

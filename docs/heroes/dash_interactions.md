@@ -162,10 +162,10 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | bulwark | air dash -> E | no air dash in the footage; as the ground dash | fires mid-dash |
 | bulwark | air dash -> ult (X) | no air dash in the footage; as the ground dash, the slam plants him where he is | cancels the dash |
 | bulwark | air dash -> Q glove | gloves are our own (no source) | fires mid-dash |
-| bulwark | LMB -> dash | wiki (Spin Dash): Shift while charging the Hammer Smash ends it in a short dash without the spin, on a reduced cooldown (ours: half a charge back) | the dash cancels its wind-up or recovery; variant: short |
+| bulwark | LMB -> dash | wiki (Spin Dash): Shift while charging the Hammer Smash ends it in a short dash without the spin, on a reduced cooldown. Owner item 51 overrides the ending: the short plain dash goes on a full charge (with the charge kept the reduced cooldown has no reason left) and the swing keeps charging through it (hold.lmb.ground); in the swing's step or the perfect launch, Shift goes at once | the dash goes, the ability keeps running; variant: short |
 | bulwark | RMB -> dash | data: Brightshield + Shift is the Shield Bash (6 s, its own cooldown), the shield briefly invulnerable; the aegis stays up through it | the dash goes, the ability keeps running; variant: charge |
 | bulwark | E -> dash | data: Regen Field stays round the hammer; the dash doesn't touch it | the dash goes, the ability keeps running |
-| bulwark | ult (X) -> dash | footage f25-f31: planted through the wind-up and the slam; Shift there goes when the plant ends | **exception:** the dash waits for the ability (today's behaviour, to review) |
+| bulwark | ult (X) -> dash | Owner item 48 (root only during the wind-up + slam, free after); footage f25-f31: Oath planted through the wind-up and slam. The data is silent on Shift in the cast. Shift pressed there goes the moment the plant ends; it is free while the lane erupts. | **exception:** the dash waits for the ability (planted for the wind-up and the slam (~0.6 s): a dash would move him off the plant) |
 | bulwark | Q glove -> dash | gloves are our own (no source) | the dash goes, the ability keeps running |
 | bulwark | jump -> LMB |  | fires mid-jump (default) |
 | bulwark | jump -> RMB |  | fires mid-jump (default) |
@@ -177,8 +177,8 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | bulwark | E -> jump |  | the move goes at once, the ability keeps running (default) |
 | bulwark | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
 | bulwark | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
-| bulwark | hold LMB through a ground dash | Wiki (Spin Dash): Shift while charging the Hammer Smash ends it in a short dash without the spin (into_dash.lmb); owner item 51 wants the hold kept. Ours today (measured by --dash-flow-check): the hold ends and the short dash goes. | **exception:** the move ends the hold (today's behaviour, to review) |
-| bulwark | hold LMB through an air dash | No air dash in the footage. Ours today (measured by --dash-flow-check): the air dash (the lumber) ends the hold with no swing. | **exception:** the move ends the hold (today's behaviour, to review) |
+| bulwark | hold LMB through a ground dash | Owner item 51 (supersedes item 30 and the wiki's Spin Dash ending the Hammer Smash): the swing keeps charging through the short plain dash and swings on the release, in the dash or after it | the hold carries through and lets go there |
+| bulwark | hold LMB through an air dash | Owner item 51: the swing keeps charging through the air dash (the lumber); let go in it, it swings there and he keeps the lumber's momentum (a perfect one launches him on from where he is) | the hold carries through and lets go there |
 | bulwark | hold LMB through a jump |  | the hold carries through and lets go there |
 | bulwark | hold LMB through a mantle | Owner item 30; the source has no mantle rule. | **exception:** the move ends the hold (owner item 30: a mantle ends the held Crushing Blow (item 51 keeps that)) |
 | dredge | ground dash -> LMB | Not determinable. Brute Dash is a ~0.12 s near-blink (briefs/hero-ref/dredge.md:303); by 493.45-493.6 s he is turning, then aiming and walking (dredge.md:296, 306): no press inside it is visible. Air: not shown (dredge.md:310-312). Data (briefs/supervive-data/supervive_kits.md:58-59) silent. Kept: held to the dash's end (owner 18:20 UTC fallback). | buffered to the dash's end |
