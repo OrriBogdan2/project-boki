@@ -524,3 +524,8 @@ ext/imagegen fb503983. The owner made flat-lit face/head sheets, prop sheets and
 - **Pip** (wardens_r2, PIP_REFS.md): pip_front (arms clear, cape behind the arms), pip_head_sheet, pip_lantern_sheet (scale only; keep the portrait's arched-pane lantern; make it cast light).
 - **Tarek** (wardens_r2, TAREK_KIT.md): tarek_front (lean, long legs, normal head), tarek_head_sheet (locs on springs), tarek_stone_sheet (rocky depth, amber iris).
 - **Ryzz, Cinder**: full sets already briefed (10:51, 11:45).
+
+## 2026-11-04 13:10 UTC (ORCH): Dredge hull upgrade GO (owner) + quality bar
+- Owner: "upgrade dredge - I want them all looking as good as possible."
+- Dredge (ext/warden-dredge-friend acb501fd): KEEP the friend's rig, bones (claw x3, winch, rope, hook) and all 184 retargeted moves. Replace only the hull/shoulder shell with a Meshy-built (or Blender-sculpted) version that matches the art: angular, dented, layered and torn brass plates instead of smooth domes; brass shifted to the art's duller olive-gold (not copper-orange); keep the cracked-lens red orb eye and the thick tar drips. Check the horn arm's size and hold against the art (it reads very big and low). Budget ~80-150 credits (balance 4,327). Post r3 shots vs the art as usual.
+- Quality bar for every Hunter in stage 2: match the art as closely as the recipe allows, using the new reference sheets (13:40 list above). Spend credits where they clearly improve the result; tell ORCH if any Hunter needs more than ~150.

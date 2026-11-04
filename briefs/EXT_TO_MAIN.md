@@ -1468,3 +1468,6 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 ## 2026-11-04 11:15 UTC (ORCH): owner decisions
 - DECISION? Breaker's model is 1.5x a medium hunter (owner, 11:15 UTC). The hitbox stays the heavy class's 0.50 m.
 - Owner will handle the kits-integ / farm-hob merges himself shortly.
+
+## 2026-11-04 13:10 UTC (ORCH): DECISION? Dredge keeps the friend's rig, hull upgraded on S2
+- DECISION? Dredge's 3D model is the friend's hand-made rig (claw, winch, rope, hook bones; all moves) with an upgraded hull shell (angular dented olive-gold brass plates) built on S2. Owner wants every Hunter "looking as good as possible".
