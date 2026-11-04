@@ -50,3 +50,7 @@ r3f_dredge_vs_r3e.png: portrait | r3e front | r3f front | r3e helm | r3f helm | 
 r3g (credit-free, ORCH's r3f review): darker, desaturated tarnished bronze with rivet rows; a smaller glassy orb in a dark cracked lens; drips off the helm rim; smoother hull; the grilled port brass with dark slots; the stance upright. Match frame: --arena-demo=pose_clear (sign hidden, off the fern; the top HUD hint line still shows).
 r3g_dredge_turnaround.png | r3g_dredge_front_34.png | r3g_dredge_back.png | r3g_dredge_closeup.png | r3g_dredge_match.png | r3g_dredge_moves.png: as for r3.
 r3g_dredge_vs_r3f.png: portrait | r3f front | r3g front | r3f helm | r3g helm | r3f match zoom | r3g match zoom.
+
+r3h (credit-free, ORCH's r3g review): no spec ovals; a brighter eye glow and a warmer far rim; the orb a cracked, hot-cored red in a lit red lens (no white dot); tarnished bronze with verdigris, plate seams and six rivet rows over the hull; smoother lames; the loose shards over the shoulders gone.
+r3h_dredge_turnaround.png | r3h_dredge_front_34.png | r3h_dredge_back.png | r3h_dredge_closeup.png | r3h_dredge_match.png | r3h_dredge_moves.png: as for r3.
+r3h_dredge_vs_r3g.png: portrait | r3g front | r3h front | r3g helm | r3h helm | r3g match | r3h match.
