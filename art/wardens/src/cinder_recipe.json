@@ -2,7 +2,7 @@
  "doc": "Cinder (ashwick): RECIPE_95 spec (docs/art/wardens/RECIPE_95.md). Separate square views (crop_from), not a turnaround sheet. python3 tools/meshy/recipe.py art/wardens/src/cinder_recipe.json <steps>",
  "name": "cinder",
  "arch": "ashwick",
- "tag": "b4",
+ "tag": "b5",
  "raw": "~/meshy/cinder_r3",
  "art": {
   "ref": "origin/ext/imagegen",
@@ -73,5 +73,6 @@
    0.25
   ]
  },
- "demo_at": "-4.5,0"
+ "demo_at": "-4.5,0",
+ "dark": "night"
 }

@@ -2106,7 +2106,15 @@ def _curl(ob, sel, s, co, p, pj, cs):
     t0 /= max(np.linalg.norm(t0), 1e-9)
     axis = np.cross(t0, np.array([0.0, 0.0, 1.0]))          # (the tangent turns from t0 toward up)
     th = np.clip((pj - s0) / rho, 0.0, turn)
-    rot = [_rotm(axis, a) for a in th]
+    # an optional swing first (`yaw` degrees about the vertical, eased in from `yaw_from` to `yaw_to` metres along):
+    # the tail turns out to her side before it curls, so the loop stands beside her (Cinder's front view)
+    yaw = math.radians(float(cs.get("yaw", 0.0)))
+    yf, yt = float(cs.get("yaw_from", s0)), float(cs.get("yaw_to", s0))
+    ya = yaw * np.clip((pj - yf) / max(yt - yf, 1e-6), 0.0, 1.0)
+    if yaw:
+        t0 = _rotm(np.array([0.0, 0.0, 1.0]), yaw) @ t0
+        axis = np.cross(t0, np.array([0.0, 0.0, 1.0]))
+    rot = [_rotm(axis, a) @ _rotm(np.array([0.0, 0.0, 1.0]), b) for a, b in zip(th, ya)]
     q = p.copy()
     for i in range(1, len(p)):
         q[i] = q[i - 1] + rot[i] @ (p[i] - p[i - 1])
@@ -2121,7 +2129,9 @@ def _curl(ob, sel, s, co, p, pj, cs):
         old = p[i - 1] * (1 - f) + p[i] * f
         new = q[i - 1] * (1 - f) + q[i] * f
         a = th[i - 1] * (1 - f) + th[i] * f
-        ob.data.vertices[int(vi)].co = Vector(new + _rotm(axis, a) @ (co[vi] - old))
+        b = ya[i - 1] * (1 - f) + ya[i] * f
+        r = _rotm(axis, a) @ _rotm(np.array([0.0, 0.0, 1.0]), b)
+        ob.data.vertices[int(vi)].co = Vector(new + r @ (co[vi] - old))
     ob.data.update()
     log("tail curl: from %.2f m, radius %.2f m, %.0f degrees" % (s0, rho, math.degrees(float(th.max()))))
     return q, rot

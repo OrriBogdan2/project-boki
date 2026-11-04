@@ -785,7 +785,9 @@ def fan(arm, spec, bld=None):
     """A fin-crest fanned round the back of the skull (Cinder r3: a newt's sail that reads from the front as a
     halo of rays): `rays` rays from angle a0 to a1 (degrees: 0 straight up, + to her right), their roots on a
     ring of radius `r_base` about `centre` (the fitted frame, rel the head bone), tilted `tilt` degrees back,
-    `length` long at the top and `side_k` x that at the ends, a spiky edge (`spike` deep between the rays).
+    `length` long at the top and `side_k` x that at the ends, a spiky edge (`spike` deep between the rays);
+    `sweep` bends each ray back along its length, `jitter` varies the rays' lengths, `top_k` lengthens them
+    about `top_at` degrees (a swept, uneven sail rather than a flat sunburst).
     Rides the head bone. Rows: `rows` from the root to the edge (the last `edge_rows` on the glow slot); `yaw`
     degrees turns the fan about the vertical (behind a head that Meshy turned)."""
     bld = bld or Builder()
@@ -813,12 +815,18 @@ def fan(arm, spec, bld=None):
         L = float(spec["length"]) * (k + (1.0 - k) * math.cos(a) ** 2 if abs(a) < math.pi / 2 else k * 0.9)
         ph = abs((u * nr) % 1.0 - 0.5) * 2.0
         L *= 1.0 - float(spec.get("spike", 0.16)) * ph ** 1.5
+        # per-ray length jitter (an organic, uneven edge) and a longer top-back (the sail sweeps back)
+        ray_i = int(u * nr)
+        L *= 1.0 + float(spec.get("jitter", 0.0)) * math.sin(ray_i * 2.399 + 0.7)
+        L *= 1.0 + float(spec.get("top_k", 0.0)) * math.exp(-((math.degrees(a) - float(spec.get("top_at", 0.0))) / 45.0) ** 2)
         side = np.cross(d, radial)
         side /= max(np.linalg.norm(side), 1e-9)
+        sweep = np.array([0.0, -1.0, 0.25]) * float(spec.get("sweep", 0.0))
         for i in range(rows):
             t = i / (rows - 1)
             tt = t if i < rows - 1 else 1.0
-            grid[i, j] = root + d * L * tt
+            # (a ray that bends back along its length: a swept fin, not a flat sunburst)
+            grid[i, j] = root + d * L * tt + sweep * L * tt * tt
             nrm[i, j] = side
             uvg[i, j] = (u, v0 + (v1 - v0) * (0.02 + 0.96 * t))
             sg[i, j] = 0.0
@@ -905,12 +913,17 @@ def vials(body, arm, spec, tag="vials"):
     t = (cen - mu) @ ax
     n = len(spec["colours"])
     edges = np.quantile(t, np.linspace(0, 1, n + 1))
+    ends = [cen[(t >= edges[k]) & (t <= edges[k + 1])].mean(axis=0) for k in (0, n - 1)]
+    nall = nrm.mean(axis=0)
+    nall /= max(np.linalg.norm(nall), 1e-9)
     bld = Builder()
     for k in range(n):
+        # (evenly along the strap, one row, all standing the same way: a neat bandolier)
+        f = (k + 0.5) / n if spec.get("even", True) else None
         sel = (t >= edges[k]) & (t <= edges[k + 1])
-        c = cen[sel].mean(axis=0)
-        nv = nrm[sel].mean(axis=0)
-        nv /= max(np.linalg.norm(nv), 1e-9)
+        c = ends[0] + (ends[1] - ends[0]) * ((k) / max(n - 1, 1)) if f is not None else cen[sel].mean(axis=0)
+        nv = nall if f is not None else nrm[sel].mean(axis=0)
+        nv = nv / max(np.linalg.norm(nv), 1e-9)
         up = np.cross(nv, ax)
         up /= max(np.linalg.norm(up), 1e-9)
         if up[2] < 0:

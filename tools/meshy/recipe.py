@@ -224,10 +224,21 @@ def step_shots():
     b = subprocess.Popen(x + ["--arena=" + SPEC["arch"], "--record=2", "--arena-demo=pose_clear", "--demo-zoom=1.0",
                               "--arena-shot=" + os.path.join(out, "match.png")] + clear + extra,
                          stdout=open(os.path.join(out, "match.log"), "w"), stderr=subprocess.STDOUT, cwd=wt)
-    log("shots rc", a.wait(), "match rc", b.wait())
+    # (rubric v2's dark scene: the same review frame under a raid condition, spec "dark" e.g. "night")
+    dk = None
+    if SPEC.get("dark"):
+        dk = subprocess.Popen(x + ["--arena=" + SPEC["arch"], "--record=2", "--arena-demo=pose_clear", "--demo-zoom=1.0",
+                                   "--raid=" + SPEC["dark"], "--arena-shot=" + os.path.join(out, "match_dark.png")]
+                              + clear + extra, stdout=open(os.path.join(out, "match_dark.log"), "w"),
+                              stderr=subprocess.STDOUT, cwd=wt)
+    log("shots rc", a.wait(), "match rc", b.wait(), "dark rc", dk.wait() if dk else "-")
     crop = SPEC.get("match_crop") or _hero_crop(os.path.join(out, "match.log"))      # (pose_clear: the review frame)
     subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", os.path.join(out, "match.png"), "-vf",
                     "crop=%s,scale=800:680:flags=neighbor" % crop, os.path.join(out, "match_x4.png")])
+    if dk:
+        dcrop = SPEC.get("match_crop") or _hero_crop(os.path.join(out, "match_dark.log"))
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", os.path.join(out, "match_dark.png"), "-vf",
+                        "crop=%s,scale=800:680:flags=neighbor" % dcrop, os.path.join(out, "match_dark_x4.png")])
     grep(os.path.join(out, "log.txt"), "does not fit", "SHADER ERROR", "SCRIPT ERROR", "WARDEN_SHOTS_DONE")
     _composites(out)
 
@@ -253,6 +264,7 @@ def _composites(out):
              ("closeup_34_vs_art.png", "cols", [os.path.join(art, k + ".png") for k in ("portrait", "head_sheet")
                                                 if os.path.exists(os.path.join(art, k + ".png"))] + [os.path.join(g, "closeup.png")]),
              ("match_vs_art.png", "cols", [os.path.join(art, "portrait.png"), os.path.join(out, "match_x4.png")]),
+             ("dark_vs_art.png", "cols", [os.path.join(art, "portrait.png"), os.path.join(out, "match_dark_x4.png")]),
              ("back_34.png", "cols", [os.path.join(g, "back_34.png")])]
     for name, mode, imgs in pairs:
         imgs = [i for i in imgs if os.path.exists(i)]

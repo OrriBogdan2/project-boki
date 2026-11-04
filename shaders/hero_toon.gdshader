@@ -22,6 +22,9 @@ uniform vec4 flash_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float rim_amount = 0.35;
 uniform vec4 rim_color : source_color = vec4(1.0, 0.96, 0.88, 1.0);
 uniform float glow = 0.0;
+// a colour-keyed glow (default off): texels whose red outweighs their green (embers, hot spots, lava cracks) glow by
+// this much, so painted spots glow and the rest of the slot doesn't (Cinder's ember spots; warden_look.json)
+uniform float glow_red = 0.0;
 uniform float shade = 0.42;
 uniform bool no_fog = false;
 uniform vec4 shadow_tint : source_color = vec4(0.66, 0.62, 0.9, 1.0);   // shadows lean cool and violet
@@ -194,7 +197,8 @@ void fragment() {
 	vec3 fcol = mix(fres_color.rgb, min(c * 1.7 + vec3(0.12), vec3(1.4)), fres_tint);
 	float up = smoothstep(0.35, 0.95, wnorm.y);
 	if (ambient_cut > 0.0) { AO = 1.0 - ambient_cut; }
-	EMISSION = flash_color.rgb * flash * 0.9 + c * glow + c * own_ambient * (1.0 - fog)
+	float hot = glow_red > 0.0 ? (1.0 - smoothstep(0.28, 0.5, c.g / max(c.r, 0.001))) * smoothstep(0.22, 0.45, c.r) : 0.0;
+	EMISSION = flash_color.rgb * flash * 0.9 + c * glow + c * own_ambient * (1.0 - fog) + c * glow_red * hot
 		+ rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
 		+ fcol * fr * fres * 0.55 + c * up * top_light * 0.18 * (1.0 - fog)
 		+ rim_far_color.rgb * fr * rim_far * far_k;
@@ -210,7 +214,7 @@ void fragment() {
 		EMISSION += fcol * fr * fres * 0.55 * (far_fres - 1.0) * far_p
 			+ rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog) * (far_spec - 1.0) * far_p
 			- rim_far_color.rgb * fr * rim_far * far_k * far_rim_soft + rim_far_color.rgb * frs * 0.6
-			+ (gf - gc) * step(0.0001, glow);
+			+ (gf - gc) * step(0.0001, glow) + c * glow_red * hot * fg;
 	}
 }
 

@@ -1,5 +1,5 @@
 {
-	"doc": "A Warden 3D model's own shading over the shared painted look (WardenGlb.look), keyed by the model's art name (art/wardens/<art>/<art>.glb; a design variant has its own key). painted: hero_toon.gdshader parameters on all of its surfaces, set after WardenGlb.PAINTED. slots: the same per toon slot (skin, hair, cloth, leather, metal, eyes, glow), after painted. Colours are [r, g, b]. A model without an entry keeps the shared look. Useful keys: rim_far and rim_far_color (a rim in the Hunter's signature colour at the match camera), top_light (surfaces facing up lift), fres and fres_tint (the coloured rim; 1 = lightened own colour), far_lift (brighter and richer at the match camera), shade and shadow_tint (the shadow floor and its tint), sheen, glow (emission x the painted colour), light_neutral_warm (takes the hue out of warm lights too: black cloth and gunmetal stay black and grey under an orange sun). halos: glow discs of a constant size on screen on the model's anchors (a lens a pixel wide at the match camera): anchor, color, strength, px (radius on screen), near and far (m: none this close, full from there; close-ups keep the lens itself).",
+	"doc": "A Warden 3D model's own shading over the shared painted look (WardenGlb.look), keyed by the model's art name (art/wardens/<art>/<art>.glb; a design variant has its own key). painted: hero_toon.gdshader parameters on all of its surfaces, set after WardenGlb.PAINTED. slots: the same per toon slot (skin, hair, cloth, leather, metal, eyes, glow), after painted. Colours are [r, g, b]. A model without an entry keeps the shared look. Useful keys: rim_far and rim_far_color (a rim in the Hunter's signature colour at the match camera), top_light (surfaces facing up lift), fres and fres_tint (the coloured rim; 1 = lightened own colour), far_lift (brighter and richer at the match camera), shade and shadow_tint (the shadow floor and its tint), sheen, glow (emission x the painted colour), glow_red (a colour-keyed glow: texels whose red outweighs their green glow by this much, e.g. ember spots), light_neutral_warm (takes the hue out of warm lights too: black cloth and gunmetal stay black and grey under an orange sun). halos: glow discs of a constant size on screen on the model's anchors (a lens a pixel wide at the match camera): anchor, color, strength, px (radius on screen), near and far (m: none this close, full from there; close-ups keep the lens itself).",
 	"vex": {
 		"painted": {
 			"rim_far": 0.35,
@@ -79,7 +79,7 @@
 				"fres": 0.45,
 				"far_lift": 0.22,
 				"light_neutral_warm": 0.6,
-				"glow": 0.14
+				"glow_red": 0.9
 			},
 			"metal": {
 				"top_light": 0.3,
@@ -89,12 +89,12 @@
 				"sheen": 0.0
 			},
 			"glow": {
-				"glow": 1.6
+				"glow": 1.9
 			},
 			"fur": {
-				"far_lift": 0.6,
-				"fres": 0.6,
-				"glow": 0.3,
+				"far_lift": 0.15,
+				"fres": 0.4,
+				"glow": 0.0,
 				"light_neutral_warm": 0.5
 			},
 			"leather": {
