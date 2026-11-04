@@ -8,3 +8,12 @@ s1_moves_close_1.png: run, run (other foot)
 s1_poses_game.png: idle, run, attack, cast, ult at the match camera
 s1_vs_sheet.png: the concept sheet beside the model's front and 3/4 and the match strip
 (glow: white-hot core #fffaf0 / pale-gold edge #f2d48a from content/archetypes/juggernaut.json model_glow; the orange-vs-white shot was made optional and is not included)
+
+Stage 2 (r3c recipe + the 12:40 reference sheets; credit-free):
+s2_closeup_vs_art.png: the kael portrait, the model's head front and 3/4 (painted from the front art; the soft layered mane per kael_head_sheet)
+s2_34_vs_art.png: the turnaround's front and 3/4 beside the model's front and 3/4: the sword hanging down across him (kael_blade_sheet: the whole core white-hot), the Warchain to one hook
+s2_back_vs_art.png: the turnaround's back beside the model's back and 3/4 back
+s2_match_vs_art.png / s2_match.png: the front art beside the match-zoom crop (the white-hot blade reads from the match camera)
+s2_vs_turnaround_close.png / s2_vs_turnaround_game.png: the turnaround above, the model close and at the match camera
+s2_moves_close_1.png, s2_poses_game.png: run cycle; idle, run, attack, cast, ult at the match camera
+s2_vs_s1.png: stage 1 (top) against stage 2 (bottom)
