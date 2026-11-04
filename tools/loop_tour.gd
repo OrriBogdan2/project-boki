@@ -275,15 +275,6 @@ func _home() -> void:
 		await shot("loadout_bottom")
 	h._close_panel()
 	await wait(0.4)
-	# the Training Grounds isle at home
-	if h.training:
-		h.ppos = HomeTraining.STILL + Vector3(1.6, 0, 0.4)
-		h.cam.snap(h.ppos)
-		await wait(1.0)
-		for i in 4:
-			h.training.cds.clear(); h.training.cast("fire")
-			await wait(0.3)
-		await shot("farm_training_grounds")
 	# the training area (a match)
 	h._start_training()
 	await _wait_match(600.0)

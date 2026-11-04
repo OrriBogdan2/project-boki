@@ -717,13 +717,6 @@ func _home(tree: SceneTree) -> void:
 	ok(_disabled_buttons(hm.panel_host).size() >= 1 and _no_weight(hm.panel_host),
 			"the expedition panel picks a Hunter (locked ones disabled) with no weight tabs")
 	hm._close_panel()
-	var tr: HomeTraining = hm.training
-	tr.try = {"arch": "bulwark", "cls": Arch.weight("bulwark")}
-	tr.apply_try()
-	tr.set_my_class()
-	ok(Arch.of_save() == sel, "'Set as my Hunter' refuses a locked Hunter")
-	tr.try = {}
-	hm._close_panel()
 	hm.queue_free()
 	for i in 3: await tree.process_frame
 

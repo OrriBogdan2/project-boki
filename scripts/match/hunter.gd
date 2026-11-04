@@ -899,7 +899,7 @@ var lift_t := 0.0              # seconds of the current abyss lift (feathering t
 ## The glider's vertical speed this step below an island's lip over the abyss, `depth` metres under
 ## it: it pulls you up harder and faster the deeper you are (ABYSS_LIFT*), then brakes into the last
 ## ABYSS_BRAKE_DIST so you arrive at ground level (let go just before to carry the climb up as height).
-## Shared by Hunter (matches, the --training ground) and Home (the farm and the Training Grounds).
+## Shared by Hunter (matches, the --training ground) and Home (the farm).
 static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float:
 	if depth > ABYSS_BRAKE_DIST:
 		var acc := (ABYSS_LIFT + ABYSS_LIFT_PER_M * depth) * k

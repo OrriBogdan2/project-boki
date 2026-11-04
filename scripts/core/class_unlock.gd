@@ -113,16 +113,6 @@ static func choose_starters(ids: Array) -> bool:
 	c["reveal"] = []
 	return true
 
-## An open Hunter of this weight (internal: the Try-on rack): `want` if it is open and fits, else the
-## first open one, else "".
-static func fix(want: String, weight: String) -> String:
-	if Arch.exists(want) and Arch.weight(want) == weight and is_open(want):
-		return want
-	for a in Arch.of_class(weight):
-		if is_open(String(a)):
-			return String(a)
-	return ""
-
 # ---- counting: what one expedition adds
 ## The counts one finished expedition adds ({stat: n}): its result plus the feats HunterFeats recorded.
 static func match_counts(r: Dictionary) -> Dictionary:

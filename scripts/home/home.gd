@@ -54,7 +54,6 @@ var petted := {}
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
-var training: HomeTraining = null  # the Training Grounds isle, where your combat kit works (home_training.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
 var hmk: HomeMarket = null         # the market stall's panel (home_market.gd)
@@ -89,7 +88,7 @@ const DAY_LEN := 300.0          # seconds for a full day at home
 var env_res: Environment
 var sun_l: DirectionalLight3D
 var p_anim: HunterAnim = null
-var p_fired := 99.0             # seconds since you last attacked (the Training Grounds), for the animation
+var p_fired := 99.0             # seconds since you last swung a tool (gathering), for the animation
 var crouch_on := false          # crouching (the match's crouch key and its tap-to-toggle setting)
 var p_crouch_k := 0.0           # the crouched pose, eased in and out
 const CROUCH_SPEED := 0.55      # walking speed crouched (the same as in a match)
@@ -162,7 +161,6 @@ func _ready() -> void:
 	await _slice()
 	hb = HomeBuild.new(self)
 	hg = HomeGather.new(self)
-	training = HomeTraining.new(self)
 	hw = HomeWork.new(self)
 	if visit.is_empty(): Work.ensure()
 	var path_col := Color("9c7a52")
@@ -325,7 +323,6 @@ func _ready_rest() -> void:
 	# a few trees around the rim of every island, kept away from paths, lots and bridges
 	world.add_trees_on_rim(54)
 	var keep_clear: Array = [[36, 34, 40, 44], [42, 28, 50, 40], [41, 20, 47, 26], [22, 28, 28, 32], [46, 26, 62, 30], [27, 23, 31, 30], [32, 41, 36, 47]]
-	keep_clear.append_array(training_reserved())
 	for b in Data.BUILDINGS:
 		var rc: Array = HomeLayout.rect_of(b, _d())
 		keep_clear.append([rc[0] - 1, rc[1] - 1, rc[2] + 1, rc[3] + 2])
@@ -343,7 +340,6 @@ func _ready_rest() -> void:
 		bridges[k] = {"tiles": world.bridge_tiles(HomeLayout.isle_bridge(world, k)["rect"]), "built": _has_br(k)}
 		if bridges[k]["built"]:
 			world.open_bridge(bridges[k]["tiles"])
-	training.prepare()
 	if visit.is_empty():
 		HomeLayout.rescue_feeders(world)
 	# the layout's buildings, decorations, paths, ponds and colour theme
@@ -368,7 +364,7 @@ func _ready_rest() -> void:
 	fx = Fx.new(); add_child(fx)
 	cam = CamRig.new(); add_child(cam)
 	cam.zoom_to = HOME_ZOOM; cam.zoom = HOME_ZOOM; cam.lead = 0.2
-	_apply_cam_settings(0.0)
+	_apply_cam_settings()
 	if "--home-wide" in OS.get_cmdline_user_args():
 		cam.zoom_to = 2.6; cam.zoom = 2.6     # test: the whole farm in one shot
 	if not fs:
@@ -492,14 +488,6 @@ func _ready_rest() -> void:
 		if a == "--home-act=run":
 			# test: run to the right (for animation shots)
 			get_tree().create_timer(1.0).timeout.connect(func(): Input.action_press("right"))
-		if a == "--home-act=swing":
-			# test: attack over and over at the Training Grounds
-			get_tree().create_timer(0.3).timeout.connect(func():
-				ppos = HomeTraining.STILL + Vector3(1.6, 0, 0.4); py = _ground_h(ppos.x, ppos.z); cam.snap(ppos))
-			for k in 12:
-				get_tree().create_timer(1.0 + k * 0.45).timeout.connect(func():
-					if training:
-						training.cds.clear(); training.cast("fire"))
 		if a.begins_with("--home-build="):
 			var bk := a.substr(13)
 			Save.d["bridges"].append(bk)
@@ -544,7 +532,7 @@ func _ready_rest() -> void:
 		if a.begins_with("--drill="):
 			var dstat := a.substr(8)
 			get_tree().create_timer(0.4).timeout.connect(func(): _start_drill(Save.active_kin(), dstat))
-		if a in ["--build-demo", "--decor-demo", "--training-demo", "--overview-demo", "--tryon-demo"]:
+		if a in ["--build-demo", "--decor-demo", "--overview-demo"]:
 			Save.no_write = true
 			var which: String = a
 			get_tree().create_timer(0.05).timeout.connect(func(): _build_demo(which))
@@ -635,8 +623,6 @@ func _ready_rest() -> void:
 	if visit.is_empty():
 		hecon.build()
 	await _slice()
-	training.build()
-	await _slice()
 	hb.build_visuals()
 	_sync_fixtures()
 	await _slice()
@@ -705,15 +691,7 @@ func _rect_center(rc: Array) -> Vector3:
 	return Vector3((rc[0] + rc[2] + 1) * 0.5, 0, (rc[1] + rc[3] + 1) * 0.5)
 
 func _isle_open(isle: String) -> bool:
-	return isle == "main" or isle == "training" or _has_br(isle)
-
-## Tile rects [x0, z0, x1, z1] the Training Grounds keep clear (none until it's built).
-func training_reserved() -> Array:
-	return HomeTraining.reserved()
-
-## Spots on the Training Grounds that must stay reachable.
-func training_targets() -> Array:
-	return training.targets() if training else []
+	return isle == "main" or _has_br(isle)
 
 # ---- buildings and building sites
 func _build_lots() -> void:
@@ -1028,7 +1006,6 @@ func _process(delta: float) -> void:
 	if _hub_room_t <= 0.0:
 		_hub_room_t = 0.2
 		_keep_off_hub(root_ui.get_node_or_null("Hints") if root_ui else null)
-		if training: _keep_off_hub(training.hud)
 	_move_player(d)
 	_move_kin(d)
 	_care_tick(d)
@@ -1039,8 +1016,7 @@ func _process(delta: float) -> void:
 	if hg: hg.tick(d)
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
-	if training: training.tick(d)
-	_apply_cam_settings(d)
+	_apply_cam_settings()
 	cam.follow(Vector3(ppos.x, minf(py, 0.0), ppos.z), d, panel_open == "" and train.is_empty())
 	_see_through()
 	_abyss_tint(d)
@@ -1072,32 +1048,15 @@ const MANTLE := 1.5            # ledges this far above your feet pop you up when
 const MANTLE_ABYSS := 3.5   # falling past an island's side, you catch its edge from this far below (pinned: the expedition reach grew to 4.5 in movefeel)
 const FALL_RESPAWN := -40.0    # (a backstop: the abyss takes you a few metres under the island, World.abyss_floor)
 ## (movefeel) The Settings camera at home too, so you can try it here: the style's angle and lens and
-## your follow mode everywhere. The farm keeps its own wider framing (the same ground across as the
-## old home camera, whatever the style, so every zoom and panel shot here still frames the same);
-## on the Training Grounds isle the view eases to exactly the expedition's framing and your hunter
-## to its expedition size (Hunter.VIS_SCALE), so movement and combat there look as they will out there.
+## your follow mode. The farm keeps its own wider framing (the same ground across as the old home
+## camera, whatever the style, so every zoom and panel shot here still frames the same).
 const HOME_ACROSS_REF := "classic"   # the style the home's zooms were framed with
-var cam_zone_k := 0.0                # 0 on the farm, 1 on the Training Grounds (eased)
-var cam_home_zoom := HOME_ZOOM       # your farm zoom, kept while you're on the Training Grounds
-var cam_in_train := false
-func _apply_cam_settings(d: float) -> void:
+func _apply_cam_settings() -> void:
 	cam.apply_settings()
-	var in_train: bool = training != null and training.in_zone
-	if in_train != cam_in_train:
-		cam_in_train = in_train
-		if in_train:
-			cam_home_zoom = cam.zoom_to
-			cam.zoom_to = 1.0
-		else:
-			cam.zoom_to = cam_home_zoom
-	var k_to := 1.0 if in_train else 0.0
-	cam_zone_k = k_to if d <= 0.0 else move_toward(cam_zone_k, k_to, d * 2.5)
-	var home_mul := CamRig.style_across(HOME_ACROSS_REF) / CamRig.style_across(cam.style_id)
-	var e := cam_zone_k * cam_zone_k * (3.0 - 2.0 * cam_zone_k)
-	cam.dist_mul = lerpf(home_mul, 1.0, e)
+	cam.dist_mul = CamRig.style_across(HOME_ACROSS_REF) / CamRig.style_across(cam.style_id)
 	if player and is_instance_valid(player):
-		# (the base is always 1: a hero swap's pop rides on top as "pop", so it can't get stuck stretched)
-		player.scale = (player.get_meta("pop", Vector3.ONE) as Vector3) * lerpf(1.0, Hunter.VIS_SCALE, e)
+		# (a hero swap's pop rides on the base scale of 1, so it can't get stuck stretched)
+		player.scale = player.get_meta("pop", Vector3.ONE) as Vector3
 
 ## Trees between the camera and you (or your active Boki) thin out, as in a match (SeeThrough).
 func _see_through() -> void:
@@ -1117,12 +1076,8 @@ func _exit_tree() -> void:
 
 ## Boki on the farm are drawn bigger than in a match: the farm's camera sits much further back than the
 ## expedition's (HOME_ACROSS_REF framing at HOME_ZOOM), and at match size a Boki was a speck beside
-## your hunter there. Presentation only (the farm has no hitboxes; a match's Boki keep their size);
-## back to match size on the Training Grounds, where the view eases to the expedition's framing.
+## your hunter there. Presentation only (the farm has no hitboxes; a match's Boki keep their size).
 const FARM_BOKI_SCALE := 1.7
-func _farm_boki_k() -> float:
-	var e := cam_zone_k * cam_zone_k * (3.0 - 2.0 * cam_zone_k)
-	return lerpf(FARM_BOKI_SCALE, 1.0, e)
 
 var climb := {}                # (unused since the ledge float; kept for anything that clears it)
 ## Floating up a ledge, as in a match (Hunter._ledge_float): {lip, n (into the wall), t, at, g0}.
@@ -1132,7 +1087,7 @@ var _mv := Vector2.ZERO
 
 ## Your class's dodge with the match's numbers: its charges and recharge (Hunter.max_dashes and
 ## dash_regen at rank 1), and the class's long dash (ex_dist, ex_time, ex_cd; Hunter.EX_DASH_CD).
-## The key hints and the Training Grounds bar sit centred at the bottom, and on a 1280-wide window
+## The key hints sit centred at the bottom, and on a 1280-wide window
 ## they ran under the hub's buttons (Settings covered the start of each): slide one right of the hub
 ## when it would overlap, centred in the room that's left.
 var _hub_room_t := 0.0
@@ -1150,7 +1105,7 @@ func _keep_off_hub(c) -> void:
 		cc.global_position.x = want
 
 func _dodge() -> Dictionary:
-	var ck := training._cls() if training and training.in_zone else Data.class_of_save()
+	var ck := Data.class_of_save()
 	var dd := Content.class_dodge(ck)
 	var cdat: Dictionary = Data.CLASSES.get(ck, {})
 	var out := {"charges": float(cdat.get("dashes", 2)), "cd": Hunter.DASH_REGEN, "speed": Hunter.DASH_SPEED, "time": Hunter.DASH_TIME,
@@ -1524,7 +1479,7 @@ func _move_kin(d: float) -> void:
 		if k.has("say"):
 			k["say_t"] = float(k.get("say_t", 0.0)) - d
 			(k["say"] as Label3D).visible = k["say_t"] > 0.0
-		n.scale = Vector3.ONE * (1.05 if rec["uid"] == _d().get("active", "") else 0.9) * float(n.get_meta("evo_scale", 1.0)) * _farm_boki_k()
+		n.scale = Vector3.ONE * (1.05 if rec["uid"] == _d().get("active", "") else 0.9) * float(n.get_meta("evo_scale", 1.0)) * FARM_BOKI_SCALE
 		if k["emote_t"] > 0.0:
 			k["emote_t"] -= d
 			var lbl: Label3D = k["emote"]
@@ -2054,8 +2009,6 @@ func _find_interact() -> void:
 		best = {"kind": "incubator"}
 	if p2.distance_to(Vector2(YARD_AT.x, YARD_AT.z)) < 1.6 and best.is_empty():
 		best = {"kind": "yard"}
-	if training and visit.is_empty() and training.near_rack(ppos):
-		best = {"kind": "tryon"}
 	if hecon:
 		var hb: Dictionary = hecon.find(p2, bd if not best.is_empty() else 9.0)
 		if not hb.is_empty(): best = hb
@@ -2102,8 +2055,6 @@ func _find_interact() -> void:
 	prompt_box.reset_size()
 	var vp := get_viewport().get_visible_rect().size
 	var py_at := vp.y - 110.0
-	if training and is_instance_valid(training.hud) and training.hud.is_visible_in_tree():
-		py_at = minf(py_at, training.hud.global_position.y - prompt_box.size.y - 6.0)     # (it sat on the Training Grounds bar)
 	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, py_at)
 	_keep_off_hub(prompt_box)
 
@@ -2203,7 +2154,6 @@ func _label_for(it: Dictionary) -> String:
 			return "Spend time with %s" % rec["name"]
 		"egg": return ("Help the %s hatch!" if _egg_ready() else "Warm the %s") % _egg_label()
 		"yard": return "Train your partner"
-		"tryon": return "Try on a Hunter, weapon, glove or Boki"
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2241,7 +2191,6 @@ func _use(it: Dictionary) -> void:
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
-		"tryon": training.open_tryon()
 		"burrow": _open_burrow()
 		"feeder", "grave", "graveyard", "place": hecon.use(it)
 		"station":
@@ -2262,9 +2211,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 	elif hb and event.is_action_pressed("build") and hb.can_build():
 		hb.toggle()
-		get_viewport().set_input_as_handled()
-		return
-	elif training and training.in_zone and panel_open == "" and not chat_open and train.is_empty() and not Overlay.is_open() and training.input(event):
 		get_viewport().set_input_as_handled()
 		return
 	if not train.is_empty():
@@ -2439,7 +2385,6 @@ func set_build_ui(on: bool) -> void:
 	if is_instance_valid(build_btn): build_btn.visible = not on
 	var hub_bar = get("hub")         # the menus branch's bottom-left hub bar, when it's merged
 	if hub_bar is CanvasItem: (hub_bar as CanvasItem).visible = not on
-	if training and is_instance_valid(training.hud): training.hud.visible = not on
 
 ## Opens build mode (for a Build entry in the home's hub bar).
 func open_build() -> void:
@@ -5351,7 +5296,7 @@ func _quirk(k: Dictionary, n: Node3D, moving: bool, d: float) -> void:
 
 # ------------------------------------------------------------------ build mode screenshots
 ## --build-demo: build mode open with a bench's ghost by the farm; --decor-demo: an island decorated
-## through the layout; --training-demo: you on the Training Grounds, firing at the dummies.
+## through the layout.
 func _build_demo(which: String) -> void:
 	Save.no_write = true
 	Save.d["gems"] = maxi(int(Save.d["gems"]), 9999); Save.d["scrap"] = 99
@@ -5390,23 +5335,6 @@ func _build_demo(which: String) -> void:
 			ppos = Vector3(46.0, 0, 37.0) if which == "--overview-demo" else Vector3(55.0, 0, 39.0)
 			player.position = ppos
 			cam.zoom_to = 3.3 if which == "--overview-demo" else 1.5; cam.zoom = cam.zoom_to; cam.snap(ppos))
-	if which == "--tryon-demo":
-		# screenshots: your hunter at the Try-on rack, the camera in close
-		get_tree().create_timer(0.3).timeout.connect(func():
-			ppos = HomeTraining.RACK + Vector3(0, 0, 1.0); player.position = ppos
-			training.tick(0.05)
-			cam.zoom_to = 0.55; cam.zoom = cam.zoom_to; cam.snap(ppos)
-			for k in 8:
-				get_tree().create_timer(0.2 + k * 0.4).timeout.connect(func(): _close_panel()))
-	if which == "--training-demo":
-		get_tree().create_timer(0.3).timeout.connect(func():
-			ppos = Vector3(39.5, 0, 57.5); player.position = ppos; cam.snap(ppos)
-			for i in 6:
-				get_tree().create_timer(0.4 + i * 0.25).timeout.connect(func():
-					if training.in_zone:
-						training.cds["fire"] = 0.0
-						training.cast("fire")
-						training.hit(training.dummies[i % 3], 6.0 + i)))
 
 # ------------------------------------------------------------------ test hooks for the economy
 ## --armory-test, --feeder-test, --grave-test, --shrine-test: set up a save and open the thing,

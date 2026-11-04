@@ -340,7 +340,6 @@ static func make_world(world: World, level: int, seed := 0, sk := 0.0) -> void:
 	var defs: Array = [["main", CORE_C, CORE_R] if sk <= 0.0 else ["main", FS_CORE_C, FS_CORE_R]]
 	for k in Data.ISLES:
 		defs.append([k, Data.ISLES[k]["c"], Data.ISLES[k]["r"]])
-	defs.append_array(HomeTraining.defs())      # the Training Grounds, which every home has
 	world.make_islands(SEED, W, H, defs)
 	grow_main(world, level, seed, sk)
 	var spans := {}
@@ -547,7 +546,7 @@ static func expand_gain(level: int, seed := 0, sk := 0.0) -> int:
 ## Every farm-start island has about this much land before any expansion (the classic island's
 ## meadow is about the same), whatever its shape.
 const FS_LAND := 1250
-## Land kept for every bridge to land on (the isles', the Training Grounds'): a small rise of
+## Land kept for every bridge to land on (the isles'): a small rise of
 ## ground always meets each one, whatever the island's shape.
 const FS_FEET := [[Vector2(62.5, 29.5), Vector2(3.4, 3.0)], [Vector2(34.5, 45.5), Vector2(3.4, 3.2)], [Vector2(28.5, 25.5), Vector2(3.0, 3.0)],
 	[Vector2(26.0, 30.5), Vector2(3.0, 3.0)], [Vector2(44.5, 24.5), Vector2(3.0, 3.0)], [Vector2(39.5, 45.0), Vector2(3.0, 3.0)]]
