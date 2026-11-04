@@ -91,4 +91,8 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   shards); smoother shoulder pods (three rows of sixteen facets); iron ball joints seating the upper arms in the
   pods; the horn moved 9 cm back into the right forearm's cuff (`weapon.offset`). Body 14,642 at fit.
   `--arena-demo=pose_clear` now hides every overlay and turns him nearly toward the camera.
+- **Match-zoom v2 (ext/warden-matchzoom-v2):** outline.gdshader and hero_toon.gdshader taken from it, and its
+  FAR_LOOK / INK_FAR_CUT / GLOW_SHELL and `_far_look()` added to WardenGlb (Dredge's LOOK / LOOK_SLOT pass in as
+  its "painted" / "slots"); his own ink takes far_cut too. The speckle fringe is gone at the match camera and the
+  eye reads as a red-orange halo.
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.

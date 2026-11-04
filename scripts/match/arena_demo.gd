@@ -315,7 +315,7 @@ static func tick(A: Arena, dt: float) -> void:
 			at_t = 99.0
 		"pose", "pose_clear":
 			# the Hunter standing at the match camera, turned three-quarters toward it (Warden model shots);
-			# pose_clear: the same, nearly facing the camera, with the arena's sign and every overlay off (review frames)
+			# pose_clear: nearly facing the camera, the arena's sign and every overlay off (review frames)
 			if w == "pose_clear":
 				if t < 0.05:
 					P.teleport(P.pos + Vector3(-1.6, 0, -1.2))      # (off the fern at the spawn)
@@ -326,7 +326,8 @@ static func tick(A: Arena, dt: float) -> void:
 					(c as CanvasLayer).visible = false
 				if m.hud: m.hud.set("visible", false)
 			P.inp["move"] = Vector2.ZERO
-			P.inp["aim"] = P.pos + (Vector3(-1.5, 0.9, 5.0) if w == "pose_clear" else Vector3(-5.0, 0.9, 3.5))
+			var face := Vector3(-1.5, 0.9, 5.0) if w == "pose_clear" else Vector3(-5.0, 0.9, 3.5)
+			P.inp["aim"] = P.pos + face
 			at_t = 2.0
 		"bulwark", "crushed":
 			var H: Hunter = A.dummies[2]["h"]

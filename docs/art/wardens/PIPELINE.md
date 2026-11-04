@@ -194,6 +194,7 @@ No Meshy. The model's own rigid skin and extra bones are kept; the script rename
 | Dredge r3g | 2026-11-04 17:30 | none (credit-free) | - | ORCH's r3f review: tarnished bronze, rivet rows, a smaller cracked orb, helm drips, smoother hull, brass grille, upright stance | 0 | Kept |
 | Dredge r3h | 2026-11-04 18:20 | none (credit-free) | - | ORCH's r3g review: no spec ovals, brighter eye and far rim, cracked glowing orb, bronze with seams and rivet rows, smoother lames, shards stripped | 0 | Kept |
 | Dredge r3i | 2026-11-04 19:10 | none (credit-free) | - | ORCH's r3h review: a small orb in a wide brass ring, no flap shards, smoother pods, shoulder joints, the horn seated | 0 | Kept |
+| Dredge r3i + v2 | 2026-11-04 19:40 | none (credit-free) | - | the shared match-zoom fix v2 ported by hand (outline + hero_toon from the branch, FAR_LOOK and _far_look in the loader) | 0 | Kept |
 
 ## Blender-driven modelling (vs Meshy)
 The owner's friend made Dredge in Blender, probably by driving it through a Blender MCP server (an LLM sends bpy
