@@ -77,7 +77,8 @@
 				"shade": 0.9,
 				"top_light": 0.2,
 				"fres": 0.45,
-				"far_lift": 0.22
+				"far_lift": 0.22,
+				"light_neutral_warm": 0.6
 			},
 			"metal": {
 				"top_light": 0.3,
@@ -92,7 +93,12 @@
 			"fur": {
 				"far_lift": 0.6,
 				"fres": 0.6,
-				"glow": 0.3
+				"glow": 0.3,
+				"light_neutral_warm": 0.5
+			},
+			"leather": {
+				"light_neutral_warm": 0.4,
+				"far_lift": 0.12
 			}
 		},
 		"halos": [
