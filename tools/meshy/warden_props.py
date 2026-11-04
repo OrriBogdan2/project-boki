@@ -234,7 +234,8 @@ def crossbow(bld, cells, g, look):
     _arc(bld, [g + np.array([0, -0.015, -0.05]), g + np.array([0, 0.0, 0.0]), top + np.array([0, 0.01, -0.01])],
          [0.017, 0.018, 0.017], cells.box["grip"], "grip")
     # the tiller (silver): a long slim box, a butt behind the grip
-    _box(bld, top + np.array([0, L * 0.5 - 0.06, 0.0]), (0.016, L * 0.5, 0.017), cells.box["silver"], "tiller")
+    _box(bld, top + np.array([0, L * 0.5 - 0.06, 0.0]), (0.016, L * 0.5, 0.017),
+         cells.box["scroll" if "scroll" in cells.box else "silver"], "tiller")
     _box(bld, top + np.array([0, L * 0.5 - 0.06, 0.02]), (0.007, L * 0.45, 0.005), cells.box["dark"], "rail")
     front = top + np.array([0, L - 0.07, 0.0])
     # the prod: recurved limbs across the front
@@ -267,9 +268,44 @@ def crossbow(bld, cells, g, look):
         _box(bld, b0 + np.array([sx * 0.008, 0.02, 0.0]), (0.006, 0.02, 0.0015), cells.box["string"], "fletch")
 
 
+def _scrollwork(cells, name, line):
+    """A cell painted with engraved scrollwork (sable_crossbow_sheet's tiller): spirals in a running vine, dark
+    engraved lines with a light edge on the silver."""
+    u0, v0, u1, v1 = cells.box[name]
+    n = cells.size
+    x0, x1, y0, y1 = int(u0 * n), int(u1 * n), int(v0 * n), int(v1 * n)
+    base = cells.px[y0, x0, :3].copy()
+    dark, lite = hexcol(line), np.minimum(base * 1.25, 1.0)
+    h = y1 - y0
+    w = x1 - x0
+    yy, xx = np.mgrid[0:h, 0:w]
+    f = (xx % (w / 4.0)) / (w / 4.0)            # across one face (4 faces round the tiller)
+    t = yy / max(h - 1, 1) * 6.0                 # along the tiller: six motifs
+    k = np.floor(t)
+    ft = t - k
+    side = np.where(k % 2 == 0, 1.0, -1.0)
+    cx, cy = 0.5 + 0.18 * side, 0.5
+    dx, dy = f - cx, ft - cy
+    r = np.hypot(dx, dy * 0.8)
+    a = np.arctan2(dy, dx)
+    spiral = np.abs(((r * 26.0 - a * side) / (2 * math.pi)) % 1.0 - 0.5) < 0.12
+    spiral &= r < 0.34
+    vine = np.abs(f - (0.5 + 0.25 * np.sin(ft * 2 * math.pi + k * math.pi))) < 0.035
+    m = spiral | vine
+    edge = np.roll(m, 1, axis=0) & ~m
+    px = cells.px[y0:y1, x0:x1, :3]
+    px[m] = dark
+    px[edge] = lite
+
+
 def crossbows(rig_grips, look):
     """The `weapon` (right hand) and its child `weapon_offhand` (left), each modelled whole about the right grip."""
-    cells = Cells(look["colours"])
+    cols = dict(look["colours"])
+    if look.get("scroll"):
+        cols.setdefault("scroll", cols["silver"])
+    cells = Cells(cols, n=4, size=256)
+    if look.get("scroll"):
+        _scrollwork(cells, "scroll", look.get("scroll_line", "4a4e5c"))
     img = cells.image("crossbow_atlas")
     gr = Vector(rig_grips["gr"])
     gl = Vector(rig_grips["gl"])
@@ -455,4 +491,144 @@ def gem(arm, body, spec, tag="gem"):
         poly.use_smooth = False
     _skin(ob, arm, {spec.get("bone", "hips"): range(len(ob.data.vertices))})
     log("gem at %s: %d tris" % (tuple(round(float(v), 3) for v in c), sum(len(f) - 2 for f in bld.f)))
+    return ob
+
+
+# ------------------------------------------------------------------------------------------------ a fluffy tail
+def fluff_tail(arm, spec, tag="tail"):
+    """A big fluffy fox tail as its own geometry (the art's size): a tube along `path` whose radius follows
+    `radii`, its cross-section scalloped into fur clumps that twist along it and its end drawn to a soft tip;
+    painted `base` fading to `tip` over the last `tip_from` of its length, with stroke lines along the fur. It rides
+    a spring chain of `bones` bones under `parent` (the contract tail bone)."""
+    path = np.array(spec["path"], float)
+    p, L = WP.resample(path, int(spec.get("samples", 48)))
+    s_arr = WP.arclen(p)
+    rr = np.interp(s_arr / max(L, 1e-6), np.linspace(0, 1, len(spec["radii"])), spec["radii"])
+    t, nrm, bin_ = WP.frames(p, spec.get("side", [1.0, 0.0, 0.0]))
+    sides = int(spec.get("sides", 18))
+    clumps = int(spec.get("clumps", 7))
+    bld = WP.Builder()
+    base = len(bld.v)
+    k = len(p)
+    for i in range(k):
+        f = s_arr[i] / L
+        for j in range(sides + 1):
+            a = 2 * math.pi * j / sides
+            amp = float(spec.get("fluff", 0.16))
+            sc = 1.0 + amp * max(0.0, math.cos(clumps * a + f * 9.0)) ** 2 - amp * 0.35
+            off = rr[i] * sc * (math.cos(a) * nrm[i] + math.sin(a) * bin_[i])
+            bld.v.append(p[i] + off)
+            bld.uv.append((j / sides, f))
+            bld.part.append("fur")
+            bld.s.append(s_arr[i])
+    row = sides + 1
+    for i in range(k - 1):
+        for j in range(sides):
+            a0 = base + i * row + j
+            bld.f.append((a0, a0 + 1, a0 + row + 1, a0 + row))
+    for i, cap in ((0, False), (k - 1, True)):
+        c = len(bld.v)
+        bld.v.append(p[i] + (t[i] * rr[i] * 0.6 if cap else -t[i] * rr[i] * 0.3))
+        bld.uv.append((0.5, 1.0 if cap else 0.0))
+        bld.part.append("fur")
+        bld.s.append(s_arr[i])
+        for j in range(sides):
+            a0 = base + i * row + j
+            bld.f.append((a0, a0 + 1, c) if cap else (a0 + 1, a0, c))
+    ob = bld.object("Tail")
+    size = 256
+    v = (np.arange(size)[:, None] + 0.5) / size * np.ones((1, size))
+    u = (np.arange(size)[None, :] + 0.5) / size * np.ones((size, 1))
+    c0, c1 = hexcol(spec["base"]), hexcol(spec["tip"])
+    dark = hexcol(spec.get("shade", spec["base"]))
+    tf = float(spec.get("tip_from", 0.7))
+    m = np.clip((v - tf) / max(1.0 - tf, 1e-3), 0, 1)[..., None] ** 0.8
+    col = c0 * (1 - m) + c1 * m
+    strokes = 0.5 + 0.5 * np.sin(u * 2 * math.pi * 24 + np.sin(v * 17.0) * 2.5 + v * 30.0)
+    col = col * (1 - 0.16 * strokes[..., None]) + dark * 0.16 * strokes[..., None] * (1 - m * 0.7)
+    px = np.ones((size, size, 4), np.float32)
+    px[..., :3] = col
+    img = bpy.data.images.new(tag + "_atlas", size, size, alpha=False)
+    img.pixels = px.ravel()
+    img.file_format = "PNG"
+    img.pack()
+    ob.data.materials.append(_mat("%s-%s" % (spec.get("slot", "fur"), tag), img))
+    names, spans = WP.chain_bones(arm, spec.get("name", "tail"), spec.get("parent", "tail"), p, L,
+                                  int(spec.get("bones", 5)), p[-1] + t[-1] * 0.02)
+    WP.weights(ob, [(vi, bld.s[vi]) for vi in range(len(bld.v))], names, spans)
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("tail: %.2f m, %d tris" % (L, sum(len(f) - 2 for f in bld.f)))
+    return ob
+
+
+# ------------------------------------------------------------------------------------------------ a flower crown
+def flower_crown(arm, body, spec, tag="flowers"):
+    """Small five-petal flowers (white petals, a yellow middle, a leaf between some) set on the head's surface
+    along an arc over the top of the head (pip_head_sheet's crown): `n` flowers from angle a0 to a1 (deg, 0 = her
+    right ear, 90 = the crown's top, 180 = her left ear) on a circle `r` round the head centre `centre`, tipped
+    `tilt` deg back; each ray-cast onto the body and lifted `out` m. Rides the head bone rigidly."""
+    from mathutils.bvhtree import BVHTree
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = body.evaluated_get(dg)
+    me = ev.to_mesh()
+    bvh = BVHTree.FromPolygons([body.matrix_world @ v.co for v in me.vertices], [list(q.vertices) for q in me.polygons])
+    ev.to_mesh_clear()
+    cells = Cells({"petal": spec.get("petal", "fbf7f2"), "heart": spec.get("heart", "f2c040"),
+                   "leaf": spec.get("leaf", "5f9a48"), "petal_shade": spec.get("petal_shade", "e8d8e0")}, n=2, size=64)
+    img = cells.image(tag + "_atlas")
+    bld = WP.Builder()
+    c = Vector(spec["centre"])
+    n = int(spec.get("n", 9))
+    tilt = math.radians(float(spec.get("tilt", 20.0)))
+    rad = float(spec.get("r", 0.2))
+    fs = float(spec.get("size", 0.028))
+    rng = np.random.default_rng(3)
+    placed = 0
+    for i in range(n):
+        a = math.radians(float(spec["a0"]) + (float(spec["a1"]) - float(spec["a0"])) * i / max(n - 1, 1))
+        d = Vector((math.cos(a), -math.sin(tilt) * math.sin(a), math.cos(tilt) * math.sin(a)))
+        hit = bvh.ray_cast(c + d * rad, -d)
+        if hit[0] is None:
+            continue
+        nrm = hit[1].normalized()
+        at = hit[0] + nrm * float(spec.get("out", 0.006))
+        e1 = nrm.orthogonal().normalized()
+        e2 = nrm.cross(e1).normalized()
+        sz = fs * rng.uniform(0.8, 1.15)
+        spin = rng.uniform(0, 2 * math.pi)
+        for k in range(5):
+            ang = spin + 2 * math.pi * k / 5
+            dirv = e1 * math.cos(ang) + e2 * math.sin(ang)
+            pc = at + dirv * sz * 0.55 + nrm * sz * 0.08
+            # a petal: a flat, slightly cupped disc (a squashed prism)
+            pa = np.array(pc - nrm * sz * 0.03)
+            pb = np.array(pc + nrm * sz * 0.03)
+            v0 = len(bld.v)
+            bld.prism(pa, pb, sz * 0.38, 8, cells.box["petal"] if k % 2 else cells.box["petal_shade"], "petal", 0.0)
+            # stretch it along the petal's direction
+            dv = np.array(dirv[:])
+            for vi in range(v0, len(bld.v)):
+                q = bld.v[vi] - np.array(pc[:])
+                along = q.dot(dv)
+                bld.v[vi] = np.array(pc[:]) + q + dv * along * 0.5
+        bld.prism(np.array(at[:]), np.array((at + nrm * sz * 0.16)[:]), sz * 0.22, 8, cells.box["heart"], "heart", 0.0)
+        if i % 2 == 0:
+            ld = e2 * math.cos(spin) - e1 * math.sin(spin)
+            lp = at + ld * sz * 1.1 - nrm * sz * 0.05
+            v0 = len(bld.v)
+            bld.prism(np.array((lp - nrm * sz * 0.02)[:]), np.array((lp + nrm * sz * 0.02)[:]), sz * 0.3, 6,
+                      cells.box["leaf"], "leaf", 0.0)
+            ldn = np.array(ld[:])
+            for vi in range(v0, len(bld.v)):
+                q = bld.v[vi] - np.array(lp[:])
+                bld.v[vi] = np.array(lp[:]) + q + ldn * q.dot(ldn) * 0.9
+        placed += 1
+    ob = bld.object("Flowers")
+    ob.data.materials.append(_mat("%s-%s" % (spec.get("slot", "leather"), tag), img, closest=True))
+    for poly in ob.data.polygons:
+        poly.use_smooth = False
+    _skin(ob, arm, {spec.get("bone", "head"): range(len(ob.data.vertices))})
+    log("flower crown: %d flowers, %d tris" % (placed, sum(len(f) - 2 for f in bld.f)))
     return ob

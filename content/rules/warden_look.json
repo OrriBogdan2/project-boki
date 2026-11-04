@@ -37,13 +37,7 @@
 			"skin": {
 				"top_light": 0.35,
 				"fres": 0.45,
-				"far_lift": 0.25,
-				"shade": 0.84,
-				"shadow_tint": [
-					0.97,
-					0.9,
-					0.92
-				]
+				"far_lift": 0.25
 			},
 			"cloth": {
 				"far_lift": 0.45,
@@ -61,8 +55,9 @@
 				"glow": 2.4
 			},
 			"card": {
-				"sheen": 0.6,
-				"glow": 0.4
+				"sheen": 0.7,
+				"glow": 0.6,
+				"irid": 0.3
 			}
 		},
 		"lights": [
