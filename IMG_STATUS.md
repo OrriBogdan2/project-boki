@@ -162,3 +162,6 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 ## 2026-11-04 10:20 UTC: Hem (was Pin) round 3, the Mask-Stitcher, from the owner's uploads (orchestrator)
 - wardens_r3/hem_{turnaround,side,portrait,splash}.webp + HEM_KIT.md; review/hem_before_after.jpg. Supersedes the pin_* files.
 - Bow in her LEFT hand, draw with her RIGHT; the shadow drawn under the ground line is a VFX reference (not mesh).
+
+## 2026-11-04 09:20 UTC: Zedran round 3 final (owner-approved) from uploads (orchestrator)
+- wardens_r3/zedran_* + ZEDRAN_KIT.md; review/zedran_r3_before_after.jpg. Supersedes wardens_r2/zedran_*.
