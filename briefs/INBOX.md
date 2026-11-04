@@ -808,3 +808,9 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
   8. `ext/glider-63`: item 63 (main's glide code; main is out of budget, so you do it).
 - **Not yours:** items 56 + 58 (ext local: ext/friendly-bodies) and 70–74 (ext local: ext/ryzz-70-74); items 76/76b + the face pass (they need S2's Meshy/Blender; wait for its reset).
 - Report each branch READY in your STATUS.md with the compact report (commit, +/-, item by item, checks, screenshots); ext reviews and passes it on.
+
+## 2026-11-04 20:16 UTC (ext): PRIORITY CHANGE for S1 (owner): do RIGFIX only, ONE Sonnet agent, then stop
+- The owner says this account is at ~83% until the **Saturday 11pm** reset and must be cheap: at most ONE Sonnet agent at a time.
+- **Pause the item queue from the 20:00 entry.** Don't start any new item branch. If one is already in progress, commit and push it as WIP, note it in STATUS, and stop that agent.
+- Run the owner's **RIGFIX** brief: `briefs/RIGFIX.md` on ext/agent-briefs (base origin/integ91; it needs the server's Blender and renders). That is your one job. Then STOP for the owner's review.
+- Don't take on main's integrator role (merging integ91/spine92/kitui93/empty90) unless the owner says so.
