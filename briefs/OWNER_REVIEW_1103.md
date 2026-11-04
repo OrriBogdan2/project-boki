@@ -830,3 +830,12 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
   - Floating combat numbers small and fading.
   - Hints show once.
 - Assert: firing 5 messages at once gives no overlap (layout check); screenshots before/after of a busy moment in a match and on the farm. List what was removed.
+
+## 103. BUG: a sound keeps playing forever after an expedition (owner, 23:24 UTC Nov 4, "again")
+- Owner: "Getting a sound bug again where it persists indefinitely from an expedition."
+- Root-cause it, don't patch one sound:
+  - Find every looping AudioStreamPlayer / ambient / channel loop started in a match (storm, glide wind, channelled abilities, extraction beacon, hold-to-build hammering, music layers).
+  - On match end / extraction / death / scene change, all match audio must stop: parent it to the match scene or put it on a "Match" bus that is muted and cleared on exit.
+  - Also stop loops when the owning node frees mid-channel (e.g. extracting during a channel).
+- Add a check (register it): run a short match, extract mid-channel and return to the farm; assert no match-started players are still playing.
+- Do this first in the item 94 perf pass (it touches the same audio/scene teardown).
