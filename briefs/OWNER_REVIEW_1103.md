@@ -866,3 +866,17 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
 - Keep the speech-stage rule: young Boki only say their name with tone + actions; the variety at that stage comes from the tones and actions.
 - English pass on every line (natural, short, warm, our own voice).
 - Assert: no line repeats within 10; the max length is enforced in data; each trigger has ≥ 8 lines. Screenshots: 3 farm moments + 2 match moments.
+
+## 106. Reticle: smaller default like the source's, plus customisable (owner, 23:31 UTC Nov 4)
+- Owner: "The reticle should be customizable and the base one should be SUPERVIVE's base reticle. It's too big I think right now."
+- Default: match the source's default cursor reticle in size and shape. Our data has no description of it, so take it from footage frames (briefs/supervive-data footage notes / clips) and confirm with the owner via a screenshot. The owner can send a screenshot of the source's reticle if handy. Our own drawing, same proportions. Clearly smaller than now.
+- Settings → Reticle:
+  - shape (default / dot / small circle / cross / circle + dot)
+  - size slider
+  - colour (preset swatches incl. high-visibility)
+  - opacity
+  - outline on/off
+  - Saved in the player's settings (not the run save).
+- Ability-specific aim visuals stay (Hem's filling line, item 55b; the charge visuals) and sit on top of the chosen reticle.
+- Assert: settings persist and apply in the farm and the match; screenshots of the default + 2 custom styles.
+- Bundle with the item 96 combat-clarity pass (reticle readability is part of clarity).
