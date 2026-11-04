@@ -506,3 +506,8 @@ Credits: ~8 x 70-110 ≈ 600-900; balance 4,993. Post per-Warden "OWNER: review 
 - 1. Treat r3c as the approved recipe: start stage 2 (paint-over, per-model look, proportions, stance) for Hem, Kael, Breaker (now 1.5x), Claire, Sable, Pip, Tarek, Ostra.
 - 2. In parallel, a Vex face pass (r3d): match the portrait's face exactly (eyes, brows, lips, skin tone), remove the faint jaw seam, make the eye-plate lens read at match zoom, clean the dark smears on the straps at 3/4. Post r3d_closeup_vs_art + r3d_closeup_34_vs_art for the owner.
 - Fold whatever the face pass learns back into the recipe for the other eight.
+
+## 2026-11-04 11:45 UTC (ORCH): Cinder art in, 3D brief (owner)
+- Art on ext/imagegen 02294108, docs/art/gen/wardens_r3/: cinder_fullbody (design ref), cinder_front (upright, the main Meshy input), cinder_back (rear 3/4), cinder_side. **Read CINDER_KIT.md first.**
+- Must hold: the short rounded feminine salamander face (no long snout); the translucent fin-crest with fin rays running onto the tail (replaces the axolotl frills, so she no longer reads like Prismander); cracked brass goggles on the crest (her relic); the flamethrower lance in her LEFT hand, hosed to the copper tank; the tail; glowing spots and vials.
+- Queue: with Ryzz, after stage 2. Portrait and splash art are still coming; not needed for the model.
