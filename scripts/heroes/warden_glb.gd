@@ -9,7 +9,7 @@ extends RefCounted
 const DIR := "res://art/wardens"
 ## Each Warden's art name, as in docs/art/gen/wardens/<name>_turnaround.png: the folder and file its .glb has.
 const ART := {"bulwark": "bjorn", "archer": "pin", "juggernaut": "zedran", "gunslinger": "vex", "ostra": "ostra",
-	"mage": "vireo", "dolm": "tarek", "thief": "sable", "rimewright": "claire", "ashwick": "cinder",
+	"mage": "ryzz", "dolm": "tarek", "thief": "sable", "rimewright": "claire", "ashwick": "cinder",
 	"tender": "moosh", "dredge": "dredge"}
 ## Armature bone -> the rig node it follows (paths under the model root).
 const BONES := {
@@ -46,6 +46,8 @@ const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline
 const PAINTED_SHADE := 0.72     # a painted atlas's shadow floor (the hero shader's own is 0.37)
 const PAINTED_RAMP := 2.6       # and its terminator, softer than the hero shader's 0.5
 const GLOW := 1.6              # emission of the glow slot (mechanical eyes, cracks), x its painted colour
+const EMIT := 2.2              # a painted emission layer's strength (the material's emissive texture: Ryzz's veins)
+const EMIT_FLICKER := 0.55     # and how much it crackles
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
 ## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model.
@@ -200,6 +202,11 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 				m.set_shader_parameter("self_shadow", 0.0)
 			if slot == "glow":
 				m.set_shader_parameter("glow", GLOW)
+			if src and src.emission_enabled and src.emission_texture:
+				m.set_shader_parameter("emit_tex", src.emission_texture)
+				m.set_shader_parameter("use_emit", true)
+				m.set_shader_parameter("emit", EMIT)
+				m.set_shader_parameter("emit_flicker", EMIT_FLICKER)
 			(mi as MeshInstance3D).set_surface_override_material(si, m)
 			out.append(m)
 	return out

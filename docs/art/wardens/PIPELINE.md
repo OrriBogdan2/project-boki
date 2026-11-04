@@ -161,4 +161,11 @@ profile views before any run.
 | Vex r2 | 2026-11-04 03:29 | 01a1a49a-5239-71e0-9906-570cbfd9715e | latest | r2 turnaround (2x enlarged): front, 3/4, near profile (her right), back; 30k, PBR, A-pose | 30 | Kept: one run; gun-arm, monocle, streak, bun and bolt, candles, vest, tights all came through. The later side view (ponytail) was not needed |
 
 Vex total: 7 tasks, 190 credits (balance before r2: 940).
+| Ryzz | 2026-11-04 04:58 | 01a1a4ec-c777-7134-a7cb-8f7633bd9e75 | latest | r2 front, 3/4 (stray second spear painted out), side sheet's profile (scaled to the turnaround), back; spear and flag painted out (tools/meshy/ryzz_inputs.py), 30k, PBR, A-pose | 30 | Kept (not yet fitted): hair standing up, jacket, blue-trim top, belt, chains, cargo pants, boots; Meshy kept the art's raised right fist, not an A-pose |
+| Ryzz spear | 2026-11-04 04:58 | 01a1a4ec-c766-739e-9022-6501ca35b1d2 | latest | spear alone from the side sheet (shaft drawn through the fist), 8k, no pose | 30 | Kept (not yet fitted): tip, copper coil, orb, bindings, black flag |
+
+Ryzz WIP (paused 05:00 by the owner's Vex gate): 2 tasks, 60 credits (balance before: 790). Not fitted yet. Joints measured on the run-1
+body (Meshy frame): shoulders -0.15/0.16 at z 0.40, elbows -0.25/0.13 and 0.26/0.12, wrists -0.31/0.25 (raised fist) and 0.30/-0.12,
+hips -0.09/0.09 at -0.14, knees -0.15/0.17 at -0.48, ankles -0.18/0.23 at -0.80, neck 0.476, crown ~0.72. Archetype body that puts the rig
+on them (not committed: it reshapes the live procedural model): size 1.0, chest 0.95, head 0.62, legs 1.58, neck -0.11, build 0.85.
 
