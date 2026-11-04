@@ -1,0 +1,125 @@
+{
+	"grammar": 1,
+	"id": "floenatee",
+	"name": "Floenatee",
+	"animals": [
+		"Manatee",
+		"Pack ice"
+	],
+	"theme": "frost",
+	"flavor": "A manatee that slides across the ice on its belly, a floe of pack ice frozen to its back like a saddle.",
+	"colors": {
+		"body": "#8aa0b0",
+		"belly": "#d8e4ec",
+		"glow": "#bff4ff"
+	},
+	"look": {
+		"ears": "none",
+		"body": "boulder",
+		"tail": "fish",
+		"feet": "none",
+		"aura": "bubbles"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.6,
+		"mass": 2.0,
+		"gait": {
+			"hop_rate": 4.5,
+			"hop_height": 0.05,
+			"pace": 0.8
+		}
+	},
+	"stats": {
+		"kin_hp": 10,
+		"kin_damage": 1,
+		"kin_speed": 3,
+		"owner_regen": 4,
+		"owner_shield": 2
+	},
+	"personality": {
+		"bravery": 0.5,
+		"loyalty": 0.9,
+		"temper": 0.05,
+		"curiosity": 0.5
+	},
+	"ai": {
+		"aggression": 0.3,
+		"loyalty": 0.9,
+		"caution": 0.6,
+		"role": "support"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Floe Saddle",
+		"passives": [
+			{
+				"stat": "damage_reduction",
+				"amount": 0.15
+			},
+			{
+				"stat": "knockback_resist",
+				"amount": 0.5
+			}
+		],
+		"mount": {
+			"speed": 0.85,
+			"jump": 0.8,
+			"turn": 0.6
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "slow",
+				"duration": 1.5,
+				"strength": 0.5
+			}
+		]
+	},
+	"active": "prism_wall",
+	"auto": "refraction",
+	"merge": "tidal_shell",
+	"evolution": {
+		"root": "Floe",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "kind, low and slow",
+		"syllables": [
+			"Floe",
+			"natee"
+		]
+	},
+	"egg": {
+		"name": "Floenatee Egg",
+		"temper": "Kind",
+		"desc": "Something kind is in here.",
+		"play": "Keeps you alive and patched up."
+	}
+}

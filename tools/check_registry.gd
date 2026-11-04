@@ -60,6 +60,7 @@ const CHECKS := {
 	"--economy-floor-check": ["res://tools/economy_floor_check.gd", "economy_floor_check", null],      # never stuck
 	"--market-check": ["res://tools/market_check.gd", "market_check", null],      # docs/decisions/0013-market.md
 	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],      # --market-shots=<dir>
+	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],      # docs/boki/ROSTER_50.md stubs
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).

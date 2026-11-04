@@ -1,0 +1,114 @@
+{
+	"grammar": 1,
+	"id": "lodestick",
+	"name": "Lodestick",
+	"animals": [
+		"Stick insect",
+		"Lodestone"
+	],
+	"theme": "gravity",
+	"flavor": "A stick insect made of dark lodestone twigs. Things drift toward it, and it drifts toward nothing.",
+	"colors": {
+		"body": "#3c3a50",
+		"belly": "#8a86a0",
+		"glow": "#b48cff"
+	},
+	"look": {
+		"ears": "none",
+		"body": "burr",
+		"tail": "none",
+		"feet": "none",
+		"aura": "pebbles"
+	},
+	"body": {
+		"size": "small",
+		"reach": 1.3,
+		"mass": 0.8,
+		"gait": {
+			"hop_rate": 10.0,
+			"hop_height": 0.06,
+			"pace": 1.05
+		}
+	},
+	"stats": {
+		"kin_hp": 3,
+		"kin_damage": 2,
+		"kin_speed": 13,
+		"owner_move_speed": 2
+	},
+	"personality": {
+		"bravery": 0.45,
+		"loyalty": 0.55,
+		"temper": 0.2,
+		"curiosity": 0.6
+	},
+	"ai": {
+		"aggression": 0.45,
+		"loyalty": 0.55,
+		"caution": 0.65,
+		"role": "trickster"
+	},
+	"carry": {
+		"style": "shoulder",
+		"name": "Still Point",
+		"passives": [
+			{
+				"stat": "dodge_regen",
+				"amount": 0.25
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "pull",
+				"strength": 8
+			}
+		]
+	},
+	"active": "moon_swap",
+	"auto": "updraft",
+	"merge": "tempest",
+	"evolution": {
+		"root": "Lode",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "deadpan, long pauses",
+		"syllables": [
+			"Lode",
+			"stick"
+		]
+	},
+	"egg": {
+		"name": "Lodestick Egg",
+		"temper": "Still",
+		"desc": "Something still is in here.",
+		"play": "Slippery and full of tricks."
+	}
+}

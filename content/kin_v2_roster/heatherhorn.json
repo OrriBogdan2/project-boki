@@ -1,0 +1,123 @@
+{
+	"grammar": 1,
+	"id": "heatherhorn",
+	"name": "Heatherhorn",
+	"animals": [
+		"Highland cow",
+		"Heather"
+	],
+	"theme": "bloom",
+	"flavor": "A shaggy highland cow with a heather meadow blooming along its back. Bees follow it everywhere.",
+	"colors": {
+		"body": "#b8643a",
+		"belly": "#e8c8a0",
+		"glow": "#c08aff"
+	},
+	"look": {
+		"ears": "leaf",
+		"body": "boulder",
+		"tail": "sprout",
+		"feet": "stumps",
+		"aura": "leaves"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.5,
+		"mass": 1.5,
+		"gait": {
+			"hop_rate": 6.0,
+			"hop_height": 0.08,
+			"pace": 1.0
+		}
+	},
+	"stats": {
+		"kin_hp": 11,
+		"kin_damage": 4,
+		"kin_speed": 4,
+		"owner_armor": 1
+	},
+	"personality": {
+		"bravery": 0.7,
+		"loyalty": 0.85,
+		"temper": 0.2,
+		"curiosity": 0.35
+	},
+	"ai": {
+		"aggression": 0.55,
+		"loyalty": 0.8,
+		"caution": 0.2,
+		"role": "tank"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Meadow Back",
+		"passives": [
+			{
+				"stat": "damage_reduction",
+				"amount": 0.1
+			},
+			{
+				"stat": "knockback_resist",
+				"amount": 0.4
+			}
+		],
+		"mount": {
+			"speed": 1.15,
+			"jump": 0.95,
+			"turn": 0.7
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "root",
+				"duration": 0.8
+			}
+		]
+	},
+	"active": "boulder_heave",
+	"auto": "thorn_patch",
+	"merge": "cairn_colossus",
+	"evolution": {
+		"root": "Heather",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "gentle, stubborn, moos for emphasis",
+		"syllables": [
+			"Heather",
+			"horn"
+		]
+	},
+	"egg": {
+		"name": "Heatherhorn Egg",
+		"temper": "Gentle",
+		"desc": "Something gentle is in here.",
+		"play": "Stands in front and soaks the hits."
+	}
+}

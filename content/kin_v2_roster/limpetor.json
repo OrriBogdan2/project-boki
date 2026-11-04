@@ -1,0 +1,123 @@
+{
+	"grammar": 1,
+	"id": "limpetor",
+	"name": "Limpetor",
+	"animals": [
+		"Limpet",
+		"Granite tor"
+	],
+	"theme": "stone",
+	"flavor": "A limpet the size of a boulder, its cone shell a weathered granite tor. Once it clamps down, nothing moves it.",
+	"colors": {
+		"body": "#7a7a7a",
+		"belly": "#d0c0a0",
+		"glow": "#ffd06a"
+	},
+	"look": {
+		"ears": "none",
+		"body": "boulder",
+		"tail": "none",
+		"feet": "stumps",
+		"aura": "pebbles"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.6,
+		"mass": 2.0,
+		"gait": {
+			"hop_rate": 4.5,
+			"hop_height": 0.05,
+			"pace": 0.8
+		}
+	},
+	"stats": {
+		"kin_hp": 12,
+		"kin_damage": 5,
+		"kin_speed": 2,
+		"owner_armor": 1
+	},
+	"personality": {
+		"bravery": 0.8,
+		"loyalty": 0.75,
+		"temper": 0.4,
+		"curiosity": 0.15
+	},
+	"ai": {
+		"aggression": 0.55,
+		"loyalty": 0.8,
+		"caution": 0.2,
+		"role": "tank"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Clamp",
+		"passives": [
+			{
+				"stat": "damage_reduction",
+				"amount": 0.15
+			},
+			{
+				"stat": "knockback_resist",
+				"amount": 0.5
+			}
+		],
+		"mount": {
+			"speed": 0.8,
+			"jump": 0.8,
+			"turn": 0.5
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "push",
+				"strength": 8
+			}
+		]
+	},
+	"active": "boulder_heave",
+	"auto": "rock_guard",
+	"merge": "cairn_colossus",
+	"evolution": {
+		"root": "Limp",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "stubborn and gravelly",
+		"syllables": [
+			"Limp",
+			"etor"
+		]
+	},
+	"egg": {
+		"name": "Limpetor Egg",
+		"temper": "Stubborn",
+		"desc": "Something stubborn is in here.",
+		"play": "Stands in front and soaks the hits."
+	}
+}

@@ -1,0 +1,123 @@
+{
+	"grammar": 1,
+	"id": "moundvark",
+	"name": "Moundvark",
+	"animals": [
+		"Aardvark",
+		"Termite mound"
+	],
+	"theme": "swarm",
+	"flavor": "An aardvark whose back is a living termite mound. Its tenants defend it fiercely, and you too while you ride.",
+	"colors": {
+		"body": "#a07a5a",
+		"belly": "#e0c8a8",
+		"glow": "#ffe680"
+	},
+	"look": {
+		"ears": "bolt",
+		"body": "boulder",
+		"tail": "stub",
+		"feet": "stumps",
+		"aura": "spores"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.6,
+		"mass": 2.0,
+		"gait": {
+			"hop_rate": 4.5,
+			"hop_height": 0.05,
+			"pace": 0.8
+		}
+	},
+	"stats": {
+		"kin_hp": 12,
+		"kin_damage": 5,
+		"kin_speed": 2,
+		"owner_armor": 1
+	},
+	"personality": {
+		"bravery": 0.6,
+		"loyalty": 0.7,
+		"temper": 0.3,
+		"curiosity": 0.8
+	},
+	"ai": {
+		"aggression": 0.55,
+		"loyalty": 0.8,
+		"caution": 0.2,
+		"role": "tank"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Living Mound",
+		"passives": [
+			{
+				"stat": "damage_reduction",
+				"amount": 0.15
+			},
+			{
+				"stat": "knockback_resist",
+				"amount": 0.5
+			}
+		],
+		"mount": {
+			"speed": 0.9,
+			"jump": 0.85,
+			"turn": 0.6
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "slow",
+				"duration": 1.0
+			}
+		]
+	},
+	"active": "hive_swarm",
+	"auto": "rock_guard",
+	"merge": "hive_crown",
+	"evolution": {
+		"root": "Mound",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "nosy and rambling",
+		"syllables": [
+			"Mound",
+			"vark"
+		]
+	},
+	"egg": {
+		"name": "Moundvark Egg",
+		"temper": "Nosy",
+		"desc": "Something nosy is in here.",
+		"play": "Stands in front and soaks the hits."
+	}
+}

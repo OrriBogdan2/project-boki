@@ -1,0 +1,123 @@
+{
+	"grammar": 1,
+	"id": "squalltross",
+	"name": "Squalltross",
+	"animals": [
+		"Albatross",
+		"Squall cloud"
+	],
+	"theme": "tempest",
+	"flavor": "A young albatross that rides its own little squall. It hardly flaps; the wind does what it asks.",
+	"colors": {
+		"body": "#e8ecf0",
+		"belly": "#ffffff",
+		"glow": "#9ff4ff",
+		"wing": "#4a5868"
+	},
+	"look": {
+		"ears": "wisp",
+		"body": "drop",
+		"tail": "wisp",
+		"feet": "none",
+		"aura": "wind"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_hp": 3,
+		"kin_damage": 3,
+		"kin_speed": 12,
+		"owner_move_speed": 2
+	},
+	"personality": {
+		"bravery": 0.75,
+		"loyalty": 0.55,
+		"temper": 0.3,
+		"curiosity": 0.8
+	},
+	"ai": {
+		"aggression": 0.7,
+		"loyalty": 0.45,
+		"caution": 0.3,
+		"role": "skirmisher"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Tailwind",
+		"passives": [
+			{
+				"stat": "fire_rate",
+				"amount": 0.15
+			},
+			{
+				"stat": "reload",
+				"amount": 0.15
+			},
+			{
+				"stat": "glide",
+				"amount": 0.15
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "push",
+				"strength": 10
+			}
+		]
+	},
+	"active": "gale_lance",
+	"auto": "updraft",
+	"merge": "stormwing",
+	"evolution": {
+		"root": "Squall",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "easygoing, drawling sailor",
+		"syllables": [
+			"Squall",
+			"tross"
+		]
+	},
+	"egg": {
+		"name": "Squalltross Egg",
+		"temper": "Wandering",
+		"desc": "Something wandering is in here.",
+		"play": "Fast, darting and always on the move."
+	}
+}
