@@ -376,9 +376,12 @@ func _own_look(a: String) -> void:
 		for si in mesh.get_surface_count():
 			var src := mesh.surface_get_material(si)
 			var slot := String(src.resource_name).get_slice("-", 0) if src else ""
+			var tag := String(src.resource_name).get_slice("-", 1) if src else ""
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
-			for k in (slots.get(slot, {}) as Dictionary):
-				var want: Variant = WardenGlb._param(slots[slot][k])
+			# (a "<slot>-<tag>" entry goes on after its slot's)
+			var want_all: Dictionary = (slots.get(slot, {}) as Dictionary).merged(slots.get(slot + "-" + tag, {}), true)
+			for k in want_all:
+				var want: Variant = WardenGlb._param(want_all[k])
 				var got: Variant = sm.get_shader_parameter(k)
 				seen += 1
 				var same: bool = got.is_equal_approx(want) if want is Color else is_equal_approx(float(got),

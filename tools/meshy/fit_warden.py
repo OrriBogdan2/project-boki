@@ -605,7 +605,8 @@ def project(ob, img, pj):
             smp = (b(y0_, x0_) * (1 - ax_) + b(y0_, x0_ + 1) * ax_) * (1 - ay_) + \
                 (b(y0_ + 1, x0_) * (1 - ax_) + b(y0_ + 1, x0_ + 1) * ax_) * ay_
             score = smp[:, 1] - np.maximum(smp[:, 0], smp[:, 2])
-            on = score > float(line.get("threshold", 0.12))
+            # (`max`: brighter greens are a trim, not a tattoo: Vex's crop-top piping beside her chest circuits)
+            on = (score > float(line.get("threshold", 0.12))) & (score < float(line.get("max", 9.0)))
             if on.any():
                 dst[ty[on], tx[on], :3] = lcol
                 painted += 1
@@ -1710,6 +1711,10 @@ def touch_up(ob, img, rules):
                     return False
             return True
         m = face_mask(ob, img, pick)
+        if r["mode"] == "fill":
+            n_bad = _fill_texels(px, m, r["fill_hsv"], int(r.get("iterations", 80)), col)
+            log("touch-up fill %s: %d of %d texels" % (r.get("name", ""), n_bad, int(m.sum())))
+            continue
         rgb = px[m, :3]
         val = rgb.max(axis=1, keepdims=True) / max(float(col.max()), 1e-3)
         if r["mode"] == "warm":
@@ -1726,6 +1731,32 @@ def touch_up(ob, img, rules):
         px[m, :3] = out
         log("touch-up %s %s: %d texels" % (r["mode"], r["colour"], int(m.sum())))
     img.pixels = px.ravel()
+
+
+def _fill_texels(px, m, q, iterations, col):
+    """Texels of a colour (hsv [h0, h1, s0, s1, v0, v1]) inside the picked faces' texels `m`, filled from the
+    other texels of `m` around them, a ring at a time (Vex's chest: Meshy's blurry tattoos on the skin): the skin
+    closes over them in its own shading, no flat patch. Texels no ring reaches take `col`. Returns their count."""
+    hq, sq, vq = _hsv_px(px[..., :3])
+    hue_ok = (hq >= q[0]) & (hq <= q[1]) if q[0] <= q[1] else (hq >= q[0]) | (hq <= q[1])
+    bad = m & hue_ok & (sq >= q[2]) & (sq <= q[3]) & (vq >= q[4]) & (vq <= q[5])
+    known = m & ~bad
+    acc = px[..., :3].copy()
+    for _i in range(iterations):
+        tot = np.zeros_like(acc)
+        cnt = np.zeros(acc.shape[:2], np.float32)
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            kn = np.roll(known, (dy, dx), (0, 1))
+            tot += np.roll(acc, (dy, dx), (0, 1)) * kn[..., None]
+            cnt += kn
+        new = bad & ~known & (cnt > 0)
+        if not new.any():
+            break
+        acc[new] = tot[new] / cnt[new][:, None]
+        known |= new
+    px[bad & known, :3] = acc[bad & known]
+    px[bad & ~known, :3] = col
+    return int(bad.sum())
 
 
 def _hue(q):
@@ -2456,20 +2487,24 @@ def face_plate(ob, ps, warp_spec):
     tree = BVHTree.FromPolygons([v.co.copy() for v in ob.data.vertices],
                                 [p.vertices[:] for p in ob.data.polygons if names[p.material_index].startswith(keep)])
     depth, edge = float(ps.get("depth", 0.004)), float(ps.get("edge", 18.0))
+    dome = _plate_dome(ob, ps.get("dome"), gc, gr, inside, xz, tree)
     vid = -np.ones(gc.shape, int)
     verts, uvs = [], []
     for i in range(gc.shape[0]):
         for j in range(gc.shape[1]):
             if not inside[i, j]:
                 continue
-            x, z = xz[i, j]
-            hit = tree.ray_cast(Vector((x, -1.0, z)), Vector((0.0, 1.0, 0.0)), 2.0)
-            if hit[0] is None:
-                continue
+            if dome is not None and dome["d"][i, j] < dome["r_out"]:
+                p, n = dome["at"](i, j)
+            else:
+                x, z = xz[i, j]
+                hit = tree.ray_cast(Vector((x, -1.0, z)), Vector((0.0, 1.0, 0.0)), 2.0)
+                if hit[0] is None:
+                    continue
+                p, n = hit[0], (Vector(hit[1]) if hit[1].y < 0 else -Vector(hit[1]))
             k = min(1.0, dist[i, j] / edge)
             k = k * k * (3.0 - 2.0 * k)
-            n = Vector(hit[1]) if hit[1].y < 0 else -Vector(hit[1])
-            verts.append(hit[0] + n * (0.0006 + depth * k))
+            verts.append(p + n * (0.0006 + depth * k))
             uvs.append((gc[i, j] / aw, 1.0 - gr[i, j] / ah))
             vid[i, j] = len(verts) - 1
     faces, glowing = [], []
@@ -2513,6 +2548,90 @@ def face_plate(ob, ps, warp_spec):
     log("face plate: %d faces from %d outline points, %d glowing" % (len(faces), len(poly), sum(glowing)))
 
 
+def _plate_dome(ob, dm, gc, gr, inside, xz, tree):
+    """The lens a plate sheet draws, as a smooth dome (Vex r3f): Meshy sculpted a horn under it, which the decal
+    draped into a green spike. Inside `r_out` px of the lens's centre the decal lies on the plane of the face
+    just around the horn (fitted robustly to the hits `fit_skip`..`fit_out` px from the centre), bulging `height`
+    m inside `r` px and blending back onto the face over the last `band` px; the scan's faces standing in front of
+    that plane near the lens's axis (the horn) go, under the dome. (A wide fit fails: across the plate the face
+    turns 5 cm away toward the temple, and rays through the bangs hit the back of the head.)"""
+    if not dm:
+        return None
+    dc, dr = (float(v) for v in dm["centre"])
+    r_in, r_out = float(dm["r"]), float(dm["r_out"])
+    skip, f_out, band = float(dm.get("fit_skip", 85)), float(dm.get("fit_out", 115)), float(dm.get("band", 25))
+    dpx = np.hypot(gc - dc, gr - dr)
+    hits = {}
+    for i, j in zip(*np.nonzero(inside & (dpx <= max(r_out, f_out)))):
+        x, z = xz[i, j]
+        hit = tree.ray_cast(Vector((x, -1.0, z)), Vector((0.0, 1.0, 0.0)), 2.0)
+        if hit[0] is not None:
+            hits[(i, j)] = (np.array(hit[0][:]), np.array((hit[1] if hit[1].y < 0 else -hit[1])[:]))
+    pts = np.array([q for ij, (q, _n) in hits.items() if skip <= dpx[ij] <= f_out])
+    if len(pts) < 8:
+        log("plate dome: only %d hits to fit, no dome" % len(pts))
+        return None
+    keep = np.abs(pts[:, 1] - np.median(pts[:, 1])) < 0.02     # (rays past the face: the back of the head)
+    for _r in range(4):
+        pc = pts[keep].mean(axis=0)
+        pn = np.linalg.svd(pts[keep] - pc)[2][2]
+        res = (pts - pc) @ pn
+        mad = float(np.median(np.abs(res[keep]))) * 1.48
+        keep = np.abs(res) < max(2.5 * mad, 0.0015)
+    pn = pn if pn[1] < 0 else -pn          # (toward the viewer, -Y)
+    rms = float(np.sqrt(np.mean(((pts[keep] - pc) @ pn) ** 2)))
+
+    def on_plane(x, z):
+        return np.array([x, pc[1] - (pn[0] * (x - pc[0]) + pn[2] * (z - pc[2])) / pn[1], z])
+    ci = np.unravel_index(int(np.argmin(np.where(inside, dpx, 1e9))), dpx.shape)
+    c3 = on_plane(*xz[ci])
+    # the horn: hits inside the fit's ring standing more than `stand` m in front of the plane; the cut its width
+    stand, top, lat = float(dm.get("stand", 0.0025)), 0.0, []
+    for ij, (q, _n) in hits.items():
+        if dpx[ij] >= skip:
+            continue
+        a = float((q - c3) @ pn)
+        top = max(top, a)
+        if a > stand:
+            d = q - c3
+            lat.append(float(np.linalg.norm(d - pn * a)))
+    r_cut = min(float(dm.get("cut_max", 0.016)), max(lat) + 0.002) if lat else 0.0
+    n_cut = 0
+    if r_cut > 0.0:
+        bm = bmesh.new()
+        bm.from_mesh(ob.data)
+        drop = []
+        for f in bm.faces:
+            d = np.array(f.calc_center_median()[:]) - c3
+            a = float(d @ pn)
+            if a > -float(dm.get("cut_back", 0.0015)) and np.linalg.norm(d - pn * a) < r_cut:
+                drop.append(f)
+        n_cut = len(drop)
+        bmesh.ops.delete(bm, geom=drop, context="FACES")
+        bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+        bm.to_mesh(ob.data)
+        bm.free()
+    height = float(dm.get("height", 0.003))
+    log("plate dome: plane on %d of %d hits (rms %.2f mm); the horn stood %.1f mm, %.1f mm wide: %d faces cut"
+        % (int(keep.sum()), len(pts), rms * 1000, top * 1000, r_cut * 2000, n_cut))
+
+    def at(i, j):
+        x, z = xz[i, j]
+        p, n = on_plane(x, z), pn.copy()
+        t = min(1.0, dpx[i, j] / r_in)
+        p = p + n * height * max(0.0, 1.0 - t * t)
+        h = hits.get((i, j))
+        w = (dpx[i, j] - (r_out - band)) / band
+        if h is not None and w > 0.0 and abs(float((h[0] - c3) @ pn)) < 0.012:
+            w = min(1.0, w)
+            w = w * w * (3.0 - 2.0 * w)
+            p = p * (1.0 - w) + h[0] * w
+            n = n * (1.0 - w) + h[1] * w
+            n = n / np.linalg.norm(n)
+        return Vector(p), Vector(n)
+    return {"d": dpx, "r_out": r_out, "at": at}
+
+
 def _pts_in_poly(pts, poly):
     """Which points (n x 2) are inside a polygon (even-odd rule)."""
     x, y = pts[:, 0] + 1e-6, pts[:, 1] + 1e-6
@@ -2534,7 +2653,14 @@ def reslot(ob, img, rs):
     px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
     uv = ob.data.uv_layers.active.data
     names = [m.name for m in ob.data.materials]
-    to = next(i for i, n in enumerate(names) if n.startswith(rs["to"] + "-"))
+    to = next((i for i, n in enumerate(names) if n.startswith(rs["to"] + "-")), None)
+    if to is None:
+        # (a slot no rule gave, e.g. brass split off the metal: the source slot's material, same atlas)
+        src = next(m for m in ob.data.materials if m.name.startswith(rs["from"] + "-"))
+        m = src.copy()
+        m.name = rs["to"] + "-" + src.name.split("-", 1)[1]
+        ob.data.materials.append(m)
+        to = len(ob.data.materials) - 1
     inf = float("inf")
     b = [(-inf if x is None else x) if i % 2 == 0 else (inf if x is None else x) for i, x in enumerate(rs["box"])]
     q = rs["hsv"]
