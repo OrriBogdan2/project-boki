@@ -8,7 +8,7 @@ extends RefCounted
 
 const DIR := "res://art/wardens"
 ## Each Warden's art name, as in docs/art/gen/wardens/<name>_turnaround.png: the folder and file its .glb has.
-const ART := {"bulwark": "bjorn", "archer": "pin", "juggernaut": "zedran", "gunslinger": "vex", "ostra": "ostra",
+const ART := {"bulwark": "breaker", "archer": "pin", "juggernaut": "zedran", "gunslinger": "vex", "ostra": "ostra",
 	"mage": "vireo", "dolm": "tarek", "thief": "sable", "rimewright": "claire", "ashwick": "cinder",
 	"tender": "moosh", "dredge": "dredge"}
 ## Armature bone -> the rig node it follows (paths under the model root).

@@ -9,9 +9,9 @@
 	"body": {
 		"size": 1.02,
 		"build": 1.18,
-		"head": 0.75,
-		"legs": 1.0,
-		"neck": 0.08
+		"head": 0.42,
+		"legs": 1.3,
+		"neck": 0.1
 	},
 	"plate_offset": 2.6,
 	"fantasy": "The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot.",

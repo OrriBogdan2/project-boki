@@ -1,0 +1,224 @@
+{
+ "body_glb": "~/meshy/breaker/bake/low.glb",
+ "rig": "art/wardens/src/breaker_rig.json",
+ "out": "art/wardens/breaker/breaker.glb",
+ "blend": "~/meshy/breaker/fit.blend",
+ "turn": 180,
+ "max_tris": 36000,
+ "floater_verts": 8,
+ "snap_r": 0.045,
+ "scale_joints": [
+  "hip.L",
+  "shoulder.L"
+ ],
+ "snap_y": false,
+ "joints": {
+  "crown": [
+   0.0,
+   -0.16,
+   0.94
+  ],
+  "neck": [
+   0.0,
+   -0.17,
+   0.74
+  ],
+  "shoulder.L": [
+   0.42,
+   -0.04,
+   0.42
+  ],
+  "elbow.L": [
+   0.51,
+   -0.08,
+   0.18
+  ],
+  "hand.L": [
+   0.524,
+   -0.15,
+   -0.12
+  ],
+  "fingers.L": [
+   0.52,
+   -0.18,
+   -0.3
+  ],
+  "hip.L": [
+   0.17,
+   -0.04,
+   -0.18
+  ],
+  "knee.L": [
+   0.25,
+   -0.02,
+   -0.56
+  ],
+  "ankle.L": [
+   0.26,
+   0.0,
+   -0.86
+  ],
+  "shoulder.R": [
+   -0.42,
+   -0.04,
+   0.42
+  ],
+  "elbow.R": [
+   -0.51,
+   -0.08,
+   0.18
+  ],
+  "hand.R": [
+   -0.524,
+   -0.15,
+   -0.12
+  ],
+  "fingers.R": [
+   -0.52,
+   -0.18,
+   -0.3
+  ],
+  "hip.R": [
+   -0.17,
+   -0.04,
+   -0.18
+  ],
+  "knee.R": [
+   -0.25,
+   -0.02,
+   -0.56
+  ],
+  "ankle.R": [
+   -0.26,
+   0.0,
+   -0.86
+  ]
+ },
+ "chunk": {
+  "head": 1.12,
+  "hand": 1.1,
+  "girth": 1.0
+ },
+ "lift": [
+  0.92,
+  1.04,
+  1.04
+ ],
+ "glow_min": [
+  2.0,
+  2.0,
+  -1.0
+ ],
+ "normal_smooth": 8,
+ "pad": 6,
+ "cap_holes": true,
+ "cap_flat": true,
+ "ink_room": 0.02,
+ "fit_weights": true,
+ "slot_vote": 4,
+ "slot_rules": [
+  {
+   "slot": "hair",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    0.35,
+    null
+   ],
+   "hsv": [
+    0.94,
+    0.04,
+    0.45,
+    1.0,
+    0.3,
+    1.0
+   ]
+  },
+  {
+   "slot": "metal",
+   "hsv": [
+    0.09,
+    0.17,
+    0.35,
+    1.0,
+    0.55,
+    1.0
+   ],
+   "box": [
+    -0.2,
+    0.2,
+    null,
+    null,
+    0.35,
+    0.65
+   ]
+  },
+  {
+   "slot": "skin",
+   "hsv": [
+    0.5,
+    0.7,
+    0.1,
+    0.45,
+    0.45,
+    1.0
+   ]
+  },
+  {
+   "slot": "metal",
+   "hsv": [
+    null,
+    null,
+    0.0,
+    0.12,
+    0.38,
+    1.0
+   ]
+  },
+  {
+   "slot": "fur",
+   "hsv": [
+    0.07,
+    0.16,
+    0.15,
+    0.5,
+    0.45,
+    1.0
+   ]
+  },
+  {
+   "slot": "leather",
+   "hsv": [
+    0.0,
+    0.12,
+    0.25,
+    0.85,
+    0.15,
+    0.6
+   ]
+  },
+  {
+   "slot": "cloth"
+  }
+ ],
+ "parts": {
+  "hammer": {
+   "head_z": -0.62,
+   "block": [
+    0.19,
+    0.125,
+    0.13
+   ]
+  },
+  "prow": {
+   "hull": [
+    0.42,
+    -0.62,
+    0.13
+   ],
+   "half_width": 0.25
+  }
+ }
+}
