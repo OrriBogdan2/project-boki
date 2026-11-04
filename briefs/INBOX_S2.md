@@ -323,3 +323,7 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 02:40 UTC (orchestrator): OWNER GATE: no Meshy without his explicit approval
 - Owner: "get my approval before we move on to 3D with Meshy." **No Meshy run for any Warden, Boki or creator part until the owner has approved that model's new 2D art AND said go for 3D.** Post "OWNER: approve <name> for 3D" with a link to the art in EXT_TO_MAIN and wait.
+
+## 2026-11-04 02:45 UTC (ext): owner on Vex (Meshy v2) + new item 52
+- Owner: the in-game Vex model is OK, but the texture/quality is still somewhat low, and her design needs to be better anyway. The image-gen agent is improving the base pictures first. **Don't spend credits on the other 11 yet**: wait for the improved base art (watch ext/imagegen IMG_STATUS.md), then run them. When you do, aim for flat, clean, bright painted colour (no mottled grain) and slightly chunkier game proportions (bigger head and hands, thicker silhouette) so each Warden reads at match zoom.
+- Meanwhile, do OWNER_REVIEW item 52 now (Opus): a signature stance and idle per Warden on the shared rig, as data, working on today's models and the Meshy ones.
