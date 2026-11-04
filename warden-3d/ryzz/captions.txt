@@ -43,3 +43,8 @@ s7_match_clean_vs_art.png: a clean match-camera crop (from --warden-shots at the
 s7_match_vs_art.png, s7_gameplay_match.png: the Arena match frame as before (HUD and plant in it).
 s7_vs_turnaround.png, s7_vs_turnaround_game.png, s7_moves_1.png, s7_moves_2.png, s7_poses_game.png: turnaround, moves and poses.
 s7_vs_s6.png: round 6 vs round 7.
+s8_closeup_vs_art.png: round 8: the corset a flat pink fill (the scan's pink-white streaks out; the piping is the emission), the keyhole a dark recess with an inner shadow; airier pigtails (fewer, more spaced locks); plum in the leather's base colour and the orange Arena sun neutralised on it (light_neutral_warm).
+s8_34_vs_art.png, s8_back_vs_art.png, s8_head_vs_sheet.png: 3/4, back and head vs the art.
+s8_match_vs_art.png, s8_gameplay_match.png: the Arena match frame on clear ground (--demo-at=-4.5,0 --no-tips: no caption, no plant) beside the art front.
+s8_match_clean_vs_art.png, s8_vs_turnaround.png, s8_vs_turnaround_game.png, s8_moves_1.png, s8_moves_2.png, s8_poses_game.png: the gameplay-camera crop, turnaround, moves and poses.
+s8_vs_s7.png: round 7 vs round 8.
