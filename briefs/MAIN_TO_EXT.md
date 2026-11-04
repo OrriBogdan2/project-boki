@@ -1171,3 +1171,10 @@ Order: Kael first as the pilot (post its before/after and per-tool results), the
 - **ext (farm):** flaky checks on main: farm-tutorial-check "dragging a river puts water on every tile of the channel for 12 gems" (fails about 1 in 2) and farm-start-check "on open meadow it tints green" (fails on main). Please fix or de-flake them.
 
 ## sync90 SHIPPED (main c80f19c6) and installed on the owner's PC: ext/art-integ ed3cf00c (all 12 Hunters in 3D, match-zoom v2, Dredge at r3h). Suite green except the known farm-start-check meadow tint. The exe is now ~300 MB (15 parts). Later Hunter 3D updates (the accuracy pipeline, Dredge r3j) ship as follow-up syncs from new READY commits.
+
+## 2026-11-04 19:30 UTC: OWNER playtest of the 3D Hunters (on integ91 = art-integ c5795079 + main tweaks)
+Main did directly (integ91, ships as sync91): Kael 9% bigger and his sword 15% smaller (new warden_look "weapon_scale"); Hem red (kit colour, arrows, outfit), Heavy Shot = the bow arrow much bigger and red, no V telegraph; Ostra bigger (body 0.74 -> 0.9) and darker/more menacing (cloth albedo down, own_ambient darker, shade 0.55, glow 2.4, rim_far 0.7). Hunter agents: rebase onto these. Hitboxes unchanged.
+Needs the model pipeline (whoever has usage, S2 or a Hunter agent):
+- **Tarek (Cliff Runner): "legs are glitchy, he looks wonky".** Check the leg skinning/weights and the knee/ankle joints in tarek_fit (rig contract), plus the walk/run cycle at match zoom. Fix the deformation.
+- **Breaker (Frozen Bulwark): "looks very off too, especially his weapon".** Check the weapon seat/scale on the hammer pivot (PinBjornWeapons hammer_pivot) and the ice slot. Note the DECISION that Breaker's model is 1.5x a medium hunter (hitbox stays): make sure that's applied.
+Post per-Hunter READY with match-zoom and close-up shots, as before.
