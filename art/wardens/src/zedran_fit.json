@@ -1,0 +1,290 @@
+{
+ "body_glb": "~/meshy/zedran/r2/run1/glb.glb",
+ "rig": "art/wardens/src/zedran_rig.json",
+ "out": "art/wardens/zedran/zedran.glb",
+ "blend": "~/meshy/zedran/r2/fit.blend",
+ "turn": 180,
+ "max_tris": 15000,
+ "floater_verts": 40,
+ "snap_r": 0.045,
+ "joints": {
+  "shoulder.R": [
+   -0.27,
+   0,
+   0.44
+  ],
+  "shoulder.L": [
+   0.22,
+   0,
+   0.47
+  ],
+  "elbow.R": [
+   -0.39,
+   0,
+   0.15
+  ],
+  "elbow.L": [
+   0.32,
+   0,
+   0.18
+  ],
+  "hand.R": [
+   -0.44,
+   0,
+   -0.03
+  ],
+  "hand.L": [
+   0.35,
+   0,
+   0.0
+  ],
+  "fingers.R": [
+   -0.45,
+   0,
+   -0.12
+  ],
+  "fingers.L": [
+   0.34,
+   0,
+   -0.09
+  ],
+  "hip.R": [
+   -0.18,
+   0,
+   -0.16
+  ],
+  "hip.L": [
+   0.08,
+   0,
+   -0.16
+  ],
+  "knee.R": [
+   -0.244,
+   0,
+   -0.45
+  ],
+  "knee.L": [
+   0.13,
+   0,
+   -0.444
+  ],
+  "ankle.R": [
+   -0.24,
+   0,
+   -0.84
+  ],
+  "ankle.L": [
+   0.16,
+   0,
+   -0.84
+  ],
+  "neck": [
+   -0.06,
+   0,
+   0.65
+  ],
+  "crown": [
+   -0.06,
+   0,
+   0.85
+  ]
+ },
+ "rigid": [
+  {
+   "bone": "hand.L",
+   "box": [
+    0.205,
+    0.6,
+    -0.4,
+    0.4,
+    -0.25,
+    -0.02
+   ]
+  },
+  {
+   "bone": "hand.L",
+   "box": [
+    0.225,
+    0.6,
+    -0.4,
+    0.4,
+    -0.9,
+    -0.25
+   ]
+  }
+ ],
+ "chunk": {
+  "head": 1.12,
+  "hand": 1.2,
+  "hands": [
+   "hand.L",
+   "hand.R"
+  ],
+  "girth": 1.06
+ },
+ "palette_from": "~/meshy/zedran/r2/prep/view0.png",
+ "snap": 0.5,
+ "lift": [
+  0.85,
+  1.04,
+  [
+   1.04,
+   1.0,
+   0.96
+  ]
+ ],
+ "project_affine": [
+  {
+   "image": "~/meshy/zedran/r2/prep/head_portrait.png",
+   "pts_img": [
+    [
+     430,
+     582
+    ],
+    [
+     611,
+     557
+    ],
+    [
+     505,
+     732
+    ]
+   ],
+   "pts_mesh": [
+    [
+     -0.0944,
+     0.7897
+    ],
+    [
+     -0.0194,
+     0.7897
+    ],
+    [
+     -0.0553,
+     0.7138
+    ]
+   ],
+   "box": [
+    -0.12,
+    0.02,
+    0.665,
+    0.82
+   ],
+   "facing": 0.6,
+   "cool_below_x": -0.065
+  }
+ ],
+ "palette": [
+  [
+   "skin",
+   "3a2b29"
+  ],
+  [
+   "skin",
+   "473735"
+  ],
+  [
+   "skin",
+   "574543"
+  ],
+  [
+   "skin",
+   "2e2020"
+  ],
+  [
+   "leather",
+   "5f3929"
+  ],
+  [
+   "leather",
+   "4d2a1d"
+  ],
+  [
+   "leather",
+   "251615"
+  ],
+  [
+   "leather",
+   "3d1810"
+  ],
+  [
+   "metal",
+   "9c663a"
+  ],
+  [
+   "metal",
+   "7c4e31"
+  ],
+  [
+   "metal",
+   "c87839"
+  ],
+  [
+   "metal",
+   "dba053"
+  ],
+  [
+   "metal",
+   "f6cf74"
+  ],
+  [
+   "metal",
+   "dbc9bb"
+  ],
+  [
+   "metal",
+   "90857f"
+  ],
+  [
+   "metal",
+   "6d5f5b"
+  ],
+  [
+   "cloth",
+   "7c2723"
+  ],
+  [
+   "cloth",
+   "56171c"
+  ]
+ ],
+ "glow_min": [
+  2.0,
+  2.0,
+  -1.0
+ ],
+ "glow_hot": [
+  0.75,
+  0.38
+ ],
+ "blade": {
+  "image": "~/meshy/zedran/r2/prep/sword.png",
+  "pommel": [
+   64.3,
+   182.1
+  ],
+  "grip": [
+   369.6,
+   367.5
+  ],
+  "fuller": [
+   589,
+   536
+  ],
+  "len": 0.8,
+  "thick": 0.035,
+  "step": 3
+ },
+ "normal_smooth": 6,
+ "pad": 6,
+ "glow_boxes": [
+  [
+   -0.6,
+   -0.3,
+   -0.4,
+   0.4,
+   -0.16,
+   0.33
+  ]
+ ]
+}

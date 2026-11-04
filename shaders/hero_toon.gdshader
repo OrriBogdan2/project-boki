@@ -22,6 +22,9 @@ uniform vec4 flash_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float rim_amount = 0.35;
 uniform vec4 rim_color : source_color = vec4(1.0, 0.96, 0.88, 1.0);
 uniform float glow = 0.0;
+// a painted atlas's glow slot (WardenGlb): only its hot texels glow (orange cracks, a burning eye), not the
+// dark rock painted between them
+uniform bool glow_key = false;
 uniform float shade = 0.42;
 uniform bool no_fog = false;
 uniform vec4 shadow_tint : source_color = vec4(0.66, 0.62, 0.9, 1.0);   // shadows lean cool and violet
@@ -65,7 +68,14 @@ void vertex() {
 
 void fragment() {
 	vec3 c = albedo.rgb;
-	if (use_tex) { c *= texture(albedo_tex, UV).rgb; }
+	float heat = 1.0;
+	if (use_tex) {
+		vec3 tx = texture(albedo_tex, UV).rgb;
+		c *= tx;
+		if (glow_key) {
+			heat = smoothstep(0.55, 0.75, tx.r) * smoothstep(0.26, 0.4, tx.r - tx.g) * smoothstep(-0.04, 0.02, tx.g - tx.b);
+		}
+	}
 	if (use_vertex_color || vertex_ao) { c *= COLOR.rgb; }
 	// hand-painted variation: soft blotches of slightly lighter and darker paint
 	float n = vnoise(lpos.xz * 7.0 + lpos.y * 4.0) * 0.6 + vnoise(lpos.xy * 15.0 + 3.1) * 0.4;
@@ -116,7 +126,7 @@ void fragment() {
 	float fr = smoothstep(0.62, 0.84, 1.0 - nv) * mix(0.55, 1.0, side) * (1.0 - fog);
 	vec3 fcol = mix(fres_color.rgb, min(c * 1.7 + vec3(0.12), vec3(1.4)), fres_tint);
 	float up = smoothstep(0.35, 0.95, wnorm.y);
-	EMISSION = flash_color.rgb * flash * 0.9 + c * glow + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
+	EMISSION = flash_color.rgb * flash * 0.9 + c * glow * heat + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
 		+ fcol * fr * fres * 0.55 + c * up * top_light * 0.18 * (1.0 - fog);
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;

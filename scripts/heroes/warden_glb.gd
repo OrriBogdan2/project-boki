@@ -198,6 +198,8 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 				m.set_shader_parameter("self_shadow", 0.0)
 			if slot == "glow":
 				m.set_shader_parameter("glow", GLOW)
+				# ("glow-<texture>-hot": only the atlas's hot texels glow, keyed per texel; Zedran's magma)
+				m.set_shader_parameter("glow_key", String(src.resource_name).ends_with("-hot") if src else false)
 			(mi as MeshInstance3D).set_surface_override_material(si, m)
 			out.append(m)
 	return out

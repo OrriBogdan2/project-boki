@@ -41,6 +41,7 @@ FIT_BONES = [  # bone, head joint, tail joint, parent
     ("thigh.L", "hip.L", "knee.L", "hips"), ("shin.L", "knee.L", "ankle.L", "thigh.L"),
     ("thigh.R", "hip.R", "knee.R", "hips"), ("shin.R", "knee.R", "ankle.R", "thigh.R"),
 ]
+RIGID = "rigid:"   # a vertex group "rigid:<bone>": those vertices ride that bone alone (Zedran's chain on his hand)
 NO_DEFORM = ["root", "skirt", "scarf", "pauldron.L", "pauldron.R", "cape", "tail", "wings"]
 
 
@@ -231,7 +232,9 @@ def apply_pose(ob, arm):
     for m in list(ob.modifiers):
         if m.type == "ARMATURE":
             bpy.ops.object.modifier_apply(modifier=m.name)
-    ob.vertex_groups.clear()
+    for g in list(ob.vertex_groups):
+        if not g.name.startswith(RIGID):
+            ob.vertex_groups.remove(g)
     mw = ob.matrix_world.copy()
     ob.parent = None
     ob.matrix_world = mw
@@ -250,21 +253,34 @@ def decimate(ob, max_tris):
     log("decimate: %d -> %d tris" % (tris, sum(len(p.vertices) - 2 for p in ob.data.polygons)))
 
 
-def slot_split(ob, img, palette, glow_min, tag):
+def slot_split(ob, img, palette, glow_min, tag, hot=None, glow_boxes=()):
     """Each face onto the toon slot of the palette colour nearest its painted colour; one material per slot and
-    texture, named "<slot>-<tag>" (the loader reads the slot before the dash), all on this piece's texture."""
+    texture, named "<slot>-<tag>" (the loader reads the slot before the dash), all on this piece's texture.
+    hot [r_min, r_minus_g]: a face with any texel that hot (magma cracks, a burning eye) goes on the glow slot,
+    whose shader keys its emission on the same heat per texel (the rock between the cracks stays unlit); so does
+    every face inside a glow box [x0, x1, y0, y1, z0, z1] (Zedran's magma arm, whole)."""
     w, h = img.size
     px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
     uv = ob.data.uv_layers.active.data
     pal = np.array([K.hexcol(c) for _s, c in palette], dtype=np.float32)
     names = [s for s, _c in palette]
-    mats = slot_materials(img, [s for s in K.SLOTS if s != "team"], tag)
+    mats = slot_materials(img, [s for s in K.SLOTS if s != "team"], tag, hot is not None)
     ob.data.materials.clear()
     order = list(mats)
     for s in order:
         ob.data.materials.append(mats[s])
     counts = {}
+    hot_faces = _hot_faces(ob, px, hot) if hot else set()
+    for bx in glow_boxes:
+        for p in ob.data.polygons:
+            c = p.center
+            if bx[0] <= c.x <= bx[1] and bx[2] <= c.y <= bx[3] and bx[4] <= c.z <= bx[5]:
+                hot_faces.add(p.index)
     for p in ob.data.polygons:
+        if p.index in hot_faces:
+            p.material_index = order.index("glow")
+            counts["glow"] = counts.get("glow", 0) + 1
+            continue
         u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
         v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
         c = px[min(h - 1, max(0, int(v * h))), min(w - 1, max(0, int(u * w))), :3]     # (stored sRGB)
@@ -275,6 +291,95 @@ def slot_split(ob, img, palette, glow_min, tag):
         p.material_index = order.index(s)
         counts[s] = counts.get(s, 0) + 1
     log("slots (%s):" % tag, counts)
+
+
+def _hot_faces(ob, px, hot):
+    """The faces whose UV triangles hold a texel at least hot[0] red and hot[1] redder than green (and greener
+    than blue: orange, not the skirt's crimson nor the gold)."""
+    h, w = px.shape[:2]
+    r, g, b = px[..., 0], px[..., 1], px[..., 2]
+    hm = (r >= hot[0]) & (r - g >= hot[1]) & (g >= b)
+    me = ob.data
+    me.calc_loop_triangles()
+    uv = me.uv_layers.active.data
+    out = set()
+    for t in me.loop_triangles:
+        p = np.array([[uv[li].uv.x * w, uv[li].uv.y * h] for li in t.loops])
+        lo = np.maximum(np.floor(p.min(axis=0)).astype(int), 0)
+        hi = np.minimum(np.ceil(p.max(axis=0)).astype(int), [w - 1, h - 1])
+        if (hi < lo).any() or not hm[lo[1]:hi[1] + 1, lo[0]:hi[0] + 1].any():
+            continue
+        xs, ys = np.meshgrid(np.arange(lo[0], hi[0] + 1), np.arange(lo[1], hi[1] + 1))
+        q = np.stack([xs.ravel() + 0.5, ys.ravel() + 0.5], axis=1)
+        a, bb, c = p
+        d = (bb[1] - c[1]) * (a[0] - c[0]) + (c[0] - bb[0]) * (a[1] - c[1])
+        if abs(d) < 1e-12:
+            continue
+        l1 = ((bb[1] - c[1]) * (q[:, 0] - c[0]) + (c[0] - bb[0]) * (q[:, 1] - c[1])) / d
+        l2 = ((c[1] - a[1]) * (q[:, 0] - c[0]) + (a[0] - c[0]) * (q[:, 1] - c[1])) / d
+        inside = (l1 >= -0.05) & (l2 >= -0.05) & (1 - l1 - l2 >= -0.05)
+        if hm[q[inside, 1].astype(int), q[inside, 0].astype(int)].any():
+            out.add(t.polygon_index)
+    log("hot faces: %d" % len(out))
+    return out
+
+
+def project_affine(ob, img, pj):
+    """Paints an image onto the faces turned toward the front inside a box (Meshy frame, front -Y), registered by
+    three points (the eyes and the mouth: pts_img in the image's pixels, pts_mesh as (x, z) on the mesh), an affine
+    map from the mesh's front plane to the image. Texels the image has as its flat grey keep Meshy's paint."""
+    art = bpy.data.images.load(os.path.expanduser(pj["image"]))
+    aw, ah = art.size
+    src = np.array(art.pixels[:], dtype=np.float32).reshape(ah, aw, 4)
+    w, h = img.size
+    dst = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    pm = np.array([[x, z, 1.0] for x, z in pj["pts_mesh"]])
+    pi = np.array(pj["pts_img"], dtype=np.float64)
+    A = np.linalg.solve(pm, pi)                         # [x z 1] @ A = [col row]
+    bg = np.array(pj.get("bg", [0.5, 0.5, 0.5]), dtype=np.float32)
+    me = ob.data
+    me.calc_loop_triangles()
+    uv = me.uv_layers.active.data
+    x0, x1, z0, z1 = pj["box"]
+    painted = 0
+    for t in me.loop_triangles:
+        if -t.normal.y < float(pj["facing"]):
+            continue
+        ps = [me.vertices[i].co for i in t.vertices]
+        if not all(x0 <= p.x <= x1 and z0 <= p.z <= z1 for p in ps):
+            continue
+        uvs = np.array([[uv[li].uv.x * w, uv[li].uv.y * h] for li in t.loops])
+        cr = np.array([[p.x, p.z, 1.0] for p in ps]) @ A
+        lo = np.floor(uvs.min(axis=0)).astype(int)
+        hi = np.ceil(uvs.max(axis=0)).astype(int)
+        xs, ys = np.meshgrid(np.arange(lo[0], hi[0] + 1), np.arange(lo[1], hi[1] + 1))
+        pts = np.stack([xs.ravel() + 0.5, ys.ravel() + 0.5], axis=1)
+        a, b, c = uvs
+        d = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1])
+        if abs(d) < 1e-9:
+            continue
+        l1 = ((b[1] - c[1]) * (pts[:, 0] - c[0]) + (c[0] - b[0]) * (pts[:, 1] - c[1])) / d
+        l2 = ((c[1] - a[1]) * (pts[:, 0] - c[0]) + (a[0] - c[0]) * (pts[:, 1] - c[1])) / d
+        l3 = 1 - l1 - l2
+        inside = (l1 >= -0.01) & (l2 >= -0.01) & (l3 >= -0.01)
+        if not inside.any():
+            continue
+        q = np.outer(l1[inside], cr[0]) + np.outer(l2[inside], cr[1]) + np.outer(l3[inside], cr[2])
+        col = np.clip(q[:, 0].astype(int), 0, aw - 1)
+        row = np.clip(q[:, 1].astype(int), 0, ah - 1)
+        tx = np.clip(pts[inside, 0].astype(int), 0, w - 1)
+        ty = np.clip(pts[inside, 1].astype(int), 0, h - 1)
+        got = src[ah - 1 - row, col]
+        art_px = np.abs(got[:, :3] - bg).sum(axis=1) > 0.06
+        if "cool_below_x" in pj:
+            # (the art's orange rim light on one side of the face is not paint: Meshy's skin stays there)
+            mx = np.outer(l1[inside], [ps[0].x]) + np.outer(l2[inside], [ps[1].x]) + np.outer(l3[inside], [ps[2].x])
+            warm = (got[:, 0] > 0.3) & (got[:, 0] - got[:, 1] > 0.12)
+            art_px &= ~(warm & (mx[:, 0] < float(pj["cool_below_x"])))
+        dst[ty[art_px], tx[art_px]] = got[art_px]
+        painted += 1
+    img.pixels = dst.ravel()
+    log("projected %s onto %d faces" % (os.path.basename(pj["image"]), painted))
 
 
 def project(ob, img, pj):
@@ -540,19 +645,21 @@ def pad(img, ids, steps):
     img.pixels = px.ravel()
 
 
-def lift(img, gamma, gain):
+def lift(img, gamma, gain, tint=None):
     """Meshy's albedo is a shade darker than the painted art and the toon shader darkens again: lift its values
     (a gamma and a gain on the stored colour) so the model reads as light as the turnaround in game."""
     px = np.array(img.pixels[:], dtype=np.float32).reshape(-1, 4)
-    px[:, :3] = np.clip(np.power(px[:, :3], gamma) * gain, 0.0, 1.0)
+    px[:, :3] = np.clip(np.power(px[:, :3], gamma) * gain * np.array(tint or [1.0, 1.0, 1.0], np.float32), 0.0, 1.0)
     img.pixels = px.ravel()
     img.pack()
 
 
-def slot_materials(img, slots, tag):
+def slot_materials(img, slots, tag, hot=False):
+    """One material per slot on this texture, "<slot>-<tag>"; with hot, the glow one is "glow-<tag>-hot" (the game
+    keys its emission on the hot texels only)."""
     out = {}
     for s in slots:
-        m = bpy.data.materials.new("%s-%s" % (s, tag))
+        m = bpy.data.materials.new("%s-%s%s" % (s, tag, "-hot" if hot and s == "glow" else ""))
         m.use_nodes = True
         bsdf = m.node_tree.nodes.get("Principled BSDF")
         tex = m.node_tree.nodes.new("ShaderNodeTexImage")
@@ -668,7 +775,41 @@ def contract_skin(ob, rig):
     for b in arm.data.bones:
         b.use_deform = b.name not in NO_DEFORM
     auto_weights(ob, arm)
+    rigid_weights(ob)
     return arm
+
+
+def mark_rigid(ob, rigids):
+    """Vertex groups "rigid:<bone>" on the vertices inside each box (Meshy frame) of spec["rigid"]."""
+    co = np.array([v.co[:] for v in ob.data.vertices])
+    for r in rigids:
+        x0, x1, y0, y1, z0, z1 = r["box"]
+        sel = np.nonzero((co[:, 0] >= x0) & (co[:, 0] <= x1) & (co[:, 1] >= y0) & (co[:, 1] <= y1) & (co[:, 2] >= z0) & (co[:, 2] <= z1))[0]
+        g = ob.vertex_groups.get(RIGID + r["bone"]) or ob.vertex_groups.new(name=RIGID + r["bone"])
+        g.add([int(i) for i in sel], 1.0, "REPLACE")
+        log("rigid %s: %d verts" % (r["bone"], len(sel)))
+
+
+def rigid_weights(ob):
+    """Every vertex of a "rigid:<bone>" group (at least half in it) takes that bone's weight alone."""
+    rig_groups = [g for g in ob.vertex_groups if g.name.startswith(RIGID)]
+    if not rig_groups:
+        return
+    for rg in rig_groups:
+        bone = rg.name[len(RIGID):]
+        bg = ob.vertex_groups.get(bone) or ob.vertex_groups.new(name=bone)
+        sel = [v.index for v in ob.data.vertices if any(x.group == rg.index and x.weight >= 0.5 for x in v.groups)]
+        for g in ob.vertex_groups:
+            if not g.name.startswith(RIGID) and g != bg:
+                g.remove(sel)
+        bg.add(sel, 1.0, "REPLACE")
+        log("rigid weights %s: %d verts" % (bone, len(sel)))
+
+
+def drop_rigid_groups(ob):
+    for g in list(ob.vertex_groups):
+        if g.name.startswith(RIGID):
+            ob.vertex_groups.remove(g)
 
 
 def weapon(spec, rig):
@@ -802,11 +943,134 @@ def gun_weapon(gun, e, t, rig, ga):
     return gun, spin
 
 
+def art_blade(bs, hot):
+    """A flat blade cut from the art itself (Zedran's greatsword: the side view's sword alone on grey, from
+    zedran_inputs.py): the image's sword pixels become a slab `thick` m thick with the art painted on both faces,
+    in the Gun node's space (Blender: the blade along +Y, the hand's grip at the origin, the spine up +Z, the face
+    the art shows to his right +X), `len` m from the pommel to the blade's end. Its hot texels (the eye and the
+    cracks) put it on the glow slot, keyed per texel by the shader."""
+    art = bpy.data.images.load(os.path.expanduser(bs["image"]))
+    aw, ah = art.size
+    px = np.array(art.pixels[:], dtype=np.float32).reshape(ah, aw, 4)[::-1]          # row 0 = top
+    bg = px[5, 5, :3]
+    mask = np.abs(px[..., :3] - bg).sum(axis=2) > float(bs.get("key", 0.1))
+    st = int(bs.get("step", 3))
+    cells = mask[: ah - ah % st, : aw - aw % st].reshape(ah // st, st, aw // st, st).mean(axis=(1, 3)) > 0.5
+    cells = _solid(cells)
+    pommel, grip = np.array(bs["pommel"], float), np.array(bs["grip"], float)
+    u = (grip - pommel) / np.linalg.norm(grip - pommel)
+    n = np.array([u[1], -u[0]])                              # (up in the picture: the spine's side)
+    ys, xs = np.nonzero(mask)
+    tt = (np.stack([xs, ys], 1) - pommel) @ u
+    k = float(bs["len"]) / (tt.max() - tt.min())
+    bm = bmesh.new()
+    vid = {}
+
+    def vert(i, j):
+        if (i, j) not in vid:
+            x, y = j * st, i * st
+            d = np.array([x, y], float) - grip
+            vid[(i, j)] = bm.verts.new((0.0, float(d @ u) * k, float(d @ n) * k))
+        return vid[(i, j)]
+    for i, j in zip(*np.nonzero(cells)):
+        bm.faces.new((vert(i, j), vert(i + 1, j), vert(i + 1, j + 1), vert(i, j + 1)))
+    # one face per piece; its pixel-stair outline smoothed, then its nearly straight runs merged
+    bmesh.ops.dissolve_faces(bm, faces=bm.faces[:], use_verts=True)
+    edge_v = [v for v in bm.verts if any(e.is_boundary for e in v.link_edges)]
+    for _it in range(int(bs.get("smooth", 4))):
+        new = {}
+        for v in edge_v:
+            nb = [e.other_vert(v) for e in v.link_edges if e.is_boundary]
+            if len(nb) == 2:
+                new[v] = (v.co * 2 + nb[0].co + nb[1].co) / 4
+        for v, c in new.items():
+            v.co = c
+    bmesh.ops.dissolve_limit(bm, angle_limit=float(bs.get("straight", 0.12)), verts=bm.verts[:], edges=[])
+    bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method="BEAUTY", ngon_method="BEAUTY")
+    uvl = bm.loops.layers.uv.new("UVMap")
+    for f in bm.faces:
+        for lp in f.loops:
+            co = lp.vert.co
+            # back from the blade's frame to the picture's pixels
+            p = grip + (co.y / k) * u + (co.z / k) * n
+            lp[uvl].uv = (p[0] / aw, 1.0 - p[1] / ah)
+    me = bpy.data.meshes.new("weapon")
+    bm.to_mesh(me)
+    bm.free()
+    w = bpy.data.objects.new("weapon", me)
+    bpy.context.scene.collection.objects.link(w)
+    sol = w.modifiers.new("thick", "SOLIDIFY")
+    sol.thickness = float(bs["thick"])
+    sol.offset = 0.0
+    sol.use_rim = True
+    bpy.context.view_layer.objects.active = w
+    bpy.ops.object.modifier_apply(modifier=sol.name)
+    # the slab's rim: one texel of the art's own edge colour (a stretched texture there reads as streaks)
+    ring = mask & ~np.roll(mask, 4, 0) | mask & ~np.roll(mask, -4, 0) | mask & ~np.roll(mask, 4, 1) | mask & ~np.roll(mask, -4, 1)
+    ry, rx = np.nonzero(ring)
+    rc = px[ry, rx, :3]
+    pick = int(np.argmin(np.abs(rc - np.median(rc, axis=0)).sum(axis=1)))
+    rim_uv = ((rx[pick] + 0.5) / aw, 1.0 - (ry[pick] + 0.5) / ah)
+    uvd = me.uv_layers.active.data
+    for p in me.polygons:
+        if abs(p.normal.x) < 0.5:
+            for li in p.loop_indices:
+                uvd[li].uv = rim_uv
+    art.pack()
+    mats = slot_materials(art, ["glow"], "sword", hot is not None)
+    me.materials.append(mats["glow"])
+    co = np.array([v.co[:] for v in me.vertices])
+    tip = Vector((0.0, float(co[:, 1].max()), float(np.median(co[co[:, 1] > co[:, 1].max() - 0.05][:, 2]))))
+    K_anchor_child(w, "anchor_weapon_tip", tip)
+    if "fuller" in bs:
+        d = np.array(bs["fuller"], float) - grip
+        K_anchor_child(w, "anchor_fuller", Vector((0.0, float(d @ u) * k, float(d @ n) * k)))
+    log("art blade: %d tris, %.3f m/px, %.2f m long" % (K.tris([w]), k, float(bs["len"])))
+    return w
+
+
+def _solid(cells):
+    """The cells as one solid piece: holes filled (light steel the key took for the grey ground: everything the
+    ground outside can't reach) and diagonal-only touches closed (so the outline is a simple loop)."""
+    from collections import deque
+    h, w = cells.shape
+    out = np.zeros((h, w), bool)
+    seen = np.zeros((h, w), bool)
+    q = deque([(i, j) for i in range(h) for j in (0, w - 1)] + [(i, j) for j in range(w) for i in (0, h - 1)])
+    for i, j in q:
+        seen[i, j] = True
+    while q:
+        i, j = q.popleft()
+        if cells[i, j]:
+            continue
+        out[i, j] = True
+        for a, b in ((i + 1, j), (i - 1, j), (i, j + 1), (i, j - 1)):
+            if 0 <= a < h and 0 <= b < w and not seen[a, b]:
+                seen[a, b] = True
+                q.append((a, b))
+    solid = ~out
+    for _it in range(3):
+        a, b, c, d = solid[:-1, :-1], solid[:-1, 1:], solid[1:, :-1], solid[1:, 1:]
+        diag = (a & d & ~b & ~c) | (b & c & ~a & ~d)
+        ii, jj = np.nonzero(diag)
+        solid[ii, jj + 1] = True
+        solid[ii + 1, jj] = True
+    return solid
+
+
+def K_anchor_child(parent, name, at):
+    e = bpy.data.objects.new(name, None)
+    bpy.context.scene.collection.objects.link(e)
+    e.parent = parent
+    e.location = at
+    return e
+
+
 def chunk(ob, rig, ck):
     """Game proportions over the art's (they read at the match camera): the head and the free hand grown about
     their joints by their skin weight, and the whole body a little thicker about its vertical axis."""
     co = np.array([v.co[:] for v in ob.data.vertices])
-    for bone, key in (("head", "head"), ("hand.L", "hand")):
+    for bone, key in [("head", "head")] + [(hb, "hand") for hb in ck.get("hands", ["hand.L"])]:
         g = ob.vertex_groups.get(bone)
         if g is None or key not in ck:
             continue
@@ -879,12 +1143,15 @@ def main():
     ob = import_glb(os.path.expanduser(spec["body_glb"]))
     img = base_image(ob)
     drop_floaters(ob, spec.get("floater_verts", 40))
+    mark_rigid(ob, spec.get("rigid", []))
     ids = island_map(ob, img)
     paint_up(img, spec, ids=ids)
     for pj in spec.get("project", []):
         project(ob, img, pj)
+    for pj in spec.get("project_affine", []):
+        project_affine(ob, img, pj)
     pad(img, ids, int(spec.get("pad", 6)))
-    slot_split(ob, img, spec["palette"], spec["glow_min"], "body")
+    slot_split(ob, img, spec["palette"], spec["glow_min"], "body", spec.get("glow_hot"), spec.get("glow_boxes", []))
     head = None
     if "head" in spec:
         decimate(ob, spec["max_tris"] - int(spec["head"]["tris"]))
@@ -924,6 +1191,7 @@ def main():
         rj["fingers." + sd] = rj["hand." + sd] + Vector((0, 0, -0.08))
     fit = fit_armature(joints)
     auto_weights(ob, fit)
+    rigid_weights(ob)
     if head:
         rigid(head, fit, "head")
     pose_to_rig(fit, rj)
@@ -936,6 +1204,7 @@ def main():
     arm = contract_skin(ob, rig)
     if "chunk" in spec:
         chunk(ob, rig, spec["chunk"])
+    drop_rigid_groups(ob)
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
@@ -944,6 +1213,8 @@ def main():
     spin = None
     if gun is not None:
         gun, spin = gun_weapon(gun, ge, gt, rig, spec["gun_arm"])
+    elif "blade" in spec:
+        gun = art_blade(spec["blade"], spec.get("glow_hot"))
     else:
         gun = weapon(spec, rig)
     crown = rig["land"]["crown"]
@@ -955,9 +1226,11 @@ def main():
         if o.data.has_custom_normals:
             bpy.ops.mesh.customdata_custom_splitnormals_clear()
         outward(o)
+        flat = o is gun and "blade" in spec          # (a flat slab: its faces stay flat)
         for p in o.data.polygons:
-            p.use_smooth = True
-        soft_normals(o, spec.get("normal_smooth", 8))
+            p.use_smooth = not flat
+        if not flat:
+            soft_normals(o, spec.get("normal_smooth", 8))
     out = os.path.join(ROOT, os.path.expanduser(spec["out"]))
     log("tris: body %d, weapon %d" % (K.tris([ob]), K.tris([x for x in (gun, spin) if x])))
     # (JPEG: Meshy's painted textures, a third of the PNG's size)
