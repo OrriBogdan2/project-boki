@@ -1427,6 +1427,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	gbas = carried.basis
 	gpos = carried.origin
 	free_l = maxf(free_l, ws.carry_free_l())
+	free_r = maxf(free_r, ws.carry_free_r())
 	# emotes: the weapon goes away, the hands do the talking
 	var gvs := gun_vis * gun_scl
 	aim.rotation = Vector3(ap, ay, ar)

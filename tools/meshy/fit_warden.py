@@ -1941,6 +1941,11 @@ def main():
     spin = None
     if gun is not None:
         gun, spin = gun_weapon(gun, ge, gt, rig, spec["gun_arm"])
+    elif "lance" in spec:
+        # (a held weapon built as a lathe in the Gun's space: Cinder's flamethrower lance; tools/meshy/lance.py)
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import lance as LANCE
+        gun, _limg = LANCE.build(spec["lance"], slot_materials(None, [s for s in K.SLOTS if s != "team"], "weapon"))
     else:
         gun = weapon(spec, rig)
     crown = rig["land"]["crown"]
