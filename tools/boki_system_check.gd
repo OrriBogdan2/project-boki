@@ -202,7 +202,7 @@ func _modes() -> void:
 	run_for(3.0)
 	ok(k.flat_dist(P) < 5.5, "follow: it comes back to your side (%.1fm away, %s)" % [k.flat_dist(P), k.state])
 
-# ------------------------------------------------------------------ 4. C
+# ------------------------------------------------------------------ 4. the Boki's own ability
 func _cast_c() -> void:
 	_fresh()
 	var P := m.player
@@ -212,7 +212,7 @@ func _cast_c() -> void:
 	aim_at(P, P.pos + Vector3(5.0, 0, 0))
 	var went := KinCommand.cast_c(P)
 	m.step(Match.DT)
-	ok(went and not k.runner.is_ready("k1") and k.state == "shoulder", "C on the shoulder: cast through you, it stays put (state %s)" % k.state)
+	ok(went and not k.runner.is_ready("k1") and k.state == "shoulder", "the ability on the shoulder: cast through you, it stays put (state %s)" % k.state)
 	_fresh()
 	P = m.player
 	k = P.kin
@@ -222,7 +222,7 @@ func _cast_c() -> void:
 	var at := k.pos
 	var out := KinCommand.cast_c(P)
 	m.step(Match.DT)
-	ok(out and not k.runner.is_ready("k1") and k.state != "shoulder" and k.pos.distance_to(at) < 3.0, "C with the Boki out: cast from where it stands, it does not come back (state %s, moved %.1fm)" % [k.state, k.pos.distance_to(at)])
+	ok(out and not k.runner.is_ready("k1") and k.state != "shoulder" and k.pos.distance_to(at) < 3.0, "the ability with the Boki out: cast from where it stands, it does not come back (state %s, moved %.1fm)" % [k.state, k.pos.distance_to(at)])
 
 # ------------------------------------------------------------------ 5. downed
 func _downed() -> void:
@@ -236,7 +236,7 @@ func _downed() -> void:
 	ok(k.state == "downed" and k.down_total >= 14.9 and k.down_total <= 20.1, "a Boki that goes down is down for 15-20s (%.1fs)" % k.down_total)
 	run_for(1.5)
 	ok(k.state == "downed" and Vector2(k.pos.x - spot.x, k.pos.z - spot.z).length() < 1.0, "it stays where it fell")
-	ok(not KinCommand.cast_c(P), "no C while down")
+	ok(not KinCommand.cast_c(P), "no ability cast while down")
 	ok(not KinMerge.can_cast(P) and not KinMerge.boki_with_you(P), "no Merge with it while down")
 	ok(BokiHud.squad_downed(m).has(k), "it is marked for your squad (HUD / minimap / full map)")
 	# rescue by touch

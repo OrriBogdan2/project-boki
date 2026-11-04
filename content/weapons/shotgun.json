@@ -11,8 +11,6 @@
 		"rate": 0.5,
 		"speed": 18,
 		"decel": 30.0,
-		"mag": 12,
-		"reload": 1.8,
 		"kb": 2.2,
 		"spread": 0.0,
 		"range": 6.3,

@@ -256,8 +256,9 @@ def crossbow(bld, cells, g, look):
     b0 = top + np.array([0, L * 0.22, 0.03])
     b1 = top + np.array([0, L + 0.02, 0.03])
     _arc(bld, [b0, b1], [0.0045, 0.0045], cells.box["dark"], "shaft", sides=5)
-    head = [b1, b1 + np.array([0, 0.02, 0]), b1 + np.array([0, 0.06, 0])]
-    bld.tube(head, [0.013, 0.011, 0.0005], 6, *[cells.box["bolt"][i] for i in (0, 2, 1, 3)], "bolt", [0.0] * 3,
+    bk = float(look.get("bolt_k", 1.0))     # the glowing head's size (reads at the match camera)
+    head = [b1, b1 + np.array([0, 0.02 * bk, 0]), b1 + np.array([0, 0.06 * bk, 0])]
+    bld.tube(head, [0.013 * bk, 0.011 * bk, 0.0005], 6, *[cells.box["bolt"][i] for i in (0, 2, 1, 3)], "bolt", [0.0] * 3,
              cap_start=True)
     if look.get("stirrup"):
         # the stirrup: a trapezoid loop past the prod (sable_crossbow_sheet)
@@ -317,7 +318,7 @@ def crossbows(rig_grips, look):
         ob = bld.object(name)
         mats = {}
         for slot in ("metal", "leather", "glow"):
-            ob.data.materials.append(_mat("%s-crossbow" % slot, img, closest=True))
+            ob.data.materials.append(_mat("%s-crossbow" % slot, img, closest=False))
             mats[slot] = len(ob.data.materials) - 1
         for poly in ob.data.polygons:
             pt = bld.part[poly.vertices[0]]
@@ -326,6 +327,12 @@ def crossbows(rig_grips, look):
             poly.use_smooth = False
         obs.append(ob)
         log("%s: %d tris" % (name, sum(len(f) - 2 for f in bld.f)))
+    pitch = float(look.get("pitch", 0.0))
+    if pitch:
+        # (the crossbow tipped about its grip: the twin hold's rest points it down by the thigh as the art holds it)
+        rot = Matrix.Translation(gr) @ Matrix.Rotation(pitch, 4, "X") @ Matrix.Translation(-gr)
+        for ob in obs:
+            ob.data.transform(rot)
     w, off = obs
     off.parent = w
     off.location = gl - gr        # (HunterAnim's twin hold hands a mesh at x < -0.04 to the left hand)
@@ -486,7 +493,7 @@ def gem(arm, body, spec, tag="gem"):
     ob = bld.object("Gem")
     mats = {}
     for slot in ("glow", "metal"):
-        ob.data.materials.append(_mat("%s-%s" % (slot, tag), img, closest=True))
+        ob.data.materials.append(_mat("%s-%s" % (slot, tag), img, closest=False))
         mats[slot] = len(ob.data.materials) - 1
     for poly in ob.data.polygons:
         poly.material_index = mats["glow"] if bld.part[poly.vertices[0]] == "gem" else mats["metal"]
@@ -573,7 +580,6 @@ def fluff_tail(arm, spec, tag="tail"):
     return ob
 
 
-# ------------------------------------------------------------------------------------------------ a cape
 def cape(arm, body, spec, tag="cape"):
     """A cloth cape down the back as its own geometry (pip_front, the turnaround's back: the scan's cape is only
     a collar). Rows from `z0` (the shoulders) to `z1` (the waist, above the tail's root), half-width `w0` to `w1`;
@@ -847,4 +853,45 @@ def flower_crown(arm, body, spec, tag="flowers"):
         poly.use_smooth = False
     _skin(ob, arm, {spec.get("bone", "head"): range(len(ob.data.vertices))})
     log("flower crown: %d flowers, %d tris" % (placed, sum(len(f) - 2 for f in bld.f)))
+    return ob
+
+
+# ------------------------------------------------------------------------------------------------ laces
+def laces(arm, body, spec, tag="laces"):
+    """A criss-cross lacing across the open back (Sable's turnaround back): `rows` crossings between the two
+    edges x = +-`half` from z0 to z1, each lace a thin tube laid on the body's surface (rays from behind, -Y), with
+    a small eyelet at each end; silver on the metal slot, riding `bone`."""
+    from mathutils.bvhtree import BVHTree
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = body.evaluated_get(dg)
+    me = ev.to_mesh()
+    bvh = BVHTree.FromPolygons([body.matrix_world @ v.co for v in me.vertices], [list(q.vertices) for q in me.polygons])
+    ev.to_mesh_clear()
+    cells = Cells({"lace": spec.get("colour", "d8dae6"), "eyelet": spec.get("eyelet", "8a8ca0")}, n=2, size=32)
+    img = cells.image(tag + "_atlas")
+    out = float(spec.get("out", 0.004))
+    r = float(spec.get("r", 0.0035))
+
+    def on(x, z):
+        hit = bvh.ray_cast(Vector((x, -1.0, z)), Vector((0, 1, 0)))
+        return np.array((hit[0] + hit[1] * out)[:]) if hit[0] is not None else None
+    bld = WP.Builder()
+    n = int(spec.get("rows", 5))
+    z0, z1, hw = float(spec["z0"]), float(spec["z1"]), float(spec["half"])
+    zs = [z0 + (z1 - z0) * i / n for i in range(n + 1)]
+    for i in range(n):
+        for a, b in (((-hw, zs[i]), (hw, zs[i + 1])), ((hw, zs[i]), (-hw, zs[i + 1]))):
+            pts = [on(a[0] + (b[0] - a[0]) * k / 8, a[1] + (b[1] - a[1]) * k / 8) for k in range(9)]
+            pts = [q for q in pts if q is not None]
+            if len(pts) > 1:
+                bld.tube(pts, [r] * len(pts), 5, *[cells.box["lace"][j] for j in (0, 2, 1, 3)], "lace", [0.0] * len(pts))
+    for z in zs:
+        for x in (-hw, hw):
+            q = on(x, z)
+            if q is not None:
+                bld.torus(q, [0, -1, 0], r * 1.8, r * 0.7, 8, 4, cells.box["eyelet"], "eyelet", 0.0)
+    ob = bld.object("Laces")
+    ob.data.materials.append(_mat("metal-%s" % tag, img))
+    _skin(ob, arm, {spec.get("bone", "hips"): range(len(ob.data.vertices))})
+    log("laces: %d rows, %d tris" % (n, sum(len(f) - 2 for f in bld.f)))
     return ob

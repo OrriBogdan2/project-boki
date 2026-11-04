@@ -1,6 +1,6 @@
 class_name PinFx
 extends Node3D
-## Pin's own effects, every one pooled (built once when the kit starts, then shown, moved and hidden). The
+## Hem's own effects, every one pooled (built once when the kit starts, then shown, moved and hidden). The
 ## coloured ones are layered (KitShaders): an alpha-blended body in her greens, teal and gold with the glow
 ## on top, so they keep their colour on bright grass.
 ## - fletch bursts (her own motif: feathers radiating from a core): the green stage-ready flash at the bow,
@@ -29,9 +29,9 @@ const WISP_EVERY := 0.05
 const SPENT_T := 4.0           # s a spent arrow stays in the ground
 const STAKE_T := 7.0           # s the stake a wall pin leaves in the wall stays
 ## the Heavy Shot's arrow is this many times a normal arrow (the Empowered bolt is 1.0): unmistakable
-const HEAVY_SCALE := 3.5
-const GREEN := Color("8dffa8")
-const TEAL := Color("5ff2d8")
+const HEAVY_SCALE := 6.0
+const GREEN := Color("ff5a4e")      # (named for its old colour: Hem is red now, owner Nov 4)
+const TEAL := Color("ffb0a0")       # (the light half of her red)
 const GOLD := Color("ffc02a")
 const VIOLET := Color("b884ff")
 
@@ -137,11 +137,11 @@ func _arrow_node() -> Node3D:
 
 ## Each kind's look: [shaft colour, head colour, fin colour, trail colour, trail length m, trail width m, body scale]
 const LOOK := {
-	"tap": [Color("cfe8b0"), Color("e8ffd0"), Color("9fe0a8"), Color(0.6, 1.0, 0.65, 0.5), 1.2, 0.07, 0.8],
-	"arrow": [GREEN, TEAL, GREEN, Color(0.45, 1.0, 0.6, 0.85), 2.4, 0.12, 1.0],
+	"tap": [Color("f0b8b0"), Color("ffe0d8"), Color("e8605a"), Color(1.0, 0.6, 0.55, 0.5), 1.2, 0.07, 0.8],
+	"arrow": [GREEN, TEAL, GREEN, Color(1.0, 0.4, 0.35, 0.85), 2.4, 0.12, 1.0],
 	"super": [Color("c8fff0"), Color("e8fffa"), TEAL, Color(0.45, 1.0, 0.88, 1.0), 5.0, 0.5, 1.35],
 	"over": [Color("9fb8a0"), Color("c8d8c0"), Color("7a9a80"), Color(0.6, 0.75, 0.62, 0.35), 1.0, 0.06, 0.9],
-	"heavy": [GOLD, Color("fff0b0"), VIOLET, Color(1.0, 0.72, 0.2, 0.95), 6.0, 0.8, HEAVY_SCALE],
+	"heavy": [Color("e02a2a"), TEAL, GREEN, Color(1.0, 0.25, 0.2, 0.95), 7.0, 0.9, HEAVY_SCALE],
 }
 
 func _dress(n: Node3D, kind: String) -> void:
@@ -158,7 +158,7 @@ func _dress(n: Node3D, kind: String) -> void:
 	tr.visible = true
 	var s := float(lk[6])
 	var core := n.get_node("Core") as MeshInstance3D
-	core.visible = kind == "heavy"
+	core.visible = false      # (the Heavy Shot is the bow's arrow, just bigger: owner Nov 4)
 	core.scale = Vector3.ONE * s * 0.5
 	KitShaders.param(core, "color", Color("fff0b0"))
 	KitShaders.param(core, "power", 2.4)

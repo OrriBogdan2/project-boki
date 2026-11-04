@@ -86,7 +86,7 @@ func pick_target() -> Ent:
 ## Called a few times a second while the kin is out (or riding with you, for abilities that work
 ## on you). Uses abilities by itself when their cue (KinParts.CUES) fits:
 ##   k2, the auto active, is the kin's own: it always uses it when it sees the chance
-##   k1, the Boki's own ability, only for bots (yours fires when you order it)
+##   k1, the Boki's own ability, when the cue fits; yours casts it only while it is out beside you or fighting
 ## Locked slots (run levels) are never cast. Event triggers (on_hit, on_throw...) fire elsewhere;
 ## on_low_hp is watched here.
 func think_abilities(dt: float) -> void:
@@ -103,8 +103,8 @@ func think_abilities(dt: float) -> void:
 		var def := k.runner.def_of(slot)
 		if def.cue == null:
 			continue
-		if slot == "k1" and k.owner_h.is_local():
-			continue     # your Boki casts its own ability when you order it
+		if slot == "k1" and k.owner_h.is_local() and k.state != "active":
+			continue     # your Boki casts its own ability once it is out
 		if slot == "k2" and (def.trigger == null or def.trigger.type != "auto"):
 			continue
 		if k.state in ["shoulder", "fused"] and def.from == "kin":

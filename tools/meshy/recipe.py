@@ -9,7 +9,8 @@ Steps, in order (the ones marked * need your eyes on their output before the nex
   crop     * 9:16 crops of the turnaround's views (<raw>/crops; spec "views")
   edit     * Meshy image-to-image of every view with the spec's prompt ("edits"; 9 credits a view, in parallel);
              <raw>/edits_sheet.png puts crops over edits; redo a view with `edit:<view>`
-  prep       the chosen edits padded square into <raw>/in ("use": view -> edit dir)
+  prep       the chosen edits padded square into <raw>/in ("use": view -> edit dir; "flat_ground": view -> flat_ground.py
+             args, the background flattened first)
   meshy    * the Meshy variants in parallel ("meshy.variants"; ~40 credits each); <raw>/variants.png compares them
   bake       the kept variant baked to the clean low mesh (spec "bake": the bake spec)
   grid     * gridded front/side renders of the low mesh (<raw>/grid_*.png, 500 px/m) for the fit spec's joints
@@ -83,6 +84,19 @@ def step_art():
 
 
 def step_crop():
+    if SPEC.get("crop_from"):
+        # (separate square views instead of a turnaround sheet, e.g. Cinder: each crop is its art, whole)
+        os.makedirs(os.path.join(RAW, "crops"), exist_ok=True)
+        pad = SPEC.get("crop_pad")   # [size, x, y, canvas, grey]: the view shrunk onto a wider grey canvas (a tail that
+        for view, key in SPEC["crop_from"].items():          # runs off the art's edge gets room to end in the frame)
+            src, dst = os.path.join(RAW, "art", key + ".png"), os.path.join(RAW, "crops", view + ".png")
+            if pad:
+                subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", src, "-vf", "scale=%d:%d,pad=%d:%d:%d:%d:color=0x%s"
+                                % (pad[0], pad[0], pad[3], pad[3], pad[1], pad[2], pad[4]), dst], check=True)
+            else:
+                subprocess.run(["cp", src, dst], check=True)
+            log("crop", view, "<-", key)
+        return
     vj = os.path.join(RAW, "views.json")
     json.dump({"views": SPEC["views"]} if isinstance(SPEC["views"], list) else {"auto": SPEC["views"]["auto"]},
               open(vj, "w"))
@@ -97,7 +111,7 @@ def step_edit(only=None):
             continue
         out = os.path.join(RAW, SPEC.get("use", {}).get(view, "edit_" + view))
         cmd = ["python3", "-I", os.path.join(TOOLS, "meshy_task.py"), "edit", out, os.path.join(RAW, "crops", view + ".png"),
-               "--prompt", prompt, "--aspect", "9:16"]
+               "--prompt", prompt, "--aspect", SPEC.get("edit_aspect", "9:16")]
         procs.append((view, subprocess.Popen(cmd, stdout=open(out.rstrip("/") + ".log", "w"), stderr=subprocess.STDOUT,
                                              cwd=ROOT)))
     for view, pr in procs:
@@ -108,7 +122,16 @@ def step_edit(only=None):
 
 
 def step_prep():
-    args = ["%s=%s" % (v, os.path.join(RAW, SPEC.get("use", {}).get(v, "edit_" + v), "image0.png")) for v in SPEC["edits"]]
+    args = []
+    for v in SPEC["edits"]:
+        src = os.path.join(RAW, SPEC.get("use", {}).get(v, "edit_" + v), "image0.png")
+        if v in SPEC.get("flat_ground", {}):
+            # (the background flattened to one grey: a padded crop's rectangle, a floor band or shadow; flat_ground.py)
+            flat = os.path.join(RAW, "flat", v + ".png")
+            os.makedirs(os.path.dirname(flat), exist_ok=True)
+            run(py("flat_ground.py", src, flat, *[str(x) for x in SPEC["flat_ground"][v]]), "flat_" + v)
+            src = flat
+        args.append("%s=%s" % (v, src))
     for v in SPEC.get("unedited", []):
         args.append("%s=%s" % (v, os.path.join(RAW, "crops", v + ".png")))
     run(py("pad_views.py", os.path.join(RAW, "in"), *args), "prep")

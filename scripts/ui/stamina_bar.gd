@@ -16,7 +16,7 @@ const SHAKE_T := 0.3                    # s of the shake and red flash on an emp
 const KEEP_T := 5.0                     # s unseen before a bar's state is dropped
 const TICK_VOL := -15.0
 
-## nid -> {at, full: Array[bool], flash: Array[float], shake, completes, denies, seen_n}
+## nid -> {at, full: Array[bool], flash: Array[float], jolt, completes, denies, seen_n}
 var st := {}
 ## Set (seconds) by tools that step the match faster or slower than real time; else the wall clock.
 var clock := -1.0
@@ -39,9 +39,10 @@ static func shorts(h: Hunter) -> int:
 static func has_long(h: Hunter) -> bool:
 	return h.ak == null or h.ak.has_long_dash()
 
-## How long the long dash takes to come back for this hunter (its class data).
+## How long the long dash takes to come back for this hunter (the kit's dash.air.cd, else its class data).
 static func long_cd(h: Hunter) -> float:
-	return maxf(0.01, float(h.cdat.get("ex_cd", Hunter.EX_DASH_CD)))
+	var cd: float = h.ak.long_dash_cd() if h.ak else float(h.cdat.get("ex_cd", Hunter.EX_DASH_CD))
+	return maxf(0.01, cd)
 
 ## Moves one hunter's bar state to `now` (seconds, any steady clock): spots completed segments and
 ## starts their flash and tick (`audible`: your own bar only). Safe to call twice in one frame.
@@ -50,7 +51,7 @@ func update(h: Hunter, now: float, audible := false) -> Dictionary:
 	var s: Dictionary = st.get(h.nid, {})
 	if s.is_empty() or (s["full"] as Array).size() != f.size():
 		var keep: Dictionary = s
-		s = {"at": now, "full": [], "flash": [], "shake": 0.0}
+		s = {"at": now, "full": [], "flash": [], "jolt": 0.0}
 		s["completes"] = int(keep.get("completes", 0))
 		s["denies"] = int(keep.get("denies", 0))
 		for v in f:
@@ -61,7 +62,7 @@ func update(h: Hunter, now: float, audible := false) -> Dictionary:
 	if dt <= 0.0 and now > 0.0:
 		return s
 	s["at"] = now
-	s["shake"] = maxf(0.0, float(s["shake"]) - dt)
+	s["jolt"] = maxf(0.0, float(s["jolt"]) - dt)
 	var done := false
 	for i in f.size():
 		var full := float(f[i]) >= 0.999
@@ -85,7 +86,7 @@ func deny(h: Hunter) -> void:
 	if s.is_empty():
 		update(h, _now())
 		s = st[h.nid]
-	s["shake"] = SHAKE_T
+	s["jolt"] = SHAKE_T
 	s["denies"] = int(s["denies"]) + 1
 
 ## Draws the bar for `h` in `r` (the segments share its width and height).
@@ -98,8 +99,8 @@ func draw(c: CanvasItem, r: Rect2, h: Hunter, audible := false) -> void:
 	var long_w := clampf(r.size.x * 0.14, 8.0, 14.0) if has_long(h) else 0.0
 	var ns := n - (1 if has_long(h) else 0)
 	var seg_w := (r.size.x - long_w - gap * float(n - 1)) / float(maxi(1, ns))
-	var k := float(s["shake"]) / SHAKE_T
-	var x := r.position.x + sin(float(s["shake"]) * 70.0) * 3.0 * k
+	var k := float(s["jolt"]) / SHAKE_T
+	var x := r.position.x + sin(float(s["jolt"]) * 70.0) * 3.0 * k
 	if cool:
 		c.draw_rect(Rect2(Vector2(x, r.position.y), Vector2(r.size.x, r.size.y)).grow(2.0), Color(COOL, 0.35))
 	for i in n:

@@ -47,6 +47,8 @@ const CATALOG := {
 	"path_wood": {"name": "Boardwalk", "cat": "Paths", "gems": 2, "brush": "path", "col": "8a6242"},
 	"path_clear": {"name": "Grass (clear)", "cat": "Paths", "gems": 0, "brush": "clear"},
 	"clear_wild": {"name": "Clear the wild", "cat": "Island", "gems": 3, "brush": "wild"},
+	"river": {"name": "River", "cat": "Paths", "gems": 2, "brush": "water", "block": true,
+		"desc": "Drag a narrow channel of water across the ground. A crop patch within 2 tiles of any water waters itself."},
 	"water": {"name": "Pond water", "cat": "Paths", "gems": 6, "brush": "water", "block": true},
 	"flowers": {"name": "Flower bed", "cat": "Garden", "gems": 8},
 	"bush": {"name": "Bush", "cat": "Garden", "gems": 10, "block": true},
@@ -94,7 +96,7 @@ const CATALOG := {
 	"house": {"name": "House", "cat": "Buildings", "gems": 90, "size": [5, 3], "block": true, "fixture": "house", "max": 1, "door": true,
 		"desc": "Your home. Go inside to rest and decorate; Boki nap here too. Its door needs open ground."},
 	"crop_patch": {"name": "Crop patch", "cat": "Buildings", "gems": 30, "size": [5, 4], "fixture": "farm", "max": 0,
-		"desc": "Four plots of tilled soil to sow and water. Buying more plots at the market makes room for another patch."},
+		"desc": "Four plots of tilled soil to sow and water. Buying more plots at the market makes room for another patch. Put it within 2 tiles of water and it waters itself."},
 	"cook_pot": {"name": "Cooking pot", "cat": "Buildings", "gems": 20, "block": true, "fixture": "pot", "max": 1,
 		"desc": "Cook what you grow into treats for your Boki."},
 	"market_stall": {"name": "Market stall", "cat": "Buildings", "gems": 30, "size": [3, 2], "block": true, "fixture": "stall", "max": 1,
@@ -112,7 +114,7 @@ const CATALOG := {
 const FIXTURES := {"house": "house", "farm": "crop_patch", "pot": "cook_pot", "stall": "market_stall", "nook": "nesting_nook",
 	"burrow": "boki_burrow", "yard": "training_post", "graves": "graveyard"}
 ## What a farm-start island begins with: the portal, wild meadow and gems for a house and the essentials
-## (house 90 + crop patch 30 + cooking pot 20 = 140, the market stall 30 more, and a few to spare).
+## (house 90 + crop patch 30 + cooking pot 20 = 140, and some to spare; the market stall comes with the island).
 const FS_GEMS := 200
 ## The landing by the portal, kept clear on a farm-start island: you arrive here.
 const LANDING := Vector3(38.5, 0, 35.5)
@@ -340,7 +342,6 @@ static func make_world(world: World, level: int, seed := 0, sk := 0.0) -> void:
 	var defs: Array = [["main", CORE_C, CORE_R] if sk <= 0.0 else ["main", FS_CORE_C, FS_CORE_R]]
 	for k in Data.ISLES:
 		defs.append([k, Data.ISLES[k]["c"], Data.ISLES[k]["r"]])
-	defs.append_array(HomeTraining.defs())      # the Training Grounds, which every home has
 	world.make_islands(SEED, W, H, defs)
 	grow_main(world, level, seed, sk)
 	var spans := {}
@@ -396,6 +397,10 @@ static func bridge_span(world: World, k: String, bad := {}) -> Dictionary:
 				if world.island[i] == ii and world.kind[i] != World.T_VOID:
 					last_isle = a
 				elif world.kind[i] != World.T_VOID:
+					var nx: int = at.call(a + int(dir), b)
+					if world.island[i] == 0 and last_isle >= 0 and nx >= 0 and world.kind[nx] == World.T_VOID:
+						a += int(dir)      # (a one-tile spur: carry on past it)
+						continue
 					if world.island[i] == 0 and last_isle >= 0: first_main = a
 					break
 				elif last_isle >= 0 and absf(a - last_isle) > 24:
@@ -547,7 +552,7 @@ static func expand_gain(level: int, seed := 0, sk := 0.0) -> int:
 ## Every farm-start island has about this much land before any expansion (the classic island's
 ## meadow is about the same), whatever its shape.
 const FS_LAND := 1250
-## Land kept for every bridge to land on (the isles', the Training Grounds'): a small rise of
+## Land kept for every bridge to land on (the isles'): a small rise of
 ## ground always meets each one, whatever the island's shape.
 const FS_FEET := [[Vector2(62.5, 29.5), Vector2(3.4, 3.0)], [Vector2(34.5, 45.5), Vector2(3.4, 3.2)], [Vector2(28.5, 25.5), Vector2(3.0, 3.0)],
 	[Vector2(26.0, 30.5), Vector2(3.0, 3.0)], [Vector2(44.5, 24.5), Vector2(3.0, 3.0)], [Vector2(39.5, 45.0), Vector2(3.0, 3.0)]]

@@ -1,7 +1,7 @@
 {
 	"id": "tender",
-	"title": "Fox Cub",
-	"base_name": "Moosh Moosh",
+	"title": "Little Lantern",
+	"base_name": "Pip",
 	"gender": "female",
 	"personality": "Small, fiery and quick, with a fox's ears and tail and red markings.\nShe is cheerful and bold, and she looks after her friends first.",
 	"role": "Tender",
@@ -15,6 +15,7 @@
 		"neck": -0.22
 	},
 	"color": "#ffc46a",
+	"clip": {"lines": {"dash": "A quick hop, a long glide in the air.", "lmb": "Embers from both hands mark foes.", "rmb": "A seed that roots its target.", "e": "A healing ring for you and your team.", "x": "Tether a teammate and heal them as you go."}, "fx": {"e": "heal", "x": "tether"}},
 	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with lantern light, pins chasers with burr-seeds.",
 	"silhouette": "small and low: a tiny courier with a trailing ember tail, casting light from her hands",
 	"card": {
@@ -24,7 +25,7 @@
 		"rmb": "Burrseed: hold to aim the lane, let go to throw; it sticks to a foe and roots them 0.7s later.",
 		"e": "Hearthlight: a healing ring on you; press again to throw it to the cursor.",
 		"dash": "Relay Step: a quick hop where you move; in the air, a long floaty glide.",
-		"passive": "Bearer: run into a downed teammate to carry up to 2 behind a shield.",
+		"passive": "Carrier: run into a downed teammate to carry up to 2 behind a shield.",
 		"weapons": {
 			"lantern_crook": "Hold to push embers from alternating hands that fly past the cursor; each hit on a foe adds Kindle."
 		},
@@ -46,8 +47,8 @@
 		"col": "#ffb347"
 	},
 	"passive": {
-		"name": "Bearer",
-		"desc": "Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). You carry a Bearer shield (40, +6 a level) that refills each time you pick someone up. While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If the shield breaks or you're stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).",
+		"name": "Carrier",
+		"desc": "Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). You carry a Carrier shield (40, +6 a level) that refills each time you pick someone up. While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If the shield breaks or you're stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).",
 		"shield": 40.0,
 		"shield_lv": 6.0,
 		"max": 2,
@@ -60,18 +61,20 @@
 		"name": "Relay Step",
 		"icon": "dash",
 		"col": "#ffe2a8",
-		"cd": 7.5,
+		"cd": 7.0,
 		"dist": 4.2,
-		"time": 0.16,
+		"time": 0.174,
 		"invuln": 0.12,
-		"desc": "A quick skip about 3.6m where you move; in the air, a floaty dash about three times as far.",
+		"desc": "A quick skip about 3.6m where you move; in the air, a long floaty glide of about 13m (its own 14s cooldown).",
 		"air": {
-			"dist": 10.7,
-			"time": 0.8,
+			"dist": 13.3,
+			"time": 0.95,
+			"cd": 14.0,
 			"ramp": 0.1,
 			"burst": 0.4,
 			"out_k": 0.45,
-			"float_fall": 1.2
+			"float_fall": 1.2,
+			"steer": 3.0
 		}
 	},
 	"rmb": {
@@ -80,7 +83,7 @@
 		"short": "Burr",
 		"icon": "binding",
 		"col": "#c8e07a",
-		"cooldown": 8.0,
+		"cooldown": 10.5,
 		"charges": 1,
 		"hold": 0.25,
 		"seed": {
@@ -149,14 +152,14 @@
 		"kin": "the thrown light's healing boost is 100% instead of 50%"
 	},
 	"rank2": {
-		"sec": "Rank 2: cooldown 8s -> 7.2s, damage +15%.",
-		"dash": "Rank 2: recharge 7.5s -> 6.4s per charge.",
+		"sec": "Rank 2: cooldown 10.5s -> 9.5s, damage +15%.",
+		"dash": "Rank 2: recharge 7s -> 6s per charge.",
 		"kin": "Rank 2: cooldown 11s -> 9.9s, healing +15%."
 	},
 	"rank_next": {
-		"sec": "Rank 3: cooldown 8s -> 6.4s, damage +30%; the roots last 0.3s longer and the burst is twice as wide.",
+		"sec": "Rank 3: cooldown 10.5s -> 8.4s, damage +30%; the roots last 0.3s longer and the burst is twice as wide.",
 		"kin": "Rank 3: cooldown 11s -> 8.8s, healing +30%; the thrown light's healing boost is 100% instead of 50%.",
-		"dash": "Rank 3: recharge 7.5s -> 5.3s; picking up a teammate refreshes your long air dash."
+		"dash": "Rank 3: recharge 7s -> 4.9s; picking up a teammate refreshes your long air dash."
 	},
 	"tells": {
 		"half": "ember sparks over the foes she has Kindled, one per stack",

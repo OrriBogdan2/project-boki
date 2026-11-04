@@ -384,7 +384,7 @@ func _update_ui() -> void:
 ## A sign by your start: where the kit card and the loadout are.
 func _sign() -> void:
 	var lb := Label3D.new()
-	lb.text = "K  ·  KIT CARD\nL  ·  LOADOUT (Hunter, Boki, glove)\nX  ·  RESET"
+	lb.text = "K  ·  KIT CARD\nL  ·  LOADOUT (Hunter, Boki, glove)\nBACKSPACE  ·  RESET"
 	lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	lb.font = UI.big
 	lb.font_size = 44

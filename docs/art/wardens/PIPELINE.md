@@ -229,6 +229,33 @@ shipped Vex as the design variant `vex_r3b` (RIG_CONTRACT "Design variants"). Fi
      the spike Meshy gave it are cut out first.
 6. **Godot:** the extracted atlases imported lossless (compress/mode 0); generate_lods off.
 
+## Stage 1 hybrids (S2 fan-out, 2026-11-04)
+Stage 1 (WARDEN_STAGE1_BRIEF) is generation, bake, rig fit and first shots only: the fit spec keeps `lift` and the
+slot rules but no `palette_from`, `smooth`, `ramps`, `project` or `touch_up` (the paint-over is stage 2, the Vex
+r3c recipe). Pieces Meshy can't give cleanly are scripted (tools/meshy/hard_parts.py, fit spec `parts`):
+- **Held pieces**, modelled in their rig node's space and exported unskinned: `weapon` (the Gun node's; a hammer
+  in its `Hammer` pivot's, where WardenGlb seats it) and `shield` (the left hand's `Shield` node's). Their own
+  small atlas of painted cells (ice, iron, oak, leather) on the toon slots.
+- **Cards and tubes on spring chains:** wings cut out of the art's back view (outline and paint from the
+  sheet's pixels, two layers), a spaded tail draped clear of the legs. Chains named `spring_wing*` fold back about
+  their root while the Warden skates (root meta `wing_fold`, set by HunterAnim from the skate dash).
+- **Split:** faces of some slots made their own mesh on one bone (Claire's horns).
+- **feet_forward:** the fit fails if a foot points away from the body's forward (the backwards-skate catch).
+- The `ice` toon slot: a cold fresnel rim and a little gloss, no real transparency (WardenGlb.ICE).
+
+## Claire b1 (Phase B, 2026-11-04): fit options added, credit-free
+- `ankle_z` (fit spec): the rig ankle's height for a body standing on skates or heels (default 0.06). Claire's boot
+  and blade are ~0.2 m below her ankle: at 0.06 they went 0.21 m through the ground and read as bare pointed feet.
+  Raising the archetype's `legs` moves every absolute part coordinate (horns, wing roots, tail path, split boxes):
+  shift them by the head bone's change.
+- `weight_rules` for long hair: the hanging hair (dark hue, below the head) goes wholly to `hips`, else bone heat gives
+  its ends to the hands and thighs and a raised hand drags the pigtails up into a bunch.
+- `anchors` [{name, slot, side, z_min, bone}]: an anchor at the centre of one slot's faces on one side (her glowing
+  irises), for warden_look.json `halos`.
+- `tools/meshy/face_touch.py` (spec art/wardens/src/claire_face_touch.json): the face sheet softened before its
+  projection (blush toward the skin, freckles deepened, eyes magnified with a soft lens and their iris lifted).
+- hard_parts: `wings.scale`, `horns.slot`/`root`/`tipcol`/`crest`, `spear.blade_w`/`blade_t`/`shaft_r`/`pale`.
+
 ## Commercial terms (checked 2026-11-04, meshy.ai/terms-of-use section 3.2)
 - **Paid plans:** the customer owns the output ("to the extent possible under applicable law") and can keep it private.
 - **Free plans:** CC BY 4.0 with attribution to Meshy. **Use the owner's paid key only.**
@@ -274,6 +301,68 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Vex r3b edit side 2 | 06:44 | 01a1a54c-f974-7239-9ea4-5a714210e1a8 | nano-banana-pro | as side, "her left arm hidden behind her body" | 9 | Kept |
 | Vex r3b A | 06:46 | 01a1a54f-35bf-734c-9ee7-55f81be998e5 | meshy-7.1 | 4 edited views (front, 3/4, side, back), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Kept: the face's smirk, chunky hair, eye plate on her right eye, gun-arm, backpack |
 | Vex r3b B | 06:46 | 01a1a54f-35c4-73d2-9fd2-ab8f7e9f5bce | meshy-7.1 | as A, enhancement on | 40 | Dropped: rounder cuter face, stringy hair; a cleaner lens (A's is replaced by geometry) |
+| Cinder r3 edit front | 13:30 | 01a1a6c1-060b-77b7-aa2e-e0720eb0e01b | nano-banana-pro | cinder_front: lance and hose out, left arm hangs, tail straight back | 9 | Dropped: the tail still curled out to the side |
+| Cinder r3 edit side | 13:30 | 01a1a6c1-05d5-74c3-910d-8309d0bec4c7 | nano-banana-pro | cinder_side: as front, right arm hidden | 9 | Dropped: both arms drawn, the tail looped up |
+| Cinder r3 edit back | 13:30 | 01a1a6c1-05e7-7718-ac85-0b7d6b15c44d | nano-banana-pro | cinder_back: as front | 9 | Dropped: the tail ran off the frame |
+| Cinder r3 edit2 front | 13:38 | 01a1a6c3-b67c-7154-9c30-aa3b777b03a5 | nano-banana-pro | as edit, on the view padded to 1500 px on a 2000 px grey canvas (crop_pad) so the tail ends in frame; no floor or shadow | 9 | Kept (flat_ground.py flattens the padded rectangle) |
+| Cinder r3 edit2 side | 13:38 | 01a1a6c3-b6db-7009-9395-b0694d0a01fe | nano-banana-pro | as edit2 front, ONE arm, the tail straight back to the ground | 9 | Kept |
+| Cinder r3 edit2 back | 13:38 | 01a1a6c3-b712-76fd-857f-54e6f3e0ee09 | nano-banana-pro | as edit2 front | 9 | Kept |
+| Cinder r3 A | 13:41 | 01a1a6c6-de62-7253-b0ea-05451a154e2d | meshy-7.1 | 3 edited views (front, side, back), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Dropped: squinting, mean face; small crest |
+| Cinder r3 B | 13:41 | 01a1a6c6-de84-7676-b5c3-08ac066b2720 | meshy-7.1 | as A, enhancement on | 40 | Kept: big round amber slit-pupil eyes, rounded feminine face, bigger crest (mouth closed: the grin painted from the head sheet) |
+
+### Hem (archer, was Pin) stage 1, 2026-11-04 (balance 4921 before; 76 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Hem edit front | 09:08 | 01a1a5d1-13fa-75ea-a82a-9a7c76eb0bbe | nano-banana-pro (image-to-image) | 9:16 crop; bow, string, spool and threads out, left hand hanging empty, ground line and VFX shadow out | 9 | Kept |
+| Hem edit 3/4 | 09:08 | 01a1a5d1-1407-7614-b39f-38720b1bd208 | nano-banana-pro | same | 9 | Kept |
+| Hem edit side | 09:08 | 01a1a5d1-1407-7050-b1dd-10efbfb9dc50 | nano-banana-pro | same, her left arm hidden behind her body | 9 | Kept |
+| Hem edit back | 09:08 | 01a1a5d1-1406-776c-a6c5-797a2b85363e | nano-banana-pro | same | 9 | Kept |
+| Hem A | 09:09 | 01a1a5d2-5a3a-759f-b819-13c6f8aa159d | meshy-7.1 | 4 edited views (front, 3/4, side, back) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** (first run): clean face and porcelain mask, bun and hair needles, coat tails, quiver, thimble claws |
+
+### Tarek (dolm) stage 1 runs, 2026-11-04 (balance 4993 before the fan-out; 85 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Tarek edit front | 09:07 | 01a1a5cf-f284-72dc-9f40-fcfd21bee436 | nano-banana-pro (image-to-image) | 9:16 crop; right fist lowered; stones, shards, ripples and ground line out | 9 | Kept |
+| Tarek edit 3/4 | 09:07 | 01a1a5cf-f279-714c-b8d1-bc7c41d2a765 | nano-banana-pro | same | 9 | Dropped: the lowered arm lost its stone bracer |
+| Tarek edit side | 09:07 | 01a1a5cf-f222-72f3-ba19-4041e00d0d94 | nano-banana-pro | same, the far arm hanging behind his body | 9 | Kept |
+| Tarek edit back | 09:07 | 01a1a5cf-f280-7465-ad2f-2aaf9ea36676 | nano-banana-pro | same | 9 | Kept |
+| Tarek edit 3/4 2 | 09:09 | 01a1a5d1-c105-7402-acba-02323e255f37 | nano-banana-pro | as 3/4, "BOTH forearms wear stone bracers" | 9 | Dropped: kept the fist raised (the run went without a 3/4) |
+| Tarek A | 09:10 | 01a1a5d2-9348-76b2-bd28-bb946e03b9b0 | meshy-7.1 | 3 edited views (front, side, back) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: blindfold, grin, chunky locs with copper beads, vest, sash, harness, both bracers, wrapped feet (the bracers' glowing cracks not painted: added as an emission layer) |
+
+### Tarek stage 2 (2026-11-04): no Meshy runs (0 credits); the r3c recipe on the stage 1 scan, see art/wardens/tarek/IMPORT.md.
+### Ostra stage 1 runs, 2026-11-04 (76 credits; balance 4327 after both Tarek and Ostra and the other fan-out agents)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Ostra edit front | 09:10 | 01a1a5d2-f7ef-76ea-900a-ac22f8f9f546 | nano-banana-pro (image-to-image) | 9:16 crop; raised right hand lowered; halo, orb, strings, cards, shadow and ground line out | 9 | Kept |
+| Ostra edit 3/4 | 09:10 | 01a1a5d2-f7ef-7670-8b06-404e1250c6c9 | nano-banana-pro | same | 9 | Dropped: the hand stayed raised (the run went without a 3/4) |
+| Ostra edit side | 09:10 | 01a1a5d2-f7e4-7641-b263-ca781ba673fa | nano-banana-pro | same | 9 | Kept |
+| Ostra edit back | 09:10 | 01a1a5d2-f7ec-7358-95c2-155f198baa71 | nano-banana-pro | same | 9 | Kept |
+| Ostra A | 09:12 | 01a1a5d4-5e39-73a5-8395-ad7a5f79eddf | meshy-7.1 | 3 edited views (front, side, back) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the cracked porcelain mask with violet eyes and mouth, cap and bells, ruff, dagged coat with the starfield painted in its tears, clawed gloves. Meshy left out the wisp (the body ends at the hem): built as geometry |
+
+### Ostra stage 2 (2026-11-04): no Meshy runs (0 credits); the r3c recipe on the stage 1 scan, see art/wardens/ostra/IMPORT.md.
+
+### Claire stage 1, 2026-11-04
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Claire edit front | 09:12 | 01a1a5d4-724a-70c1-bfd3-f01683cb53ca | nano-banana-pro (image-to-image) | 9:16 crop; spear, wings and tail out, both arms hanging, skates forward | 9 | Kept |
+| Claire edit side | 09:12 | 01a1a5d4-7267-7483-a529-b031274506af | nano-banana-pro | spear, wing and tail out, both skates pointing forward | 9 | Kept |
+| Claire edit back | 09:12 | 01a1a5d4-7247-73c0-9feb-eaa1c3a86bc2 | nano-banana-pro | wings, spear and tail out, arms hanging | 9 | Kept |
+| Claire A | 09:13 | 01a1a5d5-aa57-72df-95ba-a4926bd343d2 | meshy-7.1 | 3 edited views (front, side, back; no 3/4) as images and texture refs; geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the face, horns, pigtails, ice costume, skates both forward |
+
+Claire total: 4 tasks, 67 credits.
+
+### Kael (juggernaut, was Zedran) stage 1, 2026-11-04 (76 credits)
+Run on the zedran_* r3 art (09:20); the final kael_* art (10:15) is the same body and outfit with white-hot glow
+instead of orange, so the body run is reused (no rerun): the glow colour comes from the archetype's `model_glow`
+in game, and the blade, chains, hook and mane are scripted.
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Kael edit front | 09:12 | 01a1a5d3-2333-7482-a441-4a36831e5dd7 | nano-banana-pro (image-to-image) | 9:16 crop; greatsword, every chain and both hooks out, right hand hanging empty, the long mane cut to the nape | 9 | Kept |
+| Kael edit 3/4 | 09:12 | 01a1a5d3-2346-73a9-ae0b-7f099ecc6b7e | nano-banana-pro | same | 9 | Kept |
+| Kael edit side | 09:12 | 01a1a5d3-2359-70eb-9e32-74e30a939557 | nano-banana-pro | same | 9 | Kept (belt plate drawn as tally marks only) |
+| Kael edit back | 09:12 | 01a1a5d3-2361-7357-b09f-45cc9d92e736 | nano-banana-pro | same; back and harness shown where the mane was | 9 | Kept (a gold collar ring added at the nape) |
+| Kael A | 09:13 | 01a1a5d4-e913-74be-9dfd-20019f630127 | meshy-7.1 | 4 edited views as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** (first run): build, scarf over the face, collar, harness, magma right arm only, skirt, greaves |
+| Kael mane (stage 4) | 13:20 | 01a1a6a8-42c4-73c7-bbd5-d327f5d1b9fd | meshy-7.1 | kael_head_sheet front + side (padded square) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, no pose, enhancement off | 40 | **Kept**: its hair cut out and fitted on the body as the mane (kael_parts.meshy_mane) |
 
 ### Stage 1: Pip (tender), 2026-11-04 (85 credits; balance 4327 after both Sable and Pip, other agents spending too)
 | Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
@@ -295,7 +384,145 @@ Then the r3c recipe: re-baked (art/wardens/src/pip_bake.json) and refitted (new 
 ramps of pip_front's colours, the lantern in her left paw with arched panes and a light, stronger wing cards,
 warden_look.json `pip`, the tender stance's left paw out. IMPORT.md "Stage 2".
 
+### Claire b3 (Phase B), 2026-11-04 (balance 3804 before, 3688 after: 116 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Claire b3 edit front | 15:19 | 01a1a724-7f04-7753-b255-e723662d89a4 | nano-banana-pro (image-to-image) | from the stage-1 front edit: horns and both front pigtails out | 9 | Hair still over the shoulders: edited again |
+| Claire b3 edit side | 15:19 | 01a1a724-7f25-76a1-ada4-73ba1e51191c | nano-banana-pro | from the stage-1 side edit: horn and front pigtail out | 9 | Kept |
+| Claire b3 edit back | 15:19 | 01a1a724-7f90-768e-9e37-54ec4828f78d | nano-banana-pro | from the stage-1 back edit: horns out | 9 | Kept |
+| Claire b3 edit front 2 | 15:21 | 01a1a726-cb4f-7065-bcfa-bfd188419b67 | nano-banana-pro | the hair entirely behind her back, shoulders and upper arms clear | 9 | Kept |
+| Claire B3 off | 15:23 | 01a1a728-1c2b-7750-92eb-9e34b9a3b54c | meshy-7.1 | 3 edited views (front, side, back) as images and texture refs; geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: a clean chest and shoulders, long wavy hair behind, skates |
+| Claire B3 on | 15:23 | 01a1a728-1c2c-77d4-be29-f85cb8df23af | meshy-7.1 | as B3 off, enhancement on | 40 | Dropped: legs wide apart, arms flung out |
+
+
 ### Vex r3c and r3d (2026-11-04): credit-free
 r3c (09:00-10:30) and r3d (11:25-13:30) used no Meshy credits: every change is in the fit spec, the parts tools, the
 paint-over, the shared look (16c18b4f) and warden_look.json. Recipe: RECIPE_95.md.
 
+### Ryzz (mage) stage 1 runs, 2026-11-04 (locked art: ext/imagegen 93a2757f wardens_r3/ryzz_* + RYZZ_KIT.md; 94 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Ryzz edit front | 11:04 | 01a1a63a-9e79-721b-beba-f3deb7492a53 | nano-banana-pro (image-to-image) | 9:16 crop of ryzz_front; pigtails, ties and back rods out (two small knots left) | 9 | Kept |
+| Ryzz edit 3/4 | 11:04 | 01a1a63a-9e7c-7527-b013-d7921d97ef1e | nano-banana-pro | as front, plus hand off the hip and the gum bubble out | 9 | Dropped: the hand stayed on the hip |
+| Ryzz edit side | 11:04 | 01a1a63a-9e8a-7453-a039-308472d82679 | nano-banana-pro | as front, plus the jacket off the shoulders (RYZZ_KIT), far arm hidden | 9 | Dropped for side 2: it opened the scarred eye |
+| Ryzz edit back | 11:04 | 01a1a63a-9e78-7242-afc4-9b2c4cbf1d01 | nano-banana-pro | as front, floor shadow out | 9 | Kept (a small green bolt it drew on the corset painted out, tools/meshy/ryzz_prep.py) |
+| Ryzz edit 3/4 b | 11:07 | 01a1a63c-7713-74fc-b16f-417e5e79d363 | nano-banana-pro | the 3/4 edit again: the arm down | 9 | Dropped: arm down, but it opened the scarred (right) eye; the run went without a 3/4 |
+| Ryzz edit side 2 | 11:08 | 01a1a63e-4f65-738b-bed8-418d5d0d53ff | nano-banana-pro | the side edit: the scarred eye closed | 9 | Kept |
+| Ryzz body A | 11:09 | 01a1a640-5b8c-7749-a3ef-7f535b835d75 | meshy-7.1 | edited front, side 2, back (padded square) as images and texture refs; geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** (one body run): the wink and fern scar on her RIGHT eye, freckles, choker and bolt charm, the keyhole corset, off-shoulder jacket, chain belt, hazard bands |
+
+Ryzz notes (stage 1, docs/art/wardens/PIPELINE.md recipe; no hand polish):
+- **Pieces built by script** (tools/meshy/ryzz_parts.py, fit spec `scripted`, called by fit_warden.py through
+  `build()`): the SHORT pigtails (owner: long twin tails read as a famous character) as chunky tapered locks with
+  zigzag ends, blue to pink, out of a copper-coil tie on each of the scan's hair knots, on 3-bone `spring_pigtail_L/R`
+  chains; exactly three copper rods in a riveted mount on her back, rigid on the hips, the middle one (her relic)
+  scorched and bent. Both were taken out of the Meshy inputs.
+- **Glow** (`emit_art`): Meshy paints the art's neon as plain pink, so the emission mask is projected from the edited
+  front view (Meshy's frame, before the fit, so the A-pose arms still line up): the art's neon pixels light the scar,
+  the charm, the corset piping and the forearm veins. The game colours that layer with the archetype's
+  `model_glow.core` (hero_toon `emit_tint`), so the pink is a switch like Kael's, no rebake.
+- **Proportions:** mage body head 0.74, legs 1.95, build 0.92, chest 1.0, neck -0.02, size 1.0 (was size 1.12,
+  chest 1.15): 0.99x a medium's height as before, slimmer, the legs longer; hit radius unchanged (main's `body.hit_r` 0.4).
+- **Stage 2 (rounds 2-3, credit-free):** round 3: the face painted from the head sheet (`paint_art`), the shared look fix (16c18b4f), curly pigtails, rods flush between the shoulder blades, right hand on hip; round 2: ramps of the art's colours per slot; mantle_look "mage" colours and a no-hue
+  `tint` (the hair-pick pull was the violet cast); fuller S-fall pigtails, knots squashed under the ties; rods seated
+  on the back's slope with straps; the charm's halo off the emission (`strict`); warden_look "ryzz"; the swagger
+  stance. The stance commits (ext/warden-stance 7260bfda..aa3345b6) are cherry-picked, not merged: a merge of
+  ext/warden-stance brings a diverged main (save v8 market vs v8 Mantle look, 16 conflicting files).
+### Stage 1: Sable (thief), 2026-11-04 (balance 4921 before; 85 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Sable edit front | 09:08 | 01a1a5d1-7e41-7040-9f50-609ff1c60f5f | nano-banana-pro (image-to-image) | 3:4 crop; crossbows, wings, both braids, ground line out; hands empty | 9 | Kept |
+| Sable edit back | 09:08 | 01a1a5d1-7e3a-728b-a2b1-09e9f433952f | nano-banana-pro | as front, plus both sleeves long | 9 | Dropped: drew the pendant on her back; the sleeves were wrong (the turnaround's left arm is bare) |
+| Sable edit side | 09:08 | 01a1a5d1-7e5a-7775-a872-46e7339c4da9 | nano-banana-pro | crossbow, wing, braid out; long sleeves and fur collar | 9 | Dropped: no mask or plumes, a ground line |
+| Sable edit back 2 | 09:10 | 01a1a5d3-47b8-72ca-b79b-67cde2de6c30 | nano-banana-pro | crossbows, wings, braid out; nothing else | 9 | Kept |
+| Sable edit side 2 | 09:10 | 01a1a5d3-47c0-7739-a9b7-f67259a99aa6 | nano-banana-pro | crossbow, wing, braid out; fur collar in the standing collar; left arm bare | 9 | Kept (came back mirrored: flipped back to the art's side) |
+| Sable A | 09:12 | 01a1a5d5-1d78-72f9-b867-a9bff45038eb | meshy-7.1 | edited front, side, back (+ texture refs), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** |
+
+### Stage 2: Sable (thief), 2026-11-04: credit-free (0 Meshy tasks)
+The r3c recipe on the stage-1 body: art ramps, sable_face.png projected over the face (registered on the eyes and
+mouth, feathered: `project_late` `feather` / `feather_turn`), the mask on metal, a glowing pendant (warden_props
+`gem`), bigger crossbows with a stirrup, the fur collar pulled in (fit `shrink`), warden_look.json `sable`, the
+thief stance squared up. IMPORT.md "Stage 2".
+### Breaker r3 (sea-ogre) stage 1, 2026-11-04 (balance 4993 at the start of the fan-out; 4327 after this agent's Breaker and Claire runs; other agents spent in between)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Breaker edit front | 09:07 | 01a1a5d0-7eb7-7056-bb33-15be925aea42 | nano-banana-pro (image-to-image) | 9:16 crop; hammer and prow out, both arms hanging, two hands | 9 | Kept |
+| Breaker edit 3/4 | 09:07 | 01a1a5d0-7eb7-736a-bb44-f7fc12c7da47 | nano-banana-pro | same | 9 | Kept |
+| Breaker edit side | 09:07 | 01a1a5d0-7eaf-76de-bbbe-36f00aa1832a | nano-banana-pro | hammer and prow out (the back view's prow sliver painted out first) | 9 | Kept |
+| Breaker edit back | 09:07 | 01a1a5d0-7ea7-727a-8ae1-5c47f6b50410 | nano-banana-pro | hammer and prow out, left arm hanging | 9 | Kept |
+| Breaker A | 09:10 | 01a1a5d2-d333-731c-8775-3013c92661bd | meshy-7.1 | 4 edited views (front, 3/4, side, back) as images and texture refs; geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Dropped: no right hand (the forearm ends in a stump under the fur cuff) |
+| Breaker B | 09:19 | 01a1a5db-8178-73a6-b736-4e12d593b59b | meshy-7.1 | as A, enhancement on | 40 | **Kept**: both fists and bracers, two arms (no third hand), the face, beard braids, compass, mantle, teddy |
+
+Breaker total: 6 tasks, 116 credits (the body's two attempts used).
+
+### Breaker round 3, 2026-11-04 (owner sheets fb503983)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Breaker r3 edits | 13:20-13:30 | edit_front (9:16, dropped: clipped arms), edit_front2, edit_side, edit_back, edit_tq (dropped: a copy of the front) | nano-banana-pro | breaker_front: hammer and shield out, arms down; the r3 side/back redrawn in the new outfit | 45 | front2, side (teddy painted out), back kept |
+| Breaker C | 13:31 | 01a1a688-d08d-74e2-9e69-9015055e4130 | meshy-7.1 | front, side, back edited; texture refs the same; 2k, meshy-7 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the art's bare belly, sash, skirt, bare feet, braids, closed fists |
+| Breaker D | 13:31 | 01a1a688-d0b4-738f-bed8-df735492629b | meshy-7.1 | as C, enhancement on | 40 | Dropped: open splayed hands |
+
+## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
+No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.
+1. **Inspect** it in Blender: bones (names, parents, heads), each vertex group's bounds, loose parts, materials,
+   the clip. Render front, 3/4, side and back (Workbench renders headless; EEVEE prints EGL errors here). Check the
+   materials' base colours in the .glb itself: the friend's exports came out white (node colours don't export).
+2. **Body:** set the archetype `body` so the rig's joints land on the model's own: `legs` from the hip height,
+   the scale from the shoulder height (shoulders sit 0.5 above the hips in the rig), `build` from the shoulder
+   and hip spacing, `neck` to put the head pivot where the head turns (Dredge: the hull's centre). Then `size` for
+   the sheet height. Run `--warden-rig-json` after each change.
+3. **Spec** (`art/wardens/src/<name>_fit.json`): `groups` (source group -> part), `split` (loose parts onto
+   another bone by where they sit), `fit` (limbs turned and stretched joint to joint, or moved), `carry`, `skin`,
+   `extra` (variant bones, also listed in `WardenGlb.EXTRA`), `weapon` (a group cut into the Gun's space with a
+   `weapon_muzzle`), `materials` ("<slot>-<what>" and a colour from the art), `max_tris`, `anchors`.
+   Give thin parts (rods, fingers, ropes) their own decimation share (`protect`): at the body's ratio they vanish.
+4. `blender -b --factory-startup --python tools/blender/fit_rigged.py -- art/wardens/src/<name>_fit.json`, import,
+   the checks, the shots: as steps 9 to 12 above.
+
+| Warden | Date (UTC) | Source | Credits | Result |
+|---|---|---|---|---|
+| Dredge | 2026-11-04 07:30 | friend's Blender model (ext/imagegen ff552657), fit_rigged.py | 0 | Kept: 14.1k tris + 3.2k horn, contract + 11 variant bones, all checks pass |
+| Dredge r2b | 2026-11-04 09:40 | the same + warden_paint.py: aged-brass atlas (2048, Cycles bake), orb eye, 24 tar drips | 0 | Kept: darker, patina, dents, glowing eye; all checks pass |
+| Dredge r3 hull edits | 2026-11-04 13:20 | front 01a1a66a-ceec-75d1-96a8-dbb2b573f7d8, side 01a1a66a-ceff-7642-b000-0f167116e4a6, back 01a1a66a-cede-70a0-b459-b93ed0579a88 | nano-banana-pro image-to-image | the turnaround's front and back and the side sheet, edited to the hull alone | 27 | Front kept (projected); side dropped (turned to a 3/4 front view), back dropped (grew a porthole) |
+| Dredge r3 hull edits 2 | 2026-11-04 13:25 | side2, back2 (meshy_task.py edit, view-locked prompts) | nano-banana-pro image-to-image | the same, the view and "no porthole on the back" spelled out | 18 | Kept: both projected onto the scripted hull |
+| Dredge r3 hull | 2026-11-04 13:30 | none (the Meshy 3D run and a third front edit were not run: the session's auto-mode permission check refused the credit spend) | - | Blender fallback: warden_hull.py, a scripted dented sphere, plate bands and faceted lames, the three edits projected on it | 0 | Kept: r3 (balance 4,175 -> 4,130, 45 credits) |
+| Dredge r3b | 2026-11-04 14:10 | none (credit-free) | - | modelled tears and peeled flaps, three big curved lames a shoulder, the doubled porthole masked, brass porthole rings | 0 | Kept |
+| Dredge r3c | 2026-11-04 14:40 | none (credit-free) | - | the shared painted-look fix (16c18b4f) merged; the hull's projection lift x1.15 | 0 | Kept |
+| Dredge r3d | 2026-11-04 15:20 | none (credit-free) | - | the stance; deeper dents and tears, flared lames, sharp lens cracks and a glint, tar strands and pool, red core | 0 | Kept |
+| Dredge r3e | 2026-11-04 15:50 | none (credit-free) | - | tar runs over the hull, the back hatch and pipe as geometry, stronger lens cracks, a soft warm hull highlight | 0 | Kept |
+| Dredge r3f | 2026-11-04 16:40 | none (credit-free) | - | ORCH's r3d review: one riveted brass helm and the grilled port, hairline lens cracks, thin crimson-sheened tar, glowing gashes, warm tarnished brass with rust streaks, the eye lifted; the match-zoom fix (f4b59cb3) | 0 | Kept |
+| Dredge r3g | 2026-11-04 17:30 | none (credit-free) | - | ORCH's r3f review: tarnished bronze, rivet rows, a smaller cracked orb, helm drips, smoother hull, brass grille, upright stance | 0 | Kept |
+| Dredge r3h | 2026-11-04 18:20 | none (credit-free) | - | ORCH's r3g review: no spec ovals, brighter eye and far rim, cracked glowing orb, bronze with seams and rivet rows, smoother lames, shards stripped | 0 | Kept |
+| Dredge r3i | 2026-11-04 19:10 | none (credit-free) | - | ORCH's r3h review: a small orb in a wide brass ring, no flap shards, smoother pods, shoulder joints, the horn seated | 0 | Kept |
+| Dredge r3i + v2 | 2026-11-04 19:40 | none (credit-free) | - | the shared match-zoom fix v2 ported by hand (outline + hero_toon from the branch, FAR_LOOK and _far_look in the loader) | 0 | Kept |
+| Dredge r3j | 2026-11-04 20:30 | none (credit-free) | - | r3i limb loss fixed (per-part decimation budgets, `protect`), shards dropped, smaller pods, warm gold, darker pool | 0 | Kept |
+
+## Blender-driven modelling (vs Meshy)
+The owner's friend made Dredge in Blender, probably by driving it through a Blender MCP server (an LLM sends bpy
+code to a running Blender and looks at viewport screenshots). What his file shows:
+- **How it was built:** 3,440 loose pieces joined into one mesh, every one a low-poly primitive (cylinders, UV
+  spheres, tori, cones: rivets of 24 to 100 triangles, six stacked dome shells per shoulder, ten torus windings on
+  the drum, tar drips as stretched cones). The skin is rigid, exactly one bone a vertex: each piece was parented to
+  its bone as it was made, not weight-painted. Clean bone and material names (`Dredge_Brass`, `Claw2.1.L`), one
+  hand-keyed 4 s showcase clip (two keys a channel). This is code, piece by piece: what an agent writing bpy produces.
+- **Can we do it here:** yes, and without a GUI. Everything an MCP server does is bpy, and Blender 4.5 runs
+  headless on this box. The "live viewport" becomes a render loop: one persistent `.blend`, each step a short script
+  (`blender -b scene.blend --python step.py`, add or fix parts, save), then Workbench renders of the front, 3/4, side
+  and back next to the turnaround crops, which the agent looks at (about 5 to 10 s a round). An MCP server is not
+  needed (the common add-on is started from Blender's UI, which would need Blender under Xvfb; not tried here).
+- **What it would take:** (1) extend tools/blender/warden_kit.py with part helpers that make a primitive already
+  bevelled, named, on its slot material ("metal-brass", a colour from the sheet) and bound rigidly to its contract
+  bone, so the model is built on the rig JSON from the start and needs no fit; (2) a per-Warden build script
+  (`tools/blender/<name>.py`) and the render-beside-the-art harness above; (3) a detail pass: Dredge passes because
+  of density (layered plates, rivet rows, drips, seaweed) and true proportions. Our earlier scripted-primitive
+  Wardens were coarse, and the owner rejected them ("made of shapes", 00:30), so the bar is hundreds of parts, not tens.
+- **Time:** an estimated 2 to 4 agent-hours a Warden (40 to 80 render rounds), against about 1 to 2 hours for a
+  Meshy run plus the fit. Rigging is close to free (parts are bound as they are made), the budget is exact, and there
+  are no credits.
+- **Quality vs Meshy:** better on hard surfaces and machines: crisp silhouettes, flat clean colour (the owner's
+  ask; Meshy's textures came out mottled), every asymmetric piece where we put it, no bone-heat failures. Worse on
+  organic forms: faces, hair, cloth folds, muscle and fur come out toy-like from primitives. So use it for Dredge-like
+  Wardens, armour, shields and weapons (Bjorn's prow, Zedran's blade, Cinder's pack), and Meshy (or a Meshy head on a
+  scripted body) for faces and soft shapes (Vex, Moosh/Burple, Ostra's wisp).
+- **Watch:** keep colours on the Principled base colour (the friend's node colours exported as white). A collapse
+  decimate keeps primitives' shapes well (Dredge 43.7k -> 14.5k: no loss at match zoom, some faceting on the hull
+  close up; the planar pass only took 300). Build to the budget instead of decimating where you can.

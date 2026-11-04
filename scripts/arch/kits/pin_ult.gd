@@ -1,6 +1,6 @@
 class_name PinUlt
 extends Node3D
-## Pin's ultimate on X, Starpiercer (docs/heroes/archer.md; hero sheet pin.md "Ultimate"). A tap with no
+## Hem's ultimate on X, Starpiercer (docs/heroes/archer.md; hero sheet pin.md "Ultimate"). A tap with no
 ## cast lock empowers her next shots ("shots", 3) for "window" seconds. While empowered the bow needs no
 ## draw: each LMB press nocks for "nock" s (the bow glows, the cursor ring fills), then looses a beam
 ## that pierces every foe out to "range" (1.5x her Empowered range), knocks back and strips "shred"
@@ -73,7 +73,6 @@ func cast() -> bool:
 	k.m.sfx("pin_ult_cast", h.pos, -2.0 if h.is_local() else -6.0)
 	k.net_ring(h.pos, 1.8, TEAL)
 	k.play("pin_ult_cast")
-	Feel.shake(k.m, "cast", h, h.pos, null, 2)
 	return true
 
 ## Hunter.trigger while empowered: the bow is ours. A press (or a held button once recovered) nocks;
@@ -147,9 +146,6 @@ func _loose() -> void:
 	var vol := -1.0 if h.is_local() else -5.0
 	k.m.sfx("pin_ult_final" if last else "pin_ult_beam", h.pos, vol)
 	k.play("pin_ult_final" if last else "pin_ult_loose")
-	Feel.shake(k.m, "t3" if last else "t2", h, h.pos)
-	if h.is_local():
-		Oomph.punch_dir(k.m, dir, 0.35 if last else 0.25)
 	h.vel.x -= dir.x * 2.5
 	h.vel.z -= dir.y * 2.5
 	k.net_bolt(start, start + Vector3(dir.x, 0, dir.y) * rng, TEAL)
