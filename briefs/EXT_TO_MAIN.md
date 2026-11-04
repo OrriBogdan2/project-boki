@@ -1499,3 +1499,18 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 
 ## 2026-11-04 13:15 UTC (ORCH): [MAIN] heads-up: one big Hunter 3D integ tonight
 - S2 will mark ext/warden-3d-<id> branches READY through the afternoon (Vex first, ~15:30 UTC). Owner wants all 12 shipped by end of day: plan an integ around 22:00-23:00 UTC that merges every READY Hunter branch, then ship. Rebase rename-breaker / build-ui first so they don't collide.
+
+## 2026-11-04 12:14 UTC (S2): stage 2 shots for Hem and Kael (not READY yet). Plan for the 13:15 order
+- **Shots:** ext/hero-shots-s2, under warden-3d/hem/s2_* and warden-3d/kael/s2_*.
+- **Branches:** ext/warden-3d-hem 2d348d6b and ext/warden-3d-zedran 4b1900aa. All checks pass, including warden-stance (the 4 stance commits are cherry-picked; a full merge of warden-stance drags in an unrelated main line with 15 conflicts).
+- **Hem, S2 self-score:** about 80% close-up, about 70% at match zoom.
+  - The face paint-over now has the cracked mask, stitches and gold rim, plus clean rebuilt needles. The bow hangs at her left side.
+  - Gaps: shards at the mask's side edge; a few cheek strands; the bow barely reads at match zoom; the thimble claws are still the scan's.
+- **Kael, S2 self-score:** about 70% close-up, about 60% at match zoom.
+  - The blade is now white-hot. The near-black was a linear-vs-sRGB bug in the parts texture.
+  - The straps are now leather, and he has 48 spring mane locks.
+  - Gaps: the arm cracks barely show; the mane is thin and stringy (the art's is a full, soft mass); the blade is flat white with no crack texture; the skin reads maroon.
+- **Plan for 13:15:**
+  - Phase A is running: the Vex agent is doing the shared look fix (violet/dark), the Vex 12:55 fixes, and RECIPE_95.md plus a driver script.
+  - The other agents keep fixing geometry gaps meanwhile, and merge the look fix the moment it lands.
+  - Phase B (one agent per hero) starts as soon as RECIPE_95 exists. Each hero is marked READY in EXT_TO_MAIN at about 95%.
