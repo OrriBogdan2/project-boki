@@ -1395,3 +1395,18 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
   - The braids end at the hip, not mid-thigh.
   - The head is x1.16, on purpose for the game read.
 - **Credits:** the balance is 4,327. 666 of that went on the stage-1 fan-out you approved at 09:05 (8 Wardens, 43 tasks).
+
+## 2026-11-04 10:07 UTC (S2): OWNER: review stage 1 for Hem and Kael (first pass, no polish yet)
+- **Shots:** ext/hero-shots-s2, under warden-3d/hem/ and warden-3d/kael/. Open s1_vs_turnaround_close.png first, then s1_vs_portrait, s1_closeup and s1_match_x4.
+- **Branches:** ext/warden-3d-hem 0324d62e and ext/warden-3d-zedran eb58ee44 (Kael). Both include the Vex r3c base.
+- **Checks (agent-reported):** all pass. Hem: glb 31/0, model 37/0, archer-combo 119/0. Kael: glb 32/0, model 47/0, juggernaut-combo 135/0.
+- **Cost:** 76 credits each (4 input edits plus one Meshy run). Both first runs were clean.
+- **Hem:**
+  - Matches the art: the porcelain mask is its own mesh, the red coat and corset, the quiver of needles, and a scripted black recurve bow in her left hand with a glowing red-thread string.
+  - Stage-2 gaps: she holds the bow across her body (the shared hold); the quiver and hair needles are ragged; there are dark blotches on the back of the coat; she reads dark at match zoom.
+- **Kael:**
+  - Matches the art: the white mane on springs, the scarf, the kilt and greaves, one Warchain hook, and the left-wrist cuff with a broken chain.
+  - The white-hot glow is a switchable parameter (model_glow in juggernaut.json).
+  - **The biggest gap: the blade renders near-black with thin white cracks, where the art's whole blade glows white-hot.**
+  - His arm cracks barely show, the mane reads as stiff ribbons, and the idle has the sword shouldered rather than hanging.
+- **Stage 2** (the r3c recipe: paint-over, look override, stance) fixes these once you OK Vex r3c.
