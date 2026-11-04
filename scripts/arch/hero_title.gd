@@ -15,7 +15,7 @@ static func gender(archetype: String) -> String:
 static func personality(archetype: String) -> String:
 	return String(Arch.def(archetype).get("personality", "")).replace("\n", " ")
 
-## "Orri the Dark Archer"; the bare player name when the body has no class.
+## "Orri the Red Stitch"; the bare player name when the body has no class.
 static func label(player_name: String, archetype: String) -> String:
 	if not Arch.exists(archetype):
 		return player_name

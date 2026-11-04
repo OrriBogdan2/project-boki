@@ -1,4 +1,4 @@
-# Broken Abomination
+# Brass Abomination
 
 A harbour hauler in a brass diving helm. Throws a rope-hook, reels foes in, drops an anchor on them and
 grows with every knock.
@@ -8,7 +8,7 @@ grows with every knock.
 
 |  |  |
 |---|---|
-| Class title | Broken Abomination |
+| Class title | Brass Abomination |
 | Base character | Dredge, a robot |
 | Personality | A broken machine that leaks dark, corrupt energy. Its joints creak and its eyes flicker. Haunted and creepy, it drags a hook and keeps coming. |
 

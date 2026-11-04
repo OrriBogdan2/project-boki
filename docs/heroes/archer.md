@@ -1,6 +1,6 @@
-# Dark Archer (base character Hem; id `archer`, Light) - fidelity pass (hero sheet pin.md)
+# Red Stitch (base character Hem; id `archer`, Light) - fidelity pass (hero sheet pin.md)
 
-Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name is the class title Dark Archer; the id, files and save keys stay `archer`.
+Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name is the class title Red Stitch; the id, files and save keys stay `archer`.
 
 ## Research summary
 Sources (gameplay only; notes in our own words, nothing of the source ships):
