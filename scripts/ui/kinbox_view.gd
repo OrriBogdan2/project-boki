@@ -416,6 +416,7 @@ func _build_detail() -> void:
 	tv.add_child(UI.label("Level %d %s  ·  %s" % [int(rec["level"]), Evo.form_name(rec), String(sp["type"]).capitalize()], 13, UI.INK))
 	var where := KinBox.went_text(rec) if KinBox.is_boxed(rec) else "Out on the farm"
 	if String(rec["uid"]) == str(Save.d.get("active", "")): where = "Your partner, on the farm"
+	if KinIndoors.status(rec) != "": where = KinIndoors.status(rec)
 	tv.add_child(UI.label(where, 12, Color("cdb8ff") if KinBox.is_boxed(rec) else UI.GOOD))
 	top.add_child(tv)
 	detail.add_child(top)

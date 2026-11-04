@@ -36,14 +36,7 @@ var meteor_next := 0.0
 var meteors: Array = []     # {at, t, tele}
 var glimmer_done := false
 # ---- tutorial
-var tut_step := -1
-var tut_text := ""
-var tut_moved := 0.0
-var tut_kills := 0
-var tut_flag := false
-var tut_down_t := 0.0
-var tut_wait := 0.0
-var tut_throws0 := 0
+var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
 var exits: Exits = null     # the ways out: skiff docks, rift hatches, outpost uplinks (see Exits)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var truce: Truce = null     # emotes and truces between squads (see Truce)
@@ -656,6 +649,7 @@ func _start(o: Dictionary) -> void:
 	PerfLog.reset()
 	_stage_done_ms = 0.0
 	opts = o
+	if o.get("tutorial", false): tut = Tutorial.new(self)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
 	seed(seed_val)
@@ -730,6 +724,7 @@ func _start(o: Dictionary) -> void:
 	await _spawn_pads_and_exits()
 	await _stage("build.pads_exits")
 	await _spawn_hunters()
+	if tut: tut.setup()
 	await _stage("build.hunters")
 	if not opts.get("tutorial", false) and not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_mobs()        # the tutorial brings its own monsters, one step at a time
@@ -1075,12 +1070,8 @@ func _spawn_hunters() -> void:
 			spots.append(rest[best]); rest.remove_at(best)
 	if spots.is_empty():
 		spots = world.spawns.duplicate()
-	if opts.get("tutorial", false):
-		# start somewhere quiet
-		for sp in world.spawns:
-			var isl := world.island_of(sp.x, sp.z)
-			if isl > 0 and world.islands[isl]["role"] in ["grove", "nest"]:
-				spots = [sp]; break
+	if tut:
+		spots = [tut.stop("land")]
 	var names: Array = Data.BOT_NAMES.duplicate(); names.shuffle()
 	_bot_names = names
 	if net_on:
@@ -1325,12 +1316,7 @@ func on_drop_landed(h: Hunter) -> void:
 					var d := Vector2(dx, dz).length()
 					if d < bd: bd = d; best = Vector3(q.x, world.ground_at(q.x, q.z), q.z)
 		h.teleport(best)
-	fx.dust(h.pos, 14)
-	fx.ring(h.pos, 2.2, Color(1, 1, 1, 0.8), 0.3)
-	sfx("land", h.pos, -2.0, 0.8)
-	h.squash = 0.4
-	if h == player:
-		shake(0.25, h.pos)
+	DropFeel.land(self, h)
 	if blight: blight.on_landed(h)
 	if rolling: rolling.on_landed(h)
 
@@ -2527,10 +2513,10 @@ func on_fell(e: Ent) -> void:
 			duel.reset()
 			return
 		if e == player and S_dev_god():
-			var back: Vector3 = e.ai.get("land", world.spawns[0] if world.spawns.size() > 0 else world.random_ground())
+			var back: Vector3 = tut.respawn() if tut else e.ai.get("land", world.spawns[0] if world.spawns.size() > 0 else world.random_ground())
 			e.teleport(back)
-			if opts.get("tutorial", false):
-				hud.toast("Careful near the edges", Color("f3eee2"))
+			if tut:
+				hud.toast("Back to your last stop. Try again", Color("f3eee2"))
 			e.vel = Vector3.ZERO
 			return
 		var by: Ent = e.last_hit_by if time - e.kb_t < 4.0 else null
@@ -2592,7 +2578,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
 	if credit == player:
-		tut_kills += 1
+		if tut: tut.kills += 1
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
 	KeyCarry.on_mob_dead(self, mb)
@@ -2939,7 +2925,7 @@ func _update_vision() -> void:
 	if looking:
 		RenderingServer.global_shader_parameter_set("vis_focus", player.model.global_position if player.model else player.pos)
 		RenderingServer.global_shader_parameter_set("vis_dir", player.aim_dir())
-		RenderingServer.global_shader_parameter_set("vis_range", view_range(player.crouch) * (1.25 if player.crouch else 1.0))
+		RenderingServer.global_shader_parameter_set("vis_range", view_range() * (1.25 if player.crouch else 1.0))
 		# teammates light up what they see too (up to three)
 		var n := 0
 		for h in hunters:
@@ -3703,9 +3689,10 @@ func _process(delta: float) -> void:
 
 ## (movefeel) The camera leans a little ahead of a glide so you see where you're going (CamRig.lead_vel).
 func cam_lead_vel() -> Vector3:
-	if player == null or not player.gliding or player.dropping or player.out:
+	if player == null or not player.gliding or player.out:
 		return Vector3.ZERO
-	return Vector3(player.vel.x, 0.0, player.vel.z)
+	var ahead := 3.0 if player.dropping else 1.0      # the drop leans further, to see the ground ahead
+	return Vector3(player.vel.x, 0.0, player.vel.z) * ahead
 
 func _gather_input() -> void:
 	if player == null or player.out or opts.get("tut_test", false):
@@ -3802,6 +3789,10 @@ func _gather_input() -> void:
 		HunterKeys.ult_pressed(player)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
+		tut.ack()
+		get_viewport().set_input_as_handled()
+		return
 	if hud and hud.map_open() and (event.is_action_pressed("menu") or event.is_action_pressed("map")):
 		hud.close_map()
 		get_viewport().set_input_as_handled()
@@ -3853,6 +3844,9 @@ func step(dt: float) -> void:
 		_update_ship(dt)
 		if net_on:
 			Net.tick(dt)
+		return
+	if tut and tut.intro:
+		for k in pending_input: pending_input[k] = false     # (the intro card: the match waits for a key)
 		return
 	time += dt
 	if Game.god and player and not player.out:
@@ -4346,10 +4340,10 @@ func step(dt: float) -> void:
 	_update_tracking(dt)
 	if opts.get("tutorial", false):
 		if opts.get("tut_test", false):
-			_tut_drive()
+			TutorialDrive.drive(self)
 			if "--tut-slow" in OS.get_cmdline_user_args():
 				player.inp["move"] = (player.inp["move"] as Vector2) * 0.5     # test: walk, so your Boki can lead (screenshots)
-		_update_tutorial(dt)
+		tut.update(dt)
 	if opts.get("training", false) and duel == null:
 		_update_training(dt)
 	_update_rules(dt)
@@ -4803,8 +4797,6 @@ func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
 	if h: h.add_stat("chests")
 	if net_on and not from_net:
 		net_event(["chest", chests.find(c), h.nid if h else ""])
-	if h == player:
-		tut_flag = tut_flag or tut_id() == "chest"
 	ChestLoot.open(self, h, c, from_net)
 
 func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
@@ -4829,29 +4821,6 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 		PerkOrbs.drop(self, "shrine", sh["pos"], 0, h)      # one or two perk orbs by the shrine
 
 ## Midway through, the Warden wakes on the heart island and guards it until someone brings it down.
-## The guided first match. [id, text]: %K is the key for that step, %s your kin's name, %A an
-## ability's name. Steps a kit can't do (no right-click ability, no kin) are skipped.
-const TUT := [
-	["land", "Steer with %K to choose where you land"],
-	["move", "Walk around with %K"],
-	["dash", "Press %K to dash"],
-	["glide", "Press %K to jump, then hold Mouse 5 (or Space) in the air to glide. Mouse 5 is the easy way"],
-	["exdash", "Jump, then press %K in the air for a long dash"],
-	["shoot", "%W"],
-	["utility", "Press %K: %A"],
-	["kin1", "Press %K: %s uses %A"],
-	["throw", "Press %K to Sic %s at the monster"],
-	["chest", "Walk to the chest and hold %K to open it"],
-	["goexit", "Follow the marker to the outpost: its uplink calls you a way home"],
-	["uplink", "Hold %K at the uplink mast to start it"],
-	["defend", "Hold the outpost: stay in the yard while the uplink charges"],
-	["extract", "The lift is open. Step into the light to head home"]]
-const TUT_KEYS := {"land": "move", "move": "move", "dash": "dash", "glide": "jump", "exdash": "dash", "utility": "secondary",
-	"kin1": "signature", "throw": "throw", "chest": "interact", "uplink": "interact"}
-var tut_target := Vector3.INF    # where the HUD points (a world marker, an edge arrow and the distance)
-var tut_label := ""
-var tut_used0 := {}
-
 # ---- training area
 ## [id, what to do, the action whose key it uses ("" for none)]
 const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then hold Mouse 5 or Space in the air to glide", "jump"],
@@ -4966,312 +4935,6 @@ func _train_label(k: String) -> String:
 	for t in TRAIN:
 		if t[0] == k: return _train_text(t)
 	return k
-
-func tut_id() -> String:
-	return String(TUT[tut_step][0]) if tut_step >= 0 and tut_step < TUT.size() else ""
-
-## Whether this hunter's kit has the thing a step teaches.
-func _tut_applies(id: String) -> bool:
-	match id:
-		"utility": return player.runner != null and player.runner.has_slot("utility")
-		"kin1": return player.kin != null and player.kin.runner != null and player.kin.runner.has_slot("k1")
-		"throw": return player.kin != null
-	return true
-
-## The first match is a guided one: no rival hunters, no monster camps, gentle damage, and each
-## step waits for you. Monsters only turn up when a step needs one.
-func _update_tutorial(dt: float) -> void:
-	if player == null or player.extracted:
-		return
-	if tut_step < 0:
-		tut_step = 0
-		_tut_enter(0)
-	# getting knocked down here isn't the end: you get back up after a moment
-	if player.downed:
-		tut_down_t += dt
-		if tut_down_t > 3.0:
-			tut_down_t = 0.0
-			revive_hunter(player, null)
-	var kname: String = player.kin.rec.get("name", "your Boki") if player.kin else "your Boki"
-	var id := tut_id()
-	var done := false
-	match id:
-		"land": done = not player.dropping
-		"move":
-			if player.inp["move"].length() > 0.1:
-				tut_moved += Vector2(player.pos.x - player.prev.x, player.pos.z - player.prev.z).length()
-			done = tut_moved > 6.0
-		"dash":
-			tut_flag = tut_flag or player.roll_t > 0.0
-			done = tut_flag
-		"glide":
-			tut_flag = tut_flag or player.gliding
-			done = tut_flag and player.grounded
-		"exdash":
-			tut_flag = tut_flag or (player.roll_t > 0.0 and player.dash_is_ex)
-			done = tut_flag and player.grounded
-		"shoot":
-			done = tut_kills >= 1
-			_tut_keep_foe("skitter")
-		"utility": done = int(player.used.get("utility", 0)) > int(tut_used0.get("utility", 0))
-		"kin1":
-			done = player.kin == null or player.kin.state == "downed" or int(player.used.get("k1", 0)) > int(tut_used0.get("k1", 0))
-		"throw":
-			done = player.kin == null or player.kin.state == "downed" or player.kin.st_throws > tut_throws0
-			_tut_keep_foe("spitter")
-		"chest": done = tut_flag
-		"goexit":
-			var o := _tut_outpost()
-			done = not o.is_empty() and exits.in_yard(o, player)
-		"uplink":
-			var o2 := _tut_outpost()
-			done = o2.is_empty() or o2["state"] != "idle"
-		"defend":
-			var o3 := _tut_outpost()
-			done = o3.is_empty() or o3["state"] == "open"
-		"extract": done = false
-	# the marker follows whatever this step is about
-	_tut_point(id)
-	# and your Boki leads the way, shows you how and hints in its own voice (KinCompanion.tut)
-	if player.kin and player.kin.comp:
-		player.kin.comp.tut(id, _tut_goal(id))
-	if tut_wait > 0.0:
-		tut_wait -= dt
-		return
-	if done:
-		tut_step += 1
-		if tut_step == 1:
-			for a in OS.get_cmdline_user_args():
-				if a.begins_with("--tut-from="): tut_step = int(a.substr(11))     # test: skip ahead after landing
-		while tut_step < TUT.size() and not _tut_applies(tut_id()):
-			tut_step += 1
-		tut_flag = false
-		tut_wait = 0.6
-		sfx("pickup", null, -4.0, 1.3)
-		if hud: hud.toast("Nice!", Color("8ff0a0"))
-		_tut_enter(tut_step)
-	if tut_step < TUT.size():
-		tut_text = _tut_line(tut_id(), kname)
-
-## The words for a step, with the player's own keys, kin name and ability names filled in.
-func _tut_line(id: String, kname: String) -> String:
-	var txt := ""
-	for row in TUT:
-		if row[0] == id: txt = String(row[1])
-	if txt == "%W":
-		if player.wpn.get("melee", false):
-			txt = "Click %K to swing. Hold it to charge a heavy hit. Beat the monster"
-		else:
-			txt = "Aim with the mouse and hold %K to shoot. Beat the monster"
-		txt = txt.replace("%K", Settings.key_cap("fire"))
-	var key := ""
-	if id == "land" or id == "move":
-		key = "%s%s%s%s" % [Settings.key_cap("up"), Settings.key_cap("left"), Settings.key_cap("down"), Settings.key_cap("right")]
-	elif TUT_KEYS.has(id):
-		key = Settings.key_cap(TUT_KEYS[id])
-	txt = txt.replace("%K", key)
-	var an := ""
-	if id == "utility" and player.runner and player.runner.has_slot("utility"):
-		an = player.runner.def_of("utility").display_name
-	elif id == "kin1" and player.kin and player.kin.runner and player.kin.runner.has_slot("k1"):
-		an = player.kin.runner.def_of("k1").display_name
-	txt = txt.replace("%A", an)
-	return txt.replace("%s", kname)
-
-## Where the HUD marker points for this step.
-func _tut_point(id: String) -> void:
-	tut_target = Vector3.INF
-	tut_label = ""
-	match id:
-		"shoot", "throw", "kin1":
-			var best: Ent = null; var bd := 1e9
-			for mb in mobs:
-				if not mb.dead and player.flat_dist(mb) < bd: bd = player.flat_dist(mb); best = mb
-			if best and bd > 6.0:
-				tut_target = best.pos; tut_label = "Monster"
-		"chest":
-			for c in chests:
-				if not c["open"] and c.get("tut", false):
-					tut_target = c["pos"]; tut_label = "Chest"
-		"goexit", "uplink", "defend", "extract":
-			var o := _tut_outpost()
-			if not o.is_empty():
-				tut_target = o["pos"]
-				tut_label = {"goexit": "Outpost", "uplink": "Uplink", "defend": "Outpost", "extract": "Lift"}[id]
-
-## What a step is about, for your Boki to lead you to or point at (Vector3.INF for nothing).
-func _tut_goal(id: String) -> Vector3:
-	match id:
-		"shoot", "throw", "kin1", "defend":
-			var best: Ent = null; var bd := 1e9
-			for mb in mobs:
-				if not mb.dead and player.flat_dist(mb) < bd: bd = player.flat_dist(mb); best = mb
-			if best: return best.pos
-			if id == "defend":
-				var od := _tut_outpost()
-				return od["pos"] if not od.is_empty() else Vector3.INF
-		"chest":
-			for c in chests:
-				if not c["open"] and c.get("tut", false): return c["pos"]
-		"goexit", "uplink", "extract":
-			var o := _tut_outpost()
-			if not o.is_empty(): return o["pos"]
-	return Vector3.INF
-
-## Is your Boki out ahead leading you right now? (Then the HUD drops its own arrow.)
-func tut_kin_leading() -> bool:
-	return player != null and player.kin != null and player.kin.comp != null and player.kin.comp.leading()
-
-## Keeps exactly one monster around for a step that needs a target (if it fell off, another comes).
-func _tut_keep_foe(kind: String) -> void:
-	if mobs.any(func(x): return not x.dead):
-		return
-	if int(time * 4.0) % 4 != 0:
-		return
-	var at := _tut_spot(5.5, randf() * TAU)
-	if at != Vector3.INF:
-		spawn_mob(kind, at)
-
-func _tut_enter(step_i: int) -> void:
-	var id := String(TUT[step_i][0]) if step_i < TUT.size() else ""
-	tut_used0 = player.used.duplicate()
-	match id:
-		"shoot":
-			tut_kills = 0
-			var at := _tut_spot(5.5, 0.0)
-			if at != Vector3.INF: spawn_mob("skitter", at)
-		"kin1":
-			var at := _tut_spot(5.0, 0.8)
-			if at != Vector3.INF and not mobs.any(func(x): return not x.dead): spawn_mob("skitter", at)
-		"throw":
-			if player.kin:
-				tut_throws0 = player.kin.st_throws
-				if player.kin.state in ["active", "flying"]:
-					player.kin.recall()
-			if not mobs.any(func(x): return not x.dead):
-				var at := _tut_spot(5.0, 0.0)
-				if at != Vector3.INF: spawn_mob("spitter", at)
-		"chest":
-			# whatever is left from the fight wanders off, so the rest is calm
-			for mb in mobs:
-				if not mb.dead: mb.dead = true; mb.visible = false
-			var at := _tut_spot(4.5, 1.0)
-			if at != Vector3.INF:
-				var n := Models.chest()
-				n.position = at
-				add_child(n)
-				chests.append({"pos": at, "open": false, "prog": 0.0, "node": n, "free": true, "tut": true})
-				ping(at, Color("dfe8f2"))
-		"goexit":
-			# the map's outpost (one is made close by if the map has none): the marker leads there
-			var o := _tut_outpost()
-			if not o.is_empty():
-				ping(o["pos"], ExitModels.UPLINK)
-			if hud: hud.toast("Time to head home. Follow the marker to the outpost", ExitModels.UPLINK)
-		"uplink":
-			if hud: hud.toast("Starting the uplink draws monsters to the outpost", ExitModels.UPLINK)
-		"defend":
-			if hud: hud.toast("Stay inside the walls. A rival hunter in the yard would stall it", ExitModels.UPLINK)
-		"extract":
-			if hud: hud.toast("The lift is open!", ExitModels.UPLINK)
-
-## The tutorial's way out: the map's outpost, or (on a map without one) one made a short walk away.
-func _tut_outpost() -> Dictionary:
-	if exits == null:
-		return {}
-	var outs := exits.of_kind("outpost")
-	if not outs.is_empty():
-		return outs[0]
-	if player == null:
-		return {}
-	var at := _tut_spot(14.0, -1.0)
-	if at == Vector3.INF: at = _tut_spot(8.0, -1.0)
-	if at == Vector3.INF: return {}
-	exits._add_outpost({"pos": at, "walled": false}, true)
-	exits.list[-1]["i"] = exits.list.size() - 1
-	return exits.list[-1]
-
-var _tut_last := -1
-## Test driver: plays the tutorial by itself so the whole flow can be checked headless.
-func _tut_drive() -> void:
-	if tut_step != _tut_last:
-		print("TUT step ", tut_step, " ", tut_id(), " t=", snapped(time, 0.1), " mobs=", mobs.filter(func(x): return not x.dead).size())
-		_tut_last = tut_step
-	var p := player
-	p.inp["move"] = Vector2.ZERO
-	p.inp["fire"] = false
-	p.inp["glide"] = false
-	p.inp["interact"] = false
-	var goto := func(at: Vector3):
-		var d := Vector2(at.x - p.pos.x, at.z - p.pos.z)
-		p.inp["move"] = d.normalized() if d.length() > 0.5 else Vector2.ZERO
-	var near_mob := func() -> Ent:
-		var best: Ent = null; var bd := 1e9
-		for mb in mobs:
-			if not mb.dead and p.flat_dist(mb) < bd: bd = p.flat_dist(mb); best = mb
-		return best
-	if "--tut-debug" in OS.get_cmdline_user_args() and int(time * 60.0) % 120 == 0:
-		var nm: Ent = near_mob.call()
-		print("  dbg p=", p.pos.snapped(Vector3.ONE * 0.1), " gr=", p.grounded, " glide=", p.gliding, " mob=", (nm.pos.snapped(Vector3.ONE * 0.1) if nm else null), " hp=", (nm.hp if nm else 0.0), " wpn=", p.wid, " ammo=", p.get("ammo"), " kin=", (p.kin.state if p.kin else "-"))
-	match tut_id():
-		"move": p.inp["move"] = Vector2(1, 0) if int(time) % 4 < 2 else Vector2(-1, 0)
-		"dash": p.inp["dash"] = true
-		"glide":
-			if p.grounded and not tut_flag: p.inp["jump"] = true
-			p.inp["glide"] = true
-		"exdash":
-			if p.grounded and not tut_flag: p.inp["jump"] = true
-			elif not p.grounded and not tut_flag and p.vel.y < 0.0: p.inp["dash"] = true
-		"utility":
-			p.inp["sec"] = true
-		"shoot", "kin1", "throw":
-			var best: Ent = near_mob.call()
-			if best:
-				p.inp["aim"] = best.pos + Vector3(0, 0.9, 0)
-				if p.flat_dist(best) > 3.0: goto.call(best.pos)
-				if tut_id() == "shoot": p.inp["fire"] = true
-				elif tut_id() == "kin1": p.inp["sig"] = true
-				elif p.kin and p.kin.state in ["shoulder", "active"]: p.kin.throw_to(best.pos)
-			elif tut_id() == "kin1":
-				p.inp["sig"] = true
-		"chest":
-			for c in chests:
-				if not c["open"] and c.get("tut", false):
-					goto.call(c["pos"]); p.inp["interact"] = true; break
-		"goexit", "uplink", "defend", "extract":
-			var o := _tut_outpost()
-			if o.is_empty():
-				return
-			var c: Vector3 = o["pos"]
-			match tut_id():
-				"goexit":
-					# go there the way a bot would: over the bridges, or jump and glide across a gap
-					var mv := bot_brain._path_dir(self, p, c)
-					if p.ai.has("cross"):
-						var L: Dictionary = p.ai["cross"]
-						var land: Vector3 = L["land"]
-						var tol := Vector2(land.x - p.pos.x, land.z - p.pos.z)
-						if p.grounded and world.island_of(p.pos.x, p.pos.z) == int(L["to"]):
-							p.ai.erase("cross")
-						elif not p.grounded:
-							mv = tol.normalized()
-							p.inp["glide"] = tol.length() > 1.6 or world.is_void(p.pos.x, p.pos.z)
-						elif p.flat_dist(L["take"]) < 1.3:
-							mv = tol.normalized()
-							p.inp["jump"] = true
-					p.inp["move"] = mv
-					p.inp["aim"] = p.pos + Vector3(mv.x, 0.9, mv.y) * 3.0
-				"uplink":
-					goto.call(c)
-					p.inp["interact"] = p.flat_dist(c) < 1.4
-				"defend":
-					goto.call(c + Vector3(1.2, 0, 1.2))
-					var best: Ent = near_mob.call()
-					if best and p.flat_dist(best) < 8.0:
-						p.inp["aim"] = best.pos + Vector3(0, 0.9, 0)
-						p.inp["fire"] = true
-				"extract":
-					goto.call(c)
 
 ## Test hook (--balloon-demo=lip|glide|hop|self): hit markers. "lip" hangs a foe and a squadmate
 ## below an island's lip (balloons) and you shoot the foe's; "glide" holds them high over land
@@ -5433,17 +5096,6 @@ func _open_air(p: Vector3, rad: float) -> bool:
 			if not world.is_void(p.x + cos(a) * d, p.z + sin(a) * d):
 				return false
 	return true
-
-## Open ground a given distance from the player on the same island.
-func _tut_spot(dist: float, ang0: float) -> Vector3:
-	var isl := world.island_of(player.pos.x, player.pos.z)
-	for i in 24:
-		var a := ang0 + i * 0.52
-		for d in [dist, dist * 0.7, dist * 0.5]:
-			var x: float = player.pos.x + cos(a) * d; var z: float = player.pos.z + sin(a) * d
-			if world.island_of(x, z) == isl and not world.is_block(x, z) and world.edge_dist(int(x), int(z), 2) >= 2:
-				return Vector3(floor(x) + 0.5, world.ground_at(x, z), floor(z) + 0.5)
-	return Vector3.INF
 
 # ------------------------------------------------------------------ hero zones
 func add_zone(kind_s: String, at: Vector3, radius: float, dur: float, team_i: int, owner: Hunter, from_net := false) -> void:

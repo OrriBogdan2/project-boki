@@ -68,11 +68,9 @@ const GLIDE_MAX := 15.0
 # The opening drop, battle-royale style: a fast skydive you steer freely, then the glider opens by
 # itself near the ground (or earlier on jump) for a slower, floatier last stretch.
 const DIVE_FALL := 13.0        # [est] a punchy skydive (was 11)
-const DIVE_SPEED := 10.0
+const DIVE_SPEED := 14.0       # m/s, top flat speed in the dive (DropFeel)
 const DROP_FALL := 4.2
-const DROP_SPEED := 7.0
-const DIVE_STEER := 10.0       # how quickly the dive and the drop's glider answer the keys (1/s; was 3 and 4: ~0.7s lag)
-const DROP_STEER := 11.0
+const DROP_SPEED := 8.0        # m/s, top flat speed under the open glider
 const DIVE_VY_RATE := 7.0      # the dive reaches its fall speed in ~0.3s (was 4)
 const DROP_VY_RATE := 9.0      # the canopy settles to its sink in ~0.2s after it opens (was 4)
 const DEPLOY_POP := -1.6       # the canopy catching: your fall checks to this, then settles to DROP_FALL
@@ -899,7 +897,7 @@ var lift_t := 0.0              # seconds of the current abyss lift (feathering t
 ## The glider's vertical speed this step below an island's lip over the abyss, `depth` metres under
 ## it: it pulls you up harder and faster the deeper you are (ABYSS_LIFT*), then brakes into the last
 ## ABYSS_BRAKE_DIST so you arrive at ground level (let go just before to carry the climb up as height).
-## Shared by Hunter (matches, the --training ground) and Home (the farm and the Training Grounds).
+## Shared by Hunter (matches, the --training ground) and Home (the farm).
 static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float:
 	if depth > ABYSS_BRAKE_DIST:
 		var acc := (ABYSS_LIFT + ABYSS_LIFT_PER_M * depth) * k
@@ -2276,7 +2274,7 @@ func _physics(dt: float) -> void:
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
 			gs = DIVE_SPEED if diving else DROP_SPEED
-			hv = Vector2(vel.x, vel.z).lerp(mv * gs, 1.0 - exp(-(DIVE_STEER if diving else DROP_STEER) * dt))
+			hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)
 			if drop_follow != null and m.skydrop:
 				hv = m.skydrop.follow_hv(self, gs)     # in formation: the leader steers
 		# wind roads carry you along (either way), updrafts lift you
@@ -2323,7 +2321,7 @@ func _physics(dt: float) -> void:
 	elif gliding:
 		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
 		if dropping:
-			vel.y = lerpf(vel.y, -sink, 1.0 - exp(-(DIVE_VY_RATE if diving else DROP_VY_RATE) * dt))
+			vel.y = DropFeel.fall_vy(vel.y, sink, DIVE_VY_RATE if diving else DROP_VY_RATE, pos.y - ground(), dt)
 			if drop_follow != null and m.skydrop:
 				vel.y = m.skydrop.follow_vy(self)
 		else:
@@ -3313,6 +3311,7 @@ func render(delta: float, alpha: float) -> void:
 	if remote:
 		update_lip()
 	_render_weapon_fx(delta)
+	DropReticle.tick(self, delta)
 	var rig: Node3D = model.get_node("Rig")
 	var torso: Node3D = rig.get_node("Torso")
 	if anim == null or anim.model != model:
@@ -3352,14 +3351,6 @@ func render(delta: float, alpha: float) -> void:
 			if ak == null or not ak.dash_afterimage():
 				m.fx.ghost(position, face, tc, float(cdat["scale"]))
 	elif gliding:
-		# while dropping in, a ring on the ground shows where you'll land
-		if dropping and is_local():
-			step_t -= delta
-			if step_t <= 0.0:
-				step_t = 0.22
-				var gy: float = m.world.ground_at(pos.x, pos.z)
-				if gy > World.VOID + 1.0:
-					m.fx.ring(Vector3(pos.x, gy, pos.z), 1.1, Color(1, 1, 1, 0.7), 0.25)
 		wind_t -= delta
 		# (movefeel) carrying a dash's momentum: a dense streak trail and afterimages until it bleeds off
 		var boosted := boost_fx_t > 0.0 and spd > GLIDE_SPEED * 1.25 and not dropping

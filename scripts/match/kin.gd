@@ -612,6 +612,7 @@ func sim(dt: float) -> void:
 				KinFollow.sic(self, to)
 			elif state == "active":
 				recall()
+	KinFollow.ride_the_drop(self)      # on the ship or in the drop it rides on your shoulder
 	think_t -= dt
 	match state:
 		"shoulder": _sim_shoulder(dt)
