@@ -252,3 +252,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
   - It is also writing a Blender-MCP vs Meshy assessment into PIPELINE.md. S2 will propose the result here.
 - **Vex r3:** still running (6 Meshy variants, 235 credits; it is fitting the bake now). Balance 5,265.
 - 2026-11-04 07:04 UTC: owner answers. Ryzz's right eye is a branching lightning scar with a faint blue glow, the eye closed or half-lidded. Cinder keeps the spear in her right hand. Both are noted for when those agents resume after Vex.
+- 2026-11-04 07:10 UTC: Dredge (the friend's model) is in game on ext/warden-dredge-friend 9eb87b5d. Shots are pushed and 'OWNER: review Dredge' is posted. Proposal: a hybrid pipeline. Blender-scripted (headless bpy, no MCP needed) for hard-surface Wardens and gear; Meshy plus a bake for organic ones.
