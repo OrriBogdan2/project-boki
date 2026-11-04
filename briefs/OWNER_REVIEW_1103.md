@@ -629,3 +629,10 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Owner: "also his feet clip through the ground" (the Empty: creator preview and the farm/town).
 - Likely cause: the Empty's "real height" and build scaling (empty90) scales the model from its centre instead of the feet, or the height offset isn't re-applied after scaling, so shorter/taller settings sink the feet. Also check the walk cycle's foot height on uneven ground.
 - Fix: scale from a feet-level pivot and keep the soles on the ground for every height/build/gender setting; idle and walk keep the feet on the surface (no sinking). Assert: at min/mid/max height and both builds, the lowest foot vertex is within 2 cm of the ground in idle and across the walk cycle. Do it with items 79b/80 (same Empty files).
+
+## 82. The new-Boki screen: less text, hoverable moves (owner, 22:59 UTC Nov 4)
+- Owner: "the moves / bond move need to be hoverable when you get a new pet; right now the screen is too text-heavy and doesn't really say anything."
+- Applies to the screen shown when you hatch or catch a new Boki (and the same panel anywhere a Boki's moves are listed).
+- Redesign: lead with the Boki itself (big portrait/model, name, species, element, one-line personality). Show each move and the bond (Fusion) move as an **icon tile with its name only**; **hovering (or focusing with a controller) shows a tooltip** with what it does, in one or two plain lines with the key numbers (damage, cooldown, effect), plus the key to use it (Settings.key_cap). No paragraphs on the screen itself.
+- The bond move gets a distinct tile (it's the special one) with a short teaser line ("Fuse to unlock: <name>").
+- These are Boki UI files (capture_hud / boki_hud / field_book are reserved to main): whoever does it lists the wiring for main, or main does it after its reset.
