@@ -1,0 +1,4 @@
+# Pip: extra 3D references (owner, 2026-11-04)
+- pip_front.webp: full-body front, the main fix for stage 1: arms held clear of the body with a gap, the cape hanging BEHIND the arms (stage 1 fused the arms to her flanks and cape), wings spread, feet on the ground line. The lantern is in her LEFT paw here, matching the portrait; keep one hand consistently. Its flower crown shrank to one flower: use the full white-flower crown from the head sheet.
+- pip_head_sheet.webp: front + side head: big eyes, blush, tiny fang, red-tipped ears, the full white flower crown and brass goggles, the teal cape collar with the leaf clasp.
+- pip_lantern_sheet.webp: lantern scale and handle only (about head-sized). Keep the portrait's lantern look: copper with pointed-arch window frames and a warm living flame (the hearth fire), not a plain candle. Make it glow and cast light (stage 1 cast none).
