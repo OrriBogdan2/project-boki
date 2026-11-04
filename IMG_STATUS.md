@@ -142,3 +142,8 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 - A frost demoness figure-skater: dark ice ram horns, frost bat wings, a spaded tail, long dark wavy hair in low pigtails with ice clips, glowing pale-blue eyes, a sculpted ice costume, ice-bladed skates, ONE ice spear in her right hand.
 - Kit nit: the turnaround's 3/4 view is missing the spear; she always has it in her right hand.
 - Roster note (for the owner): winged heroes are now Sable, Pip and Claire; horns also on Zedran (ram).
+
+## 2026-11-04 07:50 UTC: Tarek round 2 (owner-approved) from the owner's uploads (orchestrator)
+- wardens_r2/tarek_{turnaround,side,portrait,splash}.webp + TAREK_KIT.md; review/tarek_before_after.jpg.
+- A blind cliff-runner: a cloth blindfold, long locs with stone beads, copper rings and amber crystals (the owner's "jewellery in his hair"), three floating geode seeing-stones with amber irises orbiting his head, stone bracers with glowing cracks, a slate vest, a terracotta sash, a climbing harness with pitons, a chalk pouch, bare wrapped feet.
+- Note for VFX: the amber ripple rings under his feet. DECISIONS: "a ground ring means gameplay", so show them only while he senses or uses an ability (or as a very faint idle pulse), not as a constant ring.
