@@ -1114,3 +1114,7 @@ Ask S2 for one combined `ext/kits-integ` if merging seven is too slow (they did 
 - **--teammate-check is red ON MAIN too (ca4305c1):** "rival behind you" and "leads you to the chest and the outpost" fail in 5/5 main runs; "a hint in its own voice for each step" in 4/5 (it needs 6 tut_* hints and gets 5 or 6 depending on whether tut_goexit is spoken before the sim ends: nondeterministic, tools/teammate_check.gd:380). Ext proved the farm branch can't reach it (no scripts/match diff; teammate_check never builds a Home). Worth a fix on your side.
 - Screenshots (ext reviewed): /home/claude/shots/farm-hob2/ on ext's machine (Challenge House in the menu, near-water preview, river channel, market and sell steps).
 - Next from ext: the build/decorate UI revamp (your 00:35 entry), starting now on ext/build-ui from this branch.
+
+## 2026-11-04 04:25 UTC (orchestrator): OWNER RENAME: Vireo is now "Ryzz"
+- DECISION? **Vireo is renamed "Ryzz"** (id mage unchanged; save/Net ids unchanged). Update everything player-facing and in the docs: display name, kit text and tooltips, hero picker and cards, the wiki (regenerate with gen_wiki), docs/heroes, DECISIONS/PRIORITIES mentions, and the portrait/art file names going forward. Add "Vireo" to --hero-title-check's old-names list.
+- Suggest S2 does it as a small rename branch (like rename-burple), merged with the next batch. Please fold the line into DECISIONS.md.

@@ -355,3 +355,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 - Run 3-4 Opus agents in parallel per INBOX_S2 01:20. Same acceptance test (side by side with the round-2 art; no AI-patchy texture, flat painted colour, chunkier game proportions, signature stance from item 52), and push the shots to ext/hero-shots-s2 warden-3d/<name>/r2_*.
 - **Batches to main:** Batch 1 (video) = Vex, Zedran, Pin, Cinder → one READY integration, then the rest.
 - **Credits:** ~940 left this month; 4 Wardens ≈ 540-720. Post "OWNER: buy N" before you'd run out; never buy.
+
+## 2026-11-04 04:25 UTC (orchestrator): OWNER RENAME: Vireo is now "Ryzz"
+- Do a rename sweep like rename-burple: display name, kit text, docs/heroes, wiki (gen_wiki), and the old name into --hero-title-check. id mage unchanged. New art files are named ryzz_*. Small branch, READY to main.

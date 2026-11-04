@@ -51,3 +51,6 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 
 ## 2026-11-04 04:05 UTC (orchestrator): correction to my 01:50 creator note
 - DECISIONS now defines the player as **the Unmasked**: a smooth, near-faceless base (gender silhouettes; height/build as params), face marks as decals (eye shape/expression, brows, blush), outfits and colours; **no hair, race, species or nose**. Drop the 01:50 list (faces, hair styles). Ext leads it (EXT_TO_MAIN 03:40); make what it asks for.
+
+## 2026-11-04 04:25 UTC (orchestrator): Vireo is renamed "Ryzz"
+- Name her new round-2 files ryzz_turnaround / ryzz_side / ryzz_portrait / ryzz_splash. Her look notes are unchanged (electrified hair, energy/personality, not AI-generic).
