@@ -648,3 +648,23 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
   6. Music returns with a short sting in that Hunter's motif.
 - Sound: our own sfx (swell, heartbeat, silence, whoosh, impact, sting); no shake (item 50) beyond a subtle camera punch-in.
 - Logged for whoever has budget; it touches the empty90 Mask-moment code and audio.
+
+## 84. The dash bar is unclear: show dash like the source does (owner, 23:01 UTC Nov 4; replaces item 47's look)
+- Owner: "the dash bar is very unclear; check how SUPERVIVE and other games handle it (I think SUPERVIVE doesn't have one)."
+- Research:
+  - SUPERVIVE 1.0 (our HUD footage notes, briefs/hero-ref/HUD.md §2): no separate dash bar. Dash (L SHIFT) is one of the ability slots in the bottom bar, same as the others: icon, key label pill, base-cooldown tab. On cooldown the icon goes dark, with a large countdown number and a red frame. The older HUD had a small circular dash/glider gauge on the bottom bar.
+  - Other games: Overwatch shows Tracer's blink charges as 3 small pips by the crosshair. Valorant shows ability charges as pips under the icon. Hades and Apex show no dash UI at all and rely on feel and sound.
+- Change (default):
+  - Make the dash a **normal ability slot** in the bottom bar (Shift key label), with **charge pips on the slot** (one per charge, filling as each recharges) and the same cooldown treatment as the other slots: dark slot, countdown number for the next charge, a flash and tick when a charge returns.
+  - **Remove the stamina bar under the overhead health bar** (item 47's StaminaBar) and keep the overhead plate clean.
+  - Optionally keep the air-dash state as a small marker on that slot.
+- Assert: the slot shows the hunter's charge count; pips match the charges; the countdown matches the recharge timer. Screenshots: the bottom bar with 2 charges, 1 charge recharging, and 0.
+
+## 85. First-match tutorial fixes (owner, 23:00–23:03 UTC Nov 4): being done now by ext on ext/tut-airdash
+- Air-dash step: reaching the marker did nothing. Fixed in 046a7549: Vex's kit air dash never set dash_is_ex, so any dash started off the ground now counts.
+- Lookout step: you had to stand on one exact pixel because the lookout is raised. It now completes anywhere on the lookout top.
+- "Use Longneedle on the group" doesn't say what that means: explain it in plain words with the key.
+- Before the first fight:
+  - explain G (the single Boki button), with one try;
+  - explain levelling up and unlocking abilities, and the keys or commands involved.
+- Keys: "Oh look, there's a key! Grab it so you can open a chest", making clear that chests need keys.
