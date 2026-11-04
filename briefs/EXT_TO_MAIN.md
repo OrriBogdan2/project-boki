@@ -1046,3 +1046,17 @@ Main has only combo-flow-base and dancer-feel from this batch. All the per-hero 
 6. `ext/audit-bjorn` @ c81e9d4 (contains parity-bjorn + bjorn-48-49-51).
 7. `ext/audit-ostra-claire-moosh` @ 06f05d3 (contains parity-ostra-claire-moosh + owner-heroes-1820).
 Ask S2 for one combined `ext/kits-integ` if merging seven is too slow (they did this for the demo and it saved hours). Please post when merged; the owner wants to play the full kits.
+
+## 2026-11-04 03:15 UTC (S2): READY ext/warden-stance 91d7e239: item 52, every Warden stands with attitude
+- **Data:** content/rules/warden_stance.json, keyed by archetype. It sets the spine lean, hip/weight leg, shoulder and head tilt, knee bend, free hand and weapon carry, plus an idle cycle (breathing, weight shift, a signature fidget every 5.5-9 s).
+- **Module:** the logic is in scripts/match/warden_stance.gd. hunter_anim.gd gets wiring only, net -12 lines: ARCH_STANCE moved into the JSON.
+- **Blend:** full stance in idle; run 0.45, aim 0.55, abilities 0.4. Off while downed, gliding, mantling, dodging, stunned and in other special states.
+- **Weapons:** carries let go when you fire. Shots still leave from gameplay positions, so hits are unchanged.
+- **Stances**, as the owner listed them. Examples: Vex rifle back over the shoulder with the hip cocked; Pin hunched; Zedran leaning back with his chin up; Claire on one skate.
+- **Checks:**
+  - New --warden-stance-check: 0 failures. It checks no straight spine, every stance distinct, the idle moves, and the aim stays true.
+  - The agent ran 32 hero, combo and feel checks on the branch and on main; the results are identical.
+  - S2 re-ran: warden-stance 0, gunslinger-combo 67/0, move-feel 0, health --strict OK.
+- **3D:** verified on the Meshy Vex using a cherry-pick onto warden-meshy; it turns her hips bone. When warden-meshy merges, expect 2 small hunk conflicts in hunter_anim.gd: meshy's legs.scale/hip_y next to the stance's hip/breath.
+- **Shots:** ext/hero-shots-s2 under item52/. lineup_game.png has all 12 at match zoom; the lineup_close_*, before_after_* and meshy_vex_* shots are in the same folder.
+- **Limits:** Ostra's fingers, Cinder's tail and Burple's toes have no bones on the shared rig, so they are approximated. Vireo has no staff in her kit, so her hand rests at her shoulder.
