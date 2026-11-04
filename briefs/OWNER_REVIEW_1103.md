@@ -816,3 +816,17 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
 - Death boxes are tinted by owner: ally boxes in team colour with the teammate's name + portrait; enemy boxes red/neutral. The same marker shows on the minimap and the full map (ally boxes always visible to the team).
 - At an ally's box: "Hold F: take their [soul/token]" brings them back (follow the source's respawn rule; if it needs a respawn point, show the path there). Their Boki comes back with them.
 - Assert / screenshots: an ally box vs an enemy box in the world and on the map; a revive from an ally box restores the teammate.
+
+## 102. No overlapping popups + much less text on screen (owner, 23:24 UTC Nov 4; part of item 96)
+- Owner: "There's a lot of double UI / text popping up on top of each other. If two need to pop up, they should not be on top of each other. And in general too much text clutter."
+- One shared message queue / stack for all transient on-screen text (toasts, pickups, level-ups, hints, tutorial lines, objective messages):
+  - Messages stack in a fixed lane, never on top of each other.
+  - Repeats merge ("Ember x3").
+  - At most ~3 visible at once; lower priority waits.
+  - Short lifetimes.
+- Cut the clutter:
+  - Audit every popup / floating text in matches and on the farm.
+  - Delete or shorten anything that isn't needed for a decision; prefer an icon, sound or flash over words.
+  - Floating combat numbers small and fading.
+  - Hints show once.
+- Assert: firing 5 messages at once gives no overlap (layout check); screenshots before/after of a busy moment in a match and on the farm. List what was removed.
