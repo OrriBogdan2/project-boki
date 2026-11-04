@@ -83,7 +83,8 @@
 					0.8,
 					0.84,
 					0.98
-				]
+				],
+				"light_neutral_warm": 0.6
 			},
 			"cloth": {
 				"fres": 0.6,

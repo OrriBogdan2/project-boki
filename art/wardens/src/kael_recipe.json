@@ -2,7 +2,7 @@
  "doc": "Kael (juggernaut; was Zedran): RECIPE_95 spec (docs/art/wardens/RECIPE_95.md). python3 tools/meshy/recipe.py art/wardens/src/kael_recipe.json <steps>. The body run (stage 1) is reused; the edits, the Meshy runs and the bake are logged in PIPELINE.md.",
  "name": "kael",
  "arch": "juggernaut",
- "tag": "b8",
+ "tag": "b9",
  "raw": "~/meshy/zedran",
  "art": {
   "ref": "origin/ext/imagegen",
@@ -18,5 +18,6 @@
  "bake": "art/wardens/src/kael_bake.json",
  "fit": "art/wardens/src/kael_fit.json",
  "match_crop": "200:170:540:270",
- "combo_check": "--juggernaut-combo-check"
+ "combo_check": "--juggernaut-combo-check",
+ "demo_at": "-4.5,0"
 }
