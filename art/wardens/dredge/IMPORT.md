@@ -25,10 +25,11 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   joint, the forearms moved onto the rig's elbows (his long claw arm keeps its length and angle; the hand bone sits
   on the rig's hand, the claw hangs on below it, rigid).
 - **Weapon:** the horn (his Hand.R) cut into `weapon` in the Gun node's space, narrow end on the shotgun's grip,
-  mouth forward, x1.3; `weapon_muzzle` on its mouth moves the Gun's Muzzle there. 1,700 triangles.
+  mouth forward, x1.3, solidified 12 mm (its mouth has an inside); `weapon_muzzle` on its mouth moves the Gun's
+  Muzzle there. 3,200 triangles.
 - **Budget:** planar dissolve (1 degree) then collapse to 14,500 triangles (14,130 after import); hard edges sharp
   past 50 degrees.
-- **Materials (flat, slot-named):** metal-brass 94804f, metal-iron 6c6762, metal-glass 8c949c, leather-boot 5e4a3c,
+- **Materials (flat, slot-named):** metal-brass a48d52, metal-iron 767069, metal-glass 8c949c, leather-boot 5e4a3c,
   leather-tar 231a1c, leather-rope a07e52, cloth-flesh 8e2a2c, cloth-seaweed 56783e, cloth-barnacle c4b8a0,
   glow-eye ff2418: four toon slots. The loader shades them with the procedural heroes' clean painted look.
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.

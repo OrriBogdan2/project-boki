@@ -181,7 +181,7 @@ No Meshy. The model's own rigid skin and extra bones are kept; the script rename
 
 | Warden | Date (UTC) | Source | Credits | Result |
 |---|---|---|---|---|
-| Dredge | 2026-11-04 07:30 | friend's Blender model (ext/imagegen ff552657), fit_rigged.py | 0 | Kept: 14.1k tris + 1.7k horn, contract + 11 variant bones, all checks pass |
+| Dredge | 2026-11-04 07:30 | friend's Blender model (ext/imagegen ff552657), fit_rigged.py | 0 | Kept: 14.1k tris + 3.2k horn, contract + 11 variant bones, all checks pass |
 
 ## Blender-driven modelling (vs Meshy)
 The owner's friend made Dredge in Blender, probably by driving it through a Blender MCP server (an LLM sends bpy
