@@ -146,6 +146,10 @@ var head: Node3D
 var aim: Node3D
 var gun: Node3D
 var mag: Node3D
+var spin: Node3D               # a 3D Warden's spinning barrels (WardenGlb.WEAPON_SPIN), turned while firing
+var spin_v := 0.0              # their turn rate (rad/s)
+const SPIN_MAX := 30.0         # rad/s while firing
+const SPIN_EASE := 4.0         # how fast they spin up and wind down (1/s)
 var mag_base := Vector3.ZERO
 var sentinel := 0             # a part of the weapon in hand (instance id): once it's gone the weapon was swapped
 var offhand: Node3D           # twin blades: the reversed dagger, carried by the left hand
@@ -390,6 +394,7 @@ func _setup_weapon(w: String) -> void:
 	if gun == null:
 		return
 	gun_scl = gun.scale.x
+	spin = gun.find_child(WardenGlb.WEAPON_SPIN, true, false) as Node3D
 	for ch in gun.get_children():
 		if ch.name == "Mag":
 			mag = ch; mag_base = mag.position
@@ -1239,6 +1244,9 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		shake_t = 0.12
 		if hold == "shotgun": pump_t = 0.0
 	fired_prev = fired
+	if spin:
+		spin_v = lerpf(spin_v, SPIN_MAX if fired < 0.3 else 0.0, minf(1.0, SPIN_EASE * dt))
+		spin.rotate_object_local(Vector3.FORWARD, spin_v * dt)
 	var ks := _spring(kick, kick_v, 0.0, 420.0, 20.0, dt)
 	kick = ks.x; kick_v = ks.y
 	shake_t = maxf(0.0, shake_t - dt)

@@ -42,6 +42,8 @@ const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
+const PAINTED_SHADE := 0.72     # a painted atlas's shadow floor (the hero shader's own is 0.37)
+const PAINTED_RAMP := 2.6       # and its terminator, softer than the hero shader's 0.5
 const GLOW := 1.6              # emission of the glow slot (mechanical eyes, cracks), x its painted colour
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
@@ -49,6 +51,7 @@ const ANCHORS := ["anchor_head_top", "anchor_chest"]
 const SETTING := "warden_models"
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
 const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
+const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (HunterAnim spins them while firing)
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
 static var _measuring := false  # building that neutral model: no .glb on it
@@ -173,8 +176,10 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 		for si in mesh.get_surface_count():
 			var src := mesh.surface_get_material(si) as BaseMaterial3D
 			var slot := String(src.resource_name).get_slice("-", 0) if src else ""      # ("<slot>-<texture>")
-			var m := Models.toon(src.albedo_color if src else Color.WHITE)
-			m.set_shader_parameter("vertex_ao", true)
+			# (no ink shell: it pokes through the scan's thin hair strands as lines)
+			var m := Models.toon(src.albedo_color if src else Color.WHITE, false)
+			# (no baked AO in a Meshy model's vertex colour: the array is absent and would read as noise)
+			m.set_shader_parameter("vertex_ao", false)
 			m.set_shader_parameter("surface", int(SLOTS.get(slot, 1)))
 			Models.hero_look(m)
 			if src and src.albedo_texture:
@@ -185,6 +190,12 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 				# so on a scanned mesh's long thin triangles it shows as facets); metal keeps its gloss and rim
 				m.set_shader_parameter("surface", 0)
 				m.set_shader_parameter("paint", 0.0)
+				# and its light and shade are painted in too: a soft, light toon ramp on top, so the scan's
+				# small bumps don't break into hard light/shadow facets (STYLE.md's flat painted read)
+				m.set_shader_parameter("shade", PAINTED_SHADE)
+				m.set_shader_parameter("ramp", PAINTED_RAMP)
+				m.set_shader_parameter("shadow_sat", 0.0)
+				m.set_shader_parameter("self_shadow", 0.0)
 			if slot == "glow":
 				m.set_shader_parameter("glow", GLOW)
 			(mi as MeshInstance3D).set_surface_override_material(si, m)

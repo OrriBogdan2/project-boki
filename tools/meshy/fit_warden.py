@@ -387,7 +387,7 @@ def sheet_palette(path, n=18, seed=1):
     return cent
 
 
-def flatten(img, pal, snap, median=True):
+def flatten(img, pal, snap, median=True, ids=None):
     """Toward the sheet's flat painted values: a 3x3 median takes out Meshy's grain and streaks, then each texel
     moves `snap` of the way to the nearest sheet colour (keeping its own light and shade)."""
     w, h = img.size
@@ -400,6 +400,14 @@ def flatten(img, pal, snap, median=True):
             y1 = min(h, y0 + 256)
             stack = np.stack([pad[y0 + dy:y1 + dy, dx:dx + w] for dy in range(3) for dx in range(3)])
             out[y0:y1] = np.median(stack, axis=0)
+        if ids is not None:
+            # (only where the whole 3x3 is one island: the median never reads across a crumb's edge)
+            ip = np.pad(ids, 1, mode="edge")
+            same = np.ones((h, w), bool)
+            for dy in range(3):
+                for dx in range(3):
+                    same &= ip[dy:dy + h, dx:dx + w] == ids
+            out = np.where(same[..., None], out, rgb)
         rgb = out
     flat = rgb.reshape(-1, 3)
     near = np.empty_like(flat)
@@ -438,19 +446,98 @@ def repaint(img, rules):
     img.pixels = px.ravel()
 
 
-def paint_up(img, spec, snap=None, head=False):
+def paint_up(img, spec, snap=None, head=False, ids=None):
     """Meshy's albedo toward the sheet's painted look: lifted, flattened onto the sheet's palette."""
     if "palette_from" in spec:
         global _SHEET_PAL
         if _SHEET_PAL is None:
             _SHEET_PAL = sheet_palette(spec["palette_from"])
-        flatten(img, _SHEET_PAL, spec.get("snap", 0.5) if snap is None else snap)
+        flatten(img, _SHEET_PAL, spec.get("snap", 0.5) if snap is None else snap, ids=ids)
     lift(img, *spec["lift"])
     if spec.get("repaint") and not head:
         repaint(img, spec["repaint"])
 
 
 _SHEET_PAL = None
+
+
+def island_map(ob, img):
+    """Which UV island each texel belongs to (-1: none). Meshy's layout is thousands of crumbs, so any filter or
+    mipmap that reads across a crumb's edge mixes in an unrelated part's colour (v2's patchy facets): the
+    paint-up filters within an island only, and pad() grows each island's colour into the gaps."""
+    w, h = img.size
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    lay = bm.loops.layers.uv.active
+    bm.faces.ensure_lookup_table()
+    island = [-1] * len(bm.faces)
+    n = 0
+    for f in bm.faces:
+        if island[f.index] >= 0:
+            continue
+        stack = [f]
+        island[f.index] = n
+        while stack:
+            g = stack.pop()
+            for lp in g.loops:
+                e = lp.edge
+                for other in e.link_faces:
+                    if island[other.index] >= 0:
+                        continue
+                    lo = next(x for x in other.loops if x.edge == e)
+                    # the same island only if the shared edge has the same UVs on both sides
+                    a0, a1 = lp[lay].uv, lp.link_loop_next[lay].uv
+                    b0, b1 = lo[lay].uv, lo.link_loop_next[lay].uv
+                    if ((a0 - b1).length < 1e-5 and (a1 - b0).length < 1e-5) or \
+                            ((a0 - b0).length < 1e-5 and (a1 - b1).length < 1e-5):
+                        island[other.index] = n
+                        stack.append(other)
+        n += 1
+    ids = np.full((h, w), -1, np.int32)
+    for f in bm.faces:
+        uvs = [lp[lay].uv for lp in f.loops]
+        for k in range(1, len(uvs) - 1):
+            _raster(ids, (uvs[0], uvs[k], uvs[k + 1]), island[f.index], w, h)
+    bm.free()
+    log("UV islands: %d, %.0f%% of the texture" % (n, 100.0 * (ids >= 0).mean()))
+    return ids
+
+
+def _raster(ids, tri, val, w, h):
+    p = np.array([[t.x * w, t.y * h] for t in tri])
+    lo = np.maximum(np.floor(p.min(axis=0)).astype(int) - 1, 0)
+    hi = np.minimum(np.ceil(p.max(axis=0)).astype(int) + 1, [w - 1, h - 1])
+    if (hi < lo).any():
+        return
+    xs, ys = np.meshgrid(np.arange(lo[0], hi[0] + 1), np.arange(lo[1], hi[1] + 1))
+    q = np.stack([xs.ravel() + 0.5, ys.ravel() + 0.5], axis=1)
+    a, b, c = p
+    d = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1])
+    if abs(d) < 1e-12:
+        return
+    l1 = ((b[1] - c[1]) * (q[:, 0] - c[0]) + (c[0] - b[0]) * (q[:, 1] - c[1])) / d
+    l2 = ((c[1] - a[1]) * (q[:, 0] - c[0]) + (a[0] - c[0]) * (q[:, 1] - c[1])) / d
+    inside = (l1 >= -0.02) & (l2 >= -0.02) & (1 - l1 - l2 >= -0.02)
+    ids[q[inside, 1].astype(int), q[inside, 0].astype(int)] = val
+
+
+def pad(img, ids, steps):
+    """Grows each island's edge colour `steps` texels into the empty gaps around it (mipmaps then fetch the
+    island's own colour at its edge, not a neighbour's)."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    filled = ids >= 0
+    for _s in range(steps):
+        acc = np.zeros_like(px)
+        cnt = np.zeros((h, w, 1), np.float32)
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            src = np.roll(np.roll(filled, dy, 0), dx, 1)
+            acc += np.roll(np.roll(px, dy, 0), dx, 1) * src[..., None]
+            cnt += src[..., None]
+        grow = (~filled) & (cnt[..., 0] > 0)
+        px[grow] = acc[grow] / cnt[grow]
+        filled = filled | grow
+    img.pixels = px.ravel()
 
 
 def lift(img, gamma, gain):
@@ -520,29 +607,34 @@ def head_pass(body, spec):
     return head
 
 
+def outward(ob):
+    """Consistent outward winding: Meshy's triangles come wound either way (about 8% inward), which Blender's
+    double-sided render hides but the game's back-face culling shows as dark triangle holes."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(ob.data)
+    bm.free()
+    ob.data.update()
+
+
 def soft_normals(ob, iterations):
-    """Meshy's surface is lumpy at this density, and the toon shader's crisp light/shadow split shows every
-    lump as a facet: the shading normals come from a smoothed copy (the shape itself stays)."""
+    """Meshy's surface is lumpy at this density (a triangle's three vertex normals ~50 degrees apart), and the
+    toon shader's light/shadow split shows every lump as a facet: the shading normals are the vertex normals
+    averaged with their neighbours' `iterations` times (the shape itself stays; a smoothed copy's normals
+    flipped on thin parts like hair strands)."""
     if iterations <= 0:
         return
-    cp = ob.copy()
-    cp.data = ob.data.copy()
-    cp.modifiers.clear()
-    bpy.context.scene.collection.objects.link(cp)
-    sm = cp.modifiers.new("smooth", "SMOOTH")
-    sm.factor = 0.8
-    sm.iterations = iterations
-    bpy.context.view_layer.objects.active = cp
-    bpy.ops.object.modifier_apply(modifier=sm.name)
-    dt = ob.modifiers.new("normals", "DATA_TRANSFER")
-    dt.object = cp
-    dt.use_loop_data = True
-    dt.data_types_loops = {"CUSTOM_NORMAL"}
-    dt.loop_mapping = "TOPOLOGY"
-    bpy.context.view_layer.objects.active = ob
-    bpy.ops.object.modifier_move_to_index(modifier=dt.name, index=0)
-    bpy.ops.object.modifier_apply(modifier=dt.name)
-    bpy.data.objects.remove(cp)
+    me = ob.data
+    nv = len(me.vertices)
+    nrm = np.array([v.normal[:] for v in me.vertices], dtype=np.float64)
+    ed = np.array([e.vertices[:] for e in me.edges], dtype=np.int64)
+    for _i in range(iterations):
+        acc = nrm.copy()
+        np.add.at(acc, ed[:, 0], nrm[ed[:, 1]])
+        np.add.at(acc, ed[:, 1], nrm[ed[:, 0]])
+        nrm = acc / np.maximum(np.linalg.norm(acc, axis=1, keepdims=True), 1e-9)
+    me.normals_split_custom_set_from_vertices([tuple(x) for x in nrm[:nv]])
 
 
 def rigid(ob, arm, bone):
@@ -623,6 +715,97 @@ def weapon(spec, rig):
     return w
 
 
+def split_off(ob, pick, name):
+    """The faces whose vertices all pass pick(co) become their own object (materials kept)."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    faces = [f for f in bm.faces if all(pick(v.co) for v in f.verts)]
+    other = bmesh.new()
+    other.from_mesh(ob.data)
+    keep = set(f.index for f in faces)
+    bmesh.ops.delete(other, geom=[f for f in other.faces if f.index not in keep], context="FACES")
+    bmesh.ops.delete(bm, geom=faces, context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bmesh.ops.delete(other, geom=[v for v in other.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(ob.data)
+    bm.free()
+    me = ob.data.copy()
+    other.to_mesh(me)
+    other.free()
+    out = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(out)
+    log("split %s: %d verts" % (name, len(me.vertices)))
+    return out
+
+
+def gun_arm(ob, ga, m):
+    """A weapon fused to the arm (Vex's minigun): the faces along the axis from the elbow to the muzzle end, within
+    `r` of it, come off the body (axis points in the Meshy frame, y found on the mesh; m the body's transform)."""
+    e = snap(ob, m @ Vector(ga["elbow"]), 0.06)
+    t = snap(ob, m @ Vector(ga["tip"]), 0.06)
+    ax = t - e
+    n = ax.length
+    ax.normalize()
+    r = float(ga["r"]) * m.to_scale().x
+    start = float(ga.get("from", 0.0))
+
+    def pick(co):
+        d = co - e
+        u = d.dot(ax) / n
+        return start - 0.02 <= u <= 1.06 and (d - ax * d.dot(ax)).length < r
+    return split_off(ob, pick, "weapon"), e, t
+
+
+def gun_weapon(gun, e, t, rig, ga):
+    """The cut-off gun-arm into the Gun node's space (Blender: forward +Y, her right +X, up +Z): its axis along
+    +Y, the side that faced out from her body to her right, the barrels' end on the Muzzle and the back end
+    `back` m behind the Gun's origin (where the elbow is in the hold), scaled to fit. The barrels past `spin`
+    (a fraction of the axis) become the child `weapon_spin`, its origin on the axis, which HunterAnim spins."""
+    ax = (t - e).normalized()
+    out = Vector((1, 0, 0))                          # (her right, in the rig frame)
+    side = (out - ax * out.dot(ax)).normalized()
+    up = side.cross(ax).normalized()
+    side = ax.cross(up).normalized()
+    rot = Matrix((side, ax, up)).to_4x4()            # rows: world -> gun frame
+    muzzle = K.g2b(rig["weapon"]["muzzle"])
+    back = -float(ga.get("back", 0.12))
+    k = (muzzle.y - back) / (t - e).length
+    m = Matrix.Translation(Vector((0, back, muzzle.z))) @ Matrix.Scale(k, 4) @ rot @ Matrix.Translation(-e)
+    transform(gun, m)
+    decimate(gun, int(ga.get("tris", 6000)))
+    sp = float(ga.get("spin", 0.62))
+    cut_y = back + sp * (muzzle.y - back)
+    spin = split_off(gun, lambda co: co.y > cut_y, "weapon_spin")
+    co = np.array([v.co[:] for v in spin.data.vertices])
+    c = Vector((float((co[:, 0].min() + co[:, 0].max()) / 2), cut_y, float((co[:, 2].min() + co[:, 2].max()) / 2)))
+    transform(spin, Matrix.Translation(-c))
+    spin.location = c
+    spin.parent = gun
+    log("gun-arm: scale %.3f, %.3f m long, spins past %.3f" % (k, muzzle.y - back, cut_y))
+    return gun, spin
+
+
+def chunk(ob, rig, ck):
+    """Game proportions over the art's (they read at the match camera): the head and the free hand grown about
+    their joints by their skin weight, and the whole body a little thicker about its vertical axis."""
+    co = np.array([v.co[:] for v in ob.data.vertices])
+    for bone, key in (("head", "head"), ("hand.L", "hand")):
+        g = ob.vertex_groups.get(bone)
+        if g is None or key not in ck:
+            continue
+        piv = np.array(K.bone_head(rig, bone)[:])
+        kk = float(ck[key]) - 1.0
+        for v in ob.data.vertices:
+            w = next((x.weight for x in v.groups if x.group == g.index), 0.0)
+            if w > 0.0:
+                co[v.index] = piv + (co[v.index] - piv) * (1.0 + kk * w)
+    gk = float(ck.get("girth", 1.0))
+    co[:, 0] *= gk
+    co[:, 1] *= gk
+    ob.data.vertices.foreach_set("co", co.ravel())
+    ob.data.update()
+
+
 def _close_gaps(w):
     """Loose pieces along the rifle (the stock the hand hid in the sheet comes back apart and at an angle): each
     is turned onto the rifle's axis and slid forward until it meets the rest, on the axis line."""
@@ -679,9 +862,11 @@ def main():
     ob = import_glb(os.path.expanduser(spec["body_glb"]))
     img = base_image(ob)
     drop_floaters(ob, spec.get("floater_verts", 40))
-    paint_up(img, spec)
+    ids = island_map(ob, img)
+    paint_up(img, spec, ids=ids)
     for pj in spec.get("project", []):
         project(ob, img, pj)
+    pad(img, ids, int(spec.get("pad", 6)))
     slot_split(ob, img, spec["palette"], spec["glow_min"], "body")
     head = None
     if "head" in spec:
@@ -699,6 +884,10 @@ def main():
     if head:
         transform(head, m)
     joints = {n: snap(ob, m @ p, spec.get("snap_r", 0.045)) for n, p in joints.items()}
+    gun = None
+    if "gun_arm" in spec:
+        gun, ge, gt = gun_arm(ob, spec["gun_arm"], m)
+        drop_floaters(ob, int(spec["gun_arm"].get("loose_verts", 1500)))     # (bits the cut left hanging)
     joints["pelvis"] = (joints["hip.L"] + joints["hip.R"]) * 0.5
     log("scale %.3f; joints:" % k, {n: tuple(round(x, 3) for x in p) for n, p in joints.items()})
     # into the contract's rest pose
@@ -726,27 +915,34 @@ def main():
     ob.name = "Body"
     ob.data.name = "Body"
     arm = contract_skin(ob, rig)
+    if "chunk" in spec:
+        chunk(ob, rig, spec["chunk"])
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
         g.add(list(range(len(head.data.vertices))), 1.0, "REPLACE")
         ob = join(ob, head)
-    gun = weapon(spec, rig)
+    spin = None
+    if gun is not None:
+        gun, spin = gun_weapon(gun, ge, gt, rig, spec["gun_arm"])
+    else:
+        gun = weapon(spec, rig)
     crown = rig["land"]["crown"]
     K.anchor(arm, "head", "anchor_head_top", (0, 0, crown + 0.07))
     K.anchor(arm, "hips", "anchor_chest", (0, 0.1, K.bone_head(rig, "upper_arm.L").z - 0.14))
-    for o in (ob, gun):
+    for o in [x for x in (ob, gun, spin) if x]:
         # Meshy's own split normals don't survive the decimation (facets): clear them, shade smooth
         bpy.context.view_layer.objects.active = o
         if o.data.has_custom_normals:
             bpy.ops.mesh.customdata_custom_splitnormals_clear()
+        outward(o)
         for p in o.data.polygons:
             p.use_smooth = True
         soft_normals(o, spec.get("normal_smooth", 8))
-    out = os.path.join(ROOT, spec["out"])
-    log("tris: body %d, weapon %d" % (K.tris([ob]), K.tris([gun])))
+    out = os.path.join(ROOT, os.path.expanduser(spec["out"]))
+    log("tris: body %d, weapon %d" % (K.tris([ob]), K.tris([x for x in (gun, spin) if x])))
     # (JPEG: Meshy's painted textures, a third of the PNG's size)
-    K.export(out, [arm, ob, gun] + [o for o in bpy.data.objects if o.name.startswith("anchor_")], "JPEG")
+    K.export(out, [arm, ob] + [x for x in (gun, spin) if x] + [o for o in bpy.data.objects if o.name.startswith("anchor_")], "JPEG")
     log("wrote", out)
     if spec.get("blend"):
         bpy.ops.wm.save_as_mainfile(filepath=os.path.expanduser(spec["blend"]))

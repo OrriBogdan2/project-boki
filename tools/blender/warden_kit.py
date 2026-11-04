@@ -110,4 +110,5 @@ def export(path, objs, image_format="AUTO"):
         ob.select_set(True)
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=False,
                               export_animations=False, export_skins=True, export_yup=True,
-                              export_materials="EXPORT", export_image_format=image_format, export_extras=False)
+                              export_materials="EXPORT", export_image_format=image_format,
+                              export_jpeg_quality=92, export_extras=False)

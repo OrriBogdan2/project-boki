@@ -11,6 +11,9 @@ shader_type spatial;
 uniform vec4 albedo : source_color = vec4(1.0);
 // a Warden's 3D model (WardenGlb): its painted atlas, multiplied by albedo (the player's colour pick)
 uniform bool use_tex = false;
+// how much the sun's shadow map darkens this surface (1: fully). A scanned 3D Warden's smooth-shaded low-poly
+// surface catches self-shadow acne in triangle-shaped patches; its painted atlas carries its own shade instead
+uniform float self_shadow = 1.0;
 uniform sampler2D albedo_tex : source_color, filter_linear_mipmap, repeat_disable;
 uniform bool use_vertex_color = false;
 uniform bool vertex_ao = false;    // characters: the vertex colour holds baked ambient occlusion (HeroKit)
@@ -127,13 +130,14 @@ void light() {
 		DIFFUSE_LIGHT += ALBEDO * LIGHT_COLOR / PI * pl;
 	} else {
 		float ndl = dot(NORMAL, LIGHT);
+		float sh_att = mix(1.0, ATTENUATION, self_shadow);
 		// the main split: a soft but clean terminator, then a gentle lift on faces turned to the light
-		float lit = smoothstep(-0.03 * ramp, 0.16 * ramp, ndl) * ATTENUATION;
+		float lit = smoothstep(-0.03 * ramp, 0.16 * ramp, ndl) * sh_att;
 		float band = smoothstep(mix(0.42, 0.2, ramp), mix(0.58, 0.8, ramp), lit);
-		float face = smoothstep(0.42, 0.78, ndl) * ATTENUATION;
+		float face = smoothstep(0.42, 0.78, ndl) * sh_att;
 		vec3 tone = mix(vec3(shade) * shadow_tint.rgb, light_tint.rgb, band) * mix(0.93, 1.06, face);
 		// warm light bleeding through just past the terminator, like skin or fur
-		float term = smoothstep(-0.34, 0.02, ndl) * (1.0 - smoothstep(0.02, 0.32, ndl)) * mix(0.35, 1.0, ATTENUATION);
+		float term = smoothstep(-0.34, 0.02, ndl) * (1.0 - smoothstep(0.02, 0.32, ndl)) * mix(0.35, 1.0, sh_att);
 		tone += sss_color.rgb * term * sss;
 		vec3 al = ALBEDO;
 		if (shadow_sat > 0.0) {
@@ -144,13 +148,13 @@ void light() {
 		// a crisp rim on the edge that faces this light (key light rims gold, the fill rims cool)
 		float fr_l = 1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0);
 		float rim_l = smoothstep(0.7, 0.8, fr_l) * smoothstep(-0.25, 0.45, ndl);
-		DIFFUSE_LIGHT += rim_color.rgb * LIGHT_COLOR * rim_l * rim_amount * 0.24 * mix(0.45, 1.0, ATTENUATION);
+		DIFFUSE_LIGHT += rim_color.rgb * LIGHT_COLOR * rim_l * rim_amount * 0.24 * mix(0.45, 1.0, sh_att);
 		vec3 hv = normalize(LIGHT + VIEW);
 		float nh = max(dot(NORMAL, hv), 0.0);
 		SPECULAR_LIGHT += LIGHT_COLOR * pow(nh, 16.0) * sheen * band;
 		if (gloss > 0.0) {
 			float sp = pow(nh, mix(14.0, 110.0, gloss));
-			SPECULAR_LIGHT += LIGHT_COLOR * (smoothstep(0.42, 0.52, sp) * 0.55 + sp * 0.25) * gloss * band * ATTENUATION;
+			SPECULAR_LIGHT += LIGHT_COLOR * (smoothstep(0.42, 0.52, sp) * 0.55 + sp * 0.25) * gloss * band * sh_att;
 		}
 	}
 }
