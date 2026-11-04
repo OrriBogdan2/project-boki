@@ -1994,3 +1994,7 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - an S-hook wisp;
   - "Orb" added to FLOATING in warden-model-check.
 - **Shots:** warden-3d/ostra/b11_*.
+
+## 2026-11-04 17:11 UTC (S2): Dredge r3i regression: integ holds r3h; Breaker READY -> 558612f3
+- **Dredge:** r3i (4f60ba6f) lost his limbs (ORCH 17:15). ext/art-integ keeps Dredge at **r3h 05596f3f** until a fixed r3j is posted. His agent is on it.
+- **Breaker s5 (558612f3):** about 86% close-up, about 82% at match zoom. Kelp and icicles added as geometry, the compass visible, a lighter shield, match-zoom v2. All checks pass.
