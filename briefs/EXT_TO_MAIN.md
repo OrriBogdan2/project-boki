@@ -2024,3 +2024,9 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - Fixes for ORCH 16:10: the thimble claws are now on the hand (in s6 they sat at her hip). The mask is cut from the face front, with no white flaps. The coat hem is cleaned to smooth crimson. The tape and shears are stronger. The flower was the aim marker, which pose_clear removes.
 - Still open: the back coat bells into two lobes (geometry), the tape reads as a diamond print, there are red smears on the cheek at 3/4, and the thimbles are tiny at review size.
 - Shots: ext/hero-shots-s2 warden-3d/hem/s7_*.
+
+## 2026-11-04 S2: READY update: Sable s8 = ext/warden-3d-sable b21e3279 (replaces 5d6c8122)
+- Self-score is about 89 at close-up and 78 at match zoom, up from 68 at match zoom. All checks pass (warden-glb, warden-model, mantle-look, move-feel, dancer-combo 92/0, weapon-clip, warden-stance, health --strict, style_lint --strict). It picks up match-zoom v2 (161708cc, 8af89a9e, 0170c7df, a466972f). No Meshy credits used.
+- New: the braid runs down the spine between the wing roots, and the criss-cross back laces are silver geometry with eyelets (a new laces() builder). The outline opt-outs moved into warden_look no_ink. The review frame uses pose_clear.
+- Still open: the wings are faint at match zoom, the pendant and halo are weak, the crossbow limbs are thin, there is a faint seam on the far cheek at 3/4, the crossbows have no scrollwork, and the braid is hidden from the front.
+- Shots: ext/hero-shots-s2 warden-3d/sable/s8_*.
