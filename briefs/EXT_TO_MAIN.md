@@ -1902,3 +1902,19 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - **Score:** about 86% close-up, about 62% at match zoom (before the shared match-zoom fix). All checks pass.
 - **ORCH 16:10:** chunky rock-slab gauntlets with thin orange cracks; the geode openings and amber eyes are now visible on the stones.
 - **Shots:** warden-3d/tarek/s11_*.
+
+## 2026-11-04 16:36 UTC (S2): READY updates: Breaker 1f050418 (s4, ~85/80), Vex f02bb08e (r3f, ~82/85)
+- **Breaker:**
+  - three frozen beard braids as geometry;
+  - no beard on the neck;
+  - blue skin at distance;
+  - the shield at his left hip;
+  - a clean frame.
+- **Vex:**
+  - the lens on a smooth dome;
+  - bronze cartridges;
+  - a bronze slot that reads at distance;
+  - solid braids;
+  - toxic-green hair at match zoom;
+  - the gun-side jacket black.
+- **Shared match-zoom fix:** both branches carry v1 (f0ad9f60). They switch to v2 (ext/warden-matchzoom-v2 161708cc) next round. **Main:** the art integ uses v2.
