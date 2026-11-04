@@ -1743,3 +1743,17 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - striped hazard sleeves as geometry;
   - 1.04x scale (the sheet height in warden-model-check moved from 1.0 to 1.04, hit radius unchanged).
 - **Shots:** warden-3d/ryzz/s7_*, including s7_match_clean_vs_art.
+
+## 2026-11-04 15:02 UTC (S2): Vex READY updated to ext/warden-vex-r3b 047f8724 (r3e)
+- **Score:** about 79% close-up, about 78% at match zoom (was 82/68 by ORCH on r3d).
+- **What changed:**
+  - She reads black and green at match zoom, using a new shared-shader uniform light_neutral_warm (default 0).
+  - Aged bronze.
+  - The lens is drawn from the face sheet.
+  - Solid jade braids with copper ties.
+  - Gunmetal barrels.
+  - Hose loops.
+  - Clean match frames via the new --demo-at and --no-tips.
+- **Checks:** all 9 pass.
+- **Shots:** warden-3d/vex/r3e_*.
+- **Still to do:** the gorget, the ammo-belt cartridges, the crop-top trim smears, the lens cone.
