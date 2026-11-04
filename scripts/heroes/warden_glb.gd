@@ -44,6 +44,7 @@ const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
 const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline shell
+const NO_INK_TAGS := ["gum"]   # small round pieces an outline turns into a cartoon ball (Ryzz's gum bubble)
 ## The `void` slot is no lit surface but a window onto the Void (shaders/hero_void.gdshader: a drifting
 ## starfield over its painted colour, Ostra's coat tears); "<void>-<tag>" with a SOFT_TAGS tag also fades
 ## out toward its tip and edges (a body that dissolves into smoke: Ostra's wisp).
@@ -258,7 +259,8 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 				(mi as MeshInstance3D).set_surface_override_material(si, vm)
 				out.append(vm)
 				continue
-			var m := Models.toon(src.albedo_color if src else Color.WHITE, not slot in NO_INK or tag in INK_TAGS)
+			var ink := (not slot in NO_INK or tag in INK_TAGS) and not tag in NO_INK_TAGS
+			var m := Models.toon(src.albedo_color if src else Color.WHITE, ink)
 			# (a Meshy model's vertex colour holds the ink room, not baked AO)
 			m.set_shader_parameter("vertex_ao", false)
 			m.set_shader_parameter("surface", int(SLOTS.get(slot, 1)))

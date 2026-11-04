@@ -59,3 +59,4 @@ Stage 2 round 3:
   thick S-curl zigzag ends a side; the relic seated in the V below the shoulder line, rods toned copper;
   charcoal-plum leather with copper zips and pink boot trim; the hazard bands a faint yellow emission (the shader
   keeps yellow untinted by model_glow); the shared match-zoom fix (f4b59cb3) with an electric-blue far rim.
+- Round 6: the gum bubble smaller with no ink (WardenGlb NO_INK_TAGS); the keyhole a dark painted recess, the corset's emission only on the piping; darker fishnet thighs; at the match camera the body lifted (leather 0.5, skin 0.3), the far rim 0.36, the bands' yellow glow.

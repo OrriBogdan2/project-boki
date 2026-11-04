@@ -36,7 +36,7 @@
 			"emit": 2.6,
 			"emit_flicker": 0.12,
 			"far_emit": 1.2,
-			"rim_far": 0.3,
+			"rim_far": 0.36,
 			"rim_far_color": [
 				0.3,
 				0.65,
@@ -47,7 +47,7 @@
 			"skin": {
 				"top_light": 0.3,
 				"fres": 0.22,
-				"far_lift": 0.15,
+				"far_lift": 0.3,
 				"shade": 0.9,
 				"fres_tint": 0.4
 			},
@@ -71,7 +71,7 @@
 				"top_light": 0.45,
 				"fres": 0.55,
 				"fres_tint": 0.5,
-				"far_lift": 0.3
+				"far_lift": 0.5
 			},
 			"metal": {
 				"top_light": 0.5,
