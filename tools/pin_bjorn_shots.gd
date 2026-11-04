@@ -26,8 +26,15 @@ const SHOTS := [
 		"draw",
 		0.35,
 		3.0,
-		"Draw toward Empowered: the feathered V closing on the cursor from the bow, the cursor ring"
-			+ " filling, no glint yet"
+		"Idle thin line to the cursor, the bright fill just growing out of Hem, the small circle ahead of it"
+	],
+	[
+		"pin_draw_mid",
+		"archer",
+		"draw",
+		0.5,
+		3.0,
+		"The fill most of the way to the circle (the circle still quiet)"
 	],
 	[
 		"pin_draw_empowered",
@@ -35,8 +42,7 @@ const SHOTS := [
 		"draw",
 		0.64,
 		3.0,
-		"Empowered ready: the lines merged into one bright line, the leaf glint riding out, a green"
-			+ " fletch burst at the bow"
+		"The fill has reached the circle and the circle flashes: release now for the perfect shot"
 	],
 	[
 		"pin_draw_super",

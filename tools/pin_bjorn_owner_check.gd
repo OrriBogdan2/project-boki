@@ -158,21 +158,37 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var aim := press_dry.bind(P, K, T.pos)
 	step(m, 0.3, aim)
 	var d := P.aim_dir()
+	var s := K.draw.stage_t()
 	var ve := AimKit.entry(P, "draw")
+	var fe := AimKit.entry(P, "draw_fill")
 	var from: Vector2 = ve.get("from", Vector2(-99, -99))
-	var vd: Vector2 = ve.get("dir", Vector2.ZERO)
-	ok("pin readout: the V leaves Hem along the aim line and is symmetric about it",
-		String(ve.get("kind", "")) == "vee" and from.distance_to(Vector2(P.pos.x, P.pos.z)) < 0.01
-		and vd.distance_to(d) < 0.01 and float(ve.get("half", 0.0)) > 0.0,
-		"from %s dir %s aim %s" % [str(from), str(vd), str(d)])
-	ok("pin readout: the bow cue sits on the aim line, not beside her", off_line(P.pos, d, K.draw.bow_at()) < 0.02,
-		"off %.3f" % off_line(P.pos, d, K.draw.bow_at()))
-	step(m, 0.4, aim)
-	ve = AimKit.entry(P, "draw")
-	ok("pin readout: Empowered ready merges the two lines into one on the aim line",
-		bool(ve.get("merged", false)) and (ve.get("dir", Vector2.ZERO) as Vector2).distance_to(d) < 0.01,
-		"merged %s t %.2f" % [str(ve.get("merged")), P.draw_t])
-	step(m, 0.7, aim)
+	var full := (ve.get("to", Vector2.ZERO) as Vector2).distance_to(from)
+	var filled := (fe.get("to", Vector2.ZERO) as Vector2).distance_to(fe.get("from", Vector2.ZERO))
+	ok("pin readout: the line leaves Hem along the aim line and the fill grows out of its start",
+		String(ve.get("kind", "")) == "line" and String(fe.get("kind", "")) == "line"
+		and off_line(P.pos, d, Vector3(from.x, P.pos.y, from.y)) < 0.01
+		and (fe.get("from", Vector2.ZERO) as Vector2).distance_to(from) < 0.01,
+		"from %s fill from %s" % [str(from), str(fe.get("from"))])
+	ok("pin readout: the fill fraction tracks the draw time",
+		absf(filled / full - K.draw.fill_frac(P.draw_t)) < 0.03 and K.draw.fill_frac(P.draw_t) > 0.2,
+		"fill %.3f vs %.3f at t %.2f" % [filled / full, K.draw.fill_frac(P.draw_t), P.draw_t])
+	var me := AimKit.entry(P, "draw_mark")
+	var mpos: Vector2 = me.get("at", Vector2.ZERO)
+	ok("pin readout: the perfect-timing circle sits on the line at the Empowered fraction",
+		String(me.get("kind", "")) == "circle" and absf(mpos.distance_to(from) / full - K.draw.mark_frac(1)) < 0.03
+		and off_line(P.pos, d, Vector3(mpos.x, P.pos.y, mpos.y)) < 0.05,
+		"at %.3f want %.3f" % [mpos.distance_to(from) / full, K.draw.mark_frac(1)])
+	ok("pin readout: the circle is quiet before the fill reaches it",
+		float(me.get("fill", 0.0)) < 0.0, "fill %s" % str(me.get("fill")))
+	step(m, s.x - P.draw_t + 0.02, aim)
+	me = AimKit.entry(P, "draw_mark")
+	ok("pin readout: the circle flashes on the frame the fill reaches it",
+		float(me.get("fill", -1.0)) > 0.0 and P.draw_t <= s.x + 0.1, "fill %s t %.2f" % [str(me.get("fill")), P.draw_t])
+	step(m, K.draw.perfect_t() + 0.1, aim)
+	me = AimKit.entry(P, "draw_mark")
+	ok("pin readout: the flash ends with the perfect window", me.is_empty(),
+		"fill %s t %.2f" % [str(me.get("fill")), P.draw_t])
+	step(m, 0.5, aim)
 	var le := AimKit.entry(P, "draw")
 	var to: Vector2 = le.get("to", Vector2.ZERO)
 	var cursor := Vector2(T.pos.x - P.pos.x, T.pos.z - P.pos.z).length()

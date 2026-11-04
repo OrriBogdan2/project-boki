@@ -6,18 +6,19 @@ extends RefCounted
 ## - Stages (content/weapons/longbow.json "draw"): a tap shot before stage 1, Empowered at stage 1,
 ##   Supercharged at stage 2. A tap or Empowered shot lands at the cursor (clamped to its range); a
 ##   Supercharged shot flies its full range past the cursor (AimMode via h.shot_aim).
-## - Reticle (world, own player), all feathered (barbs swept back toward the bow): a thin line to the
-##   cursor at rest; drawing, a V of two lines from the bow that close on the cursor, the cursor charge
-##   ring filling over the whole draw. Stage 1 ready: the lines merge into one bright line, a leaf glint
-##   rides out along it and a green fletch burst flashes at the bow. Stage 2 ready: the body flashes, a
-##   thick mint line runs past the cursor to the shot's full range, the first foe under it ringed at the
-##   feet. The fletch glint at the bow hand shows only while a stage is ready. Overdrawn: all of it dims.
+## - Reticle (world, own player; owner item 55b): a thin line to the cursor at rest. Drawing, a bright
+##   fill grows out from Hem along that line like a progress bar (full at Supercharged), with a small circle
+##   at each perfect-timing point; the circle flashes while the fill sits on it (the perfect window), and
+##   releasing then is the perfect shot. The cursor charge ring fills over the whole draw. Supercharged
+##   ready: the body flashes, a thick mint line runs past the cursor to the shot's full range, the first
+##   foe under it ringed at the feet. Overdrawn: it dims to a thin pale line.
 ## - Perfect release: let go within perfect_t of a stage coming up: the next draw runs quick_k faster
 ##   until its stage 1 (no extra damage), a brief gold fletch burst with a ring at the bow hand.
 ## - Overdraw: held overdraw_t past the last stage, the arrow does overdraw_k of its damage.
 
 const LINE_A := 0.35           # the faint resting aim line's strength
-const MERGE_T := 0.12          # s the merged bright line holds at stage 1 before the V re-opens
+const FILL_START := 0.6        # m ahead of Hem where the filling line begins
+const MIN_LEN := 2.5           # m: the shortest the filling line runs, so its circles stay apart
 const SUPER_COL := Color("a8ffe0")
 const STAGE_COL := Color("e6ffd0")
 ## the feather barbs on her draw lines (m at the bow end)
@@ -162,22 +163,33 @@ func release_move() -> String:
 
 func _reticle(t: float, s: Vector2, col: Color) -> void:
 	AimKit.charge(h, clampf(t / s.y, 0.0, 1.0), {"col": col, "flare": false})
+	AimKit.hide(h, "draw_rest")
+	var pt := perfect_t()
+	var d := h.aim_dir()
+	var o := h.pos + Vector3(d.x, 0, d.y) * FILL_START
+	var cur := cursor_len()
 	if t < s.y:
-		var kv: float
-		if t < s.x:
-			kv = t / s.x
-		elif t < s.x + MERGE_T:
-			kv = 1.0
+		# the filling line: the faint line to the cursor, a bright fill growing out from Hem over the draw,
+		# a small circle at each perfect-timing point that flashes while the fill sits on it
+		var faint := {"from": o, "len": cur, "col": col, "alpha": LINE_A, "lw": 0.03, "arrow": false}
+		AimKit.line(h, "draw", faint)
+		var f := fill_frac(t)
+		var bright := {"from": o, "len": maxf(0.05, cur * f), "col": col, "hot": 0.7, "lw": 0.09, "alpha": 1.3}
+		bright["fletch"] = FLETCH * 0.8
+		bright["arrow"] = false
+		AimKit.line(h, "draw_fill", bright)
+		var m1 := s.x / s.y
+		if t <= s.x + pt:
+			_mark("draw_mark", o, d, cur * m1, t >= s.x, col)
 		else:
-			kv = clampf((t - s.x - MERGE_T) / maxf(0.05, s.y - s.x - MERGE_T), 0.0, 0.999)
-		var c2 := Color("b6ff8a") if t < s.x else STAGE_COL
-		# the leaf glint rides out along the line only while it's merged (a stage just came up)
-		var glint := clampf((t - s.x) / MERGE_T, 0.0, 1.0) if kv >= 1.0 else -1.0
-		AimKit.vee(h, "draw", {"k": kv, "glint": glint, "col": col, "col2": c2, "fletch": FLETCH})
+			AimKit.hide(h, "draw_mark")
+		_mark("draw_mark2", o, d, cur, false, col)
 		k.fx.bow_glint_at(bow_at(), 0.55 if t >= s.x else 0.0, PinFx.GREEN)
 		tgt = null
 		return
-	# Supercharged: the thick white line to max range (dims once overdrawn)
+	# Supercharged: the thick white line to max range (dims once overdrawn); the fill is full
+	AimKit.hide(h, "draw_fill")
+	AimKit.hide(h, "draw_mark")
 	var over := t > over_t()
 	var rng := float((wpn_draw()[-1] as Array)[2]) if not wpn_draw().is_empty() else 16.0
 	AimKit.line(
@@ -192,10 +204,41 @@ func _reticle(t: float, s: Vector2, col: Color) -> void:
 			"fletch": FLETCH * (0.5 if over else 1.3)
 		}
 	)
+	if over:
+		AimKit.hide(h, "draw_mark2")
+	else:
+		_mark("draw_mark2", o, d, cur, t <= s.y + pt, SUPER_COL)
 	k.fx.bow_glint_at(bow_at() + Vector3(0, 0.05, 0), 0.3 if over else 1.0, SUPER_COL)
 	tgt = _under_line(rng)
 	if tgt != null and not over:
 		AimKit.circle(h, "draw_tgt", {"at": tgt.pos, "r": 0.85, "col": TGT_COL, "hot": 0.5})
+
+## How far along the draw's fill is (0..1 over the whole draw to Supercharged).
+func fill_frac(t: float) -> float:
+	return clampf(t / stage_t().y, 0.0, 1.0)
+
+## Where along the line the perfect-timing circle for a stage sits (0..1, the same scale as fill_frac).
+func mark_frac(stage: int) -> float:
+	var s := stage_t()
+	return s.x / s.y if stage == 1 else 1.0
+
+## The filling line's length: out to the cursor (clamped to the Empowered range), never shorter than MIN_LEN.
+func cursor_len() -> float:
+	var rng1 := float((wpn_draw()[0] as Array)[2]) if not wpn_draw().is_empty() else 12.0
+	var o := h.pos + Vector3(h.aim_dir().x, 0, h.aim_dir().y) * FILL_START
+	return maxf(MIN_LEN, AimMode.point(h, rng1).distance_to(o))
+
+## A small perfect-timing circle `at` m out along the line; `lit` flashes it (the fill just reached it).
+func _mark(id: String, o: Vector3, d: Vector2, at: float, lit: bool, col: Color) -> void:
+	var p := o + Vector3(d.x, 0, d.y) * at
+	var r := 0.22
+	var hot := 0.15
+	var fill := -1.0
+	if lit:
+		r = 0.36
+		hot = 1.0
+		fill = 1.0
+	AimKit.circle(h, id, {"at": p, "r": r, "col": col, "hot": hot, "fill": fill, "star": lit})
 
 ## The first foe under the aim line within reach (the Supercharged target highlight).
 func _under_line(rng: float) -> Ent:

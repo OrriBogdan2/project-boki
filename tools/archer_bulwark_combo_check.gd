@@ -94,12 +94,14 @@ func _archer_combos() -> void:
 	step(m, 0.3, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
 	var ve := AimKit.entry(P, "draw")
 	ok("pin anim: drawing holds arc_draw", K.anim_id == "arc_draw", K.anim_id)
+	var fe := AimKit.entry(P, "draw_fill")
+	var fl := (fe.get("to", Vector2.ZERO) as Vector2).distance_to(fe.get("from", Vector2.ZERO))
+	var tl := (ve.get("to", Vector2.ZERO) as Vector2).distance_to(ve.get("from", Vector2.ZERO))
 	ok(
-		"pin reticle: drawing shows the V, part closed",
-		AimKit.shown(P, "draw") and String(ve.get("kind", "")) == "vee" and float(
-			ve.get("half", 0.0)
-		) > 0.0 and float(ve.get("half", 1.0)) < deg_to_rad(12.5),
-		"kind %s half %.3f" % [str(ve.get("kind")), float(ve.get("half", -1.0))]
+		"pin reticle: drawing fills the aim line part way (a filling line, no V)",
+		AimKit.shown(P, "draw") and String(ve.get("kind", "")) == "line" and fl > 0.1 and fl < tl - 0.1
+			and AimKit.shown(P, "draw_mark"),
+		"fill %.2f of %.2f" % [fl, tl]
 	)
 	ok(
 		"pin reticle: the cursor charge ring fills",
@@ -171,6 +173,10 @@ func _archer_combos() -> void:
 	P.reload_t = 0.0
 	step(m, 1.8, func(): P.inp["fire"] = true; K.res = 0.0; aim_at(P, T.pos))
 	ok("pin anim: overdrawn, the draw arm shakes (arc_over)", K.anim_id == "arc_over", K.anim_id)
+	var oe := AimKit.entry(P, "draw")
+	ok("pin reticle: overdrawn dims the line to a thin pale one and drops the circle",
+		float(oe.get("alpha", 1.0)) < 0.6 and float(oe.get("lw", 1.0)) < 0.05 and not AimKit.shown(P, "draw_mark2"),
+		"alpha %s lw %s" % [str(oe.get("alpha")), str(oe.get("lw"))])
 	_loose_after(m, P, K, 0.05, T.pos)
 	ok("pin anim: an overdrawn release droops (arc_over_loose)", K.anim_id == "arc_over_loose", K.anim_id)
 	step(m, 0.4)

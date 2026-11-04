@@ -90,8 +90,10 @@ Params: `from`, `dir`, `len` (8), `width` (0.72), `gap` (0.6 m between dots), `d
 
 ### V that closes into one line
 ```gdscript
-# Hem's draw: the V opens 25 deg and closes as the stage charges; one bright line at k = 1
-AimKit.vee(h, "draw", {"k": stage_k, "glint": stage_k * 0.4, "col2": Color("b6ff8a")})
+# Hem's draw: a faint line to the cursor, a bright fill growing out along it, a circle at the perfect point
+AimKit.line(h, "draw", {"len": L, "arrow": false})
+AimKit.line(h, "draw_fill", {"len": L * fill, "arrow": false})
+AimKit.circle(h, "draw_mark", {"at": point, "r": 0.22})
 ```
 Params: `from`, `dir`, `len` (to the cursor, clamped 1.5-20), `k`, `open` (degrees, 25), `glint`
 (0..1 along the line, -1 for none).
