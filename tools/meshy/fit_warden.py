@@ -342,7 +342,9 @@ def slot_rules(ob, img, rules, glow_min, tag, default="skin", vote="island"):
     w, h = img.size
     px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
     uv = ob.data.uv_layers.active.data
-    mats = slot_materials(img, [s for s in K.SLOTS if s != "team"] + ["fur"], tag)
+    names = [s for s in K.SLOTS if s != "team"] + ["fur"]
+    names += sorted(set(r["slot"] for r in rules) - set(names))      # (a slot of a Warden's own: Ostra's void)
+    mats = slot_materials(img, names, tag)
     ob.data.materials.clear()
     order = list(mats)
     for sl in order:
@@ -1530,6 +1532,105 @@ def ramp_paint(ob, img, rules):
     img.pixels = px.ravel()
 
 
+def split_part(ob, arm, img, sp):
+    """A piece cut off the body as its own mesh (Tarek's stone bracers, Ostra's mask): the faces whose centre is in
+    one of `boxes` (the fitted frame on the contract's rest pose: his right +X, front +Y, soles on 0) and whose
+    painted colour matches `hsv` [h0, h1, s0, s1, v0, v1] (if given), still skinned as they were, on one material
+    "<slot>-<name>" over the body's atlas. `emit` paints an emission layer for it (the material's emissive
+    texture, which WardenGlb puts on the toon shader's emit layer): "dark" lights the texels darker than `k` x the
+    part's median (the cracks between a bracer's stone plates) in `colour`; "hsv" lights the texels in its range
+    (a mask's glowing mouth and eyes) with their own colour x `gain`."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    uv = ob.data.uv_layers.active.data
+    inf = float("inf")
+    pick = set()
+    for p in ob.data.polygons:
+        c = p.center
+        if not any(b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]
+                   for b in [[(-inf, inf)[i % 2] if x is None else x for i, x in enumerate(bx)] for bx in sp["boxes"]]):
+            continue
+        if sp.get("hsv"):
+            u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
+            v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
+            hh, ss, vv = _hsv(px[min(h - 1, max(0, int(v * h))), min(w - 1, max(0, int(u * w))), :3])
+            if not any((q[0] <= hh <= q[1] if q[0] <= q[1] else (hh >= q[0] or hh <= q[1])) and q[2] <= ss <= q[3]
+                       and q[4] <= vv <= q[5] for q in sp["hsv"]):
+                continue
+        pick.add(p.index)
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    other = bmesh.new()
+    other.from_mesh(ob.data)
+    bmesh.ops.delete(other, geom=[f for f in other.faces if f.index not in pick], context="FACES")
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.index in pick], context="FACES")
+    for b in (bm, other):
+        bmesh.ops.delete(b, geom=[v for v in b.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(ob.data)
+    bm.free()
+    me = ob.data.copy()
+    other.to_mesh(me)
+    other.free()
+    part = bpy.data.objects.new(sp["name"].capitalize(), me)
+    bpy.context.scene.collection.objects.link(part)
+    for g in ob.vertex_groups:
+        part.vertex_groups.new(name=g.name)
+    part.parent = arm
+    mod = part.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    # its material: the atlas, and an emission layer drawn on the part's own texels
+    m = bpy.data.materials.new("%s-%s" % (sp["slot"], sp["name"]))
+    m.use_nodes = True
+    bsdf = m.node_tree.nodes.get("Principled BSDF")
+    tex = m.node_tree.nodes.new("ShaderNodeTexImage")
+    tex.image = img
+    m.node_tree.links.new(tex.outputs[0], bsdf.inputs["Base Color"])
+    bsdf.inputs["Roughness"].default_value = 0.8
+    me.materials.clear()
+    me.materials.append(m)
+    for p in me.polygons:
+        p.material_index = 0
+    e = sp.get("emit")
+    lit = 0
+    if e:
+        ids = np.full((h, w), -1, np.int32)
+        uvp = me.uv_layers.active.data
+        for p in me.polygons:
+            li = list(p.loop_indices)
+            for k in range(1, len(li) - 1):
+                _raster(ids, [uvp[li[0]].uv, uvp[li[k]].uv, uvp[li[k + 1]].uv], 1, w, h)
+        mask = ids >= 0
+        rgb = px[..., :3]
+        lum = rgb @ np.array([0.299, 0.587, 0.114], np.float32)
+        out = np.zeros((h, w, 4), np.float32)
+        out[..., 3] = 1.0
+        if e["mode"] == "dark":
+            med = float(np.median(lum[mask]))
+            k = np.clip((float(e.get("k", 0.6)) * med - lum) / max(0.15 * med, 1e-3) + 0.5, 0.0, 1.0) * mask
+            out[..., :3] = k[..., None] * np.array(K.hexcol(e.get("colour", "ff9a30")), np.float32)
+        else:
+            q = e["hsv"]
+            mx, mn = rgb.max(axis=2), rgb.min(axis=2)
+            ss = (mx - mn) / np.maximum(mx, 1e-4)
+            hh = np.zeros_like(mx)
+            d = np.maximum(mx - mn, 1e-6)
+            r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+            hh = np.where(mx == r, ((g - b) / d) % 6.0, np.where(mx == g, (b - r) / d + 2.0, (r - g) / d + 4.0)) / 6.0
+            hue_ok = (hh >= q[0]) & (hh <= q[1]) if q[0] <= q[1] else (hh >= q[0]) | (hh <= q[1])
+            k = (hue_ok & (ss >= q[2]) & (ss <= q[3]) & (mx >= q[4]) & (mx <= q[5]) & mask).astype(np.float32)
+            out[..., :3] = k[..., None] * np.clip(rgb * float(e.get("gain", 1.4)), 0.0, 1.0)
+        lit = int((out[..., :3].max(axis=2) > 0.1).sum())
+        em = bpy.data.images.new("%s_emit" % sp["name"], w, h, alpha=False)
+        em.pixels = out.ravel()
+        em.pack()
+        et = m.node_tree.nodes.new("ShaderNodeTexImage")
+        et.image = em
+        m.node_tree.links.new(et.outputs[0], bsdf.inputs["Emission Color"])
+        bsdf.inputs["Emission Strength"].default_value = 1.0
+    log("split %s: %d faces, %d emission texels" % (sp["name"], len(pick), lit))
+    return part
+
+
 def _rel(arm, sp, keys):
     """A part spec whose points are given relative to a bone's head ("rel": bone name, the fitted frame) moved
     onto that bone: the lens and the braids ride the head, the hoses the hips, wherever the rig puts them."""
@@ -1603,7 +1704,8 @@ def main():
     # face +Y, hips on the rig's height, feet on the ground, centred between the hips
     turn = Matrix.Rotation(math.radians(spec.get("turn", 180.0)), 4, "Z")
     co = np.array([v.co[:] for v in ob.data.vertices])
-    sole = float(co[:, 2].min())
+    # (a hovering body with no feet, Ostra: where its ground would be, below the hem; else its lowest point)
+    sole = float(spec["sole_z"]) if "sole_z" in spec else float(co[:, 2].min())
     hip_mid = (joints["hip.L"] + joints["hip.R"]) * 0.5
     if "scale_joints" in spec:
         # (a body whose proportions differ from the rig's: the span between two joints, e.g. hip to shoulder, gets
@@ -1669,7 +1771,15 @@ def main():
     if "chunk" in spec:
         chunk(ob, rig, spec["chunk"])
     parts = []
-    if spec.get("lens") or spec.get("braids") or spec.get("hoses"):
+    extras = []         # (empties: an orbit's pivot, an empty weapon)
+    if spec.get("weapon_empty"):
+        # (a Warden whose weapon is part of the body, Tarek's stone bracers: an empty `weapon`, so WardenGlb hides
+        # the procedural one and the Gun node, its Muzzle and grips stay as they are)
+        we = bpy.data.objects.new("weapon", None)
+        bpy.context.scene.collection.objects.link(we)
+        we.parent = arm
+        extras.append(we)
+    if any(spec.get(k) for k in ("lens", "braids", "hoses", "orbits", "halo", "wisp", "studs")):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import warden_parts as WP
         lens_s = _rel(arm, spec.get("lens"), ("centre",))
@@ -1681,6 +1791,18 @@ def main():
             parts.append(WP.braids([ob], arm, [_rel(arm, b, ("path",)) for b in spec["braids"]], spec["braid_colours"]))
         if spec.get("hoses"):
             parts.append(WP.hoses([ob], arm, [_rel(arm, h, ("path",)) for h in spec["hoses"]], spec["hose_colours"]))
+        for o in spec.get("orbits", []):
+            got = WP.orbit_props(arm, o)
+            extras.append(got[0])
+            parts += got[1:]
+        if spec.get("halo"):
+            parts.append(WP.crescent(arm, spec["halo"]))
+        if spec.get("wisp"):
+            parts.append(WP.wisp(arm, spec["wisp"]))
+        for sd in spec.get("studs", []):
+            got = WP.studs(ob, arm, sd)
+            if got:
+                parts.append(got)
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
@@ -1689,7 +1811,7 @@ def main():
     spin = None
     if gun is not None:
         gun, spin = gun_weapon(gun, ge, gt, rig, spec["gun_arm"])
-    else:
+    elif spec.get("weapon_glb"):
         gun = weapon(spec, rig)
     crown = rig["land"]["crown"]
     K.anchor(arm, "head", "anchor_head_top", (0, 0, crown + 0.07))
@@ -1712,12 +1834,14 @@ def main():
             ink_room(o, float(spec["ink_room"]))
     if "atlas_px" in spec:
         shrink(img, int(spec["atlas_px"]))
+    for sp in spec.get("split", []):
+        parts.append(split_part(ob, arm, img, sp))
     out = os.path.join(ROOT, os.path.expanduser(spec["out"]))
     log("tris: body %d, weapon %d" % (K.tris([ob]), K.tris([x for x in (gun, spin) if x])))
     # (JPEG: Meshy's painted textures, a third of the PNG's size)
     if parts:
         log("tris: parts %s" % {o.name: K.tris([o]) for o in parts})
-    K.export(out, [arm, ob] + parts + [x for x in (gun, spin) if x] + [o for o in bpy.data.objects if o.name.startswith("anchor_")], "JPEG",
+    K.export(out, [arm, ob] + parts + extras + [x for x in (gun, spin) if x] + [o for o in bpy.data.objects if o.name.startswith("anchor_")], "JPEG",
              colors="ink_room" in spec)
     log("wrote", out)
     if spec.get("blend"):

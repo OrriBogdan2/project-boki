@@ -69,6 +69,19 @@ space, pulled back toward the shape it has riding its parent rigidly (firmer at 
 trails behind a run, swings out of a turn and settles. Nothing in the kit moves or the checks depends on them.
 `tools/meshy/warden_parts.py` builds Vex r3b's two braids this way.
 
+### Orbits (props that circle a bone)
+An empty named `orbit_<name>` parented to a bone, its rest upright (identity rotation in the model frame), carries
+unskinned props (Tarek's three seeing-stones round his head, each built facing out from the orbit's centre, its
+iris out and its plain back in). `WardenGlb.Orbits` (run by Sync) turns the empty round its own up axis
+(`ORBIT_HZ`) and bobs each prop on its own phase, so the orbit is data in the loader, never baked.
+`tools/meshy/warden_parts.py` `orbit_props()` builds them (fit spec `orbits`). They count as skinned for
+`--warden-glb-check` and stay out of `--warden-model-check`'s height.
+
+### Hovering bodies
+A body with no feet (Ostra) is built with its ground below its hem (fit spec `sole_z`); the rig's own hover
+(`KMovesStone.hover`, which lifts `Rig`, so the `root` bone) floats it and keeps the gap above the shadow. Its
+lower body is a `void` wisp on a `spring_wisp_*` chain under `hips` (`warden_parts.wisp()`).
+
 ### Design variants
 Another design of the same Warden can sit beside the shipped model while the owner compares them:
 `art/wardens/<art>_<tag>/<art>_<tag>.glb` (e.g. `vex_r3b`), built on the same rig. `--warden-variant=vex_r3b`
@@ -120,6 +133,14 @@ the vertex colour (`vertex_ao`):
 | `eyes` | — (unshaded iris) | the eye pick (`eye_col`) |
 | `team` | 1 | the team colour (keep it on one strong shape: a cuff, a cap, the stem's band) |
 | `glow` | emissive | — (Bjorn's crack, Zedran's fuller) |
+| `void` | — (shaders/hero_void.gdshader: a drifting starfield over the paint, unlit) | — (Ostra's coat tears; `void-wisp` also fades out toward its tip: `WardenGlb.SOFT_TAGS`) |
+
+A material with an emissive texture (glTF `emissiveTexture`) gets the toon shader's emission layer (`use_emit`,
+`WardenGlb.EMIT`, crackling by `EMIT_FLICKER`): Ryzz's veins, Tarek's bracer cracks. The fit's `split` parts are
+pieces cut off the body as their own skinned mesh on one "<slot>-<name>" material (Tarek's `bracers`, Ostra's
+`mask`), with such a layer painted from the atlas (`emit`: the dark cracks between plates, or a colour range).
+A .glb whose weapon is part of the body carries an empty `weapon` node (fit spec `weapon_empty`): the loader
+hides the procedural weapon and the Gun node and its Muzzle stay (Tarek's fists).
 
 Every material must end up in the root's `mats` meta (the loader does it) so hit flashes and mutations reach it.
 A model's own shading (content/rules/warden_look.json, keyed by its art name; `WardenGlb.look`) goes on last:

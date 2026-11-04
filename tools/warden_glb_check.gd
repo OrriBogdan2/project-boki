@@ -117,7 +117,9 @@ func _contract(a: String) -> void:
 	var unskinned := 0
 	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		var mesh := (mi as MeshInstance3D).mesh
-		if (mi as MeshInstance3D).skin == null:
+		# (props on an orbit ride their bone unskinned: WardenGlb.Orbits turns them)
+		var orbit := String(mi.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX)
+		if (mi as MeshInstance3D).skin == null and not orbit:
 			unskinned += 1
 		for si in mesh.get_surface_count():
 			tris += mesh.surface_get_array_index_len(si) / 3
