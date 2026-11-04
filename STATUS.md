@@ -347,3 +347,24 @@ Shots: `ext/hero-shots-s2` (README with captions).
   - v2 applies clean on most Hunter branches. It was sent to all agents and the art integ (briefs-s2/MATCHZOOM_PICK.md).
   - Vex and Breaker revert their v1 pick (f0ad9f60) and take v2.
   - **READY moves:** Vex f02bb08e (r3f), Breaker 1f050418 (s4), Tarek 85d6039d.
+- 2026-11-04 17:13 UTC:
+  - **Dredge r3i regressed** (no limbs). Integ holds r3h; his agent is fixing it.
+  - **Owner 17:05 accuracy pipeline:** the Kael pilot has started on ext/warden-3d-kael-acc (model sheet, head sheet, Meshy 7.1, Blender sculpt/retopo, art projection, face key-fill shader, rubric v2 with face and dark-scene scores).
+  - **OWNER, keys/compute needed for the full bake-off:** Rodin, Tripo, a hosted-inference key (fal/Replicate) for Hunyuan3D/TRELLIS/Sparc3D, and a GPU box or hosted ComfyUI for StableProjectorz. This box has no GPU. Posted in EXT_TO_MAIN.
+  - **ORCH 17:10 reviews:** forwarded to every Hunter.
+  - **READY:**
+
+    | Hunter | Commit |
+    |---|---|
+    | Vex | f02bb08e |
+    | Dredge | 05596f3f |
+    | Ryzz | 6ee886f7 |
+    | Sable | 5d6c8122 |
+    | Hem | d77613ca |
+    | Tarek | 940b8aee |
+    | Breaker | 558612f3 |
+    | Ostra | bc16c044 |
+    | Claire | f4fac407 |
+    | Cinder | d522f924 |
+    | Kael | 923948b1 |
+    | Pip | 8b79969d |
