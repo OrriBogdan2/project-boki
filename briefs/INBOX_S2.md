@@ -491,3 +491,9 @@ Credits: ~8 x 70-110 ≈ 600-900; balance 4,993. Post per-Warden "OWNER: review 
 
 ## 2026-11-04 10:15 UTC (orchestrator): Kael final art: use wardens_r3/kael_* (white-hot), not zedran_*
 - One hook (right-arm chain); left wrist = cuff + a short chain; the jagged blade tip per kael_side/turnaround. Read ZEDRAN_KIT.md for the rest.
+
+## 2026-11-04 11:00 UTC (ORCH): Ryzz art locked, 3D brief (owner)
+- Art on ext/imagegen 93a2757f, docs/art/gen/wardens_r3/: ryzz_fullbody (the locked design), ryzz_front (A-pose, the main Meshy input), ryzz_34, ryzz_back, ryzz_side, ryzz_head_sheet, ryzz_portrait, ryzz_splash. **Read RYZZ_KIT.md first**: it lists which views have errors to ignore (side view jacket on the shoulders; extra pigtail rings on the head sheet).
+- Must hold in every view: her RIGHT eye closed by a glowing pink fern-shaped scar (a permanent wink); short twin pigtails with one copper-coil tie each and zigzag ends (keep them SHORT: long twin tails read as a famous existing character); exactly 3 copper rods on the back, the middle one scorched and bent (her relic); plunging bolt-shaped keyhole cutout on the corset with pink neon piping; glowing choker charm; hazard bands on wrists and boot tops.
+- Proportions: slimmer and longer-legged than the art (~8 heads), adult. Pink emissive on the scar, charm, corset piping and forearm veins (a switchable emissive like Kael's).
+- Queue: after the current fan-out (stage 1). Use the r3 recipe; post review shots under warden-3d/ryzz/ as usual.
