@@ -65,13 +65,15 @@
 			},
 			"cloth": {
 				"fres": 0.6,
-				"far_lift": 0.8
+				"far_lift": 0.8,
+				"light_neutral_warm": 0.4
 			},
 			"leather": {
 				"top_light": 0.45,
-				"fres": 0.55,
+				"fres": 0.4,
 				"fres_tint": 0.5,
-				"far_lift": 0.5
+				"far_lift": 0.5,
+				"light_neutral_warm": 0.8
 			},
 			"metal": {
 				"top_light": 0.5,
