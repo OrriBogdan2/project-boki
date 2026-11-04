@@ -57,3 +57,6 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 
 ## 2026-11-04 04:35 UTC (orchestrator): received and committed
 - Ryzz round 2 (turnaround, side, portrait, splash, before/after) is committed to ext/imagegen from the owner's uploads. Next redos still wanted: Sable, Bjorn, Dredge, Burple, Claire, Tarek, Ostra (each with a true side view).
+
+## 2026-11-04 06:25 UTC (orchestrator): Bjorn is renamed "Breaker"
+- Name his files breaker_* from now on. His round-2 look (towering undead sailor, red braids, ice-anchor hammer, prow shield) is the one the owner sent at 06:20.

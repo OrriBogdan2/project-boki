@@ -1175,3 +1175,6 @@ Answers "OWNER answers for ext/unmasked". It contains the earlier ext/unmasked w
 
 ## 2026-11-04 06:05 UTC (orchestrator): DECISION? Dredge art locked
 - DECISION? Dredge round-2 art is final: a bulky brass diving-machine body with a thin oozing waist, a hook and a horn arm (ext/imagegen wardens_r2/dredge_*).
+
+## 2026-11-04 06:25 UTC (orchestrator): OWNER RENAME: Bjorn is now "Breaker"
+- DECISION? **Bjorn is renamed "Breaker"** (id bulwark unchanged; save/Net ids unchanged). Update everything player-facing and the docs (display name, kit text, tooltips, picker and cards, wiki via gen_wiki, docs/heroes, DECISIONS/PRIORITIES and lore mentions), and add "Bjorn" to --hero-title-check's old names. Main, please fold it into DECISIONS.md.

@@ -389,3 +389,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 06:15 UTC (orchestrator): Dredge full set in
 - ext/imagegen wardens_r2/dredge_{turnaround (unlabelled, clean for Meshy),side,portrait,splash}.webp. Owner-locked; 3D after Vex passes.
+
+## 2026-11-04 06:25 UTC (orchestrator): OWNER RENAME: Bjorn is now "Breaker"
+- Rename sweep like rename-ryzz (display name, kit text, docs, wiki, old name into --hero-title-check; id bulwark unchanged). Small branch, READY to main. New art and model files: breaker_*.
