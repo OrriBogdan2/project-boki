@@ -205,7 +205,9 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	_lights(glb, look(art(arch)))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
-	_hold_weapon(root, glb, float(look(art(arch)).get("weapon_scale", 1.0)))
+	var own := look(art(arch))
+	var off: Array = own.get("weapon_offset", [0.0, 0.0, 0.0])
+	_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]))
 	_hold_shield(root, glb)
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
 	_smoke(root, look(art(arch)))
@@ -358,7 +360,7 @@ static func _puff() -> Texture2D:
 
 ## The .glb's own weapon (a mesh named WEAPON, modelled in the Gun node's space) goes into the hands in place
 ## of the procedural one; the Gun node and its Muzzle stay, so shots and grips are unchanged.
-static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0) -> void:
+static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vector3.ZERO) -> void:
 	var weapon := glb.find_child(WEAPON, true, false) as Node3D
 	var gun := root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 	if weapon == null or gun == null:
@@ -374,7 +376,8 @@ static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0) -> void:
 		if c.has_meta("hammer_pivot") and not c.is_queued_for_deletion():
 			seat = c
 	seat.add_child(weapon)
-	weapon.transform = Transform3D.IDENTITY.scaled(Vector3.ONE * wscale)      # warden_look "weapon_scale"
+	# warden_look "weapon_scale", and "weapon_offset" (m, Gun space: seats the grip in the hand)
+	weapon.transform = Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * wscale), shift)
 	var off := weapon.find_child(WEAPON_OFF, true, false) as Node3D
 	if off:
 		var at := WardenGlb.model_xf(gun, off)

@@ -41,6 +41,7 @@ const LEG := THIGH + SHIN
 const UPPER := 0.21
 const FORE := 0.235
 const REACH := UPPER + FORE
+const WEAPON_SLACK := 0.02     # m: the trigger hand may sit this far off its grip before the weapon is pulled to it
 const BODY_C := Vector3(0, 0.62, 0)      # whole-body turns (flips, rolls) go about the hips
 const G_UP := Hunter.H_GRAV                # for guessing how long a jump stays up
 const FLIP_MIN := 0.8                     # total airtime that earns a trick
@@ -1647,6 +1648,8 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	_ik(arm_r, el_r, sh_r + bsh, tr2, pole_r)
 	if hd.get("fist", false):
 		_fists_to_hands(grip_r)
+	elif gun and free_r < 0.5:
+		_weapon_to_hand(grip_r)
 	# the flask in the left hand
 	if drink_k > 0.0 and flask == null and hand_l:
 		flask = Node3D.new(); flask.name = "Flask"
@@ -1773,6 +1776,14 @@ func _fists_to_hands(grip: Vector3) -> void:
 		gun.position = to_aim * (arm_r.transform * (el_r.transform * hand_r.position)) - gun.basis * grip
 	if offhand and hand_l:
 		offhand.position = to_aim * (arm_l.transform * (el_l.transform * hand_l.position)) - offhand.basis * grip
+
+## A weapon whose trigger-hand grip is out of the arm's reach (a flip, a long lunge) comes to the hand: it never
+## detaches (RIG_STANDARD: the weapon stays in the hand in every state).
+func _weapon_to_hand(grip: Vector3) -> void:
+	var hand := aim.transform.affine_inverse() * (arm_r.transform * (el_r.transform * hand_r.position))
+	var off := hand - gun.transform * grip
+	if off.length() > WEAPON_SLACK:
+		gun.position += off
 
 static func _reachable(sh: Vector3, want: Vector3, back_to: Vector3, reach: float) -> Vector3:
 	if sh.distance_to(want) <= reach:
