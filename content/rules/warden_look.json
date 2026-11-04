@@ -30,5 +30,34 @@
 				"glow": 1.8
 			}
 		}
+	},
+	"ostra": {
+		"painted": {},
+		"slots": {
+			"cloth": {
+				"fres": 1.25,
+				"fres_tint": 0.0,
+				"fres_color": [
+					0.72,
+					0.4,
+					1.0
+				],
+				"far_lift": 0.5,
+				"top_light": 0.45
+			},
+			"leather": {
+				"emit": 2.6,
+				"fres": 0.9,
+				"fres_tint": 0.0,
+				"fres_color": [
+					0.72,
+					0.4,
+					1.0
+				]
+			},
+			"glow": {
+				"glow": 1.1
+			}
+		}
 	}
 }

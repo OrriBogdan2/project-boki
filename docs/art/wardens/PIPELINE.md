@@ -234,3 +234,5 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Ostra edit side | 09:10 | 01a1a5d2-f7e4-7641-b263-ca781ba673fa | nano-banana-pro | same | 9 | Kept |
 | Ostra edit back | 09:10 | 01a1a5d2-f7ec-7358-95c2-155f198baa71 | nano-banana-pro | same | 9 | Kept |
 | Ostra A | 09:12 | 01a1a5d4-5e39-73a5-8395-ad7a5f79eddf | meshy-7.1 | 3 edited views (front, side, back) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the cracked porcelain mask with violet eyes and mouth, cap and bells, ruff, dagged coat with the starfield painted in its tears, clawed gloves. Meshy left out the wisp (the body ends at the hem): built as geometry |
+
+### Ostra stage 2 (2026-11-04): no Meshy runs (0 credits); the r3c recipe on the stage 1 scan, see art/wardens/ostra/IMPORT.md.

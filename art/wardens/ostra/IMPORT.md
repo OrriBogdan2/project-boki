@@ -1,4 +1,4 @@
-# Ostra: import note (stage 1, 2026-11-04)
+# Ostra: import note (stage 2, 2026-11-04)
 
 `ostra.glb` is stage 1 of the round-2 Ostra (ext/imagegen docs/art/gen/wardens_r2/ostra_* and OSTRA_KIT.md):
 Meshy generation, the bake, the rig fit. No hand polish yet (stage 2 applies the Vex r3c recipe). Built by script,
@@ -26,3 +26,16 @@ nothing hand-edited in Blender; run log in docs/art/wardens/PIPELINE.md.
 - **Weapon:** an empty `weapon` node: the procedural tether lantern is hidden (not in his art). The strings, card
   shards and the void orb are VFX/props for the kit, not in the model.
 - Imports: atlases lossless (`compress/mode=0`); `ostra.glb.import`: `generate_lods=false`, `force_disable_compression=true`.
+
+## Stage 2 (the Vex r3c recipe; owner refs ostra_head_sheet, ostra_mask_sheet, ostra_cap_halo_sheet, ostra_front_float on
+ext/imagegen fb503983)
+- **Proportions:** archetype body legs 1.8 and size 0.74 (was 0.9): his hips and hem ride higher so the wisp hangs long
+  below the coat, nearly to the ground with a gap over his shadow (ostra_front_float), at the same 1.09x height.
+- **Paint-over:** smooth within the UV islands, then ramps of the art's violets, blacks, the grey ruff and the gloves.
+  The mask keeps Meshy's paint: the art's projection greyed the porcelain (its painted shading).
+- **Halo:** violet (no longer white), larger (0.42 m) behind the head, softer cracks.
+- **Wisp:** 1.3 m along a curl with four tendrils on five spring bones; opaque further down (hero_void fade_from 0.72).
+- **Orb:** a glowing violet orb (`glow-orb`) on the right hand, raised to the shoulder by the stance (`ostra` carry),
+  the left hand open and out to the side, as ostra_front_float draws him.
+- **Look:** content/rules/warden_look.json `ostra`: a violet rim on the coat (fres, fres_color) and the match-camera
+  lift so he reads at match zoom; the mask's emission stronger; the halo's glow lower so it stays violet.

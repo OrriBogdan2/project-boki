@@ -1638,6 +1638,56 @@ def split_part(ob, arm, img, sp):
     return part
 
 
+def hair_spring(ob, arm, hs):
+    """Hair the scan fused into one mass, on a spring chain after all (Tarek's locs): a chain of `bones`
+    spring_<name>_<i> bones from `top` straight to `bottom` under `parent` (the head), and every vertex of the
+    `slot` (hair) faces inside the box [box_lo, box_hi] handed from the parent to the chain by how far down the
+    chain it hangs: wholly the parent's at the roots (the first `root` share of the length), wholly the chain's
+    below, so the locs' ends trail and swing while the scalp stays put (WardenGlb.Springs)."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import warden_parts as WP
+    top, bot = np.array(hs["top"], np.float64), np.array(hs["bottom"], np.float64)
+    pts = np.array([top + (bot - top) * f for f in np.linspace(0.0, 1.0, 8)])
+    L = float(np.linalg.norm(bot - top))
+    names, spans = WP.chain_bones(arm, hs["name"], hs.get("parent", "head"), pts, L, int(hs.get("bones", 3)), bot)
+    lo, hi = hs["box_lo"], hs["box_hi"]
+    slot = hs.get("slot", "hair")
+    on = {i for i, m in enumerate(ob.data.materials) if m and m.name.split("-")[0] == slot}
+    verts = set()
+    for p in ob.data.polygons:
+        if p.material_index in on:
+            verts.update(p.vertices)
+    groups = [ob.vertex_groups.get(n) or ob.vertex_groups.new(name=n) for n in names]
+    mids = np.array([(a + b) * 0.5 for a, b in spans])
+    lens = np.array([max(b - a, 1e-3) for a, b in spans])
+    ax = (bot - top) / max(L, 1e-6)
+    root = float(hs.get("root", 0.15)) * L
+    moved = 0
+    for vi in verts:
+        co = np.array(ob.data.vertices[vi].co[:])
+        if not all(lo[i] <= co[i] <= hi[i] for i in range(3)):
+            continue
+        sv = float(np.clip((co - top) @ ax, 0.0, L))
+        f = min(1.0, max(0.0, (sv - root) / max(root, 1e-6)))
+        f = f * f * (3.0 - 2.0 * f)
+        if f <= 0.0:
+            continue
+        w = np.clip(1.0 - np.abs(sv - mids) / lens, 0.0, 1.0)
+        if sv <= mids[0]:
+            w[:] = 0.0
+            w[0] = 1.0
+        if sv >= mids[-1]:
+            w[:] = 0.0
+            w[-1] = 1.0
+        w = w / max(w.sum(), 1e-6)
+        for x in ob.data.vertices[vi].groups:
+            ob.vertex_groups[x.group].add([vi], x.weight * (1.0 - f), "REPLACE")
+        for gi in np.nonzero(w > 1e-3)[0]:
+            groups[gi].add([vi], float(w[gi] * f), "ADD")
+        moved += 1
+    log("hair spring %s: %d bones, %d vertices" % (hs["name"], len(names), moved))
+
+
 def _rel(arm, sp, keys):
     """A part spec whose points are given relative to a bone's head ("rel": bone name, the fitted frame) moved
     onto that bone: the lens and the braids ride the head, the hoses the hips, wherever the rig puts them."""
@@ -1777,6 +1827,8 @@ def main():
         release(ob, spec["gun_arm"].get("bones", ["forearm.R", "hand.R"]))
     if "chunk" in spec:
         chunk(ob, rig, spec["chunk"])
+    for hs in spec.get("hair_springs", []):
+        hair_spring(ob, arm, _rel(arm, hs, ("top", "bottom", "box_lo", "box_hi")))
     parts = []
     extras = []         # (empties: an orbit's pivot, an empty weapon)
     if spec.get("weapon_empty"):
@@ -1786,7 +1838,7 @@ def main():
         bpy.context.scene.collection.objects.link(we)
         we.parent = arm
         extras.append(we)
-    if any(spec.get(k) for k in ("lens", "braids", "hoses", "orbits", "halo", "wisp", "studs")):
+    if any(spec.get(k) for k in ("lens", "braids", "hoses", "orbits", "halo", "wisp", "studs", "orb")):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import warden_parts as WP
         lens_s = _rel(arm, spec.get("lens"), ("centre",))
@@ -1799,11 +1851,13 @@ def main():
         if spec.get("hoses"):
             parts.append(WP.hoses([ob], arm, [_rel(arm, h, ("path",)) for h in spec["hoses"]], spec["hose_colours"]))
         for o in spec.get("orbits", []):
-            got = WP.orbit_props(arm, o)
+            got = WP.orbit_props(arm, _rel(arm, o, ("centre",)))
             extras.append(got[0])
             parts += got[1:]
         if spec.get("halo"):
-            parts.append(WP.crescent(arm, spec["halo"]))
+            parts.append(WP.crescent(arm, _rel(arm, spec["halo"], ("centre",))))
+        if spec.get("orb"):
+            parts.append(WP.orb(arm, _rel(arm, spec["orb"], ("centre",))))
         if spec.get("wisp"):
             parts.append(WP.wisp(arm, spec["wisp"]))
         for sd in spec.get("studs", []):
