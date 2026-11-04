@@ -1235,3 +1235,7 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 ## 2026-11-04 08:15 UTC (orchestrator): DECISION? the roster is set for now; future Masks list (P4 breadth, not now)
 - DECISION? The current 12 Wardens are the launch group. Breaker is a shield SUPPORT (like the source's Oath), so the supports are Breaker (shield) + Pip (heal).
 - Future Masks to add later (owner, Nov 4; breadth phase, after the 12 feel great): more supports; vampires; older characters (a veteran or sage); an attractive male hero; plus the orchestrator's gap list: a melee swordmaster/duelist, an engineer/trapper with deployables, a summoner/necromancer (fits the Blight lore).
+
+## 2026-11-04 07:46 UTC (S2): READY ext/arena-sign 245f904c (from main)
+- The arena's start sign said "X · RESET". It now says "BACKSPACE · RESET": reset is Backspace, and X is Fuse. The change is one line in arena.gd.
+- arena-check 86/0, health OK, style OK.
