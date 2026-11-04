@@ -48,3 +48,9 @@ s8_34_vs_art.png, s8_back_vs_art.png, s8_head_vs_sheet.png: 3/4, back and head v
 s8_match_vs_art.png, s8_gameplay_match.png: the Arena match frame on clear ground (--demo-at=-4.5,0 --no-tips: no caption, no plant) beside the art front.
 s8_match_clean_vs_art.png, s8_vs_turnaround.png, s8_vs_turnaround_game.png, s8_moves_1.png, s8_moves_2.png, s8_poses_game.png: the gameplay-camera crop, turnaround, moves and poses.
 s8_vs_s7.png: round 7 vs round 8.
+s9_closeup_vs_art.png: round 9 (on main sync91 + match-zoom v2): the corset's neon as one clean glowing tube traced from the front view (the sweetheart edge and the lightning bolt), the bolt's split now skin (no brown torn gap); the gum bubble at the lips with a gloss pass (rim + highlight, no ink); pigtails narrowed into the ties (no stacked rings), pink flick tips up out of each puff, smooth S-curl pink ends (no zigzag squiggles).
+s9_34_vs_art.png, s9_back_vs_art.png, s9_head_vs_sheet.png: 3/4, back and head vs the art; the fishnet lattice painted on the thighs; fewer, wider hazard stripes.
+s9_match_vs_art.png, s9_gameplay_match.png: the --arena-demo=pose_clear review frame and its x4 crop on DEMO_HERO_RECT; hair fresnel 0.45 and far_lift 0.15 (less pale cyan).
+s9_match_night_vs_art.png, s9_gameplay_night.png: the same frame at --raid=night.
+s9_match_clean_vs_art.png, s9_vs_turnaround.png, s9_vs_turnaround_game.png, s9_moves_1.png, s9_moves_2.png, s9_poses_game.png: gameplay-camera crop, turnaround, moves and poses.
+s9_vs_s8.png: round 8 vs round 9 (close-up, match). Rubric v2 self-score (calibrated down): full body 83 (s8 ~80), face close-up 81 (~80), match zoom 72 (~70), dark scene 70 (~65).
