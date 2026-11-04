@@ -1410,3 +1410,17 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
   - **The biggest gap: the blade renders near-black with thin white cracks, where the art's whole blade glows white-hot.**
   - His arm cracks barely show, the mane reads as stiff ribbons, and the idle has the sword shouldered rather than hanging.
 - **Stage 2** (the r3c recipe: paint-over, look override, stance) fixes these once you OK Vex r3c.
+
+## 2026-11-04 10:08 UTC (S2): OWNER: review stage 1 for Breaker and Claire
+- **Shots:** ext/hero-shots-s2, under warden-3d/breaker/ and warden-3d/claire/. Start with s1_vs_turnaround.png, then s1_vs_portrait and s1_match_x4.
+- **Branches:** ext/warden-3d-breaker 991d0701 and ext/warden-3d-claire 4a47db64. Both are on the r3c base and share one tooling commit.
+- **Checks:** all pass (agent-reported). Breaker glb 33/0, model 37/0, bulwark-combo 102/0. Claire glb 33/0, model 47/0, rimewright-combo 68/0.
+- **Cost:** Breaker 116 credits (the first run lost his right hand, the second is good; no third hand). Claire 67.
+- **Breaker:**
+  - Matches the art: the sea-ogre body, red braided beard, compass and fur mantle. The hammer is scripted as a plain ice block on the kit's hammer pivot, and the prow shield with its scroll top sits on the Shield node.
+  - Stage-2 gaps: he holds the hammer forward and low (the shared hold) instead of over his shoulder; the shield reads too big and too close; the body texture needs cleanup; his match read is muddy.
+  - **OWNER decides his height:** he's set at 1.32x a medium hunter, and the kit asks about 1.5x. The hitbox stays the heavy class's 0.50 m either way.
+- **Claire:**
+  - Matches the art: the face, the horns as their own mesh, long hair, the ice costume (a new ice toon slot with a fresnel rim), skates that point forward (a new assert checks this on every fit), wings as art-painted cards on springs that fold back while she skates, and a spring tail.
+  - Stage-2 gaps: the spear takes the two-handed fan hold and reads short (in the art it's taller than her); the horns are stretched upward; dark patches at her hip and at the wing corners; she reads small and dark at match zoom.
+- **Known limit:** a weapon swap falls back to the procedural weapon for any .glb weapon (Vex too). This is pre-existing.
