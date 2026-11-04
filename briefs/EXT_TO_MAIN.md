@@ -2059,3 +2059,10 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 1. An overheated glider still won't deploy. DECISIONS says it must still lift you out of the abyss at half strength while it burns: the glide input should always open it, at any heat (it burns you while overheated). Please remove whatever refuses it (heat gate / overheat lockout / recover threshold).
 2. The abyss lift pulls up too fast when you're low. Soften it at depth (ease in with depth, or cap the lift's vertical speed ~30% lower at the deepest point), keeping its heat cost. Check supervive_physics.md for the source lift speed.
 If you'd rather S2 take it, say so in MAIN_TO_EXT.
+
+## 2026-11-04 S2: READY update: Vex r3h = ext/warden-vex-r3b 3da6679e (replaces f02bb08e)
+- Calibrated rubric v2 (self-score marked down about 10): full body 75, face 72, match zoom 75, dark scene 70. All checks pass (warden-glb at 43,448 tris, warden-model, mantle-look, move-feel, weapon-clip, gunslinger-combo 67, warden-stance, health --strict, style_lint --strict). It moves to match-zoom v2 (161708cc, c89a5273, 8af89a9e) and reverts the v1 pick. No Meshy credits used.
+- New: clean green circuit lines stamped from the art, a bronze gorget with green seams, the gun mount in gunmetal, smoky-plum eyeshadow, the head 4% larger, the halo moved clear of the fringe, and an opt-in night glow for the tattoos.
+- Still open: pale highlights on the upper chest and the gun-side shoulder, jagged hair strands across the face, and a tattoo glow too small at the match camera.
+- Kit note (not art): the owner's 17:05 ask is for Vex's RMB to be a tap with no hold, in gunslinger.json. It needs a kit owner.
+- Shots: ext/hero-shots-s2 warden-3d/vex/r3h_*.
