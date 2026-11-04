@@ -436,6 +436,21 @@ def shield_card(spec):
     at = np.array(spec.get("at", [0.0, 0.0, 0.0]), np.float64)
     yc = float(spec.get("centre_y", 0.0))
     # the atlas: front and back side by side, at the front's height; bled past the outlines
+    def bleed(img, blob, steps=16):
+        """The view's own colours carried past its outline (the card's rim samples there, not the grey)."""
+        img, keep = img.copy(), blob.copy()
+        for _i in range(steps):
+            acc = np.zeros_like(img)
+            cnt = np.zeros(keep.shape, np.float32)
+            for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                sh = np.roll(np.roll(keep, dy, 0), dx, 1)
+                acc += np.roll(np.roll(img, dy, 0), dx, 1) * sh[..., None]
+                cnt += sh
+            new = (~keep) & (cnt > 0)
+            img[new] = acc[new] / cnt[new][:, None]
+            keep |= new
+        return img
+    fc, bc = bleed(fc, fb), bleed(bc, bb)
     fw, bw = fc.shape[1], bc.shape[1]
     tex = np.zeros((max(fc.shape[0], bc.shape[0]), fw + bw, 3), np.float32)
     tex[:fc.shape[0], :fw] = fc
@@ -840,7 +855,11 @@ def split(ob, arm, sp):
     zmin = float(sp.get("z_min", -1e9))
     bm = bmesh.new()
     bm.from_mesh(ob.data)
-    pick = [f for f in bm.faces if f.material_index in want and f.calc_center_median().z > zmin]
+    def in_box(c, b):
+        return b[0] <= abs(c.x) <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]
+    sboxes = sp.get("slot_boxes", [])    # (|x|, y, z: only the slots' faces inside these: hair behind his neck)
+    pick = [f for f in bm.faces if f.material_index in want and (f.calc_center_median().z > zmin
+            or any(in_box(f.calc_center_median(), b) for b in sboxes))]
     keep = set(f.index for f in pick)
     other = bmesh.new()
     other.from_mesh(ob.data)
@@ -888,11 +907,63 @@ def feet_forward(ob, rig, min_dot=0.8):
     return out
 
 
+def repaint(body, rules):
+    """Recolours the body atlas's texels of faces picked in the fitted frame (box [x0, x1, y0, y1, z0, z1], a hue
+    range [h0, h1] wrapping past 1, sat_min): Breaker's beard paint on the back of his neck to his skin. Keeps each
+    texel's value against the new colour (warm mode)."""
+    import colorsys
+    me = body.data
+    img = None
+    for m in me.materials:
+        img = next((n.image for n in m.node_tree.nodes if n.type == "TEX_IMAGE" and n.image), None)
+        if img:
+            break
+    w, h = img.size
+    px = np.array(img.pixels[:], np.float32).reshape(h, w, 4)
+    uv = me.uv_layers.active.data
+    me.calc_loop_triangles()
+    for r in rules:
+        b = r["box"]
+        col = hexcol(r["colour"])
+        h0, h1 = r.get("hue", [0.0, 1.0])
+        n = 0
+        for t in me.loop_triangles:
+            c = me.polygons[t.polygon_index].center
+            if not (b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]):
+                continue
+            q = np.array([[uv[li].uv.x * w, uv[li].uv.y * h] for li in t.loops])
+            lo = np.maximum(np.floor(q.min(axis=0)).astype(int) - 1, 0)
+            hi = np.minimum(np.ceil(q.max(axis=0)).astype(int) + 1, [w - 1, h - 1])
+            xs, ys = np.meshgrid(np.arange(lo[0], hi[0] + 1), np.arange(lo[1], hi[1] + 1))
+            pts = np.stack([xs.ravel() + 0.5, ys.ravel() + 0.5], axis=1)
+            a, bb, cc = q
+            d = (bb[1] - cc[1]) * (a[0] - cc[0]) + (cc[0] - bb[0]) * (a[1] - cc[1])
+            if abs(d) < 1e-12:
+                continue
+            l1 = ((bb[1] - cc[1]) * (pts[:, 0] - cc[0]) + (cc[0] - bb[0]) * (pts[:, 1] - cc[1])) / d
+            l2 = ((cc[1] - a[1]) * (pts[:, 0] - cc[0]) + (a[0] - cc[0]) * (pts[:, 1] - cc[1])) / d
+            ins = (l1 >= -0.05) & (l2 >= -0.05) & (1 - l1 - l2 >= -0.05)
+            yy, xx = pts[ins, 1].astype(int), pts[ins, 0].astype(int)
+            rgb = px[yy, xx, :3]
+            mx = rgb.max(axis=1)
+            sat = (mx - rgb.min(axis=1)) / np.maximum(mx, 1e-6)
+            hue = np.array([colorsys.rgb_to_hsv(*c3)[0] for c3 in rgb]) if len(rgb) else np.zeros(0)
+            hue_ok = (hue >= h0) & (hue <= h1) if h0 <= h1 else (hue >= h0) | (hue <= h1)
+            sel = hue_ok & (sat >= float(r.get("sat_min", 0.0)))
+            val = (mx[sel] / max(float(col.max()), 1e-3))[:, None]
+            px[yy[sel], xx[sel], :3] = np.clip(col[None] * val, 0, 1)
+            n += int(sel.sum())
+        log("repaint %s: %d texels" % (r["colour"], n))
+    img.pixels = px.ravel()
+
+
 # ------------------------------------------------------------------------------------------------ entry
 def build(spec, body, arm, rig):
     """fit_warden.py's hook (spec["parts"]): returns {"weapon": ob or None, "extra": [held or skinned pieces]}."""
     out = {"weapon": None, "extra": []}
     ps = spec["parts"]
+    if ps.get("repaint"):
+        repaint(body, ps["repaint"])
     if ps.get("feet_forward"):
         feet_forward(body, rig, float(ps.get("feet_min_dot", 0.8)))
     if "hammer" in ps:

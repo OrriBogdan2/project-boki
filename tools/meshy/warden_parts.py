@@ -269,7 +269,7 @@ class Builder:
 
 
 # ------------------------------------------------------------------------------------------------ the braid
-STRAND_COLS = 6       # texture columns: 2 braids x 3 strands, each 0.125 wide on the left 3/4 of the atlas
+STRAND_COLS = 6       # texture columns: 3 strands per braid on the left 3/4 of the atlas (braids() sets it)
 
 
 def braid(bld, spec, bvh, index):
@@ -490,6 +490,8 @@ def part_masks(ob, size, parts):
 def braids(body_obs, arm, specs, colours, tag="braid", size=TEX):
     """Every braid in `specs` as one mesh skinned to its spring chains on `arm`, with its painted atlas and the
     materials hair-<tag> (strands, tuft) and metal-<tag> (wire, bolts)."""
+    global STRAND_COLS
+    STRAND_COLS = 3 * max(2, len(specs))      # (a strand column per strand of every braid: Breaker has three)
     bvh = body_bvh(body_obs)
     bld = Builder()
     chains = []
@@ -583,6 +585,8 @@ def hoses(body_obs, arm, specs, colours, tag="hose", size=64):
     brass fittings at both ends. Each hose rides a chain of bones along its length (`bones`: [[bone, t], ...],
     t from 0 at its start to 1 at its end; weights blend linearly between neighbours), so its ends stay on the
     backpack and on the gun-arm while the arm aims and the middle follows between them."""
+    global STRAND_COLS
+    STRAND_COLS = 3 * max(2, len(specs))      # (a strand column per strand of every braid: Breaker has three)
     bvh = body_bvh(body_obs)
     bld = Builder()
     chains = []

@@ -34,9 +34,9 @@
 	"breaker": {
 		"painted": {"far_lift": 0.2, "rim_far": 0.3, "rim_far_color": [0.45, 0.78, 1.0]},
 		"slots": {
-			"skin": {"top_light": 0.1, "fres": 0.35, "far_lift": 0.08, "shade": 0.8, "shadow_tint": [0.84, 0.9, 1.0]},
+			"skin": {"top_light": 0.1, "fres": 0.35, "far_lift": 0.15, "shade": 0.84, "light_neutral_warm": 0.8, "shadow_tint": [0.84, 0.9, 1.0]},
 			"hair": {"far_lift": 0.5, "fres": 0.5},
-			"fur": {"top_light": 0.3, "far_lift": 0.25},
+			"fur": {"top_light": 0.3, "far_lift": 0.25, "light_neutral_warm": 0.4},
 			"leather": {"far_lift": 0.4, "fres": 0.5, "fres_tint": 0.7},
 			"metal": {"fres": 0.3, "fres_tint": 0.6, "sheen": 0.0},
 			"glow": {"glow": 1.2}
