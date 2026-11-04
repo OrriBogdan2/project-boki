@@ -1,0 +1,24 @@
+{
+ "high": "~/meshy/ostra/runA/glb.glb",
+ "out": "~/meshy/ostra/bake/low.glb",
+ "blend": "~/meshy/ostra/bake/bake.blend",
+ "tris": 36000,
+ "tex": 4096,
+ "head": {
+  "centre": [
+   -0.01,
+   -0.08,
+   0.36
+  ],
+  "r": 0.2
+ },
+ "head_uv": 2.5,
+ "head_tris": 9000,
+ "uv_smooth": 30,
+ "uv_angle": 66,
+ "uv_margin": 0.0008,
+ "cage": 0.008,
+ "ray": 0.03,
+ "margin_px": 16,
+ "floater_verts": 60
+}

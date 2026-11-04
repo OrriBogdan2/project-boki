@@ -1,54 +1,53 @@
 class_name HunterViewer
 extends PanelContainer
-## The Hunter viewer (docs/decisions/0005): one Hunter, big. On the left the real model on a slow
-## turntable in its own SubViewport, playing its abilities one after another (the same kit moves the
-## kits play in a match, HunterAnim.KMOVES, looped), with the key, name and plain-words line of the one
-## playing under it. On the right the name, health and dashes, the fantasy, "how it plays" (the card
-## text the L loadout picker shows) and every ability with its key; click one to watch it. Used on the
-## Hunters screen (HomeClasses) and at character creation (hatch.gd). Moves and timings:
-## content/rules/hunter_viewer.json. HoldUnlock drives power() and burst() while you hold to unlock.
+## The Hunter viewer (docs/decisions/0005): one Mask, shown rather than described. On top its face, name
+## and title and what it brings (health, dashes, weapon). Below, the real model on a slow turntable in its
+## own SubViewport (it powers up while you hold to unlock it: HoldUnlock drives power() and burst()), and
+## beside it every ability shown working in its own clip (AbilityClip: the ability used on a dummy, with
+## its key and one short line). The passive and the Boki Fusion are one line each. Used on the Masks
+## screen (HomeClasses), the Mask moments and the reveal. Kit move lists: content/rules/hunter_viewer.json.
 ##
-##   var v := HunterViewer.make("thief", Vector2(320, 380))
+##   var v := HunterViewer.make("thief", Vector2(220, 300))
 ##   v.slot_changed.connect(func(slot): ...)
 
 signal slot_changed(slot: String)
 
 const RULES_PATH := "res://content/rules/hunter_viewer.json"
 const SLOT_NAMES := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility",
-		"x": "Ultimate", "r": "with your Boki"}
+		"x": "Ultimate", "r": "Fusion with your Boki"}
 ## The input action behind each slot, so the key caps follow the player's bindings.
 const SLOT_ACTIONS := {"dash": "dash", "lmb": "fire", "rmb": "secondary", "e": "signature", "x": "hunter_ult",
 		"r": "ultimate"}
-const PORTRAIT_PX := 76.0     # px: the Warden's face beside its name
+## The slots that get a clip; the rest (passive, the Boki Fusion) are a line each.
+const CLIP_SLOTS := ["lmb", "rmb", "e", "dash", "x"]
+const PORTRAIT_PX := 64.0     # px: the Hunter's face beside its name
 static var _rules: Dictionary = {}
 
 var id := ""
-var stage_size := Vector2(320, 380)
+var stage_size := Vector2(220, 300)
+var clip_size := Vector2(200, 112)
+var clip_cols := 2
 var slots: Array = []
 var slot_i := 0
-var slot_t := 0.0             # s into the current slot
-var move_t := 0.0             # s into the current loop of its move
-var cycling := true           # steps to the next ability by itself (a click on one holds it a full turn)
 var power_k := 0.0            # 0..1 while the unlock is held (HoldUnlock)
 var burst_t := -1.0           # s since the reveal burst, -1 when none
+var spin_t := 0.0             # s the stage has run
 
 var vp: SubViewport
 var pivot: Node3D
 var model: Node3D
 var anim: HunterAnim
 var glow: OmniLight3D
-var fx: Control               # 2D sparks, the rings and the flash over the stage
-var cap_key: PanelContainer
-var cap_name: Label
-var cap_line: Label
-var cap_dots: HBoxContainer
-var rows: Array = []          # one Button per ability, in `slots` order
-var _swing_n := 0
-var _swing_at := 0.0
-var _melee := false
+var rim: DirectionalLight3D
+var plinth: StandardMaterial3D
+var cam: Camera3D
+var fx: Control               # the 2D sparks, rings and flash over the stage
+var rows: Array = []          # one Control per ability, in `slots` order (an AbilityClip or a line)
+var _body: Control            # everything but the stage, rebuilt when the Hunter changes
+var _cols: HBoxContainer
 
-## The abilities shown, in order. "x" (the Hunter's own ultimate on X, coming back later) shows only
-## once a Hunter's data has an "x" entry; R, the Boki Merge, is always last.
+## The abilities shown, in order. "x" (the Hunter's own ultimate on R) shows once a Hunter's data has an
+## "x" entry; "r", the Boki Fusion, is always last.
 static func slots_for(hunter_id: String) -> Array:
 	var out: Array = KitCard.slots_of(hunter_id).filter(func(s): return s != "r" and s != "x")
 	if Arch.def(hunter_id).has("x"): out.append("x")
@@ -65,16 +64,33 @@ static func slot_info(hunter_id: String, slot: String) -> Dictionary:
 			"col": Color(String(xd.get("col", "#ffffff"))), "tag": "", "line": String(d.get("card", {}).get("x",
 			xd.get("desc", "")))}
 
+## The key a slot is on, from the player's own bindings ("auto" for the passive).
+static func key_for(slot: String) -> String:
+	if not SLOT_ACTIONS.has(slot):
+		return "auto"
+	return Settings.key_cap(String(SLOT_ACTIONS[slot]))
+
+## "Vex, the Hired Gun": the Mask's name and title (a title starting with "The" keeps one "the").
+static func display_name(hunter_id: String) -> String:
+	var title := Arch.name_of(hunter_id)
+	if title.begins_with("The "):
+		title = title.substr(4)
+	var base := HeroTitle.base_name(hunter_id)
+	return "%s, the %s" % [base, title] if base != "" else title
+
 static func rules() -> Dictionary:
 	if _rules.is_empty():
 		var p = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
 		_rules = p if typeof(p) == TYPE_DICTIONARY else {}
 	return _rules
 
-static func make(hunter_id: String, stage_px := Vector2(320, 380)) -> HunterViewer:
+static func make(hunter_id: String, stage_px := Vector2(220, 300), clip_px := Vector2(200, 112),
+		cols := 2) -> HunterViewer:
 	var v := HunterViewer.new()
 	v.id = hunter_id
 	v.stage_size = stage_px
+	v.clip_size = clip_px
+	v.clip_cols = cols
 	return v
 
 ## The kit moves a slot plays, from the rules (only ids the animation knows).
@@ -89,7 +105,7 @@ static func move_len(mv: String) -> float:
 		return 0.0
 	return 0.9 if d.get("hold", false) else float((d["keys"] as Array)[-1][0])
 
-## "145 health  ·  1 dash  ·  Twin Blades": what the Hunter brings, with no weight label.
+## "145 health  ·  1 dash  ·  Twin Blades": what the Hunter brings.
 static func stat_line(hunter_id: String) -> String:
 	var cd: Dictionary = Data.CLASSES.get(Arch.weight(hunter_id), {})
 	var w := String(Data.weapon_stats(Arch.signature(hunter_id)).get("name", ""))
@@ -98,34 +114,115 @@ static func stat_line(hunter_id: String) -> String:
 			("  ·  " + w) if w != "" else ""]
 
 func _ready() -> void:
-	var col := Arch.color(id)
-	add_theme_stylebox_override("panel", UI.frame(Color(0.05, 0.045, 0.08, 0.96), 14, Color(col, 0.45), 1, 14, 12))
+	add_theme_stylebox_override("panel", _frame(Arch.color(id)))
 	set_meta("hunter_viewer", id)
 	slots = slots_for(id)
-	var w: Dictionary = Data.weapon_stats(Arch.signature(id))
-	_melee = bool(w.get("melee", false))
-	var row := UI.hbox(16)
-	add_child(row)
-	row.add_child(_stage(col))
-	row.add_child(_info(col))
-	select(0, false)
+	_cols = UI.hbox(14)
+	if stage_size != Vector2.ZERO:      # (the Mask moment shows the Hunter in the world instead)
+		_cols.add_child(_stage(Arch.color(id)))
+	_rebuild_body()
+
+## Shows another Hunter in this viewer without rebuilding the stage: the model swaps on the same turntable
+## (it keeps turning from where it was), the colours, header and clips follow.
+func set_hunter(hunter_id: String) -> void:
+	if hunter_id == id or not Arch.exists(hunter_id):
+		return
+	id = hunter_id
+	var col := Arch.color(id)
+	slots = slots_for(id)
+	add_theme_stylebox_override("panel", _frame(col))
+	set_meta("hunter_viewer", id)
+	_rebuild_body()
+	if model == null:
+		return
+	model.queue_free()
+	_build_model()
+	rim.light_color = col.lerp(Color.WHITE, 0.35)
+	glow.light_color = col.lerp(Color.WHITE, 0.2)
+	plinth.albedo_color = col.darkened(0.55)
+	fx.get_parent().get_child(0).queue_redraw()
+
+func _frame(col: Color) -> StyleBox:
+	return UI.frame(Color(0.05, 0.045, 0.08, 0.96), 14, Color(col, 0.45), 1, 14, 12)
+
+func _rebuild_body() -> void:
+	if _body:
+		_cols.get_parent().remove_child(_cols)
+		_body.queue_free()
+	var col := Arch.color(id)
+	var v := UI.vbox(10)
+	_body = v
+	add_child(v)
+	v.add_child(_header(col))
+	v.add_child(_cols)
+	var keep := 0 if stage_size == Vector2.ZERO else 1      # (the stage stays)
+	for i in range(_cols.get_child_count() - 1, keep - 1, -1):
+		_cols.get_child(i).queue_free()
+	rows.clear()
+	var right := UI.vbox(8)
+	var grid := GridContainer.new()
+	grid.columns = clip_cols
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	right.add_child(grid)
+	var lines := UI.vbox(8)
+	lines.custom_minimum_size.x = clip_size.x
+	for s in slots:
+		var slot := String(s)
+		var row: Control = AbilityClip.make(id, slot, clip_size) if slot in CLIP_SLOTS else _line(slot, col)
+		row.set_meta("slot", slot)
+		rows.append(row)
+		(grid if slot in CLIP_SLOTS else lines).add_child(row)
+	# the one-line abilities fill the grid's last gap when there is one, else go under it
+	var gap := grid.get_child_count() % clip_cols != 0
+	(grid if gap else right).add_child(lines)
+	_cols.add_child(right)
+	select(0)
+
+## The face, "Vex, the Hired Gun" and what it brings. No story or gender here: the clips do the talking.
+func _header(col: Color) -> Control:
+	var head := UI.hbox(12)
+	head.add_child(ClassCard.portrait(id, PORTRAIT_PX))
+	var names := UI.vbox(2)
+	names.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var nm := UI.title(display_name(id), 28, col)
+	nm.set_meta("mask_name", id)
+	names.add_child(nm)
+	names.add_child(UI.label(stat_line(id), 13, UI.MUTED))
+	head.add_child(names)
+	return head
+
+## A one-line ability (the passive, the Boki Fusion): key, icon and name, its short line under them.
+func _line(slot: String, col: Color) -> Control:
+	var info := slot_info(id, slot)
+	var v := UI.vbox(2)
+	var r := UI.hbox(8)
+	r.add_child(UI.keycap(key_for(slot), 11))
+	r.add_child(UI.IconDot.new(String(info["icon"]), info["col"], 20.0))
+	var nl := UI.label(String(info["name"]), 14, col.lightened(0.25), UI.semi)
+	nl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	r.add_child(nl)
+	v.add_child(r)
+	var ln := UI.para(AbilityClip.line_for(id, slot), 12, UI.MUTED)
+	ln.custom_minimum_size.x = clip_size.x
+	v.add_child(ln)
+	return v
 
 # ------------------------------------------------------------------ the stage
 func _stage(col: Color) -> Control:
-	var v := UI.vbox(6)
 	var holder := Control.new()
 	holder.custom_minimum_size = stage_size
 	holder.clip_contents = true
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	v.add_child(holder)
 	var back := Control.new()      # a soft pool of the Hunter's colour behind it
 	back.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	back.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back.draw.connect(func():
+		var tint := Arch.color(id)
 		var c := back.size * Vector2(0.5, 0.62)
 		for i in 6:
-			back.draw_circle(c, back.size.x * (0.52 - 0.07 * i), Color(col, 0.035 + 0.012 * i))
-		back.draw_arc(c + Vector2(0, back.size.y * 0.3), back.size.x * 0.3, 0, TAU, 48, Color(col, 0.25), 2.0, true))
+			back.draw_circle(c, back.size.x * (0.52 - 0.07 * i), Color(tint, 0.035 + 0.012 * i))
+		back.draw_arc(c + Vector2(0, back.size.y * 0.3), back.size.x * 0.3, 0, TAU, 48, Color(tint, 0.25), 2.0, true))
 	holder.add_child(back)
 	var svc := SubViewportContainer.new()
 	svc.stretch = true
@@ -143,23 +240,9 @@ func _stage(col: Color) -> Control:
 	fx = Control.new()
 	fx.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	fx.draw.connect(_draw_fx.bind(col))
+	fx.draw.connect(func(): _draw_fx(Arch.color(id)))
 	holder.add_child(fx)
-	# the caption: the key, the ability's name and its plain line, and a dot per ability
-	var cap := UI.hbox(8)
-	cap_key = UI.keycap("LMB", 14)
-	cap.add_child(cap_key)
-	cap_name = UI.label("", UI.T_BODY, col, UI.big)
-	cap.add_child(cap_name)
-	cap.add_child(UI.fill())
-	cap_dots = UI.hbox(4)
-	cap_dots.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	cap.add_child(cap_dots)
-	v.add_child(cap)
-	cap_line = UI.para("", 12, UI.MUTED)
-	cap_line.custom_minimum_size = Vector2(stage_size.x, 34)
-	v.add_child(cap_line)
-	return v
+	return holder
 
 func _build_world(col: Color) -> void:
 	var env := WorldEnvironment.new()
@@ -175,27 +258,23 @@ func _build_world(col: Color) -> void:
 	key.light_color = Color("fff1dc")
 	key.light_energy = 1.2
 	vp.add_child(key)
-	var rim := DirectionalLight3D.new()
+	rim = DirectionalLight3D.new()
 	rim.rotation_degrees = Vector3(-12, -20, 0)
 	rim.light_color = col.lerp(Color.WHITE, 0.35)
 	rim.light_energy = 0.7
 	vp.add_child(rim)
 	pivot = Node3D.new()
 	vp.add_child(pivot)
-	model = Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", Save.d.get("look", {}), id)
-	var ring := model.get_node_or_null("TeamRing")
-	if ring: (ring as Node3D).visible = false
-	pivot.add_child(model)
-	anim = HunterAnim.new(model)
+	_build_model()
 	var floor_disc := MeshInstance3D.new()      # a low plinth so the feet stand on something
 	var cm := CylinderMesh.new()
 	cm.top_radius = 0.75
 	cm.bottom_radius = 0.8
 	cm.height = 0.06
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = col.darkened(0.55)
-	mat.roughness = 0.8
-	cm.material = mat
+	plinth = StandardMaterial3D.new()
+	plinth.albedo_color = col.darkened(0.55)
+	plinth.roughness = 0.8
+	cm.material = plinth
 	floor_disc.mesh = cm
 	floor_disc.position.y = -0.03
 	vp.add_child(floor_disc)
@@ -205,153 +284,63 @@ func _build_world(col: Color) -> void:
 	glow.light_energy = 0.0
 	glow.position = Vector3(0, 1.0, -0.6)
 	vp.add_child(glow)
-	var s := model.scale.y
-	var cam := Camera3D.new()
+	cam = Camera3D.new()
 	cam.fov = 30.0
 	vp.add_child(cam)
-	cam.transform = Transform3D(Basis(), Vector3(-1.0, 1.45, -5.3) * s).looking_at(Vector3(0, 0.95 * s, 0), Vector3.UP)
+	_aim_camera()
 	cam.current = true
 
-# ------------------------------------------------------------------ the info column
-func _info(col: Color) -> Control:
-	var v := UI.vbox(4)
-	v.custom_minimum_size.x = 400
-	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var head := UI.hbox(12)
-	head.add_child(ClassCard.portrait(id, PORTRAIT_PX))
-	var names := UI.vbox(2)
-	names.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	names.add_child(UI.title(Arch.name_of(id), 30, col))
-	names.add_child(HeroTitle.intro_block(id, 390.0))
-	names.add_child(UI.label(stat_line(id), 13, UI.MUTED))
-	head.add_child(names)
-	v.add_child(head)
-	var fan := UI.para(String(Arch.def(id).get("fantasy", "")), 13, UI.INK)
-	fan.custom_minimum_size.x = 390
-	v.add_child(fan)
-	# the plain-words card, as the L loadout picker shows it
-	var card := UI.card(Color(col, 0.09), 10, 10)
-	card.set_meta("plain_card", true)
-	var cv := UI.vbox(3)
-	card.add_child(cv)
-	cv.add_child(UI.label("How it plays", 12, Color(col, 0.95), UI.caps))
-	var lp := UI.para(String(Arch.def(id).get("card", {}).get("loop", "")), 13, col.lightened(0.25))
-	lp.custom_minimum_size.x = 370
-	cv.add_child(lp)
-	v.add_child(card)
-	v.add_child(UI.label("Abilities", 12, UI.MUTED, UI.caps))
-	var list := UI.vbox(1)
-	for i in slots.size():
-		var b := _row(String(slots[i]), i, col)
-		rows.append(b)
-		list.add_child(b)
-	v.add_child(list)
-	return v
+## The Hunter's model on the turntable, standing at ease in its signature stance.
+func _build_model() -> void:
+	model = Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", Unmasked.mask_look(), id)
+	var ring := model.get_node_or_null("TeamRing")
+	if ring: (ring as Node3D).visible = false
+	pivot.add_child(model)
+	anim = HunterAnim.new(model)
+	if cam:
+		_aim_camera()
 
-func _row(slot: String, i: int, col: Color) -> Button:
-	var info := slot_info(id, slot)
-	var b := Button.new()
-	b.flat = true
-	b.focus_mode = Control.FOCUS_NONE
-	b.custom_minimum_size = Vector2(390, 26)
-	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	b.set_meta("slot", slot)
-	b.pressed.connect(func(): select(i, true))
-	var r := UI.hbox(8)
-	r.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	r.offset_left = 8
-	r.offset_right = -8
-	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	b.add_child(r)
-	var kc := UI.keycap(_key(slot), 11)
-	kc.custom_minimum_size.x = 46
-	r.add_child(kc)
-	r.add_child(UI.IconDot.new(String(info["icon"]), info["col"], 22.0))
-	var nl := UI.label(String(info["name"]), 15, UI.INK, UI.semi)
-	nl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	nl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	r.add_child(nl)
-	var tg := UI.label(String(SLOT_NAMES.get(slot, "")), 11, UI.FAINT)
-	tg.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	tg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	r.add_child(tg)
-	return b
+func _aim_camera() -> void:
+	var s := model.scale.y
+	cam.transform = Transform3D(Basis(), Vector3(-1.0, 1.45, -5.3) * s).looking_at(Vector3(0, 0.95 * s, 0), Vector3.UP)
 
-## The key a slot is on, from the player's own bindings ("auto" for the passive).
-func _key(slot: String) -> String:
-	if not SLOT_ACTIONS.has(slot):
-		return "auto"
-	return Settings.key_cap(String(SLOT_ACTIONS[slot]))
-
-## Shows ability `i` (wraps). `held`: a click, so it stays a full turn before the cycle moves on.
-func select(i: int, held := false) -> void:
+## Marks ability `i` (wraps) as the one picked: its clip lights up.
+func select(i: int) -> void:
 	if slots.is_empty():
 		return
 	slot_i = posmod(i, slots.size())
-	slot_t = 0.0
-	move_t = 0.0
-	_swing_at = 0.0
-	var slot := String(slots[slot_i])
-	var info := slot_info(id, slot)
 	var col := Arch.color(id)
-	if cap_name:
-		(cap_key.get_child(0) as Label).text = _key(slot)
-		cap_name.text = String(info["name"])
-		cap_line.text = String(info["line"])
-		for c in cap_dots.get_children(): c.queue_free()
-		for j in slots.size():
-			var d := ColorRect.new()
-			d.custom_minimum_size = Vector2(14 if j == slot_i else 6, 6)
-			d.color = col if j == slot_i else Color(1, 1, 1, 0.22)
-			d.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			cap_dots.add_child(d)
 	for j in rows.size():
-		var b: Button = rows[j]
-		var on := j == slot_i
-		var normal := UI.frame(Color(1, 1, 1, 0.03), 8, Color(0, 0, 0, 0), 0, 4, 2)
-		var hover := UI.frame(Color(1, 1, 1, 0.07), 8, Color(col, 0.6), 1, 4, 2)
-		if on:
-			normal = UI.frame(Color(col, 0.16), 8, Color(col, 0.8), 1, 4, 2)
-			hover = UI.frame(Color(col, 0.2), 8, Color(col, 0.6), 1, 4, 2)
-		b.add_theme_stylebox_override("normal", normal)
-		b.add_theme_stylebox_override("hover", hover)
-		b.add_theme_stylebox_override("pressed", b.get_theme_stylebox("hover"))
-	if held: Sfx.play("hover", null, -8.0)
-	slot_changed.emit(slot)
+		var row: Control = rows[j]
+		if row is AbilityClip:
+			var edge := Color(col, 0.95) if j == slot_i else Color(col, 0.35)
+			row.add_theme_stylebox_override("panel", UI.frame(Color(0.04, 0.035, 0.07, 0.96), 10, edge, 1, 6, 6))
+	slot_changed.emit(current_slot())
 
 func current_slot() -> String:
 	return String(slots[slot_i]) if not slots.is_empty() else ""
 
 # ------------------------------------------------------------------ playing it
-## How long one loop of the current ability's move takes.
-func loop_len() -> float:
-	var mv := moves_for(id, current_slot())
-	var n := 0.0
-	for m in mv: n += move_len(String(m))
-	return (n if n > 0.0 else 1.1) + float(rules().get("gap_s", 0.35))
-
 func _process(dt: float) -> void:
 	dt = minf(dt, 0.1)
 	if model == null or anim == null:
 		return
 	tick(dt)
 
-## One step of the viewer (also driven straight by the unlock check).
+## One step of the stage (also driven straight by the unlock check): the turntable, and the power-up.
 func tick(dt: float) -> void:
-	slot_t += dt
-	move_t += dt
-	if move_t >= loop_len():
-		move_t = 0.0
-	if cycling and slot_t >= float(rules().get("slot_s", 3.2)) and power_k <= 0.0:
-		select(slot_i + 1)
-	var playing := power_k <= 0.0 and move_t < loop_len() - float(rules().get("gap_s", 0.35))
-	pivot.rotation.y += dt * float(rules().get("turn_rate", 0.45)) * (0.33 if playing else 1.0) * (1.0 - power_k)
-	var s := _state()
+	spin_t += dt
+	pivot.rotation.y += dt * float(rules().get("turn_rate", 0.45)) * (1.0 - power_k)
+	var s := {"fired": 99.0, "face": 0.0, "grounded": true, "wid": Arch.signature(id)}
+	if power_k > 0.0:
+		s["crouch"] = 0.55 * power_k
+		s["cast_slot"] = "ult"
+		s["cast"] = 0.05
 	anim.update(dt, s)
 	# powering up: the Hunter's light builds and the body thrums; the burst pops it
 	glow.light_energy = 6.0 * power_k + (5.0 * maxf(0.0, 1.0 - burst_t / 0.6) if burst_t >= 0.0 else 0.0)
 	var shake := 0.018 * power_k * power_k
-	model.position = Vector3(sin(slot_t * 61.0) * shake, 0.04 * power_k, cos(slot_t * 47.0) * shake)
+	model.position = Vector3(sin(spin_t * 61.0) * shake, 0.04 * power_k, cos(spin_t * 47.0) * shake)
 	if burst_t >= 0.0:
 		burst_t += dt
 		var k := clampf(burst_t / 0.45, 0.0, 1.0)
@@ -362,47 +351,6 @@ func tick(dt: float) -> void:
 			model.scale = Vector3.ONE * float(model.get_meta("base_scale", model.scale.y))
 	if fx: fx.queue_redraw()
 
-## The animation state for this moment: a kit move, a swing or shot, a dodge or a cast.
-func _state() -> Dictionary:
-	var slot := current_slot()
-	var s := {"fired": 99.0, "face": 0.0, "grounded": true, "wid": Arch.signature(id)}
-	if power_k > 0.0:
-		s["crouch"] = 0.55 * power_k
-		s["cast_slot"] = "ult"
-		s["cast"] = 0.05
-		return s
-	var mv := moves_for(id, slot)
-	if not mv.is_empty():
-		var t := move_t
-		for m in mv:
-			var L := move_len(String(m))
-			if t < L:
-				s["kmove"] = String(m)
-				s["kmove_t"] = t
-				break
-			t -= L
-		return s
-	match slot:
-		"lmb":
-			if move_t < 1.0:
-				if move_t - _swing_at >= 0.42 or _swing_at == 0.0:
-					_swing_at = maxf(0.001, move_t)
-					_swing_n += 1
-				s["swing_n"] = _swing_n
-				s["combo"] = _swing_n % 3
-				if not _melee:
-					s["fired"] = move_t - _swing_at
-					s["recoil"] = clampf(1.0 - (move_t - _swing_at) / 0.18, 0.0, 1.0)
-		"dash":
-			if move_t < 0.45:
-				s["rolling"] = true
-				s["dash_dir"] = Vector2(0, -1)
-				s["vel"] = Vector3(0, 0, -6.0)
-		"rmb", "e", "x", "r":
-			s["cast_slot"] = {"rmb": "secondary", "e": "utility", "x": "ult", "r": "ult"}[slot]
-			s["cast"] = move_t
-	return s
-
 ## 0..1 while the unlock is held: the Hunter crouches into its power, its light builds, the stage thrums.
 func power(k: float) -> void:
 	power_k = clampf(k, 0.0, 1.0)
@@ -412,7 +360,6 @@ func burst() -> void:
 	if model and not model.has_meta("base_scale"): model.set_meta("base_scale", model.scale.y)
 	power_k = 0.0
 	burst_t = 0.0
-	move_t = 0.0
 
 func _draw_fx(col: Color) -> void:
 	var c := fx.size * Vector2(0.5, 0.58)
@@ -420,7 +367,7 @@ func _draw_fx(col: Color) -> void:
 		# sparks rising round the Hunter, more and faster as the hold fills
 		var n := int(8 + 30 * power_k)
 		for i in n:
-			var ph := fposmod(slot_t * (0.6 + power_k) + float(i) * 0.137, 1.0)
+			var ph := fposmod(spin_t * (0.6 + power_k) + float(i) * 0.137, 1.0)
 			var x := c.x + sin(float(i) * 12.9898) * fx.size.x * 0.32
 			var y := fx.size.y * (0.92 - 0.8 * ph)
 			fx.draw_circle(Vector2(x, y), 2.0 + 2.0 * power_k, Color(col.lightened(0.4), (1.0 - ph) * 0.9))

@@ -27,16 +27,16 @@ const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange 
 const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
+const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull_speed, stopping gap m away)
 const EMBER_EVERY := 0.035             # s between the ember puffs a ram or poof leaves behind
 const POOF_PUFFS := 5                  # smoke puffs the bellows blow out behind him as the air poof goes off
-const CLOAK_POSE_T := 0.3             # s the Furnace Cloak flare holds the flamer up off the aim (as_cloak)
+const CLOAK_POSE_T := 0.25            # s the Furnace Cloak flare holds the flamer up off the aim (as_cloak)
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
 const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the nozzle's tip from the feet in the aim pose: forward, up, right (m)
 
 var chars := {}                 # foe id -> {e, n, t}
 var ignites := {}               # foe id -> {e, lvl, until}
-var drags: Array = []           # foes being dragged in by the shield blast: {e, left}
 var hose := AshwickHose.new()   # the Torch Lance stream
 var flame_acc := 0.0
 var spool := 0.0                # how long the hose has been held
@@ -44,6 +44,7 @@ var after_t := 0.0              # the slow after letting go
 var boost_until := -9.0         # the Soot Ram's rank-3 speed boost runs until then
 var relight_t := 0.0            # the lance can't relight until this runs out (0.35s after a release)
 var was_held := false
+var hose_paused := false        # the lance held through a dash: the stream is out, it roars again as the dash ends
 var ember_t := 0.0
 var trail_t := 0.0              # the next dash after-image puff
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
@@ -159,10 +160,8 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		cd["e"] = 0.0
 		resets += 1
 		m.fx.word(h.pos + Vector3(0, 2.8, 0), "CLOAK READY", col_of(e_def()), true)
-		fx.wave(h.pos, 2.0, col_of(e_def()), 0.35)
-		m.sfx("ab_ready", h.pos, -2.0, 0.8)
+		m.sfx("ab_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the word and the sound)
 		if h.is_local(): h._ab_feedback("k1", "ready")
-		net_ring(h.pos, 2.0, col_of(e_def()))
 
 # ------------------------------------------------------------------ tick
 func _tick(dt: float) -> void:
@@ -182,7 +181,6 @@ func _tick(dt: float) -> void:
 		hose.step(m.world, dt)
 		_hose_look()
 	if not bash.is_empty(): _tick_bash(dt)
-	if not drags.is_empty(): _tick_drags(dt)
 	jet.tick(dt)
 	KMovesPair.air_moves(self, "lw_jump", "lw_land")
 	if h.shield_t > 0.0 and h.shield > 0.5 and st.get("shield_on", false):
@@ -267,7 +265,6 @@ func _drop_holds() -> void:
 
 func move_k() -> float:
 	var boost := 1.0 + float(dash_def().get("rank3_boost", 0.0)) if m.time < boost_until else 1.0
-	if was_held and h.wid == "flamethrower": return 0.8 * boost
 	return (0.6 if after_t > 0.0 else 1.0) * boost
 
 ## Rank 3 Cinder Shot holds a second charge.
@@ -288,39 +285,43 @@ func ignite_pct(f: Ent) -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "flamethrower":
 		return false
-	if held and h.ammo <= 0 and h.reload_t <= 0.0:
-		h.start_reload()          # out of fuel: the tank refills
 	# a merge ends the roar: holding the key on must not relight it
 	var merging := KinMerge.transforming(h) or KinMerge.active(h)
+	if held and was_held and not merging and flow.pauses_hold("lmb") and not jet.running():
+		_pause_hose()
+		return true
 	if not held or not h.can_fire() or merging or (relight_t > 0.0 and not was_held):
-		if was_held:
+		if was_held and not hose_paused:
 			play("as_lance_end")
+		if was_held:
 			after_t = float(lmbd().get("slow_after", 0.35))
 			relight_t = float(lmbd().get("relight", 0.35))      # a short gap before the lance can roar again
 			h.mel_hold = 0.0
 			hose.snuff()
 		was_held = false
+		hose_paused = false
 		spool = 0.0
 		flame_acc = 0.0
 		return true
 	var ld := lmbd()
+	if hose_paused:
+		hose_paused = false
+		if not jet.running(): play("as_lance")        # out of the dash, nozzle already on the aim: back at once
 	if not was_held:
-		play("as_lance")
+		if not jet.running(): play("as_lance")        # (flying, the flight pose stays)
 		m.sfx("lw_pilot", h.pos, -3.0, 1.0)
 		fx.orb(nozzle(), FLAME_CYAN, PILOT_CORE, 0.8, float(ld["spool"]))      # the pilot flares cyan before the roar
 	was_held = true
-	h.idle_fire = 0.0              # firing: no auto-reload mid-roar
+	h.idle_fire = 0.0
 	spool += dt
 	h.mel_hold = minf(spool, float(ld["spool"]))
 	if spool < float(ld["spool"]):
 		return true                # the pilot's flicker: no fire yet
-	if h.ammo > 0:
-		hose.emit(nozzle(), h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), float(ld["range"]), dt)
+	hose.emit(nozzle(), h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), float(ld["range"]), dt)
 	flame_acc += dt
 	var tick := float(ld["tick"])
-	while flame_acc >= tick and h.ammo > 0:
+	while flame_acc >= tick:
 		flame_acc -= tick
-		h.ammo -= 1               # a tick of fuel (10 a second)
 		_flame_tick(tick)
 	return true
 
@@ -359,11 +360,11 @@ func _flame_tick(tick: float) -> void:
 ## Held: a thin white lane of the shot's full, fixed length (the cursor distance doesn't matter), the gun hand
 ## cocked.
 func rmb_hold_tick(_t: float) -> void:
-	if KinMerge.active(h) or not rmb_ready() or jet.running():
+	if KinMerge.active(h) or not rmb_ready():
 		return
 	if not aiming:
 		aiming = true
-		play("as_aim")
+		if not jet.running(): play("as_aim")       # (flying, the flight pose stays)
 	var rdf := rmb_def()
 	var ln := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)
 	AimKit.lane(
@@ -376,14 +377,11 @@ func fire_rmb(c: Dictionary) -> void:
 	var was_aiming := aiming
 	aiming = false
 	AimKit.hide(h, "rmb")
-	if jet.running():
-		h._ab_feedback("sec", "deny")          # both hands on the jet while flying
-		return
 	if not spend_rmb():
 		if was_aiming: play("")
 		return
 	var rdf := rmb_def()
-	play("as_shot")
+	if not jet.running(): play("as_shot")
 	var amt := float(rdf["dmg"])
 	var rng := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)      # always its full length in the aim direction
 	var shot := {"type": "projectile", "speed": float(rdf["speed"]), "range": rng, "size": float(rdf["size"])}
@@ -400,7 +398,6 @@ func fire_rmb(c: Dictionary) -> void:
 	fx.orb(mz, Color("ff6a3a"), BOLT_CORE, 0.8, 0.12)
 	m.fx.burst(mz, Color("ffb04a"), 10, 4.0, 0.3, -2.0, 1.2, _fwd(), 30.0)
 	m.sfx("lw_bolt", h.pos, -2.0, 1.0)
-	if h.is_local(): Oomph.punch_dir(m, -h.aim_dir(), 0.12)
 
 ## A cinder that ran its full length without a hit fizzles there in a small blue-white ring (sheet 0133).
 func _bolt_end(at: Vector3, expired: bool) -> void:
@@ -444,10 +441,25 @@ func _cinder_hit(f: Ent) -> void:
 func sees_from(p: Vector3, o: Ent, lift := 0.95) -> bool:
 	return m.world.los(p, o.pos, p.y + lift)
 
+## The lance held through a ram, a poof or the flight: the stream goes out (no fire comes from the dash) but the
+## hold carries, so it roars again the step the dash ends, with no pilot and no relight gap (that gap is after a
+## release).
+func _pause_hose() -> void:
+	if not hose_paused:
+		hose_paused = true
+		hose.snuff()
+		flame_acc = 0.0
+
 # ------------------------------------------------------------------ Shift: Soot Ram
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	var dir := dash_dir()
+	if jet.running():
+		# in the flight (AshwickJet passes Shift on) a poof from the bellows feeds it and the flight goes on
+		if spend_dash(true):
+			jet.poof(dir)
+			_poof_cloud(dir)
+		return true
 	if use_ex and not h.grounded:
 		if not spend_dash(true): return true
 		_poof(dd, dir)
@@ -473,13 +485,7 @@ func _poof(dd: Dictionary, dir: Vector2) -> void:
 	h.roll_t = air_t
 	h.roll_speed = air_dist / air_t
 	play("lw_hop")
-	m.sfx("lw_hop", h.pos, -3.0, 1.0)
-	var back := -Vector3(dir.x, 0, dir.y)
-	var side := Vector3(dir.y, 0, -dir.x)
-	for i in POOF_PUFFS:
-		var spread := float(i) / (POOF_PUFFS - 1) - 0.5
-		var at := h.pos + Vector3(0, 0.9 + 0.25 * absf(spread), 0) + back * (0.5 + 0.25 * i) + side * spread * 0.7
-		fx.puff(at, LDFx.M_ORB, Color("3a2a2a"), Color("ff7a2a"), 0.6 + 0.08 * i, 0.45)
+	_poof_cloud(dir)
 	# held a step past the burst, so the kept speed lands after the class's own small carry
 	bash = {"t": air_t + 0.04, "dir": dir, "hit": true, "hop": true, "speed": h.roll_speed}
 
@@ -508,6 +514,16 @@ func _tick_bash(dt: float) -> void:
 			_keep_poof(b)
 		elif not b.get("hit", false):
 			m.fx.dust(h.pos, 6)
+
+## The poof's cloud of smoke and flame blown out behind him along `dir` (no blast), and its sound.
+func _poof_cloud(dir: Vector2) -> void:
+	m.sfx("lw_hop", h.pos, -3.0, 1.0)
+	var back := -Vector3(dir.x, 0, dir.y)
+	var side := Vector3(dir.y, 0, -dir.x)
+	for i in POOF_PUFFS:
+		var spread := float(i) / (POOF_PUFFS - 1) - 0.5
+		var at := h.pos + Vector3(0, 0.9 + 0.25 * absf(spread), 0) + back * (0.5 + 0.25 * i) + side * spread * 0.7
+		fx.puff(at, LDFx.M_ORB, Color("3a2a2a"), Color("ff7a2a"), 0.6 + 0.08 * i, 0.45)
 
 ## Out of the poof he sails on with a share of its speed (momentum kept), not the class's small carry.
 func _keep_poof(b: Dictionary) -> void:
@@ -559,9 +575,6 @@ func _bash_impact(f: Ent) -> void:
 	m.fx.burst(at, Color("ff5a3a"), 26, 6.0, 0.45, 6.0, 1.3)
 	m.sfx("lw_bash_hit", f.pos, 0.0, 1.0)
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
-	Feel.shake(m, "t2", h, f.pos, f)
-	if h.is_local(): Oomph.punch_dir(m, dir, 0.25)
-	net_ring(f.pos, 1.4, SKULL_COL)
 
 ## Rank 3: a clean ram hit speeds Cinder up and wraps him in a short shield.
 func _ram_reward() -> void:
@@ -597,7 +610,6 @@ func _cloak_blast() -> void:
 	fx.scorch(h.pos, r * 0.75, 1.6)
 	fx.wave(h.pos, r, col, 0.3)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 30, 6.0, 0.5, -2.0, 1.4)
-	Feel.shake(m, "t2", h, h.pos)
 	for f in foes_in(h.pos, r):
 		if not sees(f):
 			continue
@@ -609,8 +621,10 @@ func _cloak_blast() -> void:
 		m.fx.burst(
 			f.pos + Vector3(0, 1.4, 0), Color("6a4a5a"), 8, 1.5, 0.6, -1.0, 1.6
 		)
-		if f.mass() < 6.0 and not f.remote:
-			drags.append({"e": f, "left": 0.45})
+		if f.mass() < 6.0:
+			# dragged in toward her (Displace: a player online is pulled on their own game)
+			var drag := {"mode": "step", "spd": float(ed["pull_speed"]), "gap": float(ed["gap"]), "dur": DRAG_T}
+			m.displace.tow(f, h, drag)
 			pulled += 1
 	if hit > 0:
 		h.shield = maxf(h.shield, h.max_hp * (float(ed["shield_base"]) + float(ed["shield_each"]) * hit) * shield_k)
@@ -619,35 +633,13 @@ func _cloak_blast() -> void:
 		m.sfx("shield", h.pos, -5.0, 0.9)
 	net_ring(h.pos, r, col)
 
-func _tick_drags(dt: float) -> void:
-	var ed := e_def()
-	for dg in drags.duplicate():
-		var fe = dg["e"]
-		dg["left"] = float(dg["left"]) - dt
-		if not is_instance_valid(fe) or (fe as Ent).dead or float(dg["left"]) <= 0.0:
-			drags.erase(dg)
-			continue
-		var e := fe as Ent
-		var to := Vector2(h.pos.x - e.pos.x, h.pos.z - e.pos.z)
-		var dist := to.length()
-		if dist <= float(ed["gap"]):
-			drags.erase(dg)
-			continue
-		var step := minf(float(ed["pull_speed"]) * dt, dist - float(ed["gap"]))
-		var dir := to / dist
-		var nx := e.pos.x + dir.x * step
-		var nz := e.pos.z + dir.y * step
-		var bx: float = m.world.occupy(nx, e.pos.z, e.r, e.pos.y, false)
-		var bz: float = m.world.occupy(e.pos.x, nz, e.r, e.pos.y, false)
-		if bx == 0.0: e.pos.x = nx
-		if bz == 0.0: e.pos.z = nz
-		if bx != 0.0 and bz != 0.0: drags.erase(dg)
-
 # ------------------------------------------------------------------ X: Flue Flight
 func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
 func has_ult() -> bool: return true
 func ult_recast() -> bool: return jet.recast()
 func ult_running() -> bool: return jet.running()
+## In the flight (a roll) the lance and the Cinder Shot still work (item 51: the source is silent, so allow it).
+func fires_in_dash() -> bool: return jet.running()
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

@@ -11,6 +11,15 @@ func run(main_node: Node) -> void:
 	await ult_check.ult(main)
 	n += ult_check.n
 	fails += ult_check.fails
+	var flow = load("res://tools/dash_flow_check.gd").new()
+	var bad: int = await flow.combos_of(main, "dolm")
+	ok("item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; holds go through every move",
+		bad == 0, "%d failing (the DASHFLOW lines)" % bad)
+	var parity = load("res://tools/parity_pvb.gd").new()
+	parity.main = main
+	await parity.breah()
+	n += parity.n
+	fails += parity.fails
 	print("PAIRCHECK dolm DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -47,7 +56,7 @@ func _breah() -> void:
 		step(m, 0.25)
 	ok(
 		"name: the display name is the class title",
-		Arch.name_of("dolm") == "Rock Elementalist", Arch.name_of("dolm")
+		Arch.name_of("dolm") == "Cliff Runner", Arch.name_of("dolm")
 	)
 	var card: Dictionary = K.d["card"]
 	ok(
@@ -131,16 +140,19 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok("lmb: the punch is a lane, not a cone (a foe 1.6m to the side is missed)", dmg(T) == 0.0, "took %.1f" % dmg(T))
-	# holding on: it punches by itself and starts the next wind-up, a release throws nothing
+	# audit: held as long as you like (the data: hold and release, no timeout); full stays full, one punch on release
 	reset.call()
+	var p0 := K.punches
+	var b0 := K.boulders
 	P.inp["fire"] = true
 	step(m, 2.3, func(): P.inp["fire"] = true)
-	var p_auto := K.punches
+	var p_held := K.punches - p0
 	P.inp["fire"] = false
 	step(m, 0.2)
 	ok(
-		"small: holding LMB keeps punching, letting go after an auto-punch throws no boulder",
-		p_auto >= 1 and K.boulders == 1, "punches %d boulders %d" % [p_auto, K.boulders]
+		"small: holding LMB 2.3s throws nothing until the release, then one full punch (no boulder)",
+		p_held == 0 and K.punches == p0 + 1 and K.boulders == b0, "held %d punches %d boulders %d" % [p_held,
+			K.punches - p0, K.boulders - b0]
 	)
 	# a merge mid-hold ends it
 	reset.call()
@@ -214,7 +226,8 @@ func _breah() -> void:
 		"rock: dropped onto a rock, she stands on its top", P.grounded and absf(P.pos.y - top) < 0.05,
 		"y %.2f top %.2f" % [P.pos.y, top]
 	)
-	# item 25: only the caster climbs her rocks: she walks up and over hers, no jump; anyone else is stopped
+	# item 25: the caster climbs his rocks by walking, no jump; owner 23:55 (the data): allies hop over by jumping
+	# against them, walking they are stopped; foes are stopped either way
 	var cross := _walk_over(m, P, home, w0)
 	ok(
 		"rock (item 25): walking into her own rock lifts her onto it and over, no jump, in 0.6s or less",
@@ -236,16 +249,19 @@ func _breah() -> void:
 			B.inp["move"] = Vector2(tgt.x - B.pos.x, tgt.z - B.pos.z).normalized()
 			jump_peak[0] = maxf(jump_peak[0], B.pos.y - home.y))
 		var near_side := (B.pos - mid0).dot((mid0 - home).normalized()) < 0.0
-		ok(
-			"rock (item 25): %s walking or jumping into her rock is stopped (only the caster climbs)" % (
-				"an ally" if team == P.team else "a foe"
-			),
-			float(walk["t"]) < 0.0 and float(walk["peak"]) < 0.1 and jump_peak[0] > 0.8 and near_side
-				and B.pos.y < top - 0.5,
-			"walk cross %.2f peak %.2f, jump peak %.2f, y %.2f" % [
-				float(walk["t"]), float(walk["peak"]), jump_peak[0], B.pos.y - home.y
-			]
-		)
+		var walk_stopped := float(walk["t"]) < 0.0 and float(walk["peak"]) < 0.1
+		if team == P.team:
+			var over := not near_side or B.pos.y >= top - 0.1
+			ok("rock (the data, the owner's 23:55 answer): an ally walking into his rock is stopped, jumping hops on",
+				walk_stopped and over, "walk cross %.2f peak %.2f, jump peak %.2f, y %.2f top %.2f" % [
+					float(walk["t"]), float(walk["peak"]), jump_peak[0], B.pos.y, top
+				])
+		else:
+			ok("rock (item 25): a foe walking or jumping into his rock is stopped",
+				walk_stopped and jump_peak[0] > 0.8 and near_side and B.pos.y < top - 0.5,
+				"walk cross %.2f peak %.2f, jump peak %.2f, y %.2f" % [
+					float(walk["t"]), float(walk["peak"]), jump_peak[0], B.pos.y - home.y
+				])
 		B.queue_free()
 		m.hunters.erase(B)
 		m.step(DT)
@@ -491,6 +507,7 @@ func _breah() -> void:
 		"dunks %d vy %.1f" % [K.dunks, T.vel.y]
 	)
 	await _hop_glide(m, P, home, K, reset)
+	_glide_slam(m, P, K, reset)
 	# ---- data pass: Landslide is 12s with one charge; Molten Guard is the base passive
 	ok(
 		"data: the leap rests 12s per charge and starts with one charge (a second at rank 3)",
@@ -545,6 +562,7 @@ func _breah() -> void:
 	ok("anim: her long air dash plays breah_exdash", K.anim_id == "breah_exdash")
 	step(m, 0.8)
 	await _dash_moves(m, P, T, home, K, reset)
+	_air_dash_hold(m, P, K, reset)
 	# ---- rank 3
 	P.slot_lv["sec"] = 3
 	P.slot_lv["kin"] = 3
@@ -730,6 +748,76 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 		)
 		P.inp["glide"] = false
 		step(m, 0.8)
+
+## Owner 23:00 (reverses item 26's "the glider wins" for a press in a glide; the source allows it): Quakefall
+## pressed while gliding folds the glider and plunges at the glider's dive speed (data: 32.5 m/s down, sideways
+## speed x0.25), slamming where she lands; glide still held doesn't reopen it on the way down.
+func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
+	reset.call()
+	P.pos.y += 8.0
+	P.grounded = false
+	P.inp["move"] = Vector2(1, 0)
+	var t := 0.0
+	while not P.gliding and t < 1.0:
+		P.inp["glide"] = true
+		m.step(DT)
+		t += DT
+	var glided := P.gliding
+	var s0 := K.slams
+	var vx0 := absf(P.vel.x)
+	P.inp["move"] = Vector2.ZERO
+	tap(m, P)
+	var folded := not P.gliding and K.dive and K.dive_glide
+	var vx1 := absf(P.vel.x)
+	var fall := 0.0
+	var vmin := 0.0
+	var reopened := false
+	while not P.grounded and fall < 2.0:
+		P.inp["glide"] = true
+		m.step(DT)
+		fall += DT
+		vmin = minf(vmin, P.vel.y)
+		reopened = reopened or P.gliding
+	P.inp["glide"] = false
+	P.inp["move"] = Vector2.ZERO
+	m.step(DT)
+	ok("glide slam: RMB in a glide folds the glider and plunges at the glider's dive speed (data 32.5 m/s)",
+		glided and folded and not reopened and vmin <= -30.0 and vx1 <= vx0 * 0.3 + 0.1,
+		"glided %s folded %s reopened %s vy %.1f vx %.1f -> %.1f" % [glided, folded, reopened, vmin, vx0, vx1])
+	ok("glide slam: she slams where she lands (about 0.3s down from 8m)", K.slams == s0 + 1 and P.grounded
+		and fall < 0.6, "slams +%d, %.2f s down" % [K.slams - s0, fall])
+	step(m, 0.8)
+
+## Item 51: the Quake Fist charge carries through her air dash (it charges on, short of the auto punch) and a
+## release in it punches as the dash ends, in the air, keeping most of her speed.
+func _air_dash_hold(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
+	reset.call()
+	P.inp["fire"] = true
+	step(m, float(K.lmb_def()["tap"]) + 0.15)
+	var k0 := K.lmb_t
+	var n0 := K.punches
+	P.pos.y += 4.0
+	P.grounded = false
+	P.inp["move"] = Vector2(1, 0)
+	P.ex_cd = 0.0
+	P.do_dash()
+	var dashing := K.flow.move_now() == "air"
+	step(m, 0.08)
+	ok("item 51: the Quake Fist charge carries through her air dash, charging on",
+		dashing and K.lmb_t > k0 + 0.05 and K.punches == n0, "charge %.2f -> %.2f dash %s punches +%d" % [k0, K.lmb_t,
+		dashing, K.punches - n0])
+	var speed := 0.0
+	P.inp["fire"] = false
+	var t := 0.0
+	while K.punches == n0 and t < 0.5:
+		speed = Vector2(P.vel.x, P.vel.z).length()       # (the last step before the punch: the dash's end)
+		m.step(DT)
+		t += DT
+	var kept := Vector2(P.vel.x, P.vel.z).length()
+	ok("item 51: let go in the air dash, she punches as it ends, still in the air and moving",
+		K.punches == n0 + 1 and not P.grounded and kept >= speed * 0.5, "%.2fs speed %.1f -> %.1f" % [t, speed, kept])
+	P.inp["move"] = Vector2.ZERO
+	step(m, 0.8)
 
 ## Item 35: her own ground (Rubble Leap) and air (the long dash) moves, ids no other hero's table has, each one
 ## keyed to end with its dash (the leap's crouch and flight; the air dash's time with the dash feel), and

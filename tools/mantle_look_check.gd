@@ -4,8 +4,8 @@ extends RefCounted
 ## ends stays inside the Warden's clamp and every colour pick inside its tint range; gender, folk and
 ## face come from the Warden; the hitbox (Hunter.r and the ring that shows it) never changes; the
 ## silhouette at the match camera still reads as its own Hunter at both slider extremes; at home the
-## player is their own person. The look survives a save and load, and a v7 save migrates with
-## neutral sliders. The new-game flow has the creator right after the Boki is named. With
+## player is their own person. A v7 save migrates (to the Unmasked) and its Bearer is exactly the
+## Warden; the slider creator panel works on its own. With
 ## --shots-dir=<dir>: one Hunter at 5 slider settings, one player's look across 4 Hunters, and the
 ## creator step. Never touches the real save.
 
@@ -278,34 +278,35 @@ static func _iou(a: PackedByteArray, b: PackedByteArray) -> float:
 	return float(both) / maxf(1.0, float(either))
 
 # ---------------------------------------------------------------- 7. save and load
+## On main the saved look is the Unmasked (Unmasked.migrate at load); in a match a Bearer is built from
+## Unmasked.mask_look() through MantleLook, so every slider is neutral there: exactly the Warden. The
+## sliders themselves are model params (PlayerLook.clean keeps them exactly); saving them waits for
+## the mask-look rules. The v8 -> v9 step stays an empty placeholder.
 func _save_round_trip() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 45
 	var lk := PlayerLook.clean(PlayerLook.random(rng))
+	ok(PlayerLook.clean(lk) == lk, "a slider look cleans back to itself, slider for slider")
 	var path := "user://mantle_look_check.json"
-	var d := Save.fresh()
-	d["look"] = lk
-	_write(path, d)
-	Save.load_from(path)
-	ok(PlayerLook.clean(Save.d.get("look", {})) == lk, "a look survives a save and load, slider for slider")
-	# a v7 save from before the sliders: its picks stay, its sliders start neutral, "body" goes
 	var old := Save.fresh()
 	old["v"] = 7
 	old["look"] = {"race": 2, "body": 2, "gender": 0, "face": 4, "skin": 5, "hair": 1, "hair_v": 2, "hair_col": 9,
 		"detail": 2, "outfit": 5, "glider": "classic"}
 	_write(path, old)
 	Save.load_from(path)
-	var got: Dictionary = Save.d.get("look", {})
-	var neutral := (got.get("sliders", {}) as Dictionary).values().all(func(v): return absf(float(v) - 0.5) < EPS)
-	ok(int(Save.d["v"]) == Save.VERSION and Save.VERSION == 8, "a v7 save loads and upgrades to v8")
-	ok(neutral and (got["sliders"] as Dictionary).size() == PlayerLook.slider_keys().size() and not got.has("body"),
-			"its look gets every slider, all neutral, and loses the old body pick")
-	ok(int(got["race"]) == 2 and int(got["gender"]) == 0 and int(got["hair_col"]) == 9 and int(got["outfit"]) == 5,
-			"and keeps the picks it had")
+	ok(int(Save.d["v"]) == Save.VERSION and Save.MIGRATIONS[8] == "_migrate_8_to_9",
+			"a v7 save loads and upgrades to v%d through the v8 -> v9 step" % Save.VERSION)
+	var worn := MantleLook.params("archer", Unmasked.mask_look())
+	var plain := MantleLook.apply(MantleLook.warden("archer"), PlayerLook.neutral())
+	var same := true
+	for k in MantleLook.warden("archer")["clamp"]:
+		same = same and absf(float(worn[k]) - float(plain[k])) < EPS
+	ok(Unmasked.is_look(Save.d.get("look", {})) and same,
+			"its look becomes the Unmasked, and its Bearer is exactly the Warden (every slider neutral)")
 	old.erase("look")
 	_write(path, old)
 	Save.load_from(path)
-	ok(int(Save.d["v"]) == 8 and not Save.d.has("look") and MantleLook.params("archer", {})["gender"] == 0,
+	ok(int(Save.d["v"]) == Save.VERSION and MantleLook.params("archer", {})["gender"] == 0,
 			"a v7 save with no look loads too, and builds the plain Warden")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 	Save.d = Save.fresh()
@@ -315,26 +316,18 @@ func _write(path: String, d: Dictionary) -> void:
 	f.store_string(JSON.stringify(d))
 	f.close()
 
-# ---------------------------------------------------------------- 8. the creator step
+# ---------------------------------------------------------------- 8. the slider creator
+## The new-game flow and Change your look are main's Unmasked creator (--unmasked-check,
+## --class-unlock-check); the slider CreatorPanel is checked on its own until it is wired in.
 func _creator_step(tree: SceneTree) -> void:
-	Save.d = Save.fresh()
-	Save.d["tutorial"] = {"intro": true}
-	var hx = load("res://scripts/ui/hatch.gd").new()
-	main.add_child(hx)
-	for i in 8: await tree.process_frame
-	hx.chosen = 0
-	hx.stage = "name"
-	hx._finish(String(hx.egg_defs[0]["species"]), "Pip", "Orri", false)
-	for i in 6: await tree.process_frame
-	ok(hx.stage == "create" and hx.creator != null and hx.preview != null,
-			"naming the Boki leads straight to making yourself (stage %s)" % hx.stage)
-	ok(String(hx.preview.get_meta("arch")) == "", "the preview is you as yourself, with no Mantle on")
-	var went := [false]
-	hx.creator_then = func(): went[0] = true
-	var c: CreatorPanel = hx.creator
+	var c := CreatorPanel.make(PlayerLook.neutral(), ClassUnlock.open_ids())
+	var ui := CanvasLayer.new()
+	main.add_child(ui)
+	ui.add_child(c)
+	for i in 4: await tree.process_frame
 	ok(_find_text(c, "Randomise") != null and _find_text(c, "Looks good") != null,
 			"Randomise and Looks good are there, so a player who doesn't mind is through in one click")
-	await _shot(tree, "creator_body", 90)
+	await _shot(tree, "creator_body", 30)
 	var before: Dictionary = c.look.duplicate(true)
 	c.randomise()
 	ok(c.look != before and (c.look["sliders"] as Dictionary).values().all(func(v): return v >= 0.0 and v <= 1.0),
@@ -343,17 +336,13 @@ func _creator_step(tree: SceneTree) -> void:
 	await _shot(tree, "creator_face", 12)
 	c.show_tab("Colours")
 	await _shot(tree, "creator_colours", 12)
-	c.show_view(String(ClassUnlock.open_ids()[0]))
-	for i in 4: await tree.process_frame
-	ok(String(hx.preview.get_meta("arch")) == String(ClassUnlock.open_ids()[0]),
-			"See: In a Mantle shows you as that Hunter's Warden")
-	await _shot(tree, "creator_mantle", 90)
-	var made: Dictionary = c.look.duplicate(true)
+	var made := [{}]
+	c.done.connect(func(lk: Dictionary): made[0] = lk)
+	var want: Dictionary = c.look.duplicate(true)
 	(_find_text(c, "Looks good") as Button).pressed.emit()
 	for i in 3: await tree.process_frame
-	ok(went[0] and PlayerLook.clean(Save.d["look"]) == PlayerLook.clean(made) and Save.d["name"] == "Orri",
-			"Looks good saves the look and carries on (the name stays on the Boki card)")
-	hx.queue_free()
+	ok(PlayerLook.clean(made[0]) == PlayerLook.clean(want), "Looks good hands back the look it shows")
+	ui.queue_free()
 	for i in 3: await tree.process_frame
 
 func _find_text(nd: Node, txt: String) -> Control:

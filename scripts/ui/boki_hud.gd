@@ -63,7 +63,7 @@ static func r_slot(H, p: Hunter, ur: Rect2) -> void:
 	var ready_ult := bool(ri.get("ready", false)) and String(ri.get("plan", "")) == "ult"
 	var pl := 0.5 + 0.5 * sin(H.m.time * 8.0)
 	_ring(H, ur.grow(RING_GROW), left, Color("fff4c0").lerp(col, pl * 0.6) if ready_ult else Color("fff4c0"), 4.0 if ready_ult else 3.0)
-	var form_name := String((ml.get("form", {}) as Dictionary).get("name", "MERGED")).to_upper()
+	var form_name := String((ml.get("form", {}) as Dictionary).get("name", "FUSED")).to_upper()
 	var chip := form_name
 	if ready_ult:
 		chip = String(ri.get("name", "ULT")).to_upper()
@@ -139,7 +139,7 @@ static func _chip(H, ur: Rect2, text: String, col: Color) -> void:
 	H._rounded(btr, Color(0.03, 0.03, 0.05, 0.95), 5, Color(col, 0.9), 1)
 	H._ctext(btr.get_center() + Vector2(0, 4), text, 10, col, H.big)
 
-## C and G, the small badges after R. Returns the x where the next badge starts.
+## The Boki ability and G badges, after the ultimate tiles. Returns the x where the next badge starts.
 static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	var k: Kin = p.kin
 	if k == null or k.runner == null or k.runner.def_of("k1") == null:
@@ -148,13 +148,13 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	var down := k.state == "downed"
 	var cr := Rect2(Vector2(x, y + s - 38.0), Vector2(38, 38))
 	var cd_left: float = k.runner.cd_left("k1") if not k.runner.is_ready("k1") else 0.0
-	H._ab_slot("kin_ab", cr, KinText.icon(kd), Settings.key_cap("kin_ability"), KinText.color(kd), k.runner.cd_frac("k1"), cd_left, k.runner.is_ready("k1") and k.ready_to_fight())
+	H._ab_slot("kin_ab", cr, KinText.icon(kd), "AUTO", KinText.color(kd), k.runner.cd_frac("k1"), cd_left, k.runner.is_ready("k1") and k.ready_to_fight())
 	var in_form := KinMerge.in_form(p)
 	if in_form:
-		H._rounded(cr, Color(0.04, 0.04, 0.06, 0.72), 8)          # (the Boki is part of you: C waits)
+		H._rounded(cr, Color(0.04, 0.04, 0.06, 0.72), 8)          # (the Boki is part of you)
 	var from_txt := "from Boki" if k.state in ["active", "flying", "returning", "flying_home"] else ("DOWN" if down else "through you")
 	if in_form:
-		from_txt = "MERGED"
+		from_txt = "FUSED"
 	H._ctext(Vector2(cr.get_center().x, cr.position.y - 5), from_txt, 8, DOWN_COL if down else Color(H.INK, 0.5 if in_form else 0.7), H.big)
 	x += 50.0
 	var gr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
@@ -175,7 +175,7 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 		mode = "DOWN"
 	if in_form:
 		H._rounded(gr, Color(0.04, 0.04, 0.06, 0.72), 8)
-		mode = "MERGED"
+		mode = "FUSED"
 	elif k.resting():
 		H._rounded(gr, Color(0.04, 0.04, 0.06, 0.72), 8)
 		H._ctext(gr.get_center() + Vector2(0, 4), str(int(ceil(k.rest_t))), 14, Color(H.INK, 0.8), H.big)

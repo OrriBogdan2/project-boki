@@ -41,7 +41,7 @@ var _arm_l := Vector3.ZERO
 var _carry := Transform3D.IDENTITY
 var _has_carry := false
 var _carry_free := 0.0
-var _carry_free_r := 0.0       # (a weapon carried in the left hand alone: Cinder's lance)
+var _carry_free_r := 0.0      # a weapon carried in the left hand alone (Hem's bow at her side)
 var _breath_amp := 1.0
 var _shift := 9.0
 var _shift_t := 0.0
@@ -170,7 +170,7 @@ func carry(xf: Transform3D) -> Transform3D:
 func carry_free_l() -> float:
 	return _carry_free * carry_w
 
-## How far the carry lets the right hand off the weapon (the left hand carries it alone).
+## How far the carry lets the right hand off the weapon (a bow hanging in the left hand).
 func carry_free_r() -> float:
 	return _carry_free_r * carry_w
 

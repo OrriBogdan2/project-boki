@@ -1,4 +1,4 @@
-# Vex (r3e: the owner's pick r3b, polished; the RECIPE_95 reference): import note
+# Vex (r3g: the owner's pick r3b, polished; the RECIPE_95 reference): import note
 
 `vex.glb` is the owner-approved round-3 Vex redesign (docs/art/gen/wardens_r3/vex_* and VEX_KIT.md on
 ext/imagegen fb523188), built as the design variant `vex_r3b` and picked by the owner over the r3 model
@@ -64,3 +64,46 @@ r3e (ORCH's reviews after r3d, 14:00 and 14:10; credit-free):
   skin cleaned (the art's crop-top trim had landed on it as green smears). The face's circuits are the face sheet's.
 - **Gorget:** its seams on the glow slot (`reslot_late`).
 - Bigger hose loops; the match frame shot on clear grass (`--no-tips`, `demo_at` -4.5,0).
+
+r3f (the r3e report's next steps and ORCH's 15:10 review; credit-free):
+- **Chest:** Meshy's blurry tattoos there had gone to the hair slot (green smears): skin rules by box and hue before
+  the hair rule, stepped to clear the crop top's piping, then a `fill` touch-up closes the skin over Meshy's green
+  in its own shading. The art's circuit curl and the circuit on her left breast are crisp flat lines (`line`
+  passes, skin only, `max` under the piping's green); the projections no longer carry the art's tattoos as smudges.
+- **Belly:** the same fill, then the art's circuit lines, skin only.
+- **Lens:** the face sheet's lens on a smooth dome (fit spec `plate.dome`: on the plane of the face just around
+  Meshy's lens horn, the horn cut under it), glow 1.8: a bright core in its rings, no green spike at 3/4.
+- **Gorget:** painted from the face sheet (`project_late` "gorget": the dark centre plate, the bronze bands, the
+  green seams), its seams on the glow slot.
+- **Cartridges:** the ammo belts on both shoulders a bronze ramp (casings and dark links).
+- **Brass:** its own slot (`brass`, split off the metal by hue): its look lifts it at the match camera (far_lift
+  0.5), so the bronze reads there.
+- **Jacket and gun mount:** the gun-side shoulder's dark jacket back on cloth (it had taken the metal ramp: grey
+  camo), the atlas smoothed harder (sigma_r 0.1) and the blacks ramp kept dark: clean black leather and gunmetal.
+- **Braids:** flatter strand colours, eight thicker locks in each tuft, and a `hair-braid` look (fres 0.15, far_lift
+  0.3, no rim): solid plaits, no green edge noise.
+- **Hair at the match camera:** far_lift 0.5, fres 0.3, no rim (it had gone pale cyan).
+- **The shared match-zoom fix:** v2 (ext/warden-matchzoom-v2 161708cc, c89a5273 and 8af89a9e, picked as 5b6d6ac8,
+  3434a660 and 1312af72; the v1 pick 5fa9e23a reverted): no speckle fringe, the ink gone from ~13.5 m, a halo shell on the glow
+  pieces; the review frame is `--arena-demo=pose_clear`.
+
+r3g (the r3f report's next steps; credit-free):
+- **Chest straps:** the skin around the upper chest's straps cleaned by value (`fill`: Meshy's dark strap shadows and
+  the art's white highlights), the straps' own painted edges kept.
+- **Circuits:** the belly's and chest's circuit tattoos as vector strokes (`stamp`: the art's lines thinned to their
+  centres, stamped 2 mm wide in one green, skin only).
+- **Gorget:** its seams stamped from the face sheet in the bright seam green, then onto the glow slot.
+- **Gun mount:** the whole block on metal (a value rule had split it with the black jacket: dark blotches) and
+  flattened to gunmetal.
+- **Halo:** lime [0.7, 1.0, 0.25], a hue apart from the hair's green (it was lost in the hair at the match camera).
+
+r3h (ORCH's 17:10 review of r3f; credit-free):
+- **Face:** the eyeshadow's magenta taken to the face sheet's smoky plum (`desat`); the head a little larger and
+  wider (chunk head 1.21, head_x 1.04: it read small and gaunt); the cheek and temple circuits stamped from the
+  face sheet, their round nodes whole.
+- **Chest and belly:** the upper chest's blown highlights capped (`cap`), more of the strap streaks filled; the
+  belly's Meshy green filled further down in saturation before its circuit strokes.
+- **Gorget:** its grey plates taken to bronze (`warm`), its seams stamped green on the glow slot.
+- **Gun mount and left sleeve:** the mount a darker flat gunmetal, the left sleeve flat black leather.
+- **Night:** the circuit tattoos glow (`glow_key` on the skin slot, hero_toon); the lens and the gorget's seams
+  were on the glow slot already. The lens halo is lifted 3.5 cm toward the camera, in front of her fringe.

@@ -1,6 +1,6 @@
 class_name JuggernautUlt
 extends RefCounted
-## Zedran's ultimate on X, Gilded Riposte (his "x" data in content/archetypes/juggernaut.json; the source's
+## Kael's ultimate on X, Gilded Riposte (his "x" data in content/archetypes/juggernaut.json; the source's
 ## Retaliation, briefs/hero-ref/juggernaut.md "Ultimate (on X)"). Press: he plants in a guard for 0.65s,
 ## blade upright and his body flaring gold, taking no damage and no crowd control (each hit he blocks rings
 ## out and makes the answer harder, up to two). Then he lunges 1.8m and cleaves up through the strip ahead
@@ -35,7 +35,8 @@ func running() -> bool:
 func guarding() -> bool:
 	return String(st.get("phase", "")) == "guard"
 
-## Planted from the press until the cleave has landed (the recovery lets him walk again, slowly).
+## Planted from the press until the cleave has landed (the recovery lets him walk again, slowly, and a jump or
+## Shift moves him straight out of it).
 func move_k() -> float:
 	match String(st.get("phase", "")):
 		"guard", "strike": return 0.0
@@ -51,8 +52,6 @@ func start() -> void:
 	_show_glow(true)
 	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(data()["short"]).to_upper(), GOLD, false)
 	k.m.sfx("jug_guard", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
-	k.m.fx.ring(h.pos, 1.3, Color(GOLD, 0.9), 0.3)
-	k.net_ring(h.pos, 1.3, GOLD)
 
 ## A merge or a knock ends it at once, with no strike.
 func drop() -> void:
@@ -78,6 +77,9 @@ func tick(dt: float) -> void:
 		"recover":
 			if float(st["t"]) >= float(d["recover"]):
 				drop()
+			elif not h.grounded:
+				drop()               # a jump moves him out of it (Shift drops it in JuggernautKit.on_dash)
+				k.play("")           # the jump's own pose eases in over the follow-through
 
 ## The guard: planted (no jumping off either), the strip ahead follows the aim, gold sparks rise off him.
 func _tick_guard(d: Dictionary) -> void:
@@ -151,9 +153,7 @@ func _impact(f: Ent, dir: Vector2, dealt: float) -> void:
 	k.m.fx.burst(f.pos + Vector3(0, 0.8, 0), Color(HOT, 0.85), 22, 3.0, 0.6, -1.0, 1.6)
 	k.m.fx.burst(f.pos + Vector3(0, 1.0, 0), GOLD, 12, 6.0, 0.35, 4.0, 1.0, Vector3(dir.x, 0.6, dir.y), 50.0)
 	Feel.hitstop(k.m, h, f, dealt, {"melee": true, "payoff": true, "heavy": true})
-	Feel.shake(k.m, "t4", h, f.pos, f)
-	if h.is_local():
-		Oomph.punch_dir(k.m, dir, 0.3)
+	Shake.incoming_big(k.m, f.pos, 0.6, h)
 
 ## A hunter knocked by the cleave: it is ready again at once.
 func _reset() -> void:

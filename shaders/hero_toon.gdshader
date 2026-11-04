@@ -25,6 +25,13 @@ uniform float glow = 0.0;
 // a colour-keyed glow (default off): texels whose red outweighs their green (embers, hot spots, lava cracks) glow by
 // this much, so painted spots glow and the rest of the slot doesn't (Cinder's ember spots; warden_look.json)
 uniform float glow_red = 0.0;
+// a painted atlas's glow slot (WardenGlb): only its hot texels glow (the cracks), not the dark skin or rock painted
+// between them
+uniform bool glow_key = false;
+// a Warden's glow colours (WardenGlb, the archetype's "model_glow"; alpha 0: the painted colour): the hot texels and
+// flat glow pieces take the core colour, their soft edges the edge colour, so the glow can change without a rebake
+uniform vec4 glow_core : source_color = vec4(1.0, 1.0, 1.0, 0.0);
+uniform vec4 glow_edge : source_color = vec4(1.0, 1.0, 1.0, 0.0);
 uniform float shade = 0.42;
 uniform bool no_fog = false;
 uniform vec4 shadow_tint : source_color = vec4(0.66, 0.62, 0.9, 1.0);   // shadows lean cool and violet
@@ -45,6 +52,9 @@ uniform float top_light = 0.0;     // surfaces facing up (what the match camera 
 // a painted atlas (WardenGlb) at the match camera (~23 m): its colours this much brighter and richer, fading in
 // from 8 to 18 m away (close-ups keep the paint's own values)
 uniform float far_lift = 0.0;
+// the emission layer brighter and more saturated at the match camera (8 to 18 m away; a Warden's own look: Ryzz's
+// pink scar, charm and piping pop against her blacks at match zoom)
+uniform float far_emit = 0.0;
 // a painted atlas (WardenGlb) carries the art's own colours, and the scene's light leans cool: its ambient (Look:
 // c4cbe6, the biomes' lavender and blue) is about half the light on such a model and turned skin lilac. ambient_cut
 // takes the scene's ambient off (through AO, which only scales ambient light) and own_ambient puts a warm-neutral
@@ -54,6 +64,15 @@ uniform float ambient_cut = 0.0;
 uniform vec3 own_ambient = vec3(0.0);
 uniform float light_neutral = 0.0;
 uniform float light_neutral_warm = 0.0;   // the same for warm lights (per model: black cloth under an orange sun)
+// the painted colour pulled this far toward its own grey before the lights (per model, warden_look.json: a slot
+// the warm light and the tonemap push too saturated, Tarek's brown skin reading orange-red); 0 = unchanged
+uniform float desat = 0.0;
+// a painted colour that glows (per model: Vex's circuit tattoos on her skin read at night): texels within
+// paint_glow_width of paint_glow_color take paint_glow x their colour as emission; 0 = none (Vex r3h's glow_key,
+// renamed: glow_key is the hot-texel switch)
+uniform float paint_glow = 0.0;
+uniform vec4 paint_glow_color : source_color = vec4(0.3, 0.76, 0.37, 1.0);
+uniform float paint_glow_width = 0.12;
 // near-black paint lifted to this linear floor (jacket, trousers and gun no longer merge to black at the match
 // camera); mid and light colours keep their value and saturation
 uniform float dark_lift = 0.0;
@@ -93,6 +112,15 @@ uniform float part_grad = 0.0;
 uniform float crease = 0.0;
 uniform float edge_dark = 0.0;
 uniform int surface = 0;
+// a painted emission layer on a .glb's atlas (Ryzz's lightning veins and hair crackle, Tarek's bracer cracks):
+// its texture x emit, crackling over time by emit_flicker (0 steady .. 1 strobing along the body)
+uniform bool use_emit = false;
+uniform sampler2D emit_tex : source_color, filter_linear_mipmap, repeat_disable;
+uniform float emit = 0.0;
+uniform float emit_flicker = 0.0;
+// the emission layer's colour (WardenGlb, the archetype's "model_glow" core; alpha 0: the layer's own painted colour):
+// the layer is then a mask, and its texels' paint takes the colour too, so the glow can change without a rebake (Ryzz)
+uniform vec4 emit_tint : source_color = vec4(1.0, 1.0, 1.0, 0.0);
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
 // The distance at which the match camera's 32 degree lens sees things this size on screen: the far_* terms' measure
@@ -114,6 +142,7 @@ void vertex() {
 
 void fragment() {
 	vec3 c = albedo.rgb;
+	float heat = 1.0;
 	float far_k = smoothstep(8.0, 18.0, length(VERTEX));
 	float far_p = smoothstep(8.0, 18.0, match_d(VERTEX, PROJECTION_MATRIX));
 	if (use_tex) {
@@ -127,8 +156,28 @@ void fragment() {
 			tx = mix(tx, tc, far_smooth * far_k);
 		}
 		c *= tx;
+		if (glow_key) {
+			// (the cracks' red-orange rims count too: in a white-hot glow they take the edge colour, not the paint)
+			heat = smoothstep(0.42, 0.66, tx.r) * smoothstep(0.14, 0.32, tx.r - tx.b) * smoothstep(-0.04, 0.01, tx.g - tx.b);
+		}
+	}
+	vec3 emit_c = vec3(0.0);
+	if (use_emit) {
+		emit_c = texture(emit_tex, UV).rgb;
+		if (emit_tint.a > 0.0) {
+			float ek = max(emit_c.r, max(emit_c.g, emit_c.b));
+			// (a yellow piece keeps its own colour: Ryzz's hazard bands glow faintly as painted)
+			float yel = smoothstep(0.08, 0.2, min(emit_c.r, emit_c.g) - emit_c.b);
+			c = mix(c, emit_tint.rgb, smoothstep(0.2, 0.7, ek) * 0.85 * (1.0 - yel));
+			emit_c = mix(emit_tint.rgb * ek, emit_c, yel);
+		}
+	}
+	if (glow_core.a > 0.0 && glow > 0.0) {
+		vec3 hot = mix(glow_edge.a > 0.0 ? glow_edge.rgb : glow_core.rgb, glow_core.rgb, smoothstep(0.35, 0.9, heat));
+		c = mix(c, hot, glow_key ? heat : 1.0);
 	}
 	if (use_vertex_color || vertex_ao) { c *= COLOR.rgb; }
+	if (desat > 0.0) { c = mix(c, vec3(dot(c, vec3(0.3, 0.59, 0.11))), desat); }
 	if (dark_lift > 0.0) {
 		float dl = dot(c, vec3(0.3, 0.59, 0.11));
 		c += max(vec3(dark_lift) - c, vec3(0.0)) * (1.0 - smoothstep(0.0, dark_lift * 2.5, dl));
@@ -198,17 +247,31 @@ void fragment() {
 	float up = smoothstep(0.35, 0.95, wnorm.y);
 	if (ambient_cut > 0.0) { AO = 1.0 - ambient_cut; }
 	float hot = glow_red > 0.0 ? (1.0 - smoothstep(0.28, 0.5, c.g / max(c.r, 0.001))) * smoothstep(0.22, 0.45, c.r) : 0.0;
-	EMISSION = flash_color.rgb * flash * 0.9 + c * glow + c * own_ambient * (1.0 - fog) + c * glow_red * hot
+	EMISSION = flash_color.rgb * flash * 0.9 + c * glow * heat + c * own_ambient * (1.0 - fog) + c * glow_red * hot
 		+ rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
 		+ fcol * fr * fres * 0.55 + c * up * top_light * 0.18 * (1.0 - fog)
 		+ rim_far_color.rgb * fr * rim_far * far_k;
+	if (use_emit) {
+		float fl = vnoise(vec2(TIME * 7.0 + lpos.y * 5.0, lpos.x * 3.0 + lpos.z * 3.0));
+		vec3 ec = emit_c;
+		if (far_emit > 0.0) {
+			float fe = far_emit * smoothstep(8.0, 18.0, length(VERTEX));
+			float el = dot(ec, vec3(0.3, 0.59, 0.11));
+			ec = max(mix(vec3(el), ec, 1.0 + fe * 0.5), vec3(0.0)) * (1.0 + fe);
+		}
+		EMISSION += ec * emit * (1.0 - emit_flicker * (1.0 - smoothstep(0.25, 0.6, fl)));
+	}
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 
+	if (paint_glow > 0.0) {
+		float pg = 1.0 - smoothstep(paint_glow_width, paint_glow_width * 2.0, distance(c, paint_glow_color.rgb));
+		EMISSION += c * paint_glow * pg;
+	}
 	// the match camera's read (far_*, above): the pale fresnel and the faint rim scaled down, rim_far's hairline
 	// swapped for its broad band, the glow brighter and richer
 	if (far_p > 0.0) {
-		vec3 gc = c * glow;
+		vec3 gc = c * glow * heat;      // (a hot-keyed glow: only its hot texels, as above)
 		float fg = far_glow * far_p;
 		vec3 gf = max(mix(vec3(dot(gc, vec3(0.3, 0.59, 0.11))), gc, 1.0 + fg * 0.5), vec3(0.0)) * (1.0 + fg);
 		EMISSION += fcol * fr * fres * 0.55 * (far_fres - 1.0) * far_p

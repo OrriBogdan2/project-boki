@@ -364,18 +364,43 @@ func _tutorial() -> void:
 	var hints := {}
 	var t := 0.0
 	var last_step := -1
-	while t < 420.0 and not m.player.extracted:
-		m._tut_drive()
+	var no_marker := 0
+	var cards := 0
+	var beam_miss := 0
+	var steps_seen := {}
+	var fell_t := -1.0
+	var back_ok := false
+	while t < 600.0 and not m.player.extracted:
+		TutorialDrive.drive(m)
 		m.step(Match.DT); t += Match.DT
-		var id := m.tut_id() if m.tut_step >= 0 and m.tut_step < Match.TUT.size() else ""
+		var tu: Tutorial = m.tut
+		var id := tu.id()
+		steps_seen[id] = true
+		if id == "pickup" and fell_t < 0.0:
+			fell_t = t
+			m.player.teleport(Vector3(70.0, 0.0, 30.0))      # off every island: a fall
+		elif fell_t > 0.0 and not back_ok and t - fell_t < 12.0:
+			back_ok = m.player.grounded and m.player.flat_dist(tu.respawn()) < 6.0
 		if m.player.kin and (m.player.kin.comp.leading() or m.player.kin.comp.guide.get("to", Vector3.INF) != Vector3.INF and m.player.kin.seen_pos().distance_to(m.player.kin.comp.guide["to"]) < 2.2):
 			led[id] = true
-		if m.tut_step != last_step:
-			last_step = m.tut_step
+		var goes_somewhere := id in ["move", "dash", "exdash", "glide", "crouch", "pickup", "chest", "goexit", "uplink",
+			"defend", "extract"]
+		if tu.step == last_step and goes_somewhere and tu.target == Vector3.INF:
+			no_marker += 1
+		if goes_somewhere and tu.target != Vector3.INF and tu._beams.is_empty():
+			beam_miss += 1
+		if tu.step != last_step:
+			last_step = tu.step
+			cards += 1
 	for e in m.player.kin.comp.history:
 		hints[String(e["cat"])] = true
 	print("  tutorial: %.0fs, led on %s, hints %s" % [t, str(led.keys()), str(hints.keys().filter(func(x): return String(x).begins_with("tut_") or String(x).begins_with("demo_")))])
 	ok(m.player.extracted, "the tutorial still finishes (extracted at %.0fs)" % t)
+	var mk := "the marker and its beam are up on every destination step frame (%d without, %d no beam)"
+	ok(no_marker == 0 and beam_miss == 0, mk % [no_marker, beam_miss])
+	ok(back_ok, "a fall into the void puts you back at the last stop")
+	var need := ["crouch", "pickup", "kin1", "glide"].all(func(s): return steps_seen.has(s))
+	ok(need, "the course has the crouch, pick-up, glide and watch stops (%s)" % str(steps_seen.keys()))
 	ok(led.has("chest") and led.has("goexit"), "it leads you to (or gets to) the chest and the outpost")
 	ok(hints.keys().filter(func(x): return String(x).begins_with("tut_")).size() >= 6, "a hint in its own voice for each step")
 	ok(hints.has("demo_dash") and hints.has("demo_jump"), "it shows you a dash and a jump")

@@ -42,7 +42,7 @@ func _bond_kind(K: ArchKit) -> String:
 	return ""
 
 
-# ================================================================== Moosh Moosh: Hearth Call
+# ================================================================== Pip: Hearth Call
 func tender() -> void:
 	var r: Array = sc.setup("tender", 14.0)
 	var m: Match = r[0]
@@ -111,7 +111,7 @@ func tender() -> void:
 	await _tender_breaks()
 
 
-## A downed teammate: the healing goes to her while they are down, and at the end they are pulled to
+## A downed teammate: the tether heals them while they are down, and at the end they are pulled to
 ## her side and stood up (the bond's top event).
 func _tender_rescue() -> void:
 	var r: Array = sc.setup("tender", 14.0)
@@ -124,12 +124,16 @@ func _tender_rescue() -> void:
 	step(m, 0.1)
 	P.hp = P.max_hp * 0.5
 	var p_hp0 := P.hp
+	A.down_hp = float(Data.MATCH["down_hp"]) * 0.4
+	var a_down0 := A.down_hp
 	sc.aim_at(P, A.pos)
 	_press(P, m)
 	ok("mm X: it can be cast on a downed teammate", not K.hearth_call.is_empty() and A.downed)
 	step(m, 2.0)
-	ok("mm X: while they are down the tether heals her instead (small mechanic)", P.hp > p_hp0 + 5.0,
-		"%.0f -> %.0f" % [p_hp0, P.hp])
+	ok(
+		"mm X: the tether heals the downed teammate (game data: an ally or Wisp), not her",
+		A.down_hp > a_down0 + 5.0 and P.hp <= p_hp0 + 0.01, "ally %.0f -> %.0f, her %.0f -> %.0f" % [
+			a_down0, A.down_hp, p_hp0, P.hp])
 	step(m, 3.2)
 	var gap := P.flat_dist(A)
 	ok("mm X: at the end a downed teammate is pulled to her side and stood up", not A.downed and gap < 1.6
@@ -196,7 +200,8 @@ func rimewright() -> void:
 	ok("tm X: sealed in, the 4 bh rink shown to everyone, the cast move", not K.rime.is_empty()
 		and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 7.2) < 0.05
 		and K.ulk().showing("rink") and K.ulk().showing("bud") and K.anim_id in ["tm_rime", "tm_rime_hold"], K.anim_id)
-	ok("tm X: its own cooldown (47 s) starts on the cast, no bond for the cast", absf(float(K.cd["x"]) - 47.0) < 0.5
+	ok("tm X: its own cooldown (80 s, game data) starts on the cast, no bond for the cast",
+		absf(float(K.cd["x"]) - 80.0) < 0.5
 		and _bond_kind(K) == "")
 	var php := P.hp
 	P.hurt(30.0, T, {"src": "shot"})

@@ -497,7 +497,7 @@ def build():
 
     # ============================================================== archetype payoffs (appended last so
     # nothing above changes): each kit's cash-in has its own signature, so you know by ear what just landed
-    # Pin (archer) Deadeye: a whip-crack of the string, a split-the-air snap, a glassy high ring that bends down
+    # Hem (archer) Deadeye: a whip-crack of the string, a split-the-air snap, a glassy high ring that bends down
     def pay_deadeye(i):
         d = 1.0
         glass = ring((2637, 3951, 5274), d, (0.25, 0.16, 0.08), (0.5, 0.3, 0.16))
@@ -531,7 +531,7 @@ def build():
                    reflections(tail(0.9, 1600, 0.2) * 1.1))
     takes('pay_called', pay_called, 1, rms_db=-14)
 
-    # Bjorn (bulwark) Shield Slam: a huge plate clang (inharmonic), a body slam under it, and a ringing shimmer
+    # Breaker (bulwark) Shield Slam: a huge plate clang (inharmonic), a body slam under it, and a ringing shimmer
     def pay_slam(i):
         d = 1.2
         f = 330

@@ -1,10 +1,11 @@
 class_name StoneStand
 extends RefCounted
-## Low walls you can stand on (Tarek's rocks; any Verbs wall with a "top" height in metres). Only the
-## rock's own caster climbs it (docs/heroes/dolm.md, Rock ownership): walking into her own rock
-## lifts her smoothly onto it, no jump needed, and she walks over the top. For everyone else a rock is a
-## full wall: no climbing, no jumping over it. Anyone dropped onto a rock from above stands on it and can
-## walk off. Pieces:
+## Low walls you can stand on (Tarek's rocks; any Verbs wall with a "top" height in metres). The rock's
+## own caster climbs it by walking (docs/heroes/dolm.md, Rock ownership, item 25): walking into his own rock
+## lifts him smoothly onto it, no jump needed, and he walks over the top. His allies hop over it by jumping
+## against it (the data: "allies can hop over friendly walls by jumping against them"; owner 23:55); walking
+## into it stops them. For foes a rock is a full wall: no climbing, no jumping over it. Anyone dropped onto a
+## rock from above stands on it and can walk off. Pieces:
 ##   - Verbs.wall_blocks asks top_for(): the rock's top for its caster (and for a body standing on it), a
 ##     full wall for anyone else; Hunter's move step sets `mover` so the rule knows who is asking;
 ##   - Ent.ground() reads top_under(), so a body over a rock lands and stands on it;
@@ -23,13 +24,13 @@ const ON_TOP := 0.05           # m: feet this close to the top count as standing
 ## other query (bot paths, ability probes), which treat rocks as full walls.
 static var mover: Hunter = null
 
-## The height a standable wall blocks the current mover up to: its top for the rock's own caster and for a
-## body already standing on it, else the full Verbs wall height (nobody else climbs or jumps over it).
+## The height a standable wall blocks the current mover up to: its top for the rock's own caster, for an ally
+## in the air (a jump against it) and for a body already standing on it, else the full Verbs wall height.
 static func top_for(w: Dictionary) -> float:
 	var top := float(w["top"])
 	if mover == null:
 		return Verbs.WALL_H
-	if w.get("by") == mover:
+	if w.get("by") == mover or _ally_hop(w, mover):
 		return top
 	if mover.grounded and mover.pos.y >= float(w["y"]) + top - ON_TOP:
 		return top
@@ -71,7 +72,7 @@ static func climb(h: Hunter, blk: float) -> bool:
 	if rise <= 0.0 or rise > CLIMB_MAX:
 		return false
 	var w := face(h.m.world.dyn_walls, h.pos, h.r, blk)
-	if w.is_empty() or w.get("by") != h:
+	if w.is_empty() or (w.get("by") != h and not _ally_hop(w, h)):
 		return false
 	var p2 := Vector2(h.pos.x, h.pos.z)
 	var into := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"]) - p2
@@ -83,3 +84,8 @@ static func climb(h: Hunter, blk: float) -> bool:
 	h.vel.x = push.x
 	h.vel.z = push.y
 	return true
+
+## An ally of the rock's caster in the air (jumping against it): the rock lifts him over, as it does its caster.
+static func _ally_hop(w: Dictionary, h: Hunter) -> bool:
+	var by = w.get("by")
+	return by is Hunter and is_instance_valid(by) and by != h and (by as Hunter).team == h.team and not h.grounded

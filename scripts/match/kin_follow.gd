@@ -233,6 +233,19 @@ static func need_carry(k: Kin) -> bool:
 		k.gap_v = not KinPath.clear_line(W, Vector2(k.pos.x, k.pos.z), Vector2(o.pos.x, o.pos.z)) and KinPath.find(W, k.pos, o.pos, int(_r("path_window"))).is_empty()
 	return k.gap_v
 
+## The ship ride and the opening drop: it rides on your shoulder, never left on the ground or sent leaping
+## after you through the sky (it fell into the abyss and went down). It hops off once you are steady on the ground.
+static func ride_the_drop(k: Kin) -> void:
+	var o := k.owner_h
+	if o == null or not (o.riding or o.dropping) or not k.giant.is_empty() or KinMerge.active(o):
+		return
+	if k.state in ["active", "returning", "flying", "flying_home"]:
+		k.fly = {}
+		k.state = "shoulder"
+		k.settle = 0.0
+		k.pos = o.pos + Vector3(0, 1.5, 0)
+		k.prev = k.pos
+
 ## Carried by traversal (not by order): off again once you have been steady on the ground.
 static func carry_tick(k: Kin, dt: float) -> void:
 	var o := k.owner_h

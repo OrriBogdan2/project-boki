@@ -1,5 +1,5 @@
 {
-	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash().",
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
 	"dash": {
 		"ground": {
 			"lmb": {
@@ -49,12 +49,12 @@
 	},
 	"into_dash": {
 		"lmb": {
-			"mode": "cancel",
-			"source": "No source. Ours: Shift drops a Searing Wave charge (a slash's swing is too short to matter)."
+			"mode": "fire",
+			"source": "Footage card for his dash: 'Dash while attacking in your facing direction'; data: nothing ends a held Molten Greatsword charge. Ours: Shift goes at once between slashes, and a Searing Wave charge carries through the Rampage (hold.lmb)."
 		},
 		"rmb": {
-			"mode": "buffer",
-			"source": "Data: 'turning restricted after RMB into Shift' (patch 05.02.25): the dash comes after the strike, facing its way. Ours: Shift during the Slam's wind-up, a Lunge or a Meteor Drop is held and goes the moment it's over (the Meteor Drop lets it go 0.25s into its recovery); the turn lock is not built."
+			"mode": "fire",
+			"source": "Data: 'turning restricted after RMB into Shift' (patch 05.02.25): RMB into Shift is a combo, the dash going the strike's way. Ours: Shift in the Slam's wind-up is a Slam Drive: the drive goes at once (no crouch) along the strike's aim, the overhead pose kept, and the Slam lands where it arrives. In a Meteor Drop's hang the air dash goes and the dive comes down onto the marker from where it took him; its recovery dashes at once. A Lunge or the dive is a dash of its own: Shift goes the step it ends (at most 0.3s)."
 		},
 		"e": {
 			"mode": "cancel",
@@ -63,7 +63,41 @@
 		},
 		"x": {
 			"mode": "buffer",
-			"source": "Data: invulnerable, then the strike; footage ult f33-f44: planted ~1.1s, the cleave, the recovery. Ours: the guard and cleave are committed; Shift is held and goes when it's over."
+			"reason": "The source plants him through the guard: he can't move until the counter has struck.",
+			"source": "Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted', the strike at f39. Ours: Shift in the guard or the cleave is held and goes the step the cleave lands; in the recovery after it, Shift goes at once."
+		}
+	},
+	"hold": {
+		"lmb": {
+			"ground": {
+				"mode": "keep",
+				"source": "Footage card: 'Dash while attacking'; nothing in the data ends the charge. Ours: the Searing Wave charge waits through the Rampage's crouch and drive and goes on charging after it; let go in it, the wave goes as the drive ends."
+			},
+			"air": {
+				"mode": "keep",
+				"source": "As on the ground: the charge waits through the air dash; let go, the wave leaves as it ends, in the air."
+			},
+			"jump": {
+				"mode": "keep"
+			}
+		},
+		"rmb": {
+			"ground": {
+				"mode": "keep"
+			},
+			"air": {
+				"mode": "keep"
+			},
+			"jump": {
+				"mode": "keep"
+			}
+		}
+	},
+	"into_jump": {
+		"x": {
+			"mode": "lock",
+			"reason": "The source plants him through the guard: no jump until the counter has struck.",
+			"source": "Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted'. Ours: no jump in the guard or the cleave (JuggernautUlt holds him down); in the recovery after it a jump goes at once and ends it."
 		}
 	}
 }
