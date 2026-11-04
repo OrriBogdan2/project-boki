@@ -32,9 +32,11 @@ func catalog_entry(id: String, cb: Callable) -> Dictionary:
 	var c: Dictionary = HomeLayout.CATALOG[id]
 	var pc := hb.cost_of(id, 1)
 	var cost := entry_cost(id)
+	var in_hand: bool = hb.held.get("kind", "") == "deco" and String(hb.held.get("id", "")) == id
+	in_hand = in_hand and int(hb.held.get("from", -1)) < 0
+	var short: bool = int(pc[2]) == 0 and not hb._can_pay(int(pc[0]), int(pc[1]), int(pc[3]), int(pc[4]))
 	var e := {"id": id, "name": String(c["name"]), "cb": cb, "cost": cost, "owned": int(hb.L()["inv"].get(id, 0)),
-		"on": hb.held.get("kind", "") == "deco" and String(hb.held.get("id", "")) == id and int(hb.held.get("from", -1)) < 0,
-		"off": int(pc[2]) == 0 and not hb._can_pay(int(pc[0]), int(pc[1]), int(pc[3]), int(pc[4])), "tip": String(c.get("desc", ""))}
+		"on": in_hand, "off": short, "tip": String(c.get("desc", ""))}
 	if c.has("line") or c.has("brush"):
 		e["swatch"] = swatch(id)
 		e["note"] = "per tile" if int(c.get("gems", 0)) > 0 else "free"
@@ -61,7 +63,9 @@ func swatch(id: String) -> Color:
 		"water": return Color("4a9fd8")
 		"clear": return Color("5f8d45")
 		"wild": return Color("6b8f3a")
-	return {"fence": Color("a67c52"), "picket": Color("e8e2d0"), "stone_wall": Color("a9a39a"), "hedge": Color("3f8a45")}.get(id, Color("a67c52"))
+	var line_colours := {"fence": Color("a67c52"), "picket": Color("e8e2d0"), "stone_wall": Color("a9a39a"),
+		"hedge": Color("3f8a45")}
+	return line_colours.get(id, Color("a67c52"))
 
 func tab(tab_name: String) -> Array:
 	var out: Array = []
@@ -83,7 +87,8 @@ func tab(tab_name: String) -> Array:
 		"Upgrades":
 			out.append_array(FarmBuildUi.upgrade_entries(hb))
 			if out.is_empty():
-				out.append({"name": "Nothing to upgrade yet", "note": "Build something first", "cb": func(): pass, "off": true, "glyph": "hammer"})
+				out.append({"name": "Nothing to upgrade yet", "note": "Build something first",
+					"cb": func(): pass, "off": true, "glyph": "hammer"})
 		"Island":
 			add_island_entries(out)
 		_:
@@ -96,7 +101,7 @@ func tab(tab_name: String) -> Array:
 func feeder_entry(kind: String, count: int) -> Dictionary:
 	return {"id": "feeder_" + kind, "name": String(Econ.FEEDERS[kind]["name"]), "owned": count, "note": "from storage",
 		"cb": func(): hb.take_feeder(kind), "model": func() -> Node3D: return EconModels.feeder(kind),
-		"on": hb.held.get("kind", "") == "feeder" and String(hb.held.get("from", "x")) == "" and String(hb.held.get("id", "")) == kind}
+		"on": _feeder_in_hand(kind)}
 
 ## A farm-start island's own things (the house and the essentials), with their built / all placed states.
 func add_fixture_entry(out: Array, id: String) -> void:
@@ -119,7 +124,10 @@ func add_lot_entry(out: Array, b: String) -> void:
 	if unplaced and (not FarmUnlocks.open(b) or FarmBuilder.not_yet_arrived(b, hb.h._has_b(b))):
 		return
 	var picture := func() -> Node3D:
-		return Models.building(b) if hb.h._has_b(b) else Models.lot(HomeLayout.base_size(b).x, HomeLayout.base_size(b).y, nm, "")
+		if hb.h._has_b(b):
+			return Models.building(b)
+		var lot_size := HomeLayout.base_size(b)
+		return Models.lot(lot_size.x, lot_size.y, nm, "")
 	var on: bool = hb.held.get("kind", "") == "b" and String(hb.held.get("id", "")) == b
 	if unplaced:
 		var lot_cost := FarmBuilder.lot_cost(b)
@@ -130,12 +138,21 @@ func add_lot_entry(out: Array, b: String) -> void:
 			"cb": func(): hb.take_building(b), "on": on, "model": picture, "tip": String(Data.BUILDINGS[b]["desc"])})
 		return
 	var isl: int = hb.h.world.island_of(hb.h.lots[b]["at"].x, hb.h.lots[b]["at"].z)
-	var open: bool = isl >= 0 and hb._isle_ok(hb.h.world.idx(int(floor(hb.h.lots[b]["at"].x)), int(floor(hb.h.lots[b]["at"].z))))
+	var at: Vector3 = hb.h.lots[b]["at"]
+	var open: bool = isl >= 0 and hb._isle_ok(hb.h.world.idx(int(floor(at.x)), int(floor(at.z))))
 	if FarmUnlocks.gated() and not open:
 		return      # a lot that cannot be reached yet is not shown at all
-	out.append({"id": "lot_" + b, "name": nm, "note": "Move" if hb.h._has_b(b) else "Move the lot", "on": on, "off": not open,
-		"cb": (func(): hb.take_building(b)) if open else (func(): hb.h._toast("Build the bridge to its isle first")), "model": picture,
-		"tip": "" if open else "Build the bridge to its isle first"})
+	var blocked_msg := "Build the bridge to its isle first"
+	var go: Callable = func(): hb.take_building(b)
+	if not open:
+		go = func(): hb.h._toast(blocked_msg)
+	out.append({"id": "lot_" + b, "name": nm, "note": "Move" if hb.h._has_b(b) else "Move the lot", "on": on,
+		"off": not open, "cb": go, "model": picture, "tip": "" if open else blocked_msg})
+
+func _feeder_in_hand(kind: String) -> bool:
+	var held: Dictionary = hb.held
+	var same: bool = String(held.get("id", "")) == kind and String(held.get("from", "x")) == ""
+	return held.get("kind", "") == "feeder" and same
 
 func add_storage(out: Array) -> void:
 	var inv: Dictionary = hb.L()["inv"]
@@ -155,16 +172,24 @@ func add_island_entries(out: Array) -> void:
 		var td: Dictionary = HomeLayout.THEMES[t]
 		var own: bool = (lay["themes"] as Array).has(t)
 		var now: bool = String(lay["theme"]) == t
-		out.append({"name": "%s theme" % td["name"], "note": "In use" if now else ("Owned" if own else ""),
-			"cost": {} if own else {"gems": int(td["gems"])}, "swatch": Color(String(td["leaf"])) if td.has("leaf") else Color("5f8d45"),
+		var note := "Owned" if own else ""
+		if now:
+			note = "In use"
+		var leaf := Color(String(td["leaf"])) if td.has("leaf") else Color("5f8d45")
+		out.append({"name": "%s theme" % td["name"], "note": note,
+			"cost": {} if own else {"gems": int(td["gems"])}, "swatch": leaf,
 			"cb": func(): hb.set_theme(theme), "on": now, "off": not own and int(Save.d["gems"]) < int(td["gems"])})
 	var lv := int(lay["grow"])
 	if lv < HomeLayout.EXPAND.size():
 		var c: Array = HomeLayout.EXPAND[lv]
 		var cm: Array = HomeLayout.EXPAND_MATS[mini(lv, HomeLayout.EXPAND_MATS.size() - 1)]
-		out.append({"name": "Expand island", "glyph": "plus", "cost": {"gems": int(c[0]), "wood": int(cm[0]), "stone": int(cm[1])},
-			"note": "+ %d scrap" % int(c[1]), "cb": func(): hb.open_expand(),
-			"tip": "Grow the island's edge (step %d of %d)%s" % [lv + 1, HomeLayout.EXPAND.size(), (": also %d wood and %d stone" % [int(cm[0]), int(cm[1])]) if int(cm[0]) > 0 else ""]})
+		var extra := ""
+		if int(cm[0]) > 0:
+			extra = ": also %d wood and %d stone" % [int(cm[0]), int(cm[1])]
+		var step := "Grow the island's edge (step %d of %d)%s" % [lv + 1, HomeLayout.EXPAND.size(), extra]
+		out.append({"name": "Expand island", "glyph": "plus",
+			"cost": {"gems": int(c[0]), "wood": int(cm[0]), "stone": int(cm[1])},
+			"note": "+ %d scrap" % int(c[1]), "cb": func(): hb.open_expand(), "tip": step})
 	else:
 		out.append({"name": "Expand island", "note": "full size", "glyph": "plus", "cb": func(): pass, "off": true})
 	if hb._seed() != 0:

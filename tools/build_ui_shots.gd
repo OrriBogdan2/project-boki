@@ -49,14 +49,14 @@ func _farm_save() -> void:
 	Save.d["mats"] = {"wood": 40, "stone": 30, "fibre": 20}
 
 func _spot(hb: HomeBuild, p: Vector3, skip := 0) -> Array:
-	var size := HomeLayout.size_of(String(hb.held["id"]), int(hb.held["r"]))
+	var foot := HomeLayout.size_of(String(hb.held["id"]), int(hb.held["r"]))
 	var seen := 0
 	for rad in 22:
 		for k in 48:
 			var a := float(k) / 48.0 * TAU
-			var x := int(round(p.x + cos(a) * rad - size.x * 0.5))
-			var z := int(round(p.z + sin(a) * rad - size.y * 0.5))
-			var cs := HomeLayout.cells_of([x, z, x + size.x - 1, z + size.y - 1])
+			var x := int(round(p.x + cos(a) * rad - foot.x * 0.5))
+			var z := int(round(p.z + sin(a) * rad - foot.y * 0.5))
+			var cs := HomeLayout.cells_of([x, z, x + foot.x - 1, z + foot.y - 1])
 			if hb.fits(hb.held, cs):
 				if seen == skip:
 					return cs
@@ -132,21 +132,24 @@ func _farm() -> void:
 	hb.cat = "Furniture"
 	hb._build_bar()
 	print("BUSHOT tabs: %s" % ", ".join(hb._tabs()))
-	await _shot("01_farm_catalog", "Build mode on the farm: category tabs, search, big tiles with pictures, prices and owned counts, the camera eased to a build view")
+	await _shot("01_farm_catalog",
+		"Build mode on the farm: category tabs, search, big tiles with pictures, prices and owned counts, easing in"
 	# 2. a green ghost with the key hints at the cursor
 	hb.take("rug_long")
-	var free := _spot(hb, focus + Vector3(-3, 0, 2))
-	var free_mid := Vector2(free[0].x + 1.5, free[0].y + 1.0)
+	var open_cell := _spot(hb, focus + Vector3(-3, 0, 2))
+	var free_mid := Vector2(open_cell[0].x + 1.5, open_cell[0].y + 1.0)
 	await _settle()
 	_hover(hb, free_mid)
-	await _shot("02_ghost_green", "The held long rug as a green ghost snapped to the grid with its footprint, and the keys beside the cursor")
+	await _shot("02_ghost_green",
+		"The held long rug as a green ghost snapped to the grid with its footprint, and the keys beside the cursor")
 	# 3. red, blocked by the bench
 	var rug_e: Dictionary = HomeLayout.of(Save.d)["deco"].filter(func(e): return e["id"] == "rug_long")[0]
 	var bc: Vector2i = HomeLayout.deco_cells(rug_e)[0]
 	hb.take("rug")
 	await _settle()
 	_hover(hb, Vector2(bc.x + 1.0, bc.y + 1.0))
-	await _shot("03_ghost_red_blocked", "A rug over the long rug: the ghost turns red, the rug in the way lights up and the cursor says 'Blocked by: Long rug'")
+	await _shot("03_ghost_red_blocked",
+		"A rug over the long rug: the ghost turns red, the blocker lights up, the cursor says 'Blocked by: Long rug'")
 	hb._cancel_held()
 	# 4. the piece menu
 	hb.cat = "Furniture"
@@ -197,7 +200,8 @@ func _house() -> void:
 	var dec: Decorate = room.dec
 	dec.toggle()
 	await main.get_tree().create_timer(0.5).timeout
-	await _shot("06_empty_house_decorate", "A new house in decorate mode: empty, with the same catalog bar, the Useful pieces waiting in Storage")
+	await _shot("06_empty_house_decorate",
+		"A new house in decorate mode: empty, with the same catalog bar, the Useful pieces waiting in Storage")
 	dec.cat = BuildCatalog.STORAGE
 	dec.refresh()
 	await _shot("08_house_storage", "The house's Storage tab: the journal and gramophone, free to place")

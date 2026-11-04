@@ -101,8 +101,11 @@ func _entry(id: String, count: int) -> Dictionary:
 	var piece_id := id
 	var is_held: bool = held.get("id", "") == id and int(held.get("from", -1)) < 0
 	var cannot_afford: bool = count == 0 and int(Save.d["gems"]) < price
+	var cost := {}
+	if count == 0:
+		cost = {"gems": price}
 	return {"id": id, "name": String(Data.FURN[id]["name"]), "owned": count,
-		"note": "from storage" if count > 0 else "", "cost": {} if count > 0 else {"gems": price},
+		"note": "from storage" if count > 0 else "", "cost": cost,
 		"cb": func(): take(piece_id), "on": is_held, "off": cannot_afford,
 		"model": func() -> Node3D: return room._make_piece(piece_id, 0)}
 

@@ -20,5 +20,6 @@ static func model(id: String) -> Node3D:
 		Models.part(root, Models.box(0.6, 0.7, 0.5), wood, Vector3(0.5, 0.35, 0.5))
 		Models.part(root, Models.cyl(0.25, 0.25, 0.03, 18), Models.toon(Color("1e1e24")), Vector3(0.5, 0.72, 0.5))
 		var brass := Models.toon(Color("d9b04a"), false, 0.3)
-		Models.part(root, Models.cyl(0.05, 0.3, 0.45, 14), brass, Vector3(0.62, 1.05, 0.45), Vector3.ONE, Vector3(-0.6, 0, 0))
+		Models.part(root, Models.cyl(0.05, 0.3, 0.45, 14), brass, Vector3(0.62, 1.05, 0.45), Vector3.ONE,
+			Vector3(-0.6, 0, 0))
 	return root

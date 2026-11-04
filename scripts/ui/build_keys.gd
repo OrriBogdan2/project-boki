@@ -87,7 +87,8 @@ func _set_tag(state: Dictionary) -> void:
 	if not tag.visible:
 		return
 	var reason := String(state.get("reason", "")) if held and not bool(state.get("ok", true)) else ""
-	var flags := "%s%s%s%s" % [held, state.get("tool", false), state.get("can_rotate", false), state.get("sweep", false)]
+	var flags := "%s%s%s%s" % [held, state.get("tool", false), state.get("can_rotate", false),
+		state.get("sweep", false)]
 	var sig := "%s|%s|%s" % [item, reason, flags]
 	if sig == _tag_sig:
 		return
