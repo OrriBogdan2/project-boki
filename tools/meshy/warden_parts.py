@@ -1245,11 +1245,15 @@ def orbit_props(arm, spec):
         # (the cells of _quads_uv: rock bottom-left, rim bottom-right, iris top-left, pupil top-right)
         kind = spec.get("kind", "eye")
         if kind == "card":
-            # (a playing-card shard: a thin flat slab facing out, on a glowing string back to the orbit's centre)
-            bld.prism(p - up * r * 0.7, p + up * r * 0.7, r * 0.5, 4, (0.55, 0.05, 0.95, 0.45), "rim", 0.0, rot=0.785)
+            # (a playing-card shard: a thin flat slab facing out, on a glowing string back to the orbit's centre;
+            # `card_tilt` leans its face up toward the high match camera, so it is never seen only edge-on)
+            tl = math.radians(float(spec.get("card_tilt", 0.0)))
+            face = out_dir * math.cos(tl) + up * math.sin(tl)
+            cup = up * math.cos(tl) - out_dir * math.sin(tl)
+            bld.prism(p - cup * r * 0.7, p + cup * r * 0.7, r * 0.5, 4, (0.55, 0.05, 0.95, 0.45), "rim", 0.0, rot=0.785)
             for q in range(len(bld.v) - 12, len(bld.v)):
                 d = np.asarray(bld.v[q]) - p
-                bld.v[q] = p + d - out_dir * d.dot(out_dir) * 0.85
+                bld.v[q] = p + d - face * d.dot(face) * 0.85
             sr = float(spec.get("string_r", 0.0025))
             bld.tube([np.array(c[:]), p], [sr, sr], 4, 0.05, 0.45, 0.55, 0.95, "iris", [0.0, 0.0])
         if kind != "card":
@@ -1716,6 +1720,11 @@ def _vortex(arm, spec, tag, c, r):
             pts.append(c + rr * (math.cos(ang) * e1 + math.sin(ang) * e2) + lift * nrm)
             rad.append(max(th * 0.15, th * math.sin(math.pi * min(1.0, 0.15 + t)) * (0.45 + 0.55 * t)))
         bld.tube(pts, rad, 6, 0.55, 0.95, 0.05, 0.95, "ring", [0.0] * m, cap_end=True, cap_start=True)
+    if spec.get("orbit_ring"):
+        # (a glowing ring through the card orbit round the orb: the cards and their strings read as one shape at
+        # the match camera, where each card alone is a pixel)
+        rr, rt = spec["orbit_ring"]
+        bld.torus(c, np.array([0.0, 0.0, 1.0]), float(rr), float(rt), 32, 6, (0.55, 0.05, 0.95, 0.95), "ring", 0.0)
     ob = bld.object(tag.capitalize())
     img = bpy.data.images.new(tag + "_atlas", 64, 64, alpha=False)
     px = np.ones((64, 64, 4), np.float32)
