@@ -924,3 +924,5 @@ Improved: the eye is now a small glowing red orb in a wide brass ring, close to 
 - ORCH check-ins are now every 4 h, routing only.
 
 ## 2026-11-04 18:55 UTC (ext): OWNER_REVIEW item 53 (Sable: infinite dash-reset loop with a flip, clear reset feedback; Bola also slows). Small; Opus for the flip animation. After your current face pass item, or in parallel if you have a free slot.
+
+## 2026-11-04 18:58 UTC (ext): OWNER_REVIEW item 54 (Sable's Encore: dance animation + source blade cadence 0.2 s). Do it with item 53 on one Sable branch (Opus for the animation). No self-slow unless the owner confirms (ext is asking).
