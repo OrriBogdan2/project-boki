@@ -1625,34 +1625,121 @@ def hot_faces(ob, hb):
     log("hot faces: %d in %s" % (n, b))
 
 
+def _crack_paths(hp, L, rng):
+    """A few big branching cracks on an unwrapped arm (u along the arm 0..L m, v round it in m): `mains` long
+    jagged cracks from the shoulder to the wrist, each with `branches` side cracks (kael_arm_sheet)."""
+    circ = float(hp.get("circ", 0.42))
+    paths = []
+    for i in range(int(hp.get("mains", 3))):
+        v = circ * (i + rng.uniform(-0.1, 0.1)) / int(hp.get("mains", 3))
+        u, pts = 0.0, []
+        while u < L:
+            pts.append((u, v))
+            u += rng.uniform(0.025, 0.05)
+            v += rng.uniform(-0.03, 0.03)
+        pts.append((L, v))
+        paths.append(np.array(pts))
+        for _b in range(int(hp.get("branches", 3))):
+            j = int(rng.integers(1, len(pts) - 2))
+            bu, bv = pts[j]
+            sgn = 1 if rng.random() < 0.5 else -1
+            br = [(bu, bv)]
+            for _k in range(int(rng.integers(3, 6))):
+                bu += rng.uniform(0.015, 0.035)
+                bv += sgn * rng.uniform(0.012, 0.03)
+                br.append((bu, bv))
+            paths.append(np.array(br))
+    return paths, circ
+
+
+def _seg_dist2d(p, a, b):
+    ab = b - a
+    t = np.clip(((p - a) @ ab) / max(ab @ ab, 1e-12), 0.0, 1.0)
+    return np.linalg.norm(p - (a + np.outer(t, ab)), axis=1)
+
+
 def hot_paint(ob, img, hp):
-    """Kael's arm cracks made bold (kael_arm_sheet: white-hot over the whole right arm): in the "-hot" materials'
-    texels, the hot ones (the shader's own key) grow `dilate` px and take a warm `core` colour the shader keys as fully
-    hot (it lights them in the glow colour), and a `rim` px ring round them a duller `edge` colour it keys half hot
-    (the glow's pale-gold edge)."""
+    """Kael's arm cracks as the art draws them (kael_arm_sheet): a few big branching cracks, white-hot cores with a
+    pale-gold rim, over the whole right arm from the shoulder to the bandage, not the scan's busy net. In the
+    "-hot" materials' texels: the scan's own hot texels go back to skin (`skin`), then cracks generated on the arm's
+    surface (unwrapped round the shoulder -> wrist axis, Meshy frame) are painted: within `core` m of a crack the
+    warm colour the shader keys fully hot, out to `rim` m a duller one it keys as the glow's edge."""
     w, h = img.size
     px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
     rgb = px[..., :3]
-    m = face_mask(ob, img, lambda poly, c, mat: mat.endswith("-hot"))
+    me = ob.data
+    me.calc_loop_triangles()
+    uv = me.uv_layers.active.data
+    names = [m.name for m in me.materials]
+    a0, a1 = np.array(hp["axis"][0], float), np.array(hp["axis"][1], float)
+    ax = a1 - a0
+    L = float(np.linalg.norm(ax))
+    ax /= L
+    e1 = np.cross(ax, [0.0, 1.0, 0.0])
+    e1 /= np.linalg.norm(e1)
+    e2 = np.cross(ax, e1)
+    rng = np.random.default_rng(int(hp.get("seed", 4)))
+    paths, circ = _crack_paths(hp, L * float(hp.get("to", 0.92)), rng)
+    core, rim = float(hp.get("core_w", 0.006)), float(hp.get("rim_w", 0.014))
+    c_core = np.array(K.hexcol(hp.get("core", "ffd070")), np.float32)
+    c_rim = np.array(K.hexcol(hp.get("edge", "8c5030")), np.float32)
+    c_skin = np.array(K.hexcol(hp.get("skin", "5a3530")), np.float32)
 
-    def ss(e0, e1, x):
-        t = np.clip((x - e0) / (e1 - e0), 0, 1)
+    def ss(e0, e1_, x):
+        t = np.clip((x - e0) / (e1_ - e0), 0, 1)
         return t * t * (3 - 2 * t)
-    r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
-    heat = ss(0.42, 0.66, r) * ss(0.14, 0.32, r - b) * ss(-0.04, 0.01, g - b)
-    core = (heat > float(hp.get("min", 0.35))) & m
-
-    def grow(a, n):
-        for _ in range(n):
-            a = a | np.roll(a, 1, 0) | np.roll(a, -1, 0) | np.roll(a, 1, 1) | np.roll(a, -1, 1)
-        return a
-    big = grow(core, int(hp.get("dilate", 2))) & m
-    rim = grow(big, int(hp.get("rim", 2))) & m & ~big
-    rgb[big] = np.array(K.hexcol(hp.get("core", "ffd070")), np.float32)
-    rgb[rim] = rgb[rim] * 0.3 + np.array(K.hexcol(hp.get("edge", "8c5030")), np.float32) * 0.7
+    n_core = n_rim = n_off = 0
+    for t in me.loop_triangles:
+        if not names[t.material_index].endswith("-hot"):
+            continue
+        pv = np.array([me.vertices[i].co[:] for i in t.vertices])
+        q = np.array([[uv[li].uv.x * w, uv[li].uv.y * h] for li in t.loops])
+        lo = np.maximum(np.floor(q.min(axis=0)).astype(int), 0)
+        hi = np.minimum(np.ceil(q.max(axis=0)).astype(int), [w - 1, h - 1])
+        xs, ys = np.meshgrid(np.arange(lo[0], hi[0] + 1), np.arange(lo[1], hi[1] + 1))
+        pts = np.stack([xs.ravel() + 0.5, ys.ravel() + 0.5], axis=1)
+        a, b, c = q
+        d = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1])
+        if abs(d) < 1e-12:
+            continue
+        l1 = ((b[1] - c[1]) * (pts[:, 0] - c[0]) + (c[0] - b[0]) * (pts[:, 1] - c[1])) / d
+        l2 = ((c[1] - a[1]) * (pts[:, 0] - c[0]) + (a[0] - c[0]) * (pts[:, 1] - c[1])) / d
+        l3 = 1 - l1 - l2
+        ins = (l1 >= -0.02) & (l2 >= -0.02) & (l3 >= -0.02)
+        if not ins.any():
+            continue
+        wp = np.outer(l1[ins], pv[0]) + np.outer(l2[ins], pv[1]) + np.outer(l3[ins], pv[2])
+        tx = np.clip(pts[ins, 0].astype(int), 0, w - 1)
+        ty = np.clip(pts[ins, 1].astype(int), 0, h - 1)
+        # the scan's own hot texels back to skin (its busy net)
+        cur = rgb[ty, tx]
+        heat = ss(0.42, 0.66, cur[:, 0]) * ss(0.14, 0.32, cur[:, 0] - cur[:, 2]) * ss(-0.04, 0.01, cur[:, 1] - cur[:, 2])
+        hot = heat > 0.15
+        rgb[ty[hot], tx[hot]] = c_skin * (0.85 + 0.3 * rng.random((int(hot.sum()), 1))).astype(np.float32)
+        n_off += int(hot.sum())
+        # the texel's place on the unwrapped arm
+        rel = wp - a0
+        u = rel @ ax
+        ang = np.arctan2(rel @ e2, rel @ e1)
+        v = (ang % (2 * np.pi)) / (2 * np.pi) * circ
+        inarm = (u > -0.02) & (u < L * float(hp.get("to", 0.92)))
+        uvp = np.stack([u, v], axis=1)
+        dist = np.full(len(u), np.inf)
+        for path in paths:
+            for k in range(len(path) - 1):
+                for wrap in (-circ, 0.0, circ):
+                    off = np.array([0.0, wrap])
+                    dist = np.minimum(dist, _seg_dist2d(uvp, path[k] + off, path[k + 1] + off))
+        isc = inarm & (dist < core)
+        isr = inarm & ~isc & (dist < rim)
+        rgb[ty[isc], tx[isc]] = c_core
+        kk = (1.0 - (dist[isr] - core) / (rim - core))[:, None] * 0.8
+        rgb[ty[isr], tx[isr]] = rgb[ty[isr], tx[isr]] * (1 - kk) + c_rim * kk
+        n_core += int(isc.sum())
+        n_rim += int(isr.sum())
     px[..., :3] = rgb
     img.pixels = px.ravel()
-    log("hot paint: %d core texels (from %d), %d rim" % (int(big.sum()), int(core.sum()), int(rim.sum())))
+    log("hot paint: %d crack paths, %d core texels, %d rim, %d net texels back to skin" % (len(paths), n_core, n_rim, n_off))
 
 
 def main():
@@ -1788,7 +1875,10 @@ def main():
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import kael_parts
         parts.append(kael_parts.chains(ob, arm, rig, K, spec["kael"]["chain"]))
-        parts.append(kael_parts.mane(ob, arm, rig, K, spec["kael"]["mane"]))
+        if spec["kael"].get("meshy_mane"):
+            parts.append(kael_parts.meshy_mane(ob, arm, rig, K, spec["kael"]["meshy_mane"], import_glb, decimate, log))
+        else:
+            parts.append(kael_parts.mane(ob, arm, rig, K, spec["kael"]["mane"]))
         if spec["kael"].get("cap"):
             parts.append(kael_parts.cap(ob, arm, rig, K, spec["kael"]["cap"]))
         if spec["kael"].get("collar"):

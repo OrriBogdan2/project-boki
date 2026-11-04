@@ -52,10 +52,10 @@
 		}
 	},
 	"juggernaut": {
-		"gait": {"lean": 0.1, "width": 0.25, "knee": 0.34, "arm": 0.7},
+		"gait": {"lean": 0.0, "width": 0.22, "knee": 0.22, "arm": 0.7},
 		"leg": "r",
 		"pose": {
-			"spine": -0.12, "tilt": 0.06, "twist": -0.1, "hip": 0.02, "knee": 0.04, "spread": 0.03, "free_leg": [0.1, 0.1],
+			"spine": -0.2, "tilt": 0.05, "twist": -0.1, "hip": 0.02, "knee": 0.0, "spread": 0.03, "free_leg": [0.1, 0.1],
 			"head": [0.12, 0.0, 0.0], "arm_l": [-0.04, 0.0, 0.02],
 			"carry": {"pos": [0.28, -0.38, -0.16], "rot": [-0.85, 1.0, 0.75], "free_l": 1.0}
 		},

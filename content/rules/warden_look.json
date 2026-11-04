@@ -32,14 +32,26 @@
 		}
 	},
 	"kael": {
-		"painted": {},
+		"painted": {
+			"rim_far": 0.3,
+			"rim_far_color": [
+				1.0,
+				0.74,
+				0.28
+			]
+		},
 		"slots": {
 			"skin": {
-				"top_light": 0.5,
-				"fres": 0.8,
-				"fres_tint": 0.9,
+				"top_light": 0.4,
+				"fres": 0.6,
+				"fres_tint": 0.6,
 				"far_lift": 0.3,
-				"shade": 0.84
+				"shade": 0.84,
+				"shadow_tint": [
+					0.9,
+					0.88,
+					0.92
+				]
 			},
 			"cloth": {
 				"fres": 0.6,
@@ -62,7 +74,7 @@
 				"fres": 0.5
 			},
 			"glow": {
-				"glow": 2.6
+				"glow": 2.8
 			}
 		}
 	}

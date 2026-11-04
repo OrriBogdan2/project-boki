@@ -96,7 +96,7 @@
  "chunk": {
   "head": 1.12,
   "hand": 1.2,
-  "girth": 1.06
+  "girth": 1.0
  },
  "lift": [
   1.0,
@@ -269,11 +269,13 @@
  "fit_weights": true,
  "kael": {
   "sword": {
-   "scale": 0.55,
+   "scale": 0.5,
    "crack_w": 0.45,
    "branches": 8,
    "half_width": 0.14,
-   "core_cracks": 9
+   "core_cracks": 9,
+   "bands": true,
+   "chip": 0.03
   },
   "chain": {
    "turns": 2.6,
@@ -366,16 +368,60 @@
     }
    ]
   },
-  "collar": {
-   "drop": 0.07,
-   "height": 0.042,
-   "thick": 0.018,
-   "gap_at": 330,
-   "gap": 55,
-   "bone": "hips",
-   "gap_out": 0.004,
-   "pct": 55,
-   "tilt": 0.035
+  "meshy_mane": {
+   "glb": "~/meshy/zedran/headrun/run/glb.glb",
+   "tris": 9000,
+   "tex": 1024,
+   "sat_max": 0.16,
+   "val_min": 0.55,
+   "meshy_face_z": [
+    0.42,
+    0.78
+   ],
+   "kael_face_dz": [
+    0.03,
+    0.2
+   ],
+   "cut_above": 0.12,
+   "root_dz": 0.1,
+   "bones": 4,
+   "sectors": [
+    {
+     "name": "mane_back",
+     "az": [
+      125,
+      235
+     ]
+    },
+    {
+     "name": "mane_l",
+     "az": [
+      235,
+      300
+     ]
+    },
+    {
+     "name": "mane_r",
+     "az": [
+      60,
+      125
+     ]
+    },
+    {
+     "name": "mane_fl",
+     "az": [
+      300,
+      360
+     ]
+    },
+    {
+     "name": "mane_fr",
+     "az": [
+      0,
+      60
+     ]
+    }
+   ]
   }
  },
  "smooth": {
@@ -398,11 +444,11 @@
     0.62
    ],
    "ramp": [
-    "2e1b1c",
-    "45292b",
-    "5a3530",
-    "6e4234",
-    "86573f"
+    "1c1416",
+    "2a1e20",
+    "3a2a2a",
+    "4c3834",
+    "62483f"
    ]
   },
   {
@@ -551,10 +597,27 @@
   }
  ],
  "hot_paint": {
-  "min": 0.3,
-  "dilate": 1,
-  "rim": 2,
+  "axis": [
+   [
+    -0.23,
+    0,
+    0.57
+   ],
+   [
+    -0.35,
+    0,
+    0.06
+   ]
+  ],
+  "to": 0.9,
+  "mains": 3,
+  "branches": 3,
+  "circ": 0.36,
+  "core_w": 0.007,
+  "rim_w": 0.018,
   "core": "ffd070",
-  "edge": "8c5030"
+  "edge": "8c5030",
+  "skin": "4a2c2a",
+  "seed": 4
  }
 }

@@ -282,6 +282,11 @@ static func _glow_colours(m: ShaderMaterial, arch: String, tag: String) -> void:
 		return
 	var core := Color(String(g.get("core", "ffffff")))
 	var edge := Color(String(g.get("edge", g.get("core", "ffffff"))))
+	# (a halo layer, glow-<name>_halo*, keeps its own dimmer painted colour: the bloom's fall-off)
+	if tag.contains("_halo"):
+		m.set_shader_parameter("glow_core", Color(edge, 0.0))
+		m.set_shader_parameter("glow_edge", Color(edge, 0.0))
+		return
 	m.set_shader_parameter("glow_core", core if not tag.ends_with("_edge") else edge)
 	m.set_shader_parameter("glow_edge", edge)
 	if g.has("strength"):
