@@ -8,3 +8,12 @@ s1_moves_1.png: the run and the first kit moves, close
 s1_moves_2.png: more kit moves, close
 s1_gameplay_match.png: the arena at match zoom (--arena-demo=pose --demo-zoom=1.0)
 s1_gameplay_match_x4.png: the hero in that frame, x4 (nearest)
+s2_closeup_vs_art.png: stage 2 tarek close-ups (front, 3/4) beside the owner's head sheet
+s2_34_vs_art.png: full length front 3/4 beside the owner's front sheet
+s2_back_vs_art.png: back 3/4 beside the turnaround's back view
+s2_match_vs_art.png: the match-zoom frame (x4, nearest) beside the front sheet
+s2_vs_turnaround.png / s2_vs_turnaround_game.png: under the turnaround, close and at the match camera
+s2_moves_1.png, s2_moves_2.png: the run and kit moves, close
+s2_poses_game.png: idle, run, attack, cast, ult at the match camera
+s2_vs_s1.png: the stage 2 close turnaround (top) over stage 1's (bottom)
+s2_gameplay_match.png, s2_gameplay_match_x4.png: the arena frame at match zoom
