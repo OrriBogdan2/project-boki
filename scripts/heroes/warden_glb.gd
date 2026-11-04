@@ -8,7 +8,7 @@ extends RefCounted
 
 const DIR := "res://art/wardens"
 ## Each Warden's art name, as in docs/art/gen/wardens/<name>_turnaround.png: the folder and file its .glb has.
-const ART := {"bulwark": "bjorn", "archer": "pin", "juggernaut": "kael", "gunslinger": "vex", "ostra": "ostra",
+const ART := {"bulwark": "bjorn", "archer": "hem", "juggernaut": "kael", "gunslinger": "vex", "ostra": "ostra",
 	"mage": "ryzz", "dolm": "tarek", "thief": "sable", "rimewright": "claire", "ashwick": "cinder",
 	"tender": "moosh", "dredge": "dredge"}
 ## Armature bone -> the rig node it follows (paths under the model root).
@@ -220,6 +220,7 @@ static func _hold_weapon(root: Node3D, glb: Node3D) -> void:
 		gun.add_child(mag)
 		mag.transform = at
 		mag.name = "Mag"
+		mag.set_meta("glb", true)          # (the .glb's own, not the procedural one: --warden-glb-check)
 
 ## The rig rest of the Warden's model in the neutral look (built once a session).
 static func neutral_rest(arch: String) -> Dictionary:

@@ -30,6 +30,8 @@ from mathutils import Matrix, Vector
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "blender"))
 import warden_kit as K  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import bow_parts  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 FIT_BONES = [  # bone, head joint, tail joint, parent
@@ -554,7 +556,13 @@ def project(ob, img, pj):
         if slots and not any(names[t.material_index].startswith(sl + "-") for sl in slots):
             continue
         ps = [me.vertices[i].co for i in t.vertices]
-        if not all(x0 <= p[ax] <= x1 and z0 <= p.z <= z1 for p in ps):
+        fe = float(pj.get("box_feather", 0.0))
+        if fe > 0.0:
+            # (box_feather m: a triangle reaching into the box paints, faded by its distance from the box's edge;
+            # no stepped edge where whole triangles stopped: Hem's mask at 3/4)
+            if not any(x0 - fe <= p[ax] <= x1 + fe and z0 - fe <= p.z <= z1 + fe for p in ps):
+                continue
+        elif not all(x0 <= p[ax] <= x1 and z0 <= p.z <= z1 for p in ps):
             continue
         ca, cz = sum(p[ax] for p in ps) / 3.0, sum(p.z for p in ps) / 3.0
         if any(_in_ellipse(ca, cz, c) for c in circles):
@@ -619,6 +627,12 @@ def project(ob, img, pj):
         wt = np.full(len(col), wf, np.float32)
         if mask is not None:
             wt *= mask[row, col]
+        if fe > 0.0:
+            pv = np.array([p[:] for p in ps])
+            wp = np.outer(l1[inside], pv[0]) + np.outer(l2[inside], pv[1]) + np.outer(l3[inside], pv[2])
+            dd = np.minimum.reduce([wp[:, ax] - x0, x1 - wp[:, ax], wp[:, 2] - z0, z1 - wp[:, 2]])
+            eb = np.clip(dd / fe, 0.0, 1.0)
+            wt *= (eb * eb * (3 - 2 * eb)).astype(np.float32)
         art_px &= wt > 1e-3
         if not art_px.any():
             continue
@@ -2344,6 +2358,189 @@ def hot_faces(ob, hb):
     log("hot faces: %d in %s" % (n, b))
 
 
+def cut_strands(ob, img, cs):
+    """(From ext/warden-meshy-pin.) Hair strands Meshy hung in front of the face (they cross the mask in the 3/4 view): dark-painted faces in the
+    face's box (Meshy frame, front -Y) lying in front of the face's own surface (the nearest light-painted
+    vertices in the front view, `gap` m) are removed."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    me = ob.data
+    uv = me.uv_layers.active.data
+    x0, x1, z0, z1 = cs["box"]
+    co = np.array([v.co[:] for v in me.vertices])
+    vcol = np.zeros(len(co))
+    vn = np.zeros(len(co))
+    dark = []
+    for p in me.polygons:
+        u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
+        v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
+        lum = float(px[min(h - 1, max(0, int(v * h))), min(w - 1, max(0, int(u * w))), :3].mean())
+        for i in p.vertices:
+            vcol[i] += lum
+            vn[i] += 1
+        c = p.center
+        if lum < float(cs.get("dark", 0.2)) and x0 <= c.x <= x1 and z0 <= c.z <= z1:
+            dark.append(p.index)
+    vlum = vcol / np.maximum(vn, 1)
+    inbox = (co[:, 0] >= x0) & (co[:, 0] <= x1) & (co[:, 2] >= z0) & (co[:, 2] <= z1)
+    face = co[inbox & (vlum > float(cs.get("light", 0.45)))]
+    gap = float(cs.get("gap", 0.004))
+    drop = []
+    for i in dark:
+        c = me.polygons[i].center
+        dd = np.hypot(face[:, 0] - c.x, face[:, 2] - c.z)
+        if len(dd) and dd.min() < 0.015 and c.y < face[int(np.argmin(dd)), 1] - gap:
+            drop.append(i)
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[bm.faces[i] for i in drop], context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(me)
+    bm.free()
+    log("cut %d strand faces in front of the face" % len(drop))
+
+
+def lengthen(ob, img, ln):
+    """A long coat drawn longer than the scan's (Hem: mid-calf with an asymmetric tail): the vertices of the coat's
+    faces (painted in one of `hsv`, outside the legs' own radius `leg_r` round each leg's line) below `from_z`
+    (fitted frame, soles on 0) move down, by `k` x their drop below from_z, `k_back` at the back (-Y) and more on
+    the `tail` side (+X her right, -X her left) for the asymmetric tail."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    me = ob.data
+    uv = me.uv_layers.active.data
+    coat = np.zeros(len(me.vertices), bool)
+    for p in me.polygons:
+        u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
+        v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
+        hh, ss, vv = _hsv(px[min(h - 1, int(v * h)), min(w - 1, int(u * w)), :3])
+        if any((q[0] <= hh <= q[1] if q[0] <= q[1] else (hh >= q[0] or hh <= q[1])) and q[2] <= ss <= q[3]
+               and q[4] <= vv <= q[5] for q in ln["hsv"]):
+            coat[list(p.vertices)] = True
+    co = np.array([v.co[:] for v in me.vertices])
+    z0 = float(ln["from_z"])
+    legs = [np.array(x) for x in ln["legs"]]
+    off_leg = np.ones(len(co), bool)
+    for lx in legs:
+        off_leg &= np.hypot(co[:, 0] - lx[0], co[:, 1] - lx[1]) > float(ln.get("leg_r", 0.075))
+    sel = coat & off_leg & (co[:, 2] < z0)
+    back = np.clip(-co[:, 1] / 0.12, 0.0, 1.0)
+    tail = np.clip(co[:, 0] * float(ln.get("tail", 1.0)) / 0.15, 0.0, 1.0)
+    k = float(ln["k"]) + (float(ln.get("k_back", ln["k"])) - float(ln["k"])) * back + float(ln.get("k_tail", 0.0)) * tail * back
+    drop = (z0 - co[:, 2]) * k
+    co[sel, 2] = np.maximum(co[sel, 2] - drop[sel], float(ln.get("floor", 0.12)))     # (the coat only)
+    fl = float(ln.get("flare", 0.0))
+    if fl > 0.0:
+        # (the hem flares out from the body's axis as it falls: the art's long coat swings wide below the knees)
+        rad = np.hypot(co[sel, 0], co[sel, 1])
+        k_out = 1.0 + fl * drop[sel] / np.maximum(rad, 0.05)
+        co[sel, 0] *= k_out
+        co[sel, 1] *= k_out
+    me.vertices.foreach_set("co", co.ravel())
+    me.update()
+    log("lengthened the coat: %d vertices" % int(sel.sum()))
+
+
+def split_off_faces(ob, faces, name):
+    """These faces (indices) of ob become their own object (vertex weights kept)."""
+    me = ob.data
+    keep = set(faces)
+    mine = me.copy()
+    bm = bmesh.new()
+    bm.from_mesh(mine)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.index not in keep], context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(mine)
+    bm.free()
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.index in keep], context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(me)
+    bm.free()
+    out = bpy.data.objects.new(name, mine)
+    bpy.context.scene.collection.objects.link(out)
+    return out
+
+
+def split_piece(ob, img, pc):
+    """A piece the art draws as its own object (Hem's porcelain half-mask over her nose and mouth) comes off the
+    body as its own skinned mesh: the faces inside `box` (the fitted frame) facing `facing` or more toward the
+    front (+Y), painted in one of the `hsv` ranges [h0, h1, s0, s1, v0, v1]; the selection is closed `close` face
+    rings (the red stitches, the painted lips inside it) and its largest connected part kept. It is pushed `push`
+    m out along its normals (a lip off the face) and goes on its own material `<slot>-<name>` (same atlas)."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    me = ob.data
+    uv = me.uv_layers.active.data
+    b = pc["box"]
+    pick = set()
+    for p in me.polygons:
+        c = p.center
+        if not (b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]):
+            continue
+        if p.normal.y < float(pc.get("facing", -1.0)):
+            continue
+        u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
+        v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
+        hh, ss, vv = _hsv(px[min(h - 1, max(0, int(v * h))), min(w - 1, max(0, int(u * w))), :3])
+        if any((q[0] <= hh <= q[1] if q[0] <= q[1] else (hh >= q[0] or hh <= q[1])) and q[2] <= ss <= q[3]
+               and q[4] <= vv <= q[5] for q in pc["hsv"]):
+            pick.add(p.index)
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.faces.ensure_lookup_table()
+
+    def nbrs(i):
+        return {g.index for e in bm.faces[i].edges for g in e.link_faces if g.index != i}
+
+    def inbox(i):
+        c = bm.faces[i].calc_center_median()
+        return b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]
+    n = int(pc.get("close", 2))
+    for _k in range(n):
+        pick |= {j for i in list(pick) for j in nbrs(i) if inbox(j)}
+    for _k in range(n):
+        pick = {i for i in pick if nbrs(i) <= pick or len(nbrs(i) - pick) <= 1}
+    # the largest connected part
+    left, best = set(pick), set()
+    while left:
+        seed = left.pop()
+        comp, stack = {seed}, [seed]
+        while stack:
+            for j in nbrs(stack.pop()):
+                if j in left:
+                    left.discard(j)
+                    comp.add(j)
+                    stack.append(j)
+        if len(comp) > len(best):
+            best = comp
+    bm.free()
+    piece = split_off_faces(ob, best, pc["name"])
+    for g in ob.vertex_groups:
+        piece.vertex_groups.new(name=g.name)
+    piece.parent = ob.parent
+    for md in ob.modifiers:
+        if md.type == "ARMATURE":
+            nm = piece.modifiers.new(md.name, "ARMATURE")
+            nm.object = md.object
+    pm = piece.data
+    pm.update()
+    push = float(pc.get("push", 0.003))
+    for vx in pm.vertices:
+        vx.co = vx.co + vx.normal * push
+    mat = slot_materials(img, [pc["slot"]], pc["name"])[pc["slot"]]
+    pm.materials.clear()
+    pm.materials.append(mat)
+    for p in pm.polygons:
+        p.material_index = 0
+    log("piece %s: %d faces" % (pc["name"], len(pm.polygons)))
+    return piece
+
+
 def main():
     spec_path = sys.argv[sys.argv.index("--") + 1]
     spec = json.load(open(spec_path))
@@ -2354,6 +2551,9 @@ def main():
     drop_floaters(ob, spec.get("floater_verts", 40))
     if spec.get("cut_boxes"):
         delete_boxes(ob, spec["cut_boxes"])     # (in Meshy's frame: a strand it floats in front of the face)
+    if "cut_strands" in spec:
+        cut_strands(ob, img, spec["cut_strands"])
+        drop_floaters(ob, spec.get("floater_verts", 40))
     ids = island_map(ob, img)
     paint_up(img, spec, ids=ids)
     for pj in spec.get("project", []):
@@ -2462,6 +2662,8 @@ def main():
         _apply_armature(head)
     apply_pose(ob, fit)
     decimate(ob, spec["max_tris"] - (int(spec["head"]["tris"]) if head else 0))
+    if spec.get("lengthen"):
+        lengthen(ob, img, spec["lengthen"])
     ob.name = "Body"
     ob.data.name = "Body"
     arm = contract_skin(ob, rig)
@@ -2537,6 +2739,21 @@ def main():
             parts.append(WPR.fluff_tail(arm, spec["fluff_tail"]))
         if spec.get("flower_crown"):
             parts.append(WPR.flower_crown(arm, ob, spec["flower_crown"]))
+    for pc in spec.get("pieces", []):
+        parts.append(split_piece(ob, img, pc))
+    if spec.get("shears") or spec.get("lapel_needle"):
+        import hem_parts
+        if spec.get("shears"):
+            parts.append(hem_parts.shears(arm, spec["shears"]))
+        if spec.get("lapel_needle"):
+            parts.append(hem_parts.lapel_needle(arm, spec["lapel_needle"]))
+    if spec.get("thimbles"):
+        import hem_parts
+        parts.append(hem_parts.thimbles(ob, arm, spec["thimbles"]))
+    if spec.get("needles"):
+        # Hem's quiver needles, cut from the scan (`cut_boxes`) and built clean (tools/meshy/hem_parts.py)
+        import hem_parts
+        parts.append(hem_parts.needles(arm, spec["needles"], m, float(spec.get("chunk", {}).get("girth", 1.0))))
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
@@ -2545,6 +2762,17 @@ def main():
     spin = None
     if gun is not None:
         gun, spin = gun_weapon(gun, ge, gt, rig, spec["gun_arm"])
+    elif "bow" in spec:
+        # a held bow, built by script (tools/meshy/bow_parts.py), with its nocked arrow as the Mag
+        bw = spec["bow"]
+        gun = bow_parts.build_bow(float(bw.get("height", 1.25)), float(bw.get("depth", 0.13)))
+        gun["built"] = 1
+        # (arrow false: only the needle's eye and its red thread sit at the nock, the Mag, so nothing sticks forward
+        # off the bow at rest; the shot itself is the projectile)
+        spin = bow_parts.build_arrow(tip_y=float(bw.get("tip", 0.78)), shaft=bw.get("arrow", True))
+        spin.parent = gun
+        spin["built"] = 1
+        K.anchor(arm, "hand.R", "anchor_nock", K.bone_head(rig, "hand.R"))
     elif spec.get("weapon_glb"):
         gun = weapon(spec, rig)
     crown = rig["land"]["crown"]
@@ -2566,6 +2794,14 @@ def main():
         if "ink_room" in spec:
             ink_room(o, float(spec["ink_room"]))
     for o in parts + props:
+        if o.name in spec.get("smooth_parts", []):
+            # (a piece cut from the scan, Hem's mask: its decimated facets shaded smooth)
+            if o.data.has_custom_normals:
+                bpy.context.view_layer.objects.active = o
+                bpy.ops.mesh.customdata_custom_splitnormals_clear()
+            for p in o.data.polygons:
+                p.use_smooth = True
+            soft_normals(o, int(spec.get("normal_smooth", 8)) * 2)
         if "ink_room" in spec:
             ink_room(o, float(spec["ink_room"]))
     if "atlas_px" in spec:

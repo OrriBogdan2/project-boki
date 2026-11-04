@@ -1621,6 +1621,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		flag.visible = false
 	# the gun goes when it's stowed: the right hand is free then (and always with nothing held)
 	free_r = maxf(free_r, 1.0 - gun_vis)
+	free_r = maxf(free_r, ws.carry_free_r())
 	if hold == "palm":
 		free_r = 1.0
 	free_l = maxf(free_l, 1.0 - gun_vis)

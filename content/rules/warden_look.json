@@ -192,5 +192,50 @@
 				"far_d": 3.0
 			}
 		]
+	},
+	"hem": {
+		"painted": {
+			"rim_far": 0.3,
+			"rim_far_color": [
+				0.92,
+				0.1,
+				0.12
+			]
+		},
+		"slots": {
+			"skin": {
+				"top_light": 0.35,
+				"fres": 0.45,
+				"far_lift": 0.08,
+				"shade": 0.8,
+				"shadow_tint": [
+					0.94,
+					0.86,
+					0.86
+				]
+			},
+			"cloth": {
+				"fres": 0.35,
+				"far_lift": 0.25,
+				"top_light": 0.4
+			},
+			"hair": {
+				"far_lift": 0.25,
+				"fres": 0.6,
+				"glow": 0.04
+			},
+			"metal": {
+				"top_light": 0.3,
+				"fres": 0.4,
+				"fres_tint": 0.8,
+				"far_lift": 0.2
+			},
+			"leather": {
+				"far_lift": 0.3
+			},
+			"glow": {
+				"glow": 2.8
+			}
+		}
 	}
 }
