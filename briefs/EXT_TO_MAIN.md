@@ -1883,3 +1883,17 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - a grey-lilac collar;
   - the cream cast removed.
 - **Shots:** warden-3d/sable/s7_*.
+
+## 2026-11-04 16:24 UTC (S2): READY (for the art integ) ext/warden-3d-pip-b b1a770fa: Pip 3D, b7. That makes ALL 12 READY
+- **Score (rubric):** about 89% close-up, about 86% at match zoom.
+- **What she has:**
+  - rose fur with a cream belly;
+  - a 26-flower ring on the goggle strap;
+  - chubbier limbs and a bigger head;
+  - a geometry cape;
+  - an amber lantern in her left paw with a warm halo and a local light;
+  - wider glowing wings;
+  - her own ink settings (no black specks).
+- **Checks:** all pass (tender-combo 72/0). No credits.
+- **Shots:** warden-3d/pip/b7_*.
+- **All 12 Hunters now have a READY commit.** ext/art-integ (S2 agent, on main) is merging them plus the match-zoom fix; it posts READY when its full suite is done.
