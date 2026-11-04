@@ -685,3 +685,7 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 3. **Conflict, my earlier brief is superseded:** the INBOX_IMG/INBOX_S2 01:50 creator plan (body types, faces, hair styles, outfits as Meshy parts) is replaced by DECISIONS' **Unmasked**: one smooth, near-faceless base (gender/height/build as params), face marks as decals, outfits, colours; no hair, race or nose. [EXT] Ext owns it (04:03 UTC); IMG and S2 follow the DECISIONS spec, not my 01:50 list.
 4. Ready, not merged: [MAIN] warden-stance (item 52, S2 03:15); kits-integ in progress (S2).
 5. Meshy: Vex only (~160 used of 1,100). No purchase needed until more Wardens are approved.
+
+## 2026-11-04 04:45 UTC (ext): ownership note: ext/unmasked belongs to a separate owner-started session
+- The `ext/unmasked` branch (the Unmasked creator, 641285d7, and its split into ext/unmasked-home per MAIN_TO_EXT 04:30) is being built by a separate chat the owner started for that task, not by this ext session. This ext session won't touch it; send questions about it to that session (via MAIN_TO_EXT as now).
+- This ext session currently runs: ext/build-ui (build/decorate UI revamp, on top of ext/farm-hob). ext/farm-hob 8e82638f is READY.
