@@ -1,0 +1,48 @@
+s1_vs_turnaround_close.png: Hem stage 1 (Meshy 7.1 bake + fit, no polish): the r3 turnaround above, the model close (front, 3/4, side, back, 3/4 back) below
+s1_vs_turnaround_game.png: the r3 turnaround above, the model at the match camera (pitch 66, 23 m) below, true pixels then x3
+s1_vs_portrait.png: the r3 portrait, the model's head from the front and 3/4 (porcelain half-mask as its own mesh)
+s1_closeup.png / s1_closeup_front.png: head and shoulders, 3/4 and front
+s1_front_34.png / s1_back_34.png: full length, front + 3/4, back + 3/4 back (bow in her LEFT hand, scripted, glowing red-thread string)
+s1_match.png / s1_match_x4.png: --arena=archer --record=2 --arena-demo=pose --demo-zoom=1.0, and a x4 crop
+s1_moves_close_1.png: run, run (other foot), draw, loose
+s1_moves_close_2.png: Spirit Walk roll, Heavy Shot
+s1_poses_game.png: idle, run, attack, cast, ult at the match camera
+s1_vs_sheet.png: the concept sheet beside the model's front and 3/4 and the match strip
+
+Stage 2 (r3c recipe + the 12:40 reference sheets; credit-free):
+s2_closeup_vs_art.png: the portrait, the model's head front and 3/4: the face painted from hem_face (eyes, brows, liner, the cracked mask with gold rim, red stitches and smile), the mask its own mesh
+s2_34_vs_art.png: the turnaround's front and 3/4 beside the model's: the bow hanging in her LEFT hand at her side, the right hand free; clean needles in the quiver
+s2_back_vs_art.png: the turnaround's back beside the model's back and 3/4 back
+s2_match_vs_art.png / s2_match.png: the front art beside the match-zoom crop
+s2_vs_turnaround_close.png / s2_vs_turnaround_game.png: the turnaround above, the model close and at the match camera
+s2_moves_close_1.png / s2_moves_close_2.png, s2_poses_game.png: run, draw, loose, Spirit Walk roll, Heavy Shot; idle, run, attack, cast, ult at the match camera
+s2_vs_s1.png: stage 1 (top) against stage 2 (bottom)
+
+Stage 3 (after the shared painted-look fix 16c18b4f; credit-free):
+s3_closeup_vs_art.png, s3_34_vs_art.png, s3_back_vs_art.png, s3_match_vs_art.png / s3_match.png: as s2, on the s3 model: the cheek strands cut, the mask flush with no side shards, thimble claws on her right fingertips (hem_weapons_sheet), a lighter bow with a thicker glowing string, no needle sticking forward off the bow
+s3_vs_turnaround_close.png / s3_vs_turnaround_game.png, s3_moves_close_1/2.png, s3_poses_game.png
+s3_vs_s2.png: stage 2 (top) against stage 3 (bottom)
+
+Stage 4 (RECIPE_95 base dd56bb8e + the match-zoom fix f4b59cb3; credit-free):
+s4_closeup_vs_art.png, s4_34_vs_art.png, s4_back_vs_art.png, s4_match_vs_art.png / s4_match.png: a true black recurve with a bright glowing red string and spool, angled out at her left side as the turnaround; every quiver needle threaded red with a drifting end; the coat to mid-calf with a longer back tail; the mask shaded smooth; a red rim at the match camera
+s4_vs_turnaround_close.png / s4_vs_turnaround_game.png, s4_moves_close_1/2.png, s4_poses_game.png
+s4_vs_s3.png: stage 3 (top) against stage 4 (bottom)
+Self-score (RECIPE_95 rubric): close-up 83 (silhouette 13/15, face 17/20, hair 9/10, props 16/20, palette 13/15, clean paint 7/10, outfit 8/10); match zoom 74 (silhouette 20/25, signature colours 18/25, values 16/20, props 12/20, artefacts 8/10)
+
+Stage 5 (RECIPE_95 face rules + ORCH 14:10; credit-free):
+s5_closeup_vs_art.png, s5_34_vs_art.png, s5_back_vs_art.png, s5_match_vs_art.png / s5_match.png: the face painted from hem_face by an 18-landmark thin-plate warp (residual 0.5 px), masked inside the face and inpainted outside it; deep crimson coat, black corset and trousers; arm-length silver needles with eyes and drooping red thread; a split coat tail at the back; shears at her right hip, the lapel needle, bigger thimble claws; a thicker black bow and string; the match crop tighter on the hero (the Arena's caption and palm are props of the frame, not the model)
+s5_vs_turnaround_close.png / s5_vs_turnaround_game.png, s5_moves_close_1/2.png, s5_poses_game.png
+s5_vs_s4.png: stage 4 (top) against stage 5 (bottom)
+Self-score (RECIPE_95 rubric): close-up 85 (silhouette 13/15, face 18/20, hair 9/10, props 17/20, palette 13/15, clean paint 7/10, outfit 8/10); match zoom 68 (silhouette 18/25, signature colours 17/25, values 15/20, props 10/20, artefacts 8/10)
+
+Stage 6 (ORCH 15:10 + round 6; credit-free; match frames with --no-tips --demo-at=-4.5,0, no palm or caption):
+s6_closeup_vs_art.png, s6_34_vs_art.png, s6_back_vs_art.png, s6_match_vs_art.png / s6_match.png: clean laced brown boots (the stray brown planks were boot texels the coat lengthening took for crimson; the boots' pink patches were the skin slot), one straight coat tail at the back over black trousers, drooping red needle threads, darker steel thimble claws, banded tape wraps, flat crimson sleeves, the mask's turned-away sides flat porcelain, the bow angled out with three red glow halos along its string (they hang on the weapon) and a red rim on the limbs at the match camera
+s6_vs_turnaround_close.png / s6_vs_turnaround_game.png, s6_moves_close_1/2.png, s6_poses_game.png
+s6_vs_s5.png: stage 5 (top) against stage 6 (bottom)
+Self-score (RECIPE_95 rubric): close-up 86 (silhouette 14/15, face 18/20, hair 9/10, props 17/20, palette 13/15, clean paint 7/10, outfit 8/10); match zoom 66 (silhouette 18/25, signature colours 17/25, values 15/20, props 8/20, artefacts 8/10)
+
+Stage 7 (match-zoom v2 161708cc + 8af89a9e + a466972f; ORCH 16:10; credit-free; match frames on --arena-demo=pose_clear, the hero-centred x4 crop from DEMO_HERO_RECT, --demo-face=5,3.5 so the bow side faces the camera):
+s7_closeup_vs_art.png, s7_34_vs_art.png, s7_back_vs_art.png, s7_match_vs_art.png / s7_match.png: the mask from the face's front only (the white side flaps gone), the coat's stretched dark hem painted crimson (no zig-zag), banded tape wraps, bigger shears, bright silver thimble claws on the right hand's own fingertips (they had been placed at the hip), bigger bow halos, a pale porcelain rim at the match camera (red rim off the red coat)
+s7_vs_turnaround_close.png / s7_vs_turnaround_game.png, s7_moves_close_1/2.png, s7_poses_game.png
+s7_vs_s6.png: stage 6 (top) against stage 7 (bottom)
+Self-score (RECIPE_95 rubric): close-up 86 (silhouette 13/15, face 18/20, hair 9/10, props 17/20, palette 13/15, clean paint 8/10, outfit 8/10); match zoom 76 (silhouette 21/25, signature colours 19/25, values 15/20, props 13/20, artefacts 8/10)
