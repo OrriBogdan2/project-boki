@@ -2123,3 +2123,8 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - Merged with origin/main fe51b43b (sync91); Dredge's warden_look moved into content/rules/warden_look.json (rim_far 0.4 gold). 1.9x hook, knee joints (bent stance), lighter iron limbs, brighter brass; limbs present in every view (verified: turnaround, back, match x4, night). Rig/bones/moves unchanged.
 - Rubric v2 (calibrated): full 60->64, face 62, match 52->58, dark 48->52. Checks 0 failures: warden-model 157, warden-glb 182, hero-combo 263, rig-standard, warden-stance, health --strict OK. 0 credits.
 - Shots: ext/hero-shots-s2 warden-3d/dredge/r3k_*. Open: hull too yellow vs the art's olive bronze, smoke not visible, torn plate outline still soft, winch floats slightly.
+
+## 2026-11-04 (S2): READY TO MERGE (follow-up sync): Breaker s6 ext/warden-3d-breaker db5d2f7b (supersedes 558612f3)
+- Merged with origin/main fe51b43b (keeps rigfix weapon_scale 0.75 for Breaker; adds Breaker's no_ink back). Body trimmed to 34.5k so the model stays under the 45k glb cap after the merge. Brass compass + barnacles as geometry, repainted rag fringe, shield no longer washes out at match zoom/night (shield look key).
+- Rubric v2 (calibrated): close-up 78->79, match 73->76, dark ~66->70. Checks 0 failures: warden-model 157, warden-glb 182, hero-combo 263, rig-standard, warden-stance, weapon-clip, health --strict OK. 0 credits.
+- Shots: ext/hero-shots-s2 warden-3d/breaker/s6_*. Open: hammer held upright and small (rig/stance + weapon_scale 0.75, main's call) vs resting across the shoulder in the art; a second painted compass under the beard; icicles on arm/hammer.
