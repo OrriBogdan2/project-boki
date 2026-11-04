@@ -187,7 +187,9 @@ func _tick_weapon() -> void:
 			m.fx.ring(h.pos, 1.0, Color("6f7cff"), 0.2)
 			m.fx.burst(_hand(), Color(0.45, 0.5, 1.0, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
 	if primed and not h.downed and snap.is_empty():
-		KitLooks.of(m).hold_on("os_charge", "mote", h, _hand(), 1.1, Color("6f7cff"))
+		# (the primed tell on her actual hand, where the 3D model holds its orb: at a fixed point in front of her the
+		# match camera drew it as a disc at her feet)
+		KitLooks.of(m).hold_on("os_charge", "mote", h, hand_pos(true), 1.1, Color("6f7cff"))
 	if not primed and m.time - last_shot_t >= float(lmb_def()["idle"]) and not h.downed:
 		primed = true
 		base_wpn = h.wpn

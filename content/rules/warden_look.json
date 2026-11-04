@@ -1,5 +1,5 @@
 {
-	"doc": "A Warden 3D model's own shading over the shared painted look (WardenGlb.look), keyed by the model's art name (art/wardens/<art>/<art>.glb; a design variant has its own key). painted: hero_toon.gdshader parameters on all of its surfaces, set after WardenGlb.PAINTED. slots: the same per toon slot (skin, hair, cloth, leather, metal, eyes, glow), after painted. Colours are [r, g, b]. A model without an entry keeps the shared look. Useful keys: top_light (surfaces facing up lift), fres and fres_tint (the coloured rim; 1 = lightened own colour), far_lift (brighter and richer at the match camera), shade and shadow_tint (the shadow floor and its tint), sheen, glow (emission x the painted colour).",
+	"doc": "A Warden 3D model's own shading over the shared painted look (WardenGlb.look), keyed by the model's art name (art/wardens/<art>/<art>.glb; a design variant has its own key). painted: hero_toon.gdshader parameters on all of its surfaces, set after WardenGlb.PAINTED. slots: the same per toon slot (skin, hair, cloth, leather, metal, eyes, glow), after painted. Colours are [r, g, b]. A model without an entry keeps the shared look. Useful keys: top_light (surfaces facing up lift), fres and fres_tint (the coloured rim; 1 = lightened own colour), far_lift (brighter and richer at the match camera), shade and shadow_tint (the shadow floor and its tint), sheen, glow (emission x the painted colour). albedo: a colour multiplier on the slot's atlas, applied on top of the player's colour pick (it never replaces the pick).",
 	"vex": {
 		"painted": {},
 		"slots": {
@@ -56,7 +56,7 @@
 				]
 			},
 			"glow": {
-				"glow": 0.8,
+				"glow": 1.3,
 				"fres": 0.0,
 				"top_light": 0.0,
 				"far_lift": 0.0

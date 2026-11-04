@@ -798,13 +798,37 @@ def orbit_props(arm, spec):
         bld = Builder()
         # (the rock: flat along the outward axis, so its face meets the eye; its rim and iris on the front)
         # (the cells of _quads_uv: rock bottom-left, rim bottom-right, iris top-left, pupil top-right)
-        # (a geode: the rough rock, a raised rim round its cut face, a ring of crystals sunk inside it, and the
-        # eye's domed iris standing out of the crystals)
-        _lumpy(bld, p, (side, up, -out_dir), (r, r * 1.08, r * 0.66), "rock", (0.05, 0.05, 0.45, 0.45), 7 + i,
-               rings=9, sides=16, lump=0.26)
+        kind = spec.get("kind", "eye")
+        if kind == "card":
+            # (a playing-card shard: a thin flat slab facing out, on a glowing string back to the orbit's centre)
+            bld.prism(p - up * r * 0.7, p + up * r * 0.7, r * 0.5, 4, (0.55, 0.05, 0.95, 0.45), "rim", 0.0, rot=0.785)
+            for q in range(len(bld.v) - 12, len(bld.v)):
+                d = np.asarray(bld.v[q]) - p
+                bld.v[q] = p + d - out_dir * d.dot(out_dir) * 0.85
+            bld.tube([np.array(c[:]), p], [0.0025, 0.0025], 4, 0.05, 0.45, 0.55, 0.95, "iris", [0.0, 0.0])
+        if kind != "card":
+            # (a geode: the rough rock, a raised rim round its cut face, a ring of crystals sunk inside it, and the
+            # eye's domed iris standing out of the crystals; "rock": the rough rock alone, a shard)
+            _lumpy(bld, p, (side, up, -out_dir), (r, r * 1.08, r * 0.66), "rock", (0.05, 0.05, 0.45, 0.45), 7 + i,
+                   rings=9, sides=16, lump=0.26)
+        if kind != "eye":
+            ob = bld.object("%s_%d" % (spec["name"], i))
+            mi = {"rock": _flat_material(ob, spec.get("slot", "leather"), spec["name"], img, "Closest")}
+            mi["rim"] = mi["rock"]
+            mi["iris"] = _flat_material(ob, "glow", spec["name"], img, "Closest")
+            for poly in ob.data.polygons:
+                poly.material_index = mi[bld.part[poly.vertices[0]]]
+            ob.data.transform(Matrix.Translation(-Vector(p)))
+            ob.matrix_world = Matrix.Translation(Vector(p))
+            mw = ob.matrix_world.copy()
+            ob.parent = e
+            ob.matrix_world = mw
+            out.append(ob)
+            continue
         bld.torus(p + out_dir * r * 0.5, out_dir, r * 0.62, r * 0.13, 18, 6, (0.05, 0.05, 0.45, 0.45), "rock", 0.0)
         _disc(bld, p + out_dir * r * 0.5, out_dir, r * 0.62, "rim", (0.55, 0.05, 0.95, 0.45), dome=-0.18)
-        _disc(bld, p + out_dir * r * 0.46, out_dir, r * 0.4, "iris", (0.05, 0.55, 0.45, 0.95), dome=0.45)
+        _disc(bld, p + out_dir * r * 0.46, out_dir, r * float(spec.get("iris_r", 0.4)), "iris", (0.05, 0.55, 0.45, 0.95),
+              dome=0.45)
         bld.prism(p + out_dir * r * 0.66 - up * r * 0.24, p + out_dir * r * 0.66 + up * r * 0.24, r * 0.06, 4,
                   (0.55, 0.55, 0.95, 0.95), "pupil", 0.0)
         ob = bld.object("%s_%d" % (spec["name"], i))
@@ -954,7 +978,8 @@ def studs(body, arm, spec):
         e1 /= np.linalg.norm(e1)
         e2 = np.cross(nrm, e1)
         base = len(bld.v)
-        for d in (nrm * r * 1.6, -nrm * r * 0.4, e1 * r, -e1 * r, e2 * r * 0.7, -e2 * r * 0.7):
+        tip = float(spec.get("tip", 1.6))       # (how far it stands out: 1.6 a crystal spike, ~0.8 a round bead)
+        for d in (nrm * r * tip, -nrm * r * 0.4, e1 * r, -e1 * r, e2 * r * 0.7, -e2 * r * 0.7):
             bld.v.append(c + d)
             bld.uv.append((0.5, 0.5))
             bld.part.append("stud")
