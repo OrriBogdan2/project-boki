@@ -1,0 +1,34 @@
+r2_vs_turnaround.png: the r2 turnaround (top) over the in-game model close: front, 3/4, side, back, 3/4 back, in her item-52 stance (crouched, spear tip-up at her right side, flask at the ready in her left)
+r2_vs_turnaround_gameplay.png: the turnaround over the same five views at the match camera (pitch 66, 23 m, fov 32), true pixels then x3
+r2_vs_portrait.png: the splash (no r2 portrait yet) beside the front and 3/4 head-and-shoulders close-ups
+r2_closeup.png: head and shoulders from the front: goggles, gill-frills, amber eyes, tan jaw, the flame syringe
+r2_closeup_34.png: head and shoulders, three-quarter front
+r2_front_34.png: full length, front and three-quarter
+r2_vs_sheet.png: the shot tool's sheet-beside-model composite with the match-camera strip
+r2_poses_game.png: idle, run, attack, cast, ult at the match camera
+r2_gameplay_match.png: the Arena at the match camera (--arena-demo=pose, zoom 1), Cinder centre (taken before the 05:00 weight fix; the stance is the same)
+r2_gameplay_zoom.png: that frame around her, x4 (nearest)
+r2_moves_run_lance.png: run (two phases), Torch Lance (the flame hold), Soot Ram (head-first dash)
+r2_moves_dash_shot_cloak.png: Soot Ram late, Cinder Shot aim, Cinder Shot release, Furnace Cloak
+# b1 (Cinder r3 art, Meshy run B_enh; RECIPE_95): close-up ~68%, match zoom ~57%
+#   close-up: silhouette 10/15 (tail swept back, not looped; crest too small), face 15/20 (round face, amber eyes, toothy grin projected from the head sheet), crest 4/10 (hidden behind the skull, no glowing edge), props 14/20 (lance in LEFT hand idle, chamber glow too yellow, hose thin), palette 11/15 (white chest blob), clean paint 7/10, outfit 7/10
+#   match: silhouette 14/25, signature colours 12/25, value separation 12/20, props 12/20, artefacts 7/10
+b1_cmp_vs_turnaround.png: the art's front/side/back over the in-game close turnaround
+b1_cmp_vs_turnaround_game.png: the art over the turnaround at the match camera
+b1_cmp_closeup_vs_art.png: head sheet front, portrait, in-game front close-up
+b1_cmp_closeup_34_vs_art.png: portrait, head sheet, in-game 3/4 close-up
+b1_cmp_match_vs_art.png: portrait beside the Arena match frame x4
+b1_turnaround_close.png / b1_turnaround_game.png: front, 3/4, side, back, 3/4 back (close / match camera)
+b1_front_34.png / b1_back_34.png: full length front + 3/4, back + 3/4 back
+b1_closeup.png / b1_closeup_front.png: head and shoulders, 3/4 and front
+b1_moves_close_1.png / _2.png: run, Torch Lance, Soot Ram, Cinder Shot, Furnace Cloak frames
+b1_poses_game.png: idle, run, attack, cast, ult at the match camera
+b1_match.png / b1_match_x4.png: the Arena match frame (pose demo, zoom 1.0) and its x4 crop
+# b2 (commit 7c53cc36): close-up ~74%, match zoom ~60%
+#   close-up: silhouette 11/15 (crest grown x1.4 reads in profile and from behind; tail swept back, not the art's loop), face 16/20 (grin, liner, lashes from the head sheet; Meshy's face rounder and less wide than the art's), crest 6/10 (still thin from the front; orange edge faint), props 15/20 (lance in LEFT hand, flame chamber orange, goggles brass, copper tank; hose thin and tied to the left forearm), palette 13/15, clean paint 7/10 (membrane patches at the neck), outfit 7/10 (vials small and pale)
+#   match: silhouette 15/25, signature colours 13/25, value separation 12/20, props 13/20, artefacts 7/10 (the palm and the caption from the demo scene sit on her)
+b2_*: the same set as b1 (see the b1 lines), round b2
+# b3 (merged Vex r3e 047f8724; clean match frame: --no-tips, demo_at -4.5,0): close-up ~76%, match zoom ~62%
+#   close-up: silhouette 12/15, face 16/20, crest 7/10 (grown x1.6: a full fan with the orange edge in profile and from behind; still hidden from the front and 3/4), props 15/20, palette 13/15, clean paint 7/10, outfit 6/10 (vials stronger but small)
+#   match: silhouette 15/25 (from above the crest is a thin stripe; the tail mostly behind her), signature colours 14/25, value separation 13/20 (light_neutral_warm keeps the purple cool), props 13/20 (the lance reads as a yellow-orange stick), artefacts 7/10 (dark ink speckle on the skin)
+b3_*: the same set as b1 (see the b1 lines), round b3
