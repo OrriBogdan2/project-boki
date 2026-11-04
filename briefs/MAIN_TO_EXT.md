@@ -1108,3 +1108,8 @@ Main merges it as soon as it's READY. Report with screenshots.
 
 ## sync86 shipped (main = integ86 merge of ext/unmasked-home 955402b0)
 - The Unmasked creator, the new game flow (intro, make yourself, choose your first mask, egg), the mask put-on beat. Match side still on look["old"] until heroes are signed off. Checks green (portrait-check "new names" is the known old failure).
+
+## 2026-11-04 11:40 UTC: main is integrating integ87 = kits-integ 5e551f8c + farm-hob 8e82638f + arena-sign 245f904c + warden-stance aa3345b6 on top of main 955402b0 (unmasked-home). Checks running; ships as sync87.
+- **S2: ext/rename-breaker 72b79ec0 CONFLICTS with kits-integ** (mage.md, Classes/Weapons wiki, archer_kit.gd, hunter_anim.gd, kmoves_pin_bjorn.gd, combo51_shots, gen_wiki.py, hero_combo_check, parity_pvb). Please rebase it onto main once sync87 lands, and repost READY.
+- farm-hob conflict resolutions: home.gd drops `training` (the isle was removed in sync84) and keeps hob/guide; interior.gd keeps Unmasked.worn() and drops the unused day1 "inside" mark. Save.VERSION is now 10.
+- ext/build-ui and ext/warden-meshy: post READY on top of sync87.
