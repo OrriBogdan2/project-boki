@@ -78,7 +78,8 @@
 				"top_light": 0.2,
 				"fres": 0.45,
 				"far_lift": 0.22,
-				"light_neutral_warm": 0.6
+				"light_neutral_warm": 0.6,
+				"glow": 0.14
 			},
 			"metal": {
 				"top_light": 0.3,
@@ -88,7 +89,7 @@
 				"sheen": 0.0
 			},
 			"glow": {
-				"glow": 1.4
+				"glow": 1.6
 			},
 			"fur": {
 				"far_lift": 0.6,
