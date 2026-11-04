@@ -85,7 +85,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 - The pull of the cloak reaches the whole 4.5m ring and needs line of sight; dragged foes stop at walls.
 - The shield's size follows the wiki numbers (the footage doesn't show them); it lasts 3s.
 - Ablaze lasts 3s on its own; a fresh stoke refreshes it.
-- The hose keeps 8s of fuel and a refill (the source shows no fuel bar; keeping ours avoids an endless roar).
+- The hose has no fuel and nothing reloads (the source shows no fuel bar; no reload exists in the game). The 0.35s relight gap and the self-slow after release are the only limits.
 - The pilot flame is cyan in our palette too (it reads as cool against warm fire); the burn pips use our own flame shape.
 - Flue Flight: he is not crowd-control immune; a stun ends the flight where he is. He flies over the abyss at the height he had
   (only the carpet is missing there). The hose and the Cinder Shot are locked while flying (only the cloak was seen cast); a

@@ -6,6 +6,7 @@ extends RefCounted
 
 const ROUND_GAP := 0.12      # s between rounds held
 const MAG := 30              # rounds in the drum (game data: a 30-round magazine)
+const REFILL_DRY := 1.3      # s from running dry to the next round, the trigger held (0.35s rest + 30 at 40/s)
 const REFILL_BY := 1.2       # s of rest that brings a drum back from 18 to full ("rapidly reloads when not firing")
 const TURN_180 := 0.2        # s: the body turns 180 degrees to a new cursor (the source's 1280 deg/s: 0.14s)
 const WALK_KEEP := 0.85      # share of her walk she keeps while firing or holding the grenade
@@ -29,7 +30,6 @@ func run(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> voi
 
 func _rounds(m: Match, P: Hunter, home: Vector3) -> void:
 	P.teleport(home)
-	P.reload_t = 0.0
 	P.ammo = MAG
 	P.fire_cd = 0.0
 	var rec := {"t": 0.0, "n": P.shot_n, "at": []}
@@ -88,11 +88,9 @@ func _tracking(m: Match, P: Hunter, home: Vector3) -> void:
 	C.ok("Vex parity LMB: the body turns 180 degrees to the cursor inside 0.2s (source 1280 deg/s)",
 			float(turn["done"]) > 0.0 and float(turn["done"]) <= TURN_180, "%.2f s" % turn["done"])
 
-## The drum: 30 rounds; resting refills it fast (none in the first beat of a pause), running it dry is the normal
-## reload, which nothing refills early.
+## The drum: 30 rounds; resting refills it fast (none in the first beat of a pause).
 func _drum(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	P.teleport(home)
-	P.reload_t = 0.0
 	P.ammo = MAG
 	C.ac.step(m, 0.5)
 	P.fire_cd = 0.0
@@ -116,21 +114,38 @@ func _drum(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 			int(P.wpn["mag"]) == MAG and after12 == MAG - 12 and int(t_full["early"]) == MAG - 12
 			and float(t_full["at"]) > 0.0 and float(t_full["at"]) <= REFILL_BY,
 			"after 12: %d, after 0.25s rest: %d, full at %.2f s" % [after12, t_full["early"], t_full["at"]])
+	_dry(m, P, K, home)
+
+## Run dry with the trigger held: there is no reload (none starts, by hand or by itself), nothing fires while the
+## drum refills, the count climbs back (the HUD shows it), and once full the held string picks up again.
+func _dry(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
+	P.fire_cd = 0.0
+	var run := {"t": 0.0, "dry_at": -1.0, "back_at": -1.0, "shots_dry": 0, "s": P.shot_n, "low": MAG, "reload": 0.0}
 	C.ac.step(m, 6.0, func():
 		C.ac.aim_at(P, home + Vector3(6.0, 0, 0))
-		P.inp["fire"] = P.ammo > 0 and P.reload_t <= 0.0)
+		P.inp["fire"] = true
+		run["reload"] = maxf(float(run["reload"]), P.reload_t)
+		if float(run["dry_at"]) < 0.0 and P.ammo <= 0:
+			run["dry_at"] = run["t"]
+			run["s"] = P.shot_n
+		elif float(run["dry_at"]) >= 0.0 and float(run["back_at"]) < 0.0:
+			if P.shot_n > int(run["s"]):
+				run["back_at"] = run["t"]
+				run["low"] = P.ammo
+		run["t"] = float(run["t"]) + C.DT)
 	P.inp["fire"] = false
-	P.ammo = 0
 	P.start_reload()
-	C.ac.step(m, 0.8)
-	C.ok("Vex parity LMB: run dry, it's the normal reload, and the rest doesn't refill it early",
-			P.reload_t > 0.0 and P.ammo == 0 and K.refill_part == 0.0, "reload %.2f ammo %d" % [P.reload_t, P.ammo])
+	var gap := float(run["back_at"]) - float(run["dry_at"])
+	C.ok("Vex parity LMB: run dry, no reload; the trigger is dead until the drum refills (about 1.1s), then fires",
+			float(run["dry_at"]) > 0.0 and gap > 0.9 and gap < REFILL_DRY and float(run["reload"]) == 0.0
+			and P.reload_t == 0.0 and int(run["low"]) >= MAG - 1 and P.wpn.get("ammo", true),
+			"dry at %.2f, firing again %.2f s later with %d rounds; reload %.2f" % [run["dry_at"], gap, run["low"],
+					run["reload"]])
 	C.ac.step(m, 1.5)
 
 ## The firing brackets: two arcs either side of her while she fires (your screen only), gone soon after.
 func _brackets(m: Match, P: Hunter, home: Vector3) -> void:
 	P.teleport(home)
-	P.reload_t = 0.0
 	P.ammo = MAG
 	C.ac.step(m, 0.4, func():
 		C.ac.aim_at(P, home + Vector3(6.0, 0, 0))

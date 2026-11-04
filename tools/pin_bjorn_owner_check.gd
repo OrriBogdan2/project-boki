@@ -60,7 +60,6 @@ func pin() -> void:
 
 func ready_bow(P: Hunter) -> void:
 	P.fire_cd = 0.0
-	P.ammo = maxi(P.ammo, 1)
 	P.reload_t = 0.0
 	P.draw_t = -1.0
 
@@ -77,8 +76,8 @@ func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void
 		m.step(DT)
 		t += DT
 		early += arrows(m, P)
-	ok("pin early release: 5 s on the button looses nothing", early == 0 and K.draw.loosed_at < 0.0 and P.ammo == 1,
-		"arrows %d ammo %d" % [early, P.ammo])
+	ok("pin early release: 5 s on the button looses nothing", early == 0 and K.draw.loosed_at < 0.0,
+		"arrows %d" % early)
 	P.inp["fire"] = false
 	m.step(DT)
 	m.step(DT)

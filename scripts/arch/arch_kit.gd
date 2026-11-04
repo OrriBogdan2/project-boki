@@ -147,6 +147,8 @@ func describe_rmb_variant(c: Dictionary) -> String:
 func tick(dt: float) -> void:
 	if KinMerge.transforming(h):
 		drop_holds()
+	if not h.wpn.get("ammo", true):
+		h.ammo = int(h.wpn["mag"])        # a weapon with no ammo (Data.weapon_stats): nothing ever runs dry
 	var rate := 1.0 + h.gear_stat("cdr")
 	for k in cd.keys():
 		cd[k] = maxf(0.0, float(cd[k]) - dt * rate)

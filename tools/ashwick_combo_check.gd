@@ -128,8 +128,6 @@ func _all() -> void:
 		K.cd["e"] = 0.0
 		P.dashes = P.max_dashes()
 		P.fire_cd = 0.0
-		P.ammo = int(P.wpn["mag"])
-		P.reload_t = 0.0
 		P.inp["fire"] = false
 		P.inp["move"] = Vector2.ZERO
 		ak.aim_at(P, T.pos)
@@ -149,6 +147,20 @@ func _all() -> void:
 			and Arch.name_of("ashwick") == "Mad Pyromancer",
 		"%s %s %s" % [P.wid, P.cls, Arch.name_of("ashwick")]
 	)
+	# --- no fuel (the source's flamethrower has none, and nothing reloads): held past the old 8s tank, it still roars
+	reset.call()
+	var roar := {"t": 0.0, "ticks": K.flame_ticks}
+	ak.step(m, 9.0, func():
+		P.inp["fire"] = true
+		ak.aim_at(P, home + Vector3(0, 0, -8.0))      # away from the dummy: its burn stays clean for the next part
+		roar["t"] = float(roar["t"]) + ak.DT
+		if float(roar["t"]) > 8.5 and float(roar["t"]) - ak.DT <= 8.5:
+			roar["ticks"] = K.flame_ticks)
+	P.inp["fire"] = false
+	ak.step(m, 0.6, func(): ak.aim_at(P, T.pos))      # turned back to the dummy before the next part
+	var ft0: int = int(roar["ticks"])
+	ok("lance: no fuel or reload, held 9s it still burns (no ammo count)",
+			K.flame_ticks > ft0 and P.reload_t == 0.0 and not P.wpn.get("ammo", true), "ticks +%d" % (K.flame_ticks - ft0))
 	# --- the hose: the pilot first, then a stream that reaches its full length past a close cursor
 	reset.call()
 	ak.step(m, 0.15, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos))
@@ -222,7 +234,7 @@ func _all() -> void:
 	ak.step(m, 2.6, aim_t)
 	ok(
 		"lance: kept on a burning foe it Flashes over (level 2)", K.burning(T) == 2 and K.upgrades >= 1,
-		"burning %d ammo %d upgrades %d char %.1f" % [K.burning(T), P.ammo, K.upgrades, K.char_of(T)]
+		"burning %d upgrades %d char %.1f" % [K.burning(T), K.upgrades, K.char_of(T)]
 	)
 	ak.step(m, 0.02)
 	ok(
@@ -557,13 +569,12 @@ func _all() -> void:
 	ok("merge hold: a merge is under way", ak.merge_now(P))
 	ak.step(m, 0.1)
 	var ft: int = K.flame_ticks
-	var ammo: int = P.ammo
 	ak.step(m, 1.0, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
 	ak.step(m, 0.3)
 	ok(
 		"merge hold: linwick's lance is dropped, no fire mid-merge",
-		not K.was_held and K.spool == 0.0 and K.hose.puffs.is_empty() and K.flame_ticks == ft and P.ammo >= ammo and P.mel_hold == 0.0,
+		not K.was_held and K.spool == 0.0 and K.hose.puffs.is_empty() and K.flame_ticks == ft and P.mel_hold == 0.0,
 		"held %s puffs %d ticks +%d" % [K.was_held, K.hose.puffs.size(), K.flame_ticks - ft]
 	)
 	KinMerge.end(P, "test")

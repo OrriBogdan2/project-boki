@@ -288,8 +288,6 @@ func ignite_pct(f: Ent) -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "flamethrower":
 		return false
-	if held and h.ammo <= 0 and h.reload_t <= 0.0:
-		h.start_reload()          # out of fuel: the tank refills
 	# a merge ends the roar: holding the key on must not relight it
 	var merging := KinMerge.transforming(h) or KinMerge.active(h)
 	if not held or not h.can_fire() or merging or (relight_t > 0.0 and not was_held):
@@ -309,18 +307,16 @@ func lmb_override(held: bool, dt: float) -> bool:
 		m.sfx("lw_pilot", h.pos, -3.0, 1.0)
 		fx.orb(nozzle(), FLAME_CYAN, PILOT_CORE, 0.8, float(ld["spool"]))      # the pilot flares cyan before the roar
 	was_held = true
-	h.idle_fire = 0.0              # firing: no auto-reload mid-roar
+	h.idle_fire = 0.0
 	spool += dt
 	h.mel_hold = minf(spool, float(ld["spool"]))
 	if spool < float(ld["spool"]):
 		return true                # the pilot's flicker: no fire yet
-	if h.ammo > 0:
-		hose.emit(nozzle(), h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), float(ld["range"]), dt)
+	hose.emit(nozzle(), h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), float(ld["range"]), dt)
 	flame_acc += dt
 	var tick := float(ld["tick"])
-	while flame_acc >= tick and h.ammo > 0:
+	while flame_acc >= tick:
 		flame_acc -= tick
-		h.ammo -= 1               # a tick of fuel (10 a second)
 		_flame_tick(tick)
 	return true
 

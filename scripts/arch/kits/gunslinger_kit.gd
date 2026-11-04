@@ -47,6 +47,7 @@ var last_shot := 0
 var aim_marks := 0             # tests: foes marked inside the held lane
 var echo_t := 0.0
 var refill_part := 0.0         # rounds the resting drum has part-refilled
+var dry := false               # the drum ran dry: no round until it is full again
 var round_at := -9.0           # match time of her last rifle round (the firing brackets)
 var grenade: Node3D = null     # the Burr Charge held low in her left hand while RMB is held
 var ult: GunslingerUlt         # Cinderfall, her ultimate on X
@@ -148,8 +149,9 @@ func fires_in_dash() -> bool:
 func move_k() -> float:
 	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
 
+## The rifle can't fire while a dry drum refills (_tick_mag).
 func fire_ok() -> bool:
-	return true
+	return not dry
 
 func add_fever(n := 1) -> void:
 	res = minf(res_max(), res + float(n))
@@ -217,12 +219,20 @@ func _tick_brackets() -> void:
 func _rifle_in_hand() -> bool:
 	return h.wid == String(d.get("signature", ""))
 
-## The drum refills fast whenever the trigger rests (the source's rifle: 30 rounds, "rapidly reloads when not
-## firing"), so a string after a pause starts on a full drum; run it dry and it is the normal reload.
+## The drum (the source's rifle: 30 rounds that "rapidly reload when not firing"; there is no reload key): once no
+## round has left for `refill_after` it refills at `refill_rate`, so a string after a pause starts full. Run dry,
+## the trigger is dead until the drum is full again (held or not), then the string picks up.
 func _tick_mag(dt: float) -> void:
-	var mag := int(h.wpn.get("mag", 0))
-	if not _rifle_in_hand() or h.reload_t > 0.0 or h.ammo >= mag or h.idle_fire < float(h.wpn["refill_after"]):
+	if not _rifle_in_hand():
+		dry = false
+		return
+	var mag := int(h.wpn["mag"])
+	if h.ammo <= 0:
+		dry = true
+	if h.ammo >= mag or h.idle_fire < float(h.wpn["refill_after"]):
 		refill_part = 0.0
+		if h.ammo >= mag:
+			dry = false
 		return
 	refill_part += float(h.wpn["refill_rate"]) * dt
 	var add := int(refill_part)

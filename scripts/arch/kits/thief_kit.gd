@@ -349,7 +349,6 @@ func _bolt() -> void:
 	var n0: int = m.shots.size()
 	h.shot_aim = AimMode.CURSOR
 	h.fire()
-	h.ammo = int(h.wpn.get("mag", 99))        # no magazine: a bolt every 0.45s for as long as you hold it
 	if m.shots.size() <= n0:
 		return
 	var sd: Dictionary = m.shots[-1]

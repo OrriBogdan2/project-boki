@@ -190,6 +190,14 @@ func _data() -> void:
 	ok("weapons: Sable bolts / Pin bow / Vireo coil / Bjorn hammer and aegis", Arch.signature("thief") == "arc_bolts" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "coilcaster" and Arch.signature("bulwark") == "tower_shield")
 	ok("weapons: another archetype's weapon is not yours", not Arch.weapon_ok("bulwark", "greatsword") and not Arch.weapon_ok("thief", "smg"))
 	ok("weapons: asking for another weapon gives the signature", Arch.weapon_for("gunslinger", "medium", "longsword") == "quill_rifle")
+	# no ammo but the source's one gun (Ghost's 30-round rifle): no magazine, no reload timer, no count on the HUD
+	var ammo_bad: Array = []
+	for a2 in ids:
+		var ws := Data.weapon_stats(Arch.signature(a2))
+		var wants: bool = a2 == "gunslinger"
+		if bool(ws.get("ammo", true)) != wants or ws.has("reload"):
+			ammo_bad.append("%s:%s" % [a2, Arch.signature(a2)])
+	ok("weapons: no hero weapon has ammo or a reload but Vex's drum (no reload anywhere)", ammo_bad.is_empty(), str(ammo_bad))
 	var sup_ok := true
 	for a in ["tender", "rimewright"]:
 		var sd2 := Arch.def(a)
