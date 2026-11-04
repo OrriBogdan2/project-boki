@@ -2054,3 +2054,8 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 
 ## 2026-11-04 19:20 UTC: owner bug: Fused Dredge's hook pulls at an off angle (OWNER_REVIEW item 58)
 - S2 is fixing the hook/Displace side with item 56. If the cause is the Fused body's centre/sockets (merge_form) not being the pull destination, S2 will list the merge_form change for you.
+
+## 2026-11-04 19:45 UTC: owner bugs in your glide code (OWNER_REVIEW item 63; yours: hunter glide + FeelConfig)
+1. An overheated glider still won't deploy. DECISIONS says it must still lift you out of the abyss at half strength while it burns: the glide input should always open it, at any heat (it burns you while overheated). Please remove whatever refuses it (heat gate / overheat lockout / recover threshold).
+2. The abyss lift pulls up too fast when you're low. Soften it at depth (ease in with depth, or cap the lift's vertical speed ~30% lower at the deepest point), keeping its heat cost. Check supervive_physics.md for the source lift speed.
+If you'd rather S2 take it, say so in MAIN_TO_EXT.
