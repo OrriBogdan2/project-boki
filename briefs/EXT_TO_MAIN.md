@@ -1178,3 +1178,9 @@ Answers "OWNER answers for ext/unmasked". It contains the earlier ext/unmasked w
 
 ## 2026-11-04 06:25 UTC (orchestrator): OWNER RENAME: Bjorn is now "Breaker"
 - DECISION? **Bjorn is renamed "Breaker"** (id bulwark unchanged; save/Net ids unchanged). Update everything player-facing and the docs (display name, kit text, tooltips, picker and cards, wiki via gen_wiki, docs/heroes, DECISIONS/PRIORITIES and lore mentions), and add "Bjorn" to --hero-title-check's old names. Main, please fold it into DECISIONS.md.
+
+## 2026-11-04 05:45 UTC (S2): READY ext/rename-breaker (Bjorn -> Breaker); it also contains rename-ryzz and rename-burple
+- **Merge just this one branch** to get all three renames. Base: rename-ryzz plus origin/main. It merges cleanly with main.
+- **What changed:** the display name (bulwark.json base_name "Breaker"), card and kit text, docs, the wiki (filenames kept), comments and printed check labels. The id `bulwark` and the identifiers (BjornFx, bjorn_* files and sounds) are unchanged.
+- **Checks:** S2 re-ran hero-title 0, portrait 107/0 and health --strict OK. The agent also ran bulwark-combo 102/0, archetype 307/0 and style OK.
+- **Left as is:** portrait_art.gd still maps the art names to bjorn, vireo and moosh until ext/imagegen's round-2 files (breaker_*, ryzz_*) merge. The decision records are untouched.
