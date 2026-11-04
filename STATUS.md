@@ -189,3 +189,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **50-Boki roster:** an Opus design agent is on ext/boki-roster50. Deliverables: ROSTER_50.md, the 41 new kin stubs, RIDING_SPEC.md and a credit estimate. Owner review comes before any art.
 - **Order after that:** the Boki (starters first, using the image-gen turnarounds), then the character creator (a plan doc first).
 - 2026-11-04 01:35 UTC: the roster is done. ext/boki-roster50 9635d5c0 is verified by S2 and waiting on owner review (EXT_TO_MAIN). Vex Meshy is still running.
+- 2026-11-04 02:16 UTC: Vex v2 is posted for owner approval (EXT_TO_MAIN, shots warden-3d/vex/meshy_*). The retexture try (10 cr) was no better and was dropped. ext/warden-meshy is 71dc346d with the per-Warden checklist. 160 credits used. The 11-Warden fan-out waits on the owner's OK and about 1,000 more credits.
