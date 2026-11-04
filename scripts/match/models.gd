@@ -2062,28 +2062,6 @@ static func air_ring() -> Node3D:
 	disc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return root
 
-## A thought bubble over a kin's head with what it wants in it.
-static func want_bubble() -> Node3D:
-	var root := Node3D.new()
-	var white := toon(Color("f6f2ea"), true)
-	part(root, sphere(0.22, 14), white, Vector3(0, 0, 0), Vector3(1.15, 0.95, 0.5))
-	part(root, sphere(0.06, 8), white, Vector3(-0.17, -0.24, 0))
-	part(root, sphere(0.035, 6), white, Vector3(-0.25, -0.34, 0))
-	var food := Node3D.new(); food.name = "food"; root.add_child(food)
-	part(food, sphere(0.085, 10), toon(Color("ff6a4a"), false, 0.2), Vector3(0, -0.01, -0.1))
-	part(food, sphere(0.04, 6), toon(Color("5aa84a"), false), Vector3(0.03, 0.08, -0.1), Vector3(1.4, 0.6, 0.6))
-	var energy := Label3D.new(); energy.name = "energy"; energy.text = "z z"; energy.font = UI.big; energy.font_size = 36
-	energy.pixel_size = 0.006; energy.modulate = Color("5a7ae0"); energy.outline_size = 0; energy.position = Vector3(0, 0, -0.12)
-	energy.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	root.add_child(energy)
-	var clean := Node3D.new(); clean.name = "clean"; root.add_child(clean)
-	part(clean, sphere(0.07, 10), toon(Color("5ab8f0"), false, 0.4), Vector3(0, -0.03, -0.1), Vector3(1, 1.25, 1))
-	part(clean, cyl(0.0, 0.05, 0.08, 8), toon(Color("5ab8f0"), false, 0.4), Vector3(0, 0.08, -0.1))
-	var joy := Node3D.new(); joy.name = "joy"; root.add_child(joy)
-	part(joy, sphere(0.08, 10), toon(Color("ff6a5a"), false, 0.2), Vector3(0, 0, -0.1))
-	part(joy, cyl(0.081, 0.081, 0.025, 12), toon(Color("f6f2ea"), false), Vector3(0, 0, -0.1), Vector3.ONE, Vector3(0, 0, 0.5))
-	return root
-
 ## The training yard: a straw dummy on a post, a mat and a couple of hoops.
 static func training_yard() -> Node3D:
 	var root := Node3D.new()
