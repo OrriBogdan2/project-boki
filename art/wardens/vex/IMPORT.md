@@ -1,4 +1,4 @@
-# Vex (r3d: the owner's pick r3b, polished; the RECIPE_95 reference): import note
+# Vex (r3e: the owner's pick r3b, polished; the RECIPE_95 reference): import note
 
 `vex.glb` is the owner-approved round-3 Vex redesign (docs/art/gen/wardens_r3/vex_* and VEX_KIT.md on
 ext/imagegen fb523188), built as the design variant `vex_r3b` and picked by the owner over the r3 model
@@ -20,7 +20,7 @@ ext/imagegen fb523188), built as the design variant `vex_r3b` and picked by the 
 - **Braids:** real geometry (tools/meshy/warden_parts.py): three woven strand tubes each, draped against the
   body, copper wire wraps, steel bolts, a tuft; on `spring_braid_L_*` / `spring_braid_R_*` bone chains under the
   head that WardenGlb.Springs swings. Their own atlas `vex_braid_atlas.jpg`.
-- **Cyber eye:** a brass rim and a glowing lens dome on her right eye plate (`glow` slot, `vex_lens_atlas.jpg`).
+- **Cyber eye:** her right eye plate and its glowing lens, drawn from the face sheet as a decal (`glow` slot for the lens; see r3e).
 - **Texture:** the bake, smoothed within its UV islands and recoloured by ramps of the art's colours per slot
   and hue (toxic-green hair and trim, flat blacks, pale skin, gunmetal, brass); the face keeps its own paint.
 - Imports: the three extracted atlases lossless (`compress/mode=0`); `vex.glb.import`:
@@ -48,3 +48,19 @@ r3d (the face pass and the 95% pass, INBOX_S2 11:25-13:15; credit-free; docs/art
   four thick ribbed hoses from the backpack to the gun; the chest's strap area one skin slot, its glancing faces
   cleaned.
 
+r3e (ORCH's reviews after r3d, 14:00 and 14:10; credit-free):
+- **Eye plate and lens:** the face sheet's angular brass plate as a decal mesh on the face (fit spec `plate`: its
+  outline through the inverse of the face warp, ray-cast onto the skin and metal, a bevelled edge, textured by the
+  sheet); the sheet's own lens on it, its concentric rings and highlights, on the glow slot (`glow_circles`, glow
+  1.1: at 2.4 it tonemapped to white). The modelled lens is gone (`lens.geometry` false: it never lined up with
+  the plate's ring); its anchor stays for the match-zoom halo.
+- **Brass:** aged bronze (2e2214..8a7048), less top light and rim on metal: it read highlighter-yellow.
+- **Gun:** gunmetal barrels (3a3c42..b4b7bd) with the bronze bands.
+- **Blacks:** neutral (1c1d22..64666f); at the match camera cloth, leather and metal take the hue out of the orange
+  Arena sun (`light_neutral_warm`), no fresnel lift and no green rim: black + green + bronze, not khaki.
+- **Braids:** solid plaits (no speckle: flat strand colours, little AO), copper ties, longer (1.2 / 1.08 m),
+  toxic green (126 deg ramp, measured in game).
+- **Tattoos:** the belly's circuit lines from the turnaround as thin flat lines (`project_after` line mode); the chest
+  skin cleaned (the art's crop-top trim had landed on it as green smears). The face's circuits are the face sheet's.
+- **Gorget:** its seams on the glow slot (`reslot_late`).
+- Bigger hose loops; the match frame shot on clear grass (`--no-tips`, `demo_at` -4.5,0).

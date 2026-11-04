@@ -89,7 +89,10 @@ Copy `vex_fit.json` -> `<name>_fit.json` and set, in this order of importance:
    `braids` (woven strands, copper wraps, bolts, a tuft; on `spring_` chains that swing; `length` to the art),
    `hoses` (ribbed tubes between body and weapon, weighted along their length, e.g. hips -> upper_arm.R ->
    forearm.R; 3-4 thick ones read, 2 thin ones don't), `lens` (a glowing dome on the glow slot; `iris` paints
-   blades, dots, pupil and screws; `cut_r` removes the scan's own).
+   blades, dots, pupil and screws; `cut_r` removes the scan's own), `plate` (a plate drawn on the face sheet as
+   a decal mesh: its outline in sheet px through the inverse of the face warp, ray-cast onto the face, lifted a few
+   mm with a bevel, textured by the sheet itself: Vex's angular eye plate where Meshy built a round one; `holes`
+   [col, row, r] where a part of its own must show through, e.g. the glowing lens: else the sheet's dark glass covers it).
 8. `touch_up_late` for creases the projections can't reach (`val_max`: dark texels only, `flat` to the mid tone).
 `recipe.py SPEC fit` writes `art/wardens/<name>/<name>.glb` and imports it (atlases lossless, LODs off).
 
@@ -104,13 +107,23 @@ Per model, in `content/rules/warden_look.json` under the art name, start from Ve
 - `painted`: `rim_far` 0.25-0.35 and `rim_far_color` the signature colour, saturated (Vex [0.35, 1.0, 0.45]): a
   rim at the match camera so the silhouette holds (0.9 turned every edge pale);
 - `skin`: shade 0.9, top_light 0.35, fres 0.45, far_lift 0.12 (no shadow_tint: the shared one is warm);
-- `metal`: top_light 0.3, fres 0.3, fres_tint 0.6, far_lift 0.1, sheen 0 (no silvered gunmetal);
+- `metal`: top_light 0.15, fres 0.15, fres_tint 0.6, far_lift 0, sheen 0, rim_far 0, light_neutral_warm 0.6 (no
+  silvered gunmetal, no highlighter brass: the warm light and top light push saturated gold to yellow; keep brass
+  ramps dull, sat <= 0.6, top value <= 0.65, Vex 2e2214..8a7048);
+- `cloth` and `leather` when they are black (r3e, ORCH 14:10 "muddy khaki at match zoom"): far_lift 0, fres 0.25,
+  rim_far 0, top_light 0.3, light_neutral_warm 0.75. The Arena sun is orange (ffb27a): with the fresnel lift and the
+  green signature rim, black trousers read #433d29..#5b5532 (khaki) at the match camera; with these, #171419..#3a3431
+  (black). `light_neutral_warm` (hero_toon, default 0) takes the hue out of warm lights on those slots only, so
+  skin and hair keep the warm sun;
 - `hair`: far_lift 0.5, fres 0.6, glow 0.12 (the signature colour pops at the match camera);
-- `glow`: glow 1.8; `halos` for each glowing eye or lens (anchor_<name>, a core whiter than the hair: Vex
-  [0.62, 1.0, 0.66], strength 2.2, px 2.4, near_d 7, far_d 14).
+- `glow`: glow 1.1 (r3e; 2.4 tonemaps a flat bright green to white at close range: the lens read as a white disc);
+  `halos` for each glowing eye or lens (anchor_<name>; Vex [0.24, 1.0, 0.42], strength 2.2, px 2.4, near_d 7,
+  far_d 14).
 - If the shared warmth overshoots a palette (ORCH 13:20: Pip coral, Tarek orange, Kael red-brown, Ostra flat
   purple), correct it here per slot (`shade`, `far_lift`, `top_light`; the ramps in the fit), never in PAINTED.
-Never edit the shared shader or PAINTED for one Hunter: that is what this file is for.
+Never change the shared shader's defaults or PAINTED for one Hunter: that is what this file is for. A new key a
+Hunter needs goes into hero_toon as a uniform whose default changes nothing (r3e: `light_neutral_warm`), documented in
+this file's "doc".
 
 ## 8. Stance (10 min)
 `content/rules/warden_stance.json` (ext/warden-stance, S2's branch): the Hunter's `carry` for its own weapon (pos,
@@ -119,7 +132,8 @@ as the art draws it, no clipping through the body, the free hand where the art p
 
 ## 9. Shots and self-score (15 min) (look)
 `recipe.py SPEC shots`: --warden-shots (turnaround close and match camera, front_34, back_34, closeup, closeup_front,
-moves, poses), the Arena match frame (`--arena=<arch> --record=2 --arena-demo=pose --demo-zoom=1.0 --arena-shot=`)
+moves, poses), the Arena match frame (`--arena=<arch> --record=2 --no-tips --arena-demo=pose --demo-zoom=1.0
+--demo-at=dx,dz --arena-shot=`: no tip banner, the hero moved onto clear ground, nothing over her; spec "demo_at")
 and its x4 crop, and the composites vs the art in `<raw>/shots/compare`. Score them with the rubric below, honestly,
 beside the art; fix the lowest line first and loop (`recipe.py SPEC loop`).
 
@@ -182,9 +196,13 @@ to ignore):
    (`skip_art_poly`, filled from the skin) or build it as geometry; never let it half-project.
 7. **A lens or eye that glows needs a halo to read at the match camera** (a 3 cm lens is a pixel at 23 m): an anchor
    on the lens (`anchor_<name>`, the fit exports it) and a `halos` entry in content/rules/warden_look.json (radius in
-   screen pixels, `near_d` / `far_d` so close-ups keep the lens itself; a core whiter than the hair so it doesn't
-   merge into it: Vex [0.62, 1.0, 0.66], strength 2.2, px 2.4). Don't make the lens bigger: compare its size to the
-   eye spacing in the face sheet first.
+   screen pixels, `near_d` / `far_d` so close-ups keep the lens itself; Vex [0.24, 1.0, 0.42], strength 2.2, px 2.4:
+   the signature's toxic green, the whiter r3d core read pale). Don't make the lens bigger: compare its size to the
+   eye spacing in the face sheet first. When the face sheet draws the plate and its lens (Vex), draw the lens from the
+   sheet too (r3e): the plate decal's `glow_circles` [[col, row, radius px]] put the drawn lens (its rings, its
+   highlights) on the glow slot, and `lens.geometry: false` drops the modelled lens but keeps its anchor for the
+   halo. A modelled lens under a drawn plate never lines up with the plate's ring (r3d/r3e: a black crescent beside
+   a white dome).
 8. **Check it like the owner does:** the front and 3/4 close-ups beside the portrait (r3d_closeup_vs_art,
    r3d_closeup_34_vs_art), the 3/4 for the jaw and the straps, the match frame for the halo.
 
@@ -200,7 +218,12 @@ to ignore):
 | Smears on straps at 3/4 | a front projection on glancing faces | `feather` from 0.55-0.6 |
 | Braid NaNs / a line to the floor | the drape stacked two points | fixed in warden_parts (resample, guarded frames) |
 | Torso stretched 30% | scaling by the hips' height on a long-legged body | `scale_joints`, the archetype's legs |
+| The lens reads amber, the brass highlighter-yellow | a big saturated brass rim and gold ramp under the warm light | a larger, brighter green dome, a dull rim, dull brass ramps, metal top_light/fres 0.15 |
 | A model the loader refuses | the rig changed under it (a body edit) | `recipe.py SPEC rig fit` again |
 | The hair the wrong green in game | the lit render shifts saturated hues | measure in game, correct the ramp (step 6.4) |
 | Hoses invisible from behind | hidden by an arm or a braid, or draped flat on black cloth | hang them in a loop off the body, between the braid and the arm, a grey a step above the cloth |
 | Muddy grey-green model at match zoom | a mip bias > ~1 on a baked atlas mixes its UV islands | keep `far_smooth_bias` at 1.0 (f4b59cb3) |
+| Khaki / brown blacks at match zoom | the orange Arena sun, the fresnel lift and the signature rim on black cloth | `cloth`/`leather`/`metal`: light_neutral_warm 0.6-0.75, fres 0.25, rim_far 0, far_lift 0 (step 7) |
+| The lens a white disc with a black crescent | glow 2.4 on flat green; the decal's hole and the modelled lens out of line | the sheet's lens on the plate (`glow_circles`), `lens.geometry` false, glow 1.1 |
+| Green smears on the chest | the art's top trim projected onto skin above the mesh's trim, re-added by a tattoo line pass | no line pass there: `clean_green` on that skin; tattoos only where no trim of their hue is near |
+| A caption or a plant over the hero in the match frame | the Arena's tips and its spawn props | `--no-tips`, spec `demo_at` onto clear grass (Vex -4.5,0) |

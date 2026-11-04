@@ -482,6 +482,8 @@ def project(ob, img, pj):
     if skips and not isinstance(skips[0], (list, tuple)):
         skips = [skips]
     mask = _art_mask(src, pj["mask"]) if "mask" in pj else None
+    line = pj.get("line")
+    lcol = np.array(K.hexcol(line["colour"]), np.float32) if line else None
     if pj.get("inpaint"):
         # the art's own hair across the face and the plate's bracket filled from the skin around them (skipping
         # them left patches of the old paint inside the new face); "outside": past the face's eroded outline too,
@@ -541,6 +543,21 @@ def project(ob, img, pj):
         row = np.clip(q[:, 1].astype(int), 0, ah - 1)
         tx = np.clip(pts[inside, 0].astype(int), 0, w - 1)
         ty = np.clip(pts[inside, 1].astype(int), 0, h - 1)
+        if line:
+            # (crisp lines: the art sampled bilinearly, its "greenness" thresholded, painted one flat colour; the
+            # skin around them is left as it is, so the lines sit on clean skin)
+            fx, fy = np.clip(q[:, 0] - 0.5, 0, aw - 1.001), np.clip(q[:, 1] - 0.5, 0, ah - 1.001)
+            x0_, y0_ = fx.astype(int), fy.astype(int)
+            ax_, ay_ = (fx - x0_)[:, None], (fy - y0_)[:, None]
+            b = lambda yy, xx: src[ah - 1 - yy, xx, :3]
+            smp = (b(y0_, x0_) * (1 - ax_) + b(y0_, x0_ + 1) * ax_) * (1 - ay_) + \
+                (b(y0_ + 1, x0_) * (1 - ax_) + b(y0_ + 1, x0_ + 1) * ax_) * ay_
+            score = smp[:, 1] - np.maximum(smp[:, 0], smp[:, 2])
+            on = score > float(line.get("threshold", 0.12))
+            if on.any():
+                dst[ty[on], tx[on], :3] = lcol
+                painted += 1
+            continue
         got = src[ah - 1 - row, col]
         art_px = np.abs(got[:, :3] - bg).sum(axis=1) > 0.12               # (the sheet's grey keeps Meshy's paint)
         if skips:
@@ -1793,6 +1810,140 @@ def _rel(arm, sp, keys):
     return out
 
 
+def face_plate(ob, ps, warp_spec):
+    """A plate drawn on a face sheet (Vex's angular brass eye plate; Meshy built a round one) as a decal mesh joined
+    into the body in the Meshy frame: the outline (sheet px) mapped onto the mesh through the inverse of the face's
+    warp, a grid inside it ray-cast onto the face, lifted `depth` m off it with a bevelled edge (`edge` px), and
+    UV-mapped onto the sheet itself, so its rivets, panels and shading are the sheet's. Material "<slot>-plate"."""
+    from mathutils.bvhtree import BVHTree
+    img_path = os.path.expanduser(ps["image"])
+    art = bpy.data.images.load(img_path)
+    aw, ah = art.size
+    inv = _tps_fit(warp_spec["art"], warp_spec["mesh"], float(warp_spec.get("smooth", 1e-3)))
+    poly = np.asarray(ps["outline"], float)
+    step = float(ps.get("step", 8.0))
+    c0, r0 = np.floor(poly.min(axis=0)).astype(int)
+    c1, r1 = np.ceil(poly.max(axis=0)).astype(int)
+    cols = np.arange(c0, c1 + step, step)
+    rows = np.arange(r0, r1 + step, step)
+    gc, gr = np.meshgrid(cols, rows)
+    inside = _pts_in_poly(np.stack([gc.ravel(), gr.ravel()], 1), poly).reshape(gc.shape)
+    for hc, hr, rad in ps.get("holes", []):
+        # (a hole where a part of its own shows through: the glowing lens dome)
+        inside &= np.hypot(gc - hc, gr - hr) > rad
+    # the distance of each grid point to the outline (px), for the bevel
+    pts = np.stack([gc.ravel(), gr.ravel()], 1)
+    dist = np.full(len(pts), 1e9)
+    for a, b in zip(poly, np.roll(poly, -1, axis=0)):
+        ab = b - a
+        t = np.clip(((pts - a) @ ab) / max(ab @ ab, 1e-9), 0.0, 1.0)
+        dist = np.minimum(dist, np.linalg.norm(pts - (a + np.outer(t, ab)), axis=1))
+    dist = dist.reshape(gc.shape)
+    xz = inv(pts).reshape(gc.shape + (2,))
+    # (onto the face and its metal only: the bangs hang in front of the plate)
+    names = [m.name for m in ob.data.materials]
+    keep = tuple(x + "-" for x in ps.get("onto", ["skin", "metal", "glow"]))
+    tree = BVHTree.FromPolygons([v.co.copy() for v in ob.data.vertices],
+                                [p.vertices[:] for p in ob.data.polygons if names[p.material_index].startswith(keep)])
+    depth, edge = float(ps.get("depth", 0.004)), float(ps.get("edge", 18.0))
+    vid = -np.ones(gc.shape, int)
+    verts, uvs = [], []
+    for i in range(gc.shape[0]):
+        for j in range(gc.shape[1]):
+            if not inside[i, j]:
+                continue
+            x, z = xz[i, j]
+            hit = tree.ray_cast(Vector((x, -1.0, z)), Vector((0.0, 1.0, 0.0)), 2.0)
+            if hit[0] is None:
+                continue
+            k = min(1.0, dist[i, j] / edge)
+            k = k * k * (3.0 - 2.0 * k)
+            n = Vector(hit[1]) if hit[1].y < 0 else -Vector(hit[1])
+            verts.append(hit[0] + n * (0.0006 + depth * k))
+            uvs.append((gc[i, j] / aw, 1.0 - gr[i, j] / ah))
+            vid[i, j] = len(verts) - 1
+    faces, glowing = [], []
+    gcirc = ps.get("glow_circles", [])
+    for i in range(gc.shape[0] - 1):
+        for j in range(gc.shape[1] - 1):
+            q = [vid[i, j], vid[i, j + 1], vid[i + 1, j + 1], vid[i + 1, j]]
+            if min(q) >= 0:
+                faces.append((q[0], q[3], q[2], q[1]))
+                # (a lens drawn on the sheet glows: its faces take the glow slot, same sheet texture)
+                fc, fr = gc[i, j] + step * 0.5, gr[i, j] + step * 0.5
+                glowing.append(any(math.hypot(fc - c, fr - r) < rad for c, r, rad in gcirc))
+    me = bpy.data.meshes.new("Plate")
+    me.from_pydata([tuple(v) for v in verts], [], faces)
+    me.update()
+    lay = me.uv_layers.new(name=ob.data.uv_layers.active.name)
+    for poly_ in me.polygons:
+        for li in poly_.loop_indices:
+            lay.data[li].uv = uvs[me.loops[li].vertex_index]
+    pl = bpy.data.objects.new("Plate", me)
+    bpy.context.scene.collection.objects.link(pl)
+    for poly_ in me.polygons:
+        poly_.use_smooth = True
+    art.pack()
+    for slot in [ps.get("slot", "metal")] + (["glow"] if any(glowing) else []):
+        m = bpy.data.materials.new("%s-plate" % slot)
+        m.use_nodes = True
+        bsdf = m.node_tree.nodes.get("Principled BSDF")
+        tex = m.node_tree.nodes.new("ShaderNodeTexImage")
+        tex.image = art
+        m.node_tree.links.new(tex.outputs[0], bsdf.inputs["Base Color"])
+        me.materials.append(m)
+    for poly_, g in zip(me.polygons, glowing):
+        poly_.material_index = 1 if g else 0
+    # (the body's own materials first: joined, the plate's faces keep theirs)
+    bpy.ops.object.select_all(action="DESELECT")
+    ob.select_set(True)
+    pl.select_set(True)
+    bpy.context.view_layer.objects.active = ob
+    bpy.ops.object.join()
+    log("face plate: %d faces from %d outline points, %d glowing" % (len(faces), len(poly), sum(glowing)))
+
+
+def _pts_in_poly(pts, poly):
+    """Which points (n x 2) are inside a polygon (even-odd rule)."""
+    x, y = pts[:, 0] + 1e-6, pts[:, 1] + 1e-6
+    inside = np.zeros(len(pts), bool)
+    for (x1, y1), (x2, y2) in zip(poly, np.roll(poly, -1, axis=0)):
+        if y1 == y2:
+            continue
+        cross = ((y1 > y) != (y2 > y)) & (x < x1 + (y - y1) * (x2 - x1) / (y2 - y1))
+        inside ^= cross
+    return inside
+
+
+def reslot(ob, img, rs):
+    """Faces of one slot moved to another by their painted colour inside a box (after the paint-overs): Vex's gorget
+    seams, painted green from the face sheet on the metal slot, onto the glow slot (the hair in front of them is the
+    hair slot, so it never glows). rs: from, to, box [x0, x1, y0, y1, z0, z1] (null open), hsv [h0, h1, s0, s1, v0,
+    v1] on the face's centre texel."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    uv = ob.data.uv_layers.active.data
+    names = [m.name for m in ob.data.materials]
+    to = next(i for i, n in enumerate(names) if n.startswith(rs["to"] + "-"))
+    inf = float("inf")
+    b = [(-inf if x is None else x) if i % 2 == 0 else (inf if x is None else x) for i, x in enumerate(rs["box"])]
+    q = rs["hsv"]
+    n = 0
+    for p in ob.data.polygons:
+        if not names[p.material_index].startswith(rs["from"] + "-"):
+            continue
+        c = p.center
+        if not (b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]):
+            continue
+        u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
+        v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
+        hh, ss, vv = _hsv(px[min(h - 1, int(v * h)), min(w - 1, int(u * w)), :3])
+        if q[0] <= hh <= q[1] and q[2] <= ss <= q[3] and q[4] <= vv <= q[5]:
+            p.material_index = to
+            n += 1
+    log("reslot %s -> %s: %d faces" % (rs["from"], rs["to"], n))
+
+
 def _rig_joint(rig, name):
     """A fit joint's place on the rig (fit spec joint names: hip.L, shoulder.L, neck, ...)."""
     bone = {"hip": "thigh", "shoulder": "upper_arm", "elbow": "forearm", "hand": "hand", "knee": "shin"}
@@ -1845,6 +1996,14 @@ def main():
     if spec.get("touch_up_late"):
         touch_up(ob, img, spec["touch_up_late"])
         pad(img, ids, int(spec.get("pad", 6)))
+    for pj in spec.get("project_after", []):
+        # (after the clean-up: crisp tattoo lines on the clean skin, `line` mode)
+        project(ob, img, pj)
+    for rs in spec.get("reslot_late", []):
+        reslot(ob, img, rs)
+    if spec.get("plate"):
+        face = next(pj for pj in spec["project_late"] if pj.get("name") == spec["plate"].get("warp_from", "face"))
+        face_plate(ob, spec["plate"], face["warp"])
     head = None
     if "head" in spec:
         decimate(ob, spec["max_tris"] - int(spec["head"]["tris"]))
@@ -1924,9 +2083,11 @@ def main():
         import warden_parts as WP
         lens_s = _rel(arm, spec.get("lens"), ("centre",))
         if lens_s:
-            if lens_s.get("cut_r"):
-                _cut_lens(ob, lens_s)
-            parts.append(WP.lens(arm, lens_s))
+            # ("geometry": false when the face sheet's own lens is the plate decal's: the anchor stays for the halo)
+            if lens_s.get("geometry", True):
+                if lens_s.get("cut_r"):
+                    _cut_lens(ob, lens_s)
+                parts.append(WP.lens(arm, lens_s))
             # (an anchor on the lens: the game hangs the lens's match-zoom halo on it, warden_look.json "halos")
             K.anchor(arm, "head", "anchor_" + lens_s.get("anchor", "lens"), tuple(lens_s["centre"]))
         if spec.get("braids"):
