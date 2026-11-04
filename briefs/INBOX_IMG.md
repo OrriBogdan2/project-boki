@@ -20,3 +20,23 @@
 
 ## 2026-11-04 02:10 UTC (orchestrator): 50 original Boki are coming
 - S2 is designing a roster of 50 Boki (docs/boki/ROSTER_50.md, owner review first). Once approved, make a clean turnaround per species, in batches of ~10, in the same style as the starters. They're fusions of real animals, plants and elements; never franchise creatures (no Pokémon/Digimon-like designs or prompts naming them). Reject any output that resembles an existing franchise creature.
+
+## 2026-11-04 02:30 UTC (orchestrator): OWNER REVIEW of the Warden art: REGENERATE before any 3D
+The owner wants these redone and approved before we commit to 3D models. Common thread: **too "AI"/generic, especially faces**. Push for distinctive faces with personality, and specific, characterful costumes (not stock fantasy), to STYLE.md. Each Warden: a new splash + portrait + turnaround (clean views for Meshy). Do them in this order:
+1. **Vex:** now a **cyborg**. A cyborg arm holds the gun, maybe even fused/connected to it (big change OK). Keep her general look, a bit **younger**.
+2. **Zedran:** the splash looks AI. Make the chain weapon much cooler, and the costume more unique (spartan arena king per DECISIONS).
+3. **Pin:** she's hard to see in the image (it was reviewed on mobile). Make her fill the frame, readable at small sizes; a stronger costume (assassin archer, cloak with some red).
+4. **Cinder:** looks generic. **No eyes on the goggles.** The reviewer read Cinder as a man: Cinder is a woman (DECISIONS: salamander-folk woman), so make that read clearly.
+5. **Sable:** the face is a bit too big; a cooler, more interesting top/outfit.
+6. **Vireo:** a very AI, generic face. Give her **cool, electrified hair** (not just very long), and more energy and personality.
+7. **Bjorn:** too generic. Make him **obviously undead, rotting in places**, with more detail on his vest; bigger and more intimidating. **He's the biggest character.**
+8. **Dredge:** keep the broken-robot concept, but a more interesting shape, **thinner through the middle**.
+9. **Moosh Moosh is renamed "Burple"**: too AI/generic; redo.
+10. **Claire:** far too AI/generic, nothing interesting about her; mostly the face (same as Vireo).
+11. **Tarek:** add **jewellery in his hair**.
+12. **Ostra:** fine; give it more oomph if you can.
+- Post each redo to ext/imagegen with a before/after side-by-side for the owner (he reviews on mobile: big, readable images), and note it in IMG_STATUS.md. The video is tomorrow: Vex, Zedran, Pin and Cinder first.
+
+## 2026-11-04 02:30 UTC (orchestrator): the Boki roster as PICTURES, not text
+- Owner: "push them first, reading won't help me understand it." For the 50-Boki roster (ext/boki-roster50, docs/boki/ROSTER_50.md), make a **quick concept thumbnail per species** (one image each, or contact sheets of ~10 per image) so the owner can approve visually. Label each with its name and size class.
+- Large Boki aren't all mounts: **some walk beside you, some are mounts, some fly**, and other ideas are welcome. Show the size and role in the thumbnail label.

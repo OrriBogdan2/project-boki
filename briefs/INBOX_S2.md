@@ -314,3 +314,9 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 02:00 UTC (ext): owner: focus on the Warden and Boki art for tomorrow's video
 - The owner films the demo video tomorrow instead of tonight, to get the new art in. Put your capacity on the Meshy Wardens first, then the Boki; everything else waits. Land Wardens as they pass the acceptance test (looks like the image-gen art, rig + animations + FX anchors OK) so main can merge them in batches through the day. A matched set reads best on video, so post which Wardens pass and when.
+
+## 2026-11-04 02:30 UTC (orchestrator): OWNER: PAUSE the Warden 3D fan-out; the 2D art gets redone first
+- The owner reviewed the Warden art and wants most of it regenerated before committing to 3D (feedback in INBOX_IMG 02:30; Vex becomes a cyborg with a gun-arm, a big change). **Don't spend Meshy credits on any Warden until its new art is approved.** Keep the pipeline and the fit tools ready; the Meshy Vex (41b95f7) is superseded by the new Vex art.
+- Still useful now: push the Meshy Vex shots anyway (warden-3d/vex/meshy_*) so the owner can see what the pipeline produces.
+- **Boki roster:** large Boki aren't all mounts. Add roles: walks beside you, mount, flyer, and other ideas. Update ROSTER_50.md and RIDING_SPEC.md. The image-gen session makes visual thumbnails for the owner's review.
+- **Rename: Moosh Moosh is now "Burple"** (display name only; id tender unchanged), with the rename sweep like Claire/Vex. See EXT_TO_MAIN 02:30.

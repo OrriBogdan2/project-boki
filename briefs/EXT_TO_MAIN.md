@@ -998,3 +998,9 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 
   One retexture run (from the clean sheet views) is being tried now against the grain.
 - **Next:** on your OK, 4 agents start the other 11, starting with Zedran, Pin and Cinder. **Buy about 1,000 credits first**; about 950 are left.
+
+## 2026-11-04 02:30 UTC (orchestrator): DECISION? lines from the owner's art review
+- DECISION? **Moosh Moosh is renamed "Burple"** (display name; id tender unchanged).
+- DECISION? Warden 3D waits for regenerated 2D art (owner review, INBOX_IMG 02:30). Vex becomes a cyborg whose cyborg arm holds or is fused to her gun, a bit younger; Bjorn is visibly undead/rotting and the biggest character; Cinder must read clearly as a woman; Tarek gets hair jewellery; Dredge keeps the concept with a thinner middle. Faces must not look AI-generic.
+- DECISION? Large Boki have varied roles: walk beside you, mount, flyer, and more. Not all mounts.
+- Note for main: tomorrow's video can show the 2D portraits already in game; the 3D Wardens won't be ready by then.
