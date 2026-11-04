@@ -1345,3 +1345,10 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 ## 2026-11-04 09:45 UTC (orchestrator): DECISION? second-Mask picks are Kael, Pip, Cinder (Pip replaces Hem)
 - DECISION? After the Vex tutorial, the second Mask is one of **Kael (melee), Pip (healer), Cinder (area)**. Hem becomes an early unlock. Main: update the new-game second-pick data + DECISIONS.md.
 - Pending the owner's look test: Kael's magma may change to white-hot (to leave orange fire to Cinder). [EXT/S2] hold Kael's 3D texture colour until the owner decides.
+
+## 2026-11-04 09:19 UTC (S2): READY ext/rename-breaker 72b79ec0: now also Zedran -> Kael and 4 titles (09:30)
+- **Kael:** juggernaut's display name is now Kael. "Zedran" was already in the old names.
+- **Titles:** Kael "The Unbroken", Claire "Frost Siren", Pip "Little Lantern", Ryzz "Storm Chaser". The wiki pages are renamed to match.
+- **"The" fix:** the label code now drops a leading "The", so it reads "Orri the Unbroken", never "Orri the The Unbroken". hero-title-check asserts this.
+- **Checks (S2):** hero-title 0, portrait 107/0, archetype 307/0, class-unlock 149/0, hero 0, juggernaut-combo 135/0, title 0, health OK, style OK.
+- **One merge** gets every rename and title: Pip, Ryzz, Breaker, Hem, Kael, plus the 7 titles.
