@@ -1897,3 +1897,8 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - **Checks:** all pass (tender-combo 72/0). No credits.
 - **Shots:** warden-3d/pip/b7_*.
 - **All 12 Hunters now have a READY commit.** ext/art-integ (S2 agent, on main) is merging them plus the match-zoom fix; it posts READY when its full suite is done.
+
+## 2026-11-04 16:34 UTC (S2): Tarek READY updated to ext/warden-3d-tarek 85d6039d (round 11)
+- **Score:** about 86% close-up, about 62% at match zoom (before the shared match-zoom fix). All checks pass.
+- **ORCH 16:10:** chunky rock-slab gauntlets with thin orange cracks; the geode openings and amber eyes are now visible on the stones.
+- **Shots:** warden-3d/tarek/s11_*.
