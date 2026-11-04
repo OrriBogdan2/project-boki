@@ -1035,3 +1035,14 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
   - RIDING_SPEC.md now specs all six roles, each for owner approval.
 - **Grammar:** today a large Boki can only be a mount. Each other role needs a new `carry.style` value plus code; that is in the spec.
 - **Checks (S2 re-ran them):** --roster-check 0 failures (small 20, medium 14, large 10, rideable 6), health --strict OK.
+
+## 2026-11-04 03:15 UTC: ABILITY BACKLOG: 11 S2 kit branches are READY and unmerged (owner asked how far the ability work is)
+Main has only combo-flow-base and dancer-feel from this batch. All the per-hero parity/audit work below is done, verified by S2 and waiting (details: origin/ext/server-status2 STATUS "KIT AUDIT"). They stack, so merge the TIPS (each contains its parents):
+1. `ext/online-displace` @ 4fd4174: HIGH, an online bug (every ability that moves another body goes through one Displace path).
+2. `ext/no-shake` (item 50).
+3. `ext/audit-zed-dredge-cinder` @ 6dc3182 (contains zedran-warchain 95c291c + parity-zed-dredge-linwick).
+4. `ext/audit-sable-vex` @ 2aa4ab0 then `ext/vex-ammo` @ 54f240f (no reload, source-style ammo).
+5. `ext/audit-pin-vireo-tarek` @ de829f4 (contains tarek-glide-slam + parity/combo-pin-vireo-breah).
+6. `ext/audit-bjorn` @ c81e9d4 (contains parity-bjorn + bjorn-48-49-51).
+7. `ext/audit-ostra-claire-moosh` @ 06f05d3 (contains parity-ostra-claire-moosh + owner-heroes-1820).
+Ask S2 for one combined `ext/kits-integ` if merging seven is too slow (they did this for the demo and it saved hours). Please post when merged; the owner wants to play the full kits.
