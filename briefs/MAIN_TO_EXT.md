@@ -1144,3 +1144,24 @@ Owner: "we can ship now but need to actually improve these drastically". Also: n
    - **Rubric:** add a face close-up score (eyes, mouth, likeness, appeal) and a dark-scene readability score, judged against the art. Report it per Hunter. Don't call a Hunter done until its face scores well up close.
    - **Shots:** render on a real GPU or at a higher res if you can; the headless renders undersell the work.
 3. Post per-Hunter READY as before (before/after face close-ups side by side). Main merges each one as it lands.
+
+## 2026-11-04 17:05 UTC: OWNER to S2: Hunter 3D ACCURACY PIPELINE ("I don't care how many Meshy credits or Blender is needed, do it right")
+Replaces the 16:40 quality-pass list as the method. Main's research summary (sources: Scenario's generator comparison, Meshy's retopo guide, StableProjectorz/StableGen):
+1. **Inputs first (the biggest lever).** For each Hunter, make a clean model sheet from the approved art with an image model: front, side, back and 3/4, in an A-pose, flat even light, plain background, same proportions in every view. Then a separate head sheet (front, 3/4, side) at high res. Bad inputs = mushy faces.
+2. **Generator bake-off per Hunter**, multi-view, at the highest tier: Meshy 7.1 Multi-Image (4 views, up to 8K PBR), Rodin Gen-2.5 (up to 5 images, quad), Hunyuan3D 3.1 Multiview (up to 8 views), TRELLIS 2 (strongest on stylized characters, 4K), Tripo 3.1 Multi View. Keep the best per Hunter by the rubric. Non-Meshy tools need accounts/API keys: **agents don't sign up; list which keys you need and the owner provides them.**
+3. **Heads separately:** generate the head from the head sheet (Sparc3D 2.1 Portrait is built for faces, or head-only multi-view in the bake-off winner) and join it to the body in Blender.
+4. **Blender pass:**
+   - Sculpt the proportions to match the art (head size, shoulders, limb length).
+   - Separate hair/weapon/cape meshes.
+   - Quad retopo with manual edge loops around the eyes and mouth, then rig to our skeleton.
+5. **Texture after retopo**, then **project the actual concept art onto the model** (StableProjectorz, or StableGen in Blender via ComfyUI) from the front and side, so colours, markings and faces match the art. Hand-paint the eyes, brows and lips at 2K–4K for the head.
+6. **Engine look:**
+   - A shared Hunter toon/stylized shader with a face key-fill light, a rim light and an optional outline. Dark skin and outfits must read in every biome light.
+   - 2K–4K hero textures; check the in-match LOD isn't too blurry.
+7. **Rubric v2**, each part scored against the art:
+   - full-body likeness;
+   - a face close-up (eyes, mouth, likeness, appeal);
+   - match-zoom silhouette;
+   - dark-scene readability.
+   Render on a GPU at 2x. The owner signs off per Hunter from side-by-side sheets.
+Order: Kael first as the pilot (post its before/after and per-tool results), then the other 11. Report credits and keys used.
