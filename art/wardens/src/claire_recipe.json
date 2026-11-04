@@ -31,7 +31,6 @@
  },
  "bake": "art/wardens/src/claire_bake.json",
  "fit": "art/wardens/src/claire_fit.json",
- "match_crop": "200:170:540:270",
  "combo_check": "--rimewright-combo-check",
  "demo_at": "-4.5,0",
  "edits": {
