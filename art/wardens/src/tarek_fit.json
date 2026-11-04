@@ -1,0 +1,334 @@
+{
+ "body_glb": "~/meshy/tarek/bake/low.glb",
+ "rig": "art/wardens/src/tarek_rig.json",
+ "out": "art/wardens/tarek/tarek.glb",
+ "blend": "~/meshy/tarek/fit.blend",
+ "turn": 180,
+ "max_tris": 36000,
+ "floater_verts": 8,
+ "snap_r": 0.045,
+ "scale_joints": [
+  "hip.L",
+  "shoulder.L"
+ ],
+ "joints": {
+  "crown": [
+   -0.05,
+   0.08,
+   0.9
+  ],
+  "neck": [
+   -0.04,
+   0.12,
+   0.5
+  ],
+  "shoulder.L": [
+   0.18,
+   0.15,
+   0.4
+  ],
+  "shoulder.R": [
+   -0.24,
+   0.15,
+   0.4
+  ],
+  "elbow.L": [
+   0.32,
+   0.08,
+   0.22
+  ],
+  "hand.L": [
+   0.54,
+   -0.2,
+   0.05
+  ],
+  "fingers.L": [
+   0.57,
+   -0.3,
+   -0.03
+  ],
+  "elbow.R": [
+   -0.4,
+   0.08,
+   0.22
+  ],
+  "hand.R": [
+   -0.55,
+   -0.2,
+   0.04
+  ],
+  "fingers.R": [
+   -0.57,
+   -0.3,
+   -0.04
+  ],
+  "hip.L": [
+   0.07,
+   0.14,
+   0.06
+  ],
+  "hip.R": [
+   -0.12,
+   0.14,
+   0.06
+  ],
+  "knee.L": [
+   0.12,
+   0.12,
+   -0.38
+  ],
+  "knee.R": [
+   -0.18,
+   0.12,
+   -0.38
+  ],
+  "ankle.L": [
+   0.18,
+   0.14,
+   -0.78
+  ],
+  "ankle.R": [
+   -0.2,
+   0.14,
+   -0.78
+  ]
+ },
+ "chunk": {
+  "head": 1.0,
+  "hand": 1.2,
+  "girth": 1.06
+ },
+ "glow_min": [
+  2.0,
+  2.0,
+  -1.0
+ ],
+ "lift": [
+  0.88,
+  1.05,
+  1.1
+ ],
+ "normal_smooth": 8,
+ "pad": 6,
+ "cap_holes": true,
+ "ink_room": 0.02,
+ "slot_rules": [
+  {
+   "slot": "hair",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    0.42,
+    null
+   ],
+   "hsv": [
+    null,
+    null,
+    null,
+    null,
+    0.0,
+    0.2
+   ]
+  },
+  {
+   "slot": "metal",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    -0.3,
+    0.2
+   ],
+   "hsv": [
+    null,
+    null,
+    0.0,
+    0.14,
+    0.42,
+    1.0
+   ]
+  },
+  {
+   "slot": "leather",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    -0.3,
+    0.2
+   ],
+   "hsv": [
+    null,
+    null,
+    null,
+    null,
+    0.0,
+    0.24
+   ]
+  },
+  {
+   "slot": "cloth",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    0.05,
+    0.5
+   ],
+   "hsv": [
+    0.45,
+    0.8,
+    0.05,
+    0.4,
+    0.2,
+    0.75
+   ]
+  },
+  {
+   "slot": "leather",
+   "box": [
+    0.27,
+    null,
+    null,
+    null,
+    -0.2,
+    0.36
+   ],
+   "absx": true
+  },
+  {
+   "slot": "skin",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    0.0,
+    null
+   ],
+   "hsv": [
+    0.92,
+    0.12,
+    0.28,
+    0.92,
+    0.1,
+    0.85
+   ]
+  },
+  {
+   "slot": "skin",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    -0.72
+   ],
+   "hsv": [
+    0.92,
+    0.12,
+    0.28,
+    0.92,
+    0.1,
+    0.85
+   ]
+  },
+  {
+   "slot": "cloth"
+  }
+ ],
+ "slot_vote": 8,
+ "fit_weights": true,
+ "snap_y": false,
+ "cap_flat": true,
+ "atlas_px": 2048,
+ "orbits": [
+  {
+   "name": "orbit_stones",
+   "bone": "head",
+   "centre": [
+    0.0,
+    0.0,
+    1.54
+   ],
+   "radius": 0.46,
+   "items": [
+    {
+     "angle": 300,
+     "height": 0.02,
+     "size": 0.095
+    },
+    {
+     "angle": 60,
+     "height": 0.12,
+     "size": 0.1
+    },
+    {
+     "angle": 180,
+     "height": -0.06,
+     "size": 0.09
+    }
+   ],
+   "rock": "8f7f6a",
+   "rim": "b5a0a6",
+   "iris": "ff9a2a",
+   "pupil": "2a0d04",
+   "slot": "leather"
+  }
+ ],
+ "split": [
+  {
+   "name": "bracers",
+   "slot": "leather",
+   "boxes": [
+    [
+     0.16,
+     0.55,
+     -0.25,
+     0.25,
+     0.69,
+     1.02
+    ],
+    [
+     -0.55,
+     -0.16,
+     -0.25,
+     0.25,
+     0.69,
+     1.02
+    ]
+   ],
+   "emit": {
+    "mode": "dark",
+    "k": 0.74,
+    "colour": "ff8a1c"
+   }
+  }
+ ],
+ "studs": [
+  {
+   "name": "crystals",
+   "on": "hair",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    1.2,
+    null
+   ],
+   "count": 14,
+   "size": 0.026,
+   "spacing": 0.07,
+   "seed": 4,
+   "colour": "ffa830"
+  }
+ ],
+ "weapon_empty": true
+}
