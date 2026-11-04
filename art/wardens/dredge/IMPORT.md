@@ -102,4 +102,9 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   winch at 0.25 on their own, the rest taking what is left; `drop_small` removes the collapse's leftover shards.
   Smaller shoulder pods (x0.86, set in), warmer gold brass, a bright gold far rim (rim_far 0.35), a smaller, darker
   tar pool. Review frames: ext/warden-matchzoom-v2's `pose_clear` (no aim line, props or overlays).
+- **r3k (credit-free):** the cargo hook x1.9 about its top (`scale_parts`), so it reads at the match camera; deeper,
+  larger dents breaking the hull's outline (18, 5-11% of the radius); jointed legs (knee balls on shin.L/R, the
+  stance's knee 0.22 and gait knee 0.26); smoke wisps off the shoulders (DredgeKit: a grey puff off a pauldron bone
+  every ~0.55 s, the 3D model only); a brighter hull (gain 1.32) and brass, lighter iron limbs (7a746e) against the
+  grass, and a stronger gold far rim (0.4).
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.

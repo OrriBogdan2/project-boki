@@ -14,6 +14,7 @@ The spec (art/wardens/src/<name>_fit.json) names the source .glb, the rig JSON (
 - `weapon`: a source group cut off into the `weapon` mesh in the Gun node's space (its narrow end on the right
   hand's grip, its mouth forward; `weapon_muzzle` marks the mouth; `solidify` m gives a single-sided shell an inside);
 - `materials`: source material -> [glTF name "<slot>-<what>", colour]; `max_tris`; `anchors`;
+- `scale_parts` {label: k}: a part scaled about its top after the re-pose (the cargo hook);
 - `protect` {parts, ratio}: thin parts decimated on their own, lightly (rods and fingers vanish at the body's ratio);
 - `orb` (a glowing sphere on a bone, `replace`-ing a group), `drips` (tar drips hanging from faces that look
   down), `paint` (the ageing atlas: per-material recipes, baked in Cycles): tools/blender/warden_paint.py;
@@ -255,6 +256,18 @@ def main():
         if m is not None:
             v.co = m @ v.co
     me.update()
+    # parts scaled about their top (a part that hangs: the cargo hook), after the re-pose
+    for lbl, k in spec.get("scale_parts", {}).items():
+        sel = np.nonzero(part == lbl)[0]
+        if len(sel) == 0:
+            continue
+        pts = np.array([me.vertices[int(i)].co[:] for i in sel])
+        top = Vector((float(pts[:, 0].mean()), float(pts[:, 1].mean()), float(pts[:, 2].max())))
+        for i in sel:
+            v = me.vertices[int(i)]
+            v.co = top + (v.co - top) * float(k)
+        me.update()
+        log("scaled %s x%.2f about its top" % (lbl, float(k)))
     # the variant bones ride their part's move
     heads = {}
     for name, (src, _parent) in spec.get("extra", {}).items():

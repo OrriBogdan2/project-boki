@@ -5,7 +5,7 @@
  "blend": "~/meshy/dredge_friend/fit.blend",
  "scale": 0.665,
  "turn": 180,
- "max_tris": 5000,
+ "max_tris": 4500,
  "dissolve_deg": 1.0,
  "sharp_deg": 50,
  "groups": {
@@ -416,7 +416,7 @@
   "samples": 24,
   "looks": {
    "metal-brass": {
-    "colour": "6c5530",
+    "colour": "7a6238",
     "patina": "4f6a52",
     "patina_at": 0.6,
     "patina_k": 0.6,
@@ -432,14 +432,14 @@
     "highlight_k": 0.45
    },
    "metal-iron": {
-    "colour": "4c4844",
+    "colour": "7a746e",
     "rust": "6e4428",
     "rust_at": 0.56,
     "rust_k": 0.75,
     "dents": 1.2,
     "dent_scale": 9.0,
     "scratch": "8c8a86",
-    "edge": "8a8580",
+    "edge": "b0aaa2",
     "grime": "1a1614",
     "grime_k": 0.8
    },
@@ -495,7 +495,7 @@
     "grime": "1a160c",
     "grime_k": 0.7,
     "ao_dist": 0.05,
-    "gain": 1.18,
+    "gain": 1.32,
     "mask": {
      "at": [
       0.0,
@@ -506,7 +506,7 @@
     },
     "highlight": "e8c070",
     "highlight_at": 0.62,
-    "highlight_k": 0.35,
+    "highlight_k": 0.42,
     "tint": [
      0.98,
      0.86,
@@ -635,10 +635,10 @@
   ],
   "r": 0.3,
   "res": [
-   20,
-   30
+   22,
+   32
   ],
-  "dents": 12,
+  "dents": 18,
   "bands": [
    {
     "lat": [
@@ -819,8 +819,8 @@
    }
   ],
   "dent_depth": [
-   0.03,
-   0.06
+   0.05,
+   0.11
   ],
   "gash_material": "glow-gash"
  },
@@ -1214,6 +1214,26 @@
     "r": 0.075,
     "bone": "upper_arm.L",
     "material": "metal-iron"
+   },
+   {
+    "at": [
+     0.1744,
+     0.0,
+     0.4171
+    ],
+    "r": 0.05,
+    "bone": "shin.R",
+    "material": "metal-iron"
+   },
+   {
+    "at": [
+     -0.1744,
+     0.0,
+     0.4171
+    ],
+    "r": 0.05,
+    "bone": "shin.L",
+    "material": "metal-iron"
    }
   ]
  },
@@ -1258,5 +1278,8 @@
  "drop_small": {
   "size": 0.03,
   "tris": 10
+ },
+ "scale_parts": {
+  "hook": 1.9
  }
 }

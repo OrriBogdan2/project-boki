@@ -31,6 +31,9 @@ const ANCHOR_COL := LDFx.ANCHOR_RIM    # seafoam: the anchor's rim, its ring and
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the rope snaps taut on each
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
+const SMOKE_T := 0.55                  # s between the 3D model's shoulder smoke wisps
+const SMOKE_COL := Color(0.62, 0.6, 0.6, 0.5)
+const SMOKE_CORE := Color(0.42, 0.4, 0.41, 0.6)
 const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 # m: a rise past which a reeled body is lifted onto the ground ahead instead of walking up
@@ -67,6 +70,7 @@ var stacks_lost := 0
 var volleys := 0
 var last_quake_k := 0.0         # (tests) the height bonus of the last air smash
 var winch_a := 0.0              # the 3D model's winch drum turn (rad)
+var smoke_t := 0.0              # the next shoulder smoke wisp (3D model)
 var pool_k := 0.0               # the 3D model's tar pool at his feet (0 gone, 1 spread)
 var claw_k := 0.0               # the 3D model's grab-claw: 1 spread for the throw, -1 clenched on the rope, 0 rest
 var _down_seen := false
@@ -286,6 +290,15 @@ func _tick_model(dt: float) -> void:
 	claw_k = move_toward(claw_k, want, dt * 9.0)
 	WardenGlb.pose_extra(h.model, "winch", Quaternion(Vector3.RIGHT, wrapf(winch_a, -PI, PI)))
 	WardenGlb.pose_extra(h.model, "rope1", Quaternion.IDENTITY, Vector3.ONE * (0.001 if out else 1.0))
+	# smoke wisps off the broken shoulders (the art's), a soft grey puff each SMOKE_T from one side or the other
+	smoke_t -= dt
+	if smoke_t <= 0.0 and tells_visible():
+		smoke_t = SMOKE_T * randf_range(0.7, 1.3)
+		var bi := WardenSkeleton.find(sk, "pauldron.L" if randf() < 0.5 else "pauldron.R")
+		if bi >= 0:
+			var at := sk.global_transform * sk.get_bone_global_pose(bi).origin
+			var off := Vector3(randf_range(-0.08, 0.08), randf_range(0.25, 0.4), randf_range(-0.08, 0.08))
+			fx.puff(at + off, LDFx.M_ORB, SMOKE_COL, SMOKE_CORE, randf_range(0.35, 0.5), randf_range(0.9, 1.3))
 	# the tar pool spreads under him while he stands, and is gone the moment he moves or leaves the ground
 	var still := h.grounded and Vector2(h.vel.x, h.vel.z).length() < 0.6
 	if still:

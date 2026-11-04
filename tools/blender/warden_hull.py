@@ -381,6 +381,24 @@ def extras(ob, spec, seed=1):
             for v in bm.verts:
                 v.co = p0 + rot @ v.co
             WP._append(ob, bm, row.get("bone", "hips"), mat)
+    jh = spec.get("j_hook")
+    if jh:
+        # a big cargo hook (the art's): a J of tube from the bottom of the rope's own hook piece, on its bone
+        gi = ob.vertex_groups[jh["bone"]].index
+        pts = np.array([v.co[:] for v in ob.data.vertices if any(g.group == gi for g in v.groups)])
+        if len(pts):
+            b = Vector(pts[np.argmin(pts[:, 2])])
+            r = float(jh["r"])
+            c = b + Vector((0, 0, -r * 0.2))
+            arc = [b + Vector((0, 0, -r * 0.2 - r * 1.2 * k / 3)) for k in range(4)]
+            bot = arc[-1] + Vector((0, 0, -r))
+            for k in range(1, 10):
+                a = math.pi * k / 9
+                arc.append(bot + Vector((math.sin(a) * r * 0 + 0.0, -math.sin(a) * r, math.cos(a) * -r + r * 0.0)))
+            arc = [p for p in arc]
+            mat = WP._mat_index(ob, jh.get("material", "metal-iron"), "6e6862")
+            WP._append(ob, _tube(arc, float(jh["thick"]), 8, thin=False), jh["bone"], mat)
+            del c
     hm = spec.get("helm")
     if hm:
         _helm(ob, hm, hc, hr)
