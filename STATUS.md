@@ -199,3 +199,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
   - Credits used: 160 of 1,100.
 - **Roster:** the agent is adding large-Boki roles (walks beside you, mount, flyer, others) to ROSTER_50.md and RIDING_SPEC.md.
 - **Burple:** a Sonnet agent is renaming the display name (Moosh Moosh -> Burple, id tender) on ext/rename-burple.
+- 2026-11-04 02:38 UTC: READY ext/rename-burple 6d9fd821 (Burple). It supersedes portrait-check-fix.
