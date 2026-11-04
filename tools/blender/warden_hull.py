@@ -360,6 +360,21 @@ def extras(ob, spec, seed=1):
         pts.append(ctrl[-1])
         bm = _tube(pts, pp["r"], 8, thin=False)
         WP._append(ob, bm, pp["bone"], mat)
+    for row in spec.get("rivet_rows", []):          # rivet heads along the plate bands
+        mat = WP._mat_index(ob, row.get("material", "metal-iron"), "4c4844")
+        lo0, lo1 = row.get("lon", [0, 360])
+        for k in range(int(row["n"])):
+            lo = lo0 + (lo1 - lo0) * (k + 0.5) / row["n"]
+            bm = bmesh.new()
+            bmesh.ops.create_icosphere(bm, subdivisions=1, radius=row["r"])
+            for v in bm.verts:
+                v.co.z *= 0.6
+            p0 = on(row["lat"], lo, row["off"] + 0.01)
+            n0 = _dir(row["lat"], lo)
+            rot = Vector((0, 0, 1)).rotation_difference(n0).to_matrix()
+            for v in bm.verts:
+                v.co = p0 + rot @ v.co
+            WP._append(ob, bm, row.get("bone", "hips"), mat)
     hm = spec.get("helm")
     if hm:
         _helm(ob, hm, hc, hr)
@@ -424,7 +439,9 @@ def _helm(ob, hm, hc, hr):
         r = pt["r"]
         WP._append(ob, _lathe([(r * 1.05, 0.0), (r * 1.1, 0.03), (r * 1.25, 0.036), (r * 1.15, 0.046), (r * 0.85, 0.044)],
                               base, d, 16), hm["bone"], brass)
-        WP._append(ob, _lathe([(r * 0.85, 0.044), (0.002, 0.036)], base, d, 12), hm["bone"], dark)
+        pdk = hm.get("port_dark")
+        pd = WP._mat_index(ob, pdk["material"], pdk["colour"]) if pdk else dark
+        WP._append(ob, _lathe([(r * 0.85, 0.044), (0.002, 0.036)], base, d, 12), hm["bone"], pd)
         # the grille: three bars across it
         u = d.cross(Vector((0, 0, 1))).normalized()
         w = d.cross(u)

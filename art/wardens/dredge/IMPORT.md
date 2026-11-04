@@ -16,7 +16,7 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   colours (every base colour came out white or grey): the colours here are picked from the art.
 - **Scale and body:** x0.665 into rig space, turned to face +Y. The archetype body (`legs` 1.738, `build` 1.07,
   `neck` -0.066) puts the rig's hips, shoulders, elbows, the shoulder and hip spacing and the head (on the hull's
-  centre) on his own joints (within 5 mm); `size` 0.99 makes him 1.28x a medium hunter in his hunched stance (the art's ~2.25 m; 0.95 before the stance). Needed
+  centre) on his own joints (within 5 mm); `size` 0.94 makes him 1.28x a medium hunter standing upright (the art's ~2.25 m; 0.99 in the r3d-r3f hunch). Needed
   the one-line fix in Models.hunter: a bulky hero's leg length (and the limbs slider) was reset by its bulk.
 - **Bones:** his bones renamed onto the contract (Hips, Spine and Chest -> `hips`; Head -> `head`; arms and legs
   one to one; the boots ride `shin`); the shoulder domes split off the Chest onto `pauldron.L/R`; `root` and `skirt`
@@ -73,4 +73,10 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   brass (`tint`), rust streaks in its seams, a warm highlight; rough spec (WardenGlb.LOOK: gloss 0.18) and a warm
   brass rim at the match camera (rim_far 0.3); the stance's spine 0.34 -> 0.22 and head 0.34 -> 0.12 so the eye
   faces the camera. The shared match-zoom fix (f4b59cb3: far_smooth, a thinner far ink, rim_far) ported.
+- **r3g (credit-free, ORCH's r3f review):** the brass darkened and desaturated toward tarnished bronze (hull
+  tint/gain, brass 544228, helm 7a5e36), rougher; three rivet rows along the plate bands (iron heads) and 10 on the
+  helm; a smaller orb (r 0.025) in a dark red lens with painted cracks and a dim halo; four drips off the helm's
+  lower rim and thicker strands over the ribs; a smoother hull (28x46 -> 24x40 segments with fewer, shallower
+  dents); the grille port brass with dark slots; the stance upright (spine 0.04, head 0.02, knee 0, gait knee
+  0.1, lean 0). Review match frames: `--arena-demo=pose_clear` (the arena's sign hidden, off the spawn fern).
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.
