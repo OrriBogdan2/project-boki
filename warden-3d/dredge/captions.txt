@@ -38,3 +38,7 @@ r3c_dredge_vs_r3b.png: portrait | r3b 3/4 | r3c 3/4 | r3b at match zoom (enlarge
 r3d (credit-free; shot from ext/warden-dredge-friend itself, which now carries the stance): deeper dents and seven tears with flaps peeled ~40 degrees out; a fourth, wider lame flaring each shoulder's lower edge; six sharp crack strips over the lens and a white glint on the orb (the crazed paint gone); six tar strands from the hull to the pelvis; a red core glowing inside the ribs; a tar pool at his feet while he stands.
 r3d_dredge_turnaround.png | r3d_dredge_front_34.png | r3d_dredge_back.png | r3d_dredge_closeup.png | r3d_dredge_match.png | r3d_dredge_moves.png: as for r3.
 r3d_dredge_vs_r3c.png: portrait | r3c 3/4 | r3d 3/4 | r3c helm and eye | r3d helm and eye.
+
+r3e (credit-free, shot from the branch): nine tar runs down over the hull and off its underside; the back's hatch and pipe as geometry; eight stronger white lens cracks; a soft warm highlight on the hull's upper curves.
+r3e_dredge_turnaround.png | r3e_dredge_front_34.png | r3e_dredge_back.png | r3e_dredge_closeup.png | r3e_dredge_match.png | r3e_dredge_moves.png: as for r3.
+r3e_dredge_vs_r3d.png: portrait | r3d front | r3e front | r3d helm and eye | r3e helm and eye.
