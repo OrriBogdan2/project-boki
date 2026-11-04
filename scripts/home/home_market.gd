@@ -1,14 +1,15 @@
 class_name HomeMarket
 extends RefCounted
 ## The market stall's panel (docs/decisions/0013-market.md): one panel, its tabs by the stall's
-## level (Stalls.level). L1: the Vendor (seeds, food and utility, wear, furniture, farm goods, selling
+## level (Stalls.level). L1: the Vendor (goods for Boki and the Hunter, seeds, farm, house, selling
 ## crops) and the Tradewind Exchange (materials, Exchange). L2 adds the Shelter, your own stall and
 ## market search; L3 the Auction House (those four tabs are HomeTrade). Opened from the stall, the
-## hub bar's Market button and --open=shop / exchange[:item] / shelter / stall / search / auctions.
+## hub bar's Market button and --open=shop[:boki|hunter|seeds|farm|home|sell] / exchange[:item] / shelter / stall / search / auctions.
 
 ## [tab, the stall level that opens it]
 const TABS := [["Vendor", 1], ["Exchange", 1], ["Shelter", 2], ["My stall", 2], ["Search", 2], ["Auctions", 3]]
-const VENDOR_TABS := ["Seeds", "Kin food", "Wear", "Home", "Farm", "Sell"]
+const VENDOR_TABS := ["Boki", "Hunter", "Seeds", "Farm", "Home", "Sell"]
+const HUNTER_GROUPS := {"drink": "Healing", "mend": "Healing", "repair": "Armor"}    # belt item use -> section
 const OPEN_NAMES := {"shop": "Vendor", "exchange": "Exchange", "shelter": "Shelter", "stall": "My stall",
 	"search": "Search", "auctions": "Auctions"}
 const PANEL := "Market stall"
@@ -41,6 +42,8 @@ func open_named(which: String) -> bool:
 	var base := which.get_slice(":", 0)
 	if not OPEN_NAMES.has(base):
 		return false
+	if base == "shop" and VENDOR_TABS.has(which.get_slice(":", 1).capitalize()):
+		vendor_tab = which.get_slice(":", 1).capitalize()
 	if base == "exchange" and ":" in which: item = which.get_slice(":", 1)
 	open(String(OPEN_NAMES[base]))
 	return true
@@ -87,10 +90,11 @@ func _next_level(v: VBoxContainer) -> void:
 	v.add_child(l)
 
 # ------------------------------------------------------------------ the Vendor
-## The vendor's goods in tabs, as cards. Some only go on sale once you've made it out of enough
-## expeditions or finished a challenge; wear and utility restock by rarity (Stalls.vendor_has).
+## The vendor's goods in tabs by who they are for (Boki, Hunter, the farm, the house), as cards under
+## section headers. Some only go on sale once you've made it out of enough expeditions or finished a
+## challenge; wear and utility restock by rarity (Stalls.vendor_has).
 func _vendor(v: VBoxContainer) -> void:
-	UI.subtitle(v, "Seeds, food, utility, things to wear and things for the farm")
+	UI.subtitle(v, "Goods for your Boki, your Hunter, the farm and the house")
 	var row := UI.hbox(6)
 	for t in VENDOR_TABS:
 		var tt: String = t
@@ -99,61 +103,87 @@ func _vendor(v: VBoxContainer) -> void:
 	if vendor_tab == "Sell":
 		_vendor_sell(v)
 		return
-	var goods := _vendor_goods()
-	goods.sort_custom(func(a, b): return int(Progress.unlocked(a[0])) > int(Progress.unlocked(b[0])))
-	var grid := GridContainer.new()
-	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 10)
-	grid.add_theme_constant_override("v_separation", 8)
-	for g in goods:
-		grid.add_child(_vendor_card(g))
-	if goods.is_empty():
+	var sections := _vendor_sections().filter(func(s): return not (s[1] as Array).is_empty())
+	if sections.is_empty():
 		v.add_child(UI.empty_state("shop", "Nothing for sale", "Come back after your next expedition."))
-	v.add_child(grid)
+	for sec in sections:
+		var goods: Array = sec[1]
+		goods.sort_custom(func(a, b): return int(Progress.unlocked(a[0])) > int(Progress.unlocked(b[0])))
+		if sections.size() > 1:
+			v.add_child(UI.section(String(sec[0])))
+		var grid := GridContainer.new()
+		grid.columns = 2
+		grid.add_theme_constant_override("h_separation", 10)
+		grid.add_theme_constant_override("v_separation", 8)
+		for g in goods:
+			grid.add_child(_vendor_card(g))
+		v.add_child(grid)
 
-## [key, name, description, price, colour, on_buy, owned_text] for the vendor's tab.
-func _vendor_goods() -> Array:
-	var goods: Array = []
+## [[section title, goods]] for the vendor's tab. A good is [key, name, description, price, colour,
+## on_buy, owned_text]; every description starts with who uses it and how.
+func _vendor_sections() -> Array:
 	match vendor_tab:
-		"Seeds":
-			for c in Data.CROPS:
-				var cd: Dictionary = Data.CROPS[c]
-				var ck: String = c
-				goods.append(["seed:" + c, "%s seeds" % cd["name"], cd["desc"], int(cd["price"]), cd["color"],
-					func(): Save.add_seed(ck, 1), "have %d" % int(Save.d.get("seeds", {}).get(c, 0))])
-		"Kin food":
-			for f in Care.FOODS:
-				var fd: Dictionary = Care.FOODS[f]
-				var fk: String = f
-				goods.append(["food:" + f, fd["name"], fd["desc"], int(fd["price"]), Color("ffb36a"),
-					func(): Save.add_item(fk, 1), "have %d" % int(Save.d["items"].get(f, 0))])
-			goods.append(["tonic", "Tonic", "Heals 40%% in a match (belt key %s)." % Settings.key_cap("util1"), 30, Color("8fe0a0"),
-				func(): Save.add_item("tonic", 1), "have %d" % int(Save.d["items"].get("tonic", 0))])
-			for uid in UtilityBelt.stock_ids():      # the rest of the utility belt (HomeBelt picks what to take)
-				var ui: String = uid
-				if ui == "tonic" or not Stalls.vendor_has("util:" + ui): continue
-				goods.append([ui, UtilityBelt.name_of(ui), UtilityBelt.def(ui)["desc"], UtilityBelt.price_of(ui), UtilityBelt.col_of(ui),
-					func(): Save.add_item(ui, 1), "have %d" % Equal.stash_of(ui)])
-		"Wear":
-			var owned: Array = Save.d.get("accs", [])
-			for a in Data.ACCS:
-				var ak: String = a
-				if not owned.has(ak) and not Stalls.vendor_has("wear:" + ak): continue
-				var ad: Dictionary = Data.ACCS[ak]
-				var cost := -1 if owned.has(ak) else int(ad["price"])
-				var mark := "yours" if owned.has(ak) else ""
-				goods.append(["acc:" + ak, ad["name"], "Put it on from a Boki's card (Dress). Worn on expeditions too.",
-					cost, ad["col"], func(): Goods.give("wear:" + ak), mark])
-		"Home":
-			for f in Data.FURN:
-				var fd: Dictionary = Data.FURN[f]
-				var fk: String = f
-				goods.append(["furn:" + f, fd["name"], "For your house or a cottage. It waits in your inventory until you place it.",
-					int(fd["price"]), Color("c8a07a"), func():
-						if not Save.d.has("furniture"): Save.d["furniture"] = {}
-						Save.d["furniture"][fk] = int(Save.d["furniture"].get(fk, 0)) + 1, "have %d" % int(Save.d.get("furniture", {}).get(f, 0))])
-		"Farm":
-			goods += _farm_goods()
+		"Boki": return [["Food and treats", _boki_food()], ["Wear", _boki_wear()]]
+		"Hunter": return _hunter_sections()
+		"Seeds": return [["Seeds", _seed_goods()]]
+		"Home": return [["Furniture", _home_goods()]]
+		"Farm": return [["Farm", _farm_goods()]]
+	return []
+
+func _seed_goods() -> Array:
+	var goods: Array = []
+	for c in Data.CROPS:
+		var cd: Dictionary = Data.CROPS[c]
+		var ck: String = c
+		var have := "have %d" % int(Save.d.get("seeds", {}).get(c, 0))
+		goods.append(["seed:" + c, "%s seeds" % cd["name"], "Plant on a farm plot. " + String(cd["desc"]),
+			int(cd["price"]), cd["color"], func(): Save.add_seed(ck, 1), have])
+	return goods
+
+func _boki_food() -> Array:
+	var goods: Array = []
+	for f in Care.FOODS:
+		var fd: Dictionary = Care.FOODS[f]
+		var fk: String = f
+		var desc := "Boki eat this. Feed it from a Boki's card. " + String(fd["desc"])
+		goods.append(["food:" + f, fd["name"], desc, int(fd["price"]), Color("ffb36a"),
+			func(): Save.add_item(fk, 1), "have %d" % int(Save.d["items"].get(f, 0))])
+	return goods
+
+func _boki_wear() -> Array:
+	var goods: Array = []
+	var owned: Array = Save.d.get("accs", [])
+	for a in Data.ACCS:
+		var ak: String = a
+		if not owned.has(ak) and not Stalls.vendor_has("wear:" + ak): continue
+		var ad: Dictionary = Data.ACCS[ak]
+		var cost := -1 if owned.has(ak) else int(ad["price"])
+		var desc := "Boki wear. Put it on from a Boki's card (Dress); worn on expeditions too."
+		goods.append(["acc:" + ak, ad["name"], desc, cost, ad["col"],
+			func(): Goods.give("wear:" + ak), "yours" if owned.has(ak) else ""])
+	return goods
+
+## Everything the Hunter carries into a match (the utility belt), under what it does.
+func _hunter_sections() -> Array:
+	var by_use := {"Healing": [], "Armor": [], "Gadgets": []}
+	var belt := "belt keys %s to %s" % [Settings.key_cap(UtilityBelt.KEYS[0]), Settings.key_cap(UtilityBelt.KEYS[-1])]
+	for uid in UtilityBelt.stock_ids():      # HomeBelt picks what to take
+		var ui: String = uid
+		if ui != "tonic" and not Stalls.vendor_has("util:" + ui): continue
+		var desc := "Hunter, in a match (%s). %s" % [belt, UtilityBelt.def(ui)["desc"]]
+		by_use[HUNTER_GROUPS.get(UtilityBelt.def(ui).get("use", ""), "Gadgets")].append([ui, UtilityBelt.name_of(ui), desc,
+			UtilityBelt.price_of(ui), UtilityBelt.col_of(ui), func(): Save.add_item(ui, 1), "have %d" % Equal.stash_of(ui)])
+	return by_use.keys().map(func(k): return [k, by_use[k]])
+
+func _home_goods() -> Array:
+	var goods: Array = []
+	for f in Data.FURN:
+		var fd: Dictionary = Data.FURN[f]
+		var fk: String = f
+		var desc := "Furniture for your house or a cottage. It waits in your inventory until placed."
+		goods.append(["furn:" + f, fd["name"], desc, int(fd["price"]), Color("c8a07a"), func():
+				if not Save.d.has("furniture"): Save.d["furniture"] = {}
+				Save.d["furniture"][fk] = int(Save.d["furniture"].get(fk, 0)) + 1, "have %d" % int(Save.d.get("furniture", {}).get(f, 0))])
 	return goods
 
 func _farm_goods() -> Array:
