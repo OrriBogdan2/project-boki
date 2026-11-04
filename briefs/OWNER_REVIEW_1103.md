@@ -771,3 +771,17 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
 - **Invisibility bug:** find which shield source does it (Boki shield moves via kin_exec.gd "shield" and effects.gd "shield"/"ally_area", Breaker's aegis, gloves) and how. Likely suspects: the shield bubble's material or transparency sort hiding the body; the shield VFX node replacing or hiding the model's meshes (`visible = false` or a shared material being changed); a shield state flag reused by a stealth/untargetable path; the 3D Warden loader's hidden-mesh logic (glb_hidden) catching the shield mesh. Fix the cause; a shielded Hunter must stay fully visible and targetable unless an ability explicitly grants stealth. Add an assert: applying each shield type leaves every visible body mesh visible and the hunter targetable.
 - **Shield look:** replace the current Boki shield visual with a clean, readable one in the combat-clarity language (item 96): a thin, team-coloured shell or rim around the body with a small shield-value bar on the nameplate (like armour), with a crisp break effect when it pops. Not a big opaque bubble, no lingering particles. Same for every shield source, so players learn one look.
 - Boki-side files (kin_*) are main's: list wiring if needed.
+
+## 98. Choose which ability to rank up (e.g. max E first), like the source (owner, 23:19 UTC Nov 4)
+- Owner: "I don't see if there's an option to max one ability (I'm playing E-max Vex, etc). This should be the case. Maybe a 4th ability point that's one-time use after you max everything else (or not, not sure how SUPERVIVE did it)."
+- Today: ranks are automatic in a fixed order per Hunter (archetype JSON `"order": ["sec", "dash", "kin", ...]`), so there's no choice.
+- Source (supervive_kits.md header): each ability has its own upgrade tiers, II/III/IV for RMB, Shift, E (and the air dash, where separate), and II/III for R; you spend level-ups on the abilities you choose.
+- Change:
+  - **Each level-up gives one ability point.** A small "+" appears on each ability slot that can be ranked; press **Ctrl + the ability's key** (or click the "+") to rank it. The slot shows its tier pips (I–IV, R I–III). The ult's tiers only open at set levels (e.g. 6/11/16 equivalent on our level curve).
+  - **You can max one ability first** (E-max Vex). Respect the source's per-tier effects (the "Upg:" lines in the data, as already implemented per rank).
+  - **Owner's optional idea, a one-time bonus point once everything is maxed:** off by default; leave a data flag (`bonus_point_at_max`) the owner can turn on, and if on, it grants one extra tier on any ability (a "V" tier = a small, clearly visible bonus). Owner to decide.
+  - Bots: rank by their current fixed order (unchanged) so they stay sensible.
+  - Tutorial (items 85/93): the levelling lesson teaches this (+ on the slot, Ctrl+key).
+  - Unspent points stay banked; a gentle pulse on the "+" reminds you.
+- Assert: after N level-ups you can put all points into E up to its max; the ranks' effects apply; bots still rank automatically. Screenshots: the ability bar with "+" markers and tier pips.
+- Main's HUD files are wiring-only; logged for whoever has budget, after items 94/96.
