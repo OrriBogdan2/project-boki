@@ -117,7 +117,7 @@ func _shots() -> Array:
 	var D: Vector3 = SETS["drop"]
 	var out := [
 		{"chapter": "BEFORE THE FALL", "mood": "gold", "tint": Color("ffd27a"), "grade": 0.16,
-			"text": "Once, the sky held one great land,\nruled from the Crown by a Tyrant who never aged.",
+			"text": "The Skylands were once ruled by a great deity:\na Tyrant on the Crown who never aged.",
 			"cam": [[W + Vector3(-70, 22, 80), W + Vector3(0, 2, 0), W + Vector3(-54, 17, 62), W + Vector3(0, 3, 0), 3.4],
 				[W + Vector3(-16, 8, 18), W + Vector3(0, 5.0, 0), W + Vector3(-13, 7, 14.5), W + Vector3(0, 5.6, 0), 3.4]]},
 		{"chapter": "THE WAKING", "mood": "gold", "tint": Color("ff5a3a"), "grade": 0.3, "event": "wyrm",
@@ -130,7 +130,7 @@ func _shots() -> Array:
 			"cam": [[W + Vector3(-30, 22, 46), W + Vector3(0, 0, 0), W + Vector3(-36, 28, 56), W + Vector3(0, -6, 0), 3.6],
 				[W + Vector3(46, 4, 34), W + Vector3(0, -4, 0), W + Vector3(58, 10, 46), W + Vector3(0, -20, 0), 3.9]]},
 		{"chapter": "THE MASKS", "mood": "dawn", "tint": Color("ffe4b0"), "grade": 0.12, "event": "kin",
-			"text": "Our only salvation became the cursed fossils we once tried to destroy:\n"
+			"text": "Our only salvation became the cursed fossils we had tried to destroy:\n"
 				+ "Masks, each carrying the soul of a fallen Hunter of old.",
 			"cam": [[K + Vector3(0.2, 2.0, 7.6), K + Vector3(0.2, 0.9, -1.2), K + Vector3(0.25, 1.7, 6.4), K + Vector3(0.3, 0.85, -1.0), 3.1],
 				[K + Vector3(0.4, 0.55, 3.9), K + Vector3(0.4, 0.85, -0.3), K + Vector3(0.4, 0.55, 3.45), K + Vector3(0.4, 0.88, -0.3), 4.4]]},

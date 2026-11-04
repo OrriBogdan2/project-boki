@@ -7,7 +7,7 @@ extends RefCounted
 
 const SUNDERING := "The Wyrm broke the land and stole our essence.\n" \
 	+ "In time, humans, beasts and skyfolk alike were born without faces.\nWe became a new race: the Empty."
-const MASKS := "Our only salvation became the cursed fossils we once tried to destroy:\n" \
+const MASKS := "Our only salvation became the cursed fossils we had tried to destroy:\n" \
 	+ "Masks, each carrying the soul of a fallen Hunter of old."
 ## each slide's strip: [seconds in (from the end when negative, taken just before the wipe), caption]
 const STRIP := [
