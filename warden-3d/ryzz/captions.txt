@@ -22,3 +22,8 @@ s3_vs_turnaround.png, s3_vs_turnaround_game.png: the turnaround vs the model, cl
 s3_match_vs_art.png, s3_gameplay_match.png: the Arena match frame (x4 crop beside the art front) and the full frame.
 s3_moves_1.png, s3_moves_2.png, s3_poses_game.png: kit move frames and gameplay-camera poses.
 s3_vs_s2.png: round 2 (rows 1, 3) vs round 3 (rows 2, 4): close-ups and 3/4.
+s4_closeup_vs_art.png: round 4: pink streaks through the upper pigtails, narrower bunches, the scan's pink highlights on the upper arms and shoulders repainted as skin, the piping and charm stronger (emission gain 1.35).
+s4_34_vs_art.png, s4_back_vs_art.png, s4_head_vs_sheet.png: 3/4, back and head vs the art.
+s4_match_vs_art.png, s4_gameplay_match.png: the match frame: the emission brighter and more saturated at the match camera only (hero_toon far_emit 1.2), the bands, copper and corset lifted there (far_lift).
+s4_vs_turnaround.png, s4_vs_turnaround_game.png, s4_moves_1.png, s4_moves_2.png, s4_poses_game.png: turnaround, moves and poses.
+s4_vs_s3.png: round 3 (rows 1, 3) vs round 4 (rows 2, 4): close-ups and match zoom.
