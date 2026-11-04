@@ -225,3 +225,15 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Vex r3b edit side 2 | 06:44 | 01a1a54c-f974-7239-9ea4-5a714210e1a8 | nano-banana-pro | as side, "her left arm hidden behind her body" | 9 | Kept |
 | Vex r3b A | 06:46 | 01a1a54f-35bf-734c-9ee7-55f81be998e5 | meshy-7.1 | 4 edited views (front, 3/4, side, back), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Kept: the face's smirk, chunky hair, eye plate on her right eye, gun-arm, backpack |
 | Vex r3b B | 06:46 | 01a1a54f-35c4-73d2-9fd2-ab8f7e9f5bce | meshy-7.1 | as A, enhancement on | 40 | Dropped: rounder cuter face, stringy hair; a cleaner lens (A's is replaced by geometry) |
+
+### Kael (juggernaut, was Zedran) stage 1, 2026-11-04 (76 credits)
+Run on the zedran_* r3 art (09:20); the final kael_* art (10:15) is the same body and outfit with white-hot glow
+instead of orange, so the body run is reused (no rerun): the glow colour comes from the archetype's `model_glow`
+in game, and the blade, chains, hook and mane are scripted.
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Kael edit front | 09:12 | 01a1a5d3-2333-7482-a441-4a36831e5dd7 | nano-banana-pro (image-to-image) | 9:16 crop; greatsword, every chain and both hooks out, right hand hanging empty, the long mane cut to the nape | 9 | Kept |
+| Kael edit 3/4 | 09:12 | 01a1a5d3-2346-73a9-ae0b-7f099ecc6b7e | nano-banana-pro | same | 9 | Kept |
+| Kael edit side | 09:12 | 01a1a5d3-2359-70eb-9e32-74e30a939557 | nano-banana-pro | same | 9 | Kept (belt plate drawn as tally marks only) |
+| Kael edit back | 09:12 | 01a1a5d3-2361-7357-b09f-45cc9d92e736 | nano-banana-pro | same; back and harness shown where the mane was | 9 | Kept (a gold collar ring added at the nape) |
+| Kael A | 09:13 | 01a1a5d4-e913-74be-9dfd-20019f630127 | meshy-7.1 | 4 edited views as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** (first run): build, scarf over the face, collar, harness, magma right arm only, skirt, greaves |

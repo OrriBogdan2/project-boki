@@ -1,0 +1,45 @@
+# Kael (juggernaut; was Zedran): import note, stage 1 (2026-11-04)
+
+`kael.glb` is Kael's stage-1 model (INBOX_S2 09:20, 09:30, 10:00/10:15): a hybrid. The body is one Meshy 7.1 run
+baked to a clean low-poly and fitted to the Warden contract; the greatsword, the Warchain with its hook, the left
+cuff's broken chain and the long mane are built by script in Blender (tools/meshy/kael_parts.py). **No hand polish**
+(stage 2): no paint-over, `lift` neutral, no per-Warden shader. Raw files in ~/meshy/zedran/. Run log:
+docs/art/wardens/PIPELINE.md.
+
+    BP=~/tools/blender-4.5.15-linux-x64/4.5/python/bin/python3.11; B="~/tools/blender-4.5.15-linux-x64/blender -b --factory-startup --python"
+    $BP -I tools/meshy/kael_crops.py tools/meshy art/zedran_turnaround.png ~/meshy/zedran/crops
+    python3 -I tools/meshy/meshy_task.py edit ...  (x4; prompts in ~/meshy/zedran/edit_*/request.json)
+    $BP -I tools/meshy/kael_prep.py tools/meshy ~/meshy/zedran
+    python3 -I tools/meshy/meshy_task.py create ~/meshy/zedran/runA in/front.png in/tq.png in/side.png in/back.png \
+        --texture-refs in/front.png in/tq.png in/side.png in/back.png --enhance off
+    $B tools/meshy/bake_warden.py -- art/wardens/src/kael_bake.json
+    godot --headless -- --warden-rig-json --warden=juggernaut       # -> art/wardens/src/kael_rig.json
+    $B tools/meshy/fit_warden.py -- art/wardens/src/kael_fit.json
+
+- **Art:** generated from wardens_r3/zedran_* (the final kael_* came after the run): the same body, outfit and
+  pieces, the glow white-hot instead of orange. The body is reused; the glow is a game-side colour (below).
+- **Inputs:** each of the four views edited once: the greatsword, all chains and both hooks out, his right hand
+  hanging empty, the long mane cut to the nape (it is built as geometry). Nothing mirrored.
+- **Body:** 979k -> 30k triangles (head 9k), 4096 atlas. Archetype body: size 0.955, head 0.62, legs 1.55,
+  neck -0.02, build 0.95. Bone heat found no solution on the scan (skirt plates and scarf pass through each other):
+  fit_warden now runs it on a 12 mm voxel proxy and transfers the weights back.
+- **Glow (white-hot, switchable):** the right arm's faces (box `hot_boxes`) go on `<slot>-body-hot` copies of their
+  materials; hero_toon's `glow_key` lights only the atlas's hot texels there (the rest stays skin). Every glow piece
+  (the arm's cracks, the blade's cracks, the hook's tip) takes `model_glow` {core, edge} from
+  content/archetypes/juggernaut.json (core #fffaf0, edge #f2d48a), so orange or white is one edit, no rebake.
+  Sparks and the black demon smoke are VFX.
+- **Greatsword (weapon):** scripted slab with chipped edges and the art's jagged broken tip (from the front and 3/4
+  views), bevelled edges, two iron bands, a bar guard, a wrapped grip with chain links round it, cracks down both
+  faces as `glow-sword` over `glow-sword_edge` ribbons; built to the procedural greatsword's frame, x0.55 (the heavy
+  Gun scale 1.42 sits on top).
+- **Warchain:** links wrapped round the right forearm (rigid on forearm.R), then from the wrist by the hilt down to
+  ONE heavy hook with a hot tip, on `spring_hangwarchain_*` bones under hand.R. A `hang` chain (new in
+  WardenGlb.Springs) settles straight down from its root whichever way the arm points.
+- **Left wrist:** the scan's iron cuffs plus a short broken chain (three links and a split one) on
+  `spring_hangcuff_*` under hand.L. No second hook.
+- **Mane:** 26 chunky tapered locks rooted in the scan's short hair, draped clear of the body, in five groups
+  (back, left, right, front-left, front-right), each on a `spring_mane_*` chain under head; `hair-mane` takes the
+  ink line (INK_TAGS).
+- **Scarf:** always on (the scan's own).
+- The pieces share a small 256 px colour atlas (`kael_parts_atlas`), one cell per colour.
+- `kael.glb.import`: `generate_lods=false`, `force_disable_compression=true`; atlases lossless.
