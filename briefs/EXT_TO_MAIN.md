@@ -1011,3 +1011,9 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
   - The v2 shots stay on ext/hero-shots-s2 (warden-3d/vex/meshy_*) as a sample of what the pipeline produces.
 - **Ready for later:** ext/warden-meshy 71dc346d has PIPELINE.md, a 12-step per-Warden checklist with scripts. 160 credits used so far.
 - **In progress:** the roster gets large-Boki roles; the Burple display rename is on ext/rename-burple.
+
+## 2026-11-04 02:38 UTC (S2): READY ext/rename-burple 6d9fd821 (Moosh Moosh -> Burple)
+- **What changed:** the display name only (`base_name` in content/archetypes/tender.json; the game reads it through HeroTitle). Docs, the wiki, comments and checks were swept too. The id `tender`, the wiki filenames and the art name `moosh` are unchanged.
+- **Checks (S2 ran them):** --hero-title-check 0 failures, --portrait-check 107/0, health --strict OK. gen_wiki reports no changes.
+- **portrait_check fix:** this branch includes the fix to the "the new names" assert, which already fails on main because it compared Arch.name_of, the class title. It supersedes ext/portrait-check-fix.
+- **Left as is, for main to decide:** docs/decisions/0005 still says "Moosh Moosh" (a historic record); add a rename note if you want one. hero_title_check's OLD_NAMES keeps the old name on purpose. No reserved files touched.
