@@ -8,3 +8,12 @@ r2_dredge_closeup.png: portrait | in game, the porthole helm front | 3/4 (head c
 r2_dredge_game_turnaround.png: the match camera, true pixels (top) and enlarged x3 (bottom), stance.
 r2_dredge_match.png: the Arena at match zoom (--arena=dredge --record=2 --arena-demo=pose --demo-zoom=1.0), stance | the same frame enlarged around him.
 r2_dredge_moves.png: kit moves on the 3D model, one row each (Arena demo pr_<move>, stance): Grapnel throw (the claw spreads, the rope leaves from the claw, the hanging rope and hook gone in flight) | reel (claw clenched, drum winding) | Anchor Drop | barge lunge | scattergun shot | air smash (dive) | Brass Broadside.
+
+r2b (owner 09:05): aged-brass paint pass (one painted 2048 atlas baked in Blender: grime, verdigris, rust, painted dents, scratches, worn edges), a glowing red orb eye in a cracked lens (replaces the asterisk), 24 thicker tar drips. Rig, variant bones and moves unchanged. All r2b shots with the stance (ext/warden-stance on a scratch branch).
+r2b_dredge_turnaround.png: the art's turnaround | in game front, 3/4, side, back, 3/4 back, close camera.
+r2b_dredge_front_34.png: turnaround front + 3/4 | portrait | in game front, 3/4 close-ups.
+r2b_dredge_back.png: turnaround back | in game back, 3/4 back (cut from the 256 px close turnaround, so soft).
+r2b_dredge_closeup.png: portrait | in game, the helm and eye front | 3/4.
+r2b_dredge_game_turnaround.png: the match camera, true pixels and x3.
+r2b_dredge_match.png: the Arena at match zoom (--arena-demo=pose --demo-zoom=1.0) | the same frame enlarged around him.
+r2b_dredge_moves.png: Grapnel throw | reel | Anchor Drop | barge lunge | scattergun shot | air smash | Brass Broadside, on the 3D model.
