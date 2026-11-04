@@ -1,0 +1,8 @@
+s1_vs_turnaround.png: Ryzz stage 1 (Meshy 7.1 body + scripted pigtails and rods) vs the locked art (front / 3-4 / side / back), close camera; the art row is ryzz_front, _34, _side, _back side by side.
+s1_vs_turnaround_game.png: the same turnaround at the gameplay camera (top-down), x1 and enlarged.
+s1_vs_portrait.png: the portrait vs the in-game close-ups (front and 3/4): the wink and pink fern scar on her RIGHT eye, the glowing bolt charm, the corset's bolt keyhole and its pink piping (emission layer in model_glow pink).
+s1_front_34.png: front 3/4, both sides: short twin pigtails with copper-coil ties and zigzag pink ends, the two outer copper rods past her shoulders.
+s1_back_34.png: back 3/4, both sides: exactly three copper rods in a riveted mount, the middle one (the relic) scorched black and bent.
+s1_moves_1.png, s1_moves_2.png: kit move frames at the close camera (no weapon held; the copper Storm Rod in her hand is the kit's own RMB summon).
+s1_poses_game.png: idle / run / kit poses at the gameplay camera.
+s1_gameplay_match.png, s1_gameplay_match_x4.png: the Arena match frame (--arena=mage --record=2 --arena-demo=pose --demo-zoom=1.0) and a x4 crop round her.
