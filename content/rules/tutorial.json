@@ -3,11 +3,11 @@
  "steps": [
   [
    "land",
-   "Steer to land on the meadow"
+   "Steer down to the meadow"
   ],
   [
    "move",
-   "Walk to the beam"
+   "Walk to the glowing beam"
   ],
   [
    "dash",
@@ -15,15 +15,15 @@
   ],
   [
    "exdash",
-   "Jump, then dash in the air"
+   "Jump, then dash in mid-air"
   ],
   [
    "glide",
-   "Jump, then hold to glide"
+   "Jump (%J), then hold %G to glide"
   ],
   [
    "crouch",
-   "Climb up and hold to crouch"
+   "Climb up, then hold to crouch"
   ],
   [
    "pickup",
@@ -47,7 +47,7 @@
   ],
   [
    "utility",
-   "Tap to use %A"
+   "Use %A"
   ],
   [
    "throw",
@@ -55,7 +55,7 @@
   ],
   [
    "orders",
-   "Hold to give %s orders"
+   "Hold to give %s an order"
   ],
   [
    "kin1",
@@ -71,7 +71,7 @@
   ],
   [
    "fight",
-   "Defeat the monsters"
+   "Beat all the monsters"
   ],
   [
    "goexit",
@@ -79,11 +79,11 @@
   ],
   [
    "uplink",
-   "Hold at the uplink mast"
+   "Capture the uplink mast"
   ],
   [
    "defend",
-   "Hold the outpost"
+   "Defend the outpost"
   ],
   [
    "extract",
@@ -91,16 +91,16 @@
   ]
  ],
  "detail": {
-  "gkey": "G is your Boki button. Tap it to send %s at a foe, tap again to call it back. Hold it for orders.",
-  "rank": "Each level gives a skill point (the gold + by your level). Press %R to rank up %N. Your ultimate opens at level %U.",
+  "gkey": "%T is your Boki button. Tap it to send %s at a monster. Tap again to call it back. Hold it to give orders.",
+  "rank": "Every level gives you a skill point (see the gold + by your level). Press %R to rank up %N. Your ultimate unlocks at level %U.",
   "sig": "%X",
   "key": "Chests are locked. Walk over the key to pick it up.",
-  "chest": "A chest needs a key. Hold %F beside it to open it; that uses the key.",
+  "chest": "Chests need a key. Hold %F next to it to open it. This uses up the key.",
   "uplink": "Stay inside the circle until it's yours. Step out and the capture slips back!",
   "defend": "Stay inside the circle. Step out and the capture slips back!"
  },
  "alt": {
-  "utility_hold": "Tap, then hold: %A",
+  "utility_hold": "Tap, then hold, to use %A",
   "throw_back": "Tap to call %s back",
   "throw_send": "Tap again to send %s at the monster"
  },

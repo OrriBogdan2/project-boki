@@ -2552,7 +2552,7 @@ func _farm_tick() -> void:
 			if (wt <= 0.0 or (by_water and int(d.get("wet", 2)) < 2)) and (raining or by_water):
 				_water(arr, i, "stream" if by_water else "rain")
 				continue
-			if wt > 0.0 and now - wt >= Data.WATER_TIME * (0.5 if arr == "gh_plots" else 1.0):
+			if wt > 0.0 and now - wt >= FarmCropGuide.stage_time(Data.WATER_TIME * (0.5 if arr == "gh_plots" else 1.0)):
 				d["stage"] = int(d["stage"]) + 1
 				# rain only makes it wet; watering it yourself (or a farmhand kin) is what counts as tending
 				if int(d.get("wet", 2)) >= 2:
