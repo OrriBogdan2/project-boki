@@ -456,6 +456,7 @@ def project(ob, img, pj):
     else:
         k, col0, row0 = _register(me, src, pj, ax, sgn, pj.get("register_on"))
     keep = pj.get("keep_hue")        # [h0, h1, sat_min]: texels already painted this colour keep it (hair)
+    # skip_art [h0, h1, sat_min, val_max]: art pixels of this colour are not projected
     bg = src[ah - 1 - 5, 5, :3]
     painted = 0
     for t in me.loop_triangles:
@@ -489,6 +490,11 @@ def project(ob, img, pj):
         ty = np.clip(pts[inside, 1].astype(int), 0, h - 1)
         got = src[ah - 1 - row, col]
         art_px = np.abs(got[:, :3] - bg).sum(axis=1) > 0.12               # (the sheet's grey keeps Meshy's paint)
+        if pj.get("skip_art"):
+            # (art pixels of this colour stay off: the hair's dark shadows under the bangs onto the brow)
+            ha, sa, va = _hsv_px(got[:, :3])
+            sk = pj["skip_art"]
+            art_px &= ~((ha >= sk[0]) & (ha <= sk[1]) & (sa >= sk[2]) & (va <= sk[3]))
         if keep:
             cur = dst[ty, tx, :3]
             hh, ss, _vv = _hsv_px(cur)

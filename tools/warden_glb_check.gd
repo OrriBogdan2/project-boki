@@ -55,7 +55,7 @@ func run(main: Node) -> void:
 	ok(
 		WardenGlb.path("gunslinger") == "res://art/wardens/%s/%s.glb" % [vex, vex]
 				and (vex == "vex" or vex.begins_with("vex_") and WardenGlb.variant("vex") == vex),
-		"a Warden's file is art/wardens/<name>/<name>.glb, named as its art (Vex: %s), a design variant only when picked"
+		"a Warden's file is art/wardens/<name>/<name>.glb, named as its art (Vex: %s; a variant only when picked)"
 				% vex
 	)
 	ok(
@@ -91,6 +91,7 @@ func run(main: Node) -> void:
 		_setting(a)
 		_own_motion(a, "bulwark" if a != "bulwark" else "gunslinger")
 		_weapon(a)
+		_springs(a)
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
 	print("WARDENGLB_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
 	main.get_tree().quit()
@@ -274,6 +275,40 @@ func _hitbox(a: String) -> void:
 
 ## A .glb that carries its weapon: it is in the hands (under the Gun node, whose Muzzle stays where the shots
 ## leave), the procedural weapon is hidden, and its magazine (if it has one apart) is the Gun's Mag.
+## A model's spring chains (RIG_CONTRACT "Spring chains": braids) swing: moved sideways, each chain's tip trails
+## its rigid place, and standing still it settles back on it. (No chains: nothing to check.)
+func _springs(a: String) -> void:
+	var m := _model(a)
+	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync
+	if sync == null or sync.springs.chains.is_empty():
+		m.free()
+		return
+	var sk := _skel(m)
+	sync._process(1.0 / 60.0)
+	var lag := 0.0
+	for i in 6:
+		m.position.x += 0.08
+		sync._process(1.0 / 60.0)
+		lag = maxf(lag, _spring_off(sk, sync))
+	for i in 240:
+		sync._process(1.0 / 60.0)
+	var rest := _spring_off(sk, sync)
+	ok(lag > 0.02 and rest < 0.01, "%s: %d spring chains trail a sideways move (tip %.3f m off) and settle (%.4f m)"
+			% [a, sync.springs.chains.size(), lag, rest])
+	m.free()
+
+## The largest distance of a spring chain's tip from where it rides its parent rigidly.
+func _spring_off(sk: Skeleton3D, sync: WardenGlb.Sync) -> float:
+	var worst := 0.0
+	for ch in sync.springs.chains:
+		var ids: Array = ch["ids"]
+		var tip := int(ids[ids.size() - 1])
+		var par := sk.get_bone_parent(int(ids[0]))
+		var base := sk.get_bone_global_pose(par) * sk.get_bone_global_rest(par).affine_inverse()
+		var rigid := base * sk.get_bone_global_rest(tip)
+		worst = maxf(worst, rigid.origin.distance_to(sk.get_bone_global_pose(tip).origin))
+	return worst
+
 func _weapon(a: String) -> void:
 	var m := _model(a)
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D

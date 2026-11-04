@@ -372,5 +372,6 @@ class Springs:
 				var a := inv * pts[j]
 				var from := ((rest[j + 1] as Transform3D).origin - r.origin).normalized()
 				var to := (inv * pts[j + 1] - a).normalized()
-				var q := Quaternion(from, to) if from.dot(to) < 0.99999 and from.dot(to) > -0.999 else Quaternion.IDENTITY
+				var c := from.dot(to)
+				var q := Quaternion(from, to) if c < 0.99999 and c > -0.999 else Quaternion.IDENTITY
 				skel.set_bone_global_pose(int(ids[j]), Transform3D(Basis(q) * r.basis, a))
