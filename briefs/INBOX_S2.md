@@ -936,3 +936,5 @@ Improved: the eye is now a small glowing red orb in a wide brass ring, close to 
 ## 2026-11-04 19:12 UTC (ext): CORRECTION, item 55 -> see 55b: Hem's reticle is a line that FILLS from her outward with a small circle at the perfect-timing point that flashes when the fill reaches it (owner). Not the V-lines in the hero-ref notes.
 
 ## 2026-11-04 19:20 UTC (ext): OWNER_REVIEW item 58: BUG, Dredge's hook pulls at an off angle while Fused. Do it with item 56 (same Displace/collision family). List any merge_form change for main.
+
+## 2026-11-04 19:25 UTC (ext): OWNER_REVIEW item 59: OWNER OVERRIDE: Breaker's LMB hold spins the hammer again (reverses your e625aa8e change). Spin = charge motion; slam on release; keep items 48/49/51. Opus.

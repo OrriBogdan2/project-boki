@@ -462,3 +462,10 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Likely causes to check: the pull target uses the hunter node's position or a socket from the unfused model while the Fused form is offset or scaled (merge_form body centre ≠ hunter pos); the Fused body's own collision deflecting the pulled target (same family as item 56: friendly bodies must be pass-through for your displacements); the pull direction computed from aim instead of target -> caster.
 - Sweep it for all Fused forms × every displacing ability (hooks, pulls, knockbacks, impales, chains): source/destination points come from the live Fused body. Merge-form files are main's: S2 fixes the shared hook/Displace side and lists any merge_form/merge_look change for main.
 - Assert: Fused Dredge hooking a dummy at 0°, 45° and 90° pulls it to within 1 m of the Fused body's front, along the straight line; same for each Fused form's pull or knock abilities.
+
+## 59. Breaker's LMB hold SPINS the hammer (owner override, 18:58 UTC Nov 4; reverses S2's parity change e625aa8e)
+- Owner: "Oath definitely spins his LMB; the footage notes are wrong." S2's parity pass replaced the hold spin with a dragged-back wind-up based on hero-ref bjorn.md line 13. The owner wins: bring the spin back.
+- Hold LMB: Breaker spins the hammer around him (a continuous whirl, the hammer head circling at arm's length, a readable motion trail), building charge while he can walk (keep the source hold-walk speed). Release: the charged forward slam, with item 49's perfect-timing launch on the flash, and items 48/51 (jump/Shift keep the hold; a mantle ends it).
+- Whether the spin itself hits people on each revolution is the owner's call (ext is asking). Default until he answers: the spin is the charge motion only; the damage comes on the release slam.
+- Keep the Shift 360 Smash as is. Update the card text and docs/heroes/bulwark.md's parity table (note the owner override).
+- Assert: holding LMB rotates the hammer continuously (≥1 turn/s); the release still slams forward at the cursor; perfect launch still works. Screenshots: a 6-frame strip of the spin and the release.
