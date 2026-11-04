@@ -711,3 +711,10 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 1. S2 3D: Vex r3 is in the bake step (6 Meshy variants, 235 cr); Vex r3b (redesign) and Dredge-from-the-friend's-model are running. No shots yet. Meshy balance 5,265.
 2. Owner calls answered and routed (07:10): Ryzz's closed eye is a lightning scar; Cinder holds the spear in her right hand; sex appeal is fine (crop tops OK).
 3. Conflicts: none.
+
+## 2026-11-04 03:05 ET (08:05 UTC) ORCH check-in
+- [OWNER] To review: Dredge in 3D from the friend's model (ext/hero-shots-s2 warden-3d/dredge/r2_*) and S2's hybrid-pipeline proposal (Blender-scripted hard surface + Meshy organic; PIPELINE.md).
+1. Art: all 12 have new art (Ostra r2; Breaker r3 sea-ogre; Vex r3 green). Redos pending from IMG: Hem (was Pin), Zedran, Ryzz, Cinder (prompts in briefs/specs/REDESIGN_PROMPTS_R3.md). Rename: Pin→Hem (S2 sweep).
+2. 3D: Vex r3 / r3b still in progress; Dredge (friend's model) in game. Meshy balance ~5,265.
+3. Main: offline by the owner's choice; the queue is in EXT_TO_MAIN 07:15 (+ the Hem rename, + the arena "X · RESET" label fix).
+4. Conflicts: none.
