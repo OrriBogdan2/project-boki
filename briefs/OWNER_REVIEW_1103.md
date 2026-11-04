@@ -574,3 +574,13 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Owner: "a little too slow during Shift; slightly faster than current is good."
 - ostra.json dash `fly_slow` 0.2 (he drifts at 20% of run speed while hovering) -> **0.3**. Update the desc text ("drifting at 30% speed") and item 17's note. Data + text only.
 - Assert: planar speed during the lantern flight ≈ 30% of run speed. Sonnet, quick; batch with item 60 (Ostra LMB).
+
+## 76. Weapons look bolted on: seat every .glb weapon in the Warden's hands (owner, 19:33 UTC Nov 4)
+- Owner: "the weapons look bolted on / not accurate to the 3D model in general; why?"
+- Why (ext read scripts/heroes/warden_glb.gd `_hold_weapon`): the .glb's weapon is pulled out of the Meshy model and re-parented under the **old procedural rig's gun node** (`Rig/Torso/Aim/Gun`, or a hammer pivot), at that node's fixed offset and scale. The skinned body follows the rig bone by bone, but the weapon's grip was never fitted to the new model's hands: so it floats near the hand, at the procedural gun's angle and size, with fingers not closing on it, and on two-handed weapons the second hand isn't on it. The weapon also comes from a separate Meshy pass with its own scale and texel density, so it can look pasted on stylistically.
+- Fix, per Hunter (data in warden_look.json, the pipeline in warden_glb.gd):
+  1. **Grip fit:** a per-weapon grip transform (position, rotation, scale) so the handle sits inside the hand and matches the art's size relative to the body; authored from the turnaround/splash.
+  2. **Hands:** a closed grip pose for the holding hand(s); for two-handed weapons (Vex's rifle, Kael's blade, Breaker's hammer and shield, Hem's bow) an off-hand target on the weapon so the second hand stays on it during aim, run and attacks (simple two-bone IK or a pose offset driven by the weapon).
+  3. **Look:** match the weapon's texture density, colours and the Hunter shader/outline to the body, so it reads as one model (re-texture from the art where it's muddy, like the faces pass).
+  4. Verify across every kit move: idle, run, aim, fire, the signature attacks (Breaker's spin, Kael's lunge, Hem's draw), so it never clips through the body or detaches.
+- Assert: for each Hunter, the weapon's grip point stays within ~3 cm of the hand bone through all KMOVES; two-handed weapons keep the off-hand within tolerance. Screenshots: per Hunter, a close-up of the hands on the weapon (before/after) at idle and mid-attack.
