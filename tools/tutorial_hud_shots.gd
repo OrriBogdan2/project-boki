@@ -9,7 +9,7 @@ var m: Match
 var dir := "/tmp/tuthud_shots"
 var n := 0
 
-const WATCHED := ["dash", "exdash", "crouch", "shoot", "sig", "utility", "throw", "fight"]
+const WATCHED := ["dash", "exdash", "crouch", "gkey", "rank", "shoot", "sig", "utility", "throw", "key", "chest", "uplink", "fight"]
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -31,7 +31,7 @@ func run(main_node: Node) -> void:
 	var seen := {}
 	var times := [0.4, 1.2, 2.5, 4.0, 6.0, 9.0, 13.0, 18.0]
 	var guard := 0
-	while guard < 6000 and m.tut.step < 15 and not m.player.extracted:
+	while guard < 6000 and m.tut.step < 24 and not m.player.extracted:
 		guard += 1
 		TutorialDrive.drive(m)
 		for i in 2:

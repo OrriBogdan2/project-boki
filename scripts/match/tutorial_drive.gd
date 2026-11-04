@@ -55,6 +55,15 @@ static func drive(m: Match) -> void:
 				p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
 		"shoot", "sig", "utility", "throw", "kin1", "fight":
 			_fight(m, tu, goto)
+		"gkey":
+			if fmod(m.time, 1.5) < Match.DT and p.kin:
+				KinCommand.tap(p)
+		"rank":
+			p.level_slot("kin")
+		"key":
+			for pk in m.pickups:
+				if pk["kind"] == "ckey":
+					goto.call(pk["pos"], 0.3)
 		"orders":
 			if fmod(m.time, 1.0) < Match.DT:
 				KinCommand.order(p, "guard" if p.kin and p.kin.cmd != "guard" else "follow")

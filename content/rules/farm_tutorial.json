@@ -82,7 +82,7 @@
 			],
 			"title": "Give your Boki a job",
 			"hints": {
-				"go": "Idle hands, no wages. Open your Boki's page and pick it a job"
+				"go": "A Boki with nothing to do earns nothing. Click your Boki, or press {details} beside it, to open its page and give it a job. Kin on the bar below lists them all"
 			},
 			"world": {
 				"go": ""
@@ -111,7 +111,7 @@
 			],
 			"title": "Feed your Boki",
 			"hints": {
-				"place": "Hungry Boki are slow Boki. Press {build} and set the trough down",
+				"place": "A hungry Boki is a slow Boki. Press {build} and set the trough down",
 				"fill": "Fill the trough from your pantry ({interact})"
 			},
 			"world": {
@@ -130,7 +130,7 @@
 				"patch_dry": "Crops come from patches. Press {build} and set one down (by water it would water itself)",
 				"plant": "Plant a seed in the patch ({interact})",
 				"water": "Not by the water? Then water it yourself ({interact})",
-				"grow": "Takes a moment. Carry on with the rest meanwhile",
+				"grow": "It takes a moment. Carry on with the rest meanwhile",
 				"pick": "Ripe! Pick it ({interact})"
 			},
 			"world": {

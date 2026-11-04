@@ -1,5 +1,5 @@
 {
- "doc": "The first-match tutorial (scripts/match/tutorial.gd). steps: [id, the one banner line]. %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step (the right click with a hold, the Boki starting out). labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down). need: how many times a step's action must land, shown as 1/3 on the pill.",
+ "doc": "The first-match tutorial (scripts/match/tutorial.gd). steps: [id, the one banner line]. detail: a plain-words second line under it (%X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step (the right click with a hold, the Boki starting out). labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down). need: how many times a step's action must land, shown as 1/3 on the pill.",
  "steps": [
   [
    "land",
@@ -30,6 +30,14 @@
    "Pick up the item"
   ],
   [
+   "gkey",
+   "Send %s out"
+  ],
+  [
+   "rank",
+   "You levelled up!"
+  ],
+  [
    "shoot",
    "%W the monster"
   ],
@@ -54,8 +62,12 @@
    "Watch %s use %A"
   ],
   [
+   "key",
+   "Grab the key"
+  ],
+  [
    "chest",
-   "Open the chest"
+   "Open the chest with the key"
   ],
   [
    "fight",
@@ -78,6 +90,15 @@
    "Step into the light"
   ]
  ],
+ "detail": {
+  "gkey": "G is your Boki button. Tap it to send %s at a foe, tap again to call it back. Hold it for orders.",
+  "rank": "Each level gives a skill point (the gold + by your level). Press %R to rank up %N. Your ultimate opens at level %U.",
+  "sig": "%X",
+  "key": "Chests are locked. Walk over the key to pick it up.",
+  "chest": "A chest needs a key. Hold %F beside it to open it; that uses the key.",
+  "uplink": "Stay inside the circle until it's yours. Step out and the capture slips back!",
+  "defend": "Stay inside the circle. Step out and the capture slips back!"
+ },
  "alt": {
   "utility_hold": "Tap, then hold: %A",
   "throw_back": "Tap to call %s back",
@@ -104,6 +125,7 @@
   "glide": "Glide here",
   "crouch": "Lookout",
   "pickup": "Item",
+  "key": "Key",
   "chest": "Chest",
   "goexit": "Outpost",
   "uplink": "Uplink",
