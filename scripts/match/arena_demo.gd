@@ -21,9 +21,6 @@ extends RefCounted
 ##   anim_<move> a strip of frames of one kit move (ANIM_DEMO: arc_* and bul_* for the Archer and Bulwark;
 ##               PairDemo.ANIM for Dolm and Ostra; DJDemo.ANIM thf_* and jug_* for Sable and Juggernaut)
 ##   pose        the Hunter standing turned 3/4 toward the camera (--demo-zoom=1 for the match camera)
-##   pose_clear  the same as a review frame (Warden model shots, tools/meshy/recipe.py shots): clear ground found
-##               near the start, no HUD, caption, buttons, sign, aim line or prop over the hero; prints
-##               DEMO_HERO_RECT x,y,w,h (the hero on screen, for the x4 crop); --demo-at=dx,dz picks the spot
 ##   smg         the SMG firing at the dummy; add --legacy-shots for the old look and numbers (before)
 
 const OLD_SMG := {
@@ -324,24 +321,23 @@ static func tick(A: Arena, dt: float) -> void:
 			at_t = 99.0
 		"pose", "pose_clear":
 			# the Hunter standing at the match camera, turned three-quarters toward it (Warden model shots);
-			# --demo-at=dx,dz first moves it onto clear ground (review shots: no prop over the hero).
-			# pose_clear: the review frame (_clear_frame): clear ground found by itself, no HUD, sign or aim line
+			# --demo-at=dx,dz first moves it onto clear ground (review shots: no prop over the hero); pose_clear: the
+			# same with the arena's sign and the HUD off (review frames)
 			if t < 0.05:
-				var moved := false
 				for a in OS.get_cmdline_user_args():
 					if String(a).begins_with("--demo-at="):
 						var at := String(a).get_slice("=", 1).split(",")
 						P.teleport(P.pos + Vector3(float(at[0]), 0.0, float(at[1])))
 						A.home = P.pos
-						moved = true
-				if w == "pose_clear" and not moved:
-					P.teleport(_clear_spot(A))
-					A.home = P.pos
-				if w == "pose_clear" and m.cam:
-					m.cam.lead = 0.0
-					m.cam.snap(P.pos)
 			if w == "pose_clear":
-				_clear_frame(A, P, t)
+				if t < 0.05:
+					P.teleport(P.pos + Vector3(-1.6, 0, -1.2))      # (off the fern at the spawn)
+					for l in m.find_children("*", "Label3D", true, false):
+						if String((l as Label3D).text).contains("KIT CARD"): (l as Label3D).visible = false
+				if m.hud:
+					m.hud.set("visible", false)
+					for c in m.hud.get_children():
+						if c is CanvasItem or c is CanvasLayer: c.set("visible", false)
 			P.inp["move"] = Vector2.ZERO
 			P.inp["aim"] = P.pos + Vector3(-5.0, 0.9, 3.5)
 			at_t = 2.0
@@ -414,9 +410,6 @@ static func tick(A: Arena, dt: float) -> void:
 				m.get_tree().process_frame.connect(func():
 					m.get_viewport().get_texture().get_image().save_png(path)
 					print("ARENASHOT ", path)
-					if A.has_meta("demo_hero_rect"):      # (pose_clear: where the hero is, for the review crop)
-						var hr: Rect2 = A.get_meta("demo_hero_rect")
-						print("DEMO_HERO_RECT %d,%d,%d,%d" % [hr.position.x, hr.position.y, hr.size.x, hr.size.y])
 					m.get_tree().quit(), CONNECT_ONE_SHOT), CONNECT_ONE_SHOT)
 
 ## The scripted input for each kit move's strip.
@@ -669,115 +662,3 @@ static func _at(t: float, dt: float, when: float) -> bool:
 static func _aim(P: Hunter, T: Ent) -> void:
 	P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
 	P.inp["aim_y"] = T.pos.y
-
-## --arena-demo=pose_clear: the review frame's spot, flat open ground near the start (no block, void or slope
-## within 1.6 m, the island's edge 3 m off, 6 m from the sign and the dummies) with the fewest props round it.
-static func _clear_spot(A: Arena) -> Vector3:
-	var W: World = A.m.world
-	var keep_off: Array = [A.home + Vector3(-3.2, 0, 1.2)]
-	for dm in A.dummies:
-		keep_off.append((dm["h"] as Hunter).pos)
-	var props := _props(A.m).map(func(g): return (g as Array)[0])
-	var best := A.home
-	var best_k := INF
-	for ring in 10:
-		var rad := float(ring)
-		for k in (1 if ring == 0 else 16):
-			var x := A.home.x + cos(TAU * k / 16.0) * rad
-			var z := A.home.z + sin(TAU * k / 16.0) * rad
-			if not W._fits(x, z, 1.6) or W.is_void(x + 3.0, z) or W.is_void(x - 3.0, z) or W.is_void(x, z + 3.0) \
-					or W.is_void(x, z - 3.0):
-				continue
-			var p := Vector3(x, W.ground_at(x, z), z)
-			if keep_off.any(func(o): return Vector2(o.x - x, o.z - z).length() < 6.0):
-				continue
-			var near := props.filter(func(q): return Vector2(q.x - x, q.z - z).length() < 1.6).size()
-			var score := float(near) + rad * 0.3
-			if score < best_k:
-				best_k = score
-				best = p
-	return best
-
-## The review frame, each tick: no HUD or Arena caption and buttons (every CanvasLayer), no sign, name tags,
-## aim line or kit resource tell; at 0.3 s (the camera settled) every prop whose box covers the hero on screen,
-## grass tufts included, and the ambient motes go (they read as speckle round the hero at the match camera).
-static func _clear_frame(A: Arena, P: Hunter, t: float) -> void:
-	var m := A.m
-	for n in m.get_tree().root.find_children("*", "CanvasLayer", true, false):
-		(n as CanvasLayer).visible = false
-	if m.hud and m.hud is CanvasItem: (m.hud as CanvasItem).visible = false
-	for l in m.find_children("*", "Label3D", true, false):
-		(l as Label3D).visible = false
-		if String((l as Label3D).text).contains("KIT CARD"):
-			for post in m.get_children():
-				var off := Vector2(post.position.x - l.position.x, post.position.z - l.position.z) \
-						if post is MeshInstance3D else Vector2.ONE
-				if off.length() < 0.05:
-					(post as MeshInstance3D).visible = false
-	if m.aim_line: m.aim_line.layers = 0
-	if P.ak: P.ak.res = 0.0        # (no resource tell over the hero: Pin's Focus star and aim line)
-	var kit_aim := m.get_node_or_null("AimKit") as Node3D      # (a kit's own aim line and reticles)
-	if kit_aim: kit_aim.visible = false
-	if t < 0.3 or A.has_meta("demo_cleared"):
-		return
-	A.set_meta("demo_cleared", true)
-	var cam := m.get_viewport().get_camera_3d()
-	if cam == null:
-		return
-	var hero := Rect2(cam.unproject_position(P.pos), Vector2.ZERO)
-	for y in [0.0, 1.2, 2.6]:
-		for s in [Vector3(-1.1, 0, 0), Vector3(1.1, 0, 0), Vector3(0, 0, -1.1), Vector3(0, 0, 1.1)]:
-			hero = hero.expand(cam.unproject_position(P.pos + s + Vector3(0, y, 0)))
-	A.set_meta("demo_hero_rect", hero)
-	hero = hero.grow(16.0)
-	for g in _props(m):
-		var gi: GeometryInstance3D = g[1]
-		var box: AABB = g[2]
-		var sr := Rect2(cam.unproject_position(box.position), Vector2.ZERO)
-		for c in 8:
-			sr = sr.expand(cam.unproject_position(box.get_endpoint(c)))
-		if not sr.intersects(hero):
-			continue
-		if gi is MultiMeshInstance3D:
-			var mmi := gi as MultiMeshInstance3D
-			if not mmi.has_meta("demo_own"):
-				mmi.multimesh = mmi.multimesh.duplicate()
-				mmi.set_meta("demo_own", true)
-			var gone := Transform3D(Basis.from_scale(Vector3.ONE * 0.0001), Vector3.ZERO)
-			mmi.multimesh.set_instance_transform(int(g[3]), gone)
-		else:
-			gi.layers = 0
-	for n in m.find_children("*", "GPUParticles3D", true, false) + m.find_children("*", "CPUParticles3D", true, false):
-		if not _on_ent(n):
-			(n as Node3D).visible = false
-
-## The props round the Arena (no hunter's or dummy's own parts, not the ground): [ground point, instance, its
-## world box, multimesh instance index or -1], each grass tuft of a multimesh on its own.
-static func _props(m: Node) -> Array:
-	var out: Array = []
-	for n in m.find_children("*", "GeometryInstance3D", true, false):
-		var gi := n as GeometryInstance3D
-		if gi is Label3D or not gi.visible or _on_ent(gi):
-			continue
-		if gi is MultiMeshInstance3D:
-			var mm := (gi as MultiMeshInstance3D).multimesh
-			if mm == null or mm.mesh == null:
-				continue
-			var mb := mm.mesh.get_aabb()
-			for i in (mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count):
-				var box: AABB = (gi.global_transform * mm.get_instance_transform(i)) * mb
-				if box.size.x < 5.0 and box.size.z < 5.0:
-					out.append([box.get_center() - Vector3(0, box.size.y * 0.5, 0), gi, box, i])
-		elif gi is MeshInstance3D and (gi as MeshInstance3D).mesh:
-			var box: AABB = gi.global_transform * (gi as MeshInstance3D).mesh.get_aabb()
-			if box.size.x < 5.0 and box.size.z < 5.0:
-				out.append([box.get_center() - Vector3(0, box.size.y * 0.5, 0), gi, box, -1])
-	return out
-
-static func _on_ent(n: Node) -> bool:
-	var cur := n
-	while cur:
-		if cur is Ent:
-			return true
-		cur = cur.get_parent()
-	return false
