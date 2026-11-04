@@ -124,21 +124,30 @@ def finish(bld, name, mats_of_part):
 
 
 # ------------------------------------------------------------------------------------------------ the sword
-def _outline(L0, L1, hw, seed=3, chip=0.012):
-    """The blade's outline (y along the blade, z across), base to tip and back (kael_blade_sheet): a long straight
-    slab, faintly chipped along both edges, its end broken square into crenels with a notch on each side."""
+def _outline(L0, L1, hw, seed=3, chip=0.012, teeth=0):
+    """The blade's outline (y along the blade, z across), base to tip and back (kael_blade_sheet): a long slab of
+    broken iron, its edges chipped (and with `teeth`, notched: a sharp step in and out every few cm, the sheet's
+    jagged rock-like edge), its end broken into a stepped point: a shoulder each side, a notch, the ridge."""
     rng = np.random.default_rng(seed)
-    n = 14
-    yt = L1 - 0.14
-    top, bot = [], []
-    for i in range(n + 1):
-        y = L0 + (yt - L0) * i / n
-        top.append((y, hw + (rng.uniform(-chip, 0.0) if 0 < i < n else 0.0)))
-        bot.append((y, -hw - (rng.uniform(-chip, 0.0) if 0 < i < n else 0.0)))
-    # the broken end: out to a shoulder, a notch in, the crenellated top, the other notch and shoulder
-    tip = [(yt + 0.03, hw * 1.12), (yt + 0.07, hw * 1.05), (yt + 0.08, hw * 0.78), (yt + 0.115, hw * 0.82),
-           (L1, hw * 0.55), (L1 - 0.02, hw * 0.25), (L1 - 0.005, -hw * 0.05), (L1 - 0.03, -hw * 0.35),
-           (L1 - 0.01, -hw * 0.6), (yt + 0.1, -hw * 0.85), (yt + 0.085, -hw * 1.06), (yt + 0.04, -hw * 1.1)]
+    n = 14 if not teeth else int(teeth)
+    yt = L1 - 0.14 * (L1 - L0) / 1.22
+    q = (L1 - yt) / 0.14
+
+    def edge(sgn):
+        pts = []
+        for i in range(n + 1):
+            y = L0 + (yt - L0) * i / n
+            d = rng.uniform(-chip, 0.0) if 0 < i < n else 0.0
+            pts.append((y, sgn * (hw + d)))
+            if teeth and 0 < i < n and i % 2 == 1:
+                # a notch: straight in, then out again a little further up
+                dy = (yt - L0) / n * rng.uniform(0.25, 0.45)
+                pts.append((y + dy, sgn * (hw - chip * rng.uniform(1.0, 1.8))))
+        return pts
+    top, bot = edge(1), edge(-1)
+    tip = [(yt + 0.03 * q, hw * 1.08), (yt + 0.07 * q, hw * 1.02), (yt + 0.08 * q, hw * 0.74), (yt + 0.115 * q, hw * 0.8),
+           (L1 - 0.025 * q, hw * 0.42), (L1, hw * 0.08), (L1 - 0.012 * q, -hw * 0.12), (L1 - 0.04 * q, -hw * 0.4),
+           (L1 - 0.02 * q, -hw * 0.62), (yt + 0.1 * q, -hw * 0.82), (yt + 0.085 * q, -hw * 1.04), (yt + 0.04 * q, -hw * 1.08)]
     return top + tip + bot[::-1]
 
 
@@ -203,7 +212,7 @@ def sword(sp):
              "sword"]
     mi = {n: i for i, n in enumerate(names)}
     bm = bmesh.new()
-    out = _outline(L0, L1, hw, chip=float(sp.get("chip", 0.012)))
+    out = _outline(L0, L1, hw, chip=float(sp.get("chip", 0.012)), teeth=int(sp.get("teeth", 0)))
     _slab(bm, out, 0.011, 0.03, 0.72, mi["blade"], mi["blade_dk"])
     # the white-hot core: one broad channel the blade's whole length (kael_blade_sheet), its rim pale gold, a few
     # thin cracks breaking off it toward the edges; on both faces
@@ -225,9 +234,10 @@ def sword(sp):
     for s in (-1, 1):
         x = s * 0.0312
         # (a soft bloom: two wider, dimmer glow layers under the rim, the glow falling off toward the edges)
-        _ribbon(bm, main, min(cw * 2.1, hw * 1.85), s * 0.0306, mi["sword_halo2"], taper=False)
-        _ribbon(bm, main, cw * 1.6, s * 0.0309, mi["sword_halo"], taper=False)
-        _ribbon(bm, main, cw * 1.25, x, mi["sword_edge"], taper=False)
+        hk = sp.get("halo_k", [2.1, 1.6, 1.25])
+        _ribbon(bm, main, min(cw * hk[0], hw * 1.85), s * 0.0306, mi["sword_halo2"], taper=False)
+        _ribbon(bm, main, cw * hk[1], s * 0.0309, mi["sword_halo"], taper=False)
+        _ribbon(bm, main, cw * hk[2], x, mi["sword_edge"], taper=False)
         _ribbon(bm, main, cw, s * 0.0318, mi["sword"], taper=False)
         for br in branches:
             _ribbon(bm, br, 0.016, x, mi["sword_edge"])
@@ -245,10 +255,10 @@ def sword(sp):
             _ribbon(bm, line, 0.0035, s * 0.0324, mi["sword_edge"])
     if sp.get("bands"):
         # two iron bands round the blade above the guard (the turnaround)
-        for y in (L0 + 0.1, L0 + 0.2):
-            _box(bm, (0, y, 0), (0.036, 0.018, hw * 1.06), mi["band"])
+        for y in sp.get("band_at", [0.1, 0.2]):
+            _box(bm, (0, L0 + y, 0), (0.036, 0.016, hw * 1.08), mi["band"])
     # the bar guard, the wrapped grip, the pommel (the sheet's pommel hook is NOT his: the one hook is the chain's)
-    _box(bm, (0, L0 - 0.03, 0), (0.055, 0.045, hw * 1.55), mi["guard"])
+    _box(bm, (0, L0 - 0.03, 0), (0.05, 0.04, hw * float(sp.get("guard_k", 1.55))), mi["guard"])
     _cyl(bm, (0, L0 - 0.075, 0), (0, -0.25, 0), 0.034, 10, mi["grip"])
     for k in range(5):
         y = -0.2 + k * 0.07
@@ -265,7 +275,29 @@ def sword(sp):
     # the Warchain's links round the grip (the chain off the forearm runs down the hilt)
     bld = WP.Builder()
     hilt = np.array([[0.0, -0.22 + 0.05 * i, 0.0] for i in range(6)])
-    for i in range(6):
+    rows = sp.get("wrap_rows")
+    if rows:
+        # the chain wound round the blade's base above the guard in tight rows (kael_blade_sheet): links laid
+        # along the slab's perimeter, every other one turned on edge
+        hx, hz = 0.034, hw + 0.012
+        per = 4 * (hx + hz)
+        nl = int(per / 0.042)
+        for r_i, y in enumerate(rows):
+            for k in range(nl):
+                u = (k + 0.5 * (r_i % 2)) / nl * per
+                # the rectangle's perimeter: +z edge, +x side, -z edge, -x side
+                if u < 2 * hz:
+                    c, t = (hx, -hz + u), (0.0, 1.0)
+                elif u < 2 * hz + 2 * hx:
+                    c, t = (hx - (u - 2 * hz), hz), (-1.0, 0.0)
+                elif u < 4 * hz + 2 * hx:
+                    c, t = (-hx, hz - (u - 2 * hz - 2 * hx)), (0.0, -1.0)
+                else:
+                    c, t = (-hx + (u - 4 * hz - 2 * hx), -hz), (1.0, 0.0)
+                tv = np.array([t[0], 0.0, t[1]])
+                side = np.array([0.0, 1.0, 0.0]) if k % 2 == 0 else np.array([t[1], 0.0, -t[0]])
+                _link(bld, np.array([c[0], L0 + y, c[1]]), tv, side, 0.05, 0.032, 0.0068, "chain", 0.0)
+    for i in range(0 if rows else 6):
         # round the blade's base above the guard: links standing round its flat
         y = L0 + 0.02 + 0.035 * i
         ang = i * 1.9
@@ -630,6 +662,77 @@ def collar(body, arm, rig, K, sp):
     return ob
 
 
+def shards(body, arm, rig, K, sp):
+    """The broken gold champion's collar as the turnaround and head sheet draw it on him: not a whole ring but
+    chunky gold shards lying on the scarf's lower edge, one pair each side of his chest with the gap in the middle
+    where it broke (kael_collar_sheet: the band, its rims, the jagged broken ends). Each piece is a curved band
+    segment on a cone round the neck (`flare`: the radius grows as it drops onto the chest), its outline jagged at
+    the broken ends, extruded `thick`; the face gold, the rims and broken faces darker. Rigid on `bone` (chest)."""
+    neck = np.array(K.bone_head(rig, "head")[:])
+    co = np.array([v.co[:] for v in body.data.vertices])
+    rng = np.random.default_rng(int(sp.get("seed", 5)))
+    bm = bmesh.new()
+    names = ["gold", "gold_dk"]
+    flare = float(sp.get("flare", 0.9))
+    t = float(sp.get("thick", 0.016))
+    log_r = []
+    for pc in sp["pieces"]:
+        a0, a1 = math.radians(pc["az"][0]), math.radians(pc["az"][1])
+        zt = neck[2] - float(pc.get("drop", 0.06))
+        h = float(pc.get("h", 0.045))
+        # the body's radius at the piece's middle, round the neck's axis, in its direction
+        am = (a0 + a1) / 2
+        d2 = np.array([math.sin(am), math.cos(am)])
+        rel = co[:, :2] - neck[:2]
+        sel = (np.abs(co[:, 2] - (zt - h / 2)) < 0.02) & (rel @ d2 > 0) & (np.abs(rel @ np.array([d2[1], -d2[0]])) < 0.04)
+        r0 = float(np.percentile(rel[sel] @ d2, 90)) if sel.sum() > 5 else 0.12
+        r0 += float(pc.get("out", sp.get("out", 0.008)))
+        log_r.append(round(r0, 3))
+        # the outline in (u across 0..1 from a0 to a1, w down 0..1): straight-ish top and bottom, jagged ends
+        n = 8
+        top = [(i / n, rng.uniform(-0.06, 0.04) if 0 < i < n else 0.0) for i in range(n + 1)]
+        bot = [(1 - i / n, 1.0 + rng.uniform(-0.05, 0.05) if 0 < i < n else 1.0) for i in range(n + 1)]
+        jag = int(pc.get("jag", 3))
+        right = [(1.0 + rng.uniform(-0.12, 0.08) * (pc.get("broken", [1, 1])[1]), (k + 1) / (jag + 1)) for k in range(jag)]
+        left = [(rng.uniform(-0.08, 0.12) * (pc.get("broken", [1, 1])[0]), 1 - (k + 1) / (jag + 1)) for k in range(jag)]
+        outline = top + right + bot + left
+
+        def at(u, w, rr):
+            a = a0 + (a1 - a0) * u
+            z = zt - h * w
+            r = rr + flare * h * w
+            return Vector((neck[0] + math.sin(a) * r, neck[1] + math.cos(a) * r, z))
+        fo = [bm.verts.new(at(u, w, r0 + t)) for u, w in outline]
+        fi = [bm.verts.new(at(u, w, r0)) for u, w in outline]
+        f = bm.faces.new(fo)
+        f.material_index = 0
+        bm.faces.new(fi[::-1]).material_index = 1
+        m = len(outline)
+        for k in range(m):
+            q = (fi[k], fi[(k + 1) % m], fo[(k + 1) % m], fo[k])
+            bm.faces.new(q).material_index = 1
+        # a raised rim along the top and the bottom (the collar sheet's band edges), in the darker gold
+        for w0, w1 in ((0.0, 0.16), (0.84, 1.0)):
+            ra = [bm.verts.new(at(u, w, r0 + t * 1.6)) for u, w in ((0.03, w0), (0.97, w0), (0.97, w1), (0.03, w1))]
+            bm.faces.new(ra).material_index = 1 if pc.get("rim_dark", True) else 0
+    bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new("Collar")
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new("Collar", me)
+    bpy.context.scene.collection.objects.link(ob)
+    for nm in names:
+        me.materials.append(mat(nm))
+    paint_flat(ob)
+    g = ob.vertex_groups.new(name=sp.get("bone", "hips"))
+    g.add(list(range(len(me.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    ob.modifiers.new("Armature", "ARMATURE").object = arm
+    log("collar shards: %d pieces at r %s, %d tris" % (len(sp["pieces"]), log_r, sum(len(p.vertices) - 2 for p in me.polygons)))
+    return ob
+
+
 # ------------------------------------------------------------------------------------------------ the Meshy mane
 def _hsv_np(rgb):
     mx, mn = rgb.max(axis=1), rgb.min(axis=1)
@@ -691,14 +794,54 @@ def meshy_mane(body, arm, rig, K, sp, import_glb, decimate, log_fn=log):
     for v in bm.verts:
         x, y, z = v.co
         v.co = Vector((-x * k + off[0], -y * k + off[1], z * k + off[2]))
+    fc = sp.get("face_cut")
+    if fc:
+        # (the head run's bangs hang over his eyes and scarf; the art keeps the face clear: hair faces in front of
+        # the face, within half_x of its centre and below z_top over the head bone, go)
+        hb = K.bone_head(rig, "head")
+        hx, hy, hzz = float(hb.x), float(hb.y), float(hb.z)
+        gone = [f for f in bm.faces if abs(f.calc_center_median().x - hx) < fc[0]
+                and f.calc_center_median().y > hy + fc[1] and f.calc_center_median().z < hzz + fc[2]]
+        bmesh.ops.delete(bm, geom=gone, context="FACES")
+        bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+        log_fn("meshy mane: cut %d faces in front of the face" % len(gone))
     bm.to_mesh(me)
     bm.free()
     me.update()
     src.name = me.name = "Mane"
     decimate(src, int(sp.get("tris", 9000)))
+    if sp.get("double_sided"):
+        # (the run's hair is a single shell: from behind or through a gap the culled back faces read as holes;
+        # a flipped copy of every face makes it opaque from both sides)
+        bm = bmesh.new()
+        bm.from_mesh(me)
+        dup = bmesh.ops.duplicate(bm, geom=list(bm.faces))
+        nf_ = [g for g in dup["geom"] if isinstance(g, bmesh.types.BMFace)]
+        bmesh.ops.reverse_faces(bm, faces=nf_)
+        for v in [g for g in dup["geom"] if isinstance(g, bmesh.types.BMVert)]:
+            v.co -= v.normal * 0.0015
+        bm.to_mesh(me)
+        bm.free()
+        me.update()
     # shrink its texture
     sz = int(sp.get("tex", 1024))
     img.scale(sz, sz)
+    if sp.get("ramp"):
+        # (the head run's hair is cream; the art's is silver-white with a faint mauve: its luminance onto the
+        # art's hair ramp, p5..p95 of the hair texels dark to light, `ramp_gamma` > 1 keeps more of it light)
+        q = np.array(img.pixels[:], np.float32).reshape(sz, sz, 4)
+        lum = q[..., :3] @ np.array([0.299, 0.587, 0.114], np.float32)
+        s_, v_ = _hsv_np(q[..., :3].reshape(-1, 3))
+        hm = ((s_ < 0.25) & (v_ > 0.3)).reshape(sz, sz)
+        lo, hi = np.percentile(lum[hm], 5), np.percentile(lum[hm], 95)
+        u = np.clip((lum - lo) / max(hi - lo, 1e-4), 0, 1) ** (1.0 / float(sp.get("ramp_gamma", 1.0)))
+        ramp = np.array([[int(c[i:i + 2], 16) / 255.0 for i in (0, 2, 4)] for c in sp["ramp"]], np.float32)
+        x = u * (len(ramp) - 1)
+        i0 = np.clip(np.floor(x).astype(int), 0, len(ramp) - 2)
+        f = (x - i0)[..., None]
+        q[..., :3] = ramp[i0] * (1 - f) + ramp[i0 + 1] * f
+        img.pixels = q.ravel()
+        log_fn("meshy mane: texture onto the hair ramp (lum %.2f..%.2f)" % (lo, hi))
     img.pack()
     for m in me.materials:
         m.name = "hair-mane"

@@ -33,24 +33,24 @@
 	},
 	"kael": {
 		"painted": {
-			"rim_far": 0.3,
+			"rim_far": 0.35,
 			"rim_far_color": [
 				1.0,
-				0.74,
-				0.28
+				0.8,
+				0.36
 			]
 		},
 		"slots": {
 			"skin": {
-				"top_light": 0.4,
-				"fres": 0.6,
-				"fres_tint": 0.6,
-				"far_lift": 0.3,
-				"shade": 0.84,
+				"top_light": 0.3,
+				"fres": 0.45,
+				"fres_tint": 0.3,
+				"far_lift": 0.18,
+				"shade": 0.9,
 				"shadow_tint": [
-					0.9,
-					0.88,
-					0.92
+					0.84,
+					0.86,
+					0.96
 				]
 			},
 			"cloth": {
@@ -58,9 +58,10 @@
 				"far_lift": 0.3
 			},
 			"hair": {
-				"far_lift": 0.1,
-				"fres": 0.4,
-				"top_light": 0.5
+				"far_lift": 0.5,
+				"fres": 0.6,
+				"glow": 0.12,
+				"top_light": 0.4
 			},
 			"metal": {
 				"top_light": 0.5,
@@ -76,6 +77,19 @@
 			"glow": {
 				"glow": 2.8
 			}
+		},
+		"smoke": {
+			"color": [
+				0.06,
+				0.05,
+				0.07,
+				0.5
+			],
+			"amount": 18,
+			"life": 1.5,
+			"size": 0.16,
+			"rise": 0.45,
+			"from": 0.35
 		}
 	}
 }

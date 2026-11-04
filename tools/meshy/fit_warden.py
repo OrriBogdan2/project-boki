@@ -1961,7 +1961,7 @@ def hot_paint(ob, img, hp):
         # the scan's own hot texels back to skin (its busy net)
         cur = rgb[ty, tx]
         heat = ss(0.42, 0.66, cur[:, 0]) * ss(0.14, 0.32, cur[:, 0] - cur[:, 2]) * ss(-0.04, 0.01, cur[:, 1] - cur[:, 2])
-        hot = heat > 0.15
+        hot = heat > float(hp.get("net_k", 0.15))
         rgb[ty[hot], tx[hot]] = c_skin * (0.85 + 0.3 * rng.random((int(hot.sum()), 1))).astype(np.float32)
         n_off += int(hot.sum())
         # the texel's place on the unwrapped arm
@@ -2135,6 +2135,8 @@ def main():
             parts.append(kael_parts.cap(ob, arm, rig, K, spec["kael"]["cap"]))
         if spec["kael"].get("collar"):
             parts.append(kael_parts.collar(ob, arm, rig, K, spec["kael"]["collar"]))
+        if spec["kael"].get("shards"):
+            parts.append(kael_parts.shards(ob, arm, rig, K, spec["kael"]["shards"]))
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
