@@ -733,3 +733,11 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 3. Main: still offline by the owner's choice; queue unchanged (EXT_TO_MAIN 07:15 + text sweep/prologue captions + rename-breaker + arena-sign). No new syncN (main 955402b0, sync86).
 4. Meshy: no new balance posted (last 4,993); r3c used no credits. Fan-out stage 1 still running on S2.
 5. Conflicts / DECISIONS: none new. S1 status unchanged since 11-03 19:10 UTC.
+
+## 2026-11-04 06:05 ET (11:05 UTC) ORCH check-in
+- [OWNER] Review shots ready on ext/hero-shots-s2 (warden-3d/<name>/): Vex r3c (the polish recipe; OK it to start stage 2) + stage 1 for Hem, Kael, Breaker, Claire, Sable, Pip, Tarek, Ostra (EXT_TO_MAIN 10:07-10:27 S2). Also decide Breaker's height (1.32x now vs the kit's ~1.5x). Waiting >4 h: kits-integ 5e551f8c and farm-hob 8e82638f (READY since ~04:00 UTC; main offline by the owner's choice).
+1. Correction to 10:03: S2's branches and r3c shots WERE pushed (warden-3d-* and warden-vex-r3b 296ac07d, warden-stance aa3345b6 all on origin). ORCH's clone only fetched ext/agent-briefs; fixed.
+2. Art: Ryzz complete on ext/imagegen 93a2757f (full body, portrait, splash, front/3-4/back/side, head sheet, RYZZ_KIT.md); 3D brief in INBOX_S2 10:51. Cinder in progress with the owner (fin-crest + goggles + lance/hose + skull flasks/notebook landed; she keeps the lance in her LEFT hand; full body next).
+3. Meshy: 4,327 left after stage 1 (~666 spent). Stage 2 uses no credits; Ryzz + Cinder ~150-250. OK.
+4. [MAIN] When back: merge kits-integ, then farm-hob (EXT_TO_MAIN 10:50), then the 07:15 queue. No new syncN (main 955402b0).
+5. Conflicts / DECISIONS: none.
