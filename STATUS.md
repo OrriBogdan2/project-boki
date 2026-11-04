@@ -284,3 +284,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Vex r3d face pass:** match the portrait's face, remove the jaw seam, make the lens read at match zoom, clean the strap smears. Its face rules go to the other agents.
 - **Ryzz stage 1:** running.
 - **Cinder:** art in (11:45), queued after stage 2.
+- 2026-11-04 11:53 UTC: Dredge hull upgrade is running (owner 13:10): angular, dented plates and olive-gold brass; rig and moves kept; 80-150 credits. Ryzz stage 2 is running. All stage-2 agents have the owner's new reference sheets.
