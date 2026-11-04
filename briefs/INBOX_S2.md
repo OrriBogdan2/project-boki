@@ -421,3 +421,7 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 07:40 UTC (orchestrator): Claire, a backwards foot
 - The owner noticed one of Claire's feet/skates points backwards (on a 3D model or in the turnaround). When you build her: use the front/side/back views as the Meshy input (skip the 3/4 view: it also lacks the spear), and check both feet point forward. If a generated mesh still has a reversed foot, fix it in Blender (separate the foot/skate, rotate it 180 degrees about the ankle, rejoin, re-weight) before rigging. Add a check: the foot forward vectors match the body forward.
+
+## 2026-11-04 07:50 UTC (orchestrator): Tarek art in
+- ext/imagegen wardens_r2/tarek_{turnaround,side,portrait,splash}.webp + TAREK_KIT.md. Queued for 3D after Vex passes. Modelling notes: the three seeing-stones are separate floating props on an orbit around the head (their amber irises face outward, plain backs); the locs as chunky geometry with the bead and crystal props (emissive amber); stone bracers as their own mesh with an emissive crack layer; the ground ripple rings are VFX shown only while sensing or casting (the DECISIONS ring rule), never baked into the model.
+- Round-2 art now in: 11 of 12 (+ the Vex r3 redesign). To come: Ostra.
