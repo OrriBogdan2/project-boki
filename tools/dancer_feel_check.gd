@@ -1,5 +1,5 @@
 extends RefCounted
-## Dancer's feel pass (item 7 of the 1103 review), run inside --dancer-combo-check (tools/dancer_jug_check.gd): the
+## Sable's feel pass (item 7 of the 1103 review), run inside --dancer-combo-check (tools/dancer_jug_check.gd): the
 ## Cartwheel's distance, time and speed curve against the source's measured one, the empowered bolt's damage and
 ## window, the Vault back on the hit's own step, the reset loop's pace, and a click mid-flip kept until the bolt
 ## can go. The source numbers are in docs/heroes/thief.md, "Feel pass (item 7)".

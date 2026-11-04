@@ -512,7 +512,7 @@ static func _anim_ult(P: Hunter, mv: String, t: float, dt: float) -> void:
 			(K as ArcherKit).ult.left = 1
 	P.inp["fire"] = mv.begins_with("pin_ult_") and mv != "pin_ult_cast" and t > 0.5 and t < 0.6
 
-## Bjorn's owner-review strips (#48, #49, #51): a full swing let go after the perfect window, one let go in it,
+## Breaker's owner-review strips (#48, #49, #51): a full swing let go after the perfect window, one let go in it,
 ## one in it at an island's edge (it carries him over and he glides), Faultline cast with him walking off
 ## across the lane after the plant; the hold through a jump let go in the air, through a Shift dash let go
 ## after it, and through a jump let go in the window (the launch from the air).

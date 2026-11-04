@@ -9,7 +9,7 @@ var ac: RefCounted
 var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
-const VPARITY := preload("res://tools/venator_parity_check.gd")   # Venator against the source (the parity pass)
+const VPARITY := preload("res://tools/venator_parity_check.gd")   # Vex against the source (the parity pass)
 
 func ok(name_: String, cond: bool, info := "") -> void:
 	n += 1

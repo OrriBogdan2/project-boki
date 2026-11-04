@@ -160,7 +160,7 @@ func _run_flat(W, x: int, z: int) -> bool:
 func _at(t: float, when: float) -> bool:
 	return absf(t - when) < DT * 0.5
 
-## Zedran: the Searing Wave held through the Rampage; the Slam Drive; an air dash in the Meteor Drop's hang.
+## Kael: the Searing Wave held through the Rampage; the Slam Drive; an air dash in the Meteor Drop's hang.
 func _juggernaut() -> void:
 	var K: JuggernautKit = P.ak
 	await _reset(10.0)
@@ -173,7 +173,7 @@ func _juggernaut() -> void:
 			P.inp["move"] = Vector2.ZERO
 	var marks := _strip(
 		"combo_wave_rampage_strip",
-		"Zedran (item 51): the Searing Wave charging; Shift with it held, the Rampage's crouch; the drive, the"
+		"Kael (item 51): the Searing Wave charging; Shift with it held, the Rampage's crouch; the drive, the"
 			+ " charge kept; out of the drive, the wind-up pose back; let go, the wave leaves; the follow-through",
 		[0.38, 0.55, 0.72, 0.98, 1.2, 1.4]
 	)
@@ -186,7 +186,7 @@ func _juggernaut() -> void:
 			P.do_dash()
 	var smarks := _strip(
 		"combo_slam_drive_strip",
-		"Zedran (item 51): the Slam winding up; Shift in it, the Slam Drive goes at once along the strike's aim,"
+		"Kael (item 51): the Slam winding up; Shift in it, the Slam Drive goes at once along the strike's aim,"
 			+ " the overhead pose kept; driving in; the drive's end; the Slam lands where it arrived; recovery",
 		[0.2, 0.3, 0.42, 0.56, 0.76, 0.95]
 	)
@@ -203,7 +203,7 @@ func _juggernaut() -> void:
 			P.inp["move"] = Vector2.ZERO
 	var dmarks := _strip(
 		"combo_meteor_airdash_strip",
-		"Zedran (item 51): the Meteor Drop's hang over its marker; Shift, the air dash goes in the gather pose;"
+		"Kael (item 51): the Meteor Drop's hang over its marker; Shift, the air dash goes in the gather pose;"
 			+ " the dash's end, off to the side; the dive back onto the marker; the impact; the recovery",
 		[0.34, 0.42, 0.55, 0.64, 0.76, 1.0]
 	)
@@ -243,7 +243,7 @@ func _dredge() -> void:
 	)
 	await _go(2.3, blast, bmarks)
 
-## Linwick: the lance held through a ram; Shift in the flight; a jump off the flight.
+## Cinder: the lance held through a ram; Shift in the flight; a jump off the flight.
 func _ashwick() -> void:
 	P.lvl = 6
 	await _reset(11.0)
@@ -253,7 +253,7 @@ func _ashwick() -> void:
 			P.do_dash()
 	var marks := _strip(
 		"combo_lance_ram_strip",
-		"Linwick (item 51): the lance roaring; Shift with it held, the ram goes and the stream goes out; still"
+		"Cinder (item 51): the lance roaring; Shift with it held, the ram goes and the stream goes out; still"
 			+ " ramming; the ram's end, the stream back at once (no pilot, no gap); roaring on; let go",
 		[0.5, 0.66, 0.78, 0.94, 1.15, 1.5]
 	)
@@ -268,7 +268,7 @@ func _ashwick() -> void:
 		P.inp["move"] = Vector2(1, -0.4).normalized() if t >= 0.55 and t < 0.6 else Vector2.ZERO
 	var pmarks := _strip(
 		"combo_flight_poof_strip",
-		"Linwick (item 51): flying over the carpet; Shift, a poof from the bellows (the air dash spent); the"
+		"Cinder (item 51): flying over the carpet; Shift, a poof from the bellows (the air dash spent); the"
 			+ " flight faster and bent its way; flying on; X again, landing; on foot, the carpet behind",
 		[0.4, 0.58, 0.66, 0.74, 0.86, 1.1]
 	)
@@ -282,13 +282,13 @@ func _ashwick() -> void:
 		P.inp["glide"] = t >= 0.95
 	var lmarks := _strip(
 		"combo_flight_leap_strip",
-		"Linwick (item 51): flying; a jump leaps off the jet, its speed kept; rising; the glider opens with the"
+		"Cinder (item 51): flying; a jump leaps off the jet, its speed kept; rising; the glider opens with the"
 			+ " flight's speed; gliding on; the carpet left behind",
 		[0.6, 0.76, 0.88, 1.05, 1.3, 1.6]
 	)
 	await _go(1.7, leap, lmarks)
 
-## Zedran's Warchain, as whole views (the chain is longer than a strip crop): it pays out as he backs away and
+## Kael's Warchain, as whole views (the chain is longer than a strip crop): it pays out as he backs away and
 ## holds taut at 24 m; backing away then pulling slingshots him in; a strafe held in the pull curves him in beside.
 func _juggernaut_chain() -> void:
 	var K: JuggernautKit = P.ak
@@ -300,9 +300,9 @@ func _juggernaut_chain() -> void:
 		P.inp["move"] = Vector2(1, 0) if t > 0.4 else Vector2.ZERO
 		_aim(T.pos)
 	await _go(4.9, taut, [
-		[0.45, "full", "warchain_taut_1", "Zedran Warchain: hooked on the dummy 8 m away, he starts backing off"],
-		[2.6, "full", "warchain_taut_2", "Zedran Warchain: ~17 m, the chain paying out after him"],
-		[4.6, "full", "warchain_taut_3", "Zedran Warchain: at 24 m it is taut and hot and holds: he keeps walking but"
+		[0.45, "full", "warchain_taut_1", "Kael Warchain: hooked on the dummy 8 m away, he starts backing off"],
+		[2.6, "full", "warchain_taut_2", "Kael Warchain: ~17 m, the chain paying out after him"],
+		[4.6, "full", "warchain_taut_3", "Kael Warchain: at 24 m it is taut and hot and holds: he keeps walking but"
 				+ " stays at its end"]], -9.0)
 	K.warchain.snap("")
 	await _reset(9.0)
@@ -315,9 +315,9 @@ func _juggernaut_chain() -> void:
 			K.use_e()
 		_aim(T.pos)
 	await _go(1.5, sling, [
-		[0.9, "full", "warchain_sling_1", "Zedran Warchain: hooked, backing away"],
-		[1.07, "full", "warchain_sling_2", "Zedran Warchain: E while backing away: the slingshot, flying in faster"],
-		[1.25, "full", "warchain_sling_3", "Zedran Warchain: arrived on the dummy, still moving"]], 4.5)
+		[0.9, "full", "warchain_sling_1", "Kael Warchain: hooked, backing away"],
+		[1.07, "full", "warchain_sling_2", "Kael Warchain: E while backing away: the slingshot, flying in faster"],
+		[1.25, "full", "warchain_sling_3", "Kael Warchain: arrived on the dummy, still moving"]], 4.5)
 	await _reset(9.0)
 	var steer := func(t: float):
 		if _at(t, 0.1):
@@ -328,9 +328,9 @@ func _juggernaut_chain() -> void:
 		P.inp["move"] = Vector2(0, 1) if t > 0.6 else Vector2.ZERO
 		_aim(T.pos)
 	await _go(1.3, steer, [
-		[0.68, "full", "warchain_steer_1", "Zedran Warchain: E with a strafe held: the pull swings out that way"],
-		[0.8, "full", "warchain_steer_2", "Zedran Warchain: curving round toward the dummy"],
-		[0.95, "full", "warchain_steer_3", "Zedran Warchain: arriving beside it, not on its line"]], 4.5)
+		[0.68, "full", "warchain_steer_1", "Kael Warchain: E with a strafe held: the pull swings out that way"],
+		[0.8, "full", "warchain_steer_2", "Kael Warchain: curving round toward the dummy"],
+		[0.95, "full", "warchain_steer_3", "Kael Warchain: arriving beside it, not on its line"]], 4.5)
 
 ## The audit (Nov 3): Skycall held and dragged, then released; the strike ring at its true radius.
 func _mage_audit() -> void:
@@ -344,7 +344,7 @@ func _mage_audit() -> void:
 		P.inp["e_down"] = t < 0.6
 	var at_t := func(): return T.position + Vector3(0, 0.9, 0)
 	var marks := [
-		[0.45, "full", "audit_skycall_held", "Vireo Skycall held (audit: the data's hold, drag, release): the drag"
+		[0.45, "full", "audit_skycall_held", "Ryzz Skycall held (audit: the data's hold, drag, release): the drag"
 			+ " arrow follows the cursor back toward her, the rim chevron points it; nothing commits while E is held",
 			at_t],
 		[0.9, "full", "audit_skycall_count", "Released at 0.6s: committed, the pillar narrows over the 0.8s countdown",

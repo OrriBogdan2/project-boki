@@ -96,7 +96,7 @@ const SWINGS := {
 		{"a": Vector3(1.25, -0.75, -1.5), "b": Vector3(-1.6, 0.65, -1.5), "tw": Vector2(0.55, -0.6), "hand": "b"},
 		{"a": Vector3(0.0, 2.5, 0.0), "b": Vector3(0.0, -1.2, 0.0), "tw": Vector2(-0.1, 0.1), "hand": "b", "drop": 0.2},
 	],
-	# Dancer's Arc Bolts (by weapon id, over the twin hold's slashes): each blade whipped from cocked out
+	# Sable's Arc Bolts (by weapon id, over the twin hold's slashes): each blade whipped from cocked out
 	# wide and high to straight at the aim, the right, then the left; both at once in a V (the empowered
 	# bolt). The torso's turn comes from her kit moves (thf_lmb_r / _l, thf_primed), so no twist here; the
 	# ends lean 0.45 against the torso's 0.5 turn into the throw, so the blade points at the aim.

@@ -1,6 +1,6 @@
 class_name BjornLaunch
 extends RefCounted
-## Bjorn's perfect swing (docs/heroes/bulwark.md, "LMB hold"): let go of the Crushing Blow in the window
+## Breaker's perfect swing (docs/heroes/bulwark.md, "LMB hold"): let go of the Crushing Blow in the window
 ## right after it reaches full charge (lmb "perfect.window" s, flagged by the hammer's flash and a click)
 ## and the slam throws his whole weight forward: "perfect.dist" m over "perfect.time" s, feet off the ground
 ## (bul_launch), then a skid as he lands. The launch rides the dash plumbing (Hunter.dash_with), so its end

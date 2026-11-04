@@ -2,7 +2,7 @@ class_name Displace
 extends RefCounted
 ## Every ability that moves someone else's body goes through here: a teleport (Ostra's Trade, a rock rising
 ## under a foot), a shove, a spike down, and the tows that move a body over time (Cinder's cloak pull,
-## Dredge's reel, Bjorn's shield push, Vireo's Skycall drag, Claire's wall carry, the Nightwell's draw).
+## Dredge's reel, Breaker's shield push, Ryzz's Skycall drag, Claire's wall carry, the Nightwell's draw).
 ##
 ## A body this game owns moves here, now. A body another game owns (Ent.remote: every other player online,
 ## and the host's bots and monsters on a guest's game) is moved by ITS game: the same call goes out over Net
@@ -223,7 +223,7 @@ func _over(fe: Ent, dir: Vector2, W: World, from: float) -> float:
 			return k
 	return 0.0
 
-## Bjorn's shield push and Claire's wall carry: along a line at a steady speed.
+## Breaker's shield push and Claire's wall carry: along a line at a steady speed.
 func _push(rec: Dictionary, e: Ent, dt: float) -> String:
 	var p: Dictionary = rec["p"]
 	var step := minf(float(p["dist"]) - float(rec["gone"]), float(p["spd"]) * dt)
@@ -237,7 +237,7 @@ func _push(rec: Dictionary, e: Ent, dt: float) -> String:
 	rec["gone"] = float(rec["gone"]) + step
 	return ""
 
-## Vireo's Skycall drag: a slow ground slide that eases out (speed falls straight to zero), covering exactly
+## Ryzz's Skycall drag: a slow ground slide that eases out (speed falls straight to zero), covering exactly
 ## dist over dur unless a wall stops it.
 func _slide(rec: Dictionary, e: Ent) -> String:
 	var p: Dictionary = rec["p"]

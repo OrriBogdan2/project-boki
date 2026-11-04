@@ -18,7 +18,7 @@ const SLIDE := [-1.2, -0.15, -0.3, -1.8]
 const AIM_CROUCH := [0.55, -0.95, -0.2, -0.55]
 const TOSS_SET := [0.45, -0.75, -0.1, -0.4]
 const TOSS_STEP := [0.7, -0.8, -0.35, -0.25]
-## Venator's rifle shouldered between rounds: the chest low over the front knee, the stock in the shoulder.
+## Vex's rifle shouldered between rounds: the chest low over the front knee, the stock in the shoulder.
 const SHOULDER := {"p": -0.08, "lift": -0.05, "sq": 0.05, "wo": Vector3(0.0, 0.0, 0.02), "legs": AIM_CROUCH, "lw": 0.7}
 
 const MOVES := {

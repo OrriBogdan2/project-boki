@@ -5,7 +5,7 @@ extends RefCounted
 ## second headless game, the guest (--displace-net-check=guest), through the queue wrapper. Both build the
 ## same flat training strip; the host plays each ability first on a local bot, then on the guest's hunter,
 ## and the guest reports where its own game put it. Cinder's cloak pull, Dredge's reel, Ostra's Trade,
-## Vireo's Skycall drag, Bjorn's shield push; Zedran's Warchain pulls Zedran to the player (not the player).
+## Ryzz's Skycall drag, Breaker's shield push; Kael's Warchain pulls Kael to the player (not the player).
 ## Then the hit path: a hazard striking on both games hurts the player once; a knock's wall stun, a burn's
 ## length and a slow's strength reach the player's own game.
 ## Lines: DISPNET ok|FAIL <what>; the guest prints DISPNET guest pid=<pid>.
@@ -95,8 +95,8 @@ func _host() -> void:
 	ok(DK.arrivals == 2 and DK.pull.is_empty(),
 		"Dredge's reel: on the player too it ends as an arrival (HAULED), the reel let go", "arrivals %d" % DK.arrivals)
 	await _case(G, B, "ostra", Vector3(8.0, 0, 0), _ostra, 2.2, "Ostra's Trade")
-	await _case(G, B, "mage", Vector3(7.0, 0, 0), _vireo, 2.4, "Vireo's Skycall drag", "slide")
-	await _case(G, B, "bulwark", Vector3(1.7, 0, 0), _bjorn, 1.2, "Bjorn's shield push", "push")
+	await _case(G, B, "mage", Vector3(7.0, 0, 0), _vireo, 2.4, "Ryzz's Skycall drag", "slide")
+	await _case(G, B, "bulwark", Vector3(1.7, 0, 0), _bjorn, 1.2, "Breaker's shield push", "push")
 	await _zedran(G)
 	await _hazard(G, B)
 	await _knock_extras(G, B)
@@ -188,7 +188,7 @@ func _vireo(t: Hunter) -> void:
 	_aim(at)
 	m.player.ak.use_e()
 	await _run(0.05)
-	_aim(at + Vector3(-3.0, 0, 0))          # the flick: back toward Vireo
+	_aim(at + Vector3(-3.0, 0, 0))          # the flick: back toward Ryzz
 	await _run(0.1)
 
 func _bjorn(t: Hunter) -> void:
@@ -202,7 +202,7 @@ func _bjorn(t: Hunter) -> void:
 	P.inp["sec_hold"] = false
 	await _run(DT)
 
-## Zedran's Warchain hooks the player and pulls Zedran to them; the player stays put (a self-pull).
+## Kael's Warchain hooks the player and pulls Kael to them; the player stays put (a self-pull).
 func _zedran(G: Hunter) -> void:
 	var P := m.player
 	_kit("juggernaut")
@@ -220,10 +220,10 @@ func _zedran(G: Hunter) -> void:
 	Displace.capture = false
 	var moves := Displace.sent.filter(func(e): return String(e[2]) == G.nid).size()
 	await _ask()
-	ok(hooked and K.warchain.arrivals == 1, "Zedran's Warchain: it hooks the player and pulls Zedran in",
+	ok(hooked and K.warchain.arrivals == 1, "Kael's Warchain: it hooks the player and pulls Kael in",
 		"hooked %s arrivals %d" % [hooked, K.warchain.arrivals])
 	ok(P.flat_dist(G) < 2.6 and moves == 0,
-		"Zedran's Warchain: he lands beside the player; the chain sends no move for them",
+		"Kael's Warchain: he lands beside the player; the chain sends no move for them",
 		"gap %.1f, moves %d" % [P.flat_dist(G), moves])
 
 ## A hazard strikes on both games (each game runs its own hazards): the player is hurt once, by

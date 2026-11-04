@@ -1,5 +1,5 @@
 extends RefCounted
-## Dancer's LMB against the source (the parity pass), run inside --dancer-combo-check (tools/dancer_jug_check.gd):
+## Sable's LMB against the source (the parity pass), run inside --dancer-combo-check (tools/dancer_jug_check.gd):
 ## the throw's beats against the footage (2-3 frames a shot, one arm whipped out, the torso turned ~30 degrees),
 ## the held cadence and the alternating hands, how the aim tracks the cursor (each bolt at the cursor as it leaves,
 ## the body turning at the source's rate), and that she keeps running while she throws. Source numbers:

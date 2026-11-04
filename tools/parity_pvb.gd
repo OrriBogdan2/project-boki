@@ -127,7 +127,7 @@ func _pin_audit(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: ArcherKit, home: 
 	ok("audit pin: the Heavy Shot stops on the first foe (data: one target, a knockback; no pierce)",
 		dmg(T) > 10.0 and dmg(T2) == 0.0, "%.0f / %.0f" % [dmg(T), dmg(T2)])
 
-# ------------------------------------------------------------------ Vireo: the finger bolts
+# ------------------------------------------------------------------ Ryzz: the finger bolts
 func vireo() -> void:
 	var r := setup("mage", 7.0)
 	var m: Match = r[0]

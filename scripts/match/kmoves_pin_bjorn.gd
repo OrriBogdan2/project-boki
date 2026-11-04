@@ -43,7 +43,7 @@ const FULL_POSE := {
 	"fr": Vector3(0.04, 0.15, -0.64)
 }
 
-## Bjorn's coil at full charge (the perfect window's pose and the start of each release): twisted hard away,
+## Breaker's coil at full charge (the perfect window's pose and the start of each release): twisted hard away,
 ## sunk low and wide, the shield arm out front, the hammer hand hauled back low behind him
 const BUL_COIL := {
 	"y": 1.15,

@@ -196,7 +196,7 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				P.inp["sec_hold"] = false
 				K.press_rmb()
 
-## Dancer's reset loop (footage 0137-0143 and 0187-0194): a Vault at 0.5 (away from the dummy), the empowered bolt
+## Sable's reset loop (footage 0137-0143 and 0187-0194): a Vault at 0.5 (away from the dummy), the empowered bolt
 ## thrown once she is up (1.0), its hit gives the Vault back, then a Vault at 1.3 with the bolt thrown mid-flip.
 static func loop(P: Hunter, t: float, dt: float) -> void:
 	if (t > 0.45 and t < 0.9) or (t > 1.25 and t < 1.7):
