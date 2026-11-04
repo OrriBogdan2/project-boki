@@ -150,3 +150,7 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 
 ## 2026-11-04 08:10 UTC: Claire turnaround fixed (owner upload)
 - wardens_r2/claire_turnaround.webp replaced (the old one is in history): the 3/4 view now has her spear and the skates read forward. 3D still uses front/side/back as the Meshy input.
+
+## 2026-11-04 08:30 UTC: Ostra round 2 from the owner's uploads (orchestrator)
+- wardens_r2/ostra_{turnaround,side,portrait,splash}.webp + OSTRA_KIT.md; review/ostra_before_after.jpg. A void jester: a cracked porcelain grin mask with a violet glowing mouth, a crescent halo, a starfield coat and wisp, marionette strings to card shards, a void orb.
+- Note: his lower body is a starry wisp like Dredge's smoke; it's fine. The halo, strings and cards are separate floating elements.
