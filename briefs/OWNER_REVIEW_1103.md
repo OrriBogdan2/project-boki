@@ -619,3 +619,8 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - **Creator:** remove the skin colour option. In its place: the shroud's colour (and, if cheap, 2–3 shroud styles or trims). Height, build and Male/Female still shape the silhouette under the shroud.
 - Migrate saves: the old skin colour maps to the shroud colour (or a default).
 - Supersedes item 79's "void on the body under the outfit".
+
+## 80. The creator's "Motes" row is invisible and unexplained (owner, 22:58 UTC Nov 4)
+- Owner: "I don't see what Motes does and don't know what it is."
+- What it is (scripts/match/unmasked.gd `_motes`): None / A few / A swarm = 0 / 6 / 18 tiny specks of the face's glow colour drifting up around the head. They are so small and few that they don't read in the creator or in the world.
+- Fix (default; the owner may say "just remove it"): rename the row to something self-explanatory, e.g. **"Aura"** (None / Faint / Strong), and make it clearly visible: bigger, brighter specks drifting up and around the head and shoulders (and the shroud from item 79b), with a short tooltip line "Glowing specks that drift around you". Show it in the creator preview at a size you can see. If it still doesn't add anything once visible, remove the row.
