@@ -1,0 +1,9 @@
+lineup_game.png: all 12 standing in their stances (two rows of six) at the match camera (pitch 66, 23 m, fov 32), the true pixels on top, x2 below; left to right: Sable, Pin, Vireo, Vex, Zedran, Bjorn, Dredge, Cinder, Burple, Claire, Tarek, Ostra
+lineup_close_1.png: close, three-quarter front (top) and side on (bottom), standing 3 s; left to right: Sable, Pin, Vireo, Vex
+lineup_close_2.png: close, three-quarter front (top) and side on (bottom), standing 3 s; left to right: Zedran, Bjorn, Dredge, Cinder
+lineup_close_3.png: close, three-quarter front (top) and side on (bottom), standing 3 s; left to right: Burple, Claire, Tarek, Ostra
+before_after_Vex.png: Vex standing 3 s: no stance (left pair, the old upright idle) and the signature stance (right pair), three-quarter and side on
+before_after_Pin.png: Pin standing 3 s: no stance (left pair, the old upright idle) and the signature stance (right pair), three-quarter and side on
+before_after_Zedran.png: Zedran standing 3 s: no stance (left pair, the old upright idle) and the signature stance (right pair), three-quarter and side on
+meshy_vex_before_after.png: Vex's Meshy 3D model (scratch cherry-pick of ext/warden-stance onto ext/warden-meshy 1111d843, not pushed) standing 3 s: no stance (left pair) and her signature stance (right pair: rifle back over the shoulder, hip cocked, hand on hip, slight back lean), three-quarter and side on
+meshy_vex_lineup_close_1.png: the same scratch build, Sable, Pin, Vireo procedural and Vex on her 3D model, three-quarter front (top) and side on (bottom)
