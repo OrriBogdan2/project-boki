@@ -296,7 +296,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	dashes = max_dashes()
 	ammo = wpn["mag"]
 	r = Arch.hit_r(arch, cdat)
-	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look, arch))
+	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Unmasked.mask_look() if ctrl == "local" else bot_look, arch))
 
 ## Switches the archetype mid-match (tests, practice). "" puts back the old class kit: the weapon's
 ## right click and the class dodge.
@@ -330,7 +330,7 @@ func reclass(c: String, a: String, w := "") -> void:
 	ak = ArchKit.make(self, arch)
 	HunterMove.apply(self)
 	wid = Arch.weapon_for(arch, cls, w)
-	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look, arch))
+	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Unmasked.mask_look() if ctrl == "local" else bot_look, arch))
 	anim = null
 	equip(wid)
 	dashes = max_dashes(); ex_cd = 0.0

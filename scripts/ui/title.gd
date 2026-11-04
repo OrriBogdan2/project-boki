@@ -200,7 +200,7 @@ func _squad() -> void:
 		var lk: Dictionary = looks[i]
 		var weapon := String(WEAPONS[arch])
 		if i == 0 and Save.d.has("look"):
-			lk = Save.d["look"]          # you lead the squad, as you look
+			lk = Unmasked.mask_look()          # you lead the squad, as a Warden
 			weapon = Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", "")))
 			cls = Data.class_of_save()
 		var h := Models.hunter(cls, Data.TEAM_COLORS[0], weapon, "", lk, arch)

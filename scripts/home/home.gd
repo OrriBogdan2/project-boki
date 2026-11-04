@@ -401,7 +401,7 @@ func _ready_rest() -> void:
 	_build_bridges()
 	_build_plots()
 	await _slice()
-	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], _weapon(), "", Save.d.get("look", {}), Arch.of_save())
+	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], _weapon(), "", Unmasked.worn(), Arch.of_save())
 	add_child(player)
 	ppos = Vector3(38.0, 0, 34.5) if not fs else HomeLayout.LANDING
 	if spawn == "house":
@@ -3834,7 +3834,7 @@ func _refresh_player_model() -> void:
 	var rot := player.rotation
 	player.queue_free()
 	var w := _weapon()
-	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], w, "", Save.d.get("look", {}), Arch.of_save())
+	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], w, "", Unmasked.worn(), Arch.of_save())
 	player.position = at; player.rotation = rot
 	add_child(player)
 
