@@ -26,7 +26,7 @@ import sys
 import bmesh
 import bpy
 import numpy as np
-from mathutils import Matrix, Vector
+from mathutils import Matrix, Vector, geometry
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "blender"))
 import warden_kit as K  # noqa: E402
@@ -1657,7 +1657,7 @@ def touch_up(ob, img, rules):
     uv = ob.data.uv_layers.active.data
     for r in rules:
         box = r.get("box")
-        col = np.array(K.hexcol(r["colour"]), np.float32)
+        col = np.array(K.hexcol(r.get("colour", "808080")), np.float32)
 
         def pick(poly, c, mat, r=r, box=box):
             if r.get("slot") and not mat.startswith(r["slot"]):
@@ -1712,8 +1712,12 @@ def touch_up(ob, img, rules):
             return True
         m = face_mask(ob, img, pick)
         if r["mode"] == "fill":
-            n_bad = _fill_texels(px, m, r["fill_hsv"], int(r.get("iterations", 80)), col)
+            n_bad = _fill_texels(px, m, r["fill_hsv"], int(r.get("iterations", 80)), col, int(r.get("erode", 0)))
             log("touch-up fill %s: %d of %d texels" % (r.get("name", ""), n_bad, int(m.sum())))
+            continue
+        if r["mode"] in ("cap", "desat"):
+            n_t = _texel_tone(px, m, r)
+            log("touch-up %s %s: %d of %d texels" % (r["mode"], r.get("name", ""), n_t, int(m.sum())))
             continue
         rgb = px[m, :3]
         val = rgb.max(axis=1, keepdims=True) / max(float(col.max()), 1e-3)
@@ -1733,13 +1737,48 @@ def touch_up(ob, img, rules):
     img.pixels = px.ravel()
 
 
-def _fill_texels(px, m, q, iterations, col):
+def _texel_tone(px, m, r):
+    """Texel by texel inside the picked faces' texels `m`: "cap" compresses values above `cap` (by `k`: a skin's
+    blown highlights, Vex's upper chest), "desat" takes `k` of the saturation out of texels whose hue is within
+    `hue` [h0, h1] (h0 > h1 wraps) and saturation at least `sat_min` (her eyeshadow's magenta to the face sheet's
+    smoky plum). Returns the texels changed."""
+    rgb = px[..., :3]
+    hq, sq, vq = _hsv_px(rgb)
+    k = float(r.get("k", 0.4))
+    if r["mode"] == "cap":
+        t = float(r["cap"])
+        sel = m & (vq > t)
+        nv = t + (vq[sel] - t) * k
+        rgb[sel] = rgb[sel] * (nv / np.maximum(vq[sel], 1e-6))[:, None]
+    else:
+        h0, h1 = r["hue"]
+        hue_ok = (hq >= h0) & (hq <= h1) if h0 <= h1 else (hq >= h0) | (hq <= h1)
+        sel = m & hue_ok & (sq >= float(r.get("sat_min", 0.0)))
+        grey = rgb[sel].mean(axis=1, keepdims=True)
+        rgb[sel] = rgb[sel] * (1.0 - k) + grey * k
+    px[..., :3] = rgb
+    return int(sel.sum())
+
+
+def _fill_texels(px, m, q, iterations, col, erode=0):
     """Texels of a colour (hsv [h0, h1, s0, s1, v0, v1]) inside the picked faces' texels `m`, filled from the
     other texels of `m` around them, a ring at a time (Vex's chest: Meshy's blurry tattoos on the skin): the skin
     closes over them in its own shading, no flat patch. Texels no ring reaches take `col`. Returns their count."""
+    if not m.any():
+        return 0
+    # (on the picked texels' bounding box only, a margin round it: the whole atlas, 80 rings, was minutes)
+    rr, cc = np.nonzero(m)
+    ra, rb = max(0, rr.min() - 2), min(m.shape[0], rr.max() + 3)
+    ca, cb = max(0, cc.min() - 2), min(m.shape[1], cc.max() + 3)
+    full_px, px, m = px, px[ra:rb, ca:cb], m[ra:rb, ca:cb]
     hq, sq, vq = _hsv_px(px[..., :3])
     hue_ok = (hq >= q[0]) & (hq <= q[1]) if q[0] <= q[1] else (hq >= q[0]) | (hq <= q[1])
     bad = m & hue_ok & (sq >= q[2]) & (sq <= q[3]) & (vq >= q[4]) & (vq <= q[5])
+    inner = m.copy()
+    for _i in range(erode):
+        # (`erode` texels in from the faces' edge stay: a strap's own painted edge beside its cloth)
+        inner &= np.roll(inner, 1, 0) & np.roll(inner, -1, 0) & np.roll(inner, 1, 1) & np.roll(inner, -1, 1)
+    bad &= inner
     known = m & ~bad
     acc = px[..., :3].copy()
     for _i in range(iterations):
@@ -1756,7 +1795,132 @@ def _fill_texels(px, m, q, iterations, col):
         known |= new
     px[bad & known, :3] = acc[bad & known]
     px[bad & ~known, :3] = col
+    full_px[ra:rb, ca:cb] = px
     return int(bad.sum())
+
+
+def stamp_lines(ob, img, sp):
+    """The art's thin lines (Vex's circuit tattoos, her gorget's seams) as vector strokes of one width (r3g): the
+    art's line pixels in `art_box` (greenness g - max(r, b) above `threshold`, outside `skip_art_box`) thinned to
+    their centre lines, each centre pixel (and the step to its neighbours) mapped onto the mesh by the view's
+    registration (k, col0_at, row0_at, or the face's `warp`), ray-cast from the front onto the faces of `slots`
+    inside `box`, and stamped there as an anti-aliased disc `width` m across in `colour`, never past those faces'
+    texels (no bleed onto the jacket). The art's own soft edges and shading never reach the atlas."""
+    from mathutils.bvhtree import BVHTree
+    art = bpy.data.images.load(os.path.expanduser(sp["image"]))
+    aw, ah = art.size
+    src = np.array(art.pixels[:], dtype=np.float32).reshape(ah, aw, 4)
+    c0, r0, c1, r1 = (int(v) for v in sp["art_box"])
+    rows, cols = np.arange(r0, r1 + 1), np.arange(c0, c1 + 1)
+    sub = src[ah - 1 - rows][:, cols, :3]
+    on = (sub[..., 1] - np.maximum(sub[..., 0], sub[..., 2])) > float(sp.get("threshold", 0.08))
+    if sp.get("max"):
+        on &= (sub[..., 1] - np.maximum(sub[..., 0], sub[..., 2])) < float(sp["max"])
+    for bx in sp.get("skip_art_box", []):
+        on[max(0, bx[1] - r0):max(0, bx[3] - r0 + 1), max(0, bx[0] - c0):max(0, bx[2] - c0 + 1)] = False
+    op = int(sp.get("open_px", 0))
+    if op:
+        # (wide areas of the colour are not lines: a lock of hair, a rim light; an opening finds and drops them)
+        e = on.copy()
+        for _i in range(op):
+            e &= np.roll(e, 1, 0) & np.roll(e, -1, 0) & np.roll(e, 1, 1) & np.roll(e, -1, 1)
+        for _i in range(op + 1):
+            e |= np.roll(e, 1, 0) | np.roll(e, -1, 0) | np.roll(e, 1, 1) | np.roll(e, -1, 1)
+        wide = on & e
+        on &= ~e
+    sk = _thin(on)
+    ri, ci = np.nonzero(sk)
+    pts = [(c0 + c, r0 + r) for r, c in zip(ri, ci)]
+    if op and sp.get("keep_wide"):
+        # (the wide parts stamped whole: the round nodes of a face's circuit, where no hair is in the box)
+        wr, wc = np.nonzero(wide)
+        pts += [(c0 + c, r0 + r) for r, c in zip(wr, wc)]
+    skset = set(zip(ri.tolist(), ci.tolist()))
+    for r, c in zip(ri.tolist(), ci.tolist()):
+        for dr, dc in ((0, 1), (1, -1), (1, 0), (1, 1)):
+            if (r + dr, c + dc) in skset:
+                pts.append((c0 + c + dc * 0.5, r0 + r + dr * 0.5))
+    pts = np.array(pts, float)
+    if "warp" in sp:
+        inv = _tps_fit(sp["warp"]["art"], sp["warp"]["mesh"], float(sp["warp"].get("smooth", 1e-3)))
+        xz = inv(pts)
+    else:
+        k = float(sp["k"])
+        xz = np.stack([(pts[:, 0] - float(sp["col0_at"])) * k, (float(sp["row0_at"]) - pts[:, 1]) * k], 1)
+    me = ob.data
+    me.calc_loop_triangles()
+    names = [m.name for m in me.materials]
+    slots = tuple(x + "-" for x in sp.get("slots", ["skin"]))
+    x0, x1, z0, z1 = sp["box"]
+    tris = [t for t in me.loop_triangles if names[t.material_index].startswith(slots)
+            and all(x0 <= me.vertices[i].co.x <= x1 and z0 <= me.vertices[i].co.z <= z1 for i in t.vertices)]
+    if not tris:
+        log("stamp %s: no faces" % sp.get("name", ""))
+        return
+    tree = BVHTree.FromPolygons([v.co.copy() for v in me.vertices], [t.vertices[:] for t in tris])
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    uv = me.uv_layers.active.data
+
+    def pick(poly, c, mat):
+        return mat.startswith(slots) and x0 <= c.x <= x1 and z0 <= c.z <= z1
+    allowed = face_mask(ob, img, pick)
+    cover = np.zeros((h, w), np.float32)
+    half = float(sp.get("width", 0.002)) * 0.5
+    n_hit = 0
+    for x, z in xz:
+        hit = tree.ray_cast(Vector((x, -1.0, z)), Vector((0.0, 1.0, 0.0)), 2.0)
+        if hit[0] is None:
+            continue
+        t = tris[hit[2]]
+        a, b, c = (me.vertices[i].co for i in t.vertices)
+        ua, ub, uc = (Vector((uv[li].uv.x * w, uv[li].uv.y * h, 0.0)) for li in t.loops)
+        q = geometry.barycentric_transform(hit[0], a, b, c, ua, ub, uc)
+        # texels per metre on this triangle: its UV area over its area
+        area3 = max((b - a).cross(c - a).length, 1e-12)
+        area2 = abs((ub - ua).cross(uc - ua).z)
+        rt = max(0.6, half * math.sqrt(area2 / area3))
+        cx, cy = q.x, q.y
+        xs = np.arange(int(cx - rt - 1), int(cx + rt + 2))
+        ys = np.arange(int(cy - rt - 1), int(cy + rt + 2))
+        xs, ys = xs[(xs >= 0) & (xs < w)], ys[(ys >= 0) & (ys < h)]
+        if not len(xs) or not len(ys):
+            continue
+        gx, gy = np.meshgrid(xs, ys)
+        d = np.hypot(gx + 0.5 - cx, gy + 0.5 - cy)
+        cov = np.clip(rt + 0.5 - d, 0.0, 1.0)
+        cover[gy, gx] = np.maximum(cover[gy, gx], cov)
+        n_hit += 1
+    cover *= allowed
+    col = np.array(K.hexcol(sp["colour"]), np.float32)
+    px[..., :3] = px[..., :3] * (1.0 - cover[..., None]) + col * cover[..., None]
+    img.pixels = px.ravel()
+    log("stamp %s: %d line pixels in the art, %d stamped, %d texels" % (sp.get("name", ""), int(sk.sum()), n_hit,
+                                                                       int((cover > 0.5).sum())))
+
+
+def _thin(m):
+    """Zhang-Suen thinning of a boolean mask to one-pixel lines."""
+    m = m.astype(np.uint8)
+    while True:
+        changed = False
+        for step in (0, 1):
+            pd = np.pad(m, 1)
+            nb = [pd[:-2, 1:-1], pd[:-2, 2:], pd[1:-1, 2:], pd[2:, 2:], pd[2:, 1:-1], pd[2:, :-2], pd[1:-1, :-2],
+                  pd[:-2, :-2]]          # (N, NE, E, SE, S, SW, W, NW)
+            b = sum(x.astype(np.int32) for x in nb)
+            a = sum(((nb[i] == 0) & (nb[(i + 1) % 8] == 1)).astype(np.int32) for i in range(8))
+            n_, e_, s_, w_ = nb[0], nb[2], nb[4], nb[6]
+            if step == 0:
+                c = ((n_ * e_ * s_) == 0) & ((e_ * s_ * w_) == 0)
+            else:
+                c = ((n_ * e_ * w_) == 0) & ((n_ * s_ * w_) == 0)
+            rem = (m == 1) & (b >= 2) & (b <= 6) & (a == 1) & c
+            if rem.any():
+                m[rem] = 0
+                changed = True
+        if not changed:
+            return m.astype(bool)
 
 
 def _hue(q):
@@ -1854,10 +2018,13 @@ def chunk(ob, rig, ck):
             continue
         piv = np.array(K.bone_head(rig, bone)[:])
         kk = float(ck[key]) - 1.0
+        # (head_x: the head a little wider than that again, a face that read small and gaunt: Vex r3h)
+        kx = float(ck.get("head_x", 1.0)) - 1.0 if bone == "head" else 0.0
         for v in ob.data.vertices:
             w = next((x.weight for x in v.groups if x.group == g.index), 0.0)
             if w > 0.0:
                 co[v.index] = piv + (co[v.index] - piv) * (1.0 + kk * w)
+                co[v.index, 0] = piv[0] + (co[v.index, 0] - piv[0]) * (1.0 + kx * w)
     if "fingers" in ck:
         # (long spidery fingers: both hands stretched down from the wrist by their skin weight, Ostra's claws)
         fk = float(ck["fingers"]) - 1.0
@@ -3355,8 +3522,12 @@ def main():
         touch_up(ob, img, spec["touch_up_late"])
         pad(img, ids, int(spec.get("pad", 6)))
     for pj in spec.get("project_after", []):
-        # (after the clean-up: crisp tattoo lines on the clean skin, `line` mode)
-        project(ob, img, pj)
+        # (after the clean-up: crisp tattoo lines on the clean skin, `line` mode; `stamp`: the art's lines as
+        # vector strokes of one width)
+        if pj.get("mode") == "stamp":
+            stamp_lines(ob, img, pj)
+        else:
+            project(ob, img, pj)
     for rs in spec.get("reslot_late", []):
         reslot(ob, img, rs)
     if spec.get("plate"):
