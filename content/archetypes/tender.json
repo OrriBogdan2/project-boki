@@ -8,8 +8,11 @@
 	"weight": "medium",
 	"plate_offset": 2.05,
 	"body": {
-		"size": 0.74,
-		"hit_r": 0.34
+		"size": 0.84,
+		"hit_r": 0.34,
+		"head": 0.78,
+		"legs": 1.2,
+		"neck": -0.1
 	},
 	"color": "#ffc46a",
 	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with lantern light, pins chasers with burr-seeds.",

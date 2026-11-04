@@ -1,0 +1,442 @@
+{
+ "body_glb": "~/meshy/pip_r2/bake/low.glb",
+ "rig": "art/wardens/src/pip_rig.json",
+ "out": "art/wardens/pip/pip.glb",
+ "blend": "~/meshy/pip_r2/fit.blend",
+ "turn": 180,
+ "max_tris": 34000,
+ "floater_verts": 8,
+ "snap_r": 0.045,
+ "scale_joints": [
+  "hip.L",
+  "shoulder.L"
+ ],
+ "joints": {
+  "crown": [
+   0,
+   -0.16,
+   0.76
+  ],
+  "neck": [
+   0,
+   -0.15,
+   0.37
+  ],
+  "shoulder.L": [
+   0.14,
+   -0.17,
+   0.3
+  ],
+  "shoulder.R": [
+   -0.14,
+   -0.17,
+   0.3
+  ],
+  "elbow.L": [
+   0.2,
+   -0.24,
+   0.06
+  ],
+  "elbow.R": [
+   -0.2,
+   -0.24,
+   0.06
+  ],
+  "hand.L": [
+   0.225,
+   -0.26,
+   -0.17
+  ],
+  "hand.R": [
+   -0.225,
+   -0.26,
+   -0.17
+  ],
+  "fingers.L": [
+   0.235,
+   -0.28,
+   -0.27
+  ],
+  "fingers.R": [
+   -0.235,
+   -0.28,
+   -0.27
+  ],
+  "hip.L": [
+   0.07,
+   -0.11,
+   -0.27
+  ],
+  "hip.R": [
+   -0.07,
+   -0.11,
+   -0.27
+  ],
+  "knee.L": [
+   0.065,
+   -0.06,
+   -0.54
+  ],
+  "knee.R": [
+   -0.065,
+   -0.06,
+   -0.54
+  ],
+  "ankle.L": [
+   0.06,
+   -0.05,
+   -0.8
+  ],
+  "ankle.R": [
+   -0.06,
+   -0.05,
+   -0.8
+  ]
+ },
+ "snap_y": false,
+ "chunk": {
+  "head": 1.06,
+  "girth": 1.04
+ },
+ "lift": [
+  0.88,
+  1.05,
+  1.1
+ ],
+ "glow_min": [
+  2.0,
+  2.0,
+  -1.0
+ ],
+ "normal_smooth": 8,
+ "pad": 6,
+ "cap_holes": true,
+ "cap_flat": true,
+ "ink_room": 0.02,
+ "atlas_px": 2048,
+ "slot_rules": [
+  {
+   "slot": "cloth",
+   "hsv": [
+    0.38,
+    0.62,
+    0.18,
+    1.0,
+    0.08,
+    1.0
+   ]
+  },
+  {
+   "slot": "cloth",
+   "hsv": [
+    0.2,
+    0.38,
+    0.3,
+    1.0,
+    0.15,
+    1.0
+   ]
+  },
+  {
+   "slot": "metal",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    0.45,
+    null
+   ],
+   "hsv": [
+    0.06,
+    0.18,
+    0.25,
+    1.0,
+    0.3,
+    1.0
+   ]
+  },
+  {
+   "slot": "leather",
+   "hsv": [
+    0.03,
+    0.14,
+    0.25,
+    0.85,
+    0.12,
+    0.62
+   ]
+  },
+  {
+   "slot": "skin"
+  }
+ ],
+ "slot_vote": 4,
+ "fit_weights": true,
+ "springs": [
+  {
+   "name": "tail",
+   "parent": "tail",
+   "box": [
+    -0.45,
+    0.15,
+    -0.65,
+    -0.11,
+    0.08,
+    0.62
+   ],
+   "path": [
+    [
+     -0.016,
+     -0.089,
+     0.616
+    ],
+    [
+     -0.081,
+     -0.251,
+     0.518
+    ],
+    [
+     -0.121,
+     -0.332,
+     0.356
+    ],
+    [
+     -0.203,
+     -0.251,
+     0.235
+    ],
+    [
+     -0.267,
+     -0.13,
+     0.194
+    ]
+   ],
+   "bones": 4,
+   "blend": 0.06
+  }
+ ],
+ "wings": [
+  {
+   "name": "wing_up_R",
+   "kind": "up",
+   "root": [
+    0.03,
+    -0.13,
+    0.95
+   ],
+   "tip": [
+    0.42,
+    -0.26,
+    1.25
+   ],
+   "across": [
+    0,
+    0,
+    1
+   ],
+   "width": 0.2,
+   "bow": [
+    0,
+    -0.02,
+    0
+   ],
+   "bones": 2
+  },
+  {
+   "name": "wing_up_L",
+   "kind": "up",
+   "root": [
+    -0.03,
+    -0.13,
+    0.95
+   ],
+   "tip": [
+    -0.42,
+    -0.26,
+    1.25
+   ],
+   "across": [
+    0,
+    0,
+    1
+   ],
+   "width": 0.2,
+   "bow": [
+    0,
+    -0.02,
+    0
+   ],
+   "bones": 2
+  },
+  {
+   "name": "wing_lo_R",
+   "kind": "lo",
+   "root": [
+    0.03,
+    -0.13,
+    0.88
+   ],
+   "tip": [
+    0.33,
+    -0.22,
+    0.62
+   ],
+   "across": [
+    0,
+    0,
+    1
+   ],
+   "width": 0.15,
+   "bow": [
+    0,
+    -0.02,
+    0
+   ],
+   "bones": 2
+  },
+  {
+   "name": "wing_lo_L",
+   "kind": "lo",
+   "root": [
+    -0.03,
+    -0.13,
+    0.88
+   ],
+   "tip": [
+    -0.33,
+    -0.22,
+    0.62
+   ],
+   "across": [
+    0,
+    0,
+    1
+   ],
+   "width": 0.15,
+   "bow": [
+    0,
+    -0.02,
+    0
+   ],
+   "bones": 2
+  }
+ ],
+ "wing_look": {
+  "up": {
+   "base": "ffd8ee",
+   "tints": [
+    "fff2ff",
+    "d6efff",
+    "ffe2f2",
+    "e8fff4"
+   ],
+   "tint_k": 0.45,
+   "alpha": 0.48,
+   "rim": "fff0fa",
+   "rim_alpha": 0.7,
+   "edge": 0.95,
+   "edge_col": "f2a6cf",
+   "edge_alpha": 0.85,
+   "vein": "fff6fc",
+   "vein_w": 0.003,
+   "vein_alpha": 0.7,
+   "veins": 5,
+   "cells": [
+    0.35,
+    0.58,
+    0.8
+   ],
+   "power": 0.5,
+   "skew": 0.55,
+   "root_w": 0.06
+  },
+  "lo": {
+   "base": "ffd8ee",
+   "tints": [
+    "fff2ff",
+    "d6efff",
+    "ffe2f2",
+    "e8fff4"
+   ],
+   "tint_k": 0.45,
+   "alpha": 0.48,
+   "rim": "fff0fa",
+   "rim_alpha": 0.7,
+   "edge": 0.94,
+   "edge_col": "f2a6cf",
+   "edge_alpha": 0.85,
+   "vein": "fff6fc",
+   "vein_w": 0.003,
+   "vein_alpha": 0.7,
+   "veins": 4,
+   "cells": [
+    0.4,
+    0.7
+   ],
+   "power": 0.55,
+   "skew": 0.6,
+   "root_w": 0.06
+  }
+ },
+ "lantern": {
+  "at": [
+   0.19,
+   0.0,
+   0.5
+  ],
+  "size": 1.6,
+  "parent": "hand.R",
+  "name": "lantern"
+ },
+ "lantern_look": {
+  "colours": {
+   "copper": "b8743a",
+   "glass": "ffb03a"
+  }
+ },
+ "weight_rules": [
+  {
+   "bone": "hips",
+   "box": [
+    0.08,
+    0.45,
+    -0.25,
+    0.35,
+    0.3,
+    1.1
+   ],
+   "hsv": [
+    [
+     0.03,
+     0.14,
+     0.25,
+     0.85,
+     0.12,
+     0.62
+    ]
+   ]
+  },
+  {
+   "bone": "hips",
+   "box": [
+    -0.3,
+    0.45,
+    -0.3,
+    0.35,
+    0.55,
+    1.1
+   ],
+   "hsv": [
+    [
+     0.03,
+     0.14,
+     0.25,
+     0.85,
+     0.12,
+     0.62
+    ]
+   ]
+  }
+ ]
+}

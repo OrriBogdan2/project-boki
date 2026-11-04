@@ -170,3 +170,13 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Vex r3b edit side 2 | 06:44 | 01a1a54c-f974-7239-9ea4-5a714210e1a8 | nano-banana-pro | as side, "her left arm hidden behind her body" | 9 | Kept |
 | Vex r3b A | 06:46 | 01a1a54f-35bf-734c-9ee7-55f81be998e5 | meshy-7.1 | 4 edited views (front, 3/4, side, back), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Kept: the face's smirk, chunky hair, eye plate on her right eye, gun-arm, backpack |
 | Vex r3b B | 06:46 | 01a1a54f-35c4-73d2-9fd2-ab8f7e9f5bce | meshy-7.1 | as A, enhancement on | 40 | Dropped: rounder cuter face, stringy hair; a cleaner lens (A's is replaced by geometry) |
+
+### Stage 1: Pip (tender), 2026-11-04 (85 credits; balance 4327 after both Sable and Pip, other agents spending too)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Pip edit front | 09:13 | 01a1a5d5-b62f-723d-80e9-c89d469ca782 | nano-banana-pro (image-to-image) | 3:4 crop; lantern, wings, sparkles out; arms down | 9 | Kept |
+| Pip edit side | 09:13 | 01a1a5d5-b62f-7131-83ab-d05cf57031b6 | nano-banana-pro | the same | 9 | Kept |
+| Pip edit back | 09:13 | 01a1a5d5-b61e-74bf-80a3-67cde2a14edc | nano-banana-pro | the same, and the tail clear of the legs | 9 | Dropped: the tail still over the legs, a leaf clasp drawn on the back |
+| Pip edit back 2 | 09:14 | 01a1a5d6-d524-74d8-851c-bc3b92eee529 | nano-banana-pro | back edit: the tail out to the side, no back leaf | 9 | Kept (the tail goes to her right here, to her left in the front view; Meshy followed the front) |
+| Pip edit back 3 | 09:15 | 01a1a5d7-a0aa-77c4-821c-77445f689102 | nano-banana-pro | back edit 2: the tail to the other side | 9 | Dropped: unchanged |
+| Pip A | 09:18 | 01a1a5da-06f4-75c9-9568-ec9702d633a6 | meshy-7.1 | edited front, side, back 2 (+ texture refs), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** |

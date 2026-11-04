@@ -1656,6 +1656,18 @@ def main():
             parts.append(WP.lens(arm, spec["lens"]))
         if spec.get("braids"):
             parts.append(WP.braids([ob], arm, spec["braids"], spec["braid_colours"]))
+    props = []
+    if any(k in spec for k in ("wings", "lantern", "springs", "crossbows")):
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import warden_props as WPR
+        for sr in spec.get("springs", []):
+            WPR.spring_region(ob, arm, sr)       # (a fluffy tail of the scan itself on a spring chain)
+        if spec.get("wings"):
+            parts.append(WPR.wings(arm, spec["wings"], spec["wing_look"]))
+        if spec.get("lantern"):
+            parts.append(WPR.lantern(arm, spec["lantern"], spec["lantern_look"]))
+        if spec.get("crossbows"):
+            props = list(WPR.crossbows(spec["crossbows"], spec["crossbows"]))
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
@@ -1664,7 +1676,7 @@ def main():
     spin = None
     if gun is not None:
         gun, spin = gun_weapon(gun, ge, gt, rig, spec["gun_arm"])
-    else:
+    elif "weapon_glb" in spec:
         gun = weapon(spec, rig)
     crown = rig["land"]["crown"]
     K.anchor(arm, "head", "anchor_head_top", (0, 0, crown + 0.07))
@@ -1682,17 +1694,31 @@ def main():
         soft_normals(o, spec.get("normal_smooth", 8))
         if "ink_room" in spec:
             ink_room(o, float(spec["ink_room"]))
-    for o in parts:
+    for o in parts + props:
         if "ink_room" in spec:
             ink_room(o, float(spec["ink_room"]))
     if "atlas_px" in spec:
         shrink(img, int(spec["atlas_px"]))
     out = os.path.join(ROOT, os.path.expanduser(spec["out"]))
-    log("tris: body %d, weapon %d" % (K.tris([ob]), K.tris([x for x in (gun, spin) if x])))
+    log("tris: body %d, weapon %d" % (K.tris([ob]), K.tris([x for x in (gun, spin) if x] + props)))
     # (JPEG: Meshy's painted textures, a third of the PNG's size)
     if parts:
         log("tris: parts %s" % {o.name: K.tris([o]) for o in parts})
-    K.export(out, [arm, ob] + parts + [x for x in (gun, spin) if x] + [o for o in bpy.data.objects if o.name.startswith("anchor_")], "JPEG",
+    fmt = "JPEG"
+    if any(m.name.startswith("card-") for o in parts for m in o.data.materials):
+        # (alpha cards keep their PNG's alpha: every other texture still goes out as JPEG)
+        fmt = "AUTO"
+        tmp = os.path.join(os.path.dirname(os.path.expanduser(spec.get("blend", "/tmp/x"))), "jpg")
+        os.makedirs(tmp, exist_ok=True)
+        for im in bpy.data.images:
+            if not im.name.startswith("wing") and im.size[0] > 0 and im.users:
+                # (the exporter keeps an image's own format: saved as a .jpg file it goes out as JPEG)
+                im.filepath_raw = os.path.join(tmp, im.name.replace(".", "_") + ".jpg")
+                im.file_format = "JPEG"
+                bpy.context.scene.render.image_settings.quality = 92
+                im.save()
+                im.source = "FILE"
+    K.export(out, [arm, ob] + parts + props + [x for x in (gun, spin) if x] + [o for o in bpy.data.objects if o.name.startswith("anchor_")], fmt,
              colors="ink_room" in spec)
     log("wrote", out)
     if spec.get("blend"):

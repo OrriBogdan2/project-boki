@@ -156,6 +156,8 @@ func _kmoves(a: String) -> void:
 					worst = maxf(worst, sk.get_bone_global_pose(int(l[0])).origin.distance_to(want.origin))
 				var now := _local_poses(sk)
 				for ch in _keyed(k[1]):
+					if an.hold == "palm" and ch in ["gp", "wa", "wo"]:
+						continue      # (nothing held: the weapon's channels move no hand)
 					keyed[ch] = true
 					for b in CHANNEL_BONES[ch]:
 						if _moved(still.get(b), now.get(b)):
@@ -182,7 +184,9 @@ func _keyed(key: Dictionary) -> Array:
 			continue
 		var v = key[ch]
 		var amount := 0.0
-		if v is Vector3:
+		if ch in ["fx", "fy", "fz"]:
+			amount = absf(fposmod(float(v) + PI, TAU) - PI)      # (a whole turn ends where it began)
+		elif v is Vector3:
 			amount = (v as Vector3).length()
 		elif v is Array:
 			for x in v:
@@ -248,7 +252,7 @@ func _shading(a: String) -> void:
 		for si in (mi as MeshInstance3D).mesh.get_surface_count():
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
-			if sm == null or sm.shader != Models.HERO or not sm.get_shader_parameter("use_tex") \
+			if sm == null or not sm.shader in [Models.HERO, WardenGlb.CARD] or not sm.get_shader_parameter("use_tex") \
 					or sm.get_shader_parameter("albedo_tex") == null or not sm in mats:
 				wrong += 1
 	ok(surfaces > 0 and wrong == 0,
@@ -316,8 +320,11 @@ func _weapon(a: String) -> void:
 	if weapon == null:
 		m.free()
 		return
+	var off := gun.get_node_or_null(WardenGlb.WEAPON_OFF) as Node3D     # (a twin hold's second weapon)
+	var own := func(mi: Node) -> bool: return mi == weapon or weapon.is_ancestor_of(mi) \
+			or (off != null and (mi == off or off.is_ancestor_of(mi)))
 	var shown := gun.find_children("*", "MeshInstance3D", true, false).filter(
-			func(mi): return (mi as Node3D).is_visible_in_tree() and mi != weapon and not weapon.is_ancestor_of(mi))
+			func(mi): return (mi as Node3D).is_visible_in_tree() and not own.call(mi))
 	var mag := gun.get_node_or_null("Mag") as MeshInstance3D
 	var own_mag := weapon.find_child(WardenGlb.WEAPON_MAG, true, false) != null
 	# its own magazine is the Mag; a weapon modelled whole leaves the Mag node empty (the reload moves nothing)
