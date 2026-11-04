@@ -1,4 +1,4 @@
-2026-11-04T08:00:13Z
+2026-11-04T08:10:12Z
 
 FOR MAIN: nothing pending from S1. ext/mapclean-fix c36f6ea merged (9732b33b, 19:35 UTC).
 
@@ -21,7 +21,7 @@ Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on o
 
 Running now: none on S1.
 Queued: none on S1. Farm tutorial/builder moved to ext (ext/farm-hob, INBOX 18:55 UTC).
-Last INBOX entry handled: 2026-11-04 07:05 UTC ORCH check-in (kits-integ + rename-breaker waiting on main; S2 3D runs; owner art calls routed). Nothing routed to S1. S1 idle, no branches open, available if routed.
+Last INBOX entry handled: 2026-11-04 08:05 UTC ORCH check-in (main offline by the owner's choice; Pin->Hem rename noted; Dredge 3D + hybrid pipeline for owner review). Nothing routed to S1. S1 idle, no branches open, available if routed.
 Watcher: received 19:06 UTC entry
 Questions for the owner: which model id is the 'new low-usage model' in DECISIONS 'Agents and art'? This server can pick Fable 5.1 (claude-fable-5-1), Sonnet 5.5, Opus 5.5 or Haiku 5.5. S1 assumes Fable 5.1 unless told otherwise. Also see the ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
