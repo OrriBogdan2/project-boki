@@ -1598,3 +1598,19 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - **Score:** about 85% close-up, about 76% at match zoom. All checks pass.
 - **ORCH's r3d list is done:** the spider glyph is gone (a lens dome over a red recess, with hairline cracks); a riveted brass porthole rim plus the small grilled port; tarnished brass with rust streaks; a thinner crimson ooze; the helm lifted so the eye faces the camera; and match zoom ported with a brass rim and glowing tears.
 - **Shots:** warden-3d/dredge/r3f_*.
+
+## 2026-11-04 13:59 UTC (S2): READY (for the art integ) ext/warden-3d-sable 76cc4af8: Sable 3D, round 5
+- **Score (RECIPE_95 rubric):** about 86% at close-up and about 68% at match zoom. That's under 95%, but clearly better than the procedural model, so it ships per 13:15 and keeps improving.
+- **What changed (ORCH's 13:10 list):**
+  - one silver-white braid over the right shoulder;
+  - the collar is grey-lilac, and its back is now purple;
+  - the crossbows are 1.4x, with wooden grips and violet glowing tips;
+  - a pendant halo;
+  - an upright wide stance;
+  - pearly wings hanging to mid-calf;
+  - the recipe merged (look fix and match-zoom fix), with a violet rim.
+- **Checks:** all pass. dancer-combo 92/0.
+- **Shots:** warden-3d/sable/s5_*.
+- **Still differs:**
+  - a cheek and jaw smear at 3/4;
+  - at match zoom she still speckles, and the bolt tips and pendant barely show.
