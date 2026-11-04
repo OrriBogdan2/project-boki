@@ -1,0 +1,55 @@
+{
+ "doc": "Kael accuracy pipeline (owner 17:05): the body model sheet. python3 tools/meshy/recipe.py art/wardens/src/kael_acc_recipe.json <steps>",
+ "name": "kael",
+ "arch": "juggernaut",
+ "tag": "a1",
+ "raw": "~/meshy/kael_acc",
+ "art": {
+  "ref": "origin/ext/imagegen",
+  "turnaround": "docs/art/gen/wardens_r3/kael_turnaround.webp",
+  "side": "docs/art/gen/wardens_r3/kael_side.webp",
+  "portrait": "docs/art/gen/wardens_r3/kael_portrait.webp",
+  "head_sheet": "docs/art/gen/wardens_r3/kael_head_sheet.webp",
+  "blade_sheet": "docs/art/gen/wardens_r3/kael_blade_sheet.webp",
+  "arm_sheet": "docs/art/gen/wardens_r3/kael_arm_sheet.webp",
+  "collar_sheet": "docs/art/gen/wardens_r3/kael_collar_sheet.webp"
+ },
+ "edits": {
+  "front": "Edit this character concept art (a front view of a muscular gladiator). Make exactly these changes: 1) Pose: a relaxed A-pose. Both arms hang straight, angled out about 25 degrees from his sides, with a clear gap of grey background between each arm and his torso, hands open, palms facing his thighs, fingers relaxed; legs straight, feet a little apart, standing upright with his head level. 2) Remove the greatsword completely, the chain wrapped around his right forearm, the long chain and its hook hanging from his right hand, and the short chain hanging from his left cuff. 3) Remove the long white mane: his white hair is cut very short, close to the scalp, nothing below the ears, nothing on the neck, shoulders or back. 4) The right arm's glowing cracks are removed: plain dark skin like the left arm. 5) Flat, even, shadowless studio light: no glow, no sparks, no smoke, no rim light, no cast shadows. 6) Remove anything at the image's left and right edges that is not part of him (pieces of other figures): only plain grey there. Keep everything else exactly the same: the same man and his exact proportions (head size, shoulder width, torso, arm and leg length, the same height in the frame), his very dark cool-brown skin, his face and cold narrowed eyes, the maroon scarf over his nose and mouth and its torn hanging end, the broken gold collar shards on the scarf, the leather chest harness crossing at a central ring, the red pleated champion's skirt, the gold belt plate with tally marks, the iron wrist cuff on his left wrist, the cloth bandage on his right wrist and hand, the iron greaves, the sandals, all colours, the painted art style and clean line work, the framing, scale and position of the figure, and the plain light grey background.",
+  "tq": "Edit this character concept art (a three-quarter view of a muscular gladiator). Make exactly these changes: 1) Pose: a relaxed A-pose. Both arms hang straight, angled out about 25 degrees from his sides, with a clear gap of grey background between each arm and his torso, hands open, palms facing his thighs, fingers relaxed; legs straight, feet a little apart, standing upright with his head level. 2) Remove the greatsword completely, the chain wrapped around his right forearm, the long chain and its hook hanging from his right hand, and the short chain hanging from his left cuff. 3) Remove the long white mane: his white hair is cut very short, close to the scalp, nothing below the ears, nothing on the neck, shoulders or back. 4) The right arm's glowing cracks are removed: plain dark skin like the left arm. 5) Flat, even, shadowless studio light: no glow, no sparks, no smoke, no rim light, no cast shadows. 6) Remove anything at the image's left and right edges that is not part of him (pieces of other figures): only plain grey there. Keep everything else exactly the same: the same man and his exact proportions (head size, shoulder width, torso, arm and leg length, the same height in the frame), his very dark cool-brown skin, his face and cold narrowed eyes, the maroon scarf over his nose and mouth and its torn hanging end, the broken gold collar shards on the scarf, the leather chest harness crossing at a central ring, the red pleated champion's skirt, the gold belt plate with tally marks, the iron wrist cuff on his left wrist, the cloth bandage on his right wrist and hand, the iron greaves, the sandals, all colours, the painted art style and clean line work, the framing, scale and position of the figure, and the plain light grey background. Keep the flat 2D painted concept-art style with clean dark line work exactly as in the input: NOT a 3D render, no realistic shading. The figure fills the same height of the image as in the input, feet near the bottom, the same light grey background.",
+  "side": "Edit this character concept art (a pure side view of a muscular gladiator, his right side, facing right). Make exactly these changes: 1) Pose: standing upright, head level, his right arm hanging straight down at his side a little forward of his hip, hand open; his left arm is completely hidden behind his body: nothing of it, its cuff or its hand shows behind his back or chest. Legs straight. 2) Remove the greatsword completely, the chain wrapped around his right forearm, the long chain and its hook hanging from his right hand, and the short chain hanging from his left cuff. 3) Remove the long white mane: his white hair is cut very short, close to the scalp, nothing below the ears, nothing on the neck, shoulders or back. 4) The right arm's glowing cracks are removed: plain dark skin like the left arm. 5) Flat, even, shadowless studio light: no glow, no sparks, no smoke, no rim light, no cast shadows. 6) Remove anything at the image's left and right edges that is not part of him (pieces of other figures): only plain grey there. Keep everything else exactly the same: the same man and his exact proportions (head size, shoulder width, torso, arm and leg length, the same height in the frame), his very dark cool-brown skin, his face and cold narrowed eyes, the maroon scarf over his nose and mouth and its torn hanging end, the broken gold collar shards on the scarf, the leather chest harness crossing at a central ring, the red pleated champion's skirt, the gold belt plate with tally marks, the iron wrist cuff on his left wrist, the cloth bandage on his right wrist and hand, the iron greaves, the sandals, all colours, the painted art style and clean line work, the framing, scale and position of the figure, and the plain light grey background.",
+  "back": "Edit this character concept art (a view from behind of a muscular gladiator). Make exactly these changes: 0) From behind: the scarf is only a band around his neck with its knot at the nape, nothing hangs down his back; no gold on his back; the belt at the back is a plain dark leather band, no plate, no tally marks. 1) Pose: a relaxed A-pose. Both arms hang straight, angled out about 25 degrees from his sides, with a clear gap of grey background between each arm and his torso, hands open; legs straight, feet a little apart, standing upright. 2) Remove the greatsword completely, the chain wrapped around his right forearm, the long chain and its hook hanging from his right hand, and the short chain hanging from his left cuff. 3) Remove the long white mane: his white hair is cut very short, close to the scalp, nothing below the ears, nothing on the neck, shoulders or back. 4) The right arm's glowing cracks are removed: plain dark skin like the left arm. 5) Flat, even, shadowless studio light: no glow, no sparks, no smoke, no rim light, no cast shadows. 6) Remove anything at the image's left and right edges that is not part of him (pieces of other figures): only plain grey there. Keep everything else exactly the same: the same man and his exact proportions (head size, shoulder width, torso, arm and leg length, the same height in the frame), his very dark cool-brown skin, his face and cold narrowed eyes, the maroon scarf over his nose and mouth and its torn hanging end, the broken gold collar shards on the scarf, the leather chest harness crossing at a central ring, the red pleated champion's skirt, the gold belt plate with tally marks, the iron wrist cuff on his left wrist, the cloth bandage on his right wrist and hand, the iron greaves, the sandals, all colours, the painted art style and clean line work, the framing, scale and position of the figure, and the plain light grey background. Keep the flat 2D painted concept-art style with clean dark line work exactly as in the input: NOT a 3D render, no realistic shading. The figure fills the same height of the image as in the input, feet near the bottom, the same light grey background."
+ },
+ "meshy": {
+  "order": [
+   "front",
+   "tq",
+   "side",
+   "back"
+  ],
+  "variants": {
+   "A_noenh": {
+    "enhance": "off",
+    "pose": "a-pose"
+   },
+   "B_enh": {
+    "enhance": "on",
+    "pose": "a-pose"
+   },
+   "C_nopose": {
+    "enhance": "off",
+    "pose": ""
+   }
+  },
+  "keep": "A_noenh"
+ },
+ "bake": "art/wardens/src/kael_acc_bake.json",
+ "fit": "art/wardens/src/kael_acc_fit.json",
+ "match_crop": "200:170:540:270",
+ "combo_check": "--juggernaut-combo-check",
+ "demo_at": "-4.5,0",
+ "use": {
+  "tq": "edit_tq2",
+  "back": "edit_back2"
+ }
+}

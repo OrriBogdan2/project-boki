@@ -1,0 +1,36 @@
+{
+ "high": "~/meshy/kael_acc/assembled/assembled.glb",
+ "out": "~/meshy/kael_acc/bake/low.glb",
+ "blend": "~/meshy/kael_acc/bake/bake.blend",
+ "tris": 36000,
+ "tex": 4096,
+ "head": {
+  "centre": [
+   0.0,
+   -0.03,
+   0.8
+  ],
+  "r": 0.17
+ },
+ "head_uv": 3.0,
+ "head_tris": 9000,
+ "uv_smooth": 30,
+ "uv_angle": 66,
+ "uv_margin": 0.0008,
+ "cage": 0.006,
+ "ray": 0.07,
+ "margin_px": 16,
+ "floater_verts": 60,
+ "low_glb": "~/meshy/kael_acc/remesh2/glb.glb",
+ "low_fit_bbox": true,
+ "bake": "nearest",
+ "front_boxes": [
+  [
+   -0.075,
+   0.075,
+   0.79,
+   0.86,
+   0.35
+  ]
+ ]
+}

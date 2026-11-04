@@ -156,7 +156,12 @@ def edit(o):
 
 
 def remesh(o):
-    body = {"input_task_id": o.task, "target_formats": ["glb"], "topology": o.topology, "target_polycount": o.polycount}
+    body = {"target_formats": ["glb"], "topology": o.topology, "target_polycount": o.polycount}
+    if o.task.lower().endswith(".glb"):
+        # (a model of our own, uploaded: the Blender-joined body and head run, geometry only)
+        body["model_url"] = "data:application/octet-stream;base64," + base64.b64encode(open(o.task, "rb").read()).decode()
+    else:
+        body["input_task_id"] = o.task
     post(o.out, "remesh", body, {"source": o.task})
 
 

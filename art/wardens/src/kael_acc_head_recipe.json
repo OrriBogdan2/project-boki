@@ -1,0 +1,39 @@
+{
+ "doc": "Kael accuracy pipeline: the head sheet (front and side from kael_head_sheet as drawn; 3/4 and back redrawn). recipe.py art/wardens/src/kael_acc_head_recipe.json edit prep meshy",
+ "name": "kael",
+ "arch": "juggernaut",
+ "tag": "h1",
+ "raw": "~/meshy/kael_acc/head",
+ "aspect": "1:1",
+ "edits": {
+  "tq": "Redraw this character's head and bust (a three-quarter view, from a character turnaround) as a clean high-resolution bust illustration in exactly the same three-quarter angle: the face turned three-quarter toward the left of the image, the long silver-white mane in soft layered locks falling behind his shoulders and down past them, volume and spikes at the crown; the bust cut at mid-chest. Plain light grey background, flat even light, no glow, no sparks. Keep everything else exactly the same: the same man, his very dark cool-brown skin, his cold narrowed amber eyes and thick white brows, the maroon scarf wrapped over his nose and mouth and around his neck with its torn hanging end, the broken gold collar shards on the scarf, the long silver-white mane in soft layered locks with volume and spikes at the crown, the bust cut at the chest, all colours, the clean painted art style and line work, the same scale, and the plain light grey background, flat even light.",
+  "back": "Redraw this character's head and upper back (seen from directly behind, from a character turnaround) as a clean high-resolution illustration from the same angle: the long silver-white mane hanging loose in soft layered locks down his back well past the shoulders, NOT tied, no ponytail; volume and spikes at the crown; the maroon scarf only a band at the neck; his dark shoulders. Plain light grey background, flat even light. Keep everything else exactly the same: the same man, his very dark cool-brown skin, his cold narrowed amber eyes and thick white brows, the maroon scarf wrapped over his nose and mouth and around his neck with its torn hanging end, the broken gold collar shards on the scarf, the long silver-white mane in soft layered locks with volume and spikes at the crown, the bust cut at the chest, all colours, the clean painted art style and line work, the same scale, and the plain light grey background, flat even light."
+ },
+ "unedited": [
+  "front",
+  "side"
+ ],
+ "meshy": {
+  "order": [
+   "front",
+   "tq",
+   "side",
+   "back"
+  ],
+  "variants": {
+   "H_noenh": {
+    "enhance": "off",
+    "pose": ""
+   },
+   "H_enh": {
+    "enhance": "on",
+    "pose": ""
+   }
+  },
+  "keep": "H_noenh"
+ },
+ "use": {
+  "tq": "edit_tq2",
+  "back": "edit_back2"
+ }
+}

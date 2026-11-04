@@ -1,0 +1,43 @@
+{
+ "body": "~/meshy/kael_acc/runB_enh/glb.glb",
+ "head": "~/meshy/kael_acc/head/runH_enh/glb.glb",
+ "out": "~/meshy/kael_acc/assembled/assembled.glb",
+ "body_shard_z": [
+  0.45,
+  0.7
+ ],
+ "head_shard_z": [
+  -1.0,
+  1.0
+ ],
+ "gold_hsv": [
+  0.08,
+  0.17,
+  0.4,
+  0.55
+ ],
+ "hair": [
+  0.16,
+  0.55
+ ],
+ "cut_dz": 0.02,
+ "keep_r": 0.17,
+ "head_k": 1.08,
+ "nudge": [
+  0,
+  0,
+  0
+ ],
+ "eyes": {
+  "body": [
+   -0.0065,
+   0.812,
+   0.077
+  ],
+  "head": [
+   -0.009,
+   0.53,
+   0.17
+  ]
+ }
+}

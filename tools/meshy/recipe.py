@@ -97,7 +97,7 @@ def step_edit(only=None):
             continue
         out = os.path.join(RAW, SPEC.get("use", {}).get(view, "edit_" + view))
         cmd = ["python3", "-I", os.path.join(TOOLS, "meshy_task.py"), "edit", out, os.path.join(RAW, "crops", view + ".png"),
-               "--prompt", prompt, "--aspect", "9:16"]
+               "--prompt", prompt, "--aspect", SPEC.get("aspect", "9:16")]
         procs.append((view, subprocess.Popen(cmd, stdout=open(out.rstrip("/") + ".log", "w"), stderr=subprocess.STDOUT,
                                              cwd=ROOT)))
     for view, pr in procs:

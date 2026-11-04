@@ -1,5 +1,5 @@
 extends RefCounted
-## --warden-shots --shots-dir=<dir> [--wardens=bulwark,archer,juggernaut] [--sheets=<dir>] [--procedural]: the
+## --warden-shots --shots-dir=<dir> [--wardens=bulwark,archer,juggernaut] [--sheets=<dir>] [--procedural] [--dark]: the
 ## in-engine Warden models next to their concept sheets (concept phase 2). Per Hunter, under <dir>/<id>/:
 ## turnaround_game.png (front, 3/4, side, back, 3/4 back at the match camera: the true pixels, then
 ## enlarged 3x), front_34.png and back_34.png (full length), poses_game.png (idle, run, attack, cast, ult at the
@@ -21,6 +21,7 @@ const OUT_W := 1280
 const MOVES_PER_STRIP := 4    # kit-move frames side by side in one close strip
 
 var holder: Node3D
+var dark := false            # --dark: rubric v2's night / Gloom light (the review shots in the dark)
 var cam: Camera3D
 var anims: Array = []
 var tree: SceneTree
@@ -36,6 +37,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--sheets="): sheets = a.substr(9)
 		if a.begins_with("--wardens="): wardens = Array(a.substr(10).split(","))
 		if a == "--procedural": procedural = true
+		if a == "--dark": dark = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	_stage(main)
@@ -53,7 +55,12 @@ func _stage(main: Node) -> void:
 	env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"),
 		"stars": 0.0})
 	holder.add_child(env)
-	Look.lights(holder, Color("fff1dc"), 1.0, Vector3(-50, 145, 0), 40.0)
+	if dark:
+		# (rubric v2's dark-scene read: the night sky and a dim, cool moonlit key, the Gloom and night biomes' light)
+		Look.night(env.environment, 1.0)
+		Look.lights(holder, Color("9fa8e8"), 0.38, Vector3(-50, 145, 0), 40.0)
+	else:
+		Look.lights(holder, Color("fff1dc"), 1.0, Vector3(-50, 145, 0), 40.0)
 	var ground := MeshInstance3D.new()
 	var pm := PlaneMesh.new()
 	pm.size = Vector2(80, 60)

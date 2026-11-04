@@ -58,6 +58,14 @@ uniform float ambient_cut = 0.0;
 uniform vec3 own_ambient = vec3(0.0);
 uniform float light_neutral = 0.0;
 uniform float light_neutral_warm = 0.0;   // the same for warm lights (per model: black cloth under an orange sun)
+// a key-fill and a rim that travel with the camera, not the scene's lights (owner 17:05 accuracy pipeline: dark skin
+// and dark outfits must read in every biome light, night and Gloom included): key_fill lifts what faces the
+// viewer (a face's front) by its own painted colour, key_rim draws a band on the silhouette in key_rim_color.
+// Both default 0: procedural heroes and every model without the key in warden_look.json are unchanged.
+uniform float key_fill = 0.0;
+uniform vec4 key_fill_color : source_color = vec4(1.0, 0.97, 0.94, 1.0);
+uniform float key_rim = 0.0;
+uniform vec4 key_rim_color : source_color = vec4(0.85, 0.9, 1.0, 1.0);
 // near-black paint lifted to this linear floor (jacket, trousers and gun no longer merge to black at the match
 // camera); mid and light colours keep their value and saturation
 uniform float dark_lift = 0.0;
@@ -214,6 +222,10 @@ void fragment() {
 		+ rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
 		+ fcol * fr * fres * 0.55 + c * up * top_light * 0.18 * (1.0 - fog)
 		+ rim_far_color.rgb * fr * rim_far * far_k;
+	if (key_fill > 0.0 || key_rim > 0.0) {
+		EMISSION += c * key_fill_color.rgb * key_fill * pow(nv, 1.5) * (1.0 - fog)
+			+ key_rim_color.rgb * key_rim * smoothstep(0.55, 0.92, 1.0 - nv) * mix(0.6, 1.0, side) * (1.0 - fog);
+	}
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 
