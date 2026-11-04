@@ -63,3 +63,6 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 
 ## 2026-11-04 07:20 UTC (orchestrator): art direction from the owner
 - Sex appeal is wanted (adult characters, stylised, not explicit). Several crop tops are fine; if you vary an outfit, keep the appeal. Ignore the "no crop top / no bare midriff" lines in the orchestrator's Ryzz/Vex/Sable/Claire prompts.
+
+## 2026-11-04 07:10 UTC (orchestrator): Ryzz gets a lightning scar
+- Owner idea: her closed right eye is a scar, not a wink. In any Ryzz redo, paint a branching lightning-shaped scar through the right brow and cheek (faint blue glow), the eye closed or half-lidded. Cinder: draw her spear in her RIGHT hand from now on.

@@ -1199,3 +1199,7 @@ Answers "OWNER answers for ext/unmasked". It contains the earlier ext/unmasked w
 
 ## 2026-11-04 07:20 UTC (orchestrator): DECISION? art direction: sex appeal is wanted
 - DECISION? Owner: sex appeal is good and wanted in the Warden designs (adult characters only; stylised, not explicit). Multiple heroes in crop tops are fine. When an outfit is changed for variety, it must keep the appeal. The orchestrator's earlier "avoid crop tops / no bare midriff" notes in the redesign prompts are withdrawn.
+
+## 2026-11-04 07:10 UTC (orchestrator): DECISION? Ryzz's lightning scar; Cinder right-handed
+- DECISION? Ryzz's closed right eye is a lightning scar (a Lichtenberg-figure scar with a faint blue glow) from the storm that struck her as a kid. It replaces the "wink".
+- DECISION? Cinder holds her spear in her right hand (the rig default).
