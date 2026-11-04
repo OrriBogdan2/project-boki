@@ -1252,3 +1252,31 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 - DECISION? Canonical Mask lore and the 12 relics are in **briefs/LORE_MASKS.md**. It replaces the concept-pass relic names and any pre-redesign hero lore. Summary: a Mask is the transformation; the relic (only sometimes a literal mask) is the key; wearing it settles the Warden's face and form over you; the put-on beat is a ghostly porcelain face flicker.
 - DECISION? **Masks are unlocked first (challenges/rewards), then bought.** Vex is free at the first portal; the second Mask is one of Zedran/Hem/Cinder. Prices come in the economy pass.
 - [EXT] Sync the Lore Bible artifact and docs/art/gen/stories/*.md to LORE_MASKS.md (relics, names Hem/Breaker/Ryzz/Pip, new stories). Main: new player text about Masks should follow it.
+
+## 2026-11-04 08:11 UTC (S2): OWNER: review Vex r3 (Meshy at max + bake). Verdict and credits
+- **Shots:** ext/hero-shots-s2, under warden-3d/vex/:
+  - Start with r3_vs_r2.png, r3_vs_portrait.png and r3_vs_turnaround.png.
+  - Then r3_front_34_vs_art.png, r3_back_vs_art.png and r3_gameplay_zoom.png.
+  - r3_meshy_variants.png shows the 9 Meshy variants.
+- **Branch:** ext/warden-vex-r3 032ceeeb.
+- **Checks:** S2 re-ran warden-glb, warden-model and gunslinger-combo 67/0, and health OK. move-feel, mantle-look, weapon-clip and warden-stance also pass. The key is not in git.
+- **How it was built:**
+  - Meshy 7.1, no remesh, ultra geometry, 8k texture with PBR.
+  - Three image edits to free her left arm from her hip.
+  - The kept run uses the edited front/3-4/back plus the turnaround's profile.
+  - The 1.19M-triangle mesh is baked onto a clean 34k body plus a 4.4k gun-arm, with a 2k atlas.
+  - Targeted paint-over: skin warmed, the lens glowing, stray strands cut.
+  - A thinner outline that stays off hair and eyes, and a brightening that only kicks in at match-camera distance.
+  - Slightly chunkier build.
+- **Honest verdict:**
+  - **Clearly better than r2.** Close up, the face, the hair with its orange streak, the bun and bolt, and the vest read cleanly in flat painted colour, with no facets, patches or ragged outline. At close-up and 3/4 she looks like the portrait and turnaround.
+  - **Still differs:**
+    - the monocle is a bright yellow-orange disc, not a brass ring with a cracked glow;
+    - her skin is paler than the art's tan;
+    - the candles are blobby;
+    - the hair is a bit helmet-like at 3/4.
+  - **At match zoom** she reads by the black and orange hair and the orange top, but the face is about 8 px wide, so it's still a busy, darkish read.
+  - **The last 10-20%** (lens, candles, hair silhouette) would need a human 3D-artist pass starting from the Meshy mesh and bake (the agent estimates 2-4 h per Warden). Rodin and Tripo aren't needed: geometry and texture are no longer the weak point.
+- **Credits:** the r3 run used 382, and the parallel r3b redesign has used 125 so far. **The Meshy balance is now 4,993.**
+- **The other 11 Wardens:** about 70-110 credits each with the r3 recipe (about 0.8-1.2k for all 11). The checklist is in PIPELINE.md.
+- **Waiting on the owner:** say "go" to use the r3 recipe on the others, or wait for the r3b redesign comparison, which is still running.
