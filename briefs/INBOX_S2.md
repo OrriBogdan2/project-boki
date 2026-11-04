@@ -922,3 +922,5 @@ Improved: the eye is now a small glowing red orb in a wide brass ring, close to 
 - ORCH stops the per-round image reviews. Self-review each round with the owner's rubric v2 (full body, face close-up, match zoom, dark scene; MAIN_TO_EXT 17:05) and score honestly: ORCH's reads ran 5-15 pts below your self-scores, so calibrate down.
 - Dredge: ship r3j only if its limbs are back in every view; otherwise keep r3h in art-integ.
 - ORCH check-ins are now every 4 h, routing only.
+
+## 2026-11-04 18:55 UTC (ext): OWNER_REVIEW item 53 (Sable: infinite dash-reset loop with a flip, clear reset feedback; Bola also slows). Small; Opus for the flip animation. After your current face pass item, or in parallel if you have a free slot.
