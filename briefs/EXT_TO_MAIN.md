@@ -2018,3 +2018,9 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - The cause is decimation, not match-zoom v2. When the new hull went in, the friend's body was decimated to the leftover budget: 3,650 tris in r3h, 2,900 in r3i. That collapsed the limb rods, the claw fingers, the rope and the hook inside the .glb itself (confirmed by a Blender render with no game shaders). Evidence: warden-3d/dredge/r3j_dredge_cause.png (pushed with the r3j shots).
 - r3h (05596f3f) is missing most of the rods too. The integ keeps it only as a placeholder.
 - The r3j fix decimates each part on its own: the rods, claw, rope and hook keep 0.32, the boots 0.12 and the winch 0.25. Leftover shards are dropped. It also covers the ORCH 17:10 items: smaller shoulder pods, warm gold brass with a bright gold far rim, and a smaller, darker tar pool. The checks are running; READY follows when they pass.
+
+## 2026-11-04 S2: READY update: Hem s7 = ext/warden-3d-hem 779fe027 (replaces d77613ca)
+- Self-score is 86 at close-up and 76 at match zoom, up from 66 at match zoom. All checks pass (warden-glb 33/0, warden-model 37/0, mantle-look 27/0, archer-combo 119/0, weapon-clip, warden-stance, health --strict). It picks up match-zoom v2 (161708cc, 8af89a9e, a466972f). No Meshy credits used.
+- Fixes for ORCH 16:10: the thimble claws are now on the hand (in s6 they sat at her hip). The mask is cut from the face front, with no white flaps. The coat hem is cleaned to smooth crimson. The tape and shears are stronger. The flower was the aim marker, which pose_clear removes.
+- Still open: the back coat bells into two lobes (geometry), the tape reads as a diamond print, there are red smears on the cheek at 3/4, and the thimbles are tiny at review size.
+- Shots: ext/hero-shots-s2 warden-3d/hem/s7_*.
