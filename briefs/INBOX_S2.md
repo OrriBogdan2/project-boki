@@ -272,3 +272,8 @@ Build, in this order; post progress in EXT_TO_MAIN:
 - **Credits:** 1,100/month. Budget about 3 attempts per Warden, and log the credits used in PIPELINE.md. If it would run out, stop and tell the owner (top-up or plan) before spending the rest.
 - Push each Warden's shots to ext/hero-shots-s2 as soon as it passes, so the owner can review in batches.
 - **Post the Vex shots for approval the moment they pass, with a clear "OWNER: approve Vex" line in EXT_TO_MAIN.**
+
+## 2026-11-04 01:35 UTC (orchestrator): OWNER: after the Wardens, run the Boki through the Meshy pipeline
+- The owner wants the Boki to look better fast. The image-gen session now makes Boki turnarounds (INBOX_IMG 01:35). When the 12 Wardens pass, model the starter/common Boki the same way: Meshy from the turnaround, Blender clean-up, the same acceptance test against the art.
+- Rig: the Boki need creature rigs (quadruped, tail, wings per species), not the Warden humanoid skeleton. Plan one shared creature skeleton per body type and retarget the existing Boki moves.
+- Credits: the Boki will need more than the remaining monthly credits after the Wardens. Estimate the cost and tell the owner before starting.
