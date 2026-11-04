@@ -229,6 +229,13 @@ def _bake_tree(m, look, img):
     col = rgb(look["colour"])
     if look.get("proj"):
         col = _projected(N, L, co, look["proj"], math_, col)
+        if look.get("mask"):          # (a disc where the model has its own piece in front: the image's copy fades)
+            d = N.new("ShaderNodeVectorMath")
+            d.operation = "DISTANCE"
+            L.new(co, d.inputs[0])
+            d.inputs[1].default_value = look["mask"]["at"]
+            r_ = float(look["mask"]["r"])
+            col = mix(math_("SUBTRACT", 1.0, ramp(d.outputs["Value"], r_ * 0.8, r_)), col, rgb(look["colour"]))
         if look.get("gain", 1.0) != 1.0:          # (lifted: the art's views are painted in a darker light)
             g = N.new("ShaderNodeVectorMath")
             g.operation = "SCALE"

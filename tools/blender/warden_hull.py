@@ -150,7 +150,56 @@ def build(ob, spec, seed=1):
         for lm in spec["lames"]:
             WP._append(ob, _sphere_patch(sc, lm["r"], lm["lat"][0], lm["lat"][1], mid - lm["lon"], mid + lm["lon"],
                                          1, lm.get("facets", 7), lm.get("thick", 0.02), dents=dents[:4]), bone, mat)
+    for t in spec.get("tears", []):
+        _tear(ob, c, r, t, mat, WP._mat_index(ob, spec.get("gash_material", "cloth-flesh"), "5a1a1c"), spec["bone"],
+              rnd)
     print("HULL built: %d tris in all" % sum(len(p.vertices) - 2 for p in ob.data.polygons))
+
+
+def _dir(la, lo):
+    la, lo = math.radians(la), math.radians(lo)
+    return Vector((math.cos(la) * math.sin(lo), math.cos(la) * math.cos(lo), math.sin(la)))
+
+
+def _tear(ob, c, r, t, mat, gash_mat, bone, rnd):
+    """A tear in the hull: a jagged dark gash along the surface (from `at` [lat, lon] toward `to`), and a plate
+    flap beside it peeled `flap` degrees out about the gash's line, so the outline breaks."""
+    a, b = _dir(*t["at"]), _dir(*t["to"])
+    n = int(t.get("teeth", 7))
+    w = float(t.get("w", 0.02))
+    bm = bmesh.new()
+    top, bot = [], []
+    for i in range(n + 1):
+        k = i / n
+        d = a.slerp(b, k).normalized()
+        side = d.cross(b - a).normalized()
+        ww = w * (0.35 + 0.65 * math.sin(math.pi * k)) * (1.0 if i % 2 else 0.55) * rnd.uniform(0.8, 1.2)
+        p = c + d * r * 1.004
+        top.append(bm.verts.new(p + side * ww))
+        bot.append(bm.verts.new(p - side * ww * 0.6))
+    for i in range(n):
+        bm.faces.new((top[i], top[i + 1], bot[i + 1], bot[i]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    for f in bm.faces:              # (the gash faces outward)
+        if f.normal.dot(f.calc_center_median() - c) < 0:
+            f.normal_flip()
+    bmesh.ops.triangulate(bm, faces=bm.faces[:])
+    WP._append(ob, bm, bone, gash_mat)
+    # the flap: a small patch of plate on one side of the gash, turned out about the gash's chord
+    la0, lo0 = t["at"]
+    la1, lo1 = t["to"]
+    off = t.get("side", [4.0, 0.0])
+    fl = _sphere_patch(c, r * 1.008, min(la0, la1) + off[0], max(la0, la1) + off[0] + t.get("tall", 5.0),
+                       min(lo0, lo1) + off[1], max(lo0, lo1) + off[1] + t.get("wide", 2.0), 1, 4,
+                       r * 0.035)
+    pa, pb = c + a * r, c + b * r
+    axis = (pb - pa).normalized()
+    from mathutils import Matrix
+    rot = Matrix.Translation(pa) @ Matrix.Rotation(math.radians(t.get("flap", 25.0)), 4, axis) @ \
+        Matrix.Translation(-pa)
+    for v in fl.verts:
+        v.co = rot @ v.co
+    WP._append(ob, fl, bone, mat)
 
 
 def hull_box(ob, material):

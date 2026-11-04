@@ -49,4 +49,8 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   projected along their axes and baked into the atlas (`metal-hull`, lifted x1.3). The rest of the brass is the
   art's olive-gold (7d6c3e, highlight c4b070); the horn x0.95 (it read too big at x1.3). The porthole, lens, orb,
   winch, rope, hook, claw and tar stay. 45 credits (5 edits); no Meshy 3D run.
+- **r3b (credit-free):** the hull's outline broken by five modelled tears (a jagged dark gash and a plate flap
+  peeled 20-28 degrees out about it: right of the porthole, lower front, his left side, two on the back); the
+  shoulders three big curved lames each (wider, hanging lower) in place of four bands; the front image's own
+  porthole faded where the model has its porthole (`mask`); the porthole's iron rings moved to brass (`remat`).
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.

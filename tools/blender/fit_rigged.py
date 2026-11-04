@@ -340,6 +340,14 @@ def main():
     paint = spec.get("paint")
     if spec.get("hull"):
         WH.build(ob, spec["hull"], int(spec.get("seed", 1)))
+    for rm in spec.get("remat", []):          # one bone's faces moved from one material to another
+        names = [m.name for m in ob.data.materials]
+        gi = ob.vertex_groups[rm["group"]].index
+        src, dst = names.index(rm["from"]), names.index(rm["to"])
+        for p in ob.data.polygons:
+            if p.material_index == src and all(any(g.group == gi for g in ob.data.vertices[v].groups)
+                                               for v in p.vertices):
+                p.material_index = dst
     if spec.get("orb"):
         if spec["orb"].get("replace"):
             WP.remove_group(ob, spec["orb"]["replace"])
