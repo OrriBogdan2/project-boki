@@ -94,6 +94,7 @@ func run(main: Node) -> void:
 		_shield(a)
 		_springs(a)
 		_own_look(a)
+		await _halo(main, a)
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
 	print("WARDENGLB_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
 	main.get_tree().quit()
@@ -343,6 +344,43 @@ func _own_look(a: String) -> void:
 ## The tips of the wing chains (skeleton space: behind is +Z).
 func _wing_tips(sk: Skeleton3D, wings: Array) -> Array:
 	return wings.map(func(ch): return sk.get_bone_global_pose(int((ch["ids"] as Array)[-1])).origin)
+
+## A model's glow halos (warden_look.json "halos") hang on their anchors outside the .glb (the skin, the bounds
+## and the slot checks never see them) and follow the head when it nods.
+func _halo(main: Node, a: String) -> void:
+	var hl: Array = WardenGlb.look(WardenGlb.art(a)).get("halos", [])
+	if hl.is_empty():
+		return
+	var m := _model(a)
+	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync
+	sync.apply()
+	await main.get_tree().process_frame
+	var found := 0
+	var inside := 0
+	var off := 0.0
+	var moved := 0.0
+	var rest := {}
+	for hs in hl:
+		var mi := m.get_node_or_null("Halo_" + String(hs["anchor"])) as Node3D
+		if mi:
+			rest[mi] = mi.global_position
+	(m.get_node("Rig/Torso/HeadPivot") as Node3D).rotation.x = 0.4
+	sync.apply()
+	await main.get_tree().process_frame
+	for hs in hl:
+		var mi := m.get_node_or_null("Halo_" + String(hs["anchor"])) as Node3D
+		var an := WardenGlb.anchor(m, String(hs["anchor"]))
+		if mi == null or an == null:
+			continue
+		found += 1
+		if m.get_node("Warden").is_ancestor_of(mi):
+			inside += 1
+		off = maxf(off, mi.global_position.distance_to(an.global_position))
+		moved = maxf(moved, mi.global_position.distance_to(rest[mi]))
+	ok(found == hl.size() and inside == 0 and off < 0.001 and moved > 0.01,
+			"%s: %d glow halos on their anchors (off %.4f m), outside the .glb, follow a nod (%.3f m)"
+			% [a, found, off, moved])
+	m.free()
 
 ## The largest distance of a spring chain's tip from where it rides its parent rigidly.
 func _spring_off(sk: Skeleton3D, sync: WardenGlb.Sync) -> float:
