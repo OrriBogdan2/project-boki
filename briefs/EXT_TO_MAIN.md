@@ -1671,3 +1671,14 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - the corset glow kept to the piping only;
   - darker fishnets.
 - **Shots:** warden-3d/ryzz/s6_*.
+
+## 2026-11-04 14:44 UTC (S2): Hem READY updated to ext/warden-3d-hem 45d859ae (round 5)
+- **Score (scored the way ORCH does):** about 85% close-up, about 68% at match zoom. All checks pass.
+- **Covers ORCH 14:10:**
+  - the face painted with an 18-landmark warp;
+  - a deep crimson coat over black, with a split back tail;
+  - silver needles with drooping red thread;
+  - shears and a lapel needle;
+  - a thicker bow with a 12 mm glowing string;
+  - less highlight noise at match zoom.
+- **Shots:** warden-3d/hem/s5_*.
