@@ -1,6 +1,10 @@
-2026-11-04T20:20:42Z
+2026-11-04T20:21:22Z
 
 FOR EXT (owner item queue): READY reports go here as each branch lands.
+WIP (paused 20:21 UTC by the owner's priority change): ext/claire-62-65 @ 92ad07b0 - NOT READY
+- 62 air skate, 64 skate->ult momentum (>=80% for 0.3 s, ground + air; DashFlow skate->X is "fire" with carry), 65 frozen statue (skating cast slides ~6 m over 0.8 s, then rooted; facing locked under a 360 cursor sweep): all implemented.
+- Ran before the final amend/style edits: --rimewright-combo-check 83/0, --dash-flow-check, --check, --archetype-check, --ability-check, --arena-check, health OK. Touches shared hunter.gd + arch_kit.gd (small hooks dash_vy, face_locked), so a FULL SUITE is still owed on 92ad07b0 (not run: from --bot-sanity-check on), plus a merge-tree check. Air-skate strip: scratchpad q/claire/shots (not published yet).
+NOT STARTED (paused): ext/tarek-61-67 (no code; plan in S1 notes: dolm.json slam.time ~0.45 cap, tap_k 0.85, hop 2.5 m, rock top 1.25 -> ~2.2; breah_slam.gd, dolm_kit.gd, hero_zones.gd ROCK_TOP, stone_stand.gd CLIMB_MAX 1.75 -> ~3.0), ext/two-gloves, kael-57, breaker-59, vex-68, sable-53-54, glider-63.
 READY: ext/small-60-66-75 @ f44adba4 (+247/-87, 16 files; no shared files) - items 60, 75, 66
 - 60 Ostra LMB: time since last shot charges the next orb smoothly 0->1 over 1.4 s (dmg up to +34% = 353 vs 263, speed x1.4, radius/size +90%); full orb slows; EVERY orb passes terrain; hand mote grows with charge + chime at full. Asserts (--ostra-combo-check): dmg/speed/size monotonic over waits 0..4.4 s, mid wait between ends, capped after window, +34% at full, every charge hits a dummy behind a wall, only full waits slow.
 - 75 Ostra Shift: fly_slow 0.2 -> 0.3; measured 1.35 vs run 4.65 = 0.30.
@@ -32,7 +36,7 @@ BJORN #10 #29 #30: DONE by S1 on ext/kitdata-pin-bjorn @ 7dede8e. S2: skip them.
 DASH TABLE: converged on DashFlow. ext/kitdata-vireo-venator @ 67454b5 has no DashRules left (no rows needed porting; DashFlow already covered them; the S1 mage "rmb_to_dash cancels" row was not carried over since DashFlow's into_dash rows are empty for mage). hero_ult.gd now matches main's newer version (sha1 ef9d382e), taken from main by merge. For S2: --dash-flow-check fails "bulwark air dash -> lmb, pressed early: lost" on dash-flow-base itself (Bulwark mace lmb_override drops an early tap).
 Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on over drops and the abyss (gameplay change) OK? 2 m shield push and 4.2 m wall OK (no source numbers)? The aegis plates read like planks from top-down.
 
-Running now: PRIORITY CHANGE (INBOX 20:16 UTC, owner): item queue PAUSED, one Sonnet agent max. ext/claire-62-65 and ext/tarek-61-67 told to push WIP and stop (20:21 UTC); then ONE Sonnet agent on RIGFIX (briefs/RIGFIX.md, base origin/integ91, branch rigfix). Done: ext/hem-reticle 693b1b45, ext/small-60-66-75 f44adba4.
+Running now: ONE Sonnet agent (since 20:25 UTC): RIGFIX (briefs/RIGFIX.md; branch rigfix from origin/integ91; Blender 4.5.15 at ~/tools). Item queue paused; claire WIP pushed 92ad07b0; tarek had no code. After RIGFIX, S1 stops for the owner's review.
 Queued: PAUSED (owner 20:16 UTC). Not started: ext/two-gloves (69), ext/kael-57, ext/breaker-59, ext/vex-68, ext/sable-53-54, ext/glider-63. After RIGFIX, S1 STOPS for the owner's review.
 Last INBOX entry handled: 2026-11-04 20:20 UTC ORCH (sync90 shipped all 12 Hunters in 3D) and 20:16 UTC ext (owner: RIGFIX only, one Sonnet agent, then stop; S1 does not take main's integrator role).
 Watcher: received 19:06 UTC entry
