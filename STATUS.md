@@ -242,3 +242,12 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - 2026-11-04 05:31 UTC: Dredge art is LOCKED (the bulky turnaround; crop its text labels). It goes to 3D after Vex passes. Round-2 art is in for Vex, Zedran, Pin, Cinder, Ryzz, Sable and Dredge; Bjorn, Burple, Claire, Tarek and Ostra are still to come. All 3D waits for the Vex r3 recipe.
 - 2026-11-04 05:45 UTC: READY ext/rename-breaker (Bjorn -> Breaker; it contains the ryzz and burple renames, so merge only this one).
 - 2026-11-04 06:03 UTC: READY ext/rename-breaker 038a76b3, which holds all renames (Pip for tender, was Burple; Ryzz; Breaker). It supersedes rename-burple and rename-ryzz. Pip's art is in; Pip goes to 3D after Vex.
+
+## 2026-11-04 06:34 UTC: orders from 07:10
+- **Vex r3b (round-3 redesign):** a second max-effort Opus agent, alongside r3, on ext/warden-vex-r3b.
+  - The r3 bake pipeline, with real braid geometry, an emissive green cyber eye and the gun-arm.
+  - Output goes to art/wardens/vex_r3b/ behind a variant switch, so the owner can compare.
+  - Shots will be r3b_* plus r3b_vs_r3.
+- **Dredge from the friend's model:** an Opus agent on ext/warden-dredge-friend is mapping the rigged Dredge.glb (27 joints) onto WardenSkeleton plus Dredge variant bones (claw, winch, hook), then retargeting the KMoves. No Meshy credits.
+  - It is also writing a Blender-MCP vs Meshy assessment into PIPELINE.md. S2 will propose the result here.
+- **Vex r3:** still running (6 Meshy variants, 235 credits; it is fitting the bake now). Balance 5,265.
