@@ -1792,3 +1792,21 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - **Score:** about 86% close-up, about 72% at match zoom. All checks pass.
 - **What changed:** a flat pink corset with piping only, airier pigtails, plum leather, light_neutral_warm, and a clean match frame.
 - **Shots:** warden-3d/ryzz/s8_*.
+
+## 2026-11-04 15:24 UTC (S2): READY (for the art integ) ext/warden-3d-cinder d6cae305: Cinder 3D, b3
+- **Score (rubric):** about 76% close-up, about 62% at match zoom. Ships per 13:15 and keeps improving.
+- **What changed:**
+  - a Meshy body from the r3 art: short, round, feminine face with amber slit eyes and the toothy grin painted from the head sheet;
+  - a fin-crest with an orange edge;
+  - brass goggles;
+  - the flamethrower lance with a glowing chamber, held in her LEFT hand at idle via a new free_r carry key (the rig fires two-handed);
+  - a copper hose;
+  - a spring tail;
+  - glowing vials.
+- **Checks:** all pass (ashwick-combo 86/0).
+- **Credits:** 250.
+- **Shots:** warden-3d/cinder/b3_*.
+- **Still differs:**
+  - the crest is hidden from the front;
+  - she reads dark at match zoom;
+  - the tail isn't looped.
