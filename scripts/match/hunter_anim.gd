@@ -53,37 +53,6 @@ const STANCE := {
 	"medium": {"knee": 0.17, "width": 0.09, "lean": 0.05, "bounce": 0.0, "breath": 2.2, "arm": 1.0, "elbow": 0.75},
 	"heavy": {"knee": 0.24, "width": 0.17, "lean": 0.03, "bounce": 0.0, "breath": 1.7, "arm": 0.8, "elbow": 1.0},
 }
-## Each archetype's own stance on top of its class (Models.hunter's "arch" meta): the thief hunched
-## low and forward, springing on the balls of its feet, the archer tall and upright, the mage chest
-## up with a slow breath (its robe and orb do the moving), the gunslinger loose with a cocked hip,
-## the juggernaut low and wide over planted feet with a slow heavy breath, the bulwark wide and
-## square like a wall.
-const ARCH_STANCE := {
-	"thief": {"knee": 0.38, "lean": 0.22, "width": 0.085, "bounce": 1.7, "breath": 3.1, "arm": 1.35},
-	"archer": {"knee": 0.16, "lean": 0.0, "width": 0.1, "breath": 2.3},
-	"mage": {"lean": -0.03, "knee": 0.12, "width": 0.07, "breath": 1.8, "arm": 0.8},
-	"gunslinger": {"lean": 0.03, "width": 0.13, "knee": 0.2, "breath": 2.0},
-	"juggernaut": {"lean": 0.1, "width": 0.25, "knee": 0.34, "breath": 1.35, "arm": 0.7},
-	"bulwark": {"lean": 0.0, "width": 0.24, "knee": 0.3, "breath": 1.5, "arm": 0.7},
-	# tender: small, low and forward with the arms out, quick short steps; rimewright: a tall skater, arms
-	# held out, long strides
-	"tender": {
-		"lean": 0.24, "knee": 0.32, "width": 0.1, "bounce": 1.1, "breath": 2.9, "arm": 1.3, "cadence": 1.25},
-	"rimewright": {
-		"knee": 0.22, "lean": 0.14, "width": 0.1, "bounce": 0.4, "breath": 2.4, "arm": 1.25, "cadence": 1.4},
-	"dolm": {"lean": 0.1, "width": 0.2, "knee": 0.3, "bounce": 0.0, "breath": 1.6, "arm": 0.7},
-	"ostra": {"lean": 0.0, "width": 0.05, "knee": 0.05, "bounce": 0.0, "breath": 1.4, "arm": 0.8},
-	# cadence scales the step rate, stride the step length: Cinder scurries in short quick steps, Dredge
-	# plants wide, slower, longer ones (hero-ref "Body, scale and movement feel")
-	"ashwick": {
-		"knee": 0.2, "lean": 0.02, "width": 0.12, "bounce": 0.6, "breath": 2.4, "arm": 0.9, "cadence": 1.8,
-		"stride": 0.45, "fidgets": ["bounce", "bob", "weapon"]
-	},
-	"dredge": {
-		"knee": 0.24, "lean": 0.06, "width": 0.22, "bounce": 0.0, "breath": 1.5, "arm": 0.75, "cadence": 0.9,
-		"stride": 0.7, "fidgets": ["shoulders", "neck", "stretch"]
-	},
-}
 ## How far the shoulder pieces turn with the arm (the rest is left behind, so a raised arm slides
 ## under the plate instead of through it).
 const PAD_FOLLOW := 0.55
@@ -185,7 +154,8 @@ var race := "human"
 var wid := ""
 var hold := "rifle"
 var hd: Dictionary = {}        # HOLDS entry
-var st: Dictionary = {}        # STANCE entry
+var st: Dictionary = {}        # STANCE entry, with the Warden's gait over it
+var ws: WardenStance           # the Warden's signature stance and idle cycle
 var snap := false              # rest_pose: jump straight to the targets
 
 var ph := 0.0                  # walk phase, advances with distance travelled
@@ -342,7 +312,8 @@ func _init(m: Node3D) -> void:
 	race = String(m.get_meta("race", "human"))
 	arch = String(m.get_meta("arch", ""))
 	st = (STANCE.get(cls, STANCE["medium"]) as Dictionary).duplicate()
-	st.merge(ARCH_STANCE.get(arch, {}), true)
+	st.merge(WardenStance.gait(arch), true)
+	ws = WardenStance.new(arch)
 	rng = int(m.get_meta("anim_seed", m.get_instance_id())) & 0x7fffffff
 	seed_ph = _rand() * TAU
 	weight = 1.0 if _rand() < 0.5 else -1.0
@@ -580,6 +551,7 @@ func update(dt: float, s: Dictionary) -> void:
 		idle_t = 0.0
 	else:
 		idle_t += dt
+	ws.tick(dt, self, s)
 	# ---------------------------------------------------------------- signals
 	var vy := vel.y
 	acc_f = lerpf(acc_f, (mf - mf_prev) / dt, 1.0 - exp(-12.0 * dt))
@@ -722,6 +694,7 @@ func update(dt: float, s: Dictionary) -> void:
 	if weight_t <= 0.0:
 		weight_t = 4.0 + _rand() * 7.0
 		weight_to = -weight_to if _rand() < 0.75 else weight_to
+	weight_to = ws.weight_side(weight_to)
 	weight = _ease(weight, weight_to, 1.6, dt)
 	var wk := weight * still * (1.0 - crouch_k) * (1.0 - revive_k) * (1.0 - stomp_k)
 	_tick_fidget(dt, still, s)
@@ -850,6 +823,13 @@ func update(dt: float, s: Dictionary) -> void:
 	if sw_k > 0.0:
 		hl += sw_k * 0.32 * idle_w; kl -= sw_k * 0.3 * idle_w
 		hr -= sw_k * 0.22 * idle_w; kr -= sw_k * 0.12 * idle_w
+	# the Warden's stance: the knees, the free leg, the feet apart
+	hl += ws.hip_l.x
+	kl += ws.hip_l.y
+	hr += ws.hip_r.x
+	kr += ws.hip_r.y
+	wl -= ws.spread
+	wr += ws.spread
 	# ================================================================ BODY
 	var breath := sin(t * float(st["breath"]) + seed_ph)
 	var pitch := -float(st["lean"]) * (1.0 - down_k) - lean_f - r1 * 0.06 - crouch_k * 0.3 - land_k * 0.32 - slam_k * 0.35
@@ -868,8 +848,6 @@ func update(dt: float, s: Dictionary) -> void:
 		pitch += r1 * 0.04           # runs tall, eyes up
 	elif arch == "mage":
 		pitch += r1 * 0.05 + still * sin(t * 0.9 + seed_ph) * 0.02    # glides upright; a slow sway standing
-	elif arch == "gunslinger":
-		roll += still * 0.05         # a cocked hip at rest
 	elif arch == "bulwark":
 		yaw *= 0.5                   # the shoulders stay square, a moving wall...
 		pitch -= r1 * 0.32 * (1.0 - dash_k)      # ...pitched far forward at a run (a dash leans by itself),
@@ -974,6 +952,9 @@ func update(dt: float, s: Dictionary) -> void:
 	# fidgets that move the whole upper body
 	var fid := _fidget_body()
 	pitch += fid.x; yaw += fid.y; roll += fid.z
+	pitch += ws.body.x
+	yaw += ws.body.y
+	roll += ws.body.z
 	# skating: the skate move owns the lean, capped so she stays up on her blades (about 23 degrees)
 	if dash_k > 0.01 and dash_kind == "skate":
 		pitch = maxf(pitch, -SKATE_LEAN_MAX)
@@ -1014,7 +995,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var dl2 := (THIGH * cos(hl) + SHIN * cos(hl + kl)) * cos(wl)
 	var dr2 := (THIGH * cos(hr) + SHIN * cos(hr + kr)) * cos(wr)
 	var drop := (LEG - maxf(dl2, dr2)) * legs.scale.y * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - down_k) * (1.0 - dive_k) * (1.0 if roll_t < 0.0 else 0.0)
-	var off := Vector3(wk * 0.028 * still, -drop + bounce * 0.008, 0.0)
+	var off := Vector3(wk * 0.028 * still, -drop + bounce * 0.008, 0.0) + ws.hip
 	if arch == "juggernaut":
 		off.y -= absf(cos(ph)) * 0.035 * r1        # each footfall lands with weight
 	elif arch == "thief":
@@ -1045,7 +1026,7 @@ func update(dt: float, s: Dictionary) -> void:
 	if knee_l: knee_l.rotation.x = kl
 	if knee_r: knee_r.rotation.x = kr
 	# torso: bobs with the stride, breathes
-	var tb := breath * still * (1.0 - emote_k * 0.5)
+	var tb := breath * still * (1.0 - emote_k * 0.5) * ws.breath_k
 	torso.position.y = hip_y + tb * 0.006 + glide_k * 0.02
 	torso.scale = Vector3(1.0 - tb * 0.006, 1.0 + tb * 0.012, 1.0 - tb * 0.006)
 	torso.rotation = Vector3(pitch + dz, yaw, roll)
@@ -1064,6 +1045,7 @@ func update(dt: float, s: Dictionary) -> void:
 		head.rotation.y = head_look + fh.y + eh.y - yaw * lock - legs_yaw * 0.0
 		head.rotation.x = -pitch * 0.55 * (1.0 - tuck) + sin(ph * 2.0 + 0.6) * 0.03 * r1 + down_k * 0.25 - drink_k * 0.35 + fh.x + eh.x - tuck * 0.4 + flinch.x * 0.1
 		head.rotation.z = -roll * 0.5 + sin(t * 0.9 + seed_ph) * 0.03 * still + fh.z + eh.z + stun_k * sin(t * 3.1 + 1.2) * 0.2
+		head.rotation += ws.head
 	# ================================================================ SHOULDER PIECES
 	if pad_l and arm_l:
 		pad_l.quaternion = Quaternion.IDENTITY.slerp(arm_l.basis.get_rotation_quaternion(), PAD_FOLLOW)
@@ -1440,6 +1422,11 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		if km.has("wo"): gpos += km["wo"] as Vector3
 		gbas = Basis.from_euler(Vector3(ap, ay, ar))
 		ap = lp; ay = ly; ar = 0.0
+	# the Warden's signature carry while standing (it comes up to the aim the moment they fire)
+	var carried := ws.carry(Transform3D(gbas, gpos))
+	gbas = carried.basis
+	gpos = carried.origin
+	free_l = maxf(free_l, ws.carry_free_l())
 	# emotes: the weapon goes away, the hands do the talking
 	var gvs := gun_vis * gun_scl
 	aim.rotation = Vector3(ap, ay, ar)
@@ -1482,6 +1469,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if hd.get("fist", false):
 		# the off fist carried low and forward, ready (a brawler, not a shooter's hanging hand)
 		fl = sh_l + Vector3(-0.1, -0.3 + 0.06 * r1, -0.2 + swing_l * 0.12 * arm_amp)
+	fl += ws.arm_l
 	# dodges: arms back (phase lunge), tucked (roll), shoulder guard (charge)
 	if dash_k > 0.01:
 		match dash_kind:
@@ -1822,7 +1810,7 @@ func _tick_fidget(dt: float, still: float, s: Dictionary) -> void:
 			fidget = ""
 			fidget_wait = 4.0 + _rand() * 7.0
 		return
-	if idle_t < 2.5 or still < 0.9 or kit_pose:
+	if idle_t < 2.5 or still < 0.9 or kit_pose or ws.fidgeting():
 		return
 	fidget_wait -= dt
 	if fidget_wait > 0.0:
