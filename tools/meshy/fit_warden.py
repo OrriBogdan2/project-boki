@@ -31,6 +31,9 @@ from mathutils import Matrix, Vector
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "blender"))
 import warden_kit as K  # noqa: E402
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import bow_parts  # noqa: E402
+
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 FIT_BONES = [  # bone, head joint, tail joint, parent
     ("hips", "pelvis", "neck", None), ("head", "neck", "crown", "hips"),
@@ -115,10 +118,13 @@ def transform(ob, m):
     ob.data.update()
 
 
-def snap(ob, p, r):
-    """The middle of the mesh near joint p (vertices within r in the side view, at any depth)."""
+def snap(ob, p, r, depth=None):
+    """The middle of the mesh near joint p (vertices within r in the side view, at any depth; with `depth`, only
+    those within it of p's own depth, so a cloak hanging behind the legs doesn't pull the hips back)."""
     co = np.array([v.co[:] for v in ob.data.vertices])
     d = np.hypot(co[:, 0] - p.x, co[:, 2] - p.z)
+    if depth is not None:
+        d = np.where(np.abs(co[:, 1] - p.y) < depth, d, np.inf)
     near = co[d < r]
     if len(near) < 8:
         return p
@@ -298,7 +304,13 @@ def project(ob, img, pj):
     me.calc_loop_triangles()
     uv = me.uv_layers.active.data
     x0, x1, z0, z1 = pj["box"]
-    k, col0, row0 = _register(me, src, pj, ax, sgn, pj.get("register_on"))
+    if "affine" in pj:
+        # (a close-up, the portrait's face: three landmarks, mesh (a, z) -> image (col, row), give the map)
+        mpts = np.array([[p[0], p[1], 1.0] for p in pj["affine"]["mesh"]])
+        ipts = np.array(pj["affine"]["image"], dtype=np.float64)
+        aff = np.linalg.solve(mpts, ipts)                                 # rows: a, z, 1 -> col, row
+    else:
+        k, col0, row0 = _register(me, src, pj, ax, sgn, pj.get("register_on"))
     bg = src[ah - 1 - 5, 5, :3]
     painted = 0
     for t in me.loop_triangles:
@@ -310,7 +322,10 @@ def project(ob, img, pj):
         if not all(x0 <= p[ax] <= x1 and z0 <= p.z <= z1 for p in ps):
             continue
         uvs = np.array([[uv[li].uv.x * w, uv[li].uv.y * h] for li in t.loops])
-        cr = np.array([[col0 + sgn * p[ax] / k, row0 - p.z / k] for p in ps])
+        if "affine" in pj:
+            cr = np.array([[p[ax], p.z, 1.0] for p in ps]) @ aff
+        else:
+            cr = np.array([[col0 + sgn * p[ax] / k, row0 - p.z / k] for p in ps])
         lo = np.floor(uvs.min(axis=0)).astype(int)
         hi = np.ceil(uvs.max(axis=0)).astype(int)
         xs, ys = np.meshgrid(np.arange(lo[0], hi[0] + 1), np.arange(lo[1], hi[1] + 1))
@@ -331,8 +346,13 @@ def project(ob, img, pj):
         tx = np.clip(pts[inside, 0].astype(int), 0, w - 1)
         ty = np.clip(pts[inside, 1].astype(int), 0, h - 1)
         got = src[ah - 1 - row, col]
-        art_px = np.abs(got[:, :3] - bg).sum(axis=1) > 0.12               # (the sheet's grey keeps Meshy's paint)
-        dst[ty[art_px], tx[art_px]] = got[art_px]
+        if "affine" in pj:
+            # (the image's alpha says where it paints, feathered into Meshy's own paint)
+            al = got[:, 3:4]
+            dst[ty, tx, :3] = dst[ty, tx, :3] * (1 - al) + got[:, :3] * al
+        else:
+            art_px = np.abs(got[:, :3] - bg).sum(axis=1) > 0.12           # (the sheet's grey keeps Meshy's paint)
+            dst[ty[art_px], tx[art_px]] = got[art_px]
         painted += 1
     img.pixels = dst.ravel()
     log("projected the art onto %d faces" % painted)
@@ -802,6 +822,67 @@ def gun_weapon(gun, e, t, rig, ga):
     return gun, spin
 
 
+def plant_feet(ob, rig, ft):
+    """Boots drawn hanging (Pin's art floats on smoke): each foot below `top` turns toes-up about the lower shin's
+    middle by `angle` degrees (in full below `full`, blended above), its toe shortened to `toe` of its length,
+    then stands on the ground (its lowest point on Z = 0, blended the same). In the contract's rest pose,
+    facing +Y."""
+    co = np.array([v.co[:] for v in ob.data.vertices])
+    top, full, ang = float(ft["top"]), float(ft["full"]), math.radians(float(ft["angle"]))
+    for sd in ("L", "R"):
+        kx = K.bone_head(rig, "shin." + sd).x
+        leg = (np.abs(co[:, 0] - kx) < float(ft.get("r", 0.13))) & (co[:, 2] < top + 0.02)
+        band = leg & (co[:, 2] > top - 0.06)
+        piv = co[band].mean(axis=0)
+        w = np.clip((top - co[:, 2]) / max(top - full, 1e-6), 0.0, 1.0)
+        w = w * w * (3 - 2 * w) * leg
+        sel = w > 0
+        d = co[sel] - piv
+        a = ang * w[sel]
+        y = d[:, 1] * np.cos(a) - d[:, 2] * np.sin(a)
+        z = d[:, 1] * np.sin(a) + d[:, 2] * np.cos(a)
+        # (the hanging toe was drawn long and pointed: the part ahead of the shin comes back to a boot's length)
+        tk = float(ft.get("toe", 1.0))
+        fw = y > 0
+        y[fw] = y[fw] * (1.0 - (1.0 - tk) * w[sel][fw])
+        co[sel, 1] = piv[1] + y
+        co[sel, 2] = piv[2] + z
+        low = co[sel & (w > 0.99), 2].min()
+        co[sel, 2] -= low * w[sel]
+        log("foot %s: turned %.0f deg about %s, lifted %.3f" % (sd, float(ft["angle"]), tuple(round(x, 3) for x in piv), -low))
+    ob.data.vertices.foreach_set("co", co.ravel())
+    ob.data.update()
+
+
+def cape_weights(ob, arm, cp):
+    """A long cloak behind the body rides the rig's Cape pivot (HunterAnim streams it back on a spring): the cloth
+    faces behind the `behind` plane (facing +Y, so behind is -Y) blend onto the `cape` bone, from nothing at
+    `top` to `max` at `bottom` and below, and fading in over 8 cm behind the plane. The bone deforms."""
+    arm.data.bones["cape"].use_deform = True
+    me = ob.data
+    cloth = {i for i, m in enumerate(me.materials) if m and m.name.split("-")[0] == "cloth"}
+    on = np.zeros(len(me.vertices), bool)
+    for p in me.polygons:
+        if p.material_index in cloth:
+            on[list(p.vertices)] = True
+    co = np.array([v.co[:] for v in me.vertices])
+    top, bot, mx, behind = float(cp["top"]), float(cp["bottom"]), float(cp["max"]), float(cp["behind"])
+    u = np.clip((top - co[:, 2]) / (top - bot), 0, 1)
+    w = mx * u * u * (3 - 2 * u) * np.clip((behind - co[:, 1]) / 0.08, 0, 1) * on
+    g = ob.vertex_groups.get("cape") or ob.vertex_groups.new(name="cape")
+    n = 0
+    for v in me.vertices:
+        k = float(w[v.index])
+        if k <= 0.01:
+            continue
+        for x in v.groups:
+            if x.group != g.index:
+                x.weight *= (1.0 - k)
+        g.add([v.index], k, "REPLACE")
+        n += 1
+    log("cape: %d vertices ride the cape bone" % n)
+
+
 def chunk(ob, rig, ck):
     """Game proportions over the art's (they read at the match camera): the head and the free hand grown about
     their joints by their skin weight, and the whole body a little thicker about its vertical axis."""
@@ -900,7 +981,7 @@ def main():
     transform(ob, m)
     if head:
         transform(head, m)
-    joints = {n: snap(ob, m @ p, spec.get("snap_r", 0.045)) for n, p in joints.items()}
+    joints = {n: snap(ob, m @ p, spec.get("snap_r", 0.045), spec.get("snap_depth")) for n, p in joints.items()}
     gun = None
     if "gun_arm" in spec:
         gun, ge, gt = gun_arm(ob, spec["gun_arm"], m)
@@ -930,10 +1011,14 @@ def main():
     if head:
         _apply_armature(head)
     apply_pose(ob, fit)
+    if "feet" in spec:
+        plant_feet(ob, rig, spec["feet"])
     decimate(ob, spec["max_tris"] - (int(spec["head"]["tris"]) if head else 0))
     ob.name = "Body"
     ob.data.name = "Body"
     arm = contract_skin(ob, rig)
+    if "cape" in spec:
+        cape_weights(ob, arm, spec["cape"])
     if "chunk" in spec:
         chunk(ob, rig, spec["chunk"])
     if head:
@@ -944,6 +1029,14 @@ def main():
     spin = None
     if gun is not None:
         gun, spin = gun_weapon(gun, ge, gt, rig, spec["gun_arm"])
+    elif "bow" in spec:
+        # a held bow, built by script (tools/meshy/bow_parts.py), with its nocked arrow as the Mag
+        bw = spec["bow"]
+        gun = bow_parts.build_bow(float(bw.get("height", 1.25)), float(bw.get("depth", 0.13)))
+        spin = bow_parts.build_arrow(tip_y=float(bw.get("tip", 0.78)))
+        spin.parent = gun
+        gun["built"] = spin["built"] = 1
+        K.anchor(arm, "hand.R", "anchor_nock", K.bone_head(rig, "hand.R"))
     else:
         gun = weapon(spec, rig)
     crown = rig["land"]["crown"]
@@ -951,6 +1044,8 @@ def main():
     K.anchor(arm, "hips", "anchor_chest", (0, 0.1, K.bone_head(rig, "upper_arm.L").z - 0.14))
     for o in [x for x in (ob, gun, spin) if x]:
         # Meshy's own split normals don't survive the decimation (facets): clear them, shade smooth
+        if o.get("built"):
+            continue                  # (a scripted piece: its facets are drawn on purpose)
         bpy.context.view_layer.objects.active = o
         if o.data.has_custom_normals:
             bpy.ops.mesh.customdata_custom_splitnormals_clear()

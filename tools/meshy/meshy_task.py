@@ -7,6 +7,7 @@ repo, chmod 600). It is never printed or written anywhere else.
   python3 -I tools/meshy/meshy_task.py create OUT_DIR img1.png [img2 ...] [--polycount N] [--model latest]
   python3 -I tools/meshy/meshy_task.py fetch OUT_DIR TASK_ID
   python3 -I tools/meshy/meshy_task.py retexture OUT_DIR TASK_ID front.png [side.png back.png]
+  python3 -I tools/meshy/meshy_task.py balance      (credits left; check before every run)
 
 `create` posts the job, polls it, then downloads the GLB, texture maps,
 thumbnails and a task.json record (id, model, settings, consumed credits)
@@ -95,6 +96,8 @@ def retexture(out, tid, imgs):
 
 
 def main(a):
+    if a[:1] == ["balance"]:
+        return print("balance", call("GET", BASE + "balance").get("balance"))
     if len(a) >= 3 and a[0] == "fetch":
         return fetch(a[1], a[2])
     if len(a) >= 4 and a[0] == "retexture":
