@@ -333,16 +333,10 @@ func _end_intro() -> void:
 	if shade: shade.queue_free()
 	if card_box: card_box.queue_free()
 	title.get_parent().visible = true
-	if edit_only or "--create" in OS.get_cmdline_user_args():
-		_show_create()
+	if edit_only or "--create" in OS.get_cmdline_user_args() or not Save.d.has("look"):
+		_show_create()      # a new game starts with making yourself (Settings, Change your look, reopens it)
 	else:
-		if not Save.d.has("look"):
-			Save.d["look"] = Unmasked.default_look()      # (change it later: Settings, Change your look)
-		cam_to = Vector3(0, 3.6, 6.4)
-		if ClassUnlock.needs_starters():
-			_show_hunter_pick()
-		else:
-			_show_pick()
+		_after_create()
 
 var turning := false
 func _unhandled_input(event: InputEvent) -> void:
@@ -377,6 +371,16 @@ func _egg_under_mouse() -> int:
 func _clear_bottom() -> void:
 	for ch in bottom.get_children():
 		ch.queue_free()
+
+## After making yourself: choose your first mask, then the eggs (a save that has its masks goes straight on).
+func _after_create() -> void:
+	stage = "pick"
+	title.text = "Choose your first Boki"
+	cam_to = Vector3(0, 3.6, 6.4)
+	if ClassUnlock.needs_starters():
+		_show_hunter_pick()
+	else:
+		_show_pick()
 
 # ---- your first mask: 1 of the starters, before the egg (ClassUnlock, ClassPick). The tutorial plays as it.
 var starter_picks: Array = []
@@ -454,28 +458,27 @@ func _show_create() -> void:
 	br.add_child(UI.ghost("Random", func():
 		look = Unmasked.random_look()
 		_show_create(), 120, "swap"))
-	br.add_child(UI.primary("Looks good", func():
-		Save.d["look"] = look.duplicate()
-		Save.save_game()
-		Sfx.play("click")
-		if preview: preview.queue_free()
-		preview = null
-		if create_box: create_box.queue_free()
-		create_box = null
-		for e in eggs: (e["holder"] as Node3D).visible = true
-		if sub_lbl: sub_lbl.text = "Every Boki is different. It will remember how you treat it."
-		_top_over(0.5)
-		if edit_only or Save.d.get("tutorial", {}).get("hatched", false):
-			Game.goto("home")
-			return
-		stage = "pick"
-		title.text = "Choose your first Boki"
-		cam_to = Vector3(0, 3.6, 6.4)
-		_show_pick(), 200))
+	br.add_child(UI.primary("Looks good", _looks_good, 200))
 	v.add_child(br)
 	root_ui.add_child(card)
 	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
 	card.offset_top += 46; card.offset_bottom += 46       # clear of the title
+
+func _looks_good() -> void:
+	Save.d["look"] = look.duplicate()
+	Save.save_game()
+	Sfx.play("click")
+	if preview: preview.queue_free()
+	preview = null
+	if create_box: create_box.queue_free()
+	create_box = null
+	for e in eggs: (e["holder"] as Node3D).visible = true
+	if sub_lbl: sub_lbl.text = "Every Boki is different. It will remember how you treat it."
+	_top_over(0.5)
+	if edit_only or Save.d.get("tutorial", {}).get("hatched", false):
+		Game.goto("home")
+		return
+	_after_create()
 
 ## The highest point of a model (its meshes' bounds), in world metres.
 func _model_top(n: Node3D) -> float:
@@ -507,7 +510,6 @@ func _rebuild_preview() -> void:
 		preview_yaw = preview.rotation.y
 		preview.queue_free()
 	preview = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", ""))), "", look)
-	(preview.find_child("Gun", true, false) as Node3D).visible = false      # (you carry nothing here)
 	preview.position = Vector3(0.8, 0, 1.6)
 	preview.rotation.y = preview_yaw
 	add_child(preview)

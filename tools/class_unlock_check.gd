@@ -50,6 +50,12 @@ func shot(tree: SceneTree, file: String, frames := 25) -> void:
 	for i in frames: await tree.process_frame
 	tree.root.get_texture().get_image().save_png("%s/%s.png" % [shots, file])
 
+## A screenshot this many seconds on (real time, whatever the frame rate).
+func shot_after(tree: SceneTree, file: String, secs: float) -> void:
+	if shots == "": return
+	await tree.create_timer(secs).timeout
+	tree.root.get_texture().get_image().save_png("%s/%s.png" % [shots, file])
+
 ## A finished-expedition result for Game.apply_result, played as `arch`, with these match stats.
 func result(arch: String, extracted: bool, stats := {}, extra := {}) -> Dictionary:
 	var r := {"arch": arch, "extracted": extracted, "why": "extracted" if extracted else "knocked out", "knocks": 0,
@@ -457,13 +463,19 @@ func _new_game_flow(tree: SceneTree) -> void:
 	enter.pressed = true
 	hx._unhandled_input(enter)
 	for i in 6: await tree.process_frame
+	if hx.stage == "create": screens += 1
+	ok(hx.stage == "create" and hx.create_box != null and screens <= 2,
+			"Enter takes it to making yourself: screen %d after the intro (stage %s)" % [screens, hx.stage])
+	hx._looks_good()
+	for i in 6: await tree.process_frame
 	if hx.stage == "hunter": screens += 1
-	ok(hx.stage == "hunter" and screens <= 2, "Enter takes it to the Hunter pick: screen %d after the intro" % screens)
+	ok(hx.stage == "hunter" and Save.d.has("look") and screens <= 3,
+			"then choosing your first mask: screen %d (stage %s)" % [screens, hx.stage])
 	hx._take_hunter([ClassUnlock.starters()[0]])
 	for i in 6: await tree.process_frame
 	ok(hx.stage == "pick", "and the pick to the egg pick (stage %s)" % hx.stage)
-	ok(hx.create_box == null and hx.preview == null and Save.d.has("look"),
-			"no hunter creator on the way (a default look is set; Change your look is in the farm's menu)")
+	ok(hx.create_box == null and hx.preview == null and Unmasked.is_look(Save.d["look"]),
+			"the creator is behind us and the save holds your Unmasked look")
 	ok(hx.get_script().source_code.find("night after the storm") < 0, "the three story lines are deleted, not skipped")
 	await shot(tree, "egg_pick", 30)
 	hx.queue_free()
@@ -480,10 +492,11 @@ func _new_game_flow(tree: SceneTree) -> void:
 func _creation(tree: SceneTree) -> void:
 	new_save()
 	Save.d["tutorial"] = {"intro": true}
+	Save.d["look"] = Unmasked.default_look()      # (made yourself already)
 	var hx = load("res://scripts/ui/hatch.gd").new()
 	main.add_child(hx)
 	for i in 8: await tree.process_frame
-	ok(hx.stage == "hunter", "a new save is at the Hunter pick after the card, before any egg (stage %s)" % hx.stage)
+	ok(hx.stage == "hunter", "a new save is at the mask pick after the card, before any egg (stage %s)" % hx.stage)
 	var panel: Node = _pick_panel(hx)
 	var chip_ids := _chips(panel).map(func(c): return String(c.get_meta("arch")))
 	ok(chip_ids == STARTERS, "a chip for each of the 3 starters and nothing else (%s)" % str(chip_ids))
@@ -512,7 +525,9 @@ func _creation(tree: SceneTree) -> void:
 	await _click_chip(panel, "gunslinger", tree)
 	ok(not go.disabled and go.text.contains(Arch.name_of("gunslinger")), "the button reads: %s" % go.text)
 	await _click_chip(panel, "archer", tree)
-	await shot(tree, "hunter_pick", 60)
+	await shot_after(tree, "mask_1_you", 0.1)
+	await shot_after(tree, "mask_2_lifting", 0.8)
+	await shot_after(tree, "hunter_pick", 1.5)
 	go.pressed.emit()
 	for i in 6: await tree.process_frame
 	ok(ClassUnlock.picks() == ["archer"] and ClassUnlock.open_ids() == ["archer"] and hx.stage == "pick",

@@ -36,6 +36,7 @@ func run(main: Node) -> void:
 	_model(main)
 	await _anim(main)
 	_who_shows()
+	_blend(main)
 	print("UNMASKED CHECK DONE, failures: %d" % bad)
 	tree.quit()
 
@@ -110,9 +111,33 @@ func _anim(main: Node) -> void:
 	base.queue_free()
 
 func _who_shows() -> void:
+	var fresh := Unmasked.mask_look()
+	ok(not Unmasked.is_look(fresh) and fresh == _with_glider(Models.default_look()),
+		"a new save's Warden look is the plain default, as on main")
+	var old := {"race": 2, "gender": 0, "face": 4, "hair": 1, "skin": 5, "glider": "kite"}
+	Save.d["look"] = old.duplicate()
+	Unmasked.migrate(Save.d)
 	var warden := Unmasked.mask_look()
-	ok(not Unmasked.is_look(warden) and int(warden.get("race", -1)) == 0,
-		"a match and the hero screens use the Warden's look, not yours")
-	Save.d["look"] = {"race": 2, "gender": 0, "face": 4}
+	var same: bool = int(warden["race"]) == 2 and int(warden["face"]) == 4 and warden["glider"] == "kite"
+	ok(not Unmasked.is_look(warden) and same, "a migrated save's Warden keeps its old race, face and glider")
 	ok(Unmasked.is_look(Unmasked.worn()) and not Unmasked.is_look(Unmasked.mask_look()),
-		"the farm wears you as the Unmasked even from an old save")
+		"the farm wears you as the Unmasked, a match wears the Warden")
+
+func _with_glider(lk: Dictionary) -> Dictionary:
+	lk["glider"] = "classic"
+	return lk
+
+func _blend(main: Node) -> void:
+	Save.d["look"] = {"unmasked": true, "eyes": 5, "height": 2, "build": 2, "colour": 9, "marks": []}
+	ok(int(Unmasked.worn_look()["face"]) == Unmasked.FACE_FOR_EYES[5], "your eyes show behind the mask")
+	var hero := Models.hunter("medium", Data.TEAM_COLORS[0], "smg", "", Unmasked.worn_look(), "gunslinger")
+	var before_scale := hero.scale
+	var mat := (hero.get_meta("mats") as Array)[0] as ShaderMaterial
+	var tint_before: Color = mat.get_shader_parameter("albedo")
+	Unmasked.blend(hero)
+	var tint_after: Color = mat.get_shader_parameter("albedo")
+	ok(hero.scale.y > before_scale.y and hero.scale.y < before_scale.y * 1.09 and hero.scale.x > before_scale.x,
+		"the mask keeps about 90%% Warden: height and build show a tenth (%.3f x)" % (hero.scale.y / before_scale.y))
+	var want := tint_before.lerp(Unmasked.colour(Save.d["look"]), Unmasked.SHOW)
+	ok(tint_after.is_equal_approx(want), "and your body colour tints the Warden a tenth")
+	hero.free()

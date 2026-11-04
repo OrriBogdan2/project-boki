@@ -7,7 +7,8 @@ extends RefCounted
 
 const STAGE := Vector2(300, 300)
 const CHIP_FACE := 40         # px: the Warden's face on each starter's chip
-const HINT := "Pick the mask you wear first. The other two open after your first expedition."
+const HINT := "Pick the mask you wear first: you become mostly its Warden, with a little of you showing through. " \
+		+ "The other two open after your first expedition."
 
 static func row(picked: Array, done: Callable) -> Control:
 	var back := UI.card(Color(0.06, 0.04, 0.11, 0.94), 14, 12)
@@ -25,7 +26,7 @@ static func row(picked: Array, done: Callable) -> Control:
 	chips.add_theme_constant_override("h_separation", 6)
 	chips.add_theme_constant_override("v_separation", 6)
 	v.add_child(chips)
-	var viewer := HunterViewer.make(String(ClassUnlock.starters()[0]), STAGE)
+	var viewer := HunterViewer.make(String(ClassUnlock.starters()[0]), STAGE, true)
 	back.set_meta("viewer", viewer)
 	v.add_child(viewer)
 	var go := UI.primary("", func(): done.call(picked), 300)

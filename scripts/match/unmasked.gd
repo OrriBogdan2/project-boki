@@ -9,7 +9,8 @@ extends RefCounted
 const GENDERS := ["Feminine", "Masculine"]
 const HEIGHTS := ["Short", "Average", "Tall"]
 const HEIGHT_SCALE := [0.92, 1.0, 1.08]     # x the hunter's size
-const BUILDS := ["Slight", "Average", "Sturdy"]       # body width in Models.hunter: 0.88 / 1.0 / 1.15
+const BUILDS := ["Slight", "Average", "Sturdy"]
+const BUILD_WIDTH := [0.88, 1.0, 1.15]      # Models.hunter's body width for each build
 const EYES := ["Round", "Calm", "Sleepy", "Happy", "Narrow", "Starry"]
 const BROWS := ["None", "Soft", "Straight", "Raised", "Furrowed"]
 const BLUSH := ["None", "Soft", "Rosy"]
@@ -66,6 +67,7 @@ static func from_old(old: Dictionary) -> Dictionary:
 			out[k] = old[k]          # (the glider, and anything else the look carried)
 	if old.is_empty():
 		return out
+	out["old"] = old.duplicate(true)      # kept for mask_look until the mask-look rules replace it
 	var gender := clampi(_i(old.get("gender"), 1), 0, 1)
 	var face := clampi(_i(old.get("face"), 0), 0, Models.LOOK_FACES.size() - 1)
 	var race := clampi(_i(old.get("race"), 0), 0, Models.RACES.size() - 1)
@@ -114,12 +116,38 @@ static func migrate(data: Dictionary) -> void:
 static func worn() -> Dictionary:
 	return clean(Save.d.get("look", {}))
 
-## The look a Warden wears in a match and on hero screens: never your own face (the mask-look rules
-## decide what shows; for now a plain Warden). Only the glider is yours.
+## The look a Warden wears in a match and on hero screens, exactly as before the Unmasked: the detailed
+## look the save held (a plain Warden for a new save). The mask-look rules will replace it.
 static func mask_look() -> Dictionary:
+	var lk: Dictionary = Save.d.get("look", {})
 	var out := Models.default_look()
-	out["glider"] = String(Save.d.get("look", {}).get("glider", "classic"))
+	out.merge(lk.get("old", {}), true)
+	out["glider"] = String(lk.get("glider", "classic"))
 	return out
+
+## How much of you shows through a worn mask (the Warden is the rest).
+const SHOW := 0.1
+## Your eyes as the closest of the old faces, so they show behind the mask: an index into Models.LOOK_FACES.
+const FACE_FOR_EYES := [0, 1, 2, 3, 4, 6]
+
+## The Warden as you wear its mask: the hero look with your eyes behind it.
+static func worn_look() -> Dictionary:
+	var out := mask_look()
+	out["face"] = FACE_FOR_EYES[clean(Save.d.get("look", {}))["eyes"]]
+	return out
+
+## The put-on blend on a built hero: your body colour tinted into every surface and your height and build
+## proportions, SHOW of each. The Warden's model, outfit and weapon stay as they are.
+static func blend(model: Node3D) -> void:
+	var u := worn()
+	var tint := colour(u)
+	for m in model.get_meta("mats", []):
+		var sm := m as ShaderMaterial
+		var base: Variant = sm.get_shader_parameter("albedo")
+		if base is Color:
+			sm.set_shader_parameter("albedo", (base as Color).lerp(tint, SHOW))
+	var wide := lerpf(1.0, BUILD_WIDTH[u["build"]], SHOW)
+	model.scale *= Vector3(wide, lerpf(1.0, HEIGHT_SCALE[u["height"]], SHOW), wide)
 
 ## An Unmasked as the old look dictionary Models.hunter builds from: no race, no hair, no details.
 static func legacy(lk: Dictionary) -> Dictionary:

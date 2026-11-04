@@ -52,6 +52,8 @@ var rows: Array = []          # one Button per ability, in `slots` order
 var _swing_n := 0
 var _swing_at := 0.0
 var _melee := false
+var masked := false           # the first-mask pick: you, then the mask goes on and the Warden takes over (put_on)
+var _you := false             # (while the mask is on its way, the model is you)
 
 ## The abilities shown, in order. "x" (the Hunter's own ultimate on X, coming back later) shows only
 ## once a Hunter's data has an "x" entry; R, the Boki Merge, is always last.
@@ -77,10 +79,11 @@ static func rules() -> Dictionary:
 		_rules = p if typeof(p) == TYPE_DICTIONARY else {}
 	return _rules
 
-static func make(hunter_id: String, stage_px := Vector2(320, 380)) -> HunterViewer:
+static func make(hunter_id: String, stage_px := Vector2(320, 380), put_on_mask := false) -> HunterViewer:
 	var v := HunterViewer.new()
 	v.id = hunter_id
 	v.stage_size = stage_px
+	v.masked = put_on_mask
 	return v
 
 ## The kit moves a slot plays, from the rules (only ids the animation knows).
@@ -116,6 +119,8 @@ func _ready() -> void:
 	_info_box = _info(col)
 	_cols.add_child(_info_box)
 	select(0, false)
+	if masked:
+		put_on()
 
 ## Shows another Hunter in this viewer without rebuilding it: the model swaps on the same turntable (it
 ## keeps turning from where it was), the colours and the info column follow.
@@ -126,8 +131,11 @@ func set_hunter(hunter_id: String) -> void:
 	var col := Arch.color(id)
 	slots = slots_for(id)
 	_melee = bool(Data.weapon_stats(Arch.signature(id)).get("melee", false))
-	model.queue_free()
-	_build_model()
+	if masked:
+		put_on()
+	else:
+		model.queue_free()
+		_build_model()
 	add_theme_stylebox_override("panel", _frame(col))
 	set_meta("hunter_viewer", id)
 	rim.light_color = col.lerp(Color.WHITE, 0.35)
@@ -244,13 +252,35 @@ func _build_world(col: Color) -> void:
 
 ## The Hunter's model on the turntable, with its animation.
 func _build_model() -> void:
-	model = Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", Unmasked.mask_look(), id)
+	var look := Unmasked.mask_look()
+	if masked:
+		look = Unmasked.worn() if _you else Unmasked.worn_look()
+	model = Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", look, id)
+	if masked and not _you:
+		Unmasked.blend(model)
 	var ring := model.get_node_or_null("TeamRing")
 	if ring: (ring as Node3D).visible = false
 	pivot.add_child(model)
 	anim = HunterAnim.new(model)
 	if cam:
 		_aim_camera()
+
+## The first-mask pick: you stand on the turntable, the mask lifts to your face, and the Warden (mostly)
+## takes over (Unmasked.blend). Picking another mask runs it again.
+func put_on() -> void:
+	_you = true
+	model.queue_free()
+	_build_model()
+	var beat := MaskPutOn.new()
+	beat.col = Arch.color(id)
+	beat.face_at = func() -> Vector2:
+		var head := model.get_node("Rig/Torso/HeadPivot") as Node3D
+		return cam.unproject_position(head.global_position)
+	beat.swapped.connect(func():
+		_you = false
+		model.queue_free()
+		_build_model())
+	fx.get_parent().add_child(beat)
 
 func _aim_camera() -> void:
 	var s := model.scale.y
