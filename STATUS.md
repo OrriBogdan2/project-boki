@@ -339,3 +339,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
   Still iterating: Kael, Pip, Cinder.
 - 2026-11-04 16:23 UTC: **shared match-zoom fix is out:** ext/warden-matchzoom f0ad9f60 (+ 5a7e42cc and b03b6764 for the wing cards). It roughly halves the speckle (Vex 6.4->3.3%, Ostra 7.5->2.6%), with per-Hunter no_ink keys and a pose_clear review frame. Every Hunter agent and the art integ have it. Pick notes: briefs-s2/MATCHZOOM_PICK.md. Art integ is at 63f0c894 (merging through Ostra).
+- 2026-11-04 16:37 UTC:
+  - **Match-zoom v2** is on ext/warden-matchzoom-v2:
+    - 161708cc: code;
+    - 0170c7df: wing cards;
+    - c89a5273 / a466972f: tools.
+  - v2 applies clean on most Hunter branches. It was sent to all agents and the art integ (briefs-s2/MATCHZOOM_PICK.md).
+  - Vex and Breaker revert their v1 pick (f0ad9f60) and take v2.
+  - **READY moves:** Vex f02bb08e (r3f), Breaker 1f050418 (s4), Tarek 85d6039d.
