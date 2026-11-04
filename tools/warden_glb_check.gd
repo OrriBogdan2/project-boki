@@ -339,6 +339,11 @@ func _spring_off(sk: Skeleton3D, sync: WardenGlb.Sync) -> float:
 		var par := sk.get_bone_parent(int(ids[0]))
 		var base := sk.get_bone_global_pose(par) * sk.get_bone_global_rest(par).affine_inverse()
 		var rigid := base * sk.get_bone_global_rest(tip)
+		if bool(ch.get("hang", false)):
+			# (a hanging chain settles straight down from its root, not riding its parent)
+			var r0 := sk.get_bone_global_pose(int(ids[0])).origin
+			var ln := sk.get_bone_global_rest(tip).origin.distance_to(sk.get_bone_global_rest(int(ids[0])).origin)
+			rigid.origin = r0 + (sk.global_transform.basis.inverse() * Vector3.DOWN).normalized() * ln
 		worst = maxf(worst, rigid.origin.distance_to(sk.get_bone_global_pose(tip).origin))
 	return worst
 

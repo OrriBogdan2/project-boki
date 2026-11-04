@@ -276,76 +276,7 @@
      0.85
     ]
    ],
-   "length": 0.7,
-   "side": [
-    0.0,
-    1.0,
-    0.0
-   ],
-   "clear": 0.036,
-   "width": 0.058,
-   "strand_r": 0.0135,
-   "period": 0.15,
-   "depth": 0.5,
-   "samples": 70,
-   "sides": 5,
-   "bones": 5,
-   "wraps": [
-    {
-     "at": 0.03,
-     "rings": 2
-    },
-    {
-     "at": 0.42,
-     "rings": 3
-    },
-    {
-     "at": 0.92,
-     "rings": 3
-    }
-   ],
-   "tuft": {
-    "locks": 9,
-    "length": 0.11,
-    "spread": 24,
-    "r": 0.013
-   }
-  },
-  {
-   "name": "braid_L",
-   "path": [
-    [
-     -0.075,
-     -0.06,
-     1.47
-    ],
-    [
-     -0.13,
-     -0.02,
-     1.37
-    ],
-    [
-     -0.18,
-     0.04,
-     1.27
-    ],
-    [
-     -0.205,
-     0.08,
-     1.15
-    ],
-    [
-     -0.215,
-     0.09,
-     1.0
-    ],
-    [
-     -0.215,
-     0.09,
-     0.85
-    ]
-   ],
-   "length": 0.7,
+   "length": 0.78,
    "side": [
     0.0,
     1.0,
@@ -383,13 +314,13 @@
  ],
  "braid_colours": {
   "strand": [
-   "eceaf2",
-   "8c889c",
+   "f2f2f8",
+   "8e90a4",
    "ffffff"
   ],
   "tuft": [
-   "eceaf2",
-   "8c889c",
+   "f2f2f8",
+   "8e90a4",
    "ffffff"
   ],
   "copper": [
@@ -408,12 +339,12 @@
    "root": [
     0.05,
     -0.13,
-    1.12
+    1.05
    ],
    "tip": [
     0.2,
     -0.3,
-    0.3
+    0.22
    ],
    "across": [
     1,
@@ -434,12 +365,12 @@
    "root": [
     -0.05,
     -0.13,
-    1.12
+    1.05
    ],
    "tip": [
     -0.2,
     -0.3,
-    0.3
+    0.22
    ],
    "across": [
     1,
@@ -460,12 +391,12 @@
    "root": [
     0.035,
     -0.12,
-    0.95
+    0.9
    ],
    "tip": [
-    0.1,
+    0.11,
     -0.2,
-    0.36
+    0.28
    ],
    "across": [
     1,
@@ -486,12 +417,12 @@
    "root": [
     -0.035,
     -0.12,
-    0.95
+    0.9
    ],
    "tip": [
-    -0.1,
+    -0.11,
     -0.2,
-    0.36
+    0.28
    ],
    "across": [
     1,
@@ -509,7 +440,7 @@
  ],
  "wing_look": {
   "fore": {
-   "base": "e6e3f0",
+   "base": "eeecf4",
    "tints": [
     "9fc0ff",
     "ffb0e0",
@@ -518,8 +449,8 @@
     "ffe8a8",
     "b0f0ff"
    ],
-   "tint_k": 0.55,
-   "alpha": 0.66,
+   "tint_k": 0.25,
+   "alpha": 0.7,
    "rim": "fbf4ff",
    "rim_alpha": 0.8,
    "edge": 0.95,
@@ -567,7 +498,7 @@
    ]
   },
   "hind": {
-   "base": "e6e3f0",
+   "base": "eeecf4",
    "tints": [
     "9fc0ff",
     "ffb0e0",
@@ -576,8 +507,8 @@
     "ffe8a8",
     "b0f0ff"
    ],
-   "tint_k": 0.55,
-   "alpha": 0.66,
+   "tint_k": 0.25,
+   "alpha": 0.7,
    "rim": "fbf4ff",
    "rim_alpha": 0.8,
    "edge": 0.94,
@@ -631,25 +562,26 @@
    0.08,
    -0.06
   ],
-  "length": 0.42,
-  "span": 0.44,
+  "length": 0.6,
+  "span": 0.62,
   "colours": {
    "silver": "9ea2b0",
    "dark": "2e2a38",
-   "grip": "5e4030",
+   "grip": "8a5a3a",
    "string": "8f63cf",
-   "bolt": "c77dff",
+   "bolt": "d690ff",
    "scroll": "a4a8b6"
   },
   "stirrup": true,
   "scroll": true,
-  "scroll_line": "3c3f4c"
+  "scroll_line": "3c3f4c",
+  "thick": 1.9
  },
  "atlas_px": 2048,
  "smooth": {
-  "iterations": 2,
-  "sigma_s": 2.5,
-  "sigma_r": 0.06
+  "iterations": 3,
+  "sigma_s": 3.0,
+  "sigma_r": 0.1
  },
  "ramps": [
   {
@@ -658,33 +590,11 @@
     "hair"
    ],
    "ramp": [
-    "6e6a7c",
-    "9894a8",
-    "c4c2d0",
-    "e2e0ea",
-    "f8f8ff"
-   ]
-  },
-  {
-   "name": "collar back (the standing purple collar, the turnaround's back view)",
-   "slots": [
-    "fur",
-    "hair"
-   ],
-   "box": [
-    null,
-    null,
-    0.04,
-    null,
-    0.33,
-    0.49
-   ],
-   "ramp": [
-    "160f24",
-    "241a38",
-    "35285a",
-    "4c3d7a",
-    "6a5a9a"
+    "8a8a9e",
+    "b2b2c4",
+    "d8d8e4",
+    "eeeef6",
+    "ffffff"
    ]
   },
   {
@@ -693,11 +603,11 @@
     "fur"
    ],
    "ramp": [
-    "8a8496",
-    "b4aec0",
-    "d4cfdc",
-    "ece8f2",
-    "ffffff"
+    "6e6680",
+    "918aa4",
+    "b0a8c2",
+    "c8c2d6",
+    "ddd8e8"
    ]
   },
   {
@@ -780,6 +690,32 @@
     "b8b6c4",
     "e2e2ea"
    ]
+  },
+  {
+   "name": "collar back (the standing purple collar, the turnaround's back view)",
+   "box": [
+    -0.2,
+    0.2,
+    0.02,
+    null,
+    0.3,
+    0.46
+   ],
+   "ramp": [
+    "160f24",
+    "241a38",
+    "35285a",
+    "4c3d7a",
+    "6a5a9a"
+   ],
+   "hsv": [
+    0.0,
+    1.0,
+    0.0,
+    0.16,
+    0.55,
+    1.0
+   ]
   }
  ],
  "despeckle": 1,
@@ -811,8 +747,8 @@
    1.205
   ],
   "out": 0.018,
-  "length": 0.095,
-  "r": 0.022,
+  "length": 0.1,
+  "r": 0.024,
   "colour": "b0001a",
   "bone": "hips"
  },

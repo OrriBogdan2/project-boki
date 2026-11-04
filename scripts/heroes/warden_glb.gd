@@ -372,7 +372,8 @@ class Sync extends Node:
 ## Hanging pieces on bone chains (RIG_CONTRACT "Spring chains"): bones named spring_<name>_<i>, each the next
 ## one's parent, the first a child of a contract bone (a braid hangs from the head). Each chain is a rope of its
 ## joints in world space: it keeps its momentum (damped), is pulled back toward the shape it has riding its parent
-## rigidly (firmer at the root than at the tip), and keeps its links' lengths, so a braid trails behind a run,
+## rigidly (firmer at the root than at the tip; a spring_hang_* chain toward straight down from its root), and
+## keeps its links' lengths, so a braid trails behind a run,
 ## swings out of a turn and settles when she stands. The last bone is the tip (no skin of its own).
 class Springs:
 	const PREFIX := "spring_"
@@ -397,7 +398,9 @@ class Springs:
 				cur = int(kids[0])
 				ids.append(cur)
 			if ids.size() >= 2:
-				chains.append({"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array()})
+				# a chain named spring_hang_* hangs straight down from its root (a lantern on its bail)
+				var hang := skel.get_bone_name(bi).begins_with(PREFIX + "hang_")
+				chains.append({"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array(), "hang": hang})
 
 	func _spring(bi: int) -> bool:
 		return skel.get_bone_name(bi).begins_with(PREFIX)
@@ -420,6 +423,10 @@ class Springs:
 				rest.append(r)
 				want.append(xf * r.origin)
 			var n := want.size()
+			if bool(ch.get("hang", false)):
+				for i in range(1, n):
+					want[i] = want[i - 1] + Vector3.DOWN * (rest[i] as Transform3D).origin.distance_to(
+							(rest[i - 1] as Transform3D).origin) * absf(xf.basis.get_scale().y)
 			var pts: PackedVector3Array = ch["pts"]
 			var prev: PackedVector3Array = ch["prev"]
 			if pts.size() != n or pts[0].distance_to(want[0]) > 1.5:      # (the first frame, or a teleport)
