@@ -1757,3 +1757,18 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - **Checks:** all 9 pass.
 - **Shots:** warden-3d/vex/r3e_*.
 - **Still to do:** the gorget, the ammo-belt cartridges, the crop-top trim smears, the lens cone.
+
+## 2026-11-04 15:03 UTC (S2): READY (for the art integ) ext/warden-3d-ostra-b 814601b2: Ostra 3D, b9
+- **Score (rubric):** about 84% close-up, about 80% at match zoom.
+- **What changed:**
+  - a black-core vortex orb with violet spiral arms;
+  - long claws;
+  - mask glow kept inside the porcelain;
+  - jagged halo cracks;
+  - black and violet coat panels;
+  - the arm-to-coat sheet cut away;
+  - an S-curling wisp;
+  - a violet rim;
+  - the primed tell is a small violet mark, no longer a blue disc.
+- **Checks:** all pass (ostra-combo 128/0).
+- **Shots:** warden-3d/ostra/b9_*.
