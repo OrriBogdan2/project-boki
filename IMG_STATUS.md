@@ -126,3 +126,8 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 - wardens_r2/breaker_{turnaround,side,portrait,splash}.webp; review/breaker_before_after.jpg. The old bjorn_side.webp (05:30, superseded) is removed.
 - Meets the owner's notes: towering (dwarfs the villagers in the splash), visibly undead (white eyes, frost-pale skin, rotting gashes with bone on the arms) yet warm and grinning, a detailed vest (harness, lantern, teddy-bear trinket, tags, hook, tooth necklace), a prow shield with a scroll top and ice, and an ice-block hammer with an anchor fluke.
 - Note: the turnaround order is back / side / 3-4 / front (reversed); the side profile is the separate breaker_side.
+
+## 2026-11-04 06:50 UTC: Pip (id tender; was Moosh Moosh, then Burple) round 2, from the owner's uploads (orchestrator)
+- wardens_r2/pip_{turnaround,side,portrait,splash}.webp; review/pip_before_after.jpg. The owner calls the hero **Pip** (supersedes "Burple").
+- A pink fox-kit with glowing fairy wings, brass goggles with a flower crown, a teal cape, a satchel of herbs, and a hearth-lantern that heals (the splash shows it healing a wounded knight). Much cuter than before.
+- Notes: the fiery-fox read (DECISIONS: "small and fiery like a fox, red markings") is mostly gone (pink and pastel now; only red ear tips remain). Sable also has wings, so two winged heroes. Owner to decide if that's fine.
