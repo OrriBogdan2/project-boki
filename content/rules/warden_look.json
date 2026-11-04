@@ -42,13 +42,7 @@
 				"fres": 0.22,
 				"far_lift": 0.0,
 				"shade": 0.9,
-				"shadow_tint": [
-					1.0,
-					0.88,
-					0.8
-				],
-				"fres_tint": 0.4,
-				"sky_ao": 0.0
+				"fres_tint": 0.4
 			},
 			"hair": {
 				"top_light": 0.6,
@@ -63,23 +57,13 @@
 			},
 			"cloth": {
 				"fres": 0.6,
-				"far_lift": 0.45,
-				"shadow_tint": [
-					0.95,
-					0.9,
-					0.92
-				]
+				"far_lift": 0.45
 			},
 			"leather": {
 				"top_light": 0.45,
 				"fres": 0.55,
 				"fres_tint": 0.5,
-				"far_lift": 0.15,
-				"shadow_tint": [
-					0.92,
-					0.92,
-					0.94
-				]
+				"far_lift": 0.15
 			},
 			"metal": {
 				"top_light": 0.5,

@@ -211,7 +211,8 @@ def pigtails(body, arm, rig, K, sp):
             rad = cr * rng.uniform(0.2, 0.8)
             off = (e1 * math.cos(ang) + e2 * math.sin(ang))
             s0 = start + off * rad
-            flick = k % 5 == 0                         # (the art's few tips that spike up out of the puff)
+            fe = int(sp.get("flick_every", 5))
+            flick = fe > 0 and k % fe == 0             # (the art's few tips that spike up out of the puff)
             spread = off * float(sp.get("spread", 0.03))
             yk = rng.uniform(-1.0, 1.0) * float(sp.get("depth", 0.025))     # (front to back across the mass)
             sk = rng.uniform(0.85, 1.1)
@@ -229,6 +230,18 @@ def pigtails(body, arm, rig, K, sp):
             for _it in range(int(sp.get("smooth", 2))):
                 p[1:-1] = p[1:-1] * 0.5 + (p[:-2] + p[2:]) * 0.25
             p = WP.drape(bvh, [tuple(c) for c in p], len(p), float(sp.get("clear", 0.02)), iters=6, smooth=0.05, length=None)
+            # soft curls: each lock coils round its own path over its lower half, its own phase (a curly mass)
+            cr_ = float(sp.get("curl_r", 0.0))
+            if cr_ > 0 and not flick:
+                s_c = WP.arclen(p)
+                tt, nn, bb = WP.frames(p, [0.0, 1.0, 0.0])
+                ph = rng.uniform(0, 2 * math.pi)
+                per = float(sp.get("curl_period", 0.07))
+                for i in range(len(p)):
+                    f = s_c[i] / s_c[-1]
+                    g = max(0.0, (f - 0.45) / 0.55)
+                    a = 2 * math.pi * s_c[i] / per + ph
+                    p[i] = p[i] + (nn[i] * math.cos(a) + bb[i] * math.sin(a)) * cr_ * g
             # the zigzag ends: a sawtooth across the lock over its last third
             s_arr = WP.arclen(p)
             Lp = s_arr[-1]
@@ -342,14 +355,19 @@ def rods(body, arm, rig, K, sp):
             y = float(_back_point(bvh, x, z)[1]) if z < sh_z + 0.12 else 1.0      # (above her shoulders: free)
             if abs(x) <= pw * 0.5 + r and abs(z - pz) <= ph * 0.5 + r:
                 y = min(y, py - pt * 0.5)
+            if "seat_top" in sp and z > pz + float(sp["seat_top"]):
+                y = 1.0                 # (flush between the shoulder blades: the jacket's collar above doesn't push it off)
             lim.append(y - r - seat)
         lim = np.array(lim)
-        z_lo, z_hi = z0, min(z1, sh_z + 0.05)
+        z_hi_cap = pz + float(sp["seat_top"]) if "seat_top" in sp else sh_z + 0.05
+        z_lo, z_hi = z0, min(z1, z_hi_cap)
         y_lo = float(np.interp(z_lo, zs, lim))
         y_hi = float(np.interp(z_hi, zs, lim))
-        slope = (y_hi - y_lo) / max(z_hi - z_lo, 1e-3)
+        # (leaning back with her back's slope, never forward over her head)
+        slope = float(np.clip((y_hi - y_lo) / max(z_hi - z_lo, 1e-3), -0.35, -0.05))
         line = y_lo + (zs - z_lo) * slope
-        line -= max(0.0, float((line - lim).max()))
+        seat_m = zs <= z_hi_cap
+        line -= max(0.0, float((line - lim)[seat_m].max()))
         return np.stack([xs, line, zs], axis=1)
 
     rod_ys = []

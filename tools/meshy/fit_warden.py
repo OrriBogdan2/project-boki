@@ -1761,6 +1761,73 @@ def emit_art(ob, img, el):
     return mask
 
 
+def paint_art(ob, img, pa):
+    """The art painted over the finished atlas by an orthographic front projection with its own registration
+    (Ryzz's face from the head sheet, which draws it at 3.5x the front view's pixels): in Meshy's frame, before the
+    fit, every texel of a face on one of `slots` inside `box` [x0, x1, z0, z1] that faces the camera (normal -Y)
+    takes the art's pixel at col = col_at + x * kx, row = row_at - z * ky, blended by `k` and feathered over
+    `feather` m from the box's edges; art pixels in a `keep` hsv range (the art's hair) leave the scan's own."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import imgio
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    art = imgio.load(os.path.expanduser(pa["image"]))
+    ah, aw = art.shape[:2]
+    me = ob.data
+    me.calc_loop_triangles()
+    uvl = me.uv_layers.active.data
+    co = np.array([v.co[:] for v in me.vertices])
+    x0, x1, z0, z1 = pa["box"]
+    fe = float(pa.get("feather", 0.01))
+    kx, ky, c0, r0 = float(pa["kx"]), float(pa["ky"]), float(pa["col_at"]), float(pa["row_at"])
+    slots = pa.get("slots", ["skin"])
+    kk = float(pa.get("k", 1.0))
+    keep = pa.get("keep", [])
+    n = 0
+    for tri in me.loop_triangles:
+        P = co[list(tri.vertices)]
+        c = P.mean(axis=0)
+        if not (x0 - fe <= c[0] <= x1 + fe and z0 - fe <= c[2] <= z1 + fe) or -tri.normal.y < float(pa.get("facing", 0.25)):
+            continue
+        m = me.materials[me.polygons[tri.polygon_index].material_index]
+        if m is None or m.name.split("-")[0] not in slots:
+            continue
+        q = np.array([[uvl[li].uv.x * w, uvl[li].uv.y * h] for li in tri.loops])
+        lo = np.maximum(np.floor(q.min(axis=0)).astype(int) - 1, 0)
+        hi = np.minimum(np.ceil(q.max(axis=0)).astype(int) + 1, [w - 1, h - 1])
+        if (hi < lo).any():
+            continue
+        xs, ys = np.meshgrid(np.arange(lo[0], hi[0] + 1), np.arange(lo[1], hi[1] + 1))
+        t = np.stack([xs.ravel() + 0.5, ys.ravel() + 0.5], axis=1)
+        a_, b_, c_ = q
+        d = (b_[1] - c_[1]) * (a_[0] - c_[0]) + (c_[0] - b_[0]) * (a_[1] - c_[1])
+        if abs(d) < 1e-12:
+            continue
+        l1 = ((b_[1] - c_[1]) * (t[:, 0] - c_[0]) + (c_[0] - b_[0]) * (t[:, 1] - c_[1])) / d
+        l2 = ((c_[1] - a_[1]) * (t[:, 0] - c_[0]) + (a_[0] - c_[0]) * (t[:, 1] - c_[1])) / d
+        l3 = 1 - l1 - l2
+        ins = (l1 >= -0.02) & (l2 >= -0.02) & (l3 >= -0.02)
+        if not ins.any():
+            continue
+        pos = np.outer(l1[ins], P[0]) + np.outer(l2[ins], P[1]) + np.outer(l3[ins], P[2])
+        col = np.clip((c0 + pos[:, 0] * kx).astype(int), 0, aw - 1)
+        row = np.clip((r0 - pos[:, 2] * ky).astype(int), 0, ah - 1)
+        src = art[row, col]
+        wgt = np.clip(np.minimum.reduce([pos[:, 0] - x0, x1 - pos[:, 0], pos[:, 2] - z0, z1 - pos[:, 2]]) / fe + 0.0,
+                      0.0, 1.0) * kk
+        if keep:
+            hh, ss, vv = _hsv_px(src[None])
+            hh, ss, vv = hh[0], ss[0], vv[0]
+            for kq in keep:
+                hit = (hh >= kq[0]) & (hh <= kq[1]) & (ss >= kq[2]) & (ss <= kq[3]) & (vv >= kq[4]) & (vv <= kq[5])
+                wgt = np.where(hit, 0.0, wgt)
+        ty, tx = t[ins, 1].astype(int), t[ins, 0].astype(int)
+        px[ty, tx, :3] = px[ty, tx, :3] * (1 - wgt[:, None]) + src * wgt[:, None]
+        n += int((wgt > 0).sum())
+    img.pixels = px.ravel()
+    log("paint %s from the art: %d texels" % (pa.get("name", "?"), n))
+
+
 def emit_attach(ob, img, mask, parts=()):
     """The emission mask (from emit_art, at the bake's size) down to the atlas's size, as every body material's
     emission texture: WardenGlb puts it on the toon shader's emit layer, in the archetype's model_glow colour."""
@@ -1877,6 +1944,8 @@ def main():
         for pj in spec["project_late"]:
             project(ob, img, pj)
         pad(img, ids, int(spec.get("pad", 6)))
+    for pa in spec.get("paint_art", []):
+        paint_art(ob, img, pa)
     emask = emit_art(ob, img, spec["emit_art"]) if spec.get("emit_art") else None
     head = None
     if "head" in spec:

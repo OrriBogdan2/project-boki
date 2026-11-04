@@ -41,3 +41,12 @@ Stage 2 (round 2, the r3c recipe; credit-free):
   match camera, copper and hazard yellow on the metal slot lifted at distance).
 - **Stance:** content/rules/warden_stance.json "mage": weight on her right hip, hips 9 cm over, shoulders tilted,
   her hands on her hips (she holds nothing).
+
+Stage 2 round 3:
+- **Face:** painted from ryzz_head_sheet (fit spec `paint_art`: an orthographic front projection registered on the
+  mesh's own render by the eyes and mouth, skin-slot faces only, the art's hair left to the scan's, feathered 1.5 cm).
+- **Shared look fix** (ext/warden-vex-r3b 16c18b4f, cherry-picked): warm own ambient, cool lights neutralised, darks
+  lifted; the ryzz look entry no longer tints the shadows itself.
+- **Pigtails:** 18 rounder locks a side (no top spikes), each coiling round its own path over its lower half.
+- **Rods:** seated flush between her shoulder blades (the collar above doesn't push them off), leaning back.
+- **Stance:** her right hand on her hip, the left hanging. Body bake 30k triangles (44.1k in all).

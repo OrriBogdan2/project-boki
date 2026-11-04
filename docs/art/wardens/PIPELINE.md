@@ -249,7 +249,7 @@ Ryzz notes (stage 1, docs/art/wardens/PIPELINE.md recipe; no hand polish):
   `model_glow.core` (hero_toon `emit_tint`), so the pink is a switch like Kael's, no rebake.
 - **Proportions:** mage body head 0.74, legs 1.95, build 0.92, chest 1.0, neck -0.02, size 1.0 (was size 1.12,
   chest 1.15): 0.99x a medium's height as before, slimmer, the legs longer; hit radius 0.37 unchanged.
-- **Stage 2 (round 2, credit-free):** ramps of the art's colours per slot; mantle_look "mage" colours and a no-hue
+- **Stage 2 (rounds 2-3, credit-free):** round 3: the face painted from the head sheet (`paint_art`), the shared look fix (16c18b4f), curly pigtails, rods flush between the shoulder blades, right hand on hip; round 2: ramps of the art's colours per slot; mantle_look "mage" colours and a no-hue
   `tint` (the hair-pick pull was the violet cast); fuller S-fall pigtails, knots squashed under the ties; rods seated
   on the back's slope with straps; the charm's halo off the emission (`strict`); warden_look "ryzz"; the swagger
   stance. The stance commits (ext/warden-stance 7260bfda..aa3345b6) are cherry-picked, not merged: a merge of
