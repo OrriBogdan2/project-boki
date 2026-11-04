@@ -1,6 +1,6 @@
-2026-11-04T19:40:17Z
+2026-11-04T20:01:35Z
 
-FOR MAIN: nothing pending from S1. ext/mapclean-fix c36f6ea merged (9732b33b, 19:35 UTC).
+FOR EXT (owner item queue): READY reports go here as each branch lands.
 
 == S1 BRANCH TABLE (current; older detail further down) ==
 branch | commit | state | Net | checks
@@ -19,9 +19,9 @@ BJORN #10 #29 #30: DONE by S1 on ext/kitdata-pin-bjorn @ 7dede8e. S2: skip them.
 DASH TABLE: converged on DashFlow. ext/kitdata-vireo-venator @ 67454b5 has no DashRules left (no rows needed porting; DashFlow already covered them; the S1 mage "rmb_to_dash cancels" row was not carried over since DashFlow's into_dash rows are empty for mage). hero_ult.gd now matches main's newer version (sha1 ef9d382e), taken from main by merge. For S2: --dash-flow-check fails "bulwark air dash -> lmb, pressed early: lost" on dash-flow-base itself (Bulwark mace lmb_override drops an early tap).
 Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on over drops and the abyss (gameplay change) OK? 2 m shield push and 4.2 m wall OK (no source numbers)? The aegis plates read like planks from top-down.
 
-Running now: none on S1.
-Queued: none on S1. Farm tutorial/builder moved to ext (ext/farm-hob, INBOX 18:55 UTC).
-Last INBOX entry handled: 2026-11-04 19:40 UTC ext (ext builds OWNER_REVIEW 53-75 itself). S1 has started none of items 53-75 and won't; nothing to hand over. S1 idle, no branches open, no agents.
+Running now (since 20:05 UTC Nov 4, Sonnet, 3 max): ext/claire-62-65 (items 62, 64, 65); ext/small-60-66-75 (Ostra 60 + 75, Cinder 66); ext/hem-reticle (item 55b).
+Queued (owner item queue per INBOX 20:00 UTC, in order): ext/tarek-61-67 (61, 67); ext/two-gloves (69); ext/kael-57; ext/breaker-59; ext/vex-68; ext/sable-53-54 (53, 54); ext/glider-63 (63). Not S1's: 56/58 (ext/friendly-bodies), 70-74 (ext/ryzz-70-74), 76/76b + face pass (S2).
+Last INBOX entry handled: 2026-11-04 20:00 UTC ext (S1 now on orri@projectboki.com and BUILDS the owner item queue; Sonnet, up to 3 agents; DECISIONS > OWNER_REVIEW_1103 > supervive-data; compact READY reports here for ext to review).
 Watcher: received 19:06 UTC entry
 Questions for the owner: which model id is the 'new low-usage model' in DECISIONS 'Agents and art'? This server can pick Fable 5.1 (claude-fable-5-1), Sonnet 5.5, Opus 5.5 or Haiku 5.5. S1 assumes Fable 5.1 unless told otherwise. Also see the ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
