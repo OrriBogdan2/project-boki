@@ -37,3 +37,6 @@ s10 self-score, match zoom 62: silhouette 18/25, signature colours 13/25, value 
 s11_*: ORCH 16:10: gauntlets as a few chunky slabs (2 rows of 3, thicker, thin orange cracks), the stones' crystal opening and eye moved onto the rock's outer face (the rounder rock had hidden them). s11_vs_s10.png: s11 over s10.
 s11 self-score, close-up 86: silhouette 13/15, face 17/20, hair 8/10, signature props 19/20, palette 13/15, clean paint 7/10, outfit 9/10
 s11 self-score, match zoom 62 (before the shared match-zoom fix): silhouette 18/25, signature colours 13/25, value separation 13/20, props read 11/20, artefacts 7/10
+s12_*: match-zoom v2 (161708cc, 8af89a9e, a466972f) with the pose_clear review frame (no HUD, sign, aim line or props; the crop on DEMO_HERO_RECT); rim_far off on his skin. s12_vs_s11.png: s12 over s11.
+s12 self-score, close-up 86: silhouette 13/15, face 17/20, hair 8/10, signature props 19/20, palette 13/15, clean paint 7/10, outfit 9/10
+s12 self-score, match zoom 70: silhouette 19/25, signature colours 15/25, value separation 15/20, props read 13/20, artefacts 8/10
