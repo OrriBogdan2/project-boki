@@ -499,8 +499,8 @@ func juggernaut(a) -> void:
 	m.step(A.DT)
 	P.inp["fire"] = false
 	A.step(m, 0.3)
-	A.ok("juggernaut LMB tap: a slash, double at the tip",
-			near >= 7.0 and A.dmg(T) >= near * 1.8 and K.waves == 0, "near %.0f tip %.0f" % [near, A.dmg(T)])
+	A.ok("juggernaut LMB tap: a slash, 1.6x at the tip (the footage's 151 / 94)",
+			near >= 7.0 and A.dmg(T) >= near * 1.5 and K.waves == 0, "near %.0f tip %.0f" % [near, A.dmg(T)])
 	A.fresh(T)
 	T.teleport(home + Vector3(7.0, 0, 0))
 	A.aim_at(P, T.pos)
@@ -533,8 +533,8 @@ func juggernaut(a) -> void:
 	A.step(m, 0.4)
 	A.ok("juggernaut RMB tap: Finishing Slam winds up, then lands",
 			winding and early <= 0.0 and A.dmg(T) >= 24.0 and K.last_variant == "tap", "took %.0f" % A.dmg(T))
-	A.ok("juggernaut RMB: the sweet spot marks the foe for the Riposte reset (no crash any more)",
-			K.sweet_spots == 1 and K.sweet_hit.has(T.get_instance_id()), "spots %d" % K.sweet_spots)
+	A.ok("juggernaut RMB: the Slam marks the foe it hits for the Riposte reset",
+			K.sweet_spots == 1 and K.slam_hit.has(T.get_instance_id()), "spots %d" % K.sweet_spots)
 	P.teleport(home)
 	A.fresh(T)
 	T.teleport(home + Vector3(1.2, 0, 0))
@@ -678,8 +678,8 @@ func juggernaut(a) -> void:
 	K.cd["e"] = 0.0
 	P.ak.use_e()
 	A.step(m, 0.3)
-	A.ok("juggernaut E: Warchain hooks + blights, cooldown waits",
-			K.warchain.hooked() and K.warchain.target == T and T.blight_t > 0.0 and A.dmg(T) >= 7.0
+	A.ok("juggernaut E: Warchain hooks (no blight: the data puts Anti-Heal on the spin), cooldown waits",
+			K.warchain.hooked() and K.warchain.target == T and T.blight_t <= 0.0 and A.dmg(T) >= 7.0
 			and float(K.cd["e"]) <= 0.0,
 			"blight %.1f cd %.1f" % [T.blight_t, float(K.cd["e"])])
 	P.ak.use_e()
@@ -764,6 +764,28 @@ func juggernaut(a) -> void:
 			"x cd %.1f resets %d" % [float(K.cd["x"]), K.slam_resets])
 	A.ok("juggernaut passive: a knock heals 20% of their health",
 			K.knock_healed >= minf(0.19 * T.max_hp, 0.9 * P.max_hp), "healed %.0f of %.0f" % [K.knock_healed, T.max_hp])
+	# audit (data: "knocking an enemy resets Volcanic Rebuke"): a plain body hit then a knock resets it too
+	A.step(m, 1.0)
+	T.downed = false
+	T.dead = false
+	T.out = false
+	A.fresh(T)
+	P.teleport(home)
+	T.teleport(home + Vector3(1.4, 0, 0))
+	A.aim_at(P, T.pos)
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	K.cd["x"] = 15.0
+	var spots0 := K.sweet_spots
+	var resets0 := K.slam_resets
+	A.tap(m, P)
+	A.step(m, 0.9)
+	T.hp = 4.0
+	T.hurt(10.0, P, {"src": "shot"})
+	A.step(m, 0.1)
+	A.ok("juggernaut Smash: a knock after any Slam hit (not the sweet spot) resets the Gilded Riposte",
+			K.sweet_spots == spots0 and K.slam_resets == resets0 + 1 and float(K.cd["x"]) <= 0.0,
+			"spots +%d resets +%d" % [K.sweet_spots - spots0, K.slam_resets - resets0])
 	await A.done(m)
 	await ZFEEL.new().run(A)
 	await ULT.new().zedran(A)
@@ -796,10 +818,13 @@ func combos(a) -> void:
 	# E, E, then RMB tap in the pull: Cinder Spin
 	hook.call()
 	P.ak.use_e()
-	A.step(m, 0.06)
+	var wait := 0.0
+	while K.warchain.pulling() and wait < 1.0:      # (the spin's blight lands on who it hits: wait to be close)
+		m.step(A.DT)
+		wait += A.DT
 	A.tap(m, P)
 	A.step(m, 0.3)
-	A.ok("combo jug: E > E > RMB tap = Cinder Spin",
+	A.ok("combo jug: E > E > RMB tap = Cinder Spin (it blights who it hits)",
 			K.spins == 1 and K.last_variant == "during_e" and T.blight_t > 0.0,
 			"spins %d variant %s" % [K.spins, K.last_variant])
 	# E, then RMB held and let go while attached: Chain Lunge along it

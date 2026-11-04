@@ -16,7 +16,7 @@
 		"size": 0.2,
 		"color": "#ffb04a",
 		"sfx": "smg",
-		"desc": "Hold to hose fire 7m ahead: the stream trails behind a sweep, narrow at the nozzle and billowing at the end. 8 seconds of fuel, then a short refill. It builds Char; at full Char the foe goes Ablaze."
+		"desc": "Hold to hose fire 7m ahead: the stream trails behind a sweep, narrow at the nozzle and billowing at the end. No fuel: it roars as long as you hold. It builds Char; at full Char the foe goes Ablaze."
 	},
 	"utility": ""
 }

@@ -73,27 +73,27 @@ What the in-game kit card (K) says.
 | Loop | Melee bruiser: get in, chain them close, and finish the wounded. |
 | Passive: Rage | Damage fills Rage. Full, you're Enraged: more damage, faster dashes and cooldowns. Knocks heal you. |
 | Dash: Rampage | Two charges (a third at rank 2) of a short dash attack the way you face. Its tip hits twice as hard. |
-| RMB: Smash | Tap: a heavy slam, harder on the wounded; a knock after its sweet spot resets your ultimate. Hold: charge, then fling yourself forward. In the air: slam down at your cursor. |
+| RMB: Smash | Tap: a heavy slam, harder on the wounded; knock someone it hit and your ultimate is ready again. Hold as long as you like: charge, then fling yourself forward; let go as the raised blade flashes to fling further. In the air: slam down at your cursor. |
 | E: Warchain | Throw a chain at a foe or a wall. Press E again to be hauled to it; steer as you go. |
 | Hunter ultimate: Gilded Riposte | Guard for 0.65s, taking nothing, then lunge into a cleave that heals you; a knock with it resets it. |
-| Weapon: Greatsword | Wide slashes, double at the tip. Hold to throw a Searing Wave. |
+| Weapon: Greatsword | Wide slashes, harder at the tip. Hold to throw a Searing Wave: the longer you hold, the bigger, longer and harder it is. |
 
 ### Abilities in full
 
 **Rage (passive).** Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its).
 
-**Rampage (dash, Shift, 9s cooldown).** A short crouch, then a dash attack of about 4m the way you face (2 charges, a third at rank 2): 7 to foes along it; the tip at its end hits twice as hard, 14 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
+**Rampage (dash, Shift, 10.4s cooldown).** A short crouch, then a dash attack of about 4m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
 
 **Smash (RMB, 2s cooldown).**
 
-- *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a 4m strike ahead: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Its sweet spot is the far tip, dead ahead: knock a hunter within 2s of hitting them there and the Gilded Riposte is ready again.
-- *Hold:* Lunge: a crouched wind-up (the lane grows ahead of you, magenta and flashing at full, 0.8s), then release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. You can jump while you charge. Strike nothing and the cooldown doubles.
+- *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a 4m strike ahead: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Its sweet spot, the far tip dead ahead, hits 40% harder. Knock a hunter within 2s of hitting them with it and the Gilded Riposte is ready again.
+- *Hold:* Lunge: the blade raised over your head (the lane grows ahead of you, magenta and flashing at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. At full the raised blade flashes white once a second: let go on the flash for 20% more distance. You can jump while you charge. Strike nothing and the cooldown doubles.
 - *In the air:* Meteor Drop: a disc shows under your cursor (5m at most). Press and you hang over it for a beat, the blade raised (everyone sees where you'll land), then dive onto it: a 2.6m burst, 18 and slow 40% for 1.5s; the inner ring (1.2m) takes +50% and is stunned 0.8s. You rise from the crouch over half a second. It has its own cooldown, 7.2s, so a Smash right before it does not hold it back.
 - *During E:* With the Warchain: press while it pulls you, or as you arrive, for a Cinder Spin at once (2.6m, 18, blights 4s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); charge while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 
-**Warchain (E, 9.5s cooldown).** Throw a chain 13m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, and holds for 5s while you move (stretched past 19m it snaps). Press E again to be hauled to it: steer sideways to come in beside it, Shift or jump to break off (a jump keeps the speed), and you arrive still moving. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
+**Warchain (E, 12.8s cooldown).** Throw a chain 13m: it hooks the first foe (8 damage) or bites a wall, and holds for 5s while you move, paying out up to 24m and holding taut there. Press E again to be hauled to it: hold a direction (or look aside) to curve in beside it, back away first to slingshot in faster, Shift or jump to break off (a jump keeps the speed), and you arrive still moving. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 
-**Gilded Riposte (hunter ultimate, from level 6, 22s cooldown).** Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 34, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once.
+**Gilded Riposte (hunter ultimate, from level 6, 36s cooldown).** Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 43, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once.
 
 ### Ranks
 

@@ -21,7 +21,7 @@ const ANIM := {
 	"jug_wave": ["juggernaut", "greatsword", [0.5, 0.9, 1.4, 1.46, 1.55, 1.85]],
 	"jug_slam": ["juggernaut", "greatsword", [0.6, 0.85, 1.08, 1.12, 1.25, 1.6]],
 	"jug_riposte": ["juggernaut", "greatsword", [0.6, 1.0, 1.16, 1.22, 1.32, 1.55]],
-	"jug_lunge": ["juggernaut", "greatsword", [0.7, 1.2, 1.4, 1.45, 1.52, 1.8]],
+	"jug_lunge": ["juggernaut", "greatsword", [0.65, 1.0, 1.31, 1.42, 1.5, 1.8]],
 	"jug_meteor": ["juggernaut", "greatsword", [0.53, 0.62, 0.7, 0.82, 0.98, 1.3]],
 	"jug_dash": ["juggernaut", "greatsword", [0.55, 0.64, 0.74, 0.9, 1.2]],
 	"jug_exdash": ["juggernaut", "greatsword", [0.5, 0.54, 0.62, 0.72, 0.9]],

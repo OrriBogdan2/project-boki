@@ -3135,7 +3135,7 @@ func _update_shots(dt: float) -> void:
 			# terrain and rocks
 			var gp := world.ground_at(p.x, p.z)
 			var over_ok: bool = sx.has("dy") and gp <= float(sx["gmax"]) + 0.05
-			# a Grapnel pierces terrain: it flies over rocks and props and through cliff faces
+			# an Abyssal Hand pierces terrain: it flies over rocks and props and through cliff faces
 			var pierces: bool = sx.get("pierce_terrain", false)
 			var rock_hit: bool = world.is_block(p.x, p.z) and gp + World.BLOCK_H > p.y and not pierces
 			if rock_hit or (gp > p.y and not over_ok and not pierces):

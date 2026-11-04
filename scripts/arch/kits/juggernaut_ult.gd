@@ -35,7 +35,8 @@ func running() -> bool:
 func guarding() -> bool:
 	return String(st.get("phase", "")) == "guard"
 
-## Planted from the press until the cleave has landed (the recovery lets him walk again, slowly).
+## Planted from the press until the cleave has landed (the recovery lets him walk again, slowly, and a jump or
+## Shift moves him straight out of it).
 func move_k() -> float:
 	match String(st.get("phase", "")):
 		"guard", "strike": return 0.0
@@ -51,8 +52,6 @@ func start() -> void:
 	_show_glow(true)
 	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(data()["short"]).to_upper(), GOLD, false)
 	k.m.sfx("jug_guard", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
-	k.m.fx.ring(h.pos, 1.3, Color(GOLD, 0.9), 0.3)
-	k.net_ring(h.pos, 1.3, GOLD)
 
 ## A merge or a knock ends it at once, with no strike.
 func drop() -> void:
@@ -78,6 +77,9 @@ func tick(dt: float) -> void:
 		"recover":
 			if float(st["t"]) >= float(d["recover"]):
 				drop()
+			elif not h.grounded:
+				drop()               # a jump moves him out of it (Shift drops it in JuggernautKit.on_dash)
+				k.play("")           # the jump's own pose eases in over the follow-through
 
 ## The guard: planted (no jumping off either), the strip ahead follows the aim, gold sparks rise off him.
 func _tick_guard(d: Dictionary) -> void:

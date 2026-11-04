@@ -131,10 +131,10 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | juggernaut | air dash -> E | No source for the air dash. Ours: the throw goes mid-dash. | fires mid-dash |
 | juggernaut | air dash -> ult (X) | Data and footage: the guard is planted (ult f33-f38). Ours: X ends the air dash and the guard goes up. | cancels the dash |
 | juggernaut | air dash -> Q glove | No source (the glove is ours). | fires mid-dash |
-| juggernaut | LMB -> dash | No source. Ours: Shift drops a Searing Wave charge (a slash's swing is too short to matter). | the dash cancels its wind-up or recovery |
-| juggernaut | RMB -> dash | Data: 'turning restricted after RMB into Shift' (patch 05.02.25): the dash comes after the strike, facing its way. Ours: Shift during the Slam's wind-up, a Lunge or a Meteor Drop is held and goes the moment it's over (the Meteor Drop lets it go 0.25s into its recovery); the turn lock is not built. | **exception:** the dash waits for the ability (today's behaviour, to review) |
+| juggernaut | LMB -> dash | Footage card for his dash: 'Dash while attacking in your facing direction'; data: nothing ends a held Molten Greatsword charge. Ours: Shift goes at once between slashes, and a Searing Wave charge carries through the Rampage (hold.lmb). | the dash goes, the ability keeps running |
+| juggernaut | RMB -> dash | Data: 'turning restricted after RMB into Shift' (patch 05.02.25): RMB into Shift is a combo, the dash going the strike's way. Ours: Shift in the Slam's wind-up is a Slam Drive: the drive goes at once (no crouch) along the strike's aim, the overhead pose kept, and the Slam lands where it arrives. In a Meteor Drop's hang the air dash goes and the dive comes down onto the marker from where it took him; its recovery dashes at once. A Lunge or the dive is a dash of its own: Shift goes the step it ends (at most 0.3s). | the dash goes, the ability keeps running |
 | juggernaut | E -> dash | Owner: 'you can cancel or exit per the source'; the source's exit is not shown in the data or footage. Ours: Shift in the Warchain's pull ends it and the Rampage drives at once (no crouch), the pull's speed running into it; while the chain only flies or holds, the dash just goes. | the dash cancels its wind-up or recovery; dash momentum carries |
-| juggernaut | ult (X) -> dash | Data: invulnerable, then the strike; footage ult f33-f44: planted ~1.1s, the cleave, the recovery. Ours: the guard and cleave are committed; Shift is held and goes when it's over. | **exception:** the dash waits for the ability (today's behaviour, to review) |
+| juggernaut | ult (X) -> dash | Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted', the strike at f39. Ours: Shift in the guard or the cleave is held and goes the step the cleave lands; in the recovery after it, Shift goes at once. | **exception:** the dash waits for the ability (The source plants him through the guard: he can't move until the counter has struck.) |
 | juggernaut | Q glove -> dash |  | the kit's own handling (no row yet) |
 | juggernaut | jump -> LMB |  | fires mid-jump (default) |
 | juggernaut | jump -> RMB |  | fires mid-jump (default) |
@@ -144,10 +144,10 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | juggernaut | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
 | juggernaut | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
 | juggernaut | E -> jump |  | the move goes at once, the ability keeps running (default) |
-| juggernaut | ult (X) -> jump | Data and footage: the guard is planted (ult f33-f38). Ours today (measured by --dash-flow-check): no jump during the guard and the cleave (JuggernautUlt holds him down). | **exception:** the move is refused while it runs (today's behaviour, to review) |
+| juggernaut | ult (X) -> jump | Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted'. Ours: no jump in the guard or the cleave (JuggernautUlt holds him down); in the recovery after it a jump goes at once and ends it. | **exception:** the move is refused while it runs (The source plants him through the guard: no jump until the counter has struck.) |
 | juggernaut | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
-| juggernaut | hold LMB through a ground dash | No source (into_dash.lmb). Ours today (measured by --dash-flow-check): the Rampage drops a Searing Wave charge with nothing swung. | **exception:** the move ends the hold (today's behaviour, to review) |
-| juggernaut | hold LMB through an air dash | No source. Ours today (measured by --dash-flow-check): the air dash drops a Searing Wave charge with nothing swung. | **exception:** the move ends the hold (today's behaviour, to review) |
+| juggernaut | hold LMB through a ground dash | Footage card: 'Dash while attacking'; nothing in the data ends the charge. Ours: the Searing Wave charge waits through the Rampage's crouch and drive and goes on charging after it; let go in it, the wave goes as the drive ends. | the hold carries through and lets go there |
+| juggernaut | hold LMB through an air dash | As on the ground: the charge waits through the air dash; let go, the wave leaves as it ends, in the air. | the hold carries through and lets go there |
 | juggernaut | hold LMB through a jump |  | the hold carries through and lets go there |
 | juggernaut | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | juggernaut | hold RMB through an air dash |  | the hold carries through and lets go there |
@@ -181,7 +181,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | bulwark | hold LMB through an air dash | No air dash in the footage. Ours today (measured by --dash-flow-check): the air dash (the lumber) ends the hold with no swing. | **exception:** the move ends the hold (today's behaviour, to review) |
 | bulwark | hold LMB through a jump |  | the hold carries through and lets go there |
 | bulwark | hold LMB through a mantle | Owner item 30; the source has no mantle rule. | **exception:** the move ends the hold (owner item 30: a mantle ends the held Crushing Blow (item 51 keeps that)) |
-| dredge | ground dash -> LMB | Data: Brute Dash is a plain dash. Footage (493.2-493.6 s): a near-blink of about 0.12 s; he lands, turns back to the aim within 1 frame and fires and walks by 493.6 s. Ours: the shot goes the step the 0.18 s lunge ends. | buffered to the dash's end |
+| dredge | ground dash -> LMB | Not determinable. Brute Dash is a ~0.12 s near-blink (briefs/hero-ref/dredge.md:303); by 493.45-493.6 s he is turning, then aiming and walking (dredge.md:296, 306): no press inside it is visible. Air: not shown (dredge.md:310-312). Data (briefs/supervive-data/supervive_kits.md:58-59) silent. Kept: held to the dash's end (owner 18:20 UTC fallback). | buffered to the dash's end |
 | dredge | ground dash -> RMB | Data: Abyssal Grasp has no dash lock. Footage: not shown from a dash. Ours: the arm is thrown from the lunge (its range counts from where he is). | fires mid-dash |
 | dredge | ground dash -> E | Data: Primal Slam has no dash lock; the dash-into-slam close-in is the hero's engage. Footage: not shown from a dash. Ours: the planted wind-up starts at once and the lunge finishes under it. | fires mid-dash |
 | dredge | ground dash -> ult (X) | Data: Slugwave has no dash lock. Footage: not shown from a dash. Ours: the charge starts at once (he walks slowly through it). | fires mid-dash |
@@ -193,8 +193,8 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | dredge | air dash -> Q glove | No source glove; it goes off from the pounce. | fires mid-dash |
 | dredge | LMB -> dash | Footage: he walks and dashes between shots (0.5 s apart). Ours: the barge goes between shots. | the dash goes, the ability keeps running |
 | dredge | RMB -> dash | Wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls; data: the arm pierces terrain. Ours: the barge goes during the hook's flight and the reel, and the reel continues. | the dash goes, the ability keeps running |
-| dredge | E -> dash | Footage (0221-0236): the slam is one committed 0.4 s beat, no dash out of it. Ours: Shift in the planted wind-up (or the air smash) is held and the barge goes the step the slam lands. | **exception:** the dash waits for the ability (today's behaviour, to review) |
-| dredge | ult (X) -> dash | Footage (ult f22-f43): he stands through the charge and both waves, no dash out of it. Ours: Shift is held and the barge goes when the Broadside ends. | **exception:** the dash waits for the ability (today's behaviour, to review) |
+| dredge | E -> dash | Data: Primal Slam has no dash lock, and the dash-into-slam close-in is the hero's engage; footage (0221-0236) shows one 0.4s beat but no rule against a dash in it. Ours: Shift in the planted wind-up barges at once and the slam runs on, the fist still raised, landing where the barge arrives; in the air smash the pounce goes and the smash drops again from where it ends. | the dash goes, the ability keeps running |
+| dredge | ult (X) -> dash | Data: Slugwave has no dash lock; footage (ult f22-f43) shows him standing through it but no rule against a dash. Ours: he already walks slowly through the charge and the waves, so Shift barges at once and the Broadside runs on, the fan and the waves following him. | the dash goes, the ability keeps running |
 | dredge | Q glove -> dash | No source glove; the barge goes and the glove's effect stays. | the dash goes, the ability keeps running |
 | dredge | jump -> LMB |  | fires mid-jump (default) |
 | dredge | jump -> RMB |  | fires mid-jump (default) |
@@ -202,11 +202,11 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | dredge | jump -> ult (X) |  | fires mid-jump (default) |
 | dredge | jump -> Q glove |  | fires mid-jump (default) |
 | dredge | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| dredge | RMB -> jump | Wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls. Ours today (measured by --dash-flow-check): no jump while the hook reels (KitStatus grounded: 'reeling: no jump or glide'). | **exception:** the move is refused while it runs (today's behaviour, to review) |
+| dredge | RMB -> jump | Owner note (item 31): 'from the hook's cast until it finishes, Dredge holds his current height'. Footage card (0127): 'you GROUNDED while reeling'; wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls. Ours: no jump from the throw to the miss or the end of the reel (CastHold, KitStatus grounded); the barge works throughout. | **exception:** the move is refused while it runs (Owner item 31 and the source: he holds his height from the throw to the end of the reel, and the source grounds him while he reels (only the dash works).) |
 | dredge | E -> jump |  | the move goes at once, the ability keeps running (default) |
 | dredge | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
 | dredge | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
-| ashwick | ground dash -> LMB | Data: Pyro Pounce is a short dash that stops on impact; no fire during it. Footage (245.53-245.9 s, 0159-0161): a head-first lunge, then he is upright with the nozzle already on the aim. Ours: the hose lights the step the ram ends (or the step it hits a foe). | buffered to the dash's end |
+| ashwick | ground dash -> LMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:42) silent on presses in Pyro Pounce; the footage shows no press inside the bash (briefs/hero-ref/linwick.md:267-276, frames 0143-0144, 0159-0161); air not shown (linwick.md:278-279). Kept: held to the dash's end (owner 18:20 UTC fallback). | buffered to the dash's end |
 | ashwick | ground dash -> RMB | Data: Embry Bolt has no dash rule. Footage: never cast from the bash; the ram is one committed head-first beat with the arms swept back. Ours: the bolt goes the step the ram ends or hits, from where he stands. | buffered to the dash's end |
 | ashwick | ground dash -> E | Data: Heat Shield pulls in nearby foes; the kit's engage is bash in, then spin. Footage: not shown from a bash. Ours: E pressed in the ram goes the step it stops on the foe (pull and shield right at the impact) or ends. | buffered to the dash's end |
 | ashwick | ground dash -> ult (X) | Data: Flight of the Firefox flies forward; knockback impulses speed it up (momentum feeds it). Footage: not cast from a bash. Ours: X ends the ram at once and the flight takes over from where he is (the row ends the dash first; no kit code for it). | cancels the dash; dash momentum carries |
@@ -216,10 +216,10 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | ashwick | air dash -> E | Data (wiki): Heat Shield can be cast mid-flight in the jetpack, his one air move. Ours: likewise mid-poof. | fires mid-dash |
 | ashwick | air dash -> ult (X) | Data: knockback impulses speed the flight up. Ours: X ends the poof and the flight takes over. | cancels the dash; dash momentum carries |
 | ashwick | air dash -> Q glove | No source glove; it goes off from the poof. | fires mid-dash |
-| ashwick | LMB -> dash | Data: the flamethrower is a hold with a 0.35s gap between uses. Footage: he walks while firing; no dash out of the hose shown. Ours: Shift rams at once and the stream stops (hold again to relight after the gap). | the dash goes, the ability keeps running |
+| ashwick | LMB -> dash | Data: the flamethrower is a hold with a 0.35s gap between uses. Footage: he walks while firing; no dash out of the hose shown. Ours: Shift rams at once; the stream goes out for the ram and, still held, roars again the step it ends (hold.lmb). | the dash goes, the ability keeps running |
 | ashwick | RMB -> dash | Footage: the aim lane shows about 0.4s while he keeps moving. Ours: Shift while aiming rams; the bolt still goes on release. | the dash goes, the ability keeps running |
 | ashwick | E -> dash | Heat Shield is instant (owner item 11): there is no wind-up to dash out of. | the dash goes, the ability keeps running |
-| ashwick | ult (X) -> dash | Data: the flight is his movement; reactivating lands. Footage: no dash during the flight. Ours (measured): Shift in the flight spends the air dash at once and the flight carries on. | the dash goes, the ability keeps running |
+| ashwick | ult (X) -> dash | Data: the flight is his movement; knockback impulses speed it up; reactivating lands. Footage: no dash during the flight. Ours: Shift in the flight is a poof from the bellows that feeds it like a knockback (it spends the air dash; the flight's speed grows up to its cap and bends toward the dash) and the flight carries on. | the dash goes, the ability keeps running |
 | ashwick | Q glove -> dash | No source glove. | the dash goes, the ability keeps running |
 | ashwick | jump -> LMB |  | fires mid-jump (default) |
 | ashwick | jump -> RMB |  | fires mid-jump (default) |
@@ -229,8 +229,11 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | ashwick | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
 | ashwick | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
 | ashwick | E -> jump |  | the move goes at once, the ability keeps running (default) |
-| ashwick | ult (X) -> jump | Data: the flight is his movement; reactivating lands. Ours today (measured by --dash-flow-check): no jump in the flight (it holds his height). | **exception:** the move is refused while it runs (today's behaviour, to review) |
+| ashwick | ult (X) -> jump | Data: reactivating ends the flight early (the source's way out of it); the flight holds him low. Ours: a jump in the flight leaps off it at once: the flight ends (the carpet laid stays), he keeps a jump-out-of-a-dash share of its speed and hands it on to a glide (Hunter.glide_handoff). | the move cancels it at once |
 | ashwick | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
+| ashwick | hold LMB through a ground dash | Data: the flamethrower is a hold, the 0.35s gap is between uses; Pyro Pounce: no fire during it. Footage (0159-0161): upright out of the bash with the nozzle already on the aim. Ours: held through the ram (or the flight) the stream goes out and roars again the step it ends: no pilot, no relight gap. | the hold carries through and lets go there |
+| ashwick | hold LMB through an air dash | As on the ground: held through the poof, the stream is back the step it ends. | the hold carries through and lets go there |
+| ashwick | hold LMB through a jump | Ours: the hose keeps burning through a jump. | the hold carries through and lets go there |
 | ashwick | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | ashwick | hold RMB through an air dash |  | the hold carries through and lets go there |
 | ashwick | hold RMB through a jump |  | the hold carries through and lets go there |
