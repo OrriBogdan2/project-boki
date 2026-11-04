@@ -64,4 +64,13 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   seams and drip off its underside (17 plain drips now, from 24, to pay for them); the back's riveted hatch as a
   raised iron plate and its pipe as an iron tube standing off the hull; eight stronger, white lens cracks; a soft
   warm highlight painted on the hull's upper curves. Body 14,741 triangles (decimation 6,600).
+- **r3f (credit-free, ORCH's r3d review):** the source's stacked porthole rings, grille ports and the tar on the
+  lens stripped; one brass helm in their place (`helm`: a collar from the hull to a riveted lip round the lens,
+  a whole lens dome over a red-glowing recess) and the small grilled port above-left of the eye; the friend's
+  black asterisk eye (its own Eye group, and its tar) stripped; pale hairline cracks painted across the glass (no
+  ink line on the glass or the ooze, `NO_INK_TAGS`; the glow slot has no shadow side); the eye's drips gone; thinner tar
+  (no ink line, a crimson sheen); the tears glow the rib-core red (`glow-gash`); the hull warmed toward tarnished
+  brass (`tint`), rust streaks in its seams, a warm highlight; rough spec (WardenGlb.LOOK: gloss 0.18) and a warm
+  brass rim at the match camera (rim_far 0.3); the stance's spine 0.34 -> 0.22 and head 0.34 -> 0.12 so the eye
+  faces the camera. The shared match-zoom fix (f4b59cb3: far_smooth, a thinner far ink, rim_far) ported.
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.

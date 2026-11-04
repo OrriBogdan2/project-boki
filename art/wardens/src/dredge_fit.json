@@ -5,7 +5,7 @@
  "blend": "~/meshy/dredge_friend/fit.blend",
  "scale": 0.665,
  "turn": 180,
- "max_tris": 6600,
+ "max_tris": 6200,
  "dissolve_deg": 1.0,
  "sharp_deg": 50,
  "groups": {
@@ -281,32 +281,8 @@
     0.35000000000000003
    ],
    "r": [
-    0.018000000000000002,
-    0.033
-   ]
-  },
-  {
-   "tar": "leather-tar",
-   "tar_colour": "231a1c",
-   "group": "head",
-   "z": [
-    1.24,
-    1.37
-   ],
-   "box": [
-    -0.08,
-    0.08,
-    0.3,
-    0.6
-   ],
-   "count": 3,
-   "len": [
-    0.2,
-    0.4
-   ],
-   "r": [
-    0.015,
-    0.024
+    0.011700000000000002,
+    0.02145
    ]
   },
   {
@@ -319,8 +295,8 @@
     0.2
    ],
    "r": [
-    0.015,
-    0.024
+    0.00975,
+    0.015600000000000001
    ]
   },
   {
@@ -333,8 +309,8 @@
     0.2
    ],
    "r": [
-    0.015,
-    0.024
+    0.00975,
+    0.015600000000000001
    ]
   },
   {
@@ -347,8 +323,8 @@
     0.15
    ],
    "r": [
-    0.012,
-    0.018000000000000002
+    0.0078000000000000005,
+    0.011700000000000002
    ]
   },
   {
@@ -361,8 +337,8 @@
     0.15
    ],
    "r": [
-    0.012,
-    0.018000000000000002
+    0.0078000000000000005,
+    0.011700000000000002
    ]
   },
   {
@@ -375,8 +351,8 @@
     0.125
    ],
    "r": [
-    0.012,
-    0.018000000000000002
+    0.0078000000000000005,
+    0.011700000000000002
    ]
   },
   {
@@ -389,8 +365,8 @@
     0.125
    ],
    "r": [
-    0.012,
-    0.018000000000000002
+    0.0078000000000000005,
+    0.011700000000000002
    ]
   },
   {
@@ -403,8 +379,8 @@
     0.15
    ],
    "r": [
-    0.012,
-    0.018000000000000002
+    0.0078000000000000005,
+    0.011700000000000002
    ]
   }
  ],
@@ -415,10 +391,10 @@
   "samples": 24,
   "looks": {
    "metal-brass": {
-    "colour": "7d6c3e",
+    "colour": "7c6036",
     "patina": "5f7a5a",
     "patina_at": 0.6,
-    "patina_k": 0.9,
+    "patina_k": 0.4,
     "dents": 1.6,
     "dent_scale": 4.5,
     "scratch": "b8a66e",
@@ -426,9 +402,9 @@
     "grime": "1a160c",
     "grime_k": 0.85,
     "patina_crevice": true,
-    "highlight": "c4b070",
-    "highlight_at": 0.8,
-    "highlight_k": 0.55
+    "highlight": "e0b868",
+    "highlight_at": 0.62,
+    "highlight_k": 0.45
    },
    "metal-iron": {
     "colour": "4c4844",
@@ -452,8 +428,8 @@
    },
    "metal-glass": {
     "glass": true,
-    "colour": "4e5862",
-    "crack": "d8e0e8",
+    "colour": "b8261a",
+    "crack": "d8dce0",
     "halo": "ff3020",
     "eye_at": [
      0.0,
@@ -461,13 +437,13 @@
      1.3766
     ],
     "eye_r": 0.032,
-    "crack_scale": 22.0,
-    "crack_k": 0.0
+    "crack_scale": 9.0,
+    "crack_k": 0.7
    },
    "leather-tar": {
     "tar": true,
     "colour": "120d0e",
-    "shine": "8a7a80"
+    "shine": "8a2a30"
    },
    "leather-rope": {
     "colour": "8a6a44",
@@ -494,7 +470,7 @@
     "grime": "1a160c",
     "grime_k": 0.4,
     "ao_dist": 0.05,
-    "gain": 1.15,
+    "gain": 1.18,
     "mask": {
      "at": [
       0.0,
@@ -503,9 +479,29 @@
      ],
      "r": 0.17
     },
-    "highlight": "d8b870",
-    "highlight_at": 0.72,
-    "highlight_k": 0.35
+    "highlight": "e0b868",
+    "highlight_at": 0.62,
+    "highlight_k": 0.3,
+    "tint": [
+     1.06,
+     0.97,
+     0.86
+    ],
+    "rust": "7a3e1e",
+    "rust_at": 0.52,
+    "rust_k": 0.8,
+    "rust_crevice": true,
+    "rust_streak": true
+   },
+   "metal-helm": {
+    "colour": "a8864a",
+    "highlight": "f0cc7a",
+    "highlight_at": 0.5,
+    "highlight_k": 0.55,
+    "edge": "f0d088",
+    "grime": "2a1c10",
+    "grime_k": 0.45,
+    "ao_dist": 0.02
    }
   }
  },
@@ -526,6 +522,44 @@
     "Dredge_Brass",
     "Dredge_Iron",
     "Dredge_Flesh"
+   ]
+  },
+  {
+   "group": "Head",
+   "centre": [
+    0.0,
+    0.4,
+    1.377
+   ],
+   "r": 0.25,
+   "z": [
+    1.1,
+    1.65
+   ],
+   "materials": [
+    "Dredge_Brass",
+    "Dredge_Iron",
+    "Dredge_Tar"
+   ]
+  },
+  {
+   "group": "Eye",
+   "centre": [
+    0.0,
+    0.45,
+    1.377
+   ],
+   "r": 0.3,
+   "z": [
+    1.0,
+    1.8
+   ],
+   "materials": [
+    "Dredge_Eye",
+    "Dredge_Glass",
+    "Dredge_Iron",
+    "Dredge_Brass",
+    "Dredge_Tar"
    ]
   }
  ],
@@ -717,7 +751,8 @@
   "dent_depth": [
    0.04,
    0.085
-  ]
+  ],
+  "gash_material": "glow-gash"
  },
  "remat": [
   {
@@ -742,23 +777,6 @@
   }
  },
  "extras": {
-  "cracks": {
-   "centre": [
-    0.0,
-    0.381,
-    1.3766
-   ],
-   "R": 0.097,
-   "reach": [
-    0.03,
-    0.066
-   ],
-   "n": 8,
-   "w": 0.0045,
-   "bone": "head",
-   "material": "cloth-crack",
-   "colour": "ffffff"
-  },
   "shines": [
    {
     "at": [
@@ -800,7 +818,7 @@
      0.86
     ],
     "sag": 0.04,
-    "r": 0.008,
+    "r": 0.0055,
     "bone": "hips",
     "material": "leather-tar"
    },
@@ -816,7 +834,7 @@
      0.85
     ],
     "sag": 0.04,
-    "r": 0.008,
+    "r": 0.0055,
     "bone": "hips",
     "material": "leather-tar"
    },
@@ -832,7 +850,7 @@
      0.88
     ],
     "sag": 0.04,
-    "r": 0.008,
+    "r": 0.0055,
     "bone": "hips",
     "material": "leather-tar"
    },
@@ -848,7 +866,7 @@
      0.86
     ],
     "sag": 0.04,
-    "r": 0.008,
+    "r": 0.0055,
     "bone": "hips",
     "material": "leather-tar"
    },
@@ -864,7 +882,7 @@
      0.86
     ],
     "sag": 0.04,
-    "r": 0.008,
+    "r": 0.0055,
     "bone": "hips",
     "material": "leather-tar"
    },
@@ -880,7 +898,7 @@
      0.87
     ],
     "sag": 0.04,
-    "r": 0.008,
+    "r": 0.0055,
     "bone": "hips",
     "material": "leather-tar"
    }
@@ -905,30 +923,30 @@
     "material": "leather-tar",
     "bone": "hips",
     "at": [
-     -8,
+     -24,
      -10
     ],
-    "r": 0.012,
+    "r": 0.0084,
     "hang": 0.18
    },
    {
     "material": "leather-tar",
     "bone": "hips",
     "at": [
-     -6,
+     -24,
      6
     ],
-    "r": 0.011,
+    "r": 0.007699999999999999,
     "hang": 0.24
    },
    {
     "material": "leather-tar",
     "bone": "hips",
     "at": [
-     -10,
+     -24,
      14
     ],
-    "r": 0.01,
+    "r": 0.006999999999999999,
     "hang": 0.12
    },
    {
@@ -938,7 +956,7 @@
      22,
      36
     ],
-    "r": 0.012,
+    "r": 0.0084,
     "hang": 0.16
    },
    {
@@ -948,7 +966,7 @@
      -14,
      -34
     ],
-    "r": 0.01,
+    "r": 0.006999999999999999,
     "hang": 0.1
    },
    {
@@ -958,7 +976,7 @@
      5,
      165
     ],
-    "r": 0.012,
+    "r": 0.0084,
     "hang": 0.2
    },
    {
@@ -968,7 +986,7 @@
      -8,
      200
     ],
-    "r": 0.011,
+    "r": 0.007699999999999999,
     "hang": 0.14
    },
    {
@@ -978,7 +996,7 @@
      30,
      -80
     ],
-    "r": 0.01,
+    "r": 0.006999999999999999,
     "hang": 0.12
    },
    {
@@ -988,7 +1006,7 @@
      10,
      110
     ],
-    "r": 0.01,
+    "r": 0.006999999999999999,
     "hang": 0.1
    }
   ],
@@ -1037,6 +1055,33 @@
     "bone": "hips",
     "material": "metal-iron"
    }
-  ]
+  ],
+  "helm": {
+   "centre": [
+    0.0,
+    0.0,
+    1.3766
+   ],
+   "y0": 0.3,
+   "y1": 0.452,
+   "R": 0.082,
+   "lip": 0.09,
+   "inner": 0.064,
+   "rivets": 8,
+   "rivet_r": 0.006,
+   "bone": "head",
+   "material": "metal-helm",
+   "colour": "b8944e",
+   "recess_material": "glow-eye",
+   "recess_colour": "ff2418",
+   "port": {
+    "at": [
+     16,
+     22
+    ],
+    "r": 0.03
+   },
+   "lens_material": "metal-glass"
+  }
  }
 }

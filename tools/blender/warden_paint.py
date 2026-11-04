@@ -69,6 +69,8 @@ def _append(ob, bm_new, bone, mat):
 
 def remove_group(ob, group):
     """Deletes the vertices riding one bone (the eye's old asterisk)."""
+    if group not in ob.vertex_groups:          # (already stripped from the source)
+        return
     gi = ob.vertex_groups[group].index
     bm = bmesh.new()
     bm.from_mesh(ob.data)
@@ -236,6 +238,12 @@ def _bake_tree(m, look, img):
             d.inputs[1].default_value = look["mask"]["at"]
             r_ = float(look["mask"]["r"])
             col = mix(math_("SUBTRACT", 1.0, ramp(d.outputs["Value"], r_ * 0.8, r_)), col, rgb(look["colour"]))
+        if look.get("tint"):          # (the art's olive brass warmed toward tarnished brass and copper)
+            tn = N.new("ShaderNodeVectorMath")
+            tn.operation = "MULTIPLY"
+            L.new(col, tn.inputs[0])
+            tn.inputs[1].default_value = look["tint"]
+            col = tn.outputs[0]
         if look.get("gain", 1.0) != 1.0:          # (lifted: the art's views are painted in a darker light)
             g = N.new("ShaderNodeVectorMath")
             g.operation = "SCALE"
@@ -312,7 +320,13 @@ def _bake_tree(m, look, img):
         nz.inputs["Scale"].default_value = float(look.get(key + "_scale", scale))
         nz.inputs["Detail"].default_value = 6.0
         nz.inputs["Roughness"].default_value = 0.6
-        L.new(co, nz.inputs["Vector"])
+        if look.get(key + "_streak"):          # (stretched down the surface: streaks running from the seams)
+            mp = N.new("ShaderNodeMapping")
+            mp.inputs["Scale"].default_value = (1.0, 1.0, 0.18)
+            L.new(co, mp.inputs["Vector"])
+            L.new(mp.outputs[0], nz.inputs["Vector"])
+        else:
+            L.new(co, nz.inputs["Vector"])
         patch = ramp(math_("ADD", nz.outputs["Fac"], math_("MULTIPLY", grime, 0.35)), look[key + "_at"],
                      look[key + "_at"] + 0.08)
         if look.get(key + "_crevice"):          # (only in the crevices: accents, not a tint over the surface)

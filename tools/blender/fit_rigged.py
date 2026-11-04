@@ -217,7 +217,7 @@ def main():
     ob.data.transform(T)
     J = {n: (T @ h, T @ t) for n, (h, t) in src_bones.items()}
     grp, lab = vertex_parts(ob)
-    for rule in spec.get("strip", []):          # the source's own shell pieces, replaced by `hull`
+    for rule in spec.get("strip", []):          # the source's own shell pieces, replaced by `hull` (and the helm)
         keep = WH.strip(ob, grp, lab, rule)
         grp, lab = grp[keep], lab[keep]
     part = np.array([spec["groups"].get(g, g) for g in grp], dtype=object)

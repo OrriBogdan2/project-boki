@@ -50,6 +50,14 @@ uniform float light_neutral = 0.0;
 // near-black paint lifted to this linear floor (jacket, trousers and gun no longer merge to black at the match
 // camera); mid and light colours keep their value and saturation
 uniform float dark_lift = 0.0;
+// a painted atlas at the match camera (~2 cm a pixel at 23 m): its fine detail breaks into speckle, so from ~8 to
+// 18 m the texture blends toward a coarser mip of itself (far_smooth of the way, far_smooth_bias mips up); close-ups
+// keep every texel (the shared match-zoom fix, ext/warden-vex-r3b f4b59cb3)
+uniform float far_smooth = 0.0;
+uniform float far_smooth_bias = 1.0;
+// and a rim in the Hunter's signature colour there, so the silhouette holds
+uniform float rim_far = 0.0;
+uniform vec4 rim_far_color : source_color = vec4(1.0);
 // Imported low-poly models carry each corner's averaged (smooth) normal in TANGENT (Assets.mesh).
 // Blending toward it rounds off their facets in the shading while the silhouette stays crisp.
 uniform float soften = 0.0;
@@ -76,7 +84,14 @@ void vertex() {
 
 void fragment() {
 	vec3 c = albedo.rgb;
-	if (use_tex) { c *= texture(albedo_tex, UV).rgb; }
+	float far_k = smoothstep(8.0, 18.0, length(VERTEX));
+	if (use_tex) {
+		vec3 tx = texture(albedo_tex, UV).rgb;
+		if (far_smooth > 0.0 && far_k > 0.001) {
+			tx = mix(tx, texture(albedo_tex, UV, far_smooth_bias).rgb, far_smooth * far_k);
+		}
+		c *= tx;
+	}
 	if (use_vertex_color || vertex_ao) { c *= COLOR.rgb; }
 	if (dark_lift > 0.0) {
 		float dl = dot(c, vec3(0.3, 0.59, 0.11));
@@ -134,7 +149,8 @@ void fragment() {
 	if (ambient_cut > 0.0) { AO = 1.0 - ambient_cut; }
 	EMISSION = flash_color.rgb * flash * 0.9 + c * glow + c * own_ambient * (1.0 - fog)
 		+ rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
-		+ fcol * fr * fres * 0.55 + c * up * top_light * 0.18 * (1.0 - fog);
+		+ fcol * fr * fres * 0.55 + c * up * top_light * 0.18 * (1.0 - fog)
+		+ rim_far_color.rgb * fr * rim_far * far_k;
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }

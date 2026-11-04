@@ -52,6 +52,10 @@ const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
 const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline shell
+## Materials "<slot>-<tag>" so tagged go without it too (thin ooze read as planks; the lens's line cut the orb).
+const NO_INK_TAGS := ["tar", "crack", "glass"]
+## A Warden's own settings for its painted atlas, on top of the shared ones (Dredge: tarnished brass, rough spec).
+const LOOK := {"dredge": {"gloss": 0.18, "sheen": 0.02, "rim_far": 0.3, "rim_far_color": Color(1.0, 0.72, 0.32)}}
 const PAINTED_SHADE := 0.72     # a painted atlas's shadow floor (the hero shader's own is 0.37)
 const PAINTED_RAMP := 2.6       # and its terminator, softer than the hero shader's 0.5
 ## The scene's light leans cool and violet (Look: a c4cbe6 ambient, about half the light on a painted model, and a
@@ -59,8 +63,13 @@ const PAINTED_RAMP := 2.6       # and its terminator, softer than the hero shade
 ## scene's ambient for a warm-neutral one a step brighter, light_neutral takes the hue out of the cool fill (the
 ## warm key keeps its warmth), dark_lift raises near-black paint one step; the shadow tint is warm.
 ## (The shared fix, ext/warden-vex-r3b 16c18b4f.)
+## At the match camera far_smooth takes the atlas's fine detail out (no speckle) and the ink thins (INK_FAR_THIN);
+## a Hunter's signature rim there is rim_far / rim_far_color in LOOK (ext/warden-vex-r3b f4b59cb3).
 const PAINTED_LOOK := {"shadow_tint": Color(1.0, 0.95, 0.91), "ambient_cut": 1.0,
-	"own_ambient": Vector3(0.58, 0.54, 0.5), "light_neutral": 0.9, "dark_lift": 0.07}
+	"own_ambient": Vector3(0.58, 0.54, 0.5), "light_neutral": 0.9, "dark_lift": 0.07, "far_smooth": 0.7,
+	"far_smooth_bias": 1.0}
+const INK_FAR_THIN := 0.8       # the ink this much thinner at the match camera (outline.gdshader far_thin)
+static var _ink: ShaderMaterial    # the painted models' ink: the procedural heroes' line, thinned at the match camera
 const GLOW := 1.6              # emission of the glow slot (mechanical eyes, cracks), x its painted colour
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
@@ -132,7 +141,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
 	var mats: Array = root.get_meta("mats", [])
-	mats.append_array(_toon(glb, lk, MantleLook.warden(arch)))
+	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), arch))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
 	_hold_weapon(root, glb)
@@ -211,7 +220,7 @@ static func _hide_body(n: Node) -> void:
 
 ## Every surface onto a hero-toon material for its slot: the baked atlas as its albedo, the baked AO in the
 ## vertex colour, tinted by the player's pick where the slot takes one.
-static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
+static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, arch := "") -> Array:
 	var out: Array = []
 	for mi in glb.find_children("*", "MeshInstance3D", true, false):
 		var mesh := (mi as MeshInstance3D).mesh
@@ -220,7 +229,9 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 			var slot := String(src.resource_name).get_slice("-", 0) if src else ""      # ("<slot>-<texture>")
 			# the ink shell on the body's silhouette only: on the scan's thin hair strands it poked through as
 			# lines across the face
-			var m := Models.toon(src.albedo_color if src else Color.WHITE, not slot in NO_INK)
+			var tag := String(src.resource_name).get_slice("-", 1) if src else ""
+			var ink := not slot in NO_INK and not tag in NO_INK_TAGS
+			var m := Models.toon(src.albedo_color if src else Color.WHITE, ink)
 			# (no baked AO in a Meshy model's vertex colour: the array is absent and would read as noise)
 			m.set_shader_parameter("vertex_ao", false)
 			m.set_shader_parameter("surface", int(SLOTS.get(slot, 1)))
@@ -241,6 +252,11 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 				m.set_shader_parameter("self_shadow", 0.0)
 				for k in PAINTED_LOOK:
 					m.set_shader_parameter(k, PAINTED_LOOK[k])
+				if m.next_pass:
+					m.next_pass = _painted_ink()
+				var own: Dictionary = LOOK.get(arch, {})
+				for k in own:
+					m.set_shader_parameter(k, own[k])
 			else:
 				# a flat-painted model (hand-modelled, one colour a material, no atlas: Dredge): the procedural
 				# heroes' clean painted look (Models.hunter), the slot's surface shading on top
@@ -249,9 +265,17 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 				m.set_shader_parameter("light_tint", Color(1.08, 1.0, 0.9))
 			if slot == "glow":
 				m.set_shader_parameter("glow", GLOW)
+				m.set_shader_parameter("shade", 1.0)      # (a light source: no shadow side, which read as a dark claw)
 			(mi as MeshInstance3D).set_surface_override_material(si, m)
 			out.append(m)
 	return out
+
+static func _painted_ink() -> ShaderMaterial:
+	if _ink == null:
+		_ink = ShaderMaterial.new()
+		_ink.shader = Models.OUTLINE
+		_ink.set_shader_parameter("far_thin", INK_FAR_THIN)
+	return _ink
 
 ## How far the player's colour pick moves a painted slot from the Warden's own colour (white: not at all).
 static func _tint(slot: String, lk: Dictionary, warden: Dictionary) -> Color:

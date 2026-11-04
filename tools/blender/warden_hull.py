@@ -293,6 +293,9 @@ def extras(ob, spec, seed=1):
                 a = ang + rnd.uniform(-0.18, 0.18)
                 x, z = math.cos(a) * d, math.sin(a) * d
                 y = C.y + math.sqrt(max(R * R - x * x - z * z, 0.0)) + 0.0015
+                ov = cr.get("over")
+                if ov and d < ov["r"]:          # (across the glass in front of the orb, not on it)
+                    y = max(y, ov["y"] - 0.006 * (d / ov["r"]) ** 2)
                 w = cr["w"] * (1.0 - 0.7 * s / steps)
                 side = Vector((-math.sin(a), 0, math.cos(a))) * w
                 p = Vector((C.x + x, y, C.z + z))
@@ -357,4 +360,77 @@ def extras(ob, spec, seed=1):
         pts.append(ctrl[-1])
         bm = _tube(pts, pp["r"], 8, thin=False)
         WP._append(ob, bm, pp["bone"], mat)
+    hm = spec.get("helm")
+    if hm:
+        _helm(ob, hm, hc, hr)
     print("HULL extras: %d tris in all" % sum(len(p.vertices) - 2 for p in ob.data.polygons))
+
+
+def _lathe(profile, origin, axis, segs, cap=False):
+    """A surface of revolution: `profile` [(radius, distance along the axis)] turned about `axis` from `origin`."""
+    axis = Vector(axis).normalized()
+    u = axis.cross(Vector((0, 0, 1)))
+    if u.length < 1e-3:
+        u = axis.cross(Vector((1, 0, 0)))
+    u.normalize()
+    v = axis.cross(u)
+    bm = bmesh.new()
+    rings = []
+    for rad, along in profile:
+        rings.append([bm.verts.new(Vector(origin) + axis * along + (u * math.cos(2 * math.pi * k / segs)
+                                                                    + v * math.sin(2 * math.pi * k / segs)) * rad)
+                      for k in range(segs)])
+    for a, b in zip(rings, rings[1:]):
+        for k in range(segs):
+            bm.faces.new((a[k], a[(k + 1) % segs], b[(k + 1) % segs], b[k]))
+    if cap:
+        bm.faces.new(rings[-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    bmesh.ops.triangulate(bm, faces=bm.faces[:])
+    return bm
+
+
+def _helm(ob, hm, hc, hr):
+    """The porthole helm: a brass collar from the hull out to one riveted lip round the lens, dark in its recess,
+    and the small grilled port beside it (the art's helm, in place of the source's stacked rings)."""
+    c = Vector(hm["centre"])
+    ax = Vector((0, 1, 0))
+    brass = WP._mat_index(ob, hm["material"], hm.get("colour", "a88a4e"))
+    dark = WP._mat_index(ob, hm["recess_material"], hm.get("recess_colour", "201814"))
+    R, lip, inner = hm["R"], hm["lip"], hm["inner"]
+    y0, y1 = hm["y0"], hm["y1"]
+    prof = [(R * 0.96, y0 - c.y), (R, y1 - c.y - 0.012), (lip, y1 - c.y - 0.004), (lip * 0.97, y1 - c.y + 0.006),
+            (R * 0.9, y1 - c.y + 0.01), (inner, y1 - c.y + 0.004)]
+    WP._append(ob, _lathe(prof, c, ax, int(hm.get("segs", 24))), hm["bone"], brass)
+    WP._append(ob, _lathe([(inner, y1 - c.y + 0.004), (inner * 0.98, y1 - c.y - 0.02), (0.002, y1 - c.y - 0.022)],
+                          c, ax, 16), hm["bone"], dark)
+    if hm.get("lens_material"):          # (a whole lens dome: the source's decimated glass had holes)
+        glass = WP._mat_index(ob, hm["lens_material"], "8c949c")
+        WP._append(ob, _lathe([(inner, y1 - c.y + 0.004), (inner * 0.72, y1 - c.y + 0.012), (0.002, y1 - c.y + 0.016)],
+                              c, ax, 20), hm["bone"], glass)
+    n = int(hm.get("rivets", 8))
+    for k in range(n):
+        a = 2 * math.pi * (k + 0.5) / n
+        p = c + Vector((math.cos(a), 0, math.sin(a))) * (R * 0.5 + lip * 0.5) + Vector((0, y1 - c.y + 0.008, 0))
+        bm = bmesh.new()
+        bmesh.ops.create_icosphere(bm, subdivisions=1, radius=hm.get("rivet_r", 0.006))
+        for v in bm.verts:
+            v.co += p
+        WP._append(ob, bm, hm["bone"], brass)
+    pt = hm.get("port")
+    if pt:
+        d = _dir(*pt["at"])
+        base = hc + d * hr * 0.97
+        r = pt["r"]
+        WP._append(ob, _lathe([(r * 1.05, 0.0), (r * 1.1, 0.03), (r * 1.25, 0.036), (r * 1.15, 0.046), (r * 0.85, 0.044)],
+                              base, d, 16), hm["bone"], brass)
+        WP._append(ob, _lathe([(r * 0.85, 0.044), (0.002, 0.036)], base, d, 12), hm["bone"], dark)
+        # the grille: three bars across it
+        u = d.cross(Vector((0, 0, 1))).normalized()
+        w = d.cross(u)
+        for k in (-1, 0, 1):
+            bm = bmesh.new()
+            bmesh.ops.create_cube(bm, size=1.0)
+            for v in bm.verts:
+                v.co = base + d * 0.044 + u * (v.co.x * r * 1.7) + w * (v.co.y * 0.006 + k * r * 0.5) + d * v.co.z * 0.006
+            WP._append(ob, bm, hm["bone"], brass)
