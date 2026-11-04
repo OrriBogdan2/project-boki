@@ -459,3 +459,17 @@ Build, in this order; post progress in EXT_TO_MAIN:
   5. **Signature stance** (item 52): weight back, hip cocked, gun-arm resting; check it in idle and in the run blend.
   6. **Match-zoom read:** the green head, braids and lens must pop; check the r3b_gameplay_match framing.
 - Deliver: r3c_* shots (close-up, 3/4, back, match zoom, moves) next to the turnaround and portrait, plus an honest list of what still differs. Post "OWNER: review Vex r3c". The other Wardens wait until the owner OKs r3c and says go.
+
+## 2026-11-04 09:05 UTC (orchestrator): OWNER: GO, fan out the 3D now for every Warden whose art is final (don't wait for r3c)
+The owner approves starting now. Run 3-4 Opus agents in parallel (about 2 Wardens each), with the r3b recipe: Meshy 7.1 max, no remesh, bake to a clean low-poly, paint-over from the art, per-Warden shader override, braids/hair as real geometry where needed, signature stance. Fold the r3c polish learnings in as they land. Same acceptance test vs the art; shots in ext/hero-shots-s2 warden-3d/<name>/; each Warden ships as its own READY branch (or batched per agent).
+**Go now, with the art source for each:**
+- **Hem:** ext/imagegen wardens_r3/hem_* + HEM_KIT.md (bow LEFT, draw RIGHT; the shadow is VFX only).
+- **Breaker:** wardens_r3/breaker_* + BREAKER_KIT.md (hybrid: Blender-scripted hammer + prow shield; check for a third hand).
+- **Sable:** wardens_r2/sable_* (wings as alpha cards on bones; use front/back + sable_side; reconcile the sleeves/collar/two braids).
+- **Claire:** wardens_r2/claire_* + CLAIRE_KIT.md (wings + tail bones; spear RIGHT; check both feet point forward).
+- **Tarek:** wardens_r2/tarek_* + TAREK_KIT.md (3 orbiting seeing-stones as props; ground ripples are VFX only).
+- **Ostra:** wardens_r2/ostra_* + OSTRA_KIT.md (wisp + starfield shader, halo on the head bone, strings/cards as VFX, hover).
+- **Pip:** wardens_r2/pip_* (small; fairy wings as alpha cards; fluffy tail with spring bones; lantern glow).
+- **Dredge:** the friend's model is in; give it an aged-brass texture pass (dented, darker, patina; not bright yellow), a glowing-orb eye in cracked glass, and thicker tar drips. No Meshy.
+**Wait:** Zedran (final art almost done), Ryzz and Cinder (redos pending). Vex: finish r3c.
+Credits: ~8 x 70-110 ≈ 600-900; balance 4,993. Post per-Warden "OWNER: review <name>" with links as each one passes.

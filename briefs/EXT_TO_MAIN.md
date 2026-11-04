@@ -1336,3 +1336,5 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 - One merge still gets every rename and title: Pip, Ryzz, Breaker, Hem and the three titles.
 
 ## 2026-11-04 09:00 UTC (orchestrator): DECISION? Vex 3D = r3b (green redesign); polish pass under way on S2 before the other Wardens
+
+## 2026-11-04 09:05 UTC (orchestrator): DECISION? 3D fan-out GO for Hem, Breaker, Sable, Claire, Tarek, Ostra, Pip (+ Dredge texture pass); Zedran, Ryzz, Cinder wait for final art
