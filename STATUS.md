@@ -1,6 +1,13 @@
-2026-11-04T20:19:08Z
+2026-11-04T20:20:42Z
 
 FOR EXT (owner item queue): READY reports go here as each branch lands.
+READY: ext/small-60-66-75 @ f44adba4 (+247/-87, 16 files; no shared files) - items 60, 75, 66
+- 60 Ostra LMB: time since last shot charges the next orb smoothly 0->1 over 1.4 s (dmg up to +34% = 353 vs 263, speed x1.4, radius/size +90%); full orb slows; EVERY orb passes terrain; hand mote grows with charge + chime at full. Asserts (--ostra-combo-check): dmg/speed/size monotonic over waits 0..4.4 s, mid wait between ends, capped after window, +34% at full, every charge hits a dummy behind a wall, only full waits slow.
+- 75 Ostra Shift: fly_slow 0.2 -> 0.3; measured 1.35 vs run 4.65 = 0.30.
+- 66 Cinder: LMB ignored during Flue Flight (no flame, no buffer, one soft tick per press); Cinder Shot + Heat Shield still work mid-flight; LMB live again the frame the flight ends (normal 0.2 s pilot flicker). Asserts in --ashwick-combo-check.
+- Checks: --ostra-combo-check 137/0; --ashwick-combo-check 97/0 (coordinator rerun on f44adba4); --check, --archetype-check (339), --ability-check (29), --dash-flow-check, --keybind-check 0 fail; health --strict OK; wiki regenerated + committed.
+- Shots: ext/hero-shots ostra/item60/ (5777a7f): quick vs full orb; full orb through a wall.
+- Owner Qs: full-charge orb is +90% size (source gives no size): OK? Brightness = blue-violet bolt look from half charge + colour lerp: enough?
 READY: ext/hem-reticle @ 693b1b45 (+118/-45, 7 files; no shared files) - item 55b
 - Draw line now FILLS from near Hem toward the cursor (progress bar on the ground); small perfect-timing circle on the line at the Empowered fraction (0.522) and one at the cursor end (Supercharged); each flashes (bigger, brighter, star) for the perfect window (0.15 s) starting the frame the fill reaches it. Kept from 55: idle thin line, Supercharged thick line to max range with target ring, overdraw dims to thin pale line (circle gone), gold perfect-release burst at the bow. Removed: the V-lines, MERGE_T, the riding glint.
 - Asserts (--archer-combo-check, 132 checks): fill starts at line start; fill fraction tracks draw time (0.246 vs 0.261 at 0.30 s, tol 0.03); circle at Empowered fraction; circle quiet before, flashes on the reach frame, ends with the window; Supercharged to max range; burst on the aim line; overdraw dims and drops the circle.
@@ -25,9 +32,9 @@ BJORN #10 #29 #30: DONE by S1 on ext/kitdata-pin-bjorn @ 7dede8e. S2: skip them.
 DASH TABLE: converged on DashFlow. ext/kitdata-vireo-venator @ 67454b5 has no DashRules left (no rows needed porting; DashFlow already covered them; the S1 mage "rmb_to_dash cancels" row was not carried over since DashFlow's into_dash rows are empty for mage). hero_ult.gd now matches main's newer version (sha1 ef9d382e), taken from main by merge. For S2: --dash-flow-check fails "bulwark air dash -> lmb, pressed early: lost" on dash-flow-base itself (Bulwark mace lmb_override drops an early tap).
 Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on over drops and the abyss (gameplay change) OK? 2 m shield push and 4.2 m wall OK (no source numbers)? The aegis plates read like planks from top-down.
 
-Running now (Sonnet, 3 max): ext/claire-62-65 (62, 64, 65; since 20:05); ext/small-60-66-75 (Ostra 60 + 75, Cinder 66; since 20:05); ext/tarek-61-67 (61, 67; since 20:18). Done: ext/hem-reticle 693b1b45.
-Queued (owner item queue per INBOX 20:00 UTC, in order): ext/two-gloves (69); ext/kael-57; ext/breaker-59; ext/vex-68; ext/sable-53-54 (53, 54); ext/glider-63 (63). Not S1's: 56/58 (ext/friendly-bodies), 70-74 (ext/ryzz-70-74), 76/76b + face pass (S2).
-Last INBOX entry handled: 2026-11-04 20:00 UTC ext (S1 now on orri@projectboki.com and BUILDS the owner item queue; Sonnet, up to 3 agents; DECISIONS > OWNER_REVIEW_1103 > supervive-data; compact READY reports here for ext to review).
+Running now: PRIORITY CHANGE (INBOX 20:16 UTC, owner): item queue PAUSED, one Sonnet agent max. ext/claire-62-65 and ext/tarek-61-67 told to push WIP and stop (20:21 UTC); then ONE Sonnet agent on RIGFIX (briefs/RIGFIX.md, base origin/integ91, branch rigfix). Done: ext/hem-reticle 693b1b45, ext/small-60-66-75 f44adba4.
+Queued: PAUSED (owner 20:16 UTC). Not started: ext/two-gloves (69), ext/kael-57, ext/breaker-59, ext/vex-68, ext/sable-53-54, ext/glider-63. After RIGFIX, S1 STOPS for the owner's review.
+Last INBOX entry handled: 2026-11-04 20:20 UTC ORCH (sync90 shipped all 12 Hunters in 3D) and 20:16 UTC ext (owner: RIGFIX only, one Sonnet agent, then stop; S1 does not take main's integrator role).
 Watcher: received 19:06 UTC entry
 Questions for the owner: which model id is the 'new low-usage model' in DECISIONS 'Agents and art'? This server can pick Fable 5.1 (claude-fable-5-1), Sonnet 5.5, Opus 5.5 or Haiku 5.5. S1 assumes Fable 5.1 unless told otherwise. Also see the ext/classes line.
 Net note: main is now 0.15.0, which kits2-nor also uses (0.15.0, kit move id on the snapshot); main session to reconcile. Kitfix branches that need a bump use 0.15.2 (dancer-juggernaut), .3 (pin-bjorn), .4 (vireo-venator), .5 (linwick-dredge), .6 (moosh-tamsin), .7 (breah-ostra).
