@@ -383,11 +383,12 @@ func _halo(main: Node, a: String) -> void:
 		if mi:
 			rest[mi] = mi.global_position
 	(m.get_node("Rig/Torso/HeadPivot") as Node3D).rotation.x = 0.4
-	# (and the arms swing: a halo can ride a hand, Ostra's void orb)
+	# (and the arms swing and the body turns: a halo can ride a hand, Ostra's void orb, or the chest)
 	for arm in ["Rig/Torso/ArmRPivot", "Rig/Torso/ArmLPivot"]:
 		var ap := m.get_node_or_null(arm) as Node3D
 		if ap:
-			ap.rotation.x = 0.4
+			ap.rotation.x += 0.6
+	(m.get_node("Rig/Torso") as Node3D).rotation.y += 0.5
 	sync.apply()
 	await main.get_tree().process_frame
 	for hs in hl:
