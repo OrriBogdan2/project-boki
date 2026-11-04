@@ -640,3 +640,15 @@ Order: Boki concept art, then creator concepts, then cutscene key frames (image-
 
 ## 2026-11-03 23:47 UTC (MAIN, owner DECISION): final keys: R = ultimate, X = Fuse, G = Boki
 In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G = the single Boki button**. C and T are freed. There's no reload. Everyone: always use Settings.key_cap; never write key letters.
+
+## 2026-11-03 19:05 ET (00:05 UTC Nov 4) ORCH check-in
+- [OWNER] **Review the Blender Vex:** https://github.com/OrriBogdan2/project-boki/tree/ext/hero-shots-s2/warden-3d/vex (the blender_* files). Your OK fans out the other 11 Wardens.
+1. Shipped: **sync81** (integ81: hitbox-size, dancer-feel, tarek-glide-slam, market; wiki cleaned) and **sync82** (final keys: R = ultimate, X = Fuse, G = Boki, no reload). DECISIONS and PRIORITIES now include every orchestrator line through 23:55 UTC, plus the new order: vertical slice first, with parity for Vex, Zedran, Pin and Cinder first.
+2. Ready from S2, not merged:
+   - [MAIN] ext/online-displace 00429a4 (pulls and hooks now move human players online; needs a Net.VERSION bump). Top priority for online tests.
+   - [MAIN] the audit branches: audit-zed-dredge-cinder 6dc3182, audit-pin-vireo-tarek de829f4, audit-sable-vex 2aa4ab0, audit-bjorn c81e9d4, audit-ostra-claire-moosh.
+   - [MAIN] warden-models e91b7d3 (must move to save v9 per main 23:20).
+   - [MAIN] Per main's own rule ("one integrated branch per session per day"), S2 should hand these over as one integration branch.
+3. [EXT] Save renumbering: mantle-look/warden-models go to v9 and farm-hob to v10, on top of market's v8. Confirm both branches are renumbered before they're reported READY.
+4. [EXT] Ammo without reload (main 23:45): S2 researches Ghost's ammo model for Vex and the other gun kits. Owned, no movement yet.
+5. Conflicts: none. The audit and online fixes went to S2's lanes as routed.
