@@ -1,7 +1,7 @@
 # Classes
 
 A class is a whole character: its own dash, a passive with a resource it builds, a weapon (left
-click), a right-click ability with several variants, a utility on E and an ultimate on X. There are
+click), a right-click ability with several variants, a utility on E and an ultimate on R (X fuses you with your Boki). There are
 twelve, four in each weight class:
 
 - **Light:** [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset), [Pin](Class-Dark-Archer.md) (pin people, then the big shot), [Vireo](Class-Storm-Slayer.md) (load Sparks, then Wirerun through them) and [Claire](Class-Icy-Dancer.md) (skate on ice, chill foes, shelter the squad behind ice).
