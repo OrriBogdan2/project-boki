@@ -6,3 +6,11 @@ s1_back_34.png: back 3/4, both sides: exactly three copper rods in a riveted mou
 s1_moves_1.png, s1_moves_2.png: kit move frames at the close camera (no weapon held; the copper Storm Rod in her hand is the kit's own RMB summon).
 s1_poses_game.png: idle / run / kit poses at the gameplay camera.
 s1_gameplay_match.png, s1_gameplay_match_x4.png: the Arena match frame (--arena=mage --record=2 --arena-demo=pose --demo-zoom=1.0) and a x4 crop round her.
+s2_closeup_vs_art.png: stage 2 round 2: the portrait vs the in-game close-ups (front, 3/4): art-blue hair with hot-pink ends (hair hue no longer pulled violet), peach skin ramp, hot-pink corset, black jacket, the wink and fern scar, the charm without its halo square, the septum ring.
+s2_head_vs_sheet.png: the head sheet vs the in-game front close-up.
+s2_34_vs_art.png: ryzz_34 vs the in-game 3/4 views: the swagger stance (weight on her right hip, hands on hips), fuller pigtails with an S-fall to the jaw.
+s2_back_vs_art.png: ryzz_back vs the back 3/4: three copper rods seated on the back in a V through a riveted mount with two straps, the scorched bent relic in the middle.
+s2_vs_turnaround.png, s2_vs_turnaround_game.png: the turnaround vs the model, close and at the gameplay camera.
+s2_match_vs_art.png, s2_gameplay_match.png: the Arena match frame (x4 crop beside the art front) and the full frame.
+s2_moves_1.png, s2_moves_2.png, s2_poses_game.png: kit move frames and gameplay-camera poses.
+s2_vs_s1.png: stage 1 (rows 1, 3) vs stage 2 (rows 2, 4): close-ups and front 3/4.
