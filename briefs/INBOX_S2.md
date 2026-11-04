@@ -418,3 +418,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 ## 2026-11-04 07:30 UTC (orchestrator): Claire art in (frost demoness skater)
 - ext/imagegen wardens_r2/claire_{turnaround,side,portrait,splash}.webp + CLAIRE_KIT.md. Queued for 3D after Vex passes. Modelling notes: the wings and tail need their own bones (wings fold for the skate pose); ice horns as their own mesh; the ice costume is semi-translucent (a toon shader with a fresnel rim, not real transparency); the spear in her RIGHT hand (the 3/4 view is missing it).
 - Round-2 art now in: 10 of 12 (+ the Vex r3 redesign). To come: Tarek, Ostra.
+
+## 2026-11-04 07:40 UTC (orchestrator): Claire, a backwards foot
+- The owner noticed one of Claire's feet/skates points backwards (on a 3D model or in the turnaround). When you build her: use the front/side/back views as the Meshy input (skip the 3/4 view: it also lacks the spear), and check both feet point forward. If a generated mesh still has a reversed foot, fix it in Blender (separate the foot/skate, rotate it 180 degrees about the ankle, rejoin, re-weight) before rigging. Add a check: the foot forward vectors match the body forward.
