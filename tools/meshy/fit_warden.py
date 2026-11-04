@@ -1305,6 +1305,29 @@ def arm_reach(ob, rig_arm, spec):
                 ob.vertex_groups[g.group].add([v.index], 0.0, "REPLACE")
             dest.add([v.index], 1.0, "REPLACE")
             moved += 1
+    if spec.get("binarize"):
+        # (below z_max a vertex rides an arm wholly or not at all: coat beside the hanging hand that bone heat gave
+        # a third of its weight to the arm was dragged half way up with the raised orb hand, a long spike)
+        split = 0
+        for sd in ("R", "L"):
+            bones = {"upper_arm." + sd, "forearm." + sd, "hand." + sd}
+            for v in ob.data.vertices:
+                if v.co.z > zmax:
+                    continue
+                gs = [(names.get(g.group), g.group, g.weight) for g in v.groups]
+                a = sum(w for n, _i, w in gs if n in bones)
+                tot = sum(w for _n, _i, w in gs) or 1.0
+                if a <= 1e-4 or a >= tot - 1e-4:
+                    continue
+                keep_arm = a > 0.5 * tot
+                rest = [(i, w) for n, i, w in gs if (n in bones) == keep_arm]
+                sw = sum(w for _i, w in rest) or 1.0
+                for _n, i, _w in gs:
+                    ob.vertex_groups[i].add([v.index], 0.0, "REPLACE")
+                for i, w in rest:
+                    ob.vertex_groups[i].add([v.index], w / sw, "REPLACE")
+                split += 1
+        log("arm reach: %d vertices made wholly arm or wholly body below z %.2f" % (split, zmax))
     log("arm reach: %d vertices off the arms to %s" % (moved, dest.name))
 
 
@@ -2304,14 +2327,15 @@ def main():
         shrink(img, int(spec["atlas_px"]))
     for sp in spec.get("split", []):
         parts.append(split_part(ob, arm, img, sp))
-    if spec.get("face_marks"):
-        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        import warden_parts as WP
-        fm = spec["face_marks"]
-        tgt = next((o for o in parts if o.name == fm.get("on", "Mask")), ob)
-        got = WP.face_marks(tgt, arm, fm)
-        if got:
-            parts.append(got)
+    for key in ("face_marks", "eye_marks"):
+        if spec.get(key):
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            import warden_parts as WP
+            fm = spec[key]
+            tgt = next((o for o in parts if o.name == fm.get("on", "Mask")), ob)
+            got = WP.face_marks(tgt, arm, fm)
+            if got:
+                parts.append(got)
     out = os.path.join(ROOT, os.path.expanduser(spec["out"]))
     log("tris: body %d, weapon %d" % (K.tris([ob]), K.tris([x for x in (gun, spin) if x])))
     # (JPEG: Meshy's painted textures, a third of the PNG's size)

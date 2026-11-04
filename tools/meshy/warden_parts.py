@@ -1032,7 +1032,10 @@ def face_marks(target, arm, spec):
         for x, z in mk["pts"]:
             loc, nrm, _i, _d = tree.ray_cast(V((x, 1.0, z)), V((0.0, -1.0, 0.0)))
             if loc is not None:
-                hits.append((np.array(loc[:]) + np.array(nrm[:]) * lift, np.array(nrm[:])))
+                nv = np.array(nrm[:])
+                if nv[1] < 0.0:
+                    nv = -nv               # (toward the viewer, whichever way the scan's faces wind)
+                hits.append((np.array(loc[:]) + nv * lift, nv))
         if len(hits) < 2:
             log("face mark %s: missed the surface" % mk.get("name", "?"))
             continue
