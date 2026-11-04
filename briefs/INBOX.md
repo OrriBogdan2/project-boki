@@ -718,3 +718,10 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 2. 3D: Vex r3 / r3b still in progress; Dredge (friend's model) in game. Meshy balance ~5,265.
 3. Main: offline by the owner's choice; the queue is in EXT_TO_MAIN 07:15 (+ the Hem rename, + the arena "X · RESET" label fix).
 4. Conflicts: none.
+
+## 2026-11-04 04:05 ET (09:05 UTC) ORCH check-in
+- [OWNER] Nothing needs the owner right now. Vex r3c (polish) and the stage-1 3D fan-out (Hem, Breaker, Sable, Claire, Tarek, Ostra, Pip, Zedran; Dredge texture pass) are running on S2. Review shots will be flagged when posted.
+1. Art: final art for 10 of 12 (Zedran r3 final in). Still to redo: Ryzz, Cinder. Lore: LORE_MASKS.md has the owner's premise (the Empty, cursed fossil Masks), one villain, terms (Hunter/Mask/Empty), titles (Red Stitch, Brass Abomination, Cliff Runner).
+2. Main: offline by the owner's choice; the queue is EXT_TO_MAIN 07:15 + the text sweep/prologue captions (09:40-10:05) + rename-breaker 07ef436b (all renames + titles) + arena-sign 245f904c.
+3. Meshy balance 4,993; the fan-out needs ~600-900.
+4. Conflicts: none.
