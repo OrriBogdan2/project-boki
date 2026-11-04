@@ -7,7 +7,7 @@
 		"Marble"
 	],
 	"theme": "stone",
-	"flavor": "A goliath beetle with marble-veined wing cases. Heavy as a statue, but it can run, and it never tires.",
+	"flavor": "A goliath beetle with marble-veined wing cases. Heavy as a statue, yet it whirs into the air and hauls you over a gap.",
 	"colors": {
 		"body": "#e8e4dc",
 		"belly": "#3a3430",
@@ -22,18 +22,18 @@
 	},
 	"body": {
 		"size": "large",
-		"reach": 1.5,
-		"mass": 1.5,
+		"reach": 1.6,
+		"mass": 2.0,
 		"gait": {
-			"hop_rate": 6.0,
-			"hop_height": 0.08,
-			"pace": 1.0
+			"hop_rate": 4.5,
+			"hop_height": 0.05,
+			"pace": 0.8
 		}
 	},
 	"stats": {
-		"kin_hp": 11,
-		"kin_damage": 4,
-		"kin_speed": 4,
+		"kin_hp": 12,
+		"kin_damage": 5,
+		"kin_speed": 2,
 		"owner_armor": 1
 	},
 	"personality": {
@@ -54,15 +54,15 @@
 		"passives": [
 			{
 				"stat": "damage_reduction",
-				"amount": 0.1
+				"amount": 0.15
 			},
 			{
 				"stat": "knockback_resist",
-				"amount": 0.4
+				"amount": 0.5
 			}
 		],
 		"mount": {
-			"speed": 1.1,
+			"speed": 1.0,
 			"jump": 0.85,
 			"turn": 0.6
 		}

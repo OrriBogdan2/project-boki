@@ -1,14 +1,14 @@
 # Roster 50: original Boki for owner review
 
-Status: **proposal, for owner review before any art.** Phase 1 (design, no credits). The owner asked for
+Status: **proposal, for owner review before any art.** Revised after the owner's review: big Boki now have roles, not just riding. Phase 1 (design, no credits). The owner asked for
 "a bunch of original Boki to play with that have good 3D modelling I can later change": 50 species in
-total, a range of sizes, and 6-8 big rideable ones. Today's 9 count toward the 50, so this adds 41.
+total, a range of sizes, and some big rideable ones (revised: big Boki get roles, at most about 6 mounts). Today's 9 count toward the 50, so this adds 41.
 
 - Stubs: `content/kin_v2_roster/<id>.json`, one per new species, in the real kin grammar
   (docs/KIN_GRAMMAR.md). They are **not loaded by the game** (see "Where the stubs live" below).
 - Check: `godot --headless -- --roster-check` (tools/roster_check.gd) parses every stub, checks it against
   the live abilities, merges and evolution nodes, rejects id or name clashes, and counts sizes.
-- Riding: docs/boki/RIDING_SPEC.md (spec only, waiting for the owner's OK).
+- Big-Boki roles and riding: docs/boki/RIDING_SPEC.md (specs only, waiting for the owner's OK).
 
 ## Rules this roster follows
 
@@ -16,10 +16,14 @@ total, a range of sizes, and 6-8 big rideable ones. Today's 9 count toward the 5
   nine (fox + scorpion, axolotl + crystal). None is based on, named after or fused from a franchise
   creature (Pokémon, Digimon, Palworld, Temtem, Monster Hunter and the rest). See "Originality check".
 - **Size classes.** small = rides a shoulder (or perches if it flies); medium = perches on the pack;
-  large = a heavy mount (today's mount carry: slow, armoured, mount speed below x1.1); rideable = a
-  travel mount (mount speed x1.1 or more, the riding spec). In the grammar both large and rideable are
-  `body.size: "large"` with `carry.style: "mount"`; the grammar has no big kin that walks beside you
-  (owner decision 2 below). `--roster-check` tells them apart by mount speed.
+  large = a big Boki you don't ride (it has another big-Boki role, below); rideable = a mount you ride.
+  In the grammar all 16 big ones are `body.size: "large"` with `carry.style: "mount"`, because that is the
+  only carry style a large kin may have today. `--roster-check` counts mount speed x1.1 and up as
+  rideable; the non-ridden big Boki are stubbed at x1.0 or below. The role itself lives in this doc only
+  (see "Big-Boki roles" for the grammar field it needs).
+- **Big-Boki roles (owner review, 02:30).** Large Boki aren't all mounts. The 16 big ones (today's
+  Cairnback and Gravadillo, 14 new) split into six roles, with at most 6 mounts. Each role has a pitch
+  and a short spec in docs/boki/RIDING_SPEC.md (for owner approval).
 - **Themes are the grammar's cosmetic themes** (`KinParts.THEMES`): no new theme was invented, so every
   stub validates. There is no water theme; aquatic Boki wear frost, storm or lunar (decision 5).
 - **Abilities are the existing 16** (`content/abilities_v2`). Each entry also sketches the Boki's own
@@ -30,7 +34,9 @@ total, a range of sizes, and 6-8 big rideable ones. Today's 9 count toward the 5
 
 ## Summary
 
-**Size:** small 20 (13 new), medium 15 (15 new), rideable 8 (8 new), large 7 (5 new)
+**Big-Boki roles (the 16 large and rideable):** mount 6, companion 3, bulwark 2, flyer 2, packbeast 2, watchtower 1
+
+**Size:** small 20 (13 new), medium 14 (14 new), large 10 (8 new), rideable 6 (6 new)
 
 **Body type:** quadruped 18 (13 new), winged 8 (7 new), biped 8 (8 new), aquatic 4 (3 new), insect 4 (3 new), serpent 4 (3 new), blob 4 (4 new)
 
@@ -40,74 +46,99 @@ total, a range of sizes, and 6-8 big rideable ones. Today's 9 count toward the 5
 
 **Where the new 41 live:** Greenreach 11, Bloomwild 9, Gloomheart 8, Stormcrest 5, Emberfall 4, Frostreach 4
 
-**Rig use:** QUAD 10, WING 8, QUAD-L 8, BIPED 5, SERPENT 4, HEXA 3, BLOB 3, BIPED-L 3, FIN 2, FIN-L 2, BLOB-L 1, HEXA-L 1
+**Rig use:** QUAD 10, QUAD-L 8, WING 7, BIPED 5, SERPENT 4, HEXA 3, BLOB 3, BIPED-L 3, FIN 2, FIN-L 2, WING-L 1, BLOB-L 1, HEXA-L 1
+
+## Big-Boki roles
+
+| Role | Count | Who | Pitch |
+|---|---|---|---|
+| **mount** | 6 | Heatherhorn, Glaciyak, Lilybara, Cindowary, Nimbostrich, Duskapi | You ride it. Fast travel out of combat, one rider; you get off to loot, revive or extract. |
+| **companion** | 3 | Gravadillo, Scaldamus, Umbrathere | Walks beside you and fights as a second body. It draws fire, holds a lane and body-blocks a chase; you never sit on it. |
+| **flyer** | 2 | Goliathite, Squalltross | Lifts you. Hang from it for a long carried glide, or let it haul you over an abyss gap it can reach. Never free flight. |
+| **bulwark** (own idea) | 2 | Cairnback, Limpetor | Plants itself as living cover. You and your squad shoot from behind it while it soaks shots until it cracks. |
+| **packbeast** (own idea) | 2 | Floenatee, Spatewader | Carries loot. Extra pack slots on its back that you can extract with; hit it hard enough and the load spills for rivals to grab. |
+| **watchtower** (own idea) | 1 | Moundvark | Stands still and lets you climb on top. Height, longer sight and reveal for a sniper, but you're the most visible thing on the island. |
+
+What changed from the first draft: Goliathite (beetle) and Spatewader (salamander) stopped being mounts
+and became a flyer and a packbeast; Squalltross (albatross) grew from medium to large to be the second
+flyer; today's Cairnback and Gravadillo get roles too (bulwark and companion). Sizes now: small 20,
+medium 14, large 10, rideable 6.
+
+**Grammar field needed.** The grammar has no field that can hold these roles. `ai.role` is the combat
+style (tank, support...), and `carry.style` accepts only shoulder, perch and mount, and large kin may
+only be mount (`KinParts.CARRY`). The natural home is new `carry.style` values for large kin:
+`beside` (companion), `flyer`, `bulwark`, `pack`, `tower` next to `mount`, each with its own settings
+block like `carry.mount` (for example `carry.pack: {"slots": 4}`). That is a change to
+`scripts/kin/parts.gd` and `kin_spec.gd` plus the behaviour behind each; until then the stubs keep
+`carry.style: "mount"`, so a non-mount big Boki switched on today would still be ridden on Return.
 
 ## The 50 at a glance
 
-| # | id | Name | Mix | Theme | Size | Body (rig) | Role | Rarity | Where |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | `burrlet` | Mycroll *(existing)* | Hedgehog + Toadstool | spore | small | quadruped (QUAD) | controller | starter | Starter egg |
-| 2 | `cindle` | Vespyx *(existing)* | Fox + Scorpion | venom | small | quadruped (QUAD) | bruiser | starter | Starter egg |
-| 3 | `puddlet` | Prismander *(existing)* | Axolotl + Crystal | prism | small | aquatic (FIN) | support | starter | Starter egg |
-| 4 | `wisplet` | Lunowl *(existing)* | Owl + Luna moth | lunar | small | winged (WING) | trickster | common | Wild, nest eggs |
-| 5 | `zapple` | Echolop *(existing)* | Hare + Bat | echo | small | quadruped (QUAD) | skirmisher | common | Wild, nest eggs |
-| 6 | `pebbit` | Gravadillo *(existing)* | Armadillo + Rhino beetle | gravity | large | quadruped (QUAD-L) | tank | uncommon | Wild, nest eggs |
-| 7 | `cairnback` | Cairnback *(existing)* | Tortoise + Ibex | titan | large | quadruped (QUAD-L) | tank | boss | Boss: The Stone Colossus |
-| 8 | `hivara` | Hivara *(existing)* | Honeybee + Praying mantis | swarm | small | insect (HEXA) | bruiser | boss | Boss: The Brood Mother |
-| 9 | `zephyrak` | Zephyrak *(existing)* | Moray eel + Swift | tempest | small | serpent (SERPENT) | skirmisher | boss | Boss: Stormcoil, the Sky Serpent |
-| 10 | `kindlewren` | Kindlewren | Wren + Ember coal | ember | small | winged (WING) | skirmisher | common | Emberfall |
-| 11 | `glintmole` | Glintmole | Star-nosed mole + Quartz geode | stone | small | quadruped (QUAD) | controller | common | Greenreach |
-| 12 | `rimeshrew` | Rimeshrew | Shrew + Hoarfrost | frost | small | quadruped (QUAD) | skirmisher | common | Frostreach |
-| 13 | `mossgrade` | Mossgrade | Tardigrade + Cushion moss | bloom | small | blob (BLOB) | support | common | Bloomwild |
-| 14 | `kestrike` | Kestrike | Kestrel + Copper lightning rod | storm | small | winged (WING) | skirmisher | uncommon | Stormcrest |
-| 15 | `gloamshell` | Gloamshell | Garden snail + Smoked obsidian | shadow | small | blob (BLOB) | controller | common | Gloomheart |
-| 16 | `nettlynx` | Nettlynx | Lynx kitten + Stinging nettle | venom | small | quadruped (QUAD) | bruiser | uncommon | Bloomwild |
-| 17 | `thrumbird` | Thrumbird | Hummingbird + Tuning fork | echo | small | winged (WING) | support | uncommon | Greenreach |
-| 18 | `lodestick` | Lodestick | Stick insect + Lodestone | gravity | small | insect (HEXA) | trickster | uncommon | Gloomheart |
-| 19 | `selenfin` | Selenfin | Hatchetfish + Moonstone | lunar | small | aquatic (FIN) | support | rare | Gloomheart |
-| 20 | `marchleaf` | Marchleaf | Leafcutter ant + Leaf | swarm | small | insect (HEXA) | bruiser | common | Bloomwild |
-| 21 | `opalisk` | Opalisk | Basilisk lizard + Opal | prism | small | biped (BIPED) | trickster | uncommon | Greenreach |
-| 22 | `glomwort` | Glomwort | Slime mold + Puffball | spore | small | blob (BLOB) | controller | common | Bloomwild |
-| 23 | `kilnbadger` | Kilnbadger | Honey badger + Kiln brick | ember | medium | quadruped (QUAD) | tank | uncommon | Emberfall |
-| 24 | `hoarheron` | Hoarheron | Grey heron + Icicle | frost | medium | winged (WING) | controller | uncommon | Frostreach |
-| 25 | `sentrikat` | Sentrikat | Meerkat + Copper weathervane | storm | medium | biped (BIPED) | support | common | Stormcrest |
-| 26 | `basaltoad` | Basaltoad | Cane toad + Basalt columns | stone | medium | quadruped (QUAD) | tank | common | Greenreach |
-| 27 | `orchisloth` | Orchisloth | Three-toed sloth + Orchid | bloom | medium | biped (BIPED) | support | uncommon | Bloomwild |
-| 28 | `caecilith` | Caecilith | Caecilian + Obsidian | shadow | medium | serpent (SERPENT) | trickster | uncommon | Gloomheart |
-| 29 | `velvorm` | Velvorm | Velvet worm + Amethyst | venom | medium | serpent (SERPENT) | controller | uncommon | Bloomwild |
-| 30 | `gibbelle` | Gibbelle | Gibbon + Bellflower | echo | medium | biped (BIPED) | controller | uncommon | Greenreach |
-| 31 | `casquebill` | Casquebill | Hornbill + Iron meteorite | gravity | medium | winged (WING) | controller | rare | Gloomheart |
-| 32 | `nacrolin` | Nacrolin | Pangolin + Mother-of-pearl | prism | medium | quadruped (QUAD) | tank | rare | Greenreach |
-| 33 | `moonloris` | Moonloris | Slow loris + Moonflower | lunar | medium | biped (BIPED) | support | uncommon | Gloomheart |
-| 34 | `murmurling` | Murmurling | Starling + Flock | swarm | medium | winged (WING) | skirmisher | common | Greenreach |
-| 35 | `threadwyrm` | Threadwyrm | Slow worm + Mycelium | spore | medium | serpent (SERPENT) | controller | uncommon | Bloomwild |
-| 36 | `squalltross` | Squalltross | Albatross + Squall cloud | tempest | medium | winged (WING) | skirmisher | uncommon | Stormcrest |
-| 37 | `tuatrune` | Tuatrune | Tuatara + Rune-cut bronze | titan | medium | quadruped (QUAD) | tank | rare | Greenreach |
-| 38 | `scaldamus` | Scaldamus | Hippopotamus + Volcanic mud | ember | large | quadruped (QUAD-L) | tank | rare | Emberfall |
-| 39 | `floenatee` | Floenatee | Manatee + Pack ice | frost | large | aquatic (FIN-L) | support | rare | Frostreach |
-| 40 | `limpetor` | Limpetor | Limpet + Granite tor | stone | large | blob (BLOB-L) | tank | rare | Greenreach |
-| 41 | `umbrathere` | Umbrathere | Giant ground sloth + Night smoke | shadow | large | biped (BIPED-L) | tank | rare | Gloomheart |
-| 42 | `moundvark` | Moundvark | Aardvark + Termite mound | swarm | large | quadruped (QUAD-L) | tank | rare | Bloomwild |
-| 43 | `cindowary` | Cindowary | Cassowary + Charcoal | ember | rideable | biped (BIPED-L) | bruiser | rare | Emberfall |
-| 44 | `glaciyak` | Glaciyak | Yak + Glacier ice | frost | rideable | quadruped (QUAD-L) | tank | uncommon | Frostreach |
-| 45 | `nimbostrich` | Nimbostrich | Ostrich + Thunderhead | storm | rideable | biped (BIPED-L) | skirmisher | rare | Stormcrest |
-| 46 | `goliathite` | Goliathite | Goliath beetle + Marble | stone | rideable | insect (HEXA-L) | tank | uncommon | Greenreach |
-| 47 | `lilybara` | Lilybara | Capybara + Water lily | bloom | rideable | quadruped (QUAD-L) | support | uncommon | Bloomwild |
-| 48 | `duskapi` | Duskapi | Okapi + Dusk smoke | shadow | rideable | quadruped (QUAD-L) | trickster | rare | Gloomheart |
-| 49 | `spatewader` | Spatewader | Giant salamander + Flash flood | storm | rideable | aquatic (FIN-L) | tank | rare | Stormcrest |
-| 50 | `heatherhorn` | Heatherhorn | Highland cow + Heather | bloom | rideable | quadruped (QUAD-L) | tank | uncommon | Greenreach |
+| # | id | Name | Mix | Theme | Size | Big-Boki role | Body (rig) | Fights as | Rarity | Where |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | `burrlet` | Mycroll *(existing)* | Hedgehog + Toadstool | spore | small | - | quadruped (QUAD) | controller | starter | Starter egg |
+| 2 | `cindle` | Vespyx *(existing)* | Fox + Scorpion | venom | small | - | quadruped (QUAD) | bruiser | starter | Starter egg |
+| 3 | `puddlet` | Prismander *(existing)* | Axolotl + Crystal | prism | small | - | aquatic (FIN) | support | starter | Starter egg |
+| 4 | `wisplet` | Lunowl *(existing)* | Owl + Luna moth | lunar | small | - | winged (WING) | trickster | common | Wild, nest eggs |
+| 5 | `zapple` | Echolop *(existing)* | Hare + Bat | echo | small | - | quadruped (QUAD) | skirmisher | common | Wild, nest eggs |
+| 6 | `pebbit` | Gravadillo *(existing)* | Armadillo + Rhino beetle | gravity | large | companion | quadruped (QUAD-L) | tank | uncommon | Wild, nest eggs |
+| 7 | `cairnback` | Cairnback *(existing)* | Tortoise + Ibex | titan | large | bulwark | quadruped (QUAD-L) | tank | boss | Boss: The Stone Colossus |
+| 8 | `hivara` | Hivara *(existing)* | Honeybee + Praying mantis | swarm | small | - | insect (HEXA) | bruiser | boss | Boss: The Brood Mother |
+| 9 | `zephyrak` | Zephyrak *(existing)* | Moray eel + Swift | tempest | small | - | serpent (SERPENT) | skirmisher | boss | Boss: Stormcoil, the Sky Serpent |
+| 10 | `kindlewren` | Kindlewren | Wren + Ember coal | ember | small | - | winged (WING) | skirmisher | common | Emberfall |
+| 11 | `glintmole` | Glintmole | Star-nosed mole + Quartz geode | stone | small | - | quadruped (QUAD) | controller | common | Greenreach |
+| 12 | `rimeshrew` | Rimeshrew | Shrew + Hoarfrost | frost | small | - | quadruped (QUAD) | skirmisher | common | Frostreach |
+| 13 | `mossgrade` | Mossgrade | Tardigrade + Cushion moss | bloom | small | - | blob (BLOB) | support | common | Bloomwild |
+| 14 | `kestrike` | Kestrike | Kestrel + Copper lightning rod | storm | small | - | winged (WING) | skirmisher | uncommon | Stormcrest |
+| 15 | `gloamshell` | Gloamshell | Garden snail + Smoked obsidian | shadow | small | - | blob (BLOB) | controller | common | Gloomheart |
+| 16 | `nettlynx` | Nettlynx | Lynx kitten + Stinging nettle | venom | small | - | quadruped (QUAD) | bruiser | uncommon | Bloomwild |
+| 17 | `thrumbird` | Thrumbird | Hummingbird + Tuning fork | echo | small | - | winged (WING) | support | uncommon | Greenreach |
+| 18 | `lodestick` | Lodestick | Stick insect + Lodestone | gravity | small | - | insect (HEXA) | trickster | uncommon | Gloomheart |
+| 19 | `selenfin` | Selenfin | Hatchetfish + Moonstone | lunar | small | - | aquatic (FIN) | support | rare | Gloomheart |
+| 20 | `marchleaf` | Marchleaf | Leafcutter ant + Leaf | swarm | small | - | insect (HEXA) | bruiser | common | Bloomwild |
+| 21 | `opalisk` | Opalisk | Basilisk lizard + Opal | prism | small | - | biped (BIPED) | trickster | uncommon | Greenreach |
+| 22 | `glomwort` | Glomwort | Slime mold + Puffball | spore | small | - | blob (BLOB) | controller | common | Bloomwild |
+| 23 | `kilnbadger` | Kilnbadger | Honey badger + Kiln brick | ember | medium | - | quadruped (QUAD) | tank | uncommon | Emberfall |
+| 24 | `hoarheron` | Hoarheron | Grey heron + Icicle | frost | medium | - | winged (WING) | controller | uncommon | Frostreach |
+| 25 | `sentrikat` | Sentrikat | Meerkat + Copper weathervane | storm | medium | - | biped (BIPED) | support | common | Stormcrest |
+| 26 | `basaltoad` | Basaltoad | Cane toad + Basalt columns | stone | medium | - | quadruped (QUAD) | tank | common | Greenreach |
+| 27 | `orchisloth` | Orchisloth | Three-toed sloth + Orchid | bloom | medium | - | biped (BIPED) | support | uncommon | Bloomwild |
+| 28 | `caecilith` | Caecilith | Caecilian + Obsidian | shadow | medium | - | serpent (SERPENT) | trickster | uncommon | Gloomheart |
+| 29 | `velvorm` | Velvorm | Velvet worm + Amethyst | venom | medium | - | serpent (SERPENT) | controller | uncommon | Bloomwild |
+| 30 | `gibbelle` | Gibbelle | Gibbon + Bellflower | echo | medium | - | biped (BIPED) | controller | uncommon | Greenreach |
+| 31 | `casquebill` | Casquebill | Hornbill + Iron meteorite | gravity | medium | - | winged (WING) | controller | rare | Gloomheart |
+| 32 | `nacrolin` | Nacrolin | Pangolin + Mother-of-pearl | prism | medium | - | quadruped (QUAD) | tank | rare | Greenreach |
+| 33 | `moonloris` | Moonloris | Slow loris + Moonflower | lunar | medium | - | biped (BIPED) | support | uncommon | Gloomheart |
+| 34 | `murmurling` | Murmurling | Starling + Flock | swarm | medium | - | winged (WING) | skirmisher | common | Greenreach |
+| 35 | `threadwyrm` | Threadwyrm | Slow worm + Mycelium | spore | medium | - | serpent (SERPENT) | controller | uncommon | Bloomwild |
+| 36 | `squalltross` | Squalltross | Albatross + Squall cloud | tempest | large | flyer | winged (WING-L) | skirmisher | uncommon | Stormcrest |
+| 37 | `tuatrune` | Tuatrune | Tuatara + Rune-cut bronze | titan | medium | - | quadruped (QUAD) | tank | rare | Greenreach |
+| 38 | `scaldamus` | Scaldamus | Hippopotamus + Volcanic mud | ember | large | companion | quadruped (QUAD-L) | tank | rare | Emberfall |
+| 39 | `floenatee` | Floenatee | Manatee + Pack ice | frost | large | packbeast | aquatic (FIN-L) | support | rare | Frostreach |
+| 40 | `limpetor` | Limpetor | Limpet + Granite tor | stone | large | bulwark | blob (BLOB-L) | tank | rare | Greenreach |
+| 41 | `umbrathere` | Umbrathere | Giant ground sloth + Night smoke | shadow | large | companion | biped (BIPED-L) | tank | rare | Gloomheart |
+| 42 | `moundvark` | Moundvark | Aardvark + Termite mound | swarm | large | watchtower | quadruped (QUAD-L) | tank | rare | Bloomwild |
+| 43 | `cindowary` | Cindowary | Cassowary + Charcoal | ember | rideable | mount | biped (BIPED-L) | bruiser | rare | Emberfall |
+| 44 | `glaciyak` | Glaciyak | Yak + Glacier ice | frost | rideable | mount | quadruped (QUAD-L) | tank | uncommon | Frostreach |
+| 45 | `nimbostrich` | Nimbostrich | Ostrich + Thunderhead | storm | rideable | mount | biped (BIPED-L) | skirmisher | rare | Stormcrest |
+| 46 | `goliathite` | Goliathite | Goliath beetle + Marble | stone | large | flyer | insect (HEXA-L) | tank | uncommon | Greenreach |
+| 47 | `lilybara` | Lilybara | Capybara + Water lily | bloom | rideable | mount | quadruped (QUAD-L) | support | uncommon | Bloomwild |
+| 48 | `duskapi` | Duskapi | Okapi + Dusk smoke | shadow | rideable | mount | quadruped (QUAD-L) | trickster | rare | Gloomheart |
+| 49 | `spatewader` | Spatewader | Giant salamander + Flash flood | storm | large | packbeast | aquatic (FIN-L) | tank | rare | Stormcrest |
+| 50 | `heatherhorn` | Heatherhorn | Highland cow + Heather | bloom | rideable | mount | quadruped (QUAD-L) | tank | uncommon | Greenreach |
 
 ## Entries
 
-Each entry: mix, theme, size, body and rig, role, a 2-line personality, abilities (E and auto from the
-existing grammar; the merge the stub uses), a sketch of its own ability in grammar parts, rarity and
-where it comes from, and a one-line art note for the image-gen turnaround (silhouette and palette).
+Each entry: mix, theme, size, body and rig, how it fights, its big-Boki role (large and rideable
+only), a 2-line personality, abilities (E and auto from the existing grammar; the merge the stub uses), a
+sketch of its own ability in grammar parts, rarity and where it comes from, and a one-line art note for
+the image-gen turnaround (silhouette and palette).
 
 ### Small (shoulder or perch)
 
 #### Mycroll (`burrlet`) *(existing, live)*
 
-- **Mix:** Hedgehog + Toadstool. **Theme:** spore. **Size:** small. **Body:** quadruped, rig `QUAD`. **Role:** controller.
+- **Mix:** Hedgehog + Toadstool. **Theme:** spore. **Size:** small. **Body:** quadruped, rig `QUAD`. **Fights as:** controller.
 - **Personality:** Curious and odd, notices small things. Wanders off sometimes, comes back with something.
 - **Abilities:** Puffcap Mines (E, `puffcap_mines`), Spore Patch (auto, `thorn_patch`).
 - **Rarity / where:** starter, Starter egg.
@@ -115,7 +146,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Vespyx (`cindle`) *(existing, live)*
 
-- **Mix:** Fox + Scorpion. **Theme:** venom. **Size:** small. **Body:** quadruped, rig `QUAD`. **Role:** bruiser.
+- **Mix:** Fox + Scorpion. **Theme:** venom. **Size:** small. **Body:** quadruped, rig `QUAD`. **Fights as:** bruiser.
 - **Personality:** Sly and eager, talks in quick little hisses. Brave, but quick to anger.
 - **Abilities:** Stinger Hook (E, `stinger_hook`), Stinger Dash (auto, `flare_dash`).
 - **Rarity / where:** starter, Starter egg.
@@ -123,7 +154,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Prismander (`puddlet`) *(existing, live)*
 
-- **Mix:** Axolotl + Crystal. **Theme:** prism. **Size:** small. **Body:** aquatic, rig `FIN`. **Role:** support.
+- **Mix:** Axolotl + Crystal. **Theme:** prism. **Size:** small. **Body:** aquatic, rig `FIN`. **Fights as:** support.
 - **Personality:** Gentle, worried about you, a little formal. Loyal, a bit of a worrier.
 - **Abilities:** Prism Wall (E, `prism_wall`), Refraction (auto, `refraction`).
 - **Rarity / where:** starter, Starter egg.
@@ -131,7 +162,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Lunowl (`wisplet`) *(existing, live)*
 
-- **Mix:** Owl + Luna moth. **Theme:** lunar. **Size:** small. **Body:** winged, rig `WING`. **Role:** trickster.
+- **Mix:** Owl + Luna moth. **Theme:** lunar. **Size:** small. **Body:** winged, rig `WING`. **Fights as:** trickster.
 - **Personality:** Airy, teasing and dramatic. Quick and slippery.
 - **Abilities:** Moon Swap (E, `moon_swap`), Moonlift (auto, `updraft`).
 - **Rarity / where:** common, Wild, nest eggs.
@@ -139,7 +170,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Echolop (`zapple`) *(existing, live)*
 
-- **Mix:** Hare + Bat. **Theme:** echo. **Size:** small. **Body:** quadruped, rig `QUAD`. **Role:** skirmisher.
+- **Mix:** Hare + Bat. **Theme:** echo. **Size:** small. **Body:** quadruped, rig `QUAD`. **Fights as:** skirmisher.
 - **Personality:** Hyper and easily distracted. Loves winning.
 - **Abilities:** Echo Chain (E, `chain_spark`), Echolocate (auto, `echolocate`).
 - **Rarity / where:** common, Wild, nest eggs.
@@ -147,7 +178,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Hivara (`hivara`) *(existing, live)*
 
-- **Mix:** Honeybee + Praying mantis. **Theme:** swarm. **Size:** small. **Body:** insect, rig `HEXA`. **Role:** bruiser.
+- **Mix:** Honeybee + Praying mantis. **Theme:** swarm. **Size:** small. **Body:** insect, rig `HEXA`. **Fights as:** bruiser.
 - **Personality:** Busy and bossy, always organising. Hums when it's happy.
 - **Abilities:** Hive Swarm (E, `hive_swarm`), Spore Patch (auto, `thorn_patch`).
 - **Rarity / where:** boss, Boss: The Brood Mother.
@@ -155,7 +186,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Zephyrak (`zephyrak`) *(existing, live)*
 
-- **Mix:** Moray eel + Swift. **Theme:** tempest. **Size:** small. **Body:** serpent, rig `SERPENT`. **Role:** skirmisher.
+- **Mix:** Moray eel + Swift. **Theme:** tempest. **Size:** small. **Body:** serpent, rig `SERPENT`. **Fights as:** skirmisher.
 - **Personality:** Wild and quick, crackles with excitement. Loves heights and speed.
 - **Abilities:** Gale Lance (E, `gale_lance`), Storm Arc (auto, `storm_arc`).
 - **Rarity / where:** boss, Boss: Stormcoil, the Sky Serpent.
@@ -163,7 +194,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Kindlewren (`kindlewren`)
 
-- **Mix:** Wren + Ember coal. **Theme:** ember. **Size:** small. **Body:** winged, rig `WING`. **Role:** skirmisher.
+- **Mix:** Wren + Ember coal. **Theme:** ember. **Size:** small. **Body:** winged, rig `WING`. **Fights as:** skirmisher.
 - **Personality:** Cheeky and impatient, always first into a fight. Sulks if you leave it on your shoulder too long.
 - **Abilities:** Gale Lance (E, `gale_lance`), Stinger Dash (auto, `flare_dash`); merge stub: Stormwing (`stormwing`).
 - **Own ability later (grammar parts):** Coal Dart: dash 6 m, damage + damage over 3 s.
@@ -172,7 +203,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Glintmole (`glintmole`)
 
-- **Mix:** Star-nosed mole + Quartz geode. **Theme:** stone. **Size:** small. **Body:** quadruped, rig `QUAD`. **Role:** controller.
+- **Mix:** Star-nosed mole + Quartz geode. **Theme:** stone. **Size:** small. **Body:** quadruped, rig `QUAD`. **Fights as:** controller.
 - **Personality:** Shy and fussy, hates bright light. Points its star nose at trouble before anyone sees it.
 - **Abilities:** Puffcap Mines (E, `puffcap_mines`), Echolocate (auto, `echolocate`); merge stub: Sporewake (`thornwake`).
 - **Own ability later (grammar parts):** Geode Mines: trap x3, root + reveal.
@@ -181,7 +212,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Rimeshrew (`rimeshrew`)
 
-- **Mix:** Shrew + Hoarfrost. **Theme:** frost. **Size:** small. **Body:** quadruped, rig `QUAD`. **Role:** skirmisher.
+- **Mix:** Shrew + Hoarfrost. **Theme:** frost. **Size:** small. **Body:** quadruped, rig `QUAD`. **Fights as:** skirmisher.
 - **Personality:** Frantic, hungry and fearless for its size. Squeaks at things thirty times bigger than it.
 - **Abilities:** Hive Swarm (E, `hive_swarm`), Storm Arc (auto, `storm_arc`); merge stub: Hive Crown (`hive_crown`).
 - **Own ability later (grammar parts):** Hoarfrost Breath: cone 4 m, frost slow.
@@ -190,7 +221,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Mossgrade (`mossgrade`)
 
-- **Mix:** Tardigrade + Cushion moss. **Theme:** bloom. **Size:** small. **Body:** blob, rig `BLOB`. **Role:** support.
+- **Mix:** Tardigrade + Cushion moss. **Theme:** bloom. **Size:** small. **Body:** blob, rig `BLOB`. **Fights as:** support.
 - **Personality:** Unbothered and patient, sleeps anywhere. Will not be hurried and will not be hurt.
 - **Abilities:** Prism Wall (E, `prism_wall`), Refraction (auto, `refraction`); merge stub: Prism Shell (`tidal_shell`).
 - **Own ability later (grammar parts):** Moss Cushion: zone 3 m, heal over 4 s to allies.
@@ -199,7 +230,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Kestrike (`kestrike`)
 
-- **Mix:** Kestrel + Copper lightning rod. **Theme:** storm. **Size:** small. **Body:** winged, rig `WING`. **Role:** skirmisher.
+- **Mix:** Kestrel + Copper lightning rod. **Theme:** storm. **Size:** small. **Body:** winged, rig `WING`. **Fights as:** skirmisher.
 - **Personality:** Proud and watchful, judges your aim. Hovers over you when it thinks you're in danger.
 - **Abilities:** Echo Chain (E, `chain_spark`), Storm Arc (auto, `storm_arc`); merge stub: Resonance (`stormcoat`).
 - **Own ability later (grammar parts):** Rod Strike: projectile 10 m, stun 0.4 s + chain 1.
@@ -208,7 +239,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Gloamshell (`gloamshell`)
 
-- **Mix:** Garden snail + Smoked obsidian. **Theme:** shadow. **Size:** small. **Body:** blob, rig `BLOB`. **Role:** controller.
+- **Mix:** Garden snail + Smoked obsidian. **Theme:** shadow. **Size:** small. **Body:** blob, rig `BLOB`. **Fights as:** controller.
 - **Personality:** Slow, private and oddly smug. Likes dark corners, and your pocket.
 - **Abilities:** Puffcap Mines (E, `puffcap_mines`), Spore Patch (auto, `thorn_patch`); merge stub: Sporewake (`thornwake`).
 - **Own ability later (grammar parts):** Dusk Trail: zone line, slow foes + reveal hiders.
@@ -217,7 +248,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Nettlynx (`nettlynx`)
 
-- **Mix:** Lynx kitten + Stinging nettle. **Theme:** venom. **Size:** small. **Body:** quadruped, rig `QUAD`. **Role:** bruiser.
+- **Mix:** Lynx kitten + Stinging nettle. **Theme:** venom. **Size:** small. **Body:** quadruped, rig `QUAD`. **Fights as:** bruiser.
 - **Personality:** Prickly and proud, affectionate on its own terms. Bites first, purrs later.
 - **Abilities:** Stinger Hook (E, `stinger_hook`), Stinger Dash (auto, `flare_dash`); merge stub: Venom Fusion (`blaze_mantle`).
 - **Own ability later (grammar parts):** Nettle Pounce: leap 6 m, damage over 3 s + blight.
@@ -226,7 +257,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Thrumbird (`thrumbird`)
 
-- **Mix:** Hummingbird + Tuning fork. **Theme:** echo. **Size:** small. **Body:** winged, rig `WING`. **Role:** support.
+- **Mix:** Hummingbird + Tuning fork. **Theme:** echo. **Size:** small. **Body:** winged, rig `WING`. **Fights as:** support.
 - **Personality:** Bright and chatty, can't sit still. Hums when you're hurt, as if that helps. It does.
 - **Abilities:** Prism Wall (E, `prism_wall`), Echolocate (auto, `echolocate`); merge stub: Prism Shell (`tidal_shell`).
 - **Own ability later (grammar parts):** Sound Wall: wall 3 m, reflect.
@@ -235,7 +266,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Lodestick (`lodestick`)
 
-- **Mix:** Stick insect + Lodestone. **Theme:** gravity. **Size:** small. **Body:** insect, rig `HEXA`. **Role:** trickster.
+- **Mix:** Stick insect + Lodestone. **Theme:** gravity. **Size:** small. **Body:** insect, rig `HEXA`. **Fights as:** trickster.
 - **Personality:** Still and patient, a deadpan joker. Plays dead whenever it's bored.
 - **Abilities:** Moon Swap (E, `moon_swap`), Moonlift (auto, `updraft`); merge stub: Eclipse (`tempest`).
 - **Own ability later (grammar parts):** Lodestar: projectile 9 m, pull to the kin.
@@ -244,7 +275,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Selenfin (`selenfin`)
 
-- **Mix:** Hatchetfish + Moonstone. **Theme:** lunar. **Size:** small. **Body:** aquatic, rig `FIN`. **Role:** support.
+- **Mix:** Hatchetfish + Moonstone. **Theme:** lunar. **Size:** small. **Body:** aquatic, rig `FIN`. **Fights as:** support.
 - **Personality:** Serene and a bit aloof, rarely makes a sound. Glows brighter when you're near.
 - **Abilities:** Prism Wall (E, `prism_wall`), Refraction (auto, `refraction`); merge stub: Prism Shell (`tidal_shell`).
 - **Own ability later (grammar parts):** Tidelight: aura 4 m, heal over 3 s.
@@ -253,7 +284,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Marchleaf (`marchleaf`)
 
-- **Mix:** Leafcutter ant + Leaf. **Theme:** swarm. **Size:** small. **Body:** insect, rig `HEXA`. **Role:** bruiser.
+- **Mix:** Leafcutter ant + Leaf. **Theme:** swarm. **Size:** small. **Body:** insect, rig `HEXA`. **Fights as:** bruiser.
 - **Personality:** Dutiful and stubborn, a born foreman. Gets upset when you change plans.
 - **Abilities:** Hive Swarm (E, `hive_swarm`), Spore Patch (auto, `thorn_patch`); merge stub: Hive Crown (`hive_crown`).
 - **Own ability later (grammar parts):** Column March: projectile x3 (split), damage + slow.
@@ -262,7 +293,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Opalisk (`opalisk`)
 
-- **Mix:** Basilisk lizard + Opal. **Theme:** prism. **Size:** small. **Body:** biped, rig `BIPED`. **Role:** trickster.
+- **Mix:** Basilisk lizard + Opal. **Theme:** prism. **Size:** small. **Body:** biped, rig `BIPED`. **Fights as:** trickster.
 - **Personality:** A show-off that startles easily. Runs first, poses later.
 - **Abilities:** Moon Swap (E, `moon_swap`), Refraction (auto, `refraction`); merge stub: Eclipse (`tempest`).
 - **Own ability later (grammar parts):** Opal Flash: burst 3 m, decoy + slow.
@@ -271,7 +302,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Glomwort (`glomwort`)
 
-- **Mix:** Slime mold + Puffball. **Theme:** spore. **Size:** small. **Body:** blob, rig `BLOB`. **Role:** controller.
+- **Mix:** Slime mold + Puffball. **Theme:** spore. **Size:** small. **Body:** blob, rig `BLOB`. **Fights as:** controller.
 - **Personality:** Curious about everything, remembers every path. Quietly spreads into your stuff.
 - **Abilities:** Puffcap Mines (E, `puffcap_mines`), Spore Patch (auto, `thorn_patch`); merge stub: Sporewake (`thornwake`).
 - **Own ability later (grammar parts):** Puffball Net: zone 3 m, root on entry.
@@ -282,7 +313,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Kilnbadger (`kilnbadger`)
 
-- **Mix:** Honey badger + Kiln brick. **Theme:** ember. **Size:** medium. **Body:** quadruped, rig `QUAD`. **Role:** tank.
+- **Mix:** Honey badger + Kiln brick. **Theme:** ember. **Size:** medium. **Body:** quadruped, rig `QUAD`. **Fights as:** tank.
 - **Personality:** Fearless and grumpy, loyal like a bad habit. Picks fights it can't win, and wins them.
 - **Abilities:** Gravity Slam (E, `slam`), Mass Guard (auto, `rock_guard`); merge stub: Heavy Star (`titan`).
 - **Own ability later (grammar parts):** Kiln Charge: dash 5 m, push + damage over 2 s.
@@ -291,7 +322,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Hoarheron (`hoarheron`)
 
-- **Mix:** Grey heron + Icicle. **Theme:** frost. **Size:** medium. **Body:** winged, rig `WING`. **Role:** controller.
+- **Mix:** Grey heron + Icicle. **Theme:** frost. **Size:** medium. **Body:** winged, rig `WING`. **Fights as:** controller.
 - **Personality:** Patient and severe, says little. Approves of you only when you stand still.
 - **Abilities:** Gale Lance (E, `gale_lance`), Spore Patch (auto, `thorn_patch`); merge stub: Stormwing (`stormwing`).
 - **Own ability later (grammar parts):** Ice Spear: projectile 10 m, pierce, frost slow.
@@ -300,7 +331,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Sentrikat (`sentrikat`)
 
-- **Mix:** Meerkat + Copper weathervane. **Theme:** storm. **Size:** medium. **Body:** biped, rig `BIPED`. **Role:** support.
+- **Mix:** Meerkat + Copper weathervane. **Theme:** storm. **Size:** medium. **Body:** biped, rig `BIPED`. **Fights as:** support.
 - **Personality:** Alert and bossy, takes guard duty seriously. Can't relax unless it's the one keeping watch.
 - **Abilities:** Echo Chain (E, `chain_spark`), Echolocate (auto, `echolocate`); merge stub: Resonance (`stormcoat`).
 - **Own ability later (grammar parts):** Storm Warning: burst 15 m, reveal (utility only).
@@ -309,7 +340,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Basaltoad (`basaltoad`)
 
-- **Mix:** Cane toad + Basalt columns. **Theme:** stone. **Size:** medium. **Body:** quadruped, rig `QUAD`. **Role:** tank.
+- **Mix:** Cane toad + Basalt columns. **Theme:** stone. **Size:** medium. **Body:** quadruped, rig `QUAD`. **Fights as:** tank.
 - **Personality:** Placid and heavy, a creature of habit. Croaks once, deeply, when it disapproves.
 - **Abilities:** Boulder Heave (E, `boulder_heave`), Mass Guard (auto, `rock_guard`); merge stub: Cairn Colossus (`cairn_colossus`).
 - **Own ability later (grammar parts):** Column Rise: wall 3 m (blocks shots).
@@ -318,7 +349,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Orchisloth (`orchisloth`)
 
-- **Mix:** Three-toed sloth + Orchid. **Theme:** bloom. **Size:** medium. **Body:** biped, rig `BIPED`. **Role:** support.
+- **Mix:** Three-toed sloth + Orchid. **Theme:** bloom. **Size:** medium. **Body:** biped, rig `BIPED`. **Fights as:** support.
 - **Personality:** Gentle and dreamy, never in a hurry. Smiles at everything, even danger.
 - **Abilities:** Prism Wall (E, `prism_wall`), Refraction (auto, `refraction`); merge stub: Prism Shell (`tidal_shell`).
 - **Own ability later (grammar parts):** Orchid Mist: zone 4 m, heal over 4 s + slow foes.
@@ -327,7 +358,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Caecilith (`caecilith`)
 
-- **Mix:** Caecilian + Obsidian. **Theme:** shadow. **Size:** medium. **Body:** serpent, rig `SERPENT`. **Role:** trickster.
+- **Mix:** Caecilian + Obsidian. **Theme:** shadow. **Size:** medium. **Body:** serpent, rig `SERPENT`. **Fights as:** trickster.
 - **Personality:** Secretive and sly, loves surprises. Appears where you least expect it, grinning.
 - **Abilities:** Moon Swap (E, `moon_swap`), Echolocate (auto, `echolocate`); merge stub: Eclipse (`tempest`).
 - **Own ability later (grammar parts):** Underpass: blink 7 m, then burst 2 m slow.
@@ -336,7 +367,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Velvorm (`velvorm`)
 
-- **Mix:** Velvet worm + Amethyst. **Theme:** venom. **Size:** medium. **Body:** serpent, rig `SERPENT`. **Role:** controller.
+- **Mix:** Velvet worm + Amethyst. **Theme:** venom. **Size:** medium. **Body:** serpent, rig `SERPENT`. **Fights as:** controller.
 - **Personality:** Gentle-looking and a ruthless hunter. Loves being stroked, hates being ignored.
 - **Abilities:** Hive Swarm (E, `hive_swarm`), Spore Patch (auto, `thorn_patch`); merge stub: Hive Crown (`hive_crown`).
 - **Own ability later (grammar parts):** Thread Spray: cone 5 m, root 0.8 s + poison.
@@ -345,7 +376,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Gibbelle (`gibbelle`)
 
-- **Mix:** Gibbon + Bellflower. **Theme:** echo. **Size:** medium. **Body:** biped, rig `BIPED`. **Role:** controller.
+- **Mix:** Gibbon + Bellflower. **Theme:** echo. **Size:** medium. **Body:** biped, rig `BIPED`. **Fights as:** controller.
 - **Personality:** Loud, joyful and a show-off. Sings when happy, and louder when scared.
 - **Abilities:** Echo Chain (E, `chain_spark`), Echolocate (auto, `echolocate`); merge stub: Resonance (`stormcoat`).
 - **Own ability later (grammar parts):** Bell Peal: burst 4 m, stun 0.4 s + echo.
@@ -354,7 +385,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Casquebill (`casquebill`)
 
-- **Mix:** Hornbill + Iron meteorite. **Theme:** gravity. **Size:** medium. **Body:** winged, rig `WING`. **Role:** controller.
+- **Mix:** Hornbill + Iron meteorite. **Theme:** gravity. **Size:** medium. **Body:** winged, rig `WING`. **Fights as:** controller.
 - **Personality:** Dignified and slow to trust, keeps its own counsel. Clacks its bill when it disagrees.
 - **Abilities:** Gravity Slam (E, `slam`), Echolocate (auto, `echolocate`); merge stub: Heavy Star (`titan`).
 - **Own ability later (grammar parts):** Starfall: leap 7 m, pull to centre + stun.
@@ -363,7 +394,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Nacrolin (`nacrolin`)
 
-- **Mix:** Pangolin + Mother-of-pearl. **Theme:** prism. **Size:** medium. **Body:** quadruped, rig `QUAD`. **Role:** tank.
+- **Mix:** Pangolin + Mother-of-pearl. **Theme:** prism. **Size:** medium. **Body:** quadruped, rig `QUAD`. **Fights as:** tank.
 - **Personality:** Timid but stubborn, curls up when spoken to sharply. Unrolls for snacks.
 - **Abilities:** Prism Wall (E, `prism_wall`), Refraction (auto, `refraction`); merge stub: Prism Shell (`tidal_shell`).
 - **Own ability later (grammar parts):** Pearl Curl: aura 1.6 m on owner, reflect 1 s.
@@ -372,7 +403,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Moonloris (`moonloris`)
 
-- **Mix:** Slow loris + Moonflower. **Theme:** lunar. **Size:** medium. **Body:** biped, rig `BIPED`. **Role:** support.
+- **Mix:** Slow loris + Moonflower. **Theme:** lunar. **Size:** medium. **Body:** biped, rig `BIPED`. **Fights as:** support.
 - **Personality:** Soft-spoken and sleepy by day, wide awake at night. Clings to you when it's frightened.
 - **Abilities:** Moon Swap (E, `moon_swap`), Moonlift (auto, `updraft`); merge stub: Eclipse (`tempest`).
 - **Own ability later (grammar parts):** Moonbloom: burst 6 m, reveal + heal over 3 s.
@@ -381,7 +412,7 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Murmurling (`murmurling`)
 
-- **Mix:** Starling + Flock. **Theme:** swarm. **Size:** medium. **Body:** winged, rig `WING`. **Role:** skirmisher.
+- **Mix:** Starling + Flock. **Theme:** swarm. **Size:** medium. **Body:** winged, rig `WING`. **Fights as:** skirmisher.
 - **Personality:** Sociable and noisy, copies every sound it hears. Gets lonely in a second.
 - **Abilities:** Hive Swarm (E, `hive_swarm`), Echolocate (auto, `echolocate`); merge stub: Hive Crown (`hive_crown`).
 - **Own ability later (grammar parts):** Murmuration: zone 4 m, damage + slow, follows the kin.
@@ -390,36 +421,28 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Threadwyrm (`threadwyrm`)
 
-- **Mix:** Slow worm + Mycelium. **Theme:** spore. **Size:** medium. **Body:** serpent, rig `SERPENT`. **Role:** controller.
+- **Mix:** Slow worm + Mycelium. **Theme:** spore. **Size:** medium. **Body:** serpent, rig `SERPENT`. **Fights as:** controller.
 - **Personality:** Quiet and thoughtful, an old soul. Likes damp shade and long naps.
 - **Abilities:** Puffcap Mines (E, `puffcap_mines`), Spore Patch (auto, `thorn_patch`); merge stub: Sporewake (`thornwake`).
 - **Own ability later (grammar parts):** Root Line: zone line 6 m, root on entry.
 - **Rarity / where:** uncommon, Bloomwild.
 - **Art note:** Smooth bronze legless lizard with glossy scales, white-teal glowing mycelium threads wrapping its body and trailing off its tail.
 
-#### Squalltross (`squalltross`)
-
-- **Mix:** Albatross + Squall cloud. **Theme:** tempest. **Size:** medium. **Body:** winged, rig `WING`. **Role:** skirmisher.
-- **Personality:** Easygoing and fearless, a wanderer. Gets restless when it hasn't seen the sea for a while.
-- **Abilities:** Gale Lance (E, `gale_lance`), Moonlift (auto, `updraft`); merge stub: Stormwing (`stormwing`).
-- **Own ability later (grammar parts):** Squall Line: projectile 10 m, push + slow.
-- **Rarity / where:** uncommon, Stormcrest.
-- **Art note:** White albatross with long narrow dark-tipped wings, a small grey storm cloud trailing under it with rain wisps.
-
 #### Tuatrune (`tuatrune`)
 
-- **Mix:** Tuatara + Rune-cut bronze. **Theme:** titan. **Size:** medium. **Body:** quadruped, rig `QUAD`. **Role:** tank.
+- **Mix:** Tuatara + Rune-cut bronze. **Theme:** titan. **Size:** medium. **Body:** quadruped, rig `QUAD`. **Fights as:** tank.
 - **Personality:** Ancient, calm and faintly amused. Watches you with its third eye when you aren't looking.
 - **Abilities:** Boulder Heave (E, `boulder_heave`), Mass Guard (auto, `rock_guard`); merge stub: Cairn Colossus (`cairn_colossus`).
 - **Own ability later (grammar parts):** Rune Ward: burst 3 m on owner, shield 40 + reveal.
 - **Rarity / where:** rare, Greenreach.
 - **Art note:** Stocky olive spiny reptile, a spine crest of bronze plates engraved with glowing gold runes, a small third eye on its forehead.
 
-### Large (heavy mounts, today's mount carry)
+### Large (big Boki you don't ride: companion, flyer, bulwark, packbeast, watchtower)
 
 #### Gravadillo (`pebbit`) *(existing, live)*
 
-- **Mix:** Armadillo + Rhino beetle. **Theme:** gravity. **Size:** large. **Body:** quadruped, rig `QUAD-L`. **Role:** tank.
+- **Mix:** Armadillo + Rhino beetle. **Theme:** gravity. **Size:** large. **Body:** quadruped, rig `QUAD-L`. **Fights as:** tank.
+- **Big-Boki role:** **companion**. Walks beside you and fights as a second body, drawing fire and holding a lane; never ridden.
 - **Personality:** Slow and steady, few words. Deeply loyal once trust is earned.
 - **Abilities:** Gravity Slam (E, `slam`), Mass Guard (auto, `rock_guard`).
 - **Rarity / where:** uncommon, Wild, nest eggs.
@@ -427,62 +450,99 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Cairnback (`cairnback`) *(existing, live)*
 
-- **Mix:** Tortoise + Ibex. **Theme:** titan. **Size:** large. **Body:** quadruped, rig `QUAD-L`. **Role:** tank.
+- **Mix:** Tortoise + Ibex. **Theme:** titan. **Size:** large. **Body:** quadruped, rig `QUAD-L`. **Fights as:** tank.
+- **Big-Boki role:** **bulwark**. Plants itself as living cover you and your squad shoot from behind; it soaks shots until it breaks.
 - **Personality:** Ancient and calm, speaks like grinding stone. Fiercely protective.
 - **Abilities:** Boulder Heave (E, `boulder_heave`), Mass Guard (auto, `rock_guard`).
 - **Rarity / where:** boss, Boss: The Stone Colossus.
 - **Art note:** Grey tortoise with ibex horns and a rune-carved cairn on its shell; gold glow.
 
+#### Squalltross (`squalltross`)
+
+- **Mix:** Albatross + Squall cloud. **Theme:** tempest. **Size:** large. **Body:** winged, rig `WING-L`. **Fights as:** skirmisher.
+- **Big-Boki role:** **flyer**. Lifts you: a carried glide or a hop over an abyss gap it can reach; no free flight.
+- **Personality:** Easygoing and fearless, a wanderer. Gets restless when it hasn't seen the sea for a while.
+- **Abilities:** Gale Lance (E, `gale_lance`), Moonlift (auto, `updraft`); merge stub: Stormwing (`stormwing`).
+- **Own ability later (grammar parts):** Squall Line: projectile 10 m, push + slow.
+- **Rarity / where:** uncommon, Stormcrest.
+- **Art note:** Huge white albatross, very long narrow wings tipped charcoal, wing-tip rain wisps, a bruised-grey squall cloud swirling under its belly, pale gold beak, hunter-sized feet to hang from.
+
 #### Scaldamus (`scaldamus`)
 
-- **Mix:** Hippopotamus + Volcanic mud. **Theme:** ember. **Size:** large. **Body:** quadruped, rig `QUAD-L`. **Role:** tank.
+- **Mix:** Hippopotamus + Volcanic mud. **Theme:** ember. **Size:** large. **Body:** quadruped, rig `QUAD-L`. **Fights as:** tank.
+- **Big-Boki role:** **companion**. Walks beside you and fights as a second body, drawing fire and holding a lane; never ridden.
 - **Personality:** Lazy until crossed, then unstoppable. Yawns at you to say it likes you.
-- **Abilities:** Gravity Slam (E, `slam`), Mass Guard (auto, `rock_guard`); merge stub: Heavy Star (`titan`); mount speed x0.9, jump x0.85, turn x0.55.
+- **Abilities:** Gravity Slam (E, `slam`), Mass Guard (auto, `rock_guard`); merge stub: Heavy Star (`titan`).
 - **Own ability later (grammar parts):** Mud Geyser: zone 3 m, damage over 3 s + slow.
 - **Rarity / where:** rare, Emberfall.
 - **Art note:** Huge barrel hippo, dark plum-grey hide cracked with glowing lava lines, red steam sweat, tiny ears, wide flat back.
 
 #### Floenatee (`floenatee`)
 
-- **Mix:** Manatee + Pack ice. **Theme:** frost. **Size:** large. **Body:** aquatic, rig `FIN-L`. **Role:** support.
+- **Mix:** Manatee + Pack ice. **Theme:** frost. **Size:** large. **Body:** aquatic, rig `FIN-L`. **Fights as:** support.
+- **Big-Boki role:** **packbeast**. Carries loot: extra pack slots on its back, which a rival can knock loose and steal.
 - **Personality:** Kind and slow, everyone's friend. Hums low songs you feel through your boots.
-- **Abilities:** Prism Wall (E, `prism_wall`), Refraction (auto, `refraction`); merge stub: Prism Shell (`tidal_shell`); mount speed x0.85, jump x0.8, turn x0.6.
+- **Abilities:** Prism Wall (E, `prism_wall`), Refraction (auto, `refraction`); merge stub: Prism Shell (`tidal_shell`).
 - **Own ability later (grammar parts):** Ice Floe: wall 4 m, reflect + frost slow at the ends.
 - **Rarity / where:** rare, Frostreach.
-- **Art note:** Rotund grey-blue sea cow with paddle flippers and a round tail paddle, a flat slab of white pack ice on its back, whiskered snout.
+- **Art note:** Rotund grey-blue sea cow with paddle flippers and a round tail paddle, a flat slab of white pack ice on its back stacked with frosted crates and a lantern, whiskered snout.
 
 #### Limpetor (`limpetor`)
 
-- **Mix:** Limpet + Granite tor. **Theme:** stone. **Size:** large. **Body:** blob, rig `BLOB-L`. **Role:** tank.
+- **Mix:** Limpet + Granite tor. **Theme:** stone. **Size:** large. **Body:** blob, rig `BLOB-L`. **Fights as:** tank.
+- **Big-Boki role:** **bulwark**. Plants itself as living cover you and your squad shoot from behind; it soaks shots until it breaks.
 - **Personality:** Stubborn as rock and proud of it. Grudgingly fond of whoever rides it.
-- **Abilities:** Boulder Heave (E, `boulder_heave`), Mass Guard (auto, `rock_guard`); merge stub: Cairn Colossus (`cairn_colossus`); mount speed x0.8, jump x0.8, turn x0.5.
+- **Abilities:** Boulder Heave (E, `boulder_heave`), Mass Guard (auto, `rock_guard`); merge stub: Cairn Colossus (`cairn_colossus`).
 - **Own ability later (grammar parts):** Clamp Down: aura 3 m, knockback immunity + slow foes.
 - **Rarity / where:** rare, Greenreach.
 - **Art note:** Wide cone-shaped granite shell with lichen patches, a muscular foot and two eye tentacles under the rim, a flat summit to sit on.
 
 #### Umbrathere (`umbrathere`)
 
-- **Mix:** Giant ground sloth + Night smoke. **Theme:** shadow. **Size:** large. **Body:** biped, rig `BIPED-L`. **Role:** tank.
+- **Mix:** Giant ground sloth + Night smoke. **Theme:** shadow. **Size:** large. **Body:** biped, rig `BIPED-L`. **Fights as:** tank.
+- **Big-Boki role:** **companion**. Walks beside you and fights as a second body, drawing fire and holding a lane; never ridden.
 - **Personality:** Brooding and protective, slow to anger. Shelters smaller Boki under its arms.
-- **Abilities:** Gravity Slam (E, `slam`), Mass Guard (auto, `rock_guard`); merge stub: Heavy Star (`titan`); mount speed x0.85, jump x0.9, turn x0.55.
+- **Abilities:** Gravity Slam (E, `slam`), Mass Guard (auto, `rock_guard`); merge stub: Heavy Star (`titan`).
 - **Own ability later (grammar parts):** Smoke Shroud: zone 5 m, allies hidden (reveal-proof) 3 s.
 - **Rarity / where:** rare, Gloomheart.
 - **Art note:** Massive shaggy charcoal ground sloth reared on its hind legs and thick tail, huge hooked claws, dark smoke wisps rising from its fur.
 
 #### Moundvark (`moundvark`)
 
-- **Mix:** Aardvark + Termite mound. **Theme:** swarm. **Size:** large. **Body:** quadruped, rig `QUAD-L`. **Role:** tank.
+- **Mix:** Aardvark + Termite mound. **Theme:** swarm. **Size:** large. **Body:** quadruped, rig `QUAD-L`. **Fights as:** tank.
+- **Big-Boki role:** **watchtower**. Stands still and lets you climb on top: height, longer sight and range, but you're exposed.
 - **Personality:** Easy-going and nosy, digs when it's nervous. Talks to its termites more than to you.
-- **Abilities:** Hive Swarm (E, `hive_swarm`), Mass Guard (auto, `rock_guard`); merge stub: Hive Crown (`hive_crown`); mount speed x0.9, jump x0.85, turn x0.6.
+- **Abilities:** Hive Swarm (E, `hive_swarm`), Mass Guard (auto, `rock_guard`); merge stub: Hive Crown (`hive_crown`).
 - **Own ability later (grammar parts):** Mound Swarm: zone 4 m around the kin, damage + slow.
 - **Rarity / where:** rare, Bloomwild.
-- **Art note:** Big pink-tan aardvark with a long snout and rabbit ears, a tall clay termite mound with vents rising from its back, tiny termites around it.
+- **Art note:** Big pink-tan aardvark with a long snout and rabbit ears, a tall ochre termite mound rising from its back like a little tower with a flat lookout top and glowing vents, tiny termites streaming around it.
 
-### Rideable (travel mounts, the riding spec)
+#### Goliathite (`goliathite`)
+
+- **Mix:** Goliath beetle + Marble. **Theme:** stone. **Size:** large. **Body:** insect, rig `HEXA-L`. **Fights as:** tank.
+- **Big-Boki role:** **flyer**. Lifts you: a carried glide or a hop over an abyss gap it can reach; no free flight.
+- **Personality:** Earnest and hard-working, a gentle giant. Polishes its shell when it's proud of you.
+- **Abilities:** Boulder Heave (E, `boulder_heave`), Mass Guard (auto, `rock_guard`); merge stub: Cairn Colossus (`cairn_colossus`).
+- **Own ability later (grammar parts):** Shell Ram: dash 6 m, push + stun 0.4 s.
+- **Rarity / where:** uncommon, Greenreach.
+- **Art note:** Huge six-legged beetle, polished white marble wing cases veined grey and gold, cases flipped open over smoky amber flight wings, black-and-white striped thorax, a stubby Y horn, two hooked forelegs for gripping a hunter's harness.
+
+#### Spatewader (`spatewader`)
+
+- **Mix:** Giant salamander + Flash flood. **Theme:** storm. **Size:** large. **Body:** aquatic, rig `FIN-L`. **Fights as:** tank.
+- **Big-Boki role:** **packbeast**. Carries loot: extra pack slots on its back, which a rival can knock loose and steal.
+- **Personality:** Lazy and good-natured, dozes in puddles. Comes alive in a storm.
+- **Abilities:** Echo Chain (E, `chain_spark`), Storm Arc (auto, `storm_arc`); merge stub: Resonance (`stormcoat`).
+- **Own ability later (grammar parts):** Flash Flood: cone 6 m, push + slow.
+- **Rarity / where:** rare, Stormcrest.
+- **Art note:** Long flat wrinkled brown-black giant salamander, tiny bead eyes, wide frog grin, frilly skin folds on the flanks, storm-blue river-stone spots, a lashed bundle of driftwood crates riding on its back.
+
+### Rideable (mounts, the riding spec)
 
 #### Cindowary (`cindowary`)
 
-- **Mix:** Cassowary + Charcoal. **Theme:** ember. **Size:** rideable. **Body:** biped, rig `BIPED-L`. **Role:** bruiser.
+- **Mix:** Cassowary + Charcoal. **Theme:** ember. **Size:** rideable. **Body:** biped, rig `BIPED-L`. **Fights as:** bruiser.
+- **Big-Boki role:** **mount**. You ride it: travel speed out of combat, one rider, get off to loot or extract.
 - **Personality:** Proud and territorial, fiercely loyal to its rider. Booms a warning before it charges.
 - **Abilities:** Gale Lance (E, `gale_lance`), Stinger Dash (auto, `flare_dash`); merge stub: Stormwing (`stormwing`); mount speed x1.25, jump x1.1, turn x0.75.
 - **Own ability later (grammar parts):** Ash Kick: cone 3 m, push + damage over 3 s.
@@ -491,7 +551,8 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Glaciyak (`glaciyak`)
 
-- **Mix:** Yak + Glacier ice. **Theme:** frost. **Size:** rideable. **Body:** quadruped, rig `QUAD-L`. **Role:** tank.
+- **Mix:** Yak + Glacier ice. **Theme:** frost. **Size:** rideable. **Body:** quadruped, rig `QUAD-L`. **Fights as:** tank.
+- **Big-Boki role:** **mount**. You ride it: travel speed out of combat, one rider, get off to loot or extract.
 - **Personality:** Steady and warm-hearted, unbothered by anything. Snorts frost when it laughs.
 - **Abilities:** Gravity Slam (E, `slam`), Mass Guard (auto, `rock_guard`); merge stub: Heavy Star (`titan`); mount speed x1.1, jump x0.9, turn x0.65.
 - **Own ability later (grammar parts):** Glacier Charge: dash 8 m, push + frost slow.
@@ -500,25 +561,18 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Nimbostrich (`nimbostrich`)
 
-- **Mix:** Ostrich + Thunderhead. **Theme:** storm. **Size:** rideable. **Body:** biped, rig `BIPED-L`. **Role:** skirmisher.
+- **Mix:** Ostrich + Thunderhead. **Theme:** storm. **Size:** rideable. **Body:** biped, rig `BIPED-L`. **Fights as:** skirmisher.
+- **Big-Boki role:** **mount**. You ride it: travel speed out of combat, one rider, get off to loot or extract.
 - **Personality:** Skittish and fast, afraid of nothing but boredom. Races anything that moves.
 - **Abilities:** Echo Chain (E, `chain_spark`), Storm Arc (auto, `storm_arc`); merge stub: Resonance (`stormcoat`); mount speed x1.3, jump x1.0, turn x0.7.
 - **Own ability later (grammar parts):** Static Sprint: dash 9 m, stun 0.3 s on pass (rider-only).
 - **Rarity / where:** rare, Stormcrest.
 - **Art note:** Long-necked, long-legged ostrich, body plumage a dark grey storm cloud with yellow lightning flickers, pale pink neck and legs.
 
-#### Goliathite (`goliathite`)
-
-- **Mix:** Goliath beetle + Marble. **Theme:** stone. **Size:** rideable. **Body:** insect, rig `HEXA-L`. **Role:** tank.
-- **Personality:** Earnest and hard-working, a gentle giant. Polishes its shell when it's proud of you.
-- **Abilities:** Boulder Heave (E, `boulder_heave`), Mass Guard (auto, `rock_guard`); merge stub: Cairn Colossus (`cairn_colossus`); mount speed x1.1, jump x0.85, turn x0.6.
-- **Own ability later (grammar parts):** Shell Ram: dash 6 m, push + stun 0.4 s.
-- **Rarity / where:** uncommon, Greenreach.
-- **Art note:** Huge six-legged beetle, white and grey marble-veined wing cases, black-striped thorax, a short Y-shaped horn, saddle on the thorax.
-
 #### Lilybara (`lilybara`)
 
-- **Mix:** Capybara + Water lily. **Theme:** bloom. **Size:** rideable. **Body:** quadruped, rig `QUAD-L`. **Role:** support.
+- **Mix:** Capybara + Water lily. **Theme:** bloom. **Size:** rideable. **Body:** quadruped, rig `QUAD-L`. **Fights as:** support.
+- **Big-Boki role:** **mount**. You ride it: travel speed out of combat, one rider, get off to loot or extract.
 - **Personality:** Calm and sociable, the friend of everything. Nothing ruffles it, not even a fight.
 - **Abilities:** Prism Wall (E, `prism_wall`), Refraction (auto, `refraction`); merge stub: Prism Shell (`tidal_shell`); mount speed x1.15, jump x0.9, turn x0.7.
 - **Own ability later (grammar parts):** Lily Ring: aura 3 m, heal over 4 s + cleanse.
@@ -527,25 +581,18 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 #### Duskapi (`duskapi`)
 
-- **Mix:** Okapi + Dusk smoke. **Theme:** shadow. **Size:** rideable. **Body:** quadruped, rig `QUAD-L`. **Role:** trickster.
+- **Mix:** Okapi + Dusk smoke. **Theme:** shadow. **Size:** rideable. **Body:** quadruped, rig `QUAD-L`. **Fights as:** trickster.
+- **Big-Boki role:** **mount**. You ride it: travel speed out of combat, one rider, get off to loot or extract.
 - **Personality:** Shy and graceful, vanishes when strangers come. Trusts one rider and only one.
 - **Abilities:** Moon Swap (E, `moon_swap`), Echolocate (auto, `echolocate`); merge stub: Eclipse (`tempest`); mount speed x1.25, jump x1.1, turn x0.85.
 - **Own ability later (grammar parts):** Fade: blink 8 m, decoy at the start.
 - **Rarity / where:** rare, Gloomheart.
 - **Art note:** Graceful okapi, deep plum-brown body, white stripes on the hind legs that dissolve into dark smoke, long ears, small horn knobs.
 
-#### Spatewader (`spatewader`)
-
-- **Mix:** Giant salamander + Flash flood. **Theme:** storm. **Size:** rideable. **Body:** aquatic, rig `FIN-L`. **Role:** tank.
-- **Personality:** Lazy and good-natured, dozes in puddles. Comes alive in a storm.
-- **Abilities:** Echo Chain (E, `chain_spark`), Storm Arc (auto, `storm_arc`); merge stub: Resonance (`stormcoat`); mount speed x1.1, jump x0.85, turn x0.6.
-- **Own ability later (grammar parts):** Flash Flood: cone 6 m, push + slow.
-- **Rarity / where:** rare, Stormcrest.
-- **Art note:** Long flat wrinkled brown-black salamander, tiny eyes, wide frog mouth, frilly skin folds on the flanks, storm-blue river-stone spots, four short legs.
-
 #### Heatherhorn (`heatherhorn`)
 
-- **Mix:** Highland cow + Heather. **Theme:** bloom. **Size:** rideable. **Body:** quadruped, rig `QUAD-L`. **Role:** tank.
+- **Mix:** Highland cow + Heather. **Theme:** bloom. **Size:** rideable. **Body:** quadruped, rig `QUAD-L`. **Fights as:** tank.
+- **Big-Boki role:** **mount**. You ride it: travel speed out of combat, one rider, get off to loot or extract.
 - **Personality:** Gentle and stubborn, grazes mid-fight. Bellows proudly when you climb on.
 - **Abilities:** Boulder Heave (E, `boulder_heave`), Spore Patch (auto, `thorn_patch`); merge stub: Cairn Colossus (`cairn_colossus`); mount speed x1.15, jump x0.95, turn x0.7.
 - **Own ability later (grammar parts):** Heather Bed: zone 4 m, root on entry + heal allies.
@@ -554,15 +601,16 @@ where it comes from, and a one-line art note for the image-gen turnaround (silho
 
 ## Body types and shared skeletons (for the rig plan)
 
-Seven creature skeletons cover all 50. A `-L` rig is the same skeleton scaled up with a **rider socket**
-(saddle bone the hunter's hips attach to, plus a `rein` bone for the head) and heavier spine weights;
-it is not a separate skeleton. Bone counts are targets for Meshy-to-Blender fitting, not final.
+Seven creature skeletons cover all 50. A `-L` rig is the same skeleton scaled up with heavier spine
+weights and a **hunter socket** for its role: a saddle bone for mounts, a lookout platform for the
+watchtower, a harness or carry bone for flyers, a cargo bone for packbeasts; companions and bulwarks
+need none. It is not a separate skeleton. Bone counts are targets for Meshy-to-Blender fitting, not final.
 
 | Body | Count (new) | Skeleton | Bones (target) | Who |
 |---|---|---|---|---|
 | quadruped | 18 (13) | **QUAD** / QUAD-L | root, pelvis, spine x3, neck x2, head, jaw, 4 legs x3 + toe, tail x3, 2 ear sockets, back socket (geode, bricks, mound) | Mycroll, Vespyx, Echolop, Glintmole, Rimeshrew, Nettlynx, Kilnbadger, Basaltoad, Nacrolin, Tuatrune; L: Gravadillo, Cairnback, Scaldamus, Moundvark, Glaciyak, Lilybara, Duskapi, Heatherhorn |
 | biped | 8 (8) | **BIPED** / BIPED-L | root, pelvis, spine x3, neck, head, jaw, 2 legs x3 + toe, 2 arms x3 + hand, tail x3 (balance) | Opalisk, Sentrikat, Orchisloth, Gibbelle, Moonloris; L: Umbrathere, Cindowary, Nimbostrich (the runner birds use BIPED with arms as folded wing stubs) |
-| winged | 8 (7) | **WING** | root, body x2, neck, head, beak/jaw, 2 legs x2 + toe, 2 wings x3 + 3 feather-fan bones, tail fan x2 | Lunowl, Kindlewren, Kestrike, Thrumbird, Hoarheron, Casquebill, Murmurling, Squalltross |
+| winged | 8 (7) | **WING** / WING-L | root, body x2, neck, head, beak/jaw, 2 legs x2 + toe, 2 wings x3 + 3 feather-fan bones, tail fan x2 | Lunowl, Kindlewren, Kestrike, Thrumbird, Hoarheron, Casquebill, Murmurling; L: Squalltross (flyer: a carry socket under the feet instead of a saddle) |
 | serpent | 4 (3) | **SERPENT** | root, spine chain x10, head, jaw, 4 optional limb or wing sockets along the chain | Zephyrak (wing sockets), Caecilith, Velvorm (leg nubs driven procedurally from the chain), Threadwyrm |
 | insect | 4 (3) | **HEXA** / HEXA-L | root, thorax, abdomen x2, head, mandibles, 6 legs x3, 2 antennae x2, wing-case and wing sockets | Hivara, Lodestick, Marchleaf (leaf socket); L: Goliathite |
 | aquatic | 4 (3) | **FIN** / FIN-L | root (hover), body x4, head, jaw, tail fin x2, 2 pectoral fins, 4 optional limb stubs | Prismander (limbs on), Selenfin; L: Floenatee (flippers), Spatewader (limbs on) |
@@ -570,26 +618,23 @@ it is not a separate skeleton. Bone counts are targets for Meshy-to-Blender fitt
 
 Notes for the rig plan:
 - QUAD carries the most species (18), so it should be the first skeleton built and the most tested.
-- Every `-L` rig (15 Boki: the 7 large and the 8 rideable) needs the rider socket.
-  Today's two large Boki (Cairnback, Gravadillo) get it too.
+- The 16 `-L` rigs need their role's socket (saddle 6, harness 2, cargo 2, lookout 1); the 3 companions
+  and 2 bulwarks need only the heavier weights.
 - Extra props (the geode, kiln bricks, termite mound, heather, ice floe) are separate meshes on the back
   socket, so the owner can change them later without re-rigging, which also serves "models I can later change".
 
-## The rideables
+## The mounts
 
-| Boki | Body | Theme | Mount speed / jump / turn | Rarity, where | Role while ridden |
+| Boki | Body | Theme | Mount speed / jump / turn | Rarity, where | Fights as |
 |---|---|---|---|---|---|
-| Heatherhorn | quadruped | bloom | x1.15 / x0.95 / 0.7 | uncommon, Greenreach | the first mount most players meet; sturdy |
-| Glaciyak | quadruped | frost | x1.1 / x0.9 / 0.65 | uncommon, Frostreach | ploughs through snow; tank |
-| Goliathite | insect | stone | x1.1 / x0.85 / 0.6 | uncommon, Greenreach | heavy, never tires; tank |
-| Lilybara | quadruped | bloom | x1.15 / x0.9 / 0.7 | uncommon, Bloomwild | calm healer; support |
-| Cindowary | biped | ember | x1.25 / x1.1 / 0.75 | rare, Emberfall | fast runner, kicks; bruiser |
-| Nimbostrich | biped | storm | x1.3 / x1.0 / 0.7 | rare, Stormcrest | the fastest; skirmisher |
-| Duskapi | quadruped | shadow | x1.25 / x1.1 / 0.85 | rare, Gloomheart | nimble, hard to see; trickster |
-| Spatewader | aquatic | storm | x1.1 / x0.85 / 0.6 | rare, Stormcrest | steady on land; proposed fast in water (spec) |
+| Heatherhorn | quadruped | bloom | x1.15 / x0.95 / 0.7 | uncommon, Greenreach | tank; the first mount most players meet |
+| Glaciyak | quadruped | frost | x1.1 / x0.9 / 0.65 | uncommon, Frostreach | tank; ploughs through snow |
+| Lilybara | quadruped | bloom | x1.15 / x0.9 / 0.7 | uncommon, Bloomwild | support; a calm healer |
+| Cindowary | biped | ember | x1.25 / x1.1 / 0.75 | rare, Emberfall | bruiser; a fast runner that kicks |
+| Nimbostrich | biped | storm | x1.3 / x1.0 / 0.7 | rare, Stormcrest | skirmisher; the fastest |
+| Duskapi | quadruped | shadow | x1.25 / x1.1 / 0.85 | rare, Gloomheart | trickster; nimble and hard to see |
 
-Five heavy (large) mounts sit under them: Scaldamus, Floenatee, Limpetor, Umbrathere, Moundvark, next to
-today's Cairnback and Gravadillo.
+The other ten big Boki have the roles in "Big-Boki roles" above.
 
 ## Originality check
 
@@ -640,8 +685,8 @@ Read from the loader, not guessed:
   `abilities_v2/`, `merges_v2/`, `evolution_v2/`, `kin_v2/` under that root, not subfolders or siblings).
 - `Data.load_kin_content` puts every loaded kin into `Data.KIN`; `Data.common_kin()` (everything not
   rare) feeds wild spawns (`spawn_plan.gd`), the mystery starter egg (`hatch.gd`), rivals, the shelter,
-  the town and the Field Book. So a file in `content/kin_v2/` is live everywhere at once, and the check in
-  main.gd that expects `Data.common_kin().size() == 6` ("rare species only come from eggs") would fail.
+  the town and the Field Book. So a file in `content/kin_v2/` is live everywhere at once, and the
+  check in main.gd that expects `Data.common_kin().size() == 6` ("rare species only come from eggs") would fail.
 
 So the stubs live in **`content/kin_v2_roster/`**, which nothing loads. To check them, `--roster-check`
 parses them against the live library. I also copied the live grammar folders plus all 50 kin into a
@@ -663,13 +708,13 @@ batches for order; if they are already paid for under S2's "current 9 Boki" phas
 
 | Batch | Species | Credits |
 |---|---|---|
-| 1 | Mycroll, Vespyx, Prismander (starters); Lunowl, Echolop, Gravadillo (wild, early); Glintmole, Basaltoad, Murmurling (Greenreach commons); Heatherhorn (first rideable) | 900-1,200 |
+| 1 | Mycroll, Vespyx, Prismander (starters); Lunowl, Echolop, Gravadillo (wild, early); Glintmole, Basaltoad, Murmurling (Greenreach commons); Heatherhorn (first mount) | 900-1,200 |
 | 2 | Cairnback, Hivara, Zephyrak (boss eggs); Kindlewren, Rimeshrew, Mossgrade, Gloamshell, Marchleaf, Glomwort, Sentrikat (commons) | 900-1,200 |
 | 3 | Kestrike, Nettlynx, Thrumbird, Lodestick, Opalisk, Kilnbadger, Hoarheron, Orchisloth, Gibbelle, Glaciyak | 900-1,200 |
 | 4 | Caecilith, Velvorm, Moonloris, Threadwyrm, Squalltross, Lilybara, Goliathite, Selenfin, Casquebill, Nacrolin | 900-1,200 |
 | 5 | Tuatrune, Scaldamus, Floenatee, Limpetor, Umbrathere, Moundvark, Cindowary, Nimbostrich, Duskapi, Spatewader | 900-1,200 (big ones may need a 4th try: up to ~1,400) |
 
-- **41 new species: about 3,700-4,900 credits** (5,100 if batch 5's big mounts need extra tries).
+- **41 new species: about 3,700-4,900 credits** (5,100 if batch 5's big Boki need extra tries).
 - **All 50: about 4,500-6,000.**
 - **OWNER: buy about 5,000 credits for the 41 new Boki**, per batch (~1,200 each) if preferred. Agents
   never buy; the art session pauses before it runs out.
@@ -677,9 +722,8 @@ batches for order; if they are already paid for under S2's "current 9 Boki" phas
 ## Owner decisions
 
 1. **Approve the roster**, or name any Boki to swap. Nothing is modelled until then.
-2. **Large vs rideable.** The grammar makes every large Boki a mount. This roster splits them by mount
-   speed (heavy mounts below x1.1, travel mounts x1.1 and up). OK, or do you want big Boki that walk
-   beside you instead of being ridden (a new carry style)?
+2. **Big-Boki roles.** Approve the six roles (mount, companion, flyer, bulwark, packbeast, watchtower),
+   who has which, and the new `carry.style` values they need (specs in RIDING_SPEC.md).
 3. **Merges.** The stubs reuse today's 9 merges (chosen by active ability) so they validate; their
    flavour text names the original Boki. Each new Boki needs its own merge text or form later.
 4. **Abilities.** All 41 reuse the 16 existing abilities. The "own ability later" sketches are the Phase 3
@@ -687,5 +731,5 @@ batches for order; if they are already paid for under S2's "current 9 Boki" phas
 5. **A water theme?** No `tide` theme exists, so aquatic Boki wear frost, storm or lunar. Add one?
 6. **Boss eggs.** No new bosses, so no new boss-egg Boki. Mark some rares for future bosses?
 7. **Spawn by biome** before switching them on (see above).
-8. **Riding**: approve docs/boki/RIDING_SPEC.md.
+8. **Riding and the other roles**: approve the specs in docs/boki/RIDING_SPEC.md.
 9. **Credits**: about 5,000 for the 41 new.

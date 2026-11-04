@@ -7,7 +7,7 @@
 		"Squall cloud"
 	],
 	"theme": "tempest",
-	"flavor": "A young albatross that rides its own little squall. It hardly flaps; the wind does what it asks.",
+	"flavor": "An albatross with a three-metre wingspan that rides its own little squall. Grab its feet and the wind does the rest.",
 	"colors": {
 		"body": "#e8ecf0",
 		"belly": "#ffffff",
@@ -16,19 +16,19 @@
 	},
 	"look": {
 		"ears": "wisp",
-		"body": "drop",
+		"body": "boulder",
 		"tail": "wisp",
-		"feet": "none",
+		"feet": "stumps",
 		"aura": "wind"
 	},
 	"body": {
-		"size": "medium",
-		"reach": 1.4,
-		"mass": 1.1,
+		"size": "large",
+		"reach": 1.6,
+		"mass": 2.0,
 		"gait": {
-			"hop_rate": 4.25,
-			"hop_height": 0.2,
-			"pace": 0.95
+			"hop_rate": 4.5,
+			"hop_height": 0.05,
+			"pace": 0.8
 		}
 	},
 	"stats": {
@@ -50,22 +50,23 @@
 		"role": "skirmisher"
 	},
 	"carry": {
-		"style": "perch",
+		"style": "mount",
 		"name": "Tailwind",
 		"passives": [
 			{
-				"stat": "fire_rate",
+				"stat": "damage_reduction",
 				"amount": 0.15
 			},
 			{
-				"stat": "reload",
-				"amount": 0.15
-			},
-			{
-				"stat": "glide",
-				"amount": 0.15
+				"stat": "knockback_resist",
+				"amount": 0.5
 			}
-		]
+		],
+		"mount": {
+			"speed": 1.0,
+			"jump": 1.0,
+			"turn": 0.7
+		}
 	},
 	"throw": {
 		"effects": [

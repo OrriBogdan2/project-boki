@@ -3,13 +3,14 @@ extends RefCounted
 ## kin grammar against the live abilities, merges and evolution nodes, without being loaded by the game.
 ## Each stub is parsed as a KinSpec and its slots checked against the library under res://content. It also
 ## checks that no stub id or name clashes with a live kin or another stub, and prints the size counts
-## (a rideable is a large kin whose mount speed is at least RIDEABLE_SPEED). Never touches the save.
+## (a rideable is a large kin whose mount speed is at least RIDEABLE_SPEED; the other large kin have
+## non-ridden roles kept in the doc, as the grammar has no field for them yet). Never touches the save.
 
 const ROSTER_DIR := "res://content/kin_v2_roster"
 const TARGET_TOTAL := 50
-const RIDEABLE_SPEED := 1.1      # x; slower large kin are the heavy mounts of today's mount carry
-const RIDEABLE_MIN := 6
-const RIDEABLE_MAX := 8
+const RIDEABLE_SPEED := 1.1      # x; slower large kin have another big-Boki role (ROSTER_50.md)
+const RIDEABLE_MIN := 4
+const RIDEABLE_MAX := 6      # the owner capped mounts at about 6
 
 var bad := 0
 
