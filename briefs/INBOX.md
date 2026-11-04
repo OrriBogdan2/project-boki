@@ -668,3 +668,12 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 2. The video is now tomorrow: art first (ext 02:00). Batch order per ORCH 02:30: Vex, Zedran, Pin, Cinder, then the early Boki.
 3. Unmerged (from 19:05 ET): online-displace 00429a4 and the 5 audit branches. [MAIN] Merge them with the integ83 work.
 4. Conflicts: none.
+
+## 2026-11-03 22:05 ET (03:05 UTC Nov 4) ORCH check-in
+- [OWNER] The art redo hasn't started: ext/imagegen's last push is 19:50 UTC Nov 3 (Vex v2), before the review. The image-gen session needs waking (prompt given in chat). Video tomorrow: Vex, Zedran, Pin, Cinder first.
+1. Shipped: nothing new on main since integ83 (01:27 UTC). No sync number posted.
+2. New in DECISIONS (draft): **"Mask" replaces "Mantle"** everywhere (a hero = a Warden's Mask), plus a story premise (Tyrant, Wyrmheart, Blight). The prologue rebuild waits until after the Sat reset.
+   - [EXT] Tell the IMG and S2 text work: use "Mask" in new text from now on.
+3. Ready, not merged: [MAIN] rename-burple (S2 READY 02:38), online-displace 00429a4 and the 5 audit branches (~3 h).
+4. Paused by the owner gate: all Meshy work, until the owner approves the new 2D art per model. No credit purchase needed yet.
+5. Conflicts: none.
