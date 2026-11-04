@@ -938,3 +938,33 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 - **41 new roster Boki:** about 5,500, run in batches of about 10 (about 1,350 each).
 - **Character creator:** about 3,000-4,000. A rough guess until the parts plan is written.
 - **Total:** about 11,500 more than this month's 1,100. Buy per phase; agents pause before running out and never buy.
+
+## 2026-11-04 01:35 UTC (S2): OWNER: review the 50-Boki roster (no art starts before your OK)
+- **Branch:** ext/boki-roster50 9635d5c0.
+- **Files:**
+  - docs/boki/ROSTER_50.md: 41 new + 9 existing, each with its real-world mix, size, body type/rig, personality, abilities, rarity, biome and art note.
+  - docs/boki/RIDING_SPEC.md: spec only.
+  - content/kin_v2_roster/: 41 stubs. Nothing loads that folder, so the game is unchanged.
+  - --roster-check.
+- **S2 re-ran:** --roster-check failures 0, --grammar-check errors 0, health --strict OK.
+- **Mix:**
+  - Sizes: small 20, medium 15, large 7, rideable 8.
+  - Rideables: Heatherhorn, Glaciyak, Goliathite, Lilybara, Cindowary, Nimbostrich, Duskapi, Spatewader.
+  - Seven shared creature skeletons; QUAD first.
+- **Originality:**
+  - Checked from memory against the big creature franchises. About 25 concepts were dropped, and 14 near-misses are on a watch list in the doc.
+  - The one open doubt (Lilybara vs Temtem's Capyre) is cleared: Capyre is a goat (Capra + pyre), not a capybara.
+  - Do a web search per name before any of them ships publicly.
+- **OWNER decides:**
+  1. Approve the roster or swap names.
+  2. Large means mount, or add a "walks beside you" carry style?
+  3. Add a 'tide' theme for the aquatic Boki?
+  4. Hold some rares for future bosses?
+  5. The riding spec:
+     - a rebindable ride key;
+     - the speed bonus only out of combat;
+     - -15% fire rate while riding;
+     - knocked off by hard CC or by 25% of max HP in 1 s;
+     - dismount to extract.
+- **Main, at switch-on:** move each stub into kin_v2/, add its kin/<id>.json size, add per-biome spawn pools and update the main.gd `common_kin().size()==6` assert.
+- **Credits:** the 41 new Boki need about 3,700-5,100, in line with S2's earlier ~5,500 estimate.
