@@ -64,6 +64,12 @@ uniform float light_neutral_warm = 0.0;   // the same for warm lights (per model
 // the painted colour pulled this far toward its own grey before the lights (per model, warden_look.json: a slot
 // the warm light and the tonemap push too saturated, Tarek's brown skin reading orange-red); 0 = unchanged
 uniform float desat = 0.0;
+// a painted colour that glows (per model: Vex's circuit tattoos on her skin read at night): texels within
+// paint_glow_width of paint_glow_color take paint_glow x their colour as emission; 0 = none (Vex r3h's glow_key,
+// renamed: glow_key is the hot-texel switch)
+uniform float paint_glow = 0.0;
+uniform vec4 paint_glow_color : source_color = vec4(0.3, 0.76, 0.37, 1.0);
+uniform float paint_glow_width = 0.12;
 // near-black paint lifted to this linear floor (jacket, trousers and gun no longer merge to black at the match
 // camera); mid and light colours keep their value and saturation
 uniform float dark_lift = 0.0;
@@ -254,6 +260,10 @@ void fragment() {
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 
+	if (paint_glow > 0.0) {
+		float pg = 1.0 - smoothstep(paint_glow_width, paint_glow_width * 2.0, distance(c, paint_glow_color.rgb));
+		EMISSION += c * paint_glow * pg;
+	}
 	// the match camera's read (far_*, above): the pale fresnel and the faint rim scaled down, rim_far's hairline
 	// swapped for its broad band, the glow brighter and richer
 	if (far_p > 0.0) {

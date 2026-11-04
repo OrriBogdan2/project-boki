@@ -138,7 +138,7 @@ def needles(arm, sp, m, girth):
     return ob
 
 
-COL.update({"thimble": ("metal", "9da2aa"), "claw": ("metal", "4a4e56")})
+COL.update({"thimble": ("metal", "e6e9ee"), "claw": ("metal", "c8ccd4")})
 
 
 def thimbles(body, arm, sp):
@@ -156,7 +156,13 @@ def thimbles(body, arm, sp):
     wrist = np.array(arm.data.bones[sp.get("bone", "hand.R")].head_local[:])
     # (the hand itself: weighted to the bone, below the wrist and near it; the coat and shears share some weight)
     near = (np.linalg.norm(co - wrist, axis=1) < float(sp.get("reach", 0.15))) & (co[:, 2] < wrist[2] - 0.02)
-    hand = co[(w > 0.5) & near]
+    # (the hand's own skin: coat and shears near the hand carry its weight too, and once put the thimbles at the hip)
+    skin_v = np.zeros(len(co), bool)
+    sm = {i for i, m in enumerate(me.materials) if m and m.name.startswith("skin")}
+    for p in me.polygons:
+        if p.material_index in sm:
+            skin_v[list(p.vertices)] = True
+    hand = co[(w > 0.6) & skin_v & near]
     zlo = hand[:, 2].min()
     tips = hand[hand[:, 2] < zlo + float(sp.get("band", 0.045))]
     # four clusters across the hand's width (the fingers side by side, hanging)
@@ -173,12 +179,23 @@ def thimbles(body, arm, sp):
         c = gp.mean(axis=0)
         c[2] = tip[2]
         up = np.array([0.0, 0.0, 1.0])
-        bld.tube([c + up * 0.026, c + up * 0.012, c - up * 0.002], [r, r * 1.02, r * 0.8], 8, "thimble")
-        claw = [c - up * 0.002, c - up * 0.014 + fwd * 0.004, c - up * 0.024 + fwd * 0.012, c - up * 0.028 + fwd * 0.022]
-        bld.tube(claw, [r * 0.55, r * 0.42, r * 0.25, 0.0006], 6, "claw")
+        tl, cl = float(sp.get("length", 0.026)), float(sp.get("claw", 0.03))
+        # (wider than the finger: the cap closes over the last tl of it and shows round it)
+        fr = float(np.percentile(np.linalg.norm(gp[:, :2] - c[:2], axis=1), 90)) if len(gp) > 3 else r
+        rr = max(r, fr + 0.003)
+        bld.tube([c + up * tl, c + up * tl * 0.5, c - up * 0.004], [rr, rr * 1.05, rr * 0.75], 10, "thimble")
+        claw = [c - up * 0.002, c - up * cl * 0.45 + fwd * cl * 0.12, c - up * cl * 0.8 + fwd * cl * 0.38,
+                c - up * cl * 0.95 + fwd * cl * 0.75]
+        bld.tube(claw, [rr * 0.6, rr * 0.45, rr * 0.28, 0.0008], 6, "claw")
     me2 = bpy.data.meshes.new("Thimbles")
     me2.from_pydata([tuple(x) for x in bld.v], [], bld.f)
     me2.update()
+    import bmesh
+    bmx = bmesh.new()
+    bmx.from_mesh(me2)
+    bmesh.ops.recalc_face_normals(bmx, faces=bmx.faces)
+    bmx.to_mesh(me2)
+    bmx.free()
     names = []
     for p in bld.part:
         if p not in names:
@@ -202,7 +219,7 @@ def thimbles(body, arm, sp):
     return ob
 
 
-COL.update({"shears": ("metal", "b8bcc4"), "shears_dk": ("metal", "4a4c52")})
+COL.update({"shears": ("metal", "c8ccd2"), "shears_dk": ("metal", "26272c")})
 
 
 def shears(arm, sp):
@@ -219,11 +236,11 @@ def shears(arm, sp):
         # a blade: flat, tapering to its point from the pivot, a little apart from the other
         tip = at + down * L + side * s * 0.006
         mid = at + down * L * 0.5 + side * s * 0.01
-        bld.tube([at, mid, tip], [0.008, 0.006, 0.0008], 4, "shears")
+        bld.tube([at, mid, tip], [0.011, 0.008, 0.001], 4, "shears")
         # a finger ring above the pivot
         rc = at - down * 0.04 + side * s * 0.022
         ring = [rc + side * 0.018 * math.cos(a) - down * 0.022 * math.sin(a) for a in np.linspace(0, 2 * math.pi, 13)]
-        bld.tube(ring, [0.0035] * len(ring), 5, "shears_dk", cap=False)
+        bld.tube(ring, [0.005] * len(ring), 5, "shears_dk", cap=False)
         bld.tube([at, at - down * 0.02 + side * s * 0.012], [0.004, 0.004], 5, "shears_dk")
     return _finish(bld, arm, "Shears", sp.get("bone", "hips"))
 

@@ -85,4 +85,21 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   lit red lens; the brass toward tarnished bronze with verdigris in the crevices, painted plate seams (ten
   meridians and two latitudes) and six rivet rows over the hull (cheaper rivet heads); smoother shoulder lames
   (two rows, eleven facets); the loose iron shards over the shoulders stripped. Body 14,920 at fit.
+- **r3i (credit-free, ORCH's r3h review):** a small orb (r 0.016) in a wide brass ring (the helm's inner edge
+  0.064 -> 0.04; the source's own lens glass stripped, it poked through the ring), a dark lens with a small red
+  halo; the tears' flaps gone and the gashes unlined (`gash` in NO_INK_TAGS: their thin edges outlined as black
+  shards); smoother shoulder pods (three rows of sixteen facets); iron ball joints seating the upper arms in the
+  pods; the horn moved 9 cm back into the right forearm's cuff (`weapon.offset`). Body 14,642 at fit.
+  `--arena-demo=pose_clear` now hides every overlay and turns him nearly toward the camera.
+- **Match-zoom v2 (ext/warden-matchzoom-v2):** outline.gdshader and hero_toon.gdshader taken from it, and its
+  FAR_LOOK / INK_FAR_CUT / GLOW_SHELL and `_far_look()` added to WardenGlb (Dredge's LOOK / LOOK_SLOT pass in as
+  its "painted" / "slots"); his own ink takes far_cut too. The speckle fringe is gone at the match camera and the
+  eye reads as a red-orange halo.
+- **r3j (credit-free, ORCH 17:10 / 17:15):** the r3i limb loss found and fixed. The rods of his arms and legs, the
+  claw's fingers, the rope and the hook had collapsed in the decimation as the friend's body's share shrank to pay for
+  the hull (3,650 triangles in r3h, 2,900 in r3i; the Blender render of the .glb itself shows it, so not a shader):
+  fit_rigged's `protect` now decimates the thin limb parts (and the rope and hook) at 0.32, the boots at 0.12 and the
+  winch at 0.25 on their own, the rest taking what is left; `drop_small` removes the collapse's leftover shards.
+  Smaller shoulder pods (x0.86, set in), warmer gold brass, a bright gold far rim (rim_far 0.35), a smaller, darker
+  tar pool. Review frames: ext/warden-matchzoom-v2's `pose_clear` (no aim line, props or overlays).
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.

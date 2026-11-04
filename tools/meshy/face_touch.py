@@ -8,7 +8,7 @@ SPEC: {"in": png, "out": png, and any of
       tinted toward `colour` (fine freckles vanish on a 4096 atlas otherwise);
   "eyes": [{"c": [col, row], "r": px, "scale": 1.15, "glow": 0.25, "glow_hue": [h0, h1]}]
       each eye magnified about its centre with a soft falloff to r (no seam), and its pale-blue iris lifted toward
-      white-blue by `glow` (a glowing eye at the match camera)}.
+      white-blue by `glow` (a glowing eye at the match camera), or tinted toward `iris` (hex, `iris_k`, `iris_r`)}.
 Image coordinates are the sheet's own pixels (row 0 at the top)."""
 import json
 import os
@@ -113,6 +113,17 @@ def eye(im, e):
         lift = np.clip(sub * 0.55 + np.array([0.62, 0.86, 1.0], np.float32) * 0.6, 0, 1)
         sub[:] = sub * (1 - w) + lift * w
         print("FACETOUCH eye %s: glow %d px" % (str(e["c"]), int(m.sum())))
+    if e.get("iris"):
+        # (a blue iris, not a white glow: the iris texels toward the colour at their own value, the catchlight kept)
+        sub = im[y0:y1, x0:x1]
+        h, s, v = hsv(sub)
+        g0, g1 = e.get("glow_hue", [0.5, 0.7])
+        m = (h >= g0) & (h <= g1) & (s >= float(e.get("iris_sat", 0.18))) & (v >= 0.35) & (v <= 0.97) & (rr <= float(e.get("iris_r", 0.5)))
+        col = hexcol(e["iris"])
+        w = box_blur(m.astype(np.float32), 1)[..., None] * float(e.get("iris_k", 0.6))
+        tgt = np.clip(col[None, None, :] * (v / max(float(col.max()), 1e-3))[..., None] * 0.95, 0, 1)
+        sub[:] = sub * (1 - w) + tgt * w
+        print("FACETOUCH eye %s: iris %d px" % (str(e["c"]), int(m.sum())))
     return im
 
 
