@@ -257,32 +257,71 @@
   },
   {
    "mode": "flat",
-   "slot": "hair",
+   "slots": [
+    "hair",
+    "cloth",
+    "leather",
+    "metal"
+   ],
    "box": [
-    -0.25,
-    0.45,
-    0.5,
+    -0.12,
+    0.36,
+    0.6,
     1.0
    ],
-   "hue": [
-    0.02,
-    0.11
+   "colour": "1e1e28",
+   "val_lo": 0.9,
+   "val_hi": 1.15,
+   "not_box": [
+    -0.04,
+    0.23,
+    0.5,
+    0.77
    ],
-   "sat_min": 0.45,
-   "colour": "f07a30"
+   "skip_hue": [
+    0.08,
+    0.17,
+    0.35
+   ]
   },
   {
    "mode": "flat",
-   "slot": "hair",
-   "box": [
-    0.13,
-    0.27,
-    0.66,
-    0.92
+   "slots": [
+    "hair",
+    "cloth",
+    "leather",
+    "metal"
    ],
-   "front": 0.3,
+   "box": [
+    0.1,
+    0.36,
+    0.6,
+    1.0
+   ],
+   "sector": {
+    "centre": [
+     0.11,
+     -0.06
+    ],
+    "az": [
+     10,
+     72
+    ]
+   },
    "colour": "f07a30",
-   "val_lo": 0.9
+   "val_lo": 0.9,
+   "val_hi": 1.05,
+   "not_box": [
+    -0.04,
+    0.23,
+    0.5,
+    0.77
+   ],
+   "skip_hue": [
+    0.08,
+    0.17,
+    0.35
+   ]
   }
  ],
  "delete_boxes": [

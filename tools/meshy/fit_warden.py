@@ -800,7 +800,8 @@ def face_mask(ob, img, pick):
 
 def touch_up(ob, img, rules):
     """The cleanup pass on the atlas, by geometry (credit-free; the owner's 04:20 notes): each rule picks faces by
-    material slot, a box (Meshy frame) and their painted colour, then recolours their texels: "warm" moves them
+    material slot(s), a box (x, z in the Meshy frame), a sector (azimuth about a vertical axis), whether they face
+    the front, and their painted colour, then recolours their texels: "warm" moves them
     toward a colour keeping their value (skin to the art's tan), "flat" sets the colour with a little of their own
     value (the hair streak's band), "paint" sets it outright (the vents' glow)."""
     w, h = img.size
@@ -813,10 +814,29 @@ def touch_up(ob, img, rules):
         def pick(poly, c, mat, r=r, box=box):
             if r.get("slot") and not mat.startswith(r["slot"]):
                 return False
+            if r.get("slots") and not any(mat.startswith(x) for x in r["slots"]):
+                return False
+            if "sector" in r:
+                # azimuth about a vertical axis at sector.centre [x, y]: 0 the front (-Y), +90 her left (+X)
+                sc = r["sector"]
+                az = math.degrees(math.atan2(c.x - sc["centre"][0], -(c.y - sc["centre"][1])))
+                if not (sc["az"][0] <= az <= sc["az"][1]):
+                    return False
             if box and not (box[0] <= c.x <= box[1] and box[2] <= c.z <= box[3]):
                 return False
+            nb = r.get("not_box")
+            if nb and nb[0] <= c.x <= nb[1] and nb[2] <= c.z <= nb[3] and poly.normal.y < 0.3:
+                return False      # (the face's own front: the art projected there stays)
             if "front" in r and poly.normal.y > -float(r["front"]):
                 return False
+            if "skip_hue" in r:
+                # (keeps a piece of another colour in the box: the brass bolt in the bun)
+                u = sum(uv[i].uv.x for i in poly.loop_indices) / poly.loop_total
+                v = sum(uv[i].uv.y for i in poly.loop_indices) / poly.loop_total
+                q = px[min(h - 1, int(v * h)), min(w - 1, int(u * w)), :3]
+                sk = r["skip_hue"]
+                if sk[0] <= _hue(q) <= sk[1] and (q.max() - q.min()) / max(q.max(), 1e-6) >= sk[2] and q.max() > 0.35:
+                    return False
             if "hue" in r:
                 u = sum(uv[i].uv.x for i in poly.loop_indices) / poly.loop_total
                 v = sum(uv[i].uv.y for i in poly.loop_indices) / poly.loop_total
