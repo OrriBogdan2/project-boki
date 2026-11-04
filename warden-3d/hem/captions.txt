@@ -34,3 +34,9 @@ s5_closeup_vs_art.png, s5_34_vs_art.png, s5_back_vs_art.png, s5_match_vs_art.png
 s5_vs_turnaround_close.png / s5_vs_turnaround_game.png, s5_moves_close_1/2.png, s5_poses_game.png
 s5_vs_s4.png: stage 4 (top) against stage 5 (bottom)
 Self-score (RECIPE_95 rubric): close-up 85 (silhouette 13/15, face 18/20, hair 9/10, props 17/20, palette 13/15, clean paint 7/10, outfit 8/10); match zoom 68 (silhouette 18/25, signature colours 17/25, values 15/20, props 10/20, artefacts 8/10)
+
+Stage 6 (ORCH 15:10 + round 6; credit-free; match frames with --no-tips --demo-at=-4.5,0, no palm or caption):
+s6_closeup_vs_art.png, s6_34_vs_art.png, s6_back_vs_art.png, s6_match_vs_art.png / s6_match.png: clean laced brown boots (the stray brown planks were boot texels the coat lengthening took for crimson; the boots' pink patches were the skin slot), one straight coat tail at the back over black trousers, drooping red needle threads, darker steel thimble claws, banded tape wraps, flat crimson sleeves, the mask's turned-away sides flat porcelain, the bow angled out with three red glow halos along its string (they hang on the weapon) and a red rim on the limbs at the match camera
+s6_vs_turnaround_close.png / s6_vs_turnaround_game.png, s6_moves_close_1/2.png, s6_poses_game.png
+s6_vs_s5.png: stage 5 (top) against stage 6 (bottom)
+Self-score (RECIPE_95 rubric): close-up 86 (silhouette 14/15, face 18/20, hair 9/10, props 17/20, palette 13/15, clean paint 7/10, outfit 8/10); match zoom 66 (silhouette 18/25, signature colours 17/25, values 15/20, props 8/20, artefacts 8/10)
