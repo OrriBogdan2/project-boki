@@ -794,7 +794,8 @@ def orbit_props(arm, spec):
             for q in range(len(bld.v) - 12, len(bld.v)):
                 d = np.asarray(bld.v[q]) - p
                 bld.v[q] = p + d - out_dir * d.dot(out_dir) * 0.85
-            bld.tube([np.array(c[:]), p], [0.0025, 0.0025], 4, 0.05, 0.45, 0.55, 0.95, "iris", [0.0, 0.0])
+            sr = float(spec.get("string_r", 0.0025))
+            bld.tube([np.array(c[:]), p], [sr, sr], 4, 0.05, 0.45, 0.55, 0.95, "iris", [0.0, 0.0])
         if kind != "card":
             # (a geode: the rough rock, a raised rim round its cut face, a ring of crystals sunk inside it, and the
             # eye's domed iris standing out of the crystals; "rock": the rough rock alone, a shard)
@@ -813,6 +814,12 @@ def orbit_props(arm, spec):
             ob.parent = e
             ob.matrix_world = mw
             out.append(ob)
+            if spec.get("anchors"):
+                # (an anchor on each prop: the game hangs a match-zoom glow on it, warden_look.json "halos")
+                an = bpy.data.objects.new("anchor_%s_%d" % (spec["name"], i), None)
+                bpy.context.scene.collection.objects.link(an)
+                an.parent = ob
+                an.matrix_world = Matrix.Translation(Vector(p))
             continue
         bld.torus(p + out_dir * r * 0.5, out_dir, r * 0.62, r * 0.13, 18, 6, (0.05, 0.05, 0.45, 0.45), "rock", 0.0)
         _disc(bld, p + out_dir * r * 0.5, out_dir, r * 0.62, "rim", (0.55, 0.05, 0.95, 0.45), dome=-0.18)
@@ -1226,6 +1233,17 @@ def _vortex(arm, spec, tag, c, r):
     m = 18
     for a in range(n_arms):
         a0 = 2.0 * math.pi * a / n_arms
+        if spec.get("planes"):
+            # (each arm in its own plane, turned about the vertical through the core: a swirl from every side)
+            tilt = math.pi * a / n_arms
+            ct, st = math.cos(tilt), math.sin(tilt)
+            n2 = np.array([nrm[0] * ct - nrm[1] * st, nrm[0] * st + nrm[1] * ct, nrm[2]])
+            if spec.get("plane_normals"):
+                n2 = np.array(spec["plane_normals"][a % len(spec["plane_normals"])], np.float64)
+                n2 /= np.linalg.norm(n2)
+            e1 = np.cross(n2, [0.0, 0.0, 1.0]) if abs(n2[2]) < 0.95 else np.array([1.0, 0.0, 0.0])
+            e1 /= np.linalg.norm(e1)
+            e2 = np.cross(n2, e1)
         pts, rad = [], []
         for i in range(m):
             t = i / (m - 1)

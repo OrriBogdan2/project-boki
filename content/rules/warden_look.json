@@ -103,8 +103,8 @@
 					0.36,
 					1.0
 				],
-				"strength": 2.6,
-				"px": 5.0,
+				"strength": 3.0,
+				"px": 7.0,
 				"near_d": 7.0,
 				"far_d": 14.0
 			},
@@ -117,6 +117,54 @@
 				],
 				"strength": 0.7,
 				"px": 9.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_orbit_cards_0",
+				"color": [
+					0.62,
+					0.34,
+					1.0
+				],
+				"strength": 1.8,
+				"px": 2.6,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_orbit_cards_1",
+				"color": [
+					0.62,
+					0.34,
+					1.0
+				],
+				"strength": 1.8,
+				"px": 2.6,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_orbit_cards_2",
+				"color": [
+					0.62,
+					0.34,
+					1.0
+				],
+				"strength": 1.8,
+				"px": 2.6,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_orbit_cards_3",
+				"color": [
+					0.62,
+					0.34,
+					1.0
+				],
+				"strength": 1.8,
+				"px": 2.6,
 				"near_d": 7.0,
 				"far_d": 14.0
 			}
