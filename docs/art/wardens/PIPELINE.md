@@ -315,6 +315,14 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Vex r3b edit side 2 | 06:44 | 01a1a54c-f974-7239-9ea4-5a714210e1a8 | nano-banana-pro | as side, "her left arm hidden behind her body" | 9 | Kept |
 | Vex r3b A | 06:46 | 01a1a54f-35bf-734c-9ee7-55f81be998e5 | meshy-7.1 | 4 edited views (front, 3/4, side, back), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Kept: the face's smirk, chunky hair, eye plate on her right eye, gun-arm, backpack |
 | Vex r3b B | 06:46 | 01a1a54f-35c4-73d2-9fd2-ab8f7e9f5bce | meshy-7.1 | as A, enhancement on | 40 | Dropped: rounder cuter face, stringy hair; a cleaner lens (A's is replaced by geometry) |
+| Cinder r3 edit front | 13:30 | 01a1a6c1-060b-77b7-aa2e-e0720eb0e01b | nano-banana-pro | cinder_front: lance and hose out, left arm hangs, tail straight back | 9 | Dropped: the tail still curled out to the side |
+| Cinder r3 edit side | 13:30 | 01a1a6c1-05d5-74c3-910d-8309d0bec4c7 | nano-banana-pro | cinder_side: as front, right arm hidden | 9 | Dropped: both arms drawn, the tail looped up |
+| Cinder r3 edit back | 13:30 | 01a1a6c1-05e7-7718-ac85-0b7d6b15c44d | nano-banana-pro | cinder_back: as front | 9 | Dropped: the tail ran off the frame |
+| Cinder r3 edit2 front | 13:38 | 01a1a6c3-b67c-7154-9c30-aa3b777b03a5 | nano-banana-pro | as edit, on the view padded to 1500 px on a 2000 px grey canvas (crop_pad) so the tail ends in frame; no floor or shadow | 9 | Kept (flat_ground.py flattens the padded rectangle) |
+| Cinder r3 edit2 side | 13:38 | 01a1a6c3-b6db-7009-9395-b0694d0a01fe | nano-banana-pro | as edit2 front, ONE arm, the tail straight back to the ground | 9 | Kept |
+| Cinder r3 edit2 back | 13:38 | 01a1a6c3-b712-76fd-857f-54e6f3e0ee09 | nano-banana-pro | as edit2 front | 9 | Kept |
+| Cinder r3 A | 13:41 | 01a1a6c6-de62-7253-b0ea-05451a154e2d | meshy-7.1 | 3 edited views (front, side, back), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Dropped: squinting, mean face; small crest |
+| Cinder r3 B | 13:41 | 01a1a6c6-de84-7676-b5c3-08ac066b2720 | meshy-7.1 | as A, enhancement on | 40 | Kept: big round amber slit-pupil eyes, rounded feminine face, bigger crest (mouth closed: the grin painted from the head sheet) |
 
 ### Hem (archer, was Pin) stage 1, 2026-11-04 (balance 4921 before; 76 credits)
 | Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |

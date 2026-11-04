@@ -23,6 +23,8 @@ const WARDENS := {
 	"dolm": {"hit_r": 0.388, "height": 1.18, "width": [0.7, 1.5], "moves": "breah_"},     # (lean, the locs: his art)
 	"ostra": {"hit_r": 0.412, "height": 1.09, "width": [0.5, 1.3], "moves": "ostra_"},     # (tall and thin, the cap)
 	"rimewright": {"hit_r": 0.38, "height": 1.11, "width": [0.6, 1.1], "moves": "tm_"},     # (tall and slim)
+	# (Cinder's fin-crest stands over her head)
+	"ashwick": {"hit_r": 0.376, "height": 1.02, "height_3d": 1.11, "width": [0.7, 1.5], "moves": "as_"},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured
@@ -100,7 +102,7 @@ func _anim(id: String) -> void:
 	var still: Array = []
 	var moves: Array = []
 	for t in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
-			KMovesCare.MOVES]:
+			KMovesCare.MOVES, KMovesPair.MOVES]:
 		for mv in t:
 			if String(mv).begins_with(WARDENS[id]["moves"]): moves.append(mv)
 	for mv in moves:

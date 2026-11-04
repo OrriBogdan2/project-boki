@@ -263,10 +263,19 @@ func _fit(img: Image) -> Image:
 		img.resize(OUT_W, int(img.get_height() * float(OUT_W) / img.get_width()), Image.INTERPOLATE_LANCZOS)
 	return img
 
+## Kit moves keyed under their own names (not <id>_lmb / _dash / _rmb): [caption, move, time (s)].
+const OWN_MOVES := {
+	"ashwick": [["Torch Lance", "as_lance", 0.2], ["Soot Ram", "as_leap", 0.08], ["Soot Ram, late", "as_leap", 0.2],
+		["Cinder Shot aim", "as_aim", 0.3], ["Cinder Shot", "as_shot", 0.12], ["Furnace Cloak", "as_cloak", 0.15]],
+}
+
 ## The run cycle at two phases, then the hero's own kit moves (<id>_lmb, _dash, _rmb) at key moments: [label,
 ## kit move, its time, running]. A hero without its own moves gets the run only.
 func _move_frames(id: String) -> Array:
 	var out: Array = [["run", "", 0.0, 0], ["run, other foot", "", 0.0, 9]]
+	for f in OWN_MOVES.get(id, []):
+		if not HunterAnim.km_def(String(f[1])).is_empty():
+			out.append([f[0], f[1], f[2], -1])
 	for f in [["shoot", "_lmb", 0.03], ["recoil", "_lmb", 0.08], ["dash", "_dash", 0.1], ["dash, low", "_dash", 0.4],
 			["dash, up", "_dash", 0.62], ["RMB throw", "_rmb", 0.07]]:
 		if not HunterAnim.km_def(id + String(f[1])).is_empty():

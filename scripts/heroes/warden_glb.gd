@@ -154,7 +154,11 @@ static func skeleton(glb: Node) -> Skeleton3D:
 ## One of the model's anchor empties (ANCHORS, or a hero's own), riding its bone; null on a procedural model.
 static func anchor(root: Node3D, anchor_name: String) -> Node3D:
 	var w := root.get_node_or_null("Warden")
-	return w.find_child(anchor_name, true, false) as Node3D if w else null
+	var an := w.find_child(anchor_name, true, false) as Node3D if w else null
+	if an == null:
+		# (an anchor on the .glb's own weapon, which _hold_weapon moved into the hands: Cinder's flame chamber)
+		an = root.get_node_or_null("Rig/Torso/Aim/Gun/" + WEAPON + "/" + anchor_name) as Node3D
+	return an
 
 ## Dresses the procedural hunter `root` in its Warden's .glb when it uses one (meta "glb" says which). lk is
 ## the look Models.hunter built from (MantleLook params): its colour picks tint the painted slots.
@@ -186,11 +190,11 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
 	_lights(glb, look(art(arch)))
-	_halos(root, glb, look(art(arch)))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
 	_hold_weapon(root, glb)
 	_hold_shield(root, glb)
+	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
 
 ## The .glb's own weapon (a mesh named WEAPON, modelled in the Gun node's space) goes into the hands in place
 ## of the procedural one; the Gun node and its Muzzle stay, so shots and grips are unchanged.
@@ -298,7 +302,7 @@ static func _lights(glb: Node, own: Dictionary) -> void:
 ## skin or the bounds, sees it); meta "halo".
 static func _halos(root: Node3D, glb: Node3D, own: Dictionary) -> void:
 	for hs in own.get("halos", []):
-		var anchor_node := glb.find_child(String(hs["anchor"]), true, false) as Node3D
+		var anchor_node := anchor(root, String(hs["anchor"]))
 		if anchor_node == null:
 			continue
 		var mi := MeshInstance3D.new()

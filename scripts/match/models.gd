@@ -861,7 +861,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 				(ch as Node3D).scale = Vector3(bk, 1.0 + (bk - 1.0) * 0.35, bk)
 		aim.scale = Vector3(lerpf(1.0, bk, 0.75), 1.0, 1.0)
 		shoulder.position.x *= bk
-		legs.scale = Vector3(bk, 1.0, bk)
+		legs.scale = Vector3(bk, legs.scale.y, bk)      # (keeps the leg length set above)
 		var bks := Vector3(bk, 1.0 + (bk - 1.0) * 0.35, bk)
 		for nm in ["Skirt", "Cape", "Scarf"]:
 			var pv := torso.get_node_or_null(nm) as Node3D
