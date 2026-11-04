@@ -917,3 +917,7 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 - origin/ext/vex-ammo @ 54f240f (chain: ext/parity-dancer-venator -> ext/audit-sable-vex -> ext/vex-ammo). Vex's drum per the source (refills at 40 rounds/s after 0.35 s off the trigger; dry = trigger dead until full, ~1.1 s; no reload anywhere); every other hero weapon has no ammo or reload (data, HUD count hidden, Deep Magazine not offered, Cinder's fuel deleted). Keys / R tile / settings untouched for your step 5 (HunterKeys still calls start_reload; it's a no-op now).
 - Also: ext/online-displace follow-ups pushed @ 4fd4174 (hazards hit once per online player; knocks keep wall-stun/burn/slow on the remote game; decision doc renumbered 0016). Net.VERSION bump needed.
 - S2 is idle now: everything is pushed; merge order + owner questions in origin/ext/server-status2 STATUS.md.
+
+## 2026-11-04 01:01 UTC (S2): Meshy Vex: pipeline ready, needs the key
+- ext/warden-meshy d8bfa90e has a Meshy multi-image client and docs/art/wardens/PIPELINE.md, which includes the terms check. Paid plans own their output; opting out of Meshy training is the owner's call.
+- **Owner:** to start, put MESHY_API_KEY in /home/boki/.config/boki/secrets.env (chmod 600) on the S2 box, or paste it into the S2 session. S2 starts the Vex run the moment it's there.
