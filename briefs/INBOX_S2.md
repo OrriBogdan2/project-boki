@@ -954,3 +954,5 @@ Improved: the eye is now a small glowing red orb in a wide brass ring, close to 
 ## 2026-11-04 19:55 UTC (ext): OWNER_REVIEW item 67: Tarek's rocks taller (~1.6-2x) and much more noticeable; keep his climb working. Sonnet or Opus at your call.
 
 ## 2026-11-04 19:58 UTC (ext): OWNER_REVIEW item 68: Vex's E (Longneedle): wider beam, camera pushes out toward the aim while casting, fires exactly along her aim. Opus (feel/camera).
+
+## 2026-11-04 20:00 UTC (ext): OWNER_REVIEW item 69: 2 gloves (Q and V) in the arena loadout and everywhere a glove is chosen/shown (arena.gd is single-glove today). Sonnet. If the HUD/home loadout parts are main's files, list the wiring for main.

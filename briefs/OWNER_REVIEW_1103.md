@@ -532,3 +532,9 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - **Aim:** the beam fires along the direction she is aiming/facing at release (cursor direction), and she turns to face the aim throughout the wind-up; the narrowing aim line follows the cursor until the shot, then the beam fires exactly along it.
 - Keep: standing still for the wind-up per our data, the hit-a-hunter cooldown refund, the bonus vs Dazed.
 - Assert: beam width ≥1.5× old; camera zoom during the cast ≥15% wider and restored within 0.3 s after; the beam's direction equals the aim direction at release (±1°). Screenshots: the wind-up with the pushed-out camera, and the beam.
+
+## 69. Two gloves everywhere: the arena (and every loadout) lets you pick 2 gloves, on Q and V (owner, 19:07 UTC Nov 4)
+- Owner: "I should be able to pick 2 gloves in arena / in general, if we are allowing 2 actives, right?" Yes: DECISIONS has "2 gloves, 2 charms" and the keys are Q and V.
+- Today the arena (scripts/match/arena.gd: `var glove`, `give_glove`, the L loadout panel "Hunter, Boki, glove") only holds ONE glove, on Q.
+- Fix: the arena loadout has two glove slots (Q and V), each pickable from every glove, cooldowns-off covering both; the L panel and its tooltip show both with their key caps (Settings.key_cap). Then sweep every other place a glove is chosen or shown for a single-glove assumption: the home bring-in loadout (equal.json bring rules), the Masks/hero screen, the HUD glove tiles, bots' loadouts, the deathbox/loot equip flow, save fields. Each should support 2 gloves, with a clear rule for picking up a third (swap prompt).
+- Assert: in the arena, equipping glove A on Q and glove B on V lets both fire independently; the bring-in loadout accepts two; the HUD shows two glove tiles with Q and V.
