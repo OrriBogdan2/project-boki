@@ -362,3 +362,16 @@ Build, in this order; post progress in EXT_TO_MAIN:
 ## 2026-11-04 04:35 UTC (orchestrator): RYZZ (was Vireo) round-2 art is in: add her to the 3D fan-out
 - origin/ext/imagegen: docs/art/gen/wardens_r2/ryzz_{turnaround,side,portrait,splash}.webp. Approved for 3D (the owner approved all Wardens). Source = the turnaround (spear in her RIGHT hand) + the side view. Signature: electrified blue hair standing up (model it as chunky hair cards/shells with an emissive lightning layer as FX), lightning veins on her arms (emissive texture), copper-coiled spear with a black flag, bubblegum as an idle fidget. Queue: Vex, Zedran, Pin, Cinder, then Ryzz.
 - The rename to Ryzz (04:25) applies to the art and model files: ryzz_*.
+
+## 2026-11-04 05:00 UTC (orchestrator): OWNER: Vex r2 3D is still too buggy; PAUSE the fan-out and do a quality bake-off on Vex (spend is OK)
+- Owner on the r2 shots: "looks pretty buggy still; try the highest quality settings and a better agent; there has to be a better way; I don't mind paying more."
+- Orchestrator read of r2: jagged/faceted hair with patchy orange blocks, a smeared face and monocle, ragged black outline fringes, a muddy back, and a dark muddy read at match zoom. Likely causes: decimating to 15k with UV-island-safe collapse destroys the texture; re-projection seams; the outline shell; too little light at match zoom.
+- **Pause** Zedran/Pin/Cinder/Ryzz 3D until Vex meets the bar (don't spend credits for the same ceiling).
+- **One dedicated Opus agent, highest effort, Vex only:**
+  1. **Meshy at max:** multi-image with the clean front/side/back (+3/4) crops, `ai_model` latest/meshy-7.1 (or the top model the account offers), **should_remesh=false**, texture_resolution 4k (8k if allowed), PBR on. Check docs.meshy.ai for current params.
+  2. **Don't destroy the texture:** keep the high-res mesh for baking, retopologise to a clean ~30-40k tris (top-down camera, 12 heroes: fine), and **bake** colour (+ normal) from high to low instead of collapsing the textured mesh.
+  3. **Paint-over:** project the art's front/side/back views onto the baked texture in Blender (face, hair streak, monocle, vest symbols), hand-clean the seams; flat painted colour, no grain.
+  4. **Outline:** fix the ragged inked fringe (shell only on the clean low-poly, consistent thickness) or drop it if it hurts.
+  5. **Match-zoom read:** brighten the albedo and rim light so she pops like the art.
+  6. **Bake-off (owner OK to pay):** run the same Vex views through **Rodin (Hyper3D Gen-2.x)** and **Tripo (v3.x)** too, the leaders for character detail/topology, and compare all three side by side. The owner signs up for and buys those; post "OWNER: please create a Rodin / Tripo API key" with the plan names, and store the keys like MESHY_API_KEY.
+- Deliver: a side-by-side of the 3 services + your final cleaned Vex vs the art (close-up, 3/4, back, match zoom) in ext/hero-shots-s2 warden-3d/vex/r3_*, an honest verdict, and the cost per model. If none reaches the art, say so and recommend a human 3D artist clean-up pass (Meshy/Rodin mesh as the start).

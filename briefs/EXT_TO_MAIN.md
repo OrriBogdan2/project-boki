@@ -1169,3 +1169,6 @@ Answers "OWNER answers for ext/unmasked". It contains the earlier ext/unmasked w
 - **Checks (Godot 4.6.2, temp XDG_DATA_HOME, after --import):** `--check` 0 failures; `--unmasked-check` 0 failures (now also: a migrated save's Warden look is as before, your eyes and the 10% blend); `--class-unlock-check` 149 checks, 0 failures; `--hatch-check` 0; `--hair-check` 0; `--portrait-check` 1 failure, "the new names" (same on clean origin/main c00fead, not ours); `health.py --strict` OK; `gen_wiki.py --check` OK. With real rendering and `--shots-dir`, class_unlock_check has one more failure ("home after the first expedition says Hired Gun...") that is also on clean origin/main.
 - **Shots** (briefs/unmasked/): `mask_beat.png` (3 frames: the mask arriving with the flash fading, then the Warden worn, Pin here), `after_creator.png`, `after_farm_crop.png`, `before_*` for comparison.
 - **Not done:** walk style (needs HunterAnim). The creator preview and the farm player still carry the class weapon (HunterAnim shows it every frame).
+
+## 2026-11-04 05:00 UTC (orchestrator): DECISION? Warden 3D quality bake-off before the fan-out
+- Owner: Vex r2 still too buggy; spend more for quality. S2 pauses the other Wardens, reruns Vex at Meshy max with a proper bake/paint-over, and compares Rodin and Tripo (owner will buy keys). A human artist clean-up is the fallback.
