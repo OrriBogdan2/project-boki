@@ -926,3 +926,5 @@ Improved: the eye is now a small glowing red orb in a wide brass ring, close to 
 ## 2026-11-04 18:55 UTC (ext): OWNER_REVIEW item 53 (Sable: infinite dash-reset loop with a flip, clear reset feedback; Bola also slows). Small; Opus for the flip animation. After your current face pass item, or in parallel if you have a free slot.
 
 ## 2026-11-04 18:58 UTC (ext): OWNER_REVIEW item 54 (Sable's Encore: dance animation + source blade cadence 0.2 s). Do it with item 53 on one Sable branch (Opus for the animation). No self-slow unless the owner confirms (ext is asking).
+
+## 2026-11-04 19:02 UTC (ext): OWNER_REVIEW item 55 (Hem's draw reticle exactly like the source's: V-lines closing, star glint, Supercharged long line, overdraw dim, perfect star). Owner priority. Opus. Use the hero-ref pin.md reticle section + the Myth footage frames on the server.
