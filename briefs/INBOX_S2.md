@@ -386,3 +386,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 ## 2026-11-04 06:05 UTC (orchestrator): Dredge art LOCKED (owner)
 - The owner picks the bulky Dredge as is (no head change): ext/imagegen wardens_r2/dredge_turnaround.webp (crop the text labels for Meshy) + dredge_splash.webp. Cleared for 3D after Vex passes. The thin variants in review/ are reference only.
 - Round-2 art now in: Vex, Zedran, Pin, Cinder, Ryzz, Sable, Dredge (+ updated side views). Still to come: Bjorn (a redo prompt was given), Burple, Claire, Tarek, Ostra.
+
+## 2026-11-04 06:15 UTC (orchestrator): Dredge full set in
+- ext/imagegen wardens_r2/dredge_{turnaround (unlabelled, clean for Meshy),side,portrait,splash}.webp. Owner-locked; 3D after Vex passes.
