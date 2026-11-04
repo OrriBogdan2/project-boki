@@ -888,8 +888,8 @@ def crescent(arm, spec, tag="halo"):
             y = (k + 0.5 + rng.uniform(-0.25, 0.25)) * n / int(spec["cracks"])
             fy = y
             for x in range(n):
-                y += rng.uniform(-1.1, 1.1) * sc
-                for t in range(max(1, int(sc * 0.8))):
+                y += rng.uniform(-1.0, 1.0) * float(spec.get("crack_jitter", 1.1)) * sc
+                for t in range(max(1, int(sc * float(spec.get("crack_rows", 0.8))))):
                     lines[int(y + t) % n, x] = True
                 if x == int(30 * sc):
                     fy = y
@@ -1011,6 +1011,77 @@ def studs(body, arm, spec):
     mod = ob.modifiers.new("Armature", "ARMATURE")
     mod.object = arm
     log("studs %s: %d on %s" % (spec["name"], len(pick), spec.get("on", "hair")))
+    return ob
+
+
+# ------------------------------------------------------------------------------------------------ face marks
+def face_marks(target, arm, spec):
+    """Painted-on glowing marks laid onto a part's surface as thin ribbons (Ostra's violet tear and the glowing
+    crack on his mask: the projected art was a pixel-wide smudge there). Each mark is a polyline `pts` of [x, z]
+    on the front view (the fitted rest frame: his right +X, front +Y), cast from the front onto `target`'s mesh
+    and lifted `lift` off it; `w` its width (tapering to `tip_w` at its end), `bulb` a round drop at its end (the
+    tear). On the glow slot in `colour`, rigid on `bone`."""
+    from mathutils.bvhtree import BVHTree
+    from mathutils import Vector as V
+    tree = BVHTree.FromObject(target, bpy.context.evaluated_depsgraph_get())
+    bld = Builder()
+    lift = float(spec.get("lift", 0.0015))
+    n_ok = 0
+    for mk in spec["marks"]:
+        hits = []
+        for x, z in mk["pts"]:
+            loc, nrm, _i, _d = tree.ray_cast(V((x, 1.0, z)), V((0.0, -1.0, 0.0)))
+            if loc is not None:
+                hits.append((np.array(loc[:]) + np.array(nrm[:]) * lift, np.array(nrm[:])))
+        if len(hits) < 2:
+            log("face mark %s: missed the surface" % mk.get("name", "?"))
+            continue
+        # (resample the polyline so the ribbon follows the surface between the given points)
+        w0, w1 = float(mk.get("w", 0.004)), float(mk.get("tip_w", mk.get("w", 0.004) * 0.4))
+        k = len(hits)
+        base = len(bld.v)
+        for i, (p, nv) in enumerate(hits):
+            t = hits[min(i + 1, k - 1)][0] - hits[max(i - 1, 0)][0]
+            t /= max(np.linalg.norm(t), 1e-9)
+            sd = np.cross(t, nv)
+            sd /= max(np.linalg.norm(sd), 1e-9)
+            w = (w0 + (w1 - w0) * i / (k - 1)) * 0.5
+            for sg in (-1.0, 1.0):
+                bld.v.append(p + sd * w * sg)
+                bld.uv.append((0.5, 0.5))
+                bld.part.append("mark")
+                bld.s.append(0.0)
+        for i in range(k - 1):
+            a = base + 2 * i
+            bld.f.append((a, a + 1, a + 3, a + 2))
+        if mk.get("bulb"):
+            p, nv = hits[-1]
+            r = float(mk["bulb"])
+            c = len(bld.v)
+            ref = np.array([1.0, 0.0, 0.0])
+            e1 = np.cross(nv, ref)
+            e1 /= max(np.linalg.norm(e1), 1e-9)
+            e2 = np.cross(nv, e1)
+            bld.v.append(p - np.array([0.0, 0.0, r * 0.6]))
+            bld.uv.append((0.5, 0.5)); bld.part.append("mark"); bld.s.append(0.0)
+            for j in range(12):
+                a = 2.0 * math.pi * j / 12
+                bld.v.append(p - np.array([0.0, 0.0, r * 0.6]) + r * (math.cos(a) * e1 + math.sin(a) * e2))
+                bld.uv.append((0.5, 0.5)); bld.part.append("mark"); bld.s.append(0.0)
+            for j in range(12):
+                bld.f.append((c, c + 1 + j, c + 1 + (j + 1) % 12))
+        n_ok += 1
+    if not bld.v:
+        return None
+    ob = bld.object(spec.get("name", "marks").capitalize())
+    img = bpy.data.images.new(spec.get("name", "marks") + "_atlas", 8, 8, alpha=False)
+    px = np.ones((8, 8, 4), np.float32)
+    px[..., :3] = hexcol(spec.get("colour", "b070ff"))
+    img.pixels = px.ravel()
+    img.pack()
+    _flat_material(ob, spec.get("slot", "glow"), spec.get("name", "marks"), img, "Closest")
+    _rigid(ob, arm, spec.get("bone", "head"))
+    log("face marks on %s: %d of %d" % (target.name, n_ok, len(spec["marks"])))
     return ob
 
 

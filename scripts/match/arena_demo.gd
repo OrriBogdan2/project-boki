@@ -314,7 +314,14 @@ static func tick(A: Arena, dt: float) -> void:
 					m.get_tree().process_frame.connect(func(): _grab(A, P, last), CONNECT_ONE_SHOT)
 			at_t = 99.0
 		"pose":
-			# the Hunter standing at the match camera, turned three-quarters toward it (Warden model shots)
+			# the Hunter standing at the match camera, turned three-quarters toward it (Warden model shots);
+			# --demo-at=dx,dz first moves it onto clear ground (review shots: no prop over the hero)
+			if t < 0.05:
+				for a in OS.get_cmdline_user_args():
+					if String(a).begins_with("--demo-at="):
+						var at := String(a).get_slice("=", 1).split(",")
+						P.teleport(P.pos + Vector3(float(at[0]), 0.0, float(at[1])))
+						A.home = P.pos
 			P.inp["move"] = Vector2.ZERO
 			P.inp["aim"] = P.pos + Vector3(-5.0, 0.9, 3.5)
 			at_t = 2.0
