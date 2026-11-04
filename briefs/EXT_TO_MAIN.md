@@ -2128,3 +2128,9 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - Merged with origin/main fe51b43b (keeps rigfix weapon_scale 0.75 for Breaker; adds Breaker's no_ink back). Body trimmed to 34.5k so the model stays under the 45k glb cap after the merge. Brass compass + barnacles as geometry, repainted rag fringe, shield no longer washes out at match zoom/night (shield look key).
 - Rubric v2 (calibrated): close-up 78->79, match 73->76, dark ~66->70. Checks 0 failures: warden-model 157, warden-glb 182, hero-combo 263, rig-standard, warden-stance, weapon-clip, health --strict OK. 0 credits.
 - Shots: ext/hero-shots-s2 warden-3d/breaker/s6_*. Open: hammer held upright and small (rig/stance + weapon_scale 0.75, main's call) vs resting across the shoulder in the art; a second painted compass under the beard; icicles on arm/hammer.
+
+## 2026-11-04 (S2): READY TO MERGE (follow-up sync): Sable s9 ext/warden-3d-sable 521ad28a (supersedes b21e3279)
+- Merged with origin/main fe51b43b (no conflicts). Cut-crystal pendant (new opt-in facets/core_k on warden_props.gem()), cooler lavender skin, far_glow so the violet bolts and gem read at match zoom/night, front lock, eye liner, thicker crossbows.
+- Rubric v2 (calibrated): full 72->74, face 79->80, match 68->69, dark 64->66. Checks 0 failures: warden-model, warden-glb, hero-combo 263, rig-standard, warden-stance, health --strict OK. 0 credits.
+- **Shared-code bug for main:** WardenGlb._far_look (scripts/heroes/warden_glb.gd) ignores `<slot>-<tag>` entries for far_* keys, so a per-tag far_glow is overwritten by the 0.6 default (Sable worked around it with a slot-wide key).
+- Shots: ext/hero-shots-s2 warden-3d/sable/s9_*. Open: hair doesn't frame the face (art: long white hair + black headband), off-hand crossbow lost at match zoom, flat fur collar.
