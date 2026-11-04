@@ -595,3 +595,13 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
   4. Only weapons that truly change at runtime (Hem's drawn arrow, Breaker's thrown hammer while in flight, Kael's chain while extended) are separate pieces, attached at the skinned weapon's socket for the duration and returned after.
   5. One weapon only: hide the procedural weapon meshes everywhere (already hidden) and make sure no second copy shows in any mode (Fused, Masks screen, portraits).
 - Assert: per Hunter, through all KMOVES the weapon stays attached to its bone (no drift, no float), FX spawn within a few cm of the visible muzzle/tip, and only one weapon is drawn. Screenshots: per Hunter, idle + signature attack close-ups, old vs new.
+
+## 77. BUG: a prologue slide's third text line runs off the screen (owner, 22:56 UTC Nov 4)
+- Owner: "right now the 3rd line on the video thing goes off screen." A prologue caption wraps to a third line that is cut off at the bottom (likely the longer slide 3/4 captions, or the LORE_MASKS prologue text, at 1280x720 and smaller).
+- Fix: the caption box sizes to its text and stays fully on screen at every resolution (anchor from the bottom with a margin, wrap width ~70% of the screen, grow upward); or shorten the lines to two. Check every slide at 1280x720, 1920x1080 and a small window.
+- Small; whoever has budget. Not urgent.
+
+## 78. LATER: redo the prologue film: open on an evil deity in human form (owner, 22:56 UTC Nov 4)
+- Owner: "I think we need to redo the film to show an evil deity in human form first. All of it is pretty rough. Put that as a note for later."
+- Direction for the rebuild (after the resets; with the art pipeline): the film opens on the **evil deity in human form**: the Wyrm-crowned Tyrant / the Wyrm as a human sovereign (DECISIONS + LORE_MASKS) on the Throne, so players meet the villain before the fall. Then the rest of the story beats from LORE_MASKS (the cold open with the girl in chains and the Mask, the Sundering, the Wardens' Masks scattering, the race for the Wyrmheart). Owner verdict on the current film: "pretty rough": plan it as a proper storyboarded short (key art from the image-gen pipeline, camera work, timing) rather than polishing the current scenes.
+- Not now: logged for planning after the usage resets.
