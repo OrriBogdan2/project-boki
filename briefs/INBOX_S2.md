@@ -320,3 +320,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 - Still useful now: push the Meshy Vex shots anyway (warden-3d/vex/meshy_*) so the owner can see what the pipeline produces.
 - **Boki roster:** large Boki aren't all mounts. Add roles: walks beside you, mount, flyer, and other ideas. Update ROSTER_50.md and RIDING_SPEC.md. The image-gen session makes visual thumbnails for the owner's review.
 - **Rename: Moosh Moosh is now "Burple"** (display name only; id tender unchanged), with the rename sweep like Claire/Vex. See EXT_TO_MAIN 02:30.
+
+## 2026-11-04 02:40 UTC (orchestrator): OWNER GATE: no Meshy without his explicit approval
+- Owner: "get my approval before we move on to 3D with Meshy." **No Meshy run for any Warden, Boki or creator part until the owner has approved that model's new 2D art AND said go for 3D.** Post "OWNER: approve <name> for 3D" with a link to the art in EXT_TO_MAIN and wait.

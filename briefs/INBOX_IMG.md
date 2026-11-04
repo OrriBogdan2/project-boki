@@ -40,3 +40,6 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 ## 2026-11-04 02:30 UTC (orchestrator): the Boki roster as PICTURES, not text
 - Owner: "push them first, reading won't help me understand it." For the 50-Boki roster (ext/boki-roster50, docs/boki/ROSTER_50.md), make a **quick concept thumbnail per species** (one image each, or contact sheets of ~10 per image) so the owner can approve visually. Label each with its name and size class.
 - Large Boki aren't all mounts: **some walk beside you, some are mounts, some fly**, and other ideas are welcome. Show the size and role in the thumbnail label.
+
+## 2026-11-04 02:40 UTC (orchestrator): use anthum.ai in Chrome for the redo
+- The owner confirms you can use anthum.ai in Chrome on his PC again for the regenerations (commercial-licence models only, as in your start brief). When a redo is ready, post it for the owner's approval. 3D only starts after he explicitly approves each one.
