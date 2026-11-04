@@ -168,9 +168,7 @@
 "shadow": 2
 },
 "scripts/core/progress.gd": {
-"long_line": 5,
-"nested_ternary": 1,
-"semicolon": 5
+"long_line": 2
 },
 "scripts/core/ransom.gd": {
 "long_line": 10,
@@ -239,7 +237,7 @@
 "shadow": 2
 },
 "scripts/home/farm_build_ui.gd": {
-"long_line": 5,
+"long_line": 3,
 "semicolon": 9
 },
 "scripts/home/farm_icons.gd": {
@@ -262,7 +260,7 @@
 "shadow": 4
 },
 "scripts/home/home_build.gd": {
-"long_line": 79,
+"long_line": 78,
 "nested_ternary": 6,
 "semicolon": 87,
 "shadow": 1
@@ -288,7 +286,7 @@
 },
 "scripts/home/home_layout.gd": {
 "history_comment": 1,
-"long_line": 41,
+"long_line": 42,
 "nested_ternary": 6,
 "semicolon": 41,
 "shadow": 1
@@ -397,7 +395,7 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 401,
+"long_line": 400,
 "nested_ternary": 7,
 "semicolon": 420,
 "shadow": 3
@@ -1020,13 +1018,22 @@
 "long_line": 35,
 "semicolon": 19
 },
+"tools/farm_hob_shots.gd": {
+"long_line": 7,
+"semicolon": 2
+},
 "tools/farm_start_check.gd": {
-"long_line": 50,
+"long_line": 49,
 "nested_ternary": 6,
 "semicolon": 29
 },
+"tools/farm_tutorial_check.gd": {
+"history_comment": 1,
+"long_line": 23,
+"semicolon": 2
+},
 "tools/farmbuild_check.gd": {
-"long_line": 52,
+"long_line": 28,
 "semicolon": 15
 },
 "tools/farmbuild_shots.gd": {

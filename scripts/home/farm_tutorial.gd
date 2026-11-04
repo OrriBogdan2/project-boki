@@ -1,7 +1,8 @@
 class_name FarmTutorial
 extends RefCounted
 ## The guided farm tutorial (content/rules/farm_tutorial.json; the screen side is FarmGuide). Short steps
-## on a new farm: axe, chop a tree, house, hammer, a job for your Boki, feed, crop, meet Hob, head out.
+## on a new farm: axe, chop a tree, house, hammer, a job for your Boki, mine a rock, feed, crop (by the water),
+## buy a seed, sell a crop, meet Hob, head out.
 ## State is Save.d.tutorial.ft:
 ##   did      step id -> true for the steps done
 ##   done / skipped   finished, or skipped (nothing is granted or taken away)
@@ -71,11 +72,16 @@ static func house_built() -> bool:
 static func current() -> String:
 	if not active():
 		return ""
+	var waiting := ""
 	for s in steps():
 		var id := String(s["id"])
-		if not did(id) and available(id):
-			return id
-	return ""
+		if did(id) or not available(id):
+			continue
+		if (s.get("waits", []) as Array).has(stage(id)):
+			if waiting == "": waiting = id      # only waiting (a crop growing): show the next open step instead
+			continue
+		return id
+	return waiting
 
 ## Which hint of the current step applies (the keys of a step's "hints").
 static func stage(id: String) -> String:
@@ -86,18 +92,22 @@ static func stage(id: String) -> String:
 			return "fill" if not Econ.feeders().is_empty() else "place"
 		"crop":
 			return _crop_stage()
+		"buy", "sell":
+			return "stall" if not HomeLayout.fixtures(Save.d, "stall").is_empty() else "bar"
 	return "go"
 
 static func _crop_stage() -> String:
 	if HomeLayout.fixtures(Save.d, "farm").is_empty():
-		return "patch"
+		return "patch" if not FarmWater.tiles(Save.d).is_empty() else "patch_dry"
 	var best := "plant"
+	var i := -1
 	for p in Save.d["plots"]:
+		i += 1
 		if String(p["crop"]) == "":
 			continue
 		if int(p["stage"]) >= int(Data.CROPS[String(p["crop"])]["grow"]):
 			return "pick"
-		best = "water" if float(p.get("wt", 0.0)) <= 0.0 else "grow"
+		best = "water" if float(p.get("wt", 0.0)) <= 0.0 and not FarmWater.plot_near(Save.d, i) else "grow"
 	return best
 
 static func hint_text(id: String) -> String:
@@ -116,7 +126,8 @@ static func world_text(id: String) -> String:
 static func event(what: String) -> void:
 	if not active():
 		return
-	var id := {"swing": "hammer", "task": "task", "hob": "hob", "portal": "expedition"}.get(what, "") as String
+	var ids := {"swing": "hammer", "task": "task", "hob": "hob", "portal": "expedition", "buy": "buy", "sell": "sell"}
+	var id := ids.get(what, "") as String
 	detect()
 	if id != "" and available(id):
 		mark(id)
@@ -137,6 +148,8 @@ static func detect() -> void:
 		mark("house")
 	if house_built():
 		mark("hammer")
+	if HomeGather.has_tool("pickaxe") and FarmSites.have("stone") > 0:
+		mark("stone")
 	if Econ.feeders().any(func(f): return Econ.fill(f) > 0):
 		mark("feed")
 	if Progress.stat("harvested") > 0 and not HomeLayout.fixtures(Save.d, "farm").is_empty():
@@ -168,12 +181,25 @@ static func skip() -> void:
 	st["skipped"] = true
 	Save.save_game()
 
-## The tutorial's axe, handed over once when the option is on (the Market still sells it later).
-static func give_axe() -> bool:
-	if not bool(option("axe_free")) or HomeGather.has_tool("axe"):
-		return false
-	HomeGather.give_tool("axe")
-	return true
+## The tool a step hands over when it comes up (its "gives_tool"; the Market still sells it later).
+## Returns the tool's id if it was handed over just now, else "".
+static func give_step_tool(id: String) -> String:
+	var tool := String(step_def(id).get("gives_tool", ""))
+	if tool == "" or not bool(option("free_tools")) or HomeGather.has_tool(tool):
+		return ""
+	HomeGather.give_tool(tool)
+	return tool
+
+## The buy step: enough gems for one seed, so nobody is stuck at the stall. Returns the gems added.
+static func give_seed_gems() -> int:
+	if not bool(option("market_gems")):
+		return 0
+	var cheapest := 1000000
+	for c in Data.CROPS:
+		cheapest = mini(cheapest, int(Data.CROPS[c]["price"]))
+	var add := maxi(0, cheapest - int(Save.d["gems"]))
+	Save.d["gems"] = int(Save.d["gems"]) + add
+	return add
 
 ## Starter food for the trough, once, when the tutorial's feeding step is reached.
 static func give_food() -> void:

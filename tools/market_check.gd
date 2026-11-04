@@ -505,7 +505,8 @@ func _migration() -> void:
 	old["listings"] = {"abc": {"price": 90, "kind": "kin", "key": "pebbit", "rec": web, "t": 0},
 		"def": {"price": 4, "kind": "seed", "key": "tidebloom", "t": 0}}
 	var n0 := (old["roster"] as Array).size()
-	ok(Save.migrate(old) and int(old["v"]) == Save.VERSION and Save.VERSION == 8, "a v7 save upgrades to v8")
+	var up: bool = Save.migrate(old)
+	ok(up and int(old["v"]) == Save.VERSION and Save.VERSION >= 8, "a v7 save upgrades to the current version")
 	var names: Array = (old["roster"] as Array).map(func(r): return String(r["name"]))
 	ok((old["roster"] as Array).size() == n0 + 2 and names.has("Listed") and names.has("Web"),
 		"open pen and web Boki listings come back to the roster")

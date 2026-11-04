@@ -106,5 +106,96 @@ func run(m: Node, out_dir: String) -> void:
 	_look(hc, Vector3(4, 0, 5), 1.0)
 	await main.get_tree().create_timer(0.6).timeout
 	await _shot("07_goals_tracker", "The Goals card: Hunter challenges, mastery, a farm milestone, the next farm level")
+	await _round2()
 	print("HOBSHOT DONE")
 	main.get_tree().quit()
+
+# ---------------------------------------------------------------- round 2
+func _free_cells(sz: Vector2i, around: Vector3, min_r := 3) -> Array:
+	for rad in range(min_r, 26):
+		for k in 48:
+			var a := float(k) / 48.0 * TAU
+			var x := int(round(around.x + cos(a) * rad - sz.x * 0.5)); var z := int(round(around.z + sin(a) * rad - sz.y * 0.5))
+			var cs := HomeLayout.cells_of([x, z, x + sz.x - 1, z + sz.y - 1])
+			if home.hb.fits(home.hb.held, cs): return cs
+	return []
+
+func _paint(brush: String, cells: Array) -> void:
+	home.hb.take(brush)
+	home.hb.cells = cells
+	home.hb._check_cells()
+	home.hb.place_held()
+
+func _round2() -> void:
+	var base := {"extracts": 0, "bosses": 0, "caught": 0, "harvested": 0, "hatched": 1, "fb_built": 0}
+	# 8. the Challenge House in the build menu after the first expedition, with Hob's blueprint
+	await _new_home(base.duplicate())
+	FarmTutorial.skip()
+	Save.d["matches"] = 1
+	Save.d["stats"]["extracts"] = 1
+	Save.d["extracts"] = 1
+	FarmBuilder.draw_up()
+	Work.add_mat("wood", 8); Work.add_mat("stone", 5)
+	home.guide.refresh()
+	home.hb.toggle()
+	home.hb.cat = "Buildings"
+	home.hb._build_bar()
+	_look(HomeLayout.LANDING, Vector3(0, 0, 5), 1.0)
+	await main.get_tree().create_timer(0.6).timeout
+	await _shot("08_challenge_house_in_menu", "After the first expedition Hob draws up the Challenge House: it is in Buildings for 6 wood and 4 stone")
+	home.hb.toggle()
+	# 9. the near-water preview; 10. a river channel
+	await _new_home(base.duplicate())
+	FarmTutorial.skip()
+	Save.d["gems"] = 300
+	Save.d["plot_cap"] = 8
+	home.hb.toggle()
+	home.hb.take("crop_patch")
+	var blk := _free_cells(Vector2i(7, 10), HomeLayout.LANDING + Vector3(-8, 0, -4), 0)      # room for the channel, a gap and a patch
+	print("HOBSHOT block at ", blk[0], " landing ", HomeLayout.LANDING)
+	var line: Array = []
+	for i in 7: line.append(Vector2i(blk[0].x + i, blk[0].y))
+	_paint("river", line)
+	home.hb.apply(true)
+	home.hb._drop_held()
+	home.hb._build_bar()
+	await main.get_tree().create_timer(1.5).timeout
+	_look(Vector3(line[3].x + 0.5, 0, line[3].y + 0.5), Vector3(0, 0, 4), 1.1)
+	await main.get_tree().create_timer(0.4).timeout
+	await _shot("10_river_channel", "A River brush drag: a cheap channel of water across the meadow (2 gems a tile)", true)
+	var psz := HomeLayout.size_of("crop_patch", 0)
+	home.hb.take("crop_patch")
+	home.hb.debug_m = Vector2(blk[0].x + 1 + psz.x * 0.5, blk[0].y + 2 + psz.y * 0.5)      # one tile of grass between it and the water
+	home.hb.tick(0.0)
+	print("HOBSHOT patch ok=", home.hb.ghost_ok, " ", home.hb.why)
+	_look(Vector3(line[3].x + 0.5, 0, line[3].y + 0.5), Vector3(0, 0, 3), 1.2)
+	await main.get_tree().create_timer(0.5).timeout
+	home.hb.tick(0.0)
+	await _shot("09_near_water_preview", "Placing a crop patch within 2 tiles of the channel: 'Near water: waters itself' in green", true)
+	home.hb.debug_m = Vector2.INF
+	home.hb.toggle()
+	# 11 / 12 / 13. the market steps
+	await _new_home(base.duplicate())
+	var L := HomeLayout.of(Save.d)
+	var hsite := {"u": HomeLayout._next_uid(L), "id": "house", "x": 36, "z": 24, "r": 0}
+	(L["deco"] as Array).append(hsite)
+	var stall := {"u": HomeLayout._next_uid(L), "id": "market_stall", "x": 41, "z": 29, "r": 0}
+	(L["deco"] as Array).append(stall)
+	home._sync_fixtures()
+	for id in ["axe", "chop", "house", "hammer", "task", "stone", "feed", "crop"]:
+		FarmTutorial.mark(id)
+	Save.d["gems"] = 0
+	home.guide.detect_t = 0.0
+	var sc := HomeLayout.deco_center(stall)
+	_look(sc, Vector3(2.5, 0, 6.5), 1.0)
+	await main.get_tree().create_timer(1.2).timeout
+	await _shot("11_market_step", "Buy a seed: Hob slips you the gems, the stall is marked, the hint says Seeds tab", true)
+	FarmTutorial.event("buy")
+	Save.d["crops"]["tidebloom"] = 2
+	home.guide.detect_t = 0.0
+	await main.get_tree().create_timer(1.0).timeout
+	await _shot("12_sell_step", "Sell a crop: the hint says Sell tab and where gems come from", true)
+	home.hmk.vendor_tab = "Sell"
+	home.hmk.open("Vendor")
+	await _shot("13_sell_tab", "The Market opens on the Sell tab: sell one crop, gems come in", true)
+	home._close_panel()

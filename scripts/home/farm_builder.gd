@@ -106,6 +106,12 @@ static func tab_shown(hb: HomeBuild, ct: String) -> bool:
 static func not_yet_arrived(lot: String, built: bool) -> bool:
 	return FarmUnlocks.gated() and FarmUnlocks.need_of(lot).is_empty() and not built
 
+## What a lot costs in materials on a farm under the building pass ({} = its gem price in Data.BUILDINGS).
+static func lot_cost(b: String) -> Dictionary:
+	if not FarmUnlocks.gated():
+		return {}
+	return (FarmUnlocks.rules().get("lots", {}).get(b, {}) as Dictionary).duplicate()
+
 ## "Talk to Hob for more" in the menu's footer while anything is still locked.
 static func add_footer(foot: Control) -> void:
 	if not more_to_come():

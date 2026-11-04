@@ -130,9 +130,7 @@ func _ready() -> void:
 		ek["level"] = 8
 		Game._evolve(ek, {})
 		Save.d["tutorial"]["home"] = true
-	# the Challenge House comes with the farm
-	if visit.is_empty() and not Save.d.get("buildings", []).has("board"):
-		Save.d["buildings"].append("board")
+	# (the Challenge House is no longer given: Hob draws it up after the first expedition and you build it, FarmBuilder)
 	# so does Old Pell's Black Market
 	if visit.is_empty() and not Save.d.get("buildings", []).has("ransom"):
 		Save.d["buildings"].append("ransom")
@@ -296,6 +294,7 @@ func _fs_arrivals() -> bool:
 	if int(Save.d.get("matches", 0)) < 1:
 		return false
 	var any := false
+	var put: Array = []
 	var w: World = world
 	for b in ["board", "ransom"]:
 		if HomeLayout.placed(b, _d()) or not _has_b(b):
@@ -313,8 +312,10 @@ func _fs_arrivals() -> bool:
 			hb._apply_blockers()
 			hb._reach_cache.clear()
 			any = true
+			put.append(Data.BUILDINGS[b]["name"])
 	if any:
-		HomeBuild.pending_toast = "Old Pell set up the Black Market and the Challenge House near the portal (move them in build mode)"
+		var them := "them" if put.size() > 1 else "it"
+		HomeBuild.pending_toast = "Old Pell set up the %s near the portal (move %s in build mode)" % [" and the ".join(put), them]
 	return any
 
 ## The rest of setting the island up (after the classic farm's fixed parts, or none on a farm-start island).
@@ -728,7 +729,8 @@ func _build_lots() -> void:
 			n = Models.building(b)
 		else:
 			var sz := HomeLayout.base_size(b)
-			n = Models.lot(sz.x, sz.y, bd["name"], "%d gems" % int(bd["cost"]))
+			var lcost := FarmBuilder.lot_cost(b)
+			n = Models.lot(sz.x, sz.y, bd["name"], FarmSites.cost_text(lcost) if not lcost.is_empty() else "%d gems" % int(bd["cost"]))
 		holder.add_child(n)
 		lots[b] = {"node": holder, "built": built, "at": at, "door": HomeLayout.door_at(b, int(pl["x"]), int(pl["z"]), int(pl["r"]))}
 		if not HomeLayout.placed(b, _d()):
@@ -2191,6 +2193,8 @@ func _label_for(it: Dictionary) -> String:
 			if d["crop"] == "": return "Plant something"
 			var cd: Dictionary = Data.CROPS[d["crop"]]
 			if int(d["stage"]) >= int(cd["grow"]): return "Harvest the %s" % cd["name"]
+			if it["arr"] == "plots" and FarmWater.plot_near(Save.d, it["i"]):
+				return "%s: the water nearby tends it (%s)" % [cd["name"], _grow_left(it["arr"], d)]
 			if float(d.get("wt", 0.0)) <= 0.0: return "Water the %s" % cd["name"]
 			if int(d.get("wet", 2)) < 2: return "Water the %s (the rain only soaked it)" % cd["name"]
 			return "%s: watered, growing (%s)" % [cd["name"], _grow_left(it["arr"], d)]
@@ -2599,8 +2603,9 @@ func _farm_tick() -> void:
 			if int(d["stage"]) >= int(cd["grow"]):
 				continue
 			var wt := float(d.get("wt", 0.0))
-			if wt <= 0.0 and raining:
-				_water(arr, i, "rain")
+			var by_water: bool = arr == "plots" and FarmWater.plot_near(Save.d, i)
+			if (wt <= 0.0 or (by_water and int(d.get("wet", 2)) < 2)) and (raining or by_water):
+				_water(arr, i, "stream" if by_water else "rain")
 				continue
 			if wt > 0.0 and now - wt >= Data.WATER_TIME * (0.5 if arr == "gh_plots" else 1.0):
 				d["stage"] = int(d["stage"]) + 1
@@ -2622,7 +2627,9 @@ func _dry_plot() -> Array:
 		var nodes: Array = plots if arr == "plots" else gh_plots
 		for i in mini(nodes.size(), Save.d[arr].size()):
 			var d: Dictionary = Save.d[arr][i]
-			if d["crop"] != "" and (float(d.get("wt", 0.0)) <= 0.0 or int(d.get("wet", 2)) < 2) and int(d["stage"]) < int(Data.CROPS[d["crop"]]["grow"]):
+			var by_water: bool = arr == "plots" and FarmWater.plot_near(Save.d, i)
+			var dry: bool = float(d.get("wt", 0.0)) <= 0.0 or int(d.get("wet", 2)) < 2
+			if d["crop"] != "" and dry and int(d["stage"]) < int(Data.CROPS[d["crop"]]["grow"]) and not by_water:
 				if arr == "plots" or _isle_open("orchard"):
 					return [arr, i]
 	return []
@@ -2660,6 +2667,8 @@ func _open_plot(arr: String, i: int) -> void:
 			_water(arr, i)
 			return
 		var v := _new_panel(cd["name"], 440)
+		if arr == "plots" and FarmWater.plot_near(Save.d, i):
+			v.add_child(UI.label("This patch is by the water, so it waters itself.", 14, UI.GOOD))
 		v.add_child(UI.label("Watered. It grows a stage in %s while you're home, or after your next expedition." % _grow_left(arr, d), 16))
 		v.add_child(UI.label("Stage %d of %d. Tended %d time%s: %s" % [int(d["stage"]), grow, int(d.get("care", 0)), "" if int(d.get("care", 0)) == 1 else "s",
 			"water it every stage for a bigger harvest, and maybe a seed back." if int(d.get("care", 0)) < grow else "it'll be a big harvest."], 14, UI.MUTED))
@@ -3700,16 +3709,22 @@ func _open_lot(b: String) -> void:
 		return
 	var v := _new_panel("Build a %s" % bd["name"], 500)
 	v.add_child(UI.label(bd["desc"], 16))
+	var lc := FarmBuilder.lot_cost(b)       # a farm under the building pass pays some lots in wood and stone
 	var cost := int(bd["cost"])
-	v.add_child(UI.label("Costs %d gems. You have %d." % [cost, int(Save.d["gems"])], 15, UI.GOLD if int(Save.d["gems"]) >= cost else UI.BAD))
+	var can := FarmSites.can_pay(lc) if not lc.is_empty() else int(Save.d["gems"]) >= cost
+	var cost_line := "Costs %d gems. You have %d." % [cost, int(Save.d["gems"])]
+	if not lc.is_empty():
+		cost_line = "Costs %s. You have %s." % [FarmSites.cost_text(lc), FarmSites.mats_text()]
+	v.add_child(UI.label(cost_line, 15, UI.GOLD if can else UI.BAD))
 	var btn := UI.button("Build it", func():
-		if int(Save.d["gems"]) < cost or Save.has_building(b): return
-		Save.d["gems"] = int(Save.d["gems"]) - cost
+		if Save.has_building(b) or not (FarmSites.can_pay(lc) if not lc.is_empty() else int(Save.d["gems"]) >= cost): return
+		if lc.is_empty(): Save.d["gems"] = int(Save.d["gems"]) - cost
+		else: FarmSites.pay(lc)
 		Save.d["buildings"].append(b)
 		Save.save_game()
 		_close_panel()
 		_construct(b), 200)
-	btn.disabled = int(Save.d["gems"]) < cost
+	btn.disabled = not can
 	v.add_child(btn)
 
 var wedge_t := 0.0

@@ -1400,7 +1400,15 @@ func _draw_cells() -> void:
 			post.material_override = good; post.position = Vector3(t.x + 0.5, 0.35, t.y + 0.5)
 			ghost_cells.add_child(post)
 	FarmBuildUi.outline(ghost_cells, cells, ghost_ok)
-	FarmBuildUi.note(ghost_cells, cells, "" if ghost_ok else why)
+	if ghost_ok and held["kind"] == "deco" and String(held["id"]) == "crop_patch":
+		# a patch by water waters itself: say so in green, or that it won't
+		var wet := FarmWater.near_cells(h._d(), cells)
+		if wet:
+			FarmBuildUi.note(ghost_cells, cells, "Near water: waters itself", Color("5ff07f"))
+		else:
+			FarmBuildUi.note(ghost_cells, cells, "No water within %d tiles" % FarmWater.reach(), Color("e8e2c8"))
+	else:
+		FarmBuildUi.note(ghost_cells, cells, "" if ghost_ok else why)
 	if held["kind"] == "b" and not cells.is_empty():
 		# where the door ends up
 		var door := HomeLayout.door_at(id, cells[0].x, cells[0].y, int(held["r"]))
@@ -1837,7 +1845,12 @@ func _tab_items() -> Array:
 				if unplaced and (not FarmUnlocks.open(b) or FarmBuilder.not_yet_arrived(b, h._has_b(b))):
 					continue
 				if not HomeLayout.placed(b, h._d()):
-					var cost := "free" if bool(Data.BUILDINGS[b].get("free", false)) or h._has_b(b) else "%d gems" % int(Data.BUILDINGS[b]["cost"])
+					var lcost := FarmBuilder.lot_cost(b)
+					var cost := "%d gems" % int(Data.BUILDINGS[b]["cost"])
+					if not lcost.is_empty():
+						cost = FarmSites.cost_text(lcost)
+					if h._has_b(b) or (bool(Data.BUILDINGS[b].get("free", false)) and lcost.is_empty()):
+						cost = "free"
 					out.append({"t": "%s\n%s" % [nm, "Place it" if h._has_b(b) else "Mark a lot · %s" % cost], "cb": func(): take_building(bb),
 						"on": held.get("kind", "") == "b" and String(held.get("id", "")) == b, "tip": String(Data.BUILDINGS[b]["desc"])})
 					continue

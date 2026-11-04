@@ -46,6 +46,7 @@ const SHOP_REQ := {
 static func stat(k: String) -> int:
 	match k:
 		"extracts": return int(Save.d.get("extracts", 0))
+		"matches": return int(Save.d.get("matches", 0))
 		"max_trust":
 			var best := 0.0
 			for r in Save.d.get("roster", []): best = maxf(best, float(r.get("trust", 0.0)))

@@ -59,7 +59,7 @@ static func outline(root: Node3D, cells: Array, ok: bool) -> void:
 		root.add_child(m2)
 
 ## The reason a spot is refused, floating above the footprint. "" removes it.
-static func note(root: Node3D, cells: Array, text: String) -> void:
+static func note(root: Node3D, cells: Array, text: String, col := Color("ffb0a0")) -> void:
 	if not is_instance_valid(root):
 		return
 	for old in root.get_children():
@@ -72,7 +72,7 @@ static func note(root: Node3D, cells: Array, text: String) -> void:
 	l.font_size = 48
 	l.pixel_size = 0.012
 	l.outline_size = 16
-	l.modulate = Color("ffb0a0")
+	l.modulate = col
 	l.outline_modulate = Color(0.1, 0.05, 0.05, 0.9)
 	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	l.no_depth_test = true
