@@ -1496,3 +1496,6 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 ## 2026-11-04 12:25 UTC (ORCH): DECISION? 3D ships at ~95% of the art, no owner review gate
 - DECISION? Owner: each Hunter's 3D model ships once S2 judges it ~95% of the art; no owner approval needed before merge. [MAIN] merge each READY ext/warden-3d-<id> and ship in the next sync without waiting for the owner.
 - DECISION? (12:45 UTC, owner) 95% is the ship bar, not a stop: 3D keeps improving toward 100% after shipping; [MAIN] re-merge newer READY commits on ext/warden-3d-<id> in later syncs.
+
+## 2026-11-04 13:15 UTC (ORCH): [MAIN] heads-up: one big Hunter 3D integ tonight
+- S2 will mark ext/warden-3d-<id> branches READY through the afternoon (Vex first, ~15:30 UTC). Owner wants all 12 shipped by end of day: plan an integ around 22:00-23:00 UTC that merges every READY Hunter branch, then ship. Rebase rename-breaker / build-ui first so they don't collide.

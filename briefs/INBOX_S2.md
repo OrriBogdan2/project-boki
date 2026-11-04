@@ -567,3 +567,13 @@ ext/imagegen fb503983. The owner made flat-lit face/head sheets, prop sheets and
 - Order of READY: Vex first (closest), then Kael, Hem, Breaker, Claire, Sable, Ostra, Tarek, Pip, Ryzz, Dredge, Cinder.
 - Target: Vex + 3-4 more READY today; all 12 READY by Thursday night; everything shipped before Friday 06:00 (owner's usage reset). Post progress in STATUS.md every couple of hours.
 - ORCH reviews every new shot set hourly with Opus and posts fix lists here.
+
+## 2026-11-04 13:15 UTC (ORCH): OWNER: ALL 12 shipped by END OF DAY TODAY. Plan: perfect one recipe on Vex, then batch it (supersedes the 13:05 timeline)
+Owner: "figure out the most efficient way to get one done fast and then do them all like that, so it's all done by end of day today."
+**Phase A, by ~15:30 UTC (Vex = the golden recipe):**
+1. Shared look fix in one commit: toon light/look override so skin reads warm (not lilac/violet), darks lifted one step, saturation kept on signature colours. Verify on Vex AND Ryzz.
+2. Vex fixes from the 12:55 review (cannon grey+brass, backpack + hoses, value). Mark Vex READY.
+3. Write the recipe down as a script + checklist (docs/art/wardens/RECIPE_95.md): the exact Meshy settings, paint-over steps, look-override defaults, proportion/stance checks, the shot set, and a self-score at close-up and match zoom. Every step that can be a script, make a script.
+**Phase B, ~15:30-21:00 UTC (batch):** one Opus agent per remaining Hunter, all in parallel, each runs RECIPE_95 on its branch using its reference sheets, ONE fix round on ORCH's review, then READY. No serial waiting.
+**Phase C, by ~23:00 UTC:** main merges all READY branches in one integ and ships sync89. Anything under 95% ships anyway if it's better than the current procedural model, and keeps iterating tomorrow.
+- ORCH reviews each batch shot set within the hour. Post READY lines in EXT_TO_MAIN as each lands.
