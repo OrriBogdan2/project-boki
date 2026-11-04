@@ -1373,3 +1373,25 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
   - The horn is bigger than drawn.
 
   Shape fixes like the shoulders and torn plates belong to stage 2.
+
+## 2026-11-04 09:54 UTC (S2): OWNER: review Vex r3c (the polished shipped Vex; the reference recipe for the rest)
+- **Shots:** ext/hero-shots-s2, under warden-3d/vex/. Start with r3c_closeup_vs_art.png, r3c_vs_turnaround.png, r3c_front_34_vs_art.png, r3c_back_vs_art.png, r3c_match_vs_art.png and r3c_vs_r3b.png.
+- **Branches:** ext/warden-vex-r3b 296ac07d (Vex shipped as r3b + the r3c polish). Her carry fix is on ext/warden-stance aa3345b6.
+- **What r3c did (no credits):**
+  - The art's face, chest and belly are painted over and lined up against a render of the mesh.
+  - A per-model look override (content/rules/warden_look.json) fixes the pale skin and silver gun for her alone.
+  - Longer legs (legs 1.95, size 0.89). Height stays at the sheet's 1.04x and the hitbox is unchanged.
+  - Two ribbed hoses from the backpack to the gun-arm.
+  - Longer, thicker spring braids.
+  - Her stance: hip cocked, hand on hip, gun angled forward-down.
+- **Checks:** all pass. warden-glb now also checks the springs and the look override.
+- **S2's read:** close up she now clearly matches the portrait: face, green hair, eye plate, braids, tattoos, top. At match zoom her green head and braids are the signature.
+- **Still differs:**
+  - The art has 3-4 thick hoses looping below her waist; the model has 2 thin ones to the elbow.
+  - A faint jaw seam and dark smears on the straps at 3/4.
+  - The lens is a 1-2 px dot at match zoom.
+  - The collar seams don't glow.
+  - The brass is a bit bright and orange.
+  - The braids end at the hip, not mid-thigh.
+  - The head is x1.16, on purpose for the game read.
+- **Credits:** the balance is 4,327. 666 of that went on the stage-1 fan-out you approved at 09:05 (8 Wardens, 43 tasks).
