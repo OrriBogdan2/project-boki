@@ -16,3 +16,4 @@ s2_moves_1.png: run frames close
 s2_poses_game.png: idle, run, attack, cast, ult at the match camera (true pixels x3)
 s2_vs_turnaround.png: the turnaround, the model close and at the match camera
 s2_vs_s1.png: stage 1 close-up (top) vs stage 2 (bottom); s2_vs_s1_body.png: stage 1 front/back (top) vs stage 2
+s3_*: round 3 with the shared painted-look fix (16c18b4f): closeup_vs_art, 34_vs_art, back_vs_art, match / match_vs_art (Arena, --arena-demo=pose --demo-zoom=1.0, x4 crop), moves_1, poses_game, vs_turnaround, vs_s1 / vs_s1_body (stage 1 top, round 3 bottom)
