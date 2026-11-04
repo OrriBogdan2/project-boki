@@ -106,3 +106,9 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 - Notes: Vex's side now shows the messy bun with the bolt (matches the turnaround). Zedran's side shows the lion pauldron on the near shoulder with the cleaver and chain; check its side against the turnaround (lion on his RIGHT).
 - Bjorn side: blue undead-looking skin, red braided beard, an ice hammer, a fur collar, and a big wooden kite shield. The owner's notes asked for "obviously undead/rotting in places", "the biggest character", and DECISIONS/item 41 a frozen ship-PROW shield: this shield reads as a plain kite shield, and he reads portly rather than towering. Raise with the owner before 3D.
 - Sable side: a slender grey-skinned fae with iridescent wings, a silver braid, a feather headpiece, and a crossbow with a glowing bolt.
+
+## 2026-11-04 05:45 UTC: Sable round 2 (turnaround, splash, portrait), from the owner's uploads (orchestrator)
+- docs/art/gen/wardens_r2/sable_{turnaround,splash,portrait}.webp (+ sable_side from 05:30).
+- A moth-fae thief: silver braids, a feather-antenna headpiece with a silver domino mask, iridescent eyespot wings, a purple cropped jacket with a fur collar, a glowing ruby pendant, twin hand crossbows with violet bolts, keys and lockpicks on the belt. The splash is set in the Wyrm's hoard with its eye behind her: a strong tie to the lore (the thief who reached the Wyrmheart).
+- Owner notes met: a smaller face, a cooler and more interesting outfit.
+- Consistency to fix before 3D: the turnaround's side view drops the jacket sleeves and fur collar and shows one braid (the front/back show two braids and a full jacket). Front/back + the 05:30 sable_side as the reference; reconcile the jacket and braids.
