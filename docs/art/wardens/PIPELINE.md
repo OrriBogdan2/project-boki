@@ -239,3 +239,13 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Vex r3b edit side 2 | 06:44 | 01a1a54c-f974-7239-9ea4-5a714210e1a8 | nano-banana-pro | as side, "her left arm hidden behind her body" | 9 | Kept |
 | Vex r3b A | 06:46 | 01a1a54f-35bf-734c-9ee7-55f81be998e5 | meshy-7.1 | 4 edited views (front, 3/4, side, back), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Kept: the face's smirk, chunky hair, eye plate on her right eye, gun-arm, backpack |
 | Vex r3b B | 06:46 | 01a1a54f-35c4-73d2-9fd2-ab8f7e9f5bce | meshy-7.1 | as A, enhancement on | 40 | Dropped: rounder cuter face, stringy hair; a cleaner lens (A's is replaced by geometry) |
+
+### Claire stage 1, 2026-11-04
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Claire edit front | 09:12 | 01a1a5d4-724a-70c1-bfd3-f01683cb53ca | nano-banana-pro (image-to-image) | 9:16 crop; spear, wings and tail out, both arms hanging, skates forward | 9 | Kept |
+| Claire edit side | 09:12 | 01a1a5d4-7267-7483-a529-b031274506af | nano-banana-pro | spear, wing and tail out, both skates pointing forward | 9 | Kept |
+| Claire edit back | 09:12 | 01a1a5d4-7247-73c0-9feb-eaa1c3a86bc2 | nano-banana-pro | wings, spear and tail out, arms hanging | 9 | Kept |
+| Claire A | 09:13 | 01a1a5d5-aa57-72df-95ba-a4926bd343d2 | meshy-7.1 | 3 edited views (front, side, back; no 3/4) as images and texture refs; geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the face, horns, pigtails, ice costume, skates both forward |
+
+Claire total: 4 tasks, 67 credits.
