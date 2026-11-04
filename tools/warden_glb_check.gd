@@ -117,7 +117,7 @@ func _contract(a: String) -> void:
 		for si in mesh.get_surface_count():
 			tris += mesh.surface_get_array_index_len(si) / 3
 			var src := mesh.surface_get_material(si)
-			slots[String(src.resource_name) if src else ""] = true
+			slots[String(src.resource_name).get_slice("-", 0) if src else ""] = true
 	var unknown := slots.keys().filter(func(s): return not WardenGlb.SLOTS.has(s))
 	ok(unskinned == 0 and tris <= TRIS_MAX and slots.size() <= SLOT_MAX and unknown.is_empty(),
 			"%s: skinned (%d meshes not), %d triangles (at most %d), slots %s (at most %d, all toon slots)"

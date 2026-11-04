@@ -1,36 +1,224 @@
 {
- "body_glb": "~/meshy/vex/run1/glb.glb",
+ "body_glb": "~/meshy/vex/run3/glb.glb",
  "weapon_glb": "~/meshy/vex/run2_rifle/glb.glb",
  "rig": "art/wardens/src/vex_rig.json",
  "out": "art/wardens/vex/vex.glb",
- "blend": "~/meshy/vex/fit.blend",
+ "blend": "~/meshy/vex/fit3.blend",
  "turn": 180,
  "max_tris": 15000,
  "weapon_len": 1.0,
- "lift": [0.75, 1.08],
+ "lift": [
+  0.75,
+  1.08
+ ],
  "floater_verts": 40,
  "project": [
-  {"view": "front", "image": "~/meshy/vex/prep/front.png", "col0": 450, "sole_row": 1288, "head_z": 0.80,
-   "box": [-0.11, 0.17, 0.66, 0.97], "facing": 0.55},
-  {"view": "side", "image": "~/meshy/vex/prep/side.png", "col0": 640, "sole_row": 1288, "head_z": 0.80,
-   "head_box": [-0.2, 0.2], "box": [-0.16, 0.16, 0.38, 0.62], "facing": 0.6}
+  {
+   "view": "side",
+   "sign": -1,
+   "image": "~/meshy/vex/prep2/side.png",
+   "col0": 640,
+   "sole_row": 1288,
+   "head_z": 0.8,
+   "head_box": [
+    -0.2,
+    0.2
+   ],
+   "box": [
+    -0.2,
+    0.2,
+    0.38,
+    0.66
+   ],
+   "facing": 0.6
+  }
  ],
  "snap_r": 0.045,
  "joints": {
-  "shoulder.R": [-0.1625, 0, 0.525], "shoulder.L": [0.2375, 0, 0.525],
-  "elbow.R": [-0.2375, 0, 0.275], "elbow.L": [0.325, 0, 0.275],
-  "hand.R": [-0.3375, 0, 0.0], "hand.L": [0.4125, 0, -0.0625],
-  "fingers.R": [-0.36, 0, -0.08], "fingers.L": [0.43, 0, -0.14],
-  "hip.R": [-0.07, 0, -0.025], "hip.L": [0.2, 0, -0.025],
-  "knee.R": [-0.0825, 0, -0.4375], "knee.L": [0.1875, 0, -0.4375],
-  "ankle.R": [-0.085, 0, -0.85], "ankle.L": [0.19, 0, -0.85],
-  "neck": [0.03, 0, 0.64], "crown": [0.04, 0, 0.87]
+  "shoulder.R": [
+   -0.2125,
+   0,
+   0.5875
+  ],
+  "shoulder.L": [
+   0.125,
+   0,
+   0.5875
+  ],
+  "elbow.R": [
+   -0.3375,
+   0,
+   0.3
+  ],
+  "elbow.L": [
+   0.2375,
+   0,
+   0.3
+  ],
+  "hand.R": [
+   -0.4125,
+   0,
+   0.0125
+  ],
+  "hand.L": [
+   0.3125,
+   0,
+   0.05
+  ],
+  "fingers.R": [
+   -0.4125,
+   0,
+   -0.15
+  ],
+  "fingers.L": [
+   0.3125,
+   0,
+   -0.075
+  ],
+  "hip.R": [
+   -0.1625,
+   0,
+   -0.025
+  ],
+  "hip.L": [
+   0.05,
+   0,
+   -0.025
+  ],
+  "knee.R": [
+   -0.194,
+   0,
+   -0.4375
+  ],
+  "knee.L": [
+   0.075,
+   0,
+   -0.4375
+  ],
+  "ankle.R": [
+   -0.225,
+   0,
+   -0.85
+  ],
+  "ankle.L": [
+   0.125,
+   0,
+   -0.85
+  ],
+  "neck": [
+   -0.056,
+   0,
+   0.65
+  ],
+  "crown": [
+   -0.056,
+   0,
+   0.87
+  ]
  },
  "palette": [
-  ["skin", "c08a70"], ["skin", "8e5e48"], ["hair", "4a2e24"],
-  ["cloth", "2c2e4c"], ["cloth", "d0602c"], ["cloth", "8a7a5e"], ["cloth", "c0aa8c"],
-  ["metal", "586675"], ["metal", "4a4c50"], ["metal", "b08a40"],
-  ["leather", "2c2521"], ["leather", "313137"]
+  [
+   "skin",
+   "c08a70"
+  ],
+  [
+   "skin",
+   "8e5e48"
+  ],
+  [
+   "hair",
+   "4a2e24"
+  ],
+  [
+   "cloth",
+   "2c2e4c"
+  ],
+  [
+   "cloth",
+   "d0602c"
+  ],
+  [
+   "cloth",
+   "8a7a5e"
+  ],
+  [
+   "cloth",
+   "c0aa8c"
+  ],
+  [
+   "metal",
+   "586675"
+  ],
+  [
+   "metal",
+   "4a4c50"
+  ],
+  [
+   "metal",
+   "b08a40"
+  ],
+  [
+   "leather",
+   "2c2521"
+  ],
+  [
+   "leather",
+   "313137"
+  ]
  ],
- "glow_min": [0.95, 0.6, 0.55]
+ "glow_min": [
+  0.95,
+  0.6,
+  0.55
+ ],
+ "palette_from": "~/meshy/vex/prep2/front.png",
+ "snap": 0.5,
+ "head": {
+  "glb": "~/meshy/vex/run5_head/glb.glb",
+  "cut_z": 0.7,
+  "r": 0.22,
+  "axis": [
+   -0.056,
+   0.0
+  ],
+  "beret_h": 0.15,
+  "tris": 5000,
+  "snap": 0.2,
+  "beret_h_head": 0.3,
+  "cut_z_head": 0.64,
+  "r_head": 0.17,
+  "mirror": true,
+  "project": [
+   {
+    "view": "back",
+    "image": "~/meshy/vex/prep2/back.png",
+    "col0": 905,
+    "sole_row": 1288,
+    "head_z": 0.8,
+    "head_box": [
+     -0.25,
+     0.15
+    ],
+    "box": [
+     -0.3,
+     0.2,
+     0.72,
+     0.97
+    ],
+    "facing": 0.35
+   }
+  ]
+ },
+ "repaint": [
+  {
+   "hue": [
+    0.02,
+    0.11
+   ],
+   "sat_min": 0.62,
+   "val_min": 0.6,
+   "colour": "e8743a",
+   "k": 0.7
+  }
+ ]
 }

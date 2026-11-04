@@ -5,9 +5,9 @@
 - The rifle (and the scripture strips hanging off it) is painted out of the front and back views, so Meshy
   builds her with free hands; the rifle alone goes to rifle_front/back.png for its own model, the separate
   `weapon` mesh (RIG_CONTRACT).
-- The views are mirrored so the mechanical arm and the sigil plate land on her LEFT, as her Warden block and
-  splash have them (the sheet draws them on her right). Her head is put back unmirrored in the front view, so
-  the mechanical eye stays her right; in the profile (now her left side) the lens is painted over.
+- Never mirrored: her mechanical RIGHT arm, the sigil plate on her right shoulder and the lens on her right eye
+  are as the sheet, the portrait and the splash all draw them.
+- The head pass: her head from the portrait and from the profile, square, for a separate head model.
 """
 import os
 import sys
@@ -25,8 +25,9 @@ RIFLE = {
               (616, 1110), (618, 872), (640, 826), (678, 792), (690, 762), (660, 742), (652, 736)],
              [(712, 676), (748, 620), (800, 560), (830, 552), (830, 648), (786, 662), (766, 722), (722, 712)]],
 }
-HEAD = {"front": (450, 244, 95)}      # axis x, bottom row, half-width of the head put back unmirrored
-LENS = (764, 178, 24)                                        # the profile's lens (centre x, y, radius), before mirroring
+# the head pass: the portrait's head (2048 square art) and the profile's head (side crop), square crops
+HEAD_CROPS = {"portrait": ("venatrix_portrait.png", (650, 80, 780)), "side": ("side", (590, 60, 250))}
+HEAD_PX = 700
 
 
 def load(path):
@@ -96,28 +97,13 @@ def main():
             rifle[holes] = px[holes]
             save(rifle, os.path.join(out, "rifle_" + view + ".png"))
         px[holes] = bg[holes]
-        if view == "side":
-            cx, cy, r = LENS
-            yy, xx = np.mgrid[0:h, 0:w]
-            lens = ((xx - cx) ** 2 + (yy - cy) ** 2 < r * r) & (np.abs(px - bg).sum(axis=2) > 0.08)
-            skin = np.median(px[205:225, 745:765].reshape(-1, 4), axis=0)
-            px[lens] = skin
-            eye = (xx - (cx + 8)) ** 2 + (yy - cy) ** 2 < 20
-            px[eye] = np.array([0.12, 0.08, 0.07, 1.0])
-            px = px[:, ::-1].copy()
-        elif view == "back":
-            px = px[:, ::-1].copy()          # the back of her head mirrors without harm
-        else:
-            ax, bottom, half = HEAD[view]
-            orig = px.copy()
-            # mirror about the head's axis (the figure shifts a little, it stays on the grey)
-            idx = 2 * ax - np.arange(w)
-            off = (idx < 0) | (idx >= w)
-            px = px[:, np.clip(idx, 0, w - 1)]
-            px[:, off] = bg[:, off]
-            x0, x1 = ax - half, ax + half
-            px[:bottom, x0:x1] = orig[:bottom, x0:x1]
         save(px, os.path.join(out, view + ".png"))
+    art = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "docs", "art", "gen", "wardens")
+    for name, (src_name, (x, y, n)) in HEAD_CROPS.items():
+        px = load(os.path.join(art, src_name) if src_name.endswith(".png") else os.path.join(src, src_name + ".png"))
+        crop = px[y:y + n, x:x + n]
+        idx = (np.arange(HEAD_PX) * n / HEAD_PX).astype(int)
+        save(crop[idx][:, idx], os.path.join(out, "head_" + name + ".png"))
     print("VEXINPUTS wrote", out)
 
 

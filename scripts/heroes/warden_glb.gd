@@ -172,7 +172,7 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 		var mesh := (mi as MeshInstance3D).mesh
 		for si in mesh.get_surface_count():
 			var src := mesh.surface_get_material(si) as BaseMaterial3D
-			var slot := String(src.resource_name) if src else ""
+			var slot := String(src.resource_name).get_slice("-", 0) if src else ""      # ("<slot>-<texture>")
 			var m := Models.toon(src.albedo_color if src else Color.WHITE)
 			m.set_shader_parameter("vertex_ao", true)
 			m.set_shader_parameter("surface", int(SLOTS.get(slot, 1)))
@@ -181,6 +181,10 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 				m.set_shader_parameter("albedo_tex", src.albedo_texture)
 				m.set_shader_parameter("use_tex", true)
 				m.set_shader_parameter("albedo", _tint(slot, lk, warden))
+				# the atlas is painted already: no procedural brushwork on top (it is scaled per triangle,
+				# so on a scanned mesh's long thin triangles it shows as facets); metal keeps its gloss and rim
+				m.set_shader_parameter("surface", 0)
+				m.set_shader_parameter("paint", 0.0)
 			if slot == "glow":
 				m.set_shader_parameter("glow", GLOW)
 			(mi as MeshInstance3D).set_surface_override_material(si, m)

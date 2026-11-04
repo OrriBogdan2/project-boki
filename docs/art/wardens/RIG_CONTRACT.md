@@ -90,7 +90,7 @@ Never in the .glb. The hit radius is the class's (`Arch.hit_r`: light 0.35, medi
 
 ## Materials (toon slots)
 The game re-shades every surface with its toon shader (`shaders/hero_toon.gdshader` via `Models.hero_look`),
-so hits flash, team colours and MantleLook tints work. Name each glTF material after its slot; the loader
+so hits flash, team colours and MantleLook tints work. Name each glTF material after its slot (or "<slot>-<texture>" where a model has several textures); the loader
 makes one hero-toon ShaderMaterial per slot, with the baked atlas as the albedo texture and the baked AO in
 the vertex colour (`vertex_ao`):
 

@@ -147,7 +147,48 @@ def auto_weights(ob, arm):
     arm.select_set(True)
     bpy.context.view_layer.objects.active = arm
     bpy.ops.object.parent_set(type="ARMATURE_AUTO")
+    _fill_weights(ob, arm)
     log("auto weights on %s: %d groups" % (arm.name, len(ob.vertex_groups)))
+
+
+def _fill_weights(ob, arm):
+    """Bone heat fails on pieces it can't solve (loose parts, the joined head): every vertex left without a
+    weight takes its nearest weighted vertex's weights, or, with none near, the nearest deforming bone's."""
+    groups = {g.index: g for g in ob.vertex_groups}
+    has = np.array([sum(x.weight for x in v.groups) > 1e-4 for v in ob.data.vertices])
+    co = np.array([v.co[:] for v in ob.data.vertices])
+    missing = np.nonzero(~has)[0]
+    if len(missing) == 0:
+        return
+    from mathutils.kdtree import KDTree
+    done = np.nonzero(has)[0]
+    if len(done) > 0:
+        kd = KDTree(len(done))
+        for i in done:
+            kd.insert(co[i], int(i))
+        kd.balance()
+    segs = [(b.name, Vector(b.head_local), Vector(b.tail_local)) for b in arm.data.bones if b.use_deform]
+    for i in missing:
+        src = None
+        if len(done) > 0:
+            _p, j, d = kd.find(co[i])
+            if d < 0.06:
+                src = ob.data.vertices[j]
+        if src is not None:
+            for x in src.groups:
+                groups[x.group].add([int(i)], x.weight, "REPLACE")
+            continue
+        p = Vector(co[i])
+        best = min(segs, key=lambda sg: _seg_dist(p, sg[1], sg[2]))
+        g = ob.vertex_groups.get(best[0]) or ob.vertex_groups.new(name=best[0])
+        g.add([int(i)], 1.0, "REPLACE")
+    log("weights filled for %d of %d vertices" % (len(missing), len(co)))
+
+
+def _seg_dist(p, a, b):
+    ab = b - a
+    t = max(0.0, min(1.0, (p - a).dot(ab) / max(ab.length_squared, 1e-9)))
+    return (a + ab * t - p).length
 
 
 def pose_to_rig(arm, rig_joints):
@@ -174,6 +215,17 @@ def pose_to_rig(arm, rig_joints):
     bpy.ops.object.mode_set(mode="OBJECT")
 
 
+def _apply_armature(ob):
+    bpy.context.view_layer.objects.active = ob
+    for m in list(ob.modifiers):
+        if m.type == "ARMATURE":
+            bpy.ops.object.modifier_apply(modifier=m.name)
+    ob.vertex_groups.clear()
+    mw = ob.matrix_world.copy()
+    ob.parent = None
+    ob.matrix_world = mw
+
+
 def apply_pose(ob, arm):
     bpy.context.view_layer.objects.active = ob
     for m in list(ob.modifiers):
@@ -198,13 +250,15 @@ def decimate(ob, max_tris):
     log("decimate: %d -> %d tris" % (tris, sum(len(p.vertices) - 2 for p in ob.data.polygons)))
 
 
-def slot_split(ob, img, palette, glow_min, mats):
-    """Each face onto the toon slot of the palette colour nearest its painted colour."""
+def slot_split(ob, img, palette, glow_min, tag):
+    """Each face onto the toon slot of the palette colour nearest its painted colour; one material per slot and
+    texture, named "<slot>-<tag>" (the loader reads the slot before the dash), all on this piece's texture."""
     w, h = img.size
     px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
     uv = ob.data.uv_layers.active.data
     pal = np.array([K.hexcol(c) for _s, c in palette], dtype=np.float32)
     names = [s for s, _c in palette]
+    mats = slot_materials(img, [s for s in K.SLOTS if s != "team"], tag)
     ob.data.materials.clear()
     order = list(mats)
     for s in order:
@@ -220,7 +274,7 @@ def slot_split(ob, img, palette, glow_min, mats):
             s = names[int(np.argmin(((pal - c) ** 2).sum(axis=1)))]
         p.material_index = order.index(s)
         counts[s] = counts.get(s, 0) + 1
-    log("slots:", counts)
+    log("slots (%s):" % tag, counts)
 
 
 def project(ob, img, pj):
@@ -230,8 +284,11 @@ def project(ob, img, pj):
     (her left side, facing the sheet's left) maps y; z to the rows. pj: image, box [a0, a1, z0, z1] on the
     mapped axis and z, facing (the least turned normal kept), col0 (a column near the part) and head_z (the
     height whose silhouette lines the columns up), sole_row (the ground line)."""
-    side = pj.get("view", "front") == "side"
+    view = pj.get("view", "front")
+    side = view == "side"
     ax = 1 if side else 0
+    # side: +1 her left side (normals +x, front to the sheet's left), -1 her right; back: her right on the right
+    sgn = float(pj.get("sign", 1.0)) if side else (-1.0 if view == "back" else 1.0)
     art = bpy.data.images.load(os.path.expanduser(pj["image"]))
     aw, ah = art.size
     src = np.array(art.pixels[:], dtype=np.float32).reshape(ah, aw, 4)
@@ -241,18 +298,19 @@ def project(ob, img, pj):
     me.calc_loop_triangles()
     uv = me.uv_layers.active.data
     x0, x1, z0, z1 = pj["box"]
-    k, col0, row0 = _register(me, src, pj, ax)
+    k, col0, row0 = _register(me, src, pj, ax, sgn, pj.get("register_on"))
     bg = src[ah - 1 - 5, 5, :3]
     painted = 0
     for t in me.loop_triangles:
         n = t.normal
-        if (n.x if side else -n.y) < float(pj["facing"]):
+        facing = n.x * sgn if side else (n.y if view == "back" else -n.y)
+        if facing < float(pj["facing"]):
             continue
         ps = [me.vertices[i].co for i in t.vertices]
         if not all(x0 <= p[ax] <= x1 and z0 <= p.z <= z1 for p in ps):
             continue
         uvs = np.array([[uv[li].uv.x * w, uv[li].uv.y * h] for li in t.loops])
-        cr = np.array([[col0 + p[ax] / k, row0 - p.z / k] for p in ps])
+        cr = np.array([[col0 + sgn * p[ax] / k, row0 - p.z / k] for p in ps])
         lo = np.floor(uvs.min(axis=0)).astype(int)
         hi = np.ceil(uvs.max(axis=0)).astype(int)
         xs, ys = np.meshgrid(np.arange(lo[0], hi[0] + 1), np.arange(lo[1], hi[1] + 1))
@@ -280,7 +338,7 @@ def project(ob, img, pj):
     log("projected the art onto %d faces" % painted)
 
 
-def _register(me, src, pj, ax):
+def _register(me, src, pj, ax, sgn=1.0, other=None):
     """Lines the mesh up with the art: the figure's full height (the art's first and last non-grey rows, the
     ground line left out, against the mesh's top and soles) gives the scale and rows; the head's middle at
     `head_z` (the art's run there against the mesh's) gives the columns."""
@@ -291,7 +349,7 @@ def _register(me, src, pj, ax):
     rows = np.nonzero(fg[:, : aw].sum(axis=1) > 3)[0]
     top = rows.min()
     bottom = int(pj.get("sole_row", rows.max()))
-    co = np.array([v.co[:] for v in me.vertices])
+    co = np.array([v.co[:] for v in (other or me).vertices])     # (a head registers on the body it sits on)
     zt, zb = co[:, 2].max(), co[:, 2].min()
     k = (zt - zb) / (bottom - top)
     row0 = top + zt / k
@@ -305,9 +363,94 @@ def _register(me, src, pj, ax):
     cols = np.nonzero(fg[r])[0]
     run = cols[np.abs(cols - guess) < 90]
     ac = (run.min() + run.max()) * 0.5
-    col0 = ac - mx / k
+    col0 = ac - sgn * mx / k
     log("registered the art: %.5f m/px, x = 0 at column %.1f, z = 0 at row %.1f" % (k, col0, row0))
     return k, col0, row0
+
+
+def sheet_palette(path, n=18, seed=1):
+    """The sheet's own flat colours: k-means over the figure's pixels (the grey ground left out)."""
+    art = bpy.data.images.load(os.path.expanduser(path))
+    aw, ah = art.size
+    px = np.array(art.pixels[:], dtype=np.float32).reshape(-1, 4)[:, :3]
+    bg = px[5 * aw + 5]
+    fig = px[np.abs(px - bg).sum(axis=1) > 0.15]
+    fig = fig[(fig.max(axis=1) > 0.12)]                     # (not the ink lines)
+    rng = np.random.default_rng(seed)
+    pts = fig[rng.choice(len(fig), min(30000, len(fig)), replace=False)]
+    cent = pts[rng.choice(len(pts), n, replace=False)]
+    for _it in range(12):
+        lab = np.argmin(((pts[:, None] - cent[None]) ** 2).sum(axis=2), axis=1)
+        for c in range(n):
+            if (lab == c).any():
+                cent[c] = pts[lab == c].mean(axis=0)
+    return cent
+
+
+def flatten(img, pal, snap, median=True):
+    """Toward the sheet's flat painted values: a 3x3 median takes out Meshy's grain and streaks, then each texel
+    moves `snap` of the way to the nearest sheet colour (keeping its own light and shade)."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    rgb = px[..., :3]
+    if median:
+        pad = np.pad(rgb, ((1, 1), (1, 1), (0, 0)), mode="edge")
+        out = np.empty_like(rgb)
+        for y0 in range(0, h, 256):
+            y1 = min(h, y0 + 256)
+            stack = np.stack([pad[y0 + dy:y1 + dy, dx:dx + w] for dy in range(3) for dx in range(3)])
+            out[y0:y1] = np.median(stack, axis=0)
+        rgb = out
+    flat = rgb.reshape(-1, 3)
+    near = np.empty_like(flat)
+    for a in range(0, len(flat), 1 << 18):
+        b = flat[a:a + (1 << 18)]
+        idx = np.argmin(((b[:, None] - pal[None]) ** 2).sum(axis=2), axis=1)
+        near[a:a + (1 << 18)] = pal[idx]
+    # keep the texel's own value (light, shade) and take the sheet colour's hue and saturation
+    lum = flat.mean(axis=1, keepdims=True)
+    tone = near * (lum / np.maximum(near.mean(axis=1, keepdims=True), 1e-3))
+    flat = flat * (1 - snap) + np.clip(tone, 0, 1) * snap
+    px[..., :3] = flat.reshape(h, w, 3)
+    img.pixels = px.ravel()
+
+
+def repaint(img, rules):
+    """Pulls the texels of one colour family onto the sheet's flat colour (the scarf's pale streaks and dark
+    flecks): rule {hue: [h0, h1], sat_min, colour, k}; the texel keeps a little of its own value."""
+    import colorsys  # noqa: F401  (vectorised below)
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(-1, 4)
+    rgb = px[:, :3]
+    mx = rgb.max(axis=1)
+    mn = rgb.min(axis=1)
+    d = np.maximum(mx - mn, 1e-6)
+    hue = np.where(mx == rgb[:, 0], ((rgb[:, 1] - rgb[:, 2]) / d) % 6,
+                   np.where(mx == rgb[:, 1], (rgb[:, 2] - rgb[:, 0]) / d + 2, (rgb[:, 0] - rgb[:, 1]) / d + 4)) / 6
+    sat = np.where(mx > 0, (mx - mn) / np.maximum(mx, 1e-6), 0)
+    for r in rules:
+        sel = (hue >= r["hue"][0]) & (hue <= r["hue"][1]) & (sat >= r["sat_min"]) & (mx >= r.get("val_min", 0.0))
+        col = np.array(K.hexcol(r["colour"]), dtype=np.float32)
+        val = (mx[sel] / max(col.max(), 1e-3)).clip(0.75, 1.15)[:, None]
+        rgb[sel] = rgb[sel] * (1 - r["k"]) + np.clip(col * val, 0, 1) * r["k"]
+        log("repaint %s: %d texels" % (r["colour"], int(sel.sum())))
+    px[:, :3] = rgb
+    img.pixels = px.ravel()
+
+
+def paint_up(img, spec, snap=None, head=False):
+    """Meshy's albedo toward the sheet's painted look: lifted, flattened onto the sheet's palette."""
+    if "palette_from" in spec:
+        global _SHEET_PAL
+        if _SHEET_PAL is None:
+            _SHEET_PAL = sheet_palette(spec["palette_from"])
+        flatten(img, _SHEET_PAL, spec.get("snap", 0.5) if snap is None else snap)
+    lift(img, *spec["lift"])
+    if spec.get("repaint") and not head:
+        repaint(img, spec["repaint"])
+
+
+_SHEET_PAL = None
 
 
 def lift(img, gamma, gain):
@@ -319,10 +462,10 @@ def lift(img, gamma, gain):
     img.pack()
 
 
-def slot_materials(img, slots):
+def slot_materials(img, slots, tag):
     out = {}
     for s in slots:
-        m = bpy.data.materials.new(s)
+        m = bpy.data.materials.new("%s-%s" % (s, tag))
         m.use_nodes = True
         bsdf = m.node_tree.nodes.get("Principled BSDF")
         tex = m.node_tree.nodes.new("ShaderNodeTexImage")
@@ -334,6 +477,100 @@ def slot_materials(img, slots):
     return out
 
 
+def head_pass(body, spec):
+    """Swaps the body's head for the head model (Meshy from the portrait and the profile): the body's head is cut
+    above `cut_z` within `r` of the head's axis (the scarf below stays), the new head is scaled to the body's
+    beret width, its beret top and middle put on the body's, its own neck cut at cut_z_head (and its shoulders beyond r_head), and joined."""
+    hs = spec["head"]
+    head = import_glb(os.path.expanduser(hs["glb"]))
+    if hs.get("mirror"):
+        # (the portrait draws the lens over her left eye; her block, the turnaround and the profile, her right)
+        transform(head, Matrix.Diagonal((-1.0, 1.0, 1.0, 1.0)))
+        bm = bmesh.new()
+        bm.from_mesh(head.data)
+        bmesh.ops.reverse_faces(bm, faces=bm.faces)
+        bm.to_mesh(head.data)
+        bm.free()
+    img = base_image(head)
+    paint_up(img, spec, hs.get("snap", 0.25), head=True)
+    slot_split(head, img, spec["palette"], spec["glow_min"], "head")
+    bco = np.array([v.co[:] for v in body.data.vertices])
+    cut, r, ax = float(hs["cut_z"]), float(hs["r"]), Vector(hs["axis"])
+    near = (np.hypot(bco[:, 0] - ax.x, bco[:, 1] - ax.y) < r)
+    top = bco[near][:, 2].max()
+    band = bco[near & (bco[:, 2] > top - float(hs["beret_h"]))]
+    b_w = band[:, 0].max() - band[:, 0].min()
+    b_mid = Vector((float((band[:, 0].max() + band[:, 0].min()) / 2), float((band[:, 1].max() + band[:, 1].min()) / 2), top))
+    hco = np.array([v.co[:] for v in head.data.vertices])
+    h_top = hco[:, 2].max()
+    hb = hco[hco[:, 2] > h_top - float(hs["beret_h_head"])]
+    k = b_w / (hb[:, 0].max() - hb[:, 0].min())
+    h_mid = Vector((float((hb[:, 0].max() + hb[:, 0].min()) / 2), float((hb[:, 1].max() + hb[:, 1].min()) / 2), h_top))
+    m = Matrix.Translation(b_mid) @ Matrix.Rotation(math.radians(hs.get("turn", 0.0)), 4, "Z") @ Matrix.Scale(k, 4) \
+        @ Matrix.Translation(-h_mid)
+    transform(head, m)
+    for pj in hs.get("project", []):
+        pj = dict(pj, register_on=body.data)
+        project(head, img, pj)
+    hcut, hr = float(hs.get("cut_z_head", cut)), float(hs.get("r_head", r))
+    _cut(head, lambda co: co.z < hcut or math.hypot(co.x - b_mid.x, co.y - b_mid.y) > hr and co.z < b_mid.z - 0.12)
+    _cut(body, lambda co: co.z > cut and math.hypot(co.x - ax.x, co.y - ax.y) < r)
+    decimate(head, int(hs["tris"]))
+    log("head pass: scale %.3f, cut at %.3f" % (k, cut))
+    return head
+
+
+def soft_normals(ob, iterations):
+    """Meshy's surface is lumpy at this density, and the toon shader's crisp light/shadow split shows every
+    lump as a facet: the shading normals come from a smoothed copy (the shape itself stays)."""
+    if iterations <= 0:
+        return
+    cp = ob.copy()
+    cp.data = ob.data.copy()
+    cp.modifiers.clear()
+    bpy.context.scene.collection.objects.link(cp)
+    sm = cp.modifiers.new("smooth", "SMOOTH")
+    sm.factor = 0.8
+    sm.iterations = iterations
+    bpy.context.view_layer.objects.active = cp
+    bpy.ops.object.modifier_apply(modifier=sm.name)
+    dt = ob.modifiers.new("normals", "DATA_TRANSFER")
+    dt.object = cp
+    dt.use_loop_data = True
+    dt.data_types_loops = {"CUSTOM_NORMAL"}
+    dt.loop_mapping = "TOPOLOGY"
+    bpy.context.view_layer.objects.active = ob
+    bpy.ops.object.modifier_move_to_index(modifier=dt.name, index=0)
+    bpy.ops.object.modifier_apply(modifier=dt.name)
+    bpy.data.objects.remove(cp)
+
+
+def rigid(ob, arm, bone):
+    """A piece that rides one bone whole (the head pass: bone heat can't solve it joined to the body)."""
+    g = ob.vertex_groups.get(bone) or ob.vertex_groups.new(name=bone)
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+
+
+def join(a, b):
+    bpy.ops.object.select_all(action="DESELECT")
+    a.select_set(True)
+    b.select_set(True)
+    bpy.context.view_layer.objects.active = a
+    bpy.ops.object.join()
+    return a
+
+
+def _cut(ob, drop):
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if drop(v.co)], context="VERTS")
+    bm.to_mesh(ob.data)
+    bm.free()
+
+
 def contract_skin(ob, rig):
     arm = K.build_armature(rig)
     for b in arm.data.bones:
@@ -342,7 +579,7 @@ def contract_skin(ob, rig):
     return arm
 
 
-def weapon(spec, rig, mats):
+def weapon(spec, rig):
     w = import_glb(os.path.expanduser(spec["weapon_glb"]))
     co = np.array([v.co[:] for v in w.data.vertices])
     c = co.mean(axis=0)
@@ -379,8 +616,8 @@ def weapon(spec, rig, mats):
     w.data.update()
     _close_gaps(w)
     img = base_image(w)
-    lift(img, *spec["lift"])
-    slot_split(w, img, spec["palette"], spec["glow_min"], slot_materials(img, list(mats)))
+    paint_up(img, spec)
+    slot_split(w, img, spec["palette"], spec["glow_min"], "weapon")
     w.name = "weapon"
     w.data.name = "weapon"
     return w
@@ -442,9 +679,14 @@ def main():
     ob = import_glb(os.path.expanduser(spec["body_glb"]))
     img = base_image(ob)
     drop_floaters(ob, spec.get("floater_verts", 40))
-    lift(img, *spec["lift"])
+    paint_up(img, spec)
     for pj in spec.get("project", []):
         project(ob, img, pj)
+    slot_split(ob, img, spec["palette"], spec["glow_min"], "body")
+    head = None
+    if "head" in spec:
+        decimate(ob, spec["max_tris"] - int(spec["head"]["tris"]))
+        head = head_pass(ob, spec)
     joints = {k: Vector(v) for k, v in spec["joints"].items()}
     # face +Y, hips on the rig's height, feet on the ground, centred between the hips
     turn = Matrix.Rotation(math.radians(spec.get("turn", 180.0)), 4, "Z")
@@ -454,6 +696,8 @@ def main():
     k = K.bone_head(rig, "thigh.L").z / (hip_mid.z - sole)
     m = Matrix.Scale(k, 4) @ turn @ Matrix.Translation(Vector((-hip_mid.x, -hip_mid.y, -sole)))
     transform(ob, m)
+    if head:
+        transform(head, m)
     joints = {n: snap(ob, m @ p, spec.get("snap_r", 0.045)) for n, p in joints.items()}
     joints["pelvis"] = (joints["hip.L"] + joints["hip.R"]) * 0.5
     log("scale %.3f; joints:" % k, {n: tuple(round(x, 3) for x in p) for n, p in joints.items()})
@@ -472,21 +716,33 @@ def main():
         rj["fingers." + sd] = rj["hand." + sd] + Vector((0, 0, -0.08))
     fit = fit_armature(joints)
     auto_weights(ob, fit)
+    if head:
+        rigid(head, fit, "head")
     pose_to_rig(fit, rj)
+    if head:
+        _apply_armature(head)
     apply_pose(ob, fit)
-    decimate(ob, spec["max_tris"])
-    mats = slot_materials(img, [s for s in K.SLOTS if s != "team"])
-    slot_split(ob, img, spec["palette"], spec["glow_min"], mats)
+    decimate(ob, spec["max_tris"] - (int(spec["head"]["tris"]) if head else 0))
     ob.name = "Body"
     ob.data.name = "Body"
     arm = contract_skin(ob, rig)
-    gun = weapon(spec, rig, mats)
+    if head:
+        head.vertex_groups.clear()
+        g = head.vertex_groups.new(name="head")
+        g.add(list(range(len(head.data.vertices))), 1.0, "REPLACE")
+        ob = join(ob, head)
+    gun = weapon(spec, rig)
     crown = rig["land"]["crown"]
     K.anchor(arm, "head", "anchor_head_top", (0, 0, crown + 0.07))
     K.anchor(arm, "hips", "anchor_chest", (0, 0.1, K.bone_head(rig, "upper_arm.L").z - 0.14))
     for o in (ob, gun):
+        # Meshy's own split normals don't survive the decimation (facets): clear them, shade smooth
+        bpy.context.view_layer.objects.active = o
+        if o.data.has_custom_normals:
+            bpy.ops.mesh.customdata_custom_splitnormals_clear()
         for p in o.data.polygons:
-            p.use_smooth = True       # (Meshy's triangles come flat; smooth normals keep the toon terminator soft)
+            p.use_smooth = True
+        soft_normals(o, spec.get("normal_smooth", 8))
     out = os.path.join(ROOT, spec["out"])
     log("tris: body %d, weapon %d" % (K.tris([ob]), K.tris([gun])))
     # (JPEG: Meshy's painted textures, a third of the PNG's size)
