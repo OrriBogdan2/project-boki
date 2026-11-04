@@ -115,6 +115,25 @@
  "ink_room": 0.02,
  "slot_rules": [
   {
+   "slot": "cloth",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    -0.62
+   ],
+   "hsv": [
+    0.0,
+    1.0,
+    0.0,
+    0.42,
+    0.38,
+    1.0
+   ]
+  },
+  {
    "slot": "hair",
    "box": [
     null,

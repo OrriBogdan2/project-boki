@@ -367,7 +367,7 @@ func _within_tint(got: Color, want: Color) -> bool:
 	var lo := 1.0 - WardenGlb.TINT_MAX - 0.001
 	var hi := 1.0 + WardenGlb.TINT_MAX + 0.001
 	for i in 3:
-		var r := got[i] / maxf(want[i], 1e-4)
+		var r: float = got[i] / maxf(want[i], 1e-4)
 		if r < lo or r > hi:
 			return false
 	return true
