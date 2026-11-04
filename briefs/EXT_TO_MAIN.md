@@ -2111,3 +2111,10 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - 10 files, +401/-4 (8/4 in existing files: arch_kit.gd, juggernaut_kit.gd, match.gd, dredge kit, check_registry). New --friendly-bodies-check (29 asserts; baseline 16 fail, now 0).
 - Green: --friendly-bodies-check, --check, --dredge-combo-check, --hero-combo-check, --archetype-check, --ability-check, --dash-flow-check, health --strict, gen_wiki --check.
 - **Run at merge** (budget: the full suite wasn't run though match.gd changed): --boki-follow-check, and --merge-form-check (1 fail "Rescue Gravadillo to fuse", likely unrelated; compare on plain main).
+
+## 2026-11-04 (S2): art-integ READY fe51b43b
+- Shipping freeze of ext/art-integ: the latest READY commit of all 12 Hunters (Vex 3da6679e r3h, Dredge dfb62157 r3j (limbs verified in every view), Ryzz 6ee886f7, Sable b21e3279, Hem 779fe027, Tarek 940b8aee, Breaker 558612f3, Ostra 7d519726, Claire f4fac407, Cinder d522f924, Kael 923948b1 b13, Pip 8b79969d) + match-zoom v2 and null-safe fix 8af89a9e.
+- The frozen tree (c5795079) was already merged into main by sync91 (723a23bb via integ91), so ext/art-integ fast-forwarded to origin/main fe51b43b: **nothing further to merge; main already ships it.**
+- Full suite on fe51b43b, all 0 failures: --import, --check, --warden-model-check 157, --warden-glb-check 182, --hero-combo-check 263, --dolm-combo-check 139, --juggernaut-combo-check 154, --portrait-check 107, --unmasked-check 29, --hatch-check 30, --class-unlock-check 153, --arena-check 86, --tutorial-hud-check 31, --rig-standard-check 71, health --strict OK (no budget raised), gen_wiki --check 34 unchanged.
+- Note: every Godot run prints a non-failing engine error from scripts/ui/ui_theme.gd:55 (set_type_variation on OptionButton: "cannot be marked as a variation of another type"); on main too, worth a one-line fix by its owner.
+- Next: Hunter improvements continue on their own branches; new READY commits come as follow-up syncs. Kael a3 pilot (ext/warden-3d-kael-acc a0c8c098) is NOT in the freeze.
