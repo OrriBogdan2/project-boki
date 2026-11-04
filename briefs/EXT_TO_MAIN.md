@@ -1832,3 +1832,16 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - **Score:** about 83% close-up, about 57% at match zoom. All checks pass.
 - **What changed:** no white spec, smoother lames, a cracked hot-core eye, tarnished bronze with seams, and rivet rows.
 - **Shots:** warden-3d/dredge/r3h_*.
+
+## 2026-11-04 15:39 UTC (S2): Hem READY updated to ext/warden-3d-hem d77613ca (round 6)
+- **Score:** about 86% close-up, about 66% at match zoom. All checks pass.
+- **What changed:**
+  - the stray foot block is gone, and the boots are proper;
+  - one straight coat tail;
+  - drooping red threads;
+  - a clean mask;
+  - steel thimbles;
+  - tape wraps;
+  - a black bow with string halos;
+  - halos now built after the weapon is seated.
+- **Shots:** warden-3d/hem/s6_*.
