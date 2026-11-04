@@ -34,3 +34,7 @@ r3b_dredge_vs_r3.png: portrait | r3 3/4 | r3b 3/4 | r3 shoulder close-up | r3b s
 r3c: the shared painted-look fix (ext/warden-vex-r3b 16c18b4f: warm-neutral own ambient, cool lights neutralised, darks lifted a step, warm shadow tint) merged; the hull's own lift backed off (x1.3 -> x1.15) so nothing is lifted twice. All with the stance (scratch branch).
 r3c_dredge_turnaround.png | r3c_dredge_front_34.png | r3c_dredge_back.png | r3c_dredge_closeup.png | r3c_dredge_match.png | r3c_dredge_moves.png: as for r3.
 r3c_dredge_vs_r3b.png: portrait | r3b 3/4 | r3c 3/4 | r3b at match zoom (enlarged) | r3c at match zoom (enlarged).
+
+r3d (credit-free; shot from ext/warden-dredge-friend itself, which now carries the stance): deeper dents and seven tears with flaps peeled ~40 degrees out; a fourth, wider lame flaring each shoulder's lower edge; six sharp crack strips over the lens and a white glint on the orb (the crazed paint gone); six tar strands from the hull to the pelvis; a red core glowing inside the ribs; a tar pool at his feet while he stands.
+r3d_dredge_turnaround.png | r3d_dredge_front_34.png | r3d_dredge_back.png | r3d_dredge_closeup.png | r3d_dredge_match.png | r3d_dredge_moves.png: as for r3.
+r3d_dredge_vs_r3c.png: portrait | r3c 3/4 | r3d 3/4 | r3c helm and eye | r3d helm and eye.
