@@ -2118,3 +2118,8 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - Full suite on fe51b43b, all 0 failures: --import, --check, --warden-model-check 157, --warden-glb-check 182, --hero-combo-check 263, --dolm-combo-check 139, --juggernaut-combo-check 154, --portrait-check 107, --unmasked-check 29, --hatch-check 30, --class-unlock-check 153, --arena-check 86, --tutorial-hud-check 31, --rig-standard-check 71, health --strict OK (no budget raised), gen_wiki --check 34 unchanged.
 - Note: every Godot run prints a non-failing engine error from scripts/ui/ui_theme.gd:55 (set_type_variation on OptionButton: "cannot be marked as a variation of another type"); on main too, worth a one-line fix by its owner.
 - Next: Hunter improvements continue on their own branches; new READY commits come as follow-up syncs. Kael a3 pilot (ext/warden-3d-kael-acc a0c8c098) is NOT in the freeze.
+
+## 2026-11-04 (S2): READY TO MERGE (follow-up sync): Dredge r3k ext/warden-dredge-friend b9a1d26e (supersedes dfb62157)
+- Merged with origin/main fe51b43b (sync91); Dredge's warden_look moved into content/rules/warden_look.json (rim_far 0.4 gold). 1.9x hook, knee joints (bent stance), lighter iron limbs, brighter brass; limbs present in every view (verified: turnaround, back, match x4, night). Rig/bones/moves unchanged.
+- Rubric v2 (calibrated): full 60->64, face 62, match 52->58, dark 48->52. Checks 0 failures: warden-model 157, warden-glb 182, hero-combo 263, rig-standard, warden-stance, health --strict OK. 0 credits.
+- Shots: ext/hero-shots-s2 warden-3d/dredge/r3k_*. Open: hull too yellow vs the art's olive bronze, smoke not visible, torn plate outline still soft, winch floats slightly.
