@@ -1,6 +1,6 @@
 class_name ThiefKit
 extends ArchKit
-## Dancer (light, id "thief"): a port of SUPERVIVE's Shiv, matched to the footage (briefs/hero-ref/dancer.md),
+## Sable (light, id "thief"): a port of SUPERVIVE's Shiv, matched to the footage (briefs/hero-ref/dancer.md),
 ## scaled to our health and TTK; only the names, art, sounds and on-screen text are ours. docs/heroes/thief.md.
 ##
 ## - LMB, Arc Bolts: a spinning bolt from alternating hands every 0.45s that flies to the cursor (clamped
@@ -55,7 +55,9 @@ var glint: Node3D = null       # the empowered tell: a gold glint at the weapon 
 var glint_pop := 0.0           # 1 as the empowered bolt forms (the landing), easing back to 0
 var glint_net_t := 0.0
 var hand := 0                  # 0: the next bolt leaves the right hand, 1: the left
-var _primed_on: Ent = null     # the empowered bolt just reached this foe (its end sets it, on_deal reads it)
+var primed_on: Ent = null      # the empowered bolt just reached this foe (its end sets it; outgoing, on_deal read it)
+var bolt_buf := 0.0            # s a click that couldn't fire yet is kept (lmb_override)
+var _fire_was := false
 var primed_hits := 0           # (tests, demo)
 var bola_pairs := 0
 var bola_bounces := 0
@@ -314,17 +316,29 @@ func vault_haste() -> float:
 	var boost := float(dash_def().get("haste", 0.3))
 	return boost * (float(dash_def().get("haste_r3", 1.5)) if rank("dash") >= 3 else 1.0)
 
-## The empowered bolt's extra damage: +20% at rank 2 and again at rank 3.
+## The empowered bonus's rank growth: +20% at rank 2 and again at rank 3.
 func prime_rank_k() -> float:
 	return 1.0 + float(dash_def().get("prime_rank", 0.2)) * float(clampi(rank("dash") - 1, 0, 2))
 
+## The empowered bolt as a multiple of a plain one: a bolt plus the bonus (the source's +214 on its 160 bolt).
+func empowered_k() -> float:
+	return 1.0 + float(dash_def()["prime_bonus"]) * prime_rank_k()
+
 # ------------------------------------------------------------------ LMB: Arc Bolts
-func lmb_override(held: bool, _dt: float) -> bool:
+## Held, a bolt goes every 0.45s. A click that comes while the last bolt is still cooling (mid-cartwheel too) is
+## kept for one bolt's interval and goes the moment it can, so a tap after a Vault is never lost.
+func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "arc_bolts":
 		return false
 	if KinMerge.active(h):
 		return true
-	if held and h.fire_cd <= 0.0 and h.can_fire():
+	if held and not _fire_was:
+		bolt_buf = float(h.wpn.get("rate", 0.45))
+	else:
+		bolt_buf = maxf(0.0, bolt_buf - dt)
+	_fire_was = held
+	if (held or bolt_buf > 0.0) and h.fire_cd <= 0.0 and h.can_fire():
+		bolt_buf = 0.0
 		_bolt()
 	return true
 
@@ -360,22 +374,22 @@ func _bolt() -> void:
 	sd["life0"] = sd["life"]
 	var x: Dictionary = sd["x"]
 	x["kx"] = func(s: Dictionary, at: Vector3, e: Ent, why: String) -> void: _bolt_end(s, at, e, why, emp)
-	# the throw: the firing arm whips forward, the torso turns into it (KMovesDJ thf_lmb_r / thf_lmb_l)
-	play("thf_lmb_r" if hand == 1 else "thf_lmb_l")
+	# the throw: the firing arm whips forward, the torso turns into it (KMovesDJ thf_lmb_r / thf_lmb_l); the
+	# empowered one is both blades driven out together (thf_primed)
+	var throw := "thf_lmb_r" if hand == 1 else "thf_lmb_l"
+	play("thf_primed" if emp else throw)
 	h.swing_n += 1
 	h.combo_i = 1 if hand == 1 else 2
 	var muzzle := start + Vector3(d.x, 0, d.y) * 0.1
 	if emp:
-		var dd := dash_def()
 		primed_t = 0.0
 		haste_t = 0.0
-		sd["dmg"] = float(sd["dmg"]) * float(dd.get("prime_k", 3.5)) * prime_rank_k()
+		sd["dmg"] = float(sd["dmg"]) * empowered_k()
 		sd["r"] = 0.3
 		x["kb"] = 3.0
 		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 2.6, 0.55)
 		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
 		m.sfx("dj_bolt_emp", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
-		play("thf_primed")
 		if h.is_local() and m.cam: m.cam.add_trauma(0.12)
 	else:
 		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_GOLD, 0.9, 0.3)
@@ -386,8 +400,8 @@ func _bolt() -> void:
 func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> void:
 	s["dj_end"] = true
 	last_bolt_end = at
+	primed_on = e if emp else null
 	if e != null:
-		if emp: _primed_on = e
 		fx().star(at, BOLT_GOLD if not emp else Color("ffe070"),
 				1.5 if emp else 0.7,
 				0.24 if emp else 0.14)
@@ -521,37 +535,54 @@ func _swoosh(dir: Vector2) -> void:
 			PI * 0.5)
 
 # ------------------------------------------------------------------ passive hooks
-## Marks make your bolts (the empowered one too) on that target stronger.
+## Marks make your bolts on that target stronger: +10% of a bolt each, a flat add like the source's +16 a stack,
+## so on the empowered bolt they add to its plain-bolt part, not to the bonus.
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	var weapon := String(o.get("src", "")) == "shot" and String(o.get("ab", "")) == ""
 	if not weapon:
 		return dmg
-	return dmg * (1.0 + float(res_def().get("per_mark", 0.1)) * float(marks_on(t)))
+	var bolt := dmg / empowered_k() if t == primed_on else dmg
+	return dmg + bolt * float(res_def().get("per_mark", 0.1)) * float(marks_on(t))
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team or t.dead:
 		return
 	if String(o.get("src", "")) != "shot" or String(o.get("ab", "")) != "":
 		return          # only your weapon's hits stack
-	if _primed_on != null and _primed_on == t:
-		_primed_on = null
+	if primed_on != null and primed_on == t:
+		primed_on = null
 		_primed_hit(t)
 		return
 	add_mark(t, 1)
 
-## The empowered bolt landed: 2 Marks and Shred, and the Vault comes back (the payoff: T4 hitstop and
-## shake, pay_cashin, VAULT RESET). Its 3.5x damage was on the bolt itself.
+## The empowered bolt landed: a Mark like any bolt, and the Vault comes back on the spot (its damage was on the
+## bolt itself). Weight without a blast: a blue blade flash on them, a T4 shake, and the reset snap on her.
 func _primed_hit(t: Ent) -> void:
-	var dd := dash_def()
 	primed_hits += 1
-	var dir := Vector2(t.pos.x - h.pos.x, t.pos.z - h.pos.z).normalized()
-	add_mark(t, int(dd["prime_marks"]), true)
-	if is_instance_valid(t) and not t.dead:
-		KitStatus.apply(t, "vul", float(dd["shred_t"]), float(dd["shred"]))
-	payoff_fx(t.pos, "VAULT RESET", res_col(), "pay_cashin", dir, t)
-	m.later(0.1, func(): if is_instance_valid(h): play("thf_reset"))
+	add_mark(t, 1, true)
 	h.dashes = h.max_dashes()
 	DashReset.cue(h)
+	_reset_fx(t)
+	m.later(0.06, func(): if is_instance_valid(h): play("thf_reset"))
+
+## The empowered hit and the reset, in her colours: a blue-white star and an upright blade arc on the target (the
+## source's red-white flash with its blue chakram), VAULT RESET over them, a cyan four-point star at her hip
+## where the Vault is back; the T4 shake, a punch the way it flew, its own sound.
+func _reset_fx(t: Ent) -> void:
+	var at := t.pos + Vector3(0, 1.0, 0)
+	var dir := Vector2(t.pos.x - h.pos.x, t.pos.z - h.pos.z)
+	fx().star(at, EMP_BLUE, 2.2, 0.2, Color.WHITE)
+	fx().crescent(at, dir, 160.0, 1.2, EMP_BLUE, Color.WHITE, 0.2, PI * 0.5)
+	m.fx.flash(at, Color("e8f6ff"), 1.0, 0.08)
+	m.fx.word(t.pos + Vector3(0, 2.7, 0), "VAULT RESET", res_col(), true)
+	fx().star(h.pos + Vector3(0, 0.9, 0), GHOST, 1.0, 0.24, Color.WHITE)
+	m.sfx("pay_cashin", at, -2.0, 1.0)
+	Feel.shake(m, "t4", h, t.pos, t)
+	if h.is_local():
+		Oomph.punch_dir(m, dir.normalized(), 0.28)
+		if m.cam: m.cam.punch(0.04)
+	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
+	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
 ## A rival we hit was knocked (or we assisted): a heal, a crimson star on them, a green pillar on us.
 func on_knock(t: Hunter, mine: bool) -> void:

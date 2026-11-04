@@ -136,12 +136,11 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 
 ## class_unlock (`content/rules/class_unlock.json`)
 
-Hunter unlocks and mastery (docs/decisions/0005). A new save starts owning `first` and picks `starter_picks` Hunter from `starters` in the new-game flow. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.
+Hunter unlocks and mastery (docs/decisions/0005). A new save picks `starter_picks` Hunter from `starters` before the egg pick; the other starters open on their own after the first finished expedition (the tutorial one). Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.
 
 | Setting | Value |
 |---|---|
-| first | gunslinger |
-| starters | ["juggernaut", "archer", "ashwick"] |
+| starters | ["gunslinger", "archer", "juggernaut"] |
 | starter_picks | 1 |
 | hold_s | 1.6 |
 | tiers | {"easy": "about 1-2 expeditions", "medium": "a handful of expeditions", "hard": "real effort, once other Hunters are open"} |
@@ -156,9 +155,10 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save starts owning `firs
 
 | Setting | Value |
 |---|---|
-| doc | Global feel for every hunter's dash (Shift), applied on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Owner, Nov 2: dashes were too fast and too far in general, Vireo's should go further: its lane is drawn from its own numbers, so its distance is raised in content/archetypes/mage.json (4-7m to 5-8.5m) and only its time is scaled here. |
+| doc | Global feel for every hunter's dash (Shift), applied on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Owner, Nov 2: dashes were too fast and too far in general, Vireo's should go further: its lane is drawn from its own numbers, so its distance is raised in content/archetypes/mage.json (4-7m to 5-8.5m) and only its time is scaled here. Dancer (thief) is taken off it: her Cartwheel is the source's measured one (owner review item 7: 4.5m in 0.48s on the ground, 8.4m over 0.95s from a jump), set as-is in content/archetypes/thief.json. |
 | default | {"dist": 0.85, "time": 1.15} |
 | mage | {"dist": 1.0, "time": 1.15} |
+| thief | {"dist": 1.0, "time": 1.0} |
 
 ## equal (`content/rules/equal.json`)
 
@@ -277,7 +277,7 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 
 ## hunter_viewer (`content/rules/hunter_viewer.json`)
 
-The Hunter viewer (HunterViewer: the Hunters screen and character creation). Each ability is shown in turn for slot_s seconds, its move looped on the real model. `moves`: per Hunter and slot, the kit moves (any kit move table, HunterAnim.km_def) played back to back, the same ids the kits play. A slot with no entry falls back to the weapon swing or shot (lmb), the class dodge (dash), a cast pose (rmb, e, r) or an idle with its glow (passive). --hunter-unlock-check fails on an id that no longer exists, so a kit rename shows up here.
+The Hunter viewer (HunterViewer: the Hunters screen). Each ability is shown in turn for slot_s seconds, its move looped on the real model. `moves`: per Hunter and slot, the kit moves (any kit move table, HunterAnim.km_def) played back to back, the same ids the kits play. A slot with no entry falls back to the weapon swing or shot (lmb), the class dodge (dash), a cast pose (rmb, e, r) or an idle with its glow (passive). --hunter-unlock-check fails on an id that no longer exists, so a kit rename shows up here.
 
 | Setting | Value |
 |---|---|
@@ -329,6 +329,34 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | half_from | 7 |
 | half_k | 0.5 |
 
+## market (`content/rules/market.json`)
+
+The market (docs/decisions/0013-market.md). Gems are counts. Fees and taxes are fractions of the price. Times are seconds unless named _h (hours) or _days.
+
+| Setting | Value |
+|---|---|
+| fees | {"list_fee": 0.05, "sale_tax": 0.1, "min_fee": 1} |
+| fees_doc | Stalls and auctions: list_fee is paid up front (never refunded), sale_tax is taken from what the buyer pays. Both are gem sinks. |
+| npc | {"buy_k": 0.8, "sell_lo": 1.0, "sell_hi": 1.4, "buy_chance": 0.5, "stalls": ["Brindle's Barrow", "The Tin Lantern", "Moss & Daughter", "Quayside Odds", "Old Fen Wares"], "per_stall": 5} |
+| npc_doc | Offline stand-ins for other players. NPC buyers take a listing only when it is priced at most buy_k x the item's reference price (buy_chance per expedition). NPC stalls sell at sell_lo..sell_hi x reference. buy_k < sell_lo is the anti-mint rule: buying from the game and selling back to it always loses gems. |
+| stall | {"max_listed": 6, "levels": {"1": "Vendor", "2": "Shelter, your stall and search", "3": "Auction House"}} |
+| shelter | {"strays": 4, "base": 30, "per_level": 6, "rare": 160, "shimmer": 120, "per_mutation": 60, "min_age_days": 7, "trust_keep": 0.5, "npc_adopt": 0.35, "gave_cap": 200} |
+| shelter_doc | Adopting costs base + per_level x (level - 1) + rare (rare species) + shimmer + per_mutation x mutations; the gems are destroyed. Giving a Boki up pays nothing. npc_adopt: chance per expedition that an NPC adopts a Boki someone gave up. |
+| transfer | {"fee": 40, "week_days": 7} |
+| transfer_doc | Handing a Boki straight to a named player: a flat fee (destroyed), one per week per sender, and the receiver has to accept. |
+| auction | {"hours": [12, 24, 48], "snipe_s": 60, "extend_s": 120, "max_open": 3, "npc_lots": 3, "npc_bid_k": 0.8, "npc_lot_start": 1.0, "npc_lot_cap": 1.3} |
+| auction_doc | A bid with less than snipe_s left pushes the end out to extend_s from now. NPC bidders (offline) bid on your lots up to npc_bid_k x reference, never on friends-only lots. NPC lots open at npc_lot_start x reference and NPC rivals bid them up to npc_lot_cap x. |
+| black_market | {"stock": 4, "price_lo": 2.0, "price_hi": 2.6, "egg_price": 420, "egg_chance": 0.5} |
+| black_market_doc | Old Pell's rare stock: a daily rotation of rare and epic goods at price_lo..price_hi x reference, and now and then a Rare Egg. A gem sink. Never keys, shards or anything found only in matches. |
+| rarity | {"common": {"name": "Common", "restock": 0.9, "col": "c8cdd8"}, "uncommon": {"name": "Uncommon", "restock": 0.6, "col": "6fd86a"}, "rare": {"name": "Rare", "restock": 0.3, "col": "5ab0f0"}, "epic": {"name": "Epic", "restock": 0.12, "col": "c08cff"}} |
+| rarity_doc | restock: the chance an NPC stall carries a good on a given day. |
+| goods | {"silk_fibre": {"name": "Silk fibre", "kind": "material", "rarity": "uncommon", "ref": 18, "icon": "seed", "col": "f3eee2", "desc": "Fine fibre from a wild silk bush. Weavers pay well for it."}, "heartwood": {"name": "Heartwood", "kind": "material", "rarity": "rare", "ref": 45, "icon": "dash", "col": "8a4a2a", "desc": "The red core of a very old tree. Hard as stone, light as pine."}, "starstone": {"name": "Starstone", "kind": "material", "rarity": "epic", "ref": 110, "icon": "fortify", "col": "9ab8ff", "desc": "A stone with a faint glow inside, from the deep isles."}, "colossus_horn": {"name": "Colossus horn", "kind": "trophy", "rarity": "rare", "ref": 70, "icon": "fortify", "col": "b9a07a", "desc": "Taken from a Colossus in its lair. Proof you stood your ground."}, "serpent_scale": {"name": "Serpent scale", "kind": "trophy", "rarity": "rare", "ref": 70, "icon": "dash", "col": "5ad0b0", "desc": "A scale the size of a shield, from a sky Serpent."}, "brood_crown": {"name": "Brood crown", "kind": "trophy", "rarity": "epic", "ref": 130, "icon": "gem", "col": "e0b04a", "desc": "The crest of a Brood queen. Few hunters have one."}, "dye_rose": {"name": "Rose dye", "kind": "dye", "rarity": "common", "ref": 15, "icon": "paw", "col": "ff7aa8", "desc": "Recolours what a Boki wears."}, "dye_sky": {"name": "Sky dye", "kind": "dye", "rarity": "common", "ref": 15, "icon": "paw", "col": "5ab8f0", "desc": "Recolours what a Boki wears."}, "dye_moss": {"name": "Moss dye", "kind": "dye", "rarity": "uncommon", "ref": 25, "icon": "paw", "col": "6fbf5a", "desc": "Recolours what a Boki wears."}, "dye_gold": {"name": "Gilt dye", "kind": "dye", "rarity": "rare", "ref": 60, "icon": "paw", "col": "f2c84a", "desc": "Recolours what a Boki wears, in shining gold."}, "dye_night": {"name": "Nightfall dye", "kind": "dye", "rarity": "epic", "ref": 120, "icon": "paw", "col": "3a3a6a", "desc": "Recolours what a Boki wears, deep as the night sky."}} |
+| goods_doc | Goods held in Save.d['goods'] (counts). kind: material (rare materials, found on expeditions), trophy (boss kills), dye (recolours a Boki's worn accessory). Belt utility, Boki wear and gear are traded from where they already live; their rarity is below. |
+| utility_rarity | {"armor_kit": "common", "jump_pad": "common", "smoke": "common", "stim": "uncommon", "medkit": "uncommon", "shield_cell": "rare", "scanner": "rare"} |
+| wear_rarity | {"bell": "common", "bow": "common", "leafhat": "common", "scarf": "uncommon", "crown": "uncommon", "goggles": "uncommon", "cape": "rare", "tophat": "rare", "collar": "uncommon", "charm": "epic"} |
+| finds | {"material": 0.25, "trophy_per_boss": 1} |
+| finds_doc | Per expedition you make it out of: the chance of one rare material (weighted by restock), and trophies per boss you helped kill. |
+
 ## merge_forms (`content/rules/merge_forms.json`)
 
 How a merge looks and plays (docs/decisions/0003). Forms with a kit live in content/merge_forms/<merge id>.json. This file holds the shared timings, the stat-style fallback every other Boki gets until its form is written (the Boki's type picks its look, rider and dash trail; the same for everyone, no tiers), and the weak surge.
@@ -366,6 +394,16 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | kinds | {"flat": ["secondwind", "featherfall", "tailwind", "toughskin", "quickhands", "scavenger", "keen", "fleet", "plating", "focus", "remedy", "overcharge"], "weapon": ["hotload", "deepmag", "quickfeed", "longreach", "brand_fire", "brand_frost", "brand_storm", "brand_venom", "brand_void"], "kit": ["field_kit", "magpie", "satchel", "spyglass", "tinker_roll"]} |
 | weights | {"brand_fire": 0.7, "brand_frost": 0.7, "brand_storm": 0.7, "brand_venom": 0.7, "brand_void": 0.7, "overcharge": 0.6, "remedy": 0.8} |
 | bot_want | {"default": 1.5, "brand_fire": 3.0, "brand_frost": 2.8, "brand_storm": 3.0, "brand_venom": 2.8, "brand_void": 2.6, "hotload": 2.6, "keen": 2.5, "quickfeed": 2.2, "toughskin": 2.4, "plating": 2.2, "secondwind": 2.0, "longreach": 1.8, "deepmag": 1.6, "quickhands": 1.7, "tinker_roll": 1.5, "magpie": 1.0, "scavenger": 1.0, "satchel": 0.8, "spyglass": 0.9, "overcharge": 1.2} |
+
+## portraits (`content/rules/portraits.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Framing for the Wardens' painted portraits and splashes (Portraits, art/portraits). face: where the face's centre sits in the portrait, as fractions of its width and height; a small frame crops in on it. splash: the point a splash is cropped around (the Warden's head and shoulders), same units. |
+| face | {"bulwark": [0.37, 0.27], "archer": [0.32, 0.3], "juggernaut": [0.42, 0.3], "thief": [0.4, 0.31], "mage": [0.42, 0.32], "dolm": [0.47, 0.27], "ostra": [0.46, 0.33], "ashwick": [0.36, 0.3], "gunslinger": [0.42, 0.34], "tender": [0.4, 0.32], "rimewright": [0.43, 0.32], "dredge": [0.5, 0.28]} |
+| splash | {"bulwark": [0.46, 0.25], "archer": [0.26, 0.2], "juggernaut": [0.6, 0.16], "thief": [0.42, 0.2], "mage": [0.35, 0.22], "dolm": [0.6, 0.18], "ostra": [0.54, 0.34], "ashwick": [0.55, 0.2], "rimewright": [0.52, 0.18], "dredge": [0.45, 0.38]} |
 
 ## weapon_path (`content/rules/weapon_path.json`)
 

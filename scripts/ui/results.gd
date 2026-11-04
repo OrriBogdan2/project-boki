@@ -51,6 +51,7 @@ func show_result(r: Dictionary) -> void:
 	kr.add_child(UI.tag("Extracted" if won else "Didn't make it", UI.TEAL if won else Color("ff9a8a")))
 	kr.add_child(UI.label(kick, UI.T_CAPS, UI.FAINT, UI.caps))
 	head.add_child(kr)
+	head.add_child(UI.label(HeroTitle.label(String(Save.d.get("name", "Hunter")), Arch.of_save()), UI.T_BODY, UI.MUTED))
 	head.add_child(UI.title("You made it out" if won else _lost_title(r.get("why", "")), 46, UI.INK))
 	var how_line := String({"skiff": "Flew out on the skiff from %s. ", "hatch": "Slipped out through a rift hatch. ", "uplink": "Rode the lift out of %s. "}.get(String(r.get("how", "")), ""))
 	if how_line.contains("%s"): how_line = how_line % String(r.get("where", "the islands"))
@@ -146,15 +147,15 @@ func show_result(r: Dictionary) -> void:
 			match String(ln["fate"]):
 				"squad": txt = "%s was carried home by your squadmate %s." % [kk["name"], ln["holder"]]; col = UI.GOOD
 				"home": txt = "%s found its own way home. It trusts you that much." % kk["name"]; col = UI.GOOD
-				"rival": txt = "%s was taken home by %s. Make them an offer at the Ransom House, or find them out there and take it back." % [kk["name"], ln["holder"]]
-				_: txt = "Nobody came for %s. It's waiting at the Ransom House on your farm." % kk["name"]; col = Color("ffd58a")
+				"rival": txt = "%s was taken home by %s. Make them an offer at the Black Market, or find them out there and take it back." % [kk["name"], ln["holder"]]
+				_: txt = "Nobody came for %s. It's waiting at the Black Market on your farm." % kk["name"]; col = Color("ffd58a")
 			var l := UI.label(txt, 15, col); l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			lv.add_child(l)
 		v.add_child(lc)
 	for nw in s.get("ransom_news", []):
 		v.add_child(_note(String(nw), Color("ffd58a")))
-	for ps in s.get("pens_sold", []):
-		v.add_child(_note("%s sold at the Drift Pens: +%d gems." % [String(ps["rec"].get("name", "A Boki")), int(ps["paid"])], UI.GOLD))
+	for line in s.get("market_news", []):
+		v.add_child(_note(String(line), UI.GOLD))
 	if not (s.get("exchange_fills", []) as Array).is_empty():
 		v.add_child(_note("%d of your Exchange offers filled while you were out." % (s["exchange_fills"] as Array).size(), UI.GOLD))
 	for fe in s.get("floor", []):

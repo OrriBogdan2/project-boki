@@ -1,5 +1,5 @@
 {
-	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash().",
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
 	"dash": {
 		"ground": {
 			"lmb": {"mode": "buffer", "source": "data: Spin Dash dashes forward and hits round him; footage 0371: one hammer spin on arrival. The hammer is busy in the spin, so a throw, recall or swing goes when the dash ends (no footage of the pair)"},
@@ -20,7 +20,15 @@
 		"lmb": {"mode": "cancel", "variant": "short", "source": "wiki (Spin Dash): Shift while charging the Hammer Smash ends it in a short dash without the spin, on a reduced cooldown (ours: half a charge back)"},
 		"rmb": {"mode": "fire", "variant": "charge", "source": "data: Brightshield + Shift is the Shield Bash (6 s, its own cooldown), the shield briefly invulnerable; the aegis stays up through it"},
 		"e": {"mode": "fire", "source": "data: Regen Field stays round the hammer; the dash doesn't touch it"},
-		"x": {"mode": "buffer", "source": "footage f25-f31: planted through the wind-up and the slam; Shift there goes when the plant ends"},
+		"x": {"mode": "buffer", "source": "footage f25-f31: planted through the wind-up and the slam; Shift there goes when the plant ends", "reason": "today's behaviour, to review"},
 		"q": {"mode": "fire", "source": "gloves are our own (no source)"}
+	},
+	"hold": {
+		"lmb": {
+			"ground": {"mode": "cancel", "reason": "today's behaviour, to review", "source": "Wiki (Spin Dash): Shift while charging the Hammer Smash ends it in a short dash without the spin (into_dash.lmb); owner item 51 wants the hold kept. Ours today (measured by --dash-flow-check): the hold ends and the short dash goes."},
+			"air": {"mode": "cancel", "reason": "today's behaviour, to review", "source": "No air dash in the footage. Ours today (measured by --dash-flow-check): the air dash (the lumber) ends the hold with no swing."},
+			"jump": {"mode": "keep"},
+			"mantle": {"mode": "cancel", "reason": "owner item 30: a mantle ends the held Crushing Blow (item 51 keeps that)", "source": "Owner item 30; the source has no mantle rule."}
+		}
 	}
 }

@@ -1,4 +1,4 @@
-"""Per-ability sounds for Linwick and Dredge (kitfix pass), pure Python (no numpy), original synthesis.
+"""Per-ability sounds for Cinder and Dredge (kitfix pass), pure Python (no numpy), original synthesis.
 Run: python3 tools/sfx_linwick_dredge.py, then: godot --headless --import. 44.1 kHz mono 16-bit.
 The names are registered at run time by scripts/arch/kits/ld_sfx.gd (LDSfx.NAMES)."""
 import math, os, random, struct, wave
@@ -55,7 +55,7 @@ def save(name, x, peak=0.8):
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
         w.writeframes(b''.join(struct.pack('<h', int(v * 32000)) for v in x))
 
-# ---------------------------------------------------------------- Linwick
+# ---------------------------------------------------------------- Cinder
 # pilot: a gas tick and a soft blue whoomp as the pilot catches
 save('lw_pilot', mix((env(hp(noise(0.04), 3000), 0.0005, 0.01), 0.6), (pad(env(lp(noise(0.25), 900), 0.02, 0.08), 0.03), 0.7), (pad(env(sine(0.2, 220, 140), 0.01, 0.06), 0.03), 0.4)))
 # the hose roar: a broad, breathy jet with a low rumble and fine crackle (one 0.5 s take the kit re-triggers)
@@ -78,7 +78,7 @@ save('lw_shield', mix((inhale + [0.0] * n(1.4), 0.6), (pad(boom, 0.2), 1.0), (pa
 save('lw_blaze', mix((env(sine(0.6, 130, 50), 0.003, 0.2), 0.9), (ramp(env(bp(noise(0.6), 900, 4000), 0.05, 0.3), 1.0, 0.3), 0.5), (hp(crackle(0.6, 28, 7.0), 2000), 0.4)))
 # the fire trail lays down: a sizzle like water on a hot plate
 save('lw_trail', mix((env(hp(noise(0.7), 2500), 0.03, 0.3), 0.7), (hp(crackle(0.7, 50, 4.0), 3500), 0.5)), 0.6)
-# Linwick's air hop (the class air dash): a short flame-jet puff
+# Cinder's air hop (the class air dash): a short flame-jet puff
 save('lw_hop', mix((env(bp(noise(0.25), 400, 3000), 0.005, 0.07), 0.8), (env(sine(0.2, 260, 120), 0.003, 0.05), 0.4)))
 
 # ---------------------------------------------------------------- Dredge

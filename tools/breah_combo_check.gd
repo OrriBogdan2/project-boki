@@ -1,5 +1,5 @@
 extends "res://tools/hero_pair_check.gd"
-## --dolm-combo-check: Breah (id dolm), docs/heroes/dolm.md. Every slot, its telegraph and cursor state
+## --dolm-combo-check: Tarek (id dolm), docs/heroes/dolm.md. Every slot, its telegraph and cursor state
 ## while aiming or holding, the charge timings, where it lands, the payoffs, the small mechanics
 ## (docs/heroes/dolm.md "Small mechanics"), standing on and climbing rocks, the merge-start drops, and
 ## that every move, sound and look the kit plays exists.
@@ -11,6 +11,15 @@ func run(main_node: Node) -> void:
 	await ult_check.ult(main)
 	n += ult_check.n
 	fails += ult_check.fails
+	var flow = load("res://tools/dash_flow_check.gd").new()
+	var bad: int = await flow.combos_of(main, "dolm")
+	ok("item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; holds go through every move",
+		bad == 0, "%d failing (the DASHFLOW lines)" % bad)
+	var parity = load("res://tools/parity_pvb.gd").new()
+	parity.main = main
+	await parity.breah()
+	n += parity.n
+	fails += parity.fails
 	print("PAIRCHECK dolm DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -46,8 +55,8 @@ func _breah() -> void:
 		for w in m.verbs.walls.duplicate(): m.verbs._break_wall(w)
 		step(m, 0.25)
 	ok(
-		"name: the display name is Breah",
-		Arch.name_of("dolm") == "Breah" and HeroKit.ARCHES["dolm"]["name"] == "Breah", Arch.name_of("dolm")
+		"name: the display name is the class title",
+		Arch.name_of("dolm") == "Rock Elementalist", Arch.name_of("dolm")
 	)
 	var card: Dictionary = K.d["card"]
 	ok(
@@ -491,6 +500,7 @@ func _breah() -> void:
 		"dunks %d vy %.1f" % [K.dunks, T.vel.y]
 	)
 	await _hop_glide(m, P, home, K, reset)
+	_glide_slam(m, P, K, reset)
 	# ---- data pass: Landslide is 12s with one charge; Molten Guard is the base passive
 	ok(
 		"data: the leap rests 12s per charge and starts with one charge (a second at rank 3)",
@@ -545,6 +555,7 @@ func _breah() -> void:
 	ok("anim: her long air dash plays breah_exdash", K.anim_id == "breah_exdash")
 	step(m, 0.8)
 	await _dash_moves(m, P, T, home, K, reset)
+	_air_dash_hold(m, P, K, reset)
 	# ---- rank 3
 	P.slot_lv["sec"] = 3
 	P.slot_lv["kin"] = 3
@@ -638,13 +649,13 @@ func _breah() -> void:
 		"breah_slam_land", "breah_lunge", "breah_dash", "breah_leap_land", "breah_exdash", "breah_raise", "breah_sense"
 	]
 	ok(
-		"anim: every Breah move is keyed (KMovesStone)",
+		"anim: every Tarek move is keyed (KMovesStone)",
 		moves.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty()),
 		str(moves.filter(func(mv): return HunterAnim.km_sample(mv, 0.1).is_empty()))
 	)
 	var snd := SfxKits.NAMES.filter(func(s): return String(s).begins_with("br_"))
 	ok(
-		"sfx: every Breah sound is loaded by Sfx", snd.size() >= 14 and snd.all(func(s): return Sfx.has(s)),
+		"sfx: every Tarek sound is loaded by Sfx", snd.size() >= 14 and snd.all(func(s): return Sfx.has(s)),
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)
@@ -730,6 +741,76 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 		)
 		P.inp["glide"] = false
 		step(m, 0.8)
+
+## Owner 23:00 (reverses item 26's "the glider wins" for a press in a glide; the source allows it): Quakefall
+## pressed while gliding folds the glider and plunges at the glider's dive speed (data: 32.5 m/s down, sideways
+## speed x0.25), slamming where she lands; glide still held doesn't reopen it on the way down.
+func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
+	reset.call()
+	P.pos.y += 8.0
+	P.grounded = false
+	P.inp["move"] = Vector2(1, 0)
+	var t := 0.0
+	while not P.gliding and t < 1.0:
+		P.inp["glide"] = true
+		m.step(DT)
+		t += DT
+	var glided := P.gliding
+	var s0 := K.slams
+	var vx0 := absf(P.vel.x)
+	P.inp["move"] = Vector2.ZERO
+	tap(m, P)
+	var folded := not P.gliding and K.dive and K.dive_glide
+	var vx1 := absf(P.vel.x)
+	var fall := 0.0
+	var vmin := 0.0
+	var reopened := false
+	while not P.grounded and fall < 2.0:
+		P.inp["glide"] = true
+		m.step(DT)
+		fall += DT
+		vmin = minf(vmin, P.vel.y)
+		reopened = reopened or P.gliding
+	P.inp["glide"] = false
+	P.inp["move"] = Vector2.ZERO
+	m.step(DT)
+	ok("glide slam: RMB in a glide folds the glider and plunges at the glider's dive speed (data 32.5 m/s)",
+		glided and folded and not reopened and vmin <= -30.0 and vx1 <= vx0 * 0.3 + 0.1,
+		"glided %s folded %s reopened %s vy %.1f vx %.1f -> %.1f" % [glided, folded, reopened, vmin, vx0, vx1])
+	ok("glide slam: she slams where she lands (about 0.3s down from 8m)", K.slams == s0 + 1 and P.grounded
+		and fall < 0.6, "slams +%d, %.2f s down" % [K.slams - s0, fall])
+	step(m, 0.8)
+
+## Item 51: the Quake Fist charge carries through her air dash (it charges on, short of the auto punch) and a
+## release in it punches as the dash ends, in the air, keeping most of her speed.
+func _air_dash_hold(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
+	reset.call()
+	P.inp["fire"] = true
+	step(m, float(K.lmb_def()["tap"]) + 0.15)
+	var k0 := K.lmb_t
+	var n0 := K.punches
+	P.pos.y += 4.0
+	P.grounded = false
+	P.inp["move"] = Vector2(1, 0)
+	P.ex_cd = 0.0
+	P.do_dash()
+	var dashing := K.flow.move_now() == "air"
+	step(m, 0.08)
+	ok("item 51: the Quake Fist charge carries through her air dash, charging on",
+		dashing and K.lmb_t > k0 + 0.05 and K.punches == n0, "charge %.2f -> %.2f dash %s punches +%d" % [k0, K.lmb_t,
+		dashing, K.punches - n0])
+	var speed := 0.0
+	P.inp["fire"] = false
+	var t := 0.0
+	while K.punches == n0 and t < 0.5:
+		speed = Vector2(P.vel.x, P.vel.z).length()       # (the last step before the punch: the dash's end)
+		m.step(DT)
+		t += DT
+	var kept := Vector2(P.vel.x, P.vel.z).length()
+	ok("item 51: let go in the air dash, she punches as it ends, still in the air and moving",
+		K.punches == n0 + 1 and not P.grounded and kept >= speed * 0.5, "%.2fs speed %.1f -> %.1f" % [t, speed, kept])
+	P.inp["move"] = Vector2.ZERO
+	step(m, 0.8)
 
 ## Item 35: her own ground (Rubble Leap) and air (the long dash) moves, ids no other hero's table has, each one
 ## keyed to end with its dash (the leap's crouch and flight; the air dash's time with the dash feel), and

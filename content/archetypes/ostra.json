@@ -1,6 +1,9 @@
 {
 	"id": "ostra",
-	"name": "Ostra",
+	"title": "Void Jester",
+	"base_name": "Ostra",
+	"gender": "male",
+	"personality": "A sinister, grinning jester who floats a little above the ground and plays with the dark.\nMenacing and gleeful, he treats every fight as a joke only he gets.",
 	"weight": "medium",
 	"color": "#7fe0d0",
 	"fantasy": "The lamplighter who floats. Pulls the fight to her, then lets it fall in.",
@@ -18,7 +21,7 @@
 		},
 		"x": "Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle."
 	},
-	"body": {"size": 0.9},
+	"body": {"size": 0.9, "hit_r": 0.412},
 	"signature": "tether_lantern",
 	"no_hold": true,
 	"resource": {

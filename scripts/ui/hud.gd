@@ -1034,7 +1034,6 @@ func _narrow(sz: Vector2) -> bool:
 ## Bottom centre: armor and health over the ability row. Bottom left: your kin. Bottom right: your
 ## weapon and what you're carrying. Left: your squad. Hits on you show which way they came from.
 const ARMOR_COL := Color("dfe9f7")      # armor kits and repairs (the armour strip itself: HudStyle / armor_col)
-const STAMINA_COL := Color("ffd66a")    # dash charges: yellow pips under the bars
 const HP_LOW := Color("ff6a5a")
 var armor_lerp := 1.0
 var ready_was := {}        # slot id -> was it ready last frame, for the "ready" flash
@@ -1045,6 +1044,8 @@ var slot_fx := {}          # slot id -> {kind: "cast"|"deny", t}: a pop when a p
 ## A press on an ability slot: "cast" pops it, "deny" (on cooldown, not ready) shakes it red; "reset" (it just came back) swells it with a ring.
 func ability_feedback(id: String, kind: String) -> void:
 	slot_fx[id] = {"kind": kind, "t": 0.0}
+	if id == "dash" and kind == "deny" and m.player:
+		plates.stam.deny(m.player)
 var hurt_dirs: Array = []  # {ang, t}
 var small_toasts: Array = []
 
@@ -1338,7 +1339,6 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	var rc: Color = Loot.ELEMENTS[p.welem]["col"] if p.welem != "" else Color("e6dccb")
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12, Color(rc, 0.45), 1)
 	hover_spots.append([r, "weapon"])
-	AmmoDeny.draw(self, r)
 	BokiHud.aug_mark(self, p, Rect2(r.position + Vector2(6, 4), Vector2(18, 18)), "lmb")
 	c.draw_rect(Rect2(r.position + Vector2(0, 10), Vector2(3, r.size.y - 20)), rc)
 	Icons.draw(c, p.wid, r.position + Vector2(40, 34), 26.0, Color(rc, 0.9))
@@ -1418,7 +1418,7 @@ func _mate_state(h: Hunter) -> Array:
 		return ["WISP", Color("ffb36a"), h.pos, ""]
 	return ["ALIVE", GOOD, h.pos, ""]
 
-## Portraits, one per hunter, rendered once (and a greyed copy for the fallen).
+## Rendered portraits for hunters with no painted art, one per hunter (and a greyed copy for the fallen).
 var portraits := {}       # nid -> SubViewport
 var portraits_grey := {}  # nid -> ImageTexture
 
@@ -1444,31 +1444,16 @@ func portrait_grey(h: Hunter) -> Texture2D:
 		portraits_grey[h.nid] = g
 	return portraits_grey[h.nid]
 
-## A portrait in a rounded frame. state: "" alive, "down" (red pulse), "dead" (grey + X), "out" (check).
+## A hunter's framed portrait (Portraits): its Warden's painted face, or its rendered model when it has
+## none. state: "" alive, "down", "dead", "out". Alive, a hit flashes it and low health drains it.
 func _draw_portrait(r: Rect2, h: Hunter, state: String, border: Color) -> void:
-	_rounded(r.grow(2.0), Color(0.02, 0.02, 0.04, 0.95), 8)
-	var col: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
-	c.draw_rect(r, Color(col.darkened(0.55), 0.9))
-	if state == "dead":
-		c.draw_texture_rect(portrait_grey(h), r, false, Color(0.8, 0.8, 0.85, 0.85))
-		var k := r.size.x * 0.2
-		for pair in [[r.position + Vector2(k, k), r.end - Vector2(k, k)], [Vector2(r.end.x - k, r.position.y + k), Vector2(r.position.x + k, r.end.y - k)]]:
-			c.draw_line(pair[0], pair[1], Color(0, 0, 0, 0.7), 9.0, true)
-			c.draw_line(pair[0], pair[1], Color("ff5a4a"), 5.0, true)
-	else:
-		c.draw_texture_rect(portrait(h), r, false)
-	if state == "down":
-		var pulse := 0.5 + 0.5 * sin(m.time * 8.0)
-		c.draw_rect(r, Color(0.9, 0.1, 0.05, 0.15 + 0.2 * pulse))
-		c.draw_rect(r.grow(1.0), Color(1.0, 0.25, 0.15, 0.55 + 0.45 * pulse), false, 2.5)
-	elif state == "out":
-		c.draw_rect(r, Color(0.05, 0.15, 0.12, 0.45))
-		var a := r.position + r.size * Vector2(0.25, 0.52)
-		var b := r.position + r.size * Vector2(0.43, 0.7)
-		var d := r.position + r.size * Vector2(0.76, 0.3)
-		c.draw_polyline(PackedVector2Array([a, b, d]), Color("8fe3c8"), 5.0, true)
-	else:
-		c.draw_rect(r.grow(1.0), Color(border, 0.8), false, 1.5)
+	var ak := Portraits.arch_of(h)
+	var fallback: Texture2D = null
+	if not Portraits.has_art(ak):
+		fallback = portrait_grey(h) if state == "dead" else portrait(h)
+	var hurt := plates.flash_of(h) if state == "" else 0.0
+	var low := clampf((0.3 - h.hp / maxf(1.0, h.max_hp)) / 0.3, 0.0, 1.0) if state == "" else 0.0
+	Portraits.draw(c, r, ak, fallback, border, state, hurt, low, m.time)
 
 ## Seconds a wisp has left at the normal bleed rate.
 func _bleed_left(h: Hunter) -> float:
@@ -1519,6 +1504,8 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 					HudStyle.strip(c, Rect2(Vector2(tx, r.position.y + 38), Vector2(tw, 3)), h.armor / h.max_armor, h.armor_col())
 				if _has_status(h):
 					_status_row(Vector2(tx + tw * 0.5, r.position.y + 52), h)
+				else:
+					plates.stam.draw(c, Rect2(Vector2(tx, r.position.y + 46), Vector2(tw * 0.6, 3)), h)
 			"WISP":
 				var left := _bleed_left(h)
 				var stp: bool = h.get_meta("stomped", false)
@@ -1897,12 +1884,12 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		if rv.has("hold"): rdesc += "  Hold: %s" % String(rv["hold"])
 		lines.append([Settings.key_cap("secondary"), String(ak.rmb_def().get("name", "Right click")), rdesc, ak.col_of(ak.rmb_def())])
 		lines.append([Settings.key_cap("signature"), String(ak.e_def().get("name", "E")), String(ak.e_def().get("desc", "")), ak.col_of(ak.e_def())])
-		lines.append([Settings.key_caps("ultimate"), String(ak.r_def().get("name", "R")) + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), String(ak.r_def().get("desc", "")), ak.col_of(ak.r_def())])
+		lines.append([Settings.key_caps("hunter_ult"), String(ak.r_def().get("name", "Ultimate")) + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), String(ak.r_def().get("desc", "")), ak.col_of(ak.r_def())])
 	if p.kin and p.ak:
 		var k: Kin = p.kin
 		var kcol: Color = Data.KIN[k.species]["color"]
 		var kd1: AbilitySpec = k.runner.def_of("k1")
-		if kd1: lines.append([Settings.key_cap("kin_ability"), kd1.display_name + " (" + String(k.rec.get("name", "your Boki")) + ")", KinText.ability(k.effective("k1")), KinText.color(kd1)])
+		if kd1: lines.append(["Auto", kd1.display_name + " (" + String(k.rec.get("name", "your Boki")) + ")", KinText.ability(k.effective("k1")), KinText.color(kd1)])
 		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
 	elif p.kin:
 		var k: Kin = p.kin
@@ -2121,7 +2108,7 @@ func _draw_scores(sz: Vector2) -> void:
 	for h in hs:
 		var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
 		c.draw_rect(Rect2(Vector2(r.position.x + 12, y - 14), Vector2(4, 18)), tc)
-		_text(Vector2(r.position.x + 22, y), "%s (%s)" % [h.pname, Arch.label(h.arch)], 15, INK if h != m.player else GOLD)
+		_text(Vector2(r.position.x + 22, y), HeroTitle.of_hunter(h), 15, INK if h != m.player else GOLD)
 		if h.kin: _text(Vector2(r.position.x + 260, y), Data.KIN[h.kin.species]["name"], 14, Data.KIN[h.kin.species]["color"])
 		_text(Vector2(r.position.x + 392, y), str(h.knocks), 15)
 		_text(Vector2(r.position.x + 456, y), str(int(h.dmg_done)), 15)
@@ -2144,8 +2131,6 @@ var abyss_a := 0.0
 const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
 var abyss_fx: CanvasLayer = null
 
-var dash_seen: Array = []      # per segment of the dash strip: was it full last frame (for the flash)
-var dash_flash: Array = []     # per segment: seconds left on its "it's back" flash
 
 ## A point `up` metres above a hunter's feet, following the body's lean toward the camera
 ## (CamRig.char_lean), so bars and names stay just over the head.
@@ -2248,7 +2233,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 			if k == null or k.runner.def_of("k1") == null: return []
 			var kd: AbilitySpec = k.runner.def_of("k1")
 			out.append([kd.display_name, KinText.color(kd)])
-			out.append(["%s's own ability  ·  %s  ·  cast from wherever it is" % [k.rec.get("name", "Boki"), Settings.key_cap("kin_ability")], MUTED, 12])
+			out.append(["%s's own ability  ·  it casts it by itself" % k.rec.get("name", "Boki"), MUTED, 12])
 			out.append([KinText.ability(k.effective("k1")), INK, 14])
 			out.append(["Cooldown %s%s" % [_secs(kd.cooldown), ("  ·  ready in %s" % _secs(k.runner.cd_left("k1"))) if not k.runner.is_ready("k1") else "  ·  ready"], MUTED, 13])
 			return out
@@ -2258,10 +2243,10 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 			out.append(["%s  ·  tap: Sic %s at the cursor, or Call it back when it is away (it hits what it passes). Hold: Chase, Guard, Return or Follow. A downed Boki stays where it fell: run into it to bring it back." % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")], INK, 13])
 			return out
 	var si := p.slot_info(id)
-	var r_name := "Ultimate (%s)" % Settings.key_cap("ultimate")
+	var r_name := "Ultimate (%s)" % Settings.key_cap("hunter_ult")
 	var slot_names := {"sec": "Right click", "k1": "Utility (E)", "r": r_name, "dash": "Dash"}
 	var slot_name: String = slot_names[id]
-	var key: String = {"sec": "secondary", "k1": "signature", "r": "ultimate", "dash": "dash"}[id]
+	var key: String = {"sec": "secondary", "k1": "signature", "r": "hunter_ult", "dash": "dash"}[id]
 	out.append([String(si["name"]), si["col"]])
 	out.append(["%s %s  ·  %s  ·  %s" % [Arch.name_of(p.arch), slot_name, Settings.key_cap(key), p.rank_text({"sec": "sec", "k1": "k1", "r": "r", "dash": "dash"}[id])], MUTED, 12])
 	out.append([String(si["desc"]), INK, 13])
@@ -2271,7 +2256,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 	for i in nr.size():
 		out.append(["%s%s: %s" % ["Next  ·  " if i == 0 else "", String(nr[i][0]), String(nr[i][1])], Color(si["col"], 0.95 if i == 0 else 0.7), 12])
 	if id == "r":
-		out.append(["Unlocks at level %d, rank 2 at %d. With a full bond meter it's the Merge: you and your Boki become one for a while." % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], MUTED, 12])
+		out.append(["Unlocks at level %d, rank 2 at %d. " % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], MUTED, 12])
 	if id == "sec":
 		var rd := p.ak.res_def()
 		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12])
@@ -2306,7 +2291,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			var kd: AbilitySpec = k.runner.def_of(id)
 			if kd == null: return []
 			out.append([kd.display_name, KinText.color(kd)])
-			out.append(["%s's ability  ·  %s" % [k.rec.get("name", "Boki"), Settings.key_cap("kin_ability" if p.ak else "signature") if id == "k1" else "its own"], MUTED, 12])
+			out.append(["%s's ability  ·  %s" % [k.rec.get("name", "Boki"), "its own" if p.ak or id != "k1" else Settings.key_cap("signature")], MUTED, 12])
 			out.append([KinText.ability(k.effective(id)), INK, 14])
 			var where := "Your Boki casts it; while it rides with you, you do." if kd.from == "kin" else "Works on you wherever your Boki is."
 			out.append(["Cooldown %s%s. %s" % [_secs(kd.cooldown / maxf(0.1, k.runner.rate)), ("  ·  ready in %s" % _secs(k.runner.cd_left(id))) if not k.runner.is_ready(id) else "  ·  ready", where], MUTED, 13])
@@ -2494,7 +2479,8 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 				lines.append(["Guarding where %s fell. Scan it and whoever gets out with it keeps it; its owner can pick it up if revived." % ("you" if k.lost_from == "you" else k.lost_from), GOLD if k.lost_from == "you" else MUTED])
 		elif k.owner_h == p:
 			var a1: AbilitySpec = k.runner.def_of("k1")
-			lines.append(["Yours. %s throws it, %s uses %s." % [Settings.key_cap("throw"), Settings.key_cap("kin_ability" if p.ak else "signature"), a1.display_name if a1 else "its ability"], INK])
+			var uses := ("it uses %s itself" if p.ak else Settings.key_cap("signature") + " uses %s") % (a1.display_name if a1 else "its ability")
+			lines.append(["Yours. %s sends it out, %s." % [Settings.key_cap("throw"), uses], INK])
 		elif k.lost_from == "you" and k.lost_uid != "":
 			lines.append(["Your lost Boki! Held by %s. Take it back." % (k.owner_h.pname if k.owner_h else "a rival"), GOLD])
 		else:

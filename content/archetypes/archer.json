@@ -1,11 +1,14 @@
 {
 	"id": "archer",
-	"name": "Pin",
+	"title": "Dark Archer",
+	"base_name": "Pin",
+	"gender": "female",
+	"personality": "A cool, patient hunter in a dark cloak with a thread of red. She says little and watches everything.\nShe picks the high ground, waits, and pins you to the wall.",
 	"weight": "light",
 	"color": "#9fe0a8",
 	"body": {
 		"size": 1.15,
-		"hit_r": 0.37
+		"hit_r": 0.392
 	},
 	"fantasy": "The warden of high ground. Climbs, reads the field, pins people to walls.",
 	"silhouette": "the long weapon over the shoulder",
@@ -54,8 +57,8 @@
 		"icon": "vanish",
 		"col": "#8dffa8",
 		"cd": 6.0,
-		"roll": 3.0,
-		"roll_t": 0.16,
+		"roll": 3.5,
+		"roll_t": 0.24,
 		"time": 2.8,
 		"time_rank3": 0.5,
 		"walk_k": 1.1,

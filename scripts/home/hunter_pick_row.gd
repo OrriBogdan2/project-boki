@@ -5,6 +5,8 @@ extends RefCounted
 ## under it. No weight labels (docs/decisions/0005). Picking saves it as your expedition Hunter (its
 ## weight and weapon family follow) and turns the farm hunter into it.
 
+const CHIP_FACE := 24         # px: the Warden's face on each Hunter's chip
+
 ## Adds the section to `parent` and returns the Hunter you are taking.
 static func add(home: Node, parent: Control) -> String:
 	var cur := Arch.of_save()
@@ -23,6 +25,7 @@ static func add(home: Node, parent: Control) -> String:
 		var locked := "Locked: %s\n" % ClassUnlock.requirement(id) if b.disabled else ""
 		b.tooltip_text = locked + ClassCard.kit_tip(id)
 		b.set_meta("arch", id)
+		Portraits.set_icon(b, id, CHIP_FACE)
 		flow.add_child(b)
 	parent.add_child(flow)
 	var sl := UI.label(HunterViewer.stat_line(cur), UI.T_SMALL, Arch.color(cur))

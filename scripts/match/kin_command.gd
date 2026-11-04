@@ -1,12 +1,12 @@
 class_name KinCommand
 extends RefCounted
-## The Boki commands (docs/decisions/0001, 0002): what G and C do, for the player and for bots.
+## The Boki commands (docs/decisions/0001, 0002): what G does for the player, and the ability cast for bots.
 ##   G tap   Boki out beside you: Sic, it leaps at the cursor (its landing staggers what it lands on).
 ##           Boki away (far, guarding, running back): Call back, it leaps to your side and hits what is on its path.
 ##           Boki on you (Return): it is thrown at the cursor as before.
 ##   G hold  the flick wheel (KinWheel): Chase, Guard, Return, Follow
-##   C       the Boki's own ability, cast from wherever the Boki is. On your shoulder it is cast through you.
-##   R       the Merge (KinMerge.press)
+##   The Boki casts its own ability by itself (KinTactics.think_abilities); bots press it through cast_c.
+##   X       the Merge (KinMerge.press)
 ## A tap is judged on release (so a hold can be told apart); the press is polled each frame (poll),
 ## the result is queued in Match.pending_input and applied on the fixed step (tap); a wheel pick waits in
 ## h.inp["wheel_pick"] until apply_pick runs on the fixed step.
@@ -168,7 +168,7 @@ static func chase_pick(h: Hunter) -> Ent:
 			bd = d; best = f
 	return best
 
-## C: the Boki's own ability at the cursor, from wherever the Boki is. Out in the field it casts where
+## The Boki's own ability at the cursor, from wherever the Boki is. Out in the field it casts where
 ## it stands (range-limited by the ability); on the shoulder (or merged) it is cast through you.
 static func cast_c(h: Hunter) -> bool:
 	var k: Kin = h.kin
@@ -180,7 +180,7 @@ static func cast_c(h: Hunter) -> bool:
 		return true
 	return false
 
-## The reason a C press did nothing, for a toast ("" if there is nothing to say).
+## The reason a cast did nothing, for a toast ("" if there is nothing to say).
 static func c_deny_text(h: Hunter) -> String:
 	var k: Kin = h.kin
 	if k == null:

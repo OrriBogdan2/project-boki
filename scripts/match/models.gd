@@ -881,9 +881,9 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var size_k := float(body.get("size", 1.0)) * float(HeroGearPair.body(arch)["size"])
 	var bulk := float(body.get("bulk", 1.0))
 	root.scale = Vector3(bulk, 1.0, bulk) * float(Data.CLASSES[cls]["scale"]) * rs * ck * size_k
-	# the ring under your feet shows the real hitbox, whatever your size
-	var hit_k := Arch.hit_r(arch, Data.CLASSES[cls]) / float(Data.CLASSES[cls]["hit_r"])
-	ring.scale = Vector3(1.0 / bulk, 1.0, 1.0 / bulk) * hit_k / (rs * ck * size_k)
+	# the ring under your feet is the real hitbox: its world radius is hit_r, whatever your size
+	var ring_k := 2.0 * Arch.hit_r(arch, Data.CLASSES[cls]) / (float(Data.CLASSES[cls]["scale"]) * rs * ck * size_k)
+	ring.scale = Vector3(1.0 / bulk, 1.0, 1.0 / bulk) * ring_k
 	var torso_node := root.find_child("Torso", true, false) as Node3D
 	if torso_node != null:
 		torso_node.scale.x *= float(body.get("chest", 1.0))
@@ -1663,7 +1663,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(gun, box(0.09, 0.05, 0.16), m_acc, Vector3(0, 0.05, 0.06))
 			grip.call(-0.02, 0.15)
 		"quill_rifle":
-			# Venator's drum rifle: a squat receiver, a drum of burr charges under it, a long needle barrel
+			# Vex's drum rifle: a squat receiver, a drum of burr charges under it, a long needle barrel
 			var bronze := shiny(Color("b9732f"), 0.6)
 			part(gun, box(0.1, 0.12, 0.42), m_gun, Vector3(0, 0, -0.12))
 			part(gun, cyl(0.1, 0.1, 0.1, 14), bronze, Vector3(0, -0.12, -0.14), Vector3.ONE, Vector3(0, 0, PI / 2))
@@ -2000,7 +2000,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 			part(body, sphere(0.035, 6), toon(Color("fff6c0"), false, 1.6), Vector3(cos(a) * 0.42, 0.62 + i * 0.08, sin(a) * 0.42), Vector3.ONE, Vector3.ZERO, "Spark%d" % i)
 	var acc: String = rec.get("acc", "")
 	if acc != "" and Data.ACCS.has(acc):
-		accessory(body, acc)
+		accessory(body, acc, Goods.wear_col(rec))
 	var pup: Node = KinPuppet.new(); pup.set("species", species)
 	root.add_child(pup)
 	if int(rec.get("level", 1)) < 4 and (rec.get("forms", []) as Array).is_empty() and not rec.is_empty():
@@ -2017,9 +2017,8 @@ static func _repivot(n: Node3D, at: Vector3) -> void:
 	for ch in n.get_children():
 		(ch as Node3D).position -= at
 
-## Something a kin wears, on its body at head height.
-static func accessory(body: Node3D, id: String) -> void:
-	var c: Color = Data.ACCS[id]["col"]
+## Something a kin wears, on its body at head height, in colour c (its own, or a dye's).
+static func accessory(body: Node3D, id: String, c: Color) -> void:
 	var m := toon(c)
 	match id:
 		"bell":
@@ -2050,6 +2049,8 @@ static func accessory(body: Node3D, id: String) -> void:
 			part(body, cyl(0.17, 0.17, 0.03, 14), m, Vector3(0, 0.68, 0))
 			part(body, cyl(0.11, 0.11, 0.2, 14), m, Vector3(0, 0.79, 0))
 			part(body, cyl(0.113, 0.113, 0.04, 14), toon(Color("d9604a")), Vector3(0, 0.72, 0))
+		_:
+			BokiWear.build(body, id, c)
 
 ## An air ring: fly through it for a burst of speed.
 static func air_ring() -> Node3D:

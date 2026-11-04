@@ -112,7 +112,7 @@ const CATALOG := {
 const FIXTURES := {"house": "house", "farm": "crop_patch", "pot": "cook_pot", "stall": "market_stall", "nook": "nesting_nook",
 	"burrow": "boki_burrow", "yard": "training_post", "graves": "graveyard"}
 ## What a farm-start island begins with: the portal, wild meadow and gems for a house and the essentials
-## (house 90 + crop patch 30 + cooking pot 20 = 140, the market stall 30 more, and a few to spare).
+## (house 90 + crop patch 30 + cooking pot 20 = 140, and some to spare; the market stall comes with the island).
 const FS_GEMS := 200
 ## The landing by the portal, kept clear on a farm-start island: you arrive here.
 const LANDING := Vector3(38.5, 0, 35.5)

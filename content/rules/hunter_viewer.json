@@ -1,5 +1,5 @@
 {
-	"desc": "The Hunter viewer (HunterViewer: the Hunters screen and character creation). Each ability is shown in turn for slot_s seconds, its move looped on the real model. `moves`: per Hunter and slot, the kit moves (any kit move table, HunterAnim.km_def) played back to back, the same ids the kits play. A slot with no entry falls back to the weapon swing or shot (lmb), the class dodge (dash), a cast pose (rmb, e, r) or an idle with its glow (passive). --hunter-unlock-check fails on an id that no longer exists, so a kit rename shows up here.",
+	"desc": "The Hunter viewer (HunterViewer: the Hunters screen). Each ability is shown in turn for slot_s seconds, its move looped on the real model. `moves`: per Hunter and slot, the kit moves (any kit move table, HunterAnim.km_def) played back to back, the same ids the kits play. A slot with no entry falls back to the weapon swing or shot (lmb), the class dodge (dash), a cast pose (rmb, e, r) or an idle with its glow (passive). --hunter-unlock-check fails on an id that no longer exists, so a kit rename shows up here.",
 	"slot_s": 3.2,
 	"gap_s": 0.35,
 	"turn_rate": 0.45,

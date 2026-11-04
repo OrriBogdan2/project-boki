@@ -83,8 +83,8 @@ func _arena() -> void:
 	P.teleport(P.pos + Vector3(3, 0, 0)); P.hp = 10.0
 	var bk := InputEventKey.new(); bk.physical_keycode = KEY_BACKSPACE; bk.keycode = KEY_BACKSPACE; bk.pressed = true
 	var xk := InputEventKey.new(); xk.physical_keycode = KEY_X; xk.keycode = KEY_X; xk.pressed = true
-	A.keys_node._unhandled_input(xk)      # X is the hero ultimate's key: it must not reset the arena
-	ok("X doesn't reset the arena (it is the hero ultimate's key)", P.flat_dist(A.home) > 1.0)
+	A.keys_node._unhandled_input(xk)      # X is the Merge key: it must not reset the arena
+	ok("X doesn't reset the arena (it is the Merge key)", P.flat_dist(A.home) > 1.0)
 	A.keys_node._unhandled_input(bk)      # Backspace resets
 	ok("Backspace resets the arena", P.flat_dist(A.home) < 0.2)
 	P.teleport(P.pos + Vector3(3, 0, 0)); P.hp = 10.0
@@ -137,12 +137,12 @@ func _arena() -> void:
 		P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = float(P.ak.rmb_charges()); P.fire_cd = 0.0
 		step(m, 0.1)
 		if float(P.ak.rmb_def().get("hold", 0.0)) <= 0.0:
-			continue      # no RMB hold variant (Dredge, Linwick: their hold is the lance, see --ashwick-combo-check)
+			continue      # no RMB hold variant (Dredge, Cinder: their hold is the lance, see --ashwick-combo-check)
 		var f0: int = P.ak.charge_fulls
 		var mid := -1.0
 		var ring_ok := false
 		if a == "gunslinger":
-			# Venator's hold is Longneedle's charge (E): a ring, a full tick, the shot
+			# Vex's hold is Longneedle's charge (E): a ring, a full tick, the shot
 			P.ak.cd["e"] = 0.0; P.ak.use_e()
 			step(m, 0.5)
 			ok(
@@ -210,8 +210,10 @@ func _arena() -> void:
 	# kits2: the sparring bot really uses the Thief's and the Juggernaut's kits on you
 	# (their ultimates on X open at level 6, and the sparring bot is level 1: its kit here is RMB, E and the dash)
 	for ba in ["thief", "juggernaut"]:
-		# the bot's dice must not depend on how many rolls the earlier sections took (as in main.gd's bot checks)
+		# the bot's dice must not depend on how many rolls the earlier sections took (as in main.gd's bot checks):
+		# the global dice and the match's own, which rolls the new bot's mind (skill, strafe side, timings)
 		seed(2024)
+		m.rng.seed = 2024
 		A.set_bot_arch(ba)
 		var B: Hunter = A.bot
 		P.teleport(A.home); B.teleport(A.home + Vector3(5.0, 0, 0))

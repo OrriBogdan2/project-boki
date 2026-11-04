@@ -56,14 +56,16 @@ func run(m: Node) -> void:
 	var hb: HomeBuild = home.hb
 	var L: Dictionary = HomeLayout.of(Save.d)
 	ok(HomeLayout.fs(Save.d) and int(L["seed"]) > 0 and float(L.get("sk", 0.0)) > 0.0, "a brand new save gets a farm-start island of its own (seed %d, scale %.3f)" % [int(L["seed"]), float(L.get("sk", 0.0))])
-	ok((L["deco"] as Array).is_empty() and home.plots.is_empty() and home.spots["house"].x < -100.0 and home.spots["pot"].x < -100.0, "no house, plots, pot or decorations yet: the island starts empty")
+	var only_stall := (L["deco"] as Array).size() == 1 and String(L["deco"][0]["id"]) == "market_stall"
+	ok(only_stall and home.plots.is_empty() and home.spots["house"].x < -100.0 and home.spots["pot"].x < -100.0,
+		"no house, plots, pot or decorations yet: the island starts empty but for its market stall")
 	var lots_out := 0
 	for b in Data.BUILDINGS:
 		if String(Data.BUILDINGS[b]["isle"]) == "main" and HomeLayout.placed(b, Save.d): lots_out += 1
 	ok(lots_out == 0 and Econ.feeders().is_empty() and int(Save.d["feeder_inv"].get("trough", 0)) == 1, "no building lots on the meadow, and the first trough waits in storage to be set down")
 	var ess := int(HomeLayout.CATALOG["house"]["gems"]) + int(HomeLayout.CATALOG["crop_patch"]["gems"]) + int(HomeLayout.CATALOG["cook_pot"]["gems"])
-	ok(int(Save.d["gems"]) == HomeLayout.FS_GEMS and ess <= HomeLayout.FS_GEMS and ess + int(HomeLayout.CATALOG["market_stall"]["gems"]) <= HomeLayout.FS_GEMS and HomeLayout.FS_GEMS - ess < 90,
-		"%d gems to start: a house, a crop patch and a pot cost %d (the stall %d more), with a little to spare" % [int(Save.d["gems"]), ess, int(HomeLayout.CATALOG["market_stall"]["gems"])])
+	ok(int(Save.d["gems"]) == HomeLayout.FS_GEMS and ess <= HomeLayout.FS_GEMS and HomeLayout.FS_GEMS - ess < 90,
+		"%d gems to start: a house, a crop patch and a pot cost %d, with a little to spare" % [int(Save.d["gems"]), ess])
 	var w: World = home.world
 	var ground := 0; var placed_n := 0
 	for i in w.kind.size():
@@ -71,7 +73,8 @@ func run(m: Node) -> void:
 		if w.island[i] == 0 and hb.occ.has(i) and String(hb.occ[i]) != "w": placed_n += 1
 	var kinds := {}
 	for i in hb.wild_t: kinds[hb.wild_t[i]] = int(kinds.get(hb.wild_t[i], 0)) + 1
-	ok(placed_n == 0 and ground > 900, "%d tiles of open meadow and nothing built on it (wild: %s)" % [ground, str(kinds)])
+	var stall_tiles := HomeLayout.size_of("market_stall", 0).x * HomeLayout.size_of("market_stall", 0).y
+	ok(placed_n == stall_tiles and ground > 900, "%d tiles of open meadow and only the stall on it (wild: %s)" % [ground, str(kinds)])
 	var wd0 := World.new()
 	HomeLayout.make_world(wd0, 0, int(L["seed"]), float(L["sk"]))
 	var raw := HomeLayout.wild_fs(wd0, int(L["seed"]), float(L["sk"]), {})

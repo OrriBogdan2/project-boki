@@ -1,6 +1,6 @@
 class_name KMovesDJ
 extends RefCounted
-## Keyed full-body moves of Dancer (thief) and Juggernaut (same format and channels as
+## Keyed full-body moves of Sable (thief) and Juggernaut (same format and channels as
 ## HunterAnim.KMOVES; HunterAnim.km_sample looks here after KMOVES, KMovesPair and MergeMoves). Each is
 ## anticipation -> a key pose on the hit -> follow-through and recovery, keyed to the kit's own timing
 ## and to the footage frame counts in briefs/hero-ref/dancer.md and juggernaut.md (5 fps: a frame is 0.2s).
@@ -154,7 +154,7 @@ const MOVES := {
 		[0.3, {"blade": Vector3(0.0, 1.6, 0.0), "bw": 0.8, "rad": 0.45, "p": -0.1, "sq": 0.12, "lw": 0.8,
 				"legs": [0.9, -0.8, -0.5, -0.4]}],
 		[0.45, {}]]},
-	# ---------------------------------------------------------------- Dancer (thief)
+	# ---------------------------------------------------------------- Sable (thief)
 	# Arc Bolts, one per hand (footage 0028-0039: 2-3 frames a shot, one arm whipped forward from a wide
 	# low stance, the torso turned about 30 degrees into it, the legs keeping their stance): the throwing
 	# arm cocked back past the shoulder at 0.03, whipped to full reach at 0.08 with the torso twisting
@@ -185,12 +185,22 @@ const MOVES := {
 		[0.35, {"y": 0.10, "p": -0.06, "lw": 0.6, "legs": [0.75, -1.0, -0.6, -0.75], "lift": -0.06,
 				"fl": Vector3(-0.10, 0.04, -0.30), "hw": 0.4, "fr": Vector3(0.42, 0.10, 0.00), "rw": 0.4}],
 		[0.45, {}]]},
-	# the empowered bolt (0143): planted and stretched into it, then a hard recoil back on the heels
+	# the empowered bolt (0143: a big streak, a vertical blade flash at her hands), thrown with both blades at
+	# once: she is caught coiled (both blades swept wide behind the shoulders, sunk low), drives them out
+	# together in a V at 0.04 with a long lunge, holds the reach through 0.12, recoils back onto her heels by 0.24 with
+	# the arms snapping back, and settles by 0.55 (the next bolt's whip takes over at 0.45)
 	"thf_primed": {"keys": [
-		[0.0, {"p": -0.3, "sq": 0.15, "lw": 0.8, "legs": [0.8, -1.1, -0.5, -0.4], "lift": -0.08}],
-		[0.06, {"p": -0.42, "sq": -0.22, "lw": 0.8, "legs": [0.9, -0.8, -0.6, -0.3]}],
-		[0.16, {"p": 0.25, "sq": 0.1, "lw": 0.7, "legs": [0.4, -0.6, -0.2, -0.4]}],
-		[0.5, {}]]},
+		[0.0, {"p": 0.16, "sq": 0.22, "lift": -0.1, "lw": 1.0, "legs": [0.85, -1.25, -0.7, -0.95],
+				"fr": Vector3(0.46, 0.34, 0.42), "rw": 1.0, "fl": Vector3(-0.46, 0.34, 0.42), "hw": 1.0}],
+		[0.04, {"p": -0.46, "sq": -0.26, "lift": -0.02, "lw": 1.0, "legs": [1.05, -0.9, -0.9, -0.5],
+				"fr": Vector3(0.20, 0.16, -0.76), "rw": 1.0, "fl": Vector3(-0.20, 0.16, -0.76), "hw": 1.0}],
+		[0.12, {"p": -0.52, "sq": -0.18, "lift": -0.03, "lw": 1.0, "legs": [1.1, -0.95, -0.95, -0.5],
+				"fr": Vector3(0.18, 0.14, -0.80), "rw": 1.0, "fl": Vector3(-0.18, 0.14, -0.80), "hw": 1.0}],
+		[0.24, {"p": 0.24, "sq": 0.14, "lift": -0.06, "lw": 0.9, "legs": [0.5, -0.7, -0.3, -0.55],
+				"fr": Vector3(0.28, 0.16, -0.18), "rw": 0.8, "fl": Vector3(-0.28, 0.16, -0.18), "hw": 0.8}],
+		[0.38, {"p": 0.06, "sq": 0.04, "lw": 0.5, "legs": [0.7, -0.95, -0.55, -0.7], "lift": -0.05,
+				"fr": Vector3(0.40, 0.12, -0.02), "rw": 0.4, "fl": Vector3(-0.40, 0.12, -0.02), "hw": 0.4}],
+		[0.55, {}]]},
 	# Vault, the ground Cartwheel (sheet: body 0176-0178, 0134-0137), inside the 0.48s dash: a 0.05s crouch with
 	# the arms swung up and the body leaning into the side, a push-off into a star (legs split, arms wide), one
 	# full turn over the top in the plane of travel, a low two-beat landing crouch at 0.36, upright by 0.48
@@ -323,13 +333,13 @@ const MOVES := {
 				"blade": Vector3(-1.2, -0.4, 1.4), "bw": 0.8, "rad": 0.35}],
 		[0.5, {}]]},
 	# ---------------------------------------------------------------- payoffs and passive procs
-	# Dancer, VAULT RESET: a spin on the heel with the arms flung wide, then a snap back to aim
+	# Sable, VAULT RESET: a spin on the heel with the arms flung wide, then a snap back to aim
 	"thf_reset": {"keys": [
 		[0.0, {"sq": 0.15, "lift": -0.05}],
 		[0.08, {"fy": -3.14, "sq": -0.15, "lift": 0.08, "fl": Vector3(-0.45, 0.25, 0.0), "hw": 1.0}],
 		[0.18, {"fy": -6.283, "sq": 0.1, "fl": Vector3(-0.45, 0.2, 0.0), "hw": 0.8}],
 		[0.4, {"fy": -6.283}]]},
-	# Dancer, a knock: a flourish, chin up, one blade raised, the heal rising through her
+	# Sable, a knock: a flourish, chin up, one blade raised, the heal rising through her
 	"thf_flourish": {"keys": [
 		[0.0, {}],
 		[0.1, {"p": 0.25, "lift": 0.1, "sq": -0.2, "fl": Vector3(-0.1, 0.55, -0.05), "hw": 1.0}],

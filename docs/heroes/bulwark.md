@@ -1,6 +1,6 @@
-# Bjorn (id `bulwark`, Heavy) - fidelity pass (hero sheet bjorn.md)
+# Frozen Bulwark (base character Bjorn; id `bulwark`, Heavy) - fidelity pass (hero sheet bjorn.md)
 
-Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name Bjorn (was Bulwark); the id, files and save keys stay `bulwark`. The minigun ability that was also called "Bulwark" (content/abilities/bulwark.json) is now Bracewall.
+Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name is the class title Frozen Bulwark; the id, files and save keys stay `bulwark`. The minigun ability that was also called "Bulwark" (content/abilities/bulwark.json) is now Bracewall.
 
 ## Research summary
 Sources (gameplay only; notes in our own words, nothing of the source ships):
@@ -46,7 +46,7 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 - The throw flies at least 2.5 m: the owner wants it to land where the cursor is anywhere in range, so the source patch note's 5 m minimum is cut to 2.5 m (a point-blank click still clears his own feet).
 
 ## Body and movement (hero sheet: Body, scale and movement feel)
-- About 1.15 of a medium tall (content `body.size` 0.975 over the heavy look) and ~1.35 wide (`body.build` 1.18 over the heavy build); the hit radius stays 0.5 so the wider model isn't an easier target.
+- About 1.15 of a medium tall (content `body.size` 0.975 over the heavy look) and ~1.35 wide (`body.build` 1.18 over the heavy build); the hit radius is 0.46 (1.15 x standard, `body.hit_r`, docs/HITBOX_SIZE.md).
 - Runs pitched far forward (~0.32 rad at a full run), the shield shoulder leading, shoulders square; quick steps at `spd*2.9` (HunterAnim.STRIDE), as fast as the lights.
 - His dash after-image is his own: a gold chevron wake at chest height (BjornFx.afterimage), not the shared ghost.
 - Nameplate at 2.6 m (`plate_offset` in the archetype JSON, read by `HudPlate.plate_offset(h)`).

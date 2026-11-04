@@ -1,30 +1,10 @@
 class_name HunterKeys
 extends RefCounted
-## What the reload key (R) and the hunter-ultimate key (X) do for a hunter. Merge (T) is KinMerge.press.
+## What the hunter-ultimate key (R) does for a hunter. Fuse (X) is KinMerge.press.
 
 const UNLOCK_TOAST_EVERY := 4.0      # s: the "unlocks at level 6" line shows at most this often
 
-## R: reload by hand. Ignored when you cannot act (stunned, downed, riding, dropping, in the merge transformation)
-## and while a hold or channel is running (a charge-up, a held roar). A weapon with no magazine (melee) answers
-## with the deny tick; a full or reloading weapon does nothing, silently. Auto-reload after a short idle stays.
-static func reload_pressed(h: Hunter) -> void:
-	if h.downed or h.stun_t > 0.0 or h.riding or h.dropping or KinMerge.transforming(h):
-		return
-	if h.reload_t > 0.0 or _channeling(h):
-		return
-	if bool(h.wpn.get("melee", false)) or int(h.wpn.get("mag", 0)) <= 0:
-		h._ab_feedback("reload", "deny")
-		return
-	h.start_reload()
-
-static func _channeling(h: Hunter) -> bool:
-	if not h.abil_charge.is_empty() or not h.charge.is_empty():
-		return true
-	if h.ak != null and h.ak.busy():
-		return true
-	return bool(h.inp.get("fire", false)) and String(h.wpn.get("id", "")) == "flamethrower"
-
-## X: the hunter's own ultimate. Opens at the same level as Merge (Hunter.ULT_AT[0]). No hero has one yet:
+## R: the hunter's own ultimate. Opens at the same level as Merge (Hunter.ULT_AT[0]). No hero has one yet:
 ## ArchKit.cast_ult() is the hook a kit overrides, and says whether anything went off.
 static func ult_pressed(h: Hunter) -> bool:
 	if h == null or h.downed or h.out:

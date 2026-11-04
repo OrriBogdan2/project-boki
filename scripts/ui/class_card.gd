@@ -5,9 +5,14 @@ extends RefCounted
 
 const GOAL_COL := Color("ffd27a")
 
-## The Hunter's portrait as a TextureRect; the SubViewport that renders it is a child of the rect.
-## `body`: the whole standing hunter (the reveal) instead of head and shoulders.
-static func portrait(id: String, px := 84.0, body := false) -> TextureRect:
+## The Hunter's portrait, `px` square: its Warden's painted face (Portraits.Pic), or with `body` its
+## splash (the reveal). A Warden with no painted art shows its rendered model instead: a TextureRect
+## with the SubViewport that renders it as its child (`body`: the whole standing hunter).
+static func portrait(id: String, px := 84.0, body := false) -> Control:
+	if Portraits.has_art(id):
+		var pic := Portraits.Pic.new(id, Vector2(px, px), Arch.color(id), body)
+		pic.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		return pic
 	var vp := Portraits.make(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), Save.d.get("look", {}), id,
 			body, int(px * 2.0) if body else Portraits.SIZE)
 	var tex := TextureRect.new()

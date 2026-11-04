@@ -88,7 +88,7 @@ static func sell(uid: String) -> int:
 	var it := find(uid)
 	if it.is_empty(): return 0
 	var g := Loot.sell_price(it)
-	_remove(uid)
+	remove(uid)
 	Save.d["gems"] = int(Save.d["gems"]) + g
 	return g
 
@@ -96,11 +96,12 @@ static func salvage(uid: String) -> int:
 	var it := find(uid)
 	if it.is_empty(): return 0
 	var n := Loot.scrap_of(it)
-	_remove(uid)
+	remove(uid)
 	Save.d["scrap"] = int(Save.d.get("scrap", 0)) + n
 	return n
 
-static func _remove(uid: String) -> void:
+## Takes a piece out of the armory, and out of the loadout if it was picked.
+static func remove(uid: String) -> void:
 	var arr: Array = Save.d["armory"]
 	for i in arr.size():
 		if String(arr[i].get("uid", "")) == uid:

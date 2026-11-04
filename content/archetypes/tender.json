@@ -1,6 +1,9 @@
 {
 	"id": "tender",
-	"name": "Moosh Moosh",
+	"title": "Fox Cub",
+	"base_name": "Moosh Moosh",
+	"gender": "female",
+	"personality": "Small, fiery and quick, with a fox's ears and tail and red markings.\nShe is cheerful and bold, and she looks after her friends first.",
 	"role": "Tender",
 	"weight": "medium",
 	"plate_offset": 2.05,

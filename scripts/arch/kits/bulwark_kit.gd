@@ -396,10 +396,12 @@ func lmb_override(held: bool, dt: float) -> bool:
 		else: _smash()
 	return true
 
-## True while something else has him: a mantle, a glide, a dash, a stun, a launch or a hard knock. The held
-## Crushing Blow ends the moment one starts, and the button has to come up before it can begin again.
+## True while something else has him: a move whose hold row ends the hold (content/dash_flow/bulwark.json: a
+## mantle), a glide, a stun, a launch or a hard knock. The held Crushing Blow ends the moment one starts, and the
+## button has to come up before it can begin again.
 func _hold_interrupted() -> bool:
-	return h.mantling() or h.gliding or h.roll_t > 0.0 or h.stun_t > 0.0 or h.downed or not h.pad.is_empty() \
+	var pad_flight := not h.pad.is_empty() and not h.mantling()
+	return flow.ends_hold("lmb") or h.gliding or h.stun_t > 0.0 or h.downed or pad_flight \
 		or not h.grap.is_empty() or m.time - maxf(h.kb_time, h.kb_t) < 0.12
 
 ## Ends the Crushing Blow's hold with no swing (another ability started, or he was moved): the spin and its
@@ -674,8 +676,10 @@ func on_dash(use_ex: bool) -> bool:
 		dash_after_plant = true          # planted for the slam: Shift goes when the plant ends (into_dash.x)
 		return true
 	var dd := dash_def()
-	var winding := lmb_t > float(lmb_def().get("tap", 0.2))
-	cancel_hold()
+	var dash_ends_hold := flow.ends_hold("lmb", flow.dash_move())
+	var winding := lmb_t > float(lmb_def().get("tap", 0.2)) and dash_ends_hold
+	if dash_ends_hold:
+		cancel_hold()
 	if winding and h.grounded and mace.is_empty():
 		# Shift while winding up the Crushing Blow (into_dash.lmb): it ends, with a short plain dash (no spin) for
 		# half a charge

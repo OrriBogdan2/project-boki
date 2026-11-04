@@ -122,6 +122,7 @@ func on_block(_dmg: float, _by) -> void: pass
 func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func move_k() -> float: return 1.0
+func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)
 func draw_rate() -> float: return 1.0               # a bow's draw speed (Pin's quick draw after a perfect release)
 func fire_ok() -> bool: return true
 ## The attack key, if this kit runs the weapon's attack itself (true = handled; Hunter.trigger stops).

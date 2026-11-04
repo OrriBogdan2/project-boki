@@ -180,16 +180,15 @@ func _front() -> void:
 		note_bad("not on the hatch screen after the prologue"); return
 	hx._end_intro()
 	await wait(2.0)
+	await shot("hunter_pick")
+	hx._take_hunter([ClassUnlock.starters()[0]])
+	await wait(1.0)
 	await shot("egg_pick")
 	hx._pick(0)
 	await wait(0.8)
 	await shot("egg_chosen")
 	press("Hatch it")
-	await wait(1.5)
-	await shot("hunter_pick")
-	hx.starter_picks = [ClassUnlock.starters()[0]]
-	hx._confirm_starters()
-	await wait(1.0)
+	await wait(2.5)
 	for i in 7:
 		hx._tap_egg()
 		await wait(0.35)
@@ -487,7 +486,7 @@ func _level_up(m) -> void:
 	# spend the points the way a player does: press a locked ability with a point to spare
 	var spot: Vector3 = P.pos
 	aim_at = spot + _safe_dir(m, P) * 4.0      # (a dash goes toward the cursor: point it at ground, and put the hunter back after each press)
-	for a in ["secondary", "signature", "dash", "kin_ability", "gear1", "ultimate"]:
+	for a in ["secondary", "signature", "dash", "gear1", "ultimate"]:
 		await key(a)
 		await mwait(0.3)
 		if is_instance_valid(m) and (P.pos - spot).length() > 0.5:
@@ -519,7 +518,7 @@ func _cast_round(m, tag: String, wait_cd: bool) -> void:
 	aim_at = tgt
 	var home: Vector3 = P.pos
 	var casts := [["secondary", "rmb_tap", 0.1], ["secondary", "rmb_hold", 1.2], ["signature", "e", 0.12], ["dash", "dash", 0.1],
-		["kin_ability", "boki_c", 0.12], ["throw", "boki_g", 0.12], ["ultimate", "r", 0.12]]
+		["throw", "boki_g", 0.12], ["ultimate", "r", 0.12]]
 	for c in casts:
 		if wait_cd:
 			await mwait(1.5)

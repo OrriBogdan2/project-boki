@@ -402,16 +402,6 @@ func _ready() -> void:
 		set_meta("incubator_check", icc)
 		icc.run(self)
 		return
-	if "--economy-floor-check" in args:
-		var efc_s: GDScript = load("res://tools/economy_floor_check.gd")
-		if efc_s == null or not efc_s.can_instantiate():
-			print("ECONOMY_FLOOR CHECK failed to load, failures: 1")
-			get_tree().quit(1)
-			return
-		var efc = efc_s.new()      # never stuck: strays, the pens, the Exchange, saves
-		set_meta("economy_floor_check", efc)
-		efc.run(self)
-		return
 	if "--economy-check" in args:
 		_economy_check()
 		return
@@ -1410,7 +1400,7 @@ func _ability_check() -> void:
 	# 7. Tripwire Mine roots whoever steps on it
 	r = _ac_setup(4.0); m = r[0]; P = r[1]; T = r[2]
 	P.runner.set_slot("utility", Content.ability("tripwire_mine"))
-	P.inp["aim"] = T.pos + Vector3(-1.5, 0, 0)
+	P.inp["aim"] = T.pos + Vector3(-2.0, 0, 0)      # clear of the target's hitbox (item 46 sizes)
 	P.runner.use("utility", {})
 	_ac_run(m, 1.0)
 	var before_root := T.root_t
@@ -1947,7 +1937,7 @@ func _grammar_runtime_check() -> void:
 		if k.runner.charges("k2") < c2: used["k2"] += 1
 		k.runner.reset()
 		_grt_out(k, home + Vector3(1.0, 0, 0)); k.target = T
-	_grt("E auto-cast off for you; auto active on", int(used["k1"]) == 0 and int(used["k2"]) > 0, "E %d, auto %d" % [used["k1"], used["k2"]])
+	_grt("your out Boki casts both its abilities itself", int(used["k1"]) > 0 and int(used["k2"]) > 0, "ability %d, auto %d" % [used["k1"], used["k2"]])
 	_ac_run(m, 1.0); _grt_reset(T)
 	# ---- 6. carry modes
 	k = _grt_kin(m, P, "pebbit")

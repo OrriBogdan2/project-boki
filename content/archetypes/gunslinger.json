@@ -1,8 +1,11 @@
 {
 	"id": "gunslinger",
-	"name": "Venator",
+	"title": "Hired Gun",
+	"base_name": "Vex",
+	"gender": "female",
+	"personality": "A sharp, professional soldier in marine-style gear. She takes the contract and finishes the job.\nCalm under fire, and always has a plan for the way out.",
 	"weight": "medium",
-	"body": {"size": 1.0, "chest": 1.0},
+	"body": {"size": 1.0, "chest": 1.0, "hit_r": 0.416},
 	"color": "#ff9a5c",
 	"fantasy": "The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into his rifle, slides around while still shooting, and finishes with one long needle of light.",
 	"silhouette": "the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle",

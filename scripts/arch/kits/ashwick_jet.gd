@@ -1,6 +1,6 @@
 class_name AshwickJet
 extends RefCounted
-## Linwick's ultimate on X, Flue Flight (docs/heroes/ashwick.md): a ring of embers at lift-off, then 1.8s of
+## Cinder's ultimate on X, Flue Flight (docs/heroes/ashwick.md): a ring of embers at lift-off, then 1.8s of
 ## low flight toward the cursor that steers with the aim at a capped turn rate. A molten carpet forms under
 ## him as he goes and lasts 5.2s: it burns, slows and builds Char. X again lands early; a stun ends the flight;
 ## a knockback speeds it up. The carpet never forms over the abyss. An enemy hunter it burns (or knocks, or

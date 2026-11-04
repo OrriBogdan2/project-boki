@@ -54,8 +54,11 @@ static func air_steer(h: Hunter, hv: Vector2, wish: Vector2, dt: float) -> Vecto
 	return kept.move_toward(wish, steer)
 
 ## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
-## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover).
+## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover). A kit's
+## plunge (ArchKit.dive_speed, like Breah's air Quakefall) outruns it.
 static func fall_cap(h: Hunter) -> float:
+	if h.ak and h.ak.dive_speed() > 0.0:
+		return h.ak.dive_speed()
 	if not h.below_lip:
 		return fall_max
 	var k := clampf((h.lip_y - h.pos.y - abyss_slow_from) / (abyss_slow_to - abyss_slow_from), 0.0, 1.0)

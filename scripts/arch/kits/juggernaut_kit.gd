@@ -330,6 +330,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 	# (a merge ends the charge: letting go of it must not swing a wave mid-transformation); a press while a
 	# pull, a dash or a Meteor Drop holds the blade is kept for BUFFER and swings when it's free
 	if not h.can_fire() or KinMerge.transforming(h) or meteor.running():
+		if lmb_t >= 0.0 and _hold_waits():
+			return true         # a dash whose hold row keeps the Searing Wave charge: it waits for the dash's end
 		if lmb_t >= 0.0:
 			lmb_t = -1.0
 			h.mel_hold = 0.0
@@ -369,6 +371,10 @@ func lmb_override(held: bool, dt: float) -> bool:
 		lmb_buf = 0.0
 		_slash()
 	return true
+
+## The Searing Wave charge waits out what stops the blade, rather than ending: a dash its hold row keeps it through.
+func _hold_waits() -> bool:
+	return flow.pauses_hold("lmb") and not KinMerge.transforming(h) and not meteor.running()
 
 ## A quick slash: a cone, twice as hard on the tip (the sweet spot at the far end of the swing).
 func _slash() -> void:
@@ -653,7 +659,7 @@ func _flush_buffer() -> void:
 		h.do_dash()
 
 ## Which of his moves owns the body now, by slot ("" for none): the Gilded Riposte, a Smash (the Slam's wind-up,
-## a Lunge, a Meteor Drop until it lets Shift go), the Warchain's pull, a Searing Wave charge.
+## a Lunge, a Meteor Drop until it lets Shift go), the Warchain's pull, a Searing Wave charge a dash would end.
 func _move_slot() -> String:
 	if riposte.running():
 		return "x"
@@ -661,8 +667,8 @@ func _move_slot() -> String:
 		return "rmb"
 	if warchain.pulling():
 		return "e"
-	if lmb_t > float(lmb_def()["tap"]):
-		return "lmb"
+	if lmb_t > float(lmb_def()["tap"]) and flow.ends_hold("lmb", flow.dash_move()):
+		return "lmb"            # (a charge the dash's hold row keeps isn't in the way: it carries through)
 	return ""
 
 ## Shift drops the move (its into_dash row: cancel).

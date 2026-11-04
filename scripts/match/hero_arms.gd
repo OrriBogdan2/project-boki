@@ -1,11 +1,11 @@
 class_name HeroArms
 extends RefCounted
-## The fixed weapons of Breah (dolm, Rubble Fists) and Ostra (Tether Lantern), built on the gun node
+## The fixed weapons of Tarek (dolm, Rubble Fists) and Ostra (Tether Lantern), built on the gun node
 ## (Models.gun_parts asks first). The barrel runs along -Z, the hand holds near the origin.
 
 static func build(gun: Node3D, weapon: String, m_gun: Material, m_dark: Material, m_acc: Material) -> bool:
-	if HeroArmsDJ.build(gun, weapon, m_dark, m_acc): return true      # Dancer's Arc Bolts
-	if HeroArmsVV.build(gun, weapon, m_gun, m_dark, m_acc): return true      # Vireo's finger coil, Venator's rifle
+	if HeroArmsDJ.build(gun, weapon, m_dark, m_acc): return true      # Sable's Arc Bolts
+	if HeroArmsVV.build(gun, weapon, m_gun, m_dark, m_acc): return true      # Vireo's finger coil, Vex's rifle
 	match weapon:
 		"rubble_fists":
 			_fists(gun, m_dark, m_acc)

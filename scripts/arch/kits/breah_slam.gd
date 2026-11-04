@@ -1,6 +1,6 @@
 class_name BreahSlam
 extends RefCounted
-## Breah's Quakefall (RMB): hold to gather, let go to hop a short way forward and smash both fists down.
+## Tarek's Quakefall (RMB): hold to gather, let go to hop a short way forward and smash both fists down.
 ## While charging, everyone sees the big circle a hop ahead of her with its sweet spot growing from the
 ## centre; she can walk slowly, jump to leap forward (the circle comes with her) and punch to lunge
 ## further. The centre stuns, foes in the air are dunked, rocks inside fly outward, and at rank 3
@@ -95,12 +95,16 @@ func fire(c: Dictionary) -> void:
 	var h := k.h
 	k.last_variant = String(c["variant"])
 	AimKit.hide(h, "rmb")
-	if h.gliding:
-		k.anim_id = ""      # (the held pose ends) the glider wins: no dive out of an open glider
-		return
 	if not k.spend_rmb():
 		k.anim_id = ""
 		return
+	k.dive_glide = h.gliding
+	if h.gliding:
+		# the source's slam out of a glide: the glider folds at once and she plunges at its dive speed
+		h.gliding = false
+		h.fly_t = 0.0
+		h.vel = Vector3(h.vel.x * 0.25, minf(h.vel.y, 0.0), h.vel.z * 0.25)
+		k.m.sfx("glide", h.pos, -6.0, 0.7)
 	var ck := charge_k(float(c["t"])) if c.get("hold", false) else 0.0
 	k.dive = true
 	k.dive_k = ck

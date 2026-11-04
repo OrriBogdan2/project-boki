@@ -1,4 +1,4 @@
-# Dancer (archetype id `thief`, light)
+# Silver Thief (base character Sable; archetype id `thief`, light)
 
 Branch history: kits2 ported the kit from the source hero, kits2-nor (Nov 2) removed its R,
 ext/kitfix-dancer-juggernaut (Nov 2, server update 5) matched it to the gameplay footage and renamed the hero
@@ -15,11 +15,37 @@ section, in docs/ARCHETYPES.md and in docs/wiki/Inspirations.md. Ids and file na
 
 ## Scaling
 
-Ratios, not raw numbers: a bolt is 9 (the source basic attack, 137), the empowered bolt is 3.5x (474),
+Ratios, not raw numbers: a bolt is 9 (the source basic attack, 137), the empowered bolt is 2.34x (the data's +214 on 160),
 a Mark is +10% of a bolt (the data's +16 on its 160 bolt), the Bola is 5 (74) and +13 for a pair (199), an Encore blade
 is 8 (about 0.9 of a bolt: 114-127 against 137) and +4 from the outer band (the card's +50%: 36 + 19% against
 +18 + 9.5%). Cooldown ratios: Vault 4.5s (Cartwheel 4.2), Bola 7s (Trickshot 6.7), Shadow Knife 15s (Phantom
 Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
+
+## Feel pass (item 7)
+
+Owner review 1103 item 7: her Cartwheel, the empowered bolt after it and the reset are the source's identity.
+[game data] is briefs/supervive-data/supervive_kits.md (Shiv, read at level 15); [footage] is
+briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asserted in `--dancer-combo-check`
+(tools/dancer_feel_check.gd, lines `dancer feel: ...`).
+
+| What | Source | Ours before | Ours now |
+|---|---|---|---|
+| Ground Cartwheel distance | 105-144 px, about 4.5m (3.9-5.4) [footage] | 4.5m x the global dash feel = 3.8m | 4.5m (taken off the global dash feel, content/rules/dash_feel.json) |
+| Ground Cartwheel time | 0.37-0.57s above run speed; crouch 0.05s, over the top by 0.3, landing crouch, upright by about 0.5s [footage] | 0.42s x 1.15 = 0.48s | 0.48s (the `thf_vault` keys: crouch 0.05, over the top 0.30, landing 0.36, up 0.48) |
+| Ground speed curve | peak 15-16.5 m/s at +0.1-0.27s, then a steady run-down into the faster run [footage] | the same curve, peak about 12.5 m/s | peak about 14.8 m/s at 0.14s |
+| Air Cartwheel | 225 px, about 8.4m over about 0.95s, about 2x run speed held until she lands [footage] | 8m x 0.85 = 6.8m over 1.09s | 8.4m over 0.95s, held to the landing |
+| Cooldown, charges | 5s at rank IV, 6 mana, 1 charge [game data]; the card in the footage says 4.2s [footage] | 4.5s, 1 charge | unchanged (between the two; landing the shot resets it anyway) |
+| What empowers | the dash empowers the next Arcslinger [game data]; from a jump too (0129-0143) [footage] | the dash, ground and air (its dash -> LMB row) | unchanged |
+| How long it waits | not given; the gold aim line held about 0.8s before the shot (0139-0143) [footage] | 3s | unchanged (an assumption) |
+| Empowered damage | +214 on a 160 bolt, so 2.34x [game data]; 474 and 561 on a 137 bolt in the footage, which is 2.34x plus about 9 and 14 stacks of +17 [footage, derived] | 3.5x the bolt, Marks multiplying all of it | a bolt plus 1.34 bolts (2.34x); Marks add 10% of a bolt each, flat, as the source's +16 a stack |
+| Empowered ranks | +20% damage twice [game data] | +20% / +40% on the whole shot | +20% / +40% on the bonus (2.61x, 2.88x) |
+| Empowered extras | an Arcslinger hit: 1 stack [game data] | 2 Marks and Shred (+15% damage taken, 3s) | 1 Mark; Shred gone (not in the source) |
+| Empowered range, look | 850 -> 950 units (+12%) [game data, wiki]; a large yellow lightning streak carrying a blue chakram, a vertical blue blade flash at her hands, a red-white flash on the target (0143, 0187) [footage] | +12%; the blue chakram in a gold streak; the shared payoff burst (two rings and 36 sparks) on the target | +12%; the same bolt; on the hit a blue-white star and an upright blue blade arc, no rings or burst |
+| The throw | 2-3 frames, one arm whipped from a wide stance [footage] | the body pitched, no arm keys | `thf_primed`: coiled with both blades cocked behind the shoulders, both driven out at 0.04, held to 0.12, a recoil onto the heels by 0.24, settled by 0.55 |
+| Auto rate | 0.45s [footage card] | 0.45s | unchanged |
+| Reset | landing the empowered shot resets Quickflip and refunds its mana [game data]; hit at 0187, the next Cartwheel at 0193 [footage] | the Vault back on the hit | unchanged, asserted on the hit's own step; a cyan star at her hip and the `thf_reset` heel snap |
+| Speed boost | Quickflip gives one (rank IV makes it +50% bigger) [game data]; +15-20% for about 1-1.5s after a Cartwheel [footage] | +18% for 2s at most, ended by firing the empowered bolt | unchanged |
+| Dash -> shot rhythm | 0193: the Cartwheel and the empowered shot leave on the same frame (mid-flip); 0137 -> 0143: up after the flip, the gold line, the shot about 1s later; the loop about 1.4s (0187 -> 0194) [footage] | fires mid-flip (row `fire`); a click while the last bolt still cooled was lost | the same, and a click while the bolt cools (mid-flip too) is kept for one bolt's interval and goes the moment it can; two empowered hits fit inside 1.4s with LMB held |
 
 ## Per-slot table
 
@@ -27,7 +53,7 @@ Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
 |---|---|---|---|---|
 | LMB, Arc Bolts | hold | A spinning gold chakram from alternating hands every 0.45s, 34 m/s; it flies to the cursor (12m at most) and fizzles there in a blue-violet puff. A thin white aim line to the cursor with an arrow tick, gold while the next bolt is empowered | Arcslinger: the same, cursor-placed, 0.45s | Range 12m (the footage shows at least 7 bh); no magazine |
 | Passive, Marks | none | Every bolt that hits adds a Mark (no cap, 4s, refreshed; eight diamonds show): +10% bolt damage per Mark. A knock heals 15% on top of the shared 10% (25% in all) with a crimson star on the knocked and a green pillar on her | Malice: about +12% of a shot per consecutive hit, still climbing at 8; knock heal with a green pillar | Gold diamonds over the target keep the stack readable (ours) |
-| Dash, Vault | Shift | A 4.5m sideways cartwheel (0.42s; both x the global dash feel, so about 3.8m in 0.48s) the way you move: a burst that peaks near 0.15s and runs down into the hasted run, a cyan and lilac arc traced by hands and feet, cyan streaks behind; +18% speed until the next hit (2s at most); the next bolt within 3s is empowered: a big blue chakram in a gold lightning streak, 3.5x, 2 Marks, Shred; landing it gives the Vault back; rank 2: empowered +20%, rank 3: +40% in all and the speed boost half again as big | Cartwheel: a short sideways cartwheel, the next LMB empowered, a hit resets it | As the source |
+| Dash, Vault | Shift | A 4.5m sideways cartwheel in 0.48s (the source's measured one, off the global dash feel) the way you move: a burst that peaks near 0.15s and runs down into the hasted run, a cyan and lilac arc traced by hands and feet, cyan streaks behind; +18% speed for 2s at most; the next bolt within 3s is empowered: a big blue chakram in a gold lightning streak, 2.34x (Marks add flat), one Mark; landing it gives the Vault back at once; rank 2: the bonus +20%, rank 3: +40% in all and the speed boost half again as big | Cartwheel: a short sideways cartwheel, the next LMB empowered, a hit resets it | As the source |
 | RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.4m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5 and a Mark, the first foe Grounded 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
 | E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s) or lands where you aimed; a white circle marks it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway; rank 3: sticking in a foe gives the Vault back | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
 | X, Encore | tap (level 6) | A violet ring grows round her from 2.3m to 5.4m (3 bh) over 0.4s, everyone sees it, then rides with her for 2s: every 0.4s a blade flies at each foe inside (5 at most each): 8, and 12 from the outer band (past 75% of the radius), which also blights 6s. She keeps walking, shooting and dashing; casting it gives the Vault back; every blade refreshes her Marks; three blades circle her while it runs; a plain fade at the end. 24s cooldown. A blade landing on a rival hunter fills the bond (the best event of the cast counts) | Death Blossom: the ring grows 1.3 to 3 bh in 0.4s, up to 5 shots at each enemy over 2s, the outer band hits harder and Anti-Heals 6s | As the source; the look (her violet ring with a gold outer band, violet blades) is ours |
@@ -35,11 +61,11 @@ Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
 
 ## Body and movement (hero sheet "Body, scale and movement feel")
 
-- Model about 0.95 of a medium (`body.size` 1.11 on the light build); hit radius unchanged (0.35).
+- Model about 0.95 of a medium (`body.size` 1.11 on the light build); hit radius 0.384 (`body.hit_r`, docs/HITBOX_SIZE.md).
 - Nameplate height 2.15 m (`body.plate`; read by the HUD through `Arch.plate_y`).
 - Runs pitched far forward (about 0.57 rad at a run).
-- Ground Cartwheel: 4.5 m with the measured speed curve; the long (air) dash is the same sideways cartwheel
-  carried flat on its speed for 8 m over 0.95 s (x the dash feel), ending where she lands. From a jump it
+- Ground Cartwheel: 4.5 m in 0.48 s with the measured speed curve; the long (air) dash is the same sideways cartwheel
+  carried flat on its speed for 8.4 m over 0.95 s, ending where she lands (both off the global dash feel). From a jump it
   empowers the next bolt too (the source's Quickflip does; its dash -> LMB row in content/dash_flow/thief.json).
 - Her dashes leave her own cyan streaks and stars, not the shared after-image. No ring or burst on a dash or a
   landing: the empowered bolt shows as a tight gold glint (a hot core and a turning four-point star) in the hand
@@ -101,7 +127,7 @@ All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `-
 
 | Sequence | Result | Check |
 |---|---|---|
-| Vault, then a bolt that hits | empowered: 3.5x, 2 Marks, Shred; Vault back; the speed ends | `combo dancer: Vault > bolt = empowered hit + Vault reset` |
+| Vault, then a bolt that hits | empowered: 2.34x, a Mark; Vault back; the speed ends | `combo dancer: Vault > bolt = empowered hit + Vault reset` |
 | Vault > bolt > Vault > bolt | the reset loop | `combo dancer: the reset loop (Vault > bolt > Vault > bolt)` |
 | Vault, then a bolt that misses | spent, no reset | `combo dancer: an empowered bolt that misses is spent` |
 | Shadow Knife into a foe (rank 3) | Vault back; half the Knife's cooldown back | `combo dancer: Knife in a foe (rank 3) = Vault reset + refund` |
@@ -117,7 +143,9 @@ All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `-
 ## Animation moves
 
 `KMovesDJ` (scripts/match/kmoves_dj.gd): `thf_lmb_r` / `thf_lmb_l` (the body for each throw: release at
-0.08s, follow-through to 0.22, back by 0.42; the arm is the twin-hold swing), `thf_primed`, `thf_vault_r` /
+0.08s, follow-through to 0.22, back by 0.42; the arm is the twin-hold swing), `thf_primed` (the empowered
+throw: both blades cocked behind the shoulders, driven out together at 0.04, a recoil onto the heels by 0.24, settled
+by 0.55), `thf_vault_r` /
 `thf_vault_l` (the ground Cartwheel inside the 0.48s dash: a 0.05s crouch with the arms swung up, a push-off
 into a star, one turn over the top by 0.30, a landing crouch at 0.36, up by 0.48), `thf_exdash` (the air
 Cartwheel: a tucked flick, the star turned over by 0.34, then carried flat and stretched until she lands),

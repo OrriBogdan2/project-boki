@@ -10,12 +10,12 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 
 | Archetype | Weight | Weapons | Dash | Passive | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| **Thief** | light | Twin Blades | Vault | Marks | Bola | Shadow Knife (18s) | none (T is the Merge) |
-| **Pin** | light | Longbow | Spirit Walk | Focus | Heavy Shot | Hail Wall (9s) | none (T is the Merge) |
-| **Vireo** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (T is the Merge) |
-| **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (T is the Merge) |
-| **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (T is the Merge) |
-| **Bjorn** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (T is the Merge) |
+| **Thief** | light | Twin Blades | Vault | Marks | Bola | Shadow Knife (18s) | none (X is the Merge) |
+| **Pin** | light | Longbow | Spirit Walk | Focus | Heavy Shot | Hail Wall (9s) | none (X is the Merge) |
+| **Vireo** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
+| **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
+| **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
+| **Bjorn** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
 
 ### Thief (light)
 
@@ -174,7 +174,7 @@ Passive gloves (no Q, stats only): **Bastion Plate** (Heavy plate: lots of armor
 
 ## E, the kin's own ability, and the merge
 
-Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (C), a dodge rider and a merge (the Merge key, T by default, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.
+Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (G), a dodge rider and a merge (the Merge key, X by default, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.
 
 ### Mycroll (Hedgehog + Toadstool, shoulder)
 

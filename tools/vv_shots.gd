@@ -1,6 +1,6 @@
 extends RefCounted
 ## --vv-shots --shots-dir=<dir> [--vv-hero=mage|gunslinger] [--vv-tag=v2/polish]: screenshots of Vireo's
-## and Venator's abilities in a live Arena match (run under xvfb with a renderer). Each moment is taken at
+## and Vex's abilities in a live Arena match (run under xvfb with a renderer). Each moment is taken at
 ## the default gameplay zoom and again as a close-up crop round what it shows; every move also gets a
 ## 4-6 frame strip cropped round the hero (anticipation, release, follow-through, recovery). Files go
 ## straight into <dir> as <hero>_<name>.png, and <dir>/MANIFEST_<hero>.txt gets one line per file:
@@ -348,7 +348,8 @@ func _vireo_dash() -> void:
 			"full",
 			"dash_run",
 			"Shift released: a lightning streak, the body a trail of her own gold-teal after-images"])
-	run.append([0.46, "full", "dash_arrive", "Shift arrival: a ring burst with spark needles"])
+	run.append([0.46, "full", "dash_arrive",
+			"Shift arrival: she re-forms with a dust puff (no ring or burst: the hits are along the way)"])
 	await _go(0.8, Callable(), run, 6.0)
 	# the base air dash (her own variant): a tumble with teal after-images in her silhouette
 	await _reset(6.0, 6.0)
@@ -419,7 +420,7 @@ func _vireo_owner1103() -> void:
 	marks.append([2.4, "full", "owner1103_e_slide_c", c_cap, _on_target])
 	await _go(2.6, flick, marks)
 
-# ------------------------------------------------------------------ Venator
+# ------------------------------------------------------------------ Vex
 func _venator() -> void:
 	await _venator_lmb()
 	await _venator_rmb()

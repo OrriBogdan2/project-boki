@@ -1,5 +1,5 @@
 extends RefCounted
-## Dancer's (thief) and Juggernaut's checks, run inside --archetype-check and --kit-combo-check (the
+## Sable's (thief) and Juggernaut's checks, run inside --archetype-check and --kit-combo-check (the
 ## helpers come from tools/archetype_check.gd, passed in as A), or alone as --dancer-combo-check /
 ## --juggernaut-combo-check (tools/check_registry.gd). They assert what the hero sheets ask for: cursor
 ## landing, the telegraph while aiming or holding, the charge timings, the payoffs, and the merge holds.
@@ -7,6 +7,7 @@ extends RefCounted
 const AKCheck := preload("res://tools/archetype_check.gd")
 const ULT := preload("res://tools/dj_ult_check.gd")      # both heroes' ultimates on X, and the burst cap
 const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Zedran's chain, RMB rows, Meteor Drop and dashes
+const DFEEL := preload("res://tools/dancer_feel_check.gd")   # Dancer's Cartwheel, empowered bolt and reset (item 7)
 var A: AKCheck
 
 ## Standalone: one hero's sections (both for "all"). Prints AKCHECK lines like --archetype-check.
@@ -21,7 +22,7 @@ func run(main_node: Node, who := "all") -> void:
 	print("AKCHECK DONE, %d checks, failures: %d" % [A.n, A.fails])
 	main_node.get_tree().quit(1 if A.fails > 0 else 0)
 
-# ------------------------------------------------------------------ Dancer
+# ------------------------------------------------------------------ Sable
 func thief(a) -> void:
 	A = a
 	var r = A.setup("thief", 6.0, "", true)
@@ -35,7 +36,7 @@ func thief(a) -> void:
 	T2.teleport(home + Vector3(0, 0, 5.5))
 	A.ok("dancer: kit, model, Arc Bolts",
 			K != null and P.model.get_meta("arch") == "thief" and P.wid == "arc_bolts"
-			and Arch.name_of("thief") == "Dancer",
+			and Arch.name_of("thief") == "Silver Thief",
 			P.wid)
 	A.ok("dancer: her moves are keyed (KMovesDJ)",
 			["thf_lmb_r", "thf_lmb_l", "thf_primed", "thf_vault_r", "thf_vault_l", "thf_bola", "thf_knife",
@@ -137,8 +138,8 @@ func thief(a) -> void:
 			and K.glint.global_position.distance_to(K.hand_pos(K.hand == 0)) < 0.15,
 			"rings %d -> %d pop %.2f glint %s" % [rings0, _dancer_rings(m), pop[0],
 					K.glint.global_position.distance_to(K.hand_pos(K.hand == 0)) if K.glint else -1.0])
-	var far := 4.5 * float(K.dash_feel()["dist"])        # the sheet's 4.5m, after the global dash feel
-	A.ok("dancer dash: Vault cartwheels about 4.5m (x the dash feel), speeds +18%, empowers",
+	var far := 4.5        # the sheet's measured 4.5m (she is off the global dash feel)
+	A.ok("dancer dash: Vault cartwheels about 4.5m, speeds +18%, empowers",
 			absf(P.flat_dist(home) - far) < 0.6 and K.primed_t > 0.0 and K.move_k() > 1.15
 			and P.dashes < d0 - 0.5 and wheel in ["thf_vault_l", "thf_vault_r"],
 		"moved %.1f primed %.2f anim %s" % [P.flat_dist(home), K.primed_t, wheel])
@@ -160,8 +161,8 @@ func thief(a) -> void:
 	A.ok("dancer empowered bolt: the big look rides it",
 			K.last_bolt_emp and DJFx.of(m).free_pools.has("ride_chakram_big"))
 	A.step(m, 0.5)
-	A.ok("dancer empowered bolt: 3.5x, 2 Marks, Shred, speed ends, Vault back",
-			A.dmg(T) >= 30.0 and K.marks_on(T) == 2 and T.vuln_t > 0.0 and K.move_k() <= 1.0
+	A.ok("dancer empowered bolt: a big hit, 1 Mark like any bolt, no Shred, speed ends, Vault back",
+			A.dmg(T) >= 18.0 and K.marks_on(T) == 1 and T.vuln_t <= 0.0 and K.move_k() <= 1.0
 			and P.dashes >= P.max_dashes() - 0.01 and K.primed_t <= 0.0 and K.primed_hits == 1,
 		"dealt %.0f marks %d vuln %.1f dashes %.2f" % [A.dmg(T), K.marks_on(T), T.vuln_t, P.dashes])
 	# from a jump the cartwheel holds its speed to the landing: much further than on the ground
@@ -307,12 +308,13 @@ func thief(a) -> void:
 	A.ok("dancer fx: pooled (every kind capped, a handful of nodes at most per burst)",
 			capped and DJFx.of(m).made <= made + 6, "made %d -> %d" % [made, DJFx.of(m).made])
 	await _dancer_dash_flow(m, P, K, T, home)
+	await DFEEL.new().run(A, m, P, K, T, home)
 	await A.done(m)
 	await _growth()
 	await ULT.new().dancer(A)
 
 
-## Rings in Dancer's own colours alive now (the shared team-colour dash ring is Hunter's, not hers).
+## Rings in Sable's own colours alive now (the shared team-colour dash ring is Hunter's, not hers).
 func _dancer_rings(m: Match) -> int:
 	var res_col := Color(Arch.def("thief")["resource"]["col"])
 	var cols := [ThiefKit.AIM_LILAC, ThiefKit.EMP_LINE, Arch.color("thief"), res_col]
@@ -914,7 +916,7 @@ func combos(a) -> void:
 	A.step(m, 1.0)
 	A.ok("combo jug: Enraged hastes the Smash", float(K.cd["rmb"]) < 1.85, "%.2f" % float(K.cd["rmb"]))
 	await A.done(m)
-	# ---- Dancer
+	# ---- Sable
 	r = A.setup("thief", 4.0, "", true)
 	m = r[0]
 	P = r[1]
@@ -1093,7 +1095,7 @@ func merge_holds() -> void:
 			K.lunge.is_empty() and not K.rmb_down and K.ch_rmb >= chg, "charges %.1f of %.1f" % [K.ch_rmb, chg])
 	A.ok("merge hold jug: an armed Haul Slam is dropped", K.haul.is_empty() and K.haul_slams == 0)
 	await A.done(m)
-	# ---- Dancer: the Bola's wind-up stops when a merge starts (a running Encore: tools/dj_ult_check.gd)
+	# ---- Sable: the Bola's wind-up stops when a merge starts (a running Encore: tools/dj_ult_check.gd)
 	r = A.setup("thief", 4.0, "cindle")
 	m = r[0]
 	P = r[1]
