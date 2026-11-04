@@ -13,7 +13,7 @@ import bpy
 import numpy as np
 from mathutils import Vector
 
-COL = {"needle": ("metal", "c9ccd2"), "needle_dk": ("metal", "9a9ea6"), "thread": ("glow", "e0180e")}
+COL = {"needle": ("metal", "c9ccd2"), "needle_dk": ("metal", "9a9ea6"), "thread": ("cloth", "b8141c")}
 ATLAS = 128
 
 
@@ -107,8 +107,10 @@ def needles(arm, sp, m, girth):
             # a loop of red thread through the eye, hanging down the back of the quiver
             c = e0 + ax * 0.035
             # (the loose end drifts out and down past the quiver: the art's red thread "at rest")
-            th = [c - side * 0.006, c + side * 0.012 - ax * 0.02, c + side * 0.03 - ax * 0.06 + np.array([0, 0, -0.01]),
-                  c + side * 0.045 - ax * 0.12, c + side * 0.03 - ax * 0.19, c + side * 0.05 - ax * 0.25]
+            # (drooping: out of the eye, then hanging under gravity, a slack curve, not a straight line)
+            g = np.array([0.0, 0.0, -1.0])
+            th = [c - side * 0.006, c + side * 0.018 + g * 0.015, c + side * 0.035 + g * 0.05,
+                  c + side * 0.045 + g * 0.1, c + side * 0.04 + g * 0.15, c + side * 0.05 + g * 0.2]
             bld.tube(th, [0.0022] * len(th), 5, "thread")
     me = bpy.data.meshes.new("Needles")
     me.from_pydata([tuple(x) for x in bld.v], [], bld.f)
@@ -136,7 +138,7 @@ def needles(arm, sp, m, girth):
     return ob
 
 
-COL.update({"thimble": ("metal", "c6c9cf"), "claw": ("metal", "8e929a")})
+COL.update({"thimble": ("metal", "9da2aa"), "claw": ("metal", "4a4e56")})
 
 
 def thimbles(body, arm, sp):

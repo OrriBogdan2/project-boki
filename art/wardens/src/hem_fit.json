@@ -115,6 +115,25 @@
  "ink_room": 0.02,
  "slot_rules": [
   {
+   "slot": "leather",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    -0.5
+   ],
+   "hsv": [
+    0.95,
+    0.14,
+    0.15,
+    1.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
    "slot": "hair",
    "absx": true,
    "box": [
@@ -248,7 +267,12 @@
   "height": 1.25,
   "depth": 0.13,
   "tip": 0.78,
-  "arrow": false
+  "arrow": false,
+  "halo_anchors": {
+   "halo_bow_top": 0.42,
+   "halo_bow_mid": 0.0,
+   "halo_bow_low": -0.42
+  }
  },
  "pieces": [
   {
@@ -746,7 +770,7 @@
  "thimbles": {
   "bone": "hand.R",
   "fingers": 4,
-  "r": 0.012,
+  "r": 0.013,
   "band": 0.045
  },
  "smooth_parts": [
@@ -755,9 +779,9 @@
  "lengthen": {
   "hsv": [
    [
-    0.9,
-    0.06,
-    0.3,
+    0.93,
+    0.02,
+    0.45,
     1.0,
     0.12,
     1.0
@@ -774,7 +798,7 @@
     0.0
    ]
   ],
-  "leg_r": 0.11,
+  "leg_r": 0.0,
   "k": 0.12,
   "k_back": 0.32,
   "k_tail": 0.35,
@@ -804,5 +828,91 @@
    1.38
   ],
   "bone": "hips"
+ },
+ "touch_up_late": [
+  {
+   "mode": "flat",
+   "colour": "e6e1de",
+   "box": [
+    -0.11,
+    0.11,
+    0.56,
+    0.69
+   ],
+   "side_only": 0.35,
+   "val_lo": 0.9,
+   "val_hi": 1.05,
+   "sat_max": 0.12
+  },
+  {
+   "mode": "flat",
+   "colour": "6c1c2d",
+   "slots": [
+    "cloth"
+   ],
+   "box": [
+    -0.44,
+    -0.18,
+    -0.06,
+    0.47
+   ],
+   "hue": [
+    0.9,
+    1.0
+   ],
+   "sat_min": 0.3,
+   "val_lo": 0.8,
+   "val_hi": 1.1
+  },
+  {
+   "mode": "flat",
+   "colour": "6c1c2d",
+   "slots": [
+    "cloth"
+   ],
+   "box": [
+    0.18,
+    0.44,
+    -0.06,
+    0.47
+   ],
+   "hue": [
+    0.9,
+    1.0
+   ],
+   "sat_min": 0.3,
+   "val_lo": 0.8,
+   "val_hi": 1.1
+  }
+ ],
+ "tape_bands": {
+  "boxes": [
+   [
+    -0.44,
+    -0.18,
+    -0.3,
+    0.3,
+    -0.06,
+    0.2
+   ],
+   [
+    0.18,
+    0.44,
+    -0.3,
+    0.3,
+    -0.06,
+    0.2
+   ]
+  ],
+  "hsv": [
+   0.04,
+   0.17,
+   0.08,
+   0.6,
+   0.35,
+   1.0
+  ],
+  "period": 0.012,
+  "dark": 0.78
  }
 }

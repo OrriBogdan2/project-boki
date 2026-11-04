@@ -166,10 +166,13 @@ static func skeleton(glb: Node) -> Skeleton3D:
 ## One of the model's anchor empties (ANCHORS, or a hero's own), riding its bone; null on a procedural model.
 static func anchor(root: Node3D, anchor_name: String) -> Node3D:
 	var w := root.get_node_or_null("Warden")
-	var an := w.find_child(anchor_name, true, false) as Node3D if w else null
+	if w == null:
+		return null
+	var an := w.find_child(anchor_name, true, false) as Node3D
 	if an == null:
-		# (an anchor on the .glb's own weapon, which _hold_weapon moved into the hands: Cinder's flame chamber)
-		an = root.get_node_or_null("Rig/Torso/Aim/Gun/" + WEAPON + "/" + anchor_name) as Node3D
+		# (one on the .glb's weapon, which the loader moved under the Gun: Hem's bow, Cinder's flame chamber)
+		var gun := root.get_node_or_null("Rig/Torso/Aim/Gun/" + WEAPON)
+		an = gun.find_child(anchor_name, true, false) as Node3D if gun else null
 	return an
 
 ## Dresses the procedural hunter `root` in its Warden's .glb when it uses one (meta "glb" says which). lk is

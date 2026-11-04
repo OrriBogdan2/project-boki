@@ -217,7 +217,8 @@
 			"cloth": {
 				"fres": 0.35,
 				"far_lift": 0.25,
-				"top_light": 0.4
+				"top_light": 0.4,
+				"light_neutral_warm": 0.8
 			},
 			"hair": {
 				"far_lift": 0.25,
@@ -228,15 +229,63 @@
 				"top_light": 0.3,
 				"fres": 0.4,
 				"fres_tint": 0.8,
-				"far_lift": 0.2
+				"far_lift": 0.2,
+				"light_neutral_warm": 0.8
 			},
 			"leather": {
-				"far_lift": 0.3
+				"far_lift": 0.3,
+				"rim_far": 0.45,
+				"rim_far_color": [
+					0.95,
+					0.12,
+					0.1
+				],
+				"light_neutral_warm": 0.8,
+				"fres": 0.15,
+				"fres_tint": 0.9
 			},
 			"glow": {
 				"glow": 2.8
 			}
-		}
+		},
+		"halos": [
+			{
+				"anchor": "halo_bow_top",
+				"color": [
+					1.0,
+					0.22,
+					0.16
+				],
+				"strength": 1.8,
+				"px": 2.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "halo_bow_mid",
+				"color": [
+					1.0,
+					0.22,
+					0.16
+				],
+				"strength": 1.8,
+				"px": 2.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "halo_bow_low",
+				"color": [
+					1.0,
+					0.22,
+					0.16
+				],
+				"strength": 1.8,
+				"px": 2.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			}
+		]
 	},
 	"tarek": {
 		"painted": {
