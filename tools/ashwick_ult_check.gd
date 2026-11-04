@@ -1,8 +1,8 @@
 extends RefCounted
 ## Cinder's ultimate on X, Flue Flight, for --ashwick-combo-check (docs/heroes/ashwick.md): the level gate,
 ## the lift-off telegraph and move, the steering lane, the capped turn, the early landing, the carpet's burn,
-## slow and Char, bond only on a land (the best of hit or knock per cast), the cloak mid-flight, no Cinder
-## mid-flight, a knockback speeding it up, a stun ending it, never over the abyss, the merge drop, the
+## slow and Char, bond only on a land (the best of hit or knock per cast), the cloak, the Cinder Shot and the
+## lance mid-flight, a knockback speeding it up, a stun ending it, never over the abyss, the merge drop, the
 ## cooldown and the burst cap.
 
 const BURST := preload("res://tools/ult_burst.gd")
@@ -55,9 +55,10 @@ func _flight() -> void:
 	var casts0: int = J.flights
 	_cast(P, home + Vector3(10, 0, 0))
 	ak.step(m, 0.05)
-	var burst_up := AimKit.shown(P, "x_burst") and bool(AimKit.entry(P, "x_burst").get("all", false))
+	var no_disc := not AimKit.shown(P, "x_burst")
 	ok(
-		"ult cast: lifts off with the ember ring everyone sees", J.running() and burst_up and K.anim_id == "lw_jet",
+		"ult cast: lifts off in its ember puffs, no aim disc (it hits nothing)", J.running() and no_disc
+				and K.anim_id == "lw_jet",
 		"move %s" % K.anim_id
 	)
 	ok(
@@ -65,7 +66,8 @@ func _flight() -> void:
 		"flights +%d" % (J.flights - casts0)
 	)
 	ok(
-		"ult cast: its own cooldown starts (32s)", absf(float(K.cd["x"]) - 32.0) < 0.2 and float(K.cd["e"]) == 0.0,
+		"ult cast: its own cooldown starts (36s, the data's 45s at the kit's 0.8)",
+		absf(float(K.cd["x"]) - 36.0) < 0.2 and float(K.cd["e"]) == 0.0,
 		"cd %.1f" % float(K.cd["x"])
 	)
 	ak.step(m, 0.25, func(): ak.aim_at(P, home + Vector3(10, 0, 0)))
@@ -180,7 +182,7 @@ func _carpet() -> void:
 	)
 	T.downed = false
 	ak.fresh(T)
-	# a new flight with nobody near: the cloak works mid-flight, the Cinder Shot doesn't
+	# a new flight with nobody near: the cloak and the Cinder Shot work mid-flight (item 51)
 	ak.step(m, 4.0)
 	T.teleport(home + Vector3(0, 0, -5.0))
 	T2.teleport(home + Vector3(-3.0, 0, -5.0))
@@ -194,7 +196,16 @@ func _carpet() -> void:
 	var ch0 := K.ch_rmb
 	P.ak.press_rmb()
 	ak.step(m, 0.02)
-	ok("ult: no Cinder Shot mid-flight", K.ch_rmb == ch0 and J.running())
+	ok("ult: the Cinder Shot goes mid-flight and the flight goes on", K.ch_rmb < ch0 and J.running(),
+			"charges %.1f -> %.1f" % [ch0, K.ch_rmb])
+	K.ch_rmb = float(K.rmb_charges())
+	var em0: int = K.hose.emitted
+	ak.step(m, 0.4, func():
+		P.inp["fire"] = true
+		ak.aim_at(P, home + Vector3(16, 0, 0)))
+	P.inp["fire"] = false
+	ok("ult: the lance roars mid-flight", K.hose.emitted > em0 + 4 and J.running(),
+			"puffs +%d" % (K.hose.emitted - em0))
 	ak.step(m, 1.6, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
 	# Ablaze in about 2.4s of standing in it (4 Char every 0.3s)
 	ak.fresh(T)
@@ -253,6 +264,7 @@ func _knock_stun_merge(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> voi
 		"speed %.1f -> %.1f" % [sp0, float(J.flight.get("speed", 0.0))]
 	)
 	ak.step(m, 1.8)
+	await _shift_and_jump(m, P, K, home)
 	P.teleport(home)
 	_cast(P, home + Vector3(16, 0, 0))
 	ak.step(m, 0.3)
@@ -272,6 +284,45 @@ func _knock_stun_merge(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> voi
 		not J.running() and J.laid == laid and P.roll_t <= 0.0, "laid +%d" % (J.laid - laid)
 	)
 	KinMerge.end(P, "test")
+
+## Item 51: Shift in the flight is a poof that feeds it (the air dash spent, faster, bent its way, still flying);
+## a jump leaps off it at once, keeping a share of its speed into the air.
+func _shift_and_jump(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
+	var J := K.jet
+	var at := home + Vector3(16, 0, 0)
+	P.teleport(home)
+	P.ex_cd = 0.0
+	_cast(P, at)
+	ak.step(m, 0.3, func(): ak.aim_at(P, at))
+	var sp0 := float(J.flight["speed"])
+	P.inp["move"] = Vector2(0, 1)
+	P.inp["dash"] = true
+	ak.step(m, 0.05, func(): ak.aim_at(P, at))
+	P.inp["dash"] = false
+	P.inp["move"] = Vector2.ZERO
+	var dir: Vector2 = J.flight.get("dir", Vector2.ZERO)
+	ok(
+		"ult: Shift in the flight is a poof that feeds it: the air dash spent, faster, bent its way (item 51)",
+		J.running() and P.ex_cd > 0.0 and float(J.flight["speed"]) > sp0 + 3.0 and dir.y > 0.1,
+		"speed %.1f -> %.1f, heading %s" % [sp0, float(J.flight.get("speed", 0.0)), dir]
+	)
+	ak.step(m, 2.0)
+	P.teleport(home)
+	_cast(P, at)
+	ak.step(m, 0.3, func(): ak.aim_at(P, at))
+	var sp := float(J.flight["speed"])
+	var y0 := P.pos.y
+	P.inp["jump"] = true
+	ak.step(m, 0.1)
+	P.inp["jump"] = false
+	var flat := Vector2(P.vel.x, P.vel.z).length()
+	ok(
+		"ult: a jump in the flight leaps off it within 0.1s, keeping its speed into the air (item 51)",
+		not J.running() and J.leaps >= 1 and P.pos.y > y0 + 0.2 and P.vel.y > 0.0
+				and flat >= sp * Hunter.DASH_JUMP_CARRY * 0.9,
+		"rose %.2f m, %.1f m/s of %.1f" % [P.pos.y - y0, flat, sp]
+	)
+	ak.step(m, 1.5)
 
 func _burst() -> void:
 	var res: Dictionary = await BURST.run(ak, "ashwick", 4.0, func(m: Match, P: Hunter, T: Hunter):

@@ -41,6 +41,7 @@ var _arm_l := Vector3.ZERO
 var _carry := Transform3D.IDENTITY
 var _has_carry := false
 var _carry_free := 0.0
+var _carry_free_r := 0.0      # a weapon carried in the left hand alone (Hem's bow at her side)
 var _breath_amp := 1.0
 var _shift := 9.0
 var _shift_t := 0.0
@@ -79,6 +80,7 @@ func _init(arch: String) -> void:
 	if _has_carry:
 		_carry = Transform3D(Basis.from_euler(_v3(c["rot"])), _v3(c["pos"]))
 		_carry_free = float(c.get("free_l", 0.0))
+		_carry_free_r = float(c.get("free_r", 0.0))
 	var idle: Dictionary = d["idle"]
 	_breath_amp = float(idle.get("breath_amp", 1.0))
 	_shift = float(idle.get("shift", 9.0))
@@ -167,6 +169,10 @@ func carry(xf: Transform3D) -> Transform3D:
 ## How far the carry lets the left hand off the weapon.
 func carry_free_l() -> float:
 	return _carry_free * carry_w
+
+## How far the carry lets the right hand off the weapon (a bow hanging in the left hand).
+func carry_free_r() -> float:
+	return _carry_free_r * carry_w
 
 ## How far a whole-body move (downed, gliding, a ledge, a dodge, a trick...) takes over from the stance.
 func _whole_body(a: HunterAnim) -> float:

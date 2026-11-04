@@ -874,7 +874,7 @@ func _screen_scale() -> void:
 		return
 	cam.use_style("supervive")
 	cam.zoom = 1.0; cam.zoom_to = 1.0; cam.top = 0.0; cam.top_to = 0.0; cam.chase = 0.0; cam.chase_to = 0.0
-	cam.yaw = 0.0; cam.yaw_to = 0.0; cam.kick = 0.0
+	cam.yaw = 0.0; cam.yaw_to = 0.0;
 	if "lead_vel" in cam: cam.set("lead_vel", Vector3.ZERO)
 	if "pull" in cam: cam.set("pull", 0.0)
 	_reset(flat)

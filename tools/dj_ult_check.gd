@@ -1,5 +1,5 @@
 extends RefCounted
-## The ultimates on X of Sable (Encore, ThiefUlt) and Zedran (Gilded Riposte, JuggernautUlt), run inside
+## The ultimates on X of Sable (Encore, ThiefUlt) and Kael (Gilded Riposte, JuggernautUlt), run inside
 ## --dancer-combo-check / --juggernaut-combo-check / --kit-combo-check (tools/dancer_jug_check.gd) with the
 ## helpers of tools/archetype_check.gd passed in as A. Each asserts the cast, the telegraph, the payoff, the
 ## cooldown, the level gate (no cast below 6), the bond paid only on a land, the small mechanics, the merge
@@ -104,7 +104,7 @@ func dancer(a) -> void:
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	await A.done(m)
 
-# ------------------------------------------------------------------ Zedran: Gilded Riposte
+# ------------------------------------------------------------------ Kael: Gilded Riposte
 func zedran(a) -> void:
 	A = a
 	var r = A.setup("juggernaut", 2.6, "", true)
@@ -238,7 +238,7 @@ func _bola_encore() -> void:
 			"grounded %s blades %d" % [grounded, K.encore.blades])
 	await A.done(m)
 
-## The sheet's combo for Zedran: chain in, eat their answer in the guard, cleave back.
+## The sheet's combo for Kael: chain in, eat their answer in the guard, cleave back.
 func _chain_riposte() -> void:
 	var r = A.setup("juggernaut", 6.0)
 	var m: Match = r[0]

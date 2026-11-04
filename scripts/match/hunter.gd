@@ -68,11 +68,9 @@ const GLIDE_MAX := 15.0
 # The opening drop, battle-royale style: a fast skydive you steer freely, then the glider opens by
 # itself near the ground (or earlier on jump) for a slower, floatier last stretch.
 const DIVE_FALL := 13.0        # [est] a punchy skydive (was 11)
-const DIVE_SPEED := 10.0
+const DIVE_SPEED := 14.0       # m/s, top flat speed in the dive (DropFeel)
 const DROP_FALL := 4.2
-const DROP_SPEED := 7.0
-const DIVE_STEER := 10.0       # how quickly the dive and the drop's glider answer the keys (1/s; was 3 and 4: ~0.7s lag)
-const DROP_STEER := 11.0
+const DROP_SPEED := 8.0        # m/s, top flat speed under the open glider
 const DIVE_VY_RATE := 7.0      # the dive reaches its fall speed in ~0.3s (was 4)
 const DROP_VY_RATE := 9.0      # the canopy settles to its sink in ~0.2s after it opens (was 4)
 const DEPLOY_POP := -1.6       # the canopy catching: your fall checks to this, then settles to DROP_FALL
@@ -92,7 +90,7 @@ var wid := "rifle"
 var wpn: Dictionary = {}
 var ctrl := "bot"             # local | bot | remote
 var inp := {"move": Vector2.ZERO, "aim": Vector3.ZERO, "fire": false, "dash": false, "jump": false,
-	"throw": false, "skill": false, "sig": false, "interact": false, "reload": false, "util1": false, "util2": false, "util3": false, "util4": false, "glide": false, "ult": false,
+	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false, "util4": false, "glide": false, "ult": false,
 	"sec": false, "sec_hold": false, "crouch": false, "gear1": false, "gear2": false, "swap": false}
 var base_speed := 5.4
 var ground_accel := GROUND_ACCEL     # per hunter (HunterMove)
@@ -251,7 +249,6 @@ var ak: ArchKit = null        # the archetype's kit at run time
 var shot_range_k := 1.0       # the next shot's range (a full Focus: +20%)
 var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
-var focus_draw := false        # the draw in hand is a full-Focus one: at the top stage already, still waiting for the release
 var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees and barriers don't stop you while > 0
 var nth_n := 0                # shots since the weapon's "every Nth" bonus
 
@@ -298,7 +295,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	dashes = max_dashes()
 	ammo = wpn["mag"]
 	r = Arch.hit_r(arch, cdat)
-	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look, arch))
+	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Unmasked.mask_look() if ctrl == "local" else bot_look, arch))
 
 ## Switches the archetype mid-match (tests, practice). "" puts back the old class kit: the weapon's
 ## right click and the class dodge.
@@ -332,7 +329,7 @@ func reclass(c: String, a: String, w := "") -> void:
 	ak = ArchKit.make(self, arch)
 	HunterMove.apply(self)
 	wid = Arch.weapon_for(arch, cls, w)
-	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Save.d.get("look", {}) if ctrl == "local" else bot_look, arch))
+	set_model(Models.hunter(cls, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], wid, "", Unmasked.mask_look() if ctrl == "local" else bot_look, arch))
 	anim = null
 	equip(wid)
 	dashes = max_dashes(); ex_cd = 0.0
@@ -899,7 +896,7 @@ var lift_t := 0.0              # seconds of the current abyss lift (feathering t
 ## The glider's vertical speed this step below an island's lip over the abyss, `depth` metres under
 ## it: it pulls you up harder and faster the deeper you are (ABYSS_LIFT*), then brakes into the last
 ## ABYSS_BRAKE_DIST so you arrive at ground level (let go just before to carry the climb up as height).
-## Shared by Hunter (matches, the --training ground) and Home (the farm and the Training Grounds).
+## Shared by Hunter (matches, the --training ground) and Home (the farm).
 static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float:
 	if depth > ABYSS_BRAKE_DIST:
 		var acc := (ABYSS_LIFT + ABYSS_LIFT_PER_M * depth) * k
@@ -1098,7 +1095,6 @@ func _skyfall(drop: float, fall_v: float) -> void:
 		return
 	Abil._blast(self, pos, 2.4, 10.0 + 16.0 * k, 7.0, Color("ffd27a"), 7.0, "skyfall")
 	m.fx.word(pos + Vector3(0, 2.2, 0), "SKYFALL", Color("ffd27a"), true)
-	m.shake(0.45, pos)
 	add_stat("skyfalls")
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
 const DASH_BUFFER := 0.18
@@ -1328,7 +1324,6 @@ func _shove_along() -> void:
 		var so := {"kb": push, "lift": 2.5, "src": "abil", "ab": "dodge", "tags": ["dodge"]}
 		if float(shove.get("ws", 0.0)) > 0.0: so["wallstun"] = float(shove["ws"])
 		f.hurt(maxf(0.1, float(shove["dmg"])) * m.dmg_mult(self), self, so)
-		m.shake(0.25, f.pos)
 
 func can_fire() -> bool:
 	if Hex.active(self) or Capture.active(self):
@@ -1407,19 +1402,20 @@ func trigger(dt: float) -> void:
 	if held:
 		fire()
 
-## A bow: hold to draw, let go to loose. Only the button coming up looses a player's arrow: a full Focus
-## is drawn at once but still waits for the release, a cooldown never looses it, and a stun, dash or glide
-## cancels the draw with no shot. A bot has no button, so it lets go by itself.
+## A bow: hold to draw, let go to loose. Only the button coming up looses a player's arrow: a cooldown
+## never looses it, and a stun or glide cancels the draw with no shot (a dash too, unless its DashFlow hold
+## row keeps it). A bot lets go by itself.
 func _trigger_bow(held: bool, dt: float) -> void:
-	if draw_t < 0.0:
-		focus_draw = false
+	if draw_t >= 0.0 and not can_fire() and ak and ak.flow.pauses_hold("lmb"):
+		if held:
+			draw_t += dt * ak.draw_rate()      # a dash whose row keeps the draw: it charges on through it,
+		return          # and a release in it looses when it ends
 	var can_draw: bool = can_fire() and ammo > 0
 	if draw_t >= 0.0 and not held:
 		_loose()
 		return
 	if draw_t >= 0.0 and not can_draw:
 		draw_t = -1.0
-		focus_draw = false
 		return
 	if held and can_draw and (draw_t >= 0.0 or fire_cd <= 0.0):
 		_draw_step(dt)
@@ -1431,21 +1427,13 @@ func _draw_step(dt: float) -> void:
 	if draw_t < 0.0:
 		draw_t = 0.0
 		m.sfx("charge", pos, -12.0 if is_local() else -16.0, 1.6)
-	if focus_draw:
-		draw_t = top
-	else:
-		draw_t += dt * (ak.draw_rate() if ak else 1.0)
-	if not focus_draw and ak and ak.has_method("take_focus_shot") and draw_t < 0.85 and ak.take_focus_shot():
-		focus_draw = true
-		draw_t = top
-		shot_range_k = 1.2
-	if ctrl == "bot" and (focus_draw or draw_t >= top + 0.05):
+	draw_t += dt * (ak.draw_rate() if ak else 1.0)
+	if ctrl == "bot" and draw_t >= top + 0.05:
 		_loose()
 
 ## Looses a drawn arrow: the draw stage reached sets damage, range and speed.
 func _loose() -> void:
-	var t := 9.0 if focus_draw else draw_t
-	focus_draw = false
+	var t := draw_t
 	draw_t = -1.0
 	if not can_fire() or ammo <= 0:
 		return
@@ -1455,7 +1443,7 @@ func _loose() -> void:
 		if t >= float(stg[0]):
 			dmg = float(stg[1]); rng = float(stg[2]); spd = float(stg[3])
 	if ak and ak.has_method("draw_bonus"):
-		dmg *= float(ak.draw_bonus(t))       # the kit's stage rules (Pin: the perfect window, overdraw, where it lands)
+		dmg *= float(ak.draw_bonus(t))       # the kit's stage rules (Hem: the perfect window, overdraw, where it lands)
 	var keep := wpn
 	wpn = wpn.duplicate()
 	wpn["dmg"] = dmg * wup_dmg; wpn["range"] = rng; wpn["speed"] = spd
@@ -1624,7 +1612,6 @@ func _charged_attack() -> void:
 		m.sfx("dash", pos, -4.0, 0.7)
 	else:
 		_strike(float(st["dmg"]), float(st["reach"]), float(st["arc"]), float(st["kb"]), st)
-		m.shake(0.35, pos)
 
 func _strike(dmg: float, reach: float, arc_deg: float, kb: float, o := {}) -> void:
 	idle_fire = 0.0
@@ -1698,7 +1685,7 @@ func _emit_shot() -> void:
 		extra["farf"] = [rng * float(wpn.get("far_start", 0.6)), float(wpn["far_mult"]), rng]
 	if AimMode.take(self) == AimMode.CURSOR:
 		life = AimMode.dist(self, rng) / spd      # lands at the cursor, clamped to range (scripts/match/aim/aim_mode.gd)
-	if wpn.get("pierce", false):      # through everyone in line (Vireo's bolts)
+	if wpn.get("pierce", false):      # through everyone in line (Ryzz's bolts)
 		extra["pierce"] = true
 		extra["hitset"] = {}
 	if wpn.has("boom"):
@@ -1725,7 +1712,7 @@ func _emit_shot() -> void:
 	Juice.shot(self, start, Vector2(cos(a), sin(a)))
 
 func start_reload() -> void:
-	if reload_t > 0.0 or ammo >= int(wpn["mag"]) or downed or wpn.get("melee", false):
+	if reload_t > 0.0 or ammo >= int(wpn["mag"]) or downed or wpn.get("melee", false) or not wpn.has("reload"):
 		return
 	reload_t = float(wpn["reload"]) * (1.0 - owner_stat("reload") - gear_stat("reload")) * (0.7 if perk_n("quickhands") > 0 else 1.0)
 	m.sfx("reload", pos, -8.0)
@@ -1838,7 +1825,7 @@ func slot_info(slot: String) -> Dictionary:
 			var u := KinMerge.def_for(k) if k and KinMerge.boki_with_you(self) else null
 			var f := MergeForm.for_boki(k) if u else MergeForm.surge_form()
 			var txt: String = " ".join(KinText.merge(u, k.carry_style() == "mount")) if u else String(MergeForm.data()["surge"]["flavor"])
-			out.merge({"name": "Merge", "short": "Merge", "icon": "bond", "col": f["glow"], "desc": txt, "form": f, "bond": ult,
+			out.merge({"name": "Fusion", "short": "Fusion", "icon": "bond", "col": f["glow"], "desc": txt, "form": f, "bond": ult,
 				"plan": KinMerge.plan(self), "cd": merge_cd, "cd_max": maxf(KinParts.MERGE_SPENT_TIME, MergeRelease.rest_s()) if kin != null and kin.resting() else KinParts.MERGE_SPENT_TIME, "charges": 1 if ult >= 1.0 else 0, "max_charges": 1,
 				"ready": KinMerge.plan(self) in ["merge", "leap", "surge"]}, true)
 	return out
@@ -2014,7 +2001,7 @@ func sim(dt: float) -> void:
 			vel = Vector3.ZERO
 			if ctrl == "local" and inp["jump"]:
 				m.ship_jump(self)
-			for k in ["jump", "dash", "sig", "reload", "util1", "util2", "util3", "util4", "ult", "fire", "skill", "swap"]:
+			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "ult", "fire", "skill", "swap"]:
 				inp[k] = false
 		return
 	tick_status(dt)
@@ -2076,13 +2063,13 @@ func sim(dt: float) -> void:
 	# bringing a teammate back at their deathbox: kneeling over it, locked in place (let go of
 	# interact to stop)
 	if box_reviving():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "util1", "util2", "util3", "util4",
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
 				"gear1", "gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# mid-stomp you're committed: none of your own buttons do anything until it ends
 	if not stomp.is_empty():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "reload", "util1", "util2", "util3", "util4",
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
 				"gear1", "gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
@@ -2146,7 +2133,6 @@ func sim(dt: float) -> void:
 			_ab_feedback("sec", "deny")
 	if not abil_charge.is_empty():
 		_tick_charge(dt)
-	if inp["reload"]: HunterKeys.reload_pressed(self)
 	for ui in UtilityBelt.SLOTS:
 		if inp[UtilityBelt.KEYS[ui]]: UtilityBelt.press(self, ui)
 	UtilityBelt.tick(self, dt)
@@ -2158,7 +2144,7 @@ func sim(dt: float) -> void:
 		else: use_ultimate()
 	trigger(dt)
 	inp["kin_ab"] = false
-	for k in ["dash", "jump", "sig", "reload", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
+	for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
 		inp[k] = false
 	_physics(dt)
 	var ad := aim_dir()
@@ -2273,7 +2259,7 @@ func _physics(dt: float) -> void:
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
 			gs = DIVE_SPEED if diving else DROP_SPEED
-			hv = Vector2(vel.x, vel.z).lerp(mv * gs, 1.0 - exp(-(DIVE_STEER if diving else DROP_STEER) * dt))
+			hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)
 			if drop_follow != null and m.skydrop:
 				hv = m.skydrop.follow_hv(self, gs)     # in formation: the leader steers
 		# wind roads carry you along (either way), updrafts lift you
@@ -2320,7 +2306,7 @@ func _physics(dt: float) -> void:
 	elif gliding:
 		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
 		if dropping:
-			vel.y = lerpf(vel.y, -sink, 1.0 - exp(-(DIVE_VY_RATE if diving else DROP_VY_RATE) * dt))
+			vel.y = DropFeel.fall_vy(vel.y, sink, DIVE_VY_RATE if diving else DROP_VY_RATE, pos.y - ground(), dt)
 			if drop_follow != null and m.skydrop:
 				vel.y = m.skydrop.follow_vy(self)
 		else:
@@ -2480,7 +2466,6 @@ func _physics(dt: float) -> void:
 				hurt(SPIKE_DMG, last_hit_by, {"src": "fall"})
 				m.fx.dust(pos, 12)
 				m.fx.ring(pos + Vector3(0, 0.05, 0), 1.6, Color(1.0, 0.6, 0.4, 0.6), 0.3)
-				if is_local(): m.shake(0.25, pos)
 			if fv < -11.0 or cur > spd * 1.3:
 				m.fx.dust(pos, 6)
 				squash = 0.15
@@ -2497,7 +2482,6 @@ func _physics(dt: float) -> void:
 				m.fx.dust(pos, 12)
 				squash = 0.25
 				land_t = 0.32
-				if is_local(): m.shake(0.18, pos)
 			if jump_buf > 0.0:
 				jump_buf = 0.0
 				vel.y = JUMP_V
@@ -2572,8 +2556,6 @@ func _deploy() -> void:
 	vel.y = maxf(vel.y, DEPLOY_POP)
 	m.sfx("glide", pos, -2.0)
 	_glider_sfx("open")
-	if is_local() and m.cam:
-		m.cam.punch(0.05)
 
 ## The opening drop ends early when you press an ability, gear or a heal mid-air: the glider folds
 ## and you fall free with the speed you had, so you can dive, pull up and drink or cast on the way
@@ -3310,6 +3292,7 @@ func render(delta: float, alpha: float) -> void:
 	if remote:
 		update_lip()
 	_render_weapon_fx(delta)
+	DropReticle.tick(self, delta)
 	var rig: Node3D = model.get_node("Rig")
 	var torso: Node3D = rig.get_node("Torso")
 	if anim == null or anim.model != model:
@@ -3340,7 +3323,6 @@ func render(delta: float, alpha: float) -> void:
 	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)
-		if is_local(): m.shake(0.18, pos)
 	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
 	if roll_t > 0.0:
 		ghost_t -= delta
@@ -3349,14 +3331,6 @@ func render(delta: float, alpha: float) -> void:
 			if ak == null or not ak.dash_afterimage():
 				m.fx.ghost(position, face, tc, float(cdat["scale"]))
 	elif gliding:
-		# while dropping in, a ring on the ground shows where you'll land
-		if dropping and is_local():
-			step_t -= delta
-			if step_t <= 0.0:
-				step_t = 0.22
-				var gy: float = m.world.ground_at(pos.x, pos.z)
-				if gy > World.VOID + 1.0:
-					m.fx.ring(Vector3(pos.x, gy, pos.z), 1.1, Color(1, 1, 1, 0.7), 0.25)
 		wind_t -= delta
 		# (movefeel) carrying a dash's momentum: a dense streak trail and afterimages until it bleeds off
 		var boosted := boost_fx_t > 0.0 and spd > GLIDE_SPEED * 1.25 and not dropping

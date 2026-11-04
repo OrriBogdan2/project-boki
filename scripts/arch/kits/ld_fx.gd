@@ -5,11 +5,11 @@ extends Node3D
 ## the see-through rope shader (shaders/ld_rope.gdshader).
 ##
 ## - flame(id, parts)      the Torch Lance hose: pooled camera-facing puffs the kit simulates (immediate style)
-## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Cinder Shot), "slug" (scattergun), "claw"
-## (Grapnel head)
+## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Cinder Shot), "slug" (scattergun)
 ## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "chain",
-##                         "pip", "spiral", "pilot", "anchor", "glow"; stop calling and they hide
-## - rope(id, a, b)        the braided Grapnel rope, drawn through walls
+##                         "pip", "spiral", "pilot", "anchor", "glow", "hand" (the Abyssal Hand); stop calling
+##                         and they hide
+## - rope(id, a, b)        the Abyssal Hand's arm (twisting strands), drawn through walls
 ## - one-shots: sunburst, scorch, crescent, wave, dot, lava, orb, anchor_drop, embers, puff, volley (a Broadside slug)
 ##
 ## Each look is two passes (shaders/ld_fx.gdshaderinc): an alpha-blended body, so colour and dark rims read
@@ -229,8 +229,9 @@ func _anchor_node() -> Node3D:
 		add.call(Models.box(0.34, 0.5, 0.34), Vector3(1.2 * sx, 1.0, 0), Vector3(0, 0, 0.3 * sx))
 	return n
 
-## The Grapnel's head: a brass three-pronged claw, drawn through walls like the rope.
-func _claw_node(col: Color) -> Node3D:
+## The Abyssal Hand's head: a big open hand reaching ahead, palm down, four long fingers splayed and hooked at
+## the tips and a thumb, drawn through walls like the arm (+z is back toward Dredge).
+func _hand_node(col: Color) -> Node3D:
 	var n := Node3D.new()
 	var mt := ShaderMaterial.new()
 	mt.shader = ROPE_SHADER
@@ -242,12 +243,14 @@ func _claw_node(col: Color) -> Node3D:
 		p.position = pos
 		p.rotation = rot
 		n.add_child(p)
-	add.call(Models.box(0.2, 0.2, 0.34), Vector3(0, 0, 0.05))
-	for k in 3:
-		var a := TAU * k / 3.0
-		var o := Vector3(cos(a), sin(a), 0) * 0.17
-		add.call(Models.box(0.08, 0.08, 0.36), o + Vector3(0, 0, -0.2), Vector3(-sin(a) * 0.5, cos(a) * 0.5, 0))
-		add.call(Models.box(0.07, 0.07, 0.18), o * 1.7 + Vector3(0, 0, -0.38), Vector3(sin(a) * 0.9, -cos(a) * 0.9, 0))
+	add.call(Models.box(0.36, 0.1, 0.3), Vector3(0, 0, 0.08))                  # the palm, the wrist behind it
+	add.call(Models.box(0.2, 0.12, 0.18), Vector3(0, 0, 0.3))
+	for i in 4:
+		var x := -0.14 + 0.095 * float(i)
+		var spread := (float(i) - 1.5) * 0.16
+		add.call(Models.box(0.07, 0.07, 0.24), Vector3(x, 0, -0.16), Vector3(0, -spread, 0))
+		add.call(Models.box(0.06, 0.06, 0.16), Vector3(x * 1.35, -0.06, -0.34), Vector3(-0.7, -spread, 0))
+	add.call(Models.box(0.07, 0.07, 0.2), Vector3(0.22, 0, 0.0), Vector3(0, 0.8, 0))     # the thumb
 	return n
 
 # ------------------------------------------------------------------ the hose
@@ -458,7 +461,7 @@ func _build_place(kind: String, col: Color, col2: Color) -> Node3D:
 		"spiral": return _mi(_quad_mesh(), _mat(M_SPIRAL, col, col2, true))
 		"pilot", "glow": return _mi(_quad_mesh(), _mat(M_ORB, col, col2, true))
 		"anchor": return _anchor_node()
-		"claw": return _claw_node(col)
+		"hand": return _hand_node(col)
 		"skull": return _skull_node(col, col2)
 	return Node3D.new()
 
@@ -580,7 +583,8 @@ func _pose(n: Node3D, at: Vector3, vel: Vector2, trail: float, width: float) -> 
 		var sp := clampf(vel.length() / 20.0, 0.15, 1.0)
 		tr.scale = Vector3(width, width, trail * sp)
 
-## The braided Grapnel rope from a to b this step (seen through walls). Stop calling and it goes.
+## The Abyssal Hand's arm from a to b this step, sinew strands twisting round each other (seen through walls).
+## Stop calling and it goes.
 func rope(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.32) -> void:
 	var e: Dictionary = ropes.get(id, {})
 	if e.is_empty() or not is_instance_valid(e["node"]):

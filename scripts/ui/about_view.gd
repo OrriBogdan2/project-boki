@@ -90,6 +90,10 @@ static func origin_text(rec: Dictionary) -> String:
 			return "Hatched from a Rare Egg" + ((" from %s" % bn) if bn != "" else "")
 		"starter": return "Your first partner, hatched from the egg you chose"
 		"market": return "Bought at the market" + ((" from %s" % String(o["from"])) if String(o.get("from", "")) != "" else "")
+		"shelter":
+			var giver := String(o.get("from", ""))
+			return "Adopted from the shelter" + ((", raised by %s" % giver) if giver != "" else "")
+		"transfer": return "Handed to you by %s" % String(o.get("from", "another hunter"))
 		"event": return "Met at an event" + ((" at " + place) if place != "" else "")
 	return "From before records were kept"
 
@@ -196,6 +200,8 @@ static func origin_short(rec: Dictionary) -> String:
 		"boss_egg": return "Hatched from a Rare Egg"
 		"starter": return "Your first partner"
 		"market": return "From the market"
+		"shelter": return "Adopted from the shelter"
+		"transfer": return "Handed to you"
 		"event": return "Met at an event"
 	return "Before records"
 

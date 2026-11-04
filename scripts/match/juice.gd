@@ -69,12 +69,6 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	target.flinch = (target.flinch + dir * (0.05 + 0.045 * power) * (1.4 if crit else 1.0) / heft).limit_length(0.3)
 	if ability:
 		AbilityFx.hit(m, target, by, d, o)
-	elif credit == p and target != p and not AbilityFx.feel_owns():
-		# a weapon hit you landed shakes by how big a bite it took (Feel §5.5: T2 0.08, T3 0.15);
-		# chip hits don't shake at all, so an SMG stream stays readable
-		var mh := maxf(1.0, target.max_hp)
-		if d >= mh * 0.15: m.cam.add_trauma(0.15)
-		elif d >= mh * 0.08: m.cam.add_trauma(0.08)
 	# sound layers on top of the hit tick Match plays: armor rings, heavy hits thud, blades bite
 	if credit == p and target != p:
 		var melee: bool = by is Hunter and bool((by as Hunter).wpn.get("melee", false))
@@ -101,8 +95,6 @@ static func shot(h: Hunter, start: Vector3, dir2: Vector2) -> void:
 	var power := clampf(dmg / 16.0, 0.7, 3.0)
 	var col: Color = w.get("color", Color("ffd9a0"))
 	m.fx.muzzle(start + Vector3(dir2.x, 0, dir2.y) * 0.25, dir2, col, power)
-	if h == p and power >= 2.0:
-		m.cam.add_trauma(0.03 * power)      # (Feel: 0.05 for a cast of your own; a heavy round is about that)
 
 ## Someone knocked down (Match.knock): a burst of their team colour, a shockwave on the ground and a
 ## white flash, so the moment reads from anywhere on screen.
@@ -118,8 +110,6 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.dust(h.pos, 14)
 	if credit == m.player and h != m.player:
 		m.sfx("knock_confirm", null, -6.0)
-	else:
-		m.shake(0.25, h.pos)
 
 ## Someone taken out for good (Match.eliminate): their light goes up in a column of sparks.
 static func kill(m: Match, h: Hunter, credit: Ent) -> void:
@@ -145,9 +135,6 @@ static func armor_break(m: Match, h: Hunter, credit: Ent) -> void:
 	m.sfx("armor_break", h.pos, -1.0)
 	if credit == m.player and h != m.player:
 		m.freeze_frame(0.045)
-		m.cam.add_trauma(0.15)
-	elif h == m.player:
-		m.cam.add_trauma(0.2)
 
 ## A monster dying (Match.on_mob_dead): a flash and a spray in its colour, a ring for the big ones.
 static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
@@ -168,7 +155,6 @@ static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
 		m.fx.dust(mb.pos, 12)
 		if credit == p:
 			m.freeze_frame(0.05)
-			m.cam.add_trauma(0.2)
 
 ## A boss going down: the biggest moment in a match short of extracting. A white-hot flash, two
 ## shockwaves, a fountain of sparks in its colour, a beat of slow motion and the music dipping.
@@ -186,8 +172,6 @@ static func boss_dead(m: Match, b: Mob, credit: Ent) -> void:
 	m.sfx("boom", b.pos, 3.0, 0.7)
 	var p: Hunter = m.player
 	if p != null and p.flat_dist(b) < 22.0:
-		m.cam.add_trauma(0.6)
-		m.cam.punch(0.14)
 		Sfx.duck(1.2)
 		if m.hud: m.hud.flash(Color(1, 0.95, 0.85), 0.3)
 		if credit == p or (credit is Hunter and (credit as Hunter).team == p.team):
@@ -204,7 +188,6 @@ static func boss_phase(m: Match, b: Mob) -> void:
 	m.fx.spark(c, Vector3.UP, col.lerp(Color.WHITE, 0.2), 30, 12.0, 120.0, 0.5, 10.0, 1.6)
 	var p: Hunter = m.player
 	if p != null and p.flat_dist(b) < 20.0:
-		m.cam.punch(0.08)
 		if m.hud: m.hud.flash(col, 0.18)
 
 ## Getting out (Match._extract): a column of light where they stood. For you, the screen whites out
@@ -219,7 +202,6 @@ static func extract(m: Match, h: Hunter, col: Color) -> void:
 	m.fx.ring(h.pos, 3.2, Color(col, 0.9), 0.5)
 	if h == m.player:
 		m.sfx("extract_ok", null, -3.0)
-		m.cam.punch(0.1)
 		Sfx.duck(1.6)
 		if m.hud: m.hud.flash(col.lerp(Color.WHITE, 0.6), 0.3)
 

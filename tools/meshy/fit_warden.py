@@ -26,10 +26,12 @@ import sys
 import bmesh
 import bpy
 import numpy as np
-from mathutils import Matrix, Vector
+from mathutils import Matrix, Vector, geometry
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "blender"))
 import warden_kit as K  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import bow_parts  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 FIT_BONES = [  # bone, head joint, tail joint, parent
@@ -158,8 +160,50 @@ def auto_weights(ob, arm):
     arm.select_set(True)
     bpy.context.view_layer.objects.active = arm
     bpy.ops.object.parent_set(type="ARMATURE_AUTO")
+    if not any(sum(x.weight for x in v.groups) > 1e-4 for v in ob.data.vertices):
+        _proxy_weights(ob, arm)
     _fill_weights(ob, arm)
     log("auto weights on %s: %d groups" % (arm.name, len(ob.vertex_groups)))
+
+
+def _proxy_weights(ob, arm, voxel=0.012):
+    """Bone heat found no solution on the whole scan (Kael: the skirt's plates and the scarf pass through each
+    other): it runs on a watertight voxel remesh of the body instead, and the weights come back onto the scan
+    from the nearest proxy face (interpolated)."""
+    px = ob.copy()
+    px.data = ob.data.copy()
+    px.vertex_groups.clear()
+    px.modifiers.clear()
+    px.parent = None
+    bpy.context.scene.collection.objects.link(px)
+    rm = px.modifiers.new("Remesh", "REMESH")
+    rm.mode = "VOXEL"
+    rm.voxel_size = voxel
+    bpy.ops.object.select_all(action="DESELECT")
+    bpy.context.view_layer.objects.active = px
+    px.select_set(True)
+    bpy.ops.object.modifier_apply(modifier="Remesh")
+    arm.select_set(True)
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.parent_set(type="ARMATURE_AUTO")
+    for g in px.vertex_groups:
+        if ob.vertex_groups.get(g.name) is None:
+            ob.vertex_groups.new(name=g.name)
+    dt = ob.modifiers.new("WeightsFromProxy", "DATA_TRANSFER")
+    dt.object = px
+    dt.use_vert_data = True
+    dt.data_types_verts = {"VGROUP_WEIGHTS"}
+    dt.vert_mapping = "POLYINTERP_NEAREST"
+    dt.layers_vgroup_select_src = "ALL"
+    dt.layers_vgroup_select_dst = "NAME"
+    bpy.ops.object.select_all(action="DESELECT")
+    bpy.context.view_layer.objects.active = ob
+    ob.select_set(True)
+    while ob.modifiers[0].name != dt.name:
+        bpy.ops.object.modifier_move_up(modifier=dt.name)
+    bpy.ops.object.modifier_apply(modifier=dt.name)
+    log("bone heat on a %.3f m voxel proxy (%d verts), weights transferred" % (voxel, len(px.data.vertices)))
+    bpy.data.objects.remove(px)
 
 
 def _fill_weights(ob, arm):
@@ -484,6 +528,8 @@ def project(ob, img, pj):
     if skips and not isinstance(skips[0], (list, tuple)):
         skips = [skips]
     mask = _art_mask(src, pj["mask"]) if "mask" in pj else None
+    line = pj.get("line")
+    lcol = np.array(K.hexcol(line["colour"]), np.float32) if line else None
     if pj.get("inpaint"):
         # the art's own hair across the face and the plate's bracket filled from the skin around them (skipping
         # them left patches of the old paint inside the new face); "outside": past the face's eroded outline too,
@@ -510,7 +556,13 @@ def project(ob, img, pj):
         if slots and not any(names[t.material_index].startswith(sl + "-") for sl in slots):
             continue
         ps = [me.vertices[i].co for i in t.vertices]
-        if not all(x0 <= p[ax] <= x1 and z0 <= p.z <= z1 for p in ps):
+        fe = float(pj.get("box_feather", 0.0))
+        if fe > 0.0:
+            # (box_feather m: a triangle reaching into the box paints, faded by its distance from the box's edge;
+            # no stepped edge where whole triangles stopped: Hem's mask at 3/4)
+            if not any(x0 - fe <= p[ax] <= x1 + fe and z0 - fe <= p.z <= z1 + fe for p in ps):
+                continue
+        elif not all(x0 <= p[ax] <= x1 and z0 <= p.z <= z1 for p in ps):
             continue
         ca, cz = sum(p[ax] for p in ps) / 3.0, sum(p.z for p in ps) / 3.0
         if any(_in_ellipse(ca, cz, c) for c in circles):
@@ -543,6 +595,22 @@ def project(ob, img, pj):
         row = np.clip(q[:, 1].astype(int), 0, ah - 1)
         tx = np.clip(pts[inside, 0].astype(int), 0, w - 1)
         ty = np.clip(pts[inside, 1].astype(int), 0, h - 1)
+        if line:
+            # (crisp lines: the art sampled bilinearly, its "greenness" thresholded, painted one flat colour; the
+            # skin around them is left as it is, so the lines sit on clean skin)
+            fx, fy = np.clip(q[:, 0] - 0.5, 0, aw - 1.001), np.clip(q[:, 1] - 0.5, 0, ah - 1.001)
+            x0_, y0_ = fx.astype(int), fy.astype(int)
+            ax_, ay_ = (fx - x0_)[:, None], (fy - y0_)[:, None]
+            b = lambda yy, xx: src[ah - 1 - yy, xx, :3]
+            smp = (b(y0_, x0_) * (1 - ax_) + b(y0_, x0_ + 1) * ax_) * (1 - ay_) + \
+                (b(y0_ + 1, x0_) * (1 - ax_) + b(y0_ + 1, x0_ + 1) * ax_) * ay_
+            score = smp[:, 1] - np.maximum(smp[:, 0], smp[:, 2])
+            # (`max`: brighter greens are a trim, not a tattoo: Vex's crop-top piping beside her chest circuits)
+            on = (score > float(line.get("threshold", 0.12))) & (score < float(line.get("max", 9.0)))
+            if on.any():
+                dst[ty[on], tx[on], :3] = lcol
+                painted += 1
+            continue
         got = src[ah - 1 - row, col]
         art_px = np.abs(got[:, :3] - bg).sum(axis=1) > 0.12               # (the sheet's grey keeps Meshy's paint)
         if skips:
@@ -567,6 +635,12 @@ def project(ob, img, pj):
         wt = np.full(len(col), wf, np.float32)
         if mask is not None:
             wt *= mask[row, col]
+        if fe > 0.0:
+            pv = np.array([p[:] for p in ps])
+            wp = np.outer(l1[inside], pv[0]) + np.outer(l2[inside], pv[1]) + np.outer(l3[inside], pv[2])
+            dd = np.minimum.reduce([wp[:, ax] - x0, x1 - wp[:, ax], wp[:, 2] - z0, z1 - wp[:, 2]])
+            eb = np.clip(dd / fe, 0.0, 1.0)
+            wt *= (eb * eb * (3 - 2 * eb)).astype(np.float32)
         art_px &= wt > 1e-3
         if not art_px.any():
             continue
@@ -1220,8 +1294,8 @@ def _cut(ob, drop):
 def weight_rules(ob, img, rules):
     """Pieces bone heat gives to the wrong bone where two parts touch in Meshy's pose: every
     vertex inside a rule's box (the fitted frame: her right +X, front +Y, soles on 0) whose painted colour
-    matches one of its hsv ranges [h0, h1, s0, s1, v0, v1] (all colours without) goes wholly to the rule's
-    bone (Vex's ammo drum on her back went with the gun-arm and rose over her shoulder blades)."""
+    matches one of its hsv ranges [h0, h1, s0, s1, v0, v1] (all colours without) and, with `slots`, is on a face
+    of one of those toon slots, goes wholly to the rule's bone (Vex's ammo drum on her back went with the gun-arm and rose over her shoulder blades)."""
     w, h = img.size
     px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
     uv = ob.data.uv_layers.active.data
@@ -1232,6 +1306,11 @@ def weight_rules(ob, img, rules):
         col[lp.vertex_index] += px[min(h - 1, max(0, int(v * h))), min(w - 1, max(0, int(u * w))), :3]
         cnt[lp.vertex_index] += 1
     col /= np.maximum(cnt, 1)[:, None]
+    vslots = [set() for _ in ob.data.vertices]
+    for p in ob.data.polygons:
+        m = ob.data.materials[p.material_index] if p.material_index < len(ob.data.materials) else None
+        for i in p.vertices:
+            vslots[i].add(m.name.split("-")[0] if m else "")
     for r in rules:
         b = r["box"]
         g = ob.vertex_groups.get(r["bone"]) or ob.vertex_groups.new(name=r["bone"])
@@ -1239,6 +1318,8 @@ def weight_rules(ob, img, rules):
         for vx in ob.data.vertices:
             c = vx.co
             if not (b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]):
+                continue
+            if r.get("slots") and not vslots[vx.index] & set(r["slots"]):
                 continue
             hh, ss, vv = _hsv(col[vx.index])
             if "hsv" in r and not any(q[0] <= hh <= q[1] and q[2] <= ss <= q[3] and q[4] <= vv <= q[5] for q in r["hsv"]):
@@ -1269,6 +1350,110 @@ def release(ob, bones, to="hips"):
         dest.add([v.index], have + gone, "REPLACE")
         moved += 1
     log("released %s to %s: %d vertices" % (", ".join(bones), to, moved))
+
+
+def arm_reach(ob, rig_arm, spec):
+    """Coat that bone heat gave to a hanging arm (the rest pose: arms straight down) though it hangs away from
+    it: every vertex riding mostly an arm chain, above the wrist and below `z_max`, farther than `r` from the
+    line down the arm goes wholly to `to` (hips). Ostra's coat flap beside his orb arm rose with it as a spike."""
+    names = {g.index: g.name for g in ob.vertex_groups}
+    dest = ob.vertex_groups.get(spec.get("to", "hips")) or ob.vertex_groups.new(name=spec.get("to", "hips"))
+    r, zmax = float(spec.get("r", 0.075)), float(spec.get("z_max", 1.2))
+    moved = 0
+    for sd in ("R", "L"):
+        bones = ("upper_arm." + sd, "forearm." + sd, "hand." + sd)
+        top = np.array(rig_arm.data.bones[bones[0]].head_local[:])
+        wrist = np.array(rig_arm.data.bones[bones[2]].head_local[:])
+        ax = (wrist - top) / max(np.linalg.norm(wrist - top), 1e-9)
+        for v in ob.data.vertices:
+            tot = sum(g.weight for g in v.groups) or 1.0
+            if sum(g.weight for g in v.groups if names.get(g.group) in bones) <= 0.5 * tot:
+                continue
+            co = np.array(v.co[:])
+            if co[2] > zmax or co[2] < wrist[2]:
+                continue
+            d = co - top
+            if np.linalg.norm(d - ax * d.dot(ax)) <= r:
+                continue
+            for g in list(v.groups):
+                ob.vertex_groups[g.group].add([v.index], 0.0, "REPLACE")
+            dest.add([v.index], 1.0, "REPLACE")
+            moved += 1
+    if spec.get("binarize"):
+        # (below z_max a vertex rides an arm wholly or not at all: coat beside the hanging hand that bone heat gave
+        # a third of its weight to the arm was dragged half way up with the raised orb hand, a long spike)
+        split = 0
+        for sd in ("R", "L"):
+            bones = {"upper_arm." + sd, "forearm." + sd, "hand." + sd}
+            for v in ob.data.vertices:
+                if v.co.z > zmax:
+                    continue
+                gs = [(names.get(g.group), g.group, g.weight) for g in v.groups]
+                a = sum(w for n, _i, w in gs if n in bones)
+                tot = sum(w for _n, _i, w in gs) or 1.0
+                if a <= 1e-4 or a >= tot - 1e-4:
+                    continue
+                keep_arm = a > 0.5 * tot
+                rest = [(i, w) for n, i, w in gs if (n in bones) == keep_arm]
+                sw = sum(w for _i, w in rest) or 1.0
+                for _n, i, _w in gs:
+                    ob.vertex_groups[i].add([v.index], 0.0, "REPLACE")
+                for i, w in rest:
+                    ob.vertex_groups[i].add([v.index], w / sw, "REPLACE")
+                split += 1
+        log("arm reach: %d vertices made wholly arm or wholly body below z %.2f" % (split, zmax))
+    log("arm reach: %d vertices off the arms to %s" % (moved, dest.name))
+
+
+def cut_straddle(ob, spec):
+    """Cut the faces that join a hanging arm to the body below the shoulder (`z_max`, the rest pose): Meshy fused
+    Ostra's sleeves and gloves to the coat beside them, and with the orb hand raised those faces stretched into a
+    sheet from his hip to his hand. A face goes when its vertices ride mostly different chains (an arm's
+    upper_arm/forearm/hand against the rest)."""
+    names = {g.index: g.name for g in ob.vertex_groups}
+    arms = {"R": ("upper_arm.R", "forearm.R", "hand.R"), "L": ("upper_arm.L", "forearm.L", "hand.L")}
+
+    def chain(v):
+        s = sum(g.weight for g in v.groups) or 1.0
+        for k, bones in arms.items():
+            if sum(g.weight for g in v.groups if names.get(g.group) in bones) > 0.5 * s:
+                return k
+        return "B"
+    ch = [chain(v) for v in ob.data.vertices]
+    zmax = float(spec.get("z_max", 1.2))
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bm.faces.ensure_lookup_table()
+    cut = [f for f in bm.faces if f.calc_center_median().z < zmax and len({ch[v.index] for v in f.verts}) > 1]
+    bmesh.ops.delete(bm, geom=cut, context="FACES")
+    # (and the slivers the cut leaves hanging: small islands below the shoulder)
+    small = int(spec.get("min_island", 0))
+    dropped = 0
+    if small:
+        bm.faces.ensure_lookup_table()
+        seen = set()
+        gone = []
+        for f0 in bm.faces:
+            if f0.index in seen:
+                continue
+            isl, stack = [], [f0]
+            seen.add(f0.index)
+            while stack:
+                f = stack.pop()
+                isl.append(f)
+                for e in f.edges:
+                    for g in e.link_faces:
+                        if g.index not in seen:
+                            seen.add(g.index)
+                            stack.append(g)
+            if len(isl) < small and all(f.calc_center_median().z < zmax for f in isl):
+                gone += isl
+        dropped = len(gone)
+        bmesh.ops.delete(bm, geom=gone, context="FACES")
+        bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(ob.data)
+    bm.free()
+    log("cut straddle: %d faces between the arms and the body below z %.2f, %d sliver faces" % (len(cut), zmax, dropped))
 
 
 def keep_weights(ob):
@@ -1472,7 +1657,7 @@ def touch_up(ob, img, rules):
     uv = ob.data.uv_layers.active.data
     for r in rules:
         box = r.get("box")
-        col = np.array(K.hexcol(r["colour"]), np.float32)
+        col = np.array(K.hexcol(r.get("colour", "808080")), np.float32)
 
         def pick(poly, c, mat, r=r, box=box):
             if r.get("slot") and not mat.startswith(r["slot"]):
@@ -1526,6 +1711,14 @@ def touch_up(ob, img, rules):
                     return False
             return True
         m = face_mask(ob, img, pick)
+        if r["mode"] == "fill":
+            n_bad = _fill_texels(px, m, r["fill_hsv"], int(r.get("iterations", 80)), col, int(r.get("erode", 0)))
+            log("touch-up fill %s: %d of %d texels" % (r.get("name", ""), n_bad, int(m.sum())))
+            continue
+        if r["mode"] in ("cap", "desat"):
+            n_t = _texel_tone(px, m, r)
+            log("touch-up %s %s: %d of %d texels" % (r["mode"], r.get("name", ""), n_t, int(m.sum())))
+            continue
         rgb = px[m, :3]
         val = rgb.max(axis=1, keepdims=True) / max(float(col.max()), 1e-3)
         if r["mode"] == "warm":
@@ -1542,6 +1735,192 @@ def touch_up(ob, img, rules):
         px[m, :3] = out
         log("touch-up %s %s: %d texels" % (r["mode"], r["colour"], int(m.sum())))
     img.pixels = px.ravel()
+
+
+def _texel_tone(px, m, r):
+    """Texel by texel inside the picked faces' texels `m`: "cap" compresses values above `cap` (by `k`: a skin's
+    blown highlights, Vex's upper chest), "desat" takes `k` of the saturation out of texels whose hue is within
+    `hue` [h0, h1] (h0 > h1 wraps) and saturation at least `sat_min` (her eyeshadow's magenta to the face sheet's
+    smoky plum). Returns the texels changed."""
+    rgb = px[..., :3]
+    hq, sq, vq = _hsv_px(rgb)
+    k = float(r.get("k", 0.4))
+    if r["mode"] == "cap":
+        t = float(r["cap"])
+        sel = m & (vq > t)
+        nv = t + (vq[sel] - t) * k
+        rgb[sel] = rgb[sel] * (nv / np.maximum(vq[sel], 1e-6))[:, None]
+    else:
+        h0, h1 = r["hue"]
+        hue_ok = (hq >= h0) & (hq <= h1) if h0 <= h1 else (hq >= h0) | (hq <= h1)
+        sel = m & hue_ok & (sq >= float(r.get("sat_min", 0.0)))
+        grey = rgb[sel].mean(axis=1, keepdims=True)
+        rgb[sel] = rgb[sel] * (1.0 - k) + grey * k
+    px[..., :3] = rgb
+    return int(sel.sum())
+
+
+def _fill_texels(px, m, q, iterations, col, erode=0):
+    """Texels of a colour (hsv [h0, h1, s0, s1, v0, v1]) inside the picked faces' texels `m`, filled from the
+    other texels of `m` around them, a ring at a time (Vex's chest: Meshy's blurry tattoos on the skin): the skin
+    closes over them in its own shading, no flat patch. Texels no ring reaches take `col`. Returns their count."""
+    if not m.any():
+        return 0
+    # (on the picked texels' bounding box only, a margin round it: the whole atlas, 80 rings, was minutes)
+    rr, cc = np.nonzero(m)
+    ra, rb = max(0, rr.min() - 2), min(m.shape[0], rr.max() + 3)
+    ca, cb = max(0, cc.min() - 2), min(m.shape[1], cc.max() + 3)
+    full_px, px, m = px, px[ra:rb, ca:cb], m[ra:rb, ca:cb]
+    hq, sq, vq = _hsv_px(px[..., :3])
+    hue_ok = (hq >= q[0]) & (hq <= q[1]) if q[0] <= q[1] else (hq >= q[0]) | (hq <= q[1])
+    bad = m & hue_ok & (sq >= q[2]) & (sq <= q[3]) & (vq >= q[4]) & (vq <= q[5])
+    inner = m.copy()
+    for _i in range(erode):
+        # (`erode` texels in from the faces' edge stay: a strap's own painted edge beside its cloth)
+        inner &= np.roll(inner, 1, 0) & np.roll(inner, -1, 0) & np.roll(inner, 1, 1) & np.roll(inner, -1, 1)
+    bad &= inner
+    known = m & ~bad
+    acc = px[..., :3].copy()
+    for _i in range(iterations):
+        tot = np.zeros_like(acc)
+        cnt = np.zeros(acc.shape[:2], np.float32)
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            kn = np.roll(known, (dy, dx), (0, 1))
+            tot += np.roll(acc, (dy, dx), (0, 1)) * kn[..., None]
+            cnt += kn
+        new = bad & ~known & (cnt > 0)
+        if not new.any():
+            break
+        acc[new] = tot[new] / cnt[new][:, None]
+        known |= new
+    px[bad & known, :3] = acc[bad & known]
+    px[bad & ~known, :3] = col
+    full_px[ra:rb, ca:cb] = px
+    return int(bad.sum())
+
+
+def stamp_lines(ob, img, sp):
+    """The art's thin lines (Vex's circuit tattoos, her gorget's seams) as vector strokes of one width (r3g): the
+    art's line pixels in `art_box` (greenness g - max(r, b) above `threshold`, outside `skip_art_box`) thinned to
+    their centre lines, each centre pixel (and the step to its neighbours) mapped onto the mesh by the view's
+    registration (k, col0_at, row0_at, or the face's `warp`), ray-cast from the front onto the faces of `slots`
+    inside `box`, and stamped there as an anti-aliased disc `width` m across in `colour`, never past those faces'
+    texels (no bleed onto the jacket). The art's own soft edges and shading never reach the atlas."""
+    from mathutils.bvhtree import BVHTree
+    art = bpy.data.images.load(os.path.expanduser(sp["image"]))
+    aw, ah = art.size
+    src = np.array(art.pixels[:], dtype=np.float32).reshape(ah, aw, 4)
+    c0, r0, c1, r1 = (int(v) for v in sp["art_box"])
+    rows, cols = np.arange(r0, r1 + 1), np.arange(c0, c1 + 1)
+    sub = src[ah - 1 - rows][:, cols, :3]
+    on = (sub[..., 1] - np.maximum(sub[..., 0], sub[..., 2])) > float(sp.get("threshold", 0.08))
+    if sp.get("max"):
+        on &= (sub[..., 1] - np.maximum(sub[..., 0], sub[..., 2])) < float(sp["max"])
+    for bx in sp.get("skip_art_box", []):
+        on[max(0, bx[1] - r0):max(0, bx[3] - r0 + 1), max(0, bx[0] - c0):max(0, bx[2] - c0 + 1)] = False
+    op = int(sp.get("open_px", 0))
+    if op:
+        # (wide areas of the colour are not lines: a lock of hair, a rim light; an opening finds and drops them)
+        e = on.copy()
+        for _i in range(op):
+            e &= np.roll(e, 1, 0) & np.roll(e, -1, 0) & np.roll(e, 1, 1) & np.roll(e, -1, 1)
+        for _i in range(op + 1):
+            e |= np.roll(e, 1, 0) | np.roll(e, -1, 0) | np.roll(e, 1, 1) | np.roll(e, -1, 1)
+        wide = on & e
+        on &= ~e
+    sk = _thin(on)
+    ri, ci = np.nonzero(sk)
+    pts = [(c0 + c, r0 + r) for r, c in zip(ri, ci)]
+    if op and sp.get("keep_wide"):
+        # (the wide parts stamped whole: the round nodes of a face's circuit, where no hair is in the box)
+        wr, wc = np.nonzero(wide)
+        pts += [(c0 + c, r0 + r) for r, c in zip(wr, wc)]
+    skset = set(zip(ri.tolist(), ci.tolist()))
+    for r, c in zip(ri.tolist(), ci.tolist()):
+        for dr, dc in ((0, 1), (1, -1), (1, 0), (1, 1)):
+            if (r + dr, c + dc) in skset:
+                pts.append((c0 + c + dc * 0.5, r0 + r + dr * 0.5))
+    pts = np.array(pts, float)
+    if "warp" in sp:
+        inv = _tps_fit(sp["warp"]["art"], sp["warp"]["mesh"], float(sp["warp"].get("smooth", 1e-3)))
+        xz = inv(pts)
+    else:
+        k = float(sp["k"])
+        xz = np.stack([(pts[:, 0] - float(sp["col0_at"])) * k, (float(sp["row0_at"]) - pts[:, 1]) * k], 1)
+    me = ob.data
+    me.calc_loop_triangles()
+    names = [m.name for m in me.materials]
+    slots = tuple(x + "-" for x in sp.get("slots", ["skin"]))
+    x0, x1, z0, z1 = sp["box"]
+    tris = [t for t in me.loop_triangles if names[t.material_index].startswith(slots)
+            and all(x0 <= me.vertices[i].co.x <= x1 and z0 <= me.vertices[i].co.z <= z1 for i in t.vertices)]
+    if not tris:
+        log("stamp %s: no faces" % sp.get("name", ""))
+        return
+    tree = BVHTree.FromPolygons([v.co.copy() for v in me.vertices], [t.vertices[:] for t in tris])
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    uv = me.uv_layers.active.data
+
+    def pick(poly, c, mat):
+        return mat.startswith(slots) and x0 <= c.x <= x1 and z0 <= c.z <= z1
+    allowed = face_mask(ob, img, pick)
+    cover = np.zeros((h, w), np.float32)
+    half = float(sp.get("width", 0.002)) * 0.5
+    n_hit = 0
+    for x, z in xz:
+        hit = tree.ray_cast(Vector((x, -1.0, z)), Vector((0.0, 1.0, 0.0)), 2.0)
+        if hit[0] is None:
+            continue
+        t = tris[hit[2]]
+        a, b, c = (me.vertices[i].co for i in t.vertices)
+        ua, ub, uc = (Vector((uv[li].uv.x * w, uv[li].uv.y * h, 0.0)) for li in t.loops)
+        q = geometry.barycentric_transform(hit[0], a, b, c, ua, ub, uc)
+        # texels per metre on this triangle: its UV area over its area
+        area3 = max((b - a).cross(c - a).length, 1e-12)
+        area2 = abs((ub - ua).cross(uc - ua).z)
+        rt = max(0.6, half * math.sqrt(area2 / area3))
+        cx, cy = q.x, q.y
+        xs = np.arange(int(cx - rt - 1), int(cx + rt + 2))
+        ys = np.arange(int(cy - rt - 1), int(cy + rt + 2))
+        xs, ys = xs[(xs >= 0) & (xs < w)], ys[(ys >= 0) & (ys < h)]
+        if not len(xs) or not len(ys):
+            continue
+        gx, gy = np.meshgrid(xs, ys)
+        d = np.hypot(gx + 0.5 - cx, gy + 0.5 - cy)
+        cov = np.clip(rt + 0.5 - d, 0.0, 1.0)
+        cover[gy, gx] = np.maximum(cover[gy, gx], cov)
+        n_hit += 1
+    cover *= allowed
+    col = np.array(K.hexcol(sp["colour"]), np.float32)
+    px[..., :3] = px[..., :3] * (1.0 - cover[..., None]) + col * cover[..., None]
+    img.pixels = px.ravel()
+    log("stamp %s: %d line pixels in the art, %d stamped, %d texels" % (sp.get("name", ""), int(sk.sum()), n_hit,
+                                                                       int((cover > 0.5).sum())))
+
+
+def _thin(m):
+    """Zhang-Suen thinning of a boolean mask to one-pixel lines."""
+    m = m.astype(np.uint8)
+    while True:
+        changed = False
+        for step in (0, 1):
+            pd = np.pad(m, 1)
+            nb = [pd[:-2, 1:-1], pd[:-2, 2:], pd[1:-1, 2:], pd[2:, 2:], pd[2:, 1:-1], pd[2:, :-2], pd[1:-1, :-2],
+                  pd[:-2, :-2]]          # (N, NE, E, SE, S, SW, W, NW)
+            b = sum(x.astype(np.int32) for x in nb)
+            a = sum(((nb[i] == 0) & (nb[(i + 1) % 8] == 1)).astype(np.int32) for i in range(8))
+            n_, e_, s_, w_ = nb[0], nb[2], nb[4], nb[6]
+            if step == 0:
+                c = ((n_ * e_ * s_) == 0) & ((e_ * s_ * w_) == 0)
+            else:
+                c = ((n_ * e_ * w_) == 0) & ((n_ * s_ * w_) == 0)
+            rem = (m == 1) & (b >= 2) & (b <= 6) & (a == 1) & c
+            if rem.any():
+                m[rem] = 0
+                changed = True
+        if not changed:
+            return m.astype(bool)
 
 
 def _hue(q):
@@ -1639,10 +2018,13 @@ def chunk(ob, rig, ck):
             continue
         piv = np.array(K.bone_head(rig, bone)[:])
         kk = float(ck[key]) - 1.0
+        # (head_x: the head a little wider than that again, a face that read small and gaunt: Vex r3h)
+        kx = float(ck.get("head_x", 1.0)) - 1.0 if bone == "head" else 0.0
         for v in ob.data.vertices:
             w = next((x.weight for x in v.groups if x.group == g.index), 0.0)
             if w > 0.0:
                 co[v.index] = piv + (co[v.index] - piv) * (1.0 + kk * w)
+                co[v.index, 0] = piv[0] + (co[v.index, 0] - piv[0]) * (1.0 + kx * w)
     if "fingers" in ck:
         # (long spidery fingers: both hands stretched down from the wrist by their skin weight, Ostra's claws)
         fk = float(ck["fingers"]) - 1.0
@@ -1666,11 +2048,58 @@ def chunk(ob, rig, ck):
             w = np.clip(1.0 - co[m, 2] / top, 0.0, 1.0)[:, None]
             piv = np.array([cx, cy, 0.0])
             co[m] = piv + (co[m] - piv) * (1.0 + fk * w)
+    # "limbs" {bone: k}: the vertices on a bone (by skin weight) pushed out from the line through its head and
+    # its child's head by k (Pip's chubby thighs and chest fluff); "hips" uses the line from hips to head
+    child = {"thigh.L": "shin.L", "thigh.R": "shin.R", "hips": "head", "upper_arm.L": "forearm.L",
+             "upper_arm.R": "forearm.R", "forearm.L": "hand.L", "forearm.R": "hand.R"}
+    for bone, k in (ck.get("limbs") or {}).items():
+        g = ob.vertex_groups.get(bone)
+        if g is None:
+            continue
+        a = np.array(K.bone_head(rig, bone)[:])
+        if bone in child:
+            b = np.array(K.bone_head(rig, child[bone])[:])
+        else:                         # (a shin: on along its thigh's line)
+            par = {"shin.L": "thigh.L", "shin.R": "thigh.R"}.get(bone)
+            b = a + (a - np.array(K.bone_head(rig, par)[:])) if par else a + np.array([0.0, 0.0, -0.3])
+        ax = (b - a) / max(np.linalg.norm(b - a), 1e-6)
+        kk = float(k) - 1.0
+        for v in ob.data.vertices:
+            w = next((x.weight for x in v.groups if x.group == g.index), 0.0)
+            if w > 0.0:
+                d = co[v.index] - a
+                rad = d - ax * d.dot(ax)
+                co[v.index] = co[v.index] + rad * kk * w
     gk = float(ck.get("girth", 1.0))
     co[:, 0] *= gk
     co[:, 1] *= gk
     ob.data.vertices.foreach_set("co", co.ravel())
     ob.data.update()
+
+
+def shrink_box(ob, sb):
+    """A bulky piece pulled in (fitted frame, the rest pose): the vertices of `slots` (all without) inside `box`
+    [x0, x1, y0, y1, z0, z1] move toward the vertical axis through `centre` [x, y] by `k` of their distance
+    (Sable's fur collar standing out behind her neck), fading over `fade` m from the box's edges."""
+    b = [(-1e9 if x is None else x) if i % 2 == 0 else (1e9 if x is None else x) for i, x in enumerate(sb["box"])]
+    slots = sb.get("slots")
+    on = np.zeros(len(ob.data.vertices), bool)
+    for p in ob.data.polygons:
+        if slots is None or any(ob.data.materials[p.material_index].name.startswith(x + "-") for x in slots):
+            on[list(p.vertices)] = True
+    co = np.array([v.co[:] for v in ob.data.vertices])
+    inside = on & (co[:, 0] >= b[0]) & (co[:, 0] <= b[1]) & (co[:, 1] >= b[2]) & (co[:, 1] <= b[3]) \
+        & (co[:, 2] >= b[4]) & (co[:, 2] <= b[5])
+    fade = float(sb.get("fade", 0.03))
+    dz = np.minimum(co[:, 2] - b[4], b[5] - co[:, 2])
+    w = np.clip(dz / max(fade, 1e-4), 0.0, 1.0) * inside
+    cx, cy = sb["centre"]
+    k = float(sb["k"])
+    co[:, 0] = cx + (co[:, 0] - cx) * (1.0 - (1.0 - k) * w)
+    co[:, 1] = cy + (co[:, 1] - cy) * (1.0 - (1.0 - k) * w)
+    ob.data.vertices.foreach_set("co", co.ravel())
+    ob.data.update()
+    log("shrink: %d vertices toward (%.2f, %.2f) x%.2f" % (int(inside.sum()), cx, cy, k))
 
 
 def _close_gaps(w):
@@ -1809,6 +2238,20 @@ def ramp_paint(ob, img, rules):
     img.pixels = px.ravel()
 
 
+def _erode(m, r):
+    return ~_dilate(~m, r)
+
+
+def _dilate(m, r):
+    out = m.copy()
+    for ax in (0, 1):
+        acc = out.copy()
+        for d in range(1, r + 1):
+            acc |= np.roll(out, d, axis=ax) | np.roll(out, -d, axis=ax)
+        out = acc
+    return out
+
+
 def split_part(ob, arm, img, sp):
     """A piece cut off the body as its own mesh (Tarek's stone bracers, Ostra's mask): the faces whose centre is in
     one of `boxes` (the fitted frame on the contract's rest pose: his right +X, front +Y, soles on 0) and whose
@@ -1901,7 +2344,13 @@ def split_part(ob, arm, img, sp):
             r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
             hh = np.where(mx == r, ((g - b) / d) % 6.0, np.where(mx == g, (b - r) / d + 2.0, (r - g) / d + 4.0)) / 6.0
             hue_ok = (hh >= q[0]) & (hh <= q[1]) if q[0] <= q[1] else (hh >= q[0]) | (hh <= q[1])
-            k = (hue_ok & (ss >= q[2]) & (ss <= q[3]) & (mx >= q[4]) & (mx <= q[5]) & mask).astype(np.float32)
+            k = hue_ok & (ss >= q[2]) & (ss <= q[3]) & (mx >= q[4]) & (mx <= q[5]) & mask
+            if e.get("enclosed"):
+                # (only what the porcelain closes round: the eyes, mouth, tear and crack inside the white face,
+                # not a violet hood half that the split took along with it)
+                white = mask & (ss < 0.3) & (mx > 0.55)
+                k &= _erode(_dilate(white, int(e["enclosed"])), int(e["enclosed"]))
+            k = k.astype(np.float32)
             out[..., :3] = k[..., None] * np.clip(rgb * float(e.get("gain", 1.4)), 0.0, 1.0)
         lit = int((out[..., :3].max(axis=2) > 0.1).sum())
         em = bpy.data.images.new("%s_emit" % sp["name"], w, h, alpha=False)
@@ -1965,6 +2414,194 @@ def hair_spring(ob, arm, hs):
     log("hair spring %s: %d bones, %d vertices" % (hs["name"], len(names), moved))
 
 
+def emit_art(ob, img, el):
+    """An emission mask projected from the art (Ryzz's pink scar, choker charm, corset piping and forearm veins: the
+    scan paints them as plain pink, the art draws them as neon). In Meshy's frame, before the fit (the mesh still
+    stands as the front view does), every texel of a face in one of `boxes` that faces the camera (normal -Y) gets
+    its surface point, which the front view's registration puts on the art: `image`, `px_per_m`, `col_at` / `row_at`
+    (the art's pixel at Meshy's x = 0 / z = 0). The art's neon pixels there (`hsv` ranges [h0, h1, s0, s1, v0, v1])
+    light it with the art's own colour. Returns the mask (rgb, the atlas's size); emit_attach() puts it on."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import imgio
+    w, h = img.size
+    art = imgio.load(os.path.expanduser(el["image"]))
+    ah, aw = art.shape[:2]
+    me = ob.data
+    me.calc_loop_triangles()
+    uvl = me.uv_layers.active.data
+    inf = float("inf")
+    boxes = [[(-inf, inf)[i % 2] if x is None else x for i, x in enumerate(bx)] for bx in el["boxes"]]
+    co = np.array([v.co[:] for v in me.vertices])
+    out = np.zeros((h, w, 3), np.float32)
+    # (`strict`: regions, in Meshy's frame, with their own tighter hsv: the charm's core, not the art's glow
+    # halo on the skin round it)
+    strict = el.get("strict", [])
+    reg = np.full((h, w), -1, np.int16)
+    k_px, c0, r0 = float(el["px_per_m"]), float(el["col_at"]), float(el["row_at"])
+    face_min = float(el.get("facing", 0.2))
+    nt = 0
+    for tri in me.loop_triangles:
+        c = co[list(tri.vertices)].mean(axis=0)
+        if not any(b[0] <= c[0] <= b[1] and b[2] <= c[1] <= b[3] and b[4] <= c[2] <= b[5] for b in boxes):
+            continue
+        if -tri.normal.y < face_min:
+            continue
+        nt += 1
+        P = co[list(tri.vertices)]
+        q = np.array([[uvl[li].uv.x * w, uvl[li].uv.y * h] for li in tri.loops])
+        lo = np.maximum(np.floor(q.min(axis=0)).astype(int) - 1, 0)
+        hi = np.minimum(np.ceil(q.max(axis=0)).astype(int) + 1, [w - 1, h - 1])
+        if (hi < lo).any():
+            continue
+        xs, ys = np.meshgrid(np.arange(lo[0], hi[0] + 1), np.arange(lo[1], hi[1] + 1))
+        t = np.stack([xs.ravel() + 0.5, ys.ravel() + 0.5], axis=1)
+        a_, b_, c_ = q
+        d = (b_[1] - c_[1]) * (a_[0] - c_[0]) + (c_[0] - b_[0]) * (a_[1] - c_[1])
+        if abs(d) < 1e-12:
+            continue
+        l1 = ((b_[1] - c_[1]) * (t[:, 0] - c_[0]) + (c_[0] - b_[0]) * (t[:, 1] - c_[1])) / d
+        l2 = ((c_[1] - a_[1]) * (t[:, 0] - c_[0]) + (a_[0] - c_[0]) * (t[:, 1] - c_[1])) / d
+        l3 = 1 - l1 - l2
+        ins = (l1 >= -0.02) & (l2 >= -0.02) & (l3 >= -0.02)
+        if not ins.any():
+            continue
+        pos = np.outer(l1[ins], P[0]) + np.outer(l2[ins], P[1]) + np.outer(l3[ins], P[2])
+        col = np.clip((c0 + pos[:, 0] * k_px).astype(int), 0, aw - 1)
+        row = np.clip((r0 - pos[:, 2] * k_px).astype(int), 0, ah - 1)
+        out[t[ins, 1].astype(int), t[ins, 0].astype(int)] = art[row, col]
+        for si, st in enumerate(strict):
+            b = st["box"]
+            inb = ((pos[:, 0] >= b[0]) & (pos[:, 0] <= b[1]) & (pos[:, 1] >= b[2]) & (pos[:, 1] <= b[3])
+                   & (pos[:, 2] >= b[4]) & (pos[:, 2] <= b[5]))
+            reg[t[ins, 1].astype(int)[inb], t[ins, 0].astype(int)[inb]] = si
+    rgb = out
+    mx, mn = rgb.max(axis=2), rgb.min(axis=2)
+    ss = (mx - mn) / np.maximum(mx, 1e-4)
+    dd = np.maximum(mx - mn, 1e-6)
+    r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+    hh = np.where(mx == r, ((g - b) / dd) % 6.0, np.where(mx == g, (b - r) / dd + 2.0, (r - g) / dd + 4.0)) / 6.0
+    def neon(qs):
+        k = np.zeros((h, w), np.float32)
+        for q in qs:
+            hue_ok = (hh >= q[0]) & (hh <= q[1]) if q[0] <= q[1] else (hh >= q[0]) | (hh <= q[1])
+            k = np.maximum(k, (hue_ok & (ss >= q[2]) & (ss <= q[3]) & (mx >= q[4]) & (mx <= q[5])).astype(np.float32))
+        return k
+    k = neon(el["hsv"])
+    for si, st in enumerate(strict):
+        k = np.where(reg == si, neon(st["hsv"]), k)
+    mask = k[..., None] * np.clip(rgb * float(el.get("gain", 1.2)), 0.0, 1.0)
+    # (Blender images run bottom up, as the UVs)
+    log("emit from the art: %d triangles in the boxes, %d texels lit" % (nt, int((k > 0).sum())))
+    return mask
+
+
+def paint_art(ob, img, pa):
+    """The art painted over the finished atlas by an orthographic front projection with its own registration
+    (Ryzz's face from the head sheet, which draws it at 3.5x the front view's pixels): in Meshy's frame, before the
+    fit, every texel of a face on one of `slots` inside `box` [x0, x1, z0, z1] that faces the camera (normal -Y)
+    takes the art's pixel at col = col_at + x * kx, row = row_at - z * ky, blended by `k` and feathered over
+    `feather` m from the box's edges; art pixels in a `keep` hsv range (the art's hair) leave the scan's own."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import imgio
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    art = imgio.load(os.path.expanduser(pa["image"]))
+    ah, aw = art.shape[:2]
+    me = ob.data
+    me.calc_loop_triangles()
+    uvl = me.uv_layers.active.data
+    co = np.array([v.co[:] for v in me.vertices])
+    x0, x1, z0, z1 = pa["box"]
+    fe = float(pa.get("feather", 0.01))
+    kx, ky, c0, r0 = float(pa["kx"]), float(pa["ky"]), float(pa["col_at"]), float(pa["row_at"])
+    slots = pa.get("slots", ["skin"])
+    kk = float(pa.get("k", 1.0))
+    keep = pa.get("keep", [])
+    n = 0
+    for tri in me.loop_triangles:
+        P = co[list(tri.vertices)]
+        c = P.mean(axis=0)
+        if not (x0 - fe <= c[0] <= x1 + fe and z0 - fe <= c[2] <= z1 + fe) or -tri.normal.y < float(pa.get("facing", 0.25)):
+            continue
+        m = me.materials[me.polygons[tri.polygon_index].material_index]
+        if m is None or m.name.split("-")[0] not in slots:
+            continue
+        q = np.array([[uvl[li].uv.x * w, uvl[li].uv.y * h] for li in tri.loops])
+        lo = np.maximum(np.floor(q.min(axis=0)).astype(int) - 1, 0)
+        hi = np.minimum(np.ceil(q.max(axis=0)).astype(int) + 1, [w - 1, h - 1])
+        if (hi < lo).any():
+            continue
+        xs, ys = np.meshgrid(np.arange(lo[0], hi[0] + 1), np.arange(lo[1], hi[1] + 1))
+        t = np.stack([xs.ravel() + 0.5, ys.ravel() + 0.5], axis=1)
+        a_, b_, c_ = q
+        d = (b_[1] - c_[1]) * (a_[0] - c_[0]) + (c_[0] - b_[0]) * (a_[1] - c_[1])
+        if abs(d) < 1e-12:
+            continue
+        l1 = ((b_[1] - c_[1]) * (t[:, 0] - c_[0]) + (c_[0] - b_[0]) * (t[:, 1] - c_[1])) / d
+        l2 = ((c_[1] - a_[1]) * (t[:, 0] - c_[0]) + (a_[0] - c_[0]) * (t[:, 1] - c_[1])) / d
+        l3 = 1 - l1 - l2
+        ins = (l1 >= -0.02) & (l2 >= -0.02) & (l3 >= -0.02)
+        if not ins.any():
+            continue
+        pos = np.outer(l1[ins], P[0]) + np.outer(l2[ins], P[1]) + np.outer(l3[ins], P[2])
+        col = np.clip((c0 + pos[:, 0] * kx).astype(int), 0, aw - 1)
+        row = np.clip((r0 - pos[:, 2] * ky).astype(int), 0, ah - 1)
+        src = art[row, col]
+        wgt = np.clip(np.minimum.reduce([pos[:, 0] - x0, x1 - pos[:, 0], pos[:, 2] - z0, z1 - pos[:, 2]]) / fe + 0.0,
+                      0.0, 1.0) * kk
+        if keep:
+            hh, ss, vv = _hsv_px(src[None])
+            hh, ss, vv = hh[0], ss[0], vv[0]
+            for kq in keep:
+                hit = (hh >= kq[0]) & (hh <= kq[1]) & (ss >= kq[2]) & (ss <= kq[3]) & (vv >= kq[4]) & (vv <= kq[5])
+                wgt = np.where(hit, 0.0, wgt)
+        ty, tx = t[ins, 1].astype(int), t[ins, 0].astype(int)
+        px[ty, tx, :3] = px[ty, tx, :3] * (1 - wgt[:, None]) + src * wgt[:, None]
+        n += int((wgt > 0).sum())
+    img.pixels = px.ravel()
+    log("paint %s from the art: %d texels" % (pa.get("name", "?"), n))
+
+
+spec_emit_atlas = []
+
+
+def emit_attach(ob, img, mask, parts=()):
+    """The emission mask (from emit_art, at the bake's size) down to the atlas's size, as every body material's
+    emission texture: WardenGlb puts it on the toon shader's emit layer, in the archetype's model_glow colour."""
+    w, h = img.size
+    f = mask.shape[1] // w
+    if f > 1:
+        mask = mask.reshape(h, f, w, f, 3).mean(axis=(1, 3))
+    ea = spec_emit_atlas[0] if spec_emit_atlas else None
+    if ea:
+        # (pieces that glow in their own painted colour, not the Warden's glow colour: Ryzz's hazard bands, a faint
+        # yellow that the match camera's far_emit lifts so they read at distance; the shader keeps yellow untinted)
+        px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)[..., :3]
+        hh, ss, vv = _hsv_px(px)
+        sel = face_mask(ob, img, lambda poly, c, mat: any(mat.startswith(x + "-") for x in ea["slots"]))
+        k = np.zeros((h, w), bool)
+        for q in ea["hsv"]:
+            k |= (hh >= q[0]) & (hh <= q[1]) & (ss >= q[2]) & (ss <= q[3]) & (vv >= q[4]) & (vv <= q[5])
+        k &= sel
+        mask = np.where(k[..., None], np.clip(px * float(ea.get("gain", 0.3)), 0, 1), mask)
+        log("emit from the atlas: %d texels" % int(k.sum()))
+    out = np.ones((h, w, 4), np.float32)
+    out[..., :3] = mask
+    em = bpy.data.images.new("%s_emit" % ob.name.lower(), w, h, alpha=False)
+    em.pixels = out.ravel()
+    em.pack()
+    for m in ob.data.materials:
+        if m is None:
+            continue
+        nt = m.node_tree
+        bsdf = nt.nodes.get("Principled BSDF")
+        et = nt.nodes.new("ShaderNodeTexImage")
+        et.image = em
+        nt.links.new(et.outputs[0], bsdf.inputs["Emission Color"])
+        bsdf.inputs["Emission Strength"].default_value = 1.0
+    log("emit layer on %d materials, %d texels lit" % (len(ob.data.materials), int((mask.max(axis=2) > 0.05).sum())))
+
+
 def _rel(arm, sp, keys):
     """A part spec whose points are given relative to a bone's head ("rel": bone name, the fitted frame) moved
     onto that bone: the lens and the braids ride the head, the hoses the hips, wherever the rig puts them."""
@@ -1981,6 +2618,235 @@ def _rel(arm, sp, keys):
     return out
 
 
+def face_plate(ob, ps, warp_spec):
+    """A plate drawn on a face sheet (Vex's angular brass eye plate; Meshy built a round one) as a decal mesh joined
+    into the body in the Meshy frame: the outline (sheet px) mapped onto the mesh through the inverse of the face's
+    warp, a grid inside it ray-cast onto the face, lifted `depth` m off it with a bevelled edge (`edge` px), and
+    UV-mapped onto the sheet itself, so its rivets, panels and shading are the sheet's. Material "<slot>-plate"."""
+    from mathutils.bvhtree import BVHTree
+    img_path = os.path.expanduser(ps["image"])
+    art = bpy.data.images.load(img_path)
+    aw, ah = art.size
+    inv = _tps_fit(warp_spec["art"], warp_spec["mesh"], float(warp_spec.get("smooth", 1e-3)))
+    poly = np.asarray(ps["outline"], float)
+    step = float(ps.get("step", 8.0))
+    c0, r0 = np.floor(poly.min(axis=0)).astype(int)
+    c1, r1 = np.ceil(poly.max(axis=0)).astype(int)
+    cols = np.arange(c0, c1 + step, step)
+    rows = np.arange(r0, r1 + step, step)
+    gc, gr = np.meshgrid(cols, rows)
+    inside = _pts_in_poly(np.stack([gc.ravel(), gr.ravel()], 1), poly).reshape(gc.shape)
+    for hc, hr, rad in ps.get("holes", []):
+        # (a hole where a part of its own shows through: the glowing lens dome)
+        inside &= np.hypot(gc - hc, gr - hr) > rad
+    # the distance of each grid point to the outline (px), for the bevel
+    pts = np.stack([gc.ravel(), gr.ravel()], 1)
+    dist = np.full(len(pts), 1e9)
+    for a, b in zip(poly, np.roll(poly, -1, axis=0)):
+        ab = b - a
+        t = np.clip(((pts - a) @ ab) / max(ab @ ab, 1e-9), 0.0, 1.0)
+        dist = np.minimum(dist, np.linalg.norm(pts - (a + np.outer(t, ab)), axis=1))
+    dist = dist.reshape(gc.shape)
+    xz = inv(pts).reshape(gc.shape + (2,))
+    # (onto the face and its metal only: the bangs hang in front of the plate)
+    names = [m.name for m in ob.data.materials]
+    keep = tuple(x + "-" for x in ps.get("onto", ["skin", "metal", "glow"]))
+    tree = BVHTree.FromPolygons([v.co.copy() for v in ob.data.vertices],
+                                [p.vertices[:] for p in ob.data.polygons if names[p.material_index].startswith(keep)])
+    depth, edge = float(ps.get("depth", 0.004)), float(ps.get("edge", 18.0))
+    dome = _plate_dome(ob, ps.get("dome"), gc, gr, inside, xz, tree)
+    vid = -np.ones(gc.shape, int)
+    verts, uvs = [], []
+    for i in range(gc.shape[0]):
+        for j in range(gc.shape[1]):
+            if not inside[i, j]:
+                continue
+            if dome is not None and dome["d"][i, j] < dome["r_out"]:
+                p, n = dome["at"](i, j)
+            else:
+                x, z = xz[i, j]
+                hit = tree.ray_cast(Vector((x, -1.0, z)), Vector((0.0, 1.0, 0.0)), 2.0)
+                if hit[0] is None:
+                    continue
+                p, n = hit[0], (Vector(hit[1]) if hit[1].y < 0 else -Vector(hit[1]))
+            k = min(1.0, dist[i, j] / edge)
+            k = k * k * (3.0 - 2.0 * k)
+            verts.append(p + n * (0.0006 + depth * k))
+            uvs.append((gc[i, j] / aw, 1.0 - gr[i, j] / ah))
+            vid[i, j] = len(verts) - 1
+    faces, glowing = [], []
+    gcirc = ps.get("glow_circles", [])
+    for i in range(gc.shape[0] - 1):
+        for j in range(gc.shape[1] - 1):
+            q = [vid[i, j], vid[i, j + 1], vid[i + 1, j + 1], vid[i + 1, j]]
+            if min(q) >= 0:
+                faces.append((q[0], q[3], q[2], q[1]))
+                # (a lens drawn on the sheet glows: its faces take the glow slot, same sheet texture)
+                fc, fr = gc[i, j] + step * 0.5, gr[i, j] + step * 0.5
+                glowing.append(any(math.hypot(fc - c, fr - r) < rad for c, r, rad in gcirc))
+    me = bpy.data.meshes.new("Plate")
+    me.from_pydata([tuple(v) for v in verts], [], faces)
+    me.update()
+    lay = me.uv_layers.new(name=ob.data.uv_layers.active.name)
+    for poly_ in me.polygons:
+        for li in poly_.loop_indices:
+            lay.data[li].uv = uvs[me.loops[li].vertex_index]
+    pl = bpy.data.objects.new("Plate", me)
+    bpy.context.scene.collection.objects.link(pl)
+    for poly_ in me.polygons:
+        poly_.use_smooth = True
+    art.pack()
+    for slot in [ps.get("slot", "metal")] + (["glow"] if any(glowing) else []):
+        m = bpy.data.materials.new("%s-plate" % slot)
+        m.use_nodes = True
+        bsdf = m.node_tree.nodes.get("Principled BSDF")
+        tex = m.node_tree.nodes.new("ShaderNodeTexImage")
+        tex.image = art
+        m.node_tree.links.new(tex.outputs[0], bsdf.inputs["Base Color"])
+        me.materials.append(m)
+    for poly_, g in zip(me.polygons, glowing):
+        poly_.material_index = 1 if g else 0
+    # (the body's own materials first: joined, the plate's faces keep theirs)
+    bpy.ops.object.select_all(action="DESELECT")
+    ob.select_set(True)
+    pl.select_set(True)
+    bpy.context.view_layer.objects.active = ob
+    bpy.ops.object.join()
+    log("face plate: %d faces from %d outline points, %d glowing" % (len(faces), len(poly), sum(glowing)))
+
+
+def _plate_dome(ob, dm, gc, gr, inside, xz, tree):
+    """The lens a plate sheet draws, as a smooth dome (Vex r3f): Meshy sculpted a horn under it, which the decal
+    draped into a green spike. Inside `r_out` px of the lens's centre the decal lies on the plane of the face
+    just around the horn (fitted robustly to the hits `fit_skip`..`fit_out` px from the centre), bulging `height`
+    m inside `r` px and blending back onto the face over the last `band` px; the scan's faces standing in front of
+    that plane near the lens's axis (the horn) go, under the dome. (A wide fit fails: across the plate the face
+    turns 5 cm away toward the temple, and rays through the bangs hit the back of the head.)"""
+    if not dm:
+        return None
+    dc, dr = (float(v) for v in dm["centre"])
+    r_in, r_out = float(dm["r"]), float(dm["r_out"])
+    skip, f_out, band = float(dm.get("fit_skip", 85)), float(dm.get("fit_out", 115)), float(dm.get("band", 25))
+    dpx = np.hypot(gc - dc, gr - dr)
+    hits = {}
+    for i, j in zip(*np.nonzero(inside & (dpx <= max(r_out, f_out)))):
+        x, z = xz[i, j]
+        hit = tree.ray_cast(Vector((x, -1.0, z)), Vector((0.0, 1.0, 0.0)), 2.0)
+        if hit[0] is not None:
+            hits[(i, j)] = (np.array(hit[0][:]), np.array((hit[1] if hit[1].y < 0 else -hit[1])[:]))
+    pts = np.array([q for ij, (q, _n) in hits.items() if skip <= dpx[ij] <= f_out])
+    if len(pts) < 8:
+        log("plate dome: only %d hits to fit, no dome" % len(pts))
+        return None
+    keep = np.abs(pts[:, 1] - np.median(pts[:, 1])) < 0.02     # (rays past the face: the back of the head)
+    for _r in range(4):
+        pc = pts[keep].mean(axis=0)
+        pn = np.linalg.svd(pts[keep] - pc)[2][2]
+        res = (pts - pc) @ pn
+        mad = float(np.median(np.abs(res[keep]))) * 1.48
+        keep = np.abs(res) < max(2.5 * mad, 0.0015)
+    pn = pn if pn[1] < 0 else -pn          # (toward the viewer, -Y)
+    rms = float(np.sqrt(np.mean(((pts[keep] - pc) @ pn) ** 2)))
+
+    def on_plane(x, z):
+        return np.array([x, pc[1] - (pn[0] * (x - pc[0]) + pn[2] * (z - pc[2])) / pn[1], z])
+    ci = np.unravel_index(int(np.argmin(np.where(inside, dpx, 1e9))), dpx.shape)
+    c3 = on_plane(*xz[ci])
+    # the horn: hits inside the fit's ring standing more than `stand` m in front of the plane; the cut its width
+    stand, top, lat = float(dm.get("stand", 0.0025)), 0.0, []
+    for ij, (q, _n) in hits.items():
+        if dpx[ij] >= skip:
+            continue
+        a = float((q - c3) @ pn)
+        top = max(top, a)
+        if a > stand:
+            d = q - c3
+            lat.append(float(np.linalg.norm(d - pn * a)))
+    r_cut = min(float(dm.get("cut_max", 0.016)), max(lat) + 0.002) if lat else 0.0
+    n_cut = 0
+    if r_cut > 0.0:
+        bm = bmesh.new()
+        bm.from_mesh(ob.data)
+        drop = []
+        for f in bm.faces:
+            d = np.array(f.calc_center_median()[:]) - c3
+            a = float(d @ pn)
+            if a > -float(dm.get("cut_back", 0.0015)) and np.linalg.norm(d - pn * a) < r_cut:
+                drop.append(f)
+        n_cut = len(drop)
+        bmesh.ops.delete(bm, geom=drop, context="FACES")
+        bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+        bm.to_mesh(ob.data)
+        bm.free()
+    height = float(dm.get("height", 0.003))
+    log("plate dome: plane on %d of %d hits (rms %.2f mm); the horn stood %.1f mm, %.1f mm wide: %d faces cut"
+        % (int(keep.sum()), len(pts), rms * 1000, top * 1000, r_cut * 2000, n_cut))
+
+    def at(i, j):
+        x, z = xz[i, j]
+        p, n = on_plane(x, z), pn.copy()
+        t = min(1.0, dpx[i, j] / r_in)
+        p = p + n * height * max(0.0, 1.0 - t * t)
+        h = hits.get((i, j))
+        w = (dpx[i, j] - (r_out - band)) / band
+        if h is not None and w > 0.0 and abs(float((h[0] - c3) @ pn)) < 0.012:
+            w = min(1.0, w)
+            w = w * w * (3.0 - 2.0 * w)
+            p = p * (1.0 - w) + h[0] * w
+            n = n * (1.0 - w) + h[1] * w
+            n = n / np.linalg.norm(n)
+        return Vector(p), Vector(n)
+    return {"d": dpx, "r_out": r_out, "at": at}
+
+
+def _pts_in_poly(pts, poly):
+    """Which points (n x 2) are inside a polygon (even-odd rule)."""
+    x, y = pts[:, 0] + 1e-6, pts[:, 1] + 1e-6
+    inside = np.zeros(len(pts), bool)
+    for (x1, y1), (x2, y2) in zip(poly, np.roll(poly, -1, axis=0)):
+        if y1 == y2:
+            continue
+        cross = ((y1 > y) != (y2 > y)) & (x < x1 + (y - y1) * (x2 - x1) / (y2 - y1))
+        inside ^= cross
+    return inside
+
+
+def reslot(ob, img, rs):
+    """Faces of one slot moved to another by their painted colour inside a box (after the paint-overs): Vex's gorget
+    seams, painted green from the face sheet on the metal slot, onto the glow slot (the hair in front of them is the
+    hair slot, so it never glows). rs: from, to, box [x0, x1, y0, y1, z0, z1] (null open), hsv [h0, h1, s0, s1, v0,
+    v1] on the face's centre texel."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    uv = ob.data.uv_layers.active.data
+    names = [m.name for m in ob.data.materials]
+    to = next((i for i, n in enumerate(names) if n.startswith(rs["to"] + "-")), None)
+    if to is None:
+        # (a slot no rule gave, e.g. brass split off the metal: the source slot's material, same atlas)
+        src = next(m for m in ob.data.materials if m.name.startswith(rs["from"] + "-"))
+        m = src.copy()
+        m.name = rs["to"] + "-" + src.name.split("-", 1)[1]
+        ob.data.materials.append(m)
+        to = len(ob.data.materials) - 1
+    inf = float("inf")
+    b = [(-inf if x is None else x) if i % 2 == 0 else (inf if x is None else x) for i, x in enumerate(rs["box"])]
+    q = rs["hsv"]
+    n = 0
+    for p in ob.data.polygons:
+        if not names[p.material_index].startswith(rs["from"] + "-"):
+            continue
+        c = p.center
+        if not (b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]):
+            continue
+        u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
+        v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
+        hh, ss, vv = _hsv(px[min(h - 1, int(v * h)), min(w - 1, int(u * w)), :3])
+        if q[0] <= hh <= q[1] and q[2] <= ss <= q[3] and q[4] <= vv <= q[5]:
+            p.material_index = to
+            n += 1
+    log("reslot %s -> %s: %d faces" % (rs["from"], rs["to"], n))
+
+
 def _rig_joint(rig, name):
     """A fit joint's place on the rig (fit spec joint names: hip.L, shoulder.L, neck, ...)."""
     bone = {"hip": "thigh", "shoulder": "upper_arm", "elbow": "forearm", "hand": "hand", "knee": "shin"}
@@ -1991,6 +2857,618 @@ def _rig_joint(rig, name):
     part, side = name.split(".")
     return K.bone_head(rig, "%s.%s" % (bone[part], side))
 
+
+def grow_slot(ob, g):
+    """A part Meshy made too small (Cinder's fin-crest, a fan that hides behind her skull): the vertices of the
+    faces on slot `slot` within `box` (Meshy's frame, [x0, x1, y0, y1, z0, z1], null open) are pushed away from
+    `centre` by up to `k`, eased in from `r0` to `r1` metres out so the part's base stays on the body."""
+    names = [m.name for m in ob.data.materials]
+    vs = set()
+    for p in ob.data.polygons:
+        if names[p.material_index].startswith(g["slot"] + "-"):
+            vs.update(p.vertices)
+    b = [(-1e9 if x is None else x) if i % 2 == 0 else (1e9 if x is None else x) for i, x in enumerate(g.get("box") or [None] * 6)]
+    c = Vector(g["centre"])
+    k, r0, r1 = float(g["k"]), float(g["r0"]), float(g["r1"])
+    n = 0
+    for vi in vs:
+        v = ob.data.vertices[vi]
+        q = v.co
+        if not (b[0] <= q.x <= b[1] and b[2] <= q.y <= b[3] and b[4] <= q.z <= b[5]):
+            continue
+        d = (q - c).length
+        t = min(1.0, max(0.0, (d - r0) / max(r1 - r0, 1e-6)))
+        t = t * t * (3.0 - 2.0 * t)
+        if t > 0.0:
+            v.co = c + (q - c) * (1.0 + (k - 1.0) * t)
+            n += 1
+    ob.data.update()
+    log("grow %s: %d vertices, x%.2f" % (g["slot"], n, k))
+
+
+def tail_chain(ob, arm, ts):
+    """The tail on a spring chain (RIG_CONTRACT "Spring chains"): `bones` spring_tail_<i> bones under the hips along
+    the posed tail's own centreline (the middle of its vertices per stretch of "tail_s"), each tail vertex between
+    the two nearest, the root's first `blend` metres eased in from the hips so the tail grows out of them."""
+    import warden_parts as WP
+    a = ob.data.attributes.get("tail_s")
+    n = len(ob.data.vertices)
+    s = np.zeros(n, np.float32)
+    a.data.foreach_get("value", s)
+    sel = np.nonzero(s >= 0.0)[0]
+    co = np.array([v.co[:] for v in ob.data.vertices])
+    L = float(s[sel].max())
+    nb = int(ts.get("bones", 7))
+    k = max(nb * 3, 12)
+    pts = []
+    for i in range(k + 1):
+        lo, hi = L * (i - 0.5) / k, L * (i + 0.5) / k
+        m = sel[(s[sel] >= lo) & (s[sel] < hi)]
+        if len(m):
+            pts.append(co[m].mean(axis=0))
+    p = np.array(pts)
+    pj = np.linspace(0.0, L, len(p))           # (each centreline point's marked arc length)
+    rot = None
+    if ts.get("curl"):
+        p, rot = _curl(ob, sel, s, co, p, pj, ts["curl"])
+        co = np.array([v.co[:] for v in ob.data.vertices])
+    tip = co[sel[np.argmax(s[sel])]]
+    names, spans = WP.chain_bones(arm, "tail", "hips", p, L, nb, tip)
+    for g in ob.vertex_groups:
+        g.remove([int(i) for i in sel])
+    # (the chain's own arc lengths: the posed centreline is a little shorter than the marked one)
+    Lp = float(WP.arclen(p)[-1])
+    WP.weights(ob, [(int(vi), float(s[vi]) * Lp / L) for vi in sel], names, spans)
+    blend = float(ts.get("blend", 0.12))
+    hips = ob.vertex_groups.get("hips") or ob.vertex_groups.new(name="hips")
+    gi = {g.index: g for g in ob.vertex_groups}
+    for vi in sel:
+        t = float(np.clip(s[vi] / blend, 0.0, 1.0)) if blend > 0 else 1.0
+        if t >= 1.0:
+            continue
+        for x in ob.data.vertices[int(vi)].groups:
+            gi[x.group].add([int(vi)], x.weight * t, "REPLACE")
+        hips.add([int(vi)], 1.0 - t, "ADD")
+    log("tail chain: %d bones over %.2f m, %d vertices" % (nb, Lp, len(sel)))
+    if not ts.get("fin"):
+        return None
+    # a fin along the tail's ridge (the crest's rays carried on: Cinder r3), on the same chain
+    fs = ts["fin"]
+    f0, f1 = fs.get("span", [0.15, 0.97])
+    ks = [i for i in range(len(p)) if f0 * L <= pj[i] <= f1 * L]
+    base, ups, sa = [], [], []
+    for i in ks:
+        up = rot[i] @ np.array([0.0, 0.0, 1.0]) if rot is not None else np.array([0.0, 0.0, 1.0])
+        m = sel[np.abs(s[sel] - pj[i]) < L / k]
+        if not len(m):
+            continue
+        top = float(((co[m] - p[i]) @ up).max())
+        base.append(p[i] + up * (top - float(fs.get("sink", 0.012))))
+        ups.append(up)
+        sa.append(pj[i] * Lp / L)
+    bld = WP.Builder()
+    WP.ribbon_fin(bld, WP.resample(np.array(base), int(fs.get("samples", 90)))[0],
+                  _resample_dirs(np.array(ups), int(fs.get("samples", 90))),
+                  np.linspace(sa[0], sa[-1], int(fs.get("samples", 90))), fs)
+    fin = bld.object("TailFin")
+    img = bpy.data.images.new("tailfin_atlas", WP.MEM_TEX, WP.MEM_TEX, alpha=False)
+    img.pixels = WP.membrane_atlas(ts["fin_atlas"]).ravel()
+    img.pack()
+    mi = WP._mats(fin, img, ("fur", "glow"), "tailfin")
+    for poly in fin.data.polygons:
+        poly.material_index = mi["glow"] if all(bld.part[v] == "edge" for v in poly.vertices) else mi["fur"]
+    WP.weights(fin, [(vi, bld.s[vi]) for vi in range(len(bld.v))], names, spans)
+    fin.parent = arm
+    mod = fin.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("tail fin: %d tris" % sum(len(f) - 2 for f in bld.f))
+    return fin
+
+
+def drop_slot(ob, rule):
+    """The faces of slot `slot` whose centre is inside `box` (Meshy's frame) removed: a part rebuilt as geometry
+    (Cinder's fin-crest on the head: a fan of rays now, fit spec "fins")."""
+    names = [m.name for m in ob.data.materials]
+    b = [(-1e9 if x is None else x) if i % 2 == 0 else (1e9 if x is None else x) for i, x in enumerate(rule["box"])]
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    gone = [f for f in bm.faces if names[f.material_index].startswith(rule["slot"] + "-")
+            and b[0] <= f.calc_center_median().x <= b[1] and b[2] <= f.calc_center_median().y <= b[3]
+            and b[4] <= f.calc_center_median().z <= b[5]]
+    bmesh.ops.delete(bm, geom=gone, context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(ob.data)
+    bm.free()
+    ob.data.update()
+    log("drop %s: %d faces" % (rule["slot"], len(gone)))
+
+
+def _curl(ob, sel, s, co, p, pj, cs):
+    """The tail curled up into a loop (Cinder's art): from arc length `from` on, the centreline bends about the
+    horizontal axis across it there by 1/`radius` a metre, up to `turn` degrees, and every tail vertex goes with
+    its stretch of the centreline (its offset turned the same). Returns the new centreline and each point's turn."""
+    s0, rho, turn = float(cs["from"]), float(cs["radius"]), math.radians(float(cs["turn"]))
+    i0 = int(np.searchsorted(pj, s0))
+    t0 = p[min(i0 + 1, len(p) - 1)] - p[max(i0 - 1, 0)]
+    t0[2] = 0.0
+    t0 /= max(np.linalg.norm(t0), 1e-9)
+    axis = np.cross(t0, np.array([0.0, 0.0, 1.0]))          # (the tangent turns from t0 toward up)
+    th = np.clip((pj - s0) / rho, 0.0, turn)
+    rot = [_rotm(axis, a) for a in th]
+    q = p.copy()
+    for i in range(1, len(p)):
+        q[i] = q[i - 1] + rot[i] @ (p[i] - p[i - 1])
+    lift = float(cs.get("lift", 0.0))
+    for i in range(len(q)):
+        q[i, 2] += lift * min(1.0, max(0.0, (pj[i] - s0) / max(rho, 1e-6)))
+    # each vertex: its offset from the old centreline at its arc length, turned and put on the new one
+    for vi in sel:
+        x = float(s[vi])
+        i = int(np.clip(np.searchsorted(pj, x), 1, len(p) - 1))
+        f = (x - pj[i - 1]) / max(pj[i] - pj[i - 1], 1e-9)
+        old = p[i - 1] * (1 - f) + p[i] * f
+        new = q[i - 1] * (1 - f) + q[i] * f
+        a = th[i - 1] * (1 - f) + th[i] * f
+        ob.data.vertices[int(vi)].co = Vector(new + _rotm(axis, a) @ (co[vi] - old))
+    ob.data.update()
+    log("tail curl: from %.2f m, radius %.2f m, %.0f degrees" % (s0, rho, math.degrees(float(th.max()))))
+    return q, rot
+
+
+def _rotm(axis, ang):
+    axis = axis / np.linalg.norm(axis)
+    x, y, z = axis
+    c, s_, C = math.cos(ang), math.sin(ang), 1 - math.cos(ang)
+    return np.array([[c + x * x * C, x * y * C - z * s_, x * z * C + y * s_],
+                     [y * x * C + z * s_, c + y * y * C, y * z * C - x * s_],
+                     [z * x * C - y * s_, z * y * C + x * s_, c + z * z * C]])
+
+
+def _resample_dirs(d, n):
+    """Unit directions resampled evenly along their index to n."""
+    x = np.linspace(0, len(d) - 1, n)
+    out = np.stack([np.interp(x, np.arange(len(d)), d[:, i]) for i in range(3)], axis=1)
+    return out / np.maximum(np.linalg.norm(out, axis=1, keepdims=True), 1e-9)
+
+
+def tail_to_hips(ob):
+    """The tail rides the hips rigidly through the fit's pose (bone heat hands its ground loop to the shins)."""
+    a = ob.data.attributes.get("tail_s")
+    if a is None:
+        return
+    s = np.zeros(len(ob.data.vertices), np.float32)
+    a.data.foreach_get("value", s)
+    idx = [int(i) for i in np.nonzero(s >= 0.0)[0]]
+    for g in ob.vertex_groups:
+        g.remove(idx)
+    g = ob.vertex_groups.get("hips") or ob.vertex_groups.new(name="hips")
+    g.add(idx, 1.0, "REPLACE")
+
+
+def tail_mark(ob, ts, m):
+    """A tail (Cinder): the vertices within `r` of its centreline (`path`, Meshy's frame, root first; moved into
+    the fitted frame by the fit's own transform) and behind `y_cut` (the fitted frame: front +Y) get their arc
+    length along it in the point attribute "tail_s" (-1 elsewhere), which rides the pose and the decimation."""
+    path = np.array([(m @ Vector(p))[:] for p in ts["path"]])
+    co = np.array([v.co[:] for v in ob.data.vertices])
+    s, d = _tail_s(co, path)
+    sel = (d < float(ts.get("r", 0.2))) & (co[:, 1] < float(ts.get("y_cut", -0.08)))
+    a = ob.data.attributes.get("tail_s") or ob.data.attributes.new("tail_s", "FLOAT", "POINT")
+    a.data.foreach_set("value", np.where(sel, s, -1.0).astype(np.float32))
+    log("tail: %d vertices, %.2f m along" % (int(sel.sum()), float(s[sel].max()) if sel.any() else 0.0))
+
+
+def _tail_s(co, path):
+    """Each point's arc length along a polyline and its distance from it (nearest segment)."""
+    seg = path[1:] - path[:-1]
+    ln = np.linalg.norm(seg, axis=1)
+    s0 = np.concatenate([[0.0], np.cumsum(ln)])[:-1]
+    best_d = np.full(len(co), np.inf)
+    best_s = np.zeros(len(co))
+    for i in range(len(seg)):
+        t = np.clip(((co - path[i]) @ seg[i]) / max(ln[i] ** 2, 1e-9), 0.0, 1.0)
+        q = path[i] + t[:, None] * seg[i]
+        d = np.linalg.norm(co - q, axis=1)
+        better = d < best_d
+        best_d[better] = d[better]
+        best_s[better] = s0[i] + t[better] * ln[i]
+    return best_s, best_d
+
+
+
+def hot_faces(ob, hb):
+    """Faces inside a box (the Meshy frame) whose atlas has hot texels (Kael's magma cracks, his right arm only) move
+    to a copy of their material named "<slot>-<tag>-hot": the game lights only that material's hot texels, keyed per
+    texel (hero_toon glow_key), in the Warden's glow colour; the skin round the cracks stays skin."""
+    me = ob.data
+    b = hb["box"]
+    hot = {}
+    n = 0
+    for p in me.polygons:
+        c = p.center
+        if not (b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]):
+            continue
+        m = me.materials[p.material_index]
+        if m is None or m.name.split("-")[0] not in hb.get("slots", ["skin"]):
+            continue
+        if m.name not in hot:
+            h = m.copy()
+            h.name = m.name + "-hot"
+            me.materials.append(h)
+            hot[m.name] = len(me.materials) - 1
+        p.material_index = hot[m.name]
+        n += 1
+    log("hot faces: %d in %s" % (n, b))
+
+
+def hot_paint(ob, img, hp):
+    """Kael's arm cracks as the art draws them (kael_arm_sheet): a few big branching cracks, white-hot cores with a
+    pale-gold rim, over the whole right arm from the shoulder to the bandage, not the scan's busy net. In the
+    "-hot" materials' texels: the scan's own hot texels go back to skin (`skin`), then cracks generated on the arm's
+    surface (unwrapped round the shoulder -> wrist axis, Meshy frame) are painted: within `core` m of a crack the
+    warm colour the shader keys fully hot, out to `rim` m a duller one it keys as the glow's edge."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    rgb = px[..., :3]
+    me = ob.data
+    me.calc_loop_triangles()
+    uv = me.uv_layers.active.data
+    names = [m.name for m in me.materials]
+    a0, a1 = np.array(hp["axis"][0], float), np.array(hp["axis"][1], float)
+    ax = a1 - a0
+    L = float(np.linalg.norm(ax))
+    ax /= L
+    e1 = np.cross(ax, [0.0, 1.0, 0.0])
+    e1 /= np.linalg.norm(e1)
+    e2 = np.cross(ax, e1)
+    rng = np.random.default_rng(int(hp.get("seed", 4)))
+    paths, circ = _crack_paths(hp, L * float(hp.get("to", 0.92)), rng)
+    core, rim = float(hp.get("core_w", 0.006)), float(hp.get("rim_w", 0.014))
+    c_core = np.array(K.hexcol(hp.get("core", "ffd070")), np.float32)
+    c_rim = np.array(K.hexcol(hp.get("edge", "8c5030")), np.float32)
+    c_skin = np.array(K.hexcol(hp.get("skin", "5a3530")), np.float32)
+
+    def ss(e0, e1_, x):
+        t = np.clip((x - e0) / (e1_ - e0), 0, 1)
+        return t * t * (3 - 2 * t)
+    n_core = n_rim = n_off = 0
+    for t in me.loop_triangles:
+        if not names[t.material_index].endswith("-hot"):
+            continue
+        pv = np.array([me.vertices[i].co[:] for i in t.vertices])
+        q = np.array([[uv[li].uv.x * w, uv[li].uv.y * h] for li in t.loops])
+        lo = np.maximum(np.floor(q.min(axis=0)).astype(int), 0)
+        hi = np.minimum(np.ceil(q.max(axis=0)).astype(int), [w - 1, h - 1])
+        xs, ys = np.meshgrid(np.arange(lo[0], hi[0] + 1), np.arange(lo[1], hi[1] + 1))
+        pts = np.stack([xs.ravel() + 0.5, ys.ravel() + 0.5], axis=1)
+        a, b, c = q
+        d = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1])
+        if abs(d) < 1e-12:
+            continue
+        l1 = ((b[1] - c[1]) * (pts[:, 0] - c[0]) + (c[0] - b[0]) * (pts[:, 1] - c[1])) / d
+        l2 = ((c[1] - a[1]) * (pts[:, 0] - c[0]) + (a[0] - c[0]) * (pts[:, 1] - c[1])) / d
+        l3 = 1 - l1 - l2
+        ins = (l1 >= -0.02) & (l2 >= -0.02) & (l3 >= -0.02)
+        if not ins.any():
+            continue
+        wp = np.outer(l1[ins], pv[0]) + np.outer(l2[ins], pv[1]) + np.outer(l3[ins], pv[2])
+        tx = np.clip(pts[ins, 0].astype(int), 0, w - 1)
+        ty = np.clip(pts[ins, 1].astype(int), 0, h - 1)
+        # the scan's own hot texels back to skin (its busy net)
+        cur = rgb[ty, tx]
+        heat = ss(0.42, 0.66, cur[:, 0]) * ss(0.14, 0.32, cur[:, 0] - cur[:, 2]) * ss(-0.04, 0.01, cur[:, 1] - cur[:, 2])
+        hot = heat > float(hp.get("net_k", 0.15))
+        if hp.get("white_k"):
+            # (the scan's own pale crack paint, near-white blotches on the arm, goes too)
+            hot |= cur.min(axis=1) > float(hp["white_k"])
+        rgb[ty[hot], tx[hot]] = c_skin * (0.85 + 0.3 * rng.random((int(hot.sum()), 1))).astype(np.float32)
+        n_off += int(hot.sum())
+        # the texel's place on the unwrapped arm
+        rel = wp - a0
+        u = rel @ ax
+        ang = np.arctan2(rel @ e2, rel @ e1)
+        v = (ang % (2 * np.pi)) / (2 * np.pi) * circ
+        inarm = (u > -0.02) & (u < L * float(hp.get("to", 0.92)))
+        uvp = np.stack([u, v], axis=1)
+        dist = np.full(len(u), np.inf)
+        for path in paths:
+            for k in range(len(path) - 1):
+                for wrap in (-circ, 0.0, circ):
+                    off = np.array([0.0, wrap])
+                    dist = np.minimum(dist, _seg_dist2d(uvp, path[k] + off, path[k + 1] + off))
+        isc = inarm & (dist < core)
+        isr = inarm & ~isc & (dist < rim)
+        rgb[ty[isc], tx[isc]] = c_core
+        kk = (1.0 - (dist[isr] - core) / (rim - core))[:, None] * 0.8
+        rgb[ty[isr], tx[isr]] = rgb[ty[isr], tx[isr]] * (1 - kk) + c_rim * kk
+        n_core += int(isc.sum())
+        n_rim += int(isr.sum())
+    px[..., :3] = rgb
+    img.pixels = px.ravel()
+    log("hot paint: %d crack paths, %d core texels, %d rim, %d net texels back to skin" % (len(paths), n_core, n_rim, n_off))
+
+
+def _seg_dist2d(p, a, b):
+    ab = b - a
+    t = np.clip(((p - a) @ ab) / max(ab @ ab, 1e-12), 0.0, 1.0)
+    return np.linalg.norm(p - (a + np.outer(t, ab)), axis=1)
+
+
+def deform(ob, items):
+    """Reshape the scan's body before the rig fit (Meshy frame: +Z up, facing -Y, his right -X): each item moves
+    and scales the vertices within `r` of its centre `c`, by a smooth fall-off (1 at the centre, 0 at r), so a
+    bulge (Kael's oversized trapezius and deltoids, the hump behind his neck) shrinks without a seam. `move`
+    [dx, dy, dz] m; `scale` [sx, sy, sz] about the centre; `mirror_x` repeats it on the other side."""
+    co = np.array([v.co[:] for v in ob.data.vertices])
+    for it in items:
+        cs = [np.array(it["c"], float)]
+        if it.get("mirror_x"):
+            cs.append(cs[0] * np.array([-1.0, 1.0, 1.0]))
+        for c in cs:
+            sgn = np.sign(c[0]) if it.get("mirror_x") and c[0] != 0 else 1.0
+            mv = np.array(it.get("move", [0, 0, 0]), float) * np.array([sgn, 1.0, 1.0])
+            sc = np.array(it.get("scale", [1, 1, 1]), float)
+            r = float(it["r"])
+            d = np.linalg.norm(co - c, axis=1)
+            w = np.clip(1.0 - (d / r) ** 2, 0.0, 1.0) ** 2
+            n = int((w > 0).sum())
+            co = co + w[:, None] * (mv + (co - c) * (sc - 1.0))
+            log("deform: %d verts at %s (r %.2f)" % (n, tuple(np.round(c, 3)), r))
+    for v, p in zip(ob.data.vertices, co):
+        v.co = p
+    ob.data.update()
+
+
+def _crack_paths(hp, L, rng):
+    """A few big branching cracks on an unwrapped arm (u along the arm 0..L m, v round it in m): `mains` long
+    jagged cracks from the shoulder to the wrist, each with `branches` side cracks (kael_arm_sheet)."""
+    circ = float(hp.get("circ", 0.42))
+    paths = []
+    for i in range(int(hp.get("mains", 3))):
+        v = circ * (i + rng.uniform(-0.1, 0.1)) / int(hp.get("mains", 3))
+        u, pts = 0.0, []
+        while u < L:
+            pts.append((u, v))
+            u += rng.uniform(0.025, 0.05)
+            v += rng.uniform(-0.03, 0.03)
+        pts.append((L, v))
+        paths.append(np.array(pts))
+        for _b in range(int(hp.get("branches", 3))):
+            j = int(rng.integers(1, len(pts) - 2))
+            bu, bv = pts[j]
+            sgn = 1 if rng.random() < 0.5 else -1
+            br = [(bu, bv)]
+            for _k in range(int(rng.integers(3, 6))):
+                bu += rng.uniform(0.015, 0.035)
+                bv += sgn * rng.uniform(0.012, 0.03)
+                br.append((bu, bv))
+            paths.append(np.array(br))
+    return paths, circ
+
+
+def cut_strands(ob, img, cs):
+    """(From ext/warden-meshy-pin.) Hair strands Meshy hung in front of the face (they cross the mask in the 3/4 view): dark-painted faces in the
+    face's box (Meshy frame, front -Y) lying in front of the face's own surface (the nearest light-painted
+    vertices in the front view, `gap` m) are removed."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    me = ob.data
+    uv = me.uv_layers.active.data
+    x0, x1, z0, z1 = cs["box"]
+    co = np.array([v.co[:] for v in me.vertices])
+    vcol = np.zeros(len(co))
+    vn = np.zeros(len(co))
+    dark = []
+    for p in me.polygons:
+        u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
+        v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
+        lum = float(px[min(h - 1, max(0, int(v * h))), min(w - 1, max(0, int(u * w))), :3].mean())
+        for i in p.vertices:
+            vcol[i] += lum
+            vn[i] += 1
+        c = p.center
+        if lum < float(cs.get("dark", 0.2)) and x0 <= c.x <= x1 and z0 <= c.z <= z1:
+            dark.append(p.index)
+    vlum = vcol / np.maximum(vn, 1)
+    inbox = (co[:, 0] >= x0) & (co[:, 0] <= x1) & (co[:, 2] >= z0) & (co[:, 2] <= z1)
+    face = co[inbox & (vlum > float(cs.get("light", 0.45)))]
+    gap = float(cs.get("gap", 0.004))
+    drop = []
+    for i in dark:
+        c = me.polygons[i].center
+        dd = np.hypot(face[:, 0] - c.x, face[:, 2] - c.z)
+        if len(dd) and dd.min() < 0.015 and c.y < face[int(np.argmin(dd)), 1] - gap:
+            drop.append(i)
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[bm.faces[i] for i in drop], context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(me)
+    bm.free()
+    log("cut %d strand faces in front of the face" % len(drop))
+
+
+def lengthen(ob, img, ln):
+    """A long coat drawn longer than the scan's (Hem: mid-calf with an asymmetric tail): the vertices of the coat's
+    faces (painted in one of `hsv`, outside the legs' own radius `leg_r` round each leg's line) below `from_z`
+    (fitted frame, soles on 0) move down, by `k` x their drop below from_z, `k_back` at the back (-Y) and more on
+    the `tail` side (+X her right, -X her left) for the asymmetric tail."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    me = ob.data
+    uv = me.uv_layers.active.data
+    coat = np.zeros(len(me.vertices), bool)
+    for p in me.polygons:
+        u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
+        v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
+        hh, ss, vv = _hsv(px[min(h - 1, int(v * h)), min(w - 1, int(u * w)), :3])
+        if any((q[0] <= hh <= q[1] if q[0] <= q[1] else (hh >= q[0] or hh <= q[1])) and q[2] <= ss <= q[3]
+               and q[4] <= vv <= q[5] for q in ln["hsv"]):
+            coat[list(p.vertices)] = True
+    co = np.array([v.co[:] for v in me.vertices])
+    z0 = float(ln["from_z"])
+    legs = [np.array(x) for x in ln["legs"]]
+    off_leg = np.ones(len(co), bool)
+    for lx in legs:
+        off_leg &= np.hypot(co[:, 0] - lx[0], co[:, 1] - lx[1]) > float(ln.get("leg_r", 0.075))
+    sel = coat & off_leg & (co[:, 2] < z0)
+    back = np.clip(-co[:, 1] / 0.12, 0.0, 1.0)
+    tail = np.clip(co[:, 0] * float(ln.get("tail", 1.0)) / 0.15, 0.0, 1.0)
+    k = float(ln["k"]) + (float(ln.get("k_back", ln["k"])) - float(ln["k"])) * back + float(ln.get("k_tail", 0.0)) * tail * back
+    drop = (z0 - co[:, 2]) * k
+    co[sel, 2] = np.maximum(co[sel, 2] - drop[sel], float(ln.get("floor", 0.12)))     # (the coat only)
+    fl = float(ln.get("flare", 0.0))
+    if fl > 0.0:
+        # (the hem flares out from the body's axis as it falls: the art's long coat swings wide below the knees)
+        rad = np.hypot(co[sel, 0], co[sel, 1])
+        k_out = 1.0 + fl * drop[sel] / np.maximum(rad, 0.05)
+        co[sel, 0] *= k_out
+        co[sel, 1] *= k_out
+    me.vertices.foreach_set("co", co.ravel())
+    me.update()
+    if ln.get("hem_colour"):
+        # (the scan's dark dagged hem and lining, stretched, read as a zig-zag: the stretched coat's dark texels
+        # take the coat's colour)
+        moved = set(np.nonzero(sel)[0].tolist())
+        col = np.array(K.hexcol(ln["hem_colour"]), np.float32)
+        m = face_mask(ob, img, lambda poly, c, mat: all(v in moved for v in poly.vertices))
+        q = px[..., :3]
+        dark = m & (q.max(axis=2) < float(ln.get("hem_val", 0.22)))
+        q[dark] = col * (0.75 + 0.5 * q[dark].max(axis=1, keepdims=True) / max(float(ln.get("hem_val", 0.22)), 1e-3))
+        px[..., :3] = q
+        img.pixels = px.ravel()
+        log("hem: %d dark texels to the coat's colour" % int(dark.sum()))
+    log("lengthened the coat: %d vertices" % int(sel.sum()))
+
+
+def tape_bands(ob, img, tb):
+    """A cloth wrap read as wrapped tape (Hem's tape-measure forearm wraps): the faces of the wrap's colour in each
+    box (the Meshy frame) are banded along the limb, every other `period` m of height a little darker, with a thin
+    dark line between bands."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    me = ob.data
+    uv = me.uv_layers.active.data
+    per = float(tb.get("period", 0.012))
+    n = 0
+    for bx in tb["boxes"]:
+        def pick(poly, c, mat, bx=bx):
+            if not (bx[0] <= c.x <= bx[1] and bx[2] <= c.y <= bx[3] and bx[4] <= c.z <= bx[5]):
+                return False
+            u = sum(uv[i].uv.x for i in poly.loop_indices) / poly.loop_total
+            v = sum(uv[i].uv.y for i in poly.loop_indices) / poly.loop_total
+            hh, ss, vv = _hsv(px[min(h - 1, int(v * h)), min(w - 1, int(u * w)), :3])
+            q = tb["hsv"]
+            return q[0] <= hh <= q[1] and q[2] <= ss <= q[3] and q[4] <= vv <= q[5]
+        for band in (0, 1):
+            def pb(poly, c, mat, band=band, pick=pick):
+                return pick(poly, c, mat) and int(math.floor(c.z / per)) % 2 == band
+            m = face_mask(ob, img, pb)
+            k = float(tb.get("dark", 0.8)) if band else 1.0
+            px[m, :3] = px[m, :3] * k
+            n += int(m.sum())
+    img.pixels = px.ravel()
+    log("tape bands: %d texels" % n)
+
+
+def split_off_faces(ob, faces, name):
+    """These faces (indices) of ob become their own object (vertex weights kept)."""
+    me = ob.data
+    keep = set(faces)
+    mine = me.copy()
+    bm = bmesh.new()
+    bm.from_mesh(mine)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.index not in keep], context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(mine)
+    bm.free()
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.index in keep], context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(me)
+    bm.free()
+    out = bpy.data.objects.new(name, mine)
+    bpy.context.scene.collection.objects.link(out)
+    return out
+
+
+def split_piece(ob, img, pc):
+    """A piece the art draws as its own object (Hem's porcelain half-mask over her nose and mouth) comes off the
+    body as its own skinned mesh: the faces inside `box` (the fitted frame) facing `facing` or more toward the
+    front (+Y), painted in one of the `hsv` ranges [h0, h1, s0, s1, v0, v1]; the selection is closed `close` face
+    rings (the red stitches, the painted lips inside it) and its largest connected part kept. It is pushed `push`
+    m out along its normals (a lip off the face) and goes on its own material `<slot>-<name>` (same atlas)."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    me = ob.data
+    uv = me.uv_layers.active.data
+    b = pc["box"]
+    pick = set()
+    for p in me.polygons:
+        c = p.center
+        if not (b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]):
+            continue
+        if p.normal.y < float(pc.get("facing", -1.0)):
+            continue
+        u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
+        v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
+        hh, ss, vv = _hsv(px[min(h - 1, max(0, int(v * h))), min(w - 1, max(0, int(u * w))), :3])
+        if any((q[0] <= hh <= q[1] if q[0] <= q[1] else (hh >= q[0] or hh <= q[1])) and q[2] <= ss <= q[3]
+               and q[4] <= vv <= q[5] for q in pc["hsv"]):
+            pick.add(p.index)
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.faces.ensure_lookup_table()
+
+    def nbrs(i):
+        return {g.index for e in bm.faces[i].edges for g in e.link_faces if g.index != i}
+
+    def inbox(i):
+        c = bm.faces[i].calc_center_median()
+        return b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]
+    n = int(pc.get("close", 2))
+    for _k in range(n):
+        pick |= {j for i in list(pick) for j in nbrs(i) if inbox(j)}
+    for _k in range(n):
+        pick = {i for i in pick if nbrs(i) <= pick or len(nbrs(i) - pick) <= 1}
+    # the largest connected part
+    left, best = set(pick), set()
+    while left:
+        seed = left.pop()
+        comp, stack = {seed}, [seed]
+        while stack:
+            for j in nbrs(stack.pop()):
+                if j in left:
+                    left.discard(j)
+                    comp.add(j)
+                    stack.append(j)
+        if len(comp) > len(best):
+            best = comp
+    bm.free()
+    piece = split_off_faces(ob, best, pc["name"])
+    for g in ob.vertex_groups:
+        piece.vertex_groups.new(name=g.name)
+    piece.parent = ob.parent
+    for md in ob.modifiers:
+        if md.type == "ARMATURE":
+            nm = piece.modifiers.new(md.name, "ARMATURE")
+            nm.object = md.object
+    pm = piece.data
+    pm.update()
+    push = float(pc.get("push", 0.003))
+    for vx in pm.vertices:
+        vx.co = vx.co + vx.normal * push
+    mat = slot_materials(img, [pc["slot"]], pc["name"])[pc["slot"]]
+    pm.materials.clear()
+    pm.materials.append(mat)
+    for p in pm.polygons:
+        p.material_index = 0
+    log("piece %s: %d faces" % (pc["name"], len(pm.polygons)))
+    return piece
 
 
 def main():
@@ -2003,6 +3481,9 @@ def main():
     drop_floaters(ob, spec.get("floater_verts", 40))
     if spec.get("cut_boxes"):
         delete_boxes(ob, spec["cut_boxes"])     # (in Meshy's frame: a strand it floats in front of the face)
+    if "cut_strands" in spec:
+        cut_strands(ob, img, spec["cut_strands"])
+        drop_floaters(ob, spec.get("floater_verts", 40))
     ids = island_map(ob, img)
     paint_up(img, spec, ids=ids)
     for pj in spec.get("project", []):
@@ -2010,8 +3491,12 @@ def main():
     pad(img, ids, int(spec.get("pad", 6)))
     if "slot_rules" in spec:
         slot_rules(ob, img, spec["slot_rules"], spec["glow_min"], "body", vote=spec.get("slot_vote", "island"))
+        for g in spec.get("grow", []):
+            grow_slot(ob, g)
     else:
         slot_split(ob, img, spec["palette"], spec["glow_min"], "body")
+    for hb in spec.get("hot_boxes", []):
+        hot_faces(ob, hb)
     if spec.get("touch_up"):
         touch_up(ob, img, spec["touch_up"])
         pad(img, ids, int(spec.get("pad", 6)))       # (the touched islands' new colour into their margins too)
@@ -2030,9 +3515,32 @@ def main():
         for pj in spec["project_late"]:
             project(ob, img, pj)
         pad(img, ids, int(spec.get("pad", 6)))
+    if spec.get("hot_paint"):
+        hot_paint(ob, img, spec["hot_paint"])
+        pad(img, ids, int(spec.get("pad", 6)))
     if spec.get("touch_up_late"):
         touch_up(ob, img, spec["touch_up_late"])
         pad(img, ids, int(spec.get("pad", 6)))
+    for pj in spec.get("project_after", []):
+        # (after the clean-up: crisp tattoo lines on the clean skin, `line` mode; `stamp`: the art's lines as
+        # vector strokes of one width)
+        if pj.get("mode") == "stamp":
+            stamp_lines(ob, img, pj)
+        else:
+            project(ob, img, pj)
+    for rs in spec.get("reslot_late", []):
+        reslot(ob, img, rs)
+    if spec.get("plate"):
+        face = next(pj for pj in spec["project_late"] if pj.get("name") == spec["plate"].get("warp_from", "face"))
+        face_plate(ob, spec["plate"], face["warp"])
+    for pa in spec.get("paint_art", []):
+        paint_art(ob, img, pa)
+    emask = emit_art(ob, img, spec["emit_art"]) if spec.get("emit_art") else None
+    if spec.get("tape_bands"):
+        tape_bands(ob, img, spec["tape_bands"])
+        pad(img, ids, int(spec.get("pad", 6)))
+    if spec.get("deform"):
+        deform(ob, spec["deform"])
     head = None
     if "head" in spec:
         decimate(ob, spec["max_tris"] - int(spec["head"]["tris"]))
@@ -2083,12 +3591,18 @@ def main():
         rj["hand." + sd] = K.bone_head(rig, "hand." + sd)
         rj["hip." + sd] = K.bone_head(rig, "thigh." + sd)
         rj["knee." + sd] = K.bone_head(rig, "shin." + sd)
-        rj["ankle." + sd] = Vector((rj["knee." + sd].x, rj["knee." + sd].y, 0.06))
+        # (ankle_z: a skate or a heel stands the ankle higher than a flat foot: Claire's boot and blade are
+        # ~0.2 m below it; at 0.06 they went through the ground)
+        rj["ankle." + sd] = Vector((rj["knee." + sd].x, rj["knee." + sd].y, float(spec.get("ankle_z", 0.06))))
         rj["fingers." + sd] = rj["hand." + sd] + Vector((0, 0, -0.08))
+    if "tail" in spec:
+        tail_mark(ob, spec["tail"], m)
     fit = fit_armature(joints)
     auto_weights(ob, fit)
     if spec.get("weight_rules"):
         weight_rules(ob, img, spec["weight_rules"])
+    if "tail" in spec:
+        tail_to_hips(ob)
     if spec.get("fit_weights"):
         keep_weights(ob)
     if head:
@@ -2098,18 +3612,39 @@ def main():
         _apply_armature(head)
     apply_pose(ob, fit)
     decimate(ob, spec["max_tris"] - (int(spec["head"]["tris"]) if head else 0))
+    if spec.get("lengthen"):
+        lengthen(ob, img, spec["lengthen"])
     ob.name = "Body"
     ob.data.name = "Body"
     arm = contract_skin(ob, rig)
     if spec.get("fit_weights"):
         fit_weights(ob, arm)
+    if spec.get("weight_rules_late"):
+        # (the same on the contract's rest pose, the frame the game skins: arms straight down, the boxes read
+        # off the exported model; Ostra's glove fingers that bone heat gave to the thigh beside them stretched
+        # into a sheet from his hip to his raised orb hand)
+        weight_rules(ob, img, spec["weight_rules_late"])
+    if spec.get("arm_reach"):
+        arm_reach(ob, arm, spec["arm_reach"])
+    if spec.get("cut_straddle"):
+        cut_straddle(ob, spec["cut_straddle"])
     if "gun_arm" in spec:
         release(ob, spec["gun_arm"].get("bones", ["forearm.R", "hand.R"]))
     if "chunk" in spec:
         chunk(ob, rig, spec["chunk"])
+    for sb in spec.get("shrink", []):
+        shrink_box(ob, sb)
+    if spec.get("cut_fitted"):
+        # (the fitted rest pose: a piece the scan has that is rebuilt as geometry, Pip's tail)
+        delete_boxes(ob, spec["cut_fitted"])
+        drop_floaters(ob, int(spec.get("cut_floaters", 60)))
     for hs in spec.get("hair_springs", []):
         hair_spring(ob, arm, _rel(arm, hs, ("top", "bottom", "box_lo", "box_hi")))
-    parts = []
+    tail_fin = None
+    if "tail" in spec:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        tail_fin = tail_chain(ob, arm, spec["tail"])
+    parts = [tail_fin] if tail_fin else []
     extras = []         # (empties: an orbit's pivot, an empty weapon)
     if spec.get("weapon_empty"):
         # (a Warden whose weapon is part of the body, Tarek's stone bracers: an empty `weapon`, so WardenGlb hides
@@ -2118,18 +3653,21 @@ def main():
         bpy.context.scene.collection.objects.link(we)
         we.parent = arm
         extras.append(we)
-    if any(spec.get(k) for k in ("lens", "braids", "hoses", "orbits", "halo", "wisp", "studs", "orb", "gauntlets")):
+    if any(spec.get(k) for k in ("lens", "braids", "hoses", "orbits", "halo", "wisp", "studs", "orb", "gauntlets", "claws")):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import warden_parts as WP
         lens_s = _rel(arm, spec.get("lens"), ("centre",))
         if lens_s:
-            if lens_s.get("cut_r"):
-                _cut_lens(ob, lens_s)
-            parts.append(WP.lens(arm, lens_s))
+            # ("geometry": false when the face sheet's own lens is the plate decal's: the anchor stays for the halo)
+            if lens_s.get("geometry", True):
+                if lens_s.get("cut_r"):
+                    _cut_lens(ob, lens_s)
+                parts.append(WP.lens(arm, lens_s))
             # (an anchor on the lens: the game hangs the lens's match-zoom halo on it, warden_look.json "halos")
             K.anchor(arm, "head", "anchor_" + lens_s.get("anchor", "lens"), tuple(lens_s["centre"]))
         if spec.get("braids"):
-            parts.append(WP.braids([ob], arm, [_rel(arm, b, ("path",)) for b in spec["braids"]], spec["braid_colours"]))
+            parts.append(WP.braids([ob], arm, [_rel(arm, b, ("path",)) for b in spec["braids"]], spec["braid_colours"],
+                                   tag=spec.get("braid_tag", "braid")))
         if spec.get("hoses"):
             parts.append(WP.hoses([ob], arm, [_rel(arm, h, ("path",)) for h in spec["hoses"]], spec["hose_colours"]))
         for o in spec.get("orbits", []):
@@ -2144,13 +3682,103 @@ def main():
         if spec.get("halo"):
             parts.append(WP.crescent(arm, _rel(arm, spec["halo"], ("centre",))))
         if spec.get("orb"):
-            parts.append(WP.orb(arm, _rel(arm, spec["orb"], ("centre",))))
+            orb_s = _rel(arm, spec["orb"], ("centre",))
+            parts.append(WP.orb(arm, orb_s))
+            if orb_s.get("anchor"):
+                # (the orb's match-zoom glow hangs on it, warden_look.json "halos")
+                K.anchor(arm, orb_s.get("bone", "hand.R"), "anchor_" + orb_s["anchor"], tuple(orb_s["centre"]))
         if spec.get("wisp"):
             parts.append(WP.wisp(arm, spec["wisp"]))
+        if spec.get("claws"):
+            got = WP.claws(ob, arm, spec["claws"])
+            if got:
+                parts.append(got)
         for sd in spec.get("studs", []):
             got = WP.studs(ob, arm, sd)
             if got:
                 parts.append(got)
+    if spec.get("scripted"):
+        # a Warden's own scripted pieces (tools/meshy/<module>.py build(): Ryzz's pigtails and back rods)
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import importlib
+        parts += importlib.import_module(spec["scripted"]["module"]).build(ob, arm, rig, K, spec["scripted"])
+    props = []
+    if any(k in spec for k in ("wings", "lantern", "springs", "crossbows", "gem", "fluff_tail", "flower_crown", "cape", "laces")):
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import warden_props as WPR
+        for sr in spec.get("springs", []):
+            WPR.spring_region(ob, arm, sr)       # (a fluffy tail of the scan itself on a spring chain)
+        if spec.get("wings"):
+            parts.append(WPR.wings(arm, spec["wings"], spec["wing_look"]))
+        if spec.get("lantern"):
+            parts.append(WPR.lantern(arm, spec["lantern"], spec["lantern_look"]))
+        if spec.get("crossbows"):
+            props = list(WPR.crossbows(spec["crossbows"], spec["crossbows"]))
+        if spec.get("gem"):
+            parts.append(WPR.gem(arm, ob, spec["gem"]))
+        if spec.get("laces"):
+            parts.append(WPR.laces(arm, ob, spec["laces"]))
+        if spec.get("fluff_tail"):
+            parts.append(WPR.fluff_tail(arm, spec["fluff_tail"]))
+        if spec.get("flower_crown"):
+            parts.append(WPR.flower_crown(arm, ob, spec["flower_crown"]))
+        if spec.get("cape"):
+            parts.append(WPR.cape(arm, ob, spec["cape"]))
+    for pc in spec.get("pieces", []):
+        parts.append(split_piece(ob, img, pc))
+    if spec.get("shears") or spec.get("lapel_needle"):
+        import hem_parts
+        if spec.get("shears"):
+            parts.append(hem_parts.shears(arm, spec["shears"]))
+        if spec.get("lapel_needle"):
+            parts.append(hem_parts.lapel_needle(arm, spec["lapel_needle"]))
+    if spec.get("thimbles"):
+        import hem_parts
+        parts.append(hem_parts.thimbles(ob, arm, spec["thimbles"]))
+    if spec.get("needles"):
+        # Hem's quiver needles, cut from the scan (`cut_boxes`) and built clean (tools/meshy/hem_parts.py)
+        import hem_parts
+        parts.append(hem_parts.needles(arm, spec["needles"], m, float(spec.get("chunk", {}).get("girth", 1.0))))
+    built = {"weapon": None, "extra": []}
+    if spec.get("parts"):
+        # scripted pieces (tools/meshy/hard_parts.py): a held weapon or shield, wing cards, a tail, the feet check
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import hard_parts as HP
+        built = HP.build(spec, ob, arm, rig)
+    if spec.get("kael"):
+        # Kael's scripted pieces (tools/meshy/kael_parts.py): the Warchain, the left cuff's chain, the mane
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import kael_parts
+        parts.append(kael_parts.chains(ob, arm, rig, K, spec["kael"]["chain"]))
+        if spec["kael"].get("meshy_mane"):
+            parts.append(kael_parts.meshy_mane(ob, arm, rig, K, spec["kael"]["meshy_mane"], import_glb, decimate, log))
+            if parts[-1].get("volume"):
+                parts.append(bpy.data.objects[parts[-1]["volume"]])
+            if spec["kael"].get("spikes"):
+                parts.append(kael_parts.spikes(ob, arm, rig, K, spec["kael"]["spikes"], bpy.data.objects.get("Mane")))
+            if spec["kael"].get("under_mane"):
+                # (chunky opaque locks under the head run's stringy hair, back and sides only: its gaps show hair)
+                under = kael_parts.mane(ob, arm, rig, K, spec["kael"]["under_mane"])
+                under.name = under.data.name = "ManeUnder"
+                parts.append(under)
+        else:
+            parts.append(kael_parts.mane(ob, arm, rig, K, spec["kael"]["mane"]))
+        if spec["kael"].get("cap"):
+            parts.append(kael_parts.cap(ob, arm, rig, K, spec["kael"]["cap"]))
+        if spec["kael"].get("collar"):
+            parts.append(kael_parts.collar(ob, arm, rig, K, spec["kael"]["collar"]))
+        if spec["kael"].get("shards"):
+            parts.append(kael_parts.shards(ob, arm, rig, K, spec["kael"]["shards"]))
+    if spec.get("fins") or spec.get("vials") or spec.get("dorsal"):
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import warden_parts as WP
+        if spec.get("fins"):
+            parts.append(WP.fins(arm, [_rel(arm, f, ("centre",)) for f in spec["fins"]], spec["fin_atlas"])[0])
+        if spec.get("vials"):
+            parts.append(WP.vials(ob, arm, spec["vials"]))
+    if spec.get("dorsal"):
+        import warden_parts as WP
+        parts.append(WP.dorsal(ob, arm, spec["dorsal"], spec["fin_atlas"]))
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
@@ -2159,13 +3787,61 @@ def main():
     spin = None
     if gun is not None:
         gun, spin = gun_weapon(gun, ge, gt, rig, spec["gun_arm"])
-    elif spec.get("weapon_glb"):
+    elif "bow" in spec:
+        # a held bow, built by script (tools/meshy/bow_parts.py), with its nocked arrow as the Mag
+        bw = spec["bow"]
+        gun = bow_parts.build_bow(float(bw.get("height", 1.25)), float(bw.get("depth", 0.13)))
+        gun["built"] = 1
+        # (arrow false: only the needle's eye and its red thread sit at the nock, the Mag, so nothing sticks forward
+        # off the bow at rest; the shot itself is the projectile)
+        spin = bow_parts.build_arrow(tip_y=float(bw.get("tip", 0.78)), shaft=bw.get("arrow", True))
+        spin.parent = gun
+        spin["built"] = 1
+        K.anchor(arm, "hand.R", "anchor_nock", K.bone_head(rig, "hand.R"))
+        for nm, z in bw.get("halo_anchors", {}).items():
+            # (on the bow itself, along the string: the bow's halos at the match camera follow it)
+            e = bpy.data.objects.new(nm, None)
+            bpy.context.scene.collection.objects.link(e)
+            e.parent = gun
+            e.location = (0.0, 0.06, float(z))
+    elif "lance" in spec:
+        # (a held weapon built as a lathe in the Gun's space: Cinder's flamethrower lance; tools/meshy/lance.py)
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import lance as LANCE
+        gun, _limg = LANCE.build(spec["lance"], slot_materials(None, [s for s in K.SLOTS if s != "team"], "weapon"))
+    elif spec.get("kael"):
+        gun = kael_parts.sword(spec["kael"].get("sword", {}))     # (the greatsword, scripted)
+        gun["built"] = 1
+    elif spec.get("weapon_glb") and built["weapon"] is None:
         gun = weapon(spec, rig)
+    held = [x for x in [built["weapon"]] + built["extra"] if x is not None and x.parent is None]
+    parts += [x for x in built["extra"] if x.parent is not None]
     crown = rig["land"]["crown"]
     K.anchor(arm, "head", "anchor_head_top", (0, 0, crown + 0.07))
     K.anchor(arm, "hips", "anchor_chest", (0, 0.1, K.bone_head(rig, "upper_arm.L").z - 0.14))
+    for an in spec.get("anchors", []):
+        if "between" in an:
+            # (extra anchors for warden_look "bloom": a point between two bone heads, rigid on `bone`: Kael)
+            a, b = (K.bone_head(rig, n) for n in an["between"])
+            t = float(an.get("t", 0.5))
+            K.anchor(arm, an["bone"], an["name"], tuple(a[i] + (b[i] - a[i]) * t for i in range(3)))
+            continue
+        # (an anchor at the centre of one slot's faces on one side, the fitted frame: Claire's glowing irises,
+        # for their match-zoom halos, warden_look.json "halos"; side -1 her left (-X), +1 her right, 0 both)
+        mi = [i for i, m in enumerate(ob.data.materials) if m.name.startswith(an["slot"] + "-")]
+        sd = float(an.get("side", 0))
+        cs = [p.center for p in ob.data.polygons if p.material_index in mi and (sd == 0 or p.center.x * sd > 0)
+              and float(an.get("z_min", -9.0)) <= p.center.z]
+        if not cs:
+            log("anchor %s: no %s faces" % (an["name"], an["slot"]))
+            continue
+        c = sum(cs, Vector()) / len(cs) + Vector(an.get("offset", [0.0, 0.0, 0.0]))
+        K.anchor(arm, an.get("bone", "head"), "anchor_" + an["name"], tuple(c))
+        log("anchor %s: %d faces, at %.3f %.3f %.3f" % (an["name"], len(cs), c.x, c.y, c.z))
     for o in [x for x in (ob, gun, spin) if x]:
         # Meshy's own split normals don't survive the decimation (facets): clear them, shade smooth
+        if o.get("built"):
+            continue                  # (a scripted piece: its facets are drawn on purpose)
         bpy.context.view_layer.objects.active = o
         if o.data.has_custom_normals:
             bpy.ops.mesh.customdata_custom_splitnormals_clear()
@@ -2177,7 +3853,21 @@ def main():
         soft_normals(o, spec.get("normal_smooth", 8))
         if "ink_room" in spec:
             ink_room(o, float(spec["ink_room"]))
-    for o in parts:
+    for sp in (spec.get("parts") or {}).get("split", []):
+        piece = HP.split(ob, arm, sp)               # (Claire's horns: their own mesh, on the head bone)
+        if sp.get("drop"):
+            bpy.data.objects.remove(piece)           # (the scan's horns, replaced by scripted ones: cut and gone)
+        else:
+            parts.append(piece)
+    for o in parts + props + held:
+        if o.name in spec.get("smooth_parts", []):
+            # (a piece cut from the scan, Hem's mask: its decimated facets shaded smooth)
+            if o.data.has_custom_normals:
+                bpy.context.view_layer.objects.active = o
+                bpy.ops.mesh.customdata_custom_splitnormals_clear()
+            for p in o.data.polygons:
+                p.use_smooth = True
+            soft_normals(o, int(spec.get("normal_smooth", 8)) * 2)
         if "ink_room" in spec:
             ink_room(o, float(spec["ink_room"]))
     if "atlas_px" in spec:
@@ -2188,12 +3878,41 @@ def main():
             bpy.data.objects.remove(got)     # (cut off the body and not exported: a rebuilt part replaces it)
         else:
             parts.append(got)
+    for key in ("face_marks", "eye_marks"):
+        if spec.get(key):
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            import warden_parts as WP
+            fm = spec[key]
+            tgt = next((o for o in parts if o.name == fm.get("on", "Mask")), ob)
+            got = WP.face_marks(tgt, arm, fm)
+            if got:
+                parts.append(got)
+    if emask is not None:
+        if spec.get("emit_atlas"):
+            spec_emit_atlas.append(spec["emit_atlas"])
+        emit_attach(ob, img, emask)
     out = os.path.join(ROOT, os.path.expanduser(spec["out"]))
-    log("tris: body %d, weapon %d" % (K.tris([ob]), K.tris([x for x in (gun, spin) if x])))
+    log("tris: body %d, weapon %d" % (K.tris([ob]), K.tris([x for x in (gun, spin) if x] + props)))
     # (JPEG: Meshy's painted textures, a third of the PNG's size)
     if parts:
         log("tris: parts %s" % {o.name: K.tris([o]) for o in parts})
-    K.export(out, [arm, ob] + parts + extras + [x for x in (gun, spin) if x] + [o for o in bpy.data.objects if o.name.startswith("anchor_")], "JPEG",
+    fmt = "JPEG"
+    if any(m.name.startswith("card-") for o in parts for m in o.data.materials):
+        # (alpha cards keep their PNG's alpha: every other texture still goes out as JPEG)
+        fmt = "AUTO"
+        tmp = os.path.join(os.path.dirname(os.path.expanduser(spec.get("blend", "/tmp/x"))), "jpg")
+        os.makedirs(tmp, exist_ok=True)
+        for im in bpy.data.images:
+            if not im.name.startswith("wing") and im.size[0] > 0 and im.users:
+                # (the exporter keeps an image's own format: saved as a .jpg file it goes out as JPEG)
+                im.filepath_raw = os.path.join(tmp, im.name.replace(".", "_") + ".jpg")
+                im.file_format = "JPEG"
+                bpy.context.scene.render.image_settings.quality = 92
+                im.save()
+                im.source = "FILE"
+    if held:
+        log("tris: held %s" % {o.name: K.tris([o]) for o in held})
+    K.export(out, [arm, ob] + parts + extras + props + held + [x for x in (gun, spin) if x] + [o for o in bpy.data.objects if o.name.startswith(("anchor_", "halo_"))], fmt,
              colors="ink_room" in spec)
     log("wrote", out)
     if spec.get("blend"):

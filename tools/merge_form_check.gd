@@ -256,11 +256,11 @@ func _aug() -> void:
 			slams += 1
 			ok(i % 3 == 2, "Heavy Star's slam rides attack %d (every 3rd)" % (i + 1))
 	ok(slams == 2, "...two slams in six attacks (%d)" % slams)
-	# C is blocked, orders are inert
+	# the Boki ability is blocked, orders are inert
 	var cu := int(P.used.get("kin_ab", 0))
 	P.inp["kin_ab"] = true
 	run_for(0.1)
-	ok(int(P.used.get("kin_ab", 0)) == cu and P.kin.runner.is_ready("k1"), "C is unavailable while merged")
+	ok(int(P.used.get("kin_ab", 0)) == cu and P.kin.runner.is_ready("k1"), "its ability is off while merged")
 	ok(not KinCommand.order(P, "guard") and KinMerge.active(P), "orders do nothing while merged (your Boki is part of you)")
 	# RMB add-on: the form's effect list at your spot, hurting and slowing a close foe
 	var Rt := foe(P.pos + Vector3(2.5, 0, 0))
@@ -379,12 +379,12 @@ func _ult() -> void:
 		"...landed beside you pumped, not stowed (state %s cmd %s)" % [k.state, k.cmd])
 	ok(P.ult < 0.2, "...and the bond meter restarts from about 0 (%.2f)" % P.ult)
 	ok(P.merge_cd >= rest - 1.0, "...and Merge waits for the rest (%.1fs)" % P.merge_cd)
-	# while drained: no C, no orders, no Sic, no throw
+	# while drained: no Boki ability, no orders, no Sic, no throw
 	var cu := int(P.used.get("kin_ab", 0))
 	P.inp["kin_ab"] = true
 	run_for(0.1)
 	P.inp["kin_ab"] = false
-	ok(int(P.used.get("kin_ab", 0)) == cu and not k.ready_to_fight(), "C does nothing while it rests")
+	ok(int(P.used.get("kin_ab", 0)) == cu and not k.ready_to_fight(), "its ability is off while it rests")
 	var no_orders := not KinCommand.order(P, "chase") and not KinCommand.order(P, "guard")
 	ok(no_orders and k.cmd == "follow", "orders and Sic do nothing while it rests")
 	ok(not KinFollow.set_cmd(k, "chase") and k.cmd == "follow", "...the command cannot change either")
