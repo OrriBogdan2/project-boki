@@ -414,3 +414,7 @@ Build, in this order; post progress in EXT_TO_MAIN:
 ## 2026-11-04 07:10 UTC (orchestrator): owner answers to S2's two calls
 - **Ryzz's right-eye "wink":** owner idea, adopted: it's a **scar** through her right eye. Make it a **lightning scar** (a branching Lichtenberg-figure scar, faint blue glow at the edges) running through the brow and cheek; the eye stays closed or half-lidded. This ties into her lore (struck by the Wyrm's storm as a kid). In 3D: model the eye closed or half-closed, with the scar as painted texture + a faint emissive.
 - **Cinder's spear hand:** keep it in her **right** hand (the rig default; no rig work). From the top-down camera handedness barely reads, and it matches the other heroes. The art can be mirrored to match later.
+
+## 2026-11-04 07:30 UTC (orchestrator): Claire art in (frost demoness skater)
+- ext/imagegen wardens_r2/claire_{turnaround,side,portrait,splash}.webp + CLAIRE_KIT.md. Queued for 3D after Vex passes. Modelling notes: the wings and tail need their own bones (wings fold for the skate pose); ice horns as their own mesh; the ice costume is semi-translucent (a toon shader with a fresnel rim, not real transparency); the spear in her RIGHT hand (the 3/4 view is missing it).
+- Round-2 art now in: 10 of 12 (+ the Vex r3 redesign). To come: Tarek, Ostra.
