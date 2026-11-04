@@ -586,3 +586,285 @@ def lens(arm, spec, tag="lens"):
     mod.object = arm
     log("lens at %s, r %.3f, %d tris" % (tuple(round(x, 3) for x in c), r, sum(len(f) - 2 for f in bld.f)))
     return ob
+
+
+# ------------------------------------------------------------------------------------------------ simple materials
+def _flat_material(ob, slot, tag, img, interp="Linear"):
+    m = bpy.data.materials.new("%s-%s" % (slot, tag))
+    m.use_nodes = True
+    bsdf = m.node_tree.nodes.get("Principled BSDF")
+    tex = m.node_tree.nodes.new("ShaderNodeTexImage")
+    tex.image = img
+    tex.interpolation = interp
+    m.node_tree.links.new(tex.outputs[0], bsdf.inputs["Base Color"])
+    bsdf.inputs["Roughness"].default_value = 0.8
+    ob.data.materials.append(m)
+    return len(ob.data.materials) - 1
+
+
+def _rigid(ob, arm, bone):
+    g = ob.vertex_groups.new(name=bone)
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+
+
+def _quads_uv(size, cells, name="cells"):
+    """An atlas of flat colour cells (a 2x2 grid, row 0 at the bottom as Blender stores it): cells is
+    [colour hex] x 4 (bottom-left, bottom-right, top-left, top-right) -> the image."""
+    img = bpy.data.images.new(name, size, size, alpha=False)
+    px = np.ones((size, size, 4), np.float32)
+    hlf = size // 2
+    for i, c in enumerate(cells):
+        y, x = divmod(i, 2)
+        px[y * hlf:(y + 1) * hlf, x * hlf:(x + 1) * hlf, :3] = hexcol(c)
+    img.pixels = px.ravel()
+    img.pack()
+    return img
+
+
+# ------------------------------------------------------------------------------------------------ orbiting props
+def _lumpy(bld, centre, frame, radii, part, uv_box, seed, rings=7, sides=12, lump=0.18):
+    """A rough rock: a squashed sphere (radii along the frame's axes) with lumpy noise, as a tube capped at both
+    poles (u around, v pole to pole)."""
+    rng = np.random.default_rng(seed)
+    e1, e2, e3 = (np.asarray(a, np.float64) for a in frame)     # e3: the face's normal (the flat axis)
+    noise = rng.uniform(1.0 - lump, 1.0 + lump * 0.4, (rings + 2, sides + 1))
+    noise[:, -1] = noise[:, 0]
+    base = len(bld.v)
+    u0, v0, u1, v1 = uv_box
+    for i in range(rings + 2):
+        t = math.pi * i / (rings + 1)               # 0: the back pole .. pi: the front pole
+        for j in range(sides + 1):
+            a = 2.0 * math.pi * j / sides
+            k = noise[i, j] if 0 < i < rings + 1 else 1.0
+            d = (math.sin(t) * (math.cos(a) * e1 * radii[0] + math.sin(a) * e2 * radii[1]) - math.cos(t) * e3 * radii[2])
+            bld.v.append(np.asarray(centre) + d * k)
+            bld.uv.append((u0 + (u1 - u0) * j / sides, v0 + (v1 - v0) * i / (rings + 1)))
+            bld.part.append(part)
+            bld.s.append(0.0)
+    row = sides + 1
+    for i in range(rings + 1):
+        for j in range(sides):
+            a = base + i * row + j
+            bld.f.append((a, a + 1, a + row + 1, a + row))
+
+
+def _disc(bld, centre, nrm, r, part, uv_box, sides=16, dome=0.25):
+    nrm = np.asarray(nrm, np.float64)
+    ref = np.array([0.0, 0.0, 1.0]) if abs(nrm[2]) < 0.9 else np.array([1.0, 0.0, 0.0])
+    e1 = np.cross(nrm, ref)
+    e1 /= np.linalg.norm(e1)
+    e2 = np.cross(nrm, e1)
+    u0, v0, u1, v1 = uv_box
+    c = len(bld.v)
+    bld.v.append(np.asarray(centre) + nrm * r * dome)
+    bld.uv.append(((u0 + u1) * 0.5, (v0 + v1) * 0.5))
+    bld.part.append(part)
+    bld.s.append(0.0)
+    for j in range(sides):
+        a = 2.0 * math.pi * j / sides
+        bld.v.append(np.asarray(centre) + r * (math.cos(a) * e1 + math.sin(a) * e2))
+        bld.uv.append((u0 + (u1 - u0) * (0.5 + 0.5 * math.cos(a)), v0 + (v1 - v0) * (0.5 + 0.5 * math.sin(a))))
+        bld.part.append(part)
+        bld.s.append(0.0)
+    for j in range(sides):
+        bld.f.append((c, c + 1 + j, c + 1 + (j + 1) % sides))
+
+
+def orbit_props(arm, spec):
+    """Stones that float on an orbit round a bone (Tarek's three seeing-stones round his head): each a rough
+    geode, its glowing iris (the `glow` slot, with a slit pupil) on the side facing out from the orbit's
+    centre and its back plain rock. Every stone is its own unskinned mesh under one empty `spec["name"]`
+    (an `orbit_` name) that rides the bone; WardenGlb.Orbits turns that empty round its up axis and bobs each
+    stone, so the orbit is data, not baked. Returns [empty, stones...]."""
+    c = Vector(spec["centre"])
+    e = bpy.data.objects.new(spec["name"], None)
+    bpy.context.scene.collection.objects.link(e)
+    e.parent = arm
+    e.parent_type = "BONE"
+    e.parent_bone = spec.get("bone", "head")
+    bpy.context.view_layer.update()
+    e.matrix_world = Matrix.Translation(c)
+    img = _quads_uv(64, [spec.get("rock", "8a7a66"), spec.get("rim", "b9a3a8"), spec.get("iris", "ff9a2a"),
+                         spec.get("pupil", "2a0d04")], spec["name"] + "_cells")
+    out = [e]
+    for i, it in enumerate(spec["items"]):
+        a = math.radians(float(it["angle"]))           # 0: in front of the face (+Y), counter-clockwise from above
+        out_dir = np.array([-math.sin(a), math.cos(a), 0.0])
+        p = np.array(c[:]) + out_dir * float(it.get("radius", spec.get("radius", 0.4))) \
+            + np.array([0.0, 0.0, float(it.get("height", 0.0))])
+        r = float(it.get("size", 0.07))
+        up = np.array([0.0, 0.0, 1.0])
+        side = np.cross(up, out_dir)
+        bld = Builder()
+        # (the rock: flat along the outward axis, so its face meets the eye; its rim and iris on the front)
+        # (the cells of _quads_uv: rock bottom-left, rim bottom-right, iris top-left, pupil top-right)
+        _lumpy(bld, p, (side, up, -out_dir), (r, r * 1.08, r * 0.62), "rock", (0.05, 0.05, 0.45, 0.45), 7 + i)
+        _disc(bld, p + out_dir * r * 0.6, out_dir, r * 0.72, "rim", (0.55, 0.05, 0.95, 0.45), dome=0.1)
+        _disc(bld, p + out_dir * r * 0.68, out_dir, r * 0.46, "iris", (0.05, 0.55, 0.45, 0.95), dome=0.15)
+        bld.prism(p + out_dir * r * 0.72 - up * r * 0.3, p + out_dir * r * 0.72 + up * r * 0.3, r * 0.07, 4,
+                  (0.55, 0.55, 0.95, 0.95), "pupil", 0.0)
+        ob = bld.object("%s_%d" % (spec["name"], i))
+        mi = {"rock": _flat_material(ob, spec.get("slot", "leather"), spec["name"], img, "Closest")}
+        mi["rim"] = mi["rock"]
+        mi["pupil"] = mi["rock"]
+        mi["iris"] = _flat_material(ob, "glow", spec["name"], img, "Closest")
+        for poly in ob.data.polygons:
+            poly.material_index = mi[bld.part[poly.vertices[0]]]
+        mw = ob.matrix_world.copy()
+        ob.parent = e
+        ob.matrix_world = mw
+        out.append(ob)
+    log("orbit %s: %d props round %s" % (spec["name"], len(spec["items"]), tuple(round(x, 3) for x in c)))
+    return out
+
+
+# ------------------------------------------------------------------------------------------------ crescent halo
+def crescent(arm, spec, tag="halo"):
+    """A crescent moon (Ostra's cracked halo) behind the head: a tube along an arc whose thickness swells in the
+    middle and tapers to points, in the plane facing `normal`, riding `bone` rigidly; its own small atlas
+    (the colour by `slot`, `glow` for a glowing one)."""
+    c = np.array(spec["centre"], np.float64)
+    nrm = np.array(spec.get("normal", [0.0, 1.0, 0.0]), np.float64)
+    nrm /= np.linalg.norm(nrm)
+    R = float(spec["r"])
+    th = float(spec.get("thick", R * 0.18))
+    a0, a1 = math.radians(spec.get("from", 200.0)), math.radians(spec.get("to", 520.0))
+    up = np.array([0.0, 0.0, 1.0]) - nrm * nrm[2]
+    up /= np.linalg.norm(up)
+    rt = np.cross(up, nrm)
+    k = 40
+    rings, radii = [], []
+    for i in range(k):
+        f = i / (k - 1)
+        a = a0 + (a1 - a0) * f
+        rings.append(c + R * (math.cos(a) * rt + math.sin(a) * up))
+        radii.append(max(1e-4, th * math.sin(math.pi * f) ** 0.8))
+    bld = Builder()
+    bld.tube(rings, radii, 10, 0.0, 1.0, 0.0, 1.0, "moon", [0.0] * k, cap_end=True, cap_start=True)
+    # (squash the tube flat across the plane: a moon's crescent, not a ring of pipe)
+    for i, v in enumerate(bld.v):
+        d = np.asarray(v) - c
+        bld.v[i] = c + d - nrm * d.dot(nrm) * (1.0 - float(spec.get("flat", 0.35)))
+    ob = bld.object(tag.capitalize())
+    img = bpy.data.images.new(tag + "_atlas", 64, 64, alpha=False)
+    px = np.ones((64, 64, 4), np.float32)
+    yy, xx = np.mgrid[0:64, 0:64]
+    base, crack = hexcol(spec.get("colour", "d9b8ff")), hexcol(spec.get("crack", "8a4ad8"))
+    # a few dark crack lines across the moon (u around the tube, v along the arc)
+    lines = (np.abs(((yy * 0.37 + xx * 0.11) % 13) - 6.5) < 0.6) & (xx % 21 < 15)
+    px[..., :3] = np.where(lines[..., None], crack, base)
+    img.pixels = px.ravel()
+    img.pack()
+    _flat_material(ob, spec.get("slot", "glow"), tag, img)
+    _rigid(ob, arm, spec.get("bone", "head"))
+    log("%s: r %.3f at %s, %d tris" % (tag, R, tuple(round(x, 3) for x in c), sum(len(f) - 2 for f in bld.f)))
+    return ob
+
+
+# ------------------------------------------------------------------------------------------------ wisp
+def wisp(arm, spec, tag="wisp"):
+    """A smoky tail a hovering body dissolves into (Ostra below his coat): a tube along a curling path from
+    `path`[0] (up inside the hem) down to a point, plus thinner tendrils peeling off it, all on one spring chain
+    `spring_<tag>_*` under `parent` (hips) so it trails and swings. Material `void-<tag>`: WardenGlb draws the
+    `void` slot with the starfield shader, soft (fading to nothing toward the tip, v = 1) for this tag."""
+    p, _l = resample(np.array(spec["path"], np.float64), 40)
+    s_arr = arclen(p)
+    L = s_arr[-1]
+    r0, r1 = float(spec.get("r_top", 0.2)), float(spec.get("r_tip", 0.015))
+    bld = Builder()
+    fr = s_arr / L
+    radii = r1 + (r0 - r1) * (1.0 - fr) ** float(spec.get("taper", 1.3))
+    bld.tube(p, radii, 18, 0.0, 1.0, 0.0, 1.0, "wisp", list(s_arr), cap_end=True)
+    for j, td in enumerate(spec.get("tendrils", [])):
+        t0 = float(td["from"]) * L
+        q0 = at(p, s_arr, t0)
+        d = np.array(td["dir"], np.float64)
+        n = 12
+        pts, rr, ss = [], [], []
+        for i in range(n):
+            f = i / (n - 1)
+            curl = np.array([math.sin(f * 3.0 + j), math.cos(f * 3.0 + j), 0.0]) * float(td.get("curl", 0.05)) * f
+            pts.append(q0 + d * f + curl)
+            rr.append(float(td.get("r", 0.05)) * (1.0 - 0.9 * f))
+            ss.append(min(L, t0 + f * np.linalg.norm(d)))
+        # (the tendril's v runs on from where it leaves the tail, so the fade carries on along it)
+        bld.tube(pts, rr, 8, 0.0, 1.0, float(td["from"]), 1.0, "tendril", ss, cap_end=True)
+    ob = bld.object(tag.capitalize())
+    img = bpy.data.images.new(tag + "_atlas", 32, 32, alpha=False)
+    px = np.ones((32, 32, 4), np.float32)
+    top, tip = hexcol(spec.get("colour", "5a2a8a")), hexcol(spec.get("tip", "9a5ad8"))
+    v = (np.arange(32) / 31.0)[:, None, None]
+    px[..., :3] = top * (1 - v) + tip * v
+    img.pixels = px.ravel()
+    img.pack()
+    _flat_material(ob, "void", tag, img)
+    names, spans = chain_bones(arm, tag, spec.get("parent", "hips"), p, L, int(spec.get("bones", 4)), p[-1])
+    weights(ob, list(enumerate(bld.s)), names, spans)
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("%s: length %.2f, %d tendrils, %d tris" % (tag, L, len(spec.get("tendrils", [])), sum(len(f) - 2 for f in bld.f)))
+    return ob
+
+
+# ------------------------------------------------------------------------------------------------ studs
+def studs(body, arm, spec):
+    """Small props seeded on the body's surface (Tarek's glowing amber crystals among his locs): `count`
+    elongated octahedra on faces of the slot `on` (its material name's slot) whose centre is in `box` (fitted
+    frame), standing out along the face's normal, each skinned as the face's first vertex is (so it rides that
+    loc). Material "<slot>-<name>" (glow by default) in one flat colour."""
+    rng = np.random.default_rng(int(spec.get("seed", 1)))
+    b = [(-1e9, 1e9)[i % 2] if x is None else x for i, x in enumerate(spec.get("box", [None] * 6))]
+    on = [i for i, m in enumerate(body.data.materials) if m and m.name.split("-")[0] == spec.get("on", "hair")]
+    cand = [p for p in body.data.polygons if p.material_index in on and b[0] <= p.center.x <= b[1]
+            and b[2] <= p.center.y <= b[3] and b[4] <= p.center.z <= b[5] and p.normal.length > 0.5]
+    n = min(int(spec.get("count", 10)), len(cand))
+    if n == 0:
+        log("studs %s: no faces to sit on" % spec["name"])
+        return None
+    pick = []
+    for i in rng.permutation(len(cand)):
+        p = cand[int(i)]
+        if all((p.center - q.center).length > float(spec.get("spacing", 0.06)) for q in pick):
+            pick.append(p)
+        if len(pick) >= n:
+            break
+    r = float(spec.get("size", 0.016))
+    bld = Builder()
+    owners = []
+    for p in pick:
+        nrm = np.array(p.normal[:])
+        c = np.array(p.center[:]) + nrm * r * 0.6
+        ref = np.array([0.0, 0.0, 1.0]) if abs(nrm[2]) < 0.9 else np.array([1.0, 0.0, 0.0])
+        e1 = np.cross(nrm, ref)
+        e1 /= np.linalg.norm(e1)
+        e2 = np.cross(nrm, e1)
+        base = len(bld.v)
+        for d in (nrm * r * 1.6, -nrm * r * 0.4, e1 * r, -e1 * r, e2 * r * 0.7, -e2 * r * 0.7):
+            bld.v.append(c + d)
+            bld.uv.append((0.5, 0.5))
+            bld.part.append("stud")
+            bld.s.append(0.0)
+        for a, bb, cc in ((0, 2, 4), (0, 4, 3), (0, 3, 5), (0, 5, 2), (1, 4, 2), (1, 3, 4), (1, 5, 3), (1, 2, 5)):
+            bld.f.append((base + a, base + bb, base + cc))
+        owners.append(body.data.vertices[p.vertices[0]])
+    ob = bld.object(spec["name"].capitalize())
+    img = bpy.data.images.new(spec["name"] + "_atlas", 8, 8, alpha=False)
+    px = np.ones((8, 8, 4), np.float32)
+    px[..., :3] = hexcol(spec.get("colour", "ffb040"))
+    img.pixels = px.ravel()
+    img.pack()
+    _flat_material(ob, spec.get("slot", "glow"), spec["name"], img, "Closest")
+    groups = {g.index: g.name for g in body.vertex_groups}
+    for k, vx in enumerate(owners):
+        for x in vx.groups:
+            g = ob.vertex_groups.get(groups[x.group]) or ob.vertex_groups.new(name=groups[x.group])
+            g.add(list(range(k * 6, k * 6 + 6)), x.weight, "REPLACE")
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("studs %s: %d on %s" % (spec["name"], len(pick), spec.get("on", "hair")))
+    return ob

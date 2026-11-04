@@ -91,7 +91,7 @@ func _anim(id: String) -> void:
 	var rest := _pose(an, m, "", 0.0)
 	var still: Array = []
 	var moves: Array = []
-	for t in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES]:
+	for t in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES]:
 		for mv in t:
 			if String(mv).begins_with(WARDENS[id]["moves"]): moves.append(mv)
 	for mv in moves:
@@ -196,6 +196,8 @@ func _glb_top(m: Node3D) -> float:
 	(m.get_node("Warden/Sync") as WardenGlb.Sync).apply()
 	var top := -INF
 	for nd in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		if String(nd.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX):
+			continue        # (props floating on an orbit, Tarek's seeing-stones: not the body's height)
 		for p in WARDEN_SKIN.points(nd as MeshInstance3D):
 			top = maxf(top, p.y)
 	return top - m.global_position.y

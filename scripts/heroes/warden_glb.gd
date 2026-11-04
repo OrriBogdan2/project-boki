@@ -38,11 +38,17 @@ const OPTIONAL := ["cape", "scarf", "tail", "wings"]
 ## Procedural pieces that stay when the .glb dresses the hunter (the contract's "nodes the game keeps").
 const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus"]
 ## glTF material name -> the toon shader's painted surface (RIG_CONTRACT "Materials").
-const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur": 5, "eyes": 0, "team": 1, "glow": 0}
+const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur": 5, "eyes": 0, "team": 1, "glow": 0,
+	"void": 0}
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
 const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline shell
+## The `void` slot is no lit surface but a window onto the Void (shaders/hero_void.gdshader: a drifting
+## starfield over its painted colour, Ostra's coat tears); "<void>-<tag>" with a SOFT_TAGS tag also fades
+## out toward its tip and edges (a body that dissolves into smoke: Ostra's wisp).
+const VOID := preload("res://shaders/hero_void.gdshader")
+const SOFT_TAGS := ["wisp"]
 ## Pieces built as clean geometry (tools/meshy/warden_parts.py), "<slot>-<tag>": they take the ink line even on
 ## an inkless slot (the hair goes without it for a scan's ragged strands, not for a woven braid).
 const INK_TAGS := ["braid"]
@@ -54,6 +60,8 @@ const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(0.97, 0.94, 0
 	"sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3, "fres_tint": 0.95, "rim_amount": 0.5,
 	"top_light": 1.0, "far_lift": 0.35}
 const GLOW := 1.6              # emission of the glow slot (mechanical eyes, cracks), x its painted colour
+const EMIT := 2.2              # a painted emission layer's strength (a material's emissive texture: veins, cracks)
+const EMIT_FLICKER := 0.55     # and how much it crackles
 ## The ink shell on a painted atlas: half the procedural heroes' width per metre of camera distance (the same
 ## 4 mm line close up), and never more than the fit's ink room at a vertex (outline.gdshader ink_mask). At the
 ## match camera a full-width line round every belt, buckle and candle of a scanned model added up to a smudge.
@@ -218,6 +226,11 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 			# the ink shell on the body's silhouette only: on the scan's thin hair strands it poked through as
 			# lines across the face
 			var tag := String(src.resource_name).get_slice("-", 1) if src else ""
+			if slot == "void":
+				var vm := _void(src, tag in SOFT_TAGS)
+				(mi as MeshInstance3D).set_surface_override_material(si, vm)
+				out.append(vm)
+				continue
 			var m := Models.toon(src.albedo_color if src else Color.WHITE, not slot in NO_INK or tag in INK_TAGS)
 			# (a Meshy model's vertex colour holds the ink room, not baked AO)
 			m.set_shader_parameter("vertex_ao", false)
@@ -233,9 +246,24 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 					m.next_pass = _painted_ink()
 			if slot == "glow":
 				m.set_shader_parameter("glow", GLOW)
+			if src and src.emission_enabled and src.emission_texture:
+				m.set_shader_parameter("emit_tex", src.emission_texture)
+				m.set_shader_parameter("use_emit", true)
+				m.set_shader_parameter("emit", EMIT)
+				m.set_shader_parameter("emit_flicker", EMIT_FLICKER)
 			(mi as MeshInstance3D).set_surface_override_material(si, m)
 			out.append(m)
 	return out
+
+## A `void` surface: the starfield over its painted colour, soft (fading out) for a smoke piece.
+static func _void(src: BaseMaterial3D, soft: bool) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = VOID
+	if src and src.albedo_texture:
+		m.set_shader_parameter("albedo_tex", src.albedo_texture)
+		m.set_shader_parameter("use_tex", true)
+	m.set_shader_parameter("soft", soft)
+	return m
 
 static func _painted_ink() -> ShaderMaterial:
 	if _ink == null:
@@ -274,6 +302,7 @@ class Sync extends Node:
 	var skel: Skeleton3D
 	var links: Array = []       # [bone index, rig node, node rest (model space) inverse, bone rest (skeleton space)]
 	var springs := Springs.new()  # the spring_ bone chains (braids) swinging on top
+	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -287,10 +316,12 @@ class Sync extends Node:
 			links.append([bi, nd, (rest[b] as Transform3D).affine_inverse(), skel.get_bone_global_rest(bi)])
 		links.sort_custom(func(a, c): return int(a[0]) < int(c[0]))     # parents before children
 		springs.setup(skel)
+		orbits.setup(skel)      # (the glTF import hangs a node riding a bone on a BoneAttachment3D under it)
 
 	func _process(dt: float) -> void:
 		apply()
 		springs.step(dt)
+		orbits.step(dt)
 
 	func apply() -> void:
 		for l in links:
@@ -375,3 +406,37 @@ class Springs:
 				var c := from.dot(to)
 				var q := Quaternion(from, to) if c < 0.99999 and c > -0.999 else Quaternion.IDENTITY
 				skel.set_bone_global_pose(int(ids[j]), Transform3D(Basis(q) * r.basis, a))
+
+## Props on an orbit (RIG_CONTRACT "Orbits"): a .glb node named orbit_<name> riding a bone carries unskinned
+## props (Tarek's three seeing-stones round his head, each built facing out from the orbit's centre). Each frame
+## the node turns round its own up axis (its rest is upright) at ORBIT_HZ, so every prop circles the bone
+## and keeps facing outward, and each prop bobs on its own phase. The orbit is data here; nothing is baked.
+class Orbits:
+	const PREFIX := "orbit_"
+	const ORBIT_HZ := 0.12      # turns a second
+	const BOB := 0.025          # m, each prop up and down
+	const BOB_HZ := 0.5
+	var pivots: Array = []      # [node, its rest transform, [prop, its rest position]...]
+	var t := 0.0
+
+	func setup(glb: Node) -> void:
+		for n in glb.find_children(PREFIX + "*", "Node3D", true, false):
+			var nd := n as Node3D
+			if nd is MeshInstance3D or nd.get_child_count() == 0:
+				continue
+			var props: Array = []
+			for ch in nd.get_children():
+				if ch is Node3D:
+					props.append([ch, (ch as Node3D).position])
+			pivots.append([nd, nd.transform, props])
+
+	func step(dt: float) -> void:
+		t += dt
+		for pv in pivots:
+			var nd: Node3D = pv[0]
+			var rest: Transform3D = pv[1]
+			nd.transform = rest * Transform3D(Basis(Vector3.UP, TAU * ORBIT_HZ * t), Vector3.ZERO)
+			var props: Array = pv[2]
+			for i in props.size():
+				var pr: Node3D = props[i][0]
+				pr.position = (props[i][1] as Vector3) + Vector3.UP * BOB * sin(TAU * BOB_HZ * t + i * 2.1)

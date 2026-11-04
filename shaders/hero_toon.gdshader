@@ -53,6 +53,12 @@ uniform float part_grad = 0.0;
 uniform float crease = 0.0;
 uniform float edge_dark = 0.0;
 uniform int surface = 0;
+// a painted emission layer on a .glb's atlas (Ryzz's lightning veins and hair crackle, Tarek's bracer cracks):
+// its texture x emit, crackling over time by emit_flicker (0 steady .. 1 strobing along the body)
+uniform bool use_emit = false;
+uniform sampler2D emit_tex : source_color, filter_linear_mipmap, repeat_disable;
+uniform float emit = 0.0;
+uniform float emit_flicker = 0.0;
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
 varying vec3 lpos;
@@ -126,6 +132,10 @@ void fragment() {
 	float up = smoothstep(0.35, 0.95, wnorm.y);
 	EMISSION = flash_color.rgb * flash * 0.9 + c * glow + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
 		+ fcol * fr * fres * 0.55 + c * up * top_light * 0.18 * (1.0 - fog);
+	if (use_emit) {
+		float fl = vnoise(vec2(TIME * 7.0 + lpos.y * 5.0, lpos.x * 3.0 + lpos.z * 3.0));
+		EMISSION += texture(emit_tex, UV).rgb * emit * (1.0 - emit_flicker * (1.0 - smoothstep(0.25, 0.6, fl)));
+	}
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }
