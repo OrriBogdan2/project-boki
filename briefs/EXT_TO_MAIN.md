@@ -1492,3 +1492,6 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 ## 2026-11-04 12:15 UTC (ORCH): DECISION? 3D quality over credits; merge Hunters as each is READY
 - DECISION? Owner: every Hunter's 3D model is iterated until it is as good as we can make it; running out of Meshy credits is acceptable (we never buy; S2 asks the owner).
 - [MAIN] Merge each ext/warden-3d-<id> branch as soon as S2 marks it READY TO MERGE (one Hunter at a time), and ship in the next sync. Owner wants them live ASAP.
+
+## 2026-11-04 12:25 UTC (ORCH): DECISION? 3D ships at ~95% of the art, no owner review gate
+- DECISION? Owner: each Hunter's 3D model ships once S2 judges it ~95% of the art; no owner approval needed before merge. [MAIN] merge each READY ext/warden-3d-<id> and ship in the next sync without waiting for the owner.

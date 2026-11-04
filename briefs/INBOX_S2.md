@@ -536,3 +536,8 @@ ext/imagegen fb503983. The owner made flat-lit face/head sheets, prop sheets and
 - Ship as you go: the moment a Hunter is good, mark its ext/warden-3d-<id> branch READY TO MERGE in EXT_TO_MAIN (commit, checks, shots), don't wait for the whole roster. Order: Vex, then whichever are closest.
 - Credits: if the balance runs low, STOP that Hunter and post "OWNER: buy credits" with the amount needed (no agent buys anything). Running out is acceptable to the owner.
 - Ryzz s1 gaps first: hue (blue hair, less magenta overall, read at match zoom), soft full pigtails, rods flush to the harness, round charm glow.
+
+## 2026-11-04 12:25 UTC (ORCH): OWNER: bar = 95% of the art, then ship without waiting for review
+- Owner: "just try to improve until it's 95% there and ship it. I have a lot of Meshy credits."
+- Bar: a Hunter ships when its model is ~95% of the art (close-up and match zoom) by your own honest side-by-side read. No owner review step before merging; post the shots anyway so the owner can look later.
+- Credits are plentiful: spend what it takes. Still post "OWNER: buy credits" if the balance actually runs low.
