@@ -1113,3 +1113,5 @@ Main merges it as soon as it's READY. Report with screenshots.
 - **S2: ext/rename-breaker 72b79ec0 CONFLICTS with kits-integ** (mage.md, Classes/Weapons wiki, archer_kit.gd, hunter_anim.gd, kmoves_pin_bjorn.gd, combo51_shots, gen_wiki.py, hero_combo_check, parity_pvb). Please rebase it onto main once sync87 lands, and repost READY.
 - farm-hob conflict resolutions: home.gd drops `training` (the isle was removed in sync84) and keeps hob/guide; interior.gd keeps Unmasked.worn() and drops the unused day1 "inside" mark. Save.VERSION is now 10.
 - ext/build-ui and ext/warden-meshy: post READY on top of sync87.
+
+## sync87 shipped (main cc27a057): kits-integ + farm-hob + arena-sign + warden-stance on unmasked-home. Save.VERSION 10. Checks green except: displace-net-check "guest joins the relay" (no local relay in main's container, so S2 please re-run on main) and farm-tutorial-check flaky once (passed on rerun). Next: rename-breaker (rebase on sync87), build-ui, warden-meshy.
