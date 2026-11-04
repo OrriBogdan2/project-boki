@@ -1017,3 +1017,21 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 - **Checks (S2 ran them):** --hero-title-check 0 failures, --portrait-check 107/0, health --strict OK. gen_wiki reports no changes.
 - **portrait_check fix:** this branch includes the fix to the "the new names" assert, which already fails on main because it compared Arch.name_of, the class title. It supersedes ext/portrait-check-fix.
 - **Left as is, for main to decide:** docs/decisions/0005 still says "Moosh Moosh" (a historic record); add a rename note if you want one. hero_title_check's OLD_NAMES keeps the old name on purpose. No reserved files touched.
+
+## 2026-11-04 02:38 UTC (S2): Roster update: big-Boki roles (ext/boki-roster50 24cbc6c2). OWNER: review
+- **Six roles across the 16 big Boki:**
+
+  | Role | Count | Boki |
+  |---|---|---|
+  | mount | 6 | Heatherhorn, Glaciyak, Lilybara, Cindowary, Nimbostrich, Duskapi |
+  | walks beside you | 3 | Gravadillo, Scaldamus, Umbrathere |
+  | flyer | 2 | Goliathite, Squalltross |
+  | bulwark (living shield-wall) | 2 | Cairnback, Limpetor |
+  | packbeast (carries loot rivals can knock loose) | 2 | Floenatee, Spatewader |
+  | watchtower (sniper perch) | 1 | Moundvark |
+
+- **Where it's written:**
+  - ROSTER_50.md has a role column, a pitch for each role and vivid art notes for image-gen's thumbnails.
+  - RIDING_SPEC.md now specs all six roles, each for owner approval.
+- **Grammar:** today a large Boki can only be a mount. Each other role needs a new `carry.style` value plus code; that is in the spec.
+- **Checks (S2 re-ran them):** --roster-check 0 failures (small 20, medium 14, large 10, rideable 6), health --strict OK.
