@@ -42,7 +42,7 @@ func _bond_kind(K: ArchKit) -> String:
 	return ""
 
 
-# ================================================================== Burple: Hearth Call
+# ================================================================== Pip: Hearth Call
 func tender() -> void:
 	var r: Array = sc.setup("tender", 14.0)
 	var m: Match = r[0]

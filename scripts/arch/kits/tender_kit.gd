@@ -1,6 +1,6 @@
 class_name TenderKit
 extends ArchKit
-## Burple, the Tender (a small support on medium stats). docs/heroes/tender.md. Looks are pooled in
+## Pip, the Tender (a small support on medium stats). docs/heroes/tender.md. Looks are pooled in
 ## CareLook; the moves are KMovesCare "mm_" entries.
 ## Passive Bearer: run into a downed teammate to carry them. LMB Ember Cast: embers pushed from
 ## alternating hands Kindle foes.

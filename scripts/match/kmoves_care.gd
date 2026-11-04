@@ -1,17 +1,17 @@
 class_name KMovesCare
 extends RefCounted
-## Keyed full-body moves of Burple (tender, "mm_") and Claire (rimewright, "tm_"): same format and
+## Keyed full-body moves of Pip (tender, "mm_") and Claire (rimewright, "tm_"): same format and
 ## channels as HunterAnim.KMOVES, looked up by HunterAnim.km_sample. Timed to the reference sheets'
 ## beats (docs/heroes/tender.md, rimewright.md: Animation moves): anticipation, the release on the
 ## kit's hit time, an overshoot past the key pose, then the settle. Channels used here besides the
 ## body ones: fl / fr (a free hand from its shoulder, x right, y up, z back), hw / rw their weights,
 ## wa (the held fan's extra pitch, yaw, roll about its grip), wo (its offset, m) and wf (how far the
-## fan turns with the torso instead of staying on the aim). Burple holds nothing: both hands are
+## fan turns with the torso instead of staying on the aim). Pip holds nothing: both hands are
 ## hers to cast from, so her moves key fl and fr.
 ## A move whose first and last keys match can loop: the kit replays it (the skate stride).
 
 const MOVES := {
-	# ================================================================ Burple
+	# ================================================================ Pip
 	# Ember Cast, right hand (every 0.4 s, alternating): the fist pulled back to the hip with the torso
 	# twisted away, then a straight-arm punch-push at the cursor with the torso unwound ~45 deg past
 	# square and the stance dropped; held out 0.1 s, then the left hand rises open for the next one

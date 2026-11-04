@@ -267,7 +267,7 @@ func _free(m: Match) -> void:
 func _mine(m: Match, P: Hunter) -> Array:
 	return m.shots.filter(func(s): return s["by"] == P)
 
-# ================================================================== Burple
+# ================================================================== Pip
 func tender() -> void:
 	var r: Array = sc.setup("tender", 6.0)
 	var m: Match = r[0]
@@ -276,7 +276,7 @@ func tender() -> void:
 	var T: Hunter = r[3]
 	var K: TenderKit = P.ak
 	ok(
-			"mm: renamed Burple, kit sounds load",
+			"mm: renamed Pip, kit sounds load",
 			Arch.name_of("tender") == "Fox Cub"
 			and Sfx.streams.has("tend_seed")
 			and Sfx.streams.has("tend_root")

@@ -103,7 +103,7 @@ const HOLDS := {
 	"sword": {"gr": Vector3(0, 0, 0.06), "gl": Vector3.INF},
 	"great": {"gr": Vector3(0, 0, 0.02), "gl": Vector3(0, 0, 0.15)},
 	"twin": {"gr": Vector3(0.06, 0, -0.02), "gl": Vector3(-0.1, -0.06, -0.08)},
-	# nothing held: both hands are free and the kit's moves cast from them (Burple)
+	# nothing held: both hands are free and the kit's moves cast from them (Pip)
 	"palm": {
 		"pos": Vector3(0.14, -0.25, -0.1), "low": Vector2.ZERO, "gr": Vector3.ZERO, "gl": Vector3.INF,
 		"kick": 0.0, "push": 0.0, "shake": 0.0},

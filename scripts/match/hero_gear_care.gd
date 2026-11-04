@@ -1,6 +1,6 @@
 class_name HeroGearCare
 ## Gear for the support pair, kept out of hero_gear.gd.
-##   Burple (tender, small): a courier. A flap cap, a small satchel and bedroll low on the back, a
+##   Pip (tender, small): a courier. A flap cap, a small satchel and bedroll low on the back, a
 ##   long ember-tipped tail that swings as she scurries, ember light cupped in both palms (she holds
 ##   nothing), a rope coil, a tin cup and a cream poncho with an ochre hem.
 ##   Claire (rimewright, light): a rink-keeper. An ear-flap cap with a fur band, a huge fluffy collar,
@@ -22,7 +22,7 @@ static func dress(arch: String, c: Dictionary) -> void:
 	else:
 		_rime(c)
 
-# ------------------------------------------------------------------------------------------ Burple
+# ------------------------------------------------------------------------------------------ Pip
 static func _tender(c: Dictionary) -> void:
 	var m: Dictionary = c["m"]
 	var t: Node3D = c["torso"]

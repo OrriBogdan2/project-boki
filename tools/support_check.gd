@@ -1,5 +1,5 @@
 extends RefCounted
-## --support-check: the support pair (Burple the Tender, Claire the Rimewright). Ally heals, downed
+## --support-check: the support pair (Pip the Tender, Claire the Rimewright). Ally heals, downed
 ## teammates (heal, carry, drop, revive), the dash through a teammate, and that the Rink Wall gives the
 ## squad nothing (no heal or shield). --tender-combo-check and --rimewright-combo-check also run each
 ## hero's combos (tools/care_combo_check.gd). Mode: "all" | "tender" | "rimewright". Prints SUPPORT PASS/FAIL.

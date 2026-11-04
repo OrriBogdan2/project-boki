@@ -1,5 +1,5 @@
 shader_type spatial;
-// Burple and Claire ground discs (CareLook): a soft filled disc with a bright rim, an optional
+// Pip and Claire ground discs (CareLook): a soft filled disc with a bright rim, an optional
 // sweep that fills toward a trigger, and a sigil per owner. pattern: 0 plain, 1 a lantern plus (heal),
 // 2 a six-spoke frost flake (slow zone), 3 a ring of burr thorns (Burrseed root), 4 Claire's Rimelock rink:
 // a ragged crystalline edge and a crack network whose glow (`crack`, 0..1) is the countdown; 5 the

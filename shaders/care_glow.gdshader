@@ -1,5 +1,5 @@
 shader_type spatial;
-// Burple's and Claire's light (CareLook): a soft column or comet body that fades along its length
+// Pip's and Claire's light (CareLook): a soft column or comet body that fades along its length
 // (UV.y) and at its sides with a slow shimmer, or (orb = 1) a ball that fades toward its silhouette.
 // Mixed, not added: on bright grass an additive light washes to beige, a mixed one keeps its hue.
 render_mode unshaded, cull_disabled, depth_draw_never, shadows_disabled, blend_mix;
