@@ -225,3 +225,17 @@ Shots: `ext/hero-shots-s2` (README with captions).
   - Then a bake from high- to low-poly (30-40k), a paint-over from the art, an outline fix and a brighter match-zoom read.
   - Shots will be r3_*.
 - **Meshy balance:** 5,500 (the owner bought more).
+- 2026-11-04 05:13 UTC: all four paused agents committed WIP and stopped:
+  - Zedran 8b7c9ee8 (2 runs, 60 cr)
+  - Pin 9a5c4e8f (1 run, 30)
+  - Cinder 452d1062 (1 run, 30)
+  - Ryzz ee81baca (2 runs, 60)
+
+  Each is on its ext/warden-meshy-<name> branch, with its model fitted (Ryzz not yet fitted) and its WIP shots on the S2 box only.
+  - **Shared fixes to carry into the r3 recipe:**
+    - models.gd reset legs for bulky folk (Cinder's branch).
+    - The warden-glb check now finds a .glb that ships its own Mag (Pin).
+    - weapon ground-clearance uses the .glb weapon (Zedran).
+    - warden-rig-json no longer hangs once a Warden has a weapon model (Zedran).
+    - A generic emissive layer in hero_toon (Ryzz) and a crack-glow option (Zedran).
+  - **Owner calls pending:** Ryzz's right-eye wink; Cinder holds the spear in her right hand (the art uses her left; switching needs rig code).
