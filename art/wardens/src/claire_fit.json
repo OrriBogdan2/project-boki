@@ -1,0 +1,295 @@
+{
+ "body_glb": "~/meshy/claire/bake/low.glb",
+ "rig": "art/wardens/src/claire_rig.json",
+ "out": "art/wardens/claire/claire.glb",
+ "blend": "~/meshy/claire/fit.blend",
+ "turn": 180,
+ "max_tris": 34000,
+ "floater_verts": 8,
+ "snap_r": 0.045,
+ "scale_joints": [
+  "hip.L",
+  "shoulder.L"
+ ],
+ "snap_y": false,
+ "joints": {
+  "crown": [
+   0.0,
+   -0.01,
+   0.87
+  ],
+  "neck": [
+   0.0,
+   0.0,
+   0.59
+  ],
+  "shoulder.L": [
+   0.15,
+   0.01,
+   0.52
+  ],
+  "elbow.L": [
+   0.21,
+   0.02,
+   0.25
+  ],
+  "hand.L": [
+   0.296,
+   0.0,
+   0.06
+  ],
+  "fingers.L": [
+   0.31,
+   -0.01,
+   -0.12
+  ],
+  "hip.L": [
+   0.07,
+   0.0,
+   0.03
+  ],
+  "knee.L": [
+   0.075,
+   0.02,
+   -0.32
+  ],
+  "ankle.L": [
+   0.075,
+   0.0,
+   -0.7
+  ],
+  "shoulder.R": [
+   -0.15,
+   0.01,
+   0.52
+  ],
+  "elbow.R": [
+   -0.21,
+   0.02,
+   0.25
+  ],
+  "hand.R": [
+   -0.296,
+   0.0,
+   0.06
+  ],
+  "fingers.R": [
+   -0.31,
+   -0.01,
+   -0.12
+  ],
+  "hip.R": [
+   -0.07,
+   0.0,
+   0.03
+  ],
+  "knee.R": [
+   -0.075,
+   0.02,
+   -0.32
+  ],
+  "ankle.R": [
+   -0.075,
+   0.0,
+   -0.7
+  ]
+ },
+ "chunk": {
+  "head": 1.12,
+  "hand": 1.15,
+  "girth": 1.0
+ },
+ "lift": [
+  0.95,
+  1.02,
+  1.04
+ ],
+ "glow_min": [
+  2.0,
+  2.0,
+  -1.0
+ ],
+ "normal_smooth": 8,
+ "pad": 6,
+ "cap_holes": true,
+ "cap_flat": true,
+ "ink_room": 0.02,
+ "fit_weights": true,
+ "slot_vote": 4,
+ "slot_rules": [
+  {
+   "slot": "metal",
+   "absx": true,
+   "box": [
+    0.07,
+    0.3,
+    -0.25,
+    0.25,
+    0.62,
+    1.0
+   ],
+   "hsv": [
+    0.55,
+    0.72,
+    0.15,
+    0.5,
+    0.36,
+    0.72
+   ]
+  },
+  {
+   "slot": "hair",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    0.0,
+    null
+   ],
+   "hsv": [
+    0.5,
+    0.8,
+    0.12,
+    1.0,
+    0.0,
+    0.4
+   ]
+  },
+  {
+   "slot": "skin",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    0.55,
+    null
+   ]
+  },
+  {
+   "slot": "skin",
+   "absx": true,
+   "box": [
+    0.165,
+    0.5,
+    null,
+    null,
+    0.1,
+    0.52
+   ]
+  },
+  {
+   "slot": "skin",
+   "absx": true,
+   "box": [
+    0.24,
+    0.5,
+    null,
+    null,
+    -0.3,
+    0.1
+   ]
+  },
+  {
+   "slot": "ice",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    -0.9
+   ]
+  },
+  {
+   "slot": "leather",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    -0.66
+   ]
+  },
+  {
+   "slot": "ice"
+  }
+ ],
+ "parts": {
+  "feet_forward": true,
+  "split": [
+   {
+    "name": "horns",
+    "slots": [
+     "metal"
+    ],
+    "z_min": 1.45,
+    "bone": "head"
+   }
+  ],
+  "spear": {
+   "butt": 0.62,
+   "tip": -0.82,
+   "blade": 0.24
+  },
+  "wings": {
+   "art": "~/meshy/claire/art/claire_turnaround.png",
+   "box": [
+    1490,
+    100,
+    1660,
+    660
+   ],
+   "cut_x": 1648,
+   "sole_y": 1084,
+   "crown_y": 140,
+   "crown_z": 1.7285,
+   "root": [
+    -0.16,
+    -0.1,
+    1.3
+   ],
+   "sweep": 25,
+   "bones": 3
+  },
+  "tail": {
+   "path": [
+    [
+     0.0,
+     -0.12,
+     0.82
+    ],
+    [
+     0.02,
+     -0.22,
+     0.62
+    ],
+    [
+     0.08,
+     -0.28,
+     0.42
+    ],
+    [
+     0.16,
+     -0.27,
+     0.28
+    ],
+    [
+     0.22,
+     -0.22,
+     0.22
+    ]
+   ],
+   "length": 0.85,
+   "radius": [
+    0.024,
+    0.009
+   ],
+   "spade": 0.07,
+   "clear": 0.03,
+   "bones": 6
+  }
+ }
+}

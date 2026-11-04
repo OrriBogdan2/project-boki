@@ -670,6 +670,9 @@ func update(dt: float, s: Dictionary) -> void:
 	was_rolling = rolling
 	dash_t += dt
 	dash_k = _ease(dash_k, 1.0 if rolling and dash_kind != "roll" else 0.0, 22.0 if rolling else 9.0, dt)
+	# a 3D model's wings fold back while she skates (WardenGlb.Springs, the root's WING_FOLD meta)
+	if dash_kind == "skate" or model.has_meta(WardenGlb.WING_FOLD):
+		model.set_meta(WardenGlb.WING_FOLD, dash_k if dash_kind == "skate" else 0.0)
 	var roll_k := 0.0
 	var roll_ang := 0.0
 	if roll_t >= 0.0:
