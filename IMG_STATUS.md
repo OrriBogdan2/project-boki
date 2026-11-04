@@ -147,3 +147,6 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 - wardens_r2/tarek_{turnaround,side,portrait,splash}.webp + TAREK_KIT.md; review/tarek_before_after.jpg.
 - A blind cliff-runner: a cloth blindfold, long locs with stone beads, copper rings and amber crystals (the owner's "jewellery in his hair"), three floating geode seeing-stones with amber irises orbiting his head, stone bracers with glowing cracks, a slate vest, a terracotta sash, a climbing harness with pitons, a chalk pouch, bare wrapped feet.
 - Note for VFX: the amber ripple rings under his feet. DECISIONS: "a ground ring means gameplay", so show them only while he senses or uses an ability (or as a very faint idle pulse), not as a constant ring.
+
+## 2026-11-04 08:10 UTC: Claire turnaround fixed (owner upload)
+- wardens_r2/claire_turnaround.webp replaced (the old one is in history): the 3/4 view now has her spear and the skates read forward. 3D still uses front/side/back as the Meshy input.
