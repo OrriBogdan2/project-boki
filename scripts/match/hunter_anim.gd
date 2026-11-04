@@ -409,7 +409,8 @@ static func _collect_pts(n: Node, xf: Transform3D, out: PackedVector3Array) -> v
 		if not (ch is Node3D) or ch.is_queued_for_deletion():
 			continue
 		var cx := xf * (ch as Node3D).transform
-		if ch is MeshInstance3D and (ch as MeshInstance3D).mesh:
+		# (a procedural weapon a Warden's .glb replaced doesn't count: WardenGlb hid it for good)
+		if ch is MeshInstance3D and (ch as MeshInstance3D).mesh and not ch.has_meta("glb_hidden"):
 			var bb := (ch as MeshInstance3D).mesh.get_aabb()
 			for i in 8:
 				out.append(cx * bb.get_endpoint(i))

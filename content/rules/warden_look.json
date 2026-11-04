@@ -62,5 +62,59 @@
 				"far_d": 14.0
 			}
 		]
+	},
+	"ryzz": {
+		"painted": {
+			"emit": 2.6,
+			"emit_flicker": 0.12,
+			"far_emit": 1.2,
+			"rim_far": 0.22,
+			"rim_far_color": [
+				0.2,
+				0.45,
+				1.0
+			]
+		},
+		"slots": {
+			"skin": {
+				"top_light": 0.3,
+				"fres": 0.22,
+				"far_lift": 0.3,
+				"shade": 0.9,
+				"fres_tint": 0.4
+			},
+			"hair": {
+				"top_light": 0.6,
+				"fres": 0.8,
+				"far_lift": 0.45,
+				"glow": 0.14,
+				"shadow_tint": [
+					0.88,
+					0.94,
+					1.0
+				],
+				"fres_tint": 0.9
+			},
+			"cloth": {
+				"fres": 0.6,
+				"far_lift": 0.8,
+				"light_neutral_warm": 0.4
+			},
+			"leather": {
+				"top_light": 0.45,
+				"fres": 0.4,
+				"fres_tint": 0.5,
+				"far_lift": 0.5,
+				"light_neutral_warm": 0.8
+			},
+			"metal": {
+				"top_light": 0.5,
+				"fres": 0.5,
+				"fres_tint": 0.8,
+				"far_lift": 0.8,
+				"sheen": 0.0,
+				"shade": 0.9
+			}
+		}
 	}
 }

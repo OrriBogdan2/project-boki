@@ -279,3 +279,31 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 r3c (09:00-10:30) and r3d (11:25-13:30) used no Meshy credits: every change is in the fit spec, the parts tools, the
 paint-over, the shared look (16c18b4f) and warden_look.json. Recipe: RECIPE_95.md.
 
+### Ryzz (mage) stage 1 runs, 2026-11-04 (locked art: ext/imagegen 93a2757f wardens_r3/ryzz_* + RYZZ_KIT.md; 94 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Ryzz edit front | 11:04 | 01a1a63a-9e79-721b-beba-f3deb7492a53 | nano-banana-pro (image-to-image) | 9:16 crop of ryzz_front; pigtails, ties and back rods out (two small knots left) | 9 | Kept |
+| Ryzz edit 3/4 | 11:04 | 01a1a63a-9e7c-7527-b013-d7921d97ef1e | nano-banana-pro | as front, plus hand off the hip and the gum bubble out | 9 | Dropped: the hand stayed on the hip |
+| Ryzz edit side | 11:04 | 01a1a63a-9e8a-7453-a039-308472d82679 | nano-banana-pro | as front, plus the jacket off the shoulders (RYZZ_KIT), far arm hidden | 9 | Dropped for side 2: it opened the scarred eye |
+| Ryzz edit back | 11:04 | 01a1a63a-9e78-7242-afc4-9b2c4cbf1d01 | nano-banana-pro | as front, floor shadow out | 9 | Kept (a small green bolt it drew on the corset painted out, tools/meshy/ryzz_prep.py) |
+| Ryzz edit 3/4 b | 11:07 | 01a1a63c-7713-74fc-b16f-417e5e79d363 | nano-banana-pro | the 3/4 edit again: the arm down | 9 | Dropped: arm down, but it opened the scarred (right) eye; the run went without a 3/4 |
+| Ryzz edit side 2 | 11:08 | 01a1a63e-4f65-738b-bed8-418d5d0d53ff | nano-banana-pro | the side edit: the scarred eye closed | 9 | Kept |
+| Ryzz body A | 11:09 | 01a1a640-5b8c-7749-a3ef-7f535b835d75 | meshy-7.1 | edited front, side 2, back (padded square) as images and texture refs; geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** (one body run): the wink and fern scar on her RIGHT eye, freckles, choker and bolt charm, the keyhole corset, off-shoulder jacket, chain belt, hazard bands |
+
+Ryzz notes (stage 1, docs/art/wardens/PIPELINE.md recipe; no hand polish):
+- **Pieces built by script** (tools/meshy/ryzz_parts.py, fit spec `scripted`, called by fit_warden.py through
+  `build()`): the SHORT pigtails (owner: long twin tails read as a famous character) as chunky tapered locks with
+  zigzag ends, blue to pink, out of a copper-coil tie on each of the scan's hair knots, on 3-bone `spring_pigtail_L/R`
+  chains; exactly three copper rods in a riveted mount on her back, rigid on the hips, the middle one (her relic)
+  scorched and bent. Both were taken out of the Meshy inputs.
+- **Glow** (`emit_art`): Meshy paints the art's neon as plain pink, so the emission mask is projected from the edited
+  front view (Meshy's frame, before the fit, so the A-pose arms still line up): the art's neon pixels light the scar,
+  the charm, the corset piping and the forearm veins. The game colours that layer with the archetype's
+  `model_glow.core` (hero_toon `emit_tint`), so the pink is a switch like Kael's, no rebake.
+- **Proportions:** mage body head 0.74, legs 1.95, build 0.92, chest 1.0, neck -0.02, size 1.0 (was size 1.12,
+  chest 1.15): 0.99x a medium's height as before, slimmer, the legs longer; hit radius unchanged (main's `body.hit_r` 0.4).
+- **Stage 2 (rounds 2-3, credit-free):** round 3: the face painted from the head sheet (`paint_art`), the shared look fix (16c18b4f), curly pigtails, rods flush between the shoulder blades, right hand on hip; round 2: ramps of the art's colours per slot; mantle_look "mage" colours and a no-hue
+  `tint` (the hair-pick pull was the violet cast); fuller S-fall pigtails, knots squashed under the ties; rods seated
+  on the back's slope with straps; the charm's halo off the emission (`strict`); warden_look "ryzz"; the swagger
+  stance. The stance commits (ext/warden-stance 7260bfda..aa3345b6) are cherry-picked, not merged: a merge of
+  ext/warden-stance brings a diverged main (save v8 market vs v8 Mantle look, 16 conflicting files).
