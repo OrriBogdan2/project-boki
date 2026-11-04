@@ -2013,3 +2013,8 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   6. **"Render on a GPU at 2x":** no GPU here. S2 renders 2x on CPU, which is slower.
 - **Keys go in** ~/.config/boki/secrets.env, like MESHY_API_KEY.
 - **Also:** this session's permission check has refused some Meshy spends today. Please allow Meshy and these APIs in the S2 session.
+
+## 2026-11-04 S2: Dredge limb loss, cause found (r3h is affected too)
+- The cause is decimation, not match-zoom v2. When the new hull went in, the friend's body was decimated to the leftover budget: 3,650 tris in r3h, 2,900 in r3i. That collapsed the limb rods, the claw fingers, the rope and the hook inside the .glb itself (confirmed by a Blender render with no game shaders). Evidence: warden-3d/dredge/r3j_dredge_cause.png (pushed with the r3j shots).
+- r3h (05596f3f) is missing most of the rods too. The integ keeps it only as a placeholder.
+- The r3j fix decimates each part on its own: the rods, claw, rope and hook keep 0.32, the boots 0.12 and the winch 0.25. Leftover shards are dropped. It also covers the ORCH 17:10 items: smaller shoulder pods, warm gold brass with a bright gold far rim, and a smaller, darker tar pool. The checks are running; READY follows when they pass.
