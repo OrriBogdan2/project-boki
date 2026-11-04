@@ -59,16 +59,25 @@ const INK_TAGS := ["braid"]
 ## warm key keeps its warmth), dark_lift raises near-black paint one step; the shadow tint is warm. At the match
 ## camera far_smooth takes the atlas's fine detail out (no speckle) and the ink thins (INK_FAR_THIN); a Hunter's
 ## signature rim there is rim_far / rim_far_color in its warden_look.json "painted".
+## The match-zoom read (far_*, hero_toon.gdshader): from 8 to 18 m the pale fresnel drops to a third, the gloss,
+## sheen and light rims go, the rest is anti-aliased, stray texels are clamped to their coarser mip, and rim_far
+## becomes a broad band in the signature colour; whatever glows is a step brighter. With the ink gone there
+## (INK_FAR_CUT) and a halo shell on each glow piece (GLOW_SHELL), that is the white/dark speckle fringe gone.
 const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(1.0, 0.95, 0.91), "shadow_sat": 0.0, "sss": 0.0,
 	"sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3, "fres_tint": 0.95, "rim_amount": 0.5,
 	"top_light": 1.0, "far_lift": 0.35, "ambient_cut": 1.0, "own_ambient": Vector3(0.58, 0.54, 0.5),
-	"light_neutral": 0.9, "dark_lift": 0.07, "far_smooth": 0.7, "far_smooth_bias": 1.0}
+	"light_neutral": 0.9, "dark_lift": 0.07, "far_smooth": 0.7, "far_smooth_bias": 1.0,
+	"far_fres": 0.35, "far_spec": 0.0, "far_aa": 1.0, "far_clamp": 0.8, "far_rim_soft": 1.0, "far_glow": 0.6}
 const GLOW := 1.6              # emission of the glow slot (mechanical eyes, cracks), x its painted colour
 ## The ink shell on a painted atlas: half the procedural heroes' width per metre of camera distance (the same
 ## 4 mm line close up), and never more than the fit's ink room at a vertex (outline.gdshader ink_mask). At the
 ## match camera a full-width line round every belt, buckle and candle of a scanned model added up to a smudge.
 const INK_WIDTH := 0.0006
 const INK_FAR_THIN := 0.8      # the ink this much thinner at the match camera (outline.gdshader far_thin)
+const INK_FAR_CUT := 0.55      # and gone from ~13.5 m (outline.gdshader far_cut; a Hunter's "ink" can change both)
+## The glow slot's halo shell at the match camera (outline.gdshader glow_shell; a Hunter's "glow_shell" in its
+## warden_look.json overrides these, {"px": 0} for none): eyes, lenses and cracks read as a glow there.
+const GLOW_SHELL := {"glow_px": 1.4, "glow_k": 1.3, "glow_near": 7.0, "glow_far": 14.0}
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
 ## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model (or a design
@@ -82,8 +91,7 @@ const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (Hunte
 const WEAPON_OFF := "weapon_offhand"
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
-static var _ink: ShaderMaterial  # the painted atlas's ink shell (INK_WIDTH), shared
-static var _ink_own := {}        # a warden_look "ink" (as JSON) -> that model's own ink shell
+static var _ink := {}            # a warden_look "ink" (as JSON) -> the painted atlas's ink shell (INK_WIDTH), shared
 static var _measuring := false  # building that neutral model: no .glb on it
 static var _variants = null     # art name -> the design variant the command line picks (variant())
 static var _look = null         # content/rules/warden_look.json, read once (look())
@@ -319,7 +327,11 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}) -> A
 			# the ink shell on the body's silhouette only: on the scan's thin hair strands it poked through as
 			# lines across the face
 			var tag := String(src.resource_name).get_slice("-", 1) if src else ""
-			var m := Models.toon(src.albedo_color if src else Color.WHITE, not slot in NO_INK or tag in INK_TAGS)
+			# (a Hunter's warden_look "no_ink": material tags or slots drawn without it, e.g. a gum bubble or
+			# thin crossbows the line turns into speckle at the match camera)
+			var no_ink: Array = own.get("no_ink", [])
+			var ink := (not slot in NO_INK or tag in INK_TAGS) and not tag in no_ink and not slot in no_ink
+			var m := Models.toon(src.albedo_color if src else Color.WHITE, ink)
 			# (a Meshy model's vertex colour holds the ink room, not baked AO)
 			m.set_shader_parameter("vertex_ao", false)
 			m.set_shader_parameter("surface", int(SLOTS.get(slot, 1)))
@@ -334,6 +346,8 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}) -> A
 					m.next_pass = _painted_ink(own.get("ink", {}))
 			if slot == "glow":
 				m.set_shader_parameter("glow", GLOW)
+				if src and src.albedo_texture and m.next_pass == null:
+					m.next_pass = _glow_shell(src.albedo_texture, own.get("glow_shell", {}))
 			var per_slot: Dictionary = (own.get("slots", {}) as Dictionary).get(slot, {})
 			var over: Dictionary = (own.get("painted", {}) as Dictionary).merged(per_slot, true)
 			for k in over:
@@ -342,28 +356,35 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}) -> A
 			out.append(m)
 	return out
 
-## A model's warden_look "ink" {"far_thin", "color"} gives it its own ink shell: thinner at the match camera
-## and a softer colour (Pip's fur tufts and tail clumps: a near-black line there read as black specks).
+## The painted atlas's ink shell; a Hunter's warden_look "ink" {"far_thin", "far_cut", "color"} gives it its own
+## (Pip's fur tufts: a softer colour, thinner at the match camera).
 static func _painted_ink(own_ink: Dictionary = {}) -> ShaderMaterial:
-	if not own_ink.is_empty():
-		var key := JSON.stringify(own_ink)
-		if not _ink_own.has(key):
-			var mat := ShaderMaterial.new()
-			mat.shader = Models.OUTLINE
-			mat.set_shader_parameter("width", INK_WIDTH)
-			mat.set_shader_parameter("ink_mask", true)
-			mat.set_shader_parameter("far_thin", float(own_ink.get("far_thin", INK_FAR_THIN)))
-			if own_ink.has("color"):
-				mat.set_shader_parameter("color", _param(own_ink["color"]))
-			_ink_own[key] = mat
-		return _ink_own[key]
-	if _ink == null:
-		_ink = ShaderMaterial.new()
-		_ink.shader = Models.OUTLINE
-		_ink.set_shader_parameter("width", INK_WIDTH)
-		_ink.set_shader_parameter("ink_mask", true)
-		_ink.set_shader_parameter("far_thin", INK_FAR_THIN)
-	return _ink
+	var key := JSON.stringify(own_ink)
+	if not _ink.has(key):
+		var mat := ShaderMaterial.new()
+		mat.shader = Models.OUTLINE
+		mat.set_shader_parameter("width", INK_WIDTH)
+		mat.set_shader_parameter("ink_mask", true)
+		mat.set_shader_parameter("far_thin", float(own_ink.get("far_thin", INK_FAR_THIN)))
+		mat.set_shader_parameter("far_cut", float(own_ink.get("far_cut", INK_FAR_CUT)))
+		if own_ink.has("color"):
+			mat.set_shader_parameter("color", _param(own_ink["color"]))
+		_ink[key] = mat
+	return _ink[key]
+
+## A glow piece's halo shell (GLOW_SHELL, then the Hunter's "glow_shell": glow_px, glow_k, glow_near, glow_far,
+## glow_col), or null for {"glow_px": 0}.
+static func _glow_shell(tex: Texture2D, own_shell: Dictionary) -> ShaderMaterial:
+	var cfg := GLOW_SHELL.merged(own_shell, true)
+	if float(cfg["glow_px"]) <= 0.0:
+		return null
+	var mat := ShaderMaterial.new()
+	mat.shader = Models.OUTLINE
+	mat.set_shader_parameter("glow_shell", true)
+	mat.set_shader_parameter("glow_tex", tex)
+	for k in cfg:
+		mat.set_shader_parameter(k, _param(cfg[k]))
+	return mat
 
 ## How far the player's colour pick moves a painted slot from the Warden's own colour (white: not at all).
 static func _tint(slot: String, lk: Dictionary, warden: Dictionary) -> Color:
