@@ -336,7 +336,7 @@ def crossbows(rig_grips, look):
 def lantern(arm, spec, look, tag="lantern"):
     """A small caged lantern hanging under the paw `hand` bone's grip point `at` (fitted frame), on a spring
     chain spring_<name>_0..1 under the hand: it swings as she moves."""
-    cells = Cells(look["colours"], n=2, size=256)
+    cells = Cells(look["colours"], n=2, size=int(look.get("tex", 256)))
     if look.get("arch"):
         _arch_panes(cells, look)
     img = cells.image(tag + "_atlas")
@@ -344,12 +344,13 @@ def lantern(arm, spec, look, tag="lantern"):
     s = float(spec.get("size", 1.0))
     bld = WP.Builder()
     top = at - np.array([0, 0, 0.03 * s])          # the ring's bottom
-    bld.torus(at - np.array([0, 0, 0.012 * s]), [1, 0, 0], 0.014 * s, 0.0035 * s, 12, 4, cells.box["copper"], "frame", 0.0)
+    bld.torus(at - np.array([0, 0, 0.012 * s]), [1, 0, 0], 0.014 * s, 0.0035 * s, 16, 6, cells.box["copper"], "frame", 0.0)
     h = 0.13 * s
     r = 0.045 * s
     cap0 = top - np.array([0, 0, 0.01 * s])
     # the roof: a little four-sided cone, a cap ring
-    bld.tube([top, cap0, cap0 - np.array([0, 0, 0.025 * s])], [0.008 * s, 0.03 * s, r * 1.15], 4,
+    rs = int(look.get("round", 4))                  # roof and base sides (8: a smoother cage)
+    bld.tube([top, cap0, cap0 - np.array([0, 0, 0.025 * s])], [0.008 * s, 0.03 * s, r * 1.15], rs,
              *[cells.box["copper"][i] for i in (0, 2, 1, 3)], "frame", [0.0] * 3, cap_start=True)
     body0 = cap0 - np.array([0, 0, 0.025 * s])
     body1 = body0 - np.array([0, 0, h])
@@ -358,17 +359,17 @@ def lantern(arm, spec, look, tag="lantern"):
     for k in range(4):
         ang = math.pi / 4 + k * math.pi / 2
         off = np.array([math.cos(ang), math.sin(ang), 0]) * r * 1.02
-        bld.prism(body0 + off, body1 + off, 0.006 * s, 4, cells.box["copper"], "frame", 0.0)
+        bld.prism(body0 + off, body1 + off, 0.006 * s, 6 if rs > 4 else 4, cells.box["copper"], "frame", 0.0)
     for z in (body0, body1, (body0 + body1) * 0.5):
         bld.torus(z, [0, 0, 1], r * 1.02, 0.005 * s, 4, 4, cells.box["copper"], "frame", 0.0)
     # the base and a little foot
     bld.tube([body1, body1 - np.array([0, 0, 0.02 * s]), body1 - np.array([0, 0, 0.03 * s])],
-             [r * 1.15, r * 1.05, r * 0.6], 4, *[cells.box["copper"][i] for i in (0, 2, 1, 3)], "frame", [0.0] * 3,
+             [r * 1.15, r * 1.05, r * 0.6], rs, *[cells.box["copper"][i] for i in (0, 2, 1, 3)], "frame", [0.0] * 3,
              cap_end=True)
     ob = bld.object("Lantern")
     mats = {}
     for slot in ("metal", "glow"):
-        ob.data.materials.append(_mat("%s-%s" % (slot, tag), img, closest=True))
+        ob.data.materials.append(_mat("%s-%s" % (slot, tag), img, closest=not look.get("smooth")))
         mats[slot] = len(ob.data.materials) - 1
     for poly in ob.data.polygons:
         poly.material_index = mats["glow"] if bld.part[poly.vertices[0]] == "glass" else mats["metal"]
@@ -652,21 +653,114 @@ def cape(arm, body, spec, tag="cape"):
                 a0 = base + i * rl + j
                 q = (a0, a0 + 1, a0 + rl + 1, a0 + rl)
                 bld.f.append(q if layer == 0 else q[::-1])
+    mt = spec.get("mantle")
+    if mt:
+        _mantle(bld, bvh, mt, thick)
     ob = bld.object("Cape")
     # (the outer layer faces back, -y, the inner one the body: recalc_face_normals guesses on an open sheet)
-    half = len(bld.f) // 2
+    half = nv * nu
+    nb = 2 * half
+    cx, cy = (mt or {}).get("centre", [0.0, -0.05])
     for k, poly in enumerate(ob.data.polygons):
-        want = -1.0 if k < half else 1.0
-        if poly.normal.y * want < 0:
-            poly.flip()
+        if k < nb:
+            want = -1.0 if k < half else 1.0
+            if poly.normal.y * want < 0:
+                poly.flip()
+        else:
+            # (the mantle: its outer layer faces away from the torso's axis, the inner one toward it)
+            c = poly.center
+            rd = Vector((c.x - cx, c.y - cy, 0.0))
+            want = 1.0 if k < nb + (len(ob.data.polygons) - nb) // 2 else -1.0
+            if poly.normal.dot(rd) * want < 0:
+                poly.flip()
     ob.data.update()
     ob.data.materials.append(_mat("%s-%s" % (spec.get("slot", "cloth"), tag), img))
     for poly in ob.data.polygons:
         poly.use_smooth = True
-    _skin(ob, arm, {spec.get("bone", "hips"): range(len(ob.data.vertices))})
+    if mt:
+        # (the shoulder mantle takes the skin weights of the body under it: it rides the shoulders and the arms,
+        # so a raised arm doesn't come through it; the back sheet stays rigid on its bone)
+        n_back = len(rows) * len(rows[0]) * 2
+        _skin(ob, arm, {spec.get("bone", "hips"): range(n_back)})
+        _copy_weights(ob, body, range(n_back, len(ob.data.vertices)))
+    else:
+        _skin(ob, arm, {spec.get("bone", "hips"): range(len(ob.data.vertices))})
     log("cape: rows %.2f..%.2f m, back at y %.3f..%.3f, %d tris" % (z0, z1, rows[0][nu // 2][1], rows[-1][nu // 2][1],
                                                                      sum(len(f) - 2 for f in bld.f)))
     return ob
+
+
+def _mantle(bld, bvh, mt, thick):
+    """The cape's shoulder mantle (pip_front, the head sheet: the cape wraps over both shoulders to a leaf clasp at
+    the chest): rings from `z0` (the neck) down to `z1` (past the shoulders), each point laid `out` m outside the
+    body on a ray toward the torso's vertical axis at `centre` [x, y], the radius never shrinking going down (it
+    drapes over the arms), a gap of `gap` deg at the front (+y) for the clasp. Two layers."""
+    from mathutils import Vector as V
+    cx, cy = mt.get("centre", [0.0, -0.05])
+    z0, z1 = float(mt["z0"]), float(mt["z1"])
+    na, nz = int(mt.get("na", 40)), int(mt.get("nz", 8))
+    gap = math.radians(float(mt.get("gap", 50)))
+    out = float(mt.get("out", 0.02))
+    a0, a1 = math.pi / 2 + gap / 2, math.pi / 2 + 2 * math.pi - gap / 2
+    prev = None
+    rings = []
+    for i in range(nz + 1):
+        z = z0 + (z1 - z0) * i / nz
+        ring = []
+        for j in range(na + 1):
+            a = a0 + (a1 - a0) * j / na
+            d = V((math.cos(a), math.sin(a), 0.0))
+            o = V((cx, cy, z)) + d * 1.0
+            hit = bvh.ray_cast(o, -d)
+            r = ((hit[0] - V((cx, cy, z))).length + out) if hit[0] is not None else (prev[j] if prev else 0.15)
+            if prev is not None:
+                r = max(r, prev[j])
+            ring.append(r)
+        # (a soft drape: the radii smoothed round the ring, so an arm under it is a gentle bulge, not a step)
+        k = int(mt.get("soften", 3))
+        if k > 0:
+            rr = np.array(ring)
+            pad = np.concatenate([rr[:1].repeat(k), rr, rr[-1:].repeat(k)])
+            ring = list(np.convolve(pad, np.ones(2 * k + 1) / (2 * k + 1), mode="valid"))
+            if prev is not None:
+                ring = [max(a, b) for a, b in zip(ring, prev)]
+        prev = ring
+        rings.append((z, ring))
+    for layer in (0, 1):
+        base = len(bld.v)
+        for i, (z, ring) in enumerate(rings):
+            for j, r in enumerate(ring):
+                a = a0 + (a1 - a0) * j / na
+                rr = r - thick * layer
+                bld.v.append(np.array([cx + math.cos(a) * rr, cy + math.sin(a) * rr, z]))
+                bld.uv.append((j / na, 1.0 - 0.3 * i / nz))
+                bld.part.append("mantle")
+                bld.s.append(0.0)
+        rl = na + 1
+        for i in range(nz):
+            for j in range(na):
+                q0 = base + i * rl + j
+                q = (q0, q0 + 1, q0 + rl + 1, q0 + rl)
+                bld.f.append(q if layer == 0 else q[::-1])
+
+
+def _copy_weights(ob, body, vids):
+    """Each of `vids` takes the skin weights of the nearest body vertex."""
+    from mathutils.kdtree import KDTree
+    me = body.data
+    kd = KDTree(len(me.vertices))
+    for v in me.vertices:
+        kd.insert(body.matrix_world @ v.co, v.index)
+    kd.balance()
+    names = {g.index: g.name for g in body.vertex_groups}
+    for vi in vids:
+        co = ob.matrix_world @ ob.data.vertices[vi].co
+        _p, bi, _d = kd.find(co)
+        for g in me.vertices[bi].groups:
+            if g.weight <= 1e-3:
+                continue
+            grp = ob.vertex_groups.get(names[g.group]) or ob.vertex_groups.new(name=names[g.group])
+            grp.add([int(vi)], g.weight, "REPLACE")
 
 
 # ------------------------------------------------------------------------------------------------ a flower crown
@@ -702,6 +796,16 @@ def flower_crown(arm, body, spec, tag="flowers"):
             a = math.radians(float(spec["a0"]) + (float(spec["a1"]) - float(spec["a0"])) * i / max(n - 1, 1))
             d = Vector((math.cos(a), -math.sin(tilt) * math.sin(a), math.cos(tilt) * math.sin(a)))
         hit = bvh.ray_cast(c + d * rad, -d)
+        mr = spec.get("max_r")
+        if mr is not None:
+            # (a ray at the side meets the ear first: step down toward the strap until the hit is on the skull,
+            # within `max_r` of the head's vertical axis)
+            dz = 0.0
+            while hit[0] is not None and math.hypot(hit[0].x - c.x, hit[0].y - c.y) > float(mr) and dz < 0.1:
+                dz += 0.02
+                hit = bvh.ray_cast(c + d * rad - Vector((0.0, 0.0, dz)), -d)
+            if hit[0] is not None and math.hypot(hit[0].x - c.x, hit[0].y - c.y) > float(mr):
+                hit = (None,)
         if hit[0] is None:
             continue
         nrm = hit[1].normalized()

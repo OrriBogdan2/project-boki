@@ -1810,10 +1810,14 @@ def ramp_paint(ob, img, rules):
     for r in rules:
         slots = r.get("slots")
         box = r.get("box")          # [x0, x1, y0, y1, z0, z1] on the face's centre, null for open
+        skip = r.get("skip_box") or []   # boxes the rule leaves alone (Pip's face: the bake's own paint is the sheet's)
 
-        def pick(poly, c, mat, slots=slots, box=box):
+        def pick(poly, c, mat, slots=slots, box=box, skip=skip):
             if slots is not None and not any(mat.startswith(x + "-") for x in slots):
                 return False
+            for sb in skip:
+                if sb[0] <= c.x <= sb[1] and sb[2] <= c.y <= sb[3] and sb[4] <= c.z <= sb[5]:
+                    return False
             if box:
                 b = [(-1e9 if x is None else x) if i % 2 == 0 else (1e9 if x is None else x) for i, x in enumerate(box)]
                 return b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]

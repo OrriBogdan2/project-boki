@@ -90,7 +90,7 @@
 				"light_neutral_warm": 0.6
 			},
 			"cloth": {
-				"far_lift": 0.45,
+				"far_lift": 0.7,
 				"fres": 0.5
 			},
 			"leather": {
@@ -102,12 +102,12 @@
 				"far_lift": 0.3
 			},
 			"glow": {
-				"glow": 2.4
+				"glow": 3.0
 			},
 			"card": {
 				"sheen": 0.8,
 				"glow": 1.6,
-				"irid": 0.15,
+				"irid": 0.4,
 				"sheen_color": [
 					1.0,
 					0.75,
@@ -129,8 +129,8 @@
 					0.72,
 					0.35
 				],
-				"energy": 1.6,
-				"range": 0.9
+				"energy": 2.2,
+				"range": 1.1
 			}
 		],
 		"halos": [
@@ -141,9 +141,9 @@
 					0.78,
 					0.42
 				],
-				"strength": 2.0,
-				"px": 4.0,
-				"near_d": 7.0,
+				"strength": 2.6,
+				"px": 6.0,
+				"near_d": 4.0,
 				"far_d": 14.0
 			}
 		],

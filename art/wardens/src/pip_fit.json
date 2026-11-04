@@ -294,21 +294,21 @@
   "up": {
    "base": "ffb0d8",
    "tints": [
-    "ffc0e0",
-    "ffb8dc",
-    "f8c0f0"
+    "ffd0f0",
+    "e8d8ff",
+    "d8fff4"
    ],
-   "tint_k": 0.3,
-   "alpha": 0.55,
+   "tint_k": 0.45,
+   "alpha": 0.32,
    "rim": "ffe8f6",
-   "rim_alpha": 0.9,
-   "edge": 0.9,
-   "edge_col": "ff8cc4",
+   "rim_alpha": 0.7,
+   "edge": 0.92,
+   "edge_col": "ff7cc0",
    "edge_alpha": 0.9,
-   "vein": "ffffff",
-   "vein_w": 0.004,
-   "vein_alpha": 0.9,
-   "veins": 0,
+   "vein": "ffb0d8",
+   "vein_w": 0.006,
+   "vein_alpha": 0.4,
+   "veins": 3,
    "cells": [],
    "power": 0.5,
    "skew": 0.55,
@@ -317,21 +317,21 @@
   "lo": {
    "base": "ffb0d8",
    "tints": [
-    "ffc0e0",
-    "ffb8dc",
-    "f8c0f0"
+    "ffd0f0",
+    "e8d8ff",
+    "d8fff4"
    ],
-   "tint_k": 0.3,
-   "alpha": 0.55,
+   "tint_k": 0.45,
+   "alpha": 0.32,
    "rim": "ffe8f6",
-   "rim_alpha": 0.9,
-   "edge": 0.9,
-   "edge_col": "ff8cc4",
+   "rim_alpha": 0.7,
+   "edge": 0.92,
+   "edge_col": "ff7cc0",
    "edge_alpha": 0.9,
-   "vein": "ffffff",
-   "vein_w": 0.004,
-   "vein_alpha": 0.9,
-   "veins": 0,
+   "vein": "ffb0d8",
+   "vein_w": 0.006,
+   "vein_alpha": 0.4,
+   "veins": 3,
    "cells": [],
    "power": 0.55,
    "skew": 0.6,
@@ -350,13 +350,16 @@
  },
  "lantern_look": {
   "colours": {
-   "copper": "8e4e26",
+   "copper": "b0662e",
    "glass": "e8781e"
   },
   "arch": true,
-  "frame": "3a1c0c",
+  "frame": "5a2a10",
   "core": "ffc864",
-  "core_r": 0.38
+  "core_r": 0.45,
+  "round": 8,
+  "smooth": true,
+  "tex": 512
  },
  "weight_rules": [],
  "smooth": {
@@ -385,6 +388,16 @@
     "c4848e",
     "d4949c",
     "e0a8ae"
+   ],
+   "skip_box": [
+    [
+     -0.35,
+     0.35,
+     -1.0,
+     -0.02,
+     0.38,
+     1.2
+    ]
    ]
   },
   {
@@ -405,6 +418,16 @@
     "e0bca6",
     "eecbb4",
     "f4d8c4"
+   ],
+   "skip_box": [
+    [
+     -0.35,
+     0.35,
+     -1.0,
+     -0.02,
+     0.38,
+     1.2
+    ]
    ]
   },
   {
@@ -528,31 +551,45 @@
   "centre": [
    0.0,
    -0.02,
-   1.575
+   1.515
   ],
   "r": 0.365,
   "tilt": -12,
   "n": 34,
   "size": 0.036,
   "out": 0.016,
-  "bone": "head"
+  "bone": "head",
+  "max_r": 0.26
  },
  "cape": {
-  "z0": 1.17,
-  "z1": 0.78,
-  "w0": 0.24,
-  "w1": 0.36,
+  "z0": 1.12,
+  "z1": 0.72,
+  "w0": 0.3,
+  "w1": 0.38,
   "out": 0.02,
-  "wrap": 0.14,
+  "wrap": 0.2,
   "folds": 3,
   "fold": 0.014,
   "colours": [
-   "24484f",
    "2f5d64",
    "3d7178",
-   "4c858a"
+   "4f8890",
+   "62a0a6"
   ],
   "bone": "hips",
-  "y_lo": -0.42
+  "y_lo": -0.42,
+  "mantle": {
+   "z0": 1.15,
+   "z1": 1.0,
+   "centre": [
+    0.0,
+    -0.05
+   ],
+   "gap": 46,
+   "out": 0.022,
+   "na": 40,
+   "nz": 8,
+   "soften": 4
+  }
  }
 }
