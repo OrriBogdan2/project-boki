@@ -1328,3 +1328,9 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
     - a blotchy chest strap cage and faint seams on her cheeks.
   - A one-number fix is ready if you pick r3b: her gun angle, carry pitch -1.3 -> -1.05.
 - **Next:** pick r3 or r3b, then say "go" for the other Wardens with the r3 recipe (about 70-110 credits each).
+
+## 2026-11-04 08:43 UTC (S2): ext/rename-breaker 07ef436b now also has the new titles
+- Hem: Dark Archer -> **Red Stitch**. Dredge: Broken Abomination -> **Brass Abomination**. Tarek: Rock Elementalist -> **Cliff Runner**.
+- The wiki pages are renamed to match (Class-Red-Stitch.md and the others), and gen_wiki reports no changes.
+- **Checks (S2):** hero-title 0, portrait 107/0, archetype 307/0, class-unlock 149/0, hero 0, dredge-combo 86/0, dolm-combo 130/0, archer-combo 126/0, health OK, style OK.
+- One merge still gets every rename and title: Pip, Ryzz, Breaker, Hem and the three titles.
