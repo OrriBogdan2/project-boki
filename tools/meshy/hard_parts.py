@@ -451,6 +451,8 @@ def shield_card(spec):
             keep |= new
         return img
     fc, bc = bleed(fc, fb), bleed(bc, bb)
+    gain = float(spec.get("gain", 1.0))      # (the sheet's wood a step lighter: it reads at the match camera)
+    fc, bc = np.clip(fc * gain, 0, 1), np.clip(bc * gain, 0, 1)
     fw, bw = fc.shape[1], bc.shape[1]
     tex = np.zeros((max(fc.shape[0], bc.shape[0]), fw + bw, 3), np.float32)
     tex[:fc.shape[0], :fw] = fc
@@ -957,6 +959,63 @@ def repaint(body, rules):
     img.pixels = px.ravel()
 
 
+def stuck(specs, body, arm):
+    """Small pieces stuck on the body's surface (Breaker's icicles and kelp, after breaker_front): each is placed
+    where a ray from `from` along `ray` first meets the body (fitted frame), then grown along `dir`: an icicle a
+    clear-ice cone (the `ice` slot), a kelp blade a thin two-sided ribbon that waves and narrows (cloth, olive);
+    each rides `bone` rigidly. specs: [{kind, bone, from, ray, dir, len, r}]."""
+    from mathutils.bvhtree import BVHTree
+    bvh = WP.body_bvh([body])
+    at = Atlas(2, 64)
+    cells = {"ice": at.cell("ice", ice_paint),
+             "kelp": at.cell("kelp", lambda u, v: hexcol("3f5a2a")[None, None] * (0.75 + 0.45 * v[..., None]))}
+    out = []
+    for kind in ("icicle", "kelp"):
+        group = [sp for sp in specs if sp["kind"] == kind]
+        if not group:
+            continue
+        bld = WP.Builder()
+        bones = []
+        for sp in group:
+            hit = bvh.ray_cast(Vector(sp["from"]), Vector(sp["ray"]).normalized(), 3.0)
+            if hit[0] is None:
+                log("stuck %s: no surface from %s" % (kind, sp["from"]))
+                continue
+            base = np.array(hit[0][:]) + np.array(hit[1][:]) * 0.004
+            d = np.array(sp["dir"], np.float64)
+            d /= np.linalg.norm(d)
+            ln, r = float(sp["len"]), float(sp.get("r", 0.012))
+            v0 = len(bld.v)
+            if kind == "icicle":
+                spike(bld, base - d * r * 0.5, base + d * ln, r, 5, cells["ice"], "ice")
+            else:
+                side = np.cross(d, [0.0, 1.0, 0.0])
+                side = side / max(np.linalg.norm(side), 1e-6) if np.linalg.norm(side) > 1e-6 else np.array([1.0, 0, 0])
+                rings, radii = [], []
+                for i in range(7):
+                    t = i / 6.0
+                    wav = side * math.sin(t * math.pi * 2.0 + len(bones)) * ln * 0.08
+                    rings.append(base + d * ln * t + wav)
+                    radii.append(max(1e-4, r * (1.0 - 0.85 * t)))
+                bld.tube(rings, radii, 4, *cells["kelp"][0::2], *cells["kelp"][1::2], "kelp", [0.0] * 7,
+                         cap_end=True)
+            bones.append((sp["bone"], v0, len(bld.v)))
+        if not bones:
+            continue
+        ob = finish(bld, "Icicles" if kind == "icicle" else "Kelp")
+        img = at.image("stuck_atlas")
+        material(ob, "ice" if kind == "icicle" else "cloth", "stuck", img)
+        for bone, a, b in bones:
+            g = ob.vertex_groups.get(bone) or ob.vertex_groups.new(name=bone)
+            g.add(list(range(a, b)), 1.0, "REPLACE")
+        ob.parent = arm
+        mod = ob.modifiers.new("Armature", "ARMATURE")
+        mod.object = arm
+        log("stuck %s: %d pieces, %d tris" % (kind, len(bones), sum(len(q.vertices) - 2 for q in ob.data.polygons)))
+        out.append(ob)
+    return out
+
+
 # ------------------------------------------------------------------------------------------------ entry
 def build(spec, body, arm, rig):
     """fit_warden.py's hook (spec["parts"]): returns {"weapon": ob or None, "extra": [held or skinned pieces]}."""
@@ -978,4 +1037,6 @@ def build(spec, body, arm, rig):
         out["extra"].extend(wings(ps["wings"], body, arm, rig))
     if "tail" in ps:
         out["extra"].append(tail(ps["tail"], body, arm))
+    if "stuck" in ps:
+        out["extra"].extend(stuck(ps["stuck"], body, arm))
     return out
