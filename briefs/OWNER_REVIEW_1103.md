@@ -748,3 +748,10 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
   6. **Quality presets:** a Low/Medium/High preset that actually changes render scale, shadows, particles and LOD distance; default to Medium.
 - **Target:** a steady 60 fps on a mid-range PC at 1080p Medium in the benchmark, and no frame over 33 ms in normal play. Report before/after numbers per change.
 - Logged for whoever has budget; it touches shared files (models, main, match), so it's one careful branch.
+
+## 95. Nameplates show just the player's name; a setting swaps them to the Hunter's name (owner, 23:17 UTC Nov 4; changes item 39's "<player> the <title>")
+- Owner: "the names of people should just be their name (not X the Y), which is how it'd work with real people; you can tell who they're playing by the look. We can also have a setting for nameplates where it would say Vex or something instead."
+- **In matches** (overhead nameplates, kill feed, scoreboard, end screen, party HUD): show only the player's own name (bots: their bot name). No "the <title>".
+- **Setting** (Settings > Interface > "Nameplates show"): **Player names** (default) / **Hunter names**. Hunter names shows the Hunter on everyone's plate instead ("Vex", "Kael"), for people who'd rather see what each enemy is playing. Applies to nameplates and the kill feed; the scoreboard can show both columns.
+- The title ("the Hired Gun") still appears on the Masks screen, hero picker, kit card and Mask moment, where it describes the Hunter.
+- Small; whoever has budget. Update --hero-title-check (it asserts the "<player> the <title>" label today).
