@@ -380,7 +380,7 @@ func _tick_hook() -> void:
 func _grab(f: Ent, ally := false) -> void:
 	flying = false
 	hook_sd = {}
-	if KinMerge.transforming(h) or KinMerge.active(h):
+	if KinMerge.transforming(h):
 		hook_hold = null
 		return
 	var rdf := rmb_def()

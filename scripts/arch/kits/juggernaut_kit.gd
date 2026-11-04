@@ -445,7 +445,7 @@ func _wave() -> void:
 			{"delivery": {"type": "projectile", "speed": float(ld["wave_speed"]), "range": rng, "size": wave_size},
 					"effects": effs, "modifiers": [{"type": "pierce", "count": 6}]},
 			"", GrammarReport.new())
-	var c := KinExec.make_cx(m, h, h.kin, h, aim(), _wk(), "primary", "searing_wave")
+	var c := KinExec.make_cx(m, h, null, h, aim(), _wk(), "primary", "searing_wave")
 	c["silent"] = true
 	_shots0 = m.shots.size()
 	KinExec.run_stage(stg, c)
