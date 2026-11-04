@@ -663,10 +663,10 @@
     0.0
    ],
    "clear": 0.03,
-   "width": 0.085,
+   "width": 0.09,
    "strand_r": 0.026,
-   "period": 0.34,
-   "depth": 0.3,
+   "period": 0.4,
+   "depth": 0.18,
    "samples": 70,
    "sides": 6,
    "bones": 4,
@@ -723,10 +723,10 @@
     0.0
    ],
    "clear": 0.03,
-   "width": 0.085,
+   "width": 0.09,
    "strand_r": 0.026,
-   "period": 0.34,
-   "depth": 0.3,
+   "period": 0.4,
+   "depth": 0.18,
    "samples": 70,
    "sides": 6,
    "bones": 4,
@@ -750,14 +750,14 @@
  ],
  "braid_colours": {
   "strand": [
-   "2a3052",
-   "151a30",
-   "4c5682"
+   "343c66",
+   "1e2440",
+   "5c6896"
   ],
   "tuft": [
-   "2a3052",
-   "151a30",
-   "4c5682"
+   "343c66",
+   "1e2440",
+   "5c6896"
   ],
   "copper": [
    "c8dcf5",
