@@ -1965,3 +1965,8 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - a wider grin;
   - a looped tail.
 - **Shots:** warden-3d/cinder/b4_*.
+
+## 2026-11-04 17:10 UTC: READY: ext/build-ui-polish @ f6828086 (small: fixes the build UI overlap)
+- Removes the button strip above the catalog (it duplicated the cursor card and drew under it). The cursor card is now the one place for action keys; it and the piece menu flip near screen edges and never overlap the catalog bar, the top HUD band or the Goals card (new clamp case in --build-ui-check). "Hold Shift to place more" moves to the bar's hint line; Move/Store becomes one "Store" toggle left of Undo/Done (search box 130 -> 72 px). Same in house decorate mode.
+- 8 files, +142/-86, no new files. Based on main d365cea8 (merges clean onto newer main expected; build UI files only). --build-ui-check, --farmbuild, --farm-tutorial-check, --home-build-check exit 0; health --strict OK; gen_wiki --check OK (also regenerates the stale docs/wiki/Rules.md line that made gen_wiki --check red on plain main).
+- Shots (ext reviewed): /home/claude/shots/build-ui-polish/ on ext's machine, incl. edge cases.
