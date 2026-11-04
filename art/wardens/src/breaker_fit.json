@@ -1,0 +1,275 @@
+{
+ "body_glb": "~/meshy/breaker/s3/bake/low.glb",
+ "rig": "art/wardens/src/breaker_rig.json",
+ "out": "art/wardens/breaker/breaker.glb",
+ "blend": "~/meshy/breaker/fit.blend",
+ "turn": 180,
+ "max_tris": 36000,
+ "floater_verts": 8,
+ "snap_r": 0.045,
+ "scale_joints": [
+  "hip.L",
+  "shoulder.L"
+ ],
+ "snap_y": false,
+ "joints": {
+  "crown": [
+   0.0,
+   -0.2,
+   0.95
+  ],
+  "neck": [
+   0.0,
+   -0.16,
+   0.66
+  ],
+  "shoulder.L": [
+   0.44,
+   -0.02,
+   0.5
+  ],
+  "elbow.L": [
+   0.58,
+   0.0,
+   0.16
+  ],
+  "hand.L": [
+   0.57,
+   -0.04,
+   -0.18
+  ],
+  "fingers.L": [
+   0.55,
+   -0.06,
+   -0.4
+  ],
+  "hip.L": [
+   0.2,
+   -0.04,
+   0.0
+  ],
+  "knee.L": [
+   0.28,
+   -0.02,
+   -0.44
+  ],
+  "ankle.L": [
+   0.27,
+   0.0,
+   -0.78
+  ],
+  "shoulder.R": [
+   -0.44,
+   -0.02,
+   0.5
+  ],
+  "elbow.R": [
+   -0.58,
+   0.0,
+   0.16
+  ],
+  "hand.R": [
+   -0.57,
+   -0.04,
+   -0.18
+  ],
+  "fingers.R": [
+   -0.55,
+   -0.06,
+   -0.4
+  ],
+  "hip.R": [
+   -0.2,
+   -0.04,
+   0.0
+  ],
+  "knee.R": [
+   -0.28,
+   -0.02,
+   -0.44
+  ],
+  "ankle.R": [
+   -0.27,
+   0.0,
+   -0.78
+  ]
+ },
+ "chunk": {
+  "head": 1.04,
+  "hand": 1.0,
+  "girth": 1.0
+ },
+ "lift": [
+  0.92,
+  1.04,
+  1.04
+ ],
+ "glow_min": [
+  2.0,
+  2.0,
+  -1.0
+ ],
+ "normal_smooth": 8,
+ "pad": 6,
+ "cap_holes": true,
+ "cap_flat": true,
+ "ink_room": 0.02,
+ "fit_weights": true,
+ "slot_vote": 4,
+ "slot_rules": [
+  {
+   "slot": "hair",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    0.33,
+    null
+   ],
+   "hsv": [
+    0.95,
+    0.07,
+    0.33,
+    1.0,
+    0.2,
+    1.0
+   ]
+  },
+  {
+   "slot": "skin",
+   "hsv": [
+    0.53,
+    0.72,
+    0.18,
+    1.0,
+    0.15,
+    1.0
+   ]
+  },
+  {
+   "slot": "leather",
+   "hsv": [
+    0.03,
+    0.15,
+    0.2,
+    0.7,
+    0.15,
+    1.0
+   ]
+  },
+  {
+   "slot": "cloth"
+  }
+ ],
+ "parts": {
+  "hammer": {
+   "head_z": -0.62,
+   "block": [
+    0.155,
+    0.105,
+    0.11
+   ]
+  },
+  "shield_card": {
+   "art": "~/meshy/breaker/refs/breaker_shield_sheet.png",
+   "front": [
+    200,
+    260,
+    950,
+    1735
+   ],
+   "back": [
+    1300,
+    260,
+    1950,
+    1735
+   ],
+   "height": 0.64,
+   "centre_y": -0.27,
+   "bend": 0.05,
+   "thick": 0.04,
+   "at": [
+    -0.05,
+    0.0,
+    -0.07
+   ],
+   "eps": 3.0,
+   "strips": 28,
+   "drop_boxes": [
+    [
+     0,
+     1560,
+     470,
+     2000
+    ],
+    [
+     0,
+     1480,
+     400,
+     1560
+    ]
+   ],
+   "rows": 44,
+   "relief": 0.022,
+   "relief_box": [
+    400,
+    380,
+    780,
+    1240
+   ]
+  }
+ },
+ "smooth": {
+  "iterations": 2,
+  "sigma_s": 2.5,
+  "sigma_r": 0.06
+ },
+ "ramps": [
+  {
+   "name": "beard",
+   "slots": [
+    "hair"
+   ],
+   "hsv": [
+    0.92,
+    0.1,
+    0.25,
+    1.0,
+    0.0,
+    1.0
+   ],
+   "ramp": [
+    "4a1a10",
+    "7a3018",
+    "a84a2a",
+    "c86a40",
+    "e0905e"
+   ],
+   "k": 0.6
+  },
+  {
+   "name": "skin",
+   "slots": [
+    "skin"
+   ],
+   "hsv": [
+    0.5,
+    0.75,
+    0.1,
+    1.0,
+    0.0,
+    1.0
+   ],
+   "ramp": [
+    "394762",
+    "4f6280",
+    "6a83a2",
+    "809bb6",
+    "a6bdd0"
+   ],
+   "k": 0.7
+  }
+ ],
+ "despeckle": 1
+}

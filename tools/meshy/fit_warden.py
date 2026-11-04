@@ -2843,6 +2843,12 @@ def main():
         # Hem's quiver needles, cut from the scan (`cut_boxes`) and built clean (tools/meshy/hem_parts.py)
         import hem_parts
         parts.append(hem_parts.needles(arm, spec["needles"], m, float(spec.get("chunk", {}).get("girth", 1.0))))
+    built = {"weapon": None, "extra": []}
+    if spec.get("parts"):
+        # scripted pieces (tools/meshy/hard_parts.py): a held weapon or shield, wing cards, a tail, the feet check
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import hard_parts as HP
+        built = HP.build(spec, ob, arm, rig)
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
@@ -2862,8 +2868,10 @@ def main():
         spin.parent = gun
         spin["built"] = 1
         K.anchor(arm, "hand.R", "anchor_nock", K.bone_head(rig, "hand.R"))
-    elif spec.get("weapon_glb"):
+    elif spec.get("weapon_glb") and built["weapon"] is None:
         gun = weapon(spec, rig)
+    held = [x for x in [built["weapon"]] + built["extra"] if x is not None and x.parent is None]
+    parts += [x for x in built["extra"] if x.parent is not None]
     crown = rig["land"]["crown"]
     K.anchor(arm, "head", "anchor_head_top", (0, 0, crown + 0.07))
     K.anchor(arm, "hips", "anchor_chest", (0, 0.1, K.bone_head(rig, "upper_arm.L").z - 0.14))
@@ -2882,7 +2890,9 @@ def main():
         soft_normals(o, spec.get("normal_smooth", 8))
         if "ink_room" in spec:
             ink_room(o, float(spec["ink_room"]))
-    for o in parts + props:
+    for sp in (spec.get("parts") or {}).get("split", []):
+        parts.append(HP.split(ob, arm, sp))         # (Claire's horns: their own mesh, on the head bone)
+    for o in parts + props + held:
         if o.name in spec.get("smooth_parts", []):
             # (a piece cut from the scan, Hem's mask: its decimated facets shaded smooth)
             if o.data.has_custom_normals:
@@ -2924,7 +2934,9 @@ def main():
                 bpy.context.scene.render.image_settings.quality = 92
                 im.save()
                 im.source = "FILE"
-    K.export(out, [arm, ob] + parts + extras + props + [x for x in (gun, spin) if x] + [o for o in bpy.data.objects if o.name.startswith("anchor_")], fmt,
+    if held:
+        log("tris: held %s" % {o.name: K.tris([o]) for o in held})
+    K.export(out, [arm, ob] + parts + extras + props + held + [x for x in (gun, spin) if x] + [o for o in bpy.data.objects if o.name.startswith("anchor_")], fmt,
              colors="ink_room" in spec)
     log("wrote", out)
     if spec.get("blend"):

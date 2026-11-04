@@ -229,6 +229,20 @@ shipped Vex as the design variant `vex_r3b` (RIG_CONTRACT "Design variants"). Fi
      the spike Meshy gave it are cut out first.
 6. **Godot:** the extracted atlases imported lossless (compress/mode 0); generate_lods off.
 
+## Stage 1 hybrids (S2 fan-out, 2026-11-04)
+Stage 1 (WARDEN_STAGE1_BRIEF) is generation, bake, rig fit and first shots only: the fit spec keeps `lift` and the
+slot rules but no `palette_from`, `smooth`, `ramps`, `project` or `touch_up` (the paint-over is stage 2, the Vex
+r3c recipe). Pieces Meshy can't give cleanly are scripted (tools/meshy/hard_parts.py, fit spec `parts`):
+- **Held pieces**, modelled in their rig node's space and exported unskinned: `weapon` (the Gun node's; a hammer
+  in its `Hammer` pivot's, where WardenGlb seats it) and `shield` (the left hand's `Shield` node's). Their own
+  small atlas of painted cells (ice, iron, oak, leather) on the toon slots.
+- **Cards and tubes on spring chains:** wings cut out of the art's back view (outline and paint from the
+  sheet's pixels, two layers), a spaded tail draped clear of the legs. Chains named `spring_wing*` fold back about
+  their root while the Warden skates (root meta `wing_fold`, set by HunterAnim from the skate dash).
+- **Split:** faces of some slots made their own mesh on one bone (Claire's horns).
+- **feet_forward:** the fit fails if a foot points away from the body's forward (the backwards-skate catch).
+- The `ice` toon slot: a cold fresnel rim and a little gloss, no real transparency (WardenGlb.ICE).
+
 ## Commercial terms (checked 2026-11-04, meshy.ai/terms-of-use section 3.2)
 - **Paid plans:** the customer owns the output ("to the extent possible under applicable law") and can keep it private.
 - **Free plans:** CC BY 4.0 with attribution to Meshy. **Use the owner's paid key only.**
@@ -342,3 +356,21 @@ The r3c recipe on the stage-1 body: art ramps, sable_face.png projected over the
 mouth, feathered: `project_late` `feather` / `feather_turn`), the mask on metal, a glowing pendant (warden_props
 `gem`), bigger crossbows with a stirrup, the fur collar pulled in (fit `shrink`), warden_look.json `sable`, the
 thief stance squared up. IMPORT.md "Stage 2".
+### Breaker r3 (sea-ogre) stage 1, 2026-11-04 (balance 4993 at the start of the fan-out; 4327 after this agent's Breaker and Claire runs; other agents spent in between)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Breaker edit front | 09:07 | 01a1a5d0-7eb7-7056-bb33-15be925aea42 | nano-banana-pro (image-to-image) | 9:16 crop; hammer and prow out, both arms hanging, two hands | 9 | Kept |
+| Breaker edit 3/4 | 09:07 | 01a1a5d0-7eb7-736a-bb44-f7fc12c7da47 | nano-banana-pro | same | 9 | Kept |
+| Breaker edit side | 09:07 | 01a1a5d0-7eaf-76de-bbbe-36f00aa1832a | nano-banana-pro | hammer and prow out (the back view's prow sliver painted out first) | 9 | Kept |
+| Breaker edit back | 09:07 | 01a1a5d0-7ea7-727a-8ae1-5c47f6b50410 | nano-banana-pro | hammer and prow out, left arm hanging | 9 | Kept |
+| Breaker A | 09:10 | 01a1a5d2-d333-731c-8775-3013c92661bd | meshy-7.1 | 4 edited views (front, 3/4, side, back) as images and texture refs; geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Dropped: no right hand (the forearm ends in a stump under the fur cuff) |
+| Breaker B | 09:19 | 01a1a5db-8178-73a6-b736-4e12d593b59b | meshy-7.1 | as A, enhancement on | 40 | **Kept**: both fists and bracers, two arms (no third hand), the face, beard braids, compass, mantle, teddy |
+
+Breaker total: 6 tasks, 116 credits (the body's two attempts used).
+
+### Breaker round 3, 2026-11-04 (owner sheets fb503983)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Breaker r3 edits | 13:20-13:30 | edit_front (9:16, dropped: clipped arms), edit_front2, edit_side, edit_back, edit_tq (dropped: a copy of the front) | nano-banana-pro | breaker_front: hammer and shield out, arms down; the r3 side/back redrawn in the new outfit | 45 | front2, side (teddy painted out), back kept |
+| Breaker C | 13:31 | 01a1a688-d08d-74e2-9e69-9015055e4130 | meshy-7.1 | front, side, back edited; texture refs the same; 2k, meshy-7 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the art's bare belly, sash, skirt, bare feet, braids, closed fists |
+| Breaker D | 13:31 | 01a1a688-d0b4-738f-bed8-df735492629b | meshy-7.1 | as C, enhancement on | 40 | Dropped: open splayed hands |
