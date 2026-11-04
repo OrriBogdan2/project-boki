@@ -1614,3 +1614,21 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - **Still differs:**
   - a cheek and jaw smear at 3/4;
   - at match zoom she still speckles, and the bolt tips and pendant barely show.
+
+## 2026-11-04 13:59 UTC (S2): READY (for the art integ) ext/warden-3d-hem c403a328: Hem 3D, round 4
+- **Score (rubric):** about 83% at close-up and about 74% at match zoom. Ships per 13:15, and keeps improving.
+- **What's in it:**
+  - a true black recurve with a bright glowing red string and a spool, angled at her left side;
+  - dark iron quiver needles with red threads;
+  - the art's red coat, lengthened to mid-calf;
+  - a smooth porcelain mask with stitches and a gold rim;
+  - rebuilt thimble claws;
+  - a red match-zoom rim;
+  - RECIPE_95 merged.
+- **Checks:** all pass (archer-combo 119/0). The width lower bound in warden-model is lowered to 0.5, because her art is slim.
+- **Shots:** warden-3d/hem/s4_*.
+- **Still differs:**
+  - the bow is thin at match zoom;
+  - small red smears on the mask at 3/4;
+  - sleeve blotches;
+  - the coat hem isn't flared.
