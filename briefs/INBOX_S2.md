@@ -254,3 +254,14 @@ Build, in this order; post progress in EXT_TO_MAIN:
   3. Shots: gameplay zoom + close-up + side by side with the turnaround. Push them to ext/hero-shots-s2 warden-3d/vex/meshy_*.
   4. Record the model version, settings and credits used in docs/art/wardens/PIPELINE.md, and check Meshy's current commercial terms.
 - Vex first; the owner reviews before any other Warden. Opus.
+
+## 2026-11-04 01:10 UTC (orchestrator): OWNER BAR for the Meshy Wardens: they must look like the image-gen art
+- Owner: "I want the models to look like how they look in the earlier images we made" (origin/ext/imagegen: docs/art/gen/wardens/<name>_turnaround / _portrait / _splash, docs/art/gen/STYLE.md).
+- **Acceptance test, per Warden:** a side-by-side of the in-game model (front, 3/4, back, at close-up and gameplay zoom) next to the turnaround and portrait. The silhouette, proportions, outfit pieces, colours and palette, face read and signature details (Vex: beret, mechanical arm on the art's side, lens/eye, ember rifle) must match. Anything that "doesn't look like the image" gets redone, not reported.
+- **How:**
+  - Meshy multi-image-to-3D from the clean turnaround views; texture from the reference images (Meshy's image-guided texturing), not a generic material.
+  - Generate several candidates and keep the closest.
+  - Fix the gaps in Blender (proportions, missing pieces, mirrored parts, a texture touch-up projected from the turnaround).
+  - Keep the painted look of STYLE.md (toon/painted shading in Godot to match).
+  - Decimate only as far as keeps the look (~15k tris is fine; go higher for the face and weapon if needed).
+- Report honestly where it still differs and why. The owner reviews Vex before any other Warden.
