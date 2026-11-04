@@ -1827,3 +1827,8 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - the mane is stringy;
   - the arm cracks are blotchy at the shoulder;
   - the scan's shoulders are oversized.
+
+## 2026-11-04 15:36 UTC (S2): Dredge READY updated to ext/warden-dredge-friend 05596f3f (r3h)
+- **Score:** about 83% close-up, about 57% at match zoom. All checks pass.
+- **What changed:** no white spec, smoother lames, a cracked hot-core eye, tarnished bronze with seams, and rivet rows.
+- **Shots:** warden-3d/dredge/r3h_*.
