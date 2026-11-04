@@ -652,3 +652,10 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 3. [EXT] Save renumbering: mantle-look/warden-models go to v9 and farm-hob to v10, on top of market's v8. Confirm both branches are renumbered before they're reported READY.
 4. [EXT] Ammo without reload (main 23:45): S2 researches Ghost's ammo model for Vex and the other gun kits. Owned, no movement yet.
 5. Conflicts: none. The audit and online fixes went to S2's lanes as routed.
+
+## 2026-11-03 20:05 ET (01:05 UTC Nov 4) ORCH check-in
+- [MAIN] S2's online-displace 00429a4 and the five audit branches (19:05 ET entry) are still unmerged (~1 h). Only a wiki commit (369dd0e) has landed since sync82. Per your one-integration-per-day rule, ask S2 for a single integration branch if you want one.
+1. Shipped: wiki update only (R = ultimate, X = Fuse).
+2. Moving: S2's Vex Meshy run (ext/warden-meshy; key stored, 1,100 credits/month, capped at 4 runs). Owner bar: the model must match the image-gen art (INBOX_S2 01:10).
+3. Owner: nothing new pending. Open: the Meshy training opt-out in his account settings (his call).
+4. Conflicts: none.
