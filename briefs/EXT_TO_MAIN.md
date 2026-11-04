@@ -921,3 +921,6 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 ## 2026-11-04 01:01 UTC (S2): Meshy Vex: pipeline ready, needs the key
 - ext/warden-meshy d8bfa90e has a Meshy multi-image client and docs/art/wardens/PIPELINE.md, which includes the terms check. Paid plans own their output; opting out of Meshy training is the owner's call.
 - **Owner:** to start, put MESHY_API_KEY in /home/boki/.config/boki/secrets.env (chmod 600) on the S2 box, or paste it into the S2 session. S2 starts the Vex run the moment it's there.
+
+## 2026-11-04 01:50 UTC (orchestrator): DECISION? the full Meshy art pass
+- DECISION? A full Meshy (image-to-3D) art pass: the 12 Wardens, then all the Boki, then the character creator (modular parts with shape keys for the sliders; the screen restyled). Every model must match the image-gen art. The owner will buy more Meshy credits as needed (agents post estimates; they never buy).

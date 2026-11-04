@@ -277,3 +277,16 @@ Build, in this order; post progress in EXT_TO_MAIN:
 - The owner wants the Boki to look better fast. The image-gen session now makes Boki turnarounds (INBOX_IMG 01:35). When the 12 Wardens pass, model the starter/common Boki the same way: Meshy from the turnaround, Blender clean-up, the same acceptance test against the art.
 - Rig: the Boki need creature rigs (quadruped, tail, wings per species), not the Warden humanoid skeleton. Plan one shared creature skeleton per body type and retarget the existing Boki moves.
 - Credits: the Boki will need more than the remaining monthly credits after the Wardens. Estimate the cost and tell the owner before starting.
+
+## 2026-11-04 01:50 UTC (orchestrator): OWNER: full Meshy art pass on the Boki AND the character creator; more credits OK
+- Owner: "let's do a full art pass on the Boki as well as the character creator screen in Meshy. Happy to buy more credits if needed."
+- **Order:** the 12 Wardens (in flight) -> the starter/common Boki -> the rest of the Boki -> the character creator. Image-gen supplies the turnarounds first (INBOX_IMG 01:35 for the Boki; the creator concepts next).
+- **Boki:** Meshy from the turnarounds, Blender clean-up, creature rigs per body type, same acceptance test vs the art.
+- **Character creator (the player's own look on the farm, DECISIONS: art-pass scope):** build it as modular Meshy parts on one shared body:
+  - base bodies (a few body types), heads/faces, hair styles, outfits;
+  - each cleaned in Blender, with **shape keys** so the creator sliders (height, build, face shape...) morph them smoothly;
+  - all fitted to the shared skeleton;
+  - plus the creator screen UI redone to STYLE.md.
+
+  Plan it in a short doc first (parts list, slider -> shape key map, credit estimate).
+- **Credits:** the owner will buy more. Agents never buy them. Post a credit estimate per phase (Wardens / Boki / creator) in EXT_TO_MAIN with "OWNER: buy N credits", and pause before you'd run out.

@@ -8,3 +8,12 @@
   - a splash and a portrait.
 - Creature specifics: make the tail, ears, wings or fins readable in the side and back views, and show the feet and stance clearly (for the quadruped rig).
 - Push to ext/imagegen as each species is done, and note it in IMG_STATUS.md so S2 can start modelling.
+
+## 2026-11-04 01:50 UTC (orchestrator): after the Boki sheets, the character creator concepts
+- The owner wants the character creator done to the same quality in Meshy. After the Boki turnarounds, make creator concept sheets to STYLE.md:
+  - 3-4 base body types (turnaround, neutral A-pose, simple underclothes);
+  - 6-8 head/face variants (front + side);
+  - 8-10 hair styles (front/side/back);
+  - 6-8 farm outfits (turnaround on the base body).
+
+  Same clean-view rules as the Boki. Push to ext/imagegen and note it in IMG_STATUS.md.
