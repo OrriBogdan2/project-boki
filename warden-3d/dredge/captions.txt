@@ -46,3 +46,7 @@ r3e_dredge_vs_r3d.png: portrait | r3d front | r3e front | r3d helm and eye | r3e
 r3f (credit-free, ORCH's r3d review + the shared match-zoom fix f4b59cb3): one riveted brass helm round a whole lens over a red-glowing recess, the small grilled port above-left; the friend's black asterisk eye stripped; hairline cracks painted on the glass; no drips over the eye; thinner tar with a crimson sheen and no outline; the tears glow rib-core red; warmer tarnished brass, rust streaks, rough spec, a warm brass rim at match zoom; the stance lifted (spine 0.22, head 0.12) so the eye faces the camera.
 r3f_dredge_turnaround.png | r3f_dredge_front_34.png | r3f_dredge_back.png | r3f_dredge_closeup.png | r3f_dredge_match.png | r3f_dredge_moves.png: as for r3.
 r3f_dredge_vs_r3e.png: portrait | r3e front | r3f front | r3e helm | r3f helm | r3e match zoom | r3f match zoom.
+
+r3g (credit-free, ORCH's r3f review): darker, desaturated tarnished bronze with rivet rows; a smaller glassy orb in a dark cracked lens; drips off the helm rim; smoother hull; the grilled port brass with dark slots; the stance upright. Match frame: --arena-demo=pose_clear (sign hidden, off the fern; the top HUD hint line still shows).
+r3g_dredge_turnaround.png | r3g_dredge_front_34.png | r3g_dredge_back.png | r3g_dredge_closeup.png | r3g_dredge_match.png | r3g_dredge_moves.png: as for r3.
+r3g_dredge_vs_r3f.png: portrait | r3f front | r3g front | r3f helm | r3g helm | r3f match zoom | r3g match zoom.
