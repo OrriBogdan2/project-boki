@@ -2805,7 +2805,9 @@ def main():
         rj["hand." + sd] = K.bone_head(rig, "hand." + sd)
         rj["hip." + sd] = K.bone_head(rig, "thigh." + sd)
         rj["knee." + sd] = K.bone_head(rig, "shin." + sd)
-        rj["ankle." + sd] = Vector((rj["knee." + sd].x, rj["knee." + sd].y, 0.06))
+        # (ankle_z: a skate or a heel stands the ankle higher than a flat foot: Claire's boot and blade are
+        # ~0.2 m below it; at 0.06 they went through the ground)
+        rj["ankle." + sd] = Vector((rj["knee." + sd].x, rj["knee." + sd].y, float(spec.get("ankle_z", 0.06))))
         rj["fingers." + sd] = rj["hand." + sd] + Vector((0, 0, -0.08))
     fit = fit_armature(joints)
     auto_weights(ob, fit)
@@ -2968,6 +2970,19 @@ def main():
     crown = rig["land"]["crown"]
     K.anchor(arm, "head", "anchor_head_top", (0, 0, crown + 0.07))
     K.anchor(arm, "hips", "anchor_chest", (0, 0.1, K.bone_head(rig, "upper_arm.L").z - 0.14))
+    for an in spec.get("anchors", []):
+        # (an anchor at the centre of one slot's faces on one side, the fitted frame: Claire's glowing irises,
+        # for their match-zoom halos, warden_look.json "halos"; side -1 her left (-X), +1 her right, 0 both)
+        mi = [i for i, m in enumerate(ob.data.materials) if m.name.startswith(an["slot"] + "-")]
+        sd = float(an.get("side", 0))
+        cs = [p.center for p in ob.data.polygons if p.material_index in mi and (sd == 0 or p.center.x * sd > 0)
+              and float(an.get("z_min", -9.0)) <= p.center.z]
+        if not cs:
+            log("anchor %s: no %s faces" % (an["name"], an["slot"]))
+            continue
+        c = sum(cs, Vector()) / len(cs) + Vector(an.get("offset", [0.0, 0.0, 0.0]))
+        K.anchor(arm, an.get("bone", "head"), "anchor_" + an["name"], tuple(c))
+        log("anchor %s: %d faces, at %.3f %.3f %.3f" % (an["name"], len(cs), c.x, c.y, c.z))
     for o in [x for x in (ob, gun, spin) if x]:
         # Meshy's own split normals don't survive the decimation (facets): clear them, shade smooth
         if o.get("built"):
@@ -2984,7 +2999,11 @@ def main():
         if "ink_room" in spec:
             ink_room(o, float(spec["ink_room"]))
     for sp in (spec.get("parts") or {}).get("split", []):
-        parts.append(HP.split(ob, arm, sp))         # (Claire's horns: their own mesh, on the head bone)
+        piece = HP.split(ob, arm, sp)               # (Claire's horns: their own mesh, on the head bone)
+        if sp.get("drop"):
+            bpy.data.objects.remove(piece)           # (the scan's horns, replaced by scripted ones: cut and gone)
+        else:
+            parts.append(piece)
     for o in parts + props + held:
         if o.name in spec.get("smooth_parts", []):
             # (a piece cut from the scan, Hem's mask: its decimated facets shaded smooth)

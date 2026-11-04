@@ -243,6 +243,33 @@ r3c recipe). Pieces Meshy can't give cleanly are scripted (tools/meshy/hard_part
 - **feet_forward:** the fit fails if a foot points away from the body's forward (the backwards-skate catch).
 - The `ice` toon slot: a cold fresnel rim and a little gloss, no real transparency (WardenGlb.ICE).
 
+## Stage 1 hybrids (S2 fan-out, 2026-11-04)
+Stage 1 (WARDEN_STAGE1_BRIEF) is generation, bake, rig fit and first shots only: the fit spec keeps `lift` and the
+slot rules but no `palette_from`, `smooth`, `ramps`, `project` or `touch_up` (the paint-over is stage 2, the Vex
+r3c recipe). Pieces Meshy can't give cleanly are scripted (tools/meshy/hard_parts.py, fit spec `parts`):
+- **Held pieces**, modelled in their rig node's space and exported unskinned: `weapon` (the Gun node's; a hammer
+  in its `Hammer` pivot's, where WardenGlb seats it) and `shield` (the left hand's `Shield` node's). Their own
+  small atlas of painted cells (ice, iron, oak, leather) on the toon slots.
+- **Cards and tubes on spring chains:** wings cut out of the art's back view (outline and paint from the
+  sheet's pixels, two layers), a spaded tail draped clear of the legs. Chains named `spring_wing*` fold back about
+  their root while the Warden skates (root meta `wing_fold`, set by HunterAnim from the skate dash).
+- **Split:** faces of some slots made their own mesh on one bone (Claire's horns).
+- **feet_forward:** the fit fails if a foot points away from the body's forward (the backwards-skate catch).
+- The `ice` toon slot: a cold fresnel rim and a little gloss, no real transparency (WardenGlb.ICE).
+
+## Claire b1 (Phase B, 2026-11-04): fit options added, credit-free
+- `ankle_z` (fit spec): the rig ankle's height for a body standing on skates or heels (default 0.06). Claire's boot
+  and blade are ~0.2 m below her ankle: at 0.06 they went 0.21 m through the ground and read as bare pointed feet.
+  Raising the archetype's `legs` moves every absolute part coordinate (horns, wing roots, tail path, split boxes):
+  shift them by the head bone's change.
+- `weight_rules` for long hair: the hanging hair (dark hue, below the head) goes wholly to `hips`, else bone heat gives
+  its ends to the hands and thighs and a raised hand drags the pigtails up into a bunch.
+- `anchors` [{name, slot, side, z_min, bone}]: an anchor at the centre of one slot's faces on one side (her glowing
+  irises), for warden_look.json `halos`.
+- `tools/meshy/face_touch.py` (spec art/wardens/src/claire_face_touch.json): the face sheet softened before its
+  projection (blush toward the skin, freckles deepened, eyes magnified with a soft lens and their iris lifted).
+- hard_parts: `wings.scale`, `horns.slot`/`root`/`tipcol`/`crest`, `spear.blade_w`/`blade_t`/`shaft_r`/`pale`.
+
 ## Commercial terms (checked 2026-11-04, meshy.ai/terms-of-use section 3.2)
 - **Paid plans:** the customer owns the output ("to the extent possible under applicable law") and can keep it private.
 - **Free plans:** CC BY 4.0 with attribution to Meshy. **Use the owner's paid key only.**
@@ -319,6 +346,16 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Ostra A | 09:12 | 01a1a5d4-5e39-73a5-8395-ad7a5f79eddf | meshy-7.1 | 3 edited views (front, side, back) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the cracked porcelain mask with violet eyes and mouth, cap and bells, ruff, dagged coat with the starfield painted in its tears, clawed gloves. Meshy left out the wisp (the body ends at the hem): built as geometry |
 
 ### Ostra stage 2 (2026-11-04): no Meshy runs (0 credits); the r3c recipe on the stage 1 scan, see art/wardens/ostra/IMPORT.md.
+
+### Claire stage 1, 2026-11-04
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Claire edit front | 09:12 | 01a1a5d4-724a-70c1-bfd3-f01683cb53ca | nano-banana-pro (image-to-image) | 9:16 crop; spear, wings and tail out, both arms hanging, skates forward | 9 | Kept |
+| Claire edit side | 09:12 | 01a1a5d4-7267-7483-a529-b031274506af | nano-banana-pro | spear, wing and tail out, both skates pointing forward | 9 | Kept |
+| Claire edit back | 09:12 | 01a1a5d4-7247-73c0-9feb-eaa1c3a86bc2 | nano-banana-pro | wings, spear and tail out, arms hanging | 9 | Kept |
+| Claire A | 09:13 | 01a1a5d5-aa57-72df-95ba-a4926bd343d2 | meshy-7.1 | 3 edited views (front, side, back; no 3/4) as images and texture refs; geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the face, horns, pigtails, ice costume, skates both forward |
+
+Claire total: 4 tasks, 67 credits.
 
 ### Vex r3c and r3d (2026-11-04): credit-free
 r3c (09:00-10:30) and r3d (11:25-13:30) used no Meshy credits: every change is in the fit spec, the parts tools, the

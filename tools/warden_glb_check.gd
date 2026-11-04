@@ -307,6 +307,19 @@ func _springs(a: String) -> void:
 	var rest := _spring_off(sk, sync)
 	ok(lag > 0.02 and rest < 0.01, "%s: %d spring chains trail a sideways move (tip %.3f m off) and settle (%.4f m)"
 			% [a, sync.springs.chains.size(), lag, rest])
+	# wings fold back while she skates (the root's WING_FOLD meta): each wing tip swings behind its root
+	var wings: Array = sync.springs.chains.filter(func(ch): return bool(ch["wing"]))
+	if not wings.is_empty():
+		var open := _wing_tips(sk, wings)
+		m.set_meta(WardenGlb.WING_FOLD, 1.0)
+		for i in 240:
+			sync._process(1.0 / 60.0)
+		var shut := _wing_tips(sk, wings)
+		var back := 1.0
+		for i in open.size():
+			back = minf(back, (shut[i] as Vector3).z - (open[i] as Vector3).z)
+		ok(back > 0.08, "%s: %d wings fold back while skating (tips at least %.3f m further back)"
+				% [a, wings.size(), back])
 	m.free()
 
 ## Props on an orbit (RIG_CONTRACT "Orbits"): over a second each circles its pivot (moves, at the same distance
@@ -376,6 +389,10 @@ func _within_tint(got: Color, want: Color) -> bool:
 		if r < lo or r > hi:
 			return false
 	return true
+
+## The tips of the wing chains (skeleton space: behind is +Z).
+func _wing_tips(sk: Skeleton3D, wings: Array) -> Array:
+	return wings.map(func(ch): return sk.get_bone_global_pose(int((ch["ids"] as Array)[-1])).origin)
 
 ## A model's glow halos (warden_look.json "halos") hang on their anchors outside the .glb (the skin, the bounds
 ## and the slot checks never see them) and follow the head when it nods.

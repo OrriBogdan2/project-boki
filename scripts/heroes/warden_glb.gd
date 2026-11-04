@@ -79,7 +79,7 @@ const EMIT_FLICKER := 0.55     # and how much it crackles
 ## 4 mm line close up), and never more than the fit's ink room at a vertex (outline.gdshader ink_mask). At the
 ## match camera a full-width line round every belt, buckle and candle of a scanned model added up to a smudge.
 const INK_WIDTH := 0.0006
-const INK_FAR_THIN := 0.8      # the ink this much thinner at the match camera (outline.gdshader far_thin)
+const INK_FAR_THIN := 0.8       # the ink this much thinner at the match camera (outline.gdshader far_thin)
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
 ## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model (or a design
@@ -503,7 +503,8 @@ class Springs:
 	const PULL := 0.2           # the share of the way back to the rest shape per 1/60 s, at the root
 	const PULL_TIP := 0.07      # and at the tip
 	const DAMP := 0.84          # the velocity kept per 1/60 s
-	const FOLD := 1.25          # radians a folded wing turns back about the vertical through its root
+	const FOLD := 0.75          # radians a folded wing tips back about the side axis through its root
+	const TUCK := 0.8           # and turns in behind the back about the vertical
 	var skel: Skeleton3D
 	var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world), wing}
 	var fold := 0.0             # 0..1: how far the wing chains are folded (WING_FOLD)
@@ -546,13 +547,14 @@ class Springs:
 			var base := skel.get_bone_global_pose(par) * skel.get_bone_global_rest(par).affine_inverse()
 			var rest: Array = []
 			var want := PackedVector3Array()
-			# a wing folds: its rest shape turned back (+Z, behind) about the vertical through its root
+			# a wing folds: its rest shape tipped back (+Z, behind) and turned in, about its root
 			var turn := Transform3D.IDENTITY
 			if bool(ch["wing"]) and fold > 0.001:
 				var r0: Transform3D = base * skel.get_bone_global_rest(int(ids[0]))
 				var r1: Transform3D = base * skel.get_bone_global_rest(int(ids[ids.size() - 1]))
 				var out := signf(r1.origin.x - r0.origin.x)
-				turn = Transform3D(Basis(Vector3.UP, -out * FOLD * fold), Vector3.ZERO)
+				var tip_in := Basis(Vector3.UP, -out * TUCK * fold)
+				turn = Transform3D(Basis(Vector3.RIGHT, FOLD * fold) * tip_in, Vector3.ZERO)
 				turn = Transform3D(Basis.IDENTITY, r0.origin) * turn * Transform3D(Basis.IDENTITY, -r0.origin)
 			for bi in ids:
 				var r: Transform3D = turn * base * skel.get_bone_global_rest(int(bi))
