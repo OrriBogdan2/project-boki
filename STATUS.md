@@ -1,6 +1,13 @@
-2026-11-04T20:22:15Z
+2026-11-04T20:50:16Z
 
 FOR EXT (owner item queue): READY reports go here as each branch lands.
+READY (owner review): rigfix @ 0fe7a84e (from origin/integ91; +360/-12, 10 files) - briefs/RIGFIX.md. Posted in EXT_TO_MAIN (32f62738), contact sheets in briefs/rigfix/<hunter>_before_after.jpg.
+- Fixed: Kael greatsword left the hand by up to 0.55 m in 5 moves, and Vex's gun 0.25 m off in the flip dash -> general HunterAnim._weapon_to_hand (weapon follows the hand when the grip can't be reached). Breaker hammer oversized -> weapon_scale 0.75 (model stays 1.5x, hitbox unchanged). Hem bow grip 6.5 cm outside the bow -> new warden_look weapon_offset. Kept Kael 1.06 / weapon 0.85, Ostra 0.9, Hem red.
+- NOT fixed: Tarek's legs (trousers flare/stretch in deep crouches: leap, slam) need a skin-weight rebuild in the Meshy/Blender fit pipeline; not run. Weapons are still children of the procedural Gun node (kept seated by _weapon_to_hand), not skinned to hand bones (items 76/76b need an architecture change).
+- Audit depth: sheets made for all 12 (idle, walk, run, hit, dash, kit mid-poses; not every attack pose); viewed by eye: Tarek, Breaker, Hem, Kael, Vex. Ryzz, Pip, Dredge, Ostra, Sable, Cinder passed the numeric checks only (armature, sockets, rest pose, weapon seating); visual twists not ruled out. Foot sliding checked by eye only.
+- Standard: docs/RIG_STANDARD.md (shared contract skeleton + names; rest pose; sockets weapon/weapon_muzzle/weapon_mag/weapon_spin/weapon_offhand/shield/anchor_*; weapon within 6 cm of grip, hand within 9 cm; scale rules) + new --rig-standard-check (all 12 pass).
+- Checks on 0fe7a84e: --import, --check, --warden-model-check 157/0, --warden-glb-check 182/0, --hero-combo-check 263/0, --hitbox-size-check, --warden-stance-check, --rig-standard-check, health --strict, gen_wiki --check: all pass. The two integ91 failures fixed: model-check targets for Ostra 0.9 / Kael 1.06; Hem Heavy Shot rows assert HEAVY_SCALE 6.0 + hidden core.
+- Extra: tools/rig_shots.gd (--rig-shots, the contact-sheet tool); drop it for a leaner diff if wanted.
 WIP (paused 20:21 UTC by the owner's priority change): ext/claire-62-65 @ 92ad07b0 - NOT READY
 - 62 air skate, 64 skate->ult momentum (>=80% for 0.3 s, ground + air; DashFlow skate->X is "fire" with carry), 65 frozen statue (skating cast slides ~6 m over 0.8 s, then rooted; facing locked under a 360 cursor sweep): all implemented.
 - Ran before the final amend/style edits: --rimewright-combo-check 83/0, --dash-flow-check, --check, --archetype-check, --ability-check, --arena-check, health OK. Touches shared hunter.gd + arch_kit.gd (small hooks dash_vy, face_locked), so a FULL SUITE is still owed on 92ad07b0 (not run: from --bot-sanity-check on), plus a merge-tree check. Air-skate strip: scratchpad q/claire/shots (not published yet).
@@ -36,7 +43,7 @@ BJORN #10 #29 #30: DONE by S1 on ext/kitdata-pin-bjorn @ 7dede8e. S2: skip them.
 DASH TABLE: converged on DashFlow. ext/kitdata-vireo-venator @ 67454b5 has no DashRules left (no rows needed porting; DashFlow already covered them; the S1 mage "rmb_to_dash cancels" row was not carried over since DashFlow's into_dash rows are empty for mage). hero_ult.gd now matches main's newer version (sha1 ef9d382e), taken from main by merge. For S2: --dash-flow-check fails "bulwark air dash -> lmb, pressed early: lost" on dash-flow-base itself (Bulwark mace lmb_override drops an early tap).
 Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on over drops and the abyss (gameplay change) OK? 2 m shield push and 4.2 m wall OK (no source numbers)? The aegis plates read like planks from top-down.
 
-Running now: ONE Sonnet agent (since 20:21 UTC): RIGFIX (briefs/RIGFIX.md; branch rigfix from origin/integ91; Blender 4.5.15 at ~/tools). Item queue paused; claire WIP pushed 92ad07b0; tarek had no code. After RIGFIX, S1 stops for the owner's review.
+Running now: none. S1 STOPPED for the owner's review of rigfix 0fe7a84e (per RIGFIX.md and INBOX 20:16 UTC). Item queue paused.
 Queued: PAUSED (owner 20:16 UTC). Not started: ext/two-gloves (69), ext/kael-57, ext/breaker-59, ext/vex-68, ext/sable-53-54, ext/glider-63. After RIGFIX, S1 STOPS for the owner's review.
 Last INBOX entry handled: 2026-11-04 20:20 UTC ORCH (sync90 shipped all 12 Hunters in 3D) and 20:16 UTC ext (owner: RIGFIX only, one Sonnet agent, then stop; S1 does not take main's integrator role).
 Watcher: received 19:06 UTC entry
