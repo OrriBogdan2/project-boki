@@ -330,7 +330,8 @@ func _is_done(sid: String, dt: float) -> bool:
 			flag = flag or p.roll_t > 0.0
 			return near.call(4.0) and (flag or t > 40.0)
 		"exdash":
-			flag = flag or (p.roll_t > 0.0 and p.dash_is_ex)
+			# any dash started off the ground counts: kit air dashes (Vex's air slide) never set dash_is_ex
+			flag = flag or (p.roll_t > 0.0 and (p.dash_is_ex or not p.grounded))
 			return flag and near.call(4.5)
 		"glide":
 			flag = flag or p.gliding
