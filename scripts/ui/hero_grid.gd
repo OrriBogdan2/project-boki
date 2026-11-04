@@ -39,13 +39,8 @@ static func _card(ak: String, cur: String, on_pick: Callable, on_kit: Callable, 
 	var col := UI.vbox(2); col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(col)
-	col.add_child(UI.label(Arch.name_of(ak), 18, Arch.color(ak) if can else UI.FAINT, UI.big))
-	col.add_child(UI.label(HeroTitle.origin_line(ak), 12, UI.MUTED))
+	col.add_child(UI.label(HunterViewer.display_name(ak), 18, Arch.color(ak) if can else UI.FAINT, UI.big))
 	col.add_child(UI.label(HunterViewer.stat_line(ak), 12, UI.MUTED))
-	var adf := Arch.def(ak)
-	var fan := UI.para(String(adf.get("fantasy", "")), 12, UI.INK if can else UI.FAINT)
-	fan.custom_minimum_size.x = 150
-	col.add_child(fan)
 	if ak == cur:
 		col.add_child(UI.label("Playing", 12, UI.GOOD, UI.semi))
 	elif not open and gated:

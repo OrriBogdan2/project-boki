@@ -1,9 +1,7 @@
 {
-	"desc": "The Hunter viewer (HunterViewer: the Hunters screen). Each ability is shown in turn for slot_s seconds, its move looped on the real model. `moves`: per Hunter and slot, the kit moves (any kit move table, HunterAnim.km_def) played back to back, the same ids the kits play. A slot with no entry falls back to the weapon swing or shot (lmb), the class dodge (dash), a cast pose (rmb, e, r) or an idle with its glow (passive). --hunter-unlock-check fails on an id that no longer exists, so a kit rename shows up here.",
-	"slot_s": 3.2,
-	"gap_s": 0.35,
+	"desc": "The Hunter viewer (HunterViewer: the Masks screen, the Mask moments, the reveal). Each ability plays in its own clip (AbilityClip): the real model uses it on a training dummy. `moves`: per Hunter and slot, the kit moves (any kit move table, HunterAnim.km_def) played back to back in the clip, the same ids the kits play. A slot with no entry falls back to the weapon swing or shots (lmb), the class dodge (dash) or a cast pose (rmb, e, x). --hunter-unlock-check fails on an id that no longer exists, so a kit rename shows up here.",
 	"turn_rate": 0.45,
-	"turn_rate_desc": "rad/s the turntable spins while nothing plays; it slows to a third during a move",
+	"turn_rate_desc": "rad/s the viewer's turntable spins",
 	"moves": {
 		"thief": {"dash": ["thf_vault_r"], "lmb": ["thf_lmb_r", "thf_lmb_l"], "passive": ["thf_primed"], "rmb": ["thf_bola"], "e": ["thf_knife", "thf_arrive"], "x": ["thf_encore"]},
 		"archer": {"dash": ["pin_walk"], "lmb": ["arc_draw", "arc_loose"], "rmb": ["arc_heavy_wind", "arc_heavy"], "e": ["arc_hail"], "passive": ["arc_perfect"], "x": ["pin_ult_cast", "pin_ult_loose"]},

@@ -12,7 +12,8 @@ const RANK := ["ready", "open", "progress", "locked"]
 const TILE_W := 140.0          # px, one Hunter tile
 const TILE_COLS := 3
 const LEFT_W := TILE_W * TILE_COLS + 16.0      # px, the tiles with their gaps: mastery and the glider pick match it
-const STAGE := Vector2(250, 300)
+const STAGE := Vector2(180, 240)
+const CLIP := Vector2(150, 84)        # px: each ability clip beside the turntable
 
 static func open(home: Node, sel := "") -> void:
 	if sel == "" or not Arch.exists(sel):
@@ -44,7 +45,7 @@ static func open(home: Node, sel := "") -> void:
 	left.add_child(_glider_pick(home, sel))
 	var right := UI.vbox(10)
 	cols.add_child(right)
-	var viewer := HunterViewer.make(sel, STAGE)
+	var viewer := HunterViewer.make(sel, STAGE, CLIP, 3)
 	right.add_child(_actions(home, sel, viewer))      # (above the viewer: the hold is the first thing you see)
 	right.add_child(viewer)
 	home.set_meta("hunter_viewer", viewer)
