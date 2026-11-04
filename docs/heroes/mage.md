@@ -1,4 +1,4 @@
-# Storm Slayer (base character Vireo; archetype id `mage`, Light)
+# Storm Slayer (base character Ryzz; archetype id `mage`, Light)
 
 Internal design note. This file may name the source hero for traceability; nothing in the game does.
 Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (reference
@@ -104,7 +104,7 @@ it bursts it for 2 Static on everyone near it. It does not give Wirerun back (ow
 - Static lasts 4.5s, refreshed by every hit.
 - Wirerun: a stun, root or Grounded mid-hold cancels it and the charge stays spent (cooldown started on the press); a Boki merge refunds it.
 - An airborne Shift with a charge is a Wirerun too (height held); with no charge left it is the plain air dash.
-- Skycall: press places, a 0.3s flick window sets the drag; with no flick the drag is away from Vireo.
+- Skycall: press places, a 0.3s flick window sets the drag; with no flick the drag is away from Ryzz.
 - She can move while firing bolts and holding the rod (the footage only shows her standing).
 - Momentum: the drift during the Wirerun hold bleeds off at 6 m/s², and whatever is left is added to the streak.
 - Kitefall: the footage shows no auto-land; ours comes down at the cursor after 1.7 s of hanging (about 2 s in

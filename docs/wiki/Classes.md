@@ -4,7 +4,7 @@ A class is a whole character: its own dash, a passive with a resource it builds,
 click), a right-click ability with several variants, a utility on E and an ultimate on R (X fuses you with your Boki). There are
 twelve, four in each weight class:
 
-- **Light:** [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset), [Pin](Class-Dark-Archer.md) (pin people, then the big shot), [Vireo](Class-Storm-Slayer.md) (load Sparks, then Wirerun through them) and [Claire](Class-Icy-Dancer.md) (skate on ice, chill foes, shelter the squad behind ice).
+- **Light:** [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset), [Pin](Class-Dark-Archer.md) (pin people, then the big shot), [Ryzz](Class-Storm-Slayer.md) (load Sparks, then Wirerun through them) and [Claire](Class-Icy-Dancer.md) (skate on ice, chill foes, shelter the squad behind ice).
 - **Medium:** [Vex](Class-Hired-Gun.md) (burr charges and one long needle), [Burple](Class-Fox-Cub.md) (heal, carry the downed), [Tarek](Class-Rock-Elementalist.md) (raise rocks, punch them into the fight) and [Ostra](Class-Void-Jester.md) (swell, plant a seed, trade places).
 - **Heavy:** [Zedran](Class-Arena-King.md) (rage, chain in, crush), [Bjorn](Class-Frozen-Bulwark.md) (block, then smash them into walls), [Dredge](Class-Broken-Abomination.md) (haul a foe in, drop the anchor) and [Cinder](Class-Mad-Pyromancer.md) (build Char, flash foes over).
 

@@ -1,6 +1,6 @@
 extends "res://tools/breah_shots.gd"
 ## --combo51-shots --shots-dir=<dir> --combo51-hero=archer|mage|dolm: owner item 51's new combos for Pin,
-## Vireo and Breah as strips (the Breah rig's 3-wide grid of crops round the hero, tools/breah_shots.gd) in a
+## Ryzz and Breah as strips (the Breah rig's 3-wide grid of crops round the hero, tools/breah_shots.gd) in a
 ## live Arena match, under xvfb with a renderer. <dir>/captions.txt gets "file: caption" per file.
 
 func run(main_node: Node) -> void:
@@ -51,7 +51,7 @@ func _archer() -> void:
 	)
 	await _go(1.4, air, air_marks)
 
-## Vireo: Kitefall's crouch into a Wirerun, then the launch from where it ended; the crouch into a jump.
+## Ryzz: Kitefall's crouch into a Wirerun, then the launch from where it ended; the crouch into a jump.
 func _mage() -> void:
 	P.lvl = 6
 	await _reset(9.0)
@@ -62,7 +62,7 @@ func _mage() -> void:
 		P.inp["dash_down"] = t >= 0.05 and t < 0.35
 	var marks := _strip(
 		"combo_kitefall_shift_strip",
-		"Vireo (item 51): Kitefall's crouch; Shift in it charges the Wirerun at once; the streak; out of it the"
+		"Ryzz (item 51): Kitefall's crouch; Shift in it charges the Wirerun at once; the streak; out of it the"
 			+ " crouch starts over; she launches from where the run ended; up, the ring round the new spot",
 		[0.03, 0.2, 0.42, 0.62, 0.8, 1.0]
 	)
@@ -74,7 +74,7 @@ func _mage() -> void:
 	var jump := func(t: float): P.inp["jump"] = t >= 0.05 and t < 0.05 + DT
 	var jmarks := _strip(
 		"combo_kitefall_jump_strip",
-		"Vireo (item 51): Kitefall's crouch; a jump in it goes at once; the crouch finishing mid-jump; the launch"
+		"Ryzz (item 51): Kitefall's crouch; a jump in it goes at once; the crouch finishing mid-jump; the launch"
 			+ " from that height (no drop first); climbing; hanging",
 		[0.03, 0.12, 0.25, 0.36, 0.5, 0.75]
 	)

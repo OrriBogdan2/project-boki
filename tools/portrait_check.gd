@@ -60,7 +60,8 @@ func _art() -> void:
 			ok("%s: its splash" % Arch.name_of(ak), splash.ends_with("_splash.jpg") and st != null
 					and Vector2i(st.get_size()) == SPLASH_PX, splash)
 	var names_ok: bool = HeroTitle.base_name("gunslinger") == "Vex" and HeroTitle.base_name("rimewright") == "Claire"
-	ok("the new names", names_ok and HeroTitle.base_name("tender") == "Burple")
+	var names2: bool = HeroTitle.base_name("tender") == "Burple" and HeroTitle.base_name("mage") == "Ryzz"
+	ok("the new names", names_ok and names2)
 
 # ------------------------------------------------------------------ 2. framing
 func _framing() -> void:
