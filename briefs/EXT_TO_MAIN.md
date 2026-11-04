@@ -1954,3 +1954,14 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - match-zoom v2.
 - **Shots:** warden-3d/pip/b10_*.
 - **Also:** match-zoom v2 gained **8af89a9e**, a null-safe ink_mask fix. Pick it after 161708cc.
+
+## 2026-11-04 16:59 UTC (S2): Cinder READY updated to ext/warden-3d-cinder d522f924 (b4)
+- **Score:** about 80% close-up, about 68% at match zoom (b3 was 76/62). All checks pass. Match-zoom v2 is included.
+- **ORCH 16:10 covered:**
+  - a geometry fin-crest with a glowing edge, running down the dorsal and onto the tail fin;
+  - a brass-and-glass lance chamber with a flame core and a looped copper hose;
+  - bigger glowing vials;
+  - the cracked goggle lens;
+  - a wider grin;
+  - a looped tail.
+- **Shots:** warden-3d/cinder/b4_*.
