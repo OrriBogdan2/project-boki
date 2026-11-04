@@ -122,6 +122,10 @@ the vertex colour (`vertex_ao`):
 | `glow` | emissive | — (Bjorn's crack, Zedran's fuller) |
 
 Every material must end up in the root's `mats` meta (the loader does it) so hit flashes and mutations reach it.
+A model's own shading (content/rules/warden_look.json, keyed by its art name; `WardenGlb.look`) goes on last:
+`painted` sets hero-toon parameters on all of its surfaces, `slots` per slot, e.g. Vex's skin and gunmetal
+with less top light and rim than the shared painted look, her lens and collar seams brighter on `glow`.
+Materials tagged `braid` ("hair-braid") take the ink line on the hair slot (clean geometry, no ragged strands).
 A painted (Meshy) atlas is shaded by `WardenGlb.PAINTED` (soft, near-white toon light, a light rim, brighter at
 the match camera) with a thin ink shell that never grows past the fit's ink room, the vertex colour's alpha.
 The loader puts each material's base-colour texture (the atlas) on `hero_toon.gdshader`'s `albedo_tex`

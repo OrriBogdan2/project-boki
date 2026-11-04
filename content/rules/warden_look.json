@@ -1,0 +1,34 @@
+{
+	"doc": "A Warden 3D model's own shading over the shared painted look (WardenGlb.look), keyed by the model's art name (art/wardens/<art>/<art>.glb; a design variant has its own key). painted: hero_toon.gdshader parameters on all of its surfaces, set after WardenGlb.PAINTED. slots: the same per toon slot (skin, hair, cloth, leather, metal, eyes, glow), after painted. Colours are [r, g, b]. A model without an entry keeps the shared look. Useful keys: top_light (surfaces facing up lift), fres and fres_tint (the coloured rim; 1 = lightened own colour), far_lift (brighter and richer at the match camera), shade and shadow_tint (the shadow floor and its tint), sheen, glow (emission x the painted colour).",
+	"vex": {
+		"painted": {},
+		"slots": {
+			"skin": {
+				"top_light": 0.35,
+				"fres": 0.45,
+				"far_lift": 0.12,
+				"shade": 0.8,
+				"shadow_tint": [
+					0.94,
+					0.84,
+					0.84
+				]
+			},
+			"metal": {
+				"top_light": 0.3,
+				"fres": 0.3,
+				"fres_tint": 0.6,
+				"far_lift": 0.1,
+				"sheen": 0.0
+			},
+			"hair": {
+				"far_lift": 0.5,
+				"fres": 0.6,
+				"glow": 0.12
+			},
+			"glow": {
+				"glow": 1.8
+			}
+		}
+	}
+}
