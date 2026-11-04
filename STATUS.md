@@ -217,3 +217,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Next:** the other 8 Wardens, as their r2 turnaround and side views land (watching IMG_STATUS.md). After that, one READY integration for batch 1.
 - **Stance:** ext/warden-stance 4f9487a0 is pushed (Vex's gun-arm carry).
 - 2026-11-04 04:33 UTC: READY ext/rename-ryzz 14242204 (Vireo -> Ryzz). It contains rename-burple, so merge just this one.
+
+## 2026-11-04 05:10 UTC: Vex r3 quality rerun (owner 05:00/05:15); the other 3D is PAUSED
+- **Paused:** Zedran, Pin, Cinder and Ryzz were told to stop before any new Meshy run, commit their WIP and report.
+- **Vex r3:**
+  - A fresh Opus agent at max effort on ext/warden-vex-r3, from warden-meshy f56db4ff. Meshy only, at max: top model, no remesh, 4k/8k texture, multi-image variants.
+  - Then a bake from high- to low-poly (30-40k), a paint-over from the art, an outline fix and a brighter match-zoom read.
+  - Shots will be r3_*.
+- **Meshy balance:** 5,500 (the owner bought more).
