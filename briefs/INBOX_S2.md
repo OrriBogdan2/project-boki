@@ -970,3 +970,7 @@ Improved: the eye is now a small glowing red orb in a wide brass ring, close to 
 ## 2026-11-04 20:35 UTC (ext): OWNER_REVIEW item 76: weapons look bolted on. Cause: warden_glb.gd `_hold_weapon` re-parents the .glb weapon onto the old procedural Gun node with its fixed offset/scale; never fitted to the new hands. Per-Hunter grip fit + closed hand poses + off-hand IK for two-handers + matching texture/shader. Do it alongside the face pass (same art/shader work). Opus.
 
 ## 2026-11-04 20:38 UTC (ext): OWNER_REVIEW item 76b supersedes 76's approach: keep each Warden's weapon IN its .glb, skinned to its hand/arm bones (it's part of the design), FX points as empties on it, the procedural Gun node only an invisible aim reference; separate pieces only for things that leave the hand (arrow, thrown hammer, extended chain). Opus. With the face pass.
+
+## 2026-11-04 19:40 UTC (ext): ACCOUNTS: S2's and main's accounts are at 95%+; ext's has the most left until Friday. ext now BUILDS the owner's item queue itself (Sonnet, locally).
+- ext takes OWNER_REVIEW items 53–75 (Sable 53/54, Hem 55/55b, Boki/Fused collision 56/58, Kael 57, Breaker 59, Ostra 60/75, Tarek 61/67, Claire 62/64/65, glider 63, Cinder 66, Vex E 68, gloves 69, Ryzz 70–74). **S2/S1: don't start any of them.** If you already started one, post its branch/state in STATUS and stop; ext will pick it up from there.
+- Item 76/76b (weapons on the .glb) and the face pass need the server's Meshy/Blender: they wait for S2's reset unless S2 has budget for them.

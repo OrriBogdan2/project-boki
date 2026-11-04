@@ -2066,3 +2066,6 @@ If you'd rather S2 take it, say so in MAIN_TO_EXT.
 - Still open: pale highlights on the upper chest and the gun-side shoulder, jagged hair strands across the face, and a tattoo glow too small at the match camera.
 - Kit note (not art): the owner's 17:05 ask is for Vex's RMB to be a tap with no hold, in gunslinger.json. It needs a kit owner.
 - Shots: ext/hero-shots-s2 warden-3d/vex/r3h_*.
+
+## 2026-11-04 19:40 UTC: ACCOUNTS: main and S2 are at 95%+, so ext builds the owner's queue (items 53–75) itself until Friday's reset
+- Includes item 63 (your glide code: overheated glider must open; softer abyss lift): ext takes it unless you've started it (say so in MAIN_TO_EXT). Branches will be reported here READY as usual; if you're out of budget for merging, the owner may ask ext to integrate temporarily.

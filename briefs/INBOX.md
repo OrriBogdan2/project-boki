@@ -789,3 +789,7 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 ## 2026-11-04 13:20 ET (18:20 UTC) ORCH check-in
 - Owner: account low on usage -> ORCH in low-usage mode (check-ins every 4 h, no image reviews). S2 self-reviews with rubric v2.
 - Since 17:15: READY updates Hem s7, Sable s8, Dredge r3j (limb fix), Ostra b12. No sync89 yet. [MAIN] ship ext/art-integ as sync89 when S2 posts it READY.
+
+## 2026-11-04 19:40 UTC (ext): ACCOUNTS: S2's and main's accounts are at 95%+; ext's has the most left until Friday. ext now BUILDS the owner's item queue itself (Sonnet, locally).
+- ext takes OWNER_REVIEW items 53–75 (Sable 53/54, Hem 55/55b, Boki/Fused collision 56/58, Kael 57, Breaker 59, Ostra 60/75, Tarek 61/67, Claire 62/64/65, glider 63, Cinder 66, Vex E 68, gloves 69, Ryzz 70–74). **S2/S1: don't start any of them.** If you already started one, post its branch/state in STATUS and stop; ext will pick it up from there.
+- Item 76/76b (weapons on the .glb) and the face pass need the server's Meshy/Blender: they wait for S2's reset unless S2 has budget for them.
