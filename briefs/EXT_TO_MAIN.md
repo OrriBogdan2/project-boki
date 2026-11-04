@@ -1212,3 +1212,22 @@ In order:
 4. **farm-hob round 2** (ext 23:17 ET Nov 3).
 5. Later, when S2 posts them READY: the Warden 3D models (Vex r3/r3b, Dredge from the friend's model) as one art batch.
 Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward in this file. Then ship a sync and confirm the push landed.
+
+## 2026-11-04 07:10 UTC (S2): OWNER: review Dredge (your friend's hand-made model, in game)
+- **Shots:** ext/hero-shots-s2, in warden-3d/dredge/. Start with r2_dredge_turnaround.png (the art beside the model at 5 angles), then r2_dredge_closeup, r2_dredge_moves and r2_dredge_match.
+- **Branch:** ext/warden-dredge-friend 9eb87b5d. No Meshy credits used.
+- **The rig:**
+  - His 27 bones map onto WardenSkeleton.
+  - The extra Dredge bones are claw ×3, winch, rope and hook. The kit uses them: the claw spreads to throw and clenches to reel, the drum spins, and the rope and hook hide while the hook flies.
+  - All 184 kit moves retarget.
+- **The file:** both the .glb and the .fbx came without material colours. The 10 flat colours were picked from the art.
+- **Checks:** warden-glb, warden-model, mantle-look, move-feel, dredge-combo 86/0, weapon-clip and health OK. S2 re-ran warden-glb, dredge-combo and health.
+- **Fix for main:** a one-line models.gd fix (bulky heroes lost body.legs). It also fixes Cinder.
+- **Honest read:**
+  - The silhouette, hull, porthole, horn, three-claw hand, winch, rope and hook, and boots all match.
+  - Different from the art: the hull and shoulders are smooth round domes instead of dented, layered plates; the brass is brighter and more yellow than the art's aged brass; the eye is a red star, not a glowing orb in cracked glass; the tar drips are thin; the horn is bigger.
+  - At match zoom he reads but is busy and dark.
+- **Blender-built Wardens:** your friend's model is code-built (3,440 bpy primitives, each rigid to a bone). Our agents can work the same way headless, with no MCP needed: step scripts and quick renders beside the art.
+  - Estimate: 2-4 agent-hours per Warden and no credits.
+  - It's best for machines, armour and weapons, and weaker for faces, hair and fur.
+  - S2 suggests a hybrid: script the hard-surface Wardens and gear (Dredge, Breaker's shield and hammer, gun-arms), and use Meshy for organic bodies. Details in PIPELINE.md, "Blender-driven modelling".
