@@ -10,7 +10,7 @@ const DIR := "res://art/wardens"
 ## Each Warden's art name, as in docs/art/gen/wardens/<name>_turnaround.png: the folder and file its .glb has.
 const ART := {"bulwark": "breaker", "archer": "hem", "juggernaut": "kael", "gunslinger": "vex", "ostra": "ostra",
 	"mage": "ryzz", "dolm": "tarek", "thief": "sable", "rimewright": "claire", "ashwick": "cinder",
-	"tender": "moosh", "dredge": "dredge"}
+	"tender": "pip", "dredge": "dredge"}
 ## Armature bone -> the rig node it follows (paths under the model root).
 const BONES := {
 	"root": "Rig",

@@ -27,6 +27,8 @@ const WARDENS := {
 	"ashwick": {"hit_r": 0.376, "height": 1.02, "height_3d": 1.11, "width": [0.7, 1.5], "moves": "as_"},
 	"juggernaut": {"hit_r": 0.428, "height": 1.12, "width": [1.0, 2.0], "moves": "jug"},     # (juggernaut.md)
 	"dredge": {"hit_r": 0.452, "height": 1.28, "width": [1.3, 2.4], "moves": "dr_"},     # (~2.25 m, very broad)
+	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
+	"tender": {"hit_r": 0.34, "height": 0.74, "height_3d": 0.84, "width": [0.5, 1.5], "moves": "mm_"},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured

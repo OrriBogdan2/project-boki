@@ -364,6 +364,26 @@ in game, and the blade, chains, hook and mane are scripted.
 | Kael A | 09:13 | 01a1a5d4-e913-74be-9dfd-20019f630127 | meshy-7.1 | 4 edited views as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** (first run): build, scarf over the face, collar, harness, magma right arm only, skirt, greaves |
 | Kael mane (stage 4) | 13:20 | 01a1a6a8-42c4-73c7-bbd5-d327f5d1b9fd | meshy-7.1 | kael_head_sheet front + side (padded square) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, no pose, enhancement off | 40 | **Kept**: its hair cut out and fitted on the body as the mane (kael_parts.meshy_mane) |
 
+### Stage 1: Pip (tender), 2026-11-04 (85 credits; balance 4327 after both Sable and Pip, other agents spending too)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Pip edit front | 09:13 | 01a1a5d5-b62f-723d-80e9-c89d469ca782 | nano-banana-pro (image-to-image) | 3:4 crop; lantern, wings, sparkles out; arms down | 9 | Kept |
+| Pip edit side | 09:13 | 01a1a5d5-b62f-7131-83ab-d05cf57031b6 | nano-banana-pro | the same | 9 | Kept |
+| Pip edit back | 09:13 | 01a1a5d5-b61e-74bf-80a3-67cde2a14edc | nano-banana-pro | the same, and the tail clear of the legs | 9 | Dropped: the tail still over the legs, a leaf clasp drawn on the back |
+| Pip edit back 2 | 09:14 | 01a1a5d6-d524-74d8-851c-bc3b92eee529 | nano-banana-pro | back edit: the tail out to the side, no back leaf | 9 | Kept (the tail goes to her right here, to her left in the front view; Meshy followed the front) |
+| Pip edit back 3 | 09:15 | 01a1a5d7-a0aa-77c4-821c-77445f689102 | nano-banana-pro | back edit 2: the tail to the other side | 9 | Dropped: unchanged |
+| Pip A | 09:18 | 01a1a5da-06f4-75c9-9568-ec9702d633a6 | meshy-7.1 | edited front, side, back 2 (+ texture refs), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** |
+
+### Stage 2: Pip (tender), 2026-11-04 (58 credits; balance 4233 before, 4130 after with other agents' spend)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Pip edit front 2 | 11:21 | 01a1a64a-95d2-7529-9e37-9c7c911e62ce | nano-banana-pro (image-to-image) | the stage-1 front edit: arms out in an A-pose, clear of the flanks; the cape behind them | 9 | Kept |
+| Pip edit back 2b | 11:21 | 01a1a64a-95c5-7404-a3ab-1bf17187f7a5 | nano-banana-pro | the stage-1 back edit 2, the same | 9 | Kept |
+| Pip B | 11:23 | 01a1a64c-58ac-7471-8a83-4ef99eb35c66 | meshy-7.1 | edited front 2, the stage-1 side, edited back 2b (+ texture refs); as A | 40 | **Kept**: the arms free of the flanks and cape |
+Then the r3c recipe: re-baked (art/wardens/src/pip_bake.json) and refitted (new joints, body.legs 1.45, size 0.78),
+ramps of pip_front's colours, the lantern in her left paw with arched panes and a light, stronger wing cards,
+warden_look.json `pip`, the tender stance's left paw out. IMPORT.md "Stage 2".
+
 ### Vex r3c and r3d (2026-11-04): credit-free
 r3c (09:00-10:30) and r3d (11:25-13:30) used no Meshy credits: every change is in the fit spec, the parts tools, the
 paint-over, the shared look (16c18b4f) and warden_look.json. Recipe: RECIPE_95.md.

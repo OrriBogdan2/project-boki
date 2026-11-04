@@ -561,7 +561,7 @@ def fluff_tail(arm, spec, tag="tail"):
     m = np.clip((v - tf) / max(1.0 - tf, 1e-3), 0, 1)[..., None] ** 0.8
     col = c0 * (1 - m) + c1 * m
     strokes = 0.5 + 0.5 * np.sin(u * 2 * math.pi * 24 + np.sin(v * 17.0) * 2.5 + v * 30.0)
-    col = col * (1 - 0.16 * strokes[..., None]) + dark * 0.16 * strokes[..., None] * (1 - m * 0.7)
+    col = col * (1 - 0.16 * strokes[..., None] * (1 - m)) + dark * 0.16 * strokes[..., None] * (1 - m)
     px = np.ones((size, size, 4), np.float32)
     px[..., :3] = col
     img = bpy.data.images.new(tag + "_atlas", size, size, alpha=False)
@@ -576,6 +576,102 @@ def fluff_tail(arm, spec, tag="tail"):
     mod = ob.modifiers.new("Armature", "ARMATURE")
     mod.object = arm
     log("tail: %.2f m, %d tris" % (L, sum(len(f) - 2 for f in bld.f)))
+    return ob
+
+
+def cape(arm, body, spec, tag="cape"):
+    """A cloth cape down the back as its own geometry (pip_front, the turnaround's back: the scan's cape is only
+    a collar). Rows from `z0` (the shoulders) to `z1` (the waist, above the tail's root), half-width `w0` to `w1`;
+    each row is laid `out` m behind the body's furthest-back point under it (a ray from behind at every column)
+    and never comes forward going down, so it hangs off the shoulder blades; the sides wrap forward by `wrap`
+    (x the square of the across), `folds` soft vertical folds `fold` m deep, more toward the hem. Two layers
+    (both sides read), painted `colours` dark to light down the folds; rides `bone` rigidly."""
+    from mathutils.bvhtree import BVHTree
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = body.evaluated_get(dg)
+    me = ev.to_mesh()
+    bvh = BVHTree.FromPolygons([body.matrix_world @ v.co for v in me.vertices], [list(q.vertices) for q in me.polygons])
+    ev.to_mesh_clear()
+    nu, nv = int(spec.get("nu", 24)), int(spec.get("nv", 14))
+    z0, z1 = float(spec["z0"]), float(spec["z1"])
+    w0, w1 = float(spec["w0"]), float(spec["w1"])
+    out, wrap = float(spec.get("out", 0.02)), float(spec.get("wrap", 0.07))
+    folds, fold = float(spec.get("folds", 3)), float(spec.get("fold", 0.012))
+    rows = []
+    y_prev = None
+    for i in range(nv + 1):
+        v = i / nv
+        z = z0 + (z1 - z0) * v
+        w = w0 + (w1 - w0) * v ** 0.8
+        ys = []
+        for j in range(nu + 1):
+            x = -w + 2 * w * j / nu
+            if abs(x) > w * 0.85:
+                continue
+            hit = bvh.ray_cast(Vector((x, -2.0, z)), Vector((0.0, 1.0, 0.0)))
+            if hit[0] is not None:
+                ys.append(hit[0].y)
+        # (the row's back by the median of its hits, never behind `y_lo`: a satchel or a scan's stub on the back
+        # pushed a min-of-hits cape half a metre out)
+        yb = (float(np.median(ys)) if ys else (y_prev + out if y_prev is not None else -0.12)) - out
+        yb = max(yb, float(spec.get("y_lo", -0.22)))
+        if y_prev is not None:
+            yb = min(yb, y_prev)
+        y_prev = yb
+        row = []
+        for j in range(nu + 1):
+            u = j / nu
+            a = 2 * u - 1
+            fy = fold * (0.4 + 0.6 * v) * (0.5 - 0.5 * math.cos(2 * math.pi * folds * u))
+            row.append(np.array([w * a, yb + wrap * a * a - fy, z]))
+        rows.append(row)
+    cells = None
+    size = 64
+    cols = [hexcol(c) for c in spec.get("colours", ["1f3d44", "2c555c", "3a6870"])]
+    px = np.ones((size, size, 4), np.float32)
+    for yy in range(size):
+        for xx in range(size):
+            u, v = (xx + 0.5) / size, (yy + 0.5) / size
+            k = 0.5 - 0.5 * math.cos(2 * math.pi * folds * u)          # 0 on a fold's ridge .. 1 in its valley
+            t = max(0.0, min(1.0, 0.85 - 0.55 * k - 0.25 * (1 - v)))
+            x = t * (len(cols) - 1)
+            i0 = min(int(x), len(cols) - 2)
+            f = x - i0
+            px[yy, xx, :3] = cols[i0] * (1 - f) + cols[i0 + 1] * f
+    img = bpy.data.images.new(tag + "_atlas", size, size, alpha=False)
+    img.pixels = px.ravel()
+    img.file_format = "PNG"
+    img.pack()
+    bld = WP.Builder()
+    thick = float(spec.get("thick", 0.006))
+    for layer in (0, 1):
+        base = len(bld.v)
+        for i, row in enumerate(rows):
+            for j, pnt in enumerate(row):
+                bld.v.append(pnt + np.array([0.0, thick * layer, 0.0]))
+                bld.uv.append((j / nu, 1.0 - i / nv))
+                bld.part.append("cape")
+                bld.s.append(0.0)
+        rl = nu + 1
+        for i in range(nv):
+            for j in range(nu):
+                a0 = base + i * rl + j
+                q = (a0, a0 + 1, a0 + rl + 1, a0 + rl)
+                bld.f.append(q if layer == 0 else q[::-1])
+    ob = bld.object("Cape")
+    # (the outer layer faces back, -y, the inner one the body: recalc_face_normals guesses on an open sheet)
+    half = len(bld.f) // 2
+    for k, poly in enumerate(ob.data.polygons):
+        want = -1.0 if k < half else 1.0
+        if poly.normal.y * want < 0:
+            poly.flip()
+    ob.data.update()
+    ob.data.materials.append(_mat("%s-%s" % (spec.get("slot", "cloth"), tag), img))
+    for poly in ob.data.polygons:
+        poly.use_smooth = True
+    _skin(ob, arm, {spec.get("bone", "hips"): range(len(ob.data.vertices))})
+    log("cape: rows %.2f..%.2f m, back at y %.3f..%.3f, %d tris" % (z0, z1, rows[0][nu // 2][1], rows[-1][nu // 2][1],
+                                                                     sum(len(f) - 2 for f in bld.f)))
     return ob
 
 
