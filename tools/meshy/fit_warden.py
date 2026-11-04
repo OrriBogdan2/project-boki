@@ -3532,7 +3532,7 @@ def main():
         import importlib
         parts += importlib.import_module(spec["scripted"]["module"]).build(ob, arm, rig, K, spec["scripted"])
     props = []
-    if any(k in spec for k in ("wings", "lantern", "springs", "crossbows", "gem", "fluff_tail", "flower_crown", "cape")):
+    if any(k in spec for k in ("wings", "lantern", "springs", "crossbows", "gem", "fluff_tail", "flower_crown", "cape", "laces")):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import warden_props as WPR
         for sr in spec.get("springs", []):
@@ -3545,6 +3545,8 @@ def main():
             props = list(WPR.crossbows(spec["crossbows"], spec["crossbows"]))
         if spec.get("gem"):
             parts.append(WPR.gem(arm, ob, spec["gem"]))
+        if spec.get("laces"):
+            parts.append(WPR.laces(arm, ob, spec["laces"]))
         if spec.get("fluff_tail"):
             parts.append(WPR.fluff_tail(arm, spec["fluff_tail"]))
         if spec.get("flower_crown"):
