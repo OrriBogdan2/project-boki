@@ -518,3 +518,9 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Owner: "pyro girl shouldn't be able to shoot her LMB during ult."
 - While her ultimate (Flue Flight, the jetpack flight) is active, LMB does nothing: no flamethrower, no queued shot; the input is ignored (not buffered) and a soft "can't" tick plays on a press. Re-enable the moment the ult ends. Keep whatever the source/data allows during it (Heat Shield E mid-flight stays, per her DashFlow row and the data).
 - Update her DashFlow/kit rules and card text. Assert: LMB held through the whole ult deals no damage and spawns no flame; LMB works again on the first frame after it ends.
+
+## 67. Tarek's rocks: taller and more noticeable (owner, 19:05 UTC Nov 4)
+- Owner: "rock guy's rocks should be taller and more noticeable."
+- Applies to every rock he raises: Stone Row (E), the Rubble Leap rock, and the Basalt Spine ridge (X). Raise them to roughly 1.6–2× their current height (taller than a hunter's head, so they read as real cover from the top-down camera), and make them pop visually: a distinct silhouette (craggy, tapered columns, not smooth blocks), warm rim highlights and an earthy palette that contrasts with the grass, a dust burst and short rumble as they rise, and a crack-and-crumble when they break. A ground shadow under each.
+- Gameplay: they still block what they block now (foes, shots); keep the collision footprint the same unless the source data says otherwise; standing/climbing on top (item 25) still works at the new height (adjust the step-up so Tarek climbs them as easily as before, nobody else can).
+- Assert: rock top height ≥ 1.6× the old value; Tarek can still climb and stand on one; another hunter still can't. Screenshots: old vs new Stone Row at gameplay zoom.
