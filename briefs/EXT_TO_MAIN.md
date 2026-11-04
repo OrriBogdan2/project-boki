@@ -1424,3 +1424,17 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
   - Matches the art: the face, the horns as their own mesh, long hair, the ice costume (a new ice toon slot with a fresnel rim), skates that point forward (a new assert checks this on every fit), wings as art-painted cards on springs that fold back while she skates, and a spring tail.
   - Stage-2 gaps: the spear takes the two-handed fan hold and reads short (in the art it's taller than her); the horns are stretched upward; dark patches at her hip and at the wing corners; she reads small and dark at match zoom.
 - **Known limit:** a weapon swap falls back to the procedural weapon for any .glb weapon (Vex too). This is pre-existing.
+
+## 2026-11-04 10:09 UTC (S2): OWNER: review stage 1 for Sable and Pip
+- **Shots:** ext/hero-shots-s2, under warden-3d/sable/ and warden-3d/pip/. Start with s1_vs_turnaround.png; it includes match-zoom rows.
+- **Branches:** ext/warden-3d-sable f333efee and ext/warden-3d-pip a07581b5. Both are on the r3c base.
+- **Checks:** all pass (agent-reported). Sable: glb 31/0, dancer-combo 92/0. Pip: glb 30/0, tender-combo 72/0.
+- **Cost:** 85 credits each.
+- **Sable:**
+  - Matches the art: the face, the plumes, the goggles, the asymmetric jacket (one sleeve, on her right arm), the open laced back, two real spring braids, four alpha wing cards with eyespots on spring bones, and twin scripted crossbows (the left one in the Offhand node).
+  - Stage-2 gaps: the red pendant doesn't glow; her eyes are pale, not the art's big dark eyes; the crossbows are small; the fur collar is bulky at the back; the wings could shimmer more.
+- **Pip:**
+  - Matches the art: the face, goggles, ears and cape; the fluffy tail on a 4-bone spring; four pink fairy-wing cards; a scripted copper lantern with glowing panes swinging from her right paw.
+  - **Biggest stage-2 gap:** her arms are fused to her flanks and cape, so wide arm swings show a skin and cape flap. That needs weight painting.
+  - Also: the lantern is smaller and casts no light; the wings are faint on bright ground.
+- **Generic additions on both branches:** an alpha "card" slot and shader for wings, an offhand weapon slot, and the props builders (wings, crossbows, lantern).
