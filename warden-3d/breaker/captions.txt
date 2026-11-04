@@ -1,0 +1,8 @@
+s1_vs_turnaround.png: Breaker stage 1 (Meshy 7.1 body + Blender-scripted hammer and prow), the r3 turnaround above, the in-game model close below (front, 3/4, side, back, 3/4 back)
+s1_vs_turnaround_game.png: the r3 turnaround above, the model at the match camera (true pixels, then x3) below
+s1_vs_portrait.png: the portrait, the model's head and shoulders from the front and 3/4
+s1_front_back_34.png: full length, front and 3/4 (left pair), back and 3/4 back (right pair)
+s1_poses_game.png: idle, run, attack, cast, ult at the match camera
+s1_moves_1.png: the run, frame by frame, close
+s1_match.png: Arena match frame (--arena=bulwark --record=2 --arena-demo=pose --demo-zoom=1.0)
+s1_match_x4.png: the match frame cropped round him, x4 (nearest)
