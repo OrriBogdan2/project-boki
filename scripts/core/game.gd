@@ -96,6 +96,7 @@ func _setup_input() -> void:
 	_key("inventory", [KEY_I])                # your things
 	_key("build", [KEY_B])                    # at home: build mode (lay out the island); indoors: decorate
 	_key("rotate", [KEY_R])                   # build mode: turn what you're holding
+	_key("store", [KEY_X, KEY_DELETE])        # build mode: put the piece away
 	_key("emote", [KEY_Y])                    # in a match: hold for the emote wheel (truce, deal, no...)
 	_key("map", [KEY_M])                      # in a match: the full map (ping it with the mouse)
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate

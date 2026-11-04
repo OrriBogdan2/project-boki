@@ -103,14 +103,20 @@ static func upgrade_entries(hb: HomeBuild) -> Array:
 		var t := FarmSites.tier(e)
 		var nm := String(HomeLayout.CATALOG[id]["name"])
 		if FarmSites.is_upgrading(e):
-			out.append({"t": "%s\nUpgrading %d%%" % [nm, int(FarmSites.progress(e) * 100.0)], "cb": func(): pass, "off": true, "tip": "Boki are building the next tier"})
+			out.append({"name": nm, "note": "Upgrading %d%%" % int(FarmSites.progress(e) * 100.0), "glyph": "hammer",
+				"cb": func(): pass, "off": true, "tip": "Boki are building the next tier"})
 			continue
 		var cost := FarmSites.upgrade_cost(id, t + 1)
 		if cost.is_empty():
-			out.append({"t": "%s\nTier %d (best)" % [nm, t], "cb": func(): pass, "off": true, "tip": "Fully upgraded"})
+			out.append({"name": nm, "note": "Tier %d (best)" % t, "glyph": "hammer", "cb": func(): pass, "off": true,
+				"tip": "Fully upgraded"})
 			continue
 		var lock := FarmUnlocks.gated() and FarmUnlocks.level() < int(cost.get("level", 1))
-		out.append({"t": "%s\nTier %d to %d" % [nm, t, t + 1] if not lock else "%s\nNeeds farm level %d" % [nm, int(cost.get("level", 1))],
-			"cb": func(): hb.upgrade(uid), "off": lock, "cost": cost,
-			"tip": "Upgrade the %s to tier %d: %s. Boki do the building; it keeps working meanwhile." % [nm.to_lower(), t + 1, FarmSites.cost_text(cost)]})
+		var note := "Tier %d to %d" % [t, t + 1]
+		if lock:
+			note = "Needs farm level %d" % int(cost.get("level", 1))
+		out.append({"name": nm, "note": note, "glyph": "hammer", "cb": func(): hb.upgrade(uid), "off": lock,
+			"cost": {} if lock else cost,
+			"tip": "Upgrade the %s to tier %d: %s. Boki do the building; it keeps working meanwhile." % [
+				nm.to_lower(), t + 1, FarmSites.cost_text(cost)]})
 	return out

@@ -155,7 +155,7 @@ func run(m: Node) -> void:
 	hb.toggle()
 	hb.cat = "Work"; hb._build_bar()
 	var items: Array = hb._tab_items()
-	ok(items.size() == 1 and String(items[0]["t"]).begins_with("Ranch Pen"),
+	ok(items.size() == 1 and String(items[0]["name"]).begins_with("Ranch Pen"),
 			"the Work tab shows only the Ranch Pen on a new farm: the locked stations are hidden, not greyed (%d)" % items.size())
 	ok(not FarmBuilder.tab_shown(hb, "Lights") and FarmBuilder.tab_shown(hb, "Work") and FarmBuilder.tab_shown(hb, "Buildings"),
 			"a tab with nothing to build now is hidden (Lights), the others stay")
@@ -165,7 +165,7 @@ func run(m: Node) -> void:
 	var bi: Array = hb._tab_items()
 	var house_it: Dictionary = {}
 	for it in bi:
-		if String(it["t"]).begins_with("House"): house_it = it
+		if String(it["name"]).begins_with("House"): house_it = it
 	var hc_cost: Dictionary = house_it.get("cost", {})
 	var priced: bool = int(hc_cost.get("gems", 0)) == 0 and int(hc_cost.get("wood", 0)) == 3 and int(hc_cost.get("labour", 0)) == 8
 	ok(bi.size() >= 3 and priced and bi.all(func(it): return not it.get("lock", false)),
@@ -333,9 +333,9 @@ func run(m: Node) -> void:
 	var up_items: Array = hb._tab_items()
 	var up_camp: Dictionary = {}
 	for it in up_items:
-		if String(it["t"]).begins_with("Lumber Camp"): up_camp = it
-	ok(not up_camp.is_empty() and up_camp.get("off", false) and String(up_camp["t"]).contains("farm level 3"),
-			"the Upgrades tab lists the camp, locked until farm level 3 ('%s')" % String(up_camp.get("t", "")).replace("\n", " / "))
+		if String(it["name"]).begins_with("Lumber Camp"): up_camp = it
+	ok(not up_camp.is_empty() and up_camp.get("off", false) and String(up_camp["note"]).contains("farm level 3"),
+			"the Upgrades tab lists the camp, locked until farm level 3 ('%s')" % String(up_camp.get("note", "")))
 	ok(not hb.upgrade(cu) and FarmSites.tier(camp) == 1 and not FarmSites.has_site(camp),
 			"upgrading too early is refused")
 	_stats(0, 0, 0, 70)          # farm level 3 (17.5 points)

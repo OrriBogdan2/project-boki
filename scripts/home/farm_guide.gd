@@ -193,9 +193,8 @@ func place_house() -> bool:
 			break
 	hb._drop_held()
 	hb.active = was_active
-	if not was_active and is_instance_valid(hb.bar):
-		hb.bar.queue_free()
-		hb.bar = null
+	if not was_active:
+		hb.close_ui()
 	return found
 
 # ------------------------------------------------------------------ the world prompt

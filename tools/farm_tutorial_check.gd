@@ -442,7 +442,7 @@ func _world() -> void:
 
 # ------------------------------------------------------------------ 5. round 2: Challenge House, water, rivers
 func _item_texts(home) -> Array:
-	return home.hb._tab_items().map(func(it): return String(it["t"]))
+	return home.hb._tab_items().map(func(it): return "%s %s" % [it["name"], FarmSites.cost_text(it.get("cost", {}))])
 
 func _farm2() -> void:
 	# the Challenge House is no longer given: it is Hob's blueprint after the first expedition

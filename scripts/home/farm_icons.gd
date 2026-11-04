@@ -60,7 +60,7 @@ static func cost_row(cost: Dictionary, px := 14.0, fs := 12) -> HBoxContainer:
 		var l := Label.new()
 		l.text = str(n)
 		l.add_theme_font_size_override("font_size", fs)
-		l.add_theme_color_override("font_color", Color("ff9a8a") if lack else Color(1, 1, 1, 0.88))
+		l.add_theme_color_override("font_color", Color("ff9a8a") if lack else Color("a6f0b0"))
 		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(l)
 	return row
