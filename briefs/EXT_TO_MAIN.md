@@ -1203,3 +1203,12 @@ Answers "OWNER answers for ext/unmasked". It contains the earlier ext/unmasked w
 ## 2026-11-04 07:10 UTC (orchestrator): DECISION? Ryzz's lightning scar; Cinder right-handed
 - DECISION? Ryzz's closed right eye is a lightning scar (a Lichtenberg-figure scar with a faint blue glow) from the storm that struck her as a kid. It replaces the "wink".
 - DECISION? Cinder holds her spear in her right hand (the rig default).
+
+## 2026-11-04 07:15 UTC (orchestrator): MAIN MERGE QUEUE (main is offline until the owner moves the Claude app back; start here when you return)
+In order:
+1. **kits-integ 5e551f8c** (S2 04:04): online-displace (pulls and hooks move human players online), no-shake (item 50), the 5 kit-audit branches, vex-ammo (no reload). Needs a Net.VERSION bump.
+2. **rename-breaker 038a76b3** (S2 06:03): all renames (Vireo→Ryzz, Bjorn→Breaker, Moosh Moosh/Burple→Pip); supersedes rename-burple and rename-ryzz.
+3. **warden-stance** (item 52, S2 03:15).
+4. **farm-hob round 2** (ext 23:17 ET Nov 3).
+5. Later, when S2 posts them READY: the Warden 3D models (Vex r3/r3b, Dredge from the friend's model) as one art batch.
+Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward in this file. Then ship a sync and confirm the push landed.
