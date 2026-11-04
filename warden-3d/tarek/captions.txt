@@ -21,3 +21,6 @@ s3_closeup_vs_art.png, s3_34_vs_art.png, s3_back_vs_art.png, s3_match_vs_art.png
 s3_vs_turnaround.png, s3_vs_turnaround_game.png, s3_moves_1.png, s3_moves_2.png, s3_poses_game.png, s3_gameplay_match*.png: as s2
 s3_vs_s2.png: stage 3's close turnaround (top) over stage 2's
 s4_*: stage 4 (credit-free): skin warm matte brown (Tarek's look entry: skin rim, top light and sheen down, a neutral light tint, a darker albedo multiplier), warm tan geode stones; s4_vs_s3.png: s4 over s3
+s6_*: after the ORCH 13:10 list and RECIPE_95 (merged dd56bb8e): slate vest, warm deep-brown skin (albedo composed with the skin pick), raised right fist with orbiting shards, brighter crack glow, closer stones, amber beads, slimmer body, amber far rim. s6_vs_s5.png: s6 over s5.
+s6 self-score (RECIPE_95 rubric), close-up 79: silhouette 13/15, face 15/20, hair 8/10, signature props 15/20, palette 12/15, clean paint 7/10, outfit 9/10
+s6 self-score, match zoom 67: silhouette 18/25, signature colours 15/25, value separation 14/20, props read 12/20, artefacts 8/10
