@@ -290,3 +290,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
   - **Meshy blocked:** this session's auto-mode permission check refused the Meshy hull spend partway through (45 credits of image edits ran, then the 3D job was refused). The agent did not work around it. To unblock, the user needs to allow Meshy spends in the S2 session.
   - **Phase A:** the Vex agent is on the shared look fix, Vex 95% and RECIPE_95.
   - **Still iterating:** Hem+Kael (s3), Breaker+Claire, Sable+Pip, Tarek+Ostra and Ryzz.
+- 2026-11-04 12:37 UTC: Phase A step 1 is done. The shared painted-look fix 16c18b4f (warm-neutral ambient, cool lights neutralised, darks lifted; only for painted .glb models) went to every Hunter agent to cherry-pick and retune on top. Vex 95% and RECIPE_95 are next.
