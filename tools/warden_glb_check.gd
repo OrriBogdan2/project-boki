@@ -328,7 +328,7 @@ func _own_look(a: String) -> void:
 	m.free()
 
 ## A model's glow halos (warden_look.json "halos") hang on their anchors outside the .glb (the skin, the bounds
-## and the slot checks never see them) and follow the head when it nods.
+## and the slot checks never see them) and follow the head when it nods (or the weapon when it aims).
 func _halo(main: Node, a: String) -> void:
 	var hl: Array = WardenGlb.look(WardenGlb.art(a)).get("halos", [])
 	if hl.is_empty():
@@ -347,6 +347,7 @@ func _halo(main: Node, a: String) -> void:
 		if mi:
 			rest[mi] = mi.global_position
 	(m.get_node("Rig/Torso/HeadPivot") as Node3D).rotation.x = 0.4
+	(m.get_node("Rig/Torso/Aim") as Node3D).rotation.x = 0.4
 	sync.apply()
 	await main.get_tree().process_frame
 	for hs in hl:
@@ -360,7 +361,7 @@ func _halo(main: Node, a: String) -> void:
 		off = maxf(off, mi.global_position.distance_to(an.global_position))
 		moved = maxf(moved, mi.global_position.distance_to(rest[mi]))
 	ok(found == hl.size() and inside == 0 and off < 0.001 and moved > 0.01,
-			"%s: %d glow halos on their anchors (off %.4f m), outside the .glb, follow a nod (%.3f m)"
+			"%s: %d glow halos on their anchors (off %.4f m), outside the .glb, follow a nod or the aim (%.3f m)"
 			% [a, found, off, moved])
 	m.free()
 

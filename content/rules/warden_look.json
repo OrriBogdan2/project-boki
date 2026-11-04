@@ -30,5 +30,52 @@
 				"glow": 1.8
 			}
 		}
+	},
+	"cinder": {
+		"painted": {
+			"rim_far": 0.42,
+			"rim_far_color": [
+				1.0,
+				0.5,
+				0.16
+			]
+		},
+		"slots": {
+			"skin": {
+				"shade": 0.9,
+				"top_light": 0.2,
+				"fres": 0.45,
+				"far_lift": 0.22
+			},
+			"metal": {
+				"top_light": 0.3,
+				"fres": 0.3,
+				"fres_tint": 0.6,
+				"far_lift": 0.1,
+				"sheen": 0.0
+			},
+			"glow": {
+				"glow": 1.4
+			},
+			"fur": {
+				"far_lift": 0.6,
+				"fres": 0.6,
+				"glow": 0.3
+			}
+		},
+		"halos": [
+			{
+				"anchor": "anchor_flame",
+				"color": [
+					1.0,
+					0.55,
+					0.18
+				],
+				"px": 2.4,
+				"near_d": 7.0,
+				"far_d": 14.0,
+				"strength": 2.2
+			}
+		]
 	}
 }

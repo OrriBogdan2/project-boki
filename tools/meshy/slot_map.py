@@ -30,7 +30,7 @@ cam = bpy.data.objects.new("cam", bpy.data.cameras.new("cam")); sc.collection.ob
 cam.data.type = "ORTHO"; cam.data.ortho_scale = scale
 centre = Vector((0, 0, cz))
 for v in views:
-    az = {"front": 0.0, "tq": 35.0, "tqR": -35.0}[v]
+    az = {"front": 0.0, "tq": 35.0, "tqR": -35.0, "back": 180.0, "side": 90.0}[v]
     r = math.radians(az)
     # the fitted model faces +Y; az > 0 toward her left (-X)
     cam.location = centre + Vector((-math.sin(r) * 3, math.cos(r) * 3, 0))

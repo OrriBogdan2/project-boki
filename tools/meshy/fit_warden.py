@@ -1805,6 +1805,119 @@ def _rig_joint(rig, name):
 
 
 
+def _tail_s(co, path):
+    """Each point's arc length along a polyline and its distance from it (nearest segment)."""
+    seg = path[1:] - path[:-1]
+    ln = np.linalg.norm(seg, axis=1)
+    s0 = np.concatenate([[0.0], np.cumsum(ln)])[:-1]
+    best_d = np.full(len(co), np.inf)
+    best_s = np.zeros(len(co))
+    for i in range(len(seg)):
+        t = np.clip(((co - path[i]) @ seg[i]) / max(ln[i] ** 2, 1e-9), 0.0, 1.0)
+        q = path[i] + t[:, None] * seg[i]
+        d = np.linalg.norm(co - q, axis=1)
+        better = d < best_d
+        best_d[better] = d[better]
+        best_s[better] = s0[i] + t[better] * ln[i]
+    return best_s, best_d
+
+
+def tail_mark(ob, ts, m):
+    """A tail (Cinder): the vertices within `r` of its centreline (`path`, Meshy's frame, root first; moved into
+    the fitted frame by the fit's own transform) and behind `y_cut` (the fitted frame: front +Y) get their arc
+    length along it in the point attribute "tail_s" (-1 elsewhere), which rides the pose and the decimation."""
+    path = np.array([(m @ Vector(p))[:] for p in ts["path"]])
+    co = np.array([v.co[:] for v in ob.data.vertices])
+    s, d = _tail_s(co, path)
+    sel = (d < float(ts.get("r", 0.2))) & (co[:, 1] < float(ts.get("y_cut", -0.08)))
+    a = ob.data.attributes.get("tail_s") or ob.data.attributes.new("tail_s", "FLOAT", "POINT")
+    a.data.foreach_set("value", np.where(sel, s, -1.0).astype(np.float32))
+    log("tail: %d vertices, %.2f m along" % (int(sel.sum()), float(s[sel].max()) if sel.any() else 0.0))
+
+
+def tail_to_hips(ob):
+    """The tail rides the hips rigidly through the fit's pose (bone heat hands its ground loop to the shins)."""
+    a = ob.data.attributes.get("tail_s")
+    if a is None:
+        return
+    s = np.zeros(len(ob.data.vertices), np.float32)
+    a.data.foreach_get("value", s)
+    idx = [int(i) for i in np.nonzero(s >= 0.0)[0]]
+    for g in ob.vertex_groups:
+        g.remove(idx)
+    g = ob.vertex_groups.get("hips") or ob.vertex_groups.new(name="hips")
+    g.add(idx, 1.0, "REPLACE")
+
+
+def tail_chain(ob, arm, ts):
+    """The tail on a spring chain (RIG_CONTRACT "Spring chains"): `bones` spring_tail_<i> bones under the hips along
+    the posed tail's own centreline (the middle of its vertices per stretch of "tail_s"), each tail vertex between
+    the two nearest, the root's first `blend` metres eased in from the hips so the tail grows out of them."""
+    import warden_parts as WP
+    a = ob.data.attributes.get("tail_s")
+    n = len(ob.data.vertices)
+    s = np.zeros(n, np.float32)
+    a.data.foreach_get("value", s)
+    sel = np.nonzero(s >= 0.0)[0]
+    co = np.array([v.co[:] for v in ob.data.vertices])
+    L = float(s[sel].max())
+    nb = int(ts.get("bones", 7))
+    k = max(nb * 3, 12)
+    pts = []
+    for i in range(k + 1):
+        lo, hi = L * (i - 0.5) / k, L * (i + 0.5) / k
+        m = sel[(s[sel] >= lo) & (s[sel] < hi)]
+        if len(m):
+            pts.append(co[m].mean(axis=0))
+    p = np.array(pts)
+    tip = co[sel[np.argmax(s[sel])]]
+    names, spans = WP.chain_bones(arm, "tail", "hips", p, L, nb, tip)
+    for g in ob.vertex_groups:
+        g.remove([int(i) for i in sel])
+    # (the chain's own arc lengths: the posed centreline is a little shorter than the marked one)
+    Lp = float(WP.arclen(p)[-1])
+    WP.weights(ob, [(int(vi), float(s[vi]) * Lp / L) for vi in sel], names, spans)
+    blend = float(ts.get("blend", 0.12))
+    hips = ob.vertex_groups.get("hips") or ob.vertex_groups.new(name="hips")
+    gi = {g.index: g for g in ob.vertex_groups}
+    for vi in sel:
+        t = float(np.clip(s[vi] / blend, 0.0, 1.0)) if blend > 0 else 1.0
+        if t >= 1.0:
+            continue
+        for x in ob.data.vertices[int(vi)].groups:
+            gi[x.group].add([int(vi)], x.weight * t, "REPLACE")
+        hips.add([int(vi)], 1.0 - t, "ADD")
+    log("tail chain: %d bones over %.2f m, %d vertices" % (nb, Lp, len(sel)))
+
+
+def grow_slot(ob, g):
+    """A part Meshy made too small (Cinder's fin-crest, a fan that hides behind her skull): the vertices of the
+    faces on slot `slot` within `box` (Meshy's frame, [x0, x1, y0, y1, z0, z1], null open) are pushed away from
+    `centre` by up to `k`, eased in from `r0` to `r1` metres out so the part's base stays on the body."""
+    names = [m.name for m in ob.data.materials]
+    vs = set()
+    for p in ob.data.polygons:
+        if names[p.material_index].startswith(g["slot"] + "-"):
+            vs.update(p.vertices)
+    b = [(-1e9 if x is None else x) if i % 2 == 0 else (1e9 if x is None else x) for i, x in enumerate(g.get("box") or [None] * 6)]
+    c = Vector(g["centre"])
+    k, r0, r1 = float(g["k"]), float(g["r0"]), float(g["r1"])
+    n = 0
+    for vi in vs:
+        v = ob.data.vertices[vi]
+        q = v.co
+        if not (b[0] <= q.x <= b[1] and b[2] <= q.y <= b[3] and b[4] <= q.z <= b[5]):
+            continue
+        d = (q - c).length
+        t = min(1.0, max(0.0, (d - r0) / max(r1 - r0, 1e-6)))
+        t = t * t * (3.0 - 2.0 * t)
+        if t > 0.0:
+            v.co = c + (q - c) * (1.0 + (k - 1.0) * t)
+            n += 1
+    ob.data.update()
+    log("grow %s: %d vertices, x%.2f" % (g["slot"], n, k))
+
+
 def main():
     spec_path = sys.argv[sys.argv.index("--") + 1]
     spec = json.load(open(spec_path))
@@ -1822,6 +1935,8 @@ def main():
     pad(img, ids, int(spec.get("pad", 6)))
     if "slot_rules" in spec:
         slot_rules(ob, img, spec["slot_rules"], spec["glow_min"], "body", vote=spec.get("slot_vote", "island"))
+        for g in spec.get("grow", []):
+            grow_slot(ob, g)
     else:
         slot_split(ob, img, spec["palette"], spec["glow_min"], "body")
     if spec.get("touch_up"):
@@ -1896,10 +2011,14 @@ def main():
         rj["knee." + sd] = K.bone_head(rig, "shin." + sd)
         rj["ankle." + sd] = Vector((rj["knee." + sd].x, rj["knee." + sd].y, 0.06))
         rj["fingers." + sd] = rj["hand." + sd] + Vector((0, 0, -0.08))
+    if "tail" in spec:
+        tail_mark(ob, spec["tail"], m)
     fit = fit_armature(joints)
     auto_weights(ob, fit)
     if spec.get("weight_rules"):
         weight_rules(ob, img, spec["weight_rules"])
+    if "tail" in spec:
+        tail_to_hips(ob)
     if spec.get("fit_weights"):
         keep_weights(ob)
     if head:
@@ -1918,6 +2037,9 @@ def main():
         release(ob, spec["gun_arm"].get("bones", ["forearm.R", "hand.R"]))
     if "chunk" in spec:
         chunk(ob, rig, spec["chunk"])
+    if "tail" in spec:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        tail_chain(ob, arm, spec["tail"])
     parts = []
     if spec.get("lens") or spec.get("braids") or spec.get("hoses"):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

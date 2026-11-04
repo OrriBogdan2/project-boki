@@ -9,6 +9,7 @@ shaft, brass fittings, a glass chamber with a live flame, a cork-brown nozzle). 
 closed lathe (capped at both ends). Its texture is painted here: the part's colour lit down to `dark` round its
 back (a soft band, so the toon light still reads it as round), `stripes` [n, colour] for rings, and for a
 `flame` part a hot core along the axis (`core`) fading to `colour` at its ends, with `licks` tongues.
+`anchors` [{"name": "anchor_flame", "z": -0.54}]: empties on the weapon at a Gun-space z (a halo's anchor).
 Blender 4.5, called from fit_warden.py (it hands in its slot materials)."""
 import math
 
@@ -110,4 +111,10 @@ def build(spec, slot_mats, tag="weapon"):
                 nd.image = img
     for poly in me.polygons:
         poly.use_smooth = True
+    for an in spec.get("anchors", []):
+        # (an empty on the weapon, e.g. its flame chamber: warden_look.json "halos" hang a match-zoom glow on it)
+        e = bpy.data.objects.new(an["name"], None)
+        bpy.context.scene.collection.objects.link(e)
+        e.parent = ob
+        e.location = (0.0, -float(an["z"]), float(an.get("y", 0.0)))
     return ob, img

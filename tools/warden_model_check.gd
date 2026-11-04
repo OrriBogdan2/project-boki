@@ -18,7 +18,7 @@ const WARDENS := {
 	"archer": {"hit_r": 0.37, "height": 0.98, "width": [0.7, 1.15], "moves": "arc_"},
 	"gunslinger": {"hit_r": 0.4, "height": 1.04, "width": [0.7, 1.3], "moves": "gunslinger_"},     # (slim, per her art)
 	# (Cinder's fin-crest stands over her head)
-	"ashwick": {"hit_r": 0.5, "height": 1.02, "height_3d": 1.15, "width": [0.7, 1.5], "moves": "as_"},
+	"ashwick": {"hit_r": 0.5, "height": 1.02, "height_3d": 1.11, "width": [0.7, 1.5], "moves": "as_"},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured
