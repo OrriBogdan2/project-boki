@@ -8,3 +8,4 @@
 - Body: black skin with glowing orange spots, orange belly and throat, long tail with a fin, leather vest/corset with a bandolier of glowing skull-labelled vials, a torn red apron, a scorched recipe notebook on a chain.
 - Emissive: the spots, the crest edge, the lance flame and the vials (switchable, like Kael's).
 - cinder_portrait.webp and cinder_splash.webp (16:9: burning lab, side angle, lance sweeping fire, skull flask raised). The older square splash is review/cinder_splash_square.webp.
+- cinder_head_sheet.webp: front + side head: rounded face, crest with fin rays and glowing edge, cracked goggles, skull vials. Flatter style than the art; use it for shapes, the painted art for colour.
