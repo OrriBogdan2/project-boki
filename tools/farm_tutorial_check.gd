@@ -47,7 +47,7 @@ func run(m: Node, mode := "") -> void:
 	Save.no_write = true
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--farm-hob-shots="):
-			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
+			await load("res://tools/tmp_task_shots.gd").new().run(m, String(a).substr(17))
 			return
 	_hob_rules()
 	_tutorial_rules()

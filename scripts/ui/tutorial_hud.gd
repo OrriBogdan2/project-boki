@@ -45,7 +45,9 @@ static func draw(h, sz: Vector2) -> void:
 		r.position.y -= (1.0 - slide) * (r.end.y + 4.0)
 		_bar(h, r, tu, 1.0 - k, false)
 	var pr: Rect2 = ln["pill"]
-	pr.size.y *= DETAIL_K if tu.detail != "" else 1.0
+	if tu.detail != "":
+		pr.position.y -= pr.size.y * (DETAIL_K - 1.0)      # grows upward, clear of the HUD
+		pr.size.y *= DETAIL_K
 	_bar(h, pr, tu, k, true)
 	if k >= 1.0:
 		_pill_extras(h, pr, tu)
