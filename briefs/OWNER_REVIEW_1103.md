@@ -486,3 +486,12 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
   - Keep: jump while holding = the bigger forward leap (data: "Jump while charging to leap forward"), air press = dive slam, spikes/dunks over the abyss, Molten Guard stacks, items 51 combos.
 - Update the card, the variants text and docs/heroes/dolm.md (owner override on hold length).
 - Assert: the charge never exceeds the cap; tap radius ≈ 0.85 × hold radius with no vertical motion; the hold carries Tarek ≥2 m forward with a rise before the slam. Screenshots: tap strip vs hold strip.
+
+## 62. Claire (Frost Siren) can skate in the air (owner, 19:00 UTC Nov 4; supersedes item 12's "air press buffers the skate to landing")
+- Owner: "for some reason Frost Siren can't dash while jumping / in the air; fix this."
+- Today (rimewright.json dash): "In the air, press it to buffer the skate: it starts the moment you land" (from item 12). Replace that:
+  - Pressed in the air (jumping, falling or gliding), the Skate starts at once: she skates through the air along her current height on a thin ice ribbon she lays under her skates, at skate speed, carving with the move keys, with a gentle descent (default ~1.5 m/s down, so it carries her well over gaps without being flight). It obeys the normal Skate rules: hold to keep going, up to its 1.6 s, release to stop, early stop refunds a share.
+  - Over the abyss it carries her across like that; the data's upgrade "creates ice islands when dashing over Abyss" stays the rank upgrade (the ribbon is visual only at base).
+  - Ending in the air drops her into normal fall/glide rules; landing mid-skate continues the skate on the ground seamlessly.
+  - Combos per item 51: jump during the skate works, darts become beams while skating in the air too.
+- Assert: Shift in mid-jump starts moving within one frame at skate speed; over a 6 m abyss gap from a jump she reaches the far side; the descent rate stays within the set value; no buffer-to-landing behaviour remains. Screenshots: a strip of a jump -> air skate across a gap.
