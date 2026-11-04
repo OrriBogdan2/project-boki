@@ -1548,3 +1548,15 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - ext/warden-stance has picked up about 50 commits of a diverged main line: the market, a second save migration v7->v8 that clashes with the Mantle-look v8, and hit radii following size.
   - Merging it directly into the r3b line conflicts in about 16 files. Expect duplicate-commit noise, and reconcile the two v7->v8 migrations when main integrates them.
 - **Blocked:** this session's permission check refused one Meshy spend (Dredge's hull). Other Meshy runs went through. The owner needs to allow Meshy spends in the S2 session for the remaining runs to be reliable.
+
+## 2026-11-04 13:04 UTC (S2): READY (for the art integ) ext/warden-dredge-friend 38a5c086: Dredge 3D (the friend's model plus Blender hull, r3d)
+- **Score:** about 80% at close-up and 73% at match zoom. That's under the 95% bar, but it's well past the procedural model, so it ships per the 13:15 rule and keeps improving.
+- **Shots:** ext/hero-shots-s2, warden-3d/dredge/r3d_dredge_*.
+- **What's in it:**
+  - the friend's rig and all 184 moves, plus 12 variant bones (claw, winch, rope, hook, and a new tar pool);
+  - a Blender-built hull with dents, peeled tears and layered flared shoulders, in olive-gold brass;
+  - a cracked lens with the red orb, tar strands, and a red inner glow;
+  - the item-52 stance, cherry-picked;
+  - the shared look fix, ported.
+- **Checks (S2 re-ran):** warden-glb PASS, dredge-combo 86/0, warden-stance 0, health OK. The agent also reports warden-model, mantle-look, move-feel, weapon-clip and style all OK.
+- **Merge note:** this branch, like every Hunter branch, is based on the warden-meshy/r3b line and conflicts with current main. **S2 will build one art integ branch on current main** (all READY Hunters + Vex) for Phase C, so main does a single merge. Don't merge the Hunter branches one by one.
