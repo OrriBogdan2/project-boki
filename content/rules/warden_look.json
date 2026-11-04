@@ -116,5 +116,81 @@
 				"shade": 0.9
 			}
 		}
+	},
+	"sable": {
+		"painted": {
+			"rim_far": 0.3,
+			"rim_far_color": [
+				0.62,
+				0.32,
+				1.0
+			]
+		},
+		"slots": {
+			"skin": {
+				"top_light": 0.45,
+				"fres": 0.55,
+				"far_lift": 0.25
+			},
+			"cloth": {
+				"far_lift": 0.5,
+				"fres": 0.55,
+				"fres_tint": 0.9,
+				"top_light": 0.8
+			},
+			"leather": {
+				"far_lift": 0.45,
+				"fres": 0.5
+			},
+			"metal": {
+				"top_light": 0.5,
+				"fres": 0.6,
+				"fres_tint": 0.8,
+				"far_lift": 0.35
+			},
+			"hair": {
+				"far_lift": 0.5,
+				"fres": 0.6,
+				"glow": 0.12,
+				"shadow_tint": [
+					0.86,
+					0.85,
+					0.97
+				],
+				"fres_tint": 0.3
+			},
+			"fur": {
+				"far_lift": 0.4,
+				"glow": 0.08,
+				"shadow_tint": [
+					0.86,
+					0.85,
+					0.97
+				]
+			},
+			"glow": {
+				"glow": 2.0
+			},
+			"card": {
+				"sheen": 1.0,
+				"glow": 0.3,
+				"alpha_k": 1.0,
+				"irid": 0.05
+			}
+		},
+		"halos": [
+			{
+				"anchor": "anchor_gem",
+				"color": [
+					1.0,
+					0.2,
+					0.3
+				],
+				"strength": 2.8,
+				"px": 6.0,
+				"near_d": 0.0,
+				"far_d": 3.0
+			}
+		]
 	}
 }

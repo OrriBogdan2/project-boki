@@ -12,11 +12,14 @@ const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
 const EPS := 0.0005
 ## Per Warden: the hit radius it must keep (m), its height against a medium hunter (hero sheets, "Body,
 ## scale and movement feel"), its width against a medium (from, to), and the prefix of its keyed moves.
+## height_3d: the 3D model's top where something stands over the head the procedural one doesn't have.
 const WARDENS := {
 	"bulwark": {"hit_r": 0.46, "height": 1.15, "width": [1.3, 2.2], "moves": "bul_"},
 	"archer": {"hit_r": 0.392, "height": 0.98, "width": [0.7, 1.15], "moves": "arc_"},
 	"gunslinger": {"hit_r": 0.416, "height": 1.04, "width": [0.7, 1.3], "moves": "gunslinger_"},   # (slim)
 	"mage": {"hit_r": 0.4, "height": 1.04, "width": [0.6, 1.3], "moves": "mage_"},     # (slim and long-legged)
+	# (Sable's feather plumes stand ~0.2 m over her head)
+	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.05, "width": [0.6, 1.3], "moves": "thf_"},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured
@@ -139,8 +142,9 @@ func _scale(id: String, ref_h: float, ref_w: float) -> void:
 	ok(absf(h - want) <= HEIGHT_TOL, "%s stands %.3fx a medium hunter (sheet %.2fx)" % [id, h, want])
 	if m.has_node("Warden"):
 		var hg := _glb_top(m) / ref_h
-		ok(absf(hg - want) <= HEIGHT_TOL, "%s's 3D model stands %.3fx a medium hunter, headwear and all (sheet %.2fx)"
-				% [id, hg, want])
+		var want3 := float(WARDENS[id].get("height_3d", want))
+		ok(absf(hg - want3) <= HEIGHT_TOL, "%s's 3D model stands %.3fx a medium hunter, headwear and all (sheet %.2fx)"
+				% [id, hg, want3])
 	var span: Array = WARDENS[id]["width"]
 	ok(
 		w >= float(span[0]) and w <= float(span[1]),

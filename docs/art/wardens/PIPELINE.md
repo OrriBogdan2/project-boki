@@ -307,3 +307,18 @@ Ryzz notes (stage 1, docs/art/wardens/PIPELINE.md recipe; no hand polish):
   on the back's slope with straps; the charm's halo off the emission (`strict`); warden_look "ryzz"; the swagger
   stance. The stance commits (ext/warden-stance 7260bfda..aa3345b6) are cherry-picked, not merged: a merge of
   ext/warden-stance brings a diverged main (save v8 market vs v8 Mantle look, 16 conflicting files).
+### Stage 1: Sable (thief), 2026-11-04 (balance 4921 before; 85 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Sable edit front | 09:08 | 01a1a5d1-7e41-7040-9f50-609ff1c60f5f | nano-banana-pro (image-to-image) | 3:4 crop; crossbows, wings, both braids, ground line out; hands empty | 9 | Kept |
+| Sable edit back | 09:08 | 01a1a5d1-7e3a-728b-a2b1-09e9f433952f | nano-banana-pro | as front, plus both sleeves long | 9 | Dropped: drew the pendant on her back; the sleeves were wrong (the turnaround's left arm is bare) |
+| Sable edit side | 09:08 | 01a1a5d1-7e5a-7775-a872-46e7339c4da9 | nano-banana-pro | crossbow, wing, braid out; long sleeves and fur collar | 9 | Dropped: no mask or plumes, a ground line |
+| Sable edit back 2 | 09:10 | 01a1a5d3-47b8-72ca-b79b-67cde2de6c30 | nano-banana-pro | crossbows, wings, braid out; nothing else | 9 | Kept |
+| Sable edit side 2 | 09:10 | 01a1a5d3-47c0-7739-a9b7-f67259a99aa6 | nano-banana-pro | crossbow, wing, braid out; fur collar in the standing collar; left arm bare | 9 | Kept (came back mirrored: flipped back to the art's side) |
+| Sable A | 09:12 | 01a1a5d5-1d78-72f9-b867-a9bff45038eb | meshy-7.1 | edited front, side, back (+ texture refs), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** |
+
+### Stage 2: Sable (thief), 2026-11-04: credit-free (0 Meshy tasks)
+The r3c recipe on the stage-1 body: art ramps, sable_face.png projected over the face (registered on the eyes and
+mouth, feathered: `project_late` `feather` / `feather_turn`), the mask on metal, a glowing pendant (warden_props
+`gem`), bigger crossbows with a stirrup, the fur collar pulled in (fit `shrink`), warden_look.json `sable`, the
+thief stance squared up. IMPORT.md "Stage 2".

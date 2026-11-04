@@ -161,6 +161,8 @@ func _kmoves(a: String) -> void:
 					worst = maxf(worst, sk.get_bone_global_pose(int(l[0])).origin.distance_to(want.origin))
 				var now := _local_poses(sk)
 				for ch in _keyed(k[1]):
+					if an.hold == "palm" and ch in ["gp", "wa", "wo"]:
+						continue      # (nothing held: the weapon's channels move no hand)
 					keyed[ch] = true
 					for b in CHANNEL_BONES[ch]:
 						if _moved(still.get(b), now.get(b)):
@@ -187,7 +189,9 @@ func _keyed(key: Dictionary) -> Array:
 			continue
 		var v = key[ch]
 		var amount := 0.0
-		if v is Vector3:
+		if ch in ["fx", "fy", "fz"]:
+			amount = absf(fposmod(float(v) + PI, TAU) - PI)      # (a whole turn ends where it began)
+		elif v is Vector3:
 			amount = (v as Vector3).length()
 		elif v is Array:
 			for x in v:
@@ -254,7 +258,7 @@ func _shading(a: String) -> void:
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
 			# (the void slot is the starfield shader, RIG_CONTRACT "Materials")
-			var shader_ok := sm != null and (sm.shader == Models.HERO or sm.shader == WardenGlb.VOID)
+			var shader_ok := sm != null and sm.shader in [Models.HERO, WardenGlb.VOID, WardenGlb.CARD]
 			if not shader_ok or not sm.get_shader_parameter("use_tex") \
 					or sm.get_shader_parameter("albedo_tex") == null or not sm in mats:
 				wrong += 1
@@ -380,6 +384,7 @@ func _halo(main: Node, a: String) -> void:
 		if mi:
 			rest[mi] = mi.global_position
 	(m.get_node("Rig/Torso/HeadPivot") as Node3D).rotation.x = 0.4
+	(m.get_node("Rig/Torso") as Node3D).rotation.y = 0.4      # (a halo on the chest, Sable's pendant, rides the hips)
 	sync.apply()
 	await main.get_tree().process_frame
 	for hs in hl:
@@ -393,7 +398,7 @@ func _halo(main: Node, a: String) -> void:
 		off = maxf(off, mi.global_position.distance_to(an.global_position))
 		moved = maxf(moved, mi.global_position.distance_to(rest[mi]))
 	ok(found == hl.size() and inside == 0 and off < 0.001 and moved > 0.01,
-			"%s: %d glow halos on their anchors (off %.4f m), outside the .glb, follow a nod (%.3f m)"
+			"%s: %d glow halos on their anchors (off %.4f m), outside the .glb, follow a nod and a twist (%.3f m)"
 			% [a, found, off, moved])
 	m.free()
 
@@ -424,8 +429,11 @@ func _weapon(a: String) -> void:
 	if weapon == null:
 		m.free()
 		return
+	var off := gun.get_node_or_null(WardenGlb.WEAPON_OFF) as Node3D     # (a twin hold's second weapon)
+	var own := func(mi: Node) -> bool: return mi == weapon or weapon.is_ancestor_of(mi) \
+			or (off != null and (mi == off or off.is_ancestor_of(mi)))
 	var shown := gun.find_children("*", "MeshInstance3D", true, false).filter(
-			func(mi): return (mi as Node3D).is_visible_in_tree() and mi != weapon and not weapon.is_ancestor_of(mi))
+			func(mi): return (mi as Node3D).is_visible_in_tree() and not own.call(mi))
 	var mag := gun.get_node_or_null("Mag") as MeshInstance3D
 	var own_mag := weapon.find_child(WardenGlb.WEAPON_MAG, true, false) != null
 	# its own magazine is the Mag; a weapon modelled whole leaves the Mag node empty (the reload moves nothing)

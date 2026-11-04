@@ -39,17 +39,19 @@ const OPTIONAL := ["cape", "scarf", "tail", "wings"]
 const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus"]
 ## glTF material name -> the toon shader's painted surface (RIG_CONTRACT "Materials").
 const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur": 5, "eyes": 0, "team": 1, "glow": 0,
-	"void": 0}
+	"void": 0, "card": 0}
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
-const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline shell
+const NO_INK := ["hair", "eyes", "glow", "card"]   # slots drawn without the ink outline shell
 const NO_INK_TAGS := ["gum"]   # small round pieces an outline turns into a cartoon ball (Ryzz's gum bubble)
 ## The `void` slot is no lit surface but a window onto the Void (shaders/hero_void.gdshader: a drifting
 ## starfield over its painted colour, Ostra's coat tears); "<void>-<tag>" with a SOFT_TAGS tag also fades
 ## out toward its tip and edges (a body that dissolves into smoke: Ostra's wisp).
 const VOID := preload("res://shaders/hero_void.gdshader")
 const SOFT_TAGS := ["wisp"]
+## The "card" slot: see-through alpha cards (wings) on their own shader, both sides drawn, no ink.
+const CARD: Shader = preload("res://shaders/warden_card.gdshader")
 ## Pieces built as clean geometry (tools/meshy/warden_parts.py), "<slot>-<tag>": they take the ink line even on
 ## an inkless slot (the hair goes without it for a scan's ragged strands, not for a woven braid).
 const INK_TAGS := ["braid", "mane", "mane_dk"]
@@ -83,6 +85,9 @@ const SETTING := "warden_models"
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
 const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
 const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (HunterAnim spins them while firing)
+## the second weapon of a twin hold (Sable's left crossbow), a child of WEAPON placed so that HunterAnim's twin
+## hold hands it to the left hand (its node x < -0.04: _setup_weapon moves it into the Offhand)
+const WEAPON_OFF := "weapon_offhand"
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
 static var _ink: ShaderMaterial  # the painted atlas's ink shell (INK_WIDTH), shared
@@ -174,6 +179,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	glb.add_child(sync)
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
+	_lights(glb, look(art(arch)))
 	_halos(root, glb, look(art(arch)))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
@@ -193,6 +199,13 @@ static func _hold_weapon(root: Node3D, glb: Node3D) -> void:
 	weapon.owner = null
 	gun.add_child(weapon)
 	weapon.transform = Transform3D.IDENTITY
+	var off := weapon.find_child(WEAPON_OFF, true, false) as Node3D
+	if off:
+		var at := WardenGlb.model_xf(gun, off)
+		off.get_parent().remove_child(off)
+		off.owner = null
+		gun.add_child(off)
+		off.transform = at
 	# its magazine (WEAPON_MAG) becomes the Gun's Mag, which the reload drops out and slaps back in
 	var mag := weapon.find_child(WEAPON_MAG, true, false) as Node3D
 	var old := gun.get_node_or_null("Mag")
@@ -237,6 +250,21 @@ static func look(nm: String) -> Dictionary:
 				else null
 		_look = parsed if typeof(parsed) == TYPE_DICTIONARY else {}
 	return (_look as Dictionary).get(nm, {})
+
+## The look's "lights": a small OmniLight3D on each named anchor empty of the model (Pip's lantern glow), so a
+## prop that glows also lights what is round it: {"anchor", "colour" [r, g, b], "energy", "range"}.
+static func _lights(glb: Node, own: Dictionary) -> void:
+	for l in own.get("lights", []):
+		var at := glb.find_child(String(l.get("anchor", "")), true, false) as Node3D
+		if at == null:
+			continue
+		var om := OmniLight3D.new()
+		om.name = "Light"
+		om.light_color = _param(l.get("colour", [1.0, 0.8, 0.5]))
+		om.light_energy = float(l.get("energy", 1.0))
+		om.omni_range = float(l.get("range", 2.0))
+		om.shadow_enabled = false
+		at.add_child(om)
 
 ## The model's glow halos (warden_look.json "halos": anchor, color, px, near, far, strength): a lens that is a
 ## pixel wide at the match camera reads as a glow there (shaders/warden_halo.gdshader). Each halo is a small quad
@@ -283,6 +311,19 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 		for si in mesh.get_surface_count():
 			var src := mesh.surface_get_material(si) as BaseMaterial3D
 			var slot := String(src.resource_name).get_slice("-", 0) if src else ""      # ("<slot>-<texture>")
+			if slot == "card":
+				var cm := ShaderMaterial.new()
+				cm.shader = CARD
+				if src and src.albedo_texture:
+					cm.set_shader_parameter("albedo_tex", src.albedo_texture)
+				cm.set_shader_parameter("use_tex", src != null and src.albedo_texture != null)
+				var card_look: Dictionary = (own.get("slots", {}) as Dictionary).get("card", {})
+				for k in card_look:
+					cm.set_shader_parameter(k, _param(card_look[k]))
+				(mi as MeshInstance3D).set_surface_override_material(si, cm)
+				(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				out.append(cm)
+				continue
 			# the ink shell on the body's silhouette only: on the scan's thin hair strands it poked through as
 			# lines across the face
 			var tag := String(src.resource_name).get_slice("-", 1) if src else ""
@@ -420,7 +461,8 @@ class Sync extends Node:
 ## Hanging pieces on bone chains (RIG_CONTRACT "Spring chains"): bones named spring_<name>_<i>, each the next
 ## one's parent, the first a child of a contract bone (a braid hangs from the head). Each chain is a rope of its
 ## joints in world space: it keeps its momentum (damped), is pulled back toward the shape it has riding its parent
-## rigidly (firmer at the root than at the tip), and keeps its links' lengths, so a braid trails behind a run,
+## rigidly (firmer at the root than at the tip; a spring_hang_* chain toward straight down from its root), and
+## keeps its links' lengths, so a braid trails behind a run,
 ## swings out of a turn and settles when she stands. The last bone is the tip (no skin of its own).
 class Springs:
 	const PREFIX := "spring_"
