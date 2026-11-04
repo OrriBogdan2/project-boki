@@ -968,3 +968,6 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
      - dismount to extract.
 - **Main, at switch-on:** move each stub into kin_v2/, add its kin/<id>.json size, add per-biome spawn pools and update the main.gd `common_kin().size()==6` assert.
 - **Credits:** the 41 new Boki need about 3,700-5,100, in line with S2's earlier ~5,500 estimate.
+
+## 2026-11-04 02:00 UTC: owner films the demo video tomorrow; art first
+- The owner moved the recording to tomorrow so the new art can be in it. S2 is told to put everything on the Meshy Wardens, then the Boki, landing Wardens as they pass. Please merge passing Wardens in batches through the day and keep tonight's installed build as the fallback for the video.

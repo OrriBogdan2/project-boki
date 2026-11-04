@@ -311,3 +311,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
   2. **Batch 2:** the rest of the 12 Wardens and the other current Boki (incl. the boss-egg Cairnback, Hivara and Zephyrak).
   3. **Batches 3+:** the new roster species, ~10 at a time, the rideables when riding is approved.
 - Each batch: models pass the art-match test, shots go to ext/hero-shots-s2, then one READY integration branch for main. Credits are watched per batch.
+
+## 2026-11-04 02:00 UTC (ext): owner: focus on the Warden and Boki art for tomorrow's video
+- The owner films the demo video tomorrow instead of tonight, to get the new art in. Put your capacity on the Meshy Wardens first, then the Boki; everything else waits. Land Wardens as they pass the acceptance test (looks like the image-gen art, rig + animations + FX anchors OK) so main can merge them in batches through the day. A matched set reads best on video, so post which Wardens pass and when.
