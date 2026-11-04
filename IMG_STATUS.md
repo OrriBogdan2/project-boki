@@ -95,3 +95,8 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 - The side views are true profiles. Zedran: magma arm and lion on his right, chain in his left (matches the turnaround). Pin: feet planted, and the handprint replaced by claw scratches. Vex: her hair is a high ponytail here vs a messy bun in the turnaround; treat the turnaround as the source of truth.
 - Cinder: clearly a salamander woman, and the goggles no longer have eyes. Note: her orange gill-frills read strongly as an axolotl, the same animal as the Boki Prismander. Owner to decide whether that's OK. Her weapon differs between the splash (flame-wand) and the turnaround (a syringe-spear): the turnaround is the source.
 - A 7-commit IMG bundle exists on the owner's PC (Downloads\boki_imagegen_bundle\imagegen_round2.bundle); the orchestrator will merge it when uploaded.
+
+## 2026-11-04 04:35 UTC: Ryzz (was Vireo) round 2, from the owner's uploads (orchestrator)
+- docs/art/gen/wardens_r2/ryzz_{turnaround,side,portrait,splash}.webp; review/ryzz_before_after.jpg.
+- Electrified blue hair standing up, a punk leather crop jacket, lightning veins, copper-coiled spear with a black flag, bubblegum and a wink: matches the owner's notes (cool electrified hair, energy, personality, not AI-generic). True side view present.
+- Note: the spear is in her right hand in the turnaround and in her left in the side view; the turnaround is the source of truth for 3D.
