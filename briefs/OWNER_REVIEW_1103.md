@@ -469,3 +469,10 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Whether the spin itself hits people on each revolution is the owner's call (ext is asking). Default until he answers: the spin is the charge motion only; the damage comes on the release slam.
 - Keep the Shift 360 Smash as is. Update the card text and docs/heroes/bulwark.md's parity table (note the owner override).
 - Assert: holding LMB rotates the hammer continuously (≥1 turn/s); the release still slams forward at the cursor; perfect launch still works. Screenshots: a 6-frame strip of the spin and the release.
+
+## 60. Ostra's LMB: goes through walls, and the longer you wait between shots the bigger and harder the next orb (owner, 18:59 UTC Nov 4)
+- Owner: "Void's LMB goes through walls, and holding it longer between hits means a bigger, higher-damage LMB. Fix this."
+- Today (ostra.json lmb): after 1.4 s without firing, the next orb is a fixed "primed" bolt (+34% damage, faster, slow 10%, through terrain); otherwise a normal orb that walls stop. It's a binary switch, and it reads as no change.
+- Make it a **continuous build-up**: the time since the last shot charges the next orb smoothly from normal to full over the source window (default 1.4 s; check `briefs/supervive-data` Void: 263 -> 353 at full, plus Slow). The orb grows visibly in size and brightness with the charge, its damage scales with it, and at full it also slows. A charge glow on Ostra's hand (or the lantern) shows the build-up, with a soft chime at full.
+- **Through walls:** the source data says the strengthened orb goes through terrain. The owner says the LMB goes through walls: follow the owner: every LMB orb passes through walls/terrain (damage still only on hunters, Boki and breakables per the usual rules).
+- Assert: damage is monotonic in wait time from 0 to the window and capped after; orb scale tracks the charge; orbs pass a wall between Ostra and a dummy at any charge; a full orb slows. Screenshots: a quick shot vs a full-charge orb side by side, and one passing through a wall.
