@@ -374,3 +374,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Dredge: the limb loss was caused by decimating the whole body to the leftover budget, and r3h is affected too. The r3j fix (per-part decimation) is in checks. The integ holds r3h as a placeholder until r3j lands.
 - In flight: Hem s8, Sable s9, Dredge r3j, Kael accuracy pilot (ext/warden-3d-kael-acc), and the art-integ suite (a25da340b13600878).
 - The session usage limit has been reached. Agents still running may stop mid-round; resume from their branches.
+
+## 2026-11-04 ~22:30 UTC (S2): art-integ freeze DONE
+- art-integ READY fe51b43b (= origin/main sync91; the frozen art tree was already merged by sync91). Full suite 0 failures, health --strict OK. Posted in EXT_TO_MAIN dd37786d.
+- Kael accuracy pilot a3 (ext/warden-3d-kael-acc a0c8c098): face 45->62, dark 45->58, match 64->62; not READY, owner's call. EXT_TO_MAIN f444c3a3.
+- Hunter improvement agents ended with the session exit; branches are intact. Restarting for follow-up syncs.
