@@ -300,6 +300,8 @@ def _bake_tree(m, look, img):
         L.new(co, nz.inputs["Vector"])
         patch = ramp(math_("ADD", nz.outputs["Fac"], math_("MULTIPLY", grime, 0.35)), look[key + "_at"],
                      look[key + "_at"] + 0.08)
+        if look.get(key + "_crevice"):          # (only in the crevices: accents, not a tint over the surface)
+            patch = math_("MULTIPLY", patch, ramp(grime, 0.25, 0.65))
         col = mix(math_("MULTIPLY", patch, look.get(key + "_k", 0.85)), col, rgb(look[key]))
     # scratches: thin bright lines along a stretched noise
     if look.get("scratch"):
@@ -321,6 +323,14 @@ def _bake_tree(m, look, img):
     if look.get("edge"):
         pt = N.new("ShaderNodeNewGeometry").outputs["Pointiness"]
         col = mix(math_("MULTIPLY", ramp(pt, 0.53, 0.62), 0.6), col, rgb(look["edge"]))
+    # a painted highlight: the upper curves catching the key light, warm and bright
+    if look.get("highlight"):
+        hn = N.new("ShaderNodeVectorMath")
+        hn.operation = "DOT_PRODUCT"
+        L.new(N.new("ShaderNodeNewGeometry").outputs["Normal"], hn.inputs[0])
+        hn.inputs[1].default_value = LIGHT
+        band = ramp(hn.outputs["Value"], look.get("highlight_at", 0.55), look.get("highlight_at", 0.55) + 0.3)
+        col = mix(math_("MULTIPLY", band, look.get("highlight_k", 0.7)), col, rgb(look["highlight"]))
     # grime last: the crevices darkened toward the grime colour
     col = mix(math_("MULTIPLY", grime, look.get("grime_k", 0.75)), col, rgb(look.get("grime", "1c1612")))
     L.new(col, emi.inputs["Color"])

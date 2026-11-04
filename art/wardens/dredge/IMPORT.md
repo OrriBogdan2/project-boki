@@ -34,7 +34,8 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
     in Cycles (CPU, about 10 s): each material's colour with grime in the crevices (AO), verdigris on the brass and
     rust on the iron (noise patches gathered in the crevices), dents as painted light and shade (a voronoi bump lit
     by a fixed key light), scratches, worn edges, a painted highlight on the glossy tar, cracks and the eye's red
-    light over the lens. Colours: brass 76603a, iron 4c4844, boot 4e3e32, tar 120d0e, glass 4e5862 (the rest as r2);
+    light over the lens, a warm gold highlight painted on the upper curves (verdigris kept to the crevices).
+    Colours: brass 654a26 (highlight c8963e), iron 4c4844, boot 4e3e32, tar 120d0e, glass 4e5862 (the rest as r2);
   - the eye: the old red asterisk replaced by an emissive orb (`glow-eye`, ff2418, flat) on the `eye` bone, set in
     the cracked lens;
   - 24 tar drips (about 66 triangles each) hanging from the faces that look down: the hull's underside (12), the
