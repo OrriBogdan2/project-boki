@@ -930,6 +930,7 @@ func _spawn_kin() -> void:
 	for k in kins:
 		k["node"].queue_free()
 	kins.clear()
+	KinIndoors.inside.clear()
 	var open_isles: Array = [0]
 	for i in world.islands.size():
 		if i > 0 and _isle_open(world.islands[i]["id"]):
@@ -1381,8 +1382,7 @@ func _move_kin(d: float) -> void:
 			continue
 		if k.has("indoors"):
 			# inside the house: out of sight until it fancies coming out (or hears you whistle)
-			k["indoors"] = float(k["indoors"]) - d
-			if float(k["indoors"]) <= 0.0 and not k.has("exiting"):
+			if KinIndoors.step(k, d, ppos, _house_door(), KinIndoors.has_house(spots)) and not k.has("exiting"):
 				_kin_exit_house(k, false)
 			continue
 		if k.has("leap"):
@@ -1452,14 +1452,19 @@ func _move_kin(d: float) -> void:
 					# some sleep indoors
 					k["going_in"] = true
 					k["goal"] = _house_door()
+				elif not KinIndoors.has_house(spots) and randf() < 0.5:
+					KinIndoors.nap_outside(k)      # no house: it curls up where it is
 				else:
 					# at night they head for bed and doze
 					k["goal"] = k.get("bed", world.random_ground(maxi(here, 0)))
 				if randf() < 0.5: _emote(k, "z")
-			elif not night and randf() < 0.05 and here == world.island_of(spots["house"].x, spots["house"].z):
-				# pops inside for a nap now and then
-				k["going_in"] = true
-				k["goal"] = _house_door()
+			elif not night and randf() < 0.05:
+				# a short nap now and then: inside if there is a house, otherwise curled up outside
+				if here == world.island_of(spots["house"].x, spots["house"].z):
+					k["going_in"] = true
+					k["goal"] = _house_door()
+				elif not KinIndoors.has_house(spots):
+					KinIndoors.nap_outside(k)
 			elif friends.size() > 0 and randf() < float(pers.get("social", 0.22)):
 				var f: Dictionary = friends[randi() % friends.size()]
 				k["chase"] = f; k["chase_t"] = 4.0
@@ -1504,7 +1509,7 @@ func _move_kin(d: float) -> void:
 		if k.get("going_in", false) and Vector2(pos.x - _house_door().x, pos.z - _house_door().z).length() < 0.6:
 			k.erase("going_in")
 			var night_now := sin((day_t - 0.25) * TAU) < -0.2
-			k["indoors"] = randf_range(70.0, 140.0) if night_now else randf_range(20.0, 55.0)
+			KinIndoors.enter(k, night_now)
 			n.visible = false
 			Sfx.play("thump", pos, -16.0, 0.1, 1.3)
 			continue
@@ -1958,6 +1963,7 @@ func _house_alert(inside: Array) -> void:
 ## Out of the front door (with a little pop), and on to wherever it was going.
 func _kin_exit_house(k: Dictionary, called: bool) -> void:
 	k.erase("indoors"); k.erase("exiting")
+	KinIndoors.left(k)
 	var door := _house_door() + Vector3(randf_range(-0.4, 0.4), 0, 0.2)
 	k["pos"] = door
 	k["vel"] = Vector3(0, 0, 2.5)
@@ -2077,8 +2083,7 @@ func _find_interact() -> void:
 	prompt_box.visible = true
 	var pairs: Array = []
 	if best["kind"] == "kin" and visit.is_empty():
-		var nm: String = best["k"]["rec"]["name"]
-		pairs = [[Settings.key_cap("interact"), "Pet " + nm], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"]]
+		pairs = [[Settings.key_cap("interact"), KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"]]
 	else:
 		pairs = [[Settings.key_cap("interact"), _label_for(best)]]
 	# the prompt is keycaps and words, rebuilt only when what it says changes
@@ -2228,7 +2233,7 @@ func _use(it: Dictionary) -> void:
 		"stall": hmk.open()
 		"portal": _open_expedition()
 		"house": Game.goto("interior", {"room": "house"})
-		"kin": _pet_kin(it["k"])
+		"kin": _kin_act(it["k"])
 		"egg":
 			if _egg_ready():
 				_hatch_nest_egg()
@@ -2891,6 +2896,16 @@ func _kin_entry(rec: Dictionary) -> Dictionary:
 func _face(at: Vector3) -> void:
 	pface = atan2(-(at.x - ppos.x), -(at.z - ppos.z))
 	player.rotation.y = pface
+
+## The interact key on a Boki: do something about what it wants, otherwise pet it.
+func _kin_act(k: Dictionary) -> void:
+	var rec: Dictionary = k["rec"]
+	match KinWants.action(rec, POND_EDGE.x > -100.0):
+		"feed": _care_feed(rec, KinWants.best_food(rec))
+		"nap": _care_nap(rec)
+		"bath": _care_bath(rec)
+		"brush": _care_brush(rec)
+		_: _pet_kin(k)
 
 func _pet_kin(k: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
@@ -4207,38 +4222,14 @@ func _care_tick(d: float) -> void:
 		var sh: Node3D = nest.get_node("Shell")
 		sh.rotation.z = sin(Time.get_ticks_msec() / 90.0) * 0.12 * (1.0 if fmod(Time.get_ticks_msec() / 1000.0, 3.0) < 0.6 else 0.0)
 
-## The thought bubble over each kin: what it wants, shown now and then rather than all the time.
+## The thought bubble over each kin that wants something (KinWants), and the sleeping badge by the door.
 func _update_bubbles(d: float) -> void:
 	var now := Time.get_ticks_msec() / 1000.0
-	var shown: Array = []
+	KinWants.update(self, d, now)
+	KinIndoors.badge(self, _house_door(), KinIndoors.names(kins), ppos)
 	for k in kins:
 		var rec: Dictionary = k["rec"]
-		if not k.has("bubble"):
-			var b := Models.want_bubble()
-			b.position = Vector3(0.25, 1.45, 0)
-			b.visible = false
-			(k["node"] as Node3D).add_child(b)
-			k["bubble"] = b
-		var bub: Node3D = k["bubble"]
-		if not is_instance_valid(bub):
-			k.erase("bubble")
-			continue
 		var w := Care.want(rec) if visit.is_empty() else ""
-		var cyc := fmod(now + float(absi(String(rec["uid"]).hash()) % 97) * 0.1, 9.0) < 3.6
-		var show: bool = w != "" and cyc and not k.get("busy", false) and not k.has("fetch") and float(k.get("nap_t", 0.0)) <= 0.0 and float(k.get("say_t", 0.0)) <= 0.0
-		if show:
-			for p in shown:
-				if Vector2(p.x - k["pos"].x, p.z - k["pos"].z).length() < 2.6 or _talking_near(k, 2.6):
-					show = false; break
-		if show: shown.append(k["pos"])
-		bub.visible = show
-		if show:
-			for nm in ["food", "energy", "clean", "joy"]:
-				(bub.get_node(nm) as Node3D).visible = nm == w
-			bub.position.y = 1.45 + sin(now * 2.2) * 0.04
-			# face the camera like a cartoon thought bubble
-			bub.look_at(cam.global_position, Vector3.UP)
-			bub.scale = Vector3.ONE * 1.4
 		# dusty kin shed a little dust as they go
 		if visit.is_empty() and Care.need(rec, "clean") < 22.0 and randf() < d * 0.4:
 			fx.dust(k["pos"], 3)
