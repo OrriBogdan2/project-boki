@@ -2,7 +2,7 @@
  "doc": "Ostra (ostra): RECIPE_95 spec (docs/art/wardens/RECIPE_95.md). Steps 2-4 ran before the recipe (stage 1, art/wardens/ostra/IMPORT.md): this spec drives fit, shots and checks. python3 tools/meshy/recipe.py art/wardens/src/ostra_recipe.json <steps>",
  "name": "ostra",
  "arch": "ostra",
- "tag": "b18",
+ "tag": "b20",
  "raw": "~/meshy/ostra",
  "art": {
   "ref": "origin/ext/imagegen",

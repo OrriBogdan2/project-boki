@@ -272,8 +272,8 @@
   "taper": 0.85,
   "bones": 5,
   "parent": "hips",
-  "colour": "4a2276",
-  "tip": "a878e8",
+  "colour": "5a2a90",
+  "tip": "b890ff",
   "tendrils": [
    {
     "from": 0.2,
@@ -442,8 +442,8 @@
    -0.26
   ],
   "r": 0.12,
-  "colour": "040208",
-  "ring": "8a46e0",
+  "colour": "020104",
+  "ring": "5a20c8",
   "style": "vortex",
   "core": 0.62,
   "arms": 4,
@@ -455,7 +455,7 @@
    1.0,
    0.0
   ],
-  "hot": "f4e4ff",
+  "hot": "c080ff",
   "anchor": "orb",
   "core_slot": "void",
   "planes": true,
@@ -699,9 +699,9 @@
  "face_marks": {
   "on": "Mask",
   "name": "marks",
-  "colour": "7a28ff",
+  "colour": "a850ff",
   "bone": "head",
-  "lift": 0.005,
+  "lift": 0.008,
   "marks": [
    {
     "name": "tear",
@@ -763,8 +763,8 @@
       1.58
      ]
     ],
-    "w": 0.011,
-    "tip_w": 0.0024
+    "w": 0.0264,
+    "tip_w": 0.0058
    },
    {
     "name": "crack_b1",
@@ -782,8 +782,8 @@
       1.66
      ]
     ],
-    "w": 0.0088,
-    "tip_w": 0.002
+    "w": 0.0211,
+    "tip_w": 0.0048
    },
    {
     "name": "crack_b2",
@@ -801,8 +801,8 @@
       1.61
      ]
     ],
-    "w": 0.0088,
-    "tip_w": 0.002
+    "w": 0.0211,
+    "tip_w": 0.0048
    }
   ]
  },
@@ -815,7 +815,7 @@
  "eye_marks": {
   "on": "Mask",
   "name": "pupils",
-  "colour": "f4e0ff",
+  "colour": "b878ff",
   "bone": "head",
   "lift": 0.006,
   "marks": [
@@ -832,7 +832,7 @@
      ]
     ],
     "w": 0.003,
-    "bulb": 0.01
+    "bulb": 0.0065
    },
    {
     "name": "eye_l",
@@ -847,7 +847,7 @@
      ]
     ],
     "w": 0.003,
-    "bulb": 0.01
+    "bulb": 0.0065
    }
   ]
  }
