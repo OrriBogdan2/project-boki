@@ -22,6 +22,13 @@ uniform vec4 flash_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float rim_amount = 0.35;
 uniform vec4 rim_color : source_color = vec4(1.0, 0.96, 0.88, 1.0);
 uniform float glow = 0.0;
+// a painted atlas's glow slot (WardenGlb): only its hot texels glow (the cracks), not the dark skin or rock painted
+// between them
+uniform bool glow_key = false;
+// a Warden's glow colours (WardenGlb, the archetype's "model_glow"; alpha 0: the painted colour): the hot texels and
+// flat glow pieces take the core colour, their soft edges the edge colour, so the glow can change without a rebake
+uniform vec4 glow_core : source_color = vec4(1.0, 1.0, 1.0, 0.0);
+uniform vec4 glow_edge : source_color = vec4(1.0, 1.0, 1.0, 0.0);
 uniform float shade = 0.42;
 uniform bool no_fog = false;
 uniform vec4 shadow_tint : source_color = vec4(0.66, 0.62, 0.9, 1.0);   // shadows lean cool and violet
@@ -53,6 +60,15 @@ uniform float part_grad = 0.0;
 uniform float crease = 0.0;
 uniform float edge_dark = 0.0;
 uniform int surface = 0;
+// a painted emission layer on a .glb's atlas (Ryzz's lightning veins and hair crackle, Tarek's bracer cracks):
+// its texture x emit, crackling over time by emit_flicker (0 steady .. 1 strobing along the body)
+uniform bool use_emit = false;
+uniform sampler2D emit_tex : source_color, filter_linear_mipmap, repeat_disable;
+uniform float emit = 0.0;
+uniform float emit_flicker = 0.0;
+// the emission layer's colour (WardenGlb, the archetype's "model_glow" core; alpha 0: the layer's own painted colour):
+// the layer is then a mask, and its texels' paint takes the colour too, so the glow can change without a rebake (Ryzz)
+uniform vec4 emit_tint : source_color = vec4(1.0, 1.0, 1.0, 0.0);
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
 varying vec3 lpos;
@@ -68,7 +84,28 @@ void vertex() {
 
 void fragment() {
 	vec3 c = albedo.rgb;
-	if (use_tex) { c *= texture(albedo_tex, UV).rgb; }
+	float heat = 1.0;
+	if (use_tex) {
+		vec3 tx = texture(albedo_tex, UV).rgb;
+		c *= tx;
+		if (glow_key) {
+			// (the cracks' red-orange rims count too: in a white-hot glow they take the edge colour, not the paint)
+			heat = smoothstep(0.42, 0.66, tx.r) * smoothstep(0.14, 0.32, tx.r - tx.b) * smoothstep(-0.04, 0.01, tx.g - tx.b);
+		}
+	}
+	vec3 emit_c = vec3(0.0);
+	if (use_emit) {
+		emit_c = texture(emit_tex, UV).rgb;
+		if (emit_tint.a > 0.0) {
+			float ek = max(emit_c.r, max(emit_c.g, emit_c.b));
+			emit_c = emit_tint.rgb * ek;
+			c = mix(c, emit_tint.rgb, smoothstep(0.2, 0.7, ek) * 0.85);
+		}
+	}
+	if (glow_core.a > 0.0 && glow > 0.0) {
+		vec3 hot = mix(glow_edge.a > 0.0 ? glow_edge.rgb : glow_core.rgb, glow_core.rgb, smoothstep(0.35, 0.9, heat));
+		c = mix(c, hot, glow_key ? heat : 1.0);
+	}
 	if (use_vertex_color || vertex_ao) { c *= COLOR.rgb; }
 	// hand-painted variation: soft blotches of slightly lighter and darker paint
 	float n = vnoise(lpos.xz * 7.0 + lpos.y * 4.0) * 0.6 + vnoise(lpos.xy * 15.0 + 3.1) * 0.4;
@@ -124,8 +161,12 @@ void fragment() {
 	float fr = smoothstep(0.62, 0.84, 1.0 - nv) * mix(0.55, 1.0, side) * (1.0 - fog);
 	vec3 fcol = mix(fres_color.rgb, min(c * 1.7 + vec3(0.12), vec3(1.4)), fres_tint);
 	float up = smoothstep(0.35, 0.95, wnorm.y);
-	EMISSION = flash_color.rgb * flash * 0.9 + c * glow + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
+	EMISSION = flash_color.rgb * flash * 0.9 + c * glow * heat + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
 		+ fcol * fr * fres * 0.55 + c * up * top_light * 0.18 * (1.0 - fog);
+	if (use_emit) {
+		float fl = vnoise(vec2(TIME * 7.0 + lpos.y * 5.0, lpos.x * 3.0 + lpos.z * 3.0));
+		EMISSION += emit_c * emit * (1.0 - emit_flicker * (1.0 - smoothstep(0.25, 0.6, fl)));
+	}
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }

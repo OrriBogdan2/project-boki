@@ -92,6 +92,7 @@ func run(main: Node) -> void:
 		_own_motion(a, "bulwark" if a != "bulwark" else "gunslinger")
 		_weapon(a)
 		_springs(a)
+		_orbits(a)
 		_own_look(a)
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
 	print("WARDENGLB_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
@@ -117,7 +118,9 @@ func _contract(a: String) -> void:
 	var unskinned := 0
 	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		var mesh := (mi as MeshInstance3D).mesh
-		if (mi as MeshInstance3D).skin == null:
+		# (props on an orbit ride their bone unskinned: WardenGlb.Orbits turns them)
+		var orbit := String(mi.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX)
+		if (mi as MeshInstance3D).skin == null and not orbit:
 			unskinned += 1
 		for si in mesh.get_surface_count():
 			tris += mesh.surface_get_array_index_len(si) / 3
@@ -249,11 +252,13 @@ func _shading(a: String) -> void:
 		for si in (mi as MeshInstance3D).mesh.get_surface_count():
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
-			if sm == null or sm.shader != Models.HERO or not sm.get_shader_parameter("use_tex") \
+			# (the void slot is the starfield shader, RIG_CONTRACT "Materials")
+			var shader_ok := sm != null and (sm.shader == Models.HERO or sm.shader == WardenGlb.VOID)
+			if not shader_ok or not sm.get_shader_parameter("use_tex") \
 					or sm.get_shader_parameter("albedo_tex") == null or not sm in mats:
 				wrong += 1
 	ok(surfaces > 0 and wrong == 0,
-			"%s: all %d surfaces on the hero toon shader with the atlas, in the hit flash (%d not)"
+			"%s: all %d surfaces on the hero toon shader (or the void's) with the atlas, in the hit flash (%d not)"
 			% [a, surfaces, wrong])
 	m.free()
 
@@ -298,6 +303,34 @@ func _springs(a: String) -> void:
 			% [a, sync.springs.chains.size(), lag, rest])
 	m.free()
 
+## Props on an orbit (RIG_CONTRACT "Orbits"): over a second each circles its pivot (moves, at the same distance
+## from it), so the turning is the loader's, not baked into the .glb. (No orbit: nothing to check.)
+func _orbits(a: String) -> void:
+	var m := _model(a)
+	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync
+	if sync == null or sync.orbits.pivots.is_empty():
+		m.free()
+		return
+	sync._process(1.0 / 60.0)
+	var before: Array = []
+	for pv in sync.orbits.pivots:
+		for pr in pv[2]:
+			before.append([pr[0], (pr[0] as Node3D).global_position, (pv[0] as Node3D).global_position])
+	for i in 60:
+		sync._process(1.0 / 60.0)
+	var moved := INF
+	var drift := 0.0
+	for b in before:
+		var nd: Node3D = b[0]
+		var c: Vector3 = b[2]
+		moved = minf(moved, nd.global_position.distance_to(b[1]))
+		var r0 := Vector2(b[1].x - c.x, b[1].z - c.z).length()
+		drift = maxf(drift, absf(Vector2(nd.global_position.x - c.x, nd.global_position.z - c.z).length() - r0))
+	ok(moved > 0.05 and drift < 0.01,
+			"%s: %d orbit props circle their bone (each moved at least %.3f m in 1s, radius kept to %.4f m)"
+			% [a, before.size(), moved, drift])
+	m.free()
+
 ## A model's own look (content/rules/warden_look.json) reaches its surfaces: every surface of a slot it names
 ## carries that slot's values. (No entry: nothing to check.)
 func _own_look(a: String) -> void:
@@ -334,8 +367,16 @@ func _spring_off(sk: Skeleton3D, sync: WardenGlb.Sync) -> float:
 		var tip := int(ids[ids.size() - 1])
 		var par := sk.get_bone_parent(int(ids[0]))
 		var base := sk.get_bone_global_pose(par) * sk.get_bone_global_rest(par).affine_inverse()
-		var rigid := base * sk.get_bone_global_rest(tip)
-		worst = maxf(worst, rigid.origin.distance_to(sk.get_bone_global_pose(tip).origin))
+		var at := (base * sk.get_bone_global_rest(tip)).origin
+		if ch.get("hang", false):
+			# (a hanging chain settles straight down from its root, whichever way its parent points)
+			var root := (base * sk.get_bone_global_rest(int(ids[0]))).origin
+			var ln := 0.0
+			for j in range(1, ids.size()):
+				ln += sk.get_bone_global_rest(int(ids[j])).origin.distance_to(
+						sk.get_bone_global_rest(int(ids[j - 1])).origin)
+			at = root + (sk.global_transform.basis.inverse() * Vector3.DOWN).normalized() * ln
+		worst = maxf(worst, at.distance_to(sk.get_bone_global_pose(tip).origin))
 	return worst
 
 func _weapon(a: String) -> void:

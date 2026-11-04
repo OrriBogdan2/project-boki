@@ -1,0 +1,408 @@
+{
+ "body_glb": "~/meshy/ryzz/bake/low.glb",
+ "rig": "art/wardens/src/ryzz_rig.json",
+ "out": "art/wardens/ryzz/ryzz.glb",
+ "blend": "~/meshy/ryzz/fit.blend",
+ "turn": 180,
+ "max_tris": 34000,
+ "floater_verts": 8,
+ "snap_r": 0.045,
+ "scale_joints": [
+  "hip.L",
+  "shoulder.L"
+ ],
+ "joints": {
+  "crown": [
+   0.0,
+   -0.03,
+   0.9
+  ],
+  "neck": [
+   0.0,
+   -0.02,
+   0.63
+  ],
+  "shoulder.L": [
+   0.17,
+   0.0,
+   0.46
+  ],
+  "shoulder.R": [
+   -0.17,
+   0.0,
+   0.46
+  ],
+  "elbow.L": [
+   0.3,
+   0.0,
+   0.24
+  ],
+  "elbow.R": [
+   -0.3,
+   0.0,
+   0.24
+  ],
+  "hand.L": [
+   0.38,
+   -0.03,
+   0.07
+  ],
+  "hand.R": [
+   -0.38,
+   -0.03,
+   0.07
+  ],
+  "fingers.L": [
+   0.41,
+   -0.04,
+   -0.03
+  ],
+  "fingers.R": [
+   -0.41,
+   -0.04,
+   -0.03
+  ],
+  "hip.L": [
+   0.085,
+   0.0,
+   -0.09
+  ],
+  "hip.R": [
+   -0.085,
+   0.0,
+   -0.09
+  ],
+  "knee.L": [
+   0.17,
+   -0.01,
+   -0.47
+  ],
+  "knee.R": [
+   -0.17,
+   -0.01,
+   -0.47
+  ],
+  "ankle.L": [
+   0.27,
+   0.0,
+   -0.83
+  ],
+  "ankle.R": [
+   -0.27,
+   0.0,
+   -0.83
+  ]
+ },
+ "chunk": {
+  "head": 1.12,
+  "hand": 1.2,
+  "girth": 1.0
+ },
+ "glow_min": [
+  2.0,
+  2.0,
+  -1.0
+ ],
+ "lift": [
+  0.9,
+  1.03,
+  1.08
+ ],
+ "normal_smooth": 8,
+ "pad": 6,
+ "cap_holes": true,
+ "ink_room": 0.02,
+ "slot_rules": [
+  {
+   "slot": "hair",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    0.55,
+    null
+   ],
+   "hsv": [
+    0.5,
+    0.76,
+    0.2,
+    1.0,
+    0.12,
+    1.0
+   ]
+  },
+  {
+   "slot": "hair",
+   "box": [
+    0.05,
+    null,
+    null,
+    null,
+    0.8,
+    null
+   ],
+   "hsv": [
+    0.78,
+    0.99,
+    0.3,
+    1.0,
+    0.15,
+    1.0
+   ]
+  },
+  {
+   "slot": "hair",
+   "box": [
+    null,
+    -0.05,
+    null,
+    null,
+    0.8,
+    null
+   ],
+   "hsv": [
+    0.78,
+    0.99,
+    0.3,
+    1.0,
+    0.15,
+    1.0
+   ]
+  },
+  {
+   "slot": "leather",
+   "hsv": [
+    null,
+    null,
+    null,
+    null,
+    0.0,
+    0.3
+   ]
+  },
+  {
+   "slot": "leather",
+   "hsv": [
+    0.1,
+    0.2,
+    0.4,
+    1.0,
+    0.4,
+    1.0
+   ]
+  },
+  {
+   "slot": "leather",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    -0.3
+   ]
+  },
+  {
+   "slot": "metal",
+   "box": [
+    -0.25,
+    0.25,
+    null,
+    null,
+    -0.08,
+    0.12
+   ],
+   "hsv": [
+    null,
+    null,
+    0.25,
+    0.85,
+    0.3,
+    0.95
+   ]
+  },
+  {
+   "slot": "leather",
+   "box": [
+    -0.25,
+    0.25,
+    null,
+    null,
+    -0.15,
+    0.12
+   ],
+   "hsv": [
+    null,
+    null,
+    null,
+    null,
+    0.0,
+    0.45
+   ]
+  },
+  {
+   "slot": "leather",
+   "box": [
+    0.14,
+    null,
+    null,
+    null,
+    0.22,
+    0.52
+   ],
+   "hsv": [
+    null,
+    null,
+    0.0,
+    0.28,
+    0.0,
+    0.7
+   ]
+  },
+  {
+   "slot": "leather",
+   "box": [
+    null,
+    -0.14,
+    null,
+    null,
+    0.22,
+    0.52
+   ],
+   "hsv": [
+    null,
+    null,
+    0.0,
+    0.28,
+    0.0,
+    0.7
+   ]
+  },
+  {
+   "slot": "cloth",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    0.25,
+    0.53
+   ],
+   "hsv": [
+    0.82,
+    0.99,
+    0.55,
+    1.0,
+    0.2,
+    1.0
+   ]
+  },
+  {
+   "slot": "skin"
+  }
+ ],
+ "slot_vote": 4,
+ "fit_weights": true,
+ "snap_y": false,
+ "cap_flat": true,
+ "atlas_px": 2048,
+ "weapon_empty": true,
+ "emit_art": {
+  "image": "~/meshy/ryzz/in/front.png",
+  "px_per_m": 676.0,
+  "col_at": 715.4,
+  "row_at": 731.6,
+  "facing": 0.2,
+  "boxes": [
+   [
+    -0.5,
+    0.5,
+    null,
+    null,
+    0.03,
+    0.8
+   ],
+   [
+    -0.11,
+    0.11,
+    null,
+    null,
+    0.8,
+    0.9
+   ]
+  ],
+  "hsv": [
+   [
+    0.8,
+    0.935,
+    0.55,
+    1.0,
+    0.88,
+    1.0
+   ],
+   [
+    0.8,
+    0.95,
+    0.12,
+    0.55,
+    0.95,
+    1.0
+   ]
+  ],
+  "gain": 1.15
+ },
+ "scripted": {
+  "module": "ryzz_parts",
+  "pigtails": {
+   "L": {
+    "root": [
+     -0.13,
+     -0.07,
+     0.26
+    ],
+    "dir": [
+     -0.75,
+     -0.2,
+     0.6
+    ]
+   },
+   "R": {
+    "root": [
+     0.16,
+     -0.07,
+     0.26
+    ],
+    "dir": [
+     0.75,
+     -0.2,
+     0.6
+    ]
+   },
+   "length": 0.19,
+   "locks": 10,
+   "width": 0.05,
+   "bones": 3,
+   "coil_r": 0.026,
+   "coil_len": 0.028,
+   "coil_turns": 4.0,
+   "wire": 0.0042,
+   "zigzag": 0.016,
+   "spread": 0.035,
+   "clear": 0.02,
+   "thick": 0.5,
+   "samples": 14
+  },
+  "rods": {
+   "plate_dz": -0.08,
+   "plate_w": 0.13,
+   "plate_h": 0.07,
+   "r": 0.0095,
+   "below": 0.15,
+   "gap": 0.035,
+   "mid_top": 0.02,
+   "side_top": 0.32,
+   "side_x": 0.17
+  }
+ }
+}
