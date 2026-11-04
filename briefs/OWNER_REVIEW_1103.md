@@ -755,3 +755,13 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - **Setting** (Settings > Interface > "Nameplates show"): **Player names** (default) / **Hunter names**. Hunter names shows the Hunter on everyone's plate instead ("Vex", "Kael"), for people who'd rather see what each enemy is playing. Applies to nameplates and the kill feed; the scoreboard can show both columns.
 - The title ("the Hired Gun") still appears on the Masks screen, hero picker, kit card and Mask moment, where it describes the Hunter.
 - Small; whoever has budget. Update --hero-title-check (it asserts the "<player> the <title>" label today).
+
+## 96. TOP PRIORITY with item 94: combat clarity (owner, 23:17 UTC Nov 4: "my biggest issue is the combat clarity is not great and the performance is really bad")
+Goal: in a busy fight at match zoom, you can always tell where you are, where enemies are, what's about to hit you, and whether your hits land.
+1. **You and them:** a crisp outline or rim per team on every Hunter (self = bright, allies = blue, enemies = red), with readable ground circles (item 46). Your own Hunter is always findable (a subtle self marker when you're in a crowd).
+2. **Telegraphs:** every enemy ability that can hurt you shows a clear, consistent warning (red-edged area or line on the ground with a fill timer) for its wind-up; your own telegraphs use your team colour and are fainter. One visual language for all 12 kits (audit each kit's telegraphs against it).
+3. **Less VFX noise:** cap VFX opacity, size and lifetime; no full-screen-ish bursts; allies' effects drawn dimmer than yours and enemies'; remove decorative ambient effects near fights (items 50, 86). A ground ring means gameplay (DECISIONS).
+4. **Hit feedback:** a short hit flash on the target, consistent damage numbers (yours bigger and brighter, crits distinct), a clear hit sound per Hunter weapon, small hit-stop on heavy hits (no screen shake), and an obvious "you got hit" signal (a screen-edge pulse from the direction).
+5. **Status readability:** stun, slow, grounded, dazed, Static, Marks: one compact, consistent icon row over the target, plus a body tint for hard CC (stunned = flashing outline).
+6. **Projectiles:** enemy projectiles have a bright core and team-red trail; yours team-coloured; all readable against grass, stone and abyss.
+- Deliver: an audit of a 60 s recorded fight (2v2 + Boki) listing every clarity problem, then the fixes, with before/after captures of the same fight. Pairs with item 94 (fewer effects also helps performance).
