@@ -1231,3 +1231,7 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
   - Estimate: 2-4 agent-hours per Warden and no credits.
   - It's best for machines, armour and weapons, and weaker for faces, hair and fur.
   - S2 suggests a hybrid: script the hard-surface Wardens and gear (Dredge, Breaker's shield and hammer, gun-arms), and use Meshy for organic bodies. Details in PIPELINE.md, "Blender-driven modelling".
+
+## 2026-11-04 08:15 UTC (orchestrator): DECISION? the roster is set for now; future Masks list (P4 breadth, not now)
+- DECISION? The current 12 Wardens are the launch group. Breaker is a shield SUPPORT (like the source's Oath), so the supports are Breaker (shield) + Pip (heal).
+- Future Masks to add later (owner, Nov 4; breadth phase, after the 12 feel great): more supports; vampires; older characters (a veteran or sage); an attractive male hero; plus the orchestrator's gap list: a melee swordmaster/duelist, an engineer/trapper with deployables, a summoner/necromancer (fits the Blight lore).
