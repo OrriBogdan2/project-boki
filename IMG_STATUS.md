@@ -80,3 +80,12 @@
 
 ## Next (after approval)
 Per Warden, in brief order: splash (16:9), portrait bust (1:1), turnaround sheet (front/side/back, flat light); then texture close-ups. Check `briefs/INBOX_IMG.md` before each Warden.
+
+## 2026-11-04 03:40 UTC: round 2 Zedran + Pin (+ Vex 2K) added by the orchestrator from the owner's uploads
+The owner's image-gen session can't reach GitHub, so the owner uploaded the files to the orchestrator, which committed them:
+- docs/art/gen/wardens_r2/: zedran_{turnaround,portrait,splash}.webp, pin_{turnaround,portrait,splash}.webp, vex_{splash,turnaround,portrait}_2k.webp (2000 px versions of the round-2 Vex PNGs).
+- docs/art/gen/review/: zedran_before_after.jpg, pin_before_after.jpg.
+Orchestrator review notes (for the next pass, not yet owner decisions):
+- Zedran: the splash is mirrored vs the turnaround (the magma arm and lion pauldron are on his right in the turnaround, his left in the splash; the turnaround is the source of truth for 3D). The magma cracks are missing in the two 3/4 views. No true side view.
+- Pin: the red handprint over the mouth matches a real-world movement's symbol (Missing and Murdered Indigenous Women); suggest another mark. Her legs fade into smoke (floating): plant her feet for the model and keep the smoke as an FX. No true side view.
+- Owner approval for 3D: Vex approved; Zedran and Pin not yet.
