@@ -1561,6 +1561,49 @@ def _rig_joint(rig, name):
 
 
 
+def cut_strands(ob, img, cs):
+    """(From ext/warden-meshy-pin.) Hair strands Meshy hung in front of the face (they cross the mask in the 3/4 view): dark-painted faces in the
+    face's box (Meshy frame, front -Y) lying in front of the face's own surface (the nearest light-painted
+    vertices in the front view, `gap` m) are removed."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    me = ob.data
+    uv = me.uv_layers.active.data
+    x0, x1, z0, z1 = cs["box"]
+    co = np.array([v.co[:] for v in me.vertices])
+    vcol = np.zeros(len(co))
+    vn = np.zeros(len(co))
+    dark = []
+    for p in me.polygons:
+        u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
+        v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
+        lum = float(px[min(h - 1, max(0, int(v * h))), min(w - 1, max(0, int(u * w))), :3].mean())
+        for i in p.vertices:
+            vcol[i] += lum
+            vn[i] += 1
+        c = p.center
+        if lum < float(cs.get("dark", 0.2)) and x0 <= c.x <= x1 and z0 <= c.z <= z1:
+            dark.append(p.index)
+    vlum = vcol / np.maximum(vn, 1)
+    inbox = (co[:, 0] >= x0) & (co[:, 0] <= x1) & (co[:, 2] >= z0) & (co[:, 2] <= z1)
+    face = co[inbox & (vlum > float(cs.get("light", 0.45)))]
+    gap = float(cs.get("gap", 0.004))
+    drop = []
+    for i in dark:
+        c = me.polygons[i].center
+        dd = np.hypot(face[:, 0] - c.x, face[:, 2] - c.z)
+        if len(dd) and dd.min() < 0.015 and c.y < face[int(np.argmin(dd)), 1] - gap:
+            drop.append(i)
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[bm.faces[i] for i in drop], context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(me)
+    bm.free()
+    log("cut %d strand faces in front of the face" % len(drop))
+
+
 def split_piece(ob, img, pc):
     """A piece the art draws as its own object (Hem's porcelain half-mask over her nose and mouth) comes off the
     body as its own skinned mesh: the faces inside `box` (the fitted frame) facing `facing` or more toward the
@@ -1670,6 +1713,9 @@ def main():
     drop_floaters(ob, spec.get("floater_verts", 40))
     if spec.get("cut_boxes"):
         delete_boxes(ob, spec["cut_boxes"])     # (in Meshy's frame: a strand it floats in front of the face)
+    if "cut_strands" in spec:
+        cut_strands(ob, img, spec["cut_strands"])
+        drop_floaters(ob, spec.get("floater_verts", 40))
     ids = island_map(ob, img)
     paint_up(img, spec, ids=ids)
     for pj in spec.get("project", []):
@@ -1785,6 +1831,9 @@ def main():
             parts.append(WP.hoses([ob], arm, [_rel(arm, h, ("path",)) for h in spec["hoses"]], spec["hose_colours"]))
     for pc in spec.get("pieces", []):
         parts.append(split_piece(ob, img, pc))
+    if spec.get("thimbles"):
+        import hem_parts
+        parts.append(hem_parts.thimbles(ob, arm, spec["thimbles"]))
     if spec.get("needles"):
         # Hem's quiver needles, cut from the scan (`cut_boxes`) and built clean (tools/meshy/hem_parts.py)
         import hem_parts
@@ -1801,9 +1850,12 @@ def main():
         # a held bow, built by script (tools/meshy/bow_parts.py), with its nocked arrow as the Mag
         bw = spec["bow"]
         gun = bow_parts.build_bow(float(bw.get("height", 1.25)), float(bw.get("depth", 0.13)))
-        spin = bow_parts.build_arrow(tip_y=float(bw.get("tip", 0.78)))
+        gun["built"] = 1
+        # (arrow false: only the needle's eye and its red thread sit at the nock, the Mag, so nothing sticks forward
+        # off the bow at rest; the shot itself is the projectile)
+        spin = bow_parts.build_arrow(tip_y=float(bw.get("tip", 0.78)), shaft=bw.get("arrow", True))
         spin.parent = gun
-        gun["built"] = spin["built"] = 1
+        spin["built"] = 1
         K.anchor(arm, "hand.R", "anchor_nock", K.bone_head(rig, "hand.R"))
     else:
         gun = weapon(spec, rig)

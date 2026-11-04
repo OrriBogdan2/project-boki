@@ -14,7 +14,7 @@ import numpy as np
 from mathutils import Vector
 
 COL = {"needle": ("metal", "c9ccd2"), "needle_dk": ("metal", "7c8088"), "thread": ("cloth", "c3202c")}
-ATLAS = 64
+ATLAS = 128
 
 
 def _atlas():
@@ -132,4 +132,68 @@ def needles(arm, sp, m, girth):
     ob.parent = arm
     ob.modifiers.new("Armature", "ARMATURE").object = arm
     print("HEMPARTS needles: %d, %d tris" % (len(sp["needles"]), sum(len(f) - 2 for f in bld.f)), flush=True)
+    return ob
+
+
+COL.update({"thimble": ("metal", "c6c9cf"), "claw": ("metal", "8e929a")})
+
+
+def thimbles(body, arm, sp):
+    """Silver thimble claws on her RIGHT (draw) hand's fingertips (hem_weapons_sheet): a dimpled cap over each of the
+    four fingertips (the lowest hand.R vertices in the hanging rest pose, in four clusters across the hand) and a
+    hooked claw out of its end, curving forward. Rigid on hand.R."""
+    me = body.data
+    g = body.vertex_groups.get(sp.get("bone", "hand.R"))
+    co = np.array([v.co[:] for v in me.vertices])
+    w = np.zeros(len(co))
+    for v in me.vertices:
+        for x in v.groups:
+            if x.group == g.index:
+                w[v.index] = x.weight
+    wrist = np.array(arm.data.bones[sp.get("bone", "hand.R")].head_local[:])
+    # (the hand itself: weighted to the bone, below the wrist and near it; the coat and shears share some weight)
+    near = (np.linalg.norm(co - wrist, axis=1) < float(sp.get("reach", 0.15))) & (co[:, 2] < wrist[2] - 0.02)
+    hand = co[(w > 0.5) & near]
+    zlo = hand[:, 2].min()
+    tips = hand[hand[:, 2] < zlo + float(sp.get("band", 0.045))]
+    # four clusters across the hand's width (the fingers side by side, hanging)
+    # (the fingers side by side along the hand's widest horizontal spread at the tips)
+    c0 = tips[:, :2] - tips[:, :2].mean(axis=0)
+    _u, _sv, vt = np.linalg.svd(c0, full_matrices=False)
+    order = np.argsort(c0 @ vt[0])
+    groups = np.array_split(tips[order], int(sp.get("fingers", 4)))
+    bld = _B()
+    r = float(sp.get("r", 0.0095))
+    fwd = np.array(sp.get("forward", [0.0, 1.0, 0.0]))
+    for gp in groups:
+        tip = gp[np.argmin(gp[:, 2])]
+        c = gp.mean(axis=0)
+        c[2] = tip[2]
+        up = np.array([0.0, 0.0, 1.0])
+        bld.tube([c + up * 0.026, c + up * 0.012, c - up * 0.002], [r, r * 1.02, r * 0.8], 8, "thimble")
+        claw = [c - up * 0.002, c - up * 0.014 + fwd * 0.004, c - up * 0.024 + fwd * 0.012, c - up * 0.028 + fwd * 0.022]
+        bld.tube(claw, [r * 0.55, r * 0.42, r * 0.25, 0.0006], 6, "claw")
+    me2 = bpy.data.meshes.new("Thimbles")
+    me2.from_pydata([tuple(x) for x in bld.v], [], bld.f)
+    me2.update()
+    names = []
+    for p in bld.part:
+        if p not in names:
+            names.append(p)
+    for nm in names:
+        me2.materials.append(_mat(nm))
+    lay = me2.uv_layers.new(name="UVMap")
+    for poly in me2.polygons:
+        part = bld.part[poly.vertices[0]]
+        poly.material_index = names.index(part)
+        poly.use_smooth = True
+        for li in poly.loop_indices:
+            lay.data[li].uv = _uv(part)
+    ob = bpy.data.objects.new("Thimbles", me2)
+    bpy.context.scene.collection.objects.link(ob)
+    vg = ob.vertex_groups.new(name=sp.get("bone", "hand.R"))
+    vg.add(list(range(len(me2.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    ob.modifiers.new("Armature", "ARMATURE").object = arm
+    print("HEMPARTS thimbles: %d on %s, %d tris" % (len(groups), sp.get("bone", "hand.R"), sum(len(f) - 2 for f in bld.f)), flush=True)
     return ob

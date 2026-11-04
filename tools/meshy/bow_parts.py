@@ -20,7 +20,7 @@ import bpy
 from mathutils import Vector
 
 COL = {
-    "lacquer": ("metal", "1e1d22"), "edge": ("metal", "3c3e46"), "wrap": ("cloth", "a8202f"),
+    "lacquer": ("metal", "38363e"), "edge": ("metal", "5a5b63"), "wrap": ("cloth", "a8202f"),
     "wrap_dk": ("cloth", "6e1520"), "string": ("glow", "ff2a22"), "horn": ("metal", "141418"),
     "spool": ("leather", "c8a57a"), "spool_thread": ("cloth", "b0141c"),
     "needle": ("metal", "c4c8ce"), "thread": ("glow", "ff3a2a"),
@@ -171,7 +171,7 @@ def build_bow(height=1.25, depth=0.13, string_y=0.06, x=0.0):
     b.loft([c0 + Vector((-0.019, 0, 0)), c0 + Vector((-0.055, 0, 0))], lambda i: (0.019, 0.019, 12), "spool_thread")
     # the string, tip knot to tip knot
     knot = h * 0.97
-    b.loft([pt(-knot, 0.0), pt(knot, 0.0)], lambda i: (0.0042, 0.0042, 6), "string")
+    b.loft([pt(-knot, 0.0), pt(knot, 0.0)], lambda i: (0.0095, 0.0095, 6), "string")
     return b.obj()
 
 
@@ -186,7 +186,7 @@ def _interp(prof, z):
     return [("f", _f(prof, z))]
 
 
-def build_arrow(x=0.022, nock_y=0.035, tip_y=0.78):
+def build_arrow(x=0.022, nock_y=0.035, tip_y=0.78, shaft=True):
     """The needle-arrow: a round iron shaft tapering to a point at tip_y, the long eye at the nock end (a flattened
     loop), a red glowing thread through the eye trailing back a little."""
     b = Builder("weapon_mag")
@@ -194,7 +194,8 @@ def build_arrow(x=0.022, nock_y=0.035, tip_y=0.78):
     # the shaft: from the eye forward, thick in the middle, a long taper to the point
     zs = [eye1, eye1 + 0.05, 0.3, 0.55, tip_y - 0.12, tip_y - 0.04, tip_y]
     rs = [0.0065, 0.0072, 0.0075, 0.0072, 0.006, 0.0035, 0.0006]
-    b.loft([Vector((x, y, 0)) for y in zs], lambda i: (rs[i], rs[i], 8), "needle")
+    if shaft:
+        b.loft([Vector((x, y, 0)) for y in zs], lambda i: (rs[i], rs[i], 8), "needle")
     # the eye: two flattened bars round a slot, joined at the nock
     for s in (-1, 1):
         pts = [Vector((x, eye1, 0)), Vector((x, eye1 - 0.012, s * 0.0055)), Vector((x, (eye0 + eye1) / 2, s * 0.0062)),

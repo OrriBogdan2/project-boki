@@ -47,3 +47,12 @@ lift (`lift` 1/1/1), no per-Warden shader. Raw files in ~/meshy/hem/ (not in git
 - **Stance:** content/rules/warden_stance.json archer: upright, feet planted (was hunched), the bow carried in her
   LEFT hand at her side with the right hand free (new `free_r` in the carry: WardenStance.carry_free_r).
 - `chunk` head 1.14.
+
+## Stage 3 (2026-11-04, after the shared painted-look fix 16c18b4f; credit-free)
+- The shared look fix cherry-picked; warden_look.json `hem` retuned down on top of it.
+- `cut_strands` (from ext/warden-meshy-pin): the scan's dark strands across the cheeks cut.
+- Mask: only the white porcelain and gilt texels (no pale skin), pushed 0.5 mm, so no shards stick out at its side.
+- Thimble claws (hem_weapons_sheet): silver caps with hooked claws on the right hand's four fingertips
+  (tools/meshy/hem_parts.py thimbles), rigid on hand.R.
+- Bow: lighter lacquer and edge (it read black at match zoom), a thicker glowing string; `arrow: false` keeps only
+  the needle's eye and thread at the nock as the Mag, so no needle sticks forward off the hanging bow.
