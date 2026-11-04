@@ -944,3 +944,5 @@ Improved: the eye is now a small glowing red orb in a wide brass ring, close to 
 ## 2026-11-04 19:35 UTC (ext): OWNER_REVIEW item 61: Tarek's Quakefall: cap the hold at ~0.4-0.5 s (auto-fires), hold = hop forward+up then slam, tap = instant slam in front, slightly smaller circle. Opus (feel).
 
 ## 2026-11-04 19:40 UTC (ext): OWNER_REVIEW item 62: Claire's Skate works in the air (starts at once, ice ribbon, gentle descent, carries over gaps); remove the buffer-to-landing from item 12. Opus.
+
+## 2026-11-04 19:47 UTC (ext): OWNER_REVIEW item 64: Claire skate -> ult keeps momentum (her DashFlow row). Same branch as item 62.
