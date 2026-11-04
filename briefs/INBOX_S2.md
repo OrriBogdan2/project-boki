@@ -488,3 +488,6 @@ Credits: ~8 x 70-110 ≈ 600-900; balance 4,993. Post per-Warden "OWNER: review 
 
 ## 2026-11-04 10:00 UTC (orchestrator): Kael glow = WHITE-HOT (owner)
 - Set Kael's emissive (arm cracks, blade cracks, hook tip) to white-hot: a near-white core, a faint pale-gold edge, white-gold sparks, black demon smoke. No orange or red. New art files are coming to ext/imagegen as kael_*.
+
+## 2026-11-04 10:15 UTC (orchestrator): Kael final art: use wardens_r3/kael_* (white-hot), not zedran_*
+- One hook (right-arm chain); left wrist = cuff + a short chain; the jagged blade tip per kael_side/turnaround. Read ZEDRAN_KIT.md for the rest.
