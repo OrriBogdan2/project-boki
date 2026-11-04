@@ -273,3 +273,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Vex r3c polish:** running on ext/warden-vex-r3b.
 - **Waiting:** Ryzz and Cinder (art redos pending).
 - **Credits:** balance about 4,990; stage 1 is estimated at 600-900.
+- 2026-11-04 09:19 UTC: ext/rename-breaker 72b79ec0 now covers Kael and the titles The Unbroken, Frost Siren, Little Lantern and Storm Chaser ('Orri the Unbroken'). Dredge r2b is done (df37f73c); a quick warm-brass fix runs before posting. Kael's glow colour is now a parameter (owner 09:45).
