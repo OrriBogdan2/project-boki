@@ -654,3 +654,44 @@ def flower_crown(arm, body, spec, tag="flowers"):
     _skin(ob, arm, {spec.get("bone", "head"): range(len(ob.data.vertices))})
     log("flower crown: %d flowers, %d tris" % (placed, sum(len(f) - 2 for f in bld.f)))
     return ob
+
+
+# ------------------------------------------------------------------------------------------------ laces
+def laces(arm, body, spec, tag="laces"):
+    """A criss-cross lacing across the open back (Sable's turnaround back): `rows` crossings between the two
+    edges x = +-`half` from z0 to z1, each lace a thin tube laid on the body's surface (rays from behind, -Y), with
+    a small eyelet at each end; silver on the metal slot, riding `bone`."""
+    from mathutils.bvhtree import BVHTree
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = body.evaluated_get(dg)
+    me = ev.to_mesh()
+    bvh = BVHTree.FromPolygons([body.matrix_world @ v.co for v in me.vertices], [list(q.vertices) for q in me.polygons])
+    ev.to_mesh_clear()
+    cells = Cells({"lace": spec.get("colour", "d8dae6"), "eyelet": spec.get("eyelet", "8a8ca0")}, n=2, size=32)
+    img = cells.image(tag + "_atlas")
+    out = float(spec.get("out", 0.004))
+    r = float(spec.get("r", 0.0035))
+
+    def on(x, z):
+        hit = bvh.ray_cast(Vector((x, -1.0, z)), Vector((0, 1, 0)))
+        return np.array((hit[0] + hit[1] * out)[:]) if hit[0] is not None else None
+    bld = WP.Builder()
+    n = int(spec.get("rows", 5))
+    z0, z1, hw = float(spec["z0"]), float(spec["z1"]), float(spec["half"])
+    zs = [z0 + (z1 - z0) * i / n for i in range(n + 1)]
+    for i in range(n):
+        for a, b in (((-hw, zs[i]), (hw, zs[i + 1])), ((hw, zs[i]), (-hw, zs[i + 1]))):
+            pts = [on(a[0] + (b[0] - a[0]) * k / 8, a[1] + (b[1] - a[1]) * k / 8) for k in range(9)]
+            pts = [q for q in pts if q is not None]
+            if len(pts) > 1:
+                bld.tube(pts, [r] * len(pts), 5, *[cells.box["lace"][j] for j in (0, 2, 1, 3)], "lace", [0.0] * len(pts))
+    for z in zs:
+        for x in (-hw, hw):
+            q = on(x, z)
+            if q is not None:
+                bld.torus(q, [0, -1, 0], r * 1.8, r * 0.7, 8, 4, cells.box["eyelet"], "eyelet", 0.0)
+    ob = bld.object("Laces")
+    ob.data.materials.append(_mat("metal-%s" % tag, img))
+    _skin(ob, arm, {spec.get("bone", "hips"): range(len(ob.data.vertices))})
+    log("laces: %d rows, %d tris" % (n, sum(len(f) - 2 for f in bld.f)))
+    return ob

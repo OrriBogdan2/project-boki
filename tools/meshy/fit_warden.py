@@ -1966,7 +1966,7 @@ def main():
         if spec.get("hoses"):
             parts.append(WP.hoses([ob], arm, [_rel(arm, h, ("path",)) for h in spec["hoses"]], spec["hose_colours"]))
     props = []
-    if any(k in spec for k in ("wings", "lantern", "springs", "crossbows", "gem", "fluff_tail", "flower_crown")):
+    if any(k in spec for k in ("wings", "lantern", "springs", "crossbows", "gem", "fluff_tail", "flower_crown", "laces")):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import warden_props as WPR
         for sr in spec.get("springs", []):
@@ -1979,6 +1979,8 @@ def main():
             props = list(WPR.crossbows(spec["crossbows"], spec["crossbows"]))
         if spec.get("gem"):
             parts.append(WPR.gem(arm, ob, spec["gem"]))
+        if spec.get("laces"):
+            parts.append(WPR.laces(arm, ob, spec["laces"]))
         if spec.get("fluff_tail"):
             parts.append(WPR.fluff_tail(arm, spec["fluff_tail"]))
         if spec.get("flower_crown"):
