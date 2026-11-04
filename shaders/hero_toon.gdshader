@@ -61,6 +61,9 @@ uniform float ambient_cut = 0.0;
 uniform vec3 own_ambient = vec3(0.0);
 uniform float light_neutral = 0.0;
 uniform float light_neutral_warm = 0.0;   // the same for warm lights (per model: black cloth under an orange sun)
+// the painted colour pulled this far toward its own grey before the lights (per model, warden_look.json: a slot
+// the warm light and the tonemap push too saturated, Tarek's brown skin reading orange-red); 0 = unchanged
+uniform float desat = 0.0;
 // near-black paint lifted to this linear floor (jacket, trousers and gun no longer merge to black at the match
 // camera); mid and light colours keep their value and saturation
 uniform float dark_lift = 0.0;
@@ -137,6 +140,7 @@ void fragment() {
 		c = mix(c, hot, glow_key ? heat : 1.0);
 	}
 	if (use_vertex_color || vertex_ao) { c *= COLOR.rgb; }
+	if (desat > 0.0) { c = mix(c, vec3(dot(c, vec3(0.3, 0.59, 0.11))), desat); }
 	if (dark_lift > 0.0) {
 		float dl = dot(c, vec3(0.3, 0.59, 0.11));
 		c += max(vec3(dark_lift) - c, vec3(0.0)) * (1.0 - smoothstep(0.0, dark_lift * 2.5, dl));

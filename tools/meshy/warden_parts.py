@@ -734,7 +734,8 @@ def gauntlets(arm, spec, tag="gauntlet"):
         v0 = len(bld.v)
         # the core: a tube elbow -> knuckle, thicker toward the fist
         rings = [e + (k - e) * f for f in np.linspace(0.0, 1.0, 8)]
-        radii = [r_arm * (0.8 + 0.25 * f) for f in np.linspace(0.0, 1.0, 8)]
+        core_k = float(spec.get("core", 0.8))       # (a thinner core: thin cracks between the plates)
+        radii = [r_arm * (core_k + 0.25 * f) for f in np.linspace(0.0, 1.0, 8)]
         bld.tube(rings, radii, 12, 0.05, 0.45, 0.55, 0.95, "core", [0.0] * 8, cap_end=True, cap_start=True)
         # the plates: rows along the arm, each a lumpy rock on the surface, slightly apart
         rows = int(spec.get("rows", 5))
@@ -750,7 +751,7 @@ def gauntlets(arm, spec, tag="gauntlet"):
                 s = rr * float(spec.get("plate", 0.62)) * rng.uniform(0.85, 1.15)
                 side = np.cross(ax, out_d)
                 _lumpy(bld, p, (side, ax, -out_d), (s, s * 1.25, s * 0.45), "rock", (0.05, 0.05, 0.45, 0.45),
-                       int(rng.integers(1, 9999)), rings=5, sides=8, lump=0.3)
+                       int(rng.integers(1, 9999)), rings=5, sides=8, lump=float(spec.get("lump", 0.3)))
         spans.append((sd, v0, len(bld.v), e, w, ax, L))
     ob = bld.object(tag.capitalize() + "s")
     mi = {"rock": _flat_material(ob, spec.get("slot", "leather"), tag, img, "Closest")}
@@ -941,8 +942,8 @@ def orbit_props(arm, spec):
         if kind != "card":
             # (a geode: the rough rock, a raised rim round its cut face, a ring of crystals sunk inside it, and the
             # eye's domed iris standing out of the crystals; "rock": the rough rock alone, a shard)
-            _lumpy(bld, p, (side, up, -out_dir), (r, r * 1.08, r * 0.66), "rock", (0.05, 0.05, 0.45, 0.45), 7 + i,
-                   rings=9, sides=16, lump=0.26)
+            _lumpy(bld, p, (side, up, -out_dir), (r, r * 1.08, r * float(spec.get("depth", 0.66))), "rock",
+                   (0.05, 0.05, 0.45, 0.45), 7 + i, rings=9, sides=16, lump=0.26)
         if kind != "eye":
             ob = bld.object("%s_%d" % (spec["name"], i))
             mi = {"rock": _flat_material(ob, spec.get("slot", "leather"), spec["name"], img, "Closest")}
