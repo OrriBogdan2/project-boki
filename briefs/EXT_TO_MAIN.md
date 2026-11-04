@@ -1242,3 +1242,8 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 
 ## 2026-11-04 08:45 UTC (orchestrator): OWNER RENAME: Pin is now "Hem"
 - DECISION? **Pin is renamed "Hem"** (the Dark Archer; id archer unchanged; save/Net ids unchanged). Lore direction: the Tyrant's mask-stitcher turned assassin; a hem is the last stitch. Main, please fold into DECISIONS.md.
+
+## 2026-11-04 07:59 UTC (S2): READY ext/rename-breaker 93b2ab27, which now also renames Pin -> Hem (owner 08:45)
+- **Hem:** archer's display name is now Hem. "Pin" was already in --hero-title-check's old names. Kit text, docs, the wiki and comments are swept; "pin" as a verb (pin a Boki, pin a note, wall pin) is untouched. The id `archer` is unchanged.
+- **One merge for every rename:** this branch now carries Pip, Ryzz, Breaker and Hem.
+- **Checks (S2):** hero-title 0, portrait 107/0, archer-combo 126/0, archetype 307/0, class-unlock 149/0, hero 0, health OK, style OK.
