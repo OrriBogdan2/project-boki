@@ -468,7 +468,13 @@ def project(ob, img, pj):
         if facing < float(pj["facing"]):
             continue
         ps = [me.vertices[i].co for i in t.vertices]
-        if not all(x0 <= p[ax] <= x1 and z0 <= p.z <= z1 for p in ps):
+        fe = float(pj.get("feather", 0.0))
+        if fe > 0.0:
+            # (feathered: a triangle reaching into the box paints, faded by its distance from the box's edge
+            # and by how far it turns away; no stepped edge where whole triangles stopped)
+            if not any(x0 - fe <= p[ax] <= x1 + fe and z0 - fe <= p.z <= z1 + fe for p in ps):
+                continue
+        elif not all(x0 <= p[ax] <= x1 and z0 <= p.z <= z1 for p in ps):
             continue
         uvs = np.array([[uv[li].uv.x * w, uv[li].uv.y * h] for li in t.loops])
         cr = np.array([[col0 + sgn * p[ax] / k, row0 - p.z / k] for p in ps])
@@ -502,7 +508,16 @@ def project(ob, img, pj):
             cur = dst[ty, tx, :3]
             hh, ss, _vv = _hsv_px(cur)
             art_px &= ~((hh >= keep[0]) & (hh <= keep[1]) & (ss >= keep[2]))
-        dst[ty[art_px], tx[art_px]] = got[art_px]
+        if fe > 0.0:
+            pv = np.array([p[:] for p in ps])
+            wp = np.outer(l1[inside], pv[0]) + np.outer(l2[inside], pv[1]) + np.outer(l3[inside], pv[2])
+            dd = np.minimum.reduce([wp[:, ax] - x0, x1 - wp[:, ax], wp[:, 2] - z0, z1 - wp[:, 2]])
+            al = np.clip(dd / fe, 0.0, 1.0)
+            al *= np.clip((facing - float(pj["facing"])) / float(pj.get("feather_n", 0.25)), 0.0, 1.0)
+            al = (al * al * (3 - 2 * al))[:, None] * art_px[:, None]
+            dst[ty, tx, :3] = dst[ty, tx, :3] * (1 - al) + got[:, :3] * al
+        else:
+            dst[ty[art_px], tx[art_px]] = got[art_px]
         painted += 1
     img.pixels = dst.ravel()
     log("projected the art onto %d faces" % painted)
@@ -1703,6 +1718,41 @@ def split_off_faces(ob, faces, name):
     return out
 
 
+def lengthen(ob, img, ln):
+    """A long coat drawn longer than the scan's (Hem: mid-calf with an asymmetric tail): the vertices of the coat's
+    faces (painted in one of `hsv`, outside the legs' own radius `leg_r` round each leg's line) below `from_z`
+    (fitted frame, soles on 0) move down, by `k` x their drop below from_z, `k_back` at the back (-Y) and more on
+    the `tail` side (+X her right, -X her left) for the asymmetric tail."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    me = ob.data
+    uv = me.uv_layers.active.data
+    coat = np.zeros(len(me.vertices), bool)
+    for p in me.polygons:
+        u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
+        v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
+        hh, ss, vv = _hsv(px[min(h - 1, int(v * h)), min(w - 1, int(u * w)), :3])
+        if any((q[0] <= hh <= q[1] if q[0] <= q[1] else (hh >= q[0] or hh <= q[1])) and q[2] <= ss <= q[3]
+               and q[4] <= vv <= q[5] for q in ln["hsv"]):
+            coat[list(p.vertices)] = True
+    co = np.array([v.co[:] for v in me.vertices])
+    z0 = float(ln["from_z"])
+    legs = [np.array(x) for x in ln["legs"]]
+    off_leg = np.ones(len(co), bool)
+    for lx in legs:
+        off_leg &= np.hypot(co[:, 0] - lx[0], co[:, 1] - lx[1]) > float(ln.get("leg_r", 0.075))
+    sel = coat & off_leg & (co[:, 2] < z0)
+    back = np.clip(-co[:, 1] / 0.12, 0.0, 1.0)
+    tail = np.clip(co[:, 0] * float(ln.get("tail", 1.0)) / 0.15, 0.0, 1.0)
+    k = float(ln["k"]) + (float(ln.get("k_back", ln["k"])) - float(ln["k"])) * back + float(ln.get("k_tail", 0.0)) * tail * back
+    drop = (z0 - co[:, 2]) * k
+    co[sel, 2] -= drop[sel]
+    co[:, 2] = np.maximum(co[:, 2], float(ln.get("floor", 0.12)))
+    me.vertices.foreach_set("co", co.ravel())
+    me.update()
+    log("lengthened the coat: %d vertices" % int(sel.sum()))
+
+
 def main():
     spec_path = sys.argv[sys.argv.index("--") + 1]
     spec = json.load(open(spec_path))
@@ -1807,6 +1857,8 @@ def main():
         _apply_armature(head)
     apply_pose(ob, fit)
     decimate(ob, spec["max_tris"] - (int(spec["head"]["tris"]) if head else 0))
+    if spec.get("lengthen"):
+        lengthen(ob, img, spec["lengthen"])
     ob.name = "Body"
     ob.data.name = "Body"
     arm = contract_skin(ob, rig)
@@ -1878,6 +1930,14 @@ def main():
         if "ink_room" in spec:
             ink_room(o, float(spec["ink_room"]))
     for o in parts:
+        if o.name in spec.get("smooth_parts", []):
+            # (a piece cut from the scan, Hem's mask: its decimated facets shaded smooth)
+            if o.data.has_custom_normals:
+                bpy.context.view_layer.objects.active = o
+                bpy.ops.mesh.customdata_custom_splitnormals_clear()
+            for p in o.data.polygons:
+                p.use_smooth = True
+            soft_normals(o, int(spec.get("normal_smooth", 8)) * 2)
         if "ink_room" in spec:
             ink_room(o, float(spec["ink_room"]))
     if "atlas_px" in spec:

@@ -13,7 +13,7 @@ import bpy
 import numpy as np
 from mathutils import Vector
 
-COL = {"needle": ("metal", "c9ccd2"), "needle_dk": ("metal", "7c8088"), "thread": ("cloth", "c3202c")}
+COL = {"needle": ("metal", "5e6068"), "needle_dk": ("metal", "3a3c42"), "thread": ("glow", "e0180e")}
 ATLAS = 128
 
 
@@ -106,8 +106,9 @@ def needles(arm, sp, m, girth):
         if nd.get("thread"):
             # a loop of red thread through the eye, hanging down the back of the quiver
             c = e0 + ax * 0.035
-            th = [c - side * 0.006, c + side * 0.01 - ax * 0.02, c + side * 0.02 - ax * 0.07 + np.array([0, 0, -0.01]),
-                  c + side * 0.012 - ax * 0.12, c + side * 0.004 - ax * 0.16]
+            # (the loose end drifts out and down past the quiver: the art's red thread "at rest")
+            th = [c - side * 0.006, c + side * 0.012 - ax * 0.02, c + side * 0.03 - ax * 0.06 + np.array([0, 0, -0.01]),
+                  c + side * 0.045 - ax * 0.12, c + side * 0.03 - ax * 0.19, c + side * 0.05 - ax * 0.25]
             bld.tube(th, [0.0022] * len(th), 5, "thread")
     me = bpy.data.meshes.new("Needles")
     me.from_pydata([tuple(x) for x in bld.v], [], bld.f)

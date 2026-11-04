@@ -20,9 +20,9 @@ import bpy
 from mathutils import Vector
 
 COL = {
-    "lacquer": ("metal", "38363e"), "edge": ("metal", "5a5b63"), "wrap": ("cloth", "a8202f"),
-    "wrap_dk": ("cloth", "6e1520"), "string": ("glow", "ff2a22"), "horn": ("metal", "141418"),
-    "spool": ("leather", "c8a57a"), "spool_thread": ("cloth", "b0141c"),
+    "lacquer": ("leather", "141316"), "edge": ("leather", "2a2a30"), "wrap": ("leather", "2b2224"),
+    "wrap_dk": ("leather", "1a1517"), "string": ("glow", "ff1208"), "horn": ("leather", "0e0e10"),
+    "spool": ("leather", "c8a57a"), "spool_thread": ("glow", "e0180e"),
     "needle": ("metal", "c4c8ce"), "thread": ("glow", "ff3a2a"),
 }
 
@@ -165,10 +165,10 @@ def build_bow(height=1.25, depth=0.13, string_y=0.06, x=0.0):
     sz = -0.13
     sf = _f(prof, sz)
     c0 = pt(sz, sf)
-    b.loft([c0 + Vector((-0.012, 0, 0)), c0 + Vector((-0.062, 0, 0))], lambda i: (0.011, 0.011, 10), "spool")
+    b.loft([c0 + Vector((-0.012, 0, 0)), c0 + Vector((-0.062, 0, 0))], lambda i: (0.016, 0.016, 10), "spool")
     for dx in (-0.014, -0.06):
-        b.loft([c0 + Vector((dx + 0.004, 0, 0)), c0 + Vector((dx - 0.004, 0, 0))], lambda i: (0.024, 0.024, 12), "spool")
-    b.loft([c0 + Vector((-0.019, 0, 0)), c0 + Vector((-0.055, 0, 0))], lambda i: (0.019, 0.019, 12), "spool_thread")
+        b.loft([c0 + Vector((dx + 0.004, 0, 0)), c0 + Vector((dx - 0.004, 0, 0))], lambda i: (0.036, 0.036, 12), "spool")
+    b.loft([c0 + Vector((-0.019, 0, 0)), c0 + Vector((-0.055, 0, 0))], lambda i: (0.03, 0.03, 12), "spool_thread")
     # the string, tip knot to tip knot
     knot = h * 0.97
     b.loft([pt(-knot, 0.0), pt(knot, 0.0)], lambda i: (0.0095, 0.0095, 6), "string")
