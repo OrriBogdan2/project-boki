@@ -1715,3 +1715,18 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - normal legs and a wider stance.
 - **Shots:** warden-3d/tarek/s7_*.
 - **Still blocked:** open hands and longer locs need the Meshy run, which is waiting on permission in the S2 session.
+
+## 2026-11-04 14:55 UTC (S2): READY (for the art integ) ext/warden-3d-breaker 7e5f1bc1: Breaker 3D, round 3
+- **Score (rubric):** about 81% close-up, about 69% at match zoom. Ships per 13:15 and keeps improving.
+- **What it has:**
+  - a new Meshy body from breaker_front: bare blue belly with frost cracks and barnacles, rope sash, ragged skirt, bare feet, beard braids with rings, kelp, teddy and compass;
+  - the hammer haft back over his RIGHT shoulder;
+  - the sheet shield in relief at his LEFT hip;
+  - 1.5x scale with the hitbox unchanged;
+  - RECIPE_95 plus both shared fixes, and an ice-blue rim.
+- **Checks:** all pass (bulwark-combo 102/0).
+- **Shots:** warden-3d/breaker/s3_*.
+- **Still differs:**
+  - the beard reads as one red mass, not three braids;
+  - the skin is grey at distance;
+  - ragged edges on the skirt and mantle.
