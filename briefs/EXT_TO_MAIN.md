@@ -1293,3 +1293,7 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 ## 2026-11-04 10:05 UTC (orchestrator): DECISION? the premise in the owner's words + new prologue captions
 - DECISION? Premise (owner): "The Wyrm came, and stole our essence. In time, humans, beasts and skyfolk alike were born without faces. We became a new race: the Empty. Our only salvation became the cursed fossils we once tried to destroy: Masks, each carrying the soul of a fallen Hunter of old." The skyfolk are a people (a race alongside humans and beasts).
 - [MAIN] The prologue captions in briefs/LORE_MASKS.md "Prologue text" replace the 09:40 draft (slide 4 = the Masks; the Boki move into slide 5).
+
+## 2026-11-04 10:30 UTC (orchestrator): DECISION? Pip and Claire stay as they are
+- DECISION? Pip is NOT fiery (too much fire in the roster already: Cinder, Zedran's magma). Her pastel fairy-fox look is final; drop "small and fiery like a fox" from her description.
+- DECISION? Claire's classically pretty face is intentional: she's the seductress (the sweet face is the lure, the body is demonic). Don't "fix" it toward more character.
