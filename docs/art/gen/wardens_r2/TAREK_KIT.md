@@ -18,3 +18,8 @@ A young, nimble, cheerful blind cliff-runner who "sees" through stone.
   - portrait 155c6b04
   - turnaround 54974169
   - splash 2eb5c5e4
+
+## Extra 3D references (owner, 2026-11-04)
+- tarek_front.webp: full-body front, the main fix for stage 1: lean and long-legged with a normal-sized head (stage 1 read squat with a big head), arms clear of the body with open hands, the stone bracers with amber cracks, harness, patched trousers, wrapped feet.
+- tarek_head_sheet.webp: front + side head: bandana, cheerful grin, long locs with stone beads, copper rings and glowing amber crystals (give them springs), the three stones.
+- tarek_stone_sheet.webp: one seeing-stone, front / side / back: rough rock with depth (stage 1 read flat), a crystal-lined opening with a glowing amber slit-pupil iris, a plain rock back.
