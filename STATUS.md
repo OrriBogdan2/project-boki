@@ -318,3 +318,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
   | Dredge | ext/warden-dredge-friend |
 
   The -b branches continue the paired agents' WIP. When most are READY, S2 builds one art integ branch on main.
+- 2026-11-04 14:16 UTC: ORCH's 14:10 reviews of the 6 READY Hunters went to their agents: Vex 82/68, Ryzz 84/70, Hem 83/65, Sable 84/62, Tarek 76/55, Dredge 72/55. Shared gaps: match zoom, yellow brass, clean review frames. READY lines stay until better commits land.
