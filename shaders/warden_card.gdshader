@@ -11,6 +11,7 @@ uniform float alpha_k = 1.0;        // the whole card's opacity, x the atlas alp
 uniform float glow = 0.12;          // a little self light, so the cards read in shadow
 uniform float sheen = 0.35;         // the pearly edge-on shimmer
 uniform vec4 sheen_color : source_color = vec4(0.85, 0.9, 1.0, 1.0);
+uniform float irid = 0.0;           // thin-film colour play that shifts with the view (moth and fairy wings)
 uniform float flash : hint_range(0.0, 1.0) = 0.0;
 uniform vec4 flash_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 
@@ -20,6 +21,10 @@ void fragment() {
 	float edge = 1.0 - abs(dot(NORMAL, VIEW));
 	vec3 sh = mix(sheen_color.rgb, vec3(1.0, 0.8, 0.95), 0.5 + 0.5 * sin(UV.y * 9.0 + UV.x * 5.0));
 	c += sh * sheen * edge * edge;
+	// a soft rainbow that slides across the card as it turns: cyan, pink, gold, mint
+	float ph = dot(NORMAL, VIEW) * 3.0 + UV.y * 4.0 + UV.x * 2.0;
+	vec3 film = 0.5 + 0.5 * cos(6.2832 * (vec3(0.0, 0.33, 0.67) + ph));
+	c = mix(c, c * (0.55 + 0.9 * film), irid);
 	ALBEDO = mix(c, flash_color.rgb, flash);
 	EMISSION = c * glow + flash_color.rgb * flash * 0.9;
 	ALPHA = clamp(t.a * albedo.a * alpha_k, 0.0, 1.0);

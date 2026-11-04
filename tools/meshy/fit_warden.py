@@ -1708,6 +1708,10 @@ def main():
         chunk(ob, rig, spec["chunk"])
     for sb in spec.get("shrink", []):
         shrink_box(ob, sb)
+    if spec.get("cut_fitted"):
+        # (the fitted rest pose: a piece the scan has that is rebuilt as geometry, Pip's tail)
+        delete_boxes(ob, spec["cut_fitted"])
+        drop_floaters(ob, int(spec.get("cut_floaters", 60)))
     parts = []
     if spec.get("lens") or spec.get("braids") or spec.get("hoses"):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -1722,7 +1726,7 @@ def main():
         if spec.get("hoses"):
             parts.append(WP.hoses([ob], arm, [_rel(arm, h, ("path",)) for h in spec["hoses"]], spec["hose_colours"]))
     props = []
-    if any(k in spec for k in ("wings", "lantern", "springs", "crossbows", "gem")):
+    if any(k in spec for k in ("wings", "lantern", "springs", "crossbows", "gem", "fluff_tail", "flower_crown")):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import warden_props as WPR
         for sr in spec.get("springs", []):
@@ -1735,6 +1739,10 @@ def main():
             props = list(WPR.crossbows(spec["crossbows"], spec["crossbows"]))
         if spec.get("gem"):
             parts.append(WPR.gem(arm, ob, spec["gem"]))
+        if spec.get("fluff_tail"):
+            parts.append(WPR.fluff_tail(arm, spec["fluff_tail"]))
+        if spec.get("flower_crown"):
+            parts.append(WPR.flower_crown(arm, ob, spec["flower_crown"]))
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")

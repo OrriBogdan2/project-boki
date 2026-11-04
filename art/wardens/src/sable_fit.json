@@ -511,15 +511,16 @@
   "fore": {
    "base": "e6e3f0",
    "tints": [
-    "b8ccff",
-    "ffc4ea",
-    "bff5e2",
-    "d8bfff",
-    "fff0c8"
+    "9fc0ff",
+    "ffb0e0",
+    "a8f5d8",
+    "c8a8ff",
+    "ffe8a8",
+    "b0f0ff"
    ],
-   "tint_k": 0.6,
-   "alpha": 0.62,
-   "rim": "f4f2fa",
+   "tint_k": 0.55,
+   "alpha": 0.66,
+   "rim": "fbf4ff",
    "rim_alpha": 0.8,
    "edge": 0.95,
    "edge_col": "7d7593",
@@ -568,15 +569,16 @@
   "hind": {
    "base": "e6e3f0",
    "tints": [
-    "b8ccff",
-    "ffc4ea",
-    "bff5e2",
-    "d8bfff",
-    "fff0c8"
+    "9fc0ff",
+    "ffb0e0",
+    "a8f5d8",
+    "c8a8ff",
+    "ffe8a8",
+    "b0f0ff"
    ],
-   "tint_k": 0.6,
-   "alpha": 0.62,
-   "rim": "f4f2fa",
+   "tint_k": 0.55,
+   "alpha": 0.66,
+   "rim": "fbf4ff",
    "rim_alpha": 0.8,
    "edge": 0.94,
    "edge_col": "7d7593",
@@ -632,13 +634,16 @@
   "length": 0.42,
   "span": 0.44,
   "colours": {
-   "silver": "c9ccd6",
-   "dark": "3a3444",
+   "silver": "9ea2b0",
+   "dark": "2e2a38",
    "grip": "5e4030",
    "string": "8f63cf",
-   "bolt": "c77dff"
+   "bolt": "c77dff",
+   "scroll": "a4a8b6"
   },
-  "stirrup": true
+  "stirrup": true,
+  "scroll": true,
+  "scroll_line": "3c3f4c"
  },
  "atlas_px": 2048,
  "smooth": {
@@ -663,15 +668,16 @@
   {
    "name": "collar back (the standing purple collar, the turnaround's back view)",
    "slots": [
-    "fur"
+    "fur",
+    "hair"
    ],
    "box": [
     null,
     null,
-    0.03,
+    0.04,
     null,
-    0.36,
-    0.6
+    0.33,
+    0.49
    ],
    "ramp": [
     "160f24",
@@ -804,9 +810,9 @@
    0.0,
    1.205
   ],
-  "out": 0.016,
-  "length": 0.075,
-  "r": 0.018,
+  "out": 0.018,
+  "length": 0.095,
+  "r": 0.022,
   "colour": "b0001a",
   "bone": "hips"
  },
