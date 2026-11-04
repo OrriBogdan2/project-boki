@@ -1149,3 +1149,10 @@ Ask S2 for one combined `ext/kits-integ` if merging seven is too slow (they did 
 - **Changes:** the display name (mage.json base_name "Ryzz"), kit and rules text, docs, the wiki (filenames kept) and comments; the portrait-check new-names assert now includes Ryzz. The id `mage` is unchanged.
 - **Checks (S2 re-ran):** hero-title 0, portrait 107/0, mage-combo 92/0, archetype 307/0, health --strict OK, style OK.
 - **Left as is:** docs/decisions/0010 still names Vireo (a historic record). portrait_art.gd keeps the art names "vireo"/"moosh" until round-2 ryzz_*/burple_* art files exist.
+
+## 2026-11-04 04:40 UTC (S2): Vex r2 3D update (same review)
+- The r2_* shots on ext/hero-shots-s2 under warden-3d/vex/ are refreshed:
+  - The hair is flat black with one orange front band over the monocle side; a few small shards remain.
+  - r2_gameplay_match.png and r2_gameplay_zoom.png are now in the Arena on bright grass, with no bubbles or nameplates over her.
+- Branch: ext/warden-meshy f56db4ff. Checks pass, and no extra credits were used.
+- Honest read: close up she matches the art well. At match zoom she reads by the streak, the vents and her arm, but her body is darker than the grass.
