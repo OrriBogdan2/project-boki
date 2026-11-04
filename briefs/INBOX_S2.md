@@ -511,3 +511,16 @@ Credits: ~8 x 70-110 ≈ 600-900; balance 4,993. Post per-Warden "OWNER: review 
 - Art on ext/imagegen 02294108, docs/art/gen/wardens_r3/: cinder_fullbody (design ref), cinder_front (upright, the main Meshy input), cinder_back (rear 3/4), cinder_side. **Read CINDER_KIT.md first.**
 - Must hold: the short rounded feminine salamander face (no long snout); the translucent fin-crest with fin rays running onto the tail (replaces the axolotl frills, so she no longer reads like Prismander); cracked brass goggles on the crest (her relic); the flamethrower lance in her LEFT hand, hosed to the copper tank; the tail; glowing spots and vials.
 - Queue: with Ryzz, after stage 2. Portrait and splash art are still coming; not needed for the model.
+
+## 2026-11-04 12:40 UTC (ORCH): new 3D reference sheets for every Hunter (owner) -> use them in stage 2
+ext/imagegen fb503983. The owner made flat-lit face/head sheets, prop sheets and fixed fronts aimed at your stage-1 gaps. **Read each Hunter's notes file first**: some sheets have parts to ignore.
+- **Vex** (wardens_r3, VEX_KIT.md): vex_face, vex_head_sheet; review/vex_eyeplate_detail_ref for the lens iris only. For the r3d face pass.
+- **Sable** (wardens_r2, SABLE_REFS.md): sable_face (almond, half-lidded dark eyes, not round orbs), sable_head_sheet, sable_crossbow_sheet (scale the crossbows up).
+- **Claire** (wardens_r2, CLAIRE_REFS.md): claire_head_sheet (horns curl back and down, close to the skull), claire_face, claire_spear_sheet (the spear is taller than her).
+- **Hem** (wardens_r3, HEM_KIT.md): hem_face, hem_head_sheet, hem_mask_sheet (the separate mask mesh), hem_weapons_sheet (bow with thread string + spool, clean needles, thimbles).
+- **Ostra** (wardens_r2, OSTRA_REFS.md): ostra_head_sheet, ostra_mask_sheet, ostra_cap_halo_sheet (violet halo, large), ostra_front_float (orb-hand pose, long wisp, violet rim for match read).
+- **Kael** (wardens_r3, ZEDRAN_KIT.md): kael_blade_sheet (whole core white-hot; ignore the pommel hook), kael_arm_sheet (white-hot cracks), kael_head_sheet (soft layered mane), kael_collar_sheet.
+- **Breaker** (wardens_r3, BREAKER_KIT.md): breaker_front (hammer on the RIGHT shoulder, shield at the LEFT side), breaker_hammer_sheet (plain banded ice, no anchor), breaker_shield_sheet, breaker_head_sheet. Scale 1.5x.
+- **Pip** (wardens_r2, PIP_REFS.md): pip_front (arms clear, cape behind the arms), pip_head_sheet, pip_lantern_sheet (scale only; keep the portrait's arched-pane lantern; make it cast light).
+- **Tarek** (wardens_r2, TAREK_KIT.md): tarek_front (lean, long legs, normal head), tarek_head_sheet (locs on springs), tarek_stone_sheet (rocky depth, amber iris).
+- **Ryzz, Cinder**: full sets already briefed (10:51, 11:45).
