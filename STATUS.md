@@ -178,3 +178,13 @@ Shots: `ext/hero-shots-s2` (README with captions).
   - docs/art/wardens/PIPELINE.md: the steps, settings and commercial terms. Paid plans own their output; Meshy may train on it unless we opt out, which is the owner's call. It has a run log.
 - The front, side and back crops of venatrix_turnaround are ready on the S2 box.
 - **Blocked on the key.** Owner: put `MESHY_API_KEY=...` in `/home/boki/.config/boki/secrets.env` (chmod 600) on the S2 box, or paste it into the S2 session. As soon as it's there, an Opus agent runs Meshy, the Blender clean-up, the rig and the shots (warden-3d/vex/meshy_*).
+
+## 2026-11-04 01:14 UTC: Meshy work under way (INBOX_S2 00:30 to 02:30)
+- **Key:** stored in ~/.config/boki/secrets.env (chmod 600). Test call OK: 1,100 credits.
+- **Vex (Meshy):** an Opus agent is on ext/warden-meshy with the 01:10 acceptance bar: image-guided texture, several candidates, painted look. The shots are posted as "OWNER: approve Vex" once they pass.
+- **The other 11 Wardens:** prepped, no credits spent.
+  - The front/side/back/portrait crops are in ~/meshy/<art>/ for all 11.
+  - Four groups, each starting with its batch-1 Warden: A Zedran/Ostra/Vireo, B Pin/Dredge/Bjorn, C Cinder/Tarek/Sable, D Moosh/Claire.
+  - They start on the owner's Vex approval.
+- **50-Boki roster:** an Opus design agent is on ext/boki-roster50. Deliverables: ROSTER_50.md, the 41 new kin stubs, RIDING_SPEC.md and a credit estimate. Owner review comes before any art.
+- **Order after that:** the Boki (starters first, using the image-gen turnarounds), then the character creator (a plan doc first).
