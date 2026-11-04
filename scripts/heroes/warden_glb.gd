@@ -51,9 +51,14 @@ const INK_TAGS := ["braid"]
 ## soft and near white (no violet shadow, no warm terminator band, no sun self-shadow, no procedural
 ## brushwork), a light-coloured rim and top light lift its edges off the ground, and far_lift brightens it at
 ## the match camera, so the model reads as bright as the art. (A procedural hero's shadow floor is 0.37.)
-const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(0.97, 0.94, 0.95), "shadow_sat": 0.0, "sss": 0.0,
+## The scene's light leans cool and violet (Look: a c4cbe6 ambient, about half the light on a painted model, and a
+## blue fill), which turned a painted atlas's skin lilac and its blacks muddy: ambient_cut and own_ambient swap the
+## scene's ambient for a warm-neutral one a step brighter, light_neutral takes the hue out of the cool fill (the
+## warm key keeps its warmth), dark_lift raises near-black paint one step; the shadow tint is warm.
+const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(1.0, 0.95, 0.91), "shadow_sat": 0.0, "sss": 0.0,
 	"sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3, "fres_tint": 0.95, "rim_amount": 0.5,
-	"top_light": 1.0, "far_lift": 0.35}
+	"top_light": 1.0, "far_lift": 0.35, "ambient_cut": 1.0, "own_ambient": Vector3(0.58, 0.54, 0.5),
+	"light_neutral": 0.9, "dark_lift": 0.07}
 ## The `ice` slot (Claire's ice costume, spear and blades; Breaker's hammer block): read as clear ice without real
 ## transparency: a strong cold fresnel rim and a little gloss over the painted atlas.
 const ICE := {"fres": 2.6, "fres_color": Color(0.72, 0.9, 1.0), "fres_tint": 0.25, "gloss": 0.45, "rim_amount": 0.8}
