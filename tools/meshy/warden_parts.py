@@ -995,8 +995,11 @@ def orb(arm, spec, tag="orb"):
     bld.tube(rings, radii, 14, *((0.55, 0.95, 0.05, 0.95) if glow_ball else (0.05, 0.45, 0.05, 0.95)), "ring" if glow_ball
              else "ball", [0.0] * k, cap_end=True, cap_start=True)
     if not glow_ball:
-        nrm = np.array(spec.get("normal", [0.0, 1.0, 0.0]), np.float64)
-        bld.torus(c, nrm / np.linalg.norm(nrm), r * 1.12, r * 0.1, 24, 6, (0.55, 0.05, 0.95, 0.95), "ring", 0.0)
+        # (a black hole: the dark ball inside bright rings; several crossed rings read as a glowing rim from any side)
+        for k_i, nv in enumerate(spec.get("rings", [spec.get("normal", [0.0, 1.0, 0.0])])):
+            nrm = np.array(nv, np.float64)
+            bld.torus(c, nrm / np.linalg.norm(nrm), r * (1.1 + 0.06 * k_i), r * 0.16, 24, 6, (0.55, 0.05, 0.95, 0.95),
+                      "ring", 0.0)
     ob = bld.object(tag.capitalize())
     img = bpy.data.images.new(tag + "_atlas", 64, 64, alpha=False)
     px = np.ones((64, 64, 4), np.float32)
