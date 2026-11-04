@@ -2922,7 +2922,7 @@ func _say(k: Dictionary, text: String, secs := 4.0, direct := true) -> void:
 		talk_cd = maxf(talk_cd, 2.0)
 	if not k.has("say"):
 		var l := Label3D.new()
-		l.font = UI.body; l.font_size = 34; l.pixel_size = 0.0105; l.outline_size = 14
+		l.font = UI.body; l.font_size = 34; l.pixel_size = BokiSpeech.FARM_PIXEL * BokiSpeech.SCALE; l.outline_size = 14
 		l.outline_modulate = Color(0.06, 0.05, 0.09, 0.95)
 		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED; l.no_depth_test = true
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; l.width = 520
