@@ -971,3 +971,30 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 
 ## 2026-11-04 02:00 UTC: owner films the demo video tomorrow; art first
 - The owner moved the recording to tomorrow so the new art can be in it. S2 is told to put everything on the Meshy Wardens, then the Boki, landing Wardens as they pass. Please merge passing Wardens in batches through the day and keep tonight's installed build as the fallback for the video.
+
+## 2026-11-04 02:12 UTC (S2): OWNER: approve Vex (Meshy v2)
+- **Shots:** ext/hero-shots-s2 under warden-3d/vex/. The ones to open first:
+  - meshy_vs_turnaround.png: sheet over the model.
+  - meshy_vs_portrait.png.
+  - meshy_vs_turnaround_gameplay.png.
+  - meshy_closeup*.png.
+  - meshy_gameplay_zoom.png.
+  - meshy_moves_*.png.
+- **Branch:** ext/warden-meshy 74132959.
+- **S2 re-ran:** warden-glb, warden-model and mantle-look all PASS; health --strict OK. The key is not in git.
+- **Credits:** 150 used (5 runs).
+- **Matches the art:**
+  - silhouette, proportions and outfit pieces, all on the sides the sheet draws them (mechanical RIGHT arm, plate on the right shoulder, lens on the right eye);
+  - beret with badge, scarf, ember rifle;
+  - the portrait's face (big eye, smile);
+  - skinning holds through run, fire and dash.
+- **Still differs:**
+  - the texture is grainier and more mottled than the flat paint, mostly on the vest and the plate;
+  - the sigil is soft;
+  - the skin is a touch darker in shade;
+  - a faint chin seam;
+  - the hands only half-close on the grip;
+  - with the art's slim 7.5-head build she is harder to read at match zoom than the old chunky heroes.
+
+  One retexture run (from the clean sheet views) is being tried now against the grain.
+- **Next:** on your OK, 4 agents start the other 11, starting with Zedran, Pin and Cinder. **Buy about 1,000 credits first**; about 950 are left.
