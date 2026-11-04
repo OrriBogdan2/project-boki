@@ -1,6 +1,12 @@
 # Masks and relics: canonical lore (owner-approved 2026-11-04; orchestrator write-up)
 This file wins over older relic names (the concept-pass list: Drowned Bell, Last Pin, Champion's Torc, Ember Phial, Hollow Bell, Split Geode, Moonsilver Key, Stormglass, Paid-Up Tags, Leaking Heart, Hearth Acorn, Rink Blade) and over hero lore written before the Nov 4 redesigns. ext syncs the Lore Bible artifact and docs/art/gen/stories/*.md to it.
 
+## The premise (owner's words, Nov 4; this is the voice for all lore text)
+> The Wyrm came, and stole our essence. In time, humans, beasts and skyfolk alike were born without faces. We became a new race: **the Empty**.
+> Our only salvation became the cursed fossils we once tried to destroy: **Masks**, each carrying the soul of a fallen Hunter of old.
+- Masks are old, cursed relics dug from the ruins. People feared them and tried to destroy them; now they're the only way to have a self again. (Where they came from: the Hunters who fought the Wyrm were sealed into their relics when they fell. Hem stitched many of them for the Tyrant.)
+- Not every Mask has a face: a relic can be a compass, a jar, a pair of skates. Wearing it gives you that Hunter's face, form and memories.
+
 ## How Masks work
 - **One villain (owner, Nov 4):** the Tyrant who ruled the Crown and never aged IS the Wyrm in human shape. When the thief woke it, the Wyrm broke the land and tore away everyone's selves.
 - The Wyrm stole everyone's selves. That's why the people (the Empty, and you) are blank.
@@ -49,10 +55,10 @@ This file wins over older relic names (the concept-pass list: Drowned Bell, Last
 - **Fusion** (key: Fuse): a Hunter merged with their Boki.
 - Retired in player text: **Warden**, **Mantle**, **Bearer**, **Merge**, **Unmasked**. Internal ids and code names (warden_*, kin, unmasked) can stay.
 
-## Prologue text (owner OK'd direction A; the full visual rebuild still waits for after the Sat reset)
+## Prologue text (owner premise, Nov 4; the full visual rebuild still waits for after the Sat reset)
 1. "Once, the sky held one great land, ruled from the Crown by a Tyrant who never aged."
-2. "He was the Wyrm in human shape, asleep on its hoard. The night a thief reached its heart, it woke."
-3. "It broke the land into a thousand isles and tore away everyone's selves. The Hunters who stood against it were sealed into Masks."
-4. "On the broken isles, the survivors found the Boki, and learned that a Mask could give them a face again."
-5. (unchanged) "Somewhere in the ruins lies the Wyrmheart: ..."
+2. "He was the Wyrm in human shape. The night a thief reached its heart, it woke."
+3. "The Wyrm broke the land and stole our essence. In time, humans, beasts and skyfolk alike were born without faces. We became a new race: the Empty."
+4. "Our only salvation became the cursed fossils we once tried to destroy: Masks, each carrying the soul of a fallen Hunter of old."
+5. "Put on a Mask, bond with a Boki, and hunt for the Wyrmheart: one wish to remake the world, or rule it. Every Hunter wants it. So does the Wyrm."
 Tutorial, first portal (one sentence): "This Mask holds a fallen Hunter. Put it on, and you become them."

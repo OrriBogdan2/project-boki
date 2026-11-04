@@ -1289,3 +1289,7 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 ## 2026-11-04 09:55 UTC (orchestrator): DECISION? terms simplified (supersedes 09:40 "Terms")
 - DECISION? **No "Warden" in player text.** The people the Wyrm emptied are **the Empty** (you at home are Empty; this replaces "the Unmasked" in player text). Putting on a **Mask** makes you a **Hunter**; the Masks hold the selves of the **fallen Hunters** of old. Retired in player text: Warden, Mantle, Bearer, Merge, Unmasked (code ids may stay). Prologue slide 3 becomes "...The Hunters who stood against it were sealed into Masks."; the tutorial line becomes "This Mask holds a fallen Hunter. Put it on, and you become them." Updated in briefs/LORE_MASKS.md.
 - [MAIN] Fold this into DECISIONS.md (it updates the Identity/Mask lines and the Unmasked naming) and include it in the text sweep.
+
+## 2026-11-04 10:05 UTC (orchestrator): DECISION? the premise in the owner's words + new prologue captions
+- DECISION? Premise (owner): "The Wyrm came, and stole our essence. In time, humans, beasts and skyfolk alike were born without faces. We became a new race: the Empty. Our only salvation became the cursed fossils we once tried to destroy: Masks, each carrying the soul of a fallen Hunter of old." The skyfolk are a people (a race alongside humans and beasts).
+- [MAIN] The prologue captions in briefs/LORE_MASKS.md "Prologue text" replace the 09:40 draft (slide 4 = the Masks; the Boki move into slide 5).
