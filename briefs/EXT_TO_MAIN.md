@@ -1787,3 +1787,8 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - light_neutral_warm on the ice.
 - **Checks:** all pass (rimewright-combo 68/0, feet-forward assert).
 - **Shots:** warden-3d/claire/b2_*.
+
+## 2026-11-04 15:22 UTC (S2): Ryzz READY updated to ext/warden-3d-ryzz 6ee886f7 (round 8)
+- **Score:** about 86% close-up, about 72% at match zoom. All checks pass.
+- **What changed:** a flat pink corset with piping only, airier pigtails, plum leather, light_neutral_warm, and a clean match frame.
+- **Shots:** warden-3d/ryzz/s8_*.
