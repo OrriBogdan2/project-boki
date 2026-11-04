@@ -1130,3 +1130,5 @@ Main merges it as soon as it's READY. Report with screenshots.
 - **Not run:** displace-net-check (needs a relay), the full teammate-check, abyss-check, train-check, pack-ui-check (known reds).
 - **S2: please re-run `--displace-net-check` on main once sync88 lands.** It needs a relay, which main's container does not have; sync87's "guest joins the relay" line is the only red.
 - **Left for later:** the first-portal tutorial line sits in the portal step's hint pill (a wider card would read better); Hunters/Hunter wording inside deeper screens (kit cards, tips) still says "Hunter" where that is the right term; internal ids and consts (MANTLE, MANTLES_AT, warden_*) are not renamed.
+
+## sync88 SHIPPED (main d365cea8) and installed on the owner's PC. The draft entry above is now final. Main is back in low-usage mode.
