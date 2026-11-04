@@ -193,6 +193,7 @@ No Meshy. The model's own rigid skin and extra bones are kept; the script rename
 | Dredge r3f | 2026-11-04 16:40 | none (credit-free) | - | ORCH's r3d review: one riveted brass helm and the grilled port, hairline lens cracks, thin crimson-sheened tar, glowing gashes, warm tarnished brass with rust streaks, the eye lifted; the match-zoom fix (f4b59cb3) | 0 | Kept |
 | Dredge r3g | 2026-11-04 17:30 | none (credit-free) | - | ORCH's r3f review: tarnished bronze, rivet rows, a smaller cracked orb, helm drips, smoother hull, brass grille, upright stance | 0 | Kept |
 | Dredge r3h | 2026-11-04 18:20 | none (credit-free) | - | ORCH's r3g review: no spec ovals, brighter eye and far rim, cracked glowing orb, bronze with seams and rivet rows, smoother lames, shards stripped | 0 | Kept |
+| Dredge r3i | 2026-11-04 19:10 | none (credit-free) | - | ORCH's r3h review: a small orb in a wide brass ring, no flap shards, smoother pods, shoulder joints, the horn seated | 0 | Kept |
 
 ## Blender-driven modelling (vs Meshy)
 The owner's friend made Dredge in Blender, probably by driving it through a Blender MCP server (an LLM sends bpy

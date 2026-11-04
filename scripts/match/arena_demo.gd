@@ -315,18 +315,18 @@ static func tick(A: Arena, dt: float) -> void:
 			at_t = 99.0
 		"pose", "pose_clear":
 			# the Hunter standing at the match camera, turned three-quarters toward it (Warden model shots);
-			# pose_clear: the same with the arena's sign and the HUD off (review frames)
+			# pose_clear: the same, nearly facing the camera, with the arena's sign and every overlay off (review frames)
 			if w == "pose_clear":
 				if t < 0.05:
 					P.teleport(P.pos + Vector3(-1.6, 0, -1.2))      # (off the fern at the spawn)
 					for l in m.find_children("*", "Label3D", true, false):
 						if String((l as Label3D).text).contains("KIT CARD"): (l as Label3D).visible = false
-				if m.hud:
-					m.hud.set("visible", false)
-					for c in m.hud.get_children():
-						if c is CanvasItem or c is CanvasLayer: c.set("visible", false)
+				# every overlay off: the HUD, the arena's key hint and meter, the button bar
+				for c in m.get_tree().root.find_children("*", "CanvasLayer", true, false):
+					(c as CanvasLayer).visible = false
+				if m.hud: m.hud.set("visible", false)
 			P.inp["move"] = Vector2.ZERO
-			P.inp["aim"] = P.pos + Vector3(-5.0, 0.9, 3.5)
+			P.inp["aim"] = P.pos + (Vector3(-1.5, 0.9, 5.0) if w == "pose_clear" else Vector3(-5.0, 0.9, 3.5))
 			at_t = 2.0
 		"bulwark", "crushed":
 			var H: Hunter = A.dummies[2]["h"]

@@ -5,7 +5,7 @@
  "blend": "~/meshy/dredge_friend/fit.blend",
  "scale": 0.665,
  "turn": 180,
- "max_tris": 3650,
+ "max_tris": 2900,
  "dissolve_deg": 1.0,
  "sharp_deg": 50,
  "groups": {
@@ -187,7 +187,12 @@
   "wrist": "Hand.R",
   "scale": 0.95,
   "tris": 3200,
-  "solidify": 0.012
+  "solidify": 0.012,
+  "offset": [
+   0.0,
+   -0.09,
+   0.02
+  ]
  },
  "materials": {
   "Dredge_Brass": [
@@ -256,10 +261,10 @@
   "bone": "eye",
   "at": [
    0.0,
-   0.462,
+   0.468,
    1.3766
   ],
-  "r": 0.023,
+  "r": 0.016,
   "depth": 0.75,
   "material": "glow-eye",
   "colour": "ff2418"
@@ -448,17 +453,17 @@
    },
    "metal-glass": {
     "glass": true,
-    "colour": "5a1008",
+    "colour": "1c0c0a",
     "crack": "e8ecf0",
-    "halo": "e0301a",
+    "halo": "c42a18",
     "eye_at": [
      0.0,
      0.468,
      1.3766
     ],
-    "eye_r": 0.03,
-    "crack_scale": 15.0,
-    "crack_k": 0.55
+    "eye_r": 0.014,
+    "crack_scale": 30.0,
+    "crack_k": 0.6
    },
    "leather-tar": {
     "tar": true,
@@ -551,10 +556,10 @@
     "halo": "ff7038",
     "eye_at": [
      0.0,
-     0.475,
+     0.484,
      1.3766
     ],
-    "eye_r": 0.005
+    "eye_r": 0.004
    }
   }
  },
@@ -592,7 +597,8 @@
    "materials": [
     "Dredge_Brass",
     "Dredge_Iron",
-    "Dredge_Tar"
+    "Dredge_Tar",
+    "Dredge_Glass"
    ]
   },
   {
@@ -630,7 +636,7 @@
   "r": 0.3,
   "res": [
    22,
-   36
+   34
   ],
   "dents": 12,
   "bands": [
@@ -663,8 +669,8 @@
      88
     ],
     "lon": 122,
-    "facets": 11,
-    "rows": 2
+    "facets": 16,
+    "rows": 3
    },
    {
     "r": 0.228,
@@ -673,8 +679,8 @@
      34
     ],
     "lon": 116,
-    "facets": 11,
-    "rows": 2
+    "facets": 16,
+    "rows": 3
    },
    {
     "r": 0.245,
@@ -683,8 +689,8 @@
      4
     ],
     "lon": 106,
-    "facets": 11,
-    "rows": 2
+    "facets": 16,
+    "rows": 3
    },
    {
     "r": 0.252,
@@ -693,8 +699,8 @@
      -16
     ],
     "lon": 100,
-    "facets": 11,
-    "rows": 2
+    "facets": 16,
+    "rows": 3
    }
   ],
   "project": {
@@ -718,7 +724,8 @@
      40
     ],
     "w": 0.027999999999999997,
-    "flap": 44
+    "flap": 0,
+    "no_flap": true
    },
    {
     "at": [
@@ -730,11 +737,12 @@
      -15
     ],
     "w": 0.025199999999999997,
-    "flap": 38,
+    "flap": 0,
     "side": [
      -5,
      0
-    ]
+    ],
+    "no_flap": true
    },
    {
     "at": [
@@ -746,7 +754,8 @@
      -70
     ],
     "w": 0.0224,
-    "flap": 36
+    "flap": 0,
+    "no_flap": true
    },
    {
     "at": [
@@ -758,7 +767,8 @@
      175
     ],
     "w": 0.027999999999999997,
-    "flap": 42
+    "flap": 0,
+    "no_flap": true
    },
    {
     "at": [
@@ -770,11 +780,12 @@
      195
     ],
     "w": 0.025199999999999997,
-    "flap": 40,
+    "flap": 0,
     "side": [
      -5,
      0
-    ]
+    ],
+    "no_flap": true
    },
    {
     "at": [
@@ -786,7 +797,8 @@
      80
     ],
     "w": 0.024,
-    "flap": 40
+    "flap": 0,
+    "no_flap": true
    },
    {
     "at": [
@@ -798,11 +810,12 @@
      140
     ],
     "w": 0.024,
-    "flap": 38,
+    "flap": 0,
     "side": [
      -5,
      0
-    ]
+    ],
+    "no_flap": true
    }
   ],
   "dent_depth": [
@@ -1110,7 +1123,7 @@
    "y1": 0.452,
    "R": 0.082,
    "lip": 0.09,
-   "inner": 0.064,
+   "inner": 0.04,
    "rivets": 12,
    "rivet_r": 0.006,
    "bone": "head",
@@ -1134,19 +1147,19 @@
   "rivet_rows": [
    {
     "lat": -27,
-    "n": 24,
+    "n": 19,
     "off": 0.04,
     "r": 0.008
    },
    {
     "lat": 44,
-    "n": 22,
+    "n": 17,
     "off": 0.035,
     "r": 0.008
    },
    {
     "lat": 5,
-    "n": 18,
+    "n": 14,
     "off": 0.0,
     "r": 0.007,
     "lon": [
@@ -1156,7 +1169,7 @@
    },
    {
     "lat": 20,
-    "n": 14,
+    "n": 11,
     "off": 0.0,
     "r": 0.006,
     "lon": [
@@ -1166,7 +1179,7 @@
    },
    {
     "lat": -10,
-    "n": 14,
+    "n": 11,
     "off": 0.0,
     "r": 0.006,
     "lon": [
@@ -1176,9 +1189,31 @@
    },
    {
     "lat": 62,
-    "n": 14,
+    "n": 11,
     "off": 0.0,
     "r": 0.006
+   }
+  ],
+  "joints": [
+   {
+    "at": [
+     0.38,
+     0.0,
+     1.24
+    ],
+    "r": 0.075,
+    "bone": "upper_arm.R",
+    "material": "metal-iron"
+   },
+   {
+    "at": [
+     -0.38,
+     0.0,
+     1.24
+    ],
+    "r": 0.075,
+    "bone": "upper_arm.L",
+    "material": "metal-iron"
    }
   ]
  }

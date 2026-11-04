@@ -187,6 +187,8 @@ def _tear(ob, c, r, t, mat, gash_mat, bone, rnd):
             f.normal_flip()
     bmesh.ops.triangulate(bm, faces=bm.faces[:])
     WP._append(ob, bm, bone, gash_mat)
+    if t.get("no_flap"):
+        return
     # the flap: a small patch of plate on one side of the gash, turned out about the gash's chord
     la0, lo0 = t["at"]
     la1, lo1 = t["to"]
@@ -313,6 +315,9 @@ def extras(ob, spec, seed=1):
         WP.add_orb(ob, sh)
     for g in spec.get("glows", []):
         WP.add_orb(ob, g)
+    for j in spec.get("joints", []):          # ball joints seating a limb in its socket
+        WP.add_orb(ob, {"at": j["at"], "r": j["r"], "bone": j["bone"], "material": j["material"],
+                        "colour": j.get("colour", "4c4844")})
     tar = None
     for st in spec.get("strands", []):
         tar = WP._mat_index(ob, st["material"], st.get("colour", "1a1416"))

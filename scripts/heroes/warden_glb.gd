@@ -53,7 +53,7 @@ const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], 
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
 const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline shell
 ## Materials "<slot>-<tag>" so tagged go without it too (thin ooze read as planks; the lens's line cut the orb).
-const NO_INK_TAGS := ["tar", "crack", "glass"]
+const NO_INK_TAGS := ["tar", "crack", "glass", "gash"]
 ## A Warden's own settings for its painted atlas, on top of the shared ones (Dredge: tarnished brass, rough spec).
 const LOOK := {"dredge": {"gloss": 0.0, "sheen": 0.0, "rim_far": 0.5, "rim_far_color": Color(1.0, 0.68, 0.3)}}
 ## And per slot of a Warden's painted atlas (Dredge: the eye glows brighter, so it shows at the match camera).

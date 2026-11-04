@@ -85,4 +85,10 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   lit red lens; the brass toward tarnished bronze with verdigris in the crevices, painted plate seams (ten
   meridians and two latitudes) and six rivet rows over the hull (cheaper rivet heads); smoother shoulder lames
   (two rows, eleven facets); the loose iron shards over the shoulders stripped. Body 14,920 at fit.
+- **r3i (credit-free, ORCH's r3h review):** a small orb (r 0.016) in a wide brass ring (the helm's inner edge
+  0.064 -> 0.04; the source's own lens glass stripped, it poked through the ring), a dark lens with a small red
+  halo; the tears' flaps gone and the gashes unlined (`gash` in NO_INK_TAGS: their thin edges outlined as black
+  shards); smoother shoulder pods (three rows of sixteen facets); iron ball joints seating the upper arms in the
+  pods; the horn moved 9 cm back into the right forearm's cuff (`weapon.offset`). Body 14,642 at fit.
+  `--arena-demo=pose_clear` now hides every overlay and turns him nearly toward the camera.
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.
