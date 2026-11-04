@@ -367,8 +367,8 @@ func _draw_world_labels() -> void:
 			_ctext(bp, "%s's box" % o.pname if o != m.player else "Your box", 12, Life.box_color(b), big)
 	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
-	if m.opts.get("tutorial", false) and m.tut_target != Vector3.INF and m.player and not m.player.out:
-		_draw_waypoint(m.tut_target, m.tut_label, Color("8fe3c8"))     # (always drawn, even with your Boki leading)
+	if m.tut and m.tut.target != Vector3.INF and m.player and not m.player.out:
+		_draw_waypoint(m.tut.target, m.tut.label, Color("8fe3c8").lerp(Color.WHITE, 0.6 if m.tut.flash_t > 0.0 and int(Time.get_ticks_msec() / 150.0) % 2 == 0 else 0.0))
 	_draw_exit_labels()
 	_draw_lair_labels()
 	_draw_truce_marks()
@@ -588,18 +588,8 @@ func _draw_top(sz: Vector2) -> void:
 			_text(box.position + Vector2(14, 50 + i * 24), ("→  " if i == 0 else "○  ") + key + String(t[1]), 13, GOLD if i == 0 else INK)
 		_text(box.position + Vector2(14, box.size.y - 10), "H hides the guide and your kit", 11, Color(MUTED, 0.8))
 		return
-	if m.opts.get("tutorial", false):
-		var txt: String = m.tut_text
-		var w := maxf(360.0, big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 22).x + 60.0)
-		var rr := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 12), Vector2(w, 66))
-		_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 12)
-		_ctext(Vector2(sz.x * 0.5, 34), "TUTORIAL  %d / %d" % [mini(m.tut_step + 1, m.TUT.size()), m.TUT.size()], 12, Color("8fe3c8"))
-		_ctext(Vector2(sz.x * 0.5, 62), txt, 22, Color("f2c84a"), big)
-		if m.tut_id() == "defend" and m.player:
-			var o: Dictionary = m._tut_outpost()
-			if not o.is_empty():
-				_panel(Rect2(Vector2(sz.x * 0.5 - 120, 84), Vector2(240, 30)), Color(0.06, 0.07, 0.1, 0.85), 8)
-				_bar(Rect2(Vector2(sz.x * 0.5 - 104, 95), Vector2(208, 8)), clampf(float(o["prog"]), 0.0, 1.0), ExitModels.UPLINK)
+	if m.tut:
+		TutorialHud.draw(self, sz)
 		return
 	# top right, as in Supervive: squads left, your kills, your knocks, your gems
 	var teams := {}
@@ -767,8 +757,8 @@ func _draw_minimap(sz: Vector2) -> void:
 			var bp: Vector2 = to_map.call(h.pos)
 			if on_map.call(bp, 3.0): bounty_marker(c, bp, 0.85)
 			else: _edge_arrow(inner, inner.get_center(), bp, Color("ffb64a"))
-	if m.opts.get("tutorial", false) and m.tut_target != Vector3.INF:
-		var tv: Vector2 = to_map.call(m.tut_target)
+	if m.tut and m.tut.target != Vector3.INF:
+		var tv: Vector2 = to_map.call(m.tut.target)
 		if on_map.call(tv, 4.0): c.draw_arc(tv, 6.0, 0, TAU, 16, Color("8fe3c8"), 2.5, true)
 		else: _edge_arrow(inner, inner.get_center(), tv, Color("8fe3c8"))
 	for pg in m.pings:
