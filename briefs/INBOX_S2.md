@@ -441,3 +441,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 09:55 UTC (orchestrator): terms changed (player text)
 - "Warden" is gone from player-facing text: the Masks hold **fallen Hunters**; you at home are **the Empty** (not "the Unmasked"). Code/file names (warden_*, WardenSkeleton, unmasked) can stay. Any new kit text, tooltips or docs: follow briefs/LORE_MASKS.md "Terms".
+
+## 2026-11-04 10:20 UTC (orchestrator): Hem (was Pin) art in
+- ext/imagegen wardens_r3/hem_* + HEM_KIT.md. Queued for 3D after Vex passes. Notes: the bow in her LEFT hand, draw RIGHT; the glowing red-thread bowstring (emissive line); the needle-arrows with a stitched-trail VFX; her shadow is a VFX/decal trick (too long, clawed, red seams), not a creature and not in the mesh; the porcelain-shard mask as its own mesh; the thimble claws on the right hand.
