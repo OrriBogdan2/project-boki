@@ -216,3 +216,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Credits:** about 910 left; the 3 agents use 360 at most. Each agent stops if the balance is under 250.
 - **Next:** the other 8 Wardens, as their r2 turnaround and side views land (watching IMG_STATUS.md). After that, one READY integration for batch 1.
 - **Stance:** ext/warden-stance 4f9487a0 is pushed (Vex's gun-arm carry).
+- 2026-11-04 04:33 UTC: READY ext/rename-ryzz 14242204 (Vireo -> Ryzz). It contains rename-burple, so merge just this one.
