@@ -26,17 +26,20 @@ func _watch_boki(secs: float, steer := Vector2.ZERO) -> String:
 	var k: Kin = m.player.kin
 	var hp0 := k.hp
 	while t < secs:
+		# the ship waits during planning, and the match clock with it: not part of the window
+		var planning: bool = m.skydrop != null and m.skydrop.planning
 		m.player.inp["move"] = steer
 		if m.opts.get("tutorial", false):
 			m._tut_drive()
 		if t > 1.0 and m.player.riding:
 			m.ship_jump(m.player, true)      # off the ship early, so the drop and landing fall inside the window
 		m.step(Match.DT)
+		if planning:
+			continue
 		t += Match.DT
-		if t < 0.1:
-			print("DBG riding=%s giant=%s merge=%s state=%s remote=%s dead=%s" % [m.player.riding, k.giant.size(), KinMerge.active(m.player), k.state, k.remote, k.dead])
 		if (m.player.riding or m.player.dropping) and k.flat_dist(m.player) > 6.0:
-			return "t=%.2fs left behind (%s, kin y %.1f), %.0f m from you" % [t, k.state, k.pos.y, k.flat_dist(m.player)]
+			var gap := k.flat_dist(m.player)
+			return "t=%.2fs left behind (%s, kin y %.1f), %.0f m from you" % [t, k.state, k.pos.y, gap]
 		if k.dead or k.state == "downed" or k.hp < hp0 - 0.01:
 			return "t=%.2fs state=%s hp=%.1f/%.1f at %s" % [t, k.state, k.hp, hp0, str(k.pos)]
 	return ""
