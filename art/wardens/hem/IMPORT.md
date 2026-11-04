@@ -33,3 +33,17 @@ lift (`lift` 1/1/1), no per-Warden shader. Raw files in ~/meshy/hem/ (not in git
   a red glowing thread through its eye. `anchor_nock` on hand.R. The stitched trail, drifting threads, floating
   needles and her shadow are VFX.
 - `hem.glb.import`: `generate_lods=false`, `force_disable_compression=true`; the atlas imported lossless.
+
+## Stage 2 (2026-11-04, the Vex r3c recipe; credit-free)
+- **Paint-over:** `smooth`, then `ramps` of the art's own colours (crimson, blacks, wraps, leather, silver, hair;
+  the skin ramp is hem_face's skin so the projected face has no edge), `despeckle`; `project_late` paints
+  hem_face (the 12:40 face sheet: eyes, brows, liner, the mask's cracks, gold rim, stitches and smile) over the face,
+  registered on the mesh's own render (tools: register.py), and the edited front view over the chest.
+- **Mask:** still its own mesh (`pieces`), now on the leather slot (warm porcelain, no metal sheen), closed one ring.
+- **Needles:** the scan's ragged quiver needles cut (`cut_boxes`) and rebuilt clean (tools/meshy/hem_parts.py:
+  four iron needles with long eyes, two threaded red), on the hips.
+- **Look:** content/rules/warden_look.json `hem` (skin, crimson cloth, metal and leather brighter at the match
+  camera, the bow string's glow up).
+- **Stance:** content/rules/warden_stance.json archer: upright, feet planted (was hunched), the bow carried in her
+  LEFT hand at her side with the right hand free (new `free_r` in the carry: WardenStance.carry_free_r).
+- `chunk` head 1.14.

@@ -30,5 +30,43 @@
 				"glow": 1.8
 			}
 		}
+	},
+	"hem": {
+		"painted": {},
+		"slots": {
+			"skin": {
+				"top_light": 0.35,
+				"fres": 0.45,
+				"far_lift": 0.15,
+				"shade": 0.8,
+				"shadow_tint": [
+					0.94,
+					0.84,
+					0.86
+				]
+			},
+			"cloth": {
+				"fres": 0.7,
+				"far_lift": 0.5,
+				"top_light": 0.8
+			},
+			"hair": {
+				"far_lift": 0.3,
+				"fres": 0.6,
+				"glow": 0.06
+			},
+			"metal": {
+				"top_light": 0.5,
+				"fres": 0.6,
+				"fres_tint": 0.8,
+				"far_lift": 0.35
+			},
+			"leather": {
+				"far_lift": 0.4
+			},
+			"glow": {
+				"glow": 2.6
+			}
+		}
 	}
 }

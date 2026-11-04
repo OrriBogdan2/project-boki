@@ -1785,6 +1785,10 @@ def main():
             parts.append(WP.hoses([ob], arm, [_rel(arm, h, ("path",)) for h in spec["hoses"]], spec["hose_colours"]))
     for pc in spec.get("pieces", []):
         parts.append(split_piece(ob, img, pc))
+    if spec.get("needles"):
+        # Hem's quiver needles, cut from the scan (`cut_boxes`) and built clean (tools/meshy/hem_parts.py)
+        import hem_parts
+        parts.append(hem_parts.needles(arm, spec["needles"], m, float(spec.get("chunk", {}).get("girth", 1.0))))
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
