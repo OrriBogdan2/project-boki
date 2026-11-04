@@ -13,7 +13,7 @@ extends RefCounted
 const PORTRAIT_PX := 512
 const SPLASH_PX := Vector2i(960, 540)
 ## Wardens whose splash isn't in yet (or was redrawn away): their portrait stands in.
-const NO_SPLASH := ["gunslinger", "tender"]
+const NO_SPLASH := []
 
 var main: Node
 var fails := 0
@@ -137,9 +137,14 @@ func _menus() -> void:
 	var card := KitCard.make("rimewright", "", func(): pass)
 	host.add_child(card)
 	await tree.process_frame
-	ok("the kit card shows Claire's splash", _first_pic(card) == Portraits.art_path("rimewright", true))
+	ok("the kit card shows Claire's portrait", _first_pic(card) == Portraits.art_path("rimewright"))
 	await _shot(tree, "kit_card")
 	card.queue_free()
+	for ak in ["gunslinger", "juggernaut", "tender"]:
+		card = KitCard.make(ak, "cindle", func(): pass)
+		host.add_child(card)
+		await _shot(tree, "kit_card_" + ak)
+		card.queue_free()
 	_fallback_menus()
 	layer.queue_free()
 	await tree.process_frame
