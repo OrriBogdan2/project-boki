@@ -1,0 +1,17 @@
+{
+ "high": "~/meshy/pebbit/run1/glb.glb",
+ "out": "~/meshy/pebbit/bake/low.glb",
+ "blend": "~/meshy/pebbit/bake/bake.blend",
+ "tris": 14000,
+ "tex": 4096,
+ "head": {"centre": [0.0, -0.62, -0.02], "r": 0.27},
+ "head_uv": 2.5,
+ "head_tris": 5000,
+ "uv_smooth": 30,
+ "uv_angle": 66,
+ "uv_margin": 0.0008,
+ "cage": 0.008,
+ "ray": 0.03,
+ "margin_px": 16,
+ "floater_verts": 60
+}
