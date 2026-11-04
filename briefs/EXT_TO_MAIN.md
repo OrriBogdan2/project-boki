@@ -1514,3 +1514,37 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - Phase A is running: the Vex agent is doing the shared look fix (violet/dark), the Vex 12:55 fixes, and RECIPE_95.md plus a driver script.
   - The other agents keep fixing geometry gaps meanwhile, and merge the look fix the moment it lands.
   - Phase B (one agent per hero) starts as soon as RECIPE_95 exists. Each hero is marked READY in EXT_TO_MAIN at about 95%.
+
+## 2026-11-04 12:36 UTC (S2): stage 2 status for all Hunters, plus a merge note for main (warden-stance)
+- **Self-scores (close-up / match zoom); none at the 95% bar yet:**
+
+  | Hunter | Close-up | Match | Branch |
+  |---|---|---|---|
+  | Hem | ~80% | ~70% | |
+  | Sable | ~80% | ~65% | ext/warden-3d-sable 6af6e6f0 |
+  | Ostra | ~75% | ~60% | ext/warden-3d-ostra a927a461 |
+  | Pip | ~75% | ~60% | ext/warden-3d-pip ce53d8d0 |
+  | Dredge | ~75% | ~55% | ext/warden-dredge-friend 5faa4e51 |
+  | Ryzz | ~72% | ~60% | ext/warden-3d-ryzz 1f7958fe |
+  | Kael | ~70% | ~60% | |
+  | Tarek | ~70% | ~55% | ext/warden-3d-tarek eaf9129a |
+  | Breaker (1.5x) | ~70% | ~55% | ext/warden-3d-breaker 466c92b4 |
+  | Claire | ~70% | ~50% | ext/warden-3d-claire b3e41b74 |
+
+  Shots are on ext/hero-shots-s2 under warden-3d/<name>/s2_*.
+- **The biggest shared gap** is the violet, too-dark toon look (lilac skin, black at match zoom). The Vex agent is fixing it once in the shared shader and loader for Phase A; every Hunter branch merges it when it lands.
+- **The next rounds (s3)** are underway:
+  - Breaker: a Meshy body from breaker_front.
+  - Claire: the horns.
+  - Kael: the mane, arm cracks and collar.
+  - Hem: the mask edge and thimbles.
+  - Pip: the tail and crown.
+  - Sable: crossbow detail.
+  - Tarek: a Meshy rerun.
+  - Ostra: the orb and halo.
+  - Ryzz: the face, curls and rods.
+- **Main, about merging:**
+  - Every Hunter branch carries the item-52 stance as **cherry-picks** of ext/warden-stance's 4 stance commits (7260bfda, 91d7e239, 4f9487a0, aa3345b6), not as a merge.
+  - ext/warden-stance has picked up about 50 commits of a diverged main line: the market, a second save migration v7->v8 that clashes with the Mantle-look v8, and hit radii following size.
+  - Merging it directly into the r3b line conflicts in about 16 files. Expect duplicate-commit noise, and reconcile the two v7->v8 migrations when main integrates them.
+- **Blocked:** this session's permission check refused one Meshy spend (Dredge's hull). Other Meshy runs went through. The owner needs to allow Meshy spends in the S2 session for the remaining runs to be reliable.
