@@ -1,0 +1,10 @@
+s1_vs_turnaround.png: stage 1 ostra (Meshy 7.1, baked, fitted; no polish) under the art's turnaround, close
+s1_vs_turnaround_game.png: the same at the match camera (true pixels, enlarged 3x)
+s1_vs_portrait.png: the portrait beside the close-ups, front and 3/4
+s1_front_34.png: full length, front 3/4 both sides
+s1_back_34.png: full length, back 3/4
+s1_poses_game.png: idle, run, attack, cast, ult at the match camera
+s1_moves_1.png: the run and the first kit moves, close
+s1_moves_2.png: more kit moves, close
+s1_gameplay_match.png: the arena at match zoom (--arena-demo=pose --demo-zoom=1.0)
+s1_gameplay_match_x4.png: the hero in that frame, x4 (nearest)
