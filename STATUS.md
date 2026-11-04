@@ -368,3 +368,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
     | Cinder | d522f924 |
     | Kael | 923948b1 |
     | Pip | 8b79969d |
+
+## 2026-11-04 S2 late: READY moves + Dredge cause
+- READY Hem: ext/warden-3d-hem 779fe027 (86/76). READY Sable: ext/warden-3d-sable b21e3279 (~89/78). Shots are on ext/hero-shots-s2.
+- Dredge: the limb loss was caused by decimating the whole body to the leftover budget, and r3h is affected too. The r3j fix (per-part decimation) is in checks. The integ holds r3h as a placeholder until r3j lands.
+- In flight: Hem s8, Sable s9, Dredge r3j, Kael accuracy pilot (ext/warden-3d-kael-acc), and the art-integ suite (a25da340b13600878).
+- The session usage limit has been reached. Agents still running may stop mid-round; resume from their branches.
