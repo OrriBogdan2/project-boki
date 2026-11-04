@@ -58,7 +58,10 @@
 				"far_lift": 0.2
 			},
 			"glow": {
-				"glow": 2.2
+				"glow": 0.45,
+				"fres": 0.0,
+				"top_light": 0.0,
+				"far_lift": 0.1
 			}
 		}
 	}

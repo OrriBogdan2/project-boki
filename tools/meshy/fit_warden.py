@@ -1389,6 +1389,29 @@ def chunk(ob, rig, ck):
             w = next((x.weight for x in v.groups if x.group == g.index), 0.0)
             if w > 0.0:
                 co[v.index] = piv + (co[v.index] - piv) * (1.0 + kk * w)
+    if "fingers" in ck:
+        # (long spidery fingers: both hands stretched down from the wrist by their skin weight, Ostra's claws)
+        fk = float(ck["fingers"]) - 1.0
+        for bone in ("hand.L", "hand.R"):
+            g = ob.vertex_groups.get(bone)
+            if g is None:
+                continue
+            pz = K.bone_head(rig, bone).z
+            for v in ob.data.vertices:
+                w = next((x.weight for x in v.groups if x.group == g.index), 0.0)
+                if w > 0.0 and co[v.index, 2] < pz:
+                    co[v.index, 2] = pz + (co[v.index, 2] - pz) * (1.0 + fk * w)
+    if "feet" in ck:
+        # (the feet grown about each ankle's ground point, with a fade up the shin: the art's big wrapped feet)
+        fk, top = float(ck["feet"]) - 1.0, float(ck.get("feet_top", 0.16))
+        for side in (-1.0, 1.0):
+            m = (co[:, 2] < top) & (co[:, 0] * side > 0.0)
+            if not m.any():
+                continue
+            cx, cy = float(np.median(co[m, 0])), float(np.median(co[m, 1]))
+            w = np.clip(1.0 - co[m, 2] / top, 0.0, 1.0)[:, None]
+            piv = np.array([cx, cy, 0.0])
+            co[m] = piv + (co[m] - piv) * (1.0 + fk * w)
     gk = float(ck.get("girth", 1.0))
     co[:, 0] *= gk
     co[:, 1] *= gk

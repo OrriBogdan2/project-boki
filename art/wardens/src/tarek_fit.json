@@ -96,7 +96,8 @@
  "chunk": {
   "head": 1.0,
   "hand": 1.15,
-  "girth": 1.0
+  "girth": 1.0,
+  "feet": 1.25
  },
  "glow_min": [
   2.0,
@@ -277,12 +278,12 @@
    ],
    "rock": "9a8a76",
    "rim": "e8dccc",
-   "iris": "ff8a1c",
+   "iris": "ff7410",
    "pupil": "1e0a04",
    "slot": "leather",
    "rock_dark": "4c3e34",
    "rim_dark": "8a7466",
-   "iris_hot": "ffe27a",
+   "iris_hot": "ffb43a",
    "rel": "head"
   }
  ],
@@ -579,10 +580,10 @@
     1.0
    ],
    "ramp": [
-    "6c5848",
-    "94806c",
-    "bba68e",
-    "dccdb4"
+    "5a4a3e",
+    "7a6656",
+    "9a8672",
+    "b4a28c"
    ]
   }
  ],

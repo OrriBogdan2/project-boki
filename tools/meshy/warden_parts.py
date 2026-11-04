@@ -859,7 +859,12 @@ def crescent(arm, spec, tag="halo"):
     base, crack = hexcol(spec.get("colour", "d9b8ff")), hexcol(spec.get("crack", "8a4ad8"))
     # a few dark crack lines across the moon (u around the tube, v along the arc)
     lines = (np.abs(((yy * 0.37 + xx * 0.11) % 13) - 6.5) < 0.6) & (xx % 21 < 15)
-    px[..., :3] = np.where(lines[..., None], crack, base)
+    col = np.broadcast_to(base, (64, 64, 3)).copy()
+    if spec.get("core"):
+        # (the glow's falloff: a pale core along the moon's faces, deepening to the violet rim at its edges)
+        f = (0.5 + 0.5 * np.cos(xx / 63.0 * 4.0 * math.pi))[..., None] ** 1.5
+        col = base * (1 - f) + hexcol(spec["core"]) * f
+    px[..., :3] = np.where(lines[..., None], crack, col)
     img.pixels = px.ravel()
     img.pack()
     _flat_material(ob, spec.get("slot", "glow"), tag, img)
@@ -993,10 +998,19 @@ def orb(arm, spec, tag="orb"):
         nrm = np.array(spec.get("normal", [0.0, 1.0, 0.0]), np.float64)
         bld.torus(c, nrm / np.linalg.norm(nrm), r * 1.12, r * 0.1, 24, 6, (0.55, 0.05, 0.95, 0.95), "ring", 0.0)
     ob = bld.object(tag.capitalize())
-    img = bpy.data.images.new(tag + "_atlas", 32, 32, alpha=False)
-    px = np.ones((32, 32, 4), np.float32)
-    px[:, :16, :3] = hexcol(spec.get("colour", "1a0c2e"))
-    px[:, 16:, :3] = hexcol(spec.get("colour" if glow_ball else "ring", "b07cff"))
+    img = bpy.data.images.new(tag + "_atlas", 64, 64, alpha=False)
+    px = np.ones((64, 64, 4), np.float32)
+    px[:, :32, :3] = hexcol(spec.get("colour", "1a0c2e"))
+    px[:, 32:, :3] = hexcol(spec.get("colour" if glow_ball else "ring", "b07cff"))
+    if spec.get("swirl"):
+        # (a swirl on the glowing ball: bright violet arms winding into a dark core, u round it, v pole to pole)
+        yy, xx = np.mgrid[0:64, 0:32]
+        u, v = xx / 31.0, yy / 63.0
+        spiral = 0.5 + 0.5 * np.sin(u * 2.0 * math.pi * 3.0 + v * 14.0)
+        core = np.exp(-((v - 0.5) / 0.18) ** 2)
+        k = np.clip(spiral * (1.0 - 0.8 * core), 0.0, 1.0)[..., None]
+        dark, lit = hexcol(spec.get("dark", "12081f")), hexcol(spec["swirl"])
+        px[:, 32:, :3] = dark * (1 - k) + lit * k
     img.pixels = px.ravel()
     img.pack()
     vi = _flat_material(ob, "void", tag, img)
