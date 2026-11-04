@@ -17,3 +17,8 @@ s2_match_vs_art.png / s2_match.png: the front art beside the match-zoom crop
 s2_vs_turnaround_close.png / s2_vs_turnaround_game.png: the turnaround above, the model close and at the match camera
 s2_moves_close_1.png / s2_moves_close_2.png, s2_poses_game.png: run, draw, loose, Spirit Walk roll, Heavy Shot; idle, run, attack, cast, ult at the match camera
 s2_vs_s1.png: stage 1 (top) against stage 2 (bottom)
+
+Stage 3 (after the shared painted-look fix 16c18b4f; credit-free):
+s3_closeup_vs_art.png, s3_34_vs_art.png, s3_back_vs_art.png, s3_match_vs_art.png / s3_match.png: as s2, on the s3 model: the cheek strands cut, the mask flush with no side shards, thimble claws on her right fingertips (hem_weapons_sheet), a lighter bow with a thicker glowing string, no needle sticking forward off the bow
+s3_vs_turnaround_close.png / s3_vs_turnaround_game.png, s3_moves_close_1/2.png, s3_poses_game.png
+s3_vs_s2.png: stage 2 (top) against stage 3 (bottom)
