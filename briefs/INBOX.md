@@ -771,3 +771,10 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 2. ORCH review (close/match): Ryzz 85/70, Vex 85/73, Sable 86/62, Hem 84/63, Tarek 79/55, Dredge 78/55, Breaker 78/68, Ostra 72/38. Close-ups climbing; match zoom flat.
 3. [S2] one agent on the shared match-zoom fix (speckle edges, rim, clean frame); build the art-integ branch now (not posted yet, ~2 h since first READY). [MAIN] merge it when posted.
 4. Main: no new sync since sync88. Meshy ~4.2k. Conflicts / DECISIONS: none.
+
+## 2026-11-04 11:15 ET (16:15 UTC) ORCH check-in
+- [OWNER] S2 Meshy spends still need the permission allowed in the S2 terminal (unless already done).
+1. READY (11): Vex, Ryzz, Hem, Sable, Tarek, Dredge, Breaker, Ostra, Claire, Cinder, Kael. Pip pending (ext/warden-3d-pip-b b1a770fa).
+2. ext/art-integ 63f0c894 is up (contains main; merging READY Hunters as they update). [MAIN] merge ext/art-integ and ship when S2 marks it complete; target the evening sync.
+3. ORCH review (close/match): Sable 86/62 (15:10), Ryzz 85/71, Hem 85/62, Vex 85/73 (15:10), Tarek 81/55, Dredge 80/55, Breaker 78/68 (15:10), Ostra 76/45, Kael 70/63, Cinder 65/45, Claire 62/52.
+4. Main: no new sync since sync88. Meshy ~4.2k. Conflicts / DECISIONS: none.

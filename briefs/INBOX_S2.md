@@ -800,3 +800,61 @@ Improved: the hold (haft diagonal over the RIGHT shoulder, fist up), red brows, 
 4. Mask: the violet mouth is in, but the eye holes are flat black. Add violet pinpoints, the painted violet tear (viewer's left) and the glowing crack (viewer's right).
 5. Wisp: it tapers now, but it is a stiff straight cone. Curl it into the smoky S-tail from the turnaround, and make the low hand's long clawed fingers clearer.
 Improved: the coat now reads black with violet panels, the mouth glows violet, the orb hand is raised by the head instead of a T-pose, the lower body is a starry tapering wisp, and the blue disc at his feet is gone.
+
+## 16:15 UTC (ORCH): review of the newest rounds (Opus x2). Priority: the 3 newest READY are the weakest (Claire 62/52, Cinder 65/45, Kael 70/63): give them the strongest agents; match zoom remains the shared gap (the matchzoom agent's result is what moves every score).
+## 16:10 UTC (ORCH): 3D review Claire (b2): ~62% close-up, ~52% match zoom
+1. Hair: the pigtails are thick black braided ropes lying over the chest, with noisy clumps on the back. They should be long, loose, wavy low pigtails that hang to the hips, with the crystal clips at the ties (no clips yet).
+2. Horns: they now curl, but they're ribbed, rise above the crown and float off the head. Seat them low at the temples and curl them back and down, tight to the skull.
+3. Face and arms: blush and red lips are smeared like paint, the eyes are flat white, and the raised forearm is a stretched, flat ribbon. The wing membranes show stretched-texture streaks.
+4. Match zoom: she reads as a white stick with a purple hood. Wings and tail are lost; only the spear and skates read.
+Improved/Keep: the horns curl now (no longer straight up); the spear is taller than her; the skates, spaded tail, dark wings, pale body and crystal skirt are all there.
+
+## 16:10 UTC (ORCH): 3D review Cinder (b3): ~65% close-up, ~45% match zoom
+1. Crest: it's an opaque white fan sticking out to one side of the head, with a spike on top. It should be a thin, translucent fin-crest with a glowing orange spiky edge, running from the brow down the neck and spine onto the tail.
+2. Lance: it's a plain orange/yellow plastic tube with no brass-and-glass chamber and no live flame. No ribbed copper hose visibly connects it to the tank (it's in the correct left hand).
+3. Emissive: the spots, vials and crest edge don't glow. At match zoom she's a muddy brown-purple blob, and the yellow lance is the only clear read.
+4. Goggles: I can't see a cracked lens. The grin is narrower and less toothy than the art.
+Improved/Keep: rounded salamander face (not a snout), big amber eyes, black skin with orange spots and belly, brass goggles, vest with vial bandolier, red apron, back tank, long finned tail.
+
+## 16:10 UTC (ORCH): 3D review Kael (b9): ~70% close-up, ~63% match zoom
+1. Blade and arm: the blade is still a flat white painted stripe, not a white-hot glowing core, and there's almost no demon smoke. The arm cracks are still flat white painted blotches, not glowing magma lines.
+2. Mane: stringy dreadlock strands that sit mostly behind the head, sparse and short at the front. It should be soft layered locks falling past the shoulders at the front too.
+3. Skin and pose: the skin is still purple/red-brown (not very dark cool brown), the head is small and pushed forward (still hunched), and the scarf bleeds a red smear onto the chest.
+4. Collar: chunky rectangular gold blocks floating over the scarf. It needs thinner, broken, jagged torc plates sitting on the neck.
+Improved/Keep: red mask-scarf, gold collar now reads from above, harness, tally belt, pleated red skirt, greaves, shackle, chain-wrapped arm, hook on the chain, white mane reads at match zoom.
+
+## 16:10 UTC (ORCH): 3D review Ryzz (s8): ~85% close-up, ~71% match zoom
+1. Pigtails: the bodies are still faceted, low-poly blue slabs. The pink ends are fuller ribbons now but still squiggly. Make the curls rounded, with pink sweeping through the outer half.
+2. Match zoom (clean shot): the pigtails still wash out to pale cyan and the body still breaks into pink/black speckle.
+3. The gum bubble is still a flat matte pink disc stuck on the cheek. It should be a glossy translucent sphere at the lips.
+4. The jacket is still near-black; shift it to plum-grey leather with copper zips. The corset bolt is still a brown torn gap, not a crisp neon keyhole.
+5. The fishnets are still barely visible on the thighs.
+Improved: the plain match shot no longer has HUD text or the palm plant, the hazard bands show black stripes at the wrist, and the rods read darker and more copper.
+
+## 16:10 UTC (ORCH): 3D review Hem (s6): ~85% close-up, ~62% match zoom
+1. Match zoom is still a red blob with white speckle, the mask is a white smear, and the bow is lost. The HUD text is gone, but a large yellow flower still sits over her legs.
+2. Back view: the coat tail still flares into baggy red trouser lobes, now with a ragged zig-zag hem. Art: a straight, split, asymmetric tail over black trousers.
+3. The mask still has red and grey smudge blotches. Make it clean porcelain with crisp red stitches.
+4. The shears at the hip and the silver thimble claws are still missing (the hands are plain white), and the forearm wrap is still plain bandage.
+Improved: the bow is now black and angled out at her left side, the needle threads are red and hang from the eyes, and the stray brown block by her foot is gone.
+
+## 16:10 UTC (ORCH): 3D review Tarek (s9): ~81% close-up, ~55% match zoom
+1. Match zoom is still one speckled brown blob with edge noise. Only the grey vest reads. Separate the values and cut the edge speckle.
+2. Gauntlets are still a pebble mosaic with flat yellow blotches. Art: a few chunky rock plates with thin orange crack glow.
+3. Stones are now lumpy rocks, but plain tan with no geode openings or orange-amber eyes.
+4. The legs still knock inward at the knees, and the knee patches are still missing.
+Improved: skin is now warm mid-brown (no longer red-orange), the locs are longer and less clumped, and the palm plant is off him at match.
+
+## 16:10 UTC (ORCH): 3D review Dredge (r3h): ~80% close-up, ~55% match zoom
+1. Match zoom is still a brown blob with no readable eye (only a red sliver at the side), and HUD text is still in frame. Lift the eye glow and the rim at the far camera.
+2. Black outline shards and triangles still fringe the hull and shoulder edges, and the shoulder pods are faceted.
+3. The eye is now a cracked glowing red orb, but it is far too big, filling the porthole. Art: a small glassy orb inside a large brass ring.
+4. The arms and trumpet float with gaps from the body in the turnaround. Seat them on the shoulders.
+Improved: the white spec blotches are replaced by grime, the brass is a darker olive-bronze with vertical plate seams and rivets, and the eye is cracked and glowing instead of a ball with a white dot.
+
+## 16:10 UTC (ORCH): 3D review Ostra (b10): ~76% close-up, ~45% match zoom
+1. Void orb, strings and cards are still missing. The raised hand holds a dark shard cluster; it needs a black swirling core with a violet glow, with strings and cards hanging from it.
+2. Match zoom: he now reads as a violet streak with a pink arc, but he is still thin and noisy and the mask doesn't read. Add the emissive violet rim and glow from ostra_front_float.
+3. Wisp: it is fuller, but still a stiff straight cone. Curl it into the smoky S-tail.
+4. Halo: it is violet, large and centred behind the head now, but it is smooth, not cracked, and doubles into two crescents in the 3/4 close-up. The eye holes still lack bright violet pinpoints.
+Improved: the halo is violet emissive and centred, the ruff is grey (no longer brown), the mask has the violet tear and the glowing crack, and the match read lifted from smear to violet figure.
