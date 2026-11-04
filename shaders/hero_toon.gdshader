@@ -63,6 +63,22 @@ uniform float far_smooth_bias = 1.0;
 // and a rim in the Hunter's signature colour there (content/rules/warden_look.json), so the silhouette holds
 uniform float rim_far = 0.0;
 uniform vec4 rim_far_color : source_color = vec4(1.0);
+// The match camera's clean read (WardenGlb.PAINTED; every default changes nothing). At ~2 cm a pixel the view-
+// dependent terms of a dense scanned mesh flip per pixel: the fresnel and light rims, the gloss band on metal and
+// the sheen came out as white and dark speckle along every edge. From 8 to 18 m: far_fres scales the shared
+// fresnel (its pale lightened-own-colour rim washed hair and edges out), far_spec the gloss, sheen and the lights'
+// rims, far_aa widens what is left by its own screen derivative, far_clamp pulls a texel that stands out of its
+// coarser mip back toward it (a white bullet, a black belt pixel: speckle) without a wider blur (no UV-island mud).
+// far_rim_soft turns rim_far into a broad, saturated band in the signature colour (lit albedo leaning to it, a little
+// of it as emission) instead of a pale hairline added on top. far_glow brightens and saturates what glows (glow x
+// the painted colour: eyes, lenses, cracks) there. These go by the size on screen, not the distance (match_d), so
+// a close-up camera far off with a narrow lens (the hunter viewer, --warden-shots) keeps every line and highlight.
+uniform float far_fres = 1.0;
+uniform float far_spec = 1.0;
+uniform float far_aa = 0.0;
+uniform float far_clamp = 0.0;
+uniform float far_rim_soft = 0.0;
+uniform float far_glow = 0.0;
 // Imported low-poly models carry each corner's averaged (smooth) normal in TANGENT (Assets.mesh).
 // Blending toward it rounds off their facets in the shading while the silhouette stays crisp.
 uniform float soften = 0.0;
@@ -76,9 +92,15 @@ uniform float edge_dark = 0.0;
 uniform int surface = 0;
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
+// The distance at which the match camera's 32 degree lens sees things this size on screen: the far_* terms' measure
+// (abs: the projection's y is flipped when drawing into a texture; an orthographic camera: its view height / 0.57)
+float match_d(vec3 v, mat4 proj) {
+	return proj[3][3] > 0.5 ? 6.97 / abs(proj[1][1]) : length(v) * 3.487 / abs(proj[1][1]);
+}
 varying vec3 lpos;
 varying vec3 wnorm;
 varying vec2 part_y;
+varying float far_l;    // (fragment -> light: the match camera's share, far_spec)
 
 void vertex() {
 	if (soften > 0.0) { NORMAL = normalize(mix(NORMAL, TANGENT, soften)); }
@@ -90,10 +112,16 @@ void vertex() {
 void fragment() {
 	vec3 c = albedo.rgb;
 	float far_k = smoothstep(8.0, 18.0, length(VERTEX));
+	float far_p = smoothstep(8.0, 18.0, match_d(VERTEX, PROJECTION_MATRIX));
 	if (use_tex) {
 		vec3 tx = texture(albedo_tex, UV).rgb;
 		if (far_smooth > 0.0 && far_k > 0.001) {
-			tx = mix(tx, texture(albedo_tex, UV, far_smooth_bias).rgb, far_smooth * far_k);
+			vec3 tc = texture(albedo_tex, UV, far_smooth_bias).rgb;
+			if (far_clamp > 0.0) {
+				vec3 tr = vec3(mix(1.0, 0.06, far_clamp * far_p));
+				tx = clamp(tx, tc - tr, tc + tr);
+			}
+			tx = mix(tx, tc, far_smooth * far_k);
 		}
 		c *= tx;
 	}
@@ -153,7 +181,16 @@ void fragment() {
 	vec3 vdir = (INV_VIEW_MATRIX * vec4(VIEW, 0.0)).xyz;
 	// side-on to the camera, and more so on the sides of forms than their tops and bottoms
 	float side = 1.0 - abs(dot(wnorm, normalize(vec3(vdir.x, 0.0, vdir.z) + vec3(0.0001))));
-	float fr = smoothstep(0.62, 0.84, 1.0 - nv) * mix(0.55, 1.0, side) * (1.0 - fog);
+	float aw = fwidth(nv) * far_aa * far_p;
+	float fr = smoothstep(0.62 - aw, 0.84 + aw, 1.0 - nv) * mix(0.55, 1.0, side) * (1.0 - fog);
+	far_l = far_p;
+	// the signature rim at the match camera: a broad band on the forms' turned-away sides (far_rim_soft), the
+	// lit colour leaning to the signature hue and a little of it glowing, so it reads saturated, not pale
+	float frs = smoothstep(0.3, 0.8, 1.0 - nv) * mix(0.6, 1.0, side) * (1.0 - fog) * rim_far * far_p * far_rim_soft;
+	if (frs > 0.0) {
+		vec3 rim_al = rim_far_color.rgb * max(dot(ALBEDO, vec3(0.3, 0.59, 0.11)) * 1.5, 0.5);
+		ALBEDO = mix(ALBEDO, rim_al, min(frs * 2.2, 0.8) * (1.0 - flash));
+	}
 	vec3 fcol = mix(fres_color.rgb, min(c * 1.7 + vec3(0.12), vec3(1.4)), fres_tint);
 	float up = smoothstep(0.35, 0.95, wnorm.y);
 	if (ambient_cut > 0.0) { AO = 1.0 - ambient_cut; }
@@ -163,6 +200,18 @@ void fragment() {
 		+ rim_far_color.rgb * fr * rim_far * far_k;
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
+
+	// the match camera's read (far_*, above): the pale fresnel and the faint rim scaled down, rim_far's hairline
+	// swapped for its broad band, the glow brighter and richer
+	if (far_p > 0.0) {
+		vec3 gc = c * glow;
+		float fg = far_glow * far_p;
+		vec3 gf = max(mix(vec3(dot(gc, vec3(0.3, 0.59, 0.11))), gc, 1.0 + fg * 0.5), vec3(0.0)) * (1.0 + fg);
+		EMISSION += fcol * fr * fres * 0.55 * (far_fres - 1.0) * far_p
+			+ rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog) * (far_spec - 1.0) * far_p
+			- rim_far_color.rgb * fr * rim_far * far_k * far_rim_soft + rim_far_color.rgb * frs * 0.6
+			+ (gf - gc) * step(0.0001, glow);
+	}
 }
 
 void light() {
@@ -194,13 +243,14 @@ void light() {
 		// a crisp rim on the edge that faces this light (key light rims gold, the fill rims cool)
 		float fr_l = 1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0);
 		float rim_l = smoothstep(0.7, 0.8, fr_l) * smoothstep(-0.25, 0.45, ndl);
-		DIFFUSE_LIGHT += rim_color.rgb * lc * rim_l * rim_amount * 0.24 * mix(0.45, 1.0, sh_att);
+		float fs = mix(1.0, far_spec, far_l);
+		DIFFUSE_LIGHT += rim_color.rgb * lc * rim_l * rim_amount * 0.24 * mix(0.45, 1.0, sh_att) * fs;
 		vec3 hv = normalize(LIGHT + VIEW);
 		float nh = max(dot(NORMAL, hv), 0.0);
-		SPECULAR_LIGHT += lc * pow(nh, 16.0) * sheen * band;
+		SPECULAR_LIGHT += lc * pow(nh, 16.0) * sheen * band * fs;
 		if (gloss > 0.0) {
 			float sp = pow(nh, mix(14.0, 110.0, gloss));
-			SPECULAR_LIGHT += lc * (smoothstep(0.42, 0.52, sp) * 0.55 + sp * 0.25) * gloss * band * sh_att;
+			SPECULAR_LIGHT += lc * (smoothstep(0.42, 0.52, sp) * 0.55 + sp * 0.25) * gloss * band * sh_att * fs;
 		}
 	}
 }
