@@ -1,16 +1,16 @@
 {
- "high": "~/meshy/breaker/runB/glb.glb",
- "out": "~/meshy/breaker/bake/low.glb",
- "blend": "~/meshy/breaker/bake/bake.blend",
+ "high": "~/meshy/breaker/s3/runC/glb.glb",
+ "out": "~/meshy/breaker/s3/bake/low.glb",
+ "blend": "~/meshy/breaker/s3/bake/bake.blend",
  "tris": 36000,
  "tex": 4096,
  "head": {
   "centre": [
    0.0,
-   -0.16,
+   -0.2,
    0.8
   ],
-  "r": 0.2
+  "r": 0.21
  },
  "head_uv": 2.5,
  "head_tris": 9000,

@@ -32,7 +32,7 @@
 		}
 	},
 	"breaker": {
-		"painted": {"far_lift": 0.32},
+		"painted": {"far_lift": 0.32, "rim_far": 0.3, "rim_far_color": [0.45, 0.78, 1.0]},
 		"slots": {
 			"skin": {"top_light": 0.25, "fres": 0.4, "far_lift": 0.22, "shade": 0.82, "shadow_tint": [0.84, 0.88, 0.98]},
 			"hair": {"far_lift": 0.5, "fres": 0.5},

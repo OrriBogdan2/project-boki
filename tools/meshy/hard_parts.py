@@ -490,12 +490,36 @@ def shield_card(spec):
         geom = bm.verts[:] + bm.edges[:] + bm.faces[:]
         bmesh.ops.bisect_plane(bm, geom=geom, plane_co=(xcut + at[0], 0, 0), plane_no=(1, 0, 0))
     bm.verts.ensure_lookup_table()
+    rows = int(spec.get("rows", 0))
+    for ri in range(1, rows):
+        ycut = yc + (cy - fy0 - (fy1 - fy0) * ri / rows) * k + at[1]
+        geom = bm.verts[:] + bm.edges[:] + bm.faces[:]
+        bmesh.ops.bisect_plane(bm, geom=geom, plane_co=(0, 0, ycut), plane_no=(0, 0, 1))
+    # the carving's relief: the front view's blurred brightness inside relief_box raises the front face
+    relief = float(spec.get("relief", 0.0))
+    hmap = None
+    if relief > 0:
+        lum = fc.mean(axis=2)
+        for _i in range(6):
+            lum = (lum + np.roll(lum, 2, 0) + np.roll(lum, -2, 0) + np.roll(lum, 2, 1) + np.roll(lum, -2, 1)) / 5.0
+        rx0, ry0, rx1, ry1 = [a - b for a, b in zip(spec["relief_box"], (spec["front"][0], spec["front"][1]) * 2)]
+        hmap = np.zeros_like(lum)
+        win = lum[ry0:ry1, rx0:rx1]
+        lo, hi = np.percentile(win, 20), np.percentile(win, 95)
+        yy, xx = np.mgrid[ry0:ry1, rx0:rx1]
+        fall = np.clip(np.minimum.reduce([xx - rx0, rx1 - xx, yy - ry0, ry1 - yy]) / 30.0, 0, 1)
+        hmap[ry0:ry1, rx0:rx1] = np.clip((win - lo) / max(hi - lo, 1e-3), 0, 1) * fall
     # (re-bend every vertex by its own x: the bisect interpolated straight across the curve)
     for v in bm.verts:
         x = v.co.x - at[0]
         zb = -v.co.y - at[2]                                   # Godot z of the point
         is_back = zb > -bend * (1.0 - min(1.0, (x / hw) ** 2)) + th * 0.5
         z = -bend * (1.0 - min(1.0, (x / hw) ** 2)) + (th if is_back else 0.0)
+        if hmap is not None and not is_back:
+            px = int(round(cx - x / k))
+            py = int(round(cy - (v.co.z - at[1] - yc) / k))
+            if 0 <= py < hmap.shape[0] and 0 <= px < hmap.shape[1]:
+                z -= relief * hmap[py, px]
         v.co.y = -(z + at[2])
     bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method="BEAUTY", ngon_method="EAR_CLIP")
     me = bpy.data.meshes.new("shield")
