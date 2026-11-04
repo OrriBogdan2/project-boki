@@ -21,7 +21,7 @@ This file wins over older relic names (the concept-pass list: Drowned Bell, Last
 | Hunter (id) | Relic (the Mask) | Why it holds their self |
 |---|---|---|
 | Vex (gunslinger) | her brass cyber-eye | it saw every job she ever took |
-| Zedran (juggernaut) | the broken champion's collar | the shackle he tore out of the arena wall |
+| Zedran (juggernaut) | the broken champion's collar (the demon blade is bound to it) | the shackle he tore out of the arena wall |
 | Hem (archer) | the stitched porcelain mask | literal: she sewed it from the masks she once made |
 | Breaker (bulwark) | the ship's compass | it led his refugees home across the ice |
 | Ryzz (mage) | the jar holding her first bolt | the storm that made her |
@@ -35,7 +35,7 @@ This file wins over older relic names (the concept-pass list: Drowned Bell, Last
 
 ## Hunter stories (current designs)
 - **Vex, Hired Gun:** a foundry kid who swept brass casings off the Tyrant's war-foundry floors. A siege engine took her arm in the Sundering; she bolted its rotary cannon to her own shoulder. She's now the Skylands' most famous gun-for-hire, keeps every bounty she cashed, and adds a tally mark for each one.
-- **Zedran, Arena King:** the Tyrant's undefeated champion, a beast-blooded slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain is his weapon. The Blight burned the magma cracks into him.
+- **Zedran, Arena King:** the Tyrant's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain is his weapon. The Blight burned the magma cracks into his sword arm. A demon lives in his blade and in his mind, and it must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off.
 - **Hem, Dark Archer (was Pin):** the Tyrant's royal mask-stitcher, who sewed the Hunters' selves into their Masks. She deserted and now hunts the Tyrant's loyalists, leaving a red-threaded needle at every kill. Her own shadow came loose when she stitched her first Mask; it's only a wrong-looking shadow, not a pet.
 - **Breaker, Frozen Bulwark (was Bjorn):** a ferryman who carried refugees across the ice the night of the Sundering and went down with his ship so they could reach shore. The frozen sea remade him into a sea-ogre. He doesn't remember his old name, only the children's faces. The teddy bear belonged to the last child he saved.
 - **Ryzz, Storm Slayer (was Vireo):** a street kid struck by the Wyrm's storm in the market square. The bolt took her right eye (a lightning scar) and left the storm inside her. She steals storms, catches lightning in jars, and swears she'll give the first bolt back to the Wyrm.

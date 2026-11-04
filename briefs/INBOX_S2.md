@@ -476,3 +476,6 @@ Credits: ~8 x 70-110 ≈ 600-900; balance 4,993. Post per-Warden "OWNER: review 
 
 ## 2026-11-04 09:10 UTC (orchestrator): refinement to the 09:05 fan-out (owner unsure whether to wait for one good one)
 - Do the fan-out in two stages. **Stage 1 now:** Meshy generation + bake + rig fit + first shots for each Warden. These steps don't depend on r3c. **Stage 2 after the owner OKs Vex r3c:** apply the proven polish recipe (texture clean-up, shader override, proportions, stance) to all of them. Don't hand-polish any Warden before r3c is approved, so nobody polishes twice. If stage 1 shows a Warden's generation is bad, report it instead of burning more than 2 attempts.
+
+## 2026-11-04 09:20 UTC (orchestrator): Zedran final art in: add him to the 3D fan-out (stage 1 now)
+- ext/imagegen wardens_r3/zedran_* + ZEDRAN_KIT.md (supersedes r2). Notes: no horns; the white mane as chunky hair geometry with spring bones; the scarf always on; magma cracks (emissive) on the RIGHT arm only; the chain wrapped on the right forearm + hilt continuing to ONE hook (the Warchain; a rope/chain bone chain); left wrist: cuff + a short broken chain, NO second hook; the full blade from the front/3-4 views (the side view crops it); demon smoke as VFX. Hybrid: script the greatsword, chain and hook in Blender.
