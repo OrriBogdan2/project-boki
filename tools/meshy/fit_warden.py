@@ -2056,6 +2056,31 @@ def _seg_dist2d(p, a, b):
     return np.linalg.norm(p - (a + np.outer(t, ab)), axis=1)
 
 
+def deform(ob, items):
+    """Reshape the scan's body before the rig fit (Meshy frame: +Z up, facing -Y, his right -X): each item moves
+    and scales the vertices within `r` of its centre `c`, by a smooth fall-off (1 at the centre, 0 at r), so a
+    bulge (Kael's oversized trapezius and deltoids, the hump behind his neck) shrinks without a seam. `move`
+    [dx, dy, dz] m; `scale` [sx, sy, sz] about the centre; `mirror_x` repeats it on the other side."""
+    co = np.array([v.co[:] for v in ob.data.vertices])
+    for it in items:
+        cs = [np.array(it["c"], float)]
+        if it.get("mirror_x"):
+            cs.append(cs[0] * np.array([-1.0, 1.0, 1.0]))
+        for c in cs:
+            sgn = np.sign(c[0]) if it.get("mirror_x") and c[0] != 0 else 1.0
+            mv = np.array(it.get("move", [0, 0, 0]), float) * np.array([sgn, 1.0, 1.0])
+            sc = np.array(it.get("scale", [1, 1, 1]), float)
+            r = float(it["r"])
+            d = np.linalg.norm(co - c, axis=1)
+            w = np.clip(1.0 - (d / r) ** 2, 0.0, 1.0) ** 2
+            n = int((w > 0).sum())
+            co = co + w[:, None] * (mv + (co - c) * (sc - 1.0))
+            log("deform: %d verts at %s (r %.2f)" % (n, tuple(np.round(c, 3)), r))
+    for v, p in zip(ob.data.vertices, co):
+        v.co = p
+    ob.data.update()
+
+
 def hot_paint(ob, img, hp):
     """Kael's arm cracks as the art draws them (kael_arm_sheet): a few big branching cracks, white-hot cores with a
     pale-gold rim, over the whole right arm from the shoulder to the bandage, not the scan's busy net. In the
@@ -2113,6 +2138,9 @@ def hot_paint(ob, img, hp):
         cur = rgb[ty, tx]
         heat = ss(0.42, 0.66, cur[:, 0]) * ss(0.14, 0.32, cur[:, 0] - cur[:, 2]) * ss(-0.04, 0.01, cur[:, 1] - cur[:, 2])
         hot = heat > float(hp.get("net_k", 0.15))
+        if hp.get("white_k"):
+            # (the scan's own pale crack paint, near-white blotches on the arm, goes too)
+            hot |= cur.min(axis=1) > float(hp["white_k"])
         rgb[ty[hot], tx[hot]] = c_skin * (0.85 + 0.3 * rng.random((int(hot.sum()), 1))).astype(np.float32)
         n_off += int(hot.sum())
         # the texel's place on the unwrapped arm
@@ -2193,6 +2221,8 @@ def main():
     if spec.get("plate"):
         face = next(pj for pj in spec["project_late"] if pj.get("name") == spec["plate"].get("warp_from", "face"))
         face_plate(ob, spec["plate"], face["warp"])
+    if spec.get("deform"):
+        deform(ob, spec["deform"])
     head = None
     if "head" in spec:
         decimate(ob, spec["max_tris"] - int(spec["head"]["tris"]))
@@ -2290,6 +2320,10 @@ def main():
         parts.append(kael_parts.chains(ob, arm, rig, K, spec["kael"]["chain"]))
         if spec["kael"].get("meshy_mane"):
             parts.append(kael_parts.meshy_mane(ob, arm, rig, K, spec["kael"]["meshy_mane"], import_glb, decimate, log))
+            if parts[-1].get("volume"):
+                parts.append(bpy.data.objects[parts[-1]["volume"]])
+            if spec["kael"].get("spikes"):
+                parts.append(kael_parts.spikes(ob, arm, rig, K, spec["kael"]["spikes"], bpy.data.objects.get("Mane")))
             if spec["kael"].get("under_mane"):
                 # (chunky opaque locks under the head run's stringy hair, back and sides only: its gaps show hair)
                 under = kael_parts.mane(ob, arm, rig, K, spec["kael"]["under_mane"])
@@ -2319,6 +2353,11 @@ def main():
     crown = rig["land"]["crown"]
     K.anchor(arm, "head", "anchor_head_top", (0, 0, crown + 0.07))
     K.anchor(arm, "hips", "anchor_chest", (0, 0.1, K.bone_head(rig, "upper_arm.L").z - 0.14))
+    for an in spec.get("anchors", []):
+        # (extra anchors for warden_look "bloom": a point between two bone heads, rigid on `bone`)
+        a, b = (K.bone_head(rig, n) for n in an["between"])
+        t = float(an.get("t", 0.5))
+        K.anchor(arm, an["bone"], an["name"], tuple(a[i] + (b[i] - a[i]) * t for i in range(3)))
     for o in [x for x in (ob, gun, spin) if x]:
         # Meshy's own split normals don't survive the decimation (facets): clear them, shade smooth
         if o.get("built"):

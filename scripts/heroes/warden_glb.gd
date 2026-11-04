@@ -170,6 +170,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	root.set_meta("glb", true)
 	_hold_weapon(root, glb)
 	_smoke(root, look(art(arch)))
+	_bloom(root, glb, look(art(arch)))
 
 ## A model's wisps of smoke off its held weapon (warden_look.json "smoke": colour [r, g, b, a], amount, life (s),
 ## size (m), rise (m/s); Kael's demon blade): dark soft puffs from along the weapon's length that drift up and
@@ -239,6 +240,65 @@ static func _smoke(root: Node3D, own: Dictionary) -> void:
 	p.mesh = q
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	weapon.add_child(p)
+
+## A model's soft glow around what burns (warden_look.json "bloom": a list of {at: "weapon" or an anchor name,
+## color [r, g, b, a], size (m), count (along the weapon's length, from `from` of it), depth_test}): additive
+## camera-facing puffs, so a white-hot blade core or a magma arm glows past its own edges like the art's bloom
+## instead of reading as flat white paint. World-sized, so it shrinks with the model at the match camera.
+static func _bloom(root: Node3D, glb: Node3D, own: Dictionary) -> void:
+	for b in own.get("bloom", []):
+		var at := String(b.get("at", "weapon"))
+		var col := _param(b.get("color", [1.0, 0.9, 0.7, 0.35])) as Color
+		var m := StandardMaterial3D.new()
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		m.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+		m.no_depth_test = not bool(b.get("depth_test", false))
+		m.albedo_color = col
+		m.albedo_texture = _puff()
+		m.cull_mode = BaseMaterial3D.CULL_DISABLED
+		var sz := float(b.get("size", 0.2))
+		if at == "weapon":
+			var gun := root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
+			var weapon := gun.get_node_or_null(WEAPON) as Node3D if gun else null
+			if weapon == null or not weapon is MeshInstance3D:
+				continue
+			var box := (weapon as MeshInstance3D).get_aabb()
+			var ax := 0
+			for i in 3:
+				if box.size[i] > box.size[ax]:
+					ax = i
+			var n := int(b.get("count", 5))
+			var k0 := float(b.get("from", 0.35))
+			for j in n:
+				var p := box.get_center()
+				p[ax] = box.position[ax] + box.size[ax] * lerpf(k0, 0.95, (j + 0.5) / n)
+				weapon.add_child(_bloom_quad(m, sz, p))
+		else:
+			var a := glb.find_child(at, true, false) as Node3D
+			if a:
+				# (on the root, following the anchor like the halos: the model's own surfaces stay toon-only)
+				var q := _bloom_quad(m, sz, Vector3.ZERO)
+				root.add_child(q)
+				var follow := RemoteTransform3D.new()
+				follow.name = "BloomFollow"
+				follow.update_scale = false
+				follow.update_rotation = false
+				a.add_child(follow)
+				follow.remote_path = follow.get_path_to(q)
+
+static func _bloom_quad(m: Material, sz: float, at: Vector3) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.name = "Bloom"
+	var q := QuadMesh.new()
+	q.size = Vector2(sz, sz)
+	mi.mesh = q
+	mi.material_override = m
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.position = at
+	mi.set_meta("glb_hidden", true)      # (kept out of the model's own bounds, like the hidden procedural parts)
+	return mi
 
 static var _puff_tex: Texture2D
 ## A soft round puff (a radial fall-off), made once.
