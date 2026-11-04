@@ -1259,6 +1259,11 @@ def orbit_props(arm, spec):
         if kind != "card":
             # (a geode: the rough rock, a raised rim round its cut face, a ring of crystals sunk inside it, and the
             # eye's domed iris standing out of the crystals; "rock": the rough rock alone, a shard)
+            # (`eye_tilt` degrees lean the cut face and its eye up toward the high match camera: Tarek's
+            # seeing-stones, whose eyes looking out level were only ever seen edge-on from above)
+            et = math.radians(float(spec.get("eye_tilt", 0.0))) if kind == "eye" else 0.0
+            out_dir, up = out_dir * math.cos(et) + up * math.sin(et), up * math.cos(et) - out_dir * math.sin(et)
+            side = np.cross(up, out_dir)
             _lumpy(bld, p, (side, up, -out_dir), (r, r * 1.08, r * float(spec.get("depth", 0.66))), "rock",
                    (0.05, 0.05, 0.45, 0.45), 7 + i, rings=9, sides=16, lump=0.26)
         if kind != "eye":
@@ -1310,6 +1315,9 @@ def orbit_props(arm, spec):
             bpy.context.scene.collection.objects.link(an)
             an.parent = ob
             an.location = Vector(out_dir * r * (fz + 0.05))
+            # (turned so its -Z in the game, Blender's +Y, looks out of the eye: the halo fades as the eye turns away)
+            an.rotation_mode = "QUATERNION"
+            an.rotation_quaternion = Matrix((np.cross(out_dir, up), out_dir, up)).transposed().to_quaternion()
             out.append(an)
     log("orbit %s: %d props round %s" % (spec["name"], len(spec["items"]), tuple(round(x, 3) for x in c)))
     return out

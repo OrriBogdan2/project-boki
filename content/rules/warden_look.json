@@ -378,7 +378,7 @@
 				"far_lift": 0.2
 			},
 			"glow": {
-				"glow": 2.2,
+				"glow": 1.7,
 				"fres": 0.0,
 				"top_light": 0.0,
 				"far_lift": 0.1
@@ -389,10 +389,10 @@
 				"anchor": "anchor_stones_0",
 				"color": [
 					1.0,
-					0.62,
-					0.18
+					0.5,
+					0.1
 				],
-				"strength": 4.0,
+				"strength": 3.0,
 				"px": 7.0,
 				"near_d": 7.0,
 				"far_d": 14.0
@@ -401,10 +401,10 @@
 				"anchor": "anchor_stones_1",
 				"color": [
 					1.0,
-					0.62,
-					0.18
+					0.5,
+					0.1
 				],
-				"strength": 4.0,
+				"strength": 3.0,
 				"px": 7.0,
 				"near_d": 7.0,
 				"far_d": 14.0
@@ -413,10 +413,10 @@
 				"anchor": "anchor_stones_2",
 				"color": [
 					1.0,
-					0.62,
-					0.18
+					0.5,
+					0.1
 				],
-				"strength": 4.0,
+				"strength": 3.0,
 				"px": 7.0,
 				"near_d": 7.0,
 				"far_d": 14.0
@@ -425,8 +425,8 @@
 				"anchor": "anchor_gauntlet_L",
 				"color": [
 					1.0,
-					0.62,
-					0.18
+					0.5,
+					0.1
 				],
 				"strength": 3.4,
 				"px": 6.5,
@@ -437,8 +437,8 @@
 				"anchor": "anchor_gauntlet_R",
 				"color": [
 					1.0,
-					0.62,
-					0.18
+					0.5,
+					0.1
 				],
 				"strength": 3.4,
 				"px": 6.5,

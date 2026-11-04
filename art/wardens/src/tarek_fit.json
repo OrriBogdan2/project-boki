@@ -306,7 +306,8 @@
    "rel": "head",
    "iris_r": 0.5,
    "anchors": true,
-   "depth": 0.95
+   "depth": 0.95,
+   "eye_tilt": 35
   },
   {
    "name": "orbit_shards",
@@ -816,7 +817,7 @@
   }
  ],
  "gauntlets": {
-  "r": 0.052,
+  "r": 0.062,
   "rows": 3,
   "per_row": 5,
   "plate": 0.85,
@@ -832,6 +833,6 @@
   "pupil": "1e0a04",
   "lump": 0.1,
   "core": 0.6,
-  "thick": 0.32
+  "thick": 0.45
  }
 }
