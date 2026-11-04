@@ -455,3 +455,10 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - A **small circle** sits on the line at the point that marks the perfectly timed shot. When the fill reaches the circle, the circle **flashes**: release then for the perfect shot.
 - Keep from item 55 only what fits this: the idle thin line to the cursor; Supercharged extends the line to max range; overdraw dims it; the perfect release gives its burst at the bow. Drop the V-lines and the riding star glint.
 - Assert: the fill fraction tracks the draw time; the circle sits at the perfect-timing fraction; the flash fires on the frame the fill reaches it; a release within the window counts as perfect. Screenshots: a strip of the fill growing, reaching and flashing the circle, then the perfect release.
+
+## 58. BUG: Dredge's hook pulls at an off angle while Fused (owner, 18:58 UTC Nov 4)
+- Owner: "when I'm fused as Abomination, my hook doesn't pull them to me; it goes at an off angle."
+- Expected: while Fused, every hunter ability works exactly as unfused from the Fused body: the hook flies from the Fused body's hand and the hooked target is pulled straight to the Fused body's current position (its centre/front), not to a stale or offset point.
+- Likely causes to check: the pull target uses the hunter node's position or a socket from the unfused model while the Fused form is offset or scaled (merge_form body centre ≠ hunter pos); the Fused body's own collision deflecting the pulled target (same family as item 56: friendly bodies must be pass-through for your displacements); the pull direction computed from aim instead of target -> caster.
+- Sweep it for all Fused forms × every displacing ability (hooks, pulls, knockbacks, impales, chains): source/destination points come from the live Fused body. Merge-form files are main's: S2 fixes the shared hook/Displace side and lists any merge_form/merge_look change for main.
+- Assert: Fused Dredge hooking a dummy at 0°, 45° and 90° pulls it to within 1 m of the Fused body's front, along the straight line; same for each Fused form's pull or knock abilities.

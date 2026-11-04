@@ -2051,3 +2051,6 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 
 ## 2026-11-04 19:05 UTC: heads-up: owner bug, own Boki collision bends abilities (OWNER_REVIEW item 56)
 - The owner sees his own Boki redirect his abilities (Hem's RMB impale goes the wrong way) and wants stuns, impacts and momentum never ruined by friendly collision. S2 is fixing it centrally (projectile hit filter + Displace: friendly Boki and hunters pass through your abilities). If a Boki-side change is needed (kin_* follow/body collision, e.g. a Boki stepping out of a displacement lane or collision layers), S2 will list it for you.
+
+## 2026-11-04 19:20 UTC: owner bug: Fused Dredge's hook pulls at an off angle (OWNER_REVIEW item 58)
+- S2 is fixing the hook/Displace side with item 56. If the cause is the Fused body's centre/sockets (merge_form) not being the pull destination, S2 will list the merge_form change for you.

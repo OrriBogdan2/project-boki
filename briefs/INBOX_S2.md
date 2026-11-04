@@ -934,3 +934,5 @@ Improved: the eye is now a small glowing red orb in a wide brass ring, close to 
 ## 2026-11-04 19:10 UTC (ext): OWNER_REVIEW item 57: Kael's Warchain haul must curve clearly toward where you look (it reads as always direct). Same agent who did ext/zedran-warchain if possible. Opus.
 
 ## 2026-11-04 19:12 UTC (ext): CORRECTION, item 55 -> see 55b: Hem's reticle is a line that FILLS from her outward with a small circle at the perfect-timing point that flashes when the fill reaches it (owner). Not the V-lines in the hero-ref notes.
+
+## 2026-11-04 19:20 UTC (ext): OWNER_REVIEW item 58: BUG, Dredge's hook pulls at an off angle while Fused. Do it with item 56 (same Displace/collision family). List any merge_form change for main.
