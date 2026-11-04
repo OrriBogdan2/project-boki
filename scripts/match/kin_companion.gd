@@ -631,7 +631,7 @@ func _tut_tick() -> void:
 		lead_dir = guide.get("dir", Vector2.ZERO)
 	# a hint in its own voice when the step starts, and again if you seem stuck
 	var t := float(guide["t"])
-	if not guide["said"] or fmod(t, 14.0) < 0.4 and t > 13.0:
+	if not guide["said"] and not (m.tut and m.tut.card_up()):
 		guide["said"] = true
 		var txt := KinVoice.tut_hint(k, id)
 		if txt != "":

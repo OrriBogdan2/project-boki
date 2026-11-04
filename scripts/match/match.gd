@@ -811,7 +811,7 @@ func _start(o: Dictionary) -> void:
 	await hud.setup(self)
 	hud.process_mode = hud_mode
 	hud.visible = true
-	if player and player.dropping:
+	if player and player.dropping and tut == null:
 		hud.toast("Steer to choose where you land", Color("f3eee2"))
 	if skydrop.planning and player:
 		hud.open_map(true)
@@ -2074,6 +2074,8 @@ func my_ping() -> Dictionary:
 	return {}
 
 func kin_bark(k: Kin, txt: String, cat: String, life := 2.6) -> void:
+	if tut and tut.card_up():
+		return        # (the tutorial banner has the floor)
 	for b in bubbles:
 		if b["ent"] == k:
 			bubbles.erase(b); break
@@ -2158,6 +2160,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if credit == player and target != player and src != "burn":
 		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08))
 		if hud: hud.hitmarker(crit, armor_hit)
+		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and by and hud:
 		hud.hurt_from(by.pos)
 	if target == player:
@@ -3827,7 +3830,7 @@ func step(dt: float) -> void:
 			Net.tick(dt)
 		return
 	if tut and tut.intro:
-		for k in pending_input: pending_input[k] = false     # (the intro card: the match waits for a key)
+		tut.intro_wait(dt)      # (the intro card: the match waits for a key or two seconds)
 		return
 	time += dt
 	if Game.god and player and not player.out:
@@ -4807,7 +4810,7 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 ## [id, what to do, the action whose key it uses ("" for none)]
 const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then hold Mouse 5 or Space in the air to glide", "jump"],
 	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
-	["secondary", "Use your right click (tap it, then hold it)", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
+	["secondary", "Use your right click", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
 	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
 	["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal with a tonic (belt slot 1)", "util1"],
 	["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],

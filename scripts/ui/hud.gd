@@ -145,6 +145,7 @@ func _clear_under_toasts(delta: float) -> void:
 		(lbl as Label3D).transparency = move_toward((lbl as Label3D).transparency, want, delta * 6.0)
 
 func toast(text: String, col: Color) -> void:
+	if TutorialHud.defer(self, text, col, false): return
 	toasts.append({"text": text, "col": col, "t": 0.0})
 	if toasts.size() > 3: toasts.pop_front()
 
@@ -224,6 +225,9 @@ func _draw_all() -> void:
 	var sz := c.size
 	var p := m.player
 	hover_spots.clear()
+	if m.tut and m.tut.intro:
+		TutorialHud.draw(self, sz)      # the intro card alone: the rest of the HUD waits
+		return
 	_draw_world_labels()
 	_draw_bubbles()
 	_draw_pings(sz)
@@ -334,7 +338,8 @@ func _draw_all() -> void:
 	for i in toasts.size():
 		var t: Dictionary = toasts[i]
 		var a := clampf(1.8 - t["t"], 0.0, 1.0)
-		_ctext(Vector2(sz.x * 0.5, sz.y * 0.3 + i * 26 - t["t"] * 10.0), t["text"], 20, Color(t["col"], a), big)
+		var at := Vector2(sz.x * 0.5, sz.y * 0.3 + i * 26 - t["t"] * 10.0)
+		TutorialHud.draw_toast(self, sz, i, t["text"], Color(t["col"], a), 20, at)
 	if tips.size() > 0 and not Record.clean():
 		_draw_tip(sz, tips[0])
 	if Input.is_action_pressed("scores"):
@@ -502,6 +507,8 @@ func _draw_world_labels() -> void:
 			c.draw_rect(Rect2(sp + Vector2(-22, 0), Vector2(44 * k.hp / k.max_hp, 5)), Color(KinRegen.MOTE_COL, KinRegen.pulse(k, m.time)))
 
 func _draw_bubbles() -> void:
+	if m.tut and m.tut.card_up():
+		return        # (one voice at a time: the tutorial banner is up)
 	var cam := m.cam
 	for b in m.bubbles:
 		if not is_instance_valid(b["ent"]):
@@ -913,10 +920,10 @@ func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 		var ctr := sz * 0.5
 		var d := (tp - ctr).normalized() if not behind else (ctr - tp).normalized()
 		if d.length() < 0.1: d = Vector2.UP
-		# kept inside the play area: under the tutorial banner, above the ability bar
+		# kept inside the play area: under the tutorial banner, above the pill and the ability bar
 		var ctr2 := Vector2(sz.x * 0.5, sz.y * 0.47)
 		ctr = ctr2
-		var hx := sz.x * 0.5 - 70.0; var hy := sz.y * 0.5 - 150.0
+		var hx := sz.x * 0.5 - 70.0; var hy := sz.y * 0.24
 		var t := minf(hx / maxf(0.001, absf(d.x)), hy / maxf(0.001, absf(d.y)))
 		var edge := ctr + d * t + d * bob * 0.5
 		var perp := Vector2(-d.y, d.x)
@@ -1050,6 +1057,7 @@ func hurt_from(at: Vector3) -> void:
 	if hurt_dirs.size() > 6: hurt_dirs.pop_front()
 
 func toast_small(text: String, col: Color) -> void:
+	if TutorialHud.defer(self, text, col, true): return
 	small_toasts.append({"text": text, "col": col, "t": 0.0})
 	if small_toasts.size() > 3: small_toasts.pop_front()
 
@@ -1748,7 +1756,8 @@ func _draw_small_toasts(sz: Vector2) -> void:
 	for i in small_toasts.size():
 		var t: Dictionary = small_toasts[i]
 		var a := clampf(1.4 - float(t["t"]), 0.0, 1.0) * clampf(float(t["t"]) * 10.0, 0.0, 1.0)
-		_ctext(Vector2(sz.x * 0.5, sz.y * 0.5 + 64 + i * 22 - float(t["t"]) * 8.0), t["text"], 16, Color(t["col"], a), big)
+		var at := Vector2(sz.x * 0.5, sz.y * 0.5 + 64 + i * 22 - float(t["t"]) * 8.0)
+		TutorialHud.draw_toast(self, sz, 3 + i, t["text"], Color(t["col"], a), 16, at)
 
 ## Aboard the skyship: when to jump.
 func _draw_ship_prompt(sz: Vector2) -> void:
@@ -1842,8 +1851,8 @@ func _draw_squad_pings(p: Hunter) -> void:
 		_draw_waypoint(pg["pos"], lbl, Color(pg["col"], a))
 	# a Boki's callout: a marker with what it spotted, fading after a few seconds
 	for pg in m.pings:
-		if not pg.has("kin") or int(pg.get("team", -1)) != p.team:
-			continue
+		if not pg.has("kin") or int(pg.get("team", -1)) != p.team or m.tut != null:
+			continue      # (the tutorial has one marker: no Boki callout pins)
 		var kk: Kin = pg["kin"] if is_instance_valid(pg["kin"]) else null
 		var a2 := clampf(float(pg.get("life", 5.0)) - float(pg["t"]), 0.0, 1.0) * clampf(float(pg["t"]) * 6.0, 0.0, 1.0)
 		var who := String(kk.rec.get("name", "Boki")) if kk and kk.owner_h != p else ""
@@ -1958,7 +1967,7 @@ func _draw_perks(sz: Vector2, p: Hunter) -> void:
 
 func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 	var it := m.interact
-	var y := sz.y - 222.0
+	var y := TutorialHud.prompt_y(self, sz)
 	if not it.is_empty():
 		var prog := 0.0
 		match it["kind"]:
