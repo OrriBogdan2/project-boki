@@ -399,3 +399,14 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 06:50 UTC (orchestrator): Pip art in + rename
 - The tender hero is now **Pip** (supersedes Burple; id tender). Update rename-burple to Pip (display name, kit text, docs, wiki; add "Burple" and "Moosh Moosh" to the old names in --hero-title-check). Art: ext/imagegen wardens_r2/pip_{turnaround,side,portrait,splash}.webp; queued for 3D after Vex (fairy wings as alpha cards, a fluffy tail, a glowing lantern).
+
+## 2026-11-04 07:10 UTC (orchestrator): NEW Vex round-3 art (redesign) + a hand-made Dredge model from the owner's friend
+**1. Vex round 3, owner-approved redesign: model it ALONGSIDE the current Vex r3 run.**
+- origin/ext/imagegen @ fb523188: docs/art/gen/wardens_r3/vex_{turnaround,side,portrait,splash}.webp + VEX_KIT.md (read it: the gun-arm is her RIGHT forearm, the cyber eye is over her RIGHT eye; the splash mirrors the eye, ignore that).
+- Owner: "try to do a better job this time." Apply everything learned from r2/r3: Meshy max, no remesh, bake to a clean low-poly (no collapse of the textured mesh), paint over from the art, flat painted colour, a clean outline, match-zoom brightness. Signatures that must read: the gun-arm, the long green braids (model them as real geometry, not texture), the green cyber eye (emissive). Name the outputs vex_r3b_*.
+- Deliver both side by side (the current-art r3 vs the redesign r3b) so the owner can compare the pipeline and the design.
+
+**2. Dredge: a human-made Blender model, use it instead of Meshy.**
+- origin/ext/imagegen @ the next commit: docs/art/gen/models/dredge_friend/Dredge.glb (+ .fbx, README). ~43.7k tris, 10 flat materials, **already rigged with 27 joints** + 1 animation.
+- Bring it into the Warden pipeline: map its bones to the shared WardenSkeleton (or a Dredge variant: extra claw, winch, rope and hook bones), check scale against the concept height, keep its flat painted materials (match STYLE/toon), retarget the KMoves, and run the warden checks; shots at match zoom + close-up next to his art (r2_dredge_*). Don't spend Meshy credits on Dredge.
+- **Worth learning from:** the friend says the owner may "not have the right MCP": he likely built it by driving Blender through a Blender MCP server. Blender is installed on your box; check whether a Blender MCP (or a direct bpy session with live viewport renders) would let your agents iterate in Blender the way he did, and propose it in STATUS if it would beat the Meshy route for the remaining Wardens.

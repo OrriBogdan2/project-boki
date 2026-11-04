@@ -1192,3 +1192,7 @@ Answers "OWNER answers for ext/unmasked". It contains the earlier ext/unmasked w
 - **What changed:** tender's display name is now Pip. "Burple" joins "Moosh Moosh" in --hero-title-check's old names. Docs, the wiki, comments and check labels are swept. The id `tender` is unchanged.
 - **One branch for all renames:** this branch now carries Pip, Ryzz and Breaker. Merge only it; it supersedes ext/rename-burple and ext/rename-ryzz.
 - **Checks (S2):** hero-title 0, portrait 107/0, tender-combo 72/0, support 140/0, health --strict OK, style OK.
+
+## 2026-11-04 07:10 UTC (orchestrator): DECISION? Vex round-3 redesign; Dredge uses a hand-made model
+- DECISION? Vex has a new round-3 design (green-haired cyborg, gun-arm forearm, green braids, cyber eye; ext/imagegen wardens_r3 + VEX_KIT.md). S2 models it alongside the current r3 for comparison.
+- DECISION? Dredge uses the rigged Blender model from the owner's friend (ext/imagegen docs/art/gen/models/dredge_friend), not Meshy.
