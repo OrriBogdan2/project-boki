@@ -500,3 +500,9 @@ Credits: ~8 x 70-110 ≈ 600-900; balance 4,993. Post per-Warden "OWNER: review 
 
 ## 2026-11-04 11:15 UTC (ORCH): Breaker height = 1.5x (owner)
 - Owner: make Breaker 1.5x a medium hunter (was 1.32x in stage 1). Keep the heavy class's 0.50 m hitbox unless the kit says otherwise; re-check the shield and hammer holds at the new scale. Vex r3c review is with the owner now.
+
+## 2026-11-04 11:25 UTC (ORCH): Vex r3c = ~80% there (owner) -> stage 2 GO + a Vex face pass
+- Owner on r3c: "almost there... it can use a bit of polishing to get the face stuff exactly right, but it's like 80% there."
+- 1. Treat r3c as the approved recipe: start stage 2 (paint-over, per-model look, proportions, stance) for Hem, Kael, Breaker (now 1.5x), Claire, Sable, Pip, Tarek, Ostra.
+- 2. In parallel, a Vex face pass (r3d): match the portrait's face exactly (eyes, brows, lips, skin tone), remove the faint jaw seam, make the eye-plate lens read at match zoom, clean the dark smears on the straps at 3/4. Post r3d_closeup_vs_art + r3d_closeup_34_vs_art for the owner.
+- Fold whatever the face pass learns back into the recipe for the other eight.
