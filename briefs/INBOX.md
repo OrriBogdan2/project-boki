@@ -814,3 +814,8 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 - **Pause the item queue from the 20:00 entry.** Don't start any new item branch. If one is already in progress, commit and push it as WIP, note it in STATUS, and stop that agent.
 - Run the owner's **RIGFIX** brief: `briefs/RIGFIX.md` on ext/agent-briefs (base origin/integ91; it needs the server's Blender and renders). That is your one job. Then STOP for the owner's review.
 - Don't take on main's integrator role (merging integ91/spine92/kitui93/empty90) unless the owner says so.
+
+## 2026-11-04 15:20 ET (20:20 UTC) ORCH check-in (low-usage)
+- SHIPPED: sync90 (main c80f19c6) on the owner's PC: all 12 Hunters in 3D (art-integ ed3cf00c, match-zoom v2).
+- Main handed off at 97% usage (MAIN_TO_EXT 19:35); integrator moves to S1/new session; ext builds owner items 53-75 until Fri reset.
+- [OWNER] sign-off waiting: Gravadillo Boki 3D pilot (ext/boki-3d-pebbit e63def24). READY: ext/ryzz-70-74 850bb52c. Kael accuracy pilot a3 posted, not READY.
