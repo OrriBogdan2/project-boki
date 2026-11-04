@@ -21,7 +21,7 @@ extends RefCounted
 ##                   aim only. A foe's shows lerped toward the hostile rim colour.
 ##   dur     float   s, how long it stays without a refresh (default 0.1)
 ##   fletch  float   lines and Vs only: 0 = plain; > 0 feathers the line with barbs swept back toward
-##                   the hunter (Pin's draw), this big
+##                   the hunter (Hem's draw), this big
 
 const BH := 1.8           # m in one body height (the hero sheets measure in bh)
 

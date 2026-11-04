@@ -1,6 +1,6 @@
 class_name PinDraw
 extends RefCounted
-## Pin's longbow draw (docs/heroes/archer.md, hero sheet pin.md): the reticle, the stages, the perfect
+## Hem's longbow draw (docs/heroes/archer.md, hero sheet pin.md): the reticle, the stages, the perfect
 ## release and the overdraw. ArcherKit owns one and forwards Hunter's draw hooks to it.
 ##
 ## - Stages (content/weapons/longbow.json "draw"): a tap shot before stage 1, Empowered at stage 1,

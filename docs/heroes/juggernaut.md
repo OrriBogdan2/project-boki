@@ -1,6 +1,6 @@
-# Arena King (base character Zedran; archetype id `juggernaut`, heavy)
+# The Unbroken (base character Kael; archetype id `juggernaut`, heavy)
 
-Display name is the class title Arena King; the id, file names and code names stay `juggernaut`.
+Display name is the class title The Unbroken; the id, file names and code names stay `juggernaut`.
 
 Branch history: kits2 ported the kit from the source hero, kits2-nor (Nov 2) removed its R, ext/kitfix-dancer-juggernaut matched it to the footage, and the ult pass (server update 6) gave him his own ultimate back on X. Player-facing
 names and text are ours; the source is named only in this research section, in docs/ARCHETYPES.md and in

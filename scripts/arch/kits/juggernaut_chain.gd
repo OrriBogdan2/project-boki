@@ -1,6 +1,6 @@
 class_name JuggernautChain
 extends RefCounted
-## Zedran's E, the Warchain (his "e" data in content/archetypes/juggernaut.json; the source's tether chain).
+## Kael's E, the Warchain (his "e" data in content/archetypes/juggernaut.json; the source's tether chain).
 ## The states and every transition are in docs/heroes/juggernaut.md "Warchain: the state machine":
 ## ready -> throwing (the hook flies at the cursor) -> hooked (a foe or a wall: the link chain stays on while
 ## you move, paying out to its full length and holding there, 5s) -> pulling (E again: an impulse toward the

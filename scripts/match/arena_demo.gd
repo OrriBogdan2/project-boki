@@ -8,11 +8,11 @@ extends RefCounted
 ##   juggernaut  greatsword slashes fill Rage (the shoulder glow), the Enraged form
 ##   sweetspot   then a Finishing Slam winds up and lands its sweet spot (--hold-shot: the wind-up)
 ##   encore / encorehit   Sable's X: the ring growing (the telegraph), then a volley landing (the impact)
-##   riposte / ripostehit Zedran's X: the guard with its strip (the telegraph), then the cleave landing
+##   riposte / ripostehit Kael's X: the guard with its strip (the telegraph), then the cleave landing
 ##   wave        the greatsword held into a Searing Wave (--hold-shot: at full charge)
 ##   archer      a rooted dummy, full Focus: the lens glint, the aim line, crosshairs over it
 ##   deadeye     the same, ending on the Deadeye payoff
-##   hero_<id>_<move>   Vireo (mage) and Vex (gunslinger) moments, see scripts/arch/hero_demo.gd
+##   hero_<id>_<move>   Ryzz (mage) and Vex (gunslinger) moments, see scripts/arch/hero_demo.gd
 ##   bulwark     the shield raised and burning gold, Guard pips full (Shield Slam armed)
 ##   crushed     the same, then letting go: a Shield Slam into the pillar, Crushed
 ##   e_<a> / r_<a> / rmb_<a>   any archetype's E, R or RMB on the still dummy (--e-recast: press E again)
@@ -216,7 +216,7 @@ static func tick(A: Arena, dt: float) -> void:
 			if _at(t, dt, 0.3): DJDemo.cast_ult(P)
 			at_t = 0.55 if w == "encore" else 1.24
 		"riposte", "ripostehit":
-			# Zedran's Gilded Riposte: the guard with the strip toward the dummy, then the cleave through it
+			# Kael's Gilded Riposte: the guard with the strip toward the dummy, then the cleave through it
 			if t < 0.05:
 				if P.arch != "juggernaut" or P.wid != "greatsword": A.set_arch("juggernaut", "greatsword")
 				A.set_kin("cindle")
@@ -250,7 +250,7 @@ static func tick(A: Arena, dt: float) -> void:
 					A.set_meta("de_at", t)
 				at_t = float(A.get_meta("de_at", 9.0)) + 0.06
 		_ when w.begins_with("hero_"):
-			at_t = HeroDemo.tick(A, P, D, t, dt, w)         # Vireo and Vex (scripts/arch/hero_demo.gd)
+			at_t = HeroDemo.tick(A, P, D, t, dt, w)         # Ryzz and Vex (scripts/arch/hero_demo.gd)
 		_ when w.begins_with("e_") or w.begins_with("r_") or w.begins_with("rmb_"):
 			# any archetype's E, R or RMB on the still dummy: e_<arch>, r_<arch>, rmb_<arch> (rmb holds 0.9s)
 			var ar := w.split("_")[1]
@@ -289,7 +289,7 @@ static func tick(A: Arena, dt: float) -> void:
 					P.ak.press_rmb()
 				at_t = go + 0.7 if "--hold-shot" in OS.get_cmdline_user_args() else go + 1.05
 		_ when w.begins_with("dj_"):
-			at_t = DJDemo.still(A, P, D, w.substr(3), t, dt)      # Sable and Zedran stills (scripts/arch/dj_demo.gd)
+			at_t = DJDemo.still(A, P, D, w.substr(3), t, dt)      # Sable and Kael stills (scripts/arch/dj_demo.gd)
 			if m.hud: m.hud.toasts.clear()
 		_ when w.begins_with("pair_"):
 			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Tarek and Ostra (scripts/arch/pair_demo.gd)

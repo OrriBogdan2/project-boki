@@ -1443,7 +1443,7 @@ func _loose() -> void:
 		if t >= float(stg[0]):
 			dmg = float(stg[1]); rng = float(stg[2]); spd = float(stg[3])
 	if ak and ak.has_method("draw_bonus"):
-		dmg *= float(ak.draw_bonus(t))       # the kit's stage rules (Pin: the perfect window, overdraw, where it lands)
+		dmg *= float(ak.draw_bonus(t))       # the kit's stage rules (Hem: the perfect window, overdraw, where it lands)
 	var keep := wpn
 	wpn = wpn.duplicate()
 	wpn["dmg"] = dmg * wup_dmg; wpn["range"] = rng; wpn["speed"] = spd
@@ -1685,7 +1685,7 @@ func _emit_shot() -> void:
 		extra["farf"] = [rng * float(wpn.get("far_start", 0.6)), float(wpn["far_mult"]), rng]
 	if AimMode.take(self) == AimMode.CURSOR:
 		life = AimMode.dist(self, rng) / spd      # lands at the cursor, clamped to range (scripts/match/aim/aim_mode.gd)
-	if wpn.get("pierce", false):      # through everyone in line (Vireo's bolts)
+	if wpn.get("pierce", false):      # through everyone in line (Ryzz's bolts)
 		extra["pierce"] = true
 		extra["hitset"] = {}
 	if wpn.has("boom"):

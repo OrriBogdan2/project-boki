@@ -59,7 +59,11 @@ func _art() -> void:
 			var st := load(splash) as Texture2D
 			ok("%s: its splash" % Arch.name_of(ak), splash.ends_with("_splash.jpg") and st != null
 					and Vector2i(st.get_size()) == SPLASH_PX, splash)
-	ok("the new names", Arch.name_of("gunslinger") == "Vex" and Arch.name_of("rimewright") == "Claire")
+	var names_ok: bool = HeroTitle.base_name("gunslinger") == "Vex" and HeroTitle.base_name("rimewright") == "Claire"
+	var names2: bool = HeroTitle.base_name("tender") == "Pip" and HeroTitle.base_name("mage") == "Ryzz"
+	var names3: bool = HeroTitle.base_name("bulwark") == "Breaker" and HeroTitle.base_name("archer") == "Hem"
+	var names4: bool = HeroTitle.base_name("juggernaut") == "Kael"
+	ok("the new names", names_ok and names2 and names3 and names4)
 
 # ------------------------------------------------------------------ 2. framing
 func _framing() -> void:

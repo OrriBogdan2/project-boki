@@ -1,6 +1,6 @@
 class_name ArcherKit
 extends ArchKit
-## Pin (id archer, light; docs/heroes/archer.md, hero sheet pin.md). Spirit Walk (Shift), Focus, the Heavy Shot
+## Hem (id archer, light; docs/heroes/archer.md, hero sheet pin.md). Spirit Walk (Shift), Focus, the Heavy Shot
 ## (RMB, hold only: a charged arrow that knocks the first foe back and stuns it into a wall), Hail Wall (E, a curved arc of rain at the cursor distance), and on X
 ## Starpiercer (level 6, PinUlt: three empowered piercing beams). R is the Merge.
 ## The bow (PinDraw): hold to draw through two stages with a V reticle that closes at each; tap and
@@ -14,7 +14,7 @@ extends ArchKit
 var rain := {}                 # the live Hail Wall: {a, b, t, tick, patter, tele}
 var draw: PinDraw             # the bow's stages, reticle, perfect release and overdraw
 var spirit: PinSpirit          # Shift: Spirit Walk
-var fx: PinFx                  # Pin's pooled effects
+var fx: PinFx                  # Hem's pooled effects
 var ult: PinUlt                # X: Starpiercer
 var perfects: int:
 	get: return draw.perfects if draw else 0
@@ -52,7 +52,7 @@ func res_text() -> String:
 func ready_label() -> String:
 	return "DEADEYE READY" if full_ready() else ""
 
-## Focus from play (a Pin): the out-of-combat clock doesn't apply to Focus.
+## Focus from play (a Hem): the out-of-combat clock doesn't apply to Focus.
 func add_focus(v: float) -> void:
 	add_res(v)
 
@@ -187,7 +187,7 @@ func draw_bonus(t: float) -> float:
 		h.shot_range_k = 1.2
 	return draw.bonus(t)
 
-## Our shots the match just spawned get Pin's own look (PinFx): the bow's arrows by the kind PinDraw
+## Our shots the match just spawned get Hem's own look (PinFx): the bow's arrows by the kind PinDraw
 ## loosed, the Heavy Shot's gold arrow.
 func _tag_shots() -> void:
 	for s in m.shots:
@@ -337,7 +337,7 @@ func on_dash(use_ex: bool) -> bool:
 	if not spend_dash(ex):
 		return true
 	if ex:
-		# the long dash (in the air, or out of charges): Pin's own flick and tumble with her fletch
+		# the long dash (in the air, or out of charges): Hem's own flick and tumble with her fletch
 		# after-images (no bursts on a dash); 19 m/s, the base dash speed
 		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll"}, true)
 		play("pin_flick")

@@ -67,12 +67,12 @@ const HOLDS := {
 	"sniper": {"pos": Vector3(0.12, -0.12, -0.26), "low": Vector2(-0.55, 0.42), "gr": Vector3(0, -0.06, 0.04), "gl": Vector3(0, -0.05, -0.22), "kick": 0.42, "push": 0.12, "jitter": 0.0},
 	"shotgun": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.38), "gr": Vector3(0, -0.07, 0.04), "gl": Vector3(0, -0.08, -0.22), "kick": 0.3, "push": 0.1, "jitter": 0.0},
 	"minigun": {"pos": Vector3(0.17, -0.28, -0.3), "low": Vector2(-0.22, 0.14), "gr": Vector3(0, -0.15, 0.04), "gl": Vector3(-0.05, 0.11, -0.1), "kick": 0.03, "push": 0.02, "jitter": 1.0},
-	"finger": {"pos": Vector3(0.14, -0.02, -0.46), "low": Vector2(-0.35, 0.2), "gr": Vector3(0, 0, 0.0), "gl": Vector3.INF, "kick": 0.3, "push": 0.08, "jitter": 0.0},   # Vireo: no gun, the arm out, a finger pointed
+	"finger": {"pos": Vector3(0.14, -0.02, -0.46), "low": Vector2(-0.35, 0.2), "gr": Vector3(0, 0, 0.0), "gl": Vector3.INF, "kick": 0.3, "push": 0.08, "jitter": 0.0},   # Ryzz: no gun, the arm out, a finger pointed
 	"_gun": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.36), "gr": Vector3(0, -0.08, 0.02), "gl": Vector3(0, -0.06, -0.18), "kick": 0.15, "push": 0.05, "jitter": 0.2},
 	"sword": {"gr": Vector3(0, 0, 0.06), "gl": Vector3.INF},
 	"great": {"gr": Vector3(0, 0, 0.02), "gl": Vector3(0, 0, 0.15)},
 	"twin": {"gr": Vector3(0.06, 0, -0.02), "gl": Vector3(-0.1, -0.06, -0.08)},
-	# nothing held: both hands are free and the kit's moves cast from them (Moosh Moosh)
+	# nothing held: both hands are free and the kit's moves cast from them (Pip)
 	"palm": {
 		"pos": Vector3(0.14, -0.25, -0.1), "low": Vector2.ZERO, "gr": Vector3.ZERO, "gl": Vector3.INF,
 		"kick": 0.0, "push": 0.0, "jitter": 0.0},
@@ -1294,7 +1294,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		ay = lerpf(ay, 0.1, carry_k)
 		var carry_at := Vector3(0.22, -0.3, -0.1 - sin(ph) * 0.06)
 		if hold == "finger":
-			carry_at = Vector3(0.36, -0.1, -0.12)     # Vireo runs upright with her arms held out wide
+			carry_at = Vector3(0.36, -0.1, -0.12)     # Ryzz runs upright with her arms held out wide
 		gpos = gpos.lerp(carry_at, carry_k)
 		free_l = carry_k
 		# recoil: the muzzle kicks up and the gun pushes back

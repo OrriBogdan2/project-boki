@@ -2,7 +2,7 @@ class_name CareLook
 extends RefCounted
 ## Pooled looks of the support pair (docs/heroes/tender.md, docs/heroes/rimewright.md): every node is
 ## built once per kind and kept hidden when free, so a held LMB never creates nodes per shot.
-##   Moosh Moosh: the ember comet and its swirl, the burr orb, the Burrseed root disc, light column and
+##   Pip: the ember comet and its swirl, the burr orb, the Burrseed root disc, light column and
 ##   root beam, the lantern plus, the rising rays, the Hearthlight disc with its floating lantern, Kindle
 ##   foot glow, and her dash's ember motes.
 ##   Claire: the ice shard, the skate beam, the star-headed spear (thrown, and held while aiming), the
@@ -205,7 +205,7 @@ func _build(kind: String) -> Node3D:
 							cr, Models.crystal(0.06, 0.3, 4), ice_mat(Color("bff7ef"), 0.8, 0.3),
 							Vector3(cos(a4) * 0.32, -0.2, sin(a4) * 0.32), Vector3.ONE, Vector3(0, 0, 0.5)))
 		"mote":
-			# Moosh Moosh's dash: an ember mote with a short warm streak behind it
+			# Pip's dash: an ember mote with a short warm streak behind it
 			_off(Models.part(n, Models.sphere(0.07, 8), orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO))
 			_off(Models.part(n, Models.sphere(0.14, 8), orb_mat(Color("ff8a3c", 0.4)), Vector3.ZERO))
 			_tail(n, 0.08, 0.7, Color("ffb347", 0.8))

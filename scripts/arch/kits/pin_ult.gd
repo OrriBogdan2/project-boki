@@ -1,6 +1,6 @@
 class_name PinUlt
 extends Node3D
-## Pin's ultimate on X, Starpiercer (docs/heroes/archer.md; hero sheet pin.md "Ultimate"). A tap with no
+## Hem's ultimate on X, Starpiercer (docs/heroes/archer.md; hero sheet pin.md "Ultimate"). A tap with no
 ## cast lock empowers her next shots ("shots", 3) for "window" seconds. While empowered the bow needs no
 ## draw: each LMB press nocks for "nock" s (the bow glows, the cursor ring fills), then looses a beam
 ## that pierces every foe out to "range" (1.5x her Empowered range), knocks back and strips "shred"

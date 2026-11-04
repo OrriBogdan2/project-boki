@@ -1,6 +1,6 @@
-# Fox Cub
+# Little Lantern
 
-A lantern-carrying support. Moosh Moosh keeps the squad on its feet: she heals with Hearthlight, carries
+A lantern-carrying support. Pip keeps the squad on its feet: she heals with Hearthlight, carries
 downed friends out of danger and roots foes that chase them. She has no ultimate; R is your Boki's Merge.
 
 <!-- gen:profile -->
@@ -8,8 +8,8 @@ downed friends out of danger and roots foes that chase them. She has no ultimate
 
 |  |  |
 |---|---|
-| Class title | Fox Cub |
-| Base character | Moosh Moosh, female |
+| Class title | Little Lantern |
+| Base character | Pip, female |
 | Personality | Small, fiery and quick, with a fox's ears and tail and red markings. She is cheerful and bold, and she looks after her friends first. |
 
 <!-- /gen:profile -->

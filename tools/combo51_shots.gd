@@ -1,9 +1,9 @@
 extends "res://tools/breah_shots.gd"
 ## --combo51-shots --shots-dir=<dir> --combo51-hero=<id>: owner item 51's new combos as strips (the Breah
 ## rig's 3-wide grid of crops round the hero, tools/breah_shots.gd) in a live Arena match, under xvfb with a
-## renderer: archer|mage|dolm (Pin, Vireo, Tarek) and juggernaut|dredge|ashwick (Zedran, Dredge, Cinder).
+## renderer: archer|mage|dolm (Hem, Ryzz, Tarek) and juggernaut|dredge|ashwick (Kael, Dredge, Cinder).
 ## <dir>/captions.txt gets "file: caption" per file.
-## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Vireo, Tarek: the audit's strips) or Zedran's
+## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Ryzz, Tarek: the audit's strips) or Kael's
 ## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS).
 
 const LONG := 30                # m of flat ground the chain strips need, east of the spot
@@ -29,7 +29,7 @@ func run(main_node: Node) -> void:
 	print("COMBO51SHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
 
-## Pin: the draw held through the roll, then let go; the draw held through a jump and an air flick, let go up there.
+## Hem: the draw held through the roll, then let go; the draw held through a jump and an air flick, let go up there.
 func _archer() -> void:
 	var K: ArcherKit = P.ak
 	await _reset(9.0)
@@ -40,7 +40,7 @@ func _archer() -> void:
 			P.do_dash()
 	var marks := _strip(
 		"combo_draw_roll_strip",
-		"Pin (item 51): drawing; Shift mid-draw, the roll goes at once with the draw kept; still rolling, the"
+		"Hem (item 51): drawing; Shift mid-draw, the roll goes at once with the draw kept; still rolling, the"
 			+ " reticle charging on; out of the roll, still drawn; let go, the arrow leaves; the follow-through",
 		[0.3, 0.45, 0.52, 0.7, 1.03, 1.15]
 	)
@@ -55,13 +55,13 @@ func _archer() -> void:
 			P.do_dash()
 	var air_marks := _strip(
 		"combo_draw_jump_flick_strip",
-		"Pin (item 51): drawing; a jump with the draw held; the air flick with it still held; let go in the air,"
+		"Hem (item 51): drawing; a jump with the draw held; the air flick with it still held; let go in the air,"
 			+ " the arrow leaves and she carries on with her speed; landing",
 		[0.25, 0.4, 0.58, 0.78, 0.9, 1.2]
 	)
 	await _go(1.4, air, air_marks)
 
-## Vireo: Kitefall's crouch into a Wirerun, then the launch from where it ended; the crouch into a jump.
+## Ryzz: Kitefall's crouch into a Wirerun, then the launch from where it ended; the crouch into a jump.
 func _mage() -> void:
 	P.lvl = 6
 	await _reset(9.0)
@@ -72,7 +72,7 @@ func _mage() -> void:
 		P.inp["dash_down"] = t >= 0.05 and t < 0.35
 	var marks := _strip(
 		"combo_kitefall_shift_strip",
-		"Vireo (item 51): Kitefall's crouch; Shift in it charges the Wirerun at once; the streak; out of it the"
+		"Ryzz (item 51): Kitefall's crouch; Shift in it charges the Wirerun at once; the streak; out of it the"
 			+ " crouch starts over; she launches from where the run ended; up, the ring round the new spot",
 		[0.03, 0.2, 0.42, 0.62, 0.8, 1.0]
 	)
@@ -84,7 +84,7 @@ func _mage() -> void:
 	var jump := func(t: float): P.inp["jump"] = t >= 0.05 and t < 0.05 + DT
 	var jmarks := _strip(
 		"combo_kitefall_jump_strip",
-		"Vireo (item 51): Kitefall's crouch; a jump in it goes at once; the crouch finishing mid-jump; the launch"
+		"Ryzz (item 51): Kitefall's crouch; a jump in it goes at once; the crouch finishing mid-jump; the launch"
 			+ " from that height (no drop first); climbing; hanging",
 		[0.03, 0.12, 0.25, 0.36, 0.5, 0.75]
 	)

@@ -1,6 +1,6 @@
 class_name BulwarkKit
 extends ArchKit
-## Bjorn (id bulwark, heavy): the squad's shield. docs/heroes/bulwark.md, hero sheet bjorn.md.
+## Breaker (id bulwark, heavy): the squad's shield. docs/heroes/bulwark.md, hero sheet bjorn.md.
 ##
 ## - LMB (War Hammer): tap throws the hammer to the cursor (clamped to its range; it passes through foes
 ##   and stays planted under a gold beacon, showing foes near it to your team, until you tap again to
@@ -33,7 +33,7 @@ var knock_until := 0.0         # a knock that can Crush is landing (blow, spin, 
 var crushed_at := {}           # foe id -> last Crush (one per 0.6s each)
 var crushes := 0               # Crushes landed (tests, demo)
 var crest: Node3D = null       # the gold crest light while a Shield Slam is armed
-var fx: BjornFx                # Bjorn's pooled effects
+var fx: BjornFx                # Breaker's pooled effects
 var ult: BjornUlt              # X: Faultline
 var launch: BjornLaunch        # the perfect swing's launch
 var flared := false            # this hold's full-charge flare has gone off
@@ -733,7 +733,7 @@ func on_dash(use_ex: bool) -> bool:
 	if not spend_dash(use_ex):
 		return true
 	if use_ex:
-		# the long dash (in the air, or out of charges): Bjorn lumbers in shoulder first, shoving foes aside
+		# the long dash (in the air, or out of charges): Breaker lumbers in shoulder first, shoving foes aside
 		var de := float(h.cdat.get("ex_dist", 4.2))
 		travel(de, de / float(dd.get("lumber_speed", 14.0)), {"invuln": 0.1, "shove": true, "shove_kb": 6.0, "shove_dmg": 0.0, "trail": "dust"}, true)
 		st["last_dash"] = "lumber"

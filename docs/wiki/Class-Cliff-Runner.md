@@ -1,4 +1,4 @@
-# Rock Elementalist
+# Cliff Runner
 
 The quarry-hand. Raise rocks out of the ground, stand on them and climb them, then punch them into the enemy. A slam that knocks resets itself.
 
@@ -7,7 +7,7 @@ The quarry-hand. Raise rocks out of the ground, stand on them and climb them, th
 
 |  |  |
 |---|---|
-| Class title | Rock Elementalist |
+| Class title | Cliff Runner |
 | Base character | Tarek, male |
 | Personality | A young, nimble rock elementalist with a bandana tied over his eyes. He reads the ground by feel. Quiet and light on his feet, he moves stone like it is a dance partner. |
 

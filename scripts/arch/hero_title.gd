@@ -15,16 +15,19 @@ static func gender(archetype: String) -> String:
 static func personality(archetype: String) -> String:
 	return String(Arch.def(archetype).get("personality", "")).replace("\n", " ")
 
-## "Orri the Dark Archer"; the bare player name when the body has no class.
+## "Orri the Red Stitch"; the bare player name when the body has no class.
 static func label(player_name: String, archetype: String) -> String:
 	if not Arch.exists(archetype):
 		return player_name
-	return "%s the %s" % [player_name, title(archetype)]
+	var t := title(archetype)
+	if t.begins_with("The "):   # "Orri the Unbroken", not "Orri the The Unbroken"
+		t = t.substr(4)
+	return "%s the %s" % [player_name, t]
 
 static func of_hunter(hunter: Hunter) -> String:
 	return label(hunter.pname, hunter.arch)
 
-## "Originally Pin, female" for the class intro and picker.
+## "Originally Hem, female" for the class intro and picker.
 static func origin_line(archetype: String) -> String:
 	var gender_text := gender(archetype)
 	if gender_text == "robot":

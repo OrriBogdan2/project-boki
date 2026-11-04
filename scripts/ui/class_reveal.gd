@@ -32,7 +32,7 @@ static func maybe_show(home: Node) -> ClassReveal:
 		return null
 	return show_for(home, String(waiting[0]))
 
-## "Pin and Zedran are open now" once the starters have opened (after the first expedition): a toast as soon
+## "Hem and Kael are open now" once the starters have opened (after the first expedition): a toast as soon
 ## as no panel (the welcome, make-home) covers the farm.
 static func announce_fresh(home: Node) -> void:
 	if not (ClassUnlock.state().get("fresh", []) as Array).is_empty():

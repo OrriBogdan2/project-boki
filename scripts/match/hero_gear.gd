@@ -314,7 +314,7 @@ static func _archer(c: Dictionary) -> void:
 	_wraps(c, m["leather"], m["leather"])
 
 # ------------------------------------------------------------------------------------------ mage
-## Vireo, the storm-kite runner: no hat and no robe. Flight goggles pushed up on a swept-back head,
+## Ryzz, the storm-kite runner: no hat and no robe. Flight goggles pushed up on a swept-back head,
 ## a cropped jacket over a short split kite-tail, copper coils round both forearms, a copper rod mast
 ## on the back flying a pennant in the team colour, and a belt of glass insulators.
 static func _mage(c: Dictionary) -> void:

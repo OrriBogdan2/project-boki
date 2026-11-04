@@ -6,7 +6,7 @@ extends RefCounted
 
 const AKCheck := preload("res://tools/archetype_check.gd")
 const ULT := preload("res://tools/dj_ult_check.gd")      # both heroes' ultimates on X, and the burst cap
-const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Zedran's chain, RMB rows, Meteor Drop and dashes
+const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Kael's chain, RMB rows, Meteor Drop and dashes
 const DFEEL := preload("res://tools/dancer_feel_check.gd")   # Dancer's Cartwheel, empowered bolt and reset (item 7)
 const DPARITY := preload("res://tools/dancer_parity_check.gd")   # her LMB against the source (the parity pass)
 var A: AKCheck

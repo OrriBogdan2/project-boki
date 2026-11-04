@@ -1,4 +1,4 @@
-# Dark Archer
+# Red Stitch
 
 A light marksman who controls space. Every bow draw is timed, Heavy Shots pin people to walls, and a pinned
 target eats the big shot. Spirit Walk carries her through rocks and barriers.
@@ -8,8 +8,8 @@ target eats the big shot. Spirit Walk carries her through rocks and barriers.
 
 |  |  |
 |---|---|
-| Class title | Dark Archer |
-| Base character | Pin, female |
+| Class title | Red Stitch |
+| Base character | Hem, female |
 | Personality | A cool, patient hunter in a dark cloak with a thread of red. She says little and watches everything. She picks the high ground, waits, and pins you to the wall. |
 
 <!-- /gen:profile -->

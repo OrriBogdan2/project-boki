@@ -1,5 +1,5 @@
 extends RefCounted
-## --vv-shots --shots-dir=<dir> [--vv-hero=mage|gunslinger] [--vv-tag=v2/polish]: screenshots of Vireo's
+## --vv-shots --shots-dir=<dir> [--vv-hero=mage|gunslinger] [--vv-tag=v2/polish]: screenshots of Ryzz's
 ## and Vex's abilities in a live Arena match (run under xvfb with a renderer). Each moment is taken at
 ## the default gameplay zoom and again as a close-up crop round what it shows; every move also gets a
 ## 4-6 frame strip cropped round the hero (anticipation, release, follow-through, recovery). Files go
@@ -215,7 +215,7 @@ func _on_target() -> Vector3:
 func _above_target() -> Vector3:
 	return T.position + Vector3(0, 2.4, 0)
 
-# ------------------------------------------------------------------ Vireo
+# ------------------------------------------------------------------ Ryzz
 func _vireo() -> void:
 	await _vireo_run()
 	await _vireo_lmb()
