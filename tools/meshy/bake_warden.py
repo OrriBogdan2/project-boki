@@ -2,17 +2,19 @@
 
   ~/tools/blender-4.5.15-linux-x64/blender -b --factory-startup --python tools/meshy/bake_warden.py -- <spec.json>
 
-Meshy's should_remesh=false output is ~1.3M triangles with an 8k texture cut into thousands of UV crumbs.
+Meshy's should_remesh=false output is ~1.2M triangles with an 8k texture cut into thousands of UV crumbs.
 Decimating that mesh with its UVs kept (r2) smears the texture across the crumbs. Instead:
  1. Import the dense mesh (Meshy's frame: +Z up, facing -Y) and keep it as the bake source.
- 2. The low mesh: a welded copy, decimated (collapse, no UV limits) to `tris`, with its floaters dropped.
- 3. New UVs: Smart UV Project, with the islands of the head (`head`: centre, radius) scaled `head_uv` times
-    for more texels on the face, packed with a margin.
- 4. Bake the dense mesh's base colour onto them (Cycles, selected to active, emission: no light baked in),
-    with the islands' edges extended into the gaps.
- 5. Export the low mesh and its texture as a .glb in Meshy's frame and pose: fit_warden.py's `body_glb`.
-The spec (art/wardens/src/<name>_bake.json): high, out, tris, tex, head {centre, r}, head_uv, cage, ray,
-margin_px, floater_verts.
+ 2. The low mesh: a welded copy, its floaters dropped, decimated (collapse, no UV limits) to `tris`, of which
+    `head_tris` go to the head (`head`: centre, r).
+ 3. New UVs: flat projections of a smoothed copy, islands that overlap themselves projected again closer to
+    the real surface; the head's islands scaled `head_uv` times (more texels on the face); packed.
+ 4. Bake the dense mesh's base colour onto them (Cycles, selected to active, as emission: no light baked
+    in), each island's edge extended `margin_px` into the gaps.
+ 5. Export the low mesh and its texture (atlas.png beside it) as a .glb in Meshy's frame and pose:
+    fit_warden.py's `body_glb`.
+The spec (art/wardens/src/<name>_bake.json): high, out, tris, head {centre, r}, head_tris, head_uv, uv_smooth,
+uv_angle, uv_margin, tex, cage, ray, margin_px, floater_verts.
 """
 import json
 import math
@@ -97,8 +99,7 @@ def make_low(high, n_tris, floater_verts, head=None, head_tris=0):
         _decimate(low, (n_head + n_tris - head_tris) / tris(low), "body")
         _decimate(low, n_tris / tris(low), "head")
         low.vertex_groups.clear()
-    log("low: %d -> %d tris (head %d)" % (tris(high), tris(low),
-                                          sum(1 for p in me.polygons if head and (p.center - Vector(head["centre"])).length < float(head["r"]))))
+    log("low: %d -> %d tris" % (tris(high), tris(low)))
     return low
 
 
@@ -314,11 +315,12 @@ def bake_colour(high, low, size, cage, ray, margin_px):
     bpy.ops.object.bake(type="EMIT", use_selected_to_active=True, cage_extrusion=cage, max_ray_distance=ray,
                         margin=margin_px, margin_type="EXTEND", use_clear=True)
     log("baked %dx%d" % (size, size))
-    return img, mat
+    return img
 
 
 def export(low, img, path):
-    img.filepath_raw = os.path.join(os.path.dirname(path), "atlas.png")     # (the game's file: <name>_atlas.jpg)
+    img.name = "atlas"          # (the fit's .glb then writes it as <name>_atlas.jpg)
+    img.filepath_raw = os.path.join(os.path.dirname(path), "atlas.png")
     img.file_format = "PNG"
     img.save()
     bsdf = low.data.materials[0].node_tree.nodes.get("Principled BSDF")
@@ -343,7 +345,7 @@ def main():
                    int(spec.get("head_tris", 0)))
     unwrap(low, spec.get("head"), float(spec.get("head_uv", 2.0)), float(spec.get("uv_margin", 0.0008)),
            float(spec.get("uv_angle", 66.0)), int(spec.get("uv_smooth", 30)))
-    img, _mat = bake_colour(high, low, int(spec.get("tex", 4096)), float(spec.get("cage", 0.008)),
+    img = bake_colour(high, low, int(spec.get("tex", 4096)), float(spec.get("cage", 0.008)),
                             float(spec.get("ray", 0.03)), int(spec.get("margin_px", 16)))
     export(low, img, os.path.expanduser(spec["out"]))
     if spec.get("blend"):

@@ -39,8 +39,8 @@ uniform float fres = 0.0;          // coloured fresnel rim, independent of the l
 uniform vec4 fres_color : source_color = vec4(0.75, 0.86, 1.0, 1.0);
 uniform float fres_tint = 0.5;     // 0 = fres_color, 1 = a lightened version of the surface's own colour
 uniform float top_light = 0.0;     // surfaces facing up (what the match camera sees most) lift a little     // a soft broad highlight on every surface facing the light
-// a painted atlas (WardenGlb) read from the match camera: its colours this much brighter and richer from about
-// 10 m out (close-ups keep the paint's own values)
+// a painted atlas (WardenGlb) at the match camera (~23 m): its colours this much brighter and richer, fading in
+// from 8 to 18 m away (close-ups keep the paint's own values)
 uniform float far_lift = 0.0;
 // Imported low-poly models carry each corner's averaged (smooth) normal in TANGENT (Assets.mesh).
 // Blending toward it rounds off their facets in the shading while the silhouette stays crisp.

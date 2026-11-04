@@ -2,10 +2,10 @@ extends RefCounted
 ## --warden-shots --shots-dir=<dir> [--wardens=bulwark,archer,juggernaut] [--sheets=<dir>] [--procedural]: the
 ## in-engine Warden models next to their concept sheets (concept phase 2). Per Hunter, under <dir>/<id>/:
 ## turnaround_game.png (front, 3/4, side, back, 3/4 back at the match camera: the true pixels, then
-## enlarged 3x), poses_game.png (idle, run, attack, cast, ult at the match camera), turnaround_close.png,
-## closeup.png and closeup_front.png (head and shoulders, 3/4 and front), vs_sheet.png (the concept sheet
-## beside the close turnaround) and
-## moves_close_N.png (the run and the hero's own kit moves, frame by frame), plus captions.txt.
+## enlarged 3x), front_34.png and back_34.png (full length), poses_game.png (idle, run, attack, cast, ult at the
+## match camera), turnaround_close.png, closeup.png and closeup_front.png (head and shoulders, 3/4 and front),
+## vs_sheet.png (the concept sheet beside the close turnaround) and moves_close_N.png (the run and the hero's own
+## kit moves, frame by frame), plus captions.txt.
 ## --procedural shoots the procedural models of Wardens that have a 3D one (Settings: Warden models).
 ## --sheets names the folder holding the concept PNGs (<id>.png). Needs a renderer.
 
@@ -80,9 +80,12 @@ func _hero(id: String, dir: String, sheets: String) -> void:
 	var close := await _close_strip(row)
 	close.save_png(dir.path_join("turnaround_close.png"))
 	caps.append("turnaround_close.png: %s close, %s" % [title, ", ".join(YAW_NAMES)])
-	var pair := await _front_pair(row)
+	var pair := await _pair(row, 0, 1)
 	pair.save_png(dir.path_join("front_34.png"))
 	caps.append("front_34.png: %s full length, front and three-quarter (as the sheet's two views)" % title)
+	var back := await _pair(row, 3, 4)
+	back.save_png(dir.path_join("back_34.png"))
+	caps.append("back_34.png: %s full length, back and three-quarter back" % title)
 	# 2. head and shoulders, three-quarter front
 	var head := await _head(row[1])
 	head.save_png(dir.path_join("closeup.png"))
@@ -196,11 +199,11 @@ func _close_strip(row: Array, animate := true) -> Image:
 	var bottom := int(cam.unproject_position(Vector3(0, -0.15, 0.6)).y)
 	return _fit(img.get_region(Rect2i(0, maxi(top, 0), img.get_width(), mini(bottom, img.get_height()) - maxi(top, 0))))
 
-## The front and three-quarter hunters each filling half the frame, side by side.
-func _front_pair(row: Array) -> Image:
+## Two hunters of the turnaround row (front and 3/4, or back and 3/4 back), each filling half the frame.
+func _pair(row: Array, a: int, b: int) -> Image:
 	var out := Image.create(OUT_W, 720, false, Image.FORMAT_RGBA8)
 	for i in 2:
-		var h := row[i] as Node3D
+		var h := row[[a, b][i]] as Node3D
 		cam.fov = 30.0
 		cam.position = Vector3(h.position.x, 1.15, h.position.z + 1.3 / tan(deg_to_rad(15.0)))
 		cam.rotation = Vector3(-0.04, 0, 0)

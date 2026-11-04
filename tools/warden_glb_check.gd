@@ -34,7 +34,7 @@ const SLOT_MAX := 8
 const MOTION_BONES := ["hips", "thigh.L", "shin.L", "thigh.R", "shin.R", "upper_arm.L", "forearm.L", "upper_arm.R",
 	"forearm.R", "head"]
 const OWN_MOTION := 0.05       # rad: two Wardens' idle or run joint angles differ by more than this on average
-const TRIS_MAX := 45000         # the owner's 30-40k for the top-down camera (INBOX_S2 05:00), with braids
+const TRIS_MAX := 45000         # a Warden baked from Meshy (PIPELINE.md r3): ~30-40k body and weapon, the face kept
 
 var bad := 0
 var n := 0

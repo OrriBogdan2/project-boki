@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b0ncgbsffqjto"
-path="res://.godot/imported/vex_Image_0.jpg-7a17fa52f64e809c85b744d135ed4012.ctex"
+uid="uid://b41uk6pttnmax"
+path="res://.godot/imported/vex_atlas.jpg-c2a49001a3a216cf14b3bb1b746f1797.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "a0beb8ea7a6822b834a291496802fbeb"
+"md5": "174ca565c84f42186ce4782a1bbdb203"
 }
 
 [deps]
 
-source_file="res://art/wardens/vex/vex_Image_0.jpg"
-dest_files=["res://.godot/imported/vex_Image_0.jpg-7a17fa52f64e809c85b744d135ed4012.ctex"]
+source_file="res://art/wardens/vex/vex_atlas.jpg"
+dest_files=["res://.godot/imported/vex_atlas.jpg-c2a49001a3a216cf14b3bb1b746f1797.ctex"]
 
 [params]
 

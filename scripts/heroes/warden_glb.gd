@@ -47,17 +47,17 @@ const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline
 ## an inkless slot (the hair goes without it for a scan's ragged strands, not for a woven braid).
 const INK_TAGS := ["braid"]
 ## The hero toon shader on a painted atlas, which carries its own light and shade: the toon light on top stays
-## soft and near white (no violet shadow, no warm terminator band, no sun self-shadow, no brushwork), so the
-## model reads as bright as its paint, as the art does; the shadow floor is 0.37 on a procedural hero.
+## soft and near white (no violet shadow, no warm terminator band, no sun self-shadow, no procedural
+## brushwork), a light-coloured rim and top light lift its edges off the ground, and far_lift brightens it at
+## the match camera, so the model reads as bright as the art. (A procedural hero's shadow floor is 0.37.)
 const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(0.97, 0.94, 0.95), "shadow_sat": 0.0, "sss": 0.0,
-	"sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.7, "fres_tint": 0.8, "rim_amount": 0.6,
-	"top_light": 1.6, "far_lift": 0.3}
+	"sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3, "fres_tint": 0.95, "rim_amount": 0.5,
+	"top_light": 1.0, "far_lift": 0.35}
 const GLOW := 1.6              # emission of the glow slot (mechanical eyes, cracks), x its painted colour
 ## The ink shell on a painted atlas: half the procedural heroes' width per metre of camera distance (the same
-## 4 mm line close up). At the match camera a full-width line round every belt, buckle and candle of a scanned
-## model added up to a dark smudge.
+## 4 mm line close up), and never more than the fit's ink room at a vertex (outline.gdshader ink_mask). At the
+## match camera a full-width line round every belt, buckle and candle of a scanned model added up to a smudge.
 const INK_WIDTH := 0.0006
-static var _ink: ShaderMaterial
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
 ## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model (or a design
@@ -68,6 +68,7 @@ const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
 const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (HunterAnim spins them while firing)
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
+static var _ink: ShaderMaterial  # the painted atlas's ink shell (INK_WIDTH), shared
 static var _measuring := false  # building that neutral model: no .glb on it
 static var _variants = null     # art name -> the design variant the command line picks (variant())
 
@@ -218,7 +219,7 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 			# lines across the face
 			var tag := String(src.resource_name).get_slice("-", 1) if src else ""
 			var m := Models.toon(src.albedo_color if src else Color.WHITE, not slot in NO_INK or tag in INK_TAGS)
-			# (no baked AO in a Meshy model's vertex colour: the array is absent and would read as noise)
+			# (a Meshy model's vertex colour holds the ink room, not baked AO)
 			m.set_shader_parameter("vertex_ao", false)
 			m.set_shader_parameter("surface", int(SLOTS.get(slot, 1)))
 			Models.hero_look(m)
@@ -226,7 +227,6 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 				m.set_shader_parameter("albedo_tex", src.albedo_texture)
 				m.set_shader_parameter("use_tex", true)
 				m.set_shader_parameter("albedo", _tint(slot, lk, warden))
-				# (metal keeps its gloss and rim)
 				for k in PAINTED:
 					m.set_shader_parameter(k, PAINTED[k])
 				if m.next_pass:
@@ -242,7 +242,7 @@ static func _painted_ink() -> ShaderMaterial:
 		_ink = ShaderMaterial.new()
 		_ink.shader = Models.OUTLINE
 		_ink.set_shader_parameter("width", INK_WIDTH)
-		_ink.set_shader_parameter("ink_mask", true)      # (the fit's ink room in the vertex colour)
+		_ink.set_shader_parameter("ink_mask", true)
 	return _ink
 
 ## How far the player's colour pick moves a painted slot from the Warden's own colour (white: not at all).

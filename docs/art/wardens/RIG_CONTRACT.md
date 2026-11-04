@@ -122,6 +122,8 @@ the vertex colour (`vertex_ao`):
 | `glow` | emissive | — (Bjorn's crack, Zedran's fuller) |
 
 Every material must end up in the root's `mats` meta (the loader does it) so hit flashes and mutations reach it.
+A painted (Meshy) atlas is shaded by `WardenGlb.PAINTED` (soft, near-white toon light, a light rim, brighter at
+the match camera) with a thin ink shell that never grows past the fit's ink room, the vertex colour's alpha.
 The loader puts each material's base-colour texture (the atlas) on `hero_toon.gdshader`'s `albedo_tex`
 (`use_tex`), with `albedo` as a tint: the player's skin, hair and eye picks move the `skin`, `hair` and `eyes`
 slots at most ±35% per channel from the Warden's own colours. Bone names may come through as `upper_arm_L`
@@ -129,8 +131,8 @@ slots at most ±35% per channel from the Warden's own colours. Bone names may co
 The armature and its meshes sit at the .glb's origin (no offset on the scene root), so skeleton space is model space.
 
 ## Budget and checks
-- At most 45k triangles on the model (the owner's 30-40k for the top-down camera, INBOX_S2 2026-11-04 05:00,
-  with braids); the weapon is counted on its own. A baked 4096² atlas (lossless import); no more than 8 slots.
+- About 30–45k triangles per Warden (a Meshy model baked to a clean low mesh: ~10k of them on the head, the
+  weapon included; `--warden-glb-check` holds 45k), one 2048² atlas; no more than 8 material slots.
 - `--warden-glb-check`: the bone table covers every part HunterAnim binds; a Warden without a .glb builds the
   procedural model (the fallback); a .glb present loads with the contract armature, every kit move of every
   table retargets exactly and each keyed channel moves its bones, the anchors ride bone attachments, every

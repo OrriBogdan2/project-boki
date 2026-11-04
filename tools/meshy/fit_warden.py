@@ -701,6 +701,20 @@ def pad(img, ids, steps):
     img.pixels = px.ravel()
 
 
+def shrink(img, size):
+    """The atlas down to size x size by whole-texel box averages (the bake runs at 4096 for a clean, supersampled
+    result; the game gets 2048: 16 MB of VRAM per Warden uncompressed, a quarter of 4096's)."""
+    w, h = img.size
+    f = w // size
+    if f <= 1:
+        return
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h // f, f, w // f, f, 4).mean(axis=(1, 3))
+    img.scale(w // f, h // f)
+    img.pixels = px.ravel()
+    img.pack()
+    log("atlas %d -> %d px" % (w, w // f))
+
+
 def lift(img, gamma, gain, sat=1.0):
     """Meshy's albedo is a shade darker than the painted art and the toon shader darkens again: lift its values
     (a gamma and a gain on the stored colour) so the model reads as light as the turnaround in game, and its
@@ -815,18 +829,31 @@ def _face_parts(bm):
         yield part
 
 
-def cap_holes(ob, flat=False):
-    """Closes the openings a cut leaves (the forearm the gun-arm came off, the gun's back end, a deleted belt
-    loop): the game's ink shell is drawn from the inside of a grown copy, so through an opening it shows as a
-    black hole. Each cap's corners take the UVs of the rim's own faces (the rim's paint carries across); flat:
+def cap_holes(ob, max_rim, flat=False):
+    """Closes the openings a cut leaves (the stump the gun-arm came off, the gun's back end): the game's ink
+    shell is drawn from the inside of a grown copy, so through an opening it shows as a black hole. Only
+    openings whose rim is shorter than `max_rim` m: a long, twisted rim (where the cut ran along the ammo belt)
+    made a cap that stood out as a dark slab. Each cap's corners take the UVs of the rim's own faces; flat:
     the whole cap takes one rim texel (a rim across several UV islands smeared unrelated paint over the cap)."""
     bm = bmesh.new()
     bm.from_mesh(ob.data)
     lay = bm.loops.layers.uv.active
-    rim = [e for e in bm.edges if e.is_boundary]
-    rim_uv = {v.index: v.link_loops[0][lay].uv.copy() for e in rim for v in e.verts if v.link_loops}
-    res = bmesh.ops.holes_fill(bm, edges=rim, sides=0)
-    caps = res["faces"]
+    rim = set(e for e in bm.edges if e.is_boundary)
+    small = []
+    while rim:
+        loop, stack = [], [rim.pop()]
+        while stack:
+            e = stack.pop()
+            loop.append(e)
+            for v in e.verts:
+                for o in v.link_edges:
+                    if o in rim:
+                        rim.discard(o)
+                        stack.append(o)
+        if sum(e.calc_length() for e in loop) <= max_rim:
+            small.extend(loop)
+    rim_uv = {v.index: v.link_loops[0][lay].uv.copy() for e in small for v in e.verts if v.link_loops}
+    caps = bmesh.ops.holes_fill(bm, edges=small, sides=0)["faces"]
     for f in caps:
         one = next((rim_uv[lp.vert.index] for lp in f.loops if lp.vert.index in rim_uv), None) if flat else None
         for lp in f.loops:
@@ -863,8 +890,9 @@ def soft_normals(ob, iterations):
 def ink_room(ob, full):
     """How far the game's ink shell may grow out of each vertex without poking through the model: half the
     room along its shading normal, inward (a hair strand's, a frayed hem's or a candle's thickness) or outward
-    (a fold or the gap to the next part), as a fraction of `full` m in the vertex colour's red (Godot's
-    outline shader with ink_mask: thin and folded parts get a thin line instead of a ragged black fringe)."""
+    (a fold or the gap to the next part), as a fraction of `full` m in the vertex colour's alpha (Godot's
+    outline shader with ink_mask: thin and folded parts get a thin line instead of a ragged black fringe; the
+    colour stays white, and an opaque glTF material ignores the alpha, so other viewers show the atlas as is)."""
     from mathutils.bvhtree import BVHTree
     me = ob.data
     tree = BVHTree.FromPolygons([v.co.copy() for v in me.vertices], [p.vertices[:] for p in me.polygons])
@@ -883,7 +911,7 @@ def ink_room(ob, full):
         room[v.index] = min(1.0, best * 0.5 / full)
     attr = me.color_attributes.new("ink", "FLOAT_COLOR", "POINT")
     col = np.ones((len(me.vertices), 4), np.float32)
-    col[:, 0] = room
+    col[:, 3] = room
     attr.data.foreach_set("color", col.ravel())
     me.color_attributes.active_color = attr
     log("%s: ink room, %d%% of vertices with less than a full line" % (ob.name, int(100 * (room < 0.999).mean())))
@@ -936,10 +964,10 @@ def _cut(ob, drop):
 
 
 def weight_rules(ob, img, rules):
-    """Pieces bone heat gives to the wrong bone where two parts touch in Meshy's pose (Vex's left hand rests on
-    her hip: the belt, the shorts and the scroll under it went with the hand when the arm was lowered): every
+    """Pieces bone heat gives to the wrong bone where two parts touch in Meshy's pose: every
     vertex inside a rule's box (the fitted frame: her right +X, front +Y, soles on 0) whose painted colour
-    matches one of its hsv ranges [h0, h1, s0, s1, v0, v1] goes wholly to the rule's bone."""
+    matches one of its hsv ranges [h0, h1, s0, s1, v0, v1] (all colours without) goes wholly to the rule's
+    bone (Vex's ammo drum on her back went with the gun-arm and rose over her shoulder blades)."""
     w, h = img.size
     px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
     uv = ob.data.uv_layers.active.data
@@ -959,13 +987,34 @@ def weight_rules(ob, img, rules):
             if not (b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]):
                 continue
             hh, ss, vv = _hsv(col[vx.index])
-            if not any(q[0] <= hh <= q[1] and q[2] <= ss <= q[3] and q[4] <= vv <= q[5] for q in r["hsv"]):
+            if "hsv" in r and not any(q[0] <= hh <= q[1] and q[2] <= ss <= q[3] and q[4] <= vv <= q[5] for q in r["hsv"]):
                 continue
             for x in vx.groups:
                 ob.vertex_groups[x.group].add([vx.index], 0.0, "REPLACE")
             g.add([vx.index], 1.0, "REPLACE")
             moved += 1
         log("weight rule %s: %d vertices" % (r["bone"], moved))
+
+
+def release(ob, bones, to="hips"):
+    """The weights of bones whose geometry left the body (a gun-arm's forearm and hand: the weapon now) go to
+    `to`: the ammo belt that fed Vex's gun stayed on her forearm and was dragged across her back whenever the
+    arm moved (handed to the upper arm instead, it still was)."""
+    idx = [ob.vertex_groups[b].index for b in bones if b in ob.vertex_groups]
+    if not idx:
+        return
+    dest = ob.vertex_groups.get(to) or ob.vertex_groups.new(name=to)
+    moved = 0
+    for v in ob.data.vertices:
+        gone = sum(g.weight for g in v.groups if g.group in idx)
+        if gone <= 0.0:
+            continue
+        have = next((g.weight for g in v.groups if g.group == dest.index), 0.0)
+        for i in idx:
+            ob.vertex_groups[i].remove([v.index])
+        dest.add([v.index], have + gone, "REPLACE")
+        moved += 1
+    log("released %s to %s: %d vertices" % (", ".join(bones), to, moved))
 
 
 def keep_weights(ob):
@@ -1286,8 +1335,9 @@ def vents(gun, img, vt):
 def gun_weapon(gun, e, t, rig, ga):
     """The cut-off gun-arm into the Gun node's space (Blender: forward +Y, her right +X, up +Z): its axis along
     +Y, the side that faced out from her body to her right, the barrels' end on the Muzzle and the back end
-    `back` m behind the Gun's origin (where the elbow is in the hold), scaled to fit. The barrels past `spin`
-    (a fraction of the axis) become the child `weapon_spin`, its origin on the axis, which HunterAnim spins."""
+    `back` m behind the Gun's origin (where the elbow is in the hold), scaled to fit; faces in `trim_boxes`
+    (that frame) go. The barrels past `spin` (a fraction of the axis) become the child `weapon_spin`, its
+    origin on the axis, which HunterAnim spins."""
     ax = (t - e).normalized()
     out = Vector((1, 0, 0))                          # (her right, in the rig frame)
     side = (out - ax * out.dot(ax)).normalized()
@@ -1302,6 +1352,9 @@ def gun_weapon(gun, e, t, rig, ga):
     decimate(gun, int(ga.get("tris", 6000)))
     if "vents" in ga:
         vents(gun, base_image_of(gun), ga["vents"])
+    if ga.get("trim_boxes"):
+        delete_boxes(gun, ga["trim_boxes"])     # (in the Gun's frame: the feed belt that hung off its back end)
+        drop_floaters(gun, int(ga.get("loose_verts", 300)) // 10)
     sp = float(ga.get("spin", 0.62))
     cut_y = back + sp * (muzzle.y - back)
     spin = split_off(gun, lambda co: co.y > cut_y, "weapon_spin")
@@ -1482,6 +1535,7 @@ def _rig_joint(rig, name):
     return K.bone_head(rig, "%s.%s" % (bone[part], side))
 
 
+
 def main():
     spec_path = sys.argv[sys.argv.index("--") + 1]
     spec = json.load(open(spec_path))
@@ -1490,6 +1544,8 @@ def main():
     ob = import_glb(os.path.expanduser(spec["body_glb"]))
     img = base_image(ob)
     drop_floaters(ob, spec.get("floater_verts", 40))
+    if spec.get("cut_boxes"):
+        delete_boxes(ob, spec["cut_boxes"])     # (in Meshy's frame: a strand it floats in front of the face)
     ids = island_map(ob, img)
     paint_up(img, spec, ids=ids)
     for pj in spec.get("project", []):
@@ -1501,6 +1557,7 @@ def main():
         slot_split(ob, img, spec["palette"], spec["glow_min"], "body")
     if spec.get("touch_up"):
         touch_up(ob, img, spec["touch_up"])
+        pad(img, ids, int(spec.get("pad", 6)))       # (the touched islands' new colour into their margins too)
     if spec.get("smooth"):
         sm = spec["smooth"]
         smooth_atlas(img, ids, int(sm.get("iterations", 2)), float(sm.get("sigma_s", 2.0)), float(sm.get("sigma_r", 0.07)))
@@ -1579,6 +1636,8 @@ def main():
     arm = contract_skin(ob, rig)
     if spec.get("fit_weights"):
         fit_weights(ob, arm)
+    if "gun_arm" in spec:
+        release(ob, spec["gun_arm"].get("bones", ["forearm.R", "hand.R"]))
     if "chunk" in spec:
         chunk(ob, rig, spec["chunk"])
     parts = []
@@ -1609,8 +1668,8 @@ def main():
         bpy.context.view_layer.objects.active = o
         if o.data.has_custom_normals:
             bpy.ops.mesh.customdata_custom_splitnormals_clear()
-        if spec.get("cap_holes"):
-            cap_holes(o, spec.get("cap_flat", False))
+        if "cap_holes" in spec:
+            cap_holes(o, float(spec["cap_holes"]), spec.get("cap_flat", False))
         outward(o)
         for p in o.data.polygons:
             p.use_smooth = True
@@ -1620,6 +1679,8 @@ def main():
     for o in parts:
         if "ink_room" in spec:
             ink_room(o, float(spec["ink_room"]))
+    if "atlas_px" in spec:
+        shrink(img, int(spec["atlas_px"]))
     out = os.path.join(ROOT, os.path.expanduser(spec["out"]))
     log("tris: body %d, weapon %d" % (K.tris([ob]), K.tris([x for x in (gun, spin) if x])))
     # (JPEG: Meshy's painted textures, a third of the PNG's size)
