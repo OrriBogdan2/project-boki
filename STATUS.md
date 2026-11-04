@@ -278,3 +278,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - 2026-11-04 10:08 UTC: stage 1 is done for Hem, Kael, Breaker and Claire, with shots and review posts up; Sable+Pip and Tarek+Ostra are still running. Owner Q: Breaker's height (1.32x now, the kit says about 1.5x).
 - 2026-11-04 10:27 UTC: STAGE 1 complete for 8 heroes (Hem, Kael, Breaker, Claire, Sable, Pip, Tarek, Ostra). All posted for owner review; balance 4327. Stage 2 waits for the owner's OK on Vex r3c. No agents running.
 - 2026-11-04 11:01 UTC: Ryzz's art is locked (11:00). Her stage 1 is running on ext/warden-3d-ryzz: pink fern scar over the right eye, short twin pigtails, 3 copper back rods as her relic, and a switchable pink emissive.
+
+## 2026-11-04 11:12 UTC: STAGE 2 GO (owner 11:25: r3c is about 80% there and is the recipe)
+- **Stage 2:** the four agents are polishing Hem+Kael, Breaker (now 1.5x, owner 11:15)+Claire, Sable+Pip and Tarek+Ostra. Brief: briefs-s2/WARDEN_STAGE2_BRIEF.md (merge the r3c and stance bases, paint-over, per-model look, proportions, stance, the per-hero gap list). Shots will be s2_*.
+- **Vex r3d face pass:** match the portrait's face, remove the jaw seam, make the lens read at match zoom, clean the strap smears. Its face rules go to the other agents.
+- **Ryzz stage 1:** running.
+- **Cinder:** art in (11:45), queued after stage 2.
