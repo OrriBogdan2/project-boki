@@ -1535,7 +1535,8 @@ def ramp_paint(ob, img, rules):
 def split_part(ob, arm, img, sp):
     """A piece cut off the body as its own mesh (Tarek's stone bracers, Ostra's mask): the faces whose centre is in
     one of `boxes` (the fitted frame on the contract's rest pose: his right +X, front +Y, soles on 0) and whose
-    painted colour matches `hsv` [h0, h1, s0, s1, v0, v1] (if given), still skinned as they were, on one material
+    painted colour matches `hsv` [h0, h1, s0, s1, v0, v1] (if given) and whose vertices all ride mostly one of
+    `bones` (if given: the forearms, not the hip the hanging arm touches), still skinned as they were, on one material
     "<slot>-<name>" over the body's atlas. `emit` paints an emission layer for it (the material's emissive
     texture, which WardenGlb puts on the toon shader's emit layer): "dark" lights the texels darker than `k` x the
     part's median (the cracks between a bracer's stone plates) in `colour`; "hsv" lights the texels in its range
@@ -1545,7 +1546,13 @@ def split_part(ob, arm, img, sp):
     uv = ob.data.uv_layers.active.data
     inf = float("inf")
     pick = set()
+    on_bones = None
+    if sp.get("bones"):
+        gi = {ob.vertex_groups[b].index for b in sp["bones"] if b in ob.vertex_groups}
+        on_bones = [bool(v.groups) and max(v.groups, key=lambda x: x.weight).group in gi for v in ob.data.vertices]
     for p in ob.data.polygons:
+        if on_bones is not None and not all(on_bones[i] for i in p.vertices):
+            continue
         c = p.center
         if not any(b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]
                    for b in [[(-inf, inf)[i % 2] if x is None else x for i, x in enumerate(bx)] for bx in sp["boxes"]]):

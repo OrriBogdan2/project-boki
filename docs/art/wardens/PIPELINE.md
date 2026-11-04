@@ -225,3 +225,12 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Vex r3b edit side 2 | 06:44 | 01a1a54c-f974-7239-9ea4-5a714210e1a8 | nano-banana-pro | as side, "her left arm hidden behind her body" | 9 | Kept |
 | Vex r3b A | 06:46 | 01a1a54f-35bf-734c-9ee7-55f81be998e5 | meshy-7.1 | 4 edited views (front, 3/4, side, back), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Kept: the face's smirk, chunky hair, eye plate on her right eye, gun-arm, backpack |
 | Vex r3b B | 06:46 | 01a1a54f-35c4-73d2-9fd2-ab8f7e9f5bce | meshy-7.1 | as A, enhancement on | 40 | Dropped: rounder cuter face, stringy hair; a cleaner lens (A's is replaced by geometry) |
+
+### Ostra stage 1 runs, 2026-11-04 (76 credits; balance 4327 after both Tarek and Ostra and the other fan-out agents)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Ostra edit front | 09:10 | 01a1a5d2-f7ef-76ea-900a-ac22f8f9f546 | nano-banana-pro (image-to-image) | 9:16 crop; raised right hand lowered; halo, orb, strings, cards, shadow and ground line out | 9 | Kept |
+| Ostra edit 3/4 | 09:10 | 01a1a5d2-f7ef-7670-8b06-404e1250c6c9 | nano-banana-pro | same | 9 | Dropped: the hand stayed raised (the run went without a 3/4) |
+| Ostra edit side | 09:10 | 01a1a5d2-f7e4-7641-b263-ca781ba673fa | nano-banana-pro | same | 9 | Kept |
+| Ostra edit back | 09:10 | 01a1a5d2-f7ec-7358-95c2-155f198baa71 | nano-banana-pro | same | 9 | Kept |
+| Ostra A | 09:12 | 01a1a5d4-5e39-73a5-8395-ad7a5f79eddf | meshy-7.1 | 3 edited views (front, side, back) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the cracked porcelain mask with violet eyes and mouth, cap and bells, ruff, dagged coat with the starfield painted in its tears, clawed gloves. Meshy left out the wisp (the body ends at the hem): built as geometry |

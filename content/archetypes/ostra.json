@@ -21,7 +21,7 @@
 		},
 		"x": "Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle."
 	},
-	"body": {"size": 0.9},
+	"body": {"size": 0.9, "build": 0.65},
 	"signature": "tether_lantern",
 	"no_hold": true,
 	"resource": {

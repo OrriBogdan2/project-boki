@@ -775,6 +775,9 @@ def orbit_props(arm, spec):
         mi["iris"] = _flat_material(ob, "glow", spec["name"], img, "Closest")
         for poly in ob.data.polygons:
             poly.material_index = mi[bld.part[poly.vertices[0]]]
+        # (its origin on its own centre, so the prop node itself circles and bobs)
+        ob.data.transform(Matrix.Translation(-Vector(p)))
+        ob.matrix_world = Matrix.Translation(Vector(p))
         mw = ob.matrix_world.copy()
         ob.parent = e
         ob.matrix_world = mw
@@ -839,7 +842,9 @@ def wisp(arm, spec, tag="wisp"):
     bld = Builder()
     fr = s_arr / L
     radii = r1 + (r0 - r1) * (1.0 - fr) ** float(spec.get("taper", 1.3))
-    bld.tube(p, radii, 18, 0.0, 1.0, 0.0, 1.0, "wisp", list(s_arr), cap_end=True)
+    # (v runs 1 at the top to 0 at the tip here: the glTF export flips v, so the game sees 0 at the top and 1 at
+    # the tip, where hero_void.gdshader's soft fade wants it)
+    bld.tube(p, radii, 18, 0.0, 1.0, 1.0, 0.0, "wisp", list(s_arr), cap_end=True)
     for j, td in enumerate(spec.get("tendrils", [])):
         t0 = float(td["from"]) * L
         q0 = at(p, s_arr, t0)
@@ -853,13 +858,13 @@ def wisp(arm, spec, tag="wisp"):
             rr.append(float(td.get("r", 0.05)) * (1.0 - 0.9 * f))
             ss.append(min(L, t0 + f * np.linalg.norm(d)))
         # (the tendril's v runs on from where it leaves the tail, so the fade carries on along it)
-        bld.tube(pts, rr, 8, 0.0, 1.0, float(td["from"]), 1.0, "tendril", ss, cap_end=True)
+        bld.tube(pts, rr, 8, 0.0, 1.0, 1.0 - float(td["from"]), 0.0, "tendril", ss, cap_end=True)
     ob = bld.object(tag.capitalize())
     img = bpy.data.images.new(tag + "_atlas", 32, 32, alpha=False)
     px = np.ones((32, 32, 4), np.float32)
     top, tip = hexcol(spec.get("colour", "5a2a8a")), hexcol(spec.get("tip", "9a5ad8"))
     v = (np.arange(32) / 31.0)[:, None, None]
-    px[..., :3] = top * (1 - v) + tip * v
+    px[..., :3] = tip * (1 - v) + top * v
     img.pixels = px.ravel()
     img.pack()
     _flat_material(ob, "void", tag, img)
