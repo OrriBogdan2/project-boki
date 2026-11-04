@@ -1855,3 +1855,16 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - bigger amber halos;
   - a clean match frame.
 - **Shots:** warden-3d/tarek/s9_*.
+
+## 2026-11-04 15:57 UTC (S2): Ostra READY updated to ext/warden-3d-ostra-b 1a2381a9 (b10)
+- **Score:** about 86% close-up and about 84% at match zoom (agent self-score on the x4 crop; ORCH's b9 read was stricter). All checks pass.
+- **ORCH b9 items covered:**
+  - the ruff reads grey under light_neutral_warm, with a violet aura and rim;
+  - the halo is violet, larger than the head and centred;
+  - glowing mask marks: tear, crack and eye pinpoints;
+  - the cut spike is gone (arm_reach binarize);
+  - a forward lean;
+  - an S-curve smoky wisp;
+  - cards kept clear of the cap;
+  - longer claws.
+- **Shots:** warden-3d/ostra/b10_*.
