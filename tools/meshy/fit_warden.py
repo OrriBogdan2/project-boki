@@ -1351,6 +1351,59 @@ def release(ob, bones, to="hips"):
     log("released %s to %s: %d vertices" % (", ".join(bones), to, moved))
 
 
+def arm_reach(ob, rig_arm, spec):
+    """Coat that bone heat gave to a hanging arm (the rest pose: arms straight down) though it hangs away from
+    it: every vertex riding mostly an arm chain, above the wrist and below `z_max`, farther than `r` from the
+    line down the arm goes wholly to `to` (hips). Ostra's coat flap beside his orb arm rose with it as a spike."""
+    names = {g.index: g.name for g in ob.vertex_groups}
+    dest = ob.vertex_groups.get(spec.get("to", "hips")) or ob.vertex_groups.new(name=spec.get("to", "hips"))
+    r, zmax = float(spec.get("r", 0.075)), float(spec.get("z_max", 1.2))
+    moved = 0
+    for sd in ("R", "L"):
+        bones = ("upper_arm." + sd, "forearm." + sd, "hand." + sd)
+        top = np.array(rig_arm.data.bones[bones[0]].head_local[:])
+        wrist = np.array(rig_arm.data.bones[bones[2]].head_local[:])
+        ax = (wrist - top) / max(np.linalg.norm(wrist - top), 1e-9)
+        for v in ob.data.vertices:
+            tot = sum(g.weight for g in v.groups) or 1.0
+            if sum(g.weight for g in v.groups if names.get(g.group) in bones) <= 0.5 * tot:
+                continue
+            co = np.array(v.co[:])
+            if co[2] > zmax or co[2] < wrist[2]:
+                continue
+            d = co - top
+            if np.linalg.norm(d - ax * d.dot(ax)) <= r:
+                continue
+            for g in list(v.groups):
+                ob.vertex_groups[g.group].add([v.index], 0.0, "REPLACE")
+            dest.add([v.index], 1.0, "REPLACE")
+            moved += 1
+    if spec.get("binarize"):
+        # (below z_max a vertex rides an arm wholly or not at all: coat beside the hanging hand that bone heat gave
+        # a third of its weight to the arm was dragged half way up with the raised orb hand, a long spike)
+        split = 0
+        for sd in ("R", "L"):
+            bones = {"upper_arm." + sd, "forearm." + sd, "hand." + sd}
+            for v in ob.data.vertices:
+                if v.co.z > zmax:
+                    continue
+                gs = [(names.get(g.group), g.group, g.weight) for g in v.groups]
+                a = sum(w for n, _i, w in gs if n in bones)
+                tot = sum(w for _n, _i, w in gs) or 1.0
+                if a <= 1e-4 or a >= tot - 1e-4:
+                    continue
+                keep_arm = a > 0.5 * tot
+                rest = [(i, w) for n, i, w in gs if (n in bones) == keep_arm]
+                sw = sum(w for _i, w in rest) or 1.0
+                for _n, i, _w in gs:
+                    ob.vertex_groups[i].add([v.index], 0.0, "REPLACE")
+                for i, w in rest:
+                    ob.vertex_groups[i].add([v.index], w / sw, "REPLACE")
+                split += 1
+        log("arm reach: %d vertices made wholly arm or wholly body below z %.2f" % (split, zmax))
+    log("arm reach: %d vertices off the arms to %s" % (moved, dest.name))
+
+
 def cut_straddle(ob, spec):
     """Cut the faces that join a hanging arm to the body below the shoulder (`z_max`, the rest pose): Meshy fused
     Ostra's sleeves and gloves to the coat beside them, and with the orb hand raised those faces stretched into a
@@ -3106,6 +3159,8 @@ def main():
         # off the exported model; Ostra's glove fingers that bone heat gave to the thigh beside them stretched
         # into a sheet from his hip to his raised orb hand)
         weight_rules(ob, img, spec["weight_rules_late"])
+    if spec.get("arm_reach"):
+        arm_reach(ob, arm, spec["arm_reach"])
     if spec.get("cut_straddle"):
         cut_straddle(ob, spec["cut_straddle"])
     if "gun_arm" in spec:
@@ -3332,6 +3387,15 @@ def main():
             bpy.data.objects.remove(got)     # (cut off the body and not exported: a rebuilt part replaces it)
         else:
             parts.append(got)
+    for key in ("face_marks", "eye_marks"):
+        if spec.get(key):
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            import warden_parts as WP
+            fm = spec[key]
+            tgt = next((o for o in parts if o.name == fm.get("on", "Mask")), ob)
+            got = WP.face_marks(tgt, arm, fm)
+            if got:
+                parts.append(got)
     if emask is not None:
         if spec.get("emit_atlas"):
             spec_emit_atlas.append(spec["emit_atlas"])

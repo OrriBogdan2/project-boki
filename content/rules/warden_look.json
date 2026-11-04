@@ -447,7 +447,7 @@
 	},
 	"ostra": {
 		"painted": {
-			"rim_far": 0.45,
+			"rim_far": 0.6,
 			"rim_far_color": [
 				0.62,
 				0.3,
@@ -475,7 +475,8 @@
 					1.0,
 					0.92,
 					1.0
-				]
+				],
+				"light_neutral_warm": 0.9
 			},
 			"leather": {
 				"emit": 3.6,
@@ -492,7 +493,8 @@
 					0.9,
 					1.08
 				],
-				"top_light": 0.1
+				"top_light": 0.1,
+				"light_neutral_warm": 0.9
 			},
 			"glow": {
 				"glow": 1.4,
@@ -515,8 +517,20 @@
 					0.36,
 					1.0
 				],
-				"strength": 2.2,
-				"px": 3.2,
+				"strength": 2.6,
+				"px": 5.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_chest",
+				"color": [
+					0.55,
+					0.25,
+					1.0
+				],
+				"strength": 0.7,
+				"px": 9.0,
 				"near_d": 7.0,
 				"far_d": 14.0
 			}
