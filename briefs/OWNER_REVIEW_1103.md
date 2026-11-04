@@ -543,3 +543,17 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - **Autos a tiny bit faster** (owner: "a little bit too slow, up them by a tiny bit"): content/weapons/coilcaster.json `rate` 0.8 -> 0.72 s between finger bolts (~11% more shots) and bolt `speed` 34 -> 37. Update the card text ("every 0.72s").
 - **Dash (Wirerun, Surge in the source) goes much further** (owner: "her dash should go much further"): mage.json dash `dist` [5.0, 8.5] -> about [7.5, 13.0] (tap -> full hold, ~1.5x), keeping the 0.6 s hold, and raise `speed` 32 -> ~40 so the longer run doesn't feel slow. Keep the lane preview and the end ring scaled to the new length; DashFlow and dash_feel unaffected otherwise. DECISIONS already says Vireo/Ryzz dashes further than the rest.
 - Assert: the new values in data; a full-hold Wirerun travels ≥12.5 m; the bolt interval is 0.72 s. Data + text only; no new code. Sonnet, quick.
+
+## 71. Ryzz: Skycall flings her charge orbs too far, and an orb pulled toward her should come to her and reset her dash (owner, 19:08 UTC Nov 4)
+- Owner: "her E flip on her RMB lightning orb goes too far. If it's in your direction, it should also just flip to you if it's reasonably close enough, to reset your dash."
+- Today: Skycall flings caught charge orbs "the same way" as the drag and they become hers.
+- Change:
+  - **Shorter fling:** orbs flung away (or sideways) travel noticeably less (default ~50–60% of today's distance), so they land where she can use them.
+  - **Toward her:** when the drag points toward Ryzz and the orb is within reach (default ≤ 9 m from her), the orb flies all the way to her instead of stopping short; when it reaches her it bursts like a Wirerun through it does, **resetting her Wirerun** (dash) at once, with the usual reset flash and chime (item 53's feedback style).
+  - Beyond that reach, a toward-her drag behaves as today (shortened).
+- Assert: an orb 6 m away dragged toward her arrives and resets the dash cooldown to 0; one 14 m away does not; away-flings are ≤60% of the old distance.
+
+## 72. Ryzz's ult spreads Static: hitting a foe who has stacks spreads those stacks to everyone hit (owner, 19:09 UTC Nov 4)
+- Owner: "hitting someone with stacks with the ult should spread those stacks to everyone."
+- Kitefall: when the landing strike hits at least one foe carrying Static, every foe hit by the strike gets the highest Static count among the hit foes (then the ult's own +Static on top, capped at 4 as usual; reaching 4 triggers the sky bolt/Live as normal). Show it: arcs of lightning jump from the stacked foe to the others on impact.
+- Assert: ult landing on foes with {3, 0, 1} stacks leaves all three at ≥3 (+ the ult's own stack, capped at 4); with no stacked foe, nothing spreads.
