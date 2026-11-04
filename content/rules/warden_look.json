@@ -76,7 +76,7 @@
 				"far_lift": 0.2
 			},
 			"glow": {
-				"glow": 1.8,
+				"glow": 2.2,
 				"fres": 0.0,
 				"top_light": 0.0,
 				"far_lift": 0.1
@@ -90,8 +90,8 @@
 					0.62,
 					0.18
 				],
-				"strength": 3.4,
-				"px": 5.5,
+				"strength": 4.0,
+				"px": 7.0,
 				"near_d": 7.0,
 				"far_d": 14.0
 			},
@@ -102,8 +102,8 @@
 					0.62,
 					0.18
 				],
-				"strength": 3.4,
-				"px": 5.5,
+				"strength": 4.0,
+				"px": 7.0,
 				"near_d": 7.0,
 				"far_d": 14.0
 			},
@@ -114,8 +114,8 @@
 					0.62,
 					0.18
 				],
-				"strength": 3.4,
-				"px": 5.5,
+				"strength": 4.0,
+				"px": 7.0,
 				"near_d": 7.0,
 				"far_d": 14.0
 			},
@@ -143,6 +143,10 @@
 				"near_d": 7.0,
 				"far_d": 14.0
 			}
+		],
+		"far_hide": [
+			"Crystals",
+			"orbit_shards"
 		]
 	}
 }

@@ -816,12 +816,12 @@ def orbit_props(arm, spec):
             continue
         # (the opening on the rock's outer face, wherever `depth` puts it, so a rounder rock never hides it)
         fz = float(spec.get("depth", 0.66)) * 0.88
-        oz = fz - 0.16
+        oz = fz + 0.04         # (the iris in front of the crystal disc: behind it, the disc hid the eye)
         bld.torus(p + out_dir * r * fz, out_dir, r * 0.68, r * 0.14, 18, 6, (0.05, 0.05, 0.45, 0.45), "rock", 0.0)
         _disc(bld, p + out_dir * r * fz, out_dir, r * 0.68, "rim", (0.55, 0.05, 0.95, 0.45), dome=-0.18)
         _disc(bld, p + out_dir * r * oz, out_dir, r * float(spec.get("iris_r", 0.4)), "iris", (0.05, 0.55, 0.45, 0.95),
               dome=0.45)
-        bld.prism(p + out_dir * r * (oz + 0.2) - up * r * 0.24, p + out_dir * r * (oz + 0.2) + up * r * 0.24, r * 0.06, 4,
+        bld.prism(p + out_dir * r * (oz + 0.1) - up * r * 0.24, p + out_dir * r * (oz + 0.1) + up * r * 0.24, r * 0.06, 4,
                   (0.55, 0.55, 0.95, 0.95), "pupil", 0.0)
         ob = bld.object("%s_%d" % (spec["name"], i))
         mi = {"rock": _flat_material(ob, spec.get("slot", "leather"), spec["name"], img, "Closest")}

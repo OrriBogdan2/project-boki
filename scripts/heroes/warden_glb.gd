@@ -174,6 +174,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch))))
 	_halos(root, glb, look(art(arch)))
+	_far_hide(glb, look(art(arch)))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
 	_hold_weapon(root, glb)
@@ -265,6 +266,15 @@ static func _halos(root: Node3D, glb: Node3D, own: Dictionary) -> void:
 		follow.update_scale = false
 		anchor_node.add_child(follow)
 		follow.remote_path = follow.get_path_to(mi)
+
+## Small pieces the match camera only sees as speckle (warden_look.json "far_hide": node names, Tarek's beads and fist
+## shards) are drawn only up to FAR_HIDE_D from the camera; close-ups keep them.
+const FAR_HIDE_D := 13.0
+static func _far_hide(glb: Node3D, own: Dictionary) -> void:
+	for nm in own.get("far_hide", []):
+		for n in glb.find_children(String(nm) + "*", "GeometryInstance3D", true, false):
+			(n as GeometryInstance3D).visibility_range_end = FAR_HIDE_D
+			(n as GeometryInstance3D).visibility_range_end_margin = 1.0
 
 ## A warden_look value as a shader parameter: [r, g, b(, a)] is a colour.
 static func _param(v: Variant) -> Variant:
