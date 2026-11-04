@@ -21,3 +21,12 @@ s3_closeup_vs_art.png, s3_34_vs_art.png, s3_back_vs_art.png, s3_match_vs_art.png
 s3_vs_turnaround.png, s3_vs_turnaround_game.png, s3_moves_1.png, s3_moves_2.png, s3_poses_game.png, s3_gameplay_match*.png: as s2
 s3_vs_s2.png: stage 3's close turnaround (top) over stage 2's
 s4_*: stage 4 (credit-free): the coat toward black-violet, a violet halo core, a black-hole orb (dark ball in bright crossed rings), the halo's glow kept violet at match zoom; s4_vs_s3.png: s4 over s3
+b1_*: Ostra b1 = the inherited s5 WIP rechecked after merging ext/warden-vex-r3b (RECIPE_95). Orb a white gyroscope, the hood's violet half glowing white, a sheet stretched from the hip to the raised orb hand, a blue primed disc at the hand at match zoom. ~70% close-up / ~45% match.
+b2_*: vortex orb (black core, violet spiral arms), claws, hood emission fixed (mask glow only inside the porcelain), lilac halo, violet strings, dark cards, violet primed tell, rim_far. The sheet still there.
+b3_*: weight-rule attempt at the sheet (made it worse; reverted in b4).
+b4_*: the arm-to-coat faces cut (89): the sheet is gone.
+b5_*: jagged halo cracks, coat/gloves a cool step.
+b6_*: 256-px halo atlas; checks all pass (glb check fixed for albedo and hand halos). ~80% close-up / ~72% match.
+b7_*: the coat's violet panels kept (blacks ramp only unsaturated darks), wider wisp, bigger orb, cut slivers dropped.
+b8_*: violet hue toward the art's red-violet, black panels back (blacks sat<=0.5). Close-up 81 (silhouette 12/15, face 17/20, cap+bells 9/10, props 15/20, palette 13/15, clean 7/10, outfit 8/10). Match 78 (silhouette 19/25, colours 21/25, values 15/20, props 15/20, artefacts 8/10). The brown blob on his shoulder at match zoom is the Boki companion, not the model.
+b9_*: the orb now a glowing four-arm violet spiral round a black core (it reads as the void orb at match zoom too), the wisp swings in an S toward the ground. Close-up 84 (silhouette 13/15, face 17/20, cap+bells 9/10, props 17/20, palette 13/15, clean 7/10, outfit 8/10). Match 80 (silhouette 20/25, colours 21/25, values 15/20, props 16/20, artefacts 8/10). All checks pass.
