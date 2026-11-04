@@ -77,6 +77,8 @@ static var _neutral := {}       # Warden id -> the rig rest of its model in the 
 static var _ink: ShaderMaterial  # the painted atlas's ink shell (INK_WIDTH), shared
 static var _measuring := false  # building that neutral model: no .glb on it
 static var _variants = null     # art name -> the design variant the command line picks (variant())
+static var _look = null         # content/rules/warden_look.json, read once (look())
+const LOOK_PATH := "res://content/rules/warden_look.json"
 
 static func path(arch: String) -> String:
 	var nm := art(arch)
@@ -159,7 +161,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
 	var mats: Array = root.get_meta("mats", [])
-	mats.append_array(_toon(glb, lk, MantleLook.warden(arch)))
+	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch))))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
 	_hold_weapon(root, glb)
@@ -219,9 +221,25 @@ static func _hide_body(n: Node) -> void:
 			(ch as MeshInstance3D).visible = false
 		_hide_body(ch)
 
+## A model's own shading over the shared painted look (content/rules/warden_look.json, keyed by its art name:
+## a design variant has its own): "painted" sets hero-toon parameters on all of its surfaces, "slots" per toon
+## slot after that, e.g. a painted skin or gunmetal the shared rim and top light would wash out. {} for none.
+static func look(nm: String) -> Dictionary:
+	if _look == null:
+		var parsed = JSON.parse_string(FileAccess.get_file_as_string(LOOK_PATH)) if FileAccess.file_exists(LOOK_PATH) \
+				else null
+		_look = parsed if typeof(parsed) == TYPE_DICTIONARY else {}
+	return (_look as Dictionary).get(nm, {})
+
+## A warden_look value as a shader parameter: [r, g, b(, a)] is a colour.
+static func _param(v: Variant) -> Variant:
+	if v is Array and (v as Array).size() >= 3:
+		return Color(float(v[0]), float(v[1]), float(v[2]), float(v[3]) if (v as Array).size() > 3 else 1.0)
+	return v
+
 ## Every surface onto a hero-toon material for its slot: the baked atlas as its albedo, the baked AO in the
-## vertex colour, tinted by the player's pick where the slot takes one.
-static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
+## vertex colour, tinted by the player's pick where the slot takes one; the model's own look (look()) last.
+static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}) -> Array:
 	var out: Array = []
 	for mi in glb.find_children("*", "MeshInstance3D", true, false):
 		var mesh := (mi as MeshInstance3D).mesh
@@ -256,6 +274,10 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 					m.next_pass = _painted_ink()
 			if slot == "glow":
 				m.set_shader_parameter("glow", GLOW)
+			var per_slot: Dictionary = (own.get("slots", {}) as Dictionary).get(slot, {})
+			var over: Dictionary = (own.get("painted", {}) as Dictionary).merged(per_slot, true)
+			for k in over:
+				m.set_shader_parameter(k, _param(over[k]))
 			(mi as MeshInstance3D).set_surface_override_material(si, m)
 			out.append(m)
 	return out
