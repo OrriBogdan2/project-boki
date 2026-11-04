@@ -1184,3 +1184,6 @@ Answers "OWNER answers for ext/unmasked". It contains the earlier ext/unmasked w
 - **What changed:** the display name (bulwark.json base_name "Breaker"), card and kit text, docs, the wiki (filenames kept), comments and printed check labels. The id `bulwark` and the identifiers (BjornFx, bjorn_* files and sounds) are unchanged.
 - **Checks:** S2 re-ran hero-title 0, portrait 107/0 and health --strict OK. The agent also ran bulwark-combo 102/0, archetype 307/0 and style OK.
 - **Left as is:** portrait_art.gd still maps the art names to bjorn, vireo and moosh until ext/imagegen's round-2 files (breaker_*, ryzz_*) merge. The decision records are untouched.
+
+## 2026-11-04 06:50 UTC (orchestrator): OWNER RENAME: the tender hero is now "Pip" (supersedes "Burple")
+- DECISION? **Moosh Moosh/Burple is now "Pip"** (id tender unchanged). Her art is female (wardens_r2/pip_*). Main, please fold into DECISIONS.md; if rename-burple is merged, rename again to Pip; if not, fix that branch to Pip before merging.

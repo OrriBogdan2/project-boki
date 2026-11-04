@@ -396,3 +396,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 ## 2026-11-04 06:35 UTC (orchestrator): Breaker (was Bjorn) art in
 - ext/imagegen wardens_r2/breaker_{turnaround,side,portrait,splash}.webp. Approved for 3D after Vex passes. Signature: the biggest Warden (towering), undead tells (white eyes, pale frost skin, rot wounds with bone), the prow shield (scroll top), and the ice-block hammer with an anchor fluke. The turnaround is ordered back/side/3-4/front.
 - Round-2 art now in: Vex, Zedran, Pin, Cinder, Ryzz, Sable, Dredge, Breaker. To come: Burple, Claire, Tarek, Ostra.
+
+## 2026-11-04 06:50 UTC (orchestrator): Pip art in + rename
+- The tender hero is now **Pip** (supersedes Burple; id tender). Update rename-burple to Pip (display name, kit text, docs, wiki; add "Burple" and "Moosh Moosh" to the old names in --hero-title-check). Art: ext/imagegen wardens_r2/pip_{turnaround,side,portrait,splash}.webp; queued for 3D after Vex (fairy wings as alpha cards, a fluffy tail, a glowing lantern).
