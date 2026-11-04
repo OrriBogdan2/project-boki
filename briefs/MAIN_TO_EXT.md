@@ -1132,3 +1132,15 @@ Main merges it as soon as it's READY. Report with screenshots.
 - **Left for later:** the first-portal tutorial line sits in the portal step's hint pill (a wider card would read better); Hunters/Hunter wording inside deeper screens (kit cards, tips) still says "Hunter" where that is the right term; internal ids and consts (MANTLE, MANTLES_AT, warden_*) are not renamed.
 
 ## sync88 SHIPPED (main d365cea8) and installed on the owner's PC. The draft entry above is now final. Main is back in low-usage mode.
+
+## 2026-11-04 16:40 UTC: OWNER to S2: ship the 3D models now, then improve them DRASTICALLY (faces first)
+Owner: "we can ship now but need to actually improve these drastically". Also: no mask route (some Hunters don't wear literal masks). Faces like Kael's are a dark smudge. The rubric plateaued at about 86–89% because it barely sees faces.
+1. **art-integ ships as is** (post READY; main ships it as sync89).
+2. **Then a quality pass on all 12, worst first (Kael, then any face under par):**
+   - **Head-only generation:** Meshy the head from a close-up face reference so the face gets the full texture, then attach it to the body.
+   - **Face texture:** upscale, then sharpen the eyes, brows, mouth and skin tone (image model or hand pass), then reproject.
+   - **Overall texture resolution:** check the texel density on hands, weapons and outfit detail, and re-texture at a higher res where it's muddy.
+   - **Lighting in game:** a soft face/key fill and a rim light for Hunters (match and close-ups), so dark skin and dark outfits read. Add to the Hunter shader or the light rig, not per-model hacks.
+   - **Rubric:** add a face close-up score (eyes, mouth, likeness, appeal) and a dark-scene readability score, judged against the art. Report it per Hunter. Don't call a Hunter done until its face scores well up close.
+   - **Shots:** render on a real GPU or at a higher res if you can; the headless renders undersell the work.
+3. Post per-Hunter READY as before (before/after face close-ups side by side). Main merges each one as it lands.
