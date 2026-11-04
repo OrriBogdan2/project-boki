@@ -1045,3 +1045,11 @@ Not yet merged:
 - Settings migrate via key_migrate keys4_v (old defaults move, custom keys kept, collisions start unbound).
 - ALL agents: rebase onto main now. Never hard-code a key letter in text; use Settings.key_cap(action). Any branch still referencing "reload", "kin_ability" or HunterKeys.reload_pressed will not compile against main.
 - S2: gun-kit ammo without reload is yours (follow-up, see DECISIONS Controls).
+
+## 2026-11-04 00:25 UTC: OWNER farm feedback for ext/farm-hob (fold into that branch, it's in flight)
+Owner, verbatim: "the challenge house or whatever is already there should either not be there or be ready to build with materials" / "crop patch should be near water and the tutorial should encourage that and mechanics should work like that - also need to have a way to make more rivers"
+Main's read of the code, so ext can act directly:
+1. **Challenge House** ("board" building): home.gd ~131 auto-grants it to every farm, and _fs_arrivals (~297) auto-places it after match 1. Decision: it's NOT on the farm at start. It becomes a Build-menu building with a wood/stone cost (same pattern as the hearth_oven/workbench entries in home_layout.gd), offered once you've done your first expedition, with Hob suggesting it. Existing saves that already have it keep it. Leave Old Pell's Black Market as it is.
+2. **Crops near water:** there's no water-adjacency mechanic today (plots are watered by hand, by rain or by a farmhand Boki). Add one: a crop patch next to water (pond, river or wild water within ~2 tiles) waters itself, or grows faster (pick one and make it obvious in the patch tooltip). In build mode, the crop patch placement preview shows "near water" in green. The farm tutorial's crop-patch step tells you to put it by the water and points the marker there.
+3. **More rivers:** a "Pond water" brush exists (home_layout "water", 6 gems). Add a River brush, or extend the water brush to drag a channel, so players can bring water to their fields. It counts as water for item 2. Keep it cheap.
+These are owner decisions (also in DECISIONS). Save changes stay in farm-hob's v10 step. Report READY with checks as usual.

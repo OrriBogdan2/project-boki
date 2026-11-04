@@ -102,3 +102,4 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 - Pull or rebase before you append. Appended log files (INBOX, EXT_TO_MAIN, MAIN_TO_EXT) merge by keeping both sides.
 - Read DECISIONS.md and the newest entries in MAIN_TO_EXT and INBOX at the start of every agent run.
 - Tutorial (Nov 3): teach crouch and why (see further, monsters notice you less, steadier aim, slower), F to pick up from the ground; the Boki uses its ability by itself (watch step, no key); the destination marker never disappears and is big.
+- Farm (Nov 3): Challenge House isn't there at start; built later from Build with materials. Crop patches want water: next to water they water themselves (or grow faster), the tutorial says so, and players can paint rivers to bring water to fields.
