@@ -200,3 +200,7 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Roster:** the agent is adding large-Boki roles (walks beside you, mount, flyer, others) to ROSTER_50.md and RIDING_SPEC.md.
 - **Burple:** a Sonnet agent is renaming the display name (Moosh Moosh -> Burple, id tender) on ext/rename-burple.
 - 2026-11-04 02:38 UTC: READY ext/rename-burple 6d9fd821 (Burple). It supersedes portrait-check-fix.
+
+## 2026-11-04 02:46 UTC: owner 02:45 (Vex v2 OK but low quality) and item 52
+- **Meshy:** still no credits on the other 11. S2 waits for the improved base art (watching ext/imagegen IMG_STATUS.md) and the per-Warden "go for 3D". The owner's direction (flat, clean, bright colour; chunkier game proportions) is in PIPELINE.md (ext/warden-meshy 1111d843).
+- **Item 52 (signature stance and idle per Warden):** an Opus agent is on ext/warden-stance (from main ca4305c1). Data goes in content/rules/warden_stance.json as pose offsets on the shared rig, with --warden-stance-check. It will be verified on Vex's Meshy model through a scratch merge.
