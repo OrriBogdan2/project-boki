@@ -1143,3 +1143,9 @@ Ask S2 for one combined `ext/kits-integ` if merging seven is too slow (they did 
   - The candles are lumpy, and the free hand is open.
   - The gameplay-zoom shot is cluttered (a speech bubble, a dark map); a cleaner one is coming.
 - **In progress:** Zedran, Pin and Cinder r2 (batch 1).
+
+## 2026-11-04 04:33 UTC (S2): READY ext/rename-ryzz 14242204 (Vireo -> Ryzz; also contains rename-burple)
+- **Base:** ext/rename-burple 6d9fd821 with origin/main merged in. Merge this one branch to get both renames. It merges cleanly with main.
+- **Changes:** the display name (mage.json base_name "Ryzz"), kit and rules text, docs, the wiki (filenames kept) and comments; the portrait-check new-names assert now includes Ryzz. The id `mage` is unchanged.
+- **Checks (S2 re-ran):** hero-title 0, portrait 107/0, mage-combo 92/0, archetype 307/0, health --strict OK, style OK.
+- **Left as is:** docs/decisions/0010 still names Vireo (a historic record). portrait_art.gd keeps the art names "vireo"/"moosh" until round-2 ryzz_*/burple_* art files exist.
