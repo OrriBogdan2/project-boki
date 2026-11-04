@@ -61,7 +61,8 @@
 					0.86
 				],
 				"light_neutral_warm": 0.85,
-				"desat": 0.45
+				"desat": 0.45,
+				"rim_far": 0.0
 			},
 			"hair": {
 				"far_lift": 0.1,
