@@ -38,7 +38,8 @@
 				1.0,
 				0.62,
 				0.15
-			]
+			],
+			"far_smooth": 1.0
 		},
 		"slots": {
 			"skin": {
@@ -55,13 +56,13 @@
 				"light_neutral": 1.0,
 				"shade": 0.78,
 				"albedo": [
-					0.84,
-					0.77,
-					0.76
+					0.88,
+					0.8,
+					0.8
 				]
 			},
 			"hair": {
-				"far_lift": 0.45,
+				"far_lift": 0.1,
 				"fres": 0.55
 			},
 			"cloth": {
@@ -72,11 +73,73 @@
 				"far_lift": 0.2
 			},
 			"glow": {
-				"glow": 1.4,
+				"glow": 1.8,
 				"fres": 0.0,
 				"top_light": 0.0,
 				"far_lift": 0.1
 			}
-		}
+		},
+		"halos": [
+			{
+				"anchor": "anchor_stones_0",
+				"color": [
+					1.0,
+					0.62,
+					0.18
+				],
+				"strength": 3.0,
+				"px": 3.4,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_stones_1",
+				"color": [
+					1.0,
+					0.62,
+					0.18
+				],
+				"strength": 3.0,
+				"px": 3.4,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_stones_2",
+				"color": [
+					1.0,
+					0.62,
+					0.18
+				],
+				"strength": 3.0,
+				"px": 3.4,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_gauntlet_L",
+				"color": [
+					1.0,
+					0.62,
+					0.18
+				],
+				"strength": 3.0,
+				"px": 4.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_gauntlet_R",
+				"color": [
+					1.0,
+					0.62,
+					0.18
+				],
+				"strength": 3.0,
+				"px": 4.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			}
+		]
 	}
 }

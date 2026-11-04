@@ -96,7 +96,7 @@
  "chunk": {
   "head": 1.0,
   "hand": 1.15,
-  "girth": 0.94,
+  "girth": 1.0,
   "feet": 1.25
  },
  "glow_min": [
@@ -277,21 +277,21 @@
     0.0,
     0.22
    ],
-   "radius": 0.34,
+   "radius": 0.4,
    "items": [
     {
      "angle": 300,
-     "height": 0.02,
+     "height": 0.26,
      "size": 0.105
     },
     {
      "angle": 60,
-     "height": 0.12,
+     "height": 0.34,
      "size": 0.11
     },
     {
      "angle": 180,
-     "height": -0.06,
+     "height": 0.22,
      "size": 0.099
     }
    ],
@@ -304,7 +304,8 @@
    "rim_dark": "b49a7e",
    "iris_hot": "ffd060",
    "rel": "head",
-   "iris_r": 0.5
+   "iris_r": 0.5,
+   "anchors": true
   },
   {
    "name": "orbit_shards",
@@ -381,7 +382,8 @@
     "forearm.R",
     "hand.L",
     "hand.R"
-   ]
+   ],
+   "drop": true
   }
  ],
  "studs": [
@@ -406,9 +408,9 @@
  ],
  "weapon_empty": true,
  "smooth": {
-  "iterations": 2,
-  "sigma_s": 2.5,
-  "sigma_r": 0.06
+  "iterations": 3,
+  "sigma_s": 3.0,
+  "sigma_r": 0.08
  },
  "ramps": [
   {
@@ -476,10 +478,10 @@
     0.8
    ],
    "ramp": [
-    "3a3a46",
-    "55566a",
-    "6e7088",
-    "8c90a6"
+    "34363c",
+    "4c5058",
+    "666a72",
+    "82868e"
    ]
   },
   {
@@ -593,10 +595,10 @@
     1.0
    ],
    "ramp": [
-    "44464e",
-    "6c6f78",
-    "9da0a8",
-    "cfd1d6"
+    "5a5c64",
+    "8a8d96",
+    "b8bbc2",
+    "e4e6ea"
    ]
   },
   {
@@ -671,10 +673,10 @@
     1.0
    ],
    "ramp": [
-    "2e3442",
-    "46506a",
-    "60708e",
-    "7e8ca8"
+    "34363c",
+    "4c5058",
+    "666a72",
+    "82868e"
    ]
   }
  ],
@@ -761,5 +763,21 @@
     0.08
    ]
   }
- ]
+ ],
+ "gauntlets": {
+  "r": 0.058,
+  "rows": 5,
+  "per_row": 6,
+  "plate": 0.66,
+  "fist": 0.1,
+  "seed": 5,
+  "slot": "leather",
+  "rock": "5e5248",
+  "rock_dark": "2a2420",
+  "rim": "f0d8b0",
+  "rim_dark": "a07850",
+  "iris": "ff6a10",
+  "iris_hot": "ffa030",
+  "pupil": "1e0a04"
+ }
 }

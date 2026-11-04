@@ -834,6 +834,13 @@ def orbit_props(arm, spec):
         ob.parent = e
         ob.matrix_world = mw
         out.append(ob)
+        if spec.get("anchors"):
+            # (an empty on the eye, anchor_<name>_<i>, for a glow halo at the match camera; it rides the stone)
+            an = bpy.data.objects.new("anchor_%s_%d" % (spec["name"].replace("orbit_", ""), i), None)
+            bpy.context.scene.collection.objects.link(an)
+            an.parent = ob
+            an.location = Vector(out_dir * r * 0.7)
+            out.append(an)
     log("orbit %s: %d props round %s" % (spec["name"], len(spec["items"]), tuple(round(x, 3) for x in c)))
     return out
 
@@ -1093,3 +1100,79 @@ def _lens_atlas(spec, n):
     px[h:, h:, :3] = base
     px[h:, :h, :3] = glow
     return px
+
+
+# ------------------------------------------------------------------------------------------------ gauntlets
+def gauntlets(arm, spec, tag="gauntlet"):
+    """Stone gauntlets grown round both forearms (Tarek), elbow to knuckle: a glowing amber core (glow slot)
+    wrapped in rough stone plates (`slot`, leather) set a little apart, so the core shows through the gaps as
+    bright cracks; the plates past the wrist ride the hand bone, the rest the forearm. An empty
+    anchor_<tag>_<L|R> on each forearm's middle carries a glow halo at the match camera (warden_look.json).
+    Returns [mesh, anchors...]."""
+    rng = np.random.default_rng(int(spec.get("seed", 5)))
+    img = _stone_cells(128, spec, tag + "_cells")
+    bld = Builder()
+    owners = []           # per vertex: (bone, weight) via ranges
+    spans = []
+    for sd in ("L", "R"):
+        e = np.array(arm.data.bones["forearm." + sd].head_local[:])
+        w = np.array(arm.data.bones["hand." + sd].head_local[:])
+        ax = w - e
+        L = float(np.linalg.norm(ax))
+        ax /= L
+        k = w + ax * float(spec.get("fist", 0.1))
+        ref = np.array([0.0, 1.0, 0.0]) if abs(ax[1]) < 0.9 else np.array([1.0, 0.0, 0.0])
+        e1 = np.cross(ax, ref)
+        e1 /= np.linalg.norm(e1)
+        e2 = np.cross(ax, e1)
+        r_arm = float(spec.get("r", 0.06))
+        v0 = len(bld.v)
+        # the core: a tube elbow -> knuckle, thicker toward the fist
+        rings = [e + (k - e) * f for f in np.linspace(0.0, 1.0, 8)]
+        radii = [r_arm * (0.8 + 0.25 * f) for f in np.linspace(0.0, 1.0, 8)]
+        bld.tube(rings, radii, 12, 0.05, 0.45, 0.55, 0.95, "core", [0.0] * 8, cap_end=True, cap_start=True)
+        # the plates: rows along the arm, each a lumpy rock on the surface, slightly apart
+        rows = int(spec.get("rows", 5))
+        per = int(spec.get("per_row", 5))
+        for i in range(rows):
+            t = (i + 0.5) / rows
+            c = e + (k - e) * t
+            rr = r_arm * (0.85 + 0.3 * t)
+            for j in range(per):
+                a = 2.0 * math.pi * (j + 0.5 * (i % 2)) / per + rng.uniform(-0.15, 0.15)
+                out_d = math.cos(a) * e1 + math.sin(a) * e2
+                p = c + out_d * rr * 1.02
+                s = rr * float(spec.get("plate", 0.62)) * rng.uniform(0.85, 1.15)
+                side = np.cross(ax, out_d)
+                _lumpy(bld, p, (side, ax, -out_d), (s, s * 1.25, s * 0.45), "rock", (0.05, 0.05, 0.45, 0.45),
+                       int(rng.integers(1, 9999)), rings=5, sides=8, lump=0.3)
+        spans.append((sd, v0, len(bld.v), e, w, ax, L))
+    ob = bld.object(tag.capitalize() + "s")
+    mi = {"rock": _flat_material(ob, spec.get("slot", "leather"), tag, img, "Closest")}
+    mi["core"] = _flat_material(ob, "glow", tag, img, "Closest")
+    for poly in ob.data.polygons:
+        poly.material_index = mi[bld.part[poly.vertices[0]]]
+    anchors = []
+    for sd, v0, v1, e, w, ax, L in spans:
+        gf = ob.vertex_groups.new(name="forearm." + sd)
+        gh = ob.vertex_groups.new(name="hand." + sd)
+        for vi in range(v0, v1):
+            t = float((np.asarray(bld.v[vi]) - e) @ ax) / L
+            f = min(1.0, max(0.0, (t - 0.9) / 0.15))     # (past the wrist: the hand's)
+            if f < 1.0:
+                gf.add([vi], 1.0 - f, "REPLACE")
+            if f > 0.0:
+                gh.add([vi], f, "REPLACE")
+        an = bpy.data.objects.new("anchor_%s_%s" % (tag, sd), None)
+        bpy.context.scene.collection.objects.link(an)
+        an.parent = arm
+        an.parent_type = "BONE"
+        an.parent_bone = "forearm." + sd
+        bpy.context.view_layer.update()
+        an.matrix_world = Matrix.Translation(Vector(e + ax * L * 0.6))
+        anchors.append(an)
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("gauntlets: %d tris" % sum(len(f) - 2 for f in bld.f))
+    return [ob] + anchors

@@ -144,7 +144,7 @@
 		}
 	},
 	"dolm": {
-		"gait": {"lean": 0.04, "width": 0.06, "knee": 0.08, "bounce": 0.0, "arm": 0.9},
+		"gait": {"lean": 0.04, "width": 0.1, "knee": 0.04, "bounce": 0.0, "arm": 0.9},
 		"leg": "l",
 		"pose": {
 			"spine": -0.04, "tilt": 0.06, "twist": 0.0, "hip": 0.035, "knee": -0.05, "free_leg": [0.08, 0.12],

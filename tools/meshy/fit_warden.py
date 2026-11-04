@@ -2118,7 +2118,7 @@ def main():
         bpy.context.scene.collection.objects.link(we)
         we.parent = arm
         extras.append(we)
-    if any(spec.get(k) for k in ("lens", "braids", "hoses", "orbits", "halo", "wisp", "studs", "orb")):
+    if any(spec.get(k) for k in ("lens", "braids", "hoses", "orbits", "halo", "wisp", "studs", "orb", "gauntlets")):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import warden_parts as WP
         lens_s = _rel(arm, spec.get("lens"), ("centre",))
@@ -2135,7 +2135,12 @@ def main():
         for o in spec.get("orbits", []):
             got = WP.orbit_props(arm, _rel(arm, o, ("centre",)))
             extras.append(got[0])
-            parts += got[1:]
+            parts += [x for x in got[1:] if x.type == "MESH"]
+            extras += [x for x in got[1:] if x.type != "MESH"]
+        if spec.get("gauntlets"):
+            got = WP.gauntlets(arm, spec["gauntlets"])
+            parts.append(got[0])
+            extras += got[1:]
         if spec.get("halo"):
             parts.append(WP.crescent(arm, _rel(arm, spec["halo"], ("centre",))))
         if spec.get("orb"):
@@ -2178,7 +2183,11 @@ def main():
     if "atlas_px" in spec:
         shrink(img, int(spec["atlas_px"]))
     for sp in spec.get("split", []):
-        parts.append(split_part(ob, arm, img, sp))
+        got = split_part(ob, arm, img, sp)
+        if sp.get("drop"):
+            bpy.data.objects.remove(got)     # (cut off the body and not exported: a rebuilt part replaces it)
+        else:
+            parts.append(got)
     out = os.path.join(ROOT, os.path.expanduser(spec["out"]))
     log("tris: body %d, weapon %d" % (K.tris([ob]), K.tris([x for x in (gun, spin) if x])))
     # (JPEG: Meshy's painted textures, a third of the PNG's size)
