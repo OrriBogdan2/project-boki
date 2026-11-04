@@ -189,6 +189,7 @@ No Meshy. The model's own rigid skin and extra bones are kept; the script rename
 | Dredge r3b | 2026-11-04 14:10 | none (credit-free) | - | modelled tears and peeled flaps, three big curved lames a shoulder, the doubled porthole masked, brass porthole rings | 0 | Kept |
 | Dredge r3c | 2026-11-04 14:40 | none (credit-free) | - | the shared painted-look fix (16c18b4f) merged; the hull's projection lift x1.15 | 0 | Kept |
 | Dredge r3d | 2026-11-04 15:20 | none (credit-free) | - | the stance; deeper dents and tears, flared lames, sharp lens cracks and a glint, tar strands and pool, red core | 0 | Kept |
+| Dredge r3e | 2026-11-04 15:50 | none (credit-free) | - | tar runs over the hull, the back hatch and pipe as geometry, stronger lens cracks, a soft warm hull highlight | 0 | Kept |
 
 ## Blender-driven modelling (vs Meshy)
 The owner's friend made Dredge in Blender, probably by driving it through a Blender MCP server (an LLM sends bpy

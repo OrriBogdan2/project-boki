@@ -60,4 +60,8 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   the pelvis; a red core glowing inside the ribs (`glow-core`); a tar pool at his feet on the new variant bone
   `pool` (root), which DredgeKit spreads while he stands and takes away when he moves or leaves the ground. The
   projections' grey backgrounds filled with the hull's own colour (plate undersides were grey).
+- **r3e (credit-free):** nine tar runs that follow the hull's surface down from the porthole, the tears and the
+  seams and drip off its underside (17 plain drips now, from 24, to pay for them); the back's riveted hatch as a
+  raised iron plate and its pipe as an iron tube standing off the hull; eight stronger, white lens cracks; a soft
+  warm highlight painted on the hull's upper curves. Body 14,741 triangles (decimation 6,600).
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.

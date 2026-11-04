@@ -248,8 +248,8 @@ def projection(ob, spec):
     return out
 
 
-def _tube(pts, r, segs=6):
-    """A thin tube through the points (a tar strand)."""
+def _tube(pts, r, segs=6, thin=True):
+    """A thin tube through the points (a tar strand: thinner in the middle unless `thin` is off)."""
     bm = bmesh.new()
     rings = []
     for i, p in enumerate(pts):
@@ -259,7 +259,7 @@ def _tube(pts, r, segs=6):
             u = t.cross(Vector((1, 0, 0)))
         u.normalize()
         v = t.cross(u)
-        k = 1.0 - 0.45 * math.sin(math.pi * i / (len(pts) - 1))      # (thinner in the middle, as tar stretches)
+        k = 1.0 - 0.45 * math.sin(math.pi * i / (len(pts) - 1)) if thin else 1.0      # (tar stretches thin)
         rings.append([bm.verts.new(p + (u * math.cos(2 * math.pi * j / segs) + v * math.sin(2 * math.pi * j / segs))
                                    * r * k) for j in range(segs)])
     for a, b in zip(rings, rings[1:]):
@@ -330,4 +330,31 @@ def extras(ob, spec, seed=1):
         for i in range(n):
             bm.faces.new((mid, ring[i], ring[(i + 1) % n]))
         WP._append(ob, bm, pl["bone"], mat)
+    # on the hull's surface (centre, r): tar runs down it, raised plates (a hatch), pipes standing off it
+    hc, hr = Vector(spec.get("hull_centre", (0, 0, 0))), float(spec.get("hull_r", 0.0))
+
+    def on(la, lo, off=0.0):
+        return hc + _dir(la, lo) * hr * (1.0 + off)
+
+    for rn in spec.get("runs", []):
+        tar = WP._mat_index(ob, rn["material"], rn.get("colour", "1a1416"))
+        la0, lo = rn["at"]
+        la1 = rn.get("to", -62.0)
+        pts = [on(la0 + (la1 - la0) * i / 6, lo + rnd.uniform(-1.5, 1.5), 0.012) for i in range(7)]
+        last = pts[-1]
+        pts += [last + Vector((0, 0, -rn["hang"] * k / 2)) for k in (1, 2)]
+        WP._append(ob, _tube(pts, rn["r"], 5), rn["bone"], tar)
+    for pl in spec.get("plates", []):
+        mat = WP._mat_index(ob, pl["material"], pl.get("colour", "6c6762"))
+        WP._append(ob, _sphere_patch(hc, hr * (1.0 + pl["off"]), pl["lat"][0], pl["lat"][1], pl["lon"][0], pl["lon"][1],
+                                     1, pl.get("nlon", 3), hr * pl["thick"]), pl["bone"], mat)
+    for pp in spec.get("pipes", []):
+        mat = WP._mat_index(ob, pp["material"], pp.get("colour", "6c6762"))
+        ctrl = [on(la, lo, off) for la, lo, off in pp["path"]]
+        pts = []
+        for a, b in zip(ctrl, ctrl[1:]):
+            pts += [a.lerp(b, k / 4) for k in range(4)]
+        pts.append(ctrl[-1])
+        bm = _tube(pts, pp["r"], 8, thin=False)
+        WP._append(ob, bm, pp["bone"], mat)
     print("HULL extras: %d tris in all" % sum(len(p.vertices) - 2 for p in ob.data.polygons))
