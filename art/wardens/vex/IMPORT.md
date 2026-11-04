@@ -1,4 +1,4 @@
-# Vex (r3f: the owner's pick r3b, polished; the RECIPE_95 reference): import note
+# Vex (r3g: the owner's pick r3b, polished; the RECIPE_95 reference): import note
 
 `vex.glb` is the owner-approved round-3 Vex redesign (docs/art/gen/wardens_r3/vex_* and VEX_KIT.md on
 ext/imagegen fb523188), built as the design variant `vex_r3b` and picked by the owner over the r3 model
@@ -83,5 +83,16 @@ r3f (the r3e report's next steps and ORCH's 15:10 review; credit-free):
 - **Braids:** flatter strand colours, eight thicker locks in each tuft, and a `hair-braid` look (fres 0.15, far_lift
   0.3, no rim): solid plaits, no green edge noise.
 - **Hair at the match camera:** far_lift 0.5, fres 0.3, no rim (it had gone pale cyan).
-- **The shared match-zoom fix** (ext/warden-matchzoom f0ad9f60, picked as 5fa9e23a): no speckle fringe, the ink gone
-  from ~13.5 m, a halo shell on the glow pieces; the review frame is `--arena-demo=pose_clear`.
+- **The shared match-zoom fix:** v2 (ext/warden-matchzoom-v2 161708cc, c89a5273 and 8af89a9e, picked as 5b6d6ac8,
+  3434a660 and 1312af72; the v1 pick 5fa9e23a reverted): no speckle fringe, the ink gone from ~13.5 m, a halo shell on the glow
+  pieces; the review frame is `--arena-demo=pose_clear`.
+
+r3g (the r3f report's next steps; credit-free):
+- **Chest straps:** the skin around the upper chest's straps cleaned by value (`fill`: Meshy's dark strap shadows and
+  the art's white highlights), the straps' own painted edges kept.
+- **Circuits:** the belly's and chest's circuit tattoos as vector strokes (`stamp`: the art's lines thinned to their
+  centres, stamped 2 mm wide in one green, skin only).
+- **Gorget:** its seams stamped from the face sheet in the bright seam green, then onto the glow slot.
+- **Gun mount:** the whole block on metal (a value rule had split it with the black jacket: dark blotches) and
+  flattened to gunmetal.
+- **Halo:** lime [0.7, 1.0, 0.25], a hue apart from the hair's green (it was lost in the hair at the match camera).

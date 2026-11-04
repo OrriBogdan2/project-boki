@@ -107,9 +107,18 @@ Copy `vex_fit.json` -> `<name>_fit.json` and set, in this order of importance:
    was off by 12 mm rms, a quadratic by 39 mm).
 8. `touch_up_late` for creases the projections can't reach (`val_max`: dark texels only, `flat` to the mid tone);
    stray paint of one colour on a part (`fill`, `fill_hsv`): its texels filled ring by ring from the part's own
-   texels around them, so the skin closes over in its own shading (a `flat` patch reads as a pale smear).
+   texels around them, so the skin closes over in its own shading (a `flat` patch reads as a pale smear); by
+   value too (Vex's upper chest, r3g: dark streaks <= 0.42 and near-white patches), with `erode` 2-3 texels so a
+   strap's own painted edge beside its cloth stays.
 9. `reslot_late` metal -> brass by hue (`hsv` the brass ramp's): brass gets its own slot, so the look can lift
    it alone at the match camera (step 7).
+10. Thin lines the art draws (tattoos, glowing seams) as vector strokes (`project_after` `mode: stamp`, r3g): the
+   art's line pixels in `art_box` (greenness above `threshold`; `open_px` drops wide areas of the colour, a lock
+   of hair or a rim light) thinned to centre lines, mapped by the view's registration (`k`/`col0_at`/`row0_at`, or
+   the face's `warp`), ray-cast onto the faces of `slots` in `box` and stamped `width` m wide in one `colour`, never
+   past those faces' texels. Vex: the belly's and chest's circuits (threshold 0.02: the art's tattoos are a
+   greyish green), the gorget's seams from the face sheet (threshold 0.25, onto metal, then `reslot_late` to glow).
+   A `line` pass copies the art's soft edges and its blobs; a stroke does not.
 `recipe.py SPEC fit` writes `art/wardens/<name>/<name>.glb` and imports it (atlases lossless, LODs off).
 
 ## 7. Look (10 min)
@@ -146,8 +155,9 @@ Per model, in `content/rules/warden_look.json` under the art name, start from Ve
   0.3, rim_far 0 (no green edge noise on the plaits);
 - `glow`: glow 1.8 for a lens drawn from the sheet (r3f: its own dark glass and rings keep it green; the flat
   #3dff6a of a modelled lens went white at 2.4, r3e);
-  `halos` for each glowing eye or lens (anchor_<name>; Vex [0.24, 1.0, 0.42], strength 2.2, px 2.4, near_d 7,
-  far_d 14).
+  `halos` for each glowing eye or lens (anchor_<name>; Vex [0.7, 1.0, 0.25], strength 2.4, px 2.4, near_d 7,
+  far_d 14): a hue apart from the hair's (r3g: Vex's toxic-green halo was lost in her green hair at the match
+  camera; lime reads beside it).
 - If the shared warmth overshoots a palette (ORCH 13:20: Pip coral, Tarek orange, Kael red-brown, Ostra flat
   purple), correct it here per slot (`shade`, `far_lift`, `top_light`; the ramps in the fit), never in PAINTED.
 Never change the shared shader's defaults or PAINTED for one Hunter: that is what this file is for. A new key a
@@ -262,6 +272,11 @@ to ignore):
 | The bronze lost at the match camera | brass shares the metal slot's look | `reslot_late` metal -> brass, look `brass` far_lift 0.5 (r3f) |
 | Camo blotches on the jacket and the gun mount | the gun-side metal box took the dark jacket; Meshy's light patches stretched by the blacks ramp | that rule's hsv value >= 0.22 (the jacket falls to cloth), `smooth` sigma_r 0.1, blacks `lum` [0, 0.5] (r3f) |
 | Soft green smudges where the art's tattoos are | the chest and belly projections carried the art's tattoo pixels, blurred | `skip_art` all greens there, `fill` Meshy's, then crisp lines from a `line` pass (`slots` skin, `max` under the trim's green) (r3f) |
+| Pale patches and dark streaks on the upper chest | Meshy's strap shadows and the art's highlights on the skin around the straps | `fill` on skin by value (dark <= 0.42, near-white), `erode` 2-3 (r3g) |
+| Circuit tattoos soft, blotchy | `line` passes copy the art's soft edges and blobs | `stamp` strokes from the art's thinned lines (r3g) |
+| The gorget's seams faint | thin seams from a projection, few faces on the glow slot | `stamp` the face sheet's seams (warp), then `reslot_late` to glow (r3g) |
+| The gun mount pale with dark blotches | a value rule split the block between metal and the black jacket | a metal rule by box for the whole block before it, a `flat` gunmetal touch-up (r3g) |
+| The lens halo lost in the hair at the match camera | the halo in the hair's own green | a halo of another hue (Vex lime) (r3g) |
 | The hair pale cyan at the match camera | hair far_lift 0.7, fres 0.6 and the mint signature rim | hair far_lift 0.5, fres 0.3, rim_far 0 (step 7) |
 | A caption or a plant over the hero in the match frame | the Arena's tips and its spawn props | `--arena-demo=pose_clear` (recipe.py shots; spec `demo_at` still picks the spot) |
 | White/dark speckle fringe at match zoom | per-pixel fresnel, gloss and light rims on a dense mesh; a sub-pixel ink shell; stray texels; edge-on alpha cards | the shared far_* look (ext/warden-matchzoom); `no_ink` for thin parts |

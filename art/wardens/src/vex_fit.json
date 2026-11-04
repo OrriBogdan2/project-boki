@@ -373,6 +373,17 @@
   {
    "slot": "metal",
    "box": [
+    -0.23,
+    -0.085,
+    null,
+    null,
+    0.555,
+    0.66
+   ]
+  },
+  {
+   "slot": "metal",
+   "box": [
     null,
     -0.06,
     null,
@@ -1834,6 +1845,50 @@
    "iterations": 80
   },
   {
+   "name": "chest_dark",
+   "mode": "fill",
+   "slot": "skin",
+   "box": [
+    -0.07,
+    0.18,
+    0.44,
+    0.545
+   ],
+   "fill_hsv": [
+    0.0,
+    1.0,
+    0.0,
+    1.0,
+    0.0,
+    0.42
+   ],
+   "iterations": 60,
+   "erode": 3,
+   "colour": "c5a2a1"
+  },
+  {
+   "name": "chest_pale",
+   "mode": "fill",
+   "slot": "skin",
+   "box": [
+    -0.07,
+    0.18,
+    0.44,
+    0.545
+   ],
+   "fill_hsv": [
+    0.0,
+    1.0,
+    0.0,
+    0.08,
+    0.9,
+    1.0
+   ],
+   "iterations": 60,
+   "erode": 2,
+   "colour": "c5a2a1"
+  },
+  {
    "name": "clean_green_belly",
    "mode": "fill",
    "slot": "skin",
@@ -1860,8 +1915,8 @@
    "slot": "metal",
    "box": [
     -0.23,
-    -0.075,
-    0.59,
+    -0.085,
+    0.555,
     0.66
    ],
    "sat_max": 0.2,
@@ -1979,81 +2034,209 @@
  },
  "project_after": [
   {
-   "view": "front",
+   "name": "circuits_chest",
+   "mode": "stamp",
    "image": "~/meshy/vex_r3b/in/front.png",
-   "col0": 700,
-   "sole_row": 1331,
-   "head_z": 0.75,
+   "art_box": [
+    630,
+    330,
+    790,
+    382
+   ],
+   "threshold": 0.02,
    "k": 0.001477,
    "col0_at": 671.53,
    "row0_at": 713.79,
-   "name": "tattoo_curl",
    "slots": [
     "skin"
    ],
-   "facing": 0.3,
-   "line": {
-    "colour": "4cc35e",
-    "threshold": 0.22,
-    "max": 0.36
-   },
    "box": [
-    -0.045,
-    0.005,
-    0.488,
-    0.525
-   ]
+    -0.07,
+    0.18,
+    0.44,
+    0.57
+   ],
+   "width": 0.002,
+   "colour": "4cc35e",
+   "open_px": 5
   },
   {
-   "view": "front",
+   "name": "circuits_belly",
+   "mode": "stamp",
    "image": "~/meshy/vex_r3b/in/front.png",
-   "col0": 700,
-   "sole_row": 1331,
-   "head_z": 0.75,
-   "k": 0.001477,
-   "col0_at": 671.53,
-   "row0_at": 713.79,
-   "name": "tattoo_circuit",
+   "art_box": [
+    610,
+    512,
+    800,
+    622
+   ],
+   "threshold": 0.02,
+   "k": 0.001636,
+   "col0_at": 668.11,
+   "row0_at": 686.83,
    "slots": [
     "skin"
    ],
-   "facing": 0.3,
-   "line": {
-    "colour": "4cc35e",
-    "threshold": 0.22,
-    "max": 0.36
-   },
-   "box": [
-    0.064,
-    0.1,
-    0.472,
-    0.5
-   ]
-  },
-  {
-   "view": "front",
-   "image": "~/meshy/vex_r3b/in/front.png",
-   "col0": 700,
-   "sole_row": 1331,
-   "head_z": 0.75,
-   "slots": [
-    "skin"
-   ],
-   "facing": 0.3,
-   "line": {
-    "colour": "4cc35e",
-    "threshold": 0.22
-   },
-   "name": "tattoo_belly",
    "box": [
     -0.06,
     0.17,
-    0.12,
+    0.1,
     0.36
    ],
-   "k": 0.001636,
-   "col0_at": 668.11,
-   "row0_at": 686.83
+   "width": 0.0022,
+   "colour": "4cc35e",
+   "open_px": 5
+  },
+  {
+   "name": "gorget_seams",
+   "mode": "stamp",
+   "image": "~/meshy/vex_r3b/art/vex_face.png",
+   "art_box": [
+    690,
+    1560,
+    1310,
+    1995
+   ],
+   "threshold": 0.25,
+   "warp": {
+    "mesh": [
+     [
+      -0.02063,
+      0.74875
+     ],
+     [
+      0.0715,
+      0.7715
+     ],
+     [
+      0.0475,
+      0.758
+     ],
+     [
+      0.09675,
+      0.77825
+     ],
+     [
+      0.09925,
+      0.79175
+     ],
+     [
+      0.0305,
+      0.7795
+     ],
+     [
+      0.07575,
+      0.8095
+     ],
+     [
+      0.0925,
+      0.8095
+     ],
+     [
+      0.025,
+      0.71187
+     ],
+     [
+      0.0125,
+      0.68375
+     ],
+     [
+      0.07625,
+      0.70325
+     ],
+     [
+      0.04,
+      0.68875
+     ],
+     [
+      0.04,
+      0.67375
+     ],
+     [
+      0.0525,
+      0.6405
+     ],
+     [
+      0.095,
+      0.66625
+     ]
+    ],
+    "art": [
+     [
+      730,
+      905
+     ],
+     [
+      1240,
+      880
+     ],
+     [
+      1115,
+      912
+     ],
+     [
+      1355,
+      860
+     ],
+     [
+      1425,
+      820
+     ],
+     [
+      1078,
+      800
+     ],
+     [
+      1250,
+      690
+     ],
+     [
+      1390,
+      725
+     ],
+     [
+      1000,
+      1140
+     ],
+     [
+      825,
+      1340
+     ],
+     [
+      1200,
+      1330
+     ],
+     [
+      1000,
+      1355
+     ],
+     [
+      1000,
+      1425
+     ],
+     [
+      1000,
+      1622
+     ],
+     [
+      1235,
+      1470
+     ]
+    ],
+    "smooth": 0.002
+   },
+   "slots": [
+    "metal",
+    "glow"
+   ],
+   "box": [
+    -0.01,
+    0.115,
+    0.575,
+    0.65
+   ],
+   "width": 0.0018,
+   "colour": "3dff6a"
   }
  ],
  "reslot_late": [

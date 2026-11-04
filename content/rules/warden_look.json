@@ -67,11 +67,11 @@
 			{
 				"anchor": "anchor_lens",
 				"color": [
-					0.24,
+					0.7,
 					1.0,
-					0.42
+					0.25
 				],
-				"strength": 2.2,
+				"strength": 2.4,
 				"px": 2.4,
 				"near_d": 7.0,
 				"far_d": 14.0
