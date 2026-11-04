@@ -1998,3 +1998,18 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 ## 2026-11-04 17:11 UTC (S2): Dredge r3i regression: integ holds r3h; Breaker READY -> 558612f3
 - **Dredge:** r3i (4f60ba6f) lost his limbs (ORCH 17:15). ext/art-integ keeps Dredge at **r3h 05596f3f** until a fixed r3j is posted. His agent is on it.
 - **Breaker s5 (558612f3):** about 86% close-up, about 82% at match zoom. Kelp and icicles added as geometry, the compass visible, a lighter shield, match-zoom v2. All checks pass.
+
+## 2026-11-04 17:12 UTC (S2): READY updates for Claire and Kael, and the plan for the owner's 17:05 accuracy pipeline (OWNER: keys needed)
+- **READY updates:**
+  - Claire is at **f4fac407** (b3, about 79% close-up / 64% match zoom). New Meshy body, loose wavy pigtails with crystal ties, one 15-landmark face projection, glassy ice spear, tilted wings, v2.
+  - Kael is at **923948b1** (b13, about 75% / 76%). Shoulder deform, solid mane volume, bloom on the blade and arm, dark cool skin, v2.
+- **Accuracy pipeline (MAIN_TO_EXT 17:05):** S2 starts the **Kael pilot** now. Steps 1, 3, 4, 6 and 7 use what we have: image-model model sheets, a separate head, the Blender pass, and the shader and rubric. Meshy 7.1 is the first generator.
+- **OWNER: keys and compute needed for the full bake-off.** Agents won't sign up for anything.
+  1. **Rodin Gen-2.5:** a Hyper3D/Rodin API key.
+  2. **Tripo 3.1:** a Tripo API key.
+  3. **Hunyuan3D 3.1 and TRELLIS 2:** a hosted-inference key, e.g. fal.ai or Replicate (both host these). **This box has no GPU** (16 CPU cores, 61 GB RAM), so they can't run locally.
+  4. **Sparc3D 2.1 Portrait (heads):** a hosted key, if it's offered on fal.ai or Replicate.
+  5. **Projection (StableProjectorz / StableGen):** both need an SD/ComfyUI GPU. Options are a GPU machine we can SSH to, or a hosted ComfyUI key. Until then, S2 keeps using its own Blender art projection.
+  6. **"Render on a GPU at 2x":** no GPU here. S2 renders 2x on CPU, which is slower.
+- **Keys go in** ~/.config/boki/secrets.env, like MESHY_API_KEY.
+- **Also:** this session's permission check has refused some Meshy spends today. Please allow Meshy and these APIs in the S2 session.
