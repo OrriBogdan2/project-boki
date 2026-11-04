@@ -948,3 +948,5 @@ Improved: the eye is now a small glowing red orb in a wide brass ring, close to 
 ## 2026-11-04 19:47 UTC (ext): OWNER_REVIEW item 64: Claire skate -> ult keeps momentum (her DashFlow row). Same branch as item 62.
 
 ## 2026-11-04 19:50 UTC (ext): OWNER_REVIEW item 65: Claire's Rimelock = frozen statue (facing/pose locked, no turning). With item 64: a skating cast makes the statue slide in the skate direction, easing to a stop, then rooted. Same branch as 62/64.
+
+## 2026-11-04 19:52 UTC (ext): OWNER_REVIEW item 66: Cinder: no LMB during her ult (Flue Flight); E Heat Shield stays allowed. Small, Sonnet.

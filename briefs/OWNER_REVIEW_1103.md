@@ -513,3 +513,8 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - During Rimelock she's sealed in ice as a statue: facing and pose locked from the cast frame (no turning toward the cursor, no aim tracking, no idle fidget), no other abilities except the ones the ult already allows (the recast to crack early, and Shift out per item 27).
 - **With item 64 (momentum):** if cast while skating, the ice statue **slides** along her carried velocity and direction (it's ice on ice), easing to a stop over ~0.5–0.8 s, without steering or turning; once stopped she's rooted as before. Cast while standing: rooted in place at once.
 - Assert: her facing and model rotation don't change for the whole ult while the cursor sweeps 360°; a skating cast slides ≥2 m in the skate direction and then holds still. Same branch as items 62/64.
+
+## 66. Cinder (Mad Pyromancer) can't fire her LMB during her ult (owner, 19:02 UTC Nov 4)
+- Owner: "pyro girl shouldn't be able to shoot her LMB during ult."
+- While her ultimate (Flue Flight, the jetpack flight) is active, LMB does nothing: no flamethrower, no queued shot; the input is ignored (not buffered) and a soft "can't" tick plays on a press. Re-enable the moment the ult ends. Keep whatever the source/data allows during it (Heat Shield E mid-flight stays, per her DashFlow row and the data).
+- Update her DashFlow/kit rules and card text. Assert: LMB held through the whole ult deals no damage and spawns no flame; LMB works again on the first frame after it ends.
