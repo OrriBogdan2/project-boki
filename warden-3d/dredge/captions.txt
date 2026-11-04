@@ -72,3 +72,9 @@ r3k_dredge_turnaround.png: the art | front, 3/4, side, back, 3/4 back. r3k_dredg
 r3k_dredge_match.png: portrait | the Arena at match zoom on pose_clear | x4 on DEMO_HERO_RECT (575,265,128,170).
 r3k_dredge_night.png: the Arena with --raid=night on pose_clear | x4 on the hero.
 r3k_dredge_vs_r3j.png: r3j turnaround over r3k turnaround. r3k_dredge_vs_r3j_match.png: r3j x4 | r3k x4.
+
+r3l (credit-free, ORCH's r3k review): the hull tarnished olive bronze (match-zoom hue 30 -> 35 deg, saturation 0.71 -> 0.51, luminance kept); five torn holes, jagged brass teeth peeled out over a dark hole with a red heart, two on the shoulder pods' outer edges so the front outline breaks; the winch seated on a brass saddle; a thin smoke ribbon off a stack behind the winch (visible in the match and night frames, clear of the shoulders); the porthole a wider dark blue-grey glass with white cracks and a small red pupil.
+r3l_dredge_turnaround.png | r3l_dredge_front_34.png | r3l_dredge_back.png | r3l_dredge_closeup.png | r3l_dredge_moves.png: as for r3.
+r3l_dredge_closeup_front.png: portrait | r3k | r3l (the porthole).
+r3l_dredge_match.png: portrait | the Arena on pose_clear | x4 on DEMO_HERO_RECT. r3l_dredge_night.png: --raid=night | x4.
+r3l_dredge_vs_r3k.png: r3k turnaround over r3l. r3l_dredge_vs_r3k_match.png: r3k x4 | r3l x4.
