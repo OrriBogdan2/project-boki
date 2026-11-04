@@ -32,3 +32,8 @@ s5_34_vs_art.png, s5_back_vs_art.png, s5_head_vs_sheet.png: 3/4, back (the scorc
 s5_match_vs_art.png, s5_gameplay_match.png: the match frame with the shared match-zoom fix (f4b59cb3: far_smooth, thin far ink) and her electric-blue far rim, the hazard bands' faint yellow glow, the corset and boot trim lifted.
 s5_vs_turnaround.png, s5_vs_turnaround_game.png, s5_moves_1.png, s5_moves_2.png, s5_poses_game.png: turnaround, moves and poses.
 s5_vs_s4.png: round 4 (rows 1, 3) vs round 5 (rows 2, 4): close-ups and match zoom.
+s6_closeup_vs_art.png: round 6: a smaller gum bubble without the ink outline; the keyhole a dark painted recess with the neon only on its edge (the corset's emission now only the piping cores); darker fishnet thighs.
+s6_34_vs_art.png, s6_back_vs_art.png, s6_head_vs_sheet.png: 3/4, back and head vs the art.
+s6_match_vs_art.png, s6_gameplay_match.png: the match frame: the body's value lifted at distance (leather and skin far_lift), the electric-blue far rim at 0.36, the hazard bands' yellow emission.
+s6_vs_turnaround.png, s6_vs_turnaround_game.png, s6_moves_1.png, s6_moves_2.png, s6_poses_game.png: turnaround, moves and poses.
+s6_vs_s5.png: round 5 (rows 1, 3) vs round 6 (rows 2, 4): close-ups and match zoom.
