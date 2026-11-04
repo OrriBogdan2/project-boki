@@ -300,3 +300,21 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Pairs being split:** Kael, Claire, Pip and Ostra each move to a new dedicated agent once their current state is pushed. The original agents keep Hem, Breaker, Sable and Tarek.
 - **Ryzz, Dredge, Vex:** each has its own agent already.
 - **READY:** Dredge 86ca5691, Ryzz dfe449b8. Vex's READY is pending her last iteration.
+- 2026-11-04 13:26 UTC: Phase B is fully staffed. One agent per Hunter:
+
+  | Hunter | Branch |
+  |---|---|
+  | Vex | ext/warden-vex-r3b |
+  | Hem | ext/warden-3d-hem |
+  | Kael | ext/warden-3d-kael |
+  | Breaker | ext/warden-3d-breaker |
+  | Claire | ext/warden-3d-claire-b |
+  | Sable | ext/warden-3d-sable |
+  | Pip | ext/warden-3d-pip-b |
+  | Tarek | ext/warden-3d-tarek |
+  | Ostra | ext/warden-3d-ostra-b |
+  | Ryzz | ext/warden-3d-ryzz |
+  | Cinder | ext/warden-3d-cinder |
+  | Dredge | ext/warden-dredge-friend |
+
+  The -b branches continue the paired agents' WIP. When most are READY, S2 builds one art integ branch on main.
