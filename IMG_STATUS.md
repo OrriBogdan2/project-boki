@@ -89,3 +89,9 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 - Zedran: the splash is mirrored vs the turnaround (the magma arm and lion pauldron are on his right in the turnaround, his left in the splash; the turnaround is the source of truth for 3D). The magma cracks are missing in the two 3/4 views. No true side view.
 - Pin: the red handprint over the mouth matches a real-world movement's symbol (Missing and Murdered Indigenous Women); suggest another mark. Her legs fade into smoke (floating): plant her feet for the model and keep the smoke as an FX. No true side view.
 - Owner approval for 3D: Vex approved; Zedran and Pin not yet.
+
+## 2026-11-04 03:55 UTC: side views (Vex, Zedran, Pin) + Cinder round 2, from the owner's uploads (orchestrator)
+- docs/art/gen/wardens_r2/: vex_side.webp, zedran_side.webp, pin_side.webp, cinder_splash.webp, cinder_turnaround.webp.
+- The side views are true profiles. Zedran: magma arm and lion on his right, chain in his left (matches the turnaround). Pin: feet planted, and the handprint replaced by claw scratches. Vex: her hair is a high ponytail here vs a messy bun in the turnaround; treat the turnaround as the source of truth.
+- Cinder: clearly a salamander woman, and the goggles no longer have eyes. Note: her orange gill-frills read strongly as an axolotl, the same animal as the Boki Prismander. Owner to decide whether that's OK. Her weapon differs between the splash (flame-wand) and the turnaround (a syringe-spear): the turnaround is the source.
+- A 7-commit IMG bundle exists on the owner's PC (Downloads\boki_imagegen_bundle\imagegen_round2.bundle); the orchestrator will merge it when uploaded.
