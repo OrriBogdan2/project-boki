@@ -37,3 +37,13 @@ b2_poses_game.png: idle, run, attack, cast, ult at the match camera; b2_moves_cl
 b2_match.png: Arena match frame, clean (--arena=rimewright --record=2 --arena-demo=pose --demo-zoom=1.0 --no-tips --demo-at=-4.5,0)
 b2_match_x4.png / b2_match_vs_art.png: the match frame cropped round her, x4 (nearest), beside the portrait
 b2 self-score close-up ~76: silhouette 12/15, face 13/20, hair 7/10, props 15/20, palette 12/15, clean paint 7/10, outfit 10/10. Match zoom ~60: silhouette 15/25, signature colours 15/25, values 14/20, props 11/20, artefacts 5/10.
+b3_inputs_horns_pigtails_out.png: the b3 Meshy inputs (front, side, back): the stage-1 edits edited again with the horns and the front pigtails out (the front taken once more so no hair lies over the shoulders)
+b3_meshy_variants.png: the two b3 Meshy 7.1 runs (enhancement off above, kept; on below, dropped: wide legs, arms flung out)
+b3_vs_turnaround.png: round 3: the turnaround above, the new body below: clean chest, long wavy hair behind, scripted ram horns, loose wavy pigtails to the hips with crystal clips, wings tilted back
+b3_vs_turnaround_game.png: the turnaround above, the model at the match camera (true pixels, then x3)
+b3_closeup_vs_art.png / b3_closeup_34_vs_art.png: the face sheet, portrait and head sheet beside the model: the whole face painted from claire_face by 15 landmarks (blue irises, freckles, soft blush, the lips on the mouth)
+b3_front_34.png / b3_back_34.png / b3_closeup.png / b3_closeup_front.png / b3_turnaround_close.png: full length and close views (the spear on its own glassy ice slot)
+b3_poses_game.png: idle, run, attack, cast, ult at the match camera; b3_moves_close_1.png: the run, close
+b3_match.png: Arena review frame (--arena-demo=pose_clear --no-tips --demo-at=-4.5,0), with the shared match-zoom fix v2 (161708cc, c89a5273)
+b3_match_x4.png / b3_match_vs_art.png: the frame cropped on the hero (DEMO_HERO_RECT), x4, beside the portrait
+b3 self-score close-up ~79: silhouette 13/15, face 16/20, hair 7/10, props 16/20, palette 12/15, clean paint 7/10, outfit 8/10. Match zoom ~64: silhouette 16/25, signature colours 16/25, values 14/20, props 12/20, artefacts 6/10.
