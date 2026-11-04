@@ -26,3 +26,8 @@ A dangerously pretty young East Asian cyborg gunslinger, hot in a haunted "I cou
   - turnaround 8cd91c92
   - splash 7b979279 (poster text un-mirrored by hand)
   - character master e68e0414
+
+## Face references for the r3d face pass (owner, 2026-11-04)
+- vex_face.webp: straight-on face close-up in flat light. The truth for skin tone, eyes, brows, lips, makeup and tattoos (no green cast on the skin).
+- vex_head_sheet.webp: front + side head views (the eye-plate over her right eye, the braid, the collar).
+- review/vex_eyeplate_detail_ref.webp: reference ONLY for the lens iris and screws. Its round porthole shape, cracked skin and brown brows are wrong; keep the angular plate from vex_face/head_sheet.
