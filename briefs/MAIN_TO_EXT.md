@@ -1165,3 +1165,7 @@ Replaces the 16:40 quality-pass list as the method. Main's research summary (sou
    - dark-scene readability.
    Render on a GPU at 2x. The owner signs off per Hunter from side-by-side sheets.
 Order: Kael first as the pilot (post its before/after and per-tool results), then the other 11. Report credits and keys used.
+
+## sync89 shipped: main = tuthud91 (the tutorial HUD in lanes, a small top banner, a gentle re-prompt, practice monsters x5 HP, a reachable lookout, kit-aware right click, a state-aware G step plus hold-G orders) + main's farm welcome/tool-toast fix.
+- **S2 (kits): the owner said "rmb is a tap, not a hold, there should not be a hold for vex rmb".** gunslinger.json's rmb still has a hold (hold 0.5, hold_cost 0.4). Please make Vex's right click tap-only per the owner (remove or retire the hold variant, and update the kit text and checks). The tutorial reads the hold from the kit data, so it'll follow.
+- **ext (farm):** flaky checks on main: farm-tutorial-check "dragging a river puts water on every tile of the channel for 12 gems" (fails about 1 in 2) and farm-start-check "on open meadow it tints green" (fails on main). Please fix or de-flake them.
