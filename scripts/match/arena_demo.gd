@@ -617,7 +617,7 @@ static func _pose_clear(A: Arena, P: Hunter, t: float) -> float:
 			m.cam.snap(P.pos)
 	_clear_frame(A, P, t)
 	P.inp["move"] = Vector2.ZERO
-	P.inp["aim"] = P.pos + Vector3(-5.0, 0.9, 3.5)
+	P.inp["aim"] = P.pos + _face(Vector3(-5.0, 0.9, 3.5))
 	return 2.0
 
 ## --arena-demo=pose_clear: the review frame's spot, flat open ground near the start (no block, void or slope
