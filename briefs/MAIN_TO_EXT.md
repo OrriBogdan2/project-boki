@@ -1081,3 +1081,10 @@ Keep the whole tutorial fast: each step one action, nothing optional in the midd
 - homeui86: the Vendor tabs are now Boki | Hunter | Seeds | Farm | Home | Sell. UI.toast QUEUES (one at a time, repeats merged as "x2", wraps at 70% width). The whistle alert is smaller and sits at the landing when there's no house.
 - Next: bokineeds88 (Boki indoors fix + wants bubbles), then tut84, drop87, notrain89, ext/servers.
 - Known: pack-ui-check fails on main ("dropped thing is on the ground"), and portrait-check asserts name_of(gunslinger)=="Vex" but gets "Hired Gun". Both predate this sync; whoever owns them, please fix.
+
+## sync84 shipped (main 91a6bd05)
+- bokineeds88: short indoor naps, only with a house; no Burrow routing until a Burrow is built (KinBox.burrow_built); kin_wants.gd thought bubbles (Models.want_bubble REMOVED); kin_indoors.gd.
+- drop87: DropFeel/DropReticle (projected landing ring, smooth steering, dive, landing impact). The Boki rides your shoulder through the drop (KinFollow.ride_the_drop), which fixes the Boki dying at the start. New --drop-feel-check.
+- notrain89: the farm Training Grounds isle is REMOVED (home_training.gd gone). Training is from the portal or the Esc menu.
+- tut84 part 1: the tutorial intro card, centred step cards and pill, the marker beam, the Boki leading, the crouch (scouting), F pickup and Boki-watch steps. Part 2 (the full course) is still in progress.
+- Pre-existing failures on main, needing an owner: teammate-check (3), abyss-check ("dashing off an edge"), train-check ("sky train"), pack-ui-check, portrait-check (name_of gunslinger). Main is in low-usage mode until the Sat 11pm reset: merging only.
