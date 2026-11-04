@@ -112,3 +112,9 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 - A moth-fae thief: silver braids, a feather-antenna headpiece with a silver domino mask, iridescent eyespot wings, a purple cropped jacket with a fur collar, a glowing ruby pendant, twin hand crossbows with violet bolts, keys and lockpicks on the belt. The splash is set in the Wyrm's hoard with its eye behind her: a strong tie to the lore (the thief who reached the Wyrmheart).
 - Owner notes met: a smaller face, a cooler and more interesting outfit.
 - Consistency to fix before 3D: the turnaround's side view drops the jacket sleeves and fur collar and shows one braid (the front/back show two braids and a full jacket). Front/back + the 05:30 sable_side as the reference; reconcile the jacket and braids.
+
+## 2026-11-04 06:00 UTC: Dredge round 2, from the owner's uploads (orchestrator)
+- Chosen (owner leaning, orchestrator agrees): **the bulky version**: wardens_r2/dredge_turnaround.webp (labelled front/3-4/side/back, with a true side) + dredge_splash.webp. The two thin variants are kept for reference in review/dredge_alt_thin_{a,b}.webp.
+- Why bulky: the big round brass dome reads from the top-down camera; it keeps the owner's "thinner down the middle" (a skeletal, oozing waist under a heavy shell); it fits Dredge as hulking (one of the two biggest with Bjorn); and the turnaround is consistent with a real side view.
+- **Originality check before 3D:** a brass diving-helmet porthole with a red glowing eye on a hulking diving-suit body is close to a famous horror-shooter's armoured diver. The owner should review this; a suggested tweak keeps the body and swaps the classic helmet porthole for something of our own (a ship's lantern or boiler-gauge eye, a bell housing).
+- For the Meshy input, crop the text labels out of the turnaround.
