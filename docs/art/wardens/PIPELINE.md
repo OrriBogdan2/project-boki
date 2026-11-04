@@ -304,3 +304,10 @@ paint-over, the shared look (16c18b4f) and warden_look.json. Recipe: RECIPE_95.m
 | Breaker B | 09:19 | 01a1a5db-8178-73a6-b736-4e12d593b59b | meshy-7.1 | as A, enhancement on | 40 | **Kept**: both fists and bracers, two arms (no third hand), the face, beard braids, compass, mantle, teddy |
 
 Breaker total: 6 tasks, 116 credits (the body's two attempts used).
+
+### Breaker round 3, 2026-11-04 (owner sheets fb503983)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Breaker r3 edits | 13:20-13:30 | edit_front (9:16, dropped: clipped arms), edit_front2, edit_side, edit_back, edit_tq (dropped: a copy of the front) | nano-banana-pro | breaker_front: hammer and shield out, arms down; the r3 side/back redrawn in the new outfit | 45 | front2, side (teddy painted out), back kept |
+| Breaker C | 13:31 | 01a1a688-d08d-74e2-9e69-9015055e4130 | meshy-7.1 | front, side, back edited; texture refs the same; 2k, meshy-7 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: the art's bare belly, sash, skirt, bare feet, braids, closed fists |
+| Breaker D | 13:31 | 01a1a688-d0b4-738f-bed8-df735492629b | meshy-7.1 | as C, enhancement on | 40 | Dropped: open splayed hands |
