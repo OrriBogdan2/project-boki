@@ -216,8 +216,8 @@
 		"per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."
 	},
 	"tool_toasts": {
-		"axe": "Someone left a spare axe by the house: it is yours",
-		"pickaxe": "And a pickaxe for the rocks: yours too"
+		"axe": "Someone left a spare axe by the house",
+		"pickaxe": "And a pickaxe for the rocks"
 	},
 	"gems_toast": "Hob slips you %d gems for seeds",
 	"voice": "Hob",

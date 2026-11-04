@@ -61,7 +61,7 @@ func _poll() -> void:
 		if FarmTutorial.current() == "feed":
 			FarmTutorial.give_food()
 		var cur := FarmTutorial.current()
-		var tool := FarmTutorial.give_step_tool(cur) if cur != "" else ""
+		var tool := FarmTutorial.give_step_tool(cur) if cur != "" and h.panel_open == "" else ""
 		if tool != "":
 			h._toast(String(FarmTutorial.rules()["tool_toasts"].get(tool, "")))
 		if (cur == "buy" or cur == "sell") and cur != tab_for:

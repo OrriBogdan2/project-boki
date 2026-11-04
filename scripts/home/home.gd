@@ -2513,18 +2513,8 @@ func _open_welcome() -> void:
 	Save.save_game()
 	var kn: String = Save.active_kin().get("name", "your Boki")
 	var v := _new_panel("Welcome home", 580)
-	UI.subtitle(v, "This little island is yours.")
-	if fs:
-		v.add_child(UI.para("It's wild sky-meadow for now: just the portal and whatever grows here. Open Build (%s) and put your house down wherever you like, then a crop patch and a cooking pot. You have %d gems, enough for those and a little more." % [Settings.key_cap("build"), int(Save.d["gems"])], UI.T_BODY + 1, UI.INK))
-	v.add_child(UI.para("%s lives here with you now, and it remembers everything you do together." % kn, UI.T_BODY + 1, UI.INK))
-	v.add_child(UI.para("Between expeditions you grow crops, build up your island and look after your Boki. When you're ready, the portal takes you out to the wild isles to hunt for treasure, seeds and new Boki.", UI.T_BODY, UI.MUTED))
-	v.add_child(UI.para("Just remember: what you find out there is only yours once you make it back.", UI.T_BODY, UI.ACCENT_HI))
-	var go := UI.hbox(8)
-	go.add_child(UI.label("Walk up to anything and press", UI.T_BODY, UI.INK))
-	go.add_child(UI.keycap(Settings.key_cap("interact"), 14))
-	go.add_child(UI.label("·  the number keys open the hub", UI.T_BODY, UI.MUTED))
-	v.add_child(go)
-	UI.footer_left(v).add_child(UI.label("Start by saying hi to %s." % kn, UI.T_SMALL, UI.MUTED))
+	UI.subtitle(v, "This island is yours, and %s lives here with you." % kn)
+	v.add_child(UI.para("Hob will show you around. Out in the wild, what you find is only yours once you make it back.", UI.T_BODY, UI.MUTED))
 	var b := UI.footer_primary(v, "Let's go", func():
 		Save.d["tutorial"]["home"] = true
 		Save.save_game()
