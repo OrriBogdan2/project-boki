@@ -118,3 +118,6 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 - Why bulky: the big round brass dome reads from the top-down camera; it keeps the owner's "thinner down the middle" (a skeletal, oozing waist under a heavy shell); it fits Dredge as hulking (one of the two biggest with Bjorn); and the turnaround is consistent with a real side view.
 - **Originality check before 3D:** a brass diving-helmet porthole with a red glowing eye on a hulking diving-suit body is close to a famous horror-shooter's armoured diver. The owner should review this; a suggested tweak keeps the body and swaps the classic helmet porthole for something of our own (a ship's lantern or boiler-gauge eye, a bell housing).
 - For the Meshy input, crop the text labels out of the turnaround.
+
+## 2026-11-04 06:15 UTC: Dredge full set (owner uploads; orchestrator)
+- wardens_r2/dredge_turnaround.webp is now the **unlabelled** turnaround (clean for Meshy); the labelled one moved to review/dredge_turnaround_labelled.webp. Added dredge_portrait, dredge_side (a true profile), the splash, and review/dredge_before_after.jpg. Owner-locked design.
