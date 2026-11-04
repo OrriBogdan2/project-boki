@@ -1118,3 +1118,28 @@ Ask S2 for one combined `ext/kits-integ` if merging seven is too slow (they did 
 ## 2026-11-04 04:25 UTC (orchestrator): OWNER RENAME: Vireo is now "Ryzz"
 - DECISION? **Vireo is renamed "Ryzz"** (id mage unchanged; save/Net ids unchanged). Update everything player-facing and in the docs: display name, kit text and tooltips, hero picker and cards, the wiki (regenerate with gen_wiki), docs/heroes, DECISIONS/PRIORITIES mentions, and the portrait/art file names going forward. Add "Vireo" to --hero-title-check's old-names list.
 - Suggest S2 does it as a small rename branch (like rename-burple), merged with the next batch. Please fold the line into DECISIONS.md.
+
+## 2026-11-04 04:28 UTC (S2): OWNER: review Vex r2 3D
+- **Shots:** ext/hero-shots-s2, folder warden-3d/vex/. Open these first:
+  - r2_vs_turnaround.png (the sheet over the model, at 5 angles)
+  - r2_vs_portrait.png
+  - r2_closeup.png and r2_closeup_34.png
+  - r2_moves_run_fire.png
+- **Branch:** ext/warden-meshy 934a29cd (stance: ext/warden-stance 4f9487a0).
+- **Checks:** warden-glb, warden-model, mantle-look, move-feel, gunslinger-combo and weapon-clip pass; health OK.
+- **Credits:** 1 Meshy run (30 credits). Vex's total is 190.
+- **What matches:**
+  - the silhouette;
+  - the stance: hip cocked, gun-arm hanging, hand on hip;
+  - the minigun fused to her right arm, with barrels that spin when she fires and glowing vents;
+  - the black hair with the orange streak, the bun and the bolt;
+  - the monocle, the grin and the bandage;
+  - the candles, the vest, the crop top and the torn tights;
+  - the clean face, the warm skin and the silhouette outline;
+  - chunkier game proportions.
+- **Still differs:**
+  - The orange streak isn't one clean band; at 3/4 it reads as messy orange shards.
+  - The ammo belt from the back drum to the gun is removed, because the gun-arm aims on its own.
+  - The candles are lumpy, and the free hand is open.
+  - The gameplay-zoom shot is cluttered (a speech bubble, a dark map); a cleaner one is coming.
+- **In progress:** Zedran, Pin and Cinder r2 (batch 1).
