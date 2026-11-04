@@ -119,13 +119,6 @@ The shared painted look (WardenGlb.PAINTED) does two things for every model, so 
 - f4b59cb3, the match camera: from 8 to 18 m the atlas blends one mip coarser (`far_smooth` 0.7, bias 1.0; more
   mixes a baked atlas's UV islands into mud) and the ink thins 80% (`INK_FAR_THIN`): no speckle, no dark outline
   noise.
-- ext/warden-matchzoom, the speckle fringe (ORCH 15:15): from 8 to 18 m the pale fresnel drops to a third
-  (`far_fres`), gloss, sheen and the lights' rims go (`far_spec`: the white dots on metal), what is left is
-  anti-aliased (`far_aa`), stray texels are clamped to their coarser mip (`far_clamp`: no wider blur, no mud), the
-  ink is gone from ~13.5 m (`INK_FAR_CUT`), alpha cards fade edge-on and keep their coverage face-on
-  (warden_card `far_edge`, `far_alpha`), `rim_far` is a broad saturated band in `rim_far_color` (`far_rim_soft`),
-  and every glow-slot piece gets a 1.4 px halo shell there (`GLOW_SHELL`) and a brighter glow (`far_glow`).
-  Per-part opt-outs: `no_ink` (material tags) in the model's warden_look.json; `ink`, `glow_shell` to tune.
 Per model, in `content/rules/warden_look.json` under the art name, start from Vex's:
 - `painted`: `rim_far` 0.25-0.35 and `rim_far_color` the signature colour, saturated (Vex [0.35, 1.0, 0.45]): a
   rim at the match camera so the silhouette holds (0.9 turned every edge pale);
@@ -161,12 +154,10 @@ as the art draws it, no clipping through the body, the free hand where the art p
 
 ## 9. Shots and self-score (15 min) (look)
 `recipe.py SPEC shots`: --warden-shots (turnaround close and match camera, front_34, back_34, closeup, closeup_front,
-moves, poses), the Arena match frame (`--arena=<arch> --record=2 --no-tips --arena-demo=pose_clear
---demo-zoom=1.0 --arena-shot=`: the review frame, no HUD caption or buttons, no sign, aim line or Focus tell, the
-hero on clear ground it finds itself with no prop or grass over it; spec "demo_at" "dx,dz" still picks the spot)
-and its x4 crop centred on the hero (the frame's DEMO_HERO_RECT line), and the composites vs the art in
-`<raw>/shots/compare`. Score them with the rubric below, honestly, beside the art; fix the lowest line first and
-loop (`recipe.py SPEC loop`).
+moves, poses), the Arena match frame (`--arena=<arch> --record=2 --no-tips --arena-demo=pose --demo-zoom=1.0
+--demo-at=dx,dz --arena-shot=`: no tip banner, the hero moved onto clear ground, nothing over her; spec "demo_at")
+and its x4 crop, and the composites vs the art in `<raw>/shots/compare`. Score them with the rubric below, honestly,
+beside the art; fix the lowest line first and loop (`recipe.py SPEC loop`).
 
 ### Self-score rubric (ship at >= 95 at BOTH distances)
 | Close-up (front, 3/4, back) | pts | Match zoom (the Arena frame, x4) | pts |
@@ -263,5 +254,4 @@ to ignore):
 | Camo blotches on the jacket and the gun mount | the gun-side metal box took the dark jacket; Meshy's light patches stretched by the blacks ramp | that rule's hsv value >= 0.22 (the jacket falls to cloth), `smooth` sigma_r 0.1, blacks `lum` [0, 0.5] (r3f) |
 | Soft green smudges where the art's tattoos are | the chest and belly projections carried the art's tattoo pixels, blurred | `skip_art` all greens there, `fill` Meshy's, then crisp lines from a `line` pass (`slots` skin, `max` under the trim's green) (r3f) |
 | The hair pale cyan at the match camera | hair far_lift 0.7, fres 0.6 and the mint signature rim | hair far_lift 0.5, fres 0.3, rim_far 0 (step 7) |
-| A caption or a plant over the hero in the match frame | the Arena's tips and its spawn props | `--arena-demo=pose_clear` (recipe.py shots; spec `demo_at` still picks the spot) |
-| White/dark speckle fringe at match zoom | per-pixel fresnel, gloss and light rims on a dense mesh; a sub-pixel ink shell; stray texels; edge-on alpha cards | the shared far_* look (ext/warden-matchzoom); `no_ink` for thin parts |
+| A caption or a plant over the hero in the match frame | the Arena's tips and its spawn props | `--no-tips`, spec `demo_at` onto clear grass (Vex -4.5,0) |
