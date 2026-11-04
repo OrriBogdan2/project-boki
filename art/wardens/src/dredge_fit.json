@@ -270,6 +270,22 @@
     -0.1914,
     1.7397
    ]
+  },
+  "anchor_smoke_r": {
+   "bone": "pauldron.R",
+   "pos": [
+    0.27,
+    -0.06,
+    1.53
+   ]
+  },
+  "anchor_smoke_l": {
+   "bone": "pauldron.L",
+   "pos": [
+    -0.27,
+    -0.06,
+    1.53
+   ]
   }
  },
  "orb": {
@@ -283,7 +299,7 @@
   "r": 0.02,
   "depth": 0.75,
   "material": "glow-eye",
-  "colour": "ff2418"
+  "colour": "ff2a50"
  },
  "drips": [
   {
@@ -520,9 +536,9 @@
      ],
      "r": 0.17
     },
-    "highlight": "d4c890",
+    "highlight": "b8a466",
     "highlight_at": 0.62,
-    "highlight_k": 0.42,
+    "highlight_k": 0.22,
     "tint": [
      0.88,
      0.95,
@@ -565,11 +581,11 @@
    },
    "glow-eye": {
     "glass": true,
-    "colour": "ff2a14",
+    "colour": "ff2a50",
     "crack": "4a0806",
     "crack_k": 0.7,
     "crack_scale": 45.0,
-    "halo": "ff7038",
+    "halo": "ff8aa0",
     "eye_at": [
      0.0,
      0.484,
@@ -847,9 +863,10 @@
      12,
      95
     ],
-    "rh": 0.075,
-    "n": 8,
-    "bend": 55
+    "rh": 0.1,
+    "n": 6,
+    "bend": 55,
+    "thick": 0.012
    },
    {
     "pod": "l",
@@ -858,36 +875,20 @@
      -14,
      262
     ],
-    "rh": 0.075,
-    "n": 8,
-    "bend": 55
+    "rh": 0.1,
+    "n": 6,
+    "bend": 55,
+    "thick": 0.012
    },
    {
     "at": [
      -52,
      10
     ],
-    "rh": 0.086,
-    "n": 9,
-    "bend": 45
-   },
-   {
-    "at": [
-     30,
-     -75
-    ],
-    "rh": 0.063,
+    "rh": 0.11,
     "n": 7,
-    "bend": 45
-   },
-   {
-    "at": [
-     32,
-     200
-    ],
-    "rh": 0.081,
-    "n": 8,
-    "bend": 50
+    "bend": 50,
+    "thick": 0.012
    }
   ]
  },
@@ -914,7 +915,20 @@
   }
  },
  "extras": {
-  "shines": [],
+  "shines": [
+   {
+    "at": [
+     0.0,
+     0.486,
+     1.3766
+    ],
+    "r": 0.0075,
+    "depth": 0.6,
+    "bone": "head",
+    "material": "glow-shine",
+    "colour": "fff0f4"
+   }
+  ],
   "glows": [
    {
     "at": [
@@ -1047,51 +1061,61 @@
     "material": "leather-tar",
     "bone": "hips",
     "at": [
-     -24,
-     -10
+     -13,
+     -9
     ],
-    "r": 0.0084,
-    "hang": 0.18
+    "to": -48,
+    "r": 0.017,
+    "hang": 0.2,
+    "bulb": 1.7
    },
    {
     "material": "leather-tar",
     "bone": "hips",
     "at": [
-     -24,
-     6
+     -13,
+     3
     ],
-    "r": 0.007699999999999999,
-    "hang": 0.24
+    "to": -55,
+    "r": 0.019,
+    "hang": 0.26,
+    "bulb": 1.8
    },
    {
     "material": "leather-tar",
     "bone": "hips",
     "at": [
-     -24,
-     14
+     -13,
+     13
     ],
-    "r": 0.006999999999999999,
-    "hang": 0.12
+    "to": -46,
+    "r": 0.015,
+    "hang": 0.14,
+    "bulb": 1.6
+   },
+   {
+    "material": "leather-tar",
+    "bone": "hips",
+    "at": [
+     12,
+     24
+    ],
+    "to": -40,
+    "r": 0.015,
+    "hang": 0.16,
+    "bulb": 1.6
    },
    {
     "material": "leather-tar",
     "bone": "hips",
     "at": [
      22,
-     36
+     -40
     ],
-    "r": 0.0084,
-    "hang": 0.16
-   },
-   {
-    "material": "leather-tar",
-    "bone": "hips",
-    "at": [
-     -14,
-     -34
-    ],
-    "r": 0.006999999999999999,
-    "hang": 0.1
+    "to": -50,
+    "r": 0.014,
+    "hang": 0.14,
+    "bulb": 1.6
    },
    {
     "material": "leather-tar",
@@ -1100,38 +1124,20 @@
      5,
      165
     ],
-    "r": 0.0084,
-    "hang": 0.2
+    "r": 0.014,
+    "hang": 0.2,
+    "bulb": 1.6
    },
    {
     "material": "leather-tar",
     "bone": "hips",
     "at": [
      -8,
-     200
+     205
     ],
-    "r": 0.007699999999999999,
-    "hang": 0.14
-   },
-   {
-    "material": "leather-tar",
-    "bone": "hips",
-    "at": [
-     30,
-     -80
-    ],
-    "r": 0.006999999999999999,
-    "hang": 0.12
-   },
-   {
-    "material": "leather-tar",
-    "bone": "hips",
-    "at": [
-     10,
-     110
-    ],
-    "r": 0.006999999999999999,
-    "hang": 0.1
+    "r": 0.013,
+    "hang": 0.14,
+    "bulb": 1.5
    }
   ],
   "plates": [
@@ -1164,6 +1170,119 @@
     "nlon": 16,
     "bone": "hips",
     "material": "metal-brass"
+   },
+   {
+    "lat": [
+     -27,
+     -13
+    ],
+    "lon": [
+     -16,
+     16
+    ],
+    "off": 0.012,
+    "thick": 0.03,
+    "nlon": 6,
+    "bone": "hips",
+    "material": "leather-recess",
+    "colour": "1a120c",
+    "tag": "grille"
+   },
+   {
+    "lat": [
+     -27,
+     -12
+    ],
+    "lon": [
+     -14.0,
+     -11.6
+    ],
+    "off": 0.032,
+    "thick": 0.05,
+    "nlon": 1,
+    "bone": "hips",
+    "material": "metal-helm",
+    "tag": "grille"
+   },
+   {
+    "lat": [
+     -27,
+     -12
+    ],
+    "lon": [
+     -8.8,
+     -6.4
+    ],
+    "off": 0.032,
+    "thick": 0.05,
+    "nlon": 1,
+    "bone": "hips",
+    "material": "metal-helm",
+    "tag": "grille"
+   },
+   {
+    "lat": [
+     -27,
+     -12
+    ],
+    "lon": [
+     -3.6,
+     -1.2
+    ],
+    "off": 0.032,
+    "thick": 0.05,
+    "nlon": 1,
+    "bone": "hips",
+    "material": "metal-helm",
+    "tag": "grille"
+   },
+   {
+    "lat": [
+     -27,
+     -12
+    ],
+    "lon": [
+     1.6,
+     4.0
+    ],
+    "off": 0.032,
+    "thick": 0.05,
+    "nlon": 1,
+    "bone": "hips",
+    "material": "metal-helm",
+    "tag": "grille"
+   },
+   {
+    "lat": [
+     -27,
+     -12
+    ],
+    "lon": [
+     6.8,
+     9.2
+    ],
+    "off": 0.032,
+    "thick": 0.05,
+    "nlon": 1,
+    "bone": "hips",
+    "material": "metal-helm",
+    "tag": "grille"
+   },
+   {
+    "lat": [
+     -27,
+     -12
+    ],
+    "lon": [
+     12.0,
+     14.4
+    ],
+    "off": 0.032,
+    "thick": 0.05,
+    "nlon": 1,
+    "bone": "hips",
+    "material": "metal-helm",
+    "tag": "grille"
    }
   ],
   "pipes": [

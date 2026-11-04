@@ -497,6 +497,7 @@ No Meshy. The model's own rigid skin and extra bones are kept; the script rename
 | Dredge r3j | 2026-11-04 20:30 | none (credit-free) | - | r3i limb loss fixed (per-part decimation budgets, `protect`), shards dropped, smaller pods, warm gold, darker pool | 0 | Kept |
 | Dredge r3k | 2026-11-04 21:30 | none (credit-free) | - | a bigger hook, deeper dents, knee joints and bent knees, shoulder smoke, brighter brass and lighter limbs | 0 | Kept |
 | Dredge r3l | 2026-11-04 23:30 | none (credit-free) | - | olive bronze hull, torn holes with peeled teeth breaking the outline, winch seated, a smoke ribbon off a stack, a cracked blue-grey porthole | 0 | Kept |
+| Dredge r3m | 2026-11-05 00:30 | none (credit-free) | - | heavy tar runs with drops, three bigger torn holes, smoke over both shoulders, a pink-red pupil with a white heart, the grille, a softer hull top | 0 | Kept |
 
 ## Blender-driven modelling (vs Meshy)
 The owner's friend made Dredge in Blender, probably by driving it through a Blender MCP server (an LLM sends bpy

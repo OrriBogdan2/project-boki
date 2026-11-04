@@ -918,6 +918,7 @@
 			"sheen": 0.0,
 			"desat": 0.16,
 			"light_neutral_warm": 0.5,
+			"top_light": 0.55,
 			"rim_far": 0.4,
 			"rim_far_color": [
 				0.95,

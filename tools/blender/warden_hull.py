@@ -421,6 +421,9 @@ def extras(ob, spec, seed=1):
         last = pts[-1]
         pts += [last + Vector((0, 0, -rn["hang"] * k / 2)) for k in (1, 2)]
         WP._append(ob, _tube(pts, rn["r"], 5), rn["bone"], tar)
+        if rn.get("bulb"):          # (a heavy run ends in a drop: the art's big black drips read at the match camera)
+            WP.add_orb(ob, {"at": tuple(pts[-1] + Vector((0, 0, -rn["r"] * 0.6))), "r": rn["r"] * float(rn["bulb"]),
+                            "bone": rn["bone"], "material": rn["material"], "colour": rn.get("colour", "1a1416")})
     for pl in spec.get("plates", []):
         mat = WP._mat_index(ob, pl["material"], pl.get("colour", "6c6762"))
         WP._append(ob, _sphere_patch(hc, hr * (1.0 + pl["off"]), pl["lat"][0], pl["lat"][1], pl["lon"][0], pl["lon"][1],

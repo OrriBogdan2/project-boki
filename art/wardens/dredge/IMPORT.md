@@ -117,4 +117,10 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   collar under it); a short iron stack behind the winch (`anchor_stack`, an anchor at a fixed `pos`) trailing a
   thin wavering smoke ribbon (LDFx.wisp, ld_fx mode 13) in place of the round puffs; the porthole's glass wider
   (inner 0.058) in dark blue-grey with eight white crack strips (`glow-crack`) and a small red pupil (orb 0.02).
+- **r3m (credit-free, ORCH's r3l review):** seven heavy tar runs (r 13-19 mm, `bulb`: each ends in a drop) from the
+  porthole's lip, the grille and the side port down the front, two on the back, in place of nine thin ones; three
+  bigger torn holes (rh 0.1-0.11, 6-7 teeth 12 mm thick: the pods' outer edges and the low belly) in place of five
+  small ones; smoke ribbons from the stack and over both shoulders in turn (`anchor_smoke_l/r` on the pods); the
+  pupil pink-red (ff2a50) with a white heart (`glow-shine`); the grille under the porthole (a dark plate, six brass
+  slats); the hull's top softer at the match camera (the look's `top_light` 0.55, a darker painted highlight).
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.
