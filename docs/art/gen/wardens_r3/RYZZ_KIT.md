@@ -6,4 +6,7 @@
 - Back: three copper lightning rods; the middle one scorched and bent = her relic (the first rod she climbed).
 - Power: hot-pink lightning straight from her hands (finger-gun cast pose); pink veins on the forearms. No weapon, no jars.
 - 3D notes: slimmer, longer-legged proportions than the art (~8 heads); scar, wink and relic rod on the same side in every view.
-- Still to come: turnaround + side, ult splash.
+- 3D views (separate runs): ryzz_front.webp (A-pose, use this), ryzz_34.webp, ryzz_back.webp. Side view: still to come.
+- ryzz_back.webp draws FOUR rods with two bent: wrong. She has THREE, only the middle one scorched and bent.
+- review/ryzz_head_sheet_WRONG_SIDES.webp: face reference only; its front view winks the wrong eye. Correct: her RIGHT eye (viewer's left in front view) is closed, and the scar runs through that same eye.
+- ryzz_splash.webp: ult splash (square; a 16:9 version may replace it). Ignore the diagonal thigh bands; the bands sit straight at the boot tops.
