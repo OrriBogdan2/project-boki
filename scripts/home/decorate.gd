@@ -211,7 +211,7 @@ func _draw_footprint(fp: Vector2i) -> void:
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		footprint.add_child(mesh)
 	FarmBuildUi.outline(footprint, cells, ghost_ok)
-	FarmBuildUi.note(footprint, cells, "" if ghost_ok else String(room.why))
+	FarmBuildUi.note(footprint, cells, "")
 
 # ------------------------------------------------------------------ putting down
 ## A click on the floor with a piece in hand: places it, then leaves decorate mode unless Shift keeps it in hand.

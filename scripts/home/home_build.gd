@@ -1435,7 +1435,7 @@ func _draw_cells() -> void:
 		else:
 			FarmBuildUi.note(ghost_cells, cells, "No water within %d tiles" % FarmWater.reach(), Color("e8e2c8"))
 	else:
-		FarmBuildUi.note(ghost_cells, cells, "" if ghost_ok else why)
+		FarmBuildUi.note(ghost_cells, cells, "")
 	if held["kind"] == "b" and not cells.is_empty():
 		# where the door ends up
 		var door := HomeLayout.door_at(id, cells[0].x, cells[0].y, int(held["r"]))
@@ -1490,7 +1490,7 @@ func _update_keys() -> void:
 	var state := {"sweep": sweep}
 	var text := "Pick something from the bar, or click anything you've placed (or a building) to move it."
 	if held.is_empty():
-		var over := _tag_under_mouse()
+		var over := "" if is_instance_valid(menu) else _tag_under_mouse()
 		_light(_node_of(over) if over != "w" else null)
 		state["over"] = occ_name(over)
 		if over == "w":

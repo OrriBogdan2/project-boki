@@ -221,8 +221,8 @@ func run(m: Node) -> void:
 	var outline := FarmBuildUi.count(hb.ghost_cells, "outline") == 4 and FarmBuildUi.count(hb.ghost_cells, "grid") >= 4
 	ok(hb.ghost_ok and outline, "a good spot is accepted and shows the footprint outline and the snapping grid")
 	hb.cells = [Vector2i(1, 1)]; hb._check_cells(); hb._draw_cells()
-	ok(not hb.ghost_ok and FarmBuildUi.count(hb.ghost_cells, "note") == 1,
-			"a bad spot floats its reason over the footprint")
+	ok(not hb.ghost_ok and hb.why != "" and FarmBuildUi.count(hb.ghost_cells, "note") == 0,
+			"a bad spot gives its reason at the cursor ('%s'), not as a second label" % hb.why)
 	hb.cells = cc; hb._check_cells()
 	ok(hb.place_held(), "placed")
 	var camp := _entry(L, "lumber_camp")

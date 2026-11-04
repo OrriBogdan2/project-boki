@@ -44,8 +44,9 @@ func _farm_save() -> void:
 	d["tutorial"] = {"hatched": true, "intro": true}
 	Save.d = d
 	Save.d["gems"] = 900
-	Save.d["stats"] = {"extracts": 6, "bosses": 3, "caught": 10, "harvested": 200, "hatched": 6, "fb_built": 0}
-	Save.d["extracts"] = 6
+	Save.d["stats"] = {"extracts": 10, "bosses": 3, "caught": 10, "harvested": 400, "hatched": 6, "fb_built": 0}
+	Save.d["extracts"] = 10
+	Save.d["matches"] = 1
 	Save.d["mats"] = {"wood": 40, "stone": 30, "fibre": 20}
 
 func _spot(hb: HomeBuild, p: Vector3, skip := 0) -> Array:
@@ -61,6 +62,7 @@ func _spot(hb: HomeBuild, p: Vector3, skip := 0) -> Array:
 				if seen == skip:
 					return cs
 				seen += 1
+	print("BUSHOT no spot: %s %s held=%s" % [hb.why, p, str(hb.held)])
 	return []
 
 func _put(hb: HomeBuild, cs: Array) -> void:
@@ -105,13 +107,15 @@ func _farm() -> void:
 	hb.toggle()
 	var land := HomeLayout.LANDING
 	hb.take("house")
-	_put(hb, _spot(hb, land + Vector3(0, 0, -8)))
+	var house_cells := _spot(hb, land + Vector3(0, 0, -8))
+	_put(hb, house_cells)
+	var hpos := Vector3(house_cells[0].x, 0, house_cells[0].y)
 	hb.take("crop_patch")
-	_put(hb, _spot(hb, home.spots["house"] + Vector3(7, 0, 2)))
+	_put(hb, _spot(hb, hpos + Vector3(7, 0, 2)))
 	hb.take("rug_long")
-	_put(hb, _spot(hb, home.spots["house"] + Vector3(-1, 0, 5)))
+	_put(hb, _spot(hb, hpos + Vector3(-1, 0, 5)))
 	hb.take("lantern")
-	_put(hb, _spot(hb, home.spots["house"] + Vector3(3, 0, 5)))
+	_put(hb, _spot(hb, hpos + Vector3(3, 0, 5)))
 	hb.toggle()
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -121,21 +125,25 @@ func _farm() -> void:
 		await main.get_tree().process_frame
 	hb = home.hb
 	hm = home
+	FarmBuilder.draw_up()
 	home._close_panel()
 	if main.fade: main.fade.reveal(0.05)
 	await main.get_tree().create_timer(3.2).timeout
 	home.day_t = 0.5
-	var focus: Vector3 = home.spots["house"] + Vector3(2.0, 0, 3.0)
+	var focus: Vector3 = hpos + Vector3(2.0, 0, 5.5)
 	_look(home, focus, 1.0)
 	# 1. the catalog
 	hb.toggle()
 	hb.cat = "Furniture"
 	hb._build_bar()
 	print("BUSHOT tabs: %s" % ", ".join(hb._tabs()))
+	hb.debug_m = Vector2(-1000.0, -1000.0)
+	hb.tick(0.05)
 	await _shot("01_farm_catalog",
-		"Build mode on the farm: category tabs, search, big tiles with pictures, prices and owned counts, easing in"
+		"Build mode on the farm: category tabs, search, big tiles with pictures, prices and owned counts, easing in")
 	# 2. a green ghost with the key hints at the cursor
 	hb.take("rug_long")
+	print("BUSHOT held: %s" % str(hb.held))
 	var open_cell := _spot(hb, focus + Vector3(-3, 0, 2))
 	var free_mid := Vector2(open_cell[0].x + 1.5, open_cell[0].y + 1.0)
 	await _settle()
@@ -177,7 +185,7 @@ func _farm() -> void:
 func _strip(hb: HomeBuild, cell: Vector2) -> void:
 	await _prep()
 	var centre: Vector2 = hm.cam.unproject_position(Vector3(cell.x, 0.4, cell.y))
-	var crop := Rect2i(int(centre.x) - 150, int(centre.y) - 110, 300, 220)
+	var crop := Rect2i(int(centre.x) - 130, int(centre.y) - 120, 380, 240)
 	var frames: Array = []
 	hb.rotate_held()
 	for i in 5:
