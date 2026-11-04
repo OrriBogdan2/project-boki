@@ -122,7 +122,7 @@
     null,
     null,
     null,
-    -0.5
+    -0.62
    ],
    "hsv": [
     0.95,
@@ -279,14 +279,14 @@
    "name": "mask",
    "slot": "leather",
    "box": [
-    -0.095,
-    0.095,
+    -0.085,
+    0.085,
     0.0,
     0.3,
     1.46,
     1.67
    ],
-   "facing": -0.1,
+   "facing": 0.2,
    "hsv": [
     [
      0.0,
@@ -770,8 +770,15 @@
  "thimbles": {
   "bone": "hand.R",
   "fingers": 4,
-  "r": 0.013,
-  "band": 0.045
+  "r": 0.012,
+  "band": 0.03,
+  "length": 0.028,
+  "claw": 0.065,
+  "forward": [
+   0.0,
+   1.0,
+   0.0
+  ]
  },
  "smooth_parts": [
   "mask"
@@ -799,12 +806,14 @@
    ]
   ],
   "leg_r": 0.0,
-  "k": 0.12,
-  "k_back": 0.32,
+  "k": 0.15,
+  "k_back": 0.25,
   "k_tail": 0.35,
   "tail": -1.0,
   "floor": 0.14,
-  "flare": 0.0
+  "flare": 0.0,
+  "hem_colour": "6c1c2d",
+  "hem_val": 0.22
  },
  "shears": {
   "at": [
@@ -813,7 +822,7 @@
    0.76
   ],
   "tilt": 14,
-  "length": 0.2,
+  "length": 0.24,
   "bone": "hips"
  },
  "lapel_needle": {
@@ -842,7 +851,10 @@
    "side_only": 0.35,
    "val_lo": 0.9,
    "val_hi": 1.05,
-   "sat_max": 0.12
+   "sat_max": 0.12,
+   "slots": [
+    "metal"
+   ]
   },
   {
    "mode": "flat",
@@ -912,7 +924,85 @@
    0.35,
    1.0
   ],
-  "period": 0.012,
-  "dark": 0.78
- }
+  "period": 0.016,
+  "dark": 0.55
+ },
+ "touch_up": [
+  {
+   "mode": "flat",
+   "colour": "e6e1de",
+   "box": [
+    -0.11,
+    0.11,
+    0.56,
+    0.72
+   ],
+   "sat_max": 0.6,
+   "hue": [
+    0.9,
+    1.0
+   ],
+   "sat_min": 0.25,
+   "val_lo": 0.9,
+   "val_hi": 1.05,
+   "front": 0.45
+  },
+  {
+   "mode": "flat",
+   "colour": "e6e1de",
+   "box": [
+    -0.11,
+    0.11,
+    0.56,
+    0.72
+   ],
+   "sat_max": 0.6,
+   "hue": [
+    0.0,
+    0.04
+   ],
+   "sat_min": 0.25,
+   "val_lo": 0.9,
+   "val_hi": 1.05,
+   "front": 0.45
+  },
+  {
+   "mode": "flat",
+   "colour": "e5d0cc",
+   "box": [
+    -0.11,
+    0.11,
+    0.56,
+    0.72
+   ],
+   "sat_max": 0.6,
+   "hue": [
+    0.9,
+    1.0
+   ],
+   "sat_min": 0.25,
+   "val_lo": 0.9,
+   "val_hi": 1.05,
+   "side_only": 0.45
+  },
+  {
+   "mode": "flat",
+   "colour": "e5d0cc",
+   "box": [
+    -0.11,
+    0.11,
+    0.56,
+    0.72
+   ],
+   "sat_max": 0.6,
+   "hue": [
+    0.0,
+    0.04
+   ],
+   "sat_min": 0.25,
+   "val_lo": 0.9,
+   "val_hi": 1.05,
+   "side_only": 0.45
+  }
+ ]
 }

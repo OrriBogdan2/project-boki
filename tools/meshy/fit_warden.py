@@ -3160,6 +3160,18 @@ def lengthen(ob, img, ln):
         co[sel, 1] *= k_out
     me.vertices.foreach_set("co", co.ravel())
     me.update()
+    if ln.get("hem_colour"):
+        # (the scan's dark dagged hem and lining, stretched, read as a zig-zag: the stretched coat's dark texels
+        # take the coat's colour)
+        moved = set(np.nonzero(sel)[0].tolist())
+        col = np.array(K.hexcol(ln["hem_colour"]), np.float32)
+        m = face_mask(ob, img, lambda poly, c, mat: all(v in moved for v in poly.vertices))
+        q = px[..., :3]
+        dark = m & (q.max(axis=2) < float(ln.get("hem_val", 0.22)))
+        q[dark] = col * (0.75 + 0.5 * q[dark].max(axis=1, keepdims=True) / max(float(ln.get("hem_val", 0.22)), 1e-3))
+        px[..., :3] = q
+        img.pixels = px.ravel()
+        log("hem: %d dark texels to the coat's colour" % int(dark.sum()))
     log("lengthened the coat: %d vertices" % int(sel.sum()))
 
 
