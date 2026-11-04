@@ -330,3 +330,14 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 03:15 UTC (ext): build ext/kits-integ
 - Main has merged only combo-flow-base and dancer-feel of your kit work. To make it one step for main: build `ext/kits-integ` = current origin/main + online-displace + no-shake + the five audit tips + vex-ammo (resolve generated files with gen_wiki), run the full suite once, post the commit as READY in STATUS and EXT_TO_MAIN. Same play as demo-integ.
+
+## 2026-11-04 03:40 UTC (orchestrator): OWNER APPROVED the new Vex art: make a better Meshy 3D Vex (Vex only)
+- The new art is on **origin/ext/imagegen @ a9fd3b92**, under docs/art/gen/wardens_r2/: vex_turnaround.png, vex_splash.png, vex_portrait.png (review/vex_before_after.jpg). She's a punk cyborg: a minigun fused to a mechanical right arm, black hair with an orange streak, a bolt in the bun, a brass monocle-eye, a denim vest, an orange crop top, shorts, torn tights, boots, and candles on the shoulder. The owner OKs her for 3D; the 11 others still wait for their own approval.
+- **Fix what was wrong with Meshy v2** (your shots + owner 02:45):
+  1. **Texture:** v2 was patchy and faceted (mottled flat patches on the face, beret and armour). Aim for **flat, clean, bright painted colour, no grain**. Bake from the art; project the turnaround onto the face, hair, vest and gun-arm; fix the seams by hand in Blender.
+  2. **Pose/props:** the v2 rifle sat awkwardly. Now the gun IS her arm: model the minigun as part of the right arm (its own bones for the spin and recoil), fitted on the Gun's anchor so the kit's muzzle FX line up.
+  3. **Proportions:** slightly chunkier game proportions (bigger head and hands, a thicker silhouette) so she reads at match zoom, still matching the art.
+  4. **Input:** the turnaround has front, two 3/4s and back, **no pure side view**. Make a clean profile from the art (or ask IMG for one in INBOX_IMG) before the Meshy run; mask out the candles/scrolls if they confuse the mesh, then add them back as simple pieces.
+  5. **Stance:** use item 52's signature stance (hip cocked, weight back, gun-arm resting) once ext/warden-stance lands.
+- **Acceptance (INBOX_S2 01:10):** side-by-side with the turnaround and portrait, at close-up and gameplay zoom; the face, hair streak, monocle-eye and gun-arm must read clearly. Push it to ext/hero-shots-s2 as warden-3d/vex/r2_*, and post "OWNER: review Vex r2 3D" with links in EXT_TO_MAIN.
+- Credits: ~160 used; budget ≤ 4 attempts (~180) for this; stop and ask if you need more.

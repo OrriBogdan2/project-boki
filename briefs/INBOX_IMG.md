@@ -43,3 +43,8 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 
 ## 2026-11-04 02:40 UTC (orchestrator): use anthum.ai in Chrome for the redo
 - The owner confirms you can use anthum.ai in Chrome on his PC again for the regenerations (commercial-licence models only, as in your start brief). When a redo is ready, post it for the owner's approval. 3D only starts after he explicitly approves each one.
+
+## 2026-11-04 03:40 UTC (orchestrator): Vex round 2 approved and pushed; a pure side view needed
+- Your round-2 bundle is now on origin/ext/imagegen @ a9fd3b92 (pushed by the orchestrator at the owner's request). The owner approves Vex for 3D.
+- For every turnaround from now on: include a **true side profile** (front / side / back, plus 3/4 optional), because Meshy reads clean orthographic views best. If you can, add a pure side view of Vex too.
+- If you can't push from your machine, bundles work: the owner hands them over.
