@@ -558,7 +558,7 @@ func heel_spot() -> Vector3:
 	if guide.size() > 0 and lead_dir != Vector2.ZERO:
 		var gto: Vector3 = guide.get("to", Vector3.INF)
 		var gd := Vector2(gto.x - o.pos.x, gto.z - o.pos.z).length() if gto != Vector3.INF else 99.0
-		var ahead := clampf(gd - 1.2, 1.2, 4.5)
+		var ahead := clampf(gd - 1.2, 1.2, 8.0)
 		for kk in [1.0, 0.75, 0.5, 0.3]:
 			offs.append(lead_dir * ahead * kk)
 	if threat and is_instance_valid(threat) and not threat.dead:
@@ -597,12 +597,21 @@ func tut(id: String, to: Vector3) -> void:
 		guide = {"id": id, "to": to, "t": 0.0, "said": false, "demo_t": 0.4}
 		lead_dir = Vector2.ZERO
 		lead_t = 0.0
-		if to != Vector3.INF and h() and id in ["chest", "goexit", "uplink", "extract"]:
+		if to != Vector3.INF and h() and Tutorial.leads(id):
 			# off it goes straight away, the straight way first (the walked path comes on the next look)
 			guide["dir"] = Vector2(to.x - h().pos.x, to.z - h().pos.z).normalized()
 			lead_dir = guide["dir"]
 			lead_t = 0.4
 	guide["to"] = to
+
+## Stalled: it runs back to you and says the step again (the card and marker pulse too).
+func nag() -> void:
+	if guide.size() == 0:
+		return
+	guide["said"] = false
+	guide["back_t"] = 2.5
+	pose = "beckon"
+	pose_t = 2.0
 
 func _tut_tick() -> void:
 	var o := h()
@@ -611,7 +620,9 @@ func _tut_tick() -> void:
 	guide["t"] = float(guide["t"]) + 0.4
 	# which way to go: straight there, or the way a bot would walk it (bridges, gaps)
 	lead_dir = Vector2.ZERO
-	if to != Vector3.INF and o.flat_dist(to) > 2.5 and id in ["chest", "goexit", "uplink", "extract"]:
+	guide["back_t"] = maxf(0.0, float(guide.get("back_t", 0.0)) - 0.4)
+	var back := float(guide["back_t"]) > 0.0       # (just nagged: it runs back to you first)
+	if to != Vector3.INF and not back and o.flat_dist(to) > 2.5 and Tutorial.leads(id):
 		lead_t -= 0.4
 		if lead_t <= 0.0:
 			lead_t = 0.8
@@ -628,7 +639,7 @@ func _tut_tick() -> void:
 			m.kin_bark(k, txt, "tut", 4.0)
 		if to != Vector3.INF:
 			look = to; look_t = 2.0
-			pose = "point" if id in ["chest", "goexit", "uplink", "extract"] else ("growl" if id in ["shoot", "throw", "kin1"] else "beckon")
+			pose = "point" if Tutorial.leads(id) else ("growl" if id in ["shoot", "throw", "kin1"] else "beckon")
 			pose_t = 1.6
 	# showing you how: a dash, a jump
 	guide["demo_t"] = float(guide["demo_t"]) - 0.4
