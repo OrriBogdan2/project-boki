@@ -686,3 +686,9 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
   3. Remove the current behaviour where the extra Masks simply appear. Saves that already have them keep them.
 - Files: farm_hob.gd / farm_tutorial.gd (ext's farm-hob code) + the empty90 "second-Mask beat" code (class_unlock / class_pick). Keep the Masks screen and unlock rules otherwise as they are.
 - Assert: on a fresh save after the first expedition, no second Mask is owned until you accept Hob's offer; the offer shows exactly the three; picking one unlocks it. Screenshots: Hob calling you over, the offer dialogue, the three-Mask pick.
+
+## 88. BUG: big lag while the Mask cards are on screen and while accepting one (owner, 23:05 UTC Nov 4)
+- Owner: "it's also very laggy when the masks are on the screen / accepting them."
+- Likely causes to profile (on a real GPU build if possible): each Mask preview builds a full 3D Warden (.glb load plus skeleton set-up) and/or plays a clip at once (three at a time), maybe several SubViewports rendering every frame; the high-resolution portrait/splash textures loading synchronously on open; and the accept running the Mask moment, a model swap and a save on the same frame.
+- Fix: preload or cache the three preview models (or show the painted portraits with only the hovered card animating in 3D); render previews at a lower resolution and update only the focused one; load textures asynchronously (ResourceLoader threaded) with a short fade-in; spread the accept's work over a few frames behind the Mask-moment fade. Target: no frame over ~33 ms while the pick is open or on accept (measure frame times and include them in the report).
+- Do it with item 87 (same screens).
