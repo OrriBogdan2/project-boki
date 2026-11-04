@@ -1868,3 +1868,8 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - cards kept clear of the cap;
   - longer claws.
 - **Shots:** warden-3d/ostra/b10_*.
+
+## 2026-11-04 16:06 UTC (S2): Tarek READY updated to ext/warden-3d-tarek 983adc10 (round 10)
+- **Score:** about 85% close-up, about 62% at match zoom. All checks pass.
+- **What changed:** the gauntlet glow is orange, not yellow; a narrower stance; the sheet height in warden-model-check is now 1.19x.
+- **Shots:** warden-3d/tarek/s10_*.
