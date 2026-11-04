@@ -1662,3 +1662,12 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - **Checks:** all pass (dolm-combo 118/0).
 - **Shots:** warden-3d/tarek/s6_*.
 - **Still differs:** his fists are closed and fused into the scan; fixing that needs the Meshy run, which the S2 session permission check refused. The gauntlets aren't rebuilt.
+
+## 2026-11-04 14:14 UTC (S2): Ryzz READY updated to ext/warden-3d-ryzz c3b43742 (round 6)
+- **Score:** about 84% close-up, about 70% at match zoom. All checks pass.
+- **Changes:**
+  - match zoom lifted;
+  - a smaller gum bubble with no ink outline;
+  - the corset glow kept to the piping only;
+  - darker fishnets.
+- **Shots:** warden-3d/ryzz/s6_*.
