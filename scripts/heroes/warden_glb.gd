@@ -35,6 +35,7 @@ const BONES := {
 	"wings": "Rig/Torso/Wings",
 }
 const OPTIONAL := ["cape", "scarf", "tail", "wings"]
+const LEG_BONES := ["thigh.L", "shin.L", "thigh.R", "shin.R"]
 ## A Warden's variant of the contract (RIG_CONTRACT "Variant bones"): its own extra bones -> their parents. A .glb of
 ## that Warden must carry them (WardenSkeleton.mismatches); they are skinned like the rest and follow their parent
 ## bone, and the Warden's kit poses them on top of that (pose_extra): Dredge's grab-claw fingers, the eye, the winch
@@ -199,6 +200,9 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	var sync := Sync.new()
 	sync.name = "Sync"
 	sync.setup(root, skel, rest)
+	if look(art(arch)).get("legs_rigid", false):
+		for b in LEG_BONES:
+			sync.rigid_legs[WardenSkeleton.find(skel, b)] = true
 	glb.add_child(sync)
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
@@ -728,11 +732,36 @@ static func model_xf(root: Node3D, nd: Node3D) -> Transform3D:
 static func retarget(now: Transform3D, link: Array) -> Transform3D:
 	return now * (link[2] as Transform3D) * (link[3] as Transform3D)
 
+## retarget for a leg bone without the shear (warden_look "legs_rigid": Tarek): the rig's Legs node is scaled by
+## the archetype's leg length on y only (Models.hunter), so a leg swung inside it is sheared, which a thin
+## procedural leg hides but a baggy trouser and a big foot don't (their width, turned toward the vertical, grew
+## by the leg factor: Tarek's 3.2 turned his trousers into spikes in a run, a dash and a lunge). The bone keeps
+## retarget's origin and turns as the rig's leg points; along that line it shortens as the rig's leg does, so
+## the knee and the foot land where the procedural ones do, and its girth stays.
+static func retarget_rigid(now: Transform3D, link: Array) -> Transform3D:
+	var xf := retarget(now, link)
+	var rest := (link[2] as Transform3D).affine_inverse()
+	var d := now.basis.y.normalized()
+	var k := now.basis.y.length() / maxf(rest.basis.y.length(), 1e-6)
+	var turn := _along_y(now.basis) * _along_y(rest.basis).inverse()
+	var stretch := Basis.IDENTITY
+	for i in 3:
+		stretch[i] += d * d[i] * (k - 1.0)      # (I + (k - 1) d d^T: a scale by k along d)
+	xf.basis = stretch * turn * (link[3] as Transform3D).basis
+	return xf
+
+## A basis's rotation keeping its y axis's direction (the leg's line), x then z made square to it.
+static func _along_y(b: Basis) -> Basis:
+	var y := b.y.normalized()
+	var x := (b.x - y * b.x.dot(y)).normalized()
+	return Basis(x, y, x.cross(y))
+
 ## Each frame, after the hunter's animation, puts every mapped bone where its rig node has moved it.
 class Sync extends Node:
 	var root: Node3D
 	var skel: Skeleton3D
 	var links: Array = []       # [bone index, rig node, node rest (model space) inverse, bone rest (skeleton space)]
+	var rigid_legs := {}        # bone index -> true: the legs retargeted without the Legs node's shear (retarget_rigid)
 	var springs := Springs.new()  # the spring_ bone chains (braids) swinging on top
 	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
 
@@ -758,7 +787,9 @@ class Sync extends Node:
 
 	func apply() -> void:
 		for l in links:
-			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
+			var now := WardenGlb.model_xf(root, l[1])
+			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget_rigid(now, l) if rigid_legs.has(int(l[0]))
+					else WardenGlb.retarget(now, l))
 
 ## Hanging pieces on bone chains (RIG_CONTRACT "Spring chains"): bones named spring_<name>_<i>, each the next
 ## one's parent, the first a child of a contract bone (a braid hangs from the head). Each chain is a rope of its
