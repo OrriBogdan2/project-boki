@@ -814,11 +814,14 @@ def orbit_props(arm, spec):
             ob.matrix_world = mw
             out.append(ob)
             continue
-        bld.torus(p + out_dir * r * 0.5, out_dir, r * 0.62, r * 0.13, 18, 6, (0.05, 0.05, 0.45, 0.45), "rock", 0.0)
-        _disc(bld, p + out_dir * r * 0.5, out_dir, r * 0.62, "rim", (0.55, 0.05, 0.95, 0.45), dome=-0.18)
-        _disc(bld, p + out_dir * r * 0.46, out_dir, r * float(spec.get("iris_r", 0.4)), "iris", (0.05, 0.55, 0.45, 0.95),
+        # (the opening on the rock's outer face, wherever `depth` puts it, so a rounder rock never hides it)
+        fz = float(spec.get("depth", 0.66)) * 0.88
+        oz = fz - 0.16
+        bld.torus(p + out_dir * r * fz, out_dir, r * 0.68, r * 0.14, 18, 6, (0.05, 0.05, 0.45, 0.45), "rock", 0.0)
+        _disc(bld, p + out_dir * r * fz, out_dir, r * 0.68, "rim", (0.55, 0.05, 0.95, 0.45), dome=-0.18)
+        _disc(bld, p + out_dir * r * oz, out_dir, r * float(spec.get("iris_r", 0.4)), "iris", (0.05, 0.55, 0.45, 0.95),
               dome=0.45)
-        bld.prism(p + out_dir * r * 0.66 - up * r * 0.24, p + out_dir * r * 0.66 + up * r * 0.24, r * 0.06, 4,
+        bld.prism(p + out_dir * r * (oz + 0.2) - up * r * 0.24, p + out_dir * r * (oz + 0.2) + up * r * 0.24, r * 0.06, 4,
                   (0.55, 0.55, 0.95, 0.95), "pupil", 0.0)
         ob = bld.object("%s_%d" % (spec["name"], i))
         mi = {"rock": _flat_material(ob, spec.get("slot", "leather"), spec["name"], img, "Closest")}
@@ -839,7 +842,7 @@ def orbit_props(arm, spec):
             an = bpy.data.objects.new("anchor_%s_%d" % (spec["name"].replace("orbit_", ""), i), None)
             bpy.context.scene.collection.objects.link(an)
             an.parent = ob
-            an.location = Vector(out_dir * r * 0.7)
+            an.location = Vector(out_dir * r * (fz + 0.05))
             out.append(an)
     log("orbit %s: %d props round %s" % (spec["name"], len(spec["items"]), tuple(round(x, 3) for x in c)))
     return out
@@ -1145,7 +1148,8 @@ def gauntlets(arm, spec, tag="gauntlet"):
                 p = c + out_d * rr * 1.02
                 s = rr * float(spec.get("plate", 0.62)) * rng.uniform(0.85, 1.15)
                 side = np.cross(ax, out_d)
-                _lumpy(bld, p, (side, ax, -out_d), (s, s * 1.25, s * 0.45), "rock", (0.05, 0.05, 0.45, 0.45),
+                _lumpy(bld, p, (side, ax, -out_d), (s, s * 1.25, s * float(spec.get("thick", 0.45))), "rock",
+                       (0.05, 0.05, 0.45, 0.45),
                        int(rng.integers(1, 9999)), rings=5, sides=8, lump=float(spec.get("lump", 0.3)))
         spans.append((sd, v0, len(bld.v), e, w, ax, L))
     ob = bld.object(tag.capitalize() + "s")
