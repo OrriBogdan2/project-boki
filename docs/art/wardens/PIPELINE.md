@@ -225,3 +225,13 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Vex r3b edit side 2 | 06:44 | 01a1a54c-f974-7239-9ea4-5a714210e1a8 | nano-banana-pro | as side, "her left arm hidden behind her body" | 9 | Kept |
 | Vex r3b A | 06:46 | 01a1a54f-35bf-734c-9ee7-55f81be998e5 | meshy-7.1 | 4 edited views (front, 3/4, side, back), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Kept: the face's smirk, chunky hair, eye plate on her right eye, gun-arm, backpack |
 | Vex r3b B | 06:46 | 01a1a54f-35c4-73d2-9fd2-ab8f7e9f5bce | meshy-7.1 | as A, enhancement on | 40 | Dropped: rounder cuter face, stringy hair; a cleaner lens (A's is replaced by geometry) |
+
+### Tarek (dolm) stage 1 runs, 2026-11-04 (balance 4993 before the fan-out; 85 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Tarek edit front | 09:07 | 01a1a5cf-f284-72dc-9f40-fcfd21bee436 | nano-banana-pro (image-to-image) | 9:16 crop; right fist lowered; stones, shards, ripples and ground line out | 9 | Kept |
+| Tarek edit 3/4 | 09:07 | 01a1a5cf-f279-714c-b8d1-bc7c41d2a765 | nano-banana-pro | same | 9 | Dropped: the lowered arm lost its stone bracer |
+| Tarek edit side | 09:07 | 01a1a5cf-f222-72f3-ba19-4041e00d0d94 | nano-banana-pro | same, the far arm hanging behind his body | 9 | Kept |
+| Tarek edit back | 09:07 | 01a1a5cf-f280-7465-ad2f-2aaf9ea36676 | nano-banana-pro | same | 9 | Kept |
+| Tarek edit 3/4 2 | 09:09 | 01a1a5d1-c105-7402-acba-02323e255f37 | nano-banana-pro | as 3/4, "BOTH forearms wear stone bracers" | 9 | Dropped: kept the fist raised (the run went without a 3/4) |
+| Tarek A | 09:10 | 01a1a5d2-9348-76b2-bd28-bb946e03b9b0 | meshy-7.1 | 3 edited views (front, side, back) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: blindfold, grin, chunky locs with copper beads, vest, sash, harness, both bracers, wrapped feet (the bracers' glowing cracks not painted: added as an emission layer) |

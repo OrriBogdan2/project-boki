@@ -308,7 +308,13 @@
     "mode": "dark",
     "k": 0.74,
     "colour": "ff8a1c"
-   }
+   },
+   "bones": [
+    "forearm.L",
+    "forearm.R",
+    "hand.L",
+    "hand.R"
+   ]
   }
  ],
  "studs": [

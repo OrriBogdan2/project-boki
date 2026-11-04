@@ -92,6 +92,7 @@ func run(main: Node) -> void:
 		_own_motion(a, "bulwark" if a != "bulwark" else "gunslinger")
 		_weapon(a)
 		_springs(a)
+		_orbits(a)
 		_own_look(a)
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
 	print("WARDENGLB_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
@@ -251,11 +252,13 @@ func _shading(a: String) -> void:
 		for si in (mi as MeshInstance3D).mesh.get_surface_count():
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
-			if sm == null or sm.shader != Models.HERO or not sm.get_shader_parameter("use_tex") \
+			# (the void slot is the starfield shader, RIG_CONTRACT "Materials")
+			var shader_ok := sm != null and (sm.shader == Models.HERO or sm.shader == WardenGlb.VOID)
+			if not shader_ok or not sm.get_shader_parameter("use_tex") \
 					or sm.get_shader_parameter("albedo_tex") == null or not sm in mats:
 				wrong += 1
 	ok(surfaces > 0 and wrong == 0,
-			"%s: all %d surfaces on the hero toon shader with the atlas, in the hit flash (%d not)"
+			"%s: all %d surfaces on the hero toon shader (or the void's) with the atlas, in the hit flash (%d not)"
 			% [a, surfaces, wrong])
 	m.free()
 
@@ -298,6 +301,34 @@ func _springs(a: String) -> void:
 	var rest := _spring_off(sk, sync)
 	ok(lag > 0.02 and rest < 0.01, "%s: %d spring chains trail a sideways move (tip %.3f m off) and settle (%.4f m)"
 			% [a, sync.springs.chains.size(), lag, rest])
+	m.free()
+
+## Props on an orbit (RIG_CONTRACT "Orbits"): over a second each circles its pivot (moves, at the same distance
+## from it), so the turning is the loader's, not baked into the .glb. (No orbit: nothing to check.)
+func _orbits(a: String) -> void:
+	var m := _model(a)
+	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync
+	if sync == null or sync.orbits.pivots.is_empty():
+		m.free()
+		return
+	sync._process(1.0 / 60.0)
+	var before: Array = []
+	for pv in sync.orbits.pivots:
+		for pr in pv[2]:
+			before.append([pr[0], (pr[0] as Node3D).global_position, (pv[0] as Node3D).global_position])
+	for i in 60:
+		sync._process(1.0 / 60.0)
+	var moved := INF
+	var drift := 0.0
+	for b in before:
+		var nd: Node3D = b[0]
+		var c: Vector3 = b[2]
+		moved = minf(moved, nd.global_position.distance_to(b[1]))
+		var r0 := Vector2(b[1].x - c.x, b[1].z - c.z).length()
+		drift = maxf(drift, absf(Vector2(nd.global_position.x - c.x, nd.global_position.z - c.z).length() - r0))
+	ok(moved > 0.05 and drift < 0.01,
+			"%s: %d orbit props circle their bone (each moved at least %.3f m in 1s, radius kept to %.4f m)"
+			% [a, before.size(), moved, drift])
 	m.free()
 
 ## A model's own look (content/rules/warden_look.json) reaches its surfaces: every surface of a slot it names
