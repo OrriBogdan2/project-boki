@@ -20,3 +20,4 @@ s2_gameplay_match.png, s2_gameplay_match_x4.png: the arena frame at match zoom
 s3_closeup_vs_art.png, s3_34_vs_art.png, s3_back_vs_art.png, s3_match_vs_art.png: stage 3 (credit-free fixes, the shared look fix 16c18b4f) beside the art
 s3_vs_turnaround.png, s3_vs_turnaround_game.png, s3_moves_1.png, s3_moves_2.png, s3_poses_game.png, s3_gameplay_match*.png: as s2
 s3_vs_s2.png: stage 3's close turnaround (top) over stage 2's
+s4_*: stage 4 (credit-free): the coat toward black-violet, a violet halo core, a black-hole orb (dark ball in bright crossed rings), the halo's glow kept violet at match zoom; s4_vs_s3.png: s4 over s3
