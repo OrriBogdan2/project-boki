@@ -927,3 +927,6 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 
 ## 2026-11-04 02:10 UTC (orchestrator): DECISION? 50 original Boki + rideable ones
 - DECISION? The owner wants ~50 original Boki species (real-animal/element fusions like today's 9, never franchise creatures), incl. ~6-8 big rideable ones, all Meshy-modelled and editable later. S2 designs the roster for owner review; the riding mechanic gets a spec + owner OK first. This is an owner request ahead of the "vertical slice first" order, so it runs in S2's art lane and doesn't block the slice.
+
+## 2026-11-04 02:30 UTC (orchestrator): DECISION? art ships in batches, video-visible first
+- DECISION? The Meshy art pass ships in batches (one sync each). Batch 1 = what the owner's video shows first: Vex, Zedran, Pin, Cinder and the starter/early Boki. Then the remaining Wardens and current Boki, then new species ~10 at a time. Main: please prioritise merging each READY art batch quickly.

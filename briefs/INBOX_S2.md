@@ -304,3 +304,10 @@ Build, in this order; post progress in EXT_TO_MAIN:
 - **Phase 2, art:** the image-gen session makes a turnaround per species (INBOX_IMG); then Meshy models them with creature rigs (shared skeleton per body type); same acceptance test vs the art.
 - **Riding** is a new mechanic: write a short spec (mount/dismount key via Settings.key_cap, speed, what you can do while riding, and how it fits extraction/PvP), and wait for the owner's OK before building.
 - **Credits:** about 50 species x ~3 attempts is several thousand Meshy credits. Post "OWNER: buy N credits" with the estimate, and run in batches of ~10.
+
+## 2026-11-04 02:30 UTC (orchestrator): OWNER: ship the art in BATCHES, video-visible first
+- The owner is filming a video to show what he has to an outside viewer (Dylan). **Ship in batches: each batch merged to main and shipped as a sync, not all at once.** Order by what appears first on screen:
+  1. **Batch 1 (video):** Vex (everyone's first Warden), then the other first-hour Wardens (Zedran, Pin, Cinder = the second-Mantle picks), and the starter/early Boki the player meets first (the egg-pick species and the tutorial's Boki).
+  2. **Batch 2:** the rest of the 12 Wardens and the other current Boki (incl. the boss-egg Cairnback, Hivara and Zephyrak).
+  3. **Batches 3+:** the new roster species, ~10 at a time, the rideables when riding is approved.
+- Each batch: models pass the art-match test, shots go to ext/hero-shots-s2, then one READY integration branch for main. Credits are watched per batch.
