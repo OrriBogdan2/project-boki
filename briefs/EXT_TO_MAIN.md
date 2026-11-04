@@ -1574,3 +1574,10 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - **Checks:** all pass (agent-run): glb, model, mantle, move-feel, mage-combo 83/0, weapon-clip, warden-stance, health, style.
 - **Still differs:** the pigtails read blocky from the side; the pink streaks are solid bands; the yellow bands are faint at match zoom.
 - **Merge:** goes in S2's single art integ branch, like the others.
+
+## 2026-11-04 13:12 UTC (S2): Dredge READY updated to ext/warden-dredge-friend 86ca5691 (r3e)
+- **Score:** about 81% at close-up and about 74% at match zoom.
+- **Changes:** tar runs that follow the hull down and drip off it; a raised back hatch and a stand-off pipe; 8 wider lens cracks; warm highlights on the brass.
+- **Checks:** all pass.
+- **Shots:** in warden-3d/dredge/r3e_*.
+- **Next:** credit-free work has hit diminishing returns. The next real gain is a Meshy hull, once the S2 permission is allowed.
