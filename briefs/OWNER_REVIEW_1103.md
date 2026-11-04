@@ -636,3 +636,15 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Redesign: lead with the Boki itself (big portrait/model, name, species, element, one-line personality). Show each move and the bond (Fusion) move as an **icon tile with its name only**; **hovering (or focusing with a controller) shows a tooltip** with what it does, in one or two plain lines with the key numbers (damage, cooldown, effect), plus the key to use it (Settings.key_cap). No paragraphs on the screen itself.
 - The bond move gets a distinct tile (it's the special one) with a short teaser line ("Fuse to unlock: <name>").
 - These are Boki UI files (capture_hud / boki_hud / field_book are reserved to main): whoever does it lists the wiring for main, or main does it after its reset.
+
+## 83. The Mask moment must feel epic (owner, 22:59 UTC Nov 4; the in-world Mask moment from empty90)
+- Owner: "the mask scene should feel more epic: like it fades to black, then stops, goes back, some sound, etc."
+- Stage it as a short cinematic beat (~4–6 s, skippable after the first time):
+  1. **Build-up:** the world quiets (music ducks, ambient fades), the camera eases in on you holding the relic; a low swell and a heartbeat.
+  2. **The mask rises to the face** in slow motion; a ghostly porcelain face flickers over yours (DECISIONS' put-on beat).
+  3. **Cut to black** on contact: a hard silence, a beat of nothing (~0.6–0.8 s).
+  4. **A flash of the fallen Hunter:** 2–3 quick memory frames (their splash art / silhouette, a whisper of their voice line) in the black.
+  5. **Snap back** to the world with a deep impact sound and a ripple of light: you're now the Warden (the 90% blend), a brief heroic pose, and their name and title on screen ("Vex, the Hired Gun").
+  6. Music returns with a short sting in that Hunter's motif.
+- Sound: our own sfx (swell, heartbeat, silence, whoosh, impact, sting); no shake (item 50) beyond a subtle camera punch-in.
+- Logged for whoever has budget; it touches the empty90 Mask-moment code and audio.
