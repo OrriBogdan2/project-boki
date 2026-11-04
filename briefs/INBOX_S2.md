@@ -473,3 +473,6 @@ The owner approves starting now. Run 3-4 Opus agents in parallel (about 2 Warden
 - **Dredge:** the friend's model is in; give it an aged-brass texture pass (dented, darker, patina; not bright yellow), a glowing-orb eye in cracked glass, and thicker tar drips. No Meshy.
 **Wait:** Zedran (final art almost done), Ryzz and Cinder (redos pending). Vex: finish r3c.
 Credits: ~8 x 70-110 ≈ 600-900; balance 4,993. Post per-Warden "OWNER: review <name>" with links as each one passes.
+
+## 2026-11-04 09:10 UTC (orchestrator): refinement to the 09:05 fan-out (owner unsure whether to wait for one good one)
+- Do the fan-out in two stages. **Stage 1 now:** Meshy generation + bake + rig fit + first shots for each Warden. These steps don't depend on r3c. **Stage 2 after the owner OKs Vex r3c:** apply the proven polish recipe (texture clean-up, shader override, proportions, stance) to all of them. Don't hand-polish any Warden before r3c is approved, so nobody polishes twice. If stage 1 shows a Warden's generation is bad, report it instead of burning more than 2 attempts.
