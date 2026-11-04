@@ -265,3 +265,10 @@ Build, in this order; post progress in EXT_TO_MAIN:
   - Keep the painted look of STYLE.md (toon/painted shading in Godot to match).
   - Decimate only as far as keeps the look (~15k tris is fine; go higher for the face and weapon if needed).
 - Report honestly where it still differs and why. The owner reviews Vex before any other Warden.
+
+## 2026-11-04 01:20 UTC (orchestrator): OWNER: line up the parallel Warden agents NOW; goal all 12 by tomorrow evening
+- Owner wants all 12 Wardens as a good first pass by tomorrow (Nov 4) evening. Prepare now so they start **the moment the owner approves Vex**: 3-4 Opus model agents, ~3 Wardens each, the complex ones spread out (Moosh tail, Cinder tail/crest, Dredge robot, Ostra wisp, Bjorn shield, Tarek, Zedran).
+- Per agent: crop each Warden's turnaround views now (no credits needed), and reuse the Vex pipeline and the acceptance test (INBOX_S2 01:10).
+- **Credits:** 1,100/month. Budget about 3 attempts per Warden, and log the credits used in PIPELINE.md. If it would run out, stop and tell the owner (top-up or plan) before spending the rest.
+- Push each Warden's shots to ext/hero-shots-s2 as soon as it passes, so the owner can review in batches.
+- **Post the Vex shots for approval the moment they pass, with a clear "OWNER: approve Vex" line in EXT_TO_MAIN.**
