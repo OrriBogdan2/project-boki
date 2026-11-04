@@ -120,6 +120,10 @@
 				"near_d": 0.0,
 				"far_d": 3.0
 			}
+		],
+		"no_ink": [
+			"crossbow",
+			"silkbraid"
 		]
 	}
 }

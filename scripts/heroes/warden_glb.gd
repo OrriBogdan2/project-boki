@@ -46,9 +46,8 @@ const CARD: Shader = preload("res://shaders/warden_card.gdshader")
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
 const NO_INK := ["hair", "eyes", "glow", "card"]   # slots drawn without the ink outline shell
-## tags drawn without the ink shell whatever their slot: small round pieces an outline turns into a cartoon ball
-## (Ryzz's gum bubble), thin pieces it turns into speckle at the match camera (Sable's crossbows and braid)
-const NO_INK_TAGS := ["gum", "crossbow", "silkbraid"]
+## tags drawn without the ink shell whatever their slot (a model's own go in warden_look.json "no_ink")
+const NO_INK_TAGS := ["gum"]
 ## Pieces built as clean geometry (tools/meshy/warden_parts.py), "<slot>-<tag>": they take the ink line even on
 ## an inkless slot (the hair goes without it for a scan's ragged strands, not for a woven braid).
 const INK_TAGS := ["braid"]
