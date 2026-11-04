@@ -251,3 +251,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Dredge from the friend's model:** an Opus agent on ext/warden-dredge-friend is mapping the rigged Dredge.glb (27 joints) onto WardenSkeleton plus Dredge variant bones (claw, winch, hook), then retargeting the KMoves. No Meshy credits.
   - It is also writing a Blender-MCP vs Meshy assessment into PIPELINE.md. S2 will propose the result here.
 - **Vex r3:** still running (6 Meshy variants, 235 credits; it is fitting the bake now). Balance 5,265.
+- 2026-11-04 07:04 UTC: owner answers. Ryzz's right eye is a branching lightning scar with a faint blue glow, the eye closed or half-lidded. Cinder keeps the spear in her right hand. Both are noted for when those agents resume after Vex.
