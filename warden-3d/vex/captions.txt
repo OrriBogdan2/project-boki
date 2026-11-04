@@ -60,3 +60,18 @@ r3_gameplay_zoom.png: that frame around her, x4 (nearest)
 r3_moves_run_fire.png: run (two phases), firing (the gun-arm comes up; the barrels spin while firing), recoil
 r3_moves_dash_throw.png: Combat Slide at three moments, the RMB throw
 r3_meshy_variants.png: the nine r3 Meshy runs, flat colour, head and full front: A 4 views 8k, B N1 texture, C one image 4k geometry, D old side view, E new side view, F image enhancement off, G and H arm-down edits with the new side view, I (kept) arm-down edits with the turnaround's near profile
+r3b_vs_turnaround.png: Vex r3b (the owner-approved redesign, model vex_r3b, --warden-variant=vex_r3b) under the r3 turnaround: in game, close, front, 3/4, side, back, 3/4 back, in her item-52 stance (hip cocked, left hand on hip, the gun-arm hanging barrel-down at her right side)
+r3b_vs_turnaround_game.png: the same five views at the match camera (pitch 66, 23 m, fov 32): true pixels, then x3
+r3b_vs_portrait.png: the r3 portrait (left) beside the in-game head and shoulders, front and 3/4: the art's face projected, the brass-rimmed glowing lens on her right eye, the woven braid with copper wraps
+r3b_closeup.png / r3b_closeup_34.png: in game, head and shoulders, front and 3/4
+r3b_front_34.png / r3b_back_34.png: in game, full length, front and 3/4, back and 3/4 back (the right braid down her back over the backpack)
+r3b_gameplay_match.png: the Arena at the match camera (--arena=gunslinger --record=2 --arena-demo=pose --demo-zoom=1.0 --warden-variant=vex_r3b), Vex centre, uncropped
+r3b_gameplay_match_x4.png: that frame around her, x4 (nearest)
+r3b_poses_game.png: at the match camera in idle, run, attack, cast, ult (true pixels, then x3)
+r3b_moves_run_fire.png: run (two phases), shoot, recoil
+r3b_moves_dash_throw.png: the dash at three moments, the RMB throw
+r3b_vs_r3.png: the same shots of the two designs, both on this branch with the same stance and shader: r3b close turnaround, r3 close turnaround, r3b at the match camera, r3 at the match camera
+r3b_vs_r3_closeup.png: head and shoulders, left to right: r3b front, r3 front, r3b 3/4, r3 3/4
+r3b_vs_r3_match.png: the match frame around Vex, x4: r3b (left), r3 (right)
+r3b_inputs.png: the r3 turnaround's views (top) and the Meshy inputs edited from them with nano-banana-pro (bottom): her left hand off her hip, both braids and the backpack hoses out (built as geometry / left out), the side view's hidden arm
+r3b_meshy_variants.png: the two Meshy meshy-7.1 runs, flat colour, front, 3/4, back and the face: A image enhancement off (kept: the art's sultry smirk, chunky hair), B enhancement on (rounder face, stringy hair)
