@@ -219,7 +219,7 @@ func _pair(row: Array, a: int, b: int) -> Image:
 		var h := row[[a, b][i]] as Node3D
 		cam.fov = 30.0
 		var tall := maxf(_top([h]), 2.2)
-		cam.position = Vector3(h.position.x, tall * 0.52, h.position.z + (tall * 0.59) / tan(deg_to_rad(15.0)))
+		cam.position = Vector3(h.position.x, tall * 0.52, h.position.z + (tall * 0.5) / tan(deg_to_rad(15.0)))
 		cam.rotation = Vector3(-0.04, 0, 0)
 		await _settle(4)
 		var img := await _grab()
