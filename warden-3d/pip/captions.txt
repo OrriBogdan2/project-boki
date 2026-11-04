@@ -8,3 +8,11 @@ s1_poses_game.png: idle, run, attack, cast, ult at the match camera (true pixels
 s1_moves_1.png: run frames close (tail, wings and lantern on their springs; note the left arm/cape flap)
 s1_match.png: the Arena, --arena=tender --arena-demo=pose --demo-zoom=1.0 (the real match camera)
 s1_match_x4.png: s1_match cropped round her, x4 nearest
+s2_closeup_vs_art.png: Pip stage 2 close-up: the head sheet, the portrait, the model 3/4 and front (arms free of the flanks; cape behind them)
+s2_34_vs_art.png: the turnaround's front and 3/4 beside the model's (the lantern in her left paw, arched panes, casting light)
+s2_back_vs_art.png: the turnaround's back beside the model's back and 3/4 back (cape, tail on its spring, wing cards)
+s2_match.png / s2_match_vs_art.png: the Arena match frame (--arena=tender --arena-demo=pose --demo-zoom=1.0), x4 crop beside the art
+s2_moves_1.png: run frames close: the arms swing clear (the stage-1 flank/cape flap is gone)
+s2_poses_game.png: idle, run, attack, cast, ult at the match camera (true pixels x3)
+s2_vs_turnaround.png: the turnaround, the model close and at the match camera
+s2_vs_s1.png: stage 1 close-up (top) vs stage 2 (bottom); s2_vs_s1_body.png: stage 1 front/back (top) vs stage 2
