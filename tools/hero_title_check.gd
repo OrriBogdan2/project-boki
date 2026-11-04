@@ -3,7 +3,9 @@ extends RefCounted
 ## no old personal name is a player-facing hero label (the base_name field is the one place it lives).
 
 const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Tamsin", "Linwick", "Dredge",
-	"Moosh Moosh", "Breah", "Ostra"]
+	"Moosh Moosh", "Burple", "Breah", "Ostra"]
+## Words retired from player text (Hunter / Mask / the Empty / Fusion replace them; ids and code names may keep them).
+const RETIRED_TERMS := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|unmasked)\\b"
 const GENDERS := ["male", "female", "robot"]
 
 var bad := 0
@@ -28,16 +30,17 @@ func run(main: Node) -> void:
 		var story_lines := String(data.get("personality", "")).split("\n").size()
 		ok(story_lines <= 3, "%s personality is three lines at most" % id)
 		var label := HeroTitle.label("Orri", id)
-		ok(label == "Orri the %s" % HeroTitle.title(id), "%s label reads '%s'" % [id, label])
+		var bare := HeroTitle.title(id).trim_prefix("The ")   # "Orri the Unbroken", never "the The"
+		ok(label == "Orri the %s" % bare and not label.contains("the The"), "%s label reads '%s'" % [id, label])
 		var shown: Array = [Arch.name_of(id), Arch.label(id), label, _plain_text(data)]
 		for text in shown:
 			var found_old := _old_name_in(String(text))
 			ok(found_old == "", "%s: no old name in a player-facing label (%s)" % [id, found_old])
-		var intro := HeroTitle.intro_block(id, 300.0)
-		var has_origin: bool = intro.get_child_count() == 2 and intro.get_meta("hero_intro") == id
-		ok(has_origin, "%s class intro has origin and story" % id)
-		intro.free()
-		ok(HeroTitle.origin_line(id).contains(HeroTitle.base_name(id)), "%s intro says who it was originally" % id)
+		var retired := RegEx.create_from_string(RETIRED_TERMS).search(_plain_text(data))
+		ok(retired == null, "%s: no retired term in its text (%s)" % [id, retired.get_string() if retired else ""])
+		var shown_name := HunterViewer.display_name(id)
+		ok(shown_name.begins_with(HeroTitle.base_name(id) + ", the ") and not shown_name.contains("the The"),
+				"%s shows as '%s', with no gender line" % [id, shown_name])
 	print("HEROTITLE CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -47,7 +50,7 @@ func _plain_text(data: Dictionary) -> String:
 	copy.erase("base_name")
 	return JSON.stringify(copy)
 
-## The first old personal name found in text once the class titles (Icy Dancer ...) are taken out.
+## The first old personal name found in text once the class titles (Frost Siren ...) are taken out.
 func _old_name_in(text: String) -> String:
 	var rest := text
 	for title in _all_titles():

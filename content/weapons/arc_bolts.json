@@ -5,11 +5,9 @@
 		"light"
 	],
 	"primary": {
-		"dmg": 9.0,
+		"dmg": 13.0,
 		"rate": 0.45,
 		"speed": 34,
-		"mag": 99,
-		"reload": 0.5,
 		"kb": 0.8,
 		"spread": 0.0,
 		"range": 12.0,

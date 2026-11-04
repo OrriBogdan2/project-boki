@@ -6,7 +6,7 @@ extends ArchKit
 ## Snap to stun at range, drop the seed on the stunned foe, let it grow, pop it; Trade puts you or the foe
 ## (and everyone else in its circle) in it.
 ##
-## A thin aim line runs to the cursor the whole time she is out (her reticle); the Snap's wind-up turns
+## A thin aim line runs to the cursor the whole time he is out (his reticle); the Snap's wind-up turns
 ## it into two rails the width of the shard bundle, and holding Shift shows the Trade's two ends.
 ## The seed is a ground zone placed through HeroZones (legal ground, short of walls, never in the
 ## abyss) and synced over Net as ["zone", "seed" | "pop", ...]. Looks: KitLooks (pooled).
@@ -25,7 +25,7 @@ var base_wpn: Dictionary = {}
 var prime_until := -9.0
 var seed: Dictionary = {}      # {pos, t, grow, rmax, sid, vis, burn, col}
 var sid_n := 0
-var swap: Dictionary = {}      # in flight: {t, T, land, cast, from (where she is now), hold (CastHold)}
+var swap: Dictionary = {}      # in flight: {t, T, land, cast, from (where he is now), hold (CastHold)}
 var swap_aim := -1.0           # Shift held to aim the Trade (-1: not aiming)
 var snap: Dictionary = {}      # the Snap's wind-up: {t, T}
 var snap_rec := 0.0            # s of recovery left after a release (still slowed)
@@ -43,7 +43,7 @@ var collapses := 0
 var seed_denied := 0
 var early_pops := 0            # recasts refused inside the 0.3s minimum
 var denied_swaps := 0
-var hazards_dodged := 0        # ground-hazard hits her float turned away
+var hazards_dodged := 0        # ground-hazard hits his float turned away
 var boost_t := 0.0             # Snap rank 3: the speed burst left
 var boost_k := 0.0
 var swap_peak := 0.0           # how high the last Trade's lantern flew above its start (checks)
@@ -58,7 +58,7 @@ func cast_ult() -> bool: return HeroUlt.press(self, well.start)
 func has_ult() -> bool: return true
 func ult_running() -> bool: return well.running()
 
-## Nightwell holds her in the cast pose: no walking, jumping, dashing, other abilities or attacks, no turning.
+## Nightwell holds him in the cast pose: no walking, jumping, dashing, other abilities or attacks, no turning.
 func cast_locked() -> bool: return well.locked
 func aim_lock() -> Vector2: return well.aim_lock
 func busy() -> bool: return super.busy() or well.locked
@@ -83,7 +83,7 @@ func add_swell(v: float) -> void:
 		swells += 1
 		armed_fx("SWOLLEN", "")
 		play("ostra_empower")
-		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 2.2, Color("4a1068"), 0.45)      # the vortex disc under her
+		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 2.2, Color("4a1068"), 0.45)      # the vortex disc under him
 		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, PINK, 0.3)
 		m.fx.flash(h.pos + Vector3(0, 1.0, 0), PINK, 1.6, 0.1)
 		m.sfx("os_empower", h.pos, -2.0, 1.0)
@@ -94,8 +94,8 @@ func on_deal(t: Ent, dmg: float, _o: Dictionary) -> void:
 	var rd := res_def()
 	add_swell(dmg * float(rd["per_dmg"]) * (float(rd["hunter_k"]) if t is Hunter else 1.0))
 
-## She floats: the ground hazards (lava vents and their pools, spore pods, puddles, the pit's pull) never
-## touch her. A sky strike (the lightning rod) still does.
+## He floats: the ground hazards (lava vents and their pools, spore pods, puddles, the pit's pull) never
+## touch him. A sky strike (the lightning rod) still does.
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
 	if not o.get("sky", false) and (o.get("tags", []) as Array).any(func(t): return t in GROUND_HAZARDS):
 		hazards_dodged += 1
@@ -112,7 +112,7 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 		o["slow_k"] = float(lmb_def()["prime_slow"])
 	return dmg
 
-## She drifts slowly (dash.fly_slow of run speed) while the Trade is in flight; the Snap's wind-up slows her.
+## He drifts slowly (dash.fly_slow of run speed) while the Trade is in flight; the Snap's wind-up slows him.
 func move_k() -> float:
 	if well.locked:
 		return 0.0
@@ -154,7 +154,7 @@ func _tick(dt: float) -> void:
 	well.tick(dt)
 	_reticle()
 
-## Her reticle: the thin line to the cursor, all the time; the Snap's two rails while it winds up or
+## His reticle: the thin line to the cursor, all the time; the Snap's two rails while it winds up or
 ## while RMB is held.
 func _reticle() -> void:
 	if not h.is_local() or h.downed or h.out:
@@ -177,6 +177,8 @@ func _tick_weapon() -> void:
 		last_shot_t = m.time
 		var hot := primed
 		KitLooks.of(m).skin_last(h, "orb_hot" if hot else "orb")
+		if hot:
+			_pierce_last()
 		play("ostra_orb_hot" if hot else "ostra_orb")
 		if hot: m.sfx("os_orb_hot", h.pos, -4.0, 1.0)      # (the plain orb's sound is the weapon's own)
 		if primed:
@@ -184,10 +186,12 @@ func _tick_weapon() -> void:
 			settled_shots += 1
 			prime_until = m.time + 1.2
 			if not base_wpn.is_empty(): h.wpn = base_wpn
-			m.fx.ring(h.pos, 1.0, Color("6f7cff"), 0.2)
 			m.fx.burst(_hand(), Color(0.45, 0.5, 1.0, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
 	if primed and not h.downed and snap.is_empty():
-		KitLooks.of(m).hold_on("os_charge", "mote", h, _hand(), 1.1, Color("6f7cff"))
+		# (the primed tell on his actual hand, where the 3D model holds its orb: at a fixed point in front of him the
+		# match camera drew it as a disc at his feet; violet and smaller, so it reads as the void orb charging, not
+		# as a blue disc beside it)
+		KitLooks.of(m).hold_on("os_charge", "mote", h, hand_pos(true), 0.5, Color("9a5cff"))
 	if not primed and m.time - last_shot_t >= float(lmb_def()["idle"]) and not h.downed:
 		primed = true
 		base_wpn = h.wpn
@@ -198,22 +202,35 @@ func _tick_weapon() -> void:
 		h.wpn = w
 		m.sfx("os_prime", h.pos, -12.0, 1.0)
 
+## A seed now waits for its recast, so a kit swapped out (practice, the Arena) takes its seed with it.
+func teardown() -> void:
+	if not seed.is_empty():
+		_pop(false)
+	super.teardown()
+
+## The Settled bolt goes through terrain (the source's data: "goes through terrain").
+func _pierce_last() -> void:
+	for i in range(m.shots.size() - 1, -1, -1):
+		if m.shots[i]["by"] == h:
+			(m.shots[i]["x"] as Dictionary)["pierce_terrain"] = true
+			return
+
 # ------------------------------------------------------------------ dash: Lantern Trade
 func swap_time() -> float:
 	var dd := dash_def()
 	return float(dd["time_swollen"]) if is_swollen() else float(dd["time"])
 
-## Her dash, as DashFlow sees it: the Trade's flight (content/dash_flow/ostra.json routes presses made during it).
+## His dash, as DashFlow sees it: the Trade's flight (content/dash_flow/ostra.json routes presses made during it).
 func in_dash() -> bool:
 	return super.in_dash() or not swap.is_empty()
 
-## s left in her dash: the Trade's flight, else the shared dash's.
+## s left in his dash: the Trade's flight, else the shared dash's.
 func dash_left() -> float:
 	return float(swap["t"]) if not swap.is_empty() else super.dash_left()
 
 ## Shift: hold to see both ends (where you are, where the lantern lands at the cursor), let go to lob.
 ## A tap lobs at once. It never travels by itself, so a press in the air or with no charge never sends
-## her off in some other direction: it waits for the next charge.
+## him off in some other direction: it waits for the next charge.
 func on_dash(_use_ex: bool) -> bool:
 	if well.locked:
 		well.press_dash()
@@ -257,12 +274,12 @@ func _swap_cast() -> void:
 	net_bolt(h.pos + Vector3(0, 1.2, 0), land + Vector3(0, 0.6, 0), Color("b8f5ea"))
 	CombatBus.ability_used.emit(h, String(dd.get("id", "swap")), "dodge")
 
-## Her dash moves: the underhand lob from the ground, the overhead sling and streaming drift in the air.
+## His dash moves: the underhand lob from the ground, the overhead sling and streaming drift in the air.
 func swap_move() -> String:
 	return "ostra_swap" if h.grounded else "ostra_swap_air"
 
 ## Where the lantern lands: the cursor if it is within reach, else the point at full reach along the cursor
-## direction. No ground, wall or abyss check limits it; over the abyss it keeps her current height.
+## direction. No ground, wall or abyss check limits it; over the abyss it keeps his current height.
 func swap_spot() -> Vector3:
 	var reach := float(dash_def()["reach"])
 	var a := aim()
@@ -299,8 +316,8 @@ func _tick_swap(dt: float) -> void:
 	if float(swap["t"]) <= 0.0:
 		_swap_end(true)
 
-## Her after-image on any dash (a merge's dodge): a streak of violet motes off the hem, not the shared pill.
-## Her own hand tell (the charge mote) replaces the shared white charge orb.
+## His after-image on any dash (a merge's dodge): a streak of violet motes off the hem, not the shared pill.
+## His own hand tell (the charge mote) replaces the shared white charge orb.
 func charge_orb() -> bool:
 	return false
 
@@ -339,7 +356,7 @@ func _swap_end(go: bool) -> void:
 	_trade_bodies(land, from, float(dd["radius"]))
 	_arrive(land, from, from_void)
 	if rank("dash") >= 3:
-		# allies who were by her side when she left share in it: a shield
+		# allies who were by his side when he left share in it: a shield
 		for o2 in m.hunters:
 			if o2 != h and o2.team == h.team and not o2.downed and (
 				o2.flat_dist(from) < float(dd["ally_r"]) or o2.flat_dist(h) < float(dd["ally_r"])
@@ -347,10 +364,9 @@ func _swap_end(go: bool) -> void:
 				o2.shield = maxf(o2.shield, float(dd["ally_shield"]))
 				o2.shield_t = 3.0
 
-## Everyone in the landing circle (foes, allies, Boki off the shoulder) goes to where she was, each keeping
-## its place in the circle; foes are slowed. Bodies another game owns are moved there over Net.
+## Everyone in the landing circle (foes, allies, Boki off the shoulder) goes to where he was, each keeping
+## its place in the circle. Bodies another game owns are moved there over Net.
 func _trade_bodies(land: Vector3, from: Vector3, r: float) -> void:
-	var dd := dash_def()
 	for body in trade_bodies(land, r):
 		var off := Vector3(body.pos.x - land.x, 0, body.pos.z - land.z)
 		var to := from + off
@@ -359,10 +375,9 @@ func _trade_bodies(land: Vector3, from: Vector3, r: float) -> void:
 			to = from
 		else:
 			to.y = maxf(g, from.y)
-		HeroZones.move_body(m, body, to)
+		m.displace.teleport(body, to)
 		if body.team != h.team:
 			swapped_foes += 1
-			KitStatus.apply(body, "dsr", float(dd["slow_t"]), float(dd["slow"]))
 		elif body is Kin:
 			swapped_boki += 1
 		else:
@@ -381,8 +396,8 @@ func trade_bodies(land: Vector3, r: float) -> Array:
 			out.append(kin)
 	return out
 
-## She appears at the landing spot: at her height over the ground (over the abyss: the height she hovered
-## at, if that is higher; landing over the abyss also keeps it), with an implosion and her appear pose.
+## He appears at the landing spot: at his height over the ground (over the abyss: the height he hovered
+## at, if that is higher; landing over the abyss also keeps it), with an implosion and his appear pose.
 func _arrive(land: Vector3, from: Vector3, from_void: bool) -> void:
 	var dd := dash_def()
 	var gy: float = m.world.ground_at(land.x, land.z)
@@ -408,7 +423,7 @@ func fire_rmb(c: Dictionary) -> void:
 	if not snap.is_empty():
 		return
 	if not spend_rmb(): return
-	# the wind-up: a black orb with a bright rim gathers and swells at her hand, she slows while casting
+	# the wind-up: a black orb with a bright rim gathers and swells at his hand, he slows while casting
 	var wind := float(rmb_def()["snap"]["wind"])
 	snap = {"t": wind, "T": wind}
 	play("ostra_snap_wind")
@@ -482,7 +497,7 @@ func cast_e() -> bool:
 		"pos": p, "t": 0.0, "grow": grow, "rmax": rmax, "sid": sid, "vis": vis, "burn": 0.0, "from": _hand(),
 		"col": null
 	}
-	e_t = grow + float(ed["linger"])
+	e_t = grow + float(ed["hold_full"])
 	play("ostra_seed")
 	m.sfx("os_seed", p, -3.0, 1.0)
 	if (m.net_on or HeroZones.capture) and not h.remote:
@@ -502,7 +517,7 @@ func _tick_seed(dt: float) -> void:
 	var ed := e_def()
 	seed["t"] = float(seed["t"]) + dt
 	var p: Vector3 = seed["pos"]
-	# the cast: a small orb drops from her hand onto the spot
+	# the cast: a small orb drops from his hand onto the spot
 	var drop := float(ed["drop"])
 	if float(seed["t"]) < drop:
 		var u := float(seed["t"]) / drop
@@ -527,9 +542,11 @@ func _tick_seed(dt: float) -> void:
 	if h.downed:
 		_pop(false)
 
+## The source detonates only on the recast: a seed left at full size this long (e.hold_full) fizzles out
+## with no damage, so it can't be parked forever.
 func _e_end() -> void:
 	if not seed.is_empty():
-		_pop(true)
+		_pop(false)
 
 ## E again pops it, from 0.3s after the plant (a press before that is eaten, so a double tap can't
 ## waste the seed).
@@ -578,7 +595,6 @@ func _pop(hit: bool) -> void:
 	)
 	m.fx.flash(p + Vector3(0, 0.8, 0), Color("f2eaff"), 1.0 + k, 0.1)
 	m.sfx("os_pop", p, -2.0, 1.0)
-	Feel.shake(m, "t3" if k > 0.6 else "t2", h, p)
 	net_ring(p, rad, TEAL)
 	var caught_hunter: Ent = null
 	for f in foes_in(p, rad):

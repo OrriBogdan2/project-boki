@@ -104,7 +104,7 @@ func run(main: Node) -> void:
 		var before := int(stam.st[P.nid]["denies"])
 		P.do_dash()
 		var s2: Dictionary = stam.st[P.nid]
-		var hit := int(s2["denies"]) == before + 1 and float(s2["shake"]) > 0.0
+		var hit := int(s2["denies"]) == before + 1 and float(s2["jolt"]) > 0.0
 		if hit:
 			denied += 1
 		ok(hit, "%s: dash with no charge shakes the bar" % a)

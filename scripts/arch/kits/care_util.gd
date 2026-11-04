@@ -1,6 +1,6 @@
 class_name CareUtil
 extends RefCounted
-## Support helpers shared by the two support heroes (Moosh Moosh the Tender, Claire the Rimewright):
+## Support helpers shared by the two support heroes (Pip the Tender, Claire the Rimewright):
 ## squadmate lookups, healing that reaches bots, online squadmates and downed teammates, the
 ## revive hook, and carrying a downed teammate. Net: heals and revives use the existing "heal" and
 ## "rev" events; carrying adds one "carry" event (Net 0.14.0).
@@ -102,6 +102,4 @@ static func payoff(m: Node, h: Hunter, at: Vector3, word: String, col: Color, sn
 	m.fx.burst(at + Vector3(0, 1.1, 0), col, 36, 7.5, 0.65, 8.0, 1.3)
 	m.fx.flash(at + Vector3(0, 1.0, 0), col.lightened(0.4), 1.3, 0.1)
 	if snd != "": m.sfx(snd, at, 0.0, 1.0)
-	Feel.shake(m, "t4", h, at)
-	if h.is_local() and m.cam: m.cam.punch(0.04)
 	if h.ak: h.ak.net_ring(at, 2.4, col)

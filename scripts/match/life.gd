@@ -171,8 +171,6 @@ static func tick_stomps(m: Match, dt: float) -> void:
 			if near:
 				m.fx.burst(o.pos + Vector3(0, 0.5, 0), Color("ff6a5a"), 10, 3.0, 0.35, -4.0)
 				o.down_hp -= Data.MATCH["down_hp"] * 0.12
-			if h.is_local() or o == m.player:
-				m.shake(0.12, h.pos)
 		if t1 >= float(R["stomp_time"]):
 			if near:
 				end_stomp(m, h, "done")
@@ -570,7 +568,6 @@ static func _use_beacon(m: Match, bc: Dictionary, team: int) -> void:
 	if glow: glow.visible = false
 	m.fx.ring(bc["pos"], 4.0, Color("8fffc0"), 0.6)
 	m.sfx("unlock", bc["pos"], 0.0, 0.8)
-	m.shake(0.3, bc["pos"])
 	# everyone on the map hears a beacon go off
 	m.ping(bc["pos"], Color("8fffc0"))
 	m.add_feed("A revive beacon brought back %s" % ", ".join(names))

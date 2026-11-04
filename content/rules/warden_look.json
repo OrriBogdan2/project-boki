@@ -1,35 +1,146 @@
 {
-	"doc": "A Warden 3D model's own shading over the shared painted look (WardenGlb.look), keyed by the model's art name (art/wardens/<art>/<art>.glb; a design variant has its own key). painted: hero_toon.gdshader parameters on all of its surfaces, set after WardenGlb.PAINTED. slots: the same per toon slot (skin, hair, cloth, leather, metal, eyes, glow), after painted. Colours are [r, g, b]. A model without an entry keeps the shared look. Useful keys: top_light (surfaces facing up lift), fres and fres_tint (the coloured rim; 1 = lightened own colour), far_lift (brighter and richer at the match camera), shade and shadow_tint (the shadow floor and its tint), sheen, glow (emission x the painted colour).",
+	"doc": "A Warden 3D model's own shading over the shared painted look (WardenGlb.look), keyed by the model's art name (art/wardens/<art>/<art>.glb; a design variant has its own key). painted: hero_toon.gdshader parameters on all of its surfaces, set after WardenGlb.PAINTED. slots: the same per toon slot (skin, hair, cloth, leather, metal, eyes, glow), after painted. Colours are [r, g, b]. A model without an entry keeps the shared look. Useful keys: rim_far and rim_far_color (a rim in the Hunter's signature colour at the match camera), top_light (surfaces facing up lift), fres and fres_tint (the coloured rim; 1 = lightened own colour), far_lift (brighter and richer at the match camera), shade and shadow_tint (the shadow floor and its tint), sheen, glow (emission x the painted colour), light_neutral_warm (takes the hue out of warm lights too: black cloth and gunmetal stay black and grey under an orange sun). halos: glow discs of a constant size on screen on the model's anchors (a lens a pixel wide at the match camera): anchor, color, strength, px (radius on screen), near and far (m: none this close, full from there; close-ups keep the lens itself). albedo: a colour multiplier on the slot's atlas, applied on top of the player's colour pick (it never replaces the pick). Match zoom (the shared far_* look, WardenGlb.PAINTED; set these per model only to tune it): far_fres (the pale fresnel's share left at the match camera, 0.35), far_spec (gloss, sheen and the lights' rims there, 0), far_clamp (stray texels pulled to their coarser mip, 0.8), far_rim_soft (1: rim_far is a broad saturated band in rim_far_color; keep rim_far 0.25-0.35), far_glow (whatever glows a step brighter there, 0.6). no_ink: material tags or slots drawn without the ink shell (e.g. [\"gum\", \"crossbow\"]). ink: the model's own ink shell, far_thin (0.8), far_cut (0.55: gone from ~13.5 m; 0 keeps it), color. glow_shell: the glow slot's halo at the match camera (glow_px 1.4 screen px, glow_k 1.3, glow_near 7, glow_far 14 m, glow_col; {\"glow_px\": 0} for none). A card slot's far keys (shaders/warden_card.gdshader, under slots.card): far_sheen 0, far_edge 1, far_alpha 1.35. the same per toon slot (skin, hair, cloth, leather, metal, brass, eyes, glow), after painted; a \"<slot>-<tag>\" key (hair-braid: the woven braids) after its slot. paint_glow, paint_glow_color and paint_glow_width: texels of that painted colour glow (a skin's tattoos at night). weapon_scale: a size multiplier on the held .glb weapon (Kael 0.85, owner Nov 4); weapon_offset: [x, y, z] metres that move it in the Gun's space (seats the grip in the hand: Hem's bow).",
 	"vex": {
-		"painted": {},
+		"painted": {
+			"rim_far": 0.35,
+			"rim_far_color": [
+				0.35,
+				1.0,
+				0.45
+			]
+		},
 		"slots": {
 			"skin": {
 				"top_light": 0.35,
 				"fres": 0.45,
 				"far_lift": 0.12,
-				"shade": 0.8,
-				"shadow_tint": [
-					0.94,
-					0.84,
-					0.84
+				"shade": 0.9,
+				"paint_glow": 1.0,
+				"paint_glow_color": [
+					0.298,
+					0.765,
+					0.369
 				]
 			},
 			"metal": {
-				"top_light": 0.3,
-				"fres": 0.3,
+				"top_light": 0.15,
+				"fres": 0.15,
 				"fres_tint": 0.6,
-				"far_lift": 0.1,
-				"sheen": 0.0
+				"far_lift": 0.0,
+				"sheen": 0.0,
+				"rim_far": 0.0,
+				"light_neutral_warm": 0.6
 			},
 			"hair": {
 				"far_lift": 0.5,
-				"fres": 0.6,
-				"glow": 0.12
+				"fres": 0.3,
+				"glow": 0.12,
+				"rim_far": 0.0
 			},
 			"glow": {
 				"glow": 1.8
+			},
+			"cloth": {
+				"far_lift": 0.0,
+				"fres": 0.25,
+				"rim_far": 0.0,
+				"top_light": 0.3,
+				"light_neutral_warm": 0.75
+			},
+			"leather": {
+				"far_lift": 0.0,
+				"fres": 0.25,
+				"rim_far": 0.0,
+				"top_light": 0.3,
+				"light_neutral_warm": 0.75
+			},
+			"brass": {
+				"top_light": 0.15,
+				"fres": 0.15,
+				"fres_tint": 0.6,
+				"far_lift": 0.5,
+				"sheen": 0.0,
+				"rim_far": 0.0,
+				"light_neutral_warm": 0.4
+			},
+			"hair-braid": {
+				"fres": 0.15,
+				"far_lift": 0.3,
+				"rim_far": 0.0
 			}
-		}
+		},
+		"halos": [
+			{
+				"anchor": "anchor_lens",
+				"color": [
+					0.7,
+					1.0,
+					0.25
+				],
+				"strength": 2.4,
+				"px": 2.4,
+				"near_d": 7.0,
+				"far_d": 14.0,
+				"lift": 0.035
+			}
+		]
+	},
+	"ryzz": {
+		"painted": {
+			"emit": 2.6,
+			"emit_flicker": 0.12,
+			"far_emit": 1.2,
+			"rim_far": 0.22,
+			"rim_far_color": [
+				0.2,
+				0.45,
+				1.0
+			]
+		},
+		"slots": {
+			"skin": {
+				"top_light": 0.3,
+				"fres": 0.22,
+				"far_lift": 0.3,
+				"shade": 0.9,
+				"fres_tint": 0.4
+			},
+			"hair": {
+				"top_light": 0.6,
+				"fres": 0.8,
+				"far_lift": 0.45,
+				"glow": 0.14,
+				"shadow_tint": [
+					0.88,
+					0.94,
+					1.0
+				],
+				"fres_tint": 0.9
+			},
+			"cloth": {
+				"fres": 0.6,
+				"far_lift": 0.8,
+				"light_neutral_warm": 0.4
+			},
+			"leather": {
+				"top_light": 0.45,
+				"fres": 0.4,
+				"fres_tint": 0.5,
+				"far_lift": 0.5,
+				"light_neutral_warm": 0.8
+			},
+			"metal": {
+				"top_light": 0.5,
+				"fres": 0.5,
+				"fres_tint": 0.8,
+				"far_lift": 0.8,
+				"sheen": 0.0,
+				"shade": 0.9
+			}
+		},
+		"no_ink": [
+			"gum"
+		]
 	},
 	"sable": {
 		"painted": {
@@ -127,5 +238,798 @@
 			"crossbow",
 			"silkbraid"
 		]
+	},
+	"hem": {
+		"weapon_offset": [0.0, 0.0, 0.07],
+		"painted": {
+			"rim_far": 0.28,
+			"rim_far_color": [
+				0.96,
+				0.9,
+				0.86
+			]
+		},
+		"slots": {
+			"skin": {
+				"top_light": 0.35,
+				"fres": 0.45,
+				"far_lift": 0.08,
+				"shade": 0.8,
+				"shadow_tint": [
+					0.94,
+					0.86,
+					0.86
+				]
+			},
+			"cloth": {
+				"fres": 0.35,
+				"far_lift": 0.25,
+				"top_light": 0.4,
+				"light_neutral_warm": 0.8,
+				"rim_far": 0.0
+			},
+			"hair": {
+				"far_lift": 0.25,
+				"fres": 0.6,
+				"glow": 0.04
+			},
+			"metal": {
+				"top_light": 0.3,
+				"fres": 0.4,
+				"fres_tint": 0.8,
+				"far_lift": 0.2,
+				"light_neutral_warm": 0.8
+			},
+			"leather": {
+				"far_lift": 0.3,
+				"rim_far": 0.45,
+				"rim_far_color": [
+					0.95,
+					0.12,
+					0.1
+				],
+				"light_neutral_warm": 0.8,
+				"fres": 0.15,
+				"fres_tint": 0.9
+			},
+			"glow": {
+				"glow": 2.8
+			}
+		},
+		"halos": [
+			{
+				"anchor": "halo_bow_top",
+				"color": [
+					1.0,
+					0.18,
+					0.12
+				],
+				"strength": 2.6,
+				"px": 4.5,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "halo_bow_mid",
+				"color": [
+					1.0,
+					0.18,
+					0.12
+				],
+				"strength": 2.6,
+				"px": 4.5,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "halo_bow_low",
+				"color": [
+					1.0,
+					0.18,
+					0.12
+				],
+				"strength": 2.6,
+				"px": 4.5,
+				"near_d": 7.0,
+				"far_d": 14.0
+			}
+		]
+	},
+	"tarek": {
+		"painted": {
+			"rim_far": 0.3,
+			"rim_far_color": [
+				1.0,
+				0.62,
+				0.15
+			],
+			"far_smooth": 1.0
+		},
+		"slots": {
+			"skin": {
+				"top_light": 0.0,
+				"fres": 0.15,
+				"rim_amount": 0.15,
+				"far_lift": 0.05,
+				"sheen": 0.0,
+				"light_tint": [
+					0.9,
+					0.86,
+					0.86
+				],
+				"light_neutral": 1.0,
+				"shade": 0.78,
+				"albedo": [
+					0.95,
+					0.88,
+					0.86
+				],
+				"light_neutral_warm": 0.85,
+				"desat": 0.45,
+				"rim_far": 0.0
+			},
+			"hair": {
+				"far_lift": 0.1,
+				"fres": 0.55
+			},
+			"cloth": {
+				"far_lift": 0.3
+			},
+			"leather": {
+				"emit": 5.0,
+				"far_lift": 0.2
+			},
+			"glow": {
+				"glow": 1.8,
+				"fres": 0.0,
+				"top_light": 0.0,
+				"far_lift": 0.1
+			}
+		},
+		"halos": [
+			{
+				"anchor": "anchor_stones_0",
+				"color": [
+					1.0,
+					0.62,
+					0.18
+				],
+				"strength": 3.4,
+				"px": 5.5,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_stones_1",
+				"color": [
+					1.0,
+					0.62,
+					0.18
+				],
+				"strength": 3.4,
+				"px": 5.5,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_stones_2",
+				"color": [
+					1.0,
+					0.62,
+					0.18
+				],
+				"strength": 3.4,
+				"px": 5.5,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_gauntlet_L",
+				"color": [
+					1.0,
+					0.62,
+					0.18
+				],
+				"strength": 3.4,
+				"px": 6.5,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_gauntlet_R",
+				"color": [
+					1.0,
+					0.62,
+					0.18
+				],
+				"strength": 3.4,
+				"px": 6.5,
+				"near_d": 7.0,
+				"far_d": 14.0
+			}
+		]
+	},
+	"breaker": {
+		"weapon_scale": 0.75,
+		"painted": {
+			"far_lift": 0.2,
+			"rim_far": 0.3,
+			"rim_far_color": [
+				0.45,
+				0.78,
+				1.0
+			]
+		},
+		"slots": {
+			"skin": {
+				"top_light": 0.1,
+				"fres": 0.35,
+				"far_lift": 0.15,
+				"shade": 0.84,
+				"light_neutral_warm": 0.8,
+				"shadow_tint": [
+					0.84,
+					0.9,
+					1.0
+				]
+			},
+			"hair": {
+				"far_lift": 0.5,
+				"fres": 0.5
+			},
+			"fur": {
+				"top_light": 0.3,
+				"far_lift": 0.25,
+				"light_neutral_warm": 0.4
+			},
+			"leather": {
+				"far_lift": 0.4,
+				"fres": 0.5,
+				"fres_tint": 0.7
+			},
+			"metal": {
+				"fres": 0.3,
+				"fres_tint": 0.6,
+				"sheen": 0.0
+			},
+			"glow": {
+				"glow": 1.2
+			}
+		}
+	},
+	"ostra": {
+		"painted": {
+			"rim_far": 0.7,
+			"rim_far_color": [
+				0.78,
+				0.48,
+				1.0
+			],
+			"shade": 0.55
+		},
+		"slots": {
+			"cloth": {
+				"fres": 0.3,
+				"fres_tint": 0.0,
+				"fres_color": [
+					0.6,
+					0.3,
+					0.95
+				],
+				"far_lift": 0.3,
+				"top_light": 0.1,
+				"own_ambient": [
+					0.36,
+					0.3,
+					0.48
+				],
+				"dark_lift": 0.02,
+				"albedo": [
+					0.68,
+					0.6,
+					0.78
+				],
+				"light_neutral_warm": 0.9
+			},
+			"leather": {
+				"emit": 3.6,
+				"fres": 0.9,
+				"fres_tint": 0.0,
+				"fres_color": [
+					0.72,
+					0.4,
+					1.0
+				],
+				"dark_lift": 0.02,
+				"albedo": [
+					0.96,
+					0.9,
+					1.08
+				],
+				"top_light": 0.1,
+				"light_neutral_warm": 0.9
+			},
+			"glow": {
+				"glow": 2.4,
+				"fres": 0.8,
+				"top_light": 0.0,
+				"far_lift": 0.0,
+				"fres_tint": 0.0,
+				"fres_color": [
+					0.62,
+					0.32,
+					1.0
+				]
+			}
+		},
+		"halos": [
+			{
+				"anchor": "anchor_orb",
+				"color": [
+					0.66,
+					0.36,
+					1.0
+				],
+				"strength": 3.4,
+				"px": 11.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_chest",
+				"color": [
+					0.55,
+					0.25,
+					1.0
+				],
+				"strength": 0.7,
+				"px": 9.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_orbit_cards_0",
+				"color": [
+					0.62,
+					0.34,
+					1.0
+				],
+				"strength": 2.4,
+				"px": 4.5,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_orbit_cards_1",
+				"color": [
+					0.62,
+					0.34,
+					1.0
+				],
+				"strength": 2.4,
+				"px": 4.5,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_orbit_cards_2",
+				"color": [
+					0.62,
+					0.34,
+					1.0
+				],
+				"strength": 2.4,
+				"px": 4.5,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_orbit_cards_3",
+				"color": [
+					0.62,
+					0.34,
+					1.0
+				],
+				"strength": 2.4,
+				"px": 4.5,
+				"near_d": 7.0,
+				"far_d": 14.0
+			}
+		],
+		"closeup": {
+			"fov": 34.0,
+			"up": 0.12
+		}
+	},
+	"claire": {
+		"painted": {
+			"far_lift": 0.4,
+			"rim_far": 0.35,
+			"rim_far_color": [
+				0.4,
+				0.68,
+				1.0
+			]
+		},
+		"slots": {
+			"ice": {
+				"fres": 2.2,
+				"far_lift": 0.6,
+				"top_light": 0.6,
+				"light_neutral_warm": 0.75
+			},
+			"skin": {
+				"shade": 0.85,
+				"fres": 0.6,
+				"shadow_tint": [
+					0.88,
+					0.9,
+					1.0
+				],
+				"light_neutral_warm": 0.6
+			},
+			"hair": {
+				"far_lift": 0.45,
+				"fres": 0.5,
+				"fres_tint": 0.4,
+				"rim_far": 0.35,
+				"rim_far_color": [
+					0.42,
+					0.5,
+					1.0
+				]
+			},
+			"leather": {
+				"fres": 0.8,
+				"fres_tint": 0.4,
+				"far_lift": 0.45,
+				"light_neutral_warm": 0.6,
+				"rim_far": 0.45,
+				"rim_far_color": [
+					0.55,
+					0.48,
+					1.0
+				]
+			},
+			"metal": {
+				"fres": 0.8,
+				"fres_tint": 0.55,
+				"far_lift": 0.5
+			},
+			"glow": {
+				"glow": 0.12
+			},
+			"cloth": {
+				"fres": 2.6,
+				"fres_color": [
+					0.8,
+					0.93,
+					1.0
+				],
+				"fres_tint": 0.1,
+				"gloss": 0.6,
+				"top_light": 0.2,
+				"far_lift": 0.1,
+				"rim_far": 0.5,
+				"light_neutral_warm": 0.8
+			}
+		},
+		"halos": [
+			{
+				"anchor": "anchor_eye_l",
+				"color": [
+					0.72,
+					0.9,
+					1.0
+				],
+				"strength": 2.0,
+				"px": 2.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			},
+			{
+				"anchor": "anchor_eye_r",
+				"color": [
+					0.72,
+					0.9,
+					1.0
+				],
+				"strength": 2.0,
+				"px": 2.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			}
+		]
+	},
+	"cinder": {
+		"painted": {
+			"rim_far": 0.42,
+			"rim_far_color": [
+				1.0,
+				0.5,
+				0.16
+			]
+		},
+		"slots": {
+			"skin": {
+				"shade": 0.9,
+				"top_light": 0.2,
+				"fres": 0.45,
+				"far_lift": 0.22,
+				"light_neutral_warm": 0.6,
+				"glow": 0.14
+			},
+			"metal": {
+				"top_light": 0.3,
+				"fres": 0.3,
+				"fres_tint": 0.6,
+				"far_lift": 0.1,
+				"sheen": 0.0
+			},
+			"glow": {
+				"glow": 1.6
+			},
+			"fur": {
+				"far_lift": 0.6,
+				"fres": 0.6,
+				"glow": 0.3,
+				"light_neutral_warm": 0.5
+			},
+			"leather": {
+				"light_neutral_warm": 0.4,
+				"far_lift": 0.12
+			}
+		},
+		"halos": [
+			{
+				"anchor": "anchor_flame",
+				"color": [
+					1.0,
+					0.55,
+					0.18
+				],
+				"px": 2.4,
+				"near_d": 7.0,
+				"far_d": 14.0,
+				"strength": 2.2
+			}
+		]
+	},
+	"kael": {
+		"painted": {
+			"rim_far": 0.35,
+			"rim_far_color": [
+				1.0,
+				0.8,
+				0.36
+			]
+		},
+		"slots": {
+			"skin": {
+				"top_light": 0.45,
+				"fres": 0.45,
+				"fres_tint": 0.2,
+				"far_lift": 0.25,
+				"shade": 0.95,
+				"shadow_tint": [
+					0.8,
+					0.84,
+					0.98
+				],
+				"light_neutral_warm": 0.65
+			},
+			"cloth": {
+				"fres": 0.6,
+				"far_lift": 0.3
+			},
+			"hair": {
+				"far_lift": 0.5,
+				"fres": 0.6,
+				"glow": 0.12,
+				"top_light": 0.4
+			},
+			"metal": {
+				"top_light": 0.5,
+				"fres": 0.55,
+				"fres_tint": 0.8,
+				"far_lift": 0.25,
+				"sheen": 0.1
+			},
+			"leather": {
+				"far_lift": 0.3,
+				"fres": 0.5
+			},
+			"glow": {
+				"glow": 2.8
+			}
+		},
+		"smoke": {
+			"color": [
+				0.04,
+				0.035,
+				0.045,
+				0.32
+			],
+			"amount": 24,
+			"life": 1.8,
+			"size": 0.26,
+			"rise": 0.35,
+			"from": 0.45
+		},
+		"bloom": [
+			{
+				"at": "weapon",
+				"color": [
+					1.0,
+					0.93,
+					0.78,
+					0.42
+				],
+				"size": 0.34,
+				"count": 6,
+				"from": 0.3
+			},
+			{
+				"at": "weapon",
+				"color": [
+					1.0,
+					0.97,
+					0.9,
+					0.5
+				],
+				"size": 0.16,
+				"count": 8,
+				"from": 0.3
+			},
+			{
+				"at": "anchor_arm_up",
+				"color": [
+					1.0,
+					0.8,
+					0.5,
+					0.28
+				],
+				"size": 0.26
+			},
+			{
+				"at": "anchor_arm_elbow",
+				"color": [
+					1.0,
+					0.8,
+					0.5,
+					0.22
+				],
+				"size": 0.2
+			},
+			{
+				"at": "anchor_arm_fore",
+				"color": [
+					1.0,
+					0.8,
+					0.5,
+					0.22
+				],
+				"size": 0.2
+			}
+		],
+		"weapon_scale": 0.85
+	},
+	"dredge": {
+		"painted": {
+			"gloss": 0.0,
+			"sheen": 0.0,
+			"rim_far": 0.35,
+			"rim_far_color": [
+				1.0,
+				0.78,
+				0.3
+			]
+		},
+		"slots": {
+			"glow": {
+				"glow": 3.2,
+				"rim_far": 0.0,
+				"shade": 1.0
+			}
+		},
+		"no_ink": [
+			"tar",
+			"crack",
+			"glass",
+			"gash"
+		]
+	},
+	"pip": {
+		"painted": {
+			"rim_far": 0.3,
+			"rim_far_color": [
+				1.0,
+				0.62,
+				0.74
+			]
+		},
+		"slots": {
+			"skin": {
+				"top_light": 0.35,
+				"fres": 0.3,
+				"far_lift": 0.2,
+				"light_tint": [
+					1.0,
+					0.97,
+					1.0
+				],
+				"shadow_tint": [
+					0.97,
+					0.9,
+					0.96
+				],
+				"light_neutral_warm": 0.6
+			},
+			"cloth": {
+				"far_lift": 0.45,
+				"fres": 0.5
+			},
+			"leather": {
+				"far_lift": 0.35
+			},
+			"metal": {
+				"fres": 0.5,
+				"fres_tint": 0.8,
+				"far_lift": 0.3
+			},
+			"glow": {
+				"glow": 2.4
+			},
+			"card": {
+				"sheen": 0.8,
+				"glow": 1.6,
+				"irid": 0.15,
+				"sheen_color": [
+					1.0,
+					0.75,
+					0.9
+				],
+				"albedo": [
+					1.0,
+					0.8,
+					0.92
+				],
+				"alpha_k": 1.3
+			}
+		},
+		"lights": [
+			{
+				"anchor": "anchor_hang_lantern",
+				"colour": [
+					1.0,
+					0.72,
+					0.35
+				],
+				"energy": 1.6,
+				"range": 0.9
+			}
+		],
+		"halos": [
+			{
+				"anchor": "anchor_hang_lantern",
+				"color": [
+					1.0,
+					0.78,
+					0.42
+				],
+				"strength": 2.0,
+				"px": 4.0,
+				"near_d": 7.0,
+				"far_d": 14.0
+			}
+		],
+		"ink": {
+			"far_thin": 1.0,
+			"color": [
+				0.36,
+				0.17,
+				0.24
+			]
+		}
 	}
 }

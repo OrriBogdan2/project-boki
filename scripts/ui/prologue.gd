@@ -24,7 +24,7 @@ const SKY_KEYS := ["top", "mid", "horizon"]
 const SEA_KEYS := ["deep", "light", "glow"]
 ## How fast a camera move still creeps at its end, as a share of its average speed (eased, never a dead stop)
 const END_CREEP := 0.25
-const MANTLES_AT := 2.6        # s into THE SUNDERING: the Wardens' power bursts out of the Crown as Mantles
+const MANTLES_AT := 2.6        # s into THE SUNDERING: the Hunters' selves burst out of the Crown as Masks
 
 var cam: Camera3D
 var env: Environment
@@ -37,9 +37,10 @@ var shots: Array = []
 var rng := RandomNumberGenerator.new()
 var pieces: Array = []          # the broken continent: {node, dir, fall, spin}
 var gliders: Array = []
-var boki: PrologueBoki          # THE BOKI's set (scripts/ui/prologue_boki.gd)
+var boki: PrologueBoki          # THE MASKS' set (scripts/ui/prologue_boki.gd)
 var broke := false
-var shake := 0.0
+var rumble := 0.0                # the roar and the fall: a faint camera rumble (RUMBLE_AMP), never a shake
+const RUMBLE_AMP := 0.08
 var then_go := "hatch"          # where to go after: "hatch" for a new game, "title" when rewatched
 # ui
 var ui: CanvasLayer
@@ -116,26 +117,26 @@ func _shots() -> Array:
 	var D: Vector3 = SETS["drop"]
 	var out := [
 		{"chapter": "BEFORE THE FALL", "mood": "gold", "tint": Color("ffd27a"), "grade": 0.16,
-			"text": "Once, the sky held one great land,\nruled from the Crown by a sovereign who never aged.",
+			"text": "The Skylands were once ruled by a great deity:\na Tyrant on the Crown who never aged.",
 			"cam": [[W + Vector3(-70, 22, 80), W + Vector3(0, 2, 0), W + Vector3(-54, 17, 62), W + Vector3(0, 3, 0), 3.4],
 				[W + Vector3(-16, 8, 18), W + Vector3(0, 5.0, 0), W + Vector3(-13, 7, 14.5), W + Vector3(0, 5.6, 0), 3.4]]},
 		{"chapter": "THE WAKING", "mood": "gold", "tint": Color("ff5a3a"), "grade": 0.3, "event": "wyrm",
-			"text": "The sovereign was the Wyrm in human shape, asleep on its hoard.\nThe night a thief reached its heart, it woke.",
+			"text": "He was the Wyrm in human shape.\nThe night a thief reached its heart, it woke.",
 			"cam": [[W + Vector3(-22, 12, 26), W + Vector3(18, 6, -30), W + Vector3(-20, 11, 23), W + Vector3(20, 10, -30), 3.0],
 				[W + Vector3(12, 7, 40), W + Vector3(8, 9, -10), W + Vector3(10, 8, 42), W + Vector3(-16, 9, 10), 4.0]]},
 		{"chapter": "THE SUNDERING", "mood": "fire", "tint": Color("d0406a"), "grade": 0.34, "event": "break",
-			"text": "It broke the land into a thousand isles.\n"
-				+ "The Wardens who stood against it fell, and their power scattered as Mantles.",
+			"text": "The Wyrm broke the land and stole our essence.\n"
+				+ "In time, humans, beasts and skyfolk alike were born without faces.\nWe became a new race: the Empty.",
 			"cam": [[W + Vector3(-30, 22, 46), W + Vector3(0, 0, 0), W + Vector3(-36, 28, 56), W + Vector3(0, -6, 0), 3.6],
 				[W + Vector3(46, 4, 34), W + Vector3(0, -4, 0), W + Vector3(58, 10, 46), W + Vector3(0, -20, 0), 3.9]]},
-		{"chapter": "THE BOKI", "mood": "dawn", "tint": Color("ffe4b0"), "grade": 0.12, "event": "kin",
-			"text": "On the broken isles, survivors found the Boki.\n"
-				+ "A hunter bonded to one could wake a fallen Warden's Mantle.",
+		{"chapter": "THE MASKS", "mood": "dawn", "tint": Color("ffe4b0"), "grade": 0.12, "event": "kin",
+			"text": "Our only salvation became the cursed fossils we had tried to destroy:\n"
+				+ "Masks, each carrying the soul of a fallen Hunter of old.",
 			"cam": [[K + Vector3(0.2, 2.0, 7.6), K + Vector3(0.2, 0.9, -1.2), K + Vector3(0.25, 1.7, 6.4), K + Vector3(0.3, 0.85, -1.0), 3.1],
 				[K + Vector3(0.4, 0.55, 3.9), K + Vector3(0.4, 0.85, -0.3), K + Vector3(0.4, 0.55, 3.45), K + Vector3(0.4, 0.88, -0.3), 4.4]]},
 		{"chapter": "THE RACE", "mood": "deep", "tint": Color("b08aff"), "grade": 0.24, "event": "drop",
-			"text": "Somewhere in the ruins lies the Wyrmheart: one wish to remake the world, or rule it.\n"
-				+ "Every hunter wants it. So does the Wyrm.",
+			"text": "Put on a Mask, bond with a Boki, and hunt for the Wyrmheart:\n"
+				+ "one wish to remake the world, or rule it.\nEvery Hunter wants it. So does the Wyrm.",
 			"cam": [[D + Vector3(-6, 20, 14), D + Vector3(2, 4, -30), D + Vector3(-3, 16, 2), D + Vector3(8, -10, -52), 4.0],
 				[D + Vector3(-4, 14, -4), D + Vector3(14, -28, -70), D + Vector3(0, 11, -12), D + Vector3(18, -36, -82), 4.2]]},
 	]
@@ -294,7 +295,7 @@ func _fire(parent: Node3D, at: Vector3, size := 1.0) -> void:
 	sm.mesh = _blob(0.6, false)
 	parent.add_child(sm)
 
-## Specks drifting in a set's air (the Sundering's dust, the Mantle rising): `box` half-extents in m, `radius` the
+## Specks drifting in a set's air (the Sundering's dust, the Mask rising): `box` half-extents in m, `radius` the
 ## speck radius in m, `rise` m/s² up (negative sinks), `glow` adds light instead of covering.
 func _drift(at: Vector3, box: Vector3, col: Color, n: int, radius: float, rise: float, glow: bool) -> CPUParticles3D:
 	var p := CPUParticles3D.new()
@@ -567,7 +568,7 @@ func _process(delta: float) -> void:
 	flash.color.a = maxf(0.0, flash.color.a - delta * 1.6)
 
 ## Places the camera on the move playing now (past the last one it keeps creeping while the wipe covers it),
-## with a slow breathing sway like a held camera, and any shake.
+## with a slow breathing sway like a held camera, and a faint rumble.
 func _camera(moves: Array, delta: float) -> void:
 	var i := 0
 	var into := shot_t
@@ -580,9 +581,11 @@ func _camera(moves: Array, delta: float) -> void:
 	var look: Vector3 = (mv[1] as Vector3).lerp(mv[3], e)
 	var sway := Vector3(sin(t * 0.83) + 0.5 * sin(t * 1.9), 0.6 * sin(t * 1.21 + 2.0), 0.0)
 	look += sway * pos.distance_to(look) * 0.003
-	if shake > 0.0:
-		pos += Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)) * shake
-		shake = maxf(0.0, shake - delta * 1.2)
+	if rumble > 0.0:
+		# a slow low sway, not a shake: tiny, and scaled by the Screen shake setting (0 = still)
+		var amp := rumble * RUMBLE_AMP * float(Settings.get_v("screen_shake"))
+		pos += Vector3(sin(t * 9.0), 0.6 * sin(t * 7.0 + 1.0), 0.0) * amp
+		rumble = maxf(0.0, rumble - delta * 1.2)
 	cam.position = pos
 	cam.look_at(look, Vector3.UP)
 
@@ -604,14 +607,14 @@ func _events(ev: String, st: float, delta: float) -> void:
 		"drop":
 			_race(st, delta)
 
-## The Wyrm rises behind the Crown, roars (the sky reddens, the frame shakes) and sweeps the towns with fire.
+## The Wyrm rises behind the Crown, roars (the sky reddens, the frame rumbles) and sweeps the towns with fire.
 func _waking(st: float, delta: float) -> void:
 	var dur: float = shots[shot]["dur"]
 	_wyrm_along("wyrm", st / (dur + 0.6))
 	if st > 2.4 and not wyrm.has_meta("roared"):
 		wyrm.set_meta("roared", true)
 		wyrm.roar()
-		shake = 0.9
+		rumble = 0.9
 		Sfx.play("v_warden", null, 2.0, 0.0, 0.55)
 		Sfx.play("boom", null, -6.0, 0.0, 0.35)
 		create_tween().tween_method(_burn, 0.0, 0.6, 2.5)
@@ -620,7 +623,7 @@ func _waking(st: float, delta: float) -> void:
 		var tn: Array = towns[burning]
 		_fire(tn[0], tn[1], 1.3)
 		burning += 1
-		shake = maxf(shake, 0.25)
+		rumble = maxf(rumble, 0.25)
 		Sfx.play("boom", null, -14.0, 0.1, 1.4)
 
 ## The Wyrm circles while the land splits: a flash and a jolt, the isles drift apart and sink, rocks tumble.
@@ -638,7 +641,7 @@ func _sundering(st: float, delta: float) -> void:
 	if st > 1.4 and not broke:
 		broke = true
 		flash.color.a = 0.85
-		shake = 1.4
+		rumble = 1.4
 		Sfx.play("boom", null, 0.0, 0.0, 0.6)
 		Sfx.play("boom", null, -4.0, 0.0, 0.45)
 		Sfx.play("v_warden", null, 0.0, 0.0, 0.5)
@@ -658,9 +661,9 @@ func _sundering(st: float, delta: float) -> void:
 			n.rotation.x = float(p["spin"]) * 0.6 * e
 		if randf() < delta * 3.0 and st < 6.0:
 			flash.color.a = maxf(flash.color.a, 0.3)
-			shake = maxf(shake, 0.35)
+			rumble = maxf(rumble, 0.35)
 
-## The fallen Wardens' power scattering as Mantles: a light of each Mantle's colour bursts out of the Crown and
+## The fallen Hunters' selves scattering as Masks: a light of each Mask's colour bursts out of the Crown and
 ## flies off over the breaking isles.
 func _scatter_mantles() -> void:
 	var from: Vector3 = (pieces[0]["node"] as Node3D).position + Vector3(0, 10, 0)

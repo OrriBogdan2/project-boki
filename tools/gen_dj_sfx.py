@@ -98,13 +98,13 @@ save('dj_encore', mix(scale(mul(whirl(0.45, 8, 22, 2400), rise(N(0.45), 0.5)), 0
 wn = N(2.0)
 save('dj_encore_whirr', mul(whirl(2.0, 14, 14, 1800), [min(1.0, i / N(0.15)) * min(1.0, (wn - i) / N(0.3)) for i in range(wn)]), -25)
 save('dj_encore_hit', mix(chirp(520, 180, 0.08, 0.001, 0.03, 0.5), scale(hiss(0.05, 2500, 7000, 0.001, 0.012), 0.6), scale(mul(lp(noise(0.06), 400), env(N(0.06), 0.001, 0.02)), 0.6)), -22)
-# Zedran's Gilded Riposte: the guard (a blade drawn up with a ring and a low hum swelling), a bright metallic
+# Kael's Gilded Riposte: the guard (a blade drawn up with a ring and a low hum swelling), a bright metallic
 # ting for each hit it blocks, and the cleave (a heavy whoosh into a crunch)
 gn = N(0.65)
 save('jug_guard', mix(scale(at(bell(784, 0.6, 0.25), 0.02), 0.7), scale(hiss(0.2, 3000, 8000, 0.002, 0.06), 0.5), scale(mul(tone(110, 165, 0.65, 0.5), rise(gn, 0.8)), 0.6), scale(mul(bp(noise(0.65), 400, 1400), rise(gn, 1.4)), 0.35)), -18)
 save('jug_ting', mix(bell(2093, 0.35, 0.09), scale(bell(3136, 0.3, 0.06), 0.6), scale(hiss(0.06, 4000, 9000, 0.001, 0.015), 0.5)), -17)
 save('jug_riposte', mix(scale(mul(bp(noise(0.3), 250, 2200), [math.sin(math.pi * min(1.0, i / N(0.22))) ** 1.5 for i in range(N(0.3))]), 0.9), scale(at(mul(lp(noise(0.5), 380), env(N(0.5), 0.002, 0.16)), 0.18), 1.0), scale(at(chirp(140, 42, 0.45, 0.002, 0.16, 0.4), 0.18), 0.9), scale(at(hiss(0.3, 900, 4000, 0.002, 0.08), 0.19), 0.6)), -14)
-# Zedran's Meteor Drop landing (a deep boom, then gravel and grit spraying out), the Warchain pulled taut (an
+# Kael's Meteor Drop landing (a deep boom, then gravel and grit spraying out), the Warchain pulled taut (an
 # iron creak, links grinding) and the haul along it (a fast rattle of links running through)
 save('jug_meteor', mix(scale(mul(lp(noise(0.9), 220), env(N(0.9), 0.002, 0.3)), 1.0), scale(chirp(85, 32, 0.8, 0.002, 0.3, 0.4), 1.0), scale(at(mul(bp(noise(0.6), 900, 4500), env(N(0.6), 0.01, 0.18)), 0.03), 0.55), scale(at(hiss(0.4, 2500, 7000, 0.005, 0.08), 0.06), 0.35)), -12)
 save('jug_taut', mix(*[scale(at(chirp(330 + 25 * k, 290, 0.05, 0.001, 0.03, 0.8), 0.045 * k), 0.7 - 0.08 * k) for k in range(6)], scale(mul(bp(noise(0.3), 400, 1600), env(N(0.3), 0.02, 0.1)), 0.4)), -21)

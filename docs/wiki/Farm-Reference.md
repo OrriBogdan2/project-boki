@@ -10,7 +10,7 @@ Everything you can place in build mode (B), from `HomeLayout.CATALOG`. Costs are
 | Item | Cost | Tiles | Notes |
 |---|---|---|---|
 | House | 90 gems | 5x3 | Your home. Go inside to rest and decorate; Boki nap here too. Its door needs open ground. (one only) |
-| Crop patch | 30 gems | 5x4 | Four plots of tilled soil to sow and water. Buying more plots at the market makes room for another patch. |
+| Crop patch | 30 gems | 5x4 | Four plots of tilled soil to sow and water. Buying more plots at the market makes room for another patch. Put it within 2 tiles of water and it waters itself. |
 | Cooking pot | 20 gems | 1x1 | Cook what you grow into treats for your Boki. (one only) |
 | Market stall | 30 gems | 3x2 | Somewhere to trade on the island (the Market is always on the hub bar too). (one only) |
 | Nesting Nook | 60 gems, 8 wood | 4x2 | Where two close Boki leave an egg, with the Incubator beside it for Rare Eggs. (one only) |
@@ -52,6 +52,7 @@ Everything you can place in build mode (B), from `HomeLayout.CATALOG`. Costs are
 | Dirt path | 1 gems | 1x1 |  |
 | Boardwalk | 2 gems | 1x1 |  |
 | Grass (clear) | 0 gems | 1x1 |  |
+| River | 2 gems | 1x1 | Drag a narrow channel of water across the ground. A crop patch within 2 tiles of any water waters itself. |
 | Pond water | 6 gems | 1x1 |  |
 
 ## Garden

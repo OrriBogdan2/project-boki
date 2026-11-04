@@ -82,7 +82,10 @@ func over_void() -> bool:
 	if not m.world.is_void(pos.x, pos.z):
 		return false
 	var st = m.get("skytrain")
-	return not (st and st.deck_y(pos, 3.0) > World.VOID + 1.0)
+	if st and st.deck_y(pos, 3.0) > World.VOID + 1.0:
+		return false
+	# a standable rock under the feet is ground (Tarek's Basalt Spine over the abyss)
+	return StoneStand.top_under(m.world.dyn_walls, pos, r, World.VOID) <= World.VOID + 1.0
 
 func flat_dist(o) -> float:
 	var p: Vector3 = o.pos if o is Ent else o

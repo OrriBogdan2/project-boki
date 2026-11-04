@@ -155,7 +155,7 @@ func _charge_and_waves() -> void:
 	await _reel_combo(m, P, T, home)
 	await ak.done(m)
 
-## Grapnel, the foe hauled to your feet stunned, then the Broadside: every slug lands.
+## Abyssal Hand, the foe hauled to your feet stunned, then the Broadside: every slug lands.
 func _reel_combo(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 	var K: DredgeKit = P.ak
 	ak.fresh(T)
@@ -189,12 +189,15 @@ func _guards() -> void:
 	var ch0 := K.ch_rmb
 	ak.tap(m, P)
 	P.ak.use_e()
-	var x0 := P.pos.x
+	var x0 := P.pos
+	P.dashes = P.max_dashes()
 	P.ak.on_dash(false)
 	ak.step(m, 0.1)
 	ok(
-		"ult: RMB, E and the barge are locked while it runs",
-		K.ch_rmb == ch0 and K.grapples == g0 and K.wind <= 0.0 and absf(P.pos.x - x0) < 0.05
+		"ult: RMB and E are locked while it runs; Shift barges at once and it runs on, its pose kept (item 51)",
+		K.ch_rmb == ch0 and K.grapples == g0 and K.wind <= 0.0 and P.flat_dist(x0) > 0.5 and B.charging()
+				and K.anim_id == "dr_blast",
+		"moved %.2f m, charging %s" % [P.pos.distance_to(x0), B.charging()]
 	)
 	P.stun_t = 0.5
 	ak.step(m, 0.05)
@@ -204,14 +207,24 @@ func _guards() -> void:
 	)
 	P.stun_t = 0.0
 	ak.step(m, 0.6)
+	var waves0 := B.waves
+	_cast(P, T.pos)
+	ak.step(m, 0.3)
+	P.dashes = P.max_dashes()
+	P.do_dash()
+	ak.step(m, 2.2)
+	ok("ult: barged out of in the charge, both waves still go", not B.running() and B.waves == waves0 + 2,
+			"waves +%d" % (B.waves - waves0))
+	ak.step(m, 0.6)
+	waves0 = B.waves
 	_cast(P, T.pos)
 	ak.step(m, 0.4)
 	ok("merge hold: the Broadside is charging before the merge", B.charging())
 	ok("merge hold: a merge is under way", ak.merge_now(P))
 	ak.step(m, 1.8)
 	ok(
-		"merge hold: dredge's Broadside is dropped, no wave mid-merge", not B.running() and B.waves == 0,
-		"waves %d" % B.waves
+		"merge hold: dredge's Broadside is dropped, no wave mid-merge", not B.running() and B.waves == waves0,
+		"waves %d" % (B.waves - waves0)
 	)
 	KinMerge.end(P, "test")
 	await ak.done(m)

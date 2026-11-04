@@ -308,7 +308,6 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			m.fx.ring(at, r, col, 0.3)
 			m.fx.burst(at + Vector3(0, 0.4, 0), col, int(clampf(r * 10.0, 8.0, 30.0)), 5.0, 0.45, 6.0, 1.1)
 			m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
-			if r > 2.0: m.shake(0.3, at)
 			if not caster is Kin: AbilityFx.land(m, caster, at, r, col)
 			for f in m.foes_of(caster.team):
 				if _hits(f, at, r):
@@ -322,7 +321,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 						o["stun"] = maxf(float(o.get("stun", 0.0)), float(e["spike"].get("stun", 0.8)))
 						o.erase("lift")
 						m.fx.word(f.pos + Vector3(0, 2.0, 0), "SPIKED", col, true)
-						f.vel.y = -16.0
+						m.displace.spike(f, -16.0)
 					f.hurt(dmg, caster, o)
 		"cone":
 			var d := _aim_dir(caster, ctx)
@@ -367,7 +366,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			for f in m.foes_of(caster.team):
 				var rel := Vector2(at.x - f.pos.x, at.z - f.pos.z)
 				if rel.length() < r + f.r and rel.length() > 0.4 and absf(f.pos.y - at.y) < 2.5:
-					f.impulse(rel.normalized() * float(e.get("strength", 6.0)) * clampf(rel.length() / r + 0.3, 0.4, 1.0), 1.0)
+					m.displace.knock(f, rel.normalized() * float(e.get("strength", 6.0)) * clampf(rel.length() / r + 0.3, 0.4, 1.0), 1.0)
 		"zone":
 			var at := _where(e, caster, ctx, "aim")
 			m.fields.add(caster, at, e, ctx, pw)
@@ -508,7 +507,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 				m.fx.burst(a + Vector3(0, 0.9, 0), col, 16, 4.0, 0.4)
 				m.fx.burst(b + Vector3(0, 0.9, 0), col, 16, 4.0, 0.4)
 				m.fx.bolt(a + Vector3(0, 1.0, 0), b + Vector3(0, 1.0, 0), col)
-				who.teleport(b); tgt.teleport(a)
+				who.teleport(b); m.displace.teleport(tgt, a)
 				who.vel = Vector3.ZERO; tgt.vel = Vector3.ZERO
 				if who is Hunter: (who as Hunter).gliding = false
 				if tgt is Hunter: (tgt as Hunter).gliding = false
@@ -703,4 +702,3 @@ static func _fissure(e: Dictionary, caster: Node, ctx: Dictionary, m: Node, pw: 
 			if i % 2 == 0: m.sfx("thump", at, -6.0, 1.2)
 		if i == 0: go.call()
 		else: m.later(every * i, go)
-	m.shake(0.25, start)

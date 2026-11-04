@@ -56,14 +56,16 @@ func run(m: Node) -> void:
 	var hb: HomeBuild = home.hb
 	var L: Dictionary = HomeLayout.of(Save.d)
 	ok(HomeLayout.fs(Save.d) and int(L["seed"]) > 0 and float(L.get("sk", 0.0)) > 0.0, "a brand new save gets a farm-start island of its own (seed %d, scale %.3f)" % [int(L["seed"]), float(L.get("sk", 0.0))])
-	ok((L["deco"] as Array).is_empty() and home.plots.is_empty() and home.spots["house"].x < -100.0 and home.spots["pot"].x < -100.0, "no house, plots, pot or decorations yet: the island starts empty")
+	var only_stall := (L["deco"] as Array).size() == 1 and String(L["deco"][0]["id"]) == "market_stall"
+	ok(only_stall and home.plots.is_empty() and home.spots["house"].x < -100.0 and home.spots["pot"].x < -100.0,
+		"no house, plots, pot or decorations yet: the island starts empty but for its market stall")
 	var lots_out := 0
 	for b in Data.BUILDINGS:
 		if String(Data.BUILDINGS[b]["isle"]) == "main" and HomeLayout.placed(b, Save.d): lots_out += 1
 	ok(lots_out == 0 and Econ.feeders().is_empty() and int(Save.d["feeder_inv"].get("trough", 0)) == 1, "no building lots on the meadow, and the first trough waits in storage to be set down")
 	var ess := int(HomeLayout.CATALOG["house"]["gems"]) + int(HomeLayout.CATALOG["crop_patch"]["gems"]) + int(HomeLayout.CATALOG["cook_pot"]["gems"])
-	ok(int(Save.d["gems"]) == HomeLayout.FS_GEMS and ess <= HomeLayout.FS_GEMS and ess + int(HomeLayout.CATALOG["market_stall"]["gems"]) <= HomeLayout.FS_GEMS and HomeLayout.FS_GEMS - ess < 90,
-		"%d gems to start: a house, a crop patch and a pot cost %d (the stall %d more), with a little to spare" % [int(Save.d["gems"]), ess, int(HomeLayout.CATALOG["market_stall"]["gems"])])
+	ok(int(Save.d["gems"]) == HomeLayout.FS_GEMS and ess <= HomeLayout.FS_GEMS and HomeLayout.FS_GEMS - ess < 90,
+		"%d gems to start: a house, a crop patch and a pot cost %d, with a little to spare" % [int(Save.d["gems"]), ess])
 	var w: World = home.world
 	var ground := 0; var placed_n := 0
 	for i in w.kind.size():
@@ -71,7 +73,8 @@ func run(m: Node) -> void:
 		if w.island[i] == 0 and hb.occ.has(i) and String(hb.occ[i]) != "w": placed_n += 1
 	var kinds := {}
 	for i in hb.wild_t: kinds[hb.wild_t[i]] = int(kinds.get(hb.wild_t[i], 0)) + 1
-	ok(placed_n == 0 and ground > 900, "%d tiles of open meadow and nothing built on it (wild: %s)" % [ground, str(kinds)])
+	var stall_tiles := HomeLayout.size_of("market_stall", 0).x * HomeLayout.size_of("market_stall", 0).y
+	ok(placed_n == stall_tiles and ground > 900, "%d tiles of open meadow and only the stall on it (wild: %s)" % [ground, str(kinds)])
 	var wd0 := World.new()
 	HomeLayout.make_world(wd0, 0, int(L["seed"]), float(L["sk"]))
 	var raw := HomeLayout.wild_fs(wd0, int(L["seed"]), float(L["sk"]), {})
@@ -86,7 +89,8 @@ func run(m: Node) -> void:
 	hb.toggle()
 	hb.cat = "Buildings"; hb._build_bar()
 	var items: Array = hb._tab_items()
-	ok(items.any(func(it): return String(it["t"]).begins_with("House")) and items.any(func(it): return String(it["t"]).begins_with("Crop patch")), "build mode's Buildings tab offers the house and the essentials")
+	ok(items.any(func(it): return String(it["name"]).begins_with("House")) and items.any(func(it): return String(it["name"]).begins_with("Crop patch")), "build mode's Buildings tab offers the house and the essentials")
+	Work.add_mat("wood", 3)      # the house costs a little wood
 	hb.take("house")
 	ok(hb.held.get("id", "") == "house" and is_instance_valid(hb.ghost), "taking the house holds a ghost of it")
 	var land := HomeLayout.LANDING
@@ -105,7 +109,13 @@ func run(m: Node) -> void:
 		if mi is MeshInstance3D and ((mi as MeshInstance3D).material_override as StandardMaterial3D).albedo_color.g < 0.9: green = false
 	ok(green, "on open meadow it tints green")
 	var g0 := int(Save.d["gems"])
-	ok(hb.place_held() and int(Save.d["gems"]) == g0 - 90 + 5 and Progress.day1_steps().has("house"), "the house goes down where you chose and costs 90 gems (and ticks off the first day's first step, +5)")
+	ok(hb.place_held() and int(Save.d["gems"]) == g0 and FarmSites.is_site(HomeLayout.of(Save.d)["deco"][-1]),
+		"the house goes down where you chose as a free construction site")
+	var house_site: Dictionary = HomeLayout.of(Save.d)["deco"][-1]
+	while FarmSites.has_site(house_site):
+		FarmSites.add_swing(house_site)
+	hb.apply(false)
+	home._sync_fixtures()
 	ok(home.spots["house"].x > 0.0 and home.spots["house"].distance_to(HomeLayout.rect_center([hc[0].x, hc[0].y, hc[14].x, hc[14].y])) < 0.6 and is_instance_valid(home.house_node), "the farm knows where its house is now (%s)" % str(home.spots["house"]))
 	var dp: Vector3 = home._house_door()
 	ok(not w.is_block(dp.x, dp.z) and not w.is_void(dp.x, dp.z), "its door step is open ground (%s)" % str(dp))
@@ -119,7 +129,8 @@ func run(m: Node) -> void:
 	ok(_put(hb, pp) and home.spots["pot"].x > 0.0, "the cooking pot goes down beside it")
 	var v2 := hb.validate()
 	ok(bool(v2["ok"]), "the house door, the plots, the pot and the portal can all be walked to (%d places missed; %d of %d open reached)" % [(v2["missing"] as Array).size(), int(v2["reached"]), int(v2["open"])])
-	ok(int(Save.d["gems"]) == HomeLayout.FS_GEMS - ess + 10, "%d gems left after the essentials (with the first day's +5 for the house and the patch)" % int(Save.d["gems"]))
+	var house_gems := int(HomeLayout.CATALOG["house"]["gems"])
+	ok(int(Save.d["gems"]) == HomeLayout.FS_GEMS - ess + house_gems, "%d gems left after the patch and the pot (the house is free)" % int(Save.d["gems"]))
 	# the house can be picked up and moved again
 	var he: Dictionary = HomeLayout.fixtures(Save.d, "house")[0]
 	hb.pick_up_at(Vector2i(int(he["x"]) + 1, int(he["z"]) + 1))
@@ -194,6 +205,16 @@ func run(m: Node) -> void:
 	for k in home.kins: k["pos"] = HomeLayout.LANDING
 	var n_back: int = hb.regrow_due(Time.get_unix_time_from_system() + 4000.0)
 	ok(n_back >= 1 and hb.wild_t.has(ti) and w.is_block(ti % w.w + 0.5, ti / w.w + 0.5), "later, the tree grows back where it stood (%d came back)" % n_back)
+	# the Training Grounds isle is gone: no island of its own, and the Esc menu opens the training area instead
+	ok(home.world.island_id(40.0, 56.0) != "training", "the farm has no Training Grounds isle")
+	var was: Node = main.get("current")
+	main.set("current", home)
+	Overlay.open_pause("home")
+	await main.get_tree().process_frame
+	var btns: Array = Overlay.host.find_children("*", "Button", true, false)
+	ok(btns.any(func(b): return (b as Button).text.contains("Training area")), "the farm's Esc menu has Training area")
+	Overlay.close()
+	main.set("current", was)
 	var cl := -1
 	for i in hb.wild_t:
 		if hb.wild_t[i] == "cliff": cl = i; break
