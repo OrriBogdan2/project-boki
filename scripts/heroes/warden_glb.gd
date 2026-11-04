@@ -55,7 +55,7 @@ const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline
 ## Materials "<slot>-<tag>" so tagged go without it too (thin ooze read as planks; the lens's line cut the orb).
 const NO_INK_TAGS := ["tar", "crack", "glass", "gash"]
 ## A Warden's own settings for its painted atlas, on top of the shared ones (Dredge: tarnished brass, rough spec).
-const LOOK := {"dredge": {"gloss": 0.0, "sheen": 0.0, "rim_far": 0.5, "rim_far_color": Color(1.0, 0.68, 0.3)}}
+const LOOK := {"dredge": {"gloss": 0.0, "sheen": 0.0, "rim_far": 0.35, "rim_far_color": Color(1.0, 0.78, 0.3)}}
 ## And per slot of a Warden's painted atlas (Dredge: the eye glows brighter, so it shows at the match camera).
 const LOOK_SLOT := {"dredge": {"glow": {"glow": 3.2, "rim_far": 0.0}}}
 const PAINTED_SHADE := 0.72     # a painted atlas's shadow floor (the hero shader's own is 0.37)

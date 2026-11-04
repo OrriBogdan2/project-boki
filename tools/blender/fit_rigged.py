@@ -14,6 +14,7 @@ The spec (art/wardens/src/<name>_fit.json) names the source .glb, the rig JSON (
 - `weapon`: a source group cut off into the `weapon` mesh in the Gun node's space (its narrow end on the right
   hand's grip, its mouth forward; `weapon_muzzle` marks the mouth; `solidify` m gives a single-sided shell an inside);
 - `materials`: source material -> [glTF name "<slot>-<what>", colour]; `max_tris`; `anchors`;
+- `protect` {parts, ratio}: thin parts decimated on their own, lightly (rods and fingers vanish at the body's ratio);
 - `orb` (a glowing sphere on a bone, `replace`-ing a group), `drips` (tar drips hanging from faces that look
   down), `paint` (the ageing atlas: per-material recipes, baked in Cycles): tools/blender/warden_paint.py;
 - `strip` (the source's shell pieces dropped) and `hull` (a scripted shell in their place, the art's views
@@ -300,7 +301,75 @@ def main():
         g.add([int(i) for i in np.nonzero(bone_of == b)[0]], 1.0, "REPLACE")
     for g in [g for g in ob.vertex_groups if not g.name.startswith("_")]:
         ob.vertex_groups.remove(g)
-    decimate(ob, int(spec["max_tris"]), float(spec.get("dissolve_deg", 0.0)))
+    pr = spec.get("protect")
+    if pr:
+        # thin limbs (the claw arm's rods and fingers, the leg rods) collapse to nothing under the body's ratio, and
+        # dense pieces (the boots) take more than their share: each group is split off, decimated at its own ratio
+        # and joined back; the rest takes what is left of max_tris
+        groups = pr if isinstance(pr, list) else [pr]
+        pieces = []
+        taken = np.zeros(len(part), bool)
+        for grp_spec in groups:
+            sel = np.isin(part, grp_spec["parts"]) & ~taken
+            taken |= sel
+            pieces.append((np.nonzero(sel)[0].tolist(), float(grp_spec.get("ratio", 0.6))))
+        # (split from the highest index down is not needed: split_off keeps the mesh's own order per object)
+        limbs = []
+        idx = np.arange(len(part))
+        for keep_ids, ratio in pieces:
+            # indices into the current (shrinking) mesh: track the original index in a layer
+            limbs.append((keep_ids, ratio))
+        lay = ob.data.attributes.new("_orig", "INT", "POINT")
+        lay.data.foreach_set("value", idx.astype(np.int32))
+        outs = []
+        for keep_ids, ratio in limbs:
+            want = set(keep_ids)
+            cur = np.zeros(len(ob.data.vertices), np.int32)
+            ob.data.attributes["_orig"].data.foreach_get("value", cur)
+            sel = {i for i, o in enumerate(cur.tolist()) if o in want}
+            limb = split_off(ob, sel, "limb")
+            decimate(limb, int(tris(limb) * ratio), 0.0)
+            outs.append(limb)
+        decimate(ob, int(spec["max_tris"]) - sum(tris(o) for o in outs), float(spec.get("dissolve_deg", 0.0)))
+        bpy.ops.object.select_all(action="DESELECT")
+        for o in outs:
+            o.select_set(True)
+        ob.select_set(True)
+        bpy.context.view_layer.objects.active = ob
+        bpy.ops.object.join()
+        ob.data.attributes.remove(ob.data.attributes["_orig"])
+    if spec.get("drop_small"):
+        # fragments the collapse left (a few triangles of a decimated strap or weed: shards floating round the limbs)
+        dz = spec["drop_small"]
+        bm = bmesh.new()
+        bm.from_mesh(ob.data)
+        bm.verts.ensure_lookup_table()
+        seen = set()
+        drop = []
+        for v in bm.verts:
+            if v.index in seen:
+                continue
+            comp, stack = [v], [v]
+            seen.add(v.index)
+            while stack:
+                x = stack.pop()
+                for e in x.link_edges:
+                    o = e.other_vert(x)
+                    if o.index not in seen:
+                        seen.add(o.index)
+                        comp.append(o)
+                        stack.append(o)
+            co = np.array([q.co[:] for q in comp])
+            size = float(np.linalg.norm(co.max(axis=0) - co.min(axis=0)))
+            faces = {f for q in comp for f in q.link_faces}
+            if size < float(dz["size"]) and len(faces) < int(dz["tris"]):
+                drop.extend(comp)
+        bmesh.ops.delete(bm, geom=drop, context="VERTS")
+        bm.to_mesh(ob.data)
+        bm.free()
+        log("drop_small: %d vertices" % len(drop))
+    else:
+        decimate(ob, int(spec["max_tris"]), float(spec.get("dissolve_deg", 0.0)))
     if weapon and tris(weapon) > int(wspec.get("tris", 3000)):
         decimate(weapon, int(wspec.get("tris", 3000)), float(spec.get("dissolve_deg", 0.0)))
     for g in ob.vertex_groups:

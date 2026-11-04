@@ -95,4 +95,11 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   FAR_LOOK / INK_FAR_CUT / GLOW_SHELL and `_far_look()` added to WardenGlb (Dredge's LOOK / LOOK_SLOT pass in as
   its "painted" / "slots"); his own ink takes far_cut too. The speckle fringe is gone at the match camera and the
   eye reads as a red-orange halo.
+- **r3j (credit-free, ORCH 17:10 / 17:15):** the r3i limb loss found and fixed. The rods of his arms and legs, the
+  claw's fingers, the rope and the hook had collapsed in the decimation as the friend's body's share shrank to pay for
+  the hull (3,650 triangles in r3h, 2,900 in r3i; the Blender render of the .glb itself shows it, so not a shader):
+  fit_rigged's `protect` now decimates the thin limb parts (and the rope and hook) at 0.32, the boots at 0.12 and the
+  winch at 0.25 on their own, the rest taking what is left; `drop_small` removes the collapse's leftover shards.
+  Smaller shoulder pods (x0.86, set in), warmer gold brass, a bright gold far rim (rim_far 0.35), a smaller, darker
+  tar pool. Review frames: ext/warden-matchzoom-v2's `pose_clear` (no aim line, props or overlays).
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.
