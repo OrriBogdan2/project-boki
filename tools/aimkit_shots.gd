@@ -27,7 +27,7 @@ const SHOTS := [
 	["circle_landing", 6.5, 3.5, false, "Landing circle at the cursor with four ticks, plus the thin aim line (Vex R Mini Nuke placement)"],
 	["sweet_spot", 6.0, 2.5, false, "Slam circle a hop ahead with the inner sweet-spot ring growing, k 0.5 (Tarek RMB Volcano Crusher)"],
 	["arc_wall", 6.0, 4.0, false, "Curved arc wall at the cursor distance, 120 degrees in 7 panels (Pin E Rain of Arrows)"],
-	["dotted", 6.0, 5.0, false, "Dotted lane to max range, past the cursor (Moosh Moosh RMB seed)"],
+	["dotted", 6.0, 5.0, false, "Dotted lane to max range, past the cursor (Burple RMB seed)"],
 	["swap", 7.0, 3.5, false, "Two-end swap marker: origin ring, destination ring with its sigil filling, a link with arrows both ways (Ostra Shift)"],
 	["line_span", 6.0, 4.0, false, "Gold aim line to the cursor with an arrow tick (Sable empowered LMB) and a long span with inward chevrons (Tarek R)"],
 	["foe_view", 6.0, 5.0, false, "A foe's \"all\" telegraph tinted hostile (their slam ring); their own aim lane is not drawn for you"],

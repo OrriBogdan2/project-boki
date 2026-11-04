@@ -238,7 +238,7 @@ static func _payoff(P: Hunter, D: Hunter, Al: Hunter, K: ArchKit, arch: String, 
 		K.cd["e"] = 0.0
 		K.use_e()
 
-## The X ultimates: Moosh Moosh puts the cursor on the (downed) teammate, presses X and walks while it
+## The X ultimates: Burple puts the cursor on the (downed) teammate, presses X and walks while it
 ## channels; Claire seals in beside the dummy and lets the rink crack open.
 static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, dt: float) -> void:
 	var P: Hunter = A.m.player
