@@ -717,3 +717,8 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - **Additions to item 89 (owner, 23:08 UTC):**
   - **Introduce Hob with the camera:** on the first arrival at the farm, the camera pans to Hob at the stall, holds about 1.5 s while he waves and calls out, then returns to you. Show his name tag above him the whole time until you've talked to him.
   - **Use a free character model for Hob** instead of the low-poly placeholder: a ready-made **market vendor / villager** model from a library with a **CC0 / commercial-use licence** (e.g. Quaternius or Kenney character packs, or another clearly CC0 source). Retexture or recolour it to fit the game's style. Record the source, author and licence in `docs/art/CREDITS.md` and next to the asset. Avoid anything that isn't explicitly free for commercial use, and anything with a recognisable brand or character. Rig it to play idle/wave/talk animations (the pack's own animations, if included and under the same licence).
+
+## 92. Farm tutorial wording, plus a Boki page you can open from anywhere (owner, 23:09 UTC Nov 4)
+- "Pick it a job" is bad English. Rewrite it ("Give your Boki a job") and proofread every farm-tutorial line. Being done now on ext/tut-airdash.
+- "Open your Boki's page" doesn't say how. Name the key (C near the Boki, confirmed in code) on the same branch.
+- **Feature (main's Boki UI if missing):** a button or key that opens your Boki's page **regardless of where the Boki is**: a roster key plus a HUD button listing your Boki, each opening its page. If one already exists, make it much clearer (a visible HUD button with its key cap).
