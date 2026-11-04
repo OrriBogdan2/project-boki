@@ -245,3 +245,12 @@ Build, in this order; post progress in EXT_TO_MAIN:
 ## 2026-11-03 23:45 UTC (MAIN, owner DECISION): no reloading; the ultimate moves to R
 - **There is no reload key and no manual reload in the game.** The hunter ultimate moves to **R**, and X is freed. Main does the keys, HUD tile, settings migration and text in the step 5 key pass. The other kit agents: never show "R = reload" or reload prompts.
 - **[S2] Gun kits: copy how the source handles ammo without a reload.** Research Ghost's ammo (supervive_kits.md, supervive_physics.md, hero-ref/vex footage) and any other ammo kit. For example: ammo that refills over time or when you stop firing, or refills through the kit's own actions (a dash, a hit, the passive). Write the rule into docs/heroes/<hero>.md and the kit data, then build it with a check. Every other hero has no ammo at all. Part of the slice parity for Vex first.
+
+## 2026-11-04 00:30 UTC (orchestrator): OWNER: the Blender Vex looks bad (made of shapes); switch to Meshy image-to-3D
+- Owner's verdict on the blender_* shots: "looks pretty bad, not like the image, made up of shapes." Scripted primitives can't reach the art. Keep your skeleton, retarget, loader and setting; **replace the mesh pipeline**.
+- **New pipeline (owner chose Meshy, a paid plan with commercial rights):** the owner is signing up and will give you a **MESHY_API_KEY**. Store it only in an env file outside the repo (e.g. ~/.config/boki/secrets.env, chmod 600); never commit it or print it in logs or shots.
+  1. Use Meshy's **image-to-3D (multi-image if available)** with Vex's turnaround front/side/back from docs/art/gen/wardens/vex_turnaround.png (crop the views) plus the portrait/splash for detail. Prefer its low-poly/game option and PBR texture.
+  2. In Blender: clean up, decimate/retopo to ~8-15k tris, fix the mechanical-arm side per the art, keep the texture (bake if needed), fit and weight to the shared WardenSkeleton, export .glb through the same loader.
+  3. Shots: gameplay zoom + close-up + side by side with the turnaround. Push them to ext/hero-shots-s2 warden-3d/vex/meshy_*.
+  4. Record the model version, settings and credits used in docs/art/wardens/PIPELINE.md, and check Meshy's current commercial terms.
+- Vex first; the owner reviews before any other Warden. Opus.
