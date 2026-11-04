@@ -113,3 +113,14 @@ r3e_vs_r3d.png: the close turnaround, r3e over r3d
 r3e_vs_r3d_closeup.png: head and shoulders, left to right: r3e front, r3d front, r3e 3/4, r3d 3/4
 r3e_vs_r3d_match.png: the match frame around Vex, x4: r3e (left), r3d (right)
 r3e self-score (RECIPE_95 rubric, beside the face sheet, portrait and turnaround): close-up 79 (silhouette 13/15, face 17/20, hair and braids 8.5/10, props 13.5/20, palette 12.5/15, clean paint 6/10, outfit details 8/10); match zoom 78 (silhouette 21/25, signature colours 18/25, values 17/20, props 14/20, artefacts 8/10). Costs: the lens reads as a green blob with a dark crescent, not the sheet's clean rings; green smears along the crop top's top edge (faces Meshy coloured as hair); the gorget's seams and the ammo belt's brass cartridges don't read; the bronze is lost at the match camera
+r3f_closeup_vs_art.png: Vex r3f (the shipped vex.glb) head and shoulders from the front, beside the flat-lit face sheet (wardens_r3/vex_face) and the portrait: the chest's stray green cleaned, the sheet's lens on a smooth dome (Meshy's cone cut), the gorget painted from the face sheet with its seams on the glow slot, brass cartridges on the shoulder belt
+r3f_closeup_34_vs_art.png: the portrait and the head sheet's profile beside the in-game 3/4 close-up: the lens dome from the side (no horn), the gorget, the cartridges
+r3f_match_vs_art.png: the face sheet beside the Arena match frame around her, x4 centred on her (--arena=gunslinger --record=2 --no-tips --arena-demo=pose_clear --demo-zoom=1.0 --demo-at=-4.5,0; with the shared match-zoom fix f0ad9f60 picked): black + toxic green, the bronze lifted at the match camera (its own brass slot)
+r3f_gameplay_match.png / r3f_gameplay_match_x4.png: that Arena frame uncropped, and around her x4 (nearest)
+r3f_closeup.png / r3f_closeup_34.png: in game, head and shoulders, front and 3/4
+r3f_vs_turnaround.png: the r3 turnaround over the in-game close turnaround (front, 3/4, side, back, 3/4 back)
+r3f_back_34.png: in game, back and 3/4 back
+r3f_vs_r3e.png: the close turnaround, r3f over r3e
+r3f_vs_r3e_closeup.png: head and shoulders, left to right: r3f front, r3e front, r3f 3/4, r3e 3/4
+r3f_vs_r3e_match.png: the match frame around Vex, x4: r3f (left), r3e (right)
+r3f self-score (RECIPE_95 rubric, beside the face sheet, portrait and turnaround; with the shared match-zoom fix f0ad9f60): close-up 82 (silhouette 13/15, face 17/20, hair and braids 9/10, props 16/20, palette 13/15, clean paint 6.5/10, outfit details 7.5/10); match zoom 85 (silhouette 22/25, signature colours 21/25, values 17/20, props 16/20, artefacts 9/10; speckle in the hero's box 2.0% r3e -> 0.8%). Costs: pale patches and dark strap streaks on the upper chest, the belly's circuit lines still soft (not crisp), the gorget's seams faint, the gun mount's block pale with smears, the lens halo lost in the hair at the match camera
