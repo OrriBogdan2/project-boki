@@ -1325,12 +1325,7 @@ func on_drop_landed(h: Hunter) -> void:
 					var d := Vector2(dx, dz).length()
 					if d < bd: bd = d; best = Vector3(q.x, world.ground_at(q.x, q.z), q.z)
 		h.teleport(best)
-	fx.dust(h.pos, 14)
-	fx.ring(h.pos, 2.2, Color(1, 1, 1, 0.8), 0.3)
-	sfx("land", h.pos, -2.0, 0.8)
-	h.squash = 0.4
-	if h == player:
-		shake(0.25, h.pos)
+	DropFeel.land(self, h)
 	if blight: blight.on_landed(h)
 	if rolling: rolling.on_landed(h)
 
@@ -3703,9 +3698,10 @@ func _process(delta: float) -> void:
 
 ## (movefeel) The camera leans a little ahead of a glide so you see where you're going (CamRig.lead_vel).
 func cam_lead_vel() -> Vector3:
-	if player == null or not player.gliding or player.dropping or player.out:
+	if player == null or not player.gliding or player.out:
 		return Vector3.ZERO
-	return Vector3(player.vel.x, 0.0, player.vel.z)
+	var ahead := 3.0 if player.dropping else 1.0      # the drop leans further, to see the ground ahead
+	return Vector3(player.vel.x, 0.0, player.vel.z) * ahead
 
 func _gather_input() -> void:
 	if player == null or player.out or opts.get("tut_test", false):
