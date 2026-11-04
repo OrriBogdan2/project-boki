@@ -438,8 +438,8 @@
   "bone": "hand.R",
   "centre": [
    0.0,
-   0.06,
-   -0.19
+   0.07,
+   -0.3
   ],
   "r": 0.12,
   "colour": "040208",
@@ -636,9 +636,9 @@
    "centre": [
     0.0,
     0.07,
-    -0.09
+    -0.3
    ],
-   "radius": 0.17,
+   "radius": 0.24,
    "kind": "card",
    "items": [
     {
@@ -664,8 +664,8 @@
    ],
    "rock": "1a0c2e",
    "rock_dark": "0b0612",
-   "rim": "4a2e78",
-   "rim_dark": "3a2264",
+   "rim": "3a2464",
+   "rim_dark": "3a2464",
    "iris": "7a3ae0",
    "iris_hot": "9a5aff",
    "slot": "glow",
