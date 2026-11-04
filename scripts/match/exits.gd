@@ -354,7 +354,6 @@ func _call(x: Dictionary, h: Hunter) -> void:
 	m.sfx("warn", x["pos"], 0.0, 0.7)
 	m.ping(x["pos"], ExitModels.DOCK)
 	m.fx.ring(x["berth"], 4.0, ExitModels.DOCK, 0.6)
-	m.shake(0.15, x["pos"])
 	var mine: bool = m.player != null and h.team == m.player.team
 	m.add_feed(("%s called a skiff at %s" % [h.pname, x["name"]]) if mine else ("Someone called a skiff at %s" % x["name"]))
 	if m.hud and m.player and not m.player.out:
@@ -699,7 +698,6 @@ func _open_lift(x: Dictionary) -> void:
 	m.sfx("portal", x["pos"], 0.0, 0.8)
 	m.fx.burst(x["pos"] + Vector3(0, 1.0, 0), ExitModels.UPLINK, 34, 6.0, 0.8, -3.0)
 	m.fx.ring(x["pos"], LIFT_R + 0.4, ExitModels.UPLINK, 0.6)
-	m.shake(0.2, x["pos"])
 	if not x.get("tut", false):
 		m.ping(x["pos"], ExitModels.UPLINK)
 		if m.player and not m.player.out and m.player.flat_dist(x["pos"]) < 70.0:

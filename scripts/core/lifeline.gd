@@ -1,11 +1,10 @@
 class_name Lifeline
 ## The economy floor (owner decision, ROADMAP §2 "Nobody can be locked out"): a player must never sit
 ## at zero Boki and zero gems with no way to play. The floors, cheapest first:
-##   1. the Drift Pens (BokiPens, a stall on the farm): common Boki at a low fixed price
-##      (PEN_PRICE_MIN..MAX gems), restocked daily.
+##   1. the Shelter (at the market stall): stray commons to adopt at a low price, restocked daily.
 ##   2. a stray: with no Boki at all on your roster (lost, starved, at the Ransom House), a stray
 ##      common Boki turns up at the farm. You can't empty your roster on purpose (your last Boki can't
-##      be released or listed), so the only way to a stray is losing one: no gems are made from it.
+##      be released, given up or handed on), so the only way to a stray is losing one: no gems are made from it.
 ## Scarce, rare and limited-edition Boki are never part of the floor: only commons.
 ##
 ## On the save (optional; an older save without it reads as "never used"):
@@ -34,7 +33,7 @@ static func can_play() -> bool:
 
 ## Is this save at the floor: no Boki and no gems to buy one?
 static func stuck() -> bool:
-	return boki_count() == 0 and gems() < BokiPens.cheapest()
+	return boki_count() == 0 and gems() < Shelter.cheapest()
 
 ## Has this save started (hatched its first Boki, or played)? Before that the starter flow is its floor.
 static func started() -> bool:

@@ -29,6 +29,8 @@ const CLASSES := {
 	},
 }
 
+const NO_AMMO_MAG := 999         # rounds a weapon with no ammo nominally holds (never shown, never drained for good)
+
 ## Fallback only: every real weapon lives in content/weapons.
 const WEAPONS := {
 	"rifle": {"name": "Rifle", "dmg": 3.87, "rate": 0.08, "speed": 110.0, "mag": 30, "reload": 1.8,
@@ -54,11 +56,16 @@ func weapon_ids() -> Array:
 		if not ids.has(k): ids.append(k)
 	return ids
 
-## A weapon's plain stats. "short" is the plain name for the ability bar.
+## A weapon's plain stats. "short" is the plain name for the ability bar. A weapon with no "mag" in its data
+## has no ammo at all (the source gives ammo to one gun only): it gets "ammo": false and a nominal NO_AMMO_MAG
+## rounds that its kit keeps topped up (ArchKit.tick), so nothing drains, reloads or shows a count.
 func weapon_stats(wid: String) -> Dictionary:
 	var wd := Content.weapon(wid)
 	var w: Dictionary = wd.primary.duplicate() if wd else WEAPONS.get(wid, WEAPONS["rifle"]).duplicate()
 	w["short"] = String(w["name"]).split(" ")[0]
+	if not w.has("mag"):
+		w["mag"] = NO_AMMO_MAG
+		w["ammo"] = false
 	return w
 
 ## The class you play and the weapon you carry are your whole loadout: left and right click come
@@ -170,6 +177,8 @@ const ACCS := {
 	"goggles": {"name": "Flight goggles", "price": 55, "col": Color("8b6d52")},
 	"cape": {"name": "Hero cape", "price": 70, "col": Color("5a7ae0")},
 	"tophat": {"name": "Tiny top hat", "price": 80, "col": Color("2b2a33")},
+	"collar": {"name": "Studded collar", "price": 50, "col": Color("8a4a5a")},
+	"charm": {"name": "Star charm", "price": 150, "col": Color("ffe27a")},
 }
 
 func _init() -> void:
@@ -231,7 +240,7 @@ const MOBS := {
 	# It always carries a chest key.
 	"shrubling": {"name": "Shrubling", "hp": 26.0, "speed": 6.5, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 99.0,
 		"r": 0.4, "gems": 6, "color": Color("5f9a46"), "attack": "none", "mimic": true},
-	"warden": {"name": "The Warden", "hp": 820.0, "speed": 3.3, "dmg": 30.0, "range": 2.8, "windup": 0.95, "cd": 2.1,
+	"warden": {"name": "The Watcher", "hp": 820.0, "speed": 3.3, "dmg": 30.0, "range": 2.8, "windup": 0.95, "cd": 2.1,
 		"r": 1.3, "gems": 30, "color": Color("5a4a7a"), "attack": "slam", "slam_r": 3.3, "stag": true},
 	# lair bosses (scripts/match/boss.gd runs them; Lairs wakes them): each drops a Rare Egg of its own kin
 	"colossus": {"name": "The Stone Colossus", "hp": 1500.0, "speed": 2.5, "dmg": 26.0, "range": 3.2, "windup": 1.1, "cd": 1.9,
@@ -248,7 +257,7 @@ const MOBS := {
 	# minutes, outer islands) to full (late, the core, night). "lvl" 1 is full strength.
 	"bl_skitter": {"name": "Blight Skitter", "hp": 30.0, "speed": 5.4, "dmg": 8.0, "range": 1.15, "windup": 0.5, "cd": 1.35,
 		"r": 0.4, "gems": 1, "color": Color("3e3634"), "attack": "lunge", "blight": true},
-	"bl_warden": {"name": "Blight Warden", "hp": 150.0, "speed": 1.3, "dmg": 12.0, "range": 9.0, "windup": 1.1, "cd": 2.8,
+	"bl_warden": {"name": "Blight Watcher", "hp": 150.0, "speed": 1.3, "dmg": 12.0, "range": 9.0, "windup": 1.1, "cd": 2.8,
 		"r": 0.8, "gems": 4, "color": Color("4a4240"), "attack": "spit", "blight": true},
 	# a lair's ward stones: break all three (guards come out as you do) and its seal fails
 	"ward": {"name": "Ward Stone", "hp": 150.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
@@ -278,32 +287,34 @@ const CROPS := {
 ## Furniture for decorating the insides of buildings. size is in floor tiles (w, d); "walk" lets you
 ## walk over it (rugs). Prices are in gems at the stall or the decorating catalog.
 const FURN := {
-	"bed": {"name": "Bed", "price": 60, "size": [2, 3]},
-	"kin_bed": {"name": "Boki basket", "price": 25, "size": [1, 1]},
-	"table": {"name": "Table", "price": 40, "size": [2, 1]},
-	"chair": {"name": "Chair", "price": 15, "size": [1, 1]},
-	"stool": {"name": "Stool", "price": 10, "size": [1, 1]},
-	"rug": {"name": "Rug", "price": 30, "size": [3, 2], "walk": true},
-	"rug_round": {"name": "Round rug", "price": 30, "size": [2, 2], "walk": true},
-	"lamp": {"name": "Floor lamp", "price": 25, "size": [1, 1]},
-	"plant": {"name": "Potted plant", "price": 15, "size": [1, 1]},
-	"big_plant": {"name": "Big plant", "price": 35, "size": [1, 1]},
-	"shelf": {"name": "Bookshelf", "price": 45, "size": [2, 1]},
-	"chest": {"name": "Chest", "price": 30, "size": [1, 1]},
-	"stove": {"name": "Stove", "price": 55, "size": [1, 1]},
-	"fireplace": {"name": "Fireplace", "price": 90, "size": [2, 1]},
-	"wardrobe": {"name": "Wardrobe", "price": 50, "size": [2, 1]},
-	"fishbowl": {"name": "Fish bowl", "price": 35, "size": [1, 1]},
-	"easel": {"name": "Painting", "price": 40, "size": [1, 1]},
-	"trophy": {"name": "Trophy stand", "price": 70, "size": [1, 1]},
-	"cushion": {"name": "Floor cushion", "price": 12, "size": [1, 1], "walk": true},
-	"toy_ball": {"name": "Boki toy", "price": 8, "size": [1, 1], "walk": true},
+	"bed": {"name": "Bed", "cat": "Beds & seats", "price": 60, "size": [2, 3]},
+	"kin_bed": {"name": "Boki basket", "cat": "Beds & seats", "price": 25, "size": [1, 1]},
+	"table": {"name": "Table", "cat": "Tables & shelves", "price": 40, "size": [2, 1]},
+	"chair": {"name": "Chair", "cat": "Beds & seats", "price": 15, "size": [1, 1]},
+	"stool": {"name": "Stool", "cat": "Beds & seats", "price": 10, "size": [1, 1]},
+	"rug": {"name": "Rug", "cat": "Rugs", "price": 30, "size": [3, 2], "walk": true},
+	"rug_round": {"name": "Round rug", "cat": "Rugs", "price": 30, "size": [2, 2], "walk": true},
+	"lamp": {"name": "Floor lamp", "cat": "Decor", "price": 25, "size": [1, 1]},
+	"plant": {"name": "Potted plant", "cat": "Decor", "price": 15, "size": [1, 1]},
+	"big_plant": {"name": "Big plant", "cat": "Decor", "price": 35, "size": [1, 1]},
+	"shelf": {"name": "Bookshelf", "cat": "Tables & shelves", "price": 45, "size": [2, 1]},
+	"chest": {"name": "Chest", "cat": "Tables & shelves", "price": 30, "size": [1, 1]},
+	"stove": {"name": "Stove", "cat": "Tables & shelves", "price": 55, "size": [1, 1]},
+	"fireplace": {"name": "Fireplace", "cat": "Tables & shelves", "price": 90, "size": [2, 1]},
+	"wardrobe": {"name": "Wardrobe", "cat": "Tables & shelves", "price": 50, "size": [2, 1]},
+	"fishbowl": {"name": "Fish bowl", "cat": "Decor", "price": 35, "size": [1, 1]},
+	"easel": {"name": "Painting", "cat": "Decor", "price": 40, "size": [1, 1]},
+	"trophy": {"name": "Trophy stand", "cat": "Decor", "price": 70, "size": [1, 1]},
+	"cushion": {"name": "Floor cushion", "cat": "Beds & seats", "price": 12, "size": [1, 1], "walk": true},
+	"toy_ball": {"name": "Boki toy", "cat": "Decor", "price": 8, "size": [1, 1], "walk": true},
+	"journal": {"name": "Boki journal", "cat": "Useful", "price": 20, "size": [1, 1]},
+	"gramophone": {"name": "Gramophone", "cat": "Useful", "price": 30, "size": [1, 1]},
 }
 
 ## Rooms you can go into: floor size in tiles and what's in them to begin with.
 const ROOMS := {
 	"house": {"name": "Your house", "w": 10, "d": 8, "floor": Color("8f6644"), "wall": Color("efe2c8"),
-		"start": [["bed", 1, 1, 0], ["rug", 4, 4, 0], ["table", 6, 1, 0], ["chair", 6, 2, 0], ["lamp", 0, 6, 0], ["stove", 9, 1, 0], ["kin_bed", 8, 6, 0], ["plant", 9, 6, 0]]},
+		"start": []},
 	"cottage": {"name": "Boki Cottage", "w": 8, "d": 6, "floor": Color("86603f"), "wall": Color("e8d8b8"),
 		"start": [["kin_bed", 1, 1, 0], ["kin_bed", 3, 1, 0], ["rug_round", 4, 3, 0], ["toy_ball", 6, 4, 0]]},
 	"cottage2": {"name": "Meadow Cottage", "w": 8, "d": 6, "floor": Color("86603f"), "wall": Color("dfe8c8"),
@@ -380,8 +391,8 @@ const BUILDINGS := {
 		"desc": "If you go down, you still keep a third of the gems you were carrying."},
 	"board": {"name": "Challenge House", "isle": "main", "cost": 0, "rect": [31, 22, 33, 23], "free": true,
 		"desc": "Challenges to take on, their rewards, and what they unlock at the market."},
-	"ransom": {"name": "Ransom House", "isle": "main", "cost": 0, "rect": [42, 39, 44, 40], "free": true,
-		"desc": "Old Pell's place. Boki left behind on expeditions end up here, and it's where you deal with rivals who took yours."},
+	"ransom": {"name": "Black Market", "isle": "main", "cost": 0, "rect": [42, 39, 44, 40], "free": true,
+		"desc": "Old Pell's place. Boki left behind on expeditions end up here (Ransom), you deal with rivals who took yours, and he sells rare pieces at a steep price."},
 	"hall": {"name": "Trophy Hall", "isle": "summit", "cost": 120, "rect": [47, 6, 49, 8],
 		"desc": "Keeps your records and every Boki you've brought home."},
 	"armory": {"name": "Armory", "isle": "main", "cost": 40, "rect": [45, 25, 47, 26],

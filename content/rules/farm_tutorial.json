@@ -1,0 +1,225 @@
+{
+	"desc": "The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Short, one prompt at a time, not skippable on a new save (owner, Nov 3 DECISIONS.md). Every owner-confirmable choice is under 'options' so it is a one-line change.",
+	"options": {
+		"tracker_replaces_day1": true,
+		"player_swing": true,
+		"swing_cooldown_s": 2.0,
+		"end_gems": 30,
+		"skippable": false,
+		"house_cost_in": "farm_build.json build.house (a little wood and 8 swings of labour)",
+		"free_order": true,
+		"free_tools": true,
+		"market_gems": true
+	},
+	"options_doc": "tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: the interact key near a site swings a hammer (one swing per swing_cooldown_s), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). free_order: after the house is down feed, crop and meet-Hob can come in any order (false: strictly in the listed order). skippable: shows a Skip button (the owner says the farm tutorial cannot be skipped on a new save). free_tools: a step with gives_tool hands that tool over (the axe, the pickaxe); the Market still sells them later. market_gems: the buy step tops the gems up to one seed's price so nobody gets stuck.",
+	"house_spot": {
+		"from": "landing",
+		"x": 0.0,
+		"z": -7.0
+	},
+	"start_food": {
+		"kibble": 3
+	},
+	"build_wait_s": 30,
+	"steps": [
+		{
+			"id": "axe",
+			"needs": [],
+			"title": "Get an axe",
+			"hints": {
+				"go": "Here, take this axe. Trees are wood, and wood builds"
+			},
+			"world": {
+				"go": ""
+			},
+			"gives_tool": "axe"
+		},
+		{
+			"id": "chop",
+			"needs": [
+				"axe"
+			],
+			"title": "Chop a tree",
+			"hints": {
+				"go": "Swing it at a tree ({interact}). Wood lands in the bar up top, and building eats it"
+			},
+			"world": {
+				"go": "Chop me"
+			}
+		},
+		{
+			"id": "house",
+			"needs": [
+				"chop"
+			],
+			"title": "Put your house down",
+			"hints": {
+				"place": "Now a house. Press {build}, pick House (a little wood), click the marked spot",
+				"wait": "Your Boki are on it. Press {interact} at the house to swing a hammer too"
+			},
+			"world": {
+				"place": "Your house goes here",
+				"wait": "Building..."
+			}
+		},
+		{
+			"id": "hammer",
+			"needs": [
+				"house"
+			],
+			"title": "Swing a hammer",
+			"hints": {
+				"go": "Grab the hammer: press {interact} at the house and help them swing"
+			},
+			"world": {
+				"go": "Swing a hammer"
+			}
+		},
+		{
+			"id": "task",
+			"needs": [
+				"house"
+			],
+			"title": "Give your Boki a job",
+			"hints": {
+				"go": "Idle hands, no wages. Open your Boki's page and pick it a job"
+			},
+			"world": {
+				"go": ""
+			},
+			"after_built": true
+		},
+		{
+			"id": "stone",
+			"needs": [
+				"house"
+			],
+			"title": "Mine a rock",
+			"hints": {
+				"go": "Rocks are stone, for sturdier builds. Take this pickaxe and press {interact} on a rock"
+			},
+			"world": {
+				"go": "Mine me"
+			},
+			"gives_tool": "pickaxe",
+			"gets": "stone"
+		},
+		{
+			"id": "feed",
+			"needs": [
+				"house"
+			],
+			"title": "Feed your Boki",
+			"hints": {
+				"place": "Hungry Boki are slow Boki. Press {build} and set the trough down",
+				"fill": "Fill the trough from your pantry ({interact})"
+			},
+			"world": {
+				"place": "",
+				"fill": "Fill the trough"
+			}
+		},
+		{
+			"id": "crop",
+			"needs": [
+				"house"
+			],
+			"title": "Grow something",
+			"hints": {
+				"patch": "Crops come from patches. Press {build} and set one down by the water: it waters itself",
+				"patch_dry": "Crops come from patches. Press {build} and set one down (by water it would water itself)",
+				"plant": "Plant a seed in the patch ({interact})",
+				"water": "Not by the water? Then water it yourself ({interact})",
+				"grow": "Takes a moment. Carry on with the rest meanwhile",
+				"pick": "Ripe! Pick it ({interact})"
+			},
+			"world": {
+				"patch": "Put the patch by the water",
+				"patch_dry": "",
+				"plant": "Plant a seed",
+				"water": "Water it",
+				"grow": "Growing",
+				"pick": "Pick it"
+			},
+			"waits": [
+				"grow"
+			]
+		},
+		{
+			"id": "buy",
+			"needs": [
+				"house"
+			],
+			"title": "Buy a seed",
+			"hints": {
+				"stall": "To the market stall ({interact}). Seeds tab, buy one",
+				"bar": "Open the Market on the bar below. Seeds tab, buy one"
+			},
+			"world": {
+				"stall": "Market stall",
+				"bar": ""
+			}
+		},
+		{
+			"id": "sell",
+			"needs": [
+				"crop",
+				"buy"
+			],
+			"title": "Sell a crop",
+			"hints": {
+				"stall": "Back at the stall ({interact}): Sell tab, sell a crop. Gems come from selling, expeditions and Goals",
+				"bar": "Open the Market, Sell tab: sell a crop. Gems come from selling, expeditions and Goals"
+			},
+			"world": {
+				"stall": "Sell here",
+				"bar": ""
+			}
+		},
+		{
+			"id": "hob",
+			"needs": [
+				"house"
+			],
+			"title": "Meet the builder",
+			"hints": {
+				"go": "Come and have a word ({interact}). I draw up what you can build"
+			},
+			"world": {
+				"go": "Hob the builder"
+			}
+		},
+		{
+			"id": "expedition",
+			"needs_all": true,
+			"title": "Head out",
+			"hints": {
+				"go": "This Mask holds a fallen Hunter. Put it on, and you become them. The portal ({interact}) takes you on your first expedition"
+			},
+			"world": {
+				"go": "Portal"
+			}
+		}
+	],
+	"skip_ask": "Skip the tutorial?",
+	"done_toast": "Tutorial done! +{gems} gems",
+	"skip_label": "Skip tutorial",
+	"tracker": {
+		"title": "Goals",
+		"max": 5,
+		"per_source": {
+			"unlock": 2,
+			"mastery": 1,
+			"milestone": 1,
+			"level": 1
+		},
+		"per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."
+	},
+	"tool_toasts": {
+		"axe": "Someone left a spare axe by the house",
+		"pickaxe": "And a pickaxe for the rocks"
+	},
+	"gems_toast": "Hob slips you %d gems for seeds",
+	"voice": "Hob",
+	"steps_doc": "needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect)."
+}

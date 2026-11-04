@@ -72,7 +72,7 @@ Raising, identity and economy live in `scripts/core/`: `Care` (needs, bonds, IVs
 `scripts/home/home.gd` (`Home`) is the farm screen; helpers split out by area as `RefCounted`
 modules it owns: `HomeBuild` + `HomeLayout` (build mode and the saved layout), `HomeWork` (Boki at
 work), `HomeGather` (chopping and mining), `HomeEcon` (armory, feeders, graves, shrine),
-`HomeIncubator`, `HomeTraining` (Training Grounds), plus `interior.gd` (inside buildings).
+`HomeIncubator`, plus `interior.gd` (inside buildings).
 
 ## Online
 

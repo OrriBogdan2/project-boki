@@ -73,8 +73,7 @@ tonics, treats for your next match, snacks, a level for your partner (Starfruit)
 - **Ransom House:** Old Pell's place, where lost Boki turn up and you deal with rivals who took yours.
 - **Challenge House:** challenges, their rewards and what they unlock at the market.
 - **Graveyard** and **Soul Shrine:** a grave for every Boki that died; with a Soul Ember the Shrine brings one back, a little different.
-- **The Training Grounds:** a small isle joined by a bridge, with dummies, a climbing wall, a glide gap,
-  and the pad to the duel room. See [Arena and training](Arena-and-Training.md).
+- **The training area:** open it from the portal's "Training area" button or the Esc menu. See [Arena and training](Arena-and-Training.md).
 - **The portal:** expeditions, and (on the web build) the ferry to other players' islands and the town.
 
 ## Planned

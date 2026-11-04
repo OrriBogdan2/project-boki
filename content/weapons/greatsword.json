@@ -15,8 +15,6 @@
   "rate": 0.5,
   "combo_reset": 0.9,
   "speed": 40,
-  "mag": 1,
-  "reload": 0.1,
   "kb": 3.2,
   "spread": 0.0,
   "range": 3.4,

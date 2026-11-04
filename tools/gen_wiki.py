@@ -233,7 +233,7 @@ def gen_classes():
         if not d: continue
         cs = CLASSES.get(d["weight"], {})
         rows.append([link(class_page_name(aid), d["title"]), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
-                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none (Boki Merge)"])
+                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none (Boki Fusion)"])
     cu = json.load(open(os.path.join(ROOT, "content", "rules", "class_unlock.json"), encoding="utf-8"))
     kinds = cu["reward_kinds"]
     cu_rows = []
@@ -241,16 +241,16 @@ def gen_classes():
     for aid in ARCH_ORDER:
         if aid not in ARCH: continue
         ch = cu["unlock"].get(aid, {})
-        when = "pick at the start, else " if aid in cu["starters"] else ""
+        when = "starter, else " if aid in cu["starters"] else ""
         after = ", once %d Hunters are open" % ch["after"] if ch.get("after") else ""
-        if aid == cu["first"]:
-            cu_rows.append([link(class_page_name(aid), ARCH[aid]["title"]), "yours from the start", "none", "-"])
+        if not ch:
+            cu_rows.append([link(class_page_name(aid), ARCH[aid]["title"]), "starter", "pick at the start, or after your first expedition", "-"])
         else:
             cu_rows.append([link(class_page_name(aid), ARCH[aid]["title"]), when + ch.get("tier", "?"), ch.get("text", "") + after, num(ch.get("target", "?"))])
         for g in cu["mastery"].get(aid, []):
             m_rows.append([ARCH[aid]["title"], g["text"], num(g["target"]), "%s: %s" % (kinds.get(g["reward"]["kind"], g["reward"]["kind"]), g["reward"]["name"])])
     starters = ", ".join(ARCH[a]["title"] for a in cu["starters"] if a in ARCH)
-    unlock = "### How Hunters unlock\n\nEvery save starts with %s. In the new-game flow you pick %d of %d more (%s). " % (ARCH[cu["first"]]["title"], cu["starter_picks"], len(cu["starters"]), starters)
+    unlock = "### How Hunters unlock\n\nA new save picks %d of %d starters (%s) before the egg pick and plays the tutorial as it. The other starters open after your first expedition. " % (cu["starter_picks"], len(cu["starters"]), starters)
     unlock += "Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for %s, and letting go early cancels it. " % secs(cu.get("hold_s", 1.6))
     unlock += "Tiers: easy is %s, medium %s, hard %s. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.\n\n" % (cu["tiers"]["easy"], cu["tiers"]["medium"], cu["tiers"]["hard"])
     unlock += table(["Hunter", "Tier", "Challenge", "Target"], cu_rows)
@@ -453,8 +453,8 @@ def gen_gear():
     for wid, w in WEAPONS.items():
         p = w.get("primary", {})
         users = [ARCH[a]["title"] for a in ARCH_ORDER if a in ARCH and wid == ARCH[a].get("signature")]
-        rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p.get("mag", "")), secs(p.get("reload", "")), "%sm" % num(p.get("range", "")), p.get("desc", "")])
-    body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (Zedran's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
+        rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", secs(p["reload"]) if "reload" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
+    body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (Kael's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
     body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Reload", "Range", "Notes"], rows)
     body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (each hero's fixed weapon path on even levels, perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
     pk0 = gd_const("core/data.gd", "PERKS") or {}
@@ -632,7 +632,41 @@ def gen_controls():
 DASH_SLOTS = [("lmb", "LMB"), ("rmb", "RMB"), ("e", "E"), ("x", "ult (X)"), ("q", "Q glove")]
 DASH_MODE = {"fire": "fires mid-dash", "buffer": "buffered to the dash's end", "cancel": "cancels the dash"}
 INTO_DASH_MODE = {"fire": "the dash goes, the ability keeps running", "buffer": "the dash waits for the ability",
-                  "cancel": "the dash cancels its wind-up or recovery"}
+                  "cancel": "the dash cancels its wind-up or recovery", "lock": "the dash is refused while it runs"}
+
+JUMP_MODE = {"fire": "fires mid-jump", "buffer": "buffered to the landing"}
+INTO_MOVE_MODE = {"fire": "the move goes at once, the ability keeps running", "cancel": "the move cancels it at once",
+                  "buffer": "the move waits for the ability's end", "lock": "the move is refused while it runs"}
+HOLD_MODE = {"keep": "the hold carries through and lets go there", "cancel": "the move ends the hold"}
+HOLD_MOVES = [("ground", "a ground dash"), ("air", "an air dash"), ("jump", "a jump"), ("mantle", "a mantle")]
+
+def _combo_ours(row, modes, default):
+    """A combo row (docs/decisions/0015-combo-flow.md): its mode, and the reason when it's an exception (a mode
+    that doesn't combine: anything but the default, or a cancel that moves you out at once)."""
+    mode = row.get("mode", default)
+    if mode in (default, "cancel") and not row.get("reason"):
+        return modes[mode] + ("" if row else " (default)")
+    return "**exception:** %s (%s)" % (modes[mode], row.get("reason", "no reason given"))
+
+def _combo_rows(hero, f):
+    """The item 51 rows of one hero: jump -> slot, slot -> jump, slot -> air dash, holds through each move."""
+    rows = []
+    for slot, label in DASH_SLOTS:
+        row = f.get("jump", {}).get(slot, {})
+        rows.append([hero, "jump -> %s" % label, row.get("source", ""), _combo_ours(row, JUMP_MODE, "fire")])
+    for slot, label in DASH_SLOTS:
+        row = f.get("into_jump", {}).get(slot, {})
+        rows.append([hero, "%s -> jump" % label, row.get("source", ""), _combo_ours(row, INTO_MOVE_MODE, "fire")])
+        air = f.get("into_dash", {}).get(slot, {}).get("air")
+        if air:
+            rows.append([hero, "%s -> air dash" % label, air.get("source", ""), _combo_ours(air, INTO_MOVE_MODE, "fire")])
+    for slot, label in DASH_SLOTS:
+        held = f.get("hold", {}).get(slot)
+        for move, name in HOLD_MOVES if held is not None else []:
+            if move in held:
+                rows.append([hero, "hold %s through %s" % (label, name), held[move].get("source", ""),
+                             _combo_ours(held[move], HOLD_MODE, "keep")])
+    return rows
 
 def _dash_ours(row, modes):
     out = modes[row.get("mode", "buffer")]
@@ -640,6 +674,8 @@ def _dash_ours(row, modes):
         out += "; dash momentum carries"
     if row.get("variant"):
         out += "; variant: %s" % row["variant"]
+    if row.get("reason"):
+        out = "**exception:** %s (%s)" % (out, row["reason"])
     return out
 
 def gen_dash_flow():
@@ -661,11 +697,15 @@ def gen_dash_flow():
             row = f.get("into_dash", {}).get(slot)
             ours = _dash_ours(row, INTO_DASH_MODE) if row else "the kit's own handling (no row yet)"
             rows.append([hero, "%s -> dash" % label, (row or {}).get("source", ""), ours])
+        rows += _combo_rows(hero, f)
     body = ("One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlow` "
             "(`scripts/arch/dash_flow.gd`, docs/decisions/0010-dash-ability-flow.md). A dash pair with no row buffers the "
-            "press to the dash's end. \"Source\" is what the source hero does; \"Ours\" is what the game does now.\n\n")
+            "press to the dash's end. \"Source\" is what the source hero does; \"Ours\" is what the game does now.\n\n"
+            "The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions/0015-combo-flow.md): every "
+            "ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot "
+            "with no hold row keeps through every move.\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
-    write("dash_interactions.md", "%s\n# Dash and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
+    write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 
 # ------------------------------------------------------------------ main

@@ -24,8 +24,13 @@ var anchor := Vector2i(-999, -999)
 var drag := {}                         # dragging out a fence line or painting: {from, tiles: {Vector2i: true}, last}
 var undo: Array = []
 var colour := 0
-var bar: Control = null
-var hint_lbl: Label = null
+var bar: BuildCatalog = null
+var keys: BuildKeys = null
+var menu: BuildMenu = null
+var entries: BuildEntries
+var sweep := false                     # the quick put-away mode: a click stores the piece it lands on
+var blocker := ""                      # occ tag of the piece the ghost runs into
+var glowing: Node3D = null             # the piece lit up (the blocker, or the one under the cursor)
 var nodes := {}                        # deco uid -> Node3D
 var fence_root: Node3D
 var water_root: Node3D
@@ -48,6 +53,7 @@ const BASE_BIOME := {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Co
 
 func _init(home) -> void:
 	h = home
+	entries = BuildEntries.new(self)
 
 func L() -> Dictionary:
 	return HomeLayout.of(h._d())
@@ -265,8 +271,6 @@ func _reserve() -> void:
 		for k in Data.ISLES:
 			var sg: Vector2 = HomeLayout.isle_bridge(h.world, k)["sign"]
 			rs.call(int(sg.x) - 1, int(sg.y) - 1, int(sg.x) + 1, int(sg.y) + 1)
-		for t in h.training_reserved():
-			rs.call(t[0], t[1], t[2], t[3])
 		return
 	rs.call(35, 24, 41, 29)      # the house and its door step
 	rs.call(41, 26, 43, 28)      # the cooking pot
@@ -285,8 +289,6 @@ func _reserve() -> void:
 	for k in Data.ISLES:
 		var sg: Vector2 = HomeLayout.isle_bridge(h.world, k)["sign"]
 		rs.call(int(sg.x) - 1, int(sg.y) - 1, int(sg.x) + 1, int(sg.y) + 1)
-	for t in h.training_reserved():
-		rs.call(t[0], t[1], t[2], t[3])
 
 func _apply_theme() -> void:
 	var t: Dictionary = HomeLayout.THEMES.get(String(L().get("theme", "meadow")), HomeLayout.THEMES["meadow"])
@@ -748,7 +750,8 @@ func cell_reason(c: Vector2i, self_tag := "") -> String:
 		return "Build the bridge to that isle first"
 	var o := String(occ.get(i, ""))
 	if o != "" and o != self_tag:
-		return "Something's already there"
+		blocker = o
+		return "Blocked by: %s" % occ_name(o)
 	if wild_t.has(i):
 		if wild_t[i] == "cliff": return "That's a cliff"
 		return "Wild land: chop it with an axe or pickaxe, or clear it (Island tab)" if fs() else "Wild land: clear it first (Island tab, Clear the wild)"
@@ -802,7 +805,6 @@ func _targets(skip_b := "") -> Array:
 	for k in Data.ISLES:
 		var sg: Vector2 = HomeLayout.isle_bridge(h.world, k)["sign"]
 		out.append(Vector3(sg.x, 0, sg.y))
-	for t in h.training_targets(): out.append(t)
 	return out.filter(func(t): return (t as Vector3).x > -100.0)     # (farm-start fixtures not put down yet)
 
 func _hit(seen: PackedByteArray, p: Vector3) -> bool:
@@ -981,23 +983,35 @@ func toggle() -> void:
 	if active:
 		_drop_held()
 		active = false
-		if is_instance_valid(bar): bar.queue_free()
-		bar = null
+		close_ui()
 		h.cam.zoom_to = clampf(h.cam.zoom_to, 0.55, 1.6)
+		Placement.build_view(h.cam, false)
 		h.set_build_ui(false)
 		Save.save_game()
 		return
 	if not can_build():
 		return
-	active = true
-	var opened := FarmUnlocks.announce()
-	if not opened.is_empty():
-		h._toast("New to build: %s" % ", ".join(opened.slice(0, 3).map(func(i): return FarmUnlocks.name_of(String(i)))))
-	h.prompt_box.visible = false
-	h.cam.zoom_to = maxf(h.cam.zoom_to, 1.35)
-	h.set_build_ui(true)
+	cat = "Buildings"      # B always opens on Buildings
+	_enter()
 	Sfx.play("whoosh", null, -8.0)
 	_build_bar()
+
+## Takes the catalog bar, the key hints and any open menu off the screen.
+func close_ui() -> void:
+	_close_menu()
+	_light(null)
+	for part in [bar, keys]:
+		if is_instance_valid(part): part.queue_free()
+	bar = null
+	keys = null
+	sweep = false
+
+func _enter() -> void:
+	active = true
+	h.prompt_box.visible = false
+	h.cam.zoom_to = maxf(h.cam.zoom_to, 1.35)
+	Placement.build_view(h.cam, true)
+	h.set_build_ui(true)
 
 # ------------------------------------------------------------------ holding things
 func take(id: String) -> void:
@@ -1044,19 +1058,24 @@ func take_building(b: String) -> void:
 
 func pick_up_at(c: Vector2i) -> void:
 	var w: World = h.world
-	if not w.inb(c.x, c.y):
-		return
-	var o := String(occ.get(w.idx(c.x, c.y), ""))
-	if o.begins_with("b:"):
-		take_building(o.substr(2))
-	elif o.begins_with("f:"):
-		var f: Dictionary = h.hecon._feeder(o.substr(2))
+	if w.inb(c.x, c.y):
+		pick_up_tag(String(occ.get(w.idx(c.x, c.y), "")))
+
+## Takes the piece an occupancy tag names into the hand, to move it.
+func pick_up_tag(tag: String) -> void:
+	_close_menu()
+	if tag.begins_with("b:"):
+		take_building(tag.substr(2))
+	elif tag.begins_with("f:"):
+		var f: Dictionary = h.hecon._feeder(tag.substr(2))
 		if not f.is_empty(): take_feeder(String(f["kind"]), String(f["id"]))
-	elif o.begins_with("d:"):
-		var e := _deco_by_uid(int(o.substr(2)))
+	elif tag.begins_with("d:"):
+		var e := _deco_by_uid(int(tag.substr(2)))
 		if e.is_empty(): return
+		_drop_held()
 		held = {"kind": "deco", "id": String(e["id"]), "r": int(e.get("r", 0)), "from": int(e["u"]), "c": e.get("c", "")}
-		_sync_deco(); _sync_fences()
+		_sync_deco()
+		_sync_fences()
 		_make_ghost()
 		_build_bar()
 		Sfx.play("click")
@@ -1100,17 +1119,21 @@ func _clear_ghost() -> void:
 func rotate_held() -> void:
 	if held.is_empty():
 		return
-	if held["kind"] == "feeder":
-		held["r"] = (int(held["r"]) + 1) % 4
-		if ghost: ghost.rotation.y = int(held["r"]) * PI * 0.5
-		return
-	var c: Dictionary = HomeLayout.CATALOG.get(String(held["id"]), {})
-	if held["kind"] == "deco" and (c.has("line") or c.has("brush")):
+	if not can_rotate():
 		return
 	held["r"] = (int(held["r"]) + 1) % 4
 	anchor = Vector2i(-999, -999)
-	_make_ghost()
 	Sfx.play("click", null, -6.0, 0.1, 1.3)
+
+func can_rotate() -> bool:
+	if held.is_empty():
+		return false
+	return not _is_tool(held)
+
+## Lines and brushes (fences, paths, water, clearing) are tools: they stay in hand until cancelled.
+func _is_tool(item: Dictionary) -> bool:
+	var c: Dictionary = HomeLayout.CATALOG.get(String(item["id"]), {})
+	return item["kind"] == "deco" and (c.has("line") or c.has("brush"))
 
 func _make_ghost() -> void:
 	_clear_ghost()
@@ -1132,6 +1155,7 @@ func _make_ghost() -> void:
 			(mi as MeshInstance3D).transparency = see
 		for l in _lights_of(ghost): l.queue_free()
 		h.add_child(ghost)
+		ghost.rotation.y = int(held["r"]) * PI * 0.5
 		ghost.visible = false
 	ghost_cells = Node3D.new()
 	h.add_child(ghost_cells)
@@ -1210,7 +1234,7 @@ func tick(d: float) -> void:
 	if not active:
 		return
 	if held.is_empty():
-		_hover_hint()
+		_update_keys()
 		return
 	var mp: Vector3 = h.cam.mouse_on_plane(0.0)
 	var m := Vector2(mp.x, mp.z) if debug_m == Vector2.INF else debug_m
@@ -1238,13 +1262,14 @@ func tick(d: float) -> void:
 	if is_instance_valid(ghost) and not cells.is_empty():
 		var sz := Vector2(cells[cells.size() - 1].x - cells[0].x + 1, cells[cells.size() - 1].y - cells[0].y + 1)
 		ghost.position = Vector3(cells[0].x + sz.x * 0.5, 0.04 + sin(Time.get_ticks_msec() / 220.0) * 0.03, cells[0].y + sz.y * 0.5)
-		ghost.rotation.y = int(held["r"]) * PI * 0.5
+		Placement.turn_toward(ghost, int(held["r"]) * PI * 0.5, d)
 		ghost.visible = true
-	_set_hint()
+	_update_keys()
 
 var _bad := {}       # Vector2i -> true: the ghost's tiles that can't take it
 func _check_cells() -> void:
 	_bad.clear()
+	blocker = ""
 	var id := String(held["id"])
 	var c: Dictionary = HomeLayout.CATALOG.get(id, {})
 	if held["kind"] == "deco" and c.has("brush"):
@@ -1285,7 +1310,10 @@ func feeder_fits(t: Vector2i, from: String) -> bool:
 	if w.kind[i] == World.T_VOID: why = "That's off the island"; return false
 	if w.bridge.has(i): why = "Not on a bridge"; return false
 	if not _isle_ok(i): why = "Build the bridge to that isle first"; return false
-	if o != "" and o != tag: why = "Something's already there"; return false
+	if o != "" and o != tag:
+		blocker = o
+		why = "Blocked by: %s" % occ_name(o)
+		return false
 	if w.kind[i] != World.T_GROUND and o != tag: why = "Something's in the way"; return false
 	if reserved.has(i) or _near_plot(t): why = "That spot is kept clear"; return false
 	var p := Vector3(t.x + 0.5, 0, t.y + 0.5)
@@ -1313,10 +1341,7 @@ func take_feeder(kind: String, from := "") -> void:
 		h._close_panel()
 		if not can_build():
 			return
-		active = true
-		h.prompt_box.visible = false
-		h.cam.zoom_to = maxf(h.cam.zoom_to, 1.35)
-		h.set_build_ui(true)
+		_enter()
 	_drop_held()
 	if from == "" and int(Save.d.get("feeder_inv", {}).get(kind, 0)) <= 0:
 		h._toast("No %s in storage" % Econ.FEEDERS[kind]["name"])
@@ -1402,7 +1427,15 @@ func _draw_cells() -> void:
 			post.material_override = good; post.position = Vector3(t.x + 0.5, 0.35, t.y + 0.5)
 			ghost_cells.add_child(post)
 	FarmBuildUi.outline(ghost_cells, cells, ghost_ok)
-	FarmBuildUi.note(ghost_cells, cells, "" if ghost_ok else why)
+	if ghost_ok and held["kind"] == "deco" and String(held["id"]) == "crop_patch":
+		# a patch by water waters itself: say so in green, or that it won't
+		var wet := FarmWater.near_cells(h._d(), cells)
+		if wet:
+			FarmBuildUi.note(ghost_cells, cells, "Near water: waters itself", Color("5ff07f"))
+		else:
+			FarmBuildUi.note(ghost_cells, cells, "No water within %d tiles" % FarmWater.reach(), Color("e8e2c8"))
+	else:
+		FarmBuildUi.note(ghost_cells, cells, "")
 	if held["kind"] == "b" and not cells.is_empty():
 		# where the door ends up
 		var door := HomeLayout.door_at(id, cells[0].x, cells[0].y, int(held["r"]))
@@ -1412,38 +1445,91 @@ func _draw_cells() -> void:
 		mi.rotation = Vector3(-PI / 2, int(held["r"]) * PI * 0.5 + PI, 0)
 		ghost_cells.add_child(mi)
 
-func _hover_hint() -> void:
+## What stands on an occupancy tag ("b:<building>", "d:<uid>", "f:<feeder>", "w"), for "Blocked by".
+func occ_name(tag: String) -> String:
+	if tag.begins_with("b:"):
+		return String(Data.BUILDINGS[tag.substr(2)]["name"])
+	if tag.begins_with("d:"):
+		var e := _deco_by_uid(int(tag.substr(2)))
+		return String(HomeLayout.CATALOG[String(e["id"])]["name"]) if not e.is_empty() else ""
+	if tag.begins_with("f:"):
+		var f: Dictionary = h.hecon._feeder(tag.substr(2))
+		return String(Econ.fdef(f)["name"]) if not f.is_empty() else "Feeder"
+	return "Pond water" if tag == "w" else ""
+
+func _node_of(tag: String) -> Node3D:
+	if tag.begins_with("b:"):
+		return h.lots[tag.substr(2)]["node"]
+	if tag.begins_with("d:"):
+		return nodes.get(int(tag.substr(2)))
+	if tag.begins_with("f:"):
+		return h.hecon.fnodes.get(tag.substr(2))
+	return null
+
+func _light(piece: Node3D) -> void:
+	if glowing == piece:
+		return
+	Placement.unglow(glowing)
+	glowing = piece
+	if piece != null:
+		Placement.glow(piece)
+
+func _tag_under_mouse() -> String:
 	var mp: Vector3 = h.cam.mouse_on_plane(0.0)
 	var c := Vector2i(int(floor(mp.x)), int(floor(mp.z)))
-	var w: World = h.world
-	var t := "Pick something from the bar, or click anything you've placed (or a building) to move it."
-	if w.inb(c.x, c.y):
-		var o := String(occ.get(w.idx(c.x, c.y), ""))
-		if o.begins_with("b:"): t = "Click to pick up the %s and move it" % Data.BUILDINGS[o.substr(2)]["name"]
-		elif o.begins_with("d:"):
-			var e := _deco_by_uid(int(o.substr(2)))
-			if not e.is_empty(): t = "Click to pick up the %s" % HomeLayout.CATALOG[String(e["id"])]["name"].to_lower()
-		elif o.begins_with("f:"): t = "Click to pick up this feeder and move it"
-		elif o == "w": t = "Pond water: paint over it with Grass (clear) to fill it in"
-	if hint_lbl and hint_lbl.text != t: hint_lbl.text = t
+	if debug_m != Vector2.INF:
+		c = Vector2i(int(floor(debug_m.x)), int(floor(debug_m.y)))
+	if not h.world.inb(c.x, c.y):
+		return ""
+	return String(occ.get(h.world.idx(c.x, c.y), ""))
 
-func _set_hint() -> void:
-	if hint_lbl == null:
+## Tells the key hints and the hint line what is in hand (or under the cursor), and lights the blocker.
+func _update_keys() -> void:
+	if keys == null or bar == null:
 		return
-	var id := String(held["id"])
-	var nm: String = Data.BUILDINGS[id]["name"] if held["kind"] == "b" else (Econ.FEEDERS[id]["name"] if held["kind"] == "feeder" else HomeLayout.CATALOG[id]["name"])
-	var c: Dictionary = HomeLayout.CATALOG.get(id, {})
-	var t := ""
-	if not ghost_ok:
-		t = "%s: %s" % [nm, why]
-	elif c.has("line"):
-		t = "%s: click and drag to lay a line  ·  %d tile%s" % [nm, cells.size() - _bad.size(), "" if cells.size() - _bad.size() == 1 else "s"]
-	elif c.has("brush"):
-		t = "%s: click and drag to paint" % nm
+	var state := {"sweep": sweep}
+	var text := "Pick something from the bar, or click anything you've placed (or a building) to move it."
+	if held.is_empty():
+		var over := "" if is_instance_valid(menu) else _tag_under_mouse()
+		_light(_node_of(over) if over != "w" else null)
+		state["over"] = occ_name(over)
+		if over == "w":
+			text = "Pond water: paint over it with Grass (clear) to fill it in"
+		elif over != "":
+			text = "Click the %s for Move, Rotate and Store" % occ_name(over).to_lower()
 	else:
-		t = "%s: click to place it here" % nm
-	if hint_lbl.text != t: hint_lbl.text = t
-	hint_lbl.add_theme_color_override("font_color", UI.INK if ghost_ok else Color("ffb0a0"))
+		var nm := held_name()
+		_light(_node_of(blocker) if not ghost_ok else null)
+		state.merge({"held": true, "item": nm, "tool": _is_tool(held), "can_rotate": can_rotate(),
+			"can_store": held["kind"] != "b", "fresh": _is_fresh(), "ok": ghost_ok, "reason": why})
+		text = "%s: %s" % [nm, why] if not ghost_ok else _place_text(nm)
+	keys.show_state(state)
+	if bar.hint.text != text:
+		bar.hint.text = text
+	bar.hint.add_theme_color_override("font_color", UI.INK if ghost_ok or held.is_empty() else Color("ffb0a0"))
+
+func _place_text(nm: String) -> String:
+	var c: Dictionary = HomeLayout.CATALOG.get(String(held["id"]), {})
+	if c.has("line"):
+		var n := cells.size() - _bad.size()
+		return "%s: click and drag to lay a line  ·  %d tile%s" % [nm, n, "" if n == 1 else "s"]
+	if c.has("brush"):
+		return "%s: click and drag to paint" % nm
+	return "%s: click to place it here" % nm
+
+func held_name() -> String:
+	var id := String(held["id"])
+	if held["kind"] == "b":
+		return String(Data.BUILDINGS[id]["name"])
+	if held["kind"] == "feeder":
+		return String(Econ.FEEDERS[id]["name"])
+	return String(HomeLayout.CATALOG[id]["name"])
+
+## A new piece from the catalog or storage, as opposed to one picked up off the ground.
+func _is_fresh() -> bool:
+	if held["kind"] == "feeder":
+		return String(held["from"]) == ""
+	return held["kind"] == "deco" and int(held.get("from", -1)) < 0
 
 # ------------------------------------------------------------------ input
 ## Build mode's own keys and clicks. True if it used the event.
@@ -1451,7 +1537,9 @@ func input(event: InputEvent) -> bool:
 	if not active:
 		return false
 	if event.is_action_pressed("menu"):
-		if not held.is_empty(): _drop_held(); _build_bar()
+		if is_instance_valid(menu): _close_menu()
+		elif not held.is_empty(): _cancel_held()
+		elif sweep: _set_sweep(false)
 		else: toggle()
 		return true
 	if event.is_action_pressed("build"):
@@ -1462,47 +1550,183 @@ func input(event: InputEvent) -> bool:
 		if ke.physical_keycode == KEY_Z and (ke.ctrl_pressed or ke.meta_pressed):
 			undo_last()
 			return true
-		if ke.physical_keycode in [KEY_X, KEY_DELETE, KEY_BACKSPACE]:
-			store_held()
+		if event.is_action_pressed("store") or ke.physical_keycode == KEY_BACKSPACE:
+			_store_key()
 			return true
 	if event.is_action_pressed("rotate"):
-		rotate_held()
+		if not held.is_empty(): rotate_held()
+		elif _tag_under_mouse() != "": rotate_placed(_tag_under_mouse())
 		return true
 	if event is InputEventMouseButton:
-		var mb := event as InputEventMouseButton
-		if mb.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
-			if mb.pressed:
-				if not held.is_empty() and not HomeLayout.CATALOG.get(String(held["id"]), {}).has("brush") and not HomeLayout.CATALOG.get(String(held["id"]), {}).has("line"):
-					rotate_held()
-				else:
-					h.cam.zoom_to = clampf(h.cam.zoom_to + (-0.1 if mb.button_index == MOUSE_BUTTON_WHEEL_UP else 0.1), 0.6, 2.4)
-			return true
-		if mb.button_index == MOUSE_BUTTON_RIGHT and mb.pressed:
-			if held.is_empty(): pass
-			elif drag.is_empty(): rotate_held()
-			else: drag = {}
-			return true
-		if mb.button_index == MOUSE_BUTTON_LEFT:
-			var mp: Vector3 = h.cam.mouse_on_plane(0.0)
-			var t := Vector2i(int(floor(mp.x)), int(floor(mp.z)))
-			if mb.pressed:
-				if held.is_empty():
-					pick_up_at(t)
-				else:
-					var c: Dictionary = HomeLayout.CATALOG.get(String(held["id"]), {})
-					if held["kind"] == "deco" and (c.has("line") or c.has("brush")):
-						drag = {"from": t, "tiles": {}, "last": t}
-						if c.has("brush") and _brush_ok(t, String(c["brush"])): drag["tiles"][t] = true
-					else:
-						place_held()
-			elif not drag.is_empty():
-				tick(0.0)
-				place_held()
-				drag = {}
-			return true
+		return _mouse(event as InputEventMouseButton)
 	return false
 
+func _mouse(mb: InputEventMouseButton) -> bool:
+	if mb.pressed and bar:
+		bar.blur()
+	if mb.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+		if mb.pressed:
+			if can_rotate():
+				rotate_held()
+			else:
+				h.cam.zoom_to = clampf(h.cam.zoom_to + (-0.1 if mb.button_index == MOUSE_BUTTON_WHEEL_UP else 0.1), 0.6, 2.4)
+		return true
+	if mb.button_index == MOUSE_BUTTON_RIGHT and mb.pressed:
+		if held.is_empty(): pass
+		elif drag.is_empty(): rotate_held()
+		else: drag = {}
+		return true
+	if mb.button_index != MOUSE_BUTTON_LEFT:
+		return false
+	var mp: Vector3 = h.cam.mouse_on_plane(0.0)
+	var t := Vector2i(int(floor(mp.x)), int(floor(mp.z)))
+	if mb.pressed:
+		if held.is_empty():
+			_click_piece(_tag_under_mouse())
+		elif _is_tool(held):
+			var c: Dictionary = HomeLayout.CATALOG[String(held["id"])]
+			drag = {"from": t, "tiles": {}, "last": t}
+			if c.has("brush") and _brush_ok(t, String(c["brush"])): drag["tiles"][t] = true
+		else:
+			click_place(Input.is_key_pressed(KEY_SHIFT))
+	elif not drag.is_empty():
+		tick(0.0)
+		place_held()
+		drag = {}
+	return true
+
+func _click_piece(tag: String) -> void:
+	if tag == "" or tag == "w":
+		return
+	if sweep:
+		store_placed(tag)
+	else:
+		open_menu(tag)
+
+## X over a piece puts it away; X with one in hand puts that away.
+func _store_key() -> void:
+	if not held.is_empty():
+		store_held()
+	elif _tag_under_mouse() not in ["", "w"]:
+		store_placed(_tag_under_mouse())
+
+func _cancel_held() -> void:
+	_drop_held()
+	_build_bar()
+
+func _set_sweep(on: bool) -> void:
+	sweep = on
+	_build_bar()
+
+# ------------------------------------------------------------------ the piece menu
+func open_menu(tag: String) -> void:
+	_close_menu()
+	var title := occ_name(tag)
+	var rows: Array = [{"label": "Move", "key": "", "cb": func(): pick_up_tag(tag)}]
+	if _tag_turns(tag):
+		rows.append({"label": "Rotate", "key": Settings.key_cap("rotate"), "cb": func(): rotate_placed(tag)})
+	if not tag.begins_with("b:"):
+		rows.append({"label": "Store", "key": Settings.key_cap("store"), "cb": func(): store_placed(tag)})
+	var colours: Array = []
+	var current := ""
+	if tag.begins_with("d:"):
+		var e := _deco_by_uid(int(tag.substr(2)))
+		var c: Dictionary = HomeLayout.CATALOG[String(e["id"])]
+		if c.get("colour", false) or String(e["id"]) == "banner":
+			colours = HomeLayout.COLOURS
+			current = String(e.get("c", ""))
+	menu = BuildMenu.open(h.root_ui, h.get_viewport().get_mouse_position(), title, rows, colours, current,
+		func(hex: String): paint_placed(tag, hex))
+
+func _close_menu() -> void:
+	if is_instance_valid(menu):
+		menu.close()
+	menu = null
+
+func _tag_turns(tag: String) -> bool:
+	if tag.begins_with("d:"):
+		var e := _deco_by_uid(int(tag.substr(2)))
+		return not HomeLayout.CATALOG[String(e["id"])].has("line")
+	return true
+
+func _centre_of(tag: String) -> Vector3:
+	if tag.begins_with("b:"):
+		return HomeLayout.rect_center(HomeLayout.rect_of(tag.substr(2), h._d()))
+	if tag.begins_with("f:"):
+		var f: Dictionary = h.hecon._feeder(tag.substr(2))
+		return Vector3(float(f["x"]), 0, float(f["z"]))
+	return HomeLayout.deco_center(_deco_by_uid(int(tag.substr(2))))
+
+## Turns a placed piece a quarter turn about its middle, with the turn shown, if it fits that way.
+func rotate_placed(tag: String) -> void:
+	if not _tag_turns(tag):
+		return
+	var piece := _node_of(tag)
+	var old_yaw := piece.rotation.y if piece else 0.0
+	var centre := _centre_of(tag)
+	pick_up_tag(tag)
+	if held.is_empty():
+		return
+	rotate_held()
+	cells = _cells_for(Vector2(centre.x, centre.z))
+	_check_cells()
+	if not ghost_ok:
+		h._toast(why if why != "" else "No room to turn it here")
+		_cancel_held()
+		return
+	var uid := int(held.get("from", -1))
+	place_held()
+	if nodes.has(uid):
+		Placement.spin_from(nodes[uid], old_yaw)
+	elif piece:
+		Placement.spin_from(_node_of(tag), old_yaw)
+
+func store_placed(tag: String) -> void:
+	pick_up_tag(tag)
+	if held.is_empty():
+		return
+	store_held()
+	if not held.is_empty():
+		_cancel_held()
+
+func paint_placed(tag: String, hex: String) -> void:
+	var e := _deco_by_uid(int(tag.substr(2)))
+	if e.is_empty():
+		return
+	_snap()
+	e["c"] = hex
+	apply(false)
+	Save.save_game()
+	_build_bar()
+
 # ------------------------------------------------------------------ committing
+## A click on the ground with something in hand: places it, then leaves build mode unless it is a line or
+## brush or Shift keeps the same piece in hand.
+func click_place(keep_in_hand := false) -> bool:
+	var piece := held.duplicate()
+	if not place_held():
+		return false
+	if _is_tool(piece):
+		return true
+	if keep_in_hand and _is_fresh_item(piece):
+		_hold_again(piece)
+		return true
+	if Placement.leaves_build_mode(false, keep_in_hand):
+		toggle()
+		h._toast(Placement.placed_text())
+	return true
+
+func _is_fresh_item(piece: Dictionary) -> bool:
+	if piece["kind"] == "feeder":
+		return String(piece["from"]) == ""
+	return piece["kind"] == "deco" and int(piece.get("from", -1)) < 0
+
+func _hold_again(piece: Dictionary) -> void:
+	if piece["kind"] == "feeder":
+		take_feeder(String(piece["id"]))
+	else:
+		take(String(piece["id"]))
+
 func place_held() -> bool:
 	if held.is_empty() or cells.is_empty():
 		return false
@@ -1707,188 +1931,66 @@ func expand() -> bool:
 func _build_bar() -> void:
 	if not active:
 		return
-	if is_instance_valid(bar): bar.queue_free()
-	var vpw: float = h.get_viewport().get_visible_rect().size.x
-	var card := UI.card(Color(0.06, 0.07, 0.1, 0.93), 10, 14)
-	UI.set_card_border(card, Color(1, 1, 1, 0.08), 1)
-	card.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	card.offset_left = 16; card.offset_right = -16; card.offset_top = -196; card.offset_bottom = -12
-	var col := UI.vbox(7); card.add_child(col)
-	# the tabs, then undo / reset / done
-	var tabs := UI.hbox(5)
-	col.add_child(tabs)
+	if not is_instance_valid(bar):
+		_open_ui()
+	bar.refresh()
+	_update_keys()
+
+func _open_ui() -> void:
+	bar = BuildCatalog.new()
+	bar.tabs_fn = _tabs
+	bar.current_fn = func() -> String: return cat
+	bar.pick_fn = func(tab: String) -> void:
+		cat = tab
+		_build_bar()
+	bar.entries_fn = entries.tab
+	bar.extras_fn = _extras
+	bar.footer_fn = func(row: HBoxContainer) -> void: FarmBuilder.add_footer(row)
+	bar.undo_fn = undo_last
+	bar.undo_off_fn = func() -> bool: return undo.is_empty()
+	bar.done_fn = toggle
+	bar.search_skip = ["Upgrades", "Island"]
+	h.root_ui.add_child(bar)
+	keys = BuildKeys.new()
+	keys.above = bar
+	keys.actions = {"rotate": rotate_held, "place": func(): click_place(), "store": store_held, "cancel": _cancel_held,
+		"sweep_on": func(): _set_sweep(true), "sweep_off": func(): _set_sweep(false)}
+	h.root_ui.add_child(keys)
+
+func _tabs() -> Array:
+	var out: Array = []
 	for ct in HomeLayout.CATS:
-		var cc: String = ct
-		var tb := UI.choice(ct, ct == cat, func(): cat = cc; page = 0; _build_bar())
-		tb.add_theme_font_size_override("font_size", 14)
-		tabs.add_child(tb)
-	var sp := Control.new(); sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL; tabs.add_child(sp)
-	var held_c: bool = not held.is_empty() and held["kind"] == "deco" and (HomeLayout.CATALOG[String(held["id"])].get("colour", false))
-	if held_c or (held.is_empty() and cat in ["Furniture", "Statues"]):
+		if FarmBuilder.tab_shown(self, ct):
+			out.append(ct)
+	out.insert(1, BuildCatalog.STORAGE)
+	return out
+
+## Colour swatches for a piece that has colours, and the farm level.
+func _extras() -> Array:
+	var out: Array = []
+	var held_colours: bool = not held.is_empty() and held["kind"] == "deco" and HomeLayout.CATALOG[String(held["id"])].get("colour", false)
+	if held_colours or (held.is_empty() and cat in ["Furniture", "Statues"]):
 		for i in HomeLayout.COLOURS.size():
-			var ci := i
+			var pick := i
 			var sw := Button.new()
 			sw.custom_minimum_size = Vector2(26, 26)
-			var sb := UI.frame(Color(String(HomeLayout.COLOURS[i])), 13, UI.INK if i == colour else Color(0, 0, 0, 0), 3)
-			for st in ["normal", "hover", "pressed"]: sw.add_theme_stylebox_override(st, sb)
-			sw.pressed.connect(func(): Sfx.play("click"); set_colour(ci))
+			var face := UI.frame(Color(String(HomeLayout.COLOURS[i])), 13, UI.INK if i == colour else Color(0, 0, 0, 0), 3)
+			for state in ["normal", "hover", "pressed"]:
+				sw.add_theme_stylebox_override(state, face)
+			sw.pressed.connect(func():
+				Sfx.play("click")
+				set_colour(pick))
 			sw.tooltip_text = "Colour for banners, rugs and Boki beds"
-			tabs.add_child(sw)
-	var fp := FarmUnlocks.progress()
+			out.append(sw)
 	if FarmUnlocks.gated():
-		tabs.add_child(UI.chip("hammer", "Farm level %d%s" % [FarmUnlocks.level(), (" · %d/%d" % [int(fp[0]), int(fp[1])]) if fp[1] > 0 else " (max)"], UI.GOLD,
+		var progress := FarmUnlocks.progress()
+		var more: String = (" · %d/%d" % [int(progress[0]), int(progress[1])]) if progress[1] > 0 else " (max)"
+		out.append(UI.chip("hammer", "Farm level %d%s" % [FarmUnlocks.level(), more], UI.GOLD,
 			"Your farm levels up as you play: extract, scan Boki, hatch, harvest and build. Higher levels open more things to build."))
-	var ub := UI.button("Undo", func(): undo_last(), 76); ub.disabled = undo.is_empty(); tabs.add_child(ub)
-	tabs.add_child(UI.primary("Done", func(): toggle(), 80))
-	# the items
-	var line := UI.hbox(8)
-	line.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_child(line)
-	var items := _tab_items()
-	var per := maxi(2, int((vpw - 32.0 - 28.0 - 2.0 * 52.0) / 146.0))
-	var pages := maxi(1, int(ceil(items.size() / float(per))))
-	page = clampi(page, 0, pages - 1)
-	var prev := UI.button("‹", func(): page -= 1; _build_bar(), 44)
-	prev.custom_minimum_size.y = 80; prev.disabled = page == 0
-	line.add_child(prev)
-	var row := UI.hbox(8)
-	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	line.add_child(row)
-	for it in items.slice(page * per, page * per + per):
-		var b := UI.button(String(it["t"]), it["cb"], 138)
-		b.custom_minimum_size.y = 80
-		b.add_theme_font_size_override("font_size", 14)
-		if it.get("on", false): b.theme_type_variation = "Chosen"
-		b.disabled = it.get("off", false)
-		if it.has("tip"): b.tooltip_text = String(it["tip"])
-		if it.has("cost"):
-			var cr := FarmIcon.cost_row(it["cost"])
-			cr.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-			cr.offset_top = -24; cr.offset_bottom = -6
-			b.add_child(cr)
-		row.add_child(b)
-	var next := UI.button("›", func(): page += 1; _build_bar(), 44)
-	next.custom_minimum_size.y = 80; next.disabled = page >= pages - 1
-	line.add_child(next)
-	# what to do, and the keys
-	var foot := UI.hbox(16)
-	col.add_child(foot)
-	hint_lbl = UI.label("", 14, UI.INK)
-	hint_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	hint_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hint_lbl.clip_text = true
-	foot.add_child(hint_lbl)
-	foot.add_child(UI.key_hints([["LMB", "place / pick up"], [Settings.key_cap("rotate"), "turn"], ["X", "store"], ["Ctrl Z", "undo"], ["Esc", "cancel"], [Settings.key_cap("build"), "done"]], 12, Color(1, 1, 1, 0.75)))
-	h.root_ui.add_child(card)
-	bar = card
-	if held.is_empty(): _hover_hint()
-	else: _set_hint()
-
-## The price shown as icons on a bar entry: the construction cost, or the plain gems and materials ({} if it is
-## from storage, or priced per tile or in scrap, which stay as text).
-func _entry_cost(id: String) -> Dictionary:
-	var c: Dictionary = HomeLayout.CATALOG[id]
-	if int(L()["inv"].get(id, 0)) > 0 or c.has("brush") or c.has("line") or c.has("scrap"):
-		return {}
-	var sc := _site_cost(id)
-	if not sc.is_empty(): return sc
-	var out := {}
-	for m in ["gems", "wood", "stone"]:
-		if int(c.get(m, 0)) > 0: out[m] = int(c[m])
 	return out
 
 func _tab_items() -> Array:
-	var out: Array = []
-	var lay := L()
-	match cat:
-		"Buildings":
-			if h.visit.is_empty():
-				for kind in Econ.FEEDER_ORDER:
-					var nf := int(Save.d.get("feeder_inv", {}).get(kind, 0))
-					if nf <= 0: continue
-					var kk: String = kind
-					out.append({"t": "%s\n×%d to set down" % [Econ.FEEDERS[kind]["name"], nf], "cb": func(): take_feeder(kk), "on": held.get("kind", "") == "feeder" and String(held.get("from", "x")) == "" and String(held.get("id", "")) == kind})
-			if fs():
-				# a farm-start island's own things: the house and the essentials first
-				for id in HomeLayout.CATALOG:
-					var fc: Dictionary = HomeLayout.CATALOG[id]
-					if String(fc["cat"]) != "Buildings": continue
-					var iid: String = id
-					var pc := cost_of(id, 1)
-					var mx := HomeLayout.max_of(id, h._d())
-					var full: bool = mx > 0 and int(lay["inv"].get(id, 0)) == 0 and HomeLayout.count_of(id, h._d()) >= mx
-					if not full and not FarmUnlocks.open(id):
-						out.append(FarmBuildUi.locked_entry(id))
-						continue
-					var bc := _entry_cost(id)
-					var en := {"t": "%s\n%s" % [fc["name"], ("built" if mx == 1 else "all placed") if full else ("" if not bc.is_empty() else price_text(id))], "cb": func(): take(iid),
-						"on": held.get("kind", "") == "deco" and String(held.get("id", "")) == id and int(held.get("from", -1)) < 0,
-						"off": full or (int(pc[2]) == 0 and not _can_pay(int(pc[0]), int(pc[1]), int(pc[3]), int(pc[4]))),
-						"tip": (_max_text(id, mx) + ". " if full else "") + String(fc.get("desc", ""))}
-					if not bc.is_empty() and not full:
-						en["cost"] = bc
-						en["off"] = not FarmSites.can_pay(bc) if _site_cost(id) != {} else en["off"]
-						en["tip"] = String(en["tip"]) + (" Boki build it: %d swings of work." % int(bc.get("labour", 0)) if _site_cost(id) != {} else "")
-					out.append(en)
-			for b in h.lots:
-				var bb: String = b
-				var nm: String = Data.BUILDINGS[b]["name"]
-				if not HomeLayout.placed(b, h._d()) and not FarmUnlocks.open(b):
-					out.append(FarmBuildUi.locked_entry(b))
-					continue
-				if not HomeLayout.placed(b, h._d()):
-					var cost := "free" if bool(Data.BUILDINGS[b].get("free", false)) or h._has_b(b) else "%d gems" % int(Data.BUILDINGS[b]["cost"])
-					out.append({"t": "%s\n%s" % [nm, "Place it" if h._has_b(b) else "Mark a lot · %s" % cost], "cb": func(): take_building(bb),
-						"on": held.get("kind", "") == "b" and String(held.get("id", "")) == b, "tip": String(Data.BUILDINGS[b]["desc"])})
-					continue
-				var isl: int = h.world.island_of(h.lots[b]["at"].x, h.lots[b]["at"].z)
-				var open: bool = isl >= 0 and _isle_ok(h.world.idx(int(floor(h.lots[b]["at"].x)), int(floor(h.lots[b]["at"].z))))
-				out.append({"t": "%s\n%s" % [nm, "Move" if h._has_b(b) else "Move the lot"], "cb": func(): take_building(bb), "off": not open,
-					"on": held.get("kind", "") == "b" and String(held.get("id", "")) == b, "tip": "" if open else "Build the bridge to its isle first"})
-		"Upgrades":
-			out.append_array(FarmBuildUi.upgrade_entries(self))
-			if out.is_empty():
-				out.append({"t": "Nothing to upgrade yet\nBuild something first", "cb": func(): pass, "off": true})
-		"Island":
-			for t in HomeLayout.THEMES:
-				var tt: String = t
-				var td: Dictionary = HomeLayout.THEMES[t]
-				var own: bool = (lay["themes"] as Array).has(t)
-				var now: bool = String(lay["theme"]) == t
-				out.append({"t": "%s theme\n%s" % [td["name"], "In use" if now else ("Owned" if own else "%d gems" % int(td["gems"]))],
-					"cb": func(): set_theme(tt), "on": now, "off": not own and int(Save.d["gems"]) < int(td["gems"])})
-			var lv := int(lay["grow"])
-			if lv < HomeLayout.EXPAND.size():
-				var c: Array = HomeLayout.EXPAND[lv]
-				var cm: Array = HomeLayout.EXPAND_MATS[mini(lv, HomeLayout.EXPAND_MATS.size() - 1)]
-				out.append({"t": "Expand island\n%d gems · %d scrap%s" % [int(c[0]), int(c[1]), (" · %d wood" % int(cm[0])) if int(cm[0]) > 0 else ""], "cb": func(): open_expand(), "tip": "Grow the island's edge (step %d of %d)%s" % [lv + 1, HomeLayout.EXPAND.size(), (": also %d wood and %d stone" % [int(cm[0]), int(cm[1])]) if int(cm[0]) > 0 else ""]})
-			else:
-				out.append({"t": "Expand island\nfull size", "cb": func(): pass, "off": true})
-			if _seed() != 0:
-				out.append({"t": "Clear the wild\n%s" % price_text("clear_wild"), "cb": func(): take("clear_wild"), "tip": "Cut back trees and boulders out in the wild meadow, tile by tile",
-					"on": held.get("id", "") == "clear_wild"})
-			out.append({"t": "Reset layout\nundoable", "cb": func(): reset_layout(), "tip": "Buildings back on their lots, decorations into storage, paths and ponds cleared"})
-		_:
-			for id in HomeLayout.CATALOG:
-				var c: Dictionary = HomeLayout.CATALOG[id]
-				if String(c["cat"]) != cat: continue
-				var iid: String = id
-				if not FarmUnlocks.open(id):
-					out.append(FarmBuildUi.locked_entry(id))
-					continue
-				var pc := cost_of(id, 1)
-				var bc := _entry_cost(id)
-				var it := {"t": "%s\n%s" % [c["name"], "" if not bc.is_empty() else price_text(id)], "cb": func(): take(iid),
-					"on": held.get("kind", "") == "deco" and String(held.get("id", "")) == id and int(held.get("from", -1)) < 0,
-					"off": int(pc[2]) == 0 and not _can_pay(int(pc[0]), int(pc[1]), int(pc[3]), int(pc[4]))}
-				if c.has("desc"): it["tip"] = String(c["desc"])
-				if not bc.is_empty():
-					it["cost"] = bc
-					if _site_cost(id) != {}:
-						it["off"] = not FarmSites.can_pay(bc)
-						it["tip"] = String(it.get("tip", "")) + " Boki build it: %d swings of work." % int(bc.get("labour", 0))
-				out.append(it)
-	return out
+	return entries.tab(cat)
 
 # ------------------------------------------------------------------ "Make it home": the first look round
 ## A new procedural home starts with a choice of where the first things go: the feeder, the

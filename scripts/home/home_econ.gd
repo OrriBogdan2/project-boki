@@ -636,7 +636,7 @@ func open_grave(g: Dictionary) -> void:
 ## Keep the soul / bring it back, with what each needs.
 func _soul_row(v: VBoxContainer, g: Dictionary) -> void:
 	if not Save.has_building("shrine"):
-		var l := UI.label("A Soul Shrine could keep its soul, and one day bring it back. Build one beside the graveyard (it needs a Soul Ember from a vault or a Warden).", 13, UI.MUTED)
+		var l := UI.label("A Soul Shrine could keep its soul, and one day bring it back. Build one beside the graveyard (it needs a Soul Ember from a vault or a Watcher).", 13, UI.MUTED)
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(l)
 		return
@@ -962,7 +962,7 @@ func _treasure_n() -> int:
 func _treasure(v: VBoxContainer) -> void:
 	var vd: Dictionary = Save.d.get("valuables", {})
 	if vd.is_empty():
-		var el := UI.label("No treasure yet. Coins, pearls, idols and crown shards from chests, Wardens and rival hunters' boxes end up here to sell.", 15, UI.MUTED)
+		var el := UI.label("No treasure yet. Coins, pearls, idols and crown shards from chests, Watchers and rival hunters' boxes end up here to sell.", 15, UI.MUTED)
 		el.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(el)
 		return

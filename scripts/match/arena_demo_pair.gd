@@ -9,7 +9,7 @@ extends RefCounted
 ##   --arena-demo=pr_payoff_dr / pr_payoff_as   the payoff moments
 ##   moves: dr_shot dr_throw dr_reel dr_anchor dr_dive dr_lunge dr_pounce dr_flex
 ##          as_lance as_sweep as_shot as_leap lw_hop as_cloak lw_stoke lw_stoke_lance
-##          lw_jet dr_blast (the X ultimates), dr_rock (the Grapnel hauling a foe over a rock)
+##          lw_jet dr_blast (the X ultimates), dr_rock (the Abyssal Hand hauling a foe over a rock)
 ## A move's optional fourth entry is its strip zoom (the hose and the rope need the wider gameplay view).
 
 const MOVES := {
@@ -211,7 +211,7 @@ static func _warm_looks(m: Node, at: Vector3) -> void:
 	fx.wave(at, 0.01, Color.BLACK, 0.05)
 
 ## Puts the dummy behind the nearest rock or prop round the hunter, on the far side along the same line,
-## so the Grapnel has to fly over it and drag the dummy back across it.
+## so the Abyssal Hand has to fly over it and drag the dummy back across it.
 static func _behind_rock(A: Arena, D: Hunter) -> void:
 	var W = A.m.world
 	for ring in range(3, 10):

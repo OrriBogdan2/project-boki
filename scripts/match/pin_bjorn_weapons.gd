@@ -1,11 +1,10 @@
 class_name PinBjornWeapons
 extends RefCounted
-## The signature weapon models of Pin (the longbow) and Bjorn (his ice-cased oar and prow shield), built
-## into the hunter's "Gun" node (Models.hunter calls build). Our own shapes: Pin's bow is a layered recurve
+## The signature weapon models of Hem (the longbow) and Breaker (his ice-cased oar and prow shield), built
+## into the hunter's "Gun" node (Models.hunter calls build). Our own shapes: Hem's bow is a layered recurve
 ## in black lacquer with bone nocks, a dark steel inlay down both limbs and a leather grip, a red-fletched
-## arrow nocked on the string (concept sheet docs/art/concepts/archer.png); Bjorn's maul is a ship's oar
+## arrow nocked on the string (concept sheet docs/art/concepts/archer.png); Breaker's maul is a ship's oar
 ## whose blade is frozen into a block of ice bound in iron,
-
 ## under a "Hammer" pivot the kit spins while he charges a swing, and his shield is the frozen prow of his
 ## old ship (concept sheet docs/art/concepts/bulwark.png).
 

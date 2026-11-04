@@ -67,7 +67,9 @@ Copy `vex_fit.json` -> `<name>_fit.json` and set, in this order of importance:
    `spin` for barrels, `slot` metal); a held prop, the weapon glb (PIPELINE.md). `cap_holes`, `cap_flat`.
 3. `slot_rules` (first match wins): the face's eye box -> skin; the hair (box above the neck + hue); round parts by
    `circle` [x, z, rx, rz] (an eye plate) -> metal; the face's front box -> skin; metal parts by box (gun shoulder,
-   backpack: y behind the back); skin by hue; brass by hue; leather below the knees; cloth. Check it with
+   backpack: y behind the back); skin by hue; brass by hue; leather below the knees; cloth. Paint Meshy put on
+   skin in a hair colour (Vex's blurry chest tattoos) is taken by the hair rule: give it skin rules by box + hue
+   before the hair rule, stepped to clear a trim of the same green (r3f). Check it with
    `blender ... tools/meshy/slot_map.py -- GLB OUT 1.62 0.36` (a flat colour per slot): a face split over slots
    reads as patches and seams.
 4. `ramps`: the art's colours per slot and texel hue (dark to light), sampled with
@@ -76,18 +78,52 @@ Copy `vex_fit.json` -> `<name>_fit.json` and set, in this order of importance:
    262123..a39d9e (the art's own darks: they read a step darker in game than painted), skin 885a5e..e4ccc5 (the face
    sheet's), gunmetal 262729..b4b7bd, brass 4a3415..dcb866 (a step apart, so a gun reads grey and brass, not black).
    `smooth` first (edge-preserving, within UV islands), `despeckle` 1.
+   **Measure the signature colours in game, not in the atlas**: the lit, tonemapped render moves saturated hues
+   (Vex's hair: a 116 degree ramp read 112 in game, a 145 degree one 164, teal); sample both with
+   `colour_sample.py <shot> name:box:green` and correct the ramp by the measured shift (Vex: 133 reads the art's 144).
 5. The face: **Face rules (r3d)** below (`project_late` "face" from the flat-lit face sheet by landmarks).
 6. Other paint-overs (`project_late`, after the ramps): chest and belly from the edited front view, the back (a
    backpack, a cape's emblem) from the edited back view (`view: back`), each with a registration measured by
    `tools/meshy/register_art.py` (front, or `--back`), `feather` from ~0.7 so only clearly frontal faces take the
    art (a front projection on a glancing face smears: Vex's strap smears), then the glancing faces' old dark paint
    cleaned by a `touch_up_late` with `side_only`; `slots` keep each paint-over on its part (the backpack: metal).
+   A part the face sheet draws below the face (Vex's gorget) is its own `project_late` from the sheet with the
+   face's `warp`, `slots` metal, its box's bottom above the sheet's last row (below it the bottom row smears),
+   its seams then moved onto glow by `reslot_late` (r3f). A part the ramps should colour differently in one place
+   (the ammo belt's cartridges) is a ramp rule with a `box` after the slot's own ramps.
 7. Pieces as geometry (`tools/meshy/warden_parts.py`, points `rel` to a bone so they follow the rig):
    `braids` (woven strands, copper wraps, bolts, a tuft; on `spring_` chains that swing; `length` to the art),
    `hoses` (ribbed tubes between body and weapon, weighted along their length, e.g. hips -> upper_arm.R ->
    forearm.R; 3-4 thick ones read, 2 thin ones don't), `lens` (a glowing dome on the glow slot; `iris` paints
-   blades, dots, pupil and screws; `cut_r` removes the scan's own).
-8. `touch_up_late` for creases the projections can't reach (`val_max`: dark texels only, `flat` to the mid tone).
+   blades, dots, pupil and screws; `cut_r` removes the scan's own), `plate` (a plate drawn on the face sheet as
+   a decal mesh: its outline in sheet px through the inverse of the face warp, ray-cast onto the face, lifted a few
+   mm with a bevel, textured by the sheet itself: Vex's angular eye plate where Meshy built a round one; `holes`
+   [col, row, r] where a part of its own must show through; `glow_circles` [col, row, r] put a lens the sheet
+   draws on the glow slot; `dome` {centre, r, r_out, band, fit_skip, fit_out, height} lays that lens on a smooth
+   dome (on the plane of the face just around the horn, fitted robustly to the hits `fit_skip`..`fit_out` px out,
+   blended back onto the face over `band` px) and cuts the scan's horn under it (Vex r3f: the decal draped over
+   Meshy's lens horn read as a green spike at 3/4). Fit only that small ring: across the whole plate the face
+   turns 5 cm away toward the temple and rays through the bangs hit the back of the head (a plane over the plate
+   was off by 12 mm rms, a quadratic by 39 mm).
+8. `touch_up_late` for creases the projections can't reach (`val_max`: dark texels only, `flat` to the mid tone);
+   stray paint of one colour on a part (`fill`, `fill_hsv`): its texels filled ring by ring from the part's own
+   texels around them, so the skin closes over in its own shading (a `flat` patch reads as a pale smear); by
+   value too (Vex's upper chest, r3g: dark streaks <= 0.42 and near-white patches), with `erode` 2-3 texels so a
+   strap's own painted edge beside its cloth stays. Texel by texel too (r3h): `cap` compresses values above `cap`
+   by `k` (a skin's blown highlights: Vex's upper chest, cap 0.78, k 0.35), `desat` takes `k` of the saturation
+   out of a hue range (her eyeshadow's magenta to the face sheet's smoky plum: hue 0.75..0.96, k 0.45); `warm`
+   with `sat_max` takes grey parts to a hue keeping their value (her gorget's plates to bronze).
+9. `reslot_late` metal -> brass by hue (`hsv` the brass ramp's): brass gets its own slot, so the look can lift
+   it alone at the match camera (step 7).
+10. Thin lines the art draws (tattoos, glowing seams) as vector strokes (`project_after` `mode: stamp`, r3g): the
+   art's line pixels in `art_box` (greenness above `threshold`; `open_px` drops wide areas of the colour, a lock
+   of hair or a rim light) thinned to centre lines, mapped by the view's registration (`k`/`col0_at`/`row0_at`, or
+   the face's `warp`), ray-cast onto the faces of `slots` in `box` and stamped `width` m wide in one `colour`, never
+   past those faces' texels. Vex: the belly's and chest's circuits (threshold 0.02: the art's tattoos are a
+   greyish green), the gorget's seams from the face sheet (threshold 0.25, onto metal, then `reslot_late` to glow).
+   A `line` pass copies the art's soft edges and its blobs; a stroke does not. A face's circuits (r3h: Vex's cheek
+   and temple, from the face sheet by its warp, 1.4 mm): `open_px` 4 with `keep_wide` stamps the round nodes whole,
+   in an `art_box` that leaves the hair out.
 `recipe.py SPEC fit` writes `art/wardens/<name>/<name>.glb` and imports it (atlases lossless, LODs off).
 
 ## 7. Look (10 min)
@@ -97,17 +133,46 @@ The shared painted look (WardenGlb.PAINTED) does two things for every model, so 
 - f4b59cb3, the match camera: from 8 to 18 m the atlas blends one mip coarser (`far_smooth` 0.7, bias 1.0; more
   mixes a baked atlas's UV islands into mud) and the ink thins 80% (`INK_FAR_THIN`): no speckle, no dark outline
   noise.
+- ext/warden-matchzoom, the speckle fringe (ORCH 15:15): from 8 to 18 m the pale fresnel drops to a third
+  (`far_fres`), gloss, sheen and the lights' rims go (`far_spec`: the white dots on metal), what is left is
+  anti-aliased (`far_aa`), stray texels are clamped to their coarser mip (`far_clamp`: no wider blur, no mud), the
+  ink is gone from ~13.5 m (`INK_FAR_CUT`), alpha cards fade edge-on and keep their coverage face-on
+  (warden_card `far_edge`, `far_alpha`), `rim_far` is a broad saturated band in `rim_far_color` (`far_rim_soft`),
+  and every glow-slot piece gets a 1.4 px halo shell there (`GLOW_SHELL`) and a brighter glow (`far_glow`).
+  Per-part opt-outs: `no_ink` (material tags) in the model's warden_look.json; `ink`, `glow_shell` to tune.
 Per model, in `content/rules/warden_look.json` under the art name, start from Vex's:
 - `painted`: `rim_far` 0.25-0.35 and `rim_far_color` the signature colour, saturated (Vex [0.35, 1.0, 0.45]): a
   rim at the match camera so the silhouette holds (0.9 turned every edge pale);
 - `skin`: shade 0.9, top_light 0.35, fres 0.45, far_lift 0.12 (no shadow_tint: the shared one is warm);
-- `metal`: top_light 0.3, fres 0.3, fres_tint 0.6, far_lift 0.1, sheen 0 (no silvered gunmetal);
-- `hair`: far_lift 0.5, fres 0.6, glow 0.12 (the signature colour pops at the match camera);
-- `glow`: glow 1.8; `halos` for each glowing eye or lens (anchor_<name>, a core whiter than the hair: Vex
-  [0.62, 1.0, 0.66], strength 2.2, px 2.4, near_d 7, far_d 14).
+- `metal`: top_light 0.15, fres 0.15, fres_tint 0.6, far_lift 0, sheen 0, rim_far 0, light_neutral_warm 0.6 (no
+  silvered gunmetal, no highlighter brass: the warm light and top light push saturated gold to yellow; keep brass
+  ramps dull, sat <= 0.6, top value <= 0.65, Vex 2e2214..8a7048);
+- `brass` (the metal's values, then far_lift 0.5, light_neutral_warm 0.4): the bronze reads at the match camera
+  without going yellow at close range;
+- `cloth` and `leather` when they are black (r3e, ORCH 14:10 "muddy khaki at match zoom"): far_lift 0, fres 0.25,
+  rim_far 0, top_light 0.3, light_neutral_warm 0.75. The Arena sun is orange (ffb27a): with the fresnel lift and the
+  green signature rim, black trousers read #433d29..#5b5532 (khaki) at the match camera; with these, #171419..#3a3431
+  (black). `light_neutral_warm` (hero_toon, default 0) takes the hue out of warm lights on those slots only, so
+  skin and hair keep the warm sun;
+- `hair`: far_lift 0.5, fres 0.3, glow 0.12, rim_far 0 (r3f, ORCH 15:10: far_lift 0.7, fres 0.6 and the mint
+  signature rim turned the hair pale cyan at the match camera: #45a861..#84cf99; now #337c4c..#80b569); a
+  `hair-braid` entry (the loader takes "<slot>-<tag>" after its slot) calms woven braids: fres 0.15, far_lift
+  0.3, rim_far 0 (no green edge noise on the plaits);
+- glowing paint on a slot that does not glow (r3h, ORCH 17:10 "reads at night"): `glow_key` (1.0),
+  `glow_key_color` (the stamped colour, Vex [0.298, 0.765, 0.369]) and `glow_key_width` on that slot: her circuit
+  tattoos on the skin glow; the lens and the gorget's seams are on the glow slot already. Check it in the Arena
+  at night (`--raid=night`);
+- `glow`: glow 1.8 for a lens drawn from the sheet (r3f: its own dark glass and rings keep it green; the flat
+  #3dff6a of a modelled lens went white at 2.4, r3e);
+  `halos` for each glowing eye or lens (anchor_<name>; Vex [0.7, 1.0, 0.25], strength 2.4, px 2.4, near_d 7,
+  far_d 14): a hue apart from the hair's (r3g: Vex's toxic-green halo was lost in her green hair at the match
+  camera; lime reads beside it), `lift` m toward the camera where a fringe of hair hangs in front of the lens
+  (Vex 0.035, r3h).
 - If the shared warmth overshoots a palette (ORCH 13:20: Pip coral, Tarek orange, Kael red-brown, Ostra flat
   purple), correct it here per slot (`shade`, `far_lift`, `top_light`; the ramps in the fit), never in PAINTED.
-Never edit the shared shader or PAINTED for one Hunter: that is what this file is for.
+Never change the shared shader's defaults or PAINTED for one Hunter: that is what this file is for. A new key a
+Hunter needs goes into hero_toon as a uniform whose default changes nothing (r3e: `light_neutral_warm`), documented in
+this file's "doc".
 
 ## 8. Stance (10 min)
 `content/rules/warden_stance.json` (ext/warden-stance, S2's branch): the Hunter's `carry` for its own weapon (pos,
@@ -116,9 +181,12 @@ as the art draws it, no clipping through the body, the free hand where the art p
 
 ## 9. Shots and self-score (15 min) (look)
 `recipe.py SPEC shots`: --warden-shots (turnaround close and match camera, front_34, back_34, closeup, closeup_front,
-moves, poses), the Arena match frame (`--arena=<arch> --record=2 --arena-demo=pose --demo-zoom=1.0 --arena-shot=`)
-and its x4 crop, and the composites vs the art in `<raw>/shots/compare`. Score them with the rubric below, honestly,
-beside the art; fix the lowest line first and loop (`recipe.py SPEC loop`).
+moves, poses), the Arena match frame (`--arena=<arch> --record=2 --no-tips --arena-demo=pose_clear
+--demo-zoom=1.0 --arena-shot=`: the review frame, no HUD caption or buttons, no sign, aim line or Focus tell, the
+hero on clear ground it finds itself with no prop or grass over it; spec "demo_at" "dx,dz" still picks the spot)
+and its x4 crop centred on the hero (the frame's DEMO_HERO_RECT line), and the composites vs the art in
+`<raw>/shots/compare`. Score them with the rubric below, honestly, beside the art; fix the lowest line first and
+loop (`recipe.py SPEC loop`).
 
 ### Self-score rubric (ship at >= 95 at BOTH distances)
 | Close-up (front, 3/4, back) | pts | Match zoom (the Arena frame, x4) | pts |
@@ -179,9 +247,13 @@ to ignore):
    (`skip_art_poly`, filled from the skin) or build it as geometry; never let it half-project.
 7. **A lens or eye that glows needs a halo to read at the match camera** (a 3 cm lens is a pixel at 23 m): an anchor
    on the lens (`anchor_<name>`, the fit exports it) and a `halos` entry in content/rules/warden_look.json (radius in
-   screen pixels, `near_d` / `far_d` so close-ups keep the lens itself; a core whiter than the hair so it doesn't
-   merge into it: Vex [0.62, 1.0, 0.66], strength 2.2, px 2.4). Don't make the lens bigger: compare its size to the
-   eye spacing in the face sheet first.
+   screen pixels, `near_d` / `far_d` so close-ups keep the lens itself; Vex [0.24, 1.0, 0.42], strength 2.2, px 2.4:
+   the signature's toxic green, the whiter r3d core read pale). Don't make the lens bigger: compare its size to the
+   eye spacing in the face sheet first. When the face sheet draws the plate and its lens (Vex), draw the lens from the
+   sheet too (r3e): the plate decal's `glow_circles` [[col, row, radius px]] put the drawn lens (its rings, its
+   highlights) on the glow slot, and `lens.geometry: false` drops the modelled lens but keeps its anchor for the
+   halo. A modelled lens under a drawn plate never lines up with the plate's ring (r3d/r3e: a black crescent beside
+   a white dome).
 8. **Check it like the owner does:** the front and 3/4 close-ups beside the portrait (r3d_closeup_vs_art,
    r3d_closeup_34_vs_art), the 3/4 for the jaw and the straps, the match frame for the halo.
 
@@ -197,4 +269,27 @@ to ignore):
 | Smears on straps at 3/4 | a front projection on glancing faces | `feather` from 0.55-0.6 |
 | Braid NaNs / a line to the floor | the drape stacked two points | fixed in warden_parts (resample, guarded frames) |
 | Torso stretched 30% | scaling by the hips' height on a long-legged body | `scale_joints`, the archetype's legs |
+| The lens reads amber, the brass highlighter-yellow | a big saturated brass rim and gold ramp under the warm light | a larger, brighter green dome, a dull rim, dull brass ramps, metal top_light/fres 0.15 |
 | A model the loader refuses | the rig changed under it (a body edit) | `recipe.py SPEC rig fit` again |
+| The hair the wrong green in game | the lit render shifts saturated hues | measure in game, correct the ramp (step 6.4) |
+| Hoses invisible from behind | hidden by an arm or a braid, or draped flat on black cloth | hang them in a loop off the body, between the braid and the arm, a grey a step above the cloth |
+| Muddy grey-green model at match zoom | a mip bias > ~1 on a baked atlas mixes its UV islands | keep `far_smooth_bias` at 1.0 (f4b59cb3) |
+| Khaki / brown blacks at match zoom | the orange Arena sun, the fresnel lift and the signature rim on black cloth | `cloth`/`leather`/`metal`: light_neutral_warm 0.6-0.75, fres 0.25, rim_far 0, far_lift 0 (step 7) |
+| The lens a white disc with a black crescent | glow 2.4 on flat green; the decal's hole and the modelled lens out of line | the sheet's lens on the plate (`glow_circles`), `lens.geometry` false, glow 1.1 |
+| Green smears on the chest | Meshy's blurry tattoos taken by the hair rule (r3f); the art's top trim projected onto skin above the mesh's trim (r3e) | skin rules by box + green before the hair rule, a `fill` touch-up; no line pass where a trim of the tattoos' hue is near |
+| A green horn for a lens at 3/4 | the plate decal draped over Meshy's sculpted lens cone | `plate.dome` (r3f) |
+| The gorget a dark collar, its seams dim | the face projection's skin inpaint over the collar; Meshy's grey | a `gorget` projection from the face sheet, seams onto glow (r3f) |
+| The bronze lost at the match camera | brass shares the metal slot's look | `reslot_late` metal -> brass, look `brass` far_lift 0.5 (r3f) |
+| Camo blotches on the jacket and the gun mount | the gun-side metal box took the dark jacket; Meshy's light patches stretched by the blacks ramp | that rule's hsv value >= 0.22 (the jacket falls to cloth), `smooth` sigma_r 0.1, blacks `lum` [0, 0.5] (r3f) |
+| Soft green smudges where the art's tattoos are | the chest and belly projections carried the art's tattoo pixels, blurred | `skip_art` all greens there, `fill` Meshy's, then crisp lines from a `line` pass (`slots` skin, `max` under the trim's green) (r3f) |
+| Pale patches and dark streaks on the upper chest | Meshy's strap shadows and the art's highlights on the skin around the straps | `fill` on skin by value (dark <= 0.42, near-white), `erode` 2-3 (r3g) |
+| Circuit tattoos soft, blotchy | `line` passes copy the art's soft edges and blobs | `stamp` strokes from the art's thinned lines (r3g) |
+| The gorget's seams faint | thin seams from a projection, few faces on the glow slot | `stamp` the face sheet's seams (warp), then `reslot_late` to glow (r3g) |
+| The gun mount pale with dark blotches | a value rule split the block between metal and the black jacket | a metal rule by box for the whole block before it, a `flat` gunmetal touch-up (r3g) |
+| The lens halo lost in the hair at the match camera | the halo in the hair's own green | a halo of another hue (Vex lime) (r3g) |
+| The eyeshadow oversaturated magenta | the toon light on the face sheet's plum | `desat` touch-up on the eye's box (r3h) |
+| The face small and gaunt | the head grown about the neck only | `chunk.head` 1.21, `chunk.head_x` 1.04 (wider) (r3h) |
+| She goes dark at night | tattoos on the skin slot have no emission | `glow_key` on the skin slot (r3h) |
+| The hair pale cyan at the match camera | hair far_lift 0.7, fres 0.6 and the mint signature rim | hair far_lift 0.5, fres 0.3, rim_far 0 (step 7) |
+| A caption or a plant over the hero in the match frame | the Arena's tips and its spawn props | `--arena-demo=pose_clear` (recipe.py shots) |
+| White/dark speckle fringe at match zoom | per-pixel fresnel, gloss and light rims on a dense mesh; a sub-pixel ink shell; stray texels; edge-on alpha cards | the shared far_* look (ext/warden-matchzoom); `no_ink` for thin parts |

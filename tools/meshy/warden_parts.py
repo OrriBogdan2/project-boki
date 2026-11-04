@@ -269,7 +269,7 @@ class Builder:
 
 
 # ------------------------------------------------------------------------------------------------ the braid
-STRAND_COLS = 6       # texture columns: 2 braids x 3 strands, each 0.125 wide on the left 3/4 of the atlas
+STRAND_COLS = 6       # texture columns: 3 strands per braid on the left 3/4 of the atlas (braids() sets it)
 
 
 def braid(bld, spec, bvh, index):
@@ -295,7 +295,31 @@ def braid(bld, spec, bvh, index):
     end_k = float(spec.get("end_k", 0.7))
     amp = W - rs
     col_w = 0.75 / STRAND_COLS
-    for k in range(3):
+    if spec.get("style") == "loose":
+        # loose wavy hair, not a plait (Claire's pigtails): `locks` strands side by side across the width, fanning
+        # out toward the end (`fan`), all waving together sideways (`wave`, metres; `period`) with a small phase
+        # step between them so the lock reads as soft waves, a little depth between the front and back ones
+        nl = int(spec.get("locks", 7))
+        fan = float(spec.get("fan", 1.6))
+        wave = float(spec.get("wave", 0.02))
+        for k in range(nl):
+            u = (k / max(nl - 1, 1)) * 2.0 - 1.0
+            ph = 0.5 * k
+            dz = (0.5 if k % 2 else -0.5) * rs * 1.2
+            rings, radii = [], []
+            for i in range(n):
+                s = s_arr[i]
+                f = s / max(L, 1e-6)
+                g = min(1.0, 0.55 + 0.45 * s / taper_in) * (1.0 - (1.0 - end_k) * max(0.0, (s - (L - taper_out)) / taper_out))
+                a = 2.0 * math.pi * s / period
+                spread = amp * g * (1.0 + (fan - 1.0) * f)
+                off = (u * spread + wave * math.sin(a + ph) * min(1.0, 3.0 * f)) * nrm[i] + dz * bin_[i]
+                rings.append(p[i] + off)
+                radii.append(rs * (0.7 + 0.3 * g) * (1.0 - 0.25 * abs(u)))
+            c = index * 3 + k % 3
+            bld.tube(rings, radii, sides, c * col_w + 0.004, (c + 1) * col_w - 0.004, 0.01, 0.01 + 0.98 * L / 1.0,
+                     "strand", s_arr, cap_start=True, cap_end=True)
+    for k in (range(3) if spec.get("style") != "loose" else []):
         ph = 2.0 * math.pi * k / 3.0
         rings, radii = [], []
         for i in range(n):
@@ -325,6 +349,19 @@ def braid(bld, spec, bvh, index):
             v0 = 0.005 + 0.025 * min(ring_i, 17)
             bld.torus(c, t[i], W * g + wire_r * 0.4, wire_r, 10, 4, (cu0, v0, cu0 + 0.1, v0 + 0.02), "copper", sr)
             ring_i += 1
+        if w.get("crystals"):
+            # (ice-crystal shards on the tie, pointing up and out: Claire's pigtail clips)
+            c = at(p, s_arr, s)
+            i = int(np.clip(np.searchsorted(s_arr, s), 0, n - 1))
+            nc = int(w["crystals"])
+            box = (cu0, 0.465, cu0 + 0.1, 0.515)
+            for j in range(nc):
+                a = math.pi * (0.15 + 0.7 * j / max(nc - 1, 1))
+                d = math.cos(a) * nrm[i] + math.sin(a) * bin_[i]
+                ln = float(w.get("crystal_len", 0.035)) * (0.7 + 0.3 * ((j * 7) % 3) / 2.0)
+                root = c + d * W * 0.7
+                tip = root + (d * 0.6 - t[i] * 0.8) * ln
+                bld.prism(root, tip, float(w.get("crystal_r", 0.006)), 4, box, "steel", s)
         if w.get("bolt"):
             c = at(p, s_arr, s)
             i = int(np.clip(np.searchsorted(s_arr, s), 0, n - 1))
@@ -451,9 +488,11 @@ def paint(ob, ao, colours, part_masks):
     for part, mask in part_masks.items():
         lit, dark = hexcol(colours[part][0]), hexcol(colours[part][1])
         a = np.clip((ao - 0.35) / 0.6, 0.0, 1.0) ** 1.2
+        a = 1.0 - (1.0 - a) * float(colours.get("ao_k", 1.0))       # (a lighter AO: solid plaits, no speckle)
         col = dark[None, None] * (1 - a[..., None]) + lit[None, None] * a[..., None]
         if part in ("strand", "tuft"):
-            lines = 0.9 + 0.1 * np.sin(xx * (2 * math.pi / 9.0) + np.sin(yy * 0.05) * 2.0)
+            la = float(colours.get("lines", 0.1))
+            lines = 1.0 - la + la * np.sin(xx * (2 * math.pi / 9.0) + np.sin(yy * 0.05) * 2.0)
             col = col * lines[..., None]
             if len(colours[part]) > 2:
                 hi = hexcol(colours[part][2])
@@ -490,6 +529,8 @@ def part_masks(ob, size, parts):
 def braids(body_obs, arm, specs, colours, tag="braid", size=TEX):
     """Every braid in `specs` as one mesh skinned to its spring chains on `arm`, with its painted atlas and the
     materials hair-<tag> (strands, tuft) and metal-<tag> (wire, bolts)."""
+    global STRAND_COLS
+    STRAND_COLS = 3 * max(2, len(specs))      # (a strand column per strand of every braid: Breaker has three)
     bvh = body_bvh(body_obs)
     bld = Builder()
     chains = []
@@ -583,6 +624,8 @@ def hoses(body_obs, arm, specs, colours, tag="hose", size=64):
     brass fittings at both ends. Each hose rides a chain of bones along its length (`bones`: [[bone, t], ...],
     t from 0 at its start to 1 at its end; weights blend linearly between neighbours), so its ends stay on the
     backpack and on the gun-arm while the arm aims and the middle follows between them."""
+    global STRAND_COLS
+    STRAND_COLS = 3 * max(2, len(specs))      # (a strand column per strand of every braid: Breaker has three)
     bvh = body_bvh(body_obs)
     bld = Builder()
     chains = []
@@ -639,6 +682,420 @@ def hoses(body_obs, arm, specs, colours, tag="hose", size=64):
     return ob
 
 
+def _lens_atlas(spec, n):
+    """The lens's atlas (rows bottom up, as Blender's pixels): the rim's quarter (u 0..0.5, v 0..0.5: u round the
+    ring, v round its tube; the tube's front at v 0.125) and the lens's (u 0.5..1 round it, v 0.5 at its edge to
+    1 at its middle). With spec "iris" (the eyeplate detail: blades, dots, pupil, screws), polar paint; else the
+    plain rings."""
+    rim, glow = hexcol(spec.get("rim", "b08a48")), hexcol(spec.get("glow", "6dff5a"))
+    px = np.ones((n, n, 4), np.float32)
+    h = n // 2
+    yy, xx = np.mgrid[0:h, 0:h]
+    u = (xx + 0.5) / h                     # 0..1 round
+    v = (yy + 0.5) / h                     # 0..1 across the quarter
+    iris = spec.get("iris")
+    if not iris:
+        dark = hexcol(spec.get("pupil", "103a14"))
+        ring = np.exp(-((v - 0.55) / 0.12) ** 2)[..., None]
+        lens = glow[None, None] * (1 - 0.75 * ring) + dark[None, None] * 0.75 * ring
+        lens = np.where((v > 0.92)[..., None], np.ones(3) * 0.95 + glow * 0.05, lens)
+        px[:h, :h, :3] = rim
+        px[h:, h:, :3] = lens
+        px[:h, h:, :3] = rim
+        px[h:, :h, :3] = glow
+        return px
+    # the rim: brass, darker toward the tube's back, slotted screws round its front
+    shade = 0.72 + 0.28 * np.cos((v - 0.25) * 2.0 * np.pi)
+    col = rim[None, None] * shade[..., None]
+    k = int(iris.get("screws", 8))
+    a = (u * k) % 1.0 - 0.5
+    sv = (v - 0.25) / 0.5
+    screw = (a / 0.18) ** 2 + (sv / 0.12) ** 2 < 1.0
+    slot_line = screw & (np.abs(a) < 0.035)
+    col = np.where(screw[..., None], rim[None, None] * 0.62, col)
+    col = np.where(slot_line[..., None], np.array([0.12, 0.09, 0.05]), col)
+    px[:h, :h, :3] = col
+    px[:h, h:, :3] = rim
+    # the lens: t from its edge (0) to its middle (1); blades spiral in, a ring of dots, the dark pupil
+    t = v
+    ang = u
+    base = glow[None, None] * (0.55 + 0.45 * np.clip(1.0 - np.abs(t - 0.45) / 0.45, 0.0, 1.0))[..., None]
+    nb, tw = int(iris.get("blades", 9)), float(iris.get("twist", 1.3))
+    edge = np.abs(((ang * nb + t * tw * nb) % 1.0) - 0.5) > 0.44
+    blades = (t > 0.32) & (t < 0.8) & edge
+    base = np.where(blades[..., None], base * float(iris.get("blade_k", 0.65)), base)
+    outer = t < 0.05
+    base = np.where(outer[..., None], glow[None, None] * 0.5, base)
+    nd = int(iris.get("dots", 12))
+    da = ((ang * nd) % 1.0 - 0.5) / nd * 2.0 * np.pi * 0.2
+    dots = (da / 0.012) ** 2 + ((t - 0.2) / 0.035) ** 2 < 1.0
+    arcs = (np.abs(t - 0.14) < 0.012) & (((ang * 4) % 1.0) < 0.7)
+    base = np.where((dots | arcs)[..., None], np.minimum(glow[None, None] * 1.35 + 0.1, 1.0), base)
+    if iris.get("rings"):
+        # (vex_face's lens: glowing toxic-green glass with bright concentric rings and a bright core)
+        g = np.clip(glow[None, None] * (0.62 + 0.38 * t[..., None]), 0, 1)
+        for r0, r1 in iris["rings"]:
+            ring = (t > r0) & (t < r1)
+            g = np.where(ring[..., None], np.minimum(glow[None, None] * 1.25 + 0.12, 1.0), g)
+        g = np.where((t > 0.9)[..., None], np.minimum(glow[None, None] * 1.3 + 0.25, 1.0), g)
+        base = g
+    pupil = hexcol(iris.get("pupil", "1a1020"))
+    if not iris.get("rings"):
+        base = np.where((t > float(iris.get("pupil_t", 0.86)))[..., None], pupil[None, None], base)
+    hi = ((ang - 0.12) % 1.0 < 0.06) & (t > 0.84) & (t < 0.9)
+    base = np.where(hi[..., None], np.array([0.92, 1.0, 0.92]), base)
+    px[h:, h:, :3] = base
+    px[h:, :h, :3] = glow
+    return px
+
+
+def dorsal(body, arm, spec, atlas_spec, tag="dorsal"):
+    """The crest's fin carried down her back to the tail (Cinder r3): a fin along the back at `x` (the fitted
+    frame; beside the spine so a back tank isn't in the way) from height z0 down to z1, its base found by rays at
+    the body from behind, leaning back and up; same atlas as the crest; rides `bone`."""
+    bvh = body_bvh([body])
+    x = float(spec["x"])
+    z0, z1 = spec["z"]
+    n = int(spec.get("samples", 40))
+    base, ups = [], []
+    for z in np.linspace(z0, z1, n):
+        loc, nrm, _i, _d = bvh.ray_cast(Vector((x, -1.5, z)), Vector((0.0, 1.0, 0.0)))
+        if loc is None:
+            continue
+        up = np.array([0.0, -1.0, float(spec.get("lean", 0.35))])
+        up /= np.linalg.norm(up)
+        base.append(np.array(loc[:]) - up * float(spec.get("sink", 0.01)))
+        ups.append(up)
+    base = np.array(base)
+    bld = Builder()
+    ribbon_fin(bld, base, np.array(ups), arclen(base), spec)
+    ob = bld.object("Dorsal")
+    img = bpy.data.images.new(tag + "_atlas", MEM_TEX, MEM_TEX, alpha=False)
+    img.pixels = membrane_atlas(atlas_spec).ravel()
+    img.pack()
+    mi = _mats(ob, img, ("fur", "glow"), tag)
+    for poly in ob.data.polygons:
+        poly.material_index = mi["glow"] if all(bld.part[v] == "edge" for v in poly.vertices) else mi["fur"]
+    g = ob.vertex_groups.new(name=spec.get("bone", "hips"))
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("dorsal fin: %d points, %d tris" % (len(base), sum(len(f) - 2 for f in bld.f)))
+    return ob
+
+
+def vials(body, arm, spec, tag="vials"):
+    """Cinder's bandolier vials, bigger than Meshy's: n glass vials (glow, each its colour) with cork tops
+    (leather), one on each stretch of the body's own glow faces (Meshy's small vial caps) along the strap,
+    standing out from the chest along its normal; they ride `bone`."""
+    me = body.data
+    names = [m.name for m in me.materials]
+    cen, nrm = [], []
+    for p in me.polygons:
+        if names[p.material_index].startswith("glow-"):
+            cen.append(p.center[:])
+            nrm.append(p.normal[:])
+    cen, nrm = np.array(cen), np.array(nrm)
+    mu = cen.mean(axis=0)
+    _u, _s, vt = np.linalg.svd(cen - mu, full_matrices=False)
+    ax = vt[0]
+    t = (cen - mu) @ ax
+    n = len(spec["colours"])
+    edges = np.quantile(t, np.linspace(0, 1, n + 1))
+    bld = Builder()
+    for k in range(n):
+        sel = (t >= edges[k]) & (t <= edges[k + 1])
+        c = cen[sel].mean(axis=0)
+        nv = nrm[sel].mean(axis=0)
+        nv /= max(np.linalg.norm(nv), 1e-9)
+        up = np.cross(nv, ax)
+        up /= max(np.linalg.norm(up), 1e-9)
+        if up[2] < 0:
+            up = -up
+        r, h = float(spec.get("r", 0.017)), float(spec.get("h", 0.056))
+        mid = c + nv * (r + float(spec.get("out", 0.004)))
+        a, b = mid - up * h * 0.5, mid + up * h * 0.5
+        u0 = k / n
+        bld.prism(a, b, r, 10, (u0 + 0.01, 0.02, u0 + 1.0 / n - 0.01, 0.48), "glass%d" % k, 0.0)
+        bld.prism(b - up * 0.002, b + up * float(spec.get("cork_h", 0.016)), r * 0.7, 8,
+                  (u0 + 0.01, 0.52, u0 + 1.0 / n - 0.01, 0.98), "cork", 0.0)
+    ob = bld.object("Vials")
+    size = 64
+    img = bpy.data.images.new(tag + "_atlas", size, size, alpha=False)
+    px = np.ones((size, size, 4), np.float32)
+    for k, col in enumerate(spec["colours"]):
+        x0, x1 = int(size * k / n), int(size * (k + 1) / n)
+        px[: size // 2, x0:x1, :3] = hexcol(col)
+        px[size // 2:, x0:x1, :3] = hexcol(spec.get("cork", "7a4a2a"))
+    img.pixels = px.ravel()
+    img.pack()
+    mi = _mats(ob, img, ("glow", "leather"), tag)
+    for poly in ob.data.polygons:
+        poly.material_index = mi["leather"] if bld.part[poly.vertices[0]] == "cork" else mi["glow"]
+    g = ob.vertex_groups.new(name=spec.get("bone", "hips"))
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("vials: %d along %.2f m of strap" % (n, float(t.max() - t.min())))
+    return ob
+
+
+def ribbon_fin(bld, base, up, s_arr, spec):
+    """A fin along a ridge (Cinder's tail): `base` points (n x 3) with `up` directions, heights rising from 0 to
+    `height` and back to 0 over the run, a spiky edge between `rays` rays; s_arr the arc length at each base."""
+    n = len(base)
+    rows = int(spec.get("rows", 5))
+    nr = int(spec["rays"])
+    H = float(spec["height"])
+    grid = np.zeros((rows, n, 3))
+    nrm = np.zeros((rows, n, 3))
+    uvg = np.zeros((rows, n, 2))
+    sg = np.zeros((rows, n))
+    v0, v1 = spec.get("v", [0.5, 1.0])
+    tang = np.gradient(base, axis=0)
+    for j in range(n):
+        u = j / (n - 1)
+        h = H * math.sin(math.pi * min(1.0, u * 1.25)) ** 0.6 if u < 0.8 else H * 0.4 * (1.0 - (u - 0.8) / 0.2) + 0.002
+        ph = abs((u * nr) % 1.0 - 0.5) * 2.0
+        h *= 1.0 - float(spec.get("spike", 0.3)) * ph ** 1.5
+        side = np.cross(tang[j], up[j])
+        side /= max(np.linalg.norm(side), 1e-9)
+        for i in range(rows):
+            t = i / (rows - 1)
+            grid[i, j] = base[j] + up[j] * h * t
+            nrm[i, j] = side
+            uvg[i, j] = (u, v0 + (v1 - v0) * (0.02 + 0.96 * t))
+            sg[i, j] = s_arr[j]
+    part = ["edge" if i >= rows - 2 else "mem" for i in range(rows)]
+    _sheet(bld, grid, nrm, float(spec.get("th", 0.002)), part, sg, uvg)
+    return bld
+
+
+MEM_TEX = 512
+
+def fins(arm, specs, atlas_spec, tag="fin"):
+    """The crest fan(s) as one mesh on the head bone, with their atlas (membrane on fur, the edge on glow)."""
+    bld = Builder()
+    for sp in specs:
+        fan(arm, sp, bld)
+    ob = bld.object("Fins")
+    img = bpy.data.images.new(tag + "_atlas", MEM_TEX, MEM_TEX, alpha=False)
+    img.pixels = membrane_atlas(atlas_spec).ravel()
+    img.pack()
+    mi = _mats(ob, img, ("fur", "glow"), tag)
+    parts = bld.part
+    for poly in ob.data.polygons:
+        poly.material_index = mi["glow"] if all(parts[v] == "edge" for v in poly.vertices) else mi["fur"]
+    g = ob.vertex_groups.new(name=specs[0].get("bone", "head"))
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("fins: %d, %d tris" % (len(specs), sum(len(f) - 2 for f in bld.f)))
+    return ob, img
+
+
+def fan(arm, spec, bld=None):
+    """A fin-crest fanned round the back of the skull (Cinder r3: a newt's sail that reads from the front as a
+    halo of rays): `rays` rays from angle a0 to a1 (degrees: 0 straight up, + to her right), their roots on a
+    ring of radius `r_base` about `centre` (the fitted frame, rel the head bone), tilted `tilt` degrees back,
+    `length` long at the top and `side_k` x that at the ends, a spiky edge (`spike` deep between the rays).
+    Rides the head bone. Rows: `rows` from the root to the edge (the last `edge_rows` on the glow slot); `yaw`
+    degrees turns the fan about the vertical (behind a head that Meshy turned)."""
+    bld = bld or Builder()
+    c = np.array(spec["centre"], np.float64)
+    nr = int(spec["rays"])
+    per = int(spec.get("per_ray", 6))
+    cols = nr * per + 1
+    rows = int(spec.get("rows", 7))
+    a0, a1 = math.radians(spec["a0"]), math.radians(spec["a1"])
+    tilt = math.radians(spec.get("tilt", 30.0))
+    back = float(spec.get("back", 0.03))
+    grid = np.zeros((rows, cols, 3))
+    nrm = np.zeros((rows, cols, 3))
+    uvg = np.zeros((rows, cols, 2))
+    sg = np.zeros((rows, cols))
+    v0, v1 = spec.get("v", [0.0, 0.5])
+    for j in range(cols):
+        u = j / (cols - 1)
+        a = a0 + (a1 - a0) * u
+        radial = np.array([math.sin(a), 0.0, math.cos(a)])
+        d = radial * math.cos(tilt) + np.array([0.0, -1.0, 0.0]) * math.sin(tilt)
+        d /= np.linalg.norm(d)
+        root = c + radial * float(spec["r_base"]) + np.array([0.0, -back, 0.0])
+        k = float(spec.get("side_k", 0.8))
+        L = float(spec["length"]) * (k + (1.0 - k) * math.cos(a) ** 2 if abs(a) < math.pi / 2 else k * 0.9)
+        ph = abs((u * nr) % 1.0 - 0.5) * 2.0
+        L *= 1.0 - float(spec.get("spike", 0.16)) * ph ** 1.5
+        side = np.cross(d, radial)
+        side /= max(np.linalg.norm(side), 1e-9)
+        for i in range(rows):
+            t = i / (rows - 1)
+            tt = t if i < rows - 1 else 1.0
+            grid[i, j] = root + d * L * tt
+            nrm[i, j] = side
+            uvg[i, j] = (u, v0 + (v1 - v0) * (0.02 + 0.96 * t))
+            sg[i, j] = 0.0
+    yaw = math.radians(float(spec.get("yaw", 0.0)))         # (+ toward her right: behind a head Meshy turned)
+    if yaw:
+        cz, sz = math.cos(yaw), math.sin(yaw)
+        rz = np.array([[cz, -sz, 0.0], [sz, cz, 0.0], [0.0, 0.0, 1.0]])
+        grid = (grid - c) @ rz.T + c
+        nrm = nrm @ rz.T
+    ne = int(spec.get("edge_rows", 1))
+    part = ["edge" if i >= rows - 1 - ne else "mem" for i in range(rows)]
+    _sheet(bld, grid, nrm, float(spec.get("th", 0.0016)), part, sg, uvg)
+    return bld
+
+
+def _mats(ob, img, slots, tag):
+    out = {}
+    for slot in slots:
+        m = bpy.data.materials.new("%s-%s" % (slot, tag))
+        m.use_nodes = True
+        bsdf = m.node_tree.nodes.get("Principled BSDF")
+        tex = m.node_tree.nodes.new("ShaderNodeTexImage")
+        tex.image = img
+        m.node_tree.links.new(tex.outputs[0], bsdf.inputs["Base Color"])
+        bsdf.inputs["Roughness"].default_value = 0.8
+        ob.data.materials.append(m)
+        out[slot] = len(ob.data.materials) - 1
+    return out
+
+
+def membrane_atlas(spec, size=MEM_TEX):
+    """The fins' atlas: v from the base (0) to the tip (1) inside each fin's band, the membrane's ramp along it,
+    dark fin rays at the ray columns (stronger at the base), the last `edge` share the glowing orange edge."""
+    px = np.ones((size, size, 4), np.float32)
+    for band in spec["bands"]:
+        v0, v1 = band["v"]
+        r0, r1 = int(v0 * size), int(v1 * size)
+        t = (np.arange(r1 - r0) + 0.5) / max(1, r1 - r0)
+        cols = np.array([hexcol(c) for c in band["ramp"]], np.float32)
+        x = np.clip(t, 0, 1) * (len(cols) - 1)
+        i0 = np.clip(np.floor(x).astype(int), 0, len(cols) - 2)
+        f = (x - i0)[:, None]
+        mem = cols[i0] * (1 - f) + cols[i0 + 1] * f                     # (rows, 3)
+        img = np.repeat(mem[:, None, :], size, axis=1)
+        u = (np.arange(size) + 0.5) / size
+        nr = int(band["rays"])
+        ph = np.abs((u * nr) % 1.0 - 0.5) * 2.0                           # 1 between rays, 0 on a ray
+        ray = np.clip(1.0 - ph / float(band.get("ray_w", 0.22)), 0, 1)[None, :] * (1.0 - 0.6 * t[:, None])
+        img = img * (1 - ray[..., None]) + hexcol(band["ray"])[None, None, :] * ray[..., None]
+        e = float(band.get("edge", 0.12))
+        edge = np.clip((t - (1.0 - e)) / 0.03, 0, 1)[:, None, None]
+        img = img * (1 - edge) + hexcol(band["edge_col"])[None, None, :] * edge
+        px[r0:r1, :, :3] = img
+    return px
+
+
+def _sheet(bld, grid, nrm, th, part, s_grid, uv_grid):
+    """A thin closed sheet through a grid of points (rows x cols x 3) with per-point normals: a front and a back
+    layer `th` apart and their rims joined, so it reads from both sides under back-face culling."""
+    rows, cols = grid.shape[:2]
+    base = len(bld.v)
+    for side in (1.0, -1.0):
+        for i in range(rows):
+            for j in range(cols):
+                bld.v.append(grid[i, j] + nrm[i, j] * th * side)
+                bld.uv.append(tuple(uv_grid[i, j]))
+                bld.part.append(part[i])
+                bld.s.append(s_grid[i, j])
+    n = rows * cols
+
+    def vid(side, i, j):
+        return base + (0 if side > 0 else n) + i * cols + j
+    for i in range(rows - 1):
+        for j in range(cols - 1):
+            bld.f.append((vid(1, i, j), vid(1, i, j + 1), vid(1, i + 1, j + 1), vid(1, i + 1, j)))
+            bld.f.append((vid(-1, i, j), vid(-1, i + 1, j), vid(-1, i + 1, j + 1), vid(-1, i, j + 1)))
+    for i in range(rows - 1):
+        for j in (0, cols - 1):
+            bld.f.append((vid(1, i, j), vid(1, i + 1, j), vid(-1, i + 1, j), vid(-1, i, j)))
+    for j in range(cols - 1):
+        for i in (0, rows - 1):
+            bld.f.append((vid(1, i, j), vid(-1, i, j), vid(-1, i, j + 1), vid(1, i, j + 1)))
+
+
+def gauntlets(arm, spec, tag="gauntlet"):
+    """Stone gauntlets grown round both forearms (Tarek), elbow to knuckle: a glowing amber core (glow slot)
+    wrapped in rough stone plates (`slot`, leather) set a little apart, so the core shows through the gaps as
+    bright cracks; the plates past the wrist ride the hand bone, the rest the forearm. An empty
+    anchor_<tag>_<L|R> on each forearm's middle carries a glow halo at the match camera (warden_look.json).
+    Returns [mesh, anchors...]."""
+    rng = np.random.default_rng(int(spec.get("seed", 5)))
+    img = _stone_cells(128, spec, tag + "_cells")
+    bld = Builder()
+    owners = []           # per vertex: (bone, weight) via ranges
+    spans = []
+    for sd in ("L", "R"):
+        e = np.array(arm.data.bones["forearm." + sd].head_local[:])
+        w = np.array(arm.data.bones["hand." + sd].head_local[:])
+        ax = w - e
+        L = float(np.linalg.norm(ax))
+        ax /= L
+        k = w + ax * float(spec.get("fist", 0.1))
+        ref = np.array([0.0, 1.0, 0.0]) if abs(ax[1]) < 0.9 else np.array([1.0, 0.0, 0.0])
+        e1 = np.cross(ax, ref)
+        e1 /= np.linalg.norm(e1)
+        e2 = np.cross(ax, e1)
+        r_arm = float(spec.get("r", 0.06))
+        v0 = len(bld.v)
+        # the core: a tube elbow -> knuckle, thicker toward the fist
+        rings = [e + (k - e) * f for f in np.linspace(0.0, 1.0, 8)]
+        core_k = float(spec.get("core", 0.8))       # (a thinner core: thin cracks between the plates)
+        radii = [r_arm * (core_k + 0.25 * f) for f in np.linspace(0.0, 1.0, 8)]
+        bld.tube(rings, radii, 12, 0.05, 0.45, 0.55, 0.95, "core", [0.0] * 8, cap_end=True, cap_start=True)
+        # the plates: rows along the arm, each a lumpy rock on the surface, slightly apart
+        rows = int(spec.get("rows", 5))
+        per = int(spec.get("per_row", 5))
+        for i in range(rows):
+            t = (i + 0.5) / rows
+            c = e + (k - e) * t
+            rr = r_arm * (0.85 + 0.3 * t)
+            for j in range(per):
+                a = 2.0 * math.pi * (j + 0.5 * (i % 2)) / per + rng.uniform(-0.15, 0.15)
+                out_d = math.cos(a) * e1 + math.sin(a) * e2
+                p = c + out_d * rr * 1.02
+                s = rr * float(spec.get("plate", 0.62)) * rng.uniform(0.85, 1.15)
+                side = np.cross(ax, out_d)
+                _lumpy(bld, p, (side, ax, -out_d), (s, s * 1.25, s * float(spec.get("thick", 0.45))), "rock",
+                       (0.05, 0.05, 0.45, 0.45),
+                       int(rng.integers(1, 9999)), rings=5, sides=8, lump=float(spec.get("lump", 0.3)))
+        spans.append((sd, v0, len(bld.v), e, w, ax, L))
+    ob = bld.object(tag.capitalize() + "s")
+    mi = {"rock": _flat_material(ob, spec.get("slot", "leather"), tag, img, "Closest")}
+    mi["core"] = _flat_material(ob, "glow", tag, img, "Closest")
+    for poly in ob.data.polygons:
+        poly.material_index = mi[bld.part[poly.vertices[0]]]
+    anchors = []
+    for sd, v0, v1, e, w, ax, L in spans:
+        gf = ob.vertex_groups.new(name="forearm." + sd)
+        gh = ob.vertex_groups.new(name="hand." + sd)
+        for vi in range(v0, v1):
+            t = float((np.asarray(bld.v[vi]) - e) @ ax) / L
+            f = min(1.0, max(0.0, (t - 0.9) / 0.15))     # (past the wrist: the hand's)
+            if f < 1.0:
+                gf.add([vi], 1.0 - f, "REPLACE")
+            if f > 0.0:
+                gh.add([vi], f, "REPLACE")
+        an = bpy.data.objects.new("anchor_%s_%s" % (tag, sd), None)
+        bpy.context.scene.collection.objects.link(an)
+        an.parent = arm
+        an.parent_type = "BONE"
+        an.parent_bone = "forearm." + sd
+        bpy.context.view_layer.update()
+        an.matrix_world = Matrix.Translation(Vector(e + ax * L * 0.6))
+        anchors.append(an)
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("gauntlets: %d tris" % sum(len(f) - 2 for f in bld.f))
+    return [ob] + anchors
+
+
 # ------------------------------------------------------------------------------------------------ simple materials
 def _flat_material(ob, slot, tag, img, interp="Linear"):
     m = bpy.data.materials.new("%s-%s" % (slot, tag))
@@ -675,7 +1132,6 @@ def _quads_uv(size, cells, name="cells"):
     return img
 
 
-# ------------------------------------------------------------------------------------------------ orbiting props
 def _stone_cells(size, spec, name):
     """A seeing-stone's atlas (the _quads_uv cells): mottled rock, a crystal ring of radial facets, an iris that
     glows hot at its middle, a black pupil."""
@@ -711,7 +1167,7 @@ def _stone_cells(size, spec, name):
     return img
 
 
-
+# ------------------------------------------------------------------------------------------------ orbiting props
 def _lumpy(bld, centre, frame, radii, part, uv_box, seed, rings=7, sides=12, lump=0.18):
     """A rough rock: a squashed sphere (radii along the frame's axes) with lumpy noise, as a tube capped at both
     poles (u around, v pole to pole)."""
@@ -803,8 +1259,8 @@ def orbit_props(arm, spec):
         if kind != "card":
             # (a geode: the rough rock, a raised rim round its cut face, a ring of crystals sunk inside it, and the
             # eye's domed iris standing out of the crystals; "rock": the rough rock alone, a shard)
-            _lumpy(bld, p, (side, up, -out_dir), (r, r * 1.08, r * 0.66), "rock", (0.05, 0.05, 0.45, 0.45), 7 + i,
-                   rings=9, sides=16, lump=0.26)
+            _lumpy(bld, p, (side, up, -out_dir), (r, r * 1.08, r * float(spec.get("depth", 0.66))), "rock",
+                   (0.05, 0.05, 0.45, 0.45), 7 + i, rings=9, sides=16, lump=0.26)
         if kind != "eye":
             ob = bld.object("%s_%d" % (spec["name"], i))
             mi = {"rock": _flat_material(ob, spec.get("slot", "leather"), spec["name"], img, "Closest")}
@@ -825,11 +1281,14 @@ def orbit_props(arm, spec):
                 an.parent = ob
                 an.matrix_world = Matrix.Translation(Vector(p))
             continue
-        bld.torus(p + out_dir * r * 0.5, out_dir, r * 0.62, r * 0.13, 18, 6, (0.05, 0.05, 0.45, 0.45), "rock", 0.0)
-        _disc(bld, p + out_dir * r * 0.5, out_dir, r * 0.62, "rim", (0.55, 0.05, 0.95, 0.45), dome=-0.18)
-        _disc(bld, p + out_dir * r * 0.46, out_dir, r * float(spec.get("iris_r", 0.4)), "iris", (0.05, 0.55, 0.45, 0.95),
+        # (the opening on the rock's outer face, wherever `depth` puts it, so a rounder rock never hides it)
+        fz = float(spec.get("depth", 0.66)) * 0.88
+        oz = fz - 0.16
+        bld.torus(p + out_dir * r * fz, out_dir, r * 0.68, r * 0.14, 18, 6, (0.05, 0.05, 0.45, 0.45), "rock", 0.0)
+        _disc(bld, p + out_dir * r * fz, out_dir, r * 0.68, "rim", (0.55, 0.05, 0.95, 0.45), dome=-0.18)
+        _disc(bld, p + out_dir * r * oz, out_dir, r * float(spec.get("iris_r", 0.4)), "iris", (0.05, 0.55, 0.45, 0.95),
               dome=0.45)
-        bld.prism(p + out_dir * r * 0.66 - up * r * 0.24, p + out_dir * r * 0.66 + up * r * 0.24, r * 0.06, 4,
+        bld.prism(p + out_dir * r * (oz + 0.2) - up * r * 0.24, p + out_dir * r * (oz + 0.2) + up * r * 0.24, r * 0.06, 4,
                   (0.55, 0.55, 0.95, 0.95), "pupil", 0.0)
         ob = bld.object("%s_%d" % (spec["name"], i))
         mi = {"rock": _flat_material(ob, spec.get("slot", "leather"), spec["name"], img, "Closest")}
@@ -845,6 +1304,13 @@ def orbit_props(arm, spec):
         ob.parent = e
         ob.matrix_world = mw
         out.append(ob)
+        if spec.get("anchors"):
+            # (an empty on the eye, anchor_<name>_<i>, for a glow halo at the match camera; it rides the stone)
+            an = bpy.data.objects.new("anchor_%s_%d" % (spec["name"].replace("orbit_", ""), i), None)
+            bpy.context.scene.collection.objects.link(an)
+            an.parent = ob
+            an.location = Vector(out_dir * r * (fz + 0.05))
+            out.append(an)
     log("orbit %s: %d props round %s" % (spec["name"], len(spec["items"]), tuple(round(x, 3) for x in c)))
     return out
 
@@ -1025,7 +1491,6 @@ def studs(body, arm, spec):
     return ob
 
 
-# ------------------------------------------------------------------------------------------------ face marks
 def face_marks(target, arm, spec):
     """Painted-on glowing marks laid onto a part's surface as thin ribbons (Ostra's violet tear and the glowing
     crack on his mask: the projected art was a pixel-wide smudge there). Each mark is a polyline `pts` of [x, z]
@@ -1105,7 +1570,6 @@ def face_marks(target, arm, spec):
     return ob
 
 
-# ------------------------------------------------------------------------------------------------ claws
 def claws(body, arm, spec):
     """Long claws on a scanned glove (Ostra's clawed fingers; Meshy rounds them off): for each hand in `sides`
     the body's fingertips are its vertices furthest along the hand bone (weighted to it), `count` of them at
@@ -1177,7 +1641,6 @@ def claws(body, arm, spec):
     return ob
 
 
-# ------------------------------------------------------------------------------------------------ orb
 def orb(arm, spec, tag="orb"):
     """A hand-held orb (Ostra's swirling void orb): a sphere on the `void` slot (the starfield, opaque) inside a
     thin glowing ring (glow), or with style "glow" one glowing sphere, at `centre`, riding `bone` rigidly."""
@@ -1284,61 +1747,3 @@ def _vortex(arm, spec, tag, c, r):
     _rigid(ob, arm, spec.get("bone", "hand.R"))
     log("%s vortex on %s, r %.3f, %d arms" % (tag, spec.get("bone", "hand.R"), r, n_arms))
     return ob
-
-
-def _lens_atlas(spec, n):
-    """The lens's atlas (rows bottom up, as Blender's pixels): the rim's quarter (u 0..0.5, v 0..0.5: u round the
-    ring, v round its tube; the tube's front at v 0.125) and the lens's (u 0.5..1 round it, v 0.5 at its edge to
-    1 at its middle). With spec "iris" (the eyeplate detail: blades, dots, pupil, screws), polar paint; else the
-    plain rings."""
-    rim, glow = hexcol(spec.get("rim", "b08a48")), hexcol(spec.get("glow", "6dff5a"))
-    px = np.ones((n, n, 4), np.float32)
-    h = n // 2
-    yy, xx = np.mgrid[0:h, 0:h]
-    u = (xx + 0.5) / h                     # 0..1 round
-    v = (yy + 0.5) / h                     # 0..1 across the quarter
-    iris = spec.get("iris")
-    if not iris:
-        dark = hexcol(spec.get("pupil", "103a14"))
-        ring = np.exp(-((v - 0.55) / 0.12) ** 2)[..., None]
-        lens = glow[None, None] * (1 - 0.75 * ring) + dark[None, None] * 0.75 * ring
-        lens = np.where((v > 0.92)[..., None], np.ones(3) * 0.95 + glow * 0.05, lens)
-        px[:h, :h, :3] = rim
-        px[h:, h:, :3] = lens
-        px[:h, h:, :3] = rim
-        px[h:, :h, :3] = glow
-        return px
-    # the rim: brass, darker toward the tube's back, slotted screws round its front
-    shade = 0.72 + 0.28 * np.cos((v - 0.25) * 2.0 * np.pi)
-    col = rim[None, None] * shade[..., None]
-    k = int(iris.get("screws", 8))
-    a = (u * k) % 1.0 - 0.5
-    sv = (v - 0.25) / 0.5
-    screw = (a / 0.18) ** 2 + (sv / 0.12) ** 2 < 1.0
-    slot_line = screw & (np.abs(a) < 0.035)
-    col = np.where(screw[..., None], rim[None, None] * 0.62, col)
-    col = np.where(slot_line[..., None], np.array([0.12, 0.09, 0.05]), col)
-    px[:h, :h, :3] = col
-    px[:h, h:, :3] = rim
-    # the lens: t from its edge (0) to its middle (1); blades spiral in, a ring of dots, the dark pupil
-    t = v
-    ang = u
-    base = glow[None, None] * (0.55 + 0.45 * np.clip(1.0 - np.abs(t - 0.45) / 0.45, 0.0, 1.0))[..., None]
-    nb, tw = int(iris.get("blades", 9)), float(iris.get("twist", 1.3))
-    edge = np.abs(((ang * nb + t * tw * nb) % 1.0) - 0.5) > 0.44
-    blades = (t > 0.32) & (t < 0.8) & edge
-    base = np.where(blades[..., None], base * 0.45, base)
-    outer = t < 0.07
-    base = np.where(outer[..., None], glow[None, None] * 0.25, base)
-    nd = int(iris.get("dots", 12))
-    da = ((ang * nd) % 1.0 - 0.5) / nd * 2.0 * np.pi * 0.2
-    dots = (da / 0.012) ** 2 + ((t - 0.2) / 0.035) ** 2 < 1.0
-    arcs = (np.abs(t - 0.14) < 0.012) & (((ang * 4) % 1.0) < 0.7)
-    base = np.where((dots | arcs)[..., None], np.minimum(glow[None, None] * 1.35 + 0.1, 1.0), base)
-    pupil = hexcol(iris.get("pupil", "1a1020"))
-    base = np.where((t > 0.8)[..., None], pupil[None, None], base)
-    hi = ((ang - 0.12) % 1.0 < 0.06) & (t > 0.84) & (t < 0.9)
-    base = np.where(hi[..., None], np.array([0.92, 1.0, 0.92]), base)
-    px[h:, h:, :3] = base
-    px[h:, :h, :3] = glow
-    return px
