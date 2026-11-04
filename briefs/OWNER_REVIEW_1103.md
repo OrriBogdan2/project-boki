@@ -624,3 +624,8 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Owner: "I don't see what Motes does and don't know what it is."
 - What it is (scripts/match/unmasked.gd `_motes`): None / A few / A swarm = 0 / 6 / 18 tiny specks of the face's glow colour drifting up around the head. They are so small and few that they don't read in the creator or in the world.
 - Fix (default; the owner may say "just remove it"): rename the row to something self-explanatory, e.g. **"Aura"** (None / Faint / Strong), and make it clearly visible: bigger, brighter specks drifting up and around the head and shoulders (and the shroud from item 79b), with a short tooltip line "Glowing specks that drift around you". Show it in the creator preview at a size you can see. If it still doesn't add anything once visible, remove the row.
+
+## 81. BUG: the Empty's feet clip through the ground (owner, 22:58 UTC Nov 4)
+- Owner: "also his feet clip through the ground" (the Empty: creator preview and the farm/town).
+- Likely cause: the Empty's "real height" and build scaling (empty90) scales the model from its centre instead of the feet, or the height offset isn't re-applied after scaling, so shorter/taller settings sink the feet. Also check the walk cycle's foot height on uneven ground.
+- Fix: scale from a feet-level pivot and keep the soles on the ground for every height/build/gender setting; idle and walk keep the feet on the surface (no sinking). Assert: at min/mid/max height and both builds, the lowest foot vertex is within 2 cm of the ground in idle and across the walk cycle. Do it with items 79b/80 (same Empty files).
