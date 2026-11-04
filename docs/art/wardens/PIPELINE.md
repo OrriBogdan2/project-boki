@@ -170,3 +170,12 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 | Vex r3b edit side 2 | 06:44 | 01a1a54c-f974-7239-9ea4-5a714210e1a8 | nano-banana-pro | as side, "her left arm hidden behind her body" | 9 | Kept |
 | Vex r3b A | 06:46 | 01a1a54f-35bf-734c-9ee7-55f81be998e5 | meshy-7.1 | 4 edited views (front, 3/4, side, back), geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | Kept: the face's smirk, chunky hair, eye plate on her right eye, gun-arm, backpack |
 | Vex r3b B | 06:46 | 01a1a54f-35c4-73d2-9fd2-ab8f7e9f5bce | meshy-7.1 | as A, enhancement on | 40 | Dropped: rounder cuter face, stringy hair; a cleaner lens (A's is replaced by geometry) |
+
+### Hem (archer, was Pin) stage 1, 2026-11-04 (balance 4921 before; 76 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Hem edit front | 09:08 | 01a1a5d1-13fa-75ea-a82a-9a7c76eb0bbe | nano-banana-pro (image-to-image) | 9:16 crop; bow, string, spool and threads out, left hand hanging empty, ground line and VFX shadow out | 9 | Kept |
+| Hem edit 3/4 | 09:08 | 01a1a5d1-1407-7614-b39f-38720b1bd208 | nano-banana-pro | same | 9 | Kept |
+| Hem edit side | 09:08 | 01a1a5d1-1407-7050-b1dd-10efbfb9dc50 | nano-banana-pro | same, her left arm hidden behind her body | 9 | Kept |
+| Hem edit back | 09:08 | 01a1a5d1-1406-776c-a6c5-797a2b85363e | nano-banana-pro | same | 9 | Kept |
+| Hem A | 09:09 | 01a1a5d2-5a3a-759f-b819-13c6f8aa159d | meshy-7.1 | 4 edited views (front, 3/4, side, back) as images and texture refs, geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept** (first run): clean face and porcelain mask, bun and hair needles, coat tails, quiver, thimble claws |

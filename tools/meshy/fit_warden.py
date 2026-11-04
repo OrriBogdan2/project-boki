@@ -31,6 +31,9 @@ from mathutils import Matrix, Vector
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "blender"))
 import warden_kit as K  # noqa: E402
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import bow_parts  # noqa: E402
+
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 FIT_BONES = [  # bone, head joint, tail joint, parent
     ("hips", "pelvis", "neck", None), ("head", "neck", "crown", "hips"),
@@ -1542,6 +1545,105 @@ def _rig_joint(rig, name):
 
 
 
+def split_piece(ob, img, pc):
+    """A piece the art draws as its own object (Hem's porcelain half-mask over her nose and mouth) comes off the
+    body as its own skinned mesh: the faces inside `box` (the fitted frame) facing `facing` or more toward the
+    front (+Y), painted in one of the `hsv` ranges [h0, h1, s0, s1, v0, v1]; the selection is closed `close` face
+    rings (the red stitches, the painted lips inside it) and its largest connected part kept. It is pushed `push`
+    m out along its normals (a lip off the face) and goes on its own material `<slot>-<name>` (same atlas)."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    me = ob.data
+    uv = me.uv_layers.active.data
+    b = pc["box"]
+    pick = set()
+    for p in me.polygons:
+        c = p.center
+        if not (b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]):
+            continue
+        if p.normal.y < float(pc.get("facing", -1.0)):
+            continue
+        u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
+        v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
+        hh, ss, vv = _hsv(px[min(h - 1, max(0, int(v * h))), min(w - 1, max(0, int(u * w))), :3])
+        if any((q[0] <= hh <= q[1] if q[0] <= q[1] else (hh >= q[0] or hh <= q[1])) and q[2] <= ss <= q[3]
+               and q[4] <= vv <= q[5] for q in pc["hsv"]):
+            pick.add(p.index)
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.faces.ensure_lookup_table()
+
+    def nbrs(i):
+        return {g.index for e in bm.faces[i].edges for g in e.link_faces if g.index != i}
+
+    def inbox(i):
+        c = bm.faces[i].calc_center_median()
+        return b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]
+    n = int(pc.get("close", 2))
+    for _k in range(n):
+        pick |= {j for i in list(pick) for j in nbrs(i) if inbox(j)}
+    for _k in range(n):
+        pick = {i for i in pick if nbrs(i) <= pick or len(nbrs(i) - pick) <= 1}
+    # the largest connected part
+    left, best = set(pick), set()
+    while left:
+        seed = left.pop()
+        comp, stack = {seed}, [seed]
+        while stack:
+            for j in nbrs(stack.pop()):
+                if j in left:
+                    left.discard(j)
+                    comp.add(j)
+                    stack.append(j)
+        if len(comp) > len(best):
+            best = comp
+    bm.free()
+    piece = split_off_faces(ob, best, pc["name"])
+    for g in ob.vertex_groups:
+        piece.vertex_groups.new(name=g.name)
+    piece.parent = ob.parent
+    for md in ob.modifiers:
+        if md.type == "ARMATURE":
+            nm = piece.modifiers.new(md.name, "ARMATURE")
+            nm.object = md.object
+    pm = piece.data
+    pm.update()
+    push = float(pc.get("push", 0.003))
+    for vx in pm.vertices:
+        vx.co = vx.co + vx.normal * push
+    mat = slot_materials(img, [pc["slot"]], pc["name"])[pc["slot"]]
+    pm.materials.clear()
+    pm.materials.append(mat)
+    for p in pm.polygons:
+        p.material_index = 0
+    log("piece %s: %d faces" % (pc["name"], len(pm.polygons)))
+    return piece
+
+
+def split_off_faces(ob, faces, name):
+    """These faces (indices) of ob become their own object (vertex weights kept)."""
+    me = ob.data
+    keep = set(faces)
+    mine = me.copy()
+    bm = bmesh.new()
+    bm.from_mesh(mine)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.index not in keep], context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(mine)
+    bm.free()
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.index in keep], context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(me)
+    bm.free()
+    out = bpy.data.objects.new(name, mine)
+    bpy.context.scene.collection.objects.link(out)
+    return out
+
+
 def main():
     spec_path = sys.argv[sys.argv.index("--") + 1]
     spec = json.load(open(spec_path))
@@ -1656,6 +1758,8 @@ def main():
             parts.append(WP.lens(arm, spec["lens"]))
         if spec.get("braids"):
             parts.append(WP.braids([ob], arm, spec["braids"], spec["braid_colours"]))
+    for pc in spec.get("pieces", []):
+        parts.append(split_piece(ob, img, pc))
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
@@ -1664,6 +1768,14 @@ def main():
     spin = None
     if gun is not None:
         gun, spin = gun_weapon(gun, ge, gt, rig, spec["gun_arm"])
+    elif "bow" in spec:
+        # a held bow, built by script (tools/meshy/bow_parts.py), with its nocked arrow as the Mag
+        bw = spec["bow"]
+        gun = bow_parts.build_bow(float(bw.get("height", 1.25)), float(bw.get("depth", 0.13)))
+        spin = bow_parts.build_arrow(tip_y=float(bw.get("tip", 0.78)))
+        spin.parent = gun
+        gun["built"] = spin["built"] = 1
+        K.anchor(arm, "hand.R", "anchor_nock", K.bone_head(rig, "hand.R"))
     else:
         gun = weapon(spec, rig)
     crown = rig["land"]["crown"]
@@ -1671,6 +1783,8 @@ def main():
     K.anchor(arm, "hips", "anchor_chest", (0, 0.1, K.bone_head(rig, "upper_arm.L").z - 0.14))
     for o in [x for x in (ob, gun, spin) if x]:
         # Meshy's own split normals don't survive the decimation (facets): clear them, shade smooth
+        if o.get("built"):
+            continue                  # (a scripted piece: its facets are drawn on purpose)
         bpy.context.view_layer.objects.active = o
         if o.data.has_custom_normals:
             bpy.ops.mesh.customdata_custom_splitnormals_clear()

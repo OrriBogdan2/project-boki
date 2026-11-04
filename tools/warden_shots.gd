@@ -19,6 +19,9 @@ const CAM_FOV := 32.0
 const ENLARGE := 3            # the gameplay strip enlarged this many times (nearest, so the pixels stay honest)
 const OUT_W := 1280
 const MOVES_PER_STRIP := 4    # kit-move frames side by side in one close strip
+## Kit moves not named <id>_lmb/_dash/_rmb: [label, kit move, its time (s)] (scripts/match/arena_demo.gd's timings).
+const KIT_FRAMES := {"archer": [["draw", "arc_draw", 0.8], ["loose", "arc_loose", 0.94],
+	["Spirit Walk roll", "pin_roll", 0.58], ["Heavy Shot", "arc_heavy", 1.42]]}
 
 var holder: Node3D
 var cam: Camera3D
@@ -257,6 +260,9 @@ func _move_frames(id: String) -> Array:
 			["dash, up", "_dash", 0.62], ["RMB throw", "_rmb", 0.07]]:
 		if not HunterAnim.km_def(id + String(f[1])).is_empty():
 			out.append([f[0], id + String(f[1]), f[2], -1])
+	for f in KIT_FRAMES.get(id, []):
+		if not HunterAnim.km_def(String(f[1])).is_empty():
+			out.append([f[0], f[1], f[2], -1])
 	return out
 
 ## Plays one move frame and holds it: a run (its extra steps set the stride's phase) or a kit move at its time.

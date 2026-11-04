@@ -1,0 +1,287 @@
+{
+ "body_glb": "~/meshy/hem/bake/low.glb",
+ "rig": "art/wardens/src/hem_rig.json",
+ "out": "art/wardens/hem/hem.glb",
+ "blend": "~/meshy/hem/fit.blend",
+ "turn": 180,
+ "max_tris": 36000,
+ "floater_verts": 8,
+ "snap_r": 0.045,
+ "scale_joints": [
+  "hip.L",
+  "shoulder.L"
+ ],
+ "joints": {
+  "crown": [
+   0,
+   0,
+   0.85
+  ],
+  "neck": [
+   0,
+   0,
+   0.56
+  ],
+  "shoulder.L": [
+   0.215,
+   0,
+   0.45
+  ],
+  "shoulder.R": [
+   -0.215,
+   0,
+   0.45
+  ],
+  "elbow.L": [
+   0.255,
+   0,
+   0.2
+  ],
+  "elbow.R": [
+   -0.25,
+   0,
+   0.2
+  ],
+  "hand.L": [
+   0.335,
+   0,
+   -0.03
+  ],
+  "hand.R": [
+   -0.34,
+   0,
+   -0.03
+  ],
+  "fingers.L": [
+   0.36,
+   0,
+   -0.18
+  ],
+  "fingers.R": [
+   -0.355,
+   0,
+   -0.18
+  ],
+  "hip.L": [
+   0.09,
+   0,
+   -0.02
+  ],
+  "hip.R": [
+   -0.09,
+   0,
+   -0.02
+  ],
+  "knee.L": [
+   0.15,
+   0,
+   -0.49
+  ],
+  "knee.R": [
+   -0.14,
+   0,
+   -0.49
+  ],
+  "ankle.L": [
+   0.2,
+   0,
+   -0.8
+  ],
+  "ankle.R": [
+   -0.2,
+   0,
+   -0.8
+  ]
+ },
+ "chunk": {
+  "head": 1.12,
+  "hand": 1.2,
+  "girth": 1.06
+ },
+ "lift": [
+  1.0,
+  1.0,
+  1.0
+ ],
+ "glow_min": [
+  2.0,
+  2.0,
+  -1.0
+ ],
+ "normal_smooth": 8,
+ "pad": 6,
+ "cap_holes": 0.3,
+ "cap_flat": true,
+ "ink_room": 0.02,
+ "slot_rules": [
+  {
+   "slot": "hair",
+   "absx": true,
+   "box": [
+    0,
+    0.2,
+    null,
+    null,
+    0.6,
+    null
+   ],
+   "hsv": [
+    null,
+    null,
+    null,
+    null,
+    0.0,
+    0.22
+   ]
+  },
+  {
+   "slot": "skin",
+   "absx": true,
+   "box": [
+    0,
+    0.13,
+    null,
+    0.0,
+    0.5,
+    0.78
+   ]
+  },
+  {
+   "slot": "cloth",
+   "absx": true,
+   "box": [
+    0.2,
+    0.5,
+    null,
+    null,
+    -0.02,
+    0.24
+   ],
+   "hsv": [
+    0.05,
+    0.17,
+    0.1,
+    0.45,
+    0.5,
+    1.0
+   ]
+  },
+  {
+   "slot": "metal",
+   "hsv": [
+    null,
+    null,
+    0.0,
+    0.12,
+    0.3,
+    0.95
+   ]
+  },
+  {
+   "slot": "leather",
+   "hsv": [
+    0.02,
+    0.13,
+    0.2,
+    0.75,
+    0.1,
+    0.55
+   ]
+  },
+  {
+   "slot": "cloth",
+   "hsv": [
+    0.93,
+    0.04,
+    0.35,
+    1.0,
+    0.12,
+    1.0
+   ]
+  },
+  {
+   "slot": "cloth",
+   "hsv": [
+    null,
+    null,
+    null,
+    null,
+    0.0,
+    0.25
+   ]
+  }
+ ],
+ "slot_vote": 4,
+ "fit_weights": true,
+ "weight_rules": [
+  {
+   "bone": "hips",
+   "box": [
+    -0.25,
+    0.45,
+    -0.5,
+    -0.06,
+    0.95,
+    1.75
+   ],
+   "hsv": [
+    [
+     0.02,
+     0.13,
+     0.2,
+     0.8,
+     0.1,
+     0.6
+    ],
+    [
+     0.0,
+     1.0,
+     0.0,
+     0.15,
+     0.3,
+     1.0
+    ]
+   ]
+  }
+ ],
+ "bow": {
+  "height": 1.25,
+  "depth": 0.13,
+  "tip": 0.78
+ },
+ "pieces": [
+  {
+   "name": "mask",
+   "slot": "metal",
+   "box": [
+    -0.11,
+    0.11,
+    0.0,
+    0.3,
+    1.46,
+    1.67
+   ],
+   "facing": -0.2,
+   "hsv": [
+    [
+     0.0,
+     1.0,
+     0.0,
+     0.14,
+     0.6,
+     1.0
+    ],
+    [
+     0.07,
+     0.18,
+     0.25,
+     0.95,
+     0.35,
+     1.0
+    ]
+   ],
+   "close": 2,
+   "push": 0.003
+  }
+ ]
+}
