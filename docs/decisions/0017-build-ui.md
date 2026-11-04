@@ -1,4 +1,4 @@
-# 0016: One build and decorate UI for the farm and the house
+# 0017: One build and decorate UI for the farm and the house
 
 - **Status:** accepted (owner, Nov 4 00:35 to 00:37 UTC)
 - **Date:** 2026-11-04
