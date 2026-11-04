@@ -24,7 +24,7 @@ This file wins over older relic names (the concept-pass list: Drowned Bell, Last
 | Kael (juggernaut; was Zedran) | the broken champion's collar (the demon blade is bound to it) | the shackle he tore out of the arena wall |
 | Hem (archer) | the stitched porcelain mask | literal: she sewed it from the masks she once made |
 | Breaker (bulwark) | the ship's compass | it led his refugees home across the ice |
-| Ryzz (mage) | the jar holding her first bolt | the storm that made her |
+| Ryzz (mage) | the first copper lightning rod she ever climbed | where the Wyrm's storm struck her |
 | Cinder (ashwick) | her cracked goggles | the last thing she saw before she drank the Blight |
 | Dredge (dredge) | the cracked porthole eye | the window his haunting looks through |
 | Pip (tender) | the hearth lantern | the shelter's fire lives in it |
@@ -38,7 +38,7 @@ This file wins over older relic names (the concept-pass list: Drowned Bell, Last
 - **Kael, the Unbroken (was Zedran):** the Tyrant's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain is his weapon. The Blight burned the magma cracks into his sword arm. A demon lives in his blade and in his mind, and it must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off.
 - **Hem, Dark Archer (was Pin):** the Tyrant's royal mask-stitcher, who sewed the Hunters' selves into their Masks. She deserted and now hunts the Tyrant's loyalists, leaving a red-threaded needle at every kill. Her own shadow came loose when she stitched her first Mask; it's only a wrong-looking shadow, not a pet.
 - **Breaker, Frozen Bulwark (was Bjorn):** a ferryman who carried refugees across the ice the night of the Sundering and went down with his ship so they could reach shore. The frozen sea remade him into a sea-ogre. He doesn't remember his old name, only the children's faces. The teddy bear belonged to the last child he saved.
-- **Ryzz, Storm Chaser (was Vireo):** a street kid struck by the Wyrm's storm in the market square. The bolt took her right eye (a lightning scar) and left the storm inside her. She steals storms, catches lightning in jars, and swears she'll give the first bolt back to the Wyrm.
+- **Ryzz, Storm Chaser (was Vireo):** a street kid struck by the Wyrm's storm in the market square. The bolt took her right eye (a lightning scar) and left the storm inside her. Her lightning burns hot pink. She chases storms, climbs to the highest spires, and throws lightning straight from her hands; she swears she'll give the Wyrm's bolt back to it someday.
 - **Cinder, Mad Pyromancer (was Linwick):** the Tyrant's court alchemist, ordered to distil the Wyrm's blood into fire. She drank a vial instead; it made her fireproof and a little mad. She brews "bottled Blight" with doodled-skull labels.
 - **Dredge, Broken Abomination:** a broken diving machine haunted by whatever drowned inside it; it hooks the living down to where it was lost.
 - **Pip, Little Lantern (was Moosh Moosh / Burple):** a fox-kit who tended the hearth of a Boki shelter. The hearth's fire lives in her lantern now, and she heals with it.
