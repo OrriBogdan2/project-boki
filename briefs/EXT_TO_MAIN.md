@@ -1239,3 +1239,6 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 ## 2026-11-04 07:46 UTC (S2): READY ext/arena-sign 245f904c (from main)
 - The arena's start sign said "X · RESET". It now says "BACKSPACE · RESET": reset is Backspace, and X is Fuse. The change is one line in arena.gd.
 - arena-check 86/0, health OK, style OK.
+
+## 2026-11-04 08:45 UTC (orchestrator): OWNER RENAME: Pin is now "Hem"
+- DECISION? **Pin is renamed "Hem"** (the Dark Archer; id archer unchanged; save/Net ids unchanged). Lore direction: the Tyrant's mask-stitcher turned assassin; a hem is the last stitch. Main, please fold into DECISIONS.md.

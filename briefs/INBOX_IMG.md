@@ -66,3 +66,6 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 
 ## 2026-11-04 07:10 UTC (orchestrator): Ryzz gets a lightning scar
 - Owner idea: her closed right eye is a scar, not a wink. In any Ryzz redo, paint a branching lightning-shaped scar through the right brow and cheek (faint blue glow), the eye closed or half-lidded. Cinder: draw her spear in her RIGHT hand from now on.
+
+## 2026-11-04 08:45 UTC (orchestrator): Pin is renamed "Hem"
+- Name her new files hem_*. Her redesign prompt (the Mask-Stitcher) is in briefs/specs/REDESIGN_PROMPTS_R3.md.

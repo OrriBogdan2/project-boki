@@ -11,7 +11,7 @@ Avoid: green hair, a purple suit, painted scar-smiles, or any famous clown villa
 DELIVER per option: splash 16:9 (floating over the abyss at night, pulling a victim through a void portal, bells ringing), portrait 1:1, turnaround front / 3-4 / back + a true SIDE profile (flat light, plain grey, the wisp hovering above the ground line), and a before/after.
 ```
 
-## 2. Pin, the Mask-Stitcher (Dark Archer)
+## 2. Hem (was Pin), the Mask-Stitcher (Dark Archer)
 ```
 Redesign Pin (Dark Archer). Keep her red-and-black palette, the assassin attitude, a slim athletic build with sex appeal, feet planted, and her living clawed shadow. Make 2 options.
 LORE: Pin was the Tyrant's royal mask-stitcher: she sewed the fallen Wardens' souls into their masks with silver needles and red thread. She knows exactly how to unpick them, so she deserted, and now she hunts the Tyrant's loyalists, "pinning" them the way she once pinned souls. Her shadow tore loose from her body when she stitched her first mask; it follows her as a hungry thing she keeps on a leash of thread. She leaves one red-threaded needle at every kill as a signature.

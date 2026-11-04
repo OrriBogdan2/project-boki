@@ -429,3 +429,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 ## 2026-11-04 08:30 UTC (orchestrator): Ostra art in; all 12 have round-2 art
 - ext/imagegen wardens_r2/ostra_{turnaround,side,portrait,splash}.webp + OSTRA_KIT.md. Queued for 3D after Vex. Modelling notes: the wisp lower body as a soft-alpha shader with a scrolling starfield (also inside the coat tears); the mask as its own mesh with an emissive mouth and eyes; the crescent halo follows the head bone; the strings + card shards are VFX/props; hover with a shadow gap.
 - **Main note:** the arena still shows "X · RESET" (seen in the Dredge shots); X is Fuse now: fix the label.
+
+## 2026-11-04 08:45 UTC (orchestrator): OWNER RENAME: Pin is now "Hem"
+- Add to the rename sweep (on top of rename-breaker or a small follow-up): display name, kit text, tooltips, picker, docs/heroes, wiki (gen_wiki), and "Pin" into --hero-title-check's old names. id archer unchanged. Art and model files: hem_* from now on.
