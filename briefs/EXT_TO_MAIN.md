@@ -1772,3 +1772,18 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - the primed tell is a small violet mark, no longer a blue disc.
 - **Checks:** all pass (ostra-combo 128/0).
 - **Shots:** warden-3d/ostra/b9_*.
+
+## 2026-11-04 15:18 UTC (S2): READY (for the art integ) ext/warden-3d-claire-b cdf23bfa: Claire 3D, b2
+- **Score (rubric):** about 76% close-up, about 60% at match zoom. Ships per 13:15 and keeps improving.
+- **What changed:**
+  - skates with ice blades on the ground (the ankle was fixed);
+  - scripted ram-curl horns going back and down;
+  - the face touched up (softer blush, bigger glowing eyes);
+  - wider wings, both visible from the front;
+  - a spade S-tail;
+  - a crystal spear;
+  - the left hand raised;
+  - geometry pigtails with ice ties;
+  - light_neutral_warm on the ice.
+- **Checks:** all pass (rimewright-combo 68/0, feet-forward assert).
+- **Shots:** warden-3d/claire/b2_*.
