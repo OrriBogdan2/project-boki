@@ -1091,3 +1091,11 @@ Keep the whole tutorial fast: each step one action, nothing optional in the midd
 
 ## sync85 shipped (main c00feadf)
 - tut84 complete: the scripted tutorial course (content/maps/tutorial.json "course", content/rules/tutorial.json). Tutorial logic moved out of match.gd into Tutorial/TutorialDrive/TutorialHud. Fixed: crouch sight used view_range(crouch) (shorter); now view_range()*1.25 in ALL matches. The tutorial checks live in --teammate-check --teammate-only=tutorial.
+
+## 2026-11-04 03:40 UTC: OWNER: build the Unmasked character TONIGHT, right after the heroes (ext)
+Owner: "why cant we build it tonight? after the heroes are done. 3d is fast with meshy, i just need to re-evaluate all the heroes before pushing". So ext takes this NEXT, once the owner signs off on the heroes (warden-models / mask-look). Spec is in DECISIONS ("Player character: the Unmasked"):
+1. The base model: one smooth, near-faceless humanoid (Meshy). Gender silhouettes, with height and build/thickness as morph or scale params. Simple face marks as textures or decals (eye shapes and expressions, brows, blush). No nose, race or species features. Outfits as swappable meshes. A colour.
+2. The creator (hatch.gd LOOK_ROWS and the "make yourself" step before the egg): replace race/face/hair/skin rows with Body (gender, height, build), Face marks, Outfit, Colour, and a Walk/idle style if cheap. Migrate old saves to the closest new look.
+3. In a match you're fully the Warden (mask-look). At home you're the Unmasked plus any kept mask features (just leave a hook for them, e.g. look["marks"] = [], for later).
+4. Text: "Mask" not "Mantle" in all player text touched.
+Main merges it as soon as it's READY. Report with screenshots.
