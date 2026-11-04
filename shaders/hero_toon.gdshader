@@ -49,6 +49,17 @@ uniform float top_light = 0.0;     // surfaces facing up (what the match camera 
 // a painted atlas (WardenGlb) at the match camera (~23 m): its colours this much brighter and richer, fading in
 // from 8 to 18 m away (close-ups keep the paint's own values)
 uniform float far_lift = 0.0;
+// a painted atlas (WardenGlb) carries the art's own colours, and the scene's light leans cool: its ambient (Look:
+// c4cbe6, the biomes' lavender and blue) is about half the light on such a model and turned skin lilac. ambient_cut
+// takes the scene's ambient off (through AO, which only scales ambient light) and own_ambient puts a warm-neutral
+// one back (linear, added as emission); light_neutral takes the hue out of cool lights only (the blue fill), so the
+// warm key keeps its warmth
+uniform float ambient_cut = 0.0;
+uniform vec3 own_ambient = vec3(0.0);
+uniform float light_neutral = 0.0;
+// near-black paint lifted to this linear floor (jacket, trousers and gun no longer merge to black at the match
+// camera); mid and light colours keep their value and saturation
+uniform float dark_lift = 0.0;
 // Imported low-poly models carry each corner's averaged (smooth) normal in TANGENT (Assets.mesh).
 // Blending toward it rounds off their facets in the shading while the silhouette stays crisp.
 uniform float soften = 0.0;
@@ -107,6 +118,10 @@ void fragment() {
 		c = mix(c, hot, glow_key ? heat : 1.0);
 	}
 	if (use_vertex_color || vertex_ao) { c *= COLOR.rgb; }
+	if (dark_lift > 0.0) {
+		float dl = dot(c, vec3(0.3, 0.59, 0.11));
+		c += max(vec3(dark_lift) - c, vec3(0.0)) * (1.0 - smoothstep(0.0, dark_lift * 2.5, dl));
+	}
 	// hand-painted variation: soft blotches of slightly lighter and darker paint
 	float n = vnoise(lpos.xz * 7.0 + lpos.y * 4.0) * 0.6 + vnoise(lpos.xy * 15.0 + 3.1) * 0.4;
 	c *= 1.0 + (n - 0.5) * 2.0 * paint;
@@ -161,7 +176,9 @@ void fragment() {
 	float fr = smoothstep(0.62, 0.84, 1.0 - nv) * mix(0.55, 1.0, side) * (1.0 - fog);
 	vec3 fcol = mix(fres_color.rgb, min(c * 1.7 + vec3(0.12), vec3(1.4)), fres_tint);
 	float up = smoothstep(0.35, 0.95, wnorm.y);
-	EMISSION = flash_color.rgb * flash * 0.9 + c * glow * heat + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
+	if (ambient_cut > 0.0) { AO = 1.0 - ambient_cut; }
+	EMISSION = flash_color.rgb * flash * 0.9 + c * glow * heat + c * own_ambient * (1.0 - fog)
+		+ rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
 		+ fcol * fr * fres * 0.55 + c * up * top_light * 0.18 * (1.0 - fog);
 	if (use_emit) {
 		float fl = vnoise(vec2(TIME * 7.0 + lpos.y * 5.0, lpos.x * 3.0 + lpos.z * 3.0));
@@ -172,11 +189,13 @@ void fragment() {
 }
 
 void light() {
+	vec3 lc = mix(LIGHT_COLOR, vec3(dot(LIGHT_COLOR, vec3(0.3, 0.59, 0.11))),
+		light_neutral * step(LIGHT_COLOR.r, LIGHT_COLOR.b));
 	if (!LIGHT_IS_DIRECTIONAL) {
 		// lamps and glows: plain falloff. (The cel shade floor below is only for the sun; on a lamp
 		// it lit whole screen clusters at once, which showed up as blocky squares at night.)
 		float pl = smoothstep(-0.1, 0.4, dot(NORMAL, LIGHT)) * ATTENUATION;
-		DIFFUSE_LIGHT += ALBEDO * LIGHT_COLOR / PI * pl;
+		DIFFUSE_LIGHT += ALBEDO * lc / PI * pl;
 	} else {
 		float ndl = dot(NORMAL, LIGHT);
 		float sh_att = mix(1.0, ATTENUATION, self_shadow);
@@ -193,17 +212,17 @@ void light() {
 			float lum = dot(al, vec3(0.3, 0.59, 0.11));
 			al = mix(max(mix(vec3(lum), al, 1.0 + shadow_sat), vec3(0.0)), al, band);
 		}
-		DIFFUSE_LIGHT += al * LIGHT_COLOR / PI * tone;
+		DIFFUSE_LIGHT += al * lc / PI * tone;
 		// a crisp rim on the edge that faces this light (key light rims gold, the fill rims cool)
 		float fr_l = 1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0);
 		float rim_l = smoothstep(0.7, 0.8, fr_l) * smoothstep(-0.25, 0.45, ndl);
-		DIFFUSE_LIGHT += rim_color.rgb * LIGHT_COLOR * rim_l * rim_amount * 0.24 * mix(0.45, 1.0, sh_att);
+		DIFFUSE_LIGHT += rim_color.rgb * lc * rim_l * rim_amount * 0.24 * mix(0.45, 1.0, sh_att);
 		vec3 hv = normalize(LIGHT + VIEW);
 		float nh = max(dot(NORMAL, hv), 0.0);
-		SPECULAR_LIGHT += LIGHT_COLOR * pow(nh, 16.0) * sheen * band;
+		SPECULAR_LIGHT += lc * pow(nh, 16.0) * sheen * band;
 		if (gloss > 0.0) {
 			float sp = pow(nh, mix(14.0, 110.0, gloss));
-			SPECULAR_LIGHT += LIGHT_COLOR * (smoothstep(0.42, 0.52, sp) * 0.55 + sp * 0.25) * gloss * band * sh_att;
+			SPECULAR_LIGHT += lc * (smoothstep(0.42, 0.52, sp) * 0.55 + sp * 0.25) * gloss * band * sh_att;
 		}
 	}
 }
