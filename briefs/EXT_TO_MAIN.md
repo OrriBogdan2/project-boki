@@ -2134,3 +2134,9 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - Rubric v2 (calibrated): full 72->74, face 79->80, match 68->69, dark 64->66. Checks 0 failures: warden-model, warden-glb, hero-combo 263, rig-standard, warden-stance, health --strict OK. 0 credits.
 - **Shared-code bug for main:** WardenGlb._far_look (scripts/heroes/warden_glb.gd) ignores `<slot>-<tag>` entries for far_* keys, so a per-tag far_glow is overwritten by the 0.6 default (Sable worked around it with a slot-wide key).
 - Shots: ext/hero-shots-s2 warden-3d/sable/s9_*. Open: hair doesn't frame the face (art: long white hair + black headband), off-hand crossbow lost at match zoom, flat fur collar.
+
+## 2026-11-04 (S2): READY TO MERGE (follow-up sync): Dredge r3l ext/warden-dredge-friend c71d91e9 (supersedes b9a1d26e r3k)
+- Hull moved to the art's tarnished olive bronze (match-zoom hue 30->35 deg, sat 0.71->0.51; art ~36/0.5) at the same value; five torn plate holes as geometry (two break the front outline); winch seated on a brass saddle; cracked blue-grey porthole with a small red pupil; a thin smoke wisp from a stack behind the winch. Limbs present in every view (verified).
+- **Touches shared code:** new `LDFx.wisp` (mode 13 in the shared ld_fx shader) + an `anchor_stack` model point; DredgeKit uses it. Additive (new mode only).
+- Rubric v2 (calibrated): full 64->68, face 62->68, match 58->61, dark 52->55. Checks 0 failures: warden-model, warden-glb, hero-combo 263, dredge-combo 93, rig-standard, warden-stance, health --strict OK. 0 credits.
+- Shots: ext/hero-shots-s2 warden-3d/dredge/r3l_*. Open: torn edges only a few pixels at match zoom, one smoke ribbon (art: both shoulders), pupil renders orange, no grille.
