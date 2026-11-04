@@ -83,7 +83,7 @@
 			"title": "Give your Boki a job",
 			"hints": {
 				"go": "Click {boki}, or press {details} beside it, to open its page. The Boki button on the bar below opens it from anywhere",
-				"page": "Pick a job here. Try {job}"
+				"page": "Pick a job here: try '{job}'. Or assign it at a work station"
 			},
 			"world": {
 				"go": "Your Boki"

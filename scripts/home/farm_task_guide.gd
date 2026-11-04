@@ -22,7 +22,7 @@ static func mark_dropdown(opt: OptionButton, rec: Dictionary) -> void:
 	_drop = opt
 	_boki = String(rec.get("name", "your Boki"))
 	var jobs := Work.list(rec)
-	_job = Work.name_of(String(jobs[0][0])) if not jobs.is_empty() else "any job"
+	_job = WorkView.job_label(String(jobs[0][0])) if not jobs.is_empty() else "Whatever it's best at"
 	pulse(opt, "▶")
 
 ## What the hint line fills in: {boki}, {job}.
