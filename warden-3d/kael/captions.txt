@@ -1,0 +1,10 @@
+s1_vs_turnaround_close.png: Kael stage 1 (Meshy 7.1 body + scripted greatsword, Warchain, hook and mane; no polish): the final kael turnaround above, the model close (front, 3/4, side, back, 3/4 back) below
+s1_vs_turnaround_game.png: the turnaround above, the model at the match camera (pitch 66, 23 m) below, true pixels then x3
+s1_vs_portrait.png: the kael portrait, the model's head from the front and 3/4 (scarf always on)
+s1_closeup.png / s1_closeup_front.png: head and shoulders, 3/4 and front: mane locks, collar, the forearm wrap
+s1_front_34.png / s1_back_34.png: full length, front + 3/4, back + 3/4 back: the hanging Warchain to ONE hook (right), the short broken chain on the left cuff
+s1_match.png / s1_match_x4.png: --arena=juggernaut --record=2 --arena-demo=pose --demo-zoom=1.0, and a x4 crop
+s1_moves_close_1.png: run, run (other foot)
+s1_poses_game.png: idle, run, attack, cast, ult at the match camera
+s1_vs_sheet.png: the concept sheet beside the model's front and 3/4 and the match strip
+(glow: white-hot core #fffaf0 / pale-gold edge #f2d48a from content/archetypes/juggernaut.json model_glow; the orange-vs-white shot was made optional and is not included)

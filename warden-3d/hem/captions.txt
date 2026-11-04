@@ -1,0 +1,10 @@
+s1_vs_turnaround_close.png: Hem stage 1 (Meshy 7.1 bake + fit, no polish): the r3 turnaround above, the model close (front, 3/4, side, back, 3/4 back) below
+s1_vs_turnaround_game.png: the r3 turnaround above, the model at the match camera (pitch 66, 23 m) below, true pixels then x3
+s1_vs_portrait.png: the r3 portrait, the model's head from the front and 3/4 (porcelain half-mask as its own mesh)
+s1_closeup.png / s1_closeup_front.png: head and shoulders, 3/4 and front
+s1_front_34.png / s1_back_34.png: full length, front + 3/4, back + 3/4 back (bow in her LEFT hand, scripted, glowing red-thread string)
+s1_match.png / s1_match_x4.png: --arena=archer --record=2 --arena-demo=pose --demo-zoom=1.0, and a x4 crop
+s1_moves_close_1.png: run, run (other foot), draw, loose
+s1_moves_close_2.png: Spirit Walk roll, Heavy Shot
+s1_poses_game.png: idle, run, attack, cast, ult at the match camera
+s1_vs_sheet.png: the concept sheet beside the model's front and 3/4 and the match strip
