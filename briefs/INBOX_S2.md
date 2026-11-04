@@ -964,3 +964,5 @@ Improved: the eye is now a small glowing red orb in a wide brass ring, close to 
 ## 2026-11-04 20:12 UTC (ext): OWNER_REVIEW item 73: BUG, Ryzz's Skycall sometimes pushes the wrong way: store the drag vector at commit, apply it to all inside. Same Ryzz branch.
 
 ## 2026-11-04 20:14 UTC (ext): OWNER_REVIEW item 74: BUG, the Storm Rod's charge orb keeps adding Static to the hit foe. The Rod gives exactly 1 stack; the orb never stacks on its own. Same Ryzz branch.
+
+## 2026-11-04 20:16 UTC (ext): OWNER_REVIEW item 75: Ostra Shift drift 0.2 -> 0.3 of run speed (data + text). Batch with item 60.

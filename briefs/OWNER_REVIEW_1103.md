@@ -569,3 +569,8 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Cause (our data): every foe the Rod hits leaves a **charge orb at the impact that zaps nearby foes with Static** — so the foe just hit, standing in it, gets extra stacks over the next moments.
 - Fix: the Rod hit gives exactly **1** Static (like every other source, per the passive). The charge orb must not add Static to anyone on its own; it stays only as a pickup/burst object for Wirerun and Skycall (items 71/73). If the source data says the orb does something else (check `briefs/supervive-data` Joule RMB), follow that, but never passive stacking.
 - Assert: a Rod hit on a dummy standing still leaves exactly 1 Static for the following 4 s (no further stacks without another hit). Same Ryzz branch as items 70–73.
+
+## 75. Ostra (Void Jester): move a bit faster while his Shift lantern is in flight (owner, 19:10 UTC Nov 4)
+- Owner: "a little too slow during Shift; slightly faster than current is good."
+- ostra.json dash `fly_slow` 0.2 (he drifts at 20% of run speed while hovering) -> **0.3**. Update the desc text ("drifting at 30% speed") and item 17's note. Data + text only.
+- Assert: planar speed during the lantern flight ≈ 30% of run speed. Sonnet, quick; batch with item 60 (Ostra LMB).
