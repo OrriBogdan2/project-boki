@@ -54,3 +54,6 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 
 ## 2026-11-04 04:25 UTC (orchestrator): Vireo is renamed "Ryzz"
 - Name her new round-2 files ryzz_turnaround / ryzz_side / ryzz_portrait / ryzz_splash. Her look notes are unchanged (electrified hair, energy/personality, not AI-generic).
+
+## 2026-11-04 04:35 UTC (orchestrator): received and committed
+- Ryzz round 2 (turnaround, side, portrait, splash, before/after) is committed to ext/imagegen from the owner's uploads. Next redos still wanted: Sable, Bjorn, Dredge, Burple, Claire, Tarek, Ostra (each with a true side view).

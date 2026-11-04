@@ -358,3 +358,7 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 04:25 UTC (orchestrator): OWNER RENAME: Vireo is now "Ryzz"
 - Do a rename sweep like rename-burple: display name, kit text, docs/heroes, wiki (gen_wiki), and the old name into --hero-title-check. id mage unchanged. New art files are named ryzz_*. Small branch, READY to main.
+
+## 2026-11-04 04:35 UTC (orchestrator): RYZZ (was Vireo) round-2 art is in: add her to the 3D fan-out
+- origin/ext/imagegen: docs/art/gen/wardens_r2/ryzz_{turnaround,side,portrait,splash}.webp. Approved for 3D (the owner approved all Wardens). Source = the turnaround (spear in her RIGHT hand) + the side view. Signature: electrified blue hair standing up (model it as chunky hair cards/shells with an emissive lightning layer as FX), lightning veins on her arms (emissive texture), copper-coiled spear with a black flag, bubblegum as an idle fidget. Queue: Vex, Zedran, Pin, Cinder, then Ryzz.
+- The rename to Ryzz (04:25) applies to the art and model files: ryzz_*.

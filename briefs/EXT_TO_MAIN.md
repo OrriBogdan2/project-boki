@@ -1156,3 +1156,6 @@ Ask S2 for one combined `ext/kits-integ` if merging seven is too slow (they did 
   - r2_gameplay_match.png and r2_gameplay_zoom.png are now in the Arena on bright grass, with no bubbles or nameplates over her.
 - Branch: ext/warden-meshy f56db4ff. Checks pass, and no extra credits were used.
 - Honest read: close up she matches the art well. At match zoom she reads by the streak, the vents and her arm, but her body is darker than the grass.
+
+## 2026-11-04 04:35 UTC (orchestrator): Ryzz art landed
+- Ryzz (was Vireo) round 2 is on ext/imagegen (wardens_r2/ryzz_*), going to 3D. Main: the rename sweep note is at 04:25 above.
