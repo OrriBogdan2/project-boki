@@ -733,3 +733,18 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - **The first real expedition:** **no tutorial banners** at all; only the normal HUD, plus a single short reminder card if the player does something wrong (e.g. "Chests need a key"). Any remaining lessons move into the Trial or into contextual one-line tips the first time something happens, and each tip shows once and goes into a Tips log.
 - This reframes items 85/92's tutorial fixes: their text and step fixes carry over into the Trial's cards.
 - Logged for whoever has budget. It's the match tutorial (tutorial.gd/tutorial_drive.gd/tutorial_hud.gd), main's tut84 code.
+
+## 94. Performance pass: the game is laggy (owner, 23:16 UTC Nov 4; high priority)
+- Owner: "it's very laggy; the game needs to be more optimized." (Also item 88: lag on the Mask cards.) The lag got worse with the 3D Hunters.
+- **Measure first:**
+  - Add a toggleable performance overlay (Settings > Video or a debug key): FPS, frame time (ms, 1% low), draw calls, triangles on screen, and the top script costs.
+  - Add a scripted benchmark run (a fixed 60 s match with 4 Hunters, Boki, a fight, outposts and particles) that logs frame times, so before/after can be compared. On the server it runs headless and software-rendered, so its absolute numbers mean little; compare relative costs there, and ask the owner for one capture on his PC (GPU).
+- **Likely big wins, in order:**
+  1. **3D Hunter meshes** (Meshy outputs are often 50–200k triangles each): decimate to a game budget (~10–15k tris per Hunter, less for Boki) with clean LODs (full / half / quarter by distance); one material and one atlas per Hunter where possible; textures compressed (VRAM/BPTC), mipmapped, and ≤1–2K.
+  2. **Shadows and lights:** fewer shadow-casting lights, a sensible shadow distance and atlas size, no per-ability shadow lights.
+  3. **Particles and VFX:** cap counts, prefer GPUParticles or simpler sprites, and kill always-on ambient particles (outposts, item 86; motes).
+  4. **Scripts:** profile per-frame GDScript (e.g. Match._separate pair loops, HUD rebuilds every frame, path/bot ticks); throttle non-critical updates (HUD text, minimap) to 10–20 Hz; avoid allocating in _process.
+  5. **UI previews:** SubViewports (Mask cards, portraits) render only when visible or focused.
+  6. **Quality presets:** a Low/Medium/High preset that actually changes render scale, shadows, particles and LOD distance; default to Medium.
+- **Target:** a steady 60 fps on a mid-range PC at 1080p Medium in the benchmark, and no frame over 33 ms in normal play. Report before/after numbers per change.
+- Logged for whoever has budget; it touches shared files (models, main, match), so it's one careful branch.
