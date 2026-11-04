@@ -16,3 +16,24 @@ s2_poses_game.png: idle, run, attack, cast, ult at the match camera
 s2_moves_1.png: the run, frame by frame, close
 s2_vs_s1.png: stage 1 above, stage 2 below (close turnaround)
 s2_match.png: Arena match frame (--arena=<id> --record=2 --arena-demo=pose --demo-zoom=1.0)
+b1_vs_turnaround.png: Phase B round 1 (RECIPE_95): the turnaround above, the model close below (front, 3/4, side, back, 3/4 back): skates on the ground with ice blades, ram horns above the head, pigtails hanging, wings x1.45, left hand raised by her shoulder
+b1_vs_turnaround_game.png: the turnaround above, the model at the match camera (true pixels, then x3)
+b1_closeup_vs_art.png: claire_face and the portrait beside the model's head and shoulders, front (blush softened, freckles, bigger glowing pale-blue eyes)
+b1_closeup_34_vs_art.png: the portrait and claire_head_sheet beside the model at 3/4 (slate ram curls back and down round the ear, tips forward at cheek height)
+b1_front_34.png: full length, front and 3/4
+b1_back_34.png: back and 3/4 back (the spaded S-curve tail, long hair to mid-back)
+b1_closeup.png / b1_closeup_front.png: head and shoulders, 3/4 and front
+b1_turnaround_close.png: the close turnaround alone
+b1_poses_game.png: idle, run, attack, cast, ult at the match camera
+b1_moves_close_1.png: the run, frame by frame, close (skates, spear carry, wings)
+b1_match.png: Arena match frame (--arena=rimewright --record=2 --arena-demo=pose --demo-zoom=1.0)
+b1_match_x4.png / b1_match_vs_art.png: the match frame cropped round her, x4 (nearest), beside the portrait
+b1 self-score close-up ~74: silhouette 12/15, face 13/20, hair 6/10, props 15/20, palette 12/15, clean paint 7/10, outfit 9/10. Match zoom ~58: silhouette 14/25, signature colours 14/25, values 14/20, props 11/20, artefacts 5/10.
+b2_vs_turnaround.png: round 2: the turnaround above, the model close below: the front pigtails rebuilt as geometry (thick wavy navy locks, pale ice-ring ties at the collarbone) over the scan's shredded strands
+b2_vs_turnaround_game.png: the turnaround above, the model at the match camera (true pixels, then x3)
+b2_closeup_vs_art.png / b2_closeup_34_vs_art.png: the face sheet, portrait and head sheet beside the model's head and shoulders, front and 3/4
+b2_front_34.png / b2_back_34.png / b2_closeup.png / b2_closeup_front.png / b2_turnaround_close.png: full length and close views
+b2_poses_game.png: idle, run, attack, cast, ult at the match camera; b2_moves_close_1.png: the run, close
+b2_match.png: Arena match frame, clean (--arena=rimewright --record=2 --arena-demo=pose --demo-zoom=1.0 --no-tips --demo-at=-4.5,0)
+b2_match_x4.png / b2_match_vs_art.png: the match frame cropped round her, x4 (nearest), beside the portrait
+b2 self-score close-up ~76: silhouette 12/15, face 13/20, hair 7/10, props 15/20, palette 12/15, clean paint 7/10, outfit 10/10. Match zoom ~60: silhouette 15/25, signature colours 15/25, values 14/20, props 11/20, artefacts 5/10.
