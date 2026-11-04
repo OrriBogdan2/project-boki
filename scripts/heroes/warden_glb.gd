@@ -297,7 +297,7 @@ static func _far_look(m: ShaderMaterial, src: BaseMaterial3D, slot: String, tag:
 		if not set_by.has(k):
 			m.set_shader_parameter(k, FAR_LOOK[k])
 	var ink := m.next_pass as ShaderMaterial
-	if ink and bool(ink.get_shader_parameter("ink_mask")):
+	if ink and ink.get_shader_parameter("ink_mask") == true:
 		var no_ink: Array = own.get("no_ink", [])
 		if tag in no_ink or slot in no_ink:
 			m.next_pass = null
