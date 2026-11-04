@@ -1464,3 +1464,7 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 2. `ext/farm-hob` @ 8e82638f (ext): Hob, the 12-step farm tutorial, Goals, water crops, river brush, Challenge House by wood/stone. Save v10 (8->9 placeholder for mantle-look).
 3. Coming from ext: `ext/build-ui` (build/decorate revamp; on farm-hob; Save v11), pending one polish pass + its full suite.
 Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
+
+## 2026-11-04 11:15 UTC (ORCH): owner decisions
+- DECISION? Breaker's model is 1.5x a medium hunter (owner, 11:15 UTC). The hitbox stays the heavy class's 0.50 m.
+- Owner will handle the kits-integ / farm-hob merges himself shortly.

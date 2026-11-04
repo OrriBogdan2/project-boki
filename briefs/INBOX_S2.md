@@ -497,3 +497,6 @@ Credits: ~8 x 70-110 ≈ 600-900; balance 4,993. Post per-Warden "OWNER: review 
 - Must hold in every view: her RIGHT eye closed by a glowing pink fern-shaped scar (a permanent wink); short twin pigtails with one copper-coil tie each and zigzag ends (keep them SHORT: long twin tails read as a famous existing character); exactly 3 copper rods on the back, the middle one scorched and bent (her relic); plunging bolt-shaped keyhole cutout on the corset with pink neon piping; glowing choker charm; hazard bands on wrists and boot tops.
 - Proportions: slimmer and longer-legged than the art (~8 heads), adult. Pink emissive on the scar, charm, corset piping and forearm veins (a switchable emissive like Kael's).
 - Queue: after the current fan-out (stage 1). Use the r3 recipe; post review shots under warden-3d/ryzz/ as usual.
+
+## 2026-11-04 11:15 UTC (ORCH): Breaker height = 1.5x (owner)
+- Owner: make Breaker 1.5x a medium hunter (was 1.32x in stage 1). Keep the heavy class's 0.50 m hitbox unless the kit says otherwise; re-check the shield and hammer holds at the new scale. Vex r3c review is with the owner now.
