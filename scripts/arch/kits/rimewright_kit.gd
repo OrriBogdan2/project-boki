@@ -40,7 +40,6 @@ const SLAB_LIFE := 1.2         # s a plate stays before it fades
 const SHATTER_R := 2.7         # m, the Shatter's spike starburst (about 1.5 body heights)
 const THROW_T := 0.16          # s from letting go of RMB to the release: the arm draws back, then whips (tm_spear)
 const SPEAR_ARC := 0.9         # m the thrown spear's flight bows above the straight line from hand to ground
-const LAND_KICK_R := 7.0       # m: a landing this close to her gives her camera a small kick
 const CARRY_T := 0.5           # s a skate out of Rimelock holds its push-off speed before easing to the skate's
 
 func _setup() -> void:
@@ -538,10 +537,9 @@ func _release_spear() -> void:
 	m.sfx("rime_lance", h.pos, 0.0, 0.7)          # pitched down: a heavy shaft, not a dart
 	m.sfx("rime_wall_tell", h.pos, -6.0, 0.6)
 	m.fx.burst(start, Color("dffcff"), 8, 3.0, 0.25, 2.0, 0.8, Vector3(dir.x, 0.2, dir.y), 25.0)
-	Feel.shake(m, "cast", h, h.pos)
 
 ## The spear lands: shards burst up, the slow zone (its real radius) spreads with a spinning crystal and a
-## chill puff, a small kick if it is near her; 1.8 s later it detonates.
+## chill puff; 1.8 s later it detonates.
 func _spear_land(at0: Vector3) -> void:
 	var ld: Dictionary = rmb_def()["lance"]
 	var at := ground(at0)
@@ -552,8 +550,6 @@ func _spear_land(at0: Vector3) -> void:
 	m.fx.burst(at + Vector3(0, 0.4, 0), Color(0.9, 1.0, 1.0, 0.6), 10, 1.2, 0.8, -1.0, 2.2)      # the chill puff
 	m.sfx("rime_zone", at, -1.0, 0.85)
 	m.sfx("rime_shard", at, -4.0, 0.6)
-	if h.flat_dist(at) < LAND_KICK_R:
-		Feel.shake(m, "t2", h, at)
 	net_ring(at, float(ld["zone_r"]), col_of(rmb_def()))
 
 func _tick_zones(dt: float) -> void:
@@ -593,7 +589,7 @@ func _detonate(at: Vector3) -> void:
 	m.fx.spark(at + Vector3(0, 0.4, 0), Vector3.UP, Color("9af0ff"), 22, 11.0, 70.0, 0.5, 14.0, 1.3)
 	m.sfx("rime_burst", at, 1.0, 0.9)
 	m.sfx("rime_splinter", at, -3.0, 0.75)
-	Feel.shake(m, "t4", h, at)
+	Shake.incoming_big(m, at, 0.6, h)
 	play_soft("tm_clench")
 	for f in foes_in(at, rr):
 		f.hurt(
@@ -660,7 +656,6 @@ func _raise_wall(dir: Vector2, travel_d: float) -> void:
 	e_t = float(ed["time"])
 	m.sfx("rime_wall", at, -1.0, 1.0)
 	m.fx.burst(at + Vector3(0, 0.4, 0), Color("dffcff"), 24, 5.0, 0.45, 8.0, 1.2)
-	Feel.shake(m, "t2", h, at)
 
 func e_recastable() -> bool:
 	return not wall.is_empty() and bool(wall.get("sliding", false))
@@ -793,7 +788,6 @@ func _start_rime() -> bool:
 	m.fx.word(h.pos + Vector3(0, 3.0, 0), "RIMELOCK", col_of(x_def()), true)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("dffcff"), 24, 4.0, 0.4, 2.0, 1.1)
 	net_ring(h.pos, float(x_def()["radius"]), col_of(x_def()))
-	Feel.shake(m, "cast", h, h.pos)
 	return true
 
 

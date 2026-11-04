@@ -158,7 +158,6 @@ func slam(c: float, at_feet: bool) -> void:
 	m.fx.flash(at + Vector3(0, 0.5, 0), Color("ff8a2c"), 0.6 + 0.3 * c, 0.08)
 	KitLooks.of(m).impact(at, r, c, float(s["scorch_t"]))
 	m.sfx("br_slam", at, 0.0, 1.0)
-	Feel.shake(m, "t3" if c > 0.5 else "t2", h, at)
 	k.net_ring(at, r, Color("ff5a2a"))
 	var gained := false
 	for f in k.foes_in(at, r, 3.2):

@@ -90,27 +90,27 @@ const PAD_FOLLOW := 0.55
 
 ## Where each kind of weapon sits under Aim while aimed (pos), the relaxed carry (low: pitch, yaw),
 ## and where the hands go on it (gr: the trigger hand, gl: the support hand; Vector3.INF = free).
-## Recoil: kick (pitch), push (back), shake.
+## Recoil: kick (pitch), push (back), jitter (the gun wobbles in the hand).
 const HOLDS := {
-	"rifle": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.38), "gr": Vector3(0, -0.07, 0.04), "gl": Vector3(0, -0.06, -0.2), "kick": 0.12, "push": 0.05, "shake": 0.2},
-	"burst_rifle": {"pos": Vector3(0.12, -0.14, -0.3), "low": Vector2(-0.48, 0.36), "gr": Vector3(0, -0.08, 0.0), "gl": Vector3(0, -0.06, -0.16), "kick": 0.14, "push": 0.05, "shake": 0.15},
-	"smg": {"pos": Vector3(0.12, -0.13, -0.32), "low": Vector2(-0.45, 0.32), "gr": Vector3(0, -0.09, -0.02), "gl": Vector3(0, -0.07, -0.16), "kick": 0.07, "push": 0.03, "shake": 0.5},
-	"sniper": {"pos": Vector3(0.12, -0.12, -0.26), "low": Vector2(-0.55, 0.42), "gr": Vector3(0, -0.06, 0.04), "gl": Vector3(0, -0.05, -0.22), "kick": 0.42, "push": 0.12, "shake": 0.0},
-	"shotgun": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.38), "gr": Vector3(0, -0.07, 0.04), "gl": Vector3(0, -0.08, -0.22), "kick": 0.3, "push": 0.1, "shake": 0.0},
-	"minigun": {"pos": Vector3(0.17, -0.28, -0.3), "low": Vector2(-0.22, 0.14), "gr": Vector3(0, -0.15, 0.04), "gl": Vector3(-0.05, 0.11, -0.1), "kick": 0.03, "push": 0.02, "shake": 1.0},
-	"finger": {"pos": Vector3(0.14, -0.02, -0.46), "low": Vector2(-0.35, 0.2), "gr": Vector3(0, 0, 0.0), "gl": Vector3.INF, "kick": 0.3, "push": 0.08, "shake": 0.0},   # Vireo: no gun, the arm out, a finger pointed
-	"_gun": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.36), "gr": Vector3(0, -0.08, 0.02), "gl": Vector3(0, -0.06, -0.18), "kick": 0.15, "push": 0.05, "shake": 0.2},
+	"rifle": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.38), "gr": Vector3(0, -0.07, 0.04), "gl": Vector3(0, -0.06, -0.2), "kick": 0.12, "push": 0.05, "jitter": 0.2},
+	"burst_rifle": {"pos": Vector3(0.12, -0.14, -0.3), "low": Vector2(-0.48, 0.36), "gr": Vector3(0, -0.08, 0.0), "gl": Vector3(0, -0.06, -0.16), "kick": 0.14, "push": 0.05, "jitter": 0.15},
+	"smg": {"pos": Vector3(0.12, -0.13, -0.32), "low": Vector2(-0.45, 0.32), "gr": Vector3(0, -0.09, -0.02), "gl": Vector3(0, -0.07, -0.16), "kick": 0.07, "push": 0.03, "jitter": 0.5},
+	"sniper": {"pos": Vector3(0.12, -0.12, -0.26), "low": Vector2(-0.55, 0.42), "gr": Vector3(0, -0.06, 0.04), "gl": Vector3(0, -0.05, -0.22), "kick": 0.42, "push": 0.12, "jitter": 0.0},
+	"shotgun": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.38), "gr": Vector3(0, -0.07, 0.04), "gl": Vector3(0, -0.08, -0.22), "kick": 0.3, "push": 0.1, "jitter": 0.0},
+	"minigun": {"pos": Vector3(0.17, -0.28, -0.3), "low": Vector2(-0.22, 0.14), "gr": Vector3(0, -0.15, 0.04), "gl": Vector3(-0.05, 0.11, -0.1), "kick": 0.03, "push": 0.02, "jitter": 1.0},
+	"finger": {"pos": Vector3(0.14, -0.02, -0.46), "low": Vector2(-0.35, 0.2), "gr": Vector3(0, 0, 0.0), "gl": Vector3.INF, "kick": 0.3, "push": 0.08, "jitter": 0.0},   # Vireo: no gun, the arm out, a finger pointed
+	"_gun": {"pos": Vector3(0.12, -0.15, -0.3), "low": Vector2(-0.5, 0.36), "gr": Vector3(0, -0.08, 0.02), "gl": Vector3(0, -0.06, -0.18), "kick": 0.15, "push": 0.05, "jitter": 0.2},
 	"sword": {"gr": Vector3(0, 0, 0.06), "gl": Vector3.INF},
 	"great": {"gr": Vector3(0, 0, 0.02), "gl": Vector3(0, 0, 0.15)},
 	"twin": {"gr": Vector3(0.06, 0, -0.02), "gl": Vector3(-0.1, -0.06, -0.08)},
 	# nothing held: both hands are free and the kit's moves cast from them (Moosh Moosh)
 	"palm": {
 		"pos": Vector3(0.14, -0.25, -0.1), "low": Vector2.ZERO, "gr": Vector3.ZERO, "gl": Vector3.INF,
-		"kick": 0.0, "push": 0.0, "shake": 0.0},
+		"kick": 0.0, "push": 0.0, "jitter": 0.0},
 	# a gauntlet on each fist (Tarek): carried like a gun, but it rides the hand wherever a move sends it
 	"fist": {
 		"pos": Vector3(0.14, -0.2, -0.26), "low": Vector2(-0.35, 0.2), "gr": Vector3(0, -0.02, 0.0), "gl": Vector3.INF,
-		"kick": 0.1, "push": 0.05, "shake": 0.0, "fist": true
+		"kick": 0.1, "push": 0.05, "jitter": 0.0, "fist": true
 	},
 }
 
@@ -1295,7 +1295,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		if not km.is_empty(): ap += float(km["gp"])
 		gpos.z += kick / maxf(0.01, float(hd.get("kick", 0.15))) * float(hd.get("push", 0.05)) * 0.6
 		if shake_t > 0.0 or (hold == "minigun" and fired < 0.15):
-			var sh := float(hd.get("shake", 0.2)) * 0.012
+			var sh := float(hd.get("jitter", 0.2)) * 0.012
 			gpos += Vector3(sin(t * 91.0) * sh, cos(t * 77.0) * sh, 0.0)
 		# keep the gun on target while the body leans and twists
 		var lock := lerpf(0.5, 0.95, aim_k) * (1.0 - carry_k) * (1.0 - float(km.get("wf", 0.0)))

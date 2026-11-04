@@ -628,7 +628,6 @@ func _pick(i: int) -> void:
 ## inside get stronger. No flashes or bursts: it's a small, close moment (docs/POSITIONING.md).
 const TAPS := 7
 var taps := 0
-var cam_shake := 0.0
 func _tap_egg() -> void:
 	if taps >= TAPS or chosen < 0:
 		return
@@ -652,7 +651,6 @@ func _tap_egg() -> void:
 	# your knock, then its knock back from inside
 	Sfx.play("thump", null, -16.0 + 4.0 * k, 0.04, 1.3)
 	get_tree().create_timer(0.22).timeout.connect(func(): Sfx.play("thump", null, -20.0 + 8.0 * k, 0.05, 1.6 - 0.2 * k))
-	cam_shake = 0.004 + 0.02 * k
 	cam_to = Vector3(0, 2.5, 5.4).lerp(Vector3(0, 1.9, 4.2), k)
 	if title:
 		title.text = ["Knock on the shell", "Something stirs...", "It knocks back.", "Again, gently.", "It's pushing.", "It's cracking.", "Nearly.", "Here it comes."][mini(taps, 7)]
@@ -719,9 +717,6 @@ func _process(delta: float) -> void:
 			var hs := 1.12 if i == hover else 1.0
 			var hn: Node3D = eggs[i]["holder"]
 			hn.scale = hn.scale.lerp(Vector3.ONE * hs, minf(1.0, delta * 10.0))
-	if cam_shake > 0.0:
-		cam.position += Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)) * cam_shake
-		cam_shake = maxf(0.0, cam_shake - delta * 1.8)
 	if stage == "warm" and chosen >= 0:
 		if auto_warm and int(t * 3.0) != int((t - delta) * 3.0):
 			_tap_egg()          # test hook: taps by itself

@@ -84,7 +84,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		a["cross_t"] = float(a.get("cross_t", 12.0)) - dt
 		if (h.grounded and m.world.island_of(h.pos.x, h.pos.z) == int(L["to"])) or float(a["cross_t"]) <= 0.0:
 			a.erase("cross"); a.erase("cross_t")
-		# (gives up only well under the landing: dipping under the far lip is normal on a climb, the glider's lift under the lip carries it up; at 1.2 m a bot bailed mid-glide and never crossed a climbing gap)
+		# (gives up only well under the landing: dipping under the far lip is normal on a climb, the glider's
+		# lift under the lip carries it up; at 1.2 m a bot bailed mid-glide and never crossed a climbing gap)
 		elif not h.grounded and a.get("cross_go", false) and not (m.world.is_void(h.pos.x, h.pos.z) and h.pos.y < land.y - 4.0 and h.vel.y < 0.0):
 			inp["move"] = tol.normalized()
 			# over the landing: fold the glider and drop onto it

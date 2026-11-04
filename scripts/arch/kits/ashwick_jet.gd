@@ -215,9 +215,6 @@ func _liftoff_fx() -> void:
 	m.fx.burst(at + Vector3(0, 0.3, 0), Color("ff6a3a"), 26, 6.0, 0.45, 3.0, 1.2)
 	AimKit.circle(h, "x_burst", {"self": true, "r": r, "all": true, "dur": 0.15, "col": k.col_of(x), "hot": 0.4})
 	m.sfx("lw_jet", h.pos, -1.0, 1.0)
-	Feel.shake(m, "t2", h, h.pos)
-	if h.is_local() and m.cam:
-		m.cam.punch(0.05)
 	k.net_ring(at, r, k.col_of(x))
 
 ## The bellows jet: a hot core at his back and embers blown down behind him.

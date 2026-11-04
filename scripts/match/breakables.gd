@@ -124,7 +124,6 @@ func _explode(at: Vector3, ex: Dictionary, by: Ent, from_net: bool) -> void:
 	_fx.shatter(c, "metal", int(spec("keg")["chunks"]), radius * BLAST_SPEED / 2.6)
 	_fx.scorch(at, radius * SCORCH_SCALE)
 	_m.sfx("boom", c, 2.0, 0.85)
-	_m.shake(float(ex["shake"]), c)
 	_hitstop(by, HITSTOP * 1.5)
 	if from_net:
 		return

@@ -390,7 +390,6 @@ func _bolt() -> void:
 		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 2.6, 0.55)
 		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
 		m.sfx("dj_bolt_emp", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
-		if h.is_local() and m.cam: m.cam.add_trauma(0.12)
 	else:
 		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_GOLD, 0.9, 0.3)
 		fx().star(muzzle, BOLT_GOLD, 0.6, 0.1, BOLT_CORE)        # the gold muzzle star at the throwing hand
@@ -567,7 +566,7 @@ func _primed_hit(t: Ent) -> void:
 
 ## The empowered hit and the reset, in her colours: a blue-white star and an upright blade arc on the target (the
 ## source's red-white flash with its blue chakram), VAULT RESET over them, a cyan four-point star at her hip
-## where the Vault is back; the T4 shake, a punch the way it flew, its own sound.
+## where the Vault is back, its own sound (no self-shake: item 50).
 func _reset_fx(t: Ent) -> void:
 	var at := t.pos + Vector3(0, 1.0, 0)
 	var dir := Vector2(t.pos.x - h.pos.x, t.pos.z - h.pos.z)
@@ -577,10 +576,6 @@ func _reset_fx(t: Ent) -> void:
 	m.fx.word(t.pos + Vector3(0, 2.7, 0), "VAULT RESET", res_col(), true)
 	fx().star(h.pos + Vector3(0, 0.9, 0), GHOST, 1.0, 0.24, Color.WHITE)
 	m.sfx("pay_cashin", at, -2.0, 1.0)
-	Feel.shake(m, "t4", h, t.pos, t)
-	if h.is_local():
-		Oomph.punch_dir(m, dir.normalized(), 0.28)
-		if m.cam: m.cam.punch(0.04)
 	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
@@ -771,7 +766,6 @@ func _tangle(f, other: Ent) -> void:
 	m.fx.word(mid + Vector3(0, 2.6, 0), "TANGLED", col, true)
 	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("ff9be8"), 1.2, 0.3)
 	m.sfx("ab_stun", mid, -2.0, 1.1)
-	Feel.shake(m, "t3", h, mid, other)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
 
 # ------------------------------------------------------------------ E: Shadow Knife
@@ -896,9 +890,6 @@ func _blink(to: Vector3) -> void:
 	m.sfx("dj_blink", to, -3.0, 1.0)
 	m.fx.ring(to, 1.0, GHOST, 0.22)
 	net_bolt(from + Vector3(0, 0.9, 0), to + Vector3(0, 0.9, 0), GHOST)
-	if h.is_local():
-		Oomph.punch_dir(m, Vector2(to.x - from.x, to.z - from.z), 0.25)
-		if m.cam: m.cam.punch(0.03)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

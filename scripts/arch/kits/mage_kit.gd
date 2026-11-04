@@ -603,8 +603,6 @@ func _coil(k: float) -> void:
 		fx().arc(a, a + Vector3(dir.x, 0, dir.y) * rng, TEAL, GOLD, 0.7, 0.2)
 	m.fx.flash(a, GOLD, 0.9, 0.08)
 	m.sfx("vv_rod_throw", h.pos, -1.0, 1.0 + 0.2 * (1.0 - k))
-	Feel.shake(m, "t2", h, h.pos)
-	if h.is_local(): Oomph.punch_dir(m, dir, 0.1 + 0.12 * k)
 
 func _rod_end(at: Vector3) -> void:
 	fx().star(at, TEAL, GOLD, 1.0, 0.16)
@@ -844,7 +842,6 @@ func _strike(s: Dictionary) -> void:
 	m.fx.burst(at + Vector3(0, 0.5, 0), GOLD, 22, 6.0, 0.45, 6.0, 1.2)
 	m.fx.flash(at + Vector3(0, 1.0, 0), GOLD, 1.8, 0.12)
 	m.sfx("vv_sky_strike", at, 0.0)
-	Feel.shake(m, "t3", h, at)
 	play("mage_e_snap")
 	var delivery := {"type": "burst", "origin": "here", "radius": float(ed["radius"])}
 	var stg := stage("e", {"delivery": delivery, "effects": [{"type": "damage", "amount": float(ed["dmg"])}]})

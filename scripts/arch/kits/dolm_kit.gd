@@ -154,7 +154,6 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 	KitLooks.of(m).impact(AimMode.ground(m, at), blast * 0.8, 0.4, 0.6)
 	m.fx.flash(at + Vector3(0, 0.6, 0), Color("ff9a3c"), 0.7, 0.08)
 	m.sfx("br_burst", at, -3.0, 1.0)
-	Feel.shake(m, "t2", h, at)
 	net_ring(at, blast, Color("ff5a2a"))
 	var slow_t := float(rd["slow_t"]) if src != "dash" else float(dash_def()["slow_t"])
 	var ult_cast := int(x.get("ult", 0))
@@ -437,7 +436,6 @@ func _punch(k: float) -> void:
 	m.fx.spark(fp, Vector3(dir.x, 0.05, dir.y), MOLTEN, int(8 + 8 * k), 9.0 + 6.0 * k, 22.0, 0.22, 2.0, 1.2)
 	m.fx.slash(h.pos + Vector3(0, 1.0, 0), atan2(dir.y, dir.x), 0.5, float(pd["len"]) * 0.8, MOLTEN, k > 0.6)
 	m.sfx("br_punch", h.pos, -1.0, 1.0)
-	Feel.shake(m, "t3" if k > 0.6 else "t2", h, fp)
 	var swept := sweep_rocks(dir)
 	last_sweep = swept.size()
 	if swept.size() >= 2: sweeps += 1
@@ -468,7 +466,6 @@ func _punch(k: float) -> void:
 				f.hurt(2.0, h, {"src": "abil", "ab": "lmb", "stun": float(pd["wall_stun"])})
 			m.fx.word(f.pos + Vector3(0, 2.0, 0), "WALLED", Color("ffb36a"), false)
 			KitLooks.of(m).crown(f, float(pd["wall_stun"]))
-		if f.hp < hp0 and h.is_local() and m.cam: m.cam.punch(0.03)
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 
@@ -634,8 +631,6 @@ func _leap_off() -> void:
 	m.fx.dust(h.pos, 6)
 	m.sfx("br_leap", h.pos, -3.0, 1.0)
 	Feel.dash_sound(m, id, h.pos, h)
-	Feel.shake(m, "dash", h, h.pos)
-	if h.is_local() and m.cam: m.cam.punch(0.03)
 
 ## Rubble Leap falls at its own leap_grav (a heavy arc that still lands on time): the pull on top of gravity.
 func _leap_pull() -> float:
@@ -650,7 +645,6 @@ func _leap_land() -> void:
 	play("breah_leap_land")
 	m.fx.dust(at, 14)      # the hit area was the landing circle all through the flight: no ring or blast here
 	m.sfx("br_slam", at, -5.0, 1.15)
-	Feel.shake(m, "t2", h, at)
 	rider_points(leap["from"], at)
 	for f in foes_in(at, r, 2.0):
 		leap_hits += 1
@@ -789,7 +783,6 @@ func _raise_feel() -> void:
 	if not is_instance_valid(h):
 		return
 	m.sfx("br_raise", h.pos, -1.0, 1.0)
-	Feel.shake(m, "t2", h, h.pos)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

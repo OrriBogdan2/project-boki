@@ -556,8 +556,6 @@ func _anchor() -> void:
 	AimKit.cone(h, "e_hit", slam_tell(1.0).merged({"dur": 0.2, "alpha": 0.7}, true))
 	m.later(0.06, _anchor_dust.bind(at))
 	m.sfx("dr_anchor", h.pos, -1.0, 1.0)
-	Feel.shake(m, "t3", h, at)
-	if h.is_local(): Oomph.punch_dir(m, dd, 0.25)
 	if not h.grounded and not over_void and not h.gliding:
 		h.vel.y = -float(ed["dive"])          # a low air cast still drives you down (never over the abyss or a glider)
 	st["dive_vy"] = h.vel.y               # (tests) what the Anchor left your fall speed at
@@ -673,9 +671,7 @@ func _quake(at: Vector3, fell: float) -> void:
 	m.fx.dust(at, 34)
 	play("dr_quake")
 	m.sfx("dr_quake", at, 0.0, 1.0)
-	Feel.shake(m, "t4", h, at)
-	if h.is_local():
-		if m.cam: m.cam.punch(0.05)
+	Shake.incoming_big(m, at, 0.6, h)
 	lock_until = m.time + float(dash_def()["lock_t"])
 	net_ring(at, r, col_of(ed))
 

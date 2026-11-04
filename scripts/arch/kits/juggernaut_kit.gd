@@ -125,7 +125,6 @@ func _enrage_fx() -> void:
 	m.fx.ring(h.pos, 2.8, rc, 0.45)
 	m.fx.ring(h.pos, 1.4, FLAME_HOT, 0.25)
 	m.fx.burst(h.pos + Vector3(0, 1.2, 0), rc, 30, 6.0, 0.6, -2.0, 1.4)
-	Feel.shake(m, "t3", h, h.pos)
 	if h.is_local():
 		if m.hud: m.hud.flash(rc, 0.15)
 	net_ring(h.pos, 2.8, rc)
@@ -460,7 +459,6 @@ func _wave() -> void:
 	h.swing_t = 0.18
 	h.swing_n += 1
 	Oomph.on_fire(h, true)
-	Feel.shake(m, "t3" if full else "t2", h, h.pos)
 	net_bolt(h.pos + Vector3(0, 0.6, 0), h.pos + Vector3(dv.x * rng, 0.6, dv.y * rng), Color("ff8a4a"))
 
 # ------------------------------------------------------------------ dash: Rampage
@@ -556,8 +554,6 @@ func _tip() -> void:
 	if hit:
 		tips += 1
 		m.sfx("cleave", at, -2.0, 0.9)
-		Feel.shake(m, "t3", h, at)
-		if h.is_local(): Oomph.punch_dir(m, dv, 0.2)
 		net_ring(at, 1.4, col_of(dd))
 
 # ------------------------------------------------------------------ RMB: Smash (Adaptive Strike)
@@ -599,7 +595,6 @@ func rmb_hold_tick(t: float) -> void:
 		var d := h.aim_dir()
 		fx().star(h.pos + Vector3(d.x * 0.5, 1.0, d.y * 0.5), LUNGE_FULL, 1.8, 0.22)
 		m.sfx("jug_full", h.pos, -2.0 if h.is_local() else -6.0, 1.0)
-		if h.is_local() and m.cam: m.cam.add_trauma(0.1)
 
 func lunge_k(t: float) -> float:
 	var sd := rmb_def()
@@ -768,8 +763,6 @@ func _slam() -> void:
 	m.sfx("jug_slam_hit", h.pos, -1.0, 1.0)
 	m.fx.dust(h.pos + Vector3(dd.x, 0, dd.y) * 2.4, 12)
 	m.fx.ring(h.pos + Vector3(dd.x, 0, dd.y) * 2.6, 0.7, res_col(), 0.2)      # where the sweet spot was
-	Feel.shake(m, "t2", h, h.pos)
-	if h.is_local(): Oomph.punch_dir(m, dd, 0.24)
 	m.sfx("cleave", h.pos, -1.0, 0.75)
 	m.sfx("ab_slam", h.pos, -3.0, 0.85)
 
@@ -828,8 +821,6 @@ func _tick_lunge() -> void:
 					0.2)
 			m.sfx("jug_lunge_hit", f.pos, -1.0, 1.0)
 			m.sfx("cleave", f.pos, 0.0, 0.7)
-			Feel.shake(m, "t3", h, f.pos, f)
-			if h.is_local(): Oomph.punch_dir(m, dv, 0.25)
 			return
 	if m.time >= float(lunge["end"]) or h.roll_t <= 0.0:
 		var to_wall: bool = lunge.get("chain", false)
@@ -914,8 +905,6 @@ func _haul_land(k: float) -> void:
 	m.sfx("ab_slam", at, 0.0, 0.65)
 	m.sfx("boom", at, -4.0, 0.9)
 	m.sfx("ab_tether", at, -6.0, 0.6)
-	Feel.shake(m, "t3", h, at)
-	if h.is_local(): Oomph.punch_dir(m, h.aim_dir(), 0.25)
 	net_ring(at, float(hd["radius"]), Color("ffcf6a"))
 
 ## The reads that aren't a key press: the wounded outlined red while the Smash is ready (yours only),

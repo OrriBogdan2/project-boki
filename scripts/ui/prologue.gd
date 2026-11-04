@@ -39,7 +39,8 @@ var pieces: Array = []          # the broken continent: {node, dir, fall, spin}
 var gliders: Array = []
 var boki: PrologueBoki          # THE BOKI's set (scripts/ui/prologue_boki.gd)
 var broke := false
-var shake := 0.0
+var rumble := 0.0                # the roar and the fall: a faint camera rumble (RUMBLE_AMP), never a shake
+const RUMBLE_AMP := 0.08
 var then_go := "hatch"          # where to go after: "hatch" for a new game, "title" when rewatched
 # ui
 var ui: CanvasLayer
@@ -567,7 +568,7 @@ func _process(delta: float) -> void:
 	flash.color.a = maxf(0.0, flash.color.a - delta * 1.6)
 
 ## Places the camera on the move playing now (past the last one it keeps creeping while the wipe covers it),
-## with a slow breathing sway like a held camera, and any shake.
+## with a slow breathing sway like a held camera, and a faint rumble.
 func _camera(moves: Array, delta: float) -> void:
 	var i := 0
 	var into := shot_t
@@ -580,9 +581,11 @@ func _camera(moves: Array, delta: float) -> void:
 	var look: Vector3 = (mv[1] as Vector3).lerp(mv[3], e)
 	var sway := Vector3(sin(t * 0.83) + 0.5 * sin(t * 1.9), 0.6 * sin(t * 1.21 + 2.0), 0.0)
 	look += sway * pos.distance_to(look) * 0.003
-	if shake > 0.0:
-		pos += Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)) * shake
-		shake = maxf(0.0, shake - delta * 1.2)
+	if rumble > 0.0:
+		# a slow low sway, not a shake: tiny, and scaled by the Screen shake setting (0 = still)
+		var amp := rumble * RUMBLE_AMP * float(Settings.get_v("screen_shake"))
+		pos += Vector3(sin(t * 9.0), 0.6 * sin(t * 7.0 + 1.0), 0.0) * amp
+		rumble = maxf(0.0, rumble - delta * 1.2)
 	cam.position = pos
 	cam.look_at(look, Vector3.UP)
 
@@ -604,14 +607,14 @@ func _events(ev: String, st: float, delta: float) -> void:
 		"drop":
 			_race(st, delta)
 
-## The Wyrm rises behind the Crown, roars (the sky reddens, the frame shakes) and sweeps the towns with fire.
+## The Wyrm rises behind the Crown, roars (the sky reddens, the frame rumbles) and sweeps the towns with fire.
 func _waking(st: float, delta: float) -> void:
 	var dur: float = shots[shot]["dur"]
 	_wyrm_along("wyrm", st / (dur + 0.6))
 	if st > 2.4 and not wyrm.has_meta("roared"):
 		wyrm.set_meta("roared", true)
 		wyrm.roar()
-		shake = 0.9
+		rumble = 0.9
 		Sfx.play("v_warden", null, 2.0, 0.0, 0.55)
 		Sfx.play("boom", null, -6.0, 0.0, 0.35)
 		create_tween().tween_method(_burn, 0.0, 0.6, 2.5)
@@ -620,7 +623,7 @@ func _waking(st: float, delta: float) -> void:
 		var tn: Array = towns[burning]
 		_fire(tn[0], tn[1], 1.3)
 		burning += 1
-		shake = maxf(shake, 0.25)
+		rumble = maxf(rumble, 0.25)
 		Sfx.play("boom", null, -14.0, 0.1, 1.4)
 
 ## The Wyrm circles while the land splits: a flash and a jolt, the isles drift apart and sink, rocks tumble.
@@ -638,7 +641,7 @@ func _sundering(st: float, delta: float) -> void:
 	if st > 1.4 and not broke:
 		broke = true
 		flash.color.a = 0.85
-		shake = 1.4
+		rumble = 1.4
 		Sfx.play("boom", null, 0.0, 0.0, 0.6)
 		Sfx.play("boom", null, -4.0, 0.0, 0.45)
 		Sfx.play("v_warden", null, 0.0, 0.0, 0.5)
@@ -658,7 +661,7 @@ func _sundering(st: float, delta: float) -> void:
 			n.rotation.x = float(p["spin"]) * 0.6 * e
 		if randf() < delta * 3.0 and st < 6.0:
 			flash.color.a = maxf(flash.color.a, 0.3)
-			shake = maxf(shake, 0.35)
+			rumble = maxf(rumble, 0.35)
 
 ## The fallen Wardens' power scattering as Mantles: a light of each Mantle's colour bursts out of the Crown and
 ## flies off over the breaking isles.

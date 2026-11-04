@@ -197,7 +197,7 @@ func _impact_fx(at: Vector3) -> void:
 	m.fx.burst(at + Vector3(0, 0.3, 0), DEBRIS, 18, 6.5, 0.7, 16.0, 1.1, Vector3.UP, 55.0)
 	m.sfx("jug_meteor", at, 0.0, 1.0)
 	m.sfx("jug_slam_hit", at, -5.0, 0.8)
-	Feel.shake(m, "leap", k.h, at)
+	Shake.incoming_big(m, at, 0.5, k.h)
 	k.net_ring(at, last_shock_r, CORE)
 
 ## The crack in the ground: dark jagged fissures of uneven length running out of the impact, kinking as

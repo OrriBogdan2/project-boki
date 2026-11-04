@@ -1096,7 +1096,6 @@ func _skyfall(drop: float, fall_v: float) -> void:
 		return
 	Abil._blast(self, pos, 2.4, 10.0 + 16.0 * k, 7.0, Color("ffd27a"), 7.0, "skyfall")
 	m.fx.word(pos + Vector3(0, 2.2, 0), "SKYFALL", Color("ffd27a"), true)
-	m.shake(0.45, pos)
 	add_stat("skyfalls")
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
 const DASH_BUFFER := 0.18
@@ -1326,7 +1325,6 @@ func _shove_along() -> void:
 		var so := {"kb": push, "lift": 2.5, "src": "abil", "ab": "dodge", "tags": ["dodge"]}
 		if float(shove.get("ws", 0.0)) > 0.0: so["wallstun"] = float(shove["ws"])
 		f.hurt(maxf(0.1, float(shove["dmg"])) * m.dmg_mult(self), self, so)
-		m.shake(0.25, f.pos)
 
 func can_fire() -> bool:
 	if Hex.active(self) or Capture.active(self):
@@ -1626,7 +1624,6 @@ func _charged_attack() -> void:
 		m.sfx("dash", pos, -4.0, 0.7)
 	else:
 		_strike(float(st["dmg"]), float(st["reach"]), float(st["arc"]), float(st["kb"]), st)
-		m.shake(0.35, pos)
 
 func _strike(dmg: float, reach: float, arc_deg: float, kb: float, o := {}) -> void:
 	idle_fire = 0.0
@@ -2481,7 +2478,6 @@ func _physics(dt: float) -> void:
 				hurt(SPIKE_DMG, last_hit_by, {"src": "fall"})
 				m.fx.dust(pos, 12)
 				m.fx.ring(pos + Vector3(0, 0.05, 0), 1.6, Color(1.0, 0.6, 0.4, 0.6), 0.3)
-				if is_local(): m.shake(0.25, pos)
 			if fv < -11.0 or cur > spd * 1.3:
 				m.fx.dust(pos, 6)
 				squash = 0.15
@@ -2498,7 +2494,6 @@ func _physics(dt: float) -> void:
 				m.fx.dust(pos, 12)
 				squash = 0.25
 				land_t = 0.32
-				if is_local(): m.shake(0.18, pos)
 			if jump_buf > 0.0:
 				jump_buf = 0.0
 				vel.y = JUMP_V
@@ -2573,8 +2568,6 @@ func _deploy() -> void:
 	vel.y = maxf(vel.y, DEPLOY_POP)
 	m.sfx("glide", pos, -2.0)
 	_glider_sfx("open")
-	if is_local() and m.cam:
-		m.cam.punch(0.05)
 
 ## The opening drop ends early when you press an ability, gear or a heal mid-air: the glider folds
 ## and you fall free with the speed you had, so you can dive, pull up and drink or cast on the way
@@ -3342,7 +3335,6 @@ func render(delta: float, alpha: float) -> void:
 	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)
-		if is_local(): m.shake(0.18, pos)
 	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
 	if roll_t > 0.0:
 		ghost_t -= delta
