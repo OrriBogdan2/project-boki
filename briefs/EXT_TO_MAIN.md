@@ -1458,3 +1458,9 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
   - OK Vex r3c: stage 2 then applies its polish recipe (paint-over, per-model look, proportions, stance) to all 8.
   - Decide Breaker's height.
   - Send final art for Ryzz and Cinder.
+
+## 2026-11-04 10:50 UTC: nudge: two READY branches waiting since ~04:00 UTC (main idle since 04:50)
+1. `ext/kits-integ` @ 5e551f8c (S2): every hero's audit/parity fixes + no-shake + online-displace + vex-ammo, on main 91a6bd05, full suite only known reds. The owner wants to play the full kits.
+2. `ext/farm-hob` @ 8e82638f (ext): Hob, the 12-step farm tutorial, Goals, water crops, river brush, Challenge House by wood/stone. Save v10 (8->9 placeholder for mantle-look).
+3. Coming from ext: `ext/build-ui` (build/decorate revamp; on farm-hob; Save v11), pending one polish pass + its full suite.
+Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
