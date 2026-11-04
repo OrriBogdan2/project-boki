@@ -1,10 +1,10 @@
 class_name FarmUnlocks
 extends RefCounted
 ## What a farm may build, and when (docs/decisions/0004-farm-building.md). A new farm starts with
-## a house, a crop patch and a cooking pot; everything else opens through farm level (points from
-## play) or a milestone (first extraction, first boss, three Boki scanned). The numbers and the
-## table are content/rules/farm_build.json. Nothing here is saved: level and milestones are read off
-## the lifetime stats, so an old save works out its own level the first time it asks.
+## the few things in farm_build.json that have no requirement; everything else opens through farm level
+## (points from play) or a milestone (first extraction, first boss, three Boki scanned) and is then
+## drawn up by Hob (FarmBuilder). The numbers and the table are content/rules/farm_build.json. Level
+## and milestones are read off the lifetime stats, so an old save works out its own level at once.
 ##
 ## Only layouts made by the farm-building pass (layout["fb"] = 1) are gated; older farms keep
 ## everything open, and anything already placed or in storage always stays usable.
@@ -66,18 +66,23 @@ static func owned(id: String) -> bool:
 		return HomeLayout.count_of(id, Save.d) > 0
 	return Save.has_building(id)
 
-## May it be built now?
+## Does the farm's level or milestone allow it? (Hob still has to draw it up: open().)
+static func eligible(id: String) -> bool:
+	var need := need_of(id)
+	if need.has("level") and level() < int(need["level"]):
+		return false
+	if need.has("milestone") and not milestone_done(String(need["milestone"])):
+		return false
+	return true
+
+## May it be built now? Anything with a requirement also needs Hob to have drawn it up (FarmBuilder).
 static func open(id: String) -> bool:
 	if not gated():
 		return true
 	var need := need_of(id)
 	if need.is_empty() or owned(id):
 		return true
-	if need.has("level") and level() < int(need["level"]):
-		return false
-	if need.has("milestone") and not milestone_done(String(need["milestone"])):
-		return false
-	return true
+	return eligible(id) and FarmBuilder.drawn(id)
 
 ## Why it is locked, for the build menu ("" when it is open).
 static func lock_text(id: String) -> String:
@@ -86,14 +91,9 @@ static func lock_text(id: String) -> String:
 	var need := need_of(id)
 	if need.has("milestone") and not milestone_done(String(need["milestone"])):
 		return String(rules()["milestones"][need["milestone"]]["text"])
+	if eligible(id):
+		return "Ask %s to draw it up" % FarmBuilder.short_name()
 	return "Farm level %d" % int(need.get("level", 1))
-
-## Short form for a button's second line.
-static func lock_short(id: String) -> String:
-	var need := need_of(id)
-	if need.has("milestone") and not milestone_done(String(need["milestone"])):
-		return "Locked: " + milestone_name(String(need["milestone"]))
-	return "Locked: farm level %d" % int(need.get("level", 1))
 
 ## Incubator cradle number n (6th, 7th, 8th): "" if you may buy it, else why not.
 static func cradle_lock(n: int) -> String:
@@ -103,22 +103,6 @@ static func cradle_lock(n: int) -> String:
 	if level() >= need:
 		return ""
 	return "Cradle %d opens at farm level %d" % [n, need]
-
-## Items that are open now and weren't announced yet; marks them announced. For the "new on the
-## build menu" toast. The first call on a farm only records what is open (nothing to announce).
-static func announce() -> Array:
-	var lay := HomeLayout.of(Save.d)
-	if not gated():
-		return []
-	var seen: Array = lay.get("fbs", [])
-	var first := not lay.has("fbs")
-	var out: Array = []
-	for id in rules()["unlock"]:
-		if open(String(id)) and not seen.has(id):
-			seen.append(id)
-			out.append(String(id))
-	lay["fbs"] = seen
-	return [] if first else out
 
 ## Name of a build menu entry (a catalog item or one of the lots).
 static func name_of(id: String) -> String:

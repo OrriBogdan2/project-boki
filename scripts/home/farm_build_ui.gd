@@ -2,7 +2,7 @@ class_name FarmBuildUi
 extends RefCounted
 ## Build mode's extras for the farm building pass: the footprint outline and snapping grid round the
 ## ghost, the reason a spot is refused floating over it, the pop when something lands, and the
-## entries for the locked items and the Upgrades tab. HomeBuild calls these from a few places.
+## entries for the Upgrades tab. HomeBuild calls these from a few places.
 
 const GRID_R := 3                         # tiles of snapping grid shown round the ghost
 
@@ -59,7 +59,7 @@ static func outline(root: Node3D, cells: Array, ok: bool) -> void:
 		root.add_child(m2)
 
 ## The reason a spot is refused, floating above the footprint. "" removes it.
-static func note(root: Node3D, cells: Array, text: String) -> void:
+static func note(root: Node3D, cells: Array, text: String, col := Color("ffb0a0")) -> void:
 	if not is_instance_valid(root):
 		return
 	for old in root.get_children():
@@ -72,7 +72,7 @@ static func note(root: Node3D, cells: Array, text: String) -> void:
 	l.font_size = 48
 	l.pixel_size = 0.012
 	l.outline_size = 16
-	l.modulate = Color("ffb0a0")
+	l.modulate = col
 	l.outline_modulate = Color(0.1, 0.05, 0.05, 0.9)
 	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	l.no_depth_test = true
@@ -92,11 +92,6 @@ static func pop(n: Node3D) -> void:
 	tw.tween_property(n, "scale", s, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 # ------------------------------------------------------------------ bar entries
-## The bar entry for a catalog item that needs a farm unlock to be built: greyed with its requirement.
-static func locked_entry(id: String) -> Dictionary:
-	return {"t": "%s\n%s" % [FarmUnlocks.name_of(id), FarmUnlocks.lock_short(id)], "cb": func(): pass, "off": true, "lock": true,
-		"tip": "%s opens at: %s. %s" % [FarmUnlocks.name_of(id), FarmUnlocks.lock_text(id), String(HomeLayout.CATALOG.get(id, {}).get("desc", Data.BUILDINGS.get(id, {}).get("desc", "")))]}
-
 ## The Upgrades tab: one entry per standing building that has a next tier.
 static func upgrade_entries(hb: HomeBuild) -> Array:
 	var out: Array = []
@@ -108,14 +103,20 @@ static func upgrade_entries(hb: HomeBuild) -> Array:
 		var t := FarmSites.tier(e)
 		var nm := String(HomeLayout.CATALOG[id]["name"])
 		if FarmSites.is_upgrading(e):
-			out.append({"t": "%s\nUpgrading %d%%" % [nm, int(FarmSites.progress(e) * 100.0)], "cb": func(): pass, "off": true, "tip": "Boki are building the next tier"})
+			out.append({"name": nm, "note": "Upgrading %d%%" % int(FarmSites.progress(e) * 100.0), "glyph": "hammer",
+				"cb": func(): pass, "off": true, "tip": "Boki are building the next tier"})
 			continue
 		var cost := FarmSites.upgrade_cost(id, t + 1)
 		if cost.is_empty():
-			out.append({"t": "%s\nTier %d (best)" % [nm, t], "cb": func(): pass, "off": true, "tip": "Fully upgraded"})
+			out.append({"name": nm, "note": "Tier %d (best)" % t, "glyph": "hammer", "cb": func(): pass, "off": true,
+				"tip": "Fully upgraded"})
 			continue
 		var lock := FarmUnlocks.gated() and FarmUnlocks.level() < int(cost.get("level", 1))
-		out.append({"t": "%s\nTier %d to %d" % [nm, t, t + 1] if not lock else "%s\nNeeds farm level %d" % [nm, int(cost.get("level", 1))],
-			"cb": func(): hb.upgrade(uid), "off": lock, "cost": cost,
-			"tip": "Upgrade the %s to tier %d: %s. Boki do the building; it keeps working meanwhile." % [nm.to_lower(), t + 1, FarmSites.cost_text(cost)]})
+		var note := "Tier %d to %d" % [t, t + 1]
+		if lock:
+			note = "Needs farm level %d" % int(cost.get("level", 1))
+		out.append({"name": nm, "note": note, "glyph": "hammer", "cb": func(): hb.upgrade(uid), "off": lock,
+			"cost": {} if lock else cost,
+			"tip": "Upgrade the %s to tier %d: %s. Boki do the building; it keeps working meanwhile." % [
+				nm.to_lower(), t + 1, FarmSites.cost_text(cost)]})
 	return out

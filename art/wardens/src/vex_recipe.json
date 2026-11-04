@@ -2,7 +2,7 @@
  "doc": "Vex (gunslinger): RECIPE_95 spec, the golden recipe (docs/art/wardens/RECIPE_95.md). python3 tools/meshy/recipe.py art/wardens/src/vex_recipe.json <steps>",
  "name": "vex",
  "arch": "gunslinger",
- "tag": "r3d",
+ "tag": "r3e",
  "raw": "~/meshy/vex_r3b",
  "art": {
   "ref": "origin/ext/imagegen",
@@ -82,5 +82,6 @@
  "shots_worktree": "/home/boki/boki-vex-r3b-stance",
  "stance_worktree": "/home/boki/boki-vex-r3b-stance",
  "match_crop": "200:170:540:270",
- "combo_check": "--gunslinger-combo-check"
+ "combo_check": "--gunslinger-combo-check",
+ "demo_at": "-4.5,0"
 }

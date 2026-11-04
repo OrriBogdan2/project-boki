@@ -1,7 +1,7 @@
-# The Exchange and the Drift Pens on the server
+# The Exchange and the market on the server
 
 Status: **design stub.** The local versions are built and tested (`scripts/core/exchange.gd`,
-`scripts/core/boki_pens.gd`, `--economy-floor-check`). This document says how they move onto the
+`scripts/core/shelter.gd`, `stalls.gd`, `auction.gd`, `transfer.gd`, `--economy-floor-check`, `--market-check`; docs/decisions/0013-market.md). This document says how they move onto the
 private backend described in `ARCHITECTURE_PLAN.md` (design branch) §4-5, Phase 6. Nothing here is
 built yet.
 
@@ -10,7 +10,10 @@ built yet.
 | Piece | Code | What it does offline |
 |---|---|---|
 | Tradewind Exchange | `Exchange` (`scripts/core/exchange.gd`) | Order book for wood, stone, scrap, crops, kibble, tonics. Price-time matching, partial fills, 4% tax on the seller's gems, price history. Tradewind's market makers stand in for other players: standing offers round today's price, rebuilt daily; resting player offers fill a little each expedition (`Exchange.tick`). |
-| Drift Pens | `BokiPens` (`scripts/core/boki_pens.gd`) | The Boki market. Wenna's daily stock of ordinary commons at 30-45 gems (the economy floor), plus your own listings (5% listing fee, 5% sale tax), filtered by species, size, IVs, special rolls, provenance. Offline, your listings sell to Wenna's regulars now and then (`BokiPens.tick`). |
+| Shelter | `Shelter` (`scripts/core/shelter.gd`) | Boki are never sold for gems. Daily strays plus Boki players gave up; adopting costs gems that are destroyed, giving pays nothing (limits: not the last or a pinned Boki, 7 days old, once a day, no re-adopting your own). Offline, NPC adopters take given Boki (`Shelter.tick`). |
+| Transfers | `Transfer` (`scripts/core/transfer.gd`) | Hand a Boki to a named player: flat fee (destroyed), one a week, the receiver accepts a packet (`Social.clean_kin`). Offline it waits in the outbox. |
+| Stalls and search | `Stalls` (`scripts/core/stalls.gd`), `Goods` | Your stall (5% fee, 10% tax) for gear, utility, Boki wear, trophies, dyes, rare materials; NPC stalls restocked daily by rarity; search for the lowest price. NPC buyers pay at most 0.8x reference. |
+| Auction House | `Auction` (`scripts/core/auction.gd`) | Start, step, 12/24/48 h, friends-only; bids escrowed, refunded when outbid, never withdrawn; a bid in the last minute extends to two minutes left. NPC lots and bidders offline. |
 | The floor | `Lifeline` (`scripts/core/lifeline.gd`) | A stray common turns up on a farm with no Boki. Combined with pen prices, nobody is ever stuck. |
 
 Every function the UI calls returns a plain dictionary (`{ok, why, ...}`) and never assumes the
@@ -78,45 +81,46 @@ a buyer's price improvement, write `fill` and two `ledger` rows, update the bar.
   production online needs its own server-side rule: elapsed time x assigned Boki x station caps,
   the same as `Work.catch_up`; until that exists, farm materials are offline-only).
 
-## The Drift Pens on the server
+## The market on the server
 
 ### Data
 
 ```
 boki(uid, account_id, species, record_json, edition, serial, origin, created_at)   -- the ledger of Boki
-listing(id, boki_uid, seller_id, price, fee_paid, created_at, state, buyer_id, sold_at)
-pen_stock(day, slot, boki_uid, price)          -- Wenna's daily commons, minted by the backend
+shelter_card(id, boki_uid, giver_id, price, put_up_day, state, adopter_id)       -- adoption gems are burned
+transfer(id, boki_uid, from_id, to_id, fee, created_at, state)                   -- pending|accepted|recalled
+stall_listing(id, account_id, good_key, payload_json, price, fee_paid, state, buyer_id, sold_at)
+lot(id, account_id, good_key, payload_json, start, step, ends_at, friends_only, top, top_bidder, state)
+bid(id, lot_id, account_id, amount, held, created_at)
 ```
 
-### Requests
+### Requests (the local functions, as requests)
 
 | Request | Validation | Effect |
 |---|---|---|
-| `listings {filter}` | none | paged, filtered by species, size, IV total, mutation/shimmer, provenance, edition |
-| `list {uid, price}` | the caller owns it; not their only Boki; not pinned (partner/starter); price in the fair range (from `Ransom.value`, ported) | take the 5% fee; lock the Boki (it leaves the roster while listed) |
-| `unlist {id}` | the caller's, open | unlock it (fee not refunded) |
-| `buy {id}` | open; not the caller's; enough gems; the buyer's box has room | one transaction: gems buyer -> seller less 5% tax; ownership moves; provenance appends a `traded` event with both trainers |
+| `shelter.give_up {uid}` | `Shelter.why_not` (owned, not last/pinned/egg parent, 7+ days old, not today) | the Boki leaves the roster; no gems move |
+| `shelter.adopt {id}` | not your own gift; gems; room | gems burned; ownership moves; trust halves; `raised_by` appends |
+| `transfer.send {uid, to}` | as give_up, plus a week since the last; fee | fee burned; pending until `transfer.accept` by `to` |
+| `stall.list/unlist/buy`, `search {text}` | owned good; cap 6; price 1..99999 | fee up front; buyer pays, seller gets price less 10% |
+| `auction.create/bid` | 12/24/48 h; bid >= top + step; not your own lot | escrow; refund the outbid; extend in the last minute; settle at `ends_at` |
 
-Wenna's stock is minted by the backend each day (commons, ordinary rolls, priced 30-45). It's the
-only place new Boki enter the economy for gems, so it's capped per account per day (e.g. 2 buys) to
-stop it becoming a farm for resale; pen Boki carry `origin.how = "market"` and `from = "Wenna"`.
-
-Later: auctions (timed, highest bid, anti-snipe extension) and direct player-to-player trades (both
-parties confirm a two-sided offer; one transaction) use the same `boki` and `ledger` tables.
+Online there are no NPC buyers, sellers, adopters or bidders: those are the offline stand-ins
+(`*.tick`). Friends-only lots take bids only from the seller's friends (guild members until a
+friends list exists).
 
 ## The floor on the server
 
 - **Strays**: a backend rule on login: an account with zero Boki gets one ordinary common
-  (`origin.how = "stray"`). Accounts can't release or list their last Boki, so this only follows a
+  (`origin.how = "stray"`). Accounts can't release, give up or hand on their last Boki, so this only follows a
   real loss, and it mints no gems.
 
 ## Moving the client over
 
-1. Add `ExchangeApi` / `PensApi` (client side) with the same function names as `Exchange` and
-   `BokiPens`, returning through callbacks. `BACKEND` picks the implementation.
+1. Add `ExchangeApi` / `MarketApi` (client side) with the same function names as `Exchange`,
+   `Shelter`, `Transfer`, `Stalls` and `Auction`, returning through callbacks. `BACKEND` picks the implementation.
 2. `HomeMarket` already reads results as `{ok, why, ...}` and redraws; switch its calls to the
    callback versions (a spinner while waiting).
-3. `Game.apply_result` stops calling `Exchange.tick` / `BokiPens.tick` online (the backend fills
+3. `Game.apply_result` stops calling `Exchange.tick` / `MarketSave.tick` online (the backend fills
    offers in real time) and shows fills from `mine` instead.
 4. Test vectors: `tools/export_econ_vectors.gd` (to write, ROADMAP §2 E6) runs the local matcher on
    scripted books and writes input/expected-output pairs; the backend's tests replay them and must
@@ -124,6 +128,5 @@ parties confirm a two-sided offer; one transaction) use the same `boki` and `led
 
 ## Open questions for the owner
 
-- Exchange tax 4% and pen fees 5%/5%: fine as starting numbers?
-- Should Wenna's daily pen buys be capped online (proposed: 2 a day)?
+- Exchange tax 4%, stall and auction fees 5% / tax 10%, transfer fee 40: fine as starting numbers?
 - Online market makers (a metered Tradewind account) for a thin playtest book, or no makers at all?

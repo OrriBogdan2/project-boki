@@ -1,12 +1,13 @@
 class_name MageUlt
 extends RefCounted
-## Vireo's ultimate, Kitefall (X). docs/heroes/mage.md has the numbers and the research notes.
+## Ryzz's ultimate, Kitefall (X). docs/heroes/mage.md has the numbers and the research notes.
 ##
-## Press: a short crouch, then she launches straight up and hangs there invulnerable while a gold range ring
-## and its dark interior show round the take-off spot and the camera pulls back. Press again (X or the attack
-## key) to come down as a bolt at the cursor, clamped inside the ring; with no second press she comes down
-## there by herself when the hover runs out. The strike hurts, knocks back and adds Static to everyone round
-## the landing spot, and gold lightning crackles at her feet for a moment after.
+## Press: a short crouch (a Shift or a jump in it combines: she launches from where it takes her), then she
+## launches straight up and hangs there invulnerable while a gold range ring and its dark interior show round
+## the take-off spot and the camera pulls back. Press again (X or the attack key) to come down as a bolt at the
+## cursor, clamped inside the ring; with no second press she comes down there by herself when the hover runs
+## out. The strike hurts, knocks back and adds Static to everyone round the landing spot, and gold lightning
+## crackles at her feet for a moment after.
 
 const CROUCH := "crouch"
 const RISE := "rise"
@@ -19,7 +20,7 @@ const CAM_PULL := 0.45           # how far the camera eases back while she hangs
 const DUST := Color("c9b48a")
 
 var kit: MageKit
-var leap := {}                 # the running cast: {phase, t, from, top, land, high, queued, fire_free, disc}
+var leap := {}                 # the running cast: {phase, t, from, base, top, land, high, queued, fire_free, disc}
 var casts := 0                 # (tests)
 var hits := 0                  # foes the strikes hit (tests)
 var last := {}                 # (tests) the last strike: {at, hits, bond}
@@ -57,7 +58,7 @@ func cast() -> bool:
 	if kit.m.world.is_void(h.pos.x, h.pos.z):
 		return false
 	var from := kit.ground(h.pos)
-	leap = {"phase": CROUCH, "t": 0.0, "from": from, "top": from.y + float(data()["height"]), "land": from}
+	leap = {"phase": CROUCH, "t": 0.0, "from": from, "land": from}
 	leap["queued"] = false
 	leap["fire_free"] = not bool(h.inp.get("fire", false))
 	casts += 1
@@ -89,9 +90,16 @@ func tick(dt: float) -> void:
 	var xd := data()
 	match phase():
 		CROUCH:
-			_hold_still()
-			if t >= float(xd["windup"]):
-				_take_off()
+			if _moving():
+				leap["t"] = 0.0             # a Shift in the crouch: the crouch waits for it, then starts over
+				leap["moved"] = true
+			elif bool(leap.get("moved", false)):
+				leap["moved"] = false
+				kit.play("mage_x")
+			else:
+				_hold_still()
+				if t >= float(xd["windup"]):
+					_take_off()
 		RISE:
 			_hold_air(smoothstep(0.0, 1.0, t / float(xd["rise"])))
 			_aim_tick()
@@ -128,11 +136,14 @@ func _wants_down(t: float, xd: Dictionary) -> bool:
 		return true
 	return t >= float(xd["hover"])
 
+## The crouch: no steering, but a jump still goes (she takes off from up there) and any speed she had runs out
+## under her the way it would (item 51: an ability combines with Shift and a jump).
 func _hold_still() -> void:
-	var h := kit.h
-	h.inp["move"] = Vector2.ZERO
-	h.inp["jump"] = false
-	h.vel = Vector3(0, minf(h.vel.y, 0.0), 0)
+	kit.h.inp["move"] = Vector2.ZERO
+
+## A Wirerun charging or streaking, or her air dash: Shift pressed in the crouch.
+func _moving() -> bool:
+	return not kit.wire.is_empty() or kit.run_t > 0.0 or kit.h.roll_t > 0.0
 
 ## Up at the take-off spot, `k` of the way to the top: no keys, no gravity, nothing touches her.
 func _hold_air(k: float) -> void:
@@ -142,7 +153,8 @@ func _hold_air(k: float) -> void:
 	h.inp["jump"] = false
 	h.gliding = false
 	h.vel = Vector3.ZERO
-	h.pos = Vector3(from.x, lerpf(from.y, float(leap["top"]), k) + 0.12 * sin(kit.m.time * 3.0) * k, from.z)
+	var y := lerpf(float(leap["base"]), float(leap["top"]), k) + 0.12 * sin(kit.m.time * 3.0) * k
+	h.pos = Vector3(from.x, y, from.z)
 	_untouchable(0.1)
 	if h.is_local() and kit.m.cam:
 		kit.m.cam.pull = maxf(kit.m.cam.pull, CAM_PULL * k)
@@ -152,14 +164,22 @@ func _untouchable(secs: float) -> void:
 	h.inv_t = maxf(h.inv_t, secs)
 	h.phase_t = maxf(h.phase_t, secs)
 
+## She launches from where she is: a jump or a dash in the crouch moves the ring there (unless that is over the
+## abyss), and the climb starts at her height, so nothing snaps.
 func _take_off() -> void:
 	var h := kit.h
-	var from: Vector3 = leap["from"]
 	var r := float(data()["range"])
+	var was: Vector3 = leap["from"]
+	if Vector2(h.pos.x - was.x, h.pos.z - was.z).length() > 0.5 and not kit.m.world.is_void(h.pos.x, h.pos.z):
+		leap["from"] = kit.ground(h.pos)
+		kit.fx().ring(leap["from"], r, MageKit.GOLD, MageKit.TEAL, 0.3)
+		kit.net_ring(leap["from"], r, MageKit.GOLD)
+	var from: Vector3 = leap["from"]
+	leap["base"] = h.pos.y
+	leap["top"] = maxf(from.y + float(data()["height"]), h.pos.y)
 	_next(RISE)
 	kit.play("mage_x_air")
 	kit.m.fx.burst(from + Vector3(0, 0.2, 0), DUST, 18, 3.5, 0.5, 2.0, 1.4)
-	kit.fx().ring(from, 1.6, DUST, MageKit.GOLD, 0.3)
 	var top := from + Vector3(0, float(data()["height"]), 0)
 	kit.fx().arc(from + Vector3(0, 0.2, 0), top, MageKit.TEAL, MageKit.GOLD, 0.9, 0.25)
 	var hover := float(data()["rise"]) + float(data()["hover"]) + float(data()["drop"])
@@ -222,7 +242,7 @@ func _slam() -> void:
 	var mark := {"at": land, "r": float(data()["radius"]), "all": true, "dur": float(data()["drop"]), "fill": 1.0}
 	mark.merge({"col": MageKit.GOLD, "col2": MageKit.GOLD, "hot": 0.6})
 	AimKit.circle(kit.h, "x_land", mark)
-	kit.fx().ring(land, 2.3, MageKit.GOLD, MageKit.TEAL, 0.15)
+	kit.fx().ring(land, float(data()["radius"]), MageKit.GOLD, MageKit.TEAL, 0.15)
 	kit.net_ring(land, float(data()["radius"]), MageKit.GOLD)
 
 ## Coming down: a streak of lightning from where she hung onto the marker (the body hides in it).
@@ -254,7 +274,8 @@ func _strike() -> void:
 	_strike_fx(at, r)
 	var n := 0
 	var dmg := float(xd["dmg"]) * power()
-	for f in kit.foes_in(at, r):
+	var struck := kit.foes_in(at, r)
+	for f in struck:
 		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
 		away = away.normalized() if away.length() > 0.1 else h.aim_dir()
 		var o := {"src": "abil", "ab": "ult", "tags": ["ult", "kitefall"], "kb": away * float(xd["push"])}
@@ -263,8 +284,21 @@ func _strike() -> void:
 		kit.add_spark(f, int(xd["stacks"]))
 		HeroUlt.landed(kit, f)
 		n += 1
+	_spread_static(struck)
 	hits += n
 	last = {"at": at, "hits": n}
+
+## The data's Thunderstorm rule: striking a target spreads its Static to the foes near it (each takes the
+## struck one's count if it had less), with an arc from one to the other.
+func _spread_static(struck: Array) -> void:
+	var r := float(data()["spread_r"])
+	for f in struck:
+		var n := kit.spark_n(f)
+		for o in kit.foes_in(f.pos, r):
+			if o != f and kit.spark_n(o) < n:
+				kit.add_spark(o, n - kit.spark_n(o))
+				kit.fx().arc(f.position + Vector3(0, 1.0, 0), o.position + Vector3(0, 1.0, 0), MageKit.TEAL,
+						MageKit.GOLD, 0.6, 0.2)
 
 ## A pillar of gold light slams onto the spot out of the sky, a shock ring and a spray of sparks.
 func _strike_fx(at: Vector3, r: float) -> void:
@@ -274,13 +308,12 @@ func _strike_fx(at: Vector3, r: float) -> void:
 		var sky := at + Vector3(0, 12.0, 0) + kit._jitter(0.8, 0.0, 0.0)
 		fx.arc(sky, at + kit._jitter(0.5, 0.1, 0.1), MageKit.TEAL, MageKit.GOLD, 1.3 - 0.3 * i, 0.25)
 	fx.ring(at, r, MageKit.GOLD, MageKit.TEAL, 0.35)
-	fx.ring(at, r * 1.45, MageKit.COPPER, MageKit.GOLD, 0.5)
 	fx.disc(at, r * 0.8, Color("1a1420"), MageKit.GOLD, 0.4, MageKit.COPPER)
 	kit.m.fx.spark(at + Vector3(0, 0.3, 0), Vector3.UP, MageKit.GOLD, 26, 11.0, 75.0, 0.4, 8.0, 1.3)
 	kit.m.fx.flash(at + Vector3(0, 1.2, 0), MageKit.GOLD, 2.4, 0.12)
 	kit.net_bolt(at + Vector3(0, 12.0, 0), at, MageKit.GOLD)
 	kit.m.sfx("vv_ult_slam", at, 1.0)
-	Feel.shake(kit.m, "t4", kit.h, at)
+	Shake.incoming_big(kit.m, at, 0.6, kit.h)
 
 ## Orange-gold lightning stays at her feet for a moment after the strike (she is free to act).
 func _after_fx(dt: float) -> void:

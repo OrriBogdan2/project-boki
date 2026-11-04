@@ -65,11 +65,9 @@ func _setup_input() -> void:
 	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your archetype's right-click ability (its variants: tap, hold, air...)
 	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the archetype's ability, Shift the archetype's
 	# dash, Space jump and glide (Mouse 5 glides too), Q your active glove, E the archetype's utility,
-	# R reload, X the hunter's ultimate, T merge with your Boki (a full bond meter), C your kin's own ability (it
-	# cast from where it is), G (or middle mouse) throw / recall your kin, hold G to hold or follow, 1-4 the utility belt,
-	# F interact.
+	# R the hunter's ultimate, X Fuse with your Boki (a full bond meter), G (or middle mouse) send out / call back
+	# your Boki (hold G for the order wheel; the Boki casts its own ability), 1-4 the utility belt, F interact.
 	_key("signature", [KEY_E])                # the archetype's utility (E)
-	_key("kin_ability", [KEY_C])              # the kin's own ability: cast from wherever the Boki is
 	_key("kin_skill", [])                     # a kin's second ability: retired from the kit (data kept)
 	_key("interact", [KEY_F])                 # catch, open, pick up, finish a downed enemy (Supervive: F)
 	_key("util2", [KEY_2])                    # utility belt slot 2 (an armor kit to start)
@@ -85,9 +83,8 @@ func _setup_input() -> void:
 	_key("jump", [KEY_SPACE])
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # hold Mouse 5 (the front side button) in the air to glide, like holding Space; never jumps
 	_key("glide", [], MOUSE_BUTTON_XBUTTON1)  # Mouse 4 glides too (not advertised)
-	_key("reload", [KEY_R])                   # reload by hand (it also reloads on its own after a short idle)
-	_key("hunter_ult", [KEY_X])               # the hunter's own ultimate (level 6; none yet, see ArchKit.cast_ult)
-	_key("ultimate", [KEY_T])                 # Merge with your Boki (level 6, a full bond meter); T again releases
+	_key("hunter_ult", [KEY_R])               # the hunter's own ultimate (level 6, see ArchKit.cast_ult)
+	_key("ultimate", [KEY_X])                 # Fuse with your Boki (level 6, a full bond meter); X again releases
 	_key("util1", [KEY_1])                    # utility belt slot 1 (a tonic to start)
 	_key("scores", [KEY_TAB])
 	_key("menu", [KEY_ESCAPE])
@@ -99,6 +96,7 @@ func _setup_input() -> void:
 	_key("inventory", [KEY_I])                # your things
 	_key("build", [KEY_B])                    # at home: build mode (lay out the island); indoors: decorate
 	_key("rotate", [KEY_R])                   # build mode: turn what you're holding
+	_key("store", [KEY_X, KEY_DELETE])        # build mode: put the piece away
 	_key("emote", [KEY_Y])                    # in a match: hold for the emote wheel (truce, deal, no...)
 	_key("map", [KEY_M])                      # in a match: the full map (ping it with the mouse)
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
@@ -210,8 +208,8 @@ func apply_result(r: Dictionary) -> Dictionary:
 			out["caught"].erase(back)
 	# time passes for kin already lost: prices drift, unclaimed ones get sold, rivals ask for theirs back
 	out["ransom_news"] = Ransom.tick(r.get("rivals", []))
-	# Boki you listed at the Drift Pens may have sold, and Exchange offers fill (offline turnover)
-	out["pens_sold"] = BokiPens.tick()
+	# the market turns over while you're out (offline), and what you found comes home
+	out["market_news"] = MarketSave.tick(won, int(ms.get("bosses", 0)))
 	out["exchange_fills"] = Exchange.tick()
 	# going down leaves your kin behind; where they end up was settled in the match
 	var lost_news: Array = []
