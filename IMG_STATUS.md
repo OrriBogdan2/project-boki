@@ -165,3 +165,6 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 
 ## 2026-11-04 09:20 UTC: Zedran round 3 final (owner-approved) from uploads (orchestrator)
 - wardens_r3/zedran_* + ZEDRAN_KIT.md; review/zedran_r3_before_after.jpg. Supersedes wardens_r2/zedran_*.
+
+## 2026-11-04 10:15 UTC: Kael (was Zedran) white-hot final, from uploads (orchestrator)
+- wardens_r3/kael_{portrait,splash,turnaround,side}.webp. These supersede zedran_* for 3D (the ZEDRAN_KIT.md design + white-hot glow). The side view is the jagged-tip version (matches the turnaround blade); the alt with a clean diamond tip is in review/kael_side_alt.webp. The turnaround now has a single hook (right-arm chain), and the left wrist has a cuff + a short chain.
