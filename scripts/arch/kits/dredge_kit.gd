@@ -35,8 +35,8 @@ const ARM_THICK := 0.5                 # m, the abyssal arm's girth (an arm, not
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the rope snaps taut on each
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
 const SMOKE_T := 0.55                  # s between the 3D model's shoulder smoke wisps
-const SMOKE_COL := Color(0.62, 0.6, 0.6, 0.5)
-const SMOKE_CORE := Color(0.42, 0.4, 0.41, 0.6)
+const SMOKE_COL := Color(0.62, 0.6, 0.6, 0.22)
+const SMOKE_CORE := Color(0.46, 0.44, 0.45, 0.3)
 const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 
@@ -295,8 +295,8 @@ func _tick_model(dt: float) -> void:
 		var bi := WardenSkeleton.find(sk, "pauldron.L" if randf() < 0.5 else "pauldron.R")
 		if bi >= 0:
 			var at := sk.global_transform * sk.get_bone_global_pose(bi).origin
-			var off := Vector3(randf_range(-0.08, 0.08), randf_range(0.25, 0.4), randf_range(-0.08, 0.08))
-			fx.puff(at + off, LDFx.M_ORB, SMOKE_COL, SMOKE_CORE, randf_range(0.35, 0.5), randf_range(0.9, 1.3))
+			var off := Vector3(randf_range(-0.06, 0.06), randf_range(0.45, 0.6), randf_range(-0.06, 0.06))
+			fx.puff(at + off, LDFx.M_ORB, SMOKE_COL, SMOKE_CORE, randf_range(0.16, 0.24), randf_range(0.8, 1.1))
 	# the tar pool spreads under him while he stands, and is gone the moment he moves or leaves the ground
 	var still := h.grounded and Vector2(h.vel.x, h.vel.z).length() < 0.6
 	if still:

@@ -105,6 +105,7 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
 - **r3k (credit-free):** the cargo hook x1.9 about its top (`scale_parts`), so it reads at the match camera; deeper,
   larger dents breaking the hull's outline (18, 5-11% of the radius); jointed legs (knee balls on shin.L/R, the
   stance's knee 0.22 and gait knee 0.26); smoke wisps off the shoulders (DredgeKit: a grey puff off a pauldron bone
-  every ~0.55 s, the 3D model only); a brighter hull (gain 1.32) and brass, lighter iron limbs (7a746e) against the
-  grass, and a stronger gold far rim (0.4).
+  every ~0.55 s, the 3D model only; small and faint so it never covers a pod at the match camera); a brighter hull
+  (gain 1.25) and brass, lighter iron limbs (7a746e) against the grass, and a stronger gold far rim (0.4, in
+  content/rules/warden_look.json since main's look move).
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.

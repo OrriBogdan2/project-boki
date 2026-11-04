@@ -495,7 +495,7 @@
     "grime": "1a160c",
     "grime_k": 0.7,
     "ao_dist": 0.05,
-    "gain": 1.32,
+    "gain": 1.25,
     "mask": {
      "at": [
       0.0,
