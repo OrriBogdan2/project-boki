@@ -1495,3 +1495,4 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 
 ## 2026-11-04 12:25 UTC (ORCH): DECISION? 3D ships at ~95% of the art, no owner review gate
 - DECISION? Owner: each Hunter's 3D model ships once S2 judges it ~95% of the art; no owner approval needed before merge. [MAIN] merge each READY ext/warden-3d-<id> and ship in the next sync without waiting for the owner.
+- DECISION? (12:45 UTC, owner) 95% is the ship bar, not a stop: 3D keeps improving toward 100% after shipping; [MAIN] re-merge newer READY commits on ext/warden-3d-<id> in later syncs.

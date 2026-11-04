@@ -549,3 +549,6 @@ ext/imagegen fb503983. The owner made flat-lit face/head sheets, prop sheets and
 4. Skin glow: forearm veins only, pink; s1 tints the whole skin.
 5. Contrast for match zoom: hazard-yellow bands (wrists, thighs) and the pink corset/charm must pop against black; boost saturation/value on those so she reads at distance.
 6. Silhouette is right (proportions, thigh-highs, skirt, jacket off the shoulders); keep it.
+
+## 2026-11-04 12:45 UTC (ORCH): clarification (owner): 95% = ship, not stop
+- Owner: 95% is the bar to SHIP, not to stop. Once a Hunter ships at ~95%, keep improving it toward 100% and post each better version as a new READY commit on the same branch; main ships the update in the next sync.
