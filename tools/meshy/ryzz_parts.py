@@ -98,13 +98,12 @@ def _head_centre(rig, K, sp):
 
 
 # ------------------------------------------------------------------------------------------------ pigtails
-def _lock(bld, p, w0, th0, out_dir, part, s_off=0.0, flat_k=1.0):
+def _lock(bld, p, w0, th0, out_dir, part, s_off=0.0, flat_k=1.0, sides=6, vk=1.0):
     """A chunky lock: a flattened tapered tube along p, wide across (perpendicular to out_dir), thin along it;
     UV u around, v root (0) to tip (1)."""
     s_arr = WP.arclen(p)
     L = s_arr[-1]
     base = len(bld.v)
-    sides = 6
     n = len(p)
     for i in range(n):
         t = p[min(i + 1, n - 1)] - p[max(i - 1, 0)]
@@ -121,7 +120,7 @@ def _lock(bld, p, w0, th0, out_dir, part, s_off=0.0, flat_k=1.0):
         for j in range(sides + 1):
             a = 2 * math.pi * j / sides
             bld.v.append(p[i] + b * w * math.cos(a) + o * th * math.sin(a))
-            bld.uv.append((j / sides, u))
+            bld.uv.append((j / sides, u * vk))
             bld.part.append(part)
             bld.s.append(s_off + s_arr[i])
     row = sides + 1
@@ -131,7 +130,7 @@ def _lock(bld, p, w0, th0, out_dir, part, s_off=0.0, flat_k=1.0):
             bld.f.append((a, a + 1, a + row + 1, a + row))
     tip = len(bld.v)                 # (a point at the tip, so the lock ends sharp)
     bld.v.append(p[-1] + (p[-1] - p[-2]) * 0.6)
-    bld.uv.append((0.5, 1.0))
+    bld.uv.append((0.5, vk))
     bld.part.append(part)
     bld.s.append(s_off + L)
     for j in range(sides):
@@ -203,62 +202,75 @@ def pigtails(body, arm, rig, K, sp):
         out = np.array([sx, 0.0, 0.0])
         up = np.array([0.0, 0.0, 1.0])
         locks = []
-        nl = int(sp.get("locks", 14))
-        S = np.asarray(sp.get("curl", [[0.04, 0.0, 0.0], [0.07, 0.0, 0.045], [0.105, 0.0, -0.02],
+        # two tiers: the smooth blue body of the bunch (many locks, ending inside the curls, mostly blue) and the
+        # few thick S-curl ends swooping outward with the pink (`ends`)
+        tiers = [dict(sp, tier="body")] + ([dict(sp, **sp["ends"], tier="ends")] if sp.get("ends") else [])
+        for T in tiers:
+            nl = int(T.get("locks", 14))
+            S = np.asarray(T.get("curl", [[0.04, 0.0, 0.0], [0.07, 0.0, 0.045], [0.105, 0.0, -0.02],
                                         [0.085, 0.0, -0.1], [0.115, 0.0, -0.155], [0.09, 0.0, -0.19]]), float)
-        for k in range(nl):
-            ang = 2 * math.pi * k / nl + rng.uniform(-0.25, 0.25)
-            rad = cr * rng.uniform(0.2, 0.8)
-            off = (e1 * math.cos(ang) + e2 * math.sin(ang))
-            s0 = start + off * rad
-            fe = int(sp.get("flick_every", 5))
-            flick = fe > 0 and k % fe == 0             # (the art's few tips that spike up out of the puff)
-            spread = off * float(sp.get("spread", 0.03))
-            yk = rng.uniform(-1.0, 1.0) * float(sp.get("depth", 0.025))     # (front to back across the mass)
-            sk = rng.uniform(0.85, 1.1)
-            if flick:
-                ln = L * rng.uniform(0.4, 0.55)
-                ctrl = [s0, s0 + d * ln * 0.4 + spread, s0 + d * ln * 0.75 + out * ln * 0.3 + spread * 1.6,
-                        s0 + d * ln * 0.85 + out * ln * 0.65 + spread * 2 + up * 0.01]
-            else:
-                # the S-curl: up and out off the tie into a puff, over and down outside, in, out, and in at the jaw
-                ctrl = [s0, s0 + d * S[0][0] + spread * 0.5]
-                for q in S[1:]:
-                    ctrl.append(s0 + out * q[0] * sk + up * q[2] * sk + np.array([0.0, yk + q[1], 0.0]) + spread * 1.4)
-            p, _ = WP.resample(ctrl, int(sp.get("samples", 14)))
-            # smooth the control polyline into a curve
-            for _it in range(int(sp.get("smooth", 2))):
-                p[1:-1] = p[1:-1] * 0.5 + (p[:-2] + p[2:]) * 0.25
-            p = WP.drape(bvh, [tuple(c) for c in p], len(p), float(sp.get("clear", 0.02)), iters=6, smooth=0.05, length=None)
-            # soft curls: each lock coils round its own path over its lower half, its own phase (a curly mass)
-            cr_ = float(sp.get("curl_r", 0.0))
-            if cr_ > 0 and not flick:
-                s_c = WP.arclen(p)
-                tt, nn, bb = WP.frames(p, [0.0, 1.0, 0.0])
-                ph = rng.uniform(0, 2 * math.pi)
-                per = float(sp.get("curl_period", 0.07))
+            for k in range(nl):
+                ang = 2 * math.pi * k / nl + rng.uniform(-0.25, 0.25)
+                rad = cr * rng.uniform(0.2, 0.8)
+                off = (e1 * math.cos(ang) + e2 * math.sin(ang))
+                s0 = start + off * rad
+                fe = int(T.get("flick_every", 5))
+                flick = fe > 0 and k % fe == 0             # (the art's few tips that spike up out of the puff)
+                spread = off * float(T.get("spread", 0.03))
+                yk = rng.uniform(-1.0, 1.0) * float(T.get("depth", 0.025))     # (front to back across the mass)
+                sk = rng.uniform(0.85, 1.1)
+                if flick:
+                    ln = L * rng.uniform(0.4, 0.55)
+                    ctrl = [s0, s0 + d * ln * 0.4 + spread, s0 + d * ln * 0.75 + out * ln * 0.3 + spread * 1.6,
+                            s0 + d * ln * 0.85 + out * ln * 0.65 + spread * 2 + up * 0.01]
+                else:
+                    # the S-curl: up and out off the tie into a puff, over and down outside, in, out, and in at the jaw
+                    ctrl = [s0, s0 + d * S[0][0] + spread * 0.5]
+                    for q in S[1:]:
+                        ctrl.append(s0 + out * q[0] * sk + up * q[2] * sk + np.array([0.0, yk + q[1], 0.0]) + spread * 1.4)
+                p, _ = WP.resample(ctrl, int(T.get("samples", 14)))
+                # smooth the control polyline into a curve
+                for _it in range(int(T.get("smooth", 2))):
+                    p[1:-1] = p[1:-1] * 0.5 + (p[:-2] + p[2:]) * 0.25
+                p = WP.drape(bvh, [tuple(c) for c in p], len(p), float(T.get("clear", 0.02)), iters=6, smooth=0.05, length=None)
+                # soft curls: each lock coils round its own path over its lower half, its own phase (a curly mass)
+                cr_ = float(T.get("curl_r", 0.0))
+                if cr_ > 0 and not flick:
+                    s_c = WP.arclen(p)
+                    tt, nn, bb = WP.frames(p, [0.0, 1.0, 0.0])
+                    ph = rng.uniform(0, 2 * math.pi)
+                    per = float(T.get("curl_period", 0.07))
+                    for i in range(len(p)):
+                        f = s_c[i] / s_c[-1]
+                        f0 = float(T.get("curl_from", 0.45))
+                        g = max(0.0, (f - f0) / (1.0 - f0)) ** float(T.get("curl_pow", 1.0))
+                        a = 2 * math.pi * s_c[i] / per + ph
+                        p[i] = p[i] + (nn[i] * math.cos(a) + bb[i] * math.sin(a)) * cr_ * g
+                # the zigzag ends: a sawtooth across the lock over its last third
+                s_arr = WP.arclen(p)
+                Lp = s_arr[-1]
+                zz = float(T.get("zigzag", 0.011))
+                side_v = np.cross(p[-1] - p[-4], [0, 1, 0])
+                side_v /= max(np.linalg.norm(side_v), 1e-9)
                 for i in range(len(p)):
-                    f = s_c[i] / s_c[-1]
-                    g = max(0.0, (f - 0.45) / 0.55)
-                    a = 2 * math.pi * s_c[i] / per + ph
-                    p[i] = p[i] + (nn[i] * math.cos(a) + bb[i] * math.sin(a)) * cr_ * g
-            # the zigzag ends: a sawtooth across the lock over its last third
-            s_arr = WP.arclen(p)
-            Lp = s_arr[-1]
-            zz = float(sp.get("zigzag", 0.011))
-            side_v = np.cross(p[-1] - p[-4], [0, 1, 0])
-            side_v /= max(np.linalg.norm(side_v), 1e-9)
-            for i in range(len(p)):
-                f = s_arr[i] / Lp
-                if f > 0.75:
-                    tri = 2.0 * abs(((f - 0.75) / 0.25 * 1.5) % 1.0 - 0.5) - 0.5
-                    p[i] = p[i] + side_v * tri * zz * 2 * min(1.0, (f - 0.75) * 8)
-            w0 = float(sp.get("width", 0.024)) * rng.uniform(0.8, 1.2)
-            se = int(sp.get("streak_every", 0))
-            part = "lock_pk" if se and k % se == 2 else ("lock" if k % 4 else "lock_dk")
-            v0 = len(bld.v)
-            _lock(bld, p, w0, w0 * float(sp.get("thick", 0.5)), off if flick else out, part)
-            locks.append((p, v0, len(bld.v), flick))
+                    f = s_arr[i] / Lp
+                    if f > 0.75:
+                        tri = 2.0 * abs(((f - 0.75) / 0.25 * 1.5) % 1.0 - 0.5) - 0.5
+                        p[i] = p[i] + side_v * tri * zz * 2 * min(1.0, (f - 0.75) * 8)
+                bl = float(T.get("body_len", 1.0))
+                if bl < 1.0 and not flick:
+                    s_b = WP.arclen(p)
+                    tq = np.linspace(0.0, s_b[-1] * bl, len(p))
+                    p = np.stack([np.interp(tq, s_b, p[:, i]) for i in range(3)], axis=1)
+                w0 = float(T.get("width", 0.024)) * rng.uniform(0.8, 1.2)
+                se = int(T.get("streak_every", 0))
+                part = "lock_pk" if se and k % se == 2 else ("lock" if k % 4 else "lock_dk")
+                v0 = len(bld.v)
+                if part == "lock_pk":
+                    w0 *= float(T.get("streak_w", 1.0))       # (the streaks: thinner pink locks among the blue)
+                _lock(bld, p, w0, w0 * float(T.get("thick", 0.5)), off if flick else out, part, sides=int(T.get("sides", 6)),
+                      vk=float(T.get("v_k", 1.0)))
+                locks.append((p, v0, len(bld.v), flick))
         chains.append((side, locks))
     ob = bld.object("Pigtails")
     img = _atlas("pigtail_atlas", ["b87333", "8a5228"],
@@ -291,7 +303,7 @@ def pigtails(body, arm, rig, K, sp):
 
 
 # ------------------------------------------------------------------------------------------------ the rods
-ROD_COL = ["e0904e", "a8602e", "2f2a30", "1c1816", "4a3a30", "f0a868", "b8784a", "2a2226"]
+ROD_COL = ["c27a48", "8e5230", "2f2a30", "1c1816", "4a3a30", "d08a56", "a86a40", "2a2226"]
 # copper, copper_dk, sleeve, scorch, scorch_mid, tip, plate (the riveted mount), strap
 ROD_CELL = {"copper": 0, "copper_dk": 1, "sleeve": 2, "scorch": 3, "scorch_mid": 4, "tip": 5, "plate": 6, "strap": 7}
 
@@ -343,7 +355,8 @@ def rods(body, arm, rig, K, sp):
     r = float(sp.get("r", 0.0095))
     bottom_z = pz - float(sp.get("below", 0.2))
     seat = float(sp.get("seat", 0.004))
-    top_z = crown + float(sp.get("mid_top", 0.02))
+    # (the relic seated in the V below her shoulder line, as ryzz_back draws it, or up to the crown)
+    top_z = sh_z + float(sp["mid_top_abs"]) if "mid_top_abs" in sp else crown + float(sp.get("mid_top", 0.02))
     side_top = sh_z + float(sp.get("side_top", 0.32))
     side_x = float(sp.get("side_x", 0.17))
 
@@ -477,6 +490,38 @@ def nose_ring(body, arm, rig, K, sp):
     return ob
 
 
+def gum(body, arm, rig, K, sp):
+    """The pink gum bubble at her mouth (RYZZ_KIT "pink gum bubble"; her idle fidget in the art), rigid on the head:
+    a sphere just off her lips, a little to her left."""
+    bvh = WP.body_bvh([body])
+    nr = sp.get("nose", [0.012, 1.62])
+    best = None
+    for dz in np.linspace(-0.03, 0.03, 25):
+        hit = bvh.ray_cast((nr[0], 1.0, nr[1] + dz), (0.0, -1.0, 0.0))
+        if hit[0] is not None and (best is None or hit[0].y > best[1]):
+            best = np.array(hit[0][:])
+    r = float(sp.get("r", 0.026))
+    mz = best[2] - float(sp.get("below", 0.023)) - 0.011
+    hit = bvh.ray_cast((best[0] + float(sp.get("side", -0.012)), 1.0, mz), (0.0, -1.0, 0.0))
+    lip = np.array(hit[0][:]) if hit[0] is not None else best
+    c = lip + np.array([0.0, r * 0.8, 0.0])
+    bld = WP.Builder()
+    n = 12
+    rings = [c + np.array([0.0, 0.0, -r * math.cos(math.pi * i / n)]) for i in range(n + 1)]
+    radii = [max(r * math.sin(math.pi * i / n), 1e-4) for i in range(n + 1)]
+    bld.tube(rings, radii, 16, 0, 1, 0, 1, "gum", [0.0] * (n + 1), cap_start=True, cap_end=True)
+    ob = bld.object("Gum")
+    img = _atlas("gum_atlas", ["ff8ac6"])
+    _material(ob, "cloth-gum", img)
+    _uv_flat(ob, bld, {"gum": 0})
+    g = ob.vertex_groups.new(name="head")
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    ob.modifiers.new("Armature", "ARMATURE").object = arm
+    log("gum bubble at %s, r %.3f" % (tuple(round(float(v), 3) for v in c), r))
+    return ob
+
+
 def build(body, arm, rig, K, spec):
     """fit_warden's `scripted` hook: every piece in spec, as skinned meshes."""
     out = []
@@ -484,6 +529,8 @@ def build(body, arm, rig, K, spec):
         out.append(pigtails(body, arm, rig, K, spec["pigtails"]))
     if spec.get("rods"):
         out.append(rods(body, arm, rig, K, spec["rods"]))
+    if spec.get("gum"):
+        out.append(gum(body, arm, rig, K, spec["gum"]))
     if spec.get("nose_ring"):
         out.append(nose_ring(body, arm, rig, K, spec["nose_ring"]))
     return out

@@ -1828,6 +1828,9 @@ def paint_art(ob, img, pa):
     log("paint %s from the art: %d texels" % (pa.get("name", "?"), n))
 
 
+spec_emit_atlas = []
+
+
 def emit_attach(ob, img, mask, parts=()):
     """The emission mask (from emit_art, at the bake's size) down to the atlas's size, as every body material's
     emission texture: WardenGlb puts it on the toon shader's emit layer, in the archetype's model_glow colour."""
@@ -1835,6 +1838,19 @@ def emit_attach(ob, img, mask, parts=()):
     f = mask.shape[1] // w
     if f > 1:
         mask = mask.reshape(h, f, w, f, 3).mean(axis=(1, 3))
+    ea = spec_emit_atlas[0] if spec_emit_atlas else None
+    if ea:
+        # (pieces that glow in their own painted colour, not the Warden's glow colour: Ryzz's hazard bands, a faint
+        # yellow that the match camera's far_emit lifts so they read at distance; the shader keeps yellow untinted)
+        px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)[..., :3]
+        hh, ss, vv = _hsv_px(px)
+        sel = face_mask(ob, img, lambda poly, c, mat: any(mat.startswith(x + "-") for x in ea["slots"]))
+        k = np.zeros((h, w), bool)
+        for q in ea["hsv"]:
+            k |= (hh >= q[0]) & (hh <= q[1]) & (ss >= q[2]) & (ss <= q[3]) & (vv >= q[4]) & (vv <= q[5])
+        k &= sel
+        mask = np.where(k[..., None], np.clip(px * float(ea.get("gain", 0.3)), 0, 1), mask)
+        log("emit from the atlas: %d texels" % int(k.sum()))
     out = np.ones((h, w, 4), np.float32)
     out[..., :3] = mask
     em = bpy.data.images.new("%s_emit" % ob.name.lower(), w, h, alpha=False)
@@ -2095,6 +2111,8 @@ def main():
     for sp in spec.get("split", []):
         parts.append(split_part(ob, arm, img, sp))
     if emask is not None:
+        if spec.get("emit_atlas"):
+            spec_emit_atlas.append(spec["emit_atlas"])
         emit_attach(ob, img, emask)
     out = os.path.join(ROOT, os.path.expanduser(spec["out"]))
     log("tris: body %d, weapon %d" % (K.tris([ob]), K.tris([x for x in (gun, spin) if x])))

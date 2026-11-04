@@ -53,3 +53,9 @@ Stage 2 round 3:
 - Round 4: pink streaks through the upper pigtails (`streak_every`), the bunches 15% narrower, the scan's pink
   highlights on her upper arms and shoulders painted as skin; the emission brighter and more saturated at the match
   camera only (hero_toon `far_emit`, ryzz look 1.2), the metal (bands, copper) and corset lifted further there.
+- Round 5 (ORCH 13:10): the pink glow kept to the scar, charm and keyhole piping (stricter art neon, a strict
+  corset region; the scan's magenta smears on chest, arms and shoulders painted as skin, the charm and piping painted
+  back pink); the pink gum bubble (geometry on the head, `gum`); pigtails in two tiers, a smooth blue body and five
+  thick S-curl zigzag ends a side; the relic seated in the V below the shoulder line, rods toned copper;
+  charcoal-plum leather with copper zips and pink boot trim; the hazard bands a faint yellow emission (the shader
+  keeps yellow untinted by model_glow); the shared match-zoom fix (f4b59cb3) with an electric-blue far rim.

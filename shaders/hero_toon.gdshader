@@ -125,8 +125,10 @@ void fragment() {
 		emit_c = texture(emit_tex, UV).rgb;
 		if (emit_tint.a > 0.0) {
 			float ek = max(emit_c.r, max(emit_c.g, emit_c.b));
-			emit_c = emit_tint.rgb * ek;
-			c = mix(c, emit_tint.rgb, smoothstep(0.2, 0.7, ek) * 0.85);
+			// (a yellow piece keeps its own colour: Ryzz's hazard bands glow faintly as painted)
+			float yel = smoothstep(0.08, 0.2, min(emit_c.r, emit_c.g) - emit_c.b);
+			c = mix(c, emit_tint.rgb, smoothstep(0.2, 0.7, ek) * 0.85 * (1.0 - yel));
+			emit_c = mix(emit_tint.rgb * ek, emit_c, yel);
 		}
 	}
 	if (glow_core.a > 0.0 && glow > 0.0) {
