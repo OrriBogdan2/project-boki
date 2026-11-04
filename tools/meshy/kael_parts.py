@@ -34,6 +34,7 @@ COL = {  # name: (slot, hex)
     "chain": ("metal", "6e7075"), "hook": ("metal", "616368"),
     "sword": ("glow", "fffaf0"), "sword_edge": ("glow", "f2d48a"), "hook_tip": ("glow", "fffaf0"),
     "mane": ("hair", "e9e7e3"), "mane_dk": ("hair", "bdb9b4"),
+    "gold": ("metal", "d9a94e"), "gold_dk": ("metal", "8a6424"),
 }
 
 
@@ -226,6 +227,17 @@ def sword(sp):
         for br in branches:
             _ribbon(bm, br, 0.016, x, mi["sword_edge"])
             _ribbon(bm, br, 0.008, s * 0.0318, mi["sword"])
+        # the faint crack texture inside the white-hot core (kael_blade_sheet): thin zigzags of the gold edge
+        crng = np.random.default_rng(23)
+        for c in range(int(sp.get("core_cracks", 9))):
+            y0 = L0 + 0.08 + (L1 - 0.2 - L0) * c / max(int(sp.get("core_cracks", 9)) - 1, 1)
+            z0 = crng.uniform(-0.3, 0.3) * cw
+            line = [(y0, z0)]
+            for j in range(4):
+                y0 += crng.uniform(0.012, 0.03)
+                z0 = float(np.clip(z0 + crng.uniform(-0.45, 0.45) * cw * 0.5, -cw * 0.42, cw * 0.42))
+                line.append((y0, z0))
+            _ribbon(bm, line, 0.0035, s * 0.0324, mi["sword_edge"])
     # the bar guard, the wrapped grip, the pommel (the sheet's pommel hook is NOT his: the one hook is the chain's)
     _box(bm, (0, L0 - 0.03, 0), (0.055, 0.045, hw * 1.55), mi["guard"])
     _cyl(bm, (0, L0 - 0.075, 0), (0, -0.25, 0), 0.034, 10, mi["grip"])
@@ -464,7 +476,11 @@ def mane(body, arm, rig, K, sp):
             w0 = float(g.get("width", 0.05)) * rng.uniform(0.8, 1.15)
             part = "mane" if k % 3 else "mane_dk"
             v0 = len(bld.v)
-            _lock(bld, p, w0, w0 * 0.38, horiz, part)
+            # (flat to the head at the root, to the back further down: a root lying on the scalp, not a fin)
+            u = np.linspace(0.0, 1.0, len(p))[:, None]
+            k_root = np.clip(u * 4.0, 0.0, 1.0)
+            outs = d[None, :] * (1 - k_root) + horiz[None, :] * k_root
+            _lock(bld, p, w0, w0 * float(g.get("thick", 0.28)), outs, part)
             locks.append((p, v0, len(bld.v)))
         groups[g["name"]] = locks
     ob = finish(bld, "Mane", {"mane": "mane", "mane_dk": "mane_dk"})
@@ -481,4 +497,125 @@ def mane(body, arm, rig, K, sp):
     ob.modifiers.new("Armature", "ARMATURE").object = arm
     log("mane: %d locks in %d chains, %d tris" % (sum(len(v) for v in groups.values()), len(groups),
                                                    sum(len(f) - 2 for f in bld.f)))
+    return ob
+
+
+# ------------------------------------------------------------------------------------------------ the hair cap
+def cap(body, arm, rig, K, sp):
+    """A smooth shell over the scan's own hair (its stringy spikes go under it): a sphere shrunk onto the body round
+    the head, kept only where the nearest body vertex is painted hair, lifted `lift` m off it and smoothed. On head."""
+    me = body.data
+    hair_mats = {i for i, m in enumerate(me.materials) if m and m.name.startswith("hair")}
+    is_hair = np.zeros(len(me.vertices), bool)
+    for p in me.polygons:
+        if p.material_index in hair_mats:
+            is_hair[list(p.vertices)] = True
+    co = np.array([v.co[:] for v in me.vertices])
+    hv = co[is_hair & (co[:, 2] > float(K.bone_head(rig, "head").z) - 0.02)]
+    c = (hv.min(axis=0) + hv.max(axis=0)) * 0.5
+    rad = (hv.max(axis=0) - hv.min(axis=0)) * 0.5 + 0.03
+    from mathutils.kdtree import KDTree
+    kd = KDTree(len(co))
+    for i, x in enumerate(co):
+        kd.insert(x, i)
+    kd.balance()
+    bvh = WP.body_bvh([body])
+    nu, nv = 32, 20
+    verts, faces = [], []
+    for j in range(nv + 1):
+        th = math.pi * j / nv
+        for i in range(nu):
+            ph = 2 * math.pi * i / nu
+            d = np.array([math.sin(th) * math.cos(ph), math.sin(th) * math.sin(ph), math.cos(th)])
+            verts.append(c + d * rad)
+    for j in range(nv):
+        for i in range(nu):
+            a, b = j * nu + i, j * nu + (i + 1) % nu
+            faces.append((a, b, b + nu, a + nu))
+    lift = float(sp.get("lift", 0.012))
+    keep_v = np.zeros(len(verts), bool)
+    out = []
+    for k, v in enumerate(verts):
+        loc, nrm, _i, _d = bvh.find_nearest(Vector(v))
+        _p, vi, _dd = kd.find(loc)
+        keep_v[k] = is_hair[vi]
+        n = Vector(v) - loc
+        n = n.normalized() if n.length > 1e-6 else nrm
+        out.append(np.array(loc + n * lift))
+    out = np.array(out)
+    brow = float(sp.get("front_z", -1.0))
+    if brow > 0:
+        # (the face's front below the hairline stays open: the fringe locks fall there, not a helmet's brim)
+        keep_v &= ~((np.array(verts)[:, 1] > c[1] + rad[1] * 0.2) & (out[:, 2] < brow))
+    keep_f = [f for f in faces if sum(keep_v[list(f)]) >= 3]
+    # Laplacian smoothing on the kept shell (the scan's spikes made it lumpy)
+    nb = {}
+    for f in keep_f:
+        for a in f:
+            nb.setdefault(a, set()).update(x for x in f if x != a)
+    for _it in range(int(sp.get("smooth", 4))):
+        new = out.copy()
+        for a, ns in nb.items():
+            new[a] = out[a] * 0.5 + np.mean([out[x] for x in ns], axis=0) * 0.5
+        out = new
+    used = sorted(nb)
+    remap = {a: i for i, a in enumerate(used)}
+    bld = WP.Builder()
+    for a in used:
+        bld.v.append(out[a]); bld.uv.append((0.5, 0.5)); bld.part.append("mane"); bld.s.append(0.0)
+    for f in keep_f:
+        bld.f.append(tuple(remap[a] for a in f))
+    ob = finish(bld, "HairCap", {"mane": "mane"})
+    g = ob.vertex_groups.new(name="head")
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    ob.modifiers.new("Armature", "ARMATURE").object = arm
+    log("hair cap: %d faces" % len(keep_f))
+    return ob
+
+
+# ------------------------------------------------------------------------------------------------ the collar
+def collar(body, arm, rig, K, sp):
+    """The broken gold champion's collar (kael_collar_sheet, his relic): a heavy band round the base of his neck,
+    over the scarf, split open at the front with a chipped gap, a darker rim top and bottom and a raised plate at
+    the back. Rigid on the hips."""
+    neck = np.array(K.bone_head(rig, "head")[:])
+    zc = neck[2] - float(sp.get("drop", 0.05))
+    co = np.array([v.co[:] for v in body.data.vertices])
+    band = co[np.abs(co[:, 2] - zc) < 0.012]
+    d = np.hypot(band[:, 0] - neck[0], band[:, 1] - neck[1])
+    d = d[d < 0.3]
+    r = float(np.percentile(d, float(sp.get("pct", 85)))) + float(sp.get("gap_out", 0.012))
+    tilt = float(sp.get("tilt", 0.0))       # (a torc sits lower at the front, on the chest, than at the nape)
+    h, t = float(sp.get("height", 0.05)), float(sp.get("thick", 0.016))
+    gap_c, gap_w = math.radians(float(sp.get("gap_at", 20.0))), math.radians(float(sp.get("gap", 34.0)))
+    bld = WP.Builder()
+    n = 48
+    segs = []
+    for i in range(n + 1):
+        a = gap_c + gap_w / 2 + (2 * math.pi - gap_w) * i / n
+        segs.append(a)
+    rng = np.random.default_rng(9)
+
+    def ring(a, rr, z):
+        return np.array([neck[0] + math.sin(a) * rr, neck[1] + math.cos(a) * rr, z - tilt * math.cos(a)])
+    for part, z0, z1, ro in (("gold", zc - h / 2 + 0.008, zc + h / 2 - 0.008, r + t), ("gold_dk", zc - h / 2, zc - h / 2 + 0.008, r + t * 1.15),
+                              ("gold_dk", zc + h / 2 - 0.008, zc + h / 2, r + t * 1.15)):
+        base = len(bld.v)
+        for i, a in enumerate(segs):
+            chip = rng.uniform(-0.004, 0.0) if i in (0, n) else 0.0
+            for rr, z in ((r, z0), (ro, z0), (ro, z1 + chip), (r, z1 + chip)):
+                bld.v.append(ring(a, rr, z)); bld.uv.append((0.5, 0.5)); bld.part.append(part); bld.s.append(0.0)
+        for i in range(n):
+            q0, q1 = base + i * 4, base + (i + 1) * 4
+            for k in range(4):
+                bld.f.append((q0 + k, q0 + (k + 1) % 4, q1 + (k + 1) % 4, q1 + k))
+        for q in (base, base + n * 4):
+            bld.f.append((q, q + 1, q + 2, q + 3))
+    ob = finish(bld, "Collar", {"gold": "gold", "gold_dk": "gold_dk"})
+    g = ob.vertex_groups.new(name=sp.get("bone", "hips"))
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    ob.modifiers.new("Armature", "ARMATURE").object = arm
+    log("collar: r %.3f at z %.3f, %d tris" % (r, zc, sum(len(f) - 2 for f in bld.f)))
     return ob

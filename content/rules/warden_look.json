@@ -35,31 +35,31 @@
 		"painted": {},
 		"slots": {
 			"skin": {
-				"top_light": 0.7,
-				"fres": 0.9,
+				"top_light": 0.5,
+				"fres": 0.8,
 				"fres_tint": 0.9,
-				"far_lift": 0.45,
-				"shade": 0.82
+				"far_lift": 0.3,
+				"shade": 0.84
 			},
 			"cloth": {
-				"fres": 0.7,
-				"far_lift": 0.45
+				"fres": 0.6,
+				"far_lift": 0.3
 			},
 			"hair": {
-				"far_lift": 0.12,
+				"far_lift": 0.1,
 				"fres": 0.4,
-				"top_light": 0.6
+				"top_light": 0.5
 			},
 			"metal": {
-				"top_light": 0.6,
-				"fres": 0.6,
+				"top_light": 0.5,
+				"fres": 0.55,
 				"fres_tint": 0.8,
-				"far_lift": 0.35,
+				"far_lift": 0.25,
 				"sheen": 0.1
 			},
 			"leather": {
-				"far_lift": 0.4,
-				"fres": 0.6
+				"far_lift": 0.3,
+				"fres": 0.5
 			},
 			"glow": {
 				"glow": 2.6

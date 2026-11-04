@@ -60,3 +60,13 @@ docs/art/wardens/PIPELINE.md.
 - **Stance:** content/rules/warden_stance.json juggernaut: the greatsword hangs in his right hand down across his
   front (the turnaround), the blade's face turned up so its glow reads from the match camera; the chest less
   thrown back, the left arm hanging. Archetype size 0.975 (the sheet height with the new stance).
+
+## Stage 3 (2026-11-04, after the shared painted-look fix 16c18b4f; credit-free)
+- The shared look fix cherry-picked (the shader conflict kept both the glow heat key and the own ambient);
+  warden_look.json `kael` retuned down on top of it.
+- **Arm cracks** (kael_arm_sheet): `hot_paint` grows the arm atlas's hot texels and paints them a warm core the
+  shader keys fully hot (lit in the white-hot model_glow), with a duller rim it keys as the pale-gold edge.
+- **Collar** (kael_collar_sheet): a scripted broken gold band round the neck base, split at the front, dark rims,
+  lower at the front than the nape (kael_parts.collar).
+- **Mane:** 36 wider locks (roots lying flat on the scalp, turning out to hang), five spring chains.
+- **Blade:** faint zigzag crack lines inside the white-hot core.

@@ -272,7 +272,8 @@
    "scale": 0.55,
    "crack_w": 0.45,
    "branches": 8,
-   "half_width": 0.14
+   "half_width": 0.14,
+   "core_cracks": 9
   },
   "chain": {
    "turns": 2.6,
@@ -286,84 +287,95 @@
     {
      "name": "mane_back",
      "az": [
-      120,
-      240
+      118,
+      242
      ],
-     "locks": 22,
-     "length": 0.7,
-     "width": 0.055,
+     "locks": 16,
+     "length": 0.72,
+     "width": 0.11,
      "el": [
       -5,
-      60
+      45
      ],
      "spread": 0.02,
-     "wave": 0.03
+     "wave": 0.025
     },
     {
      "name": "mane_l",
      "az": [
-      240,
-      290
+      242,
+      282
      ],
-     "locks": 9,
-     "length": 0.6,
-     "width": 0.05,
+     "locks": 7,
+     "length": 0.62,
+     "width": 0.095,
      "el": [
       -5,
-      55
+      45
      ],
-     "spread": 0.035,
-     "wave": 0.025
+     "spread": 0.04,
+     "wave": 0.02
     },
     {
      "name": "mane_r",
      "az": [
-      70,
-      120
+      78,
+      118
      ],
-     "locks": 9,
-     "length": 0.6,
-     "width": 0.05,
+     "locks": 7,
+     "length": 0.62,
+     "width": 0.095,
      "el": [
       -5,
-      55
+      45
      ],
-     "spread": 0.035,
-     "wave": 0.025
+     "spread": 0.04,
+     "wave": 0.02
     },
     {
      "name": "mane_fl",
      "az": [
-      290,
-      320
+      272,
+      292
      ],
-     "locks": 4,
-     "length": 0.48,
-     "width": 0.042,
+     "locks": 3,
+     "length": 0.5,
+     "width": 0.08,
      "el": [
       0,
-      35
+      30
      ],
-     "spread": 0.04,
+     "spread": 0.07,
      "wave": 0.02
     },
     {
      "name": "mane_fr",
      "az": [
-      40,
-      70
+      68,
+      88
      ],
-     "locks": 4,
-     "length": 0.48,
-     "width": 0.042,
+     "locks": 3,
+     "length": 0.5,
+     "width": 0.08,
      "el": [
       0,
-      35
+      30
      ],
-     "spread": 0.04,
+     "spread": 0.07,
      "wave": 0.02
     }
    ]
+  },
+  "collar": {
+   "drop": 0.07,
+   "height": 0.042,
+   "thick": 0.018,
+   "gap_at": 330,
+   "gap": 55,
+   "bone": "hips",
+   "gap_out": 0.004,
+   "pct": 55,
+   "tilt": 0.035
   }
  },
  "smooth": {
@@ -537,5 +549,12 @@
    "col0_at": 703.03,
    "row0_at": 746.19
   }
- ]
+ ],
+ "hot_paint": {
+  "min": 0.3,
+  "dilate": 1,
+  "rim": 2,
+  "core": "ffd070",
+  "edge": "8c5030"
+ }
 }

@@ -1625,6 +1625,36 @@ def hot_faces(ob, hb):
     log("hot faces: %d in %s" % (n, b))
 
 
+def hot_paint(ob, img, hp):
+    """Kael's arm cracks made bold (kael_arm_sheet: white-hot over the whole right arm): in the "-hot" materials'
+    texels, the hot ones (the shader's own key) grow `dilate` px and take a warm `core` colour the shader keys as fully
+    hot (it lights them in the glow colour), and a `rim` px ring round them a duller `edge` colour it keys half hot
+    (the glow's pale-gold edge)."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    rgb = px[..., :3]
+    m = face_mask(ob, img, lambda poly, c, mat: mat.endswith("-hot"))
+
+    def ss(e0, e1, x):
+        t = np.clip((x - e0) / (e1 - e0), 0, 1)
+        return t * t * (3 - 2 * t)
+    r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+    heat = ss(0.42, 0.66, r) * ss(0.14, 0.32, r - b) * ss(-0.04, 0.01, g - b)
+    core = (heat > float(hp.get("min", 0.35))) & m
+
+    def grow(a, n):
+        for _ in range(n):
+            a = a | np.roll(a, 1, 0) | np.roll(a, -1, 0) | np.roll(a, 1, 1) | np.roll(a, -1, 1)
+        return a
+    big = grow(core, int(hp.get("dilate", 2))) & m
+    rim = grow(big, int(hp.get("rim", 2))) & m & ~big
+    rgb[big] = np.array(K.hexcol(hp.get("core", "ffd070")), np.float32)
+    rgb[rim] = rgb[rim] * 0.3 + np.array(K.hexcol(hp.get("edge", "8c5030")), np.float32) * 0.7
+    px[..., :3] = rgb
+    img.pixels = px.ravel()
+    log("hot paint: %d core texels (from %d), %d rim" % (int(big.sum()), int(core.sum()), int(rim.sum())))
+
+
 def main():
     spec_path = sys.argv[sys.argv.index("--") + 1]
     spec = json.load(open(spec_path))
@@ -1663,6 +1693,9 @@ def main():
         # so its colours stay the art's; each with a registration measured on the mesh's own render
         for pj in spec["project_late"]:
             project(ob, img, pj)
+        pad(img, ids, int(spec.get("pad", 6)))
+    if spec.get("hot_paint"):
+        hot_paint(ob, img, spec["hot_paint"])
         pad(img, ids, int(spec.get("pad", 6)))
     head = None
     if "head" in spec:
@@ -1756,6 +1789,10 @@ def main():
         import kael_parts
         parts.append(kael_parts.chains(ob, arm, rig, K, spec["kael"]["chain"]))
         parts.append(kael_parts.mane(ob, arm, rig, K, spec["kael"]["mane"]))
+        if spec["kael"].get("cap"):
+            parts.append(kael_parts.cap(ob, arm, rig, K, spec["kael"]["cap"]))
+        if spec["kael"].get("collar"):
+            parts.append(kael_parts.collar(ob, arm, rig, K, spec["kael"]["collar"]))
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
