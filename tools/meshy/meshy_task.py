@@ -6,6 +6,7 @@ repo, chmod 600). It is never printed or written anywhere else.
 
   python3 -I tools/meshy/meshy_task.py create OUT_DIR img1.png [img2 ...] [--polycount N] [--model latest]
   python3 -I tools/meshy/meshy_task.py fetch OUT_DIR TASK_ID
+  python3 -I tools/meshy/meshy_task.py retexture OUT_DIR TASK_ID front.png [side.png back.png]
 
 `create` posts the job, polls it, then downloads the GLB, texture maps,
 thumbnails and a task.json record (id, model, settings, consumed credits)
@@ -13,7 +14,8 @@ into OUT_DIR.
 """
 import base64, json, os, sys, time, urllib.request, urllib.error
 
-API = "https://api.meshy.ai/openapi/v1/multi-image-to-3d"
+BASE = "https://api.meshy.ai/openapi/v1/"
+API = BASE + "multi-image-to-3d"
 
 
 def key():
@@ -51,10 +53,11 @@ def download(url, path):
         f.write(r.read())
 
 
-def fetch(out, tid):
+def fetch(out, tid, api=None):
+    api = api or API
     os.makedirs(out, exist_ok=True)
     while True:
-        t = call("GET", API + "/" + tid)
+        t = call("GET", api + "/" + tid)
         print("status", t.get("status"), t.get("progress"), flush=True)
         if t.get("status") in ("SUCCEEDED", "FAILED", "CANCELED"):
             break
@@ -62,6 +65,8 @@ def fetch(out, tid):
     json.dump(t, open(os.path.join(out, "task.json"), "w"), indent=1)
     if t["status"] != "SUCCEEDED":
         sys.exit("task %s: %s" % (t["status"], t.get("task_error")))
+    if t.get("thumbnail_url"):
+        download(t["thumbnail_url"], os.path.join(out, "thumb.png"))
     for fmt, u in (t.get("model_urls") or {}).items():
         if fmt in ("glb", "pre_remeshed_glb") and u:
             download(u, os.path.join(out, fmt + ".glb"))
@@ -75,9 +80,25 @@ def fetch(out, tid):
     print("done; credits", t.get("consumed_credits"), "->", out)
 
 
+def retexture(out, tid, imgs):
+    """Retextures an existing task's model from 1-4 reference views (front first), on its own UVs, lighting
+    removed, no PBR maps."""
+    body = {"input_task_id": tid, "multiview_image_urls": [data_uri(p) for p in imgs[:4]], "ai_model": "meshy-7",
+            "enable_original_uv": True, "enable_pbr": False, "remove_lighting": True, "target_formats": ["glb"]}
+    os.makedirs(out, exist_ok=True)
+    rec = {k: v for k, v in body.items() if k != "multiview_image_urls"}
+    rec["images"] = imgs
+    json.dump(rec, open(os.path.join(out, "request.json"), "w"), indent=1)
+    rid = call("POST", BASE + "retexture", body)["result"]
+    print("task", rid, flush=True)
+    fetch(out, rid, BASE + "retexture")
+
+
 def main(a):
     if len(a) >= 3 and a[0] == "fetch":
         return fetch(a[1], a[2])
+    if len(a) >= 4 and a[0] == "retexture":
+        return retexture(a[1], a[2], a[3:])
     if len(a) < 3 or a[0] != "create":
         sys.exit(__doc__)
     out, imgs, opts = a[1], [], {"polycount": "30000", "model": "latest"}
