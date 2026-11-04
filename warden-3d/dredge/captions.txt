@@ -17,3 +17,16 @@ r2b_dredge_closeup.png: portrait | in game, the helm and eye front | 3/4.
 r2b_dredge_game_turnaround.png: the match camera, true pixels and x3.
 r2b_dredge_match.png: the Arena at match zoom (--arena-demo=pose --demo-zoom=1.0) | the same frame enlarged around him.
 r2b_dredge_moves.png: Grapnel throw | reel | Anchor Drop | barge lunge | scattergun shot | air smash | Brass Broadside, on the 3D model.
+
+r3 (owner 13:10): a new hull in place of the friend's smooth sphere and domes: a scripted dented sphere, raised plate bands and four faceted lames per shoulder, coloured from three nano-banana edits of the art (the hull alone: front, side, back) projected along their axes; the rest of the brass olive-gold; the horn x0.95 (was x1.3). No Meshy 3D run (refused by the session's permission check); 45 credits on the edits. Rig, variant bones, moves, the orb eye and the tar unchanged. All with the stance (scratch branch).
+r3_dredge_turnaround.png: the art's turnaround | in game front, 3/4, side, back, 3/4 back, close camera.
+r3_dredge_front_34.png: turnaround front + 3/4 | portrait | in game front, 3/4 close-ups.
+r3_dredge_back.png: turnaround back | in game back, 3/4 back (cut from the 256 px close turnaround, so soft).
+r3_dredge_closeup.png: portrait | in game, helm and eye front | 3/4 (the new shoulder lames).
+r3_dredge_match.png: the Arena at match zoom | the same frame enlarged around him.
+r3_dredge_moves.png: Grapnel throw | reel | Anchor Drop | barge lunge | scattergun shot | air smash | Brass Broadside.
+r3_dredge_vs_r2b.png: portrait | r2b 3/4 | r3 3/4 | r2b shoulder close-up | r3 shoulder close-up.
+
+r3b (credit-free): five modelled tears with peeled plate flaps breaking the hull's outline, three big curved lames on each shoulder, the doubled porthole ring masked, brass porthole rings. Before the shared look fix. All with the stance (scratch branch).
+r3b_dredge_turnaround.png | r3b_dredge_front_34.png | r3b_dredge_back.png | r3b_dredge_closeup.png | r3b_dredge_match.png | r3b_dredge_moves.png: as for r3.
+r3b_dredge_vs_r3.png: portrait | r3 3/4 | r3b 3/4 | r3 shoulder close-up | r3b shoulder close-up.
