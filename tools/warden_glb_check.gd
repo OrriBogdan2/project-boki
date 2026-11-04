@@ -92,6 +92,7 @@ func run(main: Node) -> void:
 		_own_motion(a, "bulwark" if a != "bulwark" else "gunslinger")
 		_weapon(a)
 		_springs(a)
+		_own_look(a)
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
 	print("WARDENGLB_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
 	main.get_tree().quit()
@@ -295,6 +296,34 @@ func _springs(a: String) -> void:
 	var rest := _spring_off(sk, sync)
 	ok(lag > 0.02 and rest < 0.01, "%s: %d spring chains trail a sideways move (tip %.3f m off) and settle (%.4f m)"
 			% [a, sync.springs.chains.size(), lag, rest])
+	m.free()
+
+## A model's own look (content/rules/warden_look.json) reaches its surfaces: every surface of a slot it names
+## carries that slot's values. (No entry: nothing to check.)
+func _own_look(a: String) -> void:
+	var own := WardenGlb.look(WardenGlb.art(a))
+	if own.is_empty():
+		return
+	var m := _model(a)
+	var slots: Dictionary = own.get("slots", {})
+	var seen := 0
+	var wrong: Array = []
+	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		var mesh := (mi as MeshInstance3D).mesh
+		for si in mesh.get_surface_count():
+			var src := mesh.surface_get_material(si)
+			var slot := String(src.resource_name).get_slice("-", 0) if src else ""
+			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
+			for k in (slots.get(slot, {}) as Dictionary):
+				var want: Variant = WardenGlb._param(slots[slot][k])
+				var got: Variant = sm.get_shader_parameter(k)
+				seen += 1
+				var same: bool = got.is_equal_approx(want) if want is Color else is_equal_approx(float(got),
+						float(want))
+				if not same:
+					wrong.append("%s.%s" % [slot, k])
+	ok(seen > 0 and wrong.is_empty(), "%s: its own look (warden_look.json) is on its surfaces (%d values, wrong %s)"
+			% [a, seen, str(wrong)])
 	m.free()
 
 ## The largest distance of a spring chain's tip from where it rides its parent rigidly.
