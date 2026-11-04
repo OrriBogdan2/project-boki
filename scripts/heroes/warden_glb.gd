@@ -132,6 +132,8 @@ static func _hold_weapon(root: Node3D, glb: Node3D) -> void:
 	# its magazine (WEAPON_MAG) becomes the Gun's Mag, which the reload drops out and slaps back in
 	var mag := weapon.find_child(WEAPON_MAG, true, false) as Node3D
 	var old := gun.get_node_or_null("Mag")
+	if old is MeshInstance3D and mag == null:
+		(old as MeshInstance3D).mesh = null      # (a weapon modelled whole: the reload still moves the Mag node)
 	if mag and old:
 		var at := WardenGlb.model_xf(gun, mag)
 		gun.remove_child(old)

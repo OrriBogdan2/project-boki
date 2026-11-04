@@ -270,7 +270,7 @@ func _hitbox(a: String) -> void:
 			% [a, ring_w, ring_p, Arch.hit_r(a, Data.CLASSES[Arch.weight(a)])])
 
 ## A .glb that carries its weapon: it is in the hands (under the Gun node, whose Muzzle stays where the shots
-## leave), the procedural weapon is hidden, and its magazine is the Gun's Mag the reload animates.
+## leave), the procedural weapon is hidden, and its magazine (if it has one apart) is the Gun's Mag.
 func _weapon(a: String) -> void:
 	var m := _model(a)
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
@@ -281,7 +281,9 @@ func _weapon(a: String) -> void:
 	var shown := gun.find_children("*", "MeshInstance3D", true, false).filter(
 			func(mi): return (mi as Node3D).is_visible_in_tree() and mi != weapon and not weapon.is_ancestor_of(mi))
 	var mag := gun.get_node_or_null("Mag") as MeshInstance3D
-	var mag_ok := mag != null and mag.mesh != null and mag.mesh.get_surface_count() > 0 and mag in shown
+	var own_mag := weapon.find_child(WardenGlb.WEAPON_MAG, true, false) != null
+	# its own magazine is the Mag; a weapon modelled whole leaves the Mag node empty (the reload moves nothing)
+	var mag_ok := mag != null and (mag.mesh != null and mag in shown if own_mag else mag.mesh == null)
 	var stray := shown.filter(func(mi): return mi != mag)
 	var left := str(stray.map(func(mi): return mi.name))
 	ok(gun.has_node("Muzzle") and stray.is_empty() and mag_ok,

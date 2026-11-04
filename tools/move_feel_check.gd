@@ -926,6 +926,7 @@ func _stand_in(id: String, look: Dictionary) -> Node3D:
 	var at_scale := h.scale * Hunter.VIS_SCALE
 	var lean := P.model.global_basis.orthonormalized()
 	h.global_transform = Transform3D(lean * Basis.from_scale(at_scale), P.model.global_position)
+	h.set_meta("anim_seed", 1)      # one stance for every measure (HunterAnim seeds it per node otherwise)
 	var an := HunterAnim.new(h)
 	for i in 30:
 		an.update(DT, {"fired": 99.0, "face": 0.0, "grounded": true})

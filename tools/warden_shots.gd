@@ -3,7 +3,8 @@ extends RefCounted
 ## in-engine Warden models next to their concept sheets (concept phase 2). Per Hunter, under <dir>/<id>/:
 ## turnaround_game.png (front, 3/4, side, back, 3/4 back at the match camera: the true pixels, then
 ## enlarged 3x), poses_game.png (idle, run, attack, cast, ult at the match camera), turnaround_close.png,
-## closeup.png (head and shoulders), vs_sheet.png (the concept sheet beside the close turnaround) and
+## closeup.png and closeup_front.png (head and shoulders, 3/4 and front), vs_sheet.png (the concept sheet
+## beside the close turnaround) and
 ## moves_close_N.png (the run and the hero's own kit moves, frame by frame), plus captions.txt.
 ## --procedural shoots the procedural models of Wardens that have a 3D one (Settings: Warden models).
 ## --sheets names the folder holding the concept PNGs (<id>.png). Needs a renderer.
@@ -86,6 +87,9 @@ func _hero(id: String, dir: String, sheets: String) -> void:
 	var head := await _head(row[1])
 	head.save_png(dir.path_join("closeup.png"))
 	caps.append("closeup.png: %s head and shoulders, three-quarter front" % title)
+	var face := await _head(row[0])
+	face.save_png(dir.path_join("closeup_front.png"))
+	caps.append("closeup_front.png: %s head and shoulders, from the front" % title)
 	# 3. the concept sheet beside the model
 	var sheet_path := sheets.path_join(id + ".png")
 	if sheets != "" and FileAccess.file_exists(sheet_path):
@@ -211,7 +215,7 @@ func _front_pair(row: Array) -> Image:
 func _head(h: Node3D) -> Image:
 	var hp := (h.get_node("Rig/Torso/HeadPivot") as Node3D).global_position + Vector3(0, 0.12 * h.scale.y, 0)
 	cam.fov = 24.0
-	cam.position = Vector3(h.position.x, hp.y + 0.1, hp.z + 2.6)
+	cam.position = Vector3(h.position.x, hp.y + 0.1, hp.z + 1.8)
 	cam.look_at(hp + Vector3(0, -0.08, 0))
 	await _settle(4)
 	var img := await _grab()

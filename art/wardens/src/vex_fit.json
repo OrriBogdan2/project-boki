@@ -1,0 +1,36 @@
+{
+ "body_glb": "~/meshy/vex/run1/glb.glb",
+ "weapon_glb": "~/meshy/vex/run2_rifle/glb.glb",
+ "rig": "art/wardens/src/vex_rig.json",
+ "out": "art/wardens/vex/vex.glb",
+ "blend": "~/meshy/vex/fit.blend",
+ "turn": 180,
+ "max_tris": 15000,
+ "weapon_len": 1.0,
+ "lift": [0.75, 1.08],
+ "floater_verts": 40,
+ "project": [
+  {"view": "front", "image": "~/meshy/vex/prep/front.png", "col0": 450, "sole_row": 1288, "head_z": 0.80,
+   "box": [-0.11, 0.17, 0.66, 0.97], "facing": 0.55},
+  {"view": "side", "image": "~/meshy/vex/prep/side.png", "col0": 640, "sole_row": 1288, "head_z": 0.80,
+   "head_box": [-0.2, 0.2], "box": [-0.16, 0.16, 0.38, 0.62], "facing": 0.6}
+ ],
+ "snap_r": 0.045,
+ "joints": {
+  "shoulder.R": [-0.1625, 0, 0.525], "shoulder.L": [0.2375, 0, 0.525],
+  "elbow.R": [-0.2375, 0, 0.275], "elbow.L": [0.325, 0, 0.275],
+  "hand.R": [-0.3375, 0, 0.0], "hand.L": [0.4125, 0, -0.0625],
+  "fingers.R": [-0.36, 0, -0.08], "fingers.L": [0.43, 0, -0.14],
+  "hip.R": [-0.07, 0, -0.025], "hip.L": [0.2, 0, -0.025],
+  "knee.R": [-0.0825, 0, -0.4375], "knee.L": [0.1875, 0, -0.4375],
+  "ankle.R": [-0.085, 0, -0.85], "ankle.L": [0.19, 0, -0.85],
+  "neck": [0.03, 0, 0.64], "crown": [0.04, 0, 0.87]
+ },
+ "palette": [
+  ["skin", "c08a70"], ["skin", "8e5e48"], ["hair", "4a2e24"],
+  ["cloth", "2c2e4c"], ["cloth", "d0602c"], ["cloth", "8a7a5e"], ["cloth", "c0aa8c"],
+  ["metal", "586675"], ["metal", "4a4c50"], ["metal", "b08a40"],
+  ["leather", "2c2521"], ["leather", "313137"]
+ ],
+ "glow_min": [0.95, 0.6, 0.55]
+}
