@@ -29,4 +29,4 @@ An undead drowned ferryman that the frozen sea remade into a monstrous sea-ogre.
 - Scale: 1.5x a medium hunter (owner, 11:15 UTC).
 - breaker_front.webp: full-body front on plain grey. Use it for the HOLD: hammer resting on his RIGHT shoulder (stage 1 held it forward and low), the prow shield at his LEFT side (smaller and further out than stage 1), and the skin texture (blue-grey, frost cracks, barnacles).
 - breaker_shield_sheet.webp: the prow shield front / side / back (carved bearded figurehead, iron rim, broken top planks, rope grip and strap on the back), with scale.
-- Hammer: a plain banded ice block, NO anchor or pick (as above). A hammer sheet is still to come; until then follow breaker_front.webp.
+- breaker_hammer_sheet.webp: the hammer (front / side / top + scale): a plain glacier-ice block in two rusty riveted ship-bands, icicles, rope-wrapped haft, iron end cap. NO anchor or pick.
