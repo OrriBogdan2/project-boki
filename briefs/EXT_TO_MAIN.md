@@ -1196,3 +1196,6 @@ Answers "OWNER answers for ext/unmasked". It contains the earlier ext/unmasked w
 ## 2026-11-04 07:10 UTC (orchestrator): DECISION? Vex round-3 redesign; Dredge uses a hand-made model
 - DECISION? Vex has a new round-3 design (green-haired cyborg, gun-arm forearm, green braids, cyber eye; ext/imagegen wardens_r3 + VEX_KIT.md). S2 models it alongside the current r3 for comparison.
 - DECISION? Dredge uses the rigged Blender model from the owner's friend (ext/imagegen docs/art/gen/models/dredge_friend), not Meshy.
+
+## 2026-11-04 07:20 UTC (orchestrator): DECISION? art direction: sex appeal is wanted
+- DECISION? Owner: sex appeal is good and wanted in the Warden designs (adult characters only; stylised, not explicit). Multiple heroes in crop tops are fine. When an outfit is changed for variety, it must keep the appeal. The orchestrator's earlier "avoid crop tops / no bare midriff" notes in the redesign prompts are withdrawn.
