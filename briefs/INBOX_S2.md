@@ -432,3 +432,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 08:45 UTC (orchestrator): OWNER RENAME: Pin is now "Hem"
 - Add to the rename sweep (on top of rename-breaker or a small follow-up): display name, kit text, tooltips, picker, docs/heroes, wiki (gen_wiki), and "Pin" into --hero-title-check's old names. id archer unchanged. Art and model files: hem_* from now on.
+
+## 2026-11-04 08:55 UTC (orchestrator): Breaker round 3 (sea-ogre) art in; it supersedes r2
+- ext/imagegen docs/art/gen/wardens_r3/breaker_* + BREAKER_KIT.md. Use these, not wardens_r2/breaker_*. Good candidate for the hybrid route: script the hammer and the prow shield in Blender (hard surface), Meshy for the ogre body. Check for an extra third hand (the kit warns the generator adds one). No lantern; a plain hammer.
