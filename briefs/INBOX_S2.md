@@ -577,3 +577,103 @@ Owner: "figure out the most efficient way to get one done fast and then do them 
 **Phase B, ~15:30-21:00 UTC (batch):** one Opus agent per remaining Hunter, all in parallel, each runs RECIPE_95 on its branch using its reference sheets, ONE fix round on ORCH's review, then READY. No serial waiting.
 **Phase C, by ~23:00 UTC:** main merges all READY branches in one integ and ships sync89. Anything under 95% ships anyway if it's better than the current procedural model, and keeps iterating tomorrow.
 - ORCH reviews each batch shot set within the hour. Post READY lines in EXT_TO_MAIN as each lands.
+
+## 13:20 UTC (ORCH): batch 3D review of the newest round (10 Hunters, Opus), shared issues first
+- Shared look fix: dark/violet is fixed. Overshoots to correct per Hunter: Pip coral, Tarek orange skin, Kael red-brown, Ostra flat bright purple, Dredge olive brass.
+- Shared at match zoom (every Hunter): high-contrast speckle/dither and dark outline noise break the silhouette. Cut texture micro-contrast at distance (mip/LOD bias or a smoothed albedo), clean the outline, add a per-Hunter rim light in the signature colour. This is the biggest lever for the match-zoom scores; put it in RECIPE_95.
+## 13:10 UTC (ORCH): 3D review Dredge (r3d): ~75% close-up, ~60% match zoom
+1. Eye: the six black crack strips sit on the orb as a black "spider/face" glyph. Make them thin pale-grey hairline cracks across the porthole glass (in front of the eye), not on the orb itself.
+2. Helm: the porthole is three thick black concentric rings with no brass. Use one brass rim with rivets and dark only in the recess, and add the small grilled porthole above-left of the eye (it is on the portrait and turnaround).
+3. Brass reads olive/mustard and plastic-shiny under the shared fix. Push it toward warm tarnished brass/copper (less green, rougher spec) and add rust streaks in the seams.
+4. Ooze: the drips are flat black planks with hard outlines. Make them thinner, tapered strings with a faint crimson inner glow as the brief asks; the ones hanging off the eye now read as a cage over it.
+5. Stance: the hull pitches so far forward that the front view is mostly top of hull. Lift the helm about 10-15 degrees so the eye faces the camera the way it does in the turnaround front.
+6. Match zoom: he reads as a muddy brown blob with one red dot. Lift brass value one step, add a bright brass rim/spec on the helm and blunderbuss bell, and let the rib-core red glow show through the gashes.
+7. KEEP: the overall silhouette (hull, winch, blunderbuss bell, claw, backward legs, boots), the red eye's punch, the lames and peeled tears.
+
+## 13:10 UTC (ORCH): 3D review Ryzz (s3): ~78% close-up, ~60% match zoom
+1. Skin: the shared fix worked and the face reads peach. But magenta smears bleed over her chest, arms and shoulders. Keep the pink glow to the scar, the choker charm and the corset piping only.
+2. Pigtails: the pink ends are shredded strands that read as frayed/burnt. Model them as the art's few thick S-curl zigzag locks swooping outward, and make the blue upper volume smoother and less blocky.
+3. The black scorched relic sticks up between the pigtails above her head. Seat it in the V on her back, below the shoulder line as in ryzz_back, and tone the rods from yellow-orange to copper.
+4. Missing the pink gum bubble (KIT: "pink gum bubble"). Add it at least for idle and close-up.
+5. Corset: the bolt keyhole should be a clean cutout with neon pink piping on the edge. Now it is glow streaks painted across the front.
+6. Jacket/boots read pure black. Lift them to the art's charcoal-plum leather with visible copper zips and pink boot trim.
+7. Match zoom: only the blue hair reads, and the body is a dark smudge. Brighten the pink corset and boot trim and add a stronger rim on the hair so the blue/pink split shows.
+8. KEEP: the face paint (wink, fern scar, freckles), the copper hair ties, the hand-on-hip swagger, the hazard bands, the fishnets.
+
+## 13:10 UTC (ORCH): 3D review Hem (s3): ~85% close-up, ~70% match zoom
+1. Skin: it now reads pale-warm, which is correct. Keep it.
+2. Mask: the 3/4 view shows hard low-poly facets and red smears. Smooth the shading, keep clean white porcelain with thin dark cracks, red-thread stitches, the gold top rim and one painted smile fragment (hem_mask_sheet).
+3. Bow: it reads navy/blue with a salmon band. Make it a true black recurve, and make the string a bright glowing red line that is visible at rest. Add the thread spool at the grip.
+4. Quiver needles: they are plain silver sticks. Give them visible eyes with red thread through them and a few loose red threads drifting (KIT "at rest").
+5. Coat: it is shorter and less flared than the turnaround. Lengthen it to mid-calf with the asymmetric tail and the black lining showing, and clear the dark blotches on the sleeves in the 3/4 view.
+6. Match zoom: she reads as a red/black blob with a white face, and the bow is invisible. Thicken the glowing string and the bow limbs' rim light so the bow silhouette reads.
+7. KEEP: the bun and needles, the eyes/liner and glasses, the crimson high collar, the bandolier of needles, the bow in her LEFT hand, the boots.
+
+## 13:10 UTC (ORCH): 3D review Kael (s3): ~70% close-up, ~65% match zoom
+1. Mane: it is flat semi-transparent cream cards hanging like curtains over his face and chest. Make it opaque silver-white soft layered locks that fall back past the shoulders, with volume and spikes at the crown (kael_head_sheet). Keep it off the face and scarf.
+2. Arm cracks: they read as flat white paint (giraffe pattern) on a reddish arm. Make them branching gold/white-hot glowing veins with bloom on the dark skin, on the RIGHT arm only.
+3. Skin reads red-brown. Shift it to the art's very dark cool brown, because the shared warm tint is too strong on him.
+4. Blade: it is a flat white plank with grey edges. It needs a jagged broken iron silhouette with iron bands, glowing cracks and bloom, plus black smoke. At match zoom it now reads as a white bar longer than his torso, so trim the length slightly.
+5. Collar: it is a thick gold ring/torc. Use the art's broken gold shard pieces sitting on the scarf.
+6. Posture: he is hunched with oversized shoulders. Stand him upright with the head higher, closer to the turnaround's proportions, and hold the sword point-down diagonally in the right hand with the chain wrapped on the forearm to the hook.
+7. Match zoom: the hair blob and the white bar dominate. Fixing 1 and 4 should let the red kilt, gold belt and glowing arm read.
+8. KEEP: the red scarf over the mouth, the narrowed eyes, the gold tally buckle, the red pleated kilt, the steel greaves and wrist cuffs, the chain and hook.
+
+## 13:10 UTC (ORCH): 3D review Sable (s3): ~80% close-up, ~55% match zoom
+1. Look fix landed for her: skin is the right lavender-grey and the jacket is a believable violet, no longer muddy/too dark. One-off check passes at close-up.
+2. Hair: the model has TWO braids, one each side; the art has ONE braid over her right shoulder. Braids and back-of-head read tan/cream-blond; make them silver-white like the head sheet.
+3. Crossbows are still too small and thin, and the violet bolt-tip glow is missing. Scale them about 1.5x to the crossbow sheet and add an emissive violet tip.
+4. Red pendant is flat red with no glow; add the pink-red emissive halo. The fur collar reads as bright white; tint it grey-lilac.
+5. Hold/proportions: side view is hunched forward with bent knees; art stands upright in a wide A-stance. Wings sit high and short; let them hang to mid-calf as in the turnaround.
+6. Match zoom: the body breaks into black/white speckle noise and arms/crossbows vanish. Simplify texture contrast (flatten the leather highlights and chains) and add a violet rim so she holds one silhouette.
+7. KEEP: the mask pushed up, feather antennae, almond half-lidded eyes, face, jacket cut, iridescent peacock-eye wings.
+
+## 13:10 UTC (ORCH): 3D review Pip (s3): ~80% close-up, ~55% match zoom
+1. Hue is now overcorrected: fur reads saturated coral/salmon-red; the art is a dusty rose pink with a cream belly. Pull saturation down and shift toward pink (less orange).
+2. Flower crown is still only a few specks; model the full ring of white flowers from the head sheet on top of the goggles.
+3. Lantern: held low at her side and barely lit. Raise it to chest height in the LEFT paw (art front view: both paws on the handle in front of the belly), make it about head-sized, glowing warm amber with a real light cast on her chest and cape.
+4. Wings: flat panes with hard white grid veins; the art has soft pink, glowing translucent wings. Lose the grid, add pink tint and edge glow.
+5. Proportions: limbs and neck read thin and long, torso stretched; the art is a chubbier, fluffier chibi fox. Thicken the chest fluff and thighs, shorten the neck.
+6. Match zoom: dithered coral speckle with black specks along the outline; only the tail and lantern read. Smooth the fur texture and keep the tail tip a clean cream.
+7. KEEP: the face (big amber eyes, blush, red-tipped ears), goggles, teal cape with leaf clasp, satchel, tail shape, arms clear of the body.
+
+## 13:10 UTC (ORCH): 3D review Tarek (s3): ~72% close-up, ~50% match zoom
+1. Look fix overshot warm: skin reads orange/terracotta-saturated; the art skin is a warm deep brown. Lower saturation, and keep the terracotta for the sash only.
+2. Vest reads khaki/olive; it must be slate blue-grey (the cool contrast in his palette).
+3. Bracers: currently lumpy rock knuckles on the fists only. The art has big forearm-length stone gauntlets (elbow to knuckle) with bright glowing amber cracks. Rebuild them and push the emissive.
+4. Seeing-stones: flat, dull grey discs, iris barely visible. Give them rough rock depth, a crystal-lined opening and a glowing amber slit-pupil eye facing out (stone sheet); orbit them closer around the head.
+5. Missing signatures: the amber ripple rings on the ground, the shard orbit around his right fist, and the glowing amber crystals in the locs (the yellow spikes on top of the hair look like stray geometry; replace with beads).
+6. Proportions/hold: shoulders and deltoids over-bulked and hunched; the art is lean, long-legged, upright, with the right fist raised. Slim the upper body.
+7. Match zoom: an orange-brown speckled blob, stones and bracers do not read. Fewer texture details, brighter amber glow points so the stones and fists pop.
+8. KEEP: the bandana and grin, the locs with copper rings, the sash knot, the sand trousers, harness and wrapped feet.
+
+## 13:10 UTC (ORCH): 3D review Ostra (s3): ~68% close-up, ~40% match zoom
+1. Colour now overcorrected the other way: the coat is flat electric purple everywhere; the art coat is mostly BLACK with violet panels. Restore the black/violet split so the starfield reads through the tears.
+2. Mask: the grin is white teeth; the art mouth glows violet. Add violet pinpoints in the black eye holes, the painted violet tear (viewer's left) and the glowing crack (viewer's right).
+3. Halo: pale pink-white, smooth, and offset to one side. Make it violet emissive, cracked, larger than the head, centred behind it.
+4. Void orb: a matte violet ball. Make it a black swirling core with a violet glow. Strings and card shards are still missing; add them.
+5. Hold: both arms are stretched out like a zombie T-pose. Use the art pose: orb hand raised beside the head, the other hand low with long clawed fingers, body leaning forward.
+6. Lower body: a rigid flat purple slab; it should be a smoky, tapering, curling wisp with stars, ending near the ground with a shadow gap.
+7. Match zoom: reads as a small brown-purple smear plus a white crescent, and a stray solid blue disc sits at his feet. Fix the blue disc and add the violet rim from ostra_front_float.
+8. KEEP: the cap shape with silver bells, the grey ruff, the starfield texture inside the coat, the dagged sleeves, the float height.
+
+Shared look fix verdict: models are no longer too dark. Sable now reads right, but Pip and Tarek overshot into saturated coral/orange, and Ostra into flat bright purple. At match zoom all four still break into a high-contrast speckle/dither, so cut texture detail and add rim light.
+
+## 13:10 UTC (ORCH): 3D review Breaker (s2): ~75% close-up, ~70% match zoom
+1. Beard: rebuild as the head sheet's THREE stiff frozen red braids with silver rings and icy tips; s2 has one loose shaggy red mass covering his chest.
+2. Hold (breaker_front): his right fist goes up at shoulder height near the hammer head, with the haft lying diagonally back over the RIGHT shoulder. s2 holds it upright in front of the shoulder with the hand at the chest, so the hammer reads raised rather than resting.
+3. Shield: bring it in to rest against his LEFT forearm and hip, with the rope grip in that hand. s2 floats it beside him, detached, at shoulder height (front and 3/4 views show a gap).
+4. Skin: add the frost cracks, barnacles and icicles to his arms and shoulders. s2's skin is smooth flat pale blue, the biggest texture gap at close-up. Add the kelp on his head and mantle, and darken the brows to red.
+5. Props: the brass compass on the chest strap and the teddy bear on his belt are missing or hidden by the beard. Both are signature details.
+6. Match zoom: the shield reads pinkish-brown and the ice block is barely visible. Lift the ice-blue value on the hammer head and the iron rim on the shield. Check the 1.5x scale against a medium hunter in the same frame.
+7. KEEP: the bald head, white eyes, grin and tusks, the plain ice-block hammer in two bands with a rope-wrapped haft and no anchor, the prow shield with its broken top planks, flat figurehead and iron rim, and the mantle, belts, boots and back view (close to the turnaround).
+
+## 13:10 UTC (ORCH): 3D review Claire (s2): ~60% close-up, ~50% match zoom
+1. Horns: still wrong, the owner's main ask. They still rise straight up like tall black pigtails. Rebuild them as compact ram curls that go back and down around the skull, with the tips forward at cheek height (claire_head_sheet front and side).
+2. Hair: make it long and wavy, falling to mid-back in LOW pigtails with ice-crystal ties at the collarbone. s2's hair is bunched up high and short, and it merges with the horns into one dark tower.
+3. Face (claire_face): soften the blush, which is a hot-pink blotch, into a light rosy glow. Add the frost freckles, and make the eyes bigger with brighter pale-blue glow and lashes.
+4. Wings: scale them up to roughly the art's span (tips past her elbows, wider than her shoulders). From the front and 3/4 only her left wing shows, so fix the clipping or placement of the right wing.
+5. Feet and tail: add the white skates with clear ice blades (s2 has bare pointed feet). Give the tail its spade tip and an S-curve instead of a straight drop to the ankle.
+6. Pose and spear: the free left hand should be raised and open by her shoulder, not clawed at her chest (both arms are bent in at the chest now). Make the spearhead a bigger crystal and the shaft translucent ice, not a thin cyan line.
+7. Match zoom: she reads as a white figure with dark speckle noise from outline artifacts all over the body. Clean the outline and texture at that distance so the horn and wing silhouette and the skates read.
+8. KEEP: one spear in her RIGHT hand, taller than her (fixed since s1), the pale blue-white skin, the slim figure and proportions, the faceted crystal top and ribbon wraps, and the dark navy wing colour.

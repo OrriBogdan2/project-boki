@@ -749,3 +749,11 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 3. Main: sync87 shipped (main cc27a057: kits-integ, farm-hob, arena-sign, warden-stance). DECISIONS.md folded the Nov 4 decisions (f0b44706). Owner pasted the next main prompt; queue: rebase+merge rename-breaker, build-ui, text sweep/prologue, sync88. [MAIN] S2 to re-run displace-net-check on main.
 4. Meshy: ~4,233 after Ryzz s1 (4,327 - 94); Dredge hull + stage-2 fixes planned well within balance. OK.
 5. S1: status refreshed 12:00 UTC; nothing pending for main. Conflicts / DECISIONS: none.
+
+## 2026-11-04 08:20 ET (13:20 UTC) ORCH check-in
+- [OWNER] S2 is blocked on Meshy spends by its session's permission prompt (EXT_TO_MAIN 12:36 S2: "the owner needs to allow Meshy spends in the S2 session"). Owner: approve/allow Meshy calls in the S2 terminal (or its allow-list) when you're up.
+1. Shipped: sync88 on main (12:13 UTC): retired terms out of player text, prologue captions, second-Mask pick, tutorial Mask line.
+2. READY: ext/warden-dredge-friend 38a5c086 (Dredge, ~80/73% S2; ORCH ~75/60%). Ships per the 13:15 rule. [MAIN] S2 is building ONE art-integ branch on current main with all READY Hunters + Vex; merge that, not the hero branches (they're on the r3b line and conflict).
+3. 3D review (ORCH, Opus x3; close-up / match): Hem 85/70, Sable 80/55, Pip 80/55, Ryzz 78/60, Breaker 75/70, Dredge 75/60, Tarek 72/50, Kael 70/65, Ostra 68/40, Claire 60/50. Vex r3c 80/65 (r3d not posted). Fix lists in INBOX_S2 13:20; biggest shared lever = match-zoom speckle + rim light.
+4. [S2] Phase A (Vex golden recipe + RECIPE_95) still pending; Cinder 3D not started.
+5. Meshy: ~4.2k; spends partly blocked by the permission prompt (above). Conflicts / DECISIONS: none.
