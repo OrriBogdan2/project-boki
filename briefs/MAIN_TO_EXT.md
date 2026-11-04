@@ -1053,3 +1053,14 @@ Main's read of the code, so ext can act directly:
 2. **Crops near water:** there's no water-adjacency mechanic today (plots are watered by hand, by rain or by a farmhand Boki). Add one: a crop patch next to water (pond, river or wild water within ~2 tiles) waters itself, or grows faster (pick one and make it obvious in the patch tooltip). In build mode, the crop patch placement preview shows "near water" in green. The farm tutorial's crop-patch step tells you to put it by the water and points the marker there.
 3. **More rivers:** a "Pond water" brush exists (home_layout "water", 6 gems). Add a River brush, or extend the water brush to drag a channel, so players can bring water to their fields. It counts as water for item 2. Keep it cheap.
 These are owner decisions (also in DECISIONS). Save changes stay in farm-hob's v10 step. Report READY with checks as usual.
+
+## 2026-11-04 00:35 UTC: OWNER: build/decorate UI revamp (next for ext, right after farm-hob; same files)
+Owner, verbatim: "there needs to be a way to rotate placements in the house and farm and also better UI for building stuff, look at established games for this like animal crossing"
+Main's read: rotation EXISTS but nobody can find it. Farm build: the "rotate" action (R) with a "turn" key hint in the footer (home_build.gd ~1781). House decorate: R or right-click (interior.gd ~392/404), with NO on-screen hint. So this is mostly a UI/discoverability revamp of home_build.gd + interior.gd. Do it after farm-hob lands, to avoid a conflict. Target, in the style of Animal Crossing (NH) furniture placement / Stardew / Sims build mode:
+- One shared build/decorate UI for the farm and the house: a bottom catalog bar with category tabs and big item tiles with icon, name, cost and owned count; a search or filter; a "storage" tab for owned items.
+- The held item shows as a ghost snapped to the grid, green or red, with its footprint drawn. Clear on-screen buttons AND keys next to the cursor: Rotate (key cap + right-click), Place, Store, Move, Cancel. Rotation animates with a quick turn, never a snap-pop.
+- Click an already-placed item to pick it up, with a small radial/context menu (Move, Rotate, Store, Colour if it has one).
+- The camera eases to a slightly top-down build view in build mode and back out after.
+- Undo stays. Prices shown in materials and gems with have/need colouring.
+- Key caps always through Settings.key_cap. Note R is the hunter ultimate in matches, but rotate on R at home is allowed (SHARED_OK).
+Owner decision, also in DECISIONS. Report READY with before/after screenshots (the farmbuild_shots tool exists).
