@@ -128,6 +128,7 @@ static func _hold_weapon(root: Node3D, glb: Node3D) -> void:
 		return
 	for mi in gun.find_children("*", "MeshInstance3D", true, false):
 		(mi as MeshInstance3D).visible = false
+		mi.set_meta("glb_hidden", true)      # (HunterAnim keeps the .glb weapon's own bounds off the ground)
 	weapon.get_parent().remove_child(weapon)
 	weapon.owner = null
 	gun.add_child(weapon)

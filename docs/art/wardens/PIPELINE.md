@@ -161,4 +161,25 @@ profile views before any run.
 | Vex r2 | 2026-11-04 03:29 | 01a1a49a-5239-71e0-9906-570cbfd9715e | latest | r2 turnaround (2x enlarged): front, 3/4, near profile (her right), back; 30k, PBR, A-pose | 30 | Kept: one run; gun-arm, monocle, streak, bun and bolt, candles, vest, tights all came through. The later side view (ponytail) was not needed |
 
 Vex total: 7 tasks, 190 credits (balance before r2: 940).
+| Zedran r2 | 2026-11-04 04:27 | 01a1a4d0-eb9a-727a-885c-dfaa74465e49 | latest | r2 turnaround front and back + the r2 side view (his right), greatsword painted out of all three, the side view's cape painted out; 30k, PBR, A-pose | 30 | Kept: magma right arm with its cracks front, side and back, lion pauldron and pelt on his right, chain and burning hook in his left hand, horns, laurel, burning left eye |
+| Zedran sword | 2026-11-04 04:27 | 01a1a4d0-eb8b-74c9-b6e5-1e743ecad8b6 | latest | the side view's greatsword alone, 6k, no pose | 30 | Dropped: a narrow pointed blade, not the art's flared cleaver; the weapon is cut flat from the art instead (`blade` in the fit spec) |
+
+Zedran total: 2 tasks, 60 credits (balance before: 910, then 880 when the runs started; the other agents share it).
+
+## r2 additions (Zedran, 2026-11-04)
+- **Inputs from turnaround + side view:** tools/meshy/zedran_inputs.py paints the held weapon out with polygons in
+  sheet pixels; where the weapon hid a leg, the front view takes the other leg mirrored across the body's middle and
+  the side view fills the thigh and skirt with their own colours. Art the sheets disagree on (the side view's cape) is
+  painted out the same way. Skip 3/4 views that contradict the front, side and back.
+- **A flat weapon from the art** (`blade`): a blade that is a flat slab in the art (a greatsword, a cleaver) is cut
+  from the side view's pixels as a slab with the art on both faces, a better match than a Meshy run.
+- **Hot texels** (`glow_hot`, `glow_boxes`): faces holding hot orange texels, or inside a box, go on `glow-<tex>-hot`;
+  the shader keys the emission per texel (`glow_key`), so cracks glow and the rock between them doesn't.
+- **Rigid pieces** (`rigid`): vertices in a box (Meshy frame) ride one bone alone (Zedran's chain on his left hand).
+- **Face from the portrait** (`project_affine`): the portrait projected on the face, registered on three points (the
+  eyes and the mouth), before the paint-up; `cool_below_x` leaves the art's coloured rim light out.
+- **Skin repaint**: dark skin reads blue-black under the toon shadow tint: pull it warm (`repaint` with
+  `sat_max`/`val_max`) and lift the darks (gamma 0.8).
+- **Weapon bounds:** HunterAnim keeps the weapon off the ground by its mesh bounds; the procedural weapon the .glb
+  replaced no longer counts (meta `glb_hidden`), so a carry can hang a .glb weapon low.
 

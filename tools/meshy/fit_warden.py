@@ -542,7 +542,8 @@ def repaint(img, rules):
                    np.where(mx == rgb[:, 1], (rgb[:, 2] - rgb[:, 0]) / d + 2, (rgb[:, 0] - rgb[:, 1]) / d + 4)) / 6
     sat = np.where(mx > 0, (mx - mn) / np.maximum(mx, 1e-6), 0)
     for r in rules:
-        sel = (hue >= r["hue"][0]) & (hue <= r["hue"][1]) & (sat >= r["sat_min"]) & (mx >= r.get("val_min", 0.0))
+        sel = (hue >= r["hue"][0]) & (hue <= r["hue"][1]) & (sat >= r["sat_min"]) & (mx >= r.get("val_min", 0.0)) \
+            & (sat <= r.get("sat_max", 1.0)) & (mx <= r.get("val_max", 1.0))
         col = np.array(K.hexcol(r["colour"]), dtype=np.float32)
         val = (mx[sel] / max(col.max(), 1e-3)).clip(0.75, 1.15)[:, None]
         rgb[sel] = rgb[sel] * (1 - r["k"]) + np.clip(col * val, 0, 1) * r["k"]
@@ -1145,11 +1146,11 @@ def main():
     drop_floaters(ob, spec.get("floater_verts", 40))
     mark_rigid(ob, spec.get("rigid", []))
     ids = island_map(ob, img)
+    for pj in spec.get("project_affine", []):
+        project_affine(ob, img, pj)        # (before the paint-up: the face gets the body's lift and warmth)
     paint_up(img, spec, ids=ids)
     for pj in spec.get("project", []):
         project(ob, img, pj)
-    for pj in spec.get("project_affine", []):
-        project_affine(ob, img, pj)
     pad(img, ids, int(spec.get("pad", 6)))
     slot_split(ob, img, spec["palette"], spec["glow_min"], "body", spec.get("glow_hot"), spec.get("glow_boxes", []))
     head = None
