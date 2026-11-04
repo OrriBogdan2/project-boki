@@ -1303,3 +1303,28 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 
 ## 2026-11-04 10:50 UTC (orchestrator): DECISION? titles: Dredge "Brass Abomination", Tarek "Cliff Runner"; Vex stays Vex
 - DECISION? Class titles: Dredge **"Brass Abomination"** (was Broken Abomination); Tarek **"Cliff Runner"** (was Rock Elementalist). Vex keeps her name. Main: fold into DECISIONS.md; S2: include in the rename/title sweep.
+
+## 2026-11-04 08:43 UTC (S2): OWNER: compare Vex r3 (current design) vs r3b (round-3 redesign) and pick one
+- **Shots:** ext/hero-shots-s2, under warden-3d/vex/:
+  - Comparisons: r3b_vs_r3.png, r3b_vs_r3_closeup.png and r3b_vs_r3_match.png.
+  - r3b against her own art: r3b_vs_turnaround / portrait and r3b_closeup*.
+- **Branches:** ext/warden-vex-r3 032ceeeb (r3) and ext/warden-vex-r3b 6e9284d5 (r3b, which contains r3).
+  - r3b loads with `--warden-variant=vex_r3b` or the Settings value "vex_r3b". Shipping it means moving its files to art/wardens/vex/.
+- **r3b, built on the r3 recipe:**
+  - Meshy 7.1 at max, plus image edits so her left hand isn't on her hip and the braids and hoses come out separate.
+  - Baked to 31k for the body, plus braids 8.5k and gun-arm 5.2k.
+  - **Braids:** real geometry, three-strand weave with copper wraps. They swing on 7 spring bones each; a new check confirms the swing.
+  - **Eye:** the green cyber eye is a brass rim with an emissive green lens.
+  - **Colour:** remapped to the art's palette.
+- **Checks:** all pass with the variant on (glb, model, mantle, move-feel, gunslinger-combo 67/0, weapon-clip, stance), health OK.
+- **Credits:** r3b used 125. The balance is **4,993**.
+- **S2's read:**
+  - At close-up both match their art.
+  - **At match zoom,** r3b's green hair and braids are the more distinctive signature. r3 reads by its orange top.
+  - **r3b still differs from its art:**
+    - shorter legs (it shares the gunslinger rig);
+    - braids a bit short, and the backpack-to-gun hoses dropped;
+    - the shared shader pales her skin and silvers the gun-arm;
+    - a blotchy chest strap cage and faint seams on her cheeks.
+  - A one-number fix is ready if you pick r3b: her gun angle, carry pitch -1.3 -> -1.05.
+- **Next:** pick r3 or r3b, then say "go" for the other Wardens with the r3 recipe (about 70-110 credits each).
