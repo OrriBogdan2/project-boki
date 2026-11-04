@@ -30,5 +30,16 @@
 				"glow": 1.8
 			}
 		}
+	},
+	"breaker": {
+		"painted": {"far_lift": 0.32},
+		"slots": {
+			"skin": {"top_light": 0.25, "fres": 0.4, "far_lift": 0.22, "shade": 0.82, "shadow_tint": [0.84, 0.88, 0.98]},
+			"hair": {"far_lift": 0.5, "fres": 0.5},
+			"fur": {"top_light": 0.3, "far_lift": 0.25},
+			"leather": {"far_lift": 0.4, "fres": 0.5, "fres_tint": 0.7},
+			"metal": {"fres": 0.3, "fres_tint": 0.6, "sheen": 0.0},
+			"glow": {"glow": 1.2}
+		}
 	}
 }

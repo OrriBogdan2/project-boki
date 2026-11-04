@@ -7,9 +7,9 @@
 	"weight": "heavy",
 	"color": "#8fd0ff",
 	"body": {
-		"size": 1.19,
+		"size": 1.436,
 		"build": 1.18,
-		"head": 0.42,
+		"head": 0.35,
 		"legs": 1.3,
 		"neck": 0.1
 	},

@@ -37,3 +37,23 @@ shader override, proportions and stance wait for the Vex r3c recipe (stage 2). R
   radius stays the heavy class's 0.50 m (the ring and the hitbox don't grow with him).
 - Imports: the atlases lossless (`compress/mode=0`); `breaker.glb.import`: `generate_lods=false`,
   `force_disable_compression=true`.
+
+## Stage 2 (the Vex r3c recipe, owner GO 11:25; owner sheets fb503983)
+- **Scale:** 1.5x a medium hunter (owner 11:15): bulwark `body.size` 1.354 (the model check's sheet 1.50x). The hit
+  radius stays the heavy class's 0.50 m. `body.head` 0.42 -> 0.35 so the rig's neck-to-crown span is the mesh's
+  (the fit stretched the head 1.2x vertically to reach the old one).
+- **Paint-over:** `smooth`, `ramps` of the art's own colours per slot (copper-red beard as the portrait and the
+  head and front sheets paint it, blue-grey skin, fur, navy tunic, leather, iron, brass), `despeckle`, and
+  `project_late` of the edited front view's face and beard/compass, each registered on the mesh's own render
+  (tools: register.py), front-facing faces only.
+- **Look** (content/rules/warden_look.json `breaker`): a moderate match-camera lift (skin, fur, leather), a
+  beard rim, iron rims without sheen, the glow toned down.
+- **Hold** (content/rules/warden_stance.json `bulwark` carry): the hammer up over his RIGHT shoulder, the haft
+  back from the fist (breaker_front, the turnaround); it lets go into the aim the moment he swings.
+- **Hammer** (`hammer`, to breaker_hammer_sheet): the plain ice block in two rusty riveted ship-bands, icicles, a
+  rusty socket, a weathered haft with two rope wraps, an iron end cap (2.1k triangles).
+- **Shield** (`shield_card`, from breaker_shield_sheet): a thick card cut to the sheet's front outline (the broken
+  top planks, the riveted iron rim, icicles), its face painted with the sheet's front (the carved bearded
+  figurehead), its back with the back view (rope grip, strap), bent so its middle stands out; smaller and a
+  little further out at his LEFT side than stage 1 (560 triangles). It replaces the scripted prow (the kit's
+  scroll top: the owner's shield sheet has none).

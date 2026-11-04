@@ -246,50 +246,49 @@ def hard_edges(ob, deg=40.0):
 
 # ------------------------------------------------------------------------------------------------ hammer
 def hammer(spec):
-    """Breaker's ice-block hammer in the Hammer pivot's space (see the module doc)."""
-    at = Atlas(2)
-    cells = {"ice": at.cell("ice", ice_paint), "iron": at.cell("iron", flat("5d6670", 0.08, 2)),
-             "wood": at.cell("wood", lambda u, v: wood_paint(u, v, "7a5636", "4d3322", 1)),
-             "grip": at.cell("grip", flat("3c2a20", 0.1, 4, 14.0))}
+    """Breaker's ice-block hammer in the Hammer pivot's space (see the module doc), as the owner's hammer sheet
+    draws it: a plain glacier-ice block in two rusty riveted ship-bands with icicles, an iron socket, a weathered
+    haft wrapped in rope in two places, an iron end cap. No anchor, no pick."""
+    at = Atlas(3)
+    cells = {"ice": at.cell("ice", ice_paint), "iron": at.cell("iron", flat("4e5258", 0.1, 2)),
+             "rust": at.cell("rust", flat("6a4434", 0.16, 5, 11.0)),
+             "wood": at.cell("wood", lambda u, v: wood_paint(u, v, "6a543f", "463526", 1)),
+             "rope": at.cell("rope", flat("8f7c5e", 0.12, 4, 18.0))}
     bld = WP.Builder()
     hz = float(spec.get("head_z", -0.62))
     L, W, D = (float(x) for x in spec.get("block", [0.19, 0.125, 0.13]))     # half: long (gun up), side, along the haft
-    # the haft: pommel, ferrule, grip, oak, socket with two langets
+
     def ring(z0, z1, r, cell, part, sides=12):
         bld.tube([G(0, 0, z0), G(0, 0, z1)], [r, r], sides, *cells[cell][0::2], *cells[cell][1::2], part, [0, 0],
                  cap_end=True, cap_start=True)
-    prof = [(0.31, 0.0), (0.30, 0.026), (0.28, 0.04), (0.26, 0.042), (0.24, 0.034), (0.225, 0.03)]
-    bld.tube([G(0, 0, z) for z, _r in prof], [max(r, 1e-4) for _z, r in prof], 12, *cells["iron"][0::2],
-             *cells["iron"][1::2], "iron", [0] * len(prof), cap_end=True)
-    ring(0.225, 0.19, 0.032, "iron", "iron")
-    ring(0.19, -0.07, 0.03, "grip", "grip", 10)
-    for z in (0.15, 0.08, 0.01, -0.05):
-        bld.torus(G(0, 0, z), G(0, 0, 1) - G(0, 0, 0), 0.03, 0.006, 12, 5, cells["grip"], "grip", 0.0)
-    ring(-0.07, hz + D - 0.01, 0.026, "wood", "wood", 10)
-    ring(hz + D + 0.07, hz + D - 0.005, 0.036, "iron", "iron")
-    for sx in (-1, 1):
-        cuboid(bld, G(sx * 0.03, 0, hz + D + 0.13), [G(1, 0, 0), G(0, 1, 0), G(0, 0, 1)], (0.006, 0.014, 0.08),
-               cells["iron"], "iron")
+    ring(0.30, 0.235, 0.036, "iron", "iron", 8)                           # the end cap
+    ring(0.24, hz + D - 0.01, 0.026, "wood", "wood", 10)                  # the haft
+    for z0 in (0.17, -0.2):                                               # the two rope wraps
+        for i in range(6):
+            bld.torus(G(0, 0, z0 - i * 0.022), G(0, 0.25, 1) - G(0, 0, 0), 0.028, 0.0075, 12, 5, cells["rope"],
+                      "rope", 0.0)
+    ring(hz + D + 0.07, hz + D - 0.005, 0.034, "rust", "rust")           # the socket
     # the block, chamfered, its long axis along the gun's up (it strikes with an end face)
     axes = [G(1, 0, 0), G(0, 1, 0), G(0, 0, 1)]
     cuboid(bld, G(0, 0, hz), axes, (W, L, D), cells["ice"], "ice", bevel=0.022)
-    # two iron bands round the block's middle third, riveted
-    t, w = 0.012, 0.022
-    for yb in (-L * 0.42, L * 0.42):
+    # two rusty ship-bands round the block, riveted
+    t, w = 0.012, 0.024
+    for yb in (-L * 0.45, L * 0.45):
         for (cx, cz, hx, hzz) in ((W + t / 2, 0, t / 2, D + t), (-W - t / 2, 0, t / 2, D + t),
                                   (0, D + t / 2, W + t, t / 2), (0, -D - t / 2, W + t, t / 2)):
-            cuboid(bld, G(cx, yb, hz + cz), axes, (hx, w, hzz), cells["iron"], "iron")
+            cuboid(bld, G(cx, yb, hz + cz), axes, (hx, w, hzz), cells["rust"], "rust")
         for sx in (-1, 1):
-            for sz in (-0.5, 0.5):
-                bld.prism(G(sx * (W + t), yb, hz + sz * D), G(sx * (W + t + 0.008), yb, hz + sz * D), 0.008, 6,
+            for sz in (-0.6, 0.0, 0.6):
+                bld.prism(G(sx * (W + t), yb, hz + sz * D), G(sx * (W + t + 0.009), yb, hz + sz * D), 0.008, 6,
                           cells["iron"], "iron", 0.0)
-    # a few icicles off the block's haft side (they hang down while he carries it raised)
-    for (x, y, ln) in ((-0.07, 0.15, 0.07), (0.05, 0.1, 0.05), (0.08, -0.16, 0.06), (-0.04, -0.12, 0.045)):
-        spike(bld, G(x, y, hz + D - 0.004), G(x, y, hz + D + ln), 0.014, 5, cells["ice"], "ice")
+    # icicles off the block's haft side (they hang down while he carries it raised)
+    for (x, y, ln) in ((-0.07, 0.15, 0.07), (0.05, 0.1, 0.05), (0.08, -0.16, 0.06), (-0.04, -0.12, 0.045),
+                       (0.0, 0.17, 0.05), (-0.08, -0.05, 0.04)):
+        spike(bld, G(x, y, hz + D - 0.004), G(x, y, hz + D + ln), 0.013, 5, cells["ice"], "ice")
     ob = finish(bld, "weapon")
     img = at.image("hammer_atlas")
     mats = {s: material(ob, s, "hammer", img) for s in ("metal", "leather", "ice")}
-    assign(ob, bld, {"ice": "ice", "iron": "metal", "wood": "leather", "grip": "leather"}, mats)
+    assign(ob, bld, {"ice": "ice", "iron": "metal", "rust": "metal", "wood": "leather", "rope": "leather"}, mats)
     hard_edges(ob)
     log("hammer: %d tris" % sum(len(p.vertices) - 2 for p in ob.data.polygons))
     return ob
@@ -395,12 +394,119 @@ def prow(spec):
     bld.tube(zig, [0.006, 0.009, 0.009, 0.008, 0.007, 0.004], 4, *cells["glow"][0::2], *cells["glow"][1::2], "glow",
              [0] * 6)
     ob = finish(bld, "shield")
+    if spec.get("at"):
+        # (the prow moved in its node's space: toward the body and back, so it rides close as the art holds it)
+        ob.data.transform(Matrix.Translation(Vector(G(*spec["at"]))))
     img = at.image("prow_atlas")
     mats = {s: material(ob, s, "prow", img) for s in ("leather", "metal", "ice", "glow")}
     assign(ob, bld, {"face": "leather", "back": "leather", "stem": "leather", "iron": "metal", "ice": "ice",
                      "glow": "glow"}, mats)
     hard_edges(ob, 50.0)
     log("prow: %d tris" % sum(len(p.vertices) - 2 for p in ob.data.polygons))
+    return ob
+
+
+def shield_card(spec):
+    """Breaker's shield from the owner's shield sheet (breaker_shield_sheet: front, side, back): a thick card cut
+    to the front view's outline (the broken top planks, the iron rim, the icicles below), its face painted with
+    the front view (the carved bearded figurehead, the rivets), its back with the back view (the rope grip and
+    strap), bent so the middle stands out (-Z), in the Shield node's space. spec: art, front and back boxes
+    [x0, y0, x1, y1] on the sheet, height (m, the node's units), centre_y, bend, thick, at, eps."""
+    sheet = _load_png(os.path.expanduser(spec["art"]))
+    # the sheet's grey darkens toward its foot (a vignette): each row's own ground, from the sheet's right edge
+    bg_rows = np.median(sheet[:, -35:-5], axis=1)
+
+    def view(box, drops=()):
+        x0, y0, x1, y1 = box
+        crop = sheet[y0:y1, x0:x1]
+        mask = np.abs(crop - bg_rows[y0:y1, None, :]).sum(axis=2) > 0.12
+        for dx0, dy0, dx1, dy1 in drops:          # (the sheet's scale figure beside the front view)
+            mask[max(0, dy0 - y0):max(0, dy1 - y0), max(0, dx0 - x0):max(0, dx1 - x0)] = False
+        outline, blob = _trace(mask)
+        ys, xs = np.nonzero(blob)
+        return crop, blob, outline, (xs.min(), xs.max(), ys.min(), ys.max())
+    fc, fb, fo, (fx0, fx1, fy0, fy1) = view(spec["front"], spec.get("drop_boxes", []))
+    bc, bb, _bo, (bx0, bx1, by0, by1) = view(spec["back"])
+    fo = _simplify(fo, float(spec.get("eps", 2.0)))
+    H = float(spec["height"])
+    k = H / float(fy1 - fy0)                                  # m per sheet pixel (front)
+    cx, cy = (fx0 + fx1) * 0.5, (fy0 + fy1) * 0.5
+    hw = (fx1 - fx0) * 0.5 * k
+    bend, th = float(spec.get("bend", 0.04)), float(spec.get("thick", 0.035))
+    at = np.array(spec.get("at", [0.0, 0.0, 0.0]), np.float64)
+    yc = float(spec.get("centre_y", 0.0))
+    # the atlas: front and back side by side, at the front's height; bled past the outlines
+    fw, bw = fc.shape[1], bc.shape[1]
+    tex = np.zeros((max(fc.shape[0], bc.shape[0]), fw + bw, 3), np.float32)
+    tex[:fc.shape[0], :fw] = fc
+    tex[:bc.shape[0], fw:] = bc
+    img = bpy.data.images.new("prow_atlas", tex.shape[1], tex.shape[0], alpha=False)
+    rgba = np.ones((tex.shape[0], tex.shape[1], 4), np.float32)
+    rgba[..., :3] = tex[::-1]
+    img.pixels = rgba.ravel()
+    img.pack()
+    TW, TH = tex.shape[1], tex.shape[0]
+
+    def pos(px, py, back):
+        x = -(px - cx) * k                                    # (seen from outside, the sheet's right is -X)
+        y = yc + (cy - py) * k
+        z = -bend * (1.0 - min(1.0, (x / hw) ** 2)) + (th if back else 0.0)
+        return G(*(np.array([x, y, z]) + at))
+
+    def uv_front(px, py):
+        return ((px + 0.5) / TW, 1.0 - (py + 0.5) / TH)
+
+    def uv_back(px, py):
+        # the back view seen from behind: the same point mirrored, scaled onto the back view's box
+        u = (px - fx0) / max(fx1 - fx0, 1)
+        v = (py - fy0) / max(fy1 - fy0, 1)
+        bpx = bx1 - u * (bx1 - bx0)
+        bpy = by0 + v * (by1 - by0)
+        return ((fw + bpx + 0.5) / TW, 1.0 - (bpy + 0.5) / TH)
+
+    bm = bmesh.new()
+    uvl = bm.loops.layers.uv.new("UVMap")
+    # a grid inside the outline for the bend (a flat n-gon can't curve): the outline's polygon cut by rows
+    front = [bm.verts.new(pos(px, py, False)) for px, py in fo]
+    back = [bm.verts.new(pos(px, py, True)) for px, py in fo]
+    ff = bm.faces.new(front)
+    bf = bm.faces.new(back[::-1])
+    for lp in ff.loops:
+        i = front.index(lp.vert)
+        lp[uvl].uv = uv_front(*fo[i])
+    for lp in bf.loops:
+        i = back.index(lp.vert)
+        lp[uvl].uv = uv_back(*fo[i])
+    n = len(fo)
+    for i in range(n):
+        j = (i + 1) % n
+        f = bm.faces.new((front[j], front[i], back[i], back[j]))
+        for lp, (px, py) in zip(f.loops, (fo[j], fo[i], fo[i], fo[j])):
+            lp[uvl].uv = uv_front(px, py)
+    # the bend: cut the faces into vertical strips so the middle can stand out
+    strips = int(spec.get("strips", 10))
+    for si in range(1, strips):
+        xcut = -hw + 2 * hw * si / strips
+        geom = bm.verts[:] + bm.edges[:] + bm.faces[:]
+        bmesh.ops.bisect_plane(bm, geom=geom, plane_co=(xcut + at[0], 0, 0), plane_no=(1, 0, 0))
+    bm.verts.ensure_lookup_table()
+    # (re-bend every vertex by its own x: the bisect interpolated straight across the curve)
+    for v in bm.verts:
+        x = v.co.x - at[0]
+        zb = -v.co.y - at[2]                                   # Godot z of the point
+        is_back = zb > -bend * (1.0 - min(1.0, (x / hw) ** 2)) + th * 0.5
+        z = -bend * (1.0 - min(1.0, (x / hw) ** 2)) + (th if is_back else 0.0)
+        v.co.y = -(z + at[2])
+    bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method="BEAUTY", ngon_method="EAR_CLIP")
+    me = bpy.data.meshes.new("shield")
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new("shield", me)
+    bpy.context.scene.collection.objects.link(ob)
+    outward(ob)
+    material(ob, "leather", "prow", img)
+    hard_edges(ob, 50.0)
+    log("shield card: outline %d points, %.4f m per sheet px, %d tris" % (n, k, sum(len(p.vertices) - 2 for p in me.polygons)))
     return ob
 
 
@@ -771,6 +877,8 @@ def build(spec, body, arm, rig):
         out["weapon"] = spear(ps["spear"])
     if "prow" in ps:
         out["extra"].append(prow(ps["prow"]))
+    if "shield_card" in ps:
+        out["extra"].append(shield_card(ps["shield_card"]))
     if "wings" in ps:
         out["extra"].extend(wings(ps["wings"], body, arm, rig))
     if "tail" in ps:
