@@ -84,7 +84,7 @@
 					0.84,
 					0.98
 				],
-				"light_neutral_warm": 0.8
+				"light_neutral_warm": 0.65
 			},
 			"cloth": {
 				"fres": 0.6,
@@ -116,13 +116,13 @@
 				0.04,
 				0.035,
 				0.045,
-				0.55
+				0.32
 			],
-			"amount": 40,
-			"life": 2.0,
-			"size": 0.36,
-			"rise": 0.4,
-			"from": 0.3
+			"amount": 24,
+			"life": 1.8,
+			"size": 0.26,
+			"rise": 0.35,
+			"from": 0.45
 		},
 		"bloom": [
 			{
