@@ -42,3 +42,7 @@ r3d_dredge_vs_r3c.png: portrait | r3c 3/4 | r3d 3/4 | r3c helm and eye | r3d hel
 r3e (credit-free, shot from the branch): nine tar runs down over the hull and off its underside; the back's hatch and pipe as geometry; eight stronger white lens cracks; a soft warm highlight on the hull's upper curves.
 r3e_dredge_turnaround.png | r3e_dredge_front_34.png | r3e_dredge_back.png | r3e_dredge_closeup.png | r3e_dredge_match.png | r3e_dredge_moves.png: as for r3.
 r3e_dredge_vs_r3d.png: portrait | r3d front | r3e front | r3d helm and eye | r3e helm and eye.
+
+r3f (credit-free, ORCH's r3d review + the shared match-zoom fix f4b59cb3): one riveted brass helm round a whole lens over a red-glowing recess, the small grilled port above-left; the friend's black asterisk eye stripped; hairline cracks painted on the glass; no drips over the eye; thinner tar with a crimson sheen and no outline; the tears glow rib-core red; warmer tarnished brass, rust streaks, rough spec, a warm brass rim at match zoom; the stance lifted (spine 0.22, head 0.12) so the eye faces the camera.
+r3f_dredge_turnaround.png | r3f_dredge_front_34.png | r3f_dredge_back.png | r3f_dredge_closeup.png | r3f_dredge_match.png | r3f_dredge_moves.png: as for r3.
+r3f_dredge_vs_r3e.png: portrait | r3e front | r3f front | r3e helm | r3f helm | r3e match zoom | r3f match zoom.
