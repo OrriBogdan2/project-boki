@@ -185,7 +185,8 @@ func _presses() -> void:
 	var wheel_open := KinWheel.is_open(P)
 	Input.action_release("throw")
 	KinCommand.poll(P, 0.05, false)
-	ok(wheel_open and not KinWheel.is_open(P) and P.inp.has("wheel_pick"), "holding G opens the order wheel, letting go picks")
+	ok(wheel_open and not KinWheel.is_open(P) and P.inp.has("wheel_pick"),
+		"holding G opens the order wheel, letting go picks")
 	ok(KinCommand.order(P, "guard") and k.cmd == "guard", "a wheel order is applied (the Boki is told to guard)")
 
 # ------------------------------------------------------------------ the bond hook

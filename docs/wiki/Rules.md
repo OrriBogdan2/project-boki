@@ -241,7 +241,7 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | done_toast | Tutorial done! +{gems} gems |
 | skip_label | Skip tutorial |
 | tracker | {"title": "Goals", "max": 5, "per_source": {"unlock": 2, "mastery": 1, "milestone": 1, "level": 1}, "per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."} |
-| tool_toasts | {"axe": "Someone left a spare axe by the house: it is yours", "pickaxe": "And a pickaxe for the rocks: yours too"} |
+| tool_toasts | {"axe": "Someone left a spare axe by the house", "pickaxe": "And a pickaxe for the rocks"} |
 | gems_toast | Hob slips you %d gems for seeds |
 | voice | Hob |
 | steps_doc | needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect). |
