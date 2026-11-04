@@ -764,3 +764,10 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 2. ORCH 3D review (close-up/match): Ryzz 84/70, Sable 84/62, Hem 83/65, Vex 82/68, Tarek 76/55, Dredge 72/55. S2 self-scores run ~5-20 pts higher on match zoom; fix lists in INBOX_S2 14:15.
 3. Not READY yet: Kael, Breaker, Claire, Ostra, Pip, Cinder (Cinder 3D not started).
 4. Main: no new sync since sync88. Meshy ~4.2k. Conflicts / DECISIONS: none.
+
+## 2026-11-04 10:15 ET (15:15 UTC) ORCH check-in
+- [OWNER] Still blocked: S2 Meshy spends need the permission allowed in the S2 terminal (Tarek hands/locs, Dredge hull).
+1. READY (8): Vex 047f8724 (r3e), Ryzz ea64914a (s7), Hem 45d859ae (s5), Sable 4d1f9221 (s6), Tarek d74e304e (s7), Dredge b9daa472 (r3g), Breaker 7e5f1bc1 (s3), Ostra 814601b2 (ext/warden-3d-ostra-b, b9). Not yet: Kael, Claire, Pip, Cinder.
+2. ORCH review (close/match): Ryzz 85/70, Vex 85/73, Sable 86/62, Hem 84/63, Tarek 79/55, Dredge 78/55, Breaker 78/68, Ostra 72/38. Close-ups climbing; match zoom flat.
+3. [S2] one agent on the shared match-zoom fix (speckle edges, rim, clean frame); build the art-integ branch now (not posted yet, ~2 h since first READY). [MAIN] merge it when posted.
+4. Main: no new sync since sync88. Meshy ~4.2k. Conflicts / DECISIONS: none.

@@ -731,3 +731,72 @@ Improved: slate (not khaki) vest, darker skin, real forearm bracers, raised righ
 4. Hull and lames are faceted low-poly. Black outline triangles and speckle sit on the hull, worst at match zoom, where he's a brown blob and the eye is barely visible.
 5. Stance still pitches forward and hunches; the hull sits low and the legs are short. Art: an upright, tall-legged robot with the hull on top. The grilled port reads as red stripes; it should be a brass grille with dark slots.
 Improved: black glyph gone, one riveted brass ring round the eye, warmer brass than olive, red rib core and tears, the eye faces the camera, back hatch and pipe modelled.
+
+## 15:15 UTC (ORCH): review of 8 READY Hunters (Opus x3) + two process asks
+- **Match zoom is stuck** (most Hunters flat at 55-73% since 13:20) because no per-Hunter agent owns it. Put ONE agent on the shared match-zoom fix now: (a) the white/dark speckle fringe = alpha-card/outline edges and texture mip at distance (fix in the shared shader/outline: alpha-to-coverage or dither-free cutout, outline width by distance, mip bias), (b) per-Hunter signature rim light, (c) clean review frame: no HUD caption text, palm plant or props over the hero. Then every Hunter rebases on it.
+- **Art integ branch**: still not posted ~2 h after the first READY. Build it now on current main with the 8 READY Hunters so main can ship tonight; update it as READY commits move.
+## 15:10 UTC (ORCH): 3D review Vex (r3e): ~85% close-up, ~73% match zoom
+1. The chest and belly circuit tattoos are still white-green paint smears, and they bleed onto the jacket and cleavage. She needs thin, crisp green circuit lines on clean warm skin (vex_face, front).
+2. The jacket and the gun's shoulder mount are camo-blotched with white/grey streaks. Make them clean black leather and gunmetal with brass trim.
+3. Gorget: the neck now has a dark collar with a green seam, but the brass plates and the glowing seam lines from vex_face are still missing.
+4. The braids are still speckled with green noise along the edges, although the copper ties now read. Make them solid plaits.
+5. The lens is green now but dull and muddy. It needs a bright glowing core with concentric rings, as in the art.
+6. Match zoom reads black + green now, but the hair goes pale cyan and the speckle fringe is still on the braids and gun. The hoses are barely visible in the turnaround.
+Improved: brass is now aged bronze (no longer school-bus yellow), the gun barrels are gunmetal grey, the shoulder ammo belt is added, the lens iris is green (no longer yellow/orange), and at match zoom she reads as black + green instead of khaki.
+
+## 15:10 UTC (ORCH): 3D review Ryzz (s7): ~85% close-up, ~70% match zoom
+1. Pigtails: the bodies are still faceted, low-poly blue slabs, and the pink ends are still thin squiggle strands. Make them rounded, fuller curls with pink sweeping through the outer half (ryzz_front).
+2. Match zoom (clean shot): the pigtails still wash out to pale cyan and the body breaks into pink/black speckle. The plain match shot still has HUD text and a palm plant over her.
+3. The gum bubble is now at the mouth corner, but it is a flat matte pink disc. It should be a glossy translucent sphere.
+4. The jacket is still near-black. Shift it to plum-grey leather with copper zips. The rods are still bright orange, not copper.
+5. The hazard bands read as solid yellow with no black stripes. The fishnets are barely visible on the thighs.
+6. The corset bolt is a split gap, not a crisp neon keyhole outline.
+Improved: skin is now pink-peach (no longer orange/tan), the gum bubble is off the nose, the white streaks on the corset are mostly gone, and the hazard bands and boot trim now show in the game turnaround.
+
+## 15:10 UTC (ORCH): 3D review Hem (s5): ~84% close-up, ~63% match zoom
+1. Match zoom is unchanged: a red blob with white speckle. The mask is a white smear, the bow and string are lost, and the frame still has HUD text, a palm plant and a flower over her.
+2. Back view: the coat tail still flares into two lobes that look like baggy red trousers. It needs the art's straight, split, asymmetric tail over black trousers.
+3. Bow: it is still held vertical against the body in the front view; angle it out at her left side. The limbs read navy, not black.
+4. The mask has grey and red smudge blotches. Make it clean porcelain with crisp red stitches.
+5. The shears at the hip and the silver thimble claws are still missing (the hands are plain white). The forearm wrap is plain bandage. A stray brown block sits by her left foot.
+6. The needle threads are straight orange lines. They should be red thread drooping out of the needle eyes.
+Improved: the coat is darker crimson (smears reduced), the quiver needles are now silver with eyes at the top (no longer arrows or brushes), and the quiver and its diagonal strap now read from the back.
+
+## 15:10 UTC (ORCH): 3D review Sable (s6): ~86% close-up, ~62% match zoom
+1. Match zoom is still white/dark speckle on the crossbows, wings and hair (not done). It reads as noise plus a red dot. Fix the alpha/outline edge, and clear the palm plant and "(…oki, glove)" HUD text from the frame.
+2. Bolt tips are still small white points. Art: glowing violet tips with bloom.
+3. The pendant is now a red drop but has no halo or bloom. The fur collar is still pure white; it should be grey-lilac.
+4. Back of the head and hair still read cream/beige in the back views. Cool them to lilac-grey. The laced open back shows as a dark patch with no laces, and the braid doesn't hang down the spine with silver rings.
+5. The crossbows are pitched forward like pistols. Angle them down by the thighs as in the turnaround.
+Improved: crossbows back to hand size and held low, wide moth wings flaring past the hips with clear eyespots (front and back), red gem shape, face still close to sable_face.
+
+## 15:10 UTC (ORCH): 3D review Tarek (s7): ~79% close-up, ~55% match zoom
+1. Match zoom is still one speckled orange-brown blob with yellow pixel noise (not done). Only a grey vest patch reads. Separate the values and cut the edge speckle; the palm plant also sits on him.
+2. Gauntlets are now dark, but they're a pebble mosaic with flat yellow blotches. Art: a few chunky rock plates with thin orange crack glow.
+3. Stones are still flat tan discs with yellow slits. Art: rough geodes with crystal-lined openings and orange-amber eyes.
+4. Skin is still red-orange (not done). Push it to warm mid-brown.
+5. The legs still knock inward at the knees and the knee patches are missing. Locs are longer but still clumped and short of the art's length.
+Improved: stones now orbit above and beside the head (face, bandana and grin clear), vest is slate grey (blue gone), sand trousers, harness and pitons read in back view, copper loc rings.
+
+## 15:10 UTC (ORCH): 3D review Dredge (r3g): ~78% close-up, ~55% match zoom
+1. Match zoom is still a brown blob with no visible eye (not done), plus HUD text in frame. Lift the eye glow and the rim at the far camera.
+2. The hull is still faceted, with black outline triangles and shards at the edges, and big white oval spec blotches. Smooth it and break up the spec with grime.
+3. The eye is still a glossy red ball with a white dot. It now sits in a cracked red recess, but it should be a smaller glassy cracked orb.
+4. Brass is darker but still too warm and clean. Push it toward tarnished bronze and add plate seams; rivets are on the rims only.
+Improved: upright, tall-legged stance with the hull on top, brass grille with dark slots, rivet rows on the helm and eye rings, tar drips off the eye rim (not across the lens), less yellow brass.
+
+## 15:10 UTC (ORCH): 3D review Breaker (s3): ~78% close-up, ~68% match zoom
+1. Beard is still one shaggy red goatee. Rebuild it as the head sheet's THREE stiff frozen braids with silver rings and icy tips. This was fix #1 last round and it is still not done.
+2. Shield still floats beside him with a visible gap in the front and 3/4 views. Rest it against his LEFT forearm and hip, with the rope grip in his hand.
+3. Skin: the arms and torso are still smooth pale blue. Add frost cracks, barnacles and icicles (a few barnacles are on the head now). The brass compass on the chest strap is still missing, and so is the kelp on the mantle.
+4. Match zoom: the body breaks into grey and brown dither, and the shield reads as a brown blob. Lift the iron rim and the ice-blue value, add a rim light, and check the 1.5x scale against a medium hunter.
+5. Back view: the red beard pokes through the back of his neck. Fix the clipping.
+Improved: the hold (haft diagonal over the RIGHT shoulder, fist up), red brows, the teddy bear on the belt, and a brighter ice hammer that reads at match zoom.
+
+## 15:10 UTC (ORCH): 3D review Ostra (b9): ~72% close-up, ~38% match zoom
+1. Match zoom is still a thin purple streak, a white crescent and a brown smear (the ruff and chest). Add the violet emissive rim and glow from ostra_front_float, lighten the ruff to grey, and give the whole figure a readable silhouette.
+2. Halo: it is a pale pink-white crescent off to one side. Make it violet emissive and cracked, larger than the head, and centred behind it.
+3. Void orb, strings and card shards are still missing or unreadable. Add the black swirling core with a violet glow in the raised hand, with strings and cards hanging from it.
+4. Mask: the violet mouth is in, but the eye holes are flat black. Add violet pinpoints, the painted violet tear (viewer's left) and the glowing crack (viewer's right).
+5. Wisp: it tapers now, but it is a stiff straight cone. Curl it into the smoky S-tail from the turnaround, and make the low hand's long clawed fingers clearer.
+Improved: the coat now reads black with violet panels, the mouth glows violet, the orb hand is raised by the head instead of a T-pose, the lower body is a starry tapering wisp, and the blue disc at his feet is gone.
