@@ -839,3 +839,10 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
   - Also stop loops when the owning node frees mid-channel (e.g. extracting during a channel).
 - Add a check (register it): run a short match, extract mid-channel and return to the farm; assert no match-started players are still playing.
 - Do this first in the item 94 perf pass (it touches the same audio/scene teardown).
+
+## 104. Farm Boki speech text is now too big (owner, 23:24 UTC Nov 4)
+- Owner: "The text from the Boki in your farm is too big now. Before it was too small but you went overboard."
+- Bring the farm Boki speech/bubble text to the middle: roughly 65-70% of the current size, still readable at the farm camera. Shorter lines help too (item 102).
+- One shared size constant for all Boki speech (farm + match) so it stays consistent.
+- Screenshot at the normal farm camera before/after.
+- Routed to the tutorial agent (ext/tut-airdash) as an add-on, since it already has the farm warm.
