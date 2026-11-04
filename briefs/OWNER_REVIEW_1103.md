@@ -880,3 +880,20 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
 - Ability-specific aim visuals stay (Hem's filling line, item 55b; the charge visuals) and sit on top of the chosen reticle.
 - Assert: settings persist and apply in the farm and the match; screenshots of the default + 2 custom styles.
 - Bundle with the item 96 combat-clarity pass (reticle readability is part of clarity).
+
+## 101b. Revive rules, from the owner (overrides the revive part of 101; owner, 23:32 UTC Nov 4)
+- Owner: "SUPERVIVE doesn't make you carry them to a respawn. You can use a respawn beacon to revive all your teammates (and it makes a big sound and notifies people it's being used), or you can save an individual box by reviving it, which is like a 7-8 s thing where you're vulnerable while doing it (extra damage taken, like with potions)."
+- Two ways back:
+  1. **Revive a box:**
+     - At an ally's death box, hold F for ~7.5 s (tunable, data).
+     - While channelling you take extra damage (use the same vulnerability multiplier as drinking potions) and can't attack.
+     - Moving / getting hit cancels it (follow the potion channel rule).
+     - The teammate comes back at the box with their Boki.
+     - A progress ring on the box + over you.
+  2. **Respawn beacon:**
+     - A map structure (several per map, shown on the map).
+     - Using it revives ALL dead teammates at once (from anywhere).
+     - It's loud: a big sound audible across a wide radius, plus a map/world notification to every player that a beacon is in use (location shown) for its duration.
+     - Short channel, data-tuned.
+- Ally boxes stay team-coloured on the map (101) so you know whom you can save.
+- Assert: a box revive takes ~7.5 s with extra damage taken and cancels per the rule; a beacon revives all dead allies and every player gets the notification + sound.
