@@ -1,0 +1,13 @@
+Shared match-zoom fix, ext/warden-matchzoom-v2 (161708cc code, 0170c7df warden_card, c89a5273 / a466972f recipe+docs). Agent: matchzoom.
+All frames: --arena=<arch> --record=2 --arena-demo=pose_clear --demo-zoom=1.0, Low preset (llvmpipe: 0.8 render scale, no MSAA), the same spot and time; "before" = the shaders and loader of 047f8724 (f4b59cb3's far_smooth/far ink thinning), "after" = v2. The other Hunters' .glb, atlases and warden_look entries were copied read-only from their worktrees into a scratch copy (Ryzz as mage, Hem as archer; void/emit/orbit features of their branches are not in that copy).
+all6_x3_before_after.png: left block before, right block after (x3): top Vex, Sable, Ryzz; bottom Tarek, Hem, Ostra.
+<name>_match_x4_before_after.png: the hero's x4 crop, before (left) and after (right). <name>_match_before/after.png: the full frames.
+Speckle (share of hero pixels > 0.12 off their 3x3 median, bright + dark) / mean high-frequency deviation, before -> after:
+  vex    6.4% / 3.35 -> 3.3% / 2.26
+  sable  7.2% / 3.42 -> 4.9% / 2.67 (edge-on wing streaks gone; white crossbows and silver hair are her palette)
+  ryzz   6.7% / 3.31 -> 3.4% / 2.45
+  tarek  7.7% / 3.67 -> 3.4% / 2.52
+  hem    6.0% / 3.15 -> 4.0% / 2.39
+  ostra  7.5% / 3.42 -> 2.8% / 2.00
+Pale (near-white, unsaturated) pixels: vex 0.6 -> 0.3%, sable 22.3 -> 17.1%, ryzz 4.1 -> 2.9%, tarek 0.8 -> 0.0%, hem 0.8 -> 0.2%.
+review_frame_old_pose_demo_at.png: the old match frame (--arena-demo=pose --no-tips --demo-at=-4.5,0): keys caption, DPS meter, buttons, KIT CARD sign, aim line, grass over the hero. review_frame_new_pose_clear.png: pose_clear: clear ground found by itself, no HUD, sign, aim line, Focus tell, props or grass over the hero; prints DEMO_HERO_RECT for the x4 crop.
