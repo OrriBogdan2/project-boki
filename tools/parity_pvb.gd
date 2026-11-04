@@ -1,5 +1,5 @@
 extends "res://tools/archetype_check.gd"
-## The parity pass (the owner's 18:45 request, briefs-s2/PARITY_BRIEF.md) for Pin, Ryzz and Breah: each LMB's
+## The parity pass (the owner's 18:45 request, briefs-s2/PARITY_BRIEF.md) for Hem, Ryzz and Breah: each LMB's
 ## tracking (the aim and the body follow the cursor during the attack, also while walking), its timing and cadence,
 ## its range and projectile speed against the source (game data, then the footage at 5 fps), and each move's beats.
 ## Runs from each hero's combo check (--archer-combo-check, --mage-combo-check, --dolm-combo-check), which adds n
@@ -45,7 +45,7 @@ func _speed(m: Match, P: Hunter, secs: float, each: Callable) -> float:
 	step(m, secs, each)
 	return Vector2(P.pos.x - a.x, P.pos.z - a.z).length() / secs
 
-# ------------------------------------------------------------------ Pin: the bow
+# ------------------------------------------------------------------ Hem: the bow
 func pin() -> void:
 	var r := setup("archer", 7.0)
 	var m: Match = r[0]

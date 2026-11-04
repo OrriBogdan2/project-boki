@@ -24,7 +24,7 @@ static func label(player_name: String, archetype: String) -> String:
 static func of_hunter(hunter: Hunter) -> String:
 	return label(hunter.pname, hunter.arch)
 
-## "Originally Pin, female" for the class intro and picker.
+## "Originally Hem, female" for the class intro and picker.
 static func origin_line(archetype: String) -> String:
 	var gender_text := gender(archetype)
 	if gender_text == "robot":

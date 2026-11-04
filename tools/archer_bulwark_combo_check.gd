@@ -48,7 +48,7 @@ func _clear_wall(m: Match, at: Vector3, lv: int, dx0: int) -> void:
 			wl[W.idx(int(at.x) + dx0 + dx, int(at.z) + dz)] = lv
 	W.level = wl
 
-## The shot of ours most recently skinned by Pin's look: how far it will fly (life * speed), or -1.
+## The shot of ours most recently skinned by Hem's look: how far it will fly (life * speed), or -1.
 func _shot_reach(m: Match, P: Hunter) -> float:
 	for i in range(m.shots.size() - 1, -1, -1):
 		var sh: Dictionary = m.shots[i]
@@ -506,7 +506,7 @@ func _archer_combos() -> void:
 	T2.spirit_t = 0.0
 	K.spirit.granted.clear()
 	P.inp["move"] = Vector2.ZERO
-	# the long dash (no charges left): Pin's own flick
+	# the long dash (no charges left): Hem's own flick
 	step(m, 0.5)
 	P.dashes = 0.0
 	P.ex_cd = 0.0

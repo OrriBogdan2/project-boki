@@ -1,6 +1,6 @@
 class_name KitShaders
 extends RefCounted
-## Our own effect shaders for the Pin and Breaker kits (pooled meshes in PinFx / BjornFx drive them through
+## Our own effect shaders for the Hem and Breaker kits (pooled meshes in PinFx / BjornFx drive them through
 ## uniforms). Every one is unshaded, casts no shadow and never writes depth, so stacked effects can't
 ## z-fight the ground. Built once and cached.
 ##
@@ -106,7 +106,7 @@ void fragment() {
 	float a = clamp((rays + core * 1.4 + rg) * power, 0.0, 1.5) * (1.0 - smoothstep(0.85, 1.0, r));
 	vec3 col = mix(color.rgb, vec3(1.0), core * 0.6 * white);
 """ + _TAIL
-		# Pin's fletch burst (her stage and perfect-release flashes, the glint at her bow): leaf-shaped
+		# Hem's fletch burst (her stage and perfect-release flashes, the glint at her bow): leaf-shaped
 		# feathers radiating from a small core, each with a bright quill down its middle, an optional ring
 		"rosette":
 			return """shader_type spatial;
@@ -151,7 +151,7 @@ void fragment() {
 	float a = pow(across, 1.6) * mix(1.0, UV.x, tail) * power;
 	vec3 col = mix(color.rgb, vec3(1.0), pow(across, 6.0) * 0.7);
 """ + _TAIL
-		# a standing translucent panel: bright rim and base, a rising shimmer (Pin's Rain of Arrows)
+		# a standing translucent panel: bright rim and base, a rising shimmer (Hem's Rain of Arrows)
 		"panel":
 			return """shader_type spatial;
 render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled;
@@ -167,7 +167,7 @@ void fragment() {
 	ALPHA = clamp(a, 0.0, 1.0) * color.a;
 }
 """
-		# a licking flame on a billboard (Pin's anti-heal burn: blue)
+		# a licking flame on a billboard (Hem's anti-heal burn: blue)
 		"flame":
 			return """shader_type spatial;
 render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled;

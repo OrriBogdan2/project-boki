@@ -1,6 +1,6 @@
 class_name PinFx
 extends Node3D
-## Pin's own effects, every one pooled (built once when the kit starts, then shown, moved and hidden). The
+## Hem's own effects, every one pooled (built once when the kit starts, then shown, moved and hidden). The
 ## coloured ones are layered (KitShaders): an alpha-blended body in her greens, teal and gold with the glow
 ## on top, so they keep their colour on bright grass.
 ## - fletch bursts (her own motif: feathers radiating from a core): the green stage-ready flash at the bow,

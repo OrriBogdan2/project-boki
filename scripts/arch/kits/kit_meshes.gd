@@ -1,6 +1,6 @@
 class_name KitMeshes
 extends RefCounted
-## Small cached ArrayMeshes for the Pin and Breaker effects: flat arc bands (crescents, swirl rings), curved
+## Small cached ArrayMeshes for the Hem and Breaker effects: flat arc bands (crescents, swirl rings), curved
 ## standing walls (Breaker's aegis), a cone pillar. UV.x runs along the arc, UV.y across it (inner 0 ->
 ## outer 1 on a band; top 0 -> foot 1 on a wall), which is what KitShaders expects.
 

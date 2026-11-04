@@ -1,5 +1,5 @@
 extends "res://tools/pin_bjorn_ult_check.gd"
-## Owner playtest items of 2026-11-03 for Pin and Breaker (briefs/OWNER_REVIEW_1103.md #5, #6, #10, #29, #30),
+## Owner playtest items of 2026-11-03 for Hem and Breaker (briefs/OWNER_REVIEW_1103.md #5, #6, #10, #29, #30),
 ## run from --archer-combo-check and --bulwark-combo-check (tools/archer_bulwark_combo_check.gd adds the
 ## counts). Prints AKCHECK lines like --archetype-check.
 
@@ -33,7 +33,7 @@ func off_line(from: Vector3, dir: Vector2, p: Vector3) -> float:
 	var d := Vector2(p.x - from.x, p.z - from.z)
 	return absf(d.x * dir.y - d.y * dir.x)
 
-## The first visible fletch burst of Pin's pool (its world place and width), or null.
+## The first visible fletch burst of Hem's pool (its world place and width), or null.
 func burst_node(K: ArcherKit) -> MeshInstance3D:
 	for b in K.fx.bursts:
 		var node: MeshInstance3D = b["node"]
@@ -161,7 +161,7 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var ve := AimKit.entry(P, "draw")
 	var from: Vector2 = ve.get("from", Vector2(-99, -99))
 	var vd: Vector2 = ve.get("dir", Vector2.ZERO)
-	ok("pin readout: the V leaves Pin along the aim line and is symmetric about it",
+	ok("pin readout: the V leaves Hem along the aim line and is symmetric about it",
 		String(ve.get("kind", "")) == "vee" and from.distance_to(Vector2(P.pos.x, P.pos.z)) < 0.01
 		and vd.distance_to(d) < 0.01 and float(ve.get("half", 0.0)) > 0.0,
 		"from %s dir %s aim %s" % [str(from), str(vd), str(d)])
@@ -176,7 +176,7 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var le := AimKit.entry(P, "draw")
 	var to: Vector2 = le.get("to", Vector2.ZERO)
 	var cursor := Vector2(T.pos.x - P.pos.x, T.pos.z - P.pos.z).length()
-	ok("pin readout: full draw runs one line from Pin along the aim line, past the cursor, to max range",
+	ok("pin readout: full draw runs one line from Hem along the aim line, past the cursor, to max range",
 		String(le.get("kind", "")) == "line" and to.distance_to(le.get("from", Vector2.ZERO)) > cursor + 3.0
 		and off_line(P.pos, d, Vector3(to.x, P.pos.y, to.y)) < 0.05,
 		"len %.1f cursor %.1f" % [to.distance_to(le.get("from", Vector2.ZERO)), cursor])
@@ -262,7 +262,7 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	step(m, 0.8, rmb_at.bind(P, T.pos))
 	var bar := AimKit.entry(P, "rmb_bar")
 	var d := P.aim_dir()
-	ok("pin heavy: the telegraph while held is a thick gold lane with a tip, from Pin along the aim line",
+	ok("pin heavy: the telegraph while held is a thick gold lane with a tip, from Hem along the aim line",
 		AimKit.shown(P, "rmb_bar") and AimKit.shown(P, "rmb_v") and float(bar.get("width", 0.0)) >= 0.45
 		and bool(bar.get("tip", false)) and (bar.get("dir", Vector2.ZERO) as Vector2).distance_to(d) < 0.01,
 		"width %.2f tip %s" % [float(bar.get("width", 0.0)), str(bar.get("tip"))])
@@ -554,7 +554,7 @@ func _let_go(P: Hunter) -> void:
 func _mode(hero: String, slot: String, in_air: bool) -> String:
 	return String(DashFlow.row_of(hero, slot, in_air)["mode"])
 
-## #32 / #35 for Pin: a press during the roll is carried, RMB / E / X work at once; item 51: a draw carries
+## #32 / #35 for Hem: a press during the roll is carried, RMB / E / X work at once; item 51: a draw carries
 ## through a dash (Shift mid-draw rolls at once).
 func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	ok("pin dash table: LMB buffers, RMB / E / X fire, a draw carries through a dash",

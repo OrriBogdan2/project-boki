@@ -12,7 +12,7 @@ Changing a hero's hit radius is one line (`body.hit_r`). The creator's look slid
 | gunslinger | Venator | 1.04 | 0.416 | broad |
 | ostra | Ostra | 1.03 | 0.412 | tall and thin; hitbox stays at ground level (item 18) |
 | mage | Ryzz | 1.00 | 0.400 | average |
-| archer | Pin | 0.98 | 0.392 | average, slim |
+| archer | Hem | 0.98 | 0.392 | average, slim |
 | dolm | Tarek (Breah's base) | 0.97 | 0.388 | lean |
 | thief | Sable (Dancer) | 0.96 | 0.384 | lean |
 | rimewright | Tamsin | 0.95 | 0.380 | slight |

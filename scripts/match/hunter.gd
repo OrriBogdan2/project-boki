@@ -1457,7 +1457,7 @@ func _loose() -> void:
 		if t >= float(stg[0]):
 			dmg = float(stg[1]); rng = float(stg[2]); spd = float(stg[3])
 	if ak and ak.has_method("draw_bonus"):
-		dmg *= float(ak.draw_bonus(t))       # the kit's stage rules (Pin: the perfect window, overdraw, where it lands)
+		dmg *= float(ak.draw_bonus(t))       # the kit's stage rules (Hem: the perfect window, overdraw, where it lands)
 	var keep := wpn
 	wpn = wpn.duplicate()
 	wpn["dmg"] = dmg * wup_dmg; wpn["range"] = rng; wpn["speed"] = spd

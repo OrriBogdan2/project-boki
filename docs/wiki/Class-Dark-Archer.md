@@ -9,7 +9,7 @@ target eats the big shot. Spirit Walk carries her through rocks and barriers.
 |  |  |
 |---|---|
 | Class title | Dark Archer |
-| Base character | Pin, female |
+| Base character | Hem, female |
 | Personality | A cool, patient hunter in a dark cloak with a thread of red. She says little and watches everything. She picks the high ground, waits, and pins you to the wall. |
 
 <!-- /gen:profile -->

@@ -497,7 +497,7 @@ def build():
 
     # ============================================================== archetype payoffs (appended last so
     # nothing above changes): each kit's cash-in has its own signature, so you know by ear what just landed
-    # Pin (archer) Deadeye: a whip-crack of the string, a split-the-air snap, a glassy high ring that bends down
+    # Hem (archer) Deadeye: a whip-crack of the string, a split-the-air snap, a glassy high ring that bends down
     def pay_deadeye(i):
         d = 1.0
         glass = ring((2637, 3951, 5274), d, (0.25, 0.16, 0.08), (0.5, 0.3, 0.16))

@@ -1,11 +1,11 @@
 class_name KMovesPinBjorn
 extends RefCounted
-## Keyed full-body moves of Pin (archer) and Breaker (bulwark): the same format and channels as
+## Keyed full-body moves of Hem (archer) and Breaker (bulwark): the same format and channels as
 ## HunterAnim.KMOVES (looked up by HunterAnim.km_sample). Timed to the hero sheets' 5 fps footage frames
 ## (one frame = 0.2 s): anticipation, a key pose on the release, overshoot, follow-through and settle.
 ## fl / fr place a free hand from its shoulder (hw / rw their weight), gp pitches the weapon.
 
-## Pin's held draw: side-on, leaning back, the bow arm out at full reach, the string hand past the chest
+## Hem's held draw: side-on, leaning back, the bow arm out at full reach, the string hand past the chest
 ## (the draw's Empowered key and the start of every release)
 const DRAW_LEGS := [0.45, -0.6, -0.35, -0.3]
 const DRAW_HAND := Vector3(0.17, 0.18, 0.36)
@@ -44,7 +44,7 @@ const FULL_POSE := {
 }
 
 const MOVES := {
-	# ---------------------------------------------------------------- Pin (archer; hero sheet pin.md, 5 fps footage)
+	# ---------------------------------------------------------------- Hem (archer; hero sheet pin.md, 5 fps footage)
 	# the bow drawn, on the draw's own clock (ArcherKit keeps it at Hunter.draw_t, so a quick draw and the
 	# stage cues line up): the arrow nocks on the press (0.05 s), then one steady pull, the bow arm
 	# reaching out and the string hand travelling back, to Empowered (0.6 s) and on to Supercharged (1.15 s)
@@ -500,7 +500,7 @@ const MOVES := {
 			}
 		],
 		[0.95, {}]]},
-	# ---------------------------------------------------------------- Pin: the other LMB variants, procs and payoffs
+	# ---------------------------------------------------------------- Hem: the other LMB variants, procs and payoffs
 	# a tap shot (let go before Empowered): a quick snap of the bow hand, half side-on, a little hop of the heel
 	"arc_tap": {"keys": [
 		[

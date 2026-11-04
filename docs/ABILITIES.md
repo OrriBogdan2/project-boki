@@ -11,7 +11,7 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 | Archetype | Weight | Weapons | Dash | Passive | RMB | E | R |
 |---|---|---|---|---|---|---|---|
 | **Thief** | light | Twin Blades | Vault | Marks | Bola | Shadow Knife (18s) | none (X is the Merge) |
-| **Pin** | light | Longbow | Spirit Walk | Focus | Heavy Shot | Hail Wall (9s) | none (X is the Merge) |
+| **Hem** | light | Longbow | Spirit Walk | Focus | Heavy Shot | Hail Wall (9s) | none (X is the Merge) |
 | **Ryzz** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
 | **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
 | **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
@@ -29,7 +29,7 @@ _The cutpurse duelist. Sticks to one mark, flips past them, never lets go._
 - **E: Shadow Knife** (18s). Throw a dagger 12m that sticks in the first foe (8 damage, slowed 50% for 2.5s) or in a wall or the ground where it stops. Press E again to step to it at once; after 5s you step to it anyway.
 - Level-up order (bots too): RMB, Dash, E, RMB, Dash, R, RMB, E, R, Q
 
-### Pin (light)
+### Hem (light)
 
 _The warden of high ground. Climbs, reads the field, pins people to walls._
 
