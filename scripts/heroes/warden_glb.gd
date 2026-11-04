@@ -45,7 +45,7 @@ const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most th
 const NO_INK := ["hair", "eyes", "glow"]   # slots drawn without the ink outline shell
 ## Pieces built as clean geometry (tools/meshy/warden_parts.py), "<slot>-<tag>": they take the ink line even on
 ## an inkless slot (the hair goes without it for a scan's ragged strands, not for a woven braid).
-const INK_TAGS := ["braid", "mane", "mane_dk"]
+const INK_TAGS := ["braid"]
 ## The hero toon shader on a painted atlas, which carries its own light and shade: the toon light on top stays
 ## soft and near white (no violet shadow, no warm terminator band, no sun self-shadow, no procedural
 ## brushwork), a light-coloured rim and top light lift its edges off the ground, and far_lift brightens it at
@@ -264,7 +264,8 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 			out.append(m)
 	return out
 
-## A Warden's glow colours from its archetype's "model_glow" {core, edge} (hex): the cracks and glowing pieces take
+## A Warden's glow colours from its archetype's "model_glow" {core, edge (hex), strength (the emission)}: the
+## cracks and glowing pieces take
 ## them instead of their painted colour, so the glow can change without a rebake. A flat piece tagged "edge"
 ## (glow-<name>_edge) takes the edge colour.
 static func _glow_colours(m: ShaderMaterial, arch: String, tag: String) -> void:
@@ -275,6 +276,8 @@ static func _glow_colours(m: ShaderMaterial, arch: String, tag: String) -> void:
 	var edge := Color(String(g.get("edge", g.get("core", "ffffff"))))
 	m.set_shader_parameter("glow_core", core if not tag.ends_with("_edge") else edge)
 	m.set_shader_parameter("glow_edge", edge)
+	if g.has("strength"):
+		m.set_shader_parameter("glow", float(g["strength"]))
 
 static func _painted_ink() -> ShaderMaterial:
 	if _ink == null:

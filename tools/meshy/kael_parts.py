@@ -29,9 +29,9 @@ from mathutils import Vector
 import warden_parts as WP
 
 COL = {  # name: (slot, hex)
-    "blade": ("metal", "8e9097"), "blade_dk": ("metal", "5b5d63"), "band": ("metal", "3b3d43"),
-    "guard": ("metal", "4a4c53"), "grip": ("leather", "5a2a24"), "pommel": ("metal", "54565d"),
-    "chain": ("metal", "55575d"), "hook": ("metal", "4c4e54"),
+    "blade": ("metal", "5f5c58"), "blade_dk": ("metal", "3e3c3a"), "band": ("metal", "4c4c52"),
+    "guard": ("metal", "6c6a65"), "grip": ("leather", "5e2c25"), "pommel": ("metal", "6c6a65"),
+    "chain": ("metal", "6e7075"), "hook": ("metal", "616368"),
     "sword": ("glow", "fffaf0"), "sword_edge": ("glow", "f2d48a"), "hook_tip": ("glow", "fffaf0"),
     "mane": ("hair", "e9e7e3"), "mane_dk": ("hair", "bdb9b4"),
 }
@@ -66,10 +66,10 @@ def atlas():
         _atlas = bpy.data.images.new("kael_parts_atlas", ATLAS, ATLAS, alpha=False)
         px = np.ones((ATLAS, ATLAS, 4), np.float32)
         for i, (name, (slot, hexc)) in enumerate(COL.items()):
+            # (the image is sRGB: its pixels are the hex colours as they are, not linear)
             c = np.array([int(hexc[k:k + 2], 16) / 255.0 for k in (0, 2, 4)], np.float32)
-            lin = np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
             r, q = divmod(i, 8)
-            px[r * 32:(r + 1) * 32, q * 32:(q + 1) * 32, :3] = lin
+            px[r * 32:(r + 1) * 32, q * 32:(q + 1) * 32, :3] = c
         _atlas.pixels = px.ravel()
         _atlas.pack()
     return _atlas
@@ -123,21 +123,20 @@ def finish(bld, name, mats_of_part):
 
 # ------------------------------------------------------------------------------------------------ the sword
 def _outline(L0, L1, hw, seed=3):
-    """The blade's outline (y along the blade, z across), base to tip and back, chipped edges and the art's broken
-    tip: the top edge runs on, the bottom edge cut back at an angle, a notch between."""
+    """The blade's outline (y along the blade, z across), base to tip and back (kael_blade_sheet): a long straight
+    slab, faintly chipped along both edges, its end broken square into crenels with a notch on each side."""
     rng = np.random.default_rng(seed)
     n = 14
+    yt = L1 - 0.14
     top, bot = [], []
     for i in range(n + 1):
-        y = L0 + (L1 - 0.2 - L0) * i / n
-        taper = 1.0 - 0.12 * i / n
-        chip = (rng.uniform(-0.018, 0.004) if 0 < i < n else 0.0)
-        top.append((y, hw * taper + chip))
-        bot.append((y, -hw * taper - (rng.uniform(-0.018, 0.004) if 0 < i < n else 0.0)))
-    yt = L1 - 0.2
-    w = hw * 0.88
-    tip = [(yt + 0.08, w * 0.9), (yt + 0.16, w * 0.55), (L1, w * 0.2), (L1 - 0.03, -w * 0.05),
-           (L1 - 0.012, -w * 0.25), (yt + 0.1, -w * 0.45), (yt + 0.05, -w * 0.7), (yt + 0.02, -w * 0.95)]
+        y = L0 + (yt - L0) * i / n
+        top.append((y, hw + (rng.uniform(-0.012, 0.0) if 0 < i < n else 0.0)))
+        bot.append((y, -hw - (rng.uniform(-0.012, 0.0) if 0 < i < n else 0.0)))
+    # the broken end: out to a shoulder, a notch in, the crenellated top, the other notch and shoulder
+    tip = [(yt + 0.03, hw * 1.12), (yt + 0.07, hw * 1.05), (yt + 0.08, hw * 0.78), (yt + 0.115, hw * 0.82),
+           (L1, hw * 0.55), (L1 - 0.02, hw * 0.25), (L1 - 0.005, -hw * 0.05), (L1 - 0.03, -hw * 0.35),
+           (L1 - 0.01, -hw * 0.6), (yt + 0.1, -hw * 0.85), (yt + 0.085, -hw * 1.06), (yt + 0.04, -hw * 1.1)]
     return top + tip + bot[::-1]
 
 
@@ -160,14 +159,14 @@ def _slab(bm, outline, t_edge, t_mid, inner_k, mi_face, mi_edge):
         bm.faces.new((vo[-1][a], vo[-1][b], vo[1][b], vo[1][a])).material_index = mi_edge
 
 
-def _ribbon(bm, pts, w, x, mi):
-    """A flat ribbon on the plane x (a crack), through pts (y, z), w wide."""
+def _ribbon(bm, pts, w, x, mi, taper=True):
+    """A flat ribbon on the plane x (a crack), through pts (y, z), w wide (tapered at both ends, or squared)."""
     pts = [Vector((0, p[0], p[1])) for p in pts]
     left, right = [], []
     for i, p in enumerate(pts):
         t = (pts[min(i + 1, len(pts) - 1)] - pts[max(i - 1, 0)]).normalized()
         nrm = Vector((0, -t.z, t.y))
-        ww = w * (0.35 + 0.65 * math.sin(math.pi * (0.15 + 0.7 * i / max(len(pts) - 1, 1))))
+        ww = w * (0.35 + 0.65 * math.sin(math.pi * (0.15 + 0.7 * i / max(len(pts) - 1, 1)))) if taper else w
         left.append(bm.verts.new((x, p.y + nrm.y * ww / 2, p.z + nrm.z * ww / 2)))
         right.append(bm.verts.new((x, p.y - nrm.y * ww / 2, p.z - nrm.z * ww / 2)))
     for i in range(len(pts) - 1):
@@ -203,30 +202,31 @@ def sword(sp):
     bm = bmesh.new()
     out = _outline(L0, L1, hw)
     _slab(bm, out, 0.011, 0.03, 0.72, mi["blade"], mi["blade_dk"])
-    # the cracks: a jagged channel down the middle and branches off it, on both faces (edge glow under the core)
+    # the white-hot core: one broad channel the blade's whole length (kael_blade_sheet), its rim pale gold, a few
+    # thin cracks breaking off it toward the edges; on both faces
     rng = np.random.default_rng(11)
-    main = [(L0 + 0.06 + (L1 - 0.12 - L0) * i / 16, rng.uniform(-0.025, 0.025) + 0.03 * math.sin(i * 1.3)) for i in range(17)]
+    cw = float(sp.get("crack_w", 0.5)) * hw * 2
+    main = [(L0 + 0.05 + (L1 - 0.1 - L0) * i / 18, rng.uniform(-0.006, 0.006)) for i in range(19)]
     branches = []
-    for k in range(6):
-        i0 = 2 + k * 2 + int(rng.integers(0, 2))
+    for k in range(int(sp.get("branches", 8))):
+        i0 = 2 + int(k * 14 / max(int(sp.get("branches", 8)), 1)) + int(rng.integers(0, 2))
         y0, z0 = main[i0]
         sgn = 1 if k % 2 == 0 else -1
+        z0 += sgn * cw * 0.4
         br = [(y0, z0)]
-        for j in range(3):
-            y0 += rng.uniform(0.03, 0.06)
-            z0 += sgn * rng.uniform(0.025, 0.04)
+        for j in range(2):
+            y0 += rng.uniform(0.02, 0.05)
+            z0 += sgn * rng.uniform(0.012, 0.022)
             br.append((y0, z0))
         branches.append(br)
     for s in (-1, 1):
         x = s * 0.0312
-        _ribbon(bm, main, 0.05, x, mi["sword_edge"])
-        _ribbon(bm, main, 0.024, s * 0.0318, mi["sword"])
+        _ribbon(bm, main, cw * 1.25, x, mi["sword_edge"], taper=False)
+        _ribbon(bm, main, cw, s * 0.0318, mi["sword"], taper=False)
         for br in branches:
-            _ribbon(bm, br, 0.024, x, mi["sword_edge"])
-            _ribbon(bm, br, 0.011, s * 0.0318, mi["sword"])
-    # iron bands near the base, the bar guard, the wrapped grip, the pommel
-    for y in (L0 + 0.08, L0 + 0.17):
-        _box(bm, (0, y, 0), (0.04, 0.02, hw * 1.04), mi["band"])
+            _ribbon(bm, br, 0.016, x, mi["sword_edge"])
+            _ribbon(bm, br, 0.008, s * 0.0318, mi["sword"])
+    # the bar guard, the wrapped grip, the pommel (the sheet's pommel hook is NOT his: the one hook is the chain's)
     _box(bm, (0, L0 - 0.03, 0), (0.055, 0.045, hw * 1.55), mi["guard"])
     _cyl(bm, (0, L0 - 0.075, 0), (0, -0.25, 0), 0.034, 10, mi["grip"])
     for k in range(5):
@@ -244,6 +244,13 @@ def sword(sp):
     # the Warchain's links round the grip (the chain off the forearm runs down the hilt)
     bld = WP.Builder()
     hilt = np.array([[0.0, -0.22 + 0.05 * i, 0.0] for i in range(6)])
+    for i in range(6):
+        # round the blade's base above the guard: links standing round its flat
+        y = L0 + 0.02 + 0.035 * i
+        ang = i * 1.9
+        off = np.array([0.03 * math.cos(ang), 0.0, (hw + 0.01) * math.sin(ang)])
+        _link(bld, np.array([0.0, y, 0.0]) + off, [0.0, 0.25, 0.0] + np.array([-math.sin(ang), 0.0, math.cos(ang)]),
+              [0.0, 1.0, 0.0], 0.05, 0.032, 0.0065, "chain", 0.0)
     for i in range(5):
         c = (hilt[i] + hilt[i + 1]) * 0.5
         ang = i * 1.1
@@ -394,7 +401,7 @@ def _lock(bld, p, w0, th0, out_dir, part, s_off=0.0):
     s_arr = WP.arclen(p)
     L = s_arr[-1]
     base = len(bld.v)
-    sides = 6
+    sides = 5
     n = len(p)
     for i in range(n):
         t = p[min(i + 1, n - 1)] - p[max(i - 1, 0)]
@@ -448,7 +455,12 @@ def mane(body, arm, rig, K, sp):
                     root + horiz * (0.05 + float(g.get("spread", 0.05))) + np.array([0, 0, -0.12]),
                     root + horiz * (0.1 + float(g.get("spread", 0.05))) + np.array([0, 0, -ln * 0.55]),
                     root + horiz * (0.1 + float(g.get("spread", 0.05)) * 1.3) + np.array([0, 0, -ln])]
-            p = WP.drape(bvh, [tuple(c) for c in ctrl], 16, float(g.get("clear", 0.03)), length=ln)
+            p = WP.drape(bvh, [tuple(c) for c in ctrl], 12, float(g.get("clear", 0.03)), length=ln)
+            # (a loose wave across the lock, growing toward the tip: hair, not a strap)
+            side = np.cross(horiz, [0.0, 0.0, 1.0])
+            u = np.linspace(0.0, 1.0, len(p))
+            ph = rng.uniform(0, 2 * math.pi)
+            p = p + np.outer(np.sin(u * math.pi * 2.2 + ph) * u * float(g.get("wave", 0.025)), side)
             w0 = float(g.get("width", 0.05)) * rng.uniform(0.8, 1.15)
             part = "mane" if k % 3 else "mane_dk"
             v0 = len(bld.v)

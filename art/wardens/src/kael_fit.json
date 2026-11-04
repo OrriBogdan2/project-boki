@@ -135,6 +135,26 @@
    ]
   },
   {
+   "slot": "leather",
+   "absx": true,
+   "box": [
+    0,
+    0.26,
+    -0.3,
+    0.3,
+    0.16,
+    0.62
+   ],
+   "hsv": [
+    0.0,
+    0.15,
+    0.0,
+    0.24,
+    0.1,
+    0.42
+   ]
+  },
+  {
    "slot": "cloth",
    "absx": true,
    "box": [
@@ -219,9 +239,9 @@
    "hsv": [
     0.93,
     0.025,
-    0.5,
+    0.58,
     1.0,
-    0.15,
+    0.22,
     1.0
    ]
   }
@@ -249,7 +269,10 @@
  "fit_weights": true,
  "kael": {
   "sword": {
-   "scale": 0.55
+   "scale": 0.55,
+   "crack_w": 0.45,
+   "branches": 8,
+   "half_width": 0.14
   },
   "chain": {
    "turns": 2.6,
@@ -258,84 +281,261 @@
    "wrap_gap": 0.01
   },
   "mane": {
-   "bones": 4,
+   "bones": 5,
    "groups": [
     {
      "name": "mane_back",
      "az": [
-      128,
-      232
+      120,
+      240
      ],
-     "locks": 12,
-     "length": 0.62,
-     "width": 0.05,
+     "locks": 22,
+     "length": 0.7,
+     "width": 0.055,
      "el": [
-      0,
-      40
+      -5,
+      60
      ],
-     "spread": 0.02
+     "spread": 0.02,
+     "wave": 0.03
     },
     {
      "name": "mane_l",
      "az": [
-      232,
-      288
+      240,
+      290
      ],
-     "locks": 5,
-     "length": 0.55,
-     "width": 0.045,
+     "locks": 9,
+     "length": 0.6,
+     "width": 0.05,
      "el": [
-      0,
-      35
+      -5,
+      55
      ],
-     "spread": 0.04
+     "spread": 0.035,
+     "wave": 0.025
     },
     {
      "name": "mane_r",
      "az": [
-      72,
-      128
+      70,
+      120
      ],
-     "locks": 5,
-     "length": 0.55,
-     "width": 0.045,
+     "locks": 9,
+     "length": 0.6,
+     "width": 0.05,
      "el": [
-      0,
-      35
+      -5,
+      55
      ],
-     "spread": 0.04
+     "spread": 0.035,
+     "wave": 0.025
     },
     {
      "name": "mane_fl",
      "az": [
-      292,
-      318
+      290,
+      320
      ],
-     "locks": 2,
-     "length": 0.4,
-     "width": 0.04,
+     "locks": 4,
+     "length": 0.48,
+     "width": 0.042,
      "el": [
       0,
-      20
+      35
      ],
-     "spread": 0.05
+     "spread": 0.04,
+     "wave": 0.02
     },
     {
      "name": "mane_fr",
      "az": [
-      42,
-      68
+      40,
+      70
      ],
-     "locks": 2,
-     "length": 0.4,
-     "width": 0.04,
+     "locks": 4,
+     "length": 0.48,
+     "width": 0.042,
      "el": [
       0,
-      20
+      35
      ],
-     "spread": 0.05
+     "spread": 0.04,
+     "wave": 0.02
     }
    ]
   }
- }
+ },
+ "smooth": {
+  "iterations": 2,
+  "sigma_s": 2.5,
+  "sigma_r": 0.06
+ },
+ "ramps": [
+  {
+   "name": "skin",
+   "slots": [
+    "skin"
+   ],
+   "hsv": [
+    0.93,
+    0.1,
+    0.15,
+    0.85,
+    0.0,
+    0.62
+   ],
+   "ramp": [
+    "2e1b1c",
+    "45292b",
+    "5a3530",
+    "6e4234",
+    "86573f"
+   ]
+  },
+  {
+   "name": "red",
+   "slots": [
+    "cloth"
+   ],
+   "hsv": [
+    0.92,
+    0.04,
+    0.45,
+    1.0,
+    0.0,
+    1.0
+   ],
+   "ramp": [
+    "3a1218",
+    "501a21",
+    "6e2229",
+    "862f34",
+    "a04248"
+   ]
+  },
+  {
+   "name": "leather",
+   "slots": [
+    "leather"
+   ],
+   "hsv": [
+    0.0,
+    1.0,
+    0.0,
+    1.0,
+    0.0,
+    1.0
+   ],
+   "ramp": [
+    "2a1e1e",
+    "3e2e2d",
+    "524040",
+    "665252",
+    "7c6868"
+   ]
+  },
+  {
+   "name": "gold",
+   "slots": [
+    "metal"
+   ],
+   "hsv": [
+    0.07,
+    0.18,
+    0.35,
+    1.0,
+    0.3,
+    1.0
+   ],
+   "ramp": [
+    "6e4f26",
+    "a07a44",
+    "d1a36c",
+    "ecbe7e",
+    "fadc96"
+   ]
+  },
+  {
+   "name": "iron",
+   "slots": [
+    "metal"
+   ],
+   "hsv": [
+    0.0,
+    1.0,
+    0.0,
+    0.3,
+    0.0,
+    1.0
+   ],
+   "ramp": [
+    "3a363a",
+    "524c52",
+    "6c646c",
+    "8a8088",
+    "b4a8b0"
+   ]
+  },
+  {
+   "name": "hair",
+   "slots": [
+    "hair"
+   ],
+   "hsv": [
+    0.0,
+    1.0,
+    0.0,
+    1.0,
+    0.0,
+    1.0
+   ],
+   "ramp": [
+    "8a7c80",
+    "a8999c",
+    "c0b2b4",
+    "d6c8ca",
+    "ece2e3"
+   ]
+  }
+ ],
+ "despeckle": 1,
+ "project_late": [
+  {
+   "view": "front",
+   "image": "~/meshy/zedran/in/front.png",
+   "col0": 699,
+   "sole_row": 1313,
+   "head_z": 0.78,
+   "name": "face",
+   "box": [
+    -0.085,
+    0.085,
+    0.7,
+    0.86
+   ],
+   "facing": 0.25,
+   "k": 0.001466,
+   "col0_at": 701.03,
+   "row0_at": 744.9
+  },
+  {
+   "view": "front",
+   "image": "~/meshy/zedran/in/front.png",
+   "col0": 699,
+   "sole_row": 1313,
+   "head_z": 0.78,
+   "name": "chest",
+   "box": [
+    -0.2,
+    0.2,
+    0.32,
+    0.64
+   ],
+   "facing": 0.35,
+   "k": 0.001483,
+   "col0_at": 703.03,
+   "row0_at": 746.19
+  }
+ ]
 }

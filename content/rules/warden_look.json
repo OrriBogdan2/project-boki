@@ -30,5 +30,40 @@
 				"glow": 1.8
 			}
 		}
+	},
+	"kael": {
+		"painted": {},
+		"slots": {
+			"skin": {
+				"top_light": 0.7,
+				"fres": 0.9,
+				"fres_tint": 0.9,
+				"far_lift": 0.45,
+				"shade": 0.82
+			},
+			"cloth": {
+				"fres": 0.7,
+				"far_lift": 0.45
+			},
+			"hair": {
+				"far_lift": 0.12,
+				"fres": 0.4,
+				"top_light": 0.6
+			},
+			"metal": {
+				"top_light": 0.6,
+				"fres": 0.6,
+				"fres_tint": 0.8,
+				"far_lift": 0.35,
+				"sheen": 0.1
+			},
+			"leather": {
+				"far_lift": 0.4,
+				"fres": 0.6
+			},
+			"glow": {
+				"glow": 2.6
+			}
+		}
 	}
 }

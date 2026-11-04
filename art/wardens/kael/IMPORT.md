@@ -43,3 +43,20 @@ docs/art/wardens/PIPELINE.md.
 - **Scarf:** always on (the scan's own).
 - The pieces share a small 256 px colour atlas (`kael_parts_atlas`), one cell per colour.
 - `kael.glb.import`: `generate_lods=false`, `force_disable_compression=true`; atlases lossless.
+
+## Stage 2 (2026-11-04, the Vex r3c recipe + the 12:40 sheets; credit-free)
+- **Slots:** the red rule tightened (dark red-brown skin was landing on cloth and took the red ramp); the harness's
+  grey-brown straps are on leather (no skin tint).
+- **Paint-over:** `smooth`, `ramps` of the art's colours (skin, red, leather, gold, iron, hair), `despeckle`;
+  `project_late` of the front art over the face and chest. The skin ramp stops below the cracks' brightness, so the
+  arm's red-orange crack rims become skin and only the hot cores light, white-hot.
+- **Blade** (kael_blade_sheet; its pommel hook ignored): a long slab with a crenellated broken end, dark stone-iron
+  edges, the WHOLE core a broad white-hot channel with thin cracks off it, chain wrapped round the blade's base and
+  the grip. The pieces' atlas now holds sRGB colours (stage 1 stored linear values: everything read near-black).
+- **Glow:** `model_glow` gains `strength` (2.4); content/rules/warden_look.json `kael` (skin and cloth up at the
+  match camera, glow 2.6).
+- **Mane** (kael_head_sheet): 48 wider, softer, wavy locks in layers past the shoulders, five spring chains of five
+  bones; no ink line on them (it drew every lock as a strip).
+- **Stance:** content/rules/warden_stance.json juggernaut: the greatsword hangs in his right hand down across his
+  front (the turnaround), the blade's face turned up so its glow reads from the match camera; the chest less
+  thrown back, the left arm hanging. Archetype size 0.975 (the sheet height with the new stance).
