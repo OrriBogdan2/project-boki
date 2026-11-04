@@ -196,15 +196,26 @@ def step_shots():
     a = subprocess.Popen(x + ["--warden-shots", "--wardens=" + SPEC["arch"], "--shots-dir=" + out,
                               "--sheets=" + os.path.join(out, "sheets")] + extra,
                          stdout=open(os.path.join(out, "log.txt"), "w"), stderr=subprocess.STDOUT, cwd=wt)
-    b = subprocess.Popen(x + ["--arena=" + SPEC["arch"], "--record=2", "--arena-demo=pose", "--demo-zoom=1.0",
-                              "--arena-shot=" + os.path.join(out, "match.png")] + extra,
+    # (a clean review frame: no tip banner, the hero moved onto clear ground: spec "demo_at" "dx,dz")
+    clear = ["--no-tips"] + (["--demo-at=" + SPEC["demo_at"]] if SPEC.get("demo_at") else [])
+    b = subprocess.Popen(x + ["--arena=" + SPEC["arch"], "--record=2", "--arena-demo=pose_clear", "--demo-zoom=1.0",
+                              "--arena-shot=" + os.path.join(out, "match.png")] + clear + extra,
                          stdout=open(os.path.join(out, "match.log"), "w"), stderr=subprocess.STDOUT, cwd=wt)
     log("shots rc", a.wait(), "match rc", b.wait())
-    crop = SPEC.get("match_crop", "200:170:540:270")
+    crop = SPEC.get("match_crop") or _hero_crop(os.path.join(out, "match.log"))      # (pose_clear: the review frame)
     subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", os.path.join(out, "match.png"), "-vf",
                     "crop=%s,scale=800:680:flags=neighbor" % crop, os.path.join(out, "match_x4.png")])
     grep(os.path.join(out, "log.txt"), "does not fit", "SHADER ERROR", "SCRIPT ERROR", "WARDEN_SHOTS_DONE")
     _composites(out)
+
+
+def _hero_crop(match_log):
+    """The x4 crop (w:h:x:y, 200x170 px) centred on the hero, from the review frame's DEMO_HERO_RECT line."""
+    for line in open(match_log, errors="replace"):
+        if line.startswith("DEMO_HERO_RECT "):
+            x, y, w, h = (int(v) for v in line.split()[1].split(","))
+            return "200:170:%d:%d" % (max(0, x + w // 2 - 100), max(0, y + h // 2 - 85))
+    return "200:170:540:270"
 
 
 def _composites(out):
