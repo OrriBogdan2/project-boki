@@ -368,12 +368,19 @@ func _tutorial() -> void:
 	var cards := 0
 	var beam_miss := 0
 	var steps_seen := {}
+	var fell_t := -1.0
+	var back_ok := false
 	while t < 600.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT); t += Match.DT
 		var tu: Tutorial = m.tut
 		var id := tu.id()
 		steps_seen[id] = true
+		if id == "pickup" and fell_t < 0.0:
+			fell_t = t
+			m.player.teleport(Vector3(70.0, 0.0, 30.0))      # off every island: a fall
+		elif fell_t > 0.0 and not back_ok and t - fell_t < 12.0:
+			back_ok = m.player.grounded and m.player.flat_dist(tu.respawn()) < 6.0
 		if m.player.kin and (m.player.kin.comp.leading() or m.player.kin.comp.guide.get("to", Vector3.INF) != Vector3.INF and m.player.kin.seen_pos().distance_to(m.player.kin.comp.guide["to"]) < 2.2):
 			led[id] = true
 		var goes_somewhere := id in ["move", "dash", "exdash", "glide", "crouch", "pickup", "chest", "goexit", "uplink",
@@ -391,6 +398,7 @@ func _tutorial() -> void:
 	ok(m.player.extracted, "the tutorial still finishes (extracted at %.0fs)" % t)
 	var mk := "the marker and its beam are up on every destination step frame (%d without, %d no beam)"
 	ok(no_marker == 0 and beam_miss == 0, mk % [no_marker, beam_miss])
+	ok(back_ok, "a fall into the void puts you back at the last stop")
 	var need := ["crouch", "pickup", "kin1", "glide"].all(func(s): return steps_seen.has(s))
 	ok(need, "the course has the crouch, pick-up, glide and watch stops (%s)" % str(steps_seen.keys()))
 	ok(led.has("chest") and led.has("goexit"), "it leads you to (or gets to) the chest and the outpost")

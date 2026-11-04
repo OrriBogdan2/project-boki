@@ -4,6 +4,8 @@ extends RefCounted
 ## (--tutorial --tut-test, and the teammate check).
 
 static var last_step := -1
+static var still_t := 0.0     # s the player has stood in one place while walking
+static var last_pos := Vector3.INF
 
 static func drive(m: Match) -> void:
 	var tu: Tutorial = m.tut
@@ -16,6 +18,8 @@ static func drive(m: Match) -> void:
 	for k in ["fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw"]:
 		p.inp[k] = false
 	p.inp["move"] = Vector2.ZERO
+	still_t = still_t + Match.DT if p.pos.distance_to(last_pos) < 0.02 else 0.0
+	last_pos = p.pos
 	var goto := func(at: Vector3, r := 0.5):
 		var d := Vector2(at.x - p.pos.x, at.z - p.pos.z)
 		p.inp["move"] = d.normalized() if d.length() > r else Vector2.ZERO
@@ -56,6 +60,8 @@ static func drive(m: Match) -> void:
 			p.inp["interact"] = true
 		"goexit", "uplink", "defend", "extract":
 			_outpost(m, tu, goto)
+	if still_t > 1.5 and p.inp["move"] != Vector2.ZERO:
+		p.inp["jump"] = true       # (stuck against something: hop)
 
 static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var p := m.player
