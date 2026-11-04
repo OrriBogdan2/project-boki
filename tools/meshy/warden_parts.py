@@ -551,20 +551,9 @@ def lens(arm, spec, tag="lens"):
         radii.append(max(1e-4, r * 0.95 * math.cos(f * math.pi / 2)))
     bld.tube(rings, radii, 20, 0.5, 1.0, 0.5, 1.0, "lens", [0.0] * k, cap_end=True)
     ob = bld.object("Lens")
-    img = bpy.data.images.new(tag + "_atlas", 64, 64, alpha=False)
-    px = np.ones((64, 64, 4), np.float32)
-    px[:32, :32, :3] = hexcol(spec.get("rim", "b08a48"))          # (the rim's quarter)
-    yy, xx = np.mgrid[0:32, 0:32]
-    v = yy / 31.0                                                   # 0 at the lens's edge ring, 1 at its middle
-    glow = hexcol(spec.get("glow", "6dff5a"))
-    dark = hexcol(spec.get("pupil", "103a14"))
-    ring = np.exp(-((v - 0.55) / 0.12) ** 2)[..., None]
-    lens_col = glow[None, None] * (1 - 0.75 * ring) + dark[None, None] * 0.75 * ring
-    lens_col = np.where((v > 0.92)[..., None], np.ones(3) * 0.95 + glow * 0.05, lens_col)
-    px[32:, 32:, :3] = lens_col
-    px[:32, 32:, :3] = hexcol(spec.get("rim", "b08a48"))
-    px[32:, :32, :3] = glow
-    img.pixels = px.ravel()
+    n = 256 if spec.get("iris") else 64
+    img = bpy.data.images.new(tag + "_atlas", n, n, alpha=False)
+    img.pixels = _lens_atlas(spec, n).ravel()
     img.pack()
     mats = {}
     for slot in ("metal", "glow"):
@@ -573,7 +562,7 @@ def lens(arm, spec, tag="lens"):
         bsdf = m.node_tree.nodes.get("Principled BSDF")
         tex = m.node_tree.nodes.new("ShaderNodeTexImage")
         tex.image = img
-        tex.interpolation = "Closest"
+        tex.interpolation = "Linear" if spec.get("iris") else "Closest"
         m.node_tree.links.new(tex.outputs[0], bsdf.inputs["Base Color"])
         ob.data.materials.append(m)
         mats[slot] = len(ob.data.materials) - 1
@@ -648,3 +637,61 @@ def hoses(body_obs, arm, specs, colours, tag="hose", size=64):
     mod.object = arm
     log("hoses: %d, %d tris" % (len(specs), sum(len(f) - 2 for f in bld.f)))
     return ob
+
+
+def _lens_atlas(spec, n):
+    """The lens's atlas (rows bottom up, as Blender's pixels): the rim's quarter (u 0..0.5, v 0..0.5: u round the
+    ring, v round its tube; the tube's front at v 0.125) and the lens's (u 0.5..1 round it, v 0.5 at its edge to
+    1 at its middle). With spec "iris" (the eyeplate detail: blades, dots, pupil, screws), polar paint; else the
+    plain rings."""
+    rim, glow = hexcol(spec.get("rim", "b08a48")), hexcol(spec.get("glow", "6dff5a"))
+    px = np.ones((n, n, 4), np.float32)
+    h = n // 2
+    yy, xx = np.mgrid[0:h, 0:h]
+    u = (xx + 0.5) / h                     # 0..1 round
+    v = (yy + 0.5) / h                     # 0..1 across the quarter
+    iris = spec.get("iris")
+    if not iris:
+        dark = hexcol(spec.get("pupil", "103a14"))
+        ring = np.exp(-((v - 0.55) / 0.12) ** 2)[..., None]
+        lens = glow[None, None] * (1 - 0.75 * ring) + dark[None, None] * 0.75 * ring
+        lens = np.where((v > 0.92)[..., None], np.ones(3) * 0.95 + glow * 0.05, lens)
+        px[:h, :h, :3] = rim
+        px[h:, h:, :3] = lens
+        px[:h, h:, :3] = rim
+        px[h:, :h, :3] = glow
+        return px
+    # the rim: brass, darker toward the tube's back, slotted screws round its front
+    shade = 0.72 + 0.28 * np.cos((v - 0.25) * 2.0 * np.pi)
+    col = rim[None, None] * shade[..., None]
+    k = int(iris.get("screws", 8))
+    a = (u * k) % 1.0 - 0.5
+    sv = (v - 0.25) / 0.5
+    screw = (a / 0.18) ** 2 + (sv / 0.12) ** 2 < 1.0
+    slot_line = screw & (np.abs(a) < 0.035)
+    col = np.where(screw[..., None], rim[None, None] * 0.62, col)
+    col = np.where(slot_line[..., None], np.array([0.12, 0.09, 0.05]), col)
+    px[:h, :h, :3] = col
+    px[:h, h:, :3] = rim
+    # the lens: t from its edge (0) to its middle (1); blades spiral in, a ring of dots, the dark pupil
+    t = v
+    ang = u
+    base = glow[None, None] * (0.55 + 0.45 * np.clip(1.0 - np.abs(t - 0.45) / 0.45, 0.0, 1.0))[..., None]
+    nb, tw = int(iris.get("blades", 9)), float(iris.get("twist", 1.3))
+    edge = np.abs(((ang * nb + t * tw * nb) % 1.0) - 0.5) > 0.44
+    blades = (t > 0.32) & (t < 0.8) & edge
+    base = np.where(blades[..., None], base * 0.45, base)
+    outer = t < 0.07
+    base = np.where(outer[..., None], glow[None, None] * 0.25, base)
+    nd = int(iris.get("dots", 12))
+    da = ((ang * nd) % 1.0 - 0.5) / nd * 2.0 * np.pi * 0.2
+    dots = (da / 0.012) ** 2 + ((t - 0.2) / 0.035) ** 2 < 1.0
+    arcs = (np.abs(t - 0.14) < 0.012) & (((ang * 4) % 1.0) < 0.7)
+    base = np.where((dots | arcs)[..., None], np.minimum(glow[None, None] * 1.35 + 0.1, 1.0), base)
+    pupil = hexcol(iris.get("pupil", "1a1020"))
+    base = np.where((t > 0.8)[..., None], pupil[None, None], base)
+    hi = ((ang - 0.12) % 1.0 < 0.06) & (t > 0.84) & (t < 0.9)
+    base = np.where(hi[..., None], np.array([0.92, 1.0, 0.92]), base)
+    px[h:, h:, :3] = base
+    px[h:, :h, :3] = glow
+    return px
