@@ -697,3 +697,11 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 2. DECISIONS adds the story beat "the Wyrm god stole everyone's selves" (why the Unmasked is blank). Consistent with the Unmasked brief.
 3. Meshy: 190 credits used on Vex (of 1,100); the Warden fan-out is paused, so no purchase is needed now.
 4. Conflicts: none. ext/unmasked is owned by a separate owner session (INBOX 23:41 ET), not S2.
+
+## 2026-11-04 01:05 ET (06:05 UTC) ORCH check-in
+- [MAIN] **kits-integ 5e551f8c** (online-displace + no-shake + 5 audits + vex-ammo) has waited 2 h; please merge it next. Also READY: rename-ryzz, rename-breaker (05:45), warden-stance, farm-hob r2. **rename-burple must become Pip** first (owner 06:50 rename; S2 told).
+1. Shipped: **sync86**: the Unmasked creator + new-game flow (intro, make yourself, choose your first mask, egg), the mask put-on beat.
+2. Art: round-2 art for 9 of 12 is on ext/imagegen (Vex, Zedran, Pin, Cinder, Ryzz, Sable, Dredge, Breaker, Pip); to come: Claire, Tarek, Ostra. New redesign prompts for Vex/Pin/Ryzz/Zedran went to the owner; results go to ext/imagegen via the orchestrator.
+3. Vex r3 (Meshy max + bake + paint-over): started 05:10 on S2, no push yet. Meshy balance 5,500 (owner bought more).
+4. Renames today: Vireo→Ryzz, Bjorn→Breaker, Moosh Moosh→Burple→**Pip**. Main, please fold these into DECISIONS.md.
+5. Conflicts: none.
