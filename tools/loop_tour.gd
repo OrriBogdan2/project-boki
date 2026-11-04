@@ -149,7 +149,7 @@ func _process(_d: float) -> void:
 			get_viewport().warp_mouse(c3.unproject_position(p + Vector3(0, 0.6, 0)))
 
 func _fake_save() -> void:
-	Save.d["look"] = PlayerLook.neutral()
+	Save.d["look"] = Unmasked.default_look()
 	Save.d["arch"] = arch; Save.d["cls"] = Arch.weight(arch); Save.d["weapon"] = Arch.signature(arch)
 	var rec := Save.new_kin("cindle", "Ember")
 	rec["trust"] = 55.0; rec["starter"] = true
@@ -180,16 +180,15 @@ func _front() -> void:
 		note_bad("not on the hatch screen after the prologue"); return
 	hx._end_intro()
 	await wait(2.0)
+	await shot("hunter_pick")
+	hx._take_hunter([ClassUnlock.starters()[0]])
+	await wait(1.0)
 	await shot("egg_pick")
 	hx._pick(0)
 	await wait(0.8)
 	await shot("egg_chosen")
 	press("Hatch it")
-	await wait(1.5)
-	await shot("hunter_pick")
-	hx.starter_picks = [ClassUnlock.starters()[0]]
-	hx._confirm_starters()
-	await wait(1.0)
+	await wait(2.5)
 	for i in 7:
 		hx._tap_egg()
 		await wait(0.35)
@@ -207,10 +206,6 @@ func _front() -> void:
 	await wait(1.0)
 	await shot("name_boki")
 	press("Skip the tutorial")
-	await until(func(): return String(hx.stage) == "create", 10.0, "the creator")
-	await wait(1.5)
-	await shot("creator")
-	press("Looks good")
 	await _wait_home()
 
 func _find_class(nd: Node, cname: String) -> Node:
@@ -279,15 +274,6 @@ func _home() -> void:
 		await shot("loadout_bottom")
 	h._close_panel()
 	await wait(0.4)
-	# the Training Grounds isle at home
-	if h.training:
-		h.ppos = HomeTraining.STILL + Vector3(1.6, 0, 0.4)
-		h.cam.snap(h.ppos)
-		await wait(1.0)
-		for i in 4:
-			h.training.cds.clear(); h.training.cast("fire")
-			await wait(0.3)
-		await shot("farm_training_grounds")
 	# the training area (a match)
 	h._start_training()
 	await _wait_match(600.0)
@@ -491,7 +477,7 @@ func _level_up(m) -> void:
 	# spend the points the way a player does: press a locked ability with a point to spare
 	var spot: Vector3 = P.pos
 	aim_at = spot + _safe_dir(m, P) * 4.0      # (a dash goes toward the cursor: point it at ground, and put the hunter back after each press)
-	for a in ["secondary", "signature", "dash", "kin_ability", "gear1", "ultimate"]:
+	for a in ["secondary", "signature", "dash", "gear1", "ultimate"]:
 		await key(a)
 		await mwait(0.3)
 		if is_instance_valid(m) and (P.pos - spot).length() > 0.5:
@@ -523,7 +509,7 @@ func _cast_round(m, tag: String, wait_cd: bool) -> void:
 	aim_at = tgt
 	var home: Vector3 = P.pos
 	var casts := [["secondary", "rmb_tap", 0.1], ["secondary", "rmb_hold", 1.2], ["signature", "e", 0.12], ["dash", "dash", 0.1],
-		["kin_ability", "boki_c", 0.12], ["throw", "boki_g", 0.12], ["ultimate", "r", 0.12]]
+		["throw", "boki_g", 0.12], ["ultimate", "r", 0.12]]
 	for c in casts:
 		if wait_cd:
 			await mwait(1.5)

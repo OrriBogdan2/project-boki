@@ -3,8 +3,9 @@ extends RefCounted
 ## Cinder's ultimate on X, Flue Flight (docs/heroes/ashwick.md): a ring of embers at lift-off, then 1.8s of
 ## low flight toward the cursor that steers with the aim at a capped turn rate. A molten carpet forms under
 ## him as he goes and lasts 5.2s: it burns, slows and builds Char. X again lands early; a stun ends the flight;
-## a knockback speeds it up. The carpet never forms over the abyss. An enemy hunter it burns (or knocks, or
-## kills) fills the Boki bond (HeroUlt.landed).
+## a knockback, or Shift (a poof from the bellows), speeds it up; a jump leaps off it, keeping its speed. The
+## carpet never forms over the abyss. An enemy hunter it burns (or knocks, or kills) fills the Boki bond
+## (HeroUlt.landed).
 
 const LAY_STEP := 1.0           # m between two carpet pieces (each one is a pooled LDFx lava strip)
 const OVERLAP := 0.45           # m each piece reaches back over the last, so the carpet reads as one strip
@@ -12,6 +13,7 @@ const NET_EVERY := 3            # carpet pieces between two rings sent to other 
 const STEER_LEAD := 1.0         # m the heading lane runs past where the flight will end
 const LAVA_DY := 1.6            # m above the carpet a body still stands in it
 const RING_PUFFS := 10          # flame puffs standing round the lift-off ring
+const FOOTING := 0.05           # s: the low flight counts as footing for a jump (Hunter.coyote) while it runs
 
 var k: AshwickKit
 var h: Hunter
@@ -24,6 +26,7 @@ var flights := 0                # (tests)
 var landings := 0
 var early := 0
 var boosts := 0
+var leaps := 0
 var trail_hits := 0
 var void_skips := 0
 
@@ -86,6 +89,13 @@ func _fly(dt: float) -> void:
 	if h.stun_t > 0.0 or h.downed or h.out or KinMerge.active(h):
 		_land()
 		return
+	if h.inp.get("jump", false) and h.vel.y > 0.0:
+		_leap()
+		return
+	h.coyote = maxf(h.coyote, FOOTING)
+	if h.dash_buf > 0.0:
+		h.dash_buf = 0.0            # Shift in the flight (Hunter.do_dash holds it for the flight's end): a poof now
+		k.on_dash(true)
 	var x := xd()
 	flight["t"] = float(flight["t"]) - dt
 	_take_boost(x)
@@ -118,6 +128,17 @@ func _take_boost(x: Dictionary) -> void:
 	var push := Vector2(h.vel.x, h.vel.z) - (flight["set_v"] as Vector2)
 	if not fresh or push.length() < 1.5:
 		return
+	_feed(push, x)
+
+## Shift in the flight: a poof from the bellows along `dir` feeds it like a knockback: the poof's kept speed
+## (Soot Ram's air_keep share of it) adds to the flight's, and the heading bends its way.
+func poof(dir: Vector2) -> void:
+	var dd := k.dash_def()
+	var kept := float(dd["air_dist"]) / float(dd["air_time"]) * float(dd["air_keep"])
+	_feed(dir.normalized() * kept, xd())
+
+## A push adds to the flight's speed (up to boost_max over its own) and bends it the way it was pushed.
+func _feed(push: Vector2, x: Dictionary) -> void:
 	boosts += 1
 	var top := float(x["speed"]) + float(x["boost_max"])
 	flight["speed"] = minf(top, float(flight["speed"]) + push.length() * float(x["boost_k"]))
@@ -133,6 +154,21 @@ func _hover(hover: float, dt: float) -> void:
 	if h.pos.y < gy + hover:
 		h.pos.y = move_toward(h.pos.y, gy + hover, 6.0 * dt)
 	h.grounded = false
+
+## A jump in the flight (Hunter.do_jump took off from it): he leaps off the jet, the flight over (no landing, the
+## carpet laid stays), keeping a jump out of a dash's share of its speed, handed on to a glide.
+func _leap() -> void:
+	var dir: Vector2 = flight["dir"]
+	var speed := float(flight["speed"])
+	flight = {}
+	leaps += 1
+	h.roll_t = 0.0
+	var keep := dir * speed * Hunter.DASH_JUMP_CARRY
+	h.vel.x = keep.x
+	h.vel.z = keep.y
+	h.glide_handoff(dir, speed)
+	AimKit.hide(h, "x_steer")
+	k.play("lw_hop")                 # tucked for the leap off (no burst: the jet's own flame just stops)
 
 func _land() -> void:
 	flight = {}
@@ -213,11 +249,7 @@ func _liftoff_fx() -> void:
 		k.fx.puff(at + Vector3(cos(ang) * r, 0.45, sin(ang) * r), LDFx.M_FLAME, Color.BLACK, Color.BLACK, 0.7, 0.4)
 	k.fx.scorch(at, r * 0.5, 1.0)
 	m.fx.burst(at + Vector3(0, 0.3, 0), Color("ff6a3a"), 26, 6.0, 0.45, 3.0, 1.2)
-	AimKit.circle(h, "x_burst", {"self": true, "r": r, "all": true, "dur": 0.15, "col": k.col_of(x), "hot": 0.4})
 	m.sfx("lw_jet", h.pos, -1.0, 1.0)
-	Feel.shake(m, "t2", h, h.pos)
-	if h.is_local() and m.cam:
-		m.cam.punch(0.05)
 	k.net_ring(at, r, k.col_of(x))
 
 ## The bellows jet: a hot core at his back and embers blown down behind him.

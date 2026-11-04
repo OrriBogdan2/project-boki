@@ -205,15 +205,42 @@ static func _line(g: AimGeo, e: Dictionary) -> void:
 	if e["arrow"]:
 		g.arrow(t, d.normalized(), 0.2, w * 1.2, c)
 
+## The point `s` metres along a line of length `len` that turns `bend` radians end to end (a circular arc
+## through `ctr`, tangent to `u` there, the ends set back from the bulge toward `-n`); `n` is the unit normal.
+static func bent(ctr: Vector2, u: Vector2, n: Vector2, bend: float, len_: float, s: float) -> Vector2:
+	var r := len_ / bend
+	return ctr + u * (r * sin(s / r)) + n * (r * (cos(s / r) - 1.0))
+
+## The unit direction of that arc at `s`.
+static func bent_tangent(u: Vector2, n: Vector2, bend: float, len_: float, s: float) -> Vector2:
+	var a := s * bend / len_
+	return u * cos(a) - n * sin(a)
+
+const SPAN_SEGS := 8      # ribbons a bent span is drawn in
+
 static func _span(g: AimGeo, e: Dictionary) -> void:
 	var ctr: Vector2 = e["at"]; var u: Vector2 = e["dir"]
 	var hl := float(e["len"]) * 0.5
 	var lw := _lw(e)
-	g.ribbon(ctr - u * hl, ctr + u * hl, lw, _rim(e))
+	var bend := float(e["bend"])
+	var n: Vector2 = e["bow"]
 	var ch := int(e["chevrons"])
-	for i in ch:
-		var t := hl * (float(i) + 1.0) / float(ch + 1)
-		g.chevron(ctr + u * t, -u, 0.28, lw, _rim(e, 0.85))
-		g.chevron(ctr - u * t, u, 0.28, lw, _rim(e, 0.85))
+	if bend > 0.0:
+		var prev := bent(ctr, u, n, bend, float(e["len"]), -hl)
+		for i in SPAN_SEGS:
+			var nxt := bent(ctr, u, n, bend, float(e["len"]), lerpf(-hl, hl, float(i + 1) / SPAN_SEGS))
+			g.ribbon(prev, nxt, lw, _rim(e))
+			prev = nxt
+		for i in ch:
+			var t := hl * (float(i) + 1.0) / float(ch + 1)
+			for sg in [-1.0, 1.0]:
+				var tan_ := bent_tangent(u, n, bend, float(e["len"]), t * sg)
+				g.chevron(bent(ctr, u, n, bend, float(e["len"]), t * sg), -tan_ * sg, 0.28, lw, _rim(e, 0.85))
+	else:
+		g.ribbon(ctr - u * hl, ctr + u * hl, lw, _rim(e))
+		for i in ch:
+			var t := hl * (float(i) + 1.0) / float(ch + 1)
+			g.chevron(ctr + u * t, -u, 0.28, lw, _rim(e, 0.85))
+			g.chevron(ctr - u * t, u, 0.28, lw, _rim(e, 0.85))
 	if e["ring"]:
 		g.ring(ctr, 0.35, lw, _rim(e))

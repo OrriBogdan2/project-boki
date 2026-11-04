@@ -2,7 +2,7 @@
 
     python3 tools/gen_care_sfx.py      (then: godot --headless --import)
 
-tend_* : Moosh Moosh's warm, wooden and lantern-bright sounds. rime_* : Claire's glassy, gliding, cracking ones.
+tend_* : Pip's warm, wooden and lantern-bright sounds. rime_* : Claire's glassy, gliding, cracking ones.
 """
 import math, os, random, struct, wave
 
@@ -50,7 +50,7 @@ def save(name, x, db=-19.0, tail=0.03):
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
         w.writeframes(b''.join(struct.pack('<h', int(max(-1, min(1, v)) * 32767)) for v in x))
 
-# ---- Moosh Moosh: wood, wick and lantern glass
+# ---- Pip: wood, wick and lantern glass
 def chirp(f0, f1, d, a=0.004, dec=0.08): return mul(tone(f0, f1, d, 0.1), env(N(d), a, dec))
 def hiss(d, lo, hi, a=0.003, dec=0.05): return mul(bp(noise(d), lo, hi), env(N(d), a, dec))
 def rise(d, lo, hi):
@@ -60,7 +60,7 @@ def trem(x, hz, depth=0.5): return [v * (1 - depth + depth * math.sin(2 * math.p
 def sparkle(n, d, lo=2400, hi=5200, gap=0.03):
     return mix(*[at(scale(bell(rnd.uniform(lo, hi), 0.25, 0.05), rnd.uniform(0.3, 0.7)), i * gap + rnd.uniform(0, gap * 0.5)) for i in range(n)]) if n else [0.0]
 
-# ---- Moosh Moosh: wood, wick and lantern glass
+# ---- Pip: wood, wick and lantern glass
 # Moon Shot: a soft wooden flick, a moth-wing whoosh and a little lantern chime on top
 save('tend_ember', mix(scale(chirp(900, 420, 0.12, 0.003, 0.04), 0.5), scale(hiss(0.14, 1500, 5000, 0.002, 0.03), 0.5), scale(bell(1320, 0.18, 0.05), 0.3)), -23)
 # the Empowered shot: the same flick, deeper, with a brighter two-note chime

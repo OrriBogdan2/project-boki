@@ -1,6 +1,6 @@
 extends RefCounted
 ## --dredge-combo-check: Dredge's abilities and their interactions, scripted one by one in the
-## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Grapnel
+## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Abyssal Hand
 ## reel, only the barge during it, reel into the Anchor Drop, terrain the hook pierces, the abyss, the Salvage
 ## passive, the back hit, the barge's turn lock after the Anchor, the rank-3 specials, and the X ult,
 ## Brass Broadside (tools/dredge_ult_check.gd).
@@ -24,7 +24,11 @@ func run(main_node: Node) -> void:
 	await _slam_tell()
 	await _dash_moves()
 	await _glide_wins()
+	await _parity_gun()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
+	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
+	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
+			rows_bad == 0, "%d failures" % rows_bad)
 	print("DREDGECHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -205,23 +209,48 @@ func _dash_moves() -> void:
 			and not others.has(air_move) and fits,
 		"%s / %s, dash %.2f s" % [ground_move, air_move, dash_t]
 	)
-	# into_dash e: buffer: Shift in the slam's wind-up is held and the barge goes the step the slam lands
+	# into_dash e: fire. Shift in the slam's wind-up barges at once, the fist still raised; the slam lands where
+	# the barge arrives
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	ak.step(m, 0.3)
 	P.dashes = P.max_dashes()
 	K.cd["e"] = 0.0
+	var anchors0 := K.anchors
 	P.ak.use_e()
 	ak.step(m, 0.1)
+	var from := P.pos
 	P.do_dash()
-	var held_now := K.dash_held and P.roll_t <= 0.0
-	var waited := 0.0
-	while P.roll_t <= 0.0 and waited < 1.0:
-		ak.step(m, ak.DT)
-		waited += ak.DT
+	ak.step(m, 0.05)
+	var barged := P.roll_t > 0.0 and K.wind > 0.0 and K.anim_id == "dr_anchor"
+	ak.step(m, 0.5)
 	ok(
-		"into dash: Shift in the slam is held, and he barges the step it lands",
-		held_now and K.anchors >= 1 and P.roll_t > 0.0 and waited < 0.35, "barged %.2f s after the press" % waited
+		"into dash: Shift in the slam's wind-up barges at once, the slam lands where it arrives (item 51)",
+		barged and K.anchors == anchors0 + 1 and Vector2(P.pos.x - from.x, P.pos.z - from.z).length() > 2.0,
+		"barged %s anchors +%d moved %.1f m" % [barged, K.anchors - anchors0, P.pos.distance_to(from)]
+	)
+	# ... and in the air smash: the pounce goes, then the smash drops from where it ends
+	ak.step(m, 1.0)
+	P.teleport(home + Vector3(0, 6.0, 0))
+	P.vel = Vector3.ZERO
+	P.grounded = false
+	K.cd["e"] = 0.0
+	P.ex_cd = 0.0
+	P.dashes = P.max_dashes()
+	var quakes0 := K.quakes
+	P.ak.use_e()
+	ak.step(m, 0.05)
+	from = P.pos
+	P.inp["move"] = Vector2(1, 0)
+	P.do_dash()
+	ak.step(m, 0.05)
+	var pounced := P.roll_t > 0.0 and not K.dive.is_empty()
+	P.inp["move"] = Vector2.ZERO
+	ak.step(m, 1.0)
+	ok(
+		"into dash: Shift in the air smash pounces at once and the smash still lands, from where it took him",
+		pounced and K.quakes == quakes0 + 1 and Vector2(P.pos.x - from.x, P.pos.z - from.z).length() > 2.0,
+		"pounced %s quakes +%d" % [pounced, K.quakes - quakes0]
 	)
 	await ak.done(m)
 
@@ -359,13 +388,13 @@ func _all() -> void:
 	ok("gun: idle, the cone folds into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
 	P.ammo = int(P.wpn["mag"])
 	P.reload_t = 0.0
-	# --- Grapnel reels a foe in
+	# --- Abyssal Hand reels a foe in
 	reset.call()
 	ak.tap(m, P)
 	ak.step(m, 0.3)
 	var d0 := P.flat_dist(T)
 	ok(
-		"grapnel: hooks the first foe, reel begins",
+		"abyssal hand: hooks the first foe, reel begins",
 		K.grapples == 1 and not K.pull.is_empty() and ak.dmg(T) >= 5.0 and float(K.cd["rmb"]) > 8.0,
 		"grapples %d took %.1f cd %.1f" % [K.grapples, ak.dmg(T), float(K.cd["rmb"])]
 	)
@@ -380,7 +409,7 @@ func _all() -> void:
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	ak.tap(m, P)
-	ok("reel: a second Grapnel is denied", K.grapples == 1)
+	ok("reel: a second Abyssal Hand is denied", K.grapples == 1)
 	K.cd["e"] = 0.0
 	P.ak.use_e()
 	ok("reel: E is denied while reeling", K.anchors == 0 and K.wind <= 0.0)
@@ -399,7 +428,7 @@ func _all() -> void:
 		ak.step(m, 0.05)
 		tw += 0.05
 	ok(
-		"grapnel: foe arrives at your feet and does not land Grounded",
+		"abyssal hand: foe arrives at your feet and does not land Grounded",
 		K.arrivals == 1 and K.pull.is_empty() and not KitStatus.grounded(T) and P.flat_dist(T) < 3.6,
 		"arrivals %d dist %.1f (was %.1f)" % [K.arrivals, P.flat_dist(T), d0]
 	)
@@ -506,12 +535,13 @@ func _all() -> void:
 		var tp := Vector2(T.pos.x, T.pos.z)
 		dev = maxf(dev, tp.distance_to(Geometry2D.get_closest_point_to_segment(tp, a2, b2)))
 	P.inp["move"] = Vector2.ZERO
+	var shuffle := P.flat_dist(p_start) / maxf(tw2, 0.01)
 	ok(
-		"reel: strafing sideways shifts the arrival point by 1.5m or more",
-		absf(T.pos.z - start.z) >= 1.5 and K.arrivals >= 1,
-		"arrival shift %.1f m (Dredge moved %.1f)" % [absf(T.pos.z - start.z), P.flat_dist(p_start)]
+		"reel audit: braced, he shuffles at a fifth of his walk (not full speed), and that still swings the arrival",
+		shuffle <= P.base_speed * 0.4 and absf(T.pos.z - start.z) >= 0.25 and K.arrivals >= 1,
+		"arrival shift %.1f m, Dredge %.2f m/s" % [absf(T.pos.z - start.z), shuffle]
 	)
-	ok("reel: the body swings on an arc, not a straight line", dev > 0.3, "off the straight line by %.2f m" % dev)
+	ok("reel: the body still swings on an arc, not a straight line", dev > 0.2, "off the straight line by %.2f m" % dev)
 	# --- an ally in the hook's path is reeled to safety (no damage, no stun); a wisp on the way is scooped up
 	reset.call()
 	var t2team := T2.team
@@ -698,17 +728,19 @@ func _all() -> void:
 		absf(in_gap - 1.0) < 0.01 and P.dashes < 0.5 and P.pos.x - home.x > one * 2.6,
 		"used in gap %.1f left %.2f went %.1f" % [in_gap, P.dashes, P.pos.x - home.x]
 	)
-	# no damage from the shove; the gun's bloom resets only from rank 3
+	# audit: the barge touches nobody (Brute Dash hits nobody); the gun's bloom resets only from rank 3
 	reset.call()
 	T.teleport(home + Vector3(1.8, 0, 0))
+	T.knock_t = 0.0
 	ak.aim_at(P, T.pos)
 	P.wbloom = 10.0
 	P.idle_fire = 0.0
 	P.ak.on_dash(false)
 	ak.step(m, 0.1)
 	ok(
-		"barge: the shove does no damage, and rank 1 keeps the gun's spread",
-		ak.dmg(T) < 0.5 and P.wbloom > 5.0, "dmg %.2f bloom %.1f" % [ak.dmg(T), P.wbloom]
+		"barge: it shoves and hurts nobody (the source's Brute Dash), and rank 1 keeps the gun's spread",
+		ak.dmg(T) < 0.5 and T.knock_t <= 0.0 and P.wbloom > 5.0,
+		"dmg %.2f knock %.2f bloom %.1f" % [ak.dmg(T), T.knock_t, P.wbloom]
 	)
 	reset.call()
 	K.next_barge = -9.0
@@ -774,14 +806,14 @@ func _all() -> void:
 		"passive: from behind +50%, from the front none", absf(behind - 15.0) < 0.01 and absf(front - 10.0) < 0.01,
 		"behind %.1f front %.1f" % [behind, front]
 	)
-	# --- rank 3: the grapnel refunds on a hit, pellet hits trim the barge recharge
+	# --- rank 3: the Abyssal Hand refunds on a hit, pellet hits trim the barge recharge
 	reset.call()
 	P.slot_lv["sec"] = 3
 	P.slot_lv["dash"] = 3
 	ak.tap(m, P)
 	ak.step(m, 0.3)
 	ok(
-		"grapnel rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)",
+		"abyssal hand rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)",
 		float(K.cd["rmb"]) < 9.6 * 0.5 + 0.5 and K.grapples >= 1, "cd %.1f" % float(K.cd["rmb"])
 	)
 	P.dashes = 0.0
@@ -836,3 +868,59 @@ func _all() -> void:
 	)
 	m.queue_free()
 	await main.get_tree().process_frame
+
+## Parity pass (docs/heroes/dredge.md): the hold-to-fire gun against the footage (0040-0080): he walks between
+## shots (at the shared firing walk), each volley is fanned on the cursor's direction at its shot, the slugs stop
+## at 6.3 m whatever the cursor distance, and the recoil settles in ~0.2 s, inside the 0.5 s cycle.
+func _parity_gun() -> void:
+	var r: Array = ak.setup("dredge", 9.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var K: DredgeKit = P.ak
+	T.teleport(home + Vector3(-9.0, 0, 9.0))
+	var from := P.pos
+	var v0 := K.volleys
+	var t := 0.0
+	var heads: Array = []            # the mean flight direction of each volley, as it leaves
+	var reach := 0.0
+	var seen := {}
+	while t < 1.02:
+		var east := t < 0.5
+		ak.aim_at(P, P.pos + (Vector3(2.0, 0, 0) if east else Vector3(0, 0, -2.0)))
+		P.inp["fire"] = true
+		P.inp["move"] = Vector2(0, 1)
+		m.step(ak.DT)
+		t += ak.DT
+		var sum := Vector2.ZERO
+		for sd in m.shots:
+			if sd["by"] != P:
+				continue
+			var at: Vector3 = sd["pos"]
+			var st: Vector3 = sd["start"]
+			reach = maxf(reach, Vector2(at.x - st.x, at.z - st.z).length())
+			if not seen.has(int(sd["sid"])):
+				seen[int(sd["sid"])] = true
+				sum += (sd["vel"] as Vector2).normalized()
+		if sum.length() > 0.1:
+			heads.append(sum.normalized())
+	P.inp["fire"] = false
+	P.inp["move"] = Vector2.ZERO
+	var walk := P.flat_dist(from) / 1.02
+	ok(
+		"parity gun: he walks on while firing, at the shared firing walk (0.8), two or three volleys in 1s",
+		K.volleys - v0 >= 2 and walk >= P.base_speed * 0.8 * 0.9,
+		"%d volleys, %.1f m/s of %.1f" % [K.volleys - v0, walk, P.base_speed]
+	)
+	var turned: bool = heads.size() >= 2 and (heads[0] as Vector2).x > 0.9 and (heads[-1] as Vector2).y < -0.9
+	ok("parity gun: each volley is fanned on the cursor's direction at its shot (east, then north)", turned,
+			str(heads))
+	ok("parity gun: the slugs stop at 6.3 m with the cursor at 2 m", absf(reach - 6.3) < 0.5, "%.2f m" % reach)
+	var keys: Array = KMovesPair.MOVES["dr_shot"]["keys"]
+	ok(
+		"parity gun: the recoil kicks at 0.05s and is back on the aim by ~0.25s, inside the 0.5s cycle",
+		absf(float(keys[1][0]) - 0.05) < 0.01 and float(keys[-2][0]) <= 0.3 and float(keys[-1][0]) < 0.5,
+		"%.2f / %.2f / %.2f" % [float(keys[1][0]), float(keys[-2][0]), float(keys[-1][0])]
+	)
+	await ak.done(m)

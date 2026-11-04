@@ -1,19 +1,19 @@
 {
 	"id": "archer",
-	"title": "Dark Archer",
-	"base_name": "Pin",
+	"title": "Red Stitch",
+	"base_name": "Hem",
 	"gender": "female",
 	"personality": "A cool, patient hunter in a dark cloak with a thread of red. She says little and watches everything.\nShe picks the high ground, waits, and pins you to the wall.",
 	"weight": "light",
-	"color": "#9fe0a8",
+	"color": "#e8483e",
 	"body": {
-		"size": 1.05,
-		"hit_r": 0.37,
+		"size": 0.98,
+		"hit_r": 0.392,
 		"head": 0.72,
-		"legs": 1.62,
+		"legs": 1.85,
 		"neck": 0.03
 	},
-	"fantasy": "The warden of high ground. Climbs, reads the field, pins people to walls.",
+	"fantasy": "The hunter of high ground. Climbs, reads the field, pins people to walls.",
 	"silhouette": "the long weapon over the shoulder",
 	"card": {
 		"loop": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, then cash a full Focus in as a Deadeye.",
@@ -47,21 +47,20 @@
 		"col": "#d8ffb0",
 		"perfect_t": 0.15,
 		"sense_hp": 0.5,
-		"sense_r": 22.0,
-		"knock_heal": 18.0
+		"sense_r": 22.0
 	},
 	"passive": {
 		"name": "Focus",
-		"desc": "Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next shot is Supercharged or aimed at once, with +20% range, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m. A knock heals 18."
+		"desc": "Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground; a Heavy Shot that hits adds 40 (a wall pin fills it). Drains while running and drops 40 when hit. At 100 your next arrow (drawn through its stages as always) flies 20% further, and if it hits a rooted or stunned foe it is a Deadeye: +18 damage, a crit. Hawk Sense: rivals under half health are seen through cover within 22m."
 	},
 	"dash": {
 		"id": "spirit_walk",
 		"name": "Spirit Walk",
 		"icon": "vanish",
 		"col": "#8dffa8",
-		"cd": 6.0,
-		"roll": 3.0,
-		"roll_t": 0.16,
+		"cd": 9.5,
+		"roll": 3.5,
+		"roll_t": 0.24,
 		"time": 2.8,
 		"time_rank3": 0.5,
 		"walk_k": 1.1,
@@ -75,7 +74,7 @@
 		"name": "Heavy Shot",
 		"short": "Heavy",
 		"icon": "snare",
-		"col": "#b8f06a",
+		"col": "#ff5a4e",
 		"cooldown": 16.0,
 		"charges": 1,
 		"hold": 0.5,
@@ -91,16 +90,16 @@
 				8.0,
 				12.0
 			],
-			"pierce": 2,
-			"wall": 3.0,
+						"wall": 3.0,
 			"stun": 1.2,
 			"full": 1.1,
 			"wall_dmg": 12.0,
+			"wall_floor": 0.4,
 			"max_hold": 3.0
 		},
 		"cd_per_rank": 3.0,
 		"variants": {
-			"hold": "Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing."
+			"hold": "Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, stops on the first foe; driven into a wall within 3m it hits again (5 -> 12 with the charge) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing."
 		},
 		"sockets": {
 			"hit": "add",
@@ -115,7 +114,7 @@
 		"short": "Hail",
 		"icon": "barrage",
 		"col": "#6ee08a",
-		"cooldown": 9.0,
+		"cooldown": 15.0,
 		"reach": 9.0,
 		"width": 1.8,
 		"tell": 0.35,
@@ -142,7 +141,7 @@
 		"icon": "skypierce",
 		"col": "#5affd2",
 		"unlock": 6,
-		"cooldown": 36.0,
+		"cooldown": 60.0,
 		"shots": 3,
 		"window": 6.0,
 		"nock": 0.3,
@@ -174,8 +173,8 @@
 	},
 	"rank2": {
 		"sec": "Rank 2: cooldown 16s -> 13s, damage +15%.",
-		"dash": "Rank 2: recharge 6s -> 5.1s per charge.",
-		"kin": "Rank 2: cooldown 9s -> 8.1s, damage +15%."
+		"dash": "Rank 2: recharge 9.5s -> 8.1s per charge.",
+		"kin": "Rank 2: cooldown 15s -> 12.8s, damage +15%."
 	},
 	"rank_next": {
 		"sec": "Rank 3: cooldown 16s -> 10s, damage +30%; flies 3m farther and a wall stun gives a dash charge.",
