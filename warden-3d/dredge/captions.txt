@@ -54,3 +54,8 @@ r3g_dredge_vs_r3f.png: portrait | r3f front | r3g front | r3f helm | r3g helm | 
 r3h (credit-free, ORCH's r3g review): no spec ovals; a brighter eye glow and a warmer far rim; the orb a cracked, hot-cored red in a lit red lens (no white dot); tarnished bronze with verdigris, plate seams and six rivet rows over the hull; smoother lames; the loose shards over the shoulders gone.
 r3h_dredge_turnaround.png | r3h_dredge_front_34.png | r3h_dredge_back.png | r3h_dredge_closeup.png | r3h_dredge_match.png | r3h_dredge_moves.png: as for r3.
 r3h_dredge_vs_r3g.png: portrait | r3g front | r3h front | r3g helm | r3h helm | r3g match | r3h match.
+
+r3i (credit-free, ORCH's r3h review): a small glowing orb in a wide brass ring; no black flap shards (flaps gone, gashes unlined); smoother shoulder pods; ball joints seating the arms; the horn seated in the right forearm cuff. Match frame: pose_clear with every overlay off, nearly facing the camera.
+r3i_dredge_turnaround.png | r3i_dredge_front_34.png | r3i_dredge_back.png | r3i_dredge_closeup.png | r3i_dredge_match.png | r3i_dredge_moves.png: as for r3.
+r3i_dredge_vs_r3h.png: portrait | r3h front | r3i front | r3h helm | r3i helm | r3h match | r3i match.
+(r3i shots are on the shared match-zoom v2 port: no speckle fringe at the match camera, the eye a red halo.)
