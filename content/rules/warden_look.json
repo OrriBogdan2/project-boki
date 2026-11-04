@@ -36,10 +36,10 @@
 			"emit": 2.6,
 			"emit_flicker": 0.12,
 			"far_emit": 1.2,
-			"rim_far": 0.36,
+			"rim_far": 0.22,
 			"rim_far_color": [
-				0.3,
-				0.65,
+				0.2,
+				0.45,
 				1.0
 			]
 		},
@@ -53,8 +53,8 @@
 			},
 			"hair": {
 				"top_light": 0.6,
-				"fres": 1.2,
-				"far_lift": 0.7,
+				"fres": 0.8,
+				"far_lift": 0.45,
 				"glow": 0.14,
 				"shadow_tint": [
 					0.88,

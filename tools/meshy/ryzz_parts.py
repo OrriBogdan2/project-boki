@@ -303,7 +303,7 @@ def pigtails(body, arm, rig, K, sp):
 
 
 # ------------------------------------------------------------------------------------------------ the rods
-ROD_COL = ["c27a48", "8e5230", "2f2a30", "1c1816", "4a3a30", "d08a56", "a86a40", "2a2226"]
+ROD_COL = ["a86a48", "7a4a32", "2f2a30", "1c1816", "4a3a30", "b87a58", "8a5a3e", "2a2226"]
 # copper, copper_dk, sleeve, scorch, scorch_mid, tip, plate (the riveted mount), strap
 ROD_CELL = {"copper": 0, "copper_dk": 1, "sleeve": 2, "scorch": 3, "scorch_mid": 4, "tip": 5, "plate": 6, "strap": 7}
 
@@ -511,14 +511,56 @@ def gum(body, arm, rig, K, sp):
     radii = [max(r * math.sin(math.pi * i / n), 1e-4) for i in range(n + 1)]
     bld.tube(rings, radii, 16, 0, 1, 0, 1, "gum", [0.0] * (n + 1), cap_start=True, cap_end=True)
     ob = bld.object("Gum")
-    img = _atlas("gum_atlas", ["ff8ac6"])
+    # (glossy: darker at the bottom, a pale highlight toward the top)
+    img = _atlas("gum_atlas", ["ff8ac6"], [[(0.0, "e0549e"), (0.55, "ff86c4"), (0.82, "ffbadf"), (1.0, "fff0f8")]])
     _material(ob, "cloth-gum", img)
-    _uv_flat(ob, bld, {"gum": 0})
+    _uv_flat(ob, bld, {}, {"gum": 0})
     g = ob.vertex_groups.new(name="head")
     g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
     ob.parent = arm
     ob.modifiers.new("Armature", "ARMATURE").object = arm
     log("gum bubble at %s, r %.3f" % (tuple(round(float(v), 3) for v in c), r))
+    return ob
+
+
+def bands(body, arm, rig, K, sp):
+    """The hazard bands as their own short striped sleeves round the scan's (wrists and boot tops): diagonal
+    yellow-and-black stripes the match camera can read, each rigid on its bone a fraction `t` down it."""
+    co = np.array([v.co[:] for v in body.data.vertices])
+    img = bpy.data.images.new("bands_atlas", ATLAS, ATLAS, alpha=False)
+    px = np.ones((ATLAS, ATLAS, 4), np.float32)
+    yy, xx = np.mgrid[0:ATLAS, 0:ATLAS]
+    n = int(sp.get("stripes", 10))
+    st = ((xx / ATLAS * n + yy / ATLAS * float(sp.get("slant", 1.2))) % 1.0) < 0.5
+    px[..., :3] = np.where(st[..., None], WP.hexcol(sp.get("yellow", "ffd21e"))[None, None],
+                           WP.hexcol(sp.get("black", "151214"))[None, None])
+    img.pixels = px.ravel()
+    img.pack()
+    bld = WP.Builder()
+    groups = []
+    for b in sp["at"]:
+        a = np.array(K.bone_head(rig, b["bone"])[:])
+        e = np.array(K.bone_head(rig, b["to"])[:])
+        ax = (e - a) / np.linalg.norm(e - a)
+        c = a + (e - a) * float(b["t"])
+        h = float(b.get("h", sp.get("h", 0.04)))
+        rel = co - c
+        along = rel @ ax
+        radial = np.linalg.norm(rel - np.outer(along, ax), axis=1)
+        sel = (np.abs(along) < h * 0.6) & (radial < float(b.get("max_r", 0.12)))
+        r = (float(np.percentile(radial[sel], 96)) if sel.sum() > 10 else 0.05) + float(sp.get("gap", 0.004))
+        v0 = len(bld.v)
+        rings = [c - ax * h * 0.5, c - ax * h * 0.45, c + ax * h * 0.45, c + ax * h * 0.5]
+        bld.tube(rings, [r * 0.97, r, r, r * 0.97], 28, 0.0, 1.0, 0.0, 1.0, "band", [0.0] * 4)
+        groups.append((b.get("rigid", b["bone"]), v0, len(bld.v)))
+        log("band on %s: r %.3f at %s" % (b["bone"], r, tuple(round(float(x), 3) for x in c)))
+    ob = bld.object("Bands")
+    _material(ob, "metal-bands", img)
+    for bone, v0, v1 in groups:
+        g = ob.vertex_groups.get(bone) or ob.vertex_groups.new(name=bone)
+        g.add(list(range(v0, v1)), 1.0, "REPLACE")
+    ob.parent = arm
+    ob.modifiers.new("Armature", "ARMATURE").object = arm
     return ob
 
 
@@ -529,6 +571,8 @@ def build(body, arm, rig, K, spec):
         out.append(pigtails(body, arm, rig, K, spec["pigtails"]))
     if spec.get("rods"):
         out.append(rods(body, arm, rig, K, spec["rods"]))
+    if spec.get("bands"):
+        out.append(bands(body, arm, rig, K, spec["bands"]))
     if spec.get("gum"):
         out.append(gum(body, arm, rig, K, spec["gum"]))
     if spec.get("nose_ring"):
