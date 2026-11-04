@@ -543,10 +543,10 @@
     0.55,
     0.8
    ],
-   "facing": 0.3,
+   "facing": 0.42,
    "feather": [
-    0.3,
-    0.65
+    0.42,
+    0.72
    ],
    "warp": {
     "mesh": [
@@ -770,10 +770,10 @@
  "thimbles": {
   "bone": "hand.R",
   "fingers": 4,
-  "r": 0.012,
+  "r": 0.016,
   "band": 0.03,
-  "length": 0.028,
-  "claw": 0.065,
+  "length": 0.035,
+  "claw": 0.085,
   "forward": [
    0.0,
    1.0,
@@ -813,7 +813,13 @@
   "floor": 0.14,
   "flare": 0.0,
   "hem_colour": "6c1c2d",
-  "hem_val": 0.22
+  "hem_val": 0.22,
+  "straight_back": {
+   "from_z": 0.88,
+   "k": 0.92,
+   "behind": 0.06,
+   "slack": 0.01
+  }
  },
  "shears": {
   "at": [
@@ -924,8 +930,11 @@
    0.35,
    1.0
   ],
-  "period": 0.016,
-  "dark": 0.55
+  "period": 0.018,
+  "line_w": 0.0022,
+  "colour": "c4aa82",
+  "colour2": "d8c29a",
+  "line": "5e4a38"
  },
  "touch_up": [
   {
@@ -942,7 +951,7 @@
     0.9,
     1.0
    ],
-   "sat_min": 0.25,
+   "sat_min": 0.18,
    "val_lo": 0.9,
    "val_hi": 1.05,
    "front": 0.45
@@ -961,7 +970,7 @@
     0.0,
     0.04
    ],
-   "sat_min": 0.25,
+   "sat_min": 0.18,
    "val_lo": 0.9,
    "val_hi": 1.05,
    "front": 0.45
@@ -980,7 +989,7 @@
     0.9,
     1.0
    ],
-   "sat_min": 0.25,
+   "sat_min": 0.18,
    "val_lo": 0.9,
    "val_hi": 1.05,
    "side_only": 0.45
@@ -999,7 +1008,7 @@
     0.0,
     0.04
    ],
-   "sat_min": 0.25,
+   "sat_min": 0.18,
    "val_lo": 0.9,
    "val_hi": 1.05,
    "side_only": 0.45

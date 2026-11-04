@@ -2000,6 +2000,34 @@ def lengthen(ob, img, ln):
         co[sel, 1] *= k_out
     me.vertices.foreach_set("co", co.ravel())
     me.update()
+    sb = ln.get("straight_back")
+    if sb:
+        # (the scan's coat bells into two lobes over the hips: below from_z the back panel's radius about the body's
+        # axis comes back toward its radius at from_z, angle by angle, so the tail hangs straight as the art draws it)
+        z0b, kb = float(sb.get("from_z", 0.85)), float(sb.get("k", 0.8))
+        back = coat & (co[:, 1] < float(sb.get("behind", -0.02)))
+        ang = np.arctan2(co[:, 0], -co[:, 1])
+        rad = np.hypot(co[:, 0], co[:, 1])
+        bins = np.linspace(-np.pi, np.pi, 37)
+        bi = np.clip(np.digitize(ang, bins) - 1, 0, 35)
+        band = back & (np.abs(co[:, 2] - z0b) < 0.04)
+        r0 = np.full(36, np.nan)
+        for b in range(36):
+            m_ = band & (bi == b)
+            if m_.sum() >= 3:
+                r0[b] = float(np.percentile(rad[m_], 70))
+        ok_b = ~np.isnan(r0)
+        if ok_b.any():
+            r0 = np.interp(np.arange(36), np.nonzero(ok_b)[0], r0[ok_b])
+            tgt = back & (co[:, 2] < z0b)
+            rr = r0[bi[tgt]] + float(sb.get("slack", 0.015))
+            r_new = np.where(rad[tgt] > rr, rr + (rad[tgt] - rr) * (1.0 - kb), rad[tgt])
+            k_r = r_new / np.maximum(rad[tgt], 1e-6)
+            co[tgt, 0] *= k_r
+            co[tgt, 1] *= k_r
+            me.vertices.foreach_set("co", co.ravel())
+            me.update()
+            log("straight back: %d vertices" % int(tgt.sum()))
     if ln.get("hem_colour"):
         # (the scan's dark dagged hem and lining, stretched, read as a zig-zag: the stretched coat's dark texels
         # take the coat's colour)
@@ -2016,31 +2044,51 @@ def lengthen(ob, img, ln):
 
 
 def tape_bands(ob, img, tb):
-    """A cloth wrap read as wrapped tape (Hem's tape-measure forearm wraps): the faces of the wrap's colour in each
-    box (the Meshy frame) are banded along the limb, every other `period` m of height a little darker, with a thin
-    dark line between bands."""
+    """A cloth wrap read as tape (Hem's tape-measure forearm wraps): the wrap's texels in each box (the Meshy frame)
+    painted flat `colour`, every other band of `period` m of height `colour2`, a thin `line` between bands (per
+    texel, from its own height: per face it read as a checker)."""
     w, h = img.size
     px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
     me = ob.data
+    me.calc_loop_triangles()
     uv = me.uv_layers.active.data
-    per = float(tb.get("period", 0.012))
+    per, lw = float(tb.get("period", 0.016)), float(tb.get("line_w", 0.0025))
+    c1 = np.array(K.hexcol(tb.get("colour", "c9b08c")), np.float32)
+    c2 = np.array(K.hexcol(tb.get("colour2", "dcc7a0")), np.float32)
+    cl = np.array(K.hexcol(tb.get("line", "6e5a46")), np.float32)
+    q = tb["hsv"]
     n = 0
-    for bx in tb["boxes"]:
-        def pick(poly, c, mat, bx=bx):
-            if not (bx[0] <= c.x <= bx[1] and bx[2] <= c.y <= bx[3] and bx[4] <= c.z <= bx[5]):
-                return False
-            u = sum(uv[i].uv.x for i in poly.loop_indices) / poly.loop_total
-            v = sum(uv[i].uv.y for i in poly.loop_indices) / poly.loop_total
-            hh, ss, vv = _hsv(px[min(h - 1, int(v * h)), min(w - 1, int(u * w)), :3])
-            q = tb["hsv"]
-            return q[0] <= hh <= q[1] and q[2] <= ss <= q[3] and q[4] <= vv <= q[5]
-        for band in (0, 1):
-            def pb(poly, c, mat, band=band, pick=pick):
-                return pick(poly, c, mat) and int(math.floor(c.z / per)) % 2 == band
-            m = face_mask(ob, img, pb)
-            k = float(tb.get("dark", 0.8)) if band else 1.0
-            px[m, :3] = px[m, :3] * k
-            n += int(m.sum())
+    for t in me.loop_triangles:
+        cen = sum((me.vertices[i].co for i in t.vertices), Vector()) / 3.0
+        if not any(bx[0] <= cen.x <= bx[1] and bx[2] <= cen.y <= bx[3] and bx[4] <= cen.z <= bx[5] for bx in tb["boxes"]):
+            continue
+        uvs = np.array([[uv[li].uv.x * w, uv[li].uv.y * h] for li in t.loops])
+        uc = uvs.mean(axis=0)
+        hh, ss, vv = _hsv(px[min(h - 1, int(uc[1])), min(w - 1, int(uc[0])), :3])
+        if not (q[0] <= hh <= q[1] and q[2] <= ss <= q[3] and q[4] <= vv <= q[5]):
+            continue
+        pz = np.array([me.vertices[i].co.z for i in t.vertices])
+        lo = np.maximum(np.floor(uvs.min(axis=0)).astype(int), 0)
+        hi = np.minimum(np.ceil(uvs.max(axis=0)).astype(int), [w - 1, h - 1])
+        xs, ys = np.meshgrid(np.arange(lo[0], hi[0] + 1), np.arange(lo[1], hi[1] + 1))
+        pts = np.stack([xs.ravel() + 0.5, ys.ravel() + 0.5], axis=1)
+        a_, b_, c_ = uvs
+        d = (b_[1] - c_[1]) * (a_[0] - c_[0]) + (c_[0] - b_[0]) * (a_[1] - c_[1])
+        if abs(d) < 1e-12:
+            continue
+        l1 = ((b_[1] - c_[1]) * (pts[:, 0] - c_[0]) + (c_[0] - b_[0]) * (pts[:, 1] - c_[1])) / d
+        l2 = ((c_[1] - a_[1]) * (pts[:, 0] - c_[0]) + (a_[0] - c_[0]) * (pts[:, 1] - c_[1])) / d
+        l3 = 1 - l1 - l2
+        ins = (l1 >= -0.02) & (l2 >= -0.02) & (l3 >= -0.02)
+        z = l1[ins] * pz[0] + l2[ins] * pz[1] + l3[ins] * pz[2]
+        ph = np.mod(z, per)
+        band = np.floor(z / per).astype(int) % 2 == 1
+        col = np.where(band[:, None], c2, c1)
+        col = np.where((ph < lw)[:, None], cl, col)
+        tx = np.clip(pts[ins, 0].astype(int), 0, w - 1)
+        ty = np.clip(pts[ins, 1].astype(int), 0, h - 1)
+        px[ty, tx, :3] = col
+        n += int(ins.sum())
     img.pixels = px.ravel()
     log("tape bands: %d texels" % n)
 
