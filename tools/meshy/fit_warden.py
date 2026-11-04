@@ -1310,16 +1310,17 @@ def lathe_weapon(spec, rig):
 
 def hand_prop(spec, rig, arm):
     """A piece of the weapon's lathe held in a free hand (Cinder's flask, `hand_prop`: t0, t1 of the lathe,
-    `hold_t` the point in the fist, `bone`, m_per_px), hanging straight down from the fist in the rest pose,
-    skinned whole to the hand: the art's flask at the ready in her left hand."""
+    `hold_t` the point in the fist, `bone`, m_per_px), skinned whole to the hand: the art's flask at the ready
+    in her left hand. `tilt` (degrees from the back, 90 = hanging straight down in the rest pose): halfway back
+    hangs it down-forward once the stance raises the hand forward."""
     hp = spec["hand_prop"]
     ob, img, _n = _lathe(spec["lathe"], hp["t0"], hp["t1"], "prop", knob=False)
     k = float(hp["m_per_px"])
     head = K.bone_head(rig, hp["bone"])
     fist = head + Vector(hp.get("fist", (0.0, 0.0, -0.07)))
     n_px = _n
-    # the axis down (-Z), the hold point at the fist
-    m = Matrix.Translation(fist) @ Matrix.Rotation(math.radians(90), 4, "X") @ Matrix.Scale(k, 4) \
+    # the axis down (-Z) and back by `tilt`, the hold point at the fist
+    m = Matrix.Translation(fist) @ Matrix.Rotation(math.radians(float(hp.get("tilt", 90.0))), 4, "X") @ Matrix.Scale(k, 4) \
         @ Matrix.Translation(Vector((0.0, float(hp["hold_t"]) * n_px, 0.0)))
     ob.data.transform(m)
     ob.data.update()
