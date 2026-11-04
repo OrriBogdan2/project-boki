@@ -108,4 +108,13 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   every ~0.55 s, the 3D model only; small and faint so it never covers a pod at the match camera); a brighter hull
   (gain 1.25) and brass, lighter iron limbs (7a746e) against the grass, and a stronger gold far rim (0.4, in
   content/rules/warden_look.json since main's look move).
+- **r3l (credit-free, ORCH's r3k review):** the hull from saturated yellow-orange to the art's tarnished olive bronze
+  (hull tint 0.88/0.95/0.84 at gain 1.38, olive brass and helm, the look's `desat` 0.16 and `light_neutral_warm` 0.5,
+  an olive-gold far rim): the same luminance at the match camera, hue 30 -> 35 degrees, saturation 0.71 -> 0.51;
+  five torn holes (`hull.bursts`, warden_hull.py `_burst`): a jagged ring of thick brass teeth peeled 45-55 degrees
+  out over a dark hole with a red heart, two on the shoulder pods' outer edges (the front view's outline), one low
+  on the belly, one upper left, one on the back; the winch seated (fit mode `shift` 2 cm down, a brass saddle
+  collar under it); a short iron stack behind the winch (`anchor_stack`, an anchor at a fixed `pos`) trailing a
+  thin wavering smoke ribbon (LDFx.wisp, ld_fx mode 13) in place of the round puffs; the porthole's glass wider
+  (inner 0.058) in dark blue-grey with eight white crack strips (`glow-crack`) and a small red pupil (orb 0.02).
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.

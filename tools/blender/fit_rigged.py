@@ -14,7 +14,8 @@ The spec (art/wardens/src/<name>_fit.json) names the source .glb, the rig JSON (
 - `weapon`: a source group cut off into the `weapon` mesh in the Gun node's space (its narrow end on the right
   hand's grip, its mouth forward; `weapon_muzzle` marks the mouth; `solidify` m gives a single-sided shell an inside);
 - `materials`: source material -> [glTF name "<slot>-<what>", colour]; `max_tris`; `anchors`;
-- `scale_parts` {label: k}: a part scaled about its top after the re-pose (the cargo hook);
+- `scale_parts` {label: k}: a part scaled about its top after the re-pose (the cargo hook); a `fit` mode "shift"
+  moves a part by `by` m as it is (the winch seated on the hull); an anchor with `pos` sits at that point;
 - `protect` {parts, ratio}: thin parts decimated on their own, lightly (rods and fingers vanish at the body's ratio);
 - `orb` (a glowing sphere on a bone, `replace`-ing a group), `drips` (tar drips hanging from faces that look
   down), `paint` (the ageing atlas: per-material recipes, baked in Cycles): tools/blender/warden_paint.py;
@@ -250,6 +251,8 @@ def main():
             moves[bone] = seg_fit(a, b, c, d)
         elif f["mode"] == "move":
             moves[bone] = Matrix.Translation(R[f["to"]] - J[f["from"]][0])
+        elif f["mode"] == "shift":          # (a part moved by `by` m as it is: the winch seated on the hull)
+            moves[bone] = Matrix.Translation(Vector(f["by"]))
     me = ob.data
     for i, v in enumerate(me.vertices):
         m = moves.get(spec.get("carry", {}).get(part[i], part[i]))
@@ -460,6 +463,9 @@ def main():
     K.anchor(arm, "head", "anchor_head_top", (0, 0, top + 0.07))
     K.anchor(arm, "hips", "anchor_chest", (0, 0.1, K.bone_head(rig, "upper_arm.L").z - 0.14))
     for name, a in spec.get("anchors", {}).items():
+        if a.get("pos"):          # (a fixed point: the smoke stack's mouth)
+            K.anchor(arm, a["bone"], name, tuple(float(x) for x in a["pos"]))
+            continue
         pts = co[np.array([any(g.group == ob.vertex_groups[a["group"]].index for g in v.groups)
                            for v in ob.data.vertices])]
         at = pts.mean(axis=0)

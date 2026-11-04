@@ -155,6 +155,18 @@ def build(ob, spec, seed=1):
     for t in spec.get("tears", []):
         _tear(ob, c, r, t, mat, WP._mat_index(ob, spec.get("gash_material", "cloth-flesh"), "5a1a1c"), spec["bone"],
               rnd)
+    # torn holes: a jagged ring of plate teeth peeled out over a glowing gash, on the hull or a shoulder pod (whose
+    # outer edge is the front view's outline), so the outline itself breaks
+    for b in spec.get("bursts", []):
+        bc, br, bone = c, r, spec["bone"]
+        if b.get("pod"):
+            sx = 1.0 if b["pod"] == "r" else -1.0
+            bc = c + Vector((sx * spec["shoulder"][0], spec["shoulder"][1], spec["shoulder"][2]))
+            br = spec["lames"][int(b.get("lame", 1))]["r"]
+            bone = spec["pauldron_r"] if sx > 0 else spec["pauldron_l"]
+        _burst(ob, bc, br, b, WP._mat_index(ob, b.get("material", "metal-brass"), "7a6238"),
+               WP._mat_index(ob, spec.get("gash_material", "cloth-flesh"), "5a1a1c"),
+               WP._mat_index(ob, spec.get("hole_material", "leather-recess"), "1a120c"), bone, rnd)
     print("HULL built: %d tris in all" % sum(len(p.vertices) - 2 for p in ob.data.polygons))
 
 
@@ -204,6 +216,62 @@ def _tear(ob, c, r, t, mat, gash_mat, bone, rnd):
     for v in fl.verts:
         v.co = rot @ v.co
     WP._append(ob, fl, bone, mat)
+
+
+def _burst(ob, c, r, b, mat, gash_mat, dark_mat, bone, rnd):
+    """A torn hole at `at` [lat, lon] on the sphere (c, r): a jagged glowing disc `rh` m across and `n` plate teeth
+    round it, each a thick wedge from the hole's rim pointing in over it and bent `bend` degrees out of the surface;
+    dark inside, the red glow only at its heart."""
+    d = _dir(*b["at"])
+    u = d.cross(Vector((0, 0, 1)))
+    if u.length < 1e-3:
+        u = d.cross(Vector((1, 0, 0)))
+    u.normalize()
+    v = d.cross(u).normalized()
+    rh, n = float(b["rh"]), int(b.get("n", 7))
+    thick = float(b.get("thick", 0.008))
+
+    def surf(rho, a, lift=1.004):          # a point on the sphere rho m from the hole's centre, at angle a
+        q = (d * r + (u * math.cos(a) + v * math.sin(a)) * rho).normalized()
+        return c + q * r * lift
+
+    # the hole: a dark fan, its rim jagged, and the red glow deep in it (a smaller fan)
+    segs = n * 2
+    for k_r, lift, m in ((1.0, 1.003, dark_mat), (0.5, 1.004, gash_mat)):
+        bm = bmesh.new()
+        mid = bm.verts.new(surf(0.0, 0.0, lift))
+        ring = [bm.verts.new(surf(rh * k_r * (1.12 if k % 2 else 0.92) * rnd.uniform(0.9, 1.1), 2 * math.pi * k / segs,
+                                  lift)) for k in range(segs)]
+        for k in range(segs):
+            bm.faces.new((mid, ring[k], ring[(k + 1) % segs]))
+        for f in bm.faces:
+            if f.normal.dot(d) < 0:
+                f.normal_flip()
+        WP._append(ob, bm, bone, m)
+    # the teeth
+    bend = math.radians(float(b.get("bend", 45.0)))
+    for k in range(n):
+        a = 2 * math.pi * (k + rnd.uniform(-0.2, 0.2)) / n
+        w = math.pi / n * rnd.uniform(0.7, 0.95)
+        p0, p1 = surf(rh * 1.05, a - w, 1.006), surf(rh * 1.05, a + w, 1.006)
+        base = (p0 + p1) * 0.5
+        nrm = (base - c).normalized()
+        e = (base - (c + d * r)).normalized()
+        e = (e - nrm * e.dot(nrm)).normalized()
+        L = rh * rnd.uniform(0.6, 1.15)
+        bk = bend * rnd.uniform(0.7, 1.25)
+        tip = base - e * L * math.cos(bk) + nrm * L * math.sin(bk)
+        bm = bmesh.new()
+        top = [bm.verts.new(p) for p in (p0, p1, tip)]
+        bot = [bm.verts.new(p - nrm * thick) for p in (p0, p1, tip)]
+        bm.faces.new(top)
+        bm.faces.new(bot[::-1])
+        for i in range(3):
+            j = (i + 1) % 3
+            bm.faces.new((top[i], bot[i], bot[j], top[j]))
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+        bmesh.ops.triangulate(bm, faces=bm.faces[:])
+        WP._append(ob, bm, bone, mat)
 
 
 def hull_box(ob, material):
