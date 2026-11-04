@@ -261,3 +261,15 @@ Shots: `ext/hero-shots-s2` (README with captions).
   - ext/rename-breaker 07ef436b now has the titles Red Stitch, Brass Abomination and Cliff Runner.
   - Balance 4,993.
 - 2026-11-04 08:54 UTC: the owner picked r3b. It ships as Vex, then gets the r3c polish pass (texture, a per-Warden shader override, longer legs, hoses, braids, stance, match read) from the r3b agent. The other 11 wait for the owner's OK on r3c.
+
+## 2026-11-04 09:05 UTC: Warden 3D fan-out STAGE 1 (owner GO 09:05, staging 09:10, Zedran 09:20)
+- **Four Opus agents**, each working from ext/warden-vex-r3b 926df0b0 (Vex r3b shipped), on branches ext/warden-3d-<name>:
+  - Hem + Zedran
+  - Breaker + Claire
+  - Sable + Pip
+  - Tarek + Ostra
+- **Stage 1** = Meshy 7.1 max, bake, rig fit and first shots (s1_*). At most 2 body attempts each; no hand polish until the owner OKs Vex r3c. Brief: briefs-s2/WARDEN_STAGE1_BRIEF.md.
+- **Dredge:** an aged-brass texture pass, a glowing orb eye behind cracked glass, and thicker tar (no Meshy), on ext/warden-dredge-friend.
+- **Vex r3c polish:** running on ext/warden-vex-r3b.
+- **Waiting:** Ryzz and Cinder (art redos pending).
+- **Credits:** balance about 4,990; stage 1 is estimated at 600-900.
