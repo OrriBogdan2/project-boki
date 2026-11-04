@@ -116,8 +116,8 @@ func _ostra() -> void:
 		"took %.1f slow %.1f" % [dmg(T), T.slow_t]
 	)
 	ok(
-		"small: the charge is stepped, not gradual (one Settled orb, then plain)",
-		not K.primed and float(P.wpn["speed"]) < 35.0, "speed %.0f" % float(P.wpn["speed"])
+		"item 60: the charge restarts from zero after a shot (plain again)",
+		not K.primed and K.last_orb_c >= 0.999 and K.charge < 0.9, "charge %.2f" % K.charge
 	)
 	_orb_parity(m, P, home, K)
 	# ---- RMB: one charge, a visible wind-up with the two rails, one bundle, a stun that reads
@@ -523,7 +523,7 @@ func _ostra() -> void:
 	step(m, 0.2)
 	ok(
 		"merge hold: the prime, the Shift aim and the Snap wind-up drop with the merge",
-		not K.primed and K.prime_until < 0.0 and K.swap_aim < 0.0 and K.snap.is_empty() and K.snaps == 0,
+		not K.primed and K.charge < 0.9 and K.swap_aim < 0.0 and K.snap.is_empty() and K.snaps == 0,
 		"primed %s" % K.primed
 	)
 	_dash_moves(K)
@@ -545,7 +545,8 @@ func _ostra() -> void:
 	await done(m)
 
 ## Item 35: his own ground and air dash moves (the Trade's lob), ids no other hero's table has, and each one's
-## The data: the Settled orb "goes through terrain"; a plain orb is stopped by it.
+## Item 60: the orb charges smoothly with the wait since the last shot (damage, speed, size monotonic from 0 to the
+## window, capped after), every orb passes a wall between him and the foe at any charge, and a full orb slows.
 func _bolt_through_terrain() -> void:
 	var r := setup("ostra", 6.0)
 	var m: Match = r[0]
@@ -559,20 +560,52 @@ func _bolt_through_terrain() -> void:
 	for dz in range(-2, 3):
 		W.kind[W.idx(wx, wz + dz)] = World.T_BLOCK
 	aim_at(P, T.pos)
-	step(m, float(K.lmb_def()["idle"]) + 0.3)
-	var shots0 := P.shot_n
-	var hot_n := K.settled_shots
-	P.fire_cd = 0.0
-	# held: the first orb is the Settled bolt (primed by the pause), the next a plain orb 0.6 s later
-	step(m, 0.7, func(): P.inp["fire"] = true)
-	P.inp["fire"] = false
-	step(m, 0.6)
-	var settled_dmg := float(P.wpn["dmg"]) * (1.0 + float(K.lmb_def()["prime_dmg"]))
+	var idle := float(K.lmb_def()["idle"])
+	var waits := [0.0, 0.35, 0.7, 1.05, idle, idle + 1.0, idle + 3.0]
+	var dmgs: Array = []
+	var spds: Array = []
+	var rads: Array = []
+	var slows: Array = []
+	var through := true
+	for w in waits:
+		fresh(T)
+		K.last_shot_t = m.time - w
+		step(m, 0.03)
+		var shots0 := P.shot_n
+		spds.append(float(P.wpn["speed"]))
+		P.fire_cd = 0.0
+		P.inp["fire"] = true
+		step(m, 0.05)
+		P.inp["fire"] = false
+		step(m, 0.9)
+		var d := dmg(T)
+		dmgs.append(d)
+		rads.append(K.last_orb_r)
+		slows.append(T.slow_t > 0.0)
+		if P.shot_n <= shots0 or d <= 0.5:
+			through = false
+		step(m, 0.6)
+	var mono := true
+	for i in range(1, waits.size()):
+		if dmgs[i] < dmgs[i - 1] - 0.01 or spds[i] < spds[i - 1] - 0.01 or rads[i] < rads[i - 1] - 0.001:
+			mono = false
 	ok(
-		"lmb data: the Settled bolt goes through terrain; the plain orb after it is stopped by the same rock",
-		P.shot_n >= shots0 + 2 and K.settled_shots == hot_n + 1 and absf(dmg(T) - settled_dmg) < 0.5,
-		"took %.1f (the Settled bolt alone is %.1f), %d shots" % [dmg(T), settled_dmg, P.shot_n - shots0]
+		"item 60: damage, speed and size grow with the wait (monotonic) from 0 to the window",
+		mono and dmgs[4] > dmgs[0] * 1.2 and rads[4] > rads[0] * 1.5 and spds[4] > spds[0] * 1.2,
+		"dmg %s speed %s r %s" % [str(dmgs), str(spds), str(rads)]
 	)
+	ok(
+		"item 60: it is smooth, not a switch (a mid wait lands between the two ends)",
+		dmgs[2] > dmgs[0] + 0.3 and dmgs[2] < dmgs[4] - 0.3 and rads[2] > rads[0] and rads[2] < rads[4]
+	)
+	ok(
+		"item 60: capped after the window",
+		absf(dmgs[5] - dmgs[4]) < 0.05 and absf(dmgs[6] - dmgs[4]) < 0.05 and absf(rads[6] - rads[4]) < 0.001,
+		str(dmgs)
+	)
+	ok("item 60: a full orb hits for the data's +34% (353 vs 263)", absf(dmgs[4] / dmgs[0] - 1.34) < 0.06, str(dmgs))
+	ok("item 60: every orb passes the wall between him and the foe at any charge", through, str(dmgs))
+	ok("item 60: only the full orb slows", slows[4] and slows[5] and not slows[0] and not slows[2], str(slows))
 	await done(m)
 
 ## Void's Gravity Orb (parity pass): held, an orb every 0.6 s (footage 0031 -> 0034), each a one-hand flick
@@ -671,8 +704,8 @@ func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	var speed := drift / (float(ticks[0]) * DT)
 	var fly_slow := float(K.dash_def()["fly_slow"])
 	ok(
-		"item 17: in flight he drifts at dash.fly_slow (in the 15-25% band) of his run speed",
-		flying and run_speed > 1.0 and fly_slow >= 0.15 and fly_slow <= 0.25
+		"item 75: in flight he drifts at dash.fly_slow (0.3) of his run speed",
+		flying and run_speed > 1.0 and absf(fly_slow - 0.3) < 0.001
 			and absf(speed / run_speed - fly_slow) < 0.03,
 		"%.2f of %.2f (data %.2f)" % [speed, run_speed, fly_slow]
 	)
