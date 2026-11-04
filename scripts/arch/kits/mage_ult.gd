@@ -272,33 +272,38 @@ func _strike() -> void:
 	_next(AFTER)
 	kit.play("mage_x_land")
 	_strike_fx(at, r)
-	var n := 0
-	var dmg := float(xd["dmg"]) * power()
 	var struck := kit.foes_in(at, r)
+	var shared := _highest_static(struck)
+	var dmg := float(xd["dmg"]) * power()
 	for f in struck:
 		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
 		away = away.normalized() if away.length() > 0.1 else h.aim_dir()
 		var o := {"src": "abil", "ab": "ult", "tags": ["ult", "kitefall"], "kb": away * float(xd["push"])}
 		o["lift"] = float(xd["lift"])
 		f.hurt(dmg, h, o)
+		_share_static(f, shared, struck)
 		kit.add_spark(f, int(xd["stacks"]))
 		HeroUlt.landed(kit, f)
-		n += 1
-	_spread_static(struck)
-	hits += n
-	last = {"at": at, "hits": n}
+	hits += struck.size()
+	last = {"at": at, "hits": struck.size()}
 
-## The data's Thunderstorm rule: striking a target spreads its Static to the foes near it (each takes the
-## struck one's count if it had less), with an arc from one to the other.
-func _spread_static(struck: Array) -> void:
-	var r := float(data()["spread_r"])
+func _highest_static(struck: Array) -> int:
+	var best := 0
 	for f in struck:
-		var n := kit.spark_n(f)
-		for o in kit.foes_in(f.pos, r):
-			if o != f and kit.spark_n(o) < n:
-				kit.add_spark(o, n - kit.spark_n(o))
-				kit.fx().arc(f.position + Vector3(0, 1.0, 0), o.position + Vector3(0, 1.0, 0), MageKit.TEAL,
-						MageKit.GOLD, 0.6, 0.2)
+		best = maxi(best, kit.spark_n(f))
+	return best
+
+## Thunderstorm: when the strike hits a foe carrying Static, every foe it hits is raised to the highest count
+## among them (before the ult's own stack), with lightning arcing from the stacked foe to each.
+func _share_static(f: Ent, shared: int, struck: Array) -> void:
+	var have := kit.spark_n(f)
+	if shared <= have:
+		return
+	kit.add_spark(f, shared - have)
+	for src in struck:
+		if kit.spark_n(src) == shared and src != f:
+			kit.fx().arc(src.position + Vector3(0, 1.0, 0), f.position + Vector3(0, 1.0, 0), MageKit.TEAL, MageKit.GOLD, 0.6, 0.2)
+			return
 
 ## A pillar of gold light slams onto the spot out of the sky, a shock ring and a spray of sparks.
 func _strike_fx(at: Vector3, r: float) -> void:
