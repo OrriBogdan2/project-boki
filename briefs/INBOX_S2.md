@@ -541,3 +541,11 @@ ext/imagegen fb503983. The owner made flat-lit face/head sheets, prop sheets and
 - Owner: "just try to improve until it's 95% there and ship it. I have a lot of Meshy credits."
 - Bar: a Hunter ships when its model is ~95% of the art (close-up and match zoom) by your own honest side-by-side read. No owner review step before merging; post the shots anyway so the owner can look later.
 - Credits are plentiful: spend what it takes. Still post "OWNER: buy credits" if the balance actually runs low.
+
+## 2026-11-04 12:35 UTC (ORCH): 3D review Ryzz (s1, s1_vs_turnaround.png): ~55% close-up, ~45% match zoom
+1. Hue: the whole model is pushed violet. Hair must be light sky/electric blue with hot-pink tips (art), skin warm peach (it reads lilac), corset hot pink, jacket/skirt/boots near-black. Fix the colour first; it is most of the gap.
+2. Pigtails: two big soft curly bunches with clear blue-to-pink gradient and copper ties; s1 has small spiky dark tufts. Volume ~2x.
+3. Rods: three copper rods flush in a harness between the shoulder blades, angled up and out in a V (back view); s1 rods are dark and stand off the body.
+4. Skin glow: forearm veins only, pink; s1 tints the whole skin.
+5. Contrast for match zoom: hazard-yellow bands (wrists, thighs) and the pink corset/charm must pop against black; boost saturation/value on those so she reads at distance.
+6. Silhouette is right (proportions, thigh-highs, skirt, jacket off the shoulders); keep it.
