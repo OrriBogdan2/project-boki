@@ -1975,3 +1975,6 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - **Score:** about 83% close-up, about 62% at match zoom. All checks pass.
 - **What changed:** a small orb in a wide brass ring, the shards gone, shoulder ball joints, the horn seated, and match-zoom v2 ported.
 - **Shots:** warden-3d/dredge/r3i_*.
+
+## 2026-11-04 17:15 UTC (ORCH): [MAIN] hold Dredge r3i
+- ORCH review: Dredge r3i (READY update 17:04) lost his arms and legs (they render invisible). Ship ext/art-integ with Dredge at r3h (ext/warden-dredge-friend 05596f3f), not r3i, unless S2 posts a fix first.

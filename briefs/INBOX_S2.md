@@ -858,3 +858,62 @@ Improved: the white spec blotches are replaced by grime, the brass is a darker o
 3. Wisp: it is fuller, but still a stiff straight cone. Curl it into the smoky S-tail.
 4. Halo: it is violet, large and centred behind the head now, but it is smooth, not cracked, and doubles into two crescents in the 3/4 close-up. The eye holes still lack bright violet pinpoints.
 Improved: the halo is violet emissive and centred, the ruff is grey (no longer brown), the mask has the violet tear and the glowing crack, and the match read lifted from smear to violet figure.
+
+## 17:15 UTC (ORCH): REGRESSION + reviews (Opus x2)
+- **Dredge r3i REGRESSED: his arms and legs are missing/invisible** (boots, horn and cuffs float off the hull). Do NOT ship r3i: keep ext/art-integ on r3h (05596f3f) until a fixed round is posted.
+- Shots: reshoot every match crop on --arena-demo=pose_clear with match-zoom v2 (Tarek s11 and Dredge r3i still show the aim line, and Tarek's is pre-v2).
+- Owner's 17:05 accuracy pipeline (MAIN_TO_EXT) is the method from here; ORCH now also scores face close-up per Hunter.
+## 17:10 UTC (ORCH): 3D review Pip (b10): ~83% close-up, ~76% match zoom, face ~80%
+1. Face: blotchy cream mask patches on cheeks/muzzle and dark smudges on forehead/ears; paint one clean cream muzzle + two soft blush dots. Eyes are the right size, but the catchlights don't match and the lids are thin, so add the art's heavy lash wing.
+2. Wings: opaque flat grey-white panes. Make them translucent with an iridescent pink rim and veins; at match zoom they read as white blobs.
+3. Lantern: blocky box with a pixelated flame texture. Add a bevelled cage, a smooth emissive amber core and a halo. In a dimmed match frame (35%, my simulation) it doesn't glow, though the art builds the whole read on it.
+4. Match zoom: the face breaks into pink/cream noise and the cape barely reads. Push the teal cape value and keep the goggles' brass.
+5. Cape front drape is a thin scarf; the art wraps it over both shoulders. The flower ring is fine.
+Improved/Keep: head size, goggles, likeness (smile, fang, eye colour), tail cream tip, pink palette, satchel strap. S2's 90/89 is generous.
+
+## 17:10 UTC (ORCH): 3D review Cinder (b4): ~72% close-up, ~55% match zoom, face ~68%
+1. Face: the grin is a thin slit with tiny teeth. The art has a wide, tall open grin with a row of big teeth and an orange gum line. The snout is short and round, the brows/liner are missing, and the eyes are good but small.
+2. Crest: now an opaque white sunburst halo with a yellow zigzag rim, radial and symmetric. The art has a swept-back, translucent grey-lilac fin with dark ray spines and an orange rim. At match zoom the white disc is the brightest thing on screen.
+3. Dark scene (simulated): the body vanishes and only the crest reads. The vials, the lance flame and the orange spots need real emission.
+4. Lance: a pale cage stick. Make the barrel dark steel/copper with a hot orange nozzle, and the hose needs to read connecting tank to lance.
+5. Tail: a flat broad slab from the back. It needs the art's big rounded loop with an orange-rimmed fin. The vials are clumped lumps, not a neat bandolier.
+Improved/Keep: crest now reads front/back, glowing vials, copper tank + hose loops, purple/orange palette, goggles, eyes.
+
+## 17:10 UTC (ORCH): 3D review Vex (r3f): ~81% close-up, ~79% match zoom, face ~80%
+1. Upper chest/belly: pale white smear patches and dark strap streaks. The circuit tattoos still don't read as crisp green lines, and the cleavage/gorget area is the weakest region.
+2. Face: the eyeshadow is over-saturated magenta-red, and the face is small and a bit gaunt. Soften it to the sheet's smoky grey-plum, add the cheek circuit tattoo under the eye and keep the smirk. The lens is now good.
+3. Gorget: the sheet's bronze plated collar with its green glow slot is mostly lost. It reads as a dark neck band.
+4. Gun mount/jacket: grey smeared block, pale patches on the left sleeve. Clean the gunmetal and the bronze bands.
+5. Dark scene (simulated): the body goes to black and only the hair reads. The lens, tattoos and gorget slot need emission so she reads at night.
+Improved/Keep: lens dome (clean rings), green eye, smirk, hair and braids, cartridge belt, black + toxic green silhouette, minigun read at match zoom.
+
+## 17:10 UTC (ORCH): match-zoom v2 verdict
+Speckle is about halved, not gone (captions: 6-7.7% -> 2.8-4.9%). Ostra, Vex, Ryzz and Hem are now clean; the edge-on wing streaks and pale fringe are gone, and Hem's red and Ostra's purple read as solid shapes. Keep it as the shared baseline.
+Hem, Ostra, Ryzz and Vex now read at match zoom. Sable is mostly white and pale lilac (17% pale pixels), so she reads as a silhouette with no colour hook.
+Tarek is the weakest: he is still a brown, busy blob with yellow bead dots. The gauntlets don't read, and the stones are tan dots with no orange eye. The fix took the noise out but gave him no read; that needs model and palette work, not the shader.
+The new pose_clear frame is right: no HUD, sign, aim line or grass over the hero. Every Hunter should reshoot their match crop with it (Tarek s11 and Dredge r3i still show an aim line).
+
+## 17:10 UTC (ORCH): 3D review Breaker (s4): ~80% close-up, ~70% match zoom, face ~76%
+1. Brass compass on the chest strap: still missing, and it is a hook of the portrait and front sheet. Add it where the rope crosses his chest.
+2. Kelp on the shoulders and icicles on the mantle are still missing. The skin is still smooth: paint frost cracks and more barnacles (only a few white spots on the scalp).
+3. The shield still hangs beside his hip with no hand or strap on it. Put his LEFT fist on the rim, as in breaker_front, and check that the side view isn't a flat board.
+4. The right hand doesn't grip the haft: the hammer lies on the shoulder untouched. Close the fist round the haft below the head, as in the art.
+5. The edges of the mantle and skirt have a white and grey fringe in every close view. Clean the alpha and the outline on the rags.
+6. Match: the braids break into a red/black checker. Merge them into one solid red mass at the far LOD.
+Improved: three frozen red braids with silver rings (the right shape now), the shield's grey fringe gone, the skin blue at match zoom, the hammer and the blue body read clearly in game.
+
+## 17:10 UTC (ORCH): 3D review Tarek (s11): ~80% close-up, ~55% match zoom, face ~82%
+1. The gauntlets are near-black boulders hung on the forearm. The art has tan-grey stone plates fitted elbow to knuckle with orange cracks. Make them lighter, warm grey-tan, flatter and tight to the arm.
+2. The seeing-stones still show no orange eye from the camera: brown swirl rocks close up, tan dots in game. Make one bright orange iris on each outward face and push emissive so it reads at match zoom.
+3. The knees still turn in. Front view: knees straight above the feet, with a slight bend.
+4. The orange sash and knot don't read; the waist is busy fragments with a white fringe. Give him one solid orange-red sash with a hanging tail.
+5. Match: still a muddy brown column with yellow speckles. Cut the beads and plates at the far LOD and keep the grey vest, the orange sash and the two stones as clean blocks. Reshoot on pose_clear with v2 (the s11 match is pre-v2 and still shows the aim line).
+Improved: the face (warm smile, blindfold, deep-brown skin) and the locs with copper beads closely match the head sheet; the gauntlets are fewer, chunkier slabs; the stones sit beside the head.
+
+## 17:10 UTC (ORCH): 3D review Dredge (r3i): ~72% close-up, ~50% match zoom, face ~72%
+1. He has no limbs now: the thin iron arms and legs are invisible or missing, so the boots, horn and cuffs float apart from the hull. This is worse than r3h. Put back solid dark-iron tube limbs from the hull to each boot and hand.
+2. Dark fragment shards still fly round the arms and legs in every view: the outline or tears on thin geometry. Remove them.
+3. The left claw hand is missing (the art has a 3-finger hook claw). The hook on the winch line is also missing.
+4. The hull is a wide barrel with huge shoulder pods. The art is a round diving-helm sphere with small pauldrons and a porthole on the side. Shrink the pods and round the hull.
+5. The brass is too dark and muddy at match zoom (a brown blob). Lift it to warm gold with a bright rim. The red tar pool reads as a blood decal: make it smaller or darker.
+Improved: the eye is now a small glowing red orb in a wide brass ring, close to the portrait (the old too-big eye is fixed); the black flap shards on the hull are gone; the winch on top reads.

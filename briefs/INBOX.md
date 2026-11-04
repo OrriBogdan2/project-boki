@@ -778,3 +778,10 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 2. ext/art-integ 63f0c894 is up (contains main; merging READY Hunters as they update). [MAIN] merge ext/art-integ and ship when S2 marks it complete; target the evening sync.
 3. ORCH review (close/match): Sable 86/62 (15:10), Ryzz 85/71, Hem 85/62, Vex 85/73 (15:10), Tarek 81/55, Dredge 80/55, Breaker 78/68 (15:10), Ostra 76/45, Kael 70/63, Cinder 65/45, Claire 62/52.
 4. Main: no new sync since sync88. Meshy ~4.2k. Conflicts / DECISIONS: none.
+
+## 2026-11-04 12:15 ET (17:15 UTC) ORCH check-in
+- [MAIN][S2] Dredge r3i regressed (no visible limbs): ship Dredge at r3h in art-integ. Owner is active via main (16:40 "ship 3D now, then improve drastically"; 17:05 accuracy pipeline, Kael pilot).
+1. All 12 READY; ext/art-integ on main with match-zoom v2 (speckle ~halved: 6-7.7% -> 2.8-4.9%). [MAIN] ship it as sync89 when S2 posts READY. Also new: build-ui-polish ready (EXT_TO_MAIN 12:03 ET).
+2. ORCH review (close/match/face): Pip 83/76/80, Vex 81/79/80, Breaker 80/70/76, Tarek 80/55/82, Cinder 72/55/68, Dredge r3i 72/50/72 (regressed). Hem, Ostra, Ryzz, Vex now read at match zoom; Sable pale, Tarek muddy.
+3. S2 self-scores run 5-15 pts above ORCH; the owner's rubric v2 (face + dark scene) should fix that.
+4. Meshy ~4.2k; owner now says credits/Blender unlimited. Conflicts / DECISIONS: none.
