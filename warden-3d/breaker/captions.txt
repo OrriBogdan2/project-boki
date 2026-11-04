@@ -16,3 +16,6 @@ s2_poses_game.png: idle, run, attack, cast, ult at the match camera
 s2_moves_1.png: the run, frame by frame, close
 s2_vs_s1.png: stage 1 above, stage 2 below (close turnaround)
 s2_match.png: Arena match frame (--arena=<id> --record=2 --arena-demo=pose --demo-zoom=1.0)
+s3_*: round 3: a new Meshy body from breaker_front (run C: bare blue belly, rope sash, ragged skirt, bare feet, braids, teddy, compass), 1.5x, hammer resting at the RIGHT shoulder, the sheet's shield at the LEFT hip; shared look + match-zoom fixes. Self-score (RECIPE_95): close-up 81 (silhouette 13/15, face 16/20, beard 6/10, props 17/20, palette 13/15, clean paint 7/10, outfit 9/10); match zoom 69 (silhouette 20/25, signature colours 14/25, value 13/20, props 16/20, artefacts 6/10).
+s3_vs_s1.png: stage 1, stage 2, round 3 (close turnaround), top to bottom
+s3_match_vs_art.png: breaker_front beside the Arena match frame x4 (the HUD caption sits beside him in this frame)
