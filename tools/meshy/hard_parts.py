@@ -708,6 +708,54 @@ def tail(spec, body, arm):
     return ob
 
 
+# ------------------------------------------------------------------------------------------------ horns
+def horns(spec, arm):
+    """Ram horns as geometry (Claire, claire_head_sheet): from the top of the head each curls outward, back and
+    down round the ear and forward again, its tip pointing ahead at cheek height, close to the skull; a tapered
+    tube with growth ridges, slate blue-black with lighter ridge crests (the `metal` slot), riding the head bone
+    rigidly. Fitted frame. spec: centre [x, y, z] of the left curl (x < 0; the right one mirrored), r [start, end]
+    of the curl, x [start, end] (|x| out from the midline along the curl), phi [start, end] (degrees in the side
+    plane: 90 up, 180 back, 270 down, 360 forward), thick [root, tip] tube radii, ridges (count)."""
+    c = np.array(spec["centre"], np.float64)
+    r0, r1 = spec.get("r", [0.085, 0.05])
+    xa, xb = spec.get("x", [0.08, 0.19])
+    p0, p1 = spec.get("phi", [70.0, 345.0])
+    t0, t1 = spec.get("thick", [0.032, 0.007])
+    ridges = int(spec.get("ridges", 26))
+    n = 72
+    at = Atlas(2, 128)
+
+    def horn_paint(u, v):
+        base = hexcol("262a44")[None, None] * (1 - v[..., None]) + hexcol("3d4566")[None, None] * v[..., None]
+        crest = np.clip(np.sin(v * ridges * math.pi) ** 8, 0, 1)[..., None] * 0.45
+        side = (0.75 + 0.25 * np.sin(u * 2 * math.pi))[..., None]
+        return base * side * (1 - 0.0 * crest) + hexcol("8e9ac0")[None, None] * crest * 0.45 * side
+    cell = at.cell("horn", horn_paint)
+    bld = WP.Builder()
+    for sx in (-1.0, 1.0):
+        rings, radii = [], []
+        for i in range(n):
+            t = i / (n - 1)
+            ph = math.radians(p0 + (p1 - p0) * t)
+            r = r0 + (r1 - r0) * t
+            x = sx * (xa + (xb - xa) * math.sin(t * math.pi * 0.5))
+            rings.append(np.array([x, c[1] + r * math.cos(ph), c[2] + r * math.sin(ph)]))
+            base = t0 + (t1 - t0) * t ** 0.9
+            radii.append(max(1e-4, base * (1.0 + 0.09 * math.cos(t * ridges * 2 * math.pi))))
+        bld.tube(rings, radii, 12, cell[0], cell[2], cell[1], cell[3], "horn", [0.0] * n, cap_end=True,
+                 cap_start=True)
+    ob = finish(bld, "horns")
+    img = at.image("horn_atlas")
+    material(ob, "metal", "horn", img)
+    g = ob.vertex_groups.new(name="head")
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("horns: %d tris" % sum(len(q.vertices) - 2 for q in ob.data.polygons))
+    return ob
+
+
 # ------------------------------------------------------------------------------------------------ split, feet
 def split(ob, arm, sp):
     """The faces of the slots in sp["slots"] (whose centre is above sp["z_min"]) as their own mesh `sp["name"]`,
@@ -717,7 +765,11 @@ def split(ob, arm, sp):
     zmin = float(sp.get("z_min", -1e9))
     bm = bmesh.new()
     bm.from_mesh(ob.data)
-    pick = [f for f in bm.faces if f.material_index in want and f.calc_center_median().z > zmin]
+    def in_box(c, b):
+        return b[0] <= abs(c.x) <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]
+    boxes = sp.get("boxes", [])          # (|x|, y, z: faces of any slot there go too, the scan's horn roots)
+    pick = [f for f in bm.faces if (f.material_index in want and f.calc_center_median().z > zmin)
+            or any(in_box(f.calc_center_median(), b) for b in boxes)]
     keep = set(f.index for f in pick)
     other = bmesh.new()
     other.from_mesh(ob.data)
@@ -787,4 +839,6 @@ def build(spec, body, arm, rig):
         out["extra"].extend(wings(ps["wings"], body, arm, rig))
     if "tail" in ps:
         out["extra"].append(tail(ps["tail"], body, arm))
+    if "horns" in ps:
+        out["extra"].append(horns(ps["horns"], arm))
     return out

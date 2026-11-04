@@ -1716,7 +1716,11 @@ def main():
         if "ink_room" in spec:
             ink_room(o, float(spec["ink_room"]))
     for sp in (spec.get("parts") or {}).get("split", []):
-        parts.append(HP.split(ob, arm, sp))         # (Claire's horns: their own mesh, on the head bone)
+        piece = HP.split(ob, arm, sp)               # (Claire's horns: their own mesh, on the head bone)
+        if sp.get("drop"):
+            bpy.data.objects.remove(piece)           # (the scan's horns, replaced by scripted ones: cut and gone)
+        else:
+            parts.append(piece)
     for o in parts + held:
         if "ink_room" in spec:
             ink_room(o, float(spec["ink_room"]))

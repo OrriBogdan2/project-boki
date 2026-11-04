@@ -32,7 +32,7 @@
 		}
 	},
 	"claire": {
-		"painted": {"far_lift": 0.5},
+		"painted": {"far_lift": 0.4, "rim_far": 0.3, "rim_far_color": [0.62, 0.88, 1.0]},
 		"slots": {
 			"ice": {"fres": 2.2, "far_lift": 0.6, "top_light": 0.6},
 			"skin": {"shade": 0.85, "fres": 0.6, "shadow_tint": [0.88, 0.9, 1.0]},
