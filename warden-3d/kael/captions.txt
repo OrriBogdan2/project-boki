@@ -42,3 +42,19 @@ b12: ORCH 16:10 folded in: the blade's core blooms (warden_look bloom: additive 
 b13 (committed): match-zoom v2 picked (27c47f20, eeefe61f, b299fcb0 = 161708cc, c89a5273, 8af89a9e): the review frame is --arena-demo=pose_clear (no HUD, sign, aim line or props), the speckle fringe and ink dots gone at the match camera. Skin ramp 3a2c2f..84706c with light_neutral_warm 0.65 (dark cool brown, no longer purple-red or near-black), smoke lighter and off the blade's outer two thirds only, arm blooms moved onto the root (warden-glb's toon-only surfaces). ALL CHECKS PASS.
 b13 self-score, close-up 75: silhouette 11/15 (traps lower and deltoids slimmer via the fit deform, still broad; head higher), face 14/20 (eyes read; small), hair 7/10 (solid volume under the strands from behind; still short at the front), props 17/20 (the blade's core glows with bloom, chain rows, bands, hook; smoke soft), palette 12/15, clean paint 6/10 (pale blotches still on the right deltoid), outfit 8/10 (the collar plates thin but still read blocky).
 b13 self-score, match 76: silhouette 19/25 (mane, blade and kilt shapes read; shoulders broad), signature colours 20/25 (white mane, glowing white blade, red kilt, gold collar and belt; the arm glow faint), value 16/20, props 14/20 (the blade reads as a glowing sword; the hook small), artefacts 7/10 (the v2 fix: clean frame, no ink speckle; a little mane speckle).
+
+# Accuracy pipeline pilot (owner 17:05), branch ext/warden-3d-kael-acc. Before = b13 (923948b1), after = a3. Sheets at 2x.
+acc_1_fullbody_art_b13_a3.png: the turnaround over b13 (middle) and a3 (bottom), close turnarounds.
+acc_2_face_art_b13_a3.png: the portrait beside b13 and a3; top row front close-ups, bottom row 3/4.
+acc_3_match_b13_a3.png: the Arena match frame x4 (pose_clear), b13 left, a3 right.
+acc_4_dark_b13_a3.png: the dark scene (warden-shots --dark: night sky, dim cool moonlit key), b13 over a3, then the close-ups b13 | a3.
+acc_5_back_b13_a3.png: back views, b13 over a3.
+acc_6a..6e: the inputs and runs: the A-pose model-sheet edits (crops over edits), the head-sheet edits, the 3 body variants, the 2 head variants, the quad low mesh with its bake (flat, front).
+Per-step log:
+ 1 inputs: 6 nano-banana-pro edits (front, 3/4, side, back; 3/4 and back redone: a 3D-render look and a plate on the back) -> an A-pose sheet with no sword, chains, mane or cracks, flat light; head sheet: front and side as drawn, 3/4 and back by 4 edits (the back redone: a ponytail). 90 credits.
+ 2 generate: Meshy 7.1 multi-image, 4 views, 8k PBR, no remesh: A (enhance off), B (enhance on), C (no A-pose). Kept B: the cleanest brows, eyes and harness. 120 credits.
+ 3 head: 2 head-only runs (enhance off/on), kept H_enh (the narrowed amber eyes, white brows, the shards, a long layered mane). 80 credits. assemble_head.py joins it to body B by the eyes (head x1.08), the body's head cut.
+ 4 Blender: Meshy quad remesh of the joined model (12.5k faces, 84% quads; 3 remeshes, 15 credits); the fit's shoulder deform; the mane, chains and sword as before; rigged to our skeleton by fit_warden.
+ 5 texture: a 4k bake by the nearest surface with a cage ray and a front projection over the brows (Cycles' bake left the remesh black); the arm cracks painted by hot_paint. No art projection beyond Meshy's own textures (StableProjectorz not available).
+ 6 look: hero_toon key_fill / key_rim (camera-borne face fill and silhouette rim, default 0); Kael's skin key_fill 0.38, a warm key_rim 0.22.
+ 7 rubric v2 (marked down ~10 as asked): b13 -> a3: full-body likeness 58 -> 62; face close-up 45 -> 62; match-zoom silhouette 64 -> 62; dark-scene readability 45 -> 58.
