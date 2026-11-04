@@ -27,3 +27,7 @@ s6 self-score, match zoom 67: silhouette 18/25, signature colours 15/25, value s
 s7_*: round 7 (ORCH 14:10 + coordinator list): scripted stone gauntlets elbow to knuckle (warden_parts.gauntlets: dark rock plates over a glowing orange core), the stones raised above and beside the head (no longer over the face) with amber halos at the match camera, grey slate vest, normal legs and a wider stance, brighter pitons, less speckle (far_smooth 1.0, a stronger atlas smooth); the match crop centred on him, no HUD text. s7_vs_s6.png: round 7 over the first s7 pass.
 s7 self-score, close-up 80: silhouette 13/15, face 15/20, hair 8/10, signature props 17/20, palette 11/15, clean paint 7/10, outfit 9/10
 s7 self-score, match zoom 64: silhouette 18/25, signature colours 14/25, value separation 13/20, props read 12/20, artefacts 7/10
+s8_*: bigger amber halos, less speckle (fewer beads and plates), r3e's light_neutral_warm on the skin, the match frame on clear ground (--demo-at=-4.5,0). s8_vs_s7.png: s8 over s7.
+s9_*: ORCH 15:10: skin a warm mid-brown (a per-slot desat uniform on hero_toon, 0.45 on his skin: in game 822a12 -> 663322), chunky dark gauntlet plates (3 rows of 4) over a thin orange core, rounder and deeper seeing-stones, straighter free leg. s9_vs_s8.png: s9 over s8.
+s9 self-score, close-up 84: silhouette 13/15, face 17/20, hair 8/10, signature props 17/20, palette 13/15, clean paint 7/10, outfit 9/10
+s9 self-score, match zoom 62: silhouette 18/25, signature colours 13/25, value separation 13/20, props read 11/20, artefacts 7/10
