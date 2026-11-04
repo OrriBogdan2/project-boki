@@ -199,15 +199,17 @@
    1.0,
    0.0
   ],
-  "r": 0.5,
-  "thick": 0.1,
+  "r": 0.4,
+  "thick": 0.085,
   "from": 100,
   "to": 330,
-  "colour": "8a40f0",
-  "crack": "2a0a60",
+  "colour": "9a6ae0",
+  "crack": "4a1a90",
   "slot": "glow",
   "bone": "head",
-  "core": "a878ff"
+  "core": "e6dcff",
+  "crack_w": 1.3,
+  "cracks": 9
  },
  "wisp": {
   "path": [
@@ -252,13 +254,13 @@
     -0.17
    ]
   ],
-  "r_top": 0.17,
+  "r_top": 0.21,
   "r_tip": 0.014,
-  "taper": 1.6,
+  "taper": 1.0,
   "bones": 5,
   "parent": "hips",
-  "colour": "3e1a66",
-  "tip": "9a5ad8",
+  "colour": "4a2276",
+  "tip": "a878e8",
   "tendrils": [
    {
     "from": 0.2,
@@ -372,7 +374,8 @@
      0.3,
      1.0
     ],
-    "gain": 1.9
+    "gain": 1.9,
+    "enclosed": 14
    }
   }
  ],
@@ -382,29 +385,26 @@
   "bone": "hand.R",
   "centre": [
    0.0,
-   0.07,
-   -0.09
+   0.06,
+   -0.19
   ],
-  "r": 0.06,
-  "colour": "0a0410",
-  "ring": "c08aff",
-  "rings": [
-   [
-    0.0,
-    1.0,
-    0.0
-   ],
-   [
-    1.0,
-    0.0,
-    0.0
-   ],
-   [
-    0.0,
-    0.0,
-    1.0
-   ]
-  ]
+  "r": 0.075,
+  "colour": "040208",
+  "ring": "7a3ad0",
+  "style": "vortex",
+  "core": 0.6,
+  "arms": 3,
+  "sweep": 1.5,
+  "reach": 1.6,
+  "arm_r": 0.16,
+  "normal": [
+   0.0,
+   1.0,
+   0.0
+  ],
+  "hot": "e8ccff",
+  "anchor": "orb",
+  "core_slot": "void"
  },
  "smooth": {
   "iterations": 2,
@@ -588,11 +588,28 @@
    ],
    "rock": "1a0c2e",
    "rock_dark": "0b0612",
-   "rim": "e8dcff",
-   "rim_dark": "6a3ab0",
-   "iris": "b07cff",
-   "iris_hot": "d8b8ff",
+   "rim": "4a3a60",
+   "rim_dark": "241a30",
+   "iris": "8a4ae0",
+   "iris_hot": "b888ff",
    "slot": "cloth"
   }
- ]
+ ],
+ "claws": {
+  "sides": [
+   "L",
+   "R"
+  ],
+  "count": 5,
+  "length": 0.075,
+  "r": 0.0065,
+  "curl": 0.35,
+  "spacing": 0.016,
+  "depth": 0.06,
+  "colour": "16101e",
+  "slot": "leather"
+ },
+ "cut_straddle": {
+  "z_max": 1.2
+ }
 }

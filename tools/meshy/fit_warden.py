@@ -1220,8 +1220,8 @@ def _cut(ob, drop):
 def weight_rules(ob, img, rules):
     """Pieces bone heat gives to the wrong bone where two parts touch in Meshy's pose: every
     vertex inside a rule's box (the fitted frame: her right +X, front +Y, soles on 0) whose painted colour
-    matches one of its hsv ranges [h0, h1, s0, s1, v0, v1] (all colours without) goes wholly to the rule's
-    bone (Vex's ammo drum on her back went with the gun-arm and rose over her shoulder blades)."""
+    matches one of its hsv ranges [h0, h1, s0, s1, v0, v1] (all colours without) and, with `slots`, is on a face
+    of one of those toon slots, goes wholly to the rule's bone (Vex's ammo drum on her back went with the gun-arm and rose over her shoulder blades)."""
     w, h = img.size
     px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
     uv = ob.data.uv_layers.active.data
@@ -1232,6 +1232,11 @@ def weight_rules(ob, img, rules):
         col[lp.vertex_index] += px[min(h - 1, max(0, int(v * h))), min(w - 1, max(0, int(u * w))), :3]
         cnt[lp.vertex_index] += 1
     col /= np.maximum(cnt, 1)[:, None]
+    vslots = [set() for _ in ob.data.vertices]
+    for p in ob.data.polygons:
+        m = ob.data.materials[p.material_index] if p.material_index < len(ob.data.materials) else None
+        for i in p.vertices:
+            vslots[i].add(m.name.split("-")[0] if m else "")
     for r in rules:
         b = r["box"]
         g = ob.vertex_groups.get(r["bone"]) or ob.vertex_groups.new(name=r["bone"])
@@ -1239,6 +1244,8 @@ def weight_rules(ob, img, rules):
         for vx in ob.data.vertices:
             c = vx.co
             if not (b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]):
+                continue
+            if r.get("slots") and not vslots[vx.index] & set(r["slots"]):
                 continue
             hh, ss, vv = _hsv(col[vx.index])
             if "hsv" in r and not any(q[0] <= hh <= q[1] and q[2] <= ss <= q[3] and q[4] <= vv <= q[5] for q in r["hsv"]):
@@ -1269,6 +1276,32 @@ def release(ob, bones, to="hips"):
         dest.add([v.index], have + gone, "REPLACE")
         moved += 1
     log("released %s to %s: %d vertices" % (", ".join(bones), to, moved))
+
+
+def cut_straddle(ob, spec):
+    """Cut the faces that join a hanging arm to the body below the shoulder (`z_max`, the rest pose): Meshy fused
+    Ostra's sleeves and gloves to the coat beside them, and with the orb hand raised those faces stretched into a
+    sheet from his hip to his hand. A face goes when its vertices ride mostly different chains (an arm's
+    upper_arm/forearm/hand against the rest)."""
+    names = {g.index: g.name for g in ob.vertex_groups}
+    arms = {"R": ("upper_arm.R", "forearm.R", "hand.R"), "L": ("upper_arm.L", "forearm.L", "hand.L")}
+
+    def chain(v):
+        s = sum(g.weight for g in v.groups) or 1.0
+        for k, bones in arms.items():
+            if sum(g.weight for g in v.groups if names.get(g.group) in bones) > 0.5 * s:
+                return k
+        return "B"
+    ch = [chain(v) for v in ob.data.vertices]
+    zmax = float(spec.get("z_max", 1.2))
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bm.faces.ensure_lookup_table()
+    cut = [f for f in bm.faces if f.calc_center_median().z < zmax and len({ch[v.index] for v in f.verts}) > 1]
+    bmesh.ops.delete(bm, geom=cut, context="FACES")
+    bm.to_mesh(ob.data)
+    bm.free()
+    log("cut straddle: %d faces between the arms and the body below z %.2f" % (len(cut), zmax))
 
 
 def keep_weights(ob):
@@ -1809,6 +1842,20 @@ def ramp_paint(ob, img, rules):
     img.pixels = px.ravel()
 
 
+def _dilate(m, r):
+    out = m.copy()
+    for ax in (0, 1):
+        acc = out.copy()
+        for d in range(1, r + 1):
+            acc |= np.roll(out, d, axis=ax) | np.roll(out, -d, axis=ax)
+        out = acc
+    return out
+
+
+def _erode(m, r):
+    return ~_dilate(~m, r)
+
+
 def split_part(ob, arm, img, sp):
     """A piece cut off the body as its own mesh (Tarek's stone bracers, Ostra's mask): the faces whose centre is in
     one of `boxes` (the fitted frame on the contract's rest pose: his right +X, front +Y, soles on 0) and whose
@@ -1901,7 +1948,13 @@ def split_part(ob, arm, img, sp):
             r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
             hh = np.where(mx == r, ((g - b) / d) % 6.0, np.where(mx == g, (b - r) / d + 2.0, (r - g) / d + 4.0)) / 6.0
             hue_ok = (hh >= q[0]) & (hh <= q[1]) if q[0] <= q[1] else (hh >= q[0]) | (hh <= q[1])
-            k = (hue_ok & (ss >= q[2]) & (ss <= q[3]) & (mx >= q[4]) & (mx <= q[5]) & mask).astype(np.float32)
+            k = hue_ok & (ss >= q[2]) & (ss <= q[3]) & (mx >= q[4]) & (mx <= q[5]) & mask
+            if e.get("enclosed"):
+                # (only what the porcelain closes round: the eyes, mouth, tear and crack inside the white face,
+                # not a violet hood half that the split took along with it)
+                white = mask & (ss < 0.3) & (mx > 0.55)
+                k &= _erode(_dilate(white, int(e["enclosed"])), int(e["enclosed"]))
+            k = k.astype(np.float32)
             out[..., :3] = k[..., None] * np.clip(rgb * float(e.get("gain", 1.4)), 0.0, 1.0)
         lit = int((out[..., :3].max(axis=2) > 0.1).sum())
         em = bpy.data.images.new("%s_emit" % sp["name"], w, h, alpha=False)
@@ -2103,6 +2156,13 @@ def main():
     arm = contract_skin(ob, rig)
     if spec.get("fit_weights"):
         fit_weights(ob, arm)
+    if spec.get("weight_rules_late"):
+        # (the same on the contract's rest pose, the frame the game skins: arms straight down, the boxes read
+        # off the exported model; Ostra's glove fingers that bone heat gave to the thigh beside them stretched
+        # into a sheet from his hip to his raised orb hand)
+        weight_rules(ob, img, spec["weight_rules_late"])
+    if spec.get("cut_straddle"):
+        cut_straddle(ob, spec["cut_straddle"])
     if "gun_arm" in spec:
         release(ob, spec["gun_arm"].get("bones", ["forearm.R", "hand.R"]))
     if "chunk" in spec:
@@ -2118,7 +2178,7 @@ def main():
         bpy.context.scene.collection.objects.link(we)
         we.parent = arm
         extras.append(we)
-    if any(spec.get(k) for k in ("lens", "braids", "hoses", "orbits", "halo", "wisp", "studs", "orb")):
+    if any(spec.get(k) for k in ("lens", "braids", "hoses", "orbits", "halo", "wisp", "studs", "orb", "claws")):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import warden_parts as WP
         lens_s = _rel(arm, spec.get("lens"), ("centre",))
@@ -2139,9 +2199,17 @@ def main():
         if spec.get("halo"):
             parts.append(WP.crescent(arm, _rel(arm, spec["halo"], ("centre",))))
         if spec.get("orb"):
-            parts.append(WP.orb(arm, _rel(arm, spec["orb"], ("centre",))))
+            orb_s = _rel(arm, spec["orb"], ("centre",))
+            parts.append(WP.orb(arm, orb_s))
+            if orb_s.get("anchor"):
+                # (the orb's match-zoom glow hangs on it, warden_look.json "halos")
+                K.anchor(arm, orb_s.get("bone", "hand.R"), "anchor_" + orb_s["anchor"], tuple(orb_s["centre"]))
         if spec.get("wisp"):
             parts.append(WP.wisp(arm, spec["wisp"]))
+        if spec.get("claws"):
+            got = WP.claws(ob, arm, spec["claws"])
+            if got:
+                parts.append(got)
         for sd in spec.get("studs", []):
             got = WP.studs(ob, arm, sd)
             if got:
