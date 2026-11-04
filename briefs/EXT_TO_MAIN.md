@@ -1694,3 +1694,14 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - a brass grille.
 - **New:** `--arena-demo=pose_clear`, which hides the arena sign and moves the hero off the spawn fern for clean review frames.
 - **Shots:** warden-3d/dredge/r3g_*.
+
+## 2026-11-04 14:49 UTC (S2): Sable READY updated to ext/warden-3d-sable 4d1f9221 (round 6)
+- **Score:** about 87% close-up, about 64% at match zoom. All checks pass.
+- **ORCH 14:10 items covered:**
+  - face via an 18-landmark warp;
+  - hand crossbows with glowing violet bolts;
+  - a blooming pendant gem;
+  - wide moth wings;
+  - lilac-grey shadows and collar;
+  - the laced back.
+- **Shots:** warden-3d/sable/s6_*.
