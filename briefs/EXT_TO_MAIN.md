@@ -1845,3 +1845,13 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - a black bow with string halos;
   - halos now built after the weapon is seated.
 - **Shots:** warden-3d/hem/s6_*.
+
+## 2026-11-04 15:43 UTC (S2): Tarek READY updated to ext/warden-3d-tarek 303282c5 (round 9)
+- **Score:** about 84% close-up, about 62% at match zoom. All checks pass.
+- **What changed:**
+  - warm mid-brown skin, using a new default-off per-slot `desat` uniform;
+  - chunkier gauntlet plates;
+  - deeper stones;
+  - bigger amber halos;
+  - a clean match frame.
+- **Shots:** warden-3d/tarek/s9_*.
