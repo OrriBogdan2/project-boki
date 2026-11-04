@@ -127,6 +127,15 @@ const SWINGS := {
 		{"a": Vector3(1.25, -0.75, -1.5), "b": Vector3(-1.6, 0.65, -1.5), "tw": Vector2(0.55, -0.6), "hand": "b"},
 		{"a": Vector3(0.0, 2.5, 0.0), "b": Vector3(0.0, -1.2, 0.0), "tw": Vector2(-0.1, 0.1), "hand": "b", "drop": 0.2},
 	],
+	# Dancer's Arc Bolts (by weapon id, over the twin hold's slashes): each blade whipped from cocked out
+	# wide and high to straight at the aim, the right, then the left; both at once in a V (the empowered
+	# bolt). The torso's turn comes from her kit moves (thf_lmb_r / _l, thf_primed), so no twist here; the
+	# ends lean 0.45 against the torso's 0.5 turn into the throw, so the blade points at the aim.
+	"arc_bolts": [
+		{"a": Vector3(-1.1, 0.45, 0.5), "b": Vector3(0.45, 0.0, 0.0), "tw": Vector2.ZERO, "hand": "r"},
+		{"a": Vector3(1.1, 0.45, -0.5), "b": Vector3(-0.45, 0.0, 0.0), "tw": Vector2.ZERO, "hand": "l"},
+		{"a": Vector3(-0.9, 0.5, 0.4), "b": Vector3(-0.14, 0.02, 0.0), "tw": Vector2.ZERO, "hand": "x"},
+	],
 	"twin": [
 		{"a": Vector3(-1.4, 0.05, 1.5), "b": Vector3(1.2, -0.25, 1.5), "tw": Vector2(-0.45, 0.5), "hand": "r"},
 		{"a": Vector3(1.4, 0.05, -1.5), "b": Vector3(-1.2, -0.25, -1.5), "tw": Vector2(0.45, -0.5), "hand": "l"},
@@ -804,7 +813,7 @@ func update(dt: float, s: Dictionary) -> void:
 	# a kit move's legs
 	if not km.is_empty() and km.has("legs") and float(km["lw"]) > 0.0:
 		var kl4: Array = km["legs"]
-		var lw := clampf(float(km["lw"]), 0.0, 1.0)
+		var lw := clampf(float(km["lw"]), 0.0, 1.0) * stance_leg_k(km_stance, run_k)
 		hl = lerpf(hl, kl4[0], lw); kl = lerpf(kl, kl4[1], lw)
 		hr = lerpf(hr, kl4[2], lw); kr = lerpf(kr, kl4[3], lw)
 	# pulling up a ledge or vaulting: one knee comes up onto it
@@ -1079,7 +1088,9 @@ func update(dt: float, s: Dictionary) -> void:
 ## blade (the greatsword's yaw, pitch, roll, like SWINGS) with bw, rad (the blade's reach), gp (a
 ## gun's extra pitch), wa / wo (a held weapon's extra pitch, yaw, roll and offset).
 ## A move with "hold": true stays on its last key until another replaces it; with
-## "loop": t as well it cycles from t to the last key instead (a recoil wobble, hand over hand).
+## "loop": t as well it cycles from t to the last key instead (a recoil wobble, hand over hand). A move with
+## "stance": true keys its legs as a planted stance, used only standing (stance_leg_k); with "swing": n the
+## weapon swing it starts plays step n of the weapon's SWINGS (one blade or the other, or both).
 const KMOVES := {
 }
 ## Stride rate (walk phase per metre) of heroes whose step differs from their class: quick, short steps
@@ -1092,6 +1103,8 @@ var km_id := ""
 var km_prev_t := 99.0
 var km_from := {}              # the pose the last kit move left the body in, eased out over KM_BLEND
 var km_blend := KM_BLEND
+var km_stance := false         # the move's legs are a standing stance: running, the legs keep running
+var km_swing := -1             # the weapon swing the move throws (its "swing" key), -1: the weapon's combo step
 const KM_BLEND := 0.08         # s: one kit move eases into the next (or back to none), so no pose pops
 
 ## The kit move's channels this frame; a new move (or the same one restarted) blends in from the last pose.
@@ -1099,11 +1112,19 @@ func _update_km(id: String, tt: float, dt: float) -> void:
 	if id != km_id or tt < km_prev_t - 0.001:
 		km_from = km
 		km_blend = 0.0
+	if id != km_id:
+		km_stance = bool(km_def(id).get("stance", false))
+		km_swing = int(km_def(id).get("swing", -1))
 	km_id = id
 	km_prev_t = tt
 	var now := km_sample(id, tt) if id != "" else {}
 	km_blend += dt
 	km = now if km_blend >= KM_BLEND or km_from.is_empty() else km_mix(km_from, now, km_blend / KM_BLEND)
+
+## How much of a kit move's legs to use: all of them, or for a move keyed "stance": true (a throw or a shot
+## from a planted stance) none at a run, so the legs keep running while the arms and torso play the move.
+static func stance_leg_k(stance: bool, run: float) -> float:
+	return 1.0 - clampf(run, 0.0, 1.0) if stance else 1.0
 
 ## Two kit-move poses mixed (u = 0: `a`, 1: `b`); a side without a channel counts as the rest pose, and the
 ## whole-body turns take the short way round.
@@ -1198,14 +1219,18 @@ var sw_hand := "r"
 var sw_drop := 0.0
 var sw_rad := -1.0
 var sw_b2 := Vector3.INF
+## How far along its arc a swing is (0 to 1) at `p`, the share of its time gone: a fast start that settles.
+static func swing_ease(p: float) -> float:
+	var u := clampf((p - 0.03) / 0.3, 0.0, 1.0)
+	return 1.0 - pow(1.0 - u, 3.0)
+
 func _swing_pose() -> void:
 	sw_w = 0.0; sw_tw = 0.0; sw_drop = 0.0; sw_rad = -1.0; sw_b2 = Vector3.INF; sw_hand = "r"
 	if swing_t >= swing_dur or not SWINGS.has(hold):
 		return
 	var p := swing_t / swing_dur
 	sw_w = smoothstep(0.0, 0.05, p) * (1.0 - smoothstep(0.6, 1.0, p))
-	var u := clampf((p - 0.03) / 0.3, 0.0, 1.0)
-	var e := 1.0 - pow(1.0 - u, 3.0)
+	var e := swing_ease(p)
 	if swing_step < 0:
 		# charged: a thrust (sword), an overhead slam (greatsword), a spin with both blades out
 		match hold:
@@ -1216,7 +1241,7 @@ func _swing_pose() -> void:
 			_:
 				sw_a = Vector3(-1.4, 0.0, 1.5); sw_b2 = Vector3(1.4, 0.0, -1.5); sw_hand = "x"
 		return
-	var sws: Array = SWINGS[hold]
+	var sws: Array = SWINGS.get(wid, SWINGS[hold])
 	var d: Dictionary = sws[swing_step % sws.size()]
 	sw_a = (d["a"] as Vector3).lerp(d["b"], e)
 	var tw: Vector2 = d["tw"]
@@ -1245,7 +1270,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if sn != swing_prev:
 		swing_prev = sn
 		swing_t = 0.0
-		swing_step = int(s.get("combo", 0))
+		swing_step = km_swing if km_swing >= 0 else int(s.get("combo", 0))
 		var base_d: float = {"twin": 0.3, "sword": 0.36, "great": 0.5}.get(hold, 0.36)
 		swing_dur = base_d * (1.25 if swing_step == 2 else 1.0) * (1.35 if swing_step < 0 else 1.0)
 	swing_t += dt

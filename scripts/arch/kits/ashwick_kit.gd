@@ -312,7 +312,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		m.sfx("lw_pilot", h.pos, -3.0, 1.0)
 		fx.orb(nozzle(), FLAME_CYAN, PILOT_CORE, 0.8, float(ld["spool"]))      # the pilot flares cyan before the roar
 	was_held = true
-	h.idle_fire = 0.0              # firing: no auto-reload mid-roar
+	h.idle_fire = 0.0
 	spool += dt
 	h.mel_hold = minf(spool, float(ld["spool"]))
 	if spool < float(ld["spool"]):

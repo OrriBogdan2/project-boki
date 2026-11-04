@@ -160,8 +160,6 @@ func _tick_sparks(dt: float) -> void:
 			fx().arc(f.position + Vector3(0, _top(f) - 0.3, 0), foot, TEAL, GOLD, 0.35, 0.12)
 
 func _tick(dt: float) -> void:
-	if h.wid == "coilcaster":
-		h.ammo = int(h.wpn.get("mag", h.ammo))      # a finger gun has no magazine: never an idle reload
 	_tick_sparks(dt)
 	ult.tick(dt)
 	_tick_echo(dt)

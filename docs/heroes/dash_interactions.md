@@ -93,21 +93,21 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | mage | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | mage | hold RMB through an air dash |  | the hold carries through and lets go there |
 | mage | hold RMB through a jump |  | the hold carries through and lets go there |
-| gunslinger | ground dash -> LMB |  | fires mid-dash |
-| gunslinger | ground dash -> RMB |  | fires mid-dash |
-| gunslinger | ground dash -> E |  | fires mid-dash |
-| gunslinger | ground dash -> ult (X) |  | fires mid-dash |
-| gunslinger | ground dash -> Q glove |  | fires mid-dash |
-| gunslinger | air dash -> LMB |  | fires mid-dash |
-| gunslinger | air dash -> RMB |  | fires mid-dash |
-| gunslinger | air dash -> E |  | fires mid-dash |
-| gunslinger | air dash -> ult (X) |  | fires mid-dash |
-| gunslinger | air dash -> Q glove |  | fires mid-dash |
-| gunslinger | LMB -> dash |  | the kit's own handling (no row yet) |
-| gunslinger | RMB -> dash |  | the kit's own handling (no row yet) |
-| gunslinger | E -> dash |  | the kit's own handling (no row yet) |
-| gunslinger | ult (X) -> dash |  | the kit's own handling (no row yet) |
-| gunslinger | Q glove -> dash |  | the kit's own handling (no row yet) |
+| gunslinger | ground dash -> LMB | Footage briefs/hero-ref/venator.md:88 ('fires the rifle during the slide', 0149-0151), :90 and :308 (slides up-left while firing up-right; 'he can fire throughout'), :189 ('fires during any slide'). | fires mid-dash |
+| gunslinger | ground dash -> RMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | ground dash -> E | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | ground dash -> ult (X) | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | ground dash -> Q glove | Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | air dash -> LMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | air dash -> RMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | air dash -> E | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | air dash -> ult (X) | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | air dash -> Q glove | Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | LMB -> dash | Footage 0149-0151: the rifle keeps firing as the slide starts and through it (briefs/hero-ref/venator.md:88). | the dash goes, the ability keeps running |
+| gunslinger | RMB -> dash | Not shown in the data or footage. Ours: Shift with the Burr Charge's lane held slides, the lane rides along and the charge still throws on release. | the dash goes, the ability keeps running |
+| gunslinger | E -> dash | Not shown (the footage casts the Ion Cannon braced and still, 0.6s). Ours (owner item 51, no cancels): Shift in the 0.6s charge slides and the beam still fires at its end, from where she is. | the dash goes, the ability keeps running |
+| gunslinger | ult (X) -> dash | Not shown. Ours: Cinderfall is a tap; the shell is already out, so Shift slides at once. | the dash goes, the ability keeps running |
+| gunslinger | Q glove -> dash | Not in the source; the glove keeps running. | the dash goes, the ability keeps running |
 | gunslinger | jump -> LMB |  | fires mid-jump (default) |
 | gunslinger | jump -> RMB |  | fires mid-jump (default) |
 | gunslinger | jump -> E |  | fires mid-jump (default) |

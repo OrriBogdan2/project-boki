@@ -48,7 +48,7 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 |---|---|
 | Body | 145 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Quill Rifle (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into his rifle, slides around while still shooting, and finishes with one long needle of light. |
+| Fantasy | The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light. |
 | Silhouette | the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle |
 | Resource | Fever (max 1) |
 
@@ -75,7 +75,7 @@ What the in-game kit card (K) says.
 **Burr Charge (RMB, 6.5s cooldown).**
 
 - *Tap:* Hold RMB: a 10.5m lane with an arrow tip shows (foes in it are marked); let go to throw. The charge flies the lane, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.
-- *Resource full:* Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s.
+- *Resource full:* Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer.
 
 **Longneedle (E, 11.5s cooldown).** Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. Then the beam fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).
 
@@ -99,6 +99,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 |---|---|
 | Building up | a lit Fever pip over the bar while the lifesteal runs |
 | Armed / full | the same lit pip and a heat shimmer |
-| Dash spent | an ember afterimage and a ring where the slide began |
+| Dash spent | an ember afterimage and faint skid streaks |
 
 <!-- /gen:kit -->

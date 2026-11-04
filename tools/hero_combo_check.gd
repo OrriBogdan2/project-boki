@@ -9,6 +9,7 @@ var ac: RefCounted
 var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
+const VPARITY := preload("res://tools/venator_parity_check.gd")   # Venator against the source (the parity pass)
 
 func ok(name_: String, cond: bool, info := "") -> void:
 	n += 1
@@ -593,7 +594,7 @@ func _gunslinger() -> void:
 	ok("RMB held: a 10.5m lane with an arrow tip, past the cursor",
 			not le.is_empty() and absf(float(le["len"]) - 10.5) < 0.01 and bool(le["tip"]))
 	ok("RMB held: the foe in the lane is marked", AimKit.shown(P, "mark%d" % T.get_instance_id()))
-	ok("RMB held: nothing thrown yet, the grenade cocked overhead",
+	ok("RMB held: nothing thrown yet, the grenade held low at the hip",
 			K.burrs.is_empty() and K.anim_id == "gunslinger_rmb_hold",
 			K.anim_id)
 	P.inp["sec_hold"] = false
@@ -663,6 +664,9 @@ func _gunslinger() -> void:
 	ok("RMB wall cone: hits, Dazes, shoves into terrain = stun, the cooldown is not shaved",
 			ac.dmg(T) >= 12.0 and KitStatus.rattled(T) and K.wall_slams == ws0 + 1 and float(K.cd["rmb"]) > 6.5 * 0.7,
 			"took %.0f slams %d cd %.1f" % [ac.dmg(T), K.wall_slams - ws0, float(K.cd["rmb"])])
+	var longer := KitStatus.rattled_left(T) - KitStatus.rattled_left(T2)
+	ok("RMB wall slam: the walled foe is Dazed longer (the data), 0.6s past the cone's Daze",
+			absf(longer - float(bd["wall_daze"])) < 0.1, "%.2f s longer" % longer)
 	for z in range(-3, 4):
 		_unwall(m, home + Vector3(9.5, 0, z))
 	for z in [1, 2]:
@@ -864,6 +868,7 @@ func _gunslinger() -> void:
 	T.downed = false
 	T.hp = T.max_hp
 	P.slot_lv["sec"] = 1
+	VPARITY.new(self).run(m, P, K, T, home)
 	# 8. a Boki merge mid-hold: the Longneedle charge goes with nothing fired
 	ac.fresh(T)
 	P.teleport(home)

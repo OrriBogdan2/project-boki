@@ -1348,6 +1348,8 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 		for ci in cn:
 			var on := live and (p.combo_i % cn) > ci
 			c.draw_circle(r.position + Vector2(160 + ci * 16, 42), 5.0 if ci == cn - 1 else 3.5, rc if on else Color(1, 1, 1, 0.2))
+	elif not p.wpn.get("ammo", true):
+		pass                       # no ammo (Data.weapon_stats): no count to show
 	elif p.reload_t > 0.0:
 		_text(r.position + Vector2(78, 46), "RELOADING", 16, Color("ffe7a8"), big)
 		_bar(Rect2(r.position + Vector2(78, 52), Vector2(170, 4)), 1.0 - p.reload_t / float(p.wpn["reload"]), Color("ffe7a8"))
