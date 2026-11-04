@@ -49,13 +49,36 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/breah.md a
 | X Tetraform | tap or hold-drag, rocks centre-out, slow [data, footage] | Basalt Spine: the same, rocks only (owner item 15) | owner rule over data |
 | Shift Landslide | a rock ahead, a shove dash, the rock launched [footage] | Rubble Leap (owner's leap), dust only (no ring or blast) | owner design |
 
+## Audit (Nov 3 23:40)
+Rows of briefs/specs/kit-audit/tarek_ostra_claire.md. (a) done on this branch, (b) fixed now, (c) not applied, with
+the reason. Asserts: `--dolm-combo-check` (`audit tarek: ...`, `rock ...`, `glide slam: ...`, `small: ...`).
+
+| Row (sev) | Verdict | Where / why |
+|---|---|---|
+| RMB out of a glide (HIGH) | (a) | 5e00729a: folds the glider, plunges at the glider's dive speed, slams where he lands |
+| RMB cooldown 9 vs 11 (LOW) | (b) | 11 s (data) |
+| RMB reset on knock (LOW) | (c) | the owner removed it (item 14); the in-game card (frame 0240) does show it, if he wants it back |
+| RMB air press (LOW) | (a) | kept and reused for the glide slam |
+| Molten Guard from any team rock (LOW) | (b) | only his own rocks give a stack (ally rocks still fly); asserted |
+| E: allies hop the rocks (MED) | (b) | owner 23:55 (the data): an ally jumping against his rock is lifted onto it and over; walking, allies are stopped; foes are stopped either way; he still climbs his own by walking (item 25). Asserted |
+| E cooldown 13 vs 12.5 (LOW) | (b) | 12.5 s |
+| Shift ground (n/a), Shift air shove (LOW) | (c) | the owner's leap stays; the air dash has no source (owner question if wanted) |
+| Dash -> LMB air buffer (LOW) | (c) | the source-buffering finding keeps modes (coordinator) |
+| LMB punch auto-release (LOW) | (b) | held as long as you like, full stays full, one punch on release; asserted |
+| LMB damage ratios (LOW) | (c) | the charge scaling is ours (noted) |
+| X Basalt Spine, X auto-cast after 3 s (LOW) | (c) | documented; the 3 s cap keeps a forgotten hold from blocking the ult |
+| Hunter viewer moves (MED) | (b) | RMB `breah_crouch`, `breah_slam`; X `breah_spine_aim`, `breah_spine`; asserted |
+| Player-facing wiki name (MED) | (c) | the Tarek rename is main's (done there) |
+| Self-shake (MED) | (c) | ext/no-shake |
+| Explosion/ring rule (n/a) | (a) | complies |
+
 ## Per-slot table
 | Slot | Input | Aim and telegraph | What it does (ours) | Anim (KMovesStone) | Sound |
 |---|---|---|---|---|---|
 | Passive Molten Guard | punch | a gold ring under her | a punch that sends any of her rocks flying (Stone Row, Basalt Spine or a leap's rock in the lane) gives a shield stack of 18, up to 4, 6s; one stack per punch whatever the number of rocks | none | none |
 | Passive Tremor Sense | sneak (crouch) | a pale cone toward the cursor, 16m, 25 deg widening to 40 over 2s | foes in the cone show through walls and fog as a molten ring, refreshed every 0.5s | `breah_sense` on a find | `br_sense` |
 | LMB tap: boulder | tap (under 0.28s) | the shared aim line; flies its full 11m (AimMode.MAX) | 9 dmg, a molten tumbling boulder with an ember trail; bursts with a red ground ring, splashing foes within 0.9m for half | `breah_throw` | `br_throw`, `br_boulder_hit` |
-| LMB hold: punch | hold, release | from the hold: a pale lane 4.2m by 1.8m with 3 chevrons toward the cursor, filling; the cursor charge ring; the fist glows molten orange, hotter with the charge | 12-24 dmg to foes in the lane, knockback 6-11, a 0.6m step, a dust ring and molten spray at the lane's end on the hit; into a wall = 0.9s stun (stars); every rock of the team in the lane flies, and rocks lined up further along the aim (gaps up to 2.8m, to 12m) follow one after another, 0.08s apart. Held past full +0.5s it punches by itself and winds the next one | `breah_wind` (hold), `breah_punch` | `br_wind`, `br_punch`, `br_launch`, `br_burst` |
+| LMB hold: punch | hold, release | from the hold: a pale lane 4.2m by 1.8m with 3 chevrons toward the cursor, filling; the cursor charge ring; the fist glows molten orange, hotter with the charge | 12-24 dmg to foes in the lane, knockback 6-11, a 0.6m step, a dust ring and molten spray at the lane's end on the hit; into a wall = 0.9s stun (stars); every rock of the team in the lane flies, and rocks lined up further along the aim (gaps up to 2.8m, to 12m) follow one after another, 0.08s apart. Held as long as you like (no timeout): full stays full until you let go | `breah_wind` (hold), `breah_punch` | `br_wind`, `br_punch`, `br_launch`, `br_burst` |
 | RMB Quakefall | hold to charge, release | everyone sees a red circle a hop (2m) ahead, radius 3.6-4.5m, its sweet spot growing 0.9-1.8m; the cursor charge ring and full flare; both fists glow molten | release: a short hop (a real 0.35s jump arc, about 2m: 1.1 body heights, 0.4m up) into the centre, then the slam as she lands: 14-30, centre x1.2 and stun 0.5-1.2s (stars), rocks in the ring fly outward, foes in the air are dunked (+40%, +20 over the abyss); a molten starburst, rock chips flying, a dust ring at the edge and a dark red cracked crater for 1s. While charging: walk at 55%, jump = a real leap 3.2m forward, about 1.2m up (circle comes along; let go in the air = the arc carries on, slam on landing), a punch = a 1.5m lunge. In the air: dive at 26 m/s and slam on landing. The hop and the leap are real jump arcs (not dashes, which hold your height), so glide works out of them: opening or holding the glider drops the pending slam and the glider takes over, never dragged down (item 26). Pressed while gliding (owner 23:00, the source allows it): the glider folds at once, she plunges at the glider's dive speed (data: 32.5 m/s down, sideways speed x0.25), the glider stays shut while she falls, and she slams where she lands | `breah_crouch` (hold), `breah_leap`, `breah_lunge`, `breah_slam`, `breah_dive`, `breah_slam_land` | `br_leap`, `br_shove`, `br_slam` |
 | Shift Rubble Leap | tap | to the cursor (1.2m to about 4.25m); everyone sees the landing circle (1.8m) filling through the flight | the rock bursts up under her (0.06s crouch), she leaps in an arc to the spot (0.52s), lands with a crash (dust, no ring or blast): 8 dmg and a shove to everyone within 1.8m, then the rock comes down 0.14s after her and rolls on 6m: 12 dmg, Shred, 1.5s slow. In the air: the class long dash, her own heavy shove with a dust after-image | `breah_dash`, `breah_leap_land`, `breah_exdash` | `br_rise`, `br_leap`, `br_slam`, `br_roll`, `br_shove` |
 | E Stone Row | tap | a 0.2s red-orange flash on the ground at each spot (everyone sees it) | three rocks of jagged basalt columns (tapered, broken tops, leaning apart) in a slight curve 3.4m ahead (outer two 0.45m back, 2.4m apart), thin molten cracks in the ground at their feet cooling over 0.6s; 9s, 45 hp; they block bodies and enemy shots; only she climbs them (walking into one lifts her onto it, no jump) and stands on them; any punch, slam or dash-launch sends them flying | `breah_raise` | `br_crack`, `br_raise` |

@@ -728,23 +728,6 @@ const MOVES := {
 			}
 		],
 		[0.75, {}]]},
-	# a knock run down (passive): a quick pumped fist and a skip
-	"pin_rundown": {"keys": [
-		[0.0, {}],
-		[
-			0.1,
-			{
-				"lift": 0.12,
-				"p": 0.15,
-				"sq": -0.15,
-				"hw": 1.0,
-				"fl": Vector3(0.05, 0.6, 0.0),
-				"lw": 0.8,
-				"legs": [-0.2, -0.4, 0.6, -0.9]
-			}
-		],
-		[0.22, {"lift": 0.0, "p": -0.05, "sq": 0.12, "hw": 1.0, "fl": Vector3(0.05, 0.35, -0.05)}],
-		[0.45, {}]]},
 	# ---------------------------------------------------------------- Bjorn: procs, payoffs and the base dash
 	# Crushed (the payoff): the hammer swung up overhead in triumph, a stamp, the chest out
 	"bul_crush": {"keys": [

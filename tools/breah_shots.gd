@@ -50,7 +50,8 @@ func _take(kind: String, file: String, caption: String, focus: Callable) -> void
 		super._take(kind, file, caption, focus)
 		return
 	var img := main.get_viewport().get_texture().get_image()
-	var crop := _crop(img, P.position + Vector3(0, 0.9, 0), GRID_CROP, 1.5)
+	var at: Vector3 = focus.call() if focus.is_valid() else P.position + Vector3(0, 0.9, 0)
+	var crop := _crop(img, at, GRID_CROP, 1.5)
 	var strip_file := "%s_%s.png" % [hero_name, kind]
 	if not strips.has(strip_file):
 		strips[strip_file] = []

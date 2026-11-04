@@ -26,7 +26,6 @@ var mote_pool: Array = []      # orb nodes, reused
 var strikes: Array = []        # Skycall: {at, t, dir, phase ("flick" | "count"), dir0}
 var rod: Node3D = null         # the Storm Rod held in the hand while RMB is down
 var rod_full := false
-var knocked := {}
 var blowouts := 0              # tests and the demo
 var slams := 0
 var orb_bursts := 0
@@ -129,14 +128,12 @@ func add_spark(f: Ent, n := 1) -> void:
 		var top := f.position + Vector3(0, 9.0, 0)
 		fx().arc(top, f.position + Vector3(0, 0.2, 0), TEAL, GOLD, 0.9, 0.28)
 		fx().arc(top + Vector3(0.4, 0, -0.3), f.position + Vector3(0, 1.0, 0), TEAL, GOLD, 0.5, 0.2)
-		fx().ring(ground(f.pos), 1.5, TEAL, GOLD, 0.35)
 		m.fx.flash(f.position + Vector3(0, 1.1, 0), GOLD, 1.1, 0.1)
 		m.sfx("vv_static_full", f.pos, -2.0)
 		# the word goes above the marker so the two never print over each other
 		m.fx.word(f.pos + Vector3(0, _top(f) + MARK_LIFT, 0) + fx().screen_up() * 1.6, "LIVE", GOLD, false)
 		if anim_id == "" or m.time - anim_at > 0.3: play("mage_live")
 		net_bolt(top, f.position, TEAL)
-		DashReset.cue(h)
 
 func clear_sparks(f: Ent) -> void:
 	var key := f.get_instance_id()
@@ -231,11 +228,6 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return
 	if String(o.get("src", "")) == "shot" and not o.has("ab"):
 		add_spark(t)
-	if t is Hunter and ((t as Hunter).downed or t.hp <= 0.0) and not knocked.has(t.get_instance_id()):
-		knocked[t.get_instance_id()] = true
-		h.heal(h.max_hp * float(res_def()["knock_heal"]))
-		fx().ring(h.pos, 1.3, Color("8ff0a0"), GOLD, 0.3)
-		m.fx.word(h.pos + Vector3(0, 2.4, 0), "+KNOCK", Color("8ff0a0"), false)
 
 # ------------------------------------------------------------------ LMB: the finger gun
 ## A new finger bolt left the hand: alternate hands (the bolt starts at that hand), a twist, a crackle
@@ -467,7 +459,6 @@ func _blowout(f: Ent) -> void:
 	for i in 3:
 		var a := TAU * i / 3.0
 		fx().pillar(me + Vector3(cos(a) * 0.55, 0, sin(a) * 0.55), COPPER, GOLD, 3.2, 0.22, 1.2, false)
-	fx().ring(me, 3.6, GOLD, COPPER, 0.4)
 	DashReset.cue(h)
 
 # ------------------------------------------------------------------ RMB: Storm Rod
@@ -496,12 +487,11 @@ func _summon_rod() -> void:
 	rod.visible = true
 	play("mage_rmb_hold")
 	_tick_rod()
-	# it arrives in her hand with a burst: a flash, a crackle off the tip, a ring at her feet
+	# it arrives in her hand: a flash and a crackle off the tip
 	var tip := rod.global_position - rod.global_basis.z * 0.75
 	m.fx.flash(_rod_hand(), GOLD, 1.0, 0.08)
 	fx().crackle(tip, TEAL, GOLD, 0.8, 5, 0.16)
 	fx().star(tip, TEAL, GOLD, 1.0, 0.14)
-	fx().ring(ground(h.pos), 1.4, TEAL, GOLD, 0.3)
 	m.sfx("vv_rod_summon", h.pos, -3.0)
 
 func shows_charge_ball() -> bool:
@@ -747,19 +737,27 @@ func _free_mote(mt: Dictionary, fizzle: bool) -> void:
 	motes.erase(mt)
 
 # ------------------------------------------------------------------ E: Skycall
-## Press: the circle drops at the cursor. For the flick window the drag follows the cursor from the
-## circle (toward you pulls in, away throws out); then it commits and the pillar counts down.
+## Press: the circle drops at the cursor. While E is held (up to drag_max) the drag follows the cursor from
+## the circle (toward you pulls in, away throws out); the release commits it and the pillar counts down. A tap
+## commits at once with the default drag (away from her).
 func cast_e() -> bool:
 	var ed := e_def()
 	var at := AimMode.point(h, float(ed["reach"]))
 	var d0 := Vector2(at.x - h.pos.x, at.z - h.pos.z)
 	d0 = d0.normalized() if d0.length() > 0.1 else h.aim_dir()
-	strikes.append({"at": at, "t": float(ed["flick"]), "dir": d0, "dir0": d0, "phase": "flick"})
+	strikes.append({"at": at, "t": float(ed["drag_max"]), "dir": d0, "dir0": d0, "phase": "flick"})
 	fx().star(at + Vector3(0, 0.3, 0), TEAL, GOLD, 0.8, 0.12)
-	fx().disc(at, float(ed["radius"]), VIOLET, GOLD, float(ed["flick"]), COPPER)
+	fx().disc(at, float(ed["radius"]), VIOLET, GOLD, 0.2, COPPER)
 	m.sfx("vv_sky_place", at, -3.0)
 	play("mage_e")
 	return true
+
+## Skycall is held to drag (the data: "HOLD AND DRAG before release to aim"): the key read here for the local
+## player, inp["e_down"] for tests and scripted demos. Bots never hold (a tap: the default drag).
+func _e_held() -> bool:
+	if bool(h.inp.get("e_down", false)):
+		return true
+	return h.is_local() and Input.is_action_pressed("signature")
 
 func flick_dir(s: Dictionary) -> Vector2:
 	var at: Vector3 = s["at"]
@@ -786,9 +784,10 @@ func _tick_strikes(dt: float) -> void:
 		_chevron(at, s["dir"] as Vector2, r)
 	for s in strikes.duplicate():
 		s["t"] = float(s["t"]) - dt
-		if float(s["t"]) > 0.0:
+		var dragging := String(s["phase"]) == "flick"
+		if float(s["t"]) > 0.0 and (not dragging or _e_held()):
 			continue
-		if String(s["phase"]) == "flick":
+		if dragging:
 			s["phase"] = "count"
 			s["t"] = float(ed["delay"])
 			var at: Vector3 = s["at"]
@@ -817,7 +816,7 @@ func _strike(s: Dictionary) -> void:
 		var sky := at + Vector3(0, 9.0, 0) + _jitter(0.6, 0.0, 0.0)
 		fx().arc(sky, at + _jitter(0.4, 0.1, 0.1), TEAL, GOLD, 1.0 - 0.25 * i, 0.22)
 	net_bolt(at + Vector3(0, 9.0, 0), at, TEAL)
-	fx().ring(at, float(ed["radius"]) + 0.8, GOLD, TEAL, 0.35)
+	fx().ring(at, float(ed["radius"]), GOLD, TEAL, 0.35)          # the hit area, at its true size
 	fx().disc(at, float(ed["radius"]) * 0.9, Color("1a1420"), GOLD, 0.45, COPPER)
 	m.fx.burst(at + Vector3(0, 0.5, 0), GOLD, 22, 6.0, 0.45, 6.0, 1.2)
 	m.fx.flash(at + Vector3(0, 1.0, 0), GOLD, 1.8, 0.12)
@@ -827,7 +826,7 @@ func _strike(s: Dictionary) -> void:
 	var stg := stage("e", {"delivery": delivery, "effects": [{"type": "damage", "amount": float(ed["dmg"])}]})
 	run(stg, cx("e", "skycall", at, {"at": at, "dir": dir}))
 	for f in foes_in(at, float(ed["radius"])):
-		add_spark(f, int(ed.get("stacks", 2)))
+		add_spark(f, int(ed.get("stacks", 1)))
 		# dragged along the ground the way you flicked, pinned there for a moment
 		var slide := {"mode": "slide", "dir": [dir.x, dir.y], "dur": float(ed["slide_t"]),
 			"dist": float(ed["slide_dist"])}

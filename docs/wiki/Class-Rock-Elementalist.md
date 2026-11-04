@@ -52,13 +52,13 @@ What the in-game kit card (K) says.
 
 **Rubble Leap (dash, Shift, 12s cooldown).** A rock bursts up under you and you leap to the cursor (up to about 4m). You land with a crash that shoves everyone beside you, and the rock comes down right after you and rolls on 6m: 12 damage, a shove, Shred (+15% damage taken for 3s) and a 1.5s slow. In the air: your long dash.
 
-**Quakefall (RMB, 9s cooldown).**
+**Quakefall (RMB, 11s cooldown).**
 
 - *Tap:* A quick hop and slam just ahead: 14 damage and a shove, the centre stuns, rocks in the ring fly outward.
 - *Hold:* Hold up to 1.2s: a bigger, harder slam (up to 30) whose growing centre stuns up to 1.2s. Jump while holding to leap forward; punch to lunge.
 - *In the air:* In the air you dive, and slam where you land; pressed while gliding, the glider folds and you plunge. A foe caught in the air is spiked down for +40%, +20 more over the abyss.
 
-**Stone Row (E, 13s cooldown).** A red flash on the ground, then three rocks rise in a slight curve 3.4m ahead, spanning 5m (on solid ground only, never into bodies). They stop foes and shots, hold 9s, you can stand on and climb them, and any punch, slam or dash-launch sends them flying.
+**Stone Row (E, 12.5s cooldown).** A red flash on the ground, then three rocks rise in a slight curve 3.4m ahead, spanning 5m (on solid ground only, never into bodies). They stop foes and shots, hold 9s, you can stand on and climb them, and any punch, slam or dash-launch sends them flying.
 
 **Basalt Spine (hunter ultimate, from level 6, 45s cooldown).** Tap: a ridge of 13 rocks, 19.8m long, centred at the cursor (up to 11m away) and across your aim. Hold the key and drag the cursor to swing it round its centre; let go to cast. Molten cracks show along the line for 0.2s, then the rocks erupt from the centre outward over 0.4s, slowing foes beside them by 35% for 1s and shoving anyone on the line aside. They are your rocks for 7s: they stop foes and their shots, you stand on them and climb them, and a punch along the ridge launches the whole line (its rocks deal at most 40 to any one hunter). Rocks only rise on solid ground: the ridge stops at the abyss, and with no ground under it the cast is refused. 45s.
 
@@ -68,9 +68,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 9s -> 8.1s, damage +15%. | cooldown 9s -> 7.2s, damage +30%; slamming a foe or a rock gives a shield of 18, up to 4 stacks. |
+| RMB | cooldown 11s -> 9.9s, damage +15%. | cooldown 11s -> 8.8s, damage +30%; slamming a foe or a rock gives a shield of 18, up to 4 stacks. |
 | Dash (Shift) | recharge 12s -> 10.2s per charge. | recharge 12s -> 8.4s; a second charge, and the leap goes a third further. |
-| E | cooldown 13s -> 11.7s, rocks hit +15%. | cooldown 13s -> 10.4s; an extra row of rocks behind the first. |
+| E | cooldown 12.5s -> 11.3s, rocks hit +15%. | cooldown 12.5s -> 10s; an extra row of rocks behind the first. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > E > Dash (Shift) > Glove (Q).
 
