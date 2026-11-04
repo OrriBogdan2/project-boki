@@ -111,6 +111,7 @@ const ACTIONS := [
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
 	["build", "Build mode at home / decorate indoors"], ["hero", "Hunters: change Hunter (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
+	["store", "Put a piece away (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
 ]
 
@@ -426,7 +427,7 @@ func conflicts(ev: InputEvent, except := "") -> Array:
 	return out
 
 ## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"]]
+const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"]]
 func _shared_ok(a: String, b: String) -> bool:
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true

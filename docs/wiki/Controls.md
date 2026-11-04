@@ -91,6 +91,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | I | Inventory | `inventory` | yes |
 | B | Build mode at home / decorate indoors | `build` | yes |
 | R | Turn a piece (build mode) | `rotate` | yes |
+| X / Delete | Put a piece away (build mode) | `store` | yes |
 | Y | Emote wheel (hold, in a match) | `emote` | yes |
 | M | Full map (click to ping) | `map` | yes |
 | P | Pass the drop lead | `pass_lead` | yes |

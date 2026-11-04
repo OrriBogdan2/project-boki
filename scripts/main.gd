@@ -666,8 +666,8 @@ func _ready() -> void:
 				print("PET gems=", Save.d["gems"]))
 		if "--decorate" in args:
 			get_tree().create_timer(0.5).timeout.connect(func():
-				current._toggle_decorate()
-				current._take("plant"))
+				current.dec.toggle()
+				current.dec.take("plant"))
 	elif town_arg != "":
 		show_screen("town", {"mode": town_arg, "gid": "test"})
 	elif "--visit-test" in args:

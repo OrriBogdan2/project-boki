@@ -8,14 +8,14 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 10
+const VERSION := 11
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
 const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
 		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
-		8: "_migrate_8_to_9", 9: "_migrate_9_to_10"}
+		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -103,6 +103,7 @@ func fresh() -> Dictionary:
 		"raid_out": [],       # loadout pieces out on an expedition right now
 		"feeders": [],        # troughs on the farm: {id, kind, x, z, food: [keys], auto}
 		"feeder_inv": {},     # feeders bought but not set down yet
+		"furniture": {"journal": 1, "gramophone": 1},   # house pieces in storage: the empty house's two useful ones
 		"graves": [],         # kin that died, with their memories (Econ.kin_dies)
 		"farm_lvl": 0,        # Kin Cottage expansions: room for 6 / 8 / 10 / 12 kin out on the farm (KinBox)
 		"box_v": true,        # the Kin Burrow is set up (old saves get their overflow boxed once)
@@ -284,6 +285,10 @@ func _migrate_8_to_9(_data: Dictionary) -> void:
 ## blueprint it could already build (FarmBuilder.migrate, keyed by its own "farm_builder" field).
 func _migrate_9_to_10(data: Dictionary) -> void:
 	FarmBuilder.migrate(data)
+
+## v10 -> v11: the house starts empty; a played house keeps its furniture, now all movable (HouseSave).
+func _migrate_10_to_11(data: Dictionary) -> void:
+	HouseSave.migrate(data)
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,
