@@ -48,3 +48,6 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 - Your round-2 bundle is now on origin/ext/imagegen @ a9fd3b92 (pushed by the orchestrator at the owner's request). The owner approves Vex for 3D.
 - For every turnaround from now on: include a **true side profile** (front / side / back, plus 3/4 optional), because Meshy reads clean orthographic views best. If you can, add a pure side view of Vex too.
 - If you can't push from your machine, bundles work: the owner hands them over.
+
+## 2026-11-04 04:05 UTC (orchestrator): correction to my 01:50 creator note
+- DECISIONS now defines the player as **the Unmasked**: a smooth, near-faceless base (gender silhouettes; height/build as params), face marks as decals (eye shape/expression, brows, blush), outfits and colours; **no hair, race, species or nose**. Drop the 01:50 list (faces, hair styles). Ext leads it (EXT_TO_MAIN 03:40); make what it asks for.

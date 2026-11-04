@@ -677,3 +677,11 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 3. Ready, not merged: [MAIN] rename-burple (S2 READY 02:38), online-displace 00429a4 and the 5 audit branches (~3 h).
 4. Paused by the owner gate: all Meshy work, until the owner approves the new 2D art per model. No credit purchase needed yet.
 5. Conflicts: none.
+
+## 2026-11-03 23:05 ET (04:05 UTC Nov 4) ORCH check-in
+- [OWNER] Still to decide: approve **Zedran** and **Pin** for 3D (their side views are fixed, on ext/imagegen 865da870), and whether **Cinder's axolotl gill-frills** stay (they echo the Boki Prismander). Also upload the IMG bundle (7 commits) so the orchestrator can merge it.
+1. Shipped: **sync84** (tutorial: scripted course, Boki leads; drop87; Boki needs; Training Grounds removed) and **sync85** (tutorial fixes). DECISIONS adds the **Unmasked** player character and "masks influence you".
+2. Art: ext/imagegen now has the round-2 Vex (approved for 3D), Zedran, Pin, Cinder and side views (the orchestrator committed the owner's uploads). S2 has the Vex side view for its Meshy run.
+3. **Conflict, my earlier brief is superseded:** the INBOX_IMG/INBOX_S2 01:50 creator plan (body types, faces, hair styles, outfits as Meshy parts) is replaced by DECISIONS' **Unmasked**: one smooth, near-faceless base (gender/height/build as params), face marks as decals, outfits, colours; no hair, race or nose. [EXT] Ext owns it (04:03 UTC); IMG and S2 follow the DECISIONS spec, not my 01:50 list.
+4. Ready, not merged: [MAIN] warden-stance (item 52, S2 03:15); kits-integ in progress (S2).
+5. Meshy: Vex only (~160 used of 1,100). No purchase needed until more Wardens are approved.

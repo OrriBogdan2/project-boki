@@ -344,3 +344,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 03:58 UTC (orchestrator): Vex side profile is in
 - origin/ext/imagegen @ 865da870: docs/art/gen/wardens_r2/vex_side.webp (a true profile; the gun-arm on her right). Use it with vex_turnaround(_2k) for the Meshy run. Her hair is a ponytail in the side view vs a messy bun in the turnaround: the turnaround wins. Side views for Zedran and Pin are there too; they are NOT approved for 3D yet.
+
+## 2026-11-04 04:05 UTC (orchestrator): correction, the creator is now the Unmasked (DECISIONS)
+- My 01:50 creator plan (modular faces/hair parts) is superseded by DECISIONS: one near-faceless Meshy base with params + decals + outfits. Ext leads it; follow DECISIONS.
