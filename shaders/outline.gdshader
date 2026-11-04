@@ -7,11 +7,15 @@ uniform float width = 0.00125;
 // a Warden's 3D model (WardenGlb): the vertex colour's alpha is how far the line may grow there (x INK_ROOM m)
 // before it pokes through a thin or folded part
 uniform bool ink_mask = false;
+// a painted model's line at the match camera: this much thinner from ~8 to 18 m away (every belt, buckle and strand
+// outlined at ~1 px added up to dark speckle along the silhouette)
+uniform float far_thin = 0.0;
 const float INK_ROOM = 0.02;
 void vertex() {
 	float d = -(MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).z;
 	float w = clamp(d * width, 0.0042, 0.034);
 	if (ink_mask) { w = min(w, COLOR.a * INK_ROOM); }
+	w *= 1.0 - far_thin * smoothstep(8.0, 18.0, d);
 	VERTEX += NORMAL * w;
 }
 void fragment() { ALBEDO = color.rgb; }
