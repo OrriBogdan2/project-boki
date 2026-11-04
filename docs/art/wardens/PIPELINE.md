@@ -243,20 +243,6 @@ r3c recipe). Pieces Meshy can't give cleanly are scripted (tools/meshy/hard_part
 - **feet_forward:** the fit fails if a foot points away from the body's forward (the backwards-skate catch).
 - The `ice` toon slot: a cold fresnel rim and a little gloss, no real transparency (WardenGlb.ICE).
 
-## Stage 1 hybrids (S2 fan-out, 2026-11-04)
-Stage 1 (WARDEN_STAGE1_BRIEF) is generation, bake, rig fit and first shots only: the fit spec keeps `lift` and the
-slot rules but no `palette_from`, `smooth`, `ramps`, `project` or `touch_up` (the paint-over is stage 2, the Vex
-r3c recipe). Pieces Meshy can't give cleanly are scripted (tools/meshy/hard_parts.py, fit spec `parts`):
-- **Held pieces**, modelled in their rig node's space and exported unskinned: `weapon` (the Gun node's; a hammer
-  in its `Hammer` pivot's, where WardenGlb seats it) and `shield` (the left hand's `Shield` node's). Their own
-  small atlas of painted cells (ice, iron, oak, leather) on the toon slots.
-- **Cards and tubes on spring chains:** wings cut out of the art's back view (outline and paint from the
-  sheet's pixels, two layers), a spaded tail draped clear of the legs. Chains named `spring_wing*` fold back about
-  their root while the Warden skates (root meta `wing_fold`, set by HunterAnim from the skate dash).
-- **Split:** faces of some slots made their own mesh on one bone (Claire's horns).
-- **feet_forward:** the fit fails if a foot points away from the body's forward (the backwards-skate catch).
-- The `ice` toon slot: a cold fresnel rim and a little gloss, no real transparency (WardenGlb.ICE).
-
 ## Claire b1 (Phase B, 2026-11-04): fit options added, credit-free
 - `ankle_z` (fit spec): the rig ankle's height for a body standing on skates or heels (default 0.06). Claire's boot
   and blade are ~0.2 m below her ankle: at 0.06 they went 0.21 m through the ground and read as bare pointed feet.
