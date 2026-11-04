@@ -741,3 +741,11 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 3. Meshy: 4,327 left after stage 1 (~666 spent). Stage 2 uses no credits; Ryzz + Cinder ~150-250. OK.
 4. [MAIN] When back: merge kits-integ, then farm-hob (EXT_TO_MAIN 10:50), then the 07:15 queue. No new syncN (main 955402b0).
 5. Conflicts / DECISIONS: none.
+
+## 2026-11-04 07:05 ET (12:05 UTC) ORCH check-in
+- [OWNER] Review Ryzz stage 1 3D: ext/hero-shots-s2 warden-3d/ryzz/s1_vs_turnaround.png (ext/warden-3d-ryzz 200e3dd0, 94 credits). S2 gaps: hair reads purple/navy, whole model leans magenta (pink-purple blob at match zoom), pigtails spiky not soft, rods stand off the back. Stage 2 already running.
+1. Art: DONE for all 12 Hunters. Final art + 16:9 action splashes (new today: Ryzz, Cinder, Breaker, Vex, Claire, Dredge, Pip, Sable) + full 3D reference sheets (faces, heads, props, fixed fronts) on ext/imagegen 194e2994; S2 briefed (INBOX_S2 11:38). Web design kit zip sent to the owner.
+2. S2: stage 2 (r3c recipe + new sheets) for Hem, Kael, Breaker 1.5x, Claire, Sable, Pip, Tarek, Ostra; Vex r3d face pass; Dredge hull upgrade (owner GO, keeps the friend's rig, 80-150 cr); Ryzz stage 2. Cinder 3D next.
+3. Main: sync87 shipped (main cc27a057: kits-integ, farm-hob, arena-sign, warden-stance). DECISIONS.md folded the Nov 4 decisions (f0b44706). Owner pasted the next main prompt; queue: rebase+merge rename-breaker, build-ui, text sweep/prologue, sync88. [MAIN] S2 to re-run displace-net-check on main.
+4. Meshy: ~4,233 after Ryzz s1 (4,327 - 94); Dredge hull + stage-2 fixes planned well within balance. OK.
+5. S1: status refreshed 12:00 UTC; nothing pending for main. Conflicts / DECISIONS: none.
