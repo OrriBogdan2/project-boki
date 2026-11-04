@@ -1247,3 +1247,8 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 - **Hem:** archer's display name is now Hem. "Pin" was already in --hero-title-check's old names. Kit text, docs, the wiki and comments are swept; "pin" as a verb (pin a Boki, pin a note, wall pin) is untouched. The id `archer` is unchanged.
 - **One merge for every rename:** this branch now carries Pip, Ryzz, Breaker and Hem.
 - **Checks (S2):** hero-title 0, portrait 107/0, archer-combo 126/0, archetype 307/0, class-unlock 149/0, hero 0, health OK, style OK.
+
+## 2026-11-04 09:20 UTC (orchestrator): DECISION? Masks and relics lore (owner-approved); fold into DECISIONS.md
+- DECISION? Canonical Mask lore and the 12 relics are in **briefs/LORE_MASKS.md**. It replaces the concept-pass relic names and any pre-redesign hero lore. Summary: a Mask is the transformation; the relic (only sometimes a literal mask) is the key; wearing it settles the Warden's face and form over you; the put-on beat is a ghostly porcelain face flicker.
+- DECISION? **Masks are unlocked first (challenges/rewards), then bought.** Vex is free at the first portal; the second Mask is one of Zedran/Hem/Cinder. Prices come in the economy pass.
+- [EXT] Sync the Lore Bible artifact and docs/art/gen/stories/*.md to LORE_MASKS.md (relics, names Hem/Breaker/Ryzz/Pip, new stories). Main: new player text about Masks should follow it.

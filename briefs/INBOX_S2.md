@@ -435,3 +435,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 08:55 UTC (orchestrator): Breaker round 3 (sea-ogre) art in; it supersedes r2
 - ext/imagegen docs/art/gen/wardens_r3/breaker_* + BREAKER_KIT.md. Use these, not wardens_r2/breaker_*. Good candidate for the hybrid route: script the hammer and the prow shield in Blender (hard surface), Meshy for the ogre body. Check for an extra third hand (the kit warns the generator adds one). No lantern; a plain hammer.
+
+## 2026-11-04 09:20 UTC (orchestrator): canonical Mask lore
+- briefs/LORE_MASKS.md: each Warden's relic (the visible signature prop) and their current story. When you render the Mask put-on beat or a hero's idle, the relic is the hero prop to feature (e.g. Breaker's compass, Ryzz's bolt jar, Tarek's seeing-stone).
