@@ -256,8 +256,9 @@ def crossbow(bld, cells, g, look):
     b0 = top + np.array([0, L * 0.22, 0.03])
     b1 = top + np.array([0, L + 0.02, 0.03])
     _arc(bld, [b0, b1], [0.0045, 0.0045], cells.box["dark"], "shaft", sides=5)
-    head = [b1, b1 + np.array([0, 0.02, 0]), b1 + np.array([0, 0.06, 0])]
-    bld.tube(head, [0.013, 0.011, 0.0005], 6, *[cells.box["bolt"][i] for i in (0, 2, 1, 3)], "bolt", [0.0] * 3,
+    bk = float(look.get("bolt_k", 1.0))     # the glowing head's size (reads at the match camera)
+    head = [b1, b1 + np.array([0, 0.02 * bk, 0]), b1 + np.array([0, 0.06 * bk, 0])]
+    bld.tube(head, [0.013 * bk, 0.011 * bk, 0.0005], 6, *[cells.box["bolt"][i] for i in (0, 2, 1, 3)], "bolt", [0.0] * 3,
              cap_start=True)
     if look.get("stirrup"):
         # the stirrup: a trapezoid loop past the prod (sable_crossbow_sheet)
@@ -317,7 +318,7 @@ def crossbows(rig_grips, look):
         ob = bld.object(name)
         mats = {}
         for slot in ("metal", "leather", "glow"):
-            ob.data.materials.append(_mat("%s-crossbow" % slot, img, closest=True))
+            ob.data.materials.append(_mat("%s-crossbow" % slot, img, closest=False))
             mats[slot] = len(ob.data.materials) - 1
         for poly in ob.data.polygons:
             pt = bld.part[poly.vertices[0]]
@@ -485,7 +486,7 @@ def gem(arm, body, spec, tag="gem"):
     ob = bld.object("Gem")
     mats = {}
     for slot in ("glow", "metal"):
-        ob.data.materials.append(_mat("%s-%s" % (slot, tag), img, closest=True))
+        ob.data.materials.append(_mat("%s-%s" % (slot, tag), img, closest=False))
         mats[slot] = len(ob.data.materials) - 1
     for poly in ob.data.polygons:
         poly.material_index = mats["glow"] if bld.part[poly.vertices[0]] == "gem" else mats["metal"]

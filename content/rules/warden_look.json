@@ -65,14 +65,25 @@
 			"hair": {
 				"far_lift": 0.5,
 				"fres": 0.6,
-				"glow": 0.12
+				"glow": 0.12,
+				"shadow_tint": [
+					0.86,
+					0.85,
+					0.97
+				],
+				"fres_tint": 0.3
 			},
 			"fur": {
 				"far_lift": 0.4,
-				"glow": 0.08
+				"glow": 0.08,
+				"shadow_tint": [
+					0.86,
+					0.85,
+					0.97
+				]
 			},
 			"glow": {
-				"glow": 2.8
+				"glow": 2.0
 			},
 			"card": {
 				"sheen": 1.0,
@@ -86,11 +97,11 @@
 				"anchor": "anchor_gem",
 				"color": [
 					1.0,
-					0.45,
-					0.6
+					0.2,
+					0.3
 				],
-				"strength": 2.0,
-				"px": 3.0,
+				"strength": 2.8,
+				"px": 6.0,
 				"near_d": 0.0,
 				"far_d": 3.0
 			}
