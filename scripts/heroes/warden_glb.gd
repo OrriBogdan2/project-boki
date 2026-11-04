@@ -38,7 +38,9 @@ const OPTIONAL := ["cape", "scarf", "tail", "wings"]
 ## Procedural pieces that stay when the .glb dresses the hunter (the contract's "nodes the game keeps").
 const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus"]
 ## glTF material name -> the toon shader's painted surface (RIG_CONTRACT "Materials").
-const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur": 5, "eyes": 0, "team": 1, "glow": 0}
+## "brass" is metal split off by its colour, so a model's look can lift it alone at the match camera (Vex r3f).
+const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "brass": 3, "fur": 5, "eyes": 0,
+	"team": 1, "glow": 0}
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
@@ -292,6 +294,8 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}) -> A
 			if slot == "glow":
 				m.set_shader_parameter("glow", GLOW)
 			var per_slot: Dictionary = (own.get("slots", {}) as Dictionary).get(slot, {})
+			# (then "<slot>-<tag>": Vex's woven braids, "hair-braid", calmer than the scan's hair)
+			per_slot = per_slot.merged((own.get("slots", {}) as Dictionary).get(slot + "-" + tag, {}), true)
 			var over: Dictionary = (own.get("painted", {}) as Dictionary).merged(per_slot, true)
 			for k in over:
 				m.set_shader_parameter(k, _param(over[k]))

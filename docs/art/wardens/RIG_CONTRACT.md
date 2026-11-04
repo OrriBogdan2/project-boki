@@ -116,6 +116,7 @@ the vertex colour (`vertex_ao`):
 | `cloth` | 1 (cloth) | the outfit pick (`outfit_col`, within the Warden's range) |
 | `leather` | 2 | — |
 | `metal` | 3 (metal: cool shadows, gloss) | — |
+| `brass` | 3 (as metal) | — (metal split off by its colour, so the model's look can lift it alone at the match camera: Vex's bronze) |
 | `fur` | 5 | — |
 | `eyes` | — (unshaded iris) | the eye pick (`eye_col`) |
 | `team` | 1 | the team colour (keep it on one strong shape: a cuff, a cap, the stem's band) |
