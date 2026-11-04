@@ -76,6 +76,9 @@ Copy `vex_fit.json` -> `<name>_fit.json` and set, in this order of importance:
    262123..a39d9e (the art's own darks: they read a step darker in game than painted), skin 885a5e..e4ccc5 (the face
    sheet's), gunmetal 262729..b4b7bd, brass 4a3415..dcb866 (a step apart, so a gun reads grey and brass, not black).
    `smooth` first (edge-preserving, within UV islands), `despeckle` 1.
+   **Measure the signature colours in game, not in the atlas**: the lit, tonemapped render moves saturated hues
+   (Vex's hair: a 116 degree ramp read 112 in game, a 145 degree one 164, teal); sample both with
+   `colour_sample.py <shot> name:box:green` and correct the ramp by the measured shift (Vex: 133 reads the art's 144).
 5. The face: **Face rules (r3d)** below (`project_late` "face" from the flat-lit face sheet by landmarks).
 6. Other paint-overs (`project_late`, after the ramps): chest and belly from the edited front view, the back (a
    backpack, a cape's emblem) from the edited back view (`view: back`), each with a registration measured by
@@ -198,3 +201,6 @@ to ignore):
 | Braid NaNs / a line to the floor | the drape stacked two points | fixed in warden_parts (resample, guarded frames) |
 | Torso stretched 30% | scaling by the hips' height on a long-legged body | `scale_joints`, the archetype's legs |
 | A model the loader refuses | the rig changed under it (a body edit) | `recipe.py SPEC rig fit` again |
+| The hair the wrong green in game | the lit render shifts saturated hues | measure in game, correct the ramp (step 6.4) |
+| Hoses invisible from behind | hidden by an arm or a braid, or draped flat on black cloth | hang them in a loop off the body, between the braid and the arm, a grey a step above the cloth |
+| Muddy grey-green model at match zoom | a mip bias > ~1 on a baked atlas mixes its UV islands | keep `far_smooth_bias` at 1.0 (f4b59cb3) |

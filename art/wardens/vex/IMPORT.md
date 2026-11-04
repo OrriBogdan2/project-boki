@@ -1,4 +1,4 @@
-# Vex (r3c: the owner's pick r3b, polished): import note
+# Vex (r3d: the owner's pick r3b, polished; the RECIPE_95 reference): import note
 
 `vex.glb` is the owner-approved round-3 Vex redesign (docs/art/gen/wardens_r3/vex_* and VEX_KIT.md on
 ext/imagegen fb523188), built as the design variant `vex_r3b` and picked by the owner over the r3 model
@@ -36,3 +36,15 @@ r3c (the polish pass, INBOX_S2 09:00; the reference recipe in PIPELINE.md):
 - **Braids:** 1.12 m and 1.0 m, 7.6 cm wide; the collar's green seams and the lens on the glow slot.
 - **Shading:** content/rules/warden_look.json "vex": the skin and gunmetal with less top light and rim (no white
   skin, no silvered gun), the hair brighter at the match camera, the glow slot at 1.8.
+
+r3d (the face pass and the 95% pass, INBOX_S2 11:25-13:15; credit-free; docs/art/wardens/RECIPE_95.md):
+- **Face:** painted from the flat-lit face sheet (wardens_r3/vex_face) through a thin-plate warp on 15 landmarks:
+  her eyes, brows, lips, skin tone, the angular brass eye plate and the circuits as the sheet draws them; the
+  sheet's outline, its hair and its jaw panels left out and the skin carried past them (no jaw seam).
+- **Lens:** a bladed green iris with a dark pupil (review/vex_eyeplate_detail_ref, iris only) and a glow halo at the
+  match camera (warden_look.json "halos" on `anchor_lens`).
+- **Look:** the shared painted-look fix (16c18b4f: warm skin, darks a step up); gunmetal and brass a step lighter and
+  apart (the gun reads grey and brass at the match camera); the art's back view on the backpack (brass plate, cogs);
+  four thick ribbed hoses from the backpack to the gun; the chest's strap area one skin slot, its glancing faces
+  cleaned.
+
