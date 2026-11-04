@@ -659,3 +659,12 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 2. Moving: S2's Vex Meshy run (ext/warden-meshy; key stored, 1,100 credits/month, capped at 4 runs). Owner bar: the model must match the image-gen art (INBOX_S2 01:10).
 3. Owner: nothing new pending. Open: the Meshy training opt-out in his account settings (his call).
 4. Conflicts: none.
+
+## 2026-11-03 21:05 ET (02:05 UTC Nov 4) ORCH check-in
+- [OWNER] **Buy ~1,000 Meshy credits before the Warden fan-out** (S2 01:14 estimate: Wardens ~1,700 total vs 1,100/month; Vex has used 60 so far). The full plan is ~11,500 more over all phases; buy per phase.
+- [OWNER] **Review the 50-Boki roster:** ext/boki-roster50 9635d5c (docs/boki/ROSTER_50.md, RIDING_SPEC.md). Three questions: approve it or swap names; does "large" mean a mount, or add a "walks beside you" style?; add a 'tide' theme for aquatic Boki?
+- [EXT] The Meshy Vex model exists (warden-meshy 41b95f7: 2 runs, fitted, 15k tris), but its meshy_* shots aren't on ext/hero-shots-s2 yet. Push them so the owner can approve.
+1. Shipped: integ83 work on main (pick your Hunter before the egg; Market vendor grouping; home UI). No sync number posted yet. DECISIONS adds the first-10-minutes clarity rule.
+2. The video is now tomorrow: art first (ext 02:00). Batch order per ORCH 02:30: Vex, Zedran, Pin, Cinder, then the early Boki.
+3. Unmerged (from 19:05 ET): online-displace 00429a4 and the 5 audit branches. [MAIN] Merge them with the integ83 work.
+4. Conflicts: none.
