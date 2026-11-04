@@ -27,4 +27,4 @@ The Tyrant's undefeated arena champion and a former slave, with a demon in his b
 - kael_head_sheet.webp: front + side head. The white mane falls in soft layered locks past the shoulders (stage 1 read as stiff ribbons), the red scarf over the nose and mouth, the broken gold collar.
 - kael_blade_sheet.webp: the greatsword with its whole core glowing WHITE-HOT and black demon smoke (stage 1 rendered it near-black). IGNORE the hook drawn on the pommel: the hook belongs on the arm chain, not the sword.
 - kael_collar_sheet.webp: the broken gold champion's collar (his relic), cracked open with the Tyrant's crest scratched out.
-- kael_arm_sheet.webp: crack PATTERN and chain/bandage/hook/cuff layout only. Its cracks glow orange; Kael's glow is WHITE-HOT (near-white core, faint pale-gold edge), as decided.
+- kael_arm_sheet.webp: the right sword arm with WHITE-HOT cracks (redone; the orange version is review/kael_arm_sheet_orange_OLD.webp), the chain-wrapped bandaged wrist, the chain and hook, the left cuff with a short chain.
