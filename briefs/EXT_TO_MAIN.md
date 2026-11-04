@@ -1087,3 +1087,21 @@ Ask S2 for one combined `ext/kits-integ` if merging seven is too slow (they did 
 
 ## 2026-11-04 04:15 UTC (orchestrator): DECISION? the owner approves 3D for all Wardens
 - DECISION? The owner approves Meshy 3D for all 12 Wardens, modelled only from the round-2 art (ext/imagegen wardens_r2), with the orchestrator deciding details. Batch 1 = Vex, Zedran, Pin, Cinder; main, please merge each READY batch quickly.
+## 2026-11-04 04:20 UTC: READY ext/unmasked 641285d7: the Unmasked replaces the detailed creator (do NOT merge before the owner signs off the heroes)
+- **Held for sign-off:** a match, hero cards, HUD and portraits now wear `Unmasked.mask_look()`, a plain Warden, so this branch touches how heroes render. Merge only after the owner OKs warden-models / mask-look. The farm/town/house and creator parts do not depend on that.
+- **Base model:** the existing hunter rig, not Meshy (faster, and every HunterAnim animation works as is). `Models.hunter` takes a look with `"unmasked": true`: human rig, no hunter gear, no hair, no ears, no nose, no mouth. New `scripts/match/unmasked.gd` (look, migration, face marks, 5 outfits); design note docs/decisions/0016-the-unmasked.md. A Meshy base can replace the geometry later without touching the look format.
+- **Look keys:** gender, height (scale 0.92/1/1.08), build (body width), eyes (6), brows (5), blush (3), outfit (5: Traveller, Scholar, Smith, Sailor, Festival), colour (12), `marks` (kept mask features; drawn as flat dots if present, empty for now). Face marks are flat decals on the head.
+- **Creator (hatch.gd):** Body (Gender, Height, Build), Face (Eyes, Brows, Blush), Outfit, Colour, name, Random; turntable kept. Net -98 lines. The Hunter stepper and the race rows are gone. Walk style NOT built (it needs HunterAnim work, so not cheap).
+- **Saves:** no version bump. `Save.load_game` runs `Unmasked.migrate` (idempotent): old look to closest Unmasked (gender, build, height from race size, eyes from face, brows, blush, outfit, colour from skin; the glider is kept). Odd data (null, strings, out of range) is clamped, never crashes.
+- **Text:** the pick screen reads "Choose your first mask" ("Pick the mask you wear first..."); the creator says "Make yourself". The prologue's old "Mantle" lines (prologue.gd, prologue_boki.gd) were not touched: they belong to the prologue rebuild.
+- **Flow:** unchanged: new game goes intro, pick mask, egg. The creator is still reached from Settings > "Change your look" (and `--creator`); class_unlock_check still asserts no creator on the way.
+- **Checks (Godot 4.6.2, temp XDG_DATA_HOME, after `--import`):**
+  - `--check` 0 failures
+  - `--unmasked-check` (new) 17 checks, 0 failures
+  - `--class-unlock-check` 148 checks, 0 failures
+  - `--hatch-check` 0 failures; `--hair-check` 0 failures
+  - `--portrait-check` 107 checks, 1 failure: "the new names" (expects Arch.name_of("gunslinger") == "Vex"). Same failure on a clean origin/main c00fead, not from this change.
+  - `python3 tools/health.py --strict` OK (models.gd 3387/3500; style baseline re-locked); `python3 tools/gen_wiki.py --check` OK (34 unchanged).
+- **Cost:** `git diff --stat origin/main`: 19 files, +64/-121 before the 3 new files (unmasked.gd ~210 lines, unmasked_check.gd ~115, the decision note). models.gd +4 net.
+- **Shots** (briefs/unmasked/): before_creator.png / after_creator.png; before_farm_crop.png / after_farm_crop.png (the farm camera is far out, so the crop is 4x of the player; he still carries the class weapon on the farm, as before).
+- **Known:** the creator preview hides the weapon; the farm player still holds it (existing behaviour). Bots keep random race looks until warden-models.
