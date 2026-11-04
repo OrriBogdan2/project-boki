@@ -239,3 +239,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
     - warden-rig-json no longer hangs once a Warden has a weapon model (Zedran).
     - A generic emissive layer in hero_toon (Ryzz) and a crack-glow option (Zedran).
   - **Owner calls pending:** Ryzz's right-eye wink; Cinder holds the spear in her right hand (the art uses her left; switching needs rig code).
+- 2026-11-04 05:31 UTC: Dredge art is LOCKED (the bulky turnaround; crop its text labels). It goes to 3D after Vex passes. Round-2 art is in for Vex, Zedran, Pin, Cinder, Ryzz, Sable and Dredge; Bjorn, Burple, Claire, Tarek and Ostra are still to come. All 3D waits for the Vex r3 recipe.
