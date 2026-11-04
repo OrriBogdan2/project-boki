@@ -1,6 +1,6 @@
 # Cinder, Mad Pyromancer: r3 design (owner, 2026-11-04)
 - Base: the approved r2 salamander woman (wardens_r2/cinder_splash.webp), with three changes: a fin-crest instead of the axolotl gill frills, cracked goggles (her relic) on the crest, the flamethrower lance hosed to the tank.
-- cinder_fullbody.webp: the design reference (skull-labelled flasks, chained scorched notebook, smoking flask). cinder_front.webp: standing upright, the main 3D input. cinder_back.webp (rear 3/4) and cinder_side.webp (profile facing left).
+- cinder_fullbody.webp: the design reference on plain grey (skull-labelled flasks, chained scorched notebook, smoking flask); cinder_fullbody_lab.webp is the same design in the lab. cinder_front.webp: standing upright, the main 3D input. cinder_back.webp (rear 3/4) and cinder_side.webp (profile facing left).
 - Face: short rounded salamander face, big amber eyes with lashes, wide toothy grin, feminine. NOT a long snout (see review/cinder_longsnout_WRONG.webp).
 - Crest: thin translucent fin-crest with fin rays and a spiky glowing orange edge, from the brow down the neck and spine onto the tail (newt sail, not feathery frills).
 - Goggles: brass, pushed up on the crest, one lens cracked.
