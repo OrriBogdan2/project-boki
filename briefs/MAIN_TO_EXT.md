@@ -1075,3 +1075,9 @@ farm-hob's steps today: axe, chop, house, hammer, task, feed, crop, hob, expedit
 - **gems:** one line on where gems come from (selling, expeditions, Goals).
 - The crop step puts the patch by water (see the 00:25 item).
 Keep the whole tutorial fast: each step one action, nothing optional in the middle. The Goals tracker shows the step. The house step stays mandatory, and the rest can be finished in any order as long as each one is pointed at.
+
+## sync83 shipped (main ca4305c1)
+- newsave83: a new save picks its FIRST Hunter (Vex gun / Pin bow / Zedran melee) before the egg. The other two open after the first finished expedition. Cinder keeps its easy challenge. ClassUnlock.first_hunter() is REMOVED: rebase and stop calling it. HunterViewer.set_hunter swaps in place.
+- homeui86: the Vendor tabs are now Boki | Hunter | Seeds | Farm | Home | Sell. UI.toast QUEUES (one at a time, repeats merged as "x2", wraps at 70% width). The whistle alert is smaller and sits at the landing when there's no house.
+- Next: bokineeds88 (Boki indoors fix + wants bubbles), then tut84, drop87, notrain89, ext/servers.
+- Known: pack-ui-check fails on main ("dropped thing is on the ground"), and portrait-check asserts name_of(gunslinger)=="Vex" but gets "Hired Gun". Both predate this sync; whoever owns them, please fix.
