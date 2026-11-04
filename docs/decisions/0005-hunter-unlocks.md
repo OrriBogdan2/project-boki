@@ -9,7 +9,7 @@ All twelve Hunters were open from the first minute: a new player met a wall of c
 
 ## Options
 1. Free picks plus account level gates (the first pass): fast, but unlocks felt like a grind and had nothing to do with the Hunter.
-2. One challenge per Hunter, tiered (decided): easy for the two unpicked starters, medium for most, hard and last for Ostra, Moosh Moosh and Breah. Vex is owned from the start, so he has no unlock challenge (his 4 mastery goals stay).
+2. One challenge per Hunter, tiered (decided): easy for the two unpicked starters, medium for most, hard and last for Ostra, Moosh Moosh and Breah. Vex is owned from the start, so she has no unlock challenge (her 4 mastery goals stay).
 
 ## Decision
 - **Start (owner, Nov 4; replaces 'pick 1 of Vex, Hem, Kael'):** a new save wears Vex first (`starters`, free at the first portal) and plays the tutorial as Vex. After its first finished expedition the farm offers the second Mask: one of Kael, Pip or Cinder (`second_picks`; `ClassPick.offer`, `ClassUnlock.choose_second`, save keys `second` / `second_ready`). The two not picked go back to their own challenges, and Hem is an early challenge unlock. Saves that already picked keep what they have (an older `bonus` still opens by itself). The new-game flow in hatch.gd is the prologue, one card, your Mask pick (`ClassPick`, Vex already chosen: a click puts the Mask on), then the egg pick.

@@ -391,6 +391,18 @@ func _tab_video(v: VBoxContainer) -> void:
 	_choice(v, "Anti-aliasing", "msaa", [[0, "Off"], [2, "2x"], [4, "4x"]], Callable(), "Smooths jagged edges")
 	_toggle(v, "Shadows", "shadows")
 	_toggle(v, "Show frame rate", "show_fps", "In the top right corner")
+	var modelled: Array = Arch.ORDER.filter(WardenGlb.has_model)
+	if not modelled.is_empty():
+		_group(v, "Warden models")
+		for a in modelled:
+			var hint := "Off: the simpler built-in model. From the next match or Hunter swap"
+			var r := _row(v, String(WardenGlb.ART[a]).capitalize(), hint)
+			var cb := CheckButton.new()
+			cb.text = "3D model"
+			cb.button_pressed = WardenGlb.uses_model(a)
+			cb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			cb.toggled.connect(func(on): WardenGlb.set_model(a, on))
+			r.add_child(cb)
 
 func _tab_access(v: VBoxContainer) -> void:
 	_group(v, "Readability")

@@ -20,6 +20,7 @@ extends RefCounted
 ##   menu        the loadout panel (L)
 ##   anim_<move> a strip of frames of one kit move (ANIM_DEMO: arc_* and bul_* for the Archer and Bulwark;
 ##               PairDemo.ANIM for Dolm and Ostra; DJDemo.ANIM thf_* and jug_* for Sable and Juggernaut)
+##   pose        the Hunter standing turned 3/4 toward the camera (--demo-zoom=1 for the match camera)
 ##   smg         the SMG firing at the dummy; add --legacy-shots for the old look and numbers (before)
 
 const OLD_SMG := {
@@ -318,6 +319,18 @@ static func tick(A: Arena, dt: float) -> void:
 					var last := i == times.size() - 1
 					m.get_tree().process_frame.connect(func(): _grab(A, P, last), CONNECT_ONE_SHOT)
 			at_t = 99.0
+		"pose":
+			# the Hunter standing at the match camera, turned three-quarters toward it (Warden model shots);
+			# --demo-at=dx,dz first moves it onto clear ground (review shots: no prop over the hero)
+			if t < 0.05:
+				for a in OS.get_cmdline_user_args():
+					if String(a).begins_with("--demo-at="):
+						var at := String(a).get_slice("=", 1).split(",")
+						P.teleport(P.pos + Vector3(float(at[0]), 0.0, float(at[1])))
+						A.home = P.pos
+			P.inp["move"] = Vector2.ZERO
+			P.inp["aim"] = P.pos + Vector3(-5.0, 0.9, 3.5)
+			at_t = 2.0
 		"bulwark", "crushed":
 			var H: Hunter = A.dummies[2]["h"]
 			if t < 0.05:

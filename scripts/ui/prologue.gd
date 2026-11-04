@@ -217,7 +217,7 @@ func _set_drop() -> void:
 	for i in 5:
 		var cl: String = ["light", "medium", "heavy"][i % 3]
 		var col: Color = Data.TEAM_COLORS[(i % (Data.TEAM_COLORS.size() - 1)) + 1]
-		var h := Models.hunter(cl, col, Data.CLASSES[cl]["weapon"], "", Models.random_look(rng))
+		var h := Models.hunter(cl, col, Data.CLASSES[cl]["weapon"], "", PlayerLook.random(rng))
 		(h.get_node("TeamRing") as Node3D).visible = false
 		(h.get_node("Rig/Torso/Glider") as Node3D).visible = true
 		h.position = o + Vector3(-4.0 + i * 2.0, 12.0, rng.randf_range(-8, -4))      # spread out, fanning apart

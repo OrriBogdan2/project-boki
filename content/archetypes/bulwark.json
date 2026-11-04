@@ -7,13 +7,16 @@
 	"weight": "heavy",
 	"color": "#8fd0ff",
 	"body": {
-		"size": 0.975,
+		"size": 1.02,
 		"build": 1.18,
-		"hit_r": 0.46
+		"hit_r": 0.46,
+		"head": 0.75,
+		"legs": 1.0,
+		"neck": 0.08
 	},
 	"plate_offset": 2.6,
 	"fantasy": "The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot.",
-	"silhouette": "the shield shape and the banner",
+	"silhouette": "the frozen prow shield and the long ice-cased oar",
 	"card": {
 		"loop": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.",
 		"role": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.",

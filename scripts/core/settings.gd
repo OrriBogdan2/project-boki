@@ -13,6 +13,8 @@ const DEFAULTS := {
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
+	"warden_models": {},
 	# how keys behave (Controls)
 	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false,
 	# camera

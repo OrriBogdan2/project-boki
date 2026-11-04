@@ -536,8 +536,8 @@
 "semicolon": 5
 },
 "scripts/match/hero_gear.gd": {
-"long_line": 102,
-"semicolon": 15
+"long_line": 63,
+"semicolon": 13
 },
 "scripts/match/hero_gear_care.gd": {
 "long_line": 1
@@ -1211,7 +1211,7 @@
 "semicolon": 14
 },
 "tools/weapon_clip_check.gd": {
-"long_line": 3,
+"long_line": 2,
 "semicolon": 17
 },
 "tools/work_check.gd": {

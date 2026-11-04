@@ -276,7 +276,7 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	pname = name_txt
 	ctrl = control
 	if control != "local":
-		bot_look = Models.random_look()
+		bot_look = PlayerLook.random()
 	max_hp = cdat["hp"]; hp = max_hp
 	max_armor = round(max_hp * ARMOR_DUR); armor = max_armor; base_armor = max_armor
 	# the belt issue and the equal pack size (Equal.pack_slots)
