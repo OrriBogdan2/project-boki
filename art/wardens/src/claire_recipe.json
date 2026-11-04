@@ -2,7 +2,7 @@
  "doc": "Claire (rimewright): RECIPE_95 spec (docs/art/wardens/RECIPE_95.md). python3 tools/meshy/recipe.py art/wardens/src/claire_recipe.json <steps>. Stage-1 inputs (front, side, back edits; no 3/4: it lacks the spear) and Meshy run A are in PIPELINE.md's run log.",
  "name": "claire",
  "arch": "rimewright",
- "tag": "b3",
+ "tag": "b4",
  "raw": "~/meshy/claire",
  "art": {
   "ref": "origin/ext/imagegen",

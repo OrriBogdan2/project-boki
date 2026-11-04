@@ -734,10 +734,10 @@
    "clear": 0.03,
    "width": 0.1,
    "strand_r": 0.017,
-   "period": 0.2,
+   "period": 0.26,
    "depth": 0.18,
-   "samples": 44,
-   "sides": 5,
+   "samples": 50,
+   "sides": 6,
    "bones": 4,
    "taper_in": 0.08,
    "taper_out": 0.08,
@@ -746,9 +746,9 @@
     {
      "at": 0.22,
      "rings": 2,
-     "crystals": 5,
-     "crystal_len": 0.04,
-     "crystal_r": 0.0065
+     "crystals": 7,
+     "crystal_len": 0.06,
+     "crystal_r": 0.009
     }
    ],
    "tuft": {
@@ -761,7 +761,7 @@
    "style": "loose",
    "locks": 6,
    "fan": 1.7,
-   "wave": 0.03
+   "wave": 0.02
   },
   {
    "name": "pigtail_R",
@@ -811,10 +811,10 @@
    "clear": 0.03,
    "width": 0.1,
    "strand_r": 0.017,
-   "period": 0.2,
+   "period": 0.26,
    "depth": 0.18,
-   "samples": 44,
-   "sides": 5,
+   "samples": 50,
+   "sides": 6,
    "bones": 4,
    "taper_in": 0.08,
    "taper_out": 0.08,
@@ -823,9 +823,9 @@
     {
      "at": 0.22,
      "rings": 2,
-     "crystals": 5,
-     "crystal_len": 0.04,
-     "crystal_r": 0.0065
+     "crystals": 7,
+     "crystal_len": 0.06,
+     "crystal_r": 0.009
     }
    ],
    "tuft": {
@@ -838,19 +838,19 @@
    "style": "loose",
    "locks": 6,
    "fan": 1.7,
-   "wave": 0.03
+   "wave": 0.02
   }
  ],
  "braid_colours": {
   "strand": [
-   "3c4672",
-   "222a4a",
-   "6a76a6"
+   "5a68a0",
+   "36406a",
+   "8e9cd0"
   ],
   "tuft": [
-   "3c4672",
-   "222a4a",
-   "6a76a6"
+   "5a68a0",
+   "36406a",
+   "8e9cd0"
   ],
   "copper": [
    "c8dcf5",
