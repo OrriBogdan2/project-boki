@@ -131,3 +131,8 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 - wardens_r2/pip_{turnaround,side,portrait,splash}.webp; review/pip_before_after.jpg. The owner calls the hero **Pip** (supersedes "Burple").
 - A pink fox-kit with glowing fairy wings, brass goggles with a flower crown, a teal cape, a satchel of herbs, and a hearth-lantern that heals (the splash shows it healing a wounded knight). Much cuter than before.
 - Notes: the fiery-fox read (DECISIONS: "small and fiery like a fox, red markings") is mostly gone (pink and pastel now; only red ear tips remain). Sable also has wings, so two winged heroes. Owner to decide if that's fine.
+
+## 2026-11-04 07:05 UTC: Vex ROUND 3 (owner-approved redesign) from the owner's uploads (orchestrator)
+- docs/art/gen/wardens_r3/: vex_{turnaround,side,portrait,splash}.webp + VEX_KIT.md (the design summary and rules from the image-gen session); review/vex_r3_before_after.jpg.
+- A green-haired cyborg gunslinger: a six-barrel gun-arm as her RIGHT forearm, two long green braids with copper wire and bolts, a brass cyber eye-plate with a green lens over her RIGHT eye, brass neck plating with green seams, circuit/tally tattoos, black and green outfit. No candle.
+- Known nit (from the kit): the splash mirrors the cyber eye to her left; model it on her RIGHT (portrait + turnaround).
