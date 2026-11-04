@@ -103,6 +103,17 @@ def ice_paint(u, v):
     return col * (1 - 0.35 * crack[..., None])
 
 
+def clear_ice_paint(u, v):
+    """Clear ice (Claire's spear shaft): pale blue-white, a lighter core streak, faint cracks."""
+    lo, mid, hi = hexcol("7fa2d8"), hexcol("a9c6ee"), hexcol("e4f0ff")
+    n = noise(u, v, 7.0, 3)
+    col = lo[None, None] * (1 - n[..., None]) * 0.45 + mid[None, None] * (0.55 + 0.45 * n[..., None])
+    core = np.exp(-((u - 0.5) / 0.12) ** 2)[..., None] * 0.6
+    col = col * (1 - core) + hi[None, None] * core
+    crack = np.exp(-((np.sin(u * 9.0 + np.sin(v * 7.0) * 1.6) * 0.5 + 0.5 - 0.5) / 0.03) ** 2)
+    return col * (1 - 0.15 * crack[..., None])
+
+
 def wood_paint(u, v, base="6e4a32", dark="4a2f1f", planks=4, frost=0.0):
     """Oak strakes: planks along v (seams across u), grain along them, frost creeping up from v = 1."""
     b, d = hexcol(base), hexcol(dark)
@@ -410,18 +421,21 @@ def spear(spec):
     the Muzzle), a short spike at the butt."""
     butt, tip = float(spec.get("butt", 0.62)), float(spec.get("tip", -0.82))
     blade = float(spec.get("blade", 0.24))
+    shaft_r = float(spec.get("shaft_r", 0.013))
     at = Atlas(2)
-    cells = {"ice": at.cell("ice", ice_paint), "core": at.cell("core", flat("cfeaff", 0.05, 8)),
+    # (pale: the spear sheet's clear ice, white-blue with pale edges, not the glacier cyan: a thin cyan line far off)
+    cells = {"ice": at.cell("ice", clear_ice_paint if spec.get("pale") else ice_paint),
+             "core": at.cell("core", flat(spec.get("core", "cfeaff"), 0.05, 8)),
              "frost": at.cell("frost", flat("f4fbff", 0.04, 9))}
     bld = WP.Builder()
     b0 = tip + blade                                         # the blade's base
-    bld.tube([G(0, 0, butt - 0.06), G(0, 0, b0 + 0.02)], [0.013, 0.013], 6, *cells["ice"][0::2],
+    bld.tube([G(0, 0, butt - 0.06), G(0, 0, b0 + 0.02)], [shaft_r, shaft_r], 8, *cells["ice"][0::2],
              *cells["ice"][1::2], "ice", [0, 0], cap_start=True, cap_end=True)
     spike(bld, G(0, 0, butt - 0.07), G(0, 0, butt), 0.016, 4, cells["ice"], "ice")
     for z in (b0 + 0.02, b0 + 0.06):                         # frost collars under the blade
         bld.prism(G(0, 0, z), G(0, 0, z - 0.02), 0.022, 6, cells["frost"], "frost", 0.4)
     # the blade: a flat diamond (wide along the gun's x), and two barbs swept back from its base
-    wmax, th = 0.042, 0.012
+    wmax, th = float(spec.get("blade_w", 0.042)), float(spec.get("blade_t", 0.012))
     prof = [(b0, 0.012), (b0 - blade * 0.25, wmax), (b0 - blade * 0.55, wmax * 0.7), (tip, 0.0)]
     base = len(bld.v)
     u0, v0, u1, v1 = cells["core"]
@@ -437,7 +451,9 @@ def spear(spec):
             bld.f.append((a, b, b + 4, a + 4))
     bld.f.append(tuple(base + k for k in range(4))[::-1])
     for sx in (-1, 1):
-        spike(bld, G(sx * 0.02, 0, b0 - 0.03), G(sx * 0.05, 0, b0 + 0.05), 0.009, 4, cells["ice"], "ice")
+        bs = wmax / 0.042
+        spike(bld, G(sx * 0.02 * bs, 0, b0 - 0.03 * bs), G(sx * 0.05 * bs, 0, b0 + 0.05 * bs), 0.009 * bs, 4,
+              cells["ice"], "ice")
     ob = finish(bld, "weapon")
     img = at.image("spear_atlas")
     mats = {"ice": material(ob, "ice", "spear", img)}
@@ -523,7 +539,8 @@ def wings(spec, body, arm, rig):
     mirror image, a symmetric piece), cut_x (sheet column where her hair starts covering it: the card's inner
     edge, tucked under the hair), sole_y and crown_y (the back view's sole and head-top rows) with crown_z (the
     fitted model's head top, m): pixels -> metres, root [x, y, z] (fitted frame, the left
-    root; the right one mirrored), sweep (degrees the tips are turned back), gap (m between the two layers)."""
+    root; the right one mirrored), sweep (degrees the tips are turned back), gap (m between the two layers), scale
+    (the card about its root: one number, or [out, up])."""
     sheet = _load_png(os.path.expanduser(spec["art"]))
     x0, y0, x1, y1 = spec["box"]
     crop = sheet[y0:y1, x0:x1]
@@ -582,6 +599,9 @@ def wings(spec, body, arm, rig):
     sweep = math.radians(float(spec.get("sweep", 25.0)))
     gap = float(spec.get("gap", 0.006))
     cut = float(spec["cut_x"])
+    # (bigger than the sheet's back view about the root: the art's span; [out, up] or one number)
+    wscale = spec.get("scale", 1.0)
+    wscale = [float(wscale), float(wscale)] if not isinstance(wscale, list) else [float(x) for x in wscale]
     objs = []
     for side in ("L", "R"):
         sx = -1.0 if side == "L" else 1.0
@@ -594,8 +614,9 @@ def wings(spec, body, arm, rig):
             # inner edge on the root, the whole card turned `sweep` back about the vertical through the root
             d = (cut - (x0 + px)) * k                            # m out from the root (the left wing: -X)
             z = (float(spec["sole_y"]) - (y0 + py)) * k
-            local = np.array([sx * d * math.cos(sweep), -d * math.sin(sweep) - layer * gap, z - root[2]])
-            return root + local
+            local = np.array([sx * d * math.cos(sweep) * wscale[0], -d * math.sin(sweep) * wscale[0],
+                              (z - root[2]) * wscale[1]])
+            return root + local - np.array([0.0, layer * gap, 0.0])
 
         for layer in (0, 1):
             vs = [bm.verts.new(place(px, py, layer)) for px, py in outline]
@@ -726,10 +747,12 @@ def horns(spec, arm):
     at = Atlas(2, 128)
 
     def horn_paint(u, v):
-        base = hexcol("262a44")[None, None] * (1 - v[..., None]) + hexcol("3d4566")[None, None] * v[..., None]
+        # (the head sheet's slate blue, a step lighter than near-black so the curl reads against the hair)
+        base = hexcol(spec.get("root", "2c3456"))[None, None] * (1 - v[..., None]) + \
+            hexcol(spec.get("tipcol", "46527a"))[None, None] * v[..., None]
         crest = np.clip(np.sin(v * ridges * math.pi) ** 8, 0, 1)[..., None] * 0.45
         side = (0.75 + 0.25 * np.sin(u * 2 * math.pi))[..., None]
-        return base * side * (1 - 0.0 * crest) + hexcol("8e9ac0")[None, None] * crest * 0.45 * side
+        return base * side + hexcol(spec.get("crest", "9aa8d0"))[None, None] * crest * 0.55 * side
     cell = at.cell("horn", horn_paint)
     bld = WP.Builder()
     for sx in (-1.0, 1.0):
@@ -746,7 +769,8 @@ def horns(spec, arm):
                  cap_start=True)
     ob = finish(bld, "horns")
     img = at.image("horn_atlas")
-    material(ob, "metal", "horn", img)
+    # (slot: Claire's on `leather`, shaded like her wings: on `metal` the toon's sheen read them glossy black)
+    material(ob, spec.get("slot", "metal"), "horn", img)
     g = ob.vertex_groups.new(name="head")
     g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
     ob.parent = arm

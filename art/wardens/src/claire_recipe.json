@@ -1,0 +1,21 @@
+{
+ "doc": "Claire (rimewright): RECIPE_95 spec (docs/art/wardens/RECIPE_95.md). python3 tools/meshy/recipe.py art/wardens/src/claire_recipe.json <steps>. Stage-1 inputs (front, side, back edits; no 3/4: it lacks the spear) and Meshy run A are in PIPELINE.md's run log.",
+ "name": "claire",
+ "arch": "rimewright",
+ "tag": "b1",
+ "raw": "~/meshy/claire",
+ "art": {
+  "ref": "origin/ext/imagegen",
+  "turnaround": "docs/art/gen/wardens_r2/claire_turnaround.webp",
+  "side": "docs/art/gen/wardens_r2/claire_side.webp",
+  "portrait": "docs/art/gen/wardens_r2/claire_portrait.webp",
+  "face": "docs/art/gen/wardens_r2/claire_face.webp",
+  "head_sheet": "docs/art/gen/wardens_r2/claire_head_sheet.webp",
+  "spear_sheet": "docs/art/gen/wardens_r2/claire_spear_sheet.webp"
+ },
+ "meshy": {"order": ["front", "side", "back"], "variants": {"A": {"enhance": "off"}}, "keep": "A"},
+ "bake": "art/wardens/src/claire_bake.json",
+ "fit": "art/wardens/src/claire_fit.json",
+ "match_crop": "200:170:540:270",
+ "combo_check": "--rimewright-combo-check"
+}

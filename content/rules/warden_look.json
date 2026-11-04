@@ -36,9 +36,14 @@
 		"slots": {
 			"ice": {"fres": 2.2, "far_lift": 0.6, "top_light": 0.6},
 			"skin": {"shade": 0.85, "fres": 0.6, "shadow_tint": [0.88, 0.9, 1.0]},
-			"hair": {"far_lift": 0.55, "fres": 0.8, "fres_tint": 0.4},
+			"hair": {"far_lift": 0.45, "fres": 0.5, "fres_tint": 0.4},
 			"leather": {"fres": 0.8, "fres_tint": 0.4, "far_lift": 0.45},
-			"metal": {"fres": 0.7, "fres_tint": 0.5, "far_lift": 0.4}
-		}
+			"metal": {"fres": 0.8, "fres_tint": 0.55, "far_lift": 0.5},
+			"glow": {"glow": 0.3}
+		},
+		"halos": [
+			{"anchor": "anchor_eye_l", "color": [0.72, 0.9, 1.0], "strength": 2.0, "px": 2.0, "near_d": 7.0, "far_d": 14.0},
+			{"anchor": "anchor_eye_r", "color": [0.72, 0.9, 1.0], "strength": 2.0, "px": 2.0, "near_d": 7.0, "far_d": 14.0}
+		]
 	}
 }

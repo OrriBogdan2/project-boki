@@ -7,10 +7,10 @@
 	"role": "Rimewright",
 	"weight": "light",
 	"body": {
-		"size": 1.17,
+		"size": 1.15,
 		"bulk": 0.78,
 		"head": 0.58,
-		"legs": 2.0,
+		"legs": 2.15,
 		"neck": -0.08
 	},
 	"color": "#5fd6c4",

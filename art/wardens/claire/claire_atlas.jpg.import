@@ -8,7 +8,7 @@ metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "092adb1bbadadb0eee7f4e854f14023d"
+"md5": "7b38e26347b7b855506c8b7c730a0312"
 }
 
 [deps]
@@ -40,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

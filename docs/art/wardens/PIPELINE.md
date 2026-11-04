@@ -243,6 +243,19 @@ r3c recipe). Pieces Meshy can't give cleanly are scripted (tools/meshy/hard_part
 - **feet_forward:** the fit fails if a foot points away from the body's forward (the backwards-skate catch).
 - The `ice` toon slot: a cold fresnel rim and a little gloss, no real transparency (WardenGlb.ICE).
 
+## Claire b1 (Phase B, 2026-11-04): fit options added, credit-free
+- `ankle_z` (fit spec): the rig ankle's height for a body standing on skates or heels (default 0.06). Claire's boot
+  and blade are ~0.2 m below her ankle: at 0.06 they went 0.21 m through the ground and read as bare pointed feet.
+  Raising the archetype's `legs` moves every absolute part coordinate (horns, wing roots, tail path, split boxes):
+  shift them by the head bone's change.
+- `weight_rules` for long hair: the hanging hair (dark hue, below the head) goes wholly to `hips`, else bone heat gives
+  its ends to the hands and thighs and a raised hand drags the pigtails up into a bunch.
+- `anchors` [{name, slot, side, z_min, bone}]: an anchor at the centre of one slot's faces on one side (her glowing
+  irises), for warden_look.json `halos`.
+- `tools/meshy/face_touch.py` (spec art/wardens/src/claire_face_touch.json): the face sheet softened before its
+  projection (blush toward the skin, freckles deepened, eyes magnified with a soft lens and their iris lifted).
+- hard_parts: `wings.scale`, `horns.slot`/`root`/`tipcol`/`crest`, `spear.blade_w`/`blade_t`/`shaft_r`/`pale`.
+
 ## Commercial terms (checked 2026-11-04, meshy.ai/terms-of-use section 3.2)
 - **Paid plans:** the customer owns the output ("to the extent possible under applicable law") and can keep it private.
 - **Free plans:** CC BY 4.0 with attribution to Meshy. **Use the owner's paid key only.**
