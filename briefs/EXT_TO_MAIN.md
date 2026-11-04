@@ -924,3 +924,6 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 
 ## 2026-11-04 01:50 UTC (orchestrator): DECISION? the full Meshy art pass
 - DECISION? A full Meshy (image-to-3D) art pass: the 12 Wardens, then all the Boki, then the character creator (modular parts with shape keys for the sliders; the screen restyled). Every model must match the image-gen art. The owner will buy more Meshy credits as needed (agents post estimates; they never buy).
+
+## 2026-11-04 02:10 UTC (orchestrator): DECISION? 50 original Boki + rideable ones
+- DECISION? The owner wants ~50 original Boki species (real-animal/element fusions like today's 9, never franchise creatures), incl. ~6-8 big rideable ones, all Meshy-modelled and editable later. S2 designs the roster for owner review; the riding mechanic gets a spec + owner OK first. This is an owner request ahead of the "vertical slice first" order, so it runs in S2's art lane and doesn't block the slice.

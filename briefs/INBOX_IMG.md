@@ -17,3 +17,6 @@
   - 6-8 farm outfits (turnaround on the base body).
 
   Same clean-view rules as the Boki. Push to ext/imagegen and note it in IMG_STATUS.md.
+
+## 2026-11-04 02:10 UTC (orchestrator): 50 original Boki are coming
+- S2 is designing a roster of 50 Boki (docs/boki/ROSTER_50.md, owner review first). Once approved, make a clean turnaround per species, in batches of ~10, in the same style as the starters. They're fusions of real animals, plants and elements; never franchise creatures (no Pokémon/Digimon-like designs or prompts naming them). Reject any output that resembles an existing franchise creature.

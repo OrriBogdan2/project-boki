@@ -290,3 +290,17 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
   Plan it in a short doc first (parts list, slider -> shape key map, credit estimate).
 - **Credits:** the owner will buy more. Agents never buy them. Post a credit estimate per phase (Wardens / Boki / creator) in EXT_TO_MAIN with "OWNER: buy N credits", and pause before you'd run out.
+
+## 2026-11-04 02:10 UTC (orchestrator): OWNER: 50 original Boki to play with, incl. big rideable ones (one design agent, Opus)
+- Owner: "get me a bunch of original Boki to play with that have good 3D modelling I can later change." Target **50 species** (the 9 existing count), a range of sizes, and **some bigger ones that are rideable** (mounts).
+- **Originality (DECISIONS rule, non-negotiable):** every Boki is our own. Design them like today's nine: **fusions of real animals, plants, minerals and elements** (fox + scorpion, axolotl + crystal). **Never base one on, name it after or fuse existing franchise creatures** (Pokémon, Digimon, Palworld, etc.). Those may set the quality and readability bar only. If a design could be mistaken for an existing franchise creature, redo it.
+- **Phase 1, design (no credits):** docs/boki/ROSTER_50.md + content/kin_v2/<id>.json stubs, using the existing grammar. For each one:
+  - name, the real-world mix, theme/element, size class (small / medium / large / rideable), body type for the rig (quadruped, biped, winged, serpent, insect...);
+  - a 2-line personality;
+  - 1-2 abilities from the existing ability grammar;
+  - rarity, and the biome or boss it comes from.
+
+  Spread the themes and body types. Aim for about 6-8 rideable ones. Post the roster for owner review before any art.
+- **Phase 2, art:** the image-gen session makes a turnaround per species (INBOX_IMG); then Meshy models them with creature rigs (shared skeleton per body type); same acceptance test vs the art.
+- **Riding** is a new mechanic: write a short spec (mount/dismount key via Settings.key_cap, speed, what you can do while riding, and how it fits extraction/PvP), and wait for the owner's OK before building.
+- **Credits:** about 50 species x ~3 attempts is several thousand Meshy credits. Post "OWNER: buy N credits" with the estimate, and run in batches of ~10.
