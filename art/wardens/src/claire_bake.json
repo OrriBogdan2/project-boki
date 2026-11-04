@@ -1,14 +1,14 @@
 {
- "high": "~/meshy/claire/runA/glb.glb",
- "out": "~/meshy/claire/bake/low.glb",
- "blend": "~/meshy/claire/bake/bake.blend",
+ "high": "~/meshy/claire/runB3_off/glb.glb",
+ "out": "~/meshy/claire/bake3/low.glb",
+ "blend": "~/meshy/claire/bake3/bake.blend",
  "tris": 36000,
  "tex": 4096,
  "head": {
   "centre": [
    0.0,
    -0.01,
-   0.73
+   0.77
   ],
   "r": 0.2
  },

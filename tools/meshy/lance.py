@@ -52,9 +52,26 @@ def _paint(px, part, v0, v1):
     px[r0:r1, :, 3] = 1.0
 
 
+def _tube_parts(spec):
+    """`tubes` [{"a": [x, y, z], "b": [...], "r", "ribs", "slot", "colour", "dark"}] (Gun space) as lathe parts
+    along their own axis ("axis_from"/"axis_to" kept for build to turn them into place)."""
+    out = []
+    for t in spec.get("tubes", []):
+        a, b = np.array(t["a"], float), np.array(t["b"], float)
+        L = float(np.linalg.norm(b - a))
+        n = int(t.get("ribs", 8))
+        prof = [[0.0, 0.0]]
+        for k in range(2 * n + 1):
+            z = -L * k / (2 * n)
+            prof.append([z, float(t["r"]) * (1.18 if k % 2 else 1.0)])
+        prof.append([-L, 0.0])
+        out.append(dict(t, prof=prof, axis_from=a.tolist(), axis_to=b.tolist(), name=t.get("name", "tube")))
+    return out
+
+
 def build(spec, slot_mats, tag="weapon"):
     sides = int(spec.get("sides", 18))
-    parts = spec["parts"]
+    parts = spec["parts"] + _tube_parts(spec)
     img = bpy.data.images.new("%s_tex" % tag, TEX, TEX, alpha=False)
     px = np.zeros((TEX, TEX, 4), np.float32)
     me = bpy.data.meshes.new(tag)
@@ -73,24 +90,40 @@ def build(spec, slot_mats, tag="weapon"):
         v0, v1 = (pi + 0.06) / n, (pi + 0.94) / n
         _paint(px, part, v0, v1)
         prof = part["prof"]
+        ox, oy = part.get("offset", [0.0, 0.0])         # (a rod beside the axis: the chamber's brass cage)
+        sd = int(part.get("sides", sides))
         rings = []
         for j, (z, r) in enumerate(prof):
             ring = []
-            for i in range(sides):
-                a = 2 * math.pi * i / sides
+            for i in range(sd):
+                a = 2 * math.pi * i / sd
                 # Godot gun space (x, y, z) -> Blender (x, -z, y); the angle from the top (+y Godot)
-                ring.append(bm.verts.new((r * math.sin(a), -z, r * math.cos(a))))
+                ring.append(bm.verts.new((ox + r * math.sin(a), -z, oy + r * math.cos(a))))
             rings.append(ring)
+        if "axis_from" in part:
+            # (a tube: built along -z from the origin, turned onto its a -> b in Gun space; Blender (x, -z, y))
+            A, B = np.array(part["axis_from"]), np.array(part["axis_to"])
+            d = (B - A) / max(np.linalg.norm(B - A), 1e-9)
+            ref = np.array([0.0, 1.0, 0.0]) if abs(d[1]) < 0.9 else np.array([1.0, 0.0, 0.0])
+            ex = np.cross(ref, d)
+            ex /= np.linalg.norm(ex)
+            ey = np.cross(d, ex)
+            for ring in rings:
+                for vtx in ring:
+                    bx, by, bz = vtx.co
+                    gx, gy, gz = bx, bz, -by                 # (back to Godot)
+                    q = A + ex * gx + ey * gy + d * (-gz)
+                    vtx.co = (q[0], -q[2], q[1])
         mi = slots.index(part["slot"])
         m = len(prof)
         for j in range(m - 1):
-            for i in range(sides):
-                a, b = rings[j][i], rings[j][(i + 1) % sides]
-                c, d = rings[j + 1][(i + 1) % sides], rings[j + 1][i]
+            for i in range(sd):
+                a, b = rings[j][i], rings[j][(i + 1) % sd]
+                c, d = rings[j + 1][(i + 1) % sd], rings[j + 1][i]
                 f = bm.faces.new((a, d, c, b))
                 f.material_index = mi
                 for lp, (uu, vv) in zip(f.loops, ((i, j), (i, j + 1), (i + 1, j + 1), (i + 1, j))):
-                    lp[uvl].uv = (uu / sides, v0 + (v1 - v0) * vv / (m - 1))
+                    lp[uvl].uv = (uu / sd, v0 + (v1 - v0) * vv / (m - 1))
         for j, flip in ((0, True), (m - 1, False)):
             if prof[j][1] < 1e-4:
                 continue

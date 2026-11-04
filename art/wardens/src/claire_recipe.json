@@ -2,7 +2,7 @@
  "doc": "Claire (rimewright): RECIPE_95 spec (docs/art/wardens/RECIPE_95.md). python3 tools/meshy/recipe.py art/wardens/src/claire_recipe.json <steps>. Stage-1 inputs (front, side, back edits; no 3/4: it lacks the spear) and Meshy run A are in PIPELINE.md's run log.",
  "name": "claire",
  "arch": "rimewright",
- "tag": "b2",
+ "tag": "b3",
  "raw": "~/meshy/claire",
  "art": {
   "ref": "origin/ext/imagegen",
@@ -20,15 +20,28 @@
    "back"
   ],
   "variants": {
-   "A": {
+   "B3_off": {
     "enhance": "off"
+   },
+   "B3_on": {
+    "enhance": "on"
    }
   },
-  "keep": "A"
+  "keep": "B3_off"
  },
  "bake": "art/wardens/src/claire_bake.json",
  "fit": "art/wardens/src/claire_fit.json",
- "match_crop": "200:170:540:270",
  "combo_check": "--rimewright-combo-check",
- "demo_at": "-4.5,0"
+ "demo_at": "-4.5,0",
+ "edits": {
+  "front": "Edit this character concept art (a front view). Make exactly these changes: 1) Remove BOTH dark ram horns completely: show the top of her head covered by her smooth dark hair and the grey background where the horns were; her pointed elf ears stay. 2) Remove BOTH long dark pigtails that hang in front of her shoulders and chest, and their ice-crystal ties: all her hair falls BEHIND her shoulders, down her back; show her bare shoulders, collarbones, neck, the faceted ice-crystal top and the ribbon wraps where the pigtails were. Nothing dark hangs in front of her body or over her arms. Keep everything else exactly the same: the same young frost demoness figure-skater, her sweet blushing face, big glowing pale-blue eyes, rosy cheeks and pointed elf ears, the small ice-crystal hair clips at her temples, her pale blue-white skin with faint frost runes, the faceted ice-crystal top, the frozen ribbon wraps, the skirt of jagged ice petals, the sheer frosty legs, the white lace-up figure skates with clear ice blades pointing forward, both arms hanging relaxed with open hands, all colours, the painted art style and line work, the framing, scale and position of the figure, and the plain light grey background. She has exactly two arms and two hands. (then a second pass from that image: her hair falls entirely behind her back; shoulders, collarbones and upper arms clear of hair)",
+  "side": "Edit this character concept art (a side view). Make exactly these changes: 1) Remove BOTH dark ram horns completely: show the top of her head covered by her smooth dark hair and the grey background where the horns were; her pointed elf ears stay. 2) Remove the long dark pigtail that hangs in front of her shoulder and chest, and its ice-crystal tie: her hair falls only BEHIND her shoulder, down her back; show her bare shoulder, upper arm, the ice-crystal top and her chest where it was. Keep everything else exactly the same: the same young frost demoness figure-skater, her sweet blushing face, big glowing pale-blue eyes, rosy cheeks and pointed elf ears, the small ice-crystal hair clips at her temples, her pale blue-white skin with faint frost runes, the faceted ice-crystal top, the frozen ribbon wraps, the skirt of jagged ice petals, the sheer frosty legs, the white lace-up figure skates with clear ice blades pointing forward, both arms hanging relaxed with open hands, all colours, the painted art style and line work, the framing, scale and position of the figure, and the plain light grey background. She has exactly two arms and two hands.",
+  "back": "Edit this character concept art (a back view). Make exactly these changes: 1) Remove BOTH dark ram horns completely: show the top of her head covered by her smooth dark hair and the grey background where the horns were; her pointed elf ears stay. Her long dark wavy hair still falls down her back to between her shoulder blades. Keep everything else exactly the same: the same young frost demoness figure-skater, her sweet blushing face, big glowing pale-blue eyes, rosy cheeks and pointed elf ears, the small ice-crystal hair clips at her temples, her pale blue-white skin with faint frost runes, the faceted ice-crystal top, the frozen ribbon wraps, the skirt of jagged ice petals, the sheer frosty legs, the white lace-up figure skates with clear ice blades pointing forward, both arms hanging relaxed with open hands, all colours, the painted art style and line work, the framing, scale and position of the figure, and the plain light grey background. She has exactly two arms and two hands."
+ },
+ "edit_source": "the stage-1 edits (edit_front/side/back: spear, wings and tail out, arms hanging) edited again: horns and front pigtails out (b3)",
+ "use": {
+  "front": "edit4_front",
+  "side": "edit3_side",
+  "back": "edit3_back"
+ }
 }

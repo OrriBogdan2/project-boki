@@ -39,7 +39,8 @@ const ANCHORS := ["Rig/Legs/LegL/Knee", "Rig/Legs/LegR/Knee", "Rig/Torso/HeadPiv
 ## Nodes a hero's own kit or weapon code finds by name (BjornFx: the hammer pivot under Gun; the prow).
 const HERO_ANCHORS := {"bulwark": ["Rig/Torso/ArmLPivot/Elbow/Hand/Shield"]}
 const SKIP := ["Glider", "Gun", "Shield", "TeamRing"]     # not part of the body's silhouette
-const FLOATING := ["Halo"]     # a .glb's floating pieces (warden_parts.crescent): not headwear
+## a .glb's floating pieces (warden_parts.crescent, Ostra's void orb held up by his head): not headwear
+const FLOATING := ["Halo", "Orb"]
 
 var bad := 0
 var n := 0
