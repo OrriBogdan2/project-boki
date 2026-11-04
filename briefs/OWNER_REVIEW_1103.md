@@ -507,3 +507,9 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Casting the ult while skating (ground or the new air skate, item 62) keeps her current skate velocity and direction going into the ult; it eases over the ult's own movement rules, never snaps to a stop. The reverse already exists (item 27: Shift out of the ult keeps momentum); make both directions symmetric.
 - Check her DashFlow row (content/dash_flow/rimewright.json): skate -> X must be "fire" with carry, not "cancel" or "buffer to end".
 - Assert: ult cast at full skate speed keeps ≥80% of that planar speed for the first 0.3 s, in the same direction. Do it with item 62.
+
+## 65. Claire's Rimelock: a frozen statue: no turning (owner, 19:02 UTC Nov 4); reconciles item 64
+- Owner: "you shouldn't be able to turn your character while she's in ult; she should be a frozen statue during it."
+- During Rimelock she's sealed in ice as a statue: facing and pose locked from the cast frame (no turning toward the cursor, no aim tracking, no idle fidget), no other abilities except the ones the ult already allows (the recast to crack early, and Shift out per item 27).
+- **With item 64 (momentum):** if cast while skating, the ice statue **slides** along her carried velocity and direction (it's ice on ice), easing to a stop over ~0.5–0.8 s, without steering or turning; once stopped she's rooted as before. Cast while standing: rooted in place at once.
+- Assert: her facing and model rotation don't change for the whole ult while the cursor sweeps 360°; a skating cast slides ≥2 m in the skate direction and then holds still. Same branch as items 62/64.
