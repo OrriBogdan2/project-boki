@@ -219,8 +219,10 @@ def step_shots():
     a = subprocess.Popen(x + ["--warden-shots", "--wardens=" + SPEC["arch"], "--shots-dir=" + out,
                               "--sheets=" + os.path.join(out, "sheets")] + extra,
                          stdout=open(os.path.join(out, "log.txt"), "w"), stderr=subprocess.STDOUT, cwd=wt)
+    # (a clean review frame: no tip banner, the hero moved onto clear ground: spec "demo_at" "dx,dz")
+    clear = ["--no-tips"] + (["--demo-at=" + SPEC["demo_at"]] if SPEC.get("demo_at") else [])
     b = subprocess.Popen(x + ["--arena=" + SPEC["arch"], "--record=2", "--arena-demo=pose", "--demo-zoom=1.0",
-                              "--arena-shot=" + os.path.join(out, "match.png")] + extra,
+                              "--arena-shot=" + os.path.join(out, "match.png")] + clear + extra,
                          stdout=open(os.path.join(out, "match.log"), "w"), stderr=subprocess.STDOUT, cwd=wt)
     log("shots rc", a.wait(), "match rc", b.wait())
     crop = SPEC.get("match_crop", "200:170:540:270")

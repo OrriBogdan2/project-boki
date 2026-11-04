@@ -451,9 +451,11 @@ def paint(ob, ao, colours, part_masks):
     for part, mask in part_masks.items():
         lit, dark = hexcol(colours[part][0]), hexcol(colours[part][1])
         a = np.clip((ao - 0.35) / 0.6, 0.0, 1.0) ** 1.2
+        a = 1.0 - (1.0 - a) * float(colours.get("ao_k", 1.0))       # (a lighter AO: solid plaits, no speckle)
         col = dark[None, None] * (1 - a[..., None]) + lit[None, None] * a[..., None]
         if part in ("strand", "tuft"):
-            lines = 0.9 + 0.1 * np.sin(xx * (2 * math.pi / 9.0) + np.sin(yy * 0.05) * 2.0)
+            la = float(colours.get("lines", 0.1))
+            lines = 1.0 - la + la * np.sin(xx * (2 * math.pi / 9.0) + np.sin(yy * 0.05) * 2.0)
             col = col * lines[..., None]
             if len(colours[part]) > 2:
                 hi = hexcol(colours[part][2])
@@ -680,16 +682,25 @@ def _lens_atlas(spec, n):
     nb, tw = int(iris.get("blades", 9)), float(iris.get("twist", 1.3))
     edge = np.abs(((ang * nb + t * tw * nb) % 1.0) - 0.5) > 0.44
     blades = (t > 0.32) & (t < 0.8) & edge
-    base = np.where(blades[..., None], base * 0.45, base)
-    outer = t < 0.07
-    base = np.where(outer[..., None], glow[None, None] * 0.25, base)
+    base = np.where(blades[..., None], base * float(iris.get("blade_k", 0.65)), base)
+    outer = t < 0.05
+    base = np.where(outer[..., None], glow[None, None] * 0.5, base)
     nd = int(iris.get("dots", 12))
     da = ((ang * nd) % 1.0 - 0.5) / nd * 2.0 * np.pi * 0.2
     dots = (da / 0.012) ** 2 + ((t - 0.2) / 0.035) ** 2 < 1.0
     arcs = (np.abs(t - 0.14) < 0.012) & (((ang * 4) % 1.0) < 0.7)
     base = np.where((dots | arcs)[..., None], np.minimum(glow[None, None] * 1.35 + 0.1, 1.0), base)
+    if iris.get("rings"):
+        # (vex_face's lens: glowing toxic-green glass with bright concentric rings and a bright core)
+        g = np.clip(glow[None, None] * (0.62 + 0.38 * t[..., None]), 0, 1)
+        for r0, r1 in iris["rings"]:
+            ring = (t > r0) & (t < r1)
+            g = np.where(ring[..., None], np.minimum(glow[None, None] * 1.25 + 0.12, 1.0), g)
+        g = np.where((t > 0.9)[..., None], np.minimum(glow[None, None] * 1.3 + 0.25, 1.0), g)
+        base = g
     pupil = hexcol(iris.get("pupil", "1a1020"))
-    base = np.where((t > 0.8)[..., None], pupil[None, None], base)
+    if not iris.get("rings"):
+        base = np.where((t > float(iris.get("pupil_t", 0.86)))[..., None], pupil[None, None], base)
     hi = ((ang - 0.12) % 1.0 < 0.06) & (t > 0.84) & (t < 0.9)
     base = np.where(hi[..., None], np.array([0.92, 1.0, 0.92]), base)
     px[h:, h:, :3] = base
