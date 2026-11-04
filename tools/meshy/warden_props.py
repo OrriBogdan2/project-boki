@@ -605,7 +605,10 @@ def cape(arm, body, spec, tag="cape"):
             hit = bvh.ray_cast(Vector((x, -2.0, z)), Vector((0.0, 1.0, 0.0)))
             if hit[0] is not None:
                 ys.append(hit[0].y)
-        yb = (min(ys) if ys else (y_prev + out if y_prev is not None else -0.12)) - out
+        # (the row's back by the median of its hits, never behind `y_lo`: a satchel or a scan's stub on the back
+        # pushed a min-of-hits cape half a metre out)
+        yb = (float(np.median(ys)) if ys else (y_prev + out if y_prev is not None else -0.12)) - out
+        yb = max(yb, float(spec.get("y_lo", -0.22)))
         if y_prev is not None:
             yb = min(yb, y_prev)
         y_prev = yb
