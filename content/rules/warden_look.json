@@ -30,5 +30,15 @@
 				"glow": 1.8
 			}
 		}
+	},
+	"claire": {
+		"painted": {"far_lift": 0.5},
+		"slots": {
+			"ice": {"fres": 2.2, "far_lift": 0.6, "top_light": 0.6},
+			"skin": {"shade": 0.85, "fres": 0.6, "shadow_tint": [0.88, 0.9, 1.0]},
+			"hair": {"far_lift": 0.55, "fres": 0.8, "fres_tint": 0.4},
+			"leather": {"fres": 0.8, "fres_tint": 0.4, "far_lift": 0.45},
+			"metal": {"fres": 0.7, "fres_tint": 0.5, "far_lift": 0.4}
+		}
 	}
 }

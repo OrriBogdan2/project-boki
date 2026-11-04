@@ -39,3 +39,22 @@ tuning, proportions and stance wait for the Vex r3c recipe). Run log: docs/art/w
   It takes the procedural hoar fan's hold, which brings both hands to it.
 - Imports: the atlases lossless (`compress/mode=0`); `claire.glb.import`: `generate_lods=false`,
   `force_disable_compression=true`.
+
+## Stage 2 (the Vex r3c recipe, owner GO 11:25; owner sheets fb503983)
+- **Head and horns:** `body.head` 0.66 -> 0.58 so the rig's neck-to-crown span is the mesh's: the fit no longer
+  stretches the head (and the horns) 14% upward; the horns sit compact on the skull as claire_head_sheet draws.
+- **Face:** `project_late` from claire_face (the owner's flat-lit face: glowing pale-blue eyes, freckles, pink
+  blush, lips) in two regions (eyes and brows; nose, cheeks, mouth), registered on the mesh's render by the eyes
+  and mouth; the art's dark hair pixels are skipped.
+- **Paint-over:** `smooth`, `ramps` of the art's colours (blue-black hair, slate horns, the lavender-blue skin
+  and ice, the white skates), `despeckle`; `ink_room` 0.012 (the ink shell speckled the thin ice petals at the
+  match camera).
+- **Look** (content/rules/warden_look.json `claire`): the ice slot's cold rim and a match-camera lift, a lighter
+  rim on her hair, wings, tail and horns so the dark shapes read on grass.
+- **Stance** (content/rules/warden_stance.json `rimewright`): the spear planted upright in her RIGHT hand, the
+  left hand raised beside her shoulder, legs together, the hip cocked (the turnaround's front view); the wings
+  fold back while she skates.
+- **Spear:** taller than she is (butt +1.05, tip -0.95 in the Gun's space: about 2.1 m against her 1.9 m), as
+  claire_spear_sheet; one-handed (the stance's free left hand).
+- **Wings:** the cards leave out her arm and the hair at their root (`drop_boxes`, `hair_lum`) and bleed the
+  membrane's colour 40 px past the outline: no dark or pale patch at the inner corner.

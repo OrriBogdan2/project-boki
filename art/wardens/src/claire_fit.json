@@ -113,7 +113,7 @@
  "pad": 6,
  "cap_holes": true,
  "cap_flat": true,
- "ink_room": 0.02,
+ "ink_room": 0.012,
  "fit_weights": true,
  "slot_vote": 4,
  "slot_rules": [
@@ -230,9 +230,9 @@
    }
   ],
   "spear": {
-   "butt": 0.62,
-   "tip": -0.82,
-   "blade": 0.24
+   "butt": 1.05,
+   "tip": -0.95,
+   "blade": 0.28
   },
   "wings": {
    "art": "~/meshy/claire/art/claire_turnaround.png",
@@ -252,7 +252,18 @@
     1.3
    ],
    "sweep": 25,
-   "bones": 3
+   "bones": 3,
+   "drop_boxes": [
+    [
+     1600,
+     370,
+     1660,
+     660
+    ]
+   ],
+   "hair_lum": 0.2,
+   "hair_px": 40,
+   "bleed": 40
   },
   "tail": {
    "path": [
@@ -291,5 +302,152 @@
    "clear": 0.03,
    "bones": 6
   }
- }
+ },
+ "smooth": {
+  "iterations": 2,
+  "sigma_s": 2.5,
+  "sigma_r": 0.05
+ },
+ "ramps": [
+  {
+   "name": "hair",
+   "slots": [
+    "hair"
+   ],
+   "hsv": [
+    0.5,
+    0.8,
+    0.0,
+    1.0,
+    0.0,
+    0.5
+   ],
+   "ramp": [
+    "15152a",
+    "222440",
+    "303455",
+    "454a70",
+    "656b92"
+   ]
+  },
+  {
+   "name": "horns",
+   "slots": [
+    "metal"
+   ],
+   "ramp": [
+    "24263f",
+    "333654",
+    "454a6a",
+    "62668a",
+    "8e92b0"
+   ]
+  },
+  {
+   "name": "skin",
+   "slots": [
+    "skin"
+   ],
+   "hsv": [
+    0.5,
+    0.75,
+    0.0,
+    0.45,
+    0.4,
+    1.0
+   ],
+   "ramp": [
+    "7a809e",
+    "98a0c0",
+    "b0bcdc",
+    "c2cdea",
+    "d4def6"
+   ]
+  },
+  {
+   "name": "ice",
+   "slots": [
+    "ice"
+   ],
+   "hsv": [
+    0.5,
+    0.78,
+    0.0,
+    0.5,
+    0.3,
+    1.0
+   ],
+   "ramp": [
+    "6f78a0",
+    "96a0c6",
+    "aab6d8",
+    "bcc8e8",
+    "d2ddf6"
+   ]
+  },
+  {
+   "name": "skates",
+   "slots": [
+    "leather"
+   ],
+   "ramp": [
+    "8083a2",
+    "9499b6",
+    "b4b9d6",
+    "cdd2ec",
+    "e8ecfb"
+   ]
+  }
+ ],
+ "despeckle": 1,
+ "project_late": [
+  {
+   "view": "front",
+   "image": "~/meshy/claire/refs/claire_face_1k.png",
+   "k": 0.0004,
+   "col0_at": 491.5,
+   "facing": 0.25,
+   "skip_art": [
+    0.55,
+    0.8,
+    0.1,
+    0.2
+   ],
+   "col0": 491,
+   "sole_row": 999,
+   "head_z": 0.74,
+   "name": "eyes and brows",
+   "box": [
+    -0.085,
+    0.085,
+    0.71,
+    0.8
+   ],
+   "row0_at": 2365
+  },
+  {
+   "view": "front",
+   "image": "~/meshy/claire/refs/claire_face_1k.png",
+   "k": 0.0004,
+   "col0_at": 491.5,
+   "facing": 0.25,
+   "skip_art": [
+    0.55,
+    0.8,
+    0.1,
+    0.2
+   ],
+   "col0": 491,
+   "sole_row": 999,
+   "head_z": 0.74,
+   "name": "nose, cheeks and mouth",
+   "box": [
+    -0.085,
+    0.085,
+    0.655,
+    0.71
+   ],
+   "row0_at": 2395
+  }
+ ]
 }

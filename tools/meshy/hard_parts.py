@@ -530,7 +530,14 @@ def wings(spec, body, arm, rig):
     bg = np.median(sheet[5:30, 5:30].reshape(-1, 3), axis=0)
     diff = np.abs(crop - bg).sum(axis=2)
     lum = crop.mean(axis=2)
-    mask = (diff > 0.16) & (lum < 0.62)
+    mask = (diff > 0.16) & (lum < float(spec.get("lum_max", 0.62)))
+    if spec.get("hair_lum"):
+        # (her hair over the wing's root: near-black pixels near the cut edge stay off the card)
+        near = np.zeros_like(mask)
+        near[:, max(0, int(spec["cut_x"]) - x0 - int(spec.get("hair_px", 40))):] = True
+        mask &= ~(near & (lum < float(spec["hair_lum"])))
+    for bx0, by0, bx1, by1 in spec.get("drop_boxes", []):
+        mask[max(0, by0 - y0):max(0, by1 - y0), max(0, bx0 - x0):max(0, bx1 - x0)] = False   # (her arm over it)
     mask[:, int(spec["cut_x"]) - x0:] = False
     # (close small holes: the membrane's light drips)
     from_pad = np.pad(mask, 2)
@@ -553,7 +560,7 @@ def wings(spec, body, arm, rig):
     th, tw = crop.shape[:2]
     tex = crop.copy()
     keep = blob.copy()
-    for _i in range(6):
+    for _i in range(int(spec.get("bleed", 6))):     # (past the simplified outline's corners too)
         grow = keep.copy()
         acc = np.zeros_like(tex)
         cnt = np.zeros(keep.shape, np.float32)
@@ -725,6 +732,11 @@ def split(ob, arm, sp):
     other.free()
     for m in ob.data.materials:
         me.materials.append(m)
+    if sp.get("scale"):
+        # (pulled in about a pivot: Claire's horns compact and close to the skull, as her head sheet draws them)
+        piv = Vector(sp.get("pivot", [0.0, 0.0, 0.0]))
+        k = sp["scale"]
+        me.transform(Matrix.Translation(piv) @ Matrix.Diagonal((k[0], k[1], k[2], 1.0)) @ Matrix.Translation(-piv))
     out = bpy.data.objects.new(sp["name"], me)
     bpy.context.scene.collection.objects.link(out)
     g = out.vertex_groups.new(name=sp["bone"])
