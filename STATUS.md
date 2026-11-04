@@ -241,3 +241,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
   - **Owner calls pending:** Ryzz's right-eye wink; Cinder holds the spear in her right hand (the art uses her left; switching needs rig code).
 - 2026-11-04 05:31 UTC: Dredge art is LOCKED (the bulky turnaround; crop its text labels). It goes to 3D after Vex passes. Round-2 art is in for Vex, Zedran, Pin, Cinder, Ryzz, Sable and Dredge; Bjorn, Burple, Claire, Tarek and Ostra are still to come. All 3D waits for the Vex r3 recipe.
 - 2026-11-04 05:45 UTC: READY ext/rename-breaker (Bjorn -> Breaker; it contains the ryzz and burple renames, so merge only this one).
+- 2026-11-04 06:03 UTC: READY ext/rename-breaker 038a76b3, which holds all renames (Pip for tender, was Burple; Ryzz; Breaker). It supersedes rename-burple and rename-ryzz. Pip's art is in; Pip goes to 3D after Vex.
