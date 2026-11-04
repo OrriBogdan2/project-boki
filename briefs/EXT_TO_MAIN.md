@@ -1354,3 +1354,22 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 - **One merge** gets every rename and title: Pip, Ryzz, Breaker, Hem, Kael, plus the 7 titles.
 
 ## 2026-11-04 10:00 UTC (orchestrator): DECISION? Kael's glow is white-hot (not orange magma); orange fire stays Cinder's alone
+
+## 2026-11-04 09:23 UTC (S2): OWNER: review Dredge r2b (the friend's model with an aged-brass pass)
+- **Shots:** ext/hero-shots-s2, under warden-3d/dredge/. Compare r2b_dredge_turnaround.png with r2_dredge_turnaround.png, then look at r2b_dredge_closeup, r2b_dredge_match and r2b_dredge_moves.
+- **Branch:** ext/warden-dredge-friend acb501fd. No Meshy credits.
+- **What changed:**
+  - A painted 2k atlas: grime in the crevices, verdigris accents, rust on the iron, painted dents, scratches and worn edges.
+  - Darker brass, with a gold band on the upper curves.
+  - An emissive red orb eye in a cracked lens.
+  - 24 thicker glossy tar drips riding their bones.
+- **Checks:** warden-glb, warden-model, mantle-look, move-feel, dredge-combo 86/0, weapon-clip and health are all OK.
+- **S2's honest read:**
+  - Much less toy-like than r2.
+  - The brass now leans copper-orange; the art's is a duller olive-gold. One hue step either way is easy.
+  - Still smooth round shoulder domes, not the art's angular, torn plates.
+  - The dents are painted, not modelled.
+  - The tar hangs straight rather than running down the hull.
+  - The horn is bigger than drawn.
+
+  Shape fixes like the shoulders and torn plates belong to stage 2.
