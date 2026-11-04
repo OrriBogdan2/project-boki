@@ -154,3 +154,7 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 ## 2026-11-04 08:30 UTC: Ostra round 2 from the owner's uploads (orchestrator)
 - wardens_r2/ostra_{turnaround,side,portrait,splash}.webp + OSTRA_KIT.md; review/ostra_before_after.jpg. A void jester: a cracked porcelain grin mask with a violet glowing mouth, a crescent halo, a starfield coat and wisp, marionette strings to card shards, a void orb.
 - Note: his lower body is a starry wisp like Dredge's smoke; it's fine. The halo, strings and cards are separate floating elements.
+
+## 2026-11-04 08:55 UTC: Breaker round 3 (sea-ogre) from the owner's uploads (orchestrator)
+- docs/art/gen/wardens_r3/breaker_{turnaround,side,portrait,splash}.webp + BREAKER_KIT.md; review/breaker_r3_before_after.jpg. Supersedes wardens_r2/breaker_*.
+- A hunched sea-ogre: tusks, barnacles and kelp, icy red braids, a compass, a teddy bear; a plain iron-banded ice hammer (no pick or anchor); the prow shield with a flat-carved figurehead; no lantern (owner).
