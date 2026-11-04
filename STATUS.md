@@ -338,3 +338,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
   - another agent owns the **shared match-zoom fix** on ext/warden-matchzoom (edge speckle, rim, clean frames).
 
   Still iterating: Kael, Pip, Cinder.
+- 2026-11-04 16:23 UTC: **shared match-zoom fix is out:** ext/warden-matchzoom f0ad9f60 (+ 5a7e42cc and b03b6764 for the wing cards). It roughly halves the speckle (Vex 6.4->3.3%, Ostra 7.5->2.6%), with per-Hunter no_ink keys and a pose_clear review frame. Every Hunter agent and the art integ have it. Pick notes: briefs-s2/MATCHZOOM_PICK.md. Art integ is at 63f0c894 (merging through Ostra).
