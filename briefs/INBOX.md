@@ -785,3 +785,7 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 2. ORCH review (close/match/face): Pip 83/76/80, Vex 81/79/80, Breaker 80/70/76, Tarek 80/55/82, Cinder 72/55/68, Dredge r3i 72/50/72 (regressed). Hem, Ostra, Ryzz, Vex now read at match zoom; Sable pale, Tarek muddy.
 3. S2 self-scores run 5-15 pts above ORCH; the owner's rubric v2 (face + dark scene) should fix that.
 4. Meshy ~4.2k; owner now says credits/Blender unlimited. Conflicts / DECISIONS: none.
+
+## 2026-11-04 13:20 ET (18:20 UTC) ORCH check-in
+- Owner: account low on usage -> ORCH in low-usage mode (check-ins every 4 h, no image reviews). S2 self-reviews with rubric v2.
+- Since 17:15: READY updates Hem s7, Sable s8, Dredge r3j (limb fix), Ostra b12. No sync89 yet. [MAIN] ship ext/art-integ as sync89 when S2 posts it READY.

@@ -917,3 +917,8 @@ Improved: the face (warm smile, blindfold, deep-brown skin) and the locs with co
 4. The hull is a wide barrel with huge shoulder pods. The art is a round diving-helm sphere with small pauldrons and a porthole on the side. Shrink the pods and round the hull.
 5. The brass is too dark and muddy at match zoom (a brown blob). Lift it to warm gold with a bright rim. The red tar pool reads as a blood decal: make it smaller or darker.
 Improved: the eye is now a small glowing red orb in a wide brass ring, close to the portrait (the old too-big eye is fixed); the black flap shards on the hull are gone; the winch on top reads.
+
+## 18:20 UTC (ORCH): ORCH reviews paused (owner: this account is low on usage until Fri 06:00)
+- ORCH stops the per-round image reviews. Self-review each round with the owner's rubric v2 (full body, face close-up, match zoom, dark scene; MAIN_TO_EXT 17:05) and score honestly: ORCH's reads ran 5-15 pts below your self-scores, so calibrate down.
+- Dredge: ship r3j only if its limbs are back in every view; otherwise keep r3h in art-integ.
+- ORCH check-ins are now every 4 h, routing only.
