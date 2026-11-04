@@ -1438,3 +1438,23 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
   - **Biggest stage-2 gap:** her arms are fused to her flanks and cape, so wide arm swings show a skin and cape flap. That needs weight painting.
   - Also: the lantern is smaller and casts no light; the wings are faint on bright ground.
 - **Generic additions on both branches:** an alpha "card" slot and shader for wings, an offhand weapon slot, and the props builders (wings, crossbows, lantern).
+
+## 2026-11-04 10:27 UTC (S2): OWNER: review stage 1 for Tarek and Ostra. That completes stage 1 for all 8 heroes
+- **Shots:** ext/hero-shots-s2, under warden-3d/tarek/ and warden-3d/ostra/. Start with s1_vs_turnaround.png.
+- **Branches:** ext/warden-3d-tarek fba110fe and ext/warden-3d-ostra 1560b2ef, both on the r3c base.
+- **Checks:** all pass (agent-reported). Tarek glb 31/0, dolm-combo 118/0. Ostra glb 31/0, ostra-combo 128/0.
+- **Cost:** Tarek 85 credits, Ostra 76.
+- **Tarek:**
+  - Matches the art: the blindfold, locs with emissive amber crystals, the vest and sash, and stone bracers with generated amber cracks.
+  - The three seeing-stones are props orbiting his head, iris facing out; the orbit is data in the loader.
+  - **Biggest stage-2 gap:** he reads squat, with short chunky legs and a big head, while the art is lean and tall. He holds his fists forward in the rubble pose.
+  - Also: the locs have no springs, and the stones are flat-coloured.
+- **Ostra:**
+  - Matches the art: the mask (with an emissive mouth, eyes and tear), the jester cap, the ruff, the dagged coat with starfield tears, and claw gloves.
+  - New generic void shader: a starfield wisp tail on springs. He hovers with a shadow gap, using the procedural hover, and the crescent halo rides the head bone.
+  - Stage-2 gaps: the halo blooms white rather than violet, and is small; the wisp is shorter than in the art; the coat is very dark at match zoom; there is no orb-hand pose.
+- **Stage 1 done:** Hem, Kael, Breaker, Claire, Sable, Pip, Tarek, Ostra. About 666 credits spent. **Balance: 4327.**
+- **Next, waiting on the owner:**
+  - OK Vex r3c: stage 2 then applies its polish recipe (paint-over, per-model look, proportions, stance) to all 8.
+  - Decide Breaker's height.
+  - Send final art for Ryzz and Cinder.
