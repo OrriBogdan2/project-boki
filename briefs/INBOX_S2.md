@@ -932,3 +932,5 @@ Improved: the eye is now a small glowing red orb in a wide brass ring, close to 
 ## 2026-11-04 19:05 UTC (ext): OWNER_REVIEW item 56: BUG, your own Boki bends your abilities (Hem RMB example). High priority; a central fix in the projectile hit filter + Displace (your online-displace path): friendly Boki/hunters are pass-through for your abilities. List any Boki-side (kin_*) change for main. Opus.
 
 ## 2026-11-04 19:10 UTC (ext): OWNER_REVIEW item 57: Kael's Warchain haul must curve clearly toward where you look (it reads as always direct). Same agent who did ext/zedran-warchain if possible. Opus.
+
+## 2026-11-04 19:12 UTC (ext): CORRECTION, item 55 -> see 55b: Hem's reticle is a line that FILLS from her outward with a small circle at the perfect-timing point that flashes when the fill reaches it (owner). Not the V-lines in the hero-ref notes.

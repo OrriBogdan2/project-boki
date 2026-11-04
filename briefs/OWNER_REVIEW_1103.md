@@ -449,3 +449,9 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
   - Show it: the chain line bends and a faint predicted-arc line appears while you hold aside, so players learn it.
   - Check the source data and footage (`briefs/supervive-data/supervive_kits.md` Brall, `briefs/hero-ref/juggernaut.md`) for the source's steer limit and match it if given; the owner's description wins where they differ.
 - Assert: pulling with the cursor 90° left lands ≥3 m left of the straight-line endpoint; the cursor straight ahead still lands direct; speed through the curve stays ≥90% of the straight haul. Screenshots: a top-down strip of a straight haul vs a left-curved haul.
+
+## 55b. CORRECTION to item 55 (owner, 18:56 UTC Nov 4): the source reticle is a FILLING LINE, not a closing V. Owner's description wins over the hero-ref notes.
+- While drawing, the aim line **fills from near Hem outward** along the line toward the cursor, like a progress bar laid on the ground.
+- A **small circle** sits on the line at the point that marks the perfectly timed shot. When the fill reaches the circle, the circle **flashes**: release then for the perfect shot.
+- Keep from item 55 only what fits this: the idle thin line to the cursor; Supercharged extends the line to max range; overdraw dims it; the perfect release gives its burst at the bow. Drop the V-lines and the riding star glint.
+- Assert: the fill fraction tracks the draw time; the circle sits at the perfect-timing fraction; the flash fires on the frame the fill reaches it; a release within the window counts as perfect. Screenshots: a strip of the fill growing, reaching and flashing the circle, then the perfect release.
