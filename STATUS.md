@@ -285,3 +285,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Ryzz stage 1:** running.
 - **Cinder:** art in (11:45), queued after stage 2.
 - 2026-11-04 11:53 UTC: Dredge hull upgrade is running (owner 13:10): angular, dented plates and olive-gold brass; rig and moves kept; 80-150 credits. Ryzz stage 2 is running. All stage-2 agents have the owner's new reference sheets.
+- 2026-11-04 12:15 UTC:
+  - **Dredge r3:** a Blender-built hull is pushed (ext/warden-dredge-friend 8b8d92c4): plates, olive-gold brass, the horn at 0.95x.
+  - **Meshy blocked:** this session's auto-mode permission check refused the Meshy hull spend partway through (45 credits of image edits ran, then the 3D job was refused). The agent did not work around it. To unblock, the user needs to allow Meshy spends in the S2 session.
+  - **Phase A:** the Vex agent is on the shared look fix, Vex 95% and RECIPE_95.
+  - **Still iterating:** Hem+Kael (s3), Breaker+Claire, Sable+Pip, Tarek+Ostra and Ryzz.
