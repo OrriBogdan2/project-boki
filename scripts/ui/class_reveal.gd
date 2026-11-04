@@ -24,12 +24,24 @@ static func maybe_show(home: Node) -> ClassReveal:
 		return null
 	var waiting := ClassUnlock.pending_reveal()
 	if waiting.is_empty():
+		announce_fresh(home)
 		var news := ClassUnlock.take_news()
 		if news > 0 and home.has_method("_toast"):
 			home._toast("A Hunter unlock is ready. Open Hunters (%s) and hold to unlock it." % Settings.key_cap("hero"))
 			Save.save_game()
 		return null
 	return show_for(home, String(waiting[0]))
+
+## "Pin and Zedran are open now" once the starters have opened (after the first expedition): a toast as soon
+## as no panel (the welcome, make-home) covers the farm.
+static func announce_fresh(home: Node) -> void:
+	if not (ClassUnlock.state().get("fresh", []) as Array).is_empty():
+		if home.panel_open != "" or home.building_now or not Save.d["tutorial"].get("home", false):
+			home.get_tree().create_timer(1.0).timeout.connect(func():
+				if is_instance_valid(home) and home.is_inside_tree(): announce_fresh(home))
+			return
+		home._toast(ClassUnlock.take_fresh())
+		Save.save_game()
 
 ## The reveal for one Hunter, over `home`.
 static func show_for(home: Node, hunter_id: String) -> ClassReveal:

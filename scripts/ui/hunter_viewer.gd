@@ -5,7 +5,7 @@ extends PanelContainer
 ## kits play in a match, HunterAnim.KMOVES, looped), with the key, name and plain-words line of the one
 ## playing under it. On the right the name, health and dashes, the fantasy, "how it plays" (the card
 ## text the L loadout picker shows) and every ability with its key; click one to watch it. Used on the
-## Hunters screen (HomeClasses) and at character creation (hatch.gd). Moves and timings:
+## Hunters screen (HomeClasses). Moves and timings:
 ## content/rules/hunter_viewer.json. HoldUnlock drives power() and burst() while you hold to unlock.
 ##
 ##   var v := HunterViewer.make("thief", Vector2(320, 380))
@@ -31,12 +31,18 @@ var move_t := 0.0             # s into the current loop of its move
 var cycling := true           # steps to the next ability by itself (a click on one holds it a full turn)
 var power_k := 0.0            # 0..1 while the unlock is held (HoldUnlock)
 var burst_t := -1.0           # s since the reveal burst, -1 when none
+var _turn_k := 1.0            # 0.33..1: how fast the turntable spins (eased, so a move starting doesn't jerk it)
 
 var vp: SubViewport
 var pivot: Node3D
 var model: Node3D
 var anim: HunterAnim
 var glow: OmniLight3D
+var rim: DirectionalLight3D
+var plinth: StandardMaterial3D
+var cam: Camera3D
+var _cols: HBoxContainer      # the stage column, then the info column
+var _info_box: Control
 var fx: Control               # 2D sparks, the rings and the flash over the stage
 var cap_key: PanelContainer
 var cap_name: Label
@@ -99,16 +105,44 @@ static func stat_line(hunter_id: String) -> String:
 
 func _ready() -> void:
 	var col := Arch.color(id)
-	add_theme_stylebox_override("panel", UI.frame(Color(0.05, 0.045, 0.08, 0.96), 14, Color(col, 0.45), 1, 14, 12))
+	add_theme_stylebox_override("panel", _frame(col))
 	set_meta("hunter_viewer", id)
 	slots = slots_for(id)
 	var w: Dictionary = Data.weapon_stats(Arch.signature(id))
 	_melee = bool(w.get("melee", false))
-	var row := UI.hbox(16)
-	add_child(row)
-	row.add_child(_stage(col))
-	row.add_child(_info(col))
+	_cols = UI.hbox(16)
+	add_child(_cols)
+	_cols.add_child(_stage(col))
+	_info_box = _info(col)
+	_cols.add_child(_info_box)
 	select(0, false)
+
+## Shows another Hunter in this viewer without rebuilding it: the model swaps on the same turntable (it
+## keeps turning from where it was), the colours and the info column follow.
+func set_hunter(hunter_id: String) -> void:
+	if hunter_id == id or not Arch.exists(hunter_id):
+		return
+	id = hunter_id
+	var col := Arch.color(id)
+	slots = slots_for(id)
+	_melee = bool(Data.weapon_stats(Arch.signature(id)).get("melee", false))
+	model.queue_free()
+	_build_model()
+	add_theme_stylebox_override("panel", _frame(col))
+	set_meta("hunter_viewer", id)
+	rim.light_color = col.lerp(Color.WHITE, 0.35)
+	glow.light_color = col.lerp(Color.WHITE, 0.2)
+	plinth.albedo_color = col.darkened(0.55)
+	cap_name.add_theme_color_override("font_color", col)
+	rows.clear()
+	_info_box.queue_free()
+	_info_box = _info(col)
+	_cols.add_child(_info_box)
+	select(0, false)
+	fx.get_parent().get_child(0).queue_redraw()
+
+func _frame(col: Color) -> StyleBox:
+	return UI.frame(Color(0.05, 0.045, 0.08, 0.96), 14, Color(col, 0.45), 1, 14, 12)
 
 # ------------------------------------------------------------------ the stage
 func _stage(col: Color) -> Control:
@@ -122,10 +156,11 @@ func _stage(col: Color) -> Control:
 	back.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	back.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	back.draw.connect(func():
+		var tint := Arch.color(id)
 		var c := back.size * Vector2(0.5, 0.62)
 		for i in 6:
-			back.draw_circle(c, back.size.x * (0.52 - 0.07 * i), Color(col, 0.035 + 0.012 * i))
-		back.draw_arc(c + Vector2(0, back.size.y * 0.3), back.size.x * 0.3, 0, TAU, 48, Color(col, 0.25), 2.0, true))
+			back.draw_circle(c, back.size.x * (0.52 - 0.07 * i), Color(tint, 0.035 + 0.012 * i))
+		back.draw_arc(c + Vector2(0, back.size.y * 0.3), back.size.x * 0.3, 0, TAU, 48, Color(tint, 0.25), 2.0, true))
 	holder.add_child(back)
 	var svc := SubViewportContainer.new()
 	svc.stretch = true
@@ -143,7 +178,7 @@ func _stage(col: Color) -> Control:
 	fx = Control.new()
 	fx.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fx.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	fx.draw.connect(_draw_fx.bind(col))
+	fx.draw.connect(func(): _draw_fx(Arch.color(id)))
 	holder.add_child(fx)
 	# the caption: the key, the ability's name and its plain line, and a dot per ability
 	var cap := UI.hbox(8)
@@ -175,27 +210,23 @@ func _build_world(col: Color) -> void:
 	key.light_color = Color("fff1dc")
 	key.light_energy = 1.2
 	vp.add_child(key)
-	var rim := DirectionalLight3D.new()
+	rim = DirectionalLight3D.new()
 	rim.rotation_degrees = Vector3(-12, -20, 0)
 	rim.light_color = col.lerp(Color.WHITE, 0.35)
 	rim.light_energy = 0.7
 	vp.add_child(rim)
 	pivot = Node3D.new()
 	vp.add_child(pivot)
-	model = Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", Save.d.get("look", {}), id)
-	var ring := model.get_node_or_null("TeamRing")
-	if ring: (ring as Node3D).visible = false
-	pivot.add_child(model)
-	anim = HunterAnim.new(model)
+	_build_model()
 	var floor_disc := MeshInstance3D.new()      # a low plinth so the feet stand on something
 	var cm := CylinderMesh.new()
 	cm.top_radius = 0.75
 	cm.bottom_radius = 0.8
 	cm.height = 0.06
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = col.darkened(0.55)
-	mat.roughness = 0.8
-	cm.material = mat
+	plinth = StandardMaterial3D.new()
+	plinth.albedo_color = col.darkened(0.55)
+	plinth.roughness = 0.8
+	cm.material = plinth
 	floor_disc.mesh = cm
 	floor_disc.position.y = -0.03
 	vp.add_child(floor_disc)
@@ -205,12 +236,25 @@ func _build_world(col: Color) -> void:
 	glow.light_energy = 0.0
 	glow.position = Vector3(0, 1.0, -0.6)
 	vp.add_child(glow)
-	var s := model.scale.y
-	var cam := Camera3D.new()
+	cam = Camera3D.new()
 	cam.fov = 30.0
 	vp.add_child(cam)
-	cam.transform = Transform3D(Basis(), Vector3(-1.0, 1.45, -5.3) * s).looking_at(Vector3(0, 0.95 * s, 0), Vector3.UP)
+	_aim_camera()
 	cam.current = true
+
+## The Hunter's model on the turntable, with its animation.
+func _build_model() -> void:
+	model = Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", Save.d.get("look", {}), id)
+	var ring := model.get_node_or_null("TeamRing")
+	if ring: (ring as Node3D).visible = false
+	pivot.add_child(model)
+	anim = HunterAnim.new(model)
+	if cam:
+		_aim_camera()
+
+func _aim_camera() -> void:
+	var s := model.scale.y
+	cam.transform = Transform3D(Basis(), Vector3(-1.0, 1.45, -5.3) * s).looking_at(Vector3(0, 0.95 * s, 0), Vector3.UP)
 
 # ------------------------------------------------------------------ the info column
 func _info(col: Color) -> Control:
@@ -345,7 +389,8 @@ func tick(dt: float) -> void:
 	if cycling and slot_t >= float(rules().get("slot_s", 3.2)) and power_k <= 0.0:
 		select(slot_i + 1)
 	var playing := power_k <= 0.0 and move_t < loop_len() - float(rules().get("gap_s", 0.35))
-	pivot.rotation.y += dt * float(rules().get("turn_rate", 0.45)) * (0.33 if playing else 1.0) * (1.0 - power_k)
+	_turn_k = move_toward(_turn_k, 0.33 if playing else 1.0, dt * 1.5)
+	pivot.rotation.y += dt * float(rules().get("turn_rate", 0.45)) * _turn_k * (1.0 - power_k)
 	var s := _state()
 	anim.update(dt, s)
 	# powering up: the Hunter's light builds and the body thrums; the burst pops it

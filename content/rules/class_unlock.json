@@ -1,7 +1,6 @@
 {
-	"desc": "Hunter unlocks and mastery (docs/decisions/0005). A new save starts owning `first` and picks `starter_picks` Hunter from `starters` in the new-game flow. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.",
-	"first": "gunslinger",
-	"starters": ["juggernaut", "archer", "ashwick"],
+	"desc": "Hunter unlocks and mastery (docs/decisions/0005). A new save picks `starter_picks` Hunter from `starters` before the egg pick; the other starters open on their own after the first finished expedition (the tutorial one). Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.",
+	"starters": ["gunslinger", "archer", "juggernaut"],
 	"starter_picks": 1,
 	"hold_s": 1.6,
 	"tiers": {

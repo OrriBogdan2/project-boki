@@ -17,7 +17,7 @@ extends RefCounted
 ## reveal_burst and viewer_strip as PNGs. Prints HUNTERCHECK lines and "HUNTERCHECK DONE, n checks, failures: n".
 
 const FIRST := "gunslinger"
-const STARTERS := ["juggernaut", "archer", "ashwick"]
+const STARTERS := ["gunslinger", "archer", "juggernaut"]
 const CHALLENGE_ONLY := ["ostra", "tender", "dolm"]
 ## Which stats count as which kind of goal (the owner's mix: kit feats, team play, exploration,
 ## extraction and Boki goals).
@@ -65,7 +65,11 @@ func new_save(picked := []) -> void:
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
 	Save.d = d
 	if not picked.is_empty():
-		ClassUnlock.choose_starters(picked)
+		# a save from before the first-Hunter pick: Vex and the pick open, nothing waits for an expedition
+		var c: Dictionary = Save.d["classes"]
+		c["picks"] = picked.duplicate()
+		c["open"] = [FIRST] + picked.filter(func(a): return a != FIRST)
+		c["seen"] = c["open"].duplicate()
 		var first := String(picked[0])
 		Save.d["cls"] = Arch.weight(first)
 		Save.d["arch"] = first
@@ -90,6 +94,7 @@ func run(m: Node) -> void:
 	_migration()
 	await _new_game_flow(tree)
 	await _creation(tree)
+	await _first_return(tree)
 	await _viewer(tree)
 	await _home(tree)
 	await _arena(tree)
@@ -98,19 +103,21 @@ func run(m: Node) -> void:
 
 # ---------------------------------------------------------------- 1. the data
 func _rules() -> void:
-	ok(ClassUnlock.first_hunter() == FIRST, "%s is the Hunter every save starts with" % Arch.name_of(FIRST))
 	ok(ClassUnlock.starters() == STARTERS, "exactly the 3 starters, by id: %s" % str(ClassUnlock.starters()))
 	ok(ClassUnlock.picks_needed() == 1, "the starter pick is 1 of them")
+	ok(ClassUnlock.starters() == ["gunslinger", "archer", "juggernaut"], "Vex, Pin and Zedran are the starters")
 	ok(CHALLENGE_ONLY.all(func(a): return not ClassUnlock.starters().has(a)),
 			"%s are challenge-only" % str(CHALLENGE_ONLY.map(func(a): return Arch.name_of(a))))
 	var stats: Dictionary = ClassUnlock.rules()["stats"]
 	var no_challenge := Arch.ids().filter(func(a): return a != FIRST and not _challenge_ok(String(a), stats))
 	ok(no_challenge.is_empty(), "every other Hunter has one challenge (a known stat, a target, one line); missing: %s"
 			% str(no_challenge))
-	ok(ClassUnlock.challenge(FIRST).is_empty(), "%s has no unlock challenge (it is yours from the start)"
-			% Arch.name_of(FIRST))
-	ok(STARTERS.all(func(a): return ClassUnlock.tier(a) == "easy"), "an unpicked starter is an easy challenge")
-	var others := Arch.ids().filter(func(a): return a != FIRST and not STARTERS.has(a) and not CHALLENGE_ONLY.has(a))
+	ok(ClassUnlock.challenge(FIRST).is_empty(), "%s has no unlock challenge (it is a starter)" % Arch.name_of(FIRST))
+	var easy := ["ashwick", "archer", "juggernaut"].all(func(a): return ClassUnlock.tier(a) == "easy")
+	ok(easy,
+			"Cinder is an easy challenge; Pin and Zedran keep theirs for saves that picked before")
+	var others := Arch.ids().filter(func(a):
+		return not STARTERS.has(a) and a != "ashwick" and not CHALLENGE_ONLY.has(a))
 	ok(others.all(func(a): return ClassUnlock.tier(String(a)) == "medium"), "the other Hunters are medium")
 	var last_medium := 0
 	for a in others: last_medium = maxi(last_medium, ClassUnlock.open_needed(String(a)))
@@ -224,9 +231,8 @@ func _glider_reads(dir_path: String) -> Array:
 # ---------------------------------------------------------------- 3. the starter pick rules
 func _creation_rules() -> void:
 	new_save()
-	ok(ClassUnlock.is_open(FIRST) and ClassUnlock.open_ids() == [FIRST], "a new save owns just %s"
-			% Arch.name_of(FIRST))
-	ok(ClassUnlock.needs_starters() and not ClassUnlock.all_open(), "a new save has to make its starter pick")
+	ok(ClassUnlock.open_ids().is_empty() and ClassUnlock.needs_starters() and not ClassUnlock.all_open(),
+			"a new save owns nothing until it picks its Hunter (%s)" % str(ClassUnlock.open_ids()))
 	ok(ClassUnlock.ready_count() == 0 and not ClassUnlock.can_unlock("thief"), "nothing can be unlocked before it")
 	ok(not ClassUnlock.choose_starters([]), "no pick is not a pick")
 	ok(not ClassUnlock.choose_starters(["archer", "juggernaut"]), "2 Hunters is not a pick")
@@ -234,21 +240,39 @@ func _creation_rules() -> void:
 	var outside := Arch.ids().filter(func(a): return not STARTERS.has(a))
 	var refused := outside.all(func(a): return not ClassUnlock.choose_starters([String(a)]))
 	ok(refused and ClassUnlock.needs_starters(), "no Hunter outside the 3 starters can be picked")
-	ok(CHALLENGE_ONLY.all(func(a): return not ClassUnlock.choose_starters([a])),
-			"%s can never be picked" % str(CHALLENGE_ONLY.map(func(a): return Arch.name_of(a))))
-	ok(ClassUnlock.choose_starters(["ashwick"]) and ClassUnlock.picks() == ["ashwick"], "picking 1 starter works")
-	ok(ClassUnlock.open_ids().size() == 2 and ClassUnlock.is_open(FIRST) and ClassUnlock.is_open("ashwick"),
-			"exactly %s and the pick are open (%s)" % [Arch.name_of(FIRST), str(ClassUnlock.open_ids())])
-	ok(not ClassUnlock.choose_starters(["archer"]) and ClassUnlock.open_ids().size() == 2, "the pick is made once")
+	var challenge_pick := CHALLENGE_ONLY + ["ashwick"]
+	ok(challenge_pick.all(func(a): return not ClassUnlock.choose_starters([a])),
+			"%s and Cinder can never be picked" % str(CHALLENGE_ONLY.map(func(a): return Arch.name_of(a))))
+	ok(ClassUnlock.choose_starters(["archer"]) and ClassUnlock.picks() == ["archer"], "picking 1 starter works")
+	ok(ClassUnlock.open_ids() == ["archer"], "only the pick is open at first (%s)" % str(ClassUnlock.open_ids()))
+	ok(not ClassUnlock.choose_starters([FIRST]) and ClassUnlock.open_ids() == ["archer"], "the pick is made once")
+	ok(ClassUnlock.is_bonus(FIRST) and ClassUnlock.is_bonus("juggernaut") and not ClassUnlock.can_unlock("juggernaut")
+			and ClassUnlock.requirement("juggernaut") == "Opens after your first expedition",
+			"the other two starters wait for the first expedition and say so")
+	ok(ClassUnlock.take_fresh() == "", "nothing is announced before they open")
+	# the first finished expedition (any finish) opens the other two, once, and says so once
+	Game.apply_result(result("archer", false))
+	ok(ClassUnlock.open_ids().size() == 3 and ClassUnlock.is_open(FIRST) and ClassUnlock.is_open("juggernaut"),
+			"a knocked-out first expedition opens the other two (%s)" % str(ClassUnlock.open_ids()))
+	ok(ClassUnlock.take_fresh() == "%s and %s are open now" % [Arch.name_of(FIRST), Arch.name_of("juggernaut")]
+			and ClassUnlock.take_fresh() == "", "and says which, once")
+	ok(not ClassUnlock.is_bonus(FIRST) and ClassUnlock.open_bonus().is_empty(), "they open once")
 	var locked := Arch.ids().filter(func(a): return not ClassUnlock.is_open(String(a)))
 	ok(locked.all(func(a): return _locked_and_says(String(a))), "every other Hunter is locked and says its challenge")
 	for starter in STARTERS:
 		new_save()
-		ok(ClassUnlock.choose_starters([starter]) and ClassUnlock.is_open(FIRST) and ClassUnlock.is_open(starter),
-				"%s can be the pick" % Arch.name_of(starter))
-	new_save()
-	Save.d["classes"]["open"] = []
-	ok(ClassUnlock.is_open(FIRST), "%s is open however the save's list reads" % Arch.name_of(FIRST))
+		var made := ClassUnlock.choose_starters([starter])
+		ok(made and ClassUnlock.is_open(starter) and ClassUnlock.open_ids().size() == 1,
+				"%s can be the first Hunter" % Arch.name_of(starter))
+		Game.apply_result(result(starter, true))
+		ok(STARTERS.all(func(a): return ClassUnlock.is_open(a)), "an extracted first expedition opens all three")
+	# a save that picked before keeps what it has: nothing waits, nothing is announced
+	new_save(["juggernaut"])
+	ok(ClassUnlock.open_ids() == [FIRST, "juggernaut"] and not ClassUnlock.is_bonus("archer"),
+			"an older save keeps its two")
+	Game.apply_result(result("juggernaut", true))
+	ok(ClassUnlock.open_ids() == [FIRST, "juggernaut"] and ClassUnlock.take_fresh() == "",
+			"and gains nothing from the first expedition")
 
 # ---------------------------------------------------------------- 4. challenges
 func _challenges() -> void:
@@ -398,23 +422,19 @@ func _migration() -> void:
 			"stuns") == 3, "a new save read back keeps its Hunters and its counts")
 	DirAccess.remove_absolute(path)
 
-# ---------------------------------------------------------------- 7. the Hunter pick in the new-game flow
+# ---------------------------------------------------------------- 7. the Hunter pick (before the egg)
 func _pick_panel(hx: Node) -> Node:
 	for ch in hx.bottom.get_children():
 		if ch.has_meta("starter_pick") and not ch.is_queued_for_deletion(): return ch
 	return null
 
-func _go_button(hx: Node) -> Button:
-	var go: Button = null
-	for ch in hx.bottom.get_children():
-		if ch is Button and not ch.is_queued_for_deletion(): go = ch
-	return go
-
-func _click_chip(hx: Node, want: String, tree: SceneTree) -> void:
+func _chips(panel: Node) -> Array:
 	var chips: Array = []
-	var panel := _pick_panel(hx)
 	if panel: _collect_meta(panel, "starter_chip", chips)
-	for c in chips:
+	return chips
+
+func _click_chip(panel: Node, want: String, tree: SceneTree) -> void:
+	for c in _chips(panel):
 		if String(c.get_meta("arch")) == want: (c as Button).pressed.emit()
 	for i in 4: await tree.process_frame
 
@@ -437,8 +457,11 @@ func _new_game_flow(tree: SceneTree) -> void:
 	enter.pressed = true
 	hx._unhandled_input(enter)
 	for i in 6: await tree.process_frame
-	if hx.stage == "pick": screens += 1
-	ok(hx.stage == "pick" and screens <= 2, "Enter takes it to the egg pick: screen %d after the intro" % screens)
+	if hx.stage == "hunter": screens += 1
+	ok(hx.stage == "hunter" and screens <= 2, "Enter takes it to the Hunter pick: screen %d after the intro" % screens)
+	hx._take_hunter([ClassUnlock.starters()[0]])
+	for i in 6: await tree.process_frame
+	ok(hx.stage == "pick", "and the pick to the egg pick (stage %s)" % hx.stage)
 	ok(hx.create_box == null and hx.preview == null and Save.d.has("look"),
 			"no hunter creator on the way (a default look is set; Change your look is in the farm's menu)")
 	ok(hx.get_script().source_code.find("night after the storm") < 0, "the three story lines are deleted, not skipped")
@@ -460,43 +483,64 @@ func _creation(tree: SceneTree) -> void:
 	var hx = load("res://scripts/ui/hatch.gd").new()
 	main.add_child(hx)
 	for i in 8: await tree.process_frame
-	ok(hx.stage == "pick", "a new save is at the egg pick once the card is past (stage %s)" % hx.stage)
-	hx._pick(0)
-	hx._pick(0)
-	for i in 8: await tree.process_frame
-	ok(hx.stage == "class", "choosing the egg opens the Hunter pick (stage %s)" % hx.stage)
+	ok(hx.stage == "hunter", "a new save is at the Hunter pick after the card, before any egg (stage %s)" % hx.stage)
 	var panel: Node = _pick_panel(hx)
-	var chips: Array = []
-	if panel: _collect_meta(panel, "starter_chip", chips)
-	var chip_ids := chips.map(func(c): return String(c.get_meta("arch")))
+	var chip_ids := _chips(panel).map(func(c): return String(c.get_meta("arch")))
 	ok(chip_ids == STARTERS, "a chip for each of the 3 starters and nothing else (%s)" % str(chip_ids))
-	ok(CHALLENGE_ONLY.all(func(a): return not chip_ids.has(a)), "no challenge-only Hunter is offered")
-	ok(not chip_ids.has(FIRST) and panel != null and _any_text(panel, Arch.name_of(FIRST)),
-			"%s is named as already yours, not offered"
-			% Arch.name_of(FIRST))
-	var go := _go_button(hx)
-	ok(go != null and go.disabled, "the button waits for the pick")
-	await _click_chip(hx, "archer", tree)
-	await _click_chip(hx, "juggernaut", tree)
+	ok(panel != null and _any_text(panel, "Pick your Hunter") and _any_text(panel, ClassPick.HINT)
+			and not _any_text(panel, "yours already"), "the pick reads plainly")
+	ok(panel != null and _no_weight(panel) and _hunter_words(panel), "the pick says Hunter with no weight labels")
+	var go: Button = panel.get_meta("go")
+	ok(go.disabled, "the button waits for the pick")
+	var viewer: HunterViewer = panel.get_meta("viewer")
+	var turned := 0.7
+	viewer.pivot.rotation.y = turned
+	var world := viewer.vp
+	await _click_chip(panel, "archer", tree)
+	await _click_chip(panel, "juggernaut", tree)
 	ok(hx.starter_picks == ["juggernaut"], "a second click swaps the pick, it never makes 2 (%s)"
 			% str(hx.starter_picks))
-	await _click_chip(hx, "juggernaut", tree)
-	ok(hx.starter_picks.is_empty(), "a click on the picked one takes it out")
-	await _click_chip(hx, "ashwick", tree)
-	panel = _pick_panel(hx)
-	var viewer: HunterViewer = panel.get_meta("viewer") if panel else null
-	ok(viewer != null and viewer.id == "ashwick" and viewer.model != null, "the viewer shows the one last clicked")
-	ok(panel != null and _no_weight(panel) and _hunter_words(panel), "the pick says Hunter with no weight labels")
-	go = _go_button(hx)
-	ok(go != null and not go.disabled and go.text.contains(Arch.name_of("ashwick")), "the button reads: %s"
-			% (go.text if go else "?"))
+	ok(_pick_panel(hx) == panel and panel.get_meta("viewer") == viewer and viewer.vp == world,
+			"a chip updates the same panel and the same viewer, nothing is rebuilt")
+	ok(viewer.id == "juggernaut" and viewer.pivot.get_child_count() == 1 and viewer.rows.size() == viewer.slots.size()
+			and viewer.model.get_meta("wid", "") == Arch.signature("juggernaut"),
+			"the viewer shows the one last clicked: one model on the turntable")
+	ok(absf(viewer.pivot.rotation.y - turned) < 0.2, "and the turntable kept its angle (%.2f)"
+			% viewer.pivot.rotation.y)
+	await _click_chip(panel, "juggernaut", tree)
+	ok(hx.starter_picks.is_empty() and go.disabled, "a click on the picked one takes it out")
+	await _click_chip(panel, "gunslinger", tree)
+	ok(not go.disabled and go.text.contains(Arch.name_of("gunslinger")), "the button reads: %s" % go.text)
+	await _click_chip(panel, "archer", tree)
 	await shot(tree, "hunter_pick", 60)
-	if go: go.pressed.emit()
+	go.pressed.emit()
 	for i in 6: await tree.process_frame
-	ok(ClassUnlock.picks() == ["ashwick"] and ClassUnlock.open_ids().size() == 2 and hx.stage == "warm",
-			"confirming opens it beside %s and carries on to the hatching (stage %s)" % [Arch.name_of(FIRST), hx.stage])
-	ok(Arch.of_save() == FIRST, "%s is the Hunter of the tutorial" % Arch.name_of(FIRST))
+	ok(ClassUnlock.picks() == ["archer"] and ClassUnlock.open_ids() == ["archer"] and hx.stage == "pick",
+			"confirming opens just %s and goes on to the egg pick (stage %s)" % [Arch.name_of("archer"), hx.stage])
+	var weapon_ok: bool = Save.d["weapon"] == Arch.signature("archer") and Save.d["cls"] == Arch.weight("archer")
+	ok(Arch.of_save() == "archer" and weapon_ok,
+			"the tutorial Hunter is the one picked")
+	hx._pick(0)
+	hx._pick(0)
+	for i in 6: await tree.process_frame
+	ok(hx.stage == "warm", "Hatch it goes straight to the hatching (stage %s)" % hx.stage)
 	hx.queue_free()
+	for i in 3: await tree.process_frame
+
+## Back home after the first expedition: the other two starters are open and a toast says so, once.
+func _first_return(tree: SceneTree) -> void:
+	new_save()
+	ClassUnlock.choose_starters(["archer"])
+	Save.d["arch"] = "archer"
+	Save.d["cls"] = Arch.weight("archer")
+	Save.d["weapon"] = Arch.signature("archer")
+	Game.apply_result(result("archer", true, {}, {"tutorial": true}))
+	var hm = await main._hb_home()
+	for i in 30: await tree.process_frame
+	var want := "%s and %s are open now" % [Arch.name_of("gunslinger"), Arch.name_of("juggernaut")]
+	ok(_any_text(hm.root_ui, want), "home after the first expedition says: %s" % want)
+	ok(ClassUnlock.take_fresh() == "" and ClassUnlock.open_ids().size() == 3, "told once; all three starters are open")
+	hm.queue_free()
 	for i in 3: await tree.process_frame
 
 # ---------------------------------------------------------------- 8. the viewer cycling abilities

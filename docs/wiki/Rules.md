@@ -136,12 +136,11 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 
 ## class_unlock (`content/rules/class_unlock.json`)
 
-Hunter unlocks and mastery (docs/decisions/0005). A new save starts owning `first` and picks `starter_picks` Hunter from `starters` in the new-game flow. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.
+Hunter unlocks and mastery (docs/decisions/0005). A new save picks `starter_picks` Hunter from `starters` before the egg pick; the other starters open on their own after the first finished expedition (the tutorial one). Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.
 
 | Setting | Value |
 |---|---|
-| first | gunslinger |
-| starters | ["juggernaut", "archer", "ashwick"] |
+| starters | ["gunslinger", "archer", "juggernaut"] |
 | starter_picks | 1 |
 | hold_s | 1.6 |
 | tiers | {"easy": "about 1-2 expeditions", "medium": "a handful of expeditions", "hard": "real effort, once other Hunters are open"} |
@@ -244,7 +243,7 @@ The farm building pass (docs/decisions/0004-farm-building.md). Farm level is poi
 
 ## hunter_viewer (`content/rules/hunter_viewer.json`)
 
-The Hunter viewer (HunterViewer: the Hunters screen and character creation). Each ability is shown in turn for slot_s seconds, its move looped on the real model. `moves`: per Hunter and slot, the kit moves (any kit move table, HunterAnim.km_def) played back to back, the same ids the kits play. A slot with no entry falls back to the weapon swing or shot (lmb), the class dodge (dash), a cast pose (rmb, e, r) or an idle with its glow (passive). --hunter-unlock-check fails on an id that no longer exists, so a kit rename shows up here.
+The Hunter viewer (HunterViewer: the Hunters screen). Each ability is shown in turn for slot_s seconds, its move looped on the real model. `moves`: per Hunter and slot, the kit moves (any kit move table, HunterAnim.km_def) played back to back, the same ids the kits play. A slot with no entry falls back to the weapon swing or shot (lmb), the class dodge (dash), a cast pose (rmb, e, r) or an idle with its glow (passive). --hunter-unlock-check fails on an id that no longer exists, so a kit rename shows up here.
 
 | Setting | Value |
 |---|---|

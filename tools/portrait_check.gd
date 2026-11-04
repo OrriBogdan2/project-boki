@@ -118,7 +118,7 @@ func _menus() -> void:
 	await tree.process_frame
 	ok("the Hunter viewer shows Vex's portrait by the name", _first_pic(viewer) == Portraits.art_path("gunslinger"))
 	viewer.queue_free()
-	var pick := ClassPick.row("archer", [], func(_a): pass)
+	var pick := ClassPick.row([], func(_a): pass)
 	var chips: Array = []
 	_collect(pick, "starter_chip", chips)
 	var chip_art := chips.map(func(b): return String(b.get_meta("portrait_art", "")))

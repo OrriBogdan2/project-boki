@@ -66,18 +66,18 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 ### How Hunters unlock
 
-Every save starts with Hired Gun. In the new-game flow you pick 1 of 3 more (Arena King, Dark Archer, Mad Pyromancer). Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for 1.6s, and letting go early cancels it. Tiers: easy is about 1-2 expeditions, medium a handful of expeditions, hard real effort, once other Hunters are open. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.
+A new save picks 1 of 3 starters (Hired Gun, Dark Archer, Arena King) before the egg pick and plays the tutorial as it. The other starters open after your first expedition. Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for 1.6s, and letting go early cancels it. Tiers: easy is about 1-2 expeditions, medium a handful of expeditions, hard real effort, once other Hunters are open. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.
 
 | Hunter | Tier | Challenge | Target |
 |---|---|---|---|
 | [Silver Thief](Class-Silver-Thief.md) | medium | Land 12 hits while in the air | 12 |
-| [Dark Archer](Class-Dark-Archer.md) | pick at the start, else easy | Stun 4 enemies | 4 |
+| [Dark Archer](Class-Dark-Archer.md) | starter, else easy | Stun 4 enemies | 4 |
 | [Storm Slayer](Class-Storm-Slayer.md) | medium | Stagger 6 monsters with abilities | 6 |
-| [Hired Gun](Class-Hired-Gun.md) | yours from the start | none | - |
-| [Arena King](Class-Arena-King.md) | pick at the start, else easy | Knock 3 enemies into walls | 3 |
+| [Hired Gun](Class-Hired-Gun.md) | starter | pick at the start, or after your first expedition | - |
+| [Arena King](Class-Arena-King.md) | starter, else easy | Knock 3 enemies into walls | 3 |
 | [Frozen Bulwark](Class-Frozen-Bulwark.md) | medium | Knock down 2 hunters while under half health | 2 |
 | [Broken Abomination](Class-Broken-Abomination.md) | medium | Make it out carrying 8 items | 8 |
-| [Mad Pyromancer](Class-Mad-Pyromancer.md) | pick at the start, else easy | Hit 3 enemies at once with one ability | 1 |
+| [Mad Pyromancer](Class-Mad-Pyromancer.md) | easy | Hit 3 enemies at once with one ability | 1 |
 | [Fox Cub](Class-Fox-Cub.md) | hard | Revive 4 teammates, once 6 Hunters are open | 4 |
 | [Icy Dancer](Class-Icy-Dancer.md) | medium | Slow 20 enemies | 20 |
 | [Rock Elementalist](Class-Rock-Elementalist.md) | hard | Hit 3 enemies at once with one ability, 5 times, once 6 Hunters are open | 5 |

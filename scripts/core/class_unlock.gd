@@ -1,16 +1,18 @@
 class_name ClassUnlock
 extends RefCounted
 ## Hunter unlocks and mastery (docs/decisions/0005; player-facing these are "Hunters", internally
-## archetypes and the save key "classes"). A new save owns the first Hunter (Vex, also the tutorial
-## Hunter) and picks 1 of 3 starters in the new-game flow. The 2 starters it did not pick are easy
-## challenges. Every other Hunter opens through its own challenge (content/rules/class_unlock.json "unlock"), counted
+## archetypes and the save key "classes"). A new save picks 1 of 3 starters (Vex, Pin, Zedran) before the egg
+## pick, and plays the tutorial as it. The other two open by themselves after the first finished expedition
+## (the tutorial). Every other Hunter opens through its own challenge (content/rules/class_unlock.json "unlock"),
+## counted
 ## across every expedition whoever you play. A done challenge never opens a Hunter by itself: it is
 ## unlocked by holding the button on the Hunters screen (HoldUnlock calls unlock()). Each Hunter also has
 ## mastery goals, counted only while you play it; each one done is a mastery level and a cosmetic reward.
 ## Nothing here ever changes stats or abilities. Locked Hunters stay playable in the Arena and the
 ## Training Grounds; only the pickers that set your expedition Hunter ask this file.
 ##
-## Save.d["classes"] = {all: bool, picks: [the creation picks], open: [ids], told: int (ready unlocks
+## Save.d["classes"] = {all: bool, picks: [the creation pick], open: [ids], bonus: [starters that open after the
+## first expedition], fresh: [just opened, not announced], told: int (ready unlocks
 ## already announced), reveal: [ids], seen: [ids], stats: {stat: n} (every expedition),
 ## hunters: {id: {stat: n}} (expeditions played as that Hunter)}. No "classes" key reads as all open.
 
@@ -23,14 +25,10 @@ static func rules() -> Dictionary:
 		_rules = parsed if typeof(parsed) == TYPE_DICTIONARY else {}
 	return _rules
 
-## A new save: the first Hunter is yours, the starter pick is still to make.
+## A new save: nothing is open, the starter pick is still to make.
 static func fresh() -> Dictionary:
-	return {"all": false, "picks": [], "open": [first_hunter()], "told": 0, "reveal": [], "seen": [],
+	return {"all": false, "picks": [], "open": [], "told": 0, "reveal": [], "seen": [],
 			"stats": {}, "hunters": {}}
-
-## The Hunter every save owns, and the tutorial Hunter.
-static func first_hunter() -> String:
-	return String(rules().get("first", "gunslinger"))
 
 ## A save from before Hunter unlocks had every Hunter, so it keeps them all.
 static func legacy() -> Dictionary:
@@ -51,7 +49,7 @@ static func upgrade_early_v6(c: Dictionary, played_now: String) -> void:
 		return
 	var open_list: Array = c.get("open", [])
 	var starter := String(c.get("starter", ""))
-	for id in [starter, played_now]:
+	for id in ["gunslinger", starter, played_now]:      # (Vex: every save had him before the starter pick)
 		if Arch.exists(id) and not open_list.has(id):
 			open_list.append(id)
 	c["open"] = open_list
@@ -68,6 +66,9 @@ static func state() -> Dictionary:
 	if typeof(c) != TYPE_DICTIONARY:
 		return {}
 	upgrade_early_v6(c, String(Save.d.get("arch", "")))
+	var picked_before: bool = not c.has("bonus") and not (c.get("picks", []) as Array).is_empty()
+	if picked_before and not (c["open"] as Array).has("gunslinger"):
+		(c["open"] as Array).append("gunslinger")      # (a save from before the first-Hunter pick: Vex was always open)
 	return c
 
 ## Whether every Hunter is open on this save (an old save, or admin mode).
@@ -76,12 +77,12 @@ static func all_open() -> bool:
 	return c.is_empty() or bool(c.get("all", false)) or Game.modding()
 
 static func is_open(id: String) -> bool:
-	return id == first_hunter() or all_open() or (state().get("open", []) as Array).has(id)
+	return all_open() or (state().get("open", []) as Array).has(id)
 
 static func open_ids() -> Array:
 	return Arch.ids().filter(func(a): return is_open(a))
 
-# ---- the starter pick: 1 of 3 (the first Hunter is already yours)
+# ---- the starter pick: 1 of 3, the other two open after the first expedition
 static func starters() -> Array:
 	return (rules().get("starters", []) as Array).filter(func(a): return Arch.exists(String(a)))
 
@@ -96,7 +97,7 @@ static func picks() -> Array:
 	return (state().get("picks", []) as Array).duplicate()
 
 ## Makes the starter pick (once): exactly picks_needed() different starters. Anything else is refused.
-## The first Hunter stays open beside it.
+## The other starters wait in "bonus" for the first finished expedition.
 static func choose_starters(ids: Array) -> bool:
 	if not needs_starters() or ids.size() != picks_needed():
 		return false
@@ -108,10 +109,33 @@ static func choose_starters(ids: Array) -> bool:
 		return false
 	var c := state()
 	c["picks"] = unique.duplicate()
-	c["open"] = [first_hunter()] + unique
+	c["open"] = unique.duplicate()
+	c["bonus"] = starters().filter(func(a): return not unique.has(a))
 	c["seen"] = c["open"].duplicate()
 	c["reveal"] = []
 	return true
+
+## The first finished expedition (any finish): the rest of the starters open. Returns the ids opened.
+static func open_bonus() -> Array:
+	var c := state()
+	var ids: Array = (c.get("bonus", []) as Array).duplicate()
+	if ids.is_empty():
+		return ids
+	c["bonus"] = []
+	for id in ids:
+		(c["open"] as Array).append(id)
+		(c["seen"] as Array).append(id)
+	c["fresh"] = ids.duplicate()
+	return ids
+
+## "Pin and Zedran are open now" for starters opened and not yet announced ("" when none); marks them told.
+static func take_fresh() -> String:
+	var c := state()
+	var names: Array = (c.get("fresh", []) as Array).map(func(a): return Arch.name_of(String(a)))
+	if names.is_empty():
+		return ""
+	c["fresh"] = []
+	return "%s %s open now" % [" and ".join(names), "is" if names.size() == 1 else "are"]
 
 ## An open Hunter of this weight (internal: the Try-on rack): `want` if it is open and fits, else the
 ## first open one, else "".
@@ -181,9 +205,13 @@ static func open_needed(id: String) -> int:
 
 ## Can it be unlocked now (by holding)?
 static func can_unlock(id: String) -> bool:
-	if not Arch.exists(id) or is_open(id) or needs_starters():
+	if not Arch.exists(id) or is_open(id) or needs_starters() or is_bonus(id):
 		return false
 	return bool(challenge_progress(id)["done"]) and open_ids().size() >= open_needed(id)
+
+## Waiting to open after the first expedition.
+static func is_bonus(id: String) -> bool:
+	return (state().get("bonus", []) as Array).has(id)
 
 static func ready_count() -> int:
 	if all_open() or needs_starters():
@@ -205,6 +233,8 @@ static func status(id: String) -> String:
 static func requirement(id: String) -> String:
 	if is_open(id):
 		return ""
+	if is_bonus(id):
+		return "Opens after your first expedition"
 	if can_unlock(id):
 		return "Ready: hold to unlock it on the Hunters screen"
 	var gp := challenge_progress(id)
@@ -274,6 +304,7 @@ static func after_match(r: Dictionary) -> Dictionary:
 	var c := state()
 	if c.is_empty():
 		return {}
+	open_bonus()
 	var played := String(r.get("arch", Arch.of_save()))
 	var before := _done_goals(played)
 	var counts := match_counts(r)

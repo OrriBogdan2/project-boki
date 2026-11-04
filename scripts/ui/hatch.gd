@@ -1,6 +1,6 @@
 extends Node3D
 ## The first thing a new player sees after the prologue: one short card, then three eggs on a little
-## island. Pick one, pick your second Hunter (Vex is already yours), knock on the shell until it
+## island. Pick your Hunter, pick an egg, knock on the shell until it
 ## hatches, name what comes out and yourself, then head into the tutorial match together.
 
 ## The three starter eggs plus a mystery one. Names, tempers and blurbs come from each species'
@@ -27,7 +27,7 @@ var cam: Camera3D
 var fx: Fx
 var eggs: Array = []          # {node, base, data}
 var chosen := -1
-var stage := "intro"          # intro (the card) | pick (eggs) | class (your second Hunter) | warm | hatching | name
+var stage := "intro"          # intro (the card) | hunter (your Hunter) | pick (eggs) | warm | hatching | name
 var card_box: Control
 var warmth := 0.0
 var warm_bar: Control
@@ -109,15 +109,14 @@ func _ready() -> void:
 		# test: straight to choosing an egg
 		if not Save.d.has("look"): Save.d["look"] = Models.default_look()
 		_end_intro()
+		if stage == "hunter": _take_hunter([ClassUnlock.starters()[0]])
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--hatch-auto="):
 			var i := int(a.substr(13))
 			if not Save.d.has("look"): Save.d["look"] = Models.default_look()
 			_end_intro()
+			if stage == "hunter": _take_hunter([ClassUnlock.starters()[0]])
 			_pick(i); _pick(i)
-			if stage == "class":
-				starter_picks = [ClassUnlock.starters()[0]]
-				_confirm_starters()
 			auto_warm = true
 
 ## The set for a new game: a carved stone dais floating at dusk, a rune circle glowing under your
@@ -340,7 +339,10 @@ func _end_intro() -> void:
 		if not Save.d.has("look"):
 			Save.d["look"] = Models.default_look()      # (change it later: Settings, Change your look)
 		cam_to = Vector3(0, 3.6, 6.4)
-		_show_pick()
+		if ClassUnlock.needs_starters():
+			_show_hunter_pick()
+		else:
+			_show_pick()
 
 var turning := false
 func _unhandled_input(event: InputEvent) -> void:
@@ -376,43 +378,29 @@ func _clear_bottom() -> void:
 	for ch in bottom.get_children():
 		ch.queue_free()
 
-# ---- your second Hunter (the first is yours already; ClassUnlock, ClassPick)
+# ---- your Hunter: 1 of the starters, before the egg (ClassUnlock, ClassPick). The tutorial plays as it.
 var starter_picks: Array = []
 
-func _show_class_pick(on := "") -> void:
-	stage = "class"
-	if on == "" or not ClassUnlock.starters().has(on):
-		on = String(ClassUnlock.starters()[0])
+func _show_hunter_pick() -> void:
+	stage = "hunter"
 	top_box.visible = false      # (the pick panel carries its own heading: the viewer needs the height)
 	_clear_bottom()
 	cam_to = Vector3(-3.5, 4.2, 9.0)
-	bottom.add_child(ClassPick.row(on, starter_picks, _chip_clicked))
-	var go := UI.primary(_start_text(), _confirm_starters, 300)
-	go.disabled = starter_picks.size() != ClassUnlock.picks_needed()
-	bottom.add_child(go)
+	bottom.add_child(ClassPick.row(starter_picks, _take_hunter))
 
-func _start_text() -> String:
-	if starter_picks.size() != ClassUnlock.picks_needed():
-		return "Pick one of the three"
-	return "Take %s" % Arch.name_of(String(starter_picks[0]))
-
-## Vex is the Hunter of the tutorial; the pick opens on the farm.
-func _confirm_starters() -> void:
-	if not ClassUnlock.choose_starters(starter_picks):
+func _take_hunter(ids: Array) -> void:
+	if not ClassUnlock.choose_starters(ids):
 		return
-	var first := ClassUnlock.first_hunter()
+	var first := String(ids[0])
 	Save.d["arch"] = first
 	Save.d["cls"] = Arch.weight(first)
 	Save.d["weapon"] = Arch.signature(first)
 	Save.save_game()
 	Sfx.play("click")
 	top_box.visible = true
-	_start_hatch()
-
-func _chip_clicked(id: String) -> void:
-	Sfx.play("hover", null, -6.0)
-	starter_picks = ClassPick.toggle(starter_picks, id)
-	_show_class_pick(id)
+	stage = "pick"
+	cam_to = Vector3(0, 3.6, 6.4)
+	_show_pick()
 
 # ---- your hunter
 const LOOK_ROWS := [["race", "Race", Models.LOOK_RACES], ["gender", "Gender", Models.LOOK_GENDERS], ["body", "Body", Models.LOOK_BODIES], ["face", "Face", Models.LOOK_FACES],
@@ -629,10 +617,7 @@ func _pick(i: int) -> void:
 	if stage != "pick":
 		return
 	if chosen == i:
-		if ClassUnlock.needs_starters():
-			_show_class_pick()
-		else:
-			_start_hatch()
+		_start_hatch()
 		return
 	chosen = i
 	Sfx.play("click")

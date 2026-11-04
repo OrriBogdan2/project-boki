@@ -180,16 +180,15 @@ func _front() -> void:
 		note_bad("not on the hatch screen after the prologue"); return
 	hx._end_intro()
 	await wait(2.0)
+	await shot("hunter_pick")
+	hx._take_hunter([ClassUnlock.starters()[0]])
+	await wait(1.0)
 	await shot("egg_pick")
 	hx._pick(0)
 	await wait(0.8)
 	await shot("egg_chosen")
 	press("Hatch it")
-	await wait(1.5)
-	await shot("hunter_pick")
-	hx.starter_picks = [ClassUnlock.starters()[0]]
-	hx._confirm_starters()
-	await wait(1.0)
+	await wait(2.5)
 	for i in 7:
 		hx._tap_egg()
 		await wait(0.35)

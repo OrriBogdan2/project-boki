@@ -241,16 +241,16 @@ def gen_classes():
     for aid in ARCH_ORDER:
         if aid not in ARCH: continue
         ch = cu["unlock"].get(aid, {})
-        when = "pick at the start, else " if aid in cu["starters"] else ""
+        when = "starter, else " if aid in cu["starters"] else ""
         after = ", once %d Hunters are open" % ch["after"] if ch.get("after") else ""
-        if aid == cu["first"]:
-            cu_rows.append([link(class_page_name(aid), ARCH[aid]["title"]), "yours from the start", "none", "-"])
+        if not ch:
+            cu_rows.append([link(class_page_name(aid), ARCH[aid]["title"]), "starter", "pick at the start, or after your first expedition", "-"])
         else:
             cu_rows.append([link(class_page_name(aid), ARCH[aid]["title"]), when + ch.get("tier", "?"), ch.get("text", "") + after, num(ch.get("target", "?"))])
         for g in cu["mastery"].get(aid, []):
             m_rows.append([ARCH[aid]["title"], g["text"], num(g["target"]), "%s: %s" % (kinds.get(g["reward"]["kind"], g["reward"]["kind"]), g["reward"]["name"])])
     starters = ", ".join(ARCH[a]["title"] for a in cu["starters"] if a in ARCH)
-    unlock = "### How Hunters unlock\n\nEvery save starts with %s. In the new-game flow you pick %d of %d more (%s). " % (ARCH[cu["first"]]["title"], cu["starter_picks"], len(cu["starters"]), starters)
+    unlock = "### How Hunters unlock\n\nA new save picks %d of %d starters (%s) before the egg pick and plays the tutorial as it. The other starters open after your first expedition. " % (cu["starter_picks"], len(cu["starters"]), starters)
     unlock += "Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for %s, and letting go early cancels it. " % secs(cu.get("hold_s", 1.6))
     unlock += "Tiers: easy is %s, medium %s, hard %s. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.\n\n" % (cu["tiers"]["easy"], cu["tiers"]["medium"], cu["tiers"]["hard"])
     unlock += table(["Hunter", "Tier", "Challenge", "Target"], cu_rows)
