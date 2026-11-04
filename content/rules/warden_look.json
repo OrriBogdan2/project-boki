@@ -71,7 +71,9 @@
 			"hair": {"far_lift": 0.45, "fres": 0.5, "fres_tint": 0.4},
 			"leather": {"fres": 0.8, "fres_tint": 0.4, "far_lift": 0.45, "light_neutral_warm": 0.6},
 			"metal": {"fres": 0.8, "fres_tint": 0.55, "far_lift": 0.5},
-			"glow": {"glow": 0.3}
+			"glow": {"glow": 0.12},
+			"cloth": {"fres": 2.6, "fres_color": [0.8, 0.93, 1.0], "fres_tint": 0.1, "gloss": 0.6, "top_light": 0.2,
+				"far_lift": 0.1, "rim_far": 0.5, "light_neutral_warm": 0.8}
 		},
 		"halos": [
 			{"anchor": "anchor_eye_l", "color": [0.72, 0.9, 1.0], "strength": 2.0, "px": 2.0, "near_d": 7.0, "far_d": 14.0},

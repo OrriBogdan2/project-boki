@@ -312,6 +312,17 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 
 Claire total: 4 tasks, 67 credits.
 
+### Claire b3 (Phase B), 2026-11-04 (balance 3804 before, 3688 after: 116 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Claire b3 edit front | 15:19 | 01a1a724-7f04-7753-b255-e723662d89a4 | nano-banana-pro (image-to-image) | from the stage-1 front edit: horns and both front pigtails out | 9 | Hair still over the shoulders: edited again |
+| Claire b3 edit side | 15:19 | 01a1a724-7f25-76a1-ada4-73ba1e51191c | nano-banana-pro | from the stage-1 side edit: horn and front pigtail out | 9 | Kept |
+| Claire b3 edit back | 15:19 | 01a1a724-7f90-768e-9e37-54ec4828f78d | nano-banana-pro | from the stage-1 back edit: horns out | 9 | Kept |
+| Claire b3 edit front 2 | 15:21 | 01a1a726-cb4f-7065-bcfa-bfd188419b67 | nano-banana-pro | the hair entirely behind her back, shoulders and upper arms clear | 9 | Kept |
+| Claire B3 off | 15:23 | 01a1a728-1c2b-7750-92eb-9e34b9a3b54c | meshy-7.1 | 3 edited views (front, side, back) as images and texture refs; geometry 2k, meshy-7 texture 8k, PBR, no remesh, a-pose, enhancement off | 40 | **Kept**: a clean chest and shoulders, long wavy hair behind, skates |
+| Claire B3 on | 15:23 | 01a1a728-1c2c-77d4-be29-f85cb8df23af | meshy-7.1 | as B3 off, enhancement on | 40 | Dropped: legs wide apart, arms flung out |
+
+
 ### Vex r3c and r3d (2026-11-04): credit-free
 r3c (09:00-10:30) and r3d (11:25-13:30) used no Meshy credits: every change is in the fit spec, the parts tools, the
 paint-over, the shared look (16c18b4f) and warden_look.json. Recipe: RECIPE_95.md.

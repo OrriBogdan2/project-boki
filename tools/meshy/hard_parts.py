@@ -105,10 +105,10 @@ def ice_paint(u, v):
 
 def clear_ice_paint(u, v):
     """Clear ice (Claire's spear shaft): pale blue-white, a lighter core streak, faint cracks."""
-    lo, mid, hi = hexcol("7fa2d8"), hexcol("a9c6ee"), hexcol("e4f0ff")
+    lo, mid, hi = hexcol("5f8ed0"), hexcol("8fb8ec"), hexcol("e8f4ff")
     n = noise(u, v, 7.0, 3)
     col = lo[None, None] * (1 - n[..., None]) * 0.45 + mid[None, None] * (0.55 + 0.45 * n[..., None])
-    core = np.exp(-((u - 0.5) / 0.12) ** 2)[..., None] * 0.6
+    core = np.exp(-((u - 0.5) / 0.08) ** 2)[..., None] * 0.45
     col = col * (1 - core) + hi[None, None] * core
     crack = np.exp(-((np.sin(u * 9.0 + np.sin(v * 7.0) * 1.6) * 0.5 + 0.5 - 0.5) / 0.03) ** 2)
     return col * (1 - 0.15 * crack[..., None])
@@ -456,7 +456,8 @@ def spear(spec):
               cells["ice"], "ice")
     ob = finish(bld, "weapon")
     img = at.image("spear_atlas")
-    mats = {"ice": material(ob, "ice", "spear", img)}
+    # (slot: Claire's spear on its own slot, so its look can read as glassy ice apart from her pale ice costume)
+    mats = {"ice": material(ob, spec.get("slot", "ice"), "spear", img)}
     for p in ob.data.polygons:
         p.material_index = mats["ice"]
     hard_edges(ob, 35.0)
@@ -576,6 +577,10 @@ def wings(spec, body, arm, rig):
     # the wing's texture: the art's pixels, the membrane's own colour bled past its edge
     th, tw = crop.shape[:2]
     tex = crop.copy()
+    if spec.get("fill_median"):
+        # (the card's pixels outside the art's wing, its cut edge and the dropped hair: one membrane colour, not
+        # the bleed's streaks dragged across them)
+        tex[~blob] = np.median(crop[blob & (crop.mean(axis=2) < 0.5)], axis=0)
     keep = blob.copy()
     for _i in range(int(spec.get("bleed", 6))):     # (past the simplified outline's corners too)
         grow = keep.copy()
@@ -616,6 +621,8 @@ def wings(spec, body, arm, rig):
             z = (float(spec["sole_y"]) - (y0 + py)) * k
             local = np.array([sx * d * math.cos(sweep) * wscale[0], -d * math.sin(sweep) * wscale[0],
                               (z - root[2]) * wscale[1]])
+            # (tilt: the card leans back above its root, so the match camera looking down sees its face)
+            local[1] -= max(0.0, local[2]) * math.tan(math.radians(float(spec.get("tilt", 0.0))))
             return root + local - np.array([0.0, layer * gap, 0.0])
 
         for layer in (0, 1):
@@ -764,7 +771,7 @@ def horns(spec, arm):
             x = sx * (xa + (xb - xa) * math.sin(t * math.pi * 0.5))
             rings.append(np.array([x, c[1] + r * math.cos(ph), c[2] + r * math.sin(ph)]))
             base = t0 + (t1 - t0) * t ** 0.9
-            radii.append(max(1e-4, base * (1.0 + 0.09 * math.cos(t * ridges * 2 * math.pi))))
+            radii.append(max(1e-4, base * (1.0 + float(spec.get("ridge_amp", 0.09)) * math.cos(t * ridges * 2 * math.pi))))
         bld.tube(rings, radii, 12, cell[0], cell[2], cell[1], cell[3], "horn", [0.0] * n, cap_end=True,
                  cap_start=True)
     ob = finish(bld, "horns")
