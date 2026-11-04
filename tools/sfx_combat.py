@@ -531,7 +531,7 @@ def build():
                    reflections(tail(0.9, 1600, 0.2) * 1.1))
     takes('pay_called', pay_called, 1, rms_db=-14)
 
-    # Bjorn (bulwark) Shield Slam: a huge plate clang (inharmonic), a body slam under it, and a ringing shimmer
+    # Breaker (bulwark) Shield Slam: a huge plate clang (inharmonic), a body slam under it, and a ringing shimmer
     def pay_slam(i):
         d = 1.2
         f = 330

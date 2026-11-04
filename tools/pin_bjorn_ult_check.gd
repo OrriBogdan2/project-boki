@@ -1,5 +1,5 @@
 extends "res://tools/archer_bulwark_combo_check.gd"
-## The X ultimates of Pin (Starpiercer) and Bjorn (Faultline), run from --archer-combo-check and
+## The X ultimates of Pin (Starpiercer) and Breaker (Faultline), run from --archer-combo-check and
 ## --bulwark-combo-check (tools/archer_bulwark_combo_check.gd adds its counts): the level gate, the cast,
 ## the telegraph, the payoff, the cooldown, bond sent only on a land, the small mechanics, a merge
 ## dropping the holds, and the burst cap (the whole ult, then a merge, never takes a full-health light

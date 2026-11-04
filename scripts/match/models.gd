@@ -1655,7 +1655,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			merge_static(spin)
 			part(gun, box(0.08, 0.18, 0.14), m_dark, Vector3(0, -0.17, 0.0))
 		"longbow", "tower_shield":
-			PinBjornWeapons.build(gun, weapon, m_dark, m_acc)      # Pin's recurve, Bjorn's war hammer and aegis
+			PinBjornWeapons.build(gun, weapon, m_dark, m_acc)      # Pin's recurve, Breaker's war hammer and aegis
 		"coilcaster":
 			# Ryzz's forearm coil: a copper tube wound in rings with a glowing mouth and a bracer grip
 			var cop := shiny(Color("c8793c"), 0.7)

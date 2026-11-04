@@ -1,6 +1,6 @@
 class_name BjornUlt
 extends Node3D
-## Bjorn's ultimate on X, Faultline (docs/heroes/bulwark.md; hero sheet bjorn.md "Ultimate"). A tap plants
+## Breaker's ultimate on X, Faultline (docs/heroes/bulwark.md; hero sheet bjorn.md "Ultimate"). A tap plants
 ## him and raises the hammer for "windup" s while a lane of "cells" square cells ("cell_len" by "width")
 ## shows toward the cursor for everyone. Then the slam: the near cell is struck (a small hit and a brief
 ## stun) and the ground erupts cell by cell to the far end ("cell_t" apart), throwing each foe on it up

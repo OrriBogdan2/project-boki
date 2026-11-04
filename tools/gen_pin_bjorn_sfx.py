@@ -1,4 +1,4 @@
-"""Synthesizes Pin's and Bjorn's ability sounds into audio/*.wav (mono, 22.05 kHz, 16-bit).
+"""Synthesizes Pin's and Breaker's ability sounds into audio/*.wav (mono, 22.05 kHz, 16-bit).
 
     python3 tools/gen_pin_bjorn_sfx.py      (then: godot --headless --import)
 
@@ -22,7 +22,7 @@ Pin (archer)
   pin_patter       one arrow of the rain striking: a small dry tick
   pin_spirit       Spirit Walk: a quick roll whoosh into an airy, hollow shimmer
   pin_spirit_end   Spirit Walk ending: a soft falling chime
-Bjorn (bulwark)
+Breaker (bulwark)
   bjorn_throw      the hammer thrown: a heavy whoof and a tumbling whirr
   bjorn_recall     the hammer called back: a rising whirr
   bjorn_catch      the catch: a leather-and-iron slap
@@ -150,7 +150,7 @@ def pin():
                            scale(at(mul(bp(noise(0.7), 3000, 9000), env(N(0.7), 0.1, 0.25)), 0.12), 0.3)), -18)
     save('pin_spirit_end', mix(bell(1320, 0.5, 0.14), scale(at(bell(990, 0.5, 0.14), 0.08), 0.7)), -22)
 
-# ------------------------------------------------------------------ Bjorn
+# ------------------------------------------------------------------ Breaker
 def bjorn():
     whirr = [0.0] * N(0.5)
     for k in range(5):

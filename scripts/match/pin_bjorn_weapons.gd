@@ -1,9 +1,9 @@
 class_name PinBjornWeapons
 extends RefCounted
-## The signature weapon models of Pin (the longbow) and Bjorn (his war hammer and aegis shield), built
+## The signature weapon models of Pin (the longbow) and Breaker (his war hammer and aegis shield), built
 ## into the hunter's "Gun" node (Models.hunter calls build). Our own shapes: Pin's bow is a layered recurve
 ## with pale horn tips, a leather grip and a green rune line that glows along both limbs, an arrow nocked
-## on the string; Bjorn's hammer is a squared head with gold face plates, a back fluke and an ember stripe
+## on the string; Breaker's hammer is a squared head with gold face plates, a back fluke and an ember stripe
 ## on a banded haft, under a "Hammer" pivot the kit spins while he charges a swing.
 
 static func build(gun: Node3D, weapon: String, m_dark: Material, m_acc: Material) -> void:

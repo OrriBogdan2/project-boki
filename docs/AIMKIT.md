@@ -144,7 +144,7 @@ AimKit.line(h, "aim", {"len": 20.0})                          # past the cursor 
 AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Tarek Tetraform: a long line, inward chevrons, centre ring
 AimKit.star(h, "lock", {"at": foe.pos, "size": 0.5})          # a glint on the ground
 ```
-The two parallel lines (Ostra RMB) are `lane` with `"rails": true` and no chevrons. The Bjorn R
+The two parallel lines (Ostra RMB) are `lane` with `"rails": true` and no chevrons. The Breaker R
 rectangle is a plain `lane`. The Juggernaut hold-blast arc round the body is `circle` with
 `"self": true`. A target highlight ring at someone's feet is a small `circle` at their position. Ryzz's E is a
 `circle` with `ticks` and `"pointer": drag_dir`, plus a `lane` with `"from": disc, "tip": true` for the

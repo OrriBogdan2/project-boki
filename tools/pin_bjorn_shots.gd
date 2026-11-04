@@ -1,5 +1,5 @@
 extends RefCounted
-## --pin-bjorn-shots --shots-dir=<dir> [--before]: screenshots of Pin's and Bjorn's abilities, run
+## --pin-bjorn-shots --shots-dir=<dir> [--before]: screenshots of Pin's and Breaker's abilities, run
 ## through the real kits with scripted input on a flat stretch of island (xvfb, a renderer). Each shot is
 ## [file stem, hero, script, capture time s, camera lead m east, caption]. Writes <dir>/MANIFEST.txt as
 ## `<hero>/v2|<file>|<caption>`. --before runs only the "before/after" set, touching nothing but input
@@ -153,7 +153,7 @@ const SHOTS := [
 		3.0,
 		"Hail Wall: seven green panels with fletch posts, arrows streaking down, blue burn flames on the dummy"
 	],
-	# ------------------------------------------------ Bjorn
+	# ------------------------------------------------ Breaker
 	[
 		"bjorn_throw_flight",
 		"bulwark",
@@ -267,7 +267,7 @@ const SHOTS := [
 		"crush",
 		1.8,
 		1.5,
-		"Passive payoff: a full Crushing Blow drives the dummy into a rock: CRUSHED, stunned, Bjorn healed"
+		"Passive payoff: a full Crushing Blow drives the dummy into a rock: CRUSHED, stunned, Breaker healed"
 	],
 	# ------------------------------------------------ the ultimates on X (MANIFEST under <hero>/v2/ult)
 	[
@@ -504,7 +504,7 @@ const OWNER := [
 		"slam_dummy",
 		2.04,
 		2.5,
-		"owner1103 #30: the held swing, strip 4/5, the dummy knocked back, Bjorn carried forward"
+		"owner1103 #30: the held swing, strip 4/5, the dummy knocked back, Breaker carried forward"
 	],
 	[
 		"o1103_bjorn_swing_e",
@@ -520,7 +520,7 @@ const OWNER := [
 		"smash",
 		0.53,
 		2.5,
-		"owner1103 #35: Bjorn's ground dash (360 Smash), strip 1/5, the push-off"
+		"owner1103 #35: Breaker's ground dash (360 Smash), strip 1/5, the push-off"
 	],
 	[
 		"o1103_bjorn_dash_b",
@@ -528,7 +528,7 @@ const OWNER := [
 		"smash",
 		0.6,
 		2.5,
-		"owner1103 #35: Bjorn's ground dash (360 Smash), strip 2/5, the stretched run-up behind the hammer"
+		"owner1103 #35: Breaker's ground dash (360 Smash), strip 2/5, the stretched run-up behind the hammer"
 	],
 	[
 		"o1103_bjorn_dash_c",
@@ -536,7 +536,7 @@ const OWNER := [
 		"smash",
 		0.72,
 		2.5,
-		"owner1103 #35: Bjorn's ground dash (360 Smash), strip 3/5, the spin on arrival"
+		"owner1103 #35: Breaker's ground dash (360 Smash), strip 3/5, the spin on arrival"
 	],
 	[
 		"o1103_bjorn_dash_d",
@@ -544,7 +544,7 @@ const OWNER := [
 		"smash",
 		0.86,
 		2.5,
-		"owner1103 #35: Bjorn's ground dash (360 Smash), strip 4/5, the low crouched recovery"
+		"owner1103 #35: Breaker's ground dash (360 Smash), strip 4/5, the low crouched recovery"
 	],
 	[
 		"o1103_bjorn_dash_e",
@@ -552,7 +552,7 @@ const OWNER := [
 		"smash",
 		1.05,
 		2.5,
-		"owner1103 #35: Bjorn's ground dash (360 Smash), strip 5/5, settled"
+		"owner1103 #35: Breaker's ground dash (360 Smash), strip 5/5, settled"
 	],
 	[
 		"o1103_bjorn_air_dash_a",
@@ -560,7 +560,7 @@ const OWNER := [
 		"lumber",
 		0.52,
 		2.5,
-		"owner1103 #35: Bjorn's air dash (the lumbering shove), strip 1/5, the shove off"
+		"owner1103 #35: Breaker's air dash (the lumbering shove), strip 1/5, the shove off"
 	],
 	[
 		"o1103_bjorn_air_dash_b",
@@ -568,7 +568,7 @@ const OWNER := [
 		"lumber",
 		0.58,
 		2.5,
-		"owner1103 #35: Bjorn's air dash (the lumbering shove), strip 2/5, shoulder first"
+		"owner1103 #35: Breaker's air dash (the lumbering shove), strip 2/5, shoulder first"
 	],
 	[
 		"o1103_bjorn_air_dash_c",
@@ -576,7 +576,7 @@ const OWNER := [
 		"lumber",
 		0.66,
 		2.5,
-		"owner1103 #35: Bjorn's air dash (the lumbering shove), strip 3/5, the lumber through the air"
+		"owner1103 #35: Breaker's air dash (the lumbering shove), strip 3/5, the lumber through the air"
 	],
 	[
 		"o1103_bjorn_air_dash_d",
@@ -584,7 +584,7 @@ const OWNER := [
 		"lumber",
 		0.76,
 		2.5,
-		"owner1103 #35: Bjorn's air dash (the lumbering shove), strip 4/5, the end of the shove"
+		"owner1103 #35: Breaker's air dash (the lumbering shove), strip 4/5, the end of the shove"
 	],
 	[
 		"o1103_bjorn_air_dash_e",
@@ -592,7 +592,7 @@ const OWNER := [
 		"lumber",
 		0.9,
 		2.5,
-		"owner1103 #35: Bjorn's air dash (the lumbering shove), strip 5/5, falling out of it"
+		"owner1103 #35: Breaker's air dash (the lumbering shove), strip 5/5, falling out of it"
 	],
 	[
 		"o1103_bjorn_abyss",

@@ -1,6 +1,6 @@
 class_name KMovesPinBjorn
 extends RefCounted
-## Keyed full-body moves of Pin (archer) and Bjorn (bulwark): the same format and channels as
+## Keyed full-body moves of Pin (archer) and Breaker (bulwark): the same format and channels as
 ## HunterAnim.KMOVES (looked up by HunterAnim.km_sample). Timed to the hero sheets' 5 fps footage frames
 ## (one frame = 0.2 s): anticipation, a key pose on the release, overshoot, follow-through and settle.
 ## fl / fr place a free hand from its shoulder (hw / rw their weight), gp pitches the weapon.
@@ -284,7 +284,7 @@ const MOVES := {
 				"fr": Vector3(0.15, -0.1, 0.35)
 			}
 		]]},
-	# ---------------------------------------------------------------- Bjorn (bulwark; hero sheet bjorn.md)
+	# ---------------------------------------------------------------- Breaker (bulwark; hero sheet bjorn.md)
 	# the hammer thrown: cocked far back and low for one frame, leaning away, then an overhand throw that
 	# overshoots past the front before it settles
 	"bul_throw": {"keys": [
@@ -745,7 +745,7 @@ const MOVES := {
 		],
 		[0.22, {"lift": 0.0, "p": -0.05, "sq": 0.12, "hw": 1.0, "fl": Vector3(0.05, 0.35, -0.05)}],
 		[0.45, {}]]},
-	# ---------------------------------------------------------------- Bjorn: procs, payoffs and the base dash
+	# ---------------------------------------------------------------- Breaker: procs, payoffs and the base dash
 	# Crushed (the payoff): the hammer swung up overhead in triumph, a stamp, the chest out
 	"bul_crush": {"keys": [
 		[0.0, {}],

@@ -6,7 +6,7 @@ Changing a hero's hit radius is one line (`body.hit_r`). The creator's look slid
 
 | Archetype | Warden | x standard | `hit_r` (m) | Why |
 |---|---|---|---|---|
-| bulwark | Bjorn | 1.15 | 0.460 | tallest and widest |
+| bulwark | Breaker | 1.15 | 0.460 | tallest and widest |
 | dredge | Dredge | 1.13 | 0.452 | hulking |
 | juggernaut | Zedran | 1.07 | 0.428 | broad |
 | gunslinger | Venator | 1.04 | 0.416 | broad |

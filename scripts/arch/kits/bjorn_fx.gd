@@ -1,6 +1,6 @@
 class_name BjornFx
 extends Node3D
-## Bjorn's own effects, every one pooled (built once when the kit starts). The coloured ones are layered
+## Breaker's own effects, every one pooled (built once when the kit starts). The coloured ones are layered
 ## (KitShaders): an alpha-blended body in his gold, orange and red with the glow on top, so they keep their
 ## colour on bright grass.
 ## - the thrown hammer (tumbling, a gold-orange glow and trail), planted head-down in the ground under an

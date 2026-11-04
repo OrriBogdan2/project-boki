@@ -9,7 +9,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 |  |  |
 |---|---|
 | Class title | Frozen Bulwark |
-| Base character | Bjorn, male |
+| Base character | Breaker, male |
 | Personality | A huge, warm-hearted northern ferryman in a fur-lined coat, carrying the frozen, iron-banded prow of his old ship as a shield. He laughs easily and guards everyone near him. Small things are off: frost that never melts on him, and no breath in the cold. |
 
 <!-- /gen:profile -->

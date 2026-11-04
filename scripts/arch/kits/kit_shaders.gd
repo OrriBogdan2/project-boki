@@ -1,6 +1,6 @@
 class_name KitShaders
 extends RefCounted
-## Our own effect shaders for the Pin and Bjorn kits (pooled meshes in PinFx / BjornFx drive them through
+## Our own effect shaders for the Pin and Breaker kits (pooled meshes in PinFx / BjornFx drive them through
 ## uniforms). Every one is unshaded, casts no shadow and never writes depth, so stacked effects can't
 ## z-fight the ground. Built once and cached.
 ##
@@ -74,7 +74,7 @@ static func _one(kind: String, col: Color, body_pass: bool) -> ShaderMaterial:
 
 static func _code(kind: String) -> String:
 	match kind:
-		# a four-point star with a soft core and an optional ring (impact stars, Bjorn's glint and flare); it
+		# a four-point star with a soft core and an optional ring (impact stars, Breaker's glint and flare); it
 		# draws over everything, since an impact star sits inside the body it hit
 		"star":
 			return """shader_type spatial;
@@ -187,7 +187,7 @@ void fragment() {
 	ALPHA = clamp(a, 0.0, 1.0) * color.a;
 }
 """
-		# a flaming crescent ribbon (Bjorn's slam): uv.x along the arc, uv.y from the inner to the outer edge;
+		# a flaming crescent ribbon (Breaker's slam): uv.x along the arc, uv.y from the inner to the outer edge;
 		# a white-yellow core, orange then red edges, burning away from its tail as life runs down
 		"crescent":
 			return """shader_type spatial;
@@ -207,7 +207,7 @@ void fragment() {
 	vec3 col = mix(vec3(0.85, 0.1, 0.04), color.rgb, clamp((across - 0.1) / 0.4, 0.0, 1.0));
 	col = mix(col, vec3(1.0, 0.95, 0.62), clamp((across - 0.62) / 0.3, 0.0, 1.0));
 """ + _TAIL
-		# a light pillar: brightest on its rim (seen side-on), rising chevron bands (Bjorn's beacon, Purify's column)
+		# a light pillar: brightest on its rim (seen side-on), rising chevron bands (Breaker's beacon, Purify's column)
 		"beam":
 			return """shader_type spatial;
 render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled;
@@ -230,7 +230,7 @@ void fragment() {
 	float a = (0.18 + rim * 0.75 + chev * 0.55) * fade * power;
 	vec3 col = mix(color.rgb, vec3(1.0), chev * 0.4 + rim * 0.2);
 """ + _TAIL
-		# a swirling ring band flat on the ground (Bjorn's 360 Smash, Purify's rings): uv.x round, uv.y across
+		# a swirling ring band flat on the ground (Breaker's 360 Smash, Purify's rings): uv.x round, uv.y across
 		"swirl":
 			return """shader_type spatial;
 render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled;
@@ -249,7 +249,7 @@ void fragment() {
 	float a = pow(across, 1.1) * (0.35 + 0.65 * streak) * life * power;
 	vec3 col = mix(color.rgb, color2.rgb, streak * across);
 """ + _TAIL
-		# Bjorn's aegis: a solid pale-gold slab with horizontal ribs, a bright rim, his hammer sigil glowing on
+		# Breaker's aegis: a solid pale-gold slab with horizontal ribs, a bright rim, his hammer sigil glowing on
 		# its face, a shimmer sweeping across, the whole slab flashing on a block and cracking as it weakens
 		"aegis":
 			return """shader_type spatial;

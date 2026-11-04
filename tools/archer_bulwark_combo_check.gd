@@ -822,7 +822,7 @@ func _bulwark_combos() -> void:
 	P.inp["sec_hold"] = false
 	step(m, 0.5)
 	_wall_at(m, home, lv, 3)
-	# the long dash (no charges left): Bjorn's lumbering shove
+	# the long dash (no charges left): Breaker's lumbering shove
 	reset.call()
 	P.dashes = 0.0
 	P.ex_cd = 0.0
