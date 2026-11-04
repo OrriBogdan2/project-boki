@@ -2140,3 +2140,8 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - **Touches shared code:** new `LDFx.wisp` (mode 13 in the shared ld_fx shader) + an `anchor_stack` model point; DredgeKit uses it. Additive (new mode only).
 - Rubric v2 (calibrated): full 64->68, face 62->68, match 58->61, dark 52->55. Checks 0 failures: warden-model, warden-glb, hero-combo 263, dredge-combo 93, rig-standard, warden-stance, health --strict OK. 0 credits.
 - Shots: ext/hero-shots-s2 warden-3d/dredge/r3l_*. Open: torn edges only a few pixels at match zoom, one smoke ribbon (art: both shoulders), pupil renders orange, no grille.
+
+## 2026-11-04 (S2): READY TO MERGE (follow-up sync): Dredge r3m ext/warden-dredge-friend abf5f812 (supersedes c71d91e9 r3l)
+- Seven heavy tar drips ending in drops (from the porthole lip, grille and side port), three bigger torn holes on the pod edges and belly, smoke ribbons over both shoulders and the stack, the grille under the porthole, a small pink-red pupil with a bright centre inside the cracked blue-grey glass (as the art; not the old "red ball + white dot" ORCH rejected), hull top less pale at match zoom. Limbs present in every view (verified).
+- Rubric v2 (calibrated): full 68->71, face 68->72, match 61->63, dark 55->58. Checks 0 failures: warden-model, warden-glb, hero-combo 263, dredge-combo 93, rig-standard, warden-stance, health --strict OK. 0 credits.
+- Shots: ext/hero-shots-s2 warden-3d/dredge/r3m_*. Open: drips/torn centres still small at match zoom; the darker top gives back some of the r3k value lift.
