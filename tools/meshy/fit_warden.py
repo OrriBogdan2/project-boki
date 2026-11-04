@@ -822,6 +822,49 @@ def gun_weapon(gun, e, t, rig, ga):
     return gun, spin
 
 
+def cut_strands(ob, img, cs):
+    """Hair strands Meshy hung in front of the face (they cross the mask in the 3/4 view): dark-painted faces in the
+    face's box (Meshy frame, front -Y) lying in front of the face's own surface (the nearest light-painted
+    vertices in the front view, `gap` m) are removed."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    me = ob.data
+    uv = me.uv_layers.active.data
+    x0, x1, z0, z1 = cs["box"]
+    co = np.array([v.co[:] for v in me.vertices])
+    vcol = np.zeros(len(co))
+    vn = np.zeros(len(co))
+    dark = []
+    for p in me.polygons:
+        u = sum(uv[i].uv.x for i in p.loop_indices) / p.loop_total
+        v = sum(uv[i].uv.y for i in p.loop_indices) / p.loop_total
+        lum = float(px[min(h - 1, max(0, int(v * h))), min(w - 1, max(0, int(u * w))), :3].mean())
+        for i in p.vertices:
+            vcol[i] += lum
+            vn[i] += 1
+        c = p.center
+        if lum < float(cs.get("dark", 0.2)) and x0 <= c.x <= x1 and z0 <= c.z <= z1:
+            dark.append(p.index)
+    vlum = vcol / np.maximum(vn, 1)
+    inbox = (co[:, 0] >= x0) & (co[:, 0] <= x1) & (co[:, 2] >= z0) & (co[:, 2] <= z1)
+    face = co[inbox & (vlum > float(cs.get("light", 0.45)))]
+    gap = float(cs.get("gap", 0.004))
+    drop = []
+    for i in dark:
+        c = me.polygons[i].center
+        dd = np.hypot(face[:, 0] - c.x, face[:, 2] - c.z)
+        if len(dd) and dd.min() < 0.015 and c.y < face[int(np.argmin(dd)), 1] - gap:
+            drop.append(i)
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[bm.faces[i] for i in drop], context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    bm.to_mesh(me)
+    bm.free()
+    log("cut %d strand faces in front of the face" % len(drop))
+
+
 def plant_feet(ob, rig, ft):
     """Boots drawn hanging (Pin's art floats on smoke): each foot below `top` turns toes-up about the lower shin's
     middle by `angle` degrees (in full below `full`, blended above), its toe shortened to `toe` of its length,
@@ -965,6 +1008,9 @@ def main():
     for pj in spec.get("project", []):
         project(ob, img, pj)
     pad(img, ids, int(spec.get("pad", 6)))
+    if "cut_strands" in spec:
+        cut_strands(ob, img, spec["cut_strands"])
+        drop_floaters(ob, spec.get("floater_verts", 40))
     slot_split(ob, img, spec["palette"], spec["glow_min"], "body")
     head = None
     if "head" in spec:

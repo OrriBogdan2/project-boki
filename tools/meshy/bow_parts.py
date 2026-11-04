@@ -16,7 +16,7 @@ import bpy
 from mathutils import Vector
 
 COL = {
-    "lacquer": ("metal", "26252b"), "edge": ("metal", "5a5c66"), "wrap": ("cloth", "a8202f"),
+    "lacquer": ("metal", "26252b"), "edge": ("metal", "3c3e46"), "wrap": ("cloth", "a8202f"),
     "wrap_dk": ("cloth", "6e1520"), "string": ("cloth", "d8d2c4"), "shaft": ("leather", "201f24"),
     "fletch": ("cloth", "b3202f"), "head": ("metal", "d8cbb0"), "horn": ("metal", "141418"),
 }
@@ -159,8 +159,8 @@ def build_bow(height=1.25, depth=0.13, string_y=0.06, x=0.0):
     # the angled fins where the limbs leave the grip (the art's steel-edged flare on the belly side)
     for s in (-1, 1):
         z0, z1, z2 = s * 0.1, s * 0.2, s * 0.32
-        vs = [pt(z0, _f(prof, z0) - 0.02), pt(z1, _f(prof, z1) - 0.065), pt(z2, _f(prof, z2) - 0.012),
-              pt(z1 * 0.9, _f(prof, z1) + 0.0)]
+        vs = [pt(z0, _f(prof, z0) - 0.015), pt(z1, _f(prof, z1) - 0.045), pt(z2, _f(prof, z2) - 0.01),
+              pt(z1 * 0.95, _f(prof, z1) + 0.0)]
         b.poly([v + Vector((0, 0, 0)) for v in vs], "edge", 0.014)
     # the string, tip knot to tip knot
     knot = h * 0.97

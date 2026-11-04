@@ -146,6 +146,7 @@ static func _hold_weapon(root: Node3D, glb: Node3D) -> void:
 		gun.add_child(mag)
 		mag.transform = at
 		mag.name = "Mag"
+		mag.set_meta("glb", true)          # (the .glb's own, not the procedural one: --warden-glb-check)
 
 ## The rig rest of the Warden's model in the neutral look (built once a session).
 static func neutral_rest(arch: String) -> Dictionary:

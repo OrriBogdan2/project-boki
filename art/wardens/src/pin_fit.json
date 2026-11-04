@@ -103,8 +103,8 @@
  "palette_from": "~/meshy/pin/prep/view0.png",
  "snap": 0.6,
  "lift": [
-  0.95,
-  1.02
+  1.0,
+  1.0
  ],
  "project": [
   {
@@ -152,7 +152,7 @@
  "palette": [
   [
    "skin",
-   "c8c8cc"
+   "c4c4ca"
   ],
   [
    "skin",
@@ -175,20 +175,24 @@
    "d8cbb0"
   ],
   [
+   "cloth",
+   "6a6052"
+  ],
+  [
    "leather",
    "2a2a30"
   ],
   [
    "leather",
-   "6a6052"
+   "45444a"
   ],
   [
-   "metal",
-   "5a5c66"
+   "cloth",
+   "3c1018"
   ],
   [
-   "metal",
-   "1e1e24"
+   "cloth",
+   "5a1824"
   ]
  ],
  "glow_min": [
@@ -210,5 +214,38 @@
   "bottom": 0.45,
   "max": 0.75,
   "behind": -0.08
+ },
+ "repaint": [
+  {
+   "hue": [
+    0.93,
+    1.0
+   ],
+   "sat_min": 0.25,
+   "val_min": 0.3,
+   "colour": "8a1c30",
+   "k": 0.6
+  },
+  {
+   "hue": [
+    0.0,
+    0.03
+   ],
+   "sat_min": 0.25,
+   "val_min": 0.3,
+   "colour": "8a1c30",
+   "k": 0.6
+  }
+ ],
+ "cut_strands": {
+  "box": [
+   0.03,
+   0.26,
+   0.58,
+   0.84
+  ],
+  "dark": 0.2,
+  "light": 0.45,
+  "gap": 0.004
  }
 }

@@ -161,4 +161,6 @@ profile views before any run.
 | Vex r2 | 2026-11-04 03:29 | 01a1a49a-5239-71e0-9906-570cbfd9715e | latest | r2 turnaround (2x enlarged): front, 3/4, near profile (her right), back; 30k, PBR, A-pose | 30 | Kept: one run; gun-arm, monocle, streak, bun and bolt, candles, vest, tights all came through. The later side view (ponytail) was not needed |
 
 Vex total: 7 tasks, 190 credits (balance before r2: 940).
+| Pin r2 | 2026-11-04 04:17 | 01a1a4d7-919b-7236-962d-12120cb32d4e | latest | turnaround front, 3/4, back + side view (bow, arrow, smoke, shadows, handprint painted out; tools/meshy/pin_inputs.py), 30k, PBR, A-pose | 30 | Kept: hood, mask, cloak with its tears, quiver, armour, wraps; boots came hanging toes-down (planted in the fit). No head or weapon run: the face is the portrait projected, the bow is scripted |
 
+Pin total: 1 task, 30 credits (balance before: 910; 820 when the run started, other agents running).
