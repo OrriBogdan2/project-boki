@@ -1,4 +1,4 @@
-2026-11-04T20:18:21Z
+2026-11-04T20:19:08Z
 
 FOR EXT (owner item queue): READY reports go here as each branch lands.
 READY: ext/hem-reticle @ 693b1b45 (+118/-45, 7 files; no shared files) - item 55b
@@ -25,7 +25,7 @@ BJORN #10 #29 #30: DONE by S1 on ext/kitdata-pin-bjorn @ 7dede8e. S2: skip them.
 DASH TABLE: converged on DashFlow. ext/kitdata-vireo-venator @ 67454b5 has no DashRules left (no rows needed porting; DashFlow already covered them; the S1 mage "rmb_to_dash cancels" row was not carried over since DashFlow's into_dash rows are empty for mage). hero_ult.gd now matches main's newer version (sha1 ef9d382e), taken from main by merge. For S2: --dash-flow-check fails "bulwark air dash -> lmb, pressed early: lost" on dash-flow-base itself (Bulwark mace lmb_override drops an early tap).
 Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on over drops and the abyss (gameplay change) OK? 2 m shield push and 4.2 m wall OK (no source numbers)? The aegis plates read like planks from top-down.
 
-Running now (Sonnet, 3 max): ext/claire-62-65 (62, 64, 65; since 20:05); ext/small-60-66-75 (Ostra 60 + 75, Cinder 66; since 20:05); ext/tarek-61-67 (61, 67; since 20:25). Done: ext/hem-reticle 693b1b45.
+Running now (Sonnet, 3 max): ext/claire-62-65 (62, 64, 65; since 20:05); ext/small-60-66-75 (Ostra 60 + 75, Cinder 66; since 20:05); ext/tarek-61-67 (61, 67; since 20:18). Done: ext/hem-reticle 693b1b45.
 Queued (owner item queue per INBOX 20:00 UTC, in order): ext/two-gloves (69); ext/kael-57; ext/breaker-59; ext/vex-68; ext/sable-53-54 (53, 54); ext/glider-63 (63). Not S1's: 56/58 (ext/friendly-bodies), 70-74 (ext/ryzz-70-74), 76/76b + face pass (S2).
 Last INBOX entry handled: 2026-11-04 20:00 UTC ext (S1 now on orri@projectboki.com and BUILDS the owner item queue; Sonnet, up to 3 agents; DECISIONS > OWNER_REVIEW_1103 > supervive-data; compact READY reports here for ext to review).
 Watcher: received 19:06 UTC entry
