@@ -83,3 +83,5 @@ r3f (the r3e report's next steps and ORCH's 15:10 review; credit-free):
 - **Braids:** flatter strand colours, eight thicker locks in each tuft, and a `hair-braid` look (fres 0.15, far_lift
   0.3, no rim): solid plaits, no green edge noise.
 - **Hair at the match camera:** far_lift 0.5, fres 0.3, no rim (it had gone pale cyan).
+- **The shared match-zoom fix** (ext/warden-matchzoom f0ad9f60, picked as 5fa9e23a): no speckle fringe, the ink gone
+  from ~13.5 m, a halo shell on the glow pieces; the review frame is `--arena-demo=pose_clear`.
