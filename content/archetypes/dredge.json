@@ -5,6 +5,7 @@
 	"gender": "robot",
 	"personality": "A broken machine that leaks dark, corrupt energy. Its joints creak and its eyes flicker.\nHaunted and creepy, it drags a hook and keeps coming.",
 	"weight": "heavy",
+	"body": {"size": 0.95, "legs": 1.738, "build": 1.07, "neck": -0.066},
 	"color": "#e0b040",
 	"fantasy": "The harbour hauler. Reels you in on a rope, drops an anchor on you, and grows with every knock.",
 	"silhouette": "the round brass helm and the rope drum on one shoulder",

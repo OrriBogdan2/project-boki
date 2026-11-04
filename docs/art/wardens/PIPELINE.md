@@ -162,3 +162,54 @@ profile views before any run.
 
 Vex total: 7 tasks, 190 credits (balance before r2: 940).
 
+
+## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
+No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.
+1. **Inspect** it in Blender: bones (names, parents, heads), each vertex group's bounds, loose parts, materials,
+   the clip. Render front, 3/4, side and back (Workbench renders headless; EEVEE prints EGL errors here). Check the
+   materials' base colours in the .glb itself: the friend's exports came out white (node colours don't export).
+2. **Body:** set the archetype `body` so the rig's joints land on the model's own: `legs` from the hip height,
+   the scale from the shoulder height (shoulders sit 0.5 above the hips in the rig), `build` from the shoulder
+   and hip spacing, `neck` to put the head pivot where the head turns (Dredge: the hull's centre). Then `size` for
+   the sheet height. Run `--warden-rig-json` after each change.
+3. **Spec** (`art/wardens/src/<name>_fit.json`): `groups` (source group -> part), `split` (loose parts onto
+   another bone by where they sit), `fit` (limbs turned and stretched joint to joint, or moved), `carry`, `skin`,
+   `extra` (variant bones, also listed in `WardenGlb.EXTRA`), `weapon` (a group cut into the Gun's space with a
+   `weapon_muzzle`), `materials` ("<slot>-<what>" and a colour from the art), `max_tris`, `anchors`.
+4. `blender -b --factory-startup --python tools/blender/fit_rigged.py -- art/wardens/src/<name>_fit.json`, import,
+   the checks, the shots: as steps 9 to 12 above.
+
+| Warden | Date (UTC) | Source | Credits | Result |
+|---|---|---|---|---|
+| Dredge | 2026-11-04 07:30 | friend's Blender model (ext/imagegen ff552657), fit_rigged.py | 0 | Kept: 14.1k tris + 1.7k horn, contract + 11 variant bones, all checks pass |
+
+## Blender-driven modelling (vs Meshy)
+The owner's friend made Dredge in Blender, probably by driving it through a Blender MCP server (an LLM sends bpy
+code to a running Blender and looks at viewport screenshots). What his file shows:
+- **How it was built:** 3,440 loose pieces joined into one mesh, every one a low-poly primitive (cylinders, UV
+  spheres, tori, cones: rivets of 24 to 100 triangles, six stacked dome shells per shoulder, ten torus windings on
+  the drum, tar drips as stretched cones). The skin is rigid, exactly one bone a vertex: each piece was parented to
+  its bone as it was made, not weight-painted. Clean bone and material names (`Dredge_Brass`, `Claw2.1.L`), one
+  hand-keyed 4 s showcase clip (two keys a channel). This is code, piece by piece: what an agent writing bpy produces.
+- **Can we do it here:** yes, and without a GUI. Everything an MCP server does is bpy, and Blender 4.5 runs
+  headless on this box. The "live viewport" becomes a render loop: one persistent `.blend`, each step a short script
+  (`blender -b scene.blend --python step.py`, add or fix parts, save), then Workbench renders of the front, 3/4, side
+  and back next to the turnaround crops, which the agent looks at (about 5 to 10 s a round). An MCP server is not
+  needed (the common add-on is started from Blender's UI, which would need Blender under Xvfb; not tried here).
+- **What it would take:** (1) extend tools/blender/warden_kit.py with part helpers that make a primitive already
+  bevelled, named, on its slot material ("metal-brass", a colour from the sheet) and bound rigidly to its contract
+  bone, so the model is built on the rig JSON from the start and needs no fit; (2) a per-Warden build script
+  (`tools/blender/<name>.py`) and the render-beside-the-art harness above; (3) a detail pass: Dredge passes because
+  of density (layered plates, rivet rows, drips, seaweed) and true proportions. Our earlier scripted-primitive
+  Wardens were coarse, and the owner rejected them ("made of shapes", 00:30), so the bar is hundreds of parts, not tens.
+- **Time:** an estimated 2 to 4 agent-hours a Warden (40 to 80 render rounds), against about 1 to 2 hours for a
+  Meshy run plus the fit. Rigging is close to free (parts are bound as they are made), the budget is exact, and there
+  are no credits.
+- **Quality vs Meshy:** better on hard surfaces and machines: crisp silhouettes, flat clean colour (the owner's
+  ask; Meshy's textures came out mottled), every asymmetric piece where we put it, no bone-heat failures. Worse on
+  organic forms: faces, hair, cloth folds, muscle and fur come out toy-like from primitives. So use it for Dredge-like
+  Wardens, armour, shields and weapons (Bjorn's prow, Zedran's blade, Cinder's pack), and Meshy (or a Meshy head on a
+  scripted body) for faces and soft shapes (Vex, Moosh/Burple, Ostra's wisp).
+- **Watch:** keep colours on the Principled base colour (the friend's node colours exported as white). A collapse
+  decimate keeps primitives' shapes well (Dredge 43.7k -> 14.5k: no loss at match zoom, some faceting on the hull
+  close up; the planar pass only took 300). Build to the budget instead of decimating where you can.

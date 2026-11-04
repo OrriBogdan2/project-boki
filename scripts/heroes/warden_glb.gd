@@ -35,6 +35,15 @@ const BONES := {
 	"wings": "Rig/Torso/Wings",
 }
 const OPTIONAL := ["cape", "scarf", "tail", "wings"]
+## A Warden's variant of the contract (RIG_CONTRACT "Variant bones"): its own extra bones -> their parents. A .glb of
+## that Warden must carry them (WardenSkeleton.mismatches); they are skinned like the rest and follow their parent
+## bone, and the Warden's kit poses them on top of that (pose_extra): Dredge's grab-claw fingers, the eye, the winch
+## drum, and the rope and cargo hook that hang from it.
+const EXTRA := {
+	"dredge": {"eye": "head", "claw1.L": "hand.L", "claw1_tip.L": "claw1.L", "claw2.L": "hand.L",
+		"claw2_tip.L": "claw2.L", "claw3.L": "hand.L", "claw3_tip.L": "claw3.L", "winch": "hips", "rope1": "hips",
+		"rope2": "rope1", "hook": "rope2"},
+}
 ## Procedural pieces that stay when the .glb dresses the hunter (the contract's "nodes the game keeps").
 const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus"]
 ## glTF material name -> the toon shader's painted surface (RIG_CONTRACT "Materials").
@@ -53,6 +62,7 @@ const SETTING := "warden_models"
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
 const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
 const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (HunterAnim spins them while firing)
+const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
 static var _measuring := false  # building that neutral model: no .glb on it
@@ -101,7 +111,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	var scene := load(path(arch)) as PackedScene
 	var glb: Node3D = scene.instantiate() as Node3D if scene else null
 	var skel := skeleton(glb)
-	var bad: Array = WardenSkeleton.mismatches(skel, rest) if skel else ["no armature"]
+	var bad: Array = WardenSkeleton.mismatches(skel, rest, EXTRA.get(arch, {})) if skel else ["no armature"]
 	if not bad.is_empty():
 		push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [path(arch), str(bad)])
 		if glb:
@@ -133,6 +143,11 @@ static func _hold_weapon(root: Node3D, glb: Node3D) -> void:
 	weapon.owner = null
 	gun.add_child(weapon)
 	weapon.transform = Transform3D.IDENTITY
+	# its mouth (WEAPON_MUZZLE) becomes where the Gun's Muzzle sits (a weapon shorter or longer than the procedural one)
+	var mouth := weapon.find_child(WEAPON_MUZZLE, true, false) as Node3D
+	var muzzle := gun.get_node_or_null("Muzzle") as Node3D
+	if mouth and muzzle:
+		muzzle.transform = WardenGlb.model_xf(weapon, mouth)
 	# its magazine (WEAPON_MAG) becomes the Gun's Mag, which the reload drops out and slaps back in
 	var mag := weapon.find_child(WEAPON_MAG, true, false) as Node3D
 	var old := gun.get_node_or_null("Mag")
@@ -147,6 +162,25 @@ static func _hold_weapon(root: Node3D, glb: Node3D) -> void:
 		gun.add_child(mag)
 		mag.transform = at
 		mag.name = "Mag"
+
+## Poses one of the Warden's variant bones (EXTRA) on its rest, riding its parent: turned by `rot` about its head
+## (an axis in model space as the model rests: Vector3.RIGHT turns a drum about its side-to-side axle), scaled by `scl`
+## (zero hides what rides it). False on a procedural model or a bone the .glb lacks.
+static func pose_extra(root: Node3D, bone: String, rot := Quaternion.IDENTITY, scl := Vector3.ONE) -> bool:
+	var sk := extra_skeleton(root)
+	var bi := WardenSkeleton.find(sk, bone) if sk else -1
+	if bi < 0:
+		return false
+	var g := sk.get_bone_global_rest(bi).basis.get_rotation_quaternion()
+	sk.set_bone_pose_rotation(bi, sk.get_bone_rest(bi).basis.get_rotation_quaternion() * (g.inverse() * rot * g))
+	sk.set_bone_pose_scale(bi, scl)
+	return true
+
+## The armature of a hunter drawn from its .glb (null on a procedural one), for its kit's variant bones.
+static func extra_skeleton(root: Node3D) -> Skeleton3D:
+	if root == null or not bool(root.get_meta("glb", false)):
+		return null
+	return skeleton(root.get_node_or_null("Warden"))
 
 ## The rig rest of the Warden's model in the neutral look (built once a session).
 static func neutral_rest(arch: String) -> Dictionary:
@@ -198,6 +232,12 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 				m.set_shader_parameter("ramp", PAINTED_RAMP)
 				m.set_shader_parameter("shadow_sat", 0.0)
 				m.set_shader_parameter("self_shadow", 0.0)
+			else:
+				# a flat-painted model (hand-modelled, one colour a material, no atlas: Dredge): the procedural
+				# heroes' clean painted look (Models.hunter), the slot's surface shading on top
+				m.set_shader_parameter("paint", 0.012)
+				m.set_shader_parameter("shadow_tint", Color(0.6, 0.6, 0.86))
+				m.set_shader_parameter("light_tint", Color(1.08, 1.0, 0.9))
 			if slot == "glow":
 				m.set_shader_parameter("glow", GLOW)
 			(mi as MeshInstance3D).set_surface_override_material(si, m)

@@ -57,6 +57,20 @@ Each bone's head sits on its rig node's origin, Y along the limb.
 | `tail` | `Rig/Torso/Tail` (optional) | a tail (Cinder, Moosh Moosh) |
 | `wings` | `Rig/Torso/Wings` (optional) | wings |
 
+### Variant bones (a Warden's own extra bones)
+A Warden may carry extra bones of its own, declared in `WardenGlb.EXTRA` (`<archetype>: {bone: parent}`), on top of
+the table above. For that Warden they are part of its contract: `WardenSkeleton.mismatches` refuses a .glb that lacks
+one or hangs it on another parent. They are skinned like the rest and follow their parent bone through the retarget
+(the loader never writes them), and only that Warden's kit poses them, on their rest, with
+`WardenGlb.pose_extra(model, bone, rot, scale)` (`rot` about the bone's head, its axis in model space as the model
+rests; a zero scale hides what rides the bone). On a procedural model the call does nothing.
+- **Dredge** (`dredge`): `eye` (head); the grab-claw's three fingers `claw1.L`..`claw3.L` (hand.L), each with a
+  `claw<n>_tip.L`; the winch drum `winch` (hips, its head on the drum's axle, which runs side to side); the rope
+  `rope1` (hips) > `rope2` > `hook`. DredgeKit spreads the claw for the Grapnel throw and clenches it while he
+  reels, spins the drum out while the hook flies and in while he reels, and hides the hanging rope and hook while
+  the kit draws them in flight. Anchors `anchor_claw` (the throw's rope leaves from it), `anchor_hook`,
+  `anchor_winch`, `anchor_eye`.
+
 The kit moves (`kmoves_*.gd`) only key channels on these nodes (`p` pitch, `y` yaw, `r` roll, `lift`, `sq`
 squash, `fx`/`fy`/`fz` whole-body turns, `legs` [hip, knee, hip, knee], `fl`/`fr` free-hand targets, `gp` weapon
 pitch, `blade`/`wa`/`wo` the weapon's swing), so a .glb that follows these bones gets every move for free.
@@ -67,7 +81,8 @@ pitch, `blade`/`wa`/`wo` the weapon's swing), so a .glb that follows these bones
   head at (0, 0, -0.62) in its space), the twin blades' `Offhand`. A .glb may carry its weapon as a separate,
   unskinned mesh named `weapon`, modelled in the Gun node's space (forward -Z, the Muzzle where shots leave),
   with its magazine as a child `weapon_mag`: the loader puts it under `Gun`, hides the procedural weapon and
-  makes the magazine the Gun's `Mag` (Vex does).
+  makes the magazine the Gun's `Mag` (Vex does). An empty `weapon_muzzle` under the weapon, on its mouth, moves the
+  Gun's `Muzzle` there, for a weapon shorter or longer than the procedural one (Dredge's horn).
 - `Rig/Torso/ArmLPivot/Elbow/Hand/Shield`: Bjorn's prow rides his left hand.
 - `Rig/Torso/Glider` (the paraglider; `meta skin`), `Rig/Torso/Shoulder` (a Boki's perch), `Rig/Torso/Halo`,
   `Rig/Torso/Focus`, `TeamRing` (the hit ring), and the root metas `cls`, `arch`, `race`, `wid`, `hip_y`, `mats`.
@@ -106,6 +121,10 @@ the vertex colour (`vertex_ao`):
 | `team` | 1 | the team colour (keep it on one strong shape: a cuff, a cap, the stem's band) |
 | `glow` | emissive | — (Bjorn's crack, Zedran's fuller) |
 
+A **flat-painted** model (hand-modelled, one colour a material and no atlas: Dredge) names its materials the same way
+("<slot>-<what>": `metal-brass`, `leather-tar`); the loader shades each in its slot with its own base colour and the
+procedural heroes' clean painted settings (little brushwork, the cool shadow and warm light tints), ink shell on.
+
 Every material must end up in the root's `mats` meta (the loader does it) so hit flashes and mutations reach it.
 The loader puts each material's base-colour texture (the atlas) on `hero_toon.gdshader`'s `albedo_tex`
 (`use_tex`), with `albedo` as a tint: the player's skin, hair and eye picks move the `skin`, `hair` and `eyes`
@@ -114,7 +133,8 @@ slots at most ±35% per channel from the Warden's own colours. Bone names may co
 The armature and its meshes sit at the .glb's origin (no offset on the scene root), so skeleton space is model space.
 
 ## Budget and checks
-- About 8–15k triangles per Warden, one 1024² atlas; no more than 8 material slots.
+- About 8–15k triangles per Warden (the held `weapon` counted apart), one 1024² atlas or flat colours; no more than 8
+  material slots (slots, not materials: Dredge's ten materials use four).
 - `--warden-glb-check`: the bone table covers every part HunterAnim binds; a Warden without a .glb builds the
   procedural model (the fallback); a .glb present loads with the contract armature, every kit move of every
   table retargets exactly and each keyed channel moves its bones, the anchors ride bone attachments, every
