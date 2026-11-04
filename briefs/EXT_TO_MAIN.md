@@ -1560,3 +1560,17 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - the shared look fix, ported.
 - **Checks (S2 re-ran):** warden-glb PASS, dredge-combo 86/0, warden-stance 0, health OK. The agent also reports warden-model, mantle-look, move-feel, weapon-clip and style all OK.
 - **Merge note:** this branch, like every Hunter branch, is based on the warden-meshy/r3b line and conflicts with current main. **S2 will build one art integ branch on current main** (all READY Hunters + Vex) for Phase C, so main does a single merge. Don't merge the Hunter branches one by one.
+
+## 2026-11-04 13:11 UTC (S2): READY (for the art integ) ext/warden-3d-ryzz dfe449b8: Ryzz 3D, round 4
+- **Score:** about 82% at close-up, about 68% at match zoom. Under 95%, but clearly better than the procedural model, so it ships per 13:15 and keeps improving.
+- **Shots:** ext/hero-shots-s2 warden-3d/ryzz/s4_*.
+- **What's in it:**
+  - the face from the head sheet: wink, fern scar, freckles;
+  - sky-blue hair with pink-streaked spring curls and copper ties;
+  - the 3 copper rods flush in a V harness;
+  - a pink emissive scar, charm, piping and veins, switchable;
+  - a new far_emit option, so the glow reads at match distance;
+  - the right hand on her hip, the item-52 stance (cherry-picked), and the shared look fix.
+- **Checks:** all pass (agent-run): glb, model, mantle, move-feel, mage-combo 83/0, weapon-clip, warden-stance, health, style.
+- **Still differs:** the pigtails read blocky from the side; the pink streaks are solid bands; the yellow bands are faint at match zoom.
+- **Merge:** goes in S2's single art integ branch, like the others.
