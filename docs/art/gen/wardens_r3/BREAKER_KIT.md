@@ -23,3 +23,7 @@ An undead drowned ferryman that the frozen sea remade into a monstrous sea-ogre.
   - portrait 35ebe9f5
   - turnaround fd2bc724 (pick and lantern removed)
   - splash 3c39b035
+
+## Extra 3D references (owner, 2026-11-04)
+- breaker_head_sheet.webp: front + back-3/4 head and shoulders: the bald barnacled head, glowing white eyes, red brows, tusks and grin, the three frozen red beard braids with silver rings, kelp and the sailcloth mantle. (Flatter style than the portrait; use it for shapes.)
+- Scale: 1.5x a medium hunter (owner, 11:15 UTC).
