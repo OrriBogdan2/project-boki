@@ -292,3 +292,13 @@ in game, and the blade, chains, hook and mane are scripted.
 r3c (09:00-10:30) and r3d (11:25-13:30) used no Meshy credits: every change is in the fit spec, the parts tools, the
 paint-over, the shared look (16c18b4f) and warden_look.json. Recipe: RECIPE_95.md.
 
+
+### Kael accuracy pilot (owner 17:05), 2026-11-04 (305 credits)
+| Step | Task ids | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|
+| Model-sheet edits | ~/meshy/kael_acc/edit_*/task.json | nano-banana-pro | A-pose, no sword/chains/mane/cracks, flat light; 3/4 and back redone | 54 | Kept (front, side, tq2, back2) |
+| Head-sheet edits | ~/meshy/kael_acc/head/edit_*/task.json | nano-banana-pro | 3/4 and back from the turnaround crops (redone: the ponytail) | 36 | Kept (tq2, back2) |
+| Body A/B/C | 01a1a792-6e8e-731a-a226-b8d7f4ae8ea3, 01a1a792-6ea8-754e-8df1-514fbf6d6008, 01a1a792-6de9-7520-9d81-688bd26795d7 | meshy-7.1 | 4 views, 2k geometry, meshy-7 8k PBR, no remesh; enhance off / on / no pose | 120 | **B (enhance on) kept** |
+| Head H_noenh/H_enh | 01a1a793-67b8-710a-92b2-7f92f20d6cf8, 01a1a793-682e-7598-8d22-c1c156ea2029 | meshy-7.1 | head sheet 4 views, no pose | 80 | **H_enh kept**: joined by assemble_head.py |
+| Quad remesh x3 | ~/meshy/kael_acc/remesh*/task.json | remesh (glb upload) | quad, 13000 / 15000 / 12500 | 15 | 12500 kept (warden-glb's 45k triangles) |
+Recipe: art/wardens/src/kael_acc_recipe.json (+ _head_recipe, _assemble, _bake, _fit).

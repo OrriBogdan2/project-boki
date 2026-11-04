@@ -21,7 +21,7 @@
  "ray": 0.07,
  "margin_px": 16,
  "floater_verts": 60,
- "low_glb": "~/meshy/kael_acc/remesh2/glb.glb",
+ "low_glb": "~/meshy/kael_acc/remesh3/glb.glb",
  "low_fit_bbox": true,
  "bake": "nearest",
  "front_boxes": [

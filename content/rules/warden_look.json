@@ -70,6 +70,12 @@
 				1.0,
 				0.8,
 				0.36
+			],
+			"key_rim": 0.22,
+			"key_rim_color": [
+				1.0,
+				0.84,
+				0.6
 			]
 		},
 		"slots": {
@@ -84,7 +90,13 @@
 					0.84,
 					0.98
 				],
-				"light_neutral_warm": 0.65
+				"light_neutral_warm": 0.65,
+				"key_fill": 0.38,
+				"key_fill_color": [
+					0.92,
+					0.93,
+					1.0
+				]
 			},
 			"cloth": {
 				"fres": 0.6,

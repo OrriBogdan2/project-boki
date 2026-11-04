@@ -2,7 +2,7 @@
  "doc": "Kael accuracy pipeline (owner 17:05): the body model sheet. python3 tools/meshy/recipe.py art/wardens/src/kael_acc_recipe.json <steps>",
  "name": "kael",
  "arch": "juggernaut",
- "tag": "a1",
+ "tag": "a3",
  "raw": "~/meshy/kael_acc",
  "art": {
   "ref": "origin/ext/imagegen",
