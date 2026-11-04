@@ -20,3 +20,14 @@ blender_front_34.png: full length in game, front and three-quarter, her own rifl
 blender_vs_sheet.png: her turnaround sheet beside the in-game model, the match-camera strip below
 blender_turnaround_close.png / blender_turnaround_game.png: five angles close and at the match camera
 blender_moves_close_1.png / blender_moves_close_2.png: run, shoot, recoil; Combat Slide (three moments), RMB throw
+
+Meshy pass v2 (unmirrored body run 3, rifle run 2, portrait head run 5; fitted by tools/meshy/fit_warden.py):
+meshy_vs_turnaround.png: the turnaround sheet (top) over the in-game model close (front, 3/4, side, back, 3/4 back). Mechanical RIGHT arm and sigil plate as drawn
+meshy_vs_turnaround_gameplay.png: the sheet over the same five angles at the match camera (true pixels, then x3)
+meshy_vs_portrait.png: the portrait art (left), the in-game head and shoulders from the front and at 3/4: the head is its own Meshy model from the portrait (lens put on her right eye, as the turnaround and her block have it)
+meshy_closeup.png: in game, head and shoulders from the front
+meshy_closeup_34.png: the same, three-quarter
+meshy_gameplay_match.png: a real match at the default camera, Vex at the centre
+meshy_gameplay_zoom.png: that frame around her, x4 (nearest)
+meshy_moves_run_fire.png: run (two stride phases), shoot, recoil
+meshy_moves_dash_throw.png: Combat Slide at three moments, the RMB throw
