@@ -35,6 +35,7 @@ COL = {  # name: (slot, hex)
     "sword": ("glow", "fffaf0"), "sword_edge": ("glow", "f2d48a"),
     "sword_halo": ("glow", "8a7448"), "sword_halo2": ("glow", "4a3e2a"), "hook_tip": ("glow", "fffaf0"),
     "mane": ("hair", "e9e7e3"), "mane_dk": ("hair", "bdb9b4"),
+    "spike": ("hair", "e4dfe0"), "spike_dk": ("hair", "b8afb2"), "mane_vol": ("hair", "cfc7c9"),
     "gold": ("metal", "d9a94e"), "gold_dk": ("metal", "8a6424"),
 }
 
@@ -411,7 +412,8 @@ def chains(body, arm, rig, K, sp):
     turns = float(sp.get("turns", 3.2))
     sp_pts = []
     for k in range(120):
-        u = 0.12 + 0.8 * k / 119
+        u0 = float(sp.get("wrap_from", 0.12))
+        u = u0 + (0.92 - u0) * k / 119
         a = 2 * math.pi * turns * u
         sp_pts.append(elbow + ax * (u * L_arm) + (e1 * math.cos(a) + e2 * math.sin(a)) * r_arm)
     v0 = len(bld.v)
@@ -735,6 +737,45 @@ def shards(body, arm, rig, K, sp):
     return ob
 
 
+def spikes(body, arm, rig, K, sp, mane=None):
+    """The crown's volume and spikes (kael_head_sheet: the white mane swept up and back off the forehead into
+    jagged points): `n` chunky tapered locks rooted on the top of the head (on the mane's own surface when there is
+    one, else the scan's), each rising `rise` up and sweeping back `back` m from a spread of azimuths behind the
+    hairline, rigid on the head (no spring: a crown that swung would cross the face). Their own material
+    (hair-spike), so they never take the head run's texture."""
+    neck = np.array(K.bone_head(rig, "head")[:])
+    crown_z = float(rig["land"]["crown"])
+    hc = np.array([neck[0], neck[1] - 0.01, neck[2] + 0.55 * (crown_z - neck[2])])
+    hr = 0.5 * (crown_z - neck[2])
+    bvh = WP.body_bvh([mane] if mane is not None else [body])
+    rng = np.random.default_rng(int(sp.get("seed", 7)))
+    bld = WP.Builder()
+    n = int(sp.get("n", 14))
+    az0, az1 = sp.get("az", [100, 260])
+    for k in range(n):
+        az = math.radians(az0 + (az1 - az0) * (k + 0.5) / n + rng.uniform(-6, 6))
+        el = math.radians(rng.uniform(*sp.get("el", [35, 75])))
+        d = np.array([math.sin(az) * math.cos(el), math.cos(az) * math.cos(el), math.sin(el)])
+        hit = bvh.ray_cast(tuple(hc + d * hr * 2.5), tuple(-d))
+        root = (np.array(hit[0][:]) if hit[0] is not None else hc + d * hr) - d * float(sp.get("sink", 0.015))
+        horiz = np.array([d[0], d[1], 0.0])
+        horiz /= max(np.linalg.norm(horiz), 1e-6)
+        ln = float(sp.get("length", 0.13)) * rng.uniform(0.7, 1.15)
+        up = float(sp.get("rise", 0.5))
+        tip_dir = horiz * (1.0 - up) + np.array([0, 0, up]) + d * 0.3
+        tip_dir /= np.linalg.norm(tip_dir)
+        p = np.array([root + d * 0.01 * t + tip_dir * ln * t + np.array([0, 0, -0.02 * t * t]) for t in np.linspace(0, 1, 7)])
+        w0 = float(sp.get("width", 0.05)) * rng.uniform(0.8, 1.2)
+        _lock(bld, p, w0, w0 * float(sp.get("thick", 0.35)), d, "spike" if k % 3 else "spike_dk")
+    ob = finish(bld, "ManeCrown", {"spike": "spike", "spike_dk": "spike_dk"})
+    g = ob.vertex_groups.new(name="head")
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    ob.modifiers.new("Armature", "ARMATURE").object = arm
+    log("crown spikes: %d, %d tris" % (n, sum(len(f) - 2 for f in bld.f)))
+    return ob
+
+
 # ------------------------------------------------------------------------------------------------ the Meshy mane
 def _hsv_np(rgb):
     mx, mn = rgb.max(axis=1), rgb.min(axis=1)
@@ -893,4 +934,56 @@ def meshy_mane(body, arm, rig, K, sp, import_glb, decimate, log_fn=log):
     src.parent = arm
     src.modifiers.new("Armature", "ARMATURE").object = arm
     log_fn("meshy mane: %d tris, %d on the head only" % (sum(len(p.vertices) - 2 for p in me.polygons), len(rest)))
+    vol = sp.get("volume")
+    if vol:
+        src["volume"] = mane_volume(src, arm, vol, decimate, log_fn)
     return src
+
+
+def mane_volume(src, arm, vp, decimate, log_fn=log):
+    """A solid body for the head run's stringy hair: the mane voxel-remeshed (`voxel` m: strands closer than that
+    merge into one mass), decimated to `tris`, pulled `inset` m in along its normals so the strands lie on top, in a
+    flat silver (its own material, hair-mane_vol), and weighted like the strands (each vertex the nearest strand
+    vertex's groups), so it swings with them and its gaps show hair, not the back."""
+    from mathutils.kdtree import KDTree
+    bpy.ops.object.select_all(action="DESELECT")
+    ob = bpy.data.objects.new("ManeVolume", src.data.copy())
+    bpy.context.scene.collection.objects.link(ob)
+    me = ob.data
+    me.materials.clear()
+    r = ob.modifiers.new("remesh", "REMESH")
+    r.mode = "VOXEL"
+    r.voxel_size = float(vp.get("voxel", 0.012))
+    bpy.context.view_layer.objects.active = ob
+    ob.select_set(True)
+    bpy.ops.object.modifier_apply(modifier=r.name)
+    decimate(ob, int(vp.get("tris", 4000)))
+    me = ob.data
+    me.update()
+    inset = float(vp.get("inset", 0.004))
+    for v in me.vertices:
+        v.co -= v.normal * inset
+    # the strands' weights onto it
+    sme = src.data
+    kd = KDTree(len(sme.vertices))
+    for v in sme.vertices:
+        kd.insert(v.co, v.index)
+    kd.balance()
+    names = [g.name for g in src.vertex_groups]
+    for g in list(ob.vertex_groups):
+        ob.vertex_groups.remove(g)
+    groups = {n: ob.vertex_groups.new(name=n) for n in names}
+    for v in me.vertices:
+        _co, idx, _d = kd.find(v.co)
+        for ge in sme.vertices[idx].groups:
+            groups[names[ge.group]].add([v.index], ge.weight, "REPLACE")
+    me.materials.append(mat("mane_vol"))
+    for p in me.polygons:
+        p.material_index = 0
+    paint_flat(ob)
+    ob.parent = arm
+    for m in list(ob.modifiers):
+        ob.modifiers.remove(m)
+    ob.modifiers.new("Armature", "ARMATURE").object = arm
+    log_fn("mane volume: %d tris (voxel %.3f, inset %.3f)" % (sum(len(p.vertices) - 2 for p in me.polygons), r.voxel_size if False else float(vp.get("voxel", 0.012)), inset))
+    return ob.name

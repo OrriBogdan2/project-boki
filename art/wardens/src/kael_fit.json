@@ -4,7 +4,7 @@
  "out": "art/wardens/kael/kael.glb",
  "blend": "~/meshy/zedran/fit.blend",
  "turn": 180,
- "max_tris": 28500,
+ "max_tris": 27500,
  "floater_verts": 8,
  "snap_r": 0.05,
  "scale_joints": [
@@ -94,7 +94,7 @@
   ]
  },
  "chunk": {
-  "head": 1.12,
+  "head": 1.2,
   "hand": 1.2,
   "girth": 1.0
  },
@@ -114,6 +114,38 @@
  "cap_flat": true,
  "ink_room": 0.02,
  "slot_rules": [
+  {
+   "slot": "skin",
+   "box": [
+    -0.46,
+    -0.19,
+    null,
+    null,
+    0.12,
+    0.66
+   ],
+   "note": "right arm all skin (its scan crack paint)"
+  },
+  {
+   "slot": "skin",
+   "box": [
+    -0.22,
+    0.22,
+    null,
+    0.0,
+    0.22,
+    0.52
+   ],
+   "hsv": [
+    0.9,
+    0.06,
+    0.3,
+    1.0,
+    0.0,
+    1.0
+   ],
+   "note": "scarf smear on the chest"
+  },
   {
    "slot": "hair",
    "absx": true,
@@ -295,10 +327,11 @@
    "guard_k": 1.25
   },
   "chain": {
-   "turns": 2.6,
+   "turns": 2.2,
    "drop": 0.45,
    "bones": 5,
-   "wrap_gap": 0.01
+   "wrap_gap": 0.01,
+   "wrap_from": 0.6
   },
   "mane": {
    "bones": 5,
@@ -387,7 +420,7 @@
   },
   "meshy_mane": {
    "glb": "~/meshy/zedran/headrun/run/glb.glb",
-   "tris": 6500,
+   "tris": 5500,
    "tex": 1024,
    "sat_max": 0.16,
    "val_min": 0.55,
@@ -458,12 +491,17 @@
     0.0,
     0.0,
     0.012
-   ]
+   ],
+   "volume": {
+    "voxel": 0.014,
+    "tris": 3500,
+    "inset": 0.005
+   }
   },
   "shards": {
-   "flare": 0.6,
-   "thick": 0.012,
-   "out": 0.004,
+   "flare": 0.9,
+   "thick": 0.006,
+   "out": 0.002,
    "seed": 5,
    "pieces": [
     {
@@ -471,64 +509,68 @@
       10,
       34
      ],
-     "drop": 0.085,
-     "h": 0.042,
+     "drop": 0.07,
+     "h": 0.03,
      "dz": [
-      0.035,
-      0.012
+      0.03,
+      0.01
      ],
      "broken": [
       1,
-      0.3
-     ]
+      0.4
+     ],
+     "jag": 5
     },
     {
      "az": [
       38,
-      58
+      60
      ],
-     "drop": 0.08,
-     "h": 0.036,
+     "drop": 0.065,
+     "h": 0.026,
      "dz": [
-      0.01,
-      -0.005
+      0.008,
+      -0.004
      ],
      "broken": [
-      0.4,
+      0.5,
       1
-     ]
+     ],
+     "jag": 5
     },
     {
      "az": [
       -34,
       -10
      ],
-     "drop": 0.085,
-     "h": 0.042,
+     "drop": 0.07,
+     "h": 0.03,
      "dz": [
-      0.012,
-      0.035
+      0.01,
+      0.03
      ],
      "broken": [
-      0.3,
+      0.4,
       1
-     ]
+     ],
+     "jag": 5
     },
     {
      "az": [
-      -58,
+      -60,
       -38
      ],
-     "drop": 0.08,
-     "h": 0.036,
+     "drop": 0.065,
+     "h": 0.026,
      "dz": [
-      -0.005,
-      0.01
+      -0.004,
+      0.008
      ],
      "broken": [
       1,
-      0.4
-     ]
+      0.5
+     ],
+     "jag": 5
     }
    ]
   },
@@ -590,6 +632,23 @@
      "clear": 0.035
     }
    ]
+  },
+  "spikes_off": {
+   "n": 20,
+   "az": [
+    105,
+    255
+   ],
+   "el": [
+    20,
+    60
+   ],
+   "length": 0.09,
+   "rise": 0.25,
+   "width": 0.08,
+   "thick": 0.5,
+   "sink": 0.03,
+   "seed": 7
   }
  },
  "smooth": {
@@ -612,11 +671,11 @@
     0.62
    ],
    "ramp": [
-    "3e2a32",
-    "4e363e",
-    "5e444b",
-    "6e5459",
-    "886a70"
+    "3a2c2f",
+    "4a383b",
+    "5a4648",
+    "6a5655",
+    "84706c"
    ]
   },
   {
@@ -778,15 +837,115 @@
    ]
   ],
   "to": 0.9,
-  "mains": 4,
-  "branches": 4,
+  "mains": 5,
+  "branches": 3,
   "circ": 0.36,
-  "core_w": 0.0045,
-  "rim_w": 0.016,
+  "core_w": 0.003,
+  "rim_w": 0.012,
   "core": "ffd070",
-  "edge": "c88a50",
+  "edge": "8a5a48",
   "skin": "4a3236",
   "seed": 4,
-  "net_k": 0.04
- }
+  "net_k": 0.04,
+  "white_k": 0.6
+ },
+ "deform": [
+  {
+   "name": "trapezius",
+   "c": [
+    0.13,
+    0.02,
+    0.635
+   ],
+   "r": 0.13,
+   "move": [
+    0.0,
+    0.0,
+    -0.045
+   ],
+   "scale": [
+    0.92,
+    1.0,
+    0.75
+   ],
+   "mirror_x": true
+  },
+  {
+   "name": "deltoid",
+   "c": [
+    0.28,
+    0.0,
+    0.55
+   ],
+   "r": 0.14,
+   "move": [
+    -0.015,
+    0.0,
+    -0.012
+   ],
+   "scale": [
+    0.86,
+    0.88,
+    0.94
+   ],
+   "mirror_x": true
+  },
+  {
+   "name": "hump",
+   "c": [
+    0.0,
+    0.12,
+    0.6
+   ],
+   "r": 0.14,
+   "move": [
+    0.0,
+    -0.03,
+    -0.025
+   ]
+  },
+  {
+   "name": "head_back",
+   "c": [
+    0.0,
+    -0.06,
+    0.8
+   ],
+   "r": 0.2,
+   "move": [
+    0.0,
+    0.025,
+    0.01
+   ]
+  }
+ ],
+ "anchors": [
+  {
+   "bone": "upper_arm.R",
+   "name": "anchor_arm_up",
+   "between": [
+    "upper_arm.R",
+    "forearm.R"
+   ],
+   "t": 0.45
+  },
+  {
+   "bone": "forearm.R",
+   "name": "anchor_arm_elbow",
+   "between": [
+    "forearm.R",
+    "hand.R"
+   ],
+   "t": 0.05
+  },
+  {
+   "bone": "forearm.R",
+   "name": "anchor_arm_fore",
+   "between": [
+    "forearm.R",
+    "hand.R"
+   ],
+   "t": 0.45
+  }
+ ]
 }
