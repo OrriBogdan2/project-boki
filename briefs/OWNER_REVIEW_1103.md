@@ -611,3 +611,11 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Today (empty90, shaders/void_face.gdshader) the void effect sits only on the front of the face, so from the side, back or above the head and body read as a normal surface.
 - Change: the Empty's whole head and body use the void material (the starry, depthless look), from every angle, including the back of the head, neck, hands and body under the outfit's open areas. Outfits and accessories can sit on top as solid pieces. Keep the face marks (eyes, brows, blush) as decals floating on the void face. The look must read at the farm's camera distance (top-down), not only in the creator close-up.
 - Check: the creator and farm screenshots from front, side, back and top-down show the void everywhere. Small; whoever has budget.
+
+## 79b. CORRECTION to item 79 (owner, 22:58 UTC Nov 4): keep the face customisation; wrap the body in a shroud; drop skin colour
+- Owner: "it's cool that you can change the face shape stuff, but the rest of the body should be in a shroud or something. It's weird you can change the skin colour and it's just plastered on the front for the look."
+- **Head:** the whole head is the void (all sides), and the face shape and face marks stay customisable as now, floating on it.
+- **Body:** covered by a shroud/cloak (a hooded or draped wrap that hides the body shape, with hands either void or wrapped). No exposed skin anywhere.
+- **Creator:** remove the skin colour option. In its place: the shroud's colour (and, if cheap, 2–3 shroud styles or trims). Height, build and Male/Female still shape the silhouette under the shroud.
+- Migrate saves: the old skin colour maps to the shroud colour (or a default).
+- Supersedes item 79's "void on the body under the outfit".
