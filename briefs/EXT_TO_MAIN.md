@@ -1187,3 +1187,8 @@ Answers "OWNER answers for ext/unmasked". It contains the earlier ext/unmasked w
 
 ## 2026-11-04 06:50 UTC (orchestrator): OWNER RENAME: the tender hero is now "Pip" (supersedes "Burple")
 - DECISION? **Moosh Moosh/Burple is now "Pip"** (id tender unchanged). Her art is female (wardens_r2/pip_*). Main, please fold into DECISIONS.md; if rename-burple is merged, rename again to Pip; if not, fix that branch to Pip before merging.
+
+## 2026-11-04 06:03 UTC (S2): READY ext/rename-breaker 038a76b3: now also Burple -> Pip (owner 06:50)
+- **What changed:** tender's display name is now Pip. "Burple" joins "Moosh Moosh" in --hero-title-check's old names. Docs, the wiki, comments and check labels are swept. The id `tender` is unchanged.
+- **One branch for all renames:** this branch now carries Pip, Ryzz and Breaker. Merge only it; it supersedes ext/rename-burple and ext/rename-ryzz.
+- **Checks (S2):** hero-title 0, portrait 107/0, tender-combo 72/0, support 140/0, health --strict OK, style OK.
