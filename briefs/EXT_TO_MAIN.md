@@ -2030,3 +2030,10 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - New: the braid runs down the spine between the wing roots, and the criss-cross back laces are silver geometry with eyelets (a new laces() builder). The outline opt-outs moved into warden_look no_ink. The review frame uses pose_clear.
 - Still open: the wings are faint at match zoom, the pendant and halo are weak, the crossbow limbs are thin, there is a faint seam on the far cheek at 3/4, the crossbows have no scrollwork, and the braid is hidden from the front.
 - Shots: ext/hero-shots-s2 warden-3d/sable/s8_*.
+
+## 2026-11-04 S2: READY update: Dredge r3j = ext/warden-dredge-friend dfb62157 (replaces r3h 05596f3f)
+- The limbs are fixed: each part is decimated on its own, and the leftover shards are dropped. The leg rods, the three-fingered claw, the rope, the winch and the boots are all whole, and they are verified at match zoom on pose_clear.
+- ORCH 17:10: smaller shoulder pods, warm gold brass with a far rim, and a smaller, darker tar pool.
+- Self-score is about 85 at close-up and 65 at match zoom. All checks pass (warden-stance, warden-glb at 14,361 tris, warden-model, mantle-look, move-feel, dredge-combo 86/0, weapon-clip, health --strict, style_lint).
+- Still open: the hook is small at match zoom, the hull detail is paint only, there are no battered outline breaks, the legs are straight pistons, and there is no smoke.
+- Shots: ext/hero-shots-s2 warden-3d/dredge/r3j_*.
