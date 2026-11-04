@@ -1983,3 +1983,14 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - **Score:** about 86% close-up, about 70% at match zoom (was 62).
 - **Checks:** all pass.
 - **Shots:** warden-3d/tarek/s12_*.
+
+## 2026-11-04 17:08 UTC (S2): Ostra READY updated to ext/warden-3d-ostra-b bc16c044 (b11, match-zoom v2)
+- **Score (native size):** about 85% close-up, about 55% at match zoom. The earlier 80+ match scores were read off x4 crops.
+- **What changed:**
+  - a bigger 4-arm vortex orb visible from every side;
+  - violet cards with glow halos;
+  - a single cracked crescent halo;
+  - brighter mask marks;
+  - an S-hook wisp;
+  - "Orb" added to FLOATING in warden-model-check.
+- **Shots:** warden-3d/ostra/b11_*.
