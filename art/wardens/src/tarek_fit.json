@@ -96,7 +96,7 @@
  "chunk": {
   "head": 1.0,
   "hand": 1.15,
-  "girth": 1.0,
+  "girth": 0.94,
   "feet": 1.25
  },
  "glow_min": [
@@ -258,33 +258,76 @@
     0.0,
     0.22
    ],
-   "radius": 0.46,
+   "radius": 0.34,
    "items": [
     {
      "angle": 300,
      "height": 0.02,
-     "size": 0.095
+     "size": 0.105
     },
     {
      "angle": 60,
      "height": 0.12,
-     "size": 0.1
+     "size": 0.11
     },
     {
      "angle": 180,
      "height": -0.06,
-     "size": 0.09
+     "size": 0.099
     }
    ],
    "rock": "a8896a",
-   "rim": "f4e6cc",
+   "rim": "f6eee0",
    "iris": "ff8a1a",
    "pupil": "1e0a04",
    "slot": "leather",
    "rock_dark": "5c4433",
-   "rim_dark": "a07e60",
+   "rim_dark": "b49a7e",
    "iris_hot": "ffd060",
-   "rel": "head"
+   "rel": "head",
+   "iris_r": 0.5
+  },
+  {
+   "name": "orbit_shards",
+   "rel": "hand.R",
+   "bone": "hand.R",
+   "centre": [
+    0.0,
+    0.0,
+    -0.02
+   ],
+   "radius": 0.15,
+   "kind": "rock",
+   "items": [
+    {
+     "angle": 0,
+     "height": 0.03,
+     "size": 0.022
+    },
+    {
+     "angle": 72,
+     "height": -0.04,
+     "size": 0.022
+    },
+    {
+     "angle": 144,
+     "height": 0.05,
+     "size": 0.022
+    },
+    {
+     "angle": 216,
+     "height": -0.02,
+     "size": 0.022
+    },
+    {
+     "angle": 288,
+     "height": 0.0,
+     "size": 0.022
+    }
+   ],
+   "rock": "8a7258",
+   "rock_dark": "4a382a",
+   "slot": "leather"
   }
  ],
  "split": [
@@ -311,7 +354,7 @@
    ],
    "emit": {
     "mode": "dark",
-    "k": 0.74,
+    "k": 0.8,
     "colour": "ff8a1c"
    },
    "bones": [
@@ -334,11 +377,12 @@
     1.2,
     null
    ],
-   "count": 14,
-   "size": 0.026,
-   "spacing": 0.07,
+   "count": 24,
+   "size": 0.02,
+   "spacing": 0.05,
    "seed": 4,
-   "colour": "ffa830"
+   "colour": "ffa020",
+   "tip": 0.8
   }
  ],
  "weapon_empty": true,
@@ -584,6 +628,34 @@
     "7a6656",
     "9a8672",
     "b4a28c"
+   ]
+  },
+  {
+   "name": "vest slate",
+   "slots": [
+    "cloth"
+   ],
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    0.12,
+    0.5
+   ],
+   "hsv": [
+    0.0,
+    1.0,
+    0.0,
+    0.42,
+    0.12,
+    1.0
+   ],
+   "ramp": [
+    "2e3442",
+    "46506a",
+    "60708e",
+    "7e8ca8"
    ]
   }
  ],

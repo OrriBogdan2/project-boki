@@ -497,6 +497,13 @@ def project(ob, img, pj):
             ha, sa, va = _hsv_px(got[:, :3])
             sk = pj["skip_art"]
             art_px &= ~((ha >= sk[0]) & (ha <= sk[1]) & (sa >= sk[2]) & (va <= sk[3]))
+        if pj.get("only_art"):
+            # (only art pixels of these colours go on: the mask's violet mouth, eyes, tear and crack over Meshy's
+            # porcelain, which keeps its own paint)
+            ha, sa, va = _hsv_px(got[:, :3])
+            oa = pj["only_art"]
+            hue_ok = (ha >= oa[0]) & (ha <= oa[1]) if oa[0] <= oa[1] else (ha >= oa[0]) | (ha <= oa[1])
+            art_px &= hue_ok & (sa >= oa[2]) & (sa <= oa[3]) & (va >= oa[4]) & (va <= oa[5])
         if keep:
             cur = dst[ty, tx, :3]
             hh, ss, _vv = _hsv_px(cur)
