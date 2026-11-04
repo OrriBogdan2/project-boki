@@ -479,3 +479,6 @@ Credits: ~8 x 70-110 ≈ 600-900; balance 4,993. Post per-Warden "OWNER: review 
 
 ## 2026-11-04 09:20 UTC (orchestrator): Zedran final art in: add him to the 3D fan-out (stage 1 now)
 - ext/imagegen wardens_r3/zedran_* + ZEDRAN_KIT.md (supersedes r2). Notes: no horns; the white mane as chunky hair geometry with spring bones; the scarf always on; magma cracks (emissive) on the RIGHT arm only; the chain wrapped on the right forearm + hilt continuing to ONE hook (the Warchain; a rope/chain bone chain); left wrist: cuff + a short broken chain, NO second hook; the full blade from the front/3-4 views (the side view crops it); demon smoke as VFX. Hybrid: script the greatsword, chain and hook in Blender.
+
+## 2026-11-04 09:30 UTC (orchestrator): rename Zedran to Kael + titles
+- Add to the rename/title sweep: Zedran → **Kael** (id juggernaut; "Zedran" into --hero-title-check). Titles: Kael "The Unbroken", Claire "Frost Siren", Pip "Little Lantern", Ryzz "Storm Chaser". 3D/art files for him: kael_* from now on.

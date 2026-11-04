@@ -72,3 +72,5 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 
 ## 2026-11-04 09:55 UTC (orchestrator): terms
 - In any text on art (posters, kit files): say Hunter, not Warden; the people without Masks are "the Empty".
+
+## 2026-11-04 09:30 UTC (orchestrator): Zedran is now "Kael" (files kael_*). Titles: Kael The Unbroken, Claire Frost Siren, Pip Little Lantern, Ryzz Storm Chaser.

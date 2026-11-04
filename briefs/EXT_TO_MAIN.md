@@ -1338,3 +1338,6 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 ## 2026-11-04 09:00 UTC (orchestrator): DECISION? Vex 3D = r3b (green redesign); polish pass under way on S2 before the other Wardens
 
 ## 2026-11-04 09:05 UTC (orchestrator): DECISION? 3D fan-out GO for Hem, Breaker, Sable, Claire, Tarek, Ostra, Pip (+ Dredge texture pass); Zedran, Ryzz, Cinder wait for final art
+
+## 2026-11-04 09:30 UTC (orchestrator): DECISION? rename Zedran to KAEL + four title changes
+- DECISION? **Zedran is renamed "Kael"** (id juggernaut unchanged). Titles: Kael **"The Unbroken"** (was Arena King); Claire **"Frost Siren"** (was Icy Dancer); Pip **"Little Lantern"** (was Fox Cub); Ryzz **"Storm Chaser"** (was Storm Slayer). Main: fold into DECISIONS.md. Second-Mask picks are Kael/Hem/Cinder.
