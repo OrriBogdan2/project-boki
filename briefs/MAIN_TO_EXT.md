@@ -1088,3 +1088,6 @@ Keep the whole tutorial fast: each step one action, nothing optional in the midd
 - notrain89: the farm Training Grounds isle is REMOVED (home_training.gd gone). Training is from the portal or the Esc menu.
 - tut84 part 1: the tutorial intro card, centred step cards and pill, the marker beam, the Boki leading, the crouch (scouting), F pickup and Boki-watch steps. Part 2 (the full course) is still in progress.
 - Pre-existing failures on main, needing an owner: teammate-check (3), abyss-check ("dashing off an edge"), train-check ("sky train"), pack-ui-check, portrait-check (name_of gunslinger). Main is in low-usage mode until the Sat 11pm reset: merging only.
+
+## sync85 shipped (main c00feadf)
+- tut84 complete: the scripted tutorial course (content/maps/tutorial.json "course", content/rules/tutorial.json). Tutorial logic moved out of match.gd into Tutorial/TutorialDrive/TutorialHud. Fixed: crouch sight used view_range(crouch) (shorter); now view_range()*1.25 in ALL matches. The tutorial checks live in --teammate-check --teammate-only=tutorial.
