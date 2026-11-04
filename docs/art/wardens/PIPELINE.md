@@ -1,5 +1,8 @@
 # Warden 3D pipeline (Meshy image-to-3D -> bake -> Blender fit -> WardenSkeleton .glb)
 
+**Start from docs/art/wardens/RECIPE_95.md** (2026-11-04: the golden recipe from Vex r3d, run by
+`tools/meshy/recipe.py` from a per-Hunter spec). The sections below are the history and the details it builds on.
+
 Owner decision 2026-11-04 00:30 UTC: the scripted-primitive Blender meshes ("made of shapes") are replaced by Meshy
 image-to-3D. The skeleton contract (RIG_CONTRACT.md), retarget, WardenGlb loader and the Settings > Video > Warden
 models toggle stay. Owner 05:00/05:15 UTC: Meshy only, at its best settings; Vex r3 (this recipe) is the bar.
@@ -90,7 +93,7 @@ Ryzz's emissive layer `use_emit`/`emit_tex` (ext/warden-meshy-ryzz). Already her
 - `MESHY_API_KEY` lives only in `~/.config/boki/secrets.env` (chmod 600) on the build box, or in the environment.
   Never in the repo, logs or shots. tools/meshy/meshy_task.py reads it and never prints it.
 
-## The reference recipe (Vex r3c, 2026-11-04): per-Warden checklist for the other 11
+## The reference recipe (Vex r3c, 2026-11-04; superseded by RECIPE_95.md)
 Vex r3c is the model the owner reviews as the recipe; the others wait for his OK. Worktree on a branch of
 ext/warden-vex-r3b. B = `~/tools/blender-4.5.15-linux-x64/blender -b --factory-startup --python`. Raw files in
 ~/meshy/<name>/ (never in git). Files: art/wardens/src/<name>_bake.json, <name>_fit.json; content/rules/
@@ -124,7 +127,8 @@ warden_look.json; content/archetypes/<id>.json `body`; content/rules/warden_stan
 8. **Paint-over, credit-free**:
    - `smooth` (edge-preserving, within UV islands), then `ramps` of the art's own colours per slot and texel hue
      (sample them from the art: hair, trims and tattoos, blacks, leather, skin, gunmetal, brass), `despeckle`;
-   - `project_late`: the art's face, chest and belly painted over the finished atlas from the edited front view,
+   - the face: see **Face rules (r3d)** below (from the flat-lit face sheet, by landmarks); `project_late` also
+     paints the chest and belly over the finished atlas from the edited front view,
      each with a registration measured on the mesh's own render (`tools: register.py`, ~20 px better than the
      figure-height guess); `keep_hue` keeps the scan's hair, `skip_art` keeps the art's hair shadows off the skin;
      the body's skin ramp uses the art's skin so there is no seam where the projection ends.
@@ -142,6 +146,51 @@ warden_look.json; content/archetypes/<id>.json `body`; content/rules/warden_stan
 13. **Shots** (`--warden-shots`, the Arena match frame `--arena=<id> --record=2 --arena-demo=pose --demo-zoom=1.0
     --arena-shot=<png>`), composited beside the turnaround and portrait; look at every one and redo what does not
     look like the art. Then the secret grep, commit, push; S2 reviews the shots before hero-shots-s2.
+
+## Face rules (r3d, Vex face pass, 2026-11-04): for every Warden's face
+The face is what the owner checks first. Paint it from the **flat-lit straight-on face sheet** (`<name>_face`, ext/imagegen
+12:40; the portrait only if there is none: it is tilted and lit by its scene), never from the turnaround, with these
+rules (fit spec `project_late`, the "face" entry of art/wardens/src/vex_fit.json; read the KIT/REFS note first for what
+to ignore):
+1. **One slot for the whole face.** Look at a flat slot map of the head first (tools/meshy/slot_map.py). Meshy's colours
+   split a face between skin, cloth (pale highlights under the skin rule's saturation floor), hair (a green or
+   blue iris) and metal (tan shading); each slot shades its own way, which reads as patches and as a "seam" along
+   the jaw. Slot rules, in this order: the eye's box -> skin (before the hair rule), the hair rule, round parts
+   by an ellipse (`circle` [x, z, rx, rz]: an eye plate) -> metal, then the face's front box -> skin.
+2. **Align by landmarks, not by a scale.** A sheet has its own proportions (Vex's face sheet has a 22% longer
+   lower face than the Meshy head; the portrait is also tilted 10 degrees). Read 12-16 landmarks on a gridded front
+   render of the Meshy-frame mesh (tools/meshy/face_grid.py, a known px/m) and on the sheet (tools/meshy/grid_crop.py; read them on gridded
+   crops, never on a downscaled whole image: those reads were 100 px off): both eyes (centre, inner and outer
+   corners, the liner's wing), the brow (inner end, peak, outer end), the nose tip, the mouth's corners, the lips'
+   parting, the lower lip, the chin, the jaw. `warp` fits a thin-plate spline through them (`smooth` 0.002; the
+   logged residual should stay under a pixel). The paint then follows Meshy's sculpted eye, nose and mouth.
+3. **Never project the art's outline.** The art's ink contour around the face, projected onto a mesh whose jaw is a
+   little wider, is the dark jaw seam. `mask`: the face by exclusion (`exclude`: the hair, the sheet's grey ground)
+   so plates and panels drawn on the face belong to it, closed over the features (`close` ~26 px fills the eyes
+   and lips), eroded past the outline (`erode` 6 px on a 2000 px sheet).
+4. **Carry the skin past the outline instead of stopping at it.** `inpaint: "outside"` fills everything outside the
+   eroded face (and the art's own hair across the face, its plate and bracket: `skip_art`, `skip_art_box`) from the
+   skin around it, fading to the skin's mid tone; the projection then fades only at the mask box's edge (`edge`
+   ~28 px), so the blend into the body's skin happens under the hair, never on the cheek.
+5. **Blend, don't overwrite.** `feather` [0.12, 0.5] on how much a face turns away; `slots` the face's own slots
+   (Vex: skin, and metal for the eye plate the sheet draws: it paints the angular plate onto Meshy's round one;
+   `exclude_circles` only for a part you keep as geometry). The body's skin ramp takes the sheet's own skin
+   (sample its face, p5..p95), so the face and the neck, arms and belly are one tone. Then look for creases the
+   projection could not reach (faces turned away: Meshy's dark paint there is a thin line) and lift them with a
+   `touch_up_late` (`val_max`: dark texels only, flat to the mid skin tone).
+6. **Eyes, lips, tattoos are the sheet's paint; the hair crossing the face is not.** With the warp the iris, the
+   liner, the lids, the brow, the circuits and the lips land on Meshy's own eye and mouth. Hair of the same hue as a
+   tattoo or trim (Vex's circuits are hair-green) is told apart by thickness, not colour: `hole_open` (~12 px) keeps
+   only thick strands as holes, so thin lines and dots stay. Anything drawn on a part that turns away from the front
+   (Vex's jaw panels on the jaw's sides) projects as a faint smeared line, the "seam": leave it out
+   (`skip_art_poly`, filled from the skin) or build it as geometry; never let it half-project.
+7. **A lens or eye that glows needs a halo to read at the match camera** (a 3 cm lens is a pixel at 23 m): an anchor
+   on the lens (`anchor_<name>`, the fit exports it) and a `halos` entry in content/rules/warden_look.json (radius in
+   screen pixels, `near_d` / `far_d` so close-ups keep the lens itself; a core whiter than the hair so it doesn't
+   merge into it: Vex [0.62, 1.0, 0.66], strength 2.2, px 2.4). Don't make the lens bigger: compare its size to the
+   eye spacing in the face sheet first.
+8. **Check it like the owner does:** the front and 3/4 close-ups beside the portrait (r3d_closeup_vs_art,
+   r3d_closeup_34_vs_art), the 3/4 for the jaw and the straps, the match frame for the halo.
 
 ## r3b (Vex redesign, 2026-11-04): what changed
 (The owner picked r3b at 09:00: it ships as art/wardens/vex/vex.glb with vex_fit.json / vex_bake.json; r3c
@@ -245,3 +294,8 @@ Vex total: 19 tasks, 572 credits (r3: 12 tasks, 382 credits; balance 5,500 befor
 Then the r3c recipe: re-baked (art/wardens/src/pip_bake.json) and refitted (new joints, body.legs 1.45, size 0.78),
 ramps of pip_front's colours, the lantern in her left paw with arched panes and a light, stronger wing cards,
 warden_look.json `pip`, the tender stance's left paw out. IMPORT.md "Stage 2".
+
+### Vex r3c and r3d (2026-11-04): credit-free
+r3c (09:00-10:30) and r3d (11:25-13:30) used no Meshy credits: every change is in the fit spec, the parts tools, the
+paint-over, the shared look (16c18b4f) and warden_look.json. Recipe: RECIPE_95.md.
+
