@@ -256,3 +256,7 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - 2026-11-04 07:46 UTC: READY ext/arena-sign 245f904c (Backspace reset label). Ostra art is in, so all 12 Wardens have round-2 art; modelling notes are in the S2 brief. All of them wait on the Vex r3 recipe.
 - 2026-11-04 07:59 UTC: READY ext/rename-breaker 93b2ab27, now with all four renames (Pip, Ryzz, Breaker, Hem).
 - 2026-11-04 08:11 UTC: Vex r3 is done (ext/warden-vex-r3 032ceeeb). Shots pushed (r3_*), verdict posted, balance 4,993. Holding the other Wardens until the owner says go; r3b is still running.
+- 2026-11-04 08:43 UTC:
+  - Vex r3b is done (ext/warden-vex-r3b 6e9284d5) and the comparison with r3 is posted. Waiting on the owner to pick r3 or r3b, then "go" for the other Wardens.
+  - ext/rename-breaker 07ef436b now has the titles Red Stitch, Brass Abomination and Cliff Runner.
+  - Balance 4,993.
