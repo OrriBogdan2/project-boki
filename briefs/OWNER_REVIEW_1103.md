@@ -677,3 +677,12 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Check against the minimap and full-map icons so they match the new look.
 - Screenshots: an outpost at match zoom in its neutral, capturing and owned states, plus a view with 2–3 outposts and a fight nearby to check the clutter.
 - Logged for whoever has budget (map/world art).
+
+## 87. The second Mask comes from Hob, in a conversation at the farm, instead of just appearing (owner, 23:05 UTC Nov 4)
+- Owner: "the masks just appear (Kael, Pip, etc). Let's have Hob call you over when you get to the farm, explain stuff to you, then after a bit be like 'by the way, I see you found a Vex mask; could I interest you in another?' and then offer one of the 3."
+- Flow on the first return to the farm (after the first expedition, per DECISIONS: Vex is free at the first portal; the second Mask is a pick of three):
+  1. On arrival Hob waves and calls you over ("Hey! Over here!"), with a marker over him. Talking to him (interact key) starts the farm tutorial talk (the existing Hob/farm-hob steps).
+  2. A little later in that flow (e.g. once the house is placed, or after one or two farm steps, not right away), Hob brings it up: "By the way... I see you found a Vex mask. Could I interest you in another?" and a short in-world pick of the three offered Masks (the DECISIONS set), each with its portrait, title, a one-line role and a preview clip; you choose one. It plays a short version of the Mask moment (item 83) for the new Mask.
+  3. Remove the current behaviour where the extra Masks simply appear. Saves that already have them keep them.
+- Files: farm_hob.gd / farm_tutorial.gd (ext's farm-hob code) + the empty90 "second-Mask beat" code (class_unlock / class_pick). Keep the Masks screen and unlock rules otherwise as they are.
+- Assert: on a fresh save after the first expedition, no second Mask is owned until you accept Hob's offer; the offer shows exactly the three; picking one unlocks it. Screenshots: Hob calling you over, the offer dialogue, the three-Mask pick.
