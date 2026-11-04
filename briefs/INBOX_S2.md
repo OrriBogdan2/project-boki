@@ -560,3 +560,10 @@ ext/imagegen fb503983. The owner made flat-lit face/head sheets, prop sheets and
 4. Back: the art's gear backpack (brass plate, cogs) and the 3-4 thick hoses to the gun are missing or thin.
 5. Keep: green hair and braid (great), eye plate, face (close), top, tattoos, belt, boots, proportions.
 6. With 1-3 done she should clear 95%: ship her then and keep the r3d face pass going.
+
+## 2026-11-04 13:05 UTC (ORCH): OWNER: max parallel — one Opus agent per Hunter, target all 12 shipped before Fri 06:00
+- Owner wants speed. Run one Opus agent per Hunter in parallel (Vex, Kael, Hem, Breaker, Ryzz, Cinder, Dredge, Pip, Claire, Tarek, Ostra, Sable), each owning its ext/warden-3d-<id> branch, iterating to ~95% then marking READY (and continuing toward 100%).
+- First do the shared fix once: the toon light / look override pushes every model violet and too dark (Vex skin lilac, Ryzz magenta). Fix it in one shared commit and rebase the Hunter branches on it.
+- Order of READY: Vex first (closest), then Kael, Hem, Breaker, Claire, Sable, Ostra, Tarek, Pip, Ryzz, Dredge, Cinder.
+- Target: Vex + 3-4 more READY today; all 12 READY by Thursday night; everything shipped before Friday 06:00 (owner's usage reset). Post progress in STATUS.md every couple of hours.
+- ORCH reviews every new shot set hourly with Opus and posts fix lists here.
