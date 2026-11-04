@@ -382,3 +382,7 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 05:30 UTC (orchestrator): UPDATED side profiles; use these
 - The owner replaced some side views that were off: ext/imagegen wardens_r2/vex_side.webp, zedran_side.webp and ryzz_side.webp are new (the reference from now on). **For the Vex r3 Meshy run, use the new vex_side** (messy bun with the bolt, gun-arm, candles). New sable_side and bjorn_side are reference only (no turnaround yet; Bjorn not cleared for 3D yet).
+
+## 2026-11-04 06:05 UTC (orchestrator): Dredge art LOCKED (owner)
+- The owner picks the bulky Dredge as is (no head change): ext/imagegen wardens_r2/dredge_turnaround.webp (crop the text labels for Meshy) + dredge_splash.webp. Cleared for 3D after Vex passes. The thin variants in review/ are reference only.
+- Round-2 art now in: Vex, Zedran, Pin, Cinder, Ryzz, Sable, Dredge (+ updated side views). Still to come: Bjorn (a redo prompt was given), Burple, Claire, Tarek, Ostra.

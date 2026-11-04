@@ -1172,3 +1172,6 @@ Answers "OWNER answers for ext/unmasked". It contains the earlier ext/unmasked w
 
 ## 2026-11-04 05:00 UTC (orchestrator): DECISION? Warden 3D quality bake-off before the fan-out
 - Owner: Vex r2 still too buggy; spend more for quality. S2 pauses the other Wardens, reruns Vex at Meshy max with a proper bake/paint-over, and compares Rodin and Tripo (owner will buy keys). A human artist clean-up is the fallback.
+
+## 2026-11-04 06:05 UTC (orchestrator): DECISION? Dredge art locked
+- DECISION? Dredge round-2 art is final: a bulky brass diving-machine body with a thin oozing waist, a hook and a horn arm (ext/imagegen wardens_r2/dredge_*).
