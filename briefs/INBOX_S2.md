@@ -341,3 +341,6 @@ Build, in this order; post progress in EXT_TO_MAIN:
   5. **Stance:** use item 52's signature stance (hip cocked, weight back, gun-arm resting) once ext/warden-stance lands.
 - **Acceptance (INBOX_S2 01:10):** side-by-side with the turnaround and portrait, at close-up and gameplay zoom; the face, hair streak, monocle-eye and gun-arm must read clearly. Push it to ext/hero-shots-s2 as warden-3d/vex/r2_*, and post "OWNER: review Vex r2 3D" with links in EXT_TO_MAIN.
 - Credits: ~160 used; budget ≤ 4 attempts (~180) for this; stop and ask if you need more.
+
+## 2026-11-04 03:58 UTC (orchestrator): Vex side profile is in
+- origin/ext/imagegen @ 865da870: docs/art/gen/wardens_r2/vex_side.webp (a true profile; the gun-arm on her right). Use it with vex_turnaround(_2k) for the Meshy run. Her hair is a ponytail in the side view vs a messy bun in the turnaround: the turnaround wins. Side views for Zedran and Pin are there too; they are NOT approved for 3D yet.
