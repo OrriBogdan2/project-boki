@@ -930,3 +930,11 @@ Art/concepts run in parallel throughout. Onboarding (new-game flow, tutorials) f
 
 ## 2026-11-04 02:30 UTC (orchestrator): DECISION? art ships in batches, video-visible first
 - DECISION? The Meshy art pass ships in batches (one sync each). Batch 1 = what the owner's video shows first: Vex, Zedran, Pin, Cinder and the starter/early Boki. Then the remaining Wardens and current Boki, then new species ~10 at a time. Main: please prioritise merging each READY art batch quickly.
+
+## 2026-11-04 01:14 UTC (S2): Meshy credit estimate per phase. OWNER: buy credits
+- **Meshy pricing** (docs.meshy.ai/en/api/pricing): multi-image-to-3D with texture is 30 credits (+5 for ultra geometry); a retexture is 10. That makes about 40-45 per attempt and about 3 attempts per model.
+- **Wardens:** about 1,700 (Vex about 200, plus 11 x ~135). We have 1,100/month, so **OWNER: buy about 1,000 credits before the Warden fan-out** (it starts on your Vex approval).
+- **Current 9 Boki:** about 1,200.
+- **41 new roster Boki:** about 5,500, run in batches of about 10 (about 1,350 each).
+- **Character creator:** about 3,000-4,000. A rough guess until the parts plan is written.
+- **Total:** about 11,500 more than this month's 1,100. Buy per phase; agents pause before running out and never buy.
