@@ -1,7 +1,7 @@
 extends RefCounted
 ## --economy-floor-check: nobody is ever left with no Boki, no gems and no way to play (Lifeline),
-## the Drift Pens (BokiPens), the stray and the pens, the Exchange order book
-## (Exchange), and save/load for all of it (old saves too).
+## the stray, the Exchange order book (Exchange), and save/load for all of it (old saves too). The
+## Shelter (the cheap commons behind the floor) is --market-check's.
 ## Prints FLOOR ok/FAIL lines and "FLOOR DONE, failures: N".
 
 var bad := 0
@@ -15,11 +15,6 @@ func run(host: Node) -> void:
 	main = host
 	Save.no_write = true
 	_zero_zero()
-	_pens()
-	_pen_listing()
-	_pens_restock()
-	_pens_no_mint()
-	_pens_gems()
 	await _stray_match()
 	_zero_run()
 	_exchange()
@@ -45,7 +40,7 @@ func _zero_zero() -> void:
 	Save.d["gems"] = 0
 	Save.d["active"] = ""
 	ok(Lifeline.stuck(), "zero Boki and zero gems is the stuck state")
-	ok(BokiPens.cheapest() <= BokiPens.PEN_PRICE_MAX, "the cheapest pen Boki (%d) is in the floor price band" % BokiPens.cheapest())
+	ok(Shelter.cheapest() <= int(Goods.rules()["shelter"]["base"]) + int(Goods.rules()["shelter"]["per_level"]), "the cheapest shelter Boki (%d) is in the floor price band" % Shelter.cheapest())
 	var ev := Lifeline.check()
 	ok(ev.size() == 1 and String(ev[0]["kind"]) == "stray" and Save.d["roster"].size() == 1, "a stray Boki turns up at the farm")
 	var st: Dictionary = Save.d["roster"][0]
@@ -53,10 +48,10 @@ func _zero_zero() -> void:
 	ok(Save.active_kin() == st and st.has("serial") and String(st["origin"]["how"]) == "stray", "it's your partner, registered as a stray")
 	ok(Lifeline.check().is_empty(), "with a Boki again, nothing more is given")
 	ok(not Lifeline.stuck(), "and you're not stuck any more")
-	# you can't get to zero on purpose: your last Boki can't be released or listed
+	# you can't get to zero on purpose: your last Boki can't be released, given up or handed on
 	ok(KinBox.release(st) != "", "your last Boki can't be released (%s)" % KinBox.release(st))
 	Save.d["gems"] = 999
-	ok(not BokiPens.list_mine(String(st["uid"]), 60)["ok"], "nor listed at the pens")
+	ok(Shelter.why_not(st) != "" and not Transfer.send(String(st["uid"]), "Moss")["ok"], "nor given up at the shelter or handed on")
 	# losing your only Boki after a run: the Ransom House lets it go on credit (existing rule) and
 	# the floor is there behind it
 	_started_save()
@@ -73,62 +68,6 @@ func _zero_zero() -> void:
 	ok(Save.d["roster"].is_empty(), "(the last Boki starved)")
 	ok(Lifeline.check().size() == 1 and Save.d["roster"].size() == 1, "a stray turns up after the last Boki starves")
 
-func _pens() -> void:
-	_started_save()
-	Save.d["roster"] = [Save.new_kin("cindle", "Pip")]
-	Save.d["active"] = Save.d["roster"][0]["uid"]
-	var ls := BokiPens.listings()
-	ok(ls.size() == BokiPens.PEN_STOCK, "the pens have %d Boki today" % ls.size())
-	ok(ls.all(func(L): return int(L["price"]) >= BokiPens.PEN_PRICE_MIN and int(L["price"]) <= BokiPens.PEN_PRICE_MAX), "all priced %d-%d: %s" % [BokiPens.PEN_PRICE_MIN, BokiPens.PEN_PRICE_MAX, str(ls.map(func(L): return L["price"]))])
-	ok(ls.all(func(L): return not Data.is_rare(String(L["rec"]["species"])) and not Mutations.special(L["rec"])), "commons only, ordinary rolls")
-	var again := BokiPens.listings()
-	ok(again.map(func(L): return L["id"]) == ls.map(func(L): return L["id"]), "the same stock all day")
-	var sp0 := String(ls[0]["rec"]["species"])
-	ok(BokiPens.listings({"species": sp0}).all(func(L): return String(L["rec"]["species"]) == sp0), "filter by species")
-	ok(BokiPens.listings({"min_iv": 200}).is_empty() or BokiPens.listings({"min_iv": 200}).all(func(L): return Care.iv_total(L["rec"]) >= 200), "filter by IVs")
-	Save.d["gems"] = 10
-	var r := BokiPens.buy(String(ls[0]["id"]))
-	ok(not r["ok"] and Save.d["roster"].size() == 1, "can't buy without the gems (%s)" % r["why"])
-	Save.d["gems"] = 100
-	var price := int(ls[0]["price"])
-	r = BokiPens.buy(String(ls[0]["id"]))
-	ok(r["ok"] and Save.d["roster"].size() == 2 and int(Save.d["gems"]) == 100 - price, "bought one for %d gems" % price)
-	var nk: Dictionary = r.get("rec", {})
-	ok(String(nk.get("origin", {}).get("how", "")) == "market" and nk.has("serial") and String(nk["uid"]) != String(ls[0]["rec"]["uid"]), "a new id, registered, from the market")
-	ok(BokiPens.listings().size() == BokiPens.PEN_STOCK - 1, "it's gone from the pens")
-	ok(Save.d["roster"].has(nk) and String(Save.d.get("active", "")) != String(nk["uid"]), "it goes to the farm roster; your active Boki stays your pick, nothing joins a match")
-	ok(not BokiPens.buy(String(ls[0]["id"]))["ok"], "can't buy it twice")
-
-func _pen_listing() -> void:
-	_started_save()
-	var a := Save.new_kin("cindle", "Pip"); a["level"] = 4
-	var b := Save.new_kin("burrlet", "Bun")
-	Save.d["roster"] = [a, b]; Save.d["active"] = b["uid"]; Save.d["gems"] = 100
-	var fr := BokiPens.fair_range(a)
-	ok(not BokiPens.list_mine(String(a["uid"]), fr.y + 50)["ok"], "a listing outside the fair range is refused (%d-%d)" % [fr.x, fr.y])
-	var price := Ransom.value(a)
-	var r := BokiPens.list_mine(String(a["uid"]), price)
-	var fee := int(r.get("fee", 0))
-	ok(fee == maxi(1, int(round(price * 0.05))) and BokiPens.LIST_FEE == 0.05, "the listing fee is 5%% of the price (%d of %d)" % [fee, price])
-	ok(r["ok"] and Save.d["roster"].size() == 1 and int(Save.d["gems"]) == 100 - fee, "listed for %d (fee %d); it leaves the farm" % [price, fee])
-	ok(BokiPens.listings({"kind": "player"}).size() == 1, "it shows in the pens")
-	ok(not BokiPens.buy(String(r["id"]))["ok"], "you can't buy your own listing")
-	var u := BokiPens.unlist(String(r["id"]))
-	ok(u["ok"] and Save.d["roster"].size() == 2 and Save.kin(String(a["uid"])) == a, "taking it down brings exactly it back")
-	# offline turnover: a fair listing sells over a few expeditions, paying out less tax
-	r = BokiPens.list_mine(String(a["uid"]), price)
-	var g0 := int(Save.d["gems"])
-	var rng := RandomNumberGenerator.new(); rng.seed = 7
-	var sold: Array = []
-	for i in 10:
-		sold = BokiPens.tick(rng)
-		if not sold.is_empty(): break
-	var paid := int(sold[0]["paid"]) if not sold.is_empty() else 0
-	ok(not sold.is_empty() and int(Save.d["gems"]) == g0 + paid and paid == price - int(round(price * BokiPens.SALE_TAX)), "it sells, paying %d (5%% tax)" % paid)
-	ok(Save.kin(String(a["uid"])).is_empty(), "and it's gone for good")
-	ok(not BokiPens.list_mine(String(b["uid"]), 60)["ok"], "your only Boki can't be listed")
-
-## A stray's run: the basic belt goes out with nobody, and a freed Boki node doesn't break leaving.
 func _stray_match() -> void:
 	_started_save()
 	Save.d["roster"] = []; Save.d["active"] = ""; Save.d["gems"] = 0
@@ -170,17 +109,17 @@ func _result_of(m: Match) -> Dictionary:
 	Game.main = g
 	return captured
 
-## The zero-zero player: a stray, and the pens' cheapest Boki is within reach of one extract.
+## The zero-zero player: a stray, and the shelter's cheapest Boki is within reach of one extract.
 func _zero_run() -> void:
 	_started_save()
 	Save.d["roster"] = []; Save.d["gems"] = 0; Save.d["active"] = ""
 	Save.d["floor"] = {"strays": 0, "last_m": -1}
 	Lifeline.check()
-	Game.apply_result({"extracted": true, "tier": 0, "gems": BokiPens.PEN_PRICE_MAX, "kin_runs": [], "caught": []})
+	Game.apply_result({"extracted": true, "tier": 0, "gems": Shelter.cheapest(), "kin_runs": [], "caught": []})
 	var have: int = Save.d["roster"].size()
-	var cheap: Dictionary = BokiPens.listings().reduce(func(a, L): return L if a.is_empty() or int(L["price"]) < int(a["price"]) else a, {})
-	var r := BokiPens.buy(String(cheap["id"]))
-	ok(r["ok"] and Save.d["roster"].size() == have + 1, "from zero: a stray, then one extract buys a Boki at the pens (%d gems)" % int(cheap["price"]))
+	var cheap: Dictionary = Shelter.cards().reduce(func(a, c): return c if a.is_empty() or int(c["price"]) < int(a["price"]) else a, {})
+	var r := Shelter.adopt(String(cheap["id"]))
+	ok(r["ok"] and Save.d["roster"].size() == have + 1, "from zero: a stray, then one extract adopts a Boki at the shelter (%d gems)" % int(cheap["price"]))
 	# and a normal run uses the treat up
 	_started_save()
 	var g45 := Save.new_kin("cindle", "Pip")
@@ -340,122 +279,11 @@ func _exchange_walk() -> void:
 		ok(sell_ok and buy_ok, "%s: no round trip profits (ask %d vs best tick sale %d net; bid %d vs cheapest tick buy %d)" % [item, ask, best_net, bid, cheapest_buy])
 	ok(losers == 0, "no commodity is a free-gem loop")
 
-## Pen stock: the day is stored, it rolls only forward, and an empty stock stays empty until tomorrow.
-func _pens_restock() -> void:
-	_started_save()
-	Save.d["roster"] = [Save.new_kin("cindle", "Pip")]
-	Save.d["active"] = Save.d["roster"][0]["uid"]
-	Save.d["gems"] = 5000
-	Save.d["farm_lvl"] = 3
-	var ls := BokiPens.listings()
-	var today := String(BokiPens._st()["day"])
-	ok(ls.size() == BokiPens.PEN_STOCK and today == BokiPens._today(), "the stock's day is stored (%s)" % today)
-	for L in ls: BokiPens.buy(String(L["id"]))
-	ok(BokiPens.listings().is_empty() and BokiPens.listings().is_empty(), "buying the pens out leaves them empty (and stays empty)")
-	BokiPens.restock()
-	ok((BokiPens._st()["stock"] as Array).is_empty() and String(BokiPens._st()["day"]) == today, "...even if something asks for a restock the same day")
-	# the next day: fresh stock
-	BokiPens._st()["day"] = "2000-01-01"
-	var fresh := BokiPens.listings()
-	ok(fresh.size() == BokiPens.PEN_STOCK and String(BokiPens._st()["day"]) == BokiPens._today(), "tomorrow brings %d fresh Boki" % fresh.size())
-	# the clock goes back: nothing is re-rolled, the stored day doesn't move back
-	BokiPens._st()["day"] = "2999-12-31"
-	var before: Array = fresh.map(func(L): return L["id"])
-	ok(BokiPens.listings().map(func(L): return L["id"]) == before, "a clock set back doesn't re-roll the stock")
-	for L in BokiPens.listings(): BokiPens.buy(String(L["id"]))
-	ok(BokiPens.listings().is_empty() and String(BokiPens._st()["day"]) == "2999-12-31", "or restock an empty pen, and the stored day never goes backwards")
-	# a bad saved day (not a date) behaves like a first visit once
-	BokiPens._st()["day"] = ""
-	ok(BokiPens.listings().size() == BokiPens.PEN_STOCK, "a save with no stored day gets its first stock")
-
-## Buy-then-list can't mint gems: pen Boki (and strays) can't be listed, and open listings are capped.
-func _pens_no_mint() -> void:
-	_started_save()
-	var base := Save.new_kin("burrlet", "Bun")
-	Save.d["roster"] = [base]; Save.d["active"] = base["uid"]; Save.d["gems"] = 500
-	var g0 := int(Save.d["gems"])
-	var L: Dictionary = BokiPens.listings()[0]
-	var price := int(L["price"])
-	var r := BokiPens.buy(String(L["id"]))
-	var bought: Dictionary = r["rec"]
-	ok(r["ok"] and String(bought["origin"]["how"]) == "market" and not BokiPens.can_list(bought), "a pen Boki is marked as market-bought and can't be listed")
-	var lr := BokiPens.list_mine(String(bought["uid"]), BokiPens.fair_range(bought).y)
-	ok(not lr["ok"] and Save.kin(String(bought["uid"])) == bought and int(Save.d["gems"]) == g0 - price, "listing it is refused and costs nothing (%s)" % lr["why"])
-	ok(int(Save.d["gems"]) < g0, "so buy-then-list can only lose gems (%d -> %d)" % [g0, int(Save.d["gems"])])
-	var stray := Lifeline.stray()
-	ok(not BokiPens.list_mine(String(stray["uid"]), BokiPens.fair_range(stray).y)["ok"], "a stray can't be listed either")
-	# a baby bred from two pen Boki is not a way round it (its own origin is "egg")
-	var bp2: Dictionary = BokiPens.buy(String(BokiPens.listings()[0]["id"]))["rec"]
-	var baby := Care.breed(bought, bp2, RandomNumberGenerator.new())
-	Save.d["roster"].append(baby)
-	ok(String(baby["origin"]["how"]) == "egg" and not BokiPens.can_list(baby), "a baby bred from two pen Boki can't be listed (stamped pen_line)")
-	var old_baby := baby.duplicate(true); old_baby["origin"].erase("pen_line"); old_baby["uid"] = Save.new_id()
-	Save.d["roster"].append(old_baby)
-	ok(not BokiPens.can_list(old_baby), "and an older baby without the stamp is caught through its parents")
-	var own_a := Save.new_kin("cindle", "OwnA"); var own_b := Save.new_kin("puddlet", "OwnB")
-	Save.d["roster"].append(own_a); Save.d["roster"].append(own_b)
-	ok(BokiPens.can_list(Care.breed(own_a, own_b, RandomNumberGenerator.new())), "a baby of two Boki you raised is still listable")
-	# the Nesting Nook's egg parents can't be listed
-	var pa := Save.new_kin("cindle", "Mum"); var pb := Save.new_kin("puddlet", "Dad")
-	Save.d["roster"].append(pa); Save.d["roster"].append(pb)
-	Save.d["egg"] = {"a": pa["uid"], "b": pb["uid"], "t": 0}
-	var er := BokiPens.list_mine(String(pa["uid"]), Ransom.value(pa))
-	ok(not er["ok"] and String(er["why"]).find("egg") >= 0 and Save.kin(String(pa["uid"])) == pa, "a Boki whose egg is in the Nesting Nook can't be listed (%s)" % er["why"])
-	Save.d.erase("egg")
-	# at most MAX_LISTED open at once
-	var mine: Array = []
-	for i in BokiPens.MAX_LISTED + 1:
-		var k := Save.new_kin("cindle", "K%d" % i)
-		Save.d["roster"].append(k); mine.append(k)
-	var listed := 0
-	var last: Dictionary = {}
-	for k in mine:
-		last = BokiPens.list_mine(String(k["uid"]), Ransom.value(k))
-		if last["ok"]: listed += 1
-	ok(listed == BokiPens.MAX_LISTED and not last["ok"], "no more than %d listings at once (%d listed: %s)" % [BokiPens.MAX_LISTED, listed, str(last.get("why", ""))])
-	var first_id := String((BokiPens._st()["mine"] as Array)[0]["id"])
-	BokiPens.unlist(first_id)
-	ok(BokiPens.list_mine(String(mine[mine.size() - 1]["uid"]), Ransom.value(mine[mine.size() - 1]))["ok"], "taking one down makes room for another")
-
-## Gem conservation across buy, list, sell and take-down: every step moves exactly the gems it should.
-func _pens_gems() -> void:
-	_started_save()
-	var a := Save.new_kin("cindle", "Pip"); a["level"] = 4
-	var b := Save.new_kin("burrlet", "Bun")
-	Save.d["roster"] = [a, b]; Save.d["active"] = b["uid"]; Save.d["gems"] = 400
-	var g := int(Save.d["gems"])
-	var pen: Dictionary = BokiPens.listings()[0]
-	var pp := int(pen["price"])
-	BokiPens.buy(String(pen["id"]))
-	g -= pp
-	ok(int(Save.d["gems"]) == g, "buy: exactly the price leaves (%d)" % pp)
-	var price := 120
-	var fr := BokiPens.fair_range(a)
-	ok(price >= fr.x and price <= fr.y, "(120 is a fair price for the level 4 Boki: %d-%d)" % [fr.x, fr.y])
-	var lr := BokiPens.list_mine(String(a["uid"]), price)
-	g -= 6
-	ok(lr["ok"] and int(lr["fee"]) == 6 and int(Save.d["gems"]) == g, "list: the fee is exactly 5%% of 120 = 6, and nothing else moves (%d)" % int(Save.d["gems"]))
-	var un := BokiPens.unlist(String(lr["id"]))
-	ok(un["ok"] and int(Save.d["gems"]) == g, "take down: the Boki is back, the fee isn't refunded, nothing is minted")
-	lr = BokiPens.list_mine(String(a["uid"]), price)
-	g -= 6
-	var rng := RandomNumberGenerator.new(); rng.seed = 5
-	var sold: Array = []
-	for i in 40:
-		sold = BokiPens.tick(rng)
-		if not sold.is_empty(): break
-	g += price - 6
-	ok(not sold.is_empty() and int(Save.d["gems"]) == g, "sell: the price less 5%% tax (6) is paid, once: %d gems, want %d" % [int(Save.d["gems"]), g])
-	ok(BokiPens.tick(rng).is_empty() and int(Save.d["gems"]) == g, "a sold listing pays only once")
-
-
 func _save_load() -> void:
 	# everything round-trips through the save file, and an old save (none of it) loads cleanly
 	_started_save()
 	var a := Save.new_kin("cindle", "Pip"); var b := Save.new_kin("burrlet", "Bun")
 	Save.d["roster"] = [a, b]; Save.d["active"] = a["uid"]; Save.d["gems"] = 400
-	BokiPens.listings()
-	BokiPens.list_mine(String(b["uid"]), Ransom.value(b))
 	Work.ensure(); Save.d["mats"]["wood"] = 20
 	Exchange.post("sell", "wood", 5, Exchange.best("wood", "sell") + 2)
 	Save.d["floor"] = {"strays": 1, "last_m": 2}
@@ -463,18 +291,14 @@ func _save_load() -> void:
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	f.store_string(JSON.stringify(Save.d))
 	f.close()
-	var before_pens := (Save.d["pens"]["stock"] as Array).size()
 	var before_mine := Exchange.mine().size()
 	var wood := int(Save.d["mats"]["wood"])
 	Save.load_from(path)
-	ok((Save.d["pens"]["stock"] as Array).size() == before_pens and (Save.d["pens"]["mine"] as Array).size() == 1, "the pens and your listing survive a save/load")
 	ok(Exchange.mine().size() == before_mine and int(Save.d["mats"]["wood"]) == wood, "open Exchange offers and escrow survive a save/load")
 	ok(int(Save.d["floor"]["strays"]) == 1, "the floor's record survives a save/load")
-	var u := BokiPens.unlist(String(Save.d["pens"]["mine"][0]["id"]))
-	ok(u["ok"] and Save.d["roster"].size() == 2, "a listing taken down after loading comes back")
 	# an old save from before any of this
 	var old := Save.fresh()
-	for k in ["pens", "exchange", "floor"]: old.erase(k)
+	for k in ["exchange", "floor"]: old.erase(k)
 	old["v"] = Save.VERSION
 	old["tutorial"] = {"hatched": true}
 	old["roster"] = [Save.new_kin("puddlet", "Old")]
@@ -483,8 +307,8 @@ func _save_load() -> void:
 	f.store_string(JSON.stringify(old))
 	f.close()
 	Save.load_from(path)
-	ok(not Save.d.has("pens") and not Save.d.has("exchange"), "an old save loads without the new keys")
-	ok(BokiPens.listings().size() == BokiPens.PEN_STOCK and not Exchange.book("wood")["buys"].is_empty() and Lifeline.check().is_empty(), "and the pens, the Exchange and the floor all work on it")
+	ok(not Save.d.has("exchange"), "an old save loads without the new keys")
+	ok(not Exchange.book("wood")["buys"].is_empty() and Lifeline.check().is_empty(), "and the Exchange and the floor work on it")
 	# the zero-zero save, saved and loaded: still gets its stray
 	old["roster"] = []; old["active"] = ""; old["gems"] = 0; old["matches"] = 4
 	f = FileAccess.open(path, FileAccess.WRITE)

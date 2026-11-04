@@ -1,0 +1,56 @@
+# Uploads every build on main to itch.io (https://projectboki.itch.io/project-boki) for testers.
+# Testers using the itch desktop app get each build as a small patch.
+# One-time setup by the owner: repo Settings > Secrets and variables > Actions > New repository secret,
+# name BUTLER_API_KEY, value = the itch.io API key (itch.io/user/settings/api-keys).
+name: itch.io
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: itch
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.6.2"
+  ITCH_TARGET: "projectboki/project-boki"
+
+jobs:
+  itch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Godot, export templates and butler
+        run: |
+          set -e
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          curl -sSL -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip && sudo mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
+          curl -sSL -o tpl.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          unzip -q tpl.tpz -d tpl && mv tpl/templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
+          curl -sSL -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -q butler.zip -d butler && chmod +x butler/butler
+          rm -rf tpl tpl.tpz godot.zip butler.zip
+
+      - name: Export Windows and macOS
+        run: |
+          godot --headless --path . --import || true
+          mkdir -p ../build/win ../build/mac
+          godot --headless --path . --export-release "Windows" ../build/win/ProjectBoki.exe
+          godot --headless --path . --export-release "macOS" ../build/mac/ProjectBoki.zip
+          mkdir -p itch/windows itch/mac
+          cp ../build/win/ProjectBoki.exe itch/windows/
+          (cd itch/mac && unzip -q ../../../build/mac/ProjectBoki.zip)
+
+      - name: Push to itch.io
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: |
+          if [ -z "$BUTLER_API_KEY" ]; then echo "::warning::BUTLER_API_KEY secret not set; skipping the upload"; exit 0; fi
+          V=$(git log -1 --format=%h)
+          butler/butler push itch/windows "$ITCH_TARGET:windows" --userversion "$V"
+          butler/butler push itch/mac "$ITCH_TARGET:mac" --userversion "$V"

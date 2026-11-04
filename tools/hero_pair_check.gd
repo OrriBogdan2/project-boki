@@ -169,7 +169,7 @@ func _zones() -> void:
 		var mid2: Vector3 = (P.ak as DolmKit).rock_mid(w)
 		all_ok = all_ok and not m.world.is_void(mid2.x, mid2.z)
 	ok("stone row: rocks near the edge stay on ground", rocks(m).size() > 0 and all_ok, "rocks %d" % rocks(m).size())
-	# ---- the Basalt Spine across the abyss: rocks on the ground either side, none over the gap, no walkway
+	# ---- the Basalt Spine over the abyss: the rocks are laid on the gap as ground, no bridge tiles or event
 	var before := void_tiles(m)
 	for w in m.verbs.walls.duplicate(): m.verbs._break_wall(w)
 	HeroZones.capture = true
@@ -178,25 +178,18 @@ func _zones() -> void:
 	step(m, float(P.ak.x_def()["rise"]) + 0.1)
 	HeroZones.capture = false
 	var spine := (P.ak as DolmKit).spine
-	var on_ground := true
-	var near_x := -99.0
-	var far_x := 99.0
-	for w in rocks(m):
-		for end in [w["a"], w["b"]]:
-			on_ground = on_ground and not m.world.is_void((end as Vector2).x, (end as Vector2).y)
-		var mx := (P.ak as DolmKit).rock_mid(w).x - home.x
-		if mx < 4.0: near_x = maxf(near_x, mx)
-		else: far_x = minf(far_x, mx)
+	var over_gap := rocks(m).filter(func(w):
+		var mid := (P.ak as DolmKit).rock_mid(w)
+		return m.world.is_void(mid.x, mid.z))
 	ok(
-		"spine (item 15): over the abyss no walkway: the abyss stays abyss, no bridge event",
+		"spine: over the abyss the rocks are the walkway: the abyss stays abyss, no bridge event",
 		void_tiles(m) == before and not HeroZones.sent.any(func(e): return e[1] == "bridge"),
 		"void %d -> %d" % [before, void_tiles(m)]
 	)
 	ok(
-		"spine (item 15): the line is clipped at the abyss edges (rocks on both banks, every end on ground)",
-		on_ground and rocks(m).size() > 2 and rocks(m).size() < int(P.ak.x_def()["rocks"]) and near_x < 4.0
-			and far_x >= 12.0 and spine.rocks_raised == rocks(m).size(),
-		"rocks %d near bank %.1f far bank %.1f" % [rocks(m).size(), near_x, far_x]
+		"spine: rocks stand over the gap and on the banks, every rock raised",
+		over_gap.size() >= 3 and rocks(m).size() > over_gap.size() and spine.rocks_raised == rocks(m).size(),
+		"rocks %d over the gap %d" % [rocks(m).size(), over_gap.size()]
 	)
 	await done(m)
 	# ---- a block tile and a body in the way
@@ -310,10 +303,12 @@ func _zones() -> void:
 	m.ents_by_id["t1"] = T
 	T.remote = true
 	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, T.pos)
-	HeroZones.sent.clear()
+	Displace.capture = true
+	Displace.sent.clear()
 	P.ak.on_dash(false)
 	step(m, 1.9)
-	var tev: Array = HeroZones.sent.filter(func(e): return e[1] == "tp")
+	Displace.capture = false
+	var tev: Array = Displace.sent.filter(func(e): return e[1] == "tp")
 	ok("net: Trade tells the game that owns the foe to move it", tev.size() == 1 and String(tev[0][2]) == "t1" and float(tev[0][3]) < home.x + 2.0 and T.pos.x - home.x > 6.0, str(tev))
 	r2 = setup("ostra", 6.0)
 	m2 = r2[0]
@@ -321,7 +316,7 @@ func _zones() -> void:
 	owned.nid = "t1"
 	m2.ents_by_id["t1"] = owned
 	owned.teleport(r2[3] + Vector3(8.0, 0, 0))
-	for e in tev: HeroZones.net_in(m2, e)
+	for e in tev: m2.displace.net_in(e)
 	ok("net: the owning game moves the foe to where the trader stood", owned.pos.x - float(r2[3].x) < 2.0, "x %.1f" % (owned.pos.x - float(r2[3].x)))
 	await done(m2)
 	await done(m)

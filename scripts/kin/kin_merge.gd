@@ -92,7 +92,7 @@ static func deny_text(h: Hunter) -> String:
 	return ""
 
 static func rescue_text(h: Hunter) -> String:
-	return "Rescue %s to merge" % String((h.kin as Kin).rec.get("name", "your Boki"))
+	return "Rescue %s to fuse" % String((h.kin as Kin).rec.get("name", "your Boki"))
 
 ## The weak merge with no Boki at all: short, plain, but the full meter is spent on something.
 static func surge(h: Hunter) -> bool:

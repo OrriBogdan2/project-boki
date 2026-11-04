@@ -24,6 +24,7 @@ var holder: Node3D
 var cam: Camera3D
 var anims: Array = []
 var tree: SceneTree
+var close_cfg := {}           # a Warden's warden_look "closeup" {fov, up}: a wider head shot (Ostra's raised orb)
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -68,6 +69,7 @@ func _hero(id: String, dir: String, sheets: String) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var caps: Array = []
 	var title := String(Arch.def(id).get("name", id))
+	close_cfg = WardenGlb.look(WardenGlb.art(id)).get("closeup", {})
 	# 1. the turnaround at the match camera, then close
 	var row := _row(id, YAWS.size())
 	for i in row.size():
@@ -231,9 +233,20 @@ func _pair(row: Array, a: int, b: int) -> Image:
 
 func _head(h: Node3D) -> Image:
 	var hp := (h.get_node("Rig/Torso/HeadPivot") as Node3D).global_position + Vector3(0, 0.12 * h.scale.y, 0)
-	cam.fov = 24.0
-	cam.position = Vector3(h.position.x, hp.y + 0.1, hp.z + 1.8)
-	cam.look_at(hp + Vector3(0, -0.08, 0))
+	var back := 1.8
+	# (a big chibi head, Pip's with its ears and flower ring: the frame centres between the neck and the head's
+	# top and backs off, so the crown and ears stay in it)
+	var top := WardenGlb.anchor(h, "anchor_head_top")
+	var pivot := (h.get_node("Rig/Torso/HeadPivot") as Node3D).global_position
+	if top and top.global_position.y - pivot.y > 0.32:
+		var span := top.global_position.y - pivot.y
+		hp.y = pivot.y + span * 0.5
+		back *= span / 0.32
+	# (a Warden's warden_look "closeup" {fov, up} frames its head shot: Ostra's raised orb)
+	var up := float(close_cfg.get("up", 0.0))
+	cam.fov = float(close_cfg.get("fov", 24.0))
+	cam.position = Vector3(h.position.x, hp.y + 0.1 + up, hp.z + back)
+	cam.look_at(hp + Vector3(0, -0.08 + up, 0))
 	await _settle(4)
 	var img := await _grab()
 	var w := img.get_height()
@@ -263,15 +276,38 @@ func _fit(img: Image) -> Image:
 		img.resize(OUT_W, int(img.get_height() * float(OUT_W) / img.get_width()), Image.INTERPOLATE_LANCZOS)
 	return img
 
+## Kit moves keyed under their own names (not <id>_lmb / _dash / _rmb): [caption, move, time (s)].
+const OWN_MOVES := {
+	"ashwick": [["Torch Lance", "as_lance", 0.2], ["Soot Ram", "as_leap", 0.08], ["Soot Ram, late", "as_leap", 0.2],
+		["Cinder Shot aim", "as_aim", 0.3], ["Cinder Shot", "as_shot", 0.12], ["Furnace Cloak", "as_cloak", 0.15]],
+}
+
 ## The run cycle at two phases, then the hero's own kit moves (<id>_lmb, _dash, _rmb) at key moments: [label,
 ## kit move, its time, running]. A hero without its own moves gets the run only.
 func _move_frames(id: String) -> Array:
 	var out: Array = [["run", "", 0.0, 0], ["run, other foot", "", 0.0, 9]]
+	for f in OWN_MOVES.get(id, []):
+		if not HunterAnim.km_def(String(f[1])).is_empty():
+			out.append([f[0], f[1], f[2], -1])
 	for f in [["shoot", "_lmb", 0.03], ["recoil", "_lmb", 0.08], ["dash", "_dash", 0.1], ["dash, low", "_dash", 0.4],
 			["dash, up", "_dash", 0.62], ["RMB throw", "_rmb", 0.07]]:
 		if not HunterAnim.km_def(id + String(f[1])).is_empty():
 			out.append([f[0], id + String(f[1]), f[2], -1])
+	for f in KIT_FRAMES.get(id, []):
+		if not HunterAnim.km_def(String(f[1])).is_empty():
+			out.append([f[0], f[1], f[2], -1])
 	return out
+
+## Heroes whose kit moves aren't named <id>_lmb / _dash / _rmb (KMovesStone, Hem's bow): [label, kit move, its time
+## (s), arena_demo.gd's timings].
+const KIT_FRAMES := {
+	"archer": [["draw", "arc_draw", 0.8], ["loose", "arc_loose", 0.94], ["Spirit Walk roll", "pin_roll", 0.58],
+		["Heavy Shot", "arc_heavy", 1.42]],
+	"dolm": [["punch", "breah_punch", 0.12], ["throw", "breah_throw", 0.2], ["leap", "breah_leap", 0.2],
+		["slam", "breah_slam", 0.1], ["sense", "breah_sense", 0.3], ["dash", "breah_dash", 0.15]],
+	"ostra": [["orb", "ostra_orb", 0.1], ["snap", "ostra_snap", 0.1], ["swap", "ostra_swap", 0.3],
+		["seed", "ostra_seed", 0.2], ["well", "ostra_well", 0.3], ["empower", "ostra_empower", 0.4]],
+}
 
 ## Plays one move frame and holds it: a run (its extra steps set the stride's phase) or a kit move at its time.
 func _frame(an: HunterAnim, h: Node3D, f: Array) -> void:

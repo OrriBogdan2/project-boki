@@ -1,12 +1,12 @@
 class_name KinCommand
 extends RefCounted
-## The Boki commands (docs/decisions/0001, 0002): what G and C do, for the player and for bots.
+## The Boki commands (docs/decisions/0001, 0002): what G does for the player, and the ability cast for bots.
 ##   G tap   Boki out beside you: Sic, it leaps at the cursor (its landing staggers what it lands on).
 ##           Boki away (far, guarding, running back): Call back, it leaps to your side and hits what is on its path.
 ##           Boki on you (Return): it is thrown at the cursor as before.
 ##   G hold  the flick wheel (KinWheel): Chase, Guard, Return, Follow
-##   C       the Boki's own ability, cast from wherever the Boki is. On your shoulder it is cast through you.
-##   R       the Merge (KinMerge.press)
+##   The Boki casts its own ability by itself (KinTactics.think_abilities); bots press it through cast_c.
+##   X       the Merge (KinMerge.press)
 ## A tap is judged on release (so a hold can be told apart); the press is polled each frame (poll),
 ## the result is queued in Match.pending_input and applied on the fixed step (tap); a wheel pick waits in
 ## h.inp["wheel_pick"] until apply_pick runs on the fixed step.
@@ -78,7 +78,7 @@ static func tap(h: Hunter) -> void:
 		say(h, resting_text(k), Color("a2a8bb"))
 		return
 	if KinMerge.in_form(h):
-		say(h, "%s is part of you while you are merged" % k.rec.get("name", "Your Boki"), Color("a2a8bb"))
+		say(h, "%s is part of you while you are fused" % k.rec.get("name", "Your Boki"), Color("a2a8bb"))
 		return
 	if KinMerge.active(h) and not h.merge_st.get("surge", false):
 		KinMerge.end(h, "throw")        # sending your Boki ends the merge, and it goes
@@ -131,6 +131,7 @@ static func order(h: Hunter, id: String) -> bool:
 		KinMerge.end(h, "order")
 	var ok := KinFollow.set_cmd(k, id, tgt)
 	if ok:
+		if h.m.tut: h.m.tut.orders += 1
 		var what := {"chase": "chasing %s" % target_name(tgt), "guard": "guarding this spot", "return": "back on you", "follow": "at your side"}
 		say(h, "%s: %s" % [k.rec.get("name", "Your Boki"), what[id]], k.sp["color"])
 		h.m.fx.ring(k.pos, 1.2, Color(k.sp["color"], 0.8), 0.3)
@@ -168,7 +169,7 @@ static func chase_pick(h: Hunter) -> Ent:
 			bd = d; best = f
 	return best
 
-## C: the Boki's own ability at the cursor, from wherever the Boki is. Out in the field it casts where
+## The Boki's own ability at the cursor, from wherever the Boki is. Out in the field it casts where
 ## it stands (range-limited by the ability); on the shoulder (or merged) it is cast through you.
 static func cast_c(h: Hunter) -> bool:
 	var k: Kin = h.kin
@@ -180,7 +181,7 @@ static func cast_c(h: Hunter) -> bool:
 		return true
 	return false
 
-## The reason a C press did nothing, for a toast ("" if there is nothing to say).
+## The reason a cast did nothing, for a toast ("" if there is nothing to say).
 static func c_deny_text(h: Hunter) -> String:
 	var k: Kin = h.kin
 	if k == null:

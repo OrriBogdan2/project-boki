@@ -1,8 +1,7 @@
 extends Node3D
-## The first thing a new player sees after the prologue: one short card, then three eggs on a little
-## island. Pick one, pick your second Hunter (Vex is already yours), knock on the shell until it
-## hatches, name what comes out and yourself, make yourself (CreatorPanel), then head into the
-## tutorial match together.
+## The first thing a new player sees after the prologue: one short card, then making yourself (one of the
+## Empty), then three eggs on a little island. Pick an egg, knock on the shell until it hatches, name what
+## comes out; then your first Mask drifts to you (MaskMoment) and you head into the tutorial together.
 
 ## The three starter eggs plus a mystery one. Names, tempers and blurbs come from each species'
 ## "egg" block in content/kin/<id>.json, so every egg is named for its element (Venom Egg, ...).
@@ -23,12 +22,14 @@ static func starter_eggs() -> Array:
 
 const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
 const CARD_BUTTON := "Choose your Boki"
+const CREATE_CAM := Vector3(0.05, 1.2, 4.75)     # m: the creator's fixed camera, the whole body in frame
+const CREATE_LOOK := Vector3(0.2, 0.98, 1.6)
 
 var cam: Camera3D
 var fx: Fx
 var eggs: Array = []          # {node, base, data}
 var chosen := -1
-var stage := "intro"          # intro (the card) | pick (eggs) | class (your second Hunter) | warm | hatching | name | create (you)
+var stage := "intro"          # intro (the card) | create (yourself) | pick (eggs) | warm | hatching | name | mask
 var card_box: Control
 var warmth := 0.0
 var warm_bar: Control
@@ -47,9 +48,10 @@ var egg_defs: Array = []      # EGGS with the mystery egg's species decided
 var look: Dictionary = {}
 var preview: Node3D
 var look_at_t := Vector3(0, 0.25, 0.5)
-var edit_only := false       # opened from the farm's menu just to change how you look
-var sub_lbl: Label
-var top_box: VBoxContainer    # the title and its line: centred, or over the preview while you make your hunter
+var edit_only := false
+var create_box: Control
+var sub_lbl: Label        # opened from the menu just to change how you look
+var top_box: VBoxContainer    # the title and its line: centred, or over the preview while you make yourself
 var cam_to := Vector3(0, 3.6, 6.4)
 
 func _ready() -> void:
@@ -107,17 +109,14 @@ func _ready() -> void:
 		_show_card()
 	if "--hatch-pick" in OS.get_cmdline_user_args():
 		# test: straight to choosing an egg
-		if not Save.d.has("look"): Save.d["look"] = PlayerLook.neutral()
+		if not Save.d.has("look"): Save.d["look"] = Unmasked.default_look()
 		_end_intro()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--hatch-auto="):
 			var i := int(a.substr(13))
-			if not Save.d.has("look"): Save.d["look"] = PlayerLook.neutral()
+			if not Save.d.has("look"): Save.d["look"] = Unmasked.default_look()
 			_end_intro()
 			_pick(i); _pick(i)
-			if stage == "class":
-				starter_picks = [ClassUnlock.starters()[0]]
-				_confirm_starters()
 			auto_warm = true
 
 ## The set for a new game: a carved stone dais floating at dusk, a rune circle glowing under your
@@ -334,18 +333,15 @@ func _end_intro() -> void:
 	if shade: shade.queue_free()
 	if card_box: card_box.queue_free()
 	title.get_parent().visible = true
-	if edit_only or "--create" in OS.get_cmdline_user_args():
-		_show_creator(func(): Game.goto("home"))
+	if edit_only or "--create" in OS.get_cmdline_user_args() or not Save.d.has("look"):
+		_show_create()      # a new game starts with making yourself (Settings, Change your look, reopens it)
 	else:
-		if not Save.d.has("look"):
-			Save.d["look"] = PlayerLook.neutral()      # (the creator comes after the Boki is named)
-		cam_to = Vector3(0, 3.6, 6.4)
-		_show_pick()
+		_after_create()
 
 var turning := false
 func _unhandled_input(event: InputEvent) -> void:
 	if stage == "create" and preview:
-		# drag with the mouse (or hold A / D) to turn your hunter round
+		# drag with the mouse (or hold A / D) to turn yourself round
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 			turning = event.pressed
 		elif event is InputEventMouseMotion and turning:
@@ -376,104 +372,88 @@ func _clear_bottom() -> void:
 	for ch in bottom.get_children():
 		ch.queue_free()
 
-# ---- your second Hunter (the first is yours already; ClassUnlock, ClassPick)
-var starter_picks: Array = []
+## After making yourself: the eggs. (Your first Mask comes after you name your Boki: MaskMoment.)
+func _after_create() -> void:
+	stage = "pick"
+	title.text = "Choose your first Boki"
+	cam_to = Vector3(0, 3.6, 6.4)
+	_show_pick()
 
-func _show_class_pick(on := "") -> void:
-	stage = "class"
-	if on == "" or not ClassUnlock.starters().has(on):
-		on = String(ClassUnlock.starters()[0])
-	top_box.visible = false      # (the pick panel carries its own heading: the viewer needs the height)
-	_clear_bottom()
-	cam_to = Vector3(-3.5, 4.2, 9.0)
-	bottom.add_child(ClassPick.row(on, starter_picks, _chip_clicked))
-	var go := UI.primary(_start_text(), _confirm_starters, 300)
-	go.disabled = starter_picks.size() != ClassUnlock.picks_needed()
-	bottom.add_child(go)
-
-func _start_text() -> String:
-	if starter_picks.size() != ClassUnlock.picks_needed():
-		return "Pick one of the three"
-	return "Take %s" % Arch.name_of(String(starter_picks[0]))
-
-## Vex is the Hunter of the tutorial; the pick opens on the farm.
-func _confirm_starters() -> void:
-	if not ClassUnlock.choose_starters(starter_picks):
-		return
-	var first := ClassUnlock.first_hunter()
-	Save.d["arch"] = first
-	Save.d["cls"] = Arch.weight(first)
-	Save.d["weapon"] = Arch.signature(first)
-	Save.save_game()
-	Sfx.play("click")
-	top_box.visible = true
-	_start_hatch()
-
-func _chip_clicked(id: String) -> void:
-	Sfx.play("hover", null, -6.0)
-	starter_picks = ClassPick.toggle(starter_picks, id)
-	_show_class_pick(id)
-
-# ---- you (CreatorPanel): right after the Boki is named, and from the farm's "Change your look"
-var creator: CreatorPanel
-var creator_then: Callable
-var preview_arch := ""        # "" shows you as yourself; a Hunter id shows you in its Mantle
-
-## The creator step. then: where to go once the look is saved.
-func _show_creator(then: Callable) -> void:
+# ---- yourself: the Empty (Unmasked)
+func _show_create() -> void:
 	stage = "create"
-	creator_then = then
-	look = PlayerLook.clean(Save.d.get("look", {}))
+	if look.is_empty():
+		look = Unmasked.clean(Save.d.get("look", {}))
 	title.text = "Make yourself"
-	if sub_lbl: sub_lbl.text = "Drag yourself (or hold A / D) to turn round. You can change this later at home."
 	_clear_bottom()
-	for e in eggs: (e["holder"] as Node3D).visible = false
-	if kin_node: kin_node.visible = false
+	if create_box: create_box.queue_free()
 	_rebuild_preview()
-	_top_over(0.73)       # over you, clear of the creator card on the left
-	_frame_preview()
-	creator = CreatorPanel.make(look, ClassUnlock.open_ids())
-	creator.changed.connect(func(lk: Dictionary):
-		look = lk
-		_rebuild_preview())
-	creator.view_changed.connect(func(a: String):
-		preview_arch = a
-		_rebuild_preview()
-		_frame_preview())
-	creator.done.connect(_creator_done)
-	root_ui.add_child(creator)
-	creator.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
-	creator.offset_top += 46
-	creator.offset_bottom += 46       # clear of the title
+	for e in eggs: (e["holder"] as Node3D).visible = false
+	if sub_lbl: sub_lbl.text = "You are one of the Empty. Drag (or hold A / D) to turn round."
+	_top_over(0.73)       # over you, clear of the tall creator card on the left
+	cam_to = CREATE_CAM          # fixed, so a change of height or build shows as one
+	look_at_t = CREATE_LOOK
+	var card := UI.card(UI.CARD, 14, 16)
+	card.custom_minimum_size = Vector2(500, 0)
+	create_box = card
+	var v := UI.vbox(8); card.add_child(v)
+	for r in Unmasked.ROWS.size():
+		var row: Array = Unmasked.ROWS[r]
+		if r == 0 or r == Unmasked.HOLLOW_ROW:
+			v.add_child(UI.label("Body" if r == 0 else "The hollow", 12, UI.ACCENT, UI.caps))
+		var key: String = row[0]
+		var opts: Array = row[2]
+		var hr := UI.hbox(8)
+		var l := UI.label(row[1], UI.T_BODY, UI.MUTED); l.custom_minimum_size.x = 120
+		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		hr.add_child(l)
+		hr.add_child(UI.icon_button("back", func(): _step_look(key, -1, opts.size()), "Previous", 12.0))
+		var i := int(look[key])
+		if opts[0] is Color:
+			var sw := Panel.new(); sw.custom_minimum_size = Vector2(170, 26)
+			sw.add_theme_stylebox_override("panel", UI.frame(opts[i], 13, Color(1, 1, 1, 0.25)))
+			sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			hr.add_child(sw)
+		else:
+			var val := UI.label(String(opts[i]), UI.T_BODY, UI.INK, UI.semi); val.custom_minimum_size.x = 170
+			val.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			hr.add_child(val)
+		hr.add_child(UI.icon_button("next", func(): _step_look(key, 1, opts.size()), "Next", 12.0))
+		v.add_child(hr)
+	var nr := UI.hbox(8)
+	var nl := UI.label("Your name", UI.T_BODY, UI.MUTED); nl.custom_minimum_size.x = 120
+	nr.add_child(nl)
+	var ne := LineEdit.new(); ne.text = Save.d.get("name", "Hunter"); ne.max_length = 16; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ne.text_changed.connect(func(t): Save.d["name"] = t.strip_edges() if t.strip_edges() != "" else "Hunter")
+	nr.add_child(ne)
+	v.add_child(nr)
+	var br := UI.hbox(10)
+	br.alignment = BoxContainer.ALIGNMENT_END
+	br.add_child(UI.ghost("Random", func():
+		look = Unmasked.random_look()
+		_show_create(), 120, "swap"))
+	br.add_child(UI.primary("Looks good", _looks_good, 200))
+	v.add_child(br)
+	root_ui.add_child(card)
+	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
+	card.offset_top += 46; card.offset_bottom += 46       # clear of the title
 
-func _creator_done(lk: Dictionary) -> void:
-	Save.d["look"] = lk.duplicate(true)
+func _looks_good() -> void:
+	Save.d["look"] = look.duplicate()
 	Save.save_game()
 	Sfx.play("click")
 	if preview: preview.queue_free()
 	preview = null
-	creator.queue_free()
-	creator = null
-	stage = "done"
-	creator_then.call()
-
-## Frames the camera to the preview's height (a tall Warden used to run off the top).
-func _frame_preview() -> void:
-	var hk := clampf(_model_top(preview) / 1.6, 1.0, 1.8) if preview else 1.0
-	cam_to = Vector3(0, 1.5 * hk, 1.6 + 3.0 * hk)
-	look_at_t = Vector3(0.0, 0.9 * hk, 1.6)
-
-## The highest point of a model (its meshes' bounds), in world metres.
-func _model_top(n: Node3D) -> float:
-	var top := 0.0
-	var st: Array = [n]
-	while not st.is_empty():
-		var nd: Node = st.pop_back()
-		if nd is MeshInstance3D and (nd as MeshInstance3D).visible and nd.is_inside_tree():
-			var gi := nd as MeshInstance3D
-			top = maxf(top, (gi.global_transform * gi.get_aabb()).end.y)
-		for ch in nd.get_children(): st.append(ch)
-	return top
+	if create_box: create_box.queue_free()
+	create_box = null
+	for e in eggs: (e["holder"] as Node3D).visible = true
+	if sub_lbl: sub_lbl.text = "Every Boki is different. It will remember how you treat it."
+	_top_over(0.5)
+	if edit_only or Save.d.get("tutorial", {}).get("hatched", false):
+		Game.goto("home")
+		return
+	_after_create()
 
 ## Centres the title block at this fraction of the window's width.
 func _top_over(x_frac: float) -> void:
@@ -481,18 +461,19 @@ func _top_over(x_frac: float) -> void:
 		top_box.anchor_left = x_frac
 		top_box.anchor_right = x_frac
 
+func _step_look(key: String, d: int, n: int) -> void:
+	look[key] = posmod(int(look[key]) + d, n)
+	Sfx.play("hover", null, -6.0)
+	_show_create()
+
 var preview_yaw := PI
 var preview_anim: HunterAnim
-## You on the dais: yourself (with your Hunter's weapon), or in the Mantle you're looking at.
 func _rebuild_preview() -> void:
 	if preview:
 		preview_yaw = preview.rotation.y
 		preview.queue_free()
-	var pa := preview_arch if preview_arch != "" else Arch.of_save()
-	var cls := Arch.weight(pa)
-	var wid := Arch.signature(pa) if preview_arch != "" else Arch.weapon_for(pa, cls, String(Save.d.get("weapon", "")))
-	var shown := look if preview_arch != "" else MantleLook.at_home(look)
-	preview = Models.hunter(cls, Data.TEAM_COLORS[0], wid, "", shown, pa)
+	preview = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], "", "", look)      # empty-handed: just you
+	preview.get_node("Rig/Torso/Aim/Gun").free()
 	preview.position = Vector3(0.8, 0, 1.6)
 	preview.rotation.y = preview_yaw
 	add_child(preview)
@@ -544,10 +525,7 @@ func _pick(i: int) -> void:
 	if stage != "pick":
 		return
 	if chosen == i:
-		if ClassUnlock.needs_starters():
-			_show_class_pick()
-		else:
-			_start_hatch()
+		_start_hatch()
 		return
 	chosen = i
 	Sfx.play("click")
@@ -558,7 +536,6 @@ func _pick(i: int) -> void:
 ## inside get stronger. No flashes or bursts: it's a small, close moment (docs/POSITIONING.md).
 const TAPS := 7
 var taps := 0
-var cam_shake := 0.0
 func _tap_egg() -> void:
 	if taps >= TAPS or chosen < 0:
 		return
@@ -582,7 +559,6 @@ func _tap_egg() -> void:
 	# your knock, then its knock back from inside
 	Sfx.play("thump", null, -16.0 + 4.0 * k, 0.04, 1.3)
 	get_tree().create_timer(0.22).timeout.connect(func(): Sfx.play("thump", null, -20.0 + 8.0 * k, 0.05, 1.6 - 0.2 * k))
-	cam_shake = 0.004 + 0.02 * k
 	cam_to = Vector3(0, 2.5, 5.4).lerp(Vector3(0, 1.9, 4.2), k)
 	if title:
 		title.text = ["Knock on the shell", "Something stirs...", "It knocks back.", "Again, gently.", "It's pushing.", "It's cracking.", "Nearly.", "Here it comes."][mini(taps, 7)]
@@ -618,9 +594,10 @@ func _start_hatch() -> void:
 
 func _process(delta: float) -> void:
 	t += delta
-	cam.position = cam.position.lerp(cam_to, minf(1.0, delta * 2.0))
-	# a slow breathing drift so the shot is never quite still
-	cam.position += Vector3(sin(t * 0.37) * 0.004, sin(t * 0.51) * 0.003, 0)
+	if stage != "mask":
+		cam.position = cam.position.lerp(cam_to, minf(1.0, delta * 2.0))
+		# a slow breathing drift so the shot is never quite still
+		cam.position += Vector3(sin(t * 0.37) * 0.004, sin(t * 0.51) * 0.003, 0)
 	for rn in runes:
 		(rn[0] as Node3D).rotation.y += delta * float(rn[1])
 	if orbit: orbit.rotation.y += delta * 0.04
@@ -630,10 +607,11 @@ func _process(delta: float) -> void:
 	if ship:
 		ship.position.x += delta * 1.6
 		if ship.position.x > 60.0: ship.position.x = -60.0
-	if stage == "create":
+	if stage == "mask":
+		pass       # (MaskMoment moves the camera)
+	elif stage == "create":
 		cam.look_at(look_at_t)
-		var focus := get_viewport().gui_get_focus_owner()
-		if preview and not (focus is LineEdit or focus is Slider):
+		if preview and not (get_viewport().gui_get_focus_owner() is LineEdit):
 			preview.rotation.y += (Input.get_axis("left", "right")) * delta * 2.5
 		# the preview stands at ease (breathing, shifting its weight, glancing round); drag it to turn
 		# it (see _unhandled_input)
@@ -650,9 +628,6 @@ func _process(delta: float) -> void:
 			var hs := 1.12 if i == hover else 1.0
 			var hn: Node3D = eggs[i]["holder"]
 			hn.scale = hn.scale.lerp(Vector3.ONE * hs, minf(1.0, delta * 10.0))
-	if cam_shake > 0.0:
-		cam.position += Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)) * cam_shake
-		cam_shake = maxf(0.0, cam_shake - delta * 1.8)
 	if stage == "warm" and chosen >= 0:
 		if auto_warm and int(t * 3.0) != int((t - delta) * 3.0):
 			_tap_egg()          # test hook: taps by itself
@@ -748,9 +723,6 @@ func _show_name() -> void:
 	ne.select_all()
 
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
-	if stage != "name":
-		return         # (Enter in both name boxes, or a second click)
-	stage = "named"
 	var rec := Save.new_kin(sp_id, kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id))
 	rec["trust"] = 55.0
 	Save.remember(rec, "hatched", "hatched from an egg you chose")
@@ -763,9 +735,26 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	Save.d["tutorial"]["hatched"] = true
 	Save.save_game()
 	Sfx.play("click")
-	_show_creator(func(): _head_out(tutorial))
+	if ClassUnlock.needs_starters():
+		_mask_moment(func(): _head_out(tutorial))
+		return
+	_head_out(tutorial)
 
-## Off into the tutorial match with your new Boki, or straight to the farm.
+## Your first Mask, in the world: Vex drifts to you and you put her on (MaskMoment), then `then`.
+func _mask_moment(then: Callable) -> void:
+	stage = "mask"
+	_clear_bottom()
+	top_box.visible = false
+	var first := String(ClassUnlock.starters()[0])
+	ClassUnlock.choose_starters([first])
+	Save.d["arch"] = first
+	Save.d["cls"] = Arch.weight(first)
+	Save.d["weapon"] = Arch.signature(first)
+	Save.save_game()
+	var moment := MaskMoment.make(self, cam, kin_node, first)
+	moment.finished.connect(then)
+	add_child(moment)
+
 func _head_out(tutorial: bool) -> void:
 	if tutorial:
 		Game.start_match({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0})

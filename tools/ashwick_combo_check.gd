@@ -25,10 +25,71 @@ func run(main_node: Node) -> void:
 	ak = load("res://tools/archetype_check.gd").new()
 	ak.main = main
 	await _all()
+	await _lance_combos()
 	await _growth()
 	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
+	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "ashwick")
+	ok("item 51: every slot casts mid-jump, holds through moves, a jump or Shift moves him out of it in 0.1s",
+			rows_bad == 0, "%d failures" % rows_bad)
 	print("ASHCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Item 51: the lance held through a ram goes out and roars again the step it ends (no pilot, no relight gap), and
+## keeps burning through a jump.
+func _lance_combos() -> void:
+	var r: Array = ak.setup("ashwick", 4.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var K: AshwickKit = P.ak
+	T.teleport(T.pos + Vector3(0, 0, 6.0))      # (off the ram's line: it would stop on him)
+	var keep_fire := func():
+		P.inp["fire"] = true
+		ak.aim_at(P, T.pos)
+	ak.step(m, 0.4, keep_fire)
+	P.dashes = P.max_dashes()
+	P.do_dash()
+	ak.step(m, 0.05, keep_fire)
+	var em1: int = K.hose.emitted
+	var out_t := 0.0
+	while P.roll_t > 0.0 and out_t < 1.0:
+		keep_fire.call()
+		m.step(ak.DT)
+		out_t += ak.DT
+	var dark: bool = K.hose.emitted == em1 and K.was_held
+	ak.step(m, 0.1, keep_fire)
+	ok(
+		"lance: held through a ram it goes out, then roars again within 0.1s of its end (item 51)",
+		dark and K.hose.emitted > em1 and K.anim_id == "as_lance", "dark %s emitted +%d" % [dark, K.hose.emitted - em1]
+	)
+	ak.step(m, 0.3, keep_fire)
+	var y0 := P.pos.y
+	P.do_jump()
+	var em2: int = K.hose.emitted
+	ak.step(m, 0.2, keep_fire)
+	var high := P.pos.y - y0
+	ok("lance: it keeps burning through a jump", K.hose.emitted > em2 + 4 and high > 0.3,
+			"emitted +%d, %.2f m up" % [K.hose.emitted - em2, high])
+	P.inp["fire"] = false
+	# audit: no fuel (the data's Flamethrower is a plain hold) and no slow while it roars (only the 0.35 s after)
+	ak.step(m, 1.0)
+	var em3: int = K.hose.emitted
+	var slowest := 9.0
+	var reloaded := false
+	var tf := 0.0
+	while tf < 10.0:
+		keep_fire.call()
+		m.step(ak.DT)
+		tf += ak.DT
+		if tf > 0.5: slowest = minf(slowest, K.move_k())
+		reloaded = reloaded or P.reload_t > 0.0
+	var late: int = K.hose.emitted
+	m.step(ak.DT)
+	ok("lance audit: 10 s of roaring with no fuel to run out (no refill), at his full walk",
+			not reloaded and K.hose.emitted > late and late - em3 > 250 and slowest >= 0.999,
+			"puffs %d, reload %s, move_k %.2f" % [late - em3, reloaded, slowest])
+	P.inp["fire"] = false
+	await ak.done(m)
 
 ## Soot Ram's hit on the first foe with the hunter at level `lvl`.
 func _ram(lvl: int) -> float:
@@ -119,7 +180,7 @@ func _all() -> void:
 		T2.teleport(home + Vector3(5.5, 0, 1.5))
 		K.chars = {}
 		K.ignites = {}
-		K.drags = []
+		m.displace.tows.clear()
 		K.hose.clear()
 		K.relight_t = 0.0
 		K.bash = {}
@@ -128,8 +189,6 @@ func _all() -> void:
 		K.cd["e"] = 0.0
 		P.dashes = P.max_dashes()
 		P.fire_cd = 0.0
-		P.ammo = int(P.wpn["mag"])
-		P.reload_t = 0.0
 		P.inp["fire"] = false
 		P.inp["move"] = Vector2.ZERO
 		ak.aim_at(P, T.pos)
@@ -149,6 +208,20 @@ func _all() -> void:
 			and Arch.name_of("ashwick") == "Mad Pyromancer",
 		"%s %s %s" % [P.wid, P.cls, Arch.name_of("ashwick")]
 	)
+	# --- no fuel (the source's flamethrower has none, and nothing reloads): held past the old 8s tank, it still roars
+	reset.call()
+	var roar := {"t": 0.0, "ticks": K.flame_ticks}
+	ak.step(m, 9.0, func():
+		P.inp["fire"] = true
+		ak.aim_at(P, home + Vector3(0, 0, -8.0))      # away from the dummy: its burn stays clean for the next part
+		roar["t"] = float(roar["t"]) + ak.DT
+		if float(roar["t"]) > 8.5 and float(roar["t"]) - ak.DT <= 8.5:
+			roar["ticks"] = K.flame_ticks)
+	P.inp["fire"] = false
+	ak.step(m, 0.6, func(): ak.aim_at(P, T.pos))      # turned back to the dummy before the next part
+	var ft0: int = int(roar["ticks"])
+	ok("lance: no fuel or reload, held 9s it still burns (no ammo count)",
+			K.flame_ticks > ft0 and P.reload_t == 0.0 and not P.wpn.get("ammo", true), "ticks +%d" % (K.flame_ticks - ft0))
 	# --- the hose: the pilot first, then a stream that reaches its full length past a close cursor
 	reset.call()
 	ak.step(m, 0.15, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos))
@@ -222,7 +295,7 @@ func _all() -> void:
 	ak.step(m, 2.6, aim_t)
 	ok(
 		"lance: kept on a burning foe it Flashes over (level 2)", K.burning(T) == 2 and K.upgrades >= 1,
-		"burning %d ammo %d upgrades %d char %.1f" % [K.burning(T), P.ammo, K.upgrades, K.char_of(T)]
+		"burning %d upgrades %d char %.1f" % [K.burning(T), K.upgrades, K.char_of(T)]
 	)
 	ak.step(m, 0.02)
 	ok(
@@ -438,15 +511,16 @@ func _all() -> void:
 	K.on_knock(T, true)
 	ok("passive: a knock gives back one ram charge, not both", absf(P.dashes - 1.0) < 0.01, "charges %.2f" % P.dashes)
 	# --- rank 3: more damage, a speed boost and a shield on a hit (the lava carpet is the X ult now, not the ram)
+	# (the target stands 3.9 m out: Cinder's own hit radius is 0.376 now, so the ram reaches 0.12 m less)
 	reset.call()
-	T.teleport(home + Vector3(4.2, 0, 0))
+	T.teleport(home + Vector3(3.9, 0, 0))
 	ak.aim_at(P, T.pos)
 	P.ak.on_dash(false)
 	ak.step(m, 0.6)
 	var ram1: float = ak.dmg(T)
 	reset.call()
 	P.slot_lv["dash"] = 3
-	T.teleport(home + Vector3(4.2, 0, 0))
+	T.teleport(home + Vector3(3.9, 0, 0))
 	ak.aim_at(P, T.pos)
 	P.ak.on_dash(false)
 	ak.step(m, 0.5)
@@ -557,13 +631,12 @@ func _all() -> void:
 	ok("merge hold: a merge is under way", ak.merge_now(P))
 	ak.step(m, 0.1)
 	var ft: int = K.flame_ticks
-	var ammo: int = P.ammo
 	ak.step(m, 1.0, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
 	ak.step(m, 0.3)
 	ok(
 		"merge hold: linwick's lance is dropped, no fire mid-merge",
-		not K.was_held and K.spool == 0.0 and K.hose.puffs.is_empty() and K.flame_ticks == ft and P.ammo >= ammo and P.mel_hold == 0.0,
+		not K.was_held and K.spool == 0.0 and K.hose.puffs.is_empty() and K.flame_ticks == ft and P.mel_hold == 0.0,
 		"held %s puffs %d ticks +%d" % [K.was_held, K.hose.puffs.size(), K.flame_ticks - ft]
 	)
 	KinMerge.end(P, "test")

@@ -230,7 +230,7 @@ func star(at: Vector3, col: Color, sz := 1.0, dur := 0.35, core := Color.WHITE) 
 	_play(n, "star", col, core, dur, Vector3.ONE * sz)
 
 ## A streak lying along the ground behind `at` (pointing back from `dir`): a dash's own after-image (Sable's
-## cyan, Zedran's orange flame). Hot `col2` at the head, `col` down the tail; it fades over `dur`.
+## cyan, Kael's orange flame). Hot `col2` at the head, `col` down the tail; it fades over `dur`.
 func streak(at: Vector3, dir: Vector2, length: float, width: float, col: Color, col2: Color, dur := 0.25) -> void:
 	var n := _fx("streak", M_COMET, _ribbon_mesh(), false)
 	n.global_position = at
@@ -330,7 +330,7 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			head.add_child(_mi(Models.sphere(0.25, 6), solid(col2)))
 			head.scale = Vector3.ONE * 0.3
 		"crescent_bolt":
-			# Zedran's Searing Wave: a flat 140-degree crescent of flame (1.4 m chord), red with an orange
+			# Kael's Searing Wave: a flat 140-degree crescent of flame (1.4 m chord), red with an orange
 			# inner edge, pushed bulge first; a red glow trail behind it
 			var cr := _mi(_crescent_mesh(140.0), _mat(M_CRESCENT, col, col2))
 			cr.name = "Cres"

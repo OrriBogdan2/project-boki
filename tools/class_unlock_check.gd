@@ -1,24 +1,28 @@
 extends RefCounted
 ## --hunter-unlock-check (alias --class-unlock-check): Hunter unlocks and mastery (docs/decisions/0005,
 ## content/rules/class_unlock.json, content/rules/hunter_viewer.json).
-##   1. the data: Vex first, 3 starters and a pick of 1, one challenge per other Hunter with its tier,
+##   1. the data: Vex first (the one starter), a second Mask picked from Kael, Pip or Cinder, one challenge per
+##      other Hunter with its tier,
 ##      3-5 mastery goals each that mix kinds, every stat measurable, the viewer's kit moves
 ##   2. mastery rewards are cosmetic only; gliders change no handling
-##   3. Vex is always owned; pick exactly 1 of exactly the 3 starters; challenge-only Hunters can't be
-##      picked
+##   3. Vex is always owned; the starter pick is Vex alone; after the first expedition exactly 1 of Kael, Pip and
+##      Cinder opens as the second Mask (nothing else can be picked); challenge-only Hunters can't be picked
 ##   4. challenge progress makes a Hunter ready (never open by itself); mastery counts per Hunter
 ##   5. the feats HunterFeats records from the combat signals
 ##   6. save migration keeps every Hunter a save had unlocked or played, and adds Vex
-##   7. the new-game flow (one card, then the egg pick) and the Hunter pick in the viewer, picking 1
-##   8. the viewer cycling abilities on the real model, keys from the bindings
+##   7. the new-game flow (one card, making yourself, the egg pick: no Mask pick) and the second Mask in the world
+##      by the portal after the first expedition (MaskOffer)
+##   8. the viewer: name and title, every ability as a clip of it working (AbilityClip), keys from the bindings
 ##   9. the Hunters screen: challenge progress, mastery, the glider pick, hold to unlock and the reveal
 ##  10. locked Hunters playable in the Arena (its Training dummy) and the practice picker
-## With --shots-dir=<dir>: new_game_card, egg_pick, hunter_pick, hunters_screen, glider_pick, hold_unlock,
-## reveal_burst and viewer_strip as PNGs. Prints HUNTERCHECK lines and "HUNTERCHECK DONE, n checks, failures: n".
+## With --shots-dir=<dir>: new_game_card, egg_pick, second_masks, second_mask_preview, viewer, hunters_screen,
+## glider_pick, hold_unlock and reveal_burst as PNGs. Prints HUNTERCHECK lines and
+## "HUNTERCHECK DONE, n checks, failures: n".
 
 const FIRST := "gunslinger"
-const STARTERS := ["juggernaut", "archer", "ashwick"]
-const CHALLENGE_ONLY := ["ostra", "tender", "dolm"]
+const STARTERS := ["gunslinger"]
+const SECOND := ["juggernaut", "tender", "ashwick"]      # the second-Mask choices: Kael, Pip, Cinder
+const CHALLENGE_ONLY := ["ostra", "tender", "dolm"]      # (tender is also a second-Mask choice)
 ## Which stats count as which kind of goal (the owner's mix: kit feats, team play, exploration,
 ## extraction and Boki goals).
 const GOAL_KINDS := {
@@ -65,7 +69,11 @@ func new_save(picked := []) -> void:
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
 	Save.d = d
 	if not picked.is_empty():
-		ClassUnlock.choose_starters(picked)
+		# a save from before the first-Hunter pick: Vex and the pick open, nothing waits for an expedition
+		var c: Dictionary = Save.d["classes"]
+		c["picks"] = picked.duplicate()
+		c["open"] = [FIRST] + picked.filter(func(a): return a != FIRST)
+		c["seen"] = c["open"].duplicate()
 		var first := String(picked[0])
 		Save.d["cls"] = Arch.weight(first)
 		Save.d["arch"] = first
@@ -84,12 +92,13 @@ func run(m: Node) -> void:
 	_cosmetic_only()
 	_gliders()
 	_creation_rules()
+	_demo_all_masks()
 	_challenges()
 	_mastery()
 	_feats()
 	_migration()
 	await _new_game_flow(tree)
-	await _creation(tree)
+	await _first_return(tree)
 	await _viewer(tree)
 	await _home(tree)
 	await _arena(tree)
@@ -98,19 +107,22 @@ func run(m: Node) -> void:
 
 # ---------------------------------------------------------------- 1. the data
 func _rules() -> void:
-	ok(ClassUnlock.first_hunter() == FIRST, "%s is the Hunter every save starts with" % Arch.name_of(FIRST))
-	ok(ClassUnlock.starters() == STARTERS, "exactly the 3 starters, by id: %s" % str(ClassUnlock.starters()))
+	ok(ClassUnlock.starters() == STARTERS, "Vex is the one starter, by id: %s" % str(ClassUnlock.starters()))
 	ok(ClassUnlock.picks_needed() == 1, "the starter pick is 1 of them")
+	ok(ClassUnlock.second_picks() == SECOND,
+		"the second Mask is a pick of Kael, Pip or Cinder: %s" % str(ClassUnlock.second_picks()))
 	ok(CHALLENGE_ONLY.all(func(a): return not ClassUnlock.starters().has(a)),
 			"%s are challenge-only" % str(CHALLENGE_ONLY.map(func(a): return Arch.name_of(a))))
 	var stats: Dictionary = ClassUnlock.rules()["stats"]
 	var no_challenge := Arch.ids().filter(func(a): return a != FIRST and not _challenge_ok(String(a), stats))
 	ok(no_challenge.is_empty(), "every other Hunter has one challenge (a known stat, a target, one line); missing: %s"
 			% str(no_challenge))
-	ok(ClassUnlock.challenge(FIRST).is_empty(), "%s has no unlock challenge (it is yours from the start)"
-			% Arch.name_of(FIRST))
-	ok(STARTERS.all(func(a): return ClassUnlock.tier(a) == "easy"), "an unpicked starter is an easy challenge")
-	var others := Arch.ids().filter(func(a): return a != FIRST and not STARTERS.has(a) and not CHALLENGE_ONLY.has(a))
+	ok(ClassUnlock.challenge(FIRST).is_empty(), "%s has no unlock challenge (it is a starter)" % Arch.name_of(FIRST))
+	var easy_ids := ["ashwick", "archer", "juggernaut"]
+	ok(easy_ids.all(func(a): return ClassUnlock.tier(a) == "easy"),
+			"Hem (an early unlock), Kael and Cinder are easy challenges")
+	var others := Arch.ids().filter(func(a):
+		return not STARTERS.has(a) and not easy_ids.has(a) and not CHALLENGE_ONLY.has(a))
 	ok(others.all(func(a): return ClassUnlock.tier(String(a)) == "medium"), "the other Hunters are medium")
 	var last_medium := 0
 	for a in others: last_medium = maxi(last_medium, ClassUnlock.open_needed(String(a)))
@@ -224,31 +236,83 @@ func _glider_reads(dir_path: String) -> Array:
 # ---------------------------------------------------------------- 3. the starter pick rules
 func _creation_rules() -> void:
 	new_save()
-	ok(ClassUnlock.is_open(FIRST) and ClassUnlock.open_ids() == [FIRST], "a new save owns just %s"
-			% Arch.name_of(FIRST))
-	ok(ClassUnlock.needs_starters() and not ClassUnlock.all_open(), "a new save has to make its starter pick")
+	ok(ClassUnlock.open_ids().is_empty() and ClassUnlock.needs_starters() and not ClassUnlock.all_open(),
+			"a new save owns nothing until it takes its first Mask (%s)" % str(ClassUnlock.open_ids()))
 	ok(ClassUnlock.ready_count() == 0 and not ClassUnlock.can_unlock("thief"), "nothing can be unlocked before it")
 	ok(not ClassUnlock.choose_starters([]), "no pick is not a pick")
-	ok(not ClassUnlock.choose_starters(["archer", "juggernaut"]), "2 Hunters is not a pick")
-	ok(not ClassUnlock.choose_starters(["archer", "archer"]), "the same Hunter twice is not a pick")
+	ok(not ClassUnlock.choose_starters(["gunslinger", "archer"]), "2 Hunters is not a pick")
+	ok(not ClassUnlock.choose_starters(["gunslinger", "gunslinger"]), "the same Hunter twice is not a pick")
 	var outside := Arch.ids().filter(func(a): return not STARTERS.has(a))
 	var refused := outside.all(func(a): return not ClassUnlock.choose_starters([String(a)]))
-	ok(refused and ClassUnlock.needs_starters(), "no Hunter outside the 3 starters can be picked")
-	ok(CHALLENGE_ONLY.all(func(a): return not ClassUnlock.choose_starters([a])),
-			"%s can never be picked" % str(CHALLENGE_ONLY.map(func(a): return Arch.name_of(a))))
-	ok(ClassUnlock.choose_starters(["ashwick"]) and ClassUnlock.picks() == ["ashwick"], "picking 1 starter works")
-	ok(ClassUnlock.open_ids().size() == 2 and ClassUnlock.is_open(FIRST) and ClassUnlock.is_open("ashwick"),
-			"exactly %s and the pick are open (%s)" % [Arch.name_of(FIRST), str(ClassUnlock.open_ids())])
-	ok(not ClassUnlock.choose_starters(["archer"]) and ClassUnlock.open_ids().size() == 2, "the pick is made once")
+	ok(refused and ClassUnlock.needs_starters(), "nothing but Vex can be the first Mask")
+	ok(ClassUnlock.choose_starters([FIRST]) and ClassUnlock.picks() == [FIRST], "taking Vex works")
+	ok(ClassUnlock.open_ids() == [FIRST], "only Vex is open at first (%s)" % str(ClassUnlock.open_ids()))
+	ok(not ClassUnlock.choose_starters([FIRST]) and ClassUnlock.open_ids() == [FIRST], "the pick is made once")
+	ok(not ClassUnlock.second_pending() and not ClassUnlock.choose_second("juggernaut"),
+			"the second Mask cannot be picked before the first expedition")
+	ok(SECOND.all(_waits_for_pick), "the three choices wait for the first expedition and say so")
+	ok(ClassUnlock.take_fresh() == "", "nothing is announced before then")
+	# the first finished expedition (any finish) puts the second pick on offer; nothing opens by itself
+	Game.apply_result(result(FIRST, false))
+	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == [FIRST],
+			"a knocked-out first expedition offers the second Mask, nothing opens (%s)" % str(ClassUnlock.open_ids()))
+	var refused_second := ["archer", "thief", FIRST].all(func(a): return not ClassUnlock.choose_second(a))
+	ok(refused_second, "only Kael, Pip or Cinder can be the second Mask")
+	ok(ClassUnlock.choose_second("tender") and ClassUnlock.open_ids() == [FIRST, "tender"]
+			and ClassUnlock.pending_reveal() == ["tender"],
+				"Pip opens, with her reveal queued (%s)" % str(ClassUnlock.open_ids()))
+	ok(not ClassUnlock.second_pending() and not ClassUnlock.choose_second("juggernaut"), "the second pick is made once")
+	ok(not ClassUnlock.is_bonus("juggernaut") and ClassUnlock.status("juggernaut") == "locked"
+			and ClassUnlock.requirement("juggernaut").begins_with(ClassUnlock.challenge_text("juggernaut")),
+			"the two not picked go back to their own challenges")
 	var locked := Arch.ids().filter(func(a): return not ClassUnlock.is_open(String(a)))
 	ok(locked.all(func(a): return _locked_and_says(String(a))), "every other Hunter is locked and says its challenge")
-	for starter in STARTERS:
+	for second in SECOND:
 		new_save()
-		ok(ClassUnlock.choose_starters([starter]) and ClassUnlock.is_open(FIRST) and ClassUnlock.is_open(starter),
-				"%s can be the pick" % Arch.name_of(starter))
+		ok(ClassUnlock.choose_starters([FIRST]), "Vex first")
+		Game.apply_result(result(FIRST, true))
+		ok(ClassUnlock.choose_second(second) and ClassUnlock.open_ids().size() == 2 and ClassUnlock.is_open(second),
+				"%s can be the second Mask" % Arch.name_of(second))
+		Game.apply_result(result(second, true))
+		ok(ClassUnlock.open_ids().size() == 2 and not ClassUnlock.second_pending(), "and nothing else opens after it")
+	# a save that picked before keeps what it has: nothing waits, nothing is announced
+	new_save(["juggernaut"])
+	ok(ClassUnlock.open_ids() == [FIRST,
+		"juggernaut"] and not ClassUnlock.is_bonus("archer") and not ClassUnlock.second_pending(),
+			"an older save keeps its two")
+	Game.apply_result(result("juggernaut", true))
+	ok(ClassUnlock.open_ids() == [FIRST,
+		"juggernaut"] and ClassUnlock.take_fresh() == "" and not ClassUnlock.second_pending(),
+			"and gains nothing from the first expedition")
+
+## A second-Mask choice that waits for the first expedition and says so.
+func _waits_for_pick(id: String) -> bool:
+	return (ClassUnlock.is_bonus(id) and not ClassUnlock.can_unlock(id)
+			and ClassUnlock.requirement(id).begins_with("One of "))
+
+## Settings > Demo > "All masks open (offline only)": every Mask is pickable offline and the save's unlocks are
+## untouched; online it changes nothing (a Mask the save has not opened is swapped for an open one).
+func _demo_all_masks() -> void:
 	new_save()
-	Save.d["classes"]["open"] = []
-	ok(ClassUnlock.is_open(FIRST), "%s is open however the save's list reads" % Arch.name_of(FIRST))
+	ClassUnlock.choose_starters([FIRST])
+	var before: Array = ClassUnlock.open_ids().duplicate()
+	ok(not bool(Settings.get_v("demo_all_masks")) and not ClassUnlock.all_open(),
+		"the setting is off by default and Masks stay locked")
+	Settings.set_v("demo_all_masks", true, false)
+	ok(ClassUnlock.all_open() and Arch.ids().all(func(a): return ClassUnlock.is_open(String(a))),
+		"on: every Mask is open offline")
+	ok((Save.d["classes"]["open"] as Array) == before and not (Save.d["classes"] as Dictionary).get("all", false),
+			"and the save's unlocked list is untouched (%s)" % str(Save.d["classes"]["open"]))
+	ok(ClassUnlock.online_arch("juggernaut") == FIRST and ClassUnlock.online_arch(FIRST) == FIRST,
+			"a Mask the save has not opened is not sent to a lobby: Vex goes instead")
+	Net.in_match = true
+	Net.mode = "room"
+	ok(Net.online() and not ClassUnlock.all_open() and ClassUnlock.open_ids() == before,
+		"online the setting changes nothing")
+	Net.in_match = false
+	Net.mode = ""
+	Settings.set_v("demo_all_masks", false, false)
+	ok(not ClassUnlock.all_open(), "off again: the Masks lock back")
 
 # ---------------------------------------------------------------- 4. challenges
 func _challenges() -> void:
@@ -275,7 +339,7 @@ func _challenges() -> void:
 	var tender_stat := String(ClassUnlock.challenge("tender")["stat"])
 	Game.apply_result(result("archer", true, {}, {tender_stat: int(ClassUnlock.challenge("tender")["target"])}))
 	ok(bool(ClassUnlock.challenge_progress("tender")["done"]) and ClassUnlock.status("tender") == "progress"
-			and ClassUnlock.requirement("tender").contains("Hunters are open"),
+			and ClassUnlock.requirement("tender").contains("Masks are open"),
 					"a hard challenge done early still waits for %d open Hunters" % ClassUnlock.open_needed("tender"))
 	var c := ClassUnlock.state()
 	for a in ["thief", "mage", "dredge"]: (c["open"] as Array).append(a)
@@ -398,28 +462,9 @@ func _migration() -> void:
 			"stuns") == 3, "a new save read back keeps its Hunters and its counts")
 	DirAccess.remove_absolute(path)
 
-# ---------------------------------------------------------------- 7. the Hunter pick in the new-game flow
-func _pick_panel(hx: Node) -> Node:
-	for ch in hx.bottom.get_children():
-		if ch.has_meta("starter_pick") and not ch.is_queued_for_deletion(): return ch
-	return null
-
-func _go_button(hx: Node) -> Button:
-	var go: Button = null
-	for ch in hx.bottom.get_children():
-		if ch is Button and not ch.is_queued_for_deletion(): go = ch
-	return go
-
-func _click_chip(hx: Node, want: String, tree: SceneTree) -> void:
-	var chips: Array = []
-	var panel := _pick_panel(hx)
-	if panel: _collect_meta(panel, "starter_chip", chips)
-	for c in chips:
-		if String(c.get_meta("arch")) == want: (c as Button).pressed.emit()
-	for i in 4: await tree.process_frame
-
-## Straight after the prologue: one card, then the egg pick. The three story screens, the Hunter pick of 2 and
-## the hunter creator are gone from a new save's way.
+# ---------------------------------------------------------------- 7. the new-game flow and the second Mask
+## Straight after the prologue: one card, making yourself, then the egg pick. No Mask pick anywhere before the
+## egg (the first Mask comes after naming the Boki: --hatch-check covers that moment).
 func _new_game_flow(tree: SceneTree) -> void:
 	new_save()
 	Save.d["tutorial"] = {}
@@ -427,7 +472,6 @@ func _new_game_flow(tree: SceneTree) -> void:
 	var hx = load("res://scripts/ui/hatch.gd").new()
 	main.add_child(hx)
 	for i in 8: await tree.process_frame
-	var screens := 1
 	ok(hx.stage == "intro" and hx.card_box != null, "the first screen after the prologue is the card (stage %s)"
 			% hx.stage)
 	var card_text := _texts(hx.card_box)
@@ -437,11 +481,15 @@ func _new_game_flow(tree: SceneTree) -> void:
 	enter.pressed = true
 	hx._unhandled_input(enter)
 	for i in 6: await tree.process_frame
-	if hx.stage == "pick": screens += 1
-	ok(hx.stage == "pick" and screens <= 2, "Enter takes it to the egg pick: screen %d after the intro" % screens)
-	ok(hx.creator == null and hx.preview == null and Save.d.has("look"),
-			"no creator before the egg pick (a neutral look is set; you make yourself after naming the Boki)")
-	ok(hx.get_script().source_code.find("night after the storm") < 0, "the three story lines are deleted, not skipped")
+	ok(hx.stage == "create" and hx.create_box != null, "Enter takes it to making yourself (stage %s)" % hx.stage)
+	hx._looks_good()
+	for i in 6: await tree.process_frame
+	ok(hx.stage == "pick" and ClassUnlock.needs_starters(),
+			"then straight to the egg pick, with no Mask pick before it (stage %s)" % hx.stage)
+	ok(_find_meta(hx, "starter_pick") == null and not _any_text(hx.root_ui, "Choose your first Mask"),
+			"there is no Mask pick screen at all")
+	ok(hx.create_box == null and hx.preview == null and Unmasked.is_look(Save.d["look"]),
+			"the creator is behind us and the save holds your Empty look")
 	await shot(tree, "egg_pick", 30)
 	hx.queue_free()
 	for i in 3: await tree.process_frame
@@ -454,52 +502,71 @@ func _new_game_flow(tree: SceneTree) -> void:
 	hx.queue_free()
 	for i in 3: await tree.process_frame
 
-func _creation(tree: SceneTree) -> void:
+## Back home after the first expedition: once the screen is clear the three second Masks (Kael, Pip, Cinder)
+## drift out of the portal and wait there; walking up to one previews it, interact puts it on and its reveal
+## plays; the other two go back into the portal. Nothing pops up over the farm.
+func _first_return(tree: SceneTree) -> void:
 	new_save()
-	Save.d["tutorial"] = {"intro": true}
-	var hx = load("res://scripts/ui/hatch.gd").new()
-	main.add_child(hx)
-	for i in 8: await tree.process_frame
-	ok(hx.stage == "pick", "a new save is at the egg pick once the card is past (stage %s)" % hx.stage)
-	hx._pick(0)
-	hx._pick(0)
-	for i in 8: await tree.process_frame
-	ok(hx.stage == "class", "choosing the egg opens the Hunter pick (stage %s)" % hx.stage)
-	var panel: Node = _pick_panel(hx)
-	var chips: Array = []
-	if panel: _collect_meta(panel, "starter_chip", chips)
-	var chip_ids := chips.map(func(c): return String(c.get_meta("arch")))
-	ok(chip_ids == STARTERS, "a chip for each of the 3 starters and nothing else (%s)" % str(chip_ids))
-	ok(CHALLENGE_ONLY.all(func(a): return not chip_ids.has(a)), "no challenge-only Hunter is offered")
-	ok(not chip_ids.has(FIRST) and panel != null and _any_text(panel, Arch.name_of(FIRST)),
-			"%s is named as already yours, not offered"
-			% Arch.name_of(FIRST))
-	var go := _go_button(hx)
-	ok(go != null and go.disabled, "the button waits for the pick")
-	await _click_chip(hx, "archer", tree)
-	await _click_chip(hx, "juggernaut", tree)
-	ok(hx.starter_picks == ["juggernaut"], "a second click swaps the pick, it never makes 2 (%s)"
-			% str(hx.starter_picks))
-	await _click_chip(hx, "juggernaut", tree)
-	ok(hx.starter_picks.is_empty(), "a click on the picked one takes it out")
-	await _click_chip(hx, "ashwick", tree)
-	panel = _pick_panel(hx)
-	var viewer: HunterViewer = panel.get_meta("viewer") if panel else null
-	ok(viewer != null and viewer.id == "ashwick" and viewer.model != null, "the viewer shows the one last clicked")
-	ok(panel != null and _no_weight(panel) and _hunter_words(panel), "the pick says Hunter with no weight labels")
-	go = _go_button(hx)
-	ok(go != null and not go.disabled and go.text.contains(Arch.name_of("ashwick")), "the button reads: %s"
-			% (go.text if go else "?"))
-	await shot(tree, "hunter_pick", 60)
-	if go: go.pressed.emit()
+	ClassUnlock.choose_starters([FIRST])
+	Save.d["arch"] = FIRST
+	Save.d["cls"] = Arch.weight(FIRST)
+	Save.d["weapon"] = Arch.signature(FIRST)
+	Game.apply_result(result(FIRST, true, {}, {"tutorial": true}))
+	var hm = await main._hb_home()
+	var offer: MaskOffer = null
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < 15000:
+		await tree.process_frame
+		offer = hm.masks
+		if offer and offer.phase == "ready": break
+	ok(offer != null and _find_meta(hm, "second_pick") == null, "home after the first expedition: no popup pick")
+	if offer == null:
+		hm.queue_free()
+		return
+	ok(offer.phase == "ready", "the Masks come out once the screen is clear (%s)" % offer.phase)
+	var ids := offer.relics.map(func(r): return (r as MaskRelic).id)
+	ok(ids == SECOND, "Kael, Pip and Cinder drift out of the portal (%s)" % str(ids))
+	var portal: Vector3 = hm.spots["portal"]
+	var by_portal: bool = offer.relics.all(func(r): return Vector2((r as Node3D).position.x - portal.x,
+			(r as Node3D).position.z - portal.z).length() < 4.0)
+	ok(by_portal and ClassUnlock.second_pending() and ClassUnlock.open_ids() == [FIRST],
+			"they hover by the portal and nothing opens by itself")
+	await shot(tree, "second_masks", 2)
+	var far := portal + Vector3(12, 0, 12)
+	_stand(hm, far)
+	for i in 10: await tree.process_frame
+	ok(offer.phase == "ready" and offer.preview == null and offer.find(Vector2(far.x, far.z)).is_empty(),
+			"walk away and they wait by the portal")
+	var pip: Node3D = offer.relics[1]
+	_stand(hm, pip.position)
+	for i in 10: await tree.process_frame
+	var card := _find_meta(offer.ui, "mask_preview")
+	var clips := card.find_children("*", "AbilityClip", true, false) if card else []
+	ok(card != null and String(card.get_meta("mask_preview")) == "tender" and clips.size() == 2
+			and _any_text(card, HunterViewer.display_name("tender")),
+			"walking up to Pip shows its name and two ability clips (%d)" % clips.size())
+	var it: Dictionary = offer.find(Vector2(pip.position.x, pip.position.z))
+	ok(String(it.get("kind", "")) == "mask" and offer.label(it) == "Put on %s" % HunterViewer.display_name("tender"),
+			"interact there reads: %s" % (offer.label(it) if not it.is_empty() else "(nothing)"))
+	await shot(tree, "second_mask_preview", 4)
+	var cinder: Node3D = offer.relics[2]
+	_stand(hm, cinder.position)
 	for i in 6: await tree.process_frame
-	ok(ClassUnlock.picks() == ["ashwick"] and ClassUnlock.open_ids().size() == 2 and hx.stage == "warm",
-			"confirming opens it beside %s and carries on to the hatching (stage %s)" % [Arch.name_of(FIRST), hx.stage])
-	ok(Arch.of_save() == FIRST, "%s is the Hunter of the tutorial" % Arch.name_of(FIRST))
-	hx.queue_free()
+	offer.use(offer.find(Vector2(cinder.position.x, cinder.position.z)))
+	ok(ClassUnlock.open_ids() == [FIRST, "ashwick"] and not ClassUnlock.second_pending(),
+			"putting on Cinder opens her, and nothing else (%s)" % str(ClassUnlock.open_ids()))
+	t0 = Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < 4000 and _find_meta(hm, "class_id") == null:
+		await tree.process_frame
+	ok(_find_meta(hm, "class_id") != null and hm.masks == null, "the put-on beat, then her reveal plays")
+	hm.queue_free()
 	for i in 3: await tree.process_frame
 
-# ---------------------------------------------------------------- 8. the viewer cycling abilities
+func _stand(hm: Node, at: Vector3) -> void:
+	hm.player.position = Vector3(at.x, 0, at.z)
+	hm.ppos = hm.player.position
+
+# ---------------------------------------------------------------- 8. the viewer: abilities shown working
 func _viewer(tree: SceneTree) -> void:
 	new_save(["juggernaut", "archer"])
 	var layer := CanvasLayer.new()
@@ -513,103 +580,84 @@ func _viewer(tree: SceneTree) -> void:
 	host.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	host.theme = UI.theme()
 	layer.add_child(host)
-	var v := HunterViewer.make("juggernaut", Vector2(300, 360))
+	var v := HunterViewer.make("juggernaut", Vector2(220, 300))
 	host.add_child(v)
 	for i in 4: await tree.process_frame
 	v.set_process(false)       # (stepped by hand below)
 	var want: Array = KitCard.slots_of("juggernaut").filter(func(x): return x != "r" and x != "x") + ["x", "r"]
 	ok(HunterViewer.slots_for("juggernaut") == want
 			and Arch.ids().all(func(a): return HunterViewer.slots_for(String(a)).slice(-2) == ["x", "r"]),
-					"every Hunter's X ultimate shows as its own row, then R last")
-	ok(v.slots == want, "the viewer shows every ability in order: %s" % str(v.slots))
+					"every Hunter's R ultimate shows, then the Boki Fusion last")
+	ok(v.slots == want and v.rows.size() == want.size(), "the viewer shows every ability in order: %s" % str(v.slots))
 	var keyed := true
-	for b in v.rows:
-		var slot := String(b.get_meta("slot"))
-		var cap := "auto"
-		if HunterViewer.SLOT_ACTIONS.has(slot):
-			cap = Settings.key_cap(String(HunterViewer.SLOT_ACTIONS[slot]))
-		keyed = keyed and _texts(b).has(cap)
-	ok(v.rows.size() == want.size() and keyed, "each ability row has its key, from the player's bindings")
+	var clipped := true
+	for row in v.rows:
+		var slot := String((row as Node).get_meta("slot"))
+		keyed = keyed and _texts(row).has(HunterViewer.key_for(slot))
+		clipped = clipped and ((row is AbilityClip) == (slot in HunterViewer.CLIP_SLOTS))
+	ok(keyed, "each ability has its key, from the player's bindings")
+	ok(clipped, "every active ability is a clip of it working; the passive and Fusion are one line each")
+	ok(_any_text(v, HunterViewer.display_name("juggernaut")) and not _any_text(v, "Originally")
+			and not _any_text(v, HeroTitle.personality("juggernaut"))
+			and not _any_text(v, String(Arch.def("juggernaut")["fantasy"])),
+			"the name and title, and no story, gender or fantasy paragraphs")
 	ok(v.pivot.get_child_count() == 1 and v.model.get_parent() == v.pivot and v.vp.own_world_3d,
 			"the real Hunter model stands in its own SubViewport")
-	var seen: Array = []
-	var moves_ok := true
 	var spun := v.pivot.rotation.y
-	var strip: Array = []
-	v.slot_changed.connect(func(s): seen.append(s))
-	var slot_s := float(HunterViewer.rules()["slot_s"])
-	for k in want.size():
-		var slot := v.current_slot()
-		var mv := HunterViewer.moves_for("juggernaut", slot)
-		# a little into the slot: the kit's own move is on the model
-		for i in 6: v.tick(0.05)
-		if not mv.is_empty() and v.anim.km_id != String(mv[0]):
+	for i in 30: v.tick(0.05)
+	ok(absf(v.pivot.rotation.y - spun) > 0.5 and v.anim.km_id == "",
+			"the model turns on its turntable, standing at ease (no kit moves played in place)")
+	var moves_ok := true
+	var hits_ok := true
+	for row in v.rows:
+		if not row is AbilityClip: continue
+		var clip := row as AbilityClip
+		clip.set_process(false)
+		clip.t = 0.0
+		clip._hit_i = 0
+		clip.tick(AbilityClip.ACT_AT + 0.05)
+		var mv := HunterViewer.moves_for("juggernaut", clip.slot)
+		if not mv.is_empty() and clip.anim.km_id != String(mv[0]):
 			moves_ok = false
-			print("  %s plays %s, wanted %s" % [slot, v.anim.km_id, mv[0]])
-		if shots != "" and k in [1, 2, 3, 5]:
-			v.tick(0.25)
-			await tree.process_frame
-			await tree.process_frame
-			await tree.process_frame
-			strip.append(_grab(tree, v))
-		var left := slot_s - v.slot_t + 0.01
-		while left > 0.0:
-			v.tick(minf(0.1, left))
-			left -= 0.1
-	ok(seen.slice(0, want.size() - 1) == want.slice(1) and v.slot_i == 0,
-			"it steps through each ability by itself and loops back (%s)" % str(seen))
-	ok(moves_ok, "each ability drives the model with the kit's own move (KMOVES)")
-	ok(absf(v.pivot.rotation.y - spun) > 0.5, "the model turns on its turntable")
-	ok(v.cap_name.text == String(KitCard.slot_text("juggernaut", v.current_slot())["name"])
-			and (v.cap_key.get_child(0) as Label).text != "", "the caption names the ability playing, with its key")
-	(v.rows[3] as Button).pressed.emit()
-	ok(v.slot_i == 3 and v.current_slot() == String(want[3]), "clicking an ability shows it at once")
+			print("  %s plays %s, wanted %s" % [clip.slot, clip.anim.km_id, mv[0]])
+		for i in 40: clip.tick(0.05)
+		if not clip._hits.is_empty() and clip._hit_i == 0:
+			hits_ok = false
+			print("  %s (%s) never hits the dummy" % [clip.slot, clip.fx])
+	ok(moves_ok, "each clip drives the Hunter with the kit's own move (KMOVES)")
+	ok(hits_ok, "and each one lands on the training dummy")
+	var long_lines: Array = []
+	for a in Arch.ids():
+		for sl in HunterViewer.slots_for(String(a)):
+			if AbilityClip.line_for(String(a), String(sl)).length() > AbilityClip.LINE_CHARS + 3:
+				long_lines.append("%s.%s" % [a, sl])
+	ok(long_lines.is_empty(), "every ability has one short line (%s)" % str(long_lines))
 	ok(_no_weight(v) and _hunter_words(v), "the viewer has no weight labels or class/hero wording")
-	if shots != "" and strip.size() == 4:
-		_save_strip(strip, "%s/viewer_strip.png" % shots)
+	if shots != "":
+		for row in v.rows: if row is AbilityClip: (row as AbilityClip).set_process(true)
+		await tree.create_timer(1.2).timeout
+		tree.root.get_texture().get_image().save_png("%s/viewer.png" % shots)
 	layer.queue_free()
 	for i in 3: await tree.process_frame
-
-func _grab(tree: SceneTree, c: Control) -> Image:
-	var img := tree.root.get_texture().get_image()
-	var r := Rect2i(c.get_global_rect())
-	r = r.intersection(Rect2i(Vector2i.ZERO, img.get_size()))
-	return img.get_region(r)
-
-func _save_strip(frames: Array, path: String) -> void:
-	var w := 0
-	var h := 0
-	for f in frames:
-		w += (f as Image).get_width() + 8
-		h = maxi(h, (f as Image).get_height())
-	var out := Image.create(w, h, false, Image.FORMAT_RGBA8)
-	out.fill(Color(0.03, 0.03, 0.05))
-	var x := 0
-	for f in frames:
-		var fi: Image = f
-		fi.convert(Image.FORMAT_RGBA8)
-		out.blit_rect(fi, Rect2i(Vector2i.ZERO, fi.get_size()), Vector2i(x, 0))
-		x += fi.get_width() + 8
-	out.save_png(path)
 
 # ---------------------------------------------------------------- 9. the Hunters screen and the hold
 func _home(tree: SceneTree) -> void:
 	new_save(["archer"])
-	# some play: Zedran's challenge done (ready to hold), Sable's half way, Pin's ring goal done
+	# some play: Kael's challenge done (ready to hold), Sable's half way, Hem's ring goal done
 	var jt := int(ClassUnlock.challenge("juggernaut")["target"])
 	var gt := int(ClassUnlock.challenge("thief")["target"])
 	Game.apply_result(result("archer", true, {"slams": jt, "air_hits": gt / 2, "rings": 8, "stuns": 5}))
 	var hm = await main._hb_home()
 	for i in 30: await tree.process_frame
 	var items: Array = hm.hub_items().filter(func(it): return String(it[0]) == "hero")
-	ok(not items.is_empty() and String(items[0][1]) == "Hunters", "the farm's bar button is Hunters")
+	ok(not items.is_empty() and String(items[0][1]) == "Masks", "the farm's bar button is Masks")
 	hm._close_panel()
 	var ev := InputEventAction.new()
 	ev.action = "hero"
 	ev.pressed = true
 	hm._unhandled_input(ev)
 	await tree.process_frame
-	ok(hm.panel_open == "Hunters", "J opens the Hunters screen (%s)" % hm.panel_open)
+	ok(hm.panel_open == "Masks", "J opens the Masks screen (%s)" % hm.panel_open)
 	var by := _statuses(hm)
 	ok(by.size() == Arch.ids().size(), "every Hunter has a tile (%d)" % by.size())
 	var mixed: bool = by.get("juggernaut", "") == "ready" and by.get("thief", "") == "progress"
@@ -619,7 +667,7 @@ func _home(tree: SceneTree) -> void:
 	ok(sel == "juggernaut" and hu != null and is_instance_valid(hu) and hu.id == sel,
 			"the ready Hunter is shown first, with Hold to unlock (%s)" % sel)
 	ok(_no_weight(hm.panel_host) and _hunter_words(hm.panel_host),
-			"the Hunters screen has no weight labels and says Hunter, not class or hero")
+			"the Masks screen has no weight labels and says Hunter, not class or hero")
 	if hu == null:
 		hm.queue_free()
 		return
@@ -659,14 +707,14 @@ func _home(tree: SceneTree) -> void:
 		if rv: break
 	ok(rv != null and rv.id == sel, "then the reveal plays for it")
 	if rv:
-		ok(_texts(rv.root).any(func(t): return t == "NEW HUNTER") and _no_weight(rv.root),
-				"the reveal says NEW HUNTER, with no weight label")
+		ok(_texts(rv.root).any(func(t): return t == "NEW MASK") and _no_weight(rv.root),
+				"the reveal says NEW MASK, with no weight label")
 		if shots != "":
 			await tree.create_timer(0.15).timeout
 			tree.root.get_texture().get_image().save_png("%s/reveal_burst.png" % shots)
 		rv._finish(false)
 		for i in 6: await tree.process_frame
-	ok(hm.panel_open == "Hunters", "Later goes back to the Hunters screen")
+	ok(hm.panel_open == "Masks", "Later goes back to the Masks screen")
 	ok(ClassReveal.maybe_show(hm) == null, "and the reveal never plays twice")
 	# --- a locked Hunter: its challenge with progress, and its mastery list
 	HomeClasses.open(hm, "thief")
@@ -716,13 +764,6 @@ func _home(tree: SceneTree) -> void:
 	await tree.process_frame
 	ok(_disabled_buttons(hm.panel_host).size() >= 1 and _no_weight(hm.panel_host),
 			"the expedition panel picks a Hunter (locked ones disabled) with no weight tabs")
-	hm._close_panel()
-	var tr: HomeTraining = hm.training
-	tr.try = {"arch": "bulwark", "cls": Arch.weight("bulwark")}
-	tr.apply_try()
-	tr.set_my_class()
-	ok(Arch.of_save() == sel, "'Set as my Hunter' refuses a locked Hunter")
-	tr.try = {}
 	hm._close_panel()
 	hm.queue_free()
 	for i in 3: await tree.process_frame

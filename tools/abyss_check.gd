@@ -343,7 +343,7 @@ func _lift_report(where: String, rows: Array) -> void:
 	ok(grows, "%s: the deeper you are, the harder it pulls you up (fastest climb rises with depth)" % where)
 	ok(float(rows[0][1]) <= 6.5, "%s: just under the lip the lift is gentle (%.1f m/s at %.0fm)" % [where, float(rows[0][1]), float(rows[0][0])])
 
-## The same at home (the farm's rims, and the Training Grounds use the same movement).
+## The same at home (the farm's rims use the same movement).
 func _home_lift(hm, e: Dictionary) -> void:
 	var dir: Vector2 = e["dir"]; var top: float = e["top"]
 	var DT := 1.0 / 60.0

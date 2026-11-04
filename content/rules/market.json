@@ -1,0 +1,41 @@
+{
+	"desc": "The market (docs/decisions/0013-market.md). Gems are counts. Fees and taxes are fractions of the price. Times are seconds unless named _h (hours) or _days.",
+	"fees": {"list_fee": 0.05, "sale_tax": 0.10, "min_fee": 1},
+	"fees_doc": "Stalls and auctions: list_fee is paid up front (never refunded), sale_tax is taken from what the buyer pays. Both are gem sinks.",
+	"npc": {"buy_k": 0.8, "sell_lo": 1.0, "sell_hi": 1.4, "buy_chance": 0.5, "stalls": ["Brindle's Barrow", "The Tin Lantern", "Moss & Daughter", "Quayside Odds", "Old Fen Wares"], "per_stall": 5},
+	"npc_doc": "Offline stand-ins for other players. NPC buyers take a listing only when it is priced at most buy_k x the item's reference price (buy_chance per expedition). NPC stalls sell at sell_lo..sell_hi x reference. buy_k < sell_lo is the anti-mint rule: buying from the game and selling back to it always loses gems.",
+	"stall": {"max_listed": 6, "levels": {"1": "Vendor", "2": "Shelter, your stall and search", "3": "Auction House"}},
+	"shelter": {"strays": 4, "base": 30, "per_level": 6, "rare": 160, "shimmer": 120, "per_mutation": 60, "min_age_days": 7, "trust_keep": 0.5, "npc_adopt": 0.35, "gave_cap": 200},
+	"shelter_doc": "Adopting costs base + per_level x (level - 1) + rare (rare species) + shimmer + per_mutation x mutations; the gems are destroyed. Giving a Boki up pays nothing. npc_adopt: chance per expedition that an NPC adopts a Boki someone gave up.",
+	"transfer": {"fee": 40, "week_days": 7},
+	"transfer_doc": "Handing a Boki straight to a named player: a flat fee (destroyed), one per week per sender, and the receiver has to accept.",
+	"auction": {"hours": [12, 24, 48], "snipe_s": 60, "extend_s": 120, "max_open": 3, "npc_lots": 3, "npc_bid_k": 0.8, "npc_lot_start": 1.0, "npc_lot_cap": 1.3},
+	"auction_doc": "A bid with less than snipe_s left pushes the end out to extend_s from now. NPC bidders (offline) bid on your lots up to npc_bid_k x reference, never on friends-only lots. NPC lots open at npc_lot_start x reference and NPC rivals bid them up to npc_lot_cap x.",
+	"black_market": {"stock": 4, "price_lo": 2.0, "price_hi": 2.6, "egg_price": 420, "egg_chance": 0.5},
+	"black_market_doc": "Old Pell's rare stock: a daily rotation of rare and epic goods at price_lo..price_hi x reference, and now and then a Rare Egg. A gem sink. Never keys, shards or anything found only in matches.",
+	"rarity": {
+		"common": {"name": "Common", "restock": 0.9, "col": "c8cdd8"},
+		"uncommon": {"name": "Uncommon", "restock": 0.6, "col": "6fd86a"},
+		"rare": {"name": "Rare", "restock": 0.3, "col": "5ab0f0"},
+		"epic": {"name": "Epic", "restock": 0.12, "col": "c08cff"}
+	},
+	"rarity_doc": "restock: the chance an NPC stall carries a good on a given day.",
+	"goods": {
+		"silk_fibre": {"name": "Silk fibre", "kind": "material", "rarity": "uncommon", "ref": 18, "icon": "seed", "col": "f3eee2", "desc": "Fine fibre from a wild silk bush. Weavers pay well for it."},
+		"heartwood": {"name": "Heartwood", "kind": "material", "rarity": "rare", "ref": 45, "icon": "dash", "col": "8a4a2a", "desc": "The red core of a very old tree. Hard as stone, light as pine."},
+		"starstone": {"name": "Starstone", "kind": "material", "rarity": "epic", "ref": 110, "icon": "fortify", "col": "9ab8ff", "desc": "A stone with a faint glow inside, from the deep isles."},
+		"colossus_horn": {"name": "Colossus horn", "kind": "trophy", "rarity": "rare", "ref": 70, "icon": "fortify", "col": "b9a07a", "desc": "Taken from a Colossus in its lair. Proof you stood your ground."},
+		"serpent_scale": {"name": "Serpent scale", "kind": "trophy", "rarity": "rare", "ref": 70, "icon": "dash", "col": "5ad0b0", "desc": "A scale the size of a shield, from a sky Serpent."},
+		"brood_crown": {"name": "Brood crown", "kind": "trophy", "rarity": "epic", "ref": 130, "icon": "gem", "col": "e0b04a", "desc": "The crest of a Brood queen. Few hunters have one."},
+		"dye_rose": {"name": "Rose dye", "kind": "dye", "rarity": "common", "ref": 15, "icon": "paw", "col": "ff7aa8", "desc": "Recolours what a Boki wears."},
+		"dye_sky": {"name": "Sky dye", "kind": "dye", "rarity": "common", "ref": 15, "icon": "paw", "col": "5ab8f0", "desc": "Recolours what a Boki wears."},
+		"dye_moss": {"name": "Moss dye", "kind": "dye", "rarity": "uncommon", "ref": 25, "icon": "paw", "col": "6fbf5a", "desc": "Recolours what a Boki wears."},
+		"dye_gold": {"name": "Gilt dye", "kind": "dye", "rarity": "rare", "ref": 60, "icon": "paw", "col": "f2c84a", "desc": "Recolours what a Boki wears, in shining gold."},
+		"dye_night": {"name": "Nightfall dye", "kind": "dye", "rarity": "epic", "ref": 120, "icon": "paw", "col": "3a3a6a", "desc": "Recolours what a Boki wears, deep as the night sky."}
+	},
+	"goods_doc": "Goods held in Save.d['goods'] (counts). kind: material (rare materials, found on expeditions), trophy (boss kills), dye (recolours a Boki's worn accessory). Belt utility, Boki wear and gear are traded from where they already live; their rarity is below.",
+	"utility_rarity": {"armor_kit": "common", "jump_pad": "common", "smoke": "common", "stim": "uncommon", "medkit": "uncommon", "shield_cell": "rare", "scanner": "rare"},
+	"wear_rarity": {"bell": "common", "bow": "common", "leafhat": "common", "scarf": "uncommon", "crown": "uncommon", "goggles": "uncommon", "cape": "rare", "tophat": "rare", "collar": "uncommon", "charm": "epic"},
+	"finds": {"material": 0.25, "trophy_per_boss": 1},
+	"finds_doc": "Per expedition you make it out of: the chance of one rare material (weighted by restock), and trophies per boss you helped kill."
+}

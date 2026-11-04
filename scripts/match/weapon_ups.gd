@@ -46,7 +46,8 @@ static func apply(h) -> void:
 static func fits(h, id: String) -> bool:
 	var wu: Dictionary = Data.PERKS.get(id, {}).get("wup", {})
 	if wu.has("mag") and not h.wpn.is_empty():
-		return int(Data.weapon_stats(h.wid).get("mag", 1)) > 3
+		var ws := Data.weapon_stats(h.wid)
+		return ws.get("ammo", true) and int(ws["mag"]) > 3
 	return true
 
 ## Upgrade perks that can still be offered to this hunter, optionally only Brands or only the plain ones.

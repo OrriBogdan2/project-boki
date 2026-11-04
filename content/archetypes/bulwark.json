@@ -1,7 +1,7 @@
 {
 	"id": "bulwark",
 	"title": "Frozen Bulwark",
-	"base_name": "Bjorn",
+	"base_name": "Breaker",
 	"gender": "male",
 	"personality": "A huge, warm-hearted northern ferryman in a fur-lined coat, carrying the frozen, iron-banded prow of his old ship as a shield.\nHe laughs easily and guards everyone near him. Small things are off: frost that never melts on him, and no breath in the cold.",
 	"weight": "heavy",
@@ -9,6 +9,7 @@
 	"body": {
 		"size": 1.335,
 		"build": 1.18,
+		"hit_r": 0.46,
 		"head": 0.52,
 		"legs": 1.3,
 		"neck": 0.1
@@ -19,14 +20,14 @@
 	"card": {
 		"loop": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.",
 		"role": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.",
-		"lmb": "Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward.",
+		"lmb": "Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you.",
 		"rmb": "Hold to raise your aegis and block shots from the front. With it up, Shift is a Shield Charge on its own cooldown.",
 		"e": "A green light comes down on your hammer (or on you), then a healing zone round it ticks and ends in a burst.",
 		"dash": "360 Smash: a short dash that ends in one spinning hit around you; with the aegis up, a Shield Charge (its own 6s cooldown).",
 		"passive": "Blocking builds Guard (50 turns your Shield Charge into a Shield Slam); knocking a foe into a wall or another foe stuns it.",
 		"x": "Faultline (level 6): plant, slam, and the ground erupts down a long lane, throwing every foe on it up.",
 		"weapons": {
-			"tower_shield": "Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward."
+			"tower_shield": "Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you."
 		}
 	},
 	"signature": "tower_shield",
@@ -72,9 +73,15 @@
 		"smash_stun": 0.4,
 		"smash_rate": 0.61,
 		"carry": [
-			1.6,
-			3.4
+			1.5,
+			1.8
 		],
+		"perfect": {
+			"window": 0.18,
+			"dist": 4.0,
+			"time": 0.3,
+			"kb_k": 1.4
+		},
 		"throw_min": 2.5,
 		"recall_lock": 0.22
 	},
@@ -83,7 +90,7 @@
 		"name": "360 Smash",
 		"icon": "cleave",
 		"col": "#cfe8ff",
-		"cd": 9.0,
+		"cd": 8.0,
 		"whirl": 3.5,
 		"whirl_speed": 20.5,
 		"whirl_kb": 7.0,
@@ -92,7 +99,7 @@
 		"charge_speed": 18.0,
 		"charge_kb": 11.0,
 		"charge_dmg": 10.0,
-		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.",
+		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.",
 		"short": 2.6,
 		"spin_r": 2.2
 	},
@@ -105,7 +112,7 @@
 		"cooldown": 6.0,
 		"cd_per_rank": 1.5,
 		"charges": 1,
-		"hold": 0.2,
+		"hold": 0.1,
 		"shield": {
 			"hp": 160.0,
 			"hp_rank": 0.25,
@@ -176,7 +183,7 @@
 		"icon": "quake",
 		"col": "#ff9a3a",
 		"unlock": 6,
-		"cooldown": 33.0,
+		"cooldown": 40.0,
 		"windup": 0.4,
 		"plant": 0.2,
 		"cells": 4,
@@ -185,9 +192,8 @@
 		"lead": 0.2,
 		"cell_t": 0.15,
 		"strike_dmg": 4.0,
-		"strike_stun": 0.3,
+		"strike_stun": 0.5,
 		"dmg": 18.0,
-		"stun": 0.5,
 		"lift": 7.0,
 		"slow": 0.5,
 		"slow_t": 1.5,
@@ -195,7 +201,7 @@
 		"scar_w": 1.4,
 		"scar_slow": 0.2,
 		"refund": 8.0,
-		"desc": "Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam: the near cell is struck (4, a brief stun) and the ground erupts cell by cell to the far end, throwing each foe up once (18, stun 0.5, slowed 50% for 1.5s). A wall or a drop stops it. A glowing scar stays 10s and slows foes on it 20%."
+		"desc": "Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%."
 	},
 	"order": [
 		"sec",
@@ -214,13 +220,13 @@
 	},
 	"rank2": {
 		"sec": "Rank 2: shield HP +25% (160 -> 200), damage +15%.",
-		"dash": "Rank 2: recharge 9s -> 7.7s per charge; the Shield Charge cooldown 6s -> 4.5s.",
+		"dash": "Rank 2: recharge 8s -> 6.8s per charge; the Shield Charge cooldown 6s -> 4.5s.",
 		"kin": "Rank 2: healing +25% (burst 18 -> 22), damage +15%."
 	},
 	"rank_next": {
 		"sec": "Rank 3: shield HP +50% (240), damage +30%; regen 20 -> 30 per second, back up in 1.4s and 2s when broken.",
 		"kin": "Rank 3: cooldown 12s -> 8s, healing +50% in all.",
-		"dash": "Rank 3: recharge 9s -> 6.3s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it."
+		"dash": "Rank 3: recharge 8s -> 5.6s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it."
 	},
 	"tells": {
 		"half": "three rune pips over the helm light at 33 / 66 / 100 Guard",

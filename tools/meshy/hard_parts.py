@@ -103,6 +103,17 @@ def ice_paint(u, v):
     return col * (1 - 0.35 * crack[..., None])
 
 
+def clear_ice_paint(u, v):
+    """Clear ice (Claire's spear shaft): pale blue-white, a lighter core streak, faint cracks."""
+    lo, mid, hi = hexcol("5f8ed0"), hexcol("8fb8ec"), hexcol("e8f4ff")
+    n = noise(u, v, 7.0, 3)
+    col = lo[None, None] * (1 - n[..., None]) * 0.45 + mid[None, None] * (0.55 + 0.45 * n[..., None])
+    core = np.exp(-((u - 0.5) / 0.08) ** 2)[..., None] * 0.45
+    col = col * (1 - core) + hi[None, None] * core
+    crack = np.exp(-((np.sin(u * 9.0 + np.sin(v * 7.0) * 1.6) * 0.5 + 0.5 - 0.5) / 0.03) ** 2)
+    return col * (1 - 0.15 * crack[..., None])
+
+
 def wood_paint(u, v, base="6e4a32", dark="4a2f1f", planks=4, frost=0.0):
     """Oak strakes: planks along v (seams across u), grain along them, frost creeping up from v = 1."""
     b, d = hexcol(base), hexcol(dark)
@@ -557,18 +568,21 @@ def spear(spec):
     the Muzzle), a short spike at the butt."""
     butt, tip = float(spec.get("butt", 0.62)), float(spec.get("tip", -0.82))
     blade = float(spec.get("blade", 0.24))
+    shaft_r = float(spec.get("shaft_r", 0.013))
     at = Atlas(2)
-    cells = {"ice": at.cell("ice", ice_paint), "core": at.cell("core", flat("cfeaff", 0.05, 8)),
+    # (pale: the spear sheet's clear ice, white-blue with pale edges, not the glacier cyan: a thin cyan line far off)
+    cells = {"ice": at.cell("ice", clear_ice_paint if spec.get("pale") else ice_paint),
+             "core": at.cell("core", flat(spec.get("core", "cfeaff"), 0.05, 8)),
              "frost": at.cell("frost", flat("f4fbff", 0.04, 9))}
     bld = WP.Builder()
     b0 = tip + blade                                         # the blade's base
-    bld.tube([G(0, 0, butt - 0.06), G(0, 0, b0 + 0.02)], [0.013, 0.013], 6, *cells["ice"][0::2],
+    bld.tube([G(0, 0, butt - 0.06), G(0, 0, b0 + 0.02)], [shaft_r, shaft_r], 8, *cells["ice"][0::2],
              *cells["ice"][1::2], "ice", [0, 0], cap_start=True, cap_end=True)
     spike(bld, G(0, 0, butt - 0.07), G(0, 0, butt), 0.016, 4, cells["ice"], "ice")
     for z in (b0 + 0.02, b0 + 0.06):                         # frost collars under the blade
         bld.prism(G(0, 0, z), G(0, 0, z - 0.02), 0.022, 6, cells["frost"], "frost", 0.4)
     # the blade: a flat diamond (wide along the gun's x), and two barbs swept back from its base
-    wmax, th = 0.042, 0.012
+    wmax, th = float(spec.get("blade_w", 0.042)), float(spec.get("blade_t", 0.012))
     prof = [(b0, 0.012), (b0 - blade * 0.25, wmax), (b0 - blade * 0.55, wmax * 0.7), (tip, 0.0)]
     base = len(bld.v)
     u0, v0, u1, v1 = cells["core"]
@@ -584,10 +598,13 @@ def spear(spec):
             bld.f.append((a, b, b + 4, a + 4))
     bld.f.append(tuple(base + k for k in range(4))[::-1])
     for sx in (-1, 1):
-        spike(bld, G(sx * 0.02, 0, b0 - 0.03), G(sx * 0.05, 0, b0 + 0.05), 0.009, 4, cells["ice"], "ice")
+        bs = wmax / 0.042
+        spike(bld, G(sx * 0.02 * bs, 0, b0 - 0.03 * bs), G(sx * 0.05 * bs, 0, b0 + 0.05 * bs), 0.009 * bs, 4,
+              cells["ice"], "ice")
     ob = finish(bld, "weapon")
     img = at.image("spear_atlas")
-    mats = {"ice": material(ob, "ice", "spear", img)}
+    # (slot: Claire's spear on its own slot, so its look can read as glassy ice apart from her pale ice costume)
+    mats = {"ice": material(ob, spec.get("slot", "ice"), "spear", img)}
     for p in ob.data.polygons:
         p.material_index = mats["ice"]
     hard_edges(ob, 35.0)
@@ -670,14 +687,22 @@ def wings(spec, body, arm, rig):
     mirror image, a symmetric piece), cut_x (sheet column where her hair starts covering it: the card's inner
     edge, tucked under the hair), sole_y and crown_y (the back view's sole and head-top rows) with crown_z (the
     fitted model's head top, m): pixels -> metres, root [x, y, z] (fitted frame, the left
-    root; the right one mirrored), sweep (degrees the tips are turned back), gap (m between the two layers)."""
+    root; the right one mirrored), sweep (degrees the tips are turned back), gap (m between the two layers), scale
+    (the card about its root: one number, or [out, up])."""
     sheet = _load_png(os.path.expanduser(spec["art"]))
     x0, y0, x1, y1 = spec["box"]
     crop = sheet[y0:y1, x0:x1]
     bg = np.median(sheet[5:30, 5:30].reshape(-1, 3), axis=0)
     diff = np.abs(crop - bg).sum(axis=2)
     lum = crop.mean(axis=2)
-    mask = (diff > 0.16) & (lum < 0.62)
+    mask = (diff > 0.16) & (lum < float(spec.get("lum_max", 0.62)))
+    if spec.get("hair_lum"):
+        # (her hair over the wing's root: near-black pixels near the cut edge stay off the card)
+        near = np.zeros_like(mask)
+        near[:, max(0, int(spec["cut_x"]) - x0 - int(spec.get("hair_px", 40))):] = True
+        mask &= ~(near & (lum < float(spec["hair_lum"])))
+    for bx0, by0, bx1, by1 in spec.get("drop_boxes", []):
+        mask[max(0, by0 - y0):max(0, by1 - y0), max(0, bx0 - x0):max(0, bx1 - x0)] = False   # (her arm over it)
     mask[:, int(spec["cut_x"]) - x0:] = False
     # (close small holes: the membrane's light drips)
     from_pad = np.pad(mask, 2)
@@ -699,8 +724,12 @@ def wings(spec, body, arm, rig):
     # the wing's texture: the art's pixels, the membrane's own colour bled past its edge
     th, tw = crop.shape[:2]
     tex = crop.copy()
+    if spec.get("fill_median"):
+        # (the card's pixels outside the art's wing, its cut edge and the dropped hair: one membrane colour, not
+        # the bleed's streaks dragged across them)
+        tex[~blob] = np.median(crop[blob & (crop.mean(axis=2) < 0.5)], axis=0)
     keep = blob.copy()
-    for _i in range(6):
+    for _i in range(int(spec.get("bleed", 6))):     # (past the simplified outline's corners too)
         grow = keep.copy()
         acc = np.zeros_like(tex)
         cnt = np.zeros(keep.shape, np.float32)
@@ -722,6 +751,9 @@ def wings(spec, body, arm, rig):
     sweep = math.radians(float(spec.get("sweep", 25.0)))
     gap = float(spec.get("gap", 0.006))
     cut = float(spec["cut_x"])
+    # (bigger than the sheet's back view about the root: the art's span; [out, up] or one number)
+    wscale = spec.get("scale", 1.0)
+    wscale = [float(wscale), float(wscale)] if not isinstance(wscale, list) else [float(x) for x in wscale]
     objs = []
     for side in ("L", "R"):
         sx = -1.0 if side == "L" else 1.0
@@ -734,8 +766,11 @@ def wings(spec, body, arm, rig):
             # inner edge on the root, the whole card turned `sweep` back about the vertical through the root
             d = (cut - (x0 + px)) * k                            # m out from the root (the left wing: -X)
             z = (float(spec["sole_y"]) - (y0 + py)) * k
-            local = np.array([sx * d * math.cos(sweep), -d * math.sin(sweep) - layer * gap, z - root[2]])
-            return root + local
+            local = np.array([sx * d * math.cos(sweep) * wscale[0], -d * math.sin(sweep) * wscale[0],
+                              (z - root[2]) * wscale[1]])
+            # (tilt: the card leans back above its root, so the match camera looking down sees its face)
+            local[1] -= max(0.0, local[2]) * math.tan(math.radians(float(spec.get("tilt", 0.0))))
+            return root + local - np.array([0.0, layer * gap, 0.0])
 
         for layer in (0, 1):
             vs = [bm.verts.new(place(px, py, layer)) for px, py in outline]
@@ -848,6 +883,56 @@ def tail(spec, body, arm):
     return ob
 
 
+def horns(spec, arm):
+    """Ram horns as geometry (Claire, claire_head_sheet): from the top of the head each curls outward, back and
+    down round the ear and forward again, its tip pointing ahead at cheek height, close to the skull; a tapered
+    tube with growth ridges, slate blue-black with lighter ridge crests (the `metal` slot), riding the head bone
+    rigidly. Fitted frame. spec: centre [x, y, z] of the left curl (x < 0; the right one mirrored), r [start, end]
+    of the curl, x [start, end] (|x| out from the midline along the curl), phi [start, end] (degrees in the side
+    plane: 90 up, 180 back, 270 down, 360 forward), thick [root, tip] tube radii, ridges (count)."""
+    c = np.array(spec["centre"], np.float64)
+    r0, r1 = spec.get("r", [0.085, 0.05])
+    xa, xb = spec.get("x", [0.08, 0.19])
+    p0, p1 = spec.get("phi", [70.0, 345.0])
+    t0, t1 = spec.get("thick", [0.032, 0.007])
+    ridges = int(spec.get("ridges", 26))
+    n = 72
+    at = Atlas(2, 128)
+
+    def horn_paint(u, v):
+        # (the head sheet's slate blue, a step lighter than near-black so the curl reads against the hair)
+        base = hexcol(spec.get("root", "2c3456"))[None, None] * (1 - v[..., None]) + \
+            hexcol(spec.get("tipcol", "46527a"))[None, None] * v[..., None]
+        crest = np.clip(np.sin(v * ridges * math.pi) ** 8, 0, 1)[..., None] * 0.45
+        side = (0.75 + 0.25 * np.sin(u * 2 * math.pi))[..., None]
+        return base * side + hexcol(spec.get("crest", "9aa8d0"))[None, None] * crest * 0.55 * side
+    cell = at.cell("horn", horn_paint)
+    bld = WP.Builder()
+    for sx in (-1.0, 1.0):
+        rings, radii = [], []
+        for i in range(n):
+            t = i / (n - 1)
+            ph = math.radians(p0 + (p1 - p0) * t)
+            r = r0 + (r1 - r0) * t
+            x = sx * (xa + (xb - xa) * math.sin(t * math.pi * 0.5))
+            rings.append(np.array([x, c[1] + r * math.cos(ph), c[2] + r * math.sin(ph)]))
+            base = t0 + (t1 - t0) * t ** 0.9
+            radii.append(max(1e-4, base * (1.0 + float(spec.get("ridge_amp", 0.09)) * math.cos(t * ridges * 2 * math.pi))))
+        bld.tube(rings, radii, 12, cell[0], cell[2], cell[1], cell[3], "horn", [0.0] * n, cap_end=True,
+                 cap_start=True)
+    ob = finish(bld, "horns")
+    img = at.image("horn_atlas")
+    # (slot: Claire's on `leather`, shaded like her wings: on `metal` the toon's sheen read them glossy black)
+    material(ob, spec.get("slot", "metal"), "horn", img)
+    g = ob.vertex_groups.new(name="head")
+    g.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+    ob.parent = arm
+    mod = ob.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    log("horns: %d tris" % sum(len(q.vertices) - 2 for q in ob.data.polygons))
+    return ob
+
+
 # ------------------------------------------------------------------------------------------------ split, feet
 def split(ob, arm, sp):
     """The faces of the slots in sp["slots"] (whose centre is above sp["z_min"]) as their own mesh `sp["name"]`,
@@ -859,9 +944,11 @@ def split(ob, arm, sp):
     bm.from_mesh(ob.data)
     def in_box(c, b):
         return b[0] <= abs(c.x) <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]
+    boxes = sp.get("boxes", [])          # (|x|, y, z: faces of any slot there go too, the scan's horn roots)
     sboxes = sp.get("slot_boxes", [])    # (|x|, y, z: only the slots' faces inside these: hair behind his neck)
-    pick = [f for f in bm.faces if f.material_index in want and (f.calc_center_median().z > zmin
-            or any(in_box(f.calc_center_median(), b) for b in sboxes))]
+    pick = [f for f in bm.faces if (f.material_index in want and (f.calc_center_median().z > zmin
+            or any(in_box(f.calc_center_median(), b) for b in sboxes)))
+            or any(in_box(f.calc_center_median(), b) for b in boxes)]
     keep = set(f.index for f in pick)
     other = bmesh.new()
     other.from_mesh(ob.data)
@@ -876,6 +963,11 @@ def split(ob, arm, sp):
     other.free()
     for m in ob.data.materials:
         me.materials.append(m)
+    if sp.get("scale"):
+        # (pulled in about a pivot: Claire's horns compact and close to the skull, as her head sheet draws them)
+        piv = Vector(sp.get("pivot", [0.0, 0.0, 0.0]))
+        k = sp["scale"]
+        me.transform(Matrix.Translation(piv) @ Matrix.Diagonal((k[0], k[1], k[2], 1.0)) @ Matrix.Translation(-piv))
     out = bpy.data.objects.new(sp["name"], me)
     bpy.context.scene.collection.objects.link(out)
     g = out.vertex_groups.new(name=sp["bone"])
@@ -1069,6 +1161,8 @@ def build(spec, body, arm, rig):
         out["extra"].extend(wings(ps["wings"], body, arm, rig))
     if "tail" in ps:
         out["extra"].append(tail(ps["tail"], body, arm))
+    if "horns" in ps:
+        out["extra"].append(horns(ps["horns"], arm))
     if "stuck" in ps:
         out["extra"].extend(stuck(ps["stuck"], body, arm))
     return out

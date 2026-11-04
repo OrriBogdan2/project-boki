@@ -26,6 +26,9 @@ const ECHO_GAP := 0.05               # s between her after-images on a slide or 
 const ECHO_ALPHA := 0.35             # see-through, so the trail never covers her live body
 const ECHO_BACK := 0.35              # m behind her along her travel: the echoes trail, not overlap
 const PIP_LIFT := 0.9                # m up the screen the Fever pips sit, clear of her cap and face
+const TOSS_Y := 1.05                 # m: the Burr Charge leaves from the hip (a side toss, not overhead)
+const BRACKET_R := 1.25              # m: the firing brackets either side of her (footage: about 0.7 bh)
+const BRACKET_DEG := 56.0            # each bracket's arc
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, wall, fuse, fuse0, range, out, y0}
@@ -43,7 +46,10 @@ var last_cone := {}            # tests: {at, dir, wall}
 var last_shot := 0
 var aim_marks := 0             # tests: foes marked inside the held lane
 var echo_t := 0.0
-var grenade: Node3D = null     # the Burr Charge cocked in her left hand while RMB is held
+var refill_part := 0.0         # rounds the resting drum has part-refilled
+var dry := false               # the drum ran dry: no round until it is full again
+var round_at := -9.0           # match time of her last rifle round (the firing brackets)
+var grenade: Node3D = null     # the Burr Charge held low in her left hand while RMB is held
 var ult: GunslingerUlt         # Cinderfall, her ultimate on X
 
 func _setup() -> void:
@@ -83,6 +89,8 @@ func _tick(dt: float) -> void:
 	if ult.running():
 		ult.tick(dt)
 	_tick_lmb()
+	_tick_mag(dt)
+	_tick_brackets()
 	_tick_echo(dt)
 	_tick_grenade()
 	_tick_trail()
@@ -125,8 +133,6 @@ func _tick_echo(dt: float) -> void:
 		return
 	echo_t = ECHO_GAP
 	fx().echo(h, echo_col(), 0.4, ECHO_ALPHA, ECHO_BACK)
-	if h.grounded:
-		fx().disc(ground(h.pos), 0.7, SCRAPE, Color.BLACK, 0.35, SCRAPE.lightened(0.25))
 
 func teardown() -> void:
 	super.teardown()
@@ -136,14 +142,16 @@ func teardown() -> void:
 	ult.clear()
 	_end_needle()
 
+## Her dashes (a slide, tap or held, and the air roll): the rifle keeps going when the dash's LMB row says so.
 func fires_in_dash() -> bool:
-	return not slide.is_empty()            # any slide, tap or held: the rifle keeps going
+	return String(flow.row("lmb")["mode"]) == "fire"
 
 func move_k() -> float:
 	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
 
+## The rifle can't fire while a dry drum refills (_tick_mag).
 func fire_ok() -> bool:
-	return true
+	return not dry
 
 func add_fever(n := 1) -> void:
 	res = minf(res_max(), res + float(n))
@@ -176,8 +184,6 @@ func _on_knock(t: Ent) -> void:
 	if rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
-	fx().ring(h.pos, 1.6, EMBER, HOT, 0.35)
-	fx().pillar(ground(h.pos), EMBER, HOT, 2.4, 0.6, 0.5)
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "+KNOCK", Color("8ff0a0"), false)
 	m.sfx("vn_stim", h.pos, -3.0)
 	play("gunslinger_knock")
@@ -189,6 +195,7 @@ func _tick_lmb() -> void:
 	if h.shot_n == last_shot:
 		return
 	last_shot = h.shot_n
+	round_at = m.time
 	var shots: Array = m.get("shots")
 	for i in range(shots.size() - 1, -1, -1):
 		var sd: Dictionary = shots[i]
@@ -198,6 +205,39 @@ func _tick_lmb() -> void:
 			break
 	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:
 		play("gunslinger_lmb")
+
+## While the rifle fires, two thin arcs bracket her left and right (your screen only; the footage's firing
+## brackets), gone a beat after the trigger rests.
+func _tick_brackets() -> void:
+	if not _rifle_in_hand() or m.time - round_at > float(h.wpn["rate"]) + 0.1 or busy():
+		return
+	var d := h.aim_dir()
+	for side in [-1.0, 1.0]:
+		AimKit.arc_wall(h, "lmb_bracket%d" % int(side), {"dir": Vector2(-d.y, d.x) * side, "radius": BRACKET_R,
+				"deg": BRACKET_DEG, "thick": 0.05, "panels": 1})
+
+func _rifle_in_hand() -> bool:
+	return h.wid == String(d.get("signature", ""))
+
+## The drum (the source's rifle: 30 rounds that "rapidly reload when not firing"; there is no reload key): once no
+## round has left for `refill_after` it refills at `refill_rate`, so a string after a pause starts full. Run dry,
+## the trigger is dead until the drum is full again (held or not), then the string picks up.
+func _tick_mag(dt: float) -> void:
+	if not _rifle_in_hand():
+		dry = false
+		return
+	var mag := int(h.wpn["mag"])
+	if h.ammo <= 0:
+		dry = true
+	if h.ammo >= mag or h.idle_fire < float(h.wpn["refill_after"]):
+		refill_part = 0.0
+		if h.ammo >= mag:
+			dry = false
+		return
+	refill_part += float(h.wpn["refill_rate"]) * dt
+	var add := int(refill_part)
+	refill_part -= float(add)
+	h.ammo = mini(mag, h.ammo + add)
 
 func _round_end(at: Vector3, vel: Vector2) -> void:
 	var d := Vector3(-vel.x, 0.4, -vel.y).normalized() if vel.length() > 0.1 else Vector3.UP
@@ -250,11 +290,9 @@ func _skid_streaks(from: Vector3, dir: Vector2) -> void:
 		fx().smear(begin, begin + along * SKID_LEN, SCRAPE, SCRAPE.lightened(0.2), SKID_WIDTH, SKID_SECONDS)
 
 func _slide_end() -> void:
-	var dd := dash_def()
 	h.roll_t = 0.0
 	if rank("dash") >= 3:
 		h.add_buff("move_speed", 0.25, 2.0)
-		fx().ring(h.pos, 1.0, col_of(dd), HOT, 0.25)
 	var air := bool(slide.get("air", false))
 	if air:
 		h.vel.x *= 0.25          # an air slide stops short instead of carrying on
@@ -337,7 +375,7 @@ func _tick_aim() -> void:
 			var mark := {"at": f.pos, "r": 0.75, "col": Color("ff4fb0"), "col2": HOT, "alpha": 1.2}
 			AimKit.circle(h, "mark%d" % f.get_instance_id(), mark)
 
-## The charge cocked in her raised left hand while RMB is held (gone the moment it's thrown).
+## The charge held low at her left hip while RMB is held (gone the moment it's thrown).
 func _tick_grenade() -> void:
 	var cocked := rmb_down and h.anim != null and h.anim.hand_l != null and not h.downed
 	if not cocked:
@@ -372,7 +410,7 @@ func fire_rmb(c: Dictionary) -> void:
 		burr_pool.append(n)
 	n.visible = true
 	n.scale = Vector3.ONE
-	var at := h.pos + Vector3(d.x * 0.6, 1.6, d.y * 0.6)
+	var at := h.pos + Vector3(d.x * 0.6, TOSS_Y, d.y * 0.6)
 	if grenade != null and is_instance_valid(grenade) and grenade.visible:
 		at.y = grenade.global_position.y       # it leaves at the height of the hand, along the lane shown
 		grenade.visible = false
@@ -384,8 +422,6 @@ func fire_rmb(c: Dictionary) -> void:
 	burrs.append(burr)
 	play("gunslinger_rmb")
 	m.sfx("vn_throw", h.pos, -2.0)
-	if h.is_local():
-		Oomph.punch_dir(m, -d, 0.08)
 
 ## The charge: a bronze ball about 0.3 m across, a dark band round it, an ember heart showing through
 ## and eight hot spikes. Solid colours, so it reads bronze and ember on any ground.
@@ -522,7 +558,6 @@ func _detonate(b: Dictionary) -> void:
 	m.fx.flash(at, HOT, 1.6, 0.1)
 	fx().ring(ground(at), 1.8, EMBER, HOT, 0.35)
 	m.sfx("vn_blast", at, -1.0)
-	Feel.shake(m, "t3", h, at)
 	_cone(at, b["out"] as Vector2, bd, bool(b["wall"]))
 
 ## The blast: a cone back out of the stick point, shoving everything in it along the cone (toward the
@@ -548,6 +583,7 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 			var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "stun": float(bd["wall_stun"])}
 			slam["dr"] = true
 			f.hurt(0.1, h, slam)
+			daze(f, float(bd["cone_rattle"]) + float(bd["wall_daze"]))     # the data: walled, "Dazed longer"
 			m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 2.0, "WALLED", EMBER, false)   # over DAZED
 
 # ------------------------------------------------------------------ E: Longneedle
@@ -557,7 +593,6 @@ func cast_e() -> bool:
 	needle = {"t": 0.0}
 	e_t = float(ed["charge"]) + 0.1
 	m.sfx("vn_ion_charge", h.pos, -3.0)
-	net_ring(h.pos, 1.2, EMBER)
 	play("gunslinger_e")
 	return true
 
@@ -619,13 +654,9 @@ func _fire_needle() -> void:
 	fx().beam(a, b, EMBER, HOT, 1.0, float(ed["linger"]), BRONZE)
 	fx().star(a, EMBER, HOT, 1.3, 0.16)
 	m.fx.flash(a, EMBER, 1.2, 0.08)
-	fx().ring(ground(h.pos), 1.6, SMOKE, EMBER, 0.4)              # the smoke ring round her
+	fx().pillar(ground(h.pos), SMOKE, EMBER, 1.6, 0.45, 0.4)   # recoil smoke puffs up round her (no ground ring)
 	net_bolt(a, b, EMBER)
 	m.sfx("vn_ion_fire", h.pos, 1.0)
-	Feel.shake(m, "t3", h, h.pos)
-	if h.is_local():
-		Oomph.punch_dir(m, -d, 0.22)
-		if m.cam: m.cam.add_trauma(0.18)
 	h.impulse(-d * float(ed.get("recoil", 6.0)))                  # the recoil shoves her back a step
 	var hits := 0
 	var dmg0: float = float(ed["dmg"]) * power("kin")

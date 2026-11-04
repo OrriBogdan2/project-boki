@@ -72,9 +72,16 @@ static func find(sk: Skeleton3D, bone: String) -> int:
 	return bi if bi >= 0 else sk.find_bone(bone.replace(".", "_"))
 
 ## What keeps `sk` from being the contract armature for `rest`: a missing bone, a wrong parent, or a bone
-## whose head is off its rig node. Empty when it matches.
-static func mismatches(sk: Skeleton3D, rest: Dictionary) -> Array:
+## whose head is off its rig node; and, for a Warden with variant bones (`extra`: bone -> parent, WardenGlb.EXTRA),
+## one of those missing or on the wrong parent. Empty when it matches.
+static func mismatches(sk: Skeleton3D, rest: Dictionary, extra := {}) -> Array:
 	var out: Array = []
+	for b in extra:
+		var bi := find(sk, b)
+		if bi < 0:
+			out.append("variant bone %s missing" % b)
+		elif sk.get_bone_parent(bi) != find(sk, String(extra[b])):
+			out.append("variant bone %s's parent is not %s" % [b, extra[b]])
 	for b in WardenGlb.BONES:
 		var bi := find(sk, b)
 		if bi < 0:

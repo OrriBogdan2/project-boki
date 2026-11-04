@@ -1,11 +1,11 @@
-"""Synthesizes Pin's and Bjorn's ability sounds into audio/*.wav (mono, 22.05 kHz, 16-bit).
+"""Synthesizes Hem's and Breaker's ability sounds into audio/*.wav (mono, 22.05 kHz, 16-bit).
 
     python3 tools/gen_pin_bjorn_sfx.py      (then: godot --headless --import)
 
 Pure Python (math, random, wave): no numpy. Every sound is original, made here from noise, sines and
 envelopes; its own random stream, so no other generator's output changes. Sfx loads these on first use.
 
-Pin (archer)
+Hem (archer)
   pin_draw         the bow drawn: a rising wooden creak of the limbs and a soft string stretch
   pin_stage        Empowered ready: a small bright ping with a short shimmer
   pin_super        Supercharged ready: a fuller two-note chime over a low swell
@@ -22,7 +22,7 @@ Pin (archer)
   pin_patter       one arrow of the rain striking: a small dry tick
   pin_spirit       Spirit Walk: a quick roll whoosh into an airy, hollow shimmer
   pin_spirit_end   Spirit Walk ending: a soft falling chime
-Bjorn (bulwark)
+Breaker (bulwark)
   bjorn_throw      the hammer thrown: a heavy whoof and a tumbling whirr
   bjorn_recall     the hammer called back: a rising whirr
   bjorn_catch      the catch: a leather-and-iron slap
@@ -123,7 +123,7 @@ def thud(f0, f1, d, decay):
 def click(d=0.01, lo=2000, hi=9000):
     return mul(bp(noise(d), lo, hi), env(N(d), 0.0005, d * 0.3))
 
-# ------------------------------------------------------------------ Pin
+# ------------------------------------------------------------------ Hem
 def pin():
     save('pin_draw', mix(mul(creak(0.5, 180, 320, 55), swell(N(0.5), 0.35)), scale(mul(bp(noise(0.5), 2500, 7000), swell(N(0.5), 0.45)), 0.25)), -22)
     save('pin_stage', mix(bell(2350, 0.35, 0.08), scale(at(bell(3520, 0.25, 0.05), 0.03), 0.5), scale(click(0.006, 4000, 11000), 0.6)), -20)
@@ -150,7 +150,7 @@ def pin():
                            scale(at(mul(bp(noise(0.7), 3000, 9000), env(N(0.7), 0.1, 0.25)), 0.12), 0.3)), -18)
     save('pin_spirit_end', mix(bell(1320, 0.5, 0.14), scale(at(bell(990, 0.5, 0.14), 0.08), 0.7)), -22)
 
-# ------------------------------------------------------------------ Bjorn
+# ------------------------------------------------------------------ Breaker
 def bjorn():
     whirr = [0.0] * N(0.5)
     for k in range(5):

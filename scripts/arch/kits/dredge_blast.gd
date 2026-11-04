@@ -170,7 +170,4 @@ func _wave_fx(i: int, at: Vector3, dir: Vector2) -> void:
 	AimKit.cone(h, "x_fan", {"dir": dir, "len": float(x["range"]), "deg": float(x["fan_deg"]), "edges": true,
 		"all": true, "col": FAN_COL, "alpha": FAN_ALPHA, "dur": 0.25})
 	m.sfx("dr_blast", h.pos, 0.0, WAVE_PITCH[i % 2])
-	Feel.shake(m, "t3", h, h.pos)
-	if h.is_local():
-		Oomph.punch_dir(m, -dir, 0.2)
 	k.net_ring(at, float(x["range"]) * 0.5, WAVE_COL[i % 2])
