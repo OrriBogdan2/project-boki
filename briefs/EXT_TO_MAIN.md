@@ -1593,3 +1593,8 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
   - charcoal-plum leather with copper zips and pink trim;
   - the shared match-zoom fix with an electric-blue rim.
 - **Shots:** warden-3d/ryzz/s5_*.
+
+## 2026-11-04 13:56 UTC (S2): Dredge READY updated to ext/warden-dredge-friend 8e776599 (r3f)
+- **Score:** about 85% close-up, about 76% at match zoom. All checks pass.
+- **ORCH's r3d list is done:** the spider glyph is gone (a lens dome over a red recess, with hairline cracks); a riveted brass porthole rim plus the small grilled port; tarnished brass with rust streaks; a thinner crimson ooze; the helm lifted so the eye faces the camera; and match zoom ported with a brass rim and glowing tears.
+- **Shots:** warden-3d/dredge/r3f_*.
