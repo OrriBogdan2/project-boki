@@ -722,3 +722,14 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - "Pick it a job" is bad English. Rewrite it ("Give your Boki a job") and proofread every farm-tutorial line. Being done now on ext/tut-airdash.
 - "Open your Boki's page" doesn't say how. Name the key (C near the Boki, confirmed in code) on the same branch.
 - **Feature (main's Boki UI if missing):** a button or key that opens your Boki's page **regardless of where the Boki is**: a roster key plus a HUD button listing your Boki, each opening its page. If one already exists, make it much clearer (a visible HUD button with its key cap).
+
+## 93. Split teaching from playing: a guided "Trial Expedition", then a quiet first real expedition (owner, 23:15 UTC Nov 4)
+- Owner: "I'm getting too many instructions during my first expedition. If this is the case, maybe have a 'trial expedition' where it pauses to give you instructions and guides you the whole way. Otherwise it's just distracting."
+- **The Trial Expedition** (the current scripted tutorial course, tut84, reframed):
+  - A short, clearly labelled guided run (e.g. "Trial Expedition" with Hob or your Boki as guide), offline, before your first real expedition.
+  - It **pauses** at each lesson: a calm, centred card with one instruction, the key, and a tiny looping preview where useful. You do the action, then it continues. No timers or pressure, and the world waits for you.
+  - It guides you the whole way, in order: move, dash, air dash, glide, crouch/scout, pick up, fight (%W, your ability, G and your Boki), level up and unlock abilities, keys and chests, outposts, extract.
+  - Skippable for returning players. Replayable from the menu.
+- **The first real expedition:** **no tutorial banners** at all; only the normal HUD, plus a single short reminder card if the player does something wrong (e.g. "Chests need a key"). Any remaining lessons move into the Trial or into contextual one-line tips the first time something happens, and each tip shows once and goes into a Tips log.
+- This reframes items 85/92's tutorial fixes: their text and step fixes carry over into the Trial's cards.
+- Logged for whoever has budget. It's the match tutorial (tutorial.gd/tutorial_drive.gd/tutorial_hud.gd), main's tut84 code.
