@@ -20,7 +20,7 @@ func _ready() -> void:
 		for i in styles.size():
 			var lk := {"race": r, "hair": i, "hair_v": 2, "hair_col": [0, 5, 3, 6, 10, 7, 12, 1, 13, 8, 2, 11, 14, 9][i % 14], "skin": int(Models.RACES[r]["skin"]) if r > 0 else 1,
 				"gender": (i + r) % 2, "face": 0, "body": 1, "outfit": 2}
-			var h := Models.hunter("medium", Data.TEAM_COLORS[0], "rifle", "bare", lk)
+			var h := Models.hunter("medium", Data.TEAM_COLORS[0], "rifle", "bare", MantleLook.at_home(lk))
 			# heads only: everything below the neck is hidden so the rows can sit close together
 			var torso: Node3D = h.get_node("Rig/Torso")
 			for ch in torso.get_children():
@@ -82,8 +82,9 @@ func _class_lineup() -> void:
 	add_child(cam)
 	cam.make_current()
 
-## Every race x style grows a hair mesh that shows outside the head, reaches above the head's
-## middle and touches the head (nothing hidden inside it, nothing floating). Returns the failures.
+## Every race x style (on the player's own person: in a Mantle the Warden decides) grows a hair
+## mesh that shows outside the head, reaches above the head's middle and touches the head (nothing
+## hidden inside it, nothing floating). Returns the failures.
 static func check() -> int:
 	var bad := 0
 	var n := 0
@@ -94,7 +95,7 @@ static func check() -> int:
 				continue
 			for outfit in ["bare", "veil", "sage"]:
 				var lk := {"race": r, "hair": i, "hair_v": 2, "hair_col": 3, "gender": i % 2, "face": 0, "body": 1, "outfit": 0}
-				var h := Models.hunter("medium", Data.TEAM_COLORS[0], "rifle", outfit, lk)
+				var h := Models.hunter("medium", Data.TEAM_COLORS[0], "rifle", outfit, MantleLook.at_home(lk))
 				var head: Node3D = h.get_node("Rig/Torso/HeadPivot")
 				var hair := head.get_node_or_null("Hair") as Node3D
 				var centre := Vector3(0, 0.18, 0)
@@ -127,7 +128,7 @@ static func check() -> int:
 	# old saves (an index into the shared list, no "hair_v") map into every race's own list
 	for r in Models.RACES.size():
 		for old in Models.LOOK_HAIRS.size():
-			var cl := Models.clean_look({"race": r, "hair": old})
+			var cl := PlayerLook.clean({"race": r, "hair": old})
 			if int(cl["hair"]) < 0 or int(cl["hair"]) >= Models.hair_styles(r).size():
 				bad += 1
 				print("HAIR FAIL old save race %d hair %d -> %d" % [r, old, int(cl["hair"])])

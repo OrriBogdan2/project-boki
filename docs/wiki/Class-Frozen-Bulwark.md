@@ -58,7 +58,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 | Body | 193 health, 4.4 m/s, 2 dash charges |
 | Signature weapon | War Hammer & Aegis (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot. |
-| Silhouette | the shield shape and the banner |
+| Silhouette | the frozen prow shield and the long ice-cased oar |
 | Resource | Guard (max 100) |
 
 ### Kit card
