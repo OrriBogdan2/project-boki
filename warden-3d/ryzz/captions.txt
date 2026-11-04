@@ -14,3 +14,11 @@ s2_vs_turnaround.png, s2_vs_turnaround_game.png: the turnaround vs the model, cl
 s2_match_vs_art.png, s2_gameplay_match.png: the Arena match frame (x4 crop beside the art front) and the full frame.
 s2_moves_1.png, s2_moves_2.png, s2_poses_game.png: kit move frames and gameplay-camera poses.
 s2_vs_s1.png: stage 1 (rows 1, 3) vs stage 2 (rows 2, 4): close-ups and front 3/4.
+s3_closeup_vs_art.png: round 3: the portrait vs the in-game close-ups: the face painted from the head sheet (registered on the mesh's own render: the wink, fern scar, brows, freckles, lips), peach skin under the shared warm look (16c18b4f), soft curly pigtails, the copper ties.
+s3_head_vs_sheet.png: the head sheet vs the in-game front close-up.
+s3_34_vs_art.png: ryzz_34 vs the in-game 3/4 views: her RIGHT hand on her hip, the left hanging, weight on her right hip.
+s3_back_vs_art.png: ryzz_back vs the back 3/4: the three rods flush between her shoulder blades in a V, the straps on the mount, the scorched bent relic.
+s3_vs_turnaround.png, s3_vs_turnaround_game.png: the turnaround vs the model, close and at the gameplay camera.
+s3_match_vs_art.png, s3_gameplay_match.png: the Arena match frame (x4 crop beside the art front) and the full frame.
+s3_moves_1.png, s3_moves_2.png, s3_poses_game.png: kit move frames and gameplay-camera poses.
+s3_vs_s2.png: round 2 (rows 1, 3) vs round 3 (rows 2, 4): close-ups and 3/4.
