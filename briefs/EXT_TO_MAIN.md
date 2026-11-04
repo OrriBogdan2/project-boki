@@ -1297,3 +1297,6 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 ## 2026-11-04 10:30 UTC (orchestrator): DECISION? Pip and Claire stay as they are
 - DECISION? Pip is NOT fiery (too much fire in the roster already: Cinder, Zedran's magma). Her pastel fairy-fox look is final; drop "small and fiery like a fox" from her description.
 - DECISION? Claire's classically pretty face is intentional: she's the seductress (the sweet face is the lure, the body is demonic). Don't "fix" it toward more character.
+
+## 2026-11-04 10:45 UTC (orchestrator): DECISION? Hem's title is "Red Stitch"
+- DECISION? Hem's class title changes from "Dark Archer" to **"Red Stitch"** (player label "<name> the Red Stitch"). Main: fold into DECISIONS.md; S2: include it in the rename sweep (titles live with the class-titles data).

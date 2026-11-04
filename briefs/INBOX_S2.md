@@ -444,3 +444,5 @@ Build, in this order; post progress in EXT_TO_MAIN:
 
 ## 2026-11-04 10:20 UTC (orchestrator): Hem (was Pin) art in
 - ext/imagegen wardens_r3/hem_* + HEM_KIT.md. Queued for 3D after Vex passes. Notes: the bow in her LEFT hand, draw RIGHT; the glowing red-thread bowstring (emissive line); the needle-arrows with a stitched-trail VFX; her shadow is a VFX/decal trick (too long, clawed, red seams), not a creature and not in the mesh; the porcelain-shard mask as its own mesh; the thimble claws on the right hand.
+
+## 2026-11-04 10:45 UTC (orchestrator): Hem's title is now "Red Stitch" (was Dark Archer); include it in the rename sweep.
