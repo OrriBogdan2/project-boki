@@ -38,7 +38,8 @@ const OPTIONAL := ["cape", "scarf", "tail", "wings"]
 ## Procedural pieces that stay when the .glb dresses the hunter (the contract's "nodes the game keeps").
 const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus"]
 ## glTF material name -> the toon shader's painted surface (RIG_CONTRACT "Materials").
-const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur": 5, "eyes": 0, "team": 1, "glow": 0}
+const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "fur": 5, "eyes": 0, "team": 1, "glow": 0,
+	"ice": 1}
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
@@ -53,6 +54,9 @@ const INK_TAGS := ["braid"]
 const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(0.97, 0.94, 0.95), "shadow_sat": 0.0, "sss": 0.0,
 	"sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3, "fres_tint": 0.95, "rim_amount": 0.5,
 	"top_light": 1.0, "far_lift": 0.35}
+## The `ice` slot (Claire's ice costume, spear and blades; Breaker's hammer block): read as clear ice without real
+## transparency: a strong cold fresnel rim and a little gloss over the painted atlas.
+const ICE := {"fres": 2.6, "fres_color": Color(0.72, 0.9, 1.0), "fres_tint": 0.25, "gloss": 0.45, "rim_amount": 0.8}
 const GLOW := 1.6              # emission of the glow slot (mechanical eyes, cracks), x its painted colour
 ## The ink shell on a painted atlas: half the procedural heroes' width per metre of camera distance (the same
 ## 4 mm line close up), and never more than the fit's ink room at a vertex (outline.gdshader ink_mask). At the
@@ -66,6 +70,9 @@ const SETTING := "warden_models"
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
 const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
 const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (HunterAnim spins them while firing)
+const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
+## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire).
+const WING_FOLD := "wing_fold"
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
 static var _ink: ShaderMaterial  # the painted atlas's ink shell (INK_WIDTH), shared
@@ -157,6 +164,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
 	_hold_weapon(root, glb)
+	_hold_shield(root, glb)
 
 ## The .glb's own weapon (a mesh named WEAPON, modelled in the Gun node's space) goes into the hands in place
 ## of the procedural one; the Gun node and its Muzzle stay, so shots and grips are unchanged.
@@ -169,7 +177,12 @@ static func _hold_weapon(root: Node3D, glb: Node3D) -> void:
 		(mi as MeshInstance3D).visible = false
 	weapon.get_parent().remove_child(weapon)
 	weapon.owner = null
-	gun.add_child(weapon)
+	# a hammer swings on its own pivot under the Gun (meta hammer_pivot, PinBjornWeapons): it is modelled there
+	var seat: Node3D = gun
+	for c in gun.get_children():
+		if c.has_meta("hammer_pivot") and not c.is_queued_for_deletion():
+			seat = c
+	seat.add_child(weapon)
 	weapon.transform = Transform3D.IDENTITY
 	# its magazine (WEAPON_MAG) becomes the Gun's Mag, which the reload drops out and slaps back in
 	var mag := weapon.find_child(WEAPON_MAG, true, false) as Node3D
@@ -185,6 +198,19 @@ static func _hold_weapon(root: Node3D, glb: Node3D) -> void:
 		gun.add_child(mag)
 		mag.transform = at
 		mag.name = "Mag"
+
+## The .glb's shield (SHIELD, modelled in the Shield node's space) replaces the procedural one on the left hand.
+static func _hold_shield(root: Node3D, glb: Node3D) -> void:
+	var shield := glb.find_child(SHIELD, true, false) as Node3D
+	var holder := root.get_node_or_null("Rig/Torso/ArmLPivot/Elbow/Hand/Shield") as Node3D
+	if shield == null or holder == null:
+		return
+	for mi in holder.find_children("*", "MeshInstance3D", true, false):
+		(mi as MeshInstance3D).visible = false
+	shield.get_parent().remove_child(shield)
+	shield.owner = null
+	holder.add_child(shield)
+	shield.transform = Transform3D.IDENTITY
 
 ## The rig rest of the Warden's model in the neutral look (built once a session).
 static func neutral_rest(arch: String) -> Dictionary:
@@ -233,6 +259,9 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary) -> Array:
 					m.next_pass = _painted_ink()
 			if slot == "glow":
 				m.set_shader_parameter("glow", GLOW)
+			if slot == "ice":
+				for k in ICE:
+					m.set_shader_parameter(k, ICE[k])
 			(mi as MeshInstance3D).set_surface_override_material(si, m)
 			out.append(m)
 	return out
@@ -290,6 +319,7 @@ class Sync extends Node:
 
 	func _process(dt: float) -> void:
 		apply()
+		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
 
 	func apply() -> void:
@@ -306,8 +336,10 @@ class Springs:
 	const PULL := 0.2           # the share of the way back to the rest shape per 1/60 s, at the root
 	const PULL_TIP := 0.07      # and at the tip
 	const DAMP := 0.84          # the velocity kept per 1/60 s
+	const FOLD := 1.25          # radians a folded wing turns back about the vertical through its root
 	var skel: Skeleton3D
-	var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world)}
+	var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world), wing}
+	var fold := 0.0             # 0..1: how far the wing chains are folded (WING_FOLD)
 
 	func setup(skeleton: Skeleton3D) -> void:
 		skel = skeleton
@@ -324,7 +356,8 @@ class Springs:
 				cur = int(kids[0])
 				ids.append(cur)
 			if ids.size() >= 2:
-				chains.append({"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array()})
+				var wing := skel.get_bone_name(bi).begins_with(PREFIX + "wing")
+				chains.append({"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array(), "wing": wing})
 
 	func _spring(bi: int) -> bool:
 		return skel.get_bone_name(bi).begins_with(PREFIX)
@@ -342,8 +375,16 @@ class Springs:
 			var base := skel.get_bone_global_pose(par) * skel.get_bone_global_rest(par).affine_inverse()
 			var rest: Array = []
 			var want := PackedVector3Array()
+			# a wing folds: its rest shape turned back (+Z, behind) about the vertical through its root
+			var turn := Transform3D.IDENTITY
+			if bool(ch["wing"]) and fold > 0.001:
+				var r0: Transform3D = base * skel.get_bone_global_rest(int(ids[0]))
+				var r1: Transform3D = base * skel.get_bone_global_rest(int(ids[ids.size() - 1]))
+				var out := signf(r1.origin.x - r0.origin.x)
+				turn = Transform3D(Basis(Vector3.UP, -out * FOLD * fold), Vector3.ZERO)
+				turn = Transform3D(Basis.IDENTITY, r0.origin) * turn * Transform3D(Basis.IDENTITY, -r0.origin)
 			for bi in ids:
-				var r: Transform3D = base * skel.get_bone_global_rest(int(bi))
+				var r: Transform3D = turn * base * skel.get_bone_global_rest(int(bi))
 				rest.append(r)
 				want.append(xf * r.origin)
 			var n := want.size()

@@ -91,6 +91,7 @@ func run(main: Node) -> void:
 		_setting(a)
 		_own_motion(a, "bulwark" if a != "bulwark" else "gunslinger")
 		_weapon(a)
+		_shield(a)
 		_springs(a)
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
 	print("WARDENGLB_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
@@ -312,10 +313,19 @@ func _spring_off(sk: Skeleton3D, sync: WardenGlb.Sync) -> float:
 func _weapon(a: String) -> void:
 	var m := _model(a)
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
-	var weapon := gun.get_node_or_null(WardenGlb.WEAPON) as MeshInstance3D
+	var weapon := gun.find_child(WardenGlb.WEAPON, true, false) as MeshInstance3D
 	if weapon == null:
 		m.free()
 		return
+	# a hammer is seated on its swing pivot (meta hammer_pivot), its block round the point BjornFx finds the head
+	var pivot: Node3D = null
+	for c in gun.get_children():
+		if c.has_meta("hammer_pivot"):
+			pivot = c
+	if pivot:
+		ok(weapon.get_parent() == pivot and weapon.get_aabb().has_point(Vector3(0, 0, -0.62)),
+				"%s's weapon rides the hammer pivot (the kit's swings) with its head round (0, 0, -0.62) (%s)"
+				% [a, str(weapon.get_aabb())])
 	var shown := gun.find_children("*", "MeshInstance3D", true, false).filter(
 			func(mi): return (mi as Node3D).is_visible_in_tree() and mi != weapon and not weapon.is_ancestor_of(mi))
 	var mag := gun.get_node_or_null("Mag") as MeshInstance3D
@@ -327,6 +337,21 @@ func _weapon(a: String) -> void:
 	ok(gun.has_node("Muzzle") and stray.is_empty() and mag_ok,
 			"%s holds its own weapon (in the Gun with the Muzzle, procedural parts left %s, its magazine the Mag: %s)"
 			% [a, left, str(mag_ok)])
+	m.free()
+
+## A .glb shield (Breaker's prow) rides the left hand's Shield node in place of the procedural one.
+func _shield(a: String) -> void:
+	var m := _model(a)
+	var holder := m.get_node_or_null("Rig/Torso/ArmLPivot/Elbow/Hand/Shield") as Node3D
+	var sh := holder.get_node_or_null(WardenGlb.SHIELD) as MeshInstance3D if holder else null
+	if sh == null:
+		m.free()
+		return
+	var shown := holder.find_children("*", "MeshInstance3D", true, false).filter(
+			func(mi): return (mi as Node3D).is_visible_in_tree() and mi != sh)
+	ok(shown.is_empty() and sh.transform.is_equal_approx(Transform3D.IDENTITY),
+			"%s holds its own shield on the left hand's Shield node (procedural parts left %s)"
+			% [a, str(shown.size())])
 	m.free()
 
 ## The skeleton is shared names and layout only: each Warden keeps its own motion. Over an idle and a run
