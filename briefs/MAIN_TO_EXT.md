@@ -1099,3 +1099,9 @@ Owner: "why cant we build it tonight? after the heroes are done. 3d is fast with
 3. In a match you're fully the Warden (mask-look). At home you're the Unmasked plus any kept mask features (just leave a hook for them, e.g. look["marks"] = [], for later).
 4. Text: "Mask" not "Mantle" in all player text touched.
 Main merges it as soon as it's READY. Report with screenshots.
+
+## 2026-11-04 04:30 UTC: OWNER answers for ext/unmasked (641285d7)
+- Heroes are NOT signed off (the owner is still working on them). So SPLIT: (a) ext/unmasked-home = the farm/town/house Unmasked + the creator + saves + text, mergeable now, with match/hero-card/HUD/portrait rendering left exactly as on main; (b) the match-side mask_look waits for hero sign-off.
+- The new game flow becomes: intro -> **make yourself** (the Unmasked creator) -> **choose your first mask** -> egg. Update the class_unlock_check assertion.
+- "Choose your first mask" preview: putting the mask on makes you MOSTLY the Warden, about 90% (owner: "dont fully become the hero, but mostly"). The Warden's model and outfit dominate, and about 10% of you shows through: your body colour on trims/accents, your height/build proportions and your eye marks behind the mask. A short put-on beat: the mask lifts to the face, a flash, the blend in. Same 90% rule in matches later (part b).
+- Vex's 3D model is done (warden-3d/vex on origin/ext/hero-shots-s2): use it for Vex in the pick preview. The others use what's on main until theirs are signed off.
