@@ -118,7 +118,6 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `home_gather.gd` | Chopping and mining |
 | `home_econ.gd`, `econ_models.gd` | Armory, feeders, graveyard, Soul Shrine |
 | `home_incubator.gd`, `kin_burrow.gd` | The Incubator and the Burrow on the island |
-| `home_training.gd` | The Training Grounds isle |
 | `interior.gd` | Inside buildings, decorating |
 | `kin_brain.gd` | Chat intents for talking to a Boki |
 

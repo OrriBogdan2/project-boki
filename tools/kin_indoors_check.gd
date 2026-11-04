@@ -138,7 +138,8 @@ func _wants() -> void:
 	ok(KinWants.line(a["rec"], true).contains("hungry"), "the prompt names it: \"%s\"" % KinWants.line(a["rec"], true))
 	a["rec"]["likes"]["food"] = "kibble"
 	Save.d["items"]["kibble"] = 2
-	ok(KinWants.line(a["rec"], true) == "%s is hungry: give food" % a["rec"]["name"] and KinWants.action(a["rec"], true) == "feed",
+	ok(KinWants.line(a["rec"], true) == "%s is hungry: give food" % a["rec"]["name"]
+		and KinWants.action(a["rec"], true) == "feed",
 		"with food on you the prompt is \"%s\"" % KinWants.line(a["rec"], true))
 	ok(KinWants.action(c["rec"], false) == "brush" and KinWants.action(c["rec"], true) == "bath",
 		"a dirty Boki gets a bath, or a brush with no pond")

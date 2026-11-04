@@ -265,8 +265,6 @@ func _reserve() -> void:
 		for k in Data.ISLES:
 			var sg: Vector2 = HomeLayout.isle_bridge(h.world, k)["sign"]
 			rs.call(int(sg.x) - 1, int(sg.y) - 1, int(sg.x) + 1, int(sg.y) + 1)
-		for t in h.training_reserved():
-			rs.call(t[0], t[1], t[2], t[3])
 		return
 	rs.call(35, 24, 41, 29)      # the house and its door step
 	rs.call(41, 26, 43, 28)      # the cooking pot
@@ -285,8 +283,6 @@ func _reserve() -> void:
 	for k in Data.ISLES:
 		var sg: Vector2 = HomeLayout.isle_bridge(h.world, k)["sign"]
 		rs.call(int(sg.x) - 1, int(sg.y) - 1, int(sg.x) + 1, int(sg.y) + 1)
-	for t in h.training_reserved():
-		rs.call(t[0], t[1], t[2], t[3])
 
 func _apply_theme() -> void:
 	var t: Dictionary = HomeLayout.THEMES.get(String(L().get("theme", "meadow")), HomeLayout.THEMES["meadow"])
@@ -802,7 +798,6 @@ func _targets(skip_b := "") -> Array:
 	for k in Data.ISLES:
 		var sg: Vector2 = HomeLayout.isle_bridge(h.world, k)["sign"]
 		out.append(Vector3(sg.x, 0, sg.y))
-	for t in h.training_targets(): out.append(t)
 	return out.filter(func(t): return (t as Vector3).x > -100.0)     # (farm-start fixtures not put down yet)
 
 func _hit(seen: PackedByteArray, p: Vector3) -> bool:
