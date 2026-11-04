@@ -100,3 +100,9 @@ Orchestrator review notes (for the next pass, not yet owner decisions):
 - docs/art/gen/wardens_r2/ryzz_{turnaround,side,portrait,splash}.webp; review/ryzz_before_after.jpg.
 - Electrified blue hair standing up, a punk leather crop jacket, lightning veins, copper-coiled spear with a black flag, bubblegum and a wink: matches the owner's notes (cool electrified hair, energy, personality, not AI-generic). True side view present.
 - Note: the spear is in her right hand in the turnaround and in her left in the side view; the turnaround is the source of truth for 3D.
+
+## 2026-11-04 05:30 UTC: UPDATED side profiles (owner: some earlier ones were off; these are the reference), from the owner's uploads (orchestrator)
+- Replaced: ryzz_side, vex_side, zedran_side (the earlier versions are in git history). New: sable_side, bjorn_side (side only; their turnarounds are still to come).
+- Notes: Vex's side now shows the messy bun with the bolt (matches the turnaround). Zedran's side shows the lion pauldron on the near shoulder with the cleaver and chain; check its side against the turnaround (lion on his RIGHT).
+- Bjorn side: blue undead-looking skin, red braided beard, an ice hammer, a fur collar, and a big wooden kite shield. The owner's notes asked for "obviously undead/rotting in places", "the biggest character", and DECISIONS/item 41 a frozen ship-PROW shield: this shield reads as a plain kite shield, and he reads portly rather than towering. Raise with the owner before 3D.
+- Sable side: a slender grey-skinned fae with iridescent wings, a silver braid, a feather headpiece, and a crossbow with a glowing bolt.
