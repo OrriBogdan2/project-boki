@@ -2,6 +2,7 @@
 This file wins over older relic names (the concept-pass list: Drowned Bell, Last Pin, Champion's Torc, Ember Phial, Hollow Bell, Split Geode, Moonsilver Key, Stormglass, Paid-Up Tags, Leaking Heart, Hearth Acorn, Rink Blade) and over hero lore written before the Nov 4 redesigns. ext syncs the Lore Bible artifact and docs/art/gen/stories/*.md to it.
 
 ## How Masks work
+- **One villain (owner, Nov 4):** the Tyrant who ruled the Crown and never aged IS the Wyrm in human shape. When the thief woke it, the Wyrm broke the land and tore away everyone's selves.
 - The Wyrm stole everyone's selves. That's why the player character, the Unmasked, is blank.
 - The fallen Wardens' selves were sealed into the one object each Warden was most bound to: their **relic**. Only some relics are literal masks; others are weapons, keepsakes or tools.
 - People call them all **Masks** because of what they do. When you take one up, that Warden's face, body and memories settle over you like a mask, so you wear the Warden (in a match you look about 90% like them). The relic is the key, and the transformation is the Mask.
@@ -39,3 +40,20 @@ This file wins over older relic names (the concept-pass list: Drowned Bell, Last
 - **Tarek, Rock Elementalist (was Breah):** a blind cliff-runner who sees through stone; his three floating seeing-stones are his eyes.
 - **Ostra, Void Jester:** the Tyrant's court jester. He laughed the night the Wardens were sealed, so the Tyrant sealed him in his own jester mask. The man behind it fell into the Void; he steals his victims' laughter, and his bells ring only when he swaps.
 - **Sable, Silver Thief (was Dancer):** the thief who reached the Wyrmheart in the hoard. It woke the Wyrm and set off the Sundering.
+
+## Terms (owner-approved usage, Nov 4)
+- **Hunter:** what the player is in a match (and other players). "Hunters race for the Wyrmheart."
+- **Mask:** the selectable hero you put on ("Choose your first mask", the Masks tab). In UI, use **Mask** wherever the game currently says "Hunter" for a hero you pick or unlock.
+- **Warden:** lore only: the original hero whose self lives in the Mask ("the Mask of Vex, a fallen Warden").
+- **Unmasked:** you, at home, without a Mask.
+- **Tyrant / Wyrm:** the same villain. **Wyrmheart:** the wish. **Blight:** the Wyrm's blood.
+- **Fusion** (key: Fuse): a hunter merged with their Boki. Never "Merge" or "Mantle" in player text.
+- Retired: **Mantle** and **Bearer**. Internal code names (e.g. kin for Boki) never appear in player text.
+
+## Prologue text (owner OK'd direction A; the full visual rebuild still waits for after the Sat reset)
+1. "Once, the sky held one great land, ruled from the Crown by a Tyrant who never aged."
+2. "He was the Wyrm in human shape, asleep on its hoard. The night a thief reached its heart, it woke."
+3. "It broke the land into a thousand isles and tore away everyone's selves. The Wardens who stood against it were sealed into Masks."
+4. "On the broken isles, the survivors found the Boki, and learned that a Mask could give them a face again."
+5. (unchanged) "Somewhere in the ruins lies the Wyrmheart: ..."
+Tutorial, first portal (one sentence): "This Mask holds a fallen Warden. Put it on, and you become them."

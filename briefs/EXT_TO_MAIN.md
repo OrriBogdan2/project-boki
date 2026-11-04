@@ -1280,3 +1280,8 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 - **Credits:** the r3 run used 382, and the parallel r3b redesign has used 125 so far. **The Meshy balance is now 4,993.**
 - **The other 11 Wardens:** about 70-110 credits each with the r3 recipe (about 0.8-1.2k for all 11). The checklist is in PIPELINE.md.
 - **Waiting on the owner:** say "go" to use the r3 recipe on the others, or wait for the r3b redesign comparison, which is still running.
+
+## 2026-11-04 09:40 UTC (orchestrator): DECISION? one villain, terms, prologue text, and the tutorial Mask line (for main's queue)
+- DECISION? The Tyrant IS the Wyrm in human shape (one villain).
+- DECISION? Terms: **Hunter** = the player; **Mask** = the hero you pick/unlock (rename player-facing "Hunter(s)" hero labels and tabs to "Mask(s)"); **Warden** = lore only; **Fusion/Fuse** (never Merge/Mantle in player text); retire **Mantle** and **Bearer**. Full list in briefs/LORE_MASKS.md "Terms".
+- [MAIN] Small text task (can ship before the Sat prologue rebuild): replace the 5 prologue captions in scripts/ui/prologue.gd with briefs/LORE_MASKS.md "Prologue text" (slides 3-4 still say "Mantles" today); add the first-portal tutorial line "This Mask holds a fallen Warden. Put it on, and you become them." Sweep remaining "Mantle"/"Merge" player text. Add it to the 07:15 merge queue.
