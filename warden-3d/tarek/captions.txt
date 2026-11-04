@@ -31,3 +31,6 @@ s8_*: bigger amber halos, less speckle (fewer beads and plates), r3e's light_neu
 s9_*: ORCH 15:10: skin a warm mid-brown (a per-slot desat uniform on hero_toon, 0.45 on his skin: in game 822a12 -> 663322), chunky dark gauntlet plates (3 rows of 4) over a thin orange core, rounder and deeper seeing-stones, straighter free leg. s9_vs_s8.png: s9 over s8.
 s9 self-score, close-up 84: silhouette 13/15, face 17/20, hair 8/10, signature props 17/20, palette 13/15, clean paint 7/10, outfit 9/10
 s9 self-score, match zoom 62: silhouette 18/25, signature colours 13/25, value separation 13/20, props read 11/20, artefacts 7/10
+s10_*: the gauntlets' cracks orange, not yellow (a deeper core colour under the shared glow), a narrower stance. s10_vs_s9.png: s10 over s9.
+s10 self-score, close-up 85: silhouette 13/15, face 17/20, hair 8/10, signature props 18/20, palette 13/15, clean paint 7/10, outfit 9/10
+s10 self-score, match zoom 62: silhouette 18/25, signature colours 13/25, value separation 13/20, props read 11/20, artefacts 7/10
