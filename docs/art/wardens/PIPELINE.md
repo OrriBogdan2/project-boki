@@ -125,6 +125,20 @@ shipped Vex as the design variant `vex_r3b` (RIG_CONTRACT "Design variants"). Fi
      the spike Meshy gave it are cut out first.
 6. **Godot:** the extracted atlases imported lossless (compress/mode 0); generate_lods off.
 
+## Stage 1 hybrids (S2 fan-out, 2026-11-04)
+Stage 1 (WARDEN_STAGE1_BRIEF) is generation, bake, rig fit and first shots only: the fit spec keeps `lift` and the
+slot rules but no `palette_from`, `smooth`, `ramps`, `project` or `touch_up` (the paint-over is stage 2, the Vex
+r3c recipe). Pieces Meshy can't give cleanly are scripted (tools/meshy/hard_parts.py, fit spec `parts`):
+- **Held pieces**, modelled in their rig node's space and exported unskinned: `weapon` (the Gun node's; a hammer
+  in its `Hammer` pivot's, where WardenGlb seats it) and `shield` (the left hand's `Shield` node's). Their own
+  small atlas of painted cells (ice, iron, oak, leather) on the toon slots.
+- **Cards and tubes on spring chains:** wings cut out of the art's back view (outline and paint from the
+  sheet's pixels, two layers), a spaded tail draped clear of the legs. Chains named `spring_wing*` fold back about
+  their root while the Warden skates (root meta `wing_fold`, set by HunterAnim from the skate dash).
+- **Split:** faces of some slots made their own mesh on one bone (Claire's horns).
+- **feet_forward:** the fit fails if a foot points away from the body's forward (the backwards-skate catch).
+- The `ice` toon slot: a cold fresnel rim and a little gloss, no real transparency (WardenGlb.ICE).
+
 ## Commercial terms (checked 2026-11-04, meshy.ai/terms-of-use section 3.2)
 - **Paid plans:** the customer owns the output ("to the extent possible under applicable law") and can keep it private.
 - **Free plans:** CC BY 4.0 with attribution to Meshy. **Use the owner's paid key only.**

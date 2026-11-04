@@ -10,7 +10,7 @@ import json
 import bpy
 from mathutils import Matrix, Vector
 
-SLOTS = ["skin", "hair", "cloth", "leather", "metal", "eyes", "team", "glow"]
+SLOTS = ["skin", "hair", "cloth", "leather", "metal", "eyes", "team", "glow", "ice"]
 BONE_LEN = {"root": 0.12, "hips": 0.2, "head": 0.25, "pauldron.L": 0.1, "pauldron.R": 0.1, "skirt": 0.1,
             "scarf": 0.12, "hand.L": 0.08, "hand.R": 0.08, "shin.L": 0.3, "shin.R": 0.3}
 

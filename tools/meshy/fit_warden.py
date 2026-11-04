@@ -1656,6 +1656,12 @@ def main():
             parts.append(WP.lens(arm, spec["lens"]))
         if spec.get("braids"):
             parts.append(WP.braids([ob], arm, spec["braids"], spec["braid_colours"]))
+    built = {"weapon": None, "extra": []}
+    if spec.get("parts"):
+        # scripted pieces (tools/meshy/hard_parts.py): a held weapon or shield, wing cards, a tail, the feet check
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import hard_parts as HP
+        built = HP.build(spec, ob, arm, rig)
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")
@@ -1664,8 +1670,10 @@ def main():
     spin = None
     if gun is not None:
         gun, spin = gun_weapon(gun, ge, gt, rig, spec["gun_arm"])
-    else:
+    elif built["weapon"] is None:
         gun = weapon(spec, rig)
+    held = [x for x in [built["weapon"]] + built["extra"] if x is not None and x.parent is None]
+    parts += [x for x in built["extra"] if x.parent is not None]
     crown = rig["land"]["crown"]
     K.anchor(arm, "head", "anchor_head_top", (0, 0, crown + 0.07))
     K.anchor(arm, "hips", "anchor_chest", (0, 0.1, K.bone_head(rig, "upper_arm.L").z - 0.14))
@@ -1682,7 +1690,9 @@ def main():
         soft_normals(o, spec.get("normal_smooth", 8))
         if "ink_room" in spec:
             ink_room(o, float(spec["ink_room"]))
-    for o in parts:
+    for sp in (spec.get("parts") or {}).get("split", []):
+        parts.append(HP.split(ob, arm, sp))         # (Claire's horns: their own mesh, on the head bone)
+    for o in parts + held:
         if "ink_room" in spec:
             ink_room(o, float(spec["ink_room"]))
     if "atlas_px" in spec:
@@ -1692,7 +1702,9 @@ def main():
     # (JPEG: Meshy's painted textures, a third of the PNG's size)
     if parts:
         log("tris: parts %s" % {o.name: K.tris([o]) for o in parts})
-    K.export(out, [arm, ob] + parts + [x for x in (gun, spin) if x] + [o for o in bpy.data.objects if o.name.startswith("anchor_")], "JPEG",
+    if held:
+        log("tris: held %s" % {o.name: K.tris([o]) for o in held})
+    K.export(out, [arm, ob] + parts + held + [x for x in (gun, spin) if x] + [o for o in bpy.data.objects if o.name.startswith("anchor_")], "JPEG",
              colors="ink_room" in spec)
     log("wrote", out)
     if spec.get("blend"):
