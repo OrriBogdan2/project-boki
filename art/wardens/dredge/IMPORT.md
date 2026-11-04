@@ -25,9 +25,10 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   joint, the forearms moved onto the rig's elbows (his long claw arm keeps its length and angle; the hand bone sits
   on the rig's hand, the claw hangs on below it, rigid).
 - **Weapon:** the horn (his Hand.R) cut into `weapon` in the Gun node's space, narrow end on the shotgun's grip,
-  mouth forward, x1.3, solidified 12 mm (its mouth has an inside); `weapon_muzzle` on its mouth moves the Gun's
+  mouth forward, x0.95 (r3; x1.3 before), solidified 12 mm (its mouth has an inside); `weapon_muzzle` on its mouth moves the Gun's
   Muzzle there. 3,200 triangles.
-- **Budget:** planar dissolve (1 degree) then collapse to 12,400 triangles, plus the orb and the drips: 14,139;
+- **Budget:** planar dissolve (1 degree) then collapse to 7,400 triangles (r3: the old shell stripped first), plus the
+  new hull, the orb and the drips: 13,572;
   hard edges sharp past 50 degrees.
 - **Aged paint (r2b, owner 09:05):** tools/blender/warden_paint.py, from the spec's `paint`, `orb` and `drips`:
   - one 2048 painted atlas (`dredge_atlas.jpg`, Godot extracts it), fresh smart UVs over the body and the horn, baked
@@ -41,4 +42,11 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   - 24 tar drips (about 66 triangles each) hanging from the faces that look down: the hull's underside (12), the
     porthole (3), the shoulder domes, the elbows, the hips and the claw, each on the bone of what it hangs from;
   - the materials keep their slot names (metal, leather, cloth, glow); the game shades the atlas like Vex's.
-- - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.
+- - **Hull (r3, owner 13:10):** the friend's sphere, domes, rivets, hatch and red gashes (1,342 pieces of the
+  Chest, `strip`) replaced by a scripted hull (tools/blender/warden_hull.py, `hull`): a dented sphere (16 dents),
+  two raised plate bands, and four faceted lames on each shoulder (on pauldron.L/R) in place of the domes. Its
+  colour is the art's: three nano-banana edits of the art (front, side, back: the hull alone, ~/meshy/dredge_r3)
+  projected along their axes and baked into the atlas (`metal-hull`, lifted x1.3). The rest of the brass is the
+  art's olive-gold (7d6c3e, highlight c4b070); the horn x0.95 (it read too big at x1.3). The porthole, lens, orb,
+  winch, rope, hook, claw and tar stay. 45 credits (5 edits); no Meshy 3D run.
+- `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.

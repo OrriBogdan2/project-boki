@@ -183,6 +183,9 @@ No Meshy. The model's own rigid skin and extra bones are kept; the script rename
 |---|---|---|---|---|
 | Dredge | 2026-11-04 07:30 | friend's Blender model (ext/imagegen ff552657), fit_rigged.py | 0 | Kept: 14.1k tris + 3.2k horn, contract + 11 variant bones, all checks pass |
 | Dredge r2b | 2026-11-04 09:40 | the same + warden_paint.py: aged-brass atlas (2048, Cycles bake), orb eye, 24 tar drips | 0 | Kept: darker, patina, dents, glowing eye; all checks pass |
+| Dredge r3 hull edits | 2026-11-04 13:20 | front 01a1a66a-ceec-75d1-96a8-dbb2b573f7d8, side 01a1a66a-ceff-7642-b000-0f167116e4a6, back 01a1a66a-cede-70a0-b459-b93ed0579a88 | nano-banana-pro image-to-image | the turnaround's front and back and the side sheet, edited to the hull alone | 27 | Front kept (projected); side dropped (turned to a 3/4 front view), back dropped (grew a porthole) |
+| Dredge r3 hull edits 2 | 2026-11-04 13:25 | side2, back2 (meshy_task.py edit, view-locked prompts) | nano-banana-pro image-to-image | the same, the view and "no porthole on the back" spelled out | 18 | Kept: both projected onto the scripted hull |
+| Dredge r3 hull | 2026-11-04 13:30 | none (the Meshy 3D run and a third front edit were not run: the session's auto-mode permission check refused the credit spend) | - | Blender fallback: warden_hull.py, a scripted dented sphere, plate bands and faceted lames, the three edits projected on it | 0 | Kept: r3 (balance 4,175 -> 4,130, 45 credits) |
 
 ## Blender-driven modelling (vs Meshy)
 The owner's friend made Dredge in Blender, probably by driving it through a Blender MCP server (an LLM sends bpy

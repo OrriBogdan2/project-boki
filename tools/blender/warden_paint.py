@@ -227,6 +227,14 @@ def _bake_tree(m, look, img):
 
     co = N.new("ShaderNodeTexCoord").outputs["Object"]
     col = rgb(look["colour"])
+    if look.get("proj"):
+        col = _projected(N, L, co, look["proj"], math_, col)
+        if look.get("gain", 1.0) != 1.0:          # (lifted: the art's views are painted in a darker light)
+            g = N.new("ShaderNodeVectorMath")
+            g.operation = "SCALE"
+            L.new(col, g.inputs[0])
+            g.inputs["Scale"].default_value = float(look["gain"])
+            col = g.outputs[0]
     if look.get("glass"):
         # cracks across the lens and the eye's red light bleeding into it
         vor = N.new("ShaderNodeTexVoronoi")
@@ -334,6 +342,51 @@ def _bake_tree(m, look, img):
     # grime last: the crevices darkened toward the grime colour
     col = mix(math_("MULTIPLY", grime, look.get("grime_k", 0.75)), col, rgb(look.get("grime", "1c1612")))
     L.new(col, emi.inputs["Color"])
+
+
+def _projected(N, L, co, proj, math_, fallback):
+    """The art's views of the hull projected along their axes (warden_hull.projection), blended by how squarely
+    each face looks down that axis (front +Y, back -Y, side either X)."""
+    sep = N.new("ShaderNodeSeparateXYZ")
+    L.new(co, sep.inputs[0])
+    nrm = N.new("ShaderNodeSeparateXYZ")
+    L.new(N.new("ShaderNodeNewGeometry").outputs["Normal"], nrm.inputs[0])
+    acc = None
+    wsum = None
+    for view, pj in proj.items():
+        u = math_("ADD", math_("MULTIPLY", sep.outputs[pj["axis"]], pj["u"][0]), pj["u"][1])
+        v = math_("ADD", math_("MULTIPLY", sep.outputs[2], pj["v"][0]), pj["v"][1])
+        cv = N.new("ShaderNodeCombineXYZ")
+        L.new(u, cv.inputs[0])
+        L.new(v, cv.inputs[1])
+        t = N.new("ShaderNodeTexImage")
+        t.image = pj["image"]
+        t.extension = "EXTEND"
+        L.new(cv.outputs[0], t.inputs["Vector"])
+        if view == "front":
+            w = math_("MAXIMUM", nrm.outputs[1], 0.0)
+        elif view == "back":
+            w = math_("MAXIMUM", math_("MULTIPLY", nrm.outputs[1], -1.0), 0.0)
+        else:
+            w = math_("ABSOLUTE", nrm.outputs[0])
+        w = math_("ADD", math_("POWER", w, 4.0), 0.002 if view == "front" else 0.0)
+        part = N.new("ShaderNodeVectorMath")
+        part.operation = "SCALE"
+        L.new(t.outputs[0], part.inputs[0])
+        L.new(w, part.inputs["Scale"])
+        if acc is None:
+            acc, wsum = part.outputs[0], w
+        else:
+            add = N.new("ShaderNodeVectorMath")
+            add.operation = "ADD"
+            L.new(acc, add.inputs[0])
+            L.new(part.outputs[0], add.inputs[1])
+            acc, wsum = add.outputs[0], math_("ADD", wsum, w)
+    div = N.new("ShaderNodeVectorMath")
+    div.operation = "SCALE"
+    L.new(acc, div.inputs[0])
+    L.new(math_("DIVIDE", 1.0, wsum), div.inputs["Scale"])
+    return div.outputs[0]
 
 
 def bake(objs, looks, size, path, samples=24):

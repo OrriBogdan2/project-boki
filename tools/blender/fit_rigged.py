@@ -15,7 +15,9 @@ The spec (art/wardens/src/<name>_fit.json) names the source .glb, the rig JSON (
   hand's grip, its mouth forward; `weapon_muzzle` marks the mouth; `solidify` m gives a single-sided shell an inside);
 - `materials`: source material -> [glTF name "<slot>-<what>", colour]; `max_tris`; `anchors`;
 - `orb` (a glowing sphere on a bone, `replace`-ing a group), `drips` (tar drips hanging from faces that look
-  down), `paint` (the ageing atlas: per-material recipes, baked in Cycles): tools/blender/warden_paint.py.
+  down), `paint` (the ageing atlas: per-material recipes, baked in Cycles): tools/blender/warden_paint.py;
+- `strip` (the source's shell pieces dropped) and `hull` (a scripted shell in their place, the art's views
+  projected on it): tools/blender/warden_hull.py.
 Steps: import, turn to face +Y and scale (Blender frame: the Warden faces +Y, its right +X), split the parts,
 re-pose them, cut the weapon, decimate, skin rigidly to the contract armature plus the variant bones, recolour,
 sharpen the hard edges, anchors, export.
@@ -33,6 +35,7 @@ from mathutils import Matrix, Vector
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import warden_kit as K  # noqa: E402
 import warden_paint as WP  # noqa: E402
+import warden_hull as WH  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 # Godot's grips for the held weapon (HunterAnim HOLDS[<weapon>]["gr"]), Gun space
@@ -214,6 +217,9 @@ def main():
     ob.data.transform(T)
     J = {n: (T @ h, T @ t) for n, (h, t) in src_bones.items()}
     grp, lab = vertex_parts(ob)
+    for rule in spec.get("strip", []):          # the source's own shell pieces, replaced by `hull`
+        keep = WH.strip(ob, grp, lab, rule)
+        grp, lab = grp[keep], lab[keep]
     part = np.array([spec["groups"].get(g, g) for g in grp], dtype=object)
     co = np.array([v.co[:] for v in ob.data.vertices])
     # loose parts moved onto another bone by where they sit (Blender frame: the Warden's right is +X)
@@ -332,6 +338,8 @@ def main():
         weapon.data.name = "weapon"
     # added pieces (a glowing orb for an eye, tar drips) and the painted ageing atlas (tools/blender/warden_paint.py)
     paint = spec.get("paint")
+    if spec.get("hull"):
+        WH.build(ob, spec["hull"], int(spec.get("seed", 1)))
     if spec.get("orb"):
         if spec["orb"].get("replace"):
             WP.remove_group(ob, spec["orb"]["replace"])
@@ -339,6 +347,8 @@ def main():
     if spec.get("drips"):
         WP.add_drips(ob, spec["drips"], int(spec.get("seed", 1)))
     if paint:
+        if spec.get("hull", {}).get("project"):
+            paint["looks"][spec["hull"]["material"]]["proj"] = WH.projection(ob, spec["hull"])
         painted = [ob] + ([weapon] if weapon else [])
         WP.uv_atlas(painted, float(paint.get("margin", 0.002)))
         WP.bake(painted, paint["looks"], int(paint["size"]), os.path.expanduser(paint["image"]),

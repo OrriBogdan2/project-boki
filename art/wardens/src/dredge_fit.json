@@ -5,7 +5,7 @@
  "blend": "~/meshy/dredge_friend/fit.blend",
  "scale": 0.665,
  "turn": 180,
- "max_tris": 12400,
+ "max_tris": 7400,
  "dissolve_deg": 1.0,
  "sharp_deg": 50,
  "groups": {
@@ -185,7 +185,7 @@
  "weapon": {
   "group": "Hand.R",
   "wrist": "Hand.R",
-  "scale": 1.3,
+  "scale": 0.95,
   "tris": 3200,
   "solidify": 0.012
  },
@@ -269,7 +269,7 @@
    "tar": "leather-tar",
    "tar_colour": "231a1c",
    "group": "hips",
-   "material": "metal-brass",
+   "material": "metal-hull",
    "z": [
     1.0,
     1.3
@@ -415,20 +415,20 @@
   "samples": 24,
   "looks": {
    "metal-brass": {
-    "colour": "654a26",
-    "patina": "4f7a62",
+    "colour": "7d6c3e",
+    "patina": "5f7a5a",
     "patina_at": 0.6,
     "patina_k": 0.9,
     "dents": 1.6,
     "dent_scale": 4.5,
-    "scratch": "c09a58",
-    "edge": "b88c48",
-    "grime": "1e140a",
+    "scratch": "b8a66e",
+    "edge": "a8985a",
+    "grime": "1a160c",
     "grime_k": 0.85,
     "patina_crevice": true,
-    "highlight": "c8963e",
+    "highlight": "c4b070",
     "highlight_at": 0.8,
-    "highlight_k": 0.6
+    "highlight_k": 0.55
    },
    "metal-iron": {
     "colour": "4c4844",
@@ -487,7 +487,122 @@
     "colour": "b0a48a",
     "grime": "2a241c",
     "grime_k": 0.7
+   },
+   "metal-hull": {
+    "colour": "7d6c3e",
+    "grime": "1a160c",
+    "grime_k": 0.4,
+    "ao_dist": 0.05,
+    "gain": 1.3
    }
   }
+ },
+ "strip": [
+  {
+   "group": "Chest",
+   "centre": [
+    0.0,
+    0.02,
+    1.35
+   ],
+   "r": 0.53,
+   "z": [
+    1.0,
+    1.63
+   ],
+   "materials": [
+    "Dredge_Brass",
+    "Dredge_Iron",
+    "Dredge_Flesh"
+   ]
+  }
+ ],
+ "hull": {
+  "material": "metal-hull",
+  "colour": "7d6c3e",
+  "bone": "hips",
+  "pauldron_l": "pauldron.L",
+  "pauldron_r": "pauldron.R",
+  "centre": [
+   0.0,
+   0.02,
+   1.35
+  ],
+  "r": 0.3,
+  "res": [
+   22,
+   38
+  ],
+  "dents": 16,
+  "bands": [
+   {
+    "lat": [
+     -40,
+     -27
+    ],
+    "off": 0.035,
+    "thick": 0.05,
+    "nlat": 2,
+    "nlon": 26
+   },
+   {
+    "lat": [
+     44,
+     54
+    ],
+    "off": 0.03,
+    "thick": 0.045,
+    "nlat": 2,
+    "nlon": 26
+   }
+  ],
+  "lames": [
+   {
+    "r": 0.19,
+    "lat": [
+     52,
+     88
+    ],
+    "lon": 115,
+    "facets": 7
+   },
+   {
+    "r": 0.2,
+    "lat": [
+     22,
+     56
+    ],
+    "lon": 112,
+    "facets": 7
+   },
+   {
+    "r": 0.21,
+    "lat": [
+     -8,
+     26
+    ],
+    "lon": 108,
+    "facets": 7
+   },
+   {
+    "r": 0.215,
+    "lat": [
+     -38,
+     -4
+    ],
+    "lon": 100,
+    "facets": 6
+   }
+  ],
+  "project": {
+   "front": "~/meshy/dredge_r3/edit_front/image0.png",
+   "side": "~/meshy/dredge_r3/edit_side2/image0.png",
+   "back": "~/meshy/dredge_r3/edit_back2/image0.png"
+  },
+  "shoulder": [
+   0.27,
+   0.0,
+   0.03
+  ]
  }
 }
