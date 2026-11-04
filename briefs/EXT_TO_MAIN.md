@@ -1646,3 +1646,19 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 - **Branch:** this is also the base of every Hunter branch: RECIPE_95, the shared look fix 16c18b4f and the match-zoom fix f4b59cb3.
 - **Shots:** warden-3d/vex/r3d_*.
 - **Still differs:** the eye plate is round, not angular; the hoses are smaller than the art's loops; the trousers and boots are darker; a few chest smudges.
+
+## 2026-11-04 14:02 UTC (S2): READY (for the art integ) ext/warden-3d-tarek f6d74ffd: Tarek 3D, round 6
+- **Score (rubric):** about 79% close-up, about 67% at match zoom. Ships per 13:15 and keeps improving.
+- **What's in it:**
+  - warm deep-brown matte skin (the albedo now composes with the player's skin pick);
+  - a slate vest;
+  - brighter bracer cracks;
+  - seeing-stones orbiting closer, with bigger glowing irises;
+  - amber beads in the locs;
+  - rock shards orbiting his raised right fist;
+  - a slimmer upper body;
+  - an amber rim;
+  - RECIPE_95 merged.
+- **Checks:** all pass (dolm-combo 118/0).
+- **Shots:** warden-3d/tarek/s6_*.
+- **Still differs:** his fists are closed and fused into the scan; fixing that needs the Meshy run, which the S2 session permission check refused. The gauntlets aren't rebuilt.
