@@ -171,3 +171,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - --mantle-look-check 27/27; hunter-unlock 137/0, title, hatch, equal-migrate, unique, capture, gear 87/0, economy-floor, weapon-clip PASS, health OK. Shots: /home/boki/shots-s2/mantle/ (to ext/hero-shots-s2).
 - Note: every Hunter now wears its class colour instead of the player's outfit colour, so other branches' screenshots will differ after this merges.
 - Owner Qs (Mantle): voice pitch slider deferred until hunters have voices: OK? existing players keep their picks with neutral sliders (not a full reset): OK? Warden genders/folk/colours are first drafts (item 39 genders; class colour as palette, so Pin stays green until the concept pass): OK? at home your own person carries your Hunter's weapon: put it away? should other players see your nudges (Net bump, ~15 bytes in the join kit)?
+
+## 2026-11-04 01:01 UTC: Meshy pipeline for Vex: ready, waiting on MESHY_API_KEY
+- Read the 00:30 order (the Blender Vex is replaced by Meshy image-to-3D). Branch **ext/warden-meshy** (d8bfa90e, on warden-models):
+  - tools/meshy/meshy_task.py: a stdlib multi-image-to-3D client. The key comes from ~/.config/boki/secrets.env and is never printed.
+  - docs/art/wardens/PIPELINE.md: the steps, settings and commercial terms. Paid plans own their output; Meshy may train on it unless we opt out, which is the owner's call. It has a run log.
+- The front, side and back crops of venatrix_turnaround are ready on the S2 box.
+- **Blocked on the key.** Owner: put `MESHY_API_KEY=...` in `/home/boki/.config/boki/secrets.env` (chmod 600) on the S2 box, or paste it into the S2 session. As soon as it's there, an Opus agent runs Meshy, the Blender clean-up, the rig and the shots (warden-3d/vex/meshy_*).
