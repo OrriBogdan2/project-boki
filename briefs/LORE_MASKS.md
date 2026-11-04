@@ -15,7 +15,7 @@ This file wins over older relic names (the concept-pass list: Drowned Bell, Last
 - The put-on beat: you touch the relic, a ghostly porcelain face flickers over yours, then the Hunter's form settles in. This works even when the relic is a compass.
 - The relic is always visible on the hero as their signature prop.
 - The more you wear a Mask, the more its Hunter seeps into you, even at home (the "masks take hold" idea, kept mask features).
-- **Getting Masks:** you unlock a Mask through challenges or rewards first, then buy it. Vex is free at the first portal, and the second Mask is one of Kael, Hem or Cinder. The shop and economy pass set the prices.
+- **Getting Masks:** you unlock a Mask through challenges or rewards first, then buy it. Vex is free at the first portal, and after the tutorial the second Mask is a pick of one of Kael, Pip or Cinder (Hem is an early challenge unlock). The shop and economy pass set the prices.
 
 ## The twelve relics
 | Hunter (id) | Relic (the Mask) | Why it holds their self |
@@ -35,7 +35,7 @@ This file wins over older relic names (the concept-pass list: Drowned Bell, Last
 
 ## Hunter stories (current designs)
 - **Vex, Hired Gun:** a foundry kid who swept brass casings off the Tyrant's war-foundry floors. A siege engine took her arm in the Sundering; she bolted its rotary cannon to her own shoulder. She's now the Skylands' most famous gun-for-hire, keeps every bounty she cashed, and adds a tally mark for each one.
-- **Kael, the Unbroken (was Zedran):** the Tyrant's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain is his weapon. The Blight burned the magma cracks into his sword arm. A demon lives in his blade and in his mind, and it must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off.
+- **Kael, the Unbroken (was Zedran; his glow is white-hot, not orange):** the Tyrant's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain is his weapon. The Blight burned the magma cracks into his sword arm. A demon lives in his blade and in his mind, and it must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off.
 - **Hem, Dark Archer (was Pin):** the Tyrant's royal mask-stitcher, who sewed the Hunters' selves into their Masks. She deserted and now hunts the Tyrant's loyalists, leaving a red-threaded needle at every kill. Her own shadow came loose when she stitched her first Mask; it's only a wrong-looking shadow, not a pet.
 - **Breaker, Frozen Bulwark (was Bjorn):** a ferryman who carried refugees across the ice the night of the Sundering and went down with his ship so they could reach shore. The frozen sea remade him into a sea-ogre. He doesn't remember his old name, only the children's faces. The teddy bear belonged to the last child he saved.
 - **Ryzz, Storm Chaser (was Vireo):** a street kid struck by the Wyrm's storm in the market square. The bolt took her right eye (a lightning scar) and left the storm inside her. Her lightning burns hot pink. She chases storms, climbs to the highest spires, and throws lightning straight from her hands; she swears she'll give the Wyrm's bolt back to it someday.

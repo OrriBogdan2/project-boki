@@ -5,21 +5,25 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 ## Priorities
 - Order: briefs/PRIORITIES.md. P0 land and stabilise, P1 onboarding, P2 one great match (Boki as the star), P3 cohesion and look (art bible, style pass, then the AI 3D prototype), P4 breadth. Frozen: farm-builder depth, maps beyond tier 2. (Black Market extras unfrozen Nov 3.)
 
-## Identity and Mantle
-- Our own names, art and text. SUPERVIVE is a reference only.
-- Hunter names (art pass, Nov 3): **Venator is Vex, Tamsin is Claire, Breah is Tarek, Linwick is Cinder, Dancer is Sable**. Unchanged: Zedran, Dredge, Ostra, Pin, Vireo, Moosh Moosh, Bjorn. Titles are in docs/art/gen/index.md (e.g. Tarek, Rock Elementalist). **Tamsin is now Claire** (rimewright; owner, Nov 3). Use "Claire" everywhere: display names, kit text, docs and the wiki.
-- Hunters are Wardens' **Mantles**. You take one up for the hunt.
-  - On the farm you are yourself (no Mantle, fully customisable).
-  - Match look: about 90–100% Mantle (silhouette, weapon, signature colour, VFX locked).
-  - Close-up look: about 60–70% Mantle (face, skin, hair, build, accent colour).
+## Identity and Masks
+- Our own names, art and text. SUPERVIVE is a reference only. Canonical lore: **briefs/LORE_MASKS.md** (owner-approved Nov 4; it wins over older relic names and pre-redesign hero lore).
+- **Terms (player text, owner Nov 4):** **Hunter** = what you become when you put on a Mask, and every player in a match. **Mask** = the hero you pick and unlock ("Choose your first Mask", the Masks tab, unlocks, shop). **The Empty** = the people the Wyrm emptied, and you at home without a Mask. **Fusion** (key: Fuse) = a Hunter merged with their Boki. The fallen Hunters (the old Hunters) are the selves sealed in the Masks. **Tyrant and Wyrm are the same villain**; **Wyrmheart** = the wish; **Blight** = the Wyrm's blood. Retired in player text: **Warden, Mantle, Bearer, Merge, Unmasked**. Internal ids and code names (warden_*, kin, unmasked, `archer`, `juggernaut`...) can stay.
+- Names and titles (owner Nov 3-4; ids unchanged): **Vex the Hired Gun** (gunslinger; was Venator), **Kael the Unbroken** (juggernaut; was Zedran), **Hem the Red Stitch** (archer; was Pin), **Breaker the Frozen Bulwark** (bulwark; was Bjorn), **Ryzz the Storm Chaser** (mage; was Vireo), **Claire the Frost Siren** (rimewright; was Tamsin), **Pip the Little Lantern** (tender; was Moosh Moosh / Burple), **Tarek the Cliff Runner** (dolm; was Breah), **Dredge the Brass Abomination**, **Ostra the Void Jester**, **Sable the Silver Thief** (thief; was Dancer), **Cinder the Mad Pyromancer** (ashwick; was Linwick). Titles live with the class-titles data; a title starting with "The" drops it in the label ("Orri the Unbroken"). "Claire" everywhere: display names, kit text, docs, the wiki.
+- A Mask is the transformation; the relic is the key (only sometimes a literal mask: Vex's cyber-eye, Kael's collar, Breaker's compass...). Putting one on settles the fallen Hunter's face, form and memories over you. Put-on beat: you touch the relic, a ghostly porcelain face flickers over yours, then the Hunter's form settles in.
+  - On the farm you are yourself (the Empty, fully customisable).
+  - Match look: about 90-100% the Hunter (silhouette, weapon, signature colour, VFX locked).
+  - Close-up look: about 60-70% the Hunter (face, skin, hair, build, accent colour).
   - Layers: Locked, then Personal, then Cosmetic (skins keep the silhouette).
-- New-game flow: intro, make yourself (pick your FIRST Hunter from Vex/gun, Pin/bow, Zedran/melee), egg, farm. The other two of those open after your first finished expedition. Cinder moves to an easy challenge; others unlock through challenges. (Owner, Nov 3; replaces 'Venator first, second Mantle after the tutorial'.)
-- Explain the Mantle in the prologue (one line) and at the first portal (one sentence).
-- A merged hunter+Boki form is a **Fusion** (owner, Nov 3). Never "Mantle". Venom Mantle is now Venom Fusion; the Gale Mantle glove is now the Gale Cloak (main f048214b).
+- **Getting Masks (owner, Nov 4):** unlocked first through challenges or rewards, then bought (prices come in the economy pass). **Vex is free at the first portal** and the tutorial plays as Vex. After the tutorial (the first finished expedition) the **second Mask is a pick of one of Kael (melee), Pip (healer) or Cinder (area)**; Hem becomes an early challenge unlock. Replaces 'pick your first from Vex/Pin/Zedran, the other two open after the first expedition' (Nov 3) and the 09:20 'Kael, Hem or Cinder'. The other Masks open through their own challenges.
+- Explain the Mask at the first portal in one sentence (tutorial line): "This Mask holds a fallen Hunter. Put it on, and you become them." The prologue captions are in LORE_MASKS.md ("Prologue text").
+- A Hunter+Boki merged form is a **Fusion** (owner, Nov 3). Never "Mantle" or "Merge" in player text. Venom Mantle is now Venom Fusion; the Gale Mantle glove is now the Gale Cloak.
+- **The roster is set for now (owner, Nov 4):** the current 12 are the launch group. Breaker is a shield SUPPORT (like the source's Oath), so the supports are Breaker (shield) and Pip (heal). Future Masks (breadth phase P4, after the 12 feel great): more supports; vampires; older characters (a veteran or sage); an attractive male hero; a melee swordmaster/duelist; an engineer/trapper with deployables; a summoner/necromancer (fits the Blight lore). Not now.
+- **Art direction (owner, Nov 4):** sex appeal is wanted in the Hunter designs (adult characters only; stylised, not explicit); multiple heroes in crop tops are fine, and an outfit changed for variety keeps the appeal. Pip is NOT fiery (her pastel fairy-fox look is final). Claire's classically pretty face is intentional (the seductress: sweet face, demonic body); don't "fix" it. Ryzz's closed right eye is a Lichtenberg-style lightning scar with a faint blue glow (replaces the wink); her lightning burns hot pink. Cinder holds her spear in her right hand. **Kael's glow is white-hot, not orange magma** (orange fire is Cinder's alone). **Breaker's model is 1.5x a medium hunter; his hitbox stays the heavy class's 0.50 m.**
+- 3D models (owner, Nov 4): Vex is **r3b** (the green-haired cyborg redesign, polished as r3c); the fan-out (Meshy, r3c recipe) covers Hem, Breaker, Sable, Claire, Tarek, Ostra, Pip plus a Dredge texture pass; Kael, Ryzz and Cinder wait for final art. **Dredge uses the rigged Blender model from the owner's friend** (ext/imagegen docs/art/gen/models/dredge_friend), not Meshy. The Warden 3D models land as one art batch when S2 posts them READY.
 
 ## Controls (final; key text always via Settings.key_cap)
-- **R = hunter ultimate** (owner, Nov 3, replaces 'X ultimate'). **No reload key and no manual reloading in the game.** Gun kits (e.g. Vex) handle ammo the way the source does, without a reload (S2: research Ghost's ammo in supervive-data and the footage; e.g. ammo that refills on its own or through the kit's own actions). **X = Fuse** (merge with your Boki into its Fusion; X again releases), owner Nov 3. Q/V gloves, 1-4 belt, F interact, Y emote, Shift dash, E utility.
-- G is the single Boki button (tap: send or recall; hold: order wheel). Merge/Fuse moves to **X** (not C) in the step 5 key pass; C is freed once it folds into G. Until then Merge stays on T.
+- **R = hunter ultimate** (owner, Nov 3, replaces 'X ultimate'). **No reload key and no manual reloading in the game.** Gun kits (e.g. Vex) handle ammo the way the source does, without a reload (S2: research Ghost's ammo in supervive-data and the footage; e.g. ammo that refills on its own or through the kit's own actions). **X = Fuse** (fuse with your Boki into its Fusion; X again releases), owner Nov 3. Q/V gloves, 1-4 belt, F interact, Y emote, Shift dash, E utility.
+- G is the single Boki button (tap: send or recall; hold: order wheel). Fuse moved to **X** (not C); C is freed once it folds into G.
 - The Boki uses its own abilities when it judges best (it may have several). A manual option, if any, is on G's wheel.
 - Secondary key binds exist (Settings > Controls).
 
@@ -32,27 +36,28 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 - Per-hunter run speeds come from the game data.
 
 ## Kits
+(Names updated to the Nov 4 renames: Kael was Zedran, Hem was Pin, Sable was Dancer, Pip was Moosh Moosh, Breaker was Bjorn, Ryzz was Vireo.)
 - Ability ranks: on level-up the player chooses which ability to rank. Maxing one unlocks its data bonus (pick one to max). Bots use `order`. Training: max all or pick your max, plus reset, from an Esc-menu Practice page.
 - Hero specifics live in OWNER_REVIEW_1103.md and the MAIN_TO_EXT entries. Examples:
-  - Zedran: RMB held indefinitely, with a perfect release; LMB hold scales.
-  - Dancer: reset only on an empowered hit.
+  - Kael: RMB held indefinitely, with a perfect release; LMB hold scales.
+  - Sable: reset only on an empowered hit.
   - Claire: skate with an ice path; her LMB tracks while she skates. RMB: the ice spear emerges from her and travels to the target point (travel time grows with distance), with a push-like animation, not a throw. Ult: skating into it carries her forward a decent distance, then she's encased in ice and rooted until it ends or she cancels.
-  - Zedran's Warchain: not super long, but the tether stays attached as he moves back, letting it extend (up to a max). How it pulls him depends on where he's facing and how he's moving. The source's Brall chain (data and footage) is the reference for every state.
+  - Kael's Warchain: not super long, but the tether stays attached as he moves back, letting it extend (up to a max). How it pulls him depends on where he's facing and how he's moving. The source's Brall chain (data and footage) is the reference for every state.
   - Tarek can use RMB/slam out of a glide, as the source does. The glider never blocks it. General rule: the source decides these interactions.
   - Allies can jump over friendly Tarek rocks (per the data). Enemies stay blocked. Tarek walks up his own.
   - Claire's LMB darts home in toward the end of their flight, as in the source (also while skating).
   - Ostra ult: about a 1 s cast lock (like the source), then he moves freely while Nightwell runs.
-  - Moosh Moosh's dashes copy the source's Elluna (ground dash and air glide distance and timing). The 3x rule is dropped.
+  - Pip's dashes copy the source's Elluna (ground dash and air glide distance and timing). The 3x rule is dropped.
   - Animation and ability parity with the source for all 12 hunters, LMB first. Our own art, same motion.
   - Vex (was Venator): RMB is a side toss.
-  - Pin: missed arrows linger.
+  - Hem: missed arrows linger.
   - Dredge: the Grapnel is renamed **Abyssal Hand** and goes through walls and cliffs (placed walls still stop it, per the data pass).
 
 ## Boki
 - Regen: 6%/s while carried, 1.5%/s out after 6 s without damage, none while downed.
-- Merge timeout gives a 10 s rest; a release gives a 6 s rest plus afterglow. Every merge should feel like an event, with a per-type form ability, dash and passive (spec pending owner approval).
+- A Fusion timeout gives a 10 s rest; a release gives a 6 s rest plus afterglow. Every Fusion should feel like an event, with a per-type form ability, dash and passive (spec pending owner approval).
 - Boki loss (higher tiers): the Boki guards the deathbox, bond-pull tracking, then the Ransom tab in the Black Market or captured_by plus an offer or message. Carry your Boki at 90% speed while rescuing it.
-- Boki HUD (main decided at the owner's request, Nov 3): **your Boki lives in the right-side box** beside your own kit (portrait, health bar, bond ring with %, MERGE and short status tags: TOO FAR, RESCUE, RESTING). It's yours, like your abilities. **The left side stays teammates**, as in SUPERVIVE; each teammate row gets a small Boki icon with its health, so squads see whose Boki is down. Revisit after a playtest if it reads badly.
+- Boki HUD (main decided at the owner's request, Nov 3): **your Boki lives in the right-side box** beside your own kit (portrait, health bar, bond ring with %, FUSE and short status tags: TOO FAR, RESCUE, RESTING). It's yours, like your abilities. **The left side stays teammates**, as in SUPERVIVE; each teammate row gets a small Boki icon with its health, so squads see whose Boki is down. Revisit after a playtest if it reads badly.
 
 ## Loadout, loot, world
 - 2 gloves, 2 charms, boots, 4 utility slots, 5 perk orbs. No upgrading. Every item exists once in a deathbox. Backpacks come from enemy deathboxes, home and shops, not random drops. Keys sit in utility slots.
@@ -92,8 +97,8 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 - Arena mode: 4v4 rounds like the source's, each round a little different.
 
 ## Agents and art
-- Agent models: the owner says the new model costs only about 15% of the usage, so **push most work onto the new low-usage model**. Use Opus only where the owner or DECISIONS asks for it (feel-critical parity, e.g. Zedran item 22). Sonnet for small, clear fixes.
-- Art pass scope (owner, Nov 3): the Boki art pass also brings the **custom character creator** (you on the farm: face, body, hair, outfits, to the new STYLE.md quality) and the **cutscenes** (prologue and story moments, incl. the 'taking up the Mantle' moment) up to the same standard. Plan them together so everything matches.
+- Agent models: the owner says the new model costs only about 15% of the usage, so **push most work onto the new low-usage model**. Use Opus only where the owner or DECISIONS asks for it (feel-critical parity, e.g. Kael item 22). Sonnet for small, clear fixes.
+- Art pass scope (owner, Nov 3): the Boki art pass also brings the **custom character creator** (you on the farm: face, body, hair, outfits, to the new STYLE.md quality) and the **cutscenes** (prologue and story moments, incl. the put-on-a-Mask moment) up to the same standard. Plan them together so everything matches.
 - Art pipeline: the image-gen session makes concept sheets on ext/imagegen. S2 builds the 3D models from them (Vex first, for the owner's review). 2D portraits go into the menus early (ext/portraits-2d).
 - Portraits come from the art pass; ext/portrait keeps only its frame and HUD side.
 
@@ -106,16 +111,19 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 - Building (Nov 3): one Animal Crossing–style build/decorate UI for farm and house: catalog bar, ghost with footprint, visible Rotate/Place/Store/Move buttons and keys, click placed items to move/rotate/store. Rotation must be obvious in both places. A new house starts empty and every piece is movable; blocked spots name what is blocking; removing is one click.
 - First 10 minutes (Nov 3, owner): "we need to make the game more obvious to start". Rule for every agent: in the tutorial and the first farm visit, there is never a moment where the player doesn't know what to do next. Your Boki physically leads (runs ahead, waits, looks back). The marker is a big light beam plus an edge arrow and distance, never hidden. Instructions are centred cards, then a bottom pill, re-prompting after ~8 s idle. Review any onboarding change with a fresh-player playthrough.
 
-## Story and naming (owner, Nov 3, DRAFT direction; the prologue rebuild waits until after the Sat reset)
-- **"Mask" replaces "Mantle" everywhere** (player text, code names where cheap). A hero = a Warden's Mask: put it on and you get that Warden's memories, abilities and look. Your own character is you unmasked (the farm).
-- Premise: a Wyrm-crowned Tyrant ruled the Skylands (Fire Emblem tyrant imagery) and sealed the fallen Wardens' souls in masks. Cold open: a young girl in chains puts on a mask, becomes a Warden (Sable or Pin, TBD) and stabs the Tyrant in the throat. His death = the Sundering: the sky breaks into islands, his caged Boki scatter free, and the masks rain across the wild isles.
-- Why you go out: the Tyrant's heart (the Wyrmheart) still beats, and his blood is the Blight. Whoever claims the heart decides what the world becomes, so hunters race for it, and loyalists want him back. Masks are how you survive and fight in the Blight, so people hunt for more. The wild also has treasure, seeds and Boki for your island. Rival hunters want the same masks, which is why it's an extraction race: only what you bring home is yours.
-- Pick screen: "Choose your first mask". First portal: a beat where you put the mask on.
-- Story pick (owner, Nov 3): "power used to be owned" premise, with masks as Wardens. Owner idea: **each time you wear a mask, it influences you more and you start taking on that Warden's features.** Proposed mechanic ("the mask takes hold"): mask mastery = how much of the Warden shows. Mastery rewards are features (eyes, hair streak, scars, markings, voice lines) that carry onto your own unmasked character on the farm. You can keep them or let them fade. The factions react (the Kept call it possession). Ties into mantle-look (now mask-look). Cheap, mostly cosmetic. Build after the reset.
-- **Player character (owner, Nov 3): the Unmasked.** A smooth, near-faceless person: simple face marks for personality (eye shape and expression, brows, blush; no nose, no race or species features), an outfit, and a body (height, build/thickness, gender silhouette and voice), plus colour. Nothing else defining. Masks fill you in: in a match you're the Warden, and mask mastery leaves features on your own character (markings, hair streaks, eyes) that you can keep or let fade. This REPLACES the detailed creator (race/face/hair rows in hatch.gd LOOK_ROWS). mask-look and warden-models should plan for it. Build after the Sat reset.
-- **Why everyone is a blob: the stolen selves (owner, Nov 4).** The world used to be full of personalities: every person was vivid and their own. The Wyrm god (the Tyrant) stole them from everyone, and that theft is why people are smooth, near-faceless blobs with no masks. This is the in-world reason for the Unmasked: you, the farmers and the townsfolk all look blank because your selves were taken. Masks give a self back: a Warden's mask fills in a face, a look and a personality, because the Wardens were the people who kept theirs and whose souls the Tyrant sealed in masks. His death (the Sundering) scatters the masks, so putting one on is getting a self back, borrowed. Wearing one more and more leaves features on you (the "mask takes hold" idea), so a kept feature is a piece of self you are getting back. Wire it in:
-  - Prologue (rebuild after the reset): show a world of vivid people, then the theft (faces and colour drain into the Wyrm), then the blank world. One line in the cold open, e.g. "He took who we were."
-  - First portal and mask pick: the put-on beat is a self returning ("choose your first mask" stays the label).
-  - NPCs: townsfolk and the builder start as blobs with a few simple marks like you. Characters who found a mask or a piece of themselves get more face. A shop or quest line can return a self.
-  - Faction hook: the Kept (loyalists) call masks possession; they would rather stay blank and safe.
-  - Art and text: the smooth blank look is a loss, not a style joke; keep it dignified. Player-facing words: "self" or "selves", "Mask", never "Mantle". Dialogue stays in our own words.
+## Story and naming (owner, Nov 3-4; the prologue's full visual rebuild waits until after the Sat reset)
+Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained girl stabbing the Tyrant, "Mask replaces Mantle", the Unmasked as the player name).
+- **Premise (owner's words):** "The Wyrm came, and stole our essence. In time, humans, beasts and skyfolk alike were born without faces. We became a new race: the Empty. Our only salvation became the cursed fossils we once tried to destroy: Masks, each carrying the soul of a fallen Hunter of old." The skyfolk are a people alongside humans and beasts.
+- **One villain:** the Tyrant who ruled the Crown and never aged IS the Wyrm in human shape. The night a thief (Sable) reached the Wyrmheart in the hoard, it woke, broke the land (the Sundering) and tore away everyone's selves. That is why the people, and you at home, are blank.
+- The fallen Hunters who stood against the Wyrm were sealed into their relics (Hem stitched many for the Tyrant). Masks are old cursed relics dug from the ruins; people feared them and tried to destroy them, and now they are the only way to have a self again. Not every Mask has a face (a compass, a jar, a pair of skates).
+- Why you go out: hunt for the **Wyrmheart**, one wish to remake the world or rule it. Every Hunter wants it, and so does the Wyrm. The Blight is the Wyrm's blood. The wild also has treasure, seeds and Boki for your island. Rivals want the same Masks, which is why it is an extraction race: only what you bring home is yours.
+- **Prologue captions (5):**
+  1. "Once, the sky held one great land, ruled from the Crown by a Tyrant who never aged."
+  2. "He was the Wyrm in human shape. The night a thief reached its heart, it woke."
+  3. "The Wyrm broke the land and stole our essence. In time, humans, beasts and skyfolk alike were born without faces. We became a new race: the Empty."
+  4. "Our only salvation became the cursed fossils we once tried to destroy: Masks, each carrying the soul of a fallen Hunter of old."
+  5. "Put on a Mask, bond with a Boki, and hunt for the Wyrmheart: one wish to remake the world, or rule it. Every Hunter wants it. So does the Wyrm."
+- Pick screen: "Choose your first Mask". First portal: the put-on beat, with the tutorial line above.
+- **The Empty (player character, owner Nov 3-4):** a smooth, near-faceless person: simple face marks for personality (eye shape and expression, brows, blush; no nose, no race or species features), an outfit, a body (height, build, gender silhouette, voice) and colour. Nothing else defining. This REPLACES the detailed creator (race/face/hair rows in hatch.gd LOOK_ROWS). The blank look is a loss, not a style joke; keep it dignified. Player-facing: "the Empty", "self"/"selves", "Mask", never "Mantle" or "Unmasked" (code ids may keep `unmasked`).
+- **The mask takes hold:** the more you wear a Mask, the more its Hunter seeps into you, even at home. Mask mastery = how much of the Hunter shows; mastery rewards are features (eyes, hair streak, scars, markings, voice lines) that carry onto your own character on the farm. Keep them or let them fade. The Kept (loyalists) call it possession and would rather stay blank and safe. Cheap, mostly cosmetic. Build after the reset (ties into mask-look).
+- Wire-in after the reset: NPCs (townsfolk, the builder) start as blobs with a few simple marks; characters who found a Mask or a piece of themselves get more face; a shop or quest line can return a self. Dialogue stays in our own words.
