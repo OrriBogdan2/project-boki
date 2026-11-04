@@ -355,6 +355,15 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | face | {"bulwark": [0.37, 0.27], "archer": [0.32, 0.3], "juggernaut": [0.42, 0.3], "thief": [0.4, 0.31], "mage": [0.42, 0.32], "dolm": [0.47, 0.27], "ostra": [0.46, 0.33], "ashwick": [0.36, 0.3], "gunslinger": [0.42, 0.34], "tender": [0.4, 0.32], "rimewright": [0.43, 0.32], "dredge": [0.5, 0.28]} |
 | splash | {"bulwark": [0.46, 0.25], "archer": [0.26, 0.2], "juggernaut": [0.6, 0.16], "thief": [0.42, 0.2], "mage": [0.35, 0.22], "dolm": [0.6, 0.18], "ostra": [0.54, 0.34], "ashwick": [0.55, 0.2], "rimewright": [0.52, 0.18], "dredge": [0.45, 0.38]} |
 
+## warden_look (`content/rules/warden_look.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | A Warden 3D model's own shading over the shared painted look (WardenGlb.look), keyed by the model's art name (art/wardens/<art>/<art>.glb; a design variant has its own key). painted: hero_toon.gdshader parameters on all of its surfaces, set after WardenGlb.PAINTED. slots: the same per toon slot (skin, hair, cloth, leather, metal, eyes, glow), after painted. Colours are [r, g, b]. A model without an entry keeps the shared look. Useful keys: top_light (surfaces facing up lift), fres and fres_tint (the coloured rim; 1 = lightened own colour), far_lift (brighter and richer at the match camera), shade and shadow_tint (the shadow floor and its tint), sheen, glow (emission x the painted colour). |
+| vex | {"painted": {}, "slots": {"skin": {"top_light": 0.35, "fres": 0.45, "far_lift": 0.12, "shade": 0.8, "shadow_tint": [0.94, 0.84, 0.84]}, "metal": {"top_light": 0.3, "fres": 0.3, "fres_tint": 0.6, "far_lift": 0.1, "sheen": 0.0}, "hair": {"far_lift": 0.5, "fres": 0.6, "glow": 0.12}, "glow": {"glow": 1.8}}} |
+
 ## weapon_path (`content/rules/weapon_path.json`)
 
 

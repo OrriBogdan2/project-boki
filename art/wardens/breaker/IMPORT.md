@@ -32,7 +32,8 @@ shader override, proportions and stance wait for the Vex r3c recipe (stage 2). R
   iron-shod foot, icicles, the faint green crack (`glow`) and the stem post rising over the top into the scroll;
   3.9k triangles, `breaker_prow_atlas.jpg`. Modelled in the left hand's `Shield` node's space (SHIELD_AT,
   SHIELD_TURN, SHIELD_K as the procedural prow); the .glb's `shield`, seated there by WardenGlb.
-- **Hit radius:** the heavy class's 0.50 m, unchanged (`--warden-model-check`); he stands 1.12x a medium
-  hunter (the sheet's 1.15x, within the 4%).
+- **Size and hit radius:** the biggest Warden: bulwark `body.size` 1.02 -> 1.19, so he stands 1.32x a medium
+  hunter (`--warden-model-check`'s sheet height 1.15 -> 1.30; BREAKER_KIT asks ~1.5x, left for the owner). The hit
+  radius stays the heavy class's 0.50 m (the ring and the hitbox don't grow with him).
 - Imports: the atlases lossless (`compress/mode=0`); `breaker.glb.import`: `generate_lods=false`,
   `force_disable_compression=true`.

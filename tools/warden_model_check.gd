@@ -13,7 +13,7 @@ const EPS := 0.0005
 ## Per Warden: the hit radius it must keep (m), its height against a medium hunter (hero sheets, "Body,
 ## scale and movement feel"), its width against a medium (from, to), and the prefix of its keyed moves.
 const WARDENS := {
-	"bulwark": {"hit_r": 0.5, "height": 1.15, "width": [1.3, 2.2], "moves": "bul_"},
+	"bulwark": {"hit_r": 0.5, "height": 1.3, "width": [1.3, 2.2], "moves": "bul_"},     # (the biggest: the r3 sea-ogre)
 	"archer": {"hit_r": 0.37, "height": 0.98, "width": [0.7, 1.15], "moves": "arc_"},
 	"gunslinger": {"hit_r": 0.4, "height": 1.04, "width": [0.7, 1.3], "moves": "gunslinger_"},     # (slim, per her art)
 }
