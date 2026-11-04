@@ -133,7 +133,8 @@ slots at most ±35% per channel from the Warden's own colours. Bone names may co
 The armature and its meshes sit at the .glb's origin (no offset on the scene root), so skeleton space is model space.
 
 ## Budget and checks
-- About 8–15k triangles per Warden (the held `weapon` counted apart), one 1024² atlas or flat colours; no more than 8
+- About 8–15k triangles per Warden (the held `weapon` counted apart), one 1024² atlas (2048² for a hand-made model
+  whose ageing is painted into one: Dredge) or flat colours; no more than 8
   material slots (slots, not materials: Dredge's ten materials use four).
 - `--warden-glb-check`: the bone table covers every part HunterAnim binds; a Warden without a .glb builds the
   procedural model (the fallback); a .glb present loads with the contract armature, every kit move of every

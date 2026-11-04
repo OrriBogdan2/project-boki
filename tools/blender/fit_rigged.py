@@ -13,7 +13,9 @@ The spec (art/wardens/src/<name>_fit.json) names the source .glb, the rig JSON (
   stretched along itself; "move": carried from a source joint to a rig joint; anything else stays);
 - `weapon`: a source group cut off into the `weapon` mesh in the Gun node's space (its narrow end on the right
   hand's grip, its mouth forward; `weapon_muzzle` marks the mouth; `solidify` m gives a single-sided shell an inside);
-- `materials`: source material -> [glTF name "<slot>-<what>", colour]; `max_tris`; `anchors`.
+- `materials`: source material -> [glTF name "<slot>-<what>", colour]; `max_tris`; `anchors`;
+- `orb` (a glowing sphere on a bone, `replace`-ing a group), `drips` (tar drips hanging from faces that look
+  down), `paint` (the ageing atlas: per-material recipes, baked in Cycles): tools/blender/warden_paint.py.
 Steps: import, turn to face +Y and scale (Blender frame: the Warden faces +Y, its right +X), split the parts,
 re-pose them, cut the weapon, decimate, skin rigidly to the contract armature plus the variant bones, recolour,
 sharpen the hard edges, anchors, export.
@@ -30,6 +32,7 @@ from mathutils import Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import warden_kit as K  # noqa: E402
+import warden_paint as WP  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 # Godot's grips for the held weapon (HunterAnim HOLDS[<weapon>]["gr"]), Gun space
@@ -173,6 +176,9 @@ def recolour(ob, spec):
         if m is None or m.name not in spec:
             continue
         name, col = spec[m.name]
+        if bpy.data.materials.get(name):          # (one material a name across the body and the weapon)
+            ob.data.materials[i] = bpy.data.materials[name]
+            continue
         nm = bpy.data.materials.new(name)
         nm.use_nodes = True
         b = nm.node_tree.nodes["Principled BSDF"]
@@ -324,6 +330,19 @@ def main():
         recolour(weapon, spec["materials"])
         sharpen(weapon, float(spec.get("sharp_deg", 40.0)))
         weapon.data.name = "weapon"
+    # added pieces (a glowing orb for an eye, tar drips) and the painted ageing atlas (tools/blender/warden_paint.py)
+    paint = spec.get("paint")
+    if spec.get("orb"):
+        if spec["orb"].get("replace"):
+            WP.remove_group(ob, spec["orb"]["replace"])
+        WP.add_orb(ob, spec["orb"])
+    if spec.get("drips"):
+        WP.add_drips(ob, spec["drips"], int(spec.get("seed", 1)))
+    if paint:
+        painted = [ob] + ([weapon] if weapon else [])
+        WP.uv_atlas(painted, float(paint.get("margin", 0.002)))
+        WP.bake(painted, paint["looks"], int(paint["size"]), os.path.expanduser(paint["image"]),
+                int(paint.get("samples", 24)))
     # anchors: the shared two and the Warden's own
     co = np.array([v.co[:] for v in ob.data.vertices])
     top = float(co[:, 2].max())
@@ -343,7 +362,7 @@ def main():
     os.makedirs(os.path.dirname(out), exist_ok=True)
     objs = [arm, ob] + ([weapon] + list(weapon.children) if weapon else []) \
         + [o for o in bpy.data.objects if o.name.startswith("anchor_")]
-    K.export(out, objs)
+    K.export(out, objs, "JPEG" if paint else "AUTO")
     log("wrote", out)
     if spec.get("blend"):
         bpy.ops.wm.save_as_mainfile(filepath=os.path.expanduser(spec["blend"]))

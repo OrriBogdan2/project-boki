@@ -27,9 +27,17 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
 - **Weapon:** the horn (his Hand.R) cut into `weapon` in the Gun node's space, narrow end on the shotgun's grip,
   mouth forward, x1.3, solidified 12 mm (its mouth has an inside); `weapon_muzzle` on its mouth moves the Gun's
   Muzzle there. 3,200 triangles.
-- **Budget:** planar dissolve (1 degree) then collapse to 14,500 triangles (14,130 after import); hard edges sharp
-  past 50 degrees.
-- **Materials (flat, slot-named):** metal-brass a48d52, metal-iron 767069, metal-glass 8c949c, leather-boot 5e4a3c,
-  leather-tar 231a1c, leather-rope a07e52, cloth-flesh 8e2a2c, cloth-seaweed 56783e, cloth-barnacle c4b8a0,
-  glow-eye ff2418: four toon slots. The loader shades them with the procedural heroes' clean painted look.
-- `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.
+- **Budget:** planar dissolve (1 degree) then collapse to 12,400 triangles, plus the orb and the drips: 14,139;
+  hard edges sharp past 50 degrees.
+- **Aged paint (r2b, owner 09:05):** tools/blender/warden_paint.py, from the spec's `paint`, `orb` and `drips`:
+  - one 2048 painted atlas (`dredge_atlas.jpg`, Godot extracts it), fresh smart UVs over the body and the horn, baked
+    in Cycles (CPU, about 10 s): each material's colour with grime in the crevices (AO), verdigris on the brass and
+    rust on the iron (noise patches gathered in the crevices), dents as painted light and shade (a voronoi bump lit
+    by a fixed key light), scratches, worn edges, a painted highlight on the glossy tar, cracks and the eye's red
+    light over the lens. Colours: brass 76603a, iron 4c4844, boot 4e3e32, tar 120d0e, glass 4e5862 (the rest as r2);
+  - the eye: the old red asterisk replaced by an emissive orb (`glow-eye`, ff2418, flat) on the `eye` bone, set in
+    the cracked lens;
+  - 24 tar drips (about 66 triangles each) hanging from the faces that look down: the hull's underside (12), the
+    porthole (3), the shoulder domes, the elbows, the hips and the claw, each on the bone of what it hangs from;
+  - the materials keep their slot names (metal, leather, cloth, glow); the game shades the atlas like Vex's.
+- - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.
