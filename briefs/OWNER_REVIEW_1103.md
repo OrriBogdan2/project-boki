@@ -846,3 +846,23 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
 - One shared size constant for all Boki speech (farm + match) so it stays consistent.
 - Screenshot at the normal farm camera before/after.
 - Routed to the tutorial agent (ext/tut-airdash) as an add-on, since it already has the farm warm.
+
+## 105. Boki talk: shorter, far less repetitive, about what's happening (owner, 23:30 UTC Nov 4)
+- Owner: "They also talk too long / too-long text bubbles, and it's too repetitive. Can we hardcode a ton more phrases and try to make them relevant to what's happening?"
+- Where the lines live: `scripts/core/KinSpeak` (`FEEL` / `ACTS` banks, the speech stages via Care.speech) for the farm; `scripts/match/kin_voice.gd` for match callouts. Move the banks to data (`content/rules/kin_lines.json`) so they're easy to grow.
+- Shorter:
+  - At most ~6 words per bubble (aim 2-4).
+  - One sentence.
+  - Bubbles last ~2 s.
+  - Longer thoughts become two separate beats or an action ("(sniffs the crop)").
+- Far more variety:
+  - ~5x the current lines per situation.
+  - Never repeat a line within the last ~10 said by that Boki.
+  - A per-Boki cooldown so they don't chatter constantly.
+  - Personality / element flavour where it fits (a Cindle line can mention warmth, a Puddlet one water).
+- Relevant to the moment: triggers for what is actually happening.
+  - **Farm:** a crop ready / watered, building in progress, being petted / fed, a new Boki arrives, rain or night, the player returning from an expedition (and how it went), working its job, idle near another Boki (they "talk" to each other), low needs.
+  - **Match:** an enemy spotted, the Hunter hurt / downed, a kill, loot found, the storm closing, extracting, revived, level-up, the Boki's own ability used.
+- Keep the speech-stage rule: young Boki only say their name with tone + actions; the variety at that stage comes from the tones and actions.
+- English pass on every line (natural, short, warm, our own voice).
+- Assert: no line repeats within 10; the max length is enforced in data; each trigger has ≥ 8 lines. Screenshots: 3 farm moments + 2 match moments.
