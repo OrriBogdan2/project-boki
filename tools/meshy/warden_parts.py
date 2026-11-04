@@ -295,7 +295,31 @@ def braid(bld, spec, bvh, index):
     end_k = float(spec.get("end_k", 0.7))
     amp = W - rs
     col_w = 0.75 / STRAND_COLS
-    for k in range(3):
+    if spec.get("style") == "loose":
+        # loose wavy hair, not a plait (Claire's pigtails): `locks` strands side by side across the width, fanning
+        # out toward the end (`fan`), all waving together sideways (`wave`, metres; `period`) with a small phase
+        # step between them so the lock reads as soft waves, a little depth between the front and back ones
+        nl = int(spec.get("locks", 7))
+        fan = float(spec.get("fan", 1.6))
+        wave = float(spec.get("wave", 0.02))
+        for k in range(nl):
+            u = (k / max(nl - 1, 1)) * 2.0 - 1.0
+            ph = 0.5 * k
+            dz = (0.5 if k % 2 else -0.5) * rs * 1.2
+            rings, radii = [], []
+            for i in range(n):
+                s = s_arr[i]
+                f = s / max(L, 1e-6)
+                g = min(1.0, 0.55 + 0.45 * s / taper_in) * (1.0 - (1.0 - end_k) * max(0.0, (s - (L - taper_out)) / taper_out))
+                a = 2.0 * math.pi * s / period
+                spread = amp * g * (1.0 + (fan - 1.0) * f)
+                off = (u * spread + wave * math.sin(a + ph) * min(1.0, 3.0 * f)) * nrm[i] + dz * bin_[i]
+                rings.append(p[i] + off)
+                radii.append(rs * (0.7 + 0.3 * g) * (1.0 - 0.25 * abs(u)))
+            c = index * 3 + k % 3
+            bld.tube(rings, radii, sides, c * col_w + 0.004, (c + 1) * col_w - 0.004, 0.01, 0.01 + 0.98 * L / 1.0,
+                     "strand", s_arr, cap_start=True, cap_end=True)
+    for k in (range(3) if spec.get("style") != "loose" else []):
         ph = 2.0 * math.pi * k / 3.0
         rings, radii = [], []
         for i in range(n):
@@ -325,6 +349,19 @@ def braid(bld, spec, bvh, index):
             v0 = 0.005 + 0.025 * min(ring_i, 17)
             bld.torus(c, t[i], W * g + wire_r * 0.4, wire_r, 10, 4, (cu0, v0, cu0 + 0.1, v0 + 0.02), "copper", sr)
             ring_i += 1
+        if w.get("crystals"):
+            # (ice-crystal shards on the tie, pointing up and out: Claire's pigtail clips)
+            c = at(p, s_arr, s)
+            i = int(np.clip(np.searchsorted(s_arr, s), 0, n - 1))
+            nc = int(w["crystals"])
+            box = (cu0, 0.465, cu0 + 0.1, 0.515)
+            for j in range(nc):
+                a = math.pi * (0.15 + 0.7 * j / max(nc - 1, 1))
+                d = math.cos(a) * nrm[i] + math.sin(a) * bin_[i]
+                ln = float(w.get("crystal_len", 0.035)) * (0.7 + 0.3 * ((j * 7) % 3) / 2.0)
+                root = c + d * W * 0.7
+                tip = root + (d * 0.6 - t[i] * 0.8) * ln
+                bld.prism(root, tip, float(w.get("crystal_r", 0.006)), 4, box, "steel", s)
         if w.get("bolt"):
             c = at(p, s_arr, s)
             i = int(np.clip(np.searchsorted(s_arr, s), 0, n - 1))
