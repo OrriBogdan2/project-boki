@@ -2,7 +2,7 @@
  "doc": "Pip (tender): RECIPE_95 spec (docs/art/wardens/RECIPE_95.md). python3 tools/meshy/recipe.py art/wardens/src/pip_recipe.json <steps>. Stages 1-2 (inputs, Meshy, bake) ran before the driver: PIPELINE.md 'Stage 1/2: Pip'.",
  "name": "pip",
  "arch": "tender",
- "tag": "b5",
+ "tag": "b6",
  "raw": "~/meshy/pip_r2",
  "art": {
   "ref": "origin/ext/imagegen",
