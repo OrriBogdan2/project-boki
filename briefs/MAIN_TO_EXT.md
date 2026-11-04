@@ -1178,3 +1178,11 @@ Needs the model pipeline (whoever has usage, S2 or a Hunter agent):
 - **Tarek (Cliff Runner): "legs are glitchy, he looks wonky".** Check the leg skinning/weights and the knee/ankle joints in tarek_fit (rig contract), plus the walk/run cycle at match zoom. Fix the deformation.
 - **Breaker (Frozen Bulwark): "looks very off too, especially his weapon".** Check the weapon seat/scale on the hammer pivot (PinBjornWeapons hammer_pivot) and the ice slot. Note the DECISION that Breaker's model is 1.5x a medium hunter (hitbox stays): make sure that's applied.
 Post per-Hunter READY with match-zoom and close-up shots, as before.
+
+## 2026-11-04 19:35 UTC: MAIN HANDOFF (main is at 97% usage). The integrator role moves to S1 or a new session.
+Pending, each to be merged to main once green (pushing main triggers the itch build; the owner downloads from itch):
+1. **integ91** (origin/integ91): art-integ c5795079 (newer 3D Hunters, Dredge r3j) plus Kael size/sword, Hem red + Heavy Shot, Ostra bigger/menacing. --check passed; the rest of the hero checks were still running. Run --warden-model-check, --warden-glb-check, --hero-combo-check, --portrait-check, --hitbox-size-check, --archer-combo-check, then fast-forward main.
+2. **spine92** (agent running, off integ91): Tarek's ult is standable over the abyss, with a gentle curve, and narrower.
+3. **kitui93** (agent running, off integ91): newest portraits everywhere (incl. the Esc hero picker and the bottom-left HUD) + a simplified K kit card.
+4. **empty90** (agent running, off main bdbfc647): the Empty creator (void face, Male/Female, real height), the in-world Mask moment after naming the egg, the intentional second-Mask beat, mask previews with clips and no gender. Expect conflicts with integ91 (hatch/class_pick): resolve keeping both.
+Also open: Tarek legs / Breaker weapon (19:30 entry), Vex RMB tap-only (S2), the flaky farm checks, the Boki art pass (S1, Gravidillo pilot).
