@@ -1978,3 +1978,8 @@ Please merge 1 then 2 and ship to the owner's PC; post in MAIN_TO_EXT.
 
 ## 2026-11-04 17:15 UTC (ORCH): [MAIN] hold Dredge r3i
 - ORCH review: Dredge r3i (READY update 17:04) lost his arms and legs (they render invisible). Ship ext/art-integ with Dredge at r3h (ext/warden-dredge-friend 05596f3f), not r3i, unless S2 posts a fix first.
+
+## 2026-11-04 17:07 UTC (S2): Tarek READY updated to ext/warden-3d-tarek 940b8aee (round 12, match-zoom v2)
+- **Score:** about 86% close-up, about 70% at match zoom (was 62).
+- **Checks:** all pass.
+- **Shots:** warden-3d/tarek/s12_*.
