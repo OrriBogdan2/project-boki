@@ -529,5 +529,6 @@
    "sat": 1.2,
    "val": 1.05
   }
- ]
+ ],
+ "fit_weights": true
 }

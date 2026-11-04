@@ -807,6 +807,44 @@ def _cut(ob, drop):
     bm.free()
 
 
+def keep_weights(ob):
+    """The fit's weights (bone heat on the A-pose, arms clear of the body) kept as point attributes "w_<bone>"
+    through the pose and the decimation: on the contract's rest pose the hanging arms touch the hips, and bone
+    heat there hands the flank to the upper arm (a skin flap from elbow to knee whenever the arm lifts)."""
+    groups = {g.index: g.name for g in ob.vertex_groups}
+    n = len(ob.data.vertices)
+    w = {name: np.zeros(n, np.float32) for name in groups.values()}
+    for v in ob.data.vertices:
+        for x in v.groups:
+            w[groups[x.group]][v.index] = x.weight
+    for name, arr in w.items():
+        a = ob.data.attributes.new("w_" + name, "FLOAT", "POINT")
+        a.data.foreach_set("value", arr)
+
+
+def fit_weights(ob, arm):
+    """The contract skin from the kept fit weights (keep_weights), normalised; bones the fit has no group for
+    (root, the pauldrons, skirt, tail) get none here."""
+    names = [a.name[2:] for a in ob.data.attributes if a.name.startswith("w_")]
+    n = len(ob.data.vertices)
+    ws = {}
+    for nm in names:
+        arr = np.empty(n, np.float32)
+        ob.data.attributes["w_" + nm].data.foreach_get("value", arr)
+        ws[nm] = np.clip(arr, 0.0, 1.0)
+    tot = np.maximum(sum(ws.values()), 1e-6)
+    ob.vertex_groups.clear()
+    for nm, arr in ws.items():
+        if arm.data.bones.get(nm) is None:
+            continue
+        g = ob.vertex_groups.new(name=nm)
+        arr = arr / tot
+        for i in np.nonzero(arr > 1e-3)[0]:
+            g.add([int(i)], float(arr[i]), "REPLACE")
+    _fill_weights(ob, arm)
+    log("contract skin from the fit's weights: %d groups" % len(ob.vertex_groups))
+
+
 def contract_skin(ob, rig):
     arm = K.build_armature(rig)
     for b in arm.data.bones:
@@ -1403,6 +1441,8 @@ def main():
     fit = fit_armature(joints)
     auto_weights(ob, fit)
     tail_weights(ob, "hips")
+    if spec.get("fit_weights"):
+        keep_weights(ob)
     if head:
         rigid(head, fit, "head")
     pose_to_rig(fit, rj)
@@ -1413,6 +1453,8 @@ def main():
     ob.name = "Body"
     ob.data.name = "Body"
     arm = contract_skin(ob, rig)
+    if spec.get("fit_weights"):
+        fit_weights(ob, arm)
     if "tail" in spec:
         arm.data.bones["tail"].use_deform = True
         tail_weights(ob, "tail")

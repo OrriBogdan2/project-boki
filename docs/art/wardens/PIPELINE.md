@@ -162,3 +162,6 @@ profile views before any run.
 
 Vex total: 7 tasks, 190 credits (balance before r2: 940).
 
+| Cinder r2 | 2026-11-04 04:22 | 01a1a4cd-d1cc-76a7-961c-8f1800676084 | latest | r2 turnaround (2000 px, views enlarged to 1024): front, 3/4, near profile (her left), back; syringe-spear and the profile's flask painted out (tools/meshy/cinder_inputs.py); 30k, PBR, A-pose | 30 | Kept: frills, goggles, vest/apron, potion belt, copper backpack, tail all came through. The spear is a lathe from the sheet (no Meshy run); no head run (the turnaround's face is clean) |
+
+Cinder total: 1 task, 30 credits (balance before: 910). Paused 05:00 (owner: Vex quality rerun first).
