@@ -1334,3 +1334,5 @@ Also fold into DECISIONS.md every "DECISION?" line from 19:35 UTC Nov 3 onward i
 - The wiki pages are renamed to match (Class-Red-Stitch.md and the others), and gen_wiki reports no changes.
 - **Checks (S2):** hero-title 0, portrait 107/0, archetype 307/0, class-unlock 149/0, hero 0, dredge-combo 86/0, dolm-combo 130/0, archer-combo 126/0, health OK, style OK.
 - One merge still gets every rename and title: Pip, Ryzz, Breaker, Hem and the three titles.
+
+## 2026-11-04 09:00 UTC (orchestrator): DECISION? Vex 3D = r3b (green redesign); polish pass under way on S2 before the other Wardens

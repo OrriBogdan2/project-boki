@@ -448,3 +448,14 @@ Build, in this order; post progress in EXT_TO_MAIN:
 ## 2026-11-04 10:45 UTC (orchestrator): Hem's title is now "Red Stitch" (was Dark Archer); include it in the rename sweep.
 
 ## 2026-11-04 10:50 UTC (orchestrator): titles: Dredge = "Brass Abomination", Tarek = "Cliff Runner" (plus Hem = "Red Stitch"); include them in the title sweep.
+
+## 2026-11-04 09:00 UTC (orchestrator): OWNER PICKS Vex r3b; polish it before any other Warden
+- The owner picks **r3b** (the green redesign). Make it the shipped Vex: move vex_r3b into art/wardens/vex/ (r3 stays in history), and apply your carry-pitch fix (-1.3 -> -1.05).
+- **Polish pass (one Opus agent, highest effort; credit-free where possible).** This becomes the reference recipe for the other 11:
+  1. **Texture clean-up:** remove the blotchy chest-strap cage and the cheek seams; flat, clean painted colour; hand-paint the seams in Blender from the portrait/turnaround.
+  2. **Shader:** fix the washed-out skin (match the art's warm tone) and the silvered gun-arm (gunmetal + brass as painted; keep the green emissive vents/lens). If the shared toon shader causes it, add a per-Warden material override rather than changing it for everyone.
+  3. **Proportions:** longer legs to match the art (a per-Warden body scale on the shared rig, not a new rig); keep the hitbox unchanged.
+  4. **Missing and short pieces:** restore the armoured hoses from the backpack/feeder to the gun-arm; lengthen the braids to the art (keep the spring bones).
+  5. **Signature stance** (item 52): weight back, hip cocked, gun-arm resting; check it in idle and in the run blend.
+  6. **Match-zoom read:** the green head, braids and lens must pop; check the r3b_gameplay_match framing.
+- Deliver: r3c_* shots (close-up, 3/4, back, match zoom, moves) next to the turnaround and portrait, plus an honest list of what still differs. Post "OWNER: review Vex r3c". The other Wardens wait until the owner OKs r3c and says go.
