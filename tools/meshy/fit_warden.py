@@ -2003,6 +2003,36 @@ def lengthen(ob, img, ln):
     log("lengthened the coat: %d vertices" % int(sel.sum()))
 
 
+def tape_bands(ob, img, tb):
+    """A cloth wrap read as wrapped tape (Hem's tape-measure forearm wraps): the faces of the wrap's colour in each
+    box (the Meshy frame) are banded along the limb, every other `period` m of height a little darker, with a thin
+    dark line between bands."""
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    me = ob.data
+    uv = me.uv_layers.active.data
+    per = float(tb.get("period", 0.012))
+    n = 0
+    for bx in tb["boxes"]:
+        def pick(poly, c, mat, bx=bx):
+            if not (bx[0] <= c.x <= bx[1] and bx[2] <= c.y <= bx[3] and bx[4] <= c.z <= bx[5]):
+                return False
+            u = sum(uv[i].uv.x for i in poly.loop_indices) / poly.loop_total
+            v = sum(uv[i].uv.y for i in poly.loop_indices) / poly.loop_total
+            hh, ss, vv = _hsv(px[min(h - 1, int(v * h)), min(w - 1, int(u * w)), :3])
+            q = tb["hsv"]
+            return q[0] <= hh <= q[1] and q[2] <= ss <= q[3] and q[4] <= vv <= q[5]
+        for band in (0, 1):
+            def pb(poly, c, mat, band=band, pick=pick):
+                return pick(poly, c, mat) and int(math.floor(c.z / per)) % 2 == band
+            m = face_mask(ob, img, pb)
+            k = float(tb.get("dark", 0.8)) if band else 1.0
+            px[m, :3] = px[m, :3] * k
+            n += int(m.sum())
+    img.pixels = px.ravel()
+    log("tape bands: %d texels" % n)
+
+
 def main():
     spec_path = sys.argv[sys.argv.index("--") + 1]
     spec = json.load(open(spec_path))
@@ -2045,6 +2075,9 @@ def main():
         pad(img, ids, int(spec.get("pad", 6)))
     if spec.get("touch_up_late"):
         touch_up(ob, img, spec["touch_up_late"])
+        pad(img, ids, int(spec.get("pad", 6)))
+    if spec.get("tape_bands"):
+        tape_bands(ob, img, spec["tape_bands"])
         pad(img, ids, int(spec.get("pad", 6)))
     head = None
     if "head" in spec:
@@ -2170,6 +2203,12 @@ def main():
         spin.parent = gun
         spin["built"] = 1
         K.anchor(arm, "hand.R", "anchor_nock", K.bone_head(rig, "hand.R"))
+        for nm, z in bw.get("halo_anchors", {}).items():
+            # (on the bow itself, along the string: the bow's halos at the match camera follow it)
+            e = bpy.data.objects.new(nm, None)
+            bpy.context.scene.collection.objects.link(e)
+            e.parent = gun
+            e.location = (0.0, 0.06, float(z))
     else:
         gun = weapon(spec, rig)
     crown = rig["land"]["crown"]
@@ -2208,7 +2247,7 @@ def main():
     # (JPEG: Meshy's painted textures, a third of the PNG's size)
     if parts:
         log("tris: parts %s" % {o.name: K.tris([o]) for o in parts})
-    K.export(out, [arm, ob] + parts + [x for x in (gun, spin) if x] + [o for o in bpy.data.objects if o.name.startswith("anchor_")], "JPEG",
+    K.export(out, [arm, ob] + parts + [x for x in (gun, spin) if x] + [o for o in bpy.data.objects if o.name.startswith(("anchor_", "halo_"))], "JPEG",
              colors="ink_room" in spec)
     log("wrote", out)
     if spec.get("blend"):
