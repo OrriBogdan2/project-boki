@@ -495,12 +495,13 @@
 	},
 	"ostra": {
 		"painted": {
-			"rim_far": 0.5,
+			"rim_far": 0.7,
 			"rim_far_color": [
 				0.78,
 				0.48,
 				1.0
-			]
+			],
+			"shade": 0.55
 		},
 		"slots": {
 			"cloth": {
@@ -514,15 +515,15 @@
 				"far_lift": 0.3,
 				"top_light": 0.1,
 				"own_ambient": [
-					0.5,
-					0.46,
-					0.62
+					0.36,
+					0.3,
+					0.48
 				],
 				"dark_lift": 0.02,
 				"albedo": [
-					1.0,
-					0.92,
-					1.0
+					0.68,
+					0.6,
+					0.78
 				],
 				"light_neutral_warm": 0.9
 			},
@@ -545,7 +546,7 @@
 				"light_neutral_warm": 0.9
 			},
 			"glow": {
-				"glow": 1.4,
+				"glow": 2.4,
 				"fres": 0.8,
 				"top_light": 0.0,
 				"far_lift": 0.0,

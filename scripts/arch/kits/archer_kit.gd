@@ -379,19 +379,18 @@ func press_rmb() -> void:
 
 func rmb_hold_tick(t: float) -> void:
 	if t > 0.15 and not pin_aim:
-		# the Heavy Shot's draw: the gold V and a gold bar growing from the bow (its own creak)
+		# the Heavy Shot's draw: a red bar growing from the bow (its own creak)
 		play("arc_heavy_wind")
 		pin_aim = true
 		m.sfx("pin_heavy_draw", h.pos, -6.0 if h.is_local() else -10.0)
 		_heavy_tele()
 
-const HEAVY_GOLD := Color("ffc24a")
+const HEAVY_GOLD := Color("ff4a3a")      # (named for its old colour: red now)
 
-## The Heavy Shot held: the V tinted gold closing with the charge, a thick gold bar out of the bow that
+## The Heavy Shot held: a thick red bar out of the bow that
 ## grows to 2 body heights, the cursor ring filling (AimKit; own player).
 func _heavy_tele() -> void:
 	var hk := heavy_k()
-	AimKit.vee(h, "rmb_v", {"k": hk, "col": HEAVY_GOLD, "col2": Color("fff0b0"), "glint": hk * 0.5})
 	AimKit.lane(h, "rmb_bar", {"len": 2.0 * AimKit.BH, "len0": 0.3, "k": hk, "width": 0.5, "fill": hk, "tip": true,
 		"col": HEAVY_GOLD, "col2": Color("fff0b0")})
 	AimKit.charge(h, hk, {"col": HEAVY_GOLD, "col2": Color("fff0b0")})

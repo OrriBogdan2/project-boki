@@ -228,7 +228,7 @@ func _archer_combos() -> void:
 	var bar0 := float(AimKit.entry(P, "rmb_bar").get("len", 0.0))
 	ok(
 		"pin RMB held: the gold V and a gold bar from the bow",
-		AimKit.shown(P, "rmb_v") and AimKit.shown(P, "rmb_bar") and K.anim_id == "arc_heavy_wind",
+		not AimKit.shown(P, "rmb_v") and AimKit.shown(P, "rmb_bar") and K.anim_id == "arc_heavy_wind",
 		"v %s bar %s anim %s" % [AimKit.shown(P, "rmb_v"), AimKit.shown(P, "rmb_bar"), K.anim_id]
 	)
 	step(m, 0.55, func(): P.inp["sec_hold"] = true; aim_at(P, T.pos))

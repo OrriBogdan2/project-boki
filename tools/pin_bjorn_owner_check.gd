@@ -263,7 +263,7 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	var bar := AimKit.entry(P, "rmb_bar")
 	var d := P.aim_dir()
 	ok("pin heavy: the telegraph while held is a thick gold lane with a tip, from Hem along the aim line",
-		AimKit.shown(P, "rmb_bar") and AimKit.shown(P, "rmb_v") and float(bar.get("width", 0.0)) >= 0.45
+		AimKit.shown(P, "rmb_bar") and not AimKit.shown(P, "rmb_v") and float(bar.get("width", 0.0)) >= 0.45
 		and bool(bar.get("tip", false)) and (bar.get("dir", Vector2.ZERO) as Vector2).distance_to(d) < 0.01,
 		"width %.2f tip %s" % [float(bar.get("width", 0.0)), str(bar.get("tip"))])
 	step(m, 0.5, rmb_at.bind(P, T.pos))
