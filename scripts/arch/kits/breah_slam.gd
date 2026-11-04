@@ -158,7 +158,6 @@ func slam(c: float, at_feet: bool) -> void:
 	m.fx.flash(at + Vector3(0, 0.5, 0), Color("ff8a2c"), 0.6 + 0.3 * c, 0.08)
 	KitLooks.of(m).impact(at, r, c, float(s["scorch_t"]))
 	m.sfx("br_slam", at, 0.0, 1.0)
-	Feel.shake(m, "t3" if c > 0.5 else "t2", h, at)
 	k.net_ring(at, r, Color("ff5a2a"))
 	var gained := false
 	for f in k.foes_in(at, r, 3.2):
@@ -181,7 +180,7 @@ func slam(c: float, at_feet: bool) -> void:
 		f.hurt(d2, h, o)
 		if in_core: KitLooks.of(m).crown(f, float(o["stun"]))
 		if air:
-			f.vel.y = minf(f.vel.y, -22.0)      # spiked down (after the hit, which would lift it)
+			m.displace.spike(f, -22.0)      # spiked down (after the hit, which would lift it)
 		gained = true
 	for w in m.verbs.walls.duplicate():
 		if not w.get("rock", false) or int(w["team"]) != h.team: continue

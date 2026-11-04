@@ -35,7 +35,7 @@ func running() -> bool:
 	return not shells.is_empty()
 
 # ------------------------------------------------------------------ the tap
-## The cast (HeroUlt.press has checked the cooldown and that nothing holds him).
+## The cast (HeroUlt.press has checked the cooldown and that nothing holds her).
 func cast() -> bool:
 	var h := kit.h
 	if not kit.needle.is_empty():
@@ -59,8 +59,6 @@ func cast() -> bool:
 	kit.m.sfx("vn_nuke_fire", h.pos, -1.0)
 	kit.m.sfx("vn_nuke_fall", at, -2.0)
 	kit.net_ring(at, r, GunslingerKit.EMBER)
-	if h.is_local() and kit.m.cam:
-		kit.m.cam.add_trauma(0.08)
 	return true
 
 ## The shell: a big Burr Charge with its spikes out, made once and reused.
@@ -157,7 +155,7 @@ func _impact_fx(at: Vector3, r: float) -> void:
 	kit.net_ring(at, r, GunslingerKit.EMBER)
 	kit.m.sfx("vn_nuke_boom", at, 1.0)
 	kit.m.sfx("vn_nuke_burn", at, -6.0)
-	Feel.shake(kit.m, "t4", kit.h, at)
+	Shake.incoming_big(kit.m, at, 0.6, kit.h)
 
 ## The burning patch: every tick it hurts and slows everyone on it; its rim stays lit for everyone and flames
 ## flicker across it. Ticks pay no bond (only the impact does).

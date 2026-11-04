@@ -4,15 +4,14 @@ extends RefCounted
 ##   gnd  Grounded (the Thief's Bola): no dash, jump or glide; the hunter's legs show the tangled cords
 ##   blt  Blight (the Juggernaut's Warchain, Sable's Encore rim): healing on the body is cut
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
-##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): slowed, and his rifle and Longneedle hit
-##        harder; stars over the head
+##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder (no slow: the
+##        source's Daze is only a damage window); stars over the head
 ##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a SLOWED word and a teal ring
 ## The game that owns the body runs the rules; the caster's game sends the Net event
 ## ["kst", nid, kind, seconds, k] for a remote body (Net.VERSION 0.7.0), every game shows it.
 
 const GROUND_COL := Color("e0a03a")
 const RATTLE_COL := Color("ffb36a")
-const RATTLE_SLOW := 0.35        # how much speed Rattled takes away
 
 static func rattled(e: Ent) -> bool:
 	return e != null and is_instance_valid(e) and e.has_meta("rat_until") and e.m != null and float(e.m.time) < float(e.get_meta("rat_until"))
@@ -54,8 +53,6 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 		"rat":
 			var was_r := rattled(e)
 			e.set_meta("rat_until", maxf(float(e.get_meta("rat_until", 0.0)), float(m.time) + secs))
-			e.slow_k = maxf(e.slow_k if e.slow_t > 0.0 else 0.0, RATTLE_SLOW)
-			e.slow_t = maxf(e.slow_t, secs)
 			if not was_r: _show(e, kind, secs)
 		"dsr":
 			var was_d := e.has_meta("dsr_until") and float(m.time) < float(e.get_meta("dsr_until"))

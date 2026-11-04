@@ -80,7 +80,7 @@ func fresh() -> Dictionary:
 		"plot_cap": 4,
 		"matches": 0,
 		"extracts": 0,
-		"settings": {"volume": 0.8, "shake": 1.0, "cam_lead": 1.0},
+		"settings": {"volume": 0.8, "cam_lead": 1.0},
 		"tutorial": {},
 		"buildings": [],
 		"music": [],

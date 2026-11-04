@@ -82,6 +82,7 @@ var pending_input := {"base": false, "dash": false, "jump": false, "sig": false,
 var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
+var displace: Displace = null     # abilities moving someone else's body (online too: its owner's game moves it)
 var _later: Array = []     # [due time, Callable]: delayed ability steps, on match time (not wall-clock timers)
 
 ## Run cb after `delay` seconds of match time: delayed effects, echoes, landing blasts. Unlike a
@@ -698,6 +699,7 @@ func _start(o: Dictionary) -> void:
 	brk = Breakables.new(self)
 	fields = Fields.new(self)
 	verbs = Verbs.new(self)
+	displace = Displace.new(self)
 	if world.layout_id != "" and not o.get("tutorial", false):
 		biomes = BiomeRun.new(self)
 		if biomes.active():
@@ -1686,7 +1688,6 @@ func use_gear(h: Hunter, slot: int) -> void:
 			sfx("shield", h.pos, 0.0, 0.8)
 		"shock":
 			Abil._blast(h, h.pos, 3.4, 12.0, 13.0, col, 5.0, "gear")
-			shake(0.3, h.pos)
 		"rocket":
 			# straight up: a column of thrust that also cools your glider, so you can keep going
 			var d := h.aim_dir()
@@ -1850,8 +1851,6 @@ func _update_rings(dt: float) -> void:
 			fx.ring(c, 1.6, Color("8fe3ff"), 0.3)
 			fx.burst(c, Color("cff6ff"), 14, 4.0, 0.35, 0.0)
 			sfx("whoosh", c, -2.0 if h == player else -10.0, 1.3)
-			if h == player:
-				cam.punch(0.05)
 
 ## Breakables are solid: push bodies out, and dashing straight through one smashes it.
 var _break_grid := {}
@@ -2013,11 +2012,9 @@ func dmg_mult(h: Hunter) -> float:
 func sfx(n: String, p = null, vol := 0.0, pitch := 1.0) -> void:
 	Sfx.play(n, p, vol, 0.07, pitch)
 
+## Legacy door for world events (a boss slam, a lair gate): a big hit at `at`, caused by nobody on your team. Shake.incoming_big is the real one.
 func shake(a: float, at: Vector3) -> void:
-	if player == null:
-		return
-	var d := Vector2(at.x - player.pos.x, at.z - player.pos.z).length()
-	cam.add_trauma(a * clampf(1.0 - d / 14.0, 0.0, 1.0))
+	Shake.incoming_big(self, at, a)
 
 func direction_word(from: Vector3, to: Vector3) -> String:
 	var d := Vector2(to.x - from.x, to.z - from.z)
@@ -2158,8 +2155,6 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	# impact: hitstop and shake by tier (docs/DASHES_AND_ABILITY_FEEL.md §5.4-5.5), from what the hit did
 	if src != "burn":
 		var tier := Feel.hitstop(self, by, target, d, o)
-		if tier >= 2 and credit == player:
-			Feel.shake(self, Feel.shake_for_tier(tier), credit, target.pos, target)
 	if credit == player and target != player and src != "burn":
 		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08))
 		if hud: hud.hitmarker(crit, armor_hit)
@@ -2167,7 +2162,6 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		hud.hurt_from(by.pos)
 	if target == player:
 		sfx("hurt", null, -4.0)
-		cam.add_trauma(clampf(d / 40.0, 0.12, 0.45))
 		if hud: hud.hurt_flash(d)
 	Juice.hit(self, target, by, d, o, crit, armor_hit)
 
@@ -2198,7 +2192,6 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if h == player:
 		# getting knocked hits hard: slow time, flash red, pull the camera in
 		_slow(0.55, 0.3)
-		cam.punch(0.12)
 		if hud: hud.flash(Color("ff3a2a"), 0.3)
 		Sfx.duck(0.6)
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
@@ -2227,7 +2220,6 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if h.kin and h.kin.comp and h.kin.state != "downed":
 		h.kin.comp.on_owner_down()
 	if h == player:
-		cam.add_trauma(0.6)
 		if h.kin and h.kin.state != "downed":
 			h.kin.bark("owner_down")
 	_check_team(h.team)
@@ -2247,8 +2239,6 @@ func _armor_up(h: Hunter) -> void:
 func _reward_moment(at: Vector3) -> void:
 	_slow(0.22, 0.35)
 	freeze_frame(0.07)
-	cam.add_trauma(0.35)
-	cam.punch(0.08)
 	if hud: hud.flash(Color.WHITE, 0.25)
 	fx.ring(at, 3.0, Color(1, 0.95, 0.8, 0.9), 0.35)
 	fx.burst(at + Vector3(0, 1.0, 0), Color("ffd23f"), 26, 6.0, 0.6, 6.0, 1.2)
@@ -2267,8 +2257,6 @@ func ult_moment(h: Hunter) -> void:
 	fx.ring(h.pos, 4.5, Color(col, 0.9), 0.45)
 	fx.burst(h.pos + Vector3(0, 1.2, 0), col, 30, 6.0, 0.6, 2.0, 1.3)
 	if h == player:
-		cam.punch(0.1)
-		cam.add_trauma(0.3)
 		if hud: hud.flash(col, 0.22)
 		freeze_frame(0.05)
 
@@ -2379,7 +2367,6 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		var rivals := hunters.any(func(x): return x.team != player.team and not x.out and not x.extracted)
 		if not rivals:
 			_slow(1.0, 0.22)
-			cam.punch(0.16)
 			if hud:
 				hud.flash(Color("ffd23f"), 0.3)
 				hud.toast("Last squad down", Color("ffd23f"))
@@ -2407,7 +2394,7 @@ func train_hit(e: Ent, fwd: Vector3, spd := 8.0) -> void:
 	fx.burst(at + Vector3(0, 0.4, 0), Color("6b5a4a"), 16, 4.0, 0.7, 10.0, 1.2)
 	fx.ring(at, 3.6, Color(1.0, 0.75, 0.4, 0.9), 0.45)
 	fx.flash(at + Vector3(0, 1.0, 0), Color("fff2c0"), 1.4, 0.1)
-	shake(0.9, at)
+	Shake.incoming_big(self, at, 0.9)
 	if e is Hunter:
 		var h: Hunter = e
 		if h.out or h.extracted or h.remote:
@@ -2421,8 +2408,6 @@ func train_hit(e: Ent, fwd: Vector3, spd := 8.0) -> void:
 			h.set_meta("fling", fling)      # (with a spare life they're already gliding back in)
 		if h == player:
 			freeze_frame(0.08)
-			cam.punch(0.2)
-			cam.add_trauma(0.9)
 			if hud: hud.flash(Color("fff2c0"), 0.35)
 	else:
 		e.hurt(9999.0, null, {"src": "train", "kb": kb, "lift": 7.0})
@@ -2834,7 +2819,6 @@ func on_stagger(mb: Mob, by: Ent, ab: String) -> void:
 	fx.flash(mb.pos + Vector3(0, 1.0, 0), Color("e0b0ff"), 1.4, 0.1)
 	sfx("crit", mb.pos, 2.0, 0.7)
 	sfx("boom", mb.pos, -4.0, 1.6)
-	shake(0.45, mb.pos)
 	freeze_frame(0.08)
 	var hunter: Hunter = by as Hunter if by is Hunter else (by.owner_h if by is Kin else null)
 	if net_on:
@@ -2870,7 +2854,6 @@ func on_wall_slam(e: Ent, st: float) -> void:
 	fx.burst(e.pos + Vector3(0, 0.9, 0), Color("e6dccb"), 16, 4.0, 0.4)
 	fx.ring(e.pos, 1.2, Color("fff27a"), 0.3)
 	sfx("knock", e.pos, -2.0, 1.2)
-	shake(0.35, e.pos)
 	var sc: Ent = e.last_hit_by
 	if sc is Kin and (sc as Kin).owner_h: sc = (sc as Kin).owner_h
 	if sc is Hunter and sc != e: (sc as Hunter).add_stat("slams")
@@ -3152,7 +3135,7 @@ func _update_shots(dt: float) -> void:
 			# terrain and rocks
 			var gp := world.ground_at(p.x, p.z)
 			var over_ok: bool = sx.has("dy") and gp <= float(sx["gmax"]) + 0.05
-			# a Grapnel pierces terrain: it flies over rocks and props and through cliff faces
+			# an Abyssal Hand pierces terrain: it flies over rocks and props and through cliff faces
 			var pierces: bool = sx.get("pierce_terrain", false)
 			var rock_hit: bool = world.is_block(p.x, p.z) and gp + World.BLOCK_H > p.y and not pierces
 			if rock_hit or (gp > p.y and not over_ok and not pierces):
@@ -3353,7 +3336,6 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 			fx.ring(at, x["boom"], Color("ffb070"), 0.3)
 			fx.burst(at, Color("ffb070"), 26, 6.0, 0.5, 6.0, 1.3)
 			sfx("boom", at, 0.0)
-			shake(0.45, at)
 		else:
 			fx.burst(at, s["col"], 5, 2.0, 0.25, 6.0, 0.6)
 		return
@@ -3516,7 +3498,6 @@ func _boom(s: Dictionary, at: Vector3) -> void:
 	var small: bool = x.get("boom_small", false)
 	fx.flash(at, Color("ffd9a0"), radius * 0.45, 0.08)
 	sfx("boom", at, 0.0 if not small else -9.0, 1.0 if not small else 1.5)
-	shake(0.45 if not small else 0.08, at)
 	var by: Ent = s["by"]
 	if not x.get("mob", false):
 		for b in breaks:
@@ -4335,6 +4316,7 @@ func step(dt: float) -> void:
 	_update_zones(dt)
 	fields.tick(dt)
 	verbs.tick(dt)
+	displace.tick(dt)
 	_run_later()
 	if biomes: biomes.tick(dt)
 	_update_tracking(dt)
@@ -5251,7 +5233,7 @@ func _meteor_hit(at: Vector3) -> void:
 	fx.burst(at + Vector3(0, 0.3, 0), Color("ffcf8a"), 22, 6.0, 0.5, 6.0, 1.2)
 	fx.dust(at, 10)
 	sfx("boom", at, -3.0, 1.3)
-	shake(0.35, at)
+	Shake.incoming_big(self, at, 0.35)
 	for e in hunters + mobs + kins:
 		if e.remote or not e.hittable() or (e is Hunter and (e as Hunter).riding):
 			continue
@@ -5520,7 +5502,7 @@ func net_send_hit(target: Ent, dmg: float, by: Ent, o: Dictionary) -> bool:
 	var kb: Vector2 = o.get("kb", Vector2.ZERO)
 	Net.hit(target.nid, [_r(dmg), _r(kb.x), _r(kb.y), _r(float(o.get("lift", -1.0))), 1 if o.get("crit", false) else 0,
 		_r(float(o.get("stun", 0.0))), _r(float(o.get("burn", 0.0))), _r(float(o.get("slow", 0.0))), _r(float(o.get("root", 0.0))),
-		by.nid if by else "", String(o.get("src", "")), String(o.get("ab", ""))])
+		by.nid if by else "", String(o.get("src", "")), String(o.get("ab", "")), Displace.hit_extra(o)])
 	return true
 
 func _flags(h: Hunter) -> int:
@@ -5752,6 +5734,7 @@ func _net_hit_in(x) -> void:
 	if float(x[8]) > 0.0: o["slow"] = float(x[8])
 	if float(x[9]) > 0.0: o["root"] = float(x[9])
 	if x.size() > 12 and String(x[12]) != "": o["ab"] = String(x[12])
+	if x.size() > 13: Displace.apply_hit_extra(o, x[13])      # wall stun, steer, burn time, slow strength
 	e.hurt(float(x[1]), by, o)
 
 func _net_ev(x, from: String) -> void:
@@ -5761,6 +5744,8 @@ func _net_ev(x, from: String) -> void:
 	match String(x[0]):
 		"zone":
 			HeroZones.net_in(self, x)
+		"disp":
+			displace.net_in(x)
 		"kcmd":
 			KinNet.on_event(self, x)       # a Boki command or a merge going off in another game
 		"kst":

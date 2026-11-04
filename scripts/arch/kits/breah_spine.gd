@@ -194,7 +194,6 @@ func _raise(p: Vector3) -> void:
 	last_rise_t = m.time
 	m.fx.burst(p + Vector3(0, 0.5, 0), Color("ff6a1f"), 10, 5.0, 0.35, 6.0, 1.1)
 	m.fx.flash(p + Vector3(0, 0.4, 0), Color("ffc070"), 0.8, 0.07)
-	Feel.shake(m, "t1", k.h, p)
 	for f in k.foes_in(p, float(xd()["slow_r"])):
 		var o := {"src": "abil", "ab": "x", "slow": float(xd()["slow_t"]), "slow_k": float(xd()["slow_k"])}
 		f.hurt(float(xd()["rise_dmg"]) * k.power("x"), k.h, o)
@@ -215,7 +214,7 @@ func _shove_off_line(p: Vector3, across: Vector2) -> void:
 			continue
 		var sgn := 1.0 if side_off >= 0.0 else -1.0
 		var dest: Vector3 = e.pos + Vector3(across.x, 0, across.y) * (clear - absf(side_off)) * sgn
-		HeroZones.move_body(k.m, e, dest)
+		k.m.displace.teleport(e, dest)
 		shoved += 1
 
 ## Is this rock one of the ult's, inside the window where its hits still fill the bond?

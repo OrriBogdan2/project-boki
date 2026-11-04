@@ -17,7 +17,11 @@ const SPEC := {
 		"keys": {"rmb_aim": 0.7, "rmb_disc": 1.4, "rmb_root": 1.86}},
 	"tender_e": {"strip": [0.36, 0.4, 0.48, 0.6, 1.06, 1.14], "keys": {"e": 0.5, "e_thrown": 1.3}},
 	"tender_dash": {"strip": [0.31, 0.35, 0.41, 0.47, 0.53], "keys": {"dash": 0.41}},
-	"tender_air": {"strip": [0.33, 0.46, 0.75, 1.05, 1.2], "keys": {"air": 0.46, "air_float": 0.8}},
+	"tender_air": {
+		"strip": [0.33, 0.5, 0.8, 1.1, 1.3],
+		"keys": {"air_start": 0.28, "air": 0.46, "air_float": 0.8, "air_land": 1.3}},
+	"tender_airsteer": {
+		"strip": [0.33, 0.6, 0.85, 1.1, 1.3], "keys": {"steer_start": 0.3, "steer_mid": 0.85, "steer_end": 1.3}},
 	"tender_carry": {"strip": [0.3, 0.45, 0.6, 1.0, 1.5, 2.0], "keys": {"carry": 1.5}},
 	"tender_payoff": {"strip": [2.6, 2.75, 2.82, 2.9, 3.0, 3.2], "keys": {"payoff": 2.82}},
 	"tender_walk": {"strip": [0.6, 0.68, 0.76, 0.84, 0.92, 1.0], "keys": {"walk": 0.8}},
@@ -26,11 +30,12 @@ const SPEC := {
 	"tender_ultkey": {"strip": [0.5, 0.56, 0.62, 0.7, 0.9, 1.5], "keys": {"ultkey": 1.5}},
 	"tender_ult": {"strip": [1.5, 5.4, 5.56, 5.62, 5.72, 5.9], "keys": {"ult_end": 5.62}},
 	"rimewright_lmb": {"strip": [0.42, 0.45, 0.5, 0.56, 0.62, 0.7], "keys": {"lmb": 0.45, "lmb_fly": 0.8}},
+	"rimewright_heavy": {"strip": [0.98, 1.02, 1.06, 1.1, 1.2], "keys": {"heavy": 1.06}},
 	"rimewright_shatter": {
 		"strip": [1.0, 1.6, 2.02, 2.12, 2.24, 2.4], "keys": {"stacks": 1.6, "shell": 1.98, "shatter": 2.2}},
 	"rimewright_payoff": {"strip": [0.5, 0.7, 0.9, 1.1, 1.3, 1.5], "keys": {"payoff": 1.3}},
 	"rimewright_rmb": {
-		"strip": [0.7, 0.88, 1.0, 1.14, 1.32], "side": 560,
+		"strip": [0.7, 0.84, 0.92, 1.05, 1.32], "side": 560,
 		"keys": {"rmb_aim": 0.7, "rmb_fly": 1.12, "rmb_land": 1.32, "rmb_boom": 3.12}},
 	"rimewright_dash": {"strip": [0.32, 0.45, 0.62, 0.8, 1.06], "keys": {"dash": 0.7, "dash_stop": 1.06}},
 	"rimewright_skatefire": {"strip": [0.5, 0.58, 0.64, 0.7, 0.8, 0.9], "keys": {"skatefire": 0.66}},
@@ -42,6 +47,9 @@ const SPEC := {
 	"rimewright_ultaim": {"strip": [0.32, 0.36, 0.42, 0.5, 1.5], "keys": {"ultaim": 0.36}},
 	"rimewright_ultkey": {"strip": [0.33, 0.37, 0.42, 0.5, 2.0, 3.0], "keys": {"ultkey": 2.0}},
 	"rimewright_ultskate": {"strip": [1.1, 1.22, 1.3, 1.4, 1.55], "keys": {"ultskate": 1.3}},
+	"rimewright_skateult": {
+		"strip": [0.7, 0.8, 0.9, 1.05, 1.3, 2.2],
+		"keys": {"skating": 0.6, "skateult": 0.88, "carried": 1.3, "encased": 2.0}},
 	"rimewright_ult": {"strip": [3.6, 3.81, 3.85, 3.91, 4.0, 4.25], "keys": {"ult_crash": 3.85}},
 }
 
@@ -156,6 +164,8 @@ static func _script(
 		A: Arena, P: Hunter, D: Hunter, Al: Hunter, arch: String, what: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	var go := 0.3
+	if t < 0.2 and (what in ["skateult", "skatefire"] or (arch == "tender" and what in ["dash", "air", "airsteer"])):
+		_open_lane(A, P, Al)
 	match what:
 		"rmb":
 			# held keys are re-sent every step: the match's own input poll would let go of them
@@ -176,8 +186,10 @@ static func _script(
 				K.use_e()
 		"dash":
 			_dash(A, P, arch, t, dt)
-		"air":
+		"air", "airsteer":
 			P.inp["move"] = A.get_meta("care_right", Vector2(1, 0))
+			if what == "airsteer" and t > 0.55:
+				P.inp["move"] = A.get_meta("care_fwd", Vector2(0, -1))      # steer the glide round mid-flight
 			if _at(t, dt, 0.2):
 				P.vel.y = 6.0
 				if arch == "rimewright":
@@ -189,7 +201,7 @@ static func _script(
 				P.ex_cd = 0.0
 				P.dashes = P.max_dashes()
 				K.on_dash(true)
-		"lmb":
+		"lmb", "heavy":
 			P.inp["fire"] = t > 0.3 and t < 1.5
 		"shatter":
 			P.inp["fire"] = t > 0.3 and t < 1.75
@@ -210,6 +222,8 @@ static func _script(
 			_payoff(P, D, Al, K, arch, t, dt)
 		"ultaim", "ultkey", "ult", "ultskate":
 			_ult(A, Al, arch, what, t, dt)
+		"skateult":
+			_skate_ult(A, P, t, dt)
 
 static func _dash(A: Arena, P: Hunter, arch: String, t: float, dt: float) -> void:
 	var side: Vector2 = A.get_meta("care_right", Vector2(1, 0))
@@ -265,6 +279,27 @@ static func _ult(A: Arena, ally: Hunter, arch: String, what: String, t: float, d
 		if _at(t, dt, 1.2):
 			P.dashes = P.max_dashes()
 			P.inp["dash"] = true
+
+## A long clear lane across the arena below the dummy (no rocks, no teammate in the way) for the dashes.
+static func _open_lane(A: Arena, P: Hunter, Al: Hunter) -> void:
+	var D: Hunter = A.dummies[0]["h"]
+	P.teleport(D.pos + Vector3(6.0, 0, 9.4))
+	if Al != null:
+		Al.teleport(D.pos + Vector3(-12.0, 0, -6.0))
+
+## Claire skates (Shift held from 0.3s) inland along the clear lane, presses X at 0.75s: carried on as the bud
+## seals, then rooted.
+static func _skate_ult(A: Arena, P: Hunter, t: float, dt: float) -> void:
+	P.lvl = maxi(P.lvl, 6)
+	if t < 0.3:
+		P.ak.cd["x"] = 0.0
+	P.inp["move"] = (A.get_meta("care_right", Vector2(1, 0)) as Vector2) if t < 2.5 else Vector2.ZERO
+	P.inp["dash_down"] = t >= 0.3 and t < 0.75
+	if _at(t, dt, 0.3):
+		P.dashes = P.max_dashes()
+		P.do_dash()
+	if _at(t, dt, 0.75):
+		HunterKeys.ult_pressed(P)
 
 ## Grabs the strip frames and the key frames at their moments; quits after the last one.
 static func _capture(A: Arena, spec: Dictionary, arch: String, what: String, t: float, dt: float) -> void:

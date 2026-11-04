@@ -1,65 +1,36 @@
 class_name Oomph
 extends RefCounted
-## Combat weight (the gameplay side of "oomph"): what a shot does to the shooter (camera kick, a push
-## back on heavy weapons), what a hit does to the body it lands on (a flinch scaled by the hit, a
+## Combat weight (the gameplay side of "oomph"): what a shot does to the shooter (a push
+## back on heavy weapons; never a camera kick), what a hit does to the body it lands on (a flinch scaled by the hit, a
 ## short stagger on big hits, a hit-shake while it's frozen), and how visible a shot is (a glowing
 ## bolt with a halo and a tracer that stretches with speed). How hits look and sound beyond that
 ## (impact sparks, sound design) belongs to Juice; the numbers and these reactions live here, in
 ## separate functions, so the two never step on each other.
 ##
-## Weapon data can tune it: "kick" (camera recoil per shot, trauma-ish 0-0.25), "push" (the shooter
+## Weapon data can tune it: "push" (the shooter
 ## is shoved back this many m/s), "tracer" (how long the streak reads, 1 = default).
 
 const STAGGER_FRAC := 0.12     # a hit of at least this share of max health staggers
 const STAGGER_T := 0.28        # ... for this long
 const STAGGER_SLOW := 0.45     # ... slowed this much
 const HEAVY_FLINCH := 2.6      # the flinch of a stagger, relative to a chip hit
-const KICK_PX := 0.55          # camera recoil offset per unit of kick (metres of view shift)
 static var legacy := false     # tooling (--legacy-shots): the old look, for before/after shots
 
 # ------------------------------------------------------------------ shooting
-## A shot (or swing) leaving: the camera kicks back along the aim for the local shooter, and heavy
-## weapons shove the shooter back a little (shotgun, sniper, bow).
-static func on_fire(h: Hunter, melee := false) -> void:
+## A shot (or swing) leaving: heavy weapons shove the shooter back a little (shotgun, sniper, bow).
+static func on_fire(h: Hunter, _melee := false) -> void:
 	if h == null or h.m == null:
 		return
 	if legacy:
 		return
 	var w: Dictionary = h.wpn
-	var kick := float(w.get("kick", 0.05 if not melee else 0.04))
 	var d := h.aim_dir()
-	if h.is_local() and h.m.get("cam") != null:
-		var cam: Camera3D = h.m.cam
-		cam.add_trauma(kick * 0.35)
-		_cam_nudge(cam, -d * kick * KICK_PX)
 	var push := float(w.get("push", 0.0))
 	# the self push is feel for your own hands only: a bot (or a teammate reviving someone) never
 	# drifts off its spot from its own shots
 	if push > 0.0 and h.grounded and h.is_local() and h.ctrl == "local" and h.base_t <= 0.0:
 		h.vel.x -= d.x * push
 		h.vel.z -= d.y * push
-
-## A screen-space shove of the camera that springs back (Camera3D offsets; the rig never touches them).
-static func _cam_nudge(cam: Camera3D, v: Vector2) -> void:
-	if not is_instance_valid(cam):
-		return
-	var tw: Tween = cam.get_meta("oomph_tw") if cam.has_meta("oomph_tw") else null
-	if tw and tw.is_valid():
-		tw.kill()
-	# world x is screen x; world +z is toward the bottom of the screen (the camera looks north)
-	cam.h_offset = clampf(cam.h_offset * 0.5 + v.x, -0.6, 0.6)
-	cam.v_offset = clampf(cam.v_offset * 0.5 + v.y, -0.6, 0.6)
-	tw = cam.create_tween()
-	tw.set_parallel(true)
-	tw.tween_property(cam, "h_offset", 0.0, 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tw.tween_property(cam, "v_offset", 0.0, 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	cam.set_meta("oomph_tw", tw)
-
-## A directional camera punch for big moments (abilities, payoffs): the view jolts along a direction.
-static func punch_dir(m: Node, dir: Vector2, amt: float) -> void:
-	if m == null or m.get("cam") == null:
-		return
-	_cam_nudge(m.cam, dir.normalized() * amt if dir.length() > 0.01 else Vector2.ZERO)
 
 # ------------------------------------------------------------------ being hit
 ## What a landed hit does to the body (called from Match.on_damage for every hit). Only the game that

@@ -310,10 +310,12 @@ func _zones() -> void:
 	m.ents_by_id["t1"] = T
 	T.remote = true
 	T.teleport(home + Vector3(8.0, 0, 0)); aim_at(P, T.pos)
-	HeroZones.sent.clear()
+	Displace.capture = true
+	Displace.sent.clear()
 	P.ak.on_dash(false)
 	step(m, 1.9)
-	var tev: Array = HeroZones.sent.filter(func(e): return e[1] == "tp")
+	Displace.capture = false
+	var tev: Array = Displace.sent.filter(func(e): return e[1] == "tp")
 	ok("net: Trade tells the game that owns the foe to move it", tev.size() == 1 and String(tev[0][2]) == "t1" and float(tev[0][3]) < home.x + 2.0 and T.pos.x - home.x > 6.0, str(tev))
 	r2 = setup("ostra", 6.0)
 	m2 = r2[0]
@@ -321,7 +323,7 @@ func _zones() -> void:
 	owned.nid = "t1"
 	m2.ents_by_id["t1"] = owned
 	owned.teleport(r2[3] + Vector3(8.0, 0, 0))
-	for e in tev: HeroZones.net_in(m2, e)
+	for e in tev: m2.displace.net_in(e)
 	ok("net: the owning game moves the foe to where the trader stood", owned.pos.x - float(r2[3].x) < 2.0, "x %.1f" % (owned.pos.x - float(r2[3].x)))
 	await done(m2)
 	await done(m)

@@ -27,6 +27,7 @@ func run(main_node: Node) -> void:
 	var r: Array = ak.setup("gunslinger", 6.0, "", true)
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	_aim_modes(m, P, T)
+	ak.step(m, 0.5)        # the rounds _aim_modes fired: Venator's firing brackets lapse, so only the shapes below show
 	_shapes(m, P, T)
 	_seen(m, P, T)
 	_membership()

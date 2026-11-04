@@ -69,7 +69,6 @@ func pin() -> void:
 
 func ready_bow(P: Hunter) -> void:
 	P.fire_cd = 0.0
-	P.ammo = maxi(P.ammo, 1)
 	P.reload_t = 0.0
 	P.draw_t = -1.0
 
@@ -86,32 +85,33 @@ func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void
 		m.step(DT)
 		t += DT
 		early += arrows(m, P)
-	ok("pin early release: 5 s on the button looses nothing", early == 0 and K.draw.loosed_at < 0.0 and P.ammo == 1,
-		"arrows %d ammo %d" % [early, P.ammo])
+	ok("pin early release: 5 s on the button looses nothing", early == 0 and K.draw.loosed_at < 0.0,
+		"arrows %d" % early)
 	P.inp["fire"] = false
 	m.step(DT)
 	m.step(DT)
 	ok("pin early release: letting go looses exactly one arrow (an overdrawn one)",
 		arrows(m, P) == 1 and K.draw.last_kind == "over", "arrows %d kind %s" % [arrows(m, P), K.draw.last_kind])
 	step(m, 1.0)
-	# a full Focus is drawn at once but waits for the button to come up (it used to loose on the press)
+	# audit (Nov 3): a full Focus no longer skips the draw: the stages run as always and it is spent on the arrow
 	ready_bow(P)
 	K.res = K.res_max()
 	early = 0
 	t = 0.0
-	while t < 2.0:
+	while t < 0.8:
 		aim.call()
 		m.step(DT)
 		t += DT
 		early += arrows(m, P)
-	ok("pin early release: a full Focus held 2 s waits for the release (drawn at the top stage)",
-		early == 0 and P.focus_draw and P.draw_t > 0.0,
-		"arrows %d focus_draw %s draw_t %.2f" % [early, P.focus_draw, P.draw_t])
+	ok("pin early release: with full Focus the draw still runs its stages (no instant Supercharged)",
+		early == 0 and P.draw_t > 0.6 and P.draw_t < 1.0 and K.full_ready(),
+		"arrows %d draw_t %.2f" % [early, P.draw_t])
 	P.inp["fire"] = false
 	m.step(DT)
 	m.step(DT)
-	ok("pin early release: the Focus shot goes on release, Supercharged and aimed at once",
-		arrows(m, P) == 1 and K.draw.last_kind == "super", "arrows %d kind %s" % [arrows(m, P), K.draw.last_kind])
+	ok("pin early release: the arrow spends the Focus (an Empowered one, armed for a Deadeye)",
+		arrows(m, P) == 1 and K.draw.last_kind == "arrow" and K.res < 10.0 and K.loosed > 0.0,
+		"arrows %d kind %s focus %.0f" % [arrows(m, P), K.draw.last_kind, K.res])
 	step(m, 1.0)
 	# a cooldown running mid-draw never looses it
 	ready_bow(P)
@@ -428,10 +428,9 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	m.step(DT)
 	step(m, 0.5, aim)
 	ok("bjorn hold: letting go and pressing again starts a fresh hold", K.lmb_t > 0.2, "lmb_t %.2f" % K.lmb_t)
-	# a glide, a dash, a knock, another ability (E or a Q glove) each end it too
+	# a glide, a knock, another ability (E or a Q glove) each end it too (a dash no longer does: item 51)
 	var cases := {
 		"glide": func(): P.gliding = true,
-		"dash": func(): P.do_dash(),
 		"knock": func(): P.impulse(Vector2(40.0, 0.0)),
 		"ability": cast_e_at.bind(P, K, home),
 		"a Q glove": _glove_q.bind(P),
@@ -452,7 +451,7 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	fresh(T)
 	aim_at(P, T.pos)
 	step(m, 0.5)
-	step(m, float(K.lmb_def()["full"]) + 0.05, aim)
+	step(m, float(K.lmb_def()["full"]) + 0.3, aim)      # past the perfect window (#49): the normal step
 	var p0 := P.pos
 	var t0 := T.pos
 	P.inp["fire"] = false
@@ -617,10 +616,10 @@ func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:
 
 ## #32 / #35 for Bjorn.
 func _bjorn_dash(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -> void:
-	ok("bjorn dash table: LMB buffers, RMB / E fire, a held swing is cancelled by a dash",
+	ok("bjorn dash table: LMB buffers, RMB / E fire, a held swing is kept through a dash (item 51)",
 		_mode("bulwark", "lmb", false) == "buffer" and _mode("bulwark", "lmb", true) == "buffer"
 		and _mode("bulwark", "rmb", false) == "fire" and _mode("bulwark", "e", false) == "fire"
-		and DashFlow.into_dash_of("bulwark", "lmb").get("mode") == "cancel")
+		and DashFlow.into_dash_of("bulwark", "lmb").get("mode") == "fire")
 	step(m, 1.5)
 	P.teleport(home)
 	T.teleport(home + Vector3(30.0, 0, 6.0))

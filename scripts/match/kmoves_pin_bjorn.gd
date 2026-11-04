@@ -43,6 +43,22 @@ const FULL_POSE := {
 	"fr": Vector3(0.04, 0.15, -0.64)
 }
 
+## Bjorn's coil at full charge (the perfect window's pose and the start of each release): twisted hard away,
+## sunk low and wide, the shield arm out front, the hammer hand hauled back low behind him
+const BUL_COIL := {
+	"y": 1.15,
+	"p": 0.3,
+	"lift": -0.16,
+	"sq": 0.24,
+	"gp": 0.5,
+	"lw": 1.0,
+	"legs": [0.85, -1.25, -0.6, -0.75],
+	"hw": 1.0,
+	"fl": Vector3(-0.05, 0.1, -0.5),
+	"rw": 1.0,
+	"fr": Vector3(0.3, -0.05, 0.42)
+}
+
 const MOVES := {
 	# ---------------------------------------------------------------- Pin (archer; hero sheet pin.md, 5 fps footage)
 	# the bow drawn, on the draw's own clock (ArcherKit keeps it at Hunter.draw_t, so a quick draw and the
@@ -285,75 +301,66 @@ const MOVES := {
 			}
 		]]},
 	# ---------------------------------------------------------------- Bjorn (bulwark; hero sheet bjorn.md)
-	# the hammer thrown: cocked far back and low for one frame, leaning away, then an overhand throw that
-	# overshoots past the front before it settles
+	# the hammer thrown (sheet 0033-0034): cocked far back and low for one frame, leaning away, then an
+	# overhand throw (the hammer leaves the hand ~0.12 s after the press, as the arm comes through)
+	# that overshoots past the front before it settles
 	"bul_throw": {"keys": [
 		[0, {}],
-		[0.088, {"y": 1.1, "p": 0.3, "gp": 1.2, "sq": -0.1, "lw": 1.0, "legs": [0.2, -0.5, -0.35, -0.3]}],
-		[0.176, {"y": -0.7, "p": -0.42, "gp": -0.6, "sq": 0.15, "lw": 1.0, "legs": [0.85, -0.7, -0.5, -0.3]}],
-		[0.246, {"y": -0.95, "p": -0.48, "gp": -0.95, "sq": 0.2, "lw": 1.0, "legs": [0.9, -0.75, -0.55, -0.3]}],
-		[0.37, {"y": -0.3, "p": -0.15, "gp": -0.2, "lw": 0.6}],
-		[0.546, {}]]},
+		[0.07, {"y": 1.1, "p": 0.3, "gp": 1.2, "sq": -0.1, "lw": 1.0, "legs": [0.2, -0.5, -0.35, -0.3]}],
+		[0.14, {"y": -0.7, "p": -0.42, "gp": -0.6, "sq": 0.15, "lw": 1.0, "legs": [0.85, -0.7, -0.5, -0.3]}],
+		[0.21, {"y": -0.95, "p": -0.48, "gp": -0.95, "sq": 0.2, "lw": 1.0, "legs": [0.9, -0.75, -0.55, -0.3]}],
+		[0.34, {"y": -0.3, "p": -0.15, "gp": -0.2, "lw": 0.6}],
+		[0.5, {}]]},
 	# the hammer called back: the free hand reaches out, then draws in and catches
 	"bul_recall": {"keys": [
 		[0, {"hw": 1.0, "fl": Vector3(0.05, 0.1, -0.55), "p": -0.1}],
 		[0.176, {"hw": 1.0, "fl": Vector3(0.05, 0.1, -0.6), "p": -0.15}],
 		[0.299, {"hw": 1.0, "fl": Vector3(-0.05, -0.05, -0.15), "p": 0.1, "sq": 0.12}],
 		[0.484, {}]]},
-	# LMB held: spinning the hammer, side-on and crouched, the hammer arm out to the side, the
-	# shield arm forward; the hammer turns in the hand (BjornFx) while the body keeps facing the cursor
+	# LMB held (sheet 0133-0145): side-on and crouched, the hammer dragged back low behind him (BjornFx cocks
+	# it in the hand), the shield arm forward, the body turning with the cursor; the coil deepens as it
+	# charges, and at full (1.05 s into the move, 1.25 s held) he is twisted hardest away and sunk lowest
+	# (BUL_COIL), the perfect window's pose
 	"bul_smash_wind": {"hold": true, "keys": [
 		[0.0, {}],
 		[
-			0.2,
+			0.15,
 			{
-				"y": 0.75,
-				"p": 0.12,
-				"lift": -0.06,
-				"sq": 0.1,
-				"gp": 0.25,
+				"y": 0.8,
+				"p": 0.18,
+				"lift": -0.08,
+				"sq": 0.12,
+				"gp": 0.4,
 				"lw": 1.0,
-				"legs": [0.55, -0.85, -0.45, -0.5],
+				"legs": [0.6, -0.9, -0.5, -0.55],
 				"hw": 1.0,
-				"fl": Vector3(-0.05, 0.12, -0.42),
+				"fl": Vector3(-0.05, 0.12, -0.45),
 				"rw": 1.0,
-				"fr": Vector3(0.42, 0.38, 0.05)
+				"fr": Vector3(0.3, 0.0, 0.36)
 			}
 		],
 		[
-			1.25,
+			0.95,
 			{
-				"y": 0.85,
-				"p": 0.18,
-				"lift": -0.1,
-				"sq": 0.16,
-				"gp": 0.3,
+				"y": 0.98,
+				"p": 0.24,
+				"lift": -0.12,
+				"sq": 0.18,
+				"gp": 0.45,
 				"lw": 1.0,
-				"legs": [0.65, -0.95, -0.5, -0.55],
+				"legs": [0.75, -1.1, -0.55, -0.65],
 				"hw": 1.0,
-				"fl": Vector3(-0.05, 0.14, -0.45),
+				"fl": Vector3(-0.05, 0.11, -0.48),
 				"rw": 1.0,
-				"fr": Vector3(0.45, 0.42, 0.05)
+				"fr": Vector3(0.3, -0.03, 0.4)
 			}
-		]]},
+		],
+		[1.05, BUL_COIL]]},
 	# ... let go: the hammer arm sweeps round from behind to the front in one frame and crashes down; the
-	# shoulders turn hard with it but the body stays on its feet (the carry's dash lean adds ~0.45 rad
+	# shoulders turn hard with it but the body stays on its feet (the step's dash lean adds ~0.45 rad
 	# forward, so the move's own pitch stays near zero), the impact the frame after, then 0.4 s to recover
 	"bul_smash": {"keys": [
-		[
-			0.0,
-			{
-				"y": 0.85,
-				"p": 0.18,
-				"lift": -0.1,
-				"sq": 0.16,
-				"gp": 0.3,
-				"lw": 1.0,
-				"legs": [0.65, -0.95, -0.5, -0.55],
-				"hw": 1.0,
-				"fl": Vector3(-0.05, 0.14, -0.45)
-			}
-		],
+		[0.0, BUL_COIL],
 		[
 			0.08,
 			{
@@ -383,6 +390,93 @@ const MOVES := {
 			}
 		],
 		[0.5, {}]]},
+	# the perfect swing: the coil uncoils in a full-body heave that throws his weight after the hammer
+	# (stretched long, the back leg driving), feet off the ground with the knees tucked over the 0.3 s
+	# launch, the front leg reaching for the ground, then a hard plant: braced back against a skid, sunk low
+	# over the planted hammer, and a slow rise
+	"bul_launch": {"keys": [
+		[0.0, BUL_COIL],
+		[
+			0.05,
+			{
+				"y": -0.7,
+				"p": 0.35,
+				"lift": 0.3,
+				"sq": -0.3,
+				"gp": -1.1,
+				"lw": 1.0,
+				"legs": [0.9, -0.5, -0.85, -0.15],
+				"hw": 1.0,
+				"fl": Vector3(-0.15, 0.05, 0.2),
+				"rw": 1.0,
+				"fr": Vector3(0.1, -0.05, -0.6)
+			}
+		],
+		[
+			0.15,
+			{
+				"y": -0.55,
+				"p": 0.42,
+				"lift": 0.8,
+				"sq": -0.12,
+				"gp": -1.0,
+				"lw": 1.0,
+				"legs": [1.15, -1.7, 0.35, -1.5],
+				"hw": 1.0,
+				"fl": Vector3(-0.2, 0.15, 0.15),
+				"rw": 1.0,
+				"fr": Vector3(0.1, -0.2, -0.6)
+			}
+		],
+		[
+			0.26,
+			{
+				"y": -0.45,
+				"p": 0.2,
+				"lift": 0.35,
+				"sq": 0.0,
+				"gp": -0.9,
+				"lw": 1.0,
+				"legs": [1.0, -0.35, -0.35, -0.9],
+				"hw": 1.0,
+				"fl": Vector3(-0.2, 0.2, 0.0),
+				"rw": 1.0,
+				"fr": Vector3(0.15, -0.2, -0.5)
+			}
+		],
+		[
+			0.32,
+			{
+				"y": -0.4,
+				"p": -0.15,
+				"lift": -0.2,
+				"sq": 0.45,
+				"gp": -0.7,
+				"lw": 1.0,
+				"legs": [1.3, -1.1, -0.95, -0.45],
+				"hw": 1.0,
+				"fl": Vector3(-0.25, 0.25, 0.1),
+				"rw": 1.0,
+				"fr": Vector3(0.2, -0.25, -0.4)
+			}
+		],
+		[
+			0.48,
+			{
+				"y": -0.3,
+				"p": -0.05,
+				"lift": -0.16,
+				"sq": 0.3,
+				"gp": -0.6,
+				"lw": 1.0,
+				"legs": [1.2, -1.2, -0.8, -0.5],
+				"hw": 0.6,
+				"fl": Vector3(-0.2, 0.2, 0.1),
+				"rw": 0.8,
+				"fr": Vector3(0.2, -0.2, -0.35)
+			}
+		],
+		[0.85, {}]]},
 	# the aegis raised: braced low behind it, the shield arm out front (holds while it's up)
 	"bul_guard": {"hold": true, "keys": [
 		[0.0, {}],
@@ -728,23 +822,6 @@ const MOVES := {
 			}
 		],
 		[0.75, {}]]},
-	# a knock run down (passive): a quick pumped fist and a skip
-	"pin_rundown": {"keys": [
-		[0.0, {}],
-		[
-			0.1,
-			{
-				"lift": 0.12,
-				"p": 0.15,
-				"sq": -0.15,
-				"hw": 1.0,
-				"fl": Vector3(0.05, 0.6, 0.0),
-				"lw": 0.8,
-				"legs": [-0.2, -0.4, 0.6, -0.9]
-			}
-		],
-		[0.22, {"lift": 0.0, "p": -0.05, "sq": 0.12, "hw": 1.0, "fl": Vector3(0.05, 0.35, -0.05)}],
-		[0.45, {}]]},
 	# ---------------------------------------------------------------- Bjorn: procs, payoffs and the base dash
 	# Crushed (the payoff): the hammer swung up overhead in triumph, a stamp, the chest out
 	"bul_crush": {"keys": [
@@ -937,7 +1014,8 @@ const MOVES := {
 				"legs": [0.7, -0.9, -0.55, -0.7]
 			}
 		]]},
-	# the Faultline slam: one frame from overhead down into the ground, a deep crouch over it, a slow rise
+	# the Faultline slam: one frame from overhead down into the ground, a deep crouch over it through the plant
+	# (0.2 s), then the legs free to walk while the back comes up over the hammer as the lane erupts
 	"bul_ult_slam": {"keys": [
 		[
 			0.0,
@@ -968,7 +1046,7 @@ const MOVES := {
 			}
 		],
 		[
-			0.5,
+			0.2,
 			{
 				"p": 0.35,
 				"lift": -0.18,
@@ -982,5 +1060,19 @@ const MOVES := {
 				"legs": [1.1, -1.5, -0.45, -0.9]
 			}
 		],
-		[0.9, {}]]},
+		[
+			0.36,
+			{
+				"p": 0.18,
+				"lift": -0.04,
+				"sq": 0.12,
+				"blade": Vector3(0.0, 0.3, 0.0),
+				"bw": 0.5,
+				"rad": 0.6,
+				"hw": 0.6,
+				"fl": Vector3(0.0, -0.3, 0.3),
+				"lw": 0.0
+			}
+		],
+		[0.6, {}]]},
 }

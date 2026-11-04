@@ -2,11 +2,13 @@ class_name BjornUlt
 extends Node3D
 ## Bjorn's ultimate on X, Faultline (docs/heroes/bulwark.md; hero sheet bjorn.md "Ultimate"). A tap plants
 ## him and raises the hammer for "windup" s while a lane of "cells" square cells ("cell_len" by "width")
-## shows toward the cursor for everyone. Then the slam: the near cell is struck (a small hit and a brief
-## stun) and the ground erupts cell by cell to the far end ("cell_t" apart), throwing each foe on it up
-## once (damage, a stun and a heavy slow). A wall or a raised ledge stops the fissure; it runs on over a drop. Where it
-## ran, a glowing scar stays "scar_t" s and slows foes standing on it. A stun during the wind-up
-## interrupts it (the cooldown comes back to "refund" s); a merge drops the wind-up with no slam.
+## shows toward the cursor for everyone. Then the slam: the fissure races down the lane over "lead" s,
+## striking every foe it reaches once (a small hit and the stun: data, "stuns struck targets"), and the
+## ground erupts cell by cell to the far end ("cell_t" apart), throwing each foe on it up once (the big hit
+## and a heavy slow, data: "explodes into a series of AoEs ... heavy Slow"). A wall or a raised ledge stops
+## the fissure; it runs on over a drop. Where it ran, a glowing scar stays "scar_t" s and slows foes
+## standing on it. A stun during the wind-up interrupts it (the cooldown comes back to "refund" s); a merge
+## drops the wind-up with no slam.
 ##
 ## Look (pooled): gold light flooding the near cell on the slam, an ember streak racing down the lane,
 ## a basalt slab with molten seams heaving up in each cell, then a flickering ember crack along the
@@ -29,6 +31,8 @@ var dir := Vector2.RIGHT       # the lane's direction, locked on the press
 var origin := Vector3.ZERO
 var cells: Array = []          # the cells the fissure reaches: their near-edge points
 var erupted := 0
+var struck := 0                # cells the racing fissure has struck
+var hit := {}                  # foe instance id -> true: struck by the fissure this cast
 var thrown := {}               # foe instance id -> true: thrown up by this cast
 var hunters := 0               # (checks) hunters thrown this cast, casts that slammed, interrupted
 var slams := 0
@@ -77,6 +81,8 @@ func cast() -> bool:
 	phase = "wind"
 	t = 0.0
 	erupted = 0
+	struck = 0
+	hit = {}
 	thrown = {}
 	hunters = 0
 	h.vel = Vector3(0, h.vel.y, 0)
@@ -129,7 +135,12 @@ func tick(dt: float) -> void:
 			_slam()
 		return
 	var x := xd()
-	var due := int(floor((t - float(x.get("lead", 0.2))) / float(x.get("cell_t", 0.15)))) + 1
+	var lead := float(x.get("lead", 0.2))
+	var reached := mini(cells.size(), int(floor(t / maxf(0.01, lead) * cells.size())) + 1)
+	while struck < reached:
+		_strike(struck)
+		struck += 1
+	var due := int(floor((t - lead) / float(x.get("cell_t", 0.15)))) + 1
 	while erupted < mini(due, cells.size()):
 		_erupt(erupted)
 		erupted += 1
@@ -167,7 +178,7 @@ func _hide_lane() -> void:
 	for i in MAX_CELLS:
 		AimKit.hide(h, "x%d" % i)
 
-## The slam: the near cell floods gold, its foes take the strike and a brief stun, the streak races off.
+## The slam: the near cell floods gold and the streak races off (striking cell by cell, see tick).
 func _slam() -> void:
 	var x := xd()
 	phase = "erupt"
@@ -176,15 +187,8 @@ func _slam() -> void:
 	k.play("bul_ult_slam")
 	k.m.sfx("bjorn_ult_slam", origin, 0.0 if h.is_local() else -4.0)
 	k.m.sfx("bjorn_ult_rumble", origin + Vector3(dir.x, 0, dir.y) * cell_len() * cells.size() * 0.5, -3.0)
-	Feel.shake(k.m, "t3", h, origin)
-	if h.is_local() and k.m.cam:
-		k.m.cam.punch(0.12)
-	var strike: float = float(x.get("strike_dmg", 4.0)) * k.m.dmg_mult(h) * LevelGrowth.ap(h)
-	for f in _foes_in(0):
-		f.hurt(strike, h, {"src": "abil", "ab": "ultimate", "stun": float(x.get("strike_stun", 0.3)), "dr": true,
-			"tags": ["ultimate"]})
-		if f is Hunter:
-			HeroUlt.landed(k, f)
+	_strike(0)
+	struck = 1
 	var c0 := _cell_mid(0)
 	_flood_t = 0.3
 	_place_flat(_flood, c0 + Vector3(0, 0.08, 0), Vector2(cell_len(), float(x.get("width", 4.0))))
@@ -192,6 +196,19 @@ func _slam() -> void:
 	k.m.fx.burst(c0 + Vector3(0, 0.4, 0), GOLD, 24, 7.0, 0.4, 3.0, 1.3)
 	k.m.fx.dust(c0, 14)
 	k.net_ring(c0, cell_len() * 0.6, GOLD)
+
+## The racing fissure reaches cell `i`: each foe in it not struck yet takes the strike and the stun.
+func _strike(i: int) -> void:
+	var x := xd()
+	var strike: float = float(x.get("strike_dmg", 4.0)) * k.m.dmg_mult(h) * LevelGrowth.ap(h)
+	for f in _foes_in(i):
+		if hit.has(f.get_instance_id()):
+			continue
+		hit[f.get_instance_id()] = true
+		f.hurt(strike, h, {"src": "abil", "ab": "ultimate", "stun": float(x.get("strike_stun", 0.5)), "dr": true,
+			"tags": ["ultimate"]})
+		if f is Hunter:
+			HeroUlt.landed(k, f)
 
 ## One cell heaves up: a slab with molten seams, each foe on it thrown once.
 func _erupt(i: int) -> void:
@@ -203,15 +220,14 @@ func _erupt(i: int) -> void:
 	k.m.fx.dust(mid, 10)
 	k.m.fx.burst(mid + Vector3(0, 0.6, 0), EMBER, 12, 6.0, 0.4, 6.0, 1.1, Vector3.UP, 30.0)
 	k.m.sfx("bjorn_slam", mid, -8.0, 0.7 + 0.08 * i)
-	Feel.shake(k.m, "t2", h, mid)
 	var dmg: float = float(x.get("dmg", 18.0)) * k.m.dmg_mult(h) * LevelGrowth.ap(h)
 	for f in _foes_in(i):
 		var key: int = f.get_instance_id()
 		if thrown.has(key):
 			continue
 		thrown[key] = true
-		f.hurt(dmg, h, {"src": "abil", "ab": "ultimate", "stun": float(x.get("stun", 0.5)),
-			"lift": float(x.get("lift", 7.0)), "slow": float(x.get("slow_t", 1.5)), "slow_k": float(x.get("slow", 0.5)),
+		f.hurt(dmg, h, {"src": "abil", "ab": "ultimate", "lift": float(x.get("lift", 7.0)),
+			"slow": float(x.get("slow_t", 1.5)), "slow_k": float(x.get("slow", 0.5)),
 			"dr": true, "tags": ["ultimate"]})
 		k.m.fx.burst(f.pos + Vector3(0, 1.0, 0), Color("ff5a3a"), 10, 5.0, 0.3, 2.0, 1.0)
 		if f is Hunter:

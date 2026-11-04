@@ -6,7 +6,9 @@ extends RefCounted
 ## moment itself (STILLS); add --demo-zoom=1.0 for the gameplay zoom.
 
 const ANIM := {
-	"thf_lmb": ["thief", "arc_bolts", [0.48, 0.52, 0.57, 0.62, 0.68, 0.85]],
+	"thf_lmb": ["thief", "arc_bolts", [0.49, 0.51, 0.54, 0.62, 0.76, 0.95, 1.2]],
+	"thf_lmb_held": ["thief", "arc_bolts", [0.5, 0.54, 0.62, 0.76, 0.95, 1.01]],
+	"thf_lmb_run": ["thief", "arc_bolts", [0.5, 0.54, 0.62, 0.76, 0.95, 1.01]],
 	"thf_primed": ["thief", "arc_bolts", [0.99, 1.02, 1.05, 1.11, 1.24, 1.38, 1.55]],
 	"thf_vault": ["thief", "arc_bolts", [0.55, 0.62, 0.69, 0.86, 0.98]],
 	"thf_exdash": ["thief", "arc_bolts", [0.55, 0.7, 0.95, 1.4, 1.7]],
@@ -21,7 +23,7 @@ const ANIM := {
 	"jug_wave": ["juggernaut", "greatsword", [0.5, 0.9, 1.4, 1.46, 1.55, 1.85]],
 	"jug_slam": ["juggernaut", "greatsword", [0.6, 0.85, 1.08, 1.12, 1.25, 1.6]],
 	"jug_riposte": ["juggernaut", "greatsword", [0.6, 1.0, 1.16, 1.22, 1.32, 1.55]],
-	"jug_lunge": ["juggernaut", "greatsword", [0.7, 1.2, 1.4, 1.45, 1.52, 1.8]],
+	"jug_lunge": ["juggernaut", "greatsword", [0.65, 1.0, 1.31, 1.42, 1.5, 1.8]],
 	"jug_meteor": ["juggernaut", "greatsword", [0.53, 0.62, 0.7, 0.82, 0.98, 1.3]],
 	"jug_dash": ["juggernaut", "greatsword", [0.55, 0.64, 0.74, 0.9, 1.2]],
 	"jug_exdash": ["juggernaut", "greatsword", [0.5, 0.54, 0.62, 0.72, 0.9]],
@@ -64,6 +66,11 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 	match mv:
 		"thf_lmb":
 			P.inp["fire"] = t > 0.49 and t < 0.52
+		"thf_lmb_held":
+			P.inp["fire"] = t > 0.49 and t < 1.0
+		"thf_lmb_run":
+			P.inp["move"] = Vector2(0, 1) if t > 0.15 else Vector2.ZERO
+			P.inp["fire"] = t > 0.49 and t < 1.0
 		"thf_primed":
 			if at(t, dt, 0.5):
 				P.dashes = P.max_dashes()

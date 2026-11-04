@@ -257,7 +257,6 @@ func pick_up(o: Hunter) -> void:
 	h.shield = float(pd.get("shield", 40.0)) + float(pd.get("shield_lv", 6.0)) * float(maxi(0, h.lvl - 1))
 	h.shield_t = 999.0
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CARRY", res_col(), false)
-	m.fx.ring(h.pos, 1.4, res_col(), 0.3)
 	m.sfx("tend_pickup", h.pos, -2.0, 1.0)
 	play("mm_pickup")
 	if rank("dash") >= 3:
@@ -268,7 +267,7 @@ func pick_up(o: Hunter) -> void:
 func drop_all(broken: bool) -> void:
 	for o in carrying():
 		CareUtil.set_carry(m, o, "")
-		o.teleport(Vector3(h.pos.x, h.pos.y, h.pos.z) + Vector3(0.9, 0, 0))
+		m.displace.teleport(o, Vector3(h.pos.x, h.pos.y, h.pos.z) + Vector3(0.9, 0, 0))
 		o.vel = Vector3.ZERO
 	h.shield = 0.0
 	h.shield_t = 0.0
@@ -281,16 +280,18 @@ func drop_all(broken: bool) -> void:
 # ------------------------------------------------------------------ dash: Relay Step
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
+	# the glide is Elluna's Lunar Air Dash: airborne only. On the ground with the hop spent, Shift is refused
+	use_ex = use_ex and not h.grounded
 	if not spend_dash(use_ex):
 		return true
 	var air: Dictionary = dd.get("air", {})
-	var dist := float(air.get("dist", 8.5)) if use_ex else float(dd.get("dist", 4.2))
-	var tt := float(air.get("time", 0.8)) if use_ex else float(dd.get("time", 0.16))
+	var dist := float(air["dist"]) if use_ex else float(dd["dist"])
+	var tt := float(air["time"]) if use_ex else float(dd["time"])
 	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12)), "dir": dash_dir()}, use_ex)
-	# travel applies the global dash feel to the time; the glide's length is set in data at about 3x the
-	# ground hop after its dash feel, and so skips the global shortening
+	# the ground hop goes through the global dash feel (its data is set so the result is the source's 2 bh in
+	# 0.2 s); the glide is the source's own measured curve (dash.air), so the feel doesn't touch it
 	if use_ex:
-		_start_glide(dist, tt * float(dash_feel()["time"]))
+		_start_glide(dist, tt)
 	play("mm_float" if use_ex else "mm_skip")
 	m.sfx("tend_hop", h.pos, -3.0, 1.05 if use_ex else 1.2)
 	aft_t = 0.0
@@ -326,6 +327,11 @@ func _tick_glide(dt: float) -> void:
 	var ramp := float(air.get("ramp", 0.1))
 	var burst := float(air.get("burst", 0.4))
 	var top := float(glide["top"])
+	# air control (owner): the move keys bend the glide's heading at a capped rate (dash.air.steer rad/s)
+	var mv: Vector2 = h.inp.get("move", Vector2.ZERO)
+	if mv.length() > 0.1:
+		var steer := float(air.get("steer", 3.0)) * dt
+		h.roll_dir = h.roll_dir.rotated(clampf(h.roll_dir.angle_to(mv.normalized()), -steer, steer))
 	var k := clampf((t - ramp - burst) / maxf(0.05, float(glide["time"]) - ramp - burst), 0.0, 1.0)
 	h.roll_speed = top * lerpf(0.5, 1.0, clampf(t / ramp, 0.0, 1.0)) * lerpf(1.0, float(air.get("out_k", 0.45)), k)
 	# held up while it floats; the last 0.15 s lets her come down
@@ -371,7 +377,6 @@ func fire_rmb(c: Dictionary) -> void:
 	lk().burst("flare", h.pos, {"col": Color("9a6aff"), "rim": Color("ffd27a"), "r": 1.4, "dur": 0.25, "pattern": 3.0})
 	m.fx.flash(start, Color("c8e07a"), 0.9, 0.08)
 	m.sfx("tend_seed", h.pos, -2.0, 1.0)
-	Feel.shake(m, "cast", h, h.pos)
 
 ## The Burrseed's burst radius: rank 3 doubles it (the source's detonation-radius upgrade).
 func burst_radius() -> float:
@@ -424,7 +429,6 @@ func _burst(t: Ent) -> void:
 	m.fx.burst(at + Vector3(0, 0.5, 0), Color("c9a0ff"), 26, 5.0, 0.6, 3.0, 1.2)
 	m.fx.burst(at + Vector3(0, 0.2, 0), col, 14, 3.5, 0.5, 6.0, 1.0)
 	m.sfx("tend_root", at, 0.0, 1.0)
-	Feel.shake(m, "t3", h, at)
 	var root := float(sd["root"]) + (0.3 if rank("sec") >= 3 else 0.0)
 	for f in foes_in(at, rr):
 		f.hurt(
@@ -722,14 +726,14 @@ func _tick_call(dt: float) -> void:
 		_call_end(true)
 
 
-## A tick of the tether's heal: on a standing teammate (or herself in solo); while they are down the
-## healing goes to her instead (the source's rule for a channel on a downed ally).
+## A tick of the tether's heal on the teammate (or herself in solo, at self_k). A downed teammate is healed
+## too, as the source's channel heals an ally or a Wisp: it tops up what keeps them from bleeding out.
 func _call_heal(who: Hunter, amount: float) -> void:
 	var amt := amount * LevelGrowth.ap(h)
-	if who.downed or who == h:
-		CareUtil.heal(m, h, amt * (float(e_def().get("self_k", 0.33)) if who == h else 1.0))
+	if who == h:
+		CareUtil.heal(m, h, amt * float(e_def().get("self_k", 0.33)))
 	else:
-		CareUtil.heal(m, who, amt)
+		CareUtil.heal(m, who, amt, float(e_def().get("wisp_k", 5.0)))
 
 
 func _call_look(who: Hunter, dt: float) -> void:
@@ -779,20 +783,14 @@ func _call_end(done: bool) -> void:
 	play("mm_call_end")
 
 
-## Pulls a downed teammate to her side and stands them up. An online teammate rides there on the
-## existing "carry" event, then the "rev" event stands them up a beat later.
+## Pulls a downed teammate to her side and stands them up (Displace and the "rev" event: an online
+## teammate is moved and stood up on their own game).
 func _call_home(who: Hunter) -> void:
 	stats["rescues"] += 1
 	var side := Vector2(cos(h.face), -sin(h.face)) * float(x_def().get("land_r", 0.9))
 	var to := Vector3(h.pos.x + side.x, h.pos.y, h.pos.z + side.y)
 	lk().burst("plus", who.pos + Vector3(0, 1.2, 0), {"r": 0.8, "dur": 0.3})
-	if who.remote:
-		CareUtil.set_carry(m, who, h.nid)
-		m.later(0.15, func():
-			CareUtil.revive(m, who, h)
-			CareUtil.set_carry(m, who, ""))
-		return
-	who.teleport(to)
+	m.displace.teleport(who, to)
 	who.vel = Vector3.ZERO
 	CareUtil.revive(m, who, h)
 

@@ -1,12 +1,12 @@
 # Classes
 
 A class is a whole character: its own dash, a passive with a resource it builds, a weapon (left
-click), a right-click ability with several variants, a utility on E and an ultimate on R (X fuses you with your Boki). There are
+click), a right-click ability with several variants, a utility on E and an ultimate on R. There are
 twelve, four in each weight class:
 
-- **Light:** [Sable](Class-Silver-Thief.md) (stay on one target from range, cartwheel and reset), [Pin](Class-Dark-Archer.md) (pin people, then the big shot), [Vireo](Class-Storm-Slayer.md) (load Sparks, then Wirerun through them) and [Claire](Class-Icy-Dancer.md) (skate on ice, chill foes, shelter the squad behind ice).
-- **Medium:** [Vex](Class-Hired-Gun.md) (burr charges and one long needle), [Moosh Moosh](Class-Fox-Cub.md) (heal, carry the downed), [Tarek](Class-Rock-Elementalist.md) (raise rocks, punch them into the fight) and [Ostra](Class-Void-Jester.md) (swell, plant a seed, trade places).
-- **Heavy:** [Zedran](Class-Arena-King.md) (rage, chain in, crush), [Bjorn](Class-Frozen-Bulwark.md) (block, then smash them into walls), [Dredge](Class-Broken-Abomination.md) (haul a foe in, drop the anchor) and [Cinder](Class-Mad-Pyromancer.md) (build Char, flash foes over).
+- **Light:** [Dancer](Class-Dancer.md) (stay on one target from range, cartwheel and reset), [Archer](Class-Archer.md) (pin people, then the big shot), [Vireo](Class-Vireo.md) (load Sparks, then Wirerun through them) and [Tamsin](Class-Tamsin.md) (chill foes, shelter the squad behind ice).
+- **Medium:** [Marlowe](Class-Marlowe.md) (burr charges and one long needle), [Linnet](Class-Linnet.md) (heal, carry the downed), [Dolm](Class-Dolm.md) (raise rocks, punch them into the fight) and [Ostra](Class-Ostra.md) (swell, plant a seed, trade places).
+- **Heavy:** [Zedran](Class-Zedran.md) (rage, chain in, crush), [Bulwark](Class-Bulwark.md) (block, then smash them into walls), [Dredge](Class-Dredge.md) (haul a foe in, drop the anchor) and [Ashwick](Class-Ashwick.md) (build Char, flash foes over).
 
 The weight class sets health, speed, mass (how far hits push you) and how many dash charges you get.
 Everything else comes from the class kit.
@@ -57,7 +57,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Merge) |
 | [Arena King](Class-Arena-King.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Merge) |
 | [Frozen Bulwark](Class-Frozen-Bulwark.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Merge) |
-| [Broken Abomination](Class-Broken-Abomination.md) | 193 / 2 | Shotgun | Salvage | Barge | Grapnel | Anchor Drop | none (Boki Merge) |
+| [Broken Abomination](Class-Broken-Abomination.md) | 193 / 2 | Shotgun | Salvage | Barge | Abyssal Hand | Anchor Drop | none (Boki Merge) |
 | [Mad Pyromancer](Class-Mad-Pyromancer.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Merge) |
 | [Fox Cub](Class-Fox-Cub.md) | 145 / 1 | Ember Cast | Bearer | Relay Step | Burrseed | Hearthlight | none (Boki Merge) |
 | [Icy Dancer](Class-Icy-Dancer.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Merge) |

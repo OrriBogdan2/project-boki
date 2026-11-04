@@ -44,12 +44,61 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 | LMB, Greatsword | tap, hold | Wide (175 degree) slashes of 8 every 0.34s, alternating, a two-tone crescent (magenta edge, flame-yellow fill), double at the tip with a white star; hold: a ring round the body fills, then a red crescent of flame (Searing Wave) flies past the cursor to max range (6 to 10m, 12 to 28) | Quick Attack: alternating 180 degree two-tone crescents, a tip star; hold: a red crescent bolt past the cursor | As the source |
 | RMB tap, Finishing Slam | tap | A 0.6s aimed wind-up (blade cocked low behind) behind a short magenta strike lane everyone sees, then a 4m strike: 26, +50% under 35% (foes that low wear a red outline while the Smash is ready); its sweet spot is the far tip (2.4 to 4.2m within 18 degrees): knock that foe within 2s and the Gilded Riposte (X) is ready again | Execution Slam: red outline on executable foes, a short magenta lane, about 2.4 bh, a sweet-spot knock resets Retaliation | As the source; the crash fold is gone (see "Ult choice") |
 | RMB hold, Lunge | hold, release | A crouched, coiled wind-up; a lane grows ahead (4.5 to 7.5m) with a fill and turns magenta with a flash and a ping at full (0.8s); a rising whine; the cursor ring fills; you can jump while charging; release flings you forward into the first foe: 14 to 20, a huge white burst and a red slash across them; striking nothing doubles the cooldown | Charge Dash: red lane growing, magenta at full, about 5m, 559 to 771 | Owner: fling far, so the length grows with the charge |
-| RMB air, Meteor Drop | in the air | A purple disc under the cursor (5m at most) shows while it's ready. Press: a 0.2s hang (blade hauled overhead, knees tucked, one turn) over a marker everyone sees (the 2.6m disc and the 1.2m stun core), a visible dive onto it with flame streaks (0.22 to 0.4s), then the landing: a crouch onto the knees, cracks in the ground, a shock ring at the stun's edge, dust and debris, a shake and a deep boom; 18, slow 40%; the core +50% and stunned 0.8s. 0.5s recovery rising from the crouch (planted 0.2s, Shift free after 0.25s). Its own 7.2s cooldown (4.8s at rank 3) | Air Slam: a disc at the cursor, ~0.85s airborne from the jump, ~0.5s recovery in a low crouch ([F] 412.0-413.9s) | As the source; press to impact 0.52s (the footage's apex to impact is ~0.55s) |
+| RMB air, Meteor Drop | in the air | A purple disc under the cursor (5m at most) shows while it's ready. Press: a 0.2s hang (blade hauled overhead, knees tucked, one turn) over a marker everyone sees (the 2.6m disc and the 1.2m stun core), a visible dive onto it with flame streaks (0.22 to 0.4s), then the landing: a crouch onto the knees, cracks in the ground, a shock ring at the stun's edge, dust and debris, a shake and a deep boom; 18, slow 40%; the core +50% and stunned 0.8s. 0.5s recovery rising from the crouch (planted 0.2s; Shift or a jump moves him out of it at once). Its own 7.2s cooldown (4.8s at rank 3) | Air Slam: a disc at the cursor, ~0.85s airborne from the jump, ~0.5s recovery in a low crouch ([F] 412.0-413.9s) | As the source; press to impact 0.52s (the footage's apex to impact is ~0.55s) |
 | RMB in the pull | during E | Cinder Spin, Haul Slam, Chain Lunge (below) | Anti-Heal Spin | As before |
 | Dash, Rampage | Shift | 2 charges, a third at rank 2: a 0.15s crouch with the blade cocked high behind, then 4.5m in 0.3s (x the global dash feel), flat and stretched, and a low recovery with the blade dragging: 7 along it, the tip 14 and a big knock, orange flame streaks; rank 3: a shot dodged through it feeds Rage (+15) | Quick Dash: 3 charges, about 2 bh | As the source; sync62's slower heavy dash kept (0.3s) |
-| E, Warchain | tap, recast | 13m (9.5s cooldown): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, pulling taut and hot as it stretches; recast hauls you in at 22 m/s, steerable sideways; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits and leash |
+| E, Warchain | tap, recast | 13m (9.5s cooldown): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
 | X, Gilded Riposte | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (an upward crescent in his gold, run hot at the edge, and a gold cloud): 34, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our look (gold guard, upward gold cleave) replaces its red crescent |
 | Merge (its own key, `ultimate`) | tap | The Boki Merge | (n/a) | The Merge is the same for every hero |
+
+## Parity pass (owner 18:45, PARITY_BRIEF)
+
+Source vs ours per slot, LMB first. [D] game data (supervive_kits.md), [F] footage (hero-ref/juggernaut.md, 10 fps
+in the ability clips), [O] owner notes (MAIN_TO_EXT 17:05-17:12). Asserted in `tools/zedran_feel_check.gd`
+("jug parity ...").
+
+| Slot | Beat | Source | Ours | Status |
+|---|---|---|---|---|
+| LMB tap | animation | [F] 0023-0034: a step into each swing, ~1 frame wind-up and 1 frame swing, alternating right-left; the blade trails behind between swings | `jug_slash_r/_l`: coiled step (0.0), the cut at 0.1, follow-through to 0.24, settled by 0.45; alternating | matches |
+| LMB tap | tracking | [F] he walks while swinging; the slash goes toward the aim (some swings look facing-led: unconfirmed) | each slash is aimed at the cursor at the swing; he keeps his full walk | matches (cursor kept: the facing read is unconfirmed) |
+| LMB tap | cadence | [F] swings 0.3-0.4 s apart (0026, 0029, 0033) | one slash per 0.34 s | matches |
+| LMB hold | charge | [F] 0.6-1.0 s, a thin white arc round him (0087); [O] it grows with the hold, shown while charging | tap 0.22 s, full 0.95 s; the ring round him fills, and now a lane on the ground grows as long (7 -> 14 m) and wide as the wave it would throw, gold-hot at full | changed (the preview is new) |
+| LMB hold | projectile | [F] a red crescent bolt at ~20 bh/s (~36 m/s) flying past the cursor to max range; [D] tap 43, hold 107 (2.5x) | 36 m/s (was 20), 7 -> 14 m (was 6 -> 10), hit radius 0.3 -> 0.6 (it was stuck at the grammar default 0.2, so the hitbox never grew), 12 -> 20 (2.5x a slash; was 28), Rage per wave kept (wave_rage 4.2) | changed |
+| RMB hold | pose | [O] the sword held over his head as long as RMB is held | `jug_lunge_wind`: the blade swings up and over and holds high overhead on a loaded back leg; the release chops down and out from overhead (`jug_lunge`) | changed (was a low crouch, the footage's) |
+| RMB hold | hold time | [O] holdable indefinitely, no auto-release | `rmb_auto_t` = INF (was full + 0.4 s) | changed |
+| RMB hold | perfect release | [O] a release at the right moment goes a bit further, with a clear "now" cue and a distinct sound | at full, then once a second: the raised blade flashes white-hot with a ring (0.15 s window); let go in it: +20% distance, the cursor's perfect star, a bright metal ring | new |
+| RMB tap / air / chain | all | [F]/[D] | unchanged (matched by the item 21/22 passes: see the per-slot table) | matches |
+| Dash, E, X | all | [F]/[D] | unchanged (the item 21/22/51 passes) | matches |
+
+## Audit (Nov 3 23:40)
+
+Every row of briefs/specs/kit-audit/zedran_bjorn_pin.md for Zedran (it audited main 200effce): (a) already done on
+this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--juggernaut-combo-check`.
+
+| Row | Sev | Verdict | Where / why |
+|---|---|---|---|
+| E pull model (facing, input, slingshot) | HIGH | (a) | ext/zedran-warchain 1ae768d5: an impulse that input and facing curve, backing away slingshots; "jug chain pull: ..." asserts. Speed 22 m/s (footage 5 bh / 0.4 s) over the wiki's 19: the game data has none |
+| E tether extend | MED | (a) | 1ae768d5 / 95c291c8: pays out to 24 m and holds there; the length is ours (no data, no footage), see "Warchain" |
+| E range / cooldown | MED | (b) | cooldown 12.8 s (the data's 16 s at the kit's 0.8x), ranks still -12.5% / -37.5% (8 s at rank 3 = 0.8 x the data's 10 s) |
+| E pull exits | LOW | (a) | kept and re-asserted under the new model ("jug pull: Shift exits ...", "... a jump exits ...") |
+| E hooked-foe blight | LOW | (b) | no Anti-Heal from the hook alone; the spin blights who it hits (the data's Scorching Spin). "juggernaut E: Warchain hooks (no blight ...)" |
+| RMB hold auto-fire, perfect release | HIGH | (a) | ext/parity e6429ccb: held indefinitely, a perfect window at full then once a second (+20%); "jug parity rmb: ..." |
+| RMB hold pose | HIGH | (a) | e6429ccb / 097cff7c: the sword over his head |
+| Slam resets X on any knock | MED | (b) | any Finishing Slam hit then a knock within 2 s readies the Riposte; the sweet spot now hits 40% harder (the data's "edge hits do more"). "juggernaut Smash: a knock after any Slam hit ..." |
+| RMB tap numbers | - | (c) | fine per the audit |
+| Meteor self-shake | MED | (c) | item 50 lands on ext/no-shake; nothing added here |
+| RMB during pull / arrival | LOW | (a) | the RMB interaction rows pass under the new pull model (Cinder Spin, Haul Slam, Chain Lunge asserts) |
+| LMB tip 2.0x | LOW | (b) | 1.6x (the footage's 151 / 94). "juggernaut LMB tap: a slash, 1.6x at the tip ..." |
+| LMB hold Shift-cancel, self-release | MED | (a)+(b) | Shift keeps the charge (item 51, 53820b53); the self-release at full + 0.5 s is gone (the owner's hold scales; no data rule) |
+| Shift numbers | LOW | (b) | 9 along it, tip 18 (the data's 49 = 1.14x a slash), cooldown 10.4 s (0.8 x 13) |
+| Air dash shove | LOW | (b) | no shove (no source) |
+| X cooldown / damage | MED | (b) | 36 s (0.8 x 45) and 43 (the data's 230 = 5.35x a slash) |
+| X fx (guard ring, self-shake) | LOW | (b)+(c) | the guard-start ring is gone; the shake is ext/no-shake's |
+| Passive / reset rings | MED | (b) | gone: Enrage rings, the Rage-spent ring, the "Riposte ready" ring (a reset), the chain-charge ring, the slam wind-up ring, the sweet-spot mark, the haul's inner ring. Kept: rings the size of a hit area (Meteor core, Haul and Spin radius, the Rampage tip) |
+| Self-shake (all) | MED | (c) | ext/no-shake; none added |
+| Passive numbers | - | (c) | fine |
+| Tall-ledge climb doc | LOW | (b) | the "Not built" row now says built (hunter_move.json `climb_tall`) |
+| Docs drift (steer 6 vs 7) | LOW | (a) | the Warchain table now matches the data (1ae768d5) |
 
 ## Warchain: the state machine
 
@@ -66,6 +115,17 @@ notes (`hero-ref/juggernaut.md` E and RMB sections, frames 0301-0366).
 flying at 32 m/s (7 bh / 0.4 s = 31.5 m/s). The pull: [W] 1900 uu/s = 19 m/s at 1 uu = 1 cm; [F] about 5 bh in
 0.4 s = 22.5 m/s. Ours: 22 m/s, not scaled by the global dash feel (the pull is not a dash).
 
+**Tether length and the pull model (owner 23:00 UTC: "stays attached while he moves back, extending to a max
+length; the pull depends on his facing and movement input: steer, curve, slingshot").** Neither [D] nor [W] gives a
+maximum tether length, and the footage never shows one: in the frames (0306-0316) the chain stays on for ~2.5 s
+while he moves about, but only ~5-6 bh (~10 m) long, and it is let go by 0320 without reaching a limit (the big
+ring on screen there is centred on him: the throw's range, ~6.8 bh). Ours: the chain pays out to **24 m** (about
+1.8x the 13 m throw, so backing off is a real choice) and holds there (no break: [W] breaks it only on a stun or
+the 5 s). The 24 m is our pick; the owner can set it. [W] makes the pull an impulse (1900 uu/s), not a winch, so his own motion and input shape it:
+the pull starts at the reel speed plus a slingshot from his speed away from the anchor (0.8 of it, up to +10 m/s),
+his sideways speed carries in, and the heading turns (6 rad/s) toward a point his movement input slides beside
+the anchor (7 m/s, up to 3 m; where he faces adds 0.4 of that).
+
 The numbers live in `e` in content/archetypes/juggernaut.json; the code is `JuggernautChain`
 (scripts/arch/kits/juggernaut_chain.gd).
 
@@ -81,19 +141,23 @@ The numbers live in `e` in content/archetypes/juggernaut.json; the code is `Jugg
 | Throwing | E pressed in flight | remembered for 0.12 s: if it hooks in that time, the pull starts on the hook | ours (buffer) |
 | Throwing | stunned | Missed (the chain breaks), the cooldown starts | [W] 05.02.25 |
 | Hooked (foe or wall) | time | the link chain stays on while you walk, jump, glide or dash, 5 s, then breaks; the cooldown starts | [W] 5 s; [F] 0305-0317 |
-| Hooked | the chain stretches | the links pull straight and glow hotter, a creak at the hook and as it tightens; past 1.5 x its range (19.5 m) it breaks | [F] tension; the break length is ours |
-| Hooked | E | Pulling (the cooldown starts) | [D] [W] |
+| Hooked | he backs away (or the foe walks off) | the chain pays out; the links pull straight and glow hotter past 85% of its length, a creak as it tightens | [F] 0305-0317 tension |
+| Hooked | at its full length (24 m) | it holds: whoever is moving away (him, or a hooked foe) is stopped at the end of it, with a hard creak; it never breaks for length | [O] 23:00; [W] breaks only on a stun or the time; the length is ours (no data, no footage) |
+| Hooked | E | Pulling (the cooldown starts): an impulse toward the anchor at 22 m/s | [D] [W] impulse |
+| Hooked | E while moving away from the anchor | Pulling, slingshot: +0.8 of his speed away (up to +10 m/s) | [O] 23:00; [W] an impulse adds to his motion |
+| Hooked | E while strafing | Pulling, swung out that way: his sideways speed carries into the start | [O] 23:00 |
 | Hooked | E with the Lunge charging | Pulling with a Haul Slam armed for the arrival | ours |
 | Hooked | stunned, or the foe is downed or gone | Broken: "CHAIN BROKE", the cooldown starts | [W] 05.02.25 |
 | Hooked | a Boki merge starts | Broken | ours |
-| Pulling | each step | you fly at 22 m/s toward the anchor (a hooked foe is followed as it moves), height held, across gaps | [W] impulse; [F] 0333 |
-| Pulling | movement held across the pull | the arrival point slides that way, up to 3 m aside (6 m/s); you curve in beside the anchor | [O] 14:07 note |
+| Pulling | each step | you fly at the pull's speed, the heading turning at 6 rad/s toward the anchor (a hooked foe is followed as it moves), height held, across gaps | [W] impulse; [F] 0333 |
+| Pulling | movement held across the pull | the aim point slides that way, up to 3 m aside (7 m/s), and the heading curves after it: you swing in beside the anchor | [O] 14:07 note, 23:00 |
+| Pulling | facing aside (the cursor off the chain's line) | bends it that way too, at 0.4 of the input's rate | [O] 23:00 "depends on his facing" |
 | Pulling | Shift | the pull ends and the Rampage goes the way you dash (exit) | ours (no source footage) |
-| Pulling | jump | the pull ends in a jump that keeps 70% of its speed (a chain launch); the glider takes it too | ours |
+| Pulling | jump | the pull ends in a jump that keeps 70% of its speed (slingshot included) along the heading (a chain launch); the glider takes it too | ours |
 | Pulling | E | ignored (no second pull, no stop) | ours |
 | Pulling | stunned, rooted or knocked | the pull stops dead | [W] stun rule |
-| Pulling | reaches the foe (contact) or the wall (0.7 m off it), or runs 0.25 s past its expected time | Arriving | [D] [F] |
-| Arriving | (0.25 s window) | you keep 35% of the pull's speed along it (momentum into the next move); an armed Haul Slam lands | [O] "arrival keeps momentum" |
+| Pulling | reaches the foe (contact) or the wall (0.7 m off it), passes it alongside within 3.5 m, or runs 0.5 s past its expected time | Arriving | [D] [F] |
+| Arriving | (0.25 s window) | you keep 35% of the pull's speed (slingshot included) along your heading (momentum into the next move); an armed Haul Slam lands | [O] "arrival keeps momentum" |
 | Arriving | over the abyss | you fall from the pull's height (the glider works) | ours |
 | Arriving | window over | Ready again (on cooldown) | |
 
@@ -122,7 +186,11 @@ is held for 0.12 s before it ends and goes off when it does; earlier presses are
 | Arrived beside a foe | tap | the Slam hits as a body hit (you're 1.2 m off, inside the 2.4 to 4.2 m sweet spot); a wall pull or a steered pull that leaves them 2.4 to 4.2 m ahead gets the sweet spot | no special rule (source: edge hits) |
 | Jumped out of a pull | press | Meteor Drop | ours |
 | Rampage (its crouch counts) | any | ground: fires mid-dash, the drive carrying him into it; air dash: ends the dash and the Meteor Drop begins | content/dash_flow/juggernaut.json (docs/heroes/dash_interactions.md) |
-| Slam wind-up, Lunge, Meteor Drop | Shift | held, goes when it's over (the Meteor Drop: 0.25s into its recovery) | dash_flow `into_dash.rmb` |
+| Slam wind-up | Shift | a Slam Drive: the drive goes at once (no crouch) along the strike's aim, the Slam's overhead pose kept, and the Slam lands where it arrives | dash_flow `into_dash.rmb` ("RMB into Shift", turning restricted) |
+| Meteor Drop hang | Shift | the air dash goes at once; the dive then comes down onto the marker from where it took him | dash_flow `into_dash.rmb` (item 51) |
+| Lunge, Meteor Drop dive | Shift | each is a dash of its own: Shift goes the step it ends; the drop's recovery dashes (or jumps) at once | dash_flow `into_dash.rmb` |
+| Searing Wave charging | Shift, jump | the charge waits through the Rampage or the air dash (and charges on in a jump); let go in it, the wave goes as the dash ends | dash_flow `hold.lmb` (item 51) |
+| Gilded Riposte guard, cleave | Shift / jump | Shift held to the step the cleave lands; no jump (planted, as the source); in the recovery after it either goes at once | dash_flow `into_dash.x`, `into_jump.x` |
 
 Differences from the source, and why:
 - **The Haul Slam and the Chain Lunge** are ours (the source has only the spin in the pull); they give the hold
@@ -131,7 +199,7 @@ Differences from the source, and why:
   hold; a held Smash only becomes a Haul Slam when it was already charging before the pull.
 - **Exits:** the footage never shows a dash or a jump in the pull; we let Shift cancel it and a jump launch out of
   it, so it never locks you in.
-- **The leash** (1.5 x range) is ours; the source's tether length is not in the data.
+- **The tether length** (24 m, held taut there) is ours: neither the data nor the footage shows one.
 
 ## Ult choice
 
@@ -186,7 +254,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | Flame Step's tip deals double | wiki Shift | yes (0401) | Built |
 | Obsidian Slam's centre ring stuns and deals +50% | wiki RMB | yes | Built |
 | The slam lands where you aim in the air | footage 0263, 0286 | yes | Built (5m reach), asserted |
-| Brall climbs double-height walls by jumping while facing them | wiki passive | no | Not built: it needs a change to the shared movement (hunter.gd mantle); listed for the main session |
+| Brall climbs double-height walls by jumping while facing them | wiki passive; data bCanWallJump (supervive_physics.md:67) | no | Built on main: `climb_tall` in content/rules/hunter_move.json, read by hunter_move.gd |
 | Dodging shots during the dash builds Empowered (top rank) | owner's game data | no | Built at rank 3: the perfect-dodge hook feeds 15 Rage |
 | The Obsidian Slam has its own cooldown slot (9s, -3s at the top) | owner's game data | n/a | Built: 7.2s, 4.8s at rank 3; the Smash stays ready |
 | The Flame Step tip does not stun into walls | owner's game data | n/a | Built: the wall stun is gone |
@@ -201,7 +269,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | He lunges about 1 bh into the strike | footage ult f39 | yes | Built (1.8m); asserted |
 
 Assumption 7: the dash after an RMB turns freely; the pull keeps 35% of its speed as you arrive (the owner: "arrival keeps momentum").
-Also ours (no footage): the pull exits (Shift, a jump), the leash (1.5x range) and the 0.12s input buffer are ours; the footage shows none of them.
+Also ours (no footage): the pull exits (Shift, a jump) and the 0.12s input buffer are ours; the footage shows none of them.
 
 ## Combinations
 

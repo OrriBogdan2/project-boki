@@ -4,15 +4,17 @@ extends ArchKit
 ##
 ## - LMB (War Hammer): tap throws the hammer to the cursor (clamped to its range; it passes through foes
 ##   and stays planted under a gold beacon, showing foes near it to your team, until you tap again to
-##   call it back, hitting on the way). Hold spins the hammer in his hand (faster as it charges, a glint
-##   on its head from 0.6 s, a flare at full, 1.25 s); let go and it's a Crushing Blow: a flaming 180
-##   degree crescent in front that carries him forward with it.
+##   call it back, hitting on the way). Hold drags the hammer back low behind him, side-on and crouched,
+##   turning with the cursor (a glint on its head from 0.6 s); at full (1.25 s) he coils deepest, and a flash
+##   on its head and a click open the perfect window. Let go and it's a Crushing Blow: a flaming 180 degree
+##   crescent in front that steps him forward with it; let go in the window and it's the perfect swing, a
+##   leaping launch (BjornLaunch).
 ## - RMB: hold to raise his aegis (its own HP, regenerates); letting go only lowers it.
 ## - Dash: 360 Smash, a short dash that ends in one full spin hit around him; with the aegis raised it's
 ##   the Shield Charge (the Bash: invulnerable for its length, a heavier knock) on the RMB slot's own cooldown.
 ## - Passive, Guard: damage the aegis blocks becomes Guard; at 50 the Shield Charge ends in a Shield Slam.
-##   Payoff, Crushed: any knock of his (Crushing Blow, 360 Smash, Shield Charge, Slam) that drives a foe into a
-##   wall or another foe stuns them (T4, pay_slam).
+##   Payoff, Crushed: any knock of his (the hammer thrown or called back, Crushing Blow, 360 Smash, Shield
+##   Charge, Slam) that drives a foe into a wall stuns them (T4, pay_slam).
 ## - E, Mending Ground: a green column comes down for 1 s, then a zone round the hammer (on you when the hammer
 ##   is in hand) heals a little every 0.5 s for 4 s and ends in a burst that also mends a raised aegis.
 ## - X, Faultline (level 6, BjornUlt): planted, a slam, and the ground erupts cell by cell down a lane.
@@ -33,6 +35,7 @@ var crushes := 0               # Crushes landed (tests, demo)
 var crest: Node3D = null       # the gold crest light while a Shield Slam is armed
 var fx: BjornFx                # Bjorn's pooled effects
 var ult: BjornUlt              # X: Faultline
+var launch: BjornLaunch        # the perfect swing's launch
 var flared := false            # this hold's full-charge flare has gone off
 var throws := 0                # (checks) hammers thrown, and the last throw's landing distance
 var throw_d := 0.0
@@ -44,10 +47,10 @@ var ticks_healed := 0           # (checks) heals the zone's ticks gave
 var shield_slams := 0           # (checks) Shield Slams the Shield Charge ended in
 var throw_at := -9.0           # when the hammer last left his hand (the recall lockout)
 var hold_blocked := false      # the Crushing Blow was cut short: the button must come up before it can start again
-var shoved := {}               # foe id -> {foe, dir, left}: foes sliding back off the raised aegis
 var pushed_at := {}            # foe id -> when the aegis last pushed it (one push per "push_gap")
 var pushes := 0                # (checks) foes the raised aegis has pushed back
 var dash_after_plant := false  # Shift came in while planted for Faultline: the dash goes when the plant ends
+var step_until := 0.0          # the swing's step or the perfect launch runs until this time
 var glove_cd_seen := [0.0, 0.0] # each glove slot's cooldown last step: a jump means a glove just went off
 ## s after a slam or a spin hit before he can open the glider (wiki: wind-down frames keep the momentum)
 const WINDDOWN := 0.3
@@ -60,6 +63,7 @@ func _setup() -> void:
 	ult = BjornUlt.new(self)
 	h.add_child(ult)
 	self_nodes.append(ult)
+	launch = BjornLaunch.new(self)
 
 ## The aegis grows by "hp_rank" of its base HP for every rank past the first (rank 2: +25%, rank 3: +50%).
 func shield_max() -> float:
@@ -102,7 +106,6 @@ func add_guard(v: float) -> void:
 	touch_res()
 	for step in [33.0, 66.0, 100.0]:
 		if was < step and res >= step:
-			m.fx.ring(h.pos, 1.0 + step / 100.0, res_col(), 0.25)      # the shield runes light in steps
 			if anim_id == "": play("bul_armed")
 	if was < float(res_def().get("slam", 50.0)) and full_ready():
 		armed_fx("SLAM READY", "sec")
@@ -148,10 +151,12 @@ func _tick(dt: float) -> void:
 		down_t += dt
 		if down_t >= _shield_stat("wait") and lock_t <= 0.0:
 			shield_hp = minf(shield_max(), shield_hp + _shield_stat("regen") * dt)
-	_tick_shoved(dt)
 	_tick_glove()
 	_tick_mace(dt)
 	ult.tick(dt)
+	if h.dash_buf > 0.0 and m.time < step_until:
+		h.roll_t = 0.0         # Shift in the swing's step or launch: the dash goes now (item 51), not at its end
+	launch.tick(dt)
 	if dash_after_plant and not ult.planted():
 		dash_after_plant = false
 		h.dash_buf = Hunter.DASH_BUFFER
@@ -186,8 +191,7 @@ func _shield_push() -> void:
 		var gap_ok: bool = m.time - float(pushed_at.get(key, -9.0)) >= float(sd.get("push_gap", 0.6))
 		if in_front and p.distance_to(q) < reach and gap_ok:
 			pushed_at[key] = m.time
-			shoved[key] = {"foe": f, "dir": n, "left": push}
-			if "roll_t" in f: f.set("roll_t", 0.0)
+			_shove(f, n, push, float(sd.get("push_speed", 14.0)))
 			pushes += 1
 			flash = true
 	fx.push_hint(wall, n, push, flash)
@@ -203,23 +207,12 @@ func _tick_glove() -> void:
 	if used and lmb_t >= 0.0:
 		cancel_hold()
 
-## Slides the pushed foes back (a wall behind them stops the slide).
-func _tick_shoved(dt: float) -> void:
-	var speed := float(rmb_def()["shield"].get("push_speed", 14.0))
-	for key in shoved.keys():
-		var e: Dictionary = shoved[key]
-		var f: Ent = e["foe"]
-		if not is_instance_valid(f) or f.dead or float(e["left"]) <= 0.0:
-			shoved.erase(key)
-			continue
-		var step := minf(float(e["left"]), speed * dt)
-		var dir: Vector2 = e["dir"]
-		var np := f.pos + Vector3(dir.x, 0, dir.y) * step
-		if m.world.is_block(np.x, np.z) or m.world.ground_at(np.x, np.z) > f.pos.y + 0.8:
-			shoved.erase(key)
-			continue
-		f.pos = np
-		e["left"] = float(e["left"]) - step
+## Slides a pushed foe back along the aegis's facing (a wall behind it stops the slide; Displace: a player
+## online slides on their own game).
+func _shove(f: Ent, dir: Vector2, dist: float, speed: float) -> void:
+	var push := {"mode": "push", "dir": [dir.x, dir.y], "dist": dist, "spd": speed, "dur": dist / speed + 0.1}
+	push["unroll"] = true          # a hunter dashing into it is stopped
+	m.displace.tow(f, null, push)
 
 func _tick_crest() -> void:
 	if crest == null or not is_instance_valid(crest):
@@ -272,6 +265,10 @@ func ult_running() -> bool:
 
 ## The Shield Charge's front guard: hits from the front 140° are blocked (and become Guard).
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
+	if _aegis_takes(by, o):
+		m.verbs.absorb(wall, dmg)          # it takes the hit (and turns it into Guard) as it does a shot
+		o = o.duplicate(); o.erase("kb"); o.erase("lift")
+		return [0.0, o]
 	if front_t > 0.0 and by != null and is_instance_valid(by):
 		var to := Vector2(by.pos.x - h.pos.x, by.pos.z - h.pos.z)
 		var fwd := Vector2(-sin(h.face), -cos(h.face))
@@ -281,6 +278,17 @@ func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 			o = o.duplicate(); o.erase("kb"); o.erase("lift")
 			return [0.0, o]
 	return [dmg, o]
+
+## The raised aegis blocks all damage from the front (data: Brightshield), melee and abilities as well as the
+## shots the wall itself stops: a hit from a foe inside its arc, facing the cursor. Damage over time isn't a hit.
+func _aegis_takes(by: Ent, o: Dictionary) -> bool:
+	if wall.is_empty() or by == null or not is_instance_valid(by) or o.get("tick", false):
+		return false
+	if String(o.get("src", "")) in ["burn", "fall", "heat"]:
+		return false
+	var to := Vector2(by.pos.x - h.pos.x, by.pos.z - h.pos.z)
+	var half := deg_to_rad(float(rmb_def()["shield"].get("arc", 140.0)) * 0.5)
+	return to.length() > 0.1 and h.aim_dir().dot(to.normalized()) > cos(half)
 
 ## A Shield Charge counts as being in the fight up front (the dash's own "during E" stand-in).
 func in_e() -> bool:
@@ -295,22 +303,12 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return
 	_try_crush(t, Vector2(t.pos.x - h.pos.x, t.pos.z - h.pos.z).normalized())
 
-func _foe_behind(t: Ent, dir: Vector2, reach: float) -> Ent:
-	for f in m.foes_of(h.team):
-		if f == t or not f.hittable(): continue
-		var to := Vector2(f.pos.x - t.pos.x, f.pos.z - t.pos.z)
-		var ahead := to.length() > 0.05 and to.normalized().dot(dir) > 0.5
-		if to.length() < reach + f.r and ahead and absf(f.pos.y - t.pos.y) < 1.4:
-			return f
-	return null
-
 func _try_crush(t: Ent, dir: Vector2) -> void:
 	if dir.length() < 0.1:
 		dir = h.aim_dir()
 	if m.time - float(crushed_at.get(t.get_instance_id(), -9.0)) < 0.6:
 		return
-	var other := _foe_behind(t, dir, 1.6)
-	if other == null and not terrain_behind(t, dir, float(res_def().get("crush_reach", 1.5))):
+	if not terrain_behind(t, dir, float(res_def().get("crush_reach", 1.5))):
 		return
 	crushed_at[t.get_instance_id()] = m.time
 	var rd := res_def()
@@ -322,10 +320,6 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 		var crush_stun := float(rd.get("crush_stun", 0.8))
 		tgt.hurt(crush_dmg, h, {"src": "abil", "ab": "utility", "tags": ["utility", "crushed"], "payoff": true,
 			"stun": crush_stun, "dr": true})
-		if other and is_instance_valid(other) and not other.dead:
-			crushed_at[other.get_instance_id()] = m.time
-			other.hurt(crush_dmg, h, {"src": "abil", "ab": "utility", "tags": ["utility", "crushed"],
-				"stun": crush_stun * 0.6, "dr": true})
 		payoff_fx(tgt.pos, "CRUSHED", res_col(), "pay_slam", dir, tgt)
 		if not anim_id in ["bul_smash", "bul_charge"]: play("bul_crush")
 		m.fx.dust(tgt.pos, 14))
@@ -356,7 +350,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return true
 	if hold_blocked:
 		return true
-	if not h.can_fire() or h.fire_cd > 0.0:
+	# a hold carried through a dash (hold rows: keep) charges on in it and swings on the release
+	var rides_dash := lmb_t >= 0.0 and flow.move_now() in ["ground", "air"]
+	if not rides_dash and (not h.can_fire() or h.fire_cd > 0.0):
 		return true
 	var md := lmb_def()
 	if not mace.is_empty():
@@ -389,12 +385,18 @@ func lmb_override(held: bool, dt: float) -> bool:
 		lmb_t = maxf(lmb_t, 0.0) + dt
 		h.mel_hold = lmb_t
 		_hold_tell()
-		if lmb_t >= float(md["full"]) + 0.4:
-			_smash()           # held well past full: it goes off by itself
+		_resume_wind()
 	elif lmb_t >= 0.0:
 		if lmb_t < float(md["tap"]): _throw()
 		else: _smash()
 	return true
+
+## Out of a dash with the swing still held: back into the spin's pose at the point the charge has reached (the
+## kit move eases over from the dash's).
+func _resume_wind() -> void:
+	if anim_id in ["bul_short", "bul_lumber", "bul_whirl"] and h.roll_t <= 0.0 and lmb_t >= float(lmb_def()["tap"]):
+		play("bul_smash_wind")
+		anim_at = m.time - (lmb_t - float(lmb_def()["tap"]))
 
 ## True while something else has him: a move whose hold row ends the hold (content/dash_flow/bulwark.json: a
 ## mantle), a glide, a stun, a launch or a hard knock. The held Crushing Blow ends the moment one starts, and the
@@ -416,36 +418,38 @@ func cancel_hold() -> void:
 			anim_id = ""
 	hold_blocked = bool(h.inp.get("fire", false))
 
-## The swing held: the hammer spins in his hand (a whoosh each turn), the glint from 0.6 s, the flare and
-## the cursor ring's flare at full; the body keeps facing the cursor (Hunter faces its aim).
+## The swing held: the hammer dragged back behind him (BjornFx, one whoosh as it goes back), the glint from
+## 0.6 s; at full he coils deepest and the perfect window opens with a flash on its head, a click and the
+## cursor ring's flare (the glint burns hot until the window shuts); the body keeps facing the cursor (Hunter
+## faces its aim).
 func _hold_tell() -> void:
 	if lmb_t < float(lmb_def()["tap"]):
 		return
 	var k := smash_k()
-	fx.hold(lmb_t, k)
+	fx.hold(lmb_t, k, launch.in_window(lmb_t))
 	AimKit.charge(h, k, {"col": Color("ffc94a"), "col2": Color("fff1c0"), "flare": false})
-	var turn := fmod(lmb_t * lerpf(1.4, 3.5, k), 1.0)
-	if turn < fmod((lmb_t - Match.DT) * lerpf(1.4, 3.5, k), 1.0):
-		m.sfx("bjorn_spin", h.pos, -9.0 if h.is_local() else -13.0, lerpf(0.9, 1.25, k))
 	if k >= 0.99 and not flared:
 		flared = true
 		fx.full_flare()
 		AimKit.flare(h, {"col2": Color("fff1c0")})
 		m.sfx("bjorn_glint", h.pos, -3.0 if h.is_local() else -8.0)
+		m.sfx("click", h.pos, -2.0 if h.is_local() else -9.0, 1.6)
 
 ## Charge 0..1 of the Crushing Blow being held.
 func smash_k() -> float:
 	var md := lmb_def()
 	return clampf((lmb_t - float(md["tap"])) / maxf(0.05, float(md["full"]) - float(md["tap"])), 0.0, 1.0)
 
-const CARRY_T := 0.24          # s the slam's forward carry lasts
+const CARRY_T := 0.24          # s the slam's forward step lasts
 
 ## The Crushing Blow let go: the hammer sweeps round from behind into a 180 degree flaming crescent in
-## front, and the slam carries him forward (a strong slam with forward momentum).
+## front and the slam steps him forward ("carry" m); let go in the perfect window it launches him instead
+## (BjornLaunch), knocks harder ("perfect.kb_k") and lands with a heavier hit-stop. His own swing never shakes his
+## screen (item 50, the owner's rule): the hit-stop, the crescent, the dust and the sound carry it.
 func _smash() -> void:
-	play("bul_smash")
 	var md := lmb_def()
 	var k := smash_k()
+	var perfect := launch.in_window(lmb_t)
 	lmb_t = -1.0
 	h.mel_hold = 0.0
 	fx.hold_end()
@@ -453,29 +457,39 @@ func _smash() -> void:
 	var full := k >= 0.99
 	var dmg := lerpf(float(md["smash_dmg"][0]), float(md["smash_dmg"][1]), k) * _wk()
 	var kb := lerpf(float(md["smash_kb"][0]), float(md["smash_kb"][1]), k)
+	if perfect:
+		kb *= float(launch.pd().get("kb_k", 1.4))
 	h.fire_cd = float(md["smash_rate"])
 	slams += 1
 	slam_k = k
-	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	knock_until = m.time + 0.25
-	h._strike(dmg / m.dmg_mult(h), float(md["smash_reach"]), float(md["smash_arc"]), kb, {"heavy": true, "charged": true, "stun": float(md["smash_stun"]) if full else 0.0})
+	h._strike(dmg / m.dmg_mult(h), float(md["smash_reach"]), float(md["smash_arc"]), kb,
+		{"heavy": true, "charged": true, "stun": float(md["smash_stun"]) if full else 0.0})
 	var dv := h.aim_dir()
-	# the slam carries him forward (a jump out of it still glides)
-	var cr: Array = md.get("carry", [1.6, 3.4])
-	if h.grounded:
-		var carry := lerpf(float(cr[0]), float(cr[1]), k)          # m carried over CARRY_T
-		h.dash_with({"type": "dash", "speed": carry / CARRY_T, "time": CARRY_T, "invuln": 0.0, "dir": dv, "trail": "dust"})
-	var front := h.pos + Vector3(dv.x, 0, dv.y) * 1.6
+	if perfect:
+		launch.start(dv)
+	else:
+		_carry(dv, k)
 	fx.slam(dv, k)
-	m.fx.dust(front, 8 + int(10 * k))
+	m.fx.dust(h.pos + Vector3(dv.x, 0, dv.y) * 1.6, 8 + int(10 * k))
 	for f in foes_in(h.pos + Vector3(dv.x, 0, dv.y) * 1.2, float(md["smash_reach"]), 2.2):
 		_impact_trail(f, dv, k)
-	Feel.shake(m, "t3" if full else "t2", h, h.pos)
-	if h.is_local(): Oomph.punch_dir(m, dv, 0.15 + 0.25 * k)
-	m.sfx("bjorn_slam", h.pos, lerpf(-4.0, 0.0, k), lerpf(1.1, 0.85, k))
-	if full:
-		m.fx.ring(front, 2.2, Color("ffb04a"), 0.3)
-		net_ring(front, 2.2, res_col())
+		if perfect:
+			Feel.hitstop(m, h, f, dmg, {"melee": true, "heavy": true, "payoff": true})
+	var heavier := 1.0 if perfect else 0.0
+	m.sfx("bjorn_slam", h.pos, lerpf(-4.0, 0.0, k) + 2.0 * heavier, lerpf(1.1, 0.85, k) - 0.1 * heavier)
+
+## The normal swing's step: "carry" m (more with the charge) over CARRY_T, on the ground only, then a short
+## wind-down before the glider can open. Let go in the air or in a dash, the swing rides the move he's in.
+func _carry(dv: Vector2, k: float) -> void:
+	play("bul_smash")
+	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
+	if not h.grounded or h.roll_t > 0.0:
+		return
+	var cr: Array = lmb_def().get("carry", [1.5, 1.8])
+	var carry := lerpf(float(cr[0]), float(cr[1]), k)
+	h.dash_with({"type": "dash", "speed": carry / CARRY_T, "time": CARRY_T, "invuln": 0.0, "dir": dv, "trail": "dust"})
+	step_until = m.time + CARRY_T
 
 ## A foe the slam caught: a white dust puff on them, then a debris trail as they fly back.
 func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
@@ -484,6 +498,10 @@ func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
 		m.later(0.06 * (i + 1), func():
 			if is_instance_valid(f) and not f.dead:
 				m.fx.burst(f.pos + Vector3(0, 0.4, 0), Color("c86a4a"), 4, 2.0 + k * 2.0, 0.35, 8.0, 0.8, Vector3(-dv.x, 0.6, -dv.y), 50.0))
+
+## s the hammer stays in his hand after the throw starts (sheet 0033-0034: about one frame of wind-up; with
+## the step it's queued on it leaves ~0.12 s after the press, as the arm comes through in bul_throw)
+const THROW_WIND := 0.08
 
 func _throw() -> void:
 	play("bul_throw")
@@ -496,10 +514,9 @@ func _throw() -> void:
 	# it lands at the cursor, clamped to its range
 	var dist := AimMode.dist(h, float(md["throw_range"]), AimMode.CURSOR, float(md.get("throw_min", 2.5)))
 	throw_at = m.time
-	mace = {"st": "fly", "pos": at, "dir": h.aim_dir(), "d": 0.0, "to": dist, "hit": {}, "t": 0.0}
+	mace = {"st": "wind", "pos": at, "dir": h.aim_dir(), "d": 0.0, "to": dist, "hit": {}, "t": 0.0}
 	throws += 1
 	h.swing_t = 0.18; h.swing_n += 1
-	fx.in_hand(false)
 	m.sfx("bjorn_throw", h.pos, -2.0)
 	Oomph.on_fire(h, true)
 	net_bolt(at, at + Vector3(mace["dir"].x, 0, mace["dir"].y) * dist, Color("ffd27a"))
@@ -513,6 +530,7 @@ func _recall() -> void:
 	CombatBus.ability_used.emit(h, id + "_recall", "primary")       # a press with the hammer out is the recall
 
 func _mace_hit(f: Ent, dmg: float, dir: Vector2) -> void:
+	knock_until = m.time + 0.25       # its knock into a wall Crushes too (data: any knock into a wall)
 	f.hurt(dmg * _wk(), h, {"src": "abil", "ab": "primary", "tags": ["primary", "mace"], "kb": dir * 3.0, "melee": true})
 
 func _tick_mace(dt: float) -> void:
@@ -524,6 +542,13 @@ func _tick_mace(dt: float) -> void:
 		return
 	var p: Vector3 = mace["pos"]
 	match String(mace["st"]):
+		"wind":
+			# still in his hand while the arm comes through: it leaves THROW_WIND s after the press
+			p = h.pos + Vector3(0, 1.0, 0)
+			mace["t"] = float(mace["t"]) + dt
+			if float(mace["t"]) >= THROW_WIND:
+				mace["st"] = "fly"
+				fx.in_hand(false)
 		"fly":
 			var dir: Vector2 = mace["dir"]
 			var step := float(md["throw_speed"]) * dt
@@ -547,9 +572,7 @@ func _tick_mace(dt: float) -> void:
 					throw_d = Vector2(p.x - h.pos.x, p.z - h.pos.z).length()
 					fx.hammer_plant(Vector3(p.x, gy, p.z), atan2(-dir.x, -dir.y))
 					m.fx.dust(p, 8)
-					m.fx.ring(Vector3(p.x, gy, p.z), 1.0, BjornFx.GOLD, 0.25)
 					m.sfx("bjorn_plant", p, -3.0)
-					net_ring(p, 1.2, Color("ffd27a"))
 		"ground":
 			mace["t"] = float(mace["t"]) + dt
 			# it shows foes near it to your team (vision where it stands)
@@ -664,8 +687,6 @@ func _shield_slam() -> void:
 	run(stg, cx("rmb", "shield_slam", aim(), {"no_floor": true, "hit_extra": {"heavy": true}}))
 	fx.bash(h.pos, dv, float(sl["radius"]), true)
 	m.sfx("bjorn_bash", h.pos, -1.0, 0.85)
-	Feel.shake(m, "t3", h, h.pos)
-	if h.is_local(): Oomph.punch_dir(m, dv, 0.3)
 
 func fire_ok_rmb() -> bool:
 	return lock_t <= 0.0
@@ -676,15 +697,14 @@ func on_dash(use_ex: bool) -> bool:
 		dash_after_plant = true          # planted for the slam: Shift goes when the plant ends (into_dash.x)
 		return true
 	var dd := dash_def()
-	var dash_ends_hold := flow.ends_hold("lmb", flow.dash_move())
-	var winding := lmb_t > float(lmb_def().get("tap", 0.2)) and dash_ends_hold
-	if dash_ends_hold:
+	var winding := lmb_t > float(lmb_def().get("tap", 0.2))
+	if flow.ends_hold("lmb", flow.dash_move()):
 		cancel_hold()
+		winding = false
 	if winding and h.grounded and mace.is_empty():
-		# Shift while winding up the Crushing Blow (into_dash.lmb): it ends, with a short plain dash (no spin) for
-		# half a charge
+		# Shift while winding up the Crushing Blow: a short plain dash (no spin: the hammer is busy) on a full
+		# charge, the swing still charging through it (hold.lmb.ground)
 		if not spend_dash(false): return true
-		h.dashes = minf(h.max_dashes(), h.dashes + 0.5)       # (half the charge comes back: the reduced cooldown)
 		var sd2 := float(dd.get("short", 2.6))
 		travel(sd2, sd2 / float(dd["whirl_speed"]), {"invuln": 0.0, "trail": "dust", "dir": dash_dir()})
 		st["last_dash"] = "short"
@@ -704,7 +724,6 @@ func on_dash(use_ex: bool) -> bool:
 		if full_ready():
 			res -= float(res_def().get("slam", 50.0))
 			m.fx.flash(h.pos + Vector3(h.aim_dir().x * 0.8, 1.0, h.aim_dir().y * 0.8), res_col(), 0.9, t_felt)
-			net_ring(h.pos, 1.6, res_col())
 			m.later(t_felt, func(): if is_instance_valid(h) and not h.downed and not KinMerge.active(h): _shield_slam())
 		st["last_dash"] = "charge"
 		play("bul_charge")
@@ -720,7 +739,7 @@ func on_dash(use_ex: bool) -> bool:
 		st["last_dash"] = "lumber"
 		play("bul_lumber")
 		for i in 4:
-			m.later(0.07 * i, func(): if is_instance_valid(h): m.fx.dust(h.pos, 5); m.fx.burst(h.pos + Vector3(0, 0.6, 0), BjornFx.GOLD, 3, 1.2, 0.3, 0.0, 1.2))
+			m.later(0.07 * i, func(): if is_instance_valid(h): m.fx.dust(h.pos, 5))
 		return true
 	# 360 Smash: a short fixed dash in the aim (or move) direction, then ONE full spin hit around him
 	var dist2 := float(dd["whirl"]) + (1.0 if rank("dash") >= 3 else 0.0)
@@ -730,7 +749,6 @@ func on_dash(use_ex: bool) -> bool:
 	t2 *= float(dash_feel()["time"])          # the spin lands when the (feel-scaled) dash arrives
 	st["last_dash"] = "whirl"
 	play("bul_whirl")
-	m.fx.burst(h.pos + Vector3(0, 0.2, 0), BjornFx.GOLD, 8, 3.0, 0.2, 2.0, 0.8)
 	m.later(t2, func():
 		if is_instance_valid(h) and not h.downed and not KinMerge.active(h) and not ult.planted(): _spin_hit(wd))
 	return true
@@ -755,7 +773,6 @@ func _spin_hit(wd: Vector2) -> void:
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
 	fx.smash_ring(h.pos)
 	m.fx.dust(h.pos, 10)
-	Feel.shake(m, "t2", h, h.pos)
 	m.sfx("bjorn_whirl", h.pos, -2.0)
 	net_ring(h.pos, r, Color("ff7a3a"))
 

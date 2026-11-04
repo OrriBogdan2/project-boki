@@ -20,8 +20,6 @@ const LEAP_ROCK_UP := 1.6      # m: how high the rock arcs after her
 
 var lmb_t := -1.0              # how long the attack key has been down (-1: not pressed)
 var lmb_was := false
-# the hold punched by itself: keep holding and the next wind-up starts, a release throws nothing
-var lmb_auto := false
 var rid_n := 0
 var dive := false              # a Quakefall in the air (the hop, a leap, an air press): slam on landing
 var dive_k := 0.0              # ...with this much charge
@@ -154,7 +152,6 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 	KitLooks.of(m).impact(AimMode.ground(m, at), blast * 0.8, 0.4, 0.6)
 	m.fx.flash(at + Vector3(0, 0.6, 0), Color("ff9a3c"), 0.7, 0.08)
 	m.sfx("br_burst", at, -3.0, 1.0)
-	Feel.shake(m, "t2", h, at)
 	net_ring(at, blast, Color("ff5a2a"))
 	var slow_t := float(rd["slow_t"]) if src != "dash" else float(dash_def()["slow_t"])
 	var ult_cast := int(x.get("ult", 0))
@@ -279,7 +276,6 @@ func _drop_holds() -> void:
 	if lmb_t >= 0.0:
 		lmb_t = -1.0
 		h.mel_hold = 0.0
-	lmb_auto = false
 
 func stonesight() -> int:
 	var dir := h.aim_dir()
@@ -342,23 +338,17 @@ func lmb_override(held: bool, dt: float) -> bool:
 				return true
 			lmb_t = 0.0
 		lmb_t += dt
-		if lmb_t > float(ld["tap"]) or lmb_auto:
+		if lmb_t > float(ld["tap"]):
 			var k := punch_k()
 			h.mel_hold = k
 			if anim_id != "breah_wind" or m.time - anim_at > 3.0: play("breah_wind")
 			_punch_tele(k)
 			if not KitLooks.of(m).holding("br_fist"): m.sfx("br_wind", h.pos, -6.0, 1.0)
 			KitLooks.of(m).hold_on("br_fist", "mote", h, _fist_at(), 0.9 + 1.0 * k, MOLTEN.lerp(Color("ffc23a"), k))
-		if lmb_t >= float(ld["full"]) + float(ld["auto"]):
-			_punch(punch_k())
-			lmb_auto = true
 	elif lmb_t >= 0.0:
-		if lmb_t < float(ld["tap"]) and not lmb_auto: _boulder()
-		elif lmb_t >= float(ld["tap"]): _punch(punch_k())
-		else:
-			lmb_t = -1.0
-			h.mel_hold = 0.0
-		lmb_auto = false
+		# held as long as you like (the data: hold and release; no timeout), full stays full
+		if lmb_t < float(ld["tap"]): _boulder()
+		else: _punch(punch_k())
 	elif pressed:
 		pass
 	return true
@@ -437,11 +427,10 @@ func _punch(k: float) -> void:
 	m.fx.spark(fp, Vector3(dir.x, 0.05, dir.y), MOLTEN, int(8 + 8 * k), 9.0 + 6.0 * k, 22.0, 0.22, 2.0, 1.2)
 	m.fx.slash(h.pos + Vector3(0, 1.0, 0), atan2(dir.y, dir.x), 0.5, float(pd["len"]) * 0.8, MOLTEN, k > 0.6)
 	m.sfx("br_punch", h.pos, -1.0, 1.0)
-	Feel.shake(m, "t3" if k > 0.6 else "t2", h, fp)
 	var swept := sweep_rocks(dir)
 	last_sweep = swept.size()
 	if swept.size() >= 2: sweeps += 1
-	if not swept.is_empty():
+	if swept.any(func(w): return w.get("by") == h):      # (the data: hitting *your* rocks; an ally's still fly)
 		guard_punches += 1
 		guard_stack()
 	for i in swept.size():
@@ -468,7 +457,6 @@ func _punch(k: float) -> void:
 				f.hurt(2.0, h, {"src": "abil", "ab": "lmb", "stun": float(pd["wall_stun"])})
 			m.fx.word(f.pos + Vector3(0, 2.0, 0), "WALLED", Color("ffb36a"), false)
 			KitLooks.of(m).crown(f, float(pd["wall_stun"]))
-		if f.hp < hp0 and h.is_local() and m.cam: m.cam.punch(0.03)
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 
@@ -634,8 +622,6 @@ func _leap_off() -> void:
 	m.fx.dust(h.pos, 6)
 	m.sfx("br_leap", h.pos, -3.0, 1.0)
 	Feel.dash_sound(m, id, h.pos, h)
-	Feel.shake(m, "dash", h, h.pos)
-	if h.is_local() and m.cam: m.cam.punch(0.03)
 
 ## Rubble Leap falls at its own leap_grav (a heavy arc that still lands on time): the pull on top of gravity.
 func _leap_pull() -> float:
@@ -650,7 +636,6 @@ func _leap_land() -> void:
 	play("breah_leap_land")
 	m.fx.dust(at, 14)      # the hit area was the landing circle all through the flight: no ring or blast here
 	m.sfx("br_slam", at, -5.0, 1.15)
-	Feel.shake(m, "t2", h, at)
 	rider_points(leap["from"], at)
 	for f in foes_in(at, r, 2.0):
 		leap_hits += 1
@@ -789,7 +774,6 @@ func _raise_feel() -> void:
 	if not is_instance_valid(h):
 		return
 	m.sfx("br_raise", h.pos, -1.0, 1.0)
-	Feel.shake(m, "t2", h, h.pos)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

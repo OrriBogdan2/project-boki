@@ -140,16 +140,19 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok("lmb: the punch is a lane, not a cone (a foe 1.6m to the side is missed)", dmg(T) == 0.0, "took %.1f" % dmg(T))
-	# holding on: it punches by itself and starts the next wind-up, a release throws nothing
+	# audit: held as long as you like (the data: hold and release, no timeout); full stays full, one punch on release
 	reset.call()
+	var p0 := K.punches
+	var b0 := K.boulders
 	P.inp["fire"] = true
 	step(m, 2.3, func(): P.inp["fire"] = true)
-	var p_auto := K.punches
+	var p_held := K.punches - p0
 	P.inp["fire"] = false
 	step(m, 0.2)
 	ok(
-		"small: holding LMB keeps punching, letting go after an auto-punch throws no boulder",
-		p_auto >= 1 and K.boulders == 1, "punches %d boulders %d" % [p_auto, K.boulders]
+		"small: holding LMB 2.3s throws nothing until the release, then one full punch (no boulder)",
+		p_held == 0 and K.punches == p0 + 1 and K.boulders == b0, "held %d punches %d boulders %d" % [p_held,
+			K.punches - p0, K.boulders - b0]
 	)
 	# a merge mid-hold ends it
 	reset.call()
@@ -223,7 +226,8 @@ func _breah() -> void:
 		"rock: dropped onto a rock, she stands on its top", P.grounded and absf(P.pos.y - top) < 0.05,
 		"y %.2f top %.2f" % [P.pos.y, top]
 	)
-	# item 25: only the caster climbs her rocks: she walks up and over hers, no jump; anyone else is stopped
+	# item 25: the caster climbs his rocks by walking, no jump; owner 23:55 (the data): allies hop over by jumping
+	# against them, walking they are stopped; foes are stopped either way
 	var cross := _walk_over(m, P, home, w0)
 	ok(
 		"rock (item 25): walking into her own rock lifts her onto it and over, no jump, in 0.6s or less",
@@ -245,16 +249,19 @@ func _breah() -> void:
 			B.inp["move"] = Vector2(tgt.x - B.pos.x, tgt.z - B.pos.z).normalized()
 			jump_peak[0] = maxf(jump_peak[0], B.pos.y - home.y))
 		var near_side := (B.pos - mid0).dot((mid0 - home).normalized()) < 0.0
-		ok(
-			"rock (item 25): %s walking or jumping into her rock is stopped (only the caster climbs)" % (
-				"an ally" if team == P.team else "a foe"
-			),
-			float(walk["t"]) < 0.0 and float(walk["peak"]) < 0.1 and jump_peak[0] > 0.8 and near_side
-				and B.pos.y < top - 0.5,
-			"walk cross %.2f peak %.2f, jump peak %.2f, y %.2f" % [
-				float(walk["t"]), float(walk["peak"]), jump_peak[0], B.pos.y - home.y
-			]
-		)
+		var walk_stopped := float(walk["t"]) < 0.0 and float(walk["peak"]) < 0.1
+		if team == P.team:
+			var over := not near_side or B.pos.y >= top - 0.1
+			ok("rock (the data, the owner's 23:55 answer): an ally walking into his rock is stopped, jumping hops on",
+				walk_stopped and over, "walk cross %.2f peak %.2f, jump peak %.2f, y %.2f top %.2f" % [
+					float(walk["t"]), float(walk["peak"]), jump_peak[0], B.pos.y, top
+				])
+		else:
+			ok("rock (item 25): a foe walking or jumping into his rock is stopped",
+				walk_stopped and jump_peak[0] > 0.8 and near_side and B.pos.y < top - 0.5,
+				"walk cross %.2f peak %.2f, jump peak %.2f, y %.2f" % [
+					float(walk["t"]), float(walk["peak"]), jump_peak[0], B.pos.y - home.y
+				])
 		B.queue_free()
 		m.hunters.erase(B)
 		m.step(DT)

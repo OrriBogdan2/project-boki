@@ -1,6 +1,6 @@
 # Broken Abomination
 
-A harbour hauler in a brass diving helm. Throws a rope-hook, reels foes in, drops an anchor on them and
+A harbour hauler in a brass diving helm. Reaches out with an abyssal hand, reels foes in, drops an anchor on them and
 grows with every knock.
 
 <!-- gen:profile -->
@@ -18,25 +18,25 @@ grows with every knock.
 
 1. **Salvage** builds from knocks and assists (+2.5% health each, up to 10). Hits on a hunter's back deal 50% more.
 2. **Scattergun** (LMB): seven slugs in a tight fan, a shot every half second. The fan's edges show on the ground while you fire.
-3. **Grapnel** (RMB): a rope-hook that flies over rocks to the first foe and reels them to your feet, stunned. Strafe while you reel to swing them. It also pulls an ally to safety. Only the barge works while you reel.
+3. **Abyssal Hand** (RMB): your arm reaches through rocks and cliffs to the first foe and reels them to your feet, stunned, while you stand braced (a slow shuffle swings them). It also pulls an ally to safety. Only the barge works while you reel.
 4. **Anchor Drop** (E): hop forward and slam a giant anchor down in front of you for a long stun. In the air you smash straight down, and the higher you fall the harder it hits.
-5. **Barge** (Shift, 2 charges): a shoulder dash toward the cursor, further in the air; just after the Anchor it can't turn much.
+5. **Barge** (Shift, 3 charges a beat apart): a low clawing lunge the way you move that touches nobody, further in the air; just after the Anchor it can't turn much.
 
 ## Combos and interactions
 
 | Do this | And you get |
 |---|---|
-| Grapnel, then Anchor Drop on the arriving foe | the core combo: damage, a long stun, slam |
+| Abyssal Hand, then Anchor Drop on the arriving foe | the core combo: damage, a long stun, slam |
 | Barge while reeling | works; the reel carries on |
-| Grapnel past a rock | the foe is dragged over it |
-| Grapnel at a cliff face | the hook stops there |
+| Abyssal Hand past a rock | the foe is dragged over it |
+| Abyssal Hand at a cliff face | it reaches through and drags the foe over |
 | A reel over a gap | the foe falls (the abyss rules) |
 | Jump, then Anchor Drop | a straight-down smash with a ring of damage |
 | Anchor over the abyss | no downward push |
 
 ## Tips
 
-- Hit from behind: reel a foe past you while strafing and use the scattergun on their back.
+- Hit from behind: swing a foe past you as you reel and use the scattergun on their back.
 - Anchor from a height for up to +50% damage (+75% at rank 3).
 
 ## Kit
@@ -60,8 +60,8 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Brawler who reels you in: hook a foe to your feet, smash them, finish them up close. |
 | Passive: Salvage | Salvage: knocks and assists add health, up to 10 stacks. A knock heals you. |
-| Dash: Barge | A short, low lunge toward the cursor, clawing the ground; a pounce, further, in the air. It works while you reel. |
-| RMB: Grapnel | Throw a rope-hook through rocks and cliffs at the first body it meets and reel it to your feet, stunned. Strafe to swing them. |
+| Dash: Barge | A short, low lunge the way you move, clawing the ground; a pounce, further, in the air. It works while you reel. |
+| RMB: Abyssal Hand | Your abyssal arm reaches through rocks and cliffs, grabs the first body it meets and reels it to your feet, stunned, while you stand braced. |
 | E: Anchor Drop | Raise your fist and slam it into the ground in front of you, the area shown as it comes down: damage and a long stun. In the air you smash straight down. |
 | Hunter ultimate: Brass Broadside | Brass Broadside (level 6): charge a fan while you walk slowly, then two waves of heavy brass slugs with Anti-Heal. |
 | Weapon: Shotgun | Seven slugs in a tight fan that stop 6m out, a shot every half second. Hits from behind hurt more. |
@@ -70,11 +70,11 @@ What the in-game kit card (K) says.
 
 **Salvage (passive).** Each knock or assist adds a Salvage stack (+2.5% health, 10 at most); being downed costs one. Hits on a hunter's back deal 50% more. Knocking a hunter heals you 16% of your health.
 
-**Barge (dash, Shift, 10s cooldown).** A quick, short lunge toward the cursor, low to the ground, clawing at it and hauling yourself along; three charges chain a beat apart, and it shoves foes along it (no damage). In the air it is a pounce that goes 35% further. It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees.
+**Barge (dash, Shift, 10s cooldown).** A quick, short lunge the way you move, low to the ground, clawing at it and hauling yourself along; three charges chain a beat apart. It touches nobody. In the air it is a pounce that goes 35% further. It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees.
 
-**Grapnel (RMB, 12s cooldown).**
+**Abyssal Hand (RMB, 12s cooldown).**
 
-- *Tap:* Throw a rope-hook 11.5m through rocks, props and cliff faces at the first body it meets (a placed wall stops it). The foe is reeled to you, stunned, dragged over rocks and cliffs (until it arrives or 3s pass); strafe and the body swings round you. While it flies out you can only walk slowly; from the throw until the reel ends you hold your height, even over the abyss. You are Grounded while you reel (no jump or glide; the barge still works). It also pulls an ally to safety and scoops up wisps on the way. Rank 3: a foe it hits takes half the cooldown off. The abyss takes whoever is pulled over it.
+- *Tap:* Your abyssal arm reaches 11.5m through rocks, props and cliff faces at the first body it meets (a placed wall stops it). The hand grabs and the foe is reeled to you, stunned, dragged over rocks and cliffs (until it arrives or 3s pass), swinging round you. While it flies out you can only walk slowly; from the throw until the reel ends you hold your height, even over the abyss. You stand braced while you reel, shuffling at a fifth of your walk to swing them (Grounded: no jump or glide; the barge still works). It also pulls an ally to safety and scoops up wisps on the way. Rank 3: a foe it hits takes half the cooldown off. The abyss takes whoever is pulled over it.
 
 **Anchor Drop (E, 7s cooldown).** Raise your fist while the area fills on the ground in front of you (0.38s), then slam it down into that 3m cone: 25 damage, stun 1.1s, slammed to the ground and Grounded. In the air you smash straight down and the anchor lands with you: a 3.2m ring, up to +50% damage by height. Over the abyss it slams where you are instead. Rank 3: double damage on a foe over the abyss and +0.2s stun.
 

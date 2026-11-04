@@ -249,7 +249,6 @@ var ak: ArchKit = null        # the archetype's kit at run time
 var shot_range_k := 1.0       # the next shot's range (a full Focus: +20%)
 var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
-var focus_draw := false        # the draw in hand is a full-Focus one: at the top stage already, still waiting for the release
 var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees and barriers don't stop you while > 0
 var nth_n := 0                # shots since the weapon's "every Nth" bonus
 
@@ -1096,7 +1095,6 @@ func _skyfall(drop: float, fall_v: float) -> void:
 		return
 	Abil._blast(self, pos, 2.4, 10.0 + 16.0 * k, 7.0, Color("ffd27a"), 7.0, "skyfall")
 	m.fx.word(pos + Vector3(0, 2.2, 0), "SKYFALL", Color("ffd27a"), true)
-	m.shake(0.45, pos)
 	add_stat("skyfalls")
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
 const DASH_BUFFER := 0.18
@@ -1326,7 +1324,6 @@ func _shove_along() -> void:
 		var so := {"kb": push, "lift": 2.5, "src": "abil", "ab": "dodge", "tags": ["dodge"]}
 		if float(shove.get("ws", 0.0)) > 0.0: so["wallstun"] = float(shove["ws"])
 		f.hurt(maxf(0.1, float(shove["dmg"])) * m.dmg_mult(self), self, so)
-		m.shake(0.25, f.pos)
 
 func can_fire() -> bool:
 	if Hex.active(self) or Capture.active(self):
@@ -1405,14 +1402,12 @@ func trigger(dt: float) -> void:
 	if held:
 		fire()
 
-## A bow: hold to draw, let go to loose. Only the button coming up looses a player's arrow: a full Focus
-## is drawn at once but still waits for the release, a cooldown never looses it, and a stun or glide
-## cancels the draw with no shot (a dash too, unless its DashFlow hold row keeps it). A bot lets go by itself.
+## A bow: hold to draw, let go to loose. Only the button coming up looses a player's arrow: a cooldown
+## never looses it, and a stun or glide cancels the draw with no shot (a dash too, unless its DashFlow hold
+## row keeps it). A bot lets go by itself.
 func _trigger_bow(held: bool, dt: float) -> void:
-	if draw_t < 0.0:
-		focus_draw = false
 	if draw_t >= 0.0 and not can_fire() and ak and ak.flow.pauses_hold("lmb"):
-		if held and not focus_draw:
+		if held:
 			draw_t += dt * ak.draw_rate()      # a dash whose row keeps the draw: it charges on through it,
 		return          # and a release in it looses when it ends
 	var can_draw: bool = can_fire() and ammo > 0
@@ -1421,7 +1416,6 @@ func _trigger_bow(held: bool, dt: float) -> void:
 		return
 	if draw_t >= 0.0 and not can_draw:
 		draw_t = -1.0
-		focus_draw = false
 		return
 	if held and can_draw and (draw_t >= 0.0 or fire_cd <= 0.0):
 		_draw_step(dt)
@@ -1433,21 +1427,13 @@ func _draw_step(dt: float) -> void:
 	if draw_t < 0.0:
 		draw_t = 0.0
 		m.sfx("charge", pos, -12.0 if is_local() else -16.0, 1.6)
-	if focus_draw:
-		draw_t = top
-	else:
-		draw_t += dt * (ak.draw_rate() if ak else 1.0)
-	if not focus_draw and ak and ak.has_method("take_focus_shot") and draw_t < 0.85 and ak.take_focus_shot():
-		focus_draw = true
-		draw_t = top
-		shot_range_k = 1.2
-	if ctrl == "bot" and (focus_draw or draw_t >= top + 0.05):
+	draw_t += dt * (ak.draw_rate() if ak else 1.0)
+	if ctrl == "bot" and draw_t >= top + 0.05:
 		_loose()
 
 ## Looses a drawn arrow: the draw stage reached sets damage, range and speed.
 func _loose() -> void:
-	var t := 9.0 if focus_draw else draw_t
-	focus_draw = false
+	var t := draw_t
 	draw_t = -1.0
 	if not can_fire() or ammo <= 0:
 		return
@@ -1626,7 +1612,6 @@ func _charged_attack() -> void:
 		m.sfx("dash", pos, -4.0, 0.7)
 	else:
 		_strike(float(st["dmg"]), float(st["reach"]), float(st["arc"]), float(st["kb"]), st)
-		m.shake(0.35, pos)
 
 func _strike(dmg: float, reach: float, arc_deg: float, kb: float, o := {}) -> void:
 	idle_fire = 0.0
@@ -1727,7 +1712,7 @@ func _emit_shot() -> void:
 	Juice.shot(self, start, Vector2(cos(a), sin(a)))
 
 func start_reload() -> void:
-	if reload_t > 0.0 or ammo >= int(wpn["mag"]) or downed or wpn.get("melee", false):
+	if reload_t > 0.0 or ammo >= int(wpn["mag"]) or downed or wpn.get("melee", false) or not wpn.has("reload"):
 		return
 	reload_t = float(wpn["reload"]) * (1.0 - owner_stat("reload") - gear_stat("reload")) * (0.7 if perk_n("quickhands") > 0 else 1.0)
 	m.sfx("reload", pos, -8.0)
@@ -2481,7 +2466,6 @@ func _physics(dt: float) -> void:
 				hurt(SPIKE_DMG, last_hit_by, {"src": "fall"})
 				m.fx.dust(pos, 12)
 				m.fx.ring(pos + Vector3(0, 0.05, 0), 1.6, Color(1.0, 0.6, 0.4, 0.6), 0.3)
-				if is_local(): m.shake(0.25, pos)
 			if fv < -11.0 or cur > spd * 1.3:
 				m.fx.dust(pos, 6)
 				squash = 0.15
@@ -2498,7 +2482,6 @@ func _physics(dt: float) -> void:
 				m.fx.dust(pos, 12)
 				squash = 0.25
 				land_t = 0.32
-				if is_local(): m.shake(0.18, pos)
 			if jump_buf > 0.0:
 				jump_buf = 0.0
 				vel.y = JUMP_V
@@ -2573,8 +2556,6 @@ func _deploy() -> void:
 	vel.y = maxf(vel.y, DEPLOY_POP)
 	m.sfx("glide", pos, -2.0)
 	_glider_sfx("open")
-	if is_local() and m.cam:
-		m.cam.punch(0.05)
 
 ## The opening drop ends early when you press an ability, gear or a heal mid-air: the glider folds
 ## and you fall free with the speed you had, so you can dive, pull up and drink or cast on the way
@@ -3342,7 +3323,6 @@ func render(delta: float, alpha: float) -> void:
 	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)
-		if is_local(): m.shake(0.18, pos)
 	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
 	if roll_t > 0.0:
 		ghost_t -= delta

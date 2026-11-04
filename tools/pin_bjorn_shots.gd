@@ -177,8 +177,8 @@ const SHOTS := [
 		"spin",
 		0.75,
 		1.5,
-		"LMB held: the hammer whirled round over his shoulder in a wide circle with a gold-orange"
-			+ " trail, the gold ring at his feet"
+		"LMB held: side-on and crouched, the hammer dragged back low behind him, the shield arm forward,"
+			+ " the gold ring at his feet"
 	],
 	[
 		"bjorn_glint",

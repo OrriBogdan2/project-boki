@@ -29,6 +29,8 @@ const CLASSES := {
 	},
 }
 
+const NO_AMMO_MAG := 999         # rounds a weapon with no ammo nominally holds (never shown, never drained for good)
+
 ## Fallback only: every real weapon lives in content/weapons.
 const WEAPONS := {
 	"rifle": {"name": "Rifle", "dmg": 3.87, "rate": 0.08, "speed": 110.0, "mag": 30, "reload": 1.8,
@@ -54,11 +56,16 @@ func weapon_ids() -> Array:
 		if not ids.has(k): ids.append(k)
 	return ids
 
-## A weapon's plain stats. "short" is the plain name for the ability bar.
+## A weapon's plain stats. "short" is the plain name for the ability bar. A weapon with no "mag" in its data
+## has no ammo at all (the source gives ammo to one gun only): it gets "ammo": false and a nominal NO_AMMO_MAG
+## rounds that its kit keeps topped up (ArchKit.tick), so nothing drains, reloads or shows a count.
 func weapon_stats(wid: String) -> Dictionary:
 	var wd := Content.weapon(wid)
 	var w: Dictionary = wd.primary.duplicate() if wd else WEAPONS.get(wid, WEAPONS["rifle"]).duplicate()
 	w["short"] = String(w["name"]).split(" ")[0]
+	if not w.has("mag"):
+		w["mag"] = NO_AMMO_MAG
+		w["ammo"] = false
 	return w
 
 ## The class you play and the weapon you carry are your whole loadout: left and right click come

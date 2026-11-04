@@ -32,12 +32,12 @@
 "semicolon": 2
 },
 "scripts/arch/kits/archer_kit.gd": {
-"long_line": 13,
-"semicolon": 3,
+"long_line": 12,
+"semicolon": 2,
 "shadow": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 13,
+"long_line": 10,
 "nested_ternary": 1,
 "semicolon": 8
 },
@@ -467,7 +467,7 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 26,
+"long_line": 25,
 "nested_ternary": 1,
 "semicolon": 49
 },
@@ -558,7 +558,7 @@
 },
 "scripts/match/hunter.gd": {
 "history_comment": 38,
-"long_line": 96,
+"long_line": 95,
 "nested_ternary": 19,
 "semicolon": 53,
 "shadow": 4
@@ -643,7 +643,7 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 231,
+"long_line": 232,
 "nested_ternary": 21,
 "semicolon": 146,
 "shadow": 9
@@ -1047,7 +1047,7 @@
 "semicolon": 3
 },
 "tools/hero_combo_check.gd": {
-"long_line": 13,
+"long_line": 12,
 "semicolon": 7
 },
 "tools/hero_pair_check.gd": {

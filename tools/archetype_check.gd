@@ -189,6 +189,14 @@ func _data() -> void:
 	ok("weapons: Sable bolts / Pin bow / Vireo coil / Bjorn hammer and aegis", Arch.signature("thief") == "arc_bolts" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "coilcaster" and Arch.signature("bulwark") == "tower_shield")
 	ok("weapons: another archetype's weapon is not yours", not Arch.weapon_ok("bulwark", "greatsword") and not Arch.weapon_ok("thief", "smg"))
 	ok("weapons: asking for another weapon gives the signature", Arch.weapon_for("gunslinger", "medium", "longsword") == "quill_rifle")
+	# no ammo but the source's one gun (Ghost's 30-round rifle): no magazine, no reload timer, no count on the HUD
+	var ammo_bad: Array = []
+	for a2 in ids:
+		var ws := Data.weapon_stats(Arch.signature(a2))
+		var wants: bool = a2 == "gunslinger"
+		if bool(ws.get("ammo", true)) != wants or ws.has("reload"):
+			ammo_bad.append("%s:%s" % [a2, Arch.signature(a2)])
+	ok("weapons: no hero weapon has ammo or a reload but Vex's drum (no reload anywhere)", ammo_bad.is_empty(), str(ammo_bad))
 	var sup_ok := true
 	for a in ["tender", "rimewright"]:
 		var sd2 := Arch.def(a)
@@ -209,7 +217,7 @@ func _thief() -> void:
 ## An ultimate's data: no generic fuse, a 15-40s cooldown, opening at level 6.
 func _ult_shaped(rd: Dictionary) -> bool:
 	var cd := float(rd["cooldown"])
-	return float(rd.get("fuse", 0.0)) <= 0.0 and cd >= 15.0 and cd <= 70.0 and int(rd.get("unlock", 6)) == 6
+	return float(rd.get("fuse", 0.0)) <= 0.0 and cd >= 15.0 and cd <= 80.0 and int(rd.get("unlock", 6)) == 6
 
 ## The hero has its own ultimate on X: "r" data opening at level 6, and a card line for it.
 func _has_ult(arch: String) -> bool:
@@ -279,7 +287,9 @@ func _archer() -> void:
 	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
 	step(m, 0.5)
 	if "--ak-debug" in OS.get_cmdline_user_args(): print("DEADEYE dd0 %.1f now %.1f" % [dd0, dmg(T)])
-	ok("archer Deadeye: Focus shot into a pinned foe", K.deadeyes == de0 + 1 and dmg(T) - dd0 >= 70.0, "deadeyes %d dealt %.0f" % [K.deadeyes - de0, dmg(T) - dd0])
+	# (audit: a full Focus no longer skips the draw, so this tapped arrow is a 15 tap plus the gold Deadeye hit)
+	ok("archer Deadeye: Focus shot into a pinned foe", K.deadeyes == de0 + 1 and dmg(T) - dd0 >= 30.0,
+		"deadeyes %d dealt %.0f" % [K.deadeyes - de0, dmg(T) - dd0])
 	# ... and not into a free one
 	fresh(T); K.res = K.res_max(); de0 = K.deadeyes
 	step(m, 0.9)      # (past the pin's grace)
@@ -287,7 +297,8 @@ func _archer() -> void:
 	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
 	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
 	step(m, 0.5)
-	ok("archer Deadeye: none without a pin", K.deadeyes == de0 and dmg(T) >= 50.0, "dealt %.0f" % dmg(T))
+	ok("archer Deadeye: none without a pin", K.deadeyes == de0 and dmg(T) >= 10.0 and dmg(T) < 30.0,
+		"dealt %.0f" % dmg(T))
 	# Spirit Walk: a dodge roll, then walking through a rock column (terrain still blocks)
 	P.teleport(home); P.vel = Vector3.ZERO; P.dashes = P.max_dashes()
 	P.inp["move"] = Vector2(0, 1)
@@ -344,13 +355,13 @@ func _mage() -> void:
 	P.inp["dash_down"] = false
 	step(m, 0.5)
 	ok("vireo Wirerun through Live: Blowout + dash back", K.blowouts == 1 and not K.live(T) and P.dashes >= 1.0 and dmg(T) >= 17.0, "blowouts %d took %.0f dashes %.1f" % [K.blowouts, dmg(T), P.dashes])
-	# a knock heals 15%
+	# no knock heal (audit: the data's passive is Static only)
 	P.hp = 20.0
 	var kt := P.hp
 	T2.hp = 1.0
 	K.on_deal(T2, 5.0, {"src": "shot"}); T2.hp = 0.0
 	K.on_deal(T2, 5.0, {"src": "shot"})
-	ok("vireo passive: a knock heals", P.hp > kt + 10.0, "hp %.0f" % P.hp)
+	ok("vireo passive: a knock heals nothing (data)", P.hp <= kt + 0.01, "hp %.0f" % P.hp)
 	T2.hp = T2.max_hp
 	# Coilshot hold: damage, a throw, a mote that gives the dash back
 	P.teleport(home); fresh(T); fresh(T2); T2.teleport(home + Vector3(12, 0, 0)); step(m, 0.2); aim_at(P, T.pos); P.dashes = 0.0
@@ -630,7 +641,7 @@ func _feel() -> void:
 	ok("feel: the Finishing Slam lands after a 0.5s wind-up", float(Arch.def("juggernaut")["rmb"]["windup"]) >= 0.3)
 	# the hero ultimates on X run their own wind-ups (a growing ring, a guard), on the source's cooldown ratios
 	var ults: Array = Arch.ids().filter(func(a): return Arch.def(a).has("x"))
-	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-70s cooldown (the game data runs to 64s)",
+	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-80s cooldown (the game data runs to 80s)",
 			ults.all(func(a): return _ult_shaped(Arch.def(a)["x"])))
 	# hitstop tiers
 	var dummy := Hunter.new(); dummy.max_hp = 145.0

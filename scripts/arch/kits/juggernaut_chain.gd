@@ -3,14 +3,15 @@ extends RefCounted
 ## Zedran's E, the Warchain (his "e" data in content/archetypes/juggernaut.json; the source's tether chain).
 ## The states and every transition are in docs/heroes/juggernaut.md "Warchain: the state machine":
 ## ready -> throwing (the hook flies at the cursor) -> hooked (a foe or a wall: the link chain stays on while
-## you move, 5s) -> pulling (E again: flown to the anchor, steerable sideways, Shift or a jump exits) ->
+## you move, paying out to its full length and holding there, 5s) -> pulling (E again: an impulse toward the
+## anchor that his movement input and facing curve, and backing away first slingshots; Shift or a jump exits) ->
 ## arriving (a short window that keeps some of the pull's speed and still takes the Cinder Spin) -> ready.
-## A miss, a stun, the time running out or the chain stretched too far breaks it. Owned by JuggernautKit.
+## A miss, a stun or the time running out breaks it. Owned by JuggernautKit.
 
 const ORANGE := Color("ff8a2a")     # the bright links (and the zig-zag in flight)
 const DARK := Color("3a2418")       # the dark iron links
 const HOT := Color("ffd04a")        # the links pulled taut, and while it hauls you in
-const TAUT := 0.85                  # share of the leash where the chain starts to strain (glow and creak)
+const TAUT := 0.85                  # share of its full length where the chain starts to strain (glow and creak)
 
 var k: JuggernautKit
 var state := "ready"                # ready | throwing | hooked | pulling | arriving
@@ -18,17 +19,22 @@ var target: Ent = null              # the hooked foe (null on a wall)
 var anchor := Vector3.ZERO          # where the hook bit (follows a hooked foe)
 var tether_t := 0.0                 # s the hook still holds
 var e_pressed_at := -9.0            # an E pressed while the hook flew (becomes the pull if it bites soon)
-var pull_dir := Vector2.ZERO        # the pull's heading when it started (the steer is sideways to it)
+var pull_dir := Vector2.ZERO        # the pull's heading now (it turns toward the anchor, bent by input and facing)
+var pull_speed := 0.0               # m/s of the pull (the reel speed plus the slingshot)
 var pull_t := 0.0                   # s left before the pull gives up (a wall in the way)
-var steer := 0.0                    # m the arrival point has slid sideways
+var sling := 0.0                    # (tests) m/s the slingshot added to the last pull
+var line := Vector2.ZERO            # the chain's line when the pull started (the steer is sideways to it)
+var steer := 0.0                    # m the arrival point has been steered sideways of the anchor
 var stall_t := 0.0
 var arrive_t := 0.0                 # s left of the arrival window
 var strained := false
+var tightened := false              # the chain has hit its full length since it bit (one creak per hold)
 # (tests)
 var throws := 0
 var hooks := 0
 var misses := 0
 var breaks := 0
+var holds := 0                      # times the chain held at its full length
 var reels := 0
 var arrivals := 0
 var exits := ""                     # how the last pull ended: arrived | dash | jump | stopped
@@ -105,10 +111,10 @@ func _hook(f: Ent, at: Vector3) -> void:
 	anchor = at
 	tether_t = float(ed["time"])
 	strained = false
+	tightened = false
 	hooks += 1
 	k.fx().star(at + Vector3(0, 1.0 if f else 0.5, 0), Color("ffd84a"), 0.9, 0.18)      # the spark at the anchor
 	if f:
-		KitStatus.apply(f, "blt", float(ed["time"]))
 		m.fx.word(f.pos + Vector3(0, 2.3, 0), "CHAINED", k.col_of(ed), true)
 	else:
 		m.fx.word(at + Vector3(0, 1.4, 0), "ANCHORED", k.col_of(ed), false)
@@ -124,7 +130,7 @@ func _miss(at: Vector3) -> void:
 	k.start_e_cd()                  # hooked nothing: the chain breaks, its cooldown starts
 	k.m.fx.word(at + Vector3(0, 1.2, 0), "MISS", Color("c0b0a0"), false)
 
-## Breaks a throw or a hold (a stun, the time, the leash, a merge): the cooldown starts.
+## Breaks a throw or a hold (a stun, the time, a merge): the cooldown starts.
 func snap(word := "CHAIN BROKE") -> void:
 	if state == "throwing" or state == "hooked":
 		breaks += 1
@@ -156,17 +162,18 @@ func pull() -> void:
 		_stop("stopped", false)
 		return
 	k.arm_haul()
-	var to := _goal() - h.pos
-	pull_dir = Vector2(to.x, to.z).normalized()
-	var dist := Vector2(to.x, to.z).length()
-	steer = 0.0
+	var at := _anchor_now()
+	var to := Vector2(at.x - h.pos.x, at.z - h.pos.z)
+	var dist := to.length()
 	stall_t = 0.0
-	pull_t = dist / float(ed["reel_speed"]) + 0.25
 	reels += 1
-	if dist < 0.4:
+	if dist < _gap() + 0.4:
+		pull_dir = to.normalized()
 		_arrive()
 		return
-	h.dash_with({"type": "dash", "speed": float(ed["reel_speed"]), "time": pull_t, "kind": "rush", "dir": pull_dir,
+	_launch(to.normalized())
+	pull_t = dist / pull_speed + 0.5
+	h.dash_with({"type": "dash", "speed": pull_speed, "time": pull_t, "kind": "rush", "dir": pull_dir,
 			"invuln": 0.0})
 	if k.anim_id != "jug_haul_wind": k.play("jug_reel")
 	k.fx().puff(h.pos + Vector3(0, 0.2, 0), Color(1, 1, 1, 0.8), 0.9, 0.35)        # the start puff (footage 0333)
@@ -174,21 +181,37 @@ func pull() -> void:
 	k.m.sfx("jug_reel", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
 	k.last_e = "reel"
 
-## Where the pull is heading now: the anchor (a hooked foe as it moves), slid sideways by the steer, short of
-## the foe's body or the wall's face.
-func _goal() -> Vector3:
+## The pull's start along `toward` (the chain's line): the reel speed, plus a slingshot from his speed away from
+## the anchor at the press (backing away stretches it); the sideways part of his motion carries in, so a strafe
+## swings the pull wide from the start.
+func _launch(toward: Vector2) -> void:
+	var ed := data()
 	var h := k.h
-	var at := anchor
-	if target != null and is_instance_valid(target):
-		at = target.pos
-	var side := Vector2(-pull_dir.y, pull_dir.x)
-	at += Vector3(side.x, 0, side.y) * steer
-	var gap := (target.r + h.r + 0.2) if target != null and is_instance_valid(target) else 0.7
-	var to := Vector2(at.x - h.pos.x, at.z - h.pos.z)
-	if to.length() > gap:
-		var back := to.normalized() * gap
-		at -= Vector3(back.x, 0, back.y)
-	return at
+	var v := Vector2(h.vel.x, h.vel.z)
+	var side := Vector2(-toward.y, toward.x)
+	sling = minf(maxf(0.0, -v.dot(toward)) * float(ed["sling_k"]), float(ed["sling_max"]))
+	line = toward
+	steer = 0.0
+	pull_speed = float(ed["reel_speed"]) + sling
+	pull_dir = (toward * pull_speed + side * v.dot(side)).normalized()
+
+## How far short of the anchor the pull ends: against a hooked foe's body, or 0.7 m off a wall.
+func _gap() -> float:
+	return (target.r + k.h.r + 0.2) if target != null and is_instance_valid(target) else 0.7
+
+## The heading the pull turns toward: a point beside the anchor that his movement input (steer_rate m/s, up to
+## steer_max) and where he faces (face_k of it) slide sideways of the chain's line, so holding a strafe or
+## looking aside curves him in beside it.
+func _want(dt: float) -> Vector2:
+	var ed := data()
+	var h := k.h
+	var side := Vector2(-line.y, line.x)
+	var mv: Vector2 = h.inp.get("move", Vector2.ZERO)
+	var push := clampf(mv.dot(side), -1.0, 1.0) + h.aim_dir().dot(side) * float(ed["face_k"])
+	var most := float(ed["steer_max"])
+	steer = clampf(steer + push * float(ed["steer_rate"]) * dt, -most, most)
+	var goal := _anchor_now() + Vector3(side.x, 0, side.y) * steer
+	return Vector2(goal.x - h.pos.x, goal.z - h.pos.z).normalized()
 
 ## Each step (before the hunter moves).
 func tick(dt: float) -> void:
@@ -219,12 +242,34 @@ func _tick_hooked(dt: float) -> void:
 	if tether_t <= 0.0:
 		snap("")
 		return
-	var leash := float(data()["range"]) * float(data()["leash_k"])
-	var stretch := Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z).length() / leash
+	var most := float(data()["tether_max"])
+	var stretch := Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z).length() / most
 	if stretch > 1.0:
-		snap()
-		return
+		_hold_taut(most)
+		stretch = 1.0
 	_draw_hooked(stretch)
+
+## The chain paid out to its full length holds: whoever is moving away is stopped at the end of it (him, or a
+## hooked foe trying to walk off); nothing breaks.
+func _hold_taut(most: float) -> void:
+	var h := k.h
+	var out := Vector2(h.pos.x - anchor.x, h.pos.z - anchor.z).normalized()
+	var mover: Ent = h
+	if target != null and Vector2(h.vel.x, h.vel.z).dot(out) <= 0.0:
+		mover = target                    # he's standing: it's the foe pulling away
+		out = -out
+	var from := anchor if mover == h else h.pos
+	var at := Vector3(from.x + out.x * most, mover.pos.y, from.z + out.y * most)
+	mover.pos.x = at.x
+	mover.pos.z = at.z
+	var away := Vector2(mover.vel.x, mover.vel.z).dot(out)
+	if away > 0.0:
+		mover.vel.x -= out.x * away
+		mover.vel.z -= out.y * away
+	if not tightened:
+		tightened = true
+		holds += 1
+		k.m.sfx("jug_taut", h.pos, -3.0, 0.75)          # the chain snapping taut at its length
 
 ## The attached chain: straight striped links that pull taut and glow hotter as it stretches (with a creak).
 func _draw_hooked(stretch: float) -> void:
@@ -258,23 +303,26 @@ func _tick_pull(dt: float) -> void:
 	if h.roll_t <= 0.0 or h.move_kind != "rush":
 		_stop("stopped", false)     # something else took over the movement
 		return
-	# movement held across the pull slides the arrival point that way
-	var side := Vector2(-pull_dir.y, pull_dir.x)
-	var mv: Vector2 = h.inp.get("move", Vector2.ZERO)
-	var lim := float(ed["steer_max"])
-	steer = clampf(steer + clampf(mv.dot(side), -1.0, 1.0) * float(ed["steer_rate"]) * dt, -lim, lim)
-	var goal := _goal()
-	var to := Vector2(goal.x - h.pos.x, goal.z - h.pos.z)
-	var step := float(ed["reel_speed"]) * dt
-	stall_t = stall_t + dt if h.vel.length() < float(ed["reel_speed"]) * 0.3 and pull_t < 0.5 else 0.0
+	var at := _anchor_now()
+	var side := Vector2(-line.y, line.x) * steer
+	var to := Vector2(at.x + side.x - h.pos.x, at.z + side.y - h.pos.z)
+	var step := pull_speed * dt
+	stall_t = stall_t + dt if h.vel.length() < pull_speed * 0.3 and pull_t < 0.5 else 0.0
 	pull_t -= dt
 	var touching := target != null and is_instance_valid(target) and h.flat_dist(target) <= target.r + h.r + 0.25
-	if to.length() <= step or touching or pull_t <= 0.0 or stall_t > 0.1:
+	# curved in beside it: the anchor is already behind the heading, close by
+	var passed := to.dot(pull_dir) <= 0.0 and to.length() < float(ed["steer_reach"])
+	if to.length() <= _gap() + step or touching or passed or pull_t <= 0.0 or stall_t > 0.1:
 		_arrive()
 		return
-	h.roll_dir = to.normalized()
+	var want := _want(dt)
+	var turn := float(ed["turn"]) * dt
+	pull_dir = pull_dir.rotated(clampf(pull_dir.angle_to(want), -turn, turn))
+	h.roll_dir = pull_dir
+	h.roll_speed = pull_speed
+	h.roll_t = maxf(h.roll_t, dt * 2.0)
 	var a := h.pos + Vector3(0, 1.0, 0)
-	k.fx().chain(_fx_id(), a, _anchor_now() + Vector3(0, 1.0 if target != null else 0.6, 0), 0.0, HOT, DARK, 0.16)
+	k.fx().chain(_fx_id(), a, at + Vector3(0, 1.0 if target != null else 0.6, 0), 0.0, HOT, DARK, 0.16)
 
 func _anchor_now() -> Vector3:
 	return target.pos if target != null and is_instance_valid(target) else anchor
@@ -283,9 +331,9 @@ func _anchor_now() -> Vector3:
 func _arrive() -> void:
 	var h := k.h
 	var ed := data()
-	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else pull_dir
+	var dir := pull_dir
 	_stop("arrived", true)
-	var keep := dir * float(ed["reel_speed"]) * float(ed["carry"])
+	var keep := dir * maxf(pull_speed, float(ed["reel_speed"])) * float(ed["carry"])
 	h.vel.x = keep.x
 	h.vel.z = keep.y
 	arrivals += 1
@@ -304,9 +352,9 @@ func dash_out() -> void:
 func _jump_out() -> void:
 	var h := k.h
 	var ed := data()
-	var dir := h.roll_dir
+	var dir := pull_dir
 	_stop("jump", false)
-	var spd := float(ed["reel_speed"]) * float(ed["jump_carry"])
+	var spd := pull_speed * float(ed["jump_carry"])
 	h.vel.x = dir.x * spd
 	h.vel.z = dir.y * spd
 	h.glide_handoff(dir, spd)

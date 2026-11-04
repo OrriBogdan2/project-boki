@@ -349,7 +349,6 @@ func _bolt() -> void:
 	var n0: int = m.shots.size()
 	h.shot_aim = AimMode.CURSOR
 	h.fire()
-	h.ammo = int(h.wpn.get("mag", 99))        # no magazine: a bolt every 0.45s for as long as you hold it
 	if m.shots.size() <= n0:
 		return
 	var sd: Dictionary = m.shots[-1]
@@ -374,7 +373,8 @@ func _bolt() -> void:
 	sd["life0"] = sd["life"]
 	var x: Dictionary = sd["x"]
 	x["kx"] = func(s: Dictionary, at: Vector3, e: Ent, why: String) -> void: _bolt_end(s, at, e, why, emp)
-	# the throw: the firing arm whips forward, the torso turns into it (KMovesDJ thf_lmb_r / thf_lmb_l); the
+	# the throw: the torso unwinds into it and winds toward the other hand for the next bolt (KMovesDJ
+	# thf_lmb_r / thf_lmb_l) while the swing whips that hand's blade out (HunterAnim.SWINGS "arc_bolts"); the
 	# empowered one is both blades driven out together (thf_primed)
 	var throw := "thf_lmb_r" if hand == 1 else "thf_lmb_l"
 	play("thf_primed" if emp else throw)
@@ -390,7 +390,6 @@ func _bolt() -> void:
 		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 2.6, 0.55)
 		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
 		m.sfx("dj_bolt_emp", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
-		if h.is_local() and m.cam: m.cam.add_trauma(0.12)
 	else:
 		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_GOLD, 0.9, 0.3)
 		fx().star(muzzle, BOLT_GOLD, 0.6, 0.1, BOLT_CORE)        # the gold muzzle star at the throwing hand
@@ -555,11 +554,11 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return
 	add_mark(t, 1)
 
-## The empowered bolt landed: a Mark like any bolt, and the Vault comes back on the spot (its damage was on the
-## bolt itself). Weight without a blast: a blue blade flash on them, a T4 shake, and the reset snap on her.
+## The empowered bolt landed: two Marks (the owner's faster stacking), and the Vault comes back on the spot (its
+## damage was on the bolt itself). Weight without a blast: a blue blade flash on them and the reset snap on her.
 func _primed_hit(t: Ent) -> void:
 	primed_hits += 1
-	add_mark(t, 1, true)
+	add_mark(t, int(dash_def()["prime_marks"]), true)
 	h.dashes = h.max_dashes()
 	DashReset.cue(h)
 	_reset_fx(t)
@@ -567,7 +566,7 @@ func _primed_hit(t: Ent) -> void:
 
 ## The empowered hit and the reset, in her colours: a blue-white star and an upright blade arc on the target (the
 ## source's red-white flash with its blue chakram), VAULT RESET over them, a cyan four-point star at her hip
-## where the Vault is back; the T4 shake, a punch the way it flew, its own sound.
+## where the Vault is back, its own sound (no self-shake: item 50).
 func _reset_fx(t: Ent) -> void:
 	var at := t.pos + Vector3(0, 1.0, 0)
 	var dir := Vector2(t.pos.x - h.pos.x, t.pos.z - h.pos.z)
@@ -577,10 +576,6 @@ func _reset_fx(t: Ent) -> void:
 	m.fx.word(t.pos + Vector3(0, 2.7, 0), "VAULT RESET", res_col(), true)
 	fx().star(h.pos + Vector3(0, 0.9, 0), GHOST, 1.0, 0.24, Color.WHITE)
 	m.sfx("pay_cashin", at, -2.0, 1.0)
-	Feel.shake(m, "t4", h, t.pos, t)
-	if h.is_local():
-		Oomph.punch_dir(m, dir.normalized(), 0.28)
-		if m.cam: m.cam.punch(0.04)
 	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
@@ -644,8 +639,7 @@ func _throw_bola() -> void:
 	var bd: Dictionary = rmb_def()["bola"]
 	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(bd["speed"]),
 			"range": float(bd["range"]), "size": 0.3},
-		"effects": [{"type": "damage", "amount": float(bd["dmg"])},
-				{"type": "slow", "duration": _ground_t(), "strength": float(bd["slow"])}]})
+		"effects": [{"type": "damage", "amount": float(bd["dmg"])}]})
 	var dv := h.aim_dir()
 	bola = {"pos": h.pos + Vector3(dv.x * 0.5, 1.0, dv.y * 0.5), "dir": dv, "left": float(bd["range"]), "first": null,
 			"bounces": int(bd["bounces"]), "stg": stg}
@@ -771,7 +765,6 @@ func _tangle(f, other: Ent) -> void:
 	m.fx.word(mid + Vector3(0, 2.6, 0), "TANGLED", col, true)
 	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("ff9be8"), 1.2, 0.3)
 	m.sfx("ab_stun", mid, -2.0, 1.1)
-	Feel.shake(m, "t3", h, mid, other)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
 
 # ------------------------------------------------------------------ E: Shadow Knife
@@ -894,11 +887,7 @@ func _blink(to: Vector3) -> void:
 	blinks += 1
 	fx().puff(to + Vector3(0, 0.9, 0), GHOST, 1.2, 0.3)
 	m.sfx("dj_blink", to, -3.0, 1.0)
-	m.fx.ring(to, 1.0, GHOST, 0.22)
 	net_bolt(from + Vector3(0, 0.9, 0), to + Vector3(0, 0.9, 0), GHOST)
-	if h.is_local():
-		Oomph.punch_dir(m, Vector2(to.x - from.x, to.z - from.z), 0.25)
-		if m.cam: m.cam.punch(0.03)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

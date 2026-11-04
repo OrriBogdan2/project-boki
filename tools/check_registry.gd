@@ -34,6 +34,7 @@ const CHECKS := {
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
+	"--shake-check": ["res://tools/shake_check.gd", "shake_check", null],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
@@ -63,6 +64,7 @@ const CHECKS := {
 	"--market-check": ["res://tools/market_check.gd", "market_check", null],      # docs/decisions/0013-market.md
 	"--drop-feel-check": ["res://tools/drop_check.gd", "drop_feel_check", null],      # the opening drop
 	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],      # --market-shots=<dir>
+	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],     # 2 games, relay
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).

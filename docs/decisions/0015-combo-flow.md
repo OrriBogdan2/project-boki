@@ -22,4 +22,4 @@ Kits ask `flow.ends_hold(slot[, move])` where a move used to end a hold, and `fl
 
 ## Consequences
 - `--dash-flow-check` walks every hero x slot x {ground dash, air dash, jump} x {cast mid, hold through, recovery out} and fails a missing reason or source on an exception; `docs/heroes/dash_interactions.md` lists the new rows (gen_wiki).
-- Wired: the bow draw (`Hunter._trigger_bow`, one line), Bjorn's Crushing Blow (`on_dash`, `_hold_interrupted`), Zedran's Searing Wave (`lmb_override`, `_move_slot`), Breah's Quake Fist; the measured cancels today are exactly these. A mid-jump press with a `buffer` row is held by `DashFlow.route`. No Net or save change.
+- Wired: the bow draw (`Hunter._trigger_bow`, one line), Bjorn's Crushing Blow (`on_dash`, `_hold_interrupted`), Zedran's Searing Wave (`lmb_override`), Breah's Quake Fist; the measured cancels today are exactly these. A mid-jump press with a `buffer` row is held by `DashFlow.route`. No Net or save change.

@@ -1,15 +1,15 @@
 class_name ArcherKit
 extends ArchKit
 ## Pin (id archer, light; docs/heroes/archer.md, hero sheet pin.md). Spirit Walk (Shift), Focus, the Heavy Shot
-## (RMB, hold only: a charged arrow that pierces, knocks back and stuns into a wall), Hail Wall (E, a curved arc of rain at the cursor distance), and on X
+## (RMB, hold only: a charged arrow that knocks the first foe back and stuns it into a wall), Hail Wall (E, a curved arc of rain at the cursor distance), and on X
 ## Starpiercer (level 6, PinUlt: three empowered piercing beams). R is the Merge.
 ## The bow (PinDraw): hold to draw through two stages with a V reticle that closes at each; tap and
 ## Empowered shots land at the cursor, Supercharged ones fly past it to max range; let go right as a stage
 ## comes up (a gold fletch burst) and the next draw is faster; hold too long and the arrow is overdrawn (half).
 ##
 ## The loop: pins and standing still feed Focus -> full Focus arms the Deadeye (a lens glint and
-## a thin aim line everyone sees, crosshairs over every pinned foe) -> the next shot is drawn at once,
-## and into a rooted or stunned foe it's a Deadeye: a gold payoff hit with T4 hitstop and its own sound.
+## a thin aim line everyone sees, crosshairs over every pinned foe) -> the next arrow (drawn through its
+## stages as always) into a rooted or stunned foe is a Deadeye: a gold payoff hit with T4 hitstop.
 
 var rain := {}                 # the live Hail Wall: {a, b, t, tick, patter, tele}
 var draw: PinDraw             # the bow's stages, reticle, perfect release and overdraw
@@ -28,7 +28,6 @@ var was_full := false
 var glint: Node3D = null       # the lens glint at the bow and the thin aim line (full Focus)
 var reticles := {}             # foe instance id -> node: crosshairs over pinned foes while Deadeye is armed
 var deadeyes := 0              # Deadeyes landed (tests, demo)
-var knock_healed := 0.0        # health the knock passive gave back (tests)
 var sense_t := 0.0
 var pins := 0                  # wall pins landed (tests)
 var heavy_kicks := 0           # Heavy Shot releases that kicked the screen (tests)
@@ -57,8 +56,8 @@ func ready_label() -> String:
 func add_focus(v: float) -> void:
 	add_res(v)
 
-## A full Focus makes the next shot fully drawn or aimed at once, with +20% range (Hunter.fire reads it).
-## The shot stays "loosed" for a moment: if it hits a pinned foe it's a Deadeye.
+## A full Focus is spent on the next shot (a bow's arrow, or a warmup weapon's shot aimed at once), with +20%
+## range (Hunter.fire reads it). The shot stays "loosed" for a moment: if it hits a pinned foe it's a Deadeye.
 func take_focus_shot() -> bool:
 	if res < res_max() - 0.01:
 		return false
@@ -67,7 +66,6 @@ func take_focus_shot() -> bool:
 	loosed = m.time + float(res_def().get("window", 1.2))
 	var d := h.aim_dir()
 	m.fx.flash(h.pos + Vector3(d.x * 0.6, 1.0, d.y * 0.6), res_col(), 0.8, 0.08)
-	m.fx.ring(h.pos + Vector3(d.x * 0.6, 1.0, d.y * 0.6), 0.6, res_col(), 0.15)
 	m.sfx("rail", h.pos, -9.0 if h.is_local() else -12.0, 1.7)       # the string's snap
 	return true
 
@@ -182,7 +180,11 @@ func draw_rate() -> float:
 	return draw.rate()
 
 ## Hunter._loose asks once per arrow: where it goes and its damage factor (PinDraw.bonus).
+## A full Focus is spent on the arrow loosed (the draw runs its stages as always): +20% range, and it can be a
+## Deadeye.
 func draw_bonus(t: float) -> float:
+	if take_focus_shot():
+		h.shot_range_k = 1.2
 	return draw.bonus(t)
 
 ## Our shots the match just spawned get Pin's own look (PinFx): the bow's arrows by the kind PinDraw
@@ -209,19 +211,6 @@ func _sense_injured() -> void:
 		var hurt_enough: bool = f.hp < f.max_hp * float(rd.get("sense_hp", 0.5))
 		if f is Hunter and not f.dead and hurt_enough and h.flat_dist(f) < float(rd.get("sense_r", 22.0)):
 			f.reveal_t = maxf(f.reveal_t, 0.4)
-
-## Passive: a knock heals us (the dash comes back for every takedown, see DashReset).
-func on_knock(t: Hunter, mine: bool) -> void:
-	if not mine or not is_instance_valid(t): return
-	var rd := res_def()
-	var hp0 := h.hp
-	h.heal(float(rd.get("knock_heal", 18.0)))
-	knock_healed += h.hp - hp0
-	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("9fe0a8"), 14, 2.5, 0.5, -2.0)
-	m.fx.word(h.pos + Vector3(0, 2.4, 0), "RUN DOWN", res_col(), true)
-	play("pin_rundown")
-	m.fx.ring(h.pos, 1.6, res_col(), 0.3)
-	net_ring(h.pos, 1.6, res_col())
 
 func _high_ground() -> bool:
 	var gy: float = m.world.ground_at(h.pos.x, h.pos.z)
@@ -339,7 +328,6 @@ func _arrow_hit(t: Ent) -> void:
 		fx.fletch_burst(at, 1.2, Color("a8ffe0"), 0.05, 0.15, 0.0, 5.0)
 		m.fx.burst(at, PinFx.TEAL, 18, 7.0, 0.35, 2.0, 1.2)
 		m.sfx("pin_super_hit", t.pos, -2.0)
-		Feel.shake(m, "t2", h, t.pos, t)
 	elif kind in ["arrow", "tap"]:
 		fx.star(at, 0.8, PinFx.GREEN, 0.1)
 
@@ -349,13 +337,11 @@ func on_dash(use_ex: bool) -> bool:
 	if not spend_dash(ex):
 		return true
 	if ex:
-		# the long dash (in the air, or out of charges): Pin's own flick and tumble, a green streak behind
-		# 19 m/s, the base dash speed
+		# the long dash (in the air, or out of charges): Pin's own flick and tumble with her fletch
+		# after-images (no bursts on a dash); 19 m/s, the base dash speed
 		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll"}, true)
 		play("pin_flick")
 		st["last_dash"] = "flick"
-		for i in 4:
-			m.later(0.05 * i, func(): if is_instance_valid(h): m.fx.burst(h.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 4, 1.5, 0.3, 0.0, 0.9))
 		return true
 	CombatBus.ability_used.emit(h, "spirit_walk", "dodge")
 	spirit.start(use_ex)
@@ -457,8 +443,8 @@ func fire_rmb(c: Dictionary) -> void:
 	play("arc_heavy")
 	_pin(aim(), clampf((float(c["t"]) - float(rmb_def()["hold"])) / maxf(0.05, float(pd["full"]) - float(rmb_def()["hold"])), 0.0, 1.0))
 
-## The Heavy Shot: a held, charged arrow (0.5s -> full at 1.1s) that pierces, knocks back by its
-## charge and, driven into a wall within 3m, stuns (PINNED). Full charge is a heavy hit.
+## The Heavy Shot: a held, charged arrow (0.5s -> full at 1.1s) that stops on the first foe, knocks it back by
+## its charge and, driven into a wall within 3m, stuns (PINNED). Full charge is a heavy hit.
 func _pin(a: Vector3, k: float) -> void:
 	var pd: Dictionary = rmb_def()["pin"]
 	var reach := heavy_reach()
@@ -466,8 +452,7 @@ func _pin(a: Vector3, k: float) -> void:
 	var dmg := lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k)
 	var push := lerpf(float(pd["push"][0]), float(pd["push"][1]), k)
 	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(pd["speed"]), "range": reach * (1.0 + 0.2 * k), "size": lerpf(0.2, 0.34, k)},
-		"effects": [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}],
-		"modifiers": [{"type": "pierce", "count": int(pd["pierce"])}]})
+		"effects": [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}]})
 	var dir := Vector2(a.x - h.pos.x, a.z - h.pos.z).normalized()
 	var extra := {"hit_extra": {"heavy": true}} if k >= 0.99 else {}
 	extra["on_foe"] = func(f: Ent, _c: Dictionary):
@@ -497,13 +482,13 @@ func _pin(a: Vector3, k: float) -> void:
 			add_focus(res_max())
 			if rank("sec") >= 3:
 				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)       # rank 3: a wall stun gives a dash charge
-			f.hurt(float(pd.get("wall_dmg", 12.0)) * k * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "pin"], "heavy": true})
+			var wall_k := lerpf(float(pd["wall_floor"]), 1.0, k)       # an early-release pin pays too
+			f.hurt(float(pd.get("wall_dmg", 12.0)) * wall_k * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "pin"], "heavy": true})
 			m.later(0.12, func():
 				if is_instance_valid(f) and not f.dead:
 					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
 					m.fx.word(f.pos + Vector3(0, 2.2, 0), "PINNED", Feel.cat_color("control"), true)
-					m.fx.dust(f.pos, 10)
-					Feel.shake(m, "t3", h, f.pos, f))
+					m.fx.dust(f.pos, 10))
 	run(stg, cx("rmb", "heavy_shot", a, extra))
 	m.sfx("pin_heavy", h.pos, lerpf(-6.0, 0.0, k), lerpf(1.15, 0.9, k))
 	m.sfx("pin_super", h.pos, lerpf(-8.0, -2.0, k), 0.6)           # a deep thump under it: heavier than the bow
@@ -512,10 +497,7 @@ func _pin(a: Vector3, k: float) -> void:
 	m.fx.slash(h.pos + Vector3(0, 0.15, 0), atan2(d.y, d.x), PI * 0.6, 1.1, Color("ff9ad8"), false)
 	# the release burst sits on the aim line at the bow, bigger than any bow cue, and a screen kick along the shot
 	fx.fletch_burst(draw.bow_at(), 1.4 + 0.8 * k, HEAVY_GOLD, 0.08, 0.14, 1.0, 5.0)
-	if h.is_local(): Oomph.punch_dir(m, d, 0.2 + 0.2 * k)
 	heavy_kicks += 1
-	if k >= 0.99: Feel.shake(m, "t2", h, h.pos)
-	h.vel.x -= d.x * (1.5 + 3.0 * k); h.vel.z -= d.y * (1.5 + 3.0 * k)
 
 func _wall_behind(f: Ent, dir: Vector2, reach: float) -> bool:
 	var g0: float = f.pos.y
