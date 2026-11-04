@@ -605,3 +605,9 @@ The owner saw an explosion with Moosh Moosh and isn't sure whether it comes from
 - Owner: "I think we need to redo the film to show an evil deity in human form first. All of it is pretty rough. Put that as a note for later."
 - Direction for the rebuild (after the resets; with the art pipeline): the film opens on the **evil deity in human form**: the Wyrm-crowned Tyrant / the Wyrm as a human sovereign (DECISIONS + LORE_MASKS) on the Throne, so players meet the villain before the fall. Then the rest of the story beats from LORE_MASKS (the cold open with the girl in chains and the Mask, the Sundering, the Wardens' Masks scattering, the race for the Wyrmheart). Owner verdict on the current film: "pretty rough": plan it as a proper storyboarded short (key art from the image-gen pipeline, camera work, timing) rather than polishing the current scenes.
 - Not now: logged for planning after the usage resets.
+
+## 79. The Empty: the void look covers the whole head and body, not just the front of the face (owner, 22:57 UTC Nov 4; follows empty90 in sync91)
+- Owner: "the whole face/body should be that void thing, not just the front of it."
+- Today (empty90, shaders/void_face.gdshader) the void effect sits only on the front of the face, so from the side, back or above the head and body read as a normal surface.
+- Change: the Empty's whole head and body use the void material (the starry, depthless look), from every angle, including the back of the head, neck, hands and body under the outfit's open areas. Outfits and accessories can sit on top as solid pieces. Keep the face marks (eyes, brows, blush) as decals floating on the void face. The look must read at the farm's camera distance (top-down), not only in the creator close-up.
+- Check: the creator and farm screenshots from front, side, back and top-down show the void everywhere. Small; whoever has budget.
