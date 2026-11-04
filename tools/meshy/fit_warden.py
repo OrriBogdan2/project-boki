@@ -1634,6 +1634,28 @@ def chunk(ob, rig, ck):
             w = next((x.weight for x in v.groups if x.group == g.index), 0.0)
             if w > 0.0:
                 co[v.index] = piv + (co[v.index] - piv) * (1.0 + kk * w)
+    # "limbs" {bone: k}: the vertices on a bone (by skin weight) pushed out from the line through its head and
+    # its child's head by k (Pip's chubby thighs and chest fluff); "hips" uses the line from hips to head
+    child = {"thigh.L": "shin.L", "thigh.R": "shin.R", "hips": "head", "upper_arm.L": "forearm.L",
+             "upper_arm.R": "forearm.R", "forearm.L": "hand.L", "forearm.R": "hand.R"}
+    for bone, k in (ck.get("limbs") or {}).items():
+        g = ob.vertex_groups.get(bone)
+        if g is None:
+            continue
+        a = np.array(K.bone_head(rig, bone)[:])
+        if bone in child:
+            b = np.array(K.bone_head(rig, child[bone])[:])
+        else:                         # (a shin: on along its thigh's line)
+            par = {"shin.L": "thigh.L", "shin.R": "thigh.R"}.get(bone)
+            b = a + (a - np.array(K.bone_head(rig, par)[:])) if par else a + np.array([0.0, 0.0, -0.3])
+        ax = (b - a) / max(np.linalg.norm(b - a), 1e-6)
+        kk = float(k) - 1.0
+        for v in ob.data.vertices:
+            w = next((x.weight for x in v.groups if x.group == g.index), 0.0)
+            if w > 0.0:
+                d = co[v.index] - a
+                rad = d - ax * d.dot(ax)
+                co[v.index] = co[v.index] + rad * kk * w
     gk = float(ck.get("girth", 1.0))
     co[:, 0] *= gk
     co[:, 1] *= gk
@@ -1965,7 +1987,7 @@ def main():
         if spec.get("hoses"):
             parts.append(WP.hoses([ob], arm, [_rel(arm, h, ("path",)) for h in spec["hoses"]], spec["hose_colours"]))
     props = []
-    if any(k in spec for k in ("wings", "lantern", "springs", "crossbows", "gem", "fluff_tail", "flower_crown")):
+    if any(k in spec for k in ("wings", "lantern", "springs", "crossbows", "gem", "fluff_tail", "flower_crown", "cape")):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import warden_props as WPR
         for sr in spec.get("springs", []):
@@ -1982,6 +2004,8 @@ def main():
             parts.append(WPR.fluff_tail(arm, spec["fluff_tail"]))
         if spec.get("flower_crown"):
             parts.append(WPR.flower_crown(arm, ob, spec["flower_crown"]))
+        if spec.get("cape"):
+            parts.append(WPR.cape(arm, ob, spec["cape"]))
     if head:
         head.vertex_groups.clear()
         g = head.vertex_groups.new(name="head")

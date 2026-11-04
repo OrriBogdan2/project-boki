@@ -83,6 +83,7 @@ const WEAPON_OFF := "weapon_offhand"
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
 static var _ink: ShaderMaterial  # the painted atlas's ink shell (INK_WIDTH), shared
+static var _ink_own := {}        # a warden_look "ink" (as JSON) -> that model's own ink shell
 static var _measuring := false  # building that neutral model: no .glb on it
 static var _variants = null     # art name -> the design variant the command line picks (variant())
 static var _look = null         # content/rules/warden_look.json, read once (look())
@@ -330,7 +331,7 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}) -> A
 				for k in PAINTED:
 					m.set_shader_parameter(k, PAINTED[k])
 				if m.next_pass:
-					m.next_pass = _painted_ink()
+					m.next_pass = _painted_ink(own.get("ink", {}))
 			if slot == "glow":
 				m.set_shader_parameter("glow", GLOW)
 			var per_slot: Dictionary = (own.get("slots", {}) as Dictionary).get(slot, {})
@@ -341,7 +342,21 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}) -> A
 			out.append(m)
 	return out
 
-static func _painted_ink() -> ShaderMaterial:
+## A model's warden_look "ink" {"far_thin", "color"} gives it its own ink shell: thinner at the match camera
+## and a softer colour (Pip's fur tufts and tail clumps: a near-black line there read as black specks).
+static func _painted_ink(own_ink: Dictionary = {}) -> ShaderMaterial:
+	if not own_ink.is_empty():
+		var key := JSON.stringify(own_ink)
+		if not _ink_own.has(key):
+			var mat := ShaderMaterial.new()
+			mat.shader = Models.OUTLINE
+			mat.set_shader_parameter("width", INK_WIDTH)
+			mat.set_shader_parameter("ink_mask", true)
+			mat.set_shader_parameter("far_thin", float(own_ink.get("far_thin", INK_FAR_THIN)))
+			if own_ink.has("color"):
+				mat.set_shader_parameter("color", _param(own_ink["color"]))
+			_ink_own[key] = mat
+		return _ink_own[key]
 	if _ink == null:
 		_ink = ShaderMaterial.new()
 		_ink.shader = Models.OUTLINE
