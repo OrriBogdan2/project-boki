@@ -505,7 +505,8 @@ def gem(arm, body, spec, tag="gem"):
     e.parent_type = "BONE"
     e.parent_bone = spec.get("bone", "hips")
     bpy.context.view_layer.update()
-    e.matrix_world = Matrix.Translation(Vector((c + np.array([0, 0.03, 0])).tolist()))
+    mid = np.array([ob.matrix_world @ v.co for v in ob.data.vertices]).mean(axis=0)     # (the gem's own middle)
+    e.matrix_world = Matrix.Translation(Vector(mid.tolist()))
     log("gem at %s: %d tris" % (tuple(round(float(v), 3) for v in c), sum(len(f) - 2 for f in bld.f)))
     return ob
 
