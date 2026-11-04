@@ -1961,7 +1961,8 @@ def main():
             # (an anchor on the lens: the game hangs the lens's match-zoom halo on it, warden_look.json "halos")
             K.anchor(arm, "head", "anchor_" + lens_s.get("anchor", "lens"), tuple(lens_s["centre"]))
         if spec.get("braids"):
-            parts.append(WP.braids([ob], arm, [_rel(arm, b, ("path",)) for b in spec["braids"]], spec["braid_colours"]))
+            parts.append(WP.braids([ob], arm, [_rel(arm, b, ("path",)) for b in spec["braids"]], spec["braid_colours"],
+                                   tag=spec.get("braid_tag", "braid")))
         if spec.get("hoses"):
             parts.append(WP.hoses([ob], arm, [_rel(arm, h, ("path",)) for h in spec["hoses"]], spec["hose_colours"]))
     props = []

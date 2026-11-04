@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://doahiw3jwf1op"
-path="res://.godot/imported/sable_braid_atlas.jpg-0d9a9184e6bc99c53a41465b6334e3d5.ctex"
+uid="uid://vd8t16bhj6rg"
+path="res://.godot/imported/sable_silkbraid_atlas.jpg-3c923d68e892518aa5e08f4e9ed94a56.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "28ff350bd45496570cc9f9e5ee091fb2"
+"md5": "4fe4e7b834cb8af1fea9defe50682f2d"
 }
 
 [deps]
 
-source_file="res://art/wardens/sable/sable_braid_atlas.jpg"
-dest_files=["res://.godot/imported/sable_braid_atlas.jpg-0d9a9184e6bc99c53a41465b6334e3d5.ctex"]
+source_file="res://art/wardens/sable/sable_silkbraid_atlas.jpg"
+dest_files=["res://.godot/imported/sable_silkbraid_atlas.jpg-3c923d68e892518aa5e08f4e9ed94a56.ctex"]
 
 [params]
 

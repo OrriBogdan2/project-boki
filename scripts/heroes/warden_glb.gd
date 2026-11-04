@@ -46,6 +46,9 @@ const CARD: Shader = preload("res://shaders/warden_card.gdshader")
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
 const NO_INK := ["hair", "eyes", "glow", "card"]   # slots drawn without the ink outline shell
+## tags drawn without the ink shell whatever their slot: small round pieces an outline turns into a cartoon ball
+## (Ryzz's gum bubble), thin pieces it turns into speckle at the match camera (Sable's crossbows and braid)
+const NO_INK_TAGS := ["gum", "crossbow", "silkbraid"]
 ## Pieces built as clean geometry (tools/meshy/warden_parts.py), "<slot>-<tag>": they take the ink line even on
 ## an inkless slot (the hair goes without it for a scan's ragged strands, not for a woven braid).
 const INK_TAGS := ["braid"]
@@ -318,7 +321,8 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}) -> A
 			# the ink shell on the body's silhouette only: on the scan's thin hair strands it poked through as
 			# lines across the face
 			var tag := String(src.resource_name).get_slice("-", 1) if src else ""
-			var m := Models.toon(src.albedo_color if src else Color.WHITE, not slot in NO_INK or tag in INK_TAGS)
+			var ink := (not slot in NO_INK or tag in INK_TAGS) and not tag in NO_INK_TAGS
+			var m := Models.toon(src.albedo_color if src else Color.WHITE, ink)
 			# (a Meshy model's vertex colour holds the ink room, not baked AO)
 			m.set_shader_parameter("vertex_ao", false)
 			m.set_shader_parameter("surface", int(SLOTS.get(slot, 1)))

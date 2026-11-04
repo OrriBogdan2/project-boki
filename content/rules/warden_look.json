@@ -50,17 +50,20 @@
 				"far_lift": 0.5,
 				"fres": 0.55,
 				"fres_tint": 0.9,
-				"top_light": 0.8
+				"top_light": 0.8,
+				"light_neutral_warm": 0.8
 			},
 			"leather": {
 				"far_lift": 0.45,
-				"fres": 0.5
+				"fres": 0.5,
+				"light_neutral_warm": 0.8
 			},
 			"metal": {
 				"top_light": 0.5,
 				"fres": 0.6,
 				"fres_tint": 0.8,
-				"far_lift": 0.35
+				"far_lift": 0.35,
+				"light_neutral_warm": 0.8
 			},
 			"hair": {
 				"far_lift": 0.5,
@@ -71,7 +74,13 @@
 					0.85,
 					0.97
 				],
-				"fres_tint": 0.3
+				"fres_tint": 0.3,
+				"own_ambient": [
+					0.5,
+					0.51,
+					0.58
+				],
+				"light_neutral_warm": 0.8
 			},
 			"fur": {
 				"far_lift": 0.4,
@@ -80,7 +89,13 @@
 					0.86,
 					0.85,
 					0.97
-				]
+				],
+				"own_ambient": [
+					0.5,
+					0.51,
+					0.58
+				],
+				"light_neutral_warm": 0.8
 			},
 			"glow": {
 				"glow": 2.0
@@ -100,8 +115,8 @@
 					0.2,
 					0.3
 				],
-				"strength": 2.8,
-				"px": 6.0,
+				"strength": 3.0,
+				"px": 10.0,
 				"near_d": 0.0,
 				"far_d": 3.0
 			}
