@@ -33,7 +33,7 @@
 	},
 	"ostra": {
 		"painted": {
-			"rim_far": 0.6,
+			"rim_far": 0.32,
 			"rim_far_color": [
 				0.62,
 				0.3,
