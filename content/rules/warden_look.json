@@ -451,8 +451,9 @@
 			"skin": {
 				"top_light": 0.1,
 				"fres": 0.35,
-				"far_lift": 0.08,
-				"shade": 0.8,
+				"far_lift": 0.15,
+				"shade": 0.84,
+				"light_neutral_warm": 0.8,
 				"shadow_tint": [
 					0.84,
 					0.9,
@@ -465,7 +466,8 @@
 			},
 			"fur": {
 				"top_light": 0.3,
-				"far_lift": 0.25
+				"far_lift": 0.25,
+				"light_neutral_warm": 0.4
 			},
 			"leather": {
 				"far_lift": 0.4,
