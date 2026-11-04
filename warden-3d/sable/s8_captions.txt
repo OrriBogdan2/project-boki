@@ -1,0 +1,23 @@
+s1_vs_turnaround.png: Sable stage 1: the r2 turnaround (top), the model close (front, 3/4, side, back, 3/4 back), and at the match camera (true pixels x3)
+s1_vs_sheet.png: the turnaround beside the model's front and 3/4, the match-camera strip below (warden-shots)
+s1_vs_portrait.png: the r2 portrait beside the model's head and shoulders, 3/4 and front
+s1_closeup.png: head and shoulders, three-quarter front: the face, mask and plumes, fur collar, both braids
+s1_front_34.png: full length, front and 3/4: twin crossbows in the twin hold, the wing cards behind
+s1_back_34.png: full length, back and 3/4 back: the open laced back, four wing cards with eyespots
+s1_poses_game.png: idle, run, attack, cast, ult at the match camera (true pixels x3)
+s1_moves_1.png: run frames close (braids and wings on their springs)
+s1_match.png: the Arena, --arena=thief --arena-demo=pose --demo-zoom=1.0 (the real match camera)
+s1_match_x4.png: s1_match cropped round her, x4 nearest
+s2_closeup_vs_art.png: Sable stage 2 close-up: sable_face, the portrait, the model 3/4 and front (face painted from sable_face: almond half-lidded eyes, liner, beauty mark; mask on metal; glowing pendant)
+s2_34_vs_art.png: the turnaround's front and 3/4 beside the model's (stance squared up, legs spread; bigger crossbows)
+s2_back_vs_art.png: the turnaround's back beside the model's back and 3/4 back (standing purple collar, wing cards)
+s2_match.png / s2_match_vs_art.png: the Arena match frame (--arena=thief --arena-demo=pose --demo-zoom=1.0), x4 crop beside the art
+s2_moves_1.png: run frames close
+s2_poses_game.png: idle, run, attack, cast, ult at the match camera (true pixels x3)
+s2_vs_turnaround.png: the turnaround, the model close and at the match camera
+s2_vs_s1.png: stage 1 close-up (top) vs stage 2 (bottom); s2_vs_s1_body.png: stage 1 front/back (top) vs stage 2
+s3_*: round 3 with the shared painted-look fix (16c18b4f): closeup_vs_art, 34_vs_art, back_vs_art, match / match_vs_art (Arena, --arena-demo=pose --demo-zoom=1.0, x4 crop), moves_1, poses_game, vs_turnaround, vs_s1 / vs_s1_body (stage 1 top, round 3 bottom)
+s5_*: round 5 on RECIPE_95 (dd56bb8e merged; shared fixes 16c18b4f + f4b59cb3): ORCH 13:10 items (one braid over her right shoulder, silver-white hair, grey-lilac fur, crossbows ~1.5x with violet tips, a pendant halo, an upright wide stance, wings to mid-calf, violet rim_far). Self-score: close-up ~86 (silhouette 14/15, face 16/20, hair 9/10, props 16/20, palette 13/15, paint 8/10, outfit 10/10), match zoom ~68 (silhouette 20/25, signature colours 16/25, value 15/20, props 11/20, artefacts 6/10).
+s6_*: round 6 (the face by RECIPE_95 face rules: 18-landmark warp, skin mask, inpaint outside; ORCH 14:10 list: hand-size crossbows 0.36 m with 2x glowing bolt heads and linear-filtered atlases, a red gem with a bloom halo, wide moth wings flaring past the hips, cool lilac-grey shadows on hair/braid/fur, grey-lilac collar, the laced back projected from the edited back view, stronger atlas smoothing). Self-score: close-up ~87 (silhouette 14, face 17, hair 9, props 16, palette 13, paint 8, outfit 10), match zoom ~64 (silhouette 20, signature colours 15, value 14, props 9, artefacts 6). HUD caption and spawn palm still in the Arena frame (the pose demo's spawn).
+s7_*: round 7: crossbows tipped down by the thighs (crossbows `pitch` -0.55), violet bolt heads, no ink on the crossbows and braid (WardenGlb NO_INK_TAGS, Ryzz's c3b43742 mechanism; tags crossbow, silkbraid), the braid down the back over her right shoulder blade, grey-lilac collar, hair/fur/cloth/leather/metal light_neutral_warm 0.8 (047f8724's uniform) and a cool own_ambient on hair and fur (no cream cast), the far cheek's dark crease lifted (touch_up_late), pendant halo 10 px; Arena frame by arena_demo pose_clear (Dredge's b9daa472: off the fern, the sign hidden). Self-score: close-up ~88 (silhouette 14, face 17, hair 9, props 17, palette 14, paint 8, outfit 9), match zoom ~68 (silhouette 21, signature colours 16, value 15, props 10, artefacts 6).
+s8_*: round 8 with the shared match-zoom v2 (161708cc, 8af89a9e, 0170c7df, a466972f; pose_clear review frame): the braid down the spine between the wings, silver criss-cross laces with eyelets as geometry, no_ink ["crossbow", "silkbraid"] in warden_look (NO_INK_TAGS back to Ryzz's gum only). Self-score: close-up ~89 (silhouette 14, face 17, hair 10, props 17, palette 14, paint 8, outfit 9), match zoom ~78 (silhouette 22, signature colours 19, value 16, props 13, artefacts 8).
