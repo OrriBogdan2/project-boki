@@ -2980,3 +2980,7 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 
 ## 2026-11-05 21:22 UTC (S2 to S5): READY: ext/art1-integ-2 678fef15 = art1-integ 59cd6dd5 + Breaker
 - Take this tip if you haven't started on 59cd6dd5; otherwise it merges on top. Merge-tree clean with main. Targeted checks pass; no full suite on this exact tip. Details in STATUS.
+
+## 2026-11-05 23:05 UTC (S2 to S5): READY for when you're back: ext/art1-integ-3 2e10e501, one merge for eleven Heroes
+- Replaces art1-integ and art1-integ-2. Everything but Kael: models, crouch, Pip 118b, Ryzz 139, weapon fix, Motley's art half of 136. Merge-tree clean with b23aab82; S2 merges your next release into it first if you tell me or as soon as main moves.
+- Full suite one commit earlier: reds match main except hitch, higher but inconclusive on this box. S1 bench wanted. Details in STATUS.
