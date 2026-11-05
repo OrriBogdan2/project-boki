@@ -628,7 +628,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		# the Unmasked as MantleLook's own-person params (every slider neutral), its build and colour
 		lk = MantleLook.own(PlayerLook.clean(Unmasked.legacy(appearance)))
 		lk["build"] = float(Unmasked.BUILD_WIDTH[int(Unmasked.clean(appearance)["build"])])
-		lk["skin_col"] = Unmasked.colour(appearance)
+		lk["skin_col"] = Unmasked.VOID_SKIN
 		race = Unmasked.race(appearance)
 		arch = "unmasked"
 	else:
@@ -643,6 +643,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	var bare := outfit == "bare"
 	var oi: int = OUTFIT_KEYS.find(outfit)
 	var hero_col: Color = OUTFIT_COLS[oi] if oi >= 0 else lk["outfit_col"]
+	if um: hero_col = Unmasked.colour(appearance)      # the shroud's colour
 	# the outfit is the gear's colourway: a saturated coat, a pale shirt, dark trousers, team colour
 	# on the strongest shapes (hood, cape, crest, pauldron tops, shield), gold on the edges
 	# a clean value structure (dark trousers and leather, a mid-dark coat, light shirt and trim), each
@@ -741,7 +742,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 		for sx in [-1.0, 1.0]:
 			var ear := HeroKit.loft("ear", [Vector3(0, -0.035, 0), Vector3(0, 0.0, 0.008), Vector3(0, 0.035, 0.02)], [Vector2(0.03, 0.012), Vector2(0.04, 0.014), Vector2(0.022, 0.01)], 10, Vector3.RIGHT, 0.75)
 			part(torso, ear, m_skin, Vector3(0.226 * sx * (1.03 if not fem else 0.98), 0.85, 0.012), Vector3.ONE, Vector3(0, 0.25 * sx, 0))
-	if um: Unmasked.face(torso, appearance, skin_c)
+	if um: Unmasked.face(torso, appearance)
 	else: _face(torso, lk, m_dark, m_skin, team_col)
 	# what the archetype wears on its head decides how much hair shows (a hat: all but the crown; a
 	# hood or helm: only what spills out below)
@@ -761,7 +762,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	# ArmXPivot (shoulder) > sleeve, Elbow > forearm "ArmX" and a cuff, Hand > a mitten glove.
 	# Rounded joints overlap at the shoulder and elbow so a bent arm never shows a gap.
 	var hk2 := float(CLASS_LOOK.get(cls, {}).get("hands", 1.0)) * (1.3 if arch == "juggernaut" else 1.0)
-	var m_glove: Material = m_steel if heavy_gear else (m_dark if arch == "thief" else m_leather)
+	var m_glove: Material = m_skin if um else (m_steel if heavy_gear else (m_dark if arch == "thief" else m_leather))
 	var arms := {}
 	for sx in [-1.0, 1.0]:
 		var sd := "L" if sx < 0.0 else "R"

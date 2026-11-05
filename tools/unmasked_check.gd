@@ -1,8 +1,10 @@
 extends RefCounted
 ## --unmasked-check: the Empty (scripts/match/unmasked.gd). Old detailed looks (every race and face, odd
 ## data) and face-marks looks (eyes, brows, blush) become the closest valid Empty and never crash; a save's look
-## migrates; the creator says Male / Female; the model builds for every body and outfit with a hollow face (the
-## void shader), a glowing heart and its motes, no hair; height visibly changes the body's height, build its
+## migrates (an old skin colour becomes the shroud colour); the creator says Male / Female, has no skin colour
+## and an Aura row with a tooltip; the model builds for every body and shroud style with a void head (the void
+## shader, all the way round), no skin showing, an aura of big bright specks, no hair; its soles stay on the
+## ground at every height and build, idle and walking; height visibly changes the body's height, build its
 ## mass, and a woman's silhouette and stance differ from a man's; it animates with HunterAnim and shows kept
 ## mask marks; a match and the Hunter screens use the Hunter's look, never yours.
 
@@ -69,13 +71,14 @@ func _old_looks() -> void:
 	var marks_look := {"unmasked": true, "gender": 1, "eyes": 2, "brows": 1, "blush": 2, "outfit": 3, "colour": 4}
 	var m2 := Unmasked.clean(marks_look)
 	ok(m2["hollow"] == Unmasked.HOLLOW_FROM_EYES[2] and m2["ghost"] == Unmasked.GHOST_FROM_BROWS[1]
-		and m2["glow"] == 3 and m2["outfit"] == 3 and not m2.has("eyes") and _in_lists(m2),
+		and m2["glow"] == 3 and m2["shroud"] == 0 and not m2.has("eyes") and _in_lists(m2),
 		"a face-marks look (eyes, brows, blush) migrates to a hollow, ghost and glow, keeping the rest")
 	var sexes: Array = Unmasked.ROWS[0][2]
 	ok(String(Unmasked.ROWS[0][1]) == "Sex" and sexes == ["Female", "Male"] and not str(Unmasked.ROWS).contains("emin")
 		and not str(Unmasked.ROWS).contains("ascul"), "the creator says Male / Female (%s)" % str(sexes))
 	ok(String(u["glider"]) == "kite" and not u.has("race") and not u.has("hair"), "the glider stays; race and hair go")
 	ok(Unmasked.clean(u) == u, "cleaning an Unmasked changes nothing")
+	_shroud_migration()
 	var data := {"look": old.duplicate()}
 	Unmasked.migrate(data)
 	var once: Dictionary = data["look"].duplicate(true)
@@ -90,14 +93,14 @@ func _old_looks() -> void:
 func _model(main: Node) -> void:
 	var bodies := 0
 	for g in 2:
-		for o in Unmasked.OUTFITS.size():
-			var lk := {"unmasked": true, "gender": g, "outfit": o, "hollow": o % 4, "ghost": o % 4, "glow": o,
+		for o in Unmasked.SHROUDS.size():
+			var lk := {"unmasked": true, "gender": g, "shroud": o, "hollow": o % 4, "ghost": o % 4, "glow": o,
 				"colour": o * 2}
 			var m := _build(Unmasked.clean(lk))
 			if m.get_node_or_null("Rig/Torso") != null and m.get_node_or_null("Rig/Legs") != null:
 				bodies += 1
 			m.free()
-	ok(bodies == 10, "both sexes x %d outfits build on the hunter rig" % Unmasked.OUTFITS.size())
+	ok(bodies == 6, "both sexes x %d shroud styles build on the hunter rig" % Unmasked.SHROUDS.size())
 	var base := _build(Unmasked.default_look())
 	var rig_ok := String(base.get_meta("race")) == "human" and String(base.get_meta("arch")) == "unmasked"
 	ok(rig_ok, "it is the human rig with no hunter's gear (arch %s)" % base.get_meta("arch"))
@@ -110,16 +113,13 @@ func _model(main: Node) -> void:
 		"the ring under your feet (your real footprint) stays the size it was")
 	var hollow := base.find_child("Hollow", true, false) as MeshInstance3D
 	var void_mat: ShaderMaterial = hollow.material_override if hollow else null
-	ok(void_mat != null and void_mat.shader == Unmasked.VOID_SHADER and hollow.get_parent().name == "Head",
-		"the face is a hollow: a void shell over the head")
-	var heart := base.find_child("Heart", true, false) as MeshInstance3D
-	ok(heart != null and int((heart.material_override as ShaderMaterial).get_shader_parameter("shape")) == 4,
-		"a small glowing void where the heart should be")
-	var swarm := _build({"unmasked": true, "motes": 2})
-	var none := _build({"unmasked": true, "motes": 0})
-	var motes := swarm.find_child("Motes", true, false) as CPUParticles3D
-	ok(motes != null and motes.amount == Unmasked.MOTE_COUNT[2] and none.find_child("Motes", true, false) == null,
-		"motes drift round the head (or none)")
+	var head := base.find_child("Head", true, false) as MeshInstance3D
+	ok(void_mat != null and void_mat.shader == Unmasked.VOID_SHADER and hollow.get_parent().name == "Head"
+		and hollow.get_aabb().is_equal_approx(head.get_aabb()) and hollow.scale.x > 1.0,
+		"the whole head is a void: a shell over all of the head mesh, not just the front of the face")
+	ok(base.find_child("Heart", true, false) == null, "the chest is under the shroud: no heart pasted on it")
+	_shroud()
+	_aura()
 	var styled := _build({"unmasked": true, "hollow": 2, "ghost": 3, "glow": 2})
 	var sm: ShaderMaterial = (styled.find_child("Hollow", true, false) as MeshInstance3D).material_override
 	ok(int(sm.get_shader_parameter("shape")) == 2 and int(sm.get_shader_parameter("ghost")) == 3
@@ -139,7 +139,7 @@ func _model(main: Node) -> void:
 	var sturdy := _build({"unmasked": true, "build": 2})
 	ok(_width(sturdy) > _width(base) * 1.08 and _width(base) > _width(slight) * 1.06,
 		"build changes the body's mass (%.2f / %.2f / %.2f m wide)" % [_width(slight), _width(base), _width(sturdy)])
-	for n in [swarm, none, styled, woman, man, slight, sturdy]:
+	for n in [styled, woman, man, slight, sturdy]:
 		n.free()
 	var marked := _build({"unmasked": true, "marks": [{"x": 0.0, "y": 0.9, "col": "#ff4040"}]})
 	ok(_verts(marked) > _verts(base), "a kept mask mark is drawn (%d > %d vertices)" % [_verts(marked), _verts(base)])
@@ -215,7 +215,7 @@ func _blend(main: Node) -> void:
 	ok(hero.scale.y > before_scale.y and hero.scale.y < before_scale.y * 1.09 and hero.scale.x > before_scale.x,
 		"the Mask keeps about 90%% Hunter: height and build show a tenth (%.3f x)" % (hero.scale.y / before_scale.y))
 	var want := tint_before.lerp(Unmasked.colour(Save.d["look"]), Unmasked.SHOW)
-	ok(tint_after.is_equal_approx(want), "and your body colour tints the Hunter a tenth")
+	ok(tint_after.is_equal_approx(want), "and your shroud colour tints the Hunter a tenth")
 	hero.free()
 
 ## The lowest point of the model's feet (the boots under each Knee), in world metres; the ground is y = 0.
@@ -254,3 +254,79 @@ func _feet(main: Node) -> void:
 				m.free()
 				await tree.process_frame
 	ok(worst <= FOOT_TOLERANCE, "feet stay on the ground at min/mid/max height, every build and both sexes, idle and walking (%d bodies, worst %.1f cm)" % [cases, worst * 100.0])
+
+## Items 79b and 80: an older Empty (a skin colour, an outfit, motes) loads as one with a shroud and an aura.
+func _shroud_migration() -> void:
+	var before := {"unmasked": true, "colour": 4, "outfit": 4, "motes": 2, "gender": 0}
+	var u := Unmasked.clean(before)
+	ok(int(u["colour"]) == 4 and int(u["shroud"]) == 4 % Unmasked.SHROUDS.size() and int(u["aura"]) == 2
+		and not u.has("outfit") and not u.has("motes") and _in_lists(u),
+		"an Empty saved with a skin colour, outfit and motes becomes a shroud colour, style and aura (%s)" % str(u))
+	var worn := {"look": before.duplicate()}
+	Unmasked.migrate(worn)
+	var once: Dictionary = worn["look"].duplicate(true)
+	Unmasked.migrate(worn)
+	ok(worn["look"] == once and not (worn["look"] as Dictionary).has("motes"), "and migrating the save twice changes nothing")
+	var deep := Unmasked.clean({"race": 0, "skin": 700, "outfit": 7, "gender": 1})
+	ok(_in_lists(deep) and int(deep["colour"]) < Unmasked.COLOURS.size(), "an old detailed look's skin colour lands on a shroud colour")
+	var labels := []
+	for row in Unmasked.ROWS:
+		labels.append(String(row[1]).to_lower())
+	ok(not labels.any(func(l): return l.contains("skin") or l == "motes") and "shroud colour" in labels and "aura" in labels,
+		"the creator has no skin colour: a shroud colour in its place, and Aura where Motes was (%s)" % str(labels))
+
+## Item 79b: no skin shows, the body is under a shroud in the chosen colour, the styles differ, the silhouette
+## still follows sex, height and build.
+func _shroud() -> void:
+	var cloak := _build({"unmasked": true, "shroud": 0, "colour": 5})
+	var wine := _coat(cloak)
+	var other := _build({"unmasked": true, "shroud": 0, "colour": 3})
+	ok(not wine.is_equal_approx(_coat(other)) and absf(wine.h - Unmasked.COLOURS[5].h) < 0.05,
+		"the shroud colour sets the cloth's colour")
+	var hand := cloak.find_child("Hand", true, false)
+	var hand_dark := false
+	for mi in hand.find_children("*", "MeshInstance3D", false, false):
+		var c: Variant = ((mi as MeshInstance3D).material_override as ShaderMaterial).get_shader_parameter("albedo")
+		hand_dark = hand_dark or (c is Color and (c as Color).v < 0.12)
+	ok(hand_dark, "the hands are void-dark: no skin colour on them")
+	var wrap := _build({"unmasked": true, "shroud": 1})
+	var tatters := _build({"unmasked": true, "shroud": 2})
+	var shapes := [_shape_of(cloak), _shape_of(wrap), _shape_of(tatters)]
+	ok(shapes[0] != shapes[1] and shapes[1] != shapes[2] and shapes[0] != shapes[2],
+		"the three shroud styles are different shapes (%s)" % str(shapes))
+	var hem := _bounds(cloak.get_node("Rig/Torso/Skirt"))
+	ok(hem.size.y > 0.3, "a drape hangs from the hips to the ankles over the legs (%.2f m long)" % hem.size.y)
+	for n in [cloak, other, wrap, tatters]:
+		n.free()
+
+## The cloth's colour: the albedo of the shroud's own material (the Skirt's drape).
+func _coat(m: Node3D) -> Color:
+	for mi in m.get_node("Rig/Torso/Skirt").find_children("*", "MeshInstance3D", false, false):
+		var c: Variant = ((mi as MeshInstance3D).material_override as ShaderMaterial).get_shader_parameter("albedo")
+		if c is Color:
+			return c
+	return Color.BLACK
+
+## Item 80: Aura is None / Faint / Strong, with big bright specks round the head, shoulders and shroud.
+func _aura() -> void:
+	var strong := _build({"unmasked": true, "aura": 2})
+	var faint := _build({"unmasked": true, "aura": 1})
+	var none := _build({"unmasked": true, "aura": 0})
+	var p := strong.find_child("Aura", true, false) as CPUParticles3D
+	var f := faint.find_child("Aura", true, false) as CPUParticles3D
+	ok(p != null and f != null and none.find_child("Aura", true, false) == null
+		and p.amount == Unmasked.AURA_COUNT[2] and f.amount == Unmasked.AURA_COUNT[1] and p.amount > f.amount,
+		"the aura has none / faint / strong (%d / %d specks)" % [Unmasked.AURA_COUNT[1], Unmasked.AURA_COUNT[2]])
+	var dot := p.mesh as SphereMesh if p else null
+	ok(dot != null and dot.radius >= 0.025 and p.emission_sphere_radius >= 0.4 and p.orbit_velocity_max > 0.0,
+		"the specks are big (%.0f mm) and drift in a wide swirl round head and shoulders" % (dot.radius * 1000.0 if dot else 0.0))
+	var row: Array = Unmasked.ROWS[Unmasked.ROWS.size() - 1]
+	ok(String(row[1]) == "Aura" and row.size() > 3 and String(row[3]) == "Glowing specks that drift around you",
+		"the Aura row has its tooltip")
+	for n in [strong, faint, none]:
+		n.free()
+
+## A model's vertex count and bounds, which tell one shroud style from another.
+func _shape_of(m: Node3D) -> String:
+	var b := _bounds(m)
+	return "%d:%.3f:%.3f" % [_verts(m), b.size.x, b.size.z]
