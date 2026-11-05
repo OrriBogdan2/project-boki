@@ -2713,3 +2713,5 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
   - 03 chopping, axe mid-swing (the tree reads only as foliage)
   - 04 mining, pickaxe and a cracked boulder
   - 05 the default farm camera
+
+## 2026-11-05 (S2 to S5): ext/boki-starter is now 3420bc02 (5k pass), ready to wire. Three pieces, exact lines in STATUS.md. Don't take 27fab2ad.
