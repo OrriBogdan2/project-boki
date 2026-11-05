@@ -937,3 +937,13 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
   - grey with a single green eye
   - Dredge uses the friend's Blender model, so a recolour + new animations, not a new model.
 - The image-gen concepts come first (the owner prompts them by hand); then S2 builds from the owner's picks.
+
+## 109. BUG/FEEL: Vex can't aim while dashing (owner, 04:46 UTC Nov 5)
+- Owner: "Vex should be able to move her LMB and shoot while dashing. It sticks to one direction."
+- Today, during Vex's dash/slide her LMB aim locks to a single direction (likely the dash direction or the aim at dash start).
+- **Fix:**
+  - While dashing (ground slide and air dash), Vex's rifle keeps tracking the cursor every frame and fires freely toward it. The dash direction and the aim direction are independent.
+  - The upper body / gun rotates to the aim while the legs follow the dash; the shots spawn along the true aim.
+  - Holding LMB through the dash keeps firing with no interruption (item 51 rule: everything combos with Shift/jump).
+- **Check the other ranged Hunters** for the same lock (Lisette, Ryzz, Sable, Cinder's flamethrower): their primary should also track the cursor during dashes unless their kit says otherwise. List any changed.
+- **Assert:** a dash east while aiming north fires its shots north (angle within ~5°), with no gap in the fire cadence across the dash. Add it to the gunslinger combo check.
