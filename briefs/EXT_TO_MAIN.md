@@ -2896,3 +2896,46 @@ Per the owner (25% usage left until Friday 6am Toronto): S4 finished only ext/sf
 - Every READY for these needs the Hunter's FIDELITY_CHECKLIST rows as a ✅/❌ table (for sound: the sound-related must-haves, with the sfx_look sheets as proof).
 - Branch each from origin/ext/sfx-base-2 (or main once S5 merges it). Brief and rules: the S4 SFX brief pattern (gen_sfx_<hero>.py on sfx_lib, content/sfx/<arch>.json, --sfx-set-check + the hero's combo check).
 - Still waiting on main (reserved files): the sfx-boki wiring in merge_xform.gd / kin_downed.gd, and boki-talk-105's kin_voice/kin_speak/kin.gd wiring.
+
+## 2026-11-05 (S7): READY ext/s7-mask-hob-83-89 486e652c: items 83, 87, 88, 89 (+ the 89 additions under 91)
+Merged with main a06099f3; merges clean onto 0237eb8d. Diff vs main: 57 files, +2525/-638.
+- **88, Mask-screen lag:** not fixed on main before this branch.
+  - Each preview used to re-read its .glb from disk (0.3-1.5 s); now each is cached and read on a loader thread (WardenGlb.fetch).
+  - Previews build one model per frame (new scripts/ui/preview_build.gd), and only the focused ability clip plays.
+  - Portraits are loaded and cut off the main thread. The Masks screen swaps tiles in place instead of rebuilding.
+  - Accepting spreads its work over frames behind the black.
+  - Headless worst frames went from 0.5-2.4 s to 12-28 ms.
+  - **Missed:** the first build of each Mask's model per session is still one 120-230 ms frame. That cost is inside models.gd (god file); DEBT.md, for perf item 94.
+- **83, the Mask moment:**
+  - New scripts/ui/mask_beat.gd + content/rules/mask_moment.json. A 5.8 s beat:
+    - build-up: music ducks, the camera eases in, a swell and a heartbeat
+    - the Mask rises under a flickering porcelain ghost face
+    - 0.7 s of black and silence (the model swaps here)
+    - 3 memory frames of the fallen Hunter, with a whisper
+    - snap back: impact, a light ring and a camera push (no shake), a pose, "Vex, the Hired Gun", and a sting
+  - Skippable once seen (tutorial.mask_seen); a short version on the farm.
+  - Our own sounds (tools/gen_mask_sfx.py, 5 wavs). The old MaskMoment.beat is deleted.
+- **89, Hob in person:**
+  - A builder model (scripts/home/hob_model.gd): sleeves, apron, tool belt, cap, a pencil behind his ear; simple face marks. Poses: idle, wave, talk, point, hammer.
+  - He stands by the stall and goes to the house site while it's being built.
+  - Talk box (scripts/ui/talk_box.gd, scripts/home/hob_talk.gd): his portrait and name, one line at a time. The camera eases toward him and he points at what he names. The HUD, Goals card and world prompts step aside for the whole talk (FarmGuide.set_quiet).
+  - First arrival: the camera swings to him for 1.5 s ("Hey! Over here!"); his name tag shows until you've talked. Meeting Hob is the first farm-tutorial step.
+  - **Not done:** a CC0 vendor model. kenney.nl and quaternius.com return 403 through this container's proxy, so he is our own model built from shapes. The swap is in DEBT.md.
+- **87, second Mask from Hob:**
+  - After the house is placed, Hob calls you over: "By the way... I see you found a Vex Mask. Could I interest you in another?"
+  - The pick (scripts/home/hob_offer.gd) shows exactly Kael, Pip and Cinder: portrait, title, a one-line role, the focused card's clip. Take or Not now.
+  - Taking it plays the short Mask moment from Hob's hands.
+  - mask_offer.gd (the portal offer) is deleted. Saves that already own a second Mask keep it.
+- **Checks:**
+  - After the last merge, run by S7 under low-spend mode: --hob-check 0 (also under xvfb with shots), --class-unlock-check 145/0, --farm-tutorial-check 0, --uipolish-check 30/0, health --strict OK, gen_wiki --check unchanged.
+  - Earlier on this branch: --check, --mask-moment-check, --mask-lag-check, --hatch-check, --portrait-check, --build-hold-check, --farmbuild 0; --simtest --seed=5 extracted.
+  - Full suite not re-run (owner's low-spend rule).
+- **God files:** home.gd +6/-12, wiring only. No Net change. New save flags (tutorial.hob_intro, tutorial.mask_seen) read false when missing.
+- **Owner questions** (defaults taken):
+  1. Hob keeps the Empty's simple face marks.
+  2. Taking the second Mask unlocks it but doesn't equip it.
+  3. The roles and the 12 whisper lines are our wording (farm_builder.json "roles", mask_moment.json "whispers").
+  4. "Vex Mask" is capitalised.
+- **Shots:** briefs/shots/s7/mask-hob-83-89/
+  - hob_1-8: call-over, camera intro, talk box, pointing, offer line, the three-Mask pick (no overlap now), farm Mask moment, name
+  - mask_beat_1-5: build-up, rise, black, memory frame, reveal

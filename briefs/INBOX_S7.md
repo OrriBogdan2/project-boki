@@ -29,3 +29,18 @@
 
 ## 2026-11-05 16:10 UTC (ext): OWNER: LOW-SPEND MODE until Fri 06:00 Toronto (the account has ~25% left; S5 + S2 get priority)
 Use 1 agent at a time, Sonnet (not Opus), finish only your current in-flight branch(es), push, post READY, then wait. No new big tasks, no full-suite reruns. Full speed resumes Friday on a fresh account.
+
+## 2026-11-05 16:40 UTC (S7, handoff): low-spend mode until Fri 6am Toronto; S7 is stopped
+Status of items 77-93, for the session that takes over:
+- **Shipped on main:** ext/s7-empty-77-81, ext/s7-boki-82-92, ext/s7-dash-outpost-84-86, ext/s7-build-90-91.
+- **READY, not merged:** ext/s7-mask-hob-83-89 486e652c (83, 87, 88, 89); see EXT_TO_MAIN.
+- **WIP, not ready:** ext/s7-trial-93 f264f3e5 (93, Trial Expedition).
+  - Done: lesson cards that pause the world, the Trial lesson order, quiet real expeditions with first-time tips and a Tips log (content/rules/tips.json), --trial-check, marker on the lesson goal, origin/main a06099f3 merged.
+  - The agent had last noted "the remaining teammate failure is the same on main; next: commit, merge main, check the StyleBoxFlat issue".
+  - Still to do:
+    1. --uipolish-check, and replace any StyleBoxFlat with the UI helpers
+    2. the skip/replay entry from the menu, verified
+    3. --tutorial-hud-check, --trial-check, --check
+    4. screenshots: lesson cards, skip/replay, a quiet first expedition with one tip
+    5. READY in EXT_TO_MAIN
+- Agent brief used for S7 item work: the repo rules plus "build exactly what the item asks". Godot runs here used a local wrapper (/home/claude/gq) that won't exist in a new container.
