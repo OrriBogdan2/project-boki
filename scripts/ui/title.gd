@@ -479,23 +479,13 @@ func _build_ui() -> void:
 	logo = lt
 	logo.name = "Logo"
 	col.add_child(logo)
-	var tag := UI.label("Raise them.  Risk them.  Bring them home.", 17, Color("e9dccb"), _spaced())
-	tag.name = "Tagline"
-	tag.autowrap_mode = TextServer.AUTOWRAP_OFF
-	tag.add_theme_constant_override("outline_size", 5)
-	tag.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.05, 0.7))
-	col.add_child(tag)
+	# no tagline under the logo (owner, Nov 5: cleaner, more professional)
 	var has: bool = not Save.d["roster"].is_empty()
 	col.add_child(UI.spacer(12 if has else 30))     # (with a save the menu has one more row: Demo match)
 	# the one big button: carry on where you left off, or start a new story
 	var b1 := _menu_main(("Continue" if has else "New game"), func(): Game.goto("home" if has else "prologue"))
 	col.add_child(b1)
-	var who := UI.label(_resume_line() if has else "A short story first, then your very first egg.", 14, Color(1, 0.93, 0.84, 0.72))
-	who.autowrap_mode = TextServer.AUTOWRAP_OFF
-	who.add_theme_constant_override("outline_size", 5)
-	who.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.05, 0.7))
-	var wm := MarginContainer.new(); wm.add_theme_constant_override("margin_left", 6); wm.add_child(who)
-	col.add_child(wm)
+	# no subtext under the main button (owner, Nov 5; OWNER_REVIEW item 155)
 	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
 	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
@@ -518,7 +508,7 @@ func _build_ui() -> void:
 		UI.pop_in(ch, 0.9 + i * 0.07)
 		i += 1
 	# bottom corners: what this is, and how to drive the menu without a mouse
-	var ver := UI.label("Project Boki  ·  early build  ·  open source", 13, Color(1, 1, 1, 0.45))
+	var ver := UI.label("v" + Net.VERSION, 13, Color(1, 1, 1, 0.45))
 	ver.autowrap_mode = TextServer.AUTOWRAP_OFF
 	ver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	ver.offset_left = 28; ver.offset_top = -40; ver.offset_bottom = -18
