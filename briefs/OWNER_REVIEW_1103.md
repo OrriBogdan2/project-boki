@@ -2159,3 +2159,11 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - A fresh save → the house can be placed at ≥3 different valid spots; the step completes.
   - No tutorial marker points at a position that fails validation.
+
+## 171b. Hob exists from the very first moment: he doesn't appear with the house (owner, 17:56 UTC Nov 5)
+- The owner: "it looks like he spawns when the house spawns - he should be standing there at the beginning beforehand".
+- Hob's spawn is tied to the house (farm_hob.gd stands "by the house"), so before the house he doesn't exist.
+- **Fix:**
+  - Hob is present from the first arrival, standing at a fixed visible spot near the landing (e.g. by a small camp: a crate, his drafting table, a lantern), where item 171's camera pan finds him.
+  - Once the house is built, he can walk over to his spot by the house (a short walk, not a teleport), or keep his camp. Either way, he's never absent.
+- **Assert:** a fresh save, frame 1 at home → the Hob node exists and is visible.
