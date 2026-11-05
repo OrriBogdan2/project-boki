@@ -1,20 +1,20 @@
 # Tarek (dolm): import note (ART-1, 2026-11-05)
 
-`tarek.glb` is the ART-1 rebuild to the stone-arm monk master (briefs/art-refs/tarek_FINAL_sheet.png): no scan in it. Every part
-is a scripted sculpt (signed distance fields) on the contract armature, painted from the fields, under 20k tris with the
-stones and shards. His LEFT arm is the huge stone arm over the shoulder and chest; his RIGHT has a great stone gauntlet and fist, its upper
-arm bare. Both are skinned in the body slab by slab, each slab on one bone (item 76b). Kit FX read `weapon_muzzle` and `anchor_wrist_R` on the right fist
-(content/rules/warden_anim/tarek.json, `blade`), and `anchor_fist_L/R`, `anchor_gauntlet_L/R`, `anchor_stones_<i>`. The Meshy recipe
-(art/wardens/src/tarek_fit.json, tarek_bake.json) is history.
+`tarek.glb` is the ART-1 model of the stone-arm monk (briefs/art-refs/tarek_FINAL_sheet.png, tarek_turnaround_apose.png, tarek_head.png).
+His body is a Meshy scan of the turnaround, baked and fitted to the contract armature (art/wardens/src/tarek_bake.json,
+tarek_fit.json); his head and locs are a separate Meshy scan of the head sheet with its own atlas (tarek_head_bake.json). The
+closed stone fists, the three eye-stones and the ground rings are scripted (tools/art1/tarek_shape.py). tools/art1/tarek_rigging.py
+`assemble_scan` joins them: left arm grown, right gauntlet slimmed, hands cut, body skin brought to the head's tone, hot cracks
+keyed from the atlas into an emission map, the stone's relief as a normal map, a loc end fused to his back painted out.
 
-Rebuild (Blender 4.5, ~3 min; numpy and ffmpeg, no Cycles):
+Rebuild (Blender under ulimit -v 12000000; raw files in ~/meshy/tarek_m):
 
     godot --headless --path . -- --warden-rig-json --warden=dolm
-    blender -b --factory-startup --python tools/art1/tarek_build.py -- art/wardens/src/tarek_rig.json WORK full
+    blender -b --factory-startup --python tools/meshy/bake_warden.py -- art/wardens/src/tarek_bake.json
+    blender -b --factory-startup --python tools/meshy/bake_warden.py -- art/wardens/src/tarek_head_bake.json
+    blender -b --factory-startup --python tools/meshy/fit_warden.py -- art/wardens/src/tarek_fit.json
+    blender -b --factory-startup --python tools/art1/tarek_build.py -- art/wardens/src/tarek_rig.json WORK scan ~/meshy/tarek_m/fit.blend
     blender -b WORK/tarek.blend --python tools/art1/tarek_clips.py -- WORK/tarek_anims.blend art/wardens/tarek/tarek.glb
 
-tools/art1: sdf_kit.py (the sculpt kit), tarek_shape.py (his forms), tarek_paint.py, tarek_rigging.py, fistkit.py (two-fist
-pose solver), tarek_clips.py (the clips, timed to KMovesStone), tarek_view.py and tarek_sheet.py (Blender previews).
-Match-camera read: the stone arm, the orange sash (material cloth-accent) and the eye-stones; copper rings, shards and the
-ground rings are separate nodes hidden past 13 m (warden_look far_hide). In game: --clip-shots (--true-cam, --ground=<hex>), --clip-check,
---rig-standard-check. His .import keeps remove_immutable_tracks off.
+tarek_clipcheck.py measures arms into the chest across the clips. In game: --clip-shots (--true-cam, --ground=<hex>), --clip-check,
+--rig-standard-check. Kit FX read `weapon_muzzle`, `anchor_wrist_R`, `anchor_fist_L/R`, `anchor_gauntlet_L/R`, `anchor_stones_<i>`.
