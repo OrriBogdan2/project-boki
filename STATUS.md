@@ -450,3 +450,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: Kael master sheet taken
 - ART-1 Kael (ext/art1-kael) has the owner's new design: kael_FINAL_sheet, kael_turnaround_apose, kael_weapons, kael_splash. Scarf and white-hot blade change his VFX look, so ART-2 Kael 0fbc63e6 will need a colour pass after the model; the sword palette question is effectively answered by the sheet (white-hot with molten cracks) unless the owner says otherwise.
+
+## 2026-11-05 S2: READY ext/kit-breaker-59 8840f3d6 (item 59) and ext/pip-scale-108 525298b8 (item 108)
+- Breaker 59: hold LMB whirls the hammer flat round him at 2.5-4 turns/s (lmb.spin_turns in bulwark.json), whoosh each turn, no spin damage (brief default), damage on the release slam. Differs: the whirl no longer stops at full charge; the old 1.6x hammer enlargement is removed (head put 2.96 m out, past the 2.8 m slam); circle centred on his hand. Checks 0 failures: --check, hero-combo 272, bulwark-combo 144, warden-model, warden-glb, class-unlock 153, arena 86, tutorial-hud, rig-standard, archetype 339, dash-flow, shake, health --strict, gen_wiki 34 unchanged. Merge-tree with ext/art1-breaker: no conflicts, but their lmb_hold loops at 1.25 turns/s vs the kit's 2.5-4. Not checked: real-speed motion, sound, online, the look on ART-1's model.
+- Pip 108: body.size 0.78 -> 0.68 (about 13% smaller), nameplate 2.05 -> 1.85 (unrequested, not shot). hit_r stays 0.34: already at item 46's 0.85x floor. warden-model targets moved with her size (height 0.74 -> 0.65, height_3d 0.84 -> 0.73), HEIGHT_TOL unchanged. Suite on aaebef5d passed; tip re-ran warden-model, health --strict, gen_wiki only.
+- Shots: ext/hero-shots-s2 kits/breaker/, kits/pip/.
+- Owner Qs: should the spin hit people each turn? 2.5-4 turns/s, or slower and heavier (ART-1 used 1.25)? Pip's hitbox stay at the 0.85x floor, or move the band?
