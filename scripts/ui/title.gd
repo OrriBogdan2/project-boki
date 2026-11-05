@@ -31,7 +31,7 @@ var embers: CPUParticles3D
 var ash: CPUParticles3D
 var mouse_k := Vector2.ZERO      # smoothed mouse position, -1..1 on both axes (parallax)
 var cam_override: Array = []     # tooling: --title-cam=x,y,z,lx,ly,lz to try framings
-var logo: TitleLogo
+var logo: Control
 var menu_col: VBoxContainer
 var stung := false
 
@@ -469,7 +469,14 @@ func _build_ui() -> void:
 	col.add_theme_constant_override("separation", 4)
 	root.add_child(col)
 	menu_col = col
-	logo = TitleLogo.new()
+	# the brand wordmark (art/brand/logo_wordmark.png, owner-approved Nov 5); TitleLogo below is the old drawn one
+	var lt := TextureRect.new()
+	lt.texture = load("res://art/brand/logo_wordmark.png")
+	lt.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	lt.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
+	lt.custom_minimum_size = Vector2(500, 244)
+	lt.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	logo = lt
 	logo.name = "Logo"
 	col.add_child(logo)
 	var tag := UI.label("Raise them.  Risk them.  Bring them home.", 17, Color("e9dccb"), _spaced())
