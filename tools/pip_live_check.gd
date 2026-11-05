@@ -24,7 +24,7 @@ func _frame(m: Match, h: Hunter) -> void:
 
 func _emit(h: Hunter) -> float:
 	for x in h.model.get_meta("mats", []):
-		if x is ShaderMaterial and bool((x as ShaderMaterial).get_shader_parameter("use_emit")):
+		if x is ShaderMaterial and (x as ShaderMaterial).get_shader_parameter("use_emit") == true:
 			return float((x as ShaderMaterial).get_shader_parameter("emit"))
 	return -1.0
 

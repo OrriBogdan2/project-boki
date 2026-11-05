@@ -13,7 +13,7 @@ static func pulse(h: Hunter) -> void:
 	if model == null or not model.is_inside_tree():
 		return
 	var mats: Array = (model.get_meta("mats", []) as Array).filter(func(x):
-		return x is ShaderMaterial and bool((x as ShaderMaterial).get_shader_parameter("use_emit")))
+		return x is ShaderMaterial and (x as ShaderMaterial).get_shader_parameter("use_emit") == true)
 	if mats.is_empty():
 		return
 	if not model.has_meta(REST):
@@ -22,9 +22,9 @@ static func pulse(h: Hunter) -> void:
 	if old is Tween and (old as Tween).is_valid():
 		(old as Tween).kill()
 	var tw := model.create_tween()
-	tw.tween_method(_set.bind(mats), PEAK, float(model.get_meta(REST)), FADE)
+	tw.tween_method(_apply.bind(mats), PEAK, float(model.get_meta(REST)), FADE)
 	model.set_meta(TWEEN, tw)
 
-static func _set(v: float, mats: Array) -> void:
+static func _apply(v: float, mats: Array) -> void:
 	for x in mats:
 		(x as ShaderMaterial).set_shader_parameter("emit", v)
