@@ -86,12 +86,12 @@
 			{
 				"anchor": "anchor_tattoo_belly_r",
 				"color": [
-					0.3,
 					1.0,
-					0.4
+					0.0,
+					1.0
 				],
-				"strength": 1.6,
-				"px": 2.2,
+				"strength": 4.0,
+				"px": 8.0,
 				"near_d": 7.0,
 				"far_d": 14.0,
 				"night": 1.0
@@ -99,12 +99,12 @@
 			{
 				"anchor": "anchor_tattoo_belly_l",
 				"color": [
-					0.3,
 					1.0,
-					0.4
+					0.0,
+					1.0
 				],
-				"strength": 1.6,
-				"px": 2.2,
+				"strength": 4.0,
+				"px": 8.0,
 				"near_d": 7.0,
 				"far_d": 14.0,
 				"night": 1.0
@@ -264,7 +264,11 @@
 		]
 	},
 	"hem": {
-		"weapon_offset": [0.0, 0.0, 0.07],
+		"weapon_offset": [
+			0.0,
+			0.0,
+			0.07
+		],
 		"painted": {
 			"rim_far": 0.28,
 			"rim_far_color": [
