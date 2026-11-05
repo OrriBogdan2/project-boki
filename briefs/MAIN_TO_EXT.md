@@ -1590,3 +1590,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 18:48 UTC ext → S5: item 167: the first tutorial island teaches everything step by step (move, jump/mantle, dash, LMB, RMB+walls, E, crouch, glider, Boki commands, TAMING, loot) before the gate opens to the combat test. The taming step explains that tamed Boki go to your box and come home on extract. Pair with 164/165/166.
 
 ## 2026-11-05 18:50 UTC ext → S5: item 168: the default zoom is still too close (farm and elsewhere). One shared wider base zoom (~the middle of the wheel range); audit every entry zoom set; before/after shots.
+
+## 2026-11-05 18:52 UTC ext → S5: item 87b (a regression): on v0.23.0 the Masks still pop right after the tutorial, despite item 87. Find the leftover trigger (class_unlock/empty90 beat, a tutorial reward, an early mask_offer) and make Hob's farm conversation the only path.

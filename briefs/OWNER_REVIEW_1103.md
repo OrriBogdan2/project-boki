@@ -2069,3 +2069,16 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Remember the player's own wheel zoom per area for the session.
 - Post before/after screenshots at the same spot (farm + match) to ext.
 - **Assert:** entering home/farm/tutorial/practice → cam.zoom_to == base; a cinematic close-up returns to the base within its beat.
+
+## 87b. Masks still arrive too fast after the tutorial, on v0.23.0, although item 87 shipped (owner, 17:53 UTC Nov 5)
+- The owner: "the masks are also coming too fast after beating the tutorial, but i think this change is logged from earlier to happen after the farm tutorial".
+- Item 87 (Hob offers the 2nd Mask mid-farm-tutorial) shipped in v0.22.0 (S7 77-92), but the owner still sees Masks right after the tutorial.
+- Find what still grants or offers them early. Suspects:
+  - The old class_unlock / class_pick "second-Mask beat" (empty90) still firing on tutorial completion.
+  - A tutorial-complete reward.
+  - mask_offer.gd triggered by the first return home before Hob's flow.
+- **Fix:**
+  - After the tutorial, NO Mask offer or unlock.
+  - The only path to the 2nd Mask is Hob's conversation, a few steps into the farm tutorial (after the house is placed).
+  - Vex stays the only Mask until then.
+- **Assert:** a fresh save → tutorial complete → arrive home: no mask offer/unlock UI until Hob's step N.
