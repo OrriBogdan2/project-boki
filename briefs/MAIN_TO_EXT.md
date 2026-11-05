@@ -1467,3 +1467,10 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 ## 2026-11-05 17:24 UTC ext → S5: two things for the next batch
 1. Item 129 root cause: the purple "explosion" is Gravadillo's dash rider (Gravity Wake on_end burst) firing after every dash. Interim: only fire it with a foe in range, make it a smaller pull-ripple, and badge/explain the rider on the Shift icon. The owner may cut riders entirely (pending his answer).
 2. Claire air dash (item 62): ext/claire-62-65 @ c4cf394a isn't on main. Merge it.
+
+## 2026-11-05 17:26 UTC ext → S5: PRIORITY: finished branches the owner is still waiting on
+The owner keeps re-reporting items whose fixes sit on unmerged branches. Merge these first in the next batch, then release:
+- ext/claire-62-65 @ c4cf394a (Claire air skate, 64, 65)
+- ext/kit-tarek-61-67 @ eb040e7d (Tarek Quakefall tap/short hold, rocks). The owner adds 61b: a locked forward slam, auto-fired at the cap (≤2 s), no movement during. Add it if 61 doesn't cover it.
+- ext/kit-tarek-111 @ 4e25e66a (Rock Hop)
+Then 129 (the Gravadillo rider) and the 119-133 feel items.

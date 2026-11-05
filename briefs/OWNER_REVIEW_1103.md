@@ -1366,3 +1366,16 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 ## 62 again: Claire still can't air-dash (owner, 17:18 UTC Nov 5, v0.23.0)
 - The owner: "i still cant air dash (should be same as regular dash) on claire".
 - The work exists on `ext/claire-62-65` (c4cf394a, 15:48 UTC) but is NOT merged to main. S5: integrate it in the next batch.
+
+## 61b. Tarek RMB Quakefall: a committed, locked forward slam (owner reiterates, 17:18 UTC Nov 5, v0.23.0)
+- The owner: "tarek rmb should automatically start the animation and bring him forward - should not be holdable beyond like 2s. right now u can hold as long as u want and move during it - its not a spell u move during, it locks u into a forward slam animation that goes up and does a bigger slam".
+- **On press:**
+  - The slam animation starts at once and he is LOCKED into it: no free movement or steering, and no other abilities except the item-61 jump variant (decide by kit consistency; default: locked).
+  - The animation itself carries him forward.
+  - Holding only extends the rise: higher and a bigger slam, capped hard at ≤2 s total (default: the cap 1.0 s; full power at the cap; auto-release at the cap).
+  - Release (or the cap) → he goes up and slams down ahead: a bigger radius/damage with more hold.
+  - A tap = the quick small slam in front (item 61).
+- His branch `ext/kit-tarek-61-67` (eb040e7d) has item 61 but ISN'T merged. S5 merges it; then whoever owns Tarek's kit adds the lock + the forward carry if 61 didn't already lock movement.
+- **Assert:**
+  - Holding RMB for 5 s → the slam fires at the cap.
+  - Move input during it changes nothing (position delta only the forward carry).
