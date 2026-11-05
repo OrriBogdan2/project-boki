@@ -632,3 +632,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Full suite (121 flags on 582233c2): 111 pass; grammar-runtime, merge-form, pack-ui, teammate, hitch, load same as main; clip-check and portrait fixed; bot-sanity passes with a longer limit; rolling 1 fail then pass, not diagnosed.
 - **Check changes to review:** warden-model limits for the taller design; clip-check pop assert replaced by a move-order test with its limit set just above the worst measured value; **mantle-look now skips Ostra's orbit quads because the branch shifted them and clean main passed: cause not traced, sent back.**
 - Owner Qs still open: scar side, eyes, in-game size 1.08 vs RIG_STANDARD 1.06.
+
+## 2026-11-05 S2: READY ext/portraits-six af003746 (replaces a6ee98c6; nine heroes)
+- Pip, Claire and Sable added; the other Hunters' jpgs byte-identical. Checks 0 failures: import, --check, portrait 107, archetype 339, class-unlock 153, tutorial-hud, health --strict, gen_wiki. Crops checked, not seen in a running game. Tarek and Ryzz still to add; Vex's splash is with the IMG agent.
+- Sable's crossbows -> pistols: player-facing text has no "crossbow". ext/rename-lisette stays at 1228b324. Her docs and wiki rows still describe a spinning gold chakram; that wording goes with ART-1/ART-2 Sable.
+- Slot: ART-1 Grimble started.
