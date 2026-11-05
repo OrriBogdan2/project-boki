@@ -114,6 +114,29 @@ def flurry_add(P, t):
     P["fan"] = 1.0 - 0.7 * min(i + 1, 8) / 8.0
 
 
+# ---- the crouch (item 143): the jack half back in his box. The spring wound down, the hat low, the hands gathered at the ruff with the grin just showing over it. No feet, no stride: a sneak is the box gliding on small spring bobs.
+HUNCH = dict(STILL, lift=(0.0, 0.0, -0.34), spine=(20.0, -4.0, 0.0), head=(-26.0, 6.0, 6.0), box=(4.0, 0.0), pld=(16.0, 16.0),
+             hR=(0.13, 0.27, 1.08), hL=(-0.13, 0.25, 1.10), cR=0.7, cL=0.75, sR=0.3, sL=0.3, brow=-0.7, cheek=0.9, lid=0.45)
+SQUEEZE = dict(HUNCH, lift=(0.0, 0.0, -0.40), spine=(26.0, -4.0, 0.0), head=(-20.0, 6.0, 6.0))
+SPRUNG = dict(STILL, lift=(0.0, 0.0, 0.035), cheek=0.6, brow=-0.3)
+
+
+def hunch_add(P, t):
+    """Wound down and still: a held breath, the hat turning slowly under its brim, the spring's small tremble."""
+    a = math.sin(t / 3.6 * TAU)
+    h = P["head"]
+    P["head"] = (h[0], h[1] + 14.0 * a, h[2] - 3.0 * a)
+    s = P["spine"]
+    P["spine"] = (s[0] + 0.8 * math.cos(t / 3.6 * TAU) - 0.8, s[1], s[2])
+    l = P["lift"]
+    P["lift"] = (l[0], l[1], l[2] + 0.006 * math.sin(t / 3.6 * TAU * 2))
+    P["wR"], P["wL"] = 0.14, 0.1
+
+
+def creep(box, shift):
+    return {"len": 0.9, "loop": True, "base": dict(HUNCH, box=box, lift=(shift[0], shift[1], -0.34)), "add": wobble(0.9, 1.2, 1.2, 0.012), "keys": [(0.0, {}), (0.9, {})]}
+
+
 CLIPS = {
     # ---------------------------------------------------------------- loco: the box goes first, tilting toward the way he moves; the body rides late
     "idle": {"len": 3.2, "base": STILL, "add": idle_add, "loop": True, "keys": [
@@ -134,6 +157,15 @@ CLIPS = {
     "run_b": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((-16.0, 0.0), (14.0, 0.0, 0.0), (0.0, 0.08, -0.07), head=(-16.0, 0.0, 6.0), cheek=0.7)), "add": wobble(0.9, 3.5, 3.0, 0.02), "keys": [(0.0, {}), (0.9, {})]},
     "run_l": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((4.0, -17.0), (6.0, 8.0, 12.0), (0.08, 0.0, -0.07), head=(-16.0, -8.0, 4.0), cheek=0.7), **TRAIL), "add": wobble(0.9, 3.0, 3.5, 0.02), "keys": [(0.0, {}), (0.9, {})]},
     "run_r": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((4.0, 17.0), (6.0, -8.0, -12.0), (-0.08, 0.0, -0.07), head=(-16.0, 8.0, 20.0), cheek=0.7), **TRAIL), "add": wobble(0.9, 3.0, 3.5, 0.02), "keys": [(0.0, {}), (0.9, {})]},
+
+    # ---------------------------------------------------------------- the crouch: down with a squeeze past the hold, up with a small overshoot
+    "crouch_idle": {"len": 3.6, "base": HUNCH, "add": hunch_add, "loop": True, "keys": [(0.0, {}), (3.6, {})]},
+    "crouch_f": creep((7.0, 0.0), (0.0, -0.02)),
+    "crouch_b": creep((-7.0, 0.0), (0.0, 0.02)),
+    "crouch_l": creep((3.0, -7.0), (0.02, 0.0)),
+    "crouch_r": creep((3.0, 7.0), (-0.02, 0.0)),
+    "crouch_in": {"len": 0.34, "base": STILL, "keys": [(0.0, {}), (0.15, SQUEEZE), (0.34, HUNCH)]},
+    "crouch_out": {"len": 0.36, "base": HUNCH, "keys": [(0.0, {}), (0.08, SQUEEZE), (0.24, SPRUNG), (0.36, STILL)]},
 
     # ---------------------------------------------------------------- LMB: Tether Lantern (leans out on the spring)
     "orb": {"len": 0.30, "base": STILL, "keys": [

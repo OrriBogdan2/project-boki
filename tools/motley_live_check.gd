@@ -40,6 +40,14 @@ func run(main: Node) -> void:
 	for an in ["anchor_hand_r", "anchor_hand_l", "anchor_cards"]:
 		ok(WardenGlb.anchor(P.model, an) != null, "%s rides his hand" % an)
 	ok(VoidCard.make() != null, "the void card builds")
+	var maps := 0
+	for mi in P.model.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		var mesh := (mi as MeshInstance3D).mesh
+		for si in (mesh.get_surface_count() if mesh else 0):
+			var sm := (mi as MeshInstance3D).get_active_material(si) as ShaderMaterial
+			if sm and sm.get_shader_parameter("use_nrm") and sm.get_shader_parameter("normal_tex") != null:
+				maps += 1
+	ok(maps > 0, "his normal map reaches the shader, use_nrm (%d surfaces)" % maps)
 	var hips := sk.find_bone("hips")
 	var box := WardenSkeleton.find(sk, "x_box")
 	var root_y := sk.get_bone_global_pose(sk.find_bone("root")).origin.y

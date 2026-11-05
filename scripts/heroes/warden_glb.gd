@@ -693,7 +693,7 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 				_glow_colours(m, arch, tag)
 			if src and src.normal_enabled and src.normal_texture:
 				m.set_shader_parameter("normal_tex", src.normal_texture)
-				m.set_shader_parameter("use_normal", true)
+				m.set_shader_parameter("use_nrm", true)
 			if src and src.emission_enabled and src.emission_texture:
 				m.set_shader_parameter("emit_tex", src.emission_texture)
 				m.set_shader_parameter("use_emit", true)
