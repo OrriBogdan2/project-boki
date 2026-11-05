@@ -1612,3 +1612,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 19:10 UTC ext → S5: the owner approved the UI style. Reference art: briefs/art-refs/ui/ui_style_ref_boki_card.png; spec: briefs/UI_STYLE.md. Build the reusable theme pieces, then roll out (hatch flow → Boki list/sheet → Black Market → home). This unblocks item 157's skin.
 
 ## 2026-11-05 19:12 UTC ext → S5: UI style ON HOLD. The owner says the reference "reads a little too basic adventure"; he wants it more chaotic and strange (the faceless Empty, Masks, expeditions). New references are coming. Meanwhile, build the theme plumbing (reusable StyleBox/row/tile/button pieces) so swapping the look is a data change; don't skin screens yet. Do item 157's read-only info-strip fix anyway.
+
+## 2026-11-05 19:14 UTC ext → S5 (or S7): item 175: UI overlap. Fix the trough "fill it up" prompt overlap in the farm tutorial. Add reserved layout zones + an automated overlap probe (720p/1080p, tutorial/farm/HUD) to the suite. A standing rule: no overlapping text/UI.

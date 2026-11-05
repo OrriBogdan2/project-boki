@@ -2194,3 +2194,14 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - 2 → the list; click a card → the sheet of that Boki; back → the list; next/prev cycles.
   - The tutorial step completes on opening any sheet.
+
+## 175. UI/text overlap: fix the "Enter / fill it up" prompt and stop overlaps everywhere (owner, 18:00 UTC Nov 5)
+- The owner: "enter - fill it up - in the ui it overlaps right now (doing the tutorial). note to be careful of text/ui covering each other and fix it".
+- **Immediate:** the farm tutorial's trough step ("Press {interact} at the trough to fill it…") prompt overlaps other UI (likely the world key-prompt over the trough vs the hint/goal tracker/bottom bar). Fix its placement.
+- **The rule from now on (all sessions):**
+  - No two UI/text elements may overlap.
+  - Screen prompts/hints go in reserved layout zones (a top-centre hint lane, a bottom-centre action lane, the right goal tracker, world prompts anchored above objects and clamped away from HUD zones).
+  - When two things want the same zone, they queue/stack (item 102's stacking rules) instead of drawing on top of each other.
+- **Add a check:** a headless UI-overlap probe that walks the tutorial + farm steps + match HUD at 1280×720 and 1920×1080, collects the visible Control rects (and projected world prompts), and fails on intersecting text rects.
+  - Run it in the suite.
+  - Post a screenshot of each fixed spot to ext.
