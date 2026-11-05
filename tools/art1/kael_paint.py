@@ -321,4 +321,4 @@ def blade_paint(a, c, h, n, ao, ol_w):
     t = 0.46 + (bid - 0.5) * 0.3 + (lit(n, ao) - 0.5) * 0.5 + 0.24 * smooth(0.72, 1.0, u)
     c0 = ramp(np.clip(t, 0, 1), [hexc("#2e282a"), hexc("#544c4c"), hexc("#7a716e"), hexc("#a59b95"), hexc("#ddd4ca")])
     c0 = mix(c0, hexc("#2a2224"), (1 - smooth(0.0, 0.07, sec - best)) * 0.65)
-    return mix(c0, hexc("#d98a4a"), smooth(0.62, 0.34, u) * 0.8 * smooth(0.97, 0.8, a / L))
+    return mix(c0, hexc("#d98a4a"), smooth(0.62, 0.34, u) * 0.8 * smooth(0.86, 0.7, a / L))
