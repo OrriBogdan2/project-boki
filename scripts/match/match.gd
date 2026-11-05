@@ -267,6 +267,7 @@ func warm_up(progress := Callable()) -> void:
 		fx.slash(at + Vector3(0, 0.8, 0), 0.0, 2.0, 1.6, Color.WHITE)
 		fx.beam(at + Vector3(0, 1, 0), at + Vector3(2, 1, 0), Color.WHITE)
 		HeroVfx.of(self).prewarm(at + Vector3(0, 1, 0))
+		DJFx.of(self).prewarm(at + Vector3(0, 1, 0))
 		var tg := fx.telegraph_circle(at, 1.5, Color(1, 0.3, 0.2))
 		# the muzzle flash light lights whatever stands near a shot: the lit variants compile now too
 		if muzzle_light:
@@ -284,6 +285,7 @@ func warm_up(progress := Callable()) -> void:
 			return
 		if progress.is_valid(): progress.call(0.7 + 0.2 * (vi + 1) / views.size())
 	HeroVfx.of(self).prewarm_end()
+	DJFx.of(self).prewarm_end()
 	# and the materials that only exist now (the effects just shown, the shots), the same way: a
 	# telegraph is held up for it (the views' own are gone by now)
 	var late_cb := func(f: float) -> void:
@@ -500,7 +502,17 @@ static func _warm_key(gi: GeometryInstance3D) -> String:
 			mats.append(_warm_mat_key(mt))
 	if gi.material_overlay:
 		mats.append("+" + _warm_mat_key(gi.material_overlay))
-	return kind + ":" + ",".join(mats)
+	return kind + ":" + ",".join(mats) + _warm_formats(mesh)
+
+## A surface's vertex format picks a pipeline too (a star and a ball with one material are two first draws).
+static func _warm_formats(mesh: Mesh) -> String:
+	var s := ""
+	if mesh is ArrayMesh:
+		for si in mesh.get_surface_count():
+			s += "/%d" % (mesh as ArrayMesh).surface_get_format(si)
+	else:
+		s = "/" + mesh.get_class()
+	return s
 
 static var _mat_keys := {}
 static func _warm_mat_key(mt: Material) -> String:
@@ -3555,7 +3567,7 @@ func _process(delta: float) -> void:
 		hitstop -= delta
 		_gather_input()
 		return
-	var d := minf(delta, 0.1)
+	var d := DashPace.frame_dt(self, minf(delta, 0.1))
 	if slowmo > 0.0:
 		slowmo -= d
 		d *= slow_k

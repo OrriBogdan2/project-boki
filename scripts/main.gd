@@ -562,6 +562,10 @@ func _ready() -> void:
 		# tooling: a scripted expedition with per-phase frame costs and hitches (tests/perf_probe.gd)
 		add_child(load("res://tests/perf_probe.gd").new())
 		return
+	if _has_arg("--dash-frames"):
+		# tooling: a frame log of a Hunter's dashes in the Arena (tools/dash_frames.gd)
+		add_child(load("res://tools/dash_frames.gd").new())
+		return
 	if "--hitch-check" in args or _has_arg("--load-check"):
 		# a seeded expedition through the drop and landing; fails on a stalled frame (tools/hitch_check.gd);
 		# --load-check stops at the reveal and judges the loading screen
