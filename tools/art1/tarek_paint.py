@@ -77,7 +77,7 @@ def p_rock(P, N, occ, cav, a, seeds):
     c = tones("94805f", "e2d4b8", "fff8e8", v + 0.16)
     # chipped lighter edges, dark grit
     speck = S.fbm(P, 90.0, 12, 2)
-        c = crease(c, np.maximum(cav, 0.0) * 0.8, "241a14", 0.8)
+    c = crease(c, np.maximum(cav, 0.0) * 0.8, "241a14", 0.8)
     crack = S.sstep(0.012, 0.006, gap)
     c = S.mix(c, S.hexc("8a3a14")[None, :], crack)
     # only some seams burn, in long runs, as the art draws them
