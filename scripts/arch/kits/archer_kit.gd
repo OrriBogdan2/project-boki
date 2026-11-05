@@ -328,7 +328,6 @@ func teardown() -> void:
 	super.teardown()
 
 func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
-	vfx("hurt")
 	if dmg > 0.5:
 		add_res(-float(res_def().get("hit_loss", 40.0)))
 		if spirit.active(): spirit.end("hit")

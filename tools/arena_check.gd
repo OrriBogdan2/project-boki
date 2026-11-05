@@ -130,14 +130,14 @@ func _arena() -> void:
 	for a in Arch.ids():
 		# (the support pair's RMBs are taps)
 		if not (Arch.def(a)["rmb"].get("variants", {}) as Dictionary).has("hold"): continue
-		# a kit with no hold input (Ostra: her orb pauses, nothing is held)
+		# a kit with no hold input (Motley: his orb pauses, nothing is held)
 		if Arch.def(a).get("no_hold", false): continue
 		A.set_arch(a)
 		P.teleport(A.home); P.inp["aim"] = D.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = D.pos.y
 		P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = float(P.ak.rmb_charges()); P.fire_cd = 0.0
 		step(m, 0.1)
 		if float(P.ak.rmb_def().get("hold", 0.0)) <= 0.0:
-			continue      # no RMB hold variant (Dredge, Cinder: their hold is the lance, see --ashwick-combo-check)
+			continue      # no RMB hold variant (Grimble, Cinder: their hold is the lance, see --ashwick-combo-check)
 		var f0: int = P.ak.charge_fulls
 		var mid := -1.0
 		var ring_ok := false

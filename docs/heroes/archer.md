@@ -169,10 +169,12 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>` (scripts/match/arena_demo.gd
 - Kit: `scripts/arch/kits/archer_kit.gd` (wiring), `pin_draw.gd` (draw stages, reticle, perfect, overdraw), `pin_spirit.gd` (Spirit Walk), `pin_fx.gd` (pooled effects), `kit_shaders.gd` / `kit_meshes.gd` (our shaders and meshes), `scripts/match/pin_bjorn_weapons.gd` (the recurve bow model), `scripts/match/kmoves_pin_bjorn.gd` (moves). Data: `content/archetypes/archer.json`, `content/weapons/longbow.json` (`draw`, `overdraw_t`, `overdraw_k`, `quick_k`, `aim`).
 - Hunter hooks: `ArchKit.draw_rate()` scales the bow's draw; `draw_bonus(t)` sets `h.shot_aim` (AimMode: stage 1 cursor, stage 2 max) and the damage factor; `Hunter.spirit_t` makes `World.occupy(..., ghost)` and the block push-out skip rocks, trees and barriers.
 - Telegraphs are AimKit: `draw_rest` (line), `draw` (vee, then line), `draw_tgt` (circle), `rmb_v` + `rmb_bar`, `e` (arc_wall, all, for the tell). Cursor: `AimKit.charge`, `flare`, `perfect`.
-- Looks and sounds: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground. Sounds: `tools/gen_lisette_sfx.py` writes `audio/pin_*.wav` and `audio/lis_*.wav`.
+- Sounds: `tools/gen_sfx_lisette.py` writes `audio/pin_*.wav` and `archer_*` (Sfx loads them on first use).
 - Merge: `_drop_holds()` clears the draw (`h.draw_t`), the Heavy Shot hold (`rmb_down`, `pin_aim`), Spirit Walk (`h.spirit_t`), and Starpiercer (`PinUlt.left`, `PinUlt.nock_t`, `window`).
 - Ult on X: `scripts/arch/hero_ult.gd` (HeroUlt, the shared X base: main's `HunterKeys.ult_pressed` takes the `hunter_ult` press and the level gate, then `cast_ult` returns `HeroUlt.press(self, ult.cast)`: the cooldown in `ArchKit.cd["x"]`, the recast, a cast id), `scripts/arch/kits/pin_ult.gd` (PinUlt: the window, nock, beams, execute, pooled ribbons and pips). Data: `content/archetypes/archer.json` `x`. Sounds: `pin_ult_cast`, `pin_ult_nock`, `pin_ult_beam`, `pin_ult_final`. Bond: `HeroUlt.landed` sends `KinBond.from_ult(h, "hit" / "knock" / "kill", cast_id)`, the best event of a cast.
 - No Net shape change: remote players see the shots and the existing fx events (rings, bolts).
+
+- Looks: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground.
 
 ## Payoff
 Deadeye: gold second hit with T4 hitstop and shake, its own sound, "DEADEYE" word and `pin_deadeye`. Pins say "PINNED"; knocks say "RUN DOWN".

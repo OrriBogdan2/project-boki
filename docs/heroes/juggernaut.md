@@ -320,8 +320,8 @@ gather and turn, then the dive) / `jug_meteor_land` (the crouch onto the knees a
 
 His moments are recipes in content/vfx/juggernaut.json, played by the shared HeroVfx (docs/HERO_VFX.md): flame arcs, burning
 ground that cools to fissures, walls of flame, mesh trails, GPU embers, smoke and debris, in his ember, magenta and gold.
-The projectile looks that ride a shot and the Warchain itself stay in scripts/arch/kits/dj_fx.gd. Sounds: tools/gen_kael_sfx.py
-(`jug_*`): our synthesis over CC0 foley, set per category to a loudness, including footsteps by surface and wordless grunts.
+The projectile looks that ride a shot and the Warchain itself stay in scripts/arch/kits/dj_fx.gd. Sounds: tools/gen_sfx_kael.py
+(`jug_*`, `juggernaut_*`), played from the recipes.
 
 ## Originality
 

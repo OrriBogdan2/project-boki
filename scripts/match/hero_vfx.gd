@@ -70,10 +70,6 @@ static func data(arch: String) -> Dictionary:
 		_data[arch] = parsed if parsed is Dictionary else {}
 	return _data[arch]
 
-## The Hero's own footstep on a surface ("grass", "stone", "snow", "wood"), or the shared one.
-static func step_sound(arch: String, surface: String) -> String:
-	return String((data(arch).get("steps", {}) as Dictionary).get(surface, "step_" + surface))
-
 ## The viewer's share of an effect: yours and enemies' at full, allies' dimmer.
 func view_k(h: Hunter) -> float:
 	var viewer: Variant = m.get("player")
