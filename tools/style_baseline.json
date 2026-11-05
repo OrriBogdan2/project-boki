@@ -99,7 +99,7 @@
 "semicolon": 9
 },
 "scripts/core/data.gd": {
-"long_line": 55
+"long_line": 54
 },
 "scripts/core/econ.gd": {
 "long_line": 10,
@@ -237,7 +237,6 @@
 "shadow": 2
 },
 "scripts/home/farm_build_ui.gd": {
-"long_line": 3,
 "semicolon": 9
 },
 "scripts/home/farm_icons.gd": {
@@ -254,15 +253,15 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 221,
+"long_line": 218,
 "nested_ternary": 33,
 "semicolon": 248,
 "shadow": 3
 },
 "scripts/home/home_build.gd": {
-"long_line": 78,
-"nested_ternary": 6,
-"semicolon": 87,
+"long_line": 55,
+"nested_ternary": 2,
+"semicolon": 73,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -307,9 +306,9 @@
 "shadow": 2
 },
 "scripts/home/interior.gd": {
-"long_line": 15,
+"long_line": 8,
 "nested_ternary": 1,
-"semicolon": 30
+"semicolon": 17
 },
 "scripts/home/kin_brain.gd": {
 "long_line": 8,
@@ -390,9 +389,9 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 392,
+"long_line": 388,
 "nested_ternary": 7,
-"semicolon": 408,
+"semicolon": 407,
 "shadow": 3
 },
 "scripts/match/abilities.gd": {
@@ -465,7 +464,7 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 25,
+"long_line": 24,
 "nested_ternary": 1,
 "semicolon": 49
 },
@@ -635,13 +634,13 @@
 "semicolon": 25
 },
 "scripts/match/life.gd": {
-"long_line": 15,
+"long_line": 14,
 "nested_ternary": 1,
-"semicolon": 4
+"semicolon": 3
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 232,
+"long_line": 231,
 "nested_ternary": 21,
 "semicolon": 146,
 "shadow": 9
@@ -669,9 +668,9 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 283,
+"long_line": 282,
 "nested_ternary": 12,
-"semicolon": 277,
+"semicolon": 276,
 "shadow": 3
 },
 "scripts/match/music_dir.gd": {
@@ -815,7 +814,7 @@
 "long_line": 2
 },
 "scripts/ui/hatch.gd": {
-"long_line": 31,
+"long_line": 30,
 "nested_ternary": 2,
 "semicolon": 66
 },
@@ -833,7 +832,7 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 199,
+"long_line": 197,
 "nested_ternary": 41,
 "semicolon": 56,
 "shadow": 2
@@ -870,7 +869,7 @@
 "scripts/ui/kit_card.gd": {
 "long_line": 31,
 "nested_ternary": 5,
-"semicolon": 5
+"semicolon": 4
 },
 "scripts/ui/level_pop.gd": {
 "long_line": 1
@@ -1028,7 +1027,7 @@
 "semicolon": 2
 },
 "tools/farmbuild_check.gd": {
-"long_line": 28,
+"long_line": 27,
 "semicolon": 15
 },
 "tools/farmbuild_shots.gd": {

@@ -37,13 +37,9 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | stomp_time | 2.4 | ...then you're locked in for this long, three stomps and done |
 | stomp_cycle | 0.7 | one foot-lift-and-slam |
 | kin_revive_time | 8 | your kin pulling you up (as long as Supervive's Guardian Angel self-revive) |
-| box_revive_time | 8 | teammate holds interact at your deathbox: slow and loud, a real risk |
 | box_revive_hp | 0.25 | same as a wisp revive |
 | soul_time | 90 | box revive window |
 | loot_time | 1 | bots: hold interact to take everything from a box (you get a loot window) |
-| beacon_time | 6 |  |
-| beacon_radius | 2.2 |  |
-| beacon_count | 6 |  |
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
@@ -421,6 +417,22 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | doc | Framing for the Wardens' painted portraits and splashes (Portraits, art/portraits). face: where the face's centre sits in the portrait, as fractions of its width and height; a small frame crops in on it. splash: the point a splash is cropped around (the Warden's head and shoulders), same units. |
 | face | {"bulwark": [0.45, 0.28], "archer": [0.32, 0.3], "juggernaut": [0.42, 0.3], "thief": [0.4, 0.31], "mage": [0.43, 0.35], "dolm": [0.53, 0.2], "ostra": [0.46, 0.33], "ashwick": [0.46, 0.28], "gunslinger": [0.4, 0.27], "tender": [0.5, 0.34], "rimewright": [0.43, 0.32], "dredge": [0.6, 0.42]} |
 | splash | {"bulwark": [0.61, 0.18], "archer": [0.28, 0.2], "juggernaut": [0.4, 0.22], "thief": [0.44, 0.4], "mage": [0.68, 0.18], "dolm": [0.55, 0.22], "ostra": [0.4, 0.2], "ashwick": [0.41, 0.18], "rimewright": [0.61, 0.22], "dredge": [0.31, 0.22], "gunslinger": [0.29, 0.22], "tender": [0.64, 0.15]} |
+
+## revive (`content/rules/revive.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Box revives and revive beacons (docs/decisions/0018-box-revive-and-beacons.md; scripts/match/box_revive.gd, beacons.gd). Seconds and metres. |
+| box_revive_s | 7.5 |
+| _box_revive_s | hold interact at a teammate's deathbox this long to bring them back (owner: a 7-8 s exposed channel) |
+| box_diminish | [1.0, 0.75, 0.58, 0.47] |
+| _box_diminish | channel speed for the 1st, 2nd, 3rd, 4th+ box revive of the same Hunter in a match (the source's revive curve) |
+| beacon_s | 4 |
+| _beacon_s | stand on a beacon this long to bring back every dead teammate (owner: a short channel) |
+| beacon_hear_m | 120 |
+| _beacon_hear_m | how far the beacon's alarm loop carries; the notice itself reaches every player on the map |
 
 ## tutorial (`content/rules/tutorial.json`)
 

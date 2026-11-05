@@ -605,8 +605,8 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	hud._text(Vector2(r.position.x + 14, y + 6), "Vaults and lairs are known to all.", 11, MUTED)
 	hud._text(Vector2(r.position.x + 14, y + 20), "The rest show up once your squad sees them.", 11, MUTED)
 	# exits, under the spawns
-	var extra := (22 if not m.shrines.is_empty() else 0) + (22 if not m.beacons.is_empty() else 0)
-	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 104 + extra))
+	var exit_rows := 3 + int(not m.shrines.is_empty()) + int(not m.beacons.is_empty())
+	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 38 + exit_rows * 22))
 	if r2.end.y < sz.y - 10 and m.exits:
 		hud._rounded(r2, Color(0.04, 0.05, 0.08, 0.88), 12)
 		hud._text(r2.position + Vector2(14, 22), "WAYS OUT", 14, Color("8fe3c8"), hud.big)
@@ -616,14 +616,14 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 			var col := Exits.color_of(fake)
 			_exit_glyph(c, String(ex[i][0]), Vector2(r2.position.x + 26, r2.position.y + 42 + i * 22), col)
 			hud._text(Vector2(r2.position.x + 48, r2.position.y + 47 + i * 22), String(ex[i][1]), 12, INK)
-		var row := 3
+		var row_y := r2.position.y + 42 + 3 * 22
 		if not m.shrines.is_empty():
-			shrine_glyph(c, Vector2(r2.position.x + 26, r2.position.y + 42 + row * 22), 5.5)
-			hud._text(Vector2(r2.position.x + 48, r2.position.y + 47 + row * 22), "Shrine (hold F: a power-up)", 12, INK)
-			row += 1
+			shrine_glyph(c, Vector2(r2.position.x + 26, row_y), 5.5)
+			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Shrine (hold F: a power-up)", 12, INK)
+			row_y += 22
 		if not m.beacons.is_empty():
-			ReviveHud.beacon_glyph(c, Vector2(r2.position.x + 26, r2.position.y + 42 + row * 22), 5.0, {}, 0.0)
-			hud._text(Vector2(r2.position.x + 48, r2.position.y + 47 + row * 22), "Revive beacon (your squad back)", 12, INK)
+			ReviveHud.beacon_glyph(c, Vector2(r2.position.x + 26, row_y), 5.0, {}, 0.0)
+			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)", 12, INK)
 
 func _exit_glyph(c: Control, kind: String, pv: Vector2, col: Color) -> void:
 	match kind:

@@ -93,8 +93,8 @@ func _boxes() -> void:
 	P.inp["aim"] = home + Vector3(0, 0.9, -4)
 	await _go(1.0)
 	_take("boxes_world", "A teammate's box (left: their squad colour, face, name, soul timer) and a rival's (red)")
-	_crop_take("boxes_minimap", Rect2i(0, 0, 250, 250), 2.0, "The minimap: the teammate's box in their colour (bright rim:"
-		+ " it can still be revived), the rival's in red, beacons as mint diamonds")
+	_crop_take("boxes_minimap", Rect2i(0, 0, 250, 250), 2.0, "The minimap: the teammate's box in their colour"
+		+ " (bright rim: it can still be revived), the rival's in red, beacons as mint diamonds")
 	m.hud.full_map.open()
 	m.hud.full_map.zoom = 5.0
 	m.hud.full_map.zoom_to = 5.0
