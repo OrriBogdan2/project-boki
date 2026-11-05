@@ -188,7 +188,7 @@ static func demo_save(which: String, seed: int) -> Dictionary:
 	var pip := Save.new_kin("zapple", "Pip")
 	pip["starter"] = true
 	d["roster"].append(pip); d["active"] = pip["uid"]
-	if which in ["station", "panel", "chop"]:
+	if which in ["station", "panel", "chop", "busy"]:
 		for p in [["pebbit", "Rocky"], ["burrlet", "Moss"], ["cindle", "Ash"]]:
 			var r := Save.new_kin(p[0], p[1])
 			r["level"] = 5; r["trust"] = 70.0
@@ -197,10 +197,15 @@ static func demo_save(which: String, seed: int) -> Dictionary:
 		Care.ensure(r)
 		for n in Care.NEEDS: r["needs"][n] = 95.0
 	HomeLayout.new_fs(d, seed)
-	d["tutorial"] = {"home": true, "day1_done": true}
+	d["tutorial"] = {"home": true, "day1_done": which != "busy"}
+	if which == "busy":
+		d["tutorial"]["ft"] = {"did": {"axe": true}, "done": false, "skipped": false, "gift": false}
 	if which != "empty" and which != "ghost":
 		d["tools"] = ["axe", "pickaxe"]
 		d["mats"] = {"wood": 14, "stone": 6}
+	if which == "busy":
+		d["tools"] = ["axe"]
+		d["mats"] = {}
 	return d
 
 ## Puts a catalog item down on the nearest spot to `near` it fits (no charge). Returns its entry.
@@ -278,6 +283,8 @@ func demo(which: String) -> void:
 			var cm: Vector2 = h.hb.debug_m
 			cam.zoom_to = 1.25; cam.zoom = 1.25; cam.snap(Vector3(cm.x, 0, cm.y + 2.0))
 			h.ppos = Vector3(cm.x, 0, cm.y + 2.0); h.player.position = h.ppos
+		"busy":
+			_demo_busy(land)
 		"chop", "station", "panel":
 			demo_place("house", land + Vector3(0, 0, -7), 0)
 			demo_place("crop_patch", land + Vector3(7, 0, -3), 0)
@@ -345,3 +352,28 @@ func demo(which: String) -> void:
 			cam.zoom_to = 0.9; cam.zoom = 0.9; cam.snap(mid + (mid - tp).normalized() * 1.5)
 			if which == "panel" and not camp.is_empty():
 				h.get_tree().create_timer(0.5).timeout.connect(func(): h.hw.open_station(camp))
+
+## The tutorial's chop step with a Boki talking beside the marked tree and a few toasts at once.
+func _demo_busy(land: Vector3) -> void:
+	var ti := nearest_wild(land, "tree")
+	if ti < 0:
+		return
+	var st := beside(ti, land)
+	h.ppos = st + Vector3(0, 0, 2.0)
+	h.player.position = h.ppos
+	var w: World = h.world
+	var tree := Vector3(ti % w.w + 0.5, 0, ti / w.w + 0.5)
+	for k in h.kins:
+		k["pos"] = tree + Vector3(0.6, 0, 0.8)
+		(k["node"] as Node3D).position = k["pos"]
+		k["t"] = 999.0
+		k["goal"] = k["pos"]
+		h._say(k, "Ooh, a tree! Swing at it and I'll carry the wood", 30.0)
+	h.cam.zoom_to = 0.8
+	h.cam.zoom = 0.8
+	h.cam.snap(st)
+	h.get_viewport().warp_mouse(Vector2(8.0, 540.0))      # (no hover card over the picture)
+	for i in 30:
+		for txt in ["A Pebbit is ready to hatch!", "Not enough wood", "Hob has new blueprints"]:
+			h._toast(txt)
+		await h.get_tree().create_timer(0.5).timeout
