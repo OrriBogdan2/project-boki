@@ -1304,3 +1304,6 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 - **Visuals:** the wings are now visible from the front; the skate blades glow with a frost trail.
 - **Animation tone:** gentle and graceful (figure-skating flourishes), never seductive.
 - She can start ART-1 after the current queue. The cute alt is withdrawn.
+
+## 2026-11-05 04:34 UTC (ext): Claire splash + A-pose: `claire_splash.png` (the frozen lake, monsters frozen in her trail), `claire_turnaround_apose.png` (a 4-view sculpt-style turnaround, an excellent model reference).
+
