@@ -2526,3 +2526,14 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Fix:** whatever the cause, every dash/lunge must show visible travel with its animation for its full duration at any frame rate (interpolated, not teleported), and no hitch on first use.
 - **Assert:** a frame capture of Sable's dash and Kael's Lunge shows ≥5 intermediate positions with the dash pose at 60 fps; no frame >33 ms during them.
 - Priority: high (a feel-breaking bug in the current release).
+
+## 182. Title screen redesign: more professional (owner, 21:10 UTC Nov 5)
+- The owner: "the hero screen on project boki needs to be better - i dont like it right now… make it look more professional". The tagline and the "A short story first…" subtext are already removed (ext/brand-logo).
+- **Redesign** in the Void & Masks style (UI_STYLE.md):
+  - **Background:** replace the low-detail 3D lineup of Hunters on the dark island (it reads as rough and placeholder) with a polished key-art backdrop: one of the new splashes, or a composed group key-art image (ext can make one in Nano Banana), with a slow parallax drift, void specks and a soft vignette. If the 3D scene stays, frame and light it cinematically (fewer characters, posed, a depth-of-field blur).
+  - **Menu:** a clean vertical stack of torn-parchment / ticket-stub items with a neon hover edge.
+    - New game / Continue is the primary ticket button, with no orange flat button.
+    - Consistent spacing; keycap hints only at the bottom right.
+  - **News card:** restyled as a torn panel with a stamp ("PLAYTEST · 0.23"), short.
+  - The version string is small in the corner (done).
+- Owner: P1 (the UI session on the owner's PC) or S5. Before/after shots to ext.

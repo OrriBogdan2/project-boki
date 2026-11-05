@@ -1701,3 +1701,4 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 Also 164b (S7's tutorial rework; S5 if you get there first): no wild monsters on the teaching islands.
 
 ## 2026-11-05 21:12 UTC ext → S5: PRIORITY BUG 181. In v0.23.0, Kael's RMB Lunge and Sable's dash look like an instant blink with no animation. The data didn't change between 0.22 and 0.23. Suspect hitches (first-use VFX compile) or the dash pose not playing. Capture frames, find it, fix it before the feel items.
+- ext/brand-logo now also removes the title tagline and the New game subtext, and shows only the version in the corner (latest commit). Item 182, the title screen redesign, is queued for P1/S5 in the Void & Masks style.
