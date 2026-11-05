@@ -123,12 +123,12 @@ func _grown_parts(main: Node) -> void:
 	var k := Shots.rigged_kin(SPECIES, rec)
 	main.add_child(k)
 	await main.get_tree().process_frame
-	await main.get_tree().process_frame
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 	var skel := rig.skeleton()
-	var horns := skel.get_bone_pose_scale(skel.find_bone("part_horns")).x
-	var spikes := skel.get_bone_pose_scale(skel.find_bone("part_spikes")).x
-	ok(horns > 0.9 and spikes < 0.01, "horns out (%.2f), spikes still folded away (%.3f)" % [horns, spikes])
+	var dna := skel.find_children("*", "BokiDna", false, false)[0] as BokiDna
+	var shown: Array = dna.shown.map(func(p: Array) -> String: return skel.get_bone_name(int(p[0])))
+	ok(shown == ["part_horns"], "only its horns are out: %s" % str(shown))
+	ok(is_equal_approx(float(dna.shown[0][1]), 1.3), "level 2 parts are bigger, as in Evo")
 	k.queue_free()
 
 func _own_look(main: Node) -> void:

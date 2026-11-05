@@ -206,7 +206,7 @@ func _fusion() -> void:
 	vp.add_child(h)
 	var sheet := _strip(4)
 	for i in 3:
-		h.rotation.y = [PI, PI * 0.72, 0.15][i]
+		h.rotation.y = [0.0, -PI * 0.28, PI][i]
 		var img: Image = await _grab(vp)
 		img.convert(Image.FORMAT_RGBA8)
 		sheet.blit_rect(img, Rect2i(0, 0, px, px), Vector2i(i * px, 0))
@@ -214,7 +214,7 @@ func _fusion() -> void:
 	cam.fov = MATCH_FOV
 	cam.position = Vector3(0, sin(p), cos(p)) * MATCH_DIST
 	cam.rotation = Vector3(-p, 0, 0)
-	h.rotation.y = PI * 0.8
+	h.rotation.y = -PI * 0.2
 	var far: Image = await _grab(vp)
 	var mid := Vector2i(cam.unproject_position(Vector3(0, 0.9, 0)))
 	var crop := far.get_region(Rect2i(mid - Vector2i(64, 64), Vector2i(128, 128)))

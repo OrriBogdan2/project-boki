@@ -137,8 +137,8 @@ def claw_prims(sd, sx):
 def parts():
     """name -> (Shape, grid step m, target tris) of each separately meshed piece."""
     out = {
-        "body": (Shape(body_prims()), 0.0035, 5700),
-        "tail": (Shape(tail_prims()), 0.0035, 1300),
+        "body": (Shape(body_prims()), 0.0035, 5400),
+        "tail": (Shape(tail_prims()), 0.0035, 1150),
         "collar": (Shape(collar_prims()), 0.0035, 120),
         "sting": (Shape(sting_prims()), 0.0035, 260),
     }

@@ -9,11 +9,11 @@ import vespyx_paint as paint
 from boki_sdf import Cone, Ellipsoid, Shape, frame, v3
 
 SIDES = (("L", -1.0), ("R", 1.0))
-TAIL = [v3(0, 0.42, 0.16), v3(0.02, 0.56, 0.33), v3(0.05, 0.76, 0.44), v3(0.08, 0.98, 0.43), v3(0.10, 1.18, 0.33),
-        v3(0.11, 1.32, 0.17), v3(0.11, 1.36, -0.01), v3(0.10, 1.29, -0.15)]
+TAIL = [v3(0, 0.42, 0.16), v3(0.02, 0.58, 0.33), v3(0.05, 0.80, 0.44), v3(0.08, 1.06, 0.45), v3(0.10, 1.32, 0.38),
+        v3(0.11, 1.52, 0.24), v3(0.11, 1.60, 0.07), v3(0.10, 1.55, -0.04)]
 RADII = [0.112, 0.118, 0.118, 0.112, 0.103, 0.092, 0.08]
-STING_C = v3(0.095, 1.24, -0.20)
-STING_DIR = np.array((0.0, -0.55, -0.83))
+STING_C = v3(0.095, 1.50, -0.09)
+STING_DIR = np.array((0.0, -0.33, -0.94))
 
 
 def tail_shape():
@@ -43,12 +43,12 @@ def claw_shape(sd, sx):
 
 
 def ruff_shape():
-    prims = [Ellipsoid("collar", "ruff", v3(0, 0.80, 0.0), v3(0.22, 0.09, 0.2), k=0)]
+    prims = [Ellipsoid("collar", "ruff", v3(0, 0.87, 0.02), v3(0.19, 0.08, 0.17), k=0)]
     for i in range(11):
         a = math.tau * i / 11 + 0.3
-        o = v3(math.cos(a) * 0.18, 0.80, math.sin(a) * 0.16)
-        t = v3(math.cos(a) * 0.40, 0.70 + 0.05 * (i % 2), math.sin(a) * 0.34)
-        prims.append(Cone("tuft%d" % i, "ruff", o, t, 0.075, 0.004, k=0.03))
+        o = v3(math.cos(a) * 0.17, 0.87, 0.02 + math.sin(a) * 0.15)
+        t = v3(math.cos(a) * 0.31, 0.74 + 0.05 * (i % 2), 0.02 + math.sin(a) * 0.27)
+        prims.append(Cone("tuft%d" % i, "ruff", o, t, 0.085, 0.004, k=0.03))
     return Shape(prims)
 
 

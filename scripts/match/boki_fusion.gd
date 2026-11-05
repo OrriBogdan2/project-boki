@@ -5,6 +5,7 @@ extends RefCounted
 
 const PATH := "res://art/kin/%s/%s_fusion.glb"
 ## Fusion type -> the species whose parts it wears.
+const HIP_Y := 0.42        # m: the torso height the parts are modelled for; 3D Hunters carry theirs higher
 const SPECIES := {"venom": "cindle"}
 
 ## True when this form has Blender parts.
@@ -17,8 +18,10 @@ static func build(parent: Node3D, form: Dictionary, base: Vector3) -> void:
 	var id := String(SPECIES[String(form["type"])])
 	var parts := (load(PATH % [id, id]) as PackedScene).instantiate() as Node3D
 	parts.name = "FusionParts"
-	parts.position = base
 	parent.add_child(parts)
+	var torso := parent.get_parent() as Node3D
+	parts.scale = Vector3.ONE / parent.scale.x          # a Fusion's own sizes: part_k is for the primitive parts
+	parts.position = base + Vector3(0, (HIP_Y - torso.position.y) / parent.scale.x, 0)
 	var glow: Color = form["glow"]
 	for mi in parts.find_children("*", "MeshInstance3D", true, false):
 		var inst := mi as MeshInstance3D
