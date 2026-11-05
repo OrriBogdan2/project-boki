@@ -1835,7 +1835,7 @@ func store_held() -> void:
 			_clear_ghost()
 			h.hecon.store_feeder(h.hecon._feeder(fid))
 			apply(false)
-			h._toast("Feeder put in storage (its food went back in the pantry)")
+			h._toast("Feeder stored, its food back in the pantry")
 		else:
 			_drop_held()
 		_build_bar()

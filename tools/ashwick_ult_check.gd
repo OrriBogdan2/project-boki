@@ -204,8 +204,9 @@ func _carpet() -> void:
 		P.inp["fire"] = true
 		ak.aim_at(P, home + Vector3(16, 0, 0)))
 	P.inp["fire"] = false
-	ok("ult: the lance roars mid-flight", K.hose.emitted > em0 + 4 and J.running(),
+	ok("ult 66: the lance does not roar mid-flight (no flame, no queued shot)", K.hose.emitted == em0 and J.running(),
 			"puffs +%d" % (K.hose.emitted - em0))
+	ok("ult 66: a press ticks softly once (denied), not once a frame", K.lmb_denied == 1, "denied %d" % K.lmb_denied)
 	ak.step(m, 1.6, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
 	# Ablaze in about 2.4s of standing in it (4 Char every 0.3s)
 	ak.fresh(T)
@@ -219,6 +220,26 @@ func _carpet() -> void:
 		"ult payoff: standing in it, Ablaze after about 2.4s", at_14 == 0 and K.burning(T) >= 1,
 		"at 1.4s %d, at 2.6s %d" % [at_14, K.burning(T)]
 	)
+	# item 66: LMB held through the whole flight deals nothing, and works again as soon as it ends
+	ak.fresh(T)
+	K.cd["x"] = 0.0
+	K.chars = {}
+	K.ignites = {}
+	T.teleport(P.pos + Vector3(4.0, 0, 0))
+	var J2 := _cast(P, P.pos + Vector3(0, 0, 40.0))
+	var em2: int = K.hose.emitted
+	ak.step(m, 1.7, func():
+		P.inp["fire"] = true
+		T.teleport(P.pos + Vector3(3.0, 0, 0))
+		ak.aim_at(P, P.pos + Vector3(3.0, 0, 0)))
+	ok("ult 66: LMB held through the flight spawns no flame and deals no damage from the lance",
+			K.hose.emitted == em2 and J2.running() and ak.dmg(T) < 0.5, "puffs +%d" % (K.hose.emitted - em2))
+	ak.step(m, 0.8, func():
+		P.inp["fire"] = true
+		ak.aim_at(P, T.pos))
+	P.inp["fire"] = false
+	ok("ult 66: the lance works again right after the flight ends", not J2.running() and K.hose.emitted > em2,
+			"puffs +%d" % (K.hose.emitted - em2))
 	await _abyss(m, P, K, home, m.world)
 	await _knock_stun_merge(m, P, K, home)
 	await ak.done(m)

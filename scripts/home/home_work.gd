@@ -631,7 +631,7 @@ func _after_shift(k: Dictionary, el: String) -> void:
 		if not rec.get("overworked", false):
 			rec["overworked"] = true
 			h._emote(k, "!")
-			h._say(k, KinSpeak.say(rec, "sad", "energy"), 2.4, false)
+			h._say(k, BokiLines.say(rec, "want_energy"), 0.0, false)
 	else:
 		k["shift"] = 0.0
 		k["break_t"] = Work.BREAK

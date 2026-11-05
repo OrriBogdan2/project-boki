@@ -3,8 +3,8 @@ class_name Life
 ## (docs/DEATH_AND_REVIVE.md):
 ##   ALIVE --0 HP--> DOWNED (wisp) --bleeds out / executed / team wiped--> DEAD (deathbox)
 ##   a teammate standing on your wisp brings you back (4s); a teammate holding interact at your
-##   deathbox does too while your soul is there (5s, loot back); a revive beacon brings back the
-##   whole team (6s, full health, no loot, resurrection sickness).
+##   deathbox does too while your soul is there (BoxRevive, loot back); a revive beacon brings back
+##   the whole team (Beacons: full health, no loot, resurrection sickness).
 ## Everything here runs on whichever game owns the hunter (local and bots); remote hunters only
 ## show what their owner sends.
 
@@ -21,16 +21,17 @@ const R := {
 	"stomp_time": 2.4,          # [footage] ...then you're locked in for this long, three stomps and done
 	"stomp_cycle": 0.7,         # one foot-lift-and-slam
 	"kin_revive_time": 8.0,     # [design] your kin pulling you up (as long as Supervive's Guardian Angel self-revive)
-	"box_revive_time": 8.0,     # [design] teammate holds interact at your deathbox: slow and loud, a real risk
 	"box_revive_hp": 0.25,      # [design] same as a wisp revive
 	"soul_time": 90.0,          # [design] box revive window
 	"loot_time": 1.0,           # [design] bots: hold interact to take everything from a box (you get a loot window)
-	"beacon_time": 6.0,         # [patch 1.0]
-	"beacon_radius": 2.2,
-	"beacon_count": 6,
 	"sickness_time": 12.0,      # [patch 1.0] resurrection sickness
 	"sickness_dmg": 0.75,       # [patch 1.0] -25% damage dealt
 }
+
+const RIVAL_BOX := Color("d0473c")    # a rival's box: red, on the box, the map and its label
+const BOX_BODY := Color("5a5560")     # Models.deathbox's body before its owner tint
+const OWNER_TINT := 0.6               # how far the body leans to the owner's colour (0..1)
+const OWNER_RING_M := 2.4             # metres across the owner's ring round a box
 
 ## Box colour by what's inside: grey, blue, purple, gold.
 const BOX_TIERS := [[0, Color("b8b4ac")], [12, Color("6ab8ff")], [35, Color("c08aff")], [80, Color("ffb64a")]]
@@ -224,8 +225,31 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 	n.position = at
 	m.add_child(n)
 	b["node"] = n
+	_mark_owner(m, b)
 	m.boxes.append(b)
 	return b
+
+## Whose box it is, for you: a teammate's in their squad colour (the map's), a rival's in red.
+static func owner_col(m: Match, b: Dictionary) -> Color:
+	var o: Hunter = b["owner"]
+	if m.player != null and o.team == m.player.team:
+		return m.mate_col(o)
+	return RIVAL_BOX
+
+## The box's body takes its owner's colour and a ring round it, so whose box it is reads at a glance
+## (the beam and trim keep the value colour).
+static func _mark_owner(m: Match, b: Dictionary) -> void:
+	var n: Node3D = b["node"]
+	var col := owner_col(m, b)
+	var mats: Array = n.get_meta("mats", [])
+	if not mats.is_empty():
+		(mats[0] as ShaderMaterial).set_shader_parameter("albedo", BOX_BODY.lerp(col, OWNER_TINT))
+	var ring := MeshInstance3D.new()
+	ring.name = "OwnerRing"
+	ring.mesh = Models.flat_quad(OWNER_RING_M)
+	ring.material_override = Models.ring_mat(col, 0.12)
+	ring.position.y = 0.05
+	n.add_child(ring)
 
 ## Your latest box (an earlier one from before a revive can't bring you back any more).
 static func box_of(m: Match, h: Hunter) -> Dictionary:
@@ -347,7 +371,7 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 					h.pack.remove_at(li)
 					h.pack.append(pit)
 				elif h == m.player and m.hud:
-					m.hud.toast_small("Your backpack is full of better things", Color("ffb0a0"))
+					m.hud.toast_small("Pack full", Color("ffb0a0"))
 	m.sfx("pickup", b["pos"], -4.0, 0.9)
 	_settle_box(b)
 
@@ -421,7 +445,7 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 	m.sfx("pickup", b["pos"], -2.0, 0.9)
 	m.fx.burst(b["pos"] + Vector3(0, 0.6, 0), Color("ffd36a"), 14, 3.0, 0.4)
 	if h == m.player and m.hud:
-		m.hud.toast_small("Looted %s's box%s" % [(b["owner"] as Hunter).pname if b["owner"] != h else "your own", ("  +%d gems" % got) if got > 0 else ""], Color("ffd36a"))
+		if got > 0: m.hud.toast_small("+%d gems" % got, Color("ffd36a"))
 
 static func _refresh_box(b: Dictionary) -> void:
 	var n: Node3D = b["node"]
@@ -492,85 +516,3 @@ static func kin_on_death(m: Match, h: Hunter, b: Dictionary) -> void:
 		if kk == null or (kk as Kin).dead:
 			continue
 		KinLoss.on_owner_out(m, h, kk, b["pos"])
-
-# ------------------------------------------------------------------ beacons
-static func place_beacons(m: Match) -> void:
-	if m.opts.get("training", false) or m.opts.get("tutorial", false):
-		return
-	var isl: Array = []
-	for i in m.world.islands.size():
-		isl.append(i)
-	isl.sort_custom(func(a, b): return float(m.world.islands[a]["r"]) > float(m.world.islands[b]["r"]))
-	var spots: Array = []
-	for i in isl:
-		if spots.size() >= int(R["beacon_count"]):
-			break
-		for tries in 12:
-			var p: Vector3 = m.world.random_ground(i)
-			if p == Vector3.INF or m.world.is_void(p.x, p.z):
-				continue
-			var ok := true
-			for s in spots:
-				if Vector2(s.x - p.x, s.z - p.z).length() < 30.0: ok = false
-			for ep in (m.exits.spots() if m.exits else []):
-				if Vector2(ep.x - p.x, ep.z - p.z).length() < 6.0: ok = false
-			if ok:
-				spots.append(p)
-				break
-	for p in spots:
-		var n := Models.revive_beacon()
-		n.position = p
-		m.add_child(n)
-		m.beacons.append({"pos": p, "used": false, "prog": 0.0, "team": -1, "node": n, "contested": false})
-
-## Who a beacon would bring back for this team: every dead or downed teammate still waiting.
-static func beacon_targets(m: Match, team: int) -> Array:
-	return m.hunters.filter(func(x): return x.team == team and not x.remote and not x.extracted and ((x.out and not x.gone) or x.downed))
-
-static func tick_beacons(m: Match, dt: float) -> void:
-	for bc in m.beacons:
-		if bc["used"]:
-			continue
-		var teams := {}
-		for h in m.hunters:
-			if h.out or h.extracted or h.downed or h.dropping:
-				continue
-			if h.flat_dist(bc["pos"]) < R["beacon_radius"] and absf(h.pos.y - float(bc["pos"].y)) < 1.8:
-				teams[h.team] = true
-				if not beacon_targets(m, h.team).is_empty(): h.set_hold("beacon")
-		bc["contested"] = teams.size() > 1
-		if teams.size() == 1:
-			var t: int = teams.keys()[0]
-			if beacon_targets(m, t).is_empty():
-				continue
-			if int(bc["team"]) != t:
-				# a different team stepping on starts from scratch
-				bc["team"] = t
-				bc["prog"] = 0.0
-			bc["prog"] = float(bc["prog"]) + dt / R["beacon_time"]
-			if float(bc["prog"]) >= 1.0:
-				_use_beacon(m, bc, t)
-		elif teams.is_empty():
-			bc["prog"] = maxf(0.0, float(bc["prog"]) - dt * 0.25)
-
-static func _use_beacon(m: Match, bc: Dictionary, team: int) -> void:
-	bc["used"] = true
-	var names: Array = []
-	var i := 0
-	for o in beacon_targets(m, team):
-		var at: Vector3 = bc["pos"] + Vector3(cos(i * 2.1) * 1.2, 0, sin(i * 2.1) * 1.2)
-		bring_back(m, o, at, 1.0, true)
-		o.gems = 0; o.seeds = {}; o.caught = []     # you come back empty-handed: your box is where you left it
-		names.append(o.pname)
-		i += 1
-	var n: Node3D = bc["node"]
-	var glow: Node3D = n.get_node_or_null("Glow")
-	if glow: glow.visible = false
-	m.fx.ring(bc["pos"], 4.0, Color("8fffc0"), 0.6)
-	m.sfx("unlock", bc["pos"], 0.0, 0.8)
-	# everyone on the map hears a beacon go off
-	m.ping(bc["pos"], Color("8fffc0"))
-	m.add_feed("A revive beacon brought back %s" % ", ".join(names))
-	trace(m, "beacon team %d brought back %s" % [team, ", ".join(names)])
-	if m.player and m.player.team != team and m.hud:
-		m.hud.toast_small("A revive beacon went off " + m.direction_word(m.player.pos, bc["pos"]), Color("8fffc0"))
