@@ -1512,3 +1512,7 @@ Faces now have a reference for every hero. The face/detail pass applies to all.
   - The head sheet omits it; the master sheet + portrait have it.
 
 ## 2026-11-05 12:05 UTC (ext): `tarek_head.png` updated (3 eye-stones, no stray). `ryzz_bubblegum_ref.png`: a reference for her gum bubble (size and placement) + side/back body views. Layout messy; use for the bubble only.
+
+## 2026-11-05 12:10 UTC (ext): owner notes on the head sheets
+- **Ryzz:** the gum bubble must also show in the SIDE profile (a sphere in front of her lips). The head sheet omits it there; model it as a prop parented to the jaw so it shows from every angle.
+- **Breaker: the helmet is too TALL, not wide enough** (owner, again). Make the helmet squat and wider than it is tall, sunk low into the hull with almost no neck (per breaker_FINAL_sheet). The whole character reads wide and round, top-heavy, stubby legs. Use the head sheet only for its rivet/porthole/moss detail, NOT its proportions.
