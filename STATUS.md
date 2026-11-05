@@ -842,3 +842,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Owner Qs: Storm Rod in hand on RMB vs HANDS-FREE? Idle both eyes open, or the master's wink?
 
 ## 2026-11-05 S2: READY ext/kit-ostra-60-75 66a9c6f2 (items 60, 75, 117); details in EXT_TO_MAIN. Owner Qs: held fire plain vs +15% curve (the 1.6x bar needs plain)? x1.9 enough? Should breakables stop orbs? Limits: placed walls still stop orbs (not asserted); no two-client test. Slot: Lisette 114.
+
+## 2026-11-05 S2: READY ext/art1-pip f9185186 (agent ~80%; carries Kael art)
+- Meshy head + body scans beat the scripted model; eyes now per pip_head.png (~13% of head width). 13,970 tris, 8 materials. 116 credits. Meshy queue has moved again.
+- **Fidelity:** all yes; wings narrower from the front; apron cross softer; lantern motes are S3/S4's. Proofs: ext/hero-shots-s2 3bb03541 art1/pip/.
+- Checks on the tip by FAIL lines: clip, rig-standard, warden-glb, warden-model, warden-stance, pip-live, clip-live, tender-combo, health --strict. All 136 flags ran before the scan: 12 baseline reds, Pip rows now clear. overflow rerun unfinished; mantle-look 0.77 (on the baseline list) not rerun. warden-model height 0.6, height_3d 0.66.
+- Eyes are paint: no gaze, brow bones gone. Sheets and 25 GIFs predate the last apron fix. Stale kael image files on the branch: the merge should clear them.
+- Owner Qs: 0.66x height? Lose gaze for painted eyes? Wings tilted for the match camera?
+- Slot: Pip 118.
