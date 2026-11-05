@@ -85,9 +85,9 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				K.cd["rmb"] = 0.0
 				K.press_rmb()
 		"br_dash":
-			# a leap that lands just short of the dummy: the crash catches it at the edge, the rock rolls into it
-			if t < 0.45: P.teleport(Vector3(D.pos.x - 6.0, P.pos.y, D.pos.z))
-			P.inp["aim"] = D.pos + Vector3(-1.9, 0.9, 0.0)
+			# one hop that lands just short of the dummy: the crash catches it at the edge, the rock rolls into it
+			if t < 0.45: P.teleport(Vector3(D.pos.x - 4.2, P.pos.y, D.pos.z))
+			P.inp["aim"] = D.pos + Vector3(-1.6, 0.9, 0.0)
 			if at(t, dt, 0.5):
 				P.dashes = P.max_dashes()
 				P.do_dash()

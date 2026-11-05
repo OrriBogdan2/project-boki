@@ -296,48 +296,56 @@ const MOVES := {
 				"fl": Vector3(-0.34, -0.26, 0.08), "hw": 1.0, "fr": Vector3(0.34, -0.26, 0.08), "rw": 1.0
 			}
 		]]},
-	# Rubble Leap (her ground dash, 0.58s: the 0.06s crouch and the 0.52s flight): crouched on the rock as it
-	# heaves up (0.06), kicked off it stretched long with the fists swept back (0.12), tucked at the top with
-	# both fists raised overhead (0.30), the legs reaching down (0.46), and the fists-high drop that
-	# breah_leap_land picks up on landing (0.58)
-	"breah_dash": {"keys": [
-		[0.00, {}],
+	# Rock Hop's hop (0.3s, a low fast arc): crouched on the rock (0), kicked off it long with the fists back
+	# (0.06), knees tucked, arms out for balance (0.16), the feet reaching for the next rock (0.28)
+	"breah_hop": {"keys": [
+		[
+			0.00,
+			{
+				"p": -0.3, "sq": 0.36, "lift": -0.14, "legs": [1.0, -1.6, 0.9, -1.5], "lw": 1.0,
+				"fl": Vector3(-0.24, -0.5, -0.3), "hw": 1.0, "fr": Vector3(0.24, -0.5, -0.3), "rw": 1.0
+			}
+		],
 		[
 			0.06,
 			{
-				"p": -0.3, "sq": 0.42, "lift": -0.16, "legs": [1.0, -1.6, 0.9, -1.5], "lw": 1.0,
-				"fl": Vector3(-0.22, -0.6, -0.3), "hw": 1.0, "fr": Vector3(0.22, -0.6, -0.3), "rw": 1.0
+				"p": -0.4, "sq": -0.3, "lift": 0.1, "legs": [-0.5, -0.2, 0.4, -0.6], "lw": 1.0,
+				"fl": Vector3(-0.38, 0.1, -0.4), "hw": 1.0, "fr": Vector3(0.38, 0.1, -0.4), "rw": 1.0
 			}
 		],
 		[
-			0.12,
+			0.16,
 			{
-				"p": -0.4, "sq": -0.35, "lift": 0.1, "legs": [-0.5, -0.2, 0.4, -0.6], "lw": 1.0,
-				"fl": Vector3(-0.38, 0.3, 0.42), "hw": 1.0, "fr": Vector3(0.38, 0.3, 0.42), "rw": 1.0
+				"p": 0.1, "sq": 0.08, "legs": [1.1, -1.7, 0.7, -1.2], "lw": 1.0,
+				"fl": Vector3(-0.6, 0.25, 0.1), "hw": 1.0, "fr": Vector3(0.6, 0.25, 0.1), "rw": 1.0
 			}
 		],
 		[
-			0.30,
+			0.28,
 			{
-				"p": 0.15, "sq": 0.1, "legs": [1.25, -1.9, 1.05, -1.75], "lw": 1.0,
-				"fl": Vector3(-0.26, 0.82, 0.0), "hw": 1.0, "fr": Vector3(0.26, 0.82, 0.0), "rw": 1.0
-			}
-		],
-		[
-			0.46,
-			{
-				"p": -0.15, "sq": -0.12, "legs": [0.5, -0.7, 0.4, -0.6], "lw": 1.0,
-				"fl": Vector3(-0.26, 0.8, -0.1), "hw": 1.0, "fr": Vector3(0.26, 0.8, -0.1), "rw": 1.0
-			}
-		],
-		[
-			0.58,
-			{
-				"p": -0.25, "legs": [0.4, -0.5, 0.3, -0.45], "lw": 1.0, "fl": Vector3(-0.26, 0.75, -0.2), "hw": 1.0,
-				"fr": Vector3(0.26, 0.75, -0.2), "rw": 1.0
+				"p": -0.12, "sq": -0.08, "legs": [0.5, -0.7, 0.3, -0.5], "lw": 1.0,
+				"fl": Vector3(-0.5, 0.1, 0.1), "hw": 1.0, "fr": Vector3(0.5, 0.1, 0.1), "rw": 1.0
 			}
 		]]},
-	# the leap's landing: both fists smashed into the ground with a deep squash (0.05), held down through
+	# Rock Hop's skid: a skater's low stance along the rock, front knee bent, back leg long, one arm out ahead and
+	# one behind (0.08), held as he slides
+	"breah_skate": {"keys": [
+		[0.00, {"p": -0.1, "sq": 0.3, "lift": -0.12, "legs": [0.9, -1.2, -0.3, -0.5], "lw": 1.0}],
+		[
+			0.08,
+			{
+				"p": -0.3, "sq": 0.26, "lift": -0.14, "legs": [1.0, -1.4, -0.4, -0.4], "lw": 1.0,
+				"fl": Vector3(-0.55, 0.05, 0.4), "hw": 1.0, "fr": Vector3(0.55, 0.15, -0.4), "rw": 1.0
+			}
+		],
+		[
+			0.3,
+			{
+				"p": -0.26, "sq": 0.22, "lift": -0.1, "legs": [0.9, -1.3, -0.3, -0.4], "lw": 1.0,
+				"fl": Vector3(-0.55, 0.1, 0.4), "hw": 1.0, "fr": Vector3(0.55, 0.2, -0.4), "rw": 1.0
+			}
+		]]},
+	# Rock Hop's crash: both fists smashed into the ground with a deep squash (0.05), held down through
 	# the crash (0.25), then she heaves upright
 	"breah_leap_land": {"keys": [
 		[

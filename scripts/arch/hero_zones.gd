@@ -7,7 +7,7 @@ extends RefCounted
 ##
 ## Net (Net.VERSION 0.14.0): ["zone", kind, ...] events through the existing "ev" topic. The caster's
 ## game sends them; every other game builds the same thing, so a rock stops a remote body the same way.
-##   ["zone", "rock",   nid, rid, x, y, z, dx, dz, len, time, hp]
+##   ["zone", "rock",   nid, rid, x, y, z, dx, dz, len, time, hp, top?]   (top: a low Rock Hop rock's height)
 ##   ["zone", "rockgo", rid]                     a rock was launched or crumbled: remove it
 ##   ["zone", "bridge", nid, x, y, z, dx, dz, len, width, time, color?]   (color: hex, rock-tan when absent)
 ##   ["zone", "seed",   nid, sid, x, y, z, rmax, grow]
@@ -33,7 +33,7 @@ static func tx(m: Node, e: Array) -> void:
 		m.net_event(e)
 
 ## Can a rock or seed sit at p? Solid ground within a step of `y`, nothing in the way, no body inside.
-static func fits(m: Node, p: Vector3, y: float, bodies := true) -> bool:
+static func fits(m: Node, p: Vector3, y: float, bodies := true, skip: Ent = null) -> bool:
 	var w: World = m.world
 	var g: float = w.ground_at(p.x, p.z)
 	if g <= World.VOID + 1.0 or absf(g - y) > 0.9:
@@ -42,7 +42,7 @@ static func fits(m: Node, p: Vector3, y: float, bodies := true) -> bool:
 		return false
 	if bodies:
 		for e in m.hunters:
-			if is_instance_valid(e) and not e.dead and Vector2(
+			if is_instance_valid(e) and e != skip and not e.dead and Vector2(
 				e.pos.x - p.x, e.pos.z - p.z
 			).length() < ROCK_R + e.r + 0.15 and absf(e.pos.y - g) < 2.0:
 				return false
@@ -87,38 +87,40 @@ static func walk(m: Node, from: Vector3, aim: Vector3, reach: float) -> Dictiona
 # ------------------------------------------------------------------ rocks
 ## Builds a rock (a movement-blocking Verbs wall wearing a rock's look). send: tell the other games.
 static func rock(
-	m: Node, by: Ent, at: Vector3, dir: Vector2, rid: String, len_: float, time_: float, hp: float, send := true
+	m: Node, by: Ent, at: Vector3, dir: Vector2, rid: String, len_: float, time_: float, hp: float, send := true,
+	top := ROCK_TOP
 ) -> Dictionary:
 	var w: Dictionary = m.verbs.add_wall(
 		by, at, dir, {"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true, "color": "#c98d4a"}, 1.0
 	)
 	var old: Node3D = w["node"]
 	var n := RockLook.make()
-	n.scale = Vector3(len_ / 1.15, 1.0, 1.0)
+	var tall := top / ROCK_TOP
+	n.scale = Vector3(len_ / 1.15, tall, 1.0)
 	m.add_child(n)
 	RockLook.cool(n)
 	w["node"] = n
 	w["rock"] = true
 	w["rid"] = rid
-	w["top"] = ROCK_TOP
+	w["top"] = top
 	w["th"] = ROCK_TH
 	w["kx_end"] = func(gone: Dictionary): RockLook.crumble(m, gone)      # (broken or timed out, not launched)
 	m.verbs._place_wall(w, n)
 	n.scale = Vector3(len_ / 1.15, 0.05, 1.0)
 	n.create_tween().tween_property(
-		n, "scale", Vector3(len_ / 1.15, 1.0, 1.0), ROCK_RISE_T
+		n, "scale", Vector3(len_ / 1.15, tall, 1.0), ROCK_RISE_T
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	if is_instance_valid(old):
 		old.queue_free()
 	RockLook.rise_fx(m, at)
 	if send and by != null and (m.net_on or capture) and not by.remote:
-		tx(
-			m,
-			[
-				"zone", "rock", by.nid, rid, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.001),
-				snappedf(dir.y, 0.001), snappedf(len_, 0.01), snappedf(time_, 0.1), snappedf(hp, 0.1)
-			]
-		)
+		var ev := [
+			"zone", "rock", by.nid, rid, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.001),
+			snappedf(dir.y, 0.001), snappedf(len_, 0.01), snappedf(time_, 0.1), snappedf(hp, 0.1)
+		]
+		if top != ROCK_TOP:
+			ev.append(snappedf(top, 0.01))
+		tx(m, ev)
 	return w
 
 static func find_rock(m: Node, rid: String) -> Dictionary:
@@ -203,7 +205,7 @@ static func net_in(m: Node, x: Array) -> void:
 			if by == null or not find_rock(m, String(x[3])).is_empty(): return
 			rock(
 				m, by, Vector3(x[4], x[5], x[6]), Vector2(x[7], x[8]), String(x[3]), float(x[9]), float(x[10]),
-				float(x[11]), false
+				float(x[11]), false, float(x[12]) if x.size() > 12 else ROCK_TOP
 			)
 		"rockgo":
 			var w := find_rock(m, String(x[2]))

@@ -9,7 +9,8 @@ extends Node3D
 ## Skins (shape, colour, trail, impact):
 ##   boulder    Tarek's tap throw: a lumpy molten rock tumbling end over end, ember trail
 ##   rock       a launched rock: bigger, hotter, flaming trail
-##   dashrock   Rubble Leap's rock: rolls along the ground, dust and embers
+##   dashrock   Rock Hop's last rock: rolls along the ground, dust and embers
+##   footrock   the slab under Tarek's foot through a Rock Hop (held)
 ##   orb        Ostra's Gravity Orb: a violet glass teardrop with a magenta tail
 ##   orb_hot    the Settled bolt: a long blue-violet bolt with a white core
 ##   spear      Shard Snap: a long bundle of dark violet crystal prisms with bright rims
@@ -86,6 +87,8 @@ func _build(kind: String) -> Node3D:
 	match kind:
 		"boulder", "rock", "dashrock":
 			_build_rock(n, kind)
+		"footrock":
+			_build_footrock(n)
 		"orb", "orb_hot", "spear":
 			_build_void_shot(n, kind)
 		"aura":
@@ -132,7 +135,7 @@ func _build(kind: String) -> Node3D:
 func _build_rock(n: Node3D, kind: String) -> void:
 	var r := {"boulder": 0.3, "rock": 0.45, "dashrock": 0.5}[kind] as float
 	var heat := {"boulder": 0.8, "rock": 0.95, "dashrock": 0.75}[kind] as float
-	# Rubble Leap's rock stands tall: a tumbling crag, not a ball
+	# Rock Hop's last rock stands tall: a tumbling crag, not a ball
 	var tall := Vector3(1.0, 1.8, 1.0) if kind == "dashrock" else Vector3.ONE
 	var body := Models.part(
 		n, lump(r), rock_mat(heat, vis_rng.randf() * 10.0), Vector3.ZERO, tall, Vector3(0.3, 0.5, 0.2)
@@ -141,6 +144,13 @@ func _build_rock(n: Node3D, kind: String) -> void:
 	Models.part(body, lump(r * 0.55), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(r * 0.55, r * 0.3, 0.0))
 	Models.part(body, lump(r * 0.45), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(-r * 0.4, -r * 0.2, r * 0.45))
 	Models.part(n, Models.sphere(r * 1.45, 10), shade_mat(Color(1.0, 0.42, 0.1, 0.28)), Vector3.ZERO)
+
+## The slab he rides through a Rock Hop, like a board: long along +Z (he turns it along the hop), a pale sunlit
+## top so the match camera reads it under his feet, a hot underside.
+func _build_footrock(n: Node3D) -> void:
+	Models.part(n, Models.box(0.5, 0.14, 1.0), Models.toon(RockLook.STONE_HI, true, 0.6), Vector3(0, -0.07, 0))
+	Models.part(n, Models.box(0.42, 0.04, 0.86), Models.toon(RockLook.CAP, true, 0.6), Vector3(0, 0.01, 0))
+	Models.part(n, Models.box(0.3, 0.12, 0.7), Models.glow_mat(Color("ff7a2a")), Vector3(0, -0.17, 0))
 
 ## Ostra's shots: dark violet glass with bright rims, each with its own length and tail (the tail points
 ## back along the flight, -Z being forward after look_at).
