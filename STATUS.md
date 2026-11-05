@@ -987,3 +987,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - RMB wind-up: 1.0 s stretch-and-gather, then a snap. I viewed the match-camera strip: the silhouette changes clearly.
 - While walking it plays upper body only, so she doesn't rise onto her toes [alternative: full-body, with foot sliding at half speed].
 - clip 0 FAIL, pip-live 0 FAIL, tender-combo 0 FAIL, health strict OK. Not played in a live match. Motes are S3's, the rising sound S4's. Shots: hero-shots-s2 art1/pip/118b/.
+
+## 2026-11-05 19:02 UTC S2: ext/art1-vex fd016e89 replaces 79dd1a4d (about 85 of the master at the hero view)
+- Round 2: real ammo belt, WANTED poster, chrome spine plate, clean circuits, baked normal map through use_nrm, cannon 57% of her height (sheet about 56%). 14,299 tris.
+- Targeted checks pass; no full suite this round, and it touches the shared shader and warden_glb.gd. The ext/art1-integ suite covers that.
+- Open: circuits blur into the skin at 3 m and beyond, some patchy skin. Shots: hero-shots-s2 art1/vex/.
