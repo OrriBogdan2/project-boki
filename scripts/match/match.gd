@@ -2037,8 +2037,8 @@ func mate_col(h: Hunter) -> Color:
 
 const SQUAD_PING_T := 45.0
 ## A squad ping: one per hunter (a new one moves it), seen by their squad on the map, the minimap and
-## as a marker in the world; it lasts a while or until its owner takes it down.
-func squad_ping(h: Hunter, p: Vector3, from_net := false) -> void:
+## as a marker in the world; it lasts a while or until its owner takes it down. `kind`: "", "enemy" or "loot".
+func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "") -> void:
 	if h == null:
 		return
 	if not world.is_void(p.x, p.z):
@@ -2046,11 +2046,12 @@ func squad_ping(h: Hunter, p: Vector3, from_net := false) -> void:
 	else:
 		p.y = 0.0
 	unping(h, true)
-	pings.append({"pos": p, "col": mate_col(h), "t": 0.0, "by": h, "team": h.team, "life": SQUAD_PING_T})
+	pings.append({"pos": p, "col": PingInput.color(self, h, kind), "t": 0.0, "by": h, "team": h.team,
+		"life": SQUAD_PING_T, "kind": kind})
 	if player and h.team == player.team:
 		sfx("ping", null, -6.0, 1.15)
 	if net_on and not from_net:
-		net_event(["sping", h.nid, p.x, p.y, p.z])
+		net_event(["sping", h.nid, p.x, p.y, p.z, kind])
 	if skydrop:
 		skydrop.on_ping(h, p)
 	if not from_net:
@@ -3706,6 +3707,7 @@ func _gather_input() -> void:
 		player.draw_t = -1.0           # a menu opened mid-draw: the draw is dropped, nothing is loosed
 	var map_up: bool = hud != null and hud.map_open()      # the map takes the mouse buttons
 	var on_panel: bool = hud != null and hud.mouse_on_panel()      # ... and so do the item windows under the cursor
+	PingInput.poll(self, map_up)
 	if paused:
 		player.inp["move"] = Vector2.ZERO
 	if KinCommand.poll(player, get_process_delta_time(), paused or map_up or on_panel) == "tap":       # G: tap sics / calls back, hold opens the order wheel
@@ -5815,7 +5817,8 @@ func _net_ev(x, from: String) -> void:
 				kk.comp.heard(String(x[2]), Vector3(float(x[3]), float(x[4]), float(x[5])))
 		"sping":
 			var ph: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
-			if ph: squad_ping(ph, Vector3(x[2], x[3], x[4]), true)
+			if ph:
+				squad_ping(ph, Vector3(x[2], x[3], x[4]), true, String(x[5]) if x.size() > 5 else "")
 		"unping":
 			var uh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if uh: unping(uh, true, true)

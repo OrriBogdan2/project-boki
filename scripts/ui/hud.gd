@@ -1832,10 +1832,8 @@ func _draw_squad_pings(p: Hunter) -> void:
 	for pg in m.pings:
 		if not pg.has("by") or int(pg.get("team", -1)) != p.team:
 			continue
-		var by: Hunter = pg["by"]
 		var a := clampf(float(pg.get("life", 4.0)) - float(pg["t"]), 0.0, 1.0)
-		var lbl: String = "Your ping" if by == p else (by.pname if is_instance_valid(by) else "Ping")
-		_draw_waypoint(pg["pos"], lbl, Color(pg["col"], a))
+		_draw_waypoint(pg["pos"], PingInput.label(pg, p), Color(pg["col"], a))
 	# a Boki's callout: a marker with what it spotted, fading after a few seconds
 	for pg in m.pings:
 		if not pg.has("kin") or int(pg.get("team", -1)) != p.team or m.tut != null:
@@ -1980,27 +1978,23 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 
 func _draw_crosshair(p: Hunter) -> void:
 	var mp := c.get_local_mouse_position()
-	var col := INK
-	# the crosshair opens with per-shot bloom and the minigun's spread
-	var gap := 6.0 + (p.recoil * 4.0) + p.wbloom * 1.2
+	# the reticle (the player's style) opens with per-shot bloom and the minigun's spread
+	var spread := p.recoil * 4.0 + p.wbloom * 1.2
 	if p.wpn.has("tighten_from_deg") and p.spin > 0.0:
-		gap += lerpf(12.0, 0.0, clampf(p.spun_t / float(p.wpn.get("tighten_time", 1.5)), 0.0, 1.0))
-	for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
-		c.draw_line(mp + d * gap, mp + d * (gap + 7.0), Color(0, 0, 0, 0.6), 4.0)
-		c.draw_line(mp + d * gap, mp + d * (gap + 7.0), col, 2.0)
-	c.draw_circle(mp, 1.6, col)
+		spread += lerpf(12.0, 0.0, clampf(p.spun_t / float(p.wpn.get("tighten_time", 1.5)), 0.0, 1.0))
+	Reticle.draw(c, mp, spread)
 	if p.ak:
 		# the archetype resource as an arc hugging the crosshair
 		var rf := p.ak.res_frac()
 		var rc := p.ak.res_col()
-		c.draw_arc(mp, 30, PI * 1.62, PI * 1.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
+		c.draw_arc(mp, Reticle.RES_R, PI * 1.62, PI * 1.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
 		if rf > 0.0:
-			c.draw_arc(mp, 30, PI * 1.62, PI * 1.62 + PI * 0.76 * rf, 24, Color(rc, 0.95 if p.ak.tell == "full" else 0.7), 3.0 if p.ak.tell == "full" else 2.0, true)
+			c.draw_arc(mp, Reticle.RES_R, PI * 1.62, PI * 1.62 + PI * 0.76 * rf, 24, Color(rc, 0.95 if p.ak.tell == "full" else 0.7), 3.0 if p.ak.tell == "full" else 2.0, true)
 		# the payoff is armed (DEADEYE, FLASHPOINT, CALLED SHOT, SLAM): a pulsing word under the arc
 		var rl := p.ak.ready_label()
 		if rl != "":
 			var pk := 0.5 + 0.5 * sin(m.time * 9.0)
-			_ctext(mp + Vector2(0, 50), rl, 13, Color(rc.lightened(0.2), 0.75 + 0.25 * pk), big)
+			_ctext(mp + Vector2(0, Reticle.RES_R + 16.0), rl, 13, Color(rc.lightened(0.2), 0.75 + 0.25 * pk), big)
 	# aiming at a truce partner: a reminder before you break it
 	if m.truce and not m.truce.pacts.is_empty():
 		var ph: Hunter = m.truce.partner_at(p.inp["aim"], p.team)
@@ -2011,20 +2005,20 @@ func _draw_crosshair(p: Hunter) -> void:
 	if ck > 0.0:
 		# a sword's charge: fills, then flashes when it's ready to release
 		var full := ck >= 1.0
-		_arc(mp, 18, ck, Color("fff3b0") if not full or int(m.time * 10.0) % 2 == 0 else Color.WHITE, 4.0 if full else 3.0)
+		_arc(mp, Reticle.CHARGE_R, ck, Color("fff3b0") if not full or int(m.time * 10.0) % 2 == 0 else Color.WHITE, 4.0 if full else 3.0)
 	elif p.warm_t > 0.0:
-		_arc(mp, 18, 1.0 - p.warm_t / maxf(0.01, float(p.wpn.get("warmup", 0.6))), p.wpn["color"], 3.0)
+		_arc(mp, Reticle.CHARGE_R, 1.0 - p.warm_t / maxf(0.01, float(p.wpn.get("warmup", 0.6))), p.wpn["color"], 3.0)
 	elif p.wpn.has("spin_up") and p.spin > 0.0 and p.spin < 1.0:
-		_arc(mp, 18, p.spin, Color("ffb34d"), 3.0)
+		_arc(mp, Reticle.CHARGE_R, p.spin, Color("ffb34d"), 3.0)
 	elif p.wpn.get("melee", false):
 		pass
 	elif p.reload_t > 0.0:
-		_arc(mp, 18, 1.0 - p.reload_t / float(p.wpn["reload"]), Color("ffe7a8"), 3.0)
+		_arc(mp, Reticle.CHARGE_R, 1.0 - p.reload_t / float(p.wpn["reload"]), Color("ffe7a8"), 3.0)
 	else:
 		# ammo left, as a thin ring that empties as you fire
 		var af := float(p.ammo) / maxf(1.0, float(p.wpn["mag"]))
-		c.draw_arc(mp, 22, PI * 0.62, PI * 0.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
-		c.draw_arc(mp, 22, PI * 0.62, PI * 0.62 + PI * 0.76 * af, 24, Color(1, 1, 1, 0.75) if af > 0.25 else Color(HP_LOW, 0.9), 2.0, true)
+		c.draw_arc(mp, Reticle.AMMO_R, PI * 0.62, PI * 0.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
+		c.draw_arc(mp, Reticle.AMMO_R, PI * 0.62, PI * 0.62 + PI * 0.76 * af, 24, Color(1, 1, 1, 0.75) if af > 0.25 else Color(HP_LOW, 0.9), 2.0, true)
 	if hit_t > 0.0:
 		var hc := Color("ffd23f") if hit_crit else Color.WHITE
 		if hit_armor: hc = ARMOR_COL if not hit_crit else Color("cfefff")

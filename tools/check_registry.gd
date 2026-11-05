@@ -30,6 +30,8 @@ const CHECKS := {
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--dash-dir-check": ["res://tools/dash_dir_check.gd", "dash_dir_check", null],
 	"--stamina-bar-check": ["res://tools/stamina_bar_check.gd", "stamina_bar_check", null],
+	"--reticle-check": ["res://tools/reticle_check.gd", "reticle_check", null],
+	"--ping-check": ["res://tools/ping_check.gd", "ping_check", null],
 	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],      # dash -> ability rows
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
@@ -49,6 +51,8 @@ const CHECKS := {
 	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],          # Ryzz / Vex screenshots
 	"--breah-shots": ["res://tools/breah_shots.gd", "breah_shots", null],          # Tarek review screenshots
 	"--stamina-bar-shots": ["res://tools/stamina_bar_shots.gd", "stamina_bar_shots", null],
+	"--reticle-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "reticle"],
+	"--ping-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "ping"],
 	"--combo51-shots": ["res://tools/combo51_shots.gd", "combo51_shots", null],      # item 51 combo strips
 	"--title-check": ["res://tools/title_check.gd", "title_check", null],      # the title: menu, key art, frame budget
 	"--hatch-check": ["res://tools/hatch_check.gd", "hatch_check", null],      # the hatch: a quiet, personal moment
