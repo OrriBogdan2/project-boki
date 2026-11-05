@@ -1,5 +1,6 @@
 extends RefCounted
-## --crouch-shots --warden=<id> --shots-dir=<dir> [--variant=new|art1|proc] [--size=480] [--sneak=f|b|l|r]: a Hero
+## --crouch-shots --warden=<id> --shots-dir=<dir> [--variant=new|art1|proc] [--size=480] [--sneak=f|b|l|r]
+## [--close-fov=24] [--close-at=0.62] [--upper=<clip>: played over the hold, as a shot from a crouch]: a Hero
 ## standing, going down, holding, sneaking, stopping and standing up, driven through the game state (HunterAnim, then
 ## WardenClips), at the match camera and a closer one: <dir>/<variant>/{match,close}/f000.png... at 15 fps.
 ## new: the crouch layer. art1: the same model with no crouch data, what the clips did before it. proc: the rig's
@@ -26,12 +27,18 @@ func run(main: Node) -> void:
 	var id := "thief"
 	var variant := "new"
 	var sneak := "f"
+	var close_fov := 24.0
+	var close_at := 0.62
+	var upper := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--warden="): id = a.substr(9)
 		if a.begins_with("--variant="): variant = a.substr(10)
 		if a.begins_with("--size="): px = int(a.substr(7))
 		if a.begins_with("--sneak="): sneak = a.substr(8)
+		if a.begins_with("--close-fov="): close_fov = float(a.substr(12))
+		if a.begins_with("--close-at="): close_at = float(a.substr(11))
+		if a.begins_with("--upper="): upper = a.substr(8)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(px, px)
@@ -69,28 +76,31 @@ func run(main: Node) -> void:
 		var down := t >= T_DOWN and t < T_UP
 		ck = move_toward(ck, 1.0 if down else 0.0, DT * 8.0)     # Hunter.render
 		var vel := walk_v if t >= T_WALK and t < T_STOP else Vector3.ZERO
+		if upper != "":
+			var ut := t - 1.0
+			clips.force = {"clip": upper, "t": ut, "upper": true} if ut >= 0.0 and ut < clips.lib.get_animation(upper).length else {}
 		anim.update(DT, {"vel": vel, "face": yaw, "grounded": true, "crouch": ck, "fired": 99.0})
 		sync.call("_process", DT)
 		t += DT
 		if t >= 0.0 and step % 2 == 0:
 			for c in ["match", "close"]:
-				_aim(String(c))
+				_aim(String(c), close_fov, close_at)
 				await _grab(out.path_join(variant).path_join(c).path_join("f%03d.png" % i))
 			i += 1
 		step += 1
 	print("CROUCH_SHOTS_DONE ", i)
 	tree.quit()
 
-func _aim(which: String) -> void:
+func _aim(which: String, fov: float, at: float) -> void:
 	if which == "match":
 		var p := deg_to_rad(CAM_PITCH)
 		cam.fov = 8.0
 		cam.position = Vector3(0, sin(p), cos(p)) * CAM_DIST + Vector3(0, 0.5, 0)
 		cam.look_at(Vector3(0, 0.5, 0))
 	else:
-		cam.fov = 24.0
-		cam.position = Vector3(0, 0.9, 5.0)
-		cam.look_at(Vector3(0, 0.62, 0))
+		cam.fov = fov
+		cam.position = Vector3(0, at + 0.3, 5.0)
+		cam.look_at(Vector3(0, at, 0))
 
 func _grab(path: String) -> void:
 	await RenderingServer.frame_post_draw

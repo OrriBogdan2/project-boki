@@ -23,7 +23,7 @@ def on_toes(z, ankle, foot, pit):
 
 def sneak(hold, heading, cfg, upper):
     """One cycle of the sneak along heading (deg, + left of facing). cfg: ankle, foot (ankle to ball, m), width, stride (a step's reach, m), lift, toe (the planted heel's
-    lift), share (of the cycle a foot stays down), sway (m the hips swing over the planted foot), bob (m), twist (rad of hips against shoulders).
+    lift), swing (how much the foot trails as it leaves the ground, 1 by default), share (of the cycle a foot stays down), sway (m the hips swing over the planted foot), bob (m), twist (rad of hips against shoulders).
     upper(p, u, c1, s2, d) sets the Hero's own hands, head and face on p; d is the heading's unit vector."""
     h = math.radians(heading)
     d = Vector((-math.sin(h), math.cos(h), 0))
@@ -44,7 +44,7 @@ def sneak(hold, heading, cfg, upper):
         sm = k * k * (3 - 2 * k)
         s = -1 + 2 * sm
         z = cfg["lift"] * math.sin(k * math.pi)
-        pit = cfg["toe"] + (0.55 * fwd + 0.3) * (1 - k) * (1 - k) + 0.15 * math.sin(k * math.pi)
+        pit = cfg["toe"] + cfg.get("swing", 1.0) * ((0.55 * fwd + 0.3) * (1 - k) * (1 - k) + 0.15 * math.sin(k * math.pi))
         return base + d * s * stride + Vector((0, 0, z + cfg["foot"] * math.sin(pit))), pit
 
     def fn(u):
@@ -68,14 +68,14 @@ def sneak(hold, heading, cfg, upper):
     return fn
 
 
-def clips(C, ready, hold, idle, cfg, upper, dip, up=None, idle_t=3.6):
-    """C(name, dur, keys): the Hero's Clip maker. ready: its standing pose. hold: the crouch. idle(u): the crouch's loop. dip: hold, 0.1 s in, lower and over-leaned.
+def clips(C, ready, hold, idle, cfg, upper, dip, up=None, idle_t=3.6, dip_t=0.15):
+    """C(name, dur, keys): the Hero's Clip maker. ready: its standing pose. hold: the crouch. idle(u): the crouch's loop. dip: hold, dip_t s in, lower and over-leaned.
     up: the standing pose just past straight, the last beat of the way out."""
     T = cfg["T"]
     out = [FnClip("crouch_idle", idle_t, idle)]
     for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
         out.append(FnClip("crouch_" + tag, T if tag == "f" else T * cfg.get("T_side", 1.0), sneak(hold, hd, cfg, upper)))
     first = idle(0.0)
-    out.append(C("crouch_in", 0.34, [(0.0, ready), (0.15, dip), (0.34, first)]))
+    out.append(C("crouch_in", dip_t + 0.19, [(0.0, ready), (dip_t, dip), (dip_t + 0.19, first)]))
     out.append(C("crouch_out", 0.36, [(0.0, first), (0.08, dip), (0.24, up or ready), (0.36, ready)]))
     return out
