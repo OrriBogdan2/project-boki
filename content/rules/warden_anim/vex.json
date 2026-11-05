@@ -3,7 +3,8 @@
 	"skinned_weapon": true,
 	"extra_bones": {"lid.L": "head", "brow.L": "head", "brow.R": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R", "coin": "hand.L", "launcher": "forearm.R", "gatling": "forearm.R"},
 	"offset_bones": ["coin", "brow.L", "brow.R"],
-	"blade": {"root": "anchor_gatling_root", "tip": "weapon_muzzle"},
+	"bone_scale": {"gatling": 0.8, "launcher": 0.9},
+	"blade": {"root": "anchor_gatling_root", "root_bone": "forearm.R", "tip": "weapon_muzzle", "bone": "gatling"},
 	"loco": {
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},

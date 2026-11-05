@@ -806,6 +806,7 @@ class Sync extends Node:
 	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
 	var blade_tip: Node3D
 	var blade_bone := -1
+	var blade_root_bone := -1     # (the bone blade_root rides; data "root_bone", else blade_bone)
 	var gun: Node3D
 	var muzzle: Node3D
 	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
@@ -836,6 +837,8 @@ class Sync extends Node:
 			blade_root = glb.find_child(String(bl["root"]), true, false) as Node3D
 			blade_tip = glb.find_child(String(bl["tip"]), true, false) as Node3D
 			blade_bone = WardenSkeleton.find(skel, String(bl.get("bone", "hand.R")))
+			# ("root_bone": the root empty rides another bone than the tip: Vex's barrels on the arm)
+			blade_root_bone = WardenSkeleton.find(skel, String(bl.get("root_bone", bl.get("bone", "hand.R"))))
 			gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 			muzzle = gun.get_node_or_null("Muzzle") as Node3D if gun else null
 		for b in dd.get("hide_while_chain", []):
@@ -940,7 +943,7 @@ class Sync extends Node:
 			return
 		# (from the bone, not the attachment nodes: those update after the skeleton does, a frame late)
 		var hand := skel.global_transform * skel.get_bone_global_pose(blade_bone)
-		var a := hand * blade_root.position
+		var a := skel.global_transform * skel.get_bone_global_pose(blade_root_bone) * blade_root.position
 		var b := hand * blade_tip.position
 		if a.distance_squared_to(b) < 0.00000001:
 			return

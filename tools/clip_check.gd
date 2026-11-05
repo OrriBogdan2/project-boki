@@ -70,6 +70,12 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	ok(shown == 0, "%s: one weapon drawn (%d procedural pieces showing)" % [id, shown])
 	_sliders(id, sync)
 	await _on_blade(id, m, sync, clips)
+	# "bone_scale" (item 137): the size holds over every clip that keys the bone
+	for nm in dd.get("bone_scale", {}):
+		var sk := WardenGlb.skeleton(m.get_node("Warden"))
+		var want := float(dd["bone_scale"][nm])
+		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
+				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _handover(id, m, sync, clips, dd)
 	m.free()
 
@@ -133,7 +139,7 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 			far = maxf(far, muzzle.global_position.distance_to(sees))
 			var hand: Vector3 = sk.global_transform * sk.get_bone_global_pose(hb).origin
 			var body_k := absf(sk.global_transform.basis.get_scale().x)
-			drift = maxf(drift, absf(hand.distance_to(sees) / body_k - rest))
+			drift = maxf(drift, absf(hand.distance_to(sees) / body_k - rest * sk.get_bone_pose_scale(hb).y))    # ("bone_scale")
 			n += 1
 	clips.force = {}
 	ok(far <= FX_ON_BLADE, "%s: the Muzzle stays on the visible tip in %d frames (worst %.3f m)" % [id, n, far])

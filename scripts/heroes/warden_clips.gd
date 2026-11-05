@@ -56,6 +56,7 @@ var force := {}              # a tool's pick ({clip, t}): skips the state (tools
 var out_w := 0.0             # the "weapon_out" data: how far the free-arm pose lies over the clips
 var out_pose: Array = []     # [bone index, rotation]: the free arm, sampled once from its clip
 var weapon_bi := -1          # "weapon_bone": the bone a thrown weapon hides on
+var bone_scales: Array = []  # "bone_scale": [bone index, its size], held over the clips
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -116,9 +117,16 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	return true
 
 ## "weapon_out": {"clip", "bones"}: an arm pose laid over everything while the weapon is out of the hand; "weapon_bone"
-## scales to zero meanwhile.
+## scales to zero meanwhile. "bone_scale": {bone: size}: a skinned weapon's size against the sheet (item 137), the skinned
+## twin of warden_look "weapon_scale": the bone and all it carries, its empties included.
 func _setup_out() -> void:
 	weapon_bi = WardenSkeleton.find(skel, String(d.get("weapon_bone", ""))) if d.has("weapon_bone") else -1
+	var sizes: Dictionary = d.get("bone_scale", {})
+	for nm in sizes:
+		var bi := WardenSkeleton.find(skel, String(nm))
+		if bi >= 0:
+			bone_scales.append([bi, Vector3.ONE * float(sizes[nm])])
+			skel.set_bone_pose_scale(bi, Vector3.ONE * float(sizes[nm]))
 	var wo: Dictionary = d.get("weapon_out", {})
 	if wo.is_empty() or not lib.has_animation(String(wo["clip"])):
 		return
@@ -134,6 +142,9 @@ func _out(dt: float) -> void:
 	var out := bool(root.get_meta(WEAPON_OUT, false))
 	if weapon_bi >= 0:
 		skel.set_bone_pose_scale(weapon_bi, Vector3.ZERO if out else Vector3.ONE)
+	for b in bone_scales:
+		if not (out and b[0] == weapon_bi):
+			skel.set_bone_pose_scale(b[0], b[1])
 	var busy := act_w > 0.5 or up_w > 0.5
 	out_w = move_toward(out_w, 1.0 if out and not busy else 0.0, OUT_RATE * dt)
 	if out_w > 0.0:
