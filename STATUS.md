@@ -913,3 +913,5 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Cinder:** spearhead tip; 4 vials in leather loops; wide tail arc; LMB returns after the 0.2 s pilot.
 - **Boki:** Vespyx palette #7c4fa2 (readable); tools in the tail; wiring recommended to S5.
 - **Drop:** 17x pull-out; comet riders break away only; snap and landing stay on the compressor until S4 reviews.
+
+## 2026-11-05 S2: READY ext/kit-tarek-111 4e25e66a (item 111 Rock Hop); fidelity row Dash = Rock Hop: yes. Defaults taken: chain ~7.5 m per "3 x ~2.5 m" (set `dash` 1.65 in dolm.json for 4.25 m); abyss gaps crossable if ground lies within remaining hops, per the splash. Not hand-played, no online test.
