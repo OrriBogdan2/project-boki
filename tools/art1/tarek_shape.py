@@ -301,6 +301,17 @@ def fist(Q, k=1.0):
     return d * k
 
 
+def fist_seeds(R):
+    """Slabs over a stone fist, right side."""
+    f = R.wr + vec(0, 0, -0.11)
+    pts = []
+    for z, n, r in ((0.08, 3, 0.09), (0.0, 4, 0.1), (-0.08, 4, 0.1), (-0.14, 2, 0.05)):
+        for i in range(n):
+            a = 2 * math.pi * (i + 0.4 * (n == 4)) / n
+            pts.append(f + vec(math.cos(a) * r, math.sin(a) * r, z))
+    return np.array(pts, np.float32)
+
+
 def gauntlet_seeds(R, seed=37):
     """The right arm's slabs: tall ones up the forearm, smaller over the fist."""
     rs = np.random.RandomState(seed)

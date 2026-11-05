@@ -414,3 +414,184 @@ def orbits(arm, geo, shard):
         out.append(o)
     bpy.data.objects.remove(shard)
     return out
+
+
+def scan_bones(arm):
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = arm.data.edit_bones
+
+    def bone(nm, parent, head, tail, up):
+        e = eb.new(nm)
+        e.head, e.tail = Vector(head), Vector(tail)
+        e.align_roll(Vector(up))
+        e.parent = eb[parent]
+        e.use_connect = False
+
+    for sd, sx in (("L", -1.0), ("R", 1.0)):
+        f = S.vec(sx, 1, 1)
+        bone("foot." + sd, "shin." + sd, R.ankle * f, R.ankle * f + S.vec(0, 0.12, -0.04), (0, 0, 1))
+        bone("lip." + sd, "head", HC + S.vec(0.062 * sx, 0.1, -0.068), HC + S.vec(0.062 * sx, 0.125, -0.068), (0, 0, 1))
+    bone("jaw", "head", HC + S.vec(0, -0.02, -0.055), HC + S.vec(0, 0.09, -0.125), (0, 0, 1))
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+
+def group_weights(ob):
+    names = [g.name for g in ob.vertex_groups]
+    W = np.zeros((len(ob.data.vertices), len(names)), np.float32)
+    for v in ob.data.vertices:
+        for g in v.groups:
+            W[v.index, g.group] = g.weight
+    return names, W
+
+
+def along_bones(P, pts):
+    """The nearest point on a polyline of joints."""
+    best = None
+    d0 = np.full(P.shape[0], 9e9, np.float32)
+    best = np.zeros_like(P)
+    for a, b in zip(pts, pts[1:]):
+        t = np.clip(T.seg_t(P, a, b), 0, 1)[:, None]
+        c = a + (b - a) * t
+        d = S.length(P - c)
+        m = d < d0
+        best[m] = c[m]
+        d0[m] = d[m]
+    return best
+
+
+def scan_reshape(ob):
+    """The master's balance on the scan: the left arm huge, the right gauntlet slighter; the feet on their own bones."""
+    names, W = group_weights(ob)
+    ix = {n: i for i, n in enumerate(names)}
+    P = verts_np(ob).copy()
+    w = lambda *ns: sum(W[:, ix[n]] for n in ns if n in ix)
+    f = S.vec(-1, 1, 1)
+    wL = np.clip(w("upper_arm.L", "forearm.L", "hand.L"), 0, 1)
+    c = along_bones(P, [R.sh * f, R.el * f, R.wr * f])
+    P = P + (P - c) * (wL * ARM_L_GROW)[:, None]
+    wR = np.clip(w("forearm.R", "hand.R"), 0, 1)
+    c = along_bones(P, [R.el, R.wr])
+    P = P + (P - c) * (wR * -ARM_R_SHRINK)[:, None]
+    ob.data.vertices.foreach_set("co", P.ravel())
+    for sd in ("L", "R"):
+        g = ob.vertex_groups.new(name="foot." + sd)
+        sh = ob.vertex_groups["shin." + sd]
+        k = S.sstep(0.15, 0.08, P[:, 2]) * W[:, ix["shin." + sd]]
+        for i in np.nonzero(k > 0.01)[0]:
+            g.add([int(i)], float(k[i]), "REPLACE")
+            sh.add([int(i)], float(W[i, ix["shin." + sd]] - k[i]) + 1e-4, "REPLACE")
+    return W, ix
+
+
+ARM_L_GROW = 0.32
+ARM_R_SHRINK = 0.14
+
+
+def scan_cut_hands(ob, W, ix):
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bm.verts.ensure_lookup_table()
+    kill = [bm.verts[i] for i in np.nonzero((W[:, ix["hand.L"]] > 0.35) | (W[:, ix["hand.R"]] > 0.35))[0]]
+    log("hands: cut", len(kill), "verts")
+    bmesh.ops.delete(bm, geom=kill, context="VERTS")
+    bm.to_mesh(ob.data)
+    bm.free()
+
+
+def scan_slots(ob):
+    """Stone on the left arm and the right forearm goes to the leather slot, whose emission lights the atlas's hot cracks;
+    a hot texel is cut from the atlas over those faces and the chest beside them. Unused slots go."""
+    me = ob.data
+    names = [m.name for m in me.materials]
+    lea = names.index("leather-body")
+    names_g = [g.name for g in ob.vertex_groups]
+    dom = []
+    for v in me.vertices:
+        dom.append(names_g[max(v.groups, key=lambda g: g.weight).group] if len(v.groups) else "")
+    stone = ("upper_arm.L", "forearm.L", "hand.L", "forearm.R", "hand.R")
+    hot = []
+    for pl in me.polygons:
+        if dom[pl.vertices[0]] in stone:
+            pl.material_index = lea
+        c = pl.center
+        if dom[pl.vertices[0]] in stone or (c.x < 0.0 and c.z > 1.45 and c.y > -0.3):
+            hot.append(pl.index)
+    tex = next(n.image for n in me.materials[lea].node_tree.nodes if n.type == "TEX_IMAGE")
+    w, h = tex.size
+    A = np.zeros(w * h * 4, np.float32)
+    tex.pixels.foreach_get(A)
+    A = A.reshape(h, w, 4)[:, :, :3]
+    uv = np.zeros(len(me.loops) * 2, np.float32)
+    me.uv_layers.active.data.foreach_get("uv", uv)
+    uv = uv.reshape(-1, 2)
+    tris = [(pl.loop_indices[0], pl.loop_indices[i], pl.loop_indices[i + 1]) for pi in hot for pl in [me.polygons[pi]] for i in range(1, len(pl.loop_indices) - 1)]
+    mask, _, _ = S.rasterize(uv[np.array(tris)], None, w, [np.zeros((len(tris), 3, 1), np.float32)])
+    keyed = S.sstep(0.62, 0.8, A[:, :, 0]) * S.sstep(0.3, 0.5, A[:, :, 0] - A[:, :, 2]) * mask
+    e = A * keyed[:, :, None]
+    im = save_img(e[::2, ::2], "tarek_scan_emit")
+    for m in me.materials:
+        if m.name in ("leather-body", "skin-body"):
+            nt = m.node_tree
+            n = nt.nodes.new("ShaderNodeTexImage")
+            n.image = im
+            b = nt.nodes["Principled BSDF"]
+            nt.links.new(n.outputs[0], b.inputs["Emission Color"])
+            b.inputs["Emission Strength"].default_value = 1.0
+    used = set(pl.material_index for pl in me.polygons)
+    for i in reversed(range(len(me.materials))):
+        if i not in used:
+            me.materials.pop(index=i)
+
+
+def assemble_scan(objs, img, emit):
+    arm = bpy.data.objects["Armature"]
+    body = bpy.data.objects["Body"]
+    body.name = "tarek_body"
+    scan_bones(arm)
+    W, ix = scan_reshape(body)
+    scan_cut_hands(body, W, ix)
+    scan_slots(body)
+    mats = {"leather": material("leather", img, emit)}
+    fists = [o for o in objs if o.name.startswith("fist_")]
+    geo, iris, shard = [next(o for o in objs if o.name == n) for n in ("geode", "iris", "shard")]
+    for ob in fists:
+        ob.data.materials.append(mats["leather"])
+        vg = ob.vertex_groups.new(name="hand." + ob.name[-1])
+        vg.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
+        for pl in ob.data.polygons:
+            pl.use_smooth = True
+    bpy.ops.object.select_all(action="DESELECT")
+    for ob in fists:
+        ob.select_set(True)
+    bpy.context.view_layer.objects.active = fists[0]
+    bpy.ops.object.join()
+    fm = fists[0]
+    fm.name = "tarek_fists"
+    fm.modifiers.new("Armature", "ARMATURE").object = arm
+    fm.parent = arm
+    glow_m = material("glow", img, None)
+    global RING_UV
+    lu = iris.data.uv_layers.active.data
+    RING_UV = lu[len(lu) // 2].uv[:]
+    geo.data.materials.append(mats["leather"])
+    iris.data.materials.append(glow_m)
+    bpy.ops.object.select_all(action="DESELECT")
+    geo.select_set(True)
+    iris.select_set(True)
+    bpy.context.view_layer.objects.active = geo
+    bpy.ops.object.join()
+    shard.data.materials.append(mats["leather"])
+    n_geo, n_shard = K.tris([geo]), K.tris([shard])
+    extras = orbits(arm, geo, shard)
+    for nm in ("anchor_chest", "anchor_head_top"):
+        extras.append(bpy.data.objects[nm])
+    for sd, sx in (("L", -1.0), ("R", 1.0)):
+        f = S.vec(sx, 1, 1)
+        extras.append(K.anchor(arm, "forearm." + sd, "anchor_gauntlet_" + sd, ((R.el + R.wr) * 0.5) * f + S.vec(0.1 * sx, 0.0, 0.0)))
+        extras.append(K.anchor(arm, "hand." + sd, "anchor_fist_" + sd, (R.wr + S.vec(0, 0, -0.13)) * f))
+    extras.append(K.anchor(arm, "hand.R", "anchor_wrist_R", R.wr))
+    extras.append(K.anchor(arm, "hand.R", "weapon_muzzle", R.wr + S.vec(0, 0, -0.17)))
+    extras += ground_rings(arm, glow_m, iris)
+    log("tris total", K.tris([body, fm]) + 3 * n_geo + 5 * n_shard, "materials", len(body.data.materials))
+    bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, "tarek.blend"))

@@ -23,7 +23,7 @@ import warden_kit as K  # noqa: E402
 ARGS = sys.argv[sys.argv.index("--") + 1:]
 RIG_PATH, OUT = ARGS[0], ARGS[1]
 MODE = ARGS[2] if len(ARGS) > 2 else "clay"
-ONLY = ARGS[3].split(",") if len(ARGS) > 3 else None
+ONLY = ARGS[3].split(",") if len(ARGS) > 3 and MODE != "scan" else None
 os.makedirs(OUT, exist_ok=True)
 RIG = K.load_rig(RIG_PATH)
 R = T.Rig(RIG["bones"])
@@ -73,7 +73,11 @@ GEO_R = 0.1
 Z_S = float(R.sh[2])
 
 # name: field, bounds (lo, hi), low step, target tris, clay colour, slot
+SEEDS_F = T.fist_seeds(R)
+H_F = np.asarray(_rs.uniform(0.012, 0.03, SEEDS_F.shape[0]), np.float32)
 PARTS = {
+    "fist_L": dict(f=lambda P: T.stone_arm(mx(P), R, SEEDS_F, H_F, lambda Q, r: T.fist(Q - r.wr, 1.42)), lo=S.vec(-0.56, -0.2, R.wr[2] - 0.32), hi=S.vec(-0.04, 0.2, R.wr[2] + 0.08), h=0.004, tris=520, col="8c90a0"),
+    "fist_R": dict(f=lambda P: T.stone_arm(P, R, SEEDS_F, H_F, lambda Q, r: T.fist(Q - r.wr, 1.2)), lo=S.vec(0.06, -0.16, R.wr[2] - 0.27), hi=S.vec(0.52, 0.16, R.wr[2] + 0.08), h=0.004, tris=420, col="8c90a0"),
     "head": dict(f=head_f, lo=HC + S.vec(-0.14, -0.17, -0.3), hi=HC + S.vec(0.14, 0.17, 0.17), h=0.0032, tris=1800, col="8a5a3c"),
     "bandana": dict(f=bandana_f, lo=HC + S.vec(-0.14, -0.19, -0.06), hi=HC + S.vec(0.14, 0.17, 0.14), h=0.0035, tris=450, col="c9b89a"),
     "cap": dict(f=cap_f, lo=HC + S.vec(-0.16, -0.19, -0.14), hi=HC + S.vec(0.16, 0.17, 0.2), h=0.0075, tris=560, col="1c1618"),
@@ -662,7 +666,28 @@ exec(open(os.path.join(os.path.dirname(__file__), "tarek_paint.py")).read())
 exec(open(os.path.join(os.path.dirname(__file__), "tarek_rigging.py")).read())
 
 
+def scan_main():
+    """The body from the fitted Meshy scan (~/meshy/tarek_m/fit.blend, FINE-DETAIL PASS); fists, eye-stones and rings scripted."""
+    bpy.ops.wm.open_mainfile(filepath=os.path.expanduser(ARGS[3]))
+    for k in list(PARTS):
+        if k not in ("fist_L", "fist_R"):
+            PARTS.pop(k)
+    objs = []
+    for nm, p in list(PARTS.items()):
+        ob = part_mesh(nm, p)
+        decimate(ob, p["tris"])
+        objs.append(ob)
+    objs += geode_parts()
+    log("props tris", K.tris(objs))
+    unwrap(objs)
+    img, emit = paint_all(objs)
+    assemble_scan(objs, img, emit)
+
+
 def main():
+    if MODE == "scan":
+        scan_main()
+        return
     K.reset()
     t0 = time.time()
     if MODE == "clay":

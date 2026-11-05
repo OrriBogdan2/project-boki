@@ -127,11 +127,11 @@ def p_arm(P, N, occ, cav, a):
     return S.mix(c, S.hexc("1e1a20")[None, :], T.left_tattoos(P, R) * 0.92), None
 
 
-def p_stone(P, N, occ, cav, a, seeds=None):
-    idx, d1, gap = S.voronoi(mx(P) if seeds is None else P, SEEDS_A if seeds is None else seeds)
+def p_stone(P, N, occ, cav, a, seeds=None, left=False):
+    idx, d1, gap = S.voronoi(mx(P) if seeds is None or left else P, SEEDS_A if seeds is None else seeds)
     v = lightness(T.key_shade(N), occ, cav * 0.5, 0.74) + 0.05 * S.fbm(P, 24.0, 6, 3) + 0.05
     tint = 0.94 + 0.09 * np.sin(idx * 2.7)
-    c = tones("3a3e4a", "6c7180", "a4aab8", v) * tint[:, None]
+    c = tones("5a5860", "9e9aa4", "cfccd4", v) * tint[:, None]
     c = crease(c, np.maximum(cav, 0.0) * 0.7, "2a2c36", 0.75)
     crack = S.sstep(0.0085, 0.0045, gap)
     c = S.mix(c, S.hexc("3a2c30")[None, :], crack)
@@ -288,7 +288,9 @@ P_FN = {"head": p_head, "teeth": p_teeth, "torso": lambda P, N, o, c, a: proj(p_
         "wraps": p_wraps, "locs": p_locs, "beads": p_beads,
         "sash_tails": p_tails, "band_tails": p_band_tails, "geode": p_geode, "iris": p_iris,
         "shard": lambda P, N, o, c, a: p_shard(P, N, o, c, a),
-        "gauntlet": lambda P, N, o, c, a: p_stone(P, N, o, c, a, SEEDS_G)}
+        "gauntlet": lambda P, N, o, c, a: p_stone(P, N, o, c, a, SEEDS_G),
+        "fist_L": lambda P, N, o, c, a: p_stone(P, N, o, c, a, SEEDS_F, True),
+        "fist_R": lambda P, N, o, c, a: p_stone(P, N, o, c, a, SEEDS_F)}
 
 
 def p_prayer(P, N, occ, cav, a):
@@ -326,7 +328,8 @@ def corners(ob):
 
 
 NRM_IMG = None
-HI_FIELD = {"stone": lambda P: T.stone_hi(mx(P), R, SEEDS_A, H_A), "gauntlet": lambda P: T.stone_hi(P, R, SEEDS_G, H_G, T.gauntlet_core),
+HI_FIELD = {"fist_L": lambda P: T.stone_hi(mx(P), R, SEEDS_F, H_F, lambda Q, r: T.fist(Q - r.wr, 1.42)),
+            "fist_R": lambda P: T.stone_hi(P, R, SEEDS_F, H_F, lambda Q, r: T.fist(Q - r.wr, 1.2)), "stone": lambda P: T.stone_hi(mx(P), R, SEEDS_A, H_A), "gauntlet": lambda P: T.stone_hi(P, R, SEEDS_G, H_G, T.gauntlet_core),
             "geode": lambda P: T.geode(P, GEO_R)}
 
 
