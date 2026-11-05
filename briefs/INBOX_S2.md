@@ -1274,3 +1274,6 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 - **Kit visuals:** a big gaff hook on a chain (right arm), a scrap fist (left), a blunderbuss at his hip.
 - **Poses:** the junk-ball roll for his dashes; rears up on one foot (an idle / emote).
 - Panel (b) is a second front view, not a back view; a turnaround will follow.
+
+## 2026-11-05 04:10 UTC (ext): Grimble turnaround: `briefs/art-refs/grimble_turnaround.png` (4 views, sculpt-style, an excellent model reference including the back of the hoard)
+
