@@ -36,6 +36,7 @@ func run(m: Node) -> void:
 		DirAccess.make_dir_recursive_absolute(shots)
 	if main.fade:
 		main.fade.reveal(0.05)
+	main.get_tree().root.size = Vector2i(1280, 720)      # (the smallest screen we lay out for)
 	await _first_arrival()
 	await _offer()
 	await _later_and_legacy()
@@ -176,6 +177,13 @@ func _offer() -> void:
 	var clips := box.find_children("*", "AbilityClip", true, false).filter(
 			func(c): return not c.is_queued_for_deletion())
 	ok(clips.size() == 1 and (clips[0] as AbilityClip).id == "tender", "one clip plays: the Mask in focus (Pip)")
+	var marker_off: bool = not is_instance_valid(home.guide.marker) or not home.guide.marker.visible
+	ok(not home.guide.tracker.visible and marker_off and not home.guide.hint_box.visible
+			and hob.node.mark.modulate.a == 0.0, "the Goals card, the goal line and the world prompts step aside")
+	var pick_rect: Rect2 = (offer.root as Control).get_global_rect()
+	var screen: Rect2 = main.get_viewport().get_visible_rect()
+	ok(screen.size == Vector2(1280, 720) and screen.encloses(pick_rect),
+			"the pick fits a 1280x720 screen (%s)" % pick_rect)
 	await _shot("hob_6_three_masks", 1.6)
 	offer.pick("tender")
 	ok(ClassUnlock.open_ids() == ["gunslinger", "tender"] and not ClassUnlock.second_pending(),
@@ -195,6 +203,8 @@ func _offer() -> void:
 			and home.find_children("*", "ClassReveal", true, false).is_empty(),
 			"then the farm again: no reveal pops up")
 	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "and no more offer")
+	ok(home.guide.tracker.visible and home.guide.hint_box.visible and hob.node.tag.modulate.a == 1.0,
+			"and the Goals card and the goal line are back")
 
 func _later_and_legacy() -> void:
 	await _new_farm(false)

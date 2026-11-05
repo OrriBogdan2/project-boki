@@ -167,8 +167,10 @@ func _screen_clear(shown: bool) -> void:
 	var h = hob.h
 	if h.hub:
 		h.hub.visible = shown
-	if h.guide and h.guide.hint_visible():
-		h.guide.hint_box.visible = shown
+	if h.guide:
+		h.guide.set_quiet(not shown)
+	for label in [hob.node.tag, hob.node.mark, hob.node.bubble]:
+		label.modulate.a = 1.0 if shown else 0.0
 
 # ------------------------------------------------------------------ every frame
 func tick(dt: float) -> void:
