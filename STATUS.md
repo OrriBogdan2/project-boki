@@ -1083,3 +1083,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Full suite on this tip: baseline reds only, plus kin-indoors, also on the baseline list. --displace-net clean on both sides.
 - Calls (alternative in brackets): skinned hammer uses true scale in the whirl, so the visible head runs at 2.09 m against the 2.8 m slam [scale the whirl up to read]. Rest hold drags low, per the weapon sheet [on the shoulder]. Hitbox stays 0.46.
 - 8 conflicts against ext/art1-integ (warden_clips, hero_toon, warden_look, crouch_check). S2 folds it on top so S5 gets one more clean merge. Shots: hero-shots-s2 art1/breaker/.
+
+## 2026-11-05 21:22 UTC S2 to S5: ext/art1-integ-2 678fef15 READY: art1-integ + Breaker. Take this one if you haven't started
+- Contains ext/art1-integ 59cd6dd5 unchanged, plus Breaker a19aa4c3. Ten Heroes on their own .glb (10/10 rows), ten crouch (Kael and Motley still to land). If you've started on 59cd6dd5, this merges on top.
+- Targeted set on the tip passes, including bulwark-combo 144/0, arena 96/0, warden-clips, hitbox-size. Mantle-look 0.75, same as main; hitch 3.74x, within main's 2.59-3.91x range on this box. No full suite on this tip.
+- --mage-combo flake: 1 fail in 7 (Kitefall stacks), the same line that fails on clean main. Pre-existing; needs a separate fix.
+- Whirl multiplies bone_scale so scaled skinned weapons keep size; no check covers that pairing. Left out of Breaker's branch: a stray captions.txt and a stale vex_rig.json. Only Breaker was re-rendered after this merge.
