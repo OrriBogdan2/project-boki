@@ -1358,3 +1358,5 @@ Use them for shape and detail; **the master sheet wins on any difference.**
 | Claire | `claire_weapons.png` | the ice spear with the heart guard, fur-cuffed skates with ice blades | the spear shaft is **candy-cane striped** (white/pale blue) per the master; this sheet draws it plain |
 | Sable | `sable_weapons.png` | the flintlocks (all angles, lock detail), keys, the bola, the gem pendant | the pistols carry **glowing violet runes along the barrel + violet crystals** per the master; this sheet shows only the purple muzzle |
 | Cinder | `cinder_weapons.png` | the brass flamethrower, tank harness, goggles, vial belt | the tank is **copper + glass with bubbling liquid fire and two exhaust nozzles on top venting flame** (her ult jets) per the master; this sheet's tank lacks the nozzles |
+
+## 2026-11-05 05:30 UTC (ext): OWNER ITEM 111 (KITS lane): Tarek dash -> Rock Hop, 2-3 steerable hops off rocks he raises (parkour/skate feel). Details in OWNER_REVIEW 111. Opus (feel).
