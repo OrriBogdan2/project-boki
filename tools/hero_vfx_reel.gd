@@ -6,11 +6,15 @@ extends "res://tools/combo51_shots.gd"
 ##   xvfb-run -a godot --rendering-driver opengl3 --resolution 1280x720 --path . --fixed-fps 60 \
 ##       --write-movie <dir>/reel.avi -- --hero-vfx-reel --shots-dir=<dir>
 
-const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"]}
+const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
+	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"]}
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
+const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
 
 var only := ""
+var crop_px := SHEET_CROP
+var crop_zoom := 1.0
 var frames := 0
 
 func run(main_node: Node) -> void:
@@ -25,6 +29,8 @@ func run(main_node: Node) -> void:
 		if arg.begins_with("--reel-only="):
 			only = arg.substr(12)
 	hero_name = String(who)
+	if who == "archer":
+		crop_px = WIDE_CROP
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
 	P.lvl = 6
@@ -50,7 +56,7 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 func _take(kind: String, _file: String, caption: String, focus: Callable) -> void:
 	var img := main.get_viewport().get_texture().get_image()
 	var at: Vector3 = focus.call() if focus.is_valid() else (P.position + T.position) * 0.5 + Vector3(0, 0.9, 0)
-	var crop := _crop(img, at, SHEET_CROP, 1.0)
+	var crop := _crop(img, at, crop_px, crop_zoom)
 	var strip_file := "%s_%s.png" % [hero_name, kind]
 	if not strips.has(strip_file):
 		strips[strip_file] = []
@@ -220,6 +226,131 @@ func _juggernaut_voice() -> void:
 			var surface: String = ["grass", "stone", "snow", "wood"][int(t / 0.56) % 4]
 			Sfx.play(HeroSfx.of(P, "step_" + surface, "step_" + surface), P.pos, -13.0, 0.08)
 			step_k += 1
+		if _at(t, 2.5) or _at(t, 2.9) or _at(t, 3.3):
+			HeroSfx.voice(m, P, "hurt")
+		if _at(t, 3.8):
+			HeroSfx.voice(m, P, "down")
+		_aim(T.pos)
+	await _go(5.0, walk)
+
+
+func _archer_string() -> void:
+	await _reset(8.0)
+	var gun: Node3D = P.model.get_node("Rig/Torso/Aim/Gun")
+	for c in gun.get_children():
+		if c is MeshInstance3D and (c as MeshInstance3D).visible:
+			print("GUNMESH ", c.name, " ", (c as MeshInstance3D).get_aabb(), " ", c.scale)
+	var idle := func(_t: float):
+		_aim(T.pos)
+	crop_px = Vector2i(220, 150)
+	crop_zoom = 3.0
+	var on_her := func() -> Vector3: return P.position + Vector3(0, 0.9, 0)
+	await _go(1.0, idle, _sheet("string", "The glowing thread bowstring at rest, then drawn back to the hand",
+			[0.3, 0.6, 0.95], on_her), 2.0)
+	var pull := func(t: float):
+		P.inp["fire"] = t < 0.5
+		_aim(T.pos)
+	await _go(0.9, pull, _sheet("string", "", [0.2, 0.4, 0.55], on_her), 2.0)
+	crop_px = WIDE_CROP
+	crop_zoom = 1.0
+	await _go(GAP)
+
+func _archer_lmb() -> void:
+	await _reset(8.0)
+	var shots := func(t: float):
+		P.inp["fire"] = t < 0.04 or (t >= 0.8 and t < 1.5)
+		_aim(T.pos)
+	await _go(2.6, shots, _sheet("lmb",
+			"LMB: a tap needle, then the Empowered draw: thread gathering at the nock, the needle with its "
+			+ "red thread trailing, the hit on the dummy", [0.06, 0.14, 0.3, 0.9, 1.3, 1.53, 1.58, 1.65, 1.8]), 3.0)
+	await _go(GAP)
+
+func _archer_miss() -> void:
+	await _reset(8.0)
+	var off := home + Vector3(5.5, 0, -2.5)
+	var shots := func(t: float):
+		P.inp["fire"] = fmod(t, 0.9) < 0.04 and t < 1.9
+		_aim(off + Vector3(0, 0, 1.6 * floor(t / 0.9)))
+	await _go(4.6, shots, _sheet("miss",
+			"Missed needles stay stuck in the ground with their red threads attached, 4 s, swaying, then they run out",
+			[0.1, 0.3, 0.6, 1.2, 2.0, 2.8, 3.6, 4.2, 4.5], func() -> Vector3: return off), 3.0)
+	await _go(GAP)
+
+func _archer_super() -> void:
+	await _reset(11.0)
+	var shot := func(t: float):
+		P.inp["fire"] = t < 1.55
+		_aim(T.pos)
+	await _go(2.8, shot, _sheet("super",
+			"LMB held to Supercharged: the ready ring, the release (the gold perfect burst stays), the long thread, "
+			+ "the silver crack on the dummy", [0.6, 1.1, 1.5, 1.58, 1.64, 1.72, 1.85, 2.2, 2.7]), 3.0)
+	await _go(GAP)
+
+func _archer_heavy() -> void:
+	await _reset(8.0)
+	var K: ArcherKit = P.ak
+	var heavy := func(t: float):
+		if _at(t, 0.1):
+			P.inp["sec_hold"] = true
+			K.press_rmb()
+		if t >= 1.3:
+			P.inp["sec_hold"] = false
+		_aim(T.pos)
+	await _go(3.0, heavy, _sheet("heavy",
+			"RMB Heavy Shot: the bar (AimKit) and thread gathering, the big red needle (HEAVY_SCALE) with "
+			+ "its thick thread, the shove, the seam it leaves",
+			[0.6, 1.2, 1.33, 1.38, 1.44, 1.52, 1.7, 2.2, 2.9]), 3.0)
+	await _go(GAP)
+
+func _archer_dash() -> void:
+	await _reset(7.0)
+	var dash := func(t: float):
+		if _at(t, 0.15):
+			P.inp["move"] = Vector2(1, 0)
+			P.do_dash()
+		P.inp["move"] = Vector2(1, 0) if t >= 0.15 and t < 2.0 else Vector2.ZERO
+		_aim(T.pos)
+	var on_her := func() -> Vector3: return P.position + Vector3(0, 0.9, 0)
+	await _go(3.6, dash, _sheet("dash",
+			"Shift, Spirit Walk: the roll unspooling thread, the walk trailing loose threads through a rock, the end",
+			[0.2, 0.28, 0.36, 0.5, 0.9, 1.5, 2.2, 3.0, 3.4], on_her), 2.0)
+	await _go(GAP)
+
+func _archer_e() -> void:
+	await _reset(7.0)
+	var K: ArcherKit = P.ak
+	var hail := func(t: float):
+		if _at(t, 0.1):
+			K.cd["e"] = 0.0
+			K.cast_e()
+		_aim(T.pos)
+	await _go(5.4, hail, _sheet("e",
+			"E Hail Wall: the volley up, needles raining on the arc, silver sparks where they land, the red "
+			+ "thread stitched post to post", [0.2, 0.42, 0.6, 1.0, 2.0, 3.0, 4.0, 4.7, 5.2],
+			func() -> Vector3: return T.position + Vector3(0, 0.9, 0)), 3.0)
+	await _go(GAP)
+
+func _archer_r() -> void:
+	await _reset(9.0)
+	var K: ArcherKit = P.ak
+	var ult := func(t: float):
+		if _at(t, 0.1):
+			K.cd["x"] = 0.0
+			K.cast_ult()
+		P.inp["fire"] = t > 0.6 and t < 0.66 or t > 1.6 and t < 1.66 or t > 2.6 and t < 2.66
+		_aim(T.pos)
+	await _go(4.6, ult, _sheet("r",
+			"X Starpiercer: armed, a nock, the beam stitching a seam across the ground, the hit, the last and "
+			+ "deepest beam", [0.15, 0.3, 0.8, 0.95, 1.05, 1.3, 2.95, 3.1, 4.4]), 3.0)
+	await _go(GAP)
+
+func _archer_voice() -> void:
+	await _reset(12.0)
+	var walk := func(t: float):
+		P.inp["move"] = Vector2(0, -1) if t < 2.2 else Vector2.ZERO
+		if fmod(t, 0.28) < DT:
+			var surface: String = ["grass", "stone", "snow", "wood"][int(t / 0.56) % 4]
+			Sfx.play(HeroSfx.of(P, "step_" + surface, "step_" + surface), P.pos, -13.0, 0.08)
 		if _at(t, 2.5) or _at(t, 2.9) or _at(t, 3.3):
 			HeroSfx.voice(m, P, "hurt")
 		if _at(t, 3.8):
