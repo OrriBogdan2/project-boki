@@ -391,6 +391,12 @@ def p_leg(p, n, c):
 SQ = "breaker_head_squat"
 
 
+def p_dial(p, n, c):
+    """The compass, round and on its own non-glowing brass surface; the rest of the hull is keyed."""
+    q = p - c["part"]["centre"]
+    return sample("breaker_turnaround", FC - q[:, 0] / 0.11 * 44.0, 262.0 - q[:, 2] / 0.11 * 44.0)
+
+
 def p_helmet(p, n, c):
     """breaker_head_squat (1000 wide): front at x 140, back at x 855, side at x 610; the dome's middle at y 195."""
     rx, ry, rz = B.HELM_R
@@ -425,9 +431,15 @@ def p_door_art(p, n, c):
     return mix(b, f, smooth(0.3, -0.3, n[:, 1]))
 
 
-TABLE = {"hull": p_hull, "limb": p_limb, "pauldron": p_pauldron, "leg": p_leg, "helmet": p_helmet, "collar": p_collar, "mast": p_mast, "iron": p_iron, "brass": p_brass, "compass": p_compass, "moss": p_moss,
+TABLE = {"hull": p_hull, "limb": p_limb, "pauldron": p_pauldron, "leg": p_leg, "helmet": p_helmet, "collar": p_collar, "dial": p_dial, "mast": p_mast, "iron": p_iron, "brass": p_brass, "compass": p_compass, "moss": p_moss,
          "sail": p_sail, "drum": p_drum, "door": p_door_art, "fish": p_fish, "lure": p_lure, "rope": p_rope}
 
 
 def paint(name, p, n, ctx):
-    return np.clip(TABLE[name](p, n, ctx), 0, 1)
+    col = np.clip(TABLE[name](p, n, ctx), 0, 1)
+    # on a keyed material any bright warm texel glows (hero_toon glow_key): only the real key may stay that bright
+    if ctx["part"]["slot"] in ("scan", "wood"):
+        key = np.abs(col - KEY).sum(1) < 0.12
+        warm = (col[:, 0] - col[:, 2] > 0.1) & ~key
+        col[:, 0] = np.where(warm, np.minimum(col[:, 0], 0.41), col[:, 0])
+    return col
