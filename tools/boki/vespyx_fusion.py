@@ -1,6 +1,6 @@
 """The Venom Fusion: what Vespyx becomes on a Hunter. Coordinates are the torso's (MergeLook hangs parts there, a 1.0
-Hunter, head top about y 1.12, its back toward +z). Its tail rises off the lower back and hangs over the head, its
-pincers ride the shoulders, its ears and ruff frame the neck."""
+Hunter, head top about y 1.12, its back toward +z). Nothing crosses her back or chest: the tail arcs out from the
+right hip, the pincers lie on the shoulders, three spines in the form's glow."""
 import math
 
 import numpy as np
@@ -9,11 +9,13 @@ import vespyx_paint as paint
 from boki_sdf import Cone, Ellipsoid, Shape, frame, v3
 
 SIDES = (("L", -1.0), ("R", 1.0))
-TAIL = [v3(0, 0.42, 0.16), v3(0.02, 0.58, 0.33), v3(0.05, 0.80, 0.44), v3(0.08, 1.06, 0.45), v3(0.10, 1.32, 0.38),
-        v3(0.11, 1.52, 0.24), v3(0.11, 1.60, 0.07), v3(0.10, 1.55, -0.04)]
-RADII = [0.112, 0.118, 0.118, 0.112, 0.103, 0.092, 0.08]
-STING_C = v3(0.095, 1.50, -0.09)
-STING_DIR = np.array((0.0, -0.33, -0.94))
+# the tail leaves the hip on its right side and arcs out and away, so her back stays clear; the sting hangs off her
+# right shoulder, level with the head, not over it
+TAIL = [v3(0.08, 0.36, 0.13), v3(0.19, 0.46, 0.25), v3(0.33, 0.64, 0.33), v3(0.44, 0.88, 0.33), v3(0.50, 1.12, 0.24),
+        v3(0.50, 1.32, 0.09), v3(0.45, 1.40, -0.06), v3(0.38, 1.36, -0.17)]
+RADII = [0.082, 0.086, 0.084, 0.078, 0.070, 0.062, 0.054]
+STING_C = v3(0.355, 1.33, -0.22)
+STING_DIR = np.array((-0.25, -0.5, -0.83))
 
 
 def tail_shape():
@@ -27,58 +29,42 @@ def tail_shape():
 
 
 def sting_shape():
-    return Shape([Cone("bulb", "sting", STING_C, STING_C + STING_DIR * 0.24, 0.125, 0.008, k=0)])
+    return Shape([Cone("bulb", "sting", STING_C, STING_C + STING_DIR * 0.2, 0.09, 0.007, k=0)])
 
 
 def claw_shape(sd, sx):
+    """A pincer folded over the shoulder like a pauldron, small enough to keep her arm and shoulder line."""
     s = v3(sx, 1, 1)
     claw, nip = "claw." + sd, "nip." + sd
     return Shape([
-        Ellipsoid("palm", claw, v3(0.36, 0.86, -0.05) * s, v3(0.13, 0.105, 0.135), k=0.01),
-        Cone("finger", claw, v3(0.42, 0.87, -0.14) * s, v3(0.43, 0.88, -0.27) * s, 0.066, 0.046, k=0.02),
-        Cone("fingertip", claw, v3(0.43, 0.88, -0.27) * s, v3(0.34, 0.89, -0.35) * s, 0.046, 0.005, k=0.012),
-        Cone("nip0", nip, v3(0.28, 0.86, -0.15) * s, v3(0.26, 0.87, -0.26) * s, 0.054, 0.04, k=0.0),
-        Cone("nip1", nip, v3(0.26, 0.87, -0.26) * s, v3(0.32, 0.88, -0.335) * s, 0.04, 0.005, k=0.012),
+        Ellipsoid("palm", claw, v3(0.31, 0.92, 0.0) * s, v3(0.095, 0.07, 0.095), k=0.01),
+        Cone("finger", claw, v3(0.35, 0.92, -0.06) * s, v3(0.355, 0.93, -0.16) * s, 0.044, 0.03, k=0.02),
+        Cone("fingertip", claw, v3(0.355, 0.93, -0.16) * s, v3(0.29, 0.94, -0.21) * s, 0.03, 0.004, k=0.012),
+        Cone("nip0", nip, v3(0.25, 0.92, -0.07) * s, v3(0.235, 0.925, -0.15) * s, 0.036, 0.026, k=0.0),
+        Cone("nip1", nip, v3(0.235, 0.925, -0.15) * s, v3(0.28, 0.935, -0.205) * s, 0.026, 0.004, k=0.012),
     ])
 
 
-def ruff_shape():
-    prims = [Ellipsoid("collar", "ruff", v3(0, 0.87, 0.02), v3(0.19, 0.08, 0.17), k=0)]
-    for i in range(11):
-        a = math.tau * i / 11 + 0.3
-        o = v3(math.cos(a) * 0.17, 0.87, 0.02 + math.sin(a) * 0.15)
-        t = v3(math.cos(a) * 0.31, 0.74 + 0.05 * (i % 2), 0.02 + math.sin(a) * 0.27)
-        prims.append(Cone("tuft%d" % i, "ruff", o, t, 0.085, 0.004, k=0.03))
+def spine_shape():
+    """Three venom spines down the shoulders and the small of the back, in the form's glow."""
+    prims = []
+    for i, (a, b, r) in enumerate((((0.20, 0.97, 0.03), (0.27, 1.11, 0.08), 0.03), ((-0.20, 0.97, 0.03), (-0.27, 1.11, 0.08), 0.03),
+                                   ((-0.26, 0.96, 0.03), (-0.37, 1.05, 0.08), 0.024))):
+        prims.append(Cone("s%d" % i, "root", v3(*a), v3(*b), r, 0.003, k=0))
     return Shape(prims)
-
-
-def ear_shape(sd, sx):
-    n = v3(sx * 0.3, 0.0, -1.0)
-    base = v3(sx * 0.13, 1.02, 0.03)
-    mid = v3(sx * 0.21, 1.20, 0.05)
-    tip = v3(sx * 0.29, 1.40, 0.07)
-    bone = "ear." + sd
-    ear = (tip - base) / np.linalg.norm(tip - base)
-    nn = n / np.linalg.norm(n)
-    return Shape([
-        Cone("ear1", bone, base, mid, 0.135, 0.095, k=0.03, flat=0.36, flat_axis=n),
-        Cone("ear2", bone, mid, tip, 0.095, 0.004, k=0.012, flat=0.36, flat_axis=n),
-        Ellipsoid("hole", bone, base + ear * 0.16 + nn * 0.048, v3(0.08, 0.15, 0.034), rot=frame(nn, ear), k=0.014, sub=True),
-    ])
 
 
 def parts():
     """name -> (Shape, tris, slot, paint name)."""
-    out = {"tail": (tail_shape(), 900, 0, "shell"), "sting": (sting_shape(), 200, 1, "glow"),
-           "ruff": (ruff_shape(), 500, 0, "ruff")}
+    out = {"tail": (tail_shape(), 420, 0, "shell"), "sting": (sting_shape(), 60, 1, "glow"),
+           "spines": (spine_shape(), 40, 1, "glow")}
     for sd, sx in SIDES:
-        out["claw" + sd] = (claw_shape(sd, sx), 420, 0, "shell")
-        out["ear" + sd] = (ear_shape(sd, sx), 260, 0, "ear")
+        out["claw" + sd] = (claw_shape(sd, sx), 170, 0, "shell")
     return out
 
 
 def bones():
-    b = {"root": ((0, 0, 0), (0, 0.2, 0), None), "ruff": ((0, 0.8, 0), (0, 0.95, 0), "root")}
+    b = {"root": ((0, 0, 0), (0, 0.2, 0), None)}
     parent = "root"
     for i in range(7):
         n = "tail%d" % (i + 1)
@@ -87,14 +73,13 @@ def bones():
     b["sting"] = (tuple(TAIL[7]), tuple(STING_C), "tail7")
     for sd, sx in SIDES:
         s = v3(sx, 1, 1)
-        b["claw." + sd] = (tuple(v3(0.28, 0.86, -0.0) * s), tuple(v3(0.36, 0.86, -0.13) * s), "root")
-        b["nip." + sd] = (tuple(v3(0.28, 0.86, -0.15) * s), tuple(v3(0.26, 0.87, -0.26) * s), "claw." + sd)
-        b["ear." + sd] = (tuple(v3(0.13, 1.02, 0.03) * s), tuple(v3(0.29, 1.40, 0.07) * s), "root")
+        b["claw." + sd] = (tuple(v3(0.24, 0.92, 0.03) * s), tuple(v3(0.32, 0.92, -0.08) * s), "root")
+        b["nip." + sd] = (tuple(v3(0.25, 0.92, -0.07) * s), tuple(v3(0.235, 0.925, -0.15) * s), "claw." + sd)
     return b
 
 
 def idle(t):
-    """The tail sways over the head, ready to strike; the pincers snip now and then; the ears twitch."""
+    """The tail sways off her shoulder, ready to strike; the pincers snip now and then."""
     p = {}
     for i in range(7):
         ph = math.tau * (t - i * 0.09)
@@ -102,9 +87,6 @@ def idle(t):
     snip = max(0.0, math.sin(math.tau * t * 3)) ** 4 * (1 if t > 0.55 else 0)
     p["nip.L"] = (0, -0.45 * snip, 0)
     p["nip.R"] = (0, 0.45 * snip, 0)
-    flick = max(0.0, math.sin(math.tau * (t * 4 - 0.2))) ** 8
-    p["ear.L"] = (0.05 * flick, 0, 0)
-    p["ear.R"] = (0.05 * flick, 0, 0)
     return p
 
 
@@ -116,11 +98,4 @@ def paint_piece(name, p, n, prims):
         ds = np.sort(np.stack([pr.d(p) for pr in prims], -1), axis=-1)
         gap = ds[:, 1] - ds[:, 0] if len(prims) > 6 else np.full(len(p), 1.0)
         return paint.paint_shell(p, n, gap)
-    if name == "ruff":
-        return paint.mixc(paint.LILAC, paint.PLUM_LIGHT, paint.sat(np.abs(p[:, 1] - 0.72) / 0.1))
-    if name == "ear":
-        hole = next(pr for pr in prims if pr.name == "hole")
-        col = np.tile(paint.PLUM, (len(p), 1))
-        col = paint.mixc(col, paint.EAR_IN, paint.edge(0.006 - hole.d(p), 0.004))
-        return paint.mixc(col, paint.SOCK, paint.edge(p[:, 1] - 1.26, 0.006))
     return np.tile(np.array([0.72, 1.0, 0.3]), (len(p), 1))
