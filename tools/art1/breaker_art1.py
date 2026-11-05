@@ -293,8 +293,9 @@ def main():
     hl = B.hull(J)
     part("hull", hl, 1500, "scan", "hull", 2.6)
     cp, c_at, c_n = B.compass_field(hl)
-    hm = B.helmet()
-    part("helmet", hm, 2200, "brass", "helmet", 2.6, bone="head", blur=0.003)
+    hm, cl = B.helmet()
+    part("helmet", hm, 1300, "brass", "helmet", 2.6, bone="head", blur=0.003)
+    part("collar", cl, 700, "brass", "collar", 2.0, blur=0.006)
     ms = B.moss(hl, None)
     part("moss", ms, 500, "moss", "moss", 1.0)
     mt = B.masts()
@@ -491,8 +492,8 @@ def main():
 
     # the porthole: its own disc and 0..1 UVs, drawn by shaders/warden_mood.gdshader
     n = 28
-    c = np.array((0, B.PORT_Y + 0.004, B.HELM_C[2]), np.float32)
-    r = B.HELM_R * 0.635
+    c = np.array((0, B.PORT_Y + 0.008, B.PORT_C[1]), np.float32)
+    r = B.PORT_R * 0.74
     v = [c + (0, 0.012, 0)]
     for i in range(n):
         a = i / n * math.tau
@@ -552,7 +553,7 @@ def main():
         md = o.modifiers.new("Armature", "ARMATURE")
         md.object = arm
     Hc = H_M(np.array([[0, 0, zc]], np.float32))[0]
-    K.anchor(arm, "head", "anchor_head_top", (0, 0.09, 1.06))
+    K.anchor(arm, "head", "anchor_head_top", (0, 0.03, 1.02))
     K.anchor(arm, "hips", "anchor_chest", tuple(c_at))
     K.anchor(arm, "x_weapon", "anchor_hammer_head", tuple(Hc))
     K.anchor(arm, "x_weapon", "anchor_weapon_tip", tuple(H_M(np.array([[0.385, 0, zc]], np.float32))[0]))

@@ -381,20 +381,32 @@ def p_leg(p, n, c):
     return mix(b, f, smooth(-0.3, 0.3, n[:, 1]))
 
 
+SQ = "breaker_head_squat"
+
+
 def p_helmet(p, n, c):
-    """breaker_head's bottom row (1000 wide): front at x 125, side at x 620, back at x 860; the helmet's middle at y 205."""
-    k = 100.0 / B.HELM_R
-    x = p[:, 0]
-    y = p[:, 1] - B.HELM_C[1]
-    z = p[:, 2] - B.HELM_C[2]
-    py = 205.0 - z * k
-    f = sample("breaker_head", 125.0 - x * k, py, 1000.0)
-    b = sample("breaker_head", 860.0 + x * k, py, 1000.0)
-    sd = sample("breaker_head", 620.0 + y * k * 0.9, py, 1000.0)
-    w = np.abs(n[:, 0]) ** 2
-    out = mix(mix(b, f, smooth(-0.25, 0.25, n[:, 1])), sd, smooth(0.5, 0.8, w))
-    # the collar's plate under the neck ring
+    """breaker_head_squat (1000 wide): front at x 140, back at x 855, side at x 610; the dome's middle at y 195."""
+    rx, ry, rz = B.HELM_R
+    k = 82.0 / rx
+    x, y = p[:, 0], p[:, 1] - B.HELM_C[1]
+    py = 195.0 - (p[:, 2] - B.HELM_C[2]) / rz * 62.0
+    f = sample(SQ, 140.0 - x * k, py, 1000.0)
+    b = sample(SQ, 855.0 + x * k, py, 1000.0)
+    sd = sample(SQ, 615.0 + y / ry * 72.0, py, 1000.0)
+    out = mix(mix(b, f, smooth(-0.25, 0.25, n[:, 1])), sd, smooth(0.5, 0.8, np.abs(n[:, 0]) ** 2))
     return out
+
+
+def p_collar(p, n, c):
+    """The collar, plan-mapped: round the ring its art runs left to right across the front and back views."""
+    x, y = p[:, 0], p[:, 1]
+    ang = np.abs(np.arctan2(x, y)) / np.pi      # 0 at the front, 1 at the back
+    u = x / 0.5
+    r = np.clip(np.sqrt((x / 0.5) ** 2 + (y / 0.43) ** 2), 0, 1)
+    py = 232.0 + (r - 0.7) * 170.0 + 55.0 * (y > 0) * np.clip(y / 0.43, 0, 1)
+    f = sample(SQ, 140.0 - u * 118.0, py, 1000.0)
+    b = sample(SQ, 855.0 + u * 118.0, py, 1000.0)
+    return mix(b, f, smooth(-0.15, 0.15, y))
 
 
 def p_door_art(p, n, c):
@@ -406,7 +418,7 @@ def p_door_art(p, n, c):
     return mix(b, f, smooth(0.3, -0.3, n[:, 1]))
 
 
-TABLE = {"hull": p_hull, "limb": p_limb, "pauldron": p_pauldron, "leg": p_leg, "helmet": p_helmet, "mast": p_mast, "iron": p_iron, "brass": p_brass, "compass": p_compass, "moss": p_moss,
+TABLE = {"hull": p_hull, "limb": p_limb, "pauldron": p_pauldron, "leg": p_leg, "helmet": p_helmet, "collar": p_collar, "mast": p_mast, "iron": p_iron, "brass": p_brass, "compass": p_compass, "moss": p_moss,
          "sail": p_sail, "drum": p_drum, "door": p_door_art, "fish": p_fish, "lure": p_lure, "rope": p_rope}
 
 

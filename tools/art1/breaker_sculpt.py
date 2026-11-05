@@ -19,9 +19,11 @@ F = np.float32
 WOOD, IRON, RIVET, BRASS, MOSS, BARN, GLASS = 1, 2, 3, 4, 5, 6, 7
 HULL_C = (0.0, 0.0, 0.5)
 HULL_R = (0.475, 0.4, 0.34)
-HELM_C = (0.0, 0.09, 0.875)
-HELM_R = 0.155
-PORT_Y = HELM_C[1] + HELM_R - 0.008          # the porthole's glass
+HELM_C = (0.0, 0.03, 0.8)
+HELM_R = (0.235, 0.205, 0.185)     # squat, wider than tall, sunk in the hull (breaker_head_squat)
+PORT_C = (0.0, 0.8)
+PORT_R = 0.125
+PORT_Y = HELM_C[1] + HELM_R[1] - 0.012          # the porthole's glass
 MAST_TIP = (0.72, -0.17, 1.3)                 # where the fish's line hangs from
 FISH_AT = (0.72, -0.17, 1.02)
 
@@ -127,25 +129,31 @@ def compass_field(hl):
 
 
 def helmet():
-    """The brass diving helmet (breaker_head): a big round dome, one huge front porthole in a thick riveted ring, a small port each
-    side, a band over the crown, a neck ring, and the wide brass collar plate lying on the hull."""
+    """The brass helmet (proportions: breaker_head_squat; detail: breaker_head): a squat dome sunk in the hull, no neck, one big
+    porthole, a port each side, a band over the crown. Returns (dome field, collar field): the wide collar lies on the hull."""
     c = np.array(HELM_C, F)
-    r = HELM_R
-    f = Field((-0.34, -0.26, 0.66), (0.34, 0.34, 1.09), 0.0022)
-    f.add(sph(HELM_C, r), 0.0, BRASS)
-    f.add(cyl((0, c[1] - 0.0, c[2] - r * 0.86), "z", r * 0.86, 0.02, 0.012), 0.012, IRON)     # the neck ring
-    # the collar: a low wide plate draped on the hull's shoulders
-    f.add(ell((0, c[1] - 0.09, 0.79), (0.26, 0.25, 0.05)), 0.02, BRASS)
-    f.sub(ell((0, c[1] - 0.09, 0.72), (0.27, 0.26, 0.05)), 0.01)
-    f.add(box((0, c[1], c[2] + 0.02), (0.012, r + 0.004, r - 0.02), 0.01), 0.004, BRASS)      # the band over the crown
+    rx, ry, rz = HELM_R
+    f = Field((-0.3, -0.24, 0.7), (0.3, 0.3, 1.0), 0.002)
+    f.add(ell(HELM_C, HELM_R), 0.0, BRASS)
+    f.add(box((0, c[1] - 0.02, c[2] + 0.03), (0.016, ry + 0.006, rz - 0.02), 0.012), 0.004, BRASS)
+    pz = PORT_C[1]
     fy = PORT_Y
-    f.add(cap((0, fy - 0.03, c[2]), (0, fy + 0.016, c[2]), r * 0.84, r * 0.8), 0.006, BRASS)
-    f.sub(cap((0, fy + 0.004, c[2]), (0, fy + 0.05, c[2]), r * 0.62, r * 0.62), 0.004, BRASS)
+    f.add(cap((0, fy - 0.03, pz), (0, fy + 0.018, pz), PORT_R, PORT_R * 0.95), 0.006, BRASS)
+    f.sub(cap((0, fy + 0.006, pz), (0, fy + 0.05, pz), PORT_R * 0.74, PORT_R * 0.74), 0.004, BRASS)
     for sd in (-1, 1):
-        q = c + np.array((sd * (r - 0.012), -0.01, 0.01), F)
-        f.add(cap(q - (sd * 0.018, 0, 0), q + (sd * 0.02, 0, 0), 0.052, 0.047), 0.004, BRASS)
-        f.sub(sph(tuple(q + (sd * 0.038, 0, 0)), 0.034), 0.004, GLASS)
-    return f
+        q = np.array((sd * (rx - 0.01), c[1] - 0.01, pz + 0.01), F)
+        f.add(cap(q - (sd * 0.02, 0, 0), q + (sd * 0.022, 0, 0), 0.05, 0.046), 0.004, BRASS)
+        f.sub(sph(tuple(q + (sd * 0.04, 0, 0)), 0.032), 0.004, GLASS)
+    f.d = np.maximum(f.d, 0.72 - f.grid()[2])
+    cl = Field((-0.56, -0.48, 0.64), (0.56, 0.48, 0.86), 0.0035)
+    x, y, z = cl.grid()
+    r = np.sqrt((x / 0.5) ** 2 + ((y - 0.0) / 0.43) ** 2)
+    sag = 0.045 * np.clip(y / 0.43, 0, 1) ** 2         # it dips at the front, as the art
+    top = 0.785 - 0.11 * r ** 3 - sag
+    d = np.maximum(np.maximum(z - top, top - 0.05 - z), r - 1.0)
+    cl.d = (d * 0.8).astype(F)
+    cl.lab[:] = BRASS
+    return f, cl
 
 
 def arm(J, s):
@@ -234,8 +242,8 @@ def moss(hl, pads):
     lump = lambda x, y, z: (fbm(x, y, z, 13.0, 3) - 0.5) * 0.08
     fine = lambda x, y, z: (fbm(x, y, z, 26.0, 2) - 0.5) * 0.016
     for s in (-1, 1):
-        f.add(ell((s * 0.4, 0.02, 0.8), (0.14, 0.22, 0.05)), 0.05, MOSS, None, lump)
-        f.add(ell((s * 0.56, 0.0, 0.79), (0.1, 0.15, 0.05)), 0.05, MOSS, None, lump)
+        f.add(ell((s * 0.44, -0.02, 0.77), (0.12, 0.2, 0.045)), 0.05, MOSS, None, lump)
+        f.add(ell((s * 0.58, 0.0, 0.76), (0.09, 0.14, 0.045)), 0.05, MOSS, None, lump)
     return f
 
 
