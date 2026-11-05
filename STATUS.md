@@ -789,3 +789,7 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - warden-model targets changed: height 1.08, height_3d 1.21, width to 1.25. model_glow is unused; eyes have no emissive glow.
 - Gaps: small black patch at the right skirt hem; dashed ink at mid distance; she looked pale in the live shot (unconfirmed cause). Item 62 air skate and item 110 wing glide have no clip.
 - Owner Qs: closed neckline and mid-thigh skirt OK vs the sheet? ~1.08x (1.21x with hood and horns) OK? Darts from the spear tip or her hands?
+
+## 2026-11-05 S2: READY ext/portraits-three 8edb4f23
+- Tarek (dolm), Ryzz (mage), Vex (gunslinger) portraits and splashes; the other nine byte-identical. Checks 0 failures: import, --check, portrait 107, tutorial-hud, health --strict. All 12 Hunters now use owner portraits once merged. Crops checked, not seen in a running game.
+- Slot: Claire kit 62+64+65.
