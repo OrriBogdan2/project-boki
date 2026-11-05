@@ -2056,3 +2056,16 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - The tutorial order has taming within the first island.
   - Tamed → the Boki appears in the inventory/box UI.
   - The barrier stays up until every first-island step is done.
+
+## 168. The default camera zoom is too close: start at a middle zoom everywhere (owner, 17:53 UTC Nov 5)
+- The owner: "it still zooms in too much as a basic zoom for farm and elsewhere - base zoom should be more middle, not super in".
+- Today:
+  - home.gd HOME_ZOOM 1.2 (the wheel goes 0.8-1.6).
+  - practice.gd ZOOM 0.55-1.6, user_zoom 1.0.
+  - Farm, tutorial and other screens each set their own zoom_to (e.g. close-up framings).
+- **Fix:**
+  - One shared default "base zoom" constant (e.g. CamDefaults.BASE), noticeably wider than now (≈1.35-1.4 on the home scale, the visual middle of the wheel range), used on arrival at home/farm, the tutorial, practice and the match start.
+  - Audit every `zoom_to =` / `zoom =` set on entry (home.gd, mask_offer.gd, farm screens, tutorial, practice, hatch) and route them to the base, unless it's a deliberate short cinematic close-up that returns to the base after.
+  - Remember the player's own wheel zoom per area for the session.
+- Post before/after screenshots at the same spot (farm + match) to ext.
+- **Assert:** entering home/farm/tutorial/practice → cam.zoom_to == base; a cinematic close-up returns to the base within its beat.
