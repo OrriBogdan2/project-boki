@@ -29,7 +29,7 @@ READY = {
     "brow": -0.25, "lid": 0.08, "fing": 0.3, "skirt": 0.0, "jaw": 0.05, "fin": 0.0, "jet": 0.0,
 }
 SHOULDERED = {"G": (0.20, 0.10, 1.32), "BE": be(-164, 50, (0.35, 0.2, 0.9)), "Lw": 0.0}
-HOSE_HIP = {"G": (0.085, 0.245, 0.93), "BE": be(1, 2), "Lw": 1.0}
+HOSE_HIP = {"G": (0.1, 0.3, 0.87), "BE": be(1, 2), "Lw": 1.0}
 
 
 def C(name, dur, keys, loop=False, base=READY):
@@ -136,20 +136,20 @@ def clips():
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sk, hd, stride * (0.8 if tag in "lr" else 1.0), share, lift)))
     # LMB: the pilot's 0.2 s: the gun drops across her hip, off hand on the chamber, feet set; then the roar throws her back a step and she leans in,
     # teeth bared, the gun bucking
-    braced = {"pel": (0.0, 0.02, -0.075), "prt": (0.2, -0.42, 0.0), "tor": (0.14, 0.0, 0.0), "hed": (-0.24, 0.42, 0.0), "brow": 0.55, "lid": 0.12, "jaw": 0.55, "fin": 0.6, "fing": 1.0,
+    braced = {"pel": (0.0, 0.03, -0.075), "prt": (0.04, -0.14, 0.0), "tor": (0.34, -0.3, 0.0), "hed": (-0.26, 0.42, 0.0), "brow": 0.55, "lid": 0.12, "jaw": 0.55, "fin": 0.6, "fing": 1.0,
               "G": HOSE_HIP["G"], "BE": HOSE_HIP["BE"], "Lw": 1.0, "FL": (-0.11, 0.17, A_Z), "FR": (0.15, -0.17, A_Z), "FLy": 0.1, "FRy": -0.55}
-    kick = dict(braced, G=(0.085, 0.17, 0.97), BE=be(1, 13), prt=(0.04, -0.4, 0.0), tor=(-0.08, 0.02, 0.0), pel=(0.0, -0.035, -0.06), jaw=0.8, fin=1.0)
-    set_ = dict(braced, G=(0.1, 0.2, 0.9), BE=be(2, 0), jaw=0.2, fin=0.3)
-    buck = dict(braced, G=(0.08, 0.235, 0.925), BE=be(0, 4), tor=(0.11, 0.0, 0.0))
+    kick = dict(braced, G=(0.1, 0.22, 0.92), BE=be(1, 13), tor=(0.08, -0.26, 0.0), pel=(0.0, -0.035, -0.06), jaw=0.8, fin=1.0)
+    set_ = dict(braced, G=(0.12, 0.24, 0.85), BE=be(2, 0), jaw=0.2, fin=0.3)
+    buck = dict(braced, G=(0.1, 0.285, 0.875), BE=be(0, 4), tor=(0.31, -0.3, 0.0))
     out.append(C("lance", 0.465, [(0.0, END), (0.1, set_), (0.2, kick, "out"), (0.34, braced), (0.4025, buck, "lin"), (0.465, braced, "lin")]))
-    fist = dict(braced, Lw=0.0, LP=(-0.14, 0.08, 1.74), fing=1.0, tor=(-0.16, 0.0, -0.08), hed=(-0.36, 0.3, 0.0), jaw=1.0, brow=-0.6, lid=0.3, BE=be(1, 16), G=(0.11, 0.18, 0.95))
+    fist = dict(braced, Lw=0.0, LP=(-0.14, 0.08, 1.74), fing=1.0, tor=(0.0, -0.16, -0.08), hed=(-0.36, 0.3, 0.0), jaw=1.0, brow=-0.6, lid=0.3, BE=be(1, 16), G=(0.13, 0.2, 0.92))
     out.append(C("lance_stoke", 0.625, [(0.0, braced), (0.1, fist, "out"), (0.22, dict(fist, tor=(-0.08, 0.0, -0.05))), (0.5, braced), (0.5625, buck, "lin"), (0.625, braced, "lin")]))
-    out.append(C("lance_end", 0.3, [(0.0, braced), (0.08, dict(braced, G=(0.12, 0.13, 0.98), BE=be(3, 24), jaw=0.3, tor=(-0.06, 0.05, 0)), "out"), (0.3, END)]))
+    out.append(C("lance_end", 0.3, [(0.0, braced), (0.08, dict(braced, G=(0.14, 0.15, 0.95), BE=be(3, 24), jaw=0.3, tor=(0.1, -0.14, 0)), "out"), (0.3, END)]))
     # RMB: up to the shoulder, one eye shut along the barrel; the shot kicks; a little shimmy of delight
-    aim = dict(braced, G=(0.1, 0.13, 1.1), BE=be(0, 1), hed=(0.06, 0.36, 0.2), tor=(0.08, 0.1, 0), prt=(0.1, -0.5, 0.0), brow=0.7, lid=0.18, jaw=0.08, fin=0.2)
+    aim = dict(braced, G=(0.1, 0.13, 1.1), BE=be(0, 1), hed=(0.06, 0.36, 0.2), tor=(0.14, -0.34, 0), brow=0.7, lid=0.18, jaw=0.08, fin=0.2)
     out.append(C("aim", 0.3, [(0.0, END), (0.12, aim), (0.3, dict(aim, G=(0.1, 0.135, 1.102)))]))
-    sh0 = dict(aim, G=(0.1, 0.03, 1.15), BE=be(0, 16), tor=(-0.2, 0.1, 0), hed=(-0.1, 0.3, 0.1), jaw=0.9, lid=0.08, fin=1.0, brow=-0.4)
-    out.append(C("shot", 0.48, [(0.0, aim), (0.06, sh0, "out"), (0.14, dict(sh0, G=(0.1, 0.07, 1.13), BE=be(0, 10)), "out"), (0.3, dict(aim, Lw=0.4, jaw=0.5, tor=(0.0, -0.06, 0.05))), (0.48, END)]))
+    sh0 = dict(aim, G=(0.1, 0.03, 1.15), BE=be(0, 16), tor=(-0.1, -0.3, 0), hed=(-0.1, 0.3, 0.1), jaw=0.9, lid=0.08, fin=1.0, brow=-0.4)
+    out.append(C("shot", 0.48, [(0.0, aim), (0.06, sh0, "out"), (0.14, dict(sh0, G=(0.1, 0.07, 1.13), BE=be(0, 10)), "out"), (0.3, dict(aim, Lw=0.4, jaw=0.5, tor=(0.1, -0.2, 0.05))), (0.48, END)]))
     # Shift, Soot Ram: head first, horns of her own making: crouched, then flat out behind her own forehead, gun flung back, teeth first; the hit stops her dead and she bounces
     cr = {"pel": (0, -0.06, -0.2), "prt": (0.35, 0, 0), "tor": (0.35, 0, 0), "hed": (-0.3, 0, 0), "G": (0.25, -0.1, 0.76), "BE": be(-150, -5), "LP": (-0.24, -0.12, 0.74), "brow": 0.8, "lid": 0.1, "jaw": 0.2, "fin": 0.6, "fing": 1.0,
           "FL": (-0.11, 0.14, A_Z), "FR": (0.12, -0.18, A_Z), "FRp": 0.5}

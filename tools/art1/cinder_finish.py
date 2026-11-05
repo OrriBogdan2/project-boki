@@ -356,6 +356,8 @@ for k_, i in enumerate(low_faces):
     brown = r_ > b_ * 1.34 and r_ < 0.5 and g_ > b_ * 0.95
     grey_hi = (mx - min(r_, g_, b_)) / max(mx, 0.01) < 0.12 and mx > 0.42
     m = "metal-cinder" if grey_hi else ("leather-cinder" if brown else "skin-cinder-hot")
+    if fc[k_][2] > 1.115 and abs(fc[k_][0]) < 0.075 and fc[k_][1] > 0.03:
+        m = "skin-cinder-hot"          # (the neckline's skin, whatever the crack bleed says)
     me.polygons[i].material_index = mat_i[m]
 
 mask = PID == 0

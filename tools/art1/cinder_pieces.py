@@ -104,13 +104,15 @@ def face_parts():
     corners both share a line. The jaw patch's top row at the corners stays with the head."""
     xs = FACE_XS
     mz = mouth_z(np.minimum(np.abs(xs), 0.056))
-    ztop = np.linspace(0.104, 0.0, 6).tolist() + [-0.012, -0.024, -0.038, -0.052, -0.064]
-    U_rows = len(ztop) + 1
+    ztop = np.linspace(0.104, 0.0, 6).tolist() + [-0.012, -0.024, -0.036]
+    ks = (0.28, 0.56, 0.8, 1.0)                  # (the last rows ease down onto the lips' line, which runs high at the corners)
+    U_rows = len(ztop) + len(ks)
     ZU = np.zeros((U_rows, len(xs)))
     for i, z in enumerate(ztop):
         ZU[i] = z
-    ZU[-1] = mz
-    XU = xs[None, :] / xs[-1] * half_width(ZU[:, :1])
+    for i, k in enumerate(ks):
+        ZU[len(ztop) + i] = ztop[-1] + (mz - ztop[-1]) * k
+    XU = xs[None, :] / xs[-1] * half_width(ZU[:, 10:11])
     YU = np.maximum(ray_y(XU, ZU), 0.0)
     up = Piece("face", "skin-cinder-hot", hl(np.stack([XU, YU, ZU], -1).reshape(-1, 3)), grid_faces(U_rows, len(xs))).rigid("head")
     fr = np.array([0.0, 0.3, 0.62, 1.0])
