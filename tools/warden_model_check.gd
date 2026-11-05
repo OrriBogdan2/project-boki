@@ -18,8 +18,8 @@ const WARDENS := {
 	"archer": {"hit_r": 0.392, "height": 0.98, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
 	"gunslinger": {"hit_r": 0.416, "height": 1.04, "width": [0.7, 1.3], "moves": "gunslinger_"},   # (slim)
 	"mage": {"hit_r": 0.4, "height": 1.04, "width": [0.6, 1.3], "moves": "mage_"},     # (slim and long-legged)
-	# (Sable's feather plumes stand ~0.2 m over her head)
-	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.05, "width": [0.6, 1.3], "moves": "thf_"},
+	# (Sable's moth antennae stand ~0.3 m over her head, as on the master sheet)
+	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.13, "width": [0.6, 1.3], "moves": "thf_"},
 	"dolm": {"hit_r": 0.388, "height": 1.19, "width": [0.7, 1.5], "moves": "breah_"},     # (lean, the locs: his art)
 	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
 	"ostra": {"hit_r": 0.412, "height": 1.33, "height_3d": 1.31, "width": [0.5, 1.3], "moves": "ostra_"},

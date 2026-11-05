@@ -693,6 +693,9 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 				# ("<slot>-<texture>-hot": only the atlas's hot texels glow, keyed per texel: Kael's arm cracks)
 				m.set_shader_parameter("glow_key", hot)
 				_glow_colours(m, arch, tag)
+			if src and src.normal_enabled and src.normal_texture:
+				m.set_shader_parameter("normal_tex", src.normal_texture)
+				m.set_shader_parameter("use_nrm", true)
 			if src and src.emission_enabled and src.emission_texture:
 				m.set_shader_parameter("emit_tex", src.emission_texture)
 				m.set_shader_parameter("use_emit", true)
@@ -1051,6 +1054,8 @@ class Springs:
 				prev[i] = p
 				p += v
 				var pull := lerpf(PULL, PULL_TIP, float(i) / float(n - 1))
+				if bool(ch["wing"]) and fold < -0.3:
+					pull = lerpf(pull, 1.0, 0.85)      # (flared through a flip: the wing turns with her, no twist)
 				pts[i] = p.lerp(want[i], 1.0 - pow(1.0 - pull, k))
 			pts[0] = want[0]
 			prev[0] = want[0]
