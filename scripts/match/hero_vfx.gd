@@ -29,6 +29,7 @@ const RIBBON_SAMPLES := 18     # points a mesh trail keeps
 const ARC_SEGS := 24           # segments of a sweep's arc mesh
 const SWEEP_INNER := 0.35      # the arc mesh's inner radius, as a share of its outer one
 const SCORCH_LIFT := 0.06       # m a ground look floats, clear of the ground mesh
+const PREWARM_LIFE := 30.0     # s a loading-screen stand-in particle lives (it must outlast the slowest loading frames)
 const SEED_MAX := 8.0          # a look's noise offset (small: the sine hash loses precision on big inputs)
 
 static var _data := {}         # arch -> its content/vfx data ({} when the Hero has none yet)
@@ -315,18 +316,21 @@ func prewarm(at: Vector3) -> void:
 			_warming.append(_prewarm_node(kind))
 	for node: Node3D in _warming:
 		node.global_transform = Transform3D(Basis.IDENTITY, Vector3.ZERO if node.get_meta("strip", false) else at)
-		if node is GPUParticles3D:
-			(node as GPUParticles3D).restart()
 
 func prewarm_end() -> void:
 	for node: Node3D in _warming:
 		node.visible = false
+		if node is GPUParticles3D:
+			(node as GPUParticles3D).emitting = false
 	_warming.clear()
 
 func _prewarm_node(kind: String) -> Node3D:
 	if not MODES.has(kind):
 		var p: GPUParticles3D = _take(kind, _mote_node.bind(kind))
 		p.amount_ratio = 2.0 / float(AMOUNT[kind])
+		p.lifetime = PREWARM_LIFE
+		p.one_shot = false
+		p.emitting = true          # (a finished one-shot isn't drawn, and a loading frame can outlast its life)
 		return p
 	var mi: MeshInstance3D = _take(kind, _surface_node.bind(kind))
 	if kind == "sweep":

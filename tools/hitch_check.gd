@@ -508,6 +508,7 @@ func _cache_count() -> int:
 			if int(_sizes.get(pth, -1)) != sz:
 				_sizes[pth] = sz
 				n += 1
+				print("DBGCACHE ", Time.get_ticks_msec(), " ", pth.get_file().substr(0, 16), " ", d.replace("user://shader_cache", ""), " ", sz)
 		for sub in da.get_directories(): stack.append(d + "/" + sub)
 	return n
 
