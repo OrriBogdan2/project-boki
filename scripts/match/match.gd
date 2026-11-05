@@ -648,6 +648,7 @@ static func _trim_shadows(root: Node) -> void:
 				stack.append(ch)
 
 func _start(o: Dictionary) -> void:
+	ShadowPolicy.watch_particles(get_tree())      # no particle system casts a shadow (item 94)
 	PerfLog.reset()
 	_stage_done_ms = 0.0
 	opts = o

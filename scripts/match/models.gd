@@ -50,6 +50,7 @@ static func part(parent: Node3D, mesh: Mesh, mat: Material, pos := Vector3.ZERO,
 	mi.rotation = rot
 	if pname != "":
 		mi.name = pname
+	ShadowPolicy.judge(mi)       # small parts don't cast (item 94)
 	parent.add_child(mi)
 	return mi
 
@@ -621,6 +622,12 @@ static func torso_mesh() -> ArrayMesh:
 ## person for a look from MantleLook.at_home(). outfit names a colourway that replaces the palette
 ## (galleries); "bare" leaves the head uncovered. arch "" takes the look's "arch", else the class default.
 static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", appearance := {}, arch := "") -> Node3D:
+	ShadowPolicy.keep += 1       # a Hunter's parts cast at any size
+	var root := _hunter(cls, team_col, weapon, outfit, appearance, arch)
+	ShadowPolicy.keep -= 1
+	return root
+
+static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", appearance := {}, arch := "") -> Node3D:
 	var um := Unmasked.is_look(appearance)       # your own character: the hunter rig without a hunter's gear
 	var lk: Dictionary
 	var race: Dictionary
@@ -1278,6 +1285,7 @@ static func merge_static(node: Node3D) -> void:
 		var mi := MeshInstance3D.new()
 		mi.mesh = (g["st"] as SurfaceTool).commit()
 		mi.material_override = g["mat"]
+		ShadowPolicy.judge(mi)       # a merged clump of small parts is still small (item 94)
 		node.add_child(mi)
 	for d in drop:
 		node.remove_child(d)
@@ -1733,6 +1741,7 @@ static func gear_drop(col: Color, rar: int) -> Node3D:
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var ring := MeshInstance3D.new(); ring.mesh = flat_quad(1.2)
 	ring.material_override = ring_mat(rc, 0.12); ring.position.y = 0.05
+	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # (a ground ring: no shadow, item 94)
 	root.add_child(ring)
 	return root
 
@@ -2040,6 +2049,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 		root.scale = Vector3.ONE * 0.82
 	Unique.dress(root, rec)          # this kin's own: size, palette shift, coat marks, proportions, shapes
 	Mutations.dress(root, rec)       # rare mutations: size, palette, extra parts
+	ShadowPolicy.boki(root)      # the body casts, the bits don't (item 94)
 	return root
 
 ## Moves a group's pivot to `at` without moving what's in it.
