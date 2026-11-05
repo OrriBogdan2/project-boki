@@ -402,8 +402,8 @@ def hammer():
     """The capstan hammer, upright with its grip on the origin (haft along +Z, the drum's middle at z = ZC): a waisted drum
     of iron-bound staves across the haft's end, spikes on both ends, chain wound round its waist; an iron haft as long as
     his arm. Returns (wood field, iron field, chain field, ZC)."""
-    ZC = 0.56
-    BL, BR, BW = 0.27, 0.235, 0.2      # half length, end radius, waist radius (a capstan)
+    ZC = 0.54
+    BL, BR, BW = 0.235, 0.205, 0.175      # half length, end radius, waist radius (a capstan)
     lo, hi = (-0.42, -0.3, -0.3), (0.42, 0.3, 0.84)
     W = Field(lo, hi, 0.0036)
     x, y, z = W.grid()
@@ -416,7 +416,7 @@ def hammer():
     W.d = (W.d + smooth(0.08, 0.0, np.abs((ang + 0.5) % 1.0 - 0.5)) * 0.004).astype(F)
     M = W.like()
     for sd in (-1, 1):
-        q = sd * 0.238
+        q = sd * 0.205
         M.add(cyl((q, 0, ZC), "x", BR + 0.016, 0.034, 0.008), 0.0, IRON)
         M.add(cap((sd * BL, 0, ZC), (sd * (BL + 0.115), 0, ZC), 0.07, 0.002), 0.0, IRON)
         for a in np.linspace(0, 6.28, 11)[:-1]:

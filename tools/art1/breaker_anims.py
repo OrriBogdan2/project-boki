@@ -51,8 +51,8 @@ def sl(x, y, dz):
 # He is a ball on two stubs. The legs can't lunge, so his weight moves by the whole hull tipping on its feet (`rot`), and his
 # arms hang off the sides, so swings go wide round the hull instead of across it.
 CARRY = dict(pos=(0, 0, 0.0), hips=(-2, 0, -2), head=(1, 0, 2),
-             gr=sp(0.06, 0.2, -0.47), gd=(-0.3, 0.94, 0.14), ga=(0.94, 0.3, 0.0), er=(0.95, -0.25, -0.1), fing_r=1.0, thumb_r=1.0,
-             sh=sl(0.06, 0.1, -0.41), sn=(-0.86, 0.5, 0.0), su=(0.0, 0.0, 1.0), el=(-0.9, -0.4, 0.1), fing_l=0.9, thumb_l=0.8,
+             gr=sp(0.09, 0.12, -0.47), gd=(0.72, 0.68, -0.12), ga=(-0.68, 0.72, 0.0), er=(0.95, -0.25, -0.1), fing_r=1.0, thumb_r=1.0,
+             sh=sl(0.09, 0.04, -0.41), sn=(-0.95, 0.3, 0.0), su=(0.0, 0.0, 1.0), el=(-0.9, -0.4, 0.1), fing_l=0.9, thumb_l=0.8,
              fr=FR, fl=FL, fra=0.0, fla=0.0, wtw=(0, 0, 0))
 FREE = dict(gr=sp(0.06, 0.1, -0.43), gd=(0.05, 1.0, -0.2), ga=(0.1, 0.2, 1.0), er=(0.9, -0.3, -0.3), fing_r=0.35, thumb_r=0.3)
 # the fighting stance (item 52): rocked onto the left foot, door half across him, hammer hauled up behind the right shoulder

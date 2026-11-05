@@ -226,7 +226,7 @@ def p_drum(p, n, c):
     f = c["f"]
     ao, cv = form(f, p, n, (0.008, 0.02, 0.05), 1.0)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    ang = np.arctan2(z - 0.56, y) / 6.283 * 16
+    ang = np.arctan2(z - 0.54, y) / 6.283 * 16
     seam = smooth(0.1, 0.03, np.abs((ang + 0.5) % 1.0 - 0.5))
     col = wood_col(p, (0.3, 2.0, 2.0)) * (1.0 + 0.1)
     col = mix(col, C("1e140e"), seam * 0.9)
