@@ -71,6 +71,7 @@ var grave_r := 0
 var burrow_r := 0
 var _fx_sig := ""
 var away_work: Array = []          # lines: what assigned Boki made while you were away
+var tw := ToolWork.new()           # your tool swing: axe, pickaxe, hammer (tool_work.gd)
 var hg: HomeGather = null           # chopping wild trees and mining boulders with your tools (home_gather.gd)
 
 ## The island being shown: yours, or the one you're visiting.
@@ -90,11 +91,9 @@ const DAY_LEN := 300.0          # seconds for a full day at home
 var env_res: Environment
 var sun_l: DirectionalLight3D
 var p_anim: HunterAnim = null
-var p_fired := 99.0             # seconds since you last swung a tool (gathering), for the animation
 var crouch_on := false          # crouching (the match's crouch key and its tap-to-toggle setting)
 var p_crouch_k := 0.0           # the crouched pose, eased in and out
 const CROUCH_SPEED := 0.55      # walking speed crouched (the same as in a match)
-var p_swing_n := 0              # melee swings so far, so each one plays its arc
 var lamps: Array = []           # OmniLight3D
 var day_t := 0.3                # 0..1, 0.25 is morning, 0.5 noon, 0.75 dusk
 var rain: CPUParticles3D
@@ -1305,15 +1304,14 @@ func _move_player(d: float) -> void:
 		if ad.length() > 0.4: want = atan2(-ad.x, -ad.y)
 	elif hv.length() > 0.3:
 		want = atan2(-hv.x, -hv.y)
-	if hg and hg.busy(): want = hg.face()      # chopping: face the tree
+	if tw.active(): want = tw.face_from(ppos)      # working: face the target
 	pface = lerp_angle(pface, want, minf(1.0, d * 14.0))
 	player.basis = cam.char_basis(pface, player.scale)     # leaned toward the camera, as in a match
 	player.basis = water.tilt(player.basis, hv.length())      # swimming: tipped into a stroke
 	if p_anim == null or p_anim.model != player:
 		p_anim = HunterAnim.new(player)
-	p_fired += d
-	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding or water.k > 0.5, "rolling": dash_t > 0.0, "dash_dir": dash_v, "fired": p_fired,
-		"swing_n": p_swing_n, "combo": maxi(0, p_swing_n - 1) % 3, "crouch": p_crouch_k}
+	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding or water.k > 0.5, "rolling": dash_t > 0.0, "dash_dir": dash_v, "crouch": p_crouch_k}
+	ps.merge(tw.anim_state())      # the Empty carries no class weapon at home; a tool only while working
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
 	p_anim.update(d, ps)

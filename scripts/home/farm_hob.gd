@@ -4,19 +4,21 @@ extends RefCounted
 ## walks over to work at the house while it goes up. On the first arrival the camera swings over to him while
 ## he waves and calls you over, and his name shows over him until you have talked. Walk up and press interact
 ## and he talks face to face (HobTalk: the farm tutorial, blueprints from FarmBuilder, and the second Mask).
-## A "!" floats over him while he has something for you. The same interact key swings a hammer at a house or
-## building going up when the tutorial option player_swing is on, so one Boki is enough to start with.
+## A "!" floats over him while he has something for you. Holding the same interact key hammers a house or
+## building going up, beat after beat, when the tutorial option player_swing is on; your Boki nearby come and
+## help, and the materials are spent as it goes (FarmSites).
 
 const FACE_YOU_M := 9.0          # m: closer than this he turns to watch you come
+const SITE_REACH := 2.2          # m beyond the site's half-size you can keep hammering from
 
 var h
 var node: HobModel = null
 var chat: HobTalk = null
 var t := 0.0
 var poll_t := 0.0
-var swing_cd := 0.0
 var call_t := 0.0
-var pos := Vector3.INF          # where he is standing (or walking to)
+var site_u := -1                 # the construction site you are hammering (deco uid)
+var pos := Vector3.INF           # where he is standing (or walking to)
 
 func _init(home) -> void:
 	h = home
@@ -72,7 +74,7 @@ func sync() -> void:
 
 func tick(dt: float) -> void:
 	t += dt
-	swing_cd = maxf(0.0, swing_cd - dt)
+	_hammer(dt)
 	if not is_instance_valid(node):
 		return
 	_walk(dt)
@@ -150,22 +152,69 @@ func label(it: Dictionary) -> String:
 	var e := FarmSites.entry(int(it["u"]))
 	if e.is_empty():
 		return ""
+	var need := FarmSites.need_text(e)
+	if need != "":
+		return need
 	var nm := String(HomeLayout.CATALOG[String(e["id"])]["name"]).to_lower()
-	return "Swing a hammer at the %s (%d/%d)" % [nm, int(e["site"]["got"]), int(e["site"]["need"])]
+	return "Hold to hammer the %s (%d/%d)" % [nm, int(e["site"]["got"]), int(e["site"]["need"])]
 
 func use(it: Dictionary) -> void:
 	if String(it["kind"]) == "hob":
 		talk()
 		return
-	if swing_cd > 0.0:
-		return
 	var e := FarmSites.entry(int(it["u"]))
-	if e.is_empty() or not FarmSites.has_site(e):
+	if e.is_empty() or not FarmSites.has_site(e) or h.tw.active():
 		return
-	swing_cd = float(FarmTutorial.option("swing_cooldown_s"))
+	var need := FarmSites.need_text(e)
+	if need != "":
+		h._toast(need)
+		return
+	site_u = int(e["u"])
+	h.tw.begin("hammer", HomeLayout.deco_center(e), _land_swing, HunterTool.period("hammer") * 0.4)
+	FarmSites.call_helpers(h.hw, e)
+
+## The hammer comes down on the site: one swing of labour. False when the build is done or waiting.
+func _land_swing() -> bool:
+	var e := FarmSites.entry(site_u)
+	if e.is_empty() or not FarmSites.has_site(e):
+		return false
 	FarmSites.player_swing(h.hw, e)
 	FarmTutorial.event("swing")
 	h._refresh_top()
+	e = FarmSites.entry(site_u)
+	if e.is_empty() or not FarmSites.has_site(e):
+		return false
+	var need := FarmSites.need_text(e)
+	if need != "":
+		h._toast(need)
+		return false
+	return true
+
+## Every frame: keeps the hammering going while you hold the key and stay at the site.
+func _hammer(dt: float) -> void:
+	if h.tw.tool != "hammer":
+		site_u = -1
+		return
+	var e := FarmSites.entry(site_u)
+	var at := Vector2(h.ppos.x, h.ppos.z)
+	var away := e.is_empty() or at.distance_to(Vector2(h.tw.target.x, h.tw.target.z)) > _reach(e)
+	var walking := Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down")).length() > 0.2
+	if away or walking or h.panel_open != "":
+		h.tw.stop()
+		return
+	h.tw.tick(dt, h.tw.held())
+
+## How far from the middle of a site you can keep hammering (the same reach as finding it).
+func _reach(e: Dictionary) -> float:
+	var sz := HomeLayout.size_of(String(e["id"]), int(e.get("r", 0)))
+	return maxf(sz.x, sz.y) * 0.5 + SITE_REACH
+
+## The swing in progress on a site, for its bar: {u, k} with k the share of the swing done (else {}).
+func live() -> Dictionary:
+	if h.tw.tool != "hammer" or site_u < 0:
+		return {}
+	var period := HunterTool.period("hammer")
+	return {"u": site_u, "k": clampf(h.tw.swing_t / (period * HunterTool.IMPACT), 0.0, 1.0)}
 
 ## Talks to him face to face (HobTalk).
 func talk() -> void:
