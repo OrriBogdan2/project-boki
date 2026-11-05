@@ -242,9 +242,9 @@ func _trail(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	shot.global_position = P.pos + Vector3(0, 1, 0)
 	V.trail(P, "shot", shot)
 	ok(V.ribbons.size() == 1, "a projectile gets its trail")
-	for i in 4:
+	for i in 4:      # (ticked by hand: on a loaded box a frame's delta can outlast the tail)
 		shot.global_position += Vector3(0.5, 0, 0)
-		await main.get_tree().process_frame
+		V._tick_ribbon(V.ribbons[0], 0.02)
 	ok((V.ribbons[0]["pts"] as Array).size() >= 3, "the trail follows the projectile")
 	shot.visible = false
 	for i in 30:

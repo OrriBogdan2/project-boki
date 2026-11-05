@@ -664,6 +664,8 @@ func _tick_ribbon(e: Dictionary, delta: float) -> bool:
 		var gone: bool = not is_instance_valid(follow) or not (follow as Node3D).is_visible_in_tree()
 		if not gone and now <= float(e["dur"]):
 			pts.push_front([(follow as Node3D).global_position, now])
+			if pts.size() > RIBBON_SAMPLES:
+				pts.pop_back()
 		elif now <= float(e["dur"]):
 			e["dur"] = now          # the projectile ended: the tail runs out from here
 	elif now <= float(e["dur"]) and is_instance_valid(h):
