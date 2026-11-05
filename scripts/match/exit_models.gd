@@ -194,10 +194,12 @@ static func hatch() -> Node3D:
 	root.add_child(Models.icon_badge("hatch", 1.5))
 	return root
 
-## The outpost's uplink: a stone plinth with a brass console and a tall mast topped with a crystal.
-## The lift is a ring of pylons around it that opens a column of light when the uplink is complete.
-## Named children: Mast/Crystal (spins and glows while charging), Charge (a ring that fills),
-## Lift (the open way out), Beam (the charging column), Sparks.
+## The outpost's uplink: a stone plinth with a brass console, a tall mast topped with a crystal and a
+## banner on the mast, and four pylons that make the lift. It shows its state through the object itself
+## (OutpostLook): the crystal and the pylon lamps fill with the charge, the banner climbs the mast in the
+## holder's team colour. The lift is the column of light that opens when the uplink is complete.
+## Named children: Mast/Crystal, Banner/Cloth, Lamp0..3, Charge (a ring that fills, shown only while it
+## matters), Zone (the yard's edge, shown only while it matters), Lift (the open way out).
 static func uplink() -> Node3D:
 	var root := Node3D.new()
 	var stone := Models.toon(Color("8a8f9c")); var dark := Models.toon(Color("4a4e5c")); var brass := Models.toon(Color("e0b84a"), true, 0.25)
@@ -207,38 +209,48 @@ static func uplink() -> Node3D:
 	else:
 		Models.part(root, Models.cyl(0.8, 0.95, 0.36, 8), stone, Vector3(0, 0.18, 0))
 	Models.part(root, Models.box(0.8, 0.7, 0.5), dark, Vector3(0, 0.7, 0.25))
-	var screen := Models.part(root, Models.box(0.6, 0.36, 0.05), Models.toon(UPLINK, false, 0.6), Vector3(0, 0.82, 0.52), Vector3.ONE, Vector3(-0.35, 0, 0))
-	screen.name = "Screen"
+	var screen_mat := Models.toon(OutpostLook.NEUTRAL, false, 0.2)
+	var tilt := Vector3(-0.35, 0, 0)
+	Models.part(root, Models.box(0.6, 0.36, 0.05), screen_mat, Vector3(0, 0.82, 0.52), Vector3.ONE, tilt, "Screen")
 	var mast := Node3D.new(); mast.name = "Mast"; root.add_child(mast)
 	Models.part(mast, Models.cyl(0.09, 0.14, 3.2, 8), dark, Vector3(0, 2.0, -0.15))
 	for y in [1.4, 2.2, 3.0]:
 		Models.part(mast, Models.cyl(0.32, 0.32, 0.06, 10), brass, Vector3(0, y, -0.15))
 	var cr := Node3D.new(); cr.name = "Crystal"; cr.position = Vector3(0, 3.9, -0.15); mast.add_child(cr)
-	var pm := PrismMesh.new(); pm.size = Vector3(0.5, 0.7, 0.5)
-	var cm := Models.toon(UPLINK.darkened(0.15), true, 0.4)
-	if Flora.v2():
-		cm.set_shader_parameter("gloss", 0.7)
-		Models.part(cr, Models.crystal(0.26, 0.95, 6), cm, Vector3(0, 0.12, 0))
-		Models.part(cr, Models.crystal(0.26, 0.45, 6), cm, Vector3(0, -0.45, 0), Vector3.ONE, Vector3(PI, 0, 0))
-	else:
-		Models.part(cr, pm, cm, Vector3(0, 0.35, 0))
-		Models.part(cr, pm, cm, Vector3(0, -0.35, 0), Vector3.ONE, Vector3(PI, 0, 0))
-	PropAnim.on(cr, 0.6, 0.08)
-	# the lift: four pylons round the plinth, and the light that opens between them
+	var cm := Models.toon(OutpostLook.NEUTRAL, true, 0.0)
+	cm.set_shader_parameter("gloss", 0.7)
+	Models.part(cr, Models.crystal(0.26, 0.95, 6), cm, Vector3(0, 0.12, 0))
+	Models.part(cr, Models.crystal(0.26, 0.45, 6), cm, Vector3(0, -0.45, 0), Vector3.ONE, Vector3(PI, 0, 0))
+	var banner := Node3D.new()
+	banner.name = "Banner"
+	banner.position = Vector3(0, OutpostLook.BANNER_LOW, -0.15)
+	mast.add_child(banner)
+	Models.part(banner, Models.box(1.25, 0.08, 0.08), dark, Vector3(0.55, 0, 0))
+	var cloth_mat := Models.toon(OutpostLook.NEUTRAL, false, 0.0)
+	var cloth_at := Vector3(0.55, -0.7, 0)
+	Models.part(banner, Models.box(1.0, 1.3, 0.04), cloth_mat, cloth_at, Vector3.ONE, Vector3.ZERO, "Cloth")
+	PropAnim.on(cr, 0.25, 0.04)
+	# the lift: four pylons round the plinth, each capped with a lamp that lights as the charge fills
 	for i in 4:
 		var a := TAU * i / 4.0 + PI / 4.0
 		Models.part(root, Models.box(0.3, 1.2, 0.3), stone, Vector3(cos(a) * 1.9, 0.6, sin(a) * 1.9))
 		if Flora.v2():
 			Models.part(root, Models.box(0.42, 0.14, 0.42), Models.toon(Color("a49e94")), Vector3(cos(a) * 1.9, 1.24, sin(a) * 1.9), Vector3.ONE, Vector3(0, -a, 0))
 			Models.part(root, Models.box(0.44, 0.16, 0.44), Models.toon(Color("6e6a66")), Vector3(cos(a) * 1.9, 0.08, sin(a) * 1.9), Vector3.ONE, Vector3(0, -a, 0))
-		Models.part(root, Models.box(0.1, 0.6, 0.32), Models.toon(UPLINK, false, 0.7), Vector3(cos(a) * 1.9, 0.9, sin(a) * 1.9), Vector3.ONE, Vector3(0, -a, 0))
+		var lamp_at := Vector3(cos(a) * 1.9, 1.38, sin(a) * 1.9)
+		var lamp_mat := Models.toon(OutpostLook.NEUTRAL, false, 0.0)
+		Models.part(root, Models.box(0.3, 0.1, 0.3), lamp_mat, lamp_at, Vector3.ONE, Vector3(0, -a, 0), "Lamp%d" % i)
 	var charge := MeshInstance3D.new(); charge.name = "Charge"; charge.mesh = Models.flat_quad(5.2)
 	var chm := Models.ring_mat(Color(UPLINK.lightened(0.3), 0.95), 0.08)
 	chm.set_shader_parameter("arc", 0.0)
-	charge.material_override = chm; charge.position.y = 0.08
+	charge.material_override = chm
+	charge.position.y = 0.08
+	charge.visible = false
 	root.add_child(charge)
 	var zone := MeshInstance3D.new(); zone.name = "Zone"; zone.mesh = Models.flat_quad(5.2)
-	zone.material_override = Models.ring_mat(Color(UPLINK, 0.35), 0.035); zone.position.y = 0.07
+	zone.material_override = Models.ring_mat(Color(UPLINK, 0.35), 0.035)
+	zone.position.y = 0.07
+	zone.visible = false
 	root.add_child(zone)
 	var lift := Node3D.new(); lift.name = "Lift"; lift.visible = false; root.add_child(lift)
 	var pad := MeshInstance3D.new(); pad.mesh = Models.flat_quad(3.6)
@@ -246,12 +258,8 @@ static func uplink() -> Node3D:
 	lpm.set_shader_parameter("fill", 0.25)
 	pad.material_override = lpm; pad.position.y = 0.09
 	lift.add_child(pad)
-	lift.add_child(_beam(UPLINK, 30.0, 1.5, 1.7, 0.18))
-	var col := _beam(UPLINK, 34.0, 0.25, 0.4, 0.3); col.name = "Beam"; col.visible = false
-	root.add_child(col)
-	root.add_child(_sparks(UPLINK, 40, 1.5, 3.0, "Sparks"))
+	lift.add_child(_beam(UPLINK, 9.0, 1.5, 1.7, 0.14))
 	Flora.paint_set_piece(root)
-	root.add_child(Models.icon_badge("uplink", 2.5))
 	return root
 
 ## Corner posts with pennants for an outpost on a map without authored walls.
