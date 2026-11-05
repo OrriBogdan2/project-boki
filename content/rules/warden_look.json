@@ -129,6 +129,9 @@
 				"far_lift": 0.5,
 				"light_neutral_warm": 0.8
 			},
+			"glow-keyhole": {
+				"glow": 1.0
+			},
 			"metal": {
 				"top_light": 0.5,
 				"fres": 0.5,

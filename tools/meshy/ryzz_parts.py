@@ -35,7 +35,7 @@ def _lin(hexc):
 ATLAS = 256
 
 
-def _atlas(name, cells, gradients=()):
+def _atlas(name, cells, gradients=(), lines=0.07):
     """A 256 atlas: flat 32 px cells (row-major from the bottom, 8 a row, the first four rows) and, in the top half,
     vertical gradients (one 32 px column each: [(v, hex), ...] from v 0 at y 128 to v 1 at the top)."""
     img = bpy.data.images.new(name, ATLAS, ATLAS, alpha=False)
@@ -51,10 +51,23 @@ def _atlas(name, cells, gradients=()):
             col = np.array([np.interp(v, vs, cs[:, k]) for k in range(3)])
             px[y, gi * 32:(gi + 1) * 32, :3] = col
             # (fine hair lines across the column)
-            px[y, gi * 32:(gi + 1) * 32, :3] *= (0.93 + 0.07 * np.sin(np.arange(32) * 1.9))[:, None]
+            px[y, gi * 32:(gi + 1) * 32, :3] *= _strands(lines)[:, None]
     img.pixels = px.ravel()
     img.pack()
     return img
+
+
+def _strands(k):
+    """A gradient column's strand lines across its 32 px: the old faint sine (k <= 0.1), or (round 10, Ryzz's
+    pigtails: strand-lined curls) a dark 1 px line every 6 px with a pale one between, k deep."""
+    x = np.arange(32)
+    if k <= 0.1:
+        return 0.93 + 0.07 * np.sin(x * 1.9)
+    f = np.ones(32)
+    f[x % 6 == 0] = 1.0 - k
+    f[(x % 6 == 1) | (x % 6 == 5)] = 1.0 - k * 0.45
+    f[x % 6 == 3] = 1.0 + k * 0.35
+    return f
 
 
 def _cell_uv(i):
@@ -225,9 +238,11 @@ def pigtails(body, arm, rig, K, sp):
                 yk = rng.uniform(-1.0, 1.0) * float(T.get("depth", 0.025))     # (front to back across the mass)
                 sk = rng.uniform(0.85, 1.1)
                 if flick:
-                    ln = L * rng.uniform(0.4, 0.55)
+                    ln = L * rng.uniform(*T.get("flick_len", [0.4, 0.55]))
+                    kick = float(T.get("flick_kick", 0.01))
                     ctrl = [s0, s0 + d * ln * 0.4 + spread, s0 + d * ln * 0.75 + out * ln * 0.3 + spread * 1.6,
-                            s0 + d * ln * 0.85 + out * ln * 0.65 + spread * 2 + up * 0.01]
+                            s0 + d * ln * 0.85 + out * ln * 0.65 + spread * 2 + up * kick,
+                            s0 + d * ln * 0.9 + out * ln * 0.85 + spread * 2.2 + up * kick * 2.2]
                 else:
                     # the S-curl: up and out off the tie into a puff, over and down outside, in, out, and in at the jaw
                     ctrl = [s0, s0 + d * S[0][0] + spread * 0.5]
@@ -269,9 +284,12 @@ def pigtails(body, arm, rig, K, sp):
                     p = np.stack([np.interp(tq, s_b, p[:, i]) for i in range(3)], axis=1)
                 w0 = float(T.get("width", 0.024)) * rng.uniform(0.8, 1.2)
                 se = int(T.get("streak_every", 0))
-                part = "lock_pk" if (se and k % se == 2) or flick else ("lock" if k % 4 else "lock_dk")
+                part = ("lock_fl" if T.get("flame") else "lock_pk") if flick else (
+                    "lock_pk" if se and k % se == 2 else ("lock" if k % 4 else "lock_dk"))
                 v0 = len(bld.v)
-                if part == "lock_pk":
+                if flick:
+                    w0 *= float(T.get("flick_w", T.get("streak_w", 1.0)))     # (a flame: a lock's width at its base)
+                elif part == "lock_pk":
                     w0 *= float(T.get("streak_w", 1.0))       # (the streaks: thinner pink locks among the blue)
                 _lock(bld, p, w0, w0 * float(T.get("thick", 0.5)), off if flick else out, part, sides=int(T.get("sides", 6)),
                       vk=float(T.get("v_k", 1.0)), root=float(T.get("root_taper", 0.0)))
@@ -279,14 +297,16 @@ def pigtails(body, arm, rig, K, sp):
         chains.append((side, locks))
     ob = bld.object("Pigtails")
     img = _atlas("pigtail_atlas", ["b87333", "8a5228"],
-                 [[(0.0, "5f8fd4"), (0.5, "84b4ee"), (0.68, "c878d0"), (0.85, "f060b0"), (1.0, "ff7ec4")],
-                  [(0.0, "4c78bc"), (0.5, "6c9cdc"), (0.68, "b464bc"), (0.85, "e04c9e"), (1.0, "f46ab4")],
-                  [(0.0, "e45aa8"), (0.35, "f078bc"), (0.6, "c870cc"), (0.85, "f060b0"), (1.0, "ff7ec4")]])
+                 [[(0.0, "5486d0"), (0.5, "6aa0e8"), (0.68, "c070d0"), (0.85, "f060b0"), (1.0, "ff7ec4")],
+                  [(0.0, "4470b8"), (0.5, "5a8cd4"), (0.68, "b05cbc"), (0.85, "e04c9e"), (1.0, "f46ab4")],
+                  [(0.0, "e45aa8"), (0.35, "f078bc"), (0.6, "c870cc"), (0.85, "f060b0"), (1.0, "ff7ec4")],
+                  [(0.0, "5f8fd4"), (0.3, "7c98e0"), (0.5, "d466be"), (0.75, "f04ca8"), (1.0, "ff70c0")]],
+                 lines=float(sp.get("strand_lines", 0.07)))
     mh = _material(ob, "hair-pigtail", img)
     mm = _material(ob, "metal-pigtail", img)
     for p in ob.data.polygons:
         p.material_index = mm if bld.part[p.vertices[0]] == "copper" else mh
-    _uv_flat(ob, bld, {"copper": 0}, {"lock": 0, "lock_dk": 1, "lock_pk": 2})
+    _uv_flat(ob, bld, {"copper": 0}, {"lock": 0, "lock_dk": 1, "lock_pk": 2, "lock_fl": 3})
     nb = int(sp.get("bones", 3))
     for side, locks in chains:
         falls = [lk for lk in locks if not lk[3]]
