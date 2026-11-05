@@ -426,3 +426,13 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Kael 57: shrink the swing while Haul Slam is armed (a 3 m+ swung arrival misses it)? Chain bow size, and should allies see the predicted line?
 - Sable 53+54: a self-slow during Encore? Is GROUNDED enough for the Bola's slow?
 - Queue change: ART-1 Hem now uses hem_v4_needlebow.png + hem_v4_props.png (owner-picked). Next slot: kit Breaker 59 and Pip scale (108).
+
+## 2026-11-05 S2: READY FOR OWNER APPROVAL: BOKI starter Vespyx ext/boki-starter 5aaaf165 (not wired)
+- Based on origin/main fe51b43b. Vespyx (cindle) chosen as STARTERS[0] / Field Book #1. Scripted Blender model, 11,722 tris with 4 work props, 39 bones, 11 face shapes (happy/sad/sleepy/angry +), 12 clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry. Identity rolls per docs/BOKI_IDENTITY.md work on the rig. New BokiRig/BokiDna, 2 shaders, --boki-rig-check, docs/art/kin/RIGGED_BOKI.md. 18 Meshy credits (balance 3262). No reserved file edited.
+- **Wiring for ext (reserved/home files, not applied):**
+  - scripts/match/kin_models.gd, first line of build(): `if BokiRig.has(species): return BokiRig.build(species, flex, c, mats)`
+  - scripts/home/home.gd, after the `n.set_meta("kstate", ...)` line: `n.set_meta("kwork", BokiRig.work_clip(k))` and `n.set_meta("kact", "pet" if float(k.get("hold_t", 0.0)) > 0.0 else ("eat" if k.has("eat") else ""))`
+- Checks wired: --check 0, boki-follow 85/0, boki-system 78/0, boki-rig 0, unique 0, plus mantle, drop, extract, boss, duel, revive, economy, home-build, arena 86, archetype 339, airheal, record, blight, raid, kinbox, hatch all 0; merge-form 1 fail, obstacle 1, teammate 1, bot-sanity 1: each also fails unwired. Unwired tip: health --strict, style OK. Not run wired: health.
+- Shots: ext/hero-shots-s2 b8273409 boki/starter/ (turntable, animation_sheet, faces, coats, match, farm, ingame_*, 12 clip GIFs).
+- Open: on the farm non-chop/ore jobs idle while home_work still rocks Body, so she looks tipped (visible in ingame_farm.png); carry shows two held items; no blend tree; hop cancels home's bounce; no element VFX; no perf number from S1; night looks unchecked.
+- Owner Qs: Vespyx as "the starter", or all three eggs (Prismander, Mycroll next)? Palette: model is brighter #7c4fa2 vs data #4a2f5c; keep or match data? Tools in the tail, or in the pincers?
