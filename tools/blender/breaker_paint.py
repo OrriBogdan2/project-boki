@@ -61,7 +61,7 @@ def form(f, p, n, steps=(0.012, 0.035, 0.09), wide=5.0):
         o = np.zeros(3, np.float32)
         o[i] = e2
         lap2 += f.sample(p + o) + f.sample(p - o)
-    return ao, lap / e + 0.8 * lap2 / e2
+    return ao, np.clip(lap / e, -1.5, 1.0) + 0.6 * np.clip(lap2 / e2, -1.0, 0.7) * (wide > 1.5)
 
 
 def shade(col, ao, curv, n, cav=0.55, hi=0.28, tint=(0.62, 0.68, 0.92)):
@@ -154,7 +154,7 @@ def p_head(p, n, c):
     bm = smooth(0.006, -0.003, br0 + (vnoise(x * 3.2, y, z * 0.5, 240.0) - 0.5) * 0.012) * (ax < 0.118) * (ax > 0.012) * (y > 0.07)
     hairs = 0.72 + 0.56 * vnoise(x * 1.0, y, z * 7.0, 170.0)
     col = mix(col, C("bb4a2a") * hairs[:, None], bm)
-    col = shade(col, ao, cv, n, 0.8, 0.42)
+    col = shade(col, ao, cv, n, 0.6, 0.42)
     # lips, gums, teeth, tusks, nose, inner ears, lids
     ones = np.ones((len(p), 1), np.float32)
     col = np.where((lab == B.LIP)[:, None], shade(C("7c5f9c") * ones, ao, cv, n, 0.5, 0.5), col)
@@ -176,8 +176,8 @@ def p_head(p, n, c):
 
 def p_mantle(p, n, c):
     f = c["f"]
-    ao, cv = form(f, p, n)
-    a2, _ = form(c["f2"], p, n, (0.05, 0.1))
+    ao, cv = form(f, p, n, (0.01, 0.025), 1.0)
+    a2, _ = form(c["f2"], p, n, (0.05, 0.1), 1.0)
     lab = f.label(p)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
     base = mix(C("cfbf9a"), C("a8987a"), fbm(x, y, z, 9.0, 3)[:, None] * 1.1)
@@ -198,7 +198,7 @@ def p_mantle(p, n, c):
 
 def p_shorts(p, n, c):
     f = c["f"]
-    ao, cv = form(f, p, n)
+    ao, cv = form(f, p, n, (0.01, 0.025), 1.0)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
     col = mix(C("6a7050"), C("454a38"), fbm(x, y, z, 7.0, 3)[:, None] * 1.2)
     col = mix(col, C("9aa08a"), smooth(0.56, 0.75, fbm(x, y, z, 20.0, 3)) * 0.4)
@@ -207,7 +207,7 @@ def p_shorts(p, n, c):
 
 def p_rag(p, n, c):
     f = c["f"]
-    ao, cv = form(f, p, n)
+    ao, cv = form(f, p, n, (0.01, 0.025), 1.0)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
     col = mix(C("9a8a68"), C("6a5a44"), fbm(x, y, z, 7.0, 3)[:, None] * 1.1)
     col = mix(col, C("4a3e30"), smooth(0.4, 0.3, z) * 0.45)
@@ -227,7 +227,7 @@ def p_beard(p, n, c):
     lab = f.label(p)
     tuft = (lab == 2)
     col = np.where(tuft[:, None], mix(col, C("cdeeff"), smooth(1.07, 0.99, z) * 0.0 + smooth(0.05, 0.0, z - np.minimum(z, 1.03)) * 0.7), col)
-    return shade(col, ao, cv * 1.1, n, 0.9, 0.5, (0.5, 0.25, 0.4))
+    return shade(col, ao, cv * 0.8, n, 0.7, 0.5, (0.6, 0.35, 0.45))
 
 
 def p_ice(p, n, c):
@@ -263,7 +263,7 @@ def p_hammer_ice(p, n, c):
 
 def p_iron(p, n, c):
     f = c["f"]
-    ao, cv = form(f, p, n, (0.005, 0.014, 0.03))
+    ao, cv = form(f, p, n, (0.005, 0.014, 0.03), 1.0)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
     lab = f.label(p)
     col = mix(C("6a6a72"), C("3e3f48"), fbm(x, y, z, 14.0, 3)[:, None] * 1.1)
@@ -276,7 +276,7 @@ def p_iron(p, n, c):
 
 def p_wood(p, n, c):
     f = c["f"]
-    ao, cv = form(f, p, n)
+    ao, cv = form(f, p, n, (0.01, 0.025), 1.0)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
     g = vnoise(x * 3.5, y * 3.5, z * 0.22, 60.0)[:, None]
     col = mix(C("9a7a50"), C("4e3a26"), g * 1.2)
@@ -288,7 +288,7 @@ def p_wood(p, n, c):
 
 def p_shield(p, n, c):
     f = c["f"]
-    ao, cv = form(f, p, n, (0.006, 0.018, 0.045))
+    ao, cv = form(f, p, n, (0.006, 0.018, 0.045), 1.0)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
     lab = f.label(p)
     # planks: vertical, each its own tone, dark seams
@@ -308,7 +308,7 @@ def p_shield(p, n, c):
     # snow on the broken planks' tops
     top = z > 0.3
     col = np.where((top & (n[:, 2] > 0.3))[:, None], C("f4fbff") * np.ones((len(p), 1), np.float32), col)
-    return shade(col, ao, cv * 1.0, n, 0.85, 0.6, (0.6, 0.55, 0.62))
+    return shade(col, ao, cv * 0.8, n, 0.7, 0.6, (0.7, 0.62, 0.66))
 
 
 def p_rope(p, n, c):

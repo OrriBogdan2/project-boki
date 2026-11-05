@@ -408,7 +408,7 @@ def main():
     bpy.ops.object.mode_set(mode="EDIT")
     bpy.ops.mesh.select_all(action="SELECT")
     bpy.ops.uv.select_all(action="SELECT")
-    bpy.ops.uv.pack_islands(rotate=True, scale=True, margin=0.004)
+    bpy.ops.uv.pack_islands(rotate=True, scale=True, margin=0.0035, shape_method="CONCAVE")
     bpy.ops.object.mode_set(mode="OBJECT")
     print("uvs", time.time() - t0, flush=True)
 
@@ -529,7 +529,7 @@ def main():
             z = vs[:, 2]
             W["hips"] = 3.0 * S.smooth(1.31, 1.25, z)
         elif nm == "beard":
-            W = {"head": 3.0 * S.smooth(1.33, 1.28, vs[:, 2]) + 0.0}
+            W = {"head": 3.0 * S.smooth(1.27, 1.33, vs[:, 2]) + 0.02}
             for pn, js in chains.items():
                 if pn.startswith("braid"):
                     W2 = chain(js, ["spring_%s_%d" % (pn, i) for i in range(3)], vs)
@@ -628,9 +628,10 @@ def main():
     M = Matrix(((-1, 0, 0, G[0]), (0, 0, -1, G[1]), (0, 1, 0, G[2]), (0, 0, 0, 1)))
     M = Matrix(((1, 0, 0, G[0]), (0, 0, -1, G[1]), (0, 1, 0, G[2]), (0, 0, 0, 1)))
     seat.matrix_world = M
-    w = bpy.data.objects.new("weapon", None)
-    bpy.context.scene.collection.objects.link(w)
-    w.parent = arm
+    for nm in ("weapon", "shield"):      # (markers: the loader hides the procedural weapon and prow)
+        w = bpy.data.objects.new(nm, None)
+        bpy.context.scene.collection.objects.link(w)
+        w.parent = arm
     tn = K.tris([bd, hm])
     print("tris", tn, "body", K.tris([bd]), "hammer", K.tris([hm]), time.time() - t0, flush=True)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "breaker_art1.blend"))
