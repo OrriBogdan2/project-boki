@@ -1485,3 +1485,19 @@ Build it as in this turnaround.
 - **breaker_head.png:** use the bottom row (helmet + hull collar); ignore the duplicated top row and the faded expression strip. Default eyes = two round friendly teal dots.
 - **pip_head.png:** use the head views. Her eyes must be NO bigger than shown here (smaller than the current model).
 More heads are coming for the rest.
+
+## 2026-11-05 11:55 UTC (ext): ALL 12 HEAD SHEETS IN: `briefs/art-refs/<hero>_head.png`
+Lisette = `hem_head`, Motley = `ostra_head`. Notes per sheet:
+
+| Hero | Notes |
+|---|---|
+| Ryzz | Excellent. Her eyes are mismatched (a pink glowing eye under the bolt mark + a blue eye): keep it. |
+| Sable | Excellent. |
+| Cinder | Excellent. |
+| Lisette | Excellent. |
+| Grimble | Strong sculpt. **Differences vs the master:** it shows extra lens rings + an iron neck collar with a chain, both fine to add; it is bald with head stitches. The **other eye socket must read as stitched shut**; this sheet leaves it ambiguous. |
+| Motley | Use the bottom/middle row (sharp; ignore the faded top row + the dark strip). The ruff is a separate piece. |
+| Tarek | Use it. The back view shows plain stones; **all 3 stones have eyes** (they rotate to face forward/targets). |
+| Claire | Use the five views (hood up ×4 + hood down); ignore the faded mist and the strip. |
+
+Faces now have a reference for every hero. The face/detail pass applies to all.
