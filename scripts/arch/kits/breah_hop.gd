@@ -108,16 +108,39 @@ func spot_for(dir: Vector2, after: int) -> Dictionary:
 	while want > 0.3:
 		var p := h.pos + Vector3(dir.x, 0, dir.y) * want
 		var g: float = m.world.ground_at(p.x, p.z)
-		if g <= World.VOID + 1.0:
+		if not _clear(dir, want):
+			pass
+		elif g <= World.VOID + 1.0:
 			if _ground_ahead(p, dir, far * after + 0.5):
-				var base := h.pos.y - top
-				if HeroZones.fits(m, Vector3(p.x, g, p.z), g, false) or m.world.is_void(p.x, p.z):
-					return {"at": Vector3(p.x, base, p.z), "rock": true, "feet": h.pos.y}
-		elif g - h.pos.y < 2.5 and m.world.occupy(p.x, p.z, h.r, g, false) == 0.0:
+				return {"at": Vector3(p.x, h.pos.y - top, p.z), "rock": true, "feet": h.pos.y}
+		elif g - h.pos.y < 2.5 and _lands(p, g):
 			var fit: bool = HeroZones.fits(m, Vector3(p.x, g, p.z), g, true, h)
 			return {"at": Vector3(p.x, g, p.z), "rock": fit, "feet": g + (top if fit else 0.0)}
 		want -= 0.25
 	return {}
+
+## A body fits at p on ground g (his own rocks count as he would walk them).
+func _lands(p: Vector3, g: float) -> bool:
+	var was := StoneStand.mover
+	StoneStand.mover = h
+	var free: bool = m.world.occupy(p.x, p.z, h.r, maxf(g, h.pos.y), false) == 0.0
+	StoneStand.mover = was
+	return free
+
+## Nothing solid on the first `want` metres of the line: a hop is low, it doesn't go over walls or trees (a terrace
+## is fine: it is measured from the terrain's own top). His own rocks count as he would walk them.
+func _clear(dir: Vector2, want: float) -> bool:
+	var was := StoneStand.mover
+	StoneStand.mover = h
+	var free := true
+	var d := 0.25
+	while free and d < want:
+		var q := h.pos + Vector3(dir.x, 0, dir.y) * d
+		var y := maxf(h.pos.y, m.world.ground_at(q.x, q.z))
+		free = m.world.occupy(q.x, q.z, 0.05, y, false) == 0.0
+		d += 0.25
+	StoneStand.mover = was
+	return free
 
 ## Solid ground on the line from p, within `reach` metres and not out of a hop's rise?
 func _ground_ahead(p: Vector3, dir: Vector2, reach: float) -> bool:
@@ -166,6 +189,7 @@ func tick(dt: float) -> void:
 	match phase:
 		"crouch":
 			if float(st["t"]) >= CROUCH:
+				_aim_hop()         # he stands on the rock now: the hop is measured from there
 				_kick()
 		"air":
 			_tick_air(dt)
@@ -258,7 +282,20 @@ func _touchdown() -> void:
 	var dir: Vector2 = st["dir"]
 	h.vel.x = 0.0
 	h.vel.z = 0.0
-	k._lunge(float(d["skid"]), float(d["skid_t"]), dir)
+	var run := _skid_room(dir)
+	k._lunge(run, float(d["skid_t"]) * run / float(d["skid"]), dir)
+
+## How far the skid can run: on ground it stops short of an edge, so a chain never slides him off one.
+func _skid_room(dir: Vector2) -> float:
+	var run := float(dd()["skid"])
+	if m.world.is_void(h.pos.x, h.pos.z):
+		return run
+	while run > 0.0:
+		var q := h.pos + Vector3(dir.x, 0, dir.y) * (run + h.r)
+		if not m.world.is_void(q.x, q.z):
+			return run
+		run -= 0.05
+	return 0.0
 
 func _tick_skid(dt: float) -> void:
 	st["left"] = float(st["left"]) - dt

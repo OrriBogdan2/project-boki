@@ -598,6 +598,7 @@ func _breah() -> void:
 	await _leap(m, P, T, home, K, reset)
 	# the base dash (in the air): her own heavy shove move
 	reset.call()
+	P.ex_cd = 0.0
 	P.pos.y += 1.5
 	P.grounded = false
 	P.do_dash()
@@ -911,10 +912,10 @@ func _air_dash_hold(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	step(m, 0.8)
 
 ## Item 35: her own ground (Rock Hop) and air (the long dash) moves, ids no other hero's table has, each one
-## keyed to end with its dash (the leap's crouch and flight; the air dash's time with the dash feel), and
-## neither dash draws a ground ring or a blast (the leap's hit area is its landing circle, shown in flight).
+## keyed to end with its dash (a hop's flight; the air dash's time with the dash feel), and
+## neither dash draws a ground ring or a blast (the hit area is the landing circle, shown in flight).
 func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
-	var ids := ["breah_dash", "breah_exdash"]
+	var ids := ["breah_hop", "breah_exdash"]
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
 		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
 	ok(
@@ -923,7 +924,7 @@ func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, rese
 			and not others.any(func(t): return ids.any(func(id): return (t as Dictionary).has(id)))
 	)
 	var feel_t := float(K.dash_feel()["time"])
-	var ground_t := DolmKit.LEAP_CROUCH + float(K.dash_def()["time"]) * feel_t
+	var ground_t := float(K.dash_def()["time"]) * feel_t
 	var air_t := float(P.cdat["ex_time"]) * feel_t
 	var lengths: Array = ids.map(func(id): return float((KMovesStone.MOVES[id]["keys"] as Array)[-1][0]))
 	ok(
@@ -974,8 +975,9 @@ func _chain(m: Match, P: Hunter, K: DolmKit, aims: Array) -> Array:
 				break
 		seen.append(P.pos)
 		aim_at(P, aims[i])
-		P.ak.on_dash(true)
-		m.step(DT * 8)
+		if K.hop.chaining():
+			P.ak.on_dash(true)
+		step(m, DT * 8)
 	for _s in 120:
 		if not K.hop.chaining():
 			break
@@ -1100,7 +1102,7 @@ func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Cal
 		"took %.1f slow %.2f" % [dmg(T), T.slow_t]
 	)
 	reset.call()
-	T.teleport(home + Vector3(reach + 8.5, 0, 0))
+	T.teleport(home + Vector3(reach + 10.5, 0, 0))
 	aim_at(P, far)
 	P.ak.on_dash(false)
 	step(m, 1.9)
@@ -1129,6 +1131,7 @@ func _chain_over(m: Match, P: Hunter, K: DolmKit, far: Vector3, each: Callable) 
 			if K.hop.chaining() and K.hop.st["phase"] == "skid":
 				break
 		P.ak.on_dash(true)
+		step(m, DT * 8, each)
 	step(m, 1.0, each)
 	aim_at(P, far)
 
@@ -1177,6 +1180,7 @@ func _hop_terrain(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, res
 			if K.hop.chaining() and K.hop.st["phase"] == "skid":
 				break
 		P.ak.on_dash(true)
+		step(m, DT * 8)
 	step(m, 0.9)
 	ok(
 		"abyss: a gap in reach: rocks rise over the void, he stands on them and lands across",
@@ -1241,7 +1245,7 @@ func _hop_terrain(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, res
 	_chain(m, P, K, [far, far, far])
 	ok(
 		"rough: a wall ahead: the hops pull back and he never lands inside it",
-		P.pos.x < home.x + 2.0 and P.grounded and not K.hop.chaining(), "x %.2f" % (P.pos.x - home.x)
+		P.pos.x < home.x + 2.0 and P.pos.x > home.x + 0.5 and P.grounded and not K.hop.chaining(), "x %.2f hops %d" % [P.pos.x - home.x, K.hop.chain_hops]
 	)
 	restore.call()
 	# a foe where the rock would rise: no rock in a body
