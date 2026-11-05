@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b3mkmbmp8jqli"
-path="res://.godot/imported/hem_hem_parts_atlas.jpg-d547f5da67321492efdbbb91ab18d3e7.ctex"
+uid="uid://pwayctbtfves"
+path="res://.godot/imported/hem_hem_atlas.jpg-7ddf2b816dbc1a6b74f2159e8a6d3e3e.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "29662f41bedd720eabacd3da3c4038c8"
+"md5": "3296ca9febf4d364f486316bf6ca7512"
 }
 
 [deps]
 
-source_file="res://art/wardens/hem/hem_hem_parts_atlas.jpg"
-dest_files=["res://.godot/imported/hem_hem_parts_atlas.jpg-d547f5da67321492efdbbb91ab18d3e7.ctex"]
+source_file="res://art/wardens/hem/hem_hem_atlas.jpg"
+dest_files=["res://.godot/imported/hem_hem_atlas.jpg-7ddf2b816dbc1a6b74f2159e8a6d3e3e.ctex"]
 
 [params]
 
