@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dn20d0dn6wux5"
-path="res://.godot/imported/burrlet_burrlet_atlas.webp-3860a501a47c338f713cfc2a734d91c1.ctex"
+path.bptc="res://.godot/imported/burrlet_burrlet_atlas.webp-3860a501a47c338f713cfc2a734d91c1.bptc.ctex"
+path.astc="res://.godot/imported/burrlet_burrlet_atlas.webp-3860a501a47c338f713cfc2a734d91c1.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "c01b4f1f0733b487e41b5985ef7410f7"
+"md5": "5818524b00ad41e75619bb71d9f8dc03"
 }
 
 [deps]
 
 source_file="res://art/kin/burrlet/burrlet_burrlet_atlas.webp"
-dest_files=["res://.godot/imported/burrlet_burrlet_atlas.webp-3860a501a47c338f713cfc2a734d91c1.ctex"]
+dest_files=["res://.godot/imported/burrlet_burrlet_atlas.webp-3860a501a47c338f713cfc2a734d91c1.bptc.ctex", "res://.godot/imported/burrlet_burrlet_atlas.webp-3860a501a47c338f713cfc2a734d91c1.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
