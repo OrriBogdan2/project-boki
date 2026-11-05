@@ -1,4 +1,4 @@
-2026-11-04T23:20:12Z
+2026-11-05T00:10:09Z
 
 FOR EXT (owner item queue): READY reports go here as each branch lands.
 READY (owner review): rigfix @ 0fe7a84e (from origin/integ91; +360/-12, 10 files) - briefs/RIGFIX.md. Posted in EXT_TO_MAIN (32f62738), contact sheets in briefs/rigfix/<hunter>_before_after.jpg.
