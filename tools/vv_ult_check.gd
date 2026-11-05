@@ -238,7 +238,8 @@ func _mage_116(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vec
 	ac.step(m, dur - 2.2)
 	ac.aim_at(P, spot)
 	HunterKeys.ult_pressed(P)
-	ac.step(m, float(xd["windup"]) + float(xd["rise"]) + float(xd["hover"]) + float(xd["drop"]) + 0.1, func(): ac.aim_at(P, spot))
+	var whole := float(xd["windup"]) + float(xd["rise"]) + float(xd["hover"]) + float(xd["drop"]) + 0.1
+	ac.step(m, whole, func(): ac.aim_at(P, spot))
 	ok("Kitefall: Static waits for her in the air (2 + the ult's 1 on the stacked foe)",
 			K.spark_n(T) == 3, str(K.spark_n(T)))
 	ok("Kitefall: the waited Static still spreads", K.spark_n(T2) == 3, str(K.spark_n(T2)))
@@ -257,11 +258,13 @@ func _mage_116(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vec
 		ac.aim_at(P, spot)
 		var before := int(U.get("spreads") if U.get("spreads") != null else 0)
 		HunterKeys.ult_pressed(P)
-		ac.step(m, float(xd["windup"]) + float(xd["rise"]) + float(xd["min_air"]) + 0.05, func(): ac.aim_at(P, spot))
+		var air := float(xd["windup"]) + float(xd["rise"]) + float(xd["min_air"]) + 0.05
+		ac.step(m, air, func(): ac.aim_at(P, spot))
 		HunterKeys.ult_pressed(P)
 		ac.step(m, float(xd["drop"]) + 0.1)
 		var drawn := int(U.get("spreads") if U.get("spreads") != null else 0) - before
-		ok("Kitefall: the spread is drawn, stacked foe %s" % ("first" if first == T else "second"), drawn == 1, str(drawn))
+		var when := "first" if first == T else "second"
+		ok("Kitefall: the spread is drawn, stacked foe %s" % when, drawn == 1, str(drawn))
 		ok("Kitefall: and counted", K.spark_n(other) == 3, str(K.spark_n(other)))
 		ac.step(m, 0.6)
 	ac.fresh(T2)
@@ -289,7 +292,8 @@ func _mage_116b(m: Match, P: Hunter, T: Hunter, K: MageKit, home: Vector3) -> vo
 	var quick := hold * float(dd["reset_charge"])
 	ok("Wirerun: the reset run charges in 0.75x the time",
 			absf(K.wire_hold() - quick) < 0.001, "%.3f s" % K.wire_hold())
-	ok("Wirerun: full at that time, 1.5x further", absf(K.wire_len(quick) - far * 1.5) < 0.01, "%.2f m" % K.wire_len(quick))
+	ok("Wirerun: full at that time, 1.5x further", absf(K.wire_len(quick) - far * 1.5) < 0.01,
+			"%.2f m" % K.wire_len(quick))
 	ok("Wirerun: a tap is still a short zap, 1.5x", absf(K.wire_len(0.0) - float(dd["dist"][0]) * 1.5) < 0.01)
 	K._end_wire(true)
 	K.reset_dash_boost = false
