@@ -71,7 +71,7 @@ What the in-game kit card (K) says.
 | Loop | Ranged duelist: stay on one foe, cartwheel, and land the big shot. |
 | Passive: Marks | Each hit on the same foe adds a Mark: +10% damage, with no cap. Knocks heal you. |
 | Dash: Vault | Cartwheel a short way (much further from a jump). Your next bolt is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back at once. |
-| RMB: Bola | A short wind-up, then a Bola down the lane: it grounds the first foe and flies on. Catch a second and both are stunned. |
+| RMB: Bola | A short wind-up, then a Bola down the lane: it grounds and slows the first foe and flies on. Catch a second and both are stunned. |
 | E: Shadow Knife | Throw a dagger to your cursor or into a foe. Press E again to blink to it. |
 | Hunter ultimate: Encore | A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge. |
 | Weapon: Arc Bolts | Bolts from alternating hands every 0.45s. Each one lands at your cursor. |
@@ -84,12 +84,12 @@ What the in-game kit card (K) says.
 
 **Bola (RMB, 7s cooldown).**
 
-- *Tap:* A 0.4s wind-up with the lane showing (you keep aiming), then the Bola flies 7m: 5 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and the Bola flies on 3.8m (a crate it breaks counts as that first catch). It bounces once off a wall. If it catches a second foe, both are stunned 0.9 and take +13 (TANGLED).
+- *Tap:* A 0.4s wind-up with the lane showing (you keep aiming), then the Bola flies 7m: 5 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide) and slowed 30%, and the Bola flies on 3.8m (a crate it breaks counts as that first catch). It bounces once off a wall. If it catches a second foe, both are stunned 0.9 and take +13 (TANGLED).
 - *In the air:* Thrown from the air the same way.
 
 **Shadow Knife (E, 15s cooldown).** Throw a dagger to your cursor (14m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press E again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
 
-**Encore (hunter ultimate, from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; for 2s a blade flies every 0.4s at each foe inside it (5 at most): 8 each, 12 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
+**Encore (hunter ultimate, from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; she dances, and for 2s a blade flies from her hands every 0.2s at each foe inside it (10 at most): 4 each, 6 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
 
 ### Ranks
 
@@ -109,6 +109,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 |---|---|
 | Building up | gold Mark diamonds over the target, one per stack |
 | Armed / full | a full ring of eight diamonds spinning fast (more Marks still count); a gold glint in the hand and a gold aim line while the next bolt is empowered; a violet ring round her and blades circling her while Encore runs |
-| Dash spent | a white cartwheel arc, dash pip dark |
+| Dash spent | a white cartwheel arc, dash pip dark; a landed empowered bolt flashes the pip back with RESET at her hand |
 
 <!-- /gen:kit -->
