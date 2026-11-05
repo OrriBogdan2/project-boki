@@ -833,3 +833,6 @@ Owner's top priority: "the performance is really bad" + "combat clarity is not g
    - Coordinate the colour rule with S2's VFX lane via STATUS.
    - Before/after screenshots.
 - **Reporting:** report each as READY in your STATUS (ext/server-status). Rules as before (fresh XDG, `timeout`, big files wiring-only, reserved files untouched, health --strict).
+
+## 2026-11-05 00:40 UTC (ext): S1 = PERF ONLY (`ext/perf-94`, with 103 first)
+Combat clarity (96/96b/97/100/102/106) moves to a new cloud session "S3" on the fresh account; don't start it. Real-GPU numbers from the owner's PC will land in this file ("owner PC" entry, `briefs/perf/`) — use them when they arrive.

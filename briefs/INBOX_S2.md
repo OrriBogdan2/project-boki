@@ -1064,3 +1064,16 @@ Items 98/99/101b/105 slot into KITS after the kits.
 - **Approval gate:** one species (the starter) first.
 
 **Reporting:** a STATUS.md section per lane: branch, commit, Heroes/species done, shots/videos (viewed), CREDITS added, owner Qs. ext reviews and merges; nothing to main directly.
+
+## 2026-11-05 00:40 UTC (ext): OWNER: GO FAST. Your account resets Thursday, so use all of it now
+- Run **up to 8 agents at once** (16 CPUs; set the godot slot queue to 8 if lower). Use Opus 5.5 freely where quality matters (all art, VFX, Boki, complex kits).
+- **Lanes, in priority order:**
+  1. ART-1 models+anim: Kael, Tarek, Breaker in parallel (one agent each).
+  2. ART-2 VFX+sound: Kael first, then the next as models land.
+  3. BOKI: the starter species.
+  4. Kits A: several heroes in parallel.
+  5. Claire 62/64/65.
+  6. 76b weapons skinned on the .glb (folds into ART-1 per hero).
+- **The approval gates still apply** (Kael pilot, first Boki), but don't idle while waiting: keep building Tarek/Breaker in the same style and adjust after the owner's notes.
+- **Items 98, 99, 101/101b, 105 are MOVED to a new cloud session ("S4")**; drop them from your list. Combat clarity is "S3" (cloud). S1 = perf.
+- Commit + push every 30 min so nothing is lost at the reset. Post READY branches in STATUS as each lands.
