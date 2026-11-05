@@ -2603,6 +2603,7 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 ## worth having. Walking away, going down or emptying the box closes it.
 var loot_open = null          # the box Dictionary, or null
 var loot_panel: PanelContainer
+var loot_hold: PanelContainer   # LootHold: your backpack beside the box while a clicked thing won't fit
 var loot_sig := ""
 
 func loot_is(b: Dictionary) -> bool:
@@ -2615,7 +2616,7 @@ var ui_extra: Array = []      # other panels that own the mouse (the practice ar
 
 ## The cursor is over one of the item windows (deathbox loot, swap, backpack) or a panel in ui_extra.
 func mouse_on_panel() -> bool:
-	for pn in [loot_panel, swap_panel, pack_panel] + ui_extra:
+	for pn in [loot_panel, loot_hold, swap_panel, pack_panel] + ui_extra:
 		if pn != null and is_instance_valid(pn) and pn.visible and not pn.is_queued_for_deletion() and pn.get_global_rect().grow(6.0).has_point(pn.get_global_mouse_position()):
 			return true
 	return false
@@ -2655,6 +2656,7 @@ func open_loot(b: Dictionary) -> void:
 
 func close_loot() -> void:
 	loot_open = null
+	_close_hold()
 	if loot_panel and is_instance_valid(loot_panel):
 		loot_panel.queue_free()
 	loot_panel = null
@@ -2673,7 +2675,36 @@ func _loot_tick(_delta: float) -> void:
 	if sig != loot_sig:
 		_build_loot()
 
+## A clicked box thing that doesn't fit: nothing moves; your backpack opens beside the box with it held.
+## (Public so the screenshot tool can open it.)
+func open_hold(row: Dictionary) -> void:
+	_close_hold()
+	if not LootFull.holdable(row):
+		return
+	var b: Dictionary = loot_open
+	var hi := int(row["i"])
+	var swap := func(mi: int): if LootFull.swap_held(m, m.player, b, hi, mi): _hold_done()
+	var drop := func(mi: int): if LootFull.drop_for_held(m, m.player, b, hi, mi): _hold_done()
+	loot_hold = LootHold.build(m.player, (b["pack"] as Array)[hi], swap, drop, _close_hold)
+	add_child(loot_hold)
+	UI.pop_in(loot_hold)
+	await get_tree().process_frame
+	if is_instance_valid(loot_hold) and loot_panel:
+		loot_hold.position = Vector2(maxf(8.0, loot_panel.position.x - loot_hold.size.x - 12.0), loot_panel.position.y)
+
+func _close_hold() -> void:
+	if loot_hold and is_instance_valid(loot_hold):
+		loot_hold.queue_free()
+	loot_hold = null
+
+func _hold_done() -> void:
+	if (loot_open as Dictionary).get("empty", false):
+		close_loot()
+	else:
+		_build_loot()
+
 func _build_loot() -> void:
+	_close_hold()
 	var p: Hunter = m.player
 	var b: Dictionary = loot_open
 	if loot_panel and is_instance_valid(loot_panel):
@@ -2721,6 +2752,7 @@ func _build_loot() -> void:
 		rs.bg_color = Color(it["col"], 0.12 if it["upgrade"] else 0.06)
 		rs.set_corner_radius_all(9)
 		rs.border_color = Color(it["col"], 0.55 if it["upgrade"] else 0.2); rs.border_width_left = 3
+		var fit := LootFull.fits(p, it, b)
 		rs.content_margin_left = 8; rs.content_margin_right = 8; rs.content_margin_top = 5; rs.content_margin_bottom = 5
 		rp.add_theme_stylebox_override("panel", rs)
 		rp.add_child(row)
@@ -2748,19 +2780,21 @@ func _build_loot() -> void:
 		var itc: Dictionary = it
 		var verb := "Take"
 		if it["key"] == "gear": verb = "Swap"
-		elif it["key"] == "pack" and it.get("full", false): verb = "Swap" if it["upgrade"] else "Full"
+		elif not fit: verb = "Full"
+		elif it["key"] == "pack" and it.get("full", false): verb = "Swap"
 		var take_it := func():
-			if loot_open != null and m.player:
-				Life.take_item(m, m.player, loot_open, itc)
-				if (loot_open as Dictionary).get("empty", false): close_loot()
-				else: _build_loot()
+			if loot_open == null or not m.player:
+				return
+			if not LootFull.click(m, m.player, loot_open, itc):
+				open_hold(itc)
+			elif (loot_open as Dictionary).get("empty", false): close_loot()
+			else: _build_loot()
 		var take := UI.button(verb, take_it, 76)
-		if verb != "Full":
-			_row_click(rp, take_it)
+		_row_click(rp, take_it)
 		take.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		if verb == "Full":
-			take.disabled = true
-			take.tooltip_text = "Your backpack is full of better things"
+		if not fit:
+			LootHold.mark_full(rp)
+			take.tooltip_text = "No room: swap it with something of yours"
 		elif it["key"] == "pack" and it.get("full", false):
 			take.tooltip_text = "Swaps out the least valuable thing in your backpack"
 		row.add_child(take)
@@ -2768,9 +2802,9 @@ func _build_loot() -> void:
 	var foot := UI.hbox(8); v.add_child(foot)
 	var sm := UI.primary("Smart loot  (%s)" % Settings.key_cap("interact"), func():
 		if loot_open != null and m.player:
-			var got := Life.smart_loot(m, m.player, loot_open)
-			toast_small(("Smart looted %d thing%s" % [got, "" if got == 1 else "s"]) if got > 0 else "Nothing here beats what you've got", Color("ffd36a"))
-			close_loot(), 200)
+			var got := LootFull.smart(m, m.player, loot_open)
+			if got > 0 or (loot_open as Dictionary).get("empty", false):
+				close_loot(), 200)
 	foot.add_child(sm)
 	var hint := UI.label("Best first: hands, then your backpack", 12, MUTED)
 	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -2833,39 +2867,7 @@ func _item_panel(title: String, col: Color, width: float) -> Array:
 
 ## One item as a row: icon, name, what it does, its worth, and buttons [[text, callable, primary]].
 func _item_row(it: Dictionary, buttons: Array, note := "") -> Control:
-	var rp := PanelContainer.new()
-	var col := Loot.col_of(it)
-	var rs := StyleBoxFlat.new()
-	rs.bg_color = Color(col, 0.09)
-	rs.set_corner_radius_all(9)
-	rs.border_color = Color(Loot.col_of(it), 0.6); rs.border_width_left = 3
-	rs.content_margin_left = 8; rs.content_margin_right = 8; rs.content_margin_top = 5; rs.content_margin_bottom = 5
-	rp.add_theme_stylebox_override("panel", rs)
-	var row := UI.hbox(8); rp.add_child(row)
-	row.add_child(Icons.Glyph.new(Loot.icon_of(it), Loot.col_of(it), 24.0))
-	var cv := UI.vbox(0); cv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var nm := UI.label(Loot.name_of(it) + (("  ·  " + note) if note != "" else ""), 15, col, UI.semi)
-	nm.autowrap_mode = TextServer.AUTOWRAP_OFF
-	nm.clip_text = true
-	nm.custom_minimum_size.x = 200
-	cv.add_child(nm)
-	var sub := UI.label(Loot.sub_of(it), 12, MUTED)
-	sub.autowrap_mode = TextServer.AUTOWRAP_OFF
-	sub.clip_text = true
-	sub.custom_minimum_size.x = 200
-	sub.tooltip_text = Loot.sub_of(it)
-	sub.mouse_filter = Control.MOUSE_FILTER_PASS
-	cv.add_child(sub)
-	row.add_child(cv)
-	row.add_child(Icons.Glyph.new("gem", Color(GOLD, 0.8), 12.0))
-	var vt := UI.label("%d" % Loot.value(it), 13, GOLD, UI.big)
-	vt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(vt)
-	for bt in buttons:
-		var b: Button = UI.primary(String(bt[0]), bt[1], 76) if bt.size() > 2 and bt[2] else UI.button(String(bt[0]), bt[1], 70)
-		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		row.add_child(b)
-	return rp
+	return LootHold.item_row(it, buttons, note)
 
 ## A scrolling list inside an item window: [scroll, rows]. _fit_panel sizes it.
 func _scroll_rows(v: VBoxContainer) -> Array:
@@ -2901,7 +2903,7 @@ func open_swap(wp: Dictionary) -> void:
 	swap_wp = wp
 	_build_swap()
 	if swap_panel: UI.pop_in(swap_panel)
-	Sfx.play("whoosh", null, -10.0, 0.05, 1.1)
+	Sfx.play("lock_rattle", null, -4.0)
 
 func close_swap() -> void:
 	swap_wp = null
@@ -2921,7 +2923,9 @@ func _build_swap() -> void:
 	var cl := UI.button("✕", func(): close_swap(), 36); cl.flat = true
 	head.add_child(cl)
 	v.add_child(UI.label("Picking up", 12, MUTED, UI.caps))
-	v.add_child(_item_row(incoming, []))
+	var incoming_row := _item_row(incoming, [])
+	LootHold.mark_full(incoming_row)
+	v.add_child(incoming_row)
 	v.add_child(UI.label("Drop one to make room", 12, MUTED, UI.caps))
 	var low := Pack.lowest(p)
 	var sl := _scroll_rows(v)
