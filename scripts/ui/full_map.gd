@@ -635,8 +635,7 @@ func _exit_glyph(c: Control, kind: String, pv: Vector2, col: Color) -> void:
 		"hatch":
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), col)
 		"outpost":
-			c.draw_rect(Rect2(pv - Vector2(5.5, 5.5), Vector2(11, 11)), col, false, 2.0)
-			c.draw_circle(pv, 2.2, col)
+			OutpostGlyph.draw(c, pv, 1.0, col, Color(0.55, 0.58, 0.64, 0.9), 0.0)
 
 ## Left of the map: your squad, who leads the drop, and the keys for it.
 func _side(c: Control, sz: Vector2) -> void:
