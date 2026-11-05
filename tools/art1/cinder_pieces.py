@@ -276,9 +276,16 @@ def fin(s):
         for k in range(rows - 1):
             a = i * rows + k
             fa.append([a, a + 1, a + rows + 1, a + rows])
-    nrm = norm(np.array([s, -0.2, 0.1]))
+    # (the ear faces forward: its true normal, or the two sheets lie on each other and fight)
+    nrm = norm(np.cross(tips[0] - roots[0], tips[3] - roots[0]))
+    if nrm[1] < 0:
+        nrm = -nrm
     n = len(verts)
-    allv = np.vstack([verts, verts - nrm * 0.0022])
+    # (wound so the front sheet faces out on either side)
+    q0 = verts[fa[0]]
+    if np.dot(np.cross(q0[1] - q0[0], q0[2] - q0[0]), nrm) < 0:
+        fa = [q[::-1] for q in fa]
+    allv = np.vstack([verts, verts - nrm * 0.004])
     p = Piece("fin" + side, HEAD_MAT, allv, fa + [[x + n for x in q[::-1]] for q in fa])
     kk = np.tile(np.array(kk), 2)
     p.w = {"head": 1 - smooth(0.0, 0.3, kk), "fin." + side: smooth(0.0, 0.3, kk)}
