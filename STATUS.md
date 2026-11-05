@@ -412,3 +412,17 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Checks 0 failures: --check, hero-combo 263, dancer-combo 126, warden-model 157, warden-glb 182, class-unlock 153, arena 86, tutorial-hud, rig-standard, archetype 352, dash-flow, health --strict, gen_wiki 34 unchanged.
 - Shots: /home/boki/shots-s2/kits/sable/. dance_strip*.png predate the last ring tweak. Not checked: motion (stills only), sound, HUD pip flash, net play, match zoom; one bow looks off her hand in one walking frame (measured grip 0.06 m).
 - Owner Qs: self-slow during Encore (off, per footage)? Bola's slow has no on-screen word, only GROUNDED; enough?
+
+## 2026-11-05 S2: READY FOR OWNER APPROVAL: ART-2 Kael ext/art2-kael 0fbc63e6
+- Based on origin/main fe51b43b. Shared scripts/match/hero_vfx.gd + per-hero content/vfx/juggernaut.json (49 recipes), guide docs/HERO_VFX.md; shader-based flame arc, burning ground, flame wall, trails, GPU motes for every ability. 51 new 44.1 kHz sounds. New --hero-vfx-check, --hero-vfx-reel, tools/sfx_loudness.py. 22 CC0 Kenney "RPG Audio" files logged in docs/ASSET_CREDITS.md.
+- Differs: no Match bus exists (S1's 103 stops voices instead), so Kael stays on SFX/SFXFar one-shots; telegraph shapes unchanged (S3's); continuous holds are local-only online; 420 live particles is provisional until S1 posts a budget.
+- Checks: juggernaut-combo 154/0, hero-combo 263/0, hero-vfx 31/0, --check, archetype, ability, shake, bot-sanity 0 fail, health --strict, gen_wiki pass.
+- Full suite (119 flags on 714abd1c, 2 commits before the tip; targeted checks ran after): 106 clean. Same failures on baseline fe51b43b: abyss, farm-start, grammar-runtime, load, pack-ui, mantle-look, merge-form, obstacle, train. hitch also fails on baseline on the loaded box. title-check failed its frame budget then passed on rerun; bot-sanity timed out then passed. teammate-check: I reran it on this tip and on clean fe51b43b: tip 1 failure, main 2, so it is a main problem ("rival behind you is called before the chest"), not ART-2. **teammate-check is red on main.**
+- Shots: ext/hero-shots-s2 3b268471 art2/kael/; MP4 with sound on disk, not in git: /home/boki/shots-s2/art2/kael/kael_vfx_sound_set.mp4 (42 s, 14.6 MB). Audio measured only, nobody has heard it: reel -26.3 LUFS, peak -4.4 dBFS. Not tested on Forward+/a GPU; perf not benched.
+- Owner Qs: slash arc size (matches his 3 m reach, longer than the blade)? Keep magenta and yellow on the sword or pure ember + gold? Do the synthesized grunts pass, or source a real voice?
+
+## 2026-11-05 S2: open owner questions from the READY kits
+- Hem 55b: two perfect stages with one moving circle OK? OK to lose the rising draw ticks?
+- Kael 57: shrink the swing while Haul Slam is armed (a 3 m+ swung arrival misses it)? Chain bow size, and should allies see the predicted line?
+- Sable 53+54: a self-slow during Encore? Is GROUNDED enough for the Bola's slow?
+- Queue change: ART-1 Hem now uses hem_v4_needlebow.png + hem_v4_props.png (owner-picked). Next slot: kit Breaker 59 and Pip scale (108).
