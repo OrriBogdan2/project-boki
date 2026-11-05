@@ -940,7 +940,7 @@ class Sync extends Node:
 		var hand := skel.global_transform * skel.get_bone_global_pose(blade_bone)
 		var a := hand * blade_root.position
 		var b := hand * blade_tip.position
-		if a.distance_squared_to(b) < 0.00000001:
+		if a.distance_squared_to(b) < 0.000000000001:
 			return
 		var up := Vector3.UP if absf((b - a).normalized().y) < 0.95 else Vector3.RIGHT
 		gun.global_transform = Transform3D(Basis.looking_at(b - a, up), a)
