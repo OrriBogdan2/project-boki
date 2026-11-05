@@ -388,10 +388,13 @@ func _build_ui() -> void:
 	tw.tween_property(bar_bot, "offset_top", -128.0, 1.2).set_trans(Tween.TRANS_SINE)
 	caption = Label.new()
 	caption.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	caption.anchor_left = CAPTION_MARGIN; caption.anchor_right = 1.0 - CAPTION_MARGIN
-	caption.offset_left = 0.0; caption.offset_right = 0.0
-	caption.offset_bottom = -12.0; caption.offset_top = -12.0
-	caption.grow_vertical = Control.GROW_DIRECTION_BEGIN      # a long caption wraps and grows upward: never off screen
+	caption.anchor_left = CAPTION_MARGIN
+	caption.anchor_right = 1.0 - CAPTION_MARGIN
+	caption.offset_left = 0.0
+	caption.offset_right = 0.0
+	caption.offset_bottom = -12.0
+	caption.offset_top = -12.0
+	caption.grow_vertical = Control.GROW_DIRECTION_BEGIN      # a long caption wraps and grows upward
 	caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	caption.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
@@ -482,7 +485,8 @@ func _next_shot() -> void:
 ## Sets the stage for a shot behind the wipe: its light, its specks, the Wyrm in or out.
 ## The caption's text size follows the window's height, so it wraps to a few lines at any size.
 func _fit_caption() -> void:
-	caption.add_theme_font_size_override("font_size", clampi(int(get_viewport().get_visible_rect().size.y / CAPTION_LINES_PER_HEIGHT), 15, 40))
+	var px := int(get_viewport().get_visible_rect().size.y / CAPTION_LINES_PER_HEIGHT)
+	caption.add_theme_font_size_override("font_size", clampi(px, 15, 40))
 
 func _enter(ev: String, mood: String) -> void:
 	_mood(mood)

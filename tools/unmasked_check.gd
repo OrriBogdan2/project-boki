@@ -253,7 +253,8 @@ func _feet(main: Node) -> void:
 				cases += 1
 				m.free()
 				await tree.process_frame
-	ok(worst <= FOOT_TOLERANCE, "feet stay on the ground at min/mid/max height, every build and both sexes, idle and walking (%d bodies, worst %.1f cm)" % [cases, worst * 100.0])
+	ok(worst <= FOOT_TOLERANCE, ("feet stay on the ground at min/mid/max height, every build and both sexes, idle and "
+		+ "walking (%d bodies, worst %.1f cm)") % [cases, worst * 100.0])
 
 ## Items 79b and 80: an older Empty (a skin colour, an outfit, motes) loads as one with a shroud and an aura.
 func _shroud_migration() -> void:
@@ -266,13 +267,16 @@ func _shroud_migration() -> void:
 	Unmasked.migrate(worn)
 	var once: Dictionary = worn["look"].duplicate(true)
 	Unmasked.migrate(worn)
-	ok(worn["look"] == once and not (worn["look"] as Dictionary).has("motes"), "and migrating the save twice changes nothing")
+	ok(worn["look"] == once and not (worn["look"] as Dictionary).has("motes"),
+		"and migrating the save twice changes nothing")
 	var deep := Unmasked.clean({"race": 0, "skin": 700, "outfit": 7, "gender": 1})
-	ok(_in_lists(deep) and int(deep["colour"]) < Unmasked.COLOURS.size(), "an old detailed look's skin colour lands on a shroud colour")
+	ok(_in_lists(deep) and int(deep["colour"]) < Unmasked.COLOURS.size(),
+		"an old detailed look's skin colour lands on a shroud colour")
 	var labels := []
 	for row in Unmasked.ROWS:
 		labels.append(String(row[1]).to_lower())
-	ok(not labels.any(func(l): return l.contains("skin") or l == "motes") and "shroud colour" in labels and "aura" in labels,
+	var old_label := func(l: String) -> bool: return l.contains("skin") or l == "motes"
+	ok(not labels.any(old_label) and "shroud colour" in labels and "aura" in labels,
 		"the creator has no skin colour: a shroud colour in its place, and Aura where Motes was (%s)" % str(labels))
 
 ## Item 79b: no skin shows, the body is under a shroud in the chosen colour, the styles differ, the silhouette
@@ -289,14 +293,14 @@ func _shroud() -> void:
 		var c: Variant = ((mi as MeshInstance3D).material_override as ShaderMaterial).get_shader_parameter("albedo")
 		hand_dark = hand_dark or (c is Color and (c as Color).v < 0.12)
 	ok(hand_dark, "the hands are void-dark: no skin colour on them")
-	var wrap := _build({"unmasked": true, "shroud": 1})
+	var wrapped := _build({"unmasked": true, "shroud": 1})
 	var tatters := _build({"unmasked": true, "shroud": 2})
-	var shapes := [_shape_of(cloak), _shape_of(wrap), _shape_of(tatters)]
+	var shapes := [_shape_of(cloak), _shape_of(wrapped), _shape_of(tatters)]
 	ok(shapes[0] != shapes[1] and shapes[1] != shapes[2] and shapes[0] != shapes[2],
 		"the three shroud styles are different shapes (%s)" % str(shapes))
 	var hem := _bounds(cloak.get_node("Rig/Torso/Skirt"))
 	ok(hem.size.y > 0.3, "a drape hangs from the hips to the ankles over the legs (%.2f m long)" % hem.size.y)
-	for n in [cloak, other, wrap, tatters]:
+	for n in [cloak, other, wrapped, tatters]:
 		n.free()
 
 ## The cloth's colour: the albedo of the shroud's own material (the Skirt's drape).
@@ -319,7 +323,7 @@ func _aura() -> void:
 		"the aura has none / faint / strong (%d / %d specks)" % [Unmasked.AURA_COUNT[1], Unmasked.AURA_COUNT[2]])
 	var dot := p.mesh as SphereMesh if p else null
 	ok(dot != null and dot.radius >= 0.02 and p.emission_sphere_radius >= 0.4 and p.orbit_velocity_max > 0.0,
-		"the specks are big (%.0f mm) and drift in a wide swirl round head and shoulders" % (dot.radius * 1000.0 if dot else 0.0))
+		"the specks are big (%.0f mm) and swirl wide round head and shoulders" % (dot.radius * 1000.0 if dot else 0.0))
 	var row: Array = Unmasked.ROWS[Unmasked.ROWS.size() - 1]
 	ok(String(row[1]) == "Aura" and row.size() > 3 and String(row[3]) == "Glowing specks that drift around you",
 		"the Aura row has its tooltip")

@@ -207,7 +207,8 @@ func _feet(tree: SceneTree) -> void:
 	var models := []
 	var anims := []
 	for h in [0, 2]:
-		var m := Models.hunter("medium", Data.TEAM_COLORS[0], "", "", Unmasked.clean({"unmasked": true, "height": h, "build": 2 * h / 2}))
+		var look := Unmasked.clean({"unmasked": true, "height": h, "build": h})
+		var m := Models.hunter("medium", Data.TEAM_COLORS[0], "", "", look)
 		m.get_node("Rig/Torso/Aim/Gun").free()
 		m.position = Vector3(-0.55 + 1.1 * (h / 2), 0, 0)
 		m.rotation.y = -PI * 0.5

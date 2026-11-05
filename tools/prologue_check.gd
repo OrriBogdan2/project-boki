@@ -31,7 +31,8 @@ const STRIP := [
 		[-0.2, "end: the Wyrm watching the race"]],
 ]
 const FRAME := Vector2i(1280, 720)      # px: the game's window (project.godot), the smallest it frames for
-const WINDOWS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(800, 450)]      # px: the game's window, a big one, a small one
+## px: the game's window, a big one, a small one
+const WINDOWS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(800, 450)]
 const BOKI_GAP := 0.75          # m: the least room between two Boki, or a Boki and the hunter's feet
 
 var bad := 0
@@ -178,7 +179,8 @@ func _captions_fit(pr, tree: SceneTree) -> void:
 			pr.caption.modulate.a = 1.0
 			for n in 2:
 				await tree.process_frame
-			var view: Rect2 = pr.caption.get_viewport().get_visible_rect()      # (canvas units: the window's stretch applies)
+			# (canvas units: the window's stretch applies)
+			var view: Rect2 = pr.caption.get_viewport().get_visible_rect()
 			var box: Rect2 = pr.caption.get_global_rect()
 			var over := maxf(maxf(view.position.x - box.position.x, view.position.y - box.position.y),
 				maxf(box.end.x - view.end.x, box.end.y - view.end.y))
@@ -190,4 +192,5 @@ func _captions_fit(pr, tree: SceneTree) -> void:
 				await tree.process_frame
 				tree.root.get_texture().get_image().save_png(dir.path_join("caption_%d_s%d.png" % [size.x, i + 1]))
 				RenderingServer.render_loop_enabled = false
-	ok(worst <= 0.5, "every caption stays fully on screen at %s (worst overhang %.1f px, up to %d lines)" % [str(WINDOWS), worst, lines])
+	ok(worst <= 0.5, "every caption stays on screen at %s (worst overhang %.1f px, up to %d lines)"
+		% [str(WINDOWS), worst, lines])

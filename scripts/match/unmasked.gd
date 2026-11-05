@@ -4,7 +4,8 @@ extends RefCounted
 ## A person whose whole head is a void (a starfield seen with parallax), with a glowing socket shaped for a
 ## Mask floating on it and faint ghosts of the features that should be there, and whose body is wrapped in a
 ## shroud (no skin shows). The body (sex, height, build) shapes the silhouette under the shroud; the hollow
-## (shape, glow, ghost features), the aura and the shroud (style, colour) are the rest. Masks fill you in: in a match you are the Hunter (mask_look); look["marks"] holds features a
+## (shape, glow, ghost features), the aura and the shroud (style, colour) are the rest.
+## Masks fill you in: in a match you are the Hunter (mask_look); look["marks"] holds features a
 ## Mask left on you. Built by Models.hunter on the hunter rig, so every HunterAnim animation plays on it.
 
 const SEXES := ["Female", "Male"]
@@ -34,6 +35,9 @@ const ROWS := [
 ]
 const HOLLOW_ROW := 5
 const VOID_SHADER := preload("res://shaders/void_face.gdshader")
+## The shroud's hem as HeroKit.drape takes it: folds, fold depth, wave, how much longer the back hangs.
+const HEM_PLAIN := [8.0, 0.05, 0.0, 0.0]
+const HEM_RAGGED := [13.0, 0.1, 0.1, 0.18]
 const AURA_RADIUS := 0.5               # m: how far from the shoulders the specks start
 const AURA_SPECK := 0.024             # m: a speck's radius (the old motes were 0.012: too small to see)
 const HEAD_SHELL := 1.012                 # x the head: the void's shell sits just over the head mesh
@@ -275,8 +279,9 @@ static func dress(c: Dictionary, lk: Dictionary) -> void:
 		m["body"], Vector3(0, 0.6, 0))
 	var hem := 0.3 * bw * (1.08 if fem else 1.0)
 	var ragged := style == 2
+	var cut: Array = HEM_RAGGED if ragged else HEM_PLAIN
 	var skirt := HeroKit.drape("skirt|%s|%.3f" % [tag, hem], 0.245 * bw, hem, 0.42, 0.0, 1.0,
-		13.0 if ragged else 8.0, 0.1 if ragged else 0.05, 0.1 if ragged else 0.0, 0.18 if ragged else 0.0)
+		cut[0], cut[1], cut[2], cut[3])
 	Models.part(c["skirt"], skirt, m["body"], Vector3(0, 0.02, 0))
 	var cowl := HeroKit.drape("cowl|" + tag, 0.2, 0.3, 0.3, 0.02, 0.48, 6.0, 0.04)
 	Models.part(torso, cowl, m["body"], Vector3(0, 0.8, 0.02))
@@ -285,7 +290,7 @@ static func dress(c: Dictionary, lk: Dictionary) -> void:
 			Vector3(0, 0, 0.7))
 	else:
 		Models.part(c["skirt"], HeroKit.drape_hem("hem|%s|%.3f" % [tag, hem], 0.245 * bw, hem, 0.42, 0.0, 1.0,
-			13.0 if ragged else 8.0, 0.1 if ragged else 0.05, 0.1 if ragged else 0.0, 0.18 if ragged else 0.0),
+			cut[0], cut[1], cut[2], cut[3]),
 			m["trim"], Vector3(0, 0.02, 0))
 
 ## Female and male read at a glance: a woman's narrower shoulders, fuller hips and a weight-on-one-hip
