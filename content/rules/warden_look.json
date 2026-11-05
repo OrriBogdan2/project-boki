@@ -842,6 +842,7 @@
 			}
 		},
 		"smoke": {
+			"at": "anchor_blade_mid",
 			"color": [
 				0.04,
 				0.035,
@@ -856,7 +857,7 @@
 		},
 		"bloom": [
 			{
-				"at": "weapon",
+				"at": "anchor_blade_mid",
 				"color": [
 					1.0,
 					0.93,
@@ -868,7 +869,7 @@
 				"from": 0.3
 			},
 			{
-				"at": "weapon",
+				"at": "anchor_blade_mid",
 				"color": [
 					1.0,
 					0.97,
@@ -909,9 +910,8 @@
 				],
 				"size": 0.2
 			}
-		],
-		"weapon_scale": 0.85
-	},
+		]
+		},
 	"dredge": {
 		"painted": {
 			"gloss": 0.0,

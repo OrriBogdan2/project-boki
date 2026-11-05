@@ -1,0 +1,130 @@
+"""ART-1 shared mesh helpers (Blender python): pieces are plain data, joined and skinned at the end.
+
+A Piece holds numpy verts (Blender frame: Z up, the hunter faces +Y, his right hand is +X), faces (lists of indices),
+one material name per piece, a uv per loop (per-face list) and bone weights as {bone: array of per-vertex weights}.
+"""
+import numpy as np
+
+
+class Piece:
+    def __init__(self, name, mat, verts, faces, uvs=None, weights=None, room=1.0):
+        self.name, self.mat = name, mat
+        self.v = np.asarray(verts, dtype=np.float64)
+        self.f = [list(q) for q in faces]
+        self.uv = uvs                  # per-face list of per-corner (u, v), or None: unwrap later
+        self.w = weights or {}
+        self.room = room               # the ink shell's room here (0..1 of 2 cm, RIG_CONTRACT ink_room)
+
+    def rigid(self, bone):
+        self.w = {bone: np.ones(len(self.v))}
+        return self
+
+    def tris(self):
+        return sum(len(q) - 2 for q in self.f)
+
+
+def norm(a, axis=-1):
+    a = np.asarray(a, dtype=np.float64)
+    n = np.linalg.norm(a, axis=axis, keepdims=True)
+    return a / np.maximum(n, 1e-9)
+
+
+def smooth(a, b, x):
+    t = np.clip((np.asarray(x, dtype=np.float64) - a) / (b - a), 0.0, 1.0)
+    return t * t * (3.0 - 2.0 * t)
+
+
+def catmull(pts, n):
+    """n points along a Catmull-Rom spline through pts."""
+    p = np.asarray(pts, dtype=np.float64)
+    q = np.vstack([2 * p[0] - p[1], p, 2 * p[-1] - p[-2]])
+    out = []
+    segs = len(p) - 1
+    for i in range(n):
+        s = i / (n - 1) * segs
+        k = min(int(s), segs - 1)
+        t = s - k
+        a, b, c, d = q[k], q[k + 1], q[k + 2], q[k + 3]
+        out.append(0.5 * (2 * b + (c - a) * t + (2 * a - 5 * b + 4 * c - d) * t * t + (3 * b - a - 3 * c + d) * t ** 3))
+    return np.array(out)
+
+
+def frames(path, up_hint=(0, 0, 1)):
+    """A parallel-transport frame (tangent, side, normal) along a path."""
+    p = np.asarray(path)
+    t = norm(np.gradient(p, axis=0))
+    side = np.cross(t[0], up_hint)
+    if np.linalg.norm(side) < 1e-4:
+        side = np.cross(t[0], (1, 0, 0))
+    side = norm(side)
+    sides = [side]
+    for i in range(1, len(p)):
+        s = sides[-1] - t[i] * np.dot(sides[-1], t[i])
+        sides.append(norm(s))
+    s = np.array(sides)
+    return t, s, norm(np.cross(s, t))
+
+
+def sweep(name, mat, path, section, width, side_hint=None, uv_rect=(0, 0, 1, 1), closed=True, tip=True, room=1.0,
+          twist=None, depth=None):
+    """A tube along `path`. `section`: [(a, b), ...] in the (side, normal) plane, unit size; width: one value per ring
+    (scales `a`); depth likewise (scales `b`; default width). A `tip` closes the end in a point. UV: u round the
+    section, v along the path, inside uv_rect."""
+    path = np.asarray(path, dtype=np.float64)
+    n = len(path)
+    t, s, nn = frames(path, side_hint if side_hint is not None else (0, 0, 1))
+    depth = width if depth is None else depth
+    m = len(section)
+    verts = []
+    for i in range(n):
+        tw = 0.0 if twist is None else twist[i]
+        c, si = np.cos(tw), np.sin(tw)
+        for a, b in section:
+            aa, bb = a * c - b * si, a * si + b * c
+            verts.append(path[i] + s[i] * aa * width[i] + nn[i] * bb * depth[i])
+    faces, uvs = [], []
+    u0, v0, u1, v1 = uv_rect
+    cols = m if closed else m - 1
+    for i in range(n - 1):
+        for j in range(cols):
+            a = i * m + j
+            b = i * m + (j + 1) % m
+            c = (i + 1) * m + (j + 1) % m
+            d = (i + 1) * m + j
+            faces.append([a, b, c, d])
+            ua, ub = u0 + (u1 - u0) * j / cols, u0 + (u1 - u0) * (j + 1) / cols
+            va, vb = v0 + (v1 - v0) * i / (n - 1), v0 + (v1 - v0) * (i + 1) / (n - 1)
+            uvs.append([(ua, va), (ub, va), (ub, vb), (ua, vb)])
+    return Piece(name, mat, verts, faces, uvs, room=room)
+
+
+def rot_about(v, axis, ang):
+    """Rodrigues: rotates vectors v about a unit axis."""
+    v = np.asarray(v, dtype=np.float64)
+    axis = np.asarray(axis, dtype=np.float64) / np.linalg.norm(axis)
+    c, s = np.cos(ang), np.sin(ang)
+    return v * c + np.cross(axis, v) * s + np.outer(np.dot(v, axis), axis) * (1 - c) if v.ndim == 2 else \
+        v * c + np.cross(axis, v) * s + axis * np.dot(v, axis) * (1 - c)
+
+
+# ---- signed distance helpers (head sculpt)
+def sd_ell(p, c, r):
+    q = (p - np.asarray(c)) / np.asarray(r)
+    k = np.linalg.norm(q, axis=-1)
+    return (k - 1.0) * np.min(r)
+
+
+def sd_cap(p, a, b, r):
+    a, b = np.asarray(a, dtype=np.float64), np.asarray(b, dtype=np.float64)
+    pa, ba = p - a, b - a
+    h = np.clip(np.sum(pa * ba, axis=-1) / np.dot(ba, ba), 0, 1)
+    return np.linalg.norm(pa - ba * h[..., None], axis=-1) - r
+
+
+def smin(a, b, k):
+    h = np.clip(0.5 + 0.5 * (b - a) / k, 0, 1)
+    return b * (1 - h) + a * h - k * h * (1 - h)
+
+
+def smax(a, b, k):
+    return -smin(-a, -b, k)
