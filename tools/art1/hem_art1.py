@@ -40,7 +40,7 @@ LSLOT = {H.SKIN: "skin", 0: "skin", H.LID: "skin", H.NAIL: "skin", H.LIP: "skin"
 class ScanPaint:
     """Colours from the fitted scan: the nearest point on its surface, by texel. (mathutils' BVH, one query a texel.)"""
 
-    def __init__(self, me, tex):
+    def __init__(self, me, tex, tri_keep=None):
         me.calc_loop_triangles()
         n = len(me.vertices)
         co = np.empty(n * 3, np.float64)
@@ -55,8 +55,11 @@ class ScanPaint:
         uv = np.empty(len(me.loops) * 2, F)
         me.uv_layers.active.data.foreach_get("uv", uv)
         self.uv = uv.reshape(-1, 2)[li.reshape(-1, 3)]
+        if tri_keep is not None:
+            keep = tri_keep(self.t)
+            self.t, self.uv = self.t[keep], self.uv[keep]
         self.bvh = BVHTree.FromPolygons(self.v.tolist(), self.t.tolist(), all_triangles=True)
-        self.tex = imgio.load(tex)
+        self.tex = tex
 
     def sample(self, pts):
         N = len(pts)
@@ -79,6 +82,12 @@ class ScanPaint:
         u = uv[:, 0, :] * w0[:, None] + uv[:, 1, :] * w1[:, None] + uv[:, 2, :] * w2[:, None]
         h, w = self.tex.shape[:2]
         return self.tex[np.clip(((1 - u[:, 1]) % 1) * h, 0, h - 1).astype(int), np.clip((u[:, 0] % 1) * w, 0, w - 1).astype(int)]
+
+
+def arm_weight(ob):
+    """Per vertex, its share on the arm bones. (Fitted, the arms hang through the hips, so paint and tests keep them apart.)"""
+    arm = {g.index for g in ob.vertex_groups if g.name.startswith(("upper_arm", "forearm", "hand"))}
+    return np.array([sum(g.weight for g in v.groups if g.group in arm) for v in ob.data.vertices], F)
 
 
 def ob_from(name, v, q):
@@ -385,7 +394,11 @@ def main():
     low.data.materials.clear()
     low.parent = None
     print("scan paint", flush=True)
-    sp = ScanPaint(src_me, SCAN_TEX)
+    tex = imgio.load(SCAN_TEX)
+    aw = arm_weight(dt.objects[0])
+    sp_body = ScanPaint(src_me, tex, lambda t: aw[t].mean(1) <= 0.5)
+    sp_arm = ScanPaint(src_me, tex, lambda t: aw[t].mean(1) > 0.5)
+    low_aw = arm_weight(low)
     P.PLATE = imgio.load(PLATE)
     hR, hinfo = H.right_hand(J)
     hL = H.left_hand(J)
@@ -534,6 +547,7 @@ def main():
             nn = np.empty(len(vs) * 3, F)
             me.vertices.foreach_get("normal", nn)
             nrm = nn.reshape(-1, 3)
+        arm_tri = low_aw[tri].mean(1) > 0.5 if p["paint"] == "scan" else None
         rt = S.raster(uv.reshape(-1, 3, 2), vs[tri], nrm[tri], tri, ATLAS, part=1)
         m = rt["id"] >= 0
         idx = np.nonzero(m)
@@ -559,7 +573,11 @@ def main():
         elif nm == "needle":
             rgb = P.needle(pts, nn)
         elif nm == "scan":
-            rgb = P.scan(sp.sample(pts), pts, nn)
+            on_arm = S.raster(uv.reshape(-1, 3, 2)[arm_tri], vs[tri][arm_tri], nrm[tri][arm_tri], tri[arm_tri], ATLAS, part=1)["id"][idx] >= 0
+            c0 = np.empty((len(pts), 3), F)
+            c0[on_arm] = sp_arm.sample(pts[on_arm])
+            c0[~on_arm] = sp_body.sample(pts[~on_arm])
+            rgb = P.scan(c0, pts, nn)
         elif nm in ("handR", "handL"):
             rgb = P.skin_hand(pts, nn, lab, f)
         elif nm == "quiver":
