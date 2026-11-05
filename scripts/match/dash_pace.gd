@@ -9,9 +9,8 @@ extends RefCounted
 ## reason as hitstop in Match._process).
 
 const MAX_FRAME_S := 1.0 / 30.0    # two sim steps
-const REHEARSE_FRAMES := 4         # frames at least, then until no pipeline has compiled for REHEARSE_QUIET more ...
-const REHEARSE_QUIET := 4
-const REHEARSE_MAX := 40           # ... and at most this many (Forward+ builds them on background threads)
+const REHEARSE_QUIET := 12         # frames with no new pipeline end it (Forward+ builds them on background threads) ...
+const REHEARSE_MAX := 60           # ... and it's over after this many at most
 
 ## The sim time this drawn frame may advance.
 static func frame_dt(m: Match, d: float) -> float:
@@ -42,7 +41,7 @@ static func rehearse(m: Match) -> void:
 	var built := _pipelines()
 	var quiet := 0
 	var frames := 0
-	while frames < REHEARSE_MAX and (frames < REHEARSE_FRAMES or quiet < REHEARSE_QUIET):
+	while frames < REHEARSE_MAX and quiet < REHEARSE_QUIET:
 		await m.get_tree().process_frame
 		if not m.is_inside_tree():
 			return

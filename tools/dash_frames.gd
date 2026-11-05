@@ -280,7 +280,7 @@ func _judge() -> void:
 		var at := Vector2.INF
 		for e: Dictionary in run:
 			var here := Vector2(e["x"], e["z"])
-			var posed: bool = float(e["bones"]) >= MIN_POSE or float(e["rig"]) >= MIN_POSE
+			var posed: bool = float(e["bones"] if sk else e["rig"]) >= MIN_POSE
 			var moved: bool = at == Vector2.INF or here.distance_to(at) >= STEP_M
 			if moved and posed and bool(e["vis"]) and (moves.is_empty() or String(e["move"]) in moves):
 				shown += 1
