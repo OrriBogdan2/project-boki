@@ -1883,3 +1883,17 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Apply it to the hatch flow first, then the home panels.
   - Ext can produce a Nano Banana UI mockup for the owner to approve the style first; S5 uses the existing UI helpers until then.
 - **Assert:** non-interactive info boxes have no hover/focus states; screenshots before/after to ext.
+
+## 158. Putting on the Mask: a real transformation animation into the Hunter (owner, 17:42 UTC Nov 5)
+- The owner: "there needs to be some animation of us transforming into the hunter after putting it on".
+- Today (scripts/ui/mask_moment.gd): the Mask lifts to the hollow face, flickers, a flash, and you are swapped to mostly-Vex. A cut, not a transformation.
+- **New sequence** (~2.5-3 s, skippable after the first time; reused for every first-time Mask):
+  1. The Mask seals onto the void face; the void starfield on the head flares in the Mask's colour.
+  2. Energy runs down from the Mask over the body: glowing seams/runes in the hero colour crawl over the shroud.
+  3. The shroud unravels/burns away in strips (cloth peeling into motes) while the Hunter's outfit forms beneath, piece by piece from the head down (a dissolve shader edge in the hero colour).
+  4. The body proportions morph smoothly from your Empty build to the Hunter's (a height/build blend), not a pop.
+  5. Weapon/gear materialises last (Vex's arm cannon forms from light), a power pose, a shockwave ring, the Boki reacting (a hop, a cheer).
+  6. A camera push-in on the reveal, then settle.
+- Keep a little of you visible after (Unmasked.blend marks), as the design says.
+- **Owners:** S5 the sequence/shader logic (a dissolve between the two models); S2 the pose/anim; S3 the VFX motes/seams when it's back; S4 a rising transformation sound into an impact.
+- **Assert:** both models are present during the blend, with no frame where neither is visible; the total length is within 2.5-3.5 s; skippable on repeats.

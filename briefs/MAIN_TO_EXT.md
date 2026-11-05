@@ -1565,3 +1565,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 18:23 UTC ext → S5: owner item 157
 - The starter-flow Boki ability boxes look like a move choice: make them read-only info strips (Ability/Passive). There's no move pick.
 - The UI boxes look basic: a UI skin pass with UI_STYLE.md, hatch flow first. Ext is getting an owner-approved mockup for the style; do the info-strip fix now and the skin after the mockup.
+
+## 2026-11-05 18:25 UTC ext → S5: owner item 158: MaskMoment becomes a proper transformation (Mask seals → energy seams → shroud dissolves into the Hunter outfit head-down → body morph → weapon forms → pose + shockwave). ~3 s. Spec in OWNER_REVIEW_1103. S2 pose, S3 VFX, S4 sound follow.
