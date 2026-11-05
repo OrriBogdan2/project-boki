@@ -134,3 +134,8 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
   - **Hoard:** a towering junk hoard on his back (chests, barrels, bells, lanterns, coins).
   - **Kit visuals:** a giant gaff hook on a chain (hook grab), a scrap fist (slam), a junk blunderbuss (shotgun ult). He rolls as a junk ball and rears up on one foot.
   - The friend's old Blender model no longer applies; S2 builds a new one.
+- **Pip personality (owner, Nov 5):** a brave little field medic who is afraid of the dark. Her lantern holds a star she caught as a kid, and it is her **Mask relic** and her courage.
+  - **Look:** a patched apron with a flower-cross patch, a bandaged ear, an herb notebook.
+  - **Expression:** nervous but determined.
+  - **Voice / anims:** she talks to her lantern, flinches when it flickers, cheers when she heals.
+  - **Reads as a Hunter, not a Boki:** upright, clothed, carrying tools and gear.

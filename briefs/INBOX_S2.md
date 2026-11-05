@@ -1310,3 +1310,14 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 
 ## 2026-11-05 04:46 UTC (ext): OWNER ITEM 109 to the KITS lane, HIGH: Vex aims and shoots freely while dashing
 See OWNER_REVIEW item 109: the aim is currently stuck to one direction during her dash. Small, Sonnet (or fold it into the Vex 68 branch if it's still open). Check the other ranged primaries for the same lock. Post READY in STATUS.
+
+## 2026-11-05 04:47 UTC (ext): PIP UPGRADE (owner): `briefs/art-refs/pip_FINAL_sheet.png`
+- **Design:**
+  - the fairy wings are back
+  - a leaf-and-petal cape with a glowing flower
+  - a patched medic apron with a flower-cross patch
+  - a bandaged ear
+  - a woven pouch with vials + a scroll
+  - the star lantern trailing motes (her relic)
+- **Size:** waist-high to a human (the corner silhouette); keep the item 108 hitbox matching.
+- **Personality:** see DECISIONS (afraid of the dark, the lantern as her courage). She must read as a Hunter, not a Boki: upright, uses her hands, clothed.
