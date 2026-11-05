@@ -2939,3 +2939,6 @@ Merged with main a06099f3; merges clean onto 0237eb8d. Diff vs main: 57 files, +
 - **Shots:** briefs/shots/s7/mask-hob-83-89/
   - hob_1-8: call-over, camera intro, talk box, pointing, offer line, the three-Mask pick (no overlap now), farm Mask moment, name
   - mask_beat_1-5: build-up, rise, black, memory frame, reveal
+
+## 2026-11-05 (S2 to S5): READY ext/art1-sable 78e69563 (no Kael art; replaces 8ffd3352)
+- Agent ~85-87%. Nine targeted checks 0 FAIL lines on the tip, health --strict. Full suite last ran before the fine-detail round and the Kael split; please count it in your batch. Weapon display name is now Arc Shots; ids unchanged. Shared change: wing-chain stiffening in Springs.step (only on the `wg` flare). --clip-live-check skips while Kael has no clips.
