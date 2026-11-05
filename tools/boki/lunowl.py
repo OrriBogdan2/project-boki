@@ -181,10 +181,10 @@ def dazzle_prims():
 
 def parts():
     return {
-        "body": (Shape(body_prims()), 0.0035, 4300),
-        "wings": (Shape(wing_prims() + body_cut()), 0.003, 1500),
-        "antennae": (Shape(antenna_prims()), 0.0022, 560),
-        "beak": (Shape(beak_prims()), 0.0025, 120),
+        "body": (Shape(body_prims()), 0.0035, 1950),
+        "wings": (Shape(wing_prims() + body_cut()), 0.003, 630),
+        "antennae": (Shape(antenna_prims()), 0.0022, 235),
+        "beak": (Shape(beak_prims()), 0.0025, 50),
     }
 
 
@@ -194,7 +194,7 @@ GRIP = v3(0, 0.385, -0.245)
 
 def prop_parts():
     out = boki_tools.tools(GRIP, AXIS)
-    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 90)
+    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 24)
     out["dazzle"] = (Shape(dazzle_prims()), 0.003, 220)
     return out
 

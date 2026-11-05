@@ -35,9 +35,9 @@ def moon_shape():
 
 def parts():
     """name -> (Shape, tris, slot, paint name)."""
-    return {"wings": (Shape(sp.wing_prims(WING_AT, WING_K)), 1600, 0, "wing"),
-            "antennae": (Shape(sp.antenna_prims(ANTENNA_AT, ANTENNA_K)), 500, 0, "antenna"),
-            "ruff": (ruff_shape(), 500, 0, "ruff"), "moon": (moon_shape(), 200, 1, "glow")}
+    return {"wings": (Shape(sp.wing_prims(WING_AT, WING_K)), 720, 0, "wing"),
+            "antennae": (Shape(sp.antenna_prims(ANTENNA_AT, ANTENNA_K)), 225, 0, "antenna"),
+            "ruff": (ruff_shape(), 225, 0, "ruff"), "moon": (moon_shape(), 90, 1, "glow")}
 
 
 def bones():

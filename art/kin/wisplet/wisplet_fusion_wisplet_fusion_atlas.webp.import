@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ur1rlx6hbqlh"
-path="res://.godot/imported/wisplet_fusion_wisplet_fusion_atlas.webp-5f5ca8a867a8b1f5897833169cc3a499.ctex"
+path.bptc="res://.godot/imported/wisplet_fusion_wisplet_fusion_atlas.webp-5f5ca8a867a8b1f5897833169cc3a499.bptc.ctex"
+path.astc="res://.godot/imported/wisplet_fusion_wisplet_fusion_atlas.webp-5f5ca8a867a8b1f5897833169cc3a499.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "0fae96850c158680f7b70c48683aa51b"
+"md5": "0517459995e97f0fe5fd0aa78b3ebcc8"
 }
 
 [deps]
 
 source_file="res://art/kin/wisplet/wisplet_fusion_wisplet_fusion_atlas.webp"
-dest_files=["res://.godot/imported/wisplet_fusion_wisplet_fusion_atlas.webp-5f5ca8a867a8b1f5897833169cc3a499.ctex"]
+dest_files=["res://.godot/imported/wisplet_fusion_wisplet_fusion_atlas.webp-5f5ca8a867a8b1f5897833169cc3a499.bptc.ctex", "res://.godot/imported/wisplet_fusion_wisplet_fusion_atlas.webp-5f5ca8a867a8b1f5897833169cc3a499.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
