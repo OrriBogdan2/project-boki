@@ -20,7 +20,14 @@ const CLOSE_ZOOM := 0.45
 
 const SHOTS := [
 	# ------------------------------------------------ Hem
-	["pin_draw_idle", "archer", "aim", 0.3, 3.0, "At rest: one faint thin line to the cursor, nothing else"],
+	[
+		"pin_draw_idle",
+		"archer",
+		"aim",
+		0.3,
+		3.0,
+		"At rest: one faint thin line to the cursor, nothing else"
+	],
 	[
 		"pin_draw_start",
 		"archer",
@@ -77,7 +84,14 @@ const SHOTS := [
 		3.0,
 		"Quick draw after a perfect release: the next Empowered comes up in 0.38 s (the fill reaching the circle)"
 	],
-	["pin_overdraw", "archer", "draw_tgt", 1.85, 4.0, "Overdrawn: the line dims to a thin pale one, the draw arm shakes"],
+	[
+		"pin_overdraw",
+		"archer",
+		"draw_tgt",
+		1.85,
+		4.0,
+		"Overdrawn: the line dims to a thin pale one, the draw arm shakes"
+	],
 	[
 		"pin_perfect",
 		"archer",

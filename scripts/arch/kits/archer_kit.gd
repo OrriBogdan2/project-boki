@@ -155,13 +155,13 @@ func _tick(dt: float) -> void:
 	_tag_shots()
 	fx.tick_shots()
 
-## Her bow hand carries its own tell (PinFx's fletch glint), so the shared charge orb stays off.
-## Her own draw shows only on the filling line (owner item 55b): no shared wind-up ring at her feet, ticks or ping
-## for the player drawing. Anyone else still sees the ring (the wind-up tell), and the Heavy Shot keeps it.
+## The player's own draw shows only on the filling line: no shared wind-up ring at her feet, ticks or ping.
+## Anyone else still sees the ring (the wind-up tell), and the Heavy Shot keeps it.
 func charge_now() -> Array:
 	var cn := super.charge_now()
 	return ["", -1.0] if h.is_local() and String(cn[0]) == "draw" else cn
 
+## Her bow hand carries its own tell (PinFx's fletch glint), so the shared charge orb stays off.
 func charge_orb() -> bool:
 	return false
 
