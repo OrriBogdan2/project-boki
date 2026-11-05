@@ -23,7 +23,8 @@ REPO = os.path.dirname(os.path.dirname(HERE))
 SPECIES = "cindle"
 # id -> (shapes module, paint module, skeleton and clips module)
 SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prismander", "prismander", "prismander_anim"),
-         "burrlet": ("mycroll", "mycroll", "mycroll_anim")}
+         "burrlet": ("mycroll", "mycroll", "mycroll_anim"),
+         "glintmole": ("glintmole", "glintmole", "glintmole_anim")}
 creature = paint = anim = None
 ATLAS_PX = 2048
 SCALE = 0.95             # the whole Boki, so its body sits near the other species' 0.8 m frame
@@ -267,7 +268,7 @@ def eye_tex(px=256):
     r = np.hypot(q[..., 0], q[..., 1] * 1.04)
     white = np.array([1.0, 1.0, 1.0])
     iris = paint.IRIS
-    deep = paint.hexc("2f5a12")
+    deep = getattr(paint, "IRIS_DEEP", paint.hexc("2f5a12"))
     t = np.clip((r - 0.2) / 0.62, 0, 1)[..., None]
     col = deep * (1 - t) + iris * t
     col = col * (r < 0.82)[..., None] + paint.INK * (r >= 0.82)[..., None]
