@@ -253,27 +253,32 @@ def step(surface, i):
 
 
 # ------------------------------------------------------------------ voice: a woman, cracked by the Blight
+def cvoice(d, *args, **kw):
+    """Her voice, its tail eased to silence (never cut off)."""
+    return S.voice(d, *args, **kw) * shape(d, 0.0, d * 0.55, d * 0.45)
+
+
 def hurt(i):
     v = ('ah', 'eh', 'uh', 'ah')[i]
     f0 = (340, 310, 360, 325)[i]
-    cry = S.voice(0.24 + 0.03 * (i % 2), f0, f0 * 0.74, v, breath=0.3, rasp=0.18, scale=1.16, a=0.008)
-    gasp = S.voice(0.1, 260, 300, 'ee', breath=0.9, scale=1.2, a=0.01) * 0.25
+    cry = cvoice(0.24 + 0.03 * (i % 2), f0, f0 * 0.74, v, breath=0.3, rasp=0.18, scale=1.16, a=0.008)
+    gasp = cvoice(0.1, 260, 300, 'ee', breath=0.9, scale=1.2, a=0.01) * 0.25
     return mix(cry, at(gasp, 0.27))
 
 
 def down():
     """Knocked down: a falling groan, then a breathless little unhinged laugh as the tank sputters."""
-    groan = S.voice(0.7, 300, 175, 'uh', breath=0.35, rasp=0.3, vib=0.02, scale=1.14, a=0.02)
+    groan = cvoice(0.7, 300, 175, 'uh', breath=0.35, rasp=0.3, vib=0.02, scale=1.14, a=0.02)
     laugh = np.zeros(1)
     for k in range(3):
-        laugh = mix(laugh, at(S.voice(0.09, 390 - 22 * k, 330 - 22 * k, 'eh', breath=0.7, scale=1.18, a=0.006) * (0.55 - 0.1 * k), 0.13 * k))
+        laugh = mix(laugh, at(cvoice(0.09, 390 - 22 * k, 330 - 22 * k, 'eh', breath=0.7, scale=1.18, a=0.006) * (0.55 - 0.1 * k), 0.13 * k))
     sputter = grains(0.6, 30, 300, 1500, 0.004, 0.01, fall=0.2) * 0.4
     return mix(groan, at(laugh, 0.78), at(sputter, 0.4))
 
 
 def death():
     """A long falling cry; the tank vents and her flame goes out."""
-    cry = S.voice(0.95, 380, 150, 'ah', breath=0.35, rasp=0.32, vib=0.025, scale=1.15, a=0.015)
+    cry = cvoice(0.95, 380, 150, 'ah', breath=0.35, rasp=0.32, vib=0.025, scale=1.15, a=0.015)
     vent = at(tank_hiss(2) * 0.5, 0.55)
     gutter = at(flame(0.8, 1400, 0.8, 0.8) * shape(0.8, 0.05, 0.1, 0.6) * 0.35, 0.3)
     return mix(cry, vent, gutter)
