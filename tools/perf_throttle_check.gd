@@ -1,7 +1,7 @@
 extends RefCounted
 ## --perf-throttle-check, item 94's script throttles: an idle monster with nobody within Mob.NAP_M stops
 ## simulating and wakes when a Hunter comes close; a bot further than Bot.FAR_M from the local player decides
-## every Bot.FAR_EVERY steps (the skipped time added in), a near one every step.
+## and roaming decides every Bot.FAR_EVERY steps (the skipped time added in), a near one every step.
 
 var main: Node
 var fails := 0
@@ -63,6 +63,8 @@ func _far_bots() -> void:
 		return
 	var brain := Bot.new()
 	b.teleport(m.player.pos + Vector3(Bot.FAR_M + 15.0, 0, 0))
+	b.ai["tgt"] = null
+	b.ai["goal_kind"] = "roam"
 	var thinks := 0
 	for i in Bot.FAR_EVERY * 4:
 		var before := float(b.ai["dash_cd"])
