@@ -182,6 +182,12 @@ def wrap_cloth(p, n, ao):
     return ramp(np.clip(t, 0, 1), CLOTH)
 
 
+def mask_fold(p, n, ao):
+    """The band over the mouth: the head sculpt's crimson, one soft fold under the nose."""
+    t = lit(n, 1.0) * 0.86 - 0.16 * np.exp(-((p[..., 2] - (K.EYE_Z - 0.095)) / 0.012) ** 2)
+    return ramp(np.clip(t, 0, 1), [hexc("#2a0c12"), hexc("#4c141c"), hexc("#6d1f27"), hexc("#8a2e33"), hexc("#a4444a")])
+
+
 def cowl_cloth(p, n, ao):
     """The rolled folds: deep arcs dipping at the front, the art's heavy drape, drawn as crease and lit lip."""
     a = np.arctan2(p[..., 0], p[..., 1] - 0.01)

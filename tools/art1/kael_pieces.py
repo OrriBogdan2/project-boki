@@ -14,7 +14,11 @@ C = np.array([0.0, 0.012, 1.482])             # the head's centre
 EYE = np.array([0.036, 0.0625, 0.008])        # head-local; x mirrored
 EYE_R = 0.0215
 SCAR_SIDE = -1.0                              # -1: his left, as the brief; 1: his right, as the sheet and splash draw it
-HEAD_S, HEAD_AT = 1.0, (0.0, 0.0, 0.0)         # the head scan onto the rig, measured
+# the head scan onto the rig: its eyes on the grid render (Meshy frame) -> world
+SCAN_EYE_X, SCAN_EYE_Z, SCAN_EYE_GAP = 0.015, 0.23, 0.35
+EYE_GAP, EYE_Z, NOSE_Y, NOSE_DEPTH = 0.064, 1.49, 0.112, 0.055
+CHIN_DROP, SCARF_WIDEN = 0.05, 0.75
+SHEET_CX, SHEET_EYE_Y, SHEET_K = 566.0, 613.0, 3531.0       # the sculpt sheet's main view: px at his centre, eye line, px per m
 GLOW_EYE = "L"                                # the eye that glows
 
 
@@ -89,6 +93,36 @@ def skull():
     R = ray_out(A, Z, r0=0.14) * 0.985
     v = hl(np.stack([np.sin(A) * R, np.cos(A) * R, Z], -1).reshape(-1, 3))
     return Piece("skull", "skin-kael", v, grid_faces(rows, cols, True)).rigid("head")
+
+
+def mask_on(bvh):
+    """The scarf pulled up over the mouth and nose: a cloth shell ray-fitted over the head scan from just under the eyes down into its
+    scarf, the nose tented, a torn top edge."""
+    from mathutils import Vector
+    cols, rows = 13, 6
+    rng = np.random.RandomState(12)
+    ang = np.linspace(-1.05, 1.05, cols)
+    G = np.zeros((rows, cols, 3))
+    axis = np.array([0.0, NOSE_Y - 0.1, 0.0])
+    z_top = EYE_Z - 0.03
+    for j in range(cols):
+        top = z_top - 0.012 + 0.03 * (abs(ang[j]) / 1.05) ** 2 + 0.005 * rng.uniform(-1, 1) + 0.012 * np.exp(-(ang[j] / 0.2) ** 2)
+        for i in range(rows):
+            k = i / (rows - 1)
+            z = top + (EYE_Z - 0.105 - top) * k
+            o = axis + np.array([np.sin(ang[j]) * 0.25, np.cos(ang[j]) * 0.25, z])
+            d = -np.array([np.sin(ang[j]), np.cos(ang[j]), 0.0])
+            hit = bvh.ray_cast(Vector(o), Vector(d), 0.3)
+            r = 0.25 - (hit[3] if hit[3] is not None else 0.2)
+            G[i, j] = axis + np.array([np.sin(ang[j]) * r, np.cos(ang[j]) * r, z])
+    # the cloth bridges the nose and lips: each ring is the hull of its neighbours, puffed out a little
+    for _ in range(2):
+        H = G.copy()
+        H[:, 1:-1] = (G[:, :-2] + 2 * G[:, 1:-1] + G[:, 2:]) / 4
+        G = np.maximum(G, H) * [0, 1, 0] + H * [1, 0, 1]
+    n_ = norm((G - axis) * [1, 1, 0])
+    G = G + n_ * 0.005
+    return holed_sheet("maskfit", "cloth-kael", G, room=0.2).rigid("head")
 
 
 def eyeball(s):

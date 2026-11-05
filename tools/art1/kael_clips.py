@@ -329,7 +329,7 @@ def extras(P):
     for s, side in ((1.0, "R"), (-1.0, "L")):
         # brow: + scowls (down and in, inner end low), - lifts (hurt)
         rot = Quaternion((0, 1, 0), -s * 0.22 * b)
-        out["brow." + side] = (rot, Vector((0, 0.004 * b * 0 - 0.0065 * b, 0)))
+        out["brow." + side] = (rot, Vector((0, 0.004 * b * 0 - 0.003 * b, 0)))
         # (a bone's Y is its tail: +Y here is forward; the local X/Z are read off the armature in Solver below)
         out["lid." + side] = (Quaternion((1, 0, 0), 0.75 * (l - 0.3)), None)
     f = P.get("fing", 0.1)

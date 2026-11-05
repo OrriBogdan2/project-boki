@@ -13,7 +13,7 @@ from meshkit import smooth, norm
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, RIG, OUT = a[0], a[1], a[2]
-LOW_TRIS = 7300
+LOW_TRIS = 6200
 SOLE = -0.95                    # the scan's sole (z)
 ANKLE = 0.10                    # the rig has no ankle node: the foot bone sits here
 # Scan joints (flipped to face +Y, his right +X, z from the sole), measured on grid_front/grid_right.

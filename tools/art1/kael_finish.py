@@ -27,7 +27,7 @@ GLOW_R = (0.88, 0.20, 1.0, 0.295)
 HALO_R = (0.88, 0.10, 1.0, 0.195)
 MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "metal-kael", "hair-mane", "skin-head-hot", "glow-sword"]
 SCALE = {"face": 4.0, "lidU": 2.6, "lidD": 2.6, "mask": 1.2, "cowl": 2.0, "cowlcore": 0.2, "stail": 0.7, "palm": 2.0, "finger": 1.8,
-         "thumb": 1.8, "skull": 0.4, "blade": 0.75, "guard": 1.4, "grip": 1.6, "pommel": 1.6, "Low": 2.4}
+         "thumb": 1.8, "skull": 0.4, "blade": 0.75, "guard": 1.4, "grip": 1.6, "pommel": 1.6, "Low": 2.4, "maskfit": 2.0}
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
@@ -66,7 +66,7 @@ pieces += [hang, hook] + K.blade() + K.hilt((0, 0, 1, 1))
 HEAD_C = tuple(K.C)
 for p_ in pieces:
     n_ = p_.name
-    if n_.startswith("stail"):
+    if n_.startswith("stail") or n_ == "headscan" or n_ == "maskfit":
         pass        # (two sheets back to back, wound as built)
     else:
         p_.orient()
@@ -120,7 +120,19 @@ for nd in head_ob.data.materials[0].node_tree.nodes:
         head_img = nd.image
 h_mw = head_ob.matrix_world.copy()
 hv = np.array([h_mw @ v.co for v in head_ob.data.vertices])
-hv = np.stack([-hv[:, 0], -hv[:, 1], hv[:, 2]], 1) * K.HEAD_S + np.array(K.HEAD_AT)    # (Meshy frame: faces -Y)
+hv = np.stack([-hv[:, 0], -hv[:, 1], hv[:, 2]], 1)                # (Meshy frame faces -Y: to +Y)
+band = (hv[:, 2] > K.SCAN_EYE_Z - 0.3) & (hv[:, 2] < K.SCAN_EYE_Z + 0.1) & (np.abs(hv[:, 0]) < 0.3)
+nose_y = hv[band, 1].max()
+face_at = np.array([K.SCAN_EYE_X, nose_y, K.SCAN_EYE_Z])
+hs_ = K.EYE_GAP / K.SCAN_EYE_GAP
+hv = (hv - face_at) * hs_
+# the scarf opens out below the chin to the sheet's width and reaches the chest
+drop = -(hv[:, 2] + K.CHIN_DROP)
+kd = smooth(0.0, 0.11, drop)
+hv[:, 0] *= 1 + K.SCARF_WIDEN * kd
+hv[:, 1] = (hv[:, 1] + K.NOSE_DEPTH) * (1 + K.SCARF_WIDEN * 0.7 * kd) - K.NOSE_DEPTH
+hv[:, 2] -= np.maximum(drop, 0.0) * 0.45
+hv = hv + np.array([0.0, K.NOSE_Y, K.EYE_Z])
 hf = [list(p.vertices) for p in head_ob.data.polygons]
 hu = head_ob.data.uv_layers[0].data
 huv = [[tuple(hu[li].uv) for li in p.loop_indices] for p in head_ob.data.polygons]
@@ -130,11 +142,23 @@ for sd_, sg_ in (("R", 1.0), ("L", -1.0)):
     c_ = K.hl(np.array([sg_ * 0.04, 0.09, 0.043]))
     hw["brow." + sd_] = (1 - smooth(0.012, 0.03, np.linalg.norm(hv - c_, axis=1))) * (hv[:, 1] > 0.05)
     hw["head"] = hw["head"] - hw["brow." + sd_] * hw["head"]
+head_bvh = BVHTree.FromPolygons([tuple(v_) for v_ in hv], [tuple(f_) for f_ in hf])
+mask_pc = K.mask_on(head_bvh)
+pieces.append(mask_pc)
 head_pc = M.Piece("headscan", "skin-head-hot", hv, hf, huv, weights=hw, room=0.5)
 pieces.append(head_pc)
 head_tex = np.zeros(head_img.size[0] * head_img.size[1] * head_img.channels, np.float32)
 head_img.pixels.foreach_get(head_tex)
-head_tex = head_tex.reshape(head_img.size[1], head_img.size[0], head_img.channels)[..., :3]
+head_tex = head_tex.reshape(head_img.size[1], head_img.size[0], head_img.channels)
+# the sculpt's darks up for the toon light: skin to a warm brown, the crimson out of black; hair and embers keep their values
+ch_ = head_tex[..., :3]
+lum_ = ch_.mean(2, keepdims=True)
+k_ = 1 - smooth(0.3, 0.55, lum_)
+ch_ = ch_ * (1 - k_) + (np.power(np.maximum(ch_, 1e-4), 0.72) * 1.28 + np.array([0.035, 0.018, 0.012])) * k_
+head_tex[..., :3] = np.clip(ch_, 0, 1)
+head_img.pixels.foreach_set(head_tex.ravel())
+head_img.update()
+head_tex = head_tex[..., :3]
 bpy.data.objects.remove(head_ob)
 
 # ---- one mesh: the scan first, then the pieces
@@ -581,7 +605,7 @@ OUTC[ys, xs] *= (0.88 + 0.12 * np.clip(AO[ys, xs], 0, 1))[:, None]
 c_ = OUTC[ys, xs]
 s_t = (c_.max(1) - c_.min(1)) / np.maximum(c_.max(1), 0.01)
 silver = (s_t < 0.18) & (c_.mean(1) > 0.38)
-c_[silver] = np.clip(c_[silver] * 1.28 + 0.04, 0, 1)
+c_[silver] = np.clip(c_[silver] * 1.04, 0, 1)
 dark = c_.max(1) < 0.3
 c_[dark] = c_[dark] * 1.3 + np.array([0.075, 0.075, 0.09])
 OUTC[ys, xs] = c_
@@ -601,6 +625,18 @@ def paint(names_pred, fn):
         OUTC[ys, xs] = fn(POS[ys, xs].astype(np.float64), NOR[ys, xs].astype(np.float64), AO[ys, xs].astype(np.float64))
 
 
+SHEET = load_rgb(os.path.expanduser("~/art1kael/ref2/kael_head.png"))
+
+
+def mask_art(p, n, ao):
+    """The band over the mouth from the sculpt sheet's own scarf, front view: his right is image left."""
+    px = np.clip((K.SHEET_CX - p[:, 0] * K.SHEET_K).astype(int), 0, SHEET.shape[1] - 1)
+    py = np.clip((K.SHEET_EYE_Y + (K.EYE_Z - p[:, 2]) * K.SHEET_K).astype(int), 0, SHEET.shape[0] - 1)
+    c = SHEET[py, px]
+    return np.clip(np.power(np.maximum(c, 1e-4), 0.72) * 1.2, 0, 1)
+
+
+paint(lambda n: n == "maskfit", mask_art)
 paint(lambda n: n.startswith(("palm", "finger", "thumb")) and n.endswith("L"), P.skin)
 
 
@@ -765,8 +801,8 @@ for i_ in hot_[:600]:
         break
 for i_, p_ in enumerate(picks_):
     A["anchor_ember_%d" % i_] = ("hips" if p_[2] < K.NECK_Z else "head", tuple(p_))
-A["anchor_eye_glow"] = ("head", tuple(K.hl(K.EYE * [1, 1, 1]) + np.array([0, 0.02, 0])))
-A["anchor_eye_glow_l"] = ("head", tuple(K.hl(K.EYE * [-1, 1, 1]) + np.array([0, 0.02, 0])))
+for sd_, sg_ in (("", 1.0), ("_l", -1.0)):
+    A["anchor_eye_glow" + sd_] = ("head", (sg_ * K.EYE_GAP * 0.5, K.NOSE_Y - 0.018, K.EYE_Z))
 for nm, (bn, at) in A.items():
     e = bpy.data.objects.new(nm, None)
     bpy.context.scene.collection.objects.link(e)
