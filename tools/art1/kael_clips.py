@@ -225,7 +225,7 @@ def clips():
     a1 = {"prt": (1.05, 0.45, 0.1), "tor": (0.2, 0.2, 0.05), "hed": (-1.2, -0.4, 0), "G": (0.3, -0.28, 0.86), "BE": be(-175, 6, (0, 0, 1)),
           "FL": (-0.12, -0.42, 0.3), "FR": (0.13, -0.55, 0.4), "FLp": 0.8, "FRp": 0.8, "LP": (-0.3, 0.45, 0.72)}
     a2 = {"prt": (0.3, 0.2, 0), "tor": (0.3, 0.1, 0), "hed": (-0.5, 0, 0), "FL": (-0.15, 0.22, 0.3), "FR": (0.16, 0.14, 0.26), "FLp": -0.2, "FRp": -0.2}
-    out.append(C("exdash", 0.6, [(0.0, a0), (0.05, a1, "out"), (0.22, {"prt": (1.0, 0.42, 0.14)}, "lin"), (0.32, a2), (0.6, {"pel": (0, 0, -0.03)})]))
+    out.append(C("exdash", 0.5, [(0.0, a0), (0.05, a1, "out"), (0.22, {"prt": (1.0, 0.42, 0.14)}, "lin"), (0.32, a2), (0.5, {"pel": (0, 0, -0.03)})]))
     # Warchain: the sword arm whips the chain out from the wrist: a sidearm crack, the blade held out of the way
     th0 = {"pel": (0, -0.04, -0.09), "prt": (0.05, -0.35, 0), "tor": (0, -0.5, 0.1), "hed": (-0.1, 0.8, 0), "G": (0.44, -0.2, 0.96), "BE": be(-170, 34, (0, 0, 1)),
            "LP": (-0.2, 0.3, 0.92), "fing": 0.3, "brow": 1.0, "lid": 0.2}
@@ -344,6 +344,7 @@ if __name__ == "__main__":
     b_, e_, n_ = K.sword_frame()
     rig = {"grip_rest": tuple(K.GRIP_AT), "blade_rest": tuple(b_), "edge_rest": tuple(e_), "pelvis": 0.66, "hilt_l": 0.09,
            "lhand": {"k": (0, 1, -0.15), "o": (-1, 0, 0), "palm": (-K.SH + 0.006, 0.0, K.HAND_Z - 0.052)}}
+    bpy.context.scene.render.fps = FPS
     sol = Solver(arm, rig)
     bpy.context.view_layer.objects.active = arm
     names = []

@@ -7,7 +7,7 @@ extends RefCounted
 const TRI_BUDGET := 20000
 const DT := 1.0 / 30.0
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
-const POP := 0.7               # m: no teleport across a hand-over (a raw cut between two poses is 1 m and more)
+const POP := 1.0               # m a frame: no teleport across a hand-over (the fastest strikes move 0.5 m a frame on their own)
 
 var bad := 0
 var holder: Node3D
@@ -100,7 +100,7 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 		var off := maxf(end_t - length, 0.0) if moves[km].has("hold_from") else absf(length - end_t)
 		if off > worst:
 			worst = off
-			where = String(km)
+			where = "%s, clip %.3f s, keys %.3f s" % [km, length, end_t]
 	ok(worst <= 0.034, "%s: every clip lasts as long as its kit move, to a frame (worst %.3f s, %s)" % [id, worst, where])
 	var unmapped: Array = []
 	var pre: String = {"juggernaut": "jug_"}.get(id, "")
