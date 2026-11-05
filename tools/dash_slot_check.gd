@@ -19,6 +19,11 @@ func _frames(n := 2) -> void:
 	for i in n:
 		await main.get_tree().process_frame
 
+## The match HUD draws the slots on HudPanels, REDRAW_HZ times a second: wait for its next draw.
+func _drawn(hud) -> void:
+	await hud.panels.draw
+	await main.get_tree().process_frame
+
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
@@ -51,7 +56,7 @@ func _pips_and_timer(m: Match, P: Hunter, hid: int) -> void:
 		P.reclass(Arch.weight(a), a, Arch.signature(a))
 		P.unlock_all()
 		P.dashes = P.max_dashes()
-		await _frames()
+		await _drawn(m.hud)
 		var want := int(Content.class_dodge(Arch.weight(a)).charges) + int(P.ak.extra_dashes() if P.ak else 0.0)
 		var air := P.ak == null or P.ak.has_long_dash()
 		var sh: Dictionary = DashSlot.shown.get(hid, {})
@@ -64,7 +69,7 @@ func _pips_and_timer(m: Match, P: Hunter, hid: int) -> void:
 	for frac in [0.0, 0.3, 0.8]:
 		P.dashes = 1.0 + frac
 		P.ex_cd = 0.0
-		await _frames()
+		await _drawn(m.hud)
 		var sh: Dictionary = DashSlot.shown[hid]
 		var pips: Array = sh["pips"]
 		var left: float = (1.0 - frac) * regen
@@ -73,7 +78,7 @@ func _pips_and_timer(m: Match, P: Hunter, hid: int) -> void:
 		ok(shape and sh["text"] == HudSlot.cd_text(left),
 			"1 charge + %.0f%%: pips %s, countdown '%s' (%.2fs of %.2fs)" % [frac * 100, pips, sh["text"], left, regen])
 	P.dashes = 0.0
-	await _frames()
+	await _drawn(m.hud)
 	var sh0: Dictionary = DashSlot.shown[hid]
 	var empty: bool = sh0["pips"].all(func(f): return f == 0.0)
 	ok(empty and sh0["text"] == HudSlot.cd_text(regen), "0 charges: every pip empty, countdown '%s'" % sh0["text"])
@@ -84,7 +89,7 @@ func _pips_and_timer(m: Match, P: Hunter, hid: int) -> void:
 	var gained: float = P.dashes - d0
 	ok(absf(gained - 1.0 / regen) < 0.01, "the real tick refills the slot's timer (%.3f charge in a second)" % gained)
 	P.ex_cd = 5.0
-	await _frames()
+	await _drawn(m.hud)
 	var air_back := float(DashSlot.shown[hid]["air"])
 	ok(air_back < 0.9, "the air-dash diamond follows its own cooldown (%.2f back)" % air_back)
 	P.ex_cd = 0.0
@@ -93,18 +98,18 @@ func _pips_and_timer(m: Match, P: Hunter, hid: int) -> void:
 func _flash_and_tick(m: Match, P: Hunter, hid: int) -> void:
 	var hud = m.hud
 	P.dashes = 0.9
-	await _frames()
+	await _drawn(m.hud)
 	hud.ready_flash.erase("dash")
 	var tick0: int = int(Sfx.last_played.get("click", -1000))
 	P.dashes = 1.0
-	await _frames(1)
+	await _drawn(m.hud)
 	var flash := float(hud.ready_flash.get("dash", 0.0))
 	ok(flash > 0.1, "a charge returning flashes the slot (%.2fs left)" % flash)
 	ok(int(Sfx.last_played.get("click", -1000)) > tick0 or Sfx.streams.is_empty(), "... and ticks softly")
 	hud.ready_flash.erase("dash")
 	DashSlot._was.erase(hid)
 	P.dashes = 2.0
-	await _frames(1)
+	await _drawn(m.hud)
 	ok(not hud.ready_flash.has("dash"), "a slot seen for the first time doesn't flash")
 
 ## 4: dash pressed with nothing to spend shakes the slot (red), for every archetype.
