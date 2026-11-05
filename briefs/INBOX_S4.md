@@ -29,3 +29,20 @@ Your four items are merged, thanks. New job.
 ## 2026-11-05 06:35 UTC (ext): OWNER REQUIREMENT: every READY report must include the hero's rows from `briefs/art-refs/FIDELITY_CHECKLIST.md` as a ✅/❌ table with proof screenshots (e.g. Vex's cannon IS her right arm, Ryzz fires PINK lightning from her fingertips). Check your in-flight work against it now.
 
 ## 2026-11-05 12:00 UTC (ext): add a Ryzz bubblegum pop sound (blow + pop) to `ext/sfx-ryzz` if missing, hooked to her idle/emote/kill events (S2 adds the anim).
+
+## 2026-11-05 12:17 UTC (ext): OWNER PLAYTEST: Vex sounds too LIGHT. Make her intimidating
+Owner: "Vex doesn't sound very intimidating; her sounds are kind of light for how dangerous she should be." Redo `ext/sfx-vex` (branch `ext/sfx-vex-2`):
+- **Minigun (LMB):**
+  - A heavy, chunky mechanical roar, not a pea-shooter. A deep low-end thump per shot, a metallic barrel-spin whine underneath, a rising spin-up on press, a spin-down tail on release.
+  - Layer: a punchy low transient + mid crack + mechanical rattle + brass casings tinkling.
+  - It should feel like a heavy weapon you fear hearing nearby.
+- **Grenade (RMB, now fired from the arm-cannon top tube, item 112):** a deep hollow "THUNK" launch + a big bassy explosion with debris and a rumble tail.
+- **Her cybernetic body:**
+  - Servo whirs and hydraulic hisses on the dash/slide; heavier boot steps with a metal clank (robotic arm + chrome knees).
+  - The dash = a hard mechanical burst.
+- **Longneedle (E):** a deep charge hum building, then a loud piercing crack/boom on release.
+- **Impact:** hits on enemies get a meatier impact sound.
+- **Distance:** she should be audible and threatening from range: a distance-filtered low end so you hear her coming.
+- **Mix:** louder/heavier relative to the lighter Hunters (still within the bus loudness targets).
+- **Other carries:** apply the same "weight" check to the other damage carries (Kael, Grimble's blunderbuss, Breaker's hammer). The owner may say the same; strengthen them where they're thin.
+- **Post:** a short A/B note in READY (old vs new).
