@@ -52,3 +52,6 @@ Owner: "Vex doesn't sound very intimidating; her sounds are kind of light for ho
 ## 2026-11-05 12:24 UTC (ext): OWNER (playtest, item 116.5): Ryzz needs WAY better lightning sounds (a crackling zap per shot, a stack tick, an ult thunder crack) + a distinct bright "reset" zing when her dash resets.
 
 ## 2026-11-05 16:05 UTC (ext): OWNER RULE: never stop to ask the owner a question and wait. He is often away. Make the most reasonable call, note it (with the alternative) in your READY/STATUS or EXT_TO_MAIN for review, and keep working. Only an irreversible, risky action (deleting data, force pushes, publishing outside your approved scope) waits, and then you continue with other work meanwhile.
+
+## 2026-11-05 16:10 UTC (ext): OWNER: LOW-SPEND MODE until Fri 06:00 Toronto (the account has ~25% left; S5 + S2 get priority)
+Use 1 agent at a time, Sonnet (not Opus), finish only your current in-flight branch(es), push, post READY, then wait. No new big tasks, no full-suite reruns. Full speed resumes Friday on a fresh account.
