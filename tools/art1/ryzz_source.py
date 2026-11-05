@@ -176,7 +176,16 @@ hand_w = GROUP["hand.R"] + GROUP["hand.L"]
 bm = bmesh.new()
 bm.from_mesh(low.data)
 bm.faces.ensure_lookup_table()
-kill = [f for f in bm.faces if max(hand_w[v.index] for v in f.verts) > 0.5]
+arm_w = sum(GROUP[b_] for b_ in ("forearm.R", "forearm.L", "hand.R", "hand.L"))
+wrist_z = T["wrist.R"][2] + 0.004
+
+
+def past_wrist(f):
+    """The rebuilt hands start here: anything of the arm below the wrist goes, the scan's thumb and cuff stubs too (they'd stick out of the new hand)."""
+    return max(hand_w[v.index] for v in f.verts) > 0.5 or (max(arm_w[v.index] for v in f.verts) > 0.3 and f.calc_center_median().z < wrist_z)
+
+
+kill = [f for f in bm.faces if past_wrist(f)]
 bmesh.ops.delete(bm, geom=kill, context="FACES")
 bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
 bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0006)

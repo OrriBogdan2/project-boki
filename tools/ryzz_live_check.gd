@@ -1,6 +1,7 @@
 extends RefCounted
-## --ryzz-live-check: Ryzz's clips through the real match code (tools/clip_live_check.gd for her kit): a Match, the kit's own presses and the render path.
-## Finger bolts, Storm Rod, Wirerun, Skycall and Kitefall each play their clip, the rods blaze in Kitefall and at no other time, and a knock-out plays the death clip.
+## --ryzz-live-check: Ryzz's clips through the real match code (tools/clip_live_check.gd for her kit): a Match,
+## the kit's own presses and the render path. Each ability plays its clip, the rods blaze in Kitefall and at no
+## other time, and a knock-out plays the death clip.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0

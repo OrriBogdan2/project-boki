@@ -8,7 +8,7 @@ metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "9a49625cf13ad5d12b88c8bf3a83b24f"
+"md5": "cdbd2645f0d443aa4d9ecaa3803aea7a"
 }
 
 [deps]
@@ -18,8 +18,8 @@ dest_files=["res://.godot/imported/ryzz_atlas.jpg-dc03ab10f2409b3b04273433bacdba
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
