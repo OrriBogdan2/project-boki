@@ -62,6 +62,8 @@ const CHECKS := {
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--pip-live-check": ["res://tools/pip_live_check.gd", "pip_live_check", null],      # Pip's clips in a real match
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
+	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],      # the crouch layer: low, feet down, eased, no pop
+	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],      # a Hero's crouch through the game state, before and after
 	"--dancer-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],
 	"--juggernaut-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "juggernaut"],
 	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],          # Ryzz / Vex screenshots
