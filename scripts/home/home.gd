@@ -72,6 +72,7 @@ var grave_r := 0
 var burrow_r := 0
 var _fx_sig := ""
 var away_work: Array = []          # lines: what assigned Boki made while you were away
+var tw := ToolWork.new()           # your tool swing: axe, pickaxe, hammer (tool_work.gd)
 var hg: HomeGather = null           # chopping wild trees and mining boulders with your tools (home_gather.gd)
 
 ## The island being shown: yours, or the one you're visiting.
@@ -91,11 +92,9 @@ const DAY_LEN := 300.0          # seconds for a full day at home
 var env_res: Environment
 var sun_l: DirectionalLight3D
 var p_anim: HunterAnim = null
-var p_fired := 99.0             # seconds since you last swung a tool (gathering), for the animation
 var crouch_on := false          # crouching (the match's crouch key and its tap-to-toggle setting)
 var p_crouch_k := 0.0           # the crouched pose, eased in and out
 const CROUCH_SPEED := 0.55      # walking speed crouched (the same as in a match)
-var p_swing_n := 0              # melee swings so far, so each one plays its arc
 var lamps: Array = []           # OmniLight3D
 var day_t := 0.3                # 0..1, 0.25 is morning, 0.5 noon, 0.75 dusk
 var rain: CPUParticles3D
@@ -1045,7 +1044,7 @@ var dash_t := 0.0
 var dash_v := Vector2.ZERO
 var dash_charges := 2.0
 var ex_cd := 0.0               # the long dash (Shift in the air, or with the short ones spent), as in a match
-var dash_pips: Control = null  # the stamina pips over your head, as in a match
+var dash_slot: HomeDashSlot = null  # the dash slot on screen, the match bar's own (DashSlot)
 var safe_at := Vector3(38.0, 0, 34.5)
 var glider_node: MeshInstance3D = null
 const HOME_ZOOM := 1.2         # the camera on arriving home: midway between close (0.8) and the widest the wheel goes (1.6)
@@ -1143,29 +1142,6 @@ func try_dash(mv: Vector2, air: bool) -> bool:
 	pvy = maxf(pvy, 0.0)
 	return true
 
-## The stamina pips over your head: one per dash charge (the next filling as it recharges), and the
-## long dash last, like the match HUD's.
-func _draw_dash_pips() -> void:
-	if dash_pips == null or player == null or cam == null or panel_open != "":
-		return
-	var at := player.position + Vector3(0, 2.3, 0)
-	if cam.is_position_behind(at):
-		return
-	var sp := cam.unproject_position(at)
-	if not sp.is_finite():
-		return
-	var dg := _dodge()
-	var n := int(dg["charges"]) + 1
-	var col := Color("ffd66a")
-	for i in n:
-		var cpt := sp + Vector2(-(n - 1) * 6.5 + i * 13, 0)
-		var fill := clampf(dash_charges - i, 0.0, 1.0) if i < n - 1 else 1.0 - ex_cd / maxf(0.1, float(dg["ex_cd"]))
-		dash_pips.draw_colored_polygon(PackedVector2Array([cpt + Vector2(0, -5), cpt + Vector2(5, 0), cpt + Vector2(0, 5), cpt + Vector2(-5, 0)]), Color(0.04, 0.04, 0.06, 0.8))
-		if fill >= 1.0:
-			dash_pips.draw_colored_polygon(PackedVector2Array([cpt + Vector2(0, -3.5), cpt + Vector2(3.5, 0), cpt + Vector2(0, 3.5), cpt + Vector2(-3.5, 0)]), col)
-		elif fill > 0.0:
-			dash_pips.draw_arc(cpt, 3.0, -PI * 0.5, -PI * 0.5 + TAU * fill, 10, Color(col, 0.6), 2.0)
-
 func start_dash(dir: Vector2, speed: float, time: float) -> void:
 	if dir.length() < 0.1:
 		dir = Vector2(-sin(pface), -cos(pface))
@@ -1207,7 +1183,8 @@ func _move_player(d: float) -> void:
 	var crouching := crouch_on and not air and dash_t <= 0.0 and not gliding and wdep == 0
 	p_crouch_k = move_toward(p_crouch_k, 1.0 if crouching else 0.0, d * 8.0)
 	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0 and not water.swimming:
-		try_dash(mv, air)
+		if not try_dash(mv, air) and dash_slot:
+			dash_slot.deny()
 	_mv = mv
 	var hv := Vector2(pvel.x, pvel.z)
 	if dash_t > 0.0:
@@ -1306,29 +1283,22 @@ func _move_player(d: float) -> void:
 		if ad.length() > 0.4: want = atan2(-ad.x, -ad.y)
 	elif hv.length() > 0.3:
 		want = atan2(-hv.x, -hv.y)
-	if hg and hg.busy(): want = hg.face()      # chopping: face the tree
+	if tw.active(): want = tw.face_from(ppos)      # working: face the target
 	pface = lerp_angle(pface, want, minf(1.0, d * 14.0))
 	player.basis = cam.char_basis(pface, player.scale)     # leaned toward the camera, as in a match
 	player.basis = water.tilt(player.basis, hv.length())      # swimming: tipped into a stroke
 	if p_anim == null or p_anim.model != player:
 		p_anim = HunterAnim.new(player)
-	p_fired += d
-	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding or water.k > 0.5, "rolling": dash_t > 0.0, "dash_dir": dash_v, "fired": p_fired,
-		"swing_n": p_swing_n, "combo": maxi(0, p_swing_n - 1) % 3, "crouch": p_crouch_k}
+	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding or water.k > 0.5, "rolling": dash_t > 0.0, "dash_dir": dash_v, "crouch": p_crouch_k}
+	ps.merge(tw.anim_state())      # the Empty carries no class weapon at home; a tool only while working
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
 	p_anim.update(d, ps)
-	if (dash_pips == null or not is_instance_valid(dash_pips)) and ui:
-		dash_pips = Control.new(); dash_pips.name = "DashPips"
-		dash_pips.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		dash_pips.set_anchors_preset(Control.PRESET_FULL_RECT)
-		dash_pips.draw.connect(_draw_dash_pips)
-		ui.add_child(dash_pips)
-		ui.move_child(dash_pips, 0)
-	if is_instance_valid(dash_pips):
-		var dg0 := _dodge()
-		dash_pips.visible = dash_charges < float(dg0["charges"]) or ex_cd > 0.0
-		if dash_pips.visible: dash_pips.queue_redraw()
+	if dash_slot == null and ui:
+		dash_slot = HomeDashSlot.new()
+		dash_slot.home = self
+		ui.add_child(dash_slot)
+		ui.move_child(dash_slot, 0)
 	if p_anim.stepped:
 		Sfx.step(null, -20.0)
 
@@ -2203,7 +2173,7 @@ func _use(it: Dictionary) -> void:
 				_hatch_nest_egg()
 			else:
 				fx.burst(NEST_AT + Vector3(0, 0.5, 0), Color("ffd28a"), 8, 1.4)
-				_toast("Warm and still. It hatches after your next expedition, or in a few minutes")
+				_toast("It hatches after your next expedition")
 		"yard":
 			var ak := Save.active_kin()
 			if not ak.is_empty(): _open_train(ak)
@@ -2595,7 +2565,7 @@ func _water(arr: String, i: int, who = "you") -> void:
 		fx.burst(pn.position + Vector3(0, 0.8, 0), Color("7ac8ff"), 14, 2.0)
 		if already:
 			fx.burst(pn.position + Vector3(0, 0.9, 0), Color("bfefff"), 10, 2.4)
-			_toast("Tended! Rain only soaks it; your watering counts toward a bigger harvest.")
+			_toast("Tended: a bigger harvest")
 	_refresh_plot(arr, i)
 	Save.save_game()
 
@@ -2839,7 +2809,7 @@ func _pet_kin(k: Dictionary) -> void:
 		pet_done[rec["uid"]] = int(Save.d["matches"])
 		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
 		Save.save_game()
-		_say(k, KinSpeak.say(rec, "love") if Care.speech(rec) < 3 else ["Hehe!", "More!", "That's the spot.", "♥"][randi() % 4], 1.6)
+		_say(k, BokiLines.say(rec, "petted"))
 
 ## Fetch: you toss a ball toward the cursor, the kin runs it down and brings it back.
 func _play_with_kin(k: Dictionary) -> void:
@@ -2907,7 +2877,12 @@ func _fetch_step(k: Dictionary, d: float) -> void:
 		k["t"] = randf_range(1.5, 3.0)
 
 ## A speech bubble over a kin's head.
-func _say(k: Dictionary, text: String, secs := 4.0, direct := true) -> void:
+## secs: how long it stays up (0: the usual BokiLines.bubble_s); an empty line says nothing.
+func _say(k: Dictionary, text: String, secs := 0.0, direct := true) -> void:
+	if text == "":
+		return
+	if secs <= 0.0:
+		secs = BokiLines.bubble_s()
 	if not direct:
 		# chatter waits its turn: nobody else talking nearby, and a breath since the last line
 		if talk_cd > 0.0 or _talking_near(k, 7.0):
@@ -2945,26 +2920,19 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 		r.add_child(kc)
 		var tv := UI.vbox(1); tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		tv.add_child(UI.label(nm, UI.T_BODY, c, UI.semi))
-		if compact:
-			var dl := UI.label(desc, 12, UI.MUTED)
-			dl.autowrap_mode = TextServer.AUTOWRAP_OFF
-			dl.clip_text = true
-			dl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-			dl.tooltip_text = desc
-			dl.mouse_filter = Control.MOUSE_FILTER_PASS
-			tv.add_child(dl)
-		else:
-			tv.add_child(UI.para(desc, 12, UI.MUTED))
+		tv.add_child(UI.para(desc, 12, UI.MUTED))
 		r.add_child(tv)
 		c2.add_child(r)
+	if compact:
+		c2.add_child(BokiMoves.new(String(rec["species"]), rec))      # tiles with tips (item 82)
 	# read from its parts (the kin grammar): what it does, coloured by effect category
-	for ai in abl.size():
+	for ai in (0 if compact else abl.size()):
 		var ad := KinLib.ability(String(abl[ai]))
 		if ad == null: continue
 		var eff := KinLib.effective(ad, "k1" if ai == 0 else "k2", kspec, rec)
 		ab_row.call(Settings.key_cap("signature") if ai == 0 else "auto", ad.display_name, (KinText.ability(eff) if ai == 0 else KinText.when(ad) + ": " + KinText.ability(eff)), KinText.color(ad).lerp(UI.INK, 0.3))
 	var ud := KinLib.merge(String(sp.get("ultimate", "")))
-	if ud:
+	if ud and not compact:
 		ab_row.call(Settings.key_caps("ultimate"), "Fusion: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
 	if kspec == null:
 		return
@@ -3146,7 +3114,7 @@ func _open_kin(rec: Dictionary) -> void:
 			fl.add_child(UI.ghost("Bring as second", func():
 				Save.d["active2"] = rec["uid"]
 				Save.save_game()
-				_toast("%s will come along on your next expedition (%s swaps it in)" % [rec["name"], Settings.key_cap("swap_kin")])
+				_toast("%s joins your next expedition (%s swaps)" % [rec["name"], Settings.key_cap("swap_kin")])
 				_open_kin(rec)))
 	# the Kin Burrow: put it to sleep there, or wake it and bring it out
 	if KinBox.is_boxed(rec):
@@ -3175,7 +3143,7 @@ func _open_kin(rec: Dictionary) -> void:
 			rec["farmhand"] = true
 			Save.remember(rec, "farm", "was put in charge of watering the farm", 1.0)
 			Save.save_game()
-			_toast("%s will water your plants (a farmhand counts as Tide 1 on the Job Board)" % rec["name"])
+			_toast("%s will water your plants" % rec["name"])
 			_open_kin(rec)))
 
 # ---- talking: speech bubbles over the kin and a slim bar to type in
@@ -3195,7 +3163,7 @@ func _open_chat(rec: Dictionary) -> void:
 		k["hold_t"] = 9999.0
 		_face(k["pos"])
 		if chat_log.size() == 1:
-			_say(k, _greeting(rec), 5.0)
+			_say(k, _greeting(rec))
 	var bar := UI.card(Color(0.06, 0.07, 0.1, 0.92), 12, 14)
 	bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
@@ -3233,14 +3201,12 @@ func _close_chat() -> void:
 		if not k.is_empty(): k["hold_t"] = 0.6
 	chat_open = false
 
+## What it says when you walk up or start talking: cold if it doesn't trust you, else what it wants.
 func _greeting(rec: Dictionary) -> String:
-	var t := float(rec["trust"])
-	if Care.speech(rec) < 3:
-		var w := Care.want(rec)
-		return KinSpeak.say(rec, "sad" if t < 30.0 else ("question" if w != "" else "happy"), "cold" if t < 30.0 else (w if w != "" else "hello"))
-	if t > 70.0: return "Hi! I was hoping you'd come say hi."
-	if t < 30.0: return "...oh. It's you."
-	return "Hey. What's up?"
+	var w := Care.want(rec)
+	if float(rec["trust"]) < 30.0:
+		return BokiLines.say(rec, "greet_cold")
+	return BokiLines.say(rec, "want_" + w if w != "" else "greet")
 
 ## Keeps the last few lines of the conversation in the bar.
 func _chat_bubble(_role: String, _text: String) -> void:
@@ -4141,23 +4107,23 @@ func _care_tick(d: float) -> void:
 func _update_bubbles(d: float) -> void:
 	var now := Time.get_ticks_msec() / 1000.0
 	KinWants.update(self, d, now)
+	FarmChatter.tick(self, d)
 	KinIndoors.badge(self, _house_door(), KinIndoors.names(kins), ppos)
 	for k in kins:
 		var rec: Dictionary = k["rec"]
-		var w := Care.want(rec) if visit.is_empty() else ""
 		# dusty kin shed a little dust as they go
 		if visit.is_empty() and Care.need(rec, "clean") < 22.0 and randf() < d * 0.4:
 			fx.dust(k["pos"], 3)
 		# saying hello when you walk up to it
 		k["hi_cd"] = float(k.get("hi_cd", 0.0)) - d
-		# the big moment of its last expedition: it brings it up when you're close (KinSpeak.recall_line)
+		# the big moment of its last expedition: it brings it up when you're close
 		if rec.has("recall") and visit.is_empty() and panel_open == "" and not chat_open and not k.get("busy", false) \
 				and float(k.get("nap_t", 0.0)) <= 0.0 and Vector2(ppos.x - k["pos"].x, ppos.z - k["pos"].z).length() < 3.2:
-			var rl := KinSpeak.recall_line(rec)
+			var rl := BokiLines.say(rec, "back_" + String(rec["recall"].get("kind", "")))
 			rec.erase("recall")
 			k["hi_cd"] = 25.0
 			if rl != "":
-				_say(k, rl, 7.0)
+				_say(k, rl)
 				_emote(k, "♥" if float(rec["trust"]) > 55.0 else "!")
 				Sfx.play("kin_happy", k["pos"], -8.0, 0.15, Unique.voice(rec))
 				Save.save_game()
@@ -4165,11 +4131,7 @@ func _update_bubbles(d: float) -> void:
 			if Vector2(ppos.x - k["pos"].x, ppos.z - k["pos"].z).length() < 2.0:
 				k["hi_cd"] = randf_range(18.0, 30.0)
 				if randf() < 0.5 and float(k.get("nap_t", 0.0)) <= 0.0:
-					var trust := float(rec["trust"])
-					if Care.speech(rec) < 3:
-						_say(k, KinSpeak.say(rec, "sad" if trust < 30.0 else ("question" if w != "" else "happy"), w if w != "" else ("cold" if trust < 30.0 else "")), 2.8, false)
-					else:
-						_say(k, _greeting(rec), 2.8, false)
+					_say(k, _greeting(rec), 0.0, false)
 
 ## Gentle routines driven by how it's feeling. Returns true if it chose where to go.
 func _care_goal(k: Dictionary) -> bool:
@@ -4305,11 +4267,11 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
 	var nm: String = rec["name"]
 	if res["hate"]:
-		_say(k, KinSpeak.say(rec, "angry", "mean") if Care.speech(rec) < 3 else "Ugh. No. Not that.", 3.0)
+		_say(k, BokiLines.say(rec, "fed_no"))
 		if res["new"]: _toast("You found out %s won't eat %s" % [nm, Care.food_name(f)])
 		return
 	if res["full"] and not res["ok"]:
-		_say(k, KinSpeak.say(rec, "content", "full") if Care.speech(rec) < 3 else "I'm full, thanks!", 3.0)
+		_say(k, BokiLines.say(rec, "full"))
 		return
 	if Data.CROPS.has(f):
 		for af in Evo.AFF:
@@ -4319,12 +4281,12 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 		_emote(k, "♥")
 		fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 16, 2.2)
 		Sfx.play("kin_happy", null, -2.0, 0.1)
-		_say(k, KinSpeak.say(rec, "love", "love") if Care.speech(rec) < 3 else "My favourite! Thank you!", 3.0)
+		_say(k, BokiLines.say(rec, "fed_fav"))
 		if res["new"]: _toast("%s loves %s!" % [nm, Care.food_name(f)])
 	else:
 		_emote(k, "♪")
 		Sfx.play("kin_happy", null, -8.0)
-		_say(k, KinSpeak.say(rec, "happy") if Care.speech(rec) < 3 else "Mm, thanks.", 2.4)
+		_say(k, BokiLines.say(rec, "fed"))
 	if res.get("hungry", false):
 		Save.remember(rec, "fed", "was fed when it was hungry", 2.0)
 	elif int(rec.get("fed_m", -1)) != int(Save.d["matches"]):
@@ -4353,7 +4315,7 @@ func _care_brush(rec: Dictionary) -> void:
 		Care.change(rec, "joy", 18.0 if loves else 6.0)
 		k["joy_t"] = 0.8
 		_emote(k, "♥" if loves else "★")
-		_say(k, KinSpeak.say(rec, "love" if loves else "content") if Care.speech(rec) < 3 else ("Ooh, that's lovely." if loves else "Thanks, that's better."), 2.6)
+		_say(k, BokiLines.say(rec, "brushed"))
 		if loves and Care.discover(rec, "play"): _toast("%s loves being brushed" % rec["name"])
 		if clean_before < 30.0: Save.remember(rec, "brushed", "got brushed clean when it was a mess", 1.5)
 		Save.save_game())
@@ -4375,11 +4337,11 @@ func _finish_bath(k: Dictionary) -> void:
 	fx.burst(k["pos"] + Vector3(0, 0.6, 0), Color("8fd0ff"), 18, 3.0, 0.5)
 	if loves:
 		_emote(k, "♥")
-		_say(k, KinSpeak.say(rec, "excited", "love") if Care.speech(rec) < 3 else "Again! Again!", 2.8)
+		_say(k, BokiLines.say(rec, "bath_fav"))
 		if Care.discover(rec, "play"): _toast("%s loves baths" % rec["name"])
 	elif grumpy:
 		_emote(k, "!")
-		_say(k, (KinSpeak.babble(rec["species"], "angry") + " (shakes water everywhere)") if Care.speech(rec) < 3 else "Brr. I'm soaked.", 2.8)
+		_say(k, BokiLines.say(rec, "bath_grump"))
 	else:
 		_emote(k, "★")
 	k["t"] = 1.5
@@ -4396,7 +4358,7 @@ func _care_nap(rec: Dictionary) -> void:
 	else:
 		k["nap_t"] = 30.0
 		k["slept"] = 0.0
-	_say(k, KinSpeak.say(rec, "sleepy") if Care.speech(rec) < 3 else "Just a little nap...", 2.0)
+	_say(k, BokiLines.say(rec, "nap"))
 
 # ---- training: a timing game at the yard; three rounds, each a little faster
 func _start_drill(rec: Dictionary, stat: String) -> void:
@@ -4406,7 +4368,7 @@ func _start_drill(rec: Dictionary, stat: String) -> void:
 	if Care.need(rec, "energy") < 20.0 or Care.need(rec, "food") < 12.0:
 		_close_panel()
 		var why := "energy" if Care.need(rec, "energy") < 20.0 else "food"
-		_say(k, KinSpeak.say(rec, "sleepy" if why == "energy" else "sad", why), 3.0)
+		_say(k, BokiLines.say(rec, "want_" + why))
 		_toast("%s is too %s to train. %s first" % [rec["name"], "tired" if why == "energy" else "hungry", "Let it nap" if why == "energy" else "Feed it"])
 		return
 	if int(rec["stats"][stat]) >= Care.stat_cap(rec):
@@ -4555,7 +4517,7 @@ func _finish_training() -> void:
 		Save.remember(rec, "trained", "trained %s with you at the yard" % String(Care.STATS[stat]["name"]).to_lower(), 1.0)
 	Save.save_game()
 	_toast("+%d %s  (%d of %d)" % [gained, Care.STATS[stat]["name"], int(rec["stats"][stat]), Care.stat_cap(rec)] if gained > 0 else "No gain this time. Try again after a rest")
-	_say(k, KinSpeak.say(rec, "excited" if gained >= 6 else ("happy" if gained > 0 else "sad")) if Care.speech(rec) < 3 else ("I'm getting stronger!" if gained > 0 else "Again. I'll get it."), 2.6)
+	_say(k, BokiLines.say(rec, "trained" if gained > 0 else "train_miss"))
 	k["busy"] = false
 	k["t"] = 1.5
 	train = {}
@@ -5048,7 +5010,7 @@ func _name_baby(baby: Dictionary) -> void:
 		if not ke.is_empty():
 			ke["pos"] = spot
 			(ke["node"] as Node3D).position = ke["pos"]
-			_say(ke, KinSpeak.say(baby, "excited", "hello"), 3.0), 220))
+			_say(ke, BokiLines.say(baby, "hatched")), 220))
 
 # ---- what it wears
 func _open_wear(rec: Dictionary) -> void:

@@ -53,7 +53,8 @@ func tick(dt: float) -> void:
 	if detect_t <= 0.0:
 		detect_t = 0.5
 		_poll()
-	_update_marker()
+	_update_marker(dt)
+	_bubbles_under_lane(dt)
 	var want_page: bool = FarmTutorial.current() == "task" and FarmTutorial.stage("task") == "go"
 	FarmTaskGuide.hub_hint(h, want_page and h.panel_open == "")
 
@@ -158,12 +159,14 @@ func _skip_buttons() -> void:
 		asking = false
 		_skip_buttons(), 0))
 
-## Skips the tutorial: nothing is granted or taken; the house is put down as a site if it isn't.
+## Skips the tutorial: nothing is taken; the house is put down as a site if it isn't, with the materials it
+## needs handed over so it can still be built.
 func skip() -> void:
 	asking = false
 	FarmTutorial.skip()
 	if FarmHob.house_entry().is_empty():
 		place_house()
+		FarmSites.refund(FarmSites.build_cost("house"))
 	_clear_hint()
 	h.hob.sync()
 	h._refresh_top()
@@ -173,16 +176,13 @@ func house_spot() -> Vector3:
 	var sp: Dictionary = FarmTutorial.rules()["house_spot"]
 	return HomeLayout.LANDING + Vector3(float(sp["x"]), 0, float(sp["z"]))
 
-## Puts the house down as a construction site on the free ground nearest the suggested spot (paying its
-## cost; a skipper who cannot is handed just that).
+## Puts the house down as a construction site on the free ground nearest the suggested spot (marking it
+## out costs nothing; the materials are spent as it goes up).
 func place_house() -> bool:
 	var hb: HomeBuild = h.hb
 	var was_active := hb.active
 	if not was_active:
 		hb.active = true
-	var cost := FarmSites.build_cost("house")
-	if not FarmSites.can_pay(cost):
-		FarmSites.refund(cost)      # a skipped tutorial: the house goes down anyway, with the wood it needs
 	hb.take("house")
 	var found := false
 	var p := house_spot()
@@ -282,7 +282,7 @@ func _update_crop_label() -> void:
 	crop_lbl.text = "Growing\n" + FarmCropGuide.bar_text(g)
 	crop_lbl.position = (h.plots[int(g["plot"])] as Node3D).position + Vector3(0, 2.2, 0)
 
-func _update_marker() -> void:
+func _update_marker(dt: float) -> void:
 	_update_crop_label()
 	var id := FarmTutorial.current()
 	var txt := FarmTutorial.world_text(id)
@@ -304,3 +304,22 @@ func _update_marker() -> void:
 	marker.visible = true
 	marker.text = "%s\n▼" % txt
 	marker.position = at + Vector3(0, 3.6 + sin(t * 3.0) * 0.18, 0)
+	_yield_to_covers(dt)
+
+## A Boki's speech bubble fades back while a message card (MsgLane) covers it on screen.
+func _bubbles_under_lane(dt: float) -> void:
+	var cards := MsgLane.of(h.root_ui).rects()
+	for k in h.kins:
+		var say: Label3D = k.get("say")
+		if say and say.visible:
+			MsgLane.yield_label(say, h.cam, cards, dt)
+
+## The marker fades back while a Boki's speech bubble or a message card covers it on screen, so two
+## lines never print over each other; it comes back when the Boki is done talking and the card goes.
+func _yield_to_covers(dt: float) -> void:
+	var covers: Array[Rect2] = MsgLane.of(h.root_ui).rects()
+	for k in h.kins:
+		var say: Label3D = k.get("say")
+		if say and say.visible:
+			covers.append(MsgLane.label_rect(say, h.cam))
+	MsgLane.yield_label(marker, h.cam, covers, dt)

@@ -1,7 +1,7 @@
 extends "res://tools/breah_shots.gd"
 ## --combo51-shots --shots-dir=<dir> --combo51-hero=<id>: owner item 51's new combos as strips (the Breah
 ## rig's 3-wide grid of crops round the hero, tools/breah_shots.gd) in a live Arena match, under xvfb with a
-## renderer: archer|mage|dolm (Hem, Ryzz, Tarek) and juggernaut|dredge|ashwick (Kael, Dredge, Cinder).
+## renderer: archer|mage|dolm (Lisette, Ryzz, Tarek) and juggernaut|dredge|ashwick (Kael, Grimble, Cinder).
 ## <dir>/captions.txt gets "file: caption" per file.
 ## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Ryzz, Tarek: the audit's strips) or Kael's
 ## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS), or Cinder's
@@ -30,7 +30,7 @@ func run(main_node: Node) -> void:
 	print("COMBO51SHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
 
-## Hem: the draw held through the roll, then let go; the draw held through a jump and an air flick, let go up there.
+## Lisette: the draw held through the roll, then let go; the draw held through a jump and an air flick, let go up there.
 func _archer() -> void:
 	var K: ArcherKit = P.ak
 	await _reset(9.0)
@@ -41,7 +41,7 @@ func _archer() -> void:
 			P.do_dash()
 	var marks := _strip(
 		"combo_draw_roll_strip",
-		"Hem (item 51): drawing; Shift mid-draw, the roll goes at once with the draw kept; still rolling, the"
+		"Lisette (item 51): drawing; Shift mid-draw, the roll goes at once with the draw kept; still rolling, the"
 			+ " reticle charging on; out of the roll, still drawn; let go, the arrow leaves; the follow-through",
 		[0.3, 0.45, 0.52, 0.7, 1.03, 1.15]
 	)
@@ -56,7 +56,7 @@ func _archer() -> void:
 			P.do_dash()
 	var air_marks := _strip(
 		"combo_draw_jump_flick_strip",
-		"Hem (item 51): drawing; a jump with the draw held; the air flick with it still held; let go in the air,"
+		"Lisette (item 51): drawing; a jump with the draw held; the air flick with it still held; let go in the air,"
 			+ " the arrow leaves and she carries on with her speed; landing",
 		[0.25, 0.4, 0.58, 0.78, 0.9, 1.2]
 	)
@@ -256,7 +256,7 @@ func _juggernaut() -> void:
 	)
 	await _go(1.3, drop, dmarks)
 
-## Dredge: Shift in the Anchor's wind-up; Shift in the Broadside's charge.
+## Grimble: Shift in the Anchor's wind-up; Shift in the Broadside's charge.
 func _dredge() -> void:
 	await _reset(8.0)
 	var anchor := func(t: float):
@@ -266,7 +266,7 @@ func _dredge() -> void:
 			P.do_dash()
 	var marks := _strip(
 		"combo_anchor_barge_strip",
-		"Dredge (item 51): the Anchor's wind-up, fist raised; Shift in it, the barge goes at once with the fist"
+		"Grimble (item 51): the Anchor's wind-up, fist raised; Shift in it, the barge goes at once with the fist"
 			+ " still up; arriving; the slam lands where he arrived; the dust; recovery",
 		[0.16, 0.24, 0.34, 0.5, 0.62, 0.85]
 	)
@@ -284,7 +284,7 @@ func _dredge() -> void:
 			P.inp["move"] = Vector2.ZERO
 	var bmarks := _strip(
 		"combo_broadside_barge_strip",
-		"Dredge (item 51): the Broadside charging behind its fan; Shift, the barge goes at once in the bracing"
+		"Grimble (item 51): the Broadside charging behind its fan; Shift, the barge goes at once in the bracing"
 			+ " pose; arrived, the fan has followed him; the first wave; the second wave; done",
 		[0.4, 0.56, 0.8, 1.25, 1.85, 2.1]
 	)
@@ -390,19 +390,30 @@ func _juggernaut_chain() -> void:
 		[0.9, "full", "warchain_sling_1", "Kael Warchain: hooked, backing away"],
 		[1.07, "full", "warchain_sling_2", "Kael Warchain: E while backing away: the slingshot, flying in faster"],
 		[1.25, "full", "warchain_sling_3", "Kael Warchain: arrived on the dummy, still moving"]], 4.5)
-	await _reset(9.0)
-	var steer := func(t: float):
+	cam_at = home + Vector3(6.5, 0, -2.0)      # item 57: both hauls under one still camera, to lay over each other
+	for run in [["straight", Vector3(13, 0, 0)], ["curved", Vector3(0, 0, -13)]]:
+		await _haul_strip(String(run[0]), run[1])
+	cam_at = Vector3.ZERO
+
+## A haul at the dummy 13 m east: hooked with the cursor on it, then the cursor at `look` from him (it stays put
+## on screen) as E is pressed.
+func _haul_strip(name_of_run: String, look: Vector3) -> void:
+	var K: JuggernautKit = P.ak
+	await _reset(13.0)
+	var haul := func(t: float):
 		if _at(t, 0.1):
 			K.cd["e"] = 0.0
 			K.use_e()
-		if _at(t, 0.6):
+		if _at(t, 0.8):
 			K.use_e()
-		P.inp["move"] = Vector2(0, 1) if t > 0.6 else Vector2.ZERO
-		_aim(T.pos)
-	await _go(1.3, steer, [
-		[0.68, "full", "warchain_steer_1", "Kael Warchain: E with a strafe held: the pull swings out that way"],
-		[0.8, "full", "warchain_steer_2", "Kael Warchain: curving round toward the dummy"],
-		[0.95, "full", "warchain_steer_3", "Kael Warchain: arriving beside it, not on its line"]], 4.5)
+		_aim(T.pos if t < 0.6 else P.pos + look)
+	var marks := []
+	for i in 7:
+		var when := 0.75 + 0.12 * i
+		marks.append([when, "full", "haul_%s_%d" % [name_of_run, i],
+				"Kael Warchain, %s haul, %.2f s after the press" % [name_of_run, when - 0.8]])
+	await _go(1.65, haul, marks)
+	K.warchain.snap("")
 
 ## The audit (Nov 3): Skycall held and dragged, then released; the strike ring at its true radius.
 func _mage_audit() -> void:

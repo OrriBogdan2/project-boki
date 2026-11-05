@@ -12,9 +12,8 @@ static func toast_stray(home: Node, events: Array) -> void:
 			home.get_tree().create_timer(1.0).timeout.connect(func():
 				if is_instance_valid(home) and home.is_inside_tree():
 					var species_name := String(Data.KIN[String(srec["species"])]["name"])
-					home._show_when_free(["A stray %s wandered onto the farm. With no Boki of your own, " % species_name
-						+ "it's decided to stay with you.",
-						"You can also adopt a Boki at the Shelter (the market stall)."]))
+					home._show_when_free(["A stray %s wandered in and decided to stay." % species_name,
+						"Adopt more at the Shelter (the market stall)."]))
 
 ## The one-time list of what the save migration converted: shown once, then forgotten.
 static func show_migration(home: Node) -> void:

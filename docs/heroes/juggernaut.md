@@ -123,8 +123,15 @@ ring on screen there is centred on him: the throw's range, ~6.8 bh). Ours: the c
 1.8x the 13 m throw, so backing off is a real choice) and holds there (no break: [W] breaks it only on a stun or
 the 5 s). The 24 m is our pick; the owner can set it. [W] makes the pull an impulse (1900 uu/s), not a winch, so his own motion and input shape it:
 the pull starts at the reel speed plus a slingshot from his speed away from the anchor (0.8 of it, up to +10 m/s),
-his sideways speed carries in, and the heading turns (6 rad/s) toward a point his movement input slides beside
-the anchor (7 m/s, up to 3 m; where he faces adds 0.4 of that).
+his sideways speed carries in, and he flies a circular arc (at most 6 rad/s) to a point beside the anchor.
+
+**The swing (owner item 57, 18:54 UTC Nov 4: "you fly somewhat in the direction you're facing").** Neither [D], [W]
+nor [F] gives a steer limit (the footage's pulls are all straight), so the owner's description sets it. Looking 90
+deg aside puts that point 36% of the chain's length beside the anchor (`swing`, up to `steer_max` 6 m; it follows the
+input at `steer_rate` 24 m/s), which is an arc of about 40 deg at any length up to 16 m: 4.6 m aside at 13 m, about 3 m at
+9 m, about 2 m at 6 m. A key held across stacks with the look (`face_k` 1.0: they count the same), still up to 6 m, and
+a key against it cancels it. The speed never changes in the curve, and he arrives along it. The chain bows toward
+the swing, and his own screen shows a faint predicted arc while he holds aside, hooked or in the pull.
 
 The numbers live in `e` in content/archetypes/juggernaut.json; the code is `JuggernautChain`
 (scripts/arch/kits/juggernaut_chain.gd).
@@ -147,11 +154,12 @@ The numbers live in `e` in content/archetypes/juggernaut.json; the code is `Jugg
 | Hooked | E while moving away from the anchor | Pulling, slingshot: +0.8 of his speed away (up to +10 m/s) | [O] 23:00; [W] an impulse adds to his motion |
 | Hooked | E while strafing | Pulling, swung out that way: his sideways speed carries into the start | [O] 23:00 |
 | Hooked | E with the Lunge charging | Pulling with a Haul Slam armed for the arrival | ours |
+| Hooked | he holds aside | the chain bows that way and his screen shows the predicted arc | [O] item 57 |
 | Hooked | stunned, or the foe is downed or gone | Broken: "CHAIN BROKE", the cooldown starts | [W] 05.02.25 |
 | Hooked | a Boki merge starts | Broken | ours |
-| Pulling | each step | you fly at the pull's speed, the heading turning at 6 rad/s toward the anchor (a hooked foe is followed as it moves), height held, across gaps | [W] impulse; [F] 0333 |
-| Pulling | movement held across the pull | the aim point slides that way, up to 3 m aside (7 m/s), and the heading curves after it: you swing in beside the anchor | [O] 14:07 note, 23:00 |
-| Pulling | facing aside (the cursor off the chain's line) | bends it that way too, at 0.4 of the input's rate | [O] 23:00 "depends on his facing" |
+| Pulling | each step | you fly at the pull's speed along a circular arc (at most 6 rad/s) to the anchor (a hooked foe is followed as it moves), height held, across gaps | [W] impulse; [F] 0333 |
+| Pulling | facing aside (the cursor off the chain's line) | you swing out that way, 36% of the chain's length at 90 deg (up to 6 m): a ~40 deg arc that lands beside or past the anchor | [O] item 57 |
+| Pulling | movement held across the pull | the same swing, stacked with the facing (still up to 6 m) | [O] 14:07 note, 23:00, item 57 |
 | Pulling | Shift | the pull ends and the Rampage goes the way you dash (exit) | ours (no source footage) |
 | Pulling | jump | the pull ends in a jump that keeps 70% of its speed (slingshot included) along the heading (a chain launch); the glider takes it too | ours |
 | Pulling | E | ignored (no second pull, no stop) | ours |
@@ -241,7 +249,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 
 | Mechanic | Source | Footage | Ours |
 |---|---|---|---|
-| The tether pull can be steered sideways while you're pulled in | owner's playtest note | not visible | Built: movement held across the pull slides the arrival point up to 3m aside (7 m/s); asserted "sideways input shifts the arrival by at least 1.5m" (2.3m) |
+| The tether pull can be steered sideways while you're pulled in | owner's playtest note, item 57 | not visible | Built: looking aside or a held key swings the arrival up to 6 m aside; asserted "jug swing: ..." (13 m: 4.6 m, 41 deg, full speed) |
 | Chain cooldown starts on the pull or when the chain breaks, not on the throw | wiki patch 07.01.25 | n/a | Built (kits2), asserted |
 | A stun on Brall breaks the tether; it can't be thrown rooted or Grounded | wiki patch 05.02.25 | n/a | Built (kits2), asserted |
 | The chain's cooldown drops 2s three times | owner's game data | n/a | Built: 12.5% at rank 2, 37.5% at rank 3 (the hook refund is gone) |
@@ -310,10 +318,10 @@ gather and turn, then the dive) / `jug_meteor_land` (the crouch onto the knees a
 
 ## Look and sound (all ours)
 
-Effects in scripts/arch/kits/dj_fx.gd and shaders/dj_fx.gdshader (pooled): the two-tone slash crescents, the
-red flame crescent of the Searing Wave, the white impact bursts, the gold guard shell, the upward gold cleave, the purple dive ring, the
-wavy and striped chains, the heal column. Sounds: tools/gen_dj_sfx.py (`jug_*`), synthesized, including the
-rising Lunge whine (`jug_charge`) and its full ping (`jug_full`).
+His moments are recipes in content/vfx/juggernaut.json, played by the shared HeroVfx (docs/HERO_VFX.md): flame arcs, burning
+ground that cools to fissures, walls of flame, mesh trails, GPU embers, smoke and debris, in his ember, magenta and gold.
+The projectile looks that ride a shot and the Warchain itself stay in scripts/arch/kits/dj_fx.gd. Sounds: tools/gen_sfx_kael.py
+(`jug_*`, `juggernaut_*`), played from the recipes.
 
 ## Originality
 

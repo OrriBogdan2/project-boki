@@ -140,7 +140,8 @@ One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700, spaced).
 - `frame(bg, rad, edge, edge_w, pad_h, pad_v, lit)` - a `UiFrame` for a control that styles itself
   (a tile, a chip, a colour swatch). Never build a `StyleBoxFlat` in a screen.
 - `badge(icon, col, px=44, rad=R_PILL)` - a tinted round (or rounded) badge with an icon.
-- `toast(host, text, col=GOLD, y=100)` - a one-line note that drops in at the top and fades.
+- `toast(host, text, col=GOLD, y=100)` - a one-line note in the host's message lane (`MsgLane`):
+  stacked at the top centre, repeats merged, a few at a time.
 - `draw_bar(canvas_item, rect, frac, col, track, rad)`, `bar_box(col, rad)` - cached bars for things
   drawn every frame.
 - `set_card_border(card, col, w)` - only for the selected or the warning card.

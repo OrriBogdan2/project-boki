@@ -236,6 +236,7 @@ func _decorate_mob(mb: Mob, R: Dictionary, muts: Array) -> void:
 		var tm := TorusMesh.new(); tm.inner_radius = 0.22; tm.outer_radius = 0.3
 		crown.mesh = tm
 		crown.material_override = Models.glow_mat(Color("ffd27a"))
+		crown.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # (a glow: no shadow, item 94)
 		crown.position.y = 1.15 + Data.MOBS[mb.mkind]["r"] * 0.8
 		mb.add_child(crown)
 

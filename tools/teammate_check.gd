@@ -315,13 +315,17 @@ func _home_memory() -> void:
 	Game.apply_result({"extracted": true, "tier": 0, "gems": 0, "kin_runs": [{"uid": rec["uid"], "events": evs, "trust": k.trust, "stats": {}}]})
 	var back := Save.kin(String(rec["uid"]))
 	ok(back.has("recall") and String(back["recall"]["kind"]) in ["escaped", "carried_out"], "the run's big moment is kept for home (%s)" % str(back.get("recall", {})))
-	back["level"] = 1; back["trust"] = 40.0
-	var baby := KinSpeak.recall_line(back, 3)
-	back["level"] = 14; back["trust"] = 85.0
-	var grown := KinSpeak.recall_line(back, 3)
+	var back_trigger := "back_" + String(back["recall"]["kind"])      # what Home says when you walk up
+	back["level"] = 1
+	back["trust"] = 40.0
+	var baby := BokiLines.say(back, back_trigger)
+	back["level"] = 14
+	back["trust"] = 85.0
+	var grown := BokiLines.say(back, back_trigger)
 	print("  hatchling: %s\n  grown: %s" % [baby, grown])
 	ok(baby.contains("(") and not baby.contains("%"), "a hatchling acts it out")
-	ok(grown.contains(String(back["recall"]["place"])) and not grown.contains("%"), "a grown Boki tells you where it happened")
+	ok(BokiLines.grown_pool(BokiLines.trigger(back_trigger), BokiLines.element_of(String(back["species"]))).has(grown),
+			"a grown Boki tells you about that moment")
 	ok(back["memory"].any(func(mm): return String(mm["kind"]) in ["escaped", "carried_out"]), "and it's in its memories")
 
 # ------------------------------------------------------------------ 4. no spam

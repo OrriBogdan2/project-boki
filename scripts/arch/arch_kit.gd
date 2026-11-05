@@ -60,6 +60,8 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	k._setup()
 	return k
 
+const OWN_LOOK_SKIP := ["boom", "ping", "whoosh", "throw"]     # KinExec's delivery sounds (see run_own)
+
 # ------------------------------------------------------------------ data
 func rmb_def() -> Dictionary: return d.get("rmb", {})
 func e_def() -> Dictionary: return d.get("e", {})
@@ -598,6 +600,15 @@ func cx(slot: String, ability: String, aim: Vector3, extra := {}) -> Dictionary:
 func run(st_: StageSpec, c: Dictionary) -> void:
 	KinExec.run_stage(st_, c)
 
+## A stage whose look and sound are the Hero's own (HeroVfx): the rules run, the shared cast language stays out.
+func run_own(st_: StageSpec, c: Dictionary) -> void:
+	c["silent"] = true
+	m.fx.own_look = true
+	Sfx.skip = OWN_LOOK_SKIP
+	KinExec.run_stage(st_, c)
+	Sfx.skip = []
+	m.fx.own_look = false
+
 # ------------------------------------------------------------------ helpers
 func aim() -> Vector3:
 	return h.inp.get("aim", h.pos)
@@ -826,6 +837,9 @@ func _tick_knocks() -> void:
 ## A rival we hit in the last 5s was knocked (mine: our blow did it; else an assist).
 func on_knock(_t: Hunter, _mine: bool) -> void: pass
 func fires_in_dash() -> bool: return false
+## The body and weapon stay on the cursor through this dash, the legs alone following it (item 109). False: she
+## turns along the dash. A kit that fires mid-dash answers true, or the gun points away from its own rounds.
+func aims_in_dash() -> bool: return false
 ## In this hero's dash right now, as DashFlow sees it (a kit with its own dash state overrides this).
 func in_dash() -> bool: return h.roll_t > 0.0 and h.move_kind == "dash"
 ## s left in that dash (0 when not in one); a kit that overrides in_dash() overrides this too.
@@ -875,6 +889,12 @@ func own_node() -> Node3D:
 	h.add_child(n)
 	self_nodes.append(n)
 	return n
+
+## One of the Hero's moments (HeroVfx, content/vfx/<arch>.json), by default at the body along the aim.
+func vfx(move: String, at: Variant = null, dir: Variant = null, o := {}) -> void:
+	var where: Vector3 = h.pos if at == null else at
+	var way: Vector2 = h.aim_dir() if dir == null else dir
+	HeroVfx.of(m).play(h, move, where, way, o)
 
 ## Whether the hunter's own tells should draw (hidden while down, out, or unseen by the viewer).
 func tells_visible() -> bool:

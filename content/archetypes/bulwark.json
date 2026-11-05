@@ -1,6 +1,6 @@
 {
 	"id": "bulwark",
-	"title": "Frozen Bulwark",
+	"title": "Sunken Bulwark",
 	"base_name": "Breaker",
 	"gender": "male",
 	"personality": "A huge, warm-hearted northern ferryman in a fur-lined coat, carrying the frozen, iron-banded prow of his old ship as a shield.\nHe laughs easily and guards everyone near him. Small things are off: frost that never melts on him, and no breath in the cold.",
@@ -52,6 +52,7 @@
 	"lmb": {
 		"tap": 0.2,
 		"full": 1.25,
+		"spin_turns": [2.5, 4.0],
 		"throw_dmg": 12.0,
 		"throw_range": 9.0,
 		"throw_speed": 24.0,
