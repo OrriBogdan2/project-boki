@@ -1084,3 +1084,19 @@ Items 98/99/101b/105 slot into KITS after the kits.
 - ART-1 order is now **Kael, Tarek, Breaker, Ostra**, then the rest; **Hem's** rework is next after Ostra (more striking and attractive, tasteful).
 - **Pip** ~10-15% smaller (a quick data change with the hitbox, item 46).
 - **Vex's splash art:** redo it via the image-gen pipeline (or post a request in briefs/INBOX_IMG.md for the IMG agent).
+
+## 2026-11-05 02:02 UTC (ext): HEM OFFICIAL REFERENCE (owner-picked): `briefs/art-refs/hem_v4_needlebow.png`
+- **Use this for Hem's model + kit visuals.** It replaces her older look.
+- **The design:**
+  - a giant silver sewing-needle bow with a glowing red-thread string (the needle's eye at the tips)
+  - silver needle arrows trailing red thread (missed arrows linger as needles stuck in the ground, threads attached)
+  - a big red thread-spool quiver on her right hip
+  - a high ponytail tied in red thread and pinned with a silver needle
+  - a long red scarf trailing behind (her top-down signature: give it cloth/spring sim, cheap)
+  - a red-stitched eye mask, green eyes, tanned skin
+  - a black-and-red stitched corset showing the midriff, stitched pauldrons + half-sleeves on both arms, stitched bracers
+  - black capris, tall laced boots, silver tailor's scissors on her belt
+- **ext's notes for the model:**
+  - Push a little more red onto the shoulders/scarf so she reads from above against dark ground.
+  - Keep the bow silhouette exact.
+- Her ART-1 slot moves up: right after Kael (the owner is actively iterating on her).
