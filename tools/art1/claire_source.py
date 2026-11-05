@@ -194,10 +194,16 @@ hand_w = GROUP["hand.R"] + GROUP["hand.L"]
 bm = bmesh.new()
 bm.from_mesh(low.data)
 bm.faces.ensure_lookup_table()
-kill = [f for f in bm.faces if max(hand_w[v.index] for v in f.verts) > 0.5]
+# (the scan welds a cuff to the hem beside it here and there: those faces would stretch from the hand to the skirt)
+arm_w = sum(GROUP[b + sd_] for b in ("upper_arm.", "forearm.", "hand.") for sd_ in ("R", "L"))
+kill = [f for f in bm.faces if max(hand_w[v.index] for v in f.verts) > 0.5 or (
+    Z0[f.verts[0].index] < 1.12 and abs(x[f.verts[0].index]) > 0.16 and max(arm_w[v.index] for v in f.verts) - min(arm_w[v.index] for v in f.verts) > 0.35)]
+print("cut faces", len(kill))
 bmesh.ops.delete(bm, geom=kill, context="FACES")
 bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
 bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0004)
+filled = bmesh.ops.holes_fill(bm, edges=[e for e in bm.edges if e.is_boundary], sides=120)
+print("holes filled", len(filled["faces"]))
 bm.to_mesh(low.data)
 bm.free()
 # the density goes to the face: a vertex group the Decimate spares

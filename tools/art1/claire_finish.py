@@ -16,7 +16,7 @@ import warden_kit as WK
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
 ATLAS = 2048
-MATS = ["skin-face-hot", "skin-body", "cloth-dress", "fur-trim", "hair-fringe", "ice-horn", "glow-blade"]
+MATS = ["skin-face-hot", "skin-body", "cloth-dress", "fur-trim", "hair-fringe", "ice-horn", "ice-bright"]
 SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "ear": 0.7, "horn": 0.9, "tail": 0.7, "wing": 0.55, "wingarm": 0.5, "wingrod": 0.4, "bowknot": 0.6, "bowloop": 0.6, "ribbon": 0.5,
          "blade": 0.5, "shaft": 1.1, "head": 0.6, "butt": 0.5, "heart": 0.7, "heartcore": 0.6, "prong": 0.4, "collarA": 0.3, "collarB": 0.3, "Low": 1.0, "tailheart": 0.7}
 FACE_K = 3.4                # texel density on the face against the body
@@ -117,7 +117,7 @@ tl = K.tail()
 tail_end = tl.path[-1]
 tail_dir = M.norm(tl.path[-1] - tl.path[-3])
 TAILC = tail_end + tail_dir * 0.056
-th = K.heart_solid("tailheart", "glow-blade", TAILC, tail_dir, M.norm(np.cross(tail_dir, (0, 0, 1.0))), 0.066, 0.017)
+th = K.heart_solid("tailheart", "ice-bright", TAILC, tail_dir, M.norm(np.cross(tail_dir, (0, 0, 1.0))), 0.066, 0.017)
 bw = K.bow()
 rr, rl = K.ribbon(1.0), K.ribbon(-1.0)
 sp = K.spear()
@@ -127,6 +127,8 @@ lids = [lid_piece(1.0), lid_piece(-1.0)]
 hR = K.hand("R", K.GRIP_K, (1.3, 1.45, 0.95))
 hL = K.hand("L", (0.0, 1.0, -0.15), (0.32, 0.42, 0.3), 0.07)
 hornR, hornL = K.horn(1.0), K.horn(-1.0)
+for q_ in hR + hL:
+    q_.room = 0.25        # (a full ink line round each finger is a black mitt at the match camera)
 pieces = [el, er, hornR, hornL, tl, th] + bw + [rr, rl, K.blade(1.0), K.blade(-1.0)] + sp + [wr, wl] + wr_rods + wl_rods + lids + hR + hL + [K.cuff_cap("R"), K.cuff_cap("L")]
 
 

@@ -323,7 +323,7 @@ def blade(s):
     for q in f:
         for k in range(1, len(q) - 1):
             tris.append([q[0], q[k], q[k + 1]])
-    return Piece("blade" + side, "glow-blade", np.array(pos), tris).rigid("foot." + side)
+    return Piece("blade" + side, "ice-bright", np.array(pos), tris).rigid("foot." + side)
 
 
 # ---- the spear: candy-cane shaft, a heart guard, a long crystal head, a spike at the butt
@@ -343,7 +343,7 @@ def spear():
     shaft = sweep("shaft", "cloth-dress", path, SEC8, np.full(14, SHAFT_R), side_hint=np.array([0, 0, 1.0]))
     out.append(shaft)
 
-    def spike(name, u0, u1, w0, n0, mids, mat="glow-blade"):
+    def spike(name, u0, u1, w0, n0, mids, mat="ice-bright"):
         """A crystal: rings of a four-sided section down its length. mids: (u fraction, width k)."""
         sec = [(1, 0), (0, 1), (-1, 0), (0, -1)]
         pts = [(u0, w0)] + [(u0 + (u1 - u0) * a, w0 * b) for a, b in mids] + [(u1, 0.0015)]
@@ -355,13 +355,13 @@ def spear():
     out.append(spike("butt", -0.665, BUTT_U, 0.034, 0.014, [(0.15, 1.0), (0.42, 0.82)]))
     for nm, u in (("collarA", 0.6), ("collarB", -0.66)):
         out.append(sweep(nm, "ice-horn", [sp(u - 0.012), sp(u), sp(u + 0.012)], SEC8, np.array([0.015, 0.0205, 0.015]), side_hint=np.array([0, 0, 1.0])))
-    h = heart_solid("heart", "glow-blade", sp(0.683), -GRIP_K, np.array([0, 0, 1.0]), 0.082, 0.021)
+    h = heart_solid("heart", "ice-bright", sp(0.683), -GRIP_K, np.array([0, 0, 1.0]), 0.082, 0.021)
     out.append(h)
-    h2 = heart_solid("heartcore", "glow-blade", sp(0.68, 0, 0.0005), -GRIP_K, np.array([0, 0, 1.0]), 0.05, 0.03)
+    h2 = heart_solid("heartcore", "ice-bright", sp(0.68, 0, 0.0005), -GRIP_K, np.array([0, 0, 1.0]), 0.05, 0.03)
     out.append(h2)
     for s in (1.0, -1.0):        # the two icicles off the guard
         out.append(spike("prong" + ("R" if s > 0 else "L"), 0.665, 0.665, 0.01, 0.01, [(0.5, 0.8)]) if False else
-                   sweep("prong" + ("R" if s > 0 else "L"), "glow-blade", [sp(0.70, s * 0.078), sp(0.655, s * 0.087), sp(0.585, s * 0.09)], [(1, 0), (0, 1), (-1, 0), (0, -1)], np.array([0.012, 0.009, 0.001]), side_hint=np.array([1.0, 0, 0])))
+                   sweep("prong" + ("R" if s > 0 else "L"), "ice-bright", [sp(0.70, s * 0.078), sp(0.655, s * 0.087), sp(0.585, s * 0.09)], [(1, 0), (0, 1), (-1, 0), (0, -1)], np.array([0.012, 0.009, 0.001]), side_hint=np.array([1.0, 0, 0])))
     for q in out:
         q.rigid("hand.R")
     return out
