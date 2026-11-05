@@ -53,6 +53,7 @@ float mk_pattern(vec3 q) {
 
 
 void vertex() {
+	VERTEX += NORMAL * 0.002;      // just off the coat, so the two passes don't fight over the same depth
 	rest = (COLOR.rgb * vec3(1.2, 1.2, 1.4) - vec3(0.6, 0.0, 0.7));
 	fur = COLOR.a;
 }

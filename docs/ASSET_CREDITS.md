@@ -58,3 +58,6 @@ Every sound effect is synthesized from scratch by `tools/gen_sfx.py`, `tools/gen
 `tools/compose.py` (the expedition's layered stems) and `tools/gen_ambience.py` (wind over the
 abyss, ruins). No recorded or downloaded audio is used. `tools/sfx_stats.py` measures the
 sound effects (peak, loudness, attack, onset, spectral centroid).
+
+Vespyx's rigged model (`art/kin/cindle/`) is ours: built by script in Blender (`tools/boki/`). Its concept sheet is
+our own image-gen (Meshy image-to-image, not shipped). No outside asset is used.

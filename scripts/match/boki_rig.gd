@@ -1,8 +1,9 @@
 class_name BokiRig
 extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
-## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet already reads,
-## plus "kwork" (chop, mine, carry) and "kact" (eat, pet), and plays the face on top of whatever the body does.
+## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
+## already reads, plus "kwork" (chop, mine, carry) and "kact" (eat, pet), and plays the face on top of whatever
+## the body does.
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
@@ -19,7 +20,12 @@ const INK_FAR_THIN := 0.5
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
 const COAT_LOOK := {"far_lift": 0.12, "fres": 0.55, "top_light": 0.45, "rim_amount": 0.25}
 const EYE_VALUE := 0.96       # iris brightness: the eye is the first thing read on a small face
+## Godot's LODs are cut from the rest pose, where the lids lie folded: they would drop the rows that cover the eye.
+const FACE_LOD_BIAS := 1000.0
+const OWN_BODY := ["chop", "mine", "carry"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry"]
+## Home's job kinds that have their own clip.
+const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
 ## Blend shapes each expression pushes.
 const FACES := {
 	"neutral": {},
@@ -75,7 +81,19 @@ var _coat: ShaderMaterial
 static func has(kin_id: String) -> bool:
 	return enabled and FRAME.has(kin_id) and ResourceLoader.exists(PATH % [kin_id, kin_id])
 
-## Adds the model and its driver under `flex`; `c` is KinModels' material set. Returns the head frame, as KinModels.build.
+## The work clip for a farm Boki (home's kin dictionary, its "job"), or "" when it isn't doing one.
+static func work_clip(k: Dictionary) -> String:
+	if not k.has("job"):
+		return ""
+	var job: Dictionary = k["job"]
+	if String(job["phase"]) == "to":
+		return "carry"
+	if String(job["phase"]) != "work":
+		return ""
+	return String(WORK_KINDS.get(String(job["kind"]), ""))
+
+## Adds the model and its driver under `flex`; `c` is KinModels' material set. Returns the head frame, as
+## KinModels.build.
 static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array) -> Dictionary:
 	var model_root := (load(PATH % [kin_id, kin_id]) as PackedScene).instantiate() as Node3D
 	model_root.name = "Rig"
@@ -139,6 +157,10 @@ func _keep_flex() -> void:
 	flex.rotation = Vector3.ZERO
 	flex.scale = Vector3(girth, 1.0, lerpf(1.0, girth, 0.5))
 	flex.position = Vector3(0, _flex_y, 0)
+	var body := flex.get_parent() as Node3D
+	if clip in OWN_BODY:
+		body.rotation = Vector3.ZERO          # home's work poses swing Body: here the clip does the swinging
+	model.position.y = -body.position.y if clip == "hop" else 0.0       # the clip does the hopping, not home
 
 func _track_speed(dt: float) -> void:
 	var gp := root.global_position
@@ -191,7 +213,8 @@ func _clip_face() -> String:
 		return "sad"
 	var cf: Variant = CLIP_FACE.get(clip, "")
 	if cf is Array:
-		var k := fposmod(player.current_animation_position, player.current_animation_length) / player.current_animation_length
+		var length := player.current_animation_length
+		var k := fposmod(player.current_animation_position, length) / length
 		var best := "neutral"
 		for beat in cf:
 			if float(beat[0]) <= k:
@@ -231,6 +254,7 @@ func _dress(c: Dictionary, mats: Array) -> void:
 		inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 		if inst.get_blend_shape_count() > 0 or inst.mesh.get_blend_shape_count() > 0:
 			face = inst
+			inst.lod_bias = FACE_LOD_BIAS
 			for i in inst.mesh.get_blend_shape_count():
 				var nm := String(inst.mesh.get_blend_shape_name(i))
 				_shapes[nm] = i
@@ -278,7 +302,8 @@ func _copy_coat() -> void:
 	var body := mats[0] as ShaderMaterial
 	var base: Color = Data.KIN[species]["color"]
 	var now := body.get_shader_parameter("albedo") as Color
-	_coat.set_shader_parameter("albedo", Color(now.r / maxf(base.r, 0.01), now.g / maxf(base.g, 0.01), now.b / maxf(base.b, 0.01)))
+	var tint := Color(now.r / maxf(base.r, 0.01), now.g / maxf(base.g, 0.01), now.b / maxf(base.b, 0.01))
+	_coat.set_shader_parameter("albedo", tint)
 	if body.get_shader_parameter("mark_kind") == null:
 		return
 	var marks := ShaderMaterial.new()

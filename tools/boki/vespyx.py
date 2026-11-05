@@ -126,11 +126,11 @@ def claw_prims(sd, sx):
     nip = "nip." + sd
     return [
         Cone("arm" + sd, arm, v3(0.070, 0.250, -0.130) * s, v3(0.118, 0.232, -0.195) * s, 0.036, 0.034, k=0.01),
-        Ellipsoid("palm" + sd, claw, v3(0.138, 0.228, -0.245) * s, v3(0.078, 0.070, 0.078), k=0.01),
-        Cone("finger" + sd, claw, v3(0.176, 0.230, -0.285) * s, v3(0.176, 0.236, -0.335) * s, 0.044, 0.030, k=0.02),
-        Cone("fingertip" + sd, claw, v3(0.176, 0.236, -0.335) * s, v3(0.128, 0.240, -0.368) * s, 0.030, 0.004, k=0.012),
-        Cone("nip0" + sd, nip, v3(0.102, 0.230, -0.292) * s, v3(0.092, 0.234, -0.335) * s, 0.034, 0.024, k=0.0),
-        Cone("nip1" + sd, nip, v3(0.092, 0.234, -0.335) * s, v3(0.118, 0.238, -0.360) * s, 0.024, 0.004, k=0.012),
+        Ellipsoid("palm" + sd, claw, v3(0.138, 0.228, -0.238) * s, v3(0.070, 0.064, 0.070), k=0.01),
+        Cone("finger" + sd, claw, v3(0.178, 0.230, -0.272) * s, v3(0.186, 0.236, -0.338) * s, 0.040, 0.030, k=0.02),
+        Cone("fingertip" + sd, claw, v3(0.186, 0.236, -0.338) * s, v3(0.132, 0.240, -0.388) * s, 0.030, 0.004, k=0.012),
+        Cone("nip0" + sd, nip, v3(0.092, 0.230, -0.272) * s, v3(0.080, 0.234, -0.332) * s, 0.032, 0.024, k=0.0),
+        Cone("nip1" + sd, nip, v3(0.080, 0.234, -0.332) * s, v3(0.116, 0.238, -0.376) * s, 0.024, 0.004, k=0.012),
     ]
 
 
@@ -154,6 +154,18 @@ SIDE = v3(1, 0, 0)
 AX_UP = np.cross(SIDE, AXIS)
 
 
+def axe_blade(base):
+    """A fan from the eye of the axe to a straight cutting edge."""
+    c1 = base + AX_UP * 0.155 + AXIS * 0.080
+    c2 = base + AX_UP * 0.155 - AXIS * 0.090
+    mid = (c1 + c2) * 0.5
+    flat = {"flat": 0.24, "flat_axis": SIDE}
+    return [Cone("b0", "prop_axe", base, mid, 0.034, 0.078, k=0.0, **flat),
+            Cone("b1", "prop_axe", base, c1, 0.030, 0.012, k=0.01, **flat),
+            Cone("b2", "prop_axe", base, c2, 0.030, 0.012, k=0.01, **flat),
+            Cone("b3", "prop_axe", c1, c2, 0.012, 0.012, k=0.01, **flat)]
+
+
 def prop_parts():
     """name -> (Shape, step, tris, bone)."""
     g = STING_C + AXIS * 0.06
@@ -161,15 +173,13 @@ def prop_parts():
     blade = end - AXIS * 0.045
     out = {
         "axe_handle": (Shape([Cone("h", "prop_axe", g, end, 0.017, 0.015, k=0)]), 0.004, 60),
-        "axe_blade": (Shape([Ellipsoid("b", "prop_axe", blade + SIDE * 0.0 + AX_UP * 0.075, v3(0.016, 0.078, 0.070),
-                                       rot=np.stack([SIDE, AX_UP, AXIS]), k=0.0)]), 0.003, 80),
+        "axe_blade": (Shape(axe_blade(blade)), 0.003, 170),
         "pick_handle": (Shape([Cone("h", "prop_pick", g, end, 0.017, 0.015, k=0)]), 0.004, 60),
-        "pick_head": (Shape([Cone("a", "prop_pick", end, end + AX_UP * 0.15 + AXIS * -0.05, 0.026, 0.004, k=0.0),
-                             Cone("b", "prop_pick", end, end - AX_UP * 0.15 + AXIS * -0.05, 0.026, 0.004, k=0.005)]),
-                      0.003, 90),
+        "pick_head": (Shape([Cone("a", "prop_pick", end, end + AX_UP * 0.17 + AXIS * -0.06, 0.034, 0.006, k=0.0),
+                             Cone("b", "prop_pick", end, end - AX_UP * 0.17 + AXIS * -0.06, 0.034, 0.006, k=0.005)]),
+                      0.003, 160),
         "log": (Shape([Cone("l", "prop_log", v3(-0.23, 0.30, -0.30), v3(0.23, 0.31, -0.31), 0.062, 0.058, k=0)]),
                 0.004, 120),
-        "berry": (Shape([Ellipsoid("b", "prop_berry", v3(-0.095, 0.30, -0.335), v3(0.055, 0.055, 0.055), k=0)]),
-                  0.003, 80),
+        "berry": (Shape([Ellipsoid("b", "prop_berry", v3(0, 0.285, -0.365), v3(0.054, 0.052, 0.054), k=0)]), 0.003, 90),
     }
     return out

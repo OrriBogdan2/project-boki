@@ -38,7 +38,7 @@ MOUTH_Y = 0.385
 
 def m_rest_u(x):
     t = np.abs(x) / MOUTH_W
-    return MOUTH_Y + 0.020 * (t - 0.42) ** 2 * 6.0 - 0.014 + 0.016 * t
+    return MOUTH_Y + 0.020 * (t - 0.42) ** 2 * 2.4 - 0.008 + 0.012 * t
 
 
 def m_line_l(x):
@@ -60,8 +60,8 @@ MOUTHS = {
 }
 # atlas strips (u0, u1)
 STRIP = {"upper": (0.02, 0.18), "lower": (0.24, 0.40), "brow": (0.46, 0.58), "mouth": (0.64, 0.82), "fang": (0.88, 0.98)}
-UPPER_ROWS, COLS = 4, 22
-LID_V = (0.0, 0.3, 0.72, 1.0)     # atlas v of the rows: the dark starts at 0.72
+UPPER_ROWS, COLS = 9, 22
+LID_V = tuple(np.linspace(0.0, 0.72, UPPER_ROWS - 1)) + (1.0,)     # atlas v of the rows: the dark starts at 0.72
 MOUTH_ROWS, MOUTH_COLS = 3, 16
 LIFT = 0.0065   # decals float this far off the true surface: the decimated head cuts corners
 
@@ -107,6 +107,8 @@ def dome(c, fr, r, a, b, lift):
     return c + (a[..., None] * r[0]) * fr[0] + (b[..., None] * r[1]) * fr[1] + (z[..., None] * r[2] + np.asarray(lift)[..., None]) * fr[2]
 
 
+LID_LIFT = 0.005
+LID_LIGHT = 1.13    # lids have no top light of their own: paint them lighter so they meet the head's colour
 LASH = {True: 0.11, False: 0.05}   # dome units: the dark line along a lid's edge, the same width in every expression
 
 
@@ -143,10 +145,10 @@ def build_face(shape, eye_c, eye_r, eye_frame):
         r = eye_r
         for upper in (True, False):
             base_edge = OPEN_U if upper else OPEN_L
-            base = lid_points(c, fr, r, base_edge, upper, 0.0028 if upper else 0.0024)
+            base = lid_points(c, fr, r, base_edge, upper, LID_LIFT)
             keys = {}
             for k, (eu, el) in LIDS.items():
-                keys[k] = lid_points(c, fr, r, eu if upper else el, upper, 0.0028 if upper else 0.0024)
+                keys[k] = lid_points(c, fr, r, eu if upper else el, upper, LID_LIFT)
             u0, u1 = STRIP["upper" if upper else "lower"]
             uv = []
             for rr in LID_V:
@@ -275,8 +277,10 @@ def face_atlas(px=256):
         u0, u1 = STRIP[name]
         i0, i1 = int(u0 * px) - 3, int(u1 * px) + 3
         img[:, i0:i1] = col
-    up = PLUM * (1 - np.clip((v - 0.72) / 0.1, 0, 1)) + INK * np.clip((v - 0.72) / 0.1, 0, 1)
-    lo = PLUM * (1 - np.clip((v - 0.72) / 0.1, 0, 1)) + INK * np.clip((v - 0.72) / 0.1, 0, 1)
+    skin = np.minimum(PLUM * LID_LIGHT, 1.0)
+    dark = np.clip((v - 0.72) / 0.1, 0, 1)
+    up = skin * (1 - dark) + INK * dark
+    lo = up
     strip("upper", up[:, None, :].repeat(1, 1))
     strip("lower", lo[:, None, :].repeat(1, 1))
     strip("brow", LILAC)

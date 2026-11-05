@@ -133,7 +133,7 @@ def rasterize(uv, tri_uv_idx, px):
     return np.concatenate(xs), np.concatenate(ys), np.concatenate(tid), np.concatenate(bary)
 
 
-def dilate(img, mask, rounds=10):
+def dilate(img, mask, rounds=28):
     img, mask = img.copy(), mask.copy()
     for _ in range(rounds):
         got = np.zeros(img.shape)
@@ -145,6 +145,7 @@ def dilate(img, mask, rounds=10):
         fill = (~mask) & (cnt > 0)
         img[fill] = got[fill] / cnt[fill][..., None]
         mask = mask | fill
+    img[~mask] = img[mask].mean(0)     # the deep mips of the far camera average into these gaps
     return img
 
 
@@ -153,7 +154,7 @@ def occlusion(pieces, p, n):
     def scene(q):
         d = None
         for pc in pieces:
-            if pc.slot == 0 and pc.name.split("_")[0] in ("axe", "pick", "log", "berry"):
+            if pc.name.split("_")[0] in ("axe", "pick", "log", "berry"):
                 continue
             e = pc.shape.eval(q)
             d = e if d is None else np.minimum(d, e)
@@ -187,7 +188,7 @@ def paint_texels(pieces, piece_id, p, n, vao):
         elif pc.name.endswith("handle"):
             c = np.tile(paint.WOOD, (len(q), 1))
         elif pc.name == "log":
-            c = np.tile(paint.WOOD, (len(q), 1))
+            c = paint.paint_log(q)
         elif pc.name == "berry":
             c = np.tile(paint.BERRY, (len(q), 1))
         else:
