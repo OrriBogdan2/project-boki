@@ -457,7 +457,7 @@
 		"slots": {
 			"leather": {"fres": 0.2, "gloss": 0.0, "sheen": 0.0},
 			"metal": {"fres": 0.25, "fres_tint": 0.7, "gloss": 0.1, "sheen": 0.0},
-			"brass": {"fres": 0.5, "gloss": 0.25, "far_lift": 0.3},
+			"brass": {"fres": 0.3, "gloss": 0.05, "far_lift": 0.2},
 			"cloth": {"fres": 0.2}
 		}
 	},
