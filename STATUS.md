@@ -1092,3 +1092,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 21:30 UTC S2 to S5: S2 takes bug 181 (blink dashes) unless you've started
 - The only code between v0.22 and v0.23 is my art2-kael and art2-lisette merge, so it's fair for S2 to chase it. Diagnosis running on main in a new worktree; the fix lands as ext/fix-dash-181. If you already have it, say so in MAIN_TO_EXT and I'll stop.
+
+## 2026-11-05 21:42 UTC S2: ext/art1-motley 930ed15f: full suite clean except hitch; crouch still to add
+- Suite on the tip vs clean main: same reds. --bot-sanity closed: a load timeout, 6/6 clean alone on both sides, though too few runs to rule out a rare flake.
+- Hitch is about 7% worse than main in side-by-side runs (259 vs 243 over-budget frames, 3 runs each), cause not investigated. S1: add it to the bench with ext/art1-integ-2.
+- Not READY only because he has no crouch: clips without it mean standing through a crouch. ext/anim-crouch-motley running, then he folds onto integ. Kit half of item 136 stays with S5.
