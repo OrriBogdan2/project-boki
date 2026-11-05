@@ -663,3 +663,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: Vex anatomy logged
 - No human right arm: the cannon IS her right arm (prosthetic, shoulder socket, aim = arm pose); robotic left arm; vex_turnaround_apose v3, all four views valid. For ART-1 Vex (last in order).
+
+## 2026-11-05 S2: Tarek arm correction, Vex weapons, Breaker eyes
+- ART-1 Tarek has the correction: huge stone LEFT arm, right forearm gauntlet. vex_weapons.png logged for ART-1 Vex. Breaker's next round: default idle eyes are soft round dots (breaker_alt_round_eyes.png), bars are "determined"; breaker_turnaround.png is the cropped 4-view.
