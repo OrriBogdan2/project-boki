@@ -4,6 +4,7 @@ extends CanvasLayer
 
 var m: Match
 var c: Control
+var panels: HudPanels
 var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
@@ -37,6 +38,8 @@ func setup(match_node: Match) -> void:
 	m = match_node
 	layer = 5
 	Record.hide_in_cinema(self)      # recording mode with the HUD hidden
+	panels = HudPanels.make(self)       # the fixed panels, under c, redrawn 20 times a second
+	add_child(panels)
 	c = Control.new()
 	c.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -89,6 +92,7 @@ func _process(delta: float) -> void:
 	hit_t = maxf(0.0, hit_t - delta)
 	_hud_tick(delta)
 	plates.tick(delta)
+	panels.tick(delta)
 	flash_t = maxf(0.0, flash_t - delta * 4.0)
 	hurt_t = maxf(0.0, hurt_t - delta)
 	for t in toasts.duplicate():
@@ -224,7 +228,6 @@ var hover_t := 0.0
 func _draw_all() -> void:
 	var sz := c.size
 	var p := m.player
-	hover_spots.clear()
 	if m.tut and m.tut.intro:
 		TutorialHud.draw(self, sz)      # the intro card alone: the rest of the HUD waits
 		return
@@ -291,16 +294,10 @@ func _draw_all() -> void:
 		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(flash_col, flash_col.a * flash_t * (0.3 if Settings.get_v("reduce_flashes") else 1.0)))
 	if p and (p.out or p.downed) and m.killcam_text != "":
 		_ctext(Vector2(sz.x * 0.5, maxf(sz.y * 0.22, 104.0 + alerts_h)), m.killcam_text, 22, Color("ff9a8a"), big)
-	_draw_top(sz)
-	if p and m.lairs:
-		_draw_boss_bar(sz, p)
-		_draw_lair_victory(sz, p)
 	if p and not m.duel:
 		_draw_alerts(sz, p)
 	else:
 		alerts_h = 0.0
-	_draw_feed(sz)
-	_draw_minimap(sz)
 	for dk in BokiHud.squad_downed(m):
 		BokiHud.downed_arrow(self, dk, sz)
 	if p and not p.out and not p.extracted:
@@ -309,13 +306,6 @@ func _draw_all() -> void:
 	if p:
 		_draw_hurt_dirs(sz)
 		if not p.out and not p.extracted:
-			HudVitals.draw(self, sz, p)
-			_draw_abilities(sz, p)
-			_draw_weapon(sz, p)
-			GearPanel.draw(self, sz, p)
-			_draw_kin_card(sz, p)
-			_draw_squad(sz, p)
-			_draw_perks(sz, p)
 			LevelPop.draw(self, sz)
 		if not p.riding:
 			_draw_kit(sz, p)

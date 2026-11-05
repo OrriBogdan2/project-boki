@@ -228,7 +228,8 @@ func _hook_hud() -> void:
 		h.c.draw.connect(func():
 			var t0 := Time.get_ticks_usec()
 			h._draw_all()
-			hud_us = Time.get_ticks_usec() - t0)
+			hud_us = Time.get_ticks_usec() - t0 + h.panels.used_us      # (the panel canvas: HudPanels)
+			h.panels.used_us = 0)
 		_hud_hooked = true
 
 func _stats(list: Array, key: String) -> Array:

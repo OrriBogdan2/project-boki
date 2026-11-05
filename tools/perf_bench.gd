@@ -2,7 +2,8 @@ extends RefCounted
 ## --perf-bench, owner item 94: a fixed, repeatable load for before/after numbers. A 60 s busy
 ## expedition (6 Hunters in squads of 2 with their Boki, the ash storm, the Blight, outposts and a lair
 ## on the map, a fight: two rivals and a monster pack brought to you), then a farm run. Every frame is
-## logged; each part ends with one summary line and the costliest match step sections and meshes.
+## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
+## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
@@ -58,6 +59,12 @@ func _match() -> void:
 		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null:
 			m = cur
 	m.set_process(false)
+	var steps := {}
+	for mk in PerfLog.marks:
+		steps[mk[1]] = float(steps.get(mk[1], 0.0)) + float(mk[2])
+	var sk := steps.keys()
+	sk.sort_custom(func(a, b): return steps[a] > steps[b])
+	print("BENCH match build (ms): " + ", ".join(sk.slice(0, 6).map(func(k): return "%s %.0f" % [k, steps[k]])))
 	_hook_hud(m)
 	main.get_tree().node_added.connect(func(n: Node):
 		var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
@@ -81,8 +88,9 @@ func _match() -> void:
 		await main.get_tree().process_frame
 		var now := Time.get_ticks_usec()
 		fl.append(_frame("match", fl.size(), (now - last) / 1000.0, script_ms))
-		if float(fl[-1]["wall"]) > HITCH_MS and fl.size() > 30:
-			print("BENCH hitch t=%.2f %.0f ms (script %.1f), new nodes: %s" % [m.time, fl[-1]["wall"], script_ms,
+		var wall: float = fl[-1]["wall"]
+		if fl.size() > 30 and wall > HITCH_MS and wall > 3.0 * _avg(fl.slice(-31, -1), "wall"):
+			print("BENCH hitch t=%.2f %.0f ms (script %.1f), new nodes: %s" % [m.time, wall, script_ms,
 				added])
 		added.clear()
 		last = now
@@ -145,7 +153,8 @@ func _hook_hud(m: Match) -> void:
 		h.c.draw.connect(func():
 			var t0 := Time.get_ticks_usec()
 			h._draw_all()
-			hud_us = Time.get_ticks_usec() - t0)
+			hud_us = Time.get_ticks_usec() - t0 + h.panels.used_us      # (the panel canvas: HudPanels)
+			h.panels.used_us = 0)
 
 func _avg(fl: Array, key: String) -> float:
 	var s := 0.0
@@ -170,6 +179,9 @@ func _summary(part: String, fl: Array) -> void:
 	print("BENCH %s scene: draws %.0f, tris %.0fk, objects %.0f, nodes %.0f, emitters %d, lights %d, shadowed %d" % [
 		part, _avg(fl, "draws"), _avg(fl, "tris") / 1000.0, _avg(fl, "objs"), _avg(fl, "nodes"),
 		_count("GPUParticles3D") + _count("CPUParticles3D"), _count("Light3D"), _shadow_lights()])
+	print("BENCH %s memory: textures %.0f MB, buffers %.0f MB" % [part,
+		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
+		Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
 
 func _count(cls: String) -> int:
 	return main.get_tree().root.find_children("*", cls, true, false).size()
@@ -191,6 +203,11 @@ func _meshes() -> void:
 				var il := (mi.mesh as ArrayMesh).surface_get_array_index_len(si)
 				tris += (il if il > 0 else (mi.mesh as ArrayMesh).surface_get_array_len(si)) / 3
 		var key := String(mi.name).rstrip("0123456789@")
+		if key == "" or key.begins_with("@"):
+			var up := mi.get_parent()
+			var up2 := up.get_parent()
+			var nm2 := String(up2.name) if up2 else ""
+			key = "%s/%s" % [nm2.rstrip("0123456789@"), String(up.name).rstrip("0123456789@")]
 		if mi.mesh.resource_path != "":
 			key = mi.mesh.resource_path.get_file()
 		var g: Array = by.get(key, [0, 0, 0])
