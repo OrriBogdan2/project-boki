@@ -781,3 +781,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: correction
 - ext/art2-kael cf1e6343 is NOT mergeable: main moved to a4b39fd7 (67 commits, including the sound pass) and its audio/jug_*.wav conflict. Agent is merging, taking main's audio, keeping VFX and warm-up. New commit to follow.
+
+## 2026-11-05 S2: READY ext/art1-claire 795bc87d
+- Meshy scan + rebuilt pieces, 14,917 tris with the spear, 8 surfaces, 41 clips, spear skinned, skating gaits. 76 credits (balance 2685). Neckline closed, skirt to mid-thigh, per the gentle, modest brief.
+- **Fidelity:** gentle not sultry yes; bunny hood yes; ram horns yes; ice bat wings yes; heart tail yes; blue corset dress + fur hem yes; ice-blade skates yes (bloom, not emissive); frost trail **partial** (kit ice plates live, no model trail: S3); candy-cane spear yes; graceful skating yes (from sheets). Proofs: ext/hero-shots-s2 70eb6f2f art1/claire/.
+- Checks on the tip: rig-standard, clip-check, clip-live-claire, warden-model, warden-glb, dash-aim, hudref, health --strict. Full suite (76 flags on 5b7ba1a6, before 67 main commits): title under load, mantle-look (baseline list, not confirmed on main), hudref stale then fixed.
+- warden-model targets changed: height 1.08, height_3d 1.21, width to 1.25. model_glow is unused; eyes have no emissive glow.
+- Gaps: small black patch at the right skirt hem; dashed ink at mid distance; she looked pale in the live shot (unconfirmed cause). Item 62 air skate and item 110 wing glide have no clip.
+- Owner Qs: closed neckline and mid-thigh skirt OK vs the sheet? ~1.08x (1.21x with hood and horns) OK? Darts from the spear tip or her hands?
