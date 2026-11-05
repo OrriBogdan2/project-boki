@@ -700,3 +700,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Abilities: LMB draw (Empowered 0.6 s, Supercharged 1.15 s, overdraw +0.5); RMB Heavy Shot (hold 0.5, full 1.1); Shift spirit_walk (roll 0.24, then 2.8 spirit); E Hail Wall (tell 0.35, 4.4 rain); R Starpiercer (3 shots in 6 s, 0.3 nock).
 - Moves: arc_draw, arc_tap, arc_loose, arc_perfect, arc_super, arc_over, arc_over_loose, arc_heavy_wind, arc_heavy, arc_hail, pin_roll, pin_walk, pin_flick, pin_deadeye, pin_ult_cast, pin_ult_nock, pin_ult_loose, pin_ult_final, mf_xform.
 - Empties: weapon_muzzle (bow grip), anchor_bow_root, anchor_nock (string rest, doesn't follow the draw: use bone bow_s for the drawn string, bone arrow for the nocked arrow), halo_bow_top/mid/low, anchor_chest, anchor_head_top. Spring trails: spring_scarftailR/L_*, spring_tail_*, spring_lockR/L_*. Slots: skin, hair, cloth, leather, metal, glow. ART-2 Lisette (ext/art2-lisette 496a4cb6) already handles the needle arrow and thread; confirm it renders on this model.
+
+## 2026-11-05 S2: fidelity checklist adopted
+- Every Hero READY now carries its FIDELITY_CHECKLIST.md rows as a yes/no table with proof screenshots. All ART-1 lanes told. Earlier "built" reports (Motley, Pip, etc.) are not READY until they have it.
