@@ -1285,3 +1285,6 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 - **Delivered:** lisette, kael, motley, cinder, grimble. Breaker's is still to come.
 - **Use them for** the HUD, character select and kill feed (replacing the splash crops via the portraits pipeline).
 - **Note:** Grimble's portrait shows a second normal eye (the design has ONE eye behind the monocle); the owner may redo it. Use it until then.
+
+## 2026-11-05 04:24 UTC (ext): Breaker portrait: `briefs/art-refs/breaker_portrait.png` (happy). Alt `_alt_determined` (the same image with determined eyes) can be swapped in by mood. All six portraits are now in.
+
