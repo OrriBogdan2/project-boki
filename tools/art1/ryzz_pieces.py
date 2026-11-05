@@ -329,6 +329,7 @@ def tie_band(s):
 FINGER_L = [(0.040, 0.028, 0.024), (0.044, 0.030, 0.025), (0.041, 0.028, 0.024), (0.032, 0.022, 0.020)]
 FINGER_R_ = [0.0095, 0.0098, 0.0093, 0.0083]
 KNUCK_D = 0.082
+HAND_K = 1.18                    # a stylised big hand: the finger gun has to read at the match camera
 
 
 def wrist_at(s):
@@ -389,6 +390,12 @@ def hand(s):
     tp.tip = t3
     tp.dirn = norm(t3 - t2)
     out.append(tp)
+    for p in out:
+        p.v = wrist + (p.v - wrist) * HAND_K
+        if hasattr(p, "tip"):
+            p.tip = wrist + (p.tip - wrist) * HAND_K
+        if hasattr(p, "base"):
+            p.base = wrist + (p.base - wrist) * HAND_K
     return out
 
 

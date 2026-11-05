@@ -19,7 +19,7 @@ ATLAS = 2048
 FACE_K = 6.0               # the face's texel density against the body
 UNIQ_W = 0.755
 EYE_R = (0.76, 0.12, 0.875, 0.22)
-MATS = ["skin-ryzz", "cloth-ryzz", "leather-ryzz", "hair-ryzz", "metal-ryzz", "glow-ryzz", "glow-wire", "cloth-gum"]
+MATS = ["skin-ryzz", "leather-ryzz", "hair-ryzz", "metal-ryzz", "glow-ryzz", "glow-arcblue", "glow-wire", "cloth-gum"]      # (8: the skirt and corset share leather's surface)
 SCALE = {"lid": 2.0, "palm": 1.4, "finger": 1.5, "thumb": 1.5, "plate": 1.1, "strap": 0.7, "gum": 0.8, "Low": 1.0}
 TILE = ("cap", "fringe", "pig", "tie", "sock", "rod", "wire", "chain", "arrow", "nosering", "arc", "buckle")
 
@@ -215,7 +215,7 @@ for v_ in range(2):
             if 0 < j < n_ - 1:
                 q = q + rng.uniform(-0.024, 0.024, 3) * [1, 0.6, 1.5]
             pts.append(q)
-        pieces.append(sweep("arc%d_%d" % (v_, i), "glow-ryzz", pts, K.TRI, np.full(n_, 0.0098), side_hint=np.array([0, 1.0, 0.2]), uv_rect=K.GLOWC_R, room=0.0).rigid("arc.%d" % v_))
+        pieces.append(sweep("arc%d_%d" % (v_, i), "glow-arcblue" if v_ else "glow-ryzz", pts, K.TRI, np.full(n_, 0.0098), side_hint=np.array([0, 1.0, 0.2]), uv_rect=K.GLOWC_R, room=0.0).rigid("arc.%d" % v_))
 
 # ---- the wires, two down each arm to the copper-capped hand
 def wire_w(p):
@@ -229,9 +229,9 @@ for s, sd in ((1.0, "R"), (-1.0, "L")):
     Sx = K.SH * s
     for w_i, ctl in enumerate((
             [(s * 0.098, back_y(s * 0.098, 1.20) - 0.01, 1.20), (s * 0.175, -0.095, 1.165), (s * 0.205, -0.055, 1.10), (Sx + s * 0.058, -0.045, 1.055),
-             (Sx + s * 0.036, -0.045, 0.985), (Sx + s * 0.022, -0.03, K.HAND_Z + 0.03), (Sx + s * 0.024, -0.008, K.HAND_Z - 0.02)],
+             (Sx + s * 0.036, -0.045, 0.985), (Sx + s * 0.024, -0.024, K.HAND_Z + 0.03), (Sx + s * 0.026, -0.012, K.HAND_Z + 0.012)],
             [(s * 0.112, back_y(s * 0.112, 1.31) - 0.01, 1.31), (s * 0.19, -0.1, 1.29), (s * 0.215, -0.05, 1.2), (Sx + s * 0.07, -0.015, 1.1),
-             (Sx + s * 0.05, -0.008, 0.99), (Sx + s * 0.03, 0.0, K.HAND_Z + 0.03), (Sx + s * 0.024, 0.008, K.HAND_Z - 0.02)])):
+             (Sx + s * 0.05, -0.008, 0.99), (Sx + s * 0.03, 0.0, K.HAND_Z + 0.03), (Sx + s * 0.026, 0.006, K.HAND_Z + 0.012)])):
         path = clear(catmull(ctl, 15), 0.010)
         wr = K.wire("wire%d%s" % (w_i, sd), path)
         ring = np.repeat(path, 3, axis=0)
@@ -649,9 +649,9 @@ for k_, i in enumerate(low_faces):
     elif r_ > 0.55 and g_ > 0.3 and b_ > 0.2 and g_ > b_ * 1.05 and r_ < g_ * 1.9 and L_ > 0.4 and not (g_ > 0.6 and b_ < 0.25):
         m = "skin-ryzz"
     elif r_ > g_ * 1.5 and b_ > g_ * 1.1:
-        m = "cloth-ryzz"       # the corset
+        m = "leather-ryzz"       # the corset
     elif 0.78 < z_ < 1.04 and abs(fc[k_][0]) < 0.34:
-        m = "cloth-ryzz"       # the skirt
+        m = "leather-ryzz"       # the skirt
     else:
         m = "leather-ryzz"
     me.polygons[i].material_index = mat_i[m]
@@ -901,7 +901,7 @@ nimg.filepath_raw = os.path.join(os.path.dirname(OUT), "nrm.png")
 nimg.file_format = "PNG"
 nimg.save()
 for mt in me.materials:
-    if mt.name.startswith(("leather", "cloth-ryzz", "metal")):
+    if mt.name.startswith(("leather", "metal")):
         nt = mt.node_tree
         ti = nt.nodes.new("ShaderNodeTexImage")
         ti.image = nimg
@@ -938,15 +938,15 @@ for s, side in ((1.0, "R"), (-1.0, "L")):
     fs = HANDS[s]
     f0 = next(p for p in fs if p.name.startswith("finger0"))
     bs = f0.base
-    bone("index." + side, "hand." + side, bs, bs + [0, 0, -K.FINGER_L[0][0]])
-    m2 = bs + [0, 0, -K.FINGER_L[0][0]]
+    bone("index." + side, "hand." + side, bs, bs + [0, 0, -K.FINGER_L[0][0] * K.HAND_K])
+    m2 = bs + [0, 0, -K.FINGER_L[0][0] * K.HAND_K]
     bone("index2." + side, "index." + side, m2, m2 + [0, 0, -0.05])
     f2 = next(p for p in fs if p.name.startswith("finger2"))
-    bone("curl." + side, "hand." + side, f2.base, f2.base + [0, 0, -K.FINGER_L[2][0]])
-    m3 = f2.base + [0, 0, -K.FINGER_L[2][0]]
+    bone("curl." + side, "hand." + side, f2.base, f2.base + [0, 0, -K.FINGER_L[2][0] * K.HAND_K])
+    m3 = f2.base + [0, 0, -K.FINGER_L[2][0] * K.HAND_K]
     bone("curl2." + side, "curl." + side, m3, m3 + [0, 0, -0.05])
     tp = next(p for p in fs if p.name.startswith("thumb"))
-    tb = K.wrist_at(s) + [0, 0.040, -0.030]
+    tb = K.wrist_at(s) + np.array([0, 0.040, -0.030]) * K.HAND_K
     bone("thumb." + side, "hand." + side, tb, tb + (tp.tip - tb) * 0.8)
     nms, chain = CH[s]
     prev = "head"
