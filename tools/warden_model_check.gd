@@ -27,7 +27,7 @@ const WARDENS := {
 	# (Cinder's fin-crest stands over her head)
 	"ashwick": {"hit_r": 0.376, "height": 1.02, "height_3d": 1.11, "width": [0.7, 1.5], "moves": "as_"},
 	# (Kael: body size 1.06, owner Nov 4: 9% bigger; juggernaut.md's 1.12x was at 1.0)
-	"juggernaut": {"hit_r": 0.428, "height": 1.26, "height_3d": 1.19, "width": [1.0, 2.0], "moves": "jug"},
+	"juggernaut": {"hit_r": 0.428, "height": 1.26, "height_3d": 1.24, "width": [0.85, 2.0], "moves": "jug"},     # (the art's shoulders; the crown of the mane)
 	"dredge": {"hit_r": 0.452, "height": 1.28, "width": [1.3, 2.4], "moves": "dr_"},     # (~2.25 m, very broad)
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
 	"tender": {"hit_r": 0.34, "height": 0.74, "height_3d": 0.84, "width": [0.5, 1.5], "moves": "mm_"},

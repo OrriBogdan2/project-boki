@@ -22,7 +22,7 @@ def be(a, e, edge=UP):
 
 READY = {
     "pel": (0.015, -0.015, -0.065), "prt": (0.10, 0.10, -0.03), "tor": (0.15, 0.12, 0.03), "hed": (-0.16, -0.14, 0.0),
-    "G": (0.335, 0.20, 0.66), "BE": be(14, -33, (0, 0.5, 0.86)), "Lw": 0.0, "LP": (-0.30, 0.05, 0.725),
+    "G": (0.335, 0.20, 0.66), "BE": be(14, -33, (0, 0.5, 0.86)), "Lw": 0.0, "LP": (-0.315, 0.10, 0.63),
     "FL": (-0.165, 0.11, A_Z), "FR": (0.185, -0.10, A_Z), "FLy": 0.22, "FRy": -0.42, "FLp": 0.0, "FRp": 0.0,
     "brow": 0.7, "lid": 0.32, "fing": 0.1, "skirt": 0.0,
 }
@@ -45,7 +45,7 @@ def idle(u):
     p["hed"] = (-0.16 - 0.02 * a, -0.14 + 0.03 * math.sin(u * 4 * math.pi), 0.0)
     g = READY["G"]
     p["G"] = (g[0], g[1], g[2] - 0.006 * a)
-    p["LP"] = (-0.30 + 0.004 * a, 0.05, 0.725 - 0.008 * a)
+    p["LP"] = (-0.315 + 0.004 * a, 0.10, 0.63 - 0.008 * a)
     p["lid"] = 1.0 if 0.40 < u < 0.43 else 0.32           # one slow blink
     return p
 
@@ -62,7 +62,7 @@ def stance(u):
     p["FL"], p["FR"] = (-0.17, 0.17, A_Z), (0.19, -0.11, A_Z)
     p["FLy"], p["FRy"] = 0.3, -0.5
     p["G"] = (0.30, 0.13 + 0.004 * a, 1.20 - 0.006 * a)
-    p["LP"] = (-0.34, 0.08, 0.74 - 0.008 * a)
+    p["LP"] = (-0.33, 0.12, 0.66 - 0.008 * a)
     p["fing"] = 0.5
     p["brow"], p["lid"] = 1.0, 0.42
     return p
@@ -121,7 +121,7 @@ def gait(speed_k, heading, T):
         p["BE"] = frame_of(D(-trail, tip) if w > 0.7 else tuple(Vector(D(14, -33)).lerp(Vector(D(-trail, tip)), min(1, w * 1.5))),
                            (0, 0.3, 1))
         # the free fist pumps
-        p["LP"] = (-0.30, 0.10 - 0.2 * c1 * w + 0.06, 0.76 + 0.09 * max(0, -c1) * w)
+        p["LP"] = (-0.31, 0.16 - 0.24 * c1 * w, 0.68 + 0.12 * max(0, -c1) * w)
         p["fing"] = 0.6
         p["skirt"] = 0.25 * c1 * speed_k
         p["brow"], p["lid"] = 0.8, 0.34
@@ -225,7 +225,7 @@ def clips():
     a1 = {"prt": (1.05, 0.45, 0.1), "tor": (0.2, 0.2, 0.05), "hed": (-1.2, -0.4, 0), "G": (0.3, -0.28, 0.86), "BE": be(-175, 6, (0, 0, 1)),
           "FL": (-0.12, -0.42, 0.3), "FR": (0.13, -0.55, 0.4), "FLp": 0.8, "FRp": 0.8, "LP": (-0.3, 0.45, 0.72)}
     a2 = {"prt": (0.3, 0.2, 0), "tor": (0.3, 0.1, 0), "hed": (-0.5, 0, 0), "FL": (-0.15, 0.22, 0.3), "FR": (0.16, 0.14, 0.26), "FLp": -0.2, "FRp": -0.2}
-    out.append(C("exdash", 0.6, [(0.0, a0), (0.05, a1, "out"), (0.22, {"prt": (1.0, 0.42, 0.14)}, "lin"), (0.32, a2), (0.6, {"pel": (0, 0, -0.03)})]))
+    out.append(C("exdash", 0.5, [(0.0, a0), (0.05, a1, "out"), (0.22, {"prt": (1.0, 0.42, 0.14)}, "lin"), (0.32, a2), (0.5, {"pel": (0, 0, -0.03)})]))
     # Warchain: the sword arm whips the chain out from the wrist: a sidearm crack, the blade held out of the way
     th0 = {"pel": (0, -0.04, -0.09), "prt": (0.05, -0.35, 0), "tor": (0, -0.5, 0.1), "hed": (-0.1, 0.8, 0), "G": (0.44, -0.2, 0.96), "BE": be(-170, 34, (0, 0, 1)),
            "LP": (-0.2, 0.3, 0.92), "fing": 0.3, "brow": 1.0, "lid": 0.2}
@@ -307,7 +307,7 @@ def clips():
     # Fusion transform: a held crouch that bursts upright, arms flung, sword high
     fu0 = {"pel": (0, -0.03, -0.26), "prt": (0.42, 0, 0), "tor": (0.55, 0, 0), "hed": (0.5, 0, 0), "G": (0.34, 0.22, 0.56), "BE": be(-10, -30, UP), "LP": (-0.26, 0.2, 0.58), "fing": 1, "lid": 0.9, "brow": 1}
     fu1 = {"pel": (0, 0, 0.0), "prt": (-0.14, 0, 0), "tor": (-0.3, 0, 0), "hed": (-0.42, 0, 0), "G": (0.34, 0.1, 1.45), "BE": be(0, 88, (0, 1, 0)), "LP": (-0.52, 0.06, 1.2), "lid": 0.0, "fing": 0.0}
-    out.append(C("fusion", 1.2, [(0.0, READY_END), (0.35, fu0), (0.6, dict(fu0, pel=(0.006, -0.03, -0.28))), (0.72, fu1, "out"), (0.98, dict(fu1, pel=(0, 0, -0.01))), (1.2, READY_END)]))
+    out.append(C("fusion", 0.8, [(0.0, READY_END), (0.18, fu0), (0.3, dict(fu0, pel=(0.006, -0.03, -0.28))), (0.45, fu1, "out"), (0.58, dict(fu1, pel=(0, 0, -0.01))), (0.8, READY_END)]))
     # the emote: drives the blade into the ground, rests both hands on the pommel and stares
     em0 = {"pel": (0, -0.02, -0.05), "prt": (0.03, 0, 0), "tor": (0.08, 0, 0), "hed": (-0.08, 0, 0), "G": (0.04, 0.34, 0.92), "BE": be(0, -86, (0, 0.8, 0.2)), "Lw": 1.0, "FL": (-0.2, 0.06, A_Z), "FR": (0.2, 0.0, A_Z), "FLy": 0.2, "FRy": -0.25, "fing": 0.9, "brow": 0.9, "lid": 0.35}
     up = dict(em0)
@@ -344,6 +344,7 @@ if __name__ == "__main__":
     b_, e_, n_ = K.sword_frame()
     rig = {"grip_rest": tuple(K.GRIP_AT), "blade_rest": tuple(b_), "edge_rest": tuple(e_), "pelvis": 0.66, "hilt_l": 0.09,
            "lhand": {"k": (0, 1, -0.15), "o": (-1, 0, 0), "palm": (-K.SH + 0.006, 0.0, K.HAND_Z - 0.052)}}
+    bpy.context.scene.render.fps = FPS
     sol = Solver(arm, rig)
     bpy.context.view_layer.objects.active = arm
     names = []

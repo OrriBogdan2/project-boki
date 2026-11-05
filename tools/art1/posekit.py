@@ -242,18 +242,18 @@ def bake(arm, clip, solver, extras):
             pb = pbs[b]
             pb.rotation_mode = "QUATERNION"
             pb.rotation_quaternion = q.normalized()
-            pb.keyframe_insert("rotation_quaternion", frame=f + 1)
+            pb.keyframe_insert("rotation_quaternion", frame=f)
         loc = R0["root"].inverted() @ (root_at - solver.H0["root"])
         pbs["root"].location = loc
-        pbs["root"].keyframe_insert("location", frame=f + 1)
+        pbs["root"].keyframe_insert("location", frame=f)
         for b, (q, l) in extras(P).items():
             pb = pbs[b]
             pb.rotation_mode = "QUATERNION"
             if q is not None:
                 pb.rotation_quaternion = q
-                pb.keyframe_insert("rotation_quaternion", frame=f + 1)
+                pb.keyframe_insert("rotation_quaternion", frame=f)
             if l is not None:
                 pb.location = l
-                pb.keyframe_insert("location", frame=f + 1)
+                pb.keyframe_insert("location", frame=f)
     arm.animation_data.action = None
     return act

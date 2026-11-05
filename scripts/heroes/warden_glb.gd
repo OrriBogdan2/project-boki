@@ -104,6 +104,9 @@ const SHIELD := "shield"        # a shield modelled in the left hand's Shield no
 ## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire).
 const WING_FOLD := "wing_fold"
 const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
+## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air): the bones the Hero's data
+## lists in "hide_while_chain" shrink away (item 76b.4), so one chain shows, never two.
+const CHAIN_OUT := "chain_out"
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
@@ -776,9 +779,11 @@ class Sync extends Node:
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
 	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
 	var blade_tip: Node3D
+	var blade_bone := -1
 	var gun: Node3D
 	var muzzle: Node3D
 	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
+	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -801,8 +806,11 @@ class Sync extends Node:
 		if not bl.is_empty():
 			blade_root = glb.find_child(String(bl["root"]), true, false) as Node3D
 			blade_tip = glb.find_child(String(bl["tip"]), true, false) as Node3D
+			blade_bone = WardenSkeleton.find(skel, String(bl.get("bone", "hand.R")))
 			gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 			muzzle = gun.get_node_or_null("Muzzle") as Node3D if gun else null
+		for b in dd.get("hide_while_chain", []):
+			hide_out.append(WardenSkeleton.find(skel, String(b)))
 		clips = WardenClips.make(root, glb, skel, art_name)
 		if clips:
 			for sd in ["L", "R"]:
@@ -820,6 +828,9 @@ class Sync extends Node:
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
 		orbits.step(dt)
+		if bool(root.get_meta(CHAIN_OUT, false)):
+			for bi in hide_out:
+				skel.set_bone_pose_scale(int(bi), Vector3.ONE * 0.001)
 
 	func apply() -> void:
 		for l in links:
@@ -851,8 +862,10 @@ class Sync extends Node:
 	func apply_blade() -> void:
 		if blade_tip == null or blade_root == null or gun == null or not gun.is_inside_tree():
 			return
-		var a := blade_root.global_position
-		var b := blade_tip.global_position
+		# (from the bone, not the attachment nodes: those update after the skeleton does, a frame late)
+		var hand := skel.global_transform * skel.get_bone_global_pose(blade_bone)
+		var a := hand * blade_root.position
+		var b := hand * blade_tip.position
 		if a.distance_squared_to(b) < 0.0001:
 			return
 		var up := Vector3.UP if absf((b - a).normalized().y) < 0.95 else Vector3.RIGHT

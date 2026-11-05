@@ -54,6 +54,27 @@ hang, hook, hang_pts = K.hanging_chain((0, 0, 1, 1))
 cuff, cuff_pts = K.cuff_chain((0, 0, 1, 1))
 pieces += [hang, hook, cuff] + K.blade() + K.hilt((0, 0, 1, 1))
 
+# ---- faces wound outward (the game culls back faces)
+HEAD_C = tuple(K.C)
+for p_ in pieces:
+    n_ = p_.name
+    if n_ in ("face", "skull", "mask", "cap") or n_.startswith(("eye", "lid")):
+        p_.orient(HEAD_C if not n_.startswith(("eye", "lid")) else tuple(K.hl(K.EYE * [1 if n_.endswith("R") else -1, 1, 1])))
+    elif n_ == "cowl":
+        p_.orient((0, 0.01, 1.2))
+    elif n_ == "tail":
+        p_.orient((-0.08, 0.0, 1.0))
+    else:
+        p_.orient()
+
+# ---- the hair's depth: root shade and layers, in the vertex colour (warden_look hair: vertex_ao)
+for p_ in locks:
+    if getattr(p_, "t", None) is None:
+        p_.shade = np.full(len(p_.v), 0.6)
+        continue
+    layer = 0.8 if p_.name.startswith("back") else (0.9 if p_.name.startswith(("side", "temple")) else 1.0)
+    p_.shade = layer * (0.72 + 0.28 * smooth(0.0, 0.22, p_.t))
+
 # ---- weights of the spring-hung chains
 def along_chain(p, names, pts, top_bone):
     pts = np.asarray(pts)
@@ -91,7 +112,7 @@ def scan_weights(ob):
 
 
 # ---- one mesh: the scan first, then the pieces
-faces_v, faces_pid, faces_uv, verts, vw, rooms = [], [], [], [], [], []
+faces_v, faces_pid, faces_uv, verts, vw, rooms, shades = [], [], [], [], [], [], []
 names = []
 
 
@@ -110,12 +131,15 @@ def add_ob(ob, name, room):
             q = float(smooth(0.68, 0.46, z_)) * float(smooth(0.0, 0.08, abs(x_)))
             d = {"hips": 1 - float(smooth(0.74, 0.62, z_)), "skirt": float(smooth(0.74, 0.62, z_)) * (1 - 0.75 * q),
                  "thigh." + sd: float(smooth(0.74, 0.62, z_)) * 0.75 * q}
+        elif name == "Low" and abs(x_) > 0.212 and z_ < 0.85 and max(d, key=d.get, default="") in ("hips", "root"):
+            d = {"forearm." + ("R" if x_ > 0 else "L"): 1.0}      # (a3 left the wrist's end on the hips)
         elif z_ < K.ANKLE_Z + 0.015:
             sd = "R" if x_ > 0 else "L"
             k = float(smooth(K.ANKLE_Z + 0.015, K.ANKLE_Z - 0.03, z_))
             d = {"foot." + sd: k, "shin." + sd: 1 - k}
         vw.append(d)
     rooms.extend([room] * len(me.vertices))
+    shades.extend([1.0] * len(me.vertices))
     mn = [m.name for m in me.materials]
     for p in me.polygons:
         faces_v.append([base + i for i in p.vertices])
@@ -135,6 +159,7 @@ for pc in pieces:
     for i in range(len(pc.v)):
         vw.append({b: float(arr[i]) for b, arr in pc.w.items() if arr[i] > 0.005})
     rooms.extend([pc.room] * len(pc.v))
+    shades.extend(getattr(pc, "shade", np.ones(len(pc.v))).tolist())
     for j, f in enumerate(pc.f):
         faces_v.append([base + i for i in f])
         faces_pid.append(pid)
@@ -160,7 +185,7 @@ def base_name(n):
 
 
 def is_tile(n):
-    return n == "cap" or n.startswith(("crown", "temple", "fore", "side", "back", "over", "brow", "chain_", "wrap", "hook", "eye", "core"))
+    return n == "cap" or n.startswith(("crown", "temple", "fore", "part", "side", "back", "over", "brow", "chain_", "wrap", "hook", "eye", "core"))
 
 
 # material per face
@@ -200,7 +225,39 @@ for f in bm.faces:
 for i in uniq:
     bm.faces[i].select = True
 bmesh.update_edit_mesh(me)
-bpy.ops.uv.smart_project(angle_limit=math.radians(58), island_margin=0.0, area_weight=0.0, scale_to_bounds=False)
+bpy.ops.uv.smart_project(angle_limit=math.radians(66), island_margin=0.0, area_weight=0.0, scale_to_bounds=False)
+bm = bmesh.from_edit_mesh(me)
+bm.faces.ensure_lookup_table()
+uvl = bm.loops.layers.uv["UV"]
+# the scan unwraps by body part: seams between parts and round each limb's sides, so the paint stays in big clean islands
+PARTS = {"upper_arm.R": "armR", "forearm.R": "armR", "pauldron.R": "armR", "hand.R": "armR", "upper_arm.L": "armL", "forearm.L": "armL",
+         "pauldron.L": "armL", "hand.L": "armL", "thigh.R": "legR", "shin.R": "legR", "foot.R": "legR", "thigh.L": "legL", "shin.L": "legL",
+         "foot.L": "legL"}
+region = {}
+for i in range(nf):
+    n = names[faces_pid[i]]
+    if n not in ("Low", "Skirt"):
+        continue
+    tally = {}
+    for vi in faces_v[i]:
+        for b, w_ in vw[vi].items():
+            p_ = PARTS.get(b, "torso")
+            tally[p_] = tally.get(p_, 0) + w_
+    part = max(tally, key=tally.get) if tally else "torso"
+    c = np.mean([verts[v] for v in faces_v[i]], axis=0)
+    if n == "Skirt":
+        part = "skirt"
+    limb_x = {"armR": K.SH, "armL": -K.SH}.get(part)
+    front = c[1] > 0.0
+    region[i] = (part, front)
+for e in bm.edges:
+    lf = [f.index for f in e.link_faces]
+    if len(lf) == 2 and lf[0] in region and lf[1] in region:
+        e.seam = region[lf[0]] != region[lf[1]]
+for f in bm.faces:
+    f.select = f.index in region
+bmesh.update_edit_mesh(me)
+bpy.ops.uv.unwrap(method="ANGLE_BASED", margin=0.0)
 bm = bmesh.from_edit_mesh(me)
 bm.faces.ensure_lookup_table()
 uvl = bm.loops.layers.uv["UV"]
@@ -223,6 +280,8 @@ for i in uniq:
 stats = {}
 for i in uniq:
     n = names[faces_pid[i]]
+    if i in region:
+        n = n + region[i][0]
     f = bm.faces[i]
     pts = [l[uvl].uv.copy() for l in f.loops]
     a2 = 0.0
@@ -235,8 +294,9 @@ for i in uniq:
     n = names[faces_pid[i]]
     k = base_name(n)
     wgt = SCALE.get(k, 1.0)
-    if n == "Low":
-        pass
+    if i in region:
+        wgt *= 1.5 if region[i][0] == "armR" else 1.0
+        n = n + region[i][0]
     s = wgt * math.sqrt(stats[n][0] / max(stats[n][1], 1e-12))
     for l in bm.faces[i].loops:
         l[uvl].uv = l[uvl].uv * s
@@ -382,8 +442,11 @@ print("source atlas", im.name, sw, sh, SP.mean())
 mask = np.isin(PID, [low_pid, skirt_pid])
 ys, xs = np.nonzero(mask)
 pos = POS[ys, xs].copy()
-mirror = (pos[:, 0] > 0.145) & (pos[:, 2] > 0.86)
+mirror = (pos[:, 0] > 0.145) & (pos[:, 2] > 0.84)
 pos[mirror, 0] *= -1
+# (the left arm's iron band is no skin: that stretch of the sword arm takes the muscle above it)
+band = mirror & (pos[:, 2] < 0.985)
+pos[band, 2] = 0.99 + (pos[band, 2] - 0.84) * 0.5
 hit_i = np.zeros(len(pos), np.int64)
 hit_p = np.zeros((len(pos), 3))
 for i, p in enumerate(pos):
@@ -408,7 +471,27 @@ sx = np.clip((uu % 1) * sw, 0, sw - 1).astype(int)
 sy = np.clip((vv % 1) * sh, 0, sh - 1).astype(int)
 col = SP[sy, sx]
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
+col = np.power(np.clip(col, 0, 1), 0.86) * 1.2
 OUTC[ys, xs] = col
+# the scan's mottling off the skin: a band-stop on the brightness, inside the islands
+def blur(a, m, r):
+    """Box blur of a over the mask m (normalised), radius r."""
+    def box(z):
+        c_ = np.cumsum(np.cumsum(z, 0), 1)
+        c_ = np.pad(c_, ((r + 1, r), (r + 1, r)), mode="edge")
+        c_[:r + 1, :] = 0
+        c_[:, :r + 1] = 0
+        return c_[2 * r + 1:, 2 * r + 1:] - c_[:-2 * r - 1, 2 * r + 1:] - c_[2 * r + 1:, :-2 * r - 1] + c_[:-2 * r - 1, :-2 * r - 1]
+    return box(a * m) / np.maximum(box(m), 1e-3)
+
+
+lum = OUTC.mean(2)
+skin_t = (mask & (OUTC[..., 0] > OUTC[..., 2] * 1.04) & (OUTC[..., 0] < OUTC[..., 2] * 1.7) & (lum < 0.5)).astype(np.float32)
+a_ = blur(lum, skin_t, 7)
+b_ = blur(lum, skin_t, 34)
+flat = np.clip(b_ / np.maximum(a_, 0.03), 0.6, 1.5)
+k_ = 1 + (flat - 1) * 0.8 * skin_t
+OUTC *= k_[..., None]
 # a little of the shared light's occlusion on the scan too
 OUTC[ys, xs] *= (0.62 + 0.38 * np.clip(AO[ys, xs], 0, 1))[:, None]
 # the scan's old pale collar under the new one
@@ -424,6 +507,7 @@ ck = P.cracks(POS[yy, xx], canvas)
 core = M.smooth(0.42, 0.62, ck)[:, None]
 rim = M.smooth(0.08, 0.42, ck)[:, None]
 c = OUTC[yy, xx]
+c = np.minimum(c, 0.4)
 c = c * (1 - rim * 0.75) + P.HOT_RIM * rim * 0.75
 c = c * (1 - core) + P.HOT * core
 OUTC[yy, xx] = c
@@ -526,6 +610,7 @@ for mt in me.materials:
 attr = me.color_attributes.new("ink", "FLOAT_COLOR", "POINT")
 ic = np.ones((len(me.vertices), 4), np.float32)
 ic[:, 3] = rooms
+ic[:, 0] = ic[:, 1] = ic[:, 2] = shades
 attr.data.foreach_set("color", ic.ravel())
 me.color_attributes.active_color = attr
 
