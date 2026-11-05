@@ -555,3 +555,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 S2: Grimble (was Dredge) refs received
 - No Dredge model work is running (the r3n round stopped at the old account's limit; ext/wip-dredge is superseded). grimble_FINAL_sheet, grimble_turnaround, grimble_splash logged.
 - Queue: name sweep on ext/rename-lisette (Motley, the Sunken Bulwark, Grimble the Scrap King), ART-1 Cinder, ART-1 Grimble, then Vex 68, gloves 69, glider 63, Claire 62+64+65. Vex stays last in ART-1.
+
+## 2026-11-05 S2: READY ext/art2-kael dc35f97d (replaces 0fbc63e6 for S5)
+- origin/main 8f7a33d2 merged; only tools/check_registry.gd conflicted, both sides kept. On the tip: hero-vfx OK, juggernaut-combo 154/0, hero-combo 263/0, health --strict OK. Full-suite notes from the earlier entry still apply.
