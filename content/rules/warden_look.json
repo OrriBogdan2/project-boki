@@ -448,7 +448,6 @@
 		]
 	},
 	"breaker": {
-		"weapon_scale": 0.75,
 		"painted": {
 			"far_lift": 0.2,
 			"rim_far": 0.3,

@@ -71,3 +71,41 @@ if MODE == "turn":
         aim(az, el, c, r)
         sc.render.filepath = os.path.join(OUT, nm + ".png")
         bpy.ops.render.render(write_still=True)
+
+if MODE in ("clip", "sheet"):
+    arm = bpy.data.objects["Armature"]
+    arm.animation_data_create()
+    px = int(a[3]) if len(a) > 3 else 300
+    sc.render.resolution_x = sc.render.resolution_y = px
+    sc.cycles.samples = 6
+
+    def fr(act, name, n=None, az=205, el=22, r=2.5, c=(0, 0.1, 0.8)):
+        arm.animation_data.action = bpy.data.actions[act]
+        slot = arm.animation_data.action.slots
+        if len(slot):
+            arm.animation_data.action_slot = slot[0]
+        f0, f1 = bpy.data.actions[act].frame_range
+        n = n or max(2, int((f1 - f0) / 2) + 1)
+        aim(az, el, c, r)
+        out = []
+        for i in range(n):
+            sc.frame_set(int(round(f0 + (f1 - f0) * i / max(n - 1, 1))))
+            p = os.path.join(OUT, "_%s_%03d.png" % (act, i))
+            sc.render.filepath = p
+            bpy.ops.render.render(write_still=True)
+            out.append(p)
+        return out
+    if MODE == "clip":
+        for act in a[2].split(","):
+            ims = fr(act, act)
+            subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-framerate", "15", "-i", os.path.join(OUT, "_%s_%%03d.png" % act),
+                            "-vf", "split[a][b];[a]palettegen=max_colors=96[p];[b][p]paletteuse", "-loop", "0", os.path.join(OUT, act + ".gif")], check=True)
+    else:
+        rows = []
+        for act in a[2].split(","):
+            ims = fr(act, act, 6)
+            rows.append(os.path.join(OUT, "_row_%s.png" % act))
+            subprocess.run(["ffmpeg", "-loglevel", "error", "-y"] + sum([["-i", p] for p in ims], [])
+                           + ["-filter_complex", "hstack=inputs=6,drawtext=text='%s':x=8:y=8:fontsize=22:fontcolor=white:box=1:boxcolor=black@0.5" % act, rows[-1]], check=True)
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y"] + sum([["-i", p] for p in rows], [])
+                       + ["-filter_complex", "vstack=inputs=%d" % len(rows), os.path.join(OUT, "sheet_%s.png" % a[4] if len(a) > 4 else "sheet.png")], check=True)

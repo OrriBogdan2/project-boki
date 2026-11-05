@@ -6,7 +6,7 @@ import breaker_sculpt as B
 import sculpt_kit as S
 from sculpt_kit import fbm, smooth, vnoise, worley
 
-C = lambda h: np.array([int(h[i:i + 2], 16) / 255.0 for i in (0, 2, 4)], np.float32) ** 2.2
+C = lambda h: np.array([int(h[i:i + 2], 16) / 255.0 for i in (0, 2, 4)], np.float32)
 
 
 def raster_aux(uv, pos, nrm, aux, size):
@@ -39,7 +39,7 @@ def raster_aux(uv, pos, nrm, aux, size):
     return out
 
 
-def form(f, p, n, steps=(0.008, 0.022, 0.05)):
+def form(f, p, n, steps=(0.012, 0.035, 0.09), wide=5.0):
     """(ao 0..1, curvature): the sculpt's occlusion along the normal, and how convex it is here."""
     ao = np.ones(len(p), np.float32)
     w = 1.0
@@ -55,7 +55,13 @@ def form(f, p, n, steps=(0.008, 0.022, 0.05)):
         o = np.zeros(3, np.float32)
         o[i] = e
         lap += f.sample(p + o) + f.sample(p - o)
-    return ao, lap / e
+    e2 = e * wide
+    lap2 = -6.0 * f.sample(p)
+    for i in range(3):
+        o = np.zeros(3, np.float32)
+        o[i] = e2
+        lap2 += f.sample(p + o) + f.sample(p - o)
+    return ao, lap / e + 0.8 * lap2 / e2
 
 
 def shade(col, ao, curv, n, cav=0.55, hi=0.28, tint=(0.62, 0.68, 0.92)):
@@ -89,11 +95,11 @@ def cracks(p, f=6.5, w=0.03):
 
 def skin_col(p, n, c0=None):
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    base = C("5c8fc4")[None, :] * np.ones((len(p), 1), np.float32)
+    base = C("6f9cc4")[None, :] * np.ones((len(p), 1), np.float32)
     # the big colour moves: paler toward light, deeper on the sides, mauve on the joints
     big = fbm(x, y, z, 3.1, 3)[:, None]
-    base = mix(base, C("3f6db0"), np.clip((big - 0.42) * 2.6, 0, 1) * 0.65)
-    base = mix(base, C("86b6dc"), smooth(0.45, 0.68, fbm(x + 7, y, z, 5.0, 3)) * 0.4)
+    base = mix(base, C("4f7cb0"), np.clip((big - 0.42) * 2.6, 0, 1) * 0.6)
+    base = mix(base, C("9ec6e2"), smooth(0.45, 0.68, fbm(x + 7, y, z, 5.0, 3)) * 0.4)
     # frost dust
     dust = smooth(0.62, 0.8, fbm(x, y, z + 3, 22.0, 3)) * smooth(0.45, 0.62, fbm(x, y - 4, z, 3.0, 2))
     base = mix(base, C("dcecf6"), dust * 0.6)
@@ -126,8 +132,8 @@ def p_skin(p, n, c):
 
 def p_head(p, n, c):
     f = c["f"]
-    ao, cv = form(f, p, n, (0.004, 0.011, 0.026))
-    cv = cv * 0.45
+    ao, cv = form(f, p, n, (0.004, 0.012, 0.03), 3.5)
+    cv = cv * 0.9
     lab = f.label(p)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
     col = skin_col(p, n)
@@ -148,14 +154,14 @@ def p_head(p, n, c):
     bm = smooth(0.006, -0.003, br0 + (vnoise(x * 3.2, y, z * 0.5, 240.0) - 0.5) * 0.012) * (ax < 0.118) * (ax > 0.012) * (y > 0.07)
     hairs = 0.72 + 0.56 * vnoise(x * 1.0, y, z * 7.0, 170.0)
     col = mix(col, C("bb4a2a") * hairs[:, None], bm)
-    col = shade(col, ao, cv, n, 0.62, 0.34)
+    col = shade(col, ao, cv, n, 0.8, 0.42)
     # lips, gums, teeth, tusks, nose, inner ears, lids
     ones = np.ones((len(p), 1), np.float32)
     col = np.where((lab == B.LIP)[:, None], shade(C("7c5f9c") * ones, ao, cv, n, 0.5, 0.5), col)
     col = np.where((lab == B.GUM)[:, None], shade(C("6a1c28") * ones, ao * 0.6, cv * 0.3, n, 0.2, 0.1), col)
     tt = C("ecdcb2") * ones * (0.9 + 0.2 * vnoise(x, y, z, 120.0))[:, None]
-    tt = mix(tt, C("a8855a"), smooth(0.2, 0.75, ao) * 0 + smooth(0.55, 0.3, ao))
-    col = np.where((lab == B.TOOTH)[:, None], shade(tt, ao, cv * 0.4, n, 0.4, 0.5), col)
+    tt = mix(tt, C("a8855a"), smooth(0.4, 0.15, ao) * 0.5)
+    col = np.where((lab == B.TOOTH)[:, None], shade(tt, 0.55 + 0.45 * ao, cv * 0.5, n, 0.6, 0.5), col)
     tu = mix(C("f0e3bf") * ones, C("b89a6e"), smooth(1.4, 1.34, z))
     col = np.where((lab == B.TUSK)[:, None], shade(tu, ao, cv * 0.4, n, 0.3, 0.6), col)
     nose = mix(C("b18aa8") * ones, C("6e7fb8"), smooth(1.4, 1.46, z))
@@ -210,7 +216,7 @@ def p_rag(p, n, c):
 
 def p_beard(p, n, c):
     f = c["f"]
-    ao, cv = form(f, p, n, (0.004, 0.012, 0.03))
+    ao, cv = form(f, p, n, (0.004, 0.012, 0.03), 3.0)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
     st = vnoise(x * 3.0, y * 3.0, z * 0.3, 200.0)
     col = mix(C("d8552a"), C("8c2b18"), st[:, None] * 1.2)
@@ -221,7 +227,7 @@ def p_beard(p, n, c):
     lab = f.label(p)
     tuft = (lab == 2)
     col = np.where(tuft[:, None], mix(col, C("cdeeff"), smooth(1.07, 0.99, z) * 0.0 + smooth(0.05, 0.0, z - np.minimum(z, 1.03)) * 0.7), col)
-    return shade(col, ao, cv * 0.35, n, 0.65, 0.4, (0.55, 0.4, 0.55))
+    return shade(col, ao, cv * 1.1, n, 0.9, 0.5, (0.5, 0.25, 0.4))
 
 
 def p_ice(p, n, c):
@@ -247,7 +253,7 @@ def p_hammer_ice(p, n, c):
     d2, e2 = worley(x + 2, y * 0.8, z, 15.0)
     col = mix(col, C("d6f2fb"), smooth(0.04, 0.01, e2) * 0.45)
     # the worn pale bevels
-    bev = np.clip(-cv * 3.0, 0, 1)
+    bev = np.clip(-cv * 0.5, 0, 1)
     col = mix(col, C("f6feff"), bev * 0.85)
     snow = (lab == 3)
     col = np.where(snow[:, None], mix(C("ffffff"), C("d9eef7"), vnoise(x, y, z, 60.0)[:, None]), col)

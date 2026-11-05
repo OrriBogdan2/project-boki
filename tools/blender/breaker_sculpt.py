@@ -212,7 +212,7 @@ def head(J, vox=0.0016):
 
 def eyes(J):
     """The glowing eyes: blank, pale almonds tucked under the lids."""
-    return [((s * 0.056, 0.139, 1.451), 0.02) for s in (-1, 1)]
+    return [((s * 0.056, 0.139, 1.449), 0.02) for s in (-1, 1)]
 
 
 # ------------------------------------------------------------------ what he wears
@@ -260,7 +260,9 @@ def mantle(J, skin):
     keep = z - hem
     # off the arm: stops round the deltoid; off the neck
     keep = np.minimum(keep, 0.53 - ax + (fbm(x, y, z, 11.0, 2) - 0.5) * 0.05)
-    neck = np.sqrt(x * x + (y - 0.05) ** 2 * 1.3) - (0.135 + 0.02 * smooth(1.42, 1.25, z))
+    # off the neck and clear of the head and beard: the collar opens wide in front
+    neck = np.sqrt(x * x + (y - 0.05) ** 2 * 0.55) - (0.175 + 0.03 * smooth(1.26, 1.34, z))
+    keep = np.minimum(keep, 1.33 - z)
     keep = np.minimum(keep, neck)
     f.d = np.maximum(sh, -keep).astype(np.float32)
     f.lab[:] = 1
@@ -329,23 +331,23 @@ def braid_path(top, tip, lobes, ph, amp):
 def beard(J):
     """The red beard: whiskers down the jaw into three plaits (the centre the longest), silver rings, frozen tufts.
     Returns (field, the plaits as [(name, top, ring, tip)] for the spring chains)."""
-    lo, hi = (-0.24, -0.04, 0.94), (0.24, 0.36, 1.52)
+    lo, hi = (-0.24, -0.04, 0.86), (0.24, 0.47, 1.52)
     f = Field(lo, hi, 0.0022)
     bn = "head"
-    plaits = [("braidR", (0.104, 0.15, 1.29), (0.122, 0.215, 1.085), (0.124, 0.22, 1.015)),
-              ("braidL", (-0.104, 0.15, 1.29), (-0.122, 0.215, 1.085), (-0.124, 0.22, 1.015)),
-              ("braidC", (0.0, 0.19, 1.27), (0.0, 0.272, 1.02), (0.0, 0.28, 0.945))]
+    plaits = [("braidR", (0.105, 0.17, 1.285), (0.135, 0.345, 1.095), (0.138, 0.36, 1.015)),
+              ("braidL", (-0.105, 0.17, 1.285), (-0.135, 0.345, 1.095), (-0.138, 0.36, 1.015)),
+              ("braidC", (0.0, 0.215, 1.255), (0.0, 0.385, 0.985), (0.0, 0.405, 0.9))]
     # sideburns and the jaw's fringe
     streak = lambda x, y, z: (vnoise(x * 3.2, y * 3.2, z * 0.5, 34.0) - 0.5) * 0.012
     for s in (-1, 1):
-        f.add(path(((s * 0.122, 0.04, 1.43), (s * 0.128, 0.075, 1.36), (s * 0.114, 0.13, 1.3)), (0.02, 0.034, 0.04)),
+        f.add(path(((s * 0.124, 0.03, 1.43), (s * 0.13, 0.06, 1.36), (s * 0.114, 0.12, 1.285)), (0.014, 0.024, 0.032)),
               0.03, 1, bn, streak)
-        f.add(ell((s * 0.056, 0.2, 1.283), (0.062, 0.042, 0.05)), 0.03, 1, bn, streak)
-    f.add(ell((0, 0.205, 1.275), (0.05, 0.045, 0.05)), 0.03, 1, bn, streak)
+        f.add(ell((s * 0.06, 0.165, 1.262), (0.06, 0.05, 0.038)), 0.03, 1, bn, streak)
+    f.add(ell((0, 0.185, 1.25), (0.05, 0.05, 0.04)), 0.03, 1, bn, streak)
     rings = []
     for nm, top, ring, tip in plaits:
         c = nm.endswith("C")
-        w = 0.052 if c else 0.04
+        w = 0.062 if c else 0.048
         for i in range(3):
             st = braid_path(top, ring, 5 if c else 4, i * math.tau / 3, w * 0.5)
             rr = [w * 0.62 * (1 - 0.4 * j / (len(st) - 1)) for j in range(len(st))]
@@ -452,27 +454,27 @@ def hammer():
     finds the head): a plain block of glacier ice, two riveted iron bands, an iron socket, a rope-wrapped oak haft,
     an iron end cap, icicles. Returns (ice field, iron field, wood field)."""
     lo, hi = (-0.42, -0.26, -0.62), (0.42, 0.26, 0.98)
-    BW, BD, BH = 0.34, 0.205, 0.2     # half width (along the swing's sides), half depth, half height
+    BW, BD, BH = 0.29, 0.175, 0.17     # half width (along the swing's sides), half depth, half height
     zc = 0.62
     I = Field(lo, hi, 0.0035)
     lump = lambda x, y, z: (fbm(x, y, z, 6.0, 3) - 0.5) * 0.028
     I.add(box((0, 0, zc), (BW, BD, BH), 0.03), 0.0, 1, "x_weapon", lump)
     rng = np.random.default_rng(5)
-    for x in (-0.3, -0.21, -0.1, 0.05, 0.15, 0.31):
+    for x in (-0.26, -0.18, -0.08, 0.05, 0.13, 0.26):
         l = float(rng.uniform(0.05, 0.13))
-        for y in (0.17, -0.17):
+        for y in (0.14, -0.14):
             xx = x + float(rng.uniform(-0.02, 0.02))
             I.add(icicle((xx, y, zc - BH + 0.01), (xx, y, zc - BH - l), 0.016), 0.006, 2, "x_weapon")
     I.add(box((0, 0, zc + BH + 0.002), (BW - 0.03, BD - 0.02, 0.016), 0.012), 0.02, 3, "x_weapon",
           lambda x, y, z: (fbm(x, y, z, 11.0, 2) - 0.55) * 0.03)     # the snow on top
     M = Field(lo, hi, 0.0035)
-    for x in (-0.175, 0.175):
-        M.add(box((x, 0, zc), (0.052, BD + 0.016, BH + 0.016), 0.012), 0.0, 1, "x_weapon",
+    for x in (-0.15, 0.15):
+        M.add(box((x, 0, zc), (0.046, BD + 0.014, BH + 0.014), 0.012), 0.0, 1, "x_weapon",
               lambda x, y, z: (fbm(x, y, z, 14.0, 2) - 0.5) * 0.008)
-        for y, z in ((BD + 0.017, 0.1), (BD + 0.017, 0.0), (BD + 0.017, -0.1), (-BD - 0.017, 0.1), (-BD - 0.017, 0.0), (-BD - 0.017, -0.1)):
+        for y, z in ((BD + 0.015, 0.09), (BD + 0.015, 0.0), (BD + 0.015, -0.09), (-BD - 0.015, 0.09), (-BD - 0.015, 0.0), (-BD - 0.015, -0.09)):
             M.add(sph((x, y, zc + z), 0.0145), 0.002, 2, "x_weapon")
-        for y in (-0.1, 0.0, 0.1):
-            M.add(sph((x, y, zc + BH + 0.017), 0.0145), 0.002, 2, "x_weapon")
+        for y in (-0.09, 0.0, 0.09):
+            M.add(sph((x, y, zc + BH + 0.015), 0.0145), 0.002, 2, "x_weapon")
     M.add(cap((0, 0, zc - BH - 0.075), (0, 0, zc - BH + 0.02), 0.055, 0.065), 0.003, 1, "x_weapon")   # the socket
     M.add(cap((0, 0, -0.46), (0, 0, -0.39), 0.058, 0.056), 0.004, 1, "x_weapon")                     # the end cap
     M.add(cyl((0, 0, -0.5), "z", 0.066, 0.045), 0.006, 1, "x_weapon")

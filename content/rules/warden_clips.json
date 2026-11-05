@@ -1,0 +1,47 @@
+{
+	"doc": "Hand-keyed clips per art name (ART-1): which .glb animation plays when. scripts/heroes/warden_clips.gd reads this; a kit move with no entry stays procedural. mask: full, upper (from the waist up, the legs keep walking) or auto (full standing, upper walking). loop_from: a hold move loops from there to the clip's end.",
+	"breaker": {
+		"loco": {
+			"idle": "idle",
+			"stance": "stance",
+			"walk": ["walk_f", "walk_b", "walk_l", "walk_r"],
+			"run": ["run_f", "run_b", "run_l", "run_r"],
+			"walk_speed": 2.0,
+			"run_speed": 4.8
+		},
+		"body": {
+			"jump": "jump",
+			"fall": "fall",
+			"glide": "glide",
+			"dive": "dive",
+			"downed": "downed",
+			"stun": "stun",
+			"revive": "revive"
+		},
+		"over": {
+			"land": "land",
+			"hit": "hit",
+			"emote": "emote_laugh"
+		},
+		"free_r": "arm_free",
+		"moves": {
+			"bul_throw": {"clip": "lmb_throw", "mask": "auto"},
+			"bul_recall": {"clip": "lmb_recall", "mask": "upper"},
+			"bul_smash_wind": {"clip": "lmb_hold", "mask": "auto", "loop_from": 0.2},
+			"bul_smash": {"clip": "lmb_slam"},
+			"bul_launch": {"clip": "lmb_launch"},
+			"bul_guard": {"clip": "rmb_guard", "mask": "auto", "loop_from": 0.12},
+			"bul_break": {"clip": "guard_break", "mask": "upper"},
+			"bul_armed": {"clip": "guard_armed", "mask": "upper"},
+			"bul_whirl": {"clip": "shift_whirl"},
+			"bul_charge": {"clip": "shift_charge"},
+			"bul_short": {"clip": "dash_short"},
+			"bul_lumber": {"clip": "dash_air"},
+			"bul_crush": {"clip": "crush", "mask": "upper"},
+			"bul_slamshield": {"clip": "shield_slam"},
+			"bul_mend": {"clip": "e_mend", "mask": "auto"},
+			"bul_ult_wind": {"clip": "x_wind", "loop_from": 0.4},
+			"bul_ult_slam": {"clip": "x_slam"}
+		}
+	}
+}

@@ -41,9 +41,21 @@ def ob_from(name, v, q):
     return ob
 
 
-def lowpoly(name, fld, tris):
-    """Surface nets, then a decimate down to `tris`, dropping specks."""
+def lowpoly(name, fld, tris, outer=None):
+    """Surface nets, then a decimate down to `tris`, dropping specks. outer: keep only the side of a thin shell that
+    faces away from this field (a mantle over a body), as a clean open sheet: decimating both skins of a thin
+    cloth bridges them into tents."""
     v, q = S.surface_nets(fld)
+    fn = np.cross(v[q[:, 1]] - v[q[:, 0]], v[q[:, 2]] - v[q[:, 0]])
+    cn = v[q].mean(1)
+    gr = fld.grad(cn.astype(np.float32))
+    if (fn * gr).sum(1).mean() < 0:      # (outward winding)
+        q = q[:, ::-1]
+        fn = -fn
+    if outer is not None:
+        q = q[(fn * outer.grad(cn.astype(np.float32))).sum(1) > 0.0]
+        used, inv = np.unique(q, return_inverse=True)
+        v, q = v[used], inv.reshape(-1, 4)
     ob = ob_from(name, v, q)
     bm = bmesh.new()
     bm.from_mesh(ob.data)
@@ -267,16 +279,16 @@ def main():
 
     parts = []     # {ob, slot, paint, xf, fields...}
 
-    def part(name, fld, tris, slot, paint, density=1.0, xf=None, group="body", fld2=None):
-        ob = lowpoly(name, fld, tris)
+    def part(name, fld, tris, slot, paint, density=1.0, xf=None, group="body", fld2=None, outer=None):
+        ob = lowpoly(name, fld, tris, outer)
         parts.append({"ob": ob, "slot": slot, "paint": paint, "density": density, "xf": xf, "group": group, "f": fld,
                       "f2": fld2, "aux": None, "name": name})
         return parts[-1]
 
     pb = part("skin_body", skin, 6000, "skin", "skin", 1.0)
     ph = part("skin_head", hd, 3300, "skin", "head", 3.2)
-    pm = part("mantle", man, 1500, "cloth", "mantle", 0.9, fld2=skin)
-    ps = part("shorts", sho, 700, "cloth", "shorts", 0.6, fld2=skin)
+    pm = part("mantle", man, 1300, "cloth", "mantle", 0.9, fld2=skin, outer=skin)
+    ps = part("shorts", sho, 500, "cloth", "shorts", 0.6, fld2=skin, outer=skin)
     prf = part("rag_front", rg["front"], 450, "cloth", "rag", 0.7)
     prb = part("rag_back", rg["back"], 400, "cloth", "rag", 0.5)
     pbd = part("beard", brd, 1500, "hair", "beard", 2.0)
@@ -302,13 +314,13 @@ def main():
     print("low parts", time.time() - t0, flush=True)
 
     # rings and eyes: small clean parts
-    rf = S.Field((-0.2, 0.12, 0.98), (0.2, 0.34, 1.14), 0.0014)
+    rf = S.Field((-0.2, 0.28, 0.93), (0.2, 0.45, 1.14), 0.0014)
     for c, r in rings:
         rf.add(S.cyl(tuple(c), "z", r + 0.0065, 0.0125, 0.003), 0.0, 1, "head")
     prn = part("rings", rf, 160, "metal", "ring", 1.5)
-    ef = S.Field((-0.1, 0.1, 1.41), (0.1, 0.17, 1.49), 0.0012)
+    ef = S.Field((-0.1, 0.1, 1.41), (0.1, 0.175, 1.49), 0.0012)
     for c, r in B.eyes(J):
-        ef.add(S.ell(c, (r * 1.15, r * 1.0, r * 0.82)), 0.0, 1, "head")
+        ef.add(S.ell(c, (r * 1.1, r * 0.95, r * 0.5), (0, 0.32 if c[0] < 0 else -0.32, 0)), 0.0, 1, "head")
     pey = part("eyes", ef, 90, "eyes", "eyes", 2.0)
 
     # ropes, on the surfaces

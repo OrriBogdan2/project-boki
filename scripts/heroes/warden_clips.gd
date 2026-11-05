@@ -10,7 +10,7 @@ extends RefCounted
 ##   "body": state -> clip, for "jump", "fall", "glide", "dive", "downed", "stun", "revive"
 ##   "over": one-shots over everything: "land", "hit", "emote", "fuse"
 ##   "free_r": a right-arm pose laid over everything while the weapon is out of the hand
-## The tree: loco (BlendSpace2D) -> stance Blend2 -> body Transition -> action Blend2s (full, upper) -> free arm.
+## The tree: loco (BlendSpace2D) -> stance Blend2 -> body Transition -> action Blend2 (whole or filtered) -> free arm.
 
 const PATH := "res://content/rules/warden_clips.json"
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the weapon out of the hand (the free-arm pose lies over all)
@@ -28,7 +28,7 @@ var player: AnimationPlayer
 var w := 0.0                    # the clips' share of the pose
 var cur := ""                   # the action clip playing
 var action_k := 0.0
-var upper_k := 0.0
+var action: AnimationNodeBlend2
 var stance_k := 0.0
 var free_k := 0.0
 var over_t := -1.0
@@ -143,16 +143,13 @@ func _build(glb: Node3D) -> void:
 		at.set_input_name(i, String(acts[i]))
 		_seeked(bt, "s%d" % i, String(acts[i]))
 		bt.connect_node("acts", i, "s%d" % i)
-	var up := AnimationNodeBlend2.new()
-	_filter(up, UPPER)
-	bt.add_node("upper", up)
-	bt.connect_node("upper", 0, last)
-	bt.connect_node("upper", 1, "acts")
-	var full := AnimationNodeBlend2.new()
-	bt.add_node("full", full)
-	bt.connect_node("full", 0, "upper")
-	bt.connect_node("full", 1, "acts")
-	last = "full"
+	# (one node for both masks: an AnimationNode's output feeds one input, so the filter is switched instead)
+	action = AnimationNodeBlend2.new()
+	_filter(action, UPPER)
+	bt.add_node("action", action)
+	bt.connect_node("action", 0, last)
+	bt.connect_node("action", 1, "acts")
+	last = "action"
 	if _has(String(cfg.get("free_r", ""))):
 		var fr := AnimationNodeBlend2.new()
 		_filter(fr, RIGHT)
@@ -261,22 +258,11 @@ func step(dt: float, an: HunterAnim) -> void:
 			tree.set("parameters/acts/transition_request", clip)
 			cur = clip
 		tree.set(String(seek_nodes[clip]), _clip_time(mv, clip, tt))
-	var moving := clampf(amt * 3.0, 0.0, 1.0)
-	var full_w := 0.0
-	var up_w := 0.0
-	if act:
-		match mask:
-			"upper":
-				up_w = 1.0
-			"auto":
-				up_w = moving
-				full_w = 1.0 - moving
-			_:
-				full_w = 1.0
-	action_k = move_toward(action_k, full_w, 16.0 * dt)
-	upper_k = move_toward(upper_k, up_w, 16.0 * dt)
-	tree.set("parameters/full/blend_amount", action_k)
-	tree.set("parameters/upper/blend_amount", upper_k)
+	var moving := amt > 0.1
+	var upper := mask == "upper" or mask == "auto" and moving
+	action.filter_enabled = upper
+	action_k = move_toward(action_k, 1.0 if act else 0.0, 16.0 * dt)
+	tree.set("parameters/action/blend_amount", action_k)
 	var out := bool(root.get_meta(WEAPON_OUT, false))
 	free_k = move_toward(free_k, 1.0 if out and not act else 0.0, 10.0 * dt)
 	if tree.tree_root.has_node("free"):
