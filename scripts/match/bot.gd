@@ -367,6 +367,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 ## round several times a second. Shots and abilities still aim exactly where they were meant to.
 const AIM_TURN := 5.0          # rad/s with nothing to fight
 const AIM_TURN_FIGHT := 9.0    # rad/s with a target, between shots
+const AIM_NEAR := 1.5          # m: an aim point this close says nothing about a way to face: hold the facing
 func _ease_aim(h: Hunter, dt: float) -> void:
 	var a := h.ai
 	var inp := h.inp
@@ -382,7 +383,8 @@ func _ease_aim(h: Hunter, dt: float) -> void:
 	# (from where the bot is facing now: Hunter.face points along (-sin, -cos))
 	var cur := atan2(-cos(h.face), -sin(h.face))
 	var rate := AIM_TURN_FIGHT if a.get("tgt") != null else AIM_TURN
-	cur += clampf(wrapf(want - cur, -PI, PI), -rate * dt, rate * dt)
+	if dv.length() >= AIM_NEAR:
+		cur += clampf(wrapf(want - cur, -PI, PI), -rate * dt, rate * dt)
 	var L := maxf(dv.length(), 1.0)
 	inp["aim"] = Vector3(h.pos.x + cos(cur) * L, aim3.y, h.pos.z + sin(cur) * L)
 

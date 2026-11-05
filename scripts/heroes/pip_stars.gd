@@ -18,7 +18,7 @@ static func pulse(h: Hunter) -> void:
 		return
 	if not model.has_meta(REST):
 		model.set_meta(REST, float((mats[0] as ShaderMaterial).get_shader_parameter("emit")))
-	var old = model.get_meta(TWEEN, null)
+	var old = model.get_meta(TWEEN) if model.has_meta(TWEEN) else null     # (a null default still logs an error)
 	if old is Tween and (old as Tween).is_valid():
 		(old as Tween).kill()
 	var tw := model.create_tween()
