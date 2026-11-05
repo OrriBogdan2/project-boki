@@ -143,7 +143,7 @@ class Rig:
             G["x_brow." + s] = G["head"]
         out = {}
         for n in self.b.keys():
-            if n.startswith("spring_"):
+            if n.startswith("spring_") or n == "x_fish":
                 continue
             p = self.parent[n]
             D = (G[p].inverted() @ G[n]) if p else G[n]
@@ -185,6 +185,7 @@ class Clips:
         self.rig = Rig(arm)
         self.arm = arm
         self.lengths = {}
+        self.remap = None      # a key's pose -> this rig's (keys written for another build)
 
     def bake(self, name, dur, keys, base=None, loop=False, over=None):
         """keys: [(t, pose)]; base: a pose merged under every key; over(t, pose): edits the pose per frame (breath, sway)."""
@@ -192,12 +193,10 @@ class Clips:
         act = bpy.data.actions.new(name)
         act.use_fake_user = True
         n = int(round(dur * FPS)) + 1
-        names = [b for b in rig.b.keys() if not b.startswith("spring_")]
+        names = [b for b in rig.b.keys() if not b.startswith("spring_") and b != "x_fish"]
         data = {b: np.empty((n, 4), np.float32) for b in names}
         loc = {"root": np.empty((n, 3), np.float32)}
-        kk = [(t, p) for t, p in keys]
-        if base:
-            kk = [(kk[0][0], dict(base, **kk[0][1]))] + kk[1:]
+        kk = [(t, self.remap(p) if self.remap else p) for t, p in keys]
         for f in range(n):
             t = min(f / FPS, dur)
             pose = evaluate(kk, t)

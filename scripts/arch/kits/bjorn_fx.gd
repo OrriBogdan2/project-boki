@@ -418,6 +418,7 @@ func aegis_rise(at: Vector3) -> void:
 ## A block: the whole wall flashes and gold sparks fly off its face at `at`.
 func aegis_block(at: Vector3) -> void:
 	aegis_hit = 1.0
+	WardenMood.poke(h.model)
 	var out := Vector3(at.x - h.pos.x, 0.15, at.z - h.pos.z).normalized()
 	h.m.fx.spark(at, out, Color("ffd25a"), 14, 9.0, 70.0, 0.25, 10.0, 1.2)
 	h.m.fx.flash(at, Color("ffc94a"), 0.8, 0.06)

@@ -85,175 +85,81 @@ def mix(a, b, m):
     return a * (1 - m) + b * m
 
 
-def cracks(p, f=6.5, w=0.03):
-    """Frost cracks: a dark line between plates, patchy."""
-    d1, e = worley(p[:, 0] + 0.6 * (vnoise(p[:, 0], p[:, 1], p[:, 2], 9.0) - 0.5) * 0.3, p[:, 1], p[:, 2], f)
-    line = smooth(w, w * 0.25, e)
-    patch = smooth(0.42, 0.62, fbm(p[:, 0] + 3, p[:, 1], p[:, 2], 2.6, 2))
-    return line * patch
+KEY = np.array((1.0, 0.76, 0.44), np.float32)     # hero_toon glow_key: these texels glow in model_glow's colour
 
 
-def skin_col(p, n, c0=None):
+def ones(p):
+    return np.ones((len(p), 1), np.float32)
+
+
+def wood_col(p, along, tone=0.0):
+    """Sea-dark timber; `along` (N, 3) scales the grain's length per axis."""
+    x, y, z = p[:, 0] * along[0], p[:, 1] * along[1], p[:, 2] * along[2]
+    g = vnoise(x, y, z, 70.0)[:, None]
+    col = mix(C("8c6a48"), C("553a26"), g * 1.15)
+    col = mix(col, C("3d2a1c"), smooth(0.5, 0.72, fbm(x, y, z, 7.0, 3)) * 0.55)
+    col = mix(col, C("7f6a52"), smooth(0.55, 0.75, fbm(p[:, 0] + 3, p[:, 1], p[:, 2], 6.0, 3)) * 0.35)     # sea-bleached
+    return col
+
+
+def stains(col, p):
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    base = C("6f9cc4")[None, :] * np.ones((len(p), 1), np.float32)
-    # the big colour moves: paler toward light, deeper on the sides, mauve on the joints
-    big = fbm(x, y, z, 3.1, 3)[:, None]
-    base = mix(base, C("4f7cb0"), np.clip((big - 0.42) * 2.6, 0, 1) * 0.6)
-    base = mix(base, C("9ec6e2"), smooth(0.45, 0.68, fbm(x + 7, y, z, 5.0, 3)) * 0.4)
-    # frost dust
-    dust = smooth(0.62, 0.8, fbm(x, y, z + 3, 22.0, 3)) * smooth(0.45, 0.62, fbm(x, y - 4, z, 3.0, 2))
-    base = mix(base, C("dcecf6"), dust * 0.6)
-    return base
+    return mix(col, C("4d6a38"), smooth(0.58, 0.72, fbm(x, y, z + 2, 9.0, 3)) * 0.5)
 
 
-def p_skin(p, n, c):
+def p_hull(p, n, c):
+    f = c["f"]
+    ao, cv = form(f, p, n)
+    x, y, z = p[:, 0], p[:, 1], p[:, 2]
+    r = np.sqrt(x * x + y ** 2) + 1e-4
+    v = (z - 0.5 - 0.12 * (r / 0.38) ** 2 * smooth(0.0, 0.35, np.abs(x))) / 0.058
+    pid = np.floor(v + 0.5)
+    q = (v + 0.5) % 1.0 - 0.5
+    seam = smooth(0.09, 0.03, np.abs(np.abs(q) - 0.5))
+    col = wood_col(p, (0.35, 0.35, 4.0))
+    col = col * (0.82 + 0.36 * vnoise(pid * 3.1, pid * 1.7, pid, 1.0))[:, None]
+    col = stains(col, p)
+    col = mix(col, C("1e140e"), seam * 0.9)
+    col = shade(col, ao, cv * 0.5, n, 0.5, 0.25, (0.6, 0.62, 0.72))
+    # the sea's light between the planks: patches of seam, wider where the hull has sprung
+    a = np.arctan2(x, y)
+    patch = smooth(0.6, 0.66, fbm(a * 0.7, a * 0.3, pid * 0.23, 4.0, 2))
+    wide = smooth(0.12, 0.02, np.abs(np.abs(q) - 0.5) + (vnoise(a * 6.0, pid, pid, 1.0) - 0.5) * 0.14)
+    lit = patch * wide * smooth(0.25, 0.32, z) * smooth(0.76, 0.68, z)
+    # and the collar: a ring of it under the helmet, running down in drips
+    ring = smooth(0.74, 0.77, z + (vnoise(a * 7.0, a, a, 1.0) - 0.5) * 0.12) * smooth(-0.02, 0.1, y)
+    run = smooth(0.08, 0.02, np.abs(((a * 3.1 + 0.4) % 1.0) - 0.5) * 0.14 + 0.0) * smooth(0.7, 0.83, z) * (y > 0.0)
+    hot = np.maximum(np.maximum(lit, ring), run * 0.0)
+    col = mix(col, C("3fbfb4"), np.clip(smooth(0.0, 0.5, hot) * 0.55, 0, 1))
+    return mix(col, KEY, smooth(0.45, 0.6, hot))
+
+
+def p_limb(p, n, c):
     f = c["f"]
     ao, cv = form(f, p, n)
     lab = f.label(p)
-    col = skin_col(p, n)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    # mauve flush at the knuckles, elbows, knees, toes
-    fl = np.maximum.reduce([smooth(0.06, 0.0, np.abs(z - 0.46)) * (np.abs(x) > 0.3), smooth(0.11, 0.03, np.abs(z - 0.32)) * (np.abs(x) < 0.3),
-                            smooth(0.16, 0.08, z) * (y > 0.12)])
-    col = mix(col, C("8a7fb2"), fl * 0.5)
-    # the belly a shade paler
-    col = mix(col, C("7fb0d6"), (lab == B.BELLY) * 0.3)
-    crk = cracks(p, 5.0, 0.022)
-    col = mix(col, C("2a4a7a"), crk * 0.8)
-    edge = cracks(p + n * 0.0, 6.5, 0.07) - crk
-    col = mix(col, C("a8d0ea"), np.clip(edge, 0, 1) * 0.35)
-    col = shade(col, ao, cv, n)
-    col = mix(col, C("c9c6cf"), (lab == B.NAIL) * 0.9)
-    bl = (lab == B.BARN)
-    if bl.any():
-        col = np.where(bl[:, None], shade(C("c8bfa8") * np.ones((len(p), 1), np.float32) * (0.8 + 0.4 * fbm(x, y, z, 80.0, 2))[:, None], ao, cv * 1.5, n, 0.8), col)
-    return col
+    col = stains(wood_col(p, (2.5, 2.5, 0.3)), p)
+    a = np.arctan2(y, np.abs(x) - 0.44)
+    col = shade(col, ao, cv * 0.7, n, 0.65, 0.3, (0.6, 0.62, 0.72))
+    iron = mix(C("5b5048"), C("3e342e"), fbm(x, y, z, 14.0, 3)[:, None] * 1.1)
+    iron = mix(iron, C("8c4d28"), smooth(0.48, 0.64, fbm(x + 5, y, z, 12.0, 4)) * 0.75)
+    col = np.where((lab == B.IRON)[:, None], shade(iron, ao, cv * 0.8, n, 0.6, 0.9, (0.65, 0.6, 0.7)), col)
+    col = np.where((lab == B.RIVET)[:, None], shade(C("8a7f74") * ones(p), ao, cv * 0.5, n, 0.5, 0.9), col)
+    barn = C("c4bcaa") * ones(p) * (0.8 + 0.4 * fbm(x, y, z, 90.0, 2))[:, None]
+    col = np.where((lab == B.BARN)[:, None], shade(barn, ao, cv, n, 0.8, 0.4), col)
+    # a few long teal splits down the staves
+    sp = smooth(0.74, 0.8, vnoise(x * 5.0, y * 5.0, z * 0.5, 16.0)) * (lab == B.WOOD) * smooth(0.45, 0.5, z) * smooth(0.72, 0.66, z)
+    return mix(col, KEY, sp)
 
 
-def p_head(p, n, c):
+def p_mast(p, n, c):
     f = c["f"]
-    ao, cv = form(f, p, n, (0.004, 0.012, 0.03), 3.5)
-    cv = cv * 0.9
+    ao, cv = form(f, p, n, (0.006, 0.016), 1.0)
     lab = f.label(p)
-    x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    col = skin_col(p, n)
-    ax = np.abs(x)
-    # the face's warmth: mauve round the eyes, cheeks and ears, a rosy nose
-    socket = np.exp(-(((ax - 0.056) / 0.05) ** 2 + ((z - 1.45) / 0.03) ** 2)) * (y > 0.08)
-    col = mix(col, C("56609a"), socket * 0.55)
-    cheek = np.exp(-(((ax - 0.085) / 0.04) ** 2 + ((z - 1.4) / 0.028) ** 2)) * (y > 0.08)
-    col = mix(col, C("9c82b4"), cheek * 0.4)
-    # crow's feet and forehead lines
-    fore = smooth(1.5, 1.49, z) * smooth(1.482, 1.495, z) * (y > 0.06)
-    wr = np.sin(z * 620.0 + (x * 22.0) ** 2) * 0.5 + 0.5
-    col = mix(col, C("2f4a80"), (smooth(0.75, 1.0, wr) * smooth(1.53, 1.51, z) * smooth(1.488, 1.5, z) * (y > 0.05) * smooth(0.11, 0.05, ax)) * 0.5)
-    crk = cracks(p, 9.0, 0.03) * smooth(1.45, 1.5, z)
-    col = mix(col, C("2a4a7a"), crk * 0.85)
-    col = shade(col, ao, cv, n, 0.6, 0.42)
-    # lips, gums, teeth, tusks, nose, inner ears, lids
-    ones = np.ones((len(p), 1), np.float32)
-    col = np.where((lab == B.LIP)[:, None], shade(C("7c5f9c") * ones, ao, cv, n, 0.5, 0.5), col)
-    col = np.where((lab == B.GUM)[:, None], shade(C("6a1c28") * ones, ao * 0.6, cv * 0.3, n, 0.2, 0.1), col)
-    tt = C("ecdcb2") * ones * (0.9 + 0.2 * vnoise(x, y, z, 120.0))[:, None]
-    tt = mix(tt, C("a8855a"), smooth(0.4, 0.15, ao) * 0.5)
-    col = np.where((lab == B.TOOTH)[:, None], shade(tt, 0.55 + 0.45 * ao, cv * 0.5, n, 0.6, 0.5), col)
-    tu = mix(C("f0e3bf") * ones, C("b89a6e"), smooth(1.4, 1.34, z))
-    col = np.where((lab == B.TUSK)[:, None], shade(tu, ao, cv * 0.4, n, 0.3, 0.6), col)
-    nose = mix(C("b18aa8") * ones, C("6e7fb8"), smooth(1.4, 1.46, z))
-    col = np.where((lab == B.NOSE)[:, None], shade(nose, ao, cv, n, 0.55, 0.4), col)
-    col = np.where((lab == B.EAR_IN)[:, None], shade(C("8d5f8c") * ones, ao, cv, n), col)
-    lid = C("6e8ec2") * ones
-    col = np.where((lab == B.LID)[:, None], shade(lid, ao, cv, n, 0.5, 0.4), col)
-    barn = C("c8bfa8") * ones * (0.85 + 0.4 * fbm(x, y, z, 160.0, 2))[:, None]
-    col = np.where((lab == B.BARN)[:, None], shade(barn, ao, cv * 1.2, n, 0.8, 0.3), col)
-    return col
-
-
-def p_mantle(p, n, c):
-    f = c["f"]
-    ao, cv = form(f, p, n, (0.01, 0.025), 1.0)
-    a2, _ = form(c["f2"], p, n, (0.05, 0.1), 1.0)
-    lab = f.label(p)
-    x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    base = mix(C("cfbf9a"), C("a8987a"), fbm(x, y, z, 9.0, 3)[:, None] * 1.1)
-    stain = smooth(0.5, 0.66, fbm(x + 2, y, z, 4.0, 3))
-    base = mix(base, C("84745e"), stain * 0.65)
-    weave = 0.96 + 0.08 * np.sin(x * 900.0) * np.sin(z * 900.0)
-    base = base * weave[:, None]
-    # stitches, a few: short dark bars
-    st = smooth(0.0035, 0.0015, np.abs(((z * 30.0 + 0.5) % 1.0 - 0.5) / 30.0)) * smooth(0.012, 0.009, np.abs(x + 0.28 + 0.2 * (z - 1.05))) * (y > 0) * (np.abs(z - 1.04) < 0.09)
-    base = mix(base, C("3a2c20"), st * 0.9)
-    frost = smooth(0.55, 0.75, fbm(x, y, z, 15.0, 3)) * smooth(1.05, 1.2, z + 0.2 * (fbm(x, y, z, 5.0, 2) - 0.5))
-    base = mix(base, C("eef6fb"), frost * 0.45)
-    fur = C("8a7458") * (0.7 + 0.8 * vnoise(x * 2.4, y * 2.4, z * 0.5, 64.0))[:, None]
-    fur = mix(fur, C("cfd8dc"), smooth(0.55, 0.8, fbm(x, y, z, 30.0, 2)) * 0.35)
-    col = np.where((lab == 2)[:, None], fur, base)
-    return shade(col, ao * (0.6 + 0.4 * a2), cv * 0.5, n, 0.5, 0.3, (0.7, 0.68, 0.8))
-
-
-def p_shorts(p, n, c):
-    f = c["f"]
-    ao, cv = form(f, p, n, (0.01, 0.025), 1.0)
-    x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    col = mix(C("6a7050"), C("454a38"), fbm(x, y, z, 7.0, 3)[:, None] * 1.2)
-    col = mix(col, C("9aa08a"), smooth(0.56, 0.75, fbm(x, y, z, 20.0, 3)) * 0.4)
-    return shade(col, ao, cv * 0.5, n, 0.4, 0.2, (0.7, 0.7, 0.8))
-
-
-def p_rag(p, n, c):
-    f = c["f"]
-    ao, cv = form(f, p, n, (0.01, 0.025), 1.0)
-    x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    col = mix(C("9a8a68"), C("6a5a44"), fbm(x, y, z, 7.0, 3)[:, None] * 1.1)
-    col = mix(col, C("4a3e30"), smooth(0.4, 0.3, z) * 0.45)
-    return shade(col, ao, cv * 0.5, n, 0.45, 0.22, (0.7, 0.68, 0.8))
-
-
-def p_beard(p, n, c):
-    f = c["f"]
-    ao, cv = form(f, p, n, (0.004, 0.012, 0.03), 3.0)
-    x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    st = vnoise(x * 3.0, y * 3.0, z * 0.3, 200.0)
-    col = mix(C("d8552a"), C("8c2b18"), st[:, None] * 1.2)
-    col = mix(col, C("f08a4e"), smooth(0.6, 0.85, vnoise(x * 3.0, y * 3.0, z * 0.5, 90.0)) * 0.55)
-    # frost glints along the locks
-    g = smooth(0.73, 0.82, fbm(x, y, z * 0.35, 46.0, 2))
-    col = mix(col, C("dff4ff"), g * 0.8)
-    lab = f.label(p)
-    tuft = (lab == 2)
-    col = np.where(tuft[:, None], mix(col, C("cdeeff"), smooth(1.07, 0.99, z) * 0.0 + smooth(0.05, 0.0, z - np.minimum(z, 1.03)) * 0.7), col)
-    return shade(col, ao, cv * 0.8, n, 0.7, 0.5, (0.6, 0.35, 0.45))
-
-
-def p_ice(p, n, c):
-    f = c["f"]
-    ao, cv = form(f, p, n, (0.004, 0.012))
-    x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    fac = 0.5 + 0.5 * n[:, 2:3]
-    col = mix(C("9fd8f2"), C("e8fbff"), fac * 0.9)
-    col = mix(col, C("ffffff"), smooth(0.4, 0.8, 1 - np.abs(n[:, 1:2])) * 0.2)
-    return col * (0.82 + 0.2 * ao[:, None])
-
-
-def p_hammer_ice(p, n, c):
-    f = c["f"]
-    ao, cv = form(f, p, n, (0.006, 0.016, 0.04))
-    lab = f.label(p)
-    x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    # deep blue inside, pale at the edges and in the white fracture planes
-    deep = fbm(x, y, z, 5.0, 3)[:, None]
-    col = mix(C("9fd2ea"), C("5aa6d2"), np.clip((deep - 0.3) * 2.2, 0, 1))
-    d1, e = worley(x * 0.7, y, z, 7.0)
-    col = mix(col, C("f0fbff"), smooth(0.05, 0.012, e) * 0.9)
-    d2, e2 = worley(x + 2, y * 0.8, z, 15.0)
-    col = mix(col, C("d6f2fb"), smooth(0.04, 0.01, e2) * 0.45)
-    # the worn pale bevels
-    bev = np.clip(-cv * 0.5, 0, 1)
-    col = mix(col, C("f6feff"), bev * 0.85)
-    snow = (lab == 3)
-    col = np.where(snow[:, None], mix(C("ffffff"), C("d9eef7"), vnoise(x, y, z, 60.0)[:, None]), col)
-    col = np.where((lab == 2)[:, None], mix(C("b6e6f8"), C("f2fdff"), 0.5 + 0.5 * n[:, 2:3]), col)
-    return col * (0.84 + 0.18 * ao[:, None])
+    col = wood_col(p, (1.2, 1.2, 0.6))
+    col = shade(col, ao, cv * 0.6, n, 0.6, 0.3, (0.6, 0.6, 0.7))
+    return np.where((lab == B.RIVET)[:, None], shade(C("b49a6a") * ones(p), ao, cv, n, 0.7, 0.3), col)
 
 
 def p_iron(p, n, c):
@@ -261,79 +167,28 @@ def p_iron(p, n, c):
     ao, cv = form(f, p, n, (0.005, 0.014, 0.03), 1.0)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
     lab = f.label(p)
-    col = mix(C("6a6a72"), C("3e3f48"), fbm(x, y, z, 14.0, 3)[:, None] * 1.1)
+    col = mix(C("665a50"), C("40362f"), fbm(x, y, z, 14.0, 3)[:, None] * 1.1)
     rust = smooth(0.46, 0.62, fbm(x + 5, y, z, 11.0, 4))
-    col = mix(col, C("8a4526"), rust * 0.85)
-    col = mix(col, C("b4693a"), smooth(0.6, 0.72, fbm(x, y + 3, z, 26.0, 2)) * rust * 0.6)
-    col = mix(col, C("aab0ba"), (lab == 2) * 0.55)
-    return shade(col, ao, cv * 0.8, n, 0.6, 0.9, (0.65, 0.6, 0.7))
+    col = mix(col, C("8a4a26"), rust * 0.85)
+    col = mix(col, C("b86a34"), smooth(0.6, 0.72, fbm(x, y + 3, z, 26.0, 2)) * rust * 0.6)
+    col = mix(col, C("a09488"), (lab == B.RIVET) * 0.7)
+    return shade(col, ao, cv * 0.8, n, 0.6, 1.0, (0.65, 0.6, 0.7))
 
 
-def p_wood(p, n, c):
+def p_brass(p, n, c):
     f = c["f"]
-    ao, cv = form(f, p, n, (0.01, 0.025), 1.0)
-    x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    g = vnoise(x * 3.5, y * 3.5, z * 0.22, 60.0)[:, None]
-    col = mix(C("9a7a50"), C("4e3a26"), g * 1.2)
-    lab = f.label(p)
-    rope = mix(C("d8c08e"), C("8a7048"), (0.5 + 0.5 * np.sin((z + np.arctan2(y, x) * 0.012) * 520.0))[:, None])
-    col = np.where((lab == 2)[:, None], rope, col)
-    return shade(col, ao, cv * 0.5, n, 0.5, 0.3, (0.7, 0.6, 0.65))
-
-
-def p_shield(p, n, c):
-    f = c["f"]
-    ao, cv = form(f, p, n, (0.006, 0.018, 0.045), 1.0)
+    ao, cv = form(f, p, n, (0.004, 0.012, 0.03), 1.5)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
     lab = f.label(p)
-    # planks: vertical, each its own tone, dark seams
-    pw = 0.092
-    px = (x + 0.46 + 0.012 * np.sin(z * 4.0)) / pw
-    pid = np.floor(px)
-    seam = smooth(0.06, 0.02, np.abs(px - np.round(px)))
-    tone = vnoise(pid * 7.3, pid * 2.1, pid * 0.7, 1.0)
-    g = vnoise(x * 4.0 + pid, y * 3.0, z * 0.32, 52.0)
-    col = mix(C("8a5e3a"), C("53361f"), (0.35 * tone + 0.8 * g)[:, None])
-    col = mix(col, C("2a1a10"), seam * 0.9)
-    frost = smooth(0.55, 0.72, fbm(x, y, z, 12.0, 3))
-    col = mix(col, C("cfe0ea"), frost * 0.4)
-    # the carved head is paler, weathered driftwood grey
-    st = C("a29c92") * (0.8 + 0.4 * vnoise(x * 3.0, y, z * 0.6, 120.0))[:, None]
-    col = np.where((lab == 2)[:, None], st, col)
-    # snow on the broken planks' tops
-    top = z > 0.3
-    col = np.where((top & (n[:, 2] > 0.3))[:, None], C("f4fbff") * np.ones((len(p), 1), np.float32), col)
-    return shade(col, ao, cv * 0.8, n, 0.7, 0.6, (0.7, 0.62, 0.66))
-
-
-def p_rope(p, n, c):
-    a = c["aux"]
-    col = mix(C("cdb486"), C("7e6640"), (0.5 + 0.5 * np.sin((a[:, 0] * 210.0 + a[:, 1] * 6.283 * 2.0)))[:, None] ** 3)
-    dk = (0.5 + 0.5 * np.sin(a[:, 1] * 6.283 + 1.0))[:, None]
-    col = col * (0.72 + 0.4 * dk)
-    return col
-
-
-def p_kelp(p, n, c):
-    x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    return mix(C("8c8a30"), C("4e5420"), fbm(x, y, z, 25.0, 2)[:, None] * 1.2)
-
-
-def p_teddy(p, n, c):
-    f = c["f"]
-    ao, cv = form(f, p, n, (0.003, 0.009, 0.02))
-    lab = f.label(p)
-    x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    col = mix(C("b87a3e"), C("8a5426"), vnoise(x, y, z, 220.0)[:, None] * 1.1)
-    col = np.where((lab == 2)[:, None], C("d9b07a") * np.ones((len(p), 1), np.float32), col)
-    col = np.where((lab == 3)[:, None], C("1c120e") * np.ones((len(p), 1), np.float32), col)
-    return shade(col, ao, cv * 0.5, n, 0.5, 0.3, (0.7, 0.55, 0.5))
+    col = mix(C("d8a858"), C("9a6c30"), fbm(x, y, z, 16.0, 3)[:, None] * 1.1)
+    col = mix(col, C("3f8f80"), smooth(0.45, 0.2, ao) * 0.6)                       # verdigris in the creases
+    col = mix(col, C("55483c"), (lab == B.IRON) * 0.85)
+    col = mix(col, C("f0d28a"), (lab == B.RIVET) * 0.6)
+    col = mix(col, C("15282c"), (lab == B.GLASS) * 0.9)
+    return shade(col, ao, cv * 0.6, n, 0.6, 1.3, (0.75, 0.6, 0.5))
 
 
 def p_compass(p, n, c):
-    f = c["f"]
-    ao, cv = form(f, p, n, (0.002, 0.006))
-    lab = f.label(p)
     q = p - c["part"]["centre"]
     nn = c["part"]["normal"]
     up = np.array((0, 0, 1), np.float32)
@@ -343,34 +198,83 @@ def p_compass(p, n, c):
     u, v = q @ rt, q @ up
     r = np.sqrt(u * u + v * v)
     ang = np.arctan2(u, v)
-    ones = np.ones((len(p), 1), np.float32)
-    col = mix(C("d8b45a"), C("8e6a2a"), vnoise(p[:, 0], p[:, 1], p[:, 2], 90.0)[:, None] * 1.1)
-    col = shade(col, ao, cv * 0.5, n, 0.7, 1.2, (0.8, 0.6, 0.45))
-    face = C("c9bea0") * ones
-    # the rose: a four-point star, the north half red
-    st = r - (0.008 + 0.034 * np.abs(np.cos(ang * 2.0)) ** 6)
-    star = smooth(0.0015, -0.0015, st)
-    tint = np.where((v > 0)[:, None], C("c23a2a") * ones, C("2c3c60") * ones)
-    face = mix(face, tint, star)
-    ringm = smooth(0.0015, 0.0, np.abs(r - 0.04))
-    face = mix(face, C("6a5030"), ringm)
-    return np.where((lab == 2)[:, None] & (r < 0.047)[:, None], face, col)
+    col = C("d8c79a") * ones(p)
+    st = r - (0.012 + 0.052 * np.abs(np.cos(ang + 0.4)) ** 7)
+    rose = smooth(0.002, -0.002, st)
+    col = mix(col, np.where(((np.cos(ang + 0.4) > 0))[:, None], C("c23a2a") * ones(p), C("1f6a78") * ones(p)), rose)
+    ticks = smooth(0.012, 0.004, np.abs(((ang / 6.283 * 16) % 1.0) - 0.5) / 16 * 6.283 * r) * smooth(0.058, 0.062, r)
+    col = mix(col, C("5a4020"), ticks)
+    # the warm light is the ring of the dial
+    return mix(col, KEY, smooth(0.066, 0.07, r) + 0.0)
 
 
-def p_ring(p, n, c):
+def p_moss(p, n, c):
     f = c["f"]
-    ao, cv = form(f, p, n, (0.002, 0.006))
-    col = mix(C("e8eef2"), C("7a8894"), 0.5 - 0.5 * n[:, 2:3] + (0.4 * vnoise(p[:, 0], p[:, 1], p[:, 2], 70.0))[:, None])
-    return shade(col, ao, cv * 0.3, n, 0.4, 0.8, (0.7, 0.75, 0.85))
+    ao, cv = form(f, p, n, (0.008, 0.02, 0.05), 1.5)
+    x, y, z = p[:, 0], p[:, 1], p[:, 2]
+    col = mix(C("7f9a34"), C("38551e"), fbm(x, y, z, 26.0, 3)[:, None] * 1.3)
+    col = mix(col, C("b2c84e"), smooth(0.62, 0.8, fbm(x + 1, y, z, 44.0, 2)) * 0.6)
+    return shade(col, ao, cv * 0.7, n, 0.6, 0.3, (0.45, 0.6, 0.55))
 
 
-def p_eyes(p, n, c):
-    return C("f4fbff") * np.ones((len(p), 1), np.float32)
+def p_sail(p, n, c):
+    x, y, z = p[:, 0], p[:, 1], p[:, 2]
+    col = mix(C("cdbf9c"), C("8a7a60"), fbm(x, y, z, 12.0, 3)[:, None] * 1.1)
+    return col * (0.8 + 0.2 * smooth(0.8, 1.05, z))[:, None]
 
 
-TABLE = {"skin": p_skin, "head": p_head, "mantle": p_mantle, "shorts": p_shorts, "rag": p_rag, "beard": p_beard, "ice": p_ice,
-         "kelp": p_kelp, "teddy": p_teddy, "compass": p_compass, "hammer_ice": p_hammer_ice, "iron": p_iron, "wood": p_wood,
-         "shield": p_shield, "ring": p_ring, "eyes": p_eyes, "rope": p_rope}
+def p_drum(p, n, c):
+    f = c["f"]
+    ao, cv = form(f, p, n, (0.008, 0.02, 0.05), 1.0)
+    x, y, z = p[:, 0], p[:, 1], p[:, 2]
+    ang = np.arctan2(z - 0.5, y) / 6.283 * 16
+    seam = smooth(0.1, 0.03, np.abs((ang + 0.5) % 1.0 - 0.5))
+    col = wood_col(p, (0.3, 2.0, 2.0)) * (1.0 + 0.1)
+    col = mix(col, C("1e140e"), seam * 0.9)
+    return shade(col, ao, cv * 0.5, n, 0.5, 0.3, (0.6, 0.6, 0.7))
+
+
+def p_door(p, n, c):
+    f = c["f"]
+    ao, cv = form(f, p, n, (0.006, 0.018, 0.045), 1.0)
+    x, y, z = p[:, 0], p[:, 1], p[:, 2]
+    lab = f.label(p)
+    px = (x + 0.46) / 0.11
+    pid = np.floor(px)
+    seam = smooth(0.06, 0.02, np.abs(px - np.round(px)))
+    col = wood_col(p, (2.5, 2.5, 0.28))
+    col = col * (0.85 + 0.3 * vnoise(pid * 7.3, pid * 2.1, pid * 0.7, 1.0))[:, None]
+    col = mix(col, C("1e140e"), seam * 0.9)
+    st = C("8d887e") * (0.8 + 0.4 * vnoise(x * 3.0, y, z * 0.7, 110.0))[:, None]
+    col = np.where((lab == 4)[:, None], st, col)
+    return shade(col, ao, cv * 0.8, n, 0.75, 0.6, (0.65, 0.62, 0.68))
+
+
+def p_fish(p, n, c):
+    f = c["f"]
+    ao, cv = form(f, p, n, (0.004, 0.012, 0.03), 1.5)
+    lab = f.label(p)
+    x, y, z = p[:, 0], p[:, 1], p[:, 2]
+    col = mix(C("52c8ac"), C("237a78"), smooth(-0.03, 0.05, z - 0.98)[:, None])
+    col = mix(col, C("9ff0d2"), smooth(0.6, 0.8, fbm(x, y, z, 60.0, 2)) * 0.4)
+    col = shade(col, ao, cv * 0.7, n, 0.7, 0.5, (0.45, 0.6, 0.65))
+    col = np.where((lab == 2)[:, None], C("24101c") * ones(p), col)
+    col = np.where((lab == 3)[:, None], C("f2ead2") * ones(p), col)
+    return np.where((lab == 4)[:, None], C("f0fff0") * ones(p), col)
+
+
+def p_lure(p, n, c):
+    return C("d8fff4") * ones(p)
+
+
+def p_rope(p, n, c):
+    a = c["aux"]
+    col = mix(C("b89c6c"), C("6e583a"), (0.5 + 0.5 * np.sin((a[:, 0] * 210.0 + a[:, 1] * 6.283 * 2.0)))[:, None] ** 3)
+    return col * (0.72 + 0.4 * (0.5 + 0.5 * np.sin(a[:, 1] * 6.283 + 1.0))[:, None])
+
+
+TABLE = {"hull": p_hull, "limb": p_limb, "mast": p_mast, "iron": p_iron, "brass": p_brass, "compass": p_compass, "moss": p_moss,
+         "sail": p_sail, "drum": p_drum, "door": p_door, "fish": p_fish, "lure": p_lure, "rope": p_rope}
 
 
 def paint(name, p, n, ctx):

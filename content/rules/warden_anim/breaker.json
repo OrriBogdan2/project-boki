@@ -6,17 +6,13 @@
 		"x_shield": "hand.L",
 		"x_foot.L": "shin.L",
 		"x_foot.R": "shin.R",
-		"x_jaw": "head",
-		"x_lid.L": "head",
-		"x_lid.R": "head",
-		"x_brow.L": "head",
-		"x_brow.R": "head",
 		"x_fing.L": "hand.L",
 		"x_fing.R": "hand.R",
 		"x_fing2.L": "x_fing.L",
 		"x_fing2.R": "x_fing.R",
 		"x_thumb.L": "hand.L",
-		"x_thumb.R": "hand.R"
+		"x_thumb.R": "hand.R",
+		"x_fish": "spring_hangfish_2"
 	},
 	"blade": {
 		"root": "anchor_hammer_grip",
@@ -166,11 +162,35 @@
 		"x_thumb.L",
 		"x_thumb.R",
 		"x_weapon",
-		"x_shield",
-		"x_jaw",
-		"x_lid.L",
-		"x_lid.R",
-		"x_brow.L",
-		"x_brow.R"
-	]
+		"x_shield"
+	],
+	"mood": {
+		"default": "calm",
+		"downed": "sad",
+		"emote": "happy",
+		"hit": "angry",
+		"hit_t": 1.2,
+		"companion": "x_fish",
+		"lure": "lure",
+		"flare_kmoves": [
+			"bul_ult_wind",
+			"bul_ult_slam"
+		],
+		"kmoves": {
+			"bul_smash_wind": "angry",
+			"bul_smash": "angry",
+			"bul_launch": "angry",
+			"bul_throw": "determined",
+			"bul_recall": "determined",
+			"bul_guard": "determined",
+			"bul_whirl": "angry",
+			"bul_charge": "determined",
+			"bul_slamshield": "angry",
+			"bul_mend": "happy",
+			"bul_ult_wind": "angry",
+			"bul_ult_slam": "angry",
+			"bul_break": "sad",
+			"bul_armed": "happy"
+		}
+	}
 }

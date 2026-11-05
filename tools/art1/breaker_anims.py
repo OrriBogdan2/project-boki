@@ -1,8 +1,9 @@
-"""Breaker's clips (ART-1), keyed by hand on the contract armature and timed to his kit's real numbers
+"""Breaker the Sunken Bulwark's clips (ART-1), keyed by hand on the contract armature and timed to his kit's real numbers
 (content/archetypes/bulwark.json, KMovesPinBjorn), then the .glb export:
   blender -b WORK/breaker_art1.blend --python tools/art1/breaker_anims.py -- WORK/breaker_anims.blend OUT.glb
-He is a huge, warm old ferryman: everything starts from the belly and the feet, the hammer's weight arrives late, and
-he grins through it all."""
+He is a walking hull: everything starts from the barrel of his body rocking on two stubby legs, and the drum's weight
+arrives late. The attack keys were written on a taller rig; remap() puts them on this one (arm lengths are the rig's,
+so the hands' moves carry over, the legs' shrink)."""
 import json
 import math
 import os
@@ -23,16 +24,42 @@ AX = float(C.rig.P["x_foot.R"].x)      # the ankle's rest x
 AZ = float(C.rig.P["x_foot.R"].z)
 FR, FL = (AX, -0.02, AZ), (-AX, 0.05, AZ)
 tau = math.tau
+SHZ = float(C.rig.P["upper_arm.R"].z)
+SHX = float(C.rig.P["upper_arm.R"].x)
+DZ, DX = 1.046 - SHZ, SHX - 0.3843         # shoulders: the old rig's -> this one's
 
-# the carry: the hammer resting across the right shoulder, the fist low in front; the prow at his left side
-CARRY = dict(pos=(0, 0, -0.012), hips=(-7, 0, -3), head=(5, 0, 3),
-             gr=(0.33, 0.3, 0.97), gd=(0.16, -0.68, 0.72), ga=(0.0, 0.72, 0.68), er=(0.95, -0.15, -0.3), fing_r=1.0, thumb_r=1.0,
-             sh=(-0.525, 0.14, 0.7), sn=(-0.92, 0.38, 0.0), su=(0.04, -0.06, 1.0), el=(-0.8, -0.6, -0.1), fing_l=0.85, thumb_l=0.8,
+
+def N(x, y, z):
+    """A point on this rig, written in the keys' old space."""
+    return (x - DX if x > 0 else x + DX, y, z + DZ)
+
+
+def remap(k):
+    o = dict(k)
+    if "gr" in o:
+        o["gr"] = (o["gr"][0] + DX, o["gr"][1], o["gr"][2] - DZ)
+    if "sh" in o:
+        o["sh"] = (o["sh"][0] - DX, o["sh"][1], o["sh"][2] - DZ)
+    if "pos" in o:
+        o["pos"] = (o["pos"][0], o["pos"][1] * 0.7, max(o["pos"][2] * 0.55, -0.1))
+    if "hips" in o:
+        o["hips"] = (o["hips"][0] * 0.72, o["hips"][1], o["hips"][2])
+    for c in ("fr", "fl"):
+        if c in o:
+            o[c] = (o[c][0], o[c][1] * 0.45, AZ + (o[c][2] - AZ) * 0.5)
+    return o
+
+
+C.remap = remap
+# the carry, as the art: the hammer low in the right fist, its drum by his feet in front, the shield at his left
+CARRY = dict(pos=(0, 0, 0.0), hips=(-3, 0, -2), head=(2, 0, 2),
+             gr=N(0.5, 0.2, 0.25), gd=(-0.28, 0.95, 0.12), ga=(0.95, 0.28, 0.0), er=(0.95, -0.25, -0.1), fing_r=1.0, thumb_r=1.0,
+             sh=N(-0.5, 0.1, 0.32), sn=(-0.86, 0.5, 0.0), su=(0.0, 0.0, 1.0), el=(-0.9, -0.4, 0.1), fing_l=0.9, thumb_l=0.8,
              fr=FR, fl=FL, fra=0.0, fla=0.0, jaw=0.09, brow=0.0, lid=0.0, wtw=(0, 0, 0))
-# the right hand with nothing in it, loose at his side (the hammer is out)
-FREE = dict(gr=(0.43, 0.1, 0.6), gd=(0.05, 1.0, -0.2), ga=(0.1, 0.2, 1.0), er=(0.9, -0.3, -0.3), fing_r=0.35, thumb_r=0.3)
-# his fighting stance (item 52): low and wide, the prow square ahead, the hammer up by the right ear
-STANCE = dict(pos=(0, 0, -0.07), rot=(0, 0, -4), hips=(-15, 0, -15), head=(11, 0, 14),
+# the right hand with nothing in it (the hammer is out)
+FREE = dict(gr=N(0.5, 0.1, 0.3), gd=(0.05, 1.0, -0.2), ga=(0.1, 0.2, 1.0), er=(0.9, -0.3, -0.3), fing_r=0.35, thumb_r=0.3)
+# his fighting stance (item 52): sunk on his stubs, the door square ahead, the hammer hauled up on his right
+STANCE = dict(pos=(0, 0, -0.07), rot=(0, 0, -4), hips=(-15, 0, -15), head=(9, 0, 14),
               gr=(0.5, 0.2, 1.1), gd=(0.12, -0.32, 0.94), ga=(0.0, 0.95, 0.3), er=(1.0, -0.2, -0.5), fing_r=1.0, thumb_r=1.0,
               sh=(-0.17, 0.47, 0.84), sn=(-0.2, 1.0, 0.05), su=(0.05, 0.0, 1.0), el=(-0.9, -0.1, -0.5), fing_l=0.9, thumb_l=0.9,
               fr=(AX + 0.08, -0.15, AZ), fl=(-AX - 0.04, 0.17, AZ), jaw=0.35, brow=1.0)
@@ -87,7 +114,7 @@ def gait(period, stride, lift, lean, dirv, bob, roll, twist, swing, base):
         ph = t / period
         for side, off, sign in (("r", 0.0, 1), ("l", 0.5, -1)):
             d, u, pit = foot(ph + off, stride, lift)
-            x0, y0 = (AX + 0.01) * sign, (-0.02 if sign > 0 else 0.03)
+            x0, y0 = AX * sign, (-0.02 if sign > 0 else 0.03)
             p["f" + side] = (x0 + dx * d, y0 + dy * d, AZ + u)
             p["f" + side + "a"] = pit * (1 if dy >= 0 else -0.5) * (abs(dy) if dy else 0.3)
         # a heavy gait: down onto each planted foot, the belly and shoulders rolling over it
@@ -105,9 +132,9 @@ def gait(period, stride, lift, lean, dirv, bob, roll, twist, swing, base):
 DIRS = {"f": (0, 1), "b": (0, -1), "l": (-1, 0), "r": (1, 0)}
 for nm, d in DIRS.items():
     C.bake("walk_" + nm, 1.1, [(0, CARRY), (1.1, {})], loop=True,
-           over=gait(1.1, 0.2, 0.085, -6.0, d, 0.02, 5.0, 9.0, 0.07, CARRY))
-    C.bake("run_" + nm, 0.68, [(0, merged(CARRY, gr=(0.3, 0.3, 0.9), sh=(-0.48, 0.22, 0.76), head=(14, 0, 3)) ), (0.68, {})], loop=True,
-           over=gait(0.68, 0.29, 0.16, -17.0, d, 0.03, 5.0, 12.0, 0.13, CARRY))
+           over=gait(1.1, 0.095, 0.05, -4.0, d, 0.014, 6.5, 9.0, 0.07, CARRY))
+    C.bake("run_" + nm, 0.56, [(0, merged(CARRY, gr=N(0.52, 0.26, 0.3), sh=N(-0.52, 0.2, 0.38), head=(9, 0, 3))), (0.56, {})], loop=True,
+           over=gait(0.56, 0.13, 0.075, -11.0, d, 0.022, 8.0, 12.0, 0.12, CARRY))
 
 # the free right arm (a layer: only the arm's tracks are used)
 C.bake("arm_free", 0.5, [(0, merged(CARRY, FREE)), (0.5, {})], loop=True)
@@ -141,7 +168,7 @@ def whirl_over(t, p):
     if t < 0.2:
         return
     a2 = (t - 0.2) / SPIN_T * tau
-    p["gr"] = (0.2 + 0.26 * math.cos(a2), 0.02 + 0.26 * math.sin(a2), 1.4)
+    p["gr"] = (0.26 + 0.2 * math.cos(a2), 0.2 * math.sin(a2), 1.02)
     p["gd"] = (math.cos(a2), math.sin(a2), 0.22)
     p["ga"] = (0, 0, 1)
     p["er"] = (0.6, -0.3, -0.6)
