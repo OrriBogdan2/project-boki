@@ -466,7 +466,7 @@ def hook_mouth(J):
 
 # the blunderbuss: lies across his left hip on a swivel, a flared mouth. Local: +Y to the muzzle; the swivel at the origin
 GUN_AT = np.array((-0.122, 0.150, 0.655), F)
-GUN_R = rot(yaw=math.radians(-58.0), pitch=math.radians(-7.0))        # (rest: muzzle forward and to his right)
+GUN_R = rot(yaw=math.radians(-42.0), pitch=math.radians(-7.0))        # (rest: muzzle forward and to his right)
 
 
 def gun(vox=0.0020):
@@ -699,10 +699,10 @@ BALL_REST = 1.0 / 3.8        # (at rest it hides inside the sack)
 BALL_AT = np.array((0.0, -0.29, 1.04), F)
 
 
-def ball(vox=0.0075):
+def ball(vox=0.030):
     """Panel d of the sheet: a ball of bent plates and planks in chains, one window the grin looks out of (+Y)."""
     b = Field((-0.62, -0.62, -0.62), (0.62, 0.62, 0.62), vox)
-    b.add(sph((0, 0, 0), BALL_R * 0.95), 0.0, DARK)
+    b.add(sph((0, 0, 0), BALL_R * 0.95), 0.0, IRON)
     rng = np.random.RandomState(11)
     wid = _item("ballplate", (0, 0, 0), np.eye(3, dtype=F))
     wood = _item("ballwood", (0, 0, 0), np.eye(3, dtype=F))
@@ -733,7 +733,7 @@ def ball(vox=0.0075):
             pts.append((math.cos(t) * BALL_R * 1.045, math.sin(t) * math.sin(tilt) * BALL_R * 1.045, math.sin(t) * math.cos(tilt) * BALL_R * 1.045))
         b.add(path(pts, [0.021] * len(pts)), 0.0, ROPE)
     # the window: a deep pocket for the head
-    b.sub(ell((0, 0.42, 0.0), (0.30, 0.34, 0.30)), 0.03, DARK)
+    b.sub(ell((0, 0.46, 0.0), (0.27, 0.30, 0.27)), 0.02, DARK)
     return b
 
 

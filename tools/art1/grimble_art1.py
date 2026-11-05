@@ -121,6 +121,11 @@ def lowpoly(name, fld, tris, cull=None, keep=None):
         m.vertex_group_factor = 8.0
     bpy.context.view_layer.objects.active = ob
     bpy.ops.object.modifier_apply(modifier="d")
+    nt2 = sum(len(pl.vertices) - 2 for pl in ob.data.polygons)
+    if nt2 > tris * 1.2:          # (one pass stalls on a field this busy)
+        m = ob.modifiers.new("d2", "DECIMATE")
+        m.ratio = tris / nt2
+        bpy.ops.object.modifier_apply(modifier="d2")
     if keep is not None:
         ob.vertex_groups.clear()
     orient(ob, fld)
@@ -317,7 +322,7 @@ def main():
         part("bell" + n, bl, 170, "gear", 1.1, tb, "bell" + n, None)
         part("lampchain" + n, None, 0, "iron", 0.5, None, "lamp" + n, "metal", ob=chain_links("lampchain" + n, [TIP[n], ends["lamp" + n]], 0.024, 0.012, 0.0042))
     bf = G.ball()
-    part("ball", bf, 1000, "hoard", 0.9, G.ball_xf, "ball", None)
+    part("ball", bf, 900, "hoard", 0.9, G.ball_xf, "ball", None)
     # the chains on the weapon and the eyepiece
     x, wz = float(J["hand.R"][0]), float(J["hand.R"][2])
     k = G.HOOK_SCALE

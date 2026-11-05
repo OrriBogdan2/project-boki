@@ -922,29 +922,26 @@
 		"painted": {
 			"gloss": 0.0,
 			"sheen": 0.0,
-			"desat": 0.16,
+			"desat": 0.06,
 			"light_neutral_warm": 0.5,
-			"top_light": 0.55,
-			"rim_far": 0.4,
+			"top_light": 0.4,
+			"rim_far": 0.3,
 			"rim_far_color": [
+				0.72,
 				0.95,
-				0.86,
-				0.55
+				0.72
 			]
 		},
 		"slots": {
 			"glow": {
-				"glow": 3.2,
+				"glow": 1.25,
 				"desat": 0.0,
 				"rim_far": 0.0,
 				"shade": 1.0
 			}
 		},
 		"no_ink": [
-			"tar",
-			"crack",
-			"glass",
-			"gash"
+			"glass"
 		]
 	},
 	"pip": {
