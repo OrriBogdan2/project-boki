@@ -588,6 +588,15 @@ def left_hand(J, vox=0.00115):
     return f
 
 
+def coat_hem(th):
+    """z of the long coat's hem at angle th (radians, 0 at the back, + toward her left... see hem_art1.coat_grid)."""
+    a0 = math.radians(128)
+    th = np.asarray(th, F)
+    h = 0.355 + 0.205 * (np.abs(th) / a0) ** 2.4 + 0.075 * np.sin(th) + 0.026 * np.cos(th * 5.0)
+    h = h - 0.09 * np.exp(-((th + 0.72) / 0.42) ** 2)        # the tail's point at the left-back
+    return h + 0.07 * smooth(1.8, a0, np.abs(th))
+
+
 # ---------------------------------------------------------------------------------------------- gear
 # The bow's own frame: x her side, y away from the string (where the arrow flies), z the long axis, the grip at 0.
 BOW_LEN = 0.56
@@ -717,13 +726,13 @@ def shears(vox=0.0012):
     return f
 
 
-SHEARS_AT = np.array((0.176, 0.046, 0.782), F)
+SHEARS_AT = np.array((0.128, 0.096, 0.775), F)
 
 
 def shears_to_model(p):
     a = math.radians(9)
     p = np.asarray(p, F)
-    q = np.stack((p[..., 0] * 0.0 + p[..., 1], p[..., 0], p[..., 2]), -1)       # flat to the thigh
+    q = np.stack((p[..., 0] * 0.92 + p[..., 1] * 0.38, p[..., 1] * 0.92 - p[..., 0] * 0.38, p[..., 2]), -1)       # flat to the thigh's front
     q = np.stack((q[..., 0] * math.cos(a) - q[..., 2] * math.sin(a), q[..., 1], q[..., 0] * math.sin(a) + q[..., 2] * math.cos(a)), -1)
     return q + SHEARS_AT
 

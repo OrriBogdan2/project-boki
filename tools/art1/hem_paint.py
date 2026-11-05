@@ -371,8 +371,18 @@ def coat(p, n, inside=False):
     k = form(n)
     if inside:
         return mix(rgb("120f13"), rgb("3a1218"), smooth(0.3, 0.9, k))
-    c = mix(C["jacket_sh"], C["jacket"], smooth(0.2, 0.62, k))
-    return mix(c, C["jacket_hi"], smooth(0.7, 1.0, k) * 0.5)
+    fold = (fbm(p[:, 0] * 1.4, p[:, 1] * 1.4, p[:, 2] * 0.25, 7.0, 2) - 0.5) * 0.5
+    c = mix(C["jacket_sh"], C["jacket"], smooth(0.2, 0.62, k + fold))
+    c = mix(c, C["jacket_hi"], smooth(0.7, 1.0, k + fold) * 0.5)
+    # the hem: a dark turned band, a line of red stitch over it (the coat's own edges read at the match camera)
+    th = np.arctan2(-p[:, 0], -p[:, 1])
+    d = p[:, 2] - H.coat_hem(th)
+    c = mix(c, C["jacket_dk"] * 0.7, smooth(0.052, 0.046, d))
+    s = smooth(0.0035, 0.002, np.abs(d - 0.062)) * (np.sin(np.arctan2(p[:, 0], p[:, 1]) * 90) > 0)
+    # and the front edges
+    edge = math.radians(128) - np.abs(th)
+    c = mix(c, C["jacket_dk"] * 0.7, smooth(0.075, 0.06, edge))
+    return mix(c, rgb("e8a050"), s)
 
 
 def collar(p, n, inside=False):

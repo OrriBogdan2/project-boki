@@ -214,9 +214,7 @@ def coat_grid(flip=0.0):
     cols, rows = 27, 10
     a0 = math.radians(128)
     th = np.linspace(-a0, a0, cols)          # 0 at the back
-    hem = 0.355 + 0.205 * (np.abs(th) / a0) ** 2.4 + 0.075 * np.sin(th) + 0.026 * np.cos(th * 5.0)
-    hem = hem - 0.09 * np.exp(-((th + 0.72) / 0.42) ** 2)        # the tail's point at the left-back
-    hem = hem + 0.07 * S.smooth(1.8, a0, np.abs(th))
+    hem = H.coat_hem(th)
     top = 1.012 + 0.0 * th
     P3 = np.zeros((rows, cols, 3), F)
     for i in range(rows):
