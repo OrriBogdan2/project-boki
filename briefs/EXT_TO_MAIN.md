@@ -2337,3 +2337,6 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 
 ## 2026-11-05 (S2): OWNER, quick Qs on Kael (final design first pass, ext/art1-kael 2a9a2b6b; shots ext/hero-shots-s2 art1/kael/)
 - Scar side: the brief says his LEFT, but the master sheet and splash show it on image left, his RIGHT. Which? Eyes: only the left eye glowing white (brief), or both orange (splash)? Is in-game size 1.08 tall enough? More rounds are running; the approval set comes after them. Full lists of owner questions per branch are in STATUS.md.
+
+## 2026-11-05 (S2): OWNER REVIEW: item 107 drop ext/drop-107 0a31cdbd
+- Video with sound on the server: /home/boki/shots-s2/drop-107/drop_107_review.mp4 (not in git). Strips/GIFs: ext/hero-shots-s2 2a400f61 drop-107/. Includes ext/drop, which never reached main. Needs a Net.VERSION bump before merge. Details and owner questions in STATUS.md.
