@@ -306,7 +306,7 @@ def clips():
     # the Fusion transform: curled in on the bow, then thrown open
     FU0 = {"pel": (0, -0.03, -0.24), "prt": (0.42, 0, 0), "tor": (0.5, 0, 0), "hed": (0.45, 0, 0), "G": (-0.12, 0.26, 0.86), "BA": n3((0.5, 0.1, 0.86)), "BS": n3((-0.1, -1.0, 0.1)), "RF": (0.1, 0.24, 0.92), "RD": n3((-0.5, 0.2, -0.8)), "RP": (-0.8, -0.1, 0.5), "lid": 0.9, "brow": 0.9, "fing": 1.0}
     FU1 = {"pel": (0, 0, 0.02), "prt": (-0.14, 0, 0), "tor": (-0.3, 0, 0), "hed": (-0.42, 0, 0), "G": (-0.52, 0.1, 1.34), "BA": n3((0.0, 0.3, 0.95)), "BS": n3((0.9, -0.3, 0.0)), "RF": (0.5, 0.08, 1.4), "RD": n3((0.7, 0.1, 0.7)), "RP": (0.3, 0, -0.9), "Rpole": (1, -0.4, -0.2), "Lpole": (-1, -0.4, -0.2), "lid": 0.0, "fing": 0.0, "brow": 0.2}
-    out.append(C("fusion", 1.2, [(0.0, dict(READY)), (0.35, FU0), (0.6, dict(FU0, pel=(0.006, -0.03, -0.26))), (0.72, FU1, "out"), (0.98, dict(FU1, pel=(0, 0, 0.0))), (1.2, dict(READY))]))
+    out.append(C("fusion", 0.8, [(0.0, dict(READY)), (0.18, FU0), (0.3, dict(FU0, pel=(0.006, -0.03, -0.26))), (0.45, FU1, "out"), (0.58, dict(FU1, pel=(0, 0, 0.0))), (0.8, dict(READY))]))
     # the emote: one claw taps the painted smile, then a slow, mocking curtsey with the bow held out
     TAP = {"hed": (-0.06, 0.05, -0.08), "tor": (0.0, 0.1, 0.03), "RF": (0.095, 0.15, 1.42), "RD": n3((-0.5, 0.45, 0.72)), "RP": (-0.5, -0.8, 0.2), "Rpole": (0.9, -0.3, -0.5), "fing": 0.55, "brow": 0.8, "lid": 0.2}
     CURT = {"pel": (0.0, -0.05, -0.20), "prt": (0.32, 0.0, 0.0), "tor": (0.36, 0.0, 0.0), "hed": (-0.42, 0.0, 0.0), "FL": (-0.08, 0.1, A_Z), "FR": (0.09, -0.26, A_Z + 0.03), "FRp": 0.5, "FRy": -0.1, "G": (-0.5, 0.24, 0.84), "BA": n3((-0.3, 0.2, 0.93)), "BS": n3((0.9, -0.3, 0.2)), "Lpole": (-0.8, -0.4, -0.4),
@@ -381,17 +381,17 @@ def bake(arm, clip, sol, extras):
             dq = Q[par] if par else Quaternion()
             pb = pbs[b]
             pb.rotation_quaternion = (sol.R0[b].inverted() @ dq.inverted() @ Q[b] @ sol.R0[b]).normalized()
-            pb.keyframe_insert("rotation_quaternion", frame=f + 1)
+            pb.keyframe_insert("rotation_quaternion", frame=f)
         pbs["root"].location = sol.R0["root"].inverted() @ (root_at - sol.H0["root"])
-        pbs["root"].keyframe_insert("location", frame=f + 1)
+        pbs["root"].keyframe_insert("location", frame=f)
         for b, (q, l) in extras(P).items():
             pb = pbs[b]
             if q is not None:
                 pb.rotation_quaternion = q
-                pb.keyframe_insert("rotation_quaternion", frame=f + 1)
+                pb.keyframe_insert("rotation_quaternion", frame=f)
             if l is not None:
                 pb.location = l
-                pb.keyframe_insert("location", frame=f + 1)
+                pb.keyframe_insert("location", frame=f)
     arm.animation_data.action = None
     return act
 
@@ -401,6 +401,7 @@ if __name__ == "__main__":
     bpy.ops.wm.open_mainfile(filepath=a[0])
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
     sol = HemSolver(arm, bpy.context.scene["pinch"])
+    bpy.context.scene.render.fps = FPS       # (the exporter times keys by the scene: at its default 24 fps every clip ran 25% long)
     bpy.context.view_layer.objects.active = arm
     wanted = a[2].split(",") if len(a) > 2 and a[2] else None
     ex = extras_for(sol)

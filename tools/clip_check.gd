@@ -114,7 +114,7 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 	var tip := sync.get("blade_tip") as Node3D
 	var muzzle := sync.get("muzzle") as Node3D
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
-	var hb := WardenSkeleton.find(sk, "hand.R")
+	var hb := int(sync.get("blade_bone"))      # (the bone the Data file names: a bow rides the left hand)
 	var rest := tip.position.length()
 	var far := 0.0
 	var drift := 0.0

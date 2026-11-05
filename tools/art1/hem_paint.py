@@ -19,12 +19,12 @@ def rgb(h):
     return np.array([int(h[i:i + 2], 16) / 255.0 for i in (0, 2, 4)], F)
 
 
-C = {"skin": rgb("c98c62"), "skin_sh": rgb("8a5136"), "blush": rgb("b5654a"), "lip": rgb("93303a"), "ear": rgb("8a5136"),
+C = {"skin": rgb("c47b4f"), "skin_sh": rgb("7e4029"), "blush": rgb("b45a3e"), "lip": rgb("a02a2e"), "ear": rgb("7e4029"),
      "hair": rgb("1a161c"), "hair_hi": rgb("5e6a88"), "hair_dk": rgb("0b0a0f"),
-     "porc": rgb("f4f0ea"), "porc_sh": rgb("b6b2c0"), "gold": rgb("e0ae42"), "gold_dk": rgb("8c5e1a"), "thread": rgb("cf1a22"),
+     "porc": rgb("f4f0ea"), "porc_sh": rgb("b6b2c0"), "gold": rgb("e0ae42"), "gold_dk": rgb("8c5e1a"), "thread": rgb("e8141e"),
      "corset": rgb("26222b"), "corset_hi": rgb("565064"), "seam": rgb("0e0c10"), "trouser": rgb("232027"), "trouser_hi": rgb("4a4655"),
-     "boot": rgb("2a2224"), "boot_hi": rgb("5a4a4e"), "boot_top": rgb("3a2e30"), "lace": rgb("140f12"),
-     "jacket": rgb("a8182a"), "jacket_hi": rgb("d83a3e"), "jacket_sh": rgb("5e0c1e"), "jacket_dk": rgb("6c0f22"), "cuff": rgb("1c1a20"),
+     "boot": rgb("38201f"), "boot_hi": rgb("6e4a42"), "boot_top": rgb("4a2a28"), "lace": rgb("140f12"),
+     "jacket": rgb("cc1420"), "jacket_hi": rgb("f4383a"), "jacket_sh": rgb("6e0a16"), "jacket_dk": rgb("6c0f22"), "cuff": rgb("1c1a20"),
      "tape": rgb("d9c49c"), "tape_dk": rgb("8b7654"), "leather": rgb("5a3524"), "leather_hi": rgb("8c5c3c"), "buckle": rgb("b9b7bd"),
      "steel": rgb("d6dae2"), "steel_dk": rgb("6c7284"), "wood": rgb("c49a6c"), "nail": rgb("e6b4ac"),
      "lacquer": rgb("15141a"), "lacquer_hi": rgb("6b6c7c")}
@@ -250,7 +250,7 @@ def head(p, n, lab, f):
     c = mix(c, C["skin_sh"], smooth(0.0052, 0.0, np.abs(z - 1.5675)) * smooth(0.0145, 0.004, ax) * fr * 0.75)
     c = mix(c, C["skin_sh"], smooth(0.0045, 0.0, np.abs(z - 1.5292)) * smooth(0.0150, 0.006, ax) * fr * 0.5)
     c = mix(c, C["skin_sh"], smooth(0.0035, 0.0, np.abs(ax - 0.0108)) * smooth(1.570, 1.584, z) * smooth(1.604, 1.590, z) * fr * 0.35)
-    c = mix(c, rgb("e0a57c"), np.exp(-(x / 0.0052) ** 2) * smooth(1.578, 1.590, z) * smooth(1.622, 1.606, z) * fr * 0.5)
+    c = mix(c, rgb("dd9a68"), np.exp(-(x / 0.0052) ** 2) * smooth(1.578, 1.590, z) * smooth(1.622, 1.606, z) * fr * 0.5)
     # the mask's strap, running back from its points under the hair
     c = mix(c, rgb("1c1518"), smooth(0.0046, 0.0028, np.abs(p[:, 2] - 1.645 - 0.05 * np.minimum(p[:, 1] - 0.012, 0.0))) * (p[:, 1] < 0.03))
     return c
@@ -267,8 +267,8 @@ def eyes(p, n):
     dz = p[:, 2] - ez + 0.0004
     r = np.sqrt(dx * dx + dz * dz)
     white = mix(rgb("bfb6b8"), rgb("efe8e6"), smooth(0.016, 0.006, r))
-    iris = mix(rgb("c8ec3a"), rgb("6cb022"), smooth(0.0035, 0.0072, r))
-    iris = mix(iris, rgb("173a10"), smooth(0.0074, 0.0088, r))
+    iris = mix(rgb("9cf23c"), rgb("2fd02c"), smooth(0.0035, 0.0072, r))
+    iris = mix(iris, rgb("0e4a14"), smooth(0.0076, 0.0088, r))
     # radial streaks
     a = np.arctan2(dz, dx)
     iris = iris * (0.86 + 0.14 * np.sin(a * 23))[:, None]
@@ -399,8 +399,8 @@ def scarf(p, n, f):
     cav = cavity(f, p, n, 0.012) if f is not None else np.zeros(len(p), F)
     fold = (fbm(p[:, 0] * 1.2, p[:, 1] * 1.2, p[:, 2] * 1.2, 7.0, 2) - 0.5) * 0.5
     k = np.clip(form(n) + fold, 0, 1)
-    c = mix(rgb("7c0c1c"), rgb("d0141f"), smooth(0.15, 0.6, k))
-    c = mix(c, rgb("ff4a48"), smooth(0.72, 1.0, k) * 0.55)
+    c = mix(rgb("860812"), rgb("e4101a"), smooth(0.15, 0.6, k))
+    c = mix(c, rgb("ff4038"), smooth(0.72, 1.0, k) * 0.55)
     return c * (1 - 0.55 * smooth(0.25, 0.9, cav))[:, None]
 
 

@@ -1,4 +1,5 @@
-"""Hem's sculpt (ART-1, item 108, design v4: briefs/art-refs/hem_v4_needlebow.png, hem_v4_props.png): the shapes as signed distance fields (tools/art1/hem_sdf.py), all built on the
+"""Hem's (Lisette's) sculpt (ART-1, item 108. Model: briefs/art-refs/lisette_turnaround_apose.png; outfit and colour:
+hem_FINAL_sheet.png; weapons and props: hem_v4_props.png): the shapes as signed distance fields (tools/art1/hem_sdf.py), all built on the
 rig's own joints (art/wardens/src/hem_rig.json), so she stays on the contract armature.
 
 The Red Stitch Archer: an adult woman of about 7 heads, tanned, a sharp mature face, a red-stitched eye mask, green eyes; a
@@ -207,7 +208,7 @@ def smax(a, b, k):
 def mask_region(x, y, z):
     """The domino: a band over the eyes and the bridge of the nose, lifting to a point at the temples, the eyes cut out."""
     a = np.abs(x)
-    top = 1.6370 + 0.0115 * smooth(0.0, 0.034, a) + 0.0030 * smooth(0.05, 0.078, a)
+    top = 1.6340 + 0.0085 * smooth(0.0, 0.034, a) + 0.0030 * smooth(0.05, 0.078, a)
     bot = 1.6115 - 0.0175 * smooth(0.006, 0.036, a) + 0.0310 * smooth(0.040, 0.079, a)
     r = smax(z - top, bot - z, 0.003)
     r = smax(r, 0.012 - y, 0.004)
@@ -299,8 +300,8 @@ LOCKS = {
     "lockL": [(-0.006, 0.076, 1.694), (-0.046, 0.074, 1.668), (-0.0695, 0.060, 1.622), (-0.0770, 0.050, 1.570), (-0.0755, 0.046, 1.520),
               (-0.0690, 0.052, 1.470), (-0.0610, 0.066, 1.425)],
     # the high ponytail: up from the tie, over, falling long down her back to the waist
-    "tail": [(0.0, -0.074, 1.742), (0.002, -0.102, 1.752), (0.006, -0.134, 1.726), (0.014, -0.158, 1.655), (0.024, -0.170, 1.550),
-             (0.036, -0.170, 1.400), (0.046, -0.172, 1.240), (0.052, -0.180, 1.090), (0.056, -0.190, 0.965)],
+    "tail": [(0.0, -0.074, 1.742), (0.002, -0.104, 1.758), (0.006, -0.140, 1.732), (0.012, -0.166, 1.655), (0.018, -0.178, 1.545),
+             (0.022, -0.172, 1.420), (0.026, -0.166, 1.290), (0.026, -0.180, 1.160), (0.018, -0.192, 1.045)],
 }
 LOCK_R = {"lockR": (0.0085, 0.0012), "lockL": (0.0085, 0.0012), "tail": (0.0330, 0.0030)}
 
@@ -436,12 +437,15 @@ def dress(b):
     for dx in (0.0, 0.040, 0.086):
         seam = (np.abs(a - dx) - 0.0030).astype(F)
         out.d = np.where(reg < -0.003, out.d + 0.0016 * smooth(0.0016, -0.0016, seam), out.d)
-    # the capris: a band at the waist, cropped below the knee; a bare span, then the boots
-    kz = 0.444
-    bare = (z < kz - 0.014) & (z > 0.415)
+    # the capris end mid-calf in a turned cuff, standing a little off the leg; a bare span of calf; then the boots
+    hem = 0.418
+    out.d = np.where((z > hem - 0.0) & (z < 0.56) & (z < 0.8), out.d - 0.0035 * smooth(0.56, 0.46, z), out.d)
+    cuff = np.maximum(hem - z, z - (hem + 0.024))
+    shell(out, base, 0.0078, lambda x, y, z: cuff, TROUSER, 0.0010)
+    bare = (z < hem) & (z > 0.372)
     out.lab = np.where(bare & (z < 0.8), SKIN, out.lab)
-    out.d = np.where(bare, out.d + 0.0035, out.d)
-    top = 0.410 + 0.014 * np.where(y > 0.0, 1.0, 0.0)
+    out.d = np.where(bare, out.d + 0.0020, out.d)
+    top = 0.368 + 0.014 * np.where(y > 0.0, 1.0, 0.0)
     rb = z - top
     shell(out, base, 0.0052, lambda x, y, z: rb, BOOT, 0.002)
     rc = np.maximum(z - top, top - 0.016 - z)
@@ -768,10 +772,12 @@ def cowl(vox=0.0028):
     return f
 
 
-# the scarf's long tail: off her right shoulder blade, sweeping out behind (the top-down signature), as a chain's rest
-SCARF_PATH = [(0.040, -0.080, 1.420), (0.120, -0.140, 1.355), (0.205, -0.205, 1.235), (0.285, -0.285, 1.075), (0.335, -0.355, 0.895),
-              (0.350, -0.420, 0.700), (0.325, -0.470, 0.510), (0.280, -0.510, 0.335)]
-SCARF_W = [0.050, 0.066, 0.078, 0.086, 0.090, 0.086, 0.074, 0.046]
+# the scarf's two long tails, hanging down her back to the thigh (the turnaround's rest; the springs stream them behind her)
+SCARF_PATHS = {
+    "scarfR": [(0.028, -0.088, 1.400), (0.052, -0.116, 1.300), (0.072, -0.136, 1.125), (0.086, -0.152, 0.925), (0.092, -0.166, 0.720), (0.090, -0.176, 0.500)],
+    "scarfL": [(-0.028, -0.088, 1.400), (-0.052, -0.116, 1.300), (-0.070, -0.136, 1.125), (-0.082, -0.150, 0.925), (-0.086, -0.162, 0.700), (-0.082, -0.170, 0.455)],
+}
+SCARF_W = [0.040, 0.056, 0.070, 0.078, 0.076, 0.012]
 
 
 if __name__ == "__main__":

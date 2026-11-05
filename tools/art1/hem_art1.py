@@ -208,23 +208,23 @@ def tube(name, pts, r, sides=4, close=False):
     return ob_from(name, np.array(v), np.array(f, np.int32))
 
 
-def ribbon_grid(flip=0.0):
-    """The scarf's long tail as a strip: rows along SCARF_PATH, three columns across, gently twisted."""
-    c = spline(np.array(H.SCARF_PATH, F), 13)
+def ribbon_grid(path, flip=0.0):
+    """A scarf tail as a strip: rows along its path, three columns across, gently twisted, tapering to a point."""
+    c = spline(np.array(path, F), 13)
     w = np.interp(np.linspace(0, 1, 13), np.linspace(0, 1, len(H.SCARF_W)), np.array(H.SCARF_W, F))
     tg = np.gradient(c, axis=0)
     tg /= np.linalg.norm(tg, axis=1, keepdims=True)
     P3 = np.zeros((13, 3, 3), F)
-    side = np.cross(tg[0], (0.0, 0.3, 1.0))
+    side = np.array((1.0, 0.0, 0.0), F)
     for i in range(13):
         side = side - tg[i] * float(side @ tg[i])          # (carried along the path: it never flips where the path falls straight)
         side /= np.linalg.norm(side)
         nrm = np.cross(side, tg[i])
-        tw = 0.25 + 0.35 * math.sin(i * 0.5)
+        tw = 0.10 * math.sin(i * 0.7)
         sd = side * math.cos(tw) + nrm * math.sin(tw)
         off = np.cross(tg[i], sd)
         for j in range(3):
-            P3[i, j] = c[i] + sd * w[i] * (j - 1) + off * flip + off * 0.012 * (1 if j == 1 else 0)
+            P3[i, j] = c[i] + sd * w[i] * (j - 1) + off * flip + off * 0.008 * (1 if j == 1 else 0)
     return P3
 
 
@@ -369,16 +369,19 @@ def main():
     part("arrow", ar, 200, "gearlab", 1.4, arxf, "arrow")
     print("low parts", time.time() - t0, flush=True)
 
-    # the scarf's tail, two sides
-    for nm, g, dens in (("scarf", ribbon_grid(0.0), 0.8), ("scarf_in", ribbon_grid(-0.004), 0.5)):
-        ob = grid_mesh(nm, g)
-        if nm == "scarf_in":
+    # the scarf's tails, each two-sided
+    for tail in ("scarfR", "scarfL"):
+        for nm, g, dens in ((tail, ribbon_grid(H.SCARF_PATHS[tail], 0.0), 0.7), (tail + "_in", ribbon_grid(H.SCARF_PATHS[tail], -0.004), 0.45)):
+            ob = grid_mesh(nm, g)
             bm = bmesh.new()
             bm.from_mesh(ob.data)
-            bmesh.ops.reverse_faces(bm, faces=bm.faces)
+            bm.faces.ensure_lookup_table()
+            out = sum(float(Vector(f.normal).y) for f in bm.faces)
+            if (out > 0) != nm.endswith("_in"):     # (the outer side faces back, away from her)
+                bmesh.ops.reverse_faces(bm, faces=bm.faces)
             bm.to_mesh(ob.data)
             bm.free()
-        part(nm, None, 0, "ribbon", dens, None, "scarf", "cloth", ob=ob)
+            part(nm, None, 0, "ribbon", dens, None, tail, "cloth", ob=ob)
     # the glowing string
     Y = H.STRING_Y
     Zs = H.STRING_Z
@@ -548,12 +551,13 @@ def main():
         for i in range(count):
             add_bone(arm, "spring_%s_%d" % (nm, i), js[i], js[i + 1], "head" if i == 0 else "spring_%s_%d" % (nm, i - 1))
         add_bone(arm, "spring_%s_%d" % (nm, count), js[-1], js[-1] + (js[-1] - js[-2]) * 0.3, "spring_%s_%d" % (nm, count - 1))
-    # the scarf's chain
-    js = spline(np.array(H.SCARF_PATH, F), 8)
-    chains["scarf"] = js
-    for i in range(7):
-        add_bone(arm, "spring_scarf_%d" % i, js[i], js[i + 1], "hips" if i == 0 else "spring_scarf_%d" % (i - 1))
-    add_bone(arm, "spring_scarf_7", js[-1], js[-1] + (js[-1] - js[-2]) * 0.3, "spring_scarf_6")
+    # the scarf's chains
+    for tail in ("scarfR", "scarfL"):
+        js = spline(np.array(H.SCARF_PATHS[tail], F), 7)
+        chains[tail] = js
+        for i in range(6):
+            add_bone(arm, "spring_%s_%d" % (tail, i), js[i], js[i + 1], "hips" if i == 0 else "spring_%s_%d" % (tail, i - 1))
+        add_bone(arm, "spring_%s_6" % tail, js[-1], js[-1] + (js[-1] - js[-2]) * 0.3, "spring_%s_5" % tail)
     bpy.ops.object.mode_set(mode="OBJECT")
     print("armature", time.time() - t0, flush=True)
 
@@ -574,9 +578,9 @@ def main():
             W = {"head": S.smooth(1.385, 1.445, vs[:, 2]) + 1e-3, "hips": S.smooth(1.445, 1.385, vs[:, 2])}
         elif grp == "head":
             W = {"head": one}
-        elif grp == "scarf":
-            W = chain(chains["scarf"], ["spring_scarf_%d" % i for i in range(7)], vs)
-            W["hips"] = S.smooth(0.10, 0.03, np.linalg.norm(vs - chains["scarf"][0], axis=1)) * 3.0
+        elif grp in ("scarfR", "scarfL"):
+            W = chain(chains[grp], ["spring_%s_%d" % (grp, i) for i in range(6)], vs)
+            W["hips"] = S.smooth(0.09, 0.03, np.linalg.norm(vs - chains[grp][0], axis=1)) * 3.0
         elif nm == "trunk":
             W = tr.weights(vs, 0.03, grp_allow)
             W = {k2: w for k2, w in W.items() if w.max() > 1e-4}
@@ -661,8 +665,8 @@ def main():
         n = n / np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-6)
         me.normals_split_custom_set_from_vertices(n.tolist())
 
-    ROOM = {"lockR": 0.25, "lockL": 0.25, "tail": 0.5, "hair_needles": 0.12, "quiver_arrows": 0.1, "arrow": 0.1, "shears": 0.2, "string": 0.0,
-            "skin_head": 0.4, "mask": 0.25, "eyes": 0.0, "handR": 0.3, "handL": 0.3, "bow": 0.35, "scarf": 0.4, "scarf_in": 0.0}
+    ROOM = {"lockR": 0.25, "lockL": 0.25, "tail": 0.5, "hair_needles": 0.0, "quiver_arrows": 0.0, "arrow": 0.0, "shears": 0.1, "string": 0.0,
+            "skin_head": 0.4, "mask": 0.25, "eyes": 0.0, "handR": 0.3, "handL": 0.3, "bow": 0.0, "scarfR": 0.3, "scarfL": 0.3, "scarfR_in": 0.0, "scarfL_in": 0.0}
     for p in parts:
         me = p["ob"].data
         at = me.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
