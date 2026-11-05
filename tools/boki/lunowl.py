@@ -24,6 +24,7 @@ BERRY_C = v3(0, 0.05, -0.36)
 FACE = {"mouth_w": 0.03, "mouth_y": 0.398, "mouth_z": -0.24, "cat_mouth": False, "brow_x": 0.09, "brow_up": 0.02,
         "brow_k": 1.0, "fang_k": 0.0}
 SHOULDER = v3(0.11, 0.41, 0.12)
+ANTENNA_ROOT = v3(0.045, 0.6, -0.09)
 WING_N = (0.3, 0.55, -0.78)      # the wing's facing, right side
 WING_SPAN = (0.62, 0.75, 0.25)   # its leading edge, out and up
 TAIL_PTS = [v3(0, 0.19, 0.16), v3(0, 0.12, 0.27)]
@@ -54,18 +55,19 @@ def wing_frame(sx):
     return np.stack([span, chord, through])
 
 
-def on_wing(sx, s, c):
-    """A point of the wing's plane: s along the leading edge, c back along the chord from the shoulder."""
+def on_wing(sx, s, c, at=SHOULDER, k=1.0):
+    """A point of the wing's plane: s along the leading edge, c back along the chord from the shoulder `at`; the
+    Fusion wears the same wings `k` times as big."""
     fr = wing_frame(sx)
-    return SHOULDER * v3(sx, 1, 1) + fr[0] * s + fr[1] * c
+    return at * v3(sx, 1, 1) + (fr[0] * s + fr[1] * c) * k
 
 
-def streamer_pts(sx):
-    """The luna moth's long hind-wing tail: off the hind wing, hanging down its flank to just above the ground."""
-    a = on_wing(sx, 0.065, 0.22)
-    b = a + v3(sx * 0.025, -0.065, 0.06)
-    c = b + v3(sx * 0.018, -0.06, 0.065)
-    d = c + v3(sx * 0.004, -0.045, 0.055)
+def streamer_pts(sx, at=SHOULDER, k=1.0):
+    """The luna moth's long hind-wing tail: off the hind wing, trailing back and down behind its flank."""
+    a = on_wing(sx, 0.065, 0.22, at, k)
+    b = a + v3(sx * 0.022, -0.055, 0.075) * k
+    c = b + v3(sx * 0.012, -0.05, 0.075) * k
+    d = c + v3(sx * -0.004, -0.04, 0.06) * k
     return [a, b, c, d]
 
 
@@ -99,51 +101,63 @@ def body_prims():
     return p
 
 
-def flat_ellipse(name, bone, sx, s, c, a, b, tilt, thick=0.009):
-    """An ellipse lying in the wing's plane, `tilt` turning it from the leading edge toward the chord."""
+def flat_ellipse(name, bone, sx, s, c, size, tilt, at, k):
+    """An ellipse (semi-axes `size`) lying in the wing's plane, `tilt` turning it from the leading edge toward the
+    chord."""
     fr = wing_frame(sx)
     ct, st = math.cos(tilt), math.sin(tilt)
     rot = np.stack([fr[0] * ct + fr[1] * st, -fr[0] * st + fr[1] * ct, fr[2]])
-    return Ellipsoid(name, bone, on_wing(sx, s, c), v3(a, b, thick), rot=rot, k=0.02)
+    return Ellipsoid(name, bone, on_wing(sx, s, c, at, k), v3(size[0], size[1], 0.009) * k, rot=rot, k=0.02 * k)
 
 
-def wing_prims():
+def wing_prims(at=SHOULDER, k=1.0):
     out = []
     for sd, sx in SIDES:
-        out += [flat_ellipse("fore" + sd, "fwing." + sd, sx, 0.17, 0.03, 0.17, 0.08, 0.1),
-                flat_ellipse("apex" + sd, "fwing." + sd, sx, 0.3, -0.005, 0.065, 0.04, -0.2),
-                flat_ellipse("hind" + sd, "hwing." + sd, sx, 0.07, 0.15, 0.095, 0.085, 0.9)]
-        pts = streamer_pts(sx)
+        out += [flat_ellipse("fore" + sd, "fwing." + sd, sx, 0.17, 0.03, (0.17, 0.08), 0.1, at, k),
+                flat_ellipse("apex" + sd, "fwing." + sd, sx, 0.3, -0.005, (0.065, 0.04), -0.2, at, k),
+                flat_ellipse("hind" + sd, "hwing." + sd, sx, 0.07, 0.15, (0.095, 0.085), 0.9, at, k)]
+        pts = streamer_pts(sx, at, k)
         fr = wing_frame(sx)
         for i in range(3):
             a, b = pts[i], pts[i + 1]
             d = b - a
-            w = (0.024, 0.016, 0.013)[i]
+            w = (0.024, 0.016, 0.013)[i] * k
             out.append(Ellipsoid("strm%s%d" % (sd, i), ("strm1." if i < 1 else "strm2.") + sd, (a + b) * 0.5,
-                                 v3(w, 0.008, np.linalg.norm(d) * 0.62), rot=frame(d, fr[2]), k=0.02))
-        out.append(Ellipsoid("paddle" + sd, "strm2." + sd, pts[3], v3(0.03, 0.008, 0.042),
-                             rot=frame(pts[3] - pts[2], fr[2]), k=0.02))
-    # the wings stop well under the skin: a wing running just below it would show its ink through the body
-    out += [Ellipsoid("cut" + nm, "spine", c, r - 0.018, k=0.004, sub=True)
-            for nm, c, r in (("body", BODY_C, BODY_R), ("chest", CHEST_C, CHEST_R), ("head", HEAD_C, HEAD_R))]
+                                 v3(w, 0.008 * k, np.linalg.norm(d) * 0.62), rot=frame(d, fr[2]), k=0.02 * k))
+        out.append(Ellipsoid("paddle" + sd, "strm2." + sd, pts[3], v3(0.03, 0.008, 0.042) * k,
+                             rot=frame(pts[3] - pts[2], fr[2]), k=0.02 * k))
     return out
 
 
-def antenna_pts(sx):
-    return [v3(sx * 0.04, 0.585, -0.13), v3(sx * 0.08, 0.68, -0.2), v3(sx * 0.175, 0.735, -0.21)]
+def body_cut():
+    """The wings stop well under the skin: a wing running just below it would show its ink through the body."""
+    return [Ellipsoid("cut" + nm, "spine", c, r - 0.018, k=0.004, sub=True)
+            for nm, c, r in (("body", BODY_C, BODY_R), ("chest", CHEST_C, CHEST_R), ("head", HEAD_C, HEAD_R))]
 
 
-def antenna_prims():
+def antenna_pts(sx, at=ANTENNA_ROOT, k=1.0):
+    a = at * v3(sx, 1, 1)
+    return [a, a + v3(sx * 0.035, 0.1, -0.035) * k, a + v3(sx * 0.13, 0.165, -0.03) * k]
+
+
+def antenna_prims(at=ANTENNA_ROOT, k=1.0):
     out = []
     for sd, sx in SIDES:
-        a, b, c = antenna_pts(sx)
+        a, b, c = antenna_pts(sx, at, k)
         bone = "ant." + sd
-        out += [Cone("stalk%s0" % sd, bone, a, b, 0.009, 0.008, k=0.01),
-                Cone("stalk%s1" % sd, bone, b, c, 0.008, 0.006, k=0.01)]
-        # the feathery comb: a flat leaf along the outer half of the stalk
+        out += [Cone("stalk%s0" % sd, bone, a, b, 0.009 * k, 0.008 * k, k=0.01 * k),
+                Cone("stalk%s1" % sd, bone, b, c, 0.008 * k, 0.006 * k, k=0.01 * k)]
+        # the feathery comb: a slim vane along the outer half of the stalk, its barbs combed toward the tip
         d = c - a
-        out.append(Ellipsoid("comb" + sd, bone, a + d * 0.62, v3(0.023, 0.006, np.linalg.norm(d) * 0.4),
-                             rot=frame(d, v3(0, 0, -1)), k=0.01))
+        fr = frame(d, v3(0, 0, -1))
+        out.append(Ellipsoid("comb" + sd, bone, a + d * 0.62, v3(0.014 * k, 0.005 * k, np.linalg.norm(d) * 0.4), rot=fr,
+                             k=0.008 * k))
+        for i in range(5):
+            on = a + d * (0.36 + 0.12 * i)
+            reach = (0.03 - 0.003 * abs(i - 1.5)) * k
+            for side in (-1.0, 1.0):
+                tip = on + fr[0] * side * reach + d * 0.12
+                out.append(Cone("barb%s%d%d" % (sd, i, side > 0), bone, on, tip, 0.006 * k, 0.0035 * k, k=0.004 * k))
     return out
 
 
@@ -168,8 +182,8 @@ def dazzle_prims():
 def parts():
     return {
         "body": (Shape(body_prims()), 0.0035, 4300),
-        "wings": (Shape(wing_prims()), 0.003, 1500),
-        "antennae": (Shape(antenna_prims()), 0.0025, 360),
+        "wings": (Shape(wing_prims() + body_cut()), 0.003, 1500),
+        "antennae": (Shape(antenna_prims()), 0.0022, 560),
         "beak": (Shape(beak_prims()), 0.0025, 120),
     }
 
@@ -187,7 +201,7 @@ def prop_parts():
 
 GROWN = {
     "horn": ((0.075, 0.585, -0.09), (0.13, 0.72, -0.15), 0.036), "fang": ((0.012, 0.385, -0.235), (0.014, 0.35, -0.238), 0.012),
-    "antenna": ((0.06, 0.6, -0.04), (0.12, 0.76, -0.02), 0.012), "brow": ((0.015, 0.522, -0.205), (0.15, 0.53, -0.172), 0.02),
+    "antenna": ((0.06, 0.6, -0.04), (0.12, 0.76, -0.02), 0.012), "brow": ((0.015, 0.505, -0.208), (0.14, 0.535, -0.16), 0.017),
     "head_top": (0, 0.6, -0.06), "fang_at": (0, 0.39, -0.23), "brow_at": (0, 0.52, -0.2), "third_eye": (0, 0.555, -0.19),
     "back": ((0, 0.47, 0.11), (0, 0.38, 0.17), (0, 0.29, 0.19)), "back_at": (0, 0.38, 0.15), "plates": (0, 0.37, 0.15),
     "plate_r": (0.13, 0.05, 0.07), "shell_c": (0, 0.24, 0.02), "shell_r": (0.21, 0.19, 0.06), "tail_bone": "tail1",
@@ -295,42 +309,41 @@ def paint_body(p, n, prim):
     return mixc(col, LAVENDER_DARK, bars * 0.8)
 
 
-def paint_wings(q, n):
+def paint_wings(q, at=SHOULDER, k=1.0):
     col = np.zeros((len(q), 3))
     for sd, sx in SIDES:
         m = q[:, 0] * sx > 0
         if not m.any():
             continue
         fr = wing_frame(sx)
-        rel = q[m] - SHOULDER * v3(sx, 1, 1)
+        rel = (q[m] - at * v3(sx, 1, 1)) / k
         s, c = rel @ fr[0], rel @ fr[1]
         far = np.hypot(s, c)
         ang = np.arctan2(c, s)
-        k = mixc(WING_LIGHT, WING, sat(far / 0.26))
-        k = mixc(k, WING_DARK, sat((far - 0.24) / 0.1) * 0.6)
+        wc = mixc(WING_LIGHT, WING, sat(far / 0.26))
+        wc = mixc(wc, WING_DARK, sat((far - 0.24) / 0.1) * 0.6)
         veins = edge(0.06 - np.abs(np.sin(ang * 7.0)), 0.03) * sat((far - 0.06) / 0.06) * (far < 0.33)
-        k = mixc(k, WING_DARK, veins * 0.35)
+        wc = mixc(wc, WING_DARK, veins * 0.35)
         # the margin glows faintly gold, the leading edge carries a plum stripe up to the shoulder
         margin = sat((far - 0.29) / 0.05) * (c < 0.08)
-        k = mixc(k, mixc(WING, MOON, np.full(len(s), 0.6)), margin * 0.5)
+        wc = mixc(wc, mixc(WING, MOON, np.full(len(s), 0.6)), margin * 0.5)
         costa = edge(-0.024 - c + s * 0.06, 0.005) * (s < 0.27)
-        k = mixc(k, PLUM, costa)
-        tail = c > 0.2
-        k[tail] = mixc(k[tail], WING_LIGHT, sat((-q[m][tail, 1] + 0.2) / 0.12) * 0.7)
+        wc = mixc(wc, PLUM, costa)
+        wc = mixc(wc, WING_LIGHT, sat((c - 0.3) / 0.12) * 0.7)      # the tails pale toward their tips
         for _, s0, c0, r in EYESPOTS:
             d = np.hypot(s - s0, c - c0) / r      # eye-spot rings, outside in: green, moon gold, plum, a pale window
             ring = mixc(np.tile(WING_DARK * 0.8, (len(s), 1)), MOON, edge(0.86 - d, 0.05))
             ring = mixc(ring, PLUM, edge(0.62 - d, 0.05))
             ring = mixc(ring, CREAM, edge(0.3 - d, 0.05))
-            k = mixc(k, ring, edge(1.0 - d, 0.06))
-        col[m] = k
+            wc = mixc(wc, ring, edge(1.0 - d, 0.06))
+        col[m] = wc
     return col
 
 
-def paint_antennae(q, n):
+def paint_antennae(q, at=ANTENNA_ROOT, k=1.0):
     fine = np.zeros(len(q))
-    for sd, sx in SIDES:
-        a, _, c = antenna_pts(sx)
+    for _, sx in SIDES:
+        a, _, c = antenna_pts(sx, at, k)
         d = c - a
         t = ((q - a) @ d) / (d @ d)
         fine = np.maximum(fine, edge(np.sin(t * 90) - 0.2, 0.3) * (q[:, 0] * sx > 0) * (t > 0.3))
@@ -341,9 +354,9 @@ def paint_piece(pc, q, nn, prim):
     if pc.name == "body":
         return paint_body(q, nn, prim)
     if pc.name == "wings":
-        return paint_wings(q, nn)
+        return paint_wings(q)
     if pc.name == "antennae":
-        return paint_antennae(q, nn)
+        return paint_antennae(q)
     if pc.name == "beak":
         return mixc(np.tile(GOLD_DARK, (len(q), 1)), GOLD, sat(nn[:, 1] * 0.8 + 0.5))
     if pc.name == "dazzle":

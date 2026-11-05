@@ -262,7 +262,7 @@ def chop(t):
 
 
 def mine(t):
-    return beak_tool(t, [(0, 0), (0.38, 1), (0.5, -1), (0.58, -0.7), (1, 0)], "prop_pick", 0.3, 0.9)
+    return beak_tool(t, [(0, 0), (0.38, 1), (0.5, -1), (0.58, -0.7), (1, 0)], "prop_pick", 0.3, 0.75)
 
 
 def carry(t):
