@@ -20,9 +20,10 @@ HAIR_R = (UNIQ_W + 0.005, 0.40, 1.0, 1.0)
 CHAIN_R = (UNIQ_W + 0.005, 0.30, 0.875, 0.395)
 HOOK_R = (0.88, 0.30, 1.0, 0.395)
 EYE_R = (UNIQ_W + 0.005, 0.20, 0.875, 0.295)
+EYE2_R = (UNIQ_W + 0.005, 0.10, 0.875, 0.195)
 GLOW_R = (0.88, 0.20, 1.0, 0.295)
-MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "leather-kael", "metal-kael", "metal-blade-hot", "hair-mane", "eyes-kael", "glow-sword"]
-SCALE = {"face": 4.0, "lidU": 2.6, "lidD": 2.6, "mask": 1.5, "cowl": 1.5, "stail": 1.3, "palm": 2.0, "finger": 1.8,
+MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "leather-kael", "metal-kael", "metal-blade-hot", "hair-mane", "eyes-kael", "eyes-glow-hot", "glow-sword", "glow-sword_edge"]
+SCALE = {"face": 4.0, "lidU": 2.6, "lidD": 2.6, "mask": 1.2, "cowl": 2.0, "cowlcore": 0.2, "stail": 1.3, "palm": 2.0, "finger": 1.8,
          "thumb": 1.8, "skull": 0.4, "blade": 1.5, "guard": 1.4, "grip": 1.6, "pommel": 1.6, "Low": 1.15}
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
@@ -38,7 +39,8 @@ def tile_uv(r, uv):
 
 hair_tile_uv = (0, 0, 1, 1)
 tails = [K.scarf_tail("R"), K.scarf_tail("L")]
-pieces = [K.face_patch(), K.skull(), K.mask(), K.cowl()] + tails
+cowl_ps = K.cowl()
+pieces = [K.face_patch(), K.skull(), K.mask()] + cowl_ps + tails
 for s in (1.0, -1.0):
     pieces.append(K.eyeball(s))
     pieces += K.lids(s)
@@ -59,17 +61,19 @@ for p_ in pieces:
     n_ = p_.name
     if n_ in ("face", "skull", "mask", "cap") or n_.startswith(("eye", "lid")):
         p_.orient(HEAD_C if not n_.startswith(("eye", "lid")) else tuple(K.hl(K.EYE * [1 if n_.endswith("R") else -1, 1, 1])))
-    elif n_ == "cowl":
-        p_.orient((0, 0.01, K.C[2] - 0.15))
+    elif n_.startswith("cowl"):
+        p_.orient((0, 0.01, K.C[2] - 0.13))
+    elif n_.startswith("stail"):
+        pass        # (two sheets back to back, wound as built)
     else:
         p_.orient()
 
 # ---- the hair's depth: root shade and layers, in the vertex colour (warden_look hair: vertex_ao)
 for p_ in locks:
     if getattr(p_, "t", None) is None:
-        p_.shade = np.full(len(p_.v), 0.6)
+        p_.shade = np.full(len(p_.v), 0.85)
         continue
-    layer = 0.8 if p_.name.startswith("back") else (0.9 if p_.name.startswith(("side", "temple")) else 1.0)
+    layer = 0.86 if p_.name.startswith("back") else 1.0
     p_.shade = np.ones(len(p_.v)) if p_.name.startswith("sweep") else layer * (0.72 + 0.28 * smooth(0.0, 0.22, p_.t))
 
 # ---- weights of the spring-hung pieces
@@ -106,7 +110,6 @@ for p_ in tails:
         w_[names_[b_]][i] += u * (1 - q)
         w_[names_[min(b_ + 1, TAIL_N - 2)]][i] += u * q
     p_.w = w_
-    p_.spots = [tuple(p_.path[int(len(p_.path) * k_)]) + (r_,) for k_, r_ in ((0.34, 0.024), (0.52, 0.018), (0.66, 0.026), (0.82, 0.02))]
 
 # ---- one mesh: the scan first, then the pieces
 faces_v, faces_pid, faces_uv, verts, vw, rooms, shades = [], [], [], [], [], [], []
@@ -170,7 +173,7 @@ def base_name(n):
 
 
 def is_tile(n):
-    return n == "cap" or n.startswith(("sweep", "temple", "fore", "back", "over", "fly", "brow", "chain_", "hook", "eye", "core"))
+    return n == "cap" or n.startswith(("sweep", "fore", "back", "over", "brow", "chain_", "hook", "eye", "core"))
 
 
 # material per face
@@ -183,12 +186,12 @@ for i, p in enumerate(me.polygons):
         m2 = "skin-kael"          # (by the scan's paint, below)
     else:
         pm = PIECE_MAT[n]
-        m2 = {"metal-chain": "metal-kael", "metal-hook": "metal-blade-hot", "metal-blade": "metal-blade-hot", "metal-guard": "metal-kael",
+        m2 = {"metal-chain": "metal-kael", "metal-hook": "metal-blade-hot", "metal-blade": "metal-kael", "metal-guard": "metal-kael",
               "leather-grip": "leather-kael", "hair-brow": "hair-mane"}.get(pm, pm)
-        if n in ("cowl", "stailR", "stailL"):
+        if n.startswith(("cowl", "stail")):
             m2 = "cloth-ember-hot"
-        if n == "eyeL":
-            m2 = "glow-sword"       # the left eye glows white under its scar
+        if n == "eye" + K.GLOW_EYE:
+            m2 = "eyes-glow-hot"    # the eye under the scar glows
     p.material_index = mat_i[m2]
 
 # ---- unwrap the unique pieces
@@ -250,12 +253,12 @@ for i in uniq:
     if n == "face":
         for l in f.loops:
             l[uvl].uv = (l.vert.co.x * 1.0 + 4, l.vert.co.z - 1.4 + 6)
-    elif n in ("mask", "cowl"):
-        off = 7 if n == "mask" else 12
-        cs = [(math.atan2(l.vert.co.x, l.vert.co.y) * (0.75 if n == "mask" else 1.3)) for l in f.loops]
+    elif n == "mask":
+        off = 7
+        cs = [(math.atan2(l.vert.co.x, l.vert.co.y) * 0.75) for l in f.loops]
         # (the seam at the back: faces straddling it unroll on one side)
         if max(cs) - min(cs) > 2.2:
-            cs = [c + 2 * math.pi * (0.75 if n == "mask" else 1.3) if c < 0 else c for c in cs]
+            cs = [c + 2 * math.pi * 0.75 if c < 0 else c for c in cs]
         for l, c in zip(f.loops, cs):
             l[uvl].uv = (c * 0.14 + off, l.vert.co.z - 1.2 + 6)
 # scale each piece to its texel density
@@ -314,11 +317,8 @@ for p in me.polygons:
         r = GLOW_R
     else:
         r = HAIR_R
-    if n == "eyeL":
-        for l in ls:
-            loop_uv[l] = ((GLOW_R[0] + GLOW_R[2]) / 2, (GLOW_R[1] + GLOW_R[3]) / 2)
-        continue
     if n.startswith("eye"):
+        r = EYE2_R if n == "eye" + K.GLOW_EYE else EYE_R
         pc = next(q for q in pieces if q.name == n)
         ev = np.array(p.vertices) - (faces_v[i][0] - pc.f[i - faces_pid.index(faces_pid[i])][0])
         coords = pc.eye_uv[ev]
@@ -487,8 +487,10 @@ for k_, i in enumerate(low_faces):
         m = "cloth-kael"
     elif L_[k_] > 0.5 or (r_ > g_ * 1.7 and b_ > g_ * 0.7):
         m = "cloth-kael"      # the bandages, the scan's own scarf
-    elif region[i][0] in ("armR", "armL", "torso") and r_ > g_ * 1.25:
-        m = "skin-kael-hot" if region[i][0] == "armR" else "skin-kael"
+    elif region[i][0] == "armR" and r_ > g_ * 1.1:
+        m = "skin-kael-hot"
+    elif region[i][0] in ("armL", "torso") and r_ > g_ * 1.25:
+        m = "skin-kael"
     else:
         m = "leather-kael"
     me.polygons[i].material_index = mat_i[m]
@@ -496,16 +498,40 @@ for k_, i in enumerate(low_faces):
 mask = PID == low_pid
 ys, xs = np.nonzero(mask)
 col = sample_scan(POS[ys, xs])
-col = np.power(np.clip(col, 0, 1), 0.92) * 1.08
+col = np.power(np.clip(col, 0, 1), 0.85) * 1.16
 # the near-black trousers up to a readable charcoal, a little cool
-dk = (col.max(1) < 0.2)[:, None]
-col = col * (1 - dk) + (col * 1.5 + np.array([0.075, 0.075, 0.09])) * dk
+dk = (col.max(1) < 0.27)[:, None]
+col = col * (1 - dk) + (col * 1.4 + np.array([0.09, 0.09, 0.105])) * dk
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 OUTC[ys, xs] = col
 # a little of the shared light's occlusion on the scan too
 OUTC[ys, xs] *= (0.62 + 0.38 * np.clip(AO[ys, xs], 0, 1))[:, None]
 
-# the white-gold fissures on the sword arm, shoulder to the bandage
+# the body's paint cleaned to planes: skin to a warm ramp of its smoothed light, the mottling off, the forms sharpened (an
+# unsharp mask at the size of a muscle); silver to a bright clean ramp that keeps its engraving
+def blur_ao(a, m, r):
+    return blur(a, m, r)
+
+
+lumi = OUTC.mean(2)
+ri, gi, bi = OUTC[..., 0], OUTC[..., 1], OUTC[..., 2]
+sat_t = (OUTC.max(2) - OUTC.min(2)) / np.maximum(OUTC.max(2), 0.01)
+skin_t = (mask & (ri > gi * 1.22) & (ri < bi * 2.6) & (lumi < 0.5)).astype(np.float32)
+silver_t = (mask & (sat_t < 0.16) & (lumi > 0.5)).astype(np.float32)
+l1 = blur(lumi, skin_t, 3)
+l2 = blur(lumi, skin_t, 22)
+t_ = np.clip(0.33 + (l1 - l2.mean() * 0 - l2) * 3.4 + (l2 - np.sum(l2 * skin_t) / max(skin_t.sum(), 1)) * 2.2, 0, 1)
+skin_new = P.ramp(t_, P.SKIN)
+keep = lumi - l1                                       # the scars and fine lines, a little
+skin_new = skin_new + keep[..., None] * 0.7
+k_ = (skin_t > 0.5)[..., None]
+OUTC = np.where(k_, skin_new.astype(np.float32), OUTC)
+s1 = blur(lumi, silver_t, 2)
+s2 = blur(lumi, silver_t, 16)
+t_ = np.clip(0.42 + (s1 - s2) * 3.2 + (s2 - 0.62) * 0.8, 0, 1)
+k_ = (silver_t > 0.5)[..., None]
+OUTC = np.where(k_, P.ramp(t_, P.SILVER).astype(np.float32), OUTC)
+
 canvas = P.crack_map(K.HAND_Z + 0.09, K.SHOULDER_Z + 0.09)
 rid = np.zeros(ATLAS * ATLAS, bool).reshape(ATLAS, ATLAS)
 hot_ids = np.zeros(len(me.polygons), bool)
@@ -514,13 +540,13 @@ for i in low_faces:
 armm = (PID == low_pid) & (POS[..., 0] > 0.13) & (POS[..., 2] > K.HAND_Z + 0.09)
 yy, xx = np.nonzero(armm)
 sk_ = OUTC[yy, xx]
-skinny = (sk_[:, 0] > sk_[:, 1] * 1.25) & (sk_.mean(1) < 0.5)
+skinny = (sk_[:, 0] > sk_[:, 1] * 1.15) & (sk_.mean(1) < 0.55)
 yy, xx = yy[skinny], xx[skinny]
 ck = P.cracks(POS[yy, xx], canvas, K.SH)
-core = M.smooth(0.42, 0.62, ck)[:, None]
-rim = M.smooth(0.05, 0.42, ck)[:, None]
-c = np.minimum(OUTC[yy, xx], 0.4)
-c = c * (1 - rim * 0.8) + P.HOT_RIM * rim * 0.8
+core = M.smooth(0.3, 0.5, ck)[:, None]
+rim = M.smooth(0.12, 0.34, ck)[:, None]
+c = np.minimum(OUTC[yy, xx], 0.38)
+c = c * (1 - rim * 0.9) + P.HOT_RIM * rim * 0.9
 c = c * (1 - core) + P.HOT * core
 OUTC[yy, xx] = c
 
@@ -535,9 +561,13 @@ def paint(names_pred, fn):
 
 paint(lambda n: n == "face", lambda p, n, ao: P.face(p, ao))
 paint(lambda n: n == "skull", P.skin)
-paint(lambda n: n.startswith("lid"), P.lid)
+for sd_, sg_ in (("R", 1.0), ("L", -1.0)):
+    paint(lambda n, q="lidU" + sd_: n == q, lambda p, n, ao, sg=sg_: P.lid(p, n, ao, sg, True))
+    paint(lambda n, q="lidD" + sd_: n == q, lambda p, n, ao, sg=sg_: P.lid(p, n, ao, sg, False))
 paint(lambda n: n == "mask", P.mask_cloth)
-paint(lambda n: n == "cowl", P.cowl_cloth)
+for pc_ in cowl_ps[:-1]:
+    paint(lambda n, q=pc_.name: n == q, lambda p, n, ao, sp=pc_.burns: P.burnt(P.wrap_cloth(p, n, ao), p, sp))
+paint(lambda n: n == "cowlcore", lambda p, n, ao: np.broadcast_to(P.hexc("#120508"), p.shape).copy())
 paint(lambda n: n.startswith(("palm", "finger", "thumb")) and n.endswith("L"), P.skin)
 
 
@@ -564,7 +594,7 @@ paint(lambda n: n == "guard", lambda p, n, ao: P.iron(p, n, ao, 0.3))
 paint(lambda n: n == "grip", P.grip)
 paint(lambda n: n == "pommel", lambda p, n, ao: P.iron(p, n, ao, 0.1))
 for p_ in tails:
-    paint(lambda n, q=p_.name: n == q, lambda p, n, ao, sp=p_.spots: P.burnt(P.cloth(p, n, np.maximum(ao, 0.75)), p, sp))
+    paint(lambda n, q=p_.name: n == q, lambda p, n, ao, sp=p_.burns: P.burnt(P.cloth(p, n, np.maximum(ao, 0.75)), p, sp))
 
 # dilate past the island edges
 known = PID >= 0
@@ -593,6 +623,9 @@ OUTC[y0:y1, x0:x1] = P.hook_tile(y1 - y0, x1 - x0)
 x0, y0, x1, y1 = rect(EYE_R)
 v_, u_ = np.mgrid[0:y1 - y0, 0:x1 - x0]
 OUTC[y0:y1, x0:x1] = P.eye((u_ + 0.5) / (x1 - x0) * 2 - 1, ((v_ + 0.5) / (y1 - y0) - 0.5) * 1.5)
+x0, y0, x1, y1 = rect(EYE2_R)
+v_, u_ = np.mgrid[0:y1 - y0, 0:x1 - x0]
+OUTC[y0:y1, x0:x1] = P.eye_glow((u_ + 0.5) / (x1 - x0) * 2 - 1, ((v_ + 0.5) / (y1 - y0) - 0.5) * 1.5)
 x0, y0, x1, y1 = rect(GLOW_R)
 OUTC[y0:y1, x0:x1] = (1.0, 0.98, 0.93)
 
@@ -687,6 +720,9 @@ A = {"anchor_head_top": ("head", (0, 0.0, K.C[2] + 0.12)), "anchor_chest": ("hip
      "weapon_muzzle": ("hand.R", tuple(g + b_ * K.BLADE_LEN)), "anchor_blade_root": ("hand.R", tuple(g + b_ * 0.05)),
      "anchor_blade_mid": ("hand.R", tuple(g + b_ * K.BLADE_LEN * 0.55)),
      "anchor_hook_mouth": (HANG[-2], tuple(np.array(hang_pts[0]) + [0, 0.10, -0.5]))}
+for i_, b_u in enumerate([b_ for pc_ in cowl_ps[:-1] for b_ in pc_.burns][:5]):
+    A["anchor_ember_%d" % i_] = ("hips" if b_u[2] < K.NECK_Z else "head", tuple(b_u[:3]))
+A["anchor_eye_glow"] = ("head", tuple(K.hl(K.EYE * [1 if K.GLOW_EYE == "R" else -1, 1, 1]) + np.array([0, 0.02, 0])))
 for nm, (bn, at) in A.items():
     e = bpy.data.objects.new(nm, None)
     bpy.context.scene.collection.objects.link(e)

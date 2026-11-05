@@ -316,6 +316,7 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_group(v, "Expeditions")
 	_toggle(v, "Damage numbers", "damage_numbers", "Numbers pop up where your hits land")
 	_toggle(v, "Tips during expeditions", "tips", "Short hints about what's around you")
+	_reticle_rows(v)
 	_group(v, "Boki")
 	var talk := [["quiet", "Quiet"], ["normal", "Normal"], ["chatty", "Chatty"]]
 	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger and your health. Chatty: everything it notices")
@@ -334,7 +335,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 			"fire", "secondary", "gear1", "gear2", "signature", "throw", "hunter_ult", "ultimate",
 			"util1", "util2", "util3", "util4", "base",
 		]],
-		["Squad and map", ["map", "scores", "emote", "pass_lead", "separate"]],
+		["Squad and map", ["ping", "map", "scores", "emote", "pass_lead", "separate"]],
 		["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
 	var named := {}
 	for a in Settings.ACTIONS:
@@ -433,6 +434,36 @@ func _tab_demo(v: VBoxContainer) -> void:
 	_choice(v, "Bots leave you be after landing", "demo_fresh", fresh)
 	_toggle(v, "All masks open (offline only)", "demo_all_masks", "Every Mask is pickable. Unlocks are untouched")
 	_note(v, "These apply from the next match you start, offline only. Online matches play the host's rules.")
+
+## Settings > Gameplay > Reticle: the aiming reticle's shape (with a preview), size, colour, opacity and outline.
+func _reticle_rows(v: VBoxContainer) -> void:
+	_group(v, "Reticle")
+	_choice(v, "Shape", "reticle_shape", Reticle.SHAPES, Callable(), "Default: a small broken ring with a dot")
+	var preview := Control.new()
+	preview.custom_minimum_size = Vector2(40, 40)
+	preview.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	preview.draw.connect(func():
+		preview.draw_rect(Rect2(Vector2.ZERO, preview.size), Color(0.16, 0.2, 0.17))
+		Reticle.draw(preview, preview.size * 0.5))
+	Settings.changed.connect(preview.queue_redraw.unbind(1))
+	v.get_child(v.get_child_count() - 1).add_child(preview)
+	_slider(v, "Size", "reticle_size", 0.5, 2.0)
+	var row := _row(v, "Colour", "High-vis yellow stands out best on busy ground")
+	for id in Reticle.COLORS:
+		var sw := Button.new()
+		sw.custom_minimum_size = Vector2(26, 26)
+		sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		sw.tooltip_text = String(Reticle.COLORS[id][0])
+		var chosen: bool = Settings.get_v("reticle_col") == id
+		var face := UI.frame(Reticle.COLORS[id][1], 13, UI.INK if chosen else Color(0, 0, 0, 0), 3)
+		for state in ["normal", "hover", "pressed"]:
+			sw.add_theme_stylebox_override(state, face)
+		sw.pressed.connect(func():
+			Settings.set_v("reticle_col", id)
+			_show_settings.call_deferred())
+		row.add_child(sw)
+	_slider(v, "Opacity", "reticle_alpha", 0.2, 1.0)
+	_toggle(v, "Dark outline", "reticle_outline", "Keeps it readable over bright effects")
 
 ## A small heading over a group of settings rows.
 func _group(v: VBoxContainer, txt: String) -> void:

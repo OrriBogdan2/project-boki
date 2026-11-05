@@ -27,10 +27,11 @@ const WARDENS := {
 	# (Cinder's fin-crest stands over her head)
 	"ashwick": {"hit_r": 0.376, "height": 1.02, "height_3d": 1.11, "width": [0.7, 1.5], "moves": "as_"},
 	# (Kael: body size 1.06, owner Nov 4: 9% bigger; juggernaut.md's 1.12x was at 1.0)
-	"juggernaut": {"hit_r": 0.428, "height": 1.26, "height_3d": 1.24, "width": [0.85, 2.0], "moves": "jug"},
+	"juggernaut": {"hit_r": 0.428, "height": 1.35, "height_3d": 1.28, "width": [0.85, 2.0], "moves": "jug"},
 	"dredge": {"hit_r": 0.452, "height": 1.28, "width": [1.3, 2.4], "moves": "dr_"},     # (~2.25 m, very broad)
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
-	"tender": {"hit_r": 0.34, "height": 0.74, "height_3d": 0.84, "width": [0.5, 1.5], "moves": "mm_"},
+	# (Pip: body size 0.68, item 108; her sheet's 0.74, 3D 0.84, was at 0.78)
+	"tender": {"hit_r": 0.34, "height": 0.65, "height_3d": 0.73, "width": [0.5, 1.5], "moves": "mm_"},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured

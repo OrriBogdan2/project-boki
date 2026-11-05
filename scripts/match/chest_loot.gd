@@ -28,6 +28,8 @@ static func open(m: Match, h: Hunter, c: Dictionary, from_net: bool) -> void:
 	m.sfx("pickup", c["pos"], 0.0, 0.8)
 	m.fx.burst(c["pos"] + Vector3(0, 0.6, 0), Color("f2c84a"), 28, 4.5, 0.6)
 	m.fx.ring(c["pos"], 2.4, Color("f2c84a", 0.9), 0.4)
+	if h == m.player and h.kin is Kin:
+		BokiChatter.say(m, h.kin, "loot")
 	drop(m, h, c, from_net)
 
 ## THE CALL SITE where a chest's contents appear (the perk orbs of ext/perkorbs go in here, at

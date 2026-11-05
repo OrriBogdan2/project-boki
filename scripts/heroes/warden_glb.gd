@@ -53,6 +53,7 @@ const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "bra
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
+const GUM_TAG := "gum"         # a bubble drawn with the gloss pass (gum_gloss.gdshader) instead of an ink shell
 const NO_INK := ["hair", "eyes", "glow", "card"]   # slots drawn without the ink outline shell
 ## The `void` slot is no lit surface but a window onto the Void (shaders/hero_void.gdshader: a drifting
 ## starfield over its painted colour, Ostra's coat tears); "<void>-<tag>" with a SOFT_TAGS tag also fades
@@ -102,7 +103,8 @@ const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (Hunte
 const WEAPON_OFF := "weapon_offhand"
 const SHIELD_PATH := "Rig/Torso/ArmLPivot/Elbow/Hand/Shield"
 const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
-## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire).
+## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire);
+## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide, Sable's flips and Encore).
 const WING_FOLD := "wing_fold"
 const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
 ## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air): the bones the Hero's data
@@ -112,6 +114,7 @@ const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: 
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
 static var _ink: ShaderMaterial  # the painted atlas's ink shell (INK_WIDTH), shared
+static var _gloss_m: ShaderMaterial
 static var _measuring := false  # building that neutral model: no .glb on it
 static var _variants = null     # art name -> the design variant the command line picks (variant())
 static var _look = null         # content/rules/warden_look.json, read once (look())
@@ -694,6 +697,8 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 				m.set_shader_parameter("emit", EMIT)
 				m.set_shader_parameter("emit_flicker", EMIT_FLICKER)
 				_emit_colour(m, arch)
+			if tag == GUM_TAG:
+				m.next_pass = _gloss()      # (a gum bubble: a glossy see-through skin over its toon pass, no ink)
 			if slot == "ice":
 				for k in ICE:
 					m.set_shader_parameter(k, ICE[k])
@@ -748,6 +753,12 @@ static func _emit_colour(m: ShaderMaterial, arch: String) -> void:
 	var g: Dictionary = Arch.def(arch).get("model_glow", {}) if arch != "" else {}
 	if g.has("core"):
 		m.set_shader_parameter("emit_tint", Color(String(g["core"])))
+
+static func _gloss() -> ShaderMaterial:
+	if _gloss_m == null:
+		_gloss_m = ShaderMaterial.new()
+		_gloss_m.shader = load("res://shaders/gum_gloss.gdshader")
+	return _gloss_m
 
 static func _painted_ink() -> ShaderMaterial:
 	if _ink == null:
@@ -947,10 +958,12 @@ class Springs:
 	const WIND := 0.09          # m: how far a scarf tail's tip ripples at rest
 	const FOLD := 0.75          # radians a folded wing tips back about the side axis through its root
 	const TUCK := 0.8           # and turns in behind the back about the vertical
+	const FLARE := 1.15         # radians a flared wing swings out to her side about the front-back axis
 	var skel: Skeleton3D
 	var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world), wing}
-	var fold := 0.0             # 0..1: how far the wing chains are folded (WING_FOLD)
+	var fold := 0.0             # how far the wing chains are folded (1) or flared (-1) (WING_FOLD)
 	var wind_t := 0.0
+	var calm := false           # no ripple (a check measuring how a chain settles)
 
 	func setup(skeleton: Skeleton3D) -> void:
 		skel = skeleton
@@ -994,21 +1007,24 @@ class Springs:
 			var want := PackedVector3Array()
 			# a wing folds: its rest shape tipped back (+Z, behind) and turned in, about its root
 			var turn := Transform3D.IDENTITY
-			if bool(ch["wing"]) and fold > 0.001:
+			if bool(ch["wing"]) and absf(fold) > 0.001:
 				var r0: Transform3D = base * skel.get_bone_global_rest(int(ids[0]))
 				var r1: Transform3D = base * skel.get_bone_global_rest(int(ids[ids.size() - 1]))
 				var out := signf(r1.origin.x - r0.origin.x)
 				var tip_in := Basis(Vector3.UP, -out * TUCK * fold)
 				# (a wing hanging down from its root, Sable's moth wings, tips the other way to go back too)
 				var up := 1.0 if r1.origin.y >= r0.origin.y else -1.0
-				turn = Transform3D(Basis(Vector3.RIGHT, up * FOLD * fold) * tip_in, Vector3.ZERO)
+				if fold > 0.0:
+					turn = Transform3D(Basis(Vector3.RIGHT, up * FOLD * fold) * tip_in, Vector3.ZERO)
+				else:
+					turn = Transform3D(Basis(Vector3.BACK, up * out * FLARE * fold), Vector3.ZERO)
 				turn = Transform3D(Basis.IDENTITY, r0.origin) * turn * Transform3D(Basis.IDENTITY, -r0.origin)
 			for bi in ids:
 				var r: Transform3D = turn * base * skel.get_bone_global_rest(int(bi))
 				rest.append(r)
 				want.append(xf * r.origin)
 			var n := want.size()
-			if ch["wind"]:
+			if ch["wind"] and not calm:
 				# (a long cloth tail never hangs dead: a slow travelling ripple, stronger toward its tip)
 				for i in range(1, n):
 					var u := float(i) / float(n - 1)
