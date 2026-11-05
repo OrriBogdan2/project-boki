@@ -1,6 +1,6 @@
 extends RefCounted
-## --clip-check: every Hero with hand-keyed clips (content/rules/warden_anim/<art>.json). Per Hero: the .glb stays in the
-## tri budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the
+## --clip-check: every Hero with hand-keyed clips (content/rules/warden_anim/<art>.json). Per Hero: the .glb stays in
+## the tri budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the
 ## timings are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the
 ## Gun and Muzzle
 ## lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop. Never touches the save.

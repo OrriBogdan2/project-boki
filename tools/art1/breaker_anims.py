@@ -118,9 +118,10 @@ COCK = dict(pos=(0, -0.03, -0.09), hips=(10, 0, -40), head=(-6, 0, 34), gr=(0.62
             er=(0.9, -0.5, 0.1), fr=(AX + 0.06, -0.2, AZ), fl=(-AX, 0.12, AZ), jaw=0.45, brow=1.0)
 THROWN = dict(pos=(0, 0.09, -0.1), hips=(-30, 0, 34), head=(20, 0, -28), gr=(0.28, 0.62, 0.98), gd=(0.0, 0.95, 0.25), ga=(0, -0.25, 0.95),
               er=(0.9, 0.1, -0.3), fing_r=0.05, thumb_r=0.1, fr=(AX + 0.06, -0.26, AZ), fl=(-AX, 0.26, AZ), fla=0.0, fra=-22.0, jaw=0.75, e="out")
-C.bake("lmb_throw", 0.5, [(0, CARRY), (0.07, merged(COCK, e="out")), (0.14, THROWN),
-                          (0.21, dict(hips=(-34, 0, 44), gr=(0.08, 0.5, 0.62), gd=(-0.2, 0.7, -0.7), ga=(0, 0.7, 0.7), e="io")),
-                          (0.34, dict(pos=(0, 0.03, -0.05), hips=(-16, 0, 18), gr=(0.3, 0.32, 0.62), fing_r=0.3, fr=(AX + 0.03, -0.1, AZ), fl=(-AX, 0.14, AZ), fra=-6.0, jaw=0.3)),
+OVER = dict(pos=(0, 0.03, -0.1), hips=(-8, 0, -4), head=(4, 0, 8), gr=(0.5, 0.2, 1.4), gd=(0.2, 0.2, 0.95), ga=(0, 0.95, -0.2), er=(1, -0.2, 0.1), fing_r=0.8, e="in")
+C.bake("lmb_throw", 0.5, [(0, CARRY), (0.07, merged(COCK, e="io")), (0.11, OVER), (0.19, merged(THROWN, e="io")),
+                          (0.27, dict(hips=(-34, 0, 44), gr=(0.08, 0.5, 0.62), gd=(-0.2, 0.7, -0.7), ga=(0, 0.7, 0.7), e="io")),
+                          (0.38, dict(pos=(0, 0.03, -0.05), hips=(-16, 0, 18), gr=(0.3, 0.32, 0.62), fing_r=0.3, fr=(AX + 0.03, -0.1, AZ), fl=(-AX, 0.14, AZ), fra=-6.0, jaw=0.3)),
                           (0.5, merged(CARRY, FREE, hips=(-7, 0, -3), head=(5, 0, 3)))])
 # recall (0.484 s): the empty right hand goes out for it, then the catch snaps it in onto the shoulder
 C.bake("lmb_recall", 0.484, [(0, merged(CARRY, FREE)),
@@ -128,9 +129,9 @@ C.bake("lmb_recall", 0.484, [(0, merged(CARRY, FREE)),
                              (0.3, dict(pos=(0, -0.05, -0.1), hips=(5, 0, -8), gr=(0.36, 0.3, 1.0), gd=(0.05, 0.1, 1.0), ga=(0, 1, -0.1), fing_r=1.0, thumb_r=1.0, e="snap")),
                              (0.484, merged(CARRY))])
 
-# LMB held: the whirl (item 59): the hammer swung round over his head like a lasso, at arm's length, 1.25 turns a second
+# LMB held: the whirl (item 59): the hammer swung round over his head like a lasso, at arm's length, 1.18 turns a second
 # while the feet stay planted. 0..0.2 goes up into it; 0.2..1.0 loops.
-SPIN_T = 0.8
+SPIN_T = 0.85
 WIND = merged(CARRY, pos=(0, 0, -0.07), hips=(-6, 0, 0), head=(-8, 0, 0), sh=(-0.42, 0.36, 0.86), sn=(-0.4, 0.9, 0.1), er=(1, -0.2, 0.4),
               fr=(AX + 0.07, -0.08, AZ), fl=(-AX - 0.07, 0.1, AZ), jaw=0.55, brow=1.0)
 
@@ -152,7 +153,7 @@ C.bake("lmb_hold", 0.2 + SPIN_T, [(0, CARRY), (0.2, merged(WIND, gr=(0.44, 0.04,
 
 # release (0.5 s): up and over, the impact at 0.08, a shudder, 0.4 s to haul it back
 IMP = dict(pos=(0, 0.13, -0.15), hips=(-26, 0, 14), head=(18, 0, -10), gr=(0.1, 0.74, 0.66), gd=(-0.12, 0.8, -0.58), ga=(0.05, 0.58, 0.8), er=(0.9, 0.2, -0.3),
-           fr=(AX + 0.08, -0.34, AZ), fl=(-AX, 0.36, AZ), fra=-24.0, jaw=0.95, brow=1.0, e="out")
+           fr=(AX + 0.08, -0.34, AZ), fl=(-AX, 0.36, AZ), fra=-24.0, jaw=0.95, brow=1.0, e="io")
 C.bake("lmb_slam", 0.5, [(0, merged(WIND, gr=(0.42, -0.1, 1.42), gd=(0.3, -0.5, 0.8), ga=(0, 0.8, 0.5), hips=(12, 0, -12))), (0.08, IMP),
                          (0.16, dict(pos=(0, 0.13, -0.17), hips=(-28, 0, 13), e="io")),
                          (0.5, merged(STANCE, jaw=0.3, fra=0.0))])
@@ -253,9 +254,9 @@ def laugh(t, p):
 
 C.bake("emote", 2.0, [(0, CARRY), (0.3, LAUGH), (1.7, dict(hips=(14, 0, 0))), (2.0, CARRY)], over=laugh)
 # Fusion: he braces, drives the hammer down and heaves up with the power, arms wide
-C.bake("fuse", 1.2, [(0, CARRY), (0.3, merged(WIND, pos=(0, 0, -0.16), hips=(-30, 0, 0), head=(26, 0, 0), gr=(0.3, 0.42, 0.72), sh=(-0.3, 0.3, 0.72), lid=1.0, jaw=0.0)),
-                     (0.7, dict(pos=(0, 0, 0.02), hips=(14, 0, 0), head=(-22, 0, 0), gr=(0.72, 0.1, 1.46), gd=(0.4, 0, 0.9), ga=(0, 1, 0), sh=(-0.8, 0.1, 1.3), sn=(-0.5, 0.7, 0.4), lid=0.0, jaw=1.0, brow=1.0, e="out")),
-                     (1.0, dict(pos=(0, 0, 0.0))), (1.2, CARRY)])
+C.bake("fuse", 0.8, [(0, CARRY), (0.2, merged(WIND, pos=(0, 0, -0.16), hips=(-30, 0, 0), head=(26, 0, 0), gr=(0.3, 0.42, 0.72), sh=(-0.3, 0.3, 0.72), lid=1.0, jaw=0.0)),
+                     (0.45, dict(pos=(0, 0, 0.02), hips=(14, 0, 0), head=(-22, 0, 0), gr=(0.72, 0.1, 1.46), gd=(0.4, 0, 0.9), ga=(0, 1, 0), sh=(-0.8, 0.1, 1.3), sn=(-0.5, 0.7, 0.4), lid=0.0, jaw=1.0, brow=1.0, e="out")),
+                     (0.6, dict(pos=(0, 0, 0.0))), (0.8, CARRY)])
 
 bpy.context.scene.render.fps = A.FPS
 # the rest shown on load
