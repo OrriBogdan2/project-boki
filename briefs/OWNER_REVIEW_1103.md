@@ -2257,3 +2257,14 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - A fresh save's tutorial shows the WASD prompt as the first step.
   - The Mask moment has no ability showcase.
   - The ability slots unlock visually as they're taught.
+
+## 178b. Teach the glider as "jump twice", and the dash as "Shift", clearly (owner, 18:06 UTC Nov 5)
+- The owner: "we need to explain the glider with jump twice more easily too. and be clear shift is dash (say use space then shift)".
+- **Glider step:**
+  - At a ledge, show the keycaps "SPACE + SPACE" with a tiny animation (a jump, then a second press opens the glider). The text is just "Jump twice to glide".
+  - Then "Space again to close it".
+  - The step completes on opening the glider.
+- **Dash steps:**
+  - On flat ground: the keycap "SHIFT", text "Shift to dash" (item 164).
+  - Then an air-dash step: the keycaps "SPACE → SHIFT", text "Jump, then Shift to dash in the air".
+- Use the bound keys (rebinding-safe), the same keycap visuals as item 178.
