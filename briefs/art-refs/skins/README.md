@@ -11,3 +11,8 @@ One line per skin: file, Hunter, name idea, notes.
   - `sable_splash_alt_window.png`
   - `ryzz_portrait_alt_wide.png`
   - The moonlit-moth Sable concept was suggested as a skin ("Moonlit Sable") but not saved yet.
+- **Vex outfit concepts** (owner exploration Nov 5; any of these may become her master):
+  - `vex_skin_chrome.png`: exposed cyborg body (robotic left arm and leg, cyber-spine, chrome hip).
+  - `vex_skin_rocker.png`: punk rocker (green tartan skirt, skull tee, studded vest, sticker-bombed gun).
+  - `vex_skin_street_racer.png`: neon street racer (racing jacket, bike shorts, glowing thigh-highs).
+  - `vex_skin_mechanic.png`: junkyard mechanic (open robotic forearm, tool belt, grease).
