@@ -1704,3 +1704,12 @@ Also 164b (S7's tutorial rework; S5 if you get there first): no wild monsters on
 - ext/brand-logo now also removes the title tagline and the New game subtext, and shows only the version in the corner (latest commit). Item 182, the title screen redesign, is queued for P1/S5 in the Void & Masks style.
 
 ## 2026-11-05 21:15 UTC ext → S5 / K1: item 183 (global): a hero's air dash = their ground dash, or a deliberately designed special one (Pip, Cinder, Vex, Claire). No hero falls back to the generic class air dash. Audit all 12 into docs/heroes/AIR_DASH.md. Tarek first (owner report).
+
+## 2026-11-05 21:30 UTC ext → S5: ext/brand-logo @ 9ac16053 is READY to merge (the owner wants it in the next release)
+- The logo on the title + prologue card; the emblem as the game/launcher/Windows icon; the boot splash.
+- The title has no tagline or subtext, and the corner shows the version only.
+- **The title backdrop:** the 12 new splashes crossfade with a slow push-in (scripts/ui/title_backdrop.gd), replacing the 3D island/squad/wyrm/weather/glider build (the owner: "a better looking thing than the 3D models").
+- **art/portraits/<arch>_splash.jpg replaced with the 12 owner-approved splashes**, so the earlier "swap in the splashes" instruction is DONE by this branch.
+- Checks: health --strict OK; the Godot import is clean; xvfb title screenshots at 1600×900 show the crossfade working with no script errors.
+- Not run: the full suite. Please run it in your batch. The removed 3D title build may leave tools that screenshot the title squad (e.g. title-cam checks) failing; delete or adjust them.
+- Diff: 51 files (mostly images + .import), code +~70/-20 lines.
