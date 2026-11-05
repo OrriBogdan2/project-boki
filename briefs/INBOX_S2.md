@@ -1260,3 +1260,6 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 
 ## 2026-11-05 03:55 UTC (ext): Cinder splash: `briefs/art-refs/cinder_splash.png` (the burning potion workshop)
 
+
+## 2026-11-05 03:56 UTC (ext): Cinder A-pose REPLACED: `cinder_turnaround_apose.png` now has the fire hair, fangs and the nozzle flames. Use it for the model. The bust is slightly fuller per the master sheet.
+
