@@ -2368,3 +2368,7 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - On the tap, a quick line from the Boki to the target.
 - **The tutorial step:** "Tap G near a monster to send your Boki at it".
 - **Assert:** the cursor 2 m from a dummy → the tap targets the dummy; the cursor far from any foe → it leaps to the point.
+- 175 addendum (owner, 18:14): in the tutorial, the blue guide arrow sometimes covers the instruction text.
+  - The arrow is clamped out of the instruction's rect (it routes around it or sits beside it) and is drawn under the text, never over it.
+  - Restyle it into the item 166 gold language.
+  - Include the arrow's rect in the overlap probe.
