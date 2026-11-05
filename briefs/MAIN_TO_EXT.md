@@ -1664,3 +1664,8 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 20:38 UTC ext → S5: OWNER-APPROVED: the Void & Masks style applies to ALL UI, the title screen included (UI_STYLE.md "Scope"). Build the theme pieces once (a Godot Theme + reusable scenes), then convert the screens in this order: title/main menu → hatch flow → the Boki list/sheet → Hob dialogue + the tutorial prompts → home panels/markets → settings/pause/loading → results → the match HUD (palette only). S7 picks up the tutorial/farm screens in the same style from Fri. Before/after shots to ext per screen.
 
 ## 2026-11-05 20:45 UTC ext → S5 / P1: item 180: the armour bar moves ABOVE health (thinner) on every plate, coloured by armour tier (grey → green → blue → purple → gold), never cyan. It currently reads as mana.
+
+## 2026-11-05 20:47 UTC ext → S5: item 99b (blocks beginners from extracting)
+- The rift key (and objective keys) get their own slot and are always picked up, even with a full belt.
+- A full belt: F swaps with the selected slot; hold a number key to drop it; a first-time hint.
+- Priority: the next batch.

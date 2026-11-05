@@ -2479,3 +2479,20 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - The colour == the tier colour for each tier.
   - No cyan armour anywhere.
 - Owner: P1 (the UI session) or S5.
+
+## 99b. A full utility belt blocked the rift key: keys never use belt slots; swap/drop made obvious (owner playtest with his dad, 18:44 UTC Nov 5)
+- The owner: "his utility belt was full and idk how to clear it - he wanted the rift key. needs to be easier to figure out".
+- **Keys/quest items** (the rift key and any extraction/objective key):
+  - Never go in the utility belt. They have their own key slot (shown by the belt/minimap with the key icon) and are always picked up, even with a full belt.
+  - On pickup, a big callout: "Rift key! Find the rift to extract" + the guide toward the rift.
+- **Full belt, normal items:**
+  - Walking over/pressing F on an item with a full belt shows a world prompt: "Belt full: F to swap with [selected slot icon]", and pressing F swaps (the old item drops on the ground).
+  - The belt's selected slot is highlighted.
+- **Dropping:**
+  - Each belt slot can be dropped: hold its number key ~0.5 s ("Hold 2 to drop"), or right-click the slot in the HUD, or drag it out.
+  - Show "Hold # to drop" on the first time the belt is full.
+- Builds on item 99 (full-inventory loot). Keep its rules otherwise.
+- **Assert:**
+  - With a full belt, the rift key is picked up into the key slot.
+  - With a full belt + F on an item → a swap.
+  - Holding a number key drops that slot.
