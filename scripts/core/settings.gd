@@ -9,7 +9,7 @@ const DEFAULTS := {
 	# audio
 	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
 	# video
-	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 4, "video_v": 2, "shadows": true, "ui_scale": 1.0, "show_fps": false,
+	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 4, "video_v": 2, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
@@ -59,6 +59,14 @@ func quality() -> String:
 		return qv
 	var found := String(v.get("quality_found", ""))
 	return found if QUALITY.has(found) else detect_quality()
+
+## Settings > Video > Frame rate: "" hidden, "fps" the rate alone, "full" the performance overlay
+## (show_fps was a toggle before, so a saved true is the plain rate).
+func fps_mode() -> String:
+	match int(v.get("show_fps", 0)):
+		0: return ""
+		1: return "fps"
+	return "full"
 
 ## A knob of the preset in effect (see QUALITY).
 func q(key: String):
@@ -147,6 +155,7 @@ func _ready() -> void:
 		# crisper by default: 4x MSAA on desktop (the browser build stays on 2x)
 		if int(v.get("msaa", 2)) == 2 or not cf.has_section_key("s", "msaa"): v["msaa"] = 2 if OS.has_feature("web") else 4
 		v["video_v"] = 2
+	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
 	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
 	_quality_basics = not cf.has_section_key("s", "quality")
 	for a in OS.get_cmdline_user_args():

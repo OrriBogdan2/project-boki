@@ -27,12 +27,16 @@ var hud_us := 0
 var vp_rid: RID
 var _hud_hooked := false
 var _end := false
+var _added := {}            # nodes that entered the tree since the last frame, by class:name (named on the worst frames)
 
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--probe-out="): out_path = a.substr(12)
 		if a == "--probe-quick": quick = true
 	vp_rid = get_viewport().get_viewport_rid()
+	get_tree().node_added.connect(func(n: Node):
+		var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
+		_added[k] = int(_added.get(k, 0)) + 1)
 	Match.prof_on = true
 	# a software rasterizer spends most of a frame filling pixels: a small window and no MSAA keep
 	# the probe quick, and change none of the counts (draws, objects, primitives) or the CPU times
@@ -78,7 +82,8 @@ func _process(_delta: float) -> void:
 		"dcv": RenderingServer.viewport_get_render_info(vp_rid, RenderingServer.VIEWPORT_RENDER_INFO_TYPE_CANVAS, RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME),
 		"objs": _rinfo(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME), "prims": _rinfo(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
 		"rcpu": RenderingServer.viewport_get_measured_render_time_cpu(vp_rid) + RenderingServer.get_frame_setup_time_cpu(),
-		"hud": hud_us / 1000.0, "marks": marks, "t": m.time}
+		"hud": hud_us / 1000.0, "marks": marks, "t": m.time, "new": _added.duplicate() if wall > 60.0 else {}}
+	_added.clear()
 	if not frames.is_empty():
 		frames[-1].merge({"draws": rec["draws"], "objs": rec["objs"], "prims": rec["prims"], "rcpu": rec["rcpu"], "d3d": rec["d3d"], "dsh": rec["dsh"], "dcv": rec["dcv"]}, true)
 	# advance the match: quiet stretches run several steps per drawn frame so the probe stays short
@@ -286,6 +291,8 @@ func _finish() -> void:
 	lines.append("PROBE worst frames (wall ms, script ms, render cpu ms, phase, sim t, build steps inside):")
 	for f in after.slice(0, 8):
 		lines.append("PROBE   %7.1f %7.2f %7.1f hud %5.1f %-9s t=%5.1f %s" % [f["wall"], f.get("proc", 0.0), f.get("rcpu", 0.0), f.get("hud", 0.0), f["phase"], f.get("t", 0.0), ", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]]))])
+		if not (f.get("new", {}) as Dictionary).is_empty():
+			lines.append("PROBE           new nodes: %s" % str(f["new"]))
 	lines.append("PROBE memory: textures %.1f MB, buffers %.1f MB, video %.1f MB, static %.1f MB, objects %d, nodes %d" % [
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0, Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
