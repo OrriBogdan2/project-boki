@@ -554,7 +554,7 @@ def pack(objs, gap=0.0016):
             else:
                 q *= tex * math.sqrt(a3 / a2)
             lo, hi = q.min(0), q.max(0)
-            size = np.minimum(hi - lo, 1.2) + 1e-4
+            size = np.minimum(hi - lo, 3.0) + 1e-4
             q = np.minimum(q - lo, size) + lo
             turn = size[0] > size[1]
             isl.append((float(max(size)), float(min(size)), turn, lo, ob, loops, q))
