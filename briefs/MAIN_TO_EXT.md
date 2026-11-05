@@ -1399,3 +1399,6 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 - 119: cut the word popups (SWEET SPOT, VAULT RESET, all payoff_fx labels); keep damage numbers and essentials. The owner says Supervive doesn't do this and it clutters the screen. One switch in ArchKit.payoff_fx is fine.
 - 120: Sable ult: a full-body spin, ~50% slow while it runs, more impact, and a much stronger, visible outer-edge bonus.
 - Both go in the next batch and release. Never block on owner questions.
+
+## 2026-11-05 16:58 UTC ext → S5: owner item 121
+- Sable's Bola passes through people, and ANY second contact stuns: person→person, person→tree/wall (pinned), tree/wall→person. Details in OWNER_REVIEW_1103 item 121. Batch with 119/120.

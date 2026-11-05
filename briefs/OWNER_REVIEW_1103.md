@@ -1119,3 +1119,20 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Rim hits look and sound different.
 - Note: the owner may have tested an old build, but he wants this anyway.
 - **Assert:** the cast → a spin anim playing for the duration; move speed ~0.5x; a rim hit deals ≥1.6x an inner hit.
+
+## 121. Sable RMB (Bola): passes through people; a second contact (person OR tree/wall) stuns (owner, 16:56 UTC Nov 5)
+- The owner: "sable rmb needs to pass through people and stun if it hits a second person (or a tree, anything it connects with - same with tree->person = stun)".
+- Code today (thief_kit.gd header): it grounds and slows the first foe and flies on; it bounces once off a wall; a second foe means both are stunned. Missing: wall and tree contacts count as the stun trigger.
+- **New rule:**
+  - The Bola always passes through people.
+  - Any second contact of any kind stuns:
+    - person → person: both stunned (as now).
+    - person → tree/wall/rock/any solid: that person stunned (pinned to it, the Ashe-style read).
+    - tree/wall → person: the person hit after the wall is stunned.
+  - The first person contact alone still grounds and slows.
+  - Keep the bonus damage on a stun.
+- Make the stun read: a tether/wrap VFX + a snap sound.
+- Update the data, the card text and the tutorial line.
+- **Assert:**
+  - Each of the three cases stuns.
+  - A single person with nothing behind → grounded and slowed only.
