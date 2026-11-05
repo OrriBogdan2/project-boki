@@ -1181,3 +1181,12 @@ A full redesign; `ext/art1-breaker` restarts from this.
 
 ## 2026-11-05 03:14 UTC (ext): Breaker retitled "the Sunken Bulwark" (DECISIONS updated)
 Update the player-facing text in the same rename sweep as Lisette. The anglerfish design question is pending the owner.
+
+## 2026-11-05 03:16 UTC (ext): Breaker turnaround + ANGLERFISH DECISION (owner)
+- **Model reference:** `briefs/art-refs/breaker_turnaround.png`, 4 views: front, left, back, right. Ignore the garbled expression row at the bottom; use the master sheet's.
+- **Anglerfish (owner decision): always on him, COSMETIC ONLY.** No kit or balance change. It dangles on its line from the broken mast and reacts:
+  - **Walking:** bobs and swings (spring sim, cheap).
+  - **Blocking a hit:** shivers.
+  - **Mood:** wiggles happily when his porthole mood is happy.
+  - **Ult** (the ice / sea path over the abyss): its lure flares bright for the duration.
+  - Its lure is a small glowing dot visible from top-down. Keep it subtle enough not to look like a pickup or projectile (clarity, item 96).
