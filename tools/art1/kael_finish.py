@@ -70,7 +70,7 @@ for p_ in locks:
         p_.shade = np.full(len(p_.v), 0.6)
         continue
     layer = 0.8 if p_.name.startswith("back") else (0.9 if p_.name.startswith(("side", "temple")) else 1.0)
-    p_.shade = layer * (0.72 + 0.28 * smooth(0.0, 0.22, p_.t))
+    p_.shade = np.ones(len(p_.v)) if p_.name.startswith("sweep") else layer * (0.72 + 0.28 * smooth(0.0, 0.22, p_.t))
 
 # ---- weights of the spring-hung pieces
 def along_chain(p, names, pts, top_bone):
@@ -497,6 +497,9 @@ mask = PID == low_pid
 ys, xs = np.nonzero(mask)
 col = sample_scan(POS[ys, xs])
 col = np.power(np.clip(col, 0, 1), 0.92) * 1.08
+# the near-black trousers up to a readable charcoal, a little cool
+dk = (col.max(1) < 0.2)[:, None]
+col = col * (1 - dk) + (col * 1.5 + np.array([0.075, 0.075, 0.09])) * dk
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 OUTC[ys, xs] = col
 # a little of the shared light's occlusion on the scan too

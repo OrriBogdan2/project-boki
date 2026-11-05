@@ -163,7 +163,8 @@ def cowl_cloth(p, n, ao):
     wob = (fbm(p * [9, 9, 3]) - 0.5) * 0.03
     t = lit(n, np.maximum(ao, 0.7)) * 0.86
     a2 = np.sin(a * 3 + 1.0) * 0.012
-    for z0, dip, k in ((1.30, 0.03, 0.6), (1.272, 0.045, 0.7), (1.25, 0.06, 1.0), (1.226, 0.085, 0.8), (1.20, 0.1, 0.8)):
+    zc = K.C[2]
+    for z0, dip, k in ((zc - 0.066, 0.008, 0.8), (zc - 0.09, 0.012, 0.9), (zc - 0.124, 0.02, 1.0), (zc - 0.15, 0.036, 0.9), (zc - 0.185, 0.05, 0.7)):
         k = k * np.clip(1.5 * fbm(np.stack([a * 2.2, 0 * a + z0 * 9, 0 * a], -1)) - 0.15, 0, 1.2)
         d = p[..., 2] - (z0 - dip * fr + wob + a2)
         t = t - k * 0.42 * np.exp(-((d + 0.003) / 0.0042) ** 2) + k * 0.16 * np.exp(-((d - 0.008) / 0.009) ** 2)
@@ -258,7 +259,7 @@ def crack_map(z0, z1, W=1100, H=900, cells=46):
             d1 = np.minimum(d1, d)
     edge = (d2 - d1)
     fade = 0.55 + 0.45 * np.sin(u * 37 + v * 23)          # the width swells and pinches along a fissure
-    wd = 0.012 * (0.55 + 0.45 * fade)
+    wd = 0.0052 * (0.55 + 0.45 * fade)
     return np.clip(1.25 - edge / wd, 0, 1), z0, z1
 
 

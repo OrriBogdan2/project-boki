@@ -173,8 +173,8 @@ def mask():
     return Piece("mask", "cloth-kael", hl(verts), grid_faces(rows + 1, cols)).rigid("head")
 
 
-COWL_BURNS = [(-0.07, 0.15, C[2] - 0.11, 0.021), (0.085, 0.135, C[2] - 0.13, 0.017), (0.13, 0.13, C[2] - 0.21, 0.024), (-0.15, 0.13, C[2] - 0.2, 0.018),
-              (0.015, 0.17, C[2] - 0.2, 0.014)]
+COWL_BURNS = [(-0.062, 0.12, C[2] - 0.075, 0.017), (0.07, 0.115, C[2] - 0.095, 0.013), (0.115, 0.115, C[2] - 0.185, 0.020),
+              (-0.125, 0.105, C[2] - 0.175, 0.015), (0.01, 0.155, C[2] - 0.165, 0.011)]
 
 
 def cowl():
@@ -182,9 +182,9 @@ def cowl():
     cols = 26
     z = C[2]
     # (z, half width, half depth, y): the funnel's top edge stands off the face, then it widens onto the shoulders
-    prof = [(z - 0.022, 0.092, 0.100, 0.018), (z - 0.046, 0.106, 0.114, 0.018), (z - 0.078, 0.122, 0.128, 0.016),
-            (z - 0.105, 0.134, 0.138, 0.014), (z - 0.128, 0.142, 0.142, 0.012), (z - 0.152, 0.168, 0.152, 0.012),
-            (z - 0.185, 0.215, 0.172, 0.012), (z - 0.225, 0.262, 0.186, 0.010), (z - 0.262, 0.286, 0.190, 0.008)]
+    prof = [(z - 0.026, 0.096, 0.108, 0.022), (z - 0.044, 0.112, 0.122, 0.020), (z - 0.062, 0.116, 0.126, 0.018), (z - 0.080, 0.108, 0.118, 0.016),
+            (z - 0.096, 0.122, 0.130, 0.014), (z - 0.112, 0.138, 0.142, 0.014), (z - 0.128, 0.130, 0.134, 0.012), (z - 0.146, 0.152, 0.142, 0.012),
+            (z - 0.168, 0.196, 0.156, 0.012), (z - 0.194, 0.238, 0.166, 0.010), (z - 0.222, 0.262, 0.170, 0.008)]
     rows = len(prof)
     verts, w_head = [], []
     rng = np.random.RandomState(5)
@@ -194,9 +194,9 @@ def cowl():
         for j in range(cols):
             a = j / cols * 2 * np.pi
             sx, cy = np.sin(a), np.cos(a)
-            sag = (0.5 * (cy + 1)) ** 1.5 * 0.06 * k ** 1.4 - (0.5 * (1 - cy)) * 0.022 * k
-            lobes = (0.010 * np.sin(a * 3 + 0.8 + k * 2.2) + 0.008 * np.sin(a * 5 + 2.1 - k)) * smooth(0.05, 0.5, k)
-            hem = 0.024 * jag[j] * k ** 8
+            sag = (0.5 * (cy + 1)) ** 1.5 * 0.05 * k ** 1.6 - (0.5 * (1 - cy)) * 0.015 * k
+            lobes = (0.011 * np.sin(a * 3 + 0.8 + k * 2.2) + 0.009 * np.sin(a * 5 + 2.1 - k)) * smooth(0.05, 0.5, k)
+            hem = 0.03 * jag[j] * k ** 10
             verts.append([sx * (hw + lobes), y + cy * (hd + lobes), zz - sag + hem])
             w_head.append(1.0 - smooth(0.25, 0.7, k))
     verts = np.array(verts)
@@ -443,7 +443,7 @@ LENS = [(-1, 0), (-0.45, 0.38), (0.45, 0.38), (1, 0), (0.45, -0.3), (-0.45, -0.3
 DIA = [(-1, 0), (0, 0.42), (1, 0), (0, -0.32)]
 
 
-def lock(name, pts, w0, rings=7, wide=False, peak=0.32, tip=0.0, hint=None, tile=0.0, group=None):
+def lock(name, pts, w0, rings=7, wide=False, peak=0.32, tip=0.0, hint=None, tile=0.0, group=None, v0=0.0):
     path = catmull(pts, rings)
     k = np.linspace(0, 1, rings)
     prof = np.minimum(1.0, 0.55 + k / peak * 0.45) * (1 - smooth(peak, 1.0, k)) ** 0.8
@@ -452,7 +452,7 @@ def lock(name, pts, w0, rings=7, wide=False, peak=0.32, tip=0.0, hint=None, tile
         c = np.array([0, -0.03, 1.40])
         hint = norm(path[0] - c)
     u0 = tile
-    p = sweep(name, "hair-mane", path, LENS if wide else DIA, wd, side_hint=hint, uv_rect=(u0, 0, u0 + 0.25, 1),
+    p = sweep(name, "hair-mane", path, LENS if wide else DIA, wd, side_hint=hint, uv_rect=(u0, v0, u0 + 0.25, 1),
               room=0.0, depth=wd * (0.5 if wide else 0.62))
     p.t = np.repeat(k, len(LENS if wide else DIA))
     p.group = group
@@ -469,8 +469,8 @@ def mane():
     # the sweep: from the hairline over the crown and down behind the head
     for i, x in enumerate((-0.062, -0.036, -0.012, 0.012, 0.036, 0.062)):
         s = np.sign(x)
-        add("sweep%d" % i, [(x * .9, .082, top - .03 - abs(x) * .4), (x * 1.15, .05, top + .022 - abs(x) * .3), (x * 1.3, -.02, top + .03 - abs(x) * .4),
-                            (x * 1.5, -.09, top - .02), (x * 1.75, -.13, top - .12), (x * 1.9, -.145, top - .24)], .062, rings=7, wide=True, tile=tile(i), group=None)
+        add("sweep%d" % i, [(x * .9, .079, top - .045 + .012 * np.sin(i * 2.6) - abs(x) * .3), (x * 1.15, .056, top + .018 - abs(x) * .3), (x * 1.3, -.02, top + .03 - abs(x) * .4),
+                            (x * 1.5, -.09, top - .02), (x * 1.75, -.13, top - .12), (x * 1.9, -.145, top - .24)], .062, rings=7, wide=True, tile=tile(i), group=None, v0=0.2)
     for s in (1.0, -1.0):
         # the sides: from the temples past the ear, behind the shoulders
         add("temple_a%d" % s, [(s * .066, .07, top - .05), (s * .092, .03, top - .05), (s * .105, -.02, top - .11), (s * .115, -.06, top - .2), (s * .14, -.09, top - .32),
@@ -478,7 +478,7 @@ def mane():
         add("temple_b%d" % s, [(s * .082, .02, top - .02), (s * .112, -.03, top - .05), (s * .125, -.08, top - .16), (s * .135, -.115, top - .3), (s * .13, -.14, top - .5)], .056, rings=6,
             wide=True, tile=tile(1), group="r" if s > 0 else "l")
         # the loose strands down each side of the face, over the funnel
-        add("fore_a%d" % s, [(s * .026, .082, top - .03), (s * .05, .086, top - .08), (s * .062, .074, top - .15), (s * .07, .076, top - .23), (s * .064, .10, top - .30)], .014, rings=6,
+        add("fore_a%d" % s, [(s * .03, .08, top - .03), (s * .058, .078, top - .07), (s * .072, .064, top - .14), (s * .082, .07, top - .2), (s * .088, .09, top - .25)], .0075, rings=6,
             tile=tile(0))
     # the fall down his back
     z = top - .08
