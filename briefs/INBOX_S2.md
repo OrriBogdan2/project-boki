@@ -1347,3 +1347,14 @@ See OWNER_REVIEW item 109: the aim is currently stuck to one direction during he
 ## 2026-11-05 05:18 UTC (ext): Ryzz turnaround + portrait saved (ryzz_turnaround_apose.png, ryzz_portrait.png). Splash pending a redo: the first one gave her pistols, but she is hands-free.
 
 ## 2026-11-05 05:20 UTC (ext): Ryzz splash: `ryzz_splash.png` (hyped, arms up, lightning off her hands, neon city rooftop). Ryzz complete. Future skin ideas now live in `briefs/art-refs/skins/README.md`.
+
+## 2026-11-05 05:25 UTC (ext): WEAPON / PROP SHEETS: `briefs/art-refs/<hero>_weapons.png`
+Use them for shape and detail; **the master sheet wins on any difference.**
+
+| Hero | File | Covers | Fix vs the master sheet |
+|---|---|---|---|
+| Pip | `pip_props.png` | the star lantern, satchel + vials + scroll, the leaf cape, goggles | none (excellent) |
+| Grimble | `grimble_weapons.png` | the gaff hook + chain, the hoard (front/side/back), the monocle, blunderbuss, gauntlets | none |
+| Claire | `claire_weapons.png` | the ice spear with the heart guard, fur-cuffed skates with ice blades | the spear shaft is **candy-cane striped** (white/pale blue) per the master; this sheet draws it plain |
+| Sable | `sable_weapons.png` | the flintlocks (all angles, lock detail), keys, the bola, the gem pendant | the pistols carry **glowing violet runes along the barrel + violet crystals** per the master; this sheet shows only the purple muzzle |
+| Cinder | `cinder_weapons.png` | the brass flamethrower, tank harness, goggles, vial belt | the tank is **copper + glass with bubbling liquid fire and two exhaust nozzles on top venting flame** (her ult jets) per the master; this sheet's tank lacks the nozzles |
