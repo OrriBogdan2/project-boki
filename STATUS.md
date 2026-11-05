@@ -775,3 +775,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Checks on the tip: rig-standard, clip-check, clip-live-grimble, clip-live, warden-model, dredge-combo, health --strict. Pre-merge: warden-glb, warden-stance, mantle-look. Full suite (132) before the final tweak and a 38-commit main merge: baseline reds + farm-tutorial (flake, also on clean main). clip-check's constant still says 20000.
 - **Kit text for an owner call:** gender robot, personality, fantasy, silhouette, tells, ult Brass Broadside, RMB Abyssal Hand, E Anchor Drop, dash desc; hero_gear_pair still dresses the old helm on the procedural fallback.
 - Owner Qs: wider shoulder OK (the rig's arms tear otherwise)? Ball with a proper chain and framed face next pass?
+
+## 2026-11-05 S2: ext/art2-kael cf1e6343 READY (one extra dj_fx compile vs main); ext/art2-lisette 9193bc48 pending its --hitch-check
+- Warm-up fix in, details in EXT_TO_MAIN. hero-vfx OK, juggernaut-combo 164/0, hero-combo 272/0, archer-combo 128/0, health --strict on both.
