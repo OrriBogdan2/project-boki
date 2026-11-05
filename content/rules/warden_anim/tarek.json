@@ -75,9 +75,6 @@
 		"breah_lunge": {
 			"clip": "rmb_lunge"
 		},
-		"breah_dash": {
-			"clip": "dash_leap"
-		},
 		"breah_leap_land": {
 			"clip": "dash_land"
 		},

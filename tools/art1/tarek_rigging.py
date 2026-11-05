@@ -594,6 +594,8 @@ def scan_slots(ob):
 HEAD_GLB = "~/meshy/tarek_m/head_bake/low.glb"     # the head from tarek_head.png, baked (tarek_head_bake.json)
 HEAD_TRIS = 3400
 CHIN_K = 0.686                # the chin's depth under the hair top, as a share of the head model's height (the sheet's front view)
+HEAD_BIG = 1.22               # the master's head against his shoulders
+NECK_R = 0.135                # m: the body's neck, cut inside this round the head's axis (the stone shoulder stays)
 NECK_CUT = 0.075              # m under the chin: where the head's neck stops and the body's begins
 
 
@@ -626,7 +628,9 @@ def scan_head(body):
     H = float(Q[:, 2].max() - Q[:, 2].min())
     k = (top - chin) / (CHIN_K * H)
     mid = (Q[Q[:, 2] > Q[:, 2].max() - 0.3 * H]).mean(0)
-    Q = (Q - np.array((mid[0], mid[1], Q[:, 2].max()), np.float32)) * k + np.array((float(HC[0]), float(HC[1]), top), np.float32)
+    k *= HEAD_BIG
+    # (the chin stays where the neck wants it; the head grows up from there)
+    Q = (Q - np.array((mid[0], mid[1], Q[:, 2].max()), np.float32)) * k + np.array((float(HC[0]), float(HC[1]), chin + CHIN_K * H * k), np.float32)
     head.data.vertices.foreach_set("co", Q.ravel())
     head.data.update()
     # the bust goes: only hair stays under the neck cut
@@ -658,7 +662,7 @@ def scan_head(body):
     bm = bmesh.new()
     bm.from_mesh(me)
     bm.faces.ensure_lookup_table()
-    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index == hair or f.calc_center_median().z > cut], context="FACES")
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index == hair or (f.calc_center_median().z > cut and math.hypot(f.calc_center_median().x, f.calc_center_median().y + 0.02) < NECK_R)], context="FACES")
     bm.to_mesh(me)
     bm.free()
     # skin: each head vertex rides the head bone, its locs the body's chains by the nearest old vertex
@@ -685,7 +689,7 @@ def scan_head(body):
     for pl in head.data.polygons:
         pl.use_smooth = True
     for m in head.data.materials:
-        m.name = "hair-head"
+        m.name = "skin-head"
     log("head: tris", len(head.data.polygons), "scale %.3f" % k, "tone", tone)
     return head, tone
 
