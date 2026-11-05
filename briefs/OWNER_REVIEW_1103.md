@@ -1256,3 +1256,21 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - Knife into a wall → recast → she is within 1 m of the knife, on the thrower's side, not overlapping collision.
   - The same for a tree.
+
+## 129. A weird mid-air explosion on dash heroes (Vex, Sable so far) + Sable's air dash must match her ground dash (owner, 17:13 UTC Nov 5, v0.23.0)
+- The owner: "i keep getting this weird explosion in air with dash characters - vex and sable so far. also sable dash in the air is different than on the ground, which is incorrect".
+- **The explosion:** find it and kill it.
+  - Suspects:
+    - hunter.gd glide_handoff → `_glide_boost_fx` (boost_fx_t trail + whoosh) firing when an air dash ends and the glider opens.
+    - A shared class air-dash (ex) burst.
+    - ashwick's bellows "poof" leaking to other kits.
+    - A payoff/DashReset flash.
+  - Repro: jump + dash with Vex and with Sable on v0.23.0 and capture frames.
+  - Remove whatever isn't the hero's own dash VFX. If it's the glide-boost, make it a subtle trail only (no burst).
+  - Check every dash hero for the same thing.
+- **Sable's air dash = her ground dash:** thief_kit.on_dash uses air_dist/air_time and the class long-dash ("ex") path in the air.
+  - Make the air Cartwheel identical to the ground one: the same distance, time, anim, invuln, Vault charge use and empowering. Only gravity/landing differ (she still lands in her crouch).
+  - Drop the separate air values (keep momentum into the landing).
+- **Assert:**
+  - No unexpected fx spawns (log the fx ids) on an air dash for all 12 heroes.
+  - Sable's air dash distance and time == ground ±5%.

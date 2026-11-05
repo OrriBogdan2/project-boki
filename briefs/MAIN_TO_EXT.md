@@ -1444,3 +1444,7 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 ## 2026-11-05 17:14 UTC ext → S5: owner item 128 + a clarification on 126
 - 128: Sable's E knife stuck in a wall/tree must still let her blink; she lands next to it on her side.
 - 126: the owner clarifies that Brall's (and Kael's) RMB+E isn't a "speed boost trick". It's momentum play: the pull velocity and the Lunge combine as real vectors, so aim vs pull direction gives curves, swings and slingshots. Spec updated. Apply the same thinking to Kael's movement chains where it fits.
+
+## 2026-11-05 17:16 UTC ext → S5: owner item 129 (a bug: priority over the feel items)
+- A weird explosion in mid-air on dash heroes (Vex, Sable) in v0.23.0. Find it (suspect the glide_handoff boost fx or a shared air-dash burst) and remove it; check all heroes.
+- Sable's air dash must be identical to her ground dash.
