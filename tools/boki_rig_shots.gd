@@ -10,6 +10,9 @@ const FACES := ["neutral", "happy", "sad", "sleepy", "angry", "bliss"]
 const COATS := [{"mark": "spots", "mark_col": "dark", "eye": "sky"},
 	{"mark": "stripes", "mark_col": "light", "eye": "amber"},
 	{"mark": "patches", "mark_col": "glow", "eye": "rose"}, {"mark": "plain", "eye": "classic"}]
+## Far shots: [clip, at (s), face], left to right.
+const ACTION := [["idle", 0.5, "neutral"], ["run", 0.1, "cheer"], ["ability", 0.5, "angry"], ["hop", 0.45, "happy"]]
+const EMOTES := [["idle", 0.5, "happy"], ["idle", 0.5, "sad"], ["idle", 0.5, "sleepy"], ["idle", 0.5, "angry"]]
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry"]
 const GIF_FPS := 15
 const MATCH_PITCH := 66.0
@@ -40,9 +43,10 @@ func run(m: Node) -> void:
 	await _faces()
 	await _coats()
 	await _anims()
-	await _far("match.png", MATCH_DIST, 1.0)
-	await _far("farm.png", FARM_DIST, FARM_BOKI_SCALE)
-	await _far("farm_close.png", FARM_CLOSE_DIST, FARM_BOKI_SCALE)
+	await _far("match.png", MATCH_DIST, 1.0, ACTION, PI * 0.8)
+	await _far("farm.png", FARM_DIST, FARM_BOKI_SCALE, ACTION, PI * 0.8)
+	await _far("farm_faces.png", FARM_DIST, FARM_BOKI_SCALE, EMOTES, PI)
+	await _far("farm_close.png", FARM_CLOSE_DIST, FARM_BOKI_SCALE, EMOTES, PI)
 	print("BOKI_RIG_SHOTS_DONE")
 	main.get_tree().quit()
 
@@ -215,7 +219,7 @@ func _clip(vp: SubViewport, rig: BokiRig, c: String) -> void:
 			next += every
 	sheet.save_png(out.path_join("anim_%s.png" % c))
 
-func _far(file: String, dist: float, boki_scale: float) -> void:
+func _far(file: String, dist: float, boki_scale: float, picks: Array, yaw: float) -> void:
 	var vp := _stage(Vector2i(1920, 1080))
 	var cam := Camera3D.new()
 	vp.add_child(cam)
@@ -224,13 +228,12 @@ func _far(file: String, dist: float, boki_scale: float) -> void:
 	var p := deg_to_rad(MATCH_PITCH)
 	cam.position = Vector3(0, sin(p), cos(p)) * dist
 	cam.rotation = Vector3(-p, 0, 0)
-	var picks := [["idle", 0.5, "neutral"], ["run", 0.1, "cheer"], ["ability", 0.5, "angry"], ["hop", 0.45, "happy"]]
 	for i in picks.size():
 		var kr := _kin(vp)
 		var k := kr[0] as Node3D
 		k.scale = Vector3.ONE * boki_scale
 		k.position = Vector3((i - 1.5) * 1.5 * boki_scale, 0, 0)
-		k.rotation.y = PI * 0.8
+		k.rotation.y = yaw
 		var rig := kr[1] as BokiRig
 		await RenderingServer.frame_post_draw
 		rig.set_clip(String(picks[i][0]), 0.0)

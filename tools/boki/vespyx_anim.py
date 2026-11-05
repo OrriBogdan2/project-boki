@@ -47,7 +47,7 @@ def _bones():
 
 
 BONES = _bones()
-LOOK_UP = 0.2      # standing, it looks up at you: the high cameras then see its face, not the top of its head
+LOOK_UP = 0.36      # standing, it looks up at you: the high cameras then see its face, not the top of its head
 # the tail reaching forward over the head, joint by joint: base swings forward, the tip unrolls
 STAB = (-0.35, -0.45, -0.5, -0.25, 0.25, 0.5, 0.55)
 HACK = (-0.42, -0.46, -0.46, -0.22, 0.28, 0.5, 0.6)
