@@ -2950,26 +2950,19 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 		r.add_child(kc)
 		var tv := UI.vbox(1); tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		tv.add_child(UI.label(nm, UI.T_BODY, c, UI.semi))
-		if compact:
-			var dl := UI.label(desc, 12, UI.MUTED)
-			dl.autowrap_mode = TextServer.AUTOWRAP_OFF
-			dl.clip_text = true
-			dl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-			dl.tooltip_text = desc
-			dl.mouse_filter = Control.MOUSE_FILTER_PASS
-			tv.add_child(dl)
-		else:
-			tv.add_child(UI.para(desc, 12, UI.MUTED))
+		tv.add_child(UI.para(desc, 12, UI.MUTED))
 		r.add_child(tv)
 		c2.add_child(r)
+	if compact:
+		c2.add_child(BokiMoves.new(String(rec["species"]), rec))      # tiles with tips (item 82)
 	# read from its parts (the kin grammar): what it does, coloured by effect category
-	for ai in abl.size():
+	for ai in (0 if compact else abl.size()):
 		var ad := KinLib.ability(String(abl[ai]))
 		if ad == null: continue
 		var eff := KinLib.effective(ad, "k1" if ai == 0 else "k2", kspec, rec)
 		ab_row.call(Settings.key_cap("signature") if ai == 0 else "auto", ad.display_name, (KinText.ability(eff) if ai == 0 else KinText.when(ad) + ": " + KinText.ability(eff)), KinText.color(ad).lerp(UI.INK, 0.3))
 	var ud := KinLib.merge(String(sp.get("ultimate", "")))
-	if ud:
+	if ud and not compact:
 		ab_row.call(Settings.key_caps("ultimate"), "Fusion: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
 	if kspec == null:
 		return

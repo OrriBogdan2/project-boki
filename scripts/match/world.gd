@@ -1348,6 +1348,14 @@ static func _thin(items: Array, keep: float, seed_i: int) -> Array:
 
 ## Scatter batches split into 16x16-tile chunks, so the camera only draws the ones it can see.
 func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: String, shadows := false, chunk := 16) -> void:
+	if shadows:
+		# rocks and trees under the caster size go in batches of their own that don't cast (item 94)
+		var parts := ShadowPolicy.split_instances(items, mesh)
+		if not (parts[1] as Array).is_empty():
+			await _chunked(parent, parts[1], mesh, mat, label + "_small", false, chunk)
+		items = parts[0]
+		if items.is_empty():
+			return
 	var cls := _scatter_class(label, chunk)
 	var draw_k := float(Settings.q("draw"))
 	var vis_end := 0.0

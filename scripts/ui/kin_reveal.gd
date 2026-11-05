@@ -41,6 +41,7 @@ var spin_v := 0.0            # turntable speed from input (rad/s)
 var dragging := false
 var ready_to_name := false
 var met := false             # it has looked at you (the imprint moment is done)
+var moves: BokiMoves = null   # the move tiles on the card (hover or focus one for its tip)
 var rare := false            # hatched from a boss's Rare Egg (said on the card, never shouted)
 var moment: Tween
 
@@ -155,13 +156,9 @@ func _build() -> void:
 	sub_lbl.modulate.a = 0.0
 	# the info card on the right
 	info = _info_card()
-	info.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
-	info.offset_right = -48
-	info.offset_left = -48 - 400
-	info.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	info.grow_vertical = Control.GROW_DIRECTION_BOTH
 	info.modulate.a = 0.0
 	root.add_child(info)
+	_place_card.call_deferred()      # once in the tree, so it is sized from its real fonts
 	# the hint under the kin
 	hint = UI.label("Drag to turn it round  ·  A / D", 15, UI.MUTED)
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
@@ -200,6 +197,14 @@ func _fur_sparkle() -> CPUParticles3D:
 	p.color_ramp = g
 	return p
 
+## The card hugs the middle of the right edge at its own height.
+func _place_card() -> void:
+	info.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT, Control.PRESET_MODE_MINSIZE)
+	info.offset_right = -48
+	info.offset_left = -48 - 400
+	info.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	info.grow_vertical = Control.GROW_DIRECTION_BOTH
+
 func _info_card() -> PanelContainer:
 	var card := UI.card(Color(0.08, 0.08, 0.1, 0.92), 18, 14)
 	UI.set_card_border(card, UI.LINE, 1)
@@ -211,10 +216,10 @@ func _info_card() -> PanelContainer:
 	head.add_child(nm)
 	head.add_child(_chip(String(sp.get("type", "")).capitalize(), UI.MUTED))
 	v.add_child(head)
-	var animals: Array = sp.get("animals", [])
-	if not animals.is_empty():
-		v.add_child(UI.label("Part %s" % " · part ".join(animals.map(func(a): return String(a).to_lower())), 15, UI.MUTED))
-	# what makes this one its own: plain words, the same colour as everything else
+	# one line on what it is, then who this one is: the Boki itself leads, its moves are tiles (item 82)
+	var desc := String(sp.get("desc", "")).get_slice(". ", 0).trim_suffix(".")
+	if desc != "":
+		v.add_child(_note(desc + "."))
 	if rare:
 		var boss := String(Data.MOBS.get(String(sp.get("boss", rec.get("from_boss", ""))), {}).get("name", "a lair boss"))
 		v.add_child(_note("Its egg was guarded by %s. Few of its kind are ever seen." % boss))
@@ -222,43 +227,26 @@ func _info_card() -> PanelContainer:
 		v.add_child(_note("Its coat came out in rare colours (about %s)." % Shiny.odds_text(Shiny.WILD)))
 	for mid in Mutations.of(rec):
 		v.add_child(_note("%s: %s" % [Mutations.name_of(mid), Mutations.perk_text(mid)]))
-	var desc := String(sp.get("desc", ""))
-	if desc != "":
-		var dl := UI.label(desc, 15, UI.INK)
-		dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		dl.custom_minimum_size.x = 360
-		v.add_child(dl)
 	if rec.has("parents"):
 		v.add_child(UI.label("Child of %s and %s" % [rec["parents"][0], rec["parents"][1]], 14, UI.MUTED))
-	# who it is, before what it can do: its sex, its nature, the habit you'll see first (no stat
-	# bars on first meeting; those live on its card)
-	var who := UI.vbox(6)
-	who.add_child(UI.section("Who it is"))
-	var sxr := UI.hbox(8)
+	var who := UI.hbox(8)
 	if Unique.sex(rec) != "":
-		sxr.add_child(UI.sex_icon(rec, 15.0))
-		sxr.add_child(UI.label(Unique.sex_name(rec), 15, UI.SEX_COL[Unique.sex(rec)], UI.semi))
+		who.add_child(UI.sex_icon(rec, 15.0))
+		who.add_child(UI.label(Unique.sex_name(rec), 15, UI.SEX_COL[Unique.sex(rec)], UI.semi))
+	var bits := PackedStringArray()
 	if rec.has("traits"):
-		sxr.add_child(UI.label("·  %s nature" % Care.nature(rec), 15, UI.INK))
-	if sxr.get_child_count() > 0: who.add_child(sxr)
+		bits.append("%s nature" % Care.nature(rec))
 	if not Unique.of(rec).is_empty():
-		who.add_child(_note("%s. %s." % [AboutView.HABIT_SHORT.get(String(Unique.of(rec).get("quirk", "")), Unique.quirk_name(rec)), AboutView.voice_note(rec)]))
-	if who.get_child_count() > 1:
-		v.add_child(UI.spacer(2))
+		bits.append(String(AboutView.HABIT_SHORT.get(String(Unique.of(rec).get("quirk", "")), Unique.quirk_name(rec))).to_lower())
+	if not bits.is_empty():
+		who.add_child(UI.label(("·  " if who.get_child_count() > 0 else "") + "  ·  ".join(bits), 15, UI.INK))
+	if who.get_child_count() > 0:
 		v.add_child(who)
-	var abil: Array = []
-	for id in sp.get("abilities", []):
-		var ad := KinLib.ability(String(id))
-		abil.append(ad.display_name if ad else String(id).capitalize())
-	var ult := String(sp.get("ultimate", ""))
-	if not abil.is_empty() or ult != "":
+	moves = BokiMoves.new(species, rec)
+	if not moves.tiles.is_empty():
 		v.add_child(UI.spacer(2))
-		v.add_child(UI.section("Moves"))
-		if not abil.is_empty():
-			v.add_child(UI.label(", ".join(abil), 15, UI.INK))
-		if ult != "":
-			var ud := KinLib.merge(ult)
-			v.add_child(UI.label("Bond move: %s" % (ud.display_name if ud else ult.capitalize()), 14, UI.MUTED))
+		v.add_child(UI.section("Moves  ·  hover one"))
+		v.add_child(moves)
 	v.add_child(UI.spacer(6))
 	name_btn = UI.primary("Name it", _go, 360)
 	name_btn.disabled = true
