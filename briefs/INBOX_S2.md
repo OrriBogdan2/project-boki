@@ -1321,3 +1321,6 @@ See OWNER_REVIEW item 109: the aim is currently stuck to one direction during he
   - the star lantern trailing motes (her relic)
 - **Size:** waist-high to a human (the corner silhouette); keep the item 108 hitbox matching.
 - **Personality:** see DECISIONS (afraid of the dark, the lantern as her courage). She must read as a Hunter, not a Boki: upright, uses her hands, clothed.
+
+## 2026-11-05 04:55 UTC (ext): Pip master sheet updated (subtle glowing gold constellation markings in her fur, a glowing tail tip, gold wing veins, glowing flowers; the markings brighten when she heals) + splash `pip_splash.png` (a dark cave, healing a knight, eyes in the dark).
+
