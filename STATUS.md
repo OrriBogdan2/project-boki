@@ -478,3 +478,7 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: Breaker final design received
 - ext/art1-breaker restarts from breaker_FINAL_sheet.png once the A-pose turnaround and weapon sheet land. Note for the rebuild: kit-59's whirl radius and 2.8 m slam reach must suit the huge capstan hammer.
+
+## 2026-11-05 S2: ext/art1-breaker paused at c4290e8f (WIP, not READY; skip 7e092bf4, parse error)
+- The old look is a dead end, but the rig, sculpt_kit.py, anim_kit.py and warden_anim/breaker.json carry over. Shared fix found there and sent to ART-1 Kael: Hunter.equip rebuilds the procedural weapon, so skinned-weapon Heroes show a second copy in matches.
+- The restart still waits for the turnaround + weapon sheet.
