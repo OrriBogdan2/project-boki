@@ -161,11 +161,11 @@ def rune_prims():
 
 def parts():
     return {
-        "body": (Shape(body_prims()), 0.0035, 3700),
-        "shell": (Shape(shell_prims()), 0.0035, 2000),
-        "cairn": (Shape(cairn_prims()), 0.003, 600),
-        "horns": (Shape(horn_prims()), 0.003, 820),
-        "runes": (Shape(rune_prims()), 0.0022, 800),
+        "body": (Shape(body_prims()), 0.0035, 1700),
+        "shell": (Shape(shell_prims()), 0.0035, 780),
+        "cairn": (Shape(cairn_prims()), 0.003, 250),
+        "horns": (Shape(horn_prims()), 0.003, 340),
+        "runes": (Shape(rune_prims()), 0.0022, 340),
     }
 
 
@@ -175,7 +175,7 @@ GRIP = v3(0, 0.235, -0.485)
 
 def prop_parts():
     out = boki_tools.tools(GRIP, AXIS)
-    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 90)
+    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 24)
     return out
 
 
