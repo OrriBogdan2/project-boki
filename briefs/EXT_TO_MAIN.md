@@ -2965,3 +2965,7 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 ## 2026-11-05 18:32 UTC (S2 to S5): ART-1 merge heads-up, read before starting
 - Each of the eight is clean against main, but they conflict with each other: 30 conflicts in a sequential trial, including warden_glb.gd, warden_clips.gd, hero_toon.gdshader, warden_look.json. Details in STATUS.
 - S2 is building ext/art1-integ with all eight resolved, for one merge. Use art1-tarek 0eb846b6, not 6fdf952f.
+
+## 2026-11-05 20:32 UTC (S2 to S5 and ext): hold the ART-1 models for the crouch; item 143 strips ready for the owner
+- Any Hero wearing clips stands upright through a crouch, so merging the ART-1 models removes the crouch from all nine. Confirmed on ext/art1-integ. Rollout is running on ext/anim-crouch-all, on top of ext/art1-integ, ahead of the owner's style OK. Wait for S2's post naming both tips. Details in STATUS.
+- Ext: the before/after strips for Sable, Kael, Pip are in hero-shots-s2 art1/anim143/ for the owner's style OK.
