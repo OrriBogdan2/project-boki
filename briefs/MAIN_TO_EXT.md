@@ -1243,3 +1243,20 @@ The owner approved a dedicated merger session that pushes `main`, because main's
 - Flaky here: --market-check "a lot nobody bid on comes back" (passed 2 of 2 reruns), --farm-start-check extra rows (crouch, pickaxe; varied per run), --farm-tutorial-check river row (passed on rerun).
 - --pickup-check prints nothing (no PASS or FAIL lines) on main or the batch; someone should look at that hook.
 - Next: batch 2 = S2 follow-up art syncs (Dredge r3m, Breaker s6, Sable s9, Ryzz r9) + ext/small-60-66-75. Then S4's ext/s4-integ (98, 99, 101, 105), S3's ext/clarity-96, and S2's kits (hem-55b, kael-57, sable-53-54). ext/hem-reticle is skipped because S2's kit-hem-55b supersedes it.
+
+## 2026-11-05 03:21 UTC S5 SHIPPED ff92d1e2: ext/small-60-66-75 f44adba4, ext/warden-dredge-friend abf5f812 (Dredge r3m), ext/warden-3d-breaker db5d2f7b (Breaker s6), ext/warden-3d-sable 521ad28a (Sable s9), ext/warden-3d-ryzz dda04366 (Ryzz r9)
+- main 4bac1edb -> ff92d1e2 (fast-forward of integ-s5b). All five merged with no conflicts.
+- Integration commit:
+  - regenerated docs/wiki/Rules.md (warden_look for Sable and Breaker)
+  - wrapped one 150-char line in tools/ostra_orb_shots.gd (the style ratchet failed on it)
+  - added its .uid
+- No Net.VERSION change.
+- Checks: --import, health --strict OK (no budget raised), gen_wiki --check clean. Full suite: 119 flags + --simtest --seed=5, fresh XDG_DATA_HOME, timeout 1200. Every check was 0 failures / PASS except the same reds as plain main:
+  - abyss, obstacle, perch, grammar-runtime (5), merge-form, farm-start meadow
+  - hitch and load (software renderer)
+  - the known pack-ui, train and teammate
+- --market-check failed once and passed on rerun (known flake).
+- Also green: --ostra-combo-check, --ashwick-combo-check, --keybind-check, --warden-model-check, --warden-glb-check, --rig-standard-check, --warden-stance-check, --dredge-combo-check, --weapon-clip-check.
+- Skipped: ext/hem-reticle (superseded by S2's ext/kit-hem-55b).
+- Next, being tested now: batch 3 = ext/s4-integ bfb12fa7 (S4 98, 99, 101, 105) + ext/clarity-96 f41a7157 (S3), with **Net.VERSION 0.21.0** (S4 0.20.0 "bcn" + S3's "sping" kind). Then batch 4 = S2 kits hem-55b, kael-57, sable-53-54 (dry-run merge is clean).
+- **Not done by S5 (reserved files, needs main or owner OK):** boki-talk-105's wiring 1-4 (kin_voice.gd line/callout -> BokiChatter, kin.gd bark_cd, kin_speak.gd recall cleanup, BokiSpeech/BokiLines tie-in). Until then the match callouts play the old lines (S4's DEBT entry covers it).
