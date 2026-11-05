@@ -116,6 +116,26 @@ def cuff_cap(side):
     return p.rigid("forearm." + side)
 
 
+def skirt_panel(s, bell):
+    """Covers the pit in the skirt's side: a curved piece of the bell, pelvis and skirt bone like the cloth round it."""
+    side = "R" if s > 0 else "L"
+    zs = np.array([z for z, r in bell if r > 0])
+    rs = np.array([r for z, r in bell if r > 0])
+    rows = np.linspace(0.815, 1.03, 8)
+    azs = np.linspace(-0.62, 0.62, 9)
+    v = []
+    for z in rows:
+        r = float(np.interp(z, zs, rs))
+        for a in azs:
+            k = 1.0 + 0.14 * np.cos(a * 2.2) ** 2 + 0.006 / max(r, 0.05)      # (the bell runs wider at the side than at the 30-50 degree ring)
+            v.append((s * r * k * np.cos(a), r * k * np.sin(a), z))
+    p = Piece("skirtpanel" + side, "cloth-dress", np.array(v), [[j * 9 + i, j * 9 + i + 1, (j + 1) * 9 + i + 1, (j + 1) * 9 + i] for j in range(7) for i in range(8)])
+    p.orient((0, 0, 0.92))
+    h = smooth(1.0, 0.84, p.v[:, 2])
+    p.w = {"root": 1 - 0.45 * h, "skirt": 0.45 * h}
+    return p
+
+
 # ---- rabbit ears: long, soft, cupped toward the front; they spill out and down off the hood so they read from above
 EAR_N = 5
 

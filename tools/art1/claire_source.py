@@ -13,7 +13,7 @@ from meshkit import smooth
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, RIG, OUT = a[0], a[1], a[2]
-LOW_TRIS = 12200
+LOW_TRIS = 11850
 SOLE = -0.95                    # the scan's sole (z)
 K_ = 0.92                       # scan metres -> rig metres, where a bone's length doesn't set it
 SOLE_Z, ANKLE = 0.052, 0.19     # the rig: the boot's sole on the blade, the foot bone
@@ -145,25 +145,16 @@ for i, (nm, j0, j1, rad, girth) in enumerate(SEG):
     ax = r @ u
     rad_v = (r - ax[:, None] * u) * girth
     Q += W[:, i, None] * (q0 + ax[:, None] * sa * v + rad_v @ R.T)
-# the skirt's sides: the scan pits them where the hand stood beside the hem; each ring is pushed back out to the bell's radius either side of the pit
+# the skirt's bell either side of the pit the scan left where the hand stood by the hem: claire_pieces covers the pit with a panel at this radius
 az_ = np.arctan2(np.abs(Q[:, 1]), np.abs(Q[:, 0]))
 rq_ = np.hypot(Q[:, 0], Q[:, 1])
 arm_ = sum(W[:, i] for i, sg_ in enumerate(SEG) if sg_[0].startswith(("upper_arm", "forearm")))
-z0_, z1_ = 0.80, 1.0
-pit = 0
-for zc_ in np.arange(z0_, z1_, 0.01):
-    ring = (np.abs(Q[:, 2] - zc_) < 0.008) & (sk > 0.3) & (arm_ < 0.3)
-    near_ = ring & (az_ > 0.5) & (az_ < 0.85)
-    if near_.sum() < 8:
-        continue
-    bell = float(np.median(rq_[near_]))
-    want = bell * (1 + 0.1 * smooth(0.5, 0.0, az_))
-    low_ = (np.abs(Q[:, 2] - zc_) < 0.0055) & (az_ < 0.5) & (rq_ < want * 0.97) & (arm_ < 0.5) & (rq_ > 0.08)
-    k_ = want[low_] / np.maximum(rq_[low_], 1e-4)
-    Q[low_, 0] *= k_
-    Q[low_, 1] *= k_
-    pit += int(low_.sum())
-print("skirt pit verts", pit)
+bell = []
+for zc_ in np.arange(0.80, 1.05, 0.02):
+    near_ = (np.abs(Q[:, 2] - zc_) < 0.012) & (sk > 0.3) & (arm_ < 0.3) & (az_ > 0.55) & (az_ < 0.85)
+    bell.append((round(float(zc_), 3), round(float(np.percentile(rq_[near_], 70)), 4) if near_.sum() > 8 else 0.0))
+print("BELL", bell)
+src["bell"] = json.dumps(bell)
 print("fitted", Q.min(0).round(3), Q.max(0).round(3))
 me.vertices.foreach_set("co", Q.ravel())
 me.update()

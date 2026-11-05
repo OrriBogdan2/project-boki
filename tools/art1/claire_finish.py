@@ -114,6 +114,8 @@ def lid_piece(s):
 
 
 el, er = K.ear(1.0), K.ear(-1.0)
+bell_ = json.loads(src["bell"])
+panels = [K.skirt_panel(1.0, bell_), K.skirt_panel(-1.0, bell_)]
 tl = K.tail()
 tail_end = tl.path[-1]
 tail_dir = M.norm(tl.path[-1] - tl.path[-3])
@@ -130,7 +132,7 @@ hL = K.hand("L", (0.0, 1.0, -0.15), (0.32, 0.42, 0.3), 0.07)
 hornR, hornL = K.horn(1.0), K.horn(-1.0)
 for q_ in hR + hL + [wr, wl] + wr_rods + wl_rods:
     q_.room = 0.2        # (a full ink line round each finger is a black mitt at the match camera)
-pieces = [el, er, hornR, hornL, tl, th] + bw + [rr, rl, K.blade(1.0), K.blade(-1.0)] + sp + [wr, wl] + wr_rods + wl_rods + lids + hR + hL + [K.cuff_cap("R"), K.cuff_cap("L")]
+pieces = [el, er, hornR, hornL, tl, th] + bw + [rr, rl, K.blade(1.0), K.blade(-1.0)] + sp + [wr, wl] + wr_rods + wl_rods + lids + hR + hL + [K.cuff_cap("R"), K.cuff_cap("L")] + panels
 
 
 def chain_w(p, pts, names, tip_free=True):
@@ -190,6 +192,8 @@ for p_ in pieces:
     n_ = p_.name
     if n_.startswith(("wing", "tailheart", "heart", "blade")) and not n_.startswith("wingarm") and not n_.startswith("wingrod"):
         continue                       # (built wound; two faced)
+    if n_.startswith("skirtpanel"):
+        continue
     if n_.startswith("lid"):
         p_.orient(tuple(p_.c))
     else:
@@ -490,8 +494,8 @@ fx, fz = pp[:, 0], pp[:, 2] - K.eye_c(1.0)[2]
 sx_, sy_ = P.sheet_xy(fx, fz)
 r_ = np.hypot((sx_ - 325.0) / 150.0, (sy_ - 695.0) / 158.0)
 sheet_k = smooth(1.0, 0.88, r_) * (pp[:, 1] > 0.02) * (pp[:, 2] > K.NECK_Z + 0.05)
-sh = P.load_sheet(HEADS)
-pc = P.sample_sheet(sh, sx_, sy_)
+head_img = P.load_sheet(HEADS)
+pc = P.sample_sheet(head_img, sx_, sy_)
 # (the slate left inside the hood round the sheet's patch goes to the same ice blue)
 cur_ = OUTC[ys, xs].astype(np.float64)
 inner = (r_ < 1.5) & (pp[:, 1] > -0.03) & (pp[:, 2] > K.NECK_Z + 0.05) & (cur_.max(1) < 0.8)
@@ -514,6 +518,19 @@ def paint(pred, fn):
 
 
 paint(lambda n: n.startswith(("palm", "finger", "thumb", "cuffcap")), P.glove)
+
+
+def panel_paint(p_, n_, ao_, th_=0.72):
+    """The dress from further round the front, where the scan is clean."""
+    q_ = p_.copy()
+    sg_ = np.sign(q_[:, 0])
+    q_[:, 0], q_[:, 1] = q_[:, 0] * np.cos(th_) - sg_ * q_[:, 1] * np.sin(th_), sg_ * q_[:, 0] * np.sin(th_) + q_[:, 1] * np.cos(th_)
+    c_ = np.power(np.clip(sample_scan(q_), 0, 1), 0.92) * 1.06
+    l_ = c_.mean(1, keepdims=True)
+    return np.clip(c_ * 0.0 + (np.clip((c_ - l_) * 1.5 + l_, 0, 1) * np.array([0.9, 1.06, 1.32])), 0, 1)
+
+
+paint(lambda n: n.startswith("skirtpanel"), panel_paint)
 paint(lambda n: n == "earR", lambda p, n, ao: P.ear(p, n, ao, el.path, 1.0))
 paint(lambda n: n == "earL", lambda p, n, ao: P.ear(p, n, ao, er.path, -1.0))
 paint(lambda n: n == "hornR", lambda p, n, ao: P.horn(p, n, ao, hornR.path))
