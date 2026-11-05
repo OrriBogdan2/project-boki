@@ -36,7 +36,7 @@ func _shown(h: Hunter) -> int:
 	var n := 0
 	var gun := h.model.get_node("Rig/Torso/Aim/Gun") as Node3D
 	for mi in gun.find_children("*", "MeshInstance3D", true, false):
-		if (mi as MeshInstance3D).visible:
+		if (mi as MeshInstance3D).visible and (mi as MeshInstance3D).mesh != null:
 			n += 1
 	return n
 
