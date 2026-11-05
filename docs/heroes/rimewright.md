@@ -54,7 +54,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 | "Merge stays on R" in this doc | MED | (b) | fixed in the table above |
 | Self screen shake | MED | (c) | ext/no-shake owns it; nothing added here (the spear's cast shake was removed in acd818b3) |
 | Body size 1.3 vs 1.1-1.15 | LOW | (c) | the concept heights (item 46) set it; not this branch's call |
-| X numbers, X glide / Shift-out, air Shift buffer | n/a | (a) | already matched in the audit |
+| X numbers, X glide / Shift-out, air Shift (item 62 now skates at once) | n/a | (a) | already matched in the audit |
 
 ## Small mechanics
 | Mechanic | Source | Footage confirms | Built | Check |

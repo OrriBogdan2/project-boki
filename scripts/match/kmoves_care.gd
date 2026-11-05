@@ -401,6 +401,27 @@ const MOVES := {
 					"p": -0.45, "r": 0.18, "y": -0.2, "lift": -0.12, "lw": 1.0, "legs": [0.85, -1.4, -0.6, -0.3],
 					"fl": Vector3(-0.15, -0.05, 0.35), "hw": 0.9, "wa": Vector3(0.3, 0.4, 0), "wo": Vector3(0, 0, -0.2),
 					"wf": 1.0}]]},
+	# Skate in the air (item 62, looped like tm_skate): no push, a long glide over the ribbon, the free leg
+	# stretched behind, the arms out for balance; ART-1 has no clip for it yet
+	"tm_skate_air": {"keys": [
+		[
+				0.0,
+				{
+					"p": -0.5, "r": 0.1, "y": -0.1, "lift": 0.0, "lw": 1.0, "legs": [0.5, -0.8, -0.7, -0.2],
+					"fl": Vector3(-0.1, -0.05, 0.3), "hw": 0.9, "wa": Vector3(0.3, 0.3, 0), "wo": Vector3(0, 0, -0.15),
+					"wf": 1.0}],
+		[
+				0.28,
+				{
+					"p": -0.42, "r": -0.1, "y": 0.1, "lift": 0.04, "lw": 1.0, "legs": [0.55, -0.9, -0.8, -0.25],
+					"fl": Vector3(0.1, 0.05, -0.3), "hw": 0.9, "wa": Vector3(0.3, -0.3, 0), "wo": Vector3(0, 0, 0.15),
+					"wf": 1.0}],
+		[
+				0.56,
+				{
+					"p": -0.5, "r": 0.1, "y": -0.1, "lift": 0.0, "lw": 1.0, "legs": [0.5, -0.8, -0.7, -0.2],
+					"fl": Vector3(-0.1, -0.05, 0.3), "hw": 0.9, "wa": Vector3(0.3, 0.3, 0), "wo": Vector3(0, 0, -0.15),
+					"wf": 1.0}]]},
 	# Skate start: a deep crouch and a hard push off the back blade
 	"tm_skate_go": {"keys": [
 		[0.0, {"sq": 0.35, "lift": -0.12, "p": -0.25, "lw": 1.0, "legs": [1.0, -1.6, 0.9, -1.5]}],

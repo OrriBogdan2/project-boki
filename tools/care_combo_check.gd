@@ -253,6 +253,110 @@ func _air_skate() -> void:
 	P.inp["move"] = Vector2.ZERO
 	await _free(m)
 
+## Item 62's rules around the air skate: a jump in the skate rises as any jump and the skate goes on (item 51), the
+## air skate plays its own move id, a press while gliding folds the glider and skates at once, and a jump press in
+## the air skate opens the glider with the speed kept (ending in the air: normal fall / glide rules).
+func _air_skate_rules() -> void:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	var skate_v := float(K.dash_def()["speed"])
+	var y0 := P.pos.y
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	step(m, 0.25)
+	var was_ground := P.grounded and K.rinkrunning()
+	P.inp["jump"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["jump"] = false
+	var top := 0.0
+	var air_id := false
+	var skated := true
+	for i in 45:
+		step(m, 1.0 / 60.0)
+		top = maxf(top, P.pos.y - y0)
+		air_id = air_id or K.anim_id == "tm_skate_air"
+		skated = skated and K.rinkrunning() and P.roll_speed >= skate_v - 0.01
+		if P.grounded and i > 3:
+			break
+	ok(
+			"tm Shift (items 51/62): a jump in the skate rises and the skate goes on under it, at skate speed",
+			was_ground and top > 0.6 and skated, "ground %s, top %.2f m, skating %s" % [was_ground, top, skated])
+	ok("tm Shift (item 62): off the ground the skate plays its own move, tm_skate_air", air_id, K.anim_id)
+	step(m, 0.1)
+	ok("tm Shift (item 62): landing from it goes back to the ground stride", K.anim_id != "tm_skate_air", K.anim_id)
+	P.inp["dash_down"] = false
+	step(m, 0.5)
+	# a press while gliding
+	P.teleport(P.pos + Vector3(0, 6.0, 0))
+	P.grounded = false
+	P.gliding = true
+	P.dashes = P.max_dashes()
+	step(m, 0.1)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	ok(
+			"tm Shift (item 62): pressed while gliding the glider folds and she skates at once",
+			not P.gliding and K.rinkrunning() and P.roll_speed >= skate_v - 0.01,
+			"gliding %s, skating %s, %.1f m/s" % [P.gliding, K.rinkrunning(), P.roll_speed])
+	step(m, 0.2)
+	P.inp["jump"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["jump"] = false
+	step(m, 1.0 / 60.0)
+	var hv := Vector2(P.vel.x, P.vel.z).length()
+	ok(
+			"tm Shift (item 62): a jump press in the air skate opens the glider, keeping the speed",
+			P.gliding and not K.rinkrunning() and hv >= 0.6 * skate_v, "gliding %s, %.1f m/s" % [P.gliding, hv])
+	P.inp["dash_down"] = false
+	P.inp["move"] = Vector2.ZERO
+	await _free(m)
+
+## Item 65: the statue takes nothing but the recast and Shift: no dart, jump or turn, from the first frame of the
+## slide (the slide counts as the dash for DashFlow, so its rows must not let a shot through).
+func _statue_locks() -> void:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	K.cd["x"] = 0.0
+	P.lvl = 6
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	step(m, 0.4)
+	HunterKeys.ult_pressed(P)
+	P.inp["dash_down"] = false
+	P.inp["fire"] = true
+	var y0 := P.pos.y
+	var top := 0.0
+	var shots := 0
+	var aimed := false
+	for i in 120:
+		P.inp["jump"] = i % 10 == 0
+		step(m, 1.0 / 60.0)
+		shots += _mine(m, P).size()
+		top = maxf(top, P.pos.y - y0)
+		aimed = aimed or K.aims_in_dash() or K.fires_in_dash()
+	ok(
+			"tm X (item 65): LMB and jump do nothing in the statue, sliding or rooted",
+			K.ult_running() and shots == 0 and top < 0.05 and not aimed and K.cast_locked(),
+			"%d shots, rose %.2f m, aiming %s" % [shots, top, aimed])
+	P.inp["fire"] = false
+	P.inp["jump"] = false
+	P.inp["move"] = Vector2.ZERO
+	await _free(m)
+
 ## Item 27: no glide while sealed in Rimelock (she falls; each press is refused), and Shift ends it and
 ## skates straight out at speed instead of stopping.
 func _rime_glide_skate() -> void:
@@ -1251,6 +1355,8 @@ func rimewright() -> void:
 	await _skate_feel()
 	await _skate_only()
 	await _air_skate()
+	await _air_skate_rules()
+	await _statue_locks()
 	await _rime_glide_skate()
 	await _rime_skate_in()
 	await _skate_ice()

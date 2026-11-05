@@ -2330,7 +2330,7 @@ func _physics(dt: float) -> void:
 	elif MergeKit.rising(self):
 		vel.y = MergeKit.rise_vy(self)      # the ultimate's climb (Thunderhead)
 	elif roll_t > 0.0 and not grounded and not dropping:
-		vel.y = ak.dash_vy() if ak else 0.0          # an air dash holds your height (a skate sinks)
+		vel.y = ak.dash_vy(dt) if ak else 0.0          # an air dash holds your height (a skate sinks)
 	elif not grounded:
 		vel.y = maxf(vel.y - H_GRAV * dt, -HunterMove.fall_cap(self))
 	# a person walks straight off an island's edge and falls (then the glider and the abyss rules

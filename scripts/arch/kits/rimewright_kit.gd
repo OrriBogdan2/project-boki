@@ -318,14 +318,20 @@ func in_dash() -> bool:
 	return not rinkrun.is_empty() or _rime_carrying()
 
 ## Mid-air she sinks gently along the skate (dash.air_fall m/s, item 62) instead of holding her height; the
-## statue sliding on in the air does the same.
-func dash_vy() -> float:
+## statue sliding on in the air does the same. A jump pressed in the skate rises and falls as any jump, down to
+## that sink (item 51's combo: the skate goes on under it).
+func dash_vy(dt: float) -> float:
 	if rinkrun.is_empty() and not _rime_carrying():
 		return 0.0
-	return -float(dash_def().get("air_fall", 1.5))
+	var sink := -float(dash_def().get("air_fall", 1.5))
+	return maxf(h.vel.y - Hunter.H_GRAV * dt, sink) if bool(rinkrun.get("jumped", false)) else sink
 
 ## Sealed in Rimelock she is a statue: her facing stays as it was on the cast frame (item 65).
 func face_locked() -> bool:
+	return not rime.is_empty()
+
+## The statue takes no jump, glove or Boki ability either; only the recast and Shift out (item 65).
+func cast_locked() -> bool:
 	return not rime.is_empty()
 
 ## Seconds left in the skate (the timer in_dash reads): to its full length while Shift is held, else to its
@@ -341,7 +347,7 @@ func dash_left() -> float:
 
 ## LMB from the skate: her row says fire, with the "beam" variant (straight thick darts).
 func fires_in_dash() -> bool:
-	return in_dash() and String(flow.row("lmb")["mode"]) == "fire"
+	return not rinkrun.is_empty() and String(flow.row("lmb")["mode"]) == "fire"
 
 ## She skates along her line and turns to the cursor only while the darts fly.
 func aims_in_dash() -> bool:
@@ -367,7 +373,7 @@ func _begin_skate() -> void:
 	var dir := dash_dir()
 	rinkrun = {"t": 0.0, "dir": dir.normalized(), "loop": 0.16, "slab": 0.0, "air": not h.grounded}
 	h.gliding = false          # a press while gliding folds the glider: the skate takes over
-	play("tm_skate_go")
+	play("tm_skate_go" if h.grounded else "tm_skate_air")
 	m.sfx("rimewright_dash", h.pos, -3.0, 1.0)
 	# ice kicked back off the pushing blade (no ring: a dash never bursts)
 	m.fx.burst(
@@ -379,6 +385,8 @@ func _tick_rinkrun(dt: float) -> void:
 	var dd := dash_def()
 	rinkrun["t"] = float(rinkrun["t"]) + dt
 	var t := float(rinkrun["t"])
+	if bool(h.inp.get("jump", false)) and h.vel.y > 0.0 and not h.grounded:
+		rinkrun["jumped"] = true
 	# she skates on over a ledge (only a glide, a stun or letting go ends it)
 	var stop := h.downed or h.stun_t > 0.0 or h.out or t >= float(dd.get("max_t", 1.6)) or h.gliding
 	if t > float(dd.get("min_t", 0.2)) and not held("dash"):
@@ -409,12 +417,14 @@ func _tick_rinkrun(dt: float) -> void:
 	h.roll_speed = spd
 	h.roll_t = 0.1
 	h.move_kind = "rinkrun"
-	# the stride move, replayed every 0.56 s
+	# the stride move, replayed every 0.56 s; off the ground she glides on her ribbon (its own move id, item 62)
+	var stride := "tm_skate" if h.grounded or h.coyote > 0.0 else "tm_skate_air"
+	var striding: bool = anim_id in ["tm_skate", "tm_skate_air"]
 	rinkrun["loop"] = float(rinkrun["loop"]) - dt
-	var stride_free: bool = anim_id in ["tm_skate", "tm_skate_go"] or m.time - anim_at >= KMovesCare.length(anim_id)
-	if float(rinkrun["loop"]) <= 0.0 and stride_free:
-		rinkrun["loop"] = KMovesCare.length("tm_skate")
-		play("tm_skate")
+	var stride_free: bool = striding or anim_id == "tm_skate_go" or m.time - anim_at >= KMovesCare.length(anim_id)
+	if stride_free and (float(rinkrun["loop"]) <= 0.0 or (striding and anim_id != stride)):
+		rinkrun["loop"] = KMovesCare.length(stride)
+		play(stride)
 		m.sfx("rimewright_skate_scrape", h.pos, -5.0, 1.0)     # each stride's blade on the ice
 	_lay_ice(cur, dt)
 
