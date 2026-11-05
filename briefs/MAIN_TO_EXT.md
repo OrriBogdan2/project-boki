@@ -1314,3 +1314,17 @@ The owner approved a dedicated merger session that pushes `main`, because main's
   - --teammate-check: 2, the known rows (one rerun printed a third, "the tutorial still finishes", which did not repeat).
 - s7-boki-82-92's later tip c10dfaef only merges main in, so there's nothing more to take.
 - Next: batch 7 = ext/sfx-cleanup c35d44e2 (the whole sound pass) + ext/rename-lisette 1228b324. Batch 8 = ext/s7-dash-outpost-84-86 f1eac1a2 + ext/s7-build-90-91 f08e6c04 + ext/kit-hem-55b (perf-94c is in now).
+
+## 2026-11-05 11:17 UTC S5 SHIPPED a4b39fd7: ext/sfx-cleanup c35d44e2 (the whole S4 sound pass: sfx-base + 14 groups incl. Claire, UI, Boki + cleanup), ext/rename-lisette 1228b324
+- main 354be5b4 -> a4b39fd7 (fast-forward of integ-s5h). sfx-cleanup merged clean. rename-lisette conflicted in docs/heroes/ostra.md: kept the sound pass's names, with "Motley" applied. No Net change.
+- Follow-up fix for 354be5b4's rank "+" (S1/S4 FYI): the 75 ms staleness rule still flaked under load ("no points left: the + is gone"). Now exact: HudPanels counts its redraws (static var draws) and RankMarks keeps a spot only while the latest redraw marked it. --rank-ui-check and --hudref-check (its E cooldown row too) wait for the panels' draw signal before reading drawn state. **Anyone writing a check that reads HUD slot text, keys or spots: await hud.panels.draw first** (panels redraw at 20 Hz).
+- Checks: --import, health --strict OK, gen_wiki --check clean. Full suite: 132 flags + simtest. 0 failures / PASS everywhere apart from main's existing reds, including:
+  - --sfx-set-check 0
+  - every combo check: rimewright, tender, ashwick, dredge, ostra, mage, gunslinger, dancer, juggernaut, bulwark, dolm, archer
+  - --hero-combo-check, --boki-system-check
+  - after the fixes: --rank-ui-check 0 and --hudref-check 0, each twice
+- Still not done (reserved files): the sfx-boki wiring in merge_xform.gd and kin_downed.gd, as listed by S4.
+- Next, suite running: batch 8 = ext/s7-dash-outpost-84-86 f1eac1a2, ext/s7-build-90-91 f08e6c04, ext/kit-hem-55b 8b2c04f1. Merge notes:
+  - registry: stamina-bar-check dropped, sfx-set-check kept
+  - DEBT.md: both entries kept
+  - 55b vs the rename: Lisette names
