@@ -18,7 +18,7 @@ SRC, RIG, OUT = a[0], a[1], a[2]
 ATLAS = 2048
 UNIQ_W = 0.755
 EYE_R = (0.76, 0.12, 0.875, 0.22)
-MATS = ["skin-ryzz", "cloth-ryzz", "leather-ryzz", "hair-ryzz", "metal-ryzz", "glow-ryzz", "cloth-gum"]
+MATS = ["skin-ryzz", "cloth-ryzz", "leather-ryzz", "hair-ryzz", "metal-ryzz", "glow-ryzz", "glow-wire", "cloth-gum"]
 SCALE = {"lid": 2.0, "palm": 1.4, "finger": 1.5, "thumb": 1.5, "plate": 1.1, "strap": 0.7, "gum": 0.8, "Low": 1.0}
 TILE = ("cap", "fringe", "pig", "tie", "sock", "rod", "wire", "chain", "arrow", "nosering", "arc", "buckle")
 
@@ -193,7 +193,7 @@ for v_ in range(2):
             if 0 < j < n_ - 1:
                 q = q + rng.uniform(-0.024, 0.024, 3) * [1, 0.6, 1.5]
             pts.append(q)
-        pieces.append(sweep("arc%d_%d" % (v_, i), "glow-ryzz", pts, K.TRI, np.full(n_, 0.0052), side_hint=np.array([0, 1.0, 0.2]), uv_rect=K.GLOWC_R, room=0.0).rigid("arc.%d" % v_))
+        pieces.append(sweep("arc%d_%d" % (v_, i), "glow-ryzz", pts, K.TRI, np.full(n_, 0.0072), side_hint=np.array([0, 1.0, 0.2]), uv_rect=K.GLOWC_R, room=0.0).rigid("arc.%d" % v_))
 
 # ---- the wires, two down each arm to the copper-capped hand
 def wire_w(p):
@@ -653,7 +653,7 @@ OUTC[y0:y1, x0:x1] = P.hair_tile(y1 - y0, x1 - x0)
 x0, y0, x1, y1 = rect(K.COPPER_R)
 OUTC[y0:y1, x0:x1] = P.copper_tile(y1 - y0, x1 - x0)
 x0, y0, x1, y1 = rect(K.GLOWC_R)
-OUTC[y0:y1, x0:x1] = P.hexc("#ffd6f2")
+OUTC[y0:y1, x0:x1] = P.hexc("#ff8fd8")
 x0, y0, x1, y1 = rect(K.GLOWW_R)
 OUTC[y0:y1, x0:x1] = P.hexc("#ffb27e")
 x0, y0, x1, y1 = rect(K.BLACK_R)

@@ -425,7 +425,7 @@ def strip(name, mat, pts, w, th, uv=None, hint=None, room=1.0):
     return p
 
 
-def wire(name, path, w=0.0048, mat="glow-ryzz", uv=GLOWW_R):
+def wire(name, path, w=0.0052, mat="glow-wire", uv=GLOWW_R):
     return sweep(name, mat, path, TRI, np.full(len(path), w), side_hint=np.array([0.3, 0.5, 0.8]), uv_rect=uv, room=0.0)
 
 
