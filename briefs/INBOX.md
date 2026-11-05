@@ -952,3 +952,121 @@ Worst frames (the report keeps 8; PerfLog marks column was empty on every one):
 | 8 | 129.9 | 17.61 | 1.6 | 10.2 | ride | 12.9 | none |
 
 Memory: textures 1187.9 MB, buffers 207.7 MB, video 1603.8 MB, static 564.8 MB, objects 25029, nodes 10323.
+
+## 2026-11-05 01:02 UTC (owner PC): REAL-GPU PERF NUMBERS for item 94
+
+S1: second measuring pass on the same PC and the same commit as the 00:47 UTC section above (origin/main `fe51b43`, Godot 4.6.2 stable, Vulkan Forward+, windowed, no `--headless`). The same job ran again after the 00:47 post, so read this as a repeat that shows run-to-run noise, not as new code. All three runs exited cleanly (41 s, 42 s, 68 s); none hung. Raw reports are in `briefs/perf/run2/` so the 00:47 files stay as they were. The save folder (`%APPDATA%\Godot\app_userdata\Kinfall`, the project's custom user dir) was backed up and restored; checksums match.
+
+**PC:** NVIDIA GeForce RTX 4070 SUPER (driver 32.0.16.1692); Intel Core i5-13400 (10 cores, 16 threads); 32 GB DDR5-6000 (2 x 16 GB; 31.7 GB usable); one display at 2560x1440, 143 Hz (Windows reports 143); Windows 11 Home.
+
+**Read these first:**
+- The caveat from 00:47 still holds: without `--probe-full` the probe asks for a 640x360 window with MSAA off (`tests/perf_probe.gd` `_ready`), so these are a best case, not what a player at 1440p with MSAA 4x pays.
+- The fight's big hitch repeats again at sim t=22.4 in all three runs, with no PerfLog marks. Across both passes it reads 173-222 ms, so it is real and the cause is not a build step.
+- `--quality=high` is again within noise of the default run.
+- The report keeps 8 worst frames per run, so 10 per run does not exist without a code change. The 10 worst below are pooled across the three runs. PerfLog marks were empty on every frame.
+- Engine errors as before, not investigated: "Invalid polygon data, triangulation failed" (3 in default, 3 in high, 19 in squad3) and the OptionButton theme variation error.
+
+### 10 worst hitches, pooled across the three runs
+
+| # | wall ms | run | phase | sim t (s) | PerfLog marks |
+|---:|---:|---|---|---:|---|
+| 1 | 200.9 | squad3 | fight | 22.4 | none |
+| 2 | 180.0 | default | fight | 22.4 | none |
+| 3 | 173.2 | high | fight | 22.4 | none |
+| 4 | 146.7 | squad3 | ride | 9.8 | none |
+| 5 | 140.0 | squad3 | ride | 6.7 | none |
+| 6 | 139.3 | squad3 | drop | 14.4 | none |
+| 7 | 134.5 | squad3 | ride | 6.6 | none |
+| 8 | 132.3 | squad3 | ride | 11.7 | none |
+| 9 | 126.9 | squad3 | ride | 13.1 | none |
+| 10 | 126.5 | squad3 | ride | 12.9 | none |
+
+### Run 1: default
+
+`godot --path . -- --perf-probe --probe-out=perf_default.txt`
+
+- load total 11579 ms over 212 frames; worst frame 835 ms
+- build steps total 10130 ms: build.hunters 2996, build.spawns 1402, build.warm_up 1094, build.mobs 802, build.chests 762, world.terrain 664, build.generate 534, world.walls 434, world.scatter_plan 399, build.pads_exits 304, world.grass 248, build.systems 102, world.roots 84, map.bake 75
+
+| phase | frames | avg ms | p95 ms | worst ms | script ms | render cpu ms | hud ms | draws avg/max | prims (k) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| first | 31 | 19.3 | 20.1 | 28.2 | 1.61 | 2.37 | 10.77 | 2292/2295 | 2259 |
+| planning | 75 | 20.2 | 21.2 | 49.7 | 0.24 | 2.56 | 10.82 | 2502/2511 | 2383 |
+| ride | 145 | 39.0 | 48.1 | 78.5 | 4.29 | 2.11 | 6.82 | 1536/1983 | 1638 |
+| drop | 91 | 32.2 | 48.5 | 68.3 | 5.87 | 2.05 | 7.18 | 1552/1929 | 2044 |
+| land | 151 | 20.8 | 24.1 | 38.8 | 7.95 | 1.98 | 6.13 | 1565/2119 | 2136 |
+| map | 60 | 26.7 | 28.5 | 34.8 | 9.55 | 2.11 | 10.04 | 2084/2119 | 2147 |
+| fight | 301 | 20.1 | 21.9 | 180.0 | 6.99 | 2.00 | 6.24 | 2016/2050 | 2304 |
+
+| # | wall ms | script ms | render cpu ms | hud ms | phase | sim t (s) | PerfLog marks |
+|---:|---:|---:|---:|---:|---|---:|---|
+| 1 | 180.0 | 7.54 | 2.6 | 6.7 | fight | 22.4 | none |
+| 2 | 78.5 | 4.11 | 1.5 | 6.6 | ride | 7.1 | none |
+| 3 | 77.8 | 5.90 | 1.6 | 30.8 | ride | 12.2 | none |
+| 4 | 68.3 | 5.82 | 5.0 | 10.5 | drop | 14.4 | none |
+| 5 | 54.0 | 5.52 | 1.5 | 6.3 | drop | 18.3 | none |
+| 6 | 53.6 | 5.87 | 2.3 | 7.9 | drop | 15.0 | none |
+| 7 | 51.3 | 3.02 | 2.4 | 7.3 | ride | 4.2 | none |
+| 8 | 50.5 | 5.28 | 2.8 | 22.4 | drop | 14.5 | none |
+
+Memory: textures 636.9 MB, buffers 152.5 MB, video 1043.6 MB, static 530.2 MB, objects 18267, nodes 7309
+
+### Run 2: --quality=high
+
+`godot --path . -- --perf-probe --quality=high --probe-out=perf_high.txt`
+
+- load total 11897 ms over 209 frames; worst frame 860 ms
+- build steps total 10485 ms: build.hunters 3178, build.spawns 1469, build.warm_up 1073, build.mobs 955, build.chests 684, world.terrain 683, build.generate 536, world.walls 437, world.scatter_plan 416, build.pads_exits 305, world.grass 257, build.systems 104, world.roots 85, world.landmarks 77
+
+| phase | frames | avg ms | p95 ms | worst ms | script ms | render cpu ms | hud ms | draws avg/max | prims (k) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| first | 31 | 19.1 | 19.9 | 27.8 | 1.63 | 2.33 | 10.58 | 2292/2295 | 2259 |
+| planning | 75 | 19.9 | 20.6 | 42.5 | 0.24 | 2.49 | 10.67 | 2502/2511 | 2383 |
+| ride | 145 | 38.6 | 48.3 | 80.6 | 4.24 | 2.10 | 6.60 | 1536/1983 | 1638 |
+| drop | 91 | 31.9 | 44.3 | 63.5 | 5.83 | 1.98 | 7.05 | 1549/1929 | 2042 |
+| land | 151 | 20.7 | 24.3 | 38.3 | 7.81 | 1.99 | 6.09 | 1564/2115 | 2140 |
+| map | 60 | 26.5 | 27.7 | 32.3 | 9.37 | 2.13 | 9.96 | 2082/2116 | 2145 |
+| fight | 301 | 20.2 | 22.2 | 173.2 | 6.88 | 2.01 | 6.15 | 2024/2070 | 2291 |
+
+| # | wall ms | script ms | render cpu ms | hud ms | phase | sim t (s) | PerfLog marks |
+|---:|---:|---:|---:|---:|---|---:|---|
+| 1 | 173.2 | 8.17 | 2.5 | 6.5 | fight | 22.4 | none |
+| 2 | 80.6 | 3.99 | 1.8 | 6.8 | ride | 7.1 | none |
+| 3 | 63.5 | 5.71 | 4.6 | 10.7 | drop | 14.4 | none |
+| 4 | 56.5 | 5.35 | 1.5 | 6.6 | drop | 18.3 | none |
+| 5 | 56.0 | 5.92 | 2.1 | 8.9 | ride | 12.2 | none |
+| 6 | 54.1 | 6.47 | 2.0 | 7.7 | drop | 15.0 | none |
+| 7 | 50.8 | 3.21 | 2.5 | 7.3 | ride | 4.2 | none |
+| 8 | 49.8 | 5.96 | 1.3 | 6.3 | ride | 11.8 | none |
+
+Memory: textures 636.4 MB, buffers 152.5 MB, video 1043.3 MB, static 529.8 MB, objects 18271, nodes 7283
+
+### Run 3: squad of 3
+
+`godot --path . -- --perf-probe --probe-squad=3 --probe-out=perf_squad3.txt`
+
+- load total 18030 ms over 210 frames; worst frame 1734 ms
+- build steps total 16335 ms: build.hunters 8439, build.spawns 1558, build.warm_up 1507, build.mobs 859, build.chests 703, world.terrain 685, build.generate 544, world.scatter_plan 473, world.walls 444, build.pads_exits 347, world.grass 263, build.systems 105, map.bake 88, world.roots 84
+
+| phase | frames | avg ms | p95 ms | worst ms | script ms | render cpu ms | hud ms | draws avg/max | prims (k) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| first | 31 | 26.7 | 28.8 | 35.7 | 2.41 | 2.67 | 15.30 | 2562/2564 | 2280 |
+| planning | 75 | 27.5 | 29.8 | 52.7 | 0.40 | 2.83 | 15.50 | 2783/2801 | 2407 |
+| ride | 145 | 85.6 | 123.3 | 146.7 | 10.88 | 2.27 | 11.61 | 1789/2298 | 1667 |
+| drop | 89 | 76.6 | 81.4 | 139.3 | 18.08 | 2.95 | 11.65 | 2342/2704 | 3046 |
+| land | 151 | 37.2 | 40.3 | 85.8 | 20.70 | 2.34 | 7.72 | 1912/2399 | 2691 |
+| map | 60 | 38.6 | 40.2 | 46.1 | 17.89 | 2.56 | 11.62 | 2364/2394 | 2647 |
+| fight | 301 | 37.1 | 40.3 | 200.9 | 19.74 | 2.59 | 8.10 | 2209/2315 | 2615 |
+
+| # | wall ms | script ms | render cpu ms | hud ms | phase | sim t (s) | PerfLog marks |
+|---:|---:|---:|---:|---:|---|---:|---|
+| 1 | 200.9 | 18.33 | 2.8 | 8.8 | fight | 22.4 | none |
+| 2 | 146.7 | 17.32 | 1.7 | 11.5 | ride | 9.8 | none |
+| 3 | 140.0 | 13.39 | 1.7 | 11.6 | ride | 6.7 | none |
+| 4 | 139.3 | 17.79 | 5.9 | 16.9 | drop | 14.4 | none |
+| 5 | 134.5 | 19.93 | 3.0 | 11.2 | ride | 6.6 | none |
+| 6 | 132.3 | 12.75 | 1.9 | 11.0 | ride | 11.7 | none |
+| 7 | 126.9 | 16.72 | 1.6 | 10.0 | ride | 13.1 | none |
+| 8 | 126.5 | 17.14 | 1.4 | 9.5 | ride | 12.9 | none |
+
+Memory: textures 1187.5 MB, buffers 207.7 MB, video 1603.5 MB, static 565.2 MB, objects 25042, nodes 10324
