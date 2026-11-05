@@ -147,10 +147,10 @@ def helmet():
     f.d = np.maximum(f.d, 0.745 - f.grid()[2])
     cl = Field((-0.56, -0.48, 0.64), (0.56, 0.48, 0.86), 0.0035)
     x, y, z = cl.grid()
-    r = np.sqrt((x / 0.47) ** 2 + (y / 0.41) ** 2)
-    sag = 0.05 * np.clip(y / 0.41, 0, 1) ** 2          # it dips at the front, as the art
-    top = 0.825 - 0.09 * r ** 3 - sag * 0.3
-    d = np.maximum(np.maximum(z - top, top - 0.075 - z), r - 1.0)
+    r = np.sqrt((x / 0.34) ** 2 + (y / 0.3) ** 2)
+    sag = 0.05 * np.clip(y / 0.3, 0, 1) ** 2          # it dips at the front, as the art
+    top = 0.815 - 0.075 * r ** 3 - sag * 0.3
+    d = np.maximum(np.maximum(z - top, top - 0.055 - z), r - 1.0)
     cl.d = (d * 0.8).astype(F)
     cl.lab[:] = BRASS
     return f, cl
