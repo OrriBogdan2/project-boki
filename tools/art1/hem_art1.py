@@ -81,13 +81,6 @@ class ScanPaint:
         return self.tex[np.clip(((1 - u[:, 1]) % 1) * h, 0, h - 1).astype(int), np.clip((u[:, 0] % 1) * w, 0, w - 1).astype(int)]
 
 
-def slot_of(c):
-    """A surface for a colour off the scan: the toon shader treats skin, cloth and leather differently."""
-    r, g, b = c[:, 0], c[:, 1], c[:, 2]
-    tan = (r > 0.42) & (g > r * 0.42) & (g < r * 0.86) & (b < g * 0.92)
-    return np.where(tan, 0, np.where(r > b * 2.2, 1, 2))
-
-
 def ob_from(name, v, q):
     me = bpy.data.meshes.new(name)
     me.vertices.add(len(v))
@@ -587,8 +580,6 @@ def main():
         mask |= m
         if p["paint"] in ("scan", "quiver"):
             relief[idx] = 1.0
-        if p["group"] == "scan":
-            p["tri_slot"] = slot_of(sp.sample(vs[tri].mean(1)))
         if f is not None and not p["slot"]:
             cen = vs[tri].mean(1).astype(F)
             p["tri_lab"] = f.label(f.project(cen, 1))
@@ -759,9 +750,7 @@ def main():
         if p["slot"]:
             me.materials.append(mat(p["slot"]))
         elif p["group"] == "scan":
-            for sl in ("skin", "cloth", "leather"):
-                me.materials.append(mat(sl))
-            me.polygons.foreach_set("material_index", p["tri_slot"].astype(np.int32))
+            me.materials.append(mat("cloth"))       # (one surface: slots picked per triangle cut jagged edges round the skin)
         else:
             # per triangle, from the sculpt's labels (read before the part moved)
             lab = p["tri_lab"]
@@ -777,7 +766,7 @@ def main():
         me.normals_split_custom_set_from_vertices(n.tolist())
 
     ROOM = {"lockR": 0.25, "lockL": 0.25, "tail": 0.5, "hair_needles": 0.0, "quiver_arrows": 0.0, "arrow": 0.0, "shears": 0.1, "string": 0.0,
-            "skin_head": 0.1, "mask": 0.1, "Low": 0.55, "eyes": 0.0, "handR": 0.3, "handL": 0.3, "bow": 0.0, "scarftailR": 0.3, "scarftailL": 0.3, "scarftailR_in": 0.0, "scarftailL_in": 0.0}
+            "skin_head": 0.0, "mask": 0.0, "Low": 0.55, "eyes": 0.0, "handR": 0.3, "handL": 0.3, "bow": 0.0, "scarftailR": 0.3, "scarftailL": 0.3, "scarftailR_in": 0.0, "scarftailL_in": 0.0}
     for p in parts:
         me = p["ob"].data
         at = me.color_attributes.new("Col", "FLOAT_COLOR", "POINT")

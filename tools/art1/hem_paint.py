@@ -200,6 +200,10 @@ def scan(c, p, n):
     c = np.clip(c, 0, 1) ** 0.82
     red = np.clip((c[:, 0:1] - c[:, 1:2] * 1.6) * 4.0, 0, 1)
     c = np.clip(c + (c - c.mean(1, keepdims=True)) * red * 0.55 + red * 0.05, 0, 1)
+    # the side views drew the hanging hand over the hip, and the scan took it as paint: back to capri
+    tan = (c[:, 0] > 0.42) & (c[:, 1] > c[:, 0] * 0.42) & (c[:, 1] < c[:, 0] * 0.9) & (c[:, 2] < c[:, 1] * 0.95)
+    hip = tan & (p[:, 2] > 0.40) & ((p[:, 2] < 0.82) | ((p[:, 2] < 0.905) & (np.abs(p[:, 0]) < 0.135)))
+    c[hip] = mix(rgb("1c1619"), rgb("4a3f48"), smooth(0.2, 0.8, form(n)))[hip]
     # graded to the master sheet: its blacks lean plum, not neutral
     dark = 1 - smooth(0.15, 0.4, c.max(1))
     c = np.clip(c * (1 + dark[:, None] * np.array((0.04, -0.08, 0.14), F)), 0, 1)

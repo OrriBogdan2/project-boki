@@ -249,6 +249,7 @@
 		},
 		"slots": {
 			"skin": {
+				"albedo": [0.92, 0.96, 1.06],
 				"top_light": 0.35,
 				"fres": 0.45,
 				"far_lift": 0.08,

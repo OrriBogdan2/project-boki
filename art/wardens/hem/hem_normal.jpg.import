@@ -3,18 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://l317avsygbwq"
-path="res://.godot/imported/hem_normal.jpg-d1335e57ffa70f454ac4593450c5bb97.ctex"
+path.bptc="res://.godot/imported/hem_normal.jpg-d1335e57ffa70f454ac4593450c5bb97.bptc.ctex"
+path.astc="res://.godot/imported/hem_normal.jpg-d1335e57ffa70f454ac4593450c5bb97.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "1ca8d52d3c1979c7da833888c2ed4db7"
+"md5": "cadd08b1efe995acf25b8ef375ee5f26"
 }
 
 [deps]
 
 source_file="res://art/wardens/hem/hem_normal.jpg"
-dest_files=["res://.godot/imported/hem_normal.jpg-d1335e57ffa70f454ac4593450c5bb97.ctex"]
+dest_files=["res://.godot/imported/hem_normal.jpg-d1335e57ffa70f454ac4593450c5bb97.bptc.ctex", "res://.godot/imported/hem_normal.jpg-d1335e57ffa70f454ac4593450c5bb97.astc.ctex"]
 
 [params]
 

@@ -259,9 +259,9 @@ def hair(h):
     zh = S_interp(th, HAIRLINE[:, 0], HAIRLINE[:, 1]).astype(F)
     # (the parting's little dip off centre)
     fade = smooth(0.0, 0.035, z - zh)
-    thick = 0.0022 + (0.0070 + 0.0130 * smooth(1.60, 1.70, z) + 0.009 * smooth(0.02, -0.08, y)) * fade
+    thick = 0.0022 + (0.0048 + 0.0080 * smooth(1.60, 1.70, z) + 0.008 * smooth(0.02, -0.08, y)) * fade
     # the volume: over the flat top of the skull (no ears, no face: the base field)
-    cr = ell((0, -0.016, 1.655), (0.0880, 0.1270, 0.0930))
+    cr = ell((0, -0.016, 1.650), (0.0830, 0.1230, 0.0890))
     base = h.base
     b0, b1 = base - thick, cr.fn(x, y, z) + 0.02 * (1 - fade)
     kk = 0.022
