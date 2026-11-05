@@ -1849,3 +1849,19 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - **HUD:** no explanatory text in a match; item 119 already cut the word popups.
   - Ability cards keep their short descriptions, but check each for bloat (cut "(the owner's call…)" style asides that leaked into player text).
 - **Assert:** a grep check over the UI strings: no menu button has a subtext label; flag any player-facing string >120 chars for review.
+
+## 156. The hatch reveal: one dedicated "new Boki" screen (a Pokémon-style reveal), no double creature; cut the title subtext (owner, 17:41 UTC Nov 5)
+- The owner: "when the egg hatches, you see the creature twice - do like a pokemon 'who is that pokemon' type of screen so you dont see the background when you see the 'new boki' screen". Also: "get rid of the subtext in the beginning under project boki".
+- **Reveal** (scripts/ui/hatch.gd + egg_hatch.gd, stage hatching → name):
+  1. After the hatch animation climbs out, cut to a full-screen reveal: the 3D scene/background is hidden (no second copy of the creature in the world behind it).
+  2. Backdrop: a bold radial-burst/spotlight in the Boki's element colour over dark, Pokémon-style.
+  3. Beat 1 (~0.8 s): the Boki as a solid black silhouette, centred, a little bob.
+  4. Beat 2: a flash → the silhouette fills in with full colour, a small pose/hop, its first cry.
+  5. Then the name entry ("Name your Boki") sits on that same screen. The species name is shown small.
+  6. Exactly one creature on screen throughout.
+- After naming, return to the 3D world with the Boki beside you as now (MaskMoment next).
+- **Title card** (prologue.gd ~:530): remove the subtitle "Every hunter's story starts with an egg." "PROJECT BOKI" alone.
+- **Assert:**
+  - During the reveal, only one Boki node is visible.
+  - The background/world is hidden.
+  - The title card has no subtitle label.

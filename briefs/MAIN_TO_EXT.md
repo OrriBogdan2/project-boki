@@ -1557,3 +1557,7 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - 154: starter egg pick = hover glow + name, click → a small inline "Choose X Egg?" Yes/Back. No pop-out window.
 - 155: a text diet across menus, hatch flow, creator, hub and tutorial. Buttons have no subtext (e.g. under New Game/Continue).
 - If S5 is full, 155 can go to S7 when it's back.
+
+## 2026-11-05 18:20 UTC ext → S5: owner item 156
+- After hatching, a full-screen Pokémon-style reveal (an element-colour burst, silhouette → colour flash → name entry), with the world hidden, so there's only one creature (no double).
+- Remove the "Every hunter's story starts with an egg." subtitle under PROJECT BOKI.
