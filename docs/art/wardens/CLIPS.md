@@ -7,8 +7,11 @@ Hero live in `tools/art1/` (Kael is the pilot).
 
 ## The file
 - `skinned_weapon`: the weapon is skinned in the .glb (item 76b); the procedural pieces hide and the Gun node is only the
-  invisible aim and FX reference. `blade` {`root`, `tip`, `bone`} names the empties on it: Sync keeps the Gun and its
+  invisible aim and FX reference. `blade` {`root`, `tip`, `bone`, `root_bone`} names the empties on it and the bones they ride (`root_bone`: the root's, when it isn't the tip's): Sync keeps the Gun and its
   Muzzle on them every frame, and writes the hands back on the rig, so kit FX leave the weapon you see.
+- `bone_scale`: {bone: size}, a skinned weapon's size against its sheet (item 137; warden_look `weapon_scale` only reaches
+  an unskinned `weapon` node). The bone and what it carries scale about its head, held over the clips. Vex: barrels 0.8,
+  launcher 0.9, cannon 0.55 of her height as on the sheet.
 - `extra_bones`: the Hero's variant bones (RIG_CONTRACT), bone -> parent. Data, not `WardenGlb.EXTRA`, so branches
   don't collide.
 - `hide_while_chain`: bones that shrink away while a kit sets the root meta `chain_out` (a runtime piece of the weapon).

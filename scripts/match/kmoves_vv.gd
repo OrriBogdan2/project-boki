@@ -16,8 +16,6 @@ const TUCK := [1.5, -2.0, 1.4, -1.9]
 const BRACE := [0.6, -1.05, 0.4, -0.8]
 const SLIDE := [-1.2, -0.15, -0.3, -1.8]
 const AIM_CROUCH := [0.55, -0.95, -0.2, -0.55]
-const TOSS_SET := [0.45, -0.75, -0.1, -0.4]
-const TOSS_STEP := [0.7, -0.8, -0.35, -0.25]
 ## Vex's rifle shouldered between rounds: the chest low over the front knee, the stock in the shoulder.
 const SHOULDER := {"p": -0.08, "lift": -0.05, "sq": 0.05, "wo": Vector3(0.0, 0.0, 0.02), "legs": AIM_CROUCH, "lw": 0.7}
 
@@ -114,6 +112,8 @@ const MOVES := {
 		[0.07, {"p": 0.18, "fl": Vector3(0.05, 0.62, -0.1), "hw": 1.0, "sq": -0.2}],
 		[0.3, {"p": 0.1, "fl": Vector3(0.05, 0.55, -0.1), "hw": 0.8}],
 		[0.55, {}]]},
+	# the gum (MageGum): head and bubble only, the keyed clip does the work; the rig just waits it out
+	"mage_gum": {"keys": [[0.0, {}], [1.2, {}]]},
 	# Kitefall (X), on the sheet's 10 fps beats. The crouch (f28-f31, 0.3 s): knees deep, arms swept down and
 	# back, a squash that loads the launch
 	"mage_x": {"hold": true, "keys": [
@@ -158,17 +158,14 @@ const MOVES := {
 		[0.09, SHOULDER],
 		[0.3, SHOULDER],
 		[0.55, {}]]},
-	# Burr Charge, the owner's side toss rather than an overhead throw: from low beside the left hip, a quick
-	# sidearm flick, the hand swept low and forward (the release at 0.05), across the body on the follow-through
-	# as the torso unwinds and she steps into it, back on the rifle by 0.5
+	# Burr Charge: fired from the cannon's launcher, no throw. A hard kick up the arm and the chest driven back, her
+	# free hand staying out of it, then back on the aim by 0.3
 	"gunslinger_rmb": {"stance": true, "keys": [
-		[0.00, {"p": -0.06, "y": -0.3, "lift": -0.05, "sq": 0.12, "fl": Vector3(-0.6, -0.06, 0.08), "hw": 1.0,
-			"legs": TOSS_SET, "lw": 0.8}],
-		[0.05, {"p": -0.18, "y": 0.35, "lift": -0.06, "sq": -0.15, "fl": Vector3(-0.12, -0.02, -0.62), "hw": 1.0,
-			"legs": TOSS_STEP, "lw": 1.0}],
-		[0.13, {"p": -0.2, "y": 0.5, "lift": -0.05, "sq": 0.05, "fl": Vector3(0.2, 0.04, -0.45), "hw": 1.0,
-			"legs": TOSS_STEP, "lw": 1.0}],
-		[0.32, {"p": -0.06, "y": 0.12, "fl": Vector3(-0.1, 0.0, -0.15), "hw": 0.4, "legs": TOSS_STEP, "lw": 0.4}],
+		[0.00, SHOULDER],
+		[0.04, {"p": 0.1, "y": 0.1, "lift": -0.06, "sq": 0.1, "gp": 0.55, "wo": Vector3(0.0, 0.05, 0.18),
+			"legs": AIM_CROUCH, "lw": 0.7}],
+		[0.18, SHOULDER],
+		[0.3, SHOULDER],
 		[0.5, {}]]},
 	# Combat Slide: dropped feet-first, leaning back (no further than 0.45, so she stays upright enough to
 	# aim), both hands left on the rifle so it stays up and aimed; a scrape squash, then the stand-up

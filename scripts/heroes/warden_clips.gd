@@ -27,6 +27,7 @@ const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon o
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
 const HEADING_MIN := 2.0     # m/s: slower than this has no heading to lean into
 const HEADING_MAX := 1.4     # rad: the most the root turns off the facing
+const LEGS_MAX := 1.75       # rad: the most the legs turn off the aim ("legs_heading")
 const HEADING_RATE := 14.0   # 1/s: how fast it turns
 const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
 const CROUCH_IN := 0.12      # s: the layer eases over the body when no dip carries it
@@ -56,11 +57,13 @@ var air_t := 0.0
 var land_t := 99.0
 var hit_seen := 99.0
 var last_emote := ""
+var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var out_w := 0.0             # the "weapon_out" data: how far the free-arm pose lies over the clips
 var out_pose: Array = []     # [bone index, rotation]: the free arm, sampled once from its clip
 var weapon_bi := -1          # "weapon_bone": the bone a thrown weapon hides on
+var bone_scales: Array = []  # "bone_scale": [bone index, its size], held over the clips
 var crouch_on := false       # which way the state's crouch is going
 var crouch_k := 0.0          # the state's crouch last frame
 var crouch_w := 0.0          # how much the crouch layer owns the body
@@ -130,9 +133,16 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	return true
 
 ## "weapon_out": {"clip", "bones"}: an arm pose laid over everything while the weapon is out of the hand; "weapon_bone"
-## scales to zero meanwhile.
+## scales to zero meanwhile. "bone_scale": {bone: size}: a skinned weapon's size against the sheet (item 137), the
+## skinned twin of warden_look "weapon_scale": the bone and all it carries, its empties included.
 func _setup_out() -> void:
 	weapon_bi = WardenSkeleton.find(skel, String(d.get("weapon_bone", ""))) if d.has("weapon_bone") else -1
+	var sizes: Dictionary = d.get("bone_scale", {})
+	for nm in sizes:
+		var bi := WardenSkeleton.find(skel, String(nm))
+		if bi >= 0:
+			bone_scales.append([bi, Vector3.ONE * float(sizes[nm])])
+			skel.set_bone_pose_scale(bi, Vector3.ONE * float(sizes[nm]))
 	var wo: Dictionary = d.get("weapon_out", {})
 	if wo.is_empty() or not lib.has_animation(String(wo["clip"])):
 		return
@@ -148,6 +158,9 @@ func _out(dt: float) -> void:
 	var out := bool(root.get_meta(WEAPON_OUT, false))
 	if weapon_bi >= 0:
 		skel.set_bone_pose_scale(weapon_bi, Vector3.ZERO if out else Vector3.ONE)
+	for b in bone_scales:
+		if not (out and b[0] == weapon_bi):
+			skel.set_bone_pose_scale(b[0], b[1])
 	var busy := act_w > 0.5 or up_w > 0.5
 	out_w = move_toward(out_w, 1.0 if out and not busy else 0.0, OUT_RATE * dt)
 	if out_w > 0.0:
@@ -295,7 +308,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			up = Vector2(vel.x, vel.z).length() >= STILL
 		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
-				"fade": float(mv.get("fade", FADE))}
+				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false))}
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	if bool(s.get("reviving", false)) and st.has("reviving"):
@@ -359,21 +372,31 @@ func step(dt: float) -> void:
 	if d.has("crouch"):
 		_crouch(s, dt)
 	tree.advance(dt)
-	_turn_to_heading(s, bool(want.get("heading", false)), dt)
+	var legs := bool(want.get("legs_heading", false))
+	_turn_to_heading(s, bool(want.get("heading", false)) or legs, legs, dt)
 	_out(dt)
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it.
-func _turn_to_heading(s: Dictionary, on: bool, dt: float) -> void:
+## "legs_heading" (Vex's slide, aims_in_dash): only the legs go: the hips take the turn back, so the torso
+## and the arm on the aim keep their pose.
+func _turn_to_heading(s: Dictionary, on: bool, legs_only: bool, dt: float) -> void:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var goal := 0.0
 	if on and Vector2(vel.x, vel.z).length() > HEADING_MIN:
-		goal = clampf(wrapf(atan2(-vel.x, -vel.z) - float(s.get("face", 0.0)), -PI, PI), -HEADING_MAX, HEADING_MAX)
+		goal = wrapf(atan2(-vel.x, -vel.z) - float(s.get("face", 0.0)), -PI, PI)
+		goal = clampf(goal, -LEGS_MAX, LEGS_MAX) if legs_only else clampf(goal, -HEADING_MAX, HEADING_MAX)
 	head_turn = lerp_angle(head_turn, goal, 1.0 - exp(-dt * HEADING_RATE))
+	legs_was = legs_only or (legs_was and absf(head_turn) >= 0.002)     # (it unwinds the same way after the slide)
 	if absf(head_turn) < 0.002:
 		return
 	var bi := WardenSkeleton.find(skel, "root")
-	skel.set_bone_pose_rotation(bi, Quaternion(Vector3.UP, head_turn) * skel.get_bone_pose_rotation(bi))
+	var was := skel.get_bone_pose_rotation(bi)
+	var turn := Quaternion(Vector3.UP, head_turn)
+	skel.set_bone_pose_rotation(bi, turn * was)
+	if legs_only or legs_was:
+		var hb := WardenSkeleton.find(skel, "hips")
+		skel.set_bone_pose_rotation(hb, was.inverse() * turn.inverse() * was * skel.get_bone_pose_rotation(hb))
 
 func _loco(s: Dictionary, dt: float) -> void:
 	var lc: Dictionary = d["loco"]

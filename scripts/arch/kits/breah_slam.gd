@@ -1,10 +1,12 @@
 class_name BreahSlam
 extends RefCounted
-## Tarek's Quakefall (RMB): hold to gather, let go to hop a short way forward and smash both fists down.
-## While charging, everyone sees the big circle a hop ahead of her with its sweet spot growing from the
-## centre; she can walk slowly, jump to leap forward (the circle comes with her) and punch to lunge
-## further. The centre stuns, foes in the air are dunked, rocks inside fly outward, and at rank 3
-## each slam that catches something adds a Molten Guard shield stack (DolmKit.guard_stack).
+## Tarek's Quakefall (RMB), owner item 61. Tap: no hop, an instant slam just ahead, in a slightly smaller
+## circle. Short hold (capped; at the cap it goes by itself): he hops forward and up, keeping part of his run's
+## speed, the move keys nudge the landing, and he slams on landing with the full circle. While charging,
+## everyone sees the circle where the hop will land with its sweet spot growing from the centre; he can walk
+## slowly, jump to leap forward (the circle comes with him) and punch to lunge further. The centre stuns,
+## foes in the air are dunked, rocks inside fly outward, and at rank 3 each slam that catches something
+## adds a Molten Guard shield stack (DolmKit.guard_stack).
 
 var k: DolmKit
 var leapt := false             # jumped during this charge (the leap forward)
@@ -13,6 +15,9 @@ var was_ground := true
 var leaps := 0                 # (checks)
 var extends_n := 0
 var hops := 0
+var taps := 0
+var hop_on := false            # the hold's hop is in the air (the move keys nudge it)
+var hop_v := Vector2.ZERO      # ...its speed along the ground before the nudge
 
 func _init(kit: DolmKit) -> void:
 	k = kit
@@ -29,10 +34,21 @@ func charging() -> bool:
 func radius(c: float) -> float: return lerpf(float(sd()["radius"][0]), float(sd()["radius"][1]), c)
 func core(c: float) -> float: return lerpf(float(sd()["core"][0]), float(sd()["core"][1]), c)
 
-## Where the slam will land: a hop ahead of her toward the aim.
+## Where the slam will land: a hop ahead of him toward the aim, plus what the hop keeps of his run.
 func center() -> Vector3:
+	var h := k.h
+	var d := h.aim_dir()
+	var c := h.pos + Vector3(d.x, 0, d.y) * float(sd()["hop"])
+	if h.grounded:
+		c += Vector3(h.vel.x, 0, h.vel.z) * float(sd()["carry"]) * _flight(float(sd()["hop_up"]))
+	return c
+
+## The tap's spot: just in front of him.
+func tap_spot() -> Vector3:
 	var d := k.h.aim_dir()
 	return k.h.pos + Vector3(d.x, 0, d.y) * float(sd()["reach"])
+
+func _flight(up: float) -> float: return 2.0 * up / Hunter.H_GRAV
 
 func move_k() -> float:
 	return float(sd()["walk_k"]) if charging() else 1.0
@@ -40,12 +56,26 @@ func move_k() -> float:
 func drop() -> void:
 	leapt = false
 	lunges = 0
+	hop_on = false
 
 func tick(_dt: float) -> void:
 	if not k.rmb_down:
 		leapt = false
 		lunges = 0
 	was_ground = k.h.grounded
+	_tick_hop()
+
+## The hop's steering: the move keys bend its ground speed by up to `nudge` m/s, no more.
+func _tick_hop() -> void:
+	var h := k.h
+	if not hop_on:
+		return
+	if not k.dive or h.grounded or h.fly_t <= 0.0:
+		hop_on = false
+		return
+	var v := hop_v + (h.inp["move"] as Vector2).limit_length(1.0) * float(sd()["nudge"])
+	h.vel.x = v.x
+	h.vel.z = v.y
 
 func hold_tick(t: float) -> void:
 	var h := k.h
@@ -106,28 +136,39 @@ func fire(c: Dictionary) -> void:
 		h.vel = Vector3(h.vel.x * 0.25, minf(h.vel.y, 0.0), h.vel.z * 0.25)
 		k.m.sfx("glide", h.pos, -6.0, 0.7)
 	var ck := charge_k(float(c["t"])) if c.get("hold", false) else 0.0
+	var air: bool = c.get("air", false) or not h.grounded
+	if not air and not c.get("hold", false):
+		taps += 1
+		k.dive = false
+		k.play("breah_slam_land")
+		slam(0.0, false)
+		return
 	k.dive = true
 	k.dive_k = ck
-	if c.get("air", false) or not h.grounded:
+	if air:
 		# pressed in the air: dive and slam where you land; let go mid-leap: the leap's arc carries on
 		k.dive_fall = h.fly_t <= 0.0
 		k.play("breah_dive" if k.dive_fall else "breah_leap")
 		k.m.sfx("br_leap", h.pos, -2.0, 0.8)
 		return
-	# a short hop into the circle's centre, both fists coming down as she lands there
+	# the hop into the circle's centre, both fists coming down as he lands there
 	hops += 1
 	k.dive_fall = false
 	k.play("breah_slam")
-	k.m.fx.dust(h.pos, 8)                # the push-off kicks up the ground she leaves
+	k.m.fx.dust(h.pos, 8)                # the push-off kicks up the ground he leaves
 	k.m.sfx("br_leap", h.pos, -6.0, 1.15)
-	arc(float(sd()["reach"]), float(sd()["hop_up"]), h.aim_dir())
+	var run := Vector2(h.vel.x, h.vel.z) * float(sd()["carry"])
+	arc(float(sd()["hop"]), float(sd()["hop_up"]), h.aim_dir(), run)
+	hop_v = Vector2(h.vel.x, h.vel.z)
+	hop_on = true
 
 ## A real jump arc (not a dash, which holds your height): `dist` along `dir`, leaving the ground at
 ## `up` m/s, so the glider can still open from it (DolmKit._tick hands the arc over when glide is held).
-func arc(dist: float, up: float, dir: Vector2) -> void:
+## carry: ground speed the arc keeps on top (his run).
+func arc(dist: float, up: float, dir: Vector2, carry := Vector2.ZERO) -> void:
 	var h := k.h
-	var flight := 2.0 * up / Hunter.H_GRAV
-	var v := dir.normalized() * dist / flight
+	var flight := _flight(up)
+	var v := dir.normalized() * dist / flight + carry
 	h.vel = Vector3(v.x, up, v.y)
 	h.grounded = false
 	h.fly_t = flight
@@ -144,7 +185,7 @@ func slam(c: float, at_feet: bool) -> void:
 	var s := sd()
 	var at := h.pos
 	if not at_feet:
-		var pw := HeroZones.walk(m, h.pos, k.aim(), float(s["reach"]))
+		var pw := HeroZones.walk(m, h.pos, tap_spot(), float(s["reach"]))
 		at = pw["pos"] if pw["ok"] else h.pos
 	k.slams += 1
 	var r := radius(c)
@@ -183,10 +224,10 @@ func slam(c: float, at_feet: bool) -> void:
 			m.displace.spike(f, -22.0)      # spiked down (after the hit, which would lift it)
 		gained = true
 	for w in m.verbs.walls.duplicate():
-		if not w.get("rock", false) or int(w["team"]) != h.team: continue
+		if not k.launchable(w): continue
 		var mid := k.rock_mid(w)
 		var rel := Vector2(mid.x - at.x, mid.z - at.z)
-		if rel.length() <= r + 1.1 and absf(mid.y - at.y) < 2.0:
+		if rel.length() <= r + 1.1 and HeroZones.rock_in_reach(mid.y, at.y):
 			k.launch(w, rel.normalized() if rel.length() > 0.2 else h.aim_dir(), "slam")
 			gained = true
 	if gained and k.rank("sec") >= 3:

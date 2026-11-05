@@ -1,6 +1,6 @@
 class_name DolmKit
 extends ArchKit
-## Tarek (id dolm, medium): Tremor Sense, Rubble Fists (tap boulder / hold punch), Rubble Leap, Quakefall,
+## Tarek (id dolm, medium): Tremor Sense, Rubble Fists (tap boulder / hold punch), Rock Hop, Quakefall,
 ## Stone Row, and Basalt Spine on X (breah_spine.gd). docs/heroes/dolm.md. The loop: raise rocks (Stone Row),
 ## then launch them with a held punch (every rock in the lane flies, a whole row one after another),
 ## a slam or a dash into the enemy. Rocks are low walls you can stand on and climb (StoneStand).
@@ -8,15 +8,14 @@ extends ArchKit
 ##
 ## Rocks are Verbs walls that block movement (HeroZones.rock), so they respect collision, placement
 ## legality and the abyss edge; they are synced over Net as ["zone", ...] events.
-## The RMB charge and slam live in BreahSlam (breah_slam.gd); the looks in KitLooks.
+## The RMB charge and slam live in BreahSlam (breah_slam.gd), the dash in BreahHop (breah_hop.gd); the looks in
+## KitLooks.
 
 const ROCK_PAY := "ROCKFALL"
 const STONE := Color("d9a35b")
 const MOLTEN := Color("ff7a2a")
 const LANE_COL := Color("f4ead8")       # the punch lane: pale stone white, as bright as an aim reticle
 const ROCK_STEP_OFF := 1.0     # m: from atop a rock, Stone Row measures from the ground this far ahead
-const LEAP_CROUCH := 0.06      # s: the rock bursts up and she crouches on it before the leap
-const LEAP_ROCK_UP := 1.6      # m: how high the rock arcs after her
 
 var lmb_t := -1.0              # how long the attack key has been down (-1: not pressed)
 var lmb_was := false
@@ -31,8 +30,7 @@ var shield_stacks := 0         # Molten Guard stacks
 var shield_at := -99.0
 var launch_pay := 0            # launched rocks that hit a hunter (payoff counter)
 var rock_hits := {}            # foe instance id -> last time a rock burst on it (repeat bursts deal less)
-# Rubble Leap in flight: {t, wait, T, from, to, dir, land_at (-1 until she lands)}
-var leap := {}
+var hop: BreahHop
 var slam: BreahSlam
 var spine: BreahSpine
 # counters for the checks
@@ -45,12 +43,16 @@ var wall_stuns := 0
 var guard_punches := 0         # punches that launched a rock of ours and gave a Molten Guard stack
 var rocks_made := 0
 var sight_pings := 0
-var landslides := 0            # leap rocks that came down and rolled on
-var leap_lands := 0            # leaps that landed
-var leap_hits := 0             # foes the landing crash caught
+var landslides := 0            # Rock Hop's last rocks that rolled on
+var leap_lands := 0            # Rock Hop chains that ended in a crash
+var leap_hits := 0             # foes the crash caught
 var sweeps := 0                # punches that launched 2+ rocks in a stream
 var last_sweep := 0            # rocks the last punch launched
 var splashes := 0              # boulder splash hits
+
+const STONES_RANGE := 12.0     # m: how far the seeing-stones watch a foe
+const STONES_EVERY := 0.2      # s between picks
+var stones_t := 0.0
 
 func rock_def() -> Dictionary: return d.get("rock", {})
 func slam_def() -> Dictionary: return rmb_def()["slam"]
@@ -58,6 +60,7 @@ func slam_def() -> Dictionary: return rmb_def()["slam"]
 func _setup() -> void:
 	slam = BreahSlam.new(self)
 	spine = BreahSpine.new(self)
+	hop = BreahHop.new(self)
 
 # ------------------------------------------------------------------ X: Basalt Spine (BreahSpine)
 func cast_ult() -> bool: return HeroUlt.press(self, spine.start)
@@ -73,7 +76,7 @@ func rid_owner() -> String:
 func my_rocks() -> Array:
 	var out: Array = []
 	for w in m.verbs.walls:
-		if w.get("rock", false) and w.get("by") == h and not w.has("ult"):
+		if w.get("rock", false) and w.get("by") == h and not w.has("ult") and not w.has("hop"):
 			out.append(w)
 	return out
 
@@ -88,6 +91,11 @@ func _rock_cap() -> int:
 func rock_mid(w: Dictionary) -> Vector3:
 	var mid: Vector2 = ((w["a"] as Vector2) + (w["b"] as Vector2)) * 0.5
 	return Vector3(mid.x, float(w["y"]), mid.y)
+
+## A rock of her team a punch or slam can send flying (a Rock Hop rock only crumbles: the dash's damage stays on
+## its last landing).
+func launchable(w: Dictionary) -> bool:
+	return w.get("rock", false) and int(w["team"]) == h.team and not w.has("hop")
 
 ## The ground her rocks rise from: the terrain under her while she stands (on one of her rocks too), else
 ## her own height (in the air nothing fits: Stone Row is ground-only).
@@ -198,6 +206,7 @@ func _repeat_k(f: Ent) -> float:
 
 # ------------------------------------------------------------------ per step
 func _tick(dt: float) -> void:
+	_tick_stones(dt)
 	var n := rocks_up()
 	res = float(n)
 	self_pips(6, mini(6, n), false, dt)
@@ -208,8 +217,7 @@ func _tick(dt: float) -> void:
 		m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.0, Color("ffd24a"), 0.28)      # the Molten Guard ring
 	if dive:
 		_tick_dive()
-	if not leap.is_empty():
-		_tick_leap(dt)
+	hop.tick(dt)
 	slam.tick(dt)
 	spine.tick(dt)
 	_tick_sight(dt)
@@ -217,6 +225,21 @@ func _tick(dt: float) -> void:
 ## The pending air slam: it lands with her, or plunges if pressed in the air. After a hop, a leap or an air
 ## press the glider wins (item 26): holding glide drops the slam and hands the arc over, never dragging her
 ## down. Pressed in a glide (the source's slam out of a glide), the dive is committed: the glider stays shut.
+## His three seeing-stones are his sight: they turn toward the nearest foe in range.
+func _tick_stones(dt: float) -> void:
+	stones_t -= dt
+	if stones_t > 0.0 or h.model == null:
+		return
+	stones_t = STONES_EVERY
+	var best: Variant = null
+	var near := INF
+	for f in foes_in(h.pos, STONES_RANGE):
+		var d := h.pos.distance_squared_to(f.pos)
+		if d < near:
+			near = d
+			best = f
+	h.model.set_meta(WardenGlb.ORBIT_LOOK, best.pos + Vector3.UP if best else Vector3.INF)
+
 func _tick_dive() -> void:
 	if dive_glide:
 		h.glide_cd = maxf(h.glide_cd, 0.1)
@@ -265,13 +288,13 @@ func sight_deg() -> float:
 	return lerpf(float(pd["deg"][0]), float(pd["deg"][1]), clampf(sneak_t / float(pd["grow"]), 0.0, 1.0))
 
 ## A Boki merge cancels the air Quakefall's dive, the Quake Fist's charge, the charge leap and
-## Rubble Leap (AimKit's telegraphs go with them through drop_holds).
+## Rock Hop (AimKit's telegraphs go with them through drop_holds).
 func _drop_holds() -> void:
 	dive = false
 	dive_k = 0.0
 	dive_fall = false
 	dive_glide = false
-	leap = {}
+	if hop: hop.drop()
 	if slam: slam.drop()
 	if spine: spine.drop()
 	if lmb_t >= 0.0:
@@ -478,10 +501,10 @@ func sweep_rocks(dir: Vector2) -> Array:
 	var half := float(pd["width"]) * 0.5 + float(pd["sweep_pad"])
 	var cand: Array = []
 	for w in m.verbs.walls:
-		if not w.get("rock", false) or int(w["team"]) != h.team:
+		if not launchable(w):
 			continue
 		var mid := rock_mid(w)
-		if absf(mid.y - h.pos.y) >= 2.0: continue
+		if not HeroZones.rock_in_reach(mid.y, h.pos.y): continue
 		var to := Vector2(mid.x - h.pos.x, mid.z - h.pos.z)
 		var along := to.dot(dir)
 		var perp := absf(to.dot(Vector2(-dir.y, dir.x)))
@@ -510,16 +533,17 @@ func _lunge(dist: float, t: float, dir: Vector2) -> void:
 	h.roll_t = t
 	h.move_kind = "rush"
 
-# ------------------------------------------------------------------ dash: Rubble Leap
+# ------------------------------------------------------------------ dash: Rock Hop (BreahHop)
 ## A second charge at rank 3.
 func extra_dashes() -> float:
 	return 1.0 if rank("dash") >= 3 else 0.0
 
-## Shift on the ground: a rock bursts up under her, she leaps in an arc to the cursor (up to `dist`, with
-## the global dash feel on top like every dash), lands with a crash that shoves everyone beside her, and
-## the rock she leapt from comes down right after her and rolls on (the source's odd dash and thrown
-## rock, built as a leap: docs/heroes/dolm.md). In the air it is her long dash.
+## Shift on the ground starts a Rock Hop chain (breah_hop.gd); a press inside a chain is its next hop, wherever
+## he is. In the air it is his long dash.
 func on_dash(use_ex: bool) -> bool:
+	if hop.chaining():
+		hop.press()
+		return true
 	if use_ex:
 		if not spend_dash(true): return true
 		play("breah_exdash")
@@ -530,152 +554,27 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	if in_dash() or not spend_dash(false):
 		return true
-	if not leap.is_empty():
-		_rock_down()       # the last leap's rock was still coming down: it rolls on now
-	var dd := dash_def()
-	var dir := h.aim_dir()
-	var to := leap_spot(dir)
-	var flight := float(dd["time"]) * float(dash_feel()["time"])
-	leap = {"t": 0.0, "wait": LEAP_CROUCH, "T": flight, "from": h.pos, "to": to, "dir": dir, "land_at": -1.0}
-	play("breah_dash")
-	# the rock heaves up under her first (dust, no blast: no explosions on a dash); she crouches on it, then leaps
-	m.fx.dust(h.pos, 10)
-	m.sfx("br_rise", h.pos, -4.0, 1.2)
-	AimKit.circle(
-		h, "leap",
-		{"at": to, "r": float(dd["land_r"]), "fill": 0.0, "all": true, "col": Color("ff5a2a"), "dur": flight + 0.3}
-	)
-	CombatBus.ability_used.emit(h, String(dd.get("id", "dash")), "dodge")
+	hop.start()
 	return true
-
-## Where the leap lands: the cursor, clamped between `min` and `dist` (times the dash feel; a third
-## further at rank 3), pulled back toward her until it is ground a body fits on.
-func leap_spot(dir: Vector2) -> Vector3:
-	var dd := dash_def()
-	var far := float(dd["dist"]) * float(dash_feel()["dist"]) * (float(dd["speed_k"]) if rank("dash") >= 3 else 1.0)
-	var to_aim := Vector2(aim().x - h.pos.x, aim().z - h.pos.z).length()
-	var want := clampf(to_aim, float(dd["min"]), far)
-	while want > 0.3:
-		var p := h.pos + Vector3(dir.x, 0, dir.y) * want
-		var g: float = m.world.ground_at(p.x, p.z)
-		if g > World.VOID + 1.0 and g - h.pos.y < 2.5 and m.world.occupy(p.x, p.z, h.r, g, false) == 0.0:
-			return Vector3(p.x, g, p.z)
-		want -= 0.25
-	return h.pos
-
-func _tick_leap(dt: float) -> void:
-	var dd := dash_def()
-	leap["t"] = float(leap["t"]) + dt
-	if h.downed:
-		leap = {}
-		AimKit.hide(h, "leap")
-		return
-	var from: Vector3 = leap["from"]
-	var to: Vector3 = leap["to"]
-	if float(leap["wait"]) > 0.0:
-		leap["wait"] = float(leap["wait"]) - dt
-		KitLooks.of(m).hold_on("br_carry", "dashrock", h, from + Vector3(0, 0.35, 0))
-		if float(leap["wait"]) <= 0.0:
-			_leap_off()
-		return
-	var flown := float(leap["t"]) - LEAP_CROUCH
-	var flight := float(leap["T"])
-	AimKit.circle(
-		h, "leap",
-		{
-			"at": to, "r": float(dd["land_r"]), "fill": clampf(flown / flight, 0.0, 1.0), "all": true,
-			"col": Color("ff5a2a")
-		}
-	)
-	# the rock follows her arc a beat behind, tumbling
-	var lag := float(dd["rock_lag"])
-	var ur := clampf((flown - lag) / flight, 0.0, 1.0)
-	var rock_at := from.lerp(to, ur) + Vector3(0, 0.5 + sin(ur * PI) * LEAP_ROCK_UP, 0)
-	var land_at := float(leap["land_at"])
-	if land_at < 0.0 and not h.grounded and h.pad.is_empty():
-		h.vel.y -= _leap_pull() * dt
-	if land_at < 0.0 and flown > 0.08 and (h.grounded or flown > flight + 0.5):
-		_leap_land()
-		land_at = flown
-		leap["land_at"] = flown
-	var rock_down := maxf(flight, land_at) + lag
-	if flown < rock_down:
-		KitLooks.of(m).hold_on("br_carry", "dashrock", h, rock_at)
-		return
-	if land_at >= 0.0:
-		_rock_down()
-
-## The leap is over: its rock comes down at the landing spot and rolls on.
-func _rock_down() -> void:
-	var to: Vector3 = leap["to"]
-	var dir: Vector2 = leap["dir"]
-	leap = {}
-	AimKit.hide(h, "leap")
-	_landslide_launch(to, dir)
-
-func _leap_off() -> void:
-	var dd := dash_def()
-	h.launch_to(leap["to"], float(leap["T"]))
-	if h.pad.is_empty():
-		h.vel.y += 0.5 * _leap_pull() * float(leap["T"])     # a heavy rock leap: a higher arc, same landing time
-	h.inv_t = maxf(h.inv_t, float(dd["invuln"]))
-	h.dash_at = m.time
-	m.fx.dust(h.pos, 6)
-	m.sfx("br_leap", h.pos, -3.0, 1.0)
-	Feel.dash_sound(m, id, h.pos, h)
-
-## Rubble Leap falls at its own leap_grav (a heavy arc that still lands on time): the pull on top of gravity.
-func _leap_pull() -> float:
-	return maxf(0.0, float(dash_def().get("leap_grav", Hunter.H_GRAV)) - Hunter.H_GRAV)
-
-## The landing: a crash that shoves everyone beside her (the first of the leap's two hits).
-func _leap_land() -> void:
-	var dd := dash_def()
-	leap_lands += 1
-	var at := h.pos
-	var r := float(dd["land_r"])
-	play("breah_leap_land")
-	m.fx.dust(at, 14)      # the hit area was the landing circle all through the flight: no ring or blast here
-	m.sfx("br_slam", at, -5.0, 1.15)
-	rider_points(leap["from"], at)
-	for f in foes_in(at, r, 2.0):
-		leap_hits += 1
-		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
-		away = away.normalized() if away.length() > 0.05 else h.aim_dir()
-		f.hurt(
-			float(dd["land_dmg"]) * power("dash"), h,
-			{"src": "abil", "ab": "dash", "kb": away * float(dd["kb"]), "lift": 2.0, "heavy": true}
-		)
-
-## The rock comes down just ahead of where she landed and rolls on (the leap's second hit).
-func _landslide_launch(at: Vector3, dir: Vector2) -> void:
-	var dd := dash_def()
-	landslides += 1
-	var start := at + Vector3(dir.x * 0.9, 0.5, dir.y * 0.9)
-	m.fx.burst(start, Color("a8805a"), 14, 5.0, 0.4, 6.0, 1.2, Vector3(dir.x, 0.3, dir.y), 50.0)
-	m.fx.dust(start, 8)
-	_fire_rock(start, dir, float(dd["dmg"]) * power("dash"), "dash", "dashrock", float(dd["rock_range"]))
-	m.sfx("br_roll", start, -3.0, 1.0)
 
 ## Her dash after-image: a puff of quarry dust and a few embers, not the shared pill.
 ## Her own hand tell (the molten fists) replaces the shared white charge orb.
 func charge_orb() -> bool:
 	return false
 
-## Rubble Leap is her ground dash for DashFlow: from the press until she lands (the rock rolling on after is not).
+## A Rock Hop chain is her ground dash for DashFlow: from the press until it ends (the rock rolling on after is not).
 func in_dash() -> bool:
-	return super.in_dash() or _leaping()
+	return super.in_dash() or hop.chaining()
 
-## Rubble Leap's time left until its planned landing (the shared dash's otherwise).
+## The skid is a roll underneath: the weapon still goes, like the hops around it (its dash row).
+func fires_in_dash() -> bool:
+	return hop.chaining() and hop.st["phase"] == "skid"
+
+## The chain's time left if nobody presses again (the shared dash's otherwise).
 func dash_left() -> float:
-	if _leaping():
-		return maxf(0.0, LEAP_CROUCH + float(leap["T"]) - float(leap["t"]))
-	return super.dash_left()
+	return hop.left() if hop.chaining() else super.dash_left()
 
-func _leaping() -> bool:
-	return not leap.is_empty() and float(leap["land_at"]) < 0.0
-
-## Her dash moves (breah_dash, breah_exdash) are the whole dash pose: no shared roll under them.
+## Her dash moves (breah_hop, breah_skate, breah_exdash) are the whole dash pose: no shared roll under them.
 func dodge_anim() -> String:
 	return "kit"
 
@@ -689,7 +588,7 @@ func rmb_charge_full() -> float:
 	return float(rmb_def()["hold"]) + float(slam_def()["time"])
 
 func rmb_auto_t() -> float:
-	return rmb_charge_full() + 0.5
+	return rmb_charge_full()      # past the short hold's cap it goes by itself
 
 func rmb_hold_tick(t: float) -> void:
 	slam.hold_tick(t)

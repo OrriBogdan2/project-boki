@@ -1,10 +1,10 @@
 {
- "body_glb": "~/meshy/tarek/bake/low.glb",
+ "body_glb": "~/meshy/tarek_m/bake/low.glb",
  "rig": "art/wardens/src/tarek_rig.json",
- "out": "art/wardens/tarek/tarek.glb",
- "blend": "~/meshy/tarek/fit.blend",
+ "out": "/home/boki/s2-art1-tarek-tmp/scan/fit.glb",
+ "blend": "~/meshy/tarek_m/fit.blend",
  "turn": 180,
- "max_tris": 36000,
+ "max_tris": 14400,
  "floater_verts": 8,
  "snap_r": 0.045,
  "scale_joints": [
@@ -13,91 +13,91 @@
  ],
  "joints": {
   "crown": [
+   0,
    -0.05,
-   0.08,
-   0.9
+   0.868
   ],
   "neck": [
-   -0.04,
-   0.12,
-   0.5
+   0,
+   -0.05,
+   0.567
   ],
   "shoulder.L": [
-   0.18,
-   0.15,
-   0.4
+   0.195,
+   -0.03,
+   0.453
   ],
   "shoulder.R": [
-   -0.24,
-   0.15,
-   0.4
+   -0.22,
+   -0.03,
+   0.453
   ],
   "elbow.L": [
-   0.32,
-   0.08,
-   0.22
+   0.367,
+   -0.03,
+   0.224
   ],
   "hand.L": [
-   0.54,
-   -0.2,
-   0.05
+   0.481,
+   -0.03,
+   0.037
   ],
   "fingers.L": [
-   0.57,
-   -0.3,
-   -0.03
+   0.553,
+   -0.03,
+   -0.063
   ],
   "elbow.R": [
-   -0.4,
-   0.08,
-   0.22
+   -0.364,
+   -0.03,
+   0.238
   ],
   "hand.R": [
-   -0.55,
-   -0.2,
-   0.04
+   -0.473,
+   -0.03,
+   0.037
   ],
   "fingers.R": [
-   -0.57,
-   -0.3,
-   -0.04
+   -0.565,
+   -0.03,
+   -0.034
   ],
   "hip.L": [
-   0.07,
-   0.14,
-   0.06
+   0.095,
+   -0.03,
+   0.05
   ],
   "hip.R": [
-   -0.12,
-   0.14,
-   0.06
+   -0.106,
+   -0.03,
+   0.05
   ],
   "knee.L": [
-   0.12,
-   0.12,
-   -0.38
+   0.129,
+   -0.03,
+   -0.436
   ],
   "knee.R": [
-   -0.18,
-   0.12,
-   -0.38
+   -0.129,
+   -0.03,
+   -0.436
   ],
   "ankle.L": [
-   0.18,
-   0.14,
-   -0.78
+   0.195,
+   -0.05,
+   -0.866
   ],
   "ankle.R": [
-   -0.2,
-   0.14,
-   -0.78
+   -0.215,
+   -0.05,
+   -0.866
   ]
  },
  "chunk": {
   "head": 1.0,
-  "hand": 1.15,
+  "hand": 1.0,
   "girth": 1.0,
-  "feet": 1.25
+  "feet": 1.0
  },
  "glow_min": [
   2.0,
@@ -115,32 +115,13 @@
  "ink_room": 0.02,
  "slot_rules": [
   {
-   "slot": "cloth",
-   "box": [
-    null,
-    null,
-    null,
-    null,
-    null,
-    -0.62
-   ],
-   "hsv": [
-    0.0,
-    1.0,
-    0.0,
-    0.42,
-    0.38,
-    1.0
-   ]
-  },
-  {
    "slot": "hair",
    "box": [
     null,
     null,
     null,
     null,
-    0.42,
+    0.3,
     null
    ],
    "hsv": [
@@ -149,538 +130,80 @@
     null,
     null,
     0.0,
-    0.2
+    0.22
    ]
   },
   {
-   "slot": "metal",
+   "slot": "leather",
    "box": [
+    0.2,
     null,
     null,
     null,
-    null,
-    -0.3,
-    0.2
+    -0.15,
+    0.6
    ],
    "hsv": [
-    null,
-    null,
+    0.5,
+    0.8,
     0.0,
-    0.14,
-    0.42,
+    0.3,
+    0.25,
     1.0
    ]
   },
   {
    "slot": "leather",
    "box": [
-    null,
-    null,
-    null,
-    null,
+    -0.6,
     -0.3,
-    0.2
+    null,
+    null,
+    -0.15,
+    0.3
    ],
    "hsv": [
-    null,
-    null,
-    null,
-    null,
-    0.0,
-    0.24
-   ]
-  },
-  {
-   "slot": "cloth",
-   "box": [
-    null,
-    null,
-    null,
-    null,
-    0.05,
-    0.5
-   ],
-   "hsv": [
-    0.45,
+    0.5,
     0.8,
-    0.05,
-    0.4,
-    0.2,
-    0.75
-   ]
-  },
-  {
-   "slot": "leather",
-   "box": [
-    0.27,
-    null,
-    null,
-    null,
-    -0.2,
-    0.36
-   ],
-   "absx": true
-  },
-  {
-   "slot": "skin",
-   "box": [
-    null,
-    null,
-    null,
-    null,
     0.0,
-    null
-   ],
-   "hsv": [
-    0.92,
-    0.12,
-    0.28,
-    0.92,
-    0.1,
-    0.85
+    0.3,
+    0.25,
+    1.0
    ]
   },
   {
    "slot": "skin",
+   "hsv": [
+    0.0,
+    0.09,
+    0.2,
+    0.65,
+    0.35,
+    1.0
+   ],
    "box": [
     null,
     null,
     null,
     null,
     null,
-    -0.72
-   ],
-   "hsv": [
-    0.92,
-    0.12,
-    0.28,
-    0.92,
-    0.1,
-    0.85
+    null
    ]
   },
   {
    "slot": "cloth"
   }
  ],
- "slot_vote": 8,
+ "slot_vote": 4,
  "fit_weights": true,
  "snap_y": false,
  "cap_flat": true,
  "atlas_px": 2048,
- "orbits": [
-  {
-   "name": "orbit_stones",
-   "bone": "head",
-   "centre": [
-    0.0,
-    0.0,
-    0.22
-   ],
-   "radius": 0.4,
-   "items": [
-    {
-     "angle": 300,
-     "height": 0.26,
-     "size": 0.105
-    },
-    {
-     "angle": 60,
-     "height": 0.34,
-     "size": 0.11
-    },
-    {
-     "angle": 180,
-     "height": 0.22,
-     "size": 0.099
-    }
-   ],
-   "rock": "a8896a",
-   "rim": "f6eee0",
-   "iris": "ff8a1a",
-   "pupil": "1e0a04",
-   "slot": "leather",
-   "rock_dark": "5c4433",
-   "rim_dark": "b49a7e",
-   "iris_hot": "ffd060",
-   "rel": "head",
-   "iris_r": 0.42,
-   "anchors": true,
-   "depth": 0.95
-  },
-  {
-   "name": "orbit_shards",
-   "rel": "hand.R",
-   "bone": "hand.R",
-   "centre": [
-    0.0,
-    0.0,
-    -0.02
-   ],
-   "radius": 0.15,
-   "kind": "rock",
-   "items": [
-    {
-     "angle": 0,
-     "height": 0.03,
-     "size": 0.022
-    },
-    {
-     "angle": 72,
-     "height": -0.04,
-     "size": 0.022
-    },
-    {
-     "angle": 144,
-     "height": 0.05,
-     "size": 0.022
-    },
-    {
-     "angle": 216,
-     "height": -0.02,
-     "size": 0.022
-    },
-    {
-     "angle": 288,
-     "height": 0.0,
-     "size": 0.022
-    }
-   ],
-   "rock": "8a7258",
-   "rock_dark": "4a382a",
-   "slot": "leather"
-  }
- ],
- "split": [
-  {
-   "name": "bracers",
-   "slot": "leather",
-   "boxes": [
-    [
-     0.16,
-     0.6,
-     -0.3,
-     0.3,
-     1.3,
-     1.68
-    ],
-    [
-     -0.6,
-     -0.16,
-     -0.3,
-     0.3,
-     1.3,
-     1.68
-    ]
-   ],
-   "emit": {
-    "mode": "dark",
-    "k": 0.8,
-    "colour": "ff8a1c"
-   },
-   "bones": [
-    "forearm.L",
-    "forearm.R",
-    "hand.L",
-    "hand.R"
-   ],
-   "drop": true
-  }
- ],
- "studs": [
-  {
-   "name": "crystals",
-   "on": "hair",
-   "box": [
-    null,
-    null,
-    null,
-    null,
-    1.2,
-    null
-   ],
-   "count": 14,
-   "size": 0.024,
-   "spacing": 0.08,
-   "seed": 4,
-   "colour": "ffa020",
-   "tip": 0.8
-  }
- ],
- "weapon_empty": true,
  "smooth": {
-  "iterations": 3,
-  "sigma_s": 3.0,
-  "sigma_r": 0.08
+  "iterations": 1,
+  "sigma_s": 2.0,
+  "sigma_r": 0.05
  },
- "ramps": [
-  {
-   "name": "hair",
-   "slots": [
-    "hair"
-   ],
-   "hsv": [
-    0.0,
-    1.0,
-    0.0,
-    0.6,
-    0.0,
-    0.32
-   ],
-   "ramp": [
-    "0d0a0b",
-    "18131a",
-    "272027",
-    "3d3438"
-   ]
-  },
-  {
-   "name": "copper beads",
-   "slots": [
-    "hair",
-    "cloth",
-    "skin"
-   ],
-   "hsv": [
-    0.02,
-    0.1,
-    0.45,
-    1.0,
-    0.35,
-    1.0
-   ],
-   "box": [
-    null,
-    null,
-    null,
-    null,
-    0.25,
-    null
-   ],
-   "ramp": [
-    "6a3418",
-    "a45a2c",
-    "d4884a",
-    "f0b070"
-   ],
-   "k": 0.8
-  },
-  {
-   "name": "vest",
-   "slots": [
-    "cloth"
-   ],
-   "hsv": [
-    0.45,
-    0.8,
-    0.05,
-    0.45,
-    0.15,
-    0.8
-   ],
-   "ramp": [
-    "34363c",
-    "4c5058",
-    "666a72",
-    "82868e"
-   ]
-  },
-  {
-   "name": "sash",
-   "slots": [
-    "cloth",
-    "skin"
-   ],
-   "hsv": [
-    0.97,
-    0.055,
-    0.5,
-    1.0,
-    0.3,
-    1.0
-   ],
-   "box": [
-    null,
-    null,
-    null,
-    null,
-    -0.1,
-    0.2
-   ],
-   "ramp": [
-    "5c1e12",
-    "8c331d",
-    "b44a28",
-    "d46a3a"
-   ]
-  },
-  {
-   "name": "trousers",
-   "slots": [
-    "cloth"
-   ],
-   "hsv": [
-    0.06,
-    0.15,
-    0.36,
-    0.85,
-    0.3,
-    1.0
-   ],
-   "ramp": [
-    "4e3426",
-    "6e4e36",
-    "8a6a4c",
-    "a68660",
-    "c0a074"
-   ],
-   "box": [
-    null,
-    null,
-    null,
-    null,
-    -0.75,
-    null
-   ]
-  },
-  {
-   "name": "wraps",
-   "slots": [
-    "cloth"
-   ],
-   "hsv": [
-    0.0,
-    1.0,
-    0.0,
-    0.36,
-    0.35,
-    1.0
-   ],
-   "ramp": [
-    "6c5848",
-    "94806c",
-    "bba68e",
-    "dccdb4"
-   ]
-  },
-  {
-   "name": "leather",
-   "slots": [
-    "leather"
-   ],
-   "hsv": [
-    0.0,
-    1.0,
-    0.0,
-    1.0,
-    0.0,
-    0.3
-   ],
-   "ramp": [
-    "1a1617",
-    "2b2426",
-    "40363a"
-   ]
-  },
-  {
-   "name": "metal",
-   "slots": [
-    "metal"
-   ],
-   "hsv": [
-    0.0,
-    1.0,
-    0.0,
-    0.2,
-    0.0,
-    1.0
-   ],
-   "ramp": [
-    "5a5c64",
-    "8a8d96",
-    "b8bbc2",
-    "e4e6ea"
-   ]
-  },
-  {
-   "name": "skin",
-   "slots": [
-    "skin"
-   ],
-   "hsv": [
-    0.92,
-    0.12,
-    0.25,
-    0.95,
-    0.08,
-    0.9
-   ],
-   "ramp": [
-    "2e1a14",
-    "472a20",
-    "603b2d",
-    "784c3b",
-    "8e5e4a"
-   ]
-  },
-  {
-   "name": "foot wraps",
-   "slots": [
-    "cloth",
-    "skin"
-   ],
-   "box": [
-    null,
-    null,
-    null,
-    null,
-    null,
-    -0.62
-   ],
-   "hsv": [
-    0.0,
-    0.2,
-    0.0,
-    0.42,
-    0.42,
-    1.0
-   ],
-   "ramp": [
-    "5a4a3e",
-    "7a6656",
-    "9a8672",
-    "b4a28c"
-   ]
-  },
-  {
-   "name": "vest slate",
-   "slots": [
-    "cloth"
-   ],
-   "box": [
-    null,
-    null,
-    null,
-    null,
-    0.12,
-    0.5
-   ],
-   "hsv": [
-    0.0,
-    1.0,
-    0.0,
-    0.42,
-    0.12,
-    1.0
-   ],
-   "ramp": [
-    "34363c",
-    "4c5058",
-    "666a72",
-    "82868e"
-   ]
-  }
- ],
  "despeckle": 1,
  "hair_springs": [
   {
@@ -765,23 +288,31 @@
    ]
   }
  ],
- "gauntlets": {
-  "r": 0.058,
-  "rows": 2,
-  "per_row": 3,
-  "plate": 1.3,
-  "fist": 0.1,
-  "seed": 5,
-  "slot": "leather",
-  "rock": "5e5248",
-  "rock_dark": "2a2420",
-  "rim": "f0d8b0",
-  "rim_dark": "a07850",
-  "iris": "a8300e",
-  "iris_hot": "b83c12",
-  "pupil": "1e0a04",
-  "lump": 0.12,
-  "core": 0.55,
-  "thick": 0.6
- }
+ "cut_boxes": [
+  [
+   -0.37,
+   -0.2,
+   -0.3,
+   0.3,
+   0.69,
+   0.87
+  ],
+  [
+   0.16,
+   0.31,
+   -0.3,
+   0.3,
+   0.76,
+   0.94
+  ],
+  [
+   0.26,
+   0.41,
+   -0.3,
+   0.3,
+   0.56,
+   0.74
+  ]
+ ],
+ "ramps": []
 }

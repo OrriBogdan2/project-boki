@@ -228,7 +228,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | ashwick | E -> jump |  | the move goes at once, the ability keeps running (default) |
 | ashwick | ult (X) -> jump | Data: reactivating ends the flight early (the source's way out of it); the flight holds him low. Ours: a jump in the flight leaps off it at once: the flight ends (the carpet laid stays), he keeps a jump-out-of-a-dash share of its speed and hands it on to a glide (Hunter.glide_handoff). | the move cancels it at once |
 | ashwick | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
-| ashwick | hold LMB through a ground dash | Data: the flamethrower is a hold, the 0.35s gap is between uses; Pyro Pounce: no fire during it. Footage (0159-0161): upright out of the bash with the nozzle already on the aim. Ours: held through the ram the stream goes out and roars again the step it ends: no pilot, no relight gap. | the hold carries through and lets go there |
+| ashwick | hold LMB through a ground dash | Data: the flamethrower is a hold, the 0.35s gap is between uses; Pyro Pounce: no fire during it. Footage (0159-0161): upright out of the bash with the nozzle already on the aim. Ours: held through the ram the stream goes out and roars again the step it ends: no pilot, no relight gap. Flue Flight is no dash here (owner item 66): LMB is off for the whole flight, ignored, not buffered, a press ticks softly, and the lance lights as usual the step it ends. | the hold carries through and lets go there |
 | ashwick | hold LMB through an air dash | As on the ground: held through the poof, the stream is back the step it ends. | the hold carries through and lets go there |
 | ashwick | hold LMB through a jump | Ours: the hose keeps burning through a jump. | the hold carries through and lets go there |
 | ashwick | hold RMB through a ground dash |  | the hold carries through and lets go there |
@@ -250,7 +250,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | tender | ult (X) -> dash | Data: cancelled only by stun, knock or moving too far. Footage: she walks through the channel. Ours: Shift goes at once and the tether holds while she stays in the ring. | the dash goes, the ability keeps running |
 | tender | Q glove -> dash | No source glove. | the dash goes, the ability keeps running |
 | tender | jump -> LMB |  | fires mid-jump (default) |
-| tender | jump -> RMB |  | fires mid-jump (default) |
+| tender | jump -> RMB | Ours: owner items 118 and 118b, the wind-up and snap release. | **exception:** buffered to the landing (Burrseed's fixed 1 s wind-up outlasts the hop, so the seed leaves after she lands) |
 | tender | jump -> E |  | fires mid-jump (default) |
 | tender | jump -> ult (X) |  | fires mid-jump (default) |
 | tender | jump -> Q glove |  | fires mid-jump (default) |
@@ -295,20 +295,20 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | rimewright | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | rimewright | hold RMB through an air dash |  | the hold carries through and lets go there |
 | rimewright | hold RMB through a jump |  | the hold carries through and lets go there |
-| dolm | ground dash -> LMB | Footage tip 'Punch to Extend Dash/RMB': a punch during Landslide goes off and carries her on. Ours: the boulder or punch goes off mid-leap and the leap's arc carries on (a punch's step pushes her a little further). | fires mid-dash; dash momentum carries |
-| dolm | ground dash -> RMB | Footage tip 'Dash -> RMB Dunk Combo' (0965-1010): Landslide shoves the foe out, then she leap-slams onto it. Ours: the charge starts mid-leap; let go in the air and the slam lands where the leap does. | fires mid-dash; dash momentum carries |
-| dolm | ground dash -> E | Card: Rockwave is only castable over ground; nothing on casting it mid-Landslide. Ours: held to the landing, then raised from there. | buffered to the dash's end |
-| dolm | ground dash -> ult (X) | Not in the data or footage. Tetraform is placed at the cursor, not at her, so the aim starts mid-leap; the ridge rises on release. | fires mid-dash |
-| dolm | ground dash -> Q glove | Not in the data or footage (the glove is ours). It goes off mid-leap like any glove. | fires mid-dash |
+| dolm | ground dash -> LMB | Footage tip 'Punch to Extend Dash/RMB': a punch during Landslide goes off and carries her on. Ours: the boulder or punch goes off mid-hop and the hop's arc carries on (a punch's step pushes him a little further); every hop of a Rock Hop chain counts as the dash. | fires mid-dash; dash momentum carries |
+| dolm | ground dash -> RMB | Footage tip 'Dash -> RMB Dunk Combo' (0965-1010): Landslide shoves the foe out, then she leap-slams onto it. Ours: the charge starts mid-hop; let go in the air and the slam lands where the hop does, which ends the chain there. | fires mid-dash; dash momentum carries |
+| dolm | ground dash -> E | Card: Rockwave is only castable over ground; nothing on casting it mid-Landslide. Ours: held to the end of the chain, then raised from there. | buffered to the dash's end |
+| dolm | ground dash -> ult (X) | Not in the data or footage. Tetraform is placed at the cursor, not at her, so the aim starts mid-hop; the ridge rises on release. | fires mid-dash |
+| dolm | ground dash -> Q glove | Not in the data or footage (the glove is ours). It goes off mid-hop like any glove. | fires mid-dash |
 | dolm | air dash -> LMB | Not in the data or footage (the source shows no air dash). The shared air dash can't fire the weapon; the press goes at its end. | buffered to the dash's end |
 | dolm | air dash -> RMB | Not in the data or footage. Ours: the charge starts mid-dash; the air dive waits for the dash to end (it holds her height), then plunges to slam. | fires mid-dash |
 | dolm | air dash -> E | Card: Rockwave is only castable over ground, so it doesn't go off in the air at all (with or without a dash). | buffered to the dash's end |
 | dolm | air dash -> ult (X) | Not in the data or footage. The aim is placed at the cursor, so it starts mid-dash. | fires mid-dash |
 | dolm | air dash -> Q glove | Not in the data or footage (the glove is ours). It goes off mid-dash like any glove. | fires mid-dash |
-| dolm | LMB -> dash | Not in the data or footage. Shift during the punch's wind-up leaps at once; the hold carries on and the punch goes on release. | the dash goes, the ability keeps running |
-| dolm | RMB -> dash | Footage: jumping while charging leaps her forward with the circle; Shift during the charge does the same with Rubble Leap (the circle comes along, the charge carries on). | the dash goes, the ability keeps running |
-| dolm | E -> dash | Not in the data or footage. The rocks are already placed during the 0.2s flash; Shift leaps at once and they rise anyway. | the dash goes, the ability keeps running |
-| dolm | ult (X) -> dash | Not in the data or footage. Shift while aiming the ridge leaps at once; the aim carries on. | the dash goes, the ability keeps running |
+| dolm | LMB -> dash | Not in the data or footage. Shift during the punch's wind-up hops at once; the hold carries on and the punch goes on release. | the dash goes, the ability keeps running |
+| dolm | RMB -> dash | Footage: jumping while charging leaps her forward with the circle; Shift during the charge does the same with Rock Hop (the circle comes along, the charge carries on). | the dash goes, the ability keeps running |
+| dolm | E -> dash | Not in the data or footage. The rocks are already placed during the 0.2s flash; Shift hops at once and they rise anyway. | the dash goes, the ability keeps running |
+| dolm | ult (X) -> dash | Not in the data or footage. Shift while aiming the ridge hops at once; the aim carries on. | the dash goes, the ability keeps running |
 | dolm | Q glove -> dash |  | the kit's own handling (no row yet) |
 | dolm | jump -> LMB |  | fires mid-jump (default) |
 | dolm | jump -> RMB |  | fires mid-jump (default) |

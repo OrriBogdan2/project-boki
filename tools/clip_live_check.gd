@@ -48,6 +48,12 @@ func run(main: Node) -> void:
 	var home: Vector3 = r[4]
 	for f in 10:
 		_frame(m, [P])
+	if WardenClips.data("kael").is_empty():
+		# (a branch without Kael's art: no clip data means he plays on the procedural rig, and that has to hold too)
+		ok(_clips(P) == null, "no clip data for Kael: he plays procedurally")
+		print("CLIP_LIVE_DONE, failures: ", bad)
+		main.get_tree().quit(1 if bad > 0 else 0)
+		return
 	ok(_clips(P) != null, "Kael wears his clips in a match")
 	ok(_shown(P) == 0, "one weapon drawn (%d procedural pieces)" % _shown(P))
 	P.equip(P.wid)

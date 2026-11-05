@@ -6,6 +6,8 @@ extends RefCounted
 ## touches the save.
 
 const TRI_BUDGET := 15000
+const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
+	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge"}
 const DT := 1.0 / 30.0
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
@@ -22,6 +24,8 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)
+	for id in OWN_MODELS:
+		_own_model(String(id), String(OWN_MODELS[id]))
 	var n := 0
 	for id in Arch.ids():
 		var art_name := WardenGlb.art(String(id))
@@ -32,6 +36,16 @@ func run(main: Node) -> void:
 	ok(n > 0, "at least one Hero has clips (%d)" % n)
 	print("CLIP_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## A Hero's own .glb, wearing its clips: a bad merge of WardenGlb falls back to the procedural body in silence.
+func _own_model(id: String, art_name: String) -> void:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	holder.add_child(m)
+	var sync := m.get_node_or_null("Warden/Sync")
+	var own := WardenGlb.art(id) == art_name and WardenGlb.has_model(id) and bool(m.get_meta("glb", false))
+	ok(own and sync != null and sync.get("clips") != null,
+			"%s: its own %s.glb with clips, not the fallback" % [id, art_name])
+	m.free()
 
 func _hero(main: Node, id: String, art_name: String) -> void:
 	var dd := WardenClips.data(art_name)
@@ -62,13 +76,22 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_timings(id, dd, clips)
 	# one weapon: the procedural pieces are hidden
 	var shown := 0
+	var which := ""
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
 	for mi in gun.find_children("*", "MeshInstance3D", true, false):
-		if (mi as MeshInstance3D).is_visible_in_tree():
+		# (an emptied Mag draws nothing: HunterAnim still shows it for the reload's motion)
+		if (mi as MeshInstance3D).is_visible_in_tree() and (mi as MeshInstance3D).mesh != null:
 			shown += 1
-	ok(shown == 0, "%s: one weapon drawn (%d procedural pieces showing)" % [id, shown])
+			which += " " + String(gun.get_path_to(mi))
+	ok(shown == 0, "%s: one weapon drawn (%d procedural pieces showing:%s)" % [id, shown, which])
 	_sliders(id, sync)
 	await _on_blade(id, m, sync, clips)
+	# "bone_scale" (item 137): the size holds over every clip that keys the bone
+	for nm in dd.get("bone_scale", {}):
+		var sk := WardenGlb.skeleton(m.get_node("Warden"))
+		var want := float(dd["bone_scale"][nm])
+		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
+				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _handover(id, m, sync, clips, dd)
 	m.free()
 
@@ -136,7 +159,8 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 			far = maxf(far, muzzle.global_position.distance_to(sees))
 			var hand: Vector3 = sk.global_transform * sk.get_bone_global_pose(hb).origin
 			var body_k := absf(sk.global_transform.basis.get_scale().x)
-			drift = maxf(drift, absf(hand.distance_to(sees) / body_k - rest))
+			var len_now := rest * sk.get_bone_pose_scale(hb).y      # ("bone_scale")
+			drift = maxf(drift, absf(hand.distance_to(sees) / body_k - len_now))
 			n += 1
 	clips.force = {}
 	ok(far <= FX_ON_BLADE, "%s: the Muzzle stays on the visible tip in %d frames (worst %.3f m)" % [id, n, far])

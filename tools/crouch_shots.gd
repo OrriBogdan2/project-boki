@@ -30,6 +30,7 @@ func run(main: Node) -> void:
 	var close_fov := 24.0
 	var close_at := 0.62
 	var upper := ""
+	var grab: Array = []
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--warden="): id = a.substr(9)
@@ -39,6 +40,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--close-fov="): close_fov = float(a.substr(12))
 		if a.begins_with("--close-at="): close_at = float(a.substr(11))
 		if a.begins_with("--upper="): upper = a.substr(8)
+		if a.begins_with("--grab="): grab = Array(a.substr(7).split(",", false)).map(func(x): return int(x))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(px, px)
@@ -85,8 +87,9 @@ func run(main: Node) -> void:
 		t += DT
 		if t >= 0.0 and step % 2 == 0:
 			for c in ["match", "close"]:
-				_aim(String(c), close_fov, close_at)
-				await _grab(out.path_join(variant).path_join(c).path_join("f%03d.png" % i))
+				if grab.is_empty() or i in grab:
+					_aim(String(c), close_fov, close_at)
+					await _grab(out.path_join(variant).path_join(c).path_join("f%03d.png" % i))
 			i += 1
 		step += 1
 	print("CROUCH_SHOTS_DONE ", i)

@@ -60,6 +60,14 @@ const CHECKS := {
 	"--warden-shots": ["res://tools/warden_shots.gd", "warden_shots", null],      # models beside sheets
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],      # hand-keyed clips, weapon on the bone
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
+	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
+	"--pip-live-check": ["res://tools/pip_live_check.gd", "pip_live_check", null],      # Pip's clips in a real match
+	"--vex-clip-live-check": ["res://tools/vex_clip_live_check.gd", "vex_clip_live_check", null],
+	"--cinder-art-check": ["res://tools/cinder_art_check.gd", "cinder_art_check", null],
+	"--ryzz-live-check": ["res://tools/ryzz_live_check.gd", "ryzz_live_check", null],
+	"--clip-live-claire-check": ["res://tools/clip_live_claire_check.gd", "clip_live_claire_check", null],
+	"--claire-skate-shots": ["res://tools/claire_skate_shots.gd", "claire_skate_shots", null],
+	"--clip-live-grimble": ["res://tools/clip_live_grimble.gd", "clip_live_grimble", null],      # Grimble, the same
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
 	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],
 	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],
@@ -108,6 +116,7 @@ const CHECKS := {
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],     # 2 games, relay
 	"--rig-standard-check": ["res://tools/rig_standard_check.gd", "rig_standard_check", null],
 	"--rig-shots": ["res://tools/rig_shots.gd", "rig_shots", null],
+	"--weapon-audit": ["res://tools/weapon_audit.gd", "weapon_audit", null],
 	"--warden-stance-check": ["res://tools/warden_stance_check.gd", "warden_stance_check", null],
 	"--warden-stance-shots": ["res://tools/warden_stance_shots.gd", "warden_stance_shots", null],
 	"--mantle-look-check": ["res://tools/mantle_look_check.gd", "mantle_look_check", null],      # Mantle look, creator
