@@ -58,16 +58,7 @@ func _ready() -> void:
 			cam_override = Array(a.substr(12).split(",")).map(func(x): return float(x))
 		elif a.begins_with("--title-t="):
 			t = float(a.substr(10))
-	_sky()
-	_hero_isle()
-	_squad()
-	_skylands()
-	if not low:
-		_shafts()
-	_cloud_banks()
-	_wyrm()
-	_weather()
-	_glider()
+	_sky()        # the painted splashes (TitleBackdrop) cover the screen, so the 3D island, squad and sky props are off
 	cam = Camera3D.new(); cam.fov = 36.0; cam.far = 1600.0
 	add_child(cam)
 	cam.make_current()
@@ -438,6 +429,7 @@ func _build_ui() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.name = "TitleUI"
 	ui.add_child(root)
+	root.add_child(TitleBackdrop.new())
 	# a dark wash on the left so the menu reads over the scene, and a vignette with a little
 	# letterbox weight top and bottom
 	var shade := TextureRect.new()
@@ -479,13 +471,13 @@ func _build_ui() -> void:
 	logo = lt
 	logo.name = "Logo"
 	col.add_child(logo)
-	# no tagline under the logo (owner, Nov 5: cleaner, more professional)
+	# no tagline under the logo
 	var has: bool = not Save.d["roster"].is_empty()
 	col.add_child(UI.spacer(12 if has else 30))     # (with a save the menu has one more row: Demo match)
 	# the one big button: carry on where you left off, or start a new story
 	var b1 := _menu_main(("Continue" if has else "New game"), func(): Game.goto("home" if has else "prologue"))
 	col.add_child(b1)
-	# no subtext under the main button (owner, Nov 5; OWNER_REVIEW item 155)
+	# no subtext under the main button
 	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
 	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
