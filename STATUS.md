@@ -615,3 +615,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: Ryzz final set received
 - ryzz_FINAL refs, ryzz_turnaround_apose, ryzz_portrait, ryzz_splash logged; ART-1 Ryzz queued after Sable. Add her portrait to ext/portraits-six next pass.
+
+## 2026-11-05 S2: READY (HIGH, can ship alone) item 109: commit b13b0bc5 on ext/kit-vex-68-109
+- One commit on origin/main 8f7a33d2. Rounds already left along the aim, but Hunter.tick turned the body to the dash line, so the rifle pointed the wrong way. New ArchKit.aims_in_dash() opts out; legs still follow the dash. Changed: Vex (slide, air slide, air roll), Sable (Vault), Claire (Rink Run, LMB down only). Others have no lock: Lisette, Ryzz, Cinder, Pip, Grimble are buffer rows; Motley, Tarek no lock measured. Lisette and Cinder are from rows and code only.
+- Checks: gunslinger-combo 91/91, dash-aim 0, dash-flow 0 (6 skipped), dash-dir 0, archetype 339, health --strict, gen_wiki unchanged. **Full suite not run on this commit.** Merge the commit, not the branch tip: items 68 and RMB tap-only follow on the same branch.
+- Sheets: ext/hero-shots-s2 kits/vex/109_*.png.
