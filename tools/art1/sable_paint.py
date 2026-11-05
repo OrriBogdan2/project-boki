@@ -1,9 +1,14 @@
 """ART-1 Sable: the texel-space paint (recipe: kael_paint.py): arrays of texels (world position, normal, occlusion) to sRGB in 0..1. Palette off sable_FINAL_sheet: dark plum leather,
 purple trim and lining, pearl moth wings with grey-lilac eye-spots, white hair, lilac skin, silver, dark wood, violet glow."""
+import os
 import numpy as np
 from meshkit import norm, smooth
 from kael_paint import hexc, mix, fbm, lit, ramp, hash3
 import sable_pieces as K
+import imgio
+
+ART = os.path.expanduser("~/meshy/sable_f/proj/")      # crops of the owner's sheets
+WINGS, HEAD, GUN = imgio.load(ART + "wings.png"), imgio.load(ART + "head.png"), imgio.load(ART + "gun.png")
 
 LEATHER = [hexc("#1d1520"), hexc("#2c2130"), hexc("#3f2f45"), hexc("#5a4562"), hexc("#7d6a86")]
 LINING = [hexc("#2d1147"), hexc("#46196e"), hexc("#5f2595"), hexc("#7a35b5"), hexc("#9a55d2")]
@@ -12,6 +17,15 @@ SKIN = [hexc("#5e5470"), hexc("#7e7492"), hexc("#a097b2"), hexc("#bcb4cb"), hexc
 SILVER = [hexc("#4c4a58"), hexc("#7b7988"), hexc("#a9a8b5"), hexc("#d3d3dc"), hexc("#fbfbff")]
 WOOD = [hexc("#35202a"), hexc("#4c2c36"), hexc("#643b45"), hexc("#7f4f5a"), hexc("#9d6a75")]
 TRIM = hexc("#6a2aa8")
+
+
+def sample(img, x, y):
+    """Bilinear lookup, clamped to the image."""
+    h, w = img.shape[:2]
+    x, y = np.clip(x, 0, w - 1.001), np.clip(y, 0, h - 1.001)
+    x0, y0 = x.astype(int), y.astype(int)
+    fx, fy = (x - x0)[:, None], (y - y0)[:, None]
+    return (img[y0, x0] * (1 - fx) + img[y0, x0 + 1] * fx) * (1 - fy) + (img[y0 + 1, x0] * (1 - fx) + img[y0 + 1, x0 + 1] * fx) * fy
 
 
 def scan_grade(col, p, ao):
@@ -110,7 +124,7 @@ def braid(p, n, ao, path):
     w = np.abs(((k + sd * 22.0) % 1.0) - 0.5) * 2
     w2 = np.abs(((k - sd * 22.0) % 1.0) - 0.5) * 2
     gap = smooth(0.18, 0.04, np.where(np.floor(k) % 2 == 0, w, w2))
-    return ramp(np.clip(lit(n, ao) * 0.9 + 0.32 - gap * 0.45, 0, 1), HAIR)
+    return ramp(np.clip(lit(n, ao) * 0.85 + 0.24 - gap * 0.6, 0, 1), HAIR)
 
 
 def tuft(p, n, ao):
@@ -136,26 +150,52 @@ def lining(p, n, ao):
     return ramp(np.clip(lit(n, ao) * 0.95 + 0.1, 0, 1), LINING)
 
 
-def wing(p, n, ao, root, along, across):
-    """Pearl membrane, lilac veins running to the tip, two grey-lilac eye-spots, a frost of blue-green at the lower lobe and a soft lilac rim."""
+def wing(p, n, ao, root, along, across, s):
+    """Projected from the turnaround's back view: the outline in sable_pieces.W_EDGE is cut to it, so its pixels land on the wing."""
     q = p - root
-    t, x = (q @ along) / K.W_LEN, q @ across
-    c = mix(hexc("#efe9f6"), hexc("#d9cfe9"), smooth(0.0, 0.5, np.abs(x - 0.07) / 0.2))
-    c = mix(c, hexc("#c4e4e8"), smooth(0.4, 0.75, t) * smooth(0.46, 0.66, fbm(p * 9.0)) * 0.75)
-    c = mix(c, hexc("#a68fc4"), smooth(0.28, 0.0, t) * 0.55)                    # darker at the root
-    # veins fan from the root
-    fan = x / np.maximum(t, 0.08) / 0.28
-    v = np.abs(((fan * 2.5) % 1.0) - 0.5)
-    c = mix(c, hexc("#8d76a6"), smooth(0.05, 0.02, v) * smooth(0.06, 0.2, t) * 0.8)
-    # the eye-spots: a pale ring, a dark ring, a crescent pupil
-    for tc, xc, r in ((0.40, 0.085, 0.074), (0.78, 0.07, 0.06)):
-        d = np.hypot((t - tc) * K.W_LEN, x - xc) / r
-        c = mix(c, hexc("#f7f3fb"), smooth(1.12, 1.0, d))
-        c = mix(c, hexc("#8a7f9c"), smooth(1.0, 0.92, d) * smooth(0.52, 0.6, d))
-        c = mix(c, hexc("#f2edf7"), smooth(0.6, 0.52, d) * smooth(0.28, 0.34, d))
-        pup = smooth(0.36, 0.3, np.hypot((t - tc) * K.W_LEN + 0.012 * r / 0.06, x - xc) / r)
-        c = mix(c, hexc("#6a5f7c"), pup)
-    return c * (0.86 + 0.18 * np.clip(ao, 0, 1))[:, None]
+    y, x = (q @ along) / K.W_PX, (q @ across) / K.W_PX + K.W_XR
+    if s < 0:
+        x = K.W_MIRROR - x
+    return sample(WINGS, x, y) * (0.92 + 0.1 * np.clip(ao, 0, 1))[:, None]
+
+
+def pistol_art(p, n, ao, fallback):
+    """The weapon sheet's side view on the pistol's own (u, v) plane: dark wood and silver per the master (the sheet's brass goes to silver, its wood darker); off the drawing, the fallback paint."""
+    g = K.grip("R")
+    u, v = g[2] - p[:, 2], p[:, 1] - g[1]
+    px, py = 25 + (K.MUZZLE_U - u) * 1780.0, 100 + (0.052 - v) * 1780.0
+    c = sample(GUN, px, py)
+    lum, sat = c.mean(1), (c.max(1) - c.min(1)) / np.maximum(c.max(1), 0.01)
+    warm = smooth(0.15, 0.3, sat) * (c[:, 0] > c[:, 2])
+    wood = mix(c, c * np.array([0.72, 0.56, 0.62]), warm)
+    brass = warm * smooth(0.42, 0.56, lum)
+    out = mix(wood, np.stack([lum, lum, lum * 1.06], 1) * 1.05, brass)
+    off = smooth(0.72, 0.8, lum) * smooth(0.12, 0.06, sat)             # the sheet's grey ground
+    fb = fallback(p, n, ao)
+    return mix(out, fb, off)
+
+
+def face_art(col, p, n):
+    """The master's head close-up on the face, front on, graded to the scan's skin. -> (colour, mask)."""
+    px, py = 193 - (p[:, 0] - K.FACE_X) * 1467.0, 252 + (K.EYE[2] - p[:, 2]) * 1338.0
+    c = sample(HEAD, px, py)
+    m = smooth(1.0, 0.8, np.hypot((px - 193) / 128.0, (py - 292) / 118.0)) * smooth(0.02, 0.05, p[:, 1]) * smooth(0.3, 0.6, n[:, 1])
+    ref = (np.hypot(px - 193, py - 372) < 26) & (m > 0.9)              # the chin, to match the two skins
+    if ref.sum() > 20:
+        c = np.clip(c * (np.median(col[ref], 0) / np.maximum(np.median(c[ref], 0), 0.02)), 0, 1)
+    return c, m
+
+
+def lacing(c, p):
+    """The master's corset lacing on the coat's lower back."""
+    z0, z1 = 0.915, 1.125
+    k = (p[:, 2] - z0) / (z1 - z0)
+    w = 0.032 - 0.016 * k
+    t = (k * 5.0) % 1.0
+    line = np.abs(np.abs(p[:, 0]) / w - np.abs(2 * t - 1))
+    m = smooth(0.2, 0.1, line) * (p[:, 1] < -0.04) * (np.abs(p[:, 0]) < w * 1.08) * (k > 0) * (k < 1)
+    c = mix(c, hexc("#17111d"), (np.abs(p[:, 0]) < 0.011 + 0 * k) * (p[:, 1] < -0.04) * (k > 0) * (k < 1) * 0.75)
+    return mix(c, hexc("#b9acc9"), m)
 
 
 def lid(p, n, ao, skin_c, liner_fn):

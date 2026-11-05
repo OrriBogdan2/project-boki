@@ -350,8 +350,15 @@ def tail_chain(G, col_u):
 
 
 # ---- the moth wings, hanging from the small of her back inside the coat's split, tips swept behind. One sheet each (the card slot draws both sides).
-W_ROWS, W_COLS = 12, 6
+W_COLS = 6
 WING_N = 4
+W_PX = 0.00111                 # metres a pixel of the turnaround's back view (the wing is projected from it, sable_paint.wing)
+W_XR = 229.0                   # the pixel of her right wing's inner edge, where it meets the rig
+W_MIRROR = 430.0               # her left wing's pixels: W_MIRROR - x
+# her right wing's outline in that crop: y, inner x, outer x
+W_EDGE = [(0, 240, 282), (60, 236, 312), (120, 232, 345), (180, 230, 380), (240, 229, 412), (300, 228, 432), (350, 229, 438), (400, 232, 430), (440, 237, 405), (480, 243, 400),
+          (530, 252, 392), (580, 270, 372), (620, 290, 348), (650, 312, 332), (666, 322, 324)]
+W_LEN = 666 * W_PX
 
 
 def wing_plane(s):
@@ -364,40 +371,23 @@ def wing_plane(s):
     return root, along, across
 
 
-W_LEN = 0.74
-
-
-def wing_outline(t):
-    """The wing's half widths at t (0 root .. 1 tip): (inner, outer), metres. Two lobes, the master's soft waist between them."""
-    outer = 0.045 + 0.165 * np.sin(np.clip(t / 0.46, 0, 1) * np.pi * 0.5) ** 1.3 - 0.022 * np.exp(-((t - 0.58) / 0.08) ** 2) + 0.03 * np.exp(-((t - 0.76) / 0.14) ** 2)
-    outer = outer * smooth(1.02, 0.84, t) ** 0.7 + 0.002
-    inner = 0.012 + 0.03 * smooth(0.15, 0.6, t) - 0.03 * smooth(0.8, 1.0, t)
-    return inner, outer
-
-
 def wing(s):
     side = "R" if s > 0 else "L"
     root, along, across = wing_plane(s)
     normal = norm(np.cross(across, along))
     v, f = [], []
-    for r in range(W_ROWS):
-        t = (r / (W_ROWS - 1)) ** 0.9
-        i_, o_ = wing_outline(t)
+    for (y, xi, xo) in W_EDGE:
         for c in range(W_COLS):
             k = c / (W_COLS - 1)
-            x = -i_ + (i_ + o_) * k
-            # the hem's scallops, one per vein
-            tt = t
-            if r >= W_ROWS - 3:
-                tt = t - 0.022 * abs(np.sin(k * np.pi * 2.5)) * (r - W_ROWS + 4) / 3
-            bow = 0.035 * np.sin(k * np.pi) * np.sin(min(t * 1.2, 1) * np.pi)
-            v.append(root + along * tt * W_LEN + across * x + normal * bow)
-    for r in range(W_ROWS - 1):
+            x = xi + (xo - xi) * k
+            bow = 0.035 * np.sin(k * np.pi) * np.sin(min(y / 666.0 * 1.2, 1) * np.pi)
+            v.append(root + along * y * W_PX + across * (x - W_XR) * W_PX + normal * bow)
+    for r in range(len(W_EDGE) - 1):
         for c in range(W_COLS - 1):
             q = r * W_COLS + c
             f.append([q, q + 1, q + 1 + W_COLS, q + W_COLS])
     p = Piece("wing" + side, "card-wing", np.array(v), f)
-    p.root, p.along, p.across = root, along, across
+    p.root, p.along, p.across, p.s = root, along, across, s
     return p
 
 

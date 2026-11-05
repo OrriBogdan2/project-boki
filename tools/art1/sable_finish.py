@@ -8,6 +8,7 @@ from mathutils.bvhtree import BVHTree
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "blender"))
+sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
 import meshkit as M, sable_pieces as K, sable_paint as P
 from meshkit import smooth, Piece
 from kael_paint import hexc, mix
@@ -20,7 +21,7 @@ MATS = ["skin-face", "cloth-coat", "leather-dark", "metal-silver", "hair-braid",
 SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "antenna": 0.9, "braid": 0.8, "tuft": 0.7, "tie": 0.5, "wing": 1.3, "tail": 0.7, "lining": 0.35,
          "barrel": 1.6, "stock": 1.1, "rod": 0.4, "cap": 0.6, "lock": 1.2, "cock": 0.8, "frizzen": 0.8, "guard": 0.5, "mouth": 1.0, "crystal": 0.8, "runeA": 5.0, "runeB": 5.0, "runeC": 5.0,
          "key": 0.8, "keyring": 0.6, "keyshaft": 0.8, "keybit": 0.6, "bolaA": 0.9, "bolaB": 0.9, "cordA": 0.3, "cordB": 0.3, "gemchain": 0.4, "gemframe": 0.8, "gemstone": 1.4, "Low": 1.0}
-FACE_K = 3.4                # texel density on the face against the body
+FACE_K = 5.5                # texel density on the face against the body
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
@@ -450,6 +451,38 @@ def blur(a_, m, r):
 
 AO = blur(AO, (PID >= 0).astype(np.float32), 3)
 
+# ---- the normal map: the scan's stitching, straps and folds, baked from its full 750k triangles onto the low body; flat on the rebuilt pieces
+nm_bake = bpy.data.images.new("nm_bake", ATLAS, ATLAS, float_buffer=True)
+nm_bake.colorspace_settings.name = "Non-Color"
+for mt in me.materials:
+    tn = next(n_ for n_ in mt.node_tree.nodes if n_.type == "TEX_IMAGE")
+    tn.image = nm_bake
+    mt.node_tree.nodes.active = tn
+src.hide_render = False
+sc.cycles.samples = 2
+sc.render.bake.use_selected_to_active = True
+sc.render.bake.cage_extrusion = 0.012
+sc.render.bake.max_ray_distance = 0.03
+sc.render.bake.normal_space = "TANGENT"
+bpy.ops.object.select_all(action="DESELECT")
+src.select_set(True)
+ob.select_set(True)
+bpy.context.view_layer.objects.active = ob
+bpy.ops.object.bake(type="NORMAL", use_clear=True, margin=6)
+sc.render.bake.use_selected_to_active = False
+src.hide_render = True
+src.select_set(False)
+NM = np.array(nm_bake.pixels[:], dtype=np.float32).reshape(ATLAS, ATLAS, 4)
+flat_ = PID != 0
+NM[flat_, 0], NM[flat_, 1], NM[flat_, 2] = 0.5, 0.5, 1.0
+nm_img = bpy.data.images.new("sable_normal", ATLAS, ATLAS)         # a file like the atlas: the clips stage reopens the .blend
+nm_img.colorspace_settings.name = "Non-Color"
+nm_img.pixels.foreach_set(NM.ravel())
+nm_img.filepath_raw = os.path.join(os.path.dirname(OUT), "normal.png")
+nm_img.file_format = "PNG"
+nm_img.save()
+print("normal baked", float(NM[..., :3].std()))
+
 # each scan face's slot, by its paint: the face and neck skin, the white hair cap, everything else the coat
 low_faces = [i for i in range(nf) if faces_pid[i] == 0]
 fc = np.array([np.mean([verts[v] for v in faces_v[i]], axis=0) for i in low_faces])
@@ -476,15 +509,11 @@ OUTC[ys, xs] = P.scan_grade(np.clip(col, 0, 1), pp, AO[ys, xs].astype(np.float64
 dm = np.hypot(pp[:, 0] - K.MARK_OFF[0], pp[:, 2] - K.MARK_OFF[2]) + 9.0 * (pp[:, 1] < 0.02)      # (across the cheek: its depth doesn't matter)
 near = np.median(OUTC[ys, xs][(dm > 0.013) & (dm < 0.02)], axis=0)
 OUTC[ys[dm < 0.013], xs[dm < 0.013]] = near
-# the master's black eyes, the glints kept; her one beauty mark, a touch stronger
+# the face pass: the master's close-up projected on the face, the coat's lacing on her back
 cc_ = OUTC[ys, xs].astype(np.float64)
-for s_ in (1.0, -1.0):
-    ec = K.eye_c(s_)
-    q_ = np.hypot((pp[:, 0] - ec[0]) / K.EYE_W, (pp[:, 2] - ec[2]) / K.EYE_H) * (pp[:, 1] > 0.05)
-    dark = smooth(0.92, 0.65, q_) * (pp[:, 1] > 0.05) * smooth(0.72, 0.5, cc_.mean(1))
-    cc_ = mix(cc_, hexc("#120d1a"), dark * 0.7)
-dmk = np.linalg.norm(pp - K.MARK_ON, axis=1)
-cc_ = mix(cc_, hexc("#2c2138"), smooth(0.0062, 0.0045, dmk))
+fa_, fm_ = P.face_art(cc_, pp, NOR[ys, xs].astype(np.float64))
+cc_ = mix(cc_, fa_, fm_)
+cc_ = P.lacing(cc_, pp)
 OUTC[ys, xs] = cc_
 
 
@@ -508,9 +537,9 @@ for q_ in tails:
     paint(lambda n, nm=q_[0].name: n == nm, lambda p, n, ao, g=q_[0].grid: P.coat_outer(p, n, ao, g))
     paint(lambda n, nm=q_[1].name: n == nm, lambda p, n, ao: P.lining(p, n, ao))
 for w_ in wings:
-    paint(lambda n, nm=w_.name: n == nm, lambda p, n, ao, q=w_: P.wing(p, n, ao, q.root, q.along, q.across))
-paint(lambda n: n.startswith(("barrel", "rod", "lock", "cock", "frizzen", "guard", "cap")), free(P.silver_engraved))
-paint(lambda n: n.startswith("stock"), free(P.wood))
+    paint(lambda n, nm=w_.name: n == nm, lambda p, n, ao, q=w_: P.wing(p, n, ao, q.root, q.along, q.across, q.s))
+paint(lambda n: n.startswith(("barrel", "rod", "lock", "cock", "frizzen", "guard", "cap")), free(lambda p, n, ao: P.pistol_art(p, n, ao, P.silver_engraved)))
+paint(lambda n: n.startswith("stock"), free(lambda p, n, ao: P.pistol_art(p, n, ao, P.wood)))
 paint(lambda n: n.startswith("mouth"), P.mouth_glow)
 paint(lambda n: n.startswith("rune"), P.runes)
 paint(lambda n: n.startswith("crystal") or n == "gemstone", P.crystal)
@@ -558,6 +587,11 @@ for mt in me.materials:
     tn = nt.nodes.new("ShaderNodeTexImage")
     tn.image = atlas
     nt.links.new(tn.outputs[0], pb.inputs[0])
+    tnn = nt.nodes.new("ShaderNodeTexImage")
+    tnn.image = nm_img
+    nmn = nt.nodes.new("ShaderNodeNormalMap")
+    nt.links.new(tnn.outputs[0], nmn.inputs["Color"])
+    nt.links.new(nmn.outputs[0], pb.inputs["Normal"])
 
 attr = me.color_attributes.new("ink", "FLOAT_COLOR", "POINT")
 ic = np.ones((len(me.vertices), 4), np.float32)
