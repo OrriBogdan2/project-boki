@@ -1518,3 +1518,5 @@ Faces now have a reference for every hero. The face/detail pass applies to all.
 - **Breaker: the helmet is too TALL, not wide enough** (owner, again). Make the helmet squat and wider than it is tall, sunk low into the hull with almost no neck (per breaker_FINAL_sheet). The whole character reads wide and round, top-heavy, stubby legs. Use the head sheet only for its rivet/porthole/moss detail, NOT its proportions.
 
 ## 2026-11-05 12:15 UTC (ext): Breaker head proportions (owner): `breaker_head_squat.png`. The helmet is sunk low into the wide hull collar, no neck, the body rounding below: the whole head+torso is one round wide mass. **Use this for PROPORTIONS** and `breaker_head.png` for the brass/rivet/moss detail. Ignore the two tiny stray marks at the top.
+
+## 2026-11-05 12:14 UTC (ext): OWNER ITEM 112 (HIGH, playtest): Vex grenade = TAP ONLY, fired from her arm-cannon's top launcher tube (no throw anim, no hold). See OWNER_REVIEW 112. KITS lane; small; land fast. Pair it with ART-1 Vex (the launcher muzzle FX empty).

@@ -987,3 +987,17 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
   - dreadlocks with copper beads
   - a plain cloth blindfold
 - **Lore:** Tarek is blind; **three floating eye-stones orbiting his head are his sight**. They look in different directions and turn toward enemies they spot. The blindfold does not glow.
+
+## 112. Vex's grenade (RMB, Burr Charge): TAP ONLY, fired FROM HER ARM-CANNON (owner playtest, 12:12 UTC Nov 5)
+- Owner: "Vex still throws the grenade and can hold it instead of it only being a tap. It should come from her arm as well (the bigger explosion thing, not the minigun)."
+- **Tap only:**
+  - Remove the hold variant / hold behaviour entirely.
+  - RMB press = fire immediately; holding does nothing extra (no aim-hold, no charge).
+  - Update `gunslinger.json` `rmb.variants`, the card text and the tutorial line.
+- **No throw:**
+  - Remove the throwing arm animation / hand spawn.
+  - The grenade launches from the **top grenade-launcher tube** of her arm-cannon (the right arm), with a muzzle puff + thunk (S4's grenade sound) and a recoil kick on the cannon. The gatling barrels stay her LMB.
+  - Spawn point = the launcher muzzle (an FX empty on the new model; on the old model, the gun's muzzle offset up).
+- Kit numbers unchanged (dmg, cone, daze, wall stun, cd 6.5 s).
+- **Assert:** a tap fires within one frame; a 1 s hold fires once at the press with no extra effect; the spawn is at the launcher muzzle, not the hand.
+- Also check her other abilities for leftover "throw" anims (consistent with "her right arm IS the cannon").
