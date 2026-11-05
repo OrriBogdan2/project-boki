@@ -6,7 +6,9 @@ var home = null
 func _snap(path: String) -> void:
 	for i in 4:
 		await main.get_tree().process_frame
-	await main.get_tree().create_timer(0.4).timeout
+	if main.fade:
+		main.fade.reveal(0.05)
+	await main.get_tree().create_timer(0.8).timeout
 	main.get_viewport().get_texture().get_image().save_png(path)
 
 func run(m: Node, out_dir: String) -> void:
@@ -31,7 +33,10 @@ func run(m: Node, out_dir: String) -> void:
 	var ke: Dictionary = home._kin_entry(Save.active_kin())
 	home.cam.zoom_to = 1.0
 	home.cam.zoom = 1.0
-	home.cam.snap((ke["node"] as Node3D).position)
+	var bp: Vector3 = (ke["node"] as Node3D).position
+	home.ppos = bp + Vector3(0, 0, 2.5)
+	home.player.position = home.ppos
+	home.cam.snap(bp + Vector3(0, 0, 1.0))
 	home._say(ke, "Hello! Is it snack time yet?", 30.0)
 	await _snap("%s/speech_%s.png" % [out_dir, "after" if tag else "before"])
 	if tag:

@@ -251,8 +251,6 @@ func _enter() -> void:
 			if p.kin:
 				throws0 = p.kin.st_throws
 			_foes(["skitter"])
-		"rank":
-			_offer_rank()
 		"key":
 			_spawn_key()
 		"shoot":
@@ -375,7 +373,11 @@ func _is_done(sid: String, dt: float) -> bool:
 			return false
 		"pickup": return ground_item().is_empty()
 		"gkey": return p.kin == null or p.kin.st_throws > throws0 or p.kin.state == "downed"
-		"rank": return p.skill_pts == 0 or t >= RANK_WAIT_T
+		"rank":
+			if not flag and t >= CARD_T:
+				flag = true      # (the level-up pop waits for the banner to settle, so the two never overlap)
+				_offer_rank()
+			return flag and (p.skill_pts == 0 or t >= RANK_WAIT_T)
 		"key": return p.chest_keys > 0 or t >= KEY_WAIT_T
 		"shoot":
 			_keep_foe("skitter")
