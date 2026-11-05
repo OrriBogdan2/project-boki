@@ -1,12 +1,12 @@
 extends RefCounted
-## Dredge's ultimate on X, Brass Broadside, for --dredge-combo-check (docs/heroes/dredge.md): the level gate,
+## Grimble's ultimate on X, Brass Broadside, for --dredge-combo-check (docs/heroes/dredge.md): the level gate,
 ## the 1.1s charge behind a growing fan everyone sees (a slow walk, the fan turning with the aim), two waves 0.6s
 ## apart of six slugs each (shots through Match.spawn_shot), Anti-Heal, every slug landing up close and fewer
 ## further out, bond once per cast and only on a land, the stun that stops it, the other buttons locked while
 ## it runs, no back bonus, the merge drop, the cooldown, the reel combo and the burst cap.
 
 const BURST := preload("res://tools/ult_burst.gd")
-const FACE_AWAY := PI / 2.0         # a target east of Dredge facing this way shows him its back
+const FACE_AWAY := PI / 2.0         # a target east of Grimble facing this way shows him its back
 
 var ak = null
 var ok_fn: Callable

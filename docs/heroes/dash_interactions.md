@@ -202,7 +202,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | dredge | jump -> ult (X) |  | fires mid-jump (default) |
 | dredge | jump -> Q glove |  | fires mid-jump (default) |
 | dredge | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| dredge | RMB -> jump | Owner note (item 31): 'from the hook's cast until it finishes, Dredge holds his current height'. Footage card (0127): 'you GROUNDED while reeling'; wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls. Ours: no jump from the throw to the miss or the end of the reel (CastHold, KitStatus grounded); the barge works throughout. | **exception:** the move is refused while it runs (Owner item 31 and the source: he holds his height from the throw to the end of the reel, and the source grounds him while he reels (only the dash works).) |
+| dredge | RMB -> jump | Owner note (item 31): 'from the hook's cast until it finishes, Grimble holds his current height'. Footage card (0127): 'you GROUNDED while reeling'; wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls. Ours: no jump from the throw to the miss or the end of the reel (CastHold, KitStatus grounded); the barge works throughout. | **exception:** the move is refused while it runs (Owner item 31 and the source: he holds his height from the throw to the end of the reel, and the source grounds him while he reels (only the dash works).) |
 | dredge | E -> jump |  | the move goes at once, the ability keeps running (default) |
 | dredge | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
 | dredge | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
