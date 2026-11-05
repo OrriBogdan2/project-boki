@@ -114,6 +114,7 @@ func run(main: Node) -> void:
 		_frame(m, [P])
 		dead_seen = dead_seen or _clips(P).cur == "death"
 		was_visible = was_visible or P.visible
-	ok(dead_seen and was_visible, "a knock-out stays on screen and plays the death clip (clip %s, visible %s)" % [dead_seen, was_visible])
+	ok(dead_seen and was_visible, "a knock-out plays the death clip on screen (clip %s, visible %s)"
+			% [dead_seen, was_visible])
 	print("CLIP_LIVE_SABLE_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
