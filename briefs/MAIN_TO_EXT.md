@@ -1573,3 +1573,8 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 18:33 UTC ext → S5: item 160: Vex passive = Ghost's current Combat Rush: stacking 6% omnivamp per non-LMB ability hit (a shared 3.5 s timer) + a heal on knock (SV 500 HP, scaled to ours). The knock dash refresh comes from global 159.
 
 ## 2026-11-05 18:35 UTC ext → S5: item 161 (a tiny fix): the tutorial intro card auto-closes after INTRO_T 2 s (tutorial.gd intro_wait). Remove the timeout; wait for a key; the dim fades after ack. Put it in the next batch.
+
+## 2026-11-05 18:40 UTC ext → S5: owner items 162-164
+- 162: movement while dropping = steer only (no dash/abilities/jumps/fire); while falling, minimal air control + the glider (kit-specific air moves only). Both tutorial and skyship.
+- 163: a skyship art upgrade is now queued (it wasn't anywhere); after the ART-1 merges; S2/S3/S4.
+- 164: tutorial: remove the random chests; teach the dash on flat ground with auto cd reset + a notice; islands gated by barriers until their step is done. Handholding.

@@ -1942,3 +1942,47 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Ignore input for the first ~0.3 s so a held key from the loading screen doesn't skip it instantly.
   - The match stays paused (the existing behaviour).
 - **Assert:** with no input for 10 s, the card is still up; a key → it closes.
+
+## 162. Restrict movement options while dropping/gliding down and falling (owner, 17:47 UTC Nov 5): tutorial AND the skyship drop
+- The owner: "there's too much movement options in the air while gliding down - and falling should take away most movement options - fix this. this is for both tutorial but also skyship".
+- **During the opening drop** (hunter.gd `dropping`; the skyship drop and the tutorial's drop):
+  - Steering only: the glide heading + speed (SV-style dive/flare). No dash, no abilities, no jump/double-jump, no air-dash, no weapon fire, no Boki throw.
+  - The HUD greys out the ability slots while dropping.
+  - Landing restores everything.
+- **During a free fall** (off a ledge, knocked into the air, glider closed):
+  - Only limited air control (≈SV's air control, see item 150) + opening the glider. No air dash or movement abilities unless a kit explicitly has an air version (Cinder poof, Sable air dash = ground per 129, Vex air tap per 125).
+  - Basic attack allowed; other abilities per kit design.
+  - Review with the item 150 parity table: SV's air options.
+- **Assert:** while dropping, pressing Shift/RMB/E/Space/G does nothing; while falling, there's no chained dash→dash→ability movement beyond what the kit allows.
+
+## 163. Skyship upgrade (owner, 17:47 UTC Nov 5: "are we getting a skyship upgrade soon? i know it's in queue")
+- Ext checked: there was NO skyship item in OWNER_REVIEW or any inbox. It is queued now.
+- The skyship (drop_squad.gd planning phase + crossing; per-wave ships on the minimap) gets a proper art pass:
+  - A hand-crafted model: a wooden sky-galleon hull with brass fittings and patched canvas balloon/sails in the Skylands style, with propellers and lanterns.
+  - Animated: a gentle bob, spinning props, flags/banners in the team colour, contrails/clouds.
+  - The interior/deck where players stand during planning (if they stand on it).
+  - A launch moment (a horn, the hatch opening).
+  - A distant-ship LOD for the other waves.
+- Ext can prepare a Nano Banana concept for the owner first (on request); S2 models, S3 VFX, S4 sounds (engine hum, horn, wind).
+- Priority: after the hero ART-1 merges.
+
+## 164. Tutorial: fewer chests; a hand-held dash lesson on the ground; islands gated until done (owner, 17:48 UTC Nov 5)
+- The owner: "there's too many random chests on the ground in the tutorial. also the dash shouldn't be over an island - should be on the ground (and maybe force them to not be able to get off each given island) until they do the right thing. can also auto reset cd for them with a notification - it needs to be handholding".
+- **Chests:** remove the random loot chests from the tutorial. Keep only the one(s) a step actually teaches (looting), placed on purpose.
+- **Dash lesson:**
+  - Teach the dash on flat ground, not across a gap.
+  - Prompt "Press Shift to dash", and a ghost arrow shows the direction.
+  - Success = one dash. Then a second prompt for the hold/long version if the hero has one.
+  - The cooldown auto-resets during the lesson, with a small notice ("Dash recharged!") so they can retry immediately.
+- **Island gating:** each tutorial island is enclosed (an invisible wall/barrier with a soft shimmer at the edges) until its step is complete.
+  - Then the barrier drops with a chime, and a path/bridge (or the gap-crossing step, now that dash is learned) opens.
+  - No falling off mid-lesson: an edge pushes you back gently.
+- **Handholding throughout:**
+  - One instruction at a time.
+  - Retry-friendly (cooldowns reset, no damage).
+  - Success feedback per step.
+  - The item 161 "press any key" fix.
+- **Assert:**
+  - The tutorial has ≤N intended chests.
+  - You can't leave island k before step k is done.
+  - The dash cd resets during the lesson.
