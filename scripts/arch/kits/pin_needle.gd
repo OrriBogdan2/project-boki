@@ -96,7 +96,7 @@ func hold(at: Vector3, dir: Vector2, k: float, sc: float, dt: float) -> void:
 	var pulse := 0.1 * sin(Time.get_ticks_msec() * 0.018) if k >= 0.99 else 0.0
 	shell_mat.set_shader_parameter("color", Color(THREAD_COL, lerpf(GLOW_A.x, GLOW_A.y, k) + pulse))
 	steel.set_shader_parameter("albedo", SILVER.lerp(THREAD_COL, HOT_K * k))
-	steel.set_shader_parameter("glow", lerpf(0.25, 0.9, k) + pulse)
+	steel.set_shader_parameter("glow", lerpf(0.25, 0.4, k) + pulse)
 	_thread(d, dt, nocking)
 
 ## The thread hangs from the eye and lags behind it.
