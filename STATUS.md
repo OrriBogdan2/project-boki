@@ -1043,3 +1043,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - So most of "oversized" isn't borne out at the branch tips, but main's old models were not audited: the owner may have been judging those.
 - Shared fix: weapon_scale in warden_look does nothing on skinned weapons, and every ART-1 Hero is skinned. New key bone_scale in warden_anim/<art>.json, plus blade.root_bone so the muzzle rides the barrels. Breaker's 0.75 and Kael's 0.85 are dead values.
 - No gameplay reach changed. Kael's visible sword is now well short of his 3.1 m LMB reach [alternative: trim reach; kit call, for review].
+
+## 2026-11-05 21:20 UTC S2: ext/anim-crouch-all 9c5a1d2a pushed: all nine merging Heroes crouch. Not final until the integ suite reports
+- On top of ext/art1-integ 6f03163e. crouch-check 100/0 (now fails any Hero with clips and no crouch key, except Kael, Motley, Breaker), clip 127/0, rig-standard 63/0, warden-stance 100/0, health and style strict OK.
+- --mantle-look fails at 0.75 against the 0.78 assert, same on the integ base. Main read about 0.78, so don't treat that as the old baseline red: the integ suite compares it.
+- I viewed the nine-Hero match sheet (hero-shots-s2 art1/anim143/all9_match_before_after.png): every Hero visibly crouches. Best: Claire, Cinder, Sable, Lisette. Weakest: Vex, whose half-kneel only half reads, and Tarek, a plain squat with no boulder look. Pip's feet are still hidden. Ryzz could go lower. All are data-only polish later.
+- Not checked: live match, net crouch, strafe and back sneaks on the seven new Heroes. Foot skate at 2.42 m/s not measured.
+- Kael, Motley, Breaker need clips when they land; each lane has the note or will.
+- Six stuck Godot runs from this lane hold slots: a parse error on 8d27d2e7 dropped them to the title screen. Stopping them was refused by the permission system; surfaced to the owner, not worked around.
