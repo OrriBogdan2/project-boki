@@ -11,7 +11,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 |---|---|---|---|---|---|---|---|---|
 | Arc Bolts | Silver Thief | light | 13 | 0.45s | none | none | 12m | A spinning bolt from alternating hands every 0.45s. It flies to your cursor (12m at most) and fizzles there if it hits nothing. |
 | Burst Rifle | none | medium | 7 | 0.45s | 27 | 1.5s | 10.5m | Three rounds per pull. Accurate at range. |
-| Coilcaster | Storm Chaser | light | 12 | 0.8s | none | none | 13m | No gun: a copper coil at each wrist. She points and a jagged bolt cracks from her fingertip, left hand then right, out to full range. |
+| Coilcaster | Storm Chaser | light | 12 | 0.72s | none | none | 13m | No gun: a copper coil at each wrist. She points and a jagged bolt cracks from her fingertip, left hand then right, out to full range. |
 | Torch Lance | Mad Pyromancer | heavy | 2.7 | 0.1s | none | none | 7m | Hold to hose fire 7m ahead: the stream trails behind a sweep, narrow at the nozzle and billowing at the end. No fuel: it roars as long as you hold. It builds Char; at full Char the foe goes Ablaze. |
 | Greatsword | The Unbroken | heavy | 11 | 0.5s | none | none | 3.4m | A slow, huge 3-hit combo, strongest on the tip. Hold 1s for a slam that stuns and throws people far. |
 | Hoar Fan | Frost Siren | light | 4 | 0.18s | none | none | 10m | A folding fan of ice slats. Hold for a barrage of slow ice darts (one every 0.18s) that fly out along your aim and curve in onto the foe nearest your cursor toward the end of their flight: four darts, then three large ones that hit twice as hard, fly faster and reach further, and round again. Eight on one foe Shatter them. While skating they fly as fast, thick beams that home in the same way. |
