@@ -10,8 +10,8 @@ func run(main: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
-	main.get_window().size = Vector2i(shot_px, shot_px)
-	main.get_viewport().size = Vector2i(shot_px, shot_px)
+	main.get_window().size = Vector2i(frame_px, frame_px)
+	main.get_viewport().size = Vector2i(frame_px, frame_px)
 	_stage(main)
 	var look := PlayerLook.neutral()
 	var m := Models.hunter(Arch.weight("ostra"), Data.TEAM_COLORS[0], Arch.signature("ostra"), "", look, "ostra")
