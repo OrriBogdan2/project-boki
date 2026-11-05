@@ -10,13 +10,13 @@ import imgio
 ART = os.path.expanduser("~/meshy/sable_f/proj/")      # crops of the owner's sheets
 WINGS, HEAD, GUN = imgio.load(ART + "wings.png"), imgio.load(ART + "head_sheet.png"), imgio.load(ART + "gun.png")
 
-LEATHER = [hexc("#1d1520"), hexc("#2c2130"), hexc("#3f2f45"), hexc("#5a4562"), hexc("#7d6a86")]
+LEATHER = [hexc("#2a1d30"), hexc("#3b2a43"), hexc("#533c5e"), hexc("#73587f"), hexc("#9a7fa6")]
 LINING = [hexc("#2d1147"), hexc("#46196e"), hexc("#5f2595"), hexc("#7a35b5"), hexc("#9a55d2")]
 HAIR = [hexc("#8f8a9c"), hexc("#b6b2c2"), hexc("#d5d2dd"), hexc("#ecebf1"), hexc("#ffffff")]
 SKIN = [hexc("#5e5470"), hexc("#7e7492"), hexc("#a097b2"), hexc("#bcb4cb"), hexc("#d6d0e0")]
 SILVER = [hexc("#4c4a58"), hexc("#7b7988"), hexc("#a9a8b5"), hexc("#d3d3dc"), hexc("#fbfbff")]
 WOOD = [hexc("#35202a"), hexc("#4c2c36"), hexc("#643b45"), hexc("#7f4f5a"), hexc("#9d6a75")]
-TRIM = hexc("#6a2aa8")
+TRIM = hexc("#7c34c4")
 
 
 def sample(img, x, y):
@@ -35,8 +35,9 @@ def scan_grade(col, p, ao):
     purple = smooth(0.25, 0.5, sat) * smooth(0.02, 0.08, col[:, 2] - col[:, 1]) * (p[:, 2] < K.NECK_Z)
     c = col.copy()
     c = mix(c, np.clip((col - lum) * 1.9 + lum, 0, 1) * np.array([1.06, 0.92, 1.3]), purple)
-    dark = smooth(0.32, 0.16, lum[:, 0]) * (p[:, 2] < K.NECK_Z)
-    c = c + dark[:, None] * np.array([0.02, 0.012, 0.03])
+    # the coat a step up and toward plum, so its purple reads in the toon light
+    body = smooth(K.NECK_Z - 0.02, K.NECK_Z - 0.06, p[:, 2]) * smooth(0.5, 0.36, lum[:, 0])
+    c = mix(c, c * np.array([1.3, 1.16, 1.42]) + np.array([0.035, 0.012, 0.055]), body)
     # (the scan's near-black slivers at the shoulders and behind the ear: its unpainted seams)
     sliver = smooth(0.11, 0.06, lum[:, 0])
     c = mix(c, hexc("#2e2233"), sliver * (p[:, 2] < K.NECK_Z - 0.02))
@@ -184,12 +185,16 @@ def pistol_art(p, n, ao, fallback):
 
 def face_art(col, p, n):
     """sable_head.png's front view on the face, graded to the scan's skin. -> (colour, mask)."""
-    px, py = 401 - (p[:, 0] - K.FACE_X) * 2144.0, 684 + (K.EYE[2] - p[:, 2]) * 2056.0
+    px, py = 401 - (p[:, 0] - K.FACE_X) * 1978.0, 695 + (K.EYE[2] - p[:, 2]) * 1901.0        # (the art's eyes on the scan's sockets, mouth on mouth)
     c = sample(HEAD, px, py)
-    m = smooth(1.0, 0.84, np.hypot((px - 401) / 192.0, (py - 738) / 196.0)) * smooth(0.02, 0.05, p[:, 1]) * smooth(0.3, 0.6, n[:, 1])
+    m = smooth(1.0, 0.84, np.hypot((px - 401) / 192.0, (py - 738) / 196.0)) * smooth(0.02, 0.05, p[:, 1]) * smooth(0.2, 0.5, n[:, 1])
     ref = (np.hypot(px - 401, py - 885) < 34) & (m > 0.8)              # the chin, to match the two skins
     if ref.sum() > 20:
-        c = np.clip(c * (np.median(col[ref], 0) / np.maximum(np.median(c[ref], 0), 0.02)), 0, 1)
+        c = np.clip(c * (np.median(col[ref].mean(1)) / max(np.median(c[ref].mean(1)), 0.02)) ** 0.6, 0, 1)      # brightness only: the art keeps its cool lilac and grey irises
+    # the irises a step lighter and cooler: the sockets' toon shade darkens them
+    for ex in (312.0, 490.0):
+        e = smooth(1.0, 0.8, np.hypot((px - ex) / 44.0, (py - 695) / 24.0))
+        c = mix(c, np.clip(c * 1.3 + np.array([0.03, 0.03, 0.055]), 0, 1), e)
     return c, m
 
 

@@ -37,6 +37,14 @@ func _run(m: Match, P: Hunter, n: int, seen: Dictionary) -> void:
 		if c.up_w > 0.3:
 			seen[String(c._node("anim_u").animation)] = true
 
+## rad the wing's chain is bent between its first and last links: a twisted wing folds over itself.
+func _wing_bend(h: Hunter) -> float:
+	var sk := WardenGlb.skeleton(h.model.get_node("Warden"))
+	var q: Array = []
+	for i in 4:
+		q.append(sk.get_bone_global_pose(sk.find_bone("spring_wingR_%d" % i)).origin)
+	return ((q[1] - q[0]) as Vector3).angle_to((q[3] - q[2]) as Vector3)
+
 func _shown(h: Hunter) -> int:
 	var n := 0
 	var gun := h.model.get_node("Rig/Torso/Aim/Gun") as Node3D
@@ -74,6 +82,7 @@ func run(main: Node) -> void:
 	# the Vault: three in a row is the routine (a cartwheel, a somersault, a corkscrew)
 	var flips := {}
 	var kit: ThiefKit = P.ak
+	var bend := 0.0
 	for i in 3:
 		if i > 0:
 			kit.chain.on_reset()          # (the empowered bolt landed: the routine moves on)
@@ -85,13 +94,17 @@ func run(main: Node) -> void:
 		P.inp["dash"] = false
 		P.inp["dash_down"] = false
 		var s2 := {}
-		_run(m, P, 24, s2)
+		for f in 24:
+			_run(m, P, 1, s2)
+			if float(P.model.get_meta(WardenGlb.WING_FOLD, 0.0)) < -0.3:
+				bend = maxf(bend, _wing_bend(P))
 		for k in s2:
 			if String(k).begins_with("vault"):
 				flips[k] = true
 	P.inp["move"] = Vector2.ZERO
 	print("LIVE flips: ", flips.keys())
 	ok(flips.size() >= 2, "the Vault's routine plays its flips (%s)" % str(flips.keys()))
+	ok(bend < 1.0, "the wings stay untwisted through the flips (worst bend %.2f rad)" % bend)
 	_run(m, P, 40, seen)
 	# Encore: the dance holds over her and loops
 	var K: ThiefKit = P.ak

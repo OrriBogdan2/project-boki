@@ -377,7 +377,8 @@ def extras(P):
         # brow: - lifts its inner end (worried), + lowers it (focus); "cock" raises her left brow, the sly one (negative her right)
         lift = max(0.0, -ck) if s > 0 else max(0.0, ck)
         out["brow." + side] = (Quaternion((0, 1, 0), s * 0.2 * b), Vector((0, 0, -0.005 * b + 0.006 * lift)))
-        out["lid." + side] = (Quaternion((1, 0, 0), -0.82 * max(0.0, min(1.0, l))), None)
+        # (the lid's skin stays up under the brow until she really narrows or blinks: the painted liner shows)
+        out["lid." + side] = (Quaternion((1, 0, 0), -0.82 * max(0.0, min(1.0, (l - 0.32) / 0.68))), None)
         # the smile pulls higher on her right: lopsided, sly
         out["mouth." + side] = (None, Vector((s * 0.002 * (sm - 0.5), 0, (0.0042 if s > 0 else 0.0028) * (sm - 0.5))))
     return out

@@ -21,7 +21,7 @@ MATS = ["skin-face", "cloth-coat", "leather-dark", "metal-silver", "hair-braid",
 SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "antenna": 0.9, "braid": 0.8, "tuft": 0.7, "tie": 0.5, "wing": 1.3, "tail": 0.7, "lining": 0.35,
          "barrel": 1.6, "stock": 1.1, "rod": 0.4, "cap": 0.6, "lock": 1.2, "cock": 0.8, "frizzen": 0.8, "guard": 0.5, "mouth": 1.0, "crystal": 0.8, "runeA": 5.0, "runeB": 5.0, "runeC": 5.0,
          "key": 0.8, "keyring": 0.6, "keyshaft": 0.8, "keybit": 0.6, "bolaA": 0.9, "bolaB": 0.9, "cordA": 0.3, "cordB": 0.3, "gemchain": 0.4, "gemframe": 0.8, "gemstone": 1.4, "Low": 1.0}
-FACE_K = 5.5                # texel density on the face against the body
+FACE_K = 8.0                # texel density on the face against the body
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
@@ -237,7 +237,12 @@ verts.extend([tuple(v.co) for v in me0.vertices])
 gn = {g.index: g.name for g in low.vertex_groups}
 for v in me0.vertices:
     vw.append({gn[g.group]: g.weight for g in v.groups if g.weight > 0.01})
-rooms.extend([1.0] * len(me0.vertices))
+# no ink inside the face: the shell poked through its creases as dashes round the eyes, nose and mouth
+vn0 = np.array([tuple(v.normal) for v in me0.vertices])
+vc0 = np.array([tuple(v.co) for v in me0.vertices])
+zf_ = (vc0[:, 2] > K.NECK_Z + 0.0) & (vc0[:, 2] < K.EYE[2] + 0.075)
+in_face = zf_ & (((np.abs(vc0[:, 0]) < 0.1) & (vn0[:, 1] > 0.2)) | ((np.abs(vc0[:, 0]) < 0.07) & (vc0[:, 1] > 0.04)))
+rooms.extend((1.0 - in_face.astype(float)).tolist())
 for p in me0.polygons:
     faces_v.append(list(p.vertices))
     faces_pid.append(0)
@@ -510,8 +515,9 @@ print("scan paint", col.mean(0))
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 OUTC[ys, xs] = P.scan_grade(np.clip(col, 0, 1), pp, AO[ys, xs].astype(np.float64))
 dm = np.hypot(pp[:, 0] - K.MARK_OFF[0], pp[:, 2] - K.MARK_OFF[2]) + 9.0 * (pp[:, 1] < 0.02)      # (across the cheek: its depth doesn't matter)
-near = np.median(OUTC[ys, xs][(dm > 0.013) & (dm < 0.02)], axis=0)
-OUTC[ys[dm < 0.013], xs[dm < 0.013]] = near
+near = np.median(OUTC[ys, xs][(dm > 0.016) & (dm < 0.024)], axis=0)
+ek_ = smooth(0.018, 0.009, dm)
+OUTC[ys, xs] = mix(OUTC[ys, xs].astype(np.float64), near, ek_)
 # the face pass: the master's close-up projected on the face, the coat's lacing on her back
 cc_ = OUTC[ys, xs].astype(np.float64)
 nn_ = NOR[ys, xs].astype(np.float64)
