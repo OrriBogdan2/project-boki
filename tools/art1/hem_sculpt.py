@@ -1,9 +1,9 @@
-"""Hem's sculpt (ART-1, item 108): the shapes as signed distance fields (tools/art1/hem_sdf.py), all built on the
+"""Hem's sculpt (ART-1, item 108, design v4: briefs/art-refs/hem_v4_needlebow.png, hem_v4_props.png): the shapes as signed distance fields (tools/art1/hem_sdf.py), all built on the
 rig's own joints (art/wardens/src/hem_rig.json), so she stays on the contract armature.
-Art: docs/art/gen/wardens_r3/hem_turnaround / head_sheet / mask_sheet / weapons_sheet (ext/imagegen), HEM_KIT.md.
 
-Item 108's look: an adult woman of about 7 heads with a mature, sharp face, a tailored crimson jacket over a fitted
-black corset with a modest neckline, slim trousers and tall boots, a long asymmetric coat tail. Tasteful, not sexualised.
+The Red Stitch Archer: an adult woman of about 7 heads, tanned, a sharp mature face, a red-stitched eye mask, green eyes; a
+high ponytail tied in red thread, pinned with a silver needle; a black-and-red stitched corset (closed high under the scarf:
+tasteful, item 108), pauldrons and half-sleeves, bracers, black capris, tall laced boots; a long red scarf.
 Space: Blender's, facing +Y, her right hand +X, up +Z, metres at the class-neutral size."""
 import json
 import math
@@ -23,6 +23,7 @@ HAIR, HAIR_DK, NEEDLE = 10, 11, 12
 PORC, GOLD, THREAD, SMILE = 20, 21, 22, 23
 CORSET, CORSET_SEAM, TROUSER, BOOT, BOOT_TOP, LACE = 30, 31, 32, 33, 34, 35
 JACKET, JACKET_DK, CUFF, TAPE, LEATHER, BUCKLE, STEEL = 40, 41, 42, 43, 44, 45, 46
+SCARF, FEATHER, PAULDRON = 50, 51, 52
 
 # the head is sculpted a shade small, then set: scaled up and sunk onto the neck (League-sized for the top-down camera)
 HEAD_K, HEAD_C, HEAD_DZ = 1.08, np.array((0, 0, 1.60), F), -0.014
@@ -158,9 +159,16 @@ def head(vox=0.0013):
         h.add(ell((s * 0.0100, 0.0912, 1.5735), (0.0052, 0.0062, 0.0048)), 0.008, SKIN, "head")
         h.sub(ell((s * 0.0048, 0.0960, 1.5700), (0.0024, 0.0036, 0.0015)), 0.0016, SKIN)
     h.sub(cap((0, 0.0985, 1.5665), (0, 0.0995, 1.5545), 0.0017, 0.0021), 0.005)        # the philtrum
-    # the lips: low forms, the smile itself is carved on the mask
-    h.add(ell((0, 0.0905, 1.5450), (0.0200, 0.0055, 0.0042)), 0.006, LIP, "head")
-    h.add(ell((0, 0.0900, 1.5365), (0.0165, 0.0065, 0.0052)), 0.006, LIP, "head")
+    # the lips: full, a slight knowing curve at the corners (the mask leaves them bare now)
+    upper = path([(-0.0225, 0.0862, 1.5478), (-0.012, 0.0925, 1.5442), (-0.0035, 0.0965, 1.5462), (0, 0.0962, 1.5444),
+                  (0.0035, 0.0965, 1.5462), (0.012, 0.0925, 1.5442), (0.0225, 0.0862, 1.5478)],
+                 [0.0012, 0.0030, 0.0036, 0.0036, 0.0036, 0.0030, 0.0012])
+    lower = path([(-0.0210, 0.0862, 1.5470), (-0.0105, 0.0920, 1.5395), (0, 0.0948, 1.5368), (0.0105, 0.0920, 1.5395),
+                  (0.0210, 0.0862, 1.5470)], [0.0012, 0.0038, 0.0050, 0.0038, 0.0012])
+    h.add(upper, 0.0030, LIP, "head")
+    h.add(lower, 0.0030, LIP, "head")
+    h.sub(path([(-0.0228, 0.0880, 1.5478), (-0.012, 0.0962, 1.5420), (0, 0.1002, 1.5408), (0.012, 0.0962, 1.5420),
+                (0.0228, 0.0880, 1.5478)], [0.0005, 0.0007, 0.0007, 0.0007, 0.0005]), 0.0010, LIP)
     h.sub(ell((0, 0.0985, 1.5275), (0.014, 0.0035, 0.0030)), 0.006)                    # under the lower lip
     h.add(ell((0, 0.0880, 1.5175), (0.0150, 0.0085, 0.0095)), 0.012, SKIN, "head")     # the chin
     h.base = h.d.copy()
@@ -178,9 +186,6 @@ def head(vox=0.0013):
         at = np.array((s * 0.0755, -0.008, 1.600), F)
         h.add(ell(tuple(at + (s * 0.0035, 0, 0)), (0.0042, 0.0155, 0.0265), (0.0, s * 0.16, 0.0)), 0.004, SKIN, "head")
         h.sub(ell(tuple(at + (s * 0.0090, 0.0015, 0.004)), (0.0040, 0.0090, 0.0165)), 0.0030, EAR_IN)
-    # a narrow black band at the throat: breaks the long neck
-    base = type("B", (), {"d": h.d.copy()})()
-    shell(h, base, 0.0026, lambda x, y, z: np.abs(z - 1.438) - 0.0098, CUFF, 0.0008)
     return h
 
 
@@ -199,17 +204,15 @@ def smax(a, b, k):
     return b * (1 - h) + a * h + k * h * (1 - h)
 
 
-def _mask_top(x):
-    """z of its upper rim: the gilt line under the eyes, rising to a point over the bridge of the nose."""
-    a = np.abs(x)
-    return 1.5935 + 0.0265 * np.exp(-(a / 0.0115) ** 2) + 0.0120 * smooth(0.040, 0.0745, a)
-
-
 def mask_region(x, y, z):
-    top = z - _mask_top(x)
-    back = 0.024 - y
-    jaw = (1.5005 + (0.088 - y) * 0.92 + 0.0065 * np.exp(-(x / 0.03) ** 2) * 0.0) - z
-    return smax(smax(top, back, 0.006), jaw, 0.005)
+    """The domino: a band over the eyes and the bridge of the nose, lifting to a point at the temples, the eyes cut out."""
+    a = np.abs(x)
+    top = 1.6370 + 0.0115 * smooth(0.0, 0.034, a) + 0.0030 * smooth(0.05, 0.078, a)
+    bot = 1.6115 - 0.0175 * smooth(0.006, 0.036, a) + 0.0310 * smooth(0.040, 0.079, a)
+    r = smax(z - top, bot - z, 0.003)
+    r = smax(r, 0.012 - y, 0.004)
+    eye = np.minimum(_almond(1).fn(x, y, z), _almond(-1).fn(x, y, z))
+    return np.maximum(r, -(eye - 0.0030))
 
 
 def mask(h, vox=0.0013):
@@ -217,11 +220,10 @@ def mask(h, vox=0.0013):
     x, y, z = f.grid()
     d0 = h.d
     reg = mask_region(x, y, z)
-    sheet = np.maximum(d0 - 0.0046, -(d0 - 0.0006))      # 0.6 mm off the skin, 4 mm thick
-    f.d = np.maximum(sheet, reg).astype(F)
+    f.d = np.maximum(np.maximum(d0 - 0.0040, -(d0 - 0.0002)), reg).astype(F)
     f.lab[:] = PORC
-    # the gilt rim, raised
-    rim = np.maximum(np.abs(reg + 0.0004) - 0.0021, np.maximum(d0 - 0.0058, -(d0 - 0.0006)))
+    # its raised red edge
+    rim = np.maximum(np.abs(reg + 0.0005) - 0.0014, np.maximum(d0 - 0.0048, -(d0 - 0.0002)))
     f.lab = np.where(rim < f.d, GOLD, f.lab)
     f.d = np.minimum(f.d, rim).astype(F)
     return f
@@ -230,7 +232,7 @@ def mask(h, vox=0.0013):
 # ---------------------------------------------------------------------------------------------- the hair
 HAIRLINE = np.array(((0, 1.692), (22, 1.694), (40, 1.680), (55, 1.655), (68, 1.636), (85, 1.636), (100, 1.634), (109, 1.586),
                      (118, 1.558), (140, 1.526), (160, 1.510), (180, 1.506)), F)
-BUN = (0.0, -0.064, 1.772)
+BUN = (0.0, -0.058, 1.748)      # where the ponytail is tied
 
 
 def S_interp(xq, xs, ys):
@@ -256,25 +258,18 @@ def hair(h):
     d = smax(a, zh - z, 0.002)
     f.d = np.maximum(d, -(base + 0.004)).astype(F)
     f.lab[:] = HAIR
-    # the bun, a coil of thick locks
-    f.grp = 0
-    f.add(ell(BUN, (0.046, 0.046, 0.041)), 0.012, HAIR, "head")
-    for k in range(3):
-        a0 = k * 2.1
-        pts, rr = [], []
-        for t in np.linspace(0, 1, 14):
-            a1 = a0 + t * 5.2
-            r = 0.041 - 0.02 * t
-            zz = BUN[2] + 0.024 - 0.05 * (1 - t) * (k * 0.3 + 0.4)
-            pts.append((BUN[0] + r * math.cos(a1), BUN[1] + r * math.sin(a1), zz + 0.014 * t))
-            rr.append(0.0115 - 0.004 * t)
-        f.add(path(pts, rr), 0.011, HAIR, "head")
+    # the ponytail's base, the red thread tied round it
+    f.add(ell(BUN, (0.034, 0.036, 0.020)), 0.018, HAIR, "head")
+    for k in range(4):
+        z0 = BUN[2] + 0.010 + k * 0.0052
+        ring = [(BUN[0] + 0.0245 * math.cos(a), BUN[1] - 0.012 + 0.0245 * math.sin(a), z0 + 0.003 * math.sin(a * 2 + k)) for a in np.linspace(0, math.tau, 13)]
+        f.add(path(ring, [0.0034] * 13), 0.0, THREAD, "head")
     return f
 
 
-def lock(pts, r0, r1, vox=0.0013, lab=HAIR):
+def lock(pts, r0, r1, vox=0.0013, lab=HAIR, spread=0.0):
     pts = np.array(pts, F)
-    lo, hi = pts.min(0) - 0.03, pts.max(0) + 0.03
+    lo, hi = pts.min(0) - 0.045, pts.max(0) + 0.045
     # a catmull chain
     q = np.vstack([2 * pts[0] - pts[1], pts, 2 * pts[-1] - pts[-2]])
     cc = []
@@ -285,21 +280,29 @@ def lock(pts, r0, r1, vox=0.0013, lab=HAIR):
     cc.append(pts[-1])
     cc = np.array(cc, F)
     n = len(cc)
-    rr = [float(r0 + (r1 - r0) * (i / (n - 1)) ** 1.2) for i in range(n)]
+    rr = [float(r0 + (r1 - r0) * (i / (n - 1)) ** 1.2) * (min(1.0, 0.62 + 2.4 * i / (n - 1)) if r0 > 0.02 else 1.0) for i in range(n)]
     f = Field(lo, hi, vox)
     f.add(path([tuple(c) for c in cc], rr), 0.0, lab, "head")
+    if spread > 0:
+        for k in (-1, 1):
+            tt = np.linspace(0, 1, n)
+            side = np.array((np.sign(pts[-1][0]) * 0.75, -0.65, 0.0), F)
+            off = cc + side[None, :] * (spread * k * np.sin(np.minimum(tt * 1.15, 1.0) * math.pi) ** 0.7)[:, None]
+            f.add(path([tuple(c) for c in off], [r * 0.86 for r in rr]), 0.004, lab, "head")
     return f
 
 
 LOCKS = {
-    # her right: the long lock past the cheek, down to the collar
-    "lockR": [(0.016, 0.070, 1.700), (0.050, 0.070, 1.668), (0.0705, 0.060, 1.622), (0.0795, 0.050, 1.570), (0.0815, 0.044, 1.515),
-              (0.0775, 0.050, 1.462), (0.0680, 0.062, 1.420)],
-    "lockL": [(-0.048, 0.062, 1.684), (-0.0725, 0.044, 1.630), (-0.0805, 0.034, 1.578), (-0.0800, 0.036, 1.530), (-0.0740, 0.042, 1.492)],
-    # the tail falling from the bun to between the shoulder blades
-    "tail": [(0.0, -0.095, 1.764), (0.002, -0.128, 1.715), (0.004, -0.137, 1.640), (0.0, -0.132, 1.560), (-0.008, -0.132, 1.480),
-             (-0.012, -0.146, 1.400), (-0.005, -0.164, 1.325)],
+    # the two locks framing her face, a centre part, down past the jaw
+    "lockR": [(0.006, 0.076, 1.694), (0.046, 0.074, 1.668), (0.0695, 0.060, 1.622), (0.0770, 0.050, 1.570), (0.0755, 0.046, 1.520),
+              (0.0690, 0.052, 1.470), (0.0610, 0.066, 1.425)],
+    "lockL": [(-0.006, 0.076, 1.694), (-0.046, 0.074, 1.668), (-0.0695, 0.060, 1.622), (-0.0770, 0.050, 1.570), (-0.0755, 0.046, 1.520),
+              (-0.0690, 0.052, 1.470), (-0.0610, 0.066, 1.425)],
+    # the high ponytail: up from the tie, over, falling long down her back to the waist
+    "tail": [(0.0, -0.074, 1.742), (0.002, -0.102, 1.752), (0.006, -0.134, 1.726), (0.014, -0.158, 1.655), (0.024, -0.170, 1.550),
+             (0.036, -0.170, 1.400), (0.046, -0.172, 1.240), (0.052, -0.180, 1.090), (0.056, -0.190, 0.965)],
 }
+LOCK_R = {"lockR": (0.0085, 0.0012), "lockL": (0.0085, 0.0012), "tail": (0.0330, 0.0030)}
 
 
 def needle_field(items, vox=0.0011, eye_w=0.0062, eye_l=0.021):
@@ -328,8 +331,7 @@ def needle_field(items, vox=0.0011, eye_w=0.0062, eye_l=0.021):
     return f
 
 
-HAIR_NEEDLES = [((-0.150, -0.070, 1.827), (0.100, -0.058, 1.722), 0.0024), ((0.150, -0.070, 1.833), (-0.095, -0.050, 1.727), 0.0024),
-                ((0.122, -0.095, 1.660), (-0.040, -0.045, 1.790), 0.0020)]
+HAIR_NEEDLES = [((-0.190, -0.090, 1.842), (0.185, -0.030, 1.690), 0.0040)]      # the one silver pin through the tie
 
 
 # ---------------------------------------------------------------------------------------------- the body
@@ -377,120 +379,112 @@ def legs(b, J):
 
 
 def neckline(x):
-    """Where the corset's top runs: square and modest, just over the collarbones' hollow."""
+    """The corset's top: closed high, under the scarf (the reference's cut-out is left out: tasteful, item 108)."""
+    return 1.345 + 0.0 * x
+
+
+def corset_low(x, y):
+    """Its lower edge: a point at the middle front, above the bare midriff."""
     a = np.abs(x)
-    return 1.2905 + 0.0140 * smooth(0.02, 0.105, a) - 0.0085 * np.exp(-(a / 0.016) ** 2)
+    return np.where(y > -0.02, 1.012 - 0.044 * np.exp(-(a / 0.022) ** 2) + 0.020 * smooth(0.03, 0.11, a), 1.040)
+
+
+WAIST_Z = 0.936                    # the capris' top
 
 
 def lapel_x(z):
-    """How far from the middle the open jacket's edge lies, by height."""
-    return np.interp(z, (0.96, 1.03, 1.11, 1.21, 1.30, 1.37, 1.45), (0.062, 0.080, 0.090, 0.095, 0.078, 0.056, 0.05)).astype(F)
+    """The shrug's front edge: how far from the middle it stands open over the corset."""
+    return np.interp(z, (1.15, 1.22, 1.30, 1.37, 1.45), (0.125, 0.106, 0.086, 0.062, 0.05)).astype(F)
 
 
 def strap_d(x, z, a=(-0.135, 1.335), b=(0.150, 0.955)):
-    """Signed distance across the bandolier in the front view."""
     ax, az = a
     dx, dz = b[0] - ax, b[1] - az
-    n = math.hypot(dx, dz)
-    return ((x - ax) * dz - (z - az) * dx) / n
+    return ((x - ax) * dz - (z - az) * dx) / math.hypot(dx, dz)
 
 
 def dress_labels(p, lab):
     """The garment edges, exactly (the labels are per voxel: 3 mm stairs in the paint). Same order as dress()."""
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
     a = np.abs(x)
-    out = lab.copy()
     up = np.isin(lab, (SKIN, CORSET, CORSET_SEAM, JACKET, JACKET_DK, TROUSER, LEATHER))
-    nl = neckline(x)
-    low = 0.925 + 0.070 * smooth(0.0, 0.10, a)
-    o2 = np.where(z > nl, SKIN, CORSET)
-    o2 = np.where(z < low, TROUSER, o2)
-    le = lapel_x(z)
-    front = np.where(y > -0.01, le - a, -1.0)
-    lo = 0.975 + 0.04 * smooth(-0.02, 0.09, y)
-    jk = (front < 0) & (z > lo)
+    o2 = np.where(z >= WAIST_Z, SKIN, TROUSER)
+    cl = corset_low(x, y)
+    o2 = np.where((z >= cl) & (z <= neckline(x)), CORSET, o2)
+    front = np.where(y > -0.01, lapel_x(z) - a, -1.0)
+    jk = (front < 0) & (z > 1.15 + 0.05 * smooth(-0.02, 0.09, y))
     o2 = np.where(jk, JACKET, o2)
-    o2 = np.where((np.abs(front + 0.0075) < 0.0075) & (z > lo), JACKET_DK, o2)
-    belt = np.abs(z - (0.965 + 0.022 * smooth(0.0, 0.1, a) * (y > 0))) < 0.0165
+    o2 = np.where((np.abs(front + 0.0045) < 0.0045) & (z > 1.15), JACKET_DK, o2)
+    belt = np.abs(z - 0.922 + 0.010 * (x > 0) * smooth(0.0, 0.14, a)) < 0.0150
     o2 = np.where(belt, LEATHER, o2)
-    st = (np.abs(strap_d(x, z)) < 0.0185) & (y > 0) & (z > 0.955) & (z < 1.345)
-    o2 = np.where(st, LEATHER, o2)
-    return np.where(up & (z > 0.8), o2, out)
+    return np.where(up & (z > 0.8), o2, lab)
 
 
 def dress(b):
-    """Clothes on the figure: the labels and layers, all one surface (nothing to poke through at the joints)."""
-    base = b.d.copy()
+    """Clothes on the figure: labels and thin layers, all one surface (nothing to poke through at the joints)."""
+    base = type("B", (), {"d": b.d.copy()})()
     out = b
     x, y, z = b.grid()
     a = np.abs(x)
-    # the skin above the neckline
+    cl = corset_low(x, y)
     nl = neckline(x)
-    b.lab = np.where(z > nl, SKIN, b.lab)
-    # the corset, cut to a point below the waist in front and laced at the back
-    corset_low = 0.925 + 0.070 * smooth(0.0, 0.10, a)
-    reg = np.maximum(corset_low - z, z - nl)
-    shell(out, type("B", (), {"d": base})(), 0.0050, lambda x, y, z: reg, CORSET)
-    # its boning: seams with a slight pad between them
-    for dx in (0.034, 0.078, 0.116):
-        seam = (np.abs(a - dx) - 0.0028).astype(F)
-        out.d = np.where(reg < -0.003, out.d + 0.0020 * smooth(0.0016, -0.0016, seam), out.d)
-    # the slim trousers: a soft waist under it
-    out.lab = np.where((z <= corset_low) & (b.lab == CORSET), TROUSER, out.lab)
-    # the tall boots, a turned cuff at the top
-    top = 0.492 + 0.026 * np.where(y > 0.0, 1.0, 0.2)
+    out.lab = np.where(z > WAIST_Z, SKIN, TROUSER)
+    # the corset
+    reg = np.maximum(cl - z, z - nl)
+    shell(out, base, 0.0052, lambda x, y, z: reg, CORSET)
+    # its seams
+    for dx in (0.0, 0.040, 0.086):
+        seam = (np.abs(a - dx) - 0.0030).astype(F)
+        out.d = np.where(reg < -0.003, out.d + 0.0016 * smooth(0.0016, -0.0016, seam), out.d)
+    # the capris: a band at the waist, cropped below the knee; a bare span, then the boots
+    kz = 0.444
+    bare = (z < kz - 0.014) & (z > 0.415)
+    out.lab = np.where(bare & (z < 0.8), SKIN, out.lab)
+    out.d = np.where(bare, out.d + 0.0035, out.d)
+    top = 0.410 + 0.014 * np.where(y > 0.0, 1.0, 0.0)
     rb = z - top
-    shell(out, type("B", (), {"d": base})(), 0.0058, lambda x, y, z: rb, BOOT, 0.002)
-    rc = np.maximum(z - top, top - 0.040 - z)
-    shell(out, type("B", (), {"d": base})(), 0.0092, lambda x, y, z: rc, BOOT_TOP, 0.001)
-    # the sole
+    shell(out, base, 0.0052, lambda x, y, z: rb, BOOT, 0.002)
+    rc = np.maximum(z - top, top - 0.016 - z)
+    shell(out, base, 0.0074, lambda x, y, z: rc, BOOT_TOP, 0.001)
     sole = z - 0.016
     out.lab = np.where((sole < 0) & (out.d > -0.012), LEATHER, out.lab)
-    # the thigh strap, right leg
-    rt = np.maximum(np.maximum(np.abs(z - 0.655) - 0.0165, 0.02 - x), x - 0.26)
-    shell(out, type("B", (), {"d": base})(), 0.0082, lambda x, y, z: rt, LEATHER, 0.0008)
-    # the cropped jacket: open in front, closing round the ribs, a dark inner band along the edge
-    le = lapel_x(z)
-    front = np.where(y > -0.01, le - a, -1.0)
-    lo, hi = 0.975 + 0.04 * smooth(-0.02, 0.09, y), 1.455
+    # the two straps round her right thigh
+    for zz in (0.690, 0.615):
+        rt = np.maximum(np.maximum(np.abs(z - zz) - 0.0125, 0.02 - x), x - 0.26)
+        shell(out, base, 0.0072, lambda x, y, z: rt, LEATHER, 0.0008)
+    # the short shrug: shoulders and back, the front edge piped red
+    front = np.where(y > -0.01, lapel_x(z) - a, -1.0)
+    lo, hi = 1.15 + 0.05 * smooth(-0.02, 0.09, y), 1.455
     rj = np.maximum(front, np.maximum(lo - z, z - hi))
-    shell(out, type("B", (), {"d": base})(), 0.0125, lambda x, y, z: rj, JACKET, 0.0012)
-    edge = np.maximum(np.abs(front + 0.0075) - 0.0075, np.maximum(lo - z, z - hi))
-    shell(out, type("B", (), {"d": base})(), 0.0150, lambda x, y, z: edge, JACKET_DK, 0.0012)
-    # the waist belt, with a square buckle on her left hip side
-    belt = np.abs(z - (0.965 + 0.022 * smooth(0.0, 0.1, a) * (y > 0))) - 0.0165
-    shell(out, type("B", (), {"d": base})(), 0.0165, lambda x, y, z: belt, LEATHER, 0.0008)
-    # the bandolier across her front
-    st = np.maximum(np.abs(strap_d(x, z)) - 0.0185, -y + 0.0)
-    st = np.maximum(st, np.maximum(0.955 - z, z - 1.345))
-    shell(out, type("B", (), {"d": base})(), 0.0205, lambda x, y, z: st, LEATHER, 0.0008)
+    shell(out, base, 0.0096, lambda x, y, z: rj, JACKET, 0.0012)
+    edge = np.maximum(np.abs(front + 0.0045) - 0.0045, np.maximum(lo - z, z - hi))
+    shell(out, base, 0.0118, lambda x, y, z: edge, JACKET_DK, 0.0012)
+    # the belt, its tail dropping toward the spool at her right hip
+    belt = np.abs(z - 0.922 + 0.010 * (x > 0) * smooth(0.0, 0.14, a)) - 0.0150
+    shell(out, base, 0.0120, lambda x, y, z: belt, LEATHER, 0.0008)
     return out
 
 
 def arm(J, s, n, vox=0.0026):
-    """The sleeve and forearm of one arm: the sleeve's cap at the shoulder, turned back at the elbow, a tape-measure wrap
-    from there to the black cuff; ending at the wrist (the hand is its own, finer part)."""
+    """One arm: a layered stitched pauldron, a half-sleeve to the elbow, a little bare forearm, a laced bracer to the wrist."""
     sx = float(J["upper_arm." + n][0])
     sz, ez, wz = float(J["upper_arm." + n][2]), float(J["forearm." + n][2]), float(J["hand." + n][2])
-    a = Field((sx - 0.10, -0.1, wz - 0.05), (sx + 0.10, 0.1, sz + 0.09), vox)
-    a.add(ell((sx + s * 0.002, 0.0, sz + 0.003), (0.0465, 0.052, 0.047)), 0.0, JACKET, "pauldron." + n)
-    a.add(cap((sx, 0, sz + 0.005), (sx, 0, ez + 0.03), 0.0445, 0.0375), 0.02, JACKET, "upper_arm." + n)
-    a.add(ell((sx - s * 0.003, 0.008, ez + 0.105), (0.040, 0.043, 0.075)), 0.02, JACKET, "upper_arm." + n)
-    a.add(cap((sx, 0, ez + 0.03), (sx, 0.001, ez - 0.012), 0.0385, 0.0375), 0.012, JACKET, "forearm." + n)
-    a.add(cap((sx, 0.001, ez - 0.012), (sx, 0, wz + 0.006), 0.0375, 0.0275), 0.012, TAPE, "forearm." + n)
-    a.add(ell((sx, 0.003, ez - 0.055), (0.0375, 0.039, 0.07)), 0.014, TAPE, "forearm." + n)
-    x, y, z = a.grid()
-    # the turned-back sleeve end and the cuff
-    cuff0, cuff1 = ez - 0.022, ez + 0.012
+    a = Field((sx - 0.11, -0.11, wz - 0.05), (sx + 0.11, 0.11, sz + 0.10), vox)
+    a.add(cap((sx, 0, sz + 0.005), (sx, 0, ez + 0.03), 0.0425, 0.0355), 0.0, JACKET, "upper_arm." + n)
+    a.add(ell((sx - s * 0.003, 0.008, ez + 0.105), (0.0385, 0.0415, 0.075)), 0.02, JACKET, "upper_arm." + n)
+    a.add(cap((sx, 0, ez + 0.03), (sx, 0.001, ez - 0.012), 0.0355, 0.0345), 0.012, JACKET, "forearm." + n)
+    a.add(cap((sx, 0.001, ez - 0.012), (sx, 0, wz + 0.006), 0.0345, 0.0245), 0.012, SKIN, "forearm." + n)
+    a.add(ell((sx, 0.003, ez - 0.055), (0.0345, 0.036, 0.07)), 0.014, SKIN, "forearm." + n)
     base = type("B", (), {"d": a.d.copy()})()
-    rc = np.maximum(cuff0 - z, z - cuff1)
-    shell(a, base, 0.0045, lambda x, y, z: rc, JACKET_DK, 0.0016)
-    wc = np.maximum(wz - 0.022 - z, z - (wz + 0.030))
-    shell(a, base, 0.0042, lambda x, y, z: wc, CUFF, 0.001)
-    # the tape's wraps, slanted
-    t = (z + 0.18 * y - wz) * 125.0
-    rt = (cuff0 > z) & (z > wz + 0.030)
-    a.d = np.where(rt, a.d + 0.0007 * (np.abs(np.sin(t)) - 0.5), a.d)
+    # the stitched bracer
+    br = lambda x, y, z: np.maximum(wz - 0.024 - z, z - (ez - 0.040))
+    shell(a, base, 0.0048, br, TAPE, 0.001)
+    # the half-sleeve's red end
+    rc = lambda x, y, z: np.maximum(ez - 0.016 - z, z - (ez + 0.004))
+    shell(a, base, 0.0030, rc, JACKET_DK, 0.0012)
+    # the pauldron, two lapped plates over the shoulder
+    a.add(ell((sx + s * 0.004, 0.0, sz + 0.008), (0.0530, 0.0610, 0.0480), (0, s * 0.30, 0)), 0.006, PAULDRON, "pauldron." + n)
+    a.add(ell((sx + s * 0.012, 0.0, sz - 0.030), (0.0490, 0.0570, 0.0290), (0, s * 0.42, 0)), 0.0025, PAULDRON, "pauldron." + n)
     return a
 
 
@@ -528,15 +522,7 @@ def right_hand(J, vox=0.00115):
         f.add(cap(P[0], P[1], r * 1.04, r * 0.96), 0.006, SKIN, b1)
         f.add(cap(P[1], P[2], r * 0.96, r * 0.86), 0.0015, SKIN, b2)
         f.add(cap(P[2], P[3], r * 0.86, r * 0.72), 0.001, SKIN, b2)
-        if k in "amr":
-            # the thimble over the last joint, its hooked claw past the tip
-            u = (P[3] - P[2]) / np.linalg.norm(P[3] - P[2])
-            f.add(cap(P[2] + u * 0.004, P[3] + u * 0.002, r * 1.12, r * 0.98), 0.0008, STEEL, b2)
-            hook = P[3] + u * 0.012 + np.array((-s * 0.0035, 0, 0), F)
-            tip = P[3] + u * 0.034 + np.array((-s * 0.0115, 0, 0), F)
-            f.add(path([P[3] + u * 0.001, hook, tip], [r * 0.72, r * 0.38, 0.0006]), 0.001, STEEL, b2)
-        else:
-            f.add(ell(tuple(P[3] - (P[3] - P[2]) * 0.02 + np.array((s * 0.0045, 0, 0), F)), (0.0024, 0.0058, 0.0072)), 0.0005, NAIL, b2)
+        f.add(ell(tuple(P[3] - (P[3] - P[2]) * 0.02 + np.array((s * 0.0045, 0, 0), F)), (0.0024, 0.0058, 0.0072)), 0.0005, NAIL, b2)
     # the thumb
     t0 = np.array((sx - 0.006, 0.030, wz - 0.022), F)
     t1 = t0 + (-0.012, 0.022, -0.030)
@@ -599,16 +585,33 @@ def coat_hem(th):
 
 # ---------------------------------------------------------------------------------------------- gear
 # The bow's own frame: x her side, y away from the string (where the arrow flies), z the long axis, the grip at 0.
-BOW_LEN = 0.56
-STRING_Y = -0.150
+# The curve is read straight off hem_v4_props.png's left bow: the silhouette is the owner's.
+BOW_LEN = 0.625
+STRING_Y = -0.200
+STRING_Z = 0.566
 
 
 def _bow_curve():
-    z = np.array((0.0, 0.055, 0.075, 0.110, 0.165, 0.250, 0.345, 0.440, 0.505, 0.5350, 0.560), F)
-    y = np.array((0.0, 0.000, 0.012, 0.028, 0.012, -0.040, -0.098, -0.142, -0.150, -0.138, -0.112), F)
-    t = np.array((0.0150, 0.0150, 0.0165, 0.0255, 0.0215, 0.0175, 0.0140, 0.0115, 0.0095, 0.0060, 0.0012), F)   # half depth
-    w = np.array((0.0150, 0.0150, 0.0160, 0.0185, 0.0170, 0.0145, 0.0125, 0.0105, 0.0090, 0.0060, 0.0012), F)   # half width
+    z = np.array((0.0, 0.060, 0.130, 0.230, 0.317, 0.447, 0.523, 0.566, 0.600, 0.625), F)
+    y = np.array((0.0, 0.006, 0.027, 0.005, -0.044, -0.131, -0.180, -0.198, -0.204, -0.204), F)
+    t = np.array((0.0165, 0.0180, 0.0340, 0.0250, 0.0175, 0.0135, 0.0115, 0.0160, 0.0150, 0.0018), F)     # half depth
+    w = np.array((0.0165, 0.0150, 0.0100, 0.0090, 0.0078, 0.0066, 0.0060, 0.0056, 0.0050, 0.0020), F)     # half width: a flat needle
     return z, y, t, w
+
+
+def _slot(zc, half_l, half_w):
+    """A needle's eye through the limb, a long slot along it."""
+    zs, ys, _, _ = _bow_curve()
+    yc = float(np.interp(zc, zs, ys))
+    dy = float(np.interp(zc + 0.01, zs, ys) - np.interp(zc - 0.01, zs, ys)) / 0.02
+    n = math.hypot(1, dy)
+
+    def fn(x, y, z):
+        px, py = (np.abs(z) - zc), y - yc
+        u = (px + py * dy) / n
+        v = (py - px * dy) / n
+        return np.sqrt((u / half_l) ** 2 + (v / half_w) ** 2) * min(half_l, half_w) - min(half_l, half_w)
+    return Prim(fn, (-0.05, yc - 0.06, -0.64), (0.05, yc + 0.06, 0.64))
 
 
 def bow_prim():
@@ -620,31 +623,21 @@ def bow_prim():
         t = np.interp(a, zc, tc).astype(F)
         w = np.interp(a, zc, wc).astype(F)
         ax, ay = np.abs(x) / w, np.abs(y - cy) / t
-        rho = np.maximum(np.maximum(ax, ay), (ax + ay) * 0.74)       # an octagon: the lacquer's facets
-        d = (rho - 1.0) * np.minimum(w, t)
+        d = (np.sqrt(ax * ax + ay * ay) - 1.0) * np.minimum(w, t)
         return np.maximum(d, a - BOW_LEN)
-    return Prim(fn, (-0.03, -0.2, -BOW_LEN), (0.03, 0.06, BOW_LEN))
+    return Prim(fn, (-0.03, -0.25, -BOW_LEN), (0.03, 0.08, BOW_LEN))
 
 
-def bow(vox=0.0017):
-    f = Field((-0.075, -0.19, -0.585), (0.075, 0.06, 0.585), vox)
-    f.add(bow_prim(), 0.0, BOOT, None)
-    # the grip's dark wrap, the red cord under the tips
-    x, y, z = f.grid()
+def bow(vox=0.0016):
+    f = Field((-0.05, -0.24, -0.645), (0.05, 0.07, 0.645), vox)
+    f.add(bow_prim(), 0.0, STEEL, None)
+    # the eyes: two long slots either side of the grip, the true needle eye at each tip
+    f.sub(_slot(0.132, 0.044, 0.0165), 0.0015, STEEL)
+    f.sub(_slot(0.232, 0.019, 0.0105), 0.0012, STEEL)
+    f.sub(_slot(0.580, 0.025, 0.0082), 0.0010, STEEL)
+    # the red-wrapped grip, thread at the string's ends
     base = type("B", (), {"d": f.d.copy()})()
-    rg = np.abs(z) - 0.056
-    shell(f, base, 0.0030, lambda x, y, z: rg, LEATHER, 0.0006)
-    for sg in (-1, 1):
-        rc = np.abs(z - sg * 0.49) - 0.0085
-        shell(f, base, 0.0022, lambda x, y, z: rc, THREAD, 0.0005)
-    # the spool on the grip's side, below the fist
-    c = (0.0, 0.043, -0.083)
-    f.add(cyl(c, "x", 0.0062, 0.021), 0.001, LACE)
-    f.add(cyl((0, c[1], c[2]), "x", 0.0145, 0.0165), 0.0, THREAD)
-    for sg in (-1, 1):
-        f.add(cyl((sg * 0.0185, c[1], c[2]), "x", 0.0185, 0.0035), 0.0, LACE)
-    # from the spool up to the grip, a loose thread
-    f.add(path([(0.012, 0.03, -0.075), (0.019, 0.02, -0.058), (0.012, 0.016, -0.046)], [0.0016, 0.0016, 0.0016]), 0.0, THREAD)
+    shell(f, base, 0.0034, lambda x, y, z: np.abs(z) - 0.072, THREAD, 0.0006)
     return f
 
 
@@ -654,21 +647,6 @@ def bow_to_model(p, J):
     Y = -Sd
     p = np.asarray(p, F)
     return c + p[..., 0:1] * X + p[..., 1:2] * Y + p[..., 2:3] * A
-
-
-QUIVER_A = np.array((0.030, -0.158, 1.060), F)     # its foot (her left of the spine), and its mouth over her right shoulder
-QUIVER_B = np.array((0.168, -0.150, 1.415), F)
-
-
-def quiver(vox=0.0022):
-    a, b = QUIVER_A, QUIVER_B
-    f = Field(np.minimum(a, b) - 0.09, np.maximum(a, b) + 0.09, vox)
-    f.add(cap(a, b, 0.040, 0.047), 0.0, LEATHER, "hips")
-    u = (b - a) / np.linalg.norm(b - a)
-    f.sub(cap(b - u * 0.03, b + u * 0.12, 0.039, 0.040), 0.002)
-    for t, lab in ((0.965, LACE), (0.03, LACE)):
-        f.add(cyl(tuple(a + (b - a) * t), _align(u), 0.0495 if t > 0.5 else 0.0435, 0.0125), 0.002, lab)
-    return f
 
 
 def _align(u):
@@ -681,94 +659,120 @@ def _align(u):
     return np.eye(3, dtype=F) + k + k @ k / (1 + c)
 
 
-def spikes(items, vox=0.0013):
-    """Plain tapered pins: [(tail, point, r)]."""
-    pts = np.array([p for a, b, r in items for p in (a, b)], F)
-    f = Field(pts.min(0) - 0.012, pts.max(0) + 0.012, vox)
-    for a, b, r in items:
-        a, b = np.array(a, F), np.array(b, F)
-        f.add(path([a, a * 0.8 + b * 0.2, b], [r, r * 0.85, 0.0006]), 0.0, NEEDLE)
+# the thread-spool quiver on her right hip, tipped out, foot behind the thigh
+QUIVER_A = np.array((0.262, -0.075, 0.500), F)
+QUIVER_B = np.array((0.205, 0.022, 0.860), F)
+SPOOL_R = 0.066
+
+
+def quiver(vox=0.0022):
+    a, b = QUIVER_A, QUIVER_B
+    f = Field(np.minimum(a, b) - 0.12, np.maximum(a, b) + 0.12, vox)
+    u = (b - a) / np.linalg.norm(b - a)
+    m = _align(u)
+    c = (a + b) * 0.5
+    L = float(np.linalg.norm(b - a)) * 0.5
+    f.add(cyl(tuple(c), m, SPOOL_R, L - 0.010, 0.006), 0.0, THREAD, "hips")
+    for t, sg in ((a, -1), (b, 1)):
+        f.add(cyl(tuple(t), m, SPOOL_R + 0.024, 0.0125, 0.006), 0.0015, LACE, "hips")
+    f.sub(cyl(tuple(b + u * 0.012), m, 0.034, 0.05, 0.002), 0.002, LACE)
     return f
 
 
-def quiver_needles():
-    """The needles in the quiver, eye up, fanned. The last one is the arrow's rest."""
+def quiver_arrows(vox=0.0016):
+    """Arrows standing in the spool's bore, nock end up, fletched."""
     a, b = QUIVER_A, QUIVER_B
     u = (b - a) / np.linalg.norm(b - a)
-    s = np.cross(u, (0, -1, 0))
+    s = np.cross(u, (0, 1, 0))
     s = s / np.linalg.norm(s)
-    out = []
-    for i, (o, up, spread) in enumerate(((-0.024, 0.255, -0.05), (-0.006, 0.310, -0.012), (0.017, 0.270, 0.03), (0.030, 0.215, 0.06))):
-        e = b + u * up + s * (o + spread)
-        out.append((tuple(e), tuple(b - u * 0.12 + s * o * 0.7), 0.0062))
-    return out
+    t = np.cross(u, s)
+    pts = [b + u * 0.3 + s * 0.05 + t * 0.03, b - u * 0.05 + s * 0.05 + t * 0.03]
+    f = Field(b - 0.16, b + u * 0.34 + 0.16, vox)
+    for i, (o1, o2, up) in enumerate(((-0.022, -0.010, 0.255), (0.0, 0.016, 0.305), (0.020, -0.012, 0.275), (0.006, -0.020, 0.230))):
+        e = b + u * up + s * o1 * 2.0 + t * o2 * 2.0
+        lo = b - u * 0.03 + s * o1 * 0.6 + t * o2 * 0.6
+        f.add(cap(tuple(e), tuple(lo), 0.0036, 0.0036), 0.0, STEEL, "hips")
+        v = (lo - e) / np.linalg.norm(lo - e)
+        # the fletching: two flat vanes, and a red binding under them
+        for sg in (-1, 1):
+            f.add(ell(tuple(e + v * 0.050 + s * sg * 0.011), (0.0165, 0.0030, 0.046), m_along(v, s)), 0.0005, FEATHER, "hips")
+        f.add(cap(tuple(e + v * 0.100), tuple(e + v * 0.110), 0.0056, 0.0056), 0.0, THREAD, "hips")
+    return f
 
 
-ARROW_LEN = 0.92
+def m_along(v, s):
+    """A rotation: +Z along v, +X along s."""
+    z = np.array(v, F)
+    x = np.array(s, F)
+    x = x - z * float(x @ z)
+    x = x / np.linalg.norm(x)
+    y = np.cross(z, x)
+    return np.stack((x, y, z), 1)
 
 
-def arrow(vox=0.0015):
-    """The nocked needle: arm-length iron, in its own frame (x, y, z), the eye at the origin (nock), the point along +y."""
-    f = needle_field([((0, -0.022, 0), (0, ARROW_LEN - 0.022, 0), 0.0052)], vox, 0.0115, 0.036)
+ARROW_LEN = 0.78
+
+
+def arrow(vox=0.0013):
+    """The nocked arrow in its own frame: the nock at the origin, flying along +y: a silver needle, its spear head slotted,
+    red thread bound at the head and the fletching, two tan vanes."""
+    L = ARROW_LEN
+    f = Field((-0.05, -0.03, -0.05), (0.05, L + 0.03, 0.05), vox)
+    f.add(cap((0, 0, 0), (0, L - 0.12, 0), 0.0040, 0.0040), 0.0, STEEL)
+    f.add(path([(0, L - 0.13, 0), (0, L - 0.10, 0), (0, L - 0.075, 0), (0, L, 0)], [0.0040, 0.0105, 0.0120, 0.0006]), 0.002, STEEL)
+    for sg in (-1, 1):
+        f.add(ell((sg * 0.0145, 0.075, 0), (0.0130, 0.052, 0.0028)), 0.0006, FEATHER)
+    for yy in (0.016, 0.142, L - 0.145):
+        f.add(cyl((0, yy, 0), "y", 0.0062, 0.007, 0.001), 0.0, THREAD)
     return f
 
 
 def shears(vox=0.0012):
-    """Tailor's shears, hanging closed at her right hip. Frame: built at z up, handles on top."""
-    f = Field((-0.055, -0.016, -0.24), (0.055, 0.016, 0.075), vox)
+    """Tailor's scissors, closed, hanging by a red thread. Built points down, finger rings on top, flat in x-z."""
+    f = Field((-0.075, -0.016, -0.25), (0.075, 0.016, 0.115), vox)
     for sg in (-1, 1):
-        f.add(path([(sg * 0.007, 0, 0.0), (sg * 0.010, 0, -0.08), (-sg * 0.002, 0, -0.218)], [0.0090, 0.0072, 0.0007]), 0.0, STEEL)
-        t = (sg * 0.026, 0, 0.042)
-        ring = [(t[0] + 0.0195 * math.cos(a), 0, t[2] + 0.030 * math.sin(a)) for a in np.linspace(0, math.tau, 17)]
-        f.add(path(ring, [0.0052] * 17), 0.0, STEEL)
-        f.add(path([(sg * 0.012, 0, 0.018), (sg * 0.006, 0, -0.004)], [0.0048, 0.0052]), 0.002, STEEL)
-    f.add(cyl((0, 0, -0.006), "y", 0.0062, 0.0115), 0.0, BUCKLE)
+        f.add(path([(sg * 0.0065, 0, 0.0), (sg * 0.0115, 0, -0.08), (-sg * 0.001, 0, -0.232)], [0.0095, 0.0080, 0.0007]), 0.0, STEEL)
+        t = (sg * 0.031, 0, 0.066)
+        ring = [(t[0] + 0.0245 * math.cos(a), 0, t[2] + 0.0365 * math.sin(a)) for a in np.linspace(0, math.tau, 19)]
+        f.add(path(ring, [0.0056] * 19), 0.0, STEEL)
+        f.add(path([(sg * 0.021, 0, 0.033), (sg * 0.006, 0, -0.004)], [0.0055, 0.0060]), 0.002, STEEL)
+    f.add(cyl((0, 0, -0.006), "y", 0.0072, 0.0125), 0.0, BUCKLE)
     return f
 
 
-SHEARS_AT = np.array((0.128, 0.096, 0.775), F)
+SHEARS_AT = np.array((-0.098, 0.122, 0.795), F)       # at her left front, hanging from the belt
 
 
 def shears_to_model(p):
-    a = math.radians(9)
+    a = math.radians(-7)
     p = np.asarray(p, F)
-    q = np.stack((p[..., 0] * 0.92 + p[..., 1] * 0.38, p[..., 1] * 0.92 - p[..., 0] * 0.38, p[..., 2]), -1)       # flat to the thigh's front
-    q = np.stack((q[..., 0] * math.cos(a) - q[..., 2] * math.sin(a), q[..., 1], q[..., 0] * math.sin(a) + q[..., 2] * math.cos(a)), -1)
+    q = np.stack((p[..., 0] * math.cos(a) - p[..., 2] * math.sin(a), p[..., 1], p[..., 0] * math.sin(a) + p[..., 2] * math.cos(a)), -1)
     return q + SHEARS_AT
 
 
-if __name__ == "__main__":
-    out = sys.argv[-1]
-    os.makedirs(out, exist_ok=True)
-    REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-    J = joints(os.path.join(REPO, "art/wardens/src/hem_rig.json"))
-    which = sys.argv[1]
+def cowl(vox=0.0028):
+    """The scarf wrapped loose round her neck: soft folds slanting round it, its front sagging over the collarbones."""
+    f = Field((-0.2, -0.17, 1.27), (0.2, 0.19, 1.52), vox)
 
-    def dump(nm, f, col):
-        v, q = S.surface_nets(f)
-        np.savez(os.path.join(out, nm + ".npz"), v=v, q=q, col=np.array(col))
-    if which == "head":
-        h = head()
-        dump("head", h, (0.86, 0.72, 0.66))
-        dump("mask", mask(h), (0.95, 0.95, 0.93))
-        dump("eyes", eyes(), (0.15, 0.1, 0.1))
-        dump("hair", hair(h), (0.08, 0.08, 0.1))
-        for k, v in LOCKS.items():
-            dump(k, lock(v, 0.0085 if k == "lockR" else (0.0065 if k == "lockL" else 0.022), 0.0012 if k != "tail" else 0.003), (0.08, 0.08, 0.1))
-        dump("needles", needle_field(HAIR_NEEDLES), (0.75, 0.76, 0.8))
-    else:
-        b = figure(J)
-        legs(b, J)
-        dress(b)
-        dump("trunk", b, (0.55, 0.15, 0.2))
-        dump("armR", arm(J, 1, "R"), (0.55, 0.15, 0.2))
-        dump("armL", arm(J, -1, "L"), (0.55, 0.15, 0.2))
-        dump("handR", right_hand(J)[0], (0.86, 0.72, 0.66))
-        dump("handL", left_hand(J), (0.86, 0.72, 0.66))
-        q = quiver()
-        dump("quiver", q, (0.3, 0.2, 0.12))
-        dump("qn", needle_field(quiver_needles(), 0.0016, 0.013, 0.04), (0.75, 0.76, 0.8))
-        v, qq = S.surface_nets(bow())
-        np.savez(os.path.join(out, "bow.npz"), v=bow_to_model(v, J), q=qq, col=np.array((0.1, 0.1, 0.12)))
-        v, qq = S.surface_nets(shears())
-        np.savez(os.path.join(out, "shears.npz"), v=shears_to_model(v), q=qq[:, ::-1], col=np.array((0.7, 0.7, 0.75)))
+    def folds(x, y, z):
+        th = np.arctan2(x, y)
+        return 0.0050 * np.sin(th * 3.0 + z * 34.0) + 0.0028 * np.sin(th * 7.0 - z * 52.0)
+    f.add(loft([(1.292, 0.030, 0.094, 0.098, 0.082), (1.335, 0.016, 0.112, 0.102, 0.098), (1.385, 0.004, 0.096, 0.088, 0.092),
+                (1.425, -0.006, 0.076, 0.076, 0.076), (1.450, -0.010, 0.066, 0.068, 0.068)], 2.0), 0.0, SCARF, "hips", folds)
+    # two loose wraps, slanting opposite ways, the top one under her chin
+    for z0, slant, r, rad in ((1.378, 0.016, 0.0235, 0.098), (1.426, -0.012, 0.0205, 0.082)):
+        pts = [(rad * math.sin(t), 0.004 + (rad + 0.004) * math.cos(t), z0 + slant * math.sin(t) - 0.016 * (0.5 + 0.5 * math.cos(t))) for t in np.linspace(0, math.tau, 21)]
+        f.add(path(pts, [r] * 21), 0.016, SCARF, "hips", folds)
+    # the head and neck's room
+    f.sub(cap((0, -0.012, 1.36), (0, 0.004, 1.56), 0.052, 0.050), 0.006, SCARF)
+    return f
+
+
+# the scarf's long tail: off her right shoulder blade, sweeping out behind (the top-down signature), as a chain's rest
+SCARF_PATH = [(0.040, -0.080, 1.420), (0.120, -0.140, 1.355), (0.205, -0.205, 1.235), (0.285, -0.285, 1.075), (0.335, -0.355, 0.895),
+              (0.350, -0.420, 0.700), (0.325, -0.470, 0.510), (0.280, -0.510, 0.335)]
+SCARF_W = [0.050, 0.066, 0.078, 0.086, 0.090, 0.086, 0.074, 0.046]
+
+
+if __name__ == "__main__":
+    pass

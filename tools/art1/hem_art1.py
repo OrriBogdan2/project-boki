@@ -29,9 +29,9 @@ WORK = sys.argv[sys.argv.index("--") + 1]
 ATLAS = 2048
 F = np.float32
 LSLOT = {H.SKIN: "skin", 0: "skin", H.LID: "skin", H.NAIL: "skin", H.LIP: "skin", H.EAR_IN: "skin", H.HAIR: "hair", H.NEEDLE: "metal",
-         H.PORC: "metal", H.GOLD: "brass", H.CORSET: "cloth", H.CORSET_SEAM: "cloth", H.TROUSER: "cloth", H.BOOT: "leather",
+         H.PORC: "leather", H.GOLD: "cloth", H.SCARF: "cloth", H.FEATHER: "leather", H.PAULDRON: "cloth", H.CORSET: "cloth", H.CORSET_SEAM: "cloth", H.TROUSER: "cloth", H.BOOT: "leather",
          H.BOOT_TOP: "leather", H.LACE: "leather", H.JACKET: "cloth", H.JACKET_DK: "cloth", H.CUFF: "cloth", H.TAPE: "leather",
-         H.LEATHER: "leather", H.BUCKLE: "metal", H.STEEL: "metal", H.THREAD: "glow"}
+         H.LEATHER: "leather", H.BUCKLE: "metal", H.STEEL: "metal", H.THREAD: "cloth"}
 
 
 def ob_from(name, v, q):
@@ -208,46 +208,23 @@ def tube(name, pts, r, sides=4, close=False):
     return ob_from(name, np.array(v), np.array(f, np.int32))
 
 
-def coat_grid(flip=0.0):
-    """The long coat, from under the waist belt: open in front, asymmetric, its back falling in a long tail that leans to
-    her left. Rows top to hem; columns from her right front edge round the back to her left front edge. Blender frame."""
-    cols, rows = 27, 10
-    a0 = math.radians(128)
-    th = np.linspace(-a0, a0, cols)          # 0 at the back
-    hem = H.coat_hem(th)
-    top = 1.012 + 0.0 * th
-    P3 = np.zeros((rows, cols, 3), F)
-    for i in range(rows):
-        t = i / (rows - 1)
-        for j in range(cols):
-            z = top[j] * (1 - t) + hem[j] * t
-            drop = max(0.98 - z, 0.0)
-            hipz = min(drop / 0.12, 1.0)
-            rx = 0.128 + 0.042 * hipz + drop * 0.20
-            ry = 0.100 + 0.030 * hipz + drop * 0.24
-            pleat = 0.011 * math.sin(th[j] * 8.5 + 0.6) * t ** 0.8
-            x = -math.sin(th[j]) * (rx + pleat)
-            y = -math.cos(th[j]) * (ry + pleat) + 0.003
-            P3[i, j] = (x - flip * math.sin(th[j]) * -1.0, y - flip * math.cos(th[j]) * -1.0, z + 0.02 * t * 0.0)
-    return P3
-
-
-def collar_grid(flip=0.0):
-    """The tall stand collar, flaring at the top, open in front (the mask needs the room), its points by her jaw."""
-    cols, rows = 21, 5
-    a0 = math.radians(144)
-    th = np.linspace(-a0, a0, cols)
-    P3 = np.zeros((rows, cols, 3), F)
-    for i in range(rows):
-        t = i / (rows - 1)
-        for j in range(cols):
-            front = abs(th[j]) / a0
-            z = 1.352 + t * (0.098 + 0.070 * front ** 2.4) - 0.012 * front * (1 - t)
-            rx = 0.066 + 0.034 * t ** 1.5 + 0.018 * front
-            ry = 0.066 + 0.026 * t ** 1.5 + 0.012 * front
-            x = -math.sin(th[j]) * (rx + flip)
-            y = -math.cos(th[j]) * (ry + flip) - 0.012
-            P3[i, j] = (x, y, z)
+def ribbon_grid(flip=0.0):
+    """The scarf's long tail as a strip: rows along SCARF_PATH, three columns across, gently twisted."""
+    c = spline(np.array(H.SCARF_PATH, F), 13)
+    w = np.interp(np.linspace(0, 1, 13), np.linspace(0, 1, len(H.SCARF_W)), np.array(H.SCARF_W, F))
+    tg = np.gradient(c, axis=0)
+    tg /= np.linalg.norm(tg, axis=1, keepdims=True)
+    P3 = np.zeros((13, 3, 3), F)
+    side = np.cross(tg[0], (0.0, 0.3, 1.0))
+    for i in range(13):
+        side = side - tg[i] * float(side @ tg[i])          # (carried along the path: it never flips where the path falls straight)
+        side /= np.linalg.norm(side)
+        nrm = np.cross(side, tg[i])
+        tw = 0.25 + 0.35 * math.sin(i * 0.5)
+        sd = side * math.cos(tw) + nrm * math.sin(tw)
+        off = np.cross(tg[i], sd)
+        for j in range(3):
+            P3[i, j] = c[i] + sd * w[i] * (j - 1) + off * flip + off * 0.012 * (1 if j == 1 else 0)
     return P3
 
 
@@ -323,9 +300,9 @@ def main():
     hd = H.head()
     mk = H.mask(hd)
     hr = H.hair(hd)
-    locks = {k: H.lock(v, {"lockR": 0.0105, "lockL": 0.0075, "tail": 0.0235}[k], {"tail": 0.003}.get(k, 0.0012)) for k, v in H.LOCKS.items()}
+    locks = {k: H.lock(v, H.LOCK_R[k][0], H.LOCK_R[k][1], spread=0.0 if k == "tail" else 0.0085) for k, v in H.LOCKS.items()}
     ey = H.eyes()
-    hn = H.needle_field(H.HAIR_NEEDLES)
+    hn = H.needle_field(H.HAIR_NEEDLES, 0.0012, 0.0095, 0.030)
     tr = H.figure(J)
     H.legs(tr, J)
     H.dress(tr)
@@ -333,7 +310,8 @@ def main():
     hR, hinfo = H.right_hand(J)
     hL = H.left_hand(J)
     qv = H.quiver()
-    qn = H.needle_field(H.quiver_needles(), 0.0016, 0.013, 0.04)
+    qn = H.quiver_arrows()
+    cw = H.cowl()
     bw = H.bow()
     ar = H.arrow()
     sh = H.shears()
@@ -349,77 +327,61 @@ def main():
     hxf = H.head_xf
 
     def head_cull(v):
-        reg = H.mask_region(v[:, 0], v[:, 1], v[:, 2])
         th = np.degrees(np.arctan2(np.abs(v[:, 0]), v[:, 1] - 0.01))
         zh = H.S_interp(th, H.HAIRLINE[:, 0], H.HAIRLINE[:, 1])
-        return (reg < -0.0045) | ((v[:, 2] > zh + 0.012) & (hd.sample(v.astype(F) + 0.0) > -9))
+        return (v[:, 2] > zh + 0.012) | (v[:, 2] < 1.40)
 
     def eye_keep(v):
         a = np.array((H.EYE[0], H.EYE[1] + 0.012, H.EYE[2] + 0.004), F)
         d = np.minimum(np.linalg.norm((v - a * (1, 1, 1)) * (1, 1, 1.1), axis=1), np.linalg.norm((v - a * (-1, 1, 1)) * (1, 1, 1.1), axis=1))
         return np.clip(1.15 - d / 0.03, 0.02, 1)
 
-    part("skin_head", hd, 3400, "head", 3.0, hxf, "head", "skin", head_cull, eye_keep)
-    part("mask", mk, 1000, "mask", 2.2, hxf, "head", None)
-    part("hair", hr, 2300, "hair", 1.5, hxf, "head", "hair")
-    part("lockR", locks["lockR"], 240, "lock", 0.6, hxf, "lockR", "hair")
-    part("lockL", locks["lockL"], 160, "lock", 0.6, hxf, "lockL", "hair")
-    part("tail", locks["tail"], 380, "lock", 0.5, hxf, "tail", "hair")
-    part("eyes", ey, 220, "eyes", 5.0, hxf, "head", "skin")   # (on the skin slot: the eyes slot would take the player's tint, she keeps hers dark)
-    part("hair_needles", hn, 200, "needle", 1.2, hxf, "head", "metal")
-    part("trunk", tr, 4300, "trunk", 1.0, None, "trunk", None, lambda v: (v[:, 2] > 1.40))
-    part("armR", armR, 620, "trunk", 1.0, None, "arm")
-    part("armL", armL, 620, "trunk", 1.0, None, "arm")
-    part("handR", hR, 1250, "handR", 2.0, None, "hand")
+    part("skin_head", hd, 4700, "head", 3.0, hxf, "head", "skin", head_cull, eye_keep)
+    part("mask", mk, 520, "mask", 2.4, hxf, "head", None)
+    part("hair", hr, 1900, "hair", 1.4, hxf, "head", None)
+    part("lockR", locks["lockR"], 320, "lock", 0.6, hxf, "lockR", "hair")
+    part("lockL", locks["lockL"], 320, "lock", 0.6, hxf, "lockL", "hair")
+    part("tail", locks["tail"], 700, "lock", 0.8, hxf, "tail", "hair")
+    part("eyes", ey, 220, "eyes", 5.0, hxf, "head", "skin")   # (on the skin slot: the eyes slot would take the player's tint, hers stay green)
+    part("hair_needles", hn, 120, "needle", 1.0, hxf, "head", "metal")
+    part("trunk", tr, 3900, "trunk", 1.0, None, "trunk", None, lambda v: (v[:, 2] > 1.40))
+    part("armR", armR, 900, "trunk", 1.0, None, "arm")
+    part("armL", armL, 900, "trunk", 1.0, None, "arm")
+    part("handR", hR, 1150, "handR", 2.0, None, "hand")
     part("handL", hL, 750, "handL", 1.7, None, "hand")
-    part("quiver", qv, 320, "quiver", 0.8, None, "gear")
-    part("quiver_needles", qn, 340, "needle", 1.0, None, "gear", "metal")
-    part("shears", sh, 170, "needle", 0.7, H.shears_to_model, "shears", "metal")
+    part("cowl", cw, 560, "scarf", 1.0, None, "gear", "cloth")
+    part("quiver", qv, 340, "quiver", 0.9, None, "gear")
+    part("quiver_arrows", qn, 420, "gearlab", 1.0, None, "gear")
+    part("shears", sh, 240, "gearlab", 1.0, H.shears_to_model, "gear")
     bxf = lambda p: H.bow_to_model(p, J)
-    pb = part("bow", bw, 760, "bow", 0.9, bxf, "bow")
+    pb = part("bow", bw, 1150, "bow", 1.2, bxf, "bow")
     # the arrow: at rest it stands in the quiver as one more needle, eye up (x_arrow's rest)
     a, b = H.QUIVER_A, H.QUIVER_B
     u = (b - a) / np.linalg.norm(b - a)
     side = np.cross(u, (0, -1, 0))
     side = side / np.linalg.norm(side)
-    ar_at = b + u * 0.285 + side * 0.008        # the eye (the nock)
+    ar_at = b + u * 0.30 + side * 0.008        # the nock
     ar_y = -u
     ar_x = np.cross(ar_y, (0.3, 0.6, 0.74))
     ar_x /= np.linalg.norm(ar_x)
     ar_z = np.cross(ar_x, ar_y)
     arxf = lambda p: ar_at + np.asarray(p, F)[..., 0:1] * ar_x + np.asarray(p, F)[..., 1:2] * ar_y + np.asarray(p, F)[..., 2:3] * ar_z
-    part("arrow", ar, 150, "needle", 1.4, arxf, "arrow", "metal")
-    # strap spikes: needles pushed through the bandolier, and the calling card on the lapel
-    sp = []
-    dx, dz = 0.285, -0.38
-    nn = math.hypot(dx, dz)
-    along = np.array((dx / nn, dz / nn), F)
-    for t in np.linspace(0.13, 0.87, 8):
-        ax, az = -0.135 + 0.285 * t, 1.335 - 0.38 * t
-        at = tr.project(np.array([[ax, 0.13, az]], F))[0] + (0, 0.004, 0)
-        d = np.array((-along[1], 0.0, along[0]), F) * (1 if t % 0.2 < 0.1 else 1)
-        sp.append((tuple(at + d * 0.028), tuple(at - d * 0.046), 0.0034))
-    spf = H.spikes(sp)
-    part("spikes", spf, 240, "needle", 0.8, None, "gear", "metal")
+    part("arrow", ar, 200, "gearlab", 1.4, arxf, "arrow")
     print("low parts", time.time() - t0, flush=True)
 
-    # the sheets, two sides each
-    for nm, g, pn, slot, grp, dens in (("coat", H_P(coat_grid, 0.0), "coat", "cloth", "coat", 0.9), ("coat_in", H_P(coat_grid, 0.006), "coat_in", "cloth", "coat", 0.5),
-                                       ("collar", H_P(collar_grid, 0.0), "collar", "cloth", "gear", 1.0), ("collar_in", H_P(collar_grid, -0.005), "collar_in", "cloth", "gear", 0.8)):
+    # the scarf's tail, two sides
+    for nm, g, dens in (("scarf", ribbon_grid(0.0), 0.8), ("scarf_in", ribbon_grid(-0.004), 0.5)):
         ob = grid_mesh(nm, g)
-        bm = bmesh.new()
-        bm.from_mesh(ob.data)
-        bm.faces.ensure_lookup_table()
-        ax = np.array((0, -0.01, 0), F)
-        out = sum(float(Vector(f.normal).dot(Vector((f.calc_center_median()[0], f.calc_center_median()[1], 0.0)))) for f in bm.faces)
-        if (out > 0) == nm.endswith("_in"):
+        if nm == "scarf_in":
+            bm = bmesh.new()
+            bm.from_mesh(ob.data)
             bmesh.ops.reverse_faces(bm, faces=bm.faces)
-        bm.to_mesh(ob.data)
-        bm.free()
-        part(nm, None, 0, pn, dens, None, grp, slot, ob=ob)
+            bm.to_mesh(ob.data)
+            bm.free()
+        part(nm, None, 0, "ribbon", dens, None, "scarf", "cloth", ob=ob)
     # the glowing string
     Y = H.STRING_Y
-    Zs = 0.505
+    Zs = H.STRING_Z
     st = tube("string", [(0, Y, Zs), (0, Y, 0.0), (0, Y, -Zs)], 0.0032, 4)
     part("string", None, 0, "string", 0.15, bxf, "string", "glow", ob=st)
 
@@ -505,7 +467,7 @@ def main():
         elif nm == "mask":
             rgb = P.mask(pts, nn, lab, f)
         elif nm == "hair":
-            rgb = P.hairc(pts, nn, f)
+            rgb = P.hairc(pts, nn, f, lab)
         elif nm == "lock":
             rgb = P.lockc(pts, nn)
         elif nm == "eyes":
@@ -520,14 +482,14 @@ def main():
             rgb = P.quiver(pts, nn, lab, f)
         elif nm == "bow":
             rgb = P.bowc(pts, nn, lab, f)
-        elif nm == "coat":
-            rgb = P.coat(pts, nn)
-        elif nm == "coat_in":
-            rgb = P.coat(pts, nn, True)
-        elif nm == "collar":
-            rgb = P.collar(pts, nn)
-        elif nm == "collar_in":
-            rgb = P.collar(pts, nn, True)
+        elif nm == "ribbon_placeholder":
+            rgb = None
+        elif nm == "scarf":
+            rgb = P.scarf(pts, nn, f)
+        elif nm == "ribbon":
+            rgb = P.scarf(pts, nn, None)
+        elif nm == "gearlab":
+            rgb = P.gearlab(pts, nn, lab)
         else:
             rgb = P.string(pts, nn)
         atlas[idx] = rgb
@@ -572,29 +534,26 @@ def main():
     # the bow: on the left hand, the limbs bend, the string's nock comes back to the right hand
     c, A, Sd = H.grip_frame(J)
     add_bone(arm, "bow", c, c + A * 0.1, "hand.L", tuple(Sd))
-    add_bone(arm, "bow_t", bxf(np.array((0, 0.02, 0.11), F)), bxf(np.array((0, -0.15, 0.505), F)), "bow", tuple(Sd))
-    add_bone(arm, "bow_b", bxf(np.array((0, 0.02, -0.11), F)), bxf(np.array((0, -0.15, -0.505), F)), "bow", tuple(Sd))
+    add_bone(arm, "bow_t", bxf(np.array((0, 0.02, 0.11), F)), bxf(np.array((0, Y, Zs), F)), "bow", tuple(Sd))
+    add_bone(arm, "bow_b", bxf(np.array((0, 0.02, -0.11), F)), bxf(np.array((0, Y, -Zs), F)), "bow", tuple(Sd))
     add_bone(arm, "bow_s", bxf(np.array((0, Y, 0), F)), bxf(np.array((0, Y - 0.05, 0), F)), "bow", tuple(A))
     add_bone(arm, "arrow", ar_at, ar_at + ar_y * 0.2, "hips", tuple(ar_z))
     chains = {}
     for nm in ("lockR", "lockL", "tail"):
         pts = hxf(np.array(H.LOCKS[nm], F))
-        i0 = 2 if nm != "tail" else 1
-        js = spline(pts[i0:], 5 if nm != "lockL" else 4)
+        i0 = 2 if nm != "tail" else 2
+        js = spline(pts[i0:], 5 if nm != "tail" else 7)
         chains[nm] = js
         count = len(js) - 1
         for i in range(count):
             add_bone(arm, "spring_%s_%d" % (nm, i), js[i], js[i + 1], "head" if i == 0 else "spring_%s_%d" % (nm, i - 1))
         add_bone(arm, "spring_%s_%d" % (nm, count), js[-1], js[-1] + (js[-1] - js[-2]) * 0.3, "spring_%s_%d" % (nm, count - 1))
-    # the coat's three chains: right front, back, left tail
-    g = coat_grid()
-    cols = g.shape[1]
-    for nm, j in (("coatR", 4), ("coatB", cols // 2), ("coatT", int(cols * 0.74)), ("coatL", cols - 5)):
-        js = g[np.array((1, 3, 5, 7, 9)), j]
-        chains[nm] = js
-        for i in range(4):
-            add_bone(arm, "spring_%s_%d" % (nm, i), js[i], js[i + 1], "hips" if i == 0 else "spring_%s_%d" % (nm, i - 1))
-        add_bone(arm, "spring_%s_4" % nm, js[-1], js[-1] + (js[-1] - js[-2]) * 0.3, "spring_%s_3" % nm)
+    # the scarf's chain
+    js = spline(np.array(H.SCARF_PATH, F), 8)
+    chains["scarf"] = js
+    for i in range(7):
+        add_bone(arm, "spring_scarf_%d" % i, js[i], js[i + 1], "hips" if i == 0 else "spring_scarf_%d" % (i - 1))
+    add_bone(arm, "spring_scarf_7", js[-1], js[-1] + (js[-1] - js[-2]) * 0.3, "spring_scarf_6")
     bpy.ops.object.mode_set(mode="OBJECT")
     print("armature", time.time() - t0, flush=True)
 
@@ -615,6 +574,9 @@ def main():
             W = {"head": S.smooth(1.385, 1.445, vs[:, 2]) + 1e-3, "hips": S.smooth(1.445, 1.385, vs[:, 2])}
         elif grp == "head":
             W = {"head": one}
+        elif grp == "scarf":
+            W = chain(chains["scarf"], ["spring_scarf_%d" % i for i in range(7)], vs)
+            W["hips"] = S.smooth(0.10, 0.03, np.linalg.norm(vs - chains["scarf"][0], axis=1)) * 3.0
         elif nm == "trunk":
             W = tr.weights(vs, 0.03, grp_allow)
             W = {k2: w for k2, w in W.items() if w.max() > 1e-4}
@@ -630,8 +592,6 @@ def main():
             W = {"hand.L": one}
         elif grp == "gear":
             W = {"hips": one}
-        elif grp == "shears":
-            W = {"thigh.R": one}
         elif grp == "arrow":
             W = {"arrow": one}
         elif nm == "bow":
@@ -642,18 +602,6 @@ def main():
         elif nm == "string":
             zz = (vs - c) @ A
             W = {"bow_s": (np.abs(zz) < 0.1) * 1.0, "bow_t": (zz >= 0.1) * 1.0, "bow_b": (zz <= -0.1) * 1.0}
-        elif grp == "coat":
-            # by column between the chains, by row along the chain, the top rows on the hips
-            cc = ["coatR", "coatB", "coatT", "coatL"]
-            W = {}
-            ang = np.arctan2(-vs[:, 0], -vs[:, 1])
-            aa = np.array([math.atan2(-chains[k][1][0], -chains[k][1][1]) for k in cc], F)
-            order = np.argsort(aa)
-            for i, k in enumerate(cc):
-                g2 = np.exp(-((ang - aa[i]) / 0.75) ** 2)
-                for k2, w in chain(chains[k], ["spring_%s_%d" % (k, j) for j in range(4)], np.stack((chains[k][0][0] + 0 * vs[:, 0], chains[k][0][1] + 0 * vs[:, 1], vs[:, 2]), 1)).items():
-                    W[k2] = w * g2
-            W["hips"] = S.smooth(0.90, 0.98, vs[:, 2]) * 6.0
         else:
             W = {"hips": one}
         add_weights(ob, W)
@@ -713,8 +661,8 @@ def main():
         n = n / np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-6)
         me.normals_split_custom_set_from_vertices(n.tolist())
 
-    ROOM = {"lockR": 0.25, "lockL": 0.25, "tail": 0.5, "hair_needles": 0.15, "quiver_needles": 0.15, "spikes": 0.1, "arrow": 0.1, "shears": 0.2, "string": 0.0,
-            "skin_head": 0.45, "mask": 0.45, "eyes": 0.0, "handR": 0.3, "handL": 0.3, "bow": 0.4, "coat_in": 0.0, "collar_in": 0.0}
+    ROOM = {"lockR": 0.25, "lockL": 0.25, "tail": 0.5, "hair_needles": 0.12, "quiver_arrows": 0.1, "arrow": 0.1, "shears": 0.2, "string": 0.0,
+            "skin_head": 0.4, "mask": 0.25, "eyes": 0.0, "handR": 0.3, "handL": 0.3, "bow": 0.35, "scarf": 0.4, "scarf_in": 0.0}
     for p in parts:
         me = p["ob"].data
         at = me.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
@@ -741,14 +689,14 @@ def main():
         md.object = arm
     # empties: anchors, the FX points on the bow, the seat the bow takes on the rig's Gun node
     crown = float(rig["land"]["crown"])
-    K.anchor(arm, "head", "anchor_head_top", (0, 0.0, float(H.head_xf(np.array((0, 0, 1.84), F))[2])))
+    K.anchor(arm, "head", "anchor_head_top", (0, 0.0, float(H.head_xf(np.array((0, 0, 1.81), F))[2])))
     K.anchor(arm, "hips", "anchor_chest", (0, 0.11, 1.17))
     K.anchor(arm, "bow", "anchor_nock", tuple(bxf(np.array((0, Y, 0), F))))
     K.anchor(arm, "bow", "weapon_muzzle", tuple(bxf(np.array((0, 0.05, 0.0), F))))
     K.anchor(arm, "bow", "anchor_bow_root", tuple(bxf(np.array((0, -0.10, 0.0), F))))
-    K.anchor(arm, "bow_t", "halo_bow_top", tuple(bxf(np.array((0, -0.150, 0.505), F))))
+    K.anchor(arm, "bow_t", "halo_bow_top", tuple(bxf(np.array((0, Y, Zs), F))))
     K.anchor(arm, "bow", "halo_bow_mid", tuple(bxf(np.array((0, Y, 0.0), F))))
-    K.anchor(arm, "bow_b", "halo_bow_low", tuple(bxf(np.array((0, -0.150, -0.505), F))))
+    K.anchor(arm, "bow_b", "halo_bow_low", tuple(bxf(np.array((0, Y, -Zs), F))))
     for ob in (bd, bo, aro):
         ob.data.validate(clean_customdata=False)
     for nm, ob in (("hem", bd), ("bow", bo), ("arrow", aro)):

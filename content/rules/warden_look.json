@@ -240,12 +240,8 @@
 	"hem": {
 		"weapon_offset": [0.0, 0.0, 0.07],
 		"painted": {
-			"rim_far": 0.28,
-			"rim_far_color": [
-				0.96,
-				0.9,
-				0.86
-			]
+			"rim_far": 0.34,
+			"rim_far_color": [1.0, 0.16, 0.14]
 		},
 		"slots": {
 			"skin": {

@@ -50,9 +50,15 @@ func run(main: Node) -> void:
 		cam.fov = 30.0
 		cam.position = Vector3(0, at_y + 0.25, dist)
 		cam.look_at(Vector3(0, at_y, 0))
+	for k in 30:
+		await tree.process_frame       # (past the title's fade)
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
+	if OS.get_cmdline_user_args().has("--list-meshes"):
+		for mi in model.find_children("*", "MeshInstance3D", true, false):
+			if (mi as MeshInstance3D).is_visible_in_tree() and not String(model.get_path_to(mi)).begins_with("Warden"):
+				print("MESH ", model.get_path_to(mi), " ", (mi as MeshInstance3D).mesh, " ", (mi as Node3D).global_position, " ", (mi as Node3D).get_parent().name)
 	if turn:
 		var dir := out.path_join("turntable")
 		DirAccess.make_dir_recursive_absolute(dir)
