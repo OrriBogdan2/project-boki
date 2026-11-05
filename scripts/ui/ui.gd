@@ -152,6 +152,10 @@ static func title(text: String, size := 34, col := INK) -> Label:
 	return l
 
 # ---------------------------------------------------------------- buttons
+## Buttons whose label says "go back" play the falling pair instead of the tap.
+const BACK_WORDS := {"Back": "ui_back", "Close": "ui_back", "Cancel": "ui_back", "✕": "ui_back",
+	"Leave it  (Esc)": "ui_back"}
+
 ## The secondary button (an outline). icon: an Icons id drawn at its left. Hover fills it with the
 ## theme's hover colour (no growing: a button never spills over its neighbours or the panel edge);
 ## pressing sinks it a touch, in about 70 ms.
@@ -159,7 +163,8 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 	var b := Button.new()
 	b.text = text
 	if cb.is_valid():
-		b.pressed.connect(func(): Sfx.play("click"); cb.call())
+		var snd: String = BACK_WORDS.get(text, "click")
+		b.pressed.connect(func(): Sfx.play(String(b.get_meta("snd", snd))); cb.call())
 	if minw > 0.0:
 		b.custom_minimum_size.x = minw
 	if icon != "":
@@ -185,6 +190,7 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 ## The main button of a screen: filled accent, dark text. One per screen.
 static func primary(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
 	var b := button(text, cb, minw, icon)
+	b.set_meta("snd", "ui_confirm")
 	b.theme_type_variation = "Primary"
 	return b
 
@@ -357,6 +363,7 @@ static func tabs(names: Array, cur: String, cb: Callable, counts := {}, minw := 
 		if counts.has(nm): txt = "%s  %s" % [nm, str(counts[nm])]
 		var b := button(txt, func(): if nm != cur: cb.call(nm), minw)
 		b.theme_type_variation = "SegOn" if nm == cur else "Seg"
+		b.set_meta("snd", "ui_tab")
 		b.set_meta("tab", nm)
 		row.add_child(b)
 	track.set_meta("pg_keep", true)

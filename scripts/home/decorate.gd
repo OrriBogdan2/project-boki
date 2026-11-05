@@ -40,7 +40,7 @@ func toggle() -> void:
 		room.prompt_box.visible = false
 		Placement.build_view(room.cam, true)
 		_open_ui()
-		Sfx.play("whoosh", null, -8.0)
+		Sfx.play("ui_open", null, -8.0)
 	else:
 		_drop_held()
 		_close_menu()
@@ -230,7 +230,7 @@ func place() -> bool:
 	if held.is_empty():
 		return false
 	if not ghost_ok:
-		Sfx.play("warn", null, -12.0)
+		Sfx.play("ui_deny", null, -12.0)
 		room._toast(String(room.why))
 		return false
 	var id := String(held["id"])

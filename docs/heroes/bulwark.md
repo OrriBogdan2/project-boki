@@ -193,7 +193,7 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>`.
 - The throw uses `AimMode.dist(h, throw_range)`; the slam's step is a 0.24 s `Hunter.dash_with` (no dash rider). The perfect launch is `scripts/arch/kits/bjorn_launch.gd` (BjornLaunch: the window, the launch, the jump-out and the off-ledge glide); data `lmb.perfect` (`window`, `dist`, `time`, `kb_k`).
 - The aegis draws over the verbs wall (its plain node hidden); the wall still does the blocking.
 - Telegraphs and cursor: `AimKit.charge` / `flare` during the spin, `AimKit.circle` "e" (all) while Mending Ground comes down.
-- Sounds: `tools/gen_pin_bjorn_sfx.py` writes `audio/bjorn_*.wav`.
+- Sounds: `tools/gen_sfx_breaker.py` writes `audio/bjorn_*.wav` and `bulwark_*`.
 - Merge: `_drop_holds()` drops the spin (`lmb_t`, `h.mel_hold`, the spinning hammer and glint), lowers the aegis, and drops the Faultline wind-up (`BjornUlt.phase == "wind"`).
 - Ult on X: `scripts/arch/hero_ult.gd` (HeroUlt, the shared X base: `cast_ult` returns `HeroUlt.press(self, _start_ult)` behind main's `HunterKeys.ult_pressed`), `scripts/arch/kits/bjorn_ult.gd` (BjornUlt: the lane, the slam, the eruptions, the scar, pooled basalt spikes, seams, streak and scar). Data: `content/archetypes/bulwark.json` `x`. Sounds: `bjorn_ult_wind`, `bjorn_ult_slam`, `bjorn_ult_rumble`, `bjorn_ult_crackle`. Telegraph: one AimKit `lane` per cell (`x0`..`x3`, `all`).
 - No Net shape change.
