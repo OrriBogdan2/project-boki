@@ -724,3 +724,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 S2: Sable ability ids + FX points for S3/S4 (thief, ext/art1-sable; names stable, updated glb on the next push)
 - LMB thf_lmb_r/l, thf_primed; dash Vault thf_vault_r/l/f/b/twist (0.48), air thf_exdash, thf_land; RMB thf_bola (sling 0.42); E thf_knife (release 0.12), thf_arrive; ult thf_encore, thf_encore_dance (8 beats at 0.2); thf_reset, thf_flourish; mf_xform.
 - Empties: weapon_muzzle (right), weapon_muzzle_l (left: kit `hand` 0 right, 1 left), anchor_pan_r/l (violet smoke puff), anchor_blade_root, anchor_blade_mid, anchor_blade_root_l, anchor_hand_r/l, anchor_gem, anchor_bola, anchor_wing_r/l, anchor_eye_r/l, anchor_head_top, anchor_chest. Wing flare is the kit's "wg" channel. The kit still spawns bolts at HAND_OFF, not at the muzzle. Her docs and wiki still describe a gold chakram.
+
+## 2026-11-05 S2: S5 shipped 25e8ea8d
+- On main now: rename 7341f61a (Lisette only), Vex 68+109, portraits-six af003746. Held: ext/art2-kael (3 mid-play shader compiles): warm-up fix running. rename-lisette 1228b324 still to go. Waiting on S1: kit-hem-55b needs perf-94c.
