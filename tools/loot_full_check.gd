@@ -38,13 +38,15 @@ func run(main: Node) -> void:
 	ok(P.pack.size() == 2 and (bx["pack"] as Array).size() == 2,
 		"nothing moved (pack %d, box %d)" % [P.pack.size(), (bx["pack"] as Array).size()])
 	ok(LootFull.blocked(m, P, bx) == 2, "both things are counted as having no room")
-	ok(LootFull.smart_text(0, 2) == "Inventory full, took nothing", "the report says so: %s" % LootFull.smart_text(0, 2))
+	var none := LootFull.smart_text(0, 2)
+	ok(none == "Inventory full, took nothing", "the report says so: %s" % none)
 	# ---------------------------------------------------------------- 2. partial: gems fit, the pack things don't
 	bx["gems"] = 12
 	var g0 := P.gems
 	got = LootFull.smart(m, P, bx)
 	ok(got == 1 and P.gems == g0 + 12, "gems still come (took %d)" % got)
-	ok(LootFull.smart_text(got, LootFull.blocked(m, P, bx)) == "Took 1 of 3, inventory full", "report: %s" % LootFull.smart_text(1, 2))
+	var report := LootFull.smart_text(got, LootFull.blocked(m, P, bx))
+	ok(report == "Took 1 of 3, inventory full", "report: %s" % report)
 	ok(LootFull.smart_text(3, 0) == "Took 3", "everything fit: a plain count")
 	# ---------------------------------------------------------------- 3. a click that doesn't fit
 	var row: Dictionary = Life.box_items(m, P, bx).filter(func(r): return r["key"] == "pack")[0]

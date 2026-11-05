@@ -9,7 +9,8 @@ const GOLD := Color("f2c84a")
 const WIDTH := 470.0
 
 ## Builds the window. on_swap / on_drop get the index of the backpack thing; on_close takes no args.
-static func build(p: Hunter, held: Dictionary, on_swap: Callable, on_drop: Callable, on_close: Callable) -> PanelContainer:
+static func build(
+		p: Hunter, held: Dictionary, on_swap: Callable, on_drop: Callable, on_close: Callable) -> PanelContainer:
 	var pc := PanelContainer.new()
 	pc.theme = UI.theme()
 	pc.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -91,7 +92,8 @@ static func item_row(it: Dictionary, buttons: Array, note := "") -> PanelContain
 	vt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(vt)
 	for bt in buttons:
-		var b: Button = UI.primary(String(bt[0]), bt[1], 76) if bt.size() > 2 and bt[2] else UI.button(String(bt[0]), bt[1], 70)
+		var is_primary: bool = bt.size() > 2 and bt[2]
+		var b: Button = UI.primary(String(bt[0]), bt[1], 76) if is_primary else UI.button(String(bt[0]), bt[1], 70)
 		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(b)
 	return rp
