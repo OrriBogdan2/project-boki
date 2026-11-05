@@ -2240,3 +2240,20 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - The player name is set only in the creator (with item 177's empty-placeholder behaviour) and is editable later in settings/profile.
   - Also check "Skip the tutorial" on this screen. It's subtext-ish and risky for new players; keep it only as a small link, per the item 155 text diet.
 - **Assert:** the Boki name screen has exactly one LineEdit.
+
+## 178. New-player overload: drop the Mask ability showcase; teach controls and abilities one at a time, in use (owner playtest with his dad, 18:05 UTC Nov 5)
+- The dad, on seeing the Mask UI: "so i have to learn all this stuff?" He also didn't know WASD is movement or Space is jump.
+- **Principle:** never show a wall of abilities up front. Teach each thing at the moment it's used, one at a time, with the key shown big on screen.
+- **Mask moment (mask_moment.gd):** remove the "short look at what Vex does" (the HunterViewer ability clips/cards) from the first-time flow.
+  - After the transformation (item 158), just one line: "You're Vex now." Then straight into the tutorial.
+  - The full ability page stays available later (the Masks/Hunter screen) for players who want it.
+- **Controls from zero** (the first tutorial island, item 167):
+  - Step 1, before anything: big animated key glyphs on screen, "W A S D to move". The step completes after moving ~3 m. Mouse-move-to-look comes in the same beat if needed.
+  - Then "Space to jump" (with the glyph), then "Shift to dash", and so on. Each is shown as a large keycap graphic next to the character, not a line of text, and fades when done.
+  - Abilities are introduced one per step as they unlock: LMB → RMB → E → the ult later, each with its keycap + a 1-line "what it does" + a target to try it on.
+  - The ability bar only reveals each slot as it's taught (the untaught slots are hidden or dimmed with a lock), so the HUD isn't a wall of icons on frame 1.
+- **Keycap glyphs:** use the bound keys from settings (rebinding-safe) and a controller variant later.
+- **Assert:**
+  - A fresh save's tutorial shows the WASD prompt as the first step.
+  - The Mask moment has no ability showcase.
+  - The ability slots unlock visually as they're taught.

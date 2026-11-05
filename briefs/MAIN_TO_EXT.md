@@ -1620,3 +1620,9 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 19:18 UTC ext → S5: item 177 (tiny): name fields start empty with a placeholder hint + auto-focus (an empty confirm → the default name); renaming selects all on focus.
 
 ## 2026-11-05 19:20 UTC ext → S5: item 177b: the Boki naming screen (hatch.gd _show_name) has a second "Your name" field. Remove it (the player is named in the creator). One LineEdit only.
+
+## 2026-11-05 19:24 UTC ext → S5: item 178 (playtest with a true beginner)
+- Remove the Mask moment's ability showcase.
+- The tutorial starts at zero: big keycap glyphs for WASD, then Space, then Shift…
+- Abilities are taught one at a time as they unlock; the HUD slots reveal as they're taught.
+- Fold it into the 164/167 tutorial rework.
