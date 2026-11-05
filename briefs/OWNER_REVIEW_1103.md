@@ -2406,3 +2406,8 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - When in range of a tree/rock/site, a big world-anchored prompt right by it: the keycap "HOLD F" (the actual bound interact key) + a hold ring that fills while held + "to chop" / "to mine" / "to build".
   - The top hint is secondary only.
   - Apply this to every interactable in the farm and the tutorial (the item 166/178d interactable highlight + keycap).
+- 178c addendum (owner, 18:17): every time the instruction CHANGES (tutorial and farm), call attention to it.
+  - The old one shows a quick "✓ done" tick + a chime, then the new one slides in big at the centre near the character for ~1.5 s (with its keycap) before settling into its normal spot.
+  - A brief glow/pulse on arrival.
+  - The goal tracker row flashes too.
+  - A step change never happens silently.
