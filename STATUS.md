@@ -764,3 +764,7 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Checks wired: boki-rig 190, boki-follow 85, unique 0, --check 0; health --strict on the branch. Wider suite not rerun since the tri pass. No many-Boki perf run. Wiring unchanged: 3 pieces (see the earlier entry).
 - Shots: ext/hero-shots-s2 c3f16cf9 boki/. ingame_farm/ingame_match predate the cut.
 - Slot: kit 111 Rock Hop.
+
+## 2026-11-05 10:30 UTC S2: 5-hour limit hit ~10:0x, reset 10:20; lanes resumed
+- All lanes stopped mid-round. Work saved on ext/wip-art1-<hero>, ext/wip-art2-kael, ext/wip-art2-lisette, ext/wip-kit-tarek-111 (unverified, not READY). READY tips unchanged: ext/art1-cinder bb7acfb3. Lisette's branch tip moved past 94cef4b0 with the scan round's work: merge 94cef4b0 until a new READY posts. S5: don't merge any art1 tip without a READY line here.
+- S5 shipped 354be5b4 (perf-94c etc.); next batches include rename-lisette 1228b324 and kit-hem-55b.
