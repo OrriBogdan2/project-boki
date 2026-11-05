@@ -293,8 +293,8 @@ def main():
     hl = B.hull(J)
     part("hull", hl, 1500, "scan", "hull", 2.6)
     cp, c_at, c_n = B.compass_field(hl)
-    dl = S.Field(c_at - 0.14, c_at + 0.14, 0.0022)
-    dl.add(S.cap(c_at - c_n * 0.02, c_at + c_n * 0.012, 0.112, 0.108), 0.0, 1)
+    dl = S.Field(c_at - 0.16, c_at + 0.16, 0.0022)
+    dl.add(S.cap(c_at - c_n * 0.02, c_at + c_n * 0.014, 0.13, 0.126), 0.0, 1)
     part("compass_dial", dl, 120, "brass", "dial", 3.0, centre=c_at)
     hm, cl = B.helmet()
     part("helmet", hm, 1300, "brass", "helmet", 2.6, bone="head", blur=0.003)
@@ -338,6 +338,13 @@ def main():
     lf.add(S.sph(tuple(lure_at), 0.0135), 0.0, 1)
     part("lure", lf, 40, "lure", "lure", 1.2, bone="x_fish")
     print("weapons", time.time() - t0, flush=True)
+
+    # the scan's body replaces the scripted hull, moss, arms and legs (FINE-DETAIL: keep the better), its own texture and normals
+    scn = np.load(os.path.join(WORK, "scan_low.npz"))
+    drop = ("hull", "moss", "pauldron", "upper", "fore", "thigh", "shin", "foot")
+    for p in [q for q in parts if q["name"].startswith(drop)]:
+        bpy.data.objects.remove(p["ob"])
+        parts.remove(p)
 
     # ropes
     def rope(name, pts, r, bone, step=0.05):
@@ -451,6 +458,9 @@ def main():
         p["nrm"] = nrm
         print("painted", p["name"], len(tri), int(m.sum()), round(time.time() - t0, 1), flush=True)
     img = S.dilate(atlas, mask, 10)
+    sa = imgio.load(os.path.join(WORK, "scan_albedo.png"))
+    sh, sw = sa.shape[:2]
+    imgio.save(P.key_scan(sa.reshape(-1, 3)).reshape(sh, sw, 3), os.path.join(WORK, "scan_albedo_key.png"))
     os.makedirs(WORK, exist_ok=True)
     png = os.path.join(WORK, "breaker_atlas.png")
     imgio.save(img[::-1], png)
@@ -512,12 +522,41 @@ def main():
     add_weights(pe, rigid(len(v), "head"))
     parts.append({"ob": pe, "slot": "eyes", "group": "body", "nrm": np.tile((0, 1, 0), (len(v), 1)).astype(np.float32), "name": "eyes"})
 
+    sv, stri = scn["v"], scn["tri"]
+    so = ob_from("scanbody", sv, stri)
+    so.data.uv_layers.new(name="UVMap").data.foreach_set("uv", scn["uv"].ravel())
+    names = scn["bone"]
+    add_weights(so, {str(b): (names == b).astype(np.float32) for b in np.unique(names)})
+    so.data.update()
+    sn = np.empty(len(sv) * 3, np.float32)
+    so.data.vertices.foreach_get("normal", sn)
+    parts.append({"ob": so, "slot": "body", "group": "body", "nrm": sn.reshape(-1, 3), "name": "scanbody"})
+
     # ----------------------------------------------------- materials (one atlas), join
     image = bpy.data.images.load(png)
     image.name = "breaker_atlas"
     mats = {}
 
+    def scan_mat():
+        m = bpy.data.materials.new("leather-scan-hot")
+        m.use_nodes = True
+        bs = m.node_tree.nodes["Principled BSDF"]
+        t = m.node_tree.nodes.new("ShaderNodeTexImage")
+        t.image = bpy.data.images.load(os.path.join(WORK, "scan_albedo_key.png"))
+        m.node_tree.links.new(t.outputs[0], bs.inputs[0])
+        tn = m.node_tree.nodes.new("ShaderNodeTexImage")
+        tn.image = bpy.data.images.load(os.path.join(WORK, "scan_normal.png"))
+        tn.image.colorspace_settings.name = "Non-Color"
+        nm = m.node_tree.nodes.new("ShaderNodeNormalMap")
+        m.node_tree.links.new(tn.outputs[0], nm.inputs["Color"])
+        m.node_tree.links.new(nm.outputs[0], bs.inputs["Normal"])
+        return m
+
     def mat(slot):
+        if slot == "body":
+            if slot not in mats:
+                mats[slot] = scan_mat()
+            return mats[slot]
         if slot not in mats:
             m = bpy.data.materials.new(MATS[slot])
             m.use_nodes = True

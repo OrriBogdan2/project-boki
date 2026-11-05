@@ -27,15 +27,16 @@ def rj(b):
 
 T = {"hull": (np.array((0, 0, 0.2)), np.array((0, 0, 0.82)))}
 SEG = [("hull", "hull_bot", "hull_top", 0.3, "hips")]
-TJ = {"hull_bot": np.array((0, 0, 0.16)), "hull_top": np.array((0, 0, 0.84))}
+TJ = {"hull_bot": np.array((0, 0, 0.2)), "hull_top": np.array((0, 0, 0.83))}
+HC = np.array((-0.045, -0.21, -0.015))
+HS = np.array((1.05, 0.93, 0.68))         # the hull, axis by axis: wider than tall, as the owner asks
 for s in "RL":
     TJ["shoulder." + s], TJ["elbow." + s], TJ["wrist." + s] = rj("upper_arm." + s), rj("forearm." + s), rj("hand." + s)
-    TJ["fist." + s] = TJ["wrist." + s] + (0, 0, -0.14)
     TJ["hip." + s], TJ["knee." + s] = rj("thigh." + s), rj("shin." + s)
-    TJ["ankle." + s] = np.array((TJ["knee." + s][0], 0, 0.06))
-    TJ["toe." + s] = np.array((TJ["knee." + s][0], 0.2, 0.03))
+    TJ["ankle." + s] = np.array((TJ["knee." + s][0], 0, 0.05))
+    TJ["toe." + s] = np.array((TJ["knee." + s][0], 0.17, 0.02))
     SEG += [("up" + s, "shoulder." + s, "elbow." + s, 0.1, "upper_arm." + s), ("fore" + s, "elbow." + s, "wrist." + s, 0.12, "forearm." + s),
-            ("fist" + s, "wrist." + s, "fist." + s, 0.1, "hand." + s), ("thigh" + s, "hip." + s, "knee." + s, 0.08, "thigh." + s),
+            ("thigh" + s, "hip." + s, "knee." + s, 0.08, "thigh." + s),
             ("shin" + s, "knee." + s, "ankle." + s, 0.08, "shin." + s), ("foot" + s, "ankle." + s, "toe." + s, 0.07, "x_foot." + s)]
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -61,7 +62,9 @@ for i, (nm, j0, j1, rad, _) in enumerate(SEG):
     u = a1 - a0
     h = np.clip(((P - a0) @ u) / (u @ u), 0, 1)
     q = P - (a0 + h[:, None] * u)
-    D[:, i] = np.linalg.norm(q, axis=1) - (rad if nm != "hull" else float(J["hull_r"]))
+    D[:, i] = np.linalg.norm(q, axis=1) - rad
+    if nm == "hull":
+        D[:, i] = (np.linalg.norm((P - HC) / (0.46, 0.44, 0.47), axis=1) - 1.0) * 0.3
     if nm[-1] in "RL" and nm != "hull":
         side = 1.0 if nm[-1] == "R" else -1.0
         D[P[:, 0] * side < 0.02, i] = 9.0
@@ -69,6 +72,9 @@ W = np.exp(-(D - D.min(1, keepdims=True)) / 0.012)
 W /= W.sum(1, keepdims=True)
 Q = np.zeros_like(P)
 for i, (nm, j0, j1, rad, _) in enumerate(SEG):
+    if nm == "hull":
+        Q += W[:, i, None] * ((P - HC) * HS + (0, 0, 0.515))
+        continue
     p0, p1, q0, q1 = SJ[j0], SJ[j1], TJ[j0], TJ[j1]
     ln = np.linalg.norm(p1 - p0)
     u = (p1 - p0) / ln
@@ -87,6 +93,41 @@ for i, (nm, j0, j1, rad, _) in enumerate(SEG):
 src.data.vertices.foreach_set("co", Q.astype(np.float32).ravel())
 src.data.update()
 BONE = np.array([SEG[i][4] for i in np.argmax(W, axis=1)])
+
+# ---- cut what the scripted parts replace: helmet and collar, stumps, the fists past the wrist; drop floaters
+import bmesh
+cut = (np.hypot(P[:, 0] - HC[0], (P[:, 1] - HC[1]) * 1.1) < 0.33) & (P[:, 2] > 0.38) | (P[:, 2] > 0.5)
+for sd, sx in (("R", 1.0), ("L", -1.0)):
+    u = SJ["wrist." + sd] - SJ["elbow." + sd]
+    cut |= (P[:, 0] * sx > 0.4) & (((P - SJ["wrist." + sd]) @ u) > 0.0)
+bm = bmesh.new()
+bm.from_mesh(src.data)
+bm.verts.ensure_lookup_table()
+bmesh.ops.delete(bm, geom=[bm.verts[i] for i in np.nonzero(cut)[0].tolist()], context="VERTS")
+seen = set()
+isl = []
+for vv in bm.verts:
+    if vv in seen:
+        continue
+    st, cur = [vv], []
+    seen.add(vv)
+    while st:
+        a_ = st.pop()
+        cur.append(a_)
+        for e in a_.link_edges:
+            o_ = e.other_vert(a_)
+            if o_ not in seen:
+                seen.add(o_)
+                st.append(o_)
+    isl.append(cur)
+big = max(len(c) for c in isl)
+bmesh.ops.delete(bm, geom=[a_ for c in isl if len(c) < big * 0.01 for a_ in c], context="VERTS")
+bm.to_mesh(src.data)
+bm.free()
+keep = ~cut
+Q, BONE = Q[keep], BONE[keep]
+n = len(Q)
+print("cut, left", len(src.data.vertices), flush=True)
 
 # ---- the game mesh
 bpy.context.view_layer.objects.active = src
@@ -151,7 +192,7 @@ uv = np.empty(len(me.loops) * 2, np.float32)
 me.uv_layers.active.data.foreach_get("uv", uv)
 from mathutils.kdtree import KDTree
 kd = KDTree(n)
-for i, p in enumerate(Q):
+for i, p in enumerate(Q.tolist()):
     kd.insert(p, i)
 kd.balance()
 nb = [BONE[kd.find(p)[1]] for p in v]

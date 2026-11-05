@@ -394,7 +394,7 @@ SQ = "breaker_head_squat"
 def p_dial(p, n, c):
     """The compass, round and on its own non-glowing brass surface; the rest of the hull is keyed."""
     q = p - c["part"]["centre"]
-    return sample("breaker_turnaround", FC - q[:, 0] / 0.11 * 44.0, 262.0 - q[:, 2] / 0.11 * 44.0)
+    return sample("breaker_turnaround", FC - q[:, 0] / 0.125 * 44.0, 262.0 - q[:, 2] / 0.125 * 44.0)
 
 
 def p_helmet(p, n, c):
@@ -433,6 +433,15 @@ def p_door_art(p, n, c):
 
 TABLE = {"hull": p_hull, "limb": p_limb, "pauldron": p_pauldron, "leg": p_leg, "helmet": p_helmet, "collar": p_collar, "dial": p_dial, "mast": p_mast, "iron": p_iron, "brass": p_brass, "compass": p_compass, "moss": p_moss,
          "sail": p_sail, "drum": p_drum, "door": p_door_art, "fish": p_fish, "lure": p_lure, "rope": p_rope}
+
+
+def key_scan(col):
+    """The scan's paint for a keyed material: its teal light on the key, every other warm texel below it."""
+    out = hot(col)
+    k = np.abs(out - KEY).sum(1) < 0.12
+    warm = (out[:, 0] - out[:, 2] > 0.1) & ~k
+    out[:, 0] = np.where(warm, np.minimum(out[:, 0], 0.41), out[:, 0])
+    return out
 
 
 def paint(name, p, n, ctx):
