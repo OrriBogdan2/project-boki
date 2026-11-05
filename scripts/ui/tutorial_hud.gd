@@ -3,9 +3,9 @@ extends RefCounted
 ## What the tutorial shows on screen (the beam and the edge arrow are Tutorial and Hud._draw_waypoint).
 ## Everything has its own lane so nothing overlaps: the short first-time intro card (the one thing that
 ## pauses play), a small banner at the top-centre for each new step that settles into a pill at the
-## bottom-centre, a quiet check beside the pill, and the toasts in the top-right. Nothing sits in the
-## middle of the screen, where the hunter, the Boki and the target are. While the banner is up other
-## popups (toasts, Boki bubbles, the scout hint) wait.
+## bottom-centre, a quiet check beside the pill, and the message lane in the top-right. Nothing sits in
+## the middle of the screen, where the hunter, the Boki and the target are. While the banner is up other
+## popups (messages, Boki bubbles, the scout hint) wait.
 
 const MINT := Color("8fe3c8")
 const GOLD := Color("f2c84a")
@@ -16,7 +16,7 @@ const FADE_T := 0.3         # s it takes to hand over to the pill
 const PANEL := Color(0.04, 0.05, 0.08, 0.9)
 const DETAIL_K := 1.9       # a bar with a second line is this much taller
 
-## The lanes: the banner, the pill, the check mark and the toast column (Rect2 each), for a screen size.
+## The lanes: the banner, the pill, the check mark and the message column (Rect2 each), for a screen size.
 static func lanes(sz: Vector2) -> Dictionary:
 	var w := sz.x * BAR_W
 	var bh := sz.y * BAR_H
@@ -138,21 +138,9 @@ static func _check(h, r: Rect2, k: float) -> void:
 static func prompt_y(h, sz: Vector2) -> float:
 	return sz.y - 222.0 if h.m.tut == null else lanes(sz)["pill"].position.y - 64.0
 
-## Toasts wait while the banner is up: true when this one was held back (Tutorial.update shows it later).
-static func defer(h, text: String, col: Color, small: bool) -> bool:
-	var tu: Tutorial = h.m.tut
-	if tu == null or not tu.card_up():
-		return false
-	tu.held_toasts.append([text, col, small])
-	return true
-
-## One toast line, in the top-right lane during the tutorial (row 0..5), else where the HUD puts it.
-static func draw_toast(h, sz: Vector2, row: int, text: String, col: Color, px: int, default_at: Vector2) -> void:
-	if h.m.tut == null:
-		h._ctext(default_at, text, px, col, h.big)
-		return
-	var lane: Rect2 = lanes(sz)["toast"]
-	while px > 12 and h.big.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > lane.size.x:
-		px -= 1
-	var w: float = h.big.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
-	h._text(Vector2(lane.end.x - w, lane.position.y + 20.0 + row * 24.0), text, px, col, h.big)
+## During the tutorial the message lane is the top-right column, clear of the banner and the pill
+## (Hud holds it while the banner is up).
+static func place_msgs(lane: MsgLane, sz: Vector2) -> void:
+	var r: Rect2 = lanes(sz)["toast"]
+	lane.top = r.position.y
+	lane.right_edge = r.end.x

@@ -53,7 +53,8 @@ func tick(dt: float) -> void:
 	if detect_t <= 0.0:
 		detect_t = 0.5
 		_poll()
-	_update_marker()
+	_update_marker(dt)
+	_bubbles_under_lane(dt)
 	var want_page: bool = FarmTutorial.current() == "task" and FarmTutorial.stage("task") == "go"
 	FarmTaskGuide.hub_hint(h, want_page and h.panel_open == "")
 
@@ -282,7 +283,7 @@ func _update_crop_label() -> void:
 	crop_lbl.text = "Growing\n" + FarmCropGuide.bar_text(g)
 	crop_lbl.position = (h.plots[int(g["plot"])] as Node3D).position + Vector3(0, 2.2, 0)
 
-func _update_marker() -> void:
+func _update_marker(dt: float) -> void:
 	_update_crop_label()
 	var id := FarmTutorial.current()
 	var txt := FarmTutorial.world_text(id)
@@ -304,3 +305,22 @@ func _update_marker() -> void:
 	marker.visible = true
 	marker.text = "%s\n▼" % txt
 	marker.position = at + Vector3(0, 3.6 + sin(t * 3.0) * 0.18, 0)
+	_yield_to_covers(dt)
+
+## A Boki's speech bubble fades back while a message card (MsgLane) covers it on screen.
+func _bubbles_under_lane(dt: float) -> void:
+	var cards := MsgLane.of(h.root_ui).rects()
+	for k in h.kins:
+		var say: Label3D = k.get("say")
+		if say and say.visible:
+			MsgLane.yield_label(say, h.cam, cards, dt)
+
+## The marker fades back while a Boki's speech bubble or a message card covers it on screen, so two
+## lines never print over each other; it comes back when the Boki is done talking and the card goes.
+func _yield_to_covers(dt: float) -> void:
+	var covers: Array[Rect2] = MsgLane.of(h.root_ui).rects()
+	for k in h.kins:
+		var say: Label3D = k.get("say")
+		if say and say.visible:
+			covers.append(MsgLane.label_rect(say, h.cam))
+	MsgLane.yield_label(marker, h.cam, covers, dt)
