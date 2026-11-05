@@ -26,6 +26,6 @@ new `"bcn"` event on the existing `"ev"` topic (lit / out / used).
 ## Consequences
 - `life.gd` loses its beacon code; `match.gd`, `hud.gd`, `hunter.gd`, `full_map.gd` get wiring only.
 - Net.VERSION bumps (new `"bcn"` event). No save change.
-- `--revive-check` (tools/revive_check.gd) and `--revive-shots` (tools/revive_shots.gd) added; the
+- `--box-revive-check` (tools/box_revive_check.gd) and `--box-revive-shots` (tools/box_revive_shots.gd) added; the
   box-revive part of main.gd's inline `--life-check` moves into the new check.
 - Known limit kept: a box or beacon revive brings back only Hunters the reviving game owns (as before).

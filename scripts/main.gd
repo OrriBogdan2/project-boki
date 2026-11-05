@@ -916,7 +916,7 @@ func _life_check() -> void:
 		if int((m.time - t0) * 60.0) % 120 == 0: print("LCHECK   t=%.1f downed=%s down_hp=%.1f revive=%.2f out=%s" % [m.time - t0, B.downed, B.down_hp, B.revive, B.out])
 	var bx := Life.box_of(m, B)
 	print("LCHECK bleed: dead=%s after %.1fs box=%s gems in box=%d" % [B.out, m.time - t0, not bx.is_empty(), int(bx.get("gems", -1))])
-	# 3. box revive: --revive-check (tools/revive_check.gd) times the channel; here it just brings B back
+	# 3. box revive: --box-revive-check (tools/box_revive_check.gd) times the channel; here it just brings B back
 	Life.box_revive(m, bx, C)
 	print("LCHECK box revive: back=%s hp %.0f%% gems %d" % [not B.out, B.hp / B.max_hp * 100.0, B.gems])
 	# 4. stomp drain

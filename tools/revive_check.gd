@@ -1,247 +1,223 @@
 extends RefCounted
-## --revive-check: box revives and revive beacons (docs/decisions/0018, owner items 101 / 101b).
-##  1. A box revive takes BoxRevive.time_for (7.5 s the first time, from content/rules/revive.json);
-##     the teammate comes back at the box with their Boki; the box hums while it's channelled.
-##  2. While channelling a hit does Hunter.CONSUME_VULN times the damage (the tonic's multiplier) and
-##     breaks it; holding on does nothing until interact is let go and held again.
-##  3. Walking breaks it; fire is held off while channelling.
-##  4. The second box revive of the same Hunter is slower (the diminishing curve).
-##  5. A beacon brings back every dead teammate at once; while it's lit every player is told
-##     (toast + map/world marker state) and its hum carries beacon_hear_m; "bcn" events from another
-##     game light it, put it out and use it.
-##  6. A bot walks to a dead teammate's box and brings them back with the new timing; with the soul
-##     gone it lights a beacon instead.
-## Never touches the save.
+## --revive-check: a bot squadmate goes and picks up a downed player first. A downed player with a
+## rival standing at medium range: an ally bot ~12 m away has to reach them and finish the revive in
+## time (open ground; a wall in the way; the player down by the island's edge; the player down on
+## the far side of a terrace step). And with a rival behind a wall, the bot never fires without a
+## clear shot. Prints PASS/FAIL.
 
 var bad := 0
 var m: Match
+var main: Node
 
 func ok(cond: bool, what: String) -> void:
-	print("RVCHECK %s %s" % ["ok  " if cond else "FAIL", what])
+	print("REVIVE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond: bad += 1
 
-func _run(sec: float) -> void:
-	var t := 0.0
-	while t < sec:
-		m.step(Match.DT)
-		t += Match.DT
-
-func _spot(h: Hunter, at: Vector3) -> void:
-	h.teleport(at)
-	h.vel = Vector3.ZERO
-
-func _calm(h: Hunter) -> void:
-	h.inv_t = 0.0
-	h.armor = 0.0
-	h.shield = 0.0
-	h.kin_shield = 0.0
-	h.hp = h.max_hp
-
-## Open, flat ground with room round it, away from the beacons.
-func _roomy() -> Vector3:
-	for k in 3000:
-		var g := m.world.random_ground()
-		var flat := true
-		for dx in range(-8, 9, 2):
-			for dz in range(-8, 9, 2):
-				if m.world.is_void(g.x + dx, g.z + dz) or absf(m.world.ground_at(g.x + dx, g.z + dz) - g.y) > 0.3:
-					flat = false
-		if flat and m.beacons.all(func(bc): return g.distance_to(bc["pos"]) > 12.0):
-			return g
-	return m.world.random_ground()
-
-## Holds interact at a box until the owner is back or the time runs out; returns the seconds taken.
-func _channel(C: Hunter, B: Hunter, cap: float) -> float:
-	C.inp["interact"] = true
-	var t0 := m.time
-	while B.out and m.time - t0 < cap:
-		_run(Match.DT)
-	C.inp["interact"] = false
-	_run(Match.DT * 2.0)
-	return m.time - t0
-
-func run(main: Node) -> void:
-	Save.no_write = true
-	Save.d = Save.fresh()
+func _fresh(seed := 77) -> void:
+	if m: m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": seed, "no_drop": true, "autoplay": true})
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
-		h.lives = 1
-	var mine: Array = m.hunters.filter(func(x): return x.team == m.player.team)
-	var foe: Hunter = m.hunters.filter(func(x): return x.team != m.player.team)[0]
-	var A: Hunter = mine[0]
-	var B: Hunter = mine[1]
-	var C: Hunter = mine[2]
-	var home := _roomy()
-	for h in m.hunters:
-		if h.team != A.team: _spot(h, m.world.random_ground())
-	_spot(foe, home + Vector3(30, 0, 0))
-	_spot(A, home + Vector3(-6, 0, 0))
-	_spot(C, home)
-	ok(m.beacons.size() >= 3, "several beacons on the map (%d)" % m.beacons.size())
-	_box_revive(B, C)
-	_hits(B, C, foe)
-	_moves(B, C)
-	_beacon(A, B, C, foe)
-	_bot(B, C, home)
-	print("REVIVE CHECK DONE, failures: ", bad)
-	main.get_tree().quit()
+		# no kin: a kin pulling its owner up would do the revive for the bot
+		for kk in [h.kin, h.kin2]:
+			if kk: m.kins.erase(kk); kk.queue_free()
+		h.kin = null; h.kin2 = null
 
-func _box_revive(B: Hunter, C: Hunter) -> void:
-	var home := C.pos
-	_spot(B, home + Vector3(3, 0, 0))
-	m.eliminate(B, null, "finished")
-	var bx := Life.box_of(m, B)
-	ok(B.out and not bx.is_empty() and Life.soul_here(m, bx), "a fallen teammate leaves a box with their soul in it")
-	ok(absf(float(BoxRevive.rules()["box_revive_s"]) - 7.5) < 0.01 and absf(BoxRevive.time_for(B) - 7.5) < 0.01,
-		"a box revive is a 7.5 s channel the first time (%.2fs)" % BoxRevive.time_for(B))
-	var ring: Node = (bx["node"] as Node).get_node_or_null("OwnerRing")
-	ok(ring != null and Life.owner_col(m, bx) == m.mate_col(B), "an ally box wears its owner's squad colour")
-	_spot(C, bx["pos"] + Vector3(0.4, 0, 0))
-	var t0 := m.time
-	C.inp["interact"] = true
-	_run(BoxRevive.time_for(B) * 0.5)
-	var hum := String(bx.get("hum_key", ""))
-	ok(C.box_reviving() and hum != "" and Sfx.loop_on(hum), "mid-channel: kneeling over the box, and it hums")
-	var prog := float(bx.get("rev_prog", 0.0))
-	ok(absf(prog - 0.5) < 0.05, "the progress ring reads half way (%.2f)" % prog)
-	C.inp["fire"] = true
-	_run(Match.DT)
-	ok(not C.inp["fire"] and C.box_reviving(), "no firing while channelling, and the channel goes on")
-	_channel(C, B, 10.0)
-	var took := m.time - t0 - Match.DT * 2.0
-	ok(not B.out and absf(took - 7.5) < 0.15, "the teammate is back after %.2fs (want 7.5s)" % took)
-	ok(B.pos.distance_to(bx["pos"]) < 3.0, "back at their box (%.1fm away)" % B.pos.distance_to(bx["pos"]))
-	var k: Kin = B.kin
-	ok(k != null and not k.dead and k.state == "active" and k.flat_dist(B) < 3.0, "their Boki is back at their side")
-	ok(not Sfx.loop_on(hum), "the hum stops once it's done")
+func _put(h: Hunter, at: Vector3) -> void:
+	h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+	h.vel = Vector3.ZERO
 
-func _hits(B: Hunter, C: Hunter, foe: Hunter) -> void:
-	var second := BoxRevive.time_for(B)
-	ok(absf(second - 7.5 / 0.75) < 0.05, "the second box revive of a Hunter is slower (%.2fs)" % second)
-	_calm(C)
-	var h0 := C.hp
-	C.hurt(10.0, foe, {"src": "abil"})
-	var plain := h0 - C.hp
-	_spot(B, C.pos + Vector3(2.5, 0, 0))
-	m.eliminate(B, null, "finished")
-	var bx := Life.box_of(m, B)
-	_spot(C, bx["pos"] + Vector3(0.4, 0, 0))
-	_calm(C)
-	C.inp["interact"] = true
-	_run(1.5)
-	ok(C.box_reviving() and C.box_t > 1.0, "channelling again")
-	var h1 := C.hp
-	C.hurt(10.0, foe, {"src": "abil"})
-	var while_rev := h1 - C.hp
-	ok(plain > 0.0 and absf(while_rev / plain - Hunter.CONSUME_VULN) < 0.02,
-		"a hit while channelling does %.2fx (the tonic's %.2fx)" % [while_rev / maxf(plain, 0.001),
-		Hunter.CONSUME_VULN])
-	_run(Match.DT)
-	ok(C.box_t == 0.0 and B.out, "and the hit breaks the channel")
-	_run(1.0)
-	ok(C.box_t == 0.0 and not C.box_reviving(), "holding on does nothing until interact is pressed again")
-	C.inp["interact"] = false
-	_run(Match.DT * 2.0)
-	var need := BoxRevive.time_for(B)
-	var took := _channel(C, B, 15.0) - Match.DT * 2.0
-	ok(not B.out and absf(took - need) < 0.15,
-		"pressed again it starts over and takes the full %.1fs (%.2fs)" % [need, took])
+## Open ground: no void or blocks within r of p, all at one height.
+func _roomy(p: Vector3, r: int) -> bool:
+	var w := m.world
+	for dx in range(-r, r + 1):
+		for dz in range(-r, r + 1):
+			if w.is_void(p.x + dx, p.z + dz) or w.is_block(p.x + dx, p.z + dz) or absf(w.ground_at(p.x + dx, p.z + dz) - w.ground_at(p.x, p.z)) > 0.3:
+				return false
+	return true
 
-func _moves(B: Hunter, C: Hunter) -> void:
-	_spot(B, C.pos + Vector3(2.5, 0, 0))
-	m.eliminate(B, null, "finished")
-	var bx := Life.box_of(m, B)
-	_spot(C, bx["pos"] + Vector3(0.4, 0, 0))
-	C.inp["interact"] = true
-	_run(1.0)
-	ok(C.box_reviving(), "channelling a third time")
-	C.inp["move"] = Vector2(1, 0)
-	_run(Match.DT * 2.0)
-	ok(C.box_t == 0.0 and not C.box_reviving() and B.out, "walking breaks the channel")
-	C.inp["move"] = Vector2.ZERO
-	C.inp["interact"] = false
-	_run(Match.DT * 2.0)
-
-func _beacon(A: Hunter, B: Hunter, C: Hunter, foe: Hunter) -> void:
-	m.eliminate(C, null, "finished")
-	ok(B.out and C.out and not A.out, "two of the squad are dead")
-	var bc: Dictionary = m.beacons[0]
-	var i := 0
-	var key := "beacon0"
-	# another game's Hunter lights it, then steps off: the notice comes and goes here too
-	Beacons.net_in(m, ["bcn", i, foe.team, "lit"])
-	ok(bc["lit"] and Beacons.lit(m).has(bc) and Sfx.loop_on(key), "a \"bcn\" lit event lights it here, hum and all")
-	Beacons.net_in(m, ["bcn", i, foe.team, "out"])
-	ok(not bc["lit"] and not Sfx.loop_on(key), "and \"out\" puts it out")
-	# every player is told: a teammate's view and a rival's
-	for viewer in [A, foe]:
-		m.player = viewer
-		m.hud.toasts.clear()
-		_spot(A, bc["pos"])
-		_run(Match.DT * 2.0)
-		var told: bool = m.hud.toasts.any(func(t): return String(t["text"]).contains("eacon"))
-		var side := "ally" if viewer.team == A.team else "rival"
-		ok(bc["lit"] and told, "%s (%s) gets the beacon notice" % [viewer.pname, side])
-		_spot(A, bc["pos"] + Vector3(12, 0, 0))
-		_run(Match.DT * 2.0)
-	m.player = A
-	ok(not bc["lit"], "stepping off puts it out")
-	_spot(A, bc["pos"])
-	_run(Match.DT * 3.0)
-	var reach := float(Sfx.loops.get(key, {}).get("reach", 0.0))
-	ok(Sfx.loop_on(key) and absf(reach - float(BoxRevive.rules()["beacon_hear_m"])) < 0.1,
-		"while it's lit its hum carries %.0fm" % reach)
-	ok(m.pings.any(func(p): return p["pos"] == bc["pos"]), "and it's marked on everyone's map")
-	var t0 := m.time
-	while (B.out or C.out) and m.time - t0 < Beacons.time_s() + 2.0:
-		_run(Match.DT)
-	var took := m.time - t0
-	ok(not B.out and not C.out and absf(took - Beacons.time_s()) < 0.3,
-		"the beacon brings back both dead teammates at once after %.1fs (want %.1fs)" % [took, Beacons.time_s()])
-	ok(bc["used"] and not bc["lit"] and not Sfx.loop_on(key), "single use, and quiet again")
-	ok(B.sick_t > 0.0 and C.sick_t > 0.0, "with resurrection sickness")
-	# a "used" event from another game brings back the dead Hunters this game owns
-	var bc2: Dictionary = m.beacons[1]
-	m.eliminate(B, null, "finished")
-	Beacons.net_in(m, ["bcn", 1, B.team, "used"])
-	ok(not B.out and bc2["used"], "a \"used\" event brings back this game's dead teammates")
-
-func _bot(B: Hunter, C: Hunter, home: Vector3) -> void:
-	for h in m.hunters:
-		if h.team != B.team:
+## Runs a revive: the player is knocked at `at`, the bot starts at `from`, a rival stands at `foe_at`.
+func _case(name: String, at: Vector3, from: Vector3, foe_at: Vector3, limit: float) -> void:
+	var p: Hunter = m.player
+	var mates: Array = m.hunters.filter(func(x): return x.team == p.team and x != p)
+	var bot: Hunter = mates[0]
+	var foes: Array = m.hunters.filter(func(x): return x.team != p.team)
+	var foe: Hunter = foes[0]
+	# park the rest far off
+	for i in mates.size():
+		if i > 0: _put(mates[i], m.world.random_ground()); mates[i].ctrl = "idle"
+	for i in foes.size():
+		if i > 0:
 			var far := m.world.random_ground()
-			for k in 200:
-				if far.distance_to(home) > 70.0: break
+			for k in 50:
+				if far.distance_to(at) > 40.0: break
 				far = m.world.random_ground()
-			_spot(h, far)
-	_calm(C)
-	_spot(B, home)
-	_spot(C, home + Vector3(6, 0, 2))
-	_run(0.5)
-	m.eliminate(B, null, "finished")
-	C.ctrl = "bot"
-	C.ai = m.bot_brain.new_mind(m.rng, 0.6, m.bot_cfg)
-	var t0 := m.time
-	while B.out and m.time - t0 < 30.0:
-		_run(Match.DT)
-	ok(not B.out, "a bot walks to the box and brings its teammate back (%.1fs incl. the walk)" % (m.time - t0))
-	# the soul has left the box: the bot heads for a beacon instead
-	var unused: Array = m.beacons.filter(func(bc): return not bc["used"])
-	_spot(C, unused[0]["pos"] + Vector3(8, 0, 0))
-	_spot(B, C.pos)
-	_run(0.3)
-	m.eliminate(B, null, "finished")
-	Life.box_of(m, B)["soul_until"] = 0.0
-	t0 = m.time
-	while B.out and m.time - t0 < 40.0:
-		_run(Match.DT)
-	C.ctrl = "idle"
-	ok(not B.out and B.sick_t > 0.0,
-		"with the soul gone a bot lights a beacon instead (%.1fs incl. the walk)" % (m.time - t0))
+			_put(foes[i], far)
+	_put(p, at)
+	_put(bot, from)
+	_put(foe, foe_at)
+	foe.max_hp = 1e6; foe.hp = 1e6      # it soaks the bot's shots, so the test isn't won by killing it
+	foe.ctrl = "idle"
+	if p.downed: m.revive_hunter(p, null)
+	m.knock(p, foe, {})
+	p.ctrl = "idle"
+	p.down_hp = 1e6       # no bleeding out mid-test
+	bot.ctrl = "bot"
+	bot.ai = m.bot_brain.new_mind(m.rng, 0.6)
+	bot.ai["think"] = 0.0
+	var t := 0.0
+	var hops := 0
+	var was_air := false
+	var reached := -1.0
+	while t < limit and p.downed:
+		m.step(Match.DT); t += Match.DT
+		var jumped := bot.vel.y > Hunter.JUMP_V * 0.85 and bot.pad.is_empty() and not bot.mantling()      # pressing jump, not a ledge rise
+		if jumped and not was_air: hops += 1
+		was_air = jumped
+		if reached < 0.0 and bot.flat_dist(p) < Life.R["revive_radius"]: reached = t
+	ok(not p.downed, "%s: revived in %.1fs (reached at %.1fs, %d hops, start %.1fm, rival %.1fm)%s" % [name, t, reached, hops, Vector2(from.x - at.x, from.z - at.z).length(), Vector2(foe_at.x - at.x, foe_at.z - at.z).length(), "" if not p.downed else " bot at %s, player at %s" % [bot.pos.snapped(Vector3(0.1, 0.1, 0.1)), p.pos.snapped(Vector3(0.1, 0.1, 0.1))]])
+	bot.ctrl = "idle"; bot.inp["move"] = Vector2.ZERO; bot.inp["fire"] = false
+
+func run(mn: Node) -> void:
+	main = mn
+	Save.no_write = true
+	_fresh()
+	var w := m.world
+	# ---- 1. open ground
+	var home := Vector3.INF
+	for k in 3000:
+		var g := w.random_ground()
+		if _roomy(g, 6): home = g; break
+	ok(home != Vector3.INF, "found open ground")
+	if home != Vector3.INF:
+		_case("open ground", home, home + Vector3(6, 0, 0), home + Vector3(-4, 0, 5), 16.0)
+	# ---- 2. a wall between the bot and the player
+	_fresh(); w = m.world
+	var wall := Vector3.INF; var wdir := Vector3.ZERO
+	for k in 6000:
+		var g := w.random_ground(-1, false)
+		for d in [Vector3(1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 0, 1), Vector3(0, 0, -1)]:
+			# player just this side of a block, the bot 7 m behind the block on open ground
+			if w.is_block(g.x + d.x * 1.0, g.z + d.z * 1.0) and not w.is_block(g.x, g.z) and not w.is_void(g.x, g.z):
+				for far in [7.0, 6.0, 5.0, 4.0, 3.0]:
+					var b: Vector3 = g + d * far
+					if not w.is_void(b.x, b.z) and not w.is_block(b.x, b.z) and absf(w.ground_at(b.x, b.z) - w.ground_at(g.x, g.z)) < 0.9 and w.island_of(b.x, b.z) == w.island_of(g.x, g.z):
+						wall = g; wdir = d * far; break
+				if wall != Vector3.INF: break
+		if wall != Vector3.INF: break
+	ok(wall != Vector3.INF, "found a wall")
+	if wall != Vector3.INF:
+		var wn := wdir.normalized()
+		_case("wall in the way (%.0fm through it)" % wdir.length(), wall, wall + wdir, wall - wn * 6.0 + Vector3(wn.z, 0, wn.x) * 4.0, 22.0)
+	# ---- 3. down by the island's edge
+	_fresh(); w = m.world
+	var edge := Vector3.INF; var edir := Vector3.ZERO
+	for k in 6000:
+		var g := w.random_ground()
+		for d in [Vector3(1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 0, 1), Vector3(0, 0, -1)]:
+			if w.is_void(g.x + d.x * 0.9, g.z + d.z * 0.9) and not w.is_void(g.x, g.z) and not w.is_block(g.x, g.z):
+				var b: Vector3 = g - d * 10.0
+				if not w.is_void(b.x, b.z) and not w.is_block(b.x, b.z) and w.island_of(b.x, b.z) == w.island_of(g.x, g.z) and absf(w.ground_at(b.x, b.z) - w.ground_at(g.x, g.z)) < 1.0:
+					edge = g; edir = d; break
+		if edge != Vector3.INF: break
+	ok(edge != Vector3.INF, "found an edge")
+	if edge != Vector3.INF:
+		_case("by the edge", edge, edge - edir * 10.0, edge - edir * 4.0 + Vector3(edir.z, 0, edir.x) * 7.0, 20.0)
+	# ---- 4. up a terrace step (a ledge between them)
+	_fresh(); w = m.world
+	var step := Vector3.INF; var sdir := Vector3.ZERO
+	for k in 8000:
+		var g := w.random_ground()
+		for d in [Vector3(1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 0, 1), Vector3(0, 0, -1)]:
+			var b: Vector3 = g + d * 6.0
+			if not w.is_void(b.x, b.z) and not w.is_block(b.x, b.z) and not w.is_block(g.x, g.z) and w.island_of(b.x, b.z) == w.island_of(g.x, g.z):
+				var dh := w.ground_at(g.x, g.z) - w.ground_at(b.x, b.z)
+				if dh > 0.7 and dh < 1.7:
+					step = g; sdir = d; break
+		if step != Vector3.INF: break
+	ok(step != Vector3.INF, "found a terrace step")
+	if step != Vector3.INF:
+		_case("up a ledge", step, step + sdir * 6.0, step + sdir * 2.0 + Vector3(sdir.z, 0, sdir.x) * 8.0, 24.0)
+	# ---- 5. a rival close by but out of sight (behind a rock; up a ledge): the bot works round to a
+	# clear shot instead of hopping at the obstacle and firing into it
+	for variant in ["rock", "ledge"]:
+		var bw := Vector3.INF; var bd := Vector3.ZERO
+		_fresh(); w = m.world
+		if variant == "ledge":
+			# the maps rarely stack two terraces right next to each other: raise a shelf two
+			# terraces (1.6 m) high on open ground, a couple of metres from where the bot stands
+			for k in 3000:
+				var g := w.random_ground()
+				if _roomy(g, 6):
+					for x in range(int(g.x) + 2, int(g.x) + 6):
+						for z in range(int(g.z) - 3, int(g.z) + 4):
+							w.level[w.idx(x, z)] += 2
+					bw = g; bd = Vector3(3, 0, 0)
+					break
+		for k in (0 if bw != Vector3.INF else 8000):
+
+			var g := w.random_ground(-1, false)
+			if w.is_block(g.x, g.z) or w.is_void(g.x, g.z): continue
+			for dd in [Vector3(3, 0, 0), Vector3(-3, 0, 0), Vector3(0, 0, 3), Vector3(0, 0, -3), Vector3(2.2, 0, 0), Vector3(-2.2, 0, 0), Vector3(0, 0, 2.2), Vector3(0, 0, -2.2)]:
+				var d: Vector3 = dd / dd.length()
+				var b: Vector3 = g + dd
+				if w.is_void(b.x, b.z) or w.is_block(b.x, b.z) or w.island_of(b.x, b.z) != w.island_of(g.x, g.z):
+					continue
+				var dh := w.ground_at(b.x, b.z) - w.ground_at(g.x, g.z)
+				if variant == "rock" and dd.length() > 2.9 and w.is_block(g.x + d.x * 1.5, g.z + d.z * 1.5) and absf(dh) < 0.5:
+					bw = g; bd = dd; break
+				if variant == "ledge" and dh > 1.2 and dh < 2.6 and not w.is_block(g.x + d.x * 1.1, g.z + d.z * 1.1):
+					bw = g; bd = dd; break
+			if bw != Vector3.INF: break
+		ok(bw != Vector3.INF, "found a rival spot out of sight (%s)" % variant)
+		if bw == Vector3.INF: continue
+		var p: Hunter = m.player
+		var bot: Hunter = m.hunters.filter(func(x): return x.team == p.team and x != p)[0]
+		var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
+		for h in m.hunters:
+			if h != bot and h != foe:
+				var far := w.random_ground()
+				for k in 50:
+					if far.distance_to(bw) > 40.0: break
+					far = w.random_ground()
+				_put(h, far)
+		_put(bot, bw); _put(foe, bw + bd)
+		foe.max_hp = 1e6; foe.hp = 1e6
+		bot.ctrl = "bot"
+		bot.ai = m.bot_brain.new_mind(m.rng, 0.8)
+		bot.ai["think"] = 0.0
+		bot.last_hit_by = foe       # provoked: it wants this fight
+		var blind := 0; var fired := 0; var frames := 0; var aimed := 0; var hops := 0; var was_air := false
+		var t := 0.0
+		while t < 8.0:
+			# (where they both were when the bot decided: it thinks at the start of the step)
+			var bp0 := bot.pos
+			var fp0 := foe.pos
+			m.step(Match.DT); t += Match.DT; frames += 1
+			# a hop is the bot pressing jump (a jump starts at Hunter.JUMP_V); mantles (a ledge pull, on
+			# a pad) and stepping up a terrace aren't hopping at anything
+			var jumped := bot.vel.y > Hunter.JUMP_V * 0.85 and bot.pad.is_empty() and not bot.mantling()
+			if jumped and not was_air: hops += 1
+			was_air = jumped
+			if bot.ai.get("tgt") == foe: aimed += 1
+			if bot.inp.get("fire", false) and bot.ai.get("tgt") == foe:
+				fired += 1
+				# (judged on the map itself: a rock on the line, or ground above the shot, which runs
+				# from the bot's eye to the rival's chest)
+				var dl := Vector2(fp0.x - bp0.x, fp0.z - bp0.z)
+				for k in 20:
+					var f := (k + 0.5) / 20.0
+					var q := Vector2(bp0.x, bp0.z) + dl * f
+					if w.is_block(q.x, q.y) or w.ground_at(q.x, q.y) > lerpf(bp0.y + 0.95, fp0.y + 0.9, f):
+						blind += 1
+						if blind <= 3: print("REVIVE  blind shot: bot %s foe %s grounded %s" % [bp0.snapped(Vector3(0.01, 0.01, 0.01)), fp0.snapped(Vector3(0.01, 0.01, 0.01)), bot.grounded])
+						break
+		ok(aimed > 0 and blind == 0 and hops <= 3, "%s: no shots without a clear line, no hopping at it (after the rival %d of %d frames, %d firing, %d blind, %d hops)" % [variant, aimed, frames, fired, blind, hops])
+	print("REVIVE CHECK %s" % ("PASS" if bad == 0 else "FAIL (%d)" % bad))
+	main.get_tree().quit()
