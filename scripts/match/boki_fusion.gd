@@ -4,7 +4,7 @@ extends RefCounted
 ## MergeParts' primitives: they ride the torso like any other parts. Forms without a model keep MergeParts.
 
 const PATH := "res://art/kin/%s/%s_fusion.glb"
-const HIP_Y := 0.42        # m: the torso height the parts are modelled for; 3D Hunters carry theirs higher
+const HIP_Y := 0.54        # m: the torso height the parts are modelled for; 3D Hunters carry theirs higher
 ## A kit form's id, or a fallback form's type -> the species whose parts it wears.
 const SPECIES := {"venom": "cindle", "tidal_shell": "puddlet", "spore": "burrlet"}
 
