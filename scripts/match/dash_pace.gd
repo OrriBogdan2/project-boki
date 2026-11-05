@@ -19,8 +19,8 @@ static func frame_dt(m: Match, d: float) -> float:
 	return minf(d, MAX_FRAME_S)
 
 ## The last of Match.warm_up, behind the loading screen: one of every effect a dash or Lunge draws, on the view and
-## settings play starts with. The same stand-ins drawn earlier in warm_up (before its benchmark sets the quality) still
-## left 14 pipelines compiling on Sable's first dash and 12 on Kael's first Lunge; drawn here, none and 6.
+## settings play starts with, held until the pipelines settle. Forward+, cold cache: Sable's first dash built 15
+## pipelines mid-move and Kael's first Lunge 12; with this, none (--dash-frames-check).
 static func rehearse(m: Match) -> void:
 	var cam: Camera3D = m.cam
 	var at: Vector3 = cam.global_position - cam.global_transform.basis.z * 6.0

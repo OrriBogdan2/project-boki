@@ -31,6 +31,7 @@ var _col: ArrayMesh
 var _ribbon: ArrayMesh
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
 var _warming: Array = []       # the loading screen's stand-ins (prewarm)
+var _solids: Array = []        # kept for the match: freeing the last material of a kind frees its compiled shader
 
 static func of(match_node: Node) -> DJFx:
 	if match_node.has_meta("dj_fx"):
@@ -105,9 +106,10 @@ func prewarm(at: Vector3) -> void:
 		for mesh: Mesh in [_quad_mesh(), _ribbon_mesh(), _crescent_mesh(140.0), _column()]:
 			_warming.append(_mi(mesh, _mat(0, Color.WHITE, Color.WHITE)))
 			_warming.append(_mi(mesh, _mat(0, Color.WHITE, Color.WHITE, false, true)))
+		_solids = [solid(Color.WHITE), solid(Color(1, 1, 1, 0.5))]
 		for mesh: Mesh in [_quad_mesh(), star_mesh(4, 0.3), Models.sphere(0.1, 8), Models.capsule(0.3, 1.25)]:
-			_warming.append(_mi(mesh, solid(Color.WHITE)))
-			_warming.append(_mi(mesh, solid(Color(1, 1, 1, 0.5))))
+			for mt: Material in _solids:
+				_warming.append(_mi(mesh, mt))
 		for node: MeshInstance3D in _warming:
 			node.top_level = true
 			add_child(node)

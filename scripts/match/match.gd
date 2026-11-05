@@ -501,17 +501,7 @@ static func _warm_key(gi: GeometryInstance3D) -> String:
 			mats.append(_warm_mat_key(mt))
 	if gi.material_overlay:
 		mats.append("+" + _warm_mat_key(gi.material_overlay))
-	return kind + ":" + ",".join(mats) + _warm_formats(mesh)
-
-## A surface's vertex format picks a pipeline too (a star and a ball with one material are two first draws).
-static func _warm_formats(mesh: Mesh) -> String:
-	var s := ""
-	if mesh is ArrayMesh:
-		for si in mesh.get_surface_count():
-			s += "/%d" % (mesh as ArrayMesh).surface_get_format(si)
-	else:
-		s = "/" + mesh.get_class()
-	return s
+	return kind + ":" + ",".join(mats)
 
 static var _mat_keys := {}
 static func _warm_mat_key(mt: Material) -> String:
