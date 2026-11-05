@@ -50,7 +50,7 @@ def mouth_arc(n=9, grin=1.0):
 
 
 def mouth_open(x):
-    return 0.003 + 0.0035 * np.sqrt(np.clip(1.0 - (x / 0.062) ** 2, 0.0, 1.0))
+    return 0.0012 + 0.0008 * np.sqrt(np.clip(1.0 - (x / 0.062) ** 2, 0.0, 1.0))
 
 
 def head_base(q):
@@ -617,28 +617,23 @@ def pouch(P, R):
 
 # --------------------------------------------------------------------------------------------------------- geode
 def geode(P, r=1.0, seed=3):
-    """A seeing-stone in its own space (radius r ~ 1), the cut face toward +Y: rough rock behind, a raised rim, a pit
-    of crystals, the eye domed in the pit."""
+    """A seeing-stone in its own space (radius r ~ 1), the eye toward +Y (tarek_head): a flat angular rock, a shallow socket
+    round the eye, a plain back."""
     Pn = P / r
-    rock = ellipsoid(Pn, (0, -0.06, 0), (0.97, 0.78, 1.04))
-    rock = rock + 0.07 * fbm(Pn, 2.2, seed, 2) + 0.018 * fbm(Pn, 8.0, seed + 5, 2)
-    cut = Pn[..., 1] - 0.36 - 0.03 * noise(Pn, 8.0, seed + 2)
-    d = smax(rock, cut, 0.16)
-    rad = np.sqrt(Pn[..., 0] ** 2 + Pn[..., 2] ** 2)
-    az = np.arctan2(Pn[..., 2], Pn[..., 0])
-    jag = 0.075 * np.abs(np.sin(az * 6.5 + 0.7)) + 0.03 * noise(Pn, 7.0, seed + 3)
-    pit_r = 0.74 - jag
-    pit = np.sqrt(np.maximum(rad - pit_r * 0.3, 0.0) ** 2 + (Pn[..., 1] - 0.40) ** 2) - pit_r * 0.8
-    d = smax(d, -pit, 0.015)
-    # crystals lining the pit
-    cr = np.abs(np.sin(az * 8.0 + 1.3 * np.sin(rad * 7.0)))
-    d = d - 0.03 * cr * sstep(0.75, 0.55, rad)
-    return d * r
+    rock = ellipsoid(Pn, (0, -0.1, 0), (1.0, 0.56, 1.1))
+    # (facets: a few cutting planes, so the outline is a chipped polygon, not an egg)
+    for i in range(9):
+        a = i * 2.4 + seed
+        n = vec(math.cos(a), 0.34 * math.sin(a * 2.1), math.sin(a))
+        n = n / length(n)
+        rock = smax(rock, (Pn * n).sum(-1) - 0.8 - 0.1 * math.sin(a * 3.0), 0.05)
+    rock = rock + 0.022 * fbm(Pn, 6.0, seed + 5, 2)
+    return smax(rock, -ellipsoid(Pn, (0, 0.46, 0), (0.62, 0.3, 0.72)), 0.05) * r
 
 
 def geode_iris(P, r=1.0):
     Pn = P / r
-    return ellipsoid(Pn, (0, 0.14, 0), (0.46, 0.16, 0.46)) * r
+    return ellipsoid(Pn, (0, 0.1, 0), (0.56, 0.2, 0.66)) * r
 
 
 # ----------------------------------------------------------------------------------------------- swept tube helper

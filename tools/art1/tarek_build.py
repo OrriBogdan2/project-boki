@@ -65,9 +65,9 @@ def mx(P):
 
 
 REF = os.environ.get("TAREK_REF", os.path.expanduser("~/shots-s2/art1/tarek/ref2"))     # the master sheets (briefs/art-refs)
-FACE_PX = 1260.0               # sheet px per model m on the head inset of tarek_FINAL_sheet
-FACE_CX = 1682.0               # the inset's nose line, sheet px
-FACE_MOUTH_Y = 497.0           # the mouth line, sheet px
+FACE_PX = 1300.0               # sheet px per model m on the front view of tarek_head
+FACE_CX = 362.0               # the inset's nose line, sheet px
+FACE_MOUTH_Y = 803.0           # the mouth line, sheet px
 X = float(R.sh[0])
 GEO_R = 0.1
 Z_S = float(R.sh[2])
@@ -75,7 +75,6 @@ Z_S = float(R.sh[2])
 # name: field, bounds (lo, hi), low step, target tris, clay colour, slot
 PARTS = {
     "head": dict(f=head_f, lo=HC + S.vec(-0.14, -0.17, -0.3), hi=HC + S.vec(0.14, 0.17, 0.17), h=0.0032, tris=1800, col="8a5a3c"),
-    "teeth": dict(f=teeth_f, lo=HC + S.vec(-0.07, 0.06, -0.11), hi=HC + S.vec(0.07, 0.13, -0.03), h=0.003, tris=80, col="f0ece0"),
     "bandana": dict(f=bandana_f, lo=HC + S.vec(-0.14, -0.19, -0.06), hi=HC + S.vec(0.14, 0.17, 0.14), h=0.0035, tris=450, col="c9b89a"),
     "cap": dict(f=cap_f, lo=HC + S.vec(-0.16, -0.19, -0.14), hi=HC + S.vec(0.16, 0.17, 0.2), h=0.0075, tris=560, col="1c1618"),
     "torso": dict(f=lambda P: T.torso(P, R), lo=S.vec(-0.33, -0.2, R.waist[2] - 0.03), hi=S.vec(0.33, 0.2, R.neck[2] + 0.03), h=0.005, tris=850, col="8a5a3c"),
@@ -305,8 +304,8 @@ def locs_bag():
         c = path[i]
         R0 = rad * 1.14
         if kind in ("copper", "steel", "stone", "geode"):
-            ln = {"copper": 0.0135, "steel": 0.015, "stone": 0.022, "geode": 0.03}[kind]
-            fat = {"copper": 1.14, "steel": 1.13, "stone": 1.34, "geode": 1.65}[kind]
+            ln = {"copper": 0.021, "steel": 0.019, "stone": 0.022, "geode": 0.03}[kind]
+            fat = {"copper": 1.32, "steel": 1.3, "stone": 1.34, "geode": 1.65}[kind]
             r0 = R0 * fat
             seg = np.array((c - tan * ln, c, c + tan * ln), np.float32)
             kid = {"copper": 0.0, "steel": 1.0, "stone": 2.0, "geode": 3.0}[kind]

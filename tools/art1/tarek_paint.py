@@ -52,7 +52,7 @@ def sample(img, x, y):
 
 def p_face(P, N, c):
     """The head inset of the master sheet, on the front of the head: the skin, the nose, the mouth, the bandage's folds."""
-    img = art_img("tarek_FINAL_sheet")
+    img = art_img("tarek_head")
     q = P - HC
     k = FACE_PX
     px = FACE_CX - q[:, 0] * k
@@ -220,7 +220,7 @@ def p_wraps(P, N, occ, cav, a):
 def p_hair(P, N, occ, cav, a):
     key = T.key_shade(N)
     v = lightness(key, occ, cav, 0.75)
-    c = tones("08080c", "18181e", "40424e", v)
+    c = tones("050505", "121213", "2e2e32", v)
     c = crease(c, cav, "060405", 0.9)
     sheen = S.sstep(0.68, 0.9, key) * S.sstep(-0.1, 0.5, S.noise(P * S.vec(1, 1, 0.3), 46.0, 3))
     return S.mix(c, S.hexc("6e6a7e")[None, :], sheen * 0.3), None
@@ -230,17 +230,17 @@ def p_locs(P, N, occ, cav, a):
     key = T.key_shade(N)
     ph = a[:, 1] * 6.283 * 2.0 + a[:, 0] * 86.0
     groove = 0.5 + 0.5 * np.sin(ph)
-    v = (0.3 + 0.7 * key) * (0.72 + 0.28 * S.sstep(0.05, 0.55, groove)) * (0.55 + 0.45 * occ)
-    c = tones("08080c", "16161c", "3c3e4c", v)
+    v = (0.3 + 0.7 * key) * (0.93 + 0.07 * groove) * (0.6 + 0.4 * occ)
+    c = tones("050505", "111112", "2c2c30", v)
     sheen = S.sstep(0.74, 0.95, key) * S.sstep(0.45, 0.9, groove)
-    return S.mix(c, S.hexc("555a72")[None, :], sheen * 0.3), None
+    return S.mix(c, S.hexc("46464e")[None, :], sheen * 0.3), None
 
 
 def p_beads(P, N, occ, cav, a):
     key = T.key_shade(N)
     kind = a[:, 3]
     v = key * (0.55 + 0.45 * occ)
-    copper = tones("4e2a1a", "a4643c", "e8b48a", v + 0.2 * S.sstep(0.74, 0.9, key))
+    copper = tones("5a3020", "b4704a", "eebc94", v + 0.2 * S.sstep(0.74, 0.9, key))
     steel = tones("4a5058", "9aa2aa", "e6ecf0", v + 0.2 * S.sstep(0.74, 0.9, key))
     stone = tones("5a4c40", "ac9a84", "dacdb6", v + 0.06 * S.noise(P, 120.0, 3))
     geo = tones("6a5848", "c4b49c", "f0e6d0", v)
@@ -257,31 +257,23 @@ def p_crystals(P, N, occ, cav, a):
 
 def p_geode(P, N, occ, cav, a):
     Pn = P / GEO_R
-    rad = np.sqrt(Pn[:, 0] ** 2 + Pn[:, 2] ** 2)
-    v = lightness(T.key_shade(N), occ, cav * 0.7, 0.65) + 0.08 * S.fbm(Pn, 5.0, 6, 3)
-    c = tones("5c5448", "a09482", "d0c6b4", v + 0.05)
-    # the pale banded rim, the crystals going warm toward the eye
-    face = S.sstep(0.0, 0.3, Pn[:, 1])
-    rim = tones("7c7060", "c4b8a4", "ecE2d0", v + 0.05)
-    c = S.mix(c, rim, face * S.sstep(0.98, 0.84, rad))
-    band = S.sstep(0.03, 0.0, np.abs(rad - 0.82 - 0.02 * np.sin(np.arctan2(Pn[:, 2], Pn[:, 0]) * 6.0)))
-    c = S.mix(c, S.hexc("a88a6c")[None, :], band * face * 0.8)
-    deep = face * S.sstep(0.74, 0.4, rad)
-    c = S.mix(c, S.mix(S.hexc("6e4228")[None, :], S.hexc("f8a858")[None, :], S.sstep(0.62, 0.38, rad)) * (0.55 + 0.6 * v)[:, None], deep)
-    e = S.hexc("ff8a1c")[None, :] * (deep * S.sstep(0.55, 0.36, rad) * 0.5)[:, None]
-    return crease(c, cav, "2a1c14", 0.6), e
+    v = lightness(T.key_shade(N), occ, cav * 0.7, 0.65) + 0.05 * S.fbm(Pn, 5.0, 6, 3) + 0.05
+    c = tones("4e443c", "8c8074", "c0b4a6", v)
+    socket = S.sstep(0.95, 0.68, np.sqrt(Pn[:, 0] ** 2 + (Pn[:, 2] / 1.16) ** 2)) * S.sstep(0.0, 0.2, Pn[:, 1])
+    c = S.mix(c, S.hexc("3a2a22")[None, :], socket * 0.8)
+    return crease(c, cav, "2a221c", 0.6), None
 
 
 def p_iris(P, N, occ, cav, a):
     Pn = P / GEO_R
     x, z = Pn[:, 0], Pn[:, 2]
-    r = np.sqrt(x * x + z * z) / 0.46
+    r = np.sqrt((x / 0.56) ** 2 + (z / 0.66) ** 2)
     az = np.arctan2(z, x)
     fib = 0.5 + 0.5 * np.sin(az * 34.0 + 3.0 * S.noise(Pn, 8.0, 2)) * (0.6 + 0.4 * np.sin(az * 13.0))
-    c = S.ramp(np.clip(1.0 - r + 0.18 * (fib - 0.5), 0, 1), ("7a1e06", "e8560c", "ff9a1e", "ffd25e", "ffe88e"))
-    slit = (np.abs(x) / (0.06 * np.sqrt(np.clip(1.0 - (z / 0.36) ** 2, 0.0, 1.0)) + 0.002))
-    c = S.mix(S.hexc("1a0704")[None, :], c, S.sstep(0.85, 1.15, slit))
-    c = S.mix(c, S.hexc("fff4cc")[None, :], S.sstep(0.09, 0.05, S.length(np.stack((x + 0.13, z - 0.14), -1))))
+    c = S.ramp(np.clip(1.0 - r + 0.16 * (fib - 0.5), 0, 1), ("4a1206", "b83c0a", "f07a14", "ffb030", "ffd868"))
+    slit = np.abs(x) / (0.075 * np.sqrt(np.clip(1.0 - (z / 0.42) ** 2, 0.0, 1.0)) + 0.002)
+    c = S.mix(S.hexc("120604")[None, :], c, S.sstep(0.85, 1.15, slit))
+    c = S.mix(c, S.hexc("fff0c0")[None, :], S.sstep(0.09, 0.05, S.length(np.stack((x + 0.16, z - 0.2), -1))))
     return c, c * 0.8
 
 
