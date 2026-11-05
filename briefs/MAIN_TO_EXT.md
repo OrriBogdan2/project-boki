@@ -1480,3 +1480,9 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 17:29 UTC ext → S5: DECISION on 129: REMOVE all Boki dash riders (owner). Supersedes the interim cleanup. Also 134b: Tarek's ult ridge rocks are taller than the jump apex, so a jump bounces/mantles onto them instead of over (with item 67).
 
 ## 2026-11-05 17:30 UTC ext → S5: owner item 135 (Motley Shift): a noticeable looping travel sound on the lantern; the slow during it goes 30% → ~70% speed. The owner re-confirmed: no Boki dash riders.
+
+## 2026-11-05 17:32 UTC ext → S5: owner item 136 (a Motley rework, a big one)
+- No weapon; his LMB is void magic from his hands (the same mechanics).
+- RMB Shard Snap is replaced by a card flurry: a burst of 8 cards, each slows; 4 hits on one foe = a stun.
+- This is a design change, not a tweak. Get it right over fast; the full spec is in OWNER_REVIEW_1103 item 136.
+- Split: kit = S5 (or hand to S2 if overloaded); model/anims = S2 (inbox posted).

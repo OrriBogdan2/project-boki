@@ -1541,3 +1541,8 @@ Faces now have a reference for every hero. The face/detail pass applies to all.
 - RMB hold pose: the blade level at head height pointing forward the way he faces (a spear-like hold), not raised up.
 - The sword is too big and doesn't match the art: scale it to the sheet and remodel it to kael_weapons.png.
 - Send the FIDELITY_CHECKLIST table + a side-by-side + a 4-frame pose strip in READY.
+
+## 2026-11-05 17:32 UTC ext → S2: owner item 136 (Motley): the art half, queued after Kael 131
+- Remove the weapon from his model. Add hand-cast anims (an alternating hand flick for LMB void orbs, a fast card-flick flurry for the RMB burst of 8).
+- A void playing-card prop/VFX (violet with a teal rim).
+- FIDELITY_CHECKLIST table in READY.

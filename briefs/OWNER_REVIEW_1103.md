@@ -1422,3 +1422,32 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - The travel sfx plays from the throw to the landing (one loop instance).
   - His move speed during it is ≥0.65x.
+
+## 136. Motley rework: no weapon, void magic from his hands; RMB becomes a card flurry (8 cards, slow, stun on 4 hits) (owner, 17:22 UTC Nov 5). Big item: do it carefully.
+- The owner: "void jester should be shooting void stuff and not have a weapon on him. we can make his rmb cards, and multifire, that slow and then stun if he hits 4 on someone (lets say he gets a burst of 8). this is different than void who does a wind up stun, so this is a bit of work to get this right".
+- **No weapon:**
+  - Remove the held weapon model (the tether_lantern).
+  - His LMB keeps its mechanics: orbs to full range through walls, the longer-wait = bigger/faster/harder orb, a full orb slows.
+  - Re-skin it as void magic cast from his hands: dark violet/black orbs with a teal rim (his palette), a hand-flick cast anim alternating hands, a gloved-hand glow while charging up the wait bonus.
+  - Card text: "Void orbs" (no lantern).
+  - The Shift "Lantern Trade" keeps its mechanics; its thrown object becomes a void card/orb (S5/S2 decide; keep the name or rename to "Void Trade" for consistency).
+- **RMB: card flurry** (replaces Shard Snap, the source's wind-up stun):
+  - A quick multi-fire burst of **8 cards**, flicked rapidly toward the cursor (~0.08 s apart, a slight fan/spread, tune), each a fast projectile.
+  - Each card hit: small damage + a stacking slow on that foe.
+  - **4 card hits on the same foe within the burst = a stun** (~0.8 s, tune), once per burst per foe. A big "pop" on the stun.
+  - No wind-up: it fires on the press, and he can move while flicking (slight move slow, tune).
+  - Read: void-tinted playing cards (jester theme) with a violet trail. A card tally on the target (pips 1-4) makes the stun readable.
+  - Tune damage so 8/8 on one target ≈ Shard Snap's old burst value.
+  - Cooldown ~10 s (as now, tune).
+- **Art:**
+  - S2 removes the weapon from his model, adds the hand-cast poses, and makes a card prop/VFX.
+  - Check his FINAL sheet (`briefs/art-refs/ostra_FINAL_sheet.png`): if the sheet shows a weapon, keep it as a cosmetic only on his back/belt or drop it. Default: drop it.
+- **Owner:**
+  - Kit: S5, or S2 if S5 is overloaded.
+  - Model/anims: S2.
+  - Sounds: S4 (a card flick, a stun pop, void orb).
+- **Assert:**
+  - 8 cards per press.
+  - 4 hits on one dummy → a stun once; 3 hits → slowed, not stunned.
+  - No weapon node on his model.
+  - LMB from the hand anchors.
