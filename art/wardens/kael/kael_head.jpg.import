@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dui5boyal022o"
-path="res://.godot/imported/kael_head.jpg-3c5d98799939e0256bab29de28545d9b.ctex"
+path.bptc="res://.godot/imported/kael_head.jpg-3c5d98799939e0256bab29de28545d9b.bptc.ctex"
+path.astc="res://.godot/imported/kael_head.jpg-3c5d98799939e0256bab29de28545d9b.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "4d19f2ef6cec8d3e6c07447c2613d22a"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/kael/kael_head.jpg"
-dest_files=["res://.godot/imported/kael_head.jpg-3c5d98799939e0256bab29de28545d9b.ctex"]
+dest_files=["res://.godot/imported/kael_head.jpg-3c5d98799939e0256bab29de28545d9b.bptc.ctex", "res://.godot/imported/kael_head.jpg-3c5d98799939e0256bab29de28545d9b.astc.ctex"]
 
 [params]
 
