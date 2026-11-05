@@ -75,10 +75,10 @@ PARTS = {
     "bandana": dict(f=bandana_f, lo=HC + S.vec(-0.14, -0.19, -0.06), hi=HC + S.vec(0.14, 0.17, 0.14), h=0.0035, tris=450, col="c9b89a"),
     "cap": dict(f=cap_f, lo=HC + S.vec(-0.16, -0.19, -0.14), hi=HC + S.vec(0.16, 0.17, 0.2), h=0.0075, tris=560, col="1c1618"),
     "torso": dict(f=lambda P: T.torso(P, R), lo=S.vec(-0.33, -0.2, R.waist[2] - 0.03), hi=S.vec(0.33, 0.2, R.neck[2] + 0.03), h=0.005, tris=850, col="8a5a3c"),
-    "arms": dict(f=lambda P: T.arm(P, R), lo=S.vec(0.14, -0.13, R.el[2] - 0.12), hi=S.vec(0.43, 0.13, Z_S + 0.11), h=0.005, tris=400, col="8a5a3c"),
-    "hands": dict(f=lambda P: T.hand(P, R), lo=S.vec(-0.42, -0.15, R.wr[2] - 0.32), hi=S.vec(-0.12, 0.2, R.wr[2] + 0.08), h=0.0028, tris=560, col="8a5a3c"),
-    "stone": dict(f=lambda P: T.stone_arm(mx(P), R, SEEDS_A, H_A), lo=S.vec(-0.58, -0.26, R.wr[2] - 0.06), hi=S.vec(-0.02, 0.26, Z_S + 0.24), h=0.0065, tris=1750, col="8c90a0"),
-    "gauntlet": dict(f=lambda P: T.stone_arm(P, R, SEEDS_G, H_G, T.gauntlet_core), lo=S.vec(0.04, -0.24, R.wr[2] - 0.29), hi=S.vec(0.54, 0.24, R.el[2] + 0.14), h=0.0058, tris=950, col="8c90a0"),
+    "arms": dict(f=lambda P: T.arm(P, R), lo=S.vec(0.14, -0.13, R.wr[2]), hi=S.vec(0.43, 0.13, Z_S + 0.11), h=0.005, tris=400, col="8a5a3c"),
+    "hands": dict(f=lambda P: T.fist(P - R.wr, 1.36), lo=S.vec(0.06, -0.16, R.wr[2] - 0.27), hi=S.vec(0.48, 0.16, R.wr[2] + 0.05), h=0.0034, tris=430, col="8a5a3c"),
+    "stone": dict(f=lambda P: T.stone_arm(mx(P), R, SEEDS_A, H_A), lo=S.vec(-0.6, -0.27, R.wr[2] - 0.3), hi=S.vec(-0.02, 0.26, Z_S + 0.24), h=0.0065, tris=1950, col="8c90a0"),
+    "gauntlet": dict(f=lambda P: T.stone_arm(P, R, SEEDS_G, H_G, T.gauntlet_core), lo=S.vec(0.08, -0.16, R.wr[2] - 0.02), hi=S.vec(0.46, 0.16, R.el[2] + 0.02), h=0.0058, tris=760, col="8c90a0"),
     "wrap": dict(f=lambda P: T.wrap_band(P, R), lo=S.vec(-0.22, -0.17, R.waist[2] + 0.04), hi=S.vec(0.22, 0.17, R.waist[2] + 0.2), h=0.006, tris=140, col="d8cfba"),
     "sash": dict(f=lambda P: T.sash(P, R), lo=S.vec(-0.27, -0.2, R.waist[2] - 0.06), hi=S.vec(0.27, 0.25, R.waist[2] + 0.18), h=0.0045, tris=380, col="b04a26"),
     "skirt": dict(f=lambda P: T.skirt(P, R), lo=S.vec(-0.33, -0.27, R.waist[2] - 0.46), hi=S.vec(0.33, 0.27, R.waist[2] + 0.1), h=0.0055, tris=560, col="b04a26"),
@@ -312,8 +312,8 @@ def locs_bag():
     return [b, jw]
 
 
-SASH_TAILS = {"sa": [(-0.03, 0.2, 0.0), (-0.02, 0.215, -0.08), (-0.042, 0.212, -0.22), (-0.05, 0.215, -0.36), (-0.04, 0.215, -0.46)],
-              "sb": [(-0.075, 0.186, -0.01), (-0.1, 0.195, -0.07), (-0.115, 0.194, -0.17), (-0.13, 0.19, -0.27)]}
+SASH_TAILS = {"sa": [(-0.03, 0.2, 0.0), (-0.02, 0.222, -0.1), (-0.042, 0.225, -0.28), (-0.05, 0.215, -0.46), (-0.04, 0.2, -0.64)],
+              "sb": [(-0.075, 0.186, -0.01), (-0.1, 0.205, -0.09), (-0.125, 0.208, -0.24), (-0.14, 0.2, -0.38)]}
 BAND_TAILS = {"ba": [(0.01, -0.158, 0.05), (0.03, -0.2, 0.0), (0.05, -0.225, -0.07), (0.075, -0.24, -0.15)],
               "bb": [(-0.015, -0.158, 0.05), (-0.04, -0.195, -0.0), (-0.055, -0.215, -0.06), (-0.065, -0.225, -0.13)]}
 
@@ -324,10 +324,10 @@ def ribbons_bag():
     z0 = float(R.waist[2]) + 0.07
     for j, (nm, pts) in enumerate(SASH_TAILS.items()):
         P = np.array(pts, np.float32) + S.vec(0, 0, z0)
-        n = 8 if nm == "sa" else 6
+        n = 9 if nm == "sa" else 6
         path = T.smooth_path(P, n)
         d = np.concatenate(([0], np.cumsum(np.linalg.norm(np.diff(path, axis=0), axis=1))))
-        flat = [(0.03 + 0.03 * min(1.0, i / 2.0) * (1 - 0.32 * (i == n - 1)), 0.008) for i in range(n)]
+        flat = [(0.034 + 0.05 * min(1.0, i / 3.0) * (1 - 0.32 * (i == n - 1)), 0.008) for i in range(n)]
         sweep(sash, path, [0.03] * n, 6, lambda i, k: (d[i], k / 6.0, 7 + j, 0.0), flat=flat, ofs=(j * 0.3, 0.0))
     for j, (nm, pts) in enumerate(BAND_TAILS.items()):
         P = np.array(pts, np.float32) + HC

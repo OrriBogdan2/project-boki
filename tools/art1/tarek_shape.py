@@ -126,7 +126,7 @@ def scalp(q):
 
 def band_t(q):
     """Height from the bandana's middle line: over the eyes in front, a little higher at the knot."""
-    return q[..., 2] - 0.036 + 0.006 * (q[..., 1] / 0.13)
+    return q[..., 2] - 0.04 + 0.006 * (q[..., 1] / 0.13)
 
 
 def cap_shell(q):
@@ -139,8 +139,8 @@ def bandana(q):
     # (a soft wrap: thicker over the eyes, cloth folds crossing it)
     w = np.arctan2(q[..., 0], q[..., 1])
     folds = 0.0028 * np.sin(t * 95.0 + 3.0 * np.sin(w * 1.7) + 1.6 * noise(q, 22.0, 3)) + 0.003 * noise(q, 18.0, 5)
-    sheet = np.abs(s - 0.0115) - 0.0095 + folds
-    return smax(sheet, np.abs(t) - 0.046 + 0.008 * sstep(0.05, -0.12, q[..., 1]) - 0.004 * noise(q, 30.0, 7), 0.006)
+    sheet = np.abs(s - 0.0135) - 0.0115 + folds
+    return smax(sheet, np.abs(t) - 0.058 + 0.008 * sstep(0.05, -0.12, q[..., 1]) - 0.004 * noise(q, 30.0, 7), 0.006)
 
 
 def bandana_knot(q):
@@ -160,8 +160,9 @@ def hair_cap(q):
     d = s - 0.026 * np.sqrt(rope) + 0.012
     d = d + 0.0035 * np.sin(length(c) * 110.0 + az * 3.0)
     # only above the bandana's top edge, and down the back of the head to the nape
-    above = band_t(q) - 0.044
-    back = np.minimum(-0.035 - q[..., 1], q[..., 2] + 0.125)
+        t = band_t(q)
+    above = t - 0.056
+    back = np.minimum(np.minimum(-0.035 - q[..., 1], q[..., 2] + 0.125), -0.05 - t)      # (under the band, down the nape)
     return smax(d, -np.maximum(above, back), 0.008)
 
 
@@ -222,7 +223,6 @@ def hand(P, R, curl=1.0):
 FINGERS = ((0.054, 0.104, 0.0205), (0.0185, 0.114, 0.0215), (-0.0185, 0.106, 0.0205), (-0.054, 0.086, 0.0185))
 THUMB = np.array(((-0.008, 0.06, -0.01), (-0.016, 0.104, -0.038), (-0.03, 0.122, -0.08), (-0.04, 0.127, -0.112)), np.float32)
 KNUCKLE_Z = -0.112
-HAND_K = 1.2                 # his big hand, under the stone arm
 
 
 def finger_pts(y, ln):
@@ -267,7 +267,7 @@ def stone_seeds(R, seed=31):
     fist = wr + vec(0, 0, -0.11)
     path = ((sh + vec(0.03, 0, 0.1), 3, 0.1), (sh + vec(0.05, 0, -0.03), 4, 0.17), (sh + vec(0.02, 0, -0.16), 4, 0.13),
             (mix(sh, el, 0.72), 4, 0.12), (el + vec(0, 0, -0.03), 4, 0.12), (mix(el, wr, 0.38), 4, 0.13), (mix(el, wr, 0.72), 4, 0.13),
-            (wr + vec(0, 0, 0.03), 4, 0.1))
+            (wr + vec(0, 0, 0.03), 4, 0.1), (fist, 4, 0.13))
     pts = []
     for ri, (c, n, r) in enumerate(path):
         for i in range(n):
@@ -286,16 +286,26 @@ def stone_core(P, R):
     d = smin(d, ellipsoid(P, mix(sh, el, 0.5), (0.122, 0.125, 0.15)), 0.04)
     d = smin(d, cone(P, el, wr, 0.098, 0.118), 0.03)
     d = smin(d, ellipsoid(P, mix(el, wr, 0.55), (0.118, 0.125, 0.19)), 0.04)
-    # (it stops at the wrist: the hand below is his own, greyed and cracked)
-    return smax(d, wr[2] - 0.015 - P[..., 2], 0.012)
+    return smin(d, fist(P - wr, 1.3), 0.02)
+
+
+def fist(Q, k=1.0):
+    """A closed fist hanging from the wrist (Q in wrist space, x out, y forward, palm side -x): four rolled fingers across
+    its end, the thumb folded over them."""
+    Q = Q / k
+    d = ellipsoid(Q, (0.0, 0.0, -0.075), (0.056, 0.078, 0.082))
+    for y in (-0.054, -0.018, 0.018, 0.054):
+        d = smin(d, capsule(Q, (0.03, y, -0.14), (-0.042, y, -0.128), 0.0205), 0.006)
+    d = smin(d, capsule(Q, (-0.05, 0.075, -0.075), (-0.058, 0.0, -0.118), 0.019), 0.012)
+    d = smin(d, cone(Q, (0.0, 0.0, 0.02), (0.0, 0.0, -0.04), 0.042, 0.05), 0.02)
+    return d * k
 
 
 def gauntlet_seeds(R, seed=37):
     """The right arm's slabs: tall ones up the forearm, smaller over the fist."""
     rs = np.random.RandomState(seed)
     el, wr = R.el, R.wr
-    fist = wr + vec(0, 0, -0.11)
-    path = ((mix(el, wr, 0.2), 4, 0.12), (mix(el, wr, 0.62), 4, 0.15), (wr + vec(0, 0, 0.02), 4, 0.13), (fist, 4, 0.11))
+    path = ((mix(el, wr, 0.42), 4, 0.09), (mix(el, wr, 0.72), 4, 0.1), (wr + vec(0, 0, 0.04), 4, 0.09))
     pts = []
     for ri, (c, n, r) in enumerate(path):
         for i in range(n):
@@ -305,17 +315,12 @@ def gauntlet_seeds(R, seed=37):
 
 
 def gauntlet_core(P, R):
-    """A great stone gauntlet and fist on the right forearm: flaring to the wrist, two slabs standing past the elbow."""
+    """The stone gauntlet on the right forearm: much slighter than the left arm, one slab standing at the elbow side, ending
+    at the wrist so the fist shows."""
     el, wr = R.el, R.wr
-    d = ellipsoid(P, mix(el, wr, 0.58), (0.135, 0.145, 0.235))
-    d = smin(d, cone(P, el + vec(0.05, 0.02, 0.06), mix(el, wr, 0.4), 0.03, 0.09), 0.03)
-    d = smin(d, cone(P, el + vec(0.015, -0.05, 0.03), mix(el, wr, 0.4), 0.025, 0.09), 0.03)
-    # the fist, closed for good: a block of stone with four knuckles and a thumb slab
-    f = wr + vec(0, 0.0, -0.115)
-    d = smin(d, ellipsoid(P, f, (0.1, 0.122, 0.112)), 0.03)
-    for y in (-0.075, -0.026, 0.026, 0.075):
-        d = smin(d, sphere(P, f + vec(0.03, y, -0.082), 0.042), 0.018)
-    return smin(d, ellipsoid(P, f + vec(-0.07, 0.07, 0.01), (0.04, 0.06, 0.08)), 0.02)
+    d = ellipsoid(P, mix(el, wr, 0.68), (0.088, 0.094, 0.165))
+    d = smin(d, cone(P, mix(el, wr, 0.2) + vec(0.045, 0.0, 0.02), mix(el, wr, 0.55), 0.016, 0.06), 0.02)
+    return smax(d, wr[2] + 0.002 - P[..., 2], 0.01)
 
 
 def stone_arm(P, R, seeds, heights, core_fn=None):
@@ -335,9 +340,9 @@ def strata(P, R):
     """His strata tattoos on the stone side of the chest, ribs and back: 1 on a dark angular band, fading to his middle."""
     x, y, z = -P[..., 0], P[..., 1], P[..., 2]       # (the stone arm is his left)
     z0 = float(R.waist[2])
-    band = np.sin((z - 0.75 * x + 0.05 * noise(P, 7.0, 3)) * 48.0 + 2.0 * noise(P, 5.0, 6))
-    m = sstep(-0.01, 0.07, x + 0.1 * (z - z0 - 0.3)) * sstep(z0 + 0.1, z0 + 0.22, z)
-    return sstep(0.1, 0.32, band) * m
+    band = np.sin((z - 0.75 * x + 0.05 * noise(P, 7.0, 3)) * 30.0 + 2.0 * noise(P, 5.0, 6))
+    m = sstep(-0.075, -0.01, x + 0.1 * (z - z0 - 0.3)) * sstep(z0 + 0.1, z0 + 0.2, z)
+    return sstep(-0.2, 0.05, band) * m
 
 
 def left_tattoos(P, R):
@@ -713,7 +718,7 @@ def _shorter(pts):
     return tuple((x, y, z if z > -0.1 else -0.1 + (z + 0.1) * 0.66) for x, y, z in pts)
 
 
-LOCS = [(c, r * 1.22, _shorter(p)) for c, r, p in LOCS]
+LOCS = [(c, r * 1.5, _shorter(p)) for c, r, p in LOCS]
 # (loc index, how far along it 0..1, kind): copper rings, stone beads, amber crystals, as tarek_head_sheet draws them
 BEADS = [(0, 0.58, "copper"), (0, 0.72, "copper"), (0, 0.9, "copper"), (1, 0.5, "steel"), (1, 0.66, "copper"), (1, 0.8, "copper"),
          (2, 0.62, "copper"), (2, 0.82, "copper"), (3, 0.56, "copper"), (3, 0.7, "copper"), (3, 0.84, "copper"),

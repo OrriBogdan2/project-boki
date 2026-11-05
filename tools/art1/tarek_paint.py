@@ -52,7 +52,7 @@ def p_teeth(P, N, occ, cav, a):
 def p_torso(P, N, occ, cav, a):
     c = skin(P, N, occ, cav)
     t = T.strata(P, R)
-    c = S.mix(c, tones("17141a", "2c2830", "4a4450", T.key_shade(N)), t * 0.92)
+    c = S.mix(c, tones("100e14", "201c24", "363240", T.key_shade(N)), t)
     return c, None
 
 
@@ -77,15 +77,13 @@ def p_stone(P, N, occ, cav, a, seeds=None):
 
 
 def p_hands(P, N, occ, cav, a):
-    # (the left hand, greyed by the stone arm above it)
-    v = lightness(T.key_shade(N), occ, cav, 0.74)
-    c = tones("3a3634", "6a6464", "a09a98", v + 0.06)
-    # amber cracks run from the bracer over the backs of his hands
-    Q = (T.fold_x(P) - R.wr) / T.HAND_K
+    c = skin(P, N, occ, cav)
+    # amber cracks run from the gauntlet over the back of his fist
+    Q = T.fold_x(P) - R.wr
     seeds = HAND_SEEDS
     q2 = Q * S.vec(0.0, 1.0, 1.0)
     idx, d1, gap = S.voronoi(q2, seeds)
-    back = S.sstep(0.0, 0.016, Q[:, 0]) * S.sstep(-0.13, -0.09, Q[:, 2])
+    back = S.sstep(-0.01, 0.016, Q[:, 0]) * S.sstep(-0.17, -0.13, Q[:, 2])
     ln = S.sstep(0.0055, 0.0018, gap) * back * S.sstep(-0.05, 0.2, S.noise(P, 16.0, 3))
     c = S.mix(c, S.hexc("5c2410")[None, :], np.minimum(ln * 2.2, 1.0) * back)
     c = S.mix(c, AMBER[None, :], ln)

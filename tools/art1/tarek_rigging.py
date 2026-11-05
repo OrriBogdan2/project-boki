@@ -26,16 +26,8 @@ def add_bones(arm):
     for sd, sx in (("L", -1.0), ("R", 1.0)):
         f = S.vec(sx, 1, 1)
         wr = R.wr * f
-        K_ = S.vec(0, 0, T.KNUCKLE_Z) * T.HAND_K
         bone("foot." + sd, "shin." + sd, R.ankle * f, R.ankle * f + S.vec(0, 0.12, -0.04), (0, 0, 1))
         bone("lip." + sd, "head", HC + S.vec(0.062 * sx, 0.1, -0.068), HC + S.vec(0.062 * sx, 0.125, -0.068), (0, 0, 1))
-        if sd == "R":
-            continue        # (his stone fist never opens)
-        bone("fingers." + sd, "hand." + sd, wr + K_ * f, wr + (K_ + S.vec(-0.024, 0, -0.054)) * f, (sx, 0, 0))
-        bone("fingers2." + sd, "fingers." + sd, wr + (K_ + S.vec(-0.024, 0, -0.054)) * f, wr + (K_ + S.vec(-0.07, 0, -0.11)) * f, (sx, 0, 0))
-        th = T.THUMB * T.HAND_K
-        bone("thumb." + sd, "hand." + sd, wr + th[0] * f, wr + th[1] * f, (sx, 0, 0))
-        bone("thumb2." + sd, "thumb." + sd, wr + th[1] * f, wr + th[3] * f, (sx, 0, 0))
     bone("jaw", "head", HC + S.vec(0, -0.02, -0.055), HC + S.vec(0, 0.09, -0.125), (0, 0, 1))
     for nm, pts in T.CHAINS.items():
         chain(bone, "spring_loc%s_" % nm, "head", np.array(pts, np.float32) + HC)
@@ -105,30 +97,6 @@ def w_prayer(P, a):
     u = np.clip(d / 0.34, 0.0, 1.0)
     root = smooth(0.08, 0.0, d) * strand
     return {"hips": ((~strand) * 1.0 + root).astype(np.float32), "spring_pb_0": (strand * (1 - root) * (1 - u)).astype(np.float32), "spring_pb_1": (strand * (1 - root) * u).astype(np.float32)}
-
-
-def w_hand(P):
-    Q = (T.fold_x(P) - R.wr) / T.HAND_K
-    z = Q[:, 2]
-    kz = T.KNUCKLE_Z
-    f1 = smooth(kz + 0.012, kz - 0.012, z)
-    f2 = smooth(kz - 0.036, kz - 0.058, z)
-    d_t = S.polyline(Q, list(T.THUMB), 0.0)
-    d_i = S.polyline(Q, T.finger_pts(T.FINGERS[0][0], T.FINGERS[0][1]), 0.0)
-    th = (d_t < d_i - 0.002) & (d_t < 0.036) & (Q[:, 1] > 0.05)
-    tt = T.seg_t(Q, T.THUMB[0], T.THUMB[3])
-    t2 = smooth(0.34, 0.46, tt)
-    fore = smooth(-0.015, 0.02, z)
-    out = {}
-    for sd, m in sides(P):
-        m = m.astype(np.float32)
-        out["forearm." + sd] = fore * m
-        out["fingers." + sd] = f1 * (1 - f2) * (~th) * m
-        out["fingers2." + sd] = f2 * (~th) * m
-        out["thumb." + sd] = (1 - t2) * th * m
-        out["thumb2." + sd] = t2 * th * m
-        out["hand." + sd] = (1 - fore) * (1 - f1 * (~th)) * (~th) * m
-    return out
 
 
 def w_head(P):
@@ -237,7 +205,7 @@ def w_swept(nm, P, a):
 WEIGHT = {"head": w_head, "teeth": lambda P: {"head": np.ones(P.shape[0], np.float32)},
           "bandana": lambda P: {"head": np.ones(P.shape[0], np.float32)}, "cap": lambda P: {"head": np.ones(P.shape[0], np.float32)},
           "stone": w_stone, "gauntlet": w_gauntlet, "skirt": w_skirt,
-          "torso": w_torso, "arms": w_arm, "hands": w_hand, "wrap": w_hips, "sash": w_root, "trousers": w_legs,
+          "torso": w_torso, "arms": w_arm, "hands": lambda P: {"hand.R": np.ones(P.shape[0], np.float32)}, "wrap": w_hips, "sash": w_root, "trousers": w_legs,
           "legs": w_legs, "wraps": w_legs,
           }
 

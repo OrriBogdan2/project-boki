@@ -5,10 +5,6 @@
 	"extra_bones": {
 		"foot.L": "shin.L",
 		"foot.R": "shin.R",
-		"fingers.L": "hand.L",
-		"fingers2.L": "fingers.L",
-		"thumb.L": "hand.L",
-		"thumb2.L": "thumb.L",
 		"jaw": "head",
 		"lip.L": "head",
 		"lip.R": "head"
@@ -134,10 +130,6 @@
 		"upper_arm.R",
 		"forearm.R",
 		"hand.R",
-		"fingers.L",
-		"fingers2.L",
-		"thumb.L",
-		"thumb2.L",
 		"jaw",
 		"lip.L",
 		"lip.R"
