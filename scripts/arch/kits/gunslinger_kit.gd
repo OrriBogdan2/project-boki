@@ -29,6 +29,7 @@ const PIP_LIFT := 0.9                # m up the screen the Fever pips sit, clear
 const TOSS_Y := 1.05                 # m: the Burr Charge leaves from the hip (a side toss, not overhead)
 const BRACKET_R := 1.25              # m: the firing brackets either side of her (footage: about 0.7 bh)
 const BRACKET_DEG := 56.0            # each bracket's arc
+const SPIN_REST := 0.5               # s without a round before the next string winds the barrels up again
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, wall, fuse, fuse0, range, out, y0}
@@ -195,6 +196,8 @@ func _tick_lmb() -> void:
 	if h.shot_n == last_shot:
 		return
 	last_shot = h.shot_n
+	if m.time - round_at > SPIN_REST:
+		m.sfx("gunslinger_spinup", h.pos, -6.0)      # the shoulder cannon winds up as a string starts
 	round_at = m.time
 	var shots: Array = m.get("shots")
 	for i in range(shots.size() - 1, -1, -1):
@@ -543,7 +546,7 @@ func _stick(b: Dictionary, at: Vector3, wall: bool) -> void:
 	b["fuse"] = float(bd["fuse"])
 	b["fuse0"] = float(bd["fuse"])
 	b["out"] = -(b["dir"] as Vector2)
-	m.sfx("vn_stick", at, -3.0)
+	m.sfx("gunslinger_grenade_thunk", at, -3.0)
 	fx().star(at, EMBER, HOT, 0.6, 0.12)
 	net_ring(at, 1.0, EMBER)
 
