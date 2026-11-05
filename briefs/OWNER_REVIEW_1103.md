@@ -1001,3 +1001,14 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
 - Kit numbers unchanged (dmg, cone, daze, wall stun, cd 6.5 s).
 - **Assert:** a tap fires within one frame; a 1 s hold fires once at the press with no extra effect; the spawn is at the launcher muzzle, not the hand.
 - Also check her other abilities for leftover "throw" anims (consistent with "her right arm IS the cannon").
+
+## 106b. Reticle + aim line, matching the source exactly (owner playtest, 12:15 UTC Nov 5; overrides 106's default look)
+- Reference: `briefs/supervive-data/refs/reticle_aimline.png` (look/proportions only; draw our own).
+- **Reticle:** a SMALL thin white circle with a tiny dot in the centre, clearly smaller than ours today (in the ref, about the size of a Hunter's head at match zoom). No crosshair arms, no fill.
+- **Aim line:**
+  - A thin light-blue/white line from the Hunter to the reticle.
+  - It starts faded/transparent at the Hunter and grows more opaque toward the cursor; its length = the distance to the cursor (it always ends at the reticle).
+  - Subtle (thin, slightly glowing), drawn under the Hunters, above the ground.
+- **Kept from 106:** these become the DEFAULT. The reticle-customisation settings stay; the aim line gets an on/off + opacity setting.
+- Ability-specific aim visuals (Lisette's filling line, cones, charge bars) draw on top and replace the plain line while active.
+- Screenshot at match zoom next to the ref.

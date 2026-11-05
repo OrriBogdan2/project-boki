@@ -30,3 +30,5 @@ Combat clarity (96) is merged, thanks. New job.
 - **Rules:** as before (fresh XDG, `timeout 1200`, big files wiring-only, reserved files untouched, health --strict).
 
 ## 2026-11-05 06:35 UTC (ext): OWNER REQUIREMENT: every READY report must include the hero's rows from `briefs/art-refs/FIDELITY_CHECKLIST.md` as a ✅/❌ table with proof screenshots (e.g. Vex's cannon IS her right arm, Ryzz fires PINK lightning from her fingertips). Check your in-flight work against it now.
+
+## 2026-11-05 12:16 UTC (ext): OWNER ITEM 106b (HIGH, playtest): the reticle + aim line must match the source. See OWNER_REVIEW 106b + `briefs/supervive-data/refs/reticle_aimline.png`. You built 106, so take it now as a small branch `ext/reticle-106b`, ahead of the remaining VFX heroes.
