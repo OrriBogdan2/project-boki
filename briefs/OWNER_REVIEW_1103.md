@@ -2446,3 +2446,21 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - Placing a trough within the door apron → invalid.
   - With two in range, the prompt matches the target picked.
+
+## 169c. The farm tutorial is a strict, logical sequence: only the needed interaction is possible (owner playtest with his dad, 18:40 UTC Nov 5)
+- The owner: "make sure the tutorial forces the player to only interact with what's needed - after buying it should kick them from the window and show an arrow back to the crop after buying the seed - needs to be way more clear. also he planted all his berries before buying, so make sure it all works logically in the rework".
+- **Strict mode for a new save's farm tutorial:**
+  - At each step, ONLY the step's target is interactable.
+  - Every other station/menu/build option is locked: dimmed, a small lock, and a gentle "Hob: one thing at a time, kid" nudge if tried.
+  - The menus open only to the relevant tab with the right button gold-highlighted (178c addendum 2).
+- **The logic order must hold:**
+  - The starter seeds/berries can't be planted, eaten or sold out of order.
+  - Either give no seeds until the buy step, or make the starter berries a separate food item (feed-only) that can't be planted.
+  - The crop step uses only the seed the player just bought.
+  - Audit every step's preconditions so no step can be completed or skipped early by an out-of-order action (free_order false for a new save).
+- **After the purchase:**
+  - The market window closes automatically (item 176).
+  - A "✓ Seed bought" tick, then the guide path + edge arrow (178i) leads back to the crop patch.
+  - The new instruction "HOLD F at the patch to plant" sits by the patch (169b).
+- The same treatment for every transition (build → trough → patch → market → sell).
+- **Assert:** a scripted run that tries every off-step action at each step → none succeeds or skips a step; the buy → the window closes → the arrow targets the patch.
