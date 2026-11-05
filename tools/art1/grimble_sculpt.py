@@ -17,8 +17,8 @@ SKIN, LIP, MOUTH, TOOTH, IRON, RUST, BRASS, LEATHER, LOIN, WOOD, BURLAP, GOLD, G
 HOARD_BASE = 100
 HOARD = []          # {id, kind, c, R}: the painter reads an item's own frame from here
 
-HEAD_C = np.array((0.0, 0.215, 1.150), F)      # the head's middle; it hangs ahead of the neck joint, the art's hunch
-EYE_C = np.array((0.036, 0.292, 1.176), F)     # the eye (one, on his right), the monocle round it
+HEAD_C = np.array((0.0, 0.268, 1.174), F)      # the head's middle; it hangs ahead of the neck joint, the art's hunch
+EYE_C = np.array((0.040, 0.345, 1.200), F)     # the eye (one, on his right), the monocle round it
 EYE_R = 0.037
 ANKLE = 0.075
 

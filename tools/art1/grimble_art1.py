@@ -364,8 +364,8 @@ def main():
     part("gauntlet", gt, 700, "gear", 1.4, None, "gauntlet", None)
     part("hook", G.hook(J), 340, "gear", 1.3, None, "hook", None)
     part("gun", G.gun(), 280, "gear", 1.3, G.gun_xf, "gun", None)
-    part("hoard", None, 0, "scan_H", 1.0, None, "scan", None, ob=scan("H", "hoard"))
-    part("frames", G.frames(), 800, "hoard", 1.0, None, "hoard", None)
+    # (the hoard scan came out a speckled brown lump at the match camera at 3k: the sculpted hoard's big shapes read far better, it stays)
+    part("hoard", G.hoard(), 3550, "hoard", 1.0, None, "hoard", None)
     bl = G.bell()
     ln = G.lantern()
     TIP = {"R": np.array((0.475, -0.215, 1.640), F), "L": np.array((-0.475, -0.215, 1.640), F)}
@@ -477,7 +477,7 @@ def main():
         nm = p["paint"]
         if nm.startswith("scan_"):
             rgb = scan_rgb(nm[-1], pts)
-            rgb = np.clip(rgb * (0.86 + 0.40 * P.form(nn))[:, None] * 1.12, 0, 1)
+            rgb = np.clip(rgb * (0.86 + 0.40 * P.form(nn))[:, None] * 1.4, 0, 1)
             p["tri_slot"] = tri_slots(nm[-1], scan_rgb(nm[-1], vs[tri].mean(1).astype(F)), vs[tri].mean(1))
         elif nm == "skin":
             rgb = P.skin(pts, nn, lab, f)

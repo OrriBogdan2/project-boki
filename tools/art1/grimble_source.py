@@ -12,6 +12,7 @@ import sys
 import bmesh
 import bpy
 import numpy as np
+from mathutils.kdtree import KDTree
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -106,10 +107,17 @@ def decimate(ob, target, keep=None):
 
 
 def dup(ob, name):
+    """A copy for decimating, welded: Meshy splits its vertices along the UV seams, and a decimate of that comes apart in shards."""
     o = ob.copy()
     o.data = ob.data.copy()
     o.name = o.data.name = name
     bpy.context.scene.collection.objects.link(o)
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0002)
+    bm.to_mesh(o.data)
+    bm.free()
+    o.data.update()
     return o
 
 
@@ -200,6 +208,7 @@ def body():
     W0 = seg_weights(P)
     Q = fit(P, W0)
     low = dup(ob, "Low_body")
+    P = verts(low) + (0, 0, -SOLE)
     # the cuts: past the wrists (gauntlet and hook are rebuilt), and the head-and-hump lump (the head scan sits there)
     bm = bmesh.new()
     bm.from_mesh(low.data)
@@ -211,13 +220,15 @@ def body():
         h = ((P - je) @ u) / (u @ u)
         kill.append((h > 0.97) & (P[:, 0] * sx > 0.45))
     kill.append(P[:, 2] > 1.60 + 0.42 * np.abs(P[:, 0]))
+    kill.append((P[:, 2] > 1.34) & (P[:, 1] > 0.10) & (np.abs(P[:, 0]) < 0.36))      # (the scan's own face and muzzle, on the front of the lump)
     gone = np.any(kill, axis=0)
     bmesh.ops.delete(bm, geom=[bm.verts[i] for i in np.nonzero(gone)[0].tolist()], context="VERTS")
     bmesh.ops.holes_fill(bm, edges=[e for e in bm.edges if e.is_boundary], sides=0)
     bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4])
     bm.to_mesh(low.data)
     bm.free()
-    decimate(low, BODY_TRIS, lambda p: np.clip(0.25 + smooth(0.75, 0.95, p[:, 2] + 0.949) * 0.0 + 0.0, 0.02, 1))
+    cl0, p0 = cloth_mask(low, "B"), verts(low)
+    decimate(low, BODY_TRIS)
     Pl = verts(low) + (0, 0, -SOLE)
     W = seg_weights(Pl)
     set_verts(low, fit(Pl, W))
@@ -231,7 +242,11 @@ def body():
         gr["foot." + sd] = gr["shin." + sd] * f
         gr["shin." + sd] = gr["shin." + sd] * (1 - f)
     # the hide and the belt ride the hips: the loincloth is found by its colour
-    cl = cloth_mask(low, "B")
+    kd = KDTree(len(p0))
+    for i, q in enumerate(p0.tolist()):
+        kd.insert(q, i)
+    kd.balance()
+    cl = np.array([cl0[kd.find(q)[1]] for q in (Pl - (0, 0, -SOLE)).tolist()], F)
     for nm in list(gr):
         gr[nm] = gr[nm] * (1 - cl)
     zk = smooth(0.98, 0.84, Pl[:, 2])
@@ -239,7 +254,16 @@ def body():
     gr["root"] = gr["root"] + cl * (1 - zk)
     set_groups(low, gr)
     print("cloth verts", int((cl > 0.5).sum()), flush=True)
+    # (the paint source loses the scan's face too, or the cap under the head paints itself with teeth)
+    Pa = verts(ob) + (0, 0, -SOLE)
     set_verts(ob, Q)
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bm.verts.ensure_lookup_table()
+    away = (Pa[:, 2] > 1.60 + 0.42 * np.abs(Pa[:, 0])) | ((Pa[:, 2] > 1.34) & (Pa[:, 1] > 0.10) & (np.abs(Pa[:, 0]) < 0.36))
+    bmesh.ops.delete(bm, geom=[bm.verts[i] for i in np.nonzero(away)[0].tolist()], context="VERTS")
+    bm.to_mesh(ob.data)
+    bm.free()
     save_src(ob, "B")
     return low
 
@@ -311,6 +335,15 @@ def hoard():
         return p * k + (0.0, -0.40, 1.245)
     set_verts(ob, xf(S))
     low = dup(ob, "Low_hoard")
+    # (a pile of thin chain and loose bits stalls the decimator near 10k: a voxel remesh first; the paint comes from the scan anyway)
+    bpy.ops.object.select_all(action="DESELECT")
+    low.select_set(True)
+    bpy.context.view_layer.objects.active = low
+    m = low.modifiers.new("r", "REMESH")
+    m.mode = "VOXEL"
+    m.voxel_size = 0.009
+    bpy.ops.object.modifier_apply(modifier="r")
+    print("remeshed", tris(low), flush=True)
     decimate(low, HOARD_TRIS)
     set_groups(low, {"hoard": np.ones(len(low.data.vertices), F)})
     save_src(ob, "H")
@@ -320,7 +353,10 @@ def hoard():
 def main():
     os.makedirs(WORK, exist_ok=True)
     out = []
+    only = os.environ.get("ONLY", "").split(",") if os.environ.get("ONLY") else []
     for fn, nm in ((hoard, "hoard"), (head, "head"), (body, "body")):
+        if only and nm not in only:
+            continue
         fn()
         p = os.path.join(WORK, "low_%s.blend" % nm)
         for o in list(bpy.data.objects):

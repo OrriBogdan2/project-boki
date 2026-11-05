@@ -924,7 +924,7 @@
 			"skin": {"top_light": 0.4, "fres": 0.3, "rim_amount": 0.2, "far_lift": 0.15, "sheen": 0.0, "shade": 0.82, "albedo": [0.92, 0.92, 0.96], "light_neutral": 1.0, "rim_far": 0.0},
 			"leather": {"top_light": 0.55, "fres": 0.4, "far_lift": 0.2, "desat": 0.2, "albedo": [1.0, 0.98, 0.95]},
 			"metal": {"top_light": 0.55, "fres": 0.5, "far_lift": 0.2},
-			"glow": {"glow": 1.25, "desat": 0.0, "rim_far": 0.0, "shade": 1.0}
+			"glow": {"glow": 1.0, "desat": 0.0, "rim_far": 0.0, "shade": 1.0}
 		},
 		"halos": [
 			{"anchor": "anchor_eye", "color": [0.25, 1.0, 0.5], "strength": 2.4, "px": 3.2, "near_d": 7.0, "far_d": 14.0, "lift": 0.03},
