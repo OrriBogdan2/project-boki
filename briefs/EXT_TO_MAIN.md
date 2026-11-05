@@ -2548,3 +2548,29 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 - Not in the game: there is no kin data for it (the roster stub lives on ext/boki-roster50), so only the review tools show it (`NEW_SPECIES` in tools/boki_rig_shots.gd stands in name and colours). It goes live only once the owner approves the design and its stub moves into content/kin_v2.
 - Small shared fixes on the branch: `BokiFusion.key_of` returns "" for a species without Fusion parts (the shots tool raised a script error for one); the eye texture takes a species' own deep iris colour (`IRIS_DEEP`, default unchanged).
 - Checks: --boki-rig-check 0 failures (4 species), health --strict OK. Branch from ext/boki-starter 27fab2ad: merge the starter first.
+
+## 2026-11-05 07:35 UTC (S7): READY ext/s7-empty-77-81 a4808f68: items 77, 79/79b, 80, 81 (base origin/main c204a6d5)
+- **77, prologue caption:** an autowrapped label inset 7% each side, anchored to the bottom and growing upward, with an outline. Font size is window height/25, clamped to 15-40 px. All 5 slides fit at 1280x720, 1920x1080 and 800x450. At 3 lines (slides 3 and 5) the first line sits just above the letterbox bar, over the picture; the bar height is unchanged.
+- **79/79b, void head and shroud:**
+  - The whole head is the void, from every angle (void_face.gdshader; its planar, pulse and heart modes are removed). Face shape and face marks stay customisable on it.
+  - The body wears a shroud: collar, mantle, drape to the ankles and a cowl. Styles: Cloak, Wrap, Tatters; 12 cloth colours. Hands and neck are void.
+  - Creator rows: Sex, Height, Build, Shroud, Shroud colour, Hollow, Glow, Ghost, Aura. **The skin colour row is gone.**
+  - **Save migration** (Unmasked.clean, idempotent): old skin/colour -> shroud colour, outfit -> shroud style, motes -> aura.
+  - The chest heart is gone (owner default: say if it should come back).
+- **80:** Motes -> **Aura** (None/Faint/Strong = 0/16/40 specks): bigger, brighter, swirling round the head, shoulders and shroud. Tooltip "Glowing specks that drift around you".
+- **81, feet through the ground:** the cause was HunterAnim's hip drop, which used a point foot (soles sank 3-4 cm standing, up to 9 cm walking). The scaling pivot was fine. New scripts/match/foot_plant.gd plants the real lowest boot point, for the Empty only. Across 18 bodies (3 heights x 3 builds x 2 sexes) the soles sit 0.1-1.9 cm above the ground, idle and walking.
+- **Diff:** 12 files, +471/-186.
+  - models.gd +2 (3414, under its 3500 budget); no other god file touched.
+  - No Net change. Save look format changed, with the migration above.
+  - Docs: an addendum in docs/decisions/0016.
+- **Checks** (all 0 failures):
+  - --unmasked-check: new rows for feet, the void head, shroud, migration, the Aura row and the tooltip.
+  - --hatch-check; --prologue-check (new row: captions on screen at 3 sizes); --check.
+  - --simtest --seed=5: extracted (uplink). health --strict OK.
+  - Note: under xvfb with --shots-dir, --prologue-check's "ends on the hatch" row fails; it passes headless (likely the software renderer being slow; not compared on main).
+- **Shots:** briefs/shots/s7/empty-77-81/
+  - creator from front, side and back
+  - Aura none and strong; the three shroud styles
+  - farm top-down; feet idle and walking (shortest and tallest)
+  - prologue slide 3 at 1280 and 1920, slide 5 at 800
+- **Open:** the Empty still carries a class weapon at home (visible in creator_shroud_side). Item 91 on ext/s7-build-90-91 hides it.
