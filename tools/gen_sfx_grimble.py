@@ -122,8 +122,8 @@ def wheeze(d, f_lo=900, f_hi=2600, a=0.05):
 
 
 def gvoice(d, f0, f1, vowel='eh', rasp=0.7, breath=0.65, scale=1.06, a=0.012):
-    """Grimble's voice: a thin, rasping, breathy throat."""
-    return S.voice(d, f0, f1, vowel, breath=breath, rasp=rasp, vib=0.01, scale=scale, a=a)
+    """Grimble's voice: a thin, rasping, breathy throat (its tail eased to silence, never cut off)."""
+    return S.voice(d, f0, f1, vowel, breath=breath, rasp=rasp, vib=0.01, scale=scale, a=a) * shape(d, 0.0, d * 0.55, d * 0.45)
 
 
 # ------------------------------------------------------------------ LMB: the scattergun
