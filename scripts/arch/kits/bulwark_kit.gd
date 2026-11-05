@@ -540,6 +540,7 @@ func _recall() -> void:
 func _mace_hit(f: Ent, dmg: float, dir: Vector2) -> void:
 	knock_until = m.time + 0.25       # its knock into a wall Crushes too (data: any knock into a wall)
 	f.hurt(dmg * _wk(), h, {"src": "abil", "ab": "primary", "tags": ["primary", "mace"], "kb": dir * 3.0, "melee": true})
+	m.sfx("bulwark_hammer_clang", f.pos, -4.0)
 
 func _tick_mace(dt: float) -> void:
 	if mace.is_empty():
@@ -645,6 +646,7 @@ func _raise() -> void:
 	last_variant = "air" if rmb_ctx.get("air", false) else "hold"
 	play("bul_guard")
 	m.sfx("bjorn_shield_up", h.pos, -4.0)
+	m.sfx("bulwark_hull_creak", h.pos, -7.0)      # the prow's old timbers take the strain
 	fx.aegis_rise(h.pos + Vector3(d.x, 0, d.y) * 1.2)
 
 ## A Boki merge ends every hold of this kit with no release effect: the Crushing Blow's charge (lmb_t) and the raised
@@ -717,7 +719,7 @@ func on_dash(use_ex: bool) -> bool:
 		travel(sd2, sd2 / float(dd["whirl_speed"]), {"invuln": 0.0, "trail": "dust", "dir": dash_dir()})
 		st["last_dash"] = "short"
 		play("bul_short")
-		m.sfx("ab_whirr", h.pos, -6.0, 0.9)
+		m.sfx("bjorn_spin", h.pos, -6.0, 0.9)
 		return true
 	if not wall.is_empty() and h.grounded:
 		# Shield Charge (into_dash.rmb): behind the raised shield, on its own cooldown (the RMB
@@ -736,7 +738,7 @@ func on_dash(use_ex: bool) -> bool:
 		st["last_dash"] = "charge"
 		play("bul_charge")
 		m.fx.word(h.pos + Vector3(0, 2.3, 0), "SHIELD CHARGE", col_of(dd), false)
-		m.sfx("shield", h.pos, 0.0, 0.55)
+		m.sfx("bulwark_charge", h.pos, -2.0)
 		return true
 	if not spend_dash(use_ex):
 		return true
