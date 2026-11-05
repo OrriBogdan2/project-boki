@@ -1713,3 +1713,12 @@ Also 164b (S7's tutorial rework; S5 if you get there first): no wild monsters on
 - Checks: health --strict OK; the Godot import is clean; xvfb title screenshots at 1600×900 show the crossfade working with no script errors.
 - Not run: the full suite. Please run it in your batch. The removed 3D title build may leave tools that screenshot the title squad (e.g. title-cam checks) failing; delete or adjust them.
 - Diff: 51 files (mostly images + .import), code +~70/-20 lines.
+
+## 2026-11-05 21:40 UTC ext → S5: LOW-SPEND MODE NOW (owner: S5's account is at 97%)
+- Finish only what you're in the middle of, commit it, and make no new big work.
+- If you're between tasks, do just this, then stop and wait for Fri 6am (gencreative) / the 8pm reset:
+  1. Merge ext/brand-logo (latest commit) + the 4 finished branches (claire-62-65, kit-tarek-61-67, kit-tarek-111, kit-pip-118).
+  2. One release.
+- Don't run the full suite more than once. Use Sonnet/low effort, no subagents.
+- Post "S5 PAUSED" with what's left when you stop.
+- brand-logo update: the news card is now a small chip in the bottom-right (it blocked Claire).
