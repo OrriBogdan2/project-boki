@@ -132,13 +132,20 @@ func _beats(h: Hunter) -> void:
 ## The glider catching: a crack of air, the canopy's bang.
 func snap(h: Hunter) -> void:
 	blasts.snap(h.render_pos(1.0) + Vector3(0, 1.2, 0), _col(h))
-	m.sfx("drop_snap", null if h.is_local() else h.pos, 0.0 if h.is_local() else -10.0)
+	_beat_sfx("drop_snap", h)
 
 ## Touchdown: the dust ring, a burst of grit and the thud (no self-shake: item 50).
 func land(h: Hunter) -> void:
 	blasts.land(h.pos, _col(h))
 	m.fx.dust(h.pos, 16)
-	m.sfx("drop_land", null if h.is_local() else h.pos, 0.0 if h.is_local() else -10.0)
+	_beat_sfx("drop_land", h)
+
+## Yours in your ears, anyone else's out in the world and quieter.
+func _beat_sfx(sound: String, h: Hunter) -> void:
+	if h.is_local():
+		m.sfx(sound)
+	else:
+		m.sfx(sound, h.pos, -10.0)
 
 ## You, your squad's own colours, and everyone else a neutral pale.
 func _col(h: Hunter) -> Color:
@@ -185,7 +192,7 @@ func _local(delta: float) -> void:
 		_duck_t -= delta
 		if _duck_t <= 0.0:
 			_duck_t = 1.0
-			Sfx.duck(MUSIC_HOLD_S, MUSIC_DUCK_DB)      # (the score gives the sky to the wind; it's back with the glider)
+			Sfx.duck(MUSIC_HOLD_S, MUSIC_DUCK_DB)      # the score leaves the sky to the wind until the glider
 	var glide_stage := 2 if p.drop_glide and not p.grounded else 0
 	wind.tick(1 if p.dropping else glide_stage, speed, delta)
 
@@ -332,7 +339,8 @@ func _draw_trails() -> void:
 		var comet: bool = tr["comet"]
 		var diver_w := 0.75 if bool(tr["near"]) else 0.45
 		# (it stays a read from the wide view, your squad's most of all: a thin line at 400 m is nothing)
-		var width := (COMET_R * 1.5 if comet else diver_w) * (far_k if bool(tr["near"]) else sqrt(far_k))
+		var from_afar := far_k if bool(tr["near"]) else sqrt(far_k)
+		var width := (COMET_R * 1.5 if comet else diver_w) * from_afar
 		var base: Color = tr["col"]
 		im.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 		for i in pts.size():
