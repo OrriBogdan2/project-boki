@@ -412,8 +412,9 @@ func _pose(n: Node3D, kind: String, at: Vector3, vel: Vector2, trail: float, wid
 
 # ------------------------------------------------------------------ chains (immediate style)
 ## Draws a chain from a to b this step. wavy 0..1: 0 = a straight striped link chain, 1 = a loose
-## zig-zag in flight. Stop calling and it goes.
-func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Color, width := 0.12) -> void:
+## zig-zag in flight. `bow`: how far its middle bends out. Stop calling and it goes.
+func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Color, width := 0.12,
+		bow := Vector3.ZERO) -> void:
 	var e: Dictionary = chains.get(id, {})
 	if e.is_empty() or not is_instance_valid(e["node"]):
 		var im := ImmediateMesh.new()
@@ -450,7 +451,7 @@ func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Co
 		var p := a.lerp(b, k)
 		# in flight: a zig-zag of about four waves over its length, still at both ends
 		var wv := sin(k * TAU * 4.0 + m.time * 14.0) * 0.28 * wavy * sin(k * PI)
-		p += side * wv
+		p += side * wv + bow * sin(k * PI)
 		# flat to the camera above, with a little height so it reads side on too
 		var across := side * width * 0.5 + Vector3.UP * width * 0.12
 		im2.surface_set_uv(Vector2(k * links, 0))
@@ -458,6 +459,31 @@ func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Co
 		im2.surface_set_uv(Vector2(k * links, 1))
 		im2.surface_add_vertex(p + across)
 	im2.surface_end()
+
+## A thin flat line through `pts` this step (a predicted path). Stop calling and it goes.
+func path_line(id: String, pts: PackedVector3Array, col: Color, width: float) -> void:
+	var e: Dictionary = chains.get(id, {})
+	if e.is_empty() or not is_instance_valid(e["node"]):
+		var im := ImmediateMesh.new()
+		var mi := _mi(im, solid(col))
+		mi.top_level = true
+		add_child(mi)
+		made += 1
+		e = {"node": mi, "mesh": im}
+		chains[id] = e
+	e["t"] = m.time
+	(e["node"] as Node3D).visible = true
+	var mesh: ImmediateMesh = e["mesh"]
+	mesh.clear_surfaces()
+	if pts.size() < 2:
+		return
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
+	for i in pts.size():
+		var fwd := pts[mini(i + 1, pts.size() - 1)] - pts[maxi(i - 1, 0)]
+		var across := fwd.cross(Vector3.UP).normalized() * width * 0.5
+		mesh.surface_add_vertex(pts[i] - across)
+		mesh.surface_add_vertex(pts[i] + across)
+	mesh.surface_end()
 
 func unchain(id: String) -> void:
 	var e: Dictionary = chains.get(id, {})
