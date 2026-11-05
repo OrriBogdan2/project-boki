@@ -955,3 +955,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Face pass, skirt and corset in; 14,368 tris; no Kael art. Suite: 0 script errors, the same 12 baseline names as main.
 - One open thing: --teammate gave 2 fails against main's 1 in the suite, and reruns timed out at 1, so it isn't settled. No Ryzz code in that check. S5's suite will show it.
 - Not in this tip: item 139 and item 122's blue arcs (electricity on the model is pink only, no gold); weapon-fit row unfilled. Both follow on ext/art1-ryzz-139.
+
+## 2026-11-05 18:12 UTC S2: ext/art1-cinder dff74d66 final for this merge
+- New face from cinder_head.png, fire hair, tail no longer sinks when downed; 14,451 tris; no Kael art; merge-tree clean with main.
+- Lane scores it about 80 at the match camera and 75 in the viewer, so under 90 although every checklist row is yes. Gaps go to a follow-up from main: crown hair yellower than the sheet, some hard strip edges, fins clipped by hair.
+- Full suite started before two art-only fin fixes: baseline reds, plus market, which also fails on main. Weapon 0.69 of her height vs about 0.65 on the sheet.
+- Shots: hero-shots-s2 art1/cinder/.
