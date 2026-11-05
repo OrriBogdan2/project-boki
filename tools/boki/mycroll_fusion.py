@@ -46,8 +46,8 @@ def cap_shape():
 
 
 def parts():
-    return {"cloak": (cloak_shape(), 700, 0, "fur"), "stalks": (stalk_shape(), 200, 0, "stalk"),
-            "caps": (cap_shape(), 500, 2, "cap")}
+    return {"cloak": (cloak_shape(), 300, 0, "fur"), "stalks": (stalk_shape(), 80, 0, "stalk"),
+            "caps": (cap_shape(), 280, 2, "cap")}
 
 
 def bones():

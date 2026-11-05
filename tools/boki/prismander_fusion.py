@@ -54,8 +54,8 @@ def collar_shape():
 
 
 def parts():
-    return {"crystal": (crystal_shape(), 900, 1, "glow"), "fin": (fin_shape(), 200, 1, "glow"),
-            "tailskin": (tail_shape(), 300, 0, "skin"), "collar": (collar_shape(), 240, 0, "skin")}
+    return {"crystal": (crystal_shape(), 420, 1, "glow"), "fin": (fin_shape(), 80, 1, "glow"),
+            "tailskin": (tail_shape(), 130, 0, "skin"), "collar": (collar_shape(), 70, 0, "skin")}
 
 
 def bones():

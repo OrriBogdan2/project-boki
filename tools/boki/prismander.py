@@ -119,11 +119,11 @@ def fin_prims():
 
 def parts():
     return {
-        "body": (Shape(body_prims()), 0.0035, 5000),
-        "tailskin": (Shape(tail_prims()), 0.0035, 700),
-        "gills": (Shape(gill_prims()), 0.0035, 620),
-        "shards": (Shape(shard_prims()), 0.0035, 240),
-        "tail_fin": (Shape(fin_prims()), 0.0035, 300),
+        "body": (Shape(body_prims()), 0.0035, 2300),
+        "tailskin": (Shape(tail_prims()), 0.0035, 240),
+        "gills": (Shape(gill_prims()), 0.0035, 330),
+        "shards": (Shape(shard_prims()), 0.0035, 110),
+        "tail_fin": (Shape(fin_prims()), 0.0035, 110),
     }
 
 
@@ -132,7 +132,7 @@ AXIS = np.array((0.0, 0.5, -0.866))
 
 def prop_parts():
     out = boki_tools.tools(v3(0, 0.235, -0.44), AXIS)
-    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 90)
+    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 24)
     return out
 
 
