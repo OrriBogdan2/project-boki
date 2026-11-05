@@ -18,14 +18,15 @@ HEAD_GLB = os.path.expanduser("~/meshy/kael_h/bake/low.glb")
 ART_PATH = os.path.expanduser("~/art1kael/ref2/kael_art_fb.png")
 ATLAS = 2048
 UNIQ_W = 0.755                       # the unique islands' share of the atlas width; the tiles sit to its right
-HAIR_R = (UNIQ_W + 0.005, 0.40, 1.0, 1.0)
+HAIR_R = (UNIQ_W + 0.005, 0.40, 0.90, 1.0)
+BLADE_R = (0.905, 0.40, 1.0, 1.0)
 CHAIN_R = (UNIQ_W + 0.005, 0.30, 0.875, 0.395)
 HOOK_R = (0.88, 0.30, 1.0, 0.395)
 EYE_R = (UNIQ_W + 0.005, 0.20, 0.875, 0.295)
 EYE2_R = (UNIQ_W + 0.005, 0.10, 0.875, 0.195)
 GLOW_R = (0.88, 0.20, 1.0, 0.295)
 HALO_R = (0.88, 0.10, 1.0, 0.195)
-MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "metal-kael", "hair-mane", "skin-head-hot", "glow-sword"]
+MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "metal-kael", "hair-mane", "skin-head-hot", "metal-sword-hot"]
 SCALE = {"face": 4.0, "lidU": 2.6, "lidD": 2.6, "mask": 1.2, "cowl": 2.0, "cowlcore": 0.2, "stail": 0.7, "palm": 2.0, "finger": 1.8,
          "thumb": 1.8, "skull": 0.4, "blade": 0.75, "guard": 1.4, "grip": 1.6, "pommel": 1.6, "Low": 2.4, "maskfit": 2.0}
 
@@ -49,6 +50,7 @@ def tile_uv(r, uv):
 
 
 hair_tile_uv = (0, 0, 1, 1)
+WEAP = load_rgb(os.path.expanduser("~/art1kael/ref2/kael_weapons_full.png"))
 tails = [K.scarf_tail("R"), K.scarf_tail("L")]
 pieces = list(tails)
 pieces += K.hand("R", K.GRIP_DIR, (1.25, 1.35, 0.9), 0.0)
@@ -60,7 +62,7 @@ pieces += locks
 pieces.append(K.wrist_chain((0, 0, 1, 1)))
 hang, hook, hang_pts = K.hanging_chain((0, 0, 1, 1))
 cuff, cuff_pts = None, None
-pieces += [hang, hook] + K.blade() + K.hilt((0, 0, 1, 1))
+pieces += [hang, hook] + K.blade(WEAP) + K.hilt((0, 0, 1, 1))
 
 # ---- faces wound outward (the game culls back faces)
 HEAD_C = tuple(K.C)
@@ -272,7 +274,7 @@ def base_name(n):
 
 
 def is_tile(n):
-    return n == "headscan" or n.startswith(("sweep", "fore", "back", "over", "brow", "chain_", "hook", "eye", "core"))
+    return n == "headscan" or n == "blade" or n.startswith(("sweep", "fore", "back", "over", "brow", "chain_", "hook", "eye", "core"))
 
 
 # material per face
@@ -285,7 +287,7 @@ for i, p in enumerate(me.polygons):
         m2 = "skin-kael"          # (by the scan's paint, below)
     else:
         pm = PIECE_MAT[n]
-        m2 = {"metal-chain": "metal-kael", "metal-hook": "metal-kael", "metal-blade": "cloth-kael", "metal-guard": "metal-kael", "metal-kael": "metal-kael",
+        m2 = {"metal-chain": "metal-kael", "metal-hook": "metal-kael", "metal-blade": "metal-sword-hot", "glow-sword": "metal-sword-hot", "metal-guard": "metal-kael", "metal-kael": "metal-kael",
               "leather-grip": "cloth-kael", "hair-brow": "hair-mane"}.get(pm, pm)
         if n.startswith(("cowl", "stail", "coreh")):
             m2 = "cloth-ember-hot"
@@ -410,7 +412,9 @@ for p in me.polygons:
         for l, (x, y) in zip(ls, fu):
             loop_uv[l] = (x, y)
         continue
-    if n.startswith(("chain_", "wrap")):
+    if n == "blade":
+        r = BLADE_R
+    elif n.startswith(("chain_", "wrap")):
         r = CHAIN_R
     elif n.startswith("hook"):
         r = HOOK_R
@@ -660,14 +664,14 @@ isbody = PID == low_pid
 hotish = (r_ > 0.72) & (g_ > 0.48) & (b_ < 0.75) & (sat_t > 0.2)
 red_t = isbody & (r_ > g_ * 2.0) & (r_ > b_ * 1.6) & ~hotish
 silver_t = isbody & (sat_t < 0.2) & (lumi > 0.36) & ~hotish
-dark_t = isbody & (sat_t < 0.34) & (lumi <= 0.36)
-skin_t = isbody & (r_ > g_ * 1.1) & ~hotish & ~red_t & ~silver_t & ~dark_t
-for cls_, ramp_, base_, gain_ in ((skin_t, P.SKIN2, 0.42, 3.0), (silver_t, P.SILVER, 0.62, 3.0), (dark_t, P.DARK, 0.34, 2.2), (red_t, P.RED, 0.45, 2.2)):
+dark_t = isbody & (sat_t < 0.34) & (lumi <= 0.36) & (b_ >= r_ * 0.9)
+skin_t = isbody & (r_ > b_ * 1.02) & ~hotish & ~red_t & ~silver_t & ~dark_t
+for cls_, ramp_, base_, gain_, wide_ in ((skin_t, P.SKIN2, 0.4, 3.0, 0.7), (silver_t, P.SILVER, 0.56, 3.0, 1.6), (dark_t, P.DARK, 0.34, 2.2, 0.7), (red_t, P.RED, 0.45, 2.2, 0.7)):
     fm_ = cls_.astype(np.float32)
     l1_ = blur(lumi, fm_, 2)
     l2_ = blur(lumi, fm_, 18)
     mean_ = float(np.sum(lumi * fm_) / max(fm_.sum(), 1.0))
-    t_ = np.clip(base_ + (l1_ - l2_) * gain_ + (l2_ - mean_) * 0.7, 0, 1)
+    t_ = np.clip(base_ + (l1_ - l2_) * gain_ + (l2_ - mean_) * wide_, 0, 1)
     new_ = P.ramp(t_, ramp_) + np.minimum(lumi - l1_, 0.0)[..., None] * 0.8
     OUTC = np.where(cls_[..., None], np.clip(new_, 0, 1).astype(np.float32), OUTC)
 # the art's fissures to the keyed hot colour, so they glow
@@ -707,14 +711,6 @@ def right_hand(p, n, ao):
 
 
 paint(lambda n: n.startswith(("palm", "finger", "thumb")) and n.endswith("R"), right_hand)
-blade_ids = [i for i, n in enumerate(names) if n == "blade"]
-pl = next(p for p in pieces if p.name == "blade")
-b_, e_, n_ = pl.frame
-m = np.isin(PID, blade_ids)
-ys, xs = np.nonzero(m)
-pp = POS[ys, xs].astype(np.float64) - pl.guard_at
-col = P.blade_paint(pp @ b_, pp @ e_, pp @ n_, NOR[ys, xs].astype(np.float64), AO[ys, xs].astype(np.float64), None)
-OUTC[ys, xs] = col
 paint(lambda n: n == "guard", lambda p, n, ao: P.iron(p, n, ao, 0.3))
 paint(lambda n: n == "grip", P.grip)
 paint(lambda n: n == "pommel", lambda p, n, ao: P.iron(p, n, ao, 0.1))
@@ -746,8 +742,19 @@ OUTC[y0:y1, x0:x1] = P.chain_tile(y1 - y0, x1 - x0)
 x0, y0, x1, y1 = rect(HOOK_R)
 OUTC[y0:y1, x0:x1] = P.hook_tile(y1 - y0, x1 - x0)
 x0, y0, x1, y1 = rect(GLOW_R)
-OUTC[y0:y1, x0:x1] = (1.0, 0.98, 0.93)
+OUTC[y0:y1, x0:x1] = P.HOT
 
+# the blade's tile: the sheet's own paint, its white core keyed hot, its stone a step down for the toon light
+x0, y0, x1, y1 = rect(BLADE_R)
+crop_ = WEAP[K.W_TIP:K.W_GUARD, K.W_X0:K.W_X1][::-1]
+iy_ = ((np.arange(y1 - y0) + 0.5) / (y1 - y0) * crop_.shape[0]).astype(int)
+ix_ = ((np.arange(x1 - x0) + 0.5) / (x1 - x0) * crop_.shape[1]).astype(int)
+tile_ = crop_[iy_][:, ix_].copy()
+lt_ = tile_.mean(2)
+stone_ = lt_ < 0.62
+tile_[stone_] *= 0.82
+tile_[lt_ > 0.8] = P.HOT
+OUTC[y0:y1, x0:x1] = tile_
 x0, y0, x1, y1 = rect(HALO_R)
 OUTC[y0:y1, x0:x1] = (0.52, 0.4, 0.2)       # (keyed part hot: the gold round the core)
 

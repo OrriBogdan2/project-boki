@@ -194,6 +194,9 @@ DARK = [hexc("#14151a"), hexc("#21232a"), hexc("#30333c"), hexc("#434752"), hexc
 RED = [hexc("#22090e"), hexc("#3a0e16"), hexc("#54141e"), hexc("#681b26"), hexc("#6e2029")]
 
 
+HAIR = [hexc("#a9a9b8"), hexc("#c9c9d6"), hexc("#e2e2ea"), hexc("#f2f2f7"), hexc("#fdfdff")]
+
+
 def grade_head(c):
     """The sculpt's paint to clean ramps: hair and eyes keep their values, the embers stay above the shader's heat key, the crimson under
     it, the skin to a deep brown."""
@@ -206,7 +209,8 @@ def grade_head(c):
     skin = ~hair & ~ember & ~red
     out = c.copy()
     out[red] = ramp(np.clip(lum[red] / 0.3, 0, 1), RED)
-    out[skin] = ramp(np.clip((lum[skin] / 0.34) ** 0.75, 0, 1), SKIN2)
+    out[skin] = ramp(np.clip(lum[skin] / 0.42, 0, 0.8), SKIN2)
+    out[hair] = ramp(np.clip((lum[hair] - 0.42) / 0.45, 0, 1), HAIR)
     return out
 
 
@@ -247,7 +251,7 @@ def leather(p, n, ao):
 
 def grip(p, n, ao):
     """The maroon leather wrap: a diagonal band with dark seams."""
-    return leather(p, n, ao) * (0.78 + 0.22 * np.sign(np.sin((p[..., 0] + p[..., 1] * 1.5 + p[..., 2]) * 120)))[..., None] * [1.25, 0.8, 0.8]
+    return leather(p, n, ao) * (0.78 + 0.22 * np.sign(np.sin((p[..., 0] + p[..., 1] * 1.5 + p[..., 2]) * 120)))[..., None] * [1.08, 0.92, 0.82]
 
 
 def bandage(p, n, ao, axis, along):
