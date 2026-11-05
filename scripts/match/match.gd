@@ -244,7 +244,9 @@ func warm_up(progress := Callable()) -> void:
 	var seen := {}
 	var batch_cb := func(f: float) -> void:
 		if progress.is_valid(): progress.call(0.7 * f)
+	var aim_warm := _warm_aim_stand_in()      # (item 94c: the aim kit's one material draws only once somebody aims)
 	var batched: bool = await _warm_batches(batch_cb, seen)
+	if is_instance_valid(aim_warm): aim_warm.queue_free()
 	if not batched:
 		return
 	var shown: Array = []
@@ -324,6 +326,27 @@ const WARM_FRAME_MS := 45.0
 
 ## The stand-ins of warm_up, a batch a frame, each batch drawn once under each light setup.
 ## False if the match went away meanwhile.
+## The aim kit (AimKit: every kit's aim lines, rings and the Hem draw's fill line and perfect circle) draws one
+## ImmediateMesh that is empty until a Hunter aims, so the scan below never sees its material and the first
+## aim after landing compiled its shader mid-play. A one-triangle mesh with the same material and vertex
+## format stands in for it for the warm-up.
+func _warm_aim_stand_in() -> MeshInstance3D:
+	var d := AimKit.layer(self)
+	if d == null or d.mat == null:
+		return null
+	var arr := []
+	arr.resize(Mesh.ARRAY_MAX)
+	arr[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3.ZERO, Vector3.RIGHT, Vector3.UP])
+	arr[Mesh.ARRAY_COLOR] = PackedColorArray([Color.WHITE, Color.WHITE, Color.WHITE])
+	var am := ArrayMesh.new()
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	am.surface_set_material(0, d.mat)
+	var mi := MeshInstance3D.new()
+	mi.mesh = am
+	mi.visible = false
+	add_child(mi)
+	return mi
+
 func _warm_batches(progress: Callable, seen: Dictionary) -> bool:
 	var list: Array = await _warm_sources(seen)
 	if not is_inside_tree():
