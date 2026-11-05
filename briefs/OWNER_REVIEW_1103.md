@@ -1032,3 +1032,17 @@ Source of truth: Brall in `briefs/supervive-data/supervive_kits.md` + footage re
    - Assert this combo end to end.
 8. **Dash = a hit with a short animation:** it damages / knocks like the source but with a much shorter commit/animation than now.
 - **Checks:** --juggernaut-combo-check updated with asserts for 2, 5, 6, 7, 8. A short GIF per change.
+
+## 114. Lisette playtest fixes (owner, 12:21 UTC Nov 5). HIGH
+1. **Idle/stance:** her standing pose / base model looks weird, as if leaning back. Use an upright, confident archer stance, weight forward, bow low and ready (ART-1 Lisette + the idle anim).
+2. **The "V" attack visual is STILL there:** the owner doesn't want it (item 55b: a filling line + a small perfect-timing circle that flashes, no V, no extra UI).
+   - NB: `ext/kit-hem-55b` was HELD by S5 (drop-phase shader-compile stutter), so main still has the V.
+   - Fix the stutter (pre-warm the shaders at load) and land 55b.
+3. **RMB (Heavy Shot):** she must visibly draw and hold a BIG needle arrow while charging: an oversized silver needle-arrow nocked on the bow, red thread trailing, glowing as it charges. Today no arrow is visible at all.
+4. **RMB charge feel:**
+   - A much stronger charge sound: a rising tension creak + thread hum + a glow-up, and a heavy release twang/whoosh (S4).
+   - She is **slowed while holding it** (data: e.g. 35-40% move speed while drawing; tune).
+5. **E VFX:** it starts GREEN then turns red. It must be **red the whole time** (her palette); remove any leftover green/default tint at the start (S3).
+
+## 115. Vex's ult should be GREEN (owner, 12:21 UTC Nov 5)
+Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, the spine), not the current colour. Check every Vex VFX for off-palette colours (S3).

@@ -46,3 +46,5 @@ Owner: "Vex doesn't sound very intimidating; her sounds are kind of light for ho
 - **Mix:** louder/heavier relative to the lighter Hunters (still within the bus loudness targets).
 - **Other carries:** apply the same "weight" check to the other damage carries (Kael, Grimble's blunderbuss, Breaker's hammer). The owner may say the same; strengthen them where they're thin.
 - **Post:** a short A/B note in READY (old vs new).
+
+## 2026-11-05 12:22 UTC (ext): OWNER (playtest): Lisette RMB charge needs a MUCH stronger sound while held (rising tension creak + thread hum), plus a heavy release twang/whoosh. Item 114.4. Same weight check as Vex.
