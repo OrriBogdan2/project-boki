@@ -36,7 +36,8 @@ var meteor_next := 0.0
 var meteors: Array = []     # {at, t, tele}
 var glimmer_done := false
 # ---- tutorial
-var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
+var tut: Tutorial = null    # the Trial Expedition (scripts/match/tutorial.gd)
+var tips: MatchTips = null  # first-time tips and the reminder card (scripts/match/match_tips.gd)
 var exits: Exits = null     # the ways out: skiff docks, rift hatches, outpost uplinks (see Exits)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var truce: Truce = null     # emotes and truces between squads (see Truce)
@@ -651,6 +652,7 @@ func _start(o: Dictionary) -> void:
 	_stage_done_ms = 0.0
 	opts = o
 	if o.get("tutorial", false): tut = Tutorial.new(self)
+	tips = MatchTips.new(self)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
 	seed(seed_val)
@@ -1820,7 +1822,7 @@ func _update_rings(dt: float) -> void:
 	if player and not player.out and int(time * 4.0) % 4 == 0:
 		for rg in air_rings:
 			if player.pos.distance_to(rg["pos"]) < 9.0:
-				_tip("rings", "Glowing rings in the air between islands: jump off the edge, glide (hold %s) and fly through them for a burst of speed. Fast gliders barely sink." % Settings.key_cap("jump"))
+				tips.show("rings")
 				break
 	for rg in air_rings:
 		# rings stand straight up facing along the route; they don't spin
@@ -2809,7 +2811,7 @@ func on_wild_dazed(k: Kin) -> void:
 func on_stag_open(mb: Mob) -> void:
 	if player and not player.out and player.flat_dist(mb) < 14.0:
 		sfx("warn", mb.pos, -10.0, 1.5)
-		_tip("stagger", "A purple ring means %s can be staggered. Hit it with an ability (%s, %s or %s) for a big hit, a long stun and your cooldown back." % [mb.md["name"], Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")])
+		tips.show("stagger")
 
 ## Someone landed an ability in a stagger window. Runs where the monster lives (the host online).
 var stag_n := 0
@@ -3522,7 +3524,7 @@ func _boom(s: Dictionary, at: Vector3) -> void:
 func _process(delta: float) -> void:
 	if paused and not net_on:
 		return
-	_tips()
+	tips.tick(delta)
 	if music_dir: music_dir.tick(self, delta)
 	if hitstop > 0.0 and not net_on:
 		hitstop -= delta
@@ -3775,7 +3777,7 @@ func _gather_input() -> void:
 		HunterKeys.ult_pressed(player)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
+	if tut and tut.card and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
 		tut.ack()
 		get_viewport().set_input_as_handled()
 		return
@@ -3831,8 +3833,8 @@ func step(dt: float) -> void:
 		if net_on:
 			Net.tick(dt)
 		return
-	if tut and tut.intro:
-		tut.intro_wait(dt)      # (the intro card: the match waits for a key or two seconds)
+	if tut and tut.card:
+		tut.hold(dt)      # (a Trial lesson card: the world waits for a key)
 		return
 	time += dt
 	if Game.god and player and not player.out:
@@ -5352,8 +5354,8 @@ func _finish() -> void:
 		if Overlay.closed.is_connected(_on_menu_closed):
 			Overlay.closed.disconnect(_on_menu_closed)
 		Overlay.close()
-	if opts.get("training", false):
-		# nothing from the training area carries over
+	if opts.get("training", false) or opts.get("trial_replay", false):
+		# nothing from the training area or a replayed Trial carries over
 		Game.goto("home")
 		return
 	var r := result.duplicate()
@@ -5950,9 +5952,6 @@ func _process_net_revives() -> void:
 			net_event(["rev", nid, _r(_rev_out[nid])])
 			_rev_out[nid] = 0.0
 
-# ------------------------------------------------------------------ first-time tips
-var _tip_t := 0.0
-
 ## Screenshot demos: moves the player (once) to the nearest open, level stretch of ground at least
 ## 6m from the start's clutter (the duel pad and its post, the glove stands) and returns a spot
 ## `dist` metres east of them with a clear line of fire.
@@ -5997,56 +5996,6 @@ func _demo_open(dist: float, avoid_mobs: bool) -> Vector3:
 			if ok:
 				bd = dd; best = Vector3(q.x, gy, q.z)
 	return best
-
-func _tip(key: String, text: String) -> void:
-	var seen: Dictionary = Save.d["tutorial"]
-	if seen.get(key, false) or hud == null:
-		return
-	seen[key] = true
-	hud.tip(text)
-
-func _tips() -> void:
-	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips") or Record.clean():
-		return
-	_tip_t += get_process_delta_time()
-	if _tip_t < 1.0:
-		return
-	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
-		return
-	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  hold Space to glide")
-	if _tip_t > 14.0:
-		if player.ak:
-			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
-		else:
-			_tip("ability", "%s: your Boki's ability  ·  full bond: %s" % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
-	if player.ult >= 1.0 and player.kin:
-		var ud := KinMerge.def_for(player.kin)
-		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
-		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
-			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
-	var k: Kin = player.kin
-	if k == null:
-		return
-	if _tip_t > 9.0:
-		var near_foe := false
-		for f in foes_of(player.team):
-			if player.flat_dist(f) < 9.0:
-				near_foe = true; break
-		if near_foe:
-			_tip("throw", "%s sends %s: its hit stuns, and stunned foes take crits" % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")])
-	if k.state == "active":
-		var a1 := k.runner.def_of("k1")
-		var a2 := k.runner.def_of("k2")
-		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
-	if not interact.is_empty() and interact["kind"] == "catch":
-		_tip("catch", "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % Settings.key_cap("interact"))
-	if exits and not interact.is_empty() and interact["kind"] == "exit":
-		match String(interact["x"]["kind"]):
-			"dock": _tip("exit_dock", "Call the skiff at the horn, hold out, board before it leaves")
-			"hatch": _tip("exit_hatch", "A Rift Key opens this hatch (%s)  ·  three can drop through" % Settings.key_cap("interact"))
-			"outpost": _tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
-	if player.downed:
-		_tip("down", "Down  ·  a trusting Boki may pick you up")
 
 # ------------------------------------------------------------------ aim indicators
 # ---- ability previews: hold E, R or Q to see the reach and where it lands

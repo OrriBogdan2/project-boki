@@ -23,7 +23,6 @@ func map_region(tiles: Rect2) -> Rect2:
 	var t := map_tex()
 	var k := Vector2(float(t.get_width()) / m.world.w, float(t.get_height()) / m.world.h)
 	return Rect2(tiles.position * k, tiles.size * k)
-var kit_t0 := 0.0
 
 const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
@@ -115,8 +114,8 @@ func flash(col: Color, strength := 0.35) -> void:
 func hurt_flash(d: float) -> void:
 	hurt_t = clampf(0.25 + d / 60.0, 0.25, 0.6)
 
-## The message lane sits under the ally alerts (they take its first rows), or in the tutorial's own
-## lane while that runs (Tutorial holds it while its banner is up).
+## The message lane sits under the ally alerts (they take its first rows), or in the Trial's own
+## lane while that runs (Tutorial holds it while a lesson card is up).
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
 	msgs.reserved = alerts.size()
@@ -217,8 +216,8 @@ func _draw_all() -> void:
 	var sz := c.size
 	var p := m.player
 	hover_spots.clear()
-	if m.tut and m.tut.intro:
-		TutorialHud.draw(self, sz)      # the intro card alone: the rest of the HUD waits
+	if m.tut and m.tut.card:
+		TutorialHud.draw(self, sz)      # a Trial lesson card alone: the rest of the HUD waits
 		return
 	_draw_world_labels()
 	_draw_bubbles()
@@ -318,6 +317,7 @@ func _draw_all() -> void:
 			_draw_squad_pings(p)
 		if not p.riding:
 			_draw_prompt(sz, p)
+			ReminderCard.draw(self, sz)
 			if m.lairs and not p.out and not map_open():
 				_draw_lair_dial(sz, p)
 			if not map_open() and not mouse_on_panel(): _draw_crosshair(p)
@@ -471,7 +471,7 @@ func _draw_world_labels() -> void:
 
 func _draw_bubbles() -> void:
 	if m.tut and m.tut.card_up():
-		return        # (one voice at a time: the tutorial banner is up)
+		return        # (one voice at a time: the Trial's lesson card is up)
 	var cam := m.cam
 	for b in m.bubbles:
 		if not is_instance_valid(b["ent"]):
@@ -884,7 +884,7 @@ func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 		var ctr := sz * 0.5
 		var d := (tp - ctr).normalized() if not behind else (ctr - tp).normalized()
 		if d.length() < 0.1: d = Vector2.UP
-		# kept inside the play area: under the tutorial banner, above the pill and the ability bar
+		# kept inside the play area, above the Trial's pill and the ability bar
 		var ctr2 := Vector2(sz.x * 0.5, sz.y * 0.47)
 		ctr = ctr2
 		var hx := sz.x * 0.5 - 70.0; var hy := sz.y * 0.24
@@ -1794,19 +1794,11 @@ func _draw_squad_pings(p: Hunter) -> void:
 		var lbl2 := String(pg.get("label", ""))
 		_draw_waypoint(pg["pos"], ("%s: %s" % [who, lbl2]) if who != "" else lbl2, Color(pg["col"], a2))
 
-## For the first seconds of every match: what each of your buttons does.
+## In the training area: what each of your buttons does (H folds it away). Expeditions show only the
+## HUD: the Trial Expedition teaches the buttons, and each slot explains itself on hover.
 func _draw_kit(sz: Vector2, p: Hunter) -> void:
-	if not Settings.get_v("tips") or Record.clean() or m.opts.get("tutorial", false) or p.out or guide_hidden:
+	if not m.opts.get("training", false) or not Settings.get_v("tips") or Record.clean() or p.out or guide_hidden:
 		return
-	var show_t := 14.0 if not m.opts.get("training", false) else 1e9
-	var t := m.time - kit_t0
-	if p.dropping or p.riding:
-		# shown once you land, not over the drop map
-		kit_t0 = m.time
-		return
-	if t > show_t:
-		return
-	var a := clampf(show_t - t, 0.0, 1.0)
 	var lines: Array = []
 	var util: AbilityDef = p.runner.def_of("utility") if p.runner and p.ak == null else null
 	if util:
@@ -1846,37 +1838,26 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var dh := body.get_multiline_string_size(String(l[2]), HORIZONTAL_ALIGNMENT_LEFT, w - 28, 12).y
 		hs.append(26.0 + dh + 8.0)
 		total += 26.0 + dh + 8.0
-	var bottom := sz.y - 176.0
-	var compact := false
-	if not m.opts.get("training", false) and total > bottom - 230.0:
-		# too tall to sit under the kill feed: names only
-		compact = true
+	# it stays up, so it lives on the left under the minimap, clear of the checklist; on a short screen
+	# it drops the descriptions rather than run into your kin card
+	var compact := total > sz.y - 240 - 196
+	if compact:
 		hs = []
 		for l in lines: hs.append(28.0)
 		total = 34.0 + 28.0 * lines.size() + 4.0
-	var box := Rect2(Vector2(sz.x - w - 16, bottom - total), Vector2(w, total))
-	if m.opts.get("training", false):
-		# in training it stays up, so it lives on the left under the minimap, clear of the checklist;
-		# on a short screen it drops the descriptions rather than run into your kin card
-		box.position = Vector2(16, 240)
-		if total > sz.y - 240 - 196:
-			compact = true
-			hs = []
-			for l in lines: hs.append(28.0)
-			total = 34.0 + 28.0 * lines.size() + 4.0
-		box.size.y = total
-	_panel(box, Color(0.06, 0.07, 0.1, 0.82 * a), 12)
-	_text(box.position + Vector2(14, 22), "Your kit", 14, Color(GOLD, a), big)
+	var box := Rect2(Vector2(16, 240), Vector2(w, total))
+	_panel(box, Color(0.06, 0.07, 0.1, 0.82), 12)
+	_text(box.position + Vector2(14, 22), "Your kit", 14, GOLD, big)
 	var y := box.position.y + 34
 	for i in lines.size():
 		var l: Array = lines[i]
 		var kw := big.get_string_size(l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
-		var ks := StyleBoxFlat.new(); ks.bg_color = Color(l[3], a); ks.set_corner_radius_all(5)
+		var ks := StyleBoxFlat.new(); ks.bg_color = l[3]; ks.set_corner_radius_all(5)
 		c.draw_style_box(ks, Rect2(Vector2(box.position.x + 14, y), Vector2(kw + 12, 20)))
-		c.draw_string(big, Vector2(box.position.x + 20, y + 15), l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.07, 0.06, 0.08, a))
-		_text(Vector2(box.position.x + 34 + kw, y + 15), l[1], 14, Color(INK, a))
+		c.draw_string(big, Vector2(box.position.x + 20, y + 15), l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.07, 0.06, 0.08))
+		_text(Vector2(box.position.x + 34 + kw, y + 15), l[1], 14, INK)
 		if not compact:
-			c.draw_multiline_string(body, Vector2(box.position.x + 14, y + 38), String(l[2]), HORIZONTAL_ALIGNMENT_LEFT, w - 28, 12, -1, Color(MUTED, a))
+			c.draw_multiline_string(body, Vector2(box.position.x + 14, y + 38), String(l[2]), HORIZONTAL_ALIGNMENT_LEFT, w - 28, 12, -1, MUTED)
 		y += float(hs[i])
 
 ## Perks you've picked up this run: a row of little badges over your health bar, with stacks.

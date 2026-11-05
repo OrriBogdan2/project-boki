@@ -45,7 +45,7 @@ func show_result(r: Dictionary) -> void:
 	sc.tree_entered.connect(func(): fit.call_deferred())
 	# header: a coloured kicker, the outcome, one line on what it means
 	var tier_name := String(Data.TIERS[clampi(Game.last_tier, 0, Data.TIERS.size() - 1)]["name"])
-	var kick := "FIRST EXPEDITION" if r.get("tutorial", false) else tier_name.to_upper()
+	var kick := "TRIAL EXPEDITION" if r.get("tutorial", false) else tier_name.to_upper()
 	var head := UI.vbox(4)
 	var kr := UI.hbox(8)
 	kr.add_child(UI.tag("Extracted" if won else "Didn't make it", UI.TEAL if won else Color("ff9a8a")))
@@ -170,7 +170,7 @@ func show_result(r: Dictionary) -> void:
 	# the way out stays on screen whatever page the details are on
 	var row := UI.hbox(14)
 	if r.get("tutorial", false):
-		var tl := UI.label("That's the basics. Now come see your home.", UI.T_BODY, UI.ACCENT_HI)
+		var tl := UI.label("That's the basics. Your first real expedition starts from home.", UI.T_BODY, UI.ACCENT_HI)
 		tl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(tl)
 	row.add_child(UI.fill())

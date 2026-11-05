@@ -83,6 +83,7 @@ func fresh() -> Dictionary:
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
 		"tutorial": {},
+		"tips": [],           # first-time expedition tips seen, oldest first: the Tips log (MatchTips)
 		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
 		"buildings": [],
 		"music": [],
@@ -436,6 +437,7 @@ func load_from(p: String) -> void:
 		if not migrate(parsed):
 			return
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
+	MatchTips.migrate(parsed)        # (keyed by its own field too: tip flags move into the Tips log)
 	for k in parsed:
 		d[k] = parsed[k]
 	Unmasked.migrate(d)      # an old detailed look becomes the closest Unmasked

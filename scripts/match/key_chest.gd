@@ -78,8 +78,8 @@ static func deny(m: Match, h: Hunter, c: Dictionary) -> void:
 		tw.tween_property(lk, "rotation:z", 0.35, 0.05)
 		tw.tween_property(lk, "rotation:z", -0.3, 0.08)
 		tw.tween_property(lk, "rotation:z", 0.0, 0.06)
-	if h == m.player and m.hud:
-		m.hud.toast_small("Locked  ·  needs a key", Color("ffb0a0"))
+	if h == m.player:
+		m.tips.remind("chest_key")
 
 ## The lock falls away as the lid opens.
 static func unlock_fx(m: Match, c: Dictionary) -> void:

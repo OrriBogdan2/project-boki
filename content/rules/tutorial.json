@@ -1,5 +1,5 @@
 {
- "doc": "The first-match tutorial (scripts/match/tutorial.gd). steps: [id, the one banner line]. detail: a plain-words second line under it (%X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step (the right click with a hold, the Boki starting out). labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down). need: how many times a step's action must land, shown as 1/3 on the pill.",
+ "doc": "The Trial Expedition (scripts/match/tutorial.gd): a guided course that stops at each lesson with a centred card (the world waits until you press a key), then a pill at the bottom while you do it. steps: [id, the lesson's one line], in the order they are taught. detail: the plain-words lines under it on the card (%X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. preview: the ability clip (AbilityClip slot) a lesson's card plays. alt: the line for a variant of a step (the right click with a hold, the Boki starting out). labels: the marker's caption per step. mob: how the Trial's monsters differ from real ones (hp and size up, damage and attack tempo down). need: how many times a step's action must land, shown as 1/3 on the pill.",
  "steps": [
   [
    "land",
@@ -30,14 +30,6 @@
    "Pick up the item"
   ],
   [
-   "gkey",
-   "Send %s out"
-  ],
-  [
-   "rank",
-   "You levelled up!"
-  ],
-  [
    "shoot",
    "%W the monster"
   ],
@@ -48,6 +40,10 @@
   [
    "utility",
    "Use %A"
+  ],
+  [
+   "gkey",
+   "Send %s out"
   ],
   [
    "throw",
@@ -62,16 +58,20 @@
    "Watch %s use %A"
   ],
   [
+   "fight",
+   "Beat all the monsters"
+  ],
+  [
+   "rank",
+   "You levelled up!"
+  ],
+  [
    "key",
-   "Grab the key"
+   "A key! Grab it"
   ],
   [
    "chest",
    "Open the chest with the key"
-  ],
-  [
-   "fight",
-   "Beat all the monsters"
   ],
   [
    "goexit",
@@ -91,13 +91,34 @@
   ]
  ],
  "detail": {
-  "gkey": "%T is your Boki button. Tap it to send %s at a monster. Tap again to call it back. Hold it to give orders.",
-  "rank": "Every level gives you a skill point (see the gold + by your level). Press %R to rank up %N. Your ultimate unlocks at level %U.",
+  "land": "This is your Trial Expedition with %s. It stops to show you each new thing, and nothing out here can hurt you.",
+  "move": "%s runs ahead to show you the way. The beam marks where to go.",
+  "dash": "A dash is a quick burst the way you're moving. Run to the glowing edge, then dash over.",
+  "exdash": "Jump with %J at the glowing edge, then dash while you're in the air to cross the wider gap.",
+  "glide": "Hold %G in the air to open your glider and float across long gaps.",
+  "crouch": "Crouching lets you see further, makes monsters slower to notice you and steadies your aim, but you move slower.",
+  "pickup": "Walk up to it and press %F to pick it up.",
+  "shoot": "Aim with the mouse. The counter shows your hits.",
   "sig": "%X",
-  "key": "Chests are locked. Walk over the key to pick it up.",
-  "chest": "Chests need a key. Hold %F next to it to open it. This uses up the key.",
+  "utility": "Your right-click ability. Watch the clip, then try it on the monster.",
+  "gkey": "%T is your Boki button. Tap it to send %s at a monster. Tap again to call it back. Hold it to give orders.",
+  "throw": "Its hit stuns, and a stunned monster takes extra damage.",
+  "orders": "Hold %T, then move the mouse toward Chase, Guard, Return or Follow and let go.",
+  "kin1": "%s uses its own ability by itself. No key needed: just watch.",
+  "fight": "Use everything you've learned: your weapon, your abilities and %s.",
+  "rank": "Every level gives you a skill point (see the gold + by your level). Press %R to rank up %N. Your ultimate unlocks at level %U.",
+  "key": "Chests are locked, and each one needs a key. Walk over the key to pick it up.",
+  "chest": "Hold %F next to the chest to open it. This uses up the key.",
+  "goexit": "Outposts are one way home. Only what you carry out of an expedition is yours to keep.",
   "uplink": "Stay inside the circle until it's yours. Step out and the capture slips back!",
-  "defend": "Stay inside the circle. Step out and the capture slips back!"
+  "defend": "Stay inside the circle. Step out and the capture slips back!",
+  "extract": "The lift takes you home with everything you carry."
+ },
+ "preview": {
+  "dash": "dash",
+  "shoot": "lmb",
+  "sig": "e",
+  "utility": "rmb"
  },
  "alt": {
   "utility_hold": "Tap, then hold, to use %A",

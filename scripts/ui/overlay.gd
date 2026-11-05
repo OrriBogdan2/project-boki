@@ -186,6 +186,7 @@ func back() -> void:
 			"saves": open_saves()
 			"inventory": open_inventory()
 			"dex": open_dex(dex_open)
+			"tips": open_tips()
 			_: close()
 	else:
 		close()
@@ -237,6 +238,7 @@ func open_pause(where: String) -> void:
 	# the rarely used ones: quiet text links in a row
 	var minor := HFlowContainer.new()
 	minor.add_theme_constant_override("h_separation", 4); minor.add_theme_constant_override("v_separation", 2)
+	minor.add_child(UI.ghost("Tips log", open_tips))
 	if where == "home":
 		minor.add_child(UI.ghost("Change your look", func():
 			close()
@@ -259,7 +261,7 @@ func open_pause(where: String) -> void:
 			close()
 			Practice.leave(m, tut)
 		if tut:
-			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
+			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the Trial", "back", leave)
 		else:
 			var lb: Button = item.call("Leave match", "back", func():
 				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
@@ -277,6 +279,10 @@ func open_pause(where: String) -> void:
 	res.grab_focus.call_deferred()
 
 # ------------------------------------------------------------------ settings
+## The Tips log: the first-time expedition tips you've seen (TipsLog).
+func open_tips() -> void:
+	TipsLog.fill(_page("tips", "Tips log", 560, true))
+
 func open_settings() -> void:
 	_show_settings()
 

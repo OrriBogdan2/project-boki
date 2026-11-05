@@ -1,11 +1,13 @@
 class_name Tutorial
 extends RefCounted
-## The first-match tutorial: a scripted course on content/maps/tutorial.json, one stop per skill (its
-## "course" table holds each stop). Match owns one of these as `tut` and calls update() every step.
+## The Trial Expedition: a guided course on content/maps/tutorial.json, one stop per skill (its
+## "course" table holds each stop), played before your first real expedition and again from the
+## expedition panel. Match owns one of these as `tut` and calls update() every step.
 ## The steps, their words and the headless driver (TutorialDrive) live here and next door, not in Match.
-## What the player sees is drawn by TutorialHud: a small banner at the top for each new step that
-## settles into a pill, a pulse when they stall, a quiet check when a step is done; the marker (beam,
-## arrow) is here and in the Hud. Nothing but the first intro card ever pauses play.
+## Each lesson opens with a calm centred card (one instruction, its key, a looping clip where one
+## helps) and the world waits until you press a key; then a pill at the bottom while you do it and a
+## pulse when you stall. Doing it brings the next lesson's card; nothing moves on by itself. Drawn by
+## TutorialHud; the marker (beam, arrow) is here and in the Hud.
 
 ## Steps: content/rules/tutorial.json. Steps a kit can't do are skipped (applies()).
 ## Whether your Boki runs ahead for this step (to a pad before a gap, or to the goal).
@@ -15,7 +17,7 @@ static func leads(sid: String) -> bool:
 static func steps() -> Array:
 	return Content.rules("tutorial")["steps"]
 
-const KEYS := {"land": "move", "move": "move", "dash": "dash", "exdash": "dash", "crouch": "crouch",
+const KEYS := {"land": "move", "move": "move", "dash": "dash", "exdash": "dash", "glide": "glide", "crouch": "crouch",
 	"pickup": "interact", "shoot": "fire", "sig": "signature", "utility": "secondary", "throw": "throw",
 	"orders": "throw", "chest": "interact", "uplink": "interact", "gkey": "throw"}
 ## Which course stop a finished step leaves you at (a fall puts you back there).
@@ -24,35 +26,30 @@ const STOP_AFTER := {"land": "land", "move": "move", "dash": "dash", "exdash": "
 const GAP_STEPS := ["dash", "exdash", "glide"]      # leave from the glowing pad on one island, land on the next
 const WALK_LEAD := ["move", "crouch", "pickup", "key", "chest", "goexit", "uplink", "extract"]
 
-const CARD_T := 1.5        # s the top banner stays up before it settles into the pill
-const NAG_T := 15.0        # s without progress before the pill pulses and the Boki says it once more
-const INTRO_T := 2.0       # s the first-time intro card stays up (any key closes it sooner)
+const READ_T := 0.4        # s a lesson card stays up before a key closes it (a held click can't skip it unread)
+const NAG_T := 8.0         # s without progress before the pill pulses and the Boki says it once more
 const SPOT_T := 5.0        # s the lookout shows the chest it spotted
-const DONE_T := 0.9        # s of the step-done sting
 const LOOKOUT_R := 4.2     # m: the lookout's top is 3.6 wide; any grounded height within this counts
 const CROUCH_HOLD := 1.5   # s of crouching at the lookout
-const RANK_WAIT_T := 60.0  # s before the rank-up step moves on by itself
-const KEY_WAIT_T := 60.0   # s before the key step moves on by itself
-const KIN_WATCH_T := 12.0  # s to wait for your Boki to use its ability before moving on
+const KIN_WATCH_T := 12.0  # s to wait for your Boki to use its ability by itself before moving on
 const FAR_SCOUT := 38.0    # m: a target this far off gets "crouch to scout ahead"
 const MINT := Color(0.56, 0.89, 0.78)
 
 var m: Match
 var step := -1
-var intro := true            # the "Training run" card: the first time only, until a key or INTRO_T
-var intro_t := 0.0
-var text := ""               # this step's one line, on the banner and the pill
-var detail := ""             # and the plain-words line under it ("" for none)
+var card := false            # this lesson's card is up: the world waits for a key
+var card_shown := -1         # the step whose card has been shown
+var card_t := 0.0            # s the card has been up
+var clip: AbilityClip = null # the card's looping ability clip (TutorialHud places it)
+var text := ""               # this step's one line, on the card and the pill
+var detail := ""             # and the plain-words lines under it on the card ("" for none)
 var key_cap := ""            # the key cap beside it ("" for none)
 var got := 0                 # times this step's action has landed (shown as got/need)
 var need := 0
 var t := 0.0                 # s in this step
-var card_t := 0.0            # s since the card (re)appeared
-var done_t := 0.0            # s left of the step-done check
 var flash_t := 0.0           # s the marker flashes (after a stall)
 var nag_t := 0.0             # s the pill pulses (after a stall)
 var spot_t := 0.0            # s left of "You spotted it!" and the chest beam
-var wait := 0.0
 var down_t := 0.0
 var kills := 0               # monsters you or your Boki beat
 var flag := false
@@ -65,6 +62,7 @@ var last_stop := Vector3.INF # where a fall puts you back
 var used0 := {}
 var throws0 := 0
 var skills0 := 0
+var pts0 := 0                # skill points to spend once the rank-up lesson's level came
 var taps := 0                # right click: taps so far
 var held := false            # and whether it was held (kits with a hold only)
 var hits := 0                # your weapon hits on a monster this step
@@ -80,8 +78,11 @@ var _pads: Array = []
 
 func _init(match_node: Match) -> void:
 	m = match_node
-	intro = not match_node.opts.get("tut_test", false) and not Save.d["tutorial"].get("tut_intro", false)
 	_course = World.load_layout("tutorial").get("course", {})
+
+## The Trial's match options. `replay`: started again from the expedition panel (nothing carries over).
+static func opts(replay := false) -> Dictionary:
+	return {"tutorial": true, "trial_replay": replay, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0}
 
 # ------------------------------------------------------------------ the course
 ## A course stop's ground position (INF when the stop isn't in the table). key: "at" or "pad".
@@ -177,27 +178,51 @@ func update(dt: float) -> void:
 	if p.kin and p.kin.state == "downed":
 		p.kin.down_t = minf(p.kin.down_t, 0.5)     # (a Boki that got knocked out here comes round at once)
 	t += dt
-	card_t += dt
-	done_t = maxf(0.0, done_t - dt)
 	flash_t = maxf(0.0, flash_t - dt)
 	nag_t = maxf(0.0, nag_t - dt)
 	spot_t = maxf(0.0, spot_t - dt)
 	if m.hud:
-		m.hud.msgs.hold = card_up()      # messages wait while the banner is up
+		m.hud.msgs.hold = card_up() or card_shown != step      # messages wait while a card is up or coming
 	var sid := id()
-	var done := _is_done(sid, dt)
+	var done := card_shown == step and _is_done(sid, dt)     # (only what you do after the lesson's card counts)
 	_point(sid)
 	_stall(dt)
 	_props()
 	if p.kin and p.kin.comp:
 		p.kin.comp.tut(sid, _lead_goal(sid))
-	if wait > 0.0:
-		wait -= dt
+	if card_shown != step:
+		_open_card()
 		return
 	if done:
 		_finish(sid)
 	if step < steps().size():
 		_words()
+
+## The lesson's card comes up and the world waits (Match.step holds while `card`).
+func _open_card() -> void:
+	card_shown = step
+	card = true
+	card_t = 0.0
+	m.bubbles.clear()       # one voice at a time: the card has the floor
+	if m.hud:
+		m.hud.msgs.hold = true
+
+## While the card is up: the match is held, button presses don't reach the hunter, the clip plays.
+func hold(dt: float) -> void:
+	for k in m.pending_input:
+		m.pending_input[k] = false
+	card_t += dt
+	if m.hud:
+		TutorialHud.sync_clip(m.hud, self)
+
+## A key or click closes the card (after READ_T) and play goes on: now do it.
+func ack() -> void:
+	if not card or card_t < READ_T:
+		return
+	card = false
+	stall_t = 0.0
+	if m.hud:
+		TutorialHud.sync_clip(m.hud, self)
 
 func _finish(sid: String) -> void:
 	if sid == "orders" and m.player.kin:
@@ -211,8 +236,6 @@ func _finish(sid: String) -> void:
 	while step < steps().size() and not applies(id()):
 		step += 1
 	flag = false
-	wait = 0.6
-	done_t = DONE_T
 	m.sfx("unlock", null, -9.0)
 	_enter()
 
@@ -220,8 +243,6 @@ func _enter() -> void:
 	var p := m.player
 	var sid := id()
 	t = 0.0
-	card_t = 0.0
-	m.bubbles.clear()       # one voice at a time: the old step's lines go, the banner has the floor
 	if m.hud:
 		m.hud.msgs.clear()
 		m.hud.msgs.hold = true
@@ -263,15 +284,15 @@ func _enter() -> void:
 		"kin1":
 			_foes(["skitter"])
 		"fight":
+			for mb in m.mobs:
+				if not mb.dead:
+					mb.dead = true      # (the practice monster from the lessons before goes: a fresh group comes)
+					mb.visible = false
 			kills = 0
 			fight_n = 3
 			_foes(["skitter", "spitter", "skitter"])
 		"chest":
 			m.ping(stop("chest"), Color("dfe8f2"))
-			for mb in m.mobs:
-				if not mb.dead:
-					mb.dead = true
-					mb.visible = false
 		"goexit":
 			var o := outpost()
 			if not o.is_empty():
@@ -280,7 +301,7 @@ func _enter() -> void:
 			pass
 	_words()
 
-## The tutorial starts with every ability open, so a level-up is given once for real: the pop, the chime and
+## The Trial starts with every ability open, so a level-up is given once for real: the pop, the chime and
 ## a skill point (the gold + by the level ring), spent with Alt + the ability's key.
 func _offer_rank() -> void:
 	var p := m.player
@@ -312,7 +333,7 @@ func _keep_foe(kind: String) -> void:
 	if at != Vector3.INF:
 		_tank(m.spawn_mob(kind, at))
 
-## The tutorial's monsters: many times the health and bigger, barely a scratch when they hit, slow
+## The Trial's monsters: many times the health and bigger, barely a scratch when they hit, slow
 ## telegraphed attacks (content/rules/tutorial.json "mob"). Real matches keep the global stats.
 func _tank(mb: Mob) -> void:
 	var c: Dictionary = Content.rules("tutorial")["mob"]
@@ -370,11 +391,12 @@ func _is_done(sid: String, dt: float) -> bool:
 		"pickup": return ground_item().is_empty()
 		"gkey": return p.kin == null or p.kin.st_throws > throws0 or p.kin.state == "downed"
 		"rank":
-			if not flag and t >= CARD_T:
-				flag = true      # (the level-up pop waits for the banner to settle, so the two never overlap)
+			if not flag and card_shown == step and not card:
+				flag = true      # (the level-up pop waits for the card to close, so the two never overlap)
 				_offer_rank()
-			return flag and (p.skill_pts == 0 or t >= RANK_WAIT_T)
-		"key": return p.chest_keys > 0 or t >= KEY_WAIT_T
+				pts0 = p.skill_pts
+			return flag and p.skill_pts < pts0      # (one point spent: the lesson is learned)
+		"key": return p.chest_keys > 0
 		"shoot":
 			_keep_foe("skitter")
 			got = hits
@@ -516,15 +538,17 @@ func _point(sid: String) -> void:
 	label = String(Content.rules("tutorial")["labels"].get(sid, "Monster"))
 
 ## A stall (NAG_T without getting closer): the pill and the marker pulse and the Boki says it once
-## more. No card comes back and nothing pauses.
+## more. The card doesn't come back.
 func _stall(dt: float) -> void:
+	if card_shown != step:
+		return      # (the lesson hasn't been shown yet)
 	stall_t += dt
 	if target != Vector3.INF:
 		var d := Vector2(target.x - m.player.pos.x, target.z - m.player.pos.z).length()
 		if d < best_d - 1.0:
 			best_d = d
 			stall_t = 0.0
-	if stall_t >= NAG_T and wait <= 0.0:
+	if stall_t >= NAG_T:
 		stall_t = 0.0
 		best_d = 1e9 if target == Vector3.INF else _dist(target)
 		nag_t = 2.5
@@ -591,12 +615,29 @@ func _words() -> void:
 		need = 2 if need_back or throw_recalls() else 1
 	detail = _fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(sid, "")), m.player))
 	key_cap = ""
-	if sid in ["land", "move"]:
+	if sid in ["land", "move", "key", "goexit", "extract"]:
 		key_cap = _wasd()
 	elif sid == "rank":
 		key_cap = TutorialText.rank_combo()
 	elif KEYS.has(sid):
 		key_cap = Settings.key_cap(KEYS[sid])
+
+## The ability clip this lesson's card plays ("" for none: a kit without archetype data has no clips).
+func preview() -> String:
+	if m.player.ak == null:
+		return ""
+	return String(Content.rules("tutorial")["preview"].get(id(), ""))
+
+## [this lesson's number, how many lessons this kit gets] for the card's kicker.
+func lesson() -> Array:
+	var n := 0
+	var total := 0
+	for i in steps().size():
+		if applies(String(steps()[i][0])):
+			total += 1
+			if i <= step:
+				n += 1
+	return [n, total]
 
 ## "1/3" for a step that wants its action a few times, else "".
 func progress_text() -> String:
@@ -639,11 +680,11 @@ func scout_hint() -> String:
 	var d := Vector2(target.x - m.player.pos.x, target.z - m.player.pos.z).length()
 	return "Hold %s to crouch and scout ahead" % Settings.key_cap("crouch") if d > FAR_SCOUT else ""
 
-## The banner is up (the first CARD_T of a step): other popups wait their turn.
+## The lesson card is up: other popups wait their turn.
 func card_up() -> bool:
-	return intro or (step >= 0 and card_t < CARD_T)
+	return card
 
-# ------------------------------------------------------------------ the fall, and the key press
+# ------------------------------------------------------------------ the fall, and the hits
 ## Where a fall into the void puts you back: the last stop you reached.
 func respawn() -> Vector3:
 	return last_stop if last_stop != Vector3.INF else stop("land")
@@ -651,17 +692,3 @@ func respawn() -> Vector3:
 ## A weapon hit of yours on a monster (Match).
 func on_hit() -> void:
 	hits += 1
-
-## The first-time intro card waits for a key or INTRO_T seconds, and the match waits with it.
-func intro_wait(dt: float) -> void:
-	for k in m.pending_input:
-		m.pending_input[k] = false
-	intro_t += dt
-	if intro_t >= INTRO_T:
-		ack()
-
-## Any key or click closes the intro card; it is shown only the first time.
-func ack() -> void:
-	if intro:
-		intro = false
-		Save.d["tutorial"]["tut_intro"] = true

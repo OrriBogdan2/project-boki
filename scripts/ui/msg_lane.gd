@@ -22,7 +22,7 @@ const WIDE := 0.45              # of the screen width: the widest a card gets be
 var top := 100.0                ## px from the top of the screen where the column starts
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
 var reserved := 0               ## rows the host's own cards take at the top (the ally alerts)
-var hold := false:              ## true: nothing new comes in (the tutorial banner has the floor)
+var hold := false:              ## true: nothing new comes in (a Trial lesson card has the floor)
 	set(v):
 		hold = v
 		_promote()

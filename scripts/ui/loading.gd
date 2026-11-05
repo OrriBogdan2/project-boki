@@ -81,7 +81,7 @@ func setup(opts: Dictionary) -> void:
 	tier = clampi(int(opts.get("tier", 0)), 0, Data.TIERS.size() - 1)
 	T = Data.TIERS[tier]
 	if opts.get("tutorial", false):
-		title = "First Expedition"; sub = "A short, safe trip with %s to learn the ropes. No rivals out here yet." % String(Save.active_kin().get("name", "your Boki"))
+		title = "Trial Expedition"; sub = "A guided run with %s. It stops to show you each new thing. Nothing out here can hurt you." % String(Save.active_kin().get("name", "your Boki"))
 	elif opts.get("training", false):
 		title = "Training Grounds"; sub = "Dummies, ledges and boosters. No danger here."
 	else:

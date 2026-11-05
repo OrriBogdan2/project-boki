@@ -1,7 +1,7 @@
 extends Node3D
 ## The first thing a new player sees after the prologue: one short card, then making yourself (one of the
 ## Empty), then three eggs on a little island. Pick an egg, knock on the shell until it hatches, name what
-## comes out; then your first Mask drifts to you (MaskMoment) and you head into the tutorial together.
+## comes out; then your first Mask drifts to you (MaskMoment) and you head into the Trial Expedition together.
 
 ## The three starter eggs plus a mystery one. Names, tempers and blurbs come from each species'
 ## "egg" block in content/kin/<id>.json, so every egg is named for its element (Venom Egg, ...).
@@ -710,7 +710,8 @@ func _show_name() -> void:
 	v.add_child(you_row)
 	var btns := UI.hbox(10)
 	btns.add_child(UI.primary("Head out together", func(): _finish(sp_id, ne.text, ye.text, true), 240))
-	var skip := UI.button("Skip the tutorial", func(): _finish(sp_id, ne.text, ye.text, false), 180)
+	var skip := UI.button("Skip the Trial", func(): _finish(sp_id, ne.text, ye.text, false), 180)
+	skip.tooltip_text = "For players who know the basics. Replay the Trial Expedition any time from the expedition panel."
 	skip.flat = true
 	btns.add_child(skip)
 	v.add_child(btns)
@@ -757,7 +758,7 @@ func _mask_moment(then: Callable) -> void:
 
 func _head_out(tutorial: bool) -> void:
 	if tutorial:
-		Game.start_match({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0})
+		Game.start_match(Tutorial.opts())
 	else:
 		Save.d["tutorial"]["match"] = true
 		Save.save_game()

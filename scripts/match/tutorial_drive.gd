@@ -59,7 +59,9 @@ static func drive(m: Match) -> void:
 			if fmod(m.time, 1.5) < Match.DT and p.kin:
 				KinCommand.tap(p)
 		"rank":
-			p.level_slot("kin")
+			for sl in ["sec", "kin", "dash"]:
+				if p.level_slot(sl):
+					break
 		"key":
 			for pk in m.pickups:
 				if pk["kind"] == "ckey":
