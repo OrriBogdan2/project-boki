@@ -2295,3 +2295,13 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - Never block input; no harsh sounds.
 - The same escalation for the farm tutorial's Hob prompts.
 - **Assert:** idle 7 s → a pulse; 13 s → the spotlight; progress resets it.
+
+## 178d. Tutorial pickup: only the one target item; no gust glove/other gear to confuse (owner playtest with his dad, 18:09 UTC Nov 5)
+- The owner: "the gust glove confused him too. he's trying to pick up the wrong thing".
+- The tutorial's "pickup" step spawns a vest (tutorial.gd ~:241, m.spawn_gear("vest")), but other gear (e.g. a gust glove from chests/ground loot) is lying around, and he went for that.
+- **Fix:**
+  - During the tutorial, no other gear or gloves on the ground: no random drops, chests or monster loot. Only the step's own item exists.
+  - The target item gets the item 166 interactable highlight + a big "E to pick up" keycap when near.
+  - Gloves (gust etc.) aren't introduced in the first tutorial at all. They come later, with their own short explainer the first time one is picked up in a real match ("Gloves give a special move on {key}").
+  - If a non-target item somehow appears, it isn't highlighted and the prompt points at the right one.
+- **Assert:** during the pickup step, the count of ground gear == 1 (the tutorial item).
