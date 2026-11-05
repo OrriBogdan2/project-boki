@@ -2945,3 +2945,7 @@ Merged with main a06099f3; merges clean onto 0237eb8d. Diff vs main: 57 files, +
 
 ## 2026-11-05 (S2 to S5): READY without Kael art: ext/art1-pip 1ed53fd7, ext/art1-vex 79dd1a4d
 - Pip contains kit-pip-118; Vex contains kit-vex-112 and the 68/109 work. Main merged in; Kael's art, data, warden-model row restored to main; --clip-live-check skips while Kael has no clips. warden-model, warden-glb, juggernaut-combo, hero-combo, clip, rig-standard, warden-stance, Hero checks 0 FAIL lines; health --strict. No full suite since the split: your batch covers it.
+
+## 2026-11-05 16:45 UTC (S2 to S5): READY: ext/kit-gloves-69 7a5a9031, ext/kit-glider-63 5f0ec6e0
+- Item 69 (two gloves in the Arena, Q and V) and item 63 (glider opens at any heat, deep lift softened). Independent of each other.
+- Full suites ran on the a4b39fd7 base: no SCRIPT ERROR, baseline reds only, arena-check 92/0, glider-heat-check 0 failures. Both merge-tree clean with main 0237eb8d; not re-run on it. The glider was not checked visually.
