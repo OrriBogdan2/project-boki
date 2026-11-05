@@ -142,6 +142,13 @@ def outward(ob, ref=None):
     ob.select_set(False)
 
 
+def write_void_card():
+    """item 136: the card he flicks, a texture the kit's projectile wears (scripts/heroes/void_card.gd)"""
+    w, h = 256, 360
+    ss, tt = np.meshgrid((np.arange(w) + 0.5) / w, (np.arange(h) + 0.5) / h)
+    imgio.save(PT.p_voidcard(ss.astype(np.float32), tt.astype(np.float32)), os.path.join(REPO, "art/wardens/ostra/void_card.png"))
+
+
 def add_cards(arm, at, mat):
     """the chaotic swirl: two orbits at different heights and radii, cards at all angles, some burnt or torn; tilted up for the match camera.
     ostra.json "swirl" tumbles them (WardenSway)."""
@@ -253,10 +260,9 @@ def main():
     for i in range(5):
         parent = "x_void" if i == 0 else "spring_wisp_%d" % (i - 1)
         joints.append(("spring_wisp_%d" % i, (path[idx[i]], path[idx[i + 1]], parent)))
-    orb_at = np.array((P.SH_X, 0, P.WR_Z)) + P.ORB_LOCAL
-    for p in P.orb(orb_at):
-        add(p)
-    joints.append(("x_weapon", (orb_at, orb_at + (0, 0, 0.1), "hand.R")))
+    # (item 136: no weapon. His palms are the cast points; the fan in his left hand is the deck the flurry deals from)
+    palm_r = (P.SH_X - 0.03, 0.0, P.WR_Z - 0.08)
+    palm_l = (-P.SH_X + 0.03, 0.0, P.WR_Z - 0.08)
     f, fc = P.fan()
     add(f)
     joints.append(("x_fan", (fc, fc + (0, 0, -0.1), "hand.L")))
@@ -280,7 +286,8 @@ def main():
         for p in ps:
             at.put(p.paint, p.px)
         pending.append((g, ps, at))
-    alb, emit = M.textures(768)
+    write_void_card()
+    alb, emit = M.textures(1024)
     tex = OUT + "/tex/"
     im_main = image("atlas", atlas.img, tex + "atlas.png")
     im_nrm = image("normal", PT.normal_map(atlas), tex + "normal.png")
@@ -292,7 +299,7 @@ def main():
     im_emit = image("face_emit", emit, tex + "face_emit.png")
     obs = []
     names = {"cloth": ("Body", "cloth-body", im_main), "cloth-ruff": ("Ruff", "cloth-ruff", im_main), "metal": ("Brass", "metal-body", im_main), "void-body": ("Lining", "void-body", im_void),
-             "void-wisp": ("Wisp", "void-wisp", im_wisp), "glow-cards": ("OrbSwirl", "glow-cards", im_glow)}
+             "void-wisp": ("Wisp", "void-wisp", im_wisp), "glow-cards": ("Fan", "glow-cards", im_glow)}
     mats = {}
     for g, ps, at in pending:
         nm, mn, im = names[g]
@@ -324,8 +331,11 @@ def main():
         e.location = pb.matrix_local.inverted() @ Vector(at) - Vector((0, pb.length, 0))
     anchor("anchor_head_top", "head", (0, 0, 1.95))
     anchor("anchor_chest", "hips", (0, 0.10, 1.116))
-    anchor("anchor_orb", "x_weapon", tuple(orb_at))
-    anchor("weapon_muzzle", "x_weapon", tuple(orb_at + (-0.09, 0.0, 0.0)))
+    anchor("anchor_orb", "hand.R", palm_r)
+    anchor("anchor_hand_r", "hand.R", palm_r)
+    anchor("anchor_hand_l", "hand.L", palm_l)
+    anchor("anchor_cards", "hand.L", palm_l)
+    anchor("weapon_muzzle", "hand.R", (palm_r[0], palm_r[1], palm_r[2] - 0.14))
     anchor("anchor_grin", "head", (0, 0.14, 1.6))
     anchor("anchor_box", "x_box", (0, 0, 0.36))
     anchor("anchor_box_base", "x_box", (0, 0, 0.02))

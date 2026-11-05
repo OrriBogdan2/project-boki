@@ -35,6 +35,11 @@ func run(main: Node) -> void:
 	var c: WardenClips = sync.get("clips")
 	ok(c != null, "Motley wears his clips in a match")
 	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
+	ok(WardenSkeleton.find(sk, "x_weapon") < 0 and P.model.get_node("Warden").find_child("weapon", true, false) == null,
+			"item 136: no weapon on his model")
+	for an in ["anchor_hand_r", "anchor_hand_l", "anchor_cards"]:
+		ok(WardenGlb.anchor(P.model, an) != null, "%s rides his hand" % an)
+	ok(VoidCard.make() != null, "the void card builds")
 	var hips := sk.find_bone("hips")
 	var box := WardenSkeleton.find(sk, "x_box")
 	var root_y := sk.get_bone_global_pose(sk.find_bone("root")).origin.y

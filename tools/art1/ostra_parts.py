@@ -592,40 +592,6 @@ def wisp():
     return out, path
 
 
-ORB_LOCAL = (-0.15, 0.0, -0.125)        # the orb from the right wrist at rest: off the palm, a little down the fingers
-
-
-def orb(at):
-    out = []
-    c = np.array(at)
-    rows, cols = 7, 10
-    P = np.zeros((rows, cols, 3))
-    a = np.linspace(0, 2 * np.pi, cols, endpoint=False)
-    for i in range(rows):
-        p = np.pi * i / (rows - 1)
-        P[i, :, 0] = c[0] + np.cos(a) * np.sin(p) * 0.098
-        P[i, :, 1] = c[1] + np.sin(a) * np.sin(p) * 0.098
-        P[i, :, 2] = c[2] + np.cos(p) * 0.098
-    V, F, ST = grid(P, closed=True)
-    out.append(Part("orbcore", "void-body", V, F, ST, rigid("x_weapon", len(V)), "orbcore", (64, 64)))
-    planes = ((np.array((1.0, 0, 0)), np.array((0, 1.0, 0)), np.array((0, 0, 1.0))), (np.array((0.0, 1.0, 0.0)), np.array((0, 0, 1.0)), np.array((1.0, 0, 0))))
-    for j in range(6):
-        n, e1, e2 = planes[j % 2]
-        e1b = e1 * np.cos(0.26) - n * np.sin(0.26)
-        m = 14
-        tt = np.linspace(0, 1, m)
-        ang = tt * 3.3 + (j // 2) * 2.094 + (j % 2) * 0.7
-        r = 0.100 + 0.105 * tt ** 1.35
-        wd = rmp(tt, [0, 0.35, 1], [0.052, 0.042, 0.002])
-        Q = np.zeros((m, 2, 3))
-        for i in range(m):
-            rad = e1b * np.cos(ang[i]) + e2 * np.sin(ang[i])
-            Q[i, 0], Q[i, 1] = c + rad * (r[i] - wd[i] * 0.2), c + rad * (r[i] + wd[i])
-        V, F, ST = both(*grid(Q))
-        out.append(Part("orbswirl%d" % j, "glow-cards", V, F, ST, rigid("x_weapon", len(V)), "orbswirl", (64, 128)))
-    return out
-
-
 def fan(side=-1):
     """the fan of cards in his off hand, five backs, on x_fan so a clip can snap it shut"""
     x0 = side * SH_X

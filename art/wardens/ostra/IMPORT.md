@@ -14,8 +14,8 @@ script in Blender on the shared armature; id and files stay `ostra`. Under the 1
 - **Normal map:** `ostra_normal.jpg`, made from the paint's own relief (`ostra_paint.normal_map`): plank gaps, grain, folds, pleats. hero_toon `use_normal`, `normal_k` per slot in warden_look.json.
 - **Face:** an emissive texture on a dished plane inside the hood (`tools/art1/ostra_mask.py`, to briefs/art-refs/ostra_head.png), tipped up 16 degrees for the match camera; `x_jaw`,
   `x_brow.*`, `x_cheek.*` bend the grin and slits.
-- **Weapon (item 76b):** the void orb and swirl on `x_weapon`, right hand (the kit's hand_pos(true); the sheet draws it in his left); the fan of cards on
-  `x_fan`, left hand. `anchor_orb`, `weapon_muzzle`.
+- **No weapon (item 136):** the void orb is gone. `anchor_orb`, `anchor_hand_r` (right palm), `anchor_hand_l`, `anchor_cards` (left palm), `weapon_muzzle` (right fingertips, an FX
+  point the Gun follows). The fan of cards on `x_fan` is the deck. The flurry's card is `void_card.png`, built by `scripts/heroes/void_card.gd`.
 - **Cards:** `orbit_cards`, `orbit_cardsb` on the hips, tumbled by WardenSway (`sway` in content/rules/warden_anim/ostra.json), some burnt or torn.
 - **Clips:** `tools/art1/ostra_clips.py` (keys), `ostra_pose.py` (hands by target, two-bone IK, fingers, face, box), `ostra_anim.py` (30 fps from frame 0).
 - Imports: `animation/fps=30`, `remove_immutable_tracks=false`, `generate_lods=true`, `force_disable_compression=true`; textures `compress/mode=2`,

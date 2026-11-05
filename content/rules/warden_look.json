@@ -594,18 +594,6 @@
 				"far_d": 14.0
 			},
 			{
-				"anchor": "anchor_orb",
-				"color": [
-					0.66,
-					0.36,
-					1.0
-				],
-				"strength": 3.0,
-				"px": 9.0,
-				"near_d": 7.0,
-				"far_d": 14.0
-			},
-			{
 				"anchor": "anchor_orbit_cards_0",
 				"color": [
 					0.74,
@@ -655,16 +643,6 @@
 			}
 		],
 		"bloom": [
-			{
-				"at": "anchor_orb",
-				"color": [
-					0.42,
-					0.16,
-					1.0,
-					0.34
-				],
-				"size": 0.46
-			},
 			{
 				"at": "anchor_orbit_cards_0",
 				"color": [

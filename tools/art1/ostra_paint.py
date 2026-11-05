@@ -243,14 +243,6 @@ def collar_paint(col_a, col_b, seed):
     return fn
 
 
-def p_orbcore(S, T):
-    return ramp(fbm(S, T, 4, 4, 9), [hx("04020a"), hx("120828"), hx("2a1460")])
-
-
-def p_swirl(S, T):
-    return ramp((1 - T) * (0.4 + 0.6 * (1 - np.abs(S - 0.5) * 2)), [hx("3a12a0"), hx("6a2ae0"), hx("a868ff"), hx("e8c8ff")], [0, 0.45, 0.8, 1])
-
-
 def p_wisp(S, T):
     ang = (S + T * 1.7) % 1.0
     st = fbm(ang, T * 0.2, 14, 2, 61, 3)
@@ -266,9 +258,20 @@ def glow_rim(S, T, c):
 
 def p_card(S, T):
     """a card's face: lilac, lit from within, its pip deep violet"""
-    c = ramp(T, [hx("a27ce8"), hx("8e62dc")])
+    c = ramp(T, [hx("8f7cea"), hx("7a62e0")])
     c = mix(c, hx("4e14c0"), suit("diamond", (S - 0.5) * 2.0, (0.5 - T) * 2.0))
     return glow_rim(S, T, c)
+
+
+def p_voidcard(S, T):
+    """item 136: the flurry's card: void violet, a teal rim, a suit-diamond eye; bright enough to read as it flies"""
+    n = fbm(S, T, 5, 7, 23)
+    c = ramp(n * 1.3 - 0.1, [hx("1a0a3e"), hx("3a1a90"), hx("6a34d8")])
+    c = mix(c, hx("c8a0ff"), suit("diamond", (S - 0.5) * 2.0, (0.5 - T) * 2.0))
+    c = mix(c, hx("1a0a3e"), suit("diamond", (S - 0.5) * 3.4, (0.5 - T) * 3.4))
+    d = np.minimum(np.minimum(S, 1 - S) * 1.4, np.minimum(T, 1 - T))
+    c = mix(c, hx("3cf0d8"), M.sm(0.075, 0.02, d))
+    return np.clip(mix(c, hx("c8fff4"), M.sm(0.026, 0.0, d)), 0, 1)
 
 
 def p_cardback(S, T):
@@ -295,7 +298,7 @@ PAINTERS = {"flame": p_flame, "wall_s": wall("spade", SLATE, 11), "wall_d": wall
             "lid": p_lid, "brass": p_brass, "knob": p_knob, "bell": p_bell, "torso": p_torso, "peplum": p_peplum, "lining": p_lining,
             "tail_v": tail_paint(False, 41), "tail_k": tail_paint(True, 43), "sleeve_k": sleeve_paint(True, 13), "sleeve_v": sleeve_paint(False, 15), "glove": p_glove,
             "hood": p_hood, "hornR": horn_paint(False), "hornL": horn_paint(True), "ruff": p_ruff, "collar_v": collar_paint(VIOLET, VIOLET_HI, 71), "collar_k": collar_paint(BLACK, PLUM, 73),
-            "orbcore": p_orbcore, "orbswirl": p_swirl, "wisp": p_wisp, "card": p_card, "cardback": p_cardback, "cardburn": p_cardburn}
+            "wisp": p_wisp, "card": p_card, "cardback": p_cardback, "cardburn": p_cardburn}
 
 
 class Atlas:

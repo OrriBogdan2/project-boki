@@ -27,9 +27,6 @@ NEUTRAL = {
     "lid": 0.0,                 # 0 wide .. 1 narrowed
     "skirt": (0.0, 0.0),        # (unused on this model: the tails are spring chains)
     "pld": (0.0, 0.0),          # the collar's points: lift R, lift L, degrees
-    "orb": 1.0,                 # the orb's size
-    "orbp": (0.0, 0.0, 0.0),    # and its offset from the palm (in the hand's frame: x palm, y fingers)
-    "orbs": 0.0,                # its spin, degrees
     "box": (0.0, 0.0),          # the box tilts: toward his front (+), his right (+), degrees
     "lidb": 0.0,                # the box's lid: 0 as modelled (open), 1 shut, -0.4 flung wide
     "crank": 0.0,               # the crank's turn, degrees
@@ -158,10 +155,6 @@ class Rig:
             out["x_cheek." + s] = (Quaternion(), self.rest["x_cheek." + s].inverted() @ d, None)
         out["pauldron.R"] = (self.about("pauldron.R", Quaternion((0, 1, 0), math.radians(-P["pld"][0]))), None, None)
         out["pauldron.L"] = (self.about("pauldron.L", Quaternion((0, 1, 0), math.radians(P["pld"][1]))), None, None)
-        rr = self.rest["x_weapon"]
-        po = P["orbp"]
-        d = rr.inverted() @ Vector((-po[0], -po[2], -po[1]))     # (in the hand's rest frame: palm is -x, fingers -z)
-        out["x_weapon"] = (self.about("x_weapon", Quaternion((0, 0, 1), math.radians(P["orbs"]))), d, Vector((max(P["orb"], 0.03),) * 3))
         bx = P["box"]
         out["x_box"] = (self.about("x_box", Quaternion((-1, 0, 0), math.radians(bx[0])) @ Quaternion((0, 1, 0), math.radians(bx[1]))), None, None)
         out["x_boxlid"] = (self.about("x_boxlid", Quaternion((1, 0, 0), math.radians(-104.0 * P["lidb"]))), None, None)

@@ -32,6 +32,9 @@ var skel: Skeleton3D
 var d: Dictionary
 var tree: AnimationTree
 var lib: AnimationLibrary
+var alt_on := false          # this play of a move takes its "alt" clip
+var alt_km := ""
+var alt_t := 0.0
 var cur := ""                # the clip on the live channel
 var chan := 0                # which channel is live, 0 or 1
 var xf := 0.0                # the crossfade between the channels (0: channel a)
@@ -234,8 +237,13 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
 		var mv: Dictionary = moves[km]
-		var clip := String(mv["clip"])
 		var tt := float(s.get("kmove_t", 0.0))
+		# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
+		if km != alt_km or tt < alt_t:
+			alt_on = not alt_on
+		alt_km = km
+		alt_t = tt
+		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
 		var length := lib.get_animation(clip).length
 		if mv.has("hold_from") and root.has_meta(PHASE):
 			var start := float(mv["hold_from"])
