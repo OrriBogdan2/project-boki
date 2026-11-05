@@ -12,11 +12,11 @@ Changing a hero's hit radius is one line (`body.hit_r`). The creator's look slid
 | gunslinger | Vex | 1.04 | 0.416 | broad |
 | ostra | Ostra | 1.03 | 0.412 | tall and thin; hitbox stays at ground level (item 18) |
 | mage | Ryzz | 1.00 | 0.400 | average |
-| archer | Hem | 0.98 | 0.392 | average, slim |
+| archer | Lisette | 0.98 | 0.392 | average, slim |
 | dolm | Tarek (Breah's base) | 0.97 | 0.388 | lean |
 | thief | Sable | 0.96 | 0.384 | lean |
 | rimewright | Claire | 0.95 | 0.380 | slight |
 | ashwick | Cinder | 0.94 | 0.376 | low and hunched |
-| tender | Pip | 0.85 | 0.340 | smallest |
+| tender | Pip | 0.85 | 0.340 | smallest (at the band's floor: item 108 shrank her model, not this) |
 
 Shots connect inside `hit_r + Match.HIT_SLACK (0.08) + the shot's radius`. `--hitbox-size-check` asserts the band, the drawn circle radius, and a shot just inside and outside the circle for the smallest and biggest.
