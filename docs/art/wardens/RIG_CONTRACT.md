@@ -179,8 +179,12 @@ slots at most ±35% per channel from the Warden's own colours. Bone names may co
 The armature and its meshes sit at the .glb's origin (no offset on the scene root), so skeleton space is model space.
 
 ## Budget and checks
-- About 30–45k triangles per Warden (a Meshy model baked to a clean low mesh: ~10k of them on the head, the
-  weapon included; `--warden-glb-check` holds 45k), one 2048² atlas; no more than 8 material slots.
+- **At most 15k triangles per Warden, weapon included** (owner item 94; `--warden-glb-check` holds it). A Meshy
+  bake (30–50k) goes through `tools/blender/decimate_warden.py` (one collapse ratio for every part over 400
+  triangles; the armature, rest pose, anchors, weights and materials are untouched). The import generates
+  LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses.
+- Textures: at most 2048² (`process/size_limit=2048`), VRAM-compressed (`compress/mode=2`, high quality:
+  BPTC on desktop), mipmapped; one atlas per Warden where possible; no more than 8 material slots.
   A hand-made model may be flat-painted instead (one colour a material, no atlas) or use a 2048² atlas with
   its ageing painted in (Dredge); slots, not materials, count (Dredge's ten materials use four).
 - `--warden-glb-check`: the bone table covers every part HunterAnim binds; a Warden without a .glb builds the
