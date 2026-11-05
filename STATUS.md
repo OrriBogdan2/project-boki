@@ -876,3 +876,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Full suite on this commit: 139, same reds as the baseline list, portrait 107, archer-combo 143, hero-combo 287, bot-sanity 0.
 - Merges clean with main; conflicts with art1-kael 679986bf in check_registry only. Shared: use_nrm optional normal map (Sable, Ryzz, Motley have the same or a similar path).
 - Gaps: player's skin colour pick no longer reaches arms/midriff; pin thread dark; stitching soft; sheet projection only on the face.
+
+## 2026-11-05 S2: READY ext/art1-vex 53db1f0e (agent ~80% hero view, ~75% face)
+- Scans for body and head on the armature: 13,319 tris, 7 slots, 29 clips; cannon is the right arm, launcher swing bone; merged 4e4ab9b5 and kit-vex-112; shared legs_heading key in warden_clips.gd; --vex-clip-live-check. 125 credits.
+- **Fidelity:** cannon arm yes; gatling + launcher yes; robotic left arm partial (brass forearm panel missing); cyber-eye right, green eye left yes; cyber-spine yes (patchy back); one braid yes; VEX belt yes; jacket off shoulder yes; ammo belt partial (reads as a hose); fires freely while dashing yes; VFX tracers: S3's. Proofs: ext/hero-shots-s2 f6ac726e art1/vex/.
+- Checks by exit code on the final merge: clip, vex-clip-live, clip-live, rig-standard, warden-glb, warden-model, dash-aim; gunslinger-combo 98 PASS; health --strict. Full suite before the last two merges: baseline reds by name. vex_rig.json committed on purpose with the new body. Normal path exists on ext/art1-hem (use_nrm).
+- Owner Qs: normal maps vs painted cavity? Launcher swing-over the right read of the sheet?
