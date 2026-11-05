@@ -2537,3 +2537,17 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - **News card:** restyled as a torn panel with a stamp ("PLAYTEST · 0.23"), short.
   - The version string is small in the corner (done).
 - Owner: P1 (the UI session on the owner's PC) or S5. Before/after shots to ext.
+
+## 183. Air dash rule for ALL heroes: same as the ground dash, OR a deliberately special one; never the generic default (owner, 21:13 UTC Nov 5)
+- The owner: "tarek's jump dash should be the same as his regular dash - for some reason some characters have a default jump dash - it's either the same or special (like pip's)".
+- **Rule:** a hero's air dash is either:
+  - (a) **identical** to their ground dash (same distance, time, anim, effects; only gravity/landing differs), or
+  - (b) a **designed special air version** listed in their kit data (e.g. Pip's glide hop, Cinder's poof per 133b, Vex's tap/hold per 125).
+  - The shared class "default air dash" (the hunter.gd `ex` long dash / `air_dashes` path) must never be what a hero uses by accident.
+- **Do:**
+  - Audit all 12: list which path each hero's air dash takes today.
+  - Tarek → identical to his ground dash (Rock Hop, item 111, once merged; until then his current ground dash).
+  - Sable → identical (already item 129). Claire → her skate (item 62).
+  - Any other hero on the generic default → identical, unless DECISIONS/OWNER_REVIEW gives them a special one.
+  - Write the audit table to docs/heroes/AIR_DASH.md.
+- **Assert:** for each hero, an air dash's distance/time == the ground ±5%, or the hero is in the "special" list, and no hero uses the class default path.
