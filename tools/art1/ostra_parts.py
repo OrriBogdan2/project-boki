@@ -433,7 +433,7 @@ def face():
     for f in F:
         corners.append([(pu[i] * 0.5 + 0.5, 0.5 - pv[i] * 0.5) for i in f])
     au = np.abs(pu)
-    top, bot = -0.34 + 0.70 * (au / 0.80) ** 2.5, -0.72 + 1.10 * (au / 0.80) ** 2.3
+    top, bot = -0.32 + 0.52 * (au / 0.80) ** 2.4, -0.72 + 0.92 * (au / 0.80) ** 2.2
     mid = top + (bot - top) * 0.5
     jaw = M.sm(mid + 0.02, mid - 0.06, pv) * M.sm(1.0, 0.7, au)
     W = {"x_jaw": jaw}

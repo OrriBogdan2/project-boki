@@ -31,8 +31,8 @@ def grin(u, v):
     """0..1 inside the grin (ostra_head): one huge solid white crescent, the corners hooked up to points, a few small fangs cut down into its
     top edge toward the corners; -> the shape, and the fangs' cuts"""
     au = np.abs(u)
-    top = -0.34 + 0.70 * (au / 0.80) ** 2.5
-    bot = -0.72 + 1.10 * (au / 0.80) ** 2.3
+    top = -0.32 + 0.52 * (au / 0.80) ** 2.4
+    bot = -0.72 + 0.92 * (au / 0.80) ** 2.2
     saw = np.abs(((u * 8.5) % 1.0) - 0.5) * 2.0
     cut = 0.055 * saw * sm(0.22, 0.42, au) * sm(0.8, 0.6, au)
     inside = sm(-0.012, 0.012, top - cut - v) * sm(-0.012, 0.012, v - bot) * (au < 0.80)
@@ -43,9 +43,9 @@ def slits(u, v):
     """the eyes: two crescents, thick in the middle, drawn to points, the outer tip high: a laughing, cruel squint"""
     au = np.abs(u)
     x = (au - 0.40) / 0.30
-    mid = 0.30 + 0.20 * x + 0.10 * (1.0 - x * x) * 0 - 0.02
-    top = mid + 0.075 * (1.0 - x * x) + 0.05 * x
-    low = mid - 0.055 * (1.0 - x * x) + 0.05 * x
+    mid = 0.27 + 0.09 * x
+    top = mid + 0.085 * (1.0 - x * x)
+    low = mid - 0.0 * x + 0.02 * (1.0 - x * x) - 0.05 * (1.0 - x * x)
     return sm(0.012, -0.006, v - top) * sm(-0.012, 0.006, v - low) * (np.abs(x) < 1.0)
 
 
@@ -91,12 +91,12 @@ def textures(size=1024):
             out = (hi - lo) / k
         return out
 
-    bloom = np.clip(blur(shape, 22) * 1.3 + blur(shape, 7) * 0.9, 0, 1)
+    bloom = np.clip(blur(shape, 18) * 0.8 + blur(shape, 6) * 0.7, 0, 1)
     hot = np.array((1.0, 0.97, 1.0))
     vio = np.array((0.62, 0.26, 1.0))
-    em = vio * (bloom * 0.85)[..., None] + c * 0.75
+    em = vio * (bloom * 0.6)[..., None] + c * 0.42
     em = em + stars[..., None] * np.array((0.9, 0.85, 1.0)) * (1 - shape[..., None])
     teeth = shape
     em = em * (1 - teeth[..., None]) + hot * teeth[..., None]
-    alb = c * (1 - shape[..., None]) + np.array((0.9, 0.85, 1.0)) * teeth[..., None]
+    alb = c * 0.35 * (1 - shape[..., None]) + np.array((0.9, 0.85, 1.0)) * teeth[..., None]
     return np.clip(alb, 0, 1).astype(np.float32), np.clip(em, 0, 1).astype(np.float32)
