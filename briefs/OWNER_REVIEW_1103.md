@@ -967,3 +967,23 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
   - Lisette's thread wings
   - Ryzz's storm kite
 - **Priority:** after the art and model passes and the glider-cosmetic system exist. Not now.
+
+## 111. Tarek's dash becomes "Rock Hop" (rock-to-rock parkour), plus his look and lore (owner, 05:29 UTC Nov 5)
+- **Owner:** "His dash: he jumps from rock to rock he spawns under him, maybe 2 or 3 jumps. Different from who he's based on, but I like the rock as a skateboard/parkour idea."
+- **Today:** `dolm.json` dash "Rubble Leap" is a single leap to the cursor (~4-5 m, cd 12 s). A rock bursts up under him, the landing shoves, and the rock follows and rolls on 6 m (12 dmg, a shove, Shred, a 1.5 s slow).
+- **New dash, Rock Hop (2-3 linked hops):**
+  - Press Shift: a rock bursts up under him and he springs off it toward the cursor (hop 1).
+  - A fresh rock rises under his feet at each landing and he chains up to **3 hops total**. Each re-press within ~0.6 s steers the next hop toward the cursor; no re-press means he lands.
+  - **Parkour feel:** fast, low arcs (not floaty); he can rail-surf briefly on the rock as it rises (a short skid, like a skateboard).
+  - Keep the total distance and damage roughly equal to today's single leap so balance holds: e.g. 3 × ~2.5 m. Data-tuned.
+  - Each landing gives a small shove. The **last** landing keeps today's crash, plus the trailing rock that rolls on (12 dmg, Shred, slow), so the kit identity stays.
+  - The rocks he hops off stay a moment and crumble (cheap). Allies can hop them too (they are his rocks, per the Tarek data rule).
+  - **Cooldown:** starts when the chain ends. Each hop is a dash for the item 32 dash→ability flow (abilities usable mid-chain).
+  - Air dash and glide: unchanged ("In the air: your long dash").
+  - **Assert:** 3 inputs = 3 hops along a steered path; 1 input = 1 hop; total distance within ±10% of the target; damage only on the final crash.
+- **Look (owner-picked, art):** keep his original identity; upgrade per `briefs/art-refs/tarek_FINAL_sheet.png` once saved.
+  - one huge stone arm with molten cracks
+  - a climbing harness + rope
+  - dreadlocks with copper beads
+  - a plain cloth blindfold
+- **Lore:** Tarek is blind; **three floating eye-stones orbiting his head are his sight**. They look in different directions and turn toward enemies they spot. The blindfold does not glow.
