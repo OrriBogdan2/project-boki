@@ -54,3 +54,4 @@ The frames behind briefs/hero-ref/*.md (5 fps JPGs; the README maps the folders 
 Items in OWNER_REVIEW_1103: 164, 165, 166, 167, 178, 178b-i, 169, 169b, 171, 171b, 172, 172b, 174, 174b, 175, 155, 154, 157 (the info-strip part), 179.
 Source: the owner's dad playing it cold. Make it handholding: key-first prompts at the object, gold highlights, escalation when ignored, one instruction at a time. Release in slices, tutorial first.
 - 169c (added 18:40 UTC): the farm tutorial in strict mode. Only the step's target is interactable. Logical order (no planting the starter berries before the buy step). Buy → auto-close → an arrow back to the patch. A scripted off-step-action test.
+- 164b (21:00 UTC): no wild monsters on the first/teaching islands; only the step's own creatures (the taming Boki, dummies).

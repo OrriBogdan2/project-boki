@@ -2508,3 +2508,10 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - Holding Kael's RMB + pressing Space in the air → no glider until release + recovery end, then it opens with the carried velocity.
   - The same for every kit's hold.
+
+## 164b. Tutorial: no wild monsters on the first islands (owner, 21:00 UTC Nov 5)
+- The owner: "get rid of the wild guys on the first few islands so it doesnt distract people learning".
+- The teaching islands (item 167's first island, and every island before the combat test) have NO wild monsters/creatures, roaming or idle.
+  - The only creatures are the ones a step needs (the taming step's friendly weakened Boki, 167; dummies for the attack steps).
+  - Wild monsters appear only from the combat/test island on.
+- **Assert:** before the combat-test step, the count of hostile/wild mobs == 0.

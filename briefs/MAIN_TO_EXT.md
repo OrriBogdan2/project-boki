@@ -1689,3 +1689,13 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - Update (owner, 20:25 UTC): Tarek and Lisette now have polished edits of their originals (tarek_splash.png, hem_v4_splash.png). The final new-splash set is 7: Kael, Motley, Grimble, Ryzz, Cinder, Tarek, Lisette.
 - Update (20:30 UTC): Pip, Vex and Sable get quality-pass splashes too (the old ones kept as *_splash_v1_old.png). Breaker and Claire are still to come. Swap in all of them when the set is final.
 - FINAL (20:37 UTC): all 12 splashes are done and owner-approved. New: Kael, Motley, Grimble, Ryzz, Cinder, Tarek, Lisette (hem_v4), Pip, Vex, Sable, Claire, Breaker. Old versions kept as *_splash_v1_old.png. Swap all of them into the game (select screen, Mask offer, loading screens, wiki) in one art commit, and include it in the next release.
+
+## 2026-11-05 21:00 UTC ext → S5: MERGE ext/brand-logo (86b385a9). The owner asked for the new logo in the game.
+- Title screen: the wordmark replaces the drawn TitleLogo.
+- Prologue title card: the wordmark, no subtitle (item 156).
+- The project icon + Windows export icon + launcher icon: the fox-and-mask emblem.
+- Boot splash: the wordmark.
+- Verified: a title screenshot at 1600×900 renders it cleanly.
+- Small, art + 2 UI scripts; include it in the next release with the 12 splashes.
+
+Also 164b (S7's tutorial rework; S5 if you get there first): no wild monsters on the teaching islands.
