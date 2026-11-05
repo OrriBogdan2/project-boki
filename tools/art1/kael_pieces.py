@@ -652,7 +652,7 @@ _a = norm(np.array([0, 0, -1.0]) - GRIP_DIR * np.dot(np.array([0, 0, -1.0]), GRI
 GRIP_AT = np.array([SH, 0.0, HAND_Z + 0.012]) + _a * 0.094 + np.array([-0.03, 0.0, 0.0])    # inside the closed fist
 L_MID = 0.5
 GUARD_OFF = 0.085                                # fist to guard: a short grip, as the master sheet
-BLADE_LEN, BLADE_W = 0.72, 0.096                  # guard to tip; half width: shoulder to ankle on him
+BLADE_LEN, BLADE_W = 0.98, 0.128                  # guard to tip; half width: shoulder to ankle on him
 
 
 def sword_frame():
@@ -720,7 +720,7 @@ def blade(sheet):
     ext = np.array(ext, float)
     cx = float(np.median(ext[9:].mean(1)))
     k = BLADE_W / float(np.max(np.abs(ext[9:] - cx)))
-    TH = 0.02
+    TH = 0.026
     cols = [(-1.0, 0.0), (-0.72, 1.0), (0.0, 1.0), (0.72, 1.0), (1.0, 0.0)]
     v, uv_v = [], []
     for sgn in (1.0, -1.0):
