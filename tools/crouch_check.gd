@@ -14,7 +14,7 @@ const POP := 0.12          # m: the head's most in one frame at 60 fps, down or 
 const BOB := 0.07          # m: the head's rise and fall over a sneak
 const STEP := 0.14         # m: how far a foot travels over a sneak
 const K := 8.0             # 1/s: Hunter.render's crouch rate
-const LATER := ["juggernaut", "ostra", "bulwark"]    # Kael, Motley, Breaker: landing after art1-integ
+const LATER := ["juggernaut", "ostra"]    # Kael, Motley: landing after art1-integ
 
 var bad := 0
 var holder: Node3D
@@ -62,8 +62,8 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	for k in 30:
 		_tick(m, a, sync, 0.0)
 	var stand: Vector3 = _at(m, sk, "head")
-	var rest_l: Vector3 = _at(m, sk, "foot.L")
-	var rest_r: Vector3 = _at(m, sk, "foot.R")
+	var rest_l: Vector3 = _at(m, sk, _foot(sk, "L"))
+	var rest_r: Vector3 = _at(m, sk, _foot(sk, "R"))
 	var ck := 0.0
 	var last := stand.y
 	var pop := 0.0
@@ -82,8 +82,8 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	ok(stand.y - held.y >= stand.y * DROP, "%s: down from %.2f to %.2f m" % [id, stand.y, held.y])
 	ok(low < hips - 0.01, "%s: the dip goes %.3f m under the hold, then settles" % [id, hips - low])
 	ok(pop <= POP, "%s: no pop going down (%.3f m a frame)" % [id, pop])
-	var fl := _at(m, sk, "foot.L")
-	var fr := _at(m, sk, "foot.R")
+	var fl := _at(m, sk, _foot(sk, "L"))
+	var fr := _at(m, sk, _foot(sk, "R"))
 	var floor_y := minf(rest_l.y, rest_r.y)
 	var sunk := minf(fl.y, fr.y)
 	ok(sunk >= floor_y - SINK, "%s: the feet stay on the ground (%.3f, standing %.3f)" % [id, sunk, floor_y])
@@ -101,7 +101,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		var h := _at(m, sk, "head").y
 		hmin = minf(hmin, h)
 		hmax = maxf(hmax, h)
-		var z := _at(m, sk, "foot.L").z
+		var z := _at(m, sk, _foot(sk, "L")).z
 		zmin = minf(zmin, z)
 		zmax = maxf(zmax, z)
 	ok(zmax - zmin >= STEP, "%s: the sneak steps (%.2f m)" % [id, zmax - zmin])
@@ -140,3 +140,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	ok(absf(_at(m2, sk2, "head").y - h0) <= 0.03, "%s: with no crouch data the clips stand through it, as before" % id)
 	m2.free()
 	dd["crouch"] = keep
+
+## A Hero's foot bone (Breaker's clip bones carry an x_ prefix).
+func _foot(sk: Skeleton3D, side: String) -> String:
+	return "foot." + side if WardenSkeleton.find(sk, "foot." + side) >= 0 else "x_foot." + side

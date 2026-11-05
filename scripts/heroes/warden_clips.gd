@@ -29,6 +29,7 @@ const HEADING_MIN := 2.0     # m/s: slower than this has no heading to lean into
 const HEADING_MAX := 1.4     # rad: the most the root turns off the facing
 const LEGS_MAX := 1.75       # rad: the most the legs turn off the aim ("legs_heading")
 const HEADING_RATE := 14.0   # 1/s: how fast it turns
+const WEAPON_K := "weapon_k"  # root meta: the skinned weapon's size over its rest (the whirl)
 const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
 const CROUCH_IN := 0.12      # s: the layer eases over the body when no dip carries it
 const CROUCH_ONE := 0.06     # s: the dip clip eases in and out of the layer
@@ -156,11 +157,14 @@ func _setup_out() -> void:
 
 func _out(dt: float) -> void:
 	var out := bool(root.get_meta(WEAPON_OUT, false))
+	var k := float(root.get_meta(WEAPON_K, 1.0))     # (the whirl, on top of any "bone_scale")
 	if weapon_bi >= 0:
-		skel.set_bone_pose_scale(weapon_bi, Vector3.ZERO if out else Vector3.ONE)
+		skel.set_bone_pose_scale(weapon_bi, Vector3.ZERO if out else Vector3.ONE * k)
 	for b in bone_scales:
-		if not (out and b[0] == weapon_bi):
+		if b[0] != weapon_bi:
 			skel.set_bone_pose_scale(b[0], b[1])
+		elif not out:
+			skel.set_bone_pose_scale(b[0], b[1] * k)
 	var busy := act_w > 0.5 or up_w > 0.5
 	out_w = move_toward(out_w, 1.0 if out and not busy else 0.0, OUT_RATE * dt)
 	if out_w > 0.0:

@@ -225,6 +225,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	else:
 		_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]))
 	_hold_shield(root, glb)
+	sync.mood = WardenMood.make(root, glb, skel, art(arch))
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
 	_smoke(root, look(art(arch)))
 	_bloom(root, glb, look(art(arch)))
@@ -856,6 +857,7 @@ class Sync extends Node:
 	var muzzle: Node3D
 	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
 	var built: Array = []         # the rig's weapon and prow last hidden (ids; _keep_one_weapon)
+	var mood: WardenMood          # a face on glass and a hanging companion, when the art has them
 	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
@@ -931,6 +933,8 @@ class Sync extends Node:
 		apply_blade()       # (again: a weapon that hangs on a chain, Pip's lantern, moved with the springs)
 		orbits.look = root.get_meta(ORBIT_LOOK, Vector3.INF)
 		orbits.step(dt)
+		if mood:
+			mood.step(dt)
 		if sway:
 			sway.tumble(dt, orbits.pivots)
 		if bool(root.get_meta(CHAIN_OUT, false)):
