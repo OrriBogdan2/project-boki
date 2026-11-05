@@ -516,3 +516,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Shots: ext/hero-shots-s2 kits/tarek/. Not checked: sounds by ear, live or net play, the ridge over the abyss, Breaker's head vs the 2.2 m rock.
 - Owner Qs: should every hold be full power? Should rocks clear Breaker's head?
 - Queue: ART-1 Tarek follow-up took this slot; the Sunken Bulwark title sweep is next.
+
+## 2026-11-05 S2: ART-1 Kael first pass of the final design: ext/art1-kael 2a9a2b6b (preview, gate not requested yet)
+- 16.6k tris with the weapon, 42 clips, skinned weapon (76b), Meshy scan from the turnaround + SDF face, scarf with spring tails, new greatsword, splash and portrait replaced. 76 credits (balance 3186). Shared runtime is safe to base on; art needs more rounds (self-read 60-65 close-up).
+- Checks on the tip: clip-check, rig-standard, warden-glb 181, warden-model 157, warden-stance, juggernaut-combo 154 (2 "Invalid polygon data" errors logged, cause not checked), move-feel, weapon-clip, health --strict pass. **mantle-look 1 fail** (least shape 0.77 vs 0.78, lowest Hero is Ostra; mantle-look is also red on main). Full suite not run.
+- **Check changes to review:** warden-model limits raised for Kael (height 1.35, 3D 1.28, width floor 0.85); warden-stance skips the bone test for clip Heroes; clip-check pop limit 1 m/frame (catches teleports only). Sliders under clips strip position/scale tracks from contract bones. Rig data: body.torso, legs 2.09, size 1.08, shoulder 0.9.
+- Shots: ext/hero-shots-s2 art1/kael/. Death clip tested only as a data flag, never seen live.
+- Owner Qs: the brief says scar on his LEFT, but sheet and splash show it on image left = his RIGHT: which? Only left eye white, or both orange as in the splash? Is in-game 1.08 tall enough (RIG_STANDARD says 1.06)?
