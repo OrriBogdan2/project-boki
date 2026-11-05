@@ -1006,3 +1006,61 @@ The owner is signing this window into a fresh account (full weekly usage). The 1
 - One full suite per branch at the end, targeted checks while working.
 - Mark READY in STATUS.md (ext/server-status2) with the branch, commit, items done/differs, a check table, screenshot paths and owner Qs.
 - ext reviews and merges. Update STATUS at least hourly.
+
+## 2026-11-05 00:20 UTC (ext): OWNER: big ART workflow for S2 (alongside the 00:15 order)
+Owner: "I need better animations for all the characters, better 3D models for most characters (especially Kael, Tarek and Breaker), better VFX on abilities, better sounds, better Boki."
+
+**Run 4 lanes at once (re-balance as lanes finish):**
+
+| Lane | Work |
+|---|---|
+| ART-1 | models + animations |
+| ART-2 | VFX + sound |
+| KITS | the 00:15 order, items 1–2 first |
+| BOKI | Boki models + animation (starts once the Kael pilot is approved) |
+
+Items 98/99/101b/105 slot into KITS after the kits.
+
+**Quality bar (all lanes):** League-of-Legends-level readability at the match camera (top-down, zoomed out).
+- Strong silhouettes, clear shapes, saturated but tasteful colour, faces readable at the farm/viewer camera.
+- Our own designs only (originality guard: no copying any game's characters, sounds or effects; mood references only).
+- Every external asset must be CC0 (or made by us / our image-gen). Log each in `docs/CREDITS.md` with source + licence. Nothing with attribution-required or unclear licences.
+
+### ART-1: models + animations (Opus 5.5)
+- **Pilot: Kael first, then Tarek, then Breaker, then the rest.** The rest are ranked by how weak they look now; Vex last (already redone).
+- **Model, per Hero:**
+  - Rebuild in Blender on the shared armature per `docs/RIG_STANDARD.md` (`--rig-standard-check` must pass), like Vex's Blender pass (`ext/warden-models`) but a clear step up from its "stylised toy" finish.
+  - A sculpted face with expression.
+  - Proper hands holding the weapon, the weapon skinned in the .glb (item 76b).
+  - Proportions and size per DECISIONS (Breaker 1.5x).
+  - Our concept art from the IMG agent / anthum as the reference.
+  - A tri budget per the perf pass (item 94: agree a number with S1's perf findings, e.g. ≤20k incl. weapon).
+- **Animations, per Hero on the shared armature:**
+  - idle, a signature stance (item 52), walk/run, a distinct dash (item 35), the air dash/glide
+  - every ability (LMB/RMB/Shift/E/R wind-up → release → recover, timed to the kit's real timings)
+  - hit react, downed, revive, death, jump/land, Fusion transform
+  - an emote
+  - Hand-keyed in Blender (scripted where useful). A CC0 base library (e.g. Quaternius' CC0 animation library) may be used for locomotion only, retargeted and then reworked so it reads as that Hero's personality (item 37).
+  - Blend trees in Godot so moves flow (item 32 dash→ability).
+- **Approval gate:** post Kael's turntable + an animation sheet (GIFs/MP4 of idle, run, dash, each ability) to ext/hero-shots-s2 and EXT_TO_MAIN for **owner approval before rolling out** the rest. Then one Hero per agent run.
+
+### ART-2: ability VFX + sounds (Opus for VFX, Sonnet OK for sound)
+- **Per Hero, every ability:** clear telegraph → impact → linger, in that Hero's palette.
+  - Shader-based (Godot GPU particles, mesh trails, dissolve/noise shaders), not flat rings.
+  - Follow S1's item 96 colour rule (you/ally/enemy); S1 owns the HUD and telegraph colour rule, you own the ability looks. Coordinate via STATUS.
+  - Respect the perf budget (item 94: particle caps, LOD at distance).
+  - Order: the Heroes in ART-1's order, so a Hero's model, animation and VFX land together.
+- **Sound, per Hero:** weapon, each ability (cast + impact), footsteps by surface, dash, hurt/downed voice grunts (no words), plus the UI, farm and Boki sounds.
+  - Today's 426 files in `audio/` are mostly synthesized: replace the weak ones.
+  - Sources: our own synthesis/layering or CC0 libraries only, logged in CREDITS.
+  - Mix with a consistent loudness, routed to the right buses (Match bus per item 103).
+- **Approval gate:** Kael's full ability VFX + sound set as a short video for owner approval first.
+
+### BOKI: models + animation (Opus)
+- Read `docs/BOKI_IDENTITY.md` first.
+- **Per species, then its grown/Fused forms:** a cute, readable creature model in Blender with a face that emotes (happy/sad/sleepy/angry), and an idle, run, attack/ability, happy hop, sleep, eat, work (chop/mine/carry, item 91) and get-petted animation.
+- Element VFX on their abilities (with ART-2).
+- **Reserved files:** kin_*, merge_*, capture*, field_book, boki_hud, bot_kin. Ship new assets + a new loader/scene, and list the one-line wiring in reserved files for main (ext merges).
+- **Approval gate:** one species (the starter) first.
+
+**Reporting:** a STATUS.md section per lane: branch, commit, Heroes/species done, shots/videos (viewed), CREDITS added, owner Qs. ext reviews and merges; nothing to main directly.
