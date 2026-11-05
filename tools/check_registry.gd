@@ -69,6 +69,8 @@ const CHECKS := {
 	"--claire-skate-shots": ["res://tools/claire_skate_shots.gd", "claire_skate_shots", null],
 	"--clip-live-grimble": ["res://tools/clip_live_grimble.gd", "clip_live_grimble", null],      # Grimble, the same
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
+	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],
+	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],
 	"--dancer-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],
 	"--juggernaut-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "juggernaut"],
 	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],          # Ryzz / Vex screenshots

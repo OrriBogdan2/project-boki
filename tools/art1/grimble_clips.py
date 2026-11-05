@@ -14,6 +14,7 @@ from mathutils import Quaternion, Vector
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import grimble_sculpt as G
+import crouchkit
 from posekit import Clip, FnClip, Solver, ang_dir as D, at, eul, frame_of
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
@@ -224,10 +225,25 @@ def gait(k, heading):
     return fn
 
 
+# ---- the crouch (item 143): a greedy scuttle. Spider low, the long arms spread over the floor, hook out, scrap fist out, the hoard riding his back, grinning at what's yours.
+SCUTTLE = dict(READY, **{
+    "pel": (0.0, -0.05, -0.21), "prt": (0.40, 0.08, 0.0), "tor": (0.42, 0.06, 0.02), "hed": (-0.76, -0.06, 0.05),
+    "G": (0.46, 0.44, 0.34), "LP": (-0.44, 0.40, 0.33), "Lh": (0.4, 0.0, 0.0),
+    "FL": (-0.22, 0.20, A_Z + 0.03), "FR": (0.24, -0.18, A_Z + 0.05), "FLy": 0.4, "FRy": -0.5, "FLp": 0.25, "FRp": 0.5,
+    "brow": 0.4, "lid": -0.15, "jaw": 0.35, "fing": 0.7,
+})
+SKITTER = {"ankle": A_Z, "foot": 0.09, "width": 0.19, "stride": 0.25, "lift": 0.05, "toe": 0.24, "share": 0.58, "sway": 0.03, "bob": 0.014, "twist": 0.1, "T": 0.5, "toe_out": -0.34}
+
+
+def crouch_set():
+    return crouchkit.quick(C, READY, SCUTTLE, SKITTER, scan=0.3)
+
+
 def clips():
     o = []
     o.append(FnClip("idle", 3.0, idle))
     o.append(FnClip("stance", 4.0, stance))
+    o += crouch_set()
     for nm, k, T in (("walk", 0.45, 1.0), ("run", 1.0, 0.62)):
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             o.append(FnClip("%s_%s" % (nm, tag), T, gait(k, hd)))

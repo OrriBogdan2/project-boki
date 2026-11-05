@@ -11,6 +11,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
 import cinder_pieces as K
+import crouchkit
 
 UP = (0, 0, 1)
 A_Z = K.ANKLE_Z
@@ -128,8 +129,23 @@ def gait(speed_k, heading, stride, share, lift):
     return fn
 
 
+# ---- the crouch (item 143): a giggling coil. Up on her toes, the long gun low at the hip in both hands, hunting something to set on fire.
+PILOT = dict(READY, **{
+    "pel": (0.03, -0.04, -0.31), "prt": (0.40, -0.14, 0.05), "tor": (0.34, 0.18, -0.05), "hed": (-0.66, -0.10, 0.12),
+    "G": (0.16, 0.46, 0.60), "BE": be(3, 2), "Lw": 1.0,
+    "FL": (-0.12, 0.24, A_Z + 0.03), "FR": (0.17, -0.22, A_Z + 0.06), "FLy": 0.3, "FRy": -0.5, "FLp": 0.25, "FRp": 0.55,
+    "brow": -0.3, "lid": 0.0, "jaw": 0.22, "fing": 0.7,
+})
+CREEP = {"ankle": A_Z, "foot": 0.10, "width": 0.13, "stride": 0.31, "lift": 0.05, "toe": 0.28, "share": 0.6, "sway": 0.035, "bob": 0.016, "twist": 0.11, "T": 0.58, "toe_out": -0.22}
+
+
+def crouch_set():
+    return crouchkit.quick(C, END, PILOT, CREEP, hands=("G",), scan=0.36)
+
+
 def clips():
     out = [FnClip("idle", 3.6, idle), FnClip("stance", 4.0, stance)]
+    out += crouch_set()
     for nm, sp, sk, stride, share, lift in (("walk", 2.2, 0.0, 0.42, 0.58, 0.075), ("run", 4.6, 1.0, 0.6, 0.37, 0.2)):
         T = 2 * stride / (share * sp)
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):

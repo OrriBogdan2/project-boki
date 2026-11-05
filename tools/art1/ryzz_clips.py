@@ -10,6 +10,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
 import ryzz_pieces as K
+import crouchkit
 
 UP = (0, 0, 1)
 A_Z = K.ANKLE_Z
@@ -139,8 +140,23 @@ def shot(name, right):
     return C(name, 0.35, keys)
 
 
+# ---- the crouch (item 143): a bouncy coil. Sprung low on her toes, knees out, both finger guns up and ready, grinning; the coil never quite stops.
+SPRING = dict(READY, **{
+    "pel": (0.02, -0.03, -0.33), "prt": (0.34, -0.10, -0.05), "tor": (0.32, 0.14, 0.05), "hed": (-0.60, -0.08, 0.12),
+    "G": (0.26, 0.42, 0.90), "BE": aim(-10, 6), "LP": (-0.26, 0.36, 0.92), "LBE": aim(14, 8),
+    "FL": (-0.13, 0.20, A_Z + 0.03), "FR": (0.15, -0.18, A_Z + 0.05), "FLy": 0.34, "FRy": -0.5, "FLp": 0.3, "FRp": 0.5,
+    "brow": 0.25, "lidR": 0.3, "lidL": 0.12, "smile": 1.0, "gunR": 1.0, "gunL": 1.0,
+})
+BOUNCE = {"ankle": A_Z, "foot": 0.10, "width": 0.11, "stride": 0.29, "lift": 0.06, "toe": 0.32, "share": 0.56, "sway": 0.035, "bob": 0.024, "twist": 0.13, "T": 0.54, "toe_out": -0.26}
+
+
+def crouch_set():
+    return crouchkit.quick(C, END, SPRING, BOUNCE, scan=0.3, bounce=0.022)
+
+
 def clips():
     out = [FnClip("idle", 4.0, idle), FnClip("stance", 5.0, stance)]
+    out += crouch_set()
     for nm, ang in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
         out.append(FnClip("walk_" + nm, 0.92, gait(0.45, ang)))
         out.append(FnClip("run_" + nm, 0.6, gait(1.0, ang)))

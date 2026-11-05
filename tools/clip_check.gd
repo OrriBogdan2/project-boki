@@ -7,7 +7,7 @@ extends RefCounted
 
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
-	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "grimble"}
+	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge"}
 const DT := 1.0 / 30.0
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
@@ -43,7 +43,8 @@ func _own_model(id: String, art_name: String) -> void:
 	holder.add_child(m)
 	var sync := m.get_node_or_null("Warden/Sync")
 	var own := WardenGlb.art(id) == art_name and WardenGlb.has_model(id) and bool(m.get_meta("glb", false))
-	ok(own and sync != null and sync.get("clips") != null, "%s: its own %s.glb with clips, not the fallback" % [id, art_name])
+	ok(own and sync != null and sync.get("clips") != null,
+			"%s: its own %s.glb with clips, not the fallback" % [id, art_name])
 	m.free()
 
 func _hero(main: Node, id: String, art_name: String) -> void:
@@ -103,6 +104,10 @@ func _named(dd: Dictionary) -> Array:
 	out.append(lc.get("stance"))
 	out.append_array((lc.get("walk", {}) as Dictionary).values())
 	out.append_array((lc.get("run", {}) as Dictionary).values())
+	var cr: Dictionary = dd.get("crouch", {})
+	if not cr.is_empty():
+		out.append_array([cr["idle"], cr["in"], cr["out"]])
+		out.append_array((cr["walk"] as Dictionary).values())
 	out.append_array((dd.get("air", {}) as Dictionary).values())
 	for k in dd.get("states", {}):
 		var v = dd["states"][k]

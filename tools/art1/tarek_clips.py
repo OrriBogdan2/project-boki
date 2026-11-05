@@ -141,6 +141,43 @@ for nm, (dx, dy) in DIRS.items():
     C.bake("run_" + nm, RUN_T, [(0, m(LOOSE, frt=0.0, flt=0.0, fing_r=0.9, fing_l=0.9, jaw=0.14, lip=0.5)), (RUN_T, {})], loop=True,
            over=gait(RUN_T, 1.5 if dy else 0.85, 0.15, 0.36, dx, dy, -19.0 if dy >= 0 else 5.0, 0.03, 0.56, back=0.3 if dy >= 0 else 0.12, turn=-dx * 24.0))
 
+# ---------------------------------------------------------------------- the crouch (item 143)
+# a boulder ready to roll: the huge fists hung forward by his knees, the back rounded, chin up; grinning, on the balls of his feet
+CROUCH = m(LOOSE, pos=(0.0, -0.06, -0.5), hips=(-40, 6, -5), head=(30, -6, 6), hr=hand(0.14, 0.5, -0.7), hl=lhand(0.1, 0.42, -0.62),
+           fr=(AX + 0.18, -0.28, AZ + 0.04), fl=(-AX - 0.16, 0.32, AZ + 0.02), frt=-14.0, flt=14.0, fra=-26.0, fla=-12.0, kr=(0.5, 1, 0), kl=(-0.5, 1, 0),
+           er=(0.75, -0.65, -0.1), el=(-0.75, -0.65, -0.1), fing_r=1.0, fing_l=1.0, thumb_r=1.0, thumb_l=1.0, jaw=0.08, lip=0.6)
+CROUCH_T = 0.68
+
+
+def crouch_scan(t, p):
+    """The breath and a slow look round; 3.6 s loop."""
+    a, b = math.sin(t / 3.6 * tau), math.cos(t / 3.6 * tau)
+    add(p, "pos", (0, 0, 0.006 * (1 - b)))
+    add(p, "hips", (0.8 * (1 - b), 0, 0))
+    add(p, "head", (0, 0, 16.0 * a))
+
+
+def crouch_gait(dx, dy):
+    g = gait(CROUCH_T, 0.74 if dy > 0 else 0.5, 0.09, 0.62, dx, dy, -40.0 if dy >= 0 else -28.0, 0.018, 0.0, turn=-dx * 12.0)
+
+    def f(t, p):
+        hr, hl = p["hr"], p["hl"]
+        g(t, p)
+        c1 = math.cos(t / CROUCH_T * tau)
+        p["pos"] = (p["pos"][0], p["pos"][1] - 0.06, p["pos"][2] - 0.47)
+        p["head"] = (30.0, 0, p["head"][2] * 0.4 - 4.0)
+        p["hr"] = (hr[0], hr[1] + 0.03 * c1, hr[2])
+        p["hl"] = (hl[0], hl[1] - 0.03 * c1, hl[2])
+    return f
+
+
+C.bake("crouch_idle", 3.6, [(0, CROUCH), (3.6, {})], loop=True, over=crouch_scan)
+for nm, (dx, dy) in DIRS.items():
+    C.bake("crouch_" + nm, CROUCH_T, [(0, m(CROUCH, frt=0.0, flt=0.0)), (CROUCH_T, {})], loop=True, over=crouch_gait(dx, dy))
+CROUCH_DIP = m(CROUCH, pos=(0.0, -0.04, -0.56), hips=(-46, 6, -5), hr=hand(0.14, 0.42, -0.74), hl=lhand(0.1, 0.34, -0.66))
+C.bake("crouch_in", 0.4, [(0, LOOSE), (0.2, CROUCH_DIP), (0.4, CROUCH)])
+C.bake("crouch_out", 0.42, [(0, CROUCH), (0.08, CROUCH_DIP), (0.28, LOOSE), (0.42, LOOSE)])
+
 # ---------------------------------------------------------------------- air
 # a jump: tucked, one knee up, fists out for balance; the fall: legs reaching, arms up and loose, locs flying
 JUMP = m(LOOSE, pos=(0, 0, 0.1), hips=(-10, 0, 4), head=(6, 0, 0), hr=hand(0.22, 0.2, -0.26), hl=lhand(0.26, -0.1, -0.4),

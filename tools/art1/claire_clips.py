@@ -10,6 +10,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of, lerp
 import claire_pieces as K
+import crouchkit
 
 UP = (0, 0, 1)
 A_Z = K.ANKLE_Z
@@ -150,8 +151,23 @@ def gait(speed_k, heading, stroke, period_lift):
     return fn
 
 
+# ---- the crouch (item 143): a skater's low edge. One long quiet lunge, the spear laid low along her line, the free hand out for balance, the head a little down and glancing up.
+EDGE = dict(READY, **{
+    "pel": (0.02, -0.06, -0.34), "prt": (0.36, 0.14, -0.04), "tor": (0.40, -0.16, 0.04), "hed": (-0.66, 0.10, 0.0),
+    "G": (0.24, 0.42, 0.66), "BE": spr(6, 8, (-0.3, -0.5, 0.8)), "Lw": 0.0, "LP": (-0.38, 0.16, 0.60),
+    "FL": (-0.10, 0.28, A_Z + 0.02), "FR": (0.14, -0.30, A_Z + 0.05), "FLy": 0.2, "FRy": -0.55, "FLp": 0.2, "FRp": 0.55,
+    "brow": -0.5, "lid": 0.04, "fing": 0.3,
+})
+GLIDE = {"ankle": A_Z, "foot": 0.10, "width": 0.10, "stride": 0.33, "lift": 0.035, "toe": 0.22, "share": 0.66, "sway": 0.04, "bob": 0.01, "twist": 0.12, "T": 0.7, "toe_out": -0.28}
+
+
+def crouch_set():
+    return crouchkit.quick(C, END, EDGE, GLIDE, scan=0.24)
+
+
 def clips():
     out = [FnClip("idle", 4.2, idle), FnClip("stance", 4.0, stance)]
+    out += crouch_set()
     for nm, sk, stroke, lift, T in (("walk", 0.0, 0.26, 0.012, 1.5), ("run", 1.0, 0.42, 0.03, 1.0)):
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sk, hd, stroke * (0.8 if tag in "lr" else 1.0), lift)))
