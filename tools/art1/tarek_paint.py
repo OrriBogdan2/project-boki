@@ -73,7 +73,7 @@ def p_stone(P, N, occ, cav, a, seeds=None):
     core = S.sstep(0.003, 0.001, gap)
     col = S.mix(S.hexc("f06010")[None, :], S.hexc("ffa030")[None, :], core)
     c = S.mix(c, col, hot)
-        return c, col * hot[:, None]
+    return c, col * hot[:, None]
 
 
 def p_hands(P, N, occ, cav, a):
