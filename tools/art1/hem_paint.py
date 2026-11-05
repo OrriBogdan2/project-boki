@@ -195,6 +195,18 @@ def eyes(p, n):
     return plate(p)
 
 
+def headscan(c, p, n):
+    """The head sheet's paint: a touch more contrast and sheen in the hair; the red tie and cowl crisp; a soft form shade (the toon light is near white)."""
+    c = np.clip(c, 0, 1)
+    k = form(n)
+    dark = c.max(1) < 0.22
+    h = mix(c * 1.1 + 0.018, rgb("7f90b4"), smooth(0.74, 1.0, k) * 0.28)
+    c[dark] = h[dark]
+    light = ~dark
+    c[light] = (c * (0.76 + 0.3 * smooth(0.15, 0.7, k))[:, None])[light]
+    return np.clip(c, 0, 1)
+
+
 def scan(c, p, n):
     """The scan's paint for the toon shader: blacks up to a charcoal that shows form, reds crisper; the shoulders' tops take more red (the top-down read)."""
     c = np.clip(c, 0, 1) ** 0.82

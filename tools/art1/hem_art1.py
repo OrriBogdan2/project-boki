@@ -1,6 +1,6 @@
 """Hem / Lisette (ART-1, item 108 + 76b): the fitted Meshy scan (hem_source.py) for the body and outfit, scripted geometry for the head, hair, hands, scarf and gear, on
 the contract armature with one painted atlas; saved as a .blend for tools/art1/hem_clips.py, which keys the clips and exports the .glb:
-  blender -b --factory-startup --python tools/art1/hem_art1.py -- WORKDIR SOURCE.blend SCAN_BASE_COLOR.png FACE_PLATE.png
+  blender -b --factory-startup --python tools/art1/hem_art1.py -- WORKDIR SOURCE.blend SCAN_BASE_COLOR.png HEAD.blend HEAD_BASE_COLOR.png
 Shapes: hem_sculpt.py; paint: hem_paint.py. Budget: 15k triangles, the bow included (S1). The bow is skinned in the .glb on
 x_weapon (hand.L); the nocked needle stays a separate piece on x_arrow, resting in the quiver (item 76b).
 tools/blender/breaker_art1.py is the pattern (sculpt_kit's chart seams, density-scaled unwrap, per-texel paint)."""
@@ -27,7 +27,7 @@ import warden_kit as K
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 _a = sys.argv[sys.argv.index("--") + 1:]
-WORK, SOURCE, SCAN_TEX, PLATE = _a[0], _a[1], _a[2], _a[3]
+WORK, SOURCE, SCAN_TEX, HEAD, HEAD_TEX = _a[0], _a[1], _a[2], _a[3], _a[4]
 ATLAS = 2048
 RELIEF = 2.6            # slope of the relief map per unit of painted height
 F = np.float32
@@ -88,6 +88,11 @@ def arm_weight(ob):
     """Per vertex, its share on the arm bones. (Fitted, the arms hang through the hips, so paint and tests keep them apart.)"""
     arm = {g.index for g in ob.vertex_groups if g.name.startswith(("upper_arm", "forearm", "hand"))}
     return np.array([sum(g.weight for g in v.groups if g.group in arm) for v in ob.data.vertices], F)
+
+
+def head_slot(c, z):
+    """A surface per triangle of the head scan: hair black, the cowl and tie red, the rest skin."""
+    return np.where(c.max(1) < 0.22, 1, np.where((c[:, 0] > c[:, 1] * 2.6) & (c[:, 1] < 0.2), 2, 0))
 
 
 def ob_from(name, v, q):
@@ -231,33 +236,6 @@ def chart_seams(ob, min_faces=24):
     bm.free()
 
 
-def face_chart(ob):
-    """The face as one chart, seam-free: every seam through it goes, its edge becomes the seam. -> its polygon indices."""
-    bm = bmesh.new()
-    bm.from_mesh(ob.data)
-    bm.faces.ensure_lookup_table()
-    front = np.array([f.calc_center_median().y > 0.015 and f.normal.y > -0.2 and f.calc_center_median().z > 1.43 for f in bm.faces], bool)
-    for e in bm.edges:
-        fs = e.link_faces
-        if len(fs) == 2:
-            a, b = front[fs[0].index], front[fs[1].index]
-            e.seam = (a != b) or (e.seam and not a)
-    bm.to_mesh(ob.data)
-    bm.free()
-    return np.nonzero(front)[0]
-
-
-def planar_uv(ob, polys):
-    """Those polygons' UVs straight from the front (x, z): no folds, so nothing overlaps; the unwrap scale stays."""
-    me = ob.data
-    uv = me.uv_layers.active.data
-    for pi in polys.tolist():
-        pl = me.polygons[pi]
-        for li in pl.loop_indices:
-            co = me.vertices[me.loops[li].vertex_index].co
-            uv[li].uv = (co.x, co.z)
-
-
 def grid_mesh(name, P3, close=False):
     """A sheet from a rows x cols grid of points, as an object."""
     r, c = P3.shape[:2]
@@ -380,11 +358,8 @@ def main():
     rig = K.load_rig(rig_path)
     J = H.joints(rig_path)
     print("sculpting", flush=True)
-    hd = H.head()
-    hr = H.hair(hd)
-    locks = {k: H.lock(v, H.LOCK_R[k][0], H.LOCK_R[k][1], spread=0.0 if k == "tail" else 0.0125) for k, v in H.LOCKS.items()}
-    ey = H.eyes()
-    hn = H.needle_field(H.HAIR_NEEDLES, 0.0012, 0.0095, 0.030)
+    needle = [((0.108, -0.080, 1.822), (-0.128, -0.070, 1.694), 0.0040)]         # the silver pin, through the tie, eye up to her right
+    hn = H.needle_field(needle, 0.0012, 0.0095, 0.030)
     with bpy.data.libraries.load(SOURCE) as (df, dt):
         dt.objects = ["Src", "Low"]
     src_me, low = dt.objects[0].data, dt.objects[1]
@@ -399,12 +374,16 @@ def main():
     sp_body = ScanPaint(src_me, tex, lambda t: aw[t].mean(1) <= 0.5)
     sp_arm = ScanPaint(src_me, tex, lambda t: aw[t].mean(1) > 0.5)
     low_aw = arm_weight(low)
-    P.PLATE = imgio.load(PLATE)
+    with bpy.data.libraries.load(HEAD) as (df, dh):
+        dh.objects = ["HSrc", "HLow"]
+    hlow = dh.objects[1]
+    bpy.context.scene.collection.objects.link(hlow)
+    hlow.data.materials.clear()
+    sp_head = ScanPaint(dh.objects[0].data, imgio.load(HEAD_TEX))
     hR, hinfo = H.right_hand(J)
     hL = H.left_hand(J)
     qv = H.quiver()
     qn = H.quiver_arrows()
-    cw = H.cowl()
     bw = H.bow()
     ar = H.arrow()
     sh = H.shears()
@@ -418,30 +397,13 @@ def main():
         return parts[-1]
 
     hxf = H.head_xf
-
-    def head_cull(v):
-        th = np.degrees(np.arctan2(np.abs(v[:, 0]), v[:, 1] - 0.01))
-        zh = H.S_interp(th, H.HAIRLINE[:, 0], H.HAIRLINE[:, 1])
-        return (v[:, 2] > zh + 0.012) | (v[:, 2] < 1.40)
-
-    def eye_keep(v):
-        a = np.array((H.EYE[0], H.EYE[1] + 0.012, H.EYE[2] + 0.004), F)
-        d = np.minimum(np.linalg.norm((v - a * (1, 1, 1)) * (1, 1, 1.1), axis=1), np.linalg.norm((v - a * (-1, 1, 1)) * (1, 1, 1.1), axis=1))
-        mouth = np.linalg.norm((v - np.array((0, 0.094, 1.552), F)) * (0.8, 1, 1), axis=1)
-        nose = np.linalg.norm((v - np.array((0, 0.100, 1.590), F)) * (1.3, 1, 0.8), axis=1)
-        return np.clip(np.maximum(1.15 - d / 0.03, np.maximum(1.0 - mouth / 0.034, 0.9 - nose / 0.03)), 0.02, 1)
-
-    part("skin_head", hd, 3220, "head", 3.6, hxf, "head", "skin", head_cull, eye_keep)
-    part("hair", hr, 1500, "hair", 1.4, hxf, "head", None)
-    part("lockR", locks["lockR"], 300, "lock", 0.6, hxf, "lockR", "hair")
-    part("lockL", locks["lockL"], 300, "lock", 0.6, hxf, "lockL", "hair")
-    part("tail", locks["tail"], 900, "lock", 0.8, hxf, "tail", "hair")
-    part("eyes", ey, 100, "eyes", 4.0, hxf, "head", "skin")   # (on the skin slot: the eyes slot would take the player's tint, hers stay green)
-    part("hair_needles", hn, 110, "needle", 2.6, hxf, "head", "metal")
+    part("skin_head", None, 0, "headscan", 2.8, None, "headscan", None, ob=hlow)
+    part("hair_needles", hn, 110, "needle", 2.6, None, "head", "metal")
+    th = tube("pin_thread", [(0.108, -0.080, 1.822), (0.124, -0.082, 1.795), (0.132, -0.085, 1.760), (0.122, -0.090, 1.728)], 0.0017, 3)
+    part("pin_thread", None, 0, "string", 0.15, None, "head", "cloth", ob=th)
     part("Low", None, 0, "scan", 1.25, None, "scan", None, ob=low)
     part("handR", hR, 800, "handR", 2.0, None, "hand")
     part("handL", hL, 500, "handL", 1.7, None, "hand")
-    part("cowl", cw, 380, "scarf", 1.0, None, "gear", "cloth")
     part("quiver", qv, 240, "quiver", 0.9, None, "gear")
     part("quiver_arrows", qn, 240, "gearlab", 1.0, None, "gear")
     part("shears", sh, 140, "gearlab", 1.0, H.shears_to_model, "gear")
@@ -490,21 +452,18 @@ def main():
         bpy.ops.mesh.select_all(action="SELECT")
         bpy.ops.mesh.quads_convert_to_tris()
         bpy.ops.object.mode_set(mode="OBJECT")
-        if p["group"] != "scan":
+        if p["group"] not in ("scan", "headscan"):
             chart_seams(ob, 24 if len(ob.data.polygons) > 300 else 8)
-        face = face_chart(ob) if p["name"] == "skin_head" else None
         bpy.ops.object.mode_set(mode="EDIT")
         bpy.ops.mesh.select_all(action="SELECT")
         if not ob.data.uv_layers:
             ob.data.uv_layers.new(name="UVMap")
-        if p["group"] == "scan":      # (charts by facing folded over themselves here, two triangles sharing paint: smart project never overlaps)
+        if p["group"] in ("scan", "headscan"):      # (charts by facing folded over themselves here, two triangles sharing paint: smart project never overlaps)
             bpy.ops.uv.smart_project(angle_limit=math.radians(60), island_margin=0.0, correct_aspect=False)
         else:
             bpy.ops.uv.unwrap(method="ANGLE_BASED", margin=0.0, correct_aspect=False)
         bpy.ops.object.mode_set(mode="OBJECT")
         ob.select_set(False)
-        if face is not None:
-            planar_uv(ob, face)
         me = ob.data
         lv = np.empty(len(me.loops), np.int32)
         me.loops.foreach_get("vertex_index", lv)
@@ -564,16 +523,8 @@ def main():
             nn = f.grad(pts, f.vox * 0.9)
             lab = f.label(pts)
         nm = p["paint"]
-        if nm == "head":
-            rgb = P.head(pts, nn, lab, f)
-        elif nm == "mask":
-            rgb = P.mask(pts, nn, lab, f)
-        elif nm == "hair":
-            rgb = P.hairc(pts, nn, f, lab)
-        elif nm == "lock":
-            rgb = P.lockc(pts, nn)
-        elif nm == "eyes":
-            rgb = P.eyes(pts, nn)
+        if nm == "headscan":
+            rgb = P.headscan(sp_head.sample(pts), pts, nn)
         elif nm == "needle":
             rgb = P.needle(pts, nn)
         elif nm == "scan":
@@ -602,6 +553,8 @@ def main():
         mask |= m
         if p["paint"] in ("scan", "quiver"):
             relief[idx] = 1.0
+        if p["group"] == "headscan":
+            p["tri_slot"] = head_slot(sp_head.sample(vs[tri].mean(1)), vs[tri].mean(1)[:, 2])
         if f is not None and not p["slot"]:
             cen = vs[tri].mean(1).astype(F)
             p["tri_lab"] = f.label(f.project(cen, 1))
@@ -661,15 +614,19 @@ def main():
     add_bone(arm, "bow_s", bxf(np.array((0, Y, 0), F)), bxf(np.array((0, Y - 0.05, 0), F)), "bow", tuple(A))
     add_bone(arm, "arrow", ar_at, ar_at + ar_y * 0.2, "hips", tuple(ar_z))
     chains = {}
-    for nm in ("lockR", "lockL", "tail"):
-        pts = hxf(np.array(H.LOCKS[nm], F))
-        i0 = 2 if nm != "tail" else 2
-        js = spline(pts[i0:], 5 if nm != "tail" else 7)
-        chains[nm] = js
-        count = len(js) - 1
-        for i in range(count):
-            add_bone(arm, "spring_%s_%d" % (nm, i), js[i], js[i + 1], "head" if i == 0 else "spring_%s_%d" % (nm, i - 1))
-        add_bone(arm, "spring_%s_%d" % (nm, count), js[-1], js[-1] + (js[-1] - js[-2]) * 0.3, "spring_%s_%d" % (nm, count - 1))
+    # the ponytail's chain, down the scan's own hair
+    hv = verts(hlow)
+    tail_m = (hv[:, 1] < -0.115) & (hv[:, 2] < 1.73) & (head_slot(sp_head.sample(hv), hv[:, 2]) == 1)
+    zs = np.linspace(1.72, hv[tail_m, 2].min() + 0.006, 7)
+    js = []
+    for i in range(7):
+        q = tail_m & (np.abs(hv[:, 2] - zs[i]) < 0.03)
+        js.append(hv[q].mean(0))
+    js = np.array(js, F)
+    chains["tail"] = js
+    for i in range(6):
+        add_bone(arm, "spring_tail_%d" % i, js[i], js[i + 1], "head" if i == 0 else "spring_tail_%d" % (i - 1))
+    add_bone(arm, "spring_tail_6", js[-1], js[-1] + (js[-1] - js[-2]) * 0.3, "spring_tail_5")
     # the scarf's chains
     for tail in ("scarftailR", "scarftailL"):
         js = spline(np.array(H.SCARF_PATHS[tail], F), 7)
@@ -688,15 +645,17 @@ def main():
         one = np.ones(len(vs), F)
         if grp == "scan":
             continue                # (its weights came with the fit)
-        if grp in ("lockR", "lockL", "tail"):
-            ch = chains[nm]
-            names = ["spring_%s_%d" % (nm, i) for i in range(len(ch) - 1)]
-            W = chain(ch, names, vs)
-            # the root rides the head
-            near = 1.0 - S.smooth(0.0, 0.05, (vs - ch[0]) @ ((ch[1] - ch[0]) / np.linalg.norm(ch[1] - ch[0])))
-            W["head"] = near * 2.0
-        elif nm == "skin_head":
-            W = {"head": S.smooth(1.385, 1.445, vs[:, 2]) + 1e-3, "hips": S.smooth(1.445, 1.385, vs[:, 2])}
+        if grp == "headscan":
+            cc = sp_head.sample(vs)
+            cowl = (head_slot(cc, vs[:, 2]) == 2) & (vs[:, 2] < 1.60)
+            tail = (vs[:, 1] < -0.115) & (vs[:, 2] < 1.73) & (head_slot(cc, vs[:, 2]) == 1)
+            hd_w = S.smooth(1.455, 1.50, vs[:, 2]) * (~cowl) + 1e-3
+            W = chain(chains["tail"], ["spring_tail_%d" % i for i in range(6)], vs)
+            W = {k: w * tail for k, w in W.items()}
+            roots = S.smooth(1.70, 1.62, vs[:, 2]) * tail
+            W["spring_tail_0"] = W["spring_tail_0"] * (1 - S.smooth(1.72, 1.68, vs[:, 2]) * 0 )
+            W["head"] = hd_w * (~tail) + tail * (1 - roots)
+            W["hips"] = (1 - S.smooth(1.455, 1.50, vs[:, 2])) * (~tail) + cowl * 1.0
         elif grp == "head":
             W = {"head": one}
         elif grp in ("scarftailR", "scarftailL"):
@@ -771,6 +730,10 @@ def main():
         me = ob.data
         if p["slot"]:
             me.materials.append(mat(p["slot"]))
+        elif p["group"] == "headscan":
+            for sl in ("skin", "hair", "cloth"):
+                me.materials.append(mat(sl))
+            me.polygons.foreach_set("material_index", p["tri_slot"].astype(np.int32))
         elif p["group"] == "scan":
             me.materials.append(mat("cloth"))       # (one surface: slots picked per triangle cut jagged edges round the skin)
         else:
@@ -787,8 +750,8 @@ def main():
         n = n / np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-6)
         me.normals_split_custom_set_from_vertices(n.tolist())
 
-    ROOM = {"lockR": 0.25, "lockL": 0.25, "tail": 0.5, "hair_needles": 0.0, "quiver_arrows": 0.0, "arrow": 0.0, "shears": 0.1, "string": 0.0,
-            "skin_head": 0.0, "mask": 0.0, "Low": 0.55, "eyes": 0.0, "handR": 0.3, "handL": 0.3, "bow": 0.0, "scarftailR": 0.3, "scarftailL": 0.3, "scarftailR_in": 0.0, "scarftailL_in": 0.0}
+    ROOM = {"hair_needles": 0.0, "quiver_arrows": 0.0, "arrow": 0.0, "shears": 0.1, "string": 0.0,
+            "skin_head": 0.0, "Low": 0.55, "handR": 0.3, "handL": 0.3, "bow": 0.0, "scarftailR": 0.3, "scarftailL": 0.3, "scarftailR_in": 0.0, "scarftailL_in": 0.0}
     for p in parts:
         me = p["ob"].data
         at = me.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
