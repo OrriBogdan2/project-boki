@@ -64,6 +64,17 @@ const GLIDE_LEAD_EASE := 3.0  # 1/s, so the lean eases in and out instead of pop
 var lead_vel := Vector3.ZERO
 var lead_off := Vector3.ZERO
 
+## An aimed cast's wider view (item 68): cast_view() asks for it every step of the cast. It eases in and out over
+## about 0.2 s, no shake. Only the casting player's camera ever hears about it.
+const CAST_EASE := 16.0       # 1/s
+const CAST_HOLD := 0.04       # s a request lasts, so the view lets go as soon as the kit stops asking
+const CAST_STEP := 1.0 / 60.0 # s a frame can take off that at most
+const CAST_EDGE := 1.5        # m kept between the hunter and the edge of the screen
+var cast_k := 0.0             # 0 = the usual view, 1 = fully pushed out
+var cast_zoom := 0.0          # how much wider at cast_k 1 (0.25: 25%)
+var cast_left := 0.0
+var cast_pan := Vector3.ZERO  # the framing at cast_k 1, taking over from the cursor pan
+
 var style_id := ""
 ## Multiplies the distance on top of zoom: the home keeps its own wider framing with any style (see
 ## Home._apply_cam_settings); 1 everywhere in a match.
@@ -112,6 +123,31 @@ func pull_back(a: float) -> void:
 ## No-op: camera punches are gone (item 50). Kept only so the reserved merge files, which still call it, compile.
 func punch(_a: float) -> void:
 	pass
+
+## Asked each step of an aimed cast: push out by `zoom_k` and frame the line of `reach` metres along `dir`.
+func cast_view(dir: Vector2, zoom_k: float, reach: float) -> void:
+	cast_left = CAST_HOLD
+	cast_zoom = zoom_k
+	var pan_by := 0.0 if follow_mode == "locked" else minf(reach * 0.5, _cast_room(dir, zoom_k))
+	cast_pan = Vector3(dir.x, 0.0, dir.y) * pan_by
+
+## Metres the view can lean along `dir` at that zoom with the hunter still on screen.
+func _cast_room(dir: Vector2, zoom_k: float) -> float:
+	var view := get_viewport().get_visible_rect().size
+	var half_up := dist * dist_mul * zoom * (1.0 + zoom_k) * tan(deg_to_rad(fov) * 0.5)
+	var room := Vector2(half_up * view.x / maxf(1.0, view.y), half_up / sin(pitch)) - Vector2.ONE * CAST_EDGE
+	var turned := dir.rotated(yaw)
+	return minf(room.x / maxf(0.001, absf(turned.x)), room.y / maxf(0.001, absf(turned.y)))
+
+func _tick_cast(delta: float) -> void:
+	cast_left = maxf(0.0, cast_left - minf(delta, CAST_STEP))      # (a slow frame mustn't outlast the kit's request)
+	cast_k = lerpf(cast_k, 1.0 if cast_left > 0.0 else 0.0, 1.0 - exp(-CAST_EASE * delta))
+	if cast_k < 0.001:
+		cast_k = 0.0
+
+## The zoom an aimed cast adds right now.
+func cast_wide() -> float:
+	return 1.0 + cast_zoom * cast_k
 
 func rumble(amp: float, secs: float) -> void:
 	shake_amp = maxf(shake_amp, amp)
@@ -162,7 +198,8 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	var ky := 1.0 - exp(-(float(rr[1]) if Record.clean() else FOLLOW_Y) * delta)
 	base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
 	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
-	focus = base + pan + lead_off
+	_tick_cast(delta)
+	focus = base + pan.lerp(cast_pan, cast_k) + lead_off
 	zoom = lerpf(zoom, zoom_to, 1.0 - exp(-float(rr[3]) * delta))
 	top = move_toward(top, top_to, delta * (0.9 if top_to < top else 2.0))
 	chase = move_toward(chase, chase_to, delta * 0.7)
@@ -180,7 +217,7 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 
 func _apply(shake: Vector3) -> void:
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
-	var z := zoom * (1.0 + pull)
+	var z := zoom * (1.0 + pull) * cast_wide()
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)
