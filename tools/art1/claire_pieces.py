@@ -61,7 +61,7 @@ def hand(side, grip_dir, curl, spread=0.0):
     centre = [wrist - a * 0.022, wrist + a * 0.024, wrist + a * 0.052, knuck]
     width = np.array([0.027, 0.034, 0.039, 0.037])
     depth = np.array([0.024, 0.0205, 0.0195, 0.0165])
-    palm = sweep("palm" + side, "leather-glove", centre, SEC8, width, side_hint=o, depth=depth)
+    palm = sweep("palm" + side, "fur-trim", centre, SEC8, width, side_hint=o, depth=depth)
     t_, s_, n_ = frames(np.asarray(centre), o)
     for i in range(len(centre)):
         for j in range(8):
@@ -86,7 +86,7 @@ def hand(side, grip_dir, curl, spread=0.0):
             p.append(cur.copy())
         p = np.array(p)
         wd = np.array([1.0, 1.02, 1.0, 0.92, 0.76]) * rads[f]
-        fp = sweep("finger%d%s" % (f, side), "leather-glove", p, SEC6, wd, side_hint=k)
+        fp = sweep("finger%d%s" % (f, side), "fur-trim", p, SEC6, wd, side_hint=k)
         if side == "R":
             fp.rigid("hand.R")
         else:
@@ -97,7 +97,7 @@ def hand(side, grip_dir, curl, spread=0.0):
     t1 = base + norm(a * 0.72 + k * 0.42 - o * 0.5) * 0.031
     t2 = t1 + norm(a * 0.9 + k * 0.05 - o * 0.45) * 0.024
     t3 = t2 + norm(a * 0.9 - k * 0.35 - o * 0.2) * 0.02
-    tp = sweep("thumb" + side, "leather-glove", [base - a * 0.008, t1, t2, t3], SEC6, np.array([0.015, 0.0115, 0.0095, 0.008]), side_hint=o)
+    tp = sweep("thumb" + side, "fur-trim", [base - a * 0.008, t1, t2, t3], SEC6, np.array([0.015, 0.0115, 0.0095, 0.008]), side_hint=o)
     if side == "R":
         tp.rigid("hand.R")
     else:
@@ -122,7 +122,7 @@ def ear(s):
     wd[-1] = 0.012
     wd[-2] *= 0.72
     sec = [(-1, 0.0), (-0.6, -0.42), (0.0, -0.62), (0.6, -0.42), (1, 0.0), (0.6, 0.3), (0.0, 0.52), (-0.6, 0.3)]
-    p = sweep("ear" + side, "fur-ear", path, sec, wd, side_hint=np.array([s, 0.0, 0.25]), depth=np.full(13, 0.022))
+    p = sweep("ear" + side, "fur-trim", path, sec, wd, side_hint=np.array([s, 0.0, 0.25]), depth=np.full(13, 0.022))
     p.path, p.u = path, u
     return p
 
@@ -186,15 +186,15 @@ def wing(s):
                 a = base + j * len(spine) + i
                 q = [a, a + 1, a + 1 + len(spine), a + len(spine)]
                 f.append(q if lay == 0 else q[::-1])
-    p = Piece("wing" + side, "ice-wing", np.array(v), f)
+    p = Piece("wing" + side, "ice-horn", np.array(v), f)
     if s < 0:
         p.f = [q[::-1] for q in p.f]
     p.spine, p.tips, p.wrist = spine, tips, wrist
-    rod = sweep("wingarm" + side, "ice-wing", spine, SEC6, 0.0125 * (1 - np.linspace(0, 1, 9)) ** 0.5 + 0.003, side_hint=np.array([0, 1.0, 0]))
+    rod = sweep("wingarm" + side, "ice-horn", spine, SEC6, 0.0125 * (1 - np.linspace(0, 1, 9)) ** 0.5 + 0.003, side_hint=np.array([0, 1.0, 0]))
     rods = [rod]
     for i, t_ in enumerate(tips[1:4]):
         path = catmull([wrist, (wrist + t_) / 2 + [0, 0, 0.012], t_], 4)
-        rods.append(sweep("wingrod%d%s" % (i, side), "ice-wing", path, SEC6[::2], np.array([0.006, 0.005, 0.004, 0.0015]), side_hint=np.array([0, 1.0, 0])))
+        rods.append(sweep("wingrod%d%s" % (i, side), "ice-horn", path, SEC6[::2], np.array([0.006, 0.005, 0.004, 0.0015]), side_hint=np.array([0, 1.0, 0])))
     return p, rods
 
 
@@ -210,7 +210,7 @@ def tail():
     pts = [(0.0, -0.075, 0.965), (-0.012, -0.205, 0.83), (-0.03, -0.275, 0.66), (-0.075, -0.31, 0.5), (-0.145, -0.315, 0.37), (-0.235, -0.285, 0.28), (-0.30, -0.235, 0.255)]
     path = catmull(pts, 22)
     wd = np.linspace(0.0185, 0.0075, 22)
-    p = sweep("tail", "skin-tail", path, SEC6, wd, side_hint=np.array([0, 0, 1.0]))
+    p = sweep("tail", "skin-body", path, SEC6, wd, side_hint=np.array([0, 0, 1.0]))
     p.path = path
     return p
 
@@ -250,7 +250,7 @@ BOW_Y = -0.145
 def bow():
     out = []
     knot = np.array([0, BOW_Y - 0.035, BOW_Z])
-    kn = sweep("bowknot", "cloth-bow", [knot + [0, 0, 0.042], knot + [0, -0.012, 0.018], knot + [0, -0.016, -0.018], knot + [0, 0, -0.042]], SEC8, np.array([0.03, 0.044, 0.044, 0.03]), side_hint=np.array([1.0, 0, 0]), depth=np.array([0.018, 0.028, 0.028, 0.018]))
+    kn = sweep("bowknot", "cloth-dress", [knot + [0, 0, 0.042], knot + [0, -0.012, 0.018], knot + [0, -0.016, -0.018], knot + [0, 0, -0.042]], SEC8, np.array([0.03, 0.044, 0.044, 0.03]), side_hint=np.array([1.0, 0, 0]), depth=np.array([0.018, 0.028, 0.028, 0.018]))
     out.append(kn.rigid("root"))
     for s in (1.0, -1.0):
         side = "R" if s > 0 else "L"
@@ -258,7 +258,7 @@ def bow():
         t = np.linspace(0, 2 * np.pi, 15)
         path = np.stack([s * (0.09 - 0.082 * np.cos(t)), BOW_Y - 0.03 - 0.006 * np.sin(t) - 0.014 * (1 - np.cos(t)), BOW_Z + 0.008 + 0.046 * np.sin(t) + 0.016 * (1 - np.cos(t))], 1)
         wd = 0.042 + 0.024 * (1 - np.cos(t)) * 0.5
-        lp = sweep("bowloop" + side, "cloth-bow", path, [(-1, 0), (-0.3, 0.13), (0.3, 0.13), (1, 0), (0.3, -0.13), (-0.3, -0.13)], wd, side_hint=np.array([1.0, 0, 0.0]), depth=wd)
+        lp = sweep("bowloop" + side, "cloth-dress", path, [(-1, 0), (-0.3, 0.13), (0.3, 0.13), (1, 0), (0.3, -0.13), (-0.3, -0.13)], wd, side_hint=np.array([1.0, 0, 0.0]), depth=wd)
         out.append(lp.rigid("root"))
     return out
 
@@ -270,7 +270,7 @@ def ribbon(s):
     u = np.linspace(0, 1, 10)
     wd = 0.03 + 0.042 * smooth(0, 0.8, u)
     sh = np.array([0.0, 1.0, 0.0])
-    p = sweep("ribbon" + side, "cloth-bow", path, [(-1, 0), (-0.35, 0.08), (0.35, 0.08), (1, 0), (0.35, -0.08), (-0.35, -0.08)], wd, side_hint=sh, depth=wd)
+    p = sweep("ribbon" + side, "cloth-dress", path, [(-1, 0), (-0.35, 0.08), (0.35, 0.08), (1, 0), (0.35, -0.08), (-0.35, -0.08)], wd, side_hint=sh, depth=wd)
     # the swallowtail: the last ring's middle pulled up
     m = len(FLAT)
     last = (len(path) - 1) * m
@@ -331,10 +331,10 @@ def spear():
     out = []
     us = np.linspace(-0.66, 0.60, 14)
     path = [sp(u) for u in us]
-    shaft = sweep("shaft", "cloth-spear", path, SEC8, np.full(14, SHAFT_R), side_hint=np.array([0, 0, 1.0]))
+    shaft = sweep("shaft", "cloth-dress", path, SEC8, np.full(14, SHAFT_R), side_hint=np.array([0, 0, 1.0]))
     out.append(shaft)
 
-    def spike(name, u0, u1, w0, n0, mids, mat="glow-spear"):
+    def spike(name, u0, u1, w0, n0, mids, mat="glow-blade"):
         """A crystal: rings of a four-sided section down its length. mids: (u fraction, width k)."""
         sec = [(1, 0), (0, 1), (-1, 0), (0, -1)]
         pts = [(u0, w0)] + [(u0 + (u1 - u0) * a, w0 * b) for a, b in mids] + [(u1, 0.0015)]
@@ -345,14 +345,14 @@ def spear():
     out.append(spike("head", 0.745, TIP_U, 0.05, 0.016, [(0.12, 1.2), (0.3, 0.9), (0.42, 0.72)]))
     out.append(spike("butt", -0.665, BUTT_U, 0.034, 0.014, [(0.15, 1.0), (0.42, 0.82)]))
     for nm, u in (("collarA", 0.6), ("collarB", -0.66)):
-        out.append(sweep(nm, "ice-spear", [sp(u - 0.012), sp(u), sp(u + 0.012)], SEC8, np.array([0.015, 0.0205, 0.015]), side_hint=np.array([0, 0, 1.0])))
-    h = heart_solid("heart", "glow-spear", sp(0.683), -GRIP_K, np.array([0, 0, 1.0]), 0.082, 0.021)
+        out.append(sweep(nm, "ice-horn", [sp(u - 0.012), sp(u), sp(u + 0.012)], SEC8, np.array([0.015, 0.0205, 0.015]), side_hint=np.array([0, 0, 1.0])))
+    h = heart_solid("heart", "glow-blade", sp(0.683), -GRIP_K, np.array([0, 0, 1.0]), 0.082, 0.021)
     out.append(h)
-    h2 = heart_solid("heartcore", "glow-spear", sp(0.68, 0, 0.0005), -GRIP_K, np.array([0, 0, 1.0]), 0.05, 0.03)
+    h2 = heart_solid("heartcore", "glow-blade", sp(0.68, 0, 0.0005), -GRIP_K, np.array([0, 0, 1.0]), 0.05, 0.03)
     out.append(h2)
     for s in (1.0, -1.0):        # the two icicles off the guard
         out.append(spike("prong" + ("R" if s > 0 else "L"), 0.665, 0.665, 0.01, 0.01, [(0.5, 0.8)]) if False else
-                   sweep("prong" + ("R" if s > 0 else "L"), "glow-spear", [sp(0.70, s * 0.078), sp(0.655, s * 0.087), sp(0.585, s * 0.09)], [(1, 0), (0, 1), (-1, 0), (0, -1)], np.array([0.012, 0.009, 0.001]), side_hint=np.array([1.0, 0, 0])))
+                   sweep("prong" + ("R" if s > 0 else "L"), "glow-blade", [sp(0.70, s * 0.078), sp(0.655, s * 0.087), sp(0.585, s * 0.09)], [(1, 0), (0, 1), (-1, 0), (0, -1)], np.array([0.012, 0.009, 0.001]), side_hint=np.array([1.0, 0, 0])))
     for q in out:
         q.rigid("hand.R")
     return out

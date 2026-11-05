@@ -7,8 +7,8 @@ import claire_pieces as K
 HOT = np.array([1.0, 0.76, 0.44])        # hero_toon's glow key: these texels glow in the archetype's model_glow colours
 ICE = [hexc("#3f7fc4"), hexc("#6aa8e4"), hexc("#9cd0f6"), hexc("#c9ecff"), hexc("#f0fbff")]
 RIBBON = [hexc("#4a8fd6"), hexc("#74b1ea"), hexc("#9dcdf5"), hexc("#c0e2fb"), hexc("#e4f4ff")]
-GLOVE = [hexc("#9fb2d2"), hexc("#c3d2e8"), hexc("#dfe8f5"), hexc("#f1f5fb"), hexc("#ffffff")]
-FUR = [hexc("#8fa6c8"), hexc("#bfd0e6"), hexc("#dfe9f5"), hexc("#f3f7fc"), hexc("#ffffff")]
+GLOVE = [hexc("#8ea4c8"), hexc("#adc2de"), hexc("#c7d7ea"), hexc("#dbe6f2"), hexc("#ecf3fa")]
+FUR = [hexc("#7f9cc4"), hexc("#a4bfe0"), hexc("#bdd3ec"), hexc("#d2e2f4"), hexc("#e6f0fa")]
 PINK = hexc("#f2b2c0")
 
 

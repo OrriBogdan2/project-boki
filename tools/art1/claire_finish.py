@@ -16,7 +16,7 @@ import warden_kit as WK
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
 ATLAS = 2048
-MATS = ["skin-face-hot", "skin-body", "cloth-dress", "fur-trim", "hair-fringe", "leather-glove", "fur-ear", "ice-horn", "ice-wing", "skin-tail", "cloth-bow", "cloth-spear", "ice-spear", "glow-blade", "glow-spear", "glow-heart"]
+MATS = ["skin-face-hot", "skin-body", "cloth-dress", "fur-trim", "hair-fringe", "ice-horn", "glow-blade"]
 SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "ear": 0.7, "horn": 0.9, "tail": 0.7, "wing": 0.55, "wingarm": 0.5, "wingrod": 0.4, "bowknot": 0.6, "bowloop": 0.6, "ribbon": 0.5,
          "blade": 0.5, "shaft": 1.1, "head": 0.6, "butt": 0.5, "heart": 0.7, "heartcore": 0.6, "prong": 0.4, "collarA": 0.3, "collarB": 0.3, "Low": 1.0, "tailheart": 0.7}
 FACE_K = 3.4                # texel density on the face against the body
@@ -117,7 +117,7 @@ tl = K.tail()
 tail_end = tl.path[-1]
 tail_dir = M.norm(tl.path[-1] - tl.path[-3])
 TAILC = tail_end + tail_dir * 0.056
-th = K.heart_solid("tailheart", "glow-heart", TAILC, tail_dir, M.norm(np.cross(tail_dir, (0, 0, 1.0))), 0.066, 0.017)
+th = K.heart_solid("tailheart", "glow-blade", TAILC, tail_dir, M.norm(np.cross(tail_dir, (0, 0, 1.0))), 0.066, 0.017)
 bw = K.bow()
 rr, rl = K.ribbon(1.0), K.ribbon(-1.0)
 sp = K.spear()
@@ -456,6 +456,10 @@ col = col * (1 - pink[:, None]) + stock * pink[:, None]
 under = smooth(K.J("thigh.R")[2] - 0.03, K.J("thigh.R")[2] - 0.06, 2 * K.J("thigh.R")[2] - pp[:, 2] - 0.0)  # (0 above the seat, kept for clarity)
 shorts = pink * smooth(0.78, 0.84, pp[:, 2])
 col = col * (1 - shorts[:, None]) + np.array([0.2, 0.36, 0.66]) * shorts[:, None]
+# the white fur and capelet held under the light (a pure white blows out at the match camera), cooled toward the sheet's ice blue
+mx_ = col.max(1)
+lt = smooth(0.5, 0.8, mx_) * (1 - bl) * (pp[:, 2] < K.NECK_Z + 0.12) + smooth(0.5, 0.8, mx_) * (1 - bl) * (pp[:, 1] < 0.0) * (pp[:, 2] >= K.NECK_Z + 0.12)
+col = col * (1 - lt[:, None]) + col * np.array([0.8, 0.87, 0.97]) * lt[:, None]
 OUTC[ys, xs] = col
 # the iris: glowing, with the slit pupil
 HOT_K = np.zeros(len(ys))

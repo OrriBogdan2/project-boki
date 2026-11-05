@@ -13,7 +13,7 @@ from meshkit import smooth
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, RIG, OUT = a[0], a[1], a[2]
-LOW_TRIS = 12400
+LOW_TRIS = 12200
 SOLE = -0.95                    # the scan's sole (z)
 K_ = 0.92                       # scan metres -> rig metres, where a bone's length doesn't set it
 SOLE_Z, ANKLE = 0.052, 0.19     # the rig: the boot's sole on the blade, the foot bone
@@ -205,7 +205,7 @@ HN = T["neck"]
 lv = np.zeros(len(low.data.vertices) * 3)
 low.data.vertices.foreach_get("co", lv)
 lv = lv.reshape(-1, 3)
-FACE_TRIS = 3000
+FACE_TRIS = 2900
 bpy.ops.object.select_all(action="DESELECT")
 low.select_set(True)
 bpy.context.view_layer.objects.active = low

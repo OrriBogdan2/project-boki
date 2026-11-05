@@ -16,7 +16,7 @@ ps += [K.ear(1.0), K.ear(-1.0), K.horn(1.0), K.horn(-1.0), K.tail()] + K.bow() +
 for s in (1.0, -1.0):
     w, r = K.wing(s)
     ps += [w] + r
-ps.append(K.heart_solid("tailheart", "glow-heart", K.tail().path[-1] + np.array([-0.05, 0.02, -0.03]), (-0.7, 0.3, -0.6), (0.5, 0.8, 0.0), 0.065, 0.016))
+ps.append(K.heart_solid("tailheart", "glow-blade", K.tail().path[-1] + np.array([-0.05, 0.02, -0.03]), (-0.7, 0.3, -0.6), (0.5, 0.8, 0.0), 0.065, 0.016))
 COL = {"leather": (0.9, 0.9, 0.95), "fur": (0.92, 0.93, 0.97), "ice": (0.45, 0.72, 0.95), "skin": (0.6, 0.78, 0.95), "cloth": (0.5, 0.72, 0.92), "glow": (0.45, 0.85, 1.0)}
 mats = {}
 for k, c in COL.items():
