@@ -1147,3 +1147,7 @@ This one sheet now has everything (vivid colours, the owner's skin tone, capris)
 - Four views (front, left, back, right), consistent: silver pauldron on his LEFT shoulder, the cracked glowing arm on his RIGHT.
 - The arms hang closer than a true A-pose; rig to the shared armature anyway.
 - The scarf's burn-hole glow and the sword come from kael_FINAL_sheet.png.
+
+## 2026-11-05 02:39 UTC (ext): Kael splash (owner-approved): `briefs/art-refs/kael_splash.png`
+- Use it for his menu splash + portrait crop.
+- Model note: the splash puts the chain on his left fist. **The model follows the master sheet: chain + hook on the RIGHT (cracked, bandaged) wrist.**
