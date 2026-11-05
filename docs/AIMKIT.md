@@ -88,9 +88,18 @@ AimKit.dotted(h, "rmb", {"len": 15.0})     # Pip seed: a faint 0.4 bh strip with
 ```
 Params: `from`, `dir`, `len` (8), `width` (0.72), `gap` (0.6 m between dots), `dot` (0.06 m radius).
 
-### V that closes into one line
+### Filling line
+No shape of its own: two lines and a circle.
 ```gdscript
-# Hem's draw: the V opens 25 deg and closes as the stage charges; one bright line at k = 1
+# Hem's draw: a faint line to the cursor, a bright fill growing out along it, a circle at the perfect point
+AimKit.line(h, "draw", {"len": L, "arrow": false})
+AimKit.line(h, "draw_fill", {"len": L * fill, "arrow": false})
+AimKit.circle(h, "draw_mark", {"at": point, "r": 0.22})
+```
+
+### V that closes into one line
+Nothing in the game uses it now (Hem's draw was the V until owner item 55b).
+```gdscript
 AimKit.vee(h, "draw", {"k": stage_k, "glint": stage_k * 0.4, "col2": Color("b6ff8a")})
 ```
 Params: `from`, `dir`, `len` (to the cursor, clamped 1.5-20), `k`, `open` (degrees, 25), `glint`
