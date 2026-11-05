@@ -78,7 +78,8 @@ func run(main: Node) -> void:
 		var vel := walk_v if t >= T_WALK and t < T_STOP else Vector3.ZERO
 		if upper != "":
 			var ut := t - 1.0
-			clips.force = {"clip": upper, "t": ut, "upper": true} if ut >= 0.0 and ut < clips.lib.get_animation(upper).length else {}
+			var on := ut >= 0.0 and ut < clips.lib.get_animation(upper).length
+			clips.force = {"clip": upper, "t": ut, "upper": true} if on else {}
 		anim.update(DT, {"vel": vel, "face": yaw, "grounded": true, "crouch": ck, "fired": 99.0})
 		sync.call("_process", DT)
 		t += DT
