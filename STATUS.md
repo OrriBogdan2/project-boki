@@ -660,3 +660,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: all 12 Hunters have full art sets
 - Vex final logged (robotic LEFT arm, cyber-eye RIGHT, one braid; follow the master over the turnaround). IMG splash request closed. Portraits still to add: Tarek, Ryzz, Vex. ART-1 order after the running lanes: Sable, Ryzz, Vex.
+
+## 2026-11-05 S2: Vex anatomy logged
+- No human right arm: the cannon IS her right arm (prosthetic, shoulder socket, aim = arm pose); robotic left arm; vex_turnaround_apose v3, all four views valid. For ART-1 Vex (last in order).
