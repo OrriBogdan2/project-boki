@@ -1225,3 +1225,16 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Tethered + aiming 120° off the chain → the Lunge goes the aimed way.
   - Hold RMB → recast E → release mid-pull → the travel is longer/faster than a plain Lunge, in the aimed direction.
   - The chain's sag is ≤0.15 m at rest.
+
+## 127. Sable: the pistols glow while the empowered shot is up + a stronger hit sound (owner, 17:11 UTC Nov 5)
+- The owner: "sable needs her guns lit up for a few seconds while her auto is empowered after dashing. and she needs to have a stronger sound for when it hits".
+- **Glow:**
+  - While the post-Vault empowered bolt is ready (thief_kit.gd: the glint at her hand, :308), both pistols light up: an emissive violet/cyan glow on the barrels, a soft light and small sparks or a trail when she moves.
+  - It shows for the full empowered window (a few seconds), then fades out quickly when spent or expired.
+  - Visible to everyone, online too (it replaces or extends the small glint ping).
+- **Sound:** a much punchier hit for the empowered bolt landing: a sharp crack + low thump + a short ring.
+  - It should clearly stand out from a normal LMB hit (+3-4 dB, a layered transient).
+  - S4's sound set; S5 can add it in vv_sfx/dj sfx if S4 is idle.
+- **Assert:**
+  - After a Vault → the gun glow is on until the empowered shot or the timeout.
+  - The empowered hit plays the new sfx id.
