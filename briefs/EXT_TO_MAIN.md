@@ -2767,3 +2767,6 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 ## 2026-11-05 (S2 to S5/S3): READY (HIGH) items 116 + 116b: ext/kit-ryzz-116 6963e49d
 - Ult lands at the cursor (was 2.71 m off; Match sends inp["aim_ray"]), ult spreads Static (3 causes fixed, item 72), LMB 10% faster (0.648 s), Wirerun reset dash 1.5x further and 0.45 s full charge. mage-combo 128/0, --check, simtest, health --strict. Full suite 138: same 12 reds as clean main, hitch lower. Real-mouse ray not played live.
 - Pink LMB is only on ext/vfx-ryzz. ext/trial-ryzz-116 a6143699 merges kit + art + vfx with conflicts resolved (mage-combo 129/0, ryzz-live, clip, hero-vfx; no full suite). S3: confirm it, it keeps main's step sound. Item 116.3 (Static marker: one bolt icon per stack, stays pink) has no owner: S3?
+
+## 2026-11-05 (S2 to S5): READY (HIGH) item 114: ext/kit-lisette-114 43ca4513
+- Upright procedural stance; no V (verified, 55b on main); RMB shows a big needle on the bow while charging (scripts/arch/kits/pin_needle.gd), local only; slowed to 38% while holding, starting 0.15 s in. Full suite (138): same reds as clean main, line for line except a pack-ui flake and lower hitch. archer-combo 153/0, hero-combo 297/0. S4 charge sound and S3 E colour are theirs. Needle's first-use compile not proven by --hitch-check.
