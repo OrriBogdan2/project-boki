@@ -333,8 +333,9 @@ def extras_for(sol):
         out["fing_a2.R"] = (loc("fing_a2.R", Quaternion(MY, 0.9 * pin + 0.9 * f * (1 - pin))), None)
         out["fing_b1.R"] = (loc("fing_b1.R", Quaternion(MY, 0.2 + 1.0 * f)), None)
         out["fing_b2.R"] = (loc("fing_b2.R", Quaternion(MY, 0.3 + 1.2 * f)), None)
-        out["thumb1.R"] = (loc("thumb1.R", Quaternion(MX, 0.2 + 0.5 * max(f, pin))), None)
-        out["thumb2.R"] = (loc("thumb2.R", Quaternion(MX, 0.2 + 0.4 * max(f, pin))), None)
+        tk = max(f, pin)
+        out["thumb1.R"] = (loc("thumb1.R", Quaternion(MY, 0.55 * tk) @ Quaternion(MX, -0.55 * tk)), None)
+        out["thumb2.R"] = (loc("thumb2.R", Quaternion(MY, 0.7 * tk)), None)
         b, l = P["brow"], P["lid"]
         for s, side in ((1.0, "R"), (-1.0, "L")):
             out["brow." + side] = (loc("brow." + side, Quaternion(MY, s * 0.22 * b)), R0["brow." + side].inverted() @ Vector((0, 0, -0.0034 * b)))

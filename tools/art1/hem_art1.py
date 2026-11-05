@@ -367,7 +367,7 @@ def main():
     part("lockR", locks["lockR"], 240, "lock", 0.6, hxf, "lockR", "hair")
     part("lockL", locks["lockL"], 160, "lock", 0.6, hxf, "lockL", "hair")
     part("tail", locks["tail"], 380, "lock", 0.5, hxf, "tail", "hair")
-    part("eyes", ey, 220, "eyes", 5.0, hxf, "head", "eyes")
+    part("eyes", ey, 220, "eyes", 5.0, hxf, "head", "skin")   # (on the skin slot: the eyes slot would take the player's tint, she keeps hers dark)
     part("hair_needles", hn, 200, "needle", 1.2, hxf, "head", "metal")
     part("trunk", tr, 4300, "trunk", 1.0, None, "trunk", None, lambda v: (v[:, 2] > 1.40))
     part("armR", armR, 620, "trunk", 1.0, None, "arm")
@@ -714,6 +714,15 @@ def main():
         n = p["nrm"]
         n = n / np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-6)
         me.normals_split_custom_set_from_vertices(n.tolist())
+
+    ROOM = {"lockR": 0.25, "lockL": 0.25, "tail": 0.5, "hair_needles": 0.15, "quiver_needles": 0.15, "spikes": 0.1, "arrow": 0.1, "shears": 0.2, "string": 0.0,
+            "skin_head": 0.45, "mask": 0.45, "eyes": 0.0, "handR": 0.3, "handL": 0.3, "bow": 0.4, "coat_in": 0.0, "collar_in": 0.0}
+    for p in parts:
+        me = p["ob"].data
+        at = me.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
+        a = np.ones(len(me.vertices) * 4, F)
+        a[3::4] = ROOM.get(p["name"], 0.7)
+        at.data.foreach_set("color", a)
 
     def join(obs, name):
         bpy.ops.object.select_all(action="DESELECT")
