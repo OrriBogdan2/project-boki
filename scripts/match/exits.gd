@@ -556,9 +556,6 @@ func _start(x: Dictionary, h: Hunter) -> void:
 	x["steal"] = 0.0
 	x["started_at"] = m.time
 	x["draining"] = false
-	var n: Node3D = x["node"]
-	n.get_node("Beam").visible = true
-	(n.get_node("Sparks") as CPUParticles3D).emitting = true
 	m.sfx("warn", x["pos"], 0.0, 0.9)
 	m.sfx("zap", x["pos"], -2.0, 0.7)
 	m.fx.ring(x["pos"], OUTPOST_R, ExitModels.UPLINK, 0.6)
@@ -610,17 +607,6 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 			else:
 				x["steal"] = 0.0
 			_waves(x, dt)
-			var ch := n.get_node("Charge") as MeshInstance3D
-			(ch.material_override as ShaderMaterial).set_shader_parameter("arc", float(x["prog"]))
-			var cr := n.get_node("Mast/Crystal") as Node3D
-			cr.rotation.y += dt * (1.0 + 6.0 * float(x["prog"]))
-			# the mast's crystal burns with the charge, and pulses dim while it drains
-			var glow := 0.25 + 1.1 * float(x["prog"])
-			if x["draining"]: glow *= 0.45 + 0.35 * sin(m.time * 7.0)
-			_crystal_glow(n, glow)
-			(n.get_node("Beam") as Node3D).visible = not x["draining"] or sin(m.time * 7.0) > -0.3
-			var zm := (n.get_node("Zone") as MeshInstance3D).material_override as ShaderMaterial
-			zm.set_shader_parameter("color", Color(Color("ff7a5a") if x["contested"] else ExitModels.UPLINK, 0.35 + 0.15 * sin(m.time * 6.0)))
 			if float(x["prog"]) >= 1.0:
 				_open_lift(x)
 		"open":
@@ -633,17 +619,11 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 				x["state"] = "spent"
 				x["t"] = UPLINK_CD
 				n.get_node("Lift").visible = false
-				n.get_node("Beam").visible = false
-				(n.get_node("Sparks") as CPUParticles3D).emitting = false
-				((n.get_node("Charge") as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("arc", 0.0)
 				m.sfx("thump", p, -6.0, 0.8)
 		"fizzling":
 			# a few hard flickers, a sputter each, then dark
 			x["t"] = float(x["t"]) - dt
 			var k := FIZZLE_T - float(x["t"])
-			var on := fmod(k, 0.45) < 0.2
-			(n.get_node("Beam") as Node3D).visible = on
-			_crystal_glow(n, 1.6 if on else 0.05)
 			if int(k / 0.45) != int((k - dt) / 0.45):
 				m.sfx("zap", x["pos"], -3.0, 0.6 + 0.1 * int(k / 0.45))
 				m.fx.ring(x["pos"], OUTPOST_R, ExitModels.UPLINK, 0.3)
@@ -651,17 +631,12 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 				x["state"] = "spent"
 				x["t"] = FIZZLE_CD
 				x["team"] = -1
-				n.get_node("Beam").visible = false
-				(n.get_node("Sparks") as CPUParticles3D).emitting = false
-				_crystal_glow(n, 0.25)
 				m.sfx("thump", x["pos"], -4.0, 0.6)
 		"spent":
 			x["t"] = float(x["t"]) - dt
 			if float(x["t"]) <= 0.0:
 				x["state"] = "idle"; x["team"] = -1; x["prog"] = 0.0
-	var zr := (n.get_node("Zone") as MeshInstance3D)
-	if x["state"] != "charging":
-		(zr.material_override as ShaderMaterial).set_shader_parameter("color", Color(ExitModels.UPLINK, 0.35 if x["state"] in ["idle", "open"] else 0.12))
+	_show_outpost(x, n)
 
 ## The yard stood empty until the charge ran out: the uplink flickers and shuts off.
 func _fizzle(x: Dictionary) -> void:
@@ -679,14 +654,25 @@ func _fizzle(x: Dictionary) -> void:
 		if m.hud and was == m.player.team:
 			m.hud.toast("The uplink shut off: nobody held the yard. Start it again to charge it", ExitModels.UPLINK)
 
-func _crystal_glow(n: Node3D, g: float) -> void:
-	var cr := n.get_node_or_null("Mast/Crystal")
-	if cr == null:
-		return
-	for ch in cr.get_children():
-		if ch is MeshInstance3D and (ch as MeshInstance3D).material_override is ShaderMaterial:
-			((ch as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("glow", g)
-			return      # (the crystal's parts share one material)
+## The outpost's look for its state (OutpostLook): lit with the charge, the banner in the holder's colour,
+## the yard's edge only while you stand in it or it is contested.
+func _show_outpost(x: Dictionary, n: Node3D) -> void:
+	var lit := OutpostLook.lit_of(x)
+	if x["state"] == "fizzling":
+		lit = 1.0 if fmod(FIZZLE_T - float(x["t"]), 0.45) < 0.2 else 0.0
+	elif x.get("draining", false) and x["state"] == "charging":
+		lit *= 0.45 + 0.35 * sin(m.time * 7.0)
+	var raised := OutpostLook.held(x)
+	var col: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if raised else OutpostLook.NEUTRAL
+	var key := [snappedf(lit, 0.01), raised, col]
+	if key != x.get("look"):
+		x["look"] = key
+		OutpostLook.apply(n, lit, col, 1.0 if raised else 0.0)
+	if raised:
+		OutpostLook.sway(n, m.time)
+	var near: bool = m.player != null and in_yard(x, m.player)
+	var charging: bool = x["state"] == "charging"
+	OutpostLook.rings(n, near or x["contested"], x["contested"], charging, float(x["prog"]))
 
 func _open_lift(x: Dictionary) -> void:
 	x["state"] = "open"
