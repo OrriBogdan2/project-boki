@@ -5,7 +5,7 @@ extends RefCounted
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const SPECIES := "cindle"
-const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry"]
+const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 const SHAPES := ["blink", "closed", "happy", "sad", "sleepy", "angry", "m_smile", "m_frown", "m_snarl", "m_chomp",
 	"m_o"]
 const MAX_TRIS := 12000
@@ -64,6 +64,8 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	ok(BokiRig.work_clip({}) == "", "no job, no work clip")
 	ok(BokiRig.work_clip({"job": {"phase": "work", "kind": "ore"}}) == "mine", "an ore job mines")
 	ok(BokiRig.work_clip({"job": {"phase": "to", "kind": "chop"}}) == "carry", "taking it home carries")
+	ok(BokiRig.work_clip({"job": {"phase": "work", "kind": "fire"}}) == "tend", "a job with no clip of its own tends")
+	await _body_stays_level(main, k, rig)
 	ok(_clip_for(rig, "happy", true) == "hop", "happy hops")
 	rig._speed = 4.0
 	rig._pick_clip(0.016)
@@ -94,6 +96,24 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig.seek(0.5)
 	w = rig.face.get_blend_shape_value(rig.face.find_blend_shape_by_name("closed"))
 	ok(w > 0.99, "asleep the eyes are shut")
+
+## Home's work poses rock Body and hold their item over its head; while it works the rig owns both.
+func _body_stays_level(main: Node, k: Node3D, rig: BokiRig) -> void:
+	var body := k.get_node("Body") as Node3D
+	var held := Node3D.new()
+	held.name = "Held"
+	k.add_child(held)
+	held.position = Vector3(0, 0.95, 0)
+	k.set_meta("kwork", "carry")
+	rig._pick_clip(0.016)
+	body.rotation.z = 0.16
+	rig._keep_flex()
+	ok(is_zero_approx(body.rotation.z), "a work clip keeps Body level")
+	ok(held.position.is_equal_approx(BokiRig.CARRY_AT), "carrying, the load sits in its pincers, not over its head")
+	k.remove_meta("kwork")
+	rig._pick_clip(0.016)
+	held.free()
+	await main.get_tree().process_frame
 
 func _own_look(main: Node) -> void:
 	var rec := Save.new_kin(SPECIES, "Spot")

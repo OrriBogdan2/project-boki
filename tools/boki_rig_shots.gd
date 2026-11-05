@@ -16,7 +16,7 @@ const COATS := [
 ## Far shots: [clip, at (s), face], left to right.
 const ACTION := [["idle", 0.5, "neutral"], ["run", 0.1, "cheer"], ["ability", 0.5, "angry"], ["hop", 0.45, "happy"]]
 const EMOTES := [["idle", 0.5, "happy"], ["idle", 0.5, "sad"], ["idle", 0.5, "sleepy"], ["idle", 0.5, "angry"]]
-const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry"]
+const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 const GIF_FPS := 15
 const MATCH_PITCH := 66.0
 const MATCH_DIST := 23.0
@@ -206,6 +206,7 @@ func _anims() -> void:
 
 func _clip(vp: SubViewport, rig: BokiRig, c: String) -> void:
 	rig.set_clip(c, 0.0)
+	_hold_load(rig, c == "carry")
 	var clip_s := rig.player.get_animation(c).length
 	var frames := maxi(int(clip_s * GIF_FPS), STRIP)
 	var dir := out.path_join("frames").path_join(c)
@@ -226,6 +227,16 @@ func _clip(vp: SubViewport, rig: BokiRig, c: String) -> void:
 			tile += 1
 			next += every
 	sheet.save_png(out.path_join("anim_%s.png" % c))
+
+## Home's carried item, as the real farm gives it.
+func _hold_load(rig: BokiRig, on: bool) -> void:
+	var old := rig.root.get_node_or_null("Held")
+	if old:
+		old.free()
+	if on:
+		var it := WorkModels.held("chop", "")
+		rig.root.add_child(it)
+		it.position = BokiRig.CARRY_AT
 
 func _far(file: String, dist: float, boki_scale: float, picks: Array, yaw: float) -> void:
 	var vp := _stage(Vector2i(1920, 1080))

@@ -22,8 +22,9 @@ const COAT_LOOK := {"far_lift": 0.12, "fres": 0.55, "top_light": 0.45, "rim_amou
 const EYE_VALUE := 0.86       # iris brightness: the eye is the first thing read on a small face
 ## Godot's LODs are cut from the rest pose, where the lids lie folded: they would drop the rows that cover the eye.
 const FACE_LOD_BIAS := 1000.0
-const OWN_BODY := ["chop", "mine", "carry"]
-const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry"]
+const OWN_BODY := ["chop", "mine", "carry", "tend"]
+const CARRY_AT := Vector3(0, 0.3, -0.34)     # m: home's Held item hugged in the pincers
+const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
 ## Blend shapes each expression pushes.
@@ -42,7 +43,7 @@ const FACES := {
 ## The clip's own expression, or a list of [from, expression] beats over its length (0..1).
 const CLIP_FACE := {
 	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
-	"chop": "focus", "mine": "focus", "carry": "cheer",
+	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
@@ -90,7 +91,7 @@ static func work_clip(k: Dictionary) -> String:
 		return "carry"
 	if String(job["phase"]) != "work":
 		return ""
-	return String(WORK_KINDS.get(String(job["kind"]), ""))
+	return String(WORK_KINDS.get(String(job["kind"]), "tend"))
 
 ## Adds the model and its driver under `flex`; `c` is KinModels' material set. Returns the head frame, as
 ## KinModels.build.
@@ -164,6 +165,10 @@ func _keep_flex() -> void:
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
 		body.rotation = Vector3.ZERO          # home's work poses swing Body: here the clip does the swinging
+	if clip == "carry":
+		var held := root.get_node_or_null("Held") as Node3D
+		if held:
+			held.position = CARRY_AT
 	model.position.y = -body.position.y if clip == "hop" else 0.0       # the clip does the hopping, not home
 	var cam := get_viewport().get_camera_3d() as CamRig
 	if cam:

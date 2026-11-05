@@ -19,11 +19,11 @@ a change to a shape, colour or clip is an edit and a rebuild:
 | `scripts/match/boki_dna.gd` | Inborn proportions, ear and tail shapes, birthmark (`Unique.dress` calls it) |
 | `shaders/boki_eye.gdshader`, `boki_marks.gdshader` | Eye with its own iris colour; coat marks fixed to the rest pose |
 
-Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry. Faces (`BokiRig.FACES`): neutral,
+Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend. Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.
 
-Props (axe, pick, log, berry) are part of the skinned mesh on their own bones, collapsed in every clip that doesn't
+Props (axe, pick, berry) are part of the skinned mesh on their own bones, collapsed in every clip that doesn't
 use them. Materials: `boki_coat` (atlas, ink), `boki_glow` (the species' glow), `boki_face` (lids, brows, mouth),
 `boki_eye`. Face LODs stay off (`FACE_LOD_BIAS`): Godot cuts them from the rest pose, where the lids lie folded.
 
