@@ -346,20 +346,6 @@ def main():
         bpy.data.objects.remove(p["ob"])
         parts.remove(p)
 
-    # dark cores under the scan's shell: a scan is overlapping skins, and a decimate leaves cracks you could see the sky through
-    def core(name, prim, tris, bone):
-        lo, hi = prim.lo - 0.02, prim.hi + 0.02
-        f = S.Field(lo, hi, 0.012)
-        f.add(prim, 0.0, 1)
-        part(name, f, tris, "soft", "core", 0.15, bone=bone)
-    core("core_hull", S.ell((0, 0, 0.515), (0.44, 0.375, 0.285)), 340, "hips")
-    for s, n in ((1, "R"), (-1, "L")):
-        sh, el, wr = J["upper_arm." + n], J["forearm." + n], J["hand." + n]
-        core("core_up" + n, S.cap(tuple(sh), tuple(el), 0.085, 0.08), 70, "upper_arm." + n)
-        core("core_fore" + n, S.cap(tuple(el), tuple(wr), 0.085, 0.105), 70, "forearm." + n)
-        kn = J["shin." + n]
-        core("core_leg" + n, S.cap(tuple(kn), (kn[0], 0.0, 0.06), 0.06, 0.06), 50, "shin." + n)
-
     # ropes
     def rope(name, pts, r, bone, step=0.05):
         ob, aux = tube(name, np.array(pts, np.float32), r, step=step)

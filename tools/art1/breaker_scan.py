@@ -194,6 +194,17 @@ bpy.ops.object.mode_set(mode="EDIT")
 bpy.ops.mesh.select_all(action="SELECT")
 bpy.ops.mesh.quads_convert_to_tris()
 bpy.ops.object.mode_set(mode="OBJECT")
+# (a scan's skins come with mixed winding: the game culls back faces, so each must face out)
+_bm = bmesh.new()
+_bm.from_mesh(low.data)
+bmesh.ops.recalc_face_normals(_bm, faces=_bm.faces)
+_c = np.array([f.calc_center_median() for f in _bm.faces])
+_n = np.array([f.normal for f in _bm.faces])
+_out = ((_c - (0, 0, 0.515)) * _n).sum(1).mean()
+if _out < 0:
+    bmesh.ops.reverse_faces(_bm, faces=_bm.faces)
+_bm.to_mesh(low.data)
+_bm.free()
 print("low", len(low.data.polygons), flush=True)
 
 # ---- a clean unwrap by form (decimating the scan's own UVs drags triangles across its islands), then the bake
