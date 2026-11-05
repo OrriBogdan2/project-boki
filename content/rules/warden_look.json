@@ -222,24 +222,8 @@
 				"far_edge": 1.4
 			}
 		},
-		"halos": [
-			{
-				"anchor": "anchor_gem",
-				"color": [
-					1.0,
-					0.12,
-					0.2
-				],
-				"strength": 2.2,
-				"px": 12.0,
-				"near_d": 0.0,
-				"far_d": 3.0
-			}
-		],
-		"no_ink": [
-			"crossbow",
-			"silkbraid"
-		]
+		"halos": [{"anchor": "anchor_gem", "color": [0.78, 0.2, 1.0], "strength": 2.2, "px": 10.0, "near_d": 0.0, "far_d": 3.0}, {"anchor": "weapon_muzzle", "color": [0.8, 0.35, 1.0], "strength": 2.0, "px": 8.0, "near_d": 0.0, "far_d": 3.0}, {"anchor": "weapon_muzzle_l", "color": [0.8, 0.35, 1.0], "strength": 2.0, "px": 8.0, "near_d": 0.0, "far_d": 3.0}],
+		"bloom": [{"at": "weapon_muzzle", "color": [0.78, 0.35, 1.0, 0.34], "size": 0.14, "depth_test": true}, {"at": "weapon_muzzle_l", "color": [0.78, 0.35, 1.0, 0.34], "size": 0.14, "depth_test": true}, {"at": "anchor_gem", "color": [0.8, 0.25, 1.0, 0.3], "size": 0.14, "depth_test": true}]
 	},
 	"hem": {
 		"weapon_offset": [0.0, 0.0, 0.07],
