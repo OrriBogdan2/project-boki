@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bej610nki3y55"
-path="res://.godot/imported/ostra_claws_atlas.jpg-2bd7093cd6cf0554418f9a636550485b.ctex"
+uid="uid://ligatailqo3"
+path="res://.godot/imported/ostra_glow.jpg-617f0fea6a200e74a3473c3bc5ffe02e.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "237feb11a5897fe4c6c53d2f355e8bcb"
+"md5": "9c6e8e8091a51fb8618302212ef8a1b5"
 }
 
 [deps]
 
-source_file="res://art/wardens/ostra/ostra_claws_atlas.jpg"
-dest_files=["res://.godot/imported/ostra_claws_atlas.jpg-2bd7093cd6cf0554418f9a636550485b.ctex"]
+source_file="res://art/wardens/ostra/ostra_glow.jpg"
+dest_files=["res://.godot/imported/ostra_glow.jpg-617f0fea6a200e74a3473c3bc5ffe02e.ctex"]
 
 [params]
 
@@ -40,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

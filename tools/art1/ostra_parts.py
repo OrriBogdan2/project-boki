@@ -303,8 +303,8 @@ def hood():
 def horn(side):
     """one of the cap's two great horns, a floppy stuffed cone; its tip and bell swing on a spring chain"""
     n = "R" if side > 0 else "L"
-    pts = np.array(((0.055, -0.04, 1.775), (0.135, -0.055, 1.845), (0.225, -0.07, 1.885), (0.31, -0.075, 1.85),
-                    (0.375, -0.068, 1.755), (0.405, -0.058, 1.655), (0.412, -0.052, 1.61)))
+    pts = np.array(((0.055, -0.04, 1.765), (0.135, -0.055, 1.815), (0.225, -0.07, 1.836), (0.31, -0.075, 1.80),
+                    (0.375, -0.068, 1.72), (0.405, -0.058, 1.625), (0.412, -0.052, 1.58)))
     pts[:, 0] *= side
     path = resample(pts, 17)
     t = np.linspace(0, 1, 17)
@@ -515,7 +515,7 @@ def wisp():
     return out, path
 
 
-ORB_LOCAL = (-0.112, 0.0, -0.105)        # the orb from the right wrist at rest: off the palm, a little down the fingers
+ORB_LOCAL = (-0.15, 0.0, -0.125)        # the orb from the right wrist at rest: off the palm, a little down the fingers
 
 
 def orb(at):
@@ -526,9 +526,9 @@ def orb(at):
     a = np.linspace(0, 2 * np.pi, cols, endpoint=False)
     for i in range(rows):
         p = np.pi * i / (rows - 1)
-        P[i, :, 0] = c[0] + np.cos(a) * np.sin(p) * 0.082
-        P[i, :, 1] = c[1] + np.sin(a) * np.sin(p) * 0.082
-        P[i, :, 2] = c[2] + np.cos(p) * 0.082
+        P[i, :, 0] = c[0] + np.cos(a) * np.sin(p) * 0.098
+        P[i, :, 1] = c[1] + np.sin(a) * np.sin(p) * 0.098
+        P[i, :, 2] = c[2] + np.cos(p) * 0.098
     V, F, ST = grid(P, closed=True)
     out.append(Part("orbcore", "void-orb", V, F, ST, rigid("x_weapon", len(V)), "orbcore", (64, 64)))
     # three swirling ribbons hugging it, opposite faces glowing
@@ -537,11 +537,11 @@ def orb(at):
         tt = np.linspace(0, 1, n)
         ang = tt * 4.4 + j * 2.09
         tilt = 0.55 + j * 0.5
-        r = 0.088 + 0.052 * (tt ** 1.4)
+        r = 0.104 + 0.075 * (tt ** 1.4)
         ca, sa = np.cos(ang), np.sin(ang)
         p = np.stack((ca * r, sa * r * np.cos(tilt), sa * r * np.sin(tilt)), axis=1) + c
         nrm = np.array((0, -np.sin(tilt), np.cos(tilt)))
-        wd = rmp(tt, [0, 0.3, 1], [0.03, 0.018, 0.001])
+        wd = rmp(tt, [0, 0.3, 1], [0.05, 0.03, 0.002])
         P = np.zeros((n, 2, 3))
         for i in range(n):
             P[i, 0] = p[i] - (p[i] - c) / np.linalg.norm(p[i] - c) * wd[i] * 0.5 + nrm * 0.0

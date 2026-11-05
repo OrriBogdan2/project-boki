@@ -27,7 +27,7 @@ for c in clips:
     if act.slots:
         arm.animation_data.action_slot = act.slots[0]
     f0, f1 = act.frame_range
-    ts = [float(x) for x in n.split(",")] if "," in n else [f0 + (f1 - f0) * i / max(int(n) - 1, 1) for i in range(int(n))]
+    ts = [float(x) for x in n.split(",") if x] if "," in n else [f0 + (f1 - f0) * i / max(int(n) - 1, 1) for i in range(int(n))]
     if "," in n:
         ts = [x * 60 + 1 for x in ts]
     for i, f in enumerate(ts):

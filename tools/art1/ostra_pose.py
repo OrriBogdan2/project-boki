@@ -161,7 +161,7 @@ class Rig:
         rr = self.rest["x_weapon"]
         po = P["orbp"]
         d = rr.inverted() @ Vector((-po[0], -po[2], -po[1]))     # (in the hand's rest frame: palm is -x, fingers -z)
-        out["x_weapon"] = (self.about("x_weapon", Quaternion((0, 0, 1), math.radians(P["orbs"]))), d, Vector((P["orb"],) * 3))
+        out["x_weapon"] = (self.about("x_weapon", Quaternion((0, 0, 1), math.radians(P["orbs"]))), d, Vector((max(P["orb"], 0.03),) * 3))
         c = self.head["x_halo"]
         out["x_halo"] = (self.about("x_halo", Quaternion((0, 1, 0), math.radians(P["halo"]))), None, None)
         return out

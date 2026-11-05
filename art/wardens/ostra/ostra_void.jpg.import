@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ch5knvr2gf1w"
-path="res://.godot/imported/ostra_marks_atlas.jpg-d1c6a9c5cc54517a0178cf247de30027.ctex"
+uid="uid://bv0h12ccaqxgr"
+path="res://.godot/imported/ostra_void.jpg-50f78a8b620e3b13387d66231a03d3a0.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "c5bcb90fce18019dffc874cc0db8e35e"
+"md5": "866357d81601945cad286617427e01c2"
 }
 
 [deps]
 
-source_file="res://art/wardens/ostra/ostra_marks_atlas.jpg"
-dest_files=["res://.godot/imported/ostra_marks_atlas.jpg-d1c6a9c5cc54517a0178cf247de30027.ctex"]
+source_file="res://art/wardens/ostra/ostra_void.jpg"
+dest_files=["res://.godot/imported/ostra_void.jpg-50f78a8b620e3b13387d66231a03d3a0.ctex"]
 
 [params]
 
@@ -40,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

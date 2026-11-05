@@ -8,7 +8,7 @@ def hx(s):
     return np.array([int(s[i:i + 2], 16) / 255.0 for i in (0, 2, 4)], np.float32)
 
 
-BLACK, PLUM, DUSK, VIOLET, VIOLET_HI, TRIM, HOT = map(hx, ("120d18", "211829", "33203f", "54266f", "7a3a9f", "a855e0", "d59bff"))
+BLACK, PLUM, DUSK, VIOLET, VIOLET_HI, TRIM, HOT = map(hx, ("150f1c", "261b30", "3d2650", "62308a", "8a46bc", "bb66f2", "e0aaff"))
 RUFF_D, RUFF_M, RUFF_L = map(hx, ("3e3a48", "7b7686", "b4afbb"))
 BLUE = hx("3a2f7c")
 
@@ -245,12 +245,11 @@ def p_orbcore(S, T):
 
 
 def p_swirl(S, T):
-    c = ramp(1 - T, [hx("4a18b0"), hx("8a46e0"), hx("d6a8ff"), hx("f4e4ff")], [0, 0.5, 0.85, 1])
-    return c
+    return ramp((1 - T) * (0.55 + 0.45 * (1 - np.abs(S - 0.5) * 2)), [hx("5a20c8"), hx("9a50f0"), hx("dcb0ff"), hx("f8ecff")], [0, 0.4, 0.8, 1])
 
 
 def p_eye(S, T):
-    return ramp(T, [hx("7a2aff"), hx("c18cff"), hx("ffffff"), hx("c18cff"), hx("7a2aff")], [0, 0.35, 0.5, 0.65, 1])
+    return ramp(T, [hx("6a20f0"), hx("9a50ff"), hx("f0e0ff"), hx("9a50ff"), hx("6a20f0")], [0, 0.38, 0.5, 0.62, 1])
 
 
 def p_card(S, T):
@@ -366,7 +365,7 @@ def mask_textures(size=1024):
     diff = nx * l[0] + ny * l[1] + nz * l[2]
     occ = np.clip((blur(h, 16) - h) * 7.0, 0, 1)
     occ2 = np.clip((blur(h, 5) - h) * 16.0, 0, 1)
-    c = ramp(diff * 0.82 + 0.18 - 0.35 * occ - 0.22 * occ2, [hx("3a3648"), hx("76718e"), hx("b2aec4"), hx("e8e5ef"), hx("fbfaff")], [0, 0.32, 0.55, 0.78, 1])
+    c = ramp(diff * 0.8 + 0.3 - 0.35 * occ - 0.22 * occ2, [hx("3a3648"), hx("817c98"), hx("c4c0d2"), hx("f0edf5"), hx("ffffff")], [0, 0.3, 0.5, 0.72, 1])
     hv = l + np.array((0, 0, 1.0))
     hv = hv / np.linalg.norm(hv)
     spec = np.clip(nx * hv[0] + ny * hv[1] + nz * hv[2], 0, 1) ** 70

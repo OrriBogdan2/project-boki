@@ -275,12 +275,12 @@ def main():
         pending.append((g, ps, at))
     alb, emit = PT.mask_textures(1024)
     tex = OUT + "/tex/"
-    im_main = image("ostra_atlas", atlas.img, tex + "ostra_atlas.png")
-    im_glow = image("ostra_glow", aglow.img, tex + "ostra_glow.png")
-    im_void = image("ostra_void", avoid.img, tex + "ostra_void.png")
-    im_wisp = image("ostra_wisp", awisp.img, tex + "ostra_wisp.png")
-    im_mask = image("ostra_mask", alb, tex + "ostra_mask.png")
-    im_emit = image("ostra_mask_emit", emit, tex + "ostra_mask_emit.png")
+    im_main = image("atlas", atlas.img, tex + "atlas.png")
+    im_glow = image("glow", aglow.img, tex + "glow.png")
+    im_void = image("void", avoid.img, tex + "void.png")
+    im_wisp = image("wisp", awisp.img, tex + "wisp.png")
+    im_mask = image("mask", alb, tex + "mask.png")
+    im_emit = image("mask_emit", emit, tex + "mask_emit.png")
     obs = []
     names = {"cloth": ("Body", "cloth-body", im_main), "leather": ("Gloves", "leather-body", im_main), "metal": ("Bells", "metal-body", im_main),
              "void-lining": ("Lining", "void-body", im_void), "void-orb": ("Orb", "void-orb", im_void), "void-wisp": ("Wisp", "void-wisp", im_wisp),
@@ -320,13 +320,12 @@ def main():
         e.matrix_parent_inverse = Matrix.Identity(4)
         e.location = pb.matrix_local.inverted() @ Vector(at) - Vector((0, pb.length, 0))
         return e
-    anchor("anchor_head_top", "head", (0, 0, 1.969))
+    anchor("anchor_head_top", "head", (0, 0, 1.92))
     anchor("anchor_chest", "hips", (0, 0.10, 1.116))
     anchor("anchor_orb", "x_weapon", tuple(orb_at))
     anchor("anchor_halo", "x_halo", tuple(P.HALO_C))
-    w = bpy.data.objects.new("weapon", None)
-    bpy.context.scene.collection.objects.link(w)
-    w.parent = arm
+    # (item 76b: the orb is skinned on x_weapon; the Gun rides these two, so shots leave the orb you see)
+    anchor("weapon_muzzle", "x_weapon", tuple(orb_at + (-0.09, 0.0, 0.0)))
     path_ = sys.argv[sys.argv.index("--") + 1] if "--" in sys.argv and len(sys.argv) > sys.argv.index("--") + 1 else OUT + "/ostra.blend"
     bpy.ops.wm.save_as_mainfile(filepath=path_)
     print("OSTRA saved", path_)
@@ -355,10 +354,10 @@ def cards(arm, c, img, at):
         up = np.array((0, 0, 1.0)) * 0.76 + d * 0.65
         pts = [-side * w - up * h, side * w - up * h, side * w + up * h, -side * w + up * h]
         o = np.array((cx, cy, z))
-        vs = [p + o for p in pts]
+        vs = list(pts)
         ins = o * -0.92
         s = np.array((0, 0, 0.0016))
-        vs += [o + s, o - s, o + ins - s, o + ins + s]
+        vs += [s, -s, ins - s, ins + s]
         faces = [(0, 1, 2, 3), (3, 2, 1, 0), (4, 5, 6, 7), (7, 6, 5, 4)]
         me = bpy.data.meshes.new("card%d" % i)
         me.from_pydata([tuple(v) for v in vs], [], faces)
@@ -373,10 +372,10 @@ def cards(arm, c, img, at):
         ob = bpy.data.objects.new("orbit_cards_%d" % i, me)
         bpy.context.scene.collection.objects.link(ob)
         ob.parent = orbit
+        ob.location = o
         an = bpy.data.objects.new("anchor_orbit_cards_%d" % i, None)
         bpy.context.scene.collection.objects.link(an)
         an.parent = ob
-        an.location = o
 
 
 main()

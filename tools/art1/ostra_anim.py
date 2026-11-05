@@ -55,6 +55,8 @@ def write_action(arm, rig, name, spec):
                 for kp in fc.keyframe_points:
                     kp.interpolation = "LINEAR"
                 fc.update()
+    if act.slots:       # (assigned, the slot takes the armature's id type: the glTF exporter lists only those)
+        arm.animation_data.action_slot = act.slots[0]
     return act
 
 
@@ -77,15 +79,9 @@ def main():
         arm.animation_data.action = None
         bpy.ops.object.select_all(action="SELECT")
         bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
-                                  export_animation_mode="ACTIONS", export_force_sampling=False, export_optimize_animation_size=True,
-                                  export_optimize_animation_keep_anim_armature=False, export_frame_step=1, export_skins=True,
-                                  export_yup=True, export_materials="EXPORT", export_image_format="JPEG", export_jpeg_quality=92,
-                                  export_extras=False, export_def_bones=False, export_rest_position_armature=True,
-                                  export_animation_mode_all=False if False else None) if False else \
-            bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
-                                      export_animation_mode="ACTIONS", export_force_sampling=False, export_optimize_animation_size=True,
-                                      export_optimize_animation_keep_anim_armature=False, export_skins=True, export_yup=True,
-                                      export_materials="EXPORT", export_image_format="JPEG", export_jpeg_quality=92, export_extras=False)
+                                  export_animation_mode="ACTIONS", export_force_sampling=False, export_optimize_animation_size=False,
+                                  export_skins=True, export_yup=True, export_materials="EXPORT", export_image_format="JPEG",
+                                  export_jpeg_quality=92, export_extras=False)
 
 
 main()

@@ -2,13 +2,13 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c0t4dkxsxs1cb"
+uid="uid://cgk0gy4xki3a7"
 path="res://.godot/imported/ostra_mask_emit.jpg-3a39c9f485155d586606441b1a297a48.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "09994ba05ce598defc04add83efcc468"
+"md5": "ba62faa1588d01f1c8a7ab403c8a7f14"
 }
 
 [deps]
@@ -40,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

@@ -140,7 +140,7 @@ def shape(u, v):
     z = CHIN + (v + 1.0) * 0.5 * (TOP - CHIN)
     # the egg's front: full at the middle, back at the rim, leaning forward at the chin (the jut of the grin)
     r = np.sqrt(np.clip(1.0 - u * u, 0.0, 1.0)) * np.sqrt(np.clip(1.0 - (v * 0.92) ** 2, 0.02, 1.0))
-    y = BACK + NECK_Y + DEPTH * (0.52 * r ** 0.8 + 0.1 * (1.0 - v) * 0.5 * r)
+    y = BACK + NECK_Y + DEPTH * (0.52 * r ** 0.8 + 0.1 * (1.0 - v) * 0.5 * r) - 0.05 * sm(0.58, 0.95, v)
     return x, y, z
 
 
