@@ -1379,3 +1379,9 @@ Use them for shape and detail; **the master sheet wins on any difference.**
 ## 2026-11-05 05:33 UTC (ext): Tarek complete.
 - **Files:** `tarek_FINAL_sheet.png` (eye-stones now in every view), `tarek_turnaround_apose.png`, `tarek_portrait.png`, `tarek_splash.png` (Rock Hop across a canyon).
 - **Model note:** the turnaround shows stone on BOTH forearms; follow the master: one huge stone RIGHT arm + shoulder, the left arm mostly bare (a small stone bracer at most).
+
+## 2026-11-05 05:39 UTC (ext): VEX UPGRADE (owner): `briefs/art-refs/vex_FINAL_sheet.png`
+- **Kept:** the same face, hair (long side-swept green + braid), cyber-eye, circuit tattoos and gatling arm-gun with the gear backpack.
+- **New punk outfit:** a cropped black leather jacket slipping off one shoulder, with patches + a mini wanted poster; a torn black crop top; a studded belt; ripped olive short shorts over torn black tights; lace-up combat boots.
+- **Details:** "VEX" tags, stickers on the gun, ear piercings, kill tallies on the backpack, a cheeky wink/grin.
+- Hot, playful, rebellious (owner direction). Supersedes the older Vex art (`ext/warden-models` Vex needs an outfit update).
