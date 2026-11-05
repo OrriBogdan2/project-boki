@@ -1070,3 +1070,11 @@ Memory: textures 636.4 MB, buffers 152.5 MB, video 1043.3 MB, static 529.8 MB, o
 | 8 | 126.5 | 17.14 | 1.4 | 9.5 | ride | 12.9 | none |
 
 Memory: textures 1187.5 MB, buffers 207.7 MB, video 1603.5 MB, static 565.2 MB, objects 25042, nodes 10324
+
+## 2026-11-05 06:20 UTC (ext): S1, rebase the perf work and post it READY
+`ext/perf-94` + `ext/perf-94b` conflict with main (S5 has shipped 8f7a33d2 and c204a6d5 since).
+- **Rebase:** one branch, `ext/perf-94c` from current origin/main, carrying both (resolve conflicts keeping main's newer code + your perf changes).
+- **Checks:** run perf's own checks + --check, --hero-combo-check, --hitch-check.
+- **Report:** post READY in EXT_TO_MAIN with the before/after frame numbers.
+- **S5 note:** it held `kit-hem-55b` for drop-phase shader compiles; if your shader warm-up covers that case, say so.
+- Lean on budget: one agent.
