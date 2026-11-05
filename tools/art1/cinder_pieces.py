@@ -365,7 +365,7 @@ def hair():
     h = C[2]
     # the body over the skull, brow to nape, three sheets side by side
     for i, x in enumerate((-0.062, 0.0, 0.062)):
-        b_ = drape("crownb%d" % i, [(x * 1.25, 0.05, h + 0.098), (x * 1.5, 0.0, h + 0.15), (x * 1.6, -0.075, h + 0.155), (x * 1.6, -0.135, h + 0.1), (x * 1.5, -0.145, h + 0.02)], 0.15, rows=7, cols=4, hint=(0, 0, 1),
+        b_ = drape("crownb%d" % i, [(x * 1.25, 0.012, h + 0.118), (x * 1.5, -0.03, h + 0.155), (x * 1.6, -0.09, h + 0.15), (x * 1.6, -0.14, h + 0.095), (x * 1.5, -0.15, h + 0.02)], 0.15, rows=7, cols=4, hint=(0, 0, 1),
                    seed=0.12 + 0.3 * i, bright=0.1, outward=np.array([0, 0, 1.0]), root=0.9, peak=0.3)
         out.append(b_.rigid("head"))
     # tall flames off the crown (master sheet), smooth S curves
@@ -394,7 +394,7 @@ def hair():
         out.append(b_)
         b_.group = g
         # loose tongues off the curtains' ends and one framing the face
-        for j, (x0, y0, z0, wd_) in enumerate(((.25, -.15, -.5, .1), (.205, -.12, -.66, .09), (.3, -.2, -.42, .085))):
+        for j, (x0, y0, z0, wd_) in enumerate(((.205, -.12, -.56, .1), (.17, -.1, -.64, .09))):
             t_ = strip("sidetg%s%d" % (g, j), "flame-hair", [(sg * x0, y0, top + z0), (sg * (x0 + .03), y0 - .01, top + z0 - .1), (sg * (x0 + .015), y0 - .02, top + z0 - .2), (sg * (x0 + .05), y0 - .03, top + z0 - .3)],
                        wd_, rows=6, hint=rad, seed=0.21 * j + 0.4, bright=0.1, root=0.8)
             t_.group = g

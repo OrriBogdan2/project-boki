@@ -77,7 +77,8 @@ verts.extend([tuple(v.co) for v in me0.vertices])
 gn = {g.index: g.name for g in low.vertex_groups}
 for v in me0.vertices:
     vw.append({gn[g.group]: g.weight for g in v.groups if g.weight > 0.01})
-rooms.extend([1.0] * len(me0.vertices))
+# (no ink room in the cleavage: the shell folds in the hollow and shows as a dark red facet)
+rooms.extend([0.0 if abs(v.co.x) < 0.1 and v.co.y > 0.02 and 1.06 < v.co.z < 1.34 else 1.0 for v in me0.vertices])
 colors.extend([(1.0, 1.0, 1.0)] * len(me0.vertices))
 for p in me0.polygons:
     faces_v.append(list(p.vertices))

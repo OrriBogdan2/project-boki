@@ -196,14 +196,14 @@ def head_skin(plates, p, n):
     fy = np.clip(517.0 + (-0.0085 - q[..., 2]) * 2975.0, 0, H - 1).astype(int)
     sx = np.clip(146.0 + (0.105 - q[..., 1]) * 2918.0, 0, H - 1).astype(int)
     sy = np.clip(466.0 + (-0.0085 - q[..., 2]) * 2918.0, 0, H - 1).astype(int)
-    k = smooth(0.52, 0.8, np.abs(n[..., 0]))
+    k = smooth(0.52, 0.8, np.abs(n[..., 0])) * smooth(0.05, 0.068, np.abs(q[..., 0]))     # (the profile for the outer cheek only: the nose's sides would catch its background)
     return mix(f[fy, fx], sd[sy, sx], k)
 
 
 def face(plates, p, n, ao):
     c = head_skin(plates, p, n)
     sh = 0.86 + 0.26 * smooth(-0.4, 0.8, n[..., 2] * 0.45 + n[..., 1] * 0.75)
-    out = c * sh[..., None] * np.array([1.05, 0.99, 1.0])
+    out = c * sh[..., None] * np.array([1.2, 0.98, 0.98])
     hot = smooth(0.14, 0.3, c[..., 0] - c[..., 2]) * smooth(0.34, 0.5, c[..., 0])
     return mix(out, np.minimum(c * 1.12, 1.0), hot)
 
