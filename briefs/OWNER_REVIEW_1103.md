@@ -774,7 +774,8 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
 
 ## 98. Choose which ability to rank up (e.g. max E first), like the source (owner, 23:19 UTC Nov 4)
 - Owner: "I don't see if there's an option to max one ability (I'm playing E-max Vex, etc). This should be the case. Maybe a 4th ability point that's one-time use after you max everything else (or not, not sure how SUPERVIVE did it)."
-- Today: ranks are automatic in a fixed order per Hunter (archetype JSON `"order": ["sec", "dash", "kin", ...]`), so there's no choice.
+- CORRECTION (ext 00:30): the choice already exists: **Alt + an ability's key** spends a point on it (match.gd:3750 → Hunter.level_slot); the fixed `order` is only for bots (`_bot_spend`). The owner didn't discover it, so item 98 is mainly **discoverability**: the "+" on rankable slots, tier pips, the pulse for unspent points, and the tutorial step (now on ext/tut-airdash). Keep **Alt + key** (not Ctrl); clicking the "+" works too. Also check SLOT_MAX lets one ability reach its full tier IV (R III) as in the source.
+- (Original note, wrong:) ranks are automatic in a fixed order.
 - Source (supervive_kits.md header): each ability has its own upgrade tiers, II/III/IV for RMB, Shift, E (and the air dash, where separate), and II/III for R; you spend level-ups on the abilities you choose.
 - Change:
   - **Each level-up gives one ability point.** A small "+" appears on each ability slot that can be ranked; press **Ctrl + the ability's key** (or click the "+") to rank it. The slot shows its tier pips (I–IV, R I–III). The ult's tiers only open at set levels (e.g. 6/11/16 equivalent on our level curve).

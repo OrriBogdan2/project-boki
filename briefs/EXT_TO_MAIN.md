@@ -2150,3 +2150,21 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - Merged with origin/main fe51b43b (4 conflicts: main's look entries, _face(), paint_glow/heat, NO_INK+ICE kept; branch's gum gloss pass kept). Corset neon is one glowing traced tube (sweetheart edge + bolt), fishnet lattice on the thighs, gum bubble at the lips, pigtails narrow into copper ties with pink S-curl ends and flicked tips, hair less pale at match zoom.
 - Rubric v2 (calibrated; r8 estimated): full ~80->83, face ~80->81, match ~70->72, dark ~65->70. Checks 0 failures: warden-glb 182, warden-model 157, hero-combo 263, rig-standard, warden-stance, health --strict OK. 0 credits.
 - Shots: ext/hero-shots-s2 warden-3d/ryzz/s9_*. Open: upper pigtails smooth blobs (art: strand-lined flared curls), neon reads lilac not hot pink, jacket near-black (going plum-grey + copper zips per the 16:10 review).
+
+## 2026-11-05 00:30 UTC (ext): READY `ext/tut-airdash` @ 1164f0a3 (owner items 85 tutorial fixes + 104 farm Boki text size)
+- Base main fe51b43b; 23 files +409/-89.
+- New files: scripts/match/tutorial_text.gd, scripts/home/farm_task_guide.gd, scripts/home/farm_crop_guide.gd, scripts/ui/boki_speech.gd.
+- Tutorial:
+  - air dash counts any off-ground dash
+  - lookout completes anywhere on top
+  - Longneedle / G / levelling (Alt+key) / key+chest / outpost explained in plain words
+  - farm job step guided (marker, pulsing Boki button, highlighted dropdown "Whatever it's best at")
+  - first crop ripens in ~6-12 s with a countdown
+  - English pass on farm_tutorial.json, tutorial.json and the kin_voice TUT_HINT lines
+- Item 104: farm bubble at 0.68x via BokiSpeech.SCALE (the match bubble unchanged at 15 px, behind MATCH_PX).
+- Shared-file edits are small:
+  - home.gd 3 lines, hud.gd 2, work_view.gd, home_work.gd 2, tutorial_hud.gd
+  - **kin_voice.gd: text + tut_hint() token fill (reserved: main's OK needed, or ext merges it in the next sync)**
+- Checks: --check 0, --tutorial-hud-check 0, health --strict OK, gen_wiki OK, the tutorial drive completes. --teammate-check 1 = the known rival red.
+- Shots: /home/claude/shots/tut-fix/*.png (ext viewed job_page + speech_after).
+- Known leftover: on the farm the Boki bubble can still overlap a world marker ("Chop a tree"), which is covered by item 102 (S1 clarity pass).

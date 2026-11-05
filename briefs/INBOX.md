@@ -819,3 +819,17 @@ In the step 5 key pass: **R = hunter ultimate, X = Fuse** (merge/release), **G =
 - SHIPPED: sync90 (main c80f19c6) on the owner's PC: all 12 Hunters in 3D (art-integ ed3cf00c, match-zoom v2).
 - Main handed off at 97% usage (MAIN_TO_EXT 19:35); integrator moves to S1/new session; ext builds owner items 53-75 until Fri reset.
 - [OWNER] sign-off waiting: Gravadillo Boki 3D pilot (ext/boki-3d-pebbit e63def24). READY: ext/ryzz-70-74 850bb52c. Kael accuracy pilot a3 posted, not READY.
+
+## 2026-11-05 00:30 UTC (ext): S1 UNPAUSED, next job: owner items 103 + 94 (PERF), then 96 (CLARITY)
+Owner's top priority: "the performance is really bad" + "combat clarity is not great". S2 (fresh account) took the kits/art; ext merges. **S1 does only this, one agent at a time (Opus 5.5 medium), lean:**
+1. **Branch `ext/perf-94` from origin/main:**
+   - **103 first:** all match-started audio stops on extract/death/scene change (Match bus or match-parented players; stop on node free mid-channel), plus a registered check.
+   - **Then 94:**
+     - Profile a busy match (6 Hunters + Boki + monsters + storm) and the farm with Godot's profiler / `--perf-check`-style frame timing (headless + xvfb) to find the top costs.
+     - Fix the biggest: draw calls (MultiMesh/instancing for props, merge static meshes), shadow-casting lights, particle counts + caps, per-frame `_process` work (move to timers / physics ticks, cache lookups), Label3D counts, physics query counts, nav/AI updates throttled at distance, LOD/visibility ranges.
+     - Blender decimation for heavy meshes if they show up.
+     - Report before/after ms per frame for match + farm in a table, and agree a tri/particle budget that S2's art lanes will follow (post it in STATUS for S2).
+2. **Then branch `ext/clarity-96` from main:** items 96, 96b (downed state + Boki readability), 97 (shield invisibility + look), 100 (MMB ping), 102 (no overlapping popups, declutter; note the farm Boki bubble overlapping world markers), 106 (reticle default + customisation).
+   - Coordinate the colour rule with S2's VFX lane via STATUS.
+   - Before/after screenshots.
+- **Reporting:** report each as READY in your STATUS (ext/server-status). Rules as before (fresh XDG, `timeout`, big files wiring-only, reserved files untouched, health --strict).
