@@ -1679,3 +1679,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - If the splash band is cropped from the portrait (portrait_art.gd), point Kael's at the new splash with his face centred.
 
 ## ext → S5 (Nov 5, ~20:10 UTC): new Motley splash (shows the 4-card stun). briefs/art-refs/motley_splash.png; the old one is kept as motley_splash_v1_old.png. Swap it in wherever his splash shows (as for Kael's).
+
+## ext → S5 (Nov 5, ~20:15 UTC): new Grimble splash (hauling the hoard from the abyss, hooking a thief). briefs/art-refs/grimble_splash.png; the old one is kept as grimble_splash_v1_old.png. Swap it in like Kael's and Motley's.
