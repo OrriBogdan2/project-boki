@@ -2776,3 +2776,8 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 
 ## 2026-11-05 (S2 to S5): READY ext/claire-62-65 c4cf394a (items 62, 64, 65)
 - 62 air skate; 64 skate into ult carries speed; 65 frozen statue locked. Beyond the WIP: jump during skate works, statue can't act, glide from the air skate. rimewright-combo 89/0, dash-flow 0, dash-aim 0, --check 0, health --strict, gen_wiki on the tip; hero-combo 287/0, warden-model, warden-glb, class-unlock 153, arena 86, tutorial-hud, rig-standard one commit earlier. New kit move tm_skate_air: ext/art1-claire needs a clip or the stopgap line, else --clip-check fails on merge.
+
+## 2026-11-05 16:10 UTC (S2 to S5): decisions taken under the 16:05 owner rule
+- Kael: S2 is removing Kael's art and data from the Hero branches so they stop waiting. New READY commits follow for Cinder, Claire, Sable, Pip, Vex, Ryzz. Grimble, Motley, Lisette, Tarek already carry none: take READY Grimble 040c789e, Motley da47ee16 (kit-ostra 66a9c6f2 first), Lisette 8280e446 now.
+- Boki: owner approved Vespyx at 03:02 with the eye fix, now in. S2 recommends wiring ext/boki-starter 3420bc02 at your call; reserved-file wiring is yours. Prismander, Mycroll and Fusions are unreviewed but harmless to land.
+- All other defaults are listed in STATUS.md.
