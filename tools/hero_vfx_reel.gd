@@ -28,10 +28,6 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
 	P.lvl = 6
-	var gun: Node3D = P.model.get_node("Rig/Torso/Aim/Gun")
-	print("GUNSCALE ", gun.global_transform.basis.get_scale())
-	for c in gun.get_children():
-		if c is MeshInstance3D: print("  mesh ", c.scale, " ", c.global_transform.basis.get_scale(), " ", (c as MeshInstance3D).visible, " ", (c as MeshInstance3D).get_aabb())
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
 	for part: String in HERO_PARTS[who]:
@@ -145,8 +141,11 @@ func _juggernaut_e() -> void:
 			K.use_e()
 		P.inp["move"] = Vector2(-1, 0) if t > 0.5 and t < 1.2 else Vector2.ZERO
 		_aim(T.pos)
-	await _go(2.6, chain, _sheet("e", "E, Warchain: the throw, the hook biting (sparks, a scorch), the chain straining as he backs off, E again: the haul with sparks off his feet, the arrival",
-			[0.13, 0.25, 0.42, 0.8, 1.15, 1.24, 1.32, 1.5, 1.8]), 4.5)
+	var on_action := func() -> Vector3:
+		var at_foe: bool = K.warchain.state == "hooked"
+		return (T.position if at_foe else P.position) + Vector3(0, 0.9, 0)
+	await _go(2.6, chain, _sheet("e", "E, Warchain: the throw from the hand, the hook biting the dummy (sparks, a scorch), the chain straining as he backs off, E again: the haul with sparks off his feet, the arrival",
+			[0.13, 0.3, 0.38, 0.5, 0.9, 1.24, 1.32, 1.5, 1.8], on_action), 4.5)
 	await _go(GAP)
 
 func _juggernaut_spin() -> void:

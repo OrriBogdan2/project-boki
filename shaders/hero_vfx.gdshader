@@ -95,7 +95,7 @@ vec4 scorch(vec2 uv) {
 	float n = fbm3(p * 2.6 + seed);
 	float front = smoothstep(0.0, 0.22, life) * 1.5;           // burns outward fast
 	float reach = (1.0 - smoothstep(0.55, 1.0, d + (n - 0.5) * 0.5)) * (1.0 - smoothstep(0.86, 0.98, length(p * vec2(1.0, shape == 1 ? 0.0 : 1.0))));
-	float lit = shape == 1 ? 1.0 - smoothstep(front - 0.3, front - 0.05, along) : 1.0 - smoothstep(front - 0.25, front, d);
+	float lit = shape == 1 ? 1.0 - smoothstep(front - 0.2, front - 0.02, along + (n - 0.5) * 0.25) : 1.0 - smoothstep(front - 0.25, front, d);
 	float fade = 1.0 - smoothstep(0.5, 1.0, life);
 	float dissolve = smoothstep(life * 1.25 - 0.28, life * 1.25, n + 0.2);
 	// only some walls of the broken plates are open: a few running fissures, not a net
@@ -105,9 +105,9 @@ vec4 scorch(vec2 uv) {
 	float cool = 1.0 - smoothstep(0.15, 0.8, life);
 	float a_char = reach * lit * (0.1 + 0.22 * smoothstep(0.35, 0.7, n)) * dissolve * mask;
 	float a_crack = cr * reach * lit * mask * (0.35 + 0.65 * fade) * dissolve;
-	float flash = (1.0 - smoothstep(0.0, 0.3, life)) * reach * lit * mask * (0.35 + 0.65 * n);
-	vec3 c = ramp(0.25 + 0.6 * cool) * a_crack + ramp(0.42 + n * 0.3) * flash * (1.0 - a_crack) + col3.rgb * a_char;
-	return vec4(c, clamp(a_char + a_crack + flash * 0.85, 0.0, 1.0));
+	float flash = (1.0 - smoothstep(0.0, 0.24, life)) * reach * lit * mask * smoothstep(0.3, 0.62, n + (1.0 - d) * 0.25);
+	vec3 c = ramp(0.2 + 0.5 * cool) * a_crack + ramp(0.3 + n * 0.35) * flash * (1.0 - a_crack) + col3.rgb * a_char;
+	return vec4(c, clamp(a_char + a_crack + flash, 0.0, 1.0));
 }
 
 vec4 skirt(vec2 uv) {
@@ -141,8 +141,8 @@ vec4 ribbon(vec2 uv) {
 	float n = fbm3(vec2(uv.x * 5.0 - TIME * 5.0 + seed, uv.y * 3.0));
 	float body = across * 1.4 + (n - 0.5) * 0.9 - uv.x * 0.9;
 	float a = smoothstep(0.08, 0.3, body);
-	float heat = across * (1.0 - uv.x) * 1.0 + (n - 0.5) * 0.35;
-	return vec4(ramp(heat) * a, a * mix(0.95, 0.55, uv.x));
+	float heat = across * across * (1.0 - uv.x) * 0.95 + (n - 0.5) * 0.3;
+	return vec4(ramp(heat) * a, a * mix(0.95, 0.35, uv.x));
 }
 
 void fragment() {

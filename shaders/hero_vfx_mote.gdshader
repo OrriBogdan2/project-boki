@@ -61,7 +61,7 @@ void fragment() {
 	} else if (look == 1) {
 		float n = fbm3(p * 1.6 + pick * 31.0 + vec2(0.0, age * 1.4));
 		float puff = (1.0 - smoothstep(0.35, 1.0, d + (n - 0.5) * 0.9));
-		a = puff * smoothstep(0.0, 0.12, age) * (1.0 - smoothstep(0.35, 1.0, age)) * 0.55;
+		a = puff * smoothstep(0.0, 0.12, age) * (1.0 - smoothstep(0.35, 1.0, age)) * 0.38;
 		ALBEDO = mix(col.rgb, col3.rgb, smoothstep(0.0, 0.35, age)) * a * gain;
 		ALPHA = a * gain;
 	} else {

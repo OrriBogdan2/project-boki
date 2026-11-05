@@ -5,9 +5,9 @@ extends Node3D
 ## moment and hold(h, "move", k) every tick for something that lasts while it asks; the data says which layers
 ## (shader meshes, mesh trails, GPU particles) and sounds that move is made of.
 ##
-## Budget (owner item 94): nodes are pooled per kind, GPU particles alive at once are capped at MAX_LIVE, the quality
+## Budget: nodes are pooled per kind, GPU particles alive at once are capped at MAX_LIVE, the quality
 ## preset thins them, and past LOD_NEAR from the camera focus the "near" layers drop and the rest thin out (nothing
-## draws past LOD_FAR). Colour rule (owner item 96): looks stay in the Hero's palette; allies' effects sit at ALLY_K.
+## draws past LOD_FAR). Colour rule: looks stay in the Hero's palette; allies' effects sit at ALLY_K.
 ## Telegraph lanes and discs are AimKit's: this adds the body and weapon tells around them, never the danger shapes.
 
 const SURFACE: Shader = preload("res://shaders/hero_vfx.gdshader")
@@ -70,7 +70,7 @@ static func data(arch: String) -> Dictionary:
 static func step_sound(arch: String, surface: String) -> String:
 	return String((data(arch).get("steps", {}) as Dictionary).get(surface, "step_" + surface))
 
-## The viewer's share of an effect (owner item 96): yours and enemies' at full, allies' dimmer.
+## The viewer's share of an effect: yours and enemies' at full, allies' dimmer.
 func view_k(h: Hunter) -> float:
 	var viewer: Variant = m.get("player")
 	if viewer == null or viewer == h or (viewer as Ent).team != h.team:
@@ -303,16 +303,16 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 	var mi: MeshInstance3D = _take(kind, _surface_node.bind(kind))
 	var mt: ShaderMaterial = mi.material_override
 	var yaw := atan2(dir.x, dir.y) + deg_to_rad(float(layer.get("yaw", 0.0)))
-	var size := _num(layer, "size", o)
+	var extent := _num(layer, "size", o)
 	var b := Basis(Vector3.UP, yaw)
-	var s0 := Vector3.ONE * size
+	var s0 := Vector3.ONE * extent
 	var s1 := s0
 	match kind:
 		"sweep":
 			mi.mesh = _arc(float(layer.get("arc", 120.0)))
 			b = b * Basis(Vector3(0, 0, 1), deg_to_rad(float(layer.get("tilt", 0.0))))
 			var flip: bool = o.get("flip", false) != bool(layer.get("flip", false))
-			s0 = Vector3(-size if flip else size, size, size)
+			s0 = Vector3(-extent if flip else extent, extent, extent)
 			s1 = s0
 		"scorch":
 			var sh := String(layer.get("shape", "disc"))
@@ -324,17 +324,17 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 				p += Vector3(dir.x, 0, dir.y) * ln * 0.5
 				mt.set_shader_parameter("aspect", ln / maxf(w, 0.1))
 			else:
-				s0 = Vector3(size * 2.0, 1.0, size * 2.0)
+				s0 = Vector3(extent * 2.0, 1.0, extent * 2.0)
 				mt.set_shader_parameter("arc", deg_to_rad(float(layer.get("arc", 60.0))) * 0.5)
 			s1 = s0
 			p.y += SCORCH_LIFT
 		"skirt":
 			var tall := _num(layer, "tall", o, 1.2)
-			s0 = Vector3(size * float(layer.get("from", 0.35)), tall, size * float(layer.get("from", 0.35)))
-			s1 = Vector3(size, tall * 0.6, size)
+			s0 = Vector3(extent * float(layer.get("from", 0.35)), tall, extent * float(layer.get("from", 0.35)))
+			s1 = Vector3(extent, tall * 0.6, extent)
 			mt.set_shader_parameter("arc", float(layer.get("arc", 1.0)))
 		"flare":
-			s0 = Vector3.ONE * size
+			s0 = Vector3.ONE * extent
 			s1 = s0 * float(layer.get("grow", 1.2))
 	mi.global_position = p
 	mi.global_transform.basis = b * Basis.from_scale(s0)
@@ -384,11 +384,11 @@ func _aim_emitter(p: GPUParticles3D, kind: String, layer: Dictionary, h: Hunter,
 		lod: float) -> int:
 	var pm: ShaderMaterial = p.process_material
 	var mt: ShaderMaterial = (p.draw_pass_1 as QuadMesh).material
-	var shape := String(layer.get("shape", "ball"))
-	pm.set_shader_parameter("shape", SHAPES[shape])
+	var form := String(layer.get("shape", "ball"))
+	pm.set_shader_parameter("shape", SHAPES[form])
 	pm.set_shader_parameter("radius", _num(layer, "radius", o, 0.2))
 	pm.set_shader_parameter("span", way * _num(layer, "len", o, 1.0))
-	pm.set_shader_parameter("dir", way if shape != "line" else Vector3.UP)
+	pm.set_shader_parameter("dir", way if form != "line" else Vector3.UP)
 	pm.set_shader_parameter("spread", float(layer.get("spread", 0.5)))
 	pm.set_shader_parameter("speed", _num(layer, "speed", o, 3.0))
 	pm.set_shader_parameter("gravity", float(layer.get("grav", 0.0)))
@@ -409,10 +409,13 @@ func _aim_emitter(p: GPUParticles3D, kind: String, layer: Dictionary, h: Hunter,
 
 func _way(layer: Dictionary, dir: Vector2) -> Vector3:
 	var flat := Vector3(dir.x, 0, dir.y)
+	var up := Vector3(0, float(layer.get("lift", 0.15)), 0)
+	if flat.length() <= 0.01:
+		return Vector3.UP
 	match String(layer.get("way", "up")):
-		"fwd": return (flat + Vector3(0, float(layer.get("lift", 0.15)), 0)).normalized() if flat.length() > 0.01 else Vector3.UP
-		"back": return (-flat + Vector3(0, float(layer.get("lift", 0.15)), 0)).normalized() if flat.length() > 0.01 else Vector3.UP
-		"along": return flat.normalized() if flat.length() > 0.01 else Vector3.FORWARD
+		"fwd": return (flat + up).normalized()
+		"back": return (-flat + up).normalized()
+		"along": return flat.normalized()
 	return Vector3.UP
 
 func _burst(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vector2, o: Dictionary, lod: float) -> void:
@@ -436,6 +439,8 @@ func shell(h: Hunter, move: String) -> MeshInstance3D:
 	var mt: ShaderMaterial = mi.material_override
 	_paint(mt, layer, h)
 	mt.set_shader_parameter("arc", 1.0)
+	mt.set_shader_parameter("life", float(layer.get("life", 0.0)))
+	mt.set_shader_parameter("gain", float(layer.get("gain", 1.0)) * view_k(h))
 	mi.scale = Vector3(float(layer["size"]), float(layer["tall"]), float(layer["size"]))
 	h.add_child(mi)
 	return mi
@@ -502,7 +507,8 @@ func _process(delta: float) -> void:
 		(e["mat"] as ShaderMaterial).set_shader_parameter("life", u)
 		if e["s0"] != e["s1"]:
 			var ease_out := 1.0 - (1.0 - u) * (1.0 - u)
-			(e["node"] as Node3D).global_transform.basis = (e["b"] as Basis) * Basis.from_scale((e["s0"] as Vector3).lerp(e["s1"], ease_out))
+			var now_scale: Vector3 = (e["s0"] as Vector3).lerp(e["s1"], ease_out)
+			(e["node"] as Node3D).global_transform.basis = (e["b"] as Basis) * Basis.from_scale(now_scale)
 	for i in range(motes.size() - 1, -1, -1):
 		var e: Dictionary = motes[i]
 		e["t"] = float(e["t"]) + delta
@@ -549,7 +555,7 @@ func _draw_ribbon(e: Dictionary, pts: Array, now: float, tail: float) -> void:
 		var along := (q - r).normalized()
 		var side := along.cross(view).normalized()
 		var age := clampf((now - float(pts[i][1])) / tail, 0.0, 1.0)
-		var half := width * (1.0 - age * age) * 0.5
+		var half := width * (1.0 - age) * 0.5
 		mesh.surface_set_uv(Vector2(age, 0.0))
 		mesh.surface_add_vertex(p + side * half)
 		mesh.surface_set_uv(Vector2(age, 1.0))

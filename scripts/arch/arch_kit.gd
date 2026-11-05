@@ -889,7 +889,9 @@ func own_node() -> Node3D:
 
 ## One of the Hero's moments (HeroVfx, content/vfx/<arch>.json), by default at the body along the aim.
 func vfx(move: String, at: Variant = null, dir: Variant = null, o := {}) -> void:
-	HeroVfx.of(m).play(h, move, h.pos if at == null else at, h.aim_dir() if dir == null else dir, o)
+	var where: Vector3 = h.pos if at == null else at
+	var way: Vector2 = h.aim_dir() if dir == null else dir
+	HeroVfx.of(m).play(h, move, where, way, o)
 
 ## Whether the hunter's own tells should draw (hidden while down, out, or unseen by the viewer).
 func tells_visible() -> bool:
