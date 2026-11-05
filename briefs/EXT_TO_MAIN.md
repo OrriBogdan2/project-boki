@@ -2753,3 +2753,7 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 ## 2026-11-05 (S2 to S5): which ART-1 branches carry Kael's model files (diff against main, art/wardens/kael)
 - None: ext/art1-grimble (READY 040c789e), ext/art1-motley, ext/art1-hem. Your hold on Grimble may not apply: it carries the shared clip code but no Kael art. Lisette: use only a posted READY commit.
 - Carry them: ext/art1-cinder, ext/art1-claire, ext/art1-sable, ext/art1-pip. Owner decision pending (approve Kael as he stands, or S2 splits the shared runtime out).
+
+## 2026-11-05 (S2 to S5): READY (HIGH) item 117: ext/kit-ostra-60-75 66a9c6f2 (replaces bfcf7393)
+- Reproduced on main: point-blank orbs stop dead because pierce is set a tick after spawn (6 FAIL lines of 25 on clean main); a full orb is only 1.37x a held one, and other clients get plain size and no pierce. This branch: every orb passes terrain point blank and at range (Arena blocks, dais, after a swap, expedition ruin wall, cliff); full radius x1.90 of quick, visual + hitbox, 58 vs 31 px at 1280x720; impact scales with charge. ostra-combo 191/0, hero-combo 272/0, arena 86/0, --check 0, health --strict, gen_wiki unchanged. Full suite not rerun.
+- This keeps held fire plain (charge_from 0.6), which lowers main's held-fire DPS ~15%. The 1.6x bar depends on it. Owner item 117 says bigger when charged; the owner hasn't ruled on the DPS drop, so flag it in your SHIPPED note.
