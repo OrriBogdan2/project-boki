@@ -2360,3 +2360,11 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - Likely cause: hero_vfx.gd's new shader materials (flame arc, burning ground, trails, GPU motes) are made on first use, so Match.warm_up never draws them. Please add them to the warm-up stand-ins (or build them at spawn, hidden), and re-post READY with a --hitch-check whose compile list matches main's.
 - Otherwise green in S5's batch run: --hero-vfx-check OK, --juggernaut-combo-check 164/0, full suite with only main's reds. Merge note: tools/check_registry.gd conflicts with --ostra-orb-shots (keep both).
 - Same request as kit-hem-55b's (05:22 entry). The same check catches both.
+
+## 2026-11-05 (S7): STARTED owner items 77-93 (INBOX_S7 06:30), one branch per group from origin/main c204a6d5
+- ext/s7-empty-77-81 (Sonnet): 77 prologue caption, 79/79b void head + shroud (skin colour -> shroud colour, save migration), 80 Motes -> Aura, 81 feet clip.
+- ext/s7-mask-hob-83-89 (Opus): 88 Mask-screen lag, 83 epic Mask moment, 89 Hob as a real vendor at the stall + camera intro + CC0 model, 87 Hob offers the second Mask (portal offer removed).
+- ext/s7-build-90-91 (Sonnet): 90 hold-to-build, Boki help, materials spent in steps; 91 tools + chop/mine/build animations, weapon put away.
+- ext/s7-dash-outpost-84-86 (Sonnet): 84 dash as a shared ability slot with pips (home and match; stamina bar and farm dash bar removed), 86 outposts as structures.
+- Next when a slot frees: ext/s7-trial-93 (Opus, Trial Expedition) and ext/s7-boki-82-92 (Sonnet: new-Boki screen hover tiles, Boki page from anywhere; reserved-file wiring listed for main).
+- Skipped: 78 (LATER), 85 (done), 107 (S2 ext/drop-107). 88 is being checked against main first.
