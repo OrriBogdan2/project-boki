@@ -14,6 +14,7 @@ import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
+ART_PATH = os.path.expanduser("~/art1kael/ref2/kael_art_fb.png")
 ATLAS = 2048
 UNIQ_W = 0.755                       # the unique islands' share of the atlas width; the tiles sit to its right
 HAIR_R = (UNIQ_W + 0.005, 0.40, 1.0, 1.0)
@@ -31,6 +32,14 @@ bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
 depsgraph = bpy.context.evaluated_depsgraph_get()
 bvh_low = BVHTree.FromObject(low, depsgraph)
+
+
+def load_rgb(path):
+    im_ = bpy.data.images.load(path)
+    w_, h_ = im_.size
+    px_ = np.zeros(w_ * h_ * im_.channels, np.float32)
+    im_.pixels.foreach_get(px_)
+    return px_.reshape(h_, w_, im_.channels)[::-1, :, :3]
 
 
 def tile_uv(r, uv):
@@ -498,60 +507,62 @@ for k_, i in enumerate(low_faces):
         m = "cloth-kael"
     me.polygons[i].material_index = mat_i[m]
 
+# ---- the flat art projected on the body: front and back turnaround views through the bones (kael_source art_map); where the art
+# has no body (grey ground, hair or tails over it), or the surface turns side on, the scan's own paint
+ART = np.load(os.path.splitext(SRC)[0] + "_art.npz")
+ART_IMG = load_rgb(ART_PATH)
+
+
+def bary_of(points):
+    hit_i = np.zeros(len(points), np.int64)
+    hit_p = np.zeros((len(points), 3))
+    for i, p in enumerate(points):
+        h = tree.find_nearest(Vector(p))
+        if h[2] is not None:
+            hit_i[i] = h[2]
+            hit_p[i] = h[0]
+    tv = svco[tri_v[hit_i]]
+    v0, v1, v2 = tv[:, 1] - tv[:, 0], tv[:, 2] - tv[:, 0], hit_p - tv[:, 0]
+    d00, d01, d11 = (v0 * v0).sum(1), (v0 * v1).sum(1), (v1 * v1).sum(1)
+    d20, d21 = (v2 * v0).sum(1), (v2 * v1).sum(1)
+    den = np.maximum(d00 * d11 - d01 * d01, 1e-14)
+    bv = (d11 * d20 - d01 * d21) / den
+    bw = (d00 * d21 - d01 * d20) / den
+    return hit_i, np.stack([1 - bv - bw, bv, bw], 1)
+
+
 mask = PID == low_pid
 ys, xs = np.nonzero(mask)
-col = sample_scan(POS[ys, xs])
-col = np.power(np.clip(col, 0, 1), 0.85) * 1.16
-# the near-black trousers up to a readable charcoal, a little cool
-dk = (col.max(1) < 0.27)[:, None]
-col = col * (1 - dk) + (col * 1.4 + np.array([0.09, 0.09, 0.105])) * dk
+points = POS[ys, xs]
+col = sample_scan(points)
+col = np.power(np.clip(col, 0, 1), 0.85) * 1.1
+hi_, bc_ = bary_of(points)
+nrm_ = NOR[ys, xs]
+h_, w_ = ART_IMG.shape[:2]
+for nm_, sign_ in (("front", 1.0), ("back", -1.0)):
+    uvq = (ART[nm_][tri_v[hi_]] * bc_[..., None]).sum(1)
+    ix = np.clip(uvq[:, 0].round().astype(int), 0, w_ - 1)
+    iy = np.clip(uvq[:, 1].round().astype(int), 0, h_ - 1)
+    a_ = ART_IMG[iy, ix]
+    m_ = a_.max(1)
+    sat_ = (m_ - a_.min(1)) / np.maximum(m_, 0.01)
+    ground = (sat_ < 0.05) & (a_.mean(1) > 0.68) & (a_.mean(1) < 0.83)
+    white = (sat_ < 0.1) & (a_.mean(1) > 0.84)
+    red = (a_[:, 0] > 0.3) & (a_[:, 1] < 0.14) & (a_[:, 2] < 0.2)
+    drop = ground | white | (red if nm_ == "back" else (red & (points[:, 2] < K.HAND_Z)))
+    k = smooth(0.12, 0.42, nrm_[:, 1] * sign_) * (~drop)
+    col = col * (1 - k[:, None]) + a_ * k[:, None]
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 OUTC[ys, xs] = col
+ART_DONE = True
 # a little of the shared light's occlusion on the scan too
 OUTC[ys, xs] *= (0.62 + 0.38 * np.clip(AO[ys, xs], 0, 1))[:, None]
 
-# the body's paint cleaned to planes: skin to a warm ramp of its smoothed light, the mottling off, the forms sharpened (an
-# unsharp mask at the size of a muscle); silver to a bright clean ramp that keeps its engraving
-def blur_ao(a, m, r):
-    return blur(a, m, r)
-
-
-lumi = OUTC.mean(2)
-ri, gi, bi = OUTC[..., 0], OUTC[..., 1], OUTC[..., 2]
-sat_t = (OUTC.max(2) - OUTC.min(2)) / np.maximum(OUTC.max(2), 0.01)
-skin_t = (mask & (ri > gi * 1.22) & (ri < bi * 2.6) & (lumi < 0.5)).astype(np.float32)
-silver_t = (mask & (sat_t < 0.16) & (lumi > 0.5)).astype(np.float32)
-l1 = blur(lumi, skin_t, 3)
-l2 = blur(lumi, skin_t, 22)
-t_ = np.clip(0.33 + (l1 - l2.mean() * 0 - l2) * 3.4 + (l2 - np.sum(l2 * skin_t) / max(skin_t.sum(), 1)) * 2.2, 0, 1)
-skin_new = P.ramp(t_, P.SKIN)
-keep = lumi - l1                                       # the scars and fine lines, a little
-skin_new = skin_new + keep[..., None] * 0.7
-k_ = (skin_t > 0.5)[..., None]
-OUTC = np.where(k_, skin_new.astype(np.float32), OUTC)
-s1 = blur(lumi, silver_t, 2)
-s2 = blur(lumi, silver_t, 16)
-t_ = np.clip(0.42 + (s1 - s2) * 3.2 + (s2 - 0.62) * 0.8, 0, 1)
-k_ = (silver_t > 0.5)[..., None]
-OUTC = np.where(k_, P.ramp(t_, P.SILVER).astype(np.float32), OUTC)
-
-canvas = P.crack_map(K.HAND_Z + 0.09, K.SHOULDER_Z + 0.09)
-rid = np.zeros(ATLAS * ATLAS, bool).reshape(ATLAS, ATLAS)
-hot_ids = np.zeros(len(me.polygons), bool)
-for i in low_faces:
-    hot_ids[i] = me.materials[me.polygons[i].material_index].name == "skin-kael-hot"
-armm = (PID == low_pid) & (POS[..., 0] > 0.13) & (POS[..., 2] > K.HAND_Z + 0.09)
-yy, xx = np.nonzero(armm)
-sk_ = OUTC[yy, xx]
-skinny = (sk_[:, 0] > sk_[:, 1] * 1.15) & (sk_.mean(1) < 0.55)
-yy, xx = yy[skinny], xx[skinny]
-ck = P.cracks(POS[yy, xx], canvas, K.SH)
-core = M.smooth(0.3, 0.5, ck)[:, None]
-rim = M.smooth(0.12, 0.34, ck)[:, None]
-c = np.minimum(OUTC[yy, xx], 0.38)
-c = c * (1 - rim * 0.9) + P.HOT_RIM * rim * 0.9
-c = c * (1 - core) + P.HOT * core
-OUTC[yy, xx] = c
+# the art's fissures to the keyed hot colour, so they glow
+hotm = (PID == low_pid) & (OUTC[..., 0] > 0.8) & (OUTC[..., 1] > 0.6) & (OUTC[..., 2] < 0.72) & (POS[..., 0] > 0.1)
+OUTC[hotm] = P.HOT
+rimm = (PID == low_pid) & (OUTC[..., 0] > 0.6) & (OUTC[..., 2] < 0.3) & (OUTC[..., 1] > 0.3) & (POS[..., 0] > 0.1)
+OUTC[rimm] = P.HOT_RIM
 
 # ---- the rebuilt pieces
 def paint(names_pred, fn):

@@ -113,6 +113,44 @@ print("fitted", Q.min(0).round(3), Q.max(0).round(3))
 me.vertices.foreach_set("co", Q.ravel())
 me.update()
 
+# ---- where each scan vertex sits on the art: front and back turnaround views, by the same bones (px in the two crops side by
+# side, measured on a grid), so the flat art's line work lands on the body whatever pose Meshy gave it
+A_F = {"neck": (385, 245), "pelvis": (385, 650), "shoulder.R": (215, 345), "elbow.R": (150, 530), "wrist.R": (105, 640), "shoulder.L": (575, 345),
+       "elbow.L": (590, 520), "wrist.L": (640, 640), "hip.R": (300, 680), "knee.R": (262, 1000), "ankle.R": (235, 1340), "hip.L": (470, 680),
+       "knee.L": (498, 1000), "ankle.L": (530, 1340)}
+A_B = {"neck": (1150, 245), "pelvis": (1150, 650), "shoulder.L": (1000, 345), "elbow.L": (930, 530), "wrist.L": (880, 640), "shoulder.R": (1320, 345),
+       "elbow.R": (1385, 525), "wrist.R": (1430, 640), "hip.L": (1075, 680), "knee.L": (1030, 1000), "ankle.L": (1000, 1340), "hip.R": (1250, 680),
+       "knee.R": (1290, 1000), "ankle.R": (1320, 1340)}
+
+
+def art_map(table, sgn):
+    """Each scan vertex's (x px, y px) on a view; sgn: the image x of his right, per scan x (front -1: his right is image left)."""
+    out = np.zeros((n, 2))
+    for i, (nm, j0, j1, rad, _) in enumerate(SEG):
+        p0, p1 = np.array(S_J[j0], float), np.array(S_J[j1], float)
+        a0, a1 = np.array(table[j0], float), np.array(table[j1], float)
+        u = (p1 - p0)[[0, 2]]
+        ln = np.linalg.norm(u)
+        u = u / ln
+        v_ = np.array([-u[1], u[0]])
+        q = (P - p0)[:, [0, 2]]
+        along, perp = q @ u, q @ v_
+        au = a1 - a0
+        al = np.linalg.norm(au)
+        au = au / al
+        # (scan +x, z up -> image: x by sgn, y down; the perpendicular keeps its sense through the same flip)
+        s0 = np.array([u[0] * sgn, -u[1]])
+        s1 = np.array([v_[0] * sgn, -v_[1]])
+        px = 697.0 * (1.0 if nm != "torso" else 1.0)
+        c, sn = float(s0 @ au), float(s0[0] * au[1] - s0[1] * au[0])
+        R = np.array([[c, -sn], [sn, c]])
+        out += W[:, i, None] * (a0 + along[:, None] / ln * al * au + perp[:, None] * px * (R @ s1))
+    return out
+
+
+AF, AB = art_map(A_F, -1.0), art_map(A_B, 1.0)
+np.savez(os.path.splitext(OUT)[0] + "_art.npz", front=AF, back=AB)
+
 # ---- contract weights
 GROUP = {}
 for i, nm in enumerate(names):
