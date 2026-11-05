@@ -257,6 +257,7 @@ def empties():
     return {"weapon_muzzle": ("gatling", tuple(C(TIP_S + 0.03, 0, GATLING_F))),
             "gatling_muzzle": ("gatling", tuple(C(TIP_S + 0.03, 0, GATLING_F))),
             "launcher_muzzle": ("launcher", tuple(C(BELL_S - 0.02, 0, TUBE_F))),
+            "launcher_fire": ("forearm.R", tuple(C(2 * POST_S - BELL_S + 0.02, 0, TUBE_F))),      # the bell's place once swung forward: fixed on the cannon, right at the press
             "anchor_gatling_root": ("forearm.R", tuple(C(0.17, 0, GATLING_F))),
             "anchor_sleeve_mouth": ("forearm.R", tuple(C(0.25, 0, SLEEVE_F))),
             "anchor_grenade_drum": ("forearm.R", tuple(C(-0.01, SLEEVE_R + 0.052, SLEEVE_F - 0.016)))}

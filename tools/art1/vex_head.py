@@ -397,3 +397,72 @@ Z_WAIST = 0.0
 
 def ammo_belt(surf, pts_top, pts_low):
     pass
+
+
+# ---- the fine-detail head: the head scan carries face, hair, goggles, ears, cyber-eye plate; here only what must move or glow on it
+def surf(bvh, x, z, off=0.0):
+    hit = bvh.ray_cast(Vector((x, 0.6, z)), Vector((0, -1, 0)), 1.2)
+    return None if hit[0] is None else np.array(hit[0]) + np.array(hit[1]) * off
+
+
+K_REF = EYE_X * SK * 0.95 / 70.0            # metres per pixel of vex_head.png's front view (displayed): half the eye span is 70 px
+
+
+def scan_brows(bvh):
+    """The brows as bone-driven strips laid on the painted ones (front view of the head sheet)."""
+    out = []
+    pts_ref = [(32, 16), (55, 26), (82, 33), (112, 34), (128, 24)]
+    wd = np.array([0.0052, 0.0062, 0.0058, 0.0042, 0.0012])
+    for s, side in ((-1.0, "L"), (1.0, "R")):
+        path = []
+        for rx, rz in pts_ref:
+            p = surf(bvh, s * rx * K_REF, EYE_Z + rz * K_REF, 0.0022)
+            if p is not None:
+                path.append(p)
+        if len(path) < 3:
+            continue
+        path = catmull(np.array(path), 6)
+        b = sweep("brow" + side, "hair-mane", path, [(-1, 0), (0, 0.3), (1, 0), (0, -0.3)], np.interp(np.linspace(0, 1, 6), np.linspace(0, 1, 5), wd), side_hint=np.array([0, 1.0, 0.3]),
+                  uv_rect=(0.1, 0.02, 0.18, 0.1), room=0.0)
+        out.append(b.rigid("brow." + side))
+    return out
+
+
+def scan_lens(bvh):
+    """The glowing ring of the cyber-eye on the scan's brass plate."""
+    c = surf(bvh, EYE_X * SK * 0.95, EYE_Z, -0.004)
+    n_ = norm(np.array([0.22, 1.0, 0.0]))
+    a = norm(np.cross(n_, (0, 0, 1.0)))
+    b = np.cross(a, n_)
+
+    def lat(name, mat, prof, m=12):
+        v, f = [], []
+        for s_, r in prof:
+            for t in np.linspace(0, 2 * np.pi, m, endpoint=False):
+                v.append(c + n_ * s_ + a * np.cos(t) * r + b * np.sin(t) * r)
+        for i in range(len(prof) - 1):
+            for j in range(m):
+                p, q = i * m + j, i * m + (j + 1) % m
+                f.append([p, q, q + m, p + m])
+        return Piece(name, mat, np.array(v), f).rigid("head")
+    k = K_REF
+    return [lat("eyelens", "glow-vex", [(0.0065, 24 * k), (0.0072, 16.5 * k), (0.0072, 10.5 * k), (0.0062, 8.5 * k)]),
+            lat("eyepupil", "metal-vex", [(0.006, 8.5 * k), (0.0075, 5 * k), (0.0075, 0.0)], m=8)]
+
+
+def blink_lid(bvh):
+    """Her left upper lid: at rest tucked up under the brow's skin (hidden), lid.L brings it down over the painted eye. Skin shell round the eye's centre."""
+    p0 = surf(bvh, -EYE_X * SK * 0.95, EYE_Z)
+    r = 0.03
+    c = p0 - np.array([0, r - 0.0012, 0])
+    rows, cols = 4, 9
+    v = []
+    for i in range(rows):
+        for j in range(cols):
+            az = (j / (cols - 1) - 0.5) * 1.5
+            el = 0.72 + 0.62 * i / (rows - 1)            # above the eye: under the skin at rest
+            d = np.array([-np.sin(az) * np.cos(el), np.cos(az) * np.cos(el), np.sin(el)])
+            v.append(c + d * r)
+    p = Piece("lidUL", "skin-vex", np.array(v), grid_faces(rows, cols)).rigid("lid.L")
+    p.orient(tuple(c))
+    return p, c

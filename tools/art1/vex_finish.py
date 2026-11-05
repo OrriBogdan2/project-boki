@@ -21,18 +21,27 @@ UNIQ_W = 0.755
 HAIR_R = (UNIQ_W + 0.005, 0.40, 1.0, 1.0)
 BELT_R = (UNIQ_W + 0.005, 0.30, 1.0, 0.395)
 EYE_R = (UNIQ_W + 0.005, 0.20, 0.875, 0.295)
-MATS = ["skin-vex", "cloth-vex", "leather-vex-hot", "metal-vex", "brass-vex", "hair-mane", "eyes-vex", "glow-vex"]
-SCALE = {"face": 4.2, "lidU": 2.2, "lidD": 2.2, "sleeve": 2.2, "tube": 1.5, "plate": 1.4, "bell": 1.2, "Low": 1.15, "eyerim": 1.5, "ear": 1.2}
+MATS = ["skin-vex", "cloth-vex", "leather-vex-hot", "metal-vex", "brass-vex", "hair-mane", "glow-vex"]
+SCALE = {"hscan": 3.0, "face": 4.2, "lidU": 2.2, "lidD": 2.2, "sleeve": 2.2, "tube": 1.5, "plate": 1.4, "bell": 1.2, "Low": 1.15, "eyerim": 1.5, "ear": 1.2}
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
 dg = bpy.context.evaluated_depsgraph_get()
 bvh_src = BVHTree.FromObject(src, dg)
 bvh_low = BVHTree.FromObject(low, dg)
-parts = VP.build(bvh_src, bvh_low)
+hsrc, hlow = bpy.data.objects["HeadSrc"], bpy.data.objects["HeadLow"]
+bvh_hs = BVHTree.FromObject(hsrc, dg)
+parts = VP.build(bvh_src, bvh_low, bvh_hs)
 pieces = parts["pieces"]
-eye = next(p for p in pieces if p.name == "eyeL")
-eye.uv = [[(eye.eye_uv[i, 0] * .5 + .5, eye.eye_uv[i, 1] / 1.5 + .5) for i in q] for q in eye.f]
+# the head scan as a piece, its faces sorted to slots by paint below
+hv = np.array([tuple(v.co) for v in hlow.data.vertices])
+gn_ = {g.index: g.name for g in hlow.vertex_groups}
+hw = {"head": np.zeros(len(hv)), "hips": np.zeros(len(hv))}
+for i_, v_ in enumerate(hlow.data.vertices):
+    for g_ in v_.groups:
+        hw[gn_[g_.group]][i_] = g_.weight
+hscan = M.Piece("hscan", "skin-vex", hv, [list(p.vertices) for p in hlow.data.polygons], weights=hw)
+pieces.insert(0, hscan)
 for p_ in parts["hair"] + parts["braid"]:
     t_ = getattr(p_, "t", None)
     p_.shade = np.full(len(p_.v), 0.85) if t_ is None else (0.74 + 0.26 * smooth(0.0, 0.22, t_))
@@ -189,7 +198,7 @@ for p in me.polygons:
         loop_uv[ls, 0] *= UNIQ_W
         continue
     fu = faces_uv[i]
-    r = BELT_R if n.startswith("ammo") else EYE_R if n.startswith("eyeL") else HAIR_R
+    r = BELT_R if n.startswith("ammo") else HAIR_R
     if fu is None:
         for l in ls:
             loop_uv[l] = ((r[0] + r[2]) / 2, (r[1] + r[3]) / 2)
@@ -206,6 +215,7 @@ vn = np.zeros(len(me.vertices) * 3)
 me.vertices.foreach_get("normal", vn)
 vn = vn.reshape(-1, 3)
 PID = -np.ones((ATLAS, ATLAS), np.int32)
+FACEI = -np.ones((ATLAS, ATLAS), np.int32)
 POS = np.zeros((ATLAS, ATLAS, 3), np.float32)
 NOR = np.zeros((ATLAS, ATLAS, 3), np.float32)
 for t in me.loop_triangles:
@@ -233,6 +243,7 @@ for t in me.loop_triangles:
     POS[ys[m], xs[m]] = w @ vco[tv]
     NOR[ys[m], xs[m]] = w @ vn[tv]
     PID[ys[m], xs[m]] = faces_pid[t.polygon_index]
+    FACEI[ys[m], xs[m]] = t.polygon_index
 NOR = M.norm(NOR)
 print("texels", (PID >= 0).sum(), "of", ATLAS * ATLAS)
 
@@ -401,22 +412,82 @@ def paint(pred, fn):
         OUTC[ys_, xs_] = fn(POS[ys_, xs_].astype(np.float64), NOR[ys_, xs_].astype(np.float64), AO[ys_, xs_].astype(np.float64))
 
 
-# the head: the scan's paint at the head's own surface (the fitted Src), then her eye plate and liner
-fid = names.index("face")
-m = PID == fid
+# the head: its own scan's paint, at high density; slots by that paint
+hid = names.index("hscan")
+hm = hsrc.data
+hm.calc_loop_triangles()
+hst = hm.loop_triangles
+hco = np.zeros(len(hm.vertices) * 3)
+hm.vertices.foreach_get("co", hco)
+hco = hco.reshape(-1, 3)
+htv = np.array([t.vertices[:] for t in hst])
+htl = np.array([t.loops[:] for t in hst])
+huv = np.zeros(len(hm.loops) * 2)
+hm.uv_layers.active.data.foreach_get("uv", huv)
+huv = huv.reshape(-1, 2)
+htree = BVHTree.FromPolygons([tuple(v) for v in hco], [tuple(t) for t in htv])
+him = next(n_.image for mt in hm.materials for n_ in mt.node_tree.nodes if n_.type == "TEX_IMAGE" and "ase" in (n_.image.name + "ase"))
+for mt in hm.materials:
+    pb_ = next(n_ for n_ in mt.node_tree.nodes if n_.type == "BSDF_PRINCIPLED")
+    nd = pb_.inputs[0].links[0].from_node if pb_.inputs[0].links else None
+    while nd is not None and nd.type != "TEX_IMAGE":
+        nd = nd.inputs[0].links[0].from_node if nd.inputs and nd.inputs[0].links else None
+    if nd is not None:
+        him = nd.image
+hw_, hh_ = him.size
+HP = np.zeros(hw_ * hh_ * him.channels, np.float32)
+him.pixels.foreach_get(HP)
+HP = HP.reshape(hh_, hw_, him.channels)[..., :3]
+
+
+def sample_head(points):
+    hi = np.zeros(len(points), np.int64)
+    hp = np.zeros((len(points), 3))
+    for i, p in enumerate(points):
+        h = htree.find_nearest(Vector(p))
+        if h[2] is not None:
+            hi[i], hp[i] = h[2], h[0]
+    tv = hco[htv[hi]]
+    v0, v1, v2 = tv[:, 1] - tv[:, 0], tv[:, 2] - tv[:, 0], hp - tv[:, 0]
+    d00, d01, d11 = (v0 * v0).sum(1), (v0 * v1).sum(1), (v1 * v1).sum(1)
+    d20, d21 = (v2 * v0).sum(1), (v2 * v1).sum(1)
+    den = np.maximum(d00 * d11 - d01 * d01, 1e-14)
+    bv, bw = (d11 * d20 - d01 * d21) / den, (d00 * d21 - d01 * d20) / den
+    bu = 1 - bv - bw
+    luv = huv[htl[hi]]
+    uu = bu * luv[:, 0, 0] + bv * luv[:, 1, 0] + bw * luv[:, 2, 0]
+    vv = bu * luv[:, 0, 1] + bv * luv[:, 1, 1] + bw * luv[:, 2, 1]
+    return HP[np.clip((vv % 1) * hh_, 0, hh_ - 1).astype(int), np.clip((uu % 1) * hw_, 0, hw_ - 1).astype(int)]
+
+
+hfaces = [i for i in range(nf) if faces_pid[i] == hid]
+hfc = np.array([np.mean([verts[v] for v in faces_v[i]], axis=0) for i in hfaces])
+hcol = sample_head(hfc)
+for k_, i in enumerate(hfaces):
+    r_, g_, b_ = hcol[k_]
+    l_ = (r_ + g_ + b_) / 3
+    st_ = (max(r_, g_, b_) - min(r_, g_, b_)) / max(max(r_, g_, b_), 0.01)
+    if g_ > r_ * 1.12 and g_ > b_ * 1.04:
+        m = "hair-mane"
+    elif st_ < 0.13:
+        m = "metal-vex"
+    elif r_ > g_ * 1.2 and g_ > b_ * 1.45:
+        m = "brass-vex"
+    elif l_ < 0.3:
+        m = "leather-vex-hot"
+    else:
+        m = "skin-vex"
+    me.polygons[i].material_index = mat_i[m]
+m = PID == hid
 ys_, xs_ = np.nonzero(m)
-hc = sample_scan(POS[ys_, xs_])
-hc = np.power(np.clip(hc, 0, 1), 0.85) * 1.14
-hc = hc * (0.74 + 0.26 * np.clip(AO[ys_, xs_], 0, 1))[:, None]
-OUTC[ys_, xs_] = hc
-fr_ = OUTC.max(2)
-lips = m & (OUTC[..., 0] > OUTC[..., 1] * 1.32) & (OUTC.mean(2) > 0.3)
-skin_m = (m & (OUTC.mean(2) > 0.3) & (OUTC[..., 1] < OUTC[..., 0] * 1.03) & ~lips) | (mask & (OUTC[..., 0] > OUTC[..., 1] * 1.08) & (OUTC[..., 0] < OUTC[..., 1] * 1.6) & (OUTC.mean(2) > 0.36))
+hc = sample_head(POS[ys_, xs_])
+hc = np.clip(hc, 0, 1)
+gr_ = (hc[:, 1] > hc[:, 0] * 1.12) & (hc[:, 1] > hc[:, 2] * 1.04)
+g0_ = hc[gr_].mean(1, keepdims=True)
+hc[gr_] = np.clip((g0_ + (hc[gr_] - g0_) * 1.3) * 1.08, 0, 1)             # the sheet's hair, a touch more colour under the toon light
+OUTC[ys_, xs_] = hc * (0.84 + 0.16 * np.clip(AO[ys_, xs_], 0, 1))[:, None]
+skin_m = mask & (OUTC[..., 0] > OUTC[..., 1] * 1.08) & (OUTC[..., 0] < OUTC[..., 1] * 1.6) & (OUTC.mean(2) > 0.36)
 OUTC = P.clean_skin(OUTC, skin_m, blur)
-OUTC[lips] = OUTC[lips] * np.array([1.0, 0.72, 0.78], np.float32)
-hc = OUTC[ys_, xs_]
-hc = P.project_portrait(POS[ys_, xs_].astype(np.float64), hc.astype(np.float64), VH)
-OUTC[ys_, xs_] = P.apply_face(POS[ys_, xs_].astype(np.float64), hc.astype(np.float64), VH)
 # the jacket: her lime green, the scan's paint lost it; the scan's dark scribbles on the slipped sleeve go
 sl_ = mask & (POS[..., 0] < -0.17) & (POS[..., 2] > VC.J("forearm.L")[2] - 0.12) & (POS[..., 2] < VC.J("upper_arm.L")[2] - 0.1) & (OUTC.max(2) < 0.3)
 OUTC[sl_] = np.array([0.42, 0.56, 0.28], np.float32) * (0.75 + 0.25 * AO[sl_])[..., None]
@@ -426,17 +497,7 @@ g_ = OUTC[jm].mean(1, keepdims=True)
 OUTC[jm] = np.clip((g_ + (OUTC[jm] - g_) * 1.55) * np.array([1.05, 1.17, 0.9], np.float32), 0, 1)
 
 SKIN = lambda p, n, ao: ramp(np.clip(lit(n, ao) * 1.05, 0, 1), [hexc("#8c5a5c"), hexc("#c58a84"), hexc("#e5ac9f"), hexc("#f3c9bb"), hexc("#fde4d7")])
-for nm_, up in (("lidUL", True), ("lidDL", False)):
-    lp = next(q for q in pieces if q.name == nm_)
-    # each vertex's distance from the lash, as a smooth paint term: position only, from the eye's centre
-    c0 = VH.eye_c(-1.0) + np.array([0, -0.012, 0])
-
-    def f_(p, n, ao, up=up, c0=c0):
-        d = M.norm(p - c0)
-        el = np.arcsin(np.clip(d[..., 2], -1, 1))
-        k = np.clip(np.abs(el - (0.2 if up else -0.1)) / 0.9, 0, 1)
-        return P.lid_paint(p, n, ao, SKIN(p, n, ao), up, k)
-    paint(lambda n, q=nm_: n == q, f_)
+paint(lambda n: n == "lidUL", lambda p, n, ao: P.mix(SKIN(p, n, ao), hexc("#1b1518"), smooth(0.92, 0.82, np.arctan2(p[..., 2] - parts["lid_c"][2], p[..., 1] - parts["lid_c"][1]))))
 paint(lambda n: n == "ear", SKIN)
 paint(lambda n: n == "sleeve", P.sleeve)
 paint(lambda n: n == "tube", P.tube)
@@ -457,28 +518,15 @@ ys, xs = np.nonzero(mask)
 c_ = OUTC[ys, xs]
 hotk = (c_[:, 1] > c_[:, 0] * 1.5) & (c_[:, 1] > c_[:, 2] * 1.4) & (c_[:, 1] > 0.5)
 KEEP = np.array(P.KEY, np.float32)
-# (the jacket is cloth, no key there: only leather and skin faces key; texels are mapped by the piece's slot below)
+fm_ = np.array([p.material_index for p in me.polygons])
+TM = np.where(FACEI >= 0, fm_[np.maximum(FACEI, 0)], -1)
 fmap = np.zeros((ATLAS, ATLAS), np.int8)
-for t in me.loop_triangles:
-    if faces_pid[t.polygon_index] != 0:
-        continue
-    uvp = loop_uv[list(t.loops)] * ATLAS - 0.5
-    x0, y0 = np.floor(uvp.min(0)).astype(int)
-    x1, y1 = np.ceil(uvp.max(0)).astype(int)
-    x0, y0, x1, y1 = max(x0, 0), max(y0, 0), min(x1, ATLAS - 1), min(y1, ATLAS - 1)
-    if x1 < x0 or y1 < y0:
-        continue
-    q = me.polygons[t.polygon_index].material_index
-    if q in (mat_i["skin-vex"], mat_i["leather-vex-hot"]):
-        yy, xx = np.mgrid[y0:y1 + 1, x0:x1 + 1]
-        a_, b_, c1 = uvp
-        den = (b_[1] - c1[1]) * (a_[0] - c1[0]) + (c1[0] - b_[0]) * (a_[1] - c1[1])
-        if abs(den) < 1e-9:
-            continue
-        l0 = ((b_[1] - c1[1]) * (xx - c1[0]) + (c1[0] - b_[0]) * (yy - c1[1])) / den
-        l1 = ((c1[1] - a_[1]) * (xx - c1[0]) + (a_[0] - c1[0]) * (yy - c1[1])) / den
-        m_ = (l0 >= 0) & (l1 >= 0) & (l0 + l1 <= 1)
-        fmap[yy[m_], xx[m_]] = 1 if q == mat_i["leather-vex-hot"] else 2
+fmap[TM == mat_i["leather-vex-hot"]] = 1
+fmap[TM == mat_i["skin-vex"]] = 2
+scanned = mask | (PID == hid)
+ys, xs = np.nonzero(scanned)
+c_ = OUTC[ys, xs]
+hotk = (c_[:, 1] > c_[:, 0] * 1.5) & (c_[:, 1] > c_[:, 2] * 1.4) & (c_[:, 1] > 0.5)
 kk = hotk & (fmap[ys, xs] == 1)
 OUTC[ys[kk], xs[kk]] = KEEP
 warm = (c_[:, 0] > 0.42) & (c_[:, 0] - c_[:, 2] > 0.14) & ~hotk & (fmap[ys, xs] == 1)
@@ -508,8 +556,6 @@ x0, y0, x1, y1 = rect(HAIR_R)
 OUTC[y0:y1, x0:x1] = P.hair_tile(y1 - y0, x1 - x0)
 x0, y0, x1, y1 = rect(BELT_R)
 OUTC[y0:y1, x0:x1] = P.belt_tile(y1 - y0, x1 - x0)
-x0, y0, x1, y1 = rect(EYE_R)
-OUTC[y0:y1, x0:x1] = P.eye_tile(y1 - y0, x1 - x0)
 
 atlas = bpy.data.images.new("vex_atlas", ATLAS, ATLAS)
 px = np.ones((ATLAS, ATLAS, 4), np.float32)
@@ -563,10 +609,10 @@ def spring(names_, pts, parent):
         prev = n
 
 
-L0 = VH.eye_c(-1.0)
-bone("lid.L", "head", L0, L0 + Vector((0, 0.03, 0)))
+L0 = parts["lid_c"]
+bone("lid.L", "head", L0, L0 + np.array([0, 0.03, 0]))
 for s, side in ((1.0, "R"), (-1.0, "L")):
-    b = np.array([s * 0.05, VH.EYE_FRONT_Y[0], VH.EYE_Z + 0.044])
+    b = np.array([s * 0.05, VH.EYE_FRONT_Y[0], VH.EYE_Z + 0.03])
     bone("brow." + side, "head", b, b + [0, 0.03, 0])
 for sd, sx in (("R", 1.0), ("L", -1.0)):
     th = VC.J("shin." + sd)
@@ -582,7 +628,6 @@ bone("launcher", "forearm.R", LP, LP + np.array([0, 0, 0.1]))
 GP = VC.C(0.15, 0, VC.GATLING_F)
 bone("gatling", "forearm.R", GP, GP + np.array([0, 0, -0.1]))
 spring(parts["bnames"], [tuple(p) for p in parts["bpts"]], "head")
-spring(parts["fnames"], [tuple(p) for p in parts["fpts"]], "head")
 bpy.ops.object.mode_set(mode="OBJECT")
 ob.parent = arm
 md = ob.modifiers.new("arm", "ARMATURE")
@@ -596,7 +641,7 @@ for vi, d in enumerate(vw):
 # ---- FX points
 A = dict(VC.empties())
 A.update({"anchor_head_top": ("head", (0, VH.HC[1], VH.TOP + 0.03)), "anchor_chest": ("hips", (0, 0.12, VC.J("upper_arm.R")[2] - 0.1)),
-          "anchor_eye_glow": ("head", tuple(VH.eye_c(1.0) + np.array([0.004, 0.022, 0]))), "anchor_lens": ("head", tuple(VH.eye_c(1.0) + np.array([0.004, 0.022, 0]))),
+          "anchor_eye_glow": ("head", tuple(VH.surf(bvh_hs, VH.EYE_X * VH.SK * 0.95, VH.EYE_Z, 0.006))), "anchor_lens": ("head", tuple(VH.surf(bvh_hs, VH.EYE_X * VH.SK * 0.95, VH.EYE_Z, 0.006))),
           "anchor_spine": ("hips", (0, -0.14, VC.J("upper_arm.R")[2] - 0.2)), "anchor_coin": ("coin", tuple(parts["coin"])),
           "anchor_left_hand": ("hand.L", tuple(VA.WR + np.array([0, 0, -0.1]))), "anchor_pack": ("hips", tuple(parts["pack_c"]))})
 for nm, (bn, at) in A.items():
@@ -610,7 +655,7 @@ for nm, (bn, at) in A.items():
 me.polygons.foreach_set("use_smooth", [True] * len(me.polygons))
 me.update()
 for o in list(bpy.data.objects):
-    if o.name in ("Src", "Low"):
+    if o.name in ("Src", "Low", "HeadSrc", "HeadLow"):
         bpy.data.objects.remove(o)
 bpy.ops.wm.save_as_mainfile(filepath=os.path.splitext(OUT)[0] + ".blend")
 objs = [arm, ob] + [o for o in bpy.data.objects if o.type == "EMPTY"]

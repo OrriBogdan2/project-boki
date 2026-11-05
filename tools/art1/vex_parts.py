@@ -83,22 +83,24 @@ def hoses(pack_c):
     return out
 
 
-def build(bvh_src, bvh_low):
-    VH.set_eye_y(bvh_src)
-    face = VH.head(bvh_src)
-    eye = VH.eyeball()
-    lids = VH.lids()
-    brows = VH.brows()
-    cyber = VH.cyber_eye()
-    hair = VH.hair(bvh_src)
-    fnames, fpts = VH.fore_chain(hair)
-    for p in hair:
-        if not p.w:
-            p.rigid("head")
+def build(bvh_src, bvh_low, bvh_head=None):
+    """bvh_head: the placed head scan (fine-detail pass): it carries the face, hair, goggles and ears."""
+    VH.set_eye_y(bvh_head or bvh_src)
     bd, bpath = VH.braid()
     bnames, bpts = VH.braid_chain(bd, bpath)
-    gog = VH.goggles(bvh_src)
-    ear = VH.ear(bvh_src)
+    if bvh_head is not None:
+        lid, lid_c = VH.blink_lid(bvh_head)
+        headp = VH.scan_brows(bvh_head) + VH.scan_lens(bvh_head) + [lid]
+        hair, fnames, fpts = [], [], []
+    else:
+        lid_c = None
+        face = VH.head(bvh_src)
+        hair = VH.hair(bvh_src)
+        fnames, fpts = VH.fore_chain(hair)
+        for p in hair:
+            if not p.w:
+                p.rigid("head")
+        headp = [face, VH.eyeball()] + VH.lids() + VH.brows() + VH.cyber_eye() + hair + VH.goggles(bvh_src) + VH.ear(bvh_src)
     cannon = VC.all_pieces()
     arm = VA.forearm()
     hnd, knuck, a, k, o = VA.hand()
@@ -111,9 +113,9 @@ def build(bvh_src, bvh_low):
     belt = ammo(bvh_low)
     belt.w = {"hips": np.ones(len(belt.v))}
     hs = hoses(pack_c)
-    pieces = stripes(bvh_low) + [face, eye] + lids + brows + cyber + hair + bd + gog + ear + cannon + arm + hnd + [coin] + sp + pack + [belt] + hs
+    pieces = stripes(bvh_low) + headp + bd + cannon + arm + hnd + [coin] + sp + pack + [belt] + hs
     for p in pieces:
         if p.name.startswith(("ammo", "lid", "face", "gfr", "gl", "eyeL", "stripe")):
             continue
         p.orient()
-    return {"pieces": pieces, "hair": hair, "braid": bd, "bnames": bnames, "bpts": bpts, "fnames": fnames, "fpts": fpts, "cyber": cyber, "coin": coin_c, "pack_c": pack_c}
+    return {"pieces": pieces, "hair": hair, "braid": bd, "bnames": bnames, "bpts": bpts, "fnames": fnames, "fpts": fpts, "coin": coin_c, "pack_c": pack_c, "lid_c": lid_c}
