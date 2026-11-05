@@ -5,9 +5,9 @@ extends RefCounted
 ##     and a Hero's own footsteps resolve when the file names them.
 ##   - The shared runtime, on a synthetic recipe set using every layer kind: anchors fall back from the model's node to
 ##     the Gun to the body; distance thins and then drops a look; pools and live particles stay capped in a pile-up and
-##     a warm pool makes no new nodes; prewarm makes one of every kind; a hold thickens with its charge and stops by
-##     itself; a projectile trail follows its node and ends with it; allies sit dimmer; a move arrives from another
-##     game.
+##     a warm pool makes no new nodes; prewarm makes one of every kind; a hold thickens with its charge, turns with
+##     the aim and stops by itself; a projectile trail follows its node and ends with it; allies sit dimmer; a move
+##     arrives from another game.
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
@@ -32,6 +32,7 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
 			{"p": "drop", "n": 24}]},
 		"heat": {"fx": [{"p": "ember", "n": 12, "n_k": 1.0, "at": "tip"}]},
+		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
 
 var bad := 0
@@ -226,6 +227,17 @@ func _holds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(V.holds.is_empty(), "the asks stop: the hold ends by itself")
 	await main.get_tree().process_frame
 	_clear(V)
+	P.inp["aim"] = P.pos + Vector3(4, 0, 0)
+	V.hold(P, "stream")
+	P.inp["aim"] = P.pos + Vector3(0, 0, 4)
+	V._tick_holds()
+	var lay: Dictionary = V.holds.values()[0]["layers"][0]
+	var way: Vector3 = (lay["node"].process_material as ShaderMaterial).get_shader_parameter("dir")
+	ok(way.distance_to(Vector3(0, 0, 1)) < 0.01, "a stream held along the aim turns with it (%s)" % way)
+	m.time += HeroVfx.HOLD_LINGER + 0.1
+	V._tick_holds()
+	await main.get_tree().process_frame
+	_clear(V)
 
 func _trail(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	var shot := Node3D.new()
@@ -233,9 +245,9 @@ func _trail(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	shot.global_position = P.pos + Vector3(0, 1, 0)
 	V.trail(P, "shot", shot)
 	ok(V.ribbons.size() == 1, "a projectile gets its trail")
-	for i in 4:
+	for i in 4:      # (ticked by hand: on a loaded box a frame's delta can outlast the tail)
 		shot.global_position += Vector3(0.5, 0, 0)
-		await main.get_tree().process_frame
+		V._tick_ribbon(V.ribbons[0], 0.02)
 	ok((V.ribbons[0]["pts"] as Array).size() >= 3, "the trail follows the projectile")
 	shot.visible = false
 	for i in 30:
