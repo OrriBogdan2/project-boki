@@ -1251,3 +1251,9 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 
 ## 2026-11-05 03:52 UTC (ext): Cinder views: `briefs/art-refs/cinder_turnaround.png` (front, 3/4, back; in-pose, not a true A-pose). Use it with the master sheet; the side profile is inferred.
 
+
+## 2026-11-05 03:54 UTC (ext): Cinder A-pose: `briefs/art-refs/cinder_turnaround_apose.png`
+- **Use it for proportions, the rig pose and the outfit construction only.**
+- The hair here is flat orange: **build it as living fire** (a flame shader + spring, per the master sheet).
+- Her figure / bust follows the master sheet, which is fuller than here.
+- The flames on the tank nozzles and the gauge come from the master sheet.
