@@ -869,3 +869,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Owner Qs: glide timing OK? RMB hold while chained: run the chain, or go to the cursor? Longer invulnerable guard during the haul OK?
 
 ## 2026-11-05 S2: READY ext/kit-ryzz-116 6963e49d (116, 116b); ext/art1-ryzz 1ad57b8f new idle and walk; details in EXT_TO_MAIN. Open: 116.3 Static marker (S3?), 116.5 sounds (S4; emote pop too). Owner Q: should a pulled-in charge orb's reset also give the boost? Agent assumed yes.
+
+## 2026-11-05 S2: READY ext/art1-hem 36307ae4 (Lisette scan round, agent ~80; replaces 94cef4b0)
+- Body and head Meshy scans fitted to the rig, face plate projected at ~2.7x density, relief normals, 14,878 tris, 6 materials, 41 clips, bow skinned. ~179 credits.
+- **Fidelity:** silver needle bow yes; red-thread string yes; needle arrows yes nocked, in-flight **no**; spool yes; mask yes (painted); green eyes yes; tan skin yes; red scarf yes (spring chains); capris yes; red-thread trails **no** (art2-lisette/S3). Proofs: ext/hero-shots-s2 547903ca art1/lisette/.
+- Full suite on this commit: 139, same reds as the baseline list, portrait 107, archer-combo 143, hero-combo 287, bot-sanity 0.
+- Merges clean with main; conflicts with art1-kael 679986bf in check_registry only. Shared: use_nrm optional normal map (Sable, Ryzz, Motley have the same or a similar path).
+- Gaps: player's skin colour pick no longer reaches arms/midriff; pin thread dark; stitching soft; sheet projection only on the face.
