@@ -391,6 +391,10 @@ def p_leg(p, n, c):
 SQ = "breaker_head_squat"
 
 
+def p_core(p, n, c):
+    return C("2c1e14") * ones(p)
+
+
 def p_dial(p, n, c):
     """The compass, round and on its own non-glowing brass surface; the rest of the hull is keyed."""
     q = p - c["part"]["centre"]
@@ -431,7 +435,7 @@ def p_door_art(p, n, c):
     return mix(b, f, smooth(0.3, -0.3, n[:, 1]))
 
 
-TABLE = {"hull": p_hull, "limb": p_limb, "pauldron": p_pauldron, "leg": p_leg, "helmet": p_helmet, "collar": p_collar, "dial": p_dial, "mast": p_mast, "iron": p_iron, "brass": p_brass, "compass": p_compass, "moss": p_moss,
+TABLE = {"hull": p_hull, "limb": p_limb, "pauldron": p_pauldron, "leg": p_leg, "helmet": p_helmet, "collar": p_collar, "dial": p_dial, "core": p_core, "mast": p_mast, "iron": p_iron, "brass": p_brass, "compass": p_compass, "moss": p_moss,
          "sail": p_sail, "drum": p_drum, "door": p_door_art, "fish": p_fish, "lure": p_lure, "rope": p_rope}
 
 
