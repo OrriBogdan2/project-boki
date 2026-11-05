@@ -466,3 +466,21 @@ def blink_lid(bvh):
     p = Piece("lidUL", "skin-vex", np.array(v), grid_faces(rows, cols)).rigid("lid.L")
     p.orient(tuple(c))
     return p, c
+
+
+def spine_plate(z_top, ysurf, hit):
+    """The chrome plate between her shoulder blades that the spine runs from: wider at the top, brass-edged by paint. On the back's surface."""
+    rows, cols = 5, 7
+    v = []
+    for i in range(rows):
+        k = i / (rows - 1)
+        z = z_top - 0.13 * k
+        w = 0.092 - 0.05 * smooth(0.45, 0.8, k)
+        for j in range(cols):
+            x = (j / (cols - 1) - 0.5) * 2 * w
+            h = hit(x, z)
+            y = (h[1] if h is not None else ysurf(z)) - 0.006
+            v.append((x, y, z))
+    p = Piece("splate", "metal-vex", np.array(v), grid_faces(rows, cols)).rigid("hips")
+    p.orient((0, 0.05, z_top - 0.06))
+    return [p]

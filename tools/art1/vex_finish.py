@@ -10,7 +10,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "blender"))
 import meshkit as M, vex_parts as VP, vex_cannon as VC, vex_head as VH, vex_arm as VA, vex_paint as P
-from kael_paint import ramp, hexc, mix, lit
+from paintkit import ramp, hexc, mix, lit
 from meshkit import smooth
 import warden_kit as WK
 
@@ -22,7 +22,7 @@ HAIR_R = (UNIQ_W + 0.005, 0.40, 1.0, 1.0)
 BELT_R = (UNIQ_W + 0.005, 0.30, 1.0, 0.395)
 EYE_R = (UNIQ_W + 0.005, 0.20, 0.875, 0.295)
 MATS = ["skin-vex", "cloth-vex", "leather-vex-hot", "metal-vex", "brass-vex", "hair-mane", "glow-vex"]
-SCALE = {"hscan": 3.0, "face": 4.2, "lidU": 2.2, "lidD": 2.2, "sleeve": 2.2, "tube": 1.5, "plate": 1.4, "bell": 1.2, "Low": 1.15, "eyerim": 1.5, "ear": 1.2}
+SCALE = {"hscan": 2.4, "poster": 3.2, "face": 4.2, "lidU": 2.2, "lidD": 2.2, "sleeve": 2.2, "tube": 1.5, "plate": 1.4, "bell": 1.2, "Low": 1.75, "eyerim": 1.5, "ear": 1.2}
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
@@ -171,7 +171,7 @@ for i in uniq:
 for i in uniq:
     n = names[faces_pid[i]]
     k = n.rstrip("RL0123456789_")
-    wgt = SCALE.get(k, 1.0)
+    wgt = SCALE.get(k, 0.7)
     if i in region:
         n = n + region[i][0]
     s = wgt * math.sqrt(stats[n][0] / max(stats[n][1], 1e-12))
@@ -385,16 +385,10 @@ OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 OUTC[ys, xs] = col
 OUTC[ys, xs] *= (0.66 + 0.34 * np.clip(AO[ys, xs], 0, 1))[:, None]
 
-# the cut-out of her jacket: bare skin on the back (the edit left it black); the spine is geometry
-pp = POS[ys, xs]
-SKIN_C = np.array([0.86, 0.62, 0.60])
-back_cut = (pp[:, 1] < -0.03) & (pp[:, 2] > Z_BELT + 0.03) & (pp[:, 2] < VC.J("upper_arm.R")[2] - 0.03) & (np.abs(pp[:, 0]) < 0.082 + 0.05 * smooth(0, 1, (Z_BELT + 0.2 - pp[:, 2]) / 0.2)) & (col.max(1) < 0.4)
-OUTC[ys[back_cut], xs[back_cut]] = SKIN_C * (0.72 + 0.28 * np.clip(AO[ys[back_cut], xs[back_cut]], 0, 1))[:, None]
-
 # (a back-cut face is skin whatever the scan's black said)
 for k_, i in enumerate(low_faces):
     q_ = fc[k_]
-    if q_[1] < -0.03 and Z_BELT + 0.03 < q_[2] < VC.J("upper_arm.R")[2] - 0.03 and abs(q_[0]) < 0.11 and L_[k_] < 0.4:
+    if q_[1] < -0.0 and Z_BELT + 0.012 < q_[2] < VC.J("upper_arm.R")[2] - 0.03 and abs(q_[0]) < 0.2 and not (fcol[k_][1] > fcol[k_][0] * 1.02 and L_[k_] > 0.34):
         me.polygons[i].material_index = mat_i["skin-vex"]
 # the green lines key the glow
 c_ = OUTC[ys, xs]
@@ -488,15 +482,38 @@ hc[gr_] = np.clip((g0_ + (hc[gr_] - g0_) * 1.35) * np.array([1.4, 1.5, 1.2]) + n
 skn_ = (hc[:, 0] > hc[:, 1] * 1.1) & (hc[:, 0] < hc[:, 1] * 1.7) & (hc.mean(1) > 0.22)
 hc[skn_] = np.clip(hc[skn_] * np.array([1.3, 1.24, 1.2]), 0, 1)
 OUTC[ys_, xs_] = hc * (0.84 + 0.16 * np.clip(AO[ys_, xs_], 0, 1))[:, None]
-skin_m = mask & (OUTC[..., 0] > OUTC[..., 1] * 1.08) & (OUTC[..., 0] < OUTC[..., 1] * 1.6) & (OUTC.mean(2) > 0.36)
-OUTC = P.clean_skin(OUTC, skin_m, blur)
+# the skin's smeared green lines go; the bare back, all of it not jacket, is clean skin; then her circuits, thin and exact
+skin_faces = np.zeros((ATLAS, ATLAS), bool)
+fm0 = np.array([p.material_index for p in me.polygons])
+skin_faces[FACEI >= 0] = (fm0[FACEI[FACEI >= 0]] == mat_i["skin-vex"])
+skin_faces &= mask
+Zs_ = VC.J("upper_arm.R")[2]
+hue_g = (OUTC[..., 1] > OUTC[..., 0] * 0.87)
+back_t = mask & (POS[..., 1] < 0.0) & (NOR[..., 1] < 0.1) & (POS[..., 2] > Z_BELT + 0.012) & (POS[..., 2] < Zs_ - 0.03) & (np.abs(POS[..., 0]) < 0.085 + 0.1 * smooth(Z_BELT + 0.32, Z_BELT + 0.16, POS[..., 2]))
+back_jacket = back_t & (OUTC[..., 1] > OUTC[..., 0] * 1.04) & (OUTC[..., 1] > 0.34) & (OUTC.max(2) - OUTC.min(2) > 0.12)
+back_bare = back_t & ~back_jacket
+fill = (skin_faces & hue_g & (OUTC.mean(2) > 0.3)) | back_bare | (skin_faces & (OUTC.mean(2) < 0.34) & (POS[..., 2] > Z_BELT + 0.03) & (POS[..., 2] < Zs_ - 0.02) & (np.abs(POS[..., 0]) < 0.2))
+sm_ = (skin_faces & ~fill).astype(np.float32)
+base_ = np.stack([blur(OUTC[..., c], sm_, 14) for c in range(3)], -1)
+OUTC[fill] = base_[fill]
+orange = (OUTC[..., 0] > OUTC[..., 1] * 1.5) & (OUTC[..., 1] > OUTC[..., 2] * 1.25)
+skin_all = (skin_faces | back_bare) & (OUTC[..., 0] > OUTC[..., 1] * 1.04) & (OUTC.mean(2) > 0.3) & ~orange | (fill & ~orange)
+OUTC = P.clean_skin(OUTC, skin_all, blur)
+OUTC[skin_all] *= (0.74 + 0.26 * np.clip(AO[skin_all], 0, 1))[..., None]
+mz_ = (skin_faces | back_bare)
+ys_c, xs_c = np.nonzero(mz_)
+lines = P.draw_circuits(POS[ys_c, xs_c, 0].astype(np.float64), POS[ys_c, xs_c, 2].astype(np.float64), NOR[ys_c, xs_c, 1] > 0, Z_BELT, Zs_ - 0.13)
+OUTC[ys_c[lines], xs_c[lines]] = np.array(P.CIRCUIT, np.float32)
+print("circuit texels", int(lines.sum()), "of", len(ys_c), "front", int((NOR[ys_c, xs_c, 1] > 0).sum()))
+CIRC = np.zeros((ATLAS, ATLAS), bool)
+CIRC[ys_c[lines], xs_c[lines]] = True
 # the jacket: her lime green, the scan's paint lost it; the scan's dark scribbles on the slipped sleeve go
 sl_ = mask & (POS[..., 0] < -0.17) & (POS[..., 2] > VC.J("forearm.L")[2] - 0.12) & (POS[..., 2] < VC.J("upper_arm.L")[2] - 0.1) & (OUTC.max(2) < 0.3)
 OUTC[sl_] = np.array([0.42, 0.56, 0.28], np.float32) * (0.75 + 0.25 * AO[sl_])[..., None]
 c0_ = OUTC
 jm = mask & (POS[..., 2] > Z_BELT) & (c0_[..., 1] > c0_[..., 0] * 1.02) & (c0_[..., 1] > c0_[..., 2] * 1.12) & (c0_.mean(2) > 0.2) & (c0_[..., 1] < c0_[..., 0] * 1.6)
 g_ = OUTC[jm].mean(1, keepdims=True)
-OUTC[jm] = np.clip((g_ + (OUTC[jm] - g_) * 1.55) * np.array([1.05, 1.17, 0.9], np.float32), 0, 1)
+OUTC[jm] = np.clip((g_ + (OUTC[jm] - g_) * 1.4) * np.array([0.98, 1.08, 0.82], np.float32), 0, 1)
 
 SKIN = lambda p, n, ao: ramp(np.clip(lit(n, ao) * 1.05, 0, 1), [hexc("#8c5a5c"), hexc("#c58a84"), hexc("#e5ac9f"), hexc("#f3c9bb"), hexc("#fde4d7")])
 paint(lambda n: n == "lidUL", lambda p, n, ao: P.mix(SKIN(p, n, ao), hexc("#2a2024"), smooth(0.9, 0.78, np.arctan2(p[..., 2] - parts["lid_c"][2], p[..., 1] - parts["lid_c"][1]))))
@@ -504,14 +521,18 @@ paint(lambda n: n.startswith("ebrow"), lambda p, n, ao: np.broadcast_to(hexc("#2
 paint(lambda n: n == "ear", SKIN)
 paint(lambda n: n == "sleeve", P.sleeve)
 paint(lambda n: n == "tube", P.tube)
-paint(lambda n: n in ("bell", "pivot", "dbrkt", "packrim", "eyerim", "wristband", "coin", "braidtie") or n.startswith("gband38"), P.brass)
+paint(lambda n: n in ("bell", "pivot", "dbrkt", "packrim", "eyerim", "wristband", "coin", "braidtie") or n.startswith("gband36"), P.brass)
 paint(lambda n: n == "plate", P.plate)
-paint(lambda n: n.startswith(("barrel", "gspindle", "gcollar", "gband55", "post", "clamp", "strut", "dlid", "packdisc", "stalk", "sightring", "hose", "gfr", "gbridge", "gstrap", "earring", "dfoot")), lambda p, n, ao: P.steel(p, n, ao))
+paint(lambda n: n.startswith(("barrel", "gspindle", "gcollar", "gband49", "post", "clamp", "strut", "dlid", "packdisc", "stalk", "sightring", "hose", "gfr", "gbridge", "gstrap", "earring", "dfoot")), lambda p, n, ao: P.steel(p, n, ao))
 paint(lambda n: n.startswith(("barrel", "gspindle", "hose", "gstrap")), lambda p, n, ao: P.steel(p, n, ao, P.BLACKM))
 paint(lambda n: n in ("glR", "glL"), P.goggle_lens)
 paint(lambda n: n in ("eyering", "eyepupil"), lambda p, n, ao: np.broadcast_to(np.array([0.04, 0.06, 0.05]), p.shape).copy())
 paint(lambda n: n.startswith("gren"), lambda p, n, ao: ramp(np.clip(lit(n, ao) * 1.12, 0, 1), [hexc("#14391a"), hexc("#256a2c"), hexc("#3e9a3e"), hexc("#74c863"), hexc("#c0f09e")]))
 paint(lambda n: n == "tapetail", lambda p, n, ao: ramp(np.clip(lit(n, ao) * 1.2, 0, 1), [hexc("#8a8778"), hexc("#b7b4a6"), hexc("#dcd9cb")]))
+paint(lambda n: n == "poster", lambda p, n, ao: P.poster_paint(p, n, ao))
+paint(lambda n: n == "splate", P.plate_paint)
+paint(lambda n: n == "robopanel", P.brass)
+paint(lambda n: n == "posterpin", lambda p, n, ao: P.brass(p, n, ao))
 paint(lambda n: n in ("robofore", "elbowball", "palm", "thumbL") or n.startswith("finger"), P.chrome)
 paint(lambda n: n.startswith(("vert", "vstub")), P.chrome)
 paint(lambda n: n.startswith(("elbowglow", "fpad", "thumbpad", "vglow", "eyelens", "stripe")), lambda p, n, ao: np.broadcast_to(np.array([0.72, 1.0, 0.45]), p.shape).copy())
@@ -586,6 +607,45 @@ ic[:, 3] = rooms
 ic[:, 0] = ic[:, 1] = ic[:, 2] = shades
 attr.data.foreach_set("color", ic.ravel())
 me.color_attributes.active_color = attr
+
+# ---- the normal map: the scans' detail on the shipped mesh; rebuilt pieces stay flat
+nrm_img = bpy.data.images.new("vex_normal", ATLAS, ATLAS)
+nrm_img.colorspace_settings.name = "Non-Color"
+for mt in me.materials:
+    nt = mt.node_tree
+    n_ = nt.nodes.new("ShaderNodeTexImage")
+    n_.image = nrm_img
+    nt.nodes.active = n_
+sc.cycles.samples = 4
+sc.render.bake.use_selected_to_active = True
+sc.render.bake.cage_extrusion = 0.014
+sc.render.bake.max_ray_distance = 0.03
+sc.render.bake.normal_space = "TANGENT"
+for o in bpy.data.objects:
+    o.select_set(False)
+src.hide_render = hsrc.hide_render = False
+src.select_set(True)
+hsrc.select_set(True)
+ob.select_set(True)
+bpy.context.view_layer.objects.active = ob
+bpy.ops.object.bake(type="NORMAL", use_clear=True, margin=6)
+NR = np.array(nrm_img.pixels[:], dtype=np.float32).reshape(ATLAS, ATLAS, 4)[..., :3]
+flat = ~((PID == 0) | (PID == names.index("hscan")))
+NR[flat] = (0.5, 0.5, 1.0)
+px_n = np.ones((ATLAS, ATLAS, 4), np.float32)
+px_n[..., :3] = NR
+nrm_img.pixels.foreach_set(px_n.ravel())
+nrm_img.filepath_raw = os.path.join(os.path.dirname(OUT), "normal.png")
+nrm_img.file_format = "PNG"
+nrm_img.save()
+ob.select_set(True)
+for mt in me.materials:
+    nt = mt.node_tree
+    n_ = next(q for q in nt.nodes if q.type == "TEX_IMAGE" and q.image is nrm_img)
+    nm_ = nt.nodes.new("ShaderNodeNormalMap")
+    nt.links.new(n_.outputs[0], nm_.inputs["Color"])
+    nt.links.new(nm_.outputs[0], nt.nodes["Principled BSDF"].inputs["Normal"])
+print("normal baked")
 
 # ---- armature
 rig = json.load(open(RIG))

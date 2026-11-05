@@ -22,19 +22,54 @@ def project(bvh, pts, off):
 
 
 def ammo(bvh):
-    """The belt: from the gear pack over her left shoulder, across the chest, down to her right hip where the cannon feeds."""
+    """The belt: from the gear pack over her left shoulder, across the chest, to her right hip. Real cartridges side by side on a dark link strip, each brass with a copper nose, tiled."""
     SH = VC.J("upper_arm.R")
     top = SH[2]
-    H = VC.J("hips")[2]
-    key = [(-.20, .10 * -1, top + .03), (-.15, .06, top + .055), (-.085, .135, top - .08), (-.03, .165, top - .2), (.05, .165, top - .32), (.13, .13, top - .40), (.215, .07, top - .45)]
-    path = catmull(np.array(key, float), 44)
-    path = project(bvh, path, 0.012)
-    # smooth what the projection jittered
-    for _ in range(3):
+    key = [(-.20, -.10, top + .03), (-.15, .06, top + .055), (-.085, .135, top - .08), (-.03, .165, top - .2), (.05, .165, top - .32), (.13, .13, top - .40), (.215, .07, top - .45)]
+    path = catmull(np.array(key, float), 60)
+    path = project(bvh, path, 0.011)
+    for _ in range(4):
         path[1:-1] = (path[:-2] + path[2:] + path[1:-1] * 2) / 4
-    side_hint = np.array([0.5, -0.1, 0.85])
-    p = VC.belt_path_tile("ammo", path, 0.028, hint=side_hint)
-    return p
+    # even steps along the path
+    d = np.concatenate([[0], np.cumsum(np.linalg.norm(np.diff(path, axis=0), axis=1))])
+    STEP, LEN, R = 0.0285, 0.03, 0.0112
+    at = np.arange(STEP * 0.5, d[-1], STEP)
+    pts = np.stack([np.interp(at, d, path[:, i]) for i in range(3)], 1)
+    tan = M_norm(np.gradient(pts, axis=0))
+    nor = M_norm(pts * [1, 1, 0] - [0, -0.02, 0])
+    acr = M_norm(np.cross(tan, nor))
+    nor = M_norm(np.cross(acr, tan)) * np.sign(np.sum(np.cross(acr, tan) * nor, axis=1, keepdims=True))
+    v, f, uv = [], [], []
+    SEC = 5
+    prof = [(-1.0, 0.92, 0.0), (0.4, 1.0, 0.72), (0.72, 0.8, 0.8), (1.0, 0.22, 1.0)]       # (along, radius, tile v)
+    for i in range(len(pts)):
+        base = len(v)
+        for al, rr, tv in prof:
+            for j in range(SEC):
+                t_ = j / SEC * 2 * np.pi
+                v.append(pts[i] + acr[i] * al * LEN + (nor[i] * np.cos(t_) + tan[i] * np.sin(t_)) * rr * R + nor[i] * 0.004)
+        for k in range(len(prof) - 1):
+            for j in range(SEC):
+                a0, b0 = base + k * SEC + j, base + k * SEC + (j + 1) % SEC
+                f.append([a0, a0 + SEC, b0 + SEC, b0])
+                s0, s1 = abs(np.cos(j / SEC * 2 * np.pi)), abs(np.cos((j + 1) / SEC * 2 * np.pi))
+                uv.append([(s0, prof[k][2]), (s0, prof[k + 1][2]), (s1, prof[k + 1][2]), (s1, prof[k][2])])
+    c = Piece("ammoc", "metal-belt", np.array(v), f, uv, room=0.3)
+    # the link strip under them
+    sv, sf, su = [], [], []
+    for i in range(len(pts)):
+        for off in (-1, 1):
+            sv.append(pts[i] + acr[i] * off * 0.02 - nor[i] * 0.004)
+    for i in range(len(pts) - 1):
+        q = i * 2
+        sf.append([q, q + 2, q + 3, q + 1])
+        su.append([(0.1, 0.02), (0.9, 0.02), (0.9, 0.2), (0.1, 0.2)])
+    st = Piece("ammostrip", "metal-belt", np.array(sv), sf, su, room=0.3)
+    return [c, st]
+
+
+def M_norm(a):
+    return norm(a)
 
 
 def stripes(bvh):
@@ -111,11 +146,14 @@ def build(bvh_src, bvh_low, bvh_head=None):
     sp = VH.spine(VC.J("hips")[2] + 0.02, sh_z - 0.06, lambda z: surf_y_back(bvh_low, z))
     pack, pack_c, pa, pb = VC.gear_pack(sh_z + 0.0, surf_y_back(bvh_low, sh_z - 0.0))
     belt = ammo(bvh_low)
-    belt.w = {"hips": np.ones(len(belt.v))}
+    for q in belt:
+        q.w = {"hips": np.ones(len(q.v))}
+    plate_back = VH.spine_plate(sh_z - 0.03, lambda z: surf_y_back(bvh_low, z), lambda x, z: bvh_low.ray_cast(Vector((x, -0.6, z)), Vector((0, 1, 0)), 1.0)[0])
+    poster = VC.poster()
     hs = hoses(pack_c)
-    pieces = stripes(bvh_low) + headp + bd + cannon + arm + hnd + [coin] + sp + pack + [belt] + hs
+    pieces = stripes(bvh_low) + headp + bd + cannon + arm + hnd + [coin] + sp + plate_back + pack + belt + poster + hs + VA.panel()
     for p in pieces:
-        if p.name.startswith(("ammo", "lid", "face", "gfr", "gl", "eyeL", "stripe")):
+        if p.name.startswith(("ammo", "lid", "face", "gfr", "gl", "eyeL", "stripe", "splate", "poster")):
             continue
         p.orient()
     return {"pieces": pieces, "hair": hair, "braid": bd, "bnames": bnames, "bpts": bpts, "fnames": fnames, "fpts": fpts, "coin": coin_c, "pack_c": pack_c, "lid_c": lid_c}

@@ -22,8 +22,8 @@ SLEEVE_F, SLEEVE_R = 0.05, 0.072
 GATLING_F = -0.052
 TUBE_F, TUBE_R = 0.15, 0.041      # the launcher: its axis ahead of the sleeve; radius of the scrap pipe
 POST_S = -0.24                    # the launcher's pivot along the cannon
-BELL_S, BREECH_S = -0.55, -0.11    # bell mouth and breech at rest
-TIP_S = 0.60                      # the gatling's mouths
+BELL_S, BREECH_S = -0.52, -0.11    # bell mouth and breech at rest
+TIP_S = 0.535                      # the gatling's mouths
 
 
 def C(s, u=0.0, f=0.0):
@@ -80,8 +80,8 @@ def gatling():
     hub = lathe("gcollar0", "metal-vex", cu, cf, [(0.02, 0.0), (0.02, 0.05), (0.06, 0.056), (0.15, 0.056), (0.2, 0.05), (0.2, 0.0)], n=10, bone="forearm.R")
     out.append(hub)
     out.append(lathe("gspindle", "metal-vex", cu, cf, [(0.15, 0.022), (TIP_S - 0.02, 0.022)], n=6, bone="gatling", cap=False))
-    for s0, s1, r in ((0.38, 0.415, 0.058), (0.555, 0.585, 0.057)):
-        out.append(lathe("gband%d" % int(s0 * 100), "brass-vex" if s0 < 0.5 else "metal-vex", cu, cf, [(s0, 0.03), (s0, r), (s1, r), (s1, 0.03)], n=10, bone="gatling", cap=False))
+    for s0, s1, r in ((0.36, 0.395, 0.058), (0.49, 0.52, 0.057)):
+        out.append(lathe("gband%d" % int(s0 * 100), "brass-vex" if s0 < 0.45 else "metal-vex", cu, cf, [(s0, 0.03), (s0, r), (s1, r), (s1, 0.03)], n=10, bone="gatling", cap=False))
     for i in range(6):
         t = i / 6 * 2 * np.pi
         bu, bf = cu + 0.036 * np.cos(t), cf + 0.036 * np.sin(t)
@@ -117,6 +117,38 @@ def launcher():
     f = [[i, i + 1, i + 5, i + 4] for i in range(3)] + [[i + 4, i + 5, i + 1, i] for i in range(3)]
     out.append(Piece("tapetail", "cloth-vex", v, f).rigid(b))
     return [p for p in out if p is not None]
+
+
+def poster():
+    """The wanted poster, its own sheet on the sleeve (top of the cannon when she aims): a curved patch, torn edges, the pin. The art is the weapon sheet's."""
+    rows, cols = 7, 6
+    r = SLEEVE_R + 0.0035
+    rng = np.random.RandomState(7)
+    v, uv = [], []
+    S0, S1 = -0.125, 0.092
+    A = 0.78
+    for i in range(rows):
+        k = i / (rows - 1)
+        for j in range(cols):
+            q = j / (cols - 1)
+            a, s_ = (q - 0.5) * 2 * A, S0 + (S1 - S0) * k
+            if i in (0, rows - 1):
+                s_ += rng.uniform(-0.009, 0.009)
+            if j in (0, cols - 1):
+                a += rng.uniform(-0.09, 0.09)
+            v.append(C(s_, np.sin(a) * r, SLEEVE_F + np.cos(a) * r))
+            uv.append((q, k))
+    v = np.array(v)
+    f = []
+    for i in range(rows - 1):
+        for j in range(cols - 1):
+            a = i * cols + j
+            f.append([a, a + 1, a + 1 + cols, a + cols])
+    p = Piece("poster", "cloth-vex", v, f).rigid("forearm.R")
+    p.orient(tuple(C(0, 0, SLEEVE_F)))
+    p.pu = np.array(uv)
+    pin = lathe("posterpin", "metal-vex", 0.0, SLEEVE_F + r + 0.002, [(S0 + 0.012, 0.0), (S0 + 0.012, 0.009), (S0 + 0.019, 0.009), (S0 + 0.019, 0.0)], n=6, cap=False)
+    return [p, pin]
 
 
 def pumpkin(name, s, u, f, r, h):
