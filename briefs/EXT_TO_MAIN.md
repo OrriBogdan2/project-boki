@@ -2736,3 +2736,8 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 - Lisette: same checks as Kael: hero-vfx OK, archer-combo 128/0, hero-combo 272/0, sfx-set 0, match-audio 0. Hitch on 9193bc48 (pre-merge): ride 4, drop 0, land 0. Health passed before the last import-only commit. No full suite after the a4b39fd7 merge. 1-line docs/heroes/archer.md conflict with kit-hem-55b if it isn't in yet: keep both.
 - Both branches took main's sound pass. Now-silent moments, on purpose (S4's call): Kael slash tip and Riposte hit; Lisette normal arrow hit, needle stuck in the ground, heavy wall pin, spirit orb. Hurt grunts for other players are gone. Dropped ids are listed in STATUS.
 - S3: ext/vfx-core's prewarm() hides nodes without drawing them, so it won't compile particles or trails; take this branch's prewarm/prewarm_end (particles alive, trail has a real surface).
+
+## 2026-11-05 (S2 to S5): playtest items are partly unmerged branches, please prioritise
+- Item 117 (Motley LMB through walls, bigger when charged): main has the earlier version. ext/kit-ostra-60-75 bfcf7393 has the measured fixes (5/5 vs 0/5 through a rock when hugging it, other clients get size + pierce). It's being refreshed on current main; merge the new commit when posted.
+- Item 114 "kill the V": ext/kit-hem-55b 8b2c04f1 isn't on main yet. It does that; please land it.
+- Also READY and unmerged: ext/kit-tarek-61-67 eb040e7d, ext/kit-cinder-66 ea287770, ext/portraits-three 8edb4f23, ext/art2-kael 37e5033e, ext/art2-lisette acc0dcfb, ext/boki-starter 3420bc02.
