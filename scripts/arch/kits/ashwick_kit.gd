@@ -34,7 +34,8 @@ const POOF_PUFFS := 5                  # smoke puffs the bellows blow out behind
 const CLOAK_POSE_T := 0.25            # s the Furnace Cloak flare holds the flamer up off the aim (as_cloak)
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
-const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the nozzle's tip from the feet in the aim pose: forward, up, right (m)
+const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the nozzle's tip from the feet in the aim pose, with no model to read: forward, up, right (m)
+const NOZZLE_REACH := 2.6                 # m: a model's nozzle further than this from her isn't posed yet (a frame's teleport): use NOZZLE
 
 var chars := {}                 # foe id -> {e, n, t}
 var ignites := {}               # foe id -> {e, lvl, until}
@@ -51,6 +52,7 @@ var trail_t := 0.0              # the next dash after-image puff
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
+var nozzle_at: Node3D           # the skinned gun's weapon_muzzle (WardenGlb.anchor), once the model has it
 var lmb_key_was := false         # the LMB key last step: only a press in the flight ticks, not a hold carried in
 var lmb_denied := 0              # (tests) presses refused during Flue Flight
 var jet: AshwickJet             # X, Flue Flight (its flight is a hold: jet.flight)
@@ -87,8 +89,15 @@ func _fwd() -> Vector3:
 	var d2 := h.aim_dir()
 	return Vector3(d2.x, 0.0, d2.y)
 
-## The nozzle: held low at the right hip, pointed forward (sheet: LMB animation).
+## The nozzle: the tip of the gun you see (the skinned gun's weapon_muzzle, item 76b); with no model (or the old
+## procedural one), held low at the right hip, pointed forward (sheet: LMB animation).
 func nozzle() -> Vector3:
+	if nozzle_at == null or not is_instance_valid(nozzle_at):
+		nozzle_at = WardenGlb.anchor(h.model, "weapon_muzzle") if h.model else null
+	if nozzle_at != null and nozzle_at.is_inside_tree():
+		var at := nozzle_at.global_position
+		if at.distance_to(h.pos) < NOZZLE_REACH:
+			return at
 	var f := _fwd()
 	return h.pos + f * NOZZLE.x + f.cross(Vector3.UP) * NOZZLE.z + Vector3(0, NOZZLE.y, 0)
 

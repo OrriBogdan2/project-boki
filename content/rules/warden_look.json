@@ -745,60 +745,7 @@
 			}
 		]
 	},
-	"cinder": {
-		"painted": {
-			"rim_far": 0.42,
-			"rim_far_color": [
-				1.0,
-				0.5,
-				0.16
-			]
-		},
-		"slots": {
-			"skin": {
-				"shade": 0.9,
-				"top_light": 0.2,
-				"fres": 0.45,
-				"far_lift": 0.22,
-				"light_neutral_warm": 0.6,
-				"glow": 0.14
-			},
-			"metal": {
-				"top_light": 0.3,
-				"fres": 0.3,
-				"fres_tint": 0.6,
-				"far_lift": 0.1,
-				"sheen": 0.0
-			},
-			"glow": {
-				"glow": 1.6
-			},
-			"fur": {
-				"far_lift": 0.6,
-				"fres": 0.6,
-				"glow": 0.3,
-				"light_neutral_warm": 0.5
-			},
-			"leather": {
-				"light_neutral_warm": 0.4,
-				"far_lift": 0.12
-			}
-		},
-		"halos": [
-			{
-				"anchor": "anchor_flame",
-				"color": [
-					1.0,
-					0.55,
-					0.18
-				],
-				"px": 2.4,
-				"near_d": 7.0,
-				"far_d": 14.0,
-				"strength": 2.2
-			}
-		]
-	},
+	"cinder": {"painted": {"rim_far": 0.4, "rim_far_color": [1.0, 0.52, 0.18]}, "slots": {"skin": {"shade": 0.92, "top_light": 0.4, "fres": 0.3, "fres_tint": 0.35, "far_lift": 0.3, "shadow_tint": [0.84, 0.82, 0.96], "light_neutral_warm": 0.6}, "leather": {"far_lift": 0.32, "fres": 0.2, "light_neutral_warm": 0.4}, "metal": {"top_light": 0.6, "fres": 0.55, "fres_tint": 0.8, "far_lift": 0.3, "sheen": 0.12}, "flame-hair": {"speed": 1.25, "scale_u": 2.2, "scale_v": 3.2, "lick": 0.6, "sway": 0.016}, "flame-jet": {"speed": 2.3, "scale_u": 2.0, "scale_v": 2.6, "lick": 0.5, "sway": 0.022}, "flame-liquid": {"level": 0.74}}, "bloom": [{"at": "anchor_crown", "color": [1, 0.5, 0.14, 0.34], "size": 0.62, "depth_test": true}, {"at": "anchor_tail_tip", "color": [1, 0.5, 0.14, 0.42], "size": 0.34, "depth_test": true}, {"at": "anchor_jet_0", "color": [1, 0.52, 0.16, 0.4], "size": 0.3, "depth_test": true}, {"at": "anchor_jet_1", "color": [1, 0.52, 0.16, 0.4], "size": 0.3, "depth_test": true}, {"at": "anchor_tank", "color": [1, 0.55, 0.16, 0.3], "size": 0.5, "depth_test": true}]},
 	"kael": {
 		"painted": {
 			"rim_far": 0.35,

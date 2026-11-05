@@ -13,7 +13,7 @@ uniform float scale_u = 2.6;       // noise cells across a strip
 uniform float scale_v = 3.4;       // and along it
 uniform float lick = 0.62;         // how deep the noise bites the outline
 uniform float sway = 0.018;        // m the tip wavers
-uniform float gain = 1.25;         // brightness over the ramp
+uniform float gain = 1.0;         // brightness over the ramp
 uniform float level = 0.72;        // liquid: the fuel's level, v
 uniform vec4 c_deep : source_color = vec4(0.72, 0.07, 0.02, 1.0);
 uniform vec4 c_mid : source_color = vec4(1.0, 0.33, 0.03, 1.0);
@@ -63,8 +63,7 @@ void fragment() {
 			c = mix(vec3(0.34, 0.16, 0.07), vec3(0.14, 0.09, 0.08), smoothstep(top, top + 0.2, v));
 		} else {
 			float n = fbm3(vec2(UV.x * 9.0, v * 5.0 - TIME * 0.35));
-			float h = 0.45 + 0.42 * n - 0.32 * smoothstep(0.0, 0.25, v) * 0.0 + 0.3 * (1.0 - smoothstep(0.0, 0.5, v));
-			h -= 0.12 * smoothstep(top - 0.14, top, v) * -1.0;
+			float h = 0.3 + 0.42 * n + 0.22 * (1.0 - smoothstep(0.0, 0.6, v));
 			float b = bubbles(vec2(UV.x * 14.0, v * 10.0 - TIME * 0.9)) + 0.7 * bubbles(vec2(UV.x * 23.0 + 3.0, v * 17.0 - TIME * 1.5));
 			c = ramp(clamp(h + b * 0.55, 0.0, 1.0));
 			c = mix(c, c_core.rgb, (1.0 - smoothstep(0.0, 0.012, abs(v - top))));
@@ -82,7 +81,8 @@ void fragment() {
 		if (h < 0.07 && UV.y > 0.03) {
 			discard;
 		}
-		c = ramp(clamp((h - 0.07) * 1.5 + bright * 0.3, 0.0, 1.0));
+		// (a strip is mostly saturated fire; the pale core is a thin heart, or it reads as a hole against a bright sky)
+		c = ramp(clamp((h - 0.07) * 0.95 + bright * 0.22, 0.0, 1.0));
 	}
 	c *= gain;
 	float fog = no_fog ? 0.0 : vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);

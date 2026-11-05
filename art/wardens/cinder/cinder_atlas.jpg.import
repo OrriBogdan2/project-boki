@@ -2,13 +2,13 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://du86fbnfciqff"
+uid="uid://cxke01iylovx5"
 path="res://.godot/imported/cinder_atlas.jpg-76b09bc7c334aec3f18d12e676876b5b.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "e4983237f2e7734f37955397c87fff9d"
+"md5": "3277854f42a2930321b345a749b2e411"
 }
 
 [deps]
@@ -40,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1
