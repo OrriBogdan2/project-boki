@@ -6,7 +6,7 @@ import cinder_pieces as K
 
 HOT = np.array([1.0, 0.68, 0.2])         # keyed fully hot by hero_toon's glow_key; she keeps her painted colours (no model_glow core), so the iris stays
 HOT_RIM = np.array([0.86, 0.3, 0.07])    # keyed partly
-SKIN = [hexc("#2c282e"), hexc("#413c43"), hexc("#585259"), hexc("#6f6870"), hexc("#88808a")]
+SKIN = [hexc("#30282a"), hexc("#463c3e"), hexc("#5f5254"), hexc("#77686a"), hexc("#918082")]
 COPPER = [hexc("#4a2210"), hexc("#7c3f1c"), hexc("#ad6230"), hexc("#d68a4c"), hexc("#f6c08c")]
 BRASS = [hexc("#4a3414"), hexc("#7e5e24"), hexc("#b08a3c"), hexc("#d8b45c"), hexc("#f6e0a0")]
 STEEL = [hexc("#35343a"), hexc("#55535a"), hexc("#7a7880"), hexc("#a09ea6"), hexc("#cfced4")]
@@ -118,6 +118,13 @@ def brass(p, n, ao):
     return metal(BRASS, p, n, ao, 0.3, 0.4)
 
 
+CORK = [hexc("#4a3420"), hexc("#7a5a38"), hexc("#a4805a"), hexc("#c4a27a"), hexc("#dcc4a0")]
+
+
+def cork(p, n, ao):
+    return ramp(np.clip(lit(n, ao) + (fbm(p * 90) - 0.5) * 0.2, 0, 1), CORK)
+
+
 def steel(p, n, ao):
     return metal(STEEL, p, n, ao, 0.35, 0.35)
 
@@ -134,11 +141,10 @@ def hose(p, n, ao, axis_ribs=True):
 
 
 def wrap(p, n, ao, g, b):
-    """The grip's red leather wrap: a spiral."""
+    """The grip's red leather wrap (master sheet): turns round it."""
     h = (p - g) @ b
     t = lit(n, ao)
-    q = np.arctan2(p[..., 2] - g[2], p[..., 0] - g[0])
-    band = 0.5 + 0.5 * np.sin(h * 170 + q * 2)
+    band = 0.5 + 0.5 * np.sin(h * 210)
     return ramp(np.clip(t * 0.95 + 0.18 * (band - 0.5), 0, 1), WRAP)
 
 
@@ -154,16 +160,18 @@ def lens(p, frame):
     return np.clip(mix(col, hexc("#e8e4dc"), (1 - smooth(0.0, 0.04, crack)) * 0.6), 0, 1)
 
 
-def gauge(p, gc, gd):
+def gauge(p, gc, gd, rad=0.046):
     k = norm(np.cross(gd, (0, 0, 1)))
     l2 = norm(np.cross(gd, k))
     d = p - gc
-    x, y = d @ k / 0.046, d @ l2 / 0.046
+    x, y = d @ k / rad, d @ l2 / rad
     r = np.sqrt(x * x + y * y)
     a = np.arctan2(x, y)
     c = np.broadcast_to(hexc("#e6dcc0"), p.shape).copy()
     red = (a > 0.9) & (a < 2.3) & (r > 0.72) & (r < 0.9)
     c[red] = hexc("#c8281a")
+    grn = (a > -0.5) & (a < 0.9) & (r > 0.76) & (r < 0.9)
+    c[grn] = hexc("#7fa04a")
     ticks = (np.abs(((a + 3.2) / 0.32) % 1 - 0.5) > 0.42) & (r > 0.76) & (r < 0.92) & (np.abs(a) < 2.4)
     c[ticks] = hexc("#2a2422")
     nd = 1.05
@@ -192,7 +200,7 @@ def face(plate, p, n, ao):
     lum = c.mean(-1)
     r_ = np.sqrt(((px - 510) / 300.0) ** 2 + ((py - 487) / 442.0) ** 2)
     sh = 0.72 + 0.42 * smooth(-0.4, 0.8, n[..., 2] * 0.45 + n[..., 1] * 0.75)
-    out = c * (sh * 0.92)[..., None] * np.array([1.03, 0.98, 1.0])
+    out = c * (sh * 1.08)[..., None] * np.array([1.1, 1.0, 0.97])
     # the cracks and the eyes keep the plate's own fire, a little lifted
     hot = smooth(0.14, 0.3, c[..., 0] - c[..., 2]) * smooth(0.34, 0.5, c[..., 0])
     out = mix(out, np.minimum(c * 1.18, 1.0), hot)

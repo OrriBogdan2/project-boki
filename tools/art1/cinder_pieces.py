@@ -526,6 +526,11 @@ def tank():
             k1 = np.array([d[1], -d[0], 0.0])
             pts = [c0 + k1 * 0.009, c0 + [0, 0, 0.009], c0 - k1 * 0.009, c0 - [0, 0, 0.009], c0 + d * 0.006]
             out.append(Piece("rivet%d_%d" % (int(z * 100), i), "metal-cinder", pts, [[0, 1, 4], [1, 2, 4], [2, 3, 4], [3, 0, 4]]).rigid("hips"))
+    # the harness: leather bands round the copper, a strap from each up over her shoulder blade
+    out.append(lathe("hband0", "leather-cinder", [(0.1535, BAND1 + 0.0), (0.1565, BAND1 - 0.004), (0.1565, BAND0 + 0.004), (0.1535, BAND0)], TANK_C, segs=14).rigid("hips"))
+    for sg, nm in ((1.0, "hstrapR"), (-1.0, "hstrapL")):
+        q = catmull([TANK_C + [sg * 0.06, 0.13, GL1 + 0.02], (sg * 0.075, -0.125, SHOULDER_Z + 0.02), (sg * 0.088, -0.07, SHOULDER_Z + 0.075), (sg * 0.095, -0.015, SHOULDER_Z + 0.075)], 5)
+        out.append(sweep(nm, "leather-cinder", q, [(-1, 0.22), (1, 0.22), (1, -0.22), (-1, -0.22)], np.full(5, 0.021), side_hint=np.array([0, 1.0, 0.4])).rigid("hips"))
     # the exhaust stacks
     top = GL1 + 0.15
     stacks = [(np.array([-0.05, TANK_C[1] - 0.005, top - 0.005]), norm(np.array([-0.08, 0.02, 1.0])), 0.128),
@@ -565,43 +570,85 @@ def jet_flames(tips):
 
 
 # ------------------------------------------------------------------ the gun
-GRIP_AT = np.array([SH, 0.008, HAND_Z - 0.078])        # inside the closed fist, on the rod
-GUN_B = np.array([0.0, 1.0, 0.0])                      # along the gun, from the fist to the nozzle
-GUN_E = np.array([0.0, 0.0, 1.0])                      # its top
-FORE = 0.33                                            # the fist to the off hand's place on the barrel
-MUZZLE = 0.88                                          # the fist to the nozzle's tip
-BUTT = -0.2
+# Built from briefs/art-refs/cinder_weapons.png (pistol grip, brass body with a glass chamber, copper barrel over a lower pipe with the leather foregrip, gauge, the
+# hose into the butt of the grip), with the master sheet's spearhead nozzle and red grip wrap. In the rest pose the arm hangs, so the barrel lies along the
+# forearm and points at the ground; every clip poses it by its own frame.
+GUN_B = np.array([0.0, 0.0, -1.0])                     # along the barrel, muzzle-ward
+GUN_E = np.array([0.0, 1.0, 0.0])                      # the gun's top (her thumb's side)
+GRIP_RAKE = np.radians(22)
+GRIP_K = GUN_E * np.cos(GRIP_RAKE) + GUN_B * np.sin(GRIP_RAKE)     # up the grip, toward the barrel: her knuckle line
+_ga = norm(np.array([0, 0, -1.0]) - GRIP_K * np.dot(np.array([0, 0, -1.0]), GRIP_K))
+GRIP_AT = np.array([SH, 0.0, HAND_Z + 0.006]) + _ga * 0.082 + np.array([-0.022, 0.0, 0.0])     # inside the closed fist, on the grip
+BORE = 0.084                                           # the barrel's line above the grip point, along the gun's top
+FORE = 0.34                                            # the grip to the off hand's place on the lower pipe
+MUZZLE = 0.88                                          # the grip to the nozzle's tip
+GRIP_BASE = GRIP_AT - GRIP_K * 0.088
+
+
+def gun_at(h, e=0.0, x=0.0):
+    return GRIP_AT + GUN_B * h + GUN_E * e + np.array([x, 0, 0])
 
 
 def gun():
-    """The flame nozzle: a wrapped rod she carries like a spear, a brass-collared chamber, a long barrel and a spearhead nozzle (the
-    sheet's). Modelled in the rest pose in her right hand; skinned 100% to it (item 76b)."""
+    """Skinned 100% to the right hand (item 76b). The glass is the fuel shader's."""
     out = []
-    g = GRIP_AT
-    ax = GUN_B
 
-    def ring(name, mat, prof, segs=8):
-        return lathe(name, mat, [(r, h) for r, h in prof], g, ax, segs=segs).rigid("hand.R")
-    out.append(ring("gunrod", "leather-cinder", [(0.0, BUTT + 0.05), (0.022, BUTT + 0.05), (0.0185, BUTT + 0.08), (0.0185, 0.10), (0.022, 0.12)]))
-    out.append(ring("gunbutt", "metal-cinder", [(0.0, BUTT - 0.03), (0.03, BUTT - 0.025), (0.034, BUTT), (0.03, BUTT + 0.02), (0.026, BUTT + 0.06)]))
-    out.append(ring("gunbody", "metal-cinder", [(0.022, 0.1), (0.038, 0.115), (0.046, 0.14), (0.046, 0.215), (0.04, 0.235), (0.03, 0.245), (0.03, 0.28), (0.036, 0.285), (0.036, 0.40), (0.031, 0.41),
-                                                (0.021, 0.42), (0.0195, 0.66), (0.027, 0.665), (0.031, 0.7), (0.024, 0.715)]))
-    # the spearhead: a flattened arrow, the flame from its slit
-    h0 = 0.715
+    def ring(name, mat, prof, segs=8, e=BORE):
+        return lathe(name, mat, prof, gun_at(0.0, e), GUN_B, segs=segs).rigid("hand.R")
+    out.append(ring("gunbody", "metal-cinder", [(0.0, -0.205), (0.03, -0.204), (0.034, -0.19), (0.03, -0.178), (0.042, -0.172), (0.05, -0.15), (0.05, -0.062), (0.058, -0.058), (0.058, -0.04), (0.05, -0.036)], segs=10))
+    out.append(ring("guncol", "metal-cinder", [(0.05, 0.13), (0.058, 0.134), (0.058, 0.15), (0.05, 0.155), (0.05, 0.2), (0.032, 0.24), (0.024, 0.25)], segs=10))
+    out.append(ring("gunbarrel", "metal-cinder", [(0.0185, 0.25), (0.0185, 0.56), (0.026, 0.565), (0.026, 0.585), (0.019, 0.59), (0.019, 0.61), (0.036, 0.615), (0.036, 0.755), (0.024, 0.76)]))
+    # the glass: raw UV
+    segs, zs = 10, (-0.036, 0.13)
+    v, f, uv = [], [], []
+    for i, h in enumerate(zs):
+        for j in range(segs + 1):
+            t = j / segs * 2 * np.pi
+            v.append(gun_at(h, BORE + np.cos(t) * 0.05, np.sin(t) * 0.05))
+    for j in range(segs):
+        q = [j, j + 1, j + segs + 2, j + segs + 1]
+        f.append(q)
+        uv.append([(j / segs, 0.0), ((j + 1) / segs, 0.0), ((j + 1) / segs, 1.0), (j / segs, 1.0)])
+    gl = Piece("gunglass", "flame-liquid", v, f, uv, room=0.3).rigid("hand.R")
+    gl.flame = True
+    gl.fire = (0.7, 0.0)
+    out.append(gl)
+    # the spearhead (master sheet)
+    h0 = 0.76
     pts = []
-    secs = [(0.024, 0.024, h0), (0.052, 0.018, h0 + 0.045), (0.024, 0.012, h0 + 0.115), (0.003, 0.003, MUZZLE)]
-    for wd, dp, h in secs:
+    for wd, dp, h in ((0.024, 0.024, h0), (0.05, 0.017, h0 + 0.04), (0.022, 0.011, h0 + 0.09), (0.003, 0.003, MUZZLE)):
         for a in np.linspace(0, 2 * np.pi, 6, endpoint=False):
-            pts.append(g + ax * h + np.array([np.cos(a) * wd, 0, np.sin(a) * dp]))
+            pts.append(gun_at(h, BORE + np.sin(a) * dp, np.cos(a) * wd))
     out.append(Piece("gunhead", "metal-cinder", pts, grid_faces(4, 6, True)).rigid("hand.R"))
-    # the feed pipe: an arc over the chamber, back to the rod
-    arc = sweep("gunarc", "metal-cinder", catmull([g + [0, 0.33, 0.03], g + [0, 0.27, 0.095], g + [0, 0.15, 0.11], g + [0, 0.07, 0.07], g + [0, 0.06, 0.02]], 7), SEC6, np.full(7, 0.0085),
-                side_hint=np.array([1.0, 0, 0]))
-    out.append(arc.rigid("hand.R"))
-    # the trigger bar, below the rod in front of the fist
-    tg = sweep("guntrig", "metal-cinder", catmull([g + [0, 0.06, -0.02], g + [0, 0.065, -0.065], g + [0, 0.11, -0.07], g + [0, 0.125, -0.04]], 5), SEC6[::2], np.full(5, 0.005),
+    # the grip, flattened, wrapped; base collar for the hose
+    gp = [GRIP_AT + GRIP_K * 0.058, GRIP_AT + GRIP_K * 0.01, GRIP_AT - GRIP_K * 0.045, GRIP_BASE]
+    grip = sweep("gungrip", "leather-cinder", np.array(gp), SEC6, np.array([0.024, 0.022, 0.024, 0.021]), side_hint=np.array([1.0, 0, 0]), depth=np.array([0.016, 0.015, 0.016, 0.015]))
+    out.append(grip.rigid("hand.R"))
+    out.append(lathe("gunbase", "metal-cinder", [(0.0, 0.032), (0.021, 0.03), (0.022, 0.0), (0.016, -0.03)], GRIP_BASE, -GRIP_K, segs=6).rigid("hand.R"))
+    # the trigger guard: a brass wire from the grip's foot to the body, the trigger in it
+    tg = sweep("gunguard", "metal-cinder", catmull([GRIP_BASE + GUN_B * 0.01, gun_at(0.03, -0.1), gun_at(0.1, -0.075), gun_at(0.135, 0.01), gun_at(0.14, 0.05)], 7), SEC6[::2], np.full(7, 0.0055),
                side_hint=np.array([1.0, 0, 0]))
     out.append(tg.rigid("hand.R"))
+    tr = sweep("guntrig", "metal-cinder", catmull([gun_at(0.056, 0.038), gun_at(0.07, 0.008), gun_at(0.055, -0.024)], 4), SEC6[::2], np.array([0.006, 0.006, 0.0055, 0.003]), side_hint=np.array([1.0, 0, 0]))
+    out.append(tr.rigid("hand.R"))
+    # the lower pipe, the leather foregrip on it, the two clamps, the brass stay up to the nozzle
+    pp = np.array([gun_at(0.17, 0.03), gun_at(0.56, 0.03)])
+    out.append(sweep("gunpipe", "metal-cinder", np.linspace(pp[0], pp[1], 3), SEC6, np.full(3, 0.0105), side_hint=np.array([1.0, 0, 0])).rigid("hand.R"))
+    out.append(lathe("gunfore", "leather-cinder", [(0.012, FORE - 0.066), (0.022, FORE - 0.06), (0.0255, FORE - 0.03), (0.0225, FORE), (0.0255, FORE + 0.03), (0.022, FORE + 0.06), (0.012, FORE + 0.066)], gun_at(0.0, 0.03), GUN_B, segs=7).rigid("hand.R"))
+    for i, h in enumerate((0.262, 0.545)):
+        c0 = gun_at(h, 0.057)
+        vv = [c0 + GUN_E * dy + np.array([sx * 0.016, 0, 0]) + GUN_B * dz for dz in (-0.012, 0.012) for sx, dy in ((-1, -0.044), (1, -0.044), (1, 0.044), (-1, 0.044))]
+        out.append(Piece("gunclamp%d" % i, "metal-cinder", vv, grid_faces(2, 4, True) + [[3, 2, 1, 0], [4, 5, 6, 7]]).rigid("hand.R"))
+    st = sweep("gunstay", "metal-cinder", catmull([gun_at(0.70, 0.062), gun_at(0.665, -0.002), gun_at(0.60, -0.03), gun_at(0.48, -0.03), gun_at(0.44, 0.02)], 6), SEC6[::2], np.full(6, 0.0048), side_hint=np.array([1.0, 0, 0]))
+    out.append(st.rigid("hand.R"))
+    # the gauge, on its side at the root of the pipe, and the filler knob on the chamber
+    gc = gun_at(0.205, 0.022, 0.03)
+    gd = np.array([1.0, 0, 0])
+    out.append(lathe("ggauge", "metal-cinder", [(0.02, -0.018), (0.036, -0.016), (0.039, -0.008), (0.039, 0.008), (0.033, 0.012), (0.032, 0.008)], gc, gd, segs=9).rigid("hand.R"))
+    gf = lathe("ggface", "metal-cinder", [(0.032, 0.0075), (0.002, 0.0075)], gc, gd, segs=9).rigid("hand.R")
+    gf.gauge = (gc, gd, 0.032)
+    out.append(gf)
+    out.append(lathe("gunknob", "metal-cinder", [(0.012, 0.0), (0.012, 0.042), (0.024, 0.044), (0.024, 0.06), (0.0, 0.062)], gun_at(0.15, BORE + 0.05), GUN_E, segs=7).rigid("hand.R"))
     return out
 
 
@@ -611,8 +658,8 @@ def hoses():
     hand, so it pays out as she aims. Two coils hang off the tank's sides, as the sheet's."""
     out = []
     base = TANK_C + [0.11, 0.02, BAND0 - 0.06]
-    butt = GRIP_AT + GUN_B * (BUTT - 0.03)
-    pts = [base, base + [0.09, 0.04, -0.06], base + [0.16, 0.08, -0.17], butt + [0.075, -0.13, -0.17], butt + [0.05, -0.13, -0.02], butt + [0.0, -0.075, 0.02], butt]
+    butt = GRIP_BASE - GRIP_K * 0.028
+    pts = [base, base + [0.09, 0.04, -0.06], base + [0.16, 0.08, -0.17], butt + [0.09, -0.16, -0.05], butt + [0.075, -0.13, -0.12], butt + [0.02, -0.075, -0.09], butt]
     rows = 15
     path = catmull(pts, rows)
     h = sweep("hose", "metal-cinder", path, SEC6, np.full(rows, 0.0135), side_hint=np.array([1.0, 0, 0.3]))
@@ -632,14 +679,13 @@ def hoses():
 
 
 # ------------------------------------------------------------------ vials
-VIAL_N = 5
+VIAL_N = 4
 BELT_Z = HIPS_Z + 0.098
 VIAL_RX, VIAL_RY = 0.142, 0.118
 
 
 def vials():
-    """A copper rack on the belt, her left hip round to the front: five vials of fuel, caps up, tilted out like cartridges. Her own, bolder than the sheet's belt loop
-    (Romi's note: a cooler potion holder)."""
+    """The vial belt (cinder_weapons.png): four vials of fuel in leather loops, her left hip round to the front, cork stoppers up, tilted out like cartridges."""
     out = []
     spots = []
     ang = np.radians(np.linspace(-24, -96, VIAL_N))
@@ -651,8 +697,6 @@ def vials():
         for a in a2:
             G.append((np.sin(a) * VIAL_RX, np.cos(a) * VIAL_RY, z))
     out.append(Piece("rack", "leather-cinder", G, grid_faces(2, rows)).rigid("root"))
-    bar = np.array([(np.sin(a) * (VIAL_RX + 0.018), np.cos(a) * (VIAL_RY + 0.018), BELT_Z - 0.005) for a in a2])
-    out.append(sweep("rackbar", "metal-cinder", bar, SEC6[::2], np.full(rows, 0.006), side_hint=np.array([0, 0, 1.0])).rigid("root"))
     for i, a in enumerate(ang):
         d = np.array([np.sin(a), np.cos(a), 0.0])
         c0 = np.array([d[0] * (VIAL_RX + 0.026), d[1] * (VIAL_RY + 0.026), BELT_Z - 0.032])
@@ -679,6 +723,8 @@ def vials():
         vp.fire = (0.1 * i, 0.0)
         out.append(vp)
         out.append(lathe("vcap%d" % i, "metal-cinder", [(0.0165, 0.018), (0.0195, 0.02), (0.0195, 0.034), (0.0125, 0.038), (0.0, 0.04)], c0, ax, segs=6).rigid("root"))
+        loop_ = lathe("vloop%d" % i, "leather-cinder", [(0.0195, -0.02), (0.0205, -0.016), (0.0205, 0.002), (0.0195, 0.006)], c0, ax, segs=6).rigid("root")
+        out.append(loop_)
         spots.append(c0 + ax * 0.05)
     return out, spots
 

@@ -16,7 +16,7 @@ a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT, PLATE = a[0], a[1], a[2], a[3]
 ATLAS = 2048
 MATS = ["skin-cinder-hot", "leather-cinder", "metal-cinder", "flame-hair", "flame-jet", "flame-liquid"]
-SCALE = {"face": 3.6, "jaw": 3.6, "lid": 2.4, "finger": 1.7, "thumb": 1.7, "palm": 1.8, "skull": 0.5, "tail": 0.9, "gface": 1.6, "lens": 1.6, "fin": 1.3,
+SCALE = {"ggface": 2.2, "gface": 1.6, "face": 3.6, "jaw": 3.6, "lid": 2.4, "finger": 1.7, "thumb": 1.7, "palm": 1.8, "skull": 0.5, "tail": 0.9, "gface": 1.6, "lens": 1.6, "fin": 1.3,
          "fang": 2.0, "mouthb": 0.4, "rivet": 0.5, "Low": 1.0}
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
@@ -34,10 +34,9 @@ pieces = K.face_parts() + [K.mouth_back(), K.skull()] + K.fangs() + K.goggles() 
 for s in (1.0, -1.0):
     pieces.append(K.lids(s))
     pieces += K.brows(s)
-hR = K.hand("R", K.GUN_B, (1.25, 1.35, 0.9), 0.0)
+hR = K.hand("R", K.GRIP_K, (1.3, 1.4, 0.9), 0.0)
 hL = K.hand("L", (0.0, 1.0, -0.15), (0.45, 0.6, 0.4), 0.05)
 pieces += hR + hL
-GUN_NAMES = ("gunrod", "gunbutt", "gunbody", "gunhead", "gunarc", "guntrig")
 
 for p_ in pieces:
     n_ = p_.name
@@ -369,7 +368,7 @@ c2 = c2 * (1 - k2[:, None]) + P.HOT * k2[:, None]
 # the skin down to the sheet's warm charcoal (the scan runs light and lilac); leather and the cracks stay
 sk = np.clip(1.0 - np.maximum(k1, smooth(1.12, 1.3, r_ / np.maximum(b_, 0.01))), 0, 1)[:, None]
 lum_ = c2.mean(1, keepdims=True)
-c2 = c2 * (1 - sk) + (lum_ * 0.62 + c2 * 0.3) * np.array([1.0, 0.96, 1.0]) * sk
+c2 = c2 * (1 - sk) + (lum_ * 0.62 + c2 * 0.3) * np.array([1.1, 1.0, 0.96]) * sk
 OUTC[ys, xs] = c2
 
 # ---- the rebuilt pieces
@@ -413,15 +412,19 @@ paint(lambda n: n.startswith(("tankfoot", "tankring", "stack", "bar", "gpipe", "
 paint(lambda n: n.startswith("rivet"), P.brass)
 gf = next(q for q in tk if q.name == "gface")
 paint(lambda n: n == "gface", lambda p, n, ao: P.gauge(p, *gf.gauge))
-paint(lambda n: n.startswith(("gogR", "gogB", "vcap", "rackbar")), P.brass)
+paint(lambda n: n.startswith(("gogR", "gogB")), P.brass)
+paint(lambda n: n.startswith("vcap"), P.cork)
 for q in pieces:
     if q.name.startswith("lens"):
         paint(lambda n, nm=q.name: n == nm, lambda p, n, ao, fr=q.frame: P.lens(p, fr))
-paint(lambda n: n in ("strap", "rack"), P.leather)
+paint(lambda n: n in ("strap", "rack", "hband0", "hstrapR", "hstrapL", "gunfore") or n.startswith("vloop"), P.leather)
 paint(lambda n: n in ("hose", "coilL", "coilR"), P.hose)
-paint(lambda n: n in ("gunbody", "gunhead", "gunarc", "guntrig"), P.steel)
-paint(lambda n: n == "gunbutt", P.brass)
-paint(lambda n: n == "gunrod", lambda p, n, ao: P.wrap(p, n, ao, K.GRIP_AT, K.GUN_B))
+paint(lambda n: n in ("gunbarrel", "gunpipe"), P.copper)
+paint(lambda n: n == "gunhead", P.steel)
+paint(lambda n: n.startswith(("gunbody", "guncol", "gunbase", "gunguard", "guntrig", "gunclamp", "gunstay", "ggauge", "gunknob")), P.brass)
+gf2 = next(q for q in pieces if q.name == "ggface")
+paint(lambda n: n == "ggface", lambda p, n, ao: P.gauge(p, *gf2.gauge))
+paint(lambda n: n == "gungrip", lambda p, n, ao: P.wrap(p, n, ao, K.GRIP_AT, K.GRIP_K))
 
 # dilate past the island edges
 known = PID >= 0
@@ -527,8 +530,8 @@ for vi, d in enumerate(vw):
 # ---- anchors and FX points: empties on the bones (RIG_CONTRACT, item 76b)
 g = K.GRIP_AT
 A = {"anchor_head_top": ("head", (0, 0.0, K.C[2] + 0.12)), "anchor_chest": ("hips", (0, 0.1, K.SHOULDER_Z - 0.09)),
-     "weapon_muzzle": ("hand.R", tuple(g + K.GUN_B * K.MUZZLE)), "anchor_blade_root": ("hand.R", tuple(g + K.GUN_B * 0.14)),
-     "anchor_gun_mid": ("hand.R", tuple(g + K.GUN_B * 0.5)),
+     "weapon_muzzle": ("hand.R", tuple(K.gun_at(K.MUZZLE, K.BORE))), "anchor_blade_root": ("hand.R", tuple(K.gun_at(0.14, K.BORE))),
+     "anchor_gun_mid": ("hand.R", tuple(K.gun_at(0.5, K.BORE))),
      "anchor_jet_0": ("jet.0", tuple(tips[0][0])), "anchor_jet_1": ("jet.1", tuple(tips[1][0])), "anchor_tank": ("hips", tuple(K.TANK_C + [0, -0.05, (K.GL0 + K.GL1) / 2])),
      "anchor_tail_tip": ("spring_scarftail_tail_%d" % (K.TAIL_N - 2), tuple(tl.path[-1])), "anchor_crown": ("head", tuple(K.C + [0, -0.03, 0.2]))}
 for i_, sp in enumerate(spots):

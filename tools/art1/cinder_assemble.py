@@ -25,7 +25,7 @@ def all_pieces():
     for s in (1.0, -1.0):
         ps.append(K.lids(s))
         ps += K.brows(s)
-    ps += K.hand("R", K.GUN_B, (1.25, 1.35, 0.9), 0.0)
+    ps += K.hand("R", K.GRIP_K, (1.3, 1.4, 0.9), 0.0)
     ps += K.hand("L", (0.0, 1.0, -0.15), (0.45, 0.6, 0.4), 0.05)
     return ps
 
