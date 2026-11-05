@@ -5,8 +5,8 @@ extends RefCounted
 ##     and a Hero's own footsteps resolve when the file names them.
 ##   - The shared runtime, on a synthetic recipe set using every layer kind: anchors fall back from the model's node to
 ##     the Gun to the body; distance thins and then drops a look; pools and live particles stay capped in a pile-up and
-##     a warm pool makes no new nodes; prewarm makes one of every kind; a hold stops by itself; a projectile trail
-##     follows its node and ends with it; allies sit dimmer; a move arrives from another game.
+##     a warm pool makes no new nodes; prewarm makes one of every kind; a hold thickens with its charge and stops by
+##     itself; a projectile trail follows its node and ends with it; allies sit dimmer; a move arrives from another game.
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
@@ -30,7 +30,7 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
 			{"p": "drop", "n": 24}]},
-		"heat": {"fx": [{"p": "ember", "n": 20, "at": "tip"}]},
+		"heat": {"fx": [{"p": "ember", "n": 12, "n_k": 1.0, "at": "tip"}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
 
 var bad := 0
@@ -218,6 +218,8 @@ func _holds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	var n0 := V.live_n
 	V.hold(P, "heat")
 	ok(V.live_n == n0, "asking again keeps the one emitter")
+	V.hold(P, "heat", 1.0)
+	ok(V.holds.size() == 1 and V.live_n > n0, "its charge grows: the emitter thickens (%d -> %d)" % [n0, V.live_n])
 	m.time += HeroVfx.HOLD_LINGER + 0.1
 	V._tick_holds()
 	ok(V.holds.is_empty(), "the asks stop: the hold ends by itself")
