@@ -562,6 +562,11 @@ def scan_slots(ob):
     uv = np.zeros(len(me.loops) * 2, np.float32)
     me.uv_layers.active.data.foreach_get("uv", uv)
     uv = uv.reshape(-1, 2)
+    scan_patch(me, A2, uv, w)
+    full[:, :, :3] = A2
+    tex.pixels.foreach_set(full.ravel())
+    tex.update()
+    tex.pack()
     tris = [(pl.loop_indices[0], pl.loop_indices[i], pl.loop_indices[i + 1]) for pi in hot for pl in [me.polygons[pi]] for i in range(1, len(pl.loop_indices) - 1)]
     mask, _, _ = S.rasterize(uv[np.array(tris)], None, w, [np.zeros((len(tris), 3, 1), np.float32)])
     keyed = S.sstep(0.62, 0.8, A[:, :, 0]) * S.sstep(0.3, 0.5, A[:, :, 0] - A[:, :, 2]) * mask
@@ -588,7 +593,6 @@ def scan_slots(ob):
     for i in reversed(range(len(me.materials))):
         if i not in used:
             me.materials.pop(index=i)
-    # (the body's slots in the far atlas stay few; the head brings its own one)
 
 
 HEAD_GLB = "~/meshy/tarek_m/head_bake/low.glb"     # the head from tarek_head.png, baked (tarek_head_bake.json)
@@ -596,7 +600,8 @@ HEAD_TRIS = 3400
 CHIN_K = 0.686                # the chin's depth under the hair top, as a share of the head model's height (the sheet's front view)
 HEAD_BIG = 1.22               # the master's head against his shoulders
 NECK_R = 0.135                # m: the body's neck, cut inside this round the head's axis (the stone shoulder stays)
-NECK_CUT = 0.075              # m under the chin: where the head's neck stops and the body's begins
+NECK_BODY = 0.05              # m under the chin: where the body's neck stops, overlapping the head's
+NECK_CUT = 0.125              # m under the chin: where the head's neck stops and the body's begins
 
 
 def scan_head(body):
@@ -646,6 +651,7 @@ def scan_head(body):
         vcol[l.vertex_index] = px[min(int(u[1] * th), th - 1), min(int(u[0] * tw), tw - 1), :3]
     is_skin = (vcol[:, 0] > vcol[:, 2] * 1.25) & (vcol.max(1) > 0.25)
     cut = chin - NECK_CUT
+    body_cut = chin - NECK_BODY
     bm = bmesh.new()
     bm.from_mesh(head.data)
     bm.verts.ensure_lookup_table()
@@ -662,7 +668,7 @@ def scan_head(body):
     bm = bmesh.new()
     bm.from_mesh(me)
     bm.faces.ensure_lookup_table()
-    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index == hair or (f.calc_center_median().z > cut and math.hypot(f.calc_center_median().x, f.calc_center_median().y + 0.02) < NECK_R)], context="FACES")
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index == hair or (f.calc_center_median().z > body_cut and math.hypot(f.calc_center_median().x, f.calc_center_median().y + 0.02) < NECK_R)], context="FACES")
     bm.to_mesh(me)
     bm.free()
     # skin: each head vertex rides the head bone, its locs the body's chains by the nearest old vertex
@@ -692,6 +698,37 @@ def scan_head(body):
         m.name = "skin-head"
     log("head: tris", len(head.data.polygons), "scale %.3f" % k, "tone", tone)
     return head, tone
+
+
+PATCH = (-0.02, 0.16, -0.32, -0.06, 1.6, 1.82)     # the fused loc end the scan left on his back (x, y, z, fit frame)
+
+
+def scan_patch(me, A, uv, w):
+    """A loc end fused to his back, the "black slash": the skin round it painted over it and the lump smoothed away."""
+    x0, x1, y0, y1, z0, z1 = PATCH
+    tri = []
+    ring = []
+    for pl in me.polygons:
+        c = pl.center
+        if x0 < c.x < x1 and y0 < c.y < y1 and z0 < c.z < z1:
+            tri += [(pl.loop_indices[0], pl.loop_indices[i], pl.loop_indices[i + 1]) for i in range(1, pl.loop_total - 1)]
+            u = uv[pl.loop_start]
+            v_ = A[min(int(u[1] * w), w - 1), min(int(u[0] * w), w - 1)]
+            ring.append(v_)
+    if not tri:
+        return
+    ring = np.array(ring)
+    bright = ring[ring.max(1) > np.median(ring.max(1))]
+    m, _, _ = S.rasterize(uv[np.array(tri)], None, w, [np.zeros((len(tri), 3, 1), np.float32)])
+    A[m] = bright.mean(0)
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    vs = [v for v in bm.verts if x0 < v.co.x < x1 and y0 < v.co.y < y1 and z0 < v.co.z < z1]
+    for _ in range(12):
+        bmesh.ops.smooth_vert(bm, verts=vs, factor=0.6, use_axis_x=True, use_axis_y=True, use_axis_z=True)
+    bm.to_mesh(me)
+    bm.free()
+    log("patched", len(tri), "tris on his back")
 
 
 def assemble_scan(objs, img, emit):
