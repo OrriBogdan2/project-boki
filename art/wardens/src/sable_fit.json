@@ -310,6 +310,61 @@
     "spread": 24,
     "r": 0.013
    }
+  },
+  {
+   "name": "lock_R",
+   "path": [
+    [
+     0.075,
+     -0.03,
+     1.45
+    ],
+    [
+     0.11,
+     0.0,
+     1.36
+    ],
+    [
+     0.15,
+     0.05,
+     1.27
+    ],
+    [
+     0.168,
+     0.085,
+     1.16
+    ]
+   ],
+   "length": 0.36,
+   "side": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "clear": 0.036,
+   "width": 0.044,
+   "strand_r": 0.011,
+   "period": 0.15,
+   "depth": 0.5,
+   "samples": 40,
+   "sides": 5,
+   "bones": 3,
+   "wraps": [
+    {
+     "at": 0.05,
+     "rings": 2
+    },
+    {
+     "at": 0.9,
+     "rings": 3
+    }
+   ],
+   "tuft": {
+    "locks": 7,
+    "length": 0.07,
+    "spread": 22,
+    "r": 0.01
+   }
   }
  ],
  "braid_colours": {
@@ -440,7 +495,7 @@
  ],
  "wing_look": {
   "fore": {
-   "base": "eeecf4",
+   "base": "e2daf6",
    "tints": [
     "9fc0ff",
     "ffb0e0",
@@ -449,12 +504,12 @@
     "ffe8a8",
     "b0f0ff"
    ],
-   "tint_k": 0.25,
-   "alpha": 0.7,
-   "rim": "fbf4ff",
+   "tint_k": 0.35,
+   "alpha": 0.76,
+   "rim": "f6f0ff",
    "rim_alpha": 0.8,
-   "edge": 0.95,
-   "edge_col": "7d7593",
+   "edge": 0.93,
+   "edge_col": "5e4e8e",
    "edge_alpha": 0.95,
    "vein": "9890ad",
    "vein_w": 0.0035,
@@ -498,7 +553,7 @@
    ]
   },
   "hind": {
-   "base": "eeecf4",
+   "base": "e2daf6",
    "tints": [
     "9fc0ff",
     "ffb0e0",
@@ -507,12 +562,12 @@
     "ffe8a8",
     "b0f0ff"
    ],
-   "tint_k": 0.25,
-   "alpha": 0.7,
-   "rim": "fbf4ff",
+   "tint_k": 0.35,
+   "alpha": 0.76,
+   "rim": "f6f0ff",
    "rim_alpha": 0.8,
-   "edge": 0.94,
-   "edge_col": "7d7593",
+   "edge": 0.93,
+   "edge_col": "5e4e8e",
    "edge_alpha": 0.95,
    "vein": "9890ad",
    "vein_w": 0.0035,
@@ -575,7 +630,7 @@
   "stirrup": true,
   "scroll": true,
   "scroll_line": "3c3f4c",
-  "thick": 1.5,
+  "thick": 2.0,
   "bolt_k": 2.0,
   "pitch": -0.55
  },
@@ -945,10 +1000,20 @@
    1.205
   ],
   "out": 0.018,
-  "length": 0.1,
-  "r": 0.024,
-  "colour": "900014",
-  "bone": "hips"
+  "length": 0.125,
+  "r": 0.025,
+  "colour": "a01020",
+  "bone": "hips",
+  "core": "ff8aa0",
+  "facets": [
+   1.0,
+   0.55,
+   0.85,
+   0.45,
+   0.95,
+   0.6
+  ],
+  "core_k": 0.45
  },
  "shrink": [
   {
@@ -1002,6 +1067,38 @@
    "side_only": 0.6,
    "val_max": 0.45,
    "colour": "8c7c9c"
+  },
+  {
+   "mode": "gain",
+   "slots": [
+    "skin"
+   ],
+   "box": [
+    -0.1,
+    -0.012,
+    0.572,
+    0.618
+   ],
+   "val_max": 0.5,
+   "gain": 0.72,
+   "colour": "302838",
+   "k": 0.0
+  },
+  {
+   "mode": "gain",
+   "slots": [
+    "skin"
+   ],
+   "box": [
+    0.012,
+    0.1,
+    0.572,
+    0.618
+   ],
+   "val_max": 0.5,
+   "gain": 0.72,
+   "colour": "302838",
+   "k": 0.0
   }
  ],
  "laces": {

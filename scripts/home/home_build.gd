@@ -1501,7 +1501,7 @@ func _update_keys() -> void:
 		var nm := held_name()
 		_light(_node_of(blocker) if not ghost_ok else null)
 		state.merge({"held": true, "item": nm, "tool": _is_tool(held), "can_rotate": can_rotate(),
-			"can_store": held["kind"] != "b", "fresh": _is_fresh(), "ok": ghost_ok, "reason": why})
+			"can_store": held["kind"] != "b", "ok": ghost_ok, "reason": why})
 		text = "%s: %s" % [nm, why] if not ghost_ok else _place_text(nm)
 	keys.show_state(state)
 	if bar.hint.text != text:
@@ -1515,7 +1515,7 @@ func _place_text(nm: String) -> String:
 		return "%s: click and drag to lay a line  ·  %d tile%s" % [nm, n, "" if n == 1 else "s"]
 	if c.has("brush"):
 		return "%s: click and drag to paint" % nm
-	return "%s: click to place it here" % nm
+	return "%s: click to place it here  ·  Hold Shift to place more" % nm
 
 func held_name() -> String:
 	var id := String(held["id"])
@@ -1524,12 +1524,6 @@ func held_name() -> String:
 	if held["kind"] == "feeder":
 		return String(Econ.FEEDERS[id]["name"])
 	return String(HomeLayout.CATALOG[id]["name"])
-
-## A new piece from the catalog or storage, as opposed to one picked up off the ground.
-func _is_fresh() -> bool:
-	if held["kind"] == "feeder":
-		return String(held["from"]) == ""
-	return held["kind"] == "deco" and int(held.get("from", -1)) < 0
 
 # ------------------------------------------------------------------ input
 ## Build mode's own keys and clicks. True if it used the event.
@@ -1636,7 +1630,7 @@ func open_menu(tag: String) -> void:
 			colours = HomeLayout.COLOURS
 			current = String(e.get("c", ""))
 	menu = BuildMenu.open(h.root_ui, h.get_viewport().get_mouse_position(), title, rows, colours, current,
-		func(hex: String): paint_placed(tag, hex))
+		func(hex: String): paint_placed(tag, hex), BuildKeys.blocked_rects(bar, keys.avoid))
 
 func _close_menu() -> void:
 	if is_instance_valid(menu):
@@ -1841,7 +1835,7 @@ func store_held() -> void:
 			_clear_ghost()
 			h.hecon.store_feeder(h.hecon._feeder(fid))
 			apply(false)
-			h._toast("Feeder put in storage (its food went back in the pantry)")
+			h._toast("Feeder stored, its food back in the pantry")
 		else:
 			_drop_held()
 		_build_bar()
@@ -1949,12 +1943,13 @@ func _open_ui() -> void:
 	bar.undo_fn = undo_last
 	bar.undo_off_fn = func() -> bool: return undo.is_empty()
 	bar.done_fn = toggle
+	bar.sweep_fn = _set_sweep
+	bar.sweep_on_fn = func() -> bool: return sweep
 	bar.search_skip = ["Upgrades", "Island"]
 	h.root_ui.add_child(bar)
 	keys = BuildKeys.new()
 	keys.above = bar
-	keys.actions = {"rotate": rotate_held, "place": func(): click_place(), "store": store_held, "cancel": _cancel_held,
-		"sweep_on": func(): _set_sweep(true), "sweep_off": func(): _set_sweep(false)}
+	keys.avoid = [h.guide.tracker] if h.guide else []
 	h.root_ui.add_child(keys)
 
 func _tabs() -> Array:

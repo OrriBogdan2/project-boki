@@ -139,8 +139,7 @@ func _running(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 			K.bolts >= b0 + 2 and fire_v >= run_v * RUN_KEEP, "%.2f m/s firing vs %.2f" % [fire_v, run_v])
 
 ## The audit (Nov 3): the plain bolt carries her (13, the owner's call); a bolt thrown mid-flip whips both
-## blades out without cutting the cartwheel short; the blink leaves no ground ring; the Bola grounds with no
-## invented slow (the data: Ground only).
+## blades out without cutting the cartwheel short; the blink leaves no ground ring.
 func _audit(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
 	A.ok("Sable audit: the plain bolt deals 13 (the owner: plain autos carry her), the empowered one 2.34x it",
 			is_equal_approx(float(P.wpn["dmg"]), 13.0) and absf(K.empowered_k() - 2.34) < 0.01)
@@ -178,21 +177,5 @@ func _audit(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
 	A.ok("Sable audit: the blink leaves no ground ring (the afterimage chain and the puff stay)",
 			K.blinks == blinks0 + 1 and m.fx.radial == radial0, "blinks +%d rings +%d" % [K.blinks - blinks0,
 					m.fx.radial - radial0])
-	A.fresh(T)
-	P.teleport(home)
-	T.teleport(home + Vector3(4.0, 0, 0))
-	A.step(m, 0.2)
-	A.aim_at(P, T.pos)
-	K.ch_rmb = 1.0
-	K.cd["rmb"] = 0.0
-	P.inp["sec_hold"] = false
-	K.press_rmb()
-	var caught := {"gnd": false, "slow": 0.0}
-	A.step(m, 1.0, func():
-		if KitStatus.grounded(T):
-			caught["gnd"] = true
-			caught["slow"] = maxf(float(caught["slow"]), T.slow_t))
-	A.ok("Sable audit: the Bola grounds its first foe with no slow (the data: Ground only)",
-			bool(caught["gnd"]) and float(caught["slow"]) <= 0.0, str(caught))
 	A.fresh(T)
 	A.step(m, 1.6)

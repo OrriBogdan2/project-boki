@@ -270,6 +270,7 @@ func _paths() -> void:
 			var before := P.perks.size()
 			var hp0: float = P.max_hp
 			var ap0 := LevelGrowth.ap(P)
+			m.hud.msgs.clear()
 			P.gain_xp(float(Hunter.XP_TO[lvl - 1]) - P.xp + 0.5)
 			var want := 0.06 if lvl <= 6 else 0.03
 			var wap := 0.05 if lvl <= 6 else 0.025
@@ -279,17 +280,14 @@ func _paths() -> void:
 			if lvl % 2 == 0:
 				if gained != 1: odd_ok = false
 				else: got.append(P.perks[P.perks.size() - 1])
-				var note: Dictionary = m.hud.lvl_note
-				if note.is_empty() or note["info"].is_empty() or String(note["info"]["perk"]) != String(P.perks[P.perks.size() - 1]): pop_ok = false
+				var step_name := String(Data.PERKS[String(P.perks[P.perks.size() - 1])]["name"])
+				if str(m.hud.msgs.texts()) != str(["LEVEL %d  ·  %s" % [lvl, step_name]]): pop_ok = false
 			else:
 				if gained != 0: odd_ok = false
-				var note2: Dictionary = m.hud.lvl_note
-				if not note2.is_empty() and int(note2["lvl"]) == lvl: pop_ok = false      # odd levels: no banner, only the badge flash
 				if m.hud.lvl_pop <= 0.0: pop_ok = false
-				var toast_text: String = m.hud.toasts[-1]["text"] if not m.hud.toasts.is_empty() else ""
-				if not toast_text.contains("+1 skill point"): pop_ok = false
+				if str(m.hud.msgs.texts()) != str(["LEVEL %d  ·  +1 skill point" % lvl]): pop_ok = false
 		ok("%s: levels 2, 4, 6, 8, 10 each apply their path step, odd levels none" % arch, odd_ok and got == steps, "%s vs %s" % [str(got), str(steps)])
-		ok("%s: the level-up pop names what improved on even levels; odd levels toast the skill point" % arch, pop_ok)
+		ok("%s: the level-up line names the weapon step on even levels, the skill point on odd ones" % arch, pop_ok)
 		ok("%s: each level adds 6%% health and 5%% ability power (2-6), half that at 7-10" % arch, grow_ok, grow_info)
 		ok("%s: by level 10 that is +42%% health and +35%% ability power" % arch, is_equal_approx(P.max_hp - P.get_meta("growth_hp", 0.0), P.max_hp - base_hp * 0.42) and is_equal_approx(LevelGrowth.ap(P), 1.35), "ap %.3f" % LevelGrowth.ap(P))
 		ok("%s: the signature weapon stays and is stronger or faster" % arch, P.wid == Arch.signature(String(arch)) and (float(P.wpn["dmg"]) > d0 or steps.has("quickfeed") or steps.has("longreach")))

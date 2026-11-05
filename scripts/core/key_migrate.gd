@@ -9,6 +9,8 @@ extends RefCounted
 ##   step 4  Fuse (Merge) is X and the hunter ultimate is R. Reload and the Boki ability key are gone. An action still
 ##           on its old default moves to the new one; a custom key is kept, and the moved action starts unbound
 ##           if its new key is already a custom key of another action.
+##   step 5  Middle mouse left the Boki key (throw) for the new ping key: a saved throw binding drops it, and
+##           ping starts unbound if middle mouse is another action's custom key.
 
 static func _code(k: int) -> String:
 	return "key:%d" % k
@@ -32,13 +34,16 @@ static func _merge_binding(ks: Dictionary) -> void:
 	else:
 		ks["ultimate"] = kept
 
-## Brings `s` (the settings dictionary: keys, keys2_v, keys3_v) up to date.
+## Brings `s` (the settings dictionary: keys and its keysN_v steps) up to date.
 static func run(s: Dictionary) -> void:
 	var ks: Dictionary = s["keys"]
 	_steps_one_to_three(s, ks)
 	if int(s.get("keys4_v", 0)) < 1:
 		_fuse_on_x(ks)
 		s["keys4_v"] = 1
+	if int(s.get("keys5_v", 0)) < 1:
+		_mmb_to_ping(ks)
+		s["keys5_v"] = 1
 
 static func _steps_one_to_three(s: Dictionary, ks: Dictionary) -> void:
 	if int(s.get("keys2_v", 0)) < 1:
@@ -80,3 +85,15 @@ static func _emote_and_merge_keys(ks: Dictionary) -> void:
 		ks["emote"] = []
 	if not ks.has("ultimate") and _used_elsewhere(ks, _code(KEY_T), ["ultimate", "talk", "emote"]):
 		ks["ultimate"] = []
+
+## Middle mouse is the ping key now: it leaves a saved throw binding (G comes back if nothing else is left).
+static func _mmb_to_ping(ks: Dictionary) -> void:
+	var mmb := "mouse:%d" % MOUSE_BUTTON_MIDDLE
+	if ks.has("throw") and (ks["throw"] as Array).has(mmb):
+		var kept: Array = (ks["throw"] as Array).filter(func(c): return c != mmb)
+		if kept.all(func(c): return c == ""):
+			ks.erase("throw")
+		else:
+			ks["throw"] = kept
+	if not ks.has("ping") and _used_elsewhere(ks, mmb, ["ping"]):
+		ks["ping"] = []

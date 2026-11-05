@@ -3,9 +3,9 @@ extends RefCounted
 ## What the tutorial shows on screen (the beam and the edge arrow are Tutorial and Hud._draw_waypoint).
 ## Everything has its own lane so nothing overlaps: the short first-time intro card (the one thing that
 ## pauses play), a small banner at the top-centre for each new step that settles into a pill at the
-## bottom-centre, a quiet check beside the pill, and the toasts in the top-right. Nothing sits in the
-## middle of the screen, where the hunter, the Boki and the target are. While the banner is up other
-## popups (toasts, Boki bubbles, the scout hint) wait.
+## bottom-centre, a quiet check beside the pill, and the message lane in the top-right. Nothing sits in
+## the middle of the screen, where the hunter, the Boki and the target are. While the banner is up other
+## popups (messages, Boki bubbles, the scout hint) wait.
 
 const MINT := Color("8fe3c8")
 const GOLD := Color("f2c84a")
@@ -14,8 +14,9 @@ const BAR_H := 0.085        # of the screen height: the banner's height (the pil
 const SLIDE_T := 0.25       # s the banner takes to slide in
 const FADE_T := 0.3         # s it takes to hand over to the pill
 const PANEL := Color(0.04, 0.05, 0.08, 0.9)
+const DETAIL_K := 1.9       # a bar with a second line is this much taller
 
-## The lanes: the banner, the pill, the check mark and the toast column (Rect2 each), for a screen size.
+## The lanes: the banner, the pill, the check mark and the message column (Rect2 each), for a screen size.
 static func lanes(sz: Vector2) -> Dictionary:
 	var w := sz.x * BAR_W
 	var bh := sz.y * BAR_H
@@ -40,9 +41,13 @@ static func draw(h, sz: Vector2) -> void:
 	if k < 1.0:
 		var slide := 1.0 - pow(1.0 - clampf(tu.card_t / SLIDE_T, 0.0, 1.0), 3.0)
 		var r: Rect2 = ln["banner"]
+		r.size.y *= DETAIL_K if tu.detail != "" else 1.0
 		r.position.y -= (1.0 - slide) * (r.end.y + 4.0)
 		_bar(h, r, tu, 1.0 - k, false)
 	var pr: Rect2 = ln["pill"]
+	if tu.detail != "":
+		pr.position.y -= pr.size.y * (DETAIL_K - 1.0)      # grows upward, clear of the HUD
+		pr.size.y *= DETAIL_K
 	_bar(h, pr, tu, k, true)
 	if k >= 1.0:
 		_pill_extras(h, pr, tu)
@@ -66,31 +71,43 @@ static func _bar(h, r: Rect2, tu: Tutorial, a: float, is_pill: bool) -> void:
 	h._panel(r, Color(PANEL.r, PANEL.g, PANEL.b, PANEL.a * a), 14)
 	if pulse > 0.0:
 		h.c.draw_rect(r, Color(MINT, 0.7 * pulse), false, 3.0)
-	var px := int(r.size.y * (0.46 if is_pill else 0.42))
+	var row := r.size.y / (DETAIL_K if tu.detail != "" else 1.0)     # the first line's height
+	var mid := r.position.y + row * 0.5
+	var px := int(row * (0.46 if is_pill else 0.42))
 	var left := r.position.x + 14.0
 	var n := tu.progress_text()
 	var n_w: float = h.big.get_string_size(n, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
 	var right: float = r.end.x - 14.0 - (n_w + 12.0 if n != "" else 0.0)
 	if tu.key_cap != "":
 		var key_w: float = h.big.get_string_size(tu.key_cap, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
-		var cap_w := maxf(r.size.y * 0.7, key_w + 20.0)
-		var cr := Rect2(Vector2(left, r.get_center().y - r.size.y * 0.3), Vector2(cap_w, r.size.y * 0.6))
+		var cap_w := maxf(row * 0.7, key_w + 20.0)
+		var cr := Rect2(Vector2(left, mid - row * 0.3), Vector2(cap_w, row * 0.6))
 		h._panel(cr, Color(0.93, 0.95, 0.98, a), 10)
 		h._ctext(cr.get_center() + Vector2(0, px * 0.36), tu.key_cap, px, Color(0.06, 0.08, 0.12, a), h.big)
 		left += cap_w + 14.0
 	var tpx := px
 	while tpx > 16 and h.big.get_string_size(tu.text, HORIZONTAL_ALIGNMENT_LEFT, -1, tpx).x > right - left:
 		tpx -= 1
-	h._text(Vector2(left, r.get_center().y + tpx * 0.36), tu.text, tpx, Color(GOLD, a), h.big)
+	h._text(Vector2(left, mid + tpx * 0.36), tu.text, tpx, Color(GOLD, a), h.big)
 	if n != "":
-		h._text(Vector2(r.end.x - 14.0 - n_w, r.get_center().y + px * 0.36), n, px, Color(MINT, a), h.big)
+		h._text(Vector2(r.end.x - 14.0 - n_w, mid + px * 0.36), n, px, Color(MINT, a), h.big)
+	if tu.detail != "":
+		_detail(h, r, row, tu.detail, a)
+
+## The plain-words line under a step's line: wrapped to three lines in the space below it.
+static func _detail(h, r: Rect2, row: float, txt: String, a: float) -> void:
+	var w := TutorialText.wrap(h.big, txt, int(row * 0.27), r.size.x - 28.0, 3)
+	var y := r.position.y + row * 0.92
+	for ln in w["lines"]:
+		y += float(w["px"]) * 1.2
+		h._text(Vector2(r.position.x + 14.0, y), String(ln), int(w["px"]), Color(1, 1, 1, 0.88 * a), h.big)
 
 ## The scout hint above the pill (not while the banner is up) and the outpost's defend bar under it.
 static func _pill_extras(h, r: Rect2, tu: Tutorial) -> void:
 	var hint := tu.scout_hint()
 	if hint != "":
 		h._ctext(Vector2(r.get_center().x, r.position.y - 14.0), hint, int(r.size.y * 0.34), MINT, h.big)
-	if tu.id() == "defend":
+	if tu.id() in ["uplink", "defend"]:
 		var o := tu.outpost()
 		if not o.is_empty():
 			var br := Rect2(Vector2(r.position.x + 20.0, r.end.y + 6.0), Vector2(r.size.x - 40.0, 6.0))
@@ -121,21 +138,9 @@ static func _check(h, r: Rect2, k: float) -> void:
 static func prompt_y(h, sz: Vector2) -> float:
 	return sz.y - 222.0 if h.m.tut == null else lanes(sz)["pill"].position.y - 64.0
 
-## Toasts wait while the banner is up: true when this one was held back (Tutorial.update shows it later).
-static func defer(h, text: String, col: Color, small: bool) -> bool:
-	var tu: Tutorial = h.m.tut
-	if tu == null or not tu.card_up():
-		return false
-	tu.held_toasts.append([text, col, small])
-	return true
-
-## One toast line, in the top-right lane during the tutorial (row 0..5), else where the HUD puts it.
-static func draw_toast(h, sz: Vector2, row: int, text: String, col: Color, px: int, default_at: Vector2) -> void:
-	if h.m.tut == null:
-		h._ctext(default_at, text, px, col, h.big)
-		return
-	var lane: Rect2 = lanes(sz)["toast"]
-	while px > 12 and h.big.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > lane.size.x:
-		px -= 1
-	var w: float = h.big.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
-	h._text(Vector2(lane.end.x - w, lane.position.y + 20.0 + row * 24.0), text, px, col, h.big)
+## During the tutorial the message lane is the top-right column, clear of the banner and the pill
+## (Hud holds it while the banner is up).
+static func place_msgs(lane: MsgLane, sz: Vector2) -> void:
+	var r: Rect2 = lanes(sz)["toast"]
+	lane.top = r.position.y
+	lane.right_edge = r.end.x

@@ -731,7 +731,7 @@ func demo(mode: String) -> void:
 				elif not h.riding and not h.dropping and not h.out and h.flat_dist(P) < 26.0:
 					h.teleport(m.world.free_spot_near(h.pos + (h.pos - P.pos).normalized() * 30.0, [], 1.0, 0.45, 20.0))
 			if m.hud:
-				m.hud.toasts.clear()
+				m.hud.msgs.clear()
 	if _demo.has("armed"):
 		_shoot()
 	if mode == "map" and _demo.has("wave") and _demo.has("bounty"):

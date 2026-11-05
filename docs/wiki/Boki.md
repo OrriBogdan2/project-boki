@@ -20,7 +20,7 @@ You bring **one Boki** per expedition. It walks beside you and fights with you; 
 
 - **C** is its own ability, cast from wherever your Boki is: on you (Return) it casts through you, out in the world it casts where it stands. It also has an **auto ability** it uses
   on its own when the moment is right (Settings can turn that off).
-- **G** (or middle mouse): with your Boki at your side, tap to **Sic** it at the cursor: it leaps there and its
+- **G**: with your Boki at your side, tap to **Sic** it at the cursor: it leaps there and its
   landing staggers whatever it lands on. With it away, tap to **Call back**: it leaps to your side and hits
   anything along the path (only within a set range; farther out it comes back on its own). **Hold G** for the
   order wheel and flick toward one: **Chase** (go for what is under the cursor), **Guard** (hold this spot),

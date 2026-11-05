@@ -241,6 +241,7 @@ func los(a: Vector3, b: Vector3, y: float) -> bool:
 		if ground_at(px, pz) > y + 0.2:
 			return false
 	for wl in dyn_walls:
+		if not Verbs.blocks_sight(wl): continue
 		if y > float(wl["y"]) - 0.3 and y < float(wl["y"]) + Verbs.WALL_H and Geometry2D.segment_intersects_segment(Vector2(a.x, a.z), Vector2(b.x, b.z), wl["a"], wl["b"]) != null:
 			return false
 	return true
