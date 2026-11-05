@@ -507,3 +507,12 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: Vespyx eye fix pushed: ext/boki-starter 71957021 (merge the tip)
 - Eyes scaled down and seated deeper (eye commit e81ba5b4); seen smaller in the wired game at the match camera, not yet confirmed at the farm camera. Farm fixes: new `tend` clip with Body level; carry shows one item (asserted, not yet seen in a shot). --boki-rig-check 0 failures; wider suite not rerun since the origin/main merge. Wiring unchanged (3 lines, see the Vespyx entry above). Grown/Fused forms next.
+
+## 2026-11-05 S2: READY ext/kit-tarek-61-67 eb040e7d (items 61 + 67)
+- Base 4bac1edb; dry-run merge into ff92d1e2 clean; spine92's ult kept. 61: tap slams instantly 1.6 m ahead with no hop (radius 3.82, 14 dmg); hold caps at 0.45 s and auto-fires, hop 2.48 m keeping 50% ground speed, move keys nudge the landing up to 0.79 m, circle shows the real landing. 67: rocks 2.2 m tall (was 1.25), jagged crags in new scripts/arch/rock_look.gd at 6 draw calls (was 10), warm colours, shadow, rise dust + rumble, crack and crumble on break; climb reworked; punches and slams still reach a rock while standing on one.
+- Differs: hold numbers ramp to the cap, so a 0.25 s release is nearer tap numbers; allies can still hop rocks by jumping, per DECISIONS and the owner's 23:55 note; Rubble Leap's rock is visual only; tap plays breah_slam_land; crossing a rock is 0.06 s slower (0.58 s); crumble doesn't show on remote clients when a rock is removed by the cap.
+- Checks 0 failures: --check, hero-combo 263, dolm-combo 147, warden-model, warden-glb, class-unlock 153, arena 86, tutorial-hud, rig-standard, zone 22, aimkit 55, hero, dash-dir, dash-flow, health --strict, gen_wiki 34 unchanged. --import clean one commit before the tip. Baseline-red checks not run.
+- ART-1 timing: breah_slam smash at 0.60 s (was 0.43), ends 1.36 s; breah_crouch shows only 0.2-0.45 s; climb rise 2.2 m in ~0.4 s; Stone Row rise 0.22 s.
+- Shots: ext/hero-shots-s2 kits/tarek/. Not checked: sounds by ear, live or net play, the ridge over the abyss, Breaker's head vs the 2.2 m rock.
+- Owner Qs: should every hold be full power? Should rocks clear Breaker's head?
+- Queue: ART-1 Tarek follow-up took this slot; the Sunken Bulwark title sweep is next.
