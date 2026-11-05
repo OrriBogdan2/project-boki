@@ -1415,3 +1415,10 @@ Use them for shape and detail; **the master sheet wins on any difference.**
   - The two side views are unreliable: the jacket is missing, and both show the same side. Take the side silhouette from the master sheet.
 
 ## 2026-11-05 05:58 UTC (ext): `vex_turnaround_apose.png` v3: all four views are now valid. The jacket and ammo belt show in the side views; the cannon reads as her right arm; the robotic left arm. Use all four views.
+
+## 2026-11-05 06:06 UTC (ext): Tarek turnaround v2 + CORRECTION to the arm notes
+`tarek_turnaround_apose.png` is replaced and now matches the master sheet. **Correction to ext's earlier notes ("left arm mostly bare"):** per the master, Tarek has stone on BOTH arms:
+- his **LEFT** arm (viewer's right in the front view) is the HUGE stone arm, covering the shoulder and spreading onto his chest, with molten cracks;
+- his **RIGHT** arm has a large stone forearm gauntlet + fist, with a bare upper arm (crescent tattoo on the shoulder).
+
+Build it as in this turnaround.
