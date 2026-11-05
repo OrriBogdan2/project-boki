@@ -2125,3 +2125,25 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - The Mask offer (item 87): "By the way… that's a Vex mask on your face, innit? Could I interest you in another? Pick one. Don't take all day."
 - **Apply** the voice to every Hob line in the code (the farm_hob.gd conversation, item 87/92 dialogue, toasts). S5/S7: grep for every Hob string and rewrite it in this voice. Non-Hob system text stays neutral.
 - Content rating: mild language only (the owner asked for "a bit crass"). Keep a settings toggle "Mild language: on/off" that swaps the swear words for gentler ones, if it's cheap.
+
+## 170. Black Market tab "What happened" → "History"; also clarify the other tabs (owner, 17:55 UTC Nov 5)
+- The owner: "'what happened' doesnt make sense as a name for the black market tab, idk what it's supposed to be".
+- It's the log of past ransoms/trades/captures (home_black_market.gd TABS.log).
+- Rename it to **"History"**.
+- Tighten the others so a new player understands at a glance:
+  - Ransom → "Lost Boki" (Boki nobody came back for: buy them back).
+  - Captured → "Held by Rivals".
+  - Their offers → "Rival Requests".
+  - Rare stock → "Rare Goods".
+- Each tab gets a one-line empty state (e.g. "No lost Boki. Good." in Old Pell's voice), no extra subtext (item 155).
+- Old --open names keep working.
+
+## 171. Arriving at the farm: the camera centres on Hob and the game requires you to talk to him first (owner, 17:55 UTC Nov 5)
+- The owner: "i cant find hob - it should center on him when we land and force us to go talk to him".
+- On the first arrival home (and whenever Hob has a required tutorial step):
+  1. A short camera pan from the player to Hob (~1.5 s), Hob waving + "Oi! Over here!" (item 169 voice), then the camera returns to the player.
+  2. A strong marker over Hob (the item 166 language: a gold light pillar + a bobbing "!" + an off-screen edge arrow pointing to him when he's not visible).
+  3. **Gate:** other farm interactions/menus are locked until you've talked to him (a gentle "Hob's waiting for you" nudge on attempts).
+  4. Talking to him starts the farm tutorial conversation (item 87 flow).
+- He stands in a consistent, visible spot near the landing (not hidden behind the house); move his spawn if needed.
+- **Assert:** a fresh save → home arrival → the cam pans to Hob; menus are blocked until talk; the edge arrow shows when he's off-screen.

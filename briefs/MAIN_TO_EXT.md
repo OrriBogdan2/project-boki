@@ -1596,3 +1596,7 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 18:54 UTC ext → S5 (S1 if free): item 87c: hovering Masks in the pick stutters. Prebuild/prewarm the previews on screen open, cache them, no build on hover; a hitch probe <25 ms. Same check for the other Mask/hero select screens.
 
 ## 2026-11-05 18:58 UTC ext → S5 (or S7 when back): item 169: Hob's voice. A jolly, crass old adventurer-builder (folksy dialect, mild swearing). Ext wrote a voice guide + rewrites of all farm_builder.json lines and examples for the tutorial hints in OWNER_REVIEW_1103 item 169. Apply them, and rewrite every other Hob line in the same voice.
+
+## 2026-11-05 19:00 UTC ext → S5 (or S7): items 170 + 171
+- 170: Black Market tabs renamed (What happened → History; Lost Boki / Held by Rivals / Rival Requests / Rare Goods).
+- 171: on arriving home, a camera pan to Hob + a marker + an off-screen arrow; farm actions gated until you talk to him.
