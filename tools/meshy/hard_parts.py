@@ -293,9 +293,14 @@ def hammer(spec):
                 bld.prism(G(sx * (W + t), yb, hz + sz * D), G(sx * (W + t + 0.009), yb, hz + sz * D), 0.008, 6,
                           cells["iron"], "iron", 0.0)
     # icicles off the block's haft side (they hang down while he carries it raised)
-    for (x, y, ln) in ((-0.07, 0.15, 0.07), (0.05, 0.1, 0.05), (0.08, -0.16, 0.06), (-0.04, -0.12, 0.045),
-                       (0.0, 0.17, 0.05), (-0.08, -0.05, 0.04)):
-        spike(bld, G(x, y, hz + D - 0.004), G(x, y, hz + D + ln), 0.013, 5, cells["ice"], "ice")
+    for (x, y, ln) in ((-0.07, 0.15, 0.12), (0.05, 0.1, 0.08), (0.08, -0.16, 0.11), (-0.04, -0.12, 0.07),
+                       (0.0, 0.17, 0.09), (-0.08, -0.05, 0.06), (0.07, 0.02, 0.1), (-0.02, 0.05, 0.05),
+                       (0.03, -0.08, 0.13), (-0.07, 0.08, 0.05)):
+        spike(bld, G(x, y, hz + D - 0.004), G(x, y, hz + D + ln), 0.017, 5, cells["ice"], "ice")
+    # and a few off the block's two end faces' lower edges (the sheet's drips)
+    for (x, sy, ln) in ((-0.06, 1, 0.06), (0.06, 1, 0.08), (0.0, -1, 0.07), (-0.06, -1, 0.05)):
+        spike(bld, G(x, sy * (L - 0.01), hz + D * 0.6), G(x, sy * (L - 0.01), hz + D * 0.6 + ln), 0.014, 5,
+              cells["ice"], "ice")
     ob = finish(bld, "weapon")
     img = at.image("hammer_atlas")
     mats = {s: material(ob, s, "hammer", img) for s in ("metal", "leather", "ice")}
@@ -1004,7 +1009,8 @@ def feet_forward(ob, rig, min_dot=0.8):
 def repaint(body, rules):
     """Recolours the body atlas's texels of faces picked in the fitted frame (box [x0, x1, y0, y1, z0, z1], a hue
     range [h0, h1] wrapping past 1, sat_min): Breaker's beard paint on the back of his neck to his skin. Keeps each
-    texel's value against the new colour (warm mode); sat_max / val_min pick pale texels (the rags' white fringe),
+    texel's value against the new colour (warm mode); sat_max / val_min pick pale texels (the rags' white fringe), val_max
+    dark ones,
     `flat` sets them to the colour outright."""
     import colorsys
     me = body.data
@@ -1045,7 +1051,7 @@ def repaint(body, rules):
             hue = np.array([colorsys.rgb_to_hsv(*c3)[0] for c3 in rgb]) if len(rgb) else np.zeros(0)
             hue_ok = (hue >= h0) & (hue <= h1) if h0 <= h1 else (hue >= h0) | (hue <= h1)
             sel = hue_ok & (sat >= float(r.get("sat_min", 0.0))) & (sat <= float(r.get("sat_max", 1.0))) & \
-                (mx >= float(r.get("val_min", 0.0)))
+                (mx >= float(r.get("val_min", 0.0))) & (mx <= float(r.get("val_max", 1.0)))
             val = (mx[sel] / max(float(col.max()), 1e-3))[:, None] if not r.get("flat") else 1.0
             px[yy[sel], xx[sel], :3] = np.clip(col[None] * val, 0, 1)
             n += int(sel.sum())
@@ -1074,7 +1080,7 @@ def stuck(specs, body, arm):
              "kelp": at.cell("kelp", lambda u, v: hexcol("3f5a2a")[None, None] * (0.75 + 0.45 * v[..., None])),
              "brass": at.cell("brass", flat("9a7632", 0.06, 5)),
              "face": at.cell("face", compass_face),
-             "barnacle": at.cell("barnacle", lambda u, v: hexcol("cfd2cc")[None, None] * (0.7 + 0.3 * noise(u, v, 20.0, 4))[..., None])}
+             "barnacle": at.cell("barnacle", lambda u, v: hexcol("aeb3ab")[None, None] * (0.7 + 0.3 * noise(u, v, 20.0, 4))[..., None])}
     out = []
     for kind in ("icicle", "kelp", "compass", "barnacle"):
         group = [sp for sp in specs if sp["kind"] == kind]

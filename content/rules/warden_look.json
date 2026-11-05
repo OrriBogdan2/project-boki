@@ -463,7 +463,8 @@
 			"skin": {
 				"top_light": 0.1,
 				"fres": 0.35,
-				"far_lift": 0.15,
+				"far_lift": 0.25,
+				"albedo": [0.96, 1.0, 1.07],
 				"shade": 0.84,
 				"light_neutral_warm": 0.8,
 				"shadow_tint": [
@@ -486,6 +487,7 @@
 				"fres": 0.5,
 				"fres_tint": 0.7
 			},
+			"hair-braid": {"far_lift": 0.45, "fres": 0.35},
 			"leather-prow": {"far_lift": 0.05, "fres": 0.25, "fres_tint": 0.4},
 			"metal": {
 				"fres": 0.3,
