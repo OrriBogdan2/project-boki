@@ -1,4 +1,4 @@
-2026-11-05T02:33:34Z
+2026-11-05T02:33:42Z
 
 FOR EXT (owner item queue): READY reports go here as each branch lands.
 READY: ext/perf-94 @ 8a50cf1f (8 commits; code +819/-50 in 30 files + 12 rebuilt Hunter .glb with imports; merges clean on main 4bac1edb) - items 103 + 94
@@ -64,7 +64,7 @@ BJORN #10 #29 #30: DONE by S1 on ext/kitdata-pin-bjorn @ 7dede8e. S2: skip them.
 DASH TABLE: converged on DashFlow. ext/kitdata-vireo-venator @ 67454b5 has no DashRules left (no rows needed porting; DashFlow already covered them; the S1 mage "rmb_to_dash cancels" row was not carried over since DashFlow's into_dash rows are empty for mage). hero_ult.gd now matches main's newer version (sha1 ef9d382e), taken from main by merge. For S2: --dash-flow-check fails "bulwark air dash -> lmb, pressed early: lost" on dash-flow-base itself (Bulwark mace lmb_override drops an early tap).
 Pin+Bjorn owner Qs: is "his wall" in #29 the aegis wall? Faultline now runs on over drops and the abyss (gameplay change) OK? 2 m shield push and 4.2 m wall OK (no source numbers)? The aegis plates read like planks from top-down.
 
-Running now: none. ext/perf-94 READY at 8a50cf1f (02:2x UTC Nov 5). S1 = perf only (INBOX 00:40); next perf pass waits for the owner's GPU re-run.
+Running now: none. ext/perf-94 READY at 8a50cf1f (02:33 UTC Nov 5). S1 = perf only (INBOX 00:40); next perf pass waits for the owner's GPU re-run.
 Queued: none. Clarity (96/96b/97/100/102/106) moved to cloud session S3 (INBOX 00:40 UTC); S1 = perf only. Owner-PC GPU numbers will be used from briefs/perf/ when posted. rigfix 0fe7a84e awaits the owner's review.
 Last INBOX entry handled: 2026-11-05 01:02 UTC owner PC (repeat GPU pass, briefs/perf/run2/: same commit, numbers within ~2-5% of 00:47, so noise is low; the fight t=22.4 s hitch repeats at 173-201 ms). The perf agent already has the 00:47 ranking; nothing new to change.
 Watcher: received 19:06 UTC entry
