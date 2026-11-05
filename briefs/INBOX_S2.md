@@ -1336,3 +1336,10 @@ See OWNER_REVIEW item 109: the aim is currently stuck to one direction during he
 
 ## 2026-11-05 05:08 UTC (ext): Sable complete: `sable_turnaround_apose.png` (sculpt-style, pistols holstered at the hips, empty hands), `sable_portrait.png`, `sable_splash.png` (the ballroom heist).
 
+
+## 2026-11-05 05:14 UTC (ext): RYZZ UPGRADE (owner): `briefs/art-refs/ryzz_FINAL_sheet.png`
+- **Signature (owner):** HANDS-FREE. Her attacks are cocky finger guns, with a spark + smoke wisp at the fingertip.
+- **Lightning rig:** a copper harness on her back with 4 lightning rods fanning above her shoulders, arcing electricity between them. Glowing copper wires run down her arms to copper-capped fingertips.
+- **Kit hooks:** the rods light up on the ult (Kitefall). Wirerun shoots a wire from her hand. The rods read from top-down.
+- **Model fix:** the front view's left boot is drawn cut off (an art error). Build both legs as in the side and back views.
+- Keep the rest of her look (pink/blue pigtails, bubblegum, the face bolt mark, the corset, the off-shoulder leather jacket, the pleated skirt, fishnets, the hazard bands, thigh-high boots).
