@@ -2,7 +2,7 @@
 import os, sys
 import numpy as np
 from meshkit import norm, smooth
-from kael_paint import hexc, mix, fbm, lit, ramp, vnoise
+from paintkit import hexc, mix, fbm, lit, ramp, vnoise
 import vex_cannon as VC
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
@@ -71,21 +71,18 @@ def sleeve(p, n, ao):
     st = np.sin((s * 90 + th * 5)) > 0
     hz = np.where(st[..., None], hexc("#e7b61c") * (0.55 + 0.6 * lit(n, ao))[..., None], hexc("#171512") + 0 * c)
     c = np.where(haz[..., None], hz, c)
-    # the wanted poster on the top (forward at rest): it faces the match camera when she aims
-    P = _decal("poster")
-    pv = (s - (-0.135)) / 0.225
-    pu = 0.5 + (u + 0.0) / 0.13
-    m = (pu > 0) & (pu < 1) & (pv > 0) & (pv < 1) & (f > VC.SLEEVE_F + 0.02)
-    sm = sample(P, pu, 1 - pv)
-    c = np.where(m[..., None], sm * (0.6 + 0.62 * lit(n, ao))[..., None], c)
     # the skull and the kill tallies on the outer face
     T = _decal("skulltally")
-    tv = (s - (-0.13)) / 0.235
-    tu = 0.5 + (f - VC.SLEEVE_F) / 0.105
+    tv = (s - (-0.13)) / 0.232
+    tu = 0.5 + (f - VC.SLEEVE_F) / 0.115
     m2 = (tu > 0) & (tu < 1) & (tv > 0) & (tv < 1) & (u > 0.03)
     tc = sample(T, tu, 1 - tv)
-    light = (tc.min(-1) > 0.72) | ((tc[..., 1] > tc[..., 0] * 1.35) & (tc[..., 1] > 0.5))
-    c = np.where((m2 & light)[..., None], tc * (0.75 + 0.45 * lit(n, ao))[..., None], c)
+    grn = (tc[..., 1] > tc[..., 0] * 1.3) & (tc[..., 1] > 0.42)
+    wht = tc.min(-1) > 0.62
+    dark = tc.max(-1) < 0.16
+    c = np.where((m2 & grn)[..., None], np.array([0.45, 1.0, 0.28]) * (0.72 + 0.4 * lit(n, ao))[..., None], c)
+    c = np.where((m2 & wht)[..., None], np.array([0.96, 0.96, 0.92]) * (0.8 + 0.3 * lit(n, ao))[..., None], c)
+    c = np.where((m2 & dark & (tv < 0.32))[..., None], np.array([0.04, 0.09, 0.04]), c)
     return c
 
 
@@ -116,15 +113,33 @@ def plate(p, n, ao):
     return rivets(p, n, ao, steel(p, n, ao))
 
 
+def poster_paint(pos, nor, ao):
+    """The poster's art by its place on the sleeve."""
+    img = _decal("poster")
+    s, u, f = scs(pos)
+    pv = (s + 0.125) / 0.217
+    pu = 0.5 - np.arcsin(np.clip(u / (VC.SLEEVE_R + 0.0035), -1, 1)) / (2 * 0.78)
+    c = sample(img, np.clip(pu, 0.02, 0.98), np.clip(1 - pv, 0.02, 0.98))
+    return c * (0.82 + 0.3 * lit(nor, ao))[..., None]
+
+
+def plate_paint(p, n, ao):
+    c = chrome(p, n, ao)
+    w = 0.092 - 0.05 * smooth(0.45, 0.8, (VC.J("upper_arm.R")[2] - 0.03 - p[..., 2]) / 0.13)
+    e = np.abs(p[..., 0]) / w
+    c = np.where((e > 0.9)[..., None], brass(p, n, ao), c)
+    return np.where((np.abs(p[..., 0]) < 0.0022)[..., None], CIRCUIT + 0 * c, c)
+
+
 def belt_tile(h, w):
-    """Cartridges across the ribbon: u along each tooth; brass case, copper tip side to side."""
+    """u round the cartridge (1 lit crest .. 0 edge), v along it: the link strip at the base, brass case, copper nose."""
     v, u = np.mgrid[0:h, 0:w]
     u, v = (u + .5) / w, (v + .5) / h
-    across = np.abs(v * 2 - 1)
-    shade = 0.12 + 1.0 * np.sin(u * np.pi) ** 0.7
-    c = ramp(np.clip(shade * 0.85, 0, 1), BRASS)
-    c = np.where((v > 0.76)[..., None], ramp(np.clip(shade, 0, 1), [hexc("#3a1f0d"), hexc("#73401c"), hexc("#a96533"), hexc("#d49358"), hexc("#f0c79a")]), c)
-    c = np.where((np.abs(v - 0.12) < 0.11)[..., None], ramp(np.clip(shade * .7, 0, 1), BLACKM), c)
+    shade = np.clip(0.2 + 0.85 * u ** 1.2, 0, 1)
+    c = ramp(shade, BRASS)
+    nose = v > 0.76
+    c = np.where(nose[..., None], ramp(shade, [hexc("#3a1f0d"), hexc("#73401c"), hexc("#a96533"), hexc("#d49358"), hexc("#f0c79a")]), c)
+    c = np.where((v < 0.21)[..., None], ramp(shade * .6, BLACKM), c)
     return c
 
 
@@ -191,7 +206,7 @@ def apply_face(pos, col, H):
     return col
 
 
-SKIN_R = [hexc("#9a5f60"), hexc("#c98680"), hexc("#e3a596"), hexc("#f2c2b2"), hexc("#fcdccd")]
+SKIN_R = [hexc("#8a5560"), hexc("#b87a7c"), hexc("#d69a96"), hexc("#ebbcae"), hexc("#fad8c8")]
 
 
 def goggle_lens(p, n, ao):
@@ -204,9 +219,9 @@ def clean_skin(col, m, blur):
     """The scan's skin rebuilt on a warm ramp from a band-pass of its light: baked highlights and mottling off, forms kept."""
     l = col.mean(-1)
     mf = m.astype(np.float32)
-    l1, l2 = blur(l, mf, 2), blur(l, mf, 20)
-    t = np.clip(0.42 + (l1 - l2) * 3.0, 0, 1)
-    new = ramp(t, SKIN_R) + (l - l1)[..., None] * 0.5
+    l1, l2 = blur(l, mf, 4), blur(l, mf, 34)
+    t = np.clip(0.48 + (l1 - l2) * 2.8, 0.06, 0.92)
+    new = ramp(t, SKIN_R)
     return np.where(m[..., None], new.astype(np.float32), col)
 
 
@@ -226,3 +241,42 @@ def project_portrait(pos, col, H):
     green = (px_[..., 1] > px_[..., 0] * 1.02)
     w = w * (1 - green)
     return col * (1 - w[..., None]) + np.clip(px_ * np.array([1.1, 1.0, 0.94]) * 1.06, 0, 1) * w[..., None]
+
+
+def _seg_dist(x, z, a, b):
+    ax, az, bx, bz = a[0], a[1], b[0], b[1]
+    dx, dz = bx - ax, bz - az
+    t = np.clip(((x - ax) * dx + (z - az) * dz) / max(dx * dx + dz * dz, 1e-9), 0, 1)
+    return np.hypot(x - ax - t * dx, z - az - t * dz)
+
+
+def circuit_lines(Zb, Zs):
+    """The master's thin angular circuits, in (x, z), rig metres: Zb the belt line, Zs the shoulders. -> [(side, polyline, end dot)], side +1 front, -1 back."""
+    out = []
+    for s in (1.0, -1.0):
+        # the stomach, from under the top to the belt
+        out.append((1, [(s * .036, Zb + .185), (s * .036, Zb + .13), (s * .06, Zb + .1), (s * .06, Zb + .02)], True))
+        out.append((1, [(s * .074, Zb + .16), (s * .074, Zb + .125), (s * .092, Zb + .1)], True))
+        # the thighs
+        for x0, sg in ((s * .12, 1.0),):
+            out.append((1, [(x0 - s * .04, Zb - .17), (x0 - s * .04, Zb - .225), (x0 - s * .06, Zb - .25)], True))
+            out.append((1, [(x0 + s * .03, Zb - .17), (x0 + s * .03, Zb - .21), (x0 + s * .05, Zb - .235), (x0 + s * .05, Zb - .262)], False))
+            out.append((-1, [(x0 + s * .02, Zb - .19), (x0 + s * .02, Zb - .24), (x0 + s * .045, Zb - .26)], True))
+        # the back: branches off the spine, the sheet's ribs of light
+        for i, dz in enumerate((.07, .12, .17, .225)):
+            out.append((-1, [(s * .03, Zb + dz), (s * (.06 + .008 * i), Zb + dz), (s * (.075 + .008 * i), Zb + dz + .025)], i % 2 == 0))
+    # the chest: one line from the collar
+    out.append((1, [(-.03, Zs - .0), (-.02, Zs - .06), (-.045, Zs - .12), (-.045, Zs - .15)], False))
+    return out
+
+
+def draw_circuits(x, z, front, Zb, Zs, wd=0.0023):
+    """-> a mask over texels."""
+    m = np.zeros(x.shape, bool)
+    for side, pl, dot in circuit_lines(Zb, Zs):
+        k = front if side > 0 else ~front
+        for a, b in zip(pl[:-1], pl[1:]):
+            m |= k & (_seg_dist(x, z, a, b) < wd)
+        if dot:
+            m |= k & (np.hypot(x - pl[-1][0], z - pl[-1][1]) < 0.0052)
+    return m

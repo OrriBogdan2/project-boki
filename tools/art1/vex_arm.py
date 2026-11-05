@@ -35,6 +35,29 @@ def forearm():
     return ps
 
 
+def panel():
+    """The forearm's long brass panel, on its outer face, as the sheet: a raised curved plate from below the elbow to the wrist."""
+    L = np.linalg.norm(WR - EL)
+    rows, arc = 6, 6
+    v = []
+    for i in range(rows):
+        k = i / (rows - 1)
+        al = L * (0.2 + 0.68 * k)
+        r = np.interp(al, (0.045, L * 0.32, L * 0.55, L * 0.8), (0.043, 0.05, 0.046, 0.036)) + 0.004
+        half = 1.25 - 0.45 * k
+        for j in range(arc):
+            t = -np.pi * 0.9 + (j / (arc - 1) - 0.5) * 2 * half
+            v.append(EL + FA * al + np.array([np.cos(t) * r, np.sin(t) * r * 0.9 * -1.0 * -1.0, 0]))
+    f = []
+    for i in range(rows - 1):
+        for j in range(arc - 1):
+            a = i * arc + j
+            f.append([a, a + 1, a + 1 + arc, a + arc])
+    p = Piece("robopanel", "brass-vex", np.array(v), f).rigid("forearm.L")
+    p.orient(tuple(EL + FA * L * 0.5))
+    return [p]
+
+
 def hand():
     """Palm block, three-joint metal fingers with glowing pads, the thumb. Rest: relaxed open. k along the knuckles (first finger first), a wrist to knuckles, o out of its back."""
     wrist = WR.copy()

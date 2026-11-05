@@ -119,6 +119,38 @@ def launcher():
     return [p for p in out if p is not None]
 
 
+def poster():
+    """The wanted poster, its own sheet on the sleeve (top of the cannon when she aims): a curved patch, torn edges, the pin. The art is the weapon sheet's."""
+    rows, cols = 7, 6
+    r = SLEEVE_R + 0.0035
+    rng = np.random.RandomState(7)
+    v, uv = [], []
+    S0, S1 = -0.125, 0.092
+    A = 0.78
+    for i in range(rows):
+        k = i / (rows - 1)
+        for j in range(cols):
+            q = j / (cols - 1)
+            a, s_ = (q - 0.5) * 2 * A, S0 + (S1 - S0) * k
+            if i in (0, rows - 1):
+                s_ += rng.uniform(-0.009, 0.009)
+            if j in (0, cols - 1):
+                a += rng.uniform(-0.09, 0.09)
+            v.append(C(s_, np.sin(a) * r, SLEEVE_F + np.cos(a) * r))
+            uv.append((q, k))
+    v = np.array(v)
+    f = []
+    for i in range(rows - 1):
+        for j in range(cols - 1):
+            a = i * cols + j
+            f.append([a, a + 1, a + 1 + cols, a + cols])
+    p = Piece("poster", "cloth-vex", v, f).rigid("forearm.R")
+    p.orient(tuple(C(0, 0, SLEEVE_F)))
+    p.pu = np.array(uv)
+    pin = lathe("posterpin", "metal-vex", 0.0, SLEEVE_F + r + 0.002, [(S0 + 0.012, 0.0), (S0 + 0.012, 0.009), (S0 + 0.019, 0.009), (S0 + 0.019, 0.0)], n=6, cap=False)
+    return [p, pin]
+
+
 def pumpkin(name, s, u, f, r, h):
     """A fat ribbed grenade with a steel lid."""
     n = 10
