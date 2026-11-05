@@ -1,0 +1,5 @@
+tender_lmb.png: LMB held: starlit comets from alternating hands, the hand flares, Kindled
+tender_dash.png: Shift: the hop's stars and its faint star trail
+tender_rmb.png: RMB: starlight gathers at the lantern, the cast, the seed's trail, the root
+tender_e.png: E: the lantern flares, stars rise off her as it heals, thrown, it lands
+tender_r.png: R, Hearth Call: the lantern's flare, the heals rising as stars

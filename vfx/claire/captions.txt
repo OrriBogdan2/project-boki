@@ -1,0 +1,5 @@
+rimewright_lmb.png: LMB held: darts with icy trails, chill and the frost on the foe
+rimewright_dash.png: Shift: the skate's frost trail, a carve, beams, the stop, the frost melting
+rimewright_rmb.png: RMB: the gather, the push, the spear's trail, the landing, the detonation
+rimewright_e.png: E: the tell at her feet, the wall rising, E again: the freeze
+rimewright_r.png: R, Rimelock: the seal, the cold held round her, the crash and its frost

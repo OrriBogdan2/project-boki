@@ -1,0 +1,5 @@
+ashwick_lmb.png: LMB held and swept: the pilot, the hose, its tongues and scorch, release
+ashwick_rmb.png: RMB: the gather, the shot and its trail, the hit on a burning foe
+ashwick_dash.png: Shift
+ashwick_e.png: E at the dummy
+ashwick_r.png: R, Flue Flight: lift-off, the tank jets, the carpet, the landing
