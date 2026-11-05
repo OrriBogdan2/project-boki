@@ -132,6 +132,69 @@ def sweep(name, mat, path, section, width, side_hint=None, uv_rect=(0, 0, 1, 1),
     return Piece(name, mat, verts, faces, uvs, room=room)
 
 
+def holed_sheet(name, mat, G, wrap=False, holes=(), room=1.0):
+    """A sheet from a (rows, cols, 3) grid of points, with real holes cut: holes = [(row, col, radius in cells, seed)]. Each hole's cells are
+    re-triangulated round an irregular ring (a constrained Delaunay in grid space). -> Piece with .rowf (0..1 per vertex)."""
+    from mathutils.geometry import delaunay_2d_cdt
+    from mathutils import Vector
+    G = np.asarray(G, dtype=np.float64)
+    R, C_ = G.shape[:2]
+
+    def at(r, c):
+        r0 = int(np.clip(np.floor(r), 0, R - 2))
+        q = r - r0
+        c0 = int(np.floor(c))
+        p = c - c0
+        a, b = c0 % C_, (c0 + 1) % C_
+        if not wrap:
+            a, b = min(c0, C_ - 2), min(c0, C_ - 2) + 1
+            p = c - a
+        return (G[r0, a] * (1 - p) + G[r0, b] * p) * (1 - q) + (G[r0 + 1, a] * (1 - p) + G[r0 + 1, b] * p) * q
+
+    verts, rowf, index, faces = [], [], {}, []
+
+    def vid(r, c):
+        k = (round(r, 4), round(c % C_ if wrap else c, 4))
+        if k not in index:
+            index[k] = len(verts)
+            verts.append(at(r, c))
+            rowf.append(r / (R - 1))
+        return index[k]
+    taken = set()
+    for hr, hc, rad, seed in holes:
+        r0, r1 = int(np.floor(hr - rad - 0.5)), int(np.ceil(hr + rad + 0.5))
+        c0, c1 = int(np.floor(hc - rad - 0.5)), int(np.ceil(hc + rad + 0.5))
+        r0, r1 = max(r0, 0), min(r1, R - 1)
+        if not wrap:
+            c0, c1 = max(c0, 0), min(c1, C_ - 1)
+        for r in range(r0, r1):
+            for c in range(c0, c1):
+                taken.add((r, c % C_))
+        outer = [(float(c), float(r0)) for c in range(c0, c1)] + [(float(c1), float(r)) for r in range(r0, r1)] + \
+            [(float(c), float(r1)) for c in range(c1, c0, -1)] + [(float(c0), float(r)) for r in range(r1, r0, -1)]
+        rng = np.random.RandomState(seed)
+        ring = []
+        for k in range(9):
+            a = k / 9 * 2 * np.pi
+            q = rad * rng.uniform(0.55, 1.1)
+            ring.append((hc + np.cos(a) * q, hr + np.sin(a) * q * 0.8))
+        co = [Vector(p) for p in outer + ring]
+        loops = [list(range(len(outer))), list(range(len(outer), len(outer) + len(ring)))]
+        out = delaunay_2d_cdt(co, [], loops, 2, 1e-5)
+        for f in out[2]:
+            q = [out[0][i] for i in f]
+            faces.append([vid(p.y, p.x) for p in q])
+    for r in range(R - 1):
+        for c in range(C_ - (0 if wrap else 1)):
+            if (r, c) in taken:
+                continue
+            faces.append([vid(r, c), vid(r, c + 1), vid(r + 1, c + 1), vid(r + 1, c)])
+    p = Piece(name, mat, verts, faces, room=room)
+    p.rowf = np.array(rowf)
+    p.at = at
+    return p
+
+
 def rot_about(v, axis, ang):
     """Rodrigues: rotates vectors v about a unit axis."""
     v = np.asarray(v, dtype=np.float64)

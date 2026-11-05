@@ -65,7 +65,7 @@ def ramp(t, cols):
     return c[i] * (1 - f) + c[i + 1] * f
 
 
-SKIN = [hexc("#2d1c22"), hexc("#4a2f31"), hexc("#694744"), hexc("#88625a"), hexc("#a98370")]
+SKIN = [hexc("#33202a"), hexc("#553636"), hexc("#774f49"), hexc("#976c60"), hexc("#b78c78")]
 CLOTH = [hexc("#1c070d"), hexc("#340d16"), hexc("#4e1520"), hexc("#68202b"), hexc("#84333a")]
 GOLD = [hexc("#5c360c"), hexc("#99621a"), hexc("#c98a2a"), hexc("#e8b24c"), hexc("#ffe08c")]
 IRON = [hexc("#1e1b1f"), hexc("#3a363a"), hexc("#5b5659"), hexc("#7f7a7b"), hexc("#b0abaa")]
@@ -108,6 +108,13 @@ def face(p, ao):
     return c
 
 
+def eye_glow(a, b):
+    """The glowing eye: a keyed-hot iris with no pupil, bleeding pale rose into the white, darker at the corners."""
+    r = np.sqrt(a * a + (b * 1.1) ** 2)
+    c = mix(hexc("#3b2426"), hexc("#d79c94"), 1 - smooth(0.28, 0.9, r))
+    return mix(c, np.array([1.0, 0.76, 0.44]), 1 - smooth(0.2, 0.36, r))
+
+
 def eye(a, b):
     """a, b: the eye's flat view. Pale cold gold iris, small pupil, shaded under the lid."""
     r = np.sqrt(a * a + b * b)
@@ -122,8 +129,16 @@ def eye(a, b):
     return c
 
 
-def lid(p, n, ao):
-    return ramp(np.clip(lit(n, np.maximum(ao, 0.85)) * 0.85, 0, 1), SKIN)
+def lid(p, n, ao, side, upper):
+    """Lids: skin, with the dark lash line along the opening's edge and a crease above it."""
+    c0 = K.hl(K.EYE * [side, 1, 1])
+    q = norm(p - c0)
+    az = np.arctan2(q[..., 0] * side, q[..., 1])
+    el = np.arcsin(np.clip(q[..., 2], -1, 1))
+    d = el - K.lid_up(az) if upper else K.lid_down(az) - el
+    t = np.clip(lit(n, np.maximum(ao, 0.85)) * 0.82, 0, 1) - 0.14 * np.exp(-((d - 0.42) / 0.09) ** 2)
+    c = ramp(t, SKIN)
+    return mix(c, hexc("#120809"), 1 - smooth(0.05, 0.16 if upper else 0.1, d))
 
 
 def cloth(p, n, ao, fold_axis=(0, 0, 1)):
@@ -143,8 +158,8 @@ def embers(p, spots):
     for x, y, z, r in spots:
         d = np.linalg.norm((p - [x, y, z]) * [1, 1, 1.5], axis=-1) / r
         w = d + (fbm(p * 90 + x * 9) - 0.5) * 0.9
-        out_k = np.maximum(out_k, 1 - smooth(1.0, 1.5, w))
-        out_h = np.maximum(out_h, 1 - smooth(0.62, 0.98, w))
+        out_k = np.maximum(out_k, 1 - smooth(0.95, 1.5, w))
+        out_h = np.maximum(out_h, 1 - smooth(0.7, 1.02, w))
     return out_k, out_h
 
 
@@ -152,8 +167,10 @@ EMBER = np.array([1.0, 0.76, 0.44])
 
 
 def burnt(c, p, spots):
+    """Char round each hole, then the ember's keyed ring right at its lip; the ring breaks up."""
     k, h = embers(p, spots)
-    return mix(mix(c, hexc("#120608"), k), EMBER, h)
+    h = h * smooth(0.36, 0.56, fbm(p * 70 + 3.0))
+    return mix(mix(c, hexc("#0d0406"), k), EMBER, h)
 
 
 def cowl_cloth(p, n, ao):
@@ -164,12 +181,12 @@ def cowl_cloth(p, n, ao):
     t = lit(n, np.maximum(ao, 0.7)) * 0.86
     a2 = np.sin(a * 3 + 1.0) * 0.012
     zc = K.C[2]
-    for z0, dip, k in ((zc - 0.066, 0.008, 0.8), (zc - 0.09, 0.012, 0.9), (zc - 0.124, 0.02, 1.0), (zc - 0.15, 0.036, 0.9), (zc - 0.185, 0.05, 0.7)):
+    for z0, dip, k in ((zc - 0.066, 0.008, 0.9), (zc - 0.09, 0.012, 1.0), (zc - 0.132, 0.02, 1.0), (zc - 0.17, 0.04, 0.9), (zc - 0.205, 0.05, 0.8)):
         k = k * np.clip(1.5 * fbm(np.stack([a * 2.2, 0 * a + z0 * 9, 0 * a], -1)) - 0.15, 0, 1.2)
         d = p[..., 2] - (z0 - dip * fr + wob + a2)
         t = t - k * 0.42 * np.exp(-((d + 0.003) / 0.0042) ** 2) + k * 0.16 * np.exp(-((d - 0.008) / 0.009) ** 2)
     t = t + (fbm(p * 150, 3) - 0.5) * 0.05
-    return burnt(ramp(np.clip(t, 0, 1), CLOTH), p, K.COWL_BURNS)
+    return ramp(np.clip(t, 0, 1), CLOTH)
 
 
 def gold(p, n, ao):
@@ -293,10 +310,13 @@ def blade_paint(a, c, h, n, ao, ol_w):
             bid = np.where(nb, jx, bid)
             best = np.where(nb, d, best)
     t = lit(n, ao) * 0.92 + (bid - 0.5) * 0.22 + (fbm(p * 2.7) - 0.5) * 0.18
-    c0 = ramp(np.clip(t, 0, 1), [hexc("#6e6461"), hexc("#938884"), hexc("#b5aaa3"), hexc("#d3cac1"), hexc("#f0e9de")])
+    c0 = ramp(np.clip(t, 0, 1), [hexc("#2b2628"), hexc("#494243"), hexc("#6e6563"), hexc("#958a84"), hexc("#c4b8ac")])
     seam = 1 - smooth(0.0, 0.1, sec - best)
-    c0 = mix(c0, hexc("#5c4a42"), seam * 0.55)
-    # a molten glow creeping in from the core
-    heat = smooth(0.62, 0.3, np.abs(c) / W)
-    c0 = mix(c0, hexc("#f4b27a"), heat * 0.55)
+    c0 = mix(c0, hexc("#17120f"), seam * 0.7)
+    # heat in the stone: amber up against the core, keyed-hot seams running out of it
+    u = np.abs(c) / W
+    heat = smooth(0.66, 0.36, u)
+    c0 = mix(c0, hexc("#a85a2c"), heat * 0.7)
+    seams = seam * smooth(0.95, 0.5, u) * smooth(0.3, 0.6, fbm(np.stack([a * 7, c * 7, a * 0], -1)))
+    c0 = mix(c0, np.array([1.0, 0.76, 0.44]), smooth(0.5, 0.8, seams))
     return c0

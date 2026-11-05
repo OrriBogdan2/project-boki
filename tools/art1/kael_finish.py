@@ -20,8 +20,9 @@ HAIR_R = (UNIQ_W + 0.005, 0.40, 1.0, 1.0)
 CHAIN_R = (UNIQ_W + 0.005, 0.30, 0.875, 0.395)
 HOOK_R = (0.88, 0.30, 1.0, 0.395)
 EYE_R = (UNIQ_W + 0.005, 0.20, 0.875, 0.295)
+EYE2_R = (UNIQ_W + 0.005, 0.10, 0.875, 0.195)
 GLOW_R = (0.88, 0.20, 1.0, 0.295)
-MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "leather-kael", "metal-kael", "metal-blade-hot", "hair-mane", "eyes-kael", "glow-sword"]
+MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "leather-kael", "metal-kael", "metal-blade-hot", "hair-mane", "eyes-kael", "eyes-glow-hot", "glow-sword"]
 SCALE = {"face": 4.0, "lidU": 2.6, "lidD": 2.6, "mask": 1.5, "cowl": 1.5, "stail": 1.3, "palm": 2.0, "finger": 1.8,
          "thumb": 1.8, "skull": 0.4, "blade": 1.5, "guard": 1.4, "grip": 1.6, "pommel": 1.6, "Low": 1.15}
 
@@ -61,6 +62,8 @@ for p_ in pieces:
         p_.orient(HEAD_C if not n_.startswith(("eye", "lid")) else tuple(K.hl(K.EYE * [1 if n_.endswith("R") else -1, 1, 1])))
     elif n_ == "cowl":
         p_.orient((0, 0.01, K.C[2] - 0.15))
+    elif n_.startswith("stail"):
+        pass        # (two sheets back to back, wound as built)
     else:
         p_.orient()
 
@@ -106,7 +109,6 @@ for p_ in tails:
         w_[names_[b_]][i] += u * (1 - q)
         w_[names_[min(b_ + 1, TAIL_N - 2)]][i] += u * q
     p_.w = w_
-    p_.spots = [tuple(p_.path[int(len(p_.path) * k_)]) + (r_,) for k_, r_ in ((0.34, 0.024), (0.52, 0.018), (0.66, 0.026), (0.82, 0.02))]
 
 # ---- one mesh: the scan first, then the pieces
 faces_v, faces_pid, faces_uv, verts, vw, rooms, shades = [], [], [], [], [], [], []
@@ -187,8 +189,8 @@ for i, p in enumerate(me.polygons):
               "leather-grip": "leather-kael", "hair-brow": "hair-mane"}.get(pm, pm)
         if n in ("cowl", "stailR", "stailL"):
             m2 = "cloth-ember-hot"
-        if n == "eyeL":
-            m2 = "glow-sword"       # the left eye glows white under its scar
+        if n == "eye" + K.GLOW_EYE:
+            m2 = "eyes-glow-hot"    # the eye under the scar glows
     p.material_index = mat_i[m2]
 
 # ---- unwrap the unique pieces
@@ -314,11 +316,8 @@ for p in me.polygons:
         r = GLOW_R
     else:
         r = HAIR_R
-    if n == "eyeL":
-        for l in ls:
-            loop_uv[l] = ((GLOW_R[0] + GLOW_R[2]) / 2, (GLOW_R[1] + GLOW_R[3]) / 2)
-        continue
     if n.startswith("eye"):
+        r = EYE2_R if n == "eye" + K.GLOW_EYE else EYE_R
         pc = next(q for q in pieces if q.name == n)
         ev = np.array(p.vertices) - (faces_v[i][0] - pc.f[i - faces_pid.index(faces_pid[i])][0])
         coords = pc.eye_uv[ev]
@@ -496,10 +495,10 @@ for k_, i in enumerate(low_faces):
 mask = PID == low_pid
 ys, xs = np.nonzero(mask)
 col = sample_scan(POS[ys, xs])
-col = np.power(np.clip(col, 0, 1), 0.92) * 1.08
+col = np.power(np.clip(col, 0, 1), 0.85) * 1.16
 # the near-black trousers up to a readable charcoal, a little cool
-dk = (col.max(1) < 0.2)[:, None]
-col = col * (1 - dk) + (col * 1.5 + np.array([0.075, 0.075, 0.09])) * dk
+dk = (col.max(1) < 0.27)[:, None]
+col = col * (1 - dk) + (col * 1.4 + np.array([0.09, 0.09, 0.105])) * dk
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 OUTC[ys, xs] = col
 # a little of the shared light's occlusion on the scan too
@@ -535,9 +534,12 @@ def paint(names_pred, fn):
 
 paint(lambda n: n == "face", lambda p, n, ao: P.face(p, ao))
 paint(lambda n: n == "skull", P.skin)
-paint(lambda n: n.startswith("lid"), P.lid)
+for sd_, sg_ in (("R", 1.0), ("L", -1.0)):
+    paint(lambda n, q="lidU" + sd_: n == q, lambda p, n, ao, sg=sg_: P.lid(p, n, ao, sg, True))
+    paint(lambda n, q="lidD" + sd_: n == q, lambda p, n, ao, sg=sg_: P.lid(p, n, ao, sg, False))
 paint(lambda n: n == "mask", P.mask_cloth)
-paint(lambda n: n == "cowl", P.cowl_cloth)
+cowl_p = next(q for q in pieces if q.name == "cowl")
+paint(lambda n: n == "cowl", lambda p, n, ao: P.burnt(P.cowl_cloth(p, n, ao), p, cowl_p.burns))
 paint(lambda n: n.startswith(("palm", "finger", "thumb")) and n.endswith("L"), P.skin)
 
 
@@ -564,7 +566,7 @@ paint(lambda n: n == "guard", lambda p, n, ao: P.iron(p, n, ao, 0.3))
 paint(lambda n: n == "grip", P.grip)
 paint(lambda n: n == "pommel", lambda p, n, ao: P.iron(p, n, ao, 0.1))
 for p_ in tails:
-    paint(lambda n, q=p_.name: n == q, lambda p, n, ao, sp=p_.spots: P.burnt(P.cloth(p, n, np.maximum(ao, 0.75)), p, sp))
+    paint(lambda n, q=p_.name: n == q, lambda p, n, ao, sp=p_.burns: P.burnt(P.cloth(p, n, np.maximum(ao, 0.75)), p, sp))
 
 # dilate past the island edges
 known = PID >= 0
@@ -593,6 +595,9 @@ OUTC[y0:y1, x0:x1] = P.hook_tile(y1 - y0, x1 - x0)
 x0, y0, x1, y1 = rect(EYE_R)
 v_, u_ = np.mgrid[0:y1 - y0, 0:x1 - x0]
 OUTC[y0:y1, x0:x1] = P.eye((u_ + 0.5) / (x1 - x0) * 2 - 1, ((v_ + 0.5) / (y1 - y0) - 0.5) * 1.5)
+x0, y0, x1, y1 = rect(EYE2_R)
+v_, u_ = np.mgrid[0:y1 - y0, 0:x1 - x0]
+OUTC[y0:y1, x0:x1] = P.eye_glow((u_ + 0.5) / (x1 - x0) * 2 - 1, ((v_ + 0.5) / (y1 - y0) - 0.5) * 1.5)
 x0, y0, x1, y1 = rect(GLOW_R)
 OUTC[y0:y1, x0:x1] = (1.0, 0.98, 0.93)
 
@@ -687,6 +692,10 @@ A = {"anchor_head_top": ("head", (0, 0.0, K.C[2] + 0.12)), "anchor_chest": ("hip
      "weapon_muzzle": ("hand.R", tuple(g + b_ * K.BLADE_LEN)), "anchor_blade_root": ("hand.R", tuple(g + b_ * 0.05)),
      "anchor_blade_mid": ("hand.R", tuple(g + b_ * K.BLADE_LEN * 0.55)),
      "anchor_hook_mouth": (HANG[-2], tuple(np.array(hang_pts[0]) + [0, 0.10, -0.5]))}
+cowl_w = next(q for q in pieces if q.name == "cowl")
+for i_, b_u in enumerate(cowl_w.burns[:5]):
+    A["anchor_ember_%d" % i_] = ("hips" if b_u[2] < K.NECK_Z else "head", tuple(b_u[:3]))
+A["anchor_eye_glow"] = ("head", tuple(K.hl(K.EYE * [1 if K.GLOW_EYE == "R" else -1, 1, 1]) + np.array([0, 0.02, 0])))
 for nm, (bn, at) in A.items():
     e = bpy.data.objects.new(nm, None)
     bpy.context.scene.collection.objects.link(e)

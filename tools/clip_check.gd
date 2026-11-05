@@ -8,7 +8,7 @@ extends RefCounted
 const TRI_BUDGET := 20000
 const DT := 1.0 / 30.0
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
-const POP := 1.0               # m a frame: no teleport across a hand-over (the fastest strikes move 0.5 m on their own)
+const POP := 0.06              # of the Hero's height: a hand's one-frame spike over its neighbour frames at a hand-over
 
 var bad := 0
 var holder: Node3D
@@ -160,19 +160,20 @@ func _sliders(id: String, sync: Node) -> void:
 	ok(not (clips.d.get("states", {}) as Dictionary).has("dead") or stays > 0.0,
 			"%s: a knocked-out Hero stays on screen for its death clip" % id)
 
-## A dash into an ability into the run: states fed as the game does, the hand never jumps.
+## Moves handed over as the game does, the state fed frame by frame: the hand's path has no one-frame spike (a step well over
+## the steps either side of it, what a pop is), measured against the Hero's height so a tall Hero's fast strike is no pop.
 func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
 	var moves: Array = (dd.get("kmoves", {}) as Dictionary).keys()
 	var s := {"vel": Vector3(0, 0, -4.0), "face": 0.0, "grounded": true}
 	m.set_meta(WardenClips.STATE, s)
 	var hand := m.get_node(String(WardenGlb.BONES["hand.R"])) as Node3D
-	var last := Vector3.INF
-	var worst := 0.0
-	var where := ""
 	var seq: Array = [["", 0.4]]
 	for i in mini(moves.size(), 8):
 		seq.append([moves[i], 0.22])
 	seq.append(["", 0.4])
+	var steps := PackedFloat32Array()
+	var marks: Array = []
+	var last := Vector3.INF
 	for st in seq:
 		var t := 0.0
 		while t < float(st[1]):
@@ -183,13 +184,21 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 			sync.call("_process", DT)
 			await holder.get_tree().process_frame
 			var p := hand.global_position
-			if last != Vector3.INF and clips.proc_w <= 0.0 and p.distance_to(last) > worst:
-				worst = p.distance_to(last)
-				where = "%s @%.2f" % [st[0], t]
+			if last != Vector3.INF and clips.proc_w <= 0.0:
+				steps.append(p.distance_to(last))
+				marks.append("%s @%.2f" % [st[0], t])
 			last = p
 			t += DT
-	ok(worst <= POP * maxf(m.scale.x, 1.0), "%s: moves hand over without a pop (worst step %.3f m a frame, %s)"
-			% [id, worst, where])
+	var worst := 0.0
+	var where := ""
+	for i in range(1, steps.size() - 1):
+		var spike := steps[i] - maxf(steps[i - 1], steps[i + 1])
+		if spike > worst:
+			worst = spike
+			where = String(marks[i])
+	var height := 1.6 * absf(m.scale.y)
+	ok(worst <= POP * height, "%s: moves hand over without a pop (worst spike %.3f m, %s; limit %.3f)"
+			% [id, worst, where, POP * height])
 	ok(clips.proc_w <= 0.0, "%s: the clips own the body after the run" % id)
 	s["kmove"] = "no_such_move"
 	for k in 12:
