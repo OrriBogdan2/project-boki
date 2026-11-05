@@ -14,11 +14,11 @@ from vespyx_sides import SIDES
 HEAD_C = v3(0, 0.47, -0.13)
 HEAD_R = v3(0.25, 0.208, 0.208)
 # the eye dome: centre and radii in the head's frame, set into the socket the head carves for it
-EYE_C = v3(0.116, 0.452, -0.283)
-EYE_R = v3(0.080, 0.096, 0.056)
+EYE_C = v3(0.112, 0.452, -0.288)
+EYE_R = v3(0.066, 0.079, 0.048)
 EYE_YAW = 0.42
 GLOW_PIECES = ("sting",)
-FACE = {}          # face.FACE's defaults are this fox's
+FACE = {"brow_up": 0.022}      # face.FACE's defaults are this fox's, with the brows nearer its smaller eyes
 
 
 def eye_frame(sx):
