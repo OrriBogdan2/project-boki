@@ -364,7 +364,7 @@ def ground_rings(arm, mat, uv_from):
     return [e, ob]
 
 
-STONES = ({"angle": 300, "height": 0.34, "k": 1.0}, {"angle": 60, "height": 0.42, "k": 1.05}, {"angle": 180, "height": 0.3, "k": 0.92})
+STONES = ({"angle": 300, "height": 0.34, "k": 1.3}, {"angle": 60, "height": 0.42, "k": 1.36}, {"angle": 180, "height": 0.3, "k": 1.2})
 
 
 def orbits(arm, geo, shard):
@@ -378,7 +378,7 @@ def orbits(arm, geo, shard):
     e.matrix_world = Matrix.Translation(Vector(c))
     bpy.context.view_layer.update()
     out = [e]
-    tilt = math.radians(62)
+    tilt = math.radians(56)
     for i, it in enumerate(STONES):
         a = math.radians(it["angle"])
         d = Vector((-math.sin(a), math.cos(a), 0))
@@ -496,6 +496,7 @@ def scan_reshape(ob):
     return W, ix
 
 
+SKIN_K = S.vec(0.7, 0.58, 0.5)
 ARM_L_GROW = 0.46
 ARM_R_SHRINK = 0.2
 HAIR_FAT = 0.011              # m the scan's thin locs grow along their normals (tarek_head: thick ropes)
@@ -535,6 +536,17 @@ def scan_slots(ob):
     A = np.zeros(w * h * 4, np.float32)
     tex.pixels.foreach_get(A)
     A = A.reshape(h, w, 4)[:, :, :3]
+    # (the scan's skin is paler than the art: the peach texels take the sheet's brown, cloth and beads stay)
+    hi, lo = A.max(2), A.min(2)
+    sat = (hi - lo) / np.maximum(hi, 1e-3)
+    hue_ok = (A[:, :, 0] >= A[:, :, 1]) & (A[:, :, 1] >= A[:, :, 2]) & ((A[:, :, 1] - A[:, :, 2]) / np.maximum(hi - lo, 1e-3) > 0.3)
+    peach = hue_ok * S.sstep(0.14, 0.24, sat) * S.sstep(0.62, 0.5, sat) * S.sstep(0.45, 0.6, hi)
+    A2 = A * (1.0 + peach[:, :, None] * (SKIN_K - 1.0))
+    full = np.ones((h, w, 4), np.float32)
+    full[:, :, :3] = A2
+    tex.pixels.foreach_set(full.ravel())
+    tex.update()
+    tex.pack()
     uv = np.zeros(len(me.loops) * 2, np.float32)
     me.uv_layers.active.data.foreach_get("uv", uv)
     uv = uv.reshape(-1, 2)
