@@ -1865,3 +1865,21 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - During the reveal, only one Boki node is visible.
   - The background/world is hidden.
   - The title card has no subtitle label.
+
+## 157. The new-player Boki boxes: make clear that you DON'T choose a move; the UI boxes look too basic (owner, 17:41 UTC Nov 5)
+- The owner: "do i choose a move for my boki? it implies that with the box - but it doesnt say. be clear here. also the ui/boxes look bad still, very basic".
+- **Fact:** each species has a fixed `active` + `auto` ability (content/kin_v2/<id>.json). There is no move choice at hatch.
+- **Fix:** find the box(es) in the starter flow (the egg pick info / name screen / first Boki card) that look like a selectable move slot.
+  - Restyle them as a read-only info strip: "Ability: <icon> <name>, <one short line>" and "Passive: <icon> <name>".
+  - No empty slot frames, hover states, or button-like borders on things you can't click.
+  - If a later system lets you change moves, say so then, not here.
+- **The look:** the panels/boxes across the new-player flow and home are plain rectangles and read as placeholder.
+  - Do a UI skin pass with one consistent style (a UI style sheet, briefs/UI_STYLE.md):
+    - Panels with a soft inner bevel and an ornamental corner/edge motif fitting the Skylands (gold-trim linework on a deep navy or parchment, matching the logo direction).
+    - Rounded corners; a subtle texture/noise.
+    - Clear header bars; icon tiles with frames.
+    - Consistent spacing/type scale (UI.T_*).
+    - Animated hover/press states only on interactive things.
+  - Apply it to the hatch flow first, then the home panels.
+  - Ext can produce a Nano Banana UI mockup for the owner to approve the style first; S5 uses the existing UI helpers until then.
+- **Assert:** non-interactive info boxes have no hover/focus states; screenshots before/after to ext.

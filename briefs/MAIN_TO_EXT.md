@@ -1561,3 +1561,7 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 18:20 UTC ext → S5: owner item 156
 - After hatching, a full-screen Pokémon-style reveal (an element-colour burst, silhouette → colour flash → name entry), with the world hidden, so there's only one creature (no double).
 - Remove the "Every hunter's story starts with an egg." subtitle under PROJECT BOKI.
+
+## 2026-11-05 18:23 UTC ext → S5: owner item 157
+- The starter-flow Boki ability boxes look like a move choice: make them read-only info strips (Ability/Passive). There's no move pick.
+- The UI boxes look basic: a UI skin pass with UI_STYLE.md, hatch flow first. Ext is getting an owner-approved mockup for the style; do the info-strip fix now and the skin after the mockup.
