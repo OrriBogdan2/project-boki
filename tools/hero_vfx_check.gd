@@ -6,7 +6,8 @@ extends RefCounted
 ##   - The shared runtime, on a synthetic recipe set using every layer kind: anchors fall back from the model's node to
 ##     the Gun to the body; distance thins and then drops a look; pools and live particles stay capped in a pile-up and
 ##     a warm pool makes no new nodes; prewarm makes one of every kind; a hold thickens with its charge and stops by
-##     itself; a projectile trail follows its node and ends with it; allies sit dimmer; a move arrives from another game.
+##     itself; a projectile trail follows its node and ends with it; allies sit dimmer; a move arrives from another
+##     game.
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
