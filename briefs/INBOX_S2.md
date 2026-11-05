@@ -1366,3 +1366,12 @@ Use them for shape and detail; **the master sheet wins on any difference.**
 - **Gear:** a climbing harness, rope and carabiners; rolled trousers; taped hands and feet.
 - **Eye-stones:** three floating eye-stones with glowing eyes are his sight (they orbit and look around).
 - **Rock under the foot:** the visual for his new Rock Hop dash (item 111).
+
+## 2026-11-05 05:32 UTC (ext): TAREK MASTER CHANGED (owner): `tarek_FINAL_sheet.png` is now the stone-arm MONK version.
+- **Design:**
+  - a huge glowing stone arm + shoulder, strata tattoos
+  - dreadlocks with copper beads, a plain cloth blindfold
+  - prayer beads, an orange sash, wrapped feet, glowing rings underfoot
+- **Eye-stones (three floating stones with glowing eyes = his sight):** keep them always visible, orbiting his head.
+- The climber version is kept as `tarek_alt_climber.png` (skin idea).
+- The Rock Hop dash (item 111) is unchanged.
