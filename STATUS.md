@@ -827,3 +827,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 S2: READY ext/kit-vex-112 d3252225 (item 112); details in EXT_TO_MAIN. ART-1 Vex must add launcher_fire, take main's side of kmoves_vv.gd, and confirm its rmb clip fires. Owner Q: gunslinger_knock still spins the "rifle" onto her shoulder; rework for a cannon arm?
 
 ## 2026-11-05 S2: READY ext/fix-breaker-spin e3a00f02; details in EXT_TO_MAIN. strip_59 shots are superseded (they showed the wrong hammer). ext/art1-breaker must keep equip(wid, -1, false) in reclass, ORBIT_SCALE, kit-angle spin rate, and adapt _breaker_whirl to its skinned hammer.
+
+## 2026-11-05 S2: READY ext/art1-sable 8ffd3352 (agent ~82-85%)
+- Meshy scan rebuilt on the armature: 14,037 tris with both pistols, 8 materials, 2048 atlas + normal map; face projected from sable_head.png; wings and pistols projected; 40 clips. 76 credits.
+- **Fidelity:** grey-lilac skin, antennae, white braid, beauty mark, long buckled coat, moth-wing tails, twin flintlocks, violet runes + crystals: yes. VFX violet shots + smoke: no (S3/S4). Proofs: ext/hero-shots-s2 81f5a72a art1/sable/.
+- Checks on the tip: clip 29/0, clip-live-sable 9/0, rig-standard 69/0, warden-model 157/0, health --strict. dash-aim, dancer-combo, weapon-clip passed before the main merge by exit code only. Full suite (138) before the fine-detail round: baseline reds + farm-tutorial. warden-model height_3d 1.05 -> 1.13.
+- Differs: face shares the atlas (not a separate head mesh). Gaps: wings twist in flips, arms ~20% shorter than the scan, faint cheek patch.
+- Owner Qs: antennae size for the match read? Card text "bolts" -> "shots"?
