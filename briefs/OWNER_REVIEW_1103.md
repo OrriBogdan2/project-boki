@@ -2372,3 +2372,17 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - The arrow is clamped out of the instruction's rect (it routes around it or sits beside it) and is drawn under the text, never over it.
   - Restyle it into the item 166 gold language.
   - Include the arrow's rect in the overlap probe.
+
+## 178i. Key + chest step: only the right chest, and guidance that actually leads (owner playtest with his dad, 18:14 UTC Nov 5)
+- The owner: "he opened the wrong chest with the key - he also isn't clear about the blue thing - it's not guiding him well enough".
+- **The key step:**
+  - Only ONE locked chest exists during it (with item 164's "remove random chests").
+  - It's visually distinct (a big padlock icon, a gold outline, item 166), and the key icon floats over it ("Use your key here").
+  - Nothing else in the area accepts the key.
+- **Guidance:** replace the blue marker/arrow with a clearer, layered guide:
+  1. A ground path of glowing footprints/motes from the player to the target (always on during "go to" steps, not only when idle).
+  2. A light pillar on the target, visible from far away and through obstacles (a silhouette).
+  3. An off-screen edge arrow that points toward the target when it's off-screen and hides when it's on-screen (so it never sits on top of things).
+  4. The instruction text names the target plainly: "Walk to the glowing chest", not just an arrow.
+- Every "go somewhere" step uses this same guide.
+- **Assert:** in the key step, the count of chests == 1; the path renders from the player to the chest; the edge arrow is hidden while the chest is on-screen.
