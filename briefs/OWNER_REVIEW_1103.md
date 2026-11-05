@@ -2356,3 +2356,15 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Keyboard keys as keycap glyphs ("Shift", "Space", "E").
   - Covers ability cards, the HUD key pills, the tutorial, tooltips and settings.
   - Assert: a grep of the player-facing strings for \bLMB\b|\bRMB\b|\bMMB\b = 0.
+
+## 178h. G tap (Sic): snap to the nearest foe near the cursor, so you don't need pixel-perfect aim (owner playtest with his dad, 18:13 UTC Nov 5)
+- The owner: "he's having a hard time with the tap G to send it at monsters - make it so it's in the area rather than directly on it so it's easier".
+- **Fix** (kin_command.gd Sic):
+  - On a G tap, target the nearest valid foe within a generous radius of the cursor's ground point (~3 m, tune; scale with the camera zoom).
+  - Prefer the foe closest to the cursor; tie-break by distance to the player.
+  - If none is within the radius, it leaps to the cursor point as now.
+- **Feedback:**
+  - While hovering near a valid target, show a small Boki-paw reticle snapping onto the foe that would be chosen, so the player sees what G will hit before tapping.
+  - On the tap, a quick line from the Boki to the target.
+- **The tutorial step:** "Tap G near a monster to send your Boki at it".
+- **Assert:** the cursor 2 m from a dummy → the tap targets the dummy; the cursor far from any foe → it leaps to the point.
