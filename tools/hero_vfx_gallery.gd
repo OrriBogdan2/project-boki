@@ -18,10 +18,10 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	var hero := arch if arch != "" else "juggernaut"
-	# (the Hero's own class and weapon, or a medium start keeps the default kit and finds no data)
+	var who := arch if arch != "" else "juggernaut"
+	# (the Hero's own class and weapon: a Hero of another class than the save's would not take)
 	await m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
-		"arch": hero, "cls": Arch.weight(hero), "weapon": Arch.signature(hero)})
+		"arch": who, "cls": Arch.weight(who), "weapon": Arch.signature(who)})
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null: await fade.reveal(0.01)
