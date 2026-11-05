@@ -175,6 +175,33 @@ def chart_seams(ob, min_faces=24):
     bm.free()
 
 
+def face_chart(ob):
+    """The face as one chart, seam-free: every seam through it goes, its edge becomes the seam. -> its polygon indices."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bm.faces.ensure_lookup_table()
+    front = np.array([f.calc_center_median().y > 0.015 and f.normal.y > -0.2 and f.calc_center_median().z > 1.43 for f in bm.faces], bool)
+    for e in bm.edges:
+        fs = e.link_faces
+        if len(fs) == 2:
+            a, b = front[fs[0].index], front[fs[1].index]
+            e.seam = (a != b) or (e.seam and not a)
+    bm.to_mesh(ob.data)
+    bm.free()
+    return np.nonzero(front)[0]
+
+
+def planar_uv(ob, polys):
+    """Those polygons' UVs straight from the front (x, z): no folds, so nothing overlaps; the unwrap scale stays."""
+    me = ob.data
+    uv = me.uv_layers.active.data
+    for pi in polys.tolist():
+        pl = me.polygons[pi]
+        for li in pl.loop_indices:
+            co = me.vertices[me.loops[li].vertex_index].co
+            uv[li].uv = (co.x, co.z)
+
+
 def grid_mesh(name, P3, close=False):
     """A sheet from a rows x cols grid of points, as an object."""
     r, c = P3.shape[:2]
@@ -401,6 +428,7 @@ def main():
         bpy.ops.mesh.quads_convert_to_tris()
         bpy.ops.object.mode_set(mode="OBJECT")
         chart_seams(ob, 24 if len(ob.data.polygons) > 300 else 8)
+        face = face_chart(ob) if p["name"] == "skin_head" else None
         bpy.ops.object.mode_set(mode="EDIT")
         bpy.ops.mesh.select_all(action="SELECT")
         if not ob.data.uv_layers:
@@ -408,6 +436,8 @@ def main():
         bpy.ops.uv.unwrap(method="ANGLE_BASED", margin=0.0, correct_aspect=False)
         bpy.ops.object.mode_set(mode="OBJECT")
         ob.select_set(False)
+        if face is not None:
+            planar_uv(ob, face)
         me = ob.data
         lv = np.empty(len(me.loops), np.int32)
         me.loops.foreach_get("vertex_index", lv)
