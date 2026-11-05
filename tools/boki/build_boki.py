@@ -27,6 +27,7 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "glintmole": ("glintmole", "glintmole", "glintmole_anim")}
 creature = paint = anim = None
 ATLAS_PX = 2048
+GROWN_K = 0.22         # most Boki show one or two grown parts; all of them hide in every tri count
 SCALE = 0.95             # the whole Boki, so its body sits near the other species' 0.8 m frame
 
 
@@ -97,7 +98,7 @@ def mesh_pieces():
     for pid, (_, _, look, tris, prims) in creature.grown_parts().items():
         shape = boki_sdf.Shape(prims)
         v, q = boki_sdf.mesh_shape(shape, 0.003)
-        v, t = decimated(v, q, tris)
+        v, t = decimated(v, q, max(int(tris * GROWN_K), 12))
         pc = Piece("gp_" + pid, shape, v, t, 1 if look == "glow" else 0, prop=True)
         pc.look = look
         out.append(pc)
@@ -196,8 +197,9 @@ def paint_texels(pieces, piece_id, p, n, vao):
         if m.any():
             col[m] = paint.paint_piece(pc, p[m], n[m], prim)
     shadow = np.clip(vao, 0, 1)[:, None] ** 1.4
-    lit = np.isin(piece_id, [i for i, pc in enumerate(pieces) if pc.name in ("stalks", "caps")])
-    shadow[lit] = np.maximum(shadow[lit], 0.75)      # pale stalks in deep crevices went violet
+    # pale pieces in deep crevices (and thin ones, which shade themselves) went violet
+    pale = np.isin(piece_id, [i for i, pc in enumerate(pieces) if pc.name in getattr(creature, "PALE_PIECES", ())])
+    shadow[pale] = np.maximum(shadow[pale], 0.75)
     tint = np.array([0.60, 0.50, 0.72])
     return col * (tint + (1 - tint) * shadow)
 
