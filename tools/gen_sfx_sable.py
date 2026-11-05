@@ -33,7 +33,9 @@ def swish(d, f0, f1, q=3.0):
 def bell(f, d=0.6, decay=0.25):
     """A small silver bell: S.chime without the partials that would fold over the top of the band."""
     parts = tuple(pg for pg in ((1.0, 1.0), (2.76, 0.45), (5.4, 0.22), (8.93, 0.1)) if f * pg[0] < 9000)
-    return S.chime(f, d, decay, parts)
+    x = S.chime(f, d, decay, parts); k = N(0.04)
+    x[-k:] *= np.linspace(1.0, 0.0, k)               # ring out instead of stopping at d
+    return x
 
 
 def polish(x):
