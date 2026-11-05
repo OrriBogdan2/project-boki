@@ -27,7 +27,7 @@ void fragment() {
 		float len = mix(0.12, 0.42, k);
 		float body = smoothstep(0.0, 0.03, run) * (1.0 - smoothstep(len * 0.5, len, run));
 		float w = i == 0 ? 0.55 : 0.8;
-		streak += on * body * (1.0 - smoothstep(0.0, w, across)) * (i == 0 ? 0.8 : 0.34);
+		streak += on * body * (1.0 - smoothstep(0.0, w, across)) * (i == 0 ? 0.8 : 0.2);
 	}
 	float edge = smoothstep(0.2 + 0.1 * (1.0 - k), 0.8, r);
 	float press = smoothstep(0.42, 1.02, r) * 0.2 * k;

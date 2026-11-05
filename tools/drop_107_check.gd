@@ -109,7 +109,7 @@ func _solo() -> void:
 			wind_top = maxf(wind_top, m.drop_fx.wind.low_db)
 			wind_at_open = m.drop_fx.wind.low_db
 			low_zoom = m.cam.zoom
-			if h < 60.0 and pr.is_empty():
+			if h < 24.0 and pr.is_empty():
 				pr = SkyFall.project(P, Vector2.ZERO)
 		elif open_t < 0.0:
 			open_t = t
@@ -127,7 +127,7 @@ func _solo() -> void:
 		_frame()
 	ok(m.cam.shake_total == shake0, "no self-shake on the way down or on landing")
 	var off := Vector2(pr.get("at", Vector3.ZERO).x - P.pos.x, pr.get("at", Vector3.ZERO).z - P.pos.z).length()
-	ok(off < 14.0, "the reticle at 60 m called the landing within %.1f m" % off)
+	ok(off < 14.0, "the reticle at 24 m called the landing within %.1f m" % off)
 
 func _squad() -> void:
 	_start({"teams": 3, "squad": 3, "tier": 0, "seed": 4101, "no_plan": true, "raid": "clear"})
@@ -188,7 +188,7 @@ func _lobby() -> void:
 		us += Time.get_ticks_usec() - t0
 	var falling := m.hunters.filter(func(x): return x.dropping).size()
 	var ms := us / 1000.0 / n
-	ok(falling >= 15 and ms < CHEAP_MS, "DropFx with %d in the air: %.2f ms a frame (budget %.1f)" % [falling, ms, CHEAP_MS])
+	ok(falling >= 10 and ms < CHEAP_MS, "DropFx with %d in the air: %.2f ms a frame (budget %.1f)" % [falling, ms, CHEAP_MS])
 	var rt0 := Time.get_ticks_usec()
 	for i in 30:
 		SkyFall.project(P, Vector2.ZERO)

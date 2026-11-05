@@ -25,7 +25,7 @@ void fragment() {
 	float n = puff_fbm(p);
 	float n2 = puff_fbm(p + vec2(0.0, 0.16));       // toward the sun, up the quad
 	float round_edge = 1.0 - smoothstep(0.2, 1.0, length(q));
-	float dens = smoothstep(0.32, 0.72, n * 0.75 + round_edge * 0.55);
+	float dens = smoothstep(0.32, 0.72, n * 0.75 + round_edge * 0.55) * smoothstep(0.0, 0.3, round_edge);
 	float litk = clamp((n - n2) * 5.0 + 0.62 - q.y * 0.32, 0.0, 1.0);
 	ALBEDO = mix(shade.rgb, lit.rgb, litk);
 	float cam_d = length(VERTEX);

@@ -3661,7 +3661,7 @@ func _gather_input() -> void:
 	if absf(cam.yaw) > 0.001:
 		mv = mv.rotated(-cam.yaw)
 	player.inp["move"] = mv
-	if player.dropping:
+	if player.dropping or player.drop_glide:
 		SkyFall.assist(self, player)
 	player.inp["aim"] = _mouse_aim()
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)

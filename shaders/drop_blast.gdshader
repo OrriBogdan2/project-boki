@@ -30,11 +30,11 @@ void fragment() {
 	float alpha;
 	if (kind < 0.5) {
 		float front = ease_out(age, 3.0) * 0.86;
-		float band = 1.0 - smoothstep(0.0, 0.05 + 0.1 * age, abs(r - front));
-		float spokes = pow(abs(cos(a * 5.0 + seed * 6.0)), 26.0);
-		float ray = spokes * smoothstep(front * 0.42, front * 0.72, r) * (1.0 - smoothstep(front, front + 0.1, r));
+		float band = 1.0 - smoothstep(0.0, 0.025 + 0.07 * age, abs(r - front));
+		float spokes = pow(abs(cos(a * 4.0 + seed * 6.0)), 40.0);
+		float ray = spokes * smoothstep(front * 0.8, front * 0.96, r) * (1.0 - smoothstep(front + 0.02, front + 0.14, r));
 		col = mix(vec3(1.0), COLOR.rgb, 0.35 + 0.5 * age);
-		alpha = (band + ray * 0.9) * (1.0 - age) * (1.0 - age);
+		alpha = (band * 0.85 + ray) * (1.0 - age) * (1.0 - age);
 	} else {
 		float front = ease_out(age, 3.4) * 0.8;
 		float n = vnoise(vec2(a * 3.2 + seed * 19.0, age * 2.0)) + 0.5 * vnoise(vec2(a * 8.1 + seed * 7.0, r * 5.0));

@@ -217,7 +217,7 @@ func _tag(h: Hunter) -> Label3D:
 	t.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	t.no_depth_test = true
 	t.fixed_size = true
-	t.pixel_size = 0.0011
+	t.pixel_size = 0.0007
 	t.font_size = 26
 	t.outline_size = 8
 	t.modulate = _col(h)
