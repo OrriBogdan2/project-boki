@@ -14,6 +14,6 @@ the shared armature, under 15k triangles with the greatsword, one 2048 atlas, 42
     $B tools/art1/kael_clips.py -- build/kael.blend build/kael_a.glb           # clips; copy this glb here
 
 `kael.glb.import`: `generate_lods=true`, `force_disable_compression=true`, `remove_immutable_tracks=false`.
-Rebuilt as geometry: head and face (SDF sculpt, brows and lids on bones), scarf funnel, its two long tails on spring
+Head and scarf: their own Meshy run from briefs/art-refs/kael_head.png (art/wardens/src/kael_head_bake.json, ~/meshy/kael_h), own texture. Body paint: the turnaround projected through the bones. Rebuilt as geometry: the mask band over the mouth, the two long scarf tails on spring
 chains, mane, hands, the right wrist's chain and hook, greatsword. From the scan: torso, arms, trousers, armour, boots.
 The blade's demon smoke and sparks are ART-2's.

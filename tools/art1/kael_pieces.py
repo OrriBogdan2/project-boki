@@ -575,10 +575,10 @@ def mane():
             wide=True, tile=tile(0), soft=0.3)
     # the fall: big clumps down the back, drifting to his left, ends lifting out
     z = top - .06
-    for i, (x, low, w, drift, g) in enumerate(((.06, .96, .115, .0, "r"), (.0, .88, .13, -.03, "c"), (-.06, .9, .125, -.07, "l"), (-.1, .98, .1, -.11, "l"), (.1, 1.08, .085, .0, "r"))):
+    for i, (x, low, w, drift, g) in enumerate(((.04, .96, .085, .0, "r"), (.0, .88, .1, -.03, "c"), (-.04, .9, .095, -.05, "l"), (-.07, .98, .075, -.08, "l"), (.07, 1.08, .065, .0, "r"))):
         add("back%d" % i, [(x * .6, -.09, z + .04), (x * 1.0, -.15, z - .08), (x * 1.15 + drift * .25, -.18, z - .24), (x * 1.2 + drift * .6, -.19, 1.2), (x * 1.2 + drift, -.19, 1.06),
                            (x * 1.15 + drift * 1.6, -.21, low)], w, rings=8, wide=True, peak=.45, tile=tile(i), group=g, hint=np.array([0, -1.0, 0.1]), soft=0.12)
-    for i, (x, low, w, drift, g) in enumerate(((.03, .96, .085, -.02, "c"), (-.04, 1.0, .085, -.07, "l"), (.08, 1.06, .07, .0, "r"))):
+    for i, (x, low, w, drift, g) in enumerate(((.02, .96, .065, -.02, "c"), (-.03, 1.0, .065, -.05, "l"), (.055, 1.06, .055, .0, "r"))):
         add("over%d" % i, [(x * .6, -.12, z + .02), (x * 1.0, -.19, z - .08), (x * 1.2, -.215, z - .24), (x * 1.25 + drift * .6, -.22, 1.2), (x * 1.3 + drift * 1.5, -.215, low)], w, rings=7, wide=True,
             peak=.4, tile=tile(i + 1), group=g, hint=np.array([0, -1.0, 0.1]), soft=0.12)
     cap = hair_cap()

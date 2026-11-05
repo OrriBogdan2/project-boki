@@ -153,8 +153,13 @@ head_tex = head_tex.reshape(head_img.size[1], head_img.size[0], head_img.channel
 # the sculpt's darks up for the toon light: skin to a warm brown, the crimson out of black; hair and embers keep their values
 ch_ = head_tex[..., :3]
 lum_ = ch_.mean(2, keepdims=True)
+ember = (ch_[..., 0] > 0.55) & (ch_[..., 1] > 0.22) & (ch_[..., 2] < 0.62) & (ch_[..., 0] > ch_[..., 2] * 1.35)
+red = ((ch_[..., 0] > ch_[..., 1] * 2.1) & (ch_[..., 0] > 0.17))[..., None]
 k_ = 1 - smooth(0.3, 0.55, lum_)
-ch_ = ch_ * (1 - k_) + (np.power(np.maximum(ch_, 1e-4), 0.62) * 1.32 + np.array([0.04, 0.02, 0.012])) * k_
+skin_up = np.power(np.maximum(ch_, 1e-4), 0.62) * 1.32 + np.array([0.04, 0.02, 0.012])
+red_up = np.minimum(np.power(np.maximum(ch_, 1e-4), 0.86) * 1.3, np.array([0.4, 0.2, 0.2]))    # (under the shader's heat key)
+ch_ = ch_ * (1 - k_) + np.where(red, red_up, skin_up) * k_
+ch_[ember] = P.HOT
 head_tex[..., :3] = np.clip(ch_, 0, 1)
 # (a new image: the exporter writes an imported image's packed original, whatever its pixels say)
 head_new = bpy.data.images.new("kael_head", head_img.size[0], head_img.size[1])
@@ -597,7 +602,7 @@ for nm_, sign_ in (("front", 1.0), ("back", -1.0)):
     sat_ = (m_ - a_.min(1)) / np.maximum(m_, 0.01)
     ground = (sat_ < 0.05) & (a_.mean(1) > 0.68) & (a_.mean(1) < 0.83)
     white = (sat_ < 0.1) & (a_.mean(1) > 0.84)
-    red = (a_[:, 0] > 0.3) & (a_[:, 1] < 0.14) & (a_[:, 2] < 0.2)
+    red = (a_[:, 0] > 0.22) & (a_[:, 0] > a_[:, 1] * 2.4) & (a_[:, 0] > a_[:, 2] * 1.7)
     drop = ground | white | (red if nm_ == "back" else (red & (points[:, 2] < K.HAND_Z)))
     k = smooth(0.12, 0.42, nrm_[:, 1] * sign_) * (~drop)
     col = col * (1 - k[:, None]) + a_ * k[:, None]
