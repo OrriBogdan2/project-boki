@@ -454,7 +454,7 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 |---|---|
 | doc | First-time tips on an expedition (scripts/match/match_tips.gd). Each tip is one line that shows once, the first time its moment comes up, and then lives in the Tips log (pause menu). What the Trial Expedition teaches isn't a tip. {boki} is your Boki's name; any other {action} is that key's cap (Settings.key_cap). reminders: the short card when you try something that can't work; remind_s: how long it stays up (s). |
 | tips | {"skill": "Stun a foe with {boki}'s ability, then hit it for a combo", "ult": "Bond full: press {ultimate} to fuse with {boki}", "catch": "Hold {interact} to scan this Boki. Rivals hear it; get out to keep it", "exit_dock": "Call the skiff at the horn, hold out, then board before it leaves", "exit_hatch": "A Rift Key opens this hatch ({interact}). Three can drop through", "down": "You're down: a trusting Boki may pick you up", "rings": "Glide through the glowing rings for a burst of speed", "stagger": "A purple ring: hit that monster with an ability to stagger it"} |
-| reminders | {"chest_key": "Chests need a key"} |
+| reminders | {"locked_chest": "Chests need a key"} |
 | remind_s | 2.5 |
 
 ## tutorial (`content/rules/tutorial.json`)

@@ -11,7 +11,7 @@
   "stagger": "A purple ring: hit that monster with an ability to stagger it"
  },
  "reminders": {
-  "chest_key": "Chests need a key"
+  "locked_chest": "Chests need a key"
  },
  "remind_s": 2.5
 }

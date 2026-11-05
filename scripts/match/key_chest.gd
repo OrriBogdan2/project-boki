@@ -79,7 +79,7 @@ static func deny(m: Match, h: Hunter, c: Dictionary) -> void:
 		tw.tween_property(lk, "rotation:z", -0.3, 0.08)
 		tw.tween_property(lk, "rotation:z", 0.0, 0.06)
 	if h == m.player:
-		m.tips.remind("chest_key")
+		m.tips.remind("locked_chest")
 
 ## The lock falls away as the lid opens.
 static func unlock_fx(m: Match, c: Dictionary) -> void:

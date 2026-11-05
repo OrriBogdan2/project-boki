@@ -17,9 +17,9 @@ static func leads(sid: String) -> bool:
 static func steps() -> Array:
 	return Content.rules("tutorial")["steps"]
 
-const KEYS := {"land": "move", "move": "move", "dash": "dash", "exdash": "dash", "glide": "glide", "crouch": "crouch",
-	"pickup": "interact", "shoot": "fire", "sig": "signature", "utility": "secondary", "throw": "throw",
-	"orders": "throw", "chest": "interact", "uplink": "interact", "gkey": "throw"}
+const KEYS := {"land": "move", "move": "move", "dash": "dash", "exdash": "dash", "glide": "glide",
+	"crouch": "crouch", "pickup": "interact", "shoot": "fire", "sig": "signature", "utility": "secondary",
+	"throw": "throw", "orders": "throw", "chest": "interact", "uplink": "interact", "gkey": "throw"}
 ## Which course stop a finished step leaves you at (a fall puts you back there).
 const STOP_AFTER := {"land": "land", "move": "move", "dash": "dash", "exdash": "exdash", "glide": "glide",
 	"crouch": "crouch", "pickup": "yard"}
@@ -199,6 +199,8 @@ func update(dt: float) -> void:
 func _open_card() -> void:
 	card = true
 	card_t = 0.0
+	_point(id())      # (the marker shows the new lesson's goal behind its card)
+	_props()
 	m.bubbles.clear()       # one voice at a time: the card has the floor
 	if m.hud:
 		m.hud.msgs.hold = true
