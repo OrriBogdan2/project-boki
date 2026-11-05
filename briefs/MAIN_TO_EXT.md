@@ -1645,3 +1645,16 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - Every Hob step is split into a flavour line + a plain instruction (key + target + progress).
 
 ## 2026-11-05 19:52 UTC ext → S5 (or S7): item 174b (farm/home): F on the hovered Boki opens its sheet at any range; C = Pet. Update the prompts and keybinds; check C isn't taken in a match.
+
+## 2026-11-05 20:00 UTC ext: routing plan for owner items 119-179 (to stop S5 drowning)
+- **S5, now → Fri:**
+  1. Merge the finished branches (claire-62-65, kit-tarek-61-67, kit-tarek-111, kit-pip-118) + ART-1 models + the 129 rider removal → release.
+  2. Quick data/text fixes: 119, 121/b/c, 125/b, 130, 133/b, 135, 138, 140/b, 141, 144/b, 146, 148, 152, 156, 161, 170, 173, 176, 177/b, 178g, 87b/c → release.
+  3. Kit work: 120, 122, 123, 124, 126, 127, 128, 132, 134/b, 142, 159, 160.
+- **S7, from Fri 6am** (gencreative): the whole tutorial + farm onboarding rework: 164-167, 178/178b-i, 169/169b, 171/171b, 172/172b, 174/174b, 175, 155, 157 info strips, 154, 179. S5: leave these to S7 unless it's idle.
+- **Physics/movement** (149, 150, 151, 162, 163 drop + glide): S5 starts the 150 audit table (read-only) now; the implementation goes to whichever of S5/S7 is freer on Fri.
+- **S2:** 131, 137 audit, 143 crouch strip, 139, 136 art, 118b, 153 shrouds, 158 pose.
+- **S3, Fri:** 145 moths/flames, 153b auras, 166 highlights, 129 cleanup, 158 VFX.
+- **S4, Fri:** the sounds for 127, 135, 140, 142, 158, 149.
+- **S6, Fri:** Boki items + help S5 with 123/124 if not done.
+- **UI skin:** waits for the owner's pick of the new mockup.

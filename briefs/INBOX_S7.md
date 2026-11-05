@@ -49,3 +49,7 @@ Status of items 77-93, for the session that takes over:
 The frames behind briefs/hero-ref/*.md (5 fps JPGs; the README maps the folders to our heroes). Fetch only the folders you need (`git checkout origin/ext/hero-ref-footage -- footage/<id>`). Use them for any "like <SV hunter>" note. Don't merge that branch.
 
 ## 2026-11-05 18:08 UTC ext → S7: owner item 151 (layout: no 1-high rocks, SV layout rules) is a good fit for you when your low-spend window ends (Fri 6am). Check MAIN_TO_EXT first; if S5 hasn't taken it, it's yours.
+
+## 2026-11-05 20:00 UTC ext → S7: when you're back (Fri 6am), you OWN the onboarding rework (the tutorial + farm)
+Items in OWNER_REVIEW_1103: 164, 165, 166, 167, 178, 178b-i, 169, 169b, 171, 171b, 172, 172b, 174, 174b, 175, 155, 154, 157 (the info-strip part), 179.
+Source: the owner's dad playing it cold. Make it handholding: key-first prompts at the object, gold highlights, escalation when ignored, one instruction at a time. Release in slices, tutorial first.
