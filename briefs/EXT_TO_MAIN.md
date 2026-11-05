@@ -2170,7 +2170,7 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - Known leftover: on the farm the Boki bubble can still overlap a world marker ("Chop a tree"), which is covered by item 102 (S1 clarity pass).
 
 ## 2026-11-05 (S4): READY `ext/rank-ui-98` @ d66e1383 (owner item 98: choosing which ability to rank)
-- Base main fe51b43b; 11 files +245/-26 incl. .uid. New: scripts/ui/rank_marks.gd (RankMarks: tier pips, the "+", the hint), scripts/ui/rank_click.gd (RankClick: click target over the "+"), tools/rank_ui_check.gd, tools/rank_ui_shots.gd. hud.gd +1 line (RankClick.attach); hud_slot.gd -20 (the marks moved out).
+- Base main fe51b43b; 12 files +269/-25 incl. .uid. New: scripts/ui/rank_marks.gd (RankMarks: tier pips, the "+", the hint), scripts/ui/rank_click.gd (RankClick: click target over the "+"), tools/rank_ui_check.gd, tools/rank_ui_shots.gd. hud.gd +1 line (RankClick.attach); hud_slot.gd -20 (the marks moved out).
 - Item 98, point by point:
   - **Visible "+":** done. Bigger gold "+" (r 11 px, pulsing) on every slot that can rank, and it is **clickable** (it wasn't before). Clicks never fire the weapon (RankClick sits in Hud.ui_extra, so the pointer shows). A locked slot that a point can open takes a click on its face too. Alt + key unchanged.
   - **Tier pips:** done. Bigger pips over each ranked slot (I-III; Fusion slot I-II), gold once maxed.
@@ -2210,3 +2210,31 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - Shots (in this branch): briefs/shots/s4/loot-full-99/hold_window.png (full backpack: red "Full" rows, the hold window with Swap/Drop), after_swap.png (box now holds your swapped item), ground_full.png (ground pickup with a full pack); captions.txt.
 - Wiring for main: none. No reserved files touched.
 - Note: S3 (clarity/102) will own the message queue; these use the existing toast path.
+
+## 2026-11-05 (S4): READY `ext/revive-101` @ d53c445b (owner items 101 + 101b: whose box, box revive, beacons)
+- Base main fe51b43b; 25 files +972/-249. Design note docs/decisions/0018-box-revive-and-beacons.md. New: content/rules/revive.json (tuning), scripts/match/box_revive.gd (BoxRevive, moved out of Match._update_interact), scripts/match/beacons.gd (Beacons, moved out of life.gd + alarm + Net), scripts/ui/revive_hud.gd (ReviveHud: boxes/beacons/rings/alarm on world, minimap, full map), tools/box_revive_check.gd, tools/box_revive_shots.gd. **Every god file shrank:** main.gd +3/-36, match.gd +14/-34, hud.gd +9/-39, hunter.gd +10/-13.
+- **Net.VERSION 0.19.1 -> 0.20.0**: beacons now run online through a new "bcn" event on the "ev" topic (lit / out / used).
+- Items, point by point:
+  - **101 box colours:** done. A teammate's box is tinted their squad colour (m.mate_col, same as the map) with a ring, portrait, name and soul timer; a rival's box is red. Minimap + full map: your squad's boxes always show (bright rim while revivable, edge arrow off-map, named on the full map); rivals' boxes only while in your sight. The old red on-screen "DEATHBOX" squad marker duplicated this and was removed (its edge arrow now uses the teammate colour).
+  - **101b box revive:** done. Hold F 7.5 s (data). Reuses Hunter.CONSUME_VULN and the tonic's spill path (1.2x damage taken, a hit cancels), no attacking, moving/dash/jump/glide/stun cancels, release and re-hold to restart. The teammate comes back at the box with their Boki (existing Life.bring_back). Ring on the box and round the reviver. **Extra, from the data (owner to confirm or drop):** the source's diminishing curve 1.0/0.75/0.58/0.47 slows later box revives of the same Hunter in a match. No carry-to-respawn rule existed to delete.
+  - **101b beacons:** done. 6 per map (mint diamonds + legend on the full map). Channel 4 s (was 6; "short channel"). Brings back every dead teammate at once. While lit, every player gets a horn, a toast with the direction, a 120 m hum, a map ping, a pulsing map marker with edge arrow, and a world waypoint.
+  - Bots: two small bot.gd fixes so bots let go of F after a broken revive and don't base away mid-channel (STAY_GOALS).
+- **Debt (docs/DEBT.md "Revives online"), important for online play:** deathboxes are still only dropped offline (pre-existing), and online a death sets `gone`, so **online, box revives and beacon revives of dead Hunters still don't happen**; online beacons only light, alert everyone and bring back wisps. "bcn" identifies a beacon by index (assumes seeded identical placement). Needs a follow-up item for online deathboxes.
+- Process note: a WIP commit briefly overwrote tools/revive_check.gd (the bot wisp-revive check); restored unchanged in the next commit (verified identical to main). Hence the new check's name is --box-revive-check.
+- Checks:
+
+| Check | Result |
+|---|---|
+| --box-revive-check (new) | 0 failures |
+| --revive-check (bot wisp revive) | PASS |
+| --life-check | all LCHECK fine (box part moved to the new check) |
+| --airheal-check | 0 failures |
+| --raid-check | 0 failures |
+| --kin-loss-check | 0 failures |
+| --uipolish-check | 0 failures / 30 |
+| --backpack-check | 0 failures |
+| health --strict | OK, no budget raised |
+
+- Shots (in this branch): briefs/shots/s4/revive-101/boxes_world.png (ally box cyan + face/name/timer beside a red rival box), boxes_minimap.png, boxes_full_map.png, revive_ring.png (rings on the box and reviver, the prompt bar), beacon_notice.png (a rival's beacon far off: toast + world arrow; they sit close, item 102's queue should space them), beacon_full_map.png; captions.txt.
+- Wiring for main: none; no reserved files touched.
+- Seen in every S4 shot (not ours): the top-left session timer prints garbage ("16666...999:58") when a match runs with length 1e9, as the shot tools do. Probably only the test setup, worth a glance.
