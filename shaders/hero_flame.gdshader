@@ -17,7 +17,7 @@ uniform float gain = 1.0;         // brightness over the ramp
 uniform float level = 0.72;        // liquid: the fuel's level, v
 uniform vec4 c_deep : source_color = vec4(0.95, 0.2, 0.03, 1.0);
 uniform vec4 c_mid : source_color = vec4(1.0, 0.42, 0.04, 1.0);
-uniform vec4 c_hot : source_color = vec4(1.0, 0.68, 0.10, 1.0);
+uniform vec4 c_hot : source_color = vec4(1.0, 0.6, 0.07, 1.0);
 uniform vec4 c_core : source_color = vec4(1.0, 0.95, 0.62, 1.0);
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
@@ -37,9 +37,9 @@ void vertex() {
 }
 
 vec3 ramp(float h) {
-	vec3 c = mix(c_deep.rgb, c_mid.rgb, smoothstep(0.0, 0.38, h));
-	c = mix(c, c_hot.rgb, smoothstep(0.34, 0.66, h));
-	return mix(c, c_core.rgb, smoothstep(0.66, 0.96, h));
+	vec3 c = mix(c_deep.rgb, c_mid.rgb, smoothstep(0.05, 0.45, h));
+	c = mix(c, c_hot.rgb, smoothstep(0.42, 0.76, h));
+	return mix(c, c_core.rgb, smoothstep(0.8, 1.0, h));
 }
 
 float bubbles(vec2 p) {

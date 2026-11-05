@@ -7,7 +7,7 @@
 	"weight": "heavy",
 	"body": {"size": 1.0, "head": 0.62, "legs": 1.85, "torso": 0.9, "neck": -0.02, "build": 0.82, "shoulder": 0.88, "hit_r": 0.376},
 	"color": "#ff9a3a",
-	"model_glow": {"core": "#ffc24a", "edge": "#ff5a12", "strength": 1.7},
+	"model_glow": {"strength": 1.6},
 	"clip": {"lines": {"dash": "Ram head first into the first foe.", "lmb": "Hose fire 7m ahead.", "rmb": "A cinder that slows and spreads the burn.", "e": "A heat blast drags foes in and shields you.", "x": "Fly, laying a burning lava carpet."}, "fx": {"lmb": "spray", "x": "dash"}},
 	"fantasy": "The flue sweep. Hoses foes down with fire until they blaze, rams them head first, and hits back harder after every knock.",
 	"silhouette": "the blazing hair, the copper tank of fire on her back and the long burning tail",

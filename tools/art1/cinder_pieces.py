@@ -388,13 +388,13 @@ def weight_falls(locks, chains):
 
 # ------------------------------------------------------------------ the tail
 TAIL_N = 9
-TAIL_PTS = [(0, -.055, HIPS_Z + .075), (0, -.145, HIPS_Z - .04), (.015, -.27, HIPS_Z - .22), (.06, -.40, HIPS_Z - .40), (.14, -.53, HIPS_Z - .515), (.27, -.64, HIPS_Z - .545),
-            (.41, -.70, HIPS_Z - .49), (.52, -.70, HIPS_Z - .36), (.585, -.655, HIPS_Z - .21)]
+TAIL_PTS = [(0, -.055, HIPS_Z + .075), (0, -.15, HIPS_Z - .05), (.03, -.29, HIPS_Z - .26), (.13, -.42, HIPS_Z - .46), (.31, -.50, HIPS_Z - .58), (.52, -.47, HIPS_Z - .6),
+            (.70, -.33, HIPS_Z - .56), (.80, -.12, HIPS_Z - .46), (.82, .10, HIPS_Z - .30)]
 
 
 def tail():
-    """A long tapering tail: out behind her, sweeping low and round to her right, the tip up. Deep ventral side, scaled back."""
-    rows = 15
+    """A long tapering tail: out behind her, then low round her right side in a wide arc, the tip up: it reads from straight above whichever way she faces."""
+    rows = 17
     path = catmull(TAIL_PTS, rows)
     k = np.linspace(0, 1, rows)
     wd = 0.078 * (1 - k) ** 0.85 + 0.009
