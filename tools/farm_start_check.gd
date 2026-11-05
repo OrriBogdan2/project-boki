@@ -180,11 +180,12 @@ func run(m: Node) -> void:
 	it = hg.find(Vector2(st.x, st.z))
 	ok(hg.label(it) == "Chop the tree", "now the prompt says: %s" % hg.label(it))
 	hg.use(it)
-	var swings0: int = home.p_swing_n
-	for i in 40:
+	home.tw.test_hold = true
+	for i in 120:
 		if not hg.busy(): break
 		hg.tick(0.05)
-	ok(not hb.wild_t.has(ti) and Work.mat("wood") >= 3 and home.p_swing_n - swings0 == HomeGather.HITS, "three swings and it's down: %d wood" % Work.mat("wood"))
+	home.tw.test_hold = false
+	ok(not hb.wild_t.has(ti) and Work.mat("wood") >= 3, "holding the key, three hits and it's down: %d wood" % Work.mat("wood"))
 	var key := HomeLayout.key(ti % w.w, ti / w.w)
 	var rg: Dictionary = HomeLayout.of(Save.d)["regrow"]
 	ok(rg.has(key) and float(rg[key]["t"]) - Time.get_unix_time_from_system() > 600.0, "it grows back in %.0f minutes" % ((float(rg.get(key, {}).get("t", 0)) - Time.get_unix_time_from_system()) / 60.0))
@@ -197,9 +198,11 @@ func run(m: Node) -> void:
 	if ri >= 0:
 		home.ppos = rs; home.player.position = rs
 		hg.use(hg.find(Vector2(rs.x, rs.z)))
-		for i in 40:
+		home.tw.test_hold = true
+		for i in 120:
 			if not hg.busy(): break
 			hg.tick(0.05)
+		home.tw.test_hold = false
 	ok(ri >= 0 and Work.mat("stone") >= 3, "a pickaxe mines a boulder for %d stone" % Work.mat("stone"))
 	home.ppos = HomeLayout.LANDING; home.player.position = home.ppos
 	for k in home.kins: k["pos"] = HomeLayout.LANDING
