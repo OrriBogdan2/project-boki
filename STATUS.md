@@ -596,3 +596,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Merge note: ext/art1-hem and ext/art1-kael also replaced archer and juggernaut portraits; these win. Names on main change only with ext/rename-lisette 1228b324.
 - Open: Grimble's portrait shows a second normal eye (owner may redo); breaker alt_determined not committed (needs mood-swap code); Cinder cut at the right edge in the tall crop.
 - Next slot: ext/kit-vex-68-109 started.
+
+## 2026-11-05 S2: Pip and Claire full sets in
+- pip_turnaround, pip_portrait, claire_portrait received. Add Pip and Claire to ext/portraits-six when a slot frees; ART-1 Pip and Claire have full refs.
