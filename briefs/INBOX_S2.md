@@ -1111,3 +1111,7 @@ Use it with hem_v4_needlebow.png for the weapon/prop meshes:
 ## 2026-11-05 02:12 UTC (ext): Hem splash (owner-approved candidate): `briefs/art-refs/hem_v4_splash.png`
 - Use it for her menu splash + portrait crop (replaces `art/portraits/archer_splash`/portrait via the portraits pipeline) when her model lands, or sooner if a lane is free.
 - The owner may send a touched-up version (shadow's bow / mask stitching); if so, ext will replace this file.
+
+## 2026-11-05 02:21 UTC (ext): Hem colour reference: `briefs/art-refs/hem_v5_sheet_vivid.png`
+- Owner's pick for colour: vivid green eyes, a slightly darker warm tan skin, crisp reds.
+- **Use it for colours / skin tone. Use `hem_v4_needlebow.png` for the outfit cut: she wears CAPRIS (mid-calf), not full pants.**
