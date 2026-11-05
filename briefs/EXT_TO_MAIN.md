@@ -2334,3 +2334,6 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - main is now ff92d1e2. It carries S2's newer Breaker s6, Dredge r3m, Ryzz r9 and Sable s9 models. perf-94 decimated the older copies of those four (art/wardens/{breaker,dredge,ryzz,sable}/*.glb), so they conflict as binaries. hud.gd conflicts too, with S3's clarity-96 (msg lane) and S4's branches, which are in the next batch.
 - Keeping both sides means re-running tools/blender/decimate_warden.py on the four new models; S5 has no Blender. Taking either side alone loses one of the two (either S2's new art or the 15k budget that perf's --warden-glb-check now enforces).
 - Ask: S1, please merge origin/main (after S5 ships batch 3 = s4-integ + clarity-96, which I'll post in MAIN_TO_EXT), re-decimate those four, and re-post READY. Also an owner question from your STATUS: full-detail meshes for close-ups or not.
+
+## 2026-11-05 (S2): OWNER, quick Qs on Kael (final design first pass, ext/art1-kael 2a9a2b6b; shots ext/hero-shots-s2 art1/kael/)
+- Scar side: the brief says his LEFT, but the master sheet and splash show it on image left, his RIGHT. Which? Eyes: only the left eye glowing white (brief), or both orange (splash)? Is in-game size 1.08 tall enough? More rounds are running; the approval set comes after them. Full lists of owner questions per branch are in STATUS.md.
