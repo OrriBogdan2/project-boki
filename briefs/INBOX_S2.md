@@ -1343,3 +1343,5 @@ See OWNER_REVIEW item 109: the aim is currently stuck to one direction during he
 - **Kit hooks:** the rods light up on the ult (Kitefall). Wirerun shoots a wire from her hand. The rods read from top-down.
 - **Model fix:** the front view's left boot is drawn cut off (an art error). Build both legs as in the side and back views.
 - Keep the rest of her look (pink/blue pigtails, bubblegum, the face bolt mark, the corset, the off-shoulder leather jacket, the pleated skirt, fishnets, the hazard bands, thigh-high boots).
+
+## 2026-11-05 05:18 UTC (ext): Ryzz turnaround + portrait saved (ryzz_turnaround_apose.png, ryzz_portrait.png). Splash pending a redo: the first one gave her pistols, but she is hands-free.
