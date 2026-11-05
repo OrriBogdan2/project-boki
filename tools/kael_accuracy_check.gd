@@ -126,7 +126,7 @@ func _throw_after(m: Match, P: Hunter, K: JuggernautKit, home: Vector3, how: Str
 	K.use_e()
 	var shot: Dictionary = m.shots[-1] if m.shots.size() > shots0 else {}
 	var vel: Vector2 = shot.get("vel", Vector2.ZERO)
-	return {"state": K.warchain.state, "dir": vel.normalized(), "slam": not K.slam_w.is_empty(), "lunge": not K.lunge.is_empty()}
+	return {"state": K.warchain.state, "dir": vel.normalized()}
 
 func e_free() -> void:
 	var g := _rig()
@@ -259,9 +259,9 @@ func short_dash() -> void:
 	var commit: float = m.time - t0
 	P.inp["move"] = Vector2.ZERO
 	A.step(m, 0.1)
-	A.ok("jug 113.8: press to the end of the drive is 0.3s or less (was ~0.5s)", commit <= 0.3, "%.2fs" % commit)
+	A.ok("jug 113.8: press to the end of the drive is 0.3s or less", commit <= 0.3, "%.2fs" % commit)
 	A.ok("jug 113.8: it still hits and knocks", T.hp < hp0 - float(dd["hit_dmg"]) * 0.5 and T.flat_dist(P) > 0.8,
 			"foe %.0f > %.0f" % [hp0, T.hp])
 	var last: float = KMovesDJ.MOVES["jug_dash"]["keys"][-1][0]
-	A.ok("jug 113.8: its whole animation is under 0.5s (was 0.9s)", last < 0.5, "%.2fs" % last)
+	A.ok("jug 113.8: its whole animation is under 0.5s", last < 0.5, "%.2fs" % last)
 	await A.done(m)

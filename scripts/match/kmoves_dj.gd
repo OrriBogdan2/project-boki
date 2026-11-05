@@ -7,7 +7,7 @@ extends RefCounted
 
 const MOVES := {
 	# ---------------------------------------------------------------- Juggernaut
-	# the Searing Wave let go (owner 113.4): a flat side swing from his right across to his left at waist height,
+	# the Searing Wave let go: a flat side swing from his right across to his left at waist height,
 	# the hips turning through it, the weight stepping into it
 	"jug_wave": {"keys": [
 		[0.0, {"blade": Vector3(-1.9, 0.1, 0.0), "bw": 1.0, "rad": 0.5, "y": 0.9, "p": 0.1, "lw": 1.0,
@@ -30,7 +30,7 @@ const MOVES := {
 		[0.85, {"blade": Vector3(1.2, -0.4, 1.4), "bw": 0.9, "rad": 0.55, "p": -0.45, "y": -0.5, "lw": 1.0,
 				"legs": [1.0, -0.8, -0.6, -0.3]}],
 		[1.15, {}]]},
-	# the Lunge, held as long as RMB is held (owner 113.3: ready to lunge, not overhead): he sinks onto the loaded
+	# the Lunge, held as long as RMB is held, ready to lunge: he sinks onto the loaded
 	# back leg and levels the blade forward at the aim, leaning in behind it
 	"jug_lunge_wind": {"hold": true, "keys": [
 		[0.0, {}],
@@ -51,7 +51,7 @@ const MOVES := {
 		[0.6, {}]]},
 	# Meteor Drop, the hang and the dive (footage 0261-0288: the rise, a slash at the top, a steep drive): he
 	# rocks back and hauls the blade up overhead with the knees tucked, turning once as he gathers (0.2s hang),
-	# then drops upright and straight down (owner 113.6), the blade driven point-down under him and the legs
+	# then drops upright and straight down, the blade driven point-down under him and the legs
 	# straight; that pose holds until he hits the ground
 	"jug_meteor": {"hold": true, "keys": [
 		[0.0, {"p": 0.1, "sq": 0.1, "lw": 1.0, "legs": [0.9, -1.3, 0.7, -1.1]}],
