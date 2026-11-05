@@ -41,9 +41,6 @@ const LEG_BONES := ["thigh.L", "shin.L", "thigh.R", "shin.R"]
 ## bone, and the Warden's kit poses them on top of that (pose_extra): Dredge's grab-claw fingers, the eye, the winch
 ## drum, the rope and cargo hook that hang from it, and the tar pool at his feet.
 const EXTRA := {
-	"dredge": {"eye": "head", "claw1.L": "hand.L", "claw1_tip.L": "claw1.L", "claw2.L": "hand.L",
-		"claw2_tip.L": "claw2.L", "claw3.L": "hand.L", "claw3_tip.L": "claw3.L", "winch": "hips", "rope1": "hips",
-		"rope2": "rope1", "hook": "rope2", "pool": "root"},
 }
 ## Procedural pieces that stay when the .glb dresses the hunter (the contract's "nodes the game keeps").
 const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus"]
@@ -1001,6 +998,66 @@ class Sync extends Node:
 		var a := hand * blade_root.position
 		var b := hand * blade_tip.position
 		if a.distance_squared_to(b) < 0.00000001:
+			return
+		var up := Vector3.UP if absf((b - a).normalized().y) < 0.95 else Vector3.RIGHT
+		gun.global_transform = Transform3D(Basis.looking_at(b - a, up), a)
+		if muzzle:
+			muzzle.global_position = b
+
+	## The player's MantleLook sliders under the clips: each contract bone's offset and scale for this look, against the
+	## neutral rig the clips were keyed on. The clips key rotations; these stay on the bones (WardenClips strips the
+	## position and scale tracks of the contract bones, the root's position aside).
+	func _look_pose() -> void:
+		var now: Dictionary = root.get_meta("rig_rest", {})
+		var glob := {}
+		for b in BONES:
+			var bi := WardenSkeleton.find(skel, b)
+			for l in links:
+				if int(l[0]) == bi and now.has(b):
+					glob[bi] = WardenGlb.retarget(now[b] as Transform3D, l)
+		for bi in glob:
+			var par := skel.get_bone_parent(int(bi))
+			if par < 0 or not glob.has(par):
+				continue
+			var local: Transform3D = (glob[par] as Transform3D).affine_inverse() * (glob[bi] as Transform3D)
+			look_pose.append([int(bi), local.origin, local.basis.get_scale()])
+
+	## The clips' pose, mixed with the retargeted rig while a state hands over (clips.proc_w), then the rig's hands and
+	## the Gun laid on what is shown, so kit FX leave the bodies you see.
+	func _play(dt: float) -> void:
+		for o in look_pose:
+			skel.set_bone_pose_position(int(o[0]), o[1])
+			skel.set_bone_pose_scale(int(o[0]), o[2])
+		clips.step(dt)
+		var w := clips.proc_w
+		if w >= 1.0:
+			apply()
+		elif w > 0.0:
+			var poses: Array = []
+			for l in links:
+				poses.append(skel.get_bone_global_pose(int(l[0])))
+			for i in links.size():
+				var l: Array = links[i]
+				var pose: Transform3D = poses[i]
+				skel.set_bone_global_pose(int(l[0]), pose.interpolate_with(
+						WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l), w))
+		for l in rig_root:
+			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
+		if w < 1.0:
+			var inv := skel.global_transform
+			for h in hand_nodes:
+				(h[0] as Node3D).global_position = inv * skel.get_bone_global_pose(int(h[1])).origin
+		apply_blade()
+
+	## The Gun on the skinned blade: its origin at the blade's root, -Z along the blade, the Muzzle on the tip.
+	func apply_blade() -> void:
+		if blade_tip == null or blade_root == null or gun == null or not gun.is_inside_tree():
+			return
+		# (from the bone, not the attachment nodes: those update after the skeleton does, a frame late)
+		var hand := skel.global_transform * skel.get_bone_global_pose(blade_bone)
+		var a := hand * blade_root.position
+		var b := hand * blade_tip.position
+		if a.distance_squared_to(b) < 0.0001:
 			return
 		var up := Vector3.UP if absf((b - a).normalized().y) < 0.95 else Vector3.RIGHT
 		gun.global_transform = Transform3D(Basis.looking_at(b - a, up), a)

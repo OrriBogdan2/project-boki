@@ -67,6 +67,7 @@ const CHECKS := {
 	"--ryzz-live-check": ["res://tools/ryzz_live_check.gd", "ryzz_live_check", null],
 	"--clip-live-claire-check": ["res://tools/clip_live_claire_check.gd", "clip_live_claire_check", null],
 	"--claire-skate-shots": ["res://tools/claire_skate_shots.gd", "claire_skate_shots", null],
+	"--clip-live-grimble": ["res://tools/clip_live_grimble.gd", "clip_live_grimble", null],      # Grimble, the same
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
 	"--dancer-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],
 	"--juggernaut-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "juggernaut"],

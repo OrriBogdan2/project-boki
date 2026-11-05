@@ -2,7 +2,7 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b5gq3w34y7yve"
+uid="uid://bvqm8tcacftpv"
 path.bptc="res://.godot/imported/dredge_atlas.jpg-0141224b726b74824b9c9e866399542b.bptc.ctex"
 path.astc="res://.godot/imported/dredge_atlas.jpg-0141224b726b74824b9c9e866399542b.astc.ctex"
 metadata={
@@ -10,7 +10,7 @@ metadata={
 "vram_texture": true
 }
 generator_parameters={
-"md5": "d8e9594b4ca7963a77d849bbc52d89dd"
+"md5": "6d05bcca7bbe9b182aab5615843fc160"
 }
 
 [deps]
