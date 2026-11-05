@@ -93,10 +93,8 @@ func _perfect() -> void:
 	perfects += 1
 	quick = true
 	perfect_now = true
-	var d := h.aim_dir()
-	k.fx.fletch_burst(bow_at(), 1.1, PinFx.GOLD, 0.13, 0.07, 1.0)
+	k.vfx("draw_perfect")
 	AimKit.perfect(h)
-	k.m.sfx("pin_perfect", h.pos, -3.0 if h.is_local() else -8.0, 1.25)
 
 func _sc() -> float:
 	return float(h.cdat.get("scale", 1.0))
@@ -116,22 +114,20 @@ func tick() -> void:
 	if h.wpn.has("draw") and not drawing and k.tells_visible() and h.can_fire():
 		AimKit.line(h, "draw_rest", {"alpha": LINE_A, "col": col, "fletch": FLETCH * 0.6})
 	if drawing:
+		if k.tells_visible():
+			HeroVfx.of(k.m).hold(h, "draw", clampf(t / s.y, 0.0, 1.0))      # thread gathering at the nock
 		if was < s.x and t >= s.x:
-			k.m.sfx("pin_stage", h.pos, -6.0 if h.is_local() else -10.0)
-			k.fx.fletch_burst(bow_at(), 0.8, PinFx.GREEN, 0.05, 0.1, 0.0, 5.0)
+			k.vfx("draw_stage")          # the string's threads drawn taut at the bow
 			AimKit.flare(h, {"col2": STAGE_COL})
 		if was < s.y and t >= s.y:
-			k.m.sfx("pin_super", h.pos, -3.0 if h.is_local() else -7.0)
 			h.flash_t = 0.12           # the whole body flashes once
-			k.fx.fletch_burst(bow_at(), 1.0, SUPER_COL, 0.06, 0.12, 0.6, 5.0)
+			k.vfx("draw_stage", null, null, {"super": true})
 			AimKit.flare(h, {"col2": SUPER_COL})
-			k.net_ring(h.pos, 1.3, k.res_col())
 		if was < over_t() and t >= over_t():
 			k.m.sfx("pin_overdraw", h.pos, -10.0, 0.9)
 			k.play("arc_over")
 		_reticle(t, s, col)
 	elif was >= 0.0:
-		k.fx.bow_glint_at(Vector3.ZERO, 0.0, col)
 		tgt = null
 	if drawing and was < 0.0:
 		k.play("arc_draw")
@@ -144,8 +140,7 @@ func tick() -> void:
 			was = t
 			return
 		k.play(release_move())
-		var loose_sfx := "pin_loose_super" if last_kind == "super" else "pin_loose"
-		k.m.sfx(loose_sfx, h.pos, -3.0 if h.is_local() else -7.0)
+		k.vfx("loose", null, null, {"super": last_kind == "super"})
 	was = t
 
 ## Each release has its own move: a tap's snap, Empowered's loose, Supercharged's kick, a perfect's
@@ -174,7 +169,6 @@ func _reticle(t: float, s: Vector2, col: Color) -> void:
 		# the leaf glint rides out along the line only while it's merged (a stage just came up)
 		var glint := clampf((t - s.x) / MERGE_T, 0.0, 1.0) if kv >= 1.0 else -1.0
 		AimKit.vee(h, "draw", {"k": kv, "glint": glint, "col": col, "col2": c2, "fletch": FLETCH})
-		k.fx.bow_glint_at(bow_at(), 0.55 if t >= s.x else 0.0, PinFx.GREEN)
 		tgt = null
 		return
 	# Supercharged: the thick white line to max range (dims once overdrawn)
@@ -192,7 +186,6 @@ func _reticle(t: float, s: Vector2, col: Color) -> void:
 			"fletch": FLETCH * (0.5 if over else 1.3)
 		}
 	)
-	k.fx.bow_glint_at(bow_at() + Vector3(0, 0.05, 0), 0.3 if over else 1.0, SUPER_COL)
 	tgt = _under_line(rng)
 	if tgt != null and not over:
 		AimKit.circle(h, "draw_tgt", {"at": tgt.pos, "r": 0.85, "col": TGT_COL, "hot": 0.5})
@@ -215,4 +208,3 @@ func _under_line(rng: float) -> Ent:
 func drop() -> void:
 	was = -1.0
 	tgt = null
-	k.fx.bow_glint_at(Vector3.ZERO, 0.0, Color.WHITE)

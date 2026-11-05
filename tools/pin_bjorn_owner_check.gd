@@ -33,13 +33,13 @@ func off_line(from: Vector3, dir: Vector2, p: Vector3) -> float:
 	var d := Vector2(p.x - from.x, p.z - from.z)
 	return absf(d.x * dir.y - d.y * dir.x)
 
-## The first visible fletch burst of Hem's pool (its world place and width), or null.
-func burst_node(K: ArcherKit) -> MeshInstance3D:
-	for b in K.fx.bursts:
-		var node: MeshInstance3D = b["node"]
-		if node.visible:
-			return node
-	return null
+## Times Lisette's HeroVfx moment `move` has played.
+func played(m: Match, move: String) -> int:
+	return int(HeroVfx.of(m).plays.get(move, 0))
+
+## Where her release cues sit (the "cue" anchor of content/vfx/archer.json): on the aim line at the bow.
+func cue_at(m: Match, P: Hunter) -> Vector3:
+	return HeroVfx.of(m).anchor_pos(P, "cue")
 
 func pin() -> void:
 	var r := setup("archer", 7.0, "", true)
@@ -184,13 +184,13 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	step(m, 1.0)
 	# the perfect release: a gold flash on the aim line (and the star on the cursor), never beside her
 	ready_bow(P)
+	var perfect0 := played(m, "draw_perfect")
 	step(m, K.draw.stage_t().x + 0.05, aim)
 	P.inp["fire"] = false
 	m.step(DT)
-	var flash := burst_node(K)
-	var at := flash.global_position if flash != null else Vector3(999, 0, 999)
+	var at := cue_at(m, P)
 	ok("pin readout: the perfect release flash sits on the aim line at the bow, and the cursor star fires",
-		K.draw.perfect_now and flash != null and off_line(P.pos, d, at) < 0.05
+		K.draw.perfect_now and played(m, "draw_perfect") > perfect0 and off_line(P.pos, d, at) < 0.05
 			and float(AimKit.reticle(P)["perfect"]) > 0.0,
 		"perfect %s off %.3f" % [K.draw.perfect_now, off_line(P.pos, d, at)])
 	step(m, 1.0)
@@ -244,10 +244,13 @@ func _pin_draw_pose(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv: int) -> void:
 	var arrow_look: Array = PinFx.LOOK["arrow"]
 	var heavy_look: Array = PinFx.LOOK["heavy"]
-	var ratio := float(heavy_look[6]) / float(arrow_look[6])
-	ok("pin heavy: the arrow is the bow's arrow made much bigger (PinFx.HEAVY_SCALE) with a long trail",
-		is_equal_approx(ratio, PinFx.HEAVY_SCALE) and float(heavy_look[4]) >= 2.0 * float(arrow_look[4]),
-		"scale x%.1f trail %.1f vs %.1f" % [ratio, float(heavy_look[4]), float(arrow_look[4])])
+	var ratio := float(heavy_look[3]) / float(arrow_look[3])
+	var moves: Dictionary = HeroVfx.data("archer")["moves"]
+	var heavy_tail := float(moves["fire_heavy"]["fx"][0]["tail"])
+	var arrow_tail := float(moves["fire_arrow"]["fx"][0]["tail"])
+	ok("pin heavy: the arrow is the bow's arrow made much bigger (PinFx.HEAVY_SCALE) with a long thread",
+		is_equal_approx(ratio, PinFx.HEAVY_SCALE) and heavy_tail >= 2.0 * arrow_tail,
+		"scale x%.1f thread %.2f vs %.2f s" % [ratio, heavy_tail, arrow_tail])
 	fresh(T)
 	T.teleport(home + Vector3(7.0, 0, 0))
 	K.ch_rmb = 2.0
@@ -256,6 +259,7 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	_wall_at(m, T.pos, lv, 2)
 	aim_at(P, T.pos)
 	var kicks0 := K.heavy_kicks
+	var heavy_go0 := played(m, "heavy_go")
 	var pins0 := K.pins
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
@@ -285,11 +289,14 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	ok("pin heavy: it spawns its own projectile type (heavy), never an LMB arrow type",
 		heavy >= 1 and lmb_kinds == 0 and node != null and not (node.get_node("Core") as Node3D).visible,
 		"heavy %d lmb %d" % [heavy, lmb_kinds])
-	var burst := burst_node(K)
+	var flares: Array = (HeroVfx.data("archer")["moves"]["heavy_go"]["fx"] as Array).filter(
+			func(l): return l["p"] == "flare" and l.get("at") == "cue")
+	var perfect_flare: Dictionary = HeroVfx.data("archer")["moves"]["draw_perfect"]["fx"][0]
+	var wide: bool = not flares.is_empty() and float(flares[0]["size"]) > float(perfect_flare["size"])
 	ok("pin heavy: a release burst at the bow, on the aim line, wider than the bow cues, with a screen kick",
-		burst != null and off_line(P.pos, d, burst.global_position) < 0.05 and burst.scale.x >= 1.4
+		played(m, "heavy_go") > heavy_go0 and wide and off_line(P.pos, d, cue_at(m, P)) < 0.05
 			and K.heavy_kicks == kicks0 + 1,
-		"scale %.1f kicks %d" % [burst.scale.x if burst != null else 0.0, K.heavy_kicks - kicks0])
+		"plays %d wide %s kicks %d" % [played(m, "heavy_go") - heavy_go0, wide, K.heavy_kicks - kicks0])
 	var flashed := 0.0
 	for i in 20:
 		m.step(DT)
