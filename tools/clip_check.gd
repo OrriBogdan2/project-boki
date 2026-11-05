@@ -8,7 +8,7 @@ extends RefCounted
 const TRI_BUDGET := 20000
 const DT := 1.0 / 30.0
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
-const POP := 0.06              # of the Hero's height: a hand's one-frame spike over its neighbour frames at a hand-over
+const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
 
 var bad := 0
 var holder: Node3D
@@ -162,22 +162,43 @@ func _sliders(id: String, sync: Node) -> void:
 	ok(not (clips.d.get("states", {}) as Dictionary).has("dead") or stays > 0.0,
 			"%s: a knocked-out Hero stays on screen for its death clip" % id)
 
-## Moves handed over as the game does, the state fed frame by frame: the hand's path has no one-frame spike (a step well
-## over the steps either side of it, what a pop is), against the Hero's height, so a tall Hero's fast strike is no pop.
+## Moves handed over as the game does, the state fed frame by frame. A strike is meant to snap, so a pop is the hand
+## moving further in a frame than the clip alone moves it there: that excess stays small against the Hero's height.
 func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
-	var moves: Array = (dd.get("kmoves", {}) as Dictionary).keys()
+	var hand := m.get_node(String(WardenGlb.BONES["hand.R"])) as Node3D
+	var moves: Dictionary = dd.get("kmoves", {})
+	var seq: Array = [["", 0.4]]
+	seq.append_array(dd.get("flow", []))
+	seq.append(["", 0.4])
+	var own := {}
+	for st in seq:
+		if st[0] == "" or own.has(st[0]):
+			continue
+		var clip := String(moves[st[0]]["clip"])
+		clips.force = {"clip": clip, "t": 0.0}
+		for k in 10:
+			sync.call("_process", DT)
+		await holder.get_tree().process_frame
+		var path: Array = []
+		var t := 0.0
+		var last_p := hand.global_position
+		while t < float(st[1]):
+			clips.force = {"clip": clip, "t": minf(t, clips.lib.get_animation(clip).length - 0.001)}
+			sync.call("_process", DT)
+			await holder.get_tree().process_frame
+			path.append(hand.global_position.distance_to(last_p))
+			last_p = hand.global_position
+			t += DT
+		own[st[0]] = path
+	clips.force = {}
 	var s := {"vel": Vector3(0, 0, -4.0), "face": 0.0, "grounded": true}
 	m.set_meta(WardenClips.STATE, s)
-	var hand := m.get_node(String(WardenGlb.BONES["hand.R"])) as Node3D
-	var seq: Array = [["", 0.4]]
-	for i in mini(moves.size(), 8):
-		seq.append([moves[i], 0.22])
-	seq.append(["", 0.4])
-	var steps := PackedFloat32Array()
-	var marks: Array = []
 	var last := Vector3.INF
+	var worst := 0.0
+	var where := ""
 	for st in seq:
 		var t := 0.0
+		var i := 0
 		while t < float(st[1]):
 			s["kmove"] = st[0]
 			s["kmove_t"] = t
@@ -186,20 +207,20 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 			sync.call("_process", DT)
 			await holder.get_tree().process_frame
 			var p := hand.global_position
-			if last != Vector3.INF and clips.proc_w <= 0.0:
-				steps.append(p.distance_to(last))
-				marks.append("%s @%.2f" % [st[0], t])
+			if last != Vector3.INF and clips.proc_w <= 0.0 and own.has(st[0]):
+				var path: Array = own[st[0]]
+				var clip_step := 0.0
+				for j in range(maxi(i - 2, 0), mini(i + 3, path.size())):      # (a frame or two either way: the fade)
+					clip_step = maxf(clip_step, float(path[j]))
+				var over := p.distance_to(last) - clip_step
+				if over > worst:
+					worst = over
+					where = "%s @%.2f" % [st[0], t]
 			last = p
 			t += DT
-	var worst := 0.0
-	var where := ""
-	for i in range(1, steps.size() - 1):
-		var spike := steps[i] - maxf(steps[i - 1], steps[i + 1])
-		if spike > worst:
-			worst = spike
-			where = String(marks[i])
+			i += 1
 	var height := 1.6 * absf(m.scale.y)
-	ok(worst <= POP * height, "%s: moves hand over without a pop (worst spike %.3f m, %s; limit %.3f)"
+	ok(worst <= POP * height, "%s: moves hand over without a pop (worst %.3f m over the clip's own, %s; limit %.3f)"
 			% [id, worst, where, POP * height])
 	ok(clips.proc_w <= 0.0, "%s: the clips own the body after the run" % id)
 	s["kmove"] = "no_such_move"

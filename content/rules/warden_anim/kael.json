@@ -27,6 +27,7 @@
 		"mf_xform": {"clip": "fusion"}
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
+	"flow": [["jug_slash_r", 0.25], ["jug_slash_l", 0.25], ["jug_dash", 0.4], ["jug_slash_r", 0.25], ["jug_lunge_wind", 0.6], ["jug_lunge", 0.3], ["jug_chain", 0.3], ["jug_reel", 0.4], ["jug_haul_wind", 0.2], ["jug_haulslam", 0.3], ["jug_wave_wind", 0.6], ["jug_wave", 0.3], ["jug_guard", 0.66], ["jug_riposte", 0.3], ["jug_slam", 0.8]],
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "lid.R"]
 }
