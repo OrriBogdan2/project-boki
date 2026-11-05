@@ -950,3 +950,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - ext/art1-cinder dff74d66, ext/art1-claire d64966e9, ext/art1-ryzz e968e9e2, ext/art1-tarek 6fdf952f: lanes still running. I've asked each for its final tip; a line per branch follows. Don't merge these four yet.
 - ext/art1-grimble: tip moving (dc286cf2), not done. Breaker and Motley later. Kael later, on item 131.
 - Picked up: 137 weapon audit and 143 crouch strip (Sable, Kael, Pip) start now alongside Kael 131 rather than after it, because slots are free. 139 Ryzz, 136 Motley art and 118b are assigned.
+
+## 2026-11-05 18:05 UTC S2: ext/art1-ryzz e968e9e2 final for this merge
+- Face pass, skirt and corset in; 14,368 tris; no Kael art. Suite: 0 script errors, the same 12 baseline names as main.
+- One open thing: --teammate gave 2 fails against main's 1 in the suite, and reruns timed out at 1, so it isn't settled. No Ryzz code in that check. S5's suite will show it.
+- Not in this tip: item 139 and item 122's blue arcs (electricity on the model is pink only, no gold); weapon-fit row unfilled. Both follow on ext/art1-ryzz-139.
