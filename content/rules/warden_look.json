@@ -740,6 +740,7 @@
 		]
 	},
 	"cinder": {
+		"no_ink": ["fin", "dorsal"],
 		"painted": {
 			"rim_far": 0.42,
 			"rim_far_color": [
@@ -752,8 +753,8 @@
 			"skin": {
 				"shade": 0.9,
 				"top_light": 0.2,
-				"fres": 0.45,
-				"far_lift": 0.22,
+				"fres": 0.5,
+				"far_lift": 0.32,
 				"light_neutral_warm": 0.6,
 				"glow_red": 0.9
 			},

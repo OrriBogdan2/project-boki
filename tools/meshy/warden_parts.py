@@ -937,8 +937,8 @@ def fan(arm, spec, bld=None):
         ph = abs((u * nr) % 1.0 - 0.5) * 2.0
         L *= 1.0 - float(spec.get("spike", 0.16)) * ph ** 1.5
         # per-ray length jitter (an organic, uneven edge) and a longer top-back (the sail sweeps back)
-        ray_i = int(u * nr)
-        L *= 1.0 + float(spec.get("jitter", 0.0)) * math.sin(ray_i * 2.399 + 0.7)
+        # (smooth in u: a per-ray step tore the sheet at each ray boundary into dark slits)
+        L *= 1.0 + float(spec.get("jitter", 0.0)) * math.sin(u * nr * 2.399 + 0.7)
         L *= 1.0 + float(spec.get("top_k", 0.0)) * math.exp(-((math.degrees(a) - float(spec.get("top_at", 0.0))) / 45.0) ** 2)
         side = np.cross(d, radial)
         side /= max(np.linalg.norm(side), 1e-9)

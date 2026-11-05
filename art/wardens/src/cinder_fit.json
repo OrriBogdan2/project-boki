@@ -5,7 +5,7 @@
  "out": "art/wardens/cinder/cinder.glb",
  "blend": "~/meshy/cinder_r3/fit.blend",
  "turn": 180,
- "max_tris": 36000,
+ "max_tris": 35000,
  "floater_verts": 8,
  "snap_r": 0.045,
  "snap_y": false,
@@ -449,7 +449,7 @@
    "from": 1.0,
    "radius": 0.3,
    "turn": 320,
-   "yaw": 55,
+   "yaw": 15,
    "yaw_from": 0.55,
    "yaw_to": 1.1
   },
@@ -486,7 +486,7 @@
      "rays": 16,
      "ray": "6a2a2a",
      "ray_w": 0.22,
-     "edge": 0.16,
+     "edge": 0.27,
      "edge_col": "b82a06"
     }
    ]
@@ -662,8 +662,8 @@
    {
     "name": "flame",
     "slot": "glow",
-    "colour": "b02a06",
-    "core": "f07018",
+    "colour": "a8260a",
+    "core": "e85a14",
     "flame": true,
     "licks": 5,
     "prof": [
@@ -1819,7 +1819,7 @@
     1.0
    ],
    "yaw": 0,
-   "edge_rows": 2,
+   "edge_rows": 1,
    "sweep": 0.35,
    "jitter": 0.12,
    "top_k": 0.18,
@@ -1843,7 +1843,7 @@
     "rays": 13,
     "ray": "3a2446",
     "ray_w": 0.17,
-    "edge": 0.22,
+    "edge": 0.27,
     "edge_col": "b82a06"
    }
   ]
