@@ -17,7 +17,7 @@ a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
 HEADS = a[3]
 ATLAS = 2048
-MATS = ["skin-face", "skin-body", "cloth-dress", "fur-trim", "hair-fringe", "ice-horn", "ice-wing", "ice-bright"]
+MATS = ["skin-face", "skin-body", "cloth-dress", "fur-trim", "ice-horn", "ice-wing", "ice-bright"]
 SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "ear": 0.7, "horn": 0.9, "tail": 0.7, "wing": 0.55, "wingarm": 0.5, "wingrod": 0.4, "bowknot": 0.6, "bowloop": 0.6, "ribbon": 0.5,
          "blade": 0.5, "shaft": 1.1, "head": 0.6, "butt": 0.5, "heart": 0.7, "heartcore": 0.6, "prong": 0.4, "collarA": 0.3, "collarB": 0.3, "Low": 1.0, "tailheart": 0.7}
 FACE_K = 4.6                # texel density on the face against the body
@@ -419,7 +419,9 @@ def blur(a_, m, r):
 
 AO = blur(AO, (PID >= 0).astype(np.float32), 3)
 
-# each scan face's slot, by its paint
+# each scan face's slot, by its paint (her hair shades as paint on the face's surface: the hair slot's toon goes slate on a pale colour)
+is_hair = np.zeros(nf, bool)
+arm_face = np.zeros(nf, bool)
 low_faces = [i for i in range(nf) if faces_pid[i] == 0]
 fc = np.array([np.mean([verts[v] for v in faces_v[i]], axis=0) for i in low_faces])
 fcol = sample_scan(fc)
@@ -431,7 +433,8 @@ for k_, i in enumerate(low_faces):
     if i in face_i and pink:
         m = "skin-face"
     elif i in face_i:
-        m = "skin-face" if abs(fc[k_][0]) < 0.075 and fc[k_][2] < K.hs([0, 0, 1.72])[2] else "hair-fringe"
+        m = "skin-face"
+        is_hair[i] = not (abs(fc[k_][0]) < 0.075 and fc[k_][2] < K.hs([0, 0, 1.72])[2])
     elif pink and fc[k_][2] > K.NECK_Z:
         m = "skin-face"
     elif blue and (mx < 0.62):
@@ -439,6 +442,7 @@ for k_, i in enumerate(low_faces):
     else:
         m = "fur-trim"
     me.polygons[i].material_index = mat_i[m]
+    arm_face[i] = sum(w_ for b_, w_ in vw[faces_v[i][0]].items() if b_.startswith(("forearm", "upper_arm", "hand"))) > 0.5
 
 mask = PID == 0
 ys, xs = np.nonzero(mask)
@@ -447,7 +451,7 @@ col = sample_scan(pp)
 print("scan paint", col.mean(0))
 # the scan drew her glove and cuff into the skirt's sides: those sides take the dress from further round the front
 az_ = np.abs(np.arctan2(pp[:, 1], np.abs(pp[:, 0])))
-side_ = smooth(0.62, 0.42, az_) * (np.abs(pp[:, 0]) > 0.1) * smooth(0.74, 0.8, pp[:, 2]) * smooth(1.04, 0.98, pp[:, 2])
+side_ = smooth(0.62, 0.42, az_) * (np.abs(pp[:, 0]) > 0.1) * smooth(0.74, 0.8, pp[:, 2]) * smooth(1.04, 0.98, pp[:, 2]) * (~arm_face[FID[ys, xs]])
 sid_ = np.nonzero(side_ > 0.01)[0]
 if len(sid_):
     th_ = 0.7
@@ -477,12 +481,11 @@ lt = smooth(0.5, 0.8, mx_) * (1 - bl) * (pp[:, 2] < K.NECK_Z + 0.12) + smooth(0.
 col = col * (1 - lt[:, None]) + col * np.array([0.8, 0.87, 0.97]) * lt[:, None]
 OUTC[ys, xs] = col
 # hair round the face: the sheet's ice blue over the scan's slate, its shading kept
-slot_ = np.array([p_.material_index for p_ in me.polygons])[FID[ys, xs]]
-hair_ = slot_ == mat_i["hair-fringe"]
+hair_ = is_hair[FID[ys, xs]]
 hc = OUTC[ys[hair_], xs[hair_]].astype(np.float64)
 OUTC[ys[hair_], xs[hair_]] = P.ramp(np.clip((hc.mean(1) - 0.2) / 0.5, 0, 1), P.HAIR)
 # the face: the owner's head sheet (claire_head.png, hood up, front), warped onto the sculpt's own landmarks; eyes, brows, mouth, blush, fringe
-face_m = np.isin(slot_, [mat_i["skin-face"], mat_i["hair-fringe"]])
+face_m = np.array([p_.material_index for p_ in me.polygons])[FID[ys, xs]] == mat_i["skin-face"]
 fx, fz = pp[:, 0], pp[:, 2] - K.eye_c(1.0)[2]
 sx_, sy_ = P.sheet_xy(fx, fz)
 r_ = np.hypot((sx_ - 325.0) / 150.0, (sy_ - 695.0) / 158.0)
