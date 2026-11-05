@@ -15,7 +15,7 @@ def rgb(h):
     return np.array([int(h[i:i + 2], 16) / 255.0 for i in (0, 2, 4)], F)
 
 
-PINK, PINK_HI, ROSE, PLUM = rgb("ec8fab"), rgb("f7b2c2"), rgb("d76d92"), rgb("a2517a")
+PINK, PINK_HI, ROSE, PLUM = rgb("ef9db0"), rgb("f9bcc6"), rgb("dc7e98"), rgb("ac6480")
 CREAM, CREAM_T = rgb("fbe4d4"), rgb("fff1c9")
 INNER = rgb("f6c3c6")
 GOLD = rgb("ffd98a")
@@ -99,7 +99,7 @@ def constellation(p, n, names, name_of):
             ab = P[i + 1] - P[i]
             t = np.clip(((q - P[i]) @ ab) / (ab @ ab), 0, 1)
             d = np.minimum(d, np.linalg.norm(q - (P[i] + np.outer(t, ab)), axis=1))
-        line[m] = np.maximum(line[m], smooth(0.0052, 0.0024, d))
+        line[m] = np.maximum(line[m], smooth(0.0042, 0.0018, d))
         s_ = np.zeros(len(q), F)
         for i, pt in enumerate(P):
             r = 0.0145 if i % 2 == 0 else 0.0105
@@ -110,9 +110,9 @@ def constellation(p, n, names, name_of):
 
 
 def stack(col, em, line, star):
-    k = np.clip(np.maximum(line * 0.62, star), 0, 1)
+    k = np.clip(np.maximum(line * 0.5, star), 0, 1)
     col = mix(col, GOLD, k)
-    em = np.maximum(em, (GOLD * 0.95)[None, :] * np.maximum(line * 0.55, star)[:, None])
+    em = np.maximum(em, (GOLD * 0.95)[None, :] * np.maximum(line * 0.38, star)[:, None])
     return col, em
 
 
@@ -153,8 +153,8 @@ def head(p, n, ao, mouth_d):
         e = K.EYE * (s, 1, 1)
         rr = np.hypot((x - e[0]) / K.EYE_R, (z - e[2]) / K.EYE_R)
         front = smooth(0.02, 0.06, y)
-        rim = smooth(0.86, 0.97, rr) * smooth(1.09, 1.0, rr) * front
-        c = mix(c, INK, 0.9 * rim)
+        rim = smooth(0.93, 0.985, rr) * smooth(1.05, 0.995, rr) * front * smooth(-0.3, 0.2, (z - e[2]) / K.EYE_R)
+        c = mix(c, INK, 0.75 * rim)
         # the small pale pad under the eye
     # mouth
     c = mix(c, INK, smooth(0.0052, 0.0022, mouth_d))
@@ -315,8 +315,8 @@ def pane(p, pc):
     r = np.hypot(u, v)
     sa = np.mod(a * 5 / (2 * np.pi), 1.0) - 0.5
     star = r < (0.26 + 0.34 * (1 - 2 * np.abs(sa)) ** 1.6) * 0.92
-    c = mix(np.broadcast_to(rgb("ffb648"), p.shape).astype(F), rgb("ffe39a"), smooth(1.0, 0.2, r))
-    c[star] = rgb("fffbe6")
+    c = mix(np.broadcast_to(rgb("e88a24"), p.shape).astype(F), rgb("ffc45c"), smooth(1.1, 0.3, r))
+    c[star] = rgb("fff2c0")
     return c
 
 
@@ -343,7 +343,7 @@ def wing_atlas(w=1024, h=1024):
             bot = 0.85 * np.sin(np.pi * u ** 0.95) ** 0.8
         sd = np.where(v > 0, v / np.maximum(top, 1e-3), -v / np.maximum(bot, 1e-3))
         inside = smooth(1.0, 0.965, sd) * smooth(0.0, 0.015, u) * smooth(1.0, 0.985, u)
-        c = mix(np.broadcast_to(rgb("ffd8dc"), (hh, w, 3)).astype(F), rgb("fff0dc"), smooth(0.1, 0.9, u))
+        c = mix(np.broadcast_to(rgb("ffc4d0"), (hh, w, 3)).astype(F), rgb("ffe6c8"), smooth(0.1, 0.9, u))
         a = 0.40 + 0.12 * (1 - u)
         # veins fan from the root, forking
         vein = np.zeros((hh, w), F)
@@ -355,7 +355,7 @@ def wing_atlas(w=1024, h=1024):
                 vein = np.maximum(vein, smooth(0.012, 0.003, np.abs(ang - (cen + 0.14 * (u - 0.45)) * (0.45 + 0.75 * u) * 0.8)) * smooth(0.42, 0.5, u))
         rim = smooth(0.90, 0.985, sd) * inside
         gold = np.maximum(vein, rim)
-        c = mix(c, rgb("ffdb8e"), gold)
+        c = mix(c, rgb("ffcc66"), gold)
         a = a + (0.98 - a) * gold
         # stars in the membrane
         for (su, sv, r) in ((0.42, 0.32, 0.016), (0.62, -0.18, 0.012), (0.75, 0.3, 0.014), (0.3, -0.2, 0.01), (0.86, 0.05, 0.012), (0.54, 0.55, 0.011)):

@@ -636,7 +636,7 @@ def pouch():
     vials = []
     for nm, at, r, ht in (("vialP", (0.052, 0.086, -0.052), 0.046, 0.05), ("vialV", (-0.052, 0.082, -0.02), 0.024, 0.08), ("vialT", (-0.14, 0.0, -0.05), 0.04, 0.04)):
         p0 = c + at
-        vials.append(ball(nm, "glow", p0, (r, r, r * (1.0 if ht < 0.06 else 1.5)), n=8, m=5))
+        vials.append(ball(nm, "leather", p0, (r, r, r * (1.0 if ht < 0.06 else 1.5)), n=8, m=5))
         vials.append(tube(nm + "_neck", "metal", [p0 + (0, 0, r * (0.9 if ht < 0.06 else 1.35)), p0 + (0, 0, r + ht * 0.62)], 0.0125, sides=6))
         vials.append(tube(nm + "_cork", "leather", [p0 + (0, 0, r + ht * 0.6), p0 + (0, 0, r + ht * 0.95)], 0.0145, sides=6))
     a, b = c + (0.09, -0.012, 0.03), c + (0.17, -0.03, 0.20)
@@ -696,8 +696,8 @@ def lantern():
             w = 0.058 * abs(cb) ** 0.62 * (1 if cb > 0 else -1)
             z = zc + hh * abs(sb) ** 0.72 * (1 if sb > 0 else -1)
             wall = 0.086 + (0.070 - 0.086) * (Ze - 0.012 - z) / (Ze - Zb - 0.028)
-            rim.append(c(z) + n_ * (wall + 0.0025) + t_ * w)
-        mid = c(zc) + n_ * (0.0795)
+            rim.append(c(z) + n_ * (wall * 1.1 + 0.0025) + t_ * w)
+        mid = c(zc) + n_ * (0.0885)
         v = [mid] + rim[:-1]
         n = len(rim) - 1
         p = Piece("lpane%d" % i, "glow", v, [[0, j + 1, (j + 1) % n + 1] for j in range(n)], room=0.0)
@@ -718,7 +718,7 @@ def wing_frame(s, upper):
         span = _unit((s * 0.62, -0.50, -0.60))
         L, Wd = 0.50, 0.32
     # the card's plane faces up and back: the match camera sees 65 degrees down, from behind or in front, so a wing never goes edge-on
-    tilt = _unit((0, 0.8, 0.6))
+    tilt = _unit((0, 0.7, 0.71))
     ch = _unit(tilt - span * tilt.dot(span))
     return root, span, ch, L, Wd
 

@@ -288,7 +288,7 @@ for p in pieces:
         print("NO WEIGHTS", p.name)
         p.w = {"hips": np.ones(len(p.v))}
     norm_w(p)
-    if p.name.startswith(("wing",)):
+    if p.name.startswith(("wing", "lpane", "lens", "lidR", "lidL", "browR", "browL")):
         continue
     if p.name in ("body", "armR", "armL", "head"):
         continue
@@ -568,8 +568,8 @@ for pi_, p in enumerate(pieces):
         edge = 0.58 + 0.055 * np.abs(np.sin(ang * 3.5))
         cr = K.smooth(edge - 0.008, edge + 0.008, tt)
         c = P.mix(P.fur(q, n_, a), P.CREAM_T, cr)
-        emi[np.nonzero(m)[0]] = P.rgb("ffdf9c")[None, :] * (K.smooth(0.66, 0.92, tt) * 0.95 + 0.12 * cr)[:, None]
-        c = P.mix(c, P.rgb("fff8d8"), K.smooth(0.72, 0.95, tt))
+        emi[np.nonzero(m)[0]] = P.rgb("ffdf9c")[None, :] * (K.smooth(0.72, 0.97, tt) * 0.42)[:, None]
+        c = P.mix(c, P.rgb("ffeeb4"), K.smooth(0.72, 0.95, tt))
     elif nm.startswith("lid"):
         c = np.broadcast_to(P.ROSE * 0.98 + P.PINK * 0.02, q.shape).astype(F).copy()
         e_ = K.h(K.EYE * (1 if nm.endswith("R") else -1, 1, 1)).astype(F)
