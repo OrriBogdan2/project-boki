@@ -703,3 +703,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: fidelity checklist adopted
 - Every Hero READY now carries its FIDELITY_CHECKLIST.md rows as a yes/no table with proof screenshots. All ART-1 lanes told. Earlier "built" reports (Motley, Pip, etc.) are not READY until they have it.
+
+## 2026-11-05 S2: Grimble ability ids + FX points for S3/S4 (dredge, ext/art1-grimble; final mesh pending, names stable)
+- LMB dr_shot (0.36, kick 0.05); RMB dr_throw (release 0.14), dr_reel (loop 0.18-0.70), dr_pullend; E dr_anchor (slam 0.38), air dr_dive + dr_quake; dash dr_lunge (junk ball, 0.38), air dr_pounce; R dr_blast (charge 1.1, waves 1.1 and 1.7, ends 2.1); dr_flex; dr_jump, dr_land; mf_xform.
+- Empties: weapon_muzzle, anchor_gun_root, anchor_claw, anchor_hook_tip (hidden while chain_out), anchor_fist, anchor_ball, anchor_coins, anchor_hoard_top, anchor_lamp_r/l, anchor_head_top, anchor_chest.
+- For VFX: the kit still draws RMB as a violet abyssal arm and hand (dredge_kit.gd ARM_COL, fx.rope, fx.place "hand"); the design is a gaff hook on a chain. A coin burst exists in scripts/arch/kits/dredge_coins.gd.
