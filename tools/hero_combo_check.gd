@@ -577,7 +577,7 @@ func _gunslinger() -> void:
 	ok("Dazed: abilities are not boosted through outgoing",
 			is_equal_approx(K.outgoing(T, 10.0, {"src": "abil", "ab": "k1"}), 10.0))
 	KitStatus.clear_rattled(T)
-	# 2. RMB held: the fixed lane (past the cursor) with an arrow tip, the foe in it marked; nothing thrown until release
+	# 2. RMB is a tap: no hold in the data, the press throws, no lane and no held pose
 	ac.fresh(T)
 	T.teleport(home + Vector3(4, 0, 0))
 	P.teleport(home)
@@ -585,19 +585,18 @@ func _gunslinger() -> void:
 	P.inp["aim"] = home + Vector3(2.0, 0.9, 0)
 	K.cd["rmb"] = 0.0
 	K.ch_rmb = 1.0
-	P.inp["sec_hold"] = true
+	var card_rmb := String((K.d["card"] as Dictionary)["rmb"]) + String((K.rmb_def()["variants"] as Dictionary)["tap"])
+	ok("RMB: tap only, no hold or auto release in the data, the text says tap",
+			not K.rmb_def().has("hold") and not K.rmb_def().has("auto") and K.rmb_charge_full() == 0.0
+			and "tap" in card_rmb.to_lower() and not "hold" in card_rmb.to_lower(), card_rmb.left(60))
+	P.inp["sec_hold"] = true           # the key staying down changes nothing
 	P.ak.press_rmb()
-	ac.step(m, 0.5, func(): P.inp["sec_hold"] = true)
-	var le := AimKit.entry(P, "rmb")
-	ok("RMB held: a 10.5m lane with an arrow tip, past the cursor",
-			not le.is_empty() and absf(float(le["len"]) - 10.5) < 0.01 and bool(le["tip"]))
-	ok("RMB held: the foe in the lane is marked", AimKit.shown(P, "mark%d" % T.get_instance_id()))
-	ok("RMB held: nothing thrown yet, the grenade held low at the hip",
-			K.burrs.is_empty() and K.anim_id == "gunslinger_rmb_hold",
-			K.anim_id)
+	ok("RMB tap: thrown on the press, nothing held, no lane shown",
+			not K.rmb_down and K.burrs.size() == 1 and K.anim_id == "gunslinger_rmb" and AimKit.entry(P, "rmb").is_empty(),
+			"%s, %d in flight" % [K.anim_id, K.burrs.size()])
 	P.inp["sec_hold"] = false
 	m.step(DT)
-	# 3a. a direct hit: the foe in the lane is hurt and Dazed on the spot, the charge is spent, no cone
+	# 3a. a direct hit: the foe on the line is hurt and Dazed on the spot, the charge is spent, no cone
 	ac.step(m, 0.2)
 	ok("RMB direct hit: damage + Dazed, no cone, the charge is spent",
 			K.direct_hits == 1 and ac.dmg(T) >= 20.0 and KitStatus.rattled(T) and K.rattles == 0 and K.burrs.is_empty(),
@@ -684,7 +683,7 @@ func _gunslinger() -> void:
 	ac.step(m, 0.45)
 	var w2: float = float(AimKit.entry(P, "e").get("width", 0.0))
 	ok("Longneedle: the line narrows over the cast (18m)",
-			w1 > 0.8 and w2 < 0.4 and absf(float(AimKit.entry(P, "e").get("len", 0.0)) - 18.0) < 0.01,
+			w1 > 0.8 and w2 < w1 * 0.4 and absf(float(AimKit.entry(P, "e").get("len", 0.0)) - 18.0) < 0.01,
 			"%.2f -> %.2f" % [w1, w2])
 	ok("Longneedle: nothing before 0.6s", ac.dmg(T) < 0.5)
 	var px := P.pos.x
