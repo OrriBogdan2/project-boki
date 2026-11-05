@@ -147,7 +147,7 @@ func _ready_up(m: Match) -> void:
 			break
 		m.step(Match.DT)
 	if k.e_t > 0.0:
-		# an E that waits for its recast (Ostra's seed) would turn the next E press into that recast: a new kit
+		# an E that waits for its recast (Motley's seed) would turn the next E press into that recast: a new kit
 		hunter.set_arch(hunter.arch)
 	for wall in m.verbs.walls.duplicate():
 		m.verbs._break_wall(wall)          # (the last trial's rocks and barriers would block this one's)

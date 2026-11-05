@@ -73,7 +73,6 @@ var _stab_at := -9.0
 func _setup() -> void:
 	st["base_hp"] = h.max_hp
 	fx = LDFx.of(m)
-	LDSfx.ensure()
 	broadside = DredgeBlast.new(self)
 
 func res_text() -> String: return "%d" % int(res)
@@ -103,7 +102,7 @@ func add_stack(n: int) -> void:
 	_apply_hp()
 	if n > 0:
 		m.fx.word(h.pos + Vector3(0, 2.6, 0), "SALVAGE %d" % int(res), res_col(), res >= res_max())
-		m.sfx("pay_salvage", h.pos, -4.0, 1.0)        # (no ground ring: the word, the sound and the flex)
+		m.sfx("dredge_coin_jingle", h.pos, -4.0, 1.0)        # (no ground ring: the word, his coins and the flex)
 		if pull.is_empty() and wind <= 0.0 and dive.is_empty(): play("dr_flex")
 
 func _apply_hp() -> void:
@@ -442,7 +441,7 @@ func _end_pull(arrived: bool) -> void:
 		if ally:
 			if not wisp: m.fx.word((f as Ent).pos + Vector3(0, 2.4, 0), "SAVED", col_of(rdf), true)
 			return
-		payoff_fx((f as Ent).pos, "HAULED", col_of(rdf), "pay_salvage", h.aim_dir(), f)
+		payoff_fx((f as Ent).pos, "HAULED", col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
 
 # ------------------------------------------------------------------ E: Anchor Drop
 func cast_e() -> bool:
@@ -666,6 +665,7 @@ func on_dash(use_ex: bool) -> bool:
 		if not _move_runs(): play("dr_lunge")
 		h.glide_cd = maxf(h.glide_cd, h.roll_t + 0.35)
 		m.sfx("dr_barge", h.pos, -2.0, 1.0)
+		m.sfx("dredge_junk_clatter", h.pos, -6.0, 1.0)      # the hoard on his back rattles
 	if rank("dash") >= 3:
 		h.wbloom = 0.0                # rank 3: a dash resets the gun's bloom
 	_clawed_turf(dir)
