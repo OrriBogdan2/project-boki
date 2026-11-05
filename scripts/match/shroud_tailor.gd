@@ -23,6 +23,7 @@ var key := ""
 var cached := false                 # this exact shroud is already baked: skip making the cloth again
 var pieces := {"body": [], "alt": [], "trim": []}
 var bands: Array = []               # edges that take the trim: {fn(u, w), length (m), rule}
+var keep := 0.6                     # of the cloth's triangles: most shells are cut finer than they need
 var bulk := 1.0                     # the race bulk Models.hunter puts on the body, which the cloth takes too
 
 func _init(ctx: Dictionary, settings: Dictionary) -> void:
@@ -94,6 +95,10 @@ func finish() -> void:
 		ShroudSkin.ARM_L: arms["L"][0], ShroudSkin.ARM_R: arms["R"][0],
 		ShroudSkin.ELBOW_L: arms["L"][1], ShroudSkin.ELBOW_R: arms["R"][1],
 	})
+	# the body's small parts share the cloth's materials: soles with the legs, the cuffs with the accent
+	var base: Dictionary = c["m"]
+	var root := torso.get_parent().get_parent()
+	root.set_meta("shroud_swap", {base["dark"]: base["pants"], base["acc"]: m["trim"], base["trim"]: m["trim"]})
 	var meshes := _bake()
 	for tone in meshes:
 		var mi := MeshInstance3D.new()
@@ -155,7 +160,11 @@ func _bake_tone(list: Array) -> ArrayMesh:
 	arrs[Mesh.ARRAY_WEIGHTS] = weights
 	arrs[Mesh.ARRAY_INDEX] = idx
 	var am := ArrayMesh.new()
-	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
+	var fine := EmptySlim.reduce(arrs, keep)
+	if not fine.is_empty():
+		arrs[Mesh.ARRAY_INDEX] = fine
+	var far := EmptySlim.reduce(arrs, EmptySlim.LOD_KEEP)
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs, [], {} if far.is_empty() else {0.05: far})
 	return am
 
 ## How much a cloth vertex follows each bone. legs: cloth below the hip follows the leg on its side, more toward
@@ -175,7 +184,7 @@ func _weigh(p: Vector3, r: Dictionary) -> PackedFloat32Array:
 			w[ShroudSkin.ARM_L + s] = arms * (1.0 - smoothstep(0.1, 0.3, d1)) * (1.0 - below)
 			w[ShroudSkin.ELBOW_L + s] = arms * (1.0 - smoothstep(0.08, 0.26, d2)) * (1.0 - below)
 	if legs > 0.0:
-		var sx := smoothstep(-0.09, 0.09, p.x)
+		var sx := smoothstep(-0.2, 0.2, p.x)
 		var k := legs * smoothstep(0.05, 0.5, below)
 		var kn := smoothstep(0.45, 0.95, below) * 0.65
 		w[ShroudSkin.LEG_L] = k * (1.0 - sx) * (1.0 - kn)

@@ -77,3 +77,4 @@ static func bind(model: Node3D) -> void:
 	var skin := model.get_node_or_null("Rig/Torso/ShroudBones") as ShroudSkin
 	if skin:
 		skin.bind(model.get_node("Rig"))
+	EmptySlim.apply(model)

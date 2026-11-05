@@ -742,7 +742,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		part(torso, cyl(0.075, 0.075, 0.44, 12), toon(Color("f3eee2")), Vector3(0, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
 		for sx in [-1.0, 1.0]:
 			part(torso, cyl(0.08, 0.08, 0.06, 12), m_acc, Vector3(0.2 * sx, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
-	_class_marks(torso, cls, bw, m_acc, m_trim)
+	if not um: _class_marks(torso, cls, bw, m_acc, m_trim)      # (the shroud covers the back it would sit on)
 	# head: the sculpted head (jaw, cheeks, brow, chin per race and gender) with its face
 	var hk := HeroKit.head_key(rid, fem)
 	part(torso, HeroKit.head(hk), m_skin, Vector3(0, 0.86, 0), Vector3.ONE, Vector3.ZERO, "Head")

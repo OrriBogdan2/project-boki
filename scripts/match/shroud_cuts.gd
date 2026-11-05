@@ -69,8 +69,6 @@ static func _hood_down(t: ShroudTailor, nm: String, mat: Material, radius := 0.2
 	var ao := func(_u: float, v: float) -> float: return lerpf(0.8, 1.0, clampf(sin(v * TAU) * 0.5 + 0.5, 0.0, 1.0))
 	t.add("body", HeroKit.surf("shroud|hooddn|%s|%s" % [nm, t.tag], fn, 24, 8, ao, -1.0), {},
 		Transform3D(Basis.IDENTITY, Vector3(0, 0.655, 0)))
-	t.add("body", HeroKit.drape("shroud_nape|" + t.tag, 0.1, 0.13, 0.1, 0.0, 1.0, 5.0, 0.02), {},
-		Transform3D(Basis.IDENTITY, Vector3(0, 0.69, 0.0)))
 	t.rigid(t.torso, Models.cyl(0.1, 0.14, 0.1, 14), mat, Vector3(0, 0.63, 0))
 
 static func _hood_for(t: ShroudTailor, nm: String, up: bool, peak: float, flop := 0.0, tone := "body") -> void:
@@ -123,10 +121,11 @@ static func _cloak(t: ShroudTailor, hood_up: bool) -> void:
 	var fn := func(u: float, v: float) -> Vector3:
 		var gap := 0.03 + 0.3 * v * v
 		var th := PI * 0.5 + (2.0 * u - 1.0) * (PI - gap)
-		var rr := lerpf(0.13, 0.385 * s, smoothstep(0.0, 0.2, v)) + 0.15 * pow(v, 1.6)
+		var rr := lerpf(0.13, 0.385 * s, smoothstep(-0.04, 0.3, v)) + 0.15 * pow(v, 1.6)
 		rr *= 1.0 + 0.07 * v * _fold(th, 7.0)
 		return Vector3(cos(th) * rr, lerpf(0.67, f + 0.02, v), sin(th) * rr * 0.94 + 0.3 * maxf(sin(th), 0.0) * v * v * v)
-	t.add("body", _shell(t, "cloak", fn, 44, 11), {"legs": 0.8, "arms": 0.9})
+	t.keep = 0.85       # (one big surface: its folds are all it has)
+	t.add("body", _shell(t, "cloak", fn, 48, 14), {"legs": 0.8, "arms": 0.9})
 	t.band(_edge(fn, 0.95, 1.0), 2.8, LIMB)
 	t.band(_edge_v(fn, 0.985, 1.0, 0.1, 0.96), 1.1, LIMB)
 	t.band(_edge_v(fn, 0.0, 0.015, 0.1, 0.96), 1.1, LIMB)
@@ -166,8 +165,8 @@ static func _wrap(t: ShroudTailor) -> void:
 		var shin := func(k: float) -> float: return lerpf(0.074, 0.086, k)
 		t.rigid(t.c["knees"][sd], _helix("shin", shin, 0.03, -0.14, 2.0, 0.07), body)
 	t.rigid(torso, Models.cyl(0.095, 0.13, 0.15, 12), body, Vector3(0, 0.63, 0))
-	var brow := func(_k: float) -> float: return 0.262
-	t.rigid(torso, _helix("brow", brow, 0.1, -0.02, 2.0, 0.07, 0.0), body, Vector3(0, 0.89, 0), Vector3(0.3, 0, 0))
+	var brow := func(k: float) -> float: return sqrt(0.0538 - pow(lerpf(0.11, 0.02, k), 2.0)) + 0.004
+	t.rigid(torso, _helix("brow", brow, 0.11, 0.02, 2.0, 0.045), body, Vector3(0, 0.86, 0), Vector3(0.25, 0, 0))
 	var tails := [
 		[PackedVector3Array([Vector3(0.14, 0.02, 0.2), Vector3(0.2, -0.16, 0.34), Vector3(0.28, -0.3, 0.52),
 			Vector3(0.22, -0.36, 0.8)]), 0.09, 0.05],
@@ -198,8 +197,8 @@ static func _tatters(t: ShroudTailor, hood_up: bool) -> void:
 	var n := 15
 	for i in n:
 		var th0 := TAU * (i + 0.3 * sin(i * 2.7)) / n
-		var ln := 0.66 + 0.44 * absf(sin(i * 1.9 + 0.6))
-		var flare := 0.5 + 0.13 * sin(i * 3.1)
+		var ln := 0.62 + 0.46 * absf(sin(i * 1.9 + 0.6))
+		var flare := 0.56 + 0.3 * absf(sin(i * 2.3 + 1.1))     # how far out the strip's point flies: uneven, spiky
 		var wide := TAU / n * 0.72
 		var r0 := lerpf(0.27, 0.37, absf(cos(th0))) * s
 		var top := 0.52
@@ -248,7 +247,7 @@ static func _coat(t: ShroudTailor) -> void:
 	t.add("body", _shell(t, "coatcollar", collar, 22, 5, 0.018), {})
 	t.band(_edge(collar, 0.0, 0.1), 1.2, {})
 	t.rigid(t.torso, Models.cyl(0.25 * t.bw, 0.25 * t.bw, 0.05, 20), t.m["leather"], Vector3(0, 0.05, 0))
-	t.rigid(t.torso, Models.box(0.09, 0.07, 0.02), t.m["gold"], Vector3(0, 0.05, -0.25 * t.bw))
+	t.rigid(t.torso, Models.box(0.09, 0.07, 0.02), t.m["trim"], Vector3(0, 0.05, -0.25 * t.bw))
 	for k in 4:
 		t.rigid(t.torso, Models.sphere(0.016, 6), t.m["trim"], Vector3(0.05, 0.16 + k * 0.1, -0.215 - 0.006 * k))
 
@@ -270,7 +269,8 @@ static func _poncho(t: ShroudTailor, hood_up: bool) -> void:
 		var p: Vector3 = fn.call(u, 1.0)
 		var tooth := absf(fposmod(u * 70.0, 1.0) * 2.0 - 1.0)
 		return Vector3(p.x, p.y - v * (0.03 + 0.07 * tooth), p.z)
-	t.add("alt", _shell(t, "ponchofringe", fringe, 140, 1, 0.006, true), {"arms": 0.95})
+	var ao := func(_u: float, _v: float) -> float: return 0.9
+	t.add("alt", HeroKit.surf("shroud|fringe|" + t.tag, fringe, 120, 1, ao, 1.0), {"arms": 0.95})
 	for v0 in [0.6, 0.8]:
 		t.add("trim", HeroKit.surf("shroud|ponstripe%.1f|%s" % [v0, t.tag], _edge(fn, v0, v0 + 0.09), 52, 1,
 			Callable(), 1.0), {"arms": 0.95})
@@ -328,12 +328,12 @@ static func _mantle(t: ShroudTailor) -> void:
 	var fn := func(u: float, v: float) -> Vector3:
 		var th := PI * 0.5 + (2.0 * u - 1.0) * (PI - 0.3)
 		var left := clampf(-cos(th), -1.0, 1.0)
-		var wing := pow(maxf(left, 0.0), 3.0)
+		var wing := pow(maxf(left, 0.0), 14.0)
 		var aft := pow(maxf(sin(th), 0.0), 8.0)
-		var bot := lerpf(0.47, 0.3, wing) - 0.5 * aft
-		var rr := lerpf(0.13, (0.34 + 0.34 * wing) * s, pow(v, 0.6)) * (1.0 + 0.04 * v * _fold(th, 5.0))
+		var bot := lerpf(0.47, 0.36, wing) - 0.5 * aft
+		var rr := lerpf(0.13, (0.33 + 0.62 * wing) * s, pow(v, 0.6)) * (1.0 + 0.04 * v * _fold(th, 5.0))
 		return Vector3(cos(th) * rr, lerpf(0.68, bot, pow(v, 0.85)), sin(th) * rr * 0.92)
-	t.add("body", _shell(t, "mantle", fn, 40, 8, 0.02), {"arms": 0.9, "bone": ShroudSkin.CAPE,
+	t.add("body", _shell(t, "mantle", fn, 56, 8, 0.02), {"arms": 0.9, "bone": ShroudSkin.CAPE,
 		"from": Vector3(0, 0.62, 0.1), "reach": 0.7, "share": 0.4})
 	t.band(_edge(fn, 0.93, 1.0), 2.4, UPPER)
 	var collar := func(u: float, v: float) -> Vector3:
@@ -347,7 +347,7 @@ static func _mantle(t: ShroudTailor) -> void:
 		return Vector3(cos(th) * rr, lerpf(0.05, -0.16, v), sin(th) * rr * 0.92)
 	t.add("alt", _shell(t, "mantletunic", tunic, 26, 4, 0.014, true), {"legs": 0.9})
 	t.rigid(t.torso, Models.cyl(0.24 * t.bw, 0.24 * t.bw, 0.045, 18), t.m["leather"], Vector3(0, 0.05, 0))
-	t.rigid(t.torso, Models.sphere(0.04, 8), t.m["gold"], Vector3(0.13, 0.57, -0.19))
+	t.rigid(t.torso, Models.sphere(0.04, 8), t.m["trim"], Vector3(0.13, 0.57, -0.19))
 	t.rigid(t.torso, Models.cyl(0.1, 0.14, 0.1, 14), t.m["body"], Vector3(0, 0.63, 0))
 
 # ---------------------------------------------------------------------------------------------- 7 Shawl & Scarf

@@ -123,11 +123,11 @@ static func _lantern(t: ShroudTailor, fit: Dictionary) -> void:
 	var r := float(fit["waist"]) + 0.03
 	var skirt: Node3D = t.c["skirt"]
 	var at := Vector3(r + 0.05, -0.14, -0.04)
-	t.rigid(skirt, Models.box(0.09, 0.03, 0.02), t.m["steel"], Vector3(r + 0.02, -0.02, -0.04))
-	t.rigid(skirt, Models.cyl(0.008, 0.008, 0.06, 5), t.m["steel"], at + Vector3(0, 0.09, 0))
+	t.rigid(skirt, Models.box(0.09, 0.03, 0.02), t.m["leather"], Vector3(r + 0.02, -0.02, -0.04))
+	t.rigid(skirt, Models.cyl(0.008, 0.008, 0.06, 5), t.m["leather"], at + Vector3(0, 0.09, 0))
 	t.rigid(skirt, Models.sphere(0.052, 8), t.m["glow"], at)
-	t.rigid(skirt, Models.cyl(0.05, 0.062, 0.024, 8), t.m["steel"], at + Vector3(0, 0.07, 0))
-	t.rigid(skirt, Models.cyl(0.062, 0.05, 0.018, 8), t.m["steel"], at + Vector3(0, -0.07, 0))
+	t.rigid(skirt, Models.cyl(0.05, 0.062, 0.024, 8), t.m["leather"], at + Vector3(0, 0.07, 0))
+	t.rigid(skirt, Models.cyl(0.062, 0.05, 0.018, 8), t.m["leather"], at + Vector3(0, -0.07, 0))
 
 static func _bandolier(t: ShroudTailor, fit: Dictionary) -> void:
 	t.rigid(t.torso, _strap(t, "ban", fit, -1.0, 0.075), t.m["leather"])
