@@ -44,6 +44,7 @@ var made := 0                  # nodes made so far (tests: it stops growing once
 var plays := {}                # (tests) move -> times played
 var _arcs := {}                # arc degrees -> arc mesh
 var _cyl: ArrayMesh
+var _warming: Array = []       # the loading screen's stand-ins (prewarm)
 var _anchors := {}             # "<model id>/<anchor>" -> the node found for it (null: none)
 
 static func of(match_node: Node) -> HeroVfx:
@@ -305,6 +306,43 @@ func _cylinder() -> ArrayMesh:
 		st.add_vertex(way + Vector3.UP)
 	_cyl = st.commit()
 	return _cyl
+
+## One of every kind held up at `at` on the loading screen (Match.warm_up, once per view, then prewarm_end), so the
+## first cast compiles nothing. Particles have to run and a trail needs a surface, or their shaders are never built.
+func prewarm(at: Vector3) -> void:
+	if _warming.is_empty():
+		for kind: String in POOL:
+			_warming.append(_prewarm_node(kind))
+	for node: Node3D in _warming:
+		node.global_transform = Transform3D(Basis.IDENTITY, Vector3.ZERO if node.get_meta("strip", false) else at)
+		if node is GPUParticles3D:
+			(node as GPUParticles3D).restart()
+
+func prewarm_end() -> void:
+	for node: Node3D in _warming:
+		node.visible = false
+	_warming.clear()
+
+func _prewarm_node(kind: String) -> Node3D:
+	if not MODES.has(kind):
+		var p: GPUParticles3D = _take(kind, _mote_node.bind(kind))
+		p.amount_ratio = 2.0 / float(AMOUNT[kind])
+		return p
+	var mi: MeshInstance3D = _take(kind, _surface_node.bind(kind))
+	if kind == "sweep":
+		mi.mesh = _arc(120.0)
+	elif kind == "ribbon":
+		_prewarm_strip(mi.mesh)
+		mi.set_meta("strip", true)
+	return mi
+
+func _prewarm_strip(mesh: ImmediateMesh) -> void:
+	mesh.clear_surfaces()
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
+	for i in 3:
+		mesh.surface_set_uv(Vector2(float(i) * 0.5, 0.0))
+		mesh.surface_add_vertex(Vector3(float(i), 0.0, float(i % 2)) * 0.01)
+	mesh.surface_end()
 
 func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vector2, o: Dictionary) -> void:
 	var mi: MeshInstance3D = _take(kind, _surface_node.bind(kind))
