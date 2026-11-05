@@ -1360,3 +1360,9 @@ Use them for shape and detail; **the master sheet wins on any difference.**
 | Cinder | `cinder_weapons.png` | the brass flamethrower, tank harness, goggles, vial belt | the tank is **copper + glass with bubbling liquid fire and two exhaust nozzles on top venting flame** (her ult jets) per the master; this sheet's tank lacks the nozzles |
 
 ## 2026-11-05 05:30 UTC (ext): OWNER ITEM 111 (KITS lane): Tarek dash -> Rock Hop, 2-3 steerable hops off rocks he raises (parkour/skate feel). Details in OWNER_REVIEW 111. Opus (feel).
+
+## 2026-11-05 05:31 UTC (ext): TAREK UPGRADE (owner): `briefs/art-refs/tarek_FINAL_sheet.png`
+- **Look:** one huge stone arm (right) with molten cracks, a plain cloth blindfold (no glow), a big friendly smile, dreadlocks with copper beads.
+- **Gear:** a climbing harness, rope and carabiners; rolled trousers; taped hands and feet.
+- **Eye-stones:** three floating eye-stones with glowing eyes are his sight (they orbit and look around).
+- **Rock under the foot:** the visual for his new Rock Hop dash (item 111).
