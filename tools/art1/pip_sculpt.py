@@ -510,14 +510,14 @@ def cape(body, arms):
         return p
 
     # the long green layer, from the art's outline: longest at the back, the front left open for the apron
-    for i, (th, L, W, dr, tw) in enumerate(((58, 0.31, 0.125, 62, -0.2), (92, 0.36, 0.145, 66, -0.1), (124, 0.42, 0.16, 71, 0.05), (153, 0.47, 0.17, 76, 0.03), (180, 0.50, 0.18, 79, 0.0),
-                                            (207, 0.47, 0.17, 76, -0.03), (236, 0.42, 0.16, 71, -0.05), (268, 0.36, 0.145, 66, 0.1), (302, 0.31, 0.125, 62, 0.2))):
+    for i, (th, L, W, dr, tw) in enumerate(((56, 0.35, 0.155, 62, -0.2), (92, 0.36, 0.145, 66, -0.1), (124, 0.42, 0.16, 71, 0.05), (153, 0.47, 0.17, 76, 0.03), (180, 0.50, 0.18, 79, 0.0),
+                                            (207, 0.47, 0.17, 76, -0.03), (236, 0.42, 0.16, 71, -0.05), (268, 0.36, 0.145, 66, 0.1), (304, 0.35, 0.155, 62, 0.2))):
         add("leafG%d" % i, "cloth", th, 0.175, 1.075, L, W, dr - 8, tw=tw, curl=0.30)
     # the pink petals over it
     for i, (th, L, W, dr) in enumerate(((36, 0.235, 0.135, 42), (84, 0.29, 0.165, 54), (128, 0.30, 0.175, 60), (180, 0.345, 0.19, 66), (232, 0.30, 0.175, 60), (276, 0.29, 0.165, 54), (324, 0.235, 0.135, 42))):
         add("petal%d" % i, "cloth", th, 0.135, 1.128, L, W, dr - 14, curl=0.34)
     # the small collar leaves on top, round the neck
-    for i, (th, L, W, dr) in enumerate(((14, 0.135, 0.085, 8), (346, 0.135, 0.085, 8), (62, 0.17, 0.095, 18), (298, 0.17, 0.095, 18), (116, 0.17, 0.10, 26), (244, 0.17, 0.10, 26), (180, 0.19, 0.115, 30))):
+    for i, (th, L, W, dr) in enumerate(((16, 0.165, 0.11, 8), (344, 0.165, 0.11, 8), (62, 0.19, 0.12, 18), (298, 0.19, 0.12, 18), (116, 0.17, 0.10, 26), (244, 0.17, 0.10, 26), (180, 0.19, 0.115, 30))):
         add("collar%d" % i, "cloth", th, 0.095, 1.15, L, W, dr, curl=0.28, n=5)
     # stay outside the trunk and the arms
     fields = [body] + arms
@@ -634,12 +634,12 @@ def pouch():
     fl = loft("flap", "leather", flap, room=0.4)
     buckle = ring_tube("buckle", "metal", c + (0, 0.092, -0.022), (1, 0, 0), (0, 0, 1), 0.013, 0.0035, n=8, sides=4)
     vials = []
-    for nm, at, r, ht in (("vialP", (0.052, 0.086, -0.052), 0.046, 0.05), ("vialV", (-0.052, 0.082, -0.02), 0.024, 0.08), ("vialT", (-0.14, 0.0, -0.05), 0.04, 0.04)):
+    for nm, at, r, ht in (("vialP", (0.052, 0.086, -0.052), 0.046, 0.05), ("vialV", (-0.052, 0.082, -0.02), 0.024, 0.08), ("vialT", (-0.148, 0.0, -0.062), 0.04, 0.04)):
         p0 = c + at
         vials.append(ball(nm, "leather", p0, (r, r, r * (1.0 if ht < 0.06 else 1.5)), n=8, m=5))
         vials.append(tube(nm + "_neck", "metal", [p0 + (0, 0, r * (0.9 if ht < 0.06 else 1.35)), p0 + (0, 0, r + ht * 0.62)], 0.0125, sides=6))
         vials.append(tube(nm + "_cork", "leather", [p0 + (0, 0, r + ht * 0.6), p0 + (0, 0, r + ht * 0.95)], 0.0145, sides=6))
-    a, b = c + (0.09, -0.012, 0.03), c + (0.17, -0.03, 0.20)
+    a, b = c + (-0.07, -0.022, 0.04), c + (-0.155, -0.04, 0.215)
     scroll = tube("scroll", "cloth", [a, (a + b) / 2, b], (0.031, 0.034, 0.036), sides=8)
     tie = tube("scrolltie", "leather", [(a + b) / 2 + (b - a) * -0.06, (a + b) / 2 + (b - a) * 0.08], 0.037, sides=8)
     return [bag, fl, buckle, scroll, tie] + vials
