@@ -200,5 +200,29 @@ bpy.ops.object.select_all(action="DESELECT")
 low.select_set(True)
 bpy.context.view_layer.objects.active = low
 bpy.ops.object.modifier_apply(modifier=m.name)
+# scraps the cuts left at the wrists: small loose islands at waist height, half on the thigh and half on the hand, that float off as he moves
+bm = bmesh.new()
+bm.from_mesh(low.data)
+bm.verts.ensure_lookup_table()
+seen, drop = set(), []
+for v in bm.verts:
+    if v.index in seen:
+        continue
+    stack, part = [v], []
+    seen.add(v.index)
+    while stack:
+        q = stack.pop()
+        part.append(q)
+        for e in q.link_edges:
+            o = e.other_vert(q)
+            if o.index not in seen:
+                seen.add(o.index)
+                stack.append(o)
+    if len(part) < 70 and max(abs(q.co.x) for q in part) > 0.24 and max(q.co.z for q in part) < 0.74:
+        drop += part
+print("scraps dropped", len(drop))
+bmesh.ops.delete(bm, geom=drop, context="VERTS")
+bm.to_mesh(low.data)
+bm.free()
 print("Low tris", sum(len(p.vertices) - 2 for p in low.data.polygons))
 bpy.ops.wm.save_as_mainfile(filepath=OUT)

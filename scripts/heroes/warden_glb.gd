@@ -889,6 +889,9 @@ class Sync extends Node:
 			blade_root_bone = WardenSkeleton.find(skel, String(bl.get("root_bone", bl.get("bone", "hand.R"))))
 			gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 			muzzle = gun.get_node_or_null("Muzzle") as Node3D if gun else null
+		for ch in springs.chains:
+			var first := skel.get_bone_name(int(ch["ids"][0]))
+			ch["own_rest"] = Array(dd.get("hang_own_rest", [])).any(func(n): return first.begins_with(String(n)))
 		for b in dd.get("hide_while_chain", []):
 			hide_out.append(WardenSkeleton.find(skel, String(b)))
 		clips = WardenClips.make(root, glb, skel, art_name)
@@ -1130,7 +1133,7 @@ class Springs:
 				var r: Transform3D = rest[j]
 				var a := inv * pts[j]
 				var from := ((rest[j + 1] as Transform3D).origin - r.origin).normalized()
-				if ch["hang"]:       # (off the model's own rest: the fist's turn doesn't twist the hook edge on)
+				if ch.get("own_rest", false):       # (data "hang_own_rest": the fist's turn doesn't twist it edge on)
 					r = skel.get_bone_global_rest(int(ids[j]))
 					from = (skel.get_bone_global_rest(int(ids[j + 1])).origin - r.origin).normalized()
 				var to := (inv * pts[j + 1] - a).normalized()

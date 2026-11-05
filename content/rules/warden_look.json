@@ -551,10 +551,10 @@
 				"top_light": 0.25
 			},
 			"metal": {
-				"top_light": 0.35,
-				"fres": 0.35,
+				"top_light": 0.15,
+				"fres": 0.2,
 				"fres_tint": 0.3,
-				"far_lift": 0.3,
+				"far_lift": 0.12,
 				"sheen": 0.1
 			},
 			"leather": {

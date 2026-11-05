@@ -4,6 +4,7 @@
 	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R"},
 	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
 	"hide_while_chain": ["spring_hangwarchain_0"],
+	"hang_own_rest": ["spring_hangwarchain"],
 	"loco": {
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},

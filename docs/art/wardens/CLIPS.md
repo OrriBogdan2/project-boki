@@ -15,6 +15,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `extra_bones`: the Hero's variant bones (RIG_CONTRACT), bone -> parent. Data, not `WardenGlb.EXTRA`, so branches
   don't collide.
 - `hide_while_chain`: bones that shrink away while a kit sets the root meta `chain_out` (a runtime piece of the weapon).
+- `hang_own_rest`: `spring_hang*` chain names that keep the model's rest basis, so a turned fist does not twist them edge on.
 - `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds.
 - `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.

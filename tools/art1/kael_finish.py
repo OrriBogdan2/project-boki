@@ -666,9 +666,17 @@ red_t = isbody & (r_ > g_ * 2.0) & (r_ > b_ * 1.6) & ~hotish
 silver_t = isbody & (sat_t < 0.2) & (lumi > 0.36) & ~hotish
 dark_t = isbody & (sat_t < 0.34) & (lumi <= 0.36) & (b_ >= r_ * 0.9)
 skin_t = isbody & (r_ > b_ * 1.02) & ~hotish & ~red_t & ~silver_t & ~dark_t
-for cls_, ramp_, base_, gain_, wide_ in ((skin_t, P.SKIN2, 0.4, 3.0, 0.7), (silver_t, P.SILVER, 0.48, 3.4, 1.6), (dark_t, P.DARK, 0.34, 2.2, 0.7), (red_t, P.RED, 0.45, 2.2, 0.7)):
+# the classes' confetti out, so the match camera's mips average one colour: a pixel takes the class round it (small belts survive as line work)
+bf_ = isbody.astype(np.float32)
+dm_ = blur(dark_t.astype(np.float32), bf_, 5)
+sm_ = blur(skin_t.astype(np.float32), bf_, 5)
+flip_d = dark_t & (dm_ < 0.42) & (sm_ > 0.4)
+flip_s = skin_t & (dm_ > 0.62)
+dark_t = (dark_t & ~flip_d) | flip_s
+skin_t = (skin_t & ~flip_s) | flip_d
+for cls_, ramp_, base_, gain_, wide_ in ((skin_t, P.SKIN2, 0.38, 1.7, 0.35), (silver_t, P.SILVER, 0.42, 3.0, 1.4), (dark_t, P.DARK, 0.34, 2.2, 0.7), (red_t, P.RED, 0.45, 2.2, 0.7)):
     fm_ = cls_.astype(np.float32)
-    l1_ = blur(lumi, fm_, 2)
+    l1_ = blur(lumi, fm_, 4 if ramp_ is P.SKIN2 else 2)
     l2_ = blur(lumi, fm_, 18)
     mean_ = float(np.sum(lumi * fm_) / max(fm_.sum(), 1.0))
     t_ = np.clip(base_ + (l1_ - l2_) * gain_ + (l2_ - mean_) * wide_, 0, 1)

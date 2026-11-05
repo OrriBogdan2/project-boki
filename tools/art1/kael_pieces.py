@@ -652,7 +652,7 @@ _a = norm(np.array([0, 0, -1.0]) - GRIP_DIR * np.dot(np.array([0, 0, -1.0]), GRI
 GRIP_AT = np.array([SH, 0.0, HAND_Z + 0.012]) + _a * 0.094 + np.array([-0.03, 0.0, 0.0])    # inside the closed fist
 L_MID = 0.5
 GUARD_OFF = 0.085                                # fist to guard: a short grip, as the master sheet
-BLADE_LEN, BLADE_W = 0.98, 0.128                  # guard to tip; half width: shoulder to ankle on him
+BLADE_LEN, BLADE_W = 0.72, 0.1                  # guard to tip; half width: shoulder to ankle on him
 
 
 def sword_frame():
@@ -770,7 +770,7 @@ def hilt(uv_chain):
     p = [g - b * 0.20, g - b * 0.19, g - b * 0.175, g - b * 0.16, g - b * 0.02, g]
     grip = sweep("grip", "leather-grip", p, sec8, np.array([0.03, 0.03, 0.026, 0.0195, 0.0195, 0.024]), side_hint=e)
     out.append(grip.rigid("hand.R"))
-    spike = [g - b * 0.195, g - b * 0.215, g - b * 0.245, g - b * 0.285]
+    spike = [g - b * 0.195, g - b * 0.21, g - b * 0.235, g - b * 0.27]
     sp = sweep("pommel", "metal-guard", spike, [(-1, 0), (0, 1), (1, 0), (0, -1)], np.array([0.018, 0.024, 0.012, 0.001]), side_hint=e)
     out.append(sp.rigid("hand.R"))
     return out
