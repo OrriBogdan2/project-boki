@@ -751,9 +751,6 @@
 			},
 			"cloth-ember": {
 				"glow": 1.5
-			},
-			"glow-sword_edge": {
-				"glow": 0.75
 			}
 		},
 		"bloom": [
