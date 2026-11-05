@@ -269,8 +269,10 @@ for v in me_l.vertices:
     rooms.append(0.0 if v.co.z > K.NECK_Z + 0.03 else 1.0)       # (no ink shell on the sculpt: it breaks into dashes round the eyes and mouth)
 # the scan's forearms sit against the skirt in the rest pose: nothing on an arm follows the hips
 for d_ in vw:
-    if d_.get("forearm.R", 0) + d_.get("forearm.L", 0) + d_.get("hand.R", 0) + d_.get("hand.L", 0) > 0.15:
-        for b_ in ("root", "hips", "skirt", "thigh.R", "thigh.L"):
+    arm_ = d_.get("forearm.R", 0) + d_.get("forearm.L", 0) + d_.get("hand.R", 0) + d_.get("hand.L", 0)
+    body_ = sum(d_.get(b_, 0) for b_ in ("root", "skirt", "thigh.R", "thigh.L"))
+    if arm_ > 0.0 and body_ > 0.0:              # each vertex goes one way: mostly arm, or mostly body (a little arm drags the skirt to the wrist)
+        for b_ in (("root", "skirt", "thigh.R", "thigh.L") if arm_ > body_ else ("forearm.R", "forearm.L", "hand.R", "hand.L")):
             d_.pop(b_, None)
 # the face's own deformers, soft spots on the sculpt
 DEFORM = {}
@@ -668,7 +670,7 @@ head_m = mask & (z_t > K.NECK_Z + 0.04) & (POS[..., 1] > 0.0)
 hb = blur(OUTC.mean(2), head_m.astype(np.float32), 4)
 OUTC[head_m] = np.clip(OUTC[head_m] + (OUTC.mean(2) - hb)[head_m][:, None] * 1.1, 0, 1)
 # the owner's head sheet, front view, projected on the face: eyes (pink glowing under the bolt, blue), brows, nose, grin. Scaled by its eyes and mouth.
-HEAD = "/home/boki/briefs-wt/briefs/art-refs/ryzz_head.png"
+HEAD = "/home/boki/meshy/ryzz_f/ryzz_head_nogum.png"      # (the sheet's first version, her grin: the later one paints the bubble, and that is geometry here)
 hd_ = imgio.load(HEAD)
 HU, HE, HM = 402.5, 743.0, 856.0                 # the sheet's face centre, eye line and mouth line (px)
 SU = 95.0 * 1.376 / (2 * EYE_X)                  # its eyes are 131 px apart
@@ -686,6 +688,7 @@ kk_ = (1 - smooth(0.86, 1.0, rr_)) * not_hair
 cc_[blue_eye] = np.clip(cc_[blue_eye] * np.array([0.8, 1.02, 1.3]), 0, 1)     # the blue eye stays clearly blue under the toon light
 OUTC[yy_, xx_] = (OUTC[yy_, xx_] * (1 - kk_[:, None]) + cc_ * kk_[:, None]).astype(np.float32)
 hot_ = (cc_[:, 0] > 0.8) & (cc_[:, 2] > 0.6) & (cc_[:, 1] < 0.45) & (kk_ > 0.5)
+hot_ &= np.hypot(px_ - EYE_X, pz_ - EYE_Z) > 0.024        # (the pink eye keeps its painted iris; its glow is the bloom on anchor_eye_glow)
 core[yy_, xx_] = False
 core[yy_[hot_], xx_[hot_]] = True
 OUTC[core] = P.KEY
@@ -875,6 +878,7 @@ for s, side in ((1.0, "R"), (-1.0, "L")):
     A["anchor_wire_" + side] = ("hand." + side, tuple(K.wrist_at(s) + [s * 0.024, 0.0, -0.02]))
     tp = next(p for p in fs if p.name.startswith("thumb"))
     A["anchor_thumb_" + side] = ("thumb." + side, tuple(tp.tip + tp.dirn * 0.01))
+A["anchor_eye_glow"] = ("head", (EYE_X, front_y(EYE_X, EYE_Z) + 0.004, EYE_Z))
 for i, (ra, rb, rd) in enumerate(RODB):
     A["anchor_rod_%d" % i] = ("rod.%d" % i, tuple(rb + rd * 0.015))
 for nm, (bn, at) in A.items():

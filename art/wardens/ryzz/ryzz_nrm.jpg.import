@@ -3,18 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dvb2f1lma0xq4"
-path="res://.godot/imported/ryzz_nrm.jpg-993c9c1ae514992ec2721d0bf50179d3.ctex"
+path.bptc="res://.godot/imported/ryzz_nrm.jpg-993c9c1ae514992ec2721d0bf50179d3.bptc.ctex"
+path.astc="res://.godot/imported/ryzz_nrm.jpg-993c9c1ae514992ec2721d0bf50179d3.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "118bb2d80dcaea17de899c5ed45ff72b"
+"md5": "e5fff2a1459c6295924bf64a811e5ccd"
 }
 
 [deps]
 
 source_file="res://art/wardens/ryzz/ryzz_nrm.jpg"
-dest_files=["res://.godot/imported/ryzz_nrm.jpg-993c9c1ae514992ec2721d0bf50179d3.ctex"]
+dest_files=["res://.godot/imported/ryzz_nrm.jpg-993c9c1ae514992ec2721d0bf50179d3.bptc.ctex", "res://.godot/imported/ryzz_nrm.jpg-993c9c1ae514992ec2721d0bf50179d3.astc.ctex"]
 
 [params]
 
