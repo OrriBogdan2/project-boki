@@ -1794,3 +1794,35 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - An old save loads.
   - ≥10 shrouds selectable.
   - The unmasked_check passes.
+
+## 153b. The Empty creator: more, more distinct Ghost features and Aura types (owner, 17:39 UTC Nov 5)
+- The owner: "same with ghost - needs more options and differentiations" + "and aura too, can have different types of things, like darker aura, angelic aura, etc".
+- **Ghost** (the faint ghosts of the missing features on the void face; today None / Eyes / Whole face / Stitched). Go to ~10, each clearly different at the match camera:
+  - None.
+  - Eyes.
+  - Whole face.
+  - Stitched.
+  - Smile (a wide grin only).
+  - Tears (glowing tear streaks).
+  - Third Eye.
+  - Cracked (porcelain-like crack lines).
+  - Runes (glyph markings where the features would be).
+  - Many Eyes (3-5 small scattered eyes).
+  - Fanged (a jaw outline with teeth).
+  - Hollow Stare (two deep dark sockets).
+  - Plus a "ghost intensity" slider (faint ↔ vivid).
+- **Aura:** split into Type + Strength (Strength = the old None/Faint/Strong, now a slider). Types with distinct shapes/motion, not just colour:
+  - **Specks:** today's drifting specks.
+  - **Dark:** smoky black wisps rising, a slight shadow pooling at the feet.
+  - **Angelic:** soft gold-white light motes, a faint halo ring over the head, gentle upward drift.
+  - **Ember:** sparks and heat shimmer.
+  - **Frost:** a cold mist + tiny ice glints.
+  - **Void:** small starfield fragments orbiting (matching the face).
+  - **Spirit:** translucent ghostly ribbons trailing.
+  - **Storm:** faint crackles.
+  - **Bloom:** petals/leaves drifting.
+  - **Shadow-wings:** a faint wing silhouette flickering behind you (rare and cool).
+  - Aura colour follows the Glow pick by default, with an override.
+- **Budget:** auras use pooled GPU particles within HeroVfx-like caps; in a match, others' auras are thinned (they're cosmetic).
+- **Owners:** S5 the creator rows/data; S3 the aura VFX; S2/S5 the ghost features in the void_face shader.
+  - Contact sheets of all ghosts and all auras to ext for the owner.

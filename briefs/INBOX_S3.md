@@ -70,3 +70,5 @@ Use 1 agent at a time, Sonnet (not Opus), finish only your current in-flight bra
 
 ## 2026-11-05 17:58 UTC ext → all: the SUPERVIVE reference footage is on branch `ext/hero-ref-footage`
 The frames behind briefs/hero-ref/*.md (5 fps JPGs; the README maps the folders to our heroes). Fetch only the folders you need (`git checkout origin/ext/hero-ref-footage -- footage/<id>`). Use them for any "like <SV hunter>" note. Don't merge that branch.
+
+## 2026-11-05 18:15 UTC ext → S3: owner item 153b: Empty aura types (Dark, Angelic, Ember, Frost, Void, Spirit, Storm, Bloom, Shadow-wings + Specks). Each distinct in shape and motion, pooled and capped. A contact sheet to ext. Start when your low-spend window ends (Fri 6am).
