@@ -47,14 +47,19 @@ def C(name, dur, keys, loop=False, base=READY):
 
 
 def idle(u):
-    a, b = math.sin(u * 2 * math.pi), math.cos(u * 2 * math.pi)
+    """Never quite still: her weight rolls from one hip to the other, the shoulders answering, a head tilt, a toe tap on the off beat."""
+    a = math.sin(u * 2 * math.pi)
+    b2 = math.sin(u * 4 * math.pi + 0.6)
     p = dict(READY)
-    p["pel"] = (0.022 + 0.008 * b, 0.0, -0.022 - 0.005 * a)
-    p["prt"] = (0.03, -0.1, -0.05 - 0.018 * b)
-    p["tor"] = (0.0 + 0.012 * a, 0.14, 0.05 + 0.012 * b)
-    p["hed"] = (0.02 - 0.012 * a, -0.08 + 0.04 * math.sin(u * 4 * math.pi), 0.09)
-    p["G"] = (0.215, 0.05, 1.0 - 0.006 * a)
-    p["LP"] = (-0.235, 0.055, 0.985 - 0.006 * a)
+    p["pel"] = (0.024 + 0.036 * a, 0.0, -0.026 - 0.006 * b2)
+    p["prt"] = (0.03, -0.1 + 0.07 * a, -0.05 - 0.12 * a)        # the hip rolls over the leg she stands on
+    p["tor"] = (0.012 * b2, 0.14 - 0.07 * a, 0.05 + 0.1 * a)    # the shoulders go the other way
+    p["hed"] = (0.02 - 0.015 * b2, -0.08 + 0.05 * math.sin(u * 2 * math.pi + 1.0), 0.09 - 0.05 * a)
+    p["G"] = (0.215 + 0.022 * a, 0.05, 1.0 - 0.01 * b2)
+    p["LP"] = (-0.235 + 0.022 * a, 0.055, 0.985 + 0.01 * b2)
+    tap = max(0.0, math.sin((u - 0.66) / 0.2 * math.pi)) if 0.66 < u < 0.86 else 0.0
+    p["FR"] = (0.115, -0.06, A_Z + 0.022 * tap)
+    p["FRp"] = 0.32 * tap
     p["lidL"] = p["lidR"] = 1.0 if 0.60 < u < 0.63 else 0.12
     return p
 
@@ -79,7 +84,7 @@ def gait(k, heading):
 
     def foot(ph, sx):
         ph %= 1.0
-        base = Vector((sx * 0.085, 0, A_Z))
+        base = Vector((sx * (0.085 - 0.04 * (1 - k) * fwd), 0, A_Z))      # a narrow, one-foot-before-the-other walk
         if ph < share:
             s, z, pit = 1 - 2 * ph / share, 0.0, 0.0
         else:
@@ -97,11 +102,13 @@ def gait(k, heading):
         h = math.radians(heading) * 0.45
         p["FRy"], p["FLy"] = -0.08 + h, 0.08 + h
         s2, c1 = math.sin(u * 4 * math.pi + 0.5), math.cos(u * 2 * math.pi)
+        s1 = math.sin(u * 2 * math.pi)                        # + mid-stance on the right foot, - on the left
         lean = (0.08 + 0.26 * k) * fwd - 0.1 * back
-        p["pel"] = (0.03 * c1, 0.02 * k * fwd, -0.03 - 0.03 * k + (0.016 + 0.024 * k) * s2)
-        p["prt"] = (lean * 0.5, 0.2 * c1 * k, -0.06 * c1)                     # all hip
-        p["tor"] = (lean * 0.7, -0.34 * c1 * k, 0.04 * c1)
-        p["hed"] = (-lean * 1.05, 0.14 * c1 * k, -0.02 * c1)
+        sway = 1.0 - 0.55 * k                                 # the swagger is the walk's; a run tucks it in
+        p["pel"] = (0.042 * s1 * sway, 0.02 * k * fwd, -0.03 - 0.03 * k + (0.02 + 0.02 * k) * s2)
+        p["prt"] = (lean * 0.5, 0.2 * c1 * k + 0.16 * c1 * sway, -0.15 * s1 * sway)      # the stance hip rides up
+        p["tor"] = (lean * 0.7, -0.34 * c1 * k - 0.2 * c1 * sway, 0.1 * s1 * sway)        # the shoulders answer it
+        p["hed"] = (-lean * 1.05, 0.14 * c1 * k + 0.1 * c1 * sway, -0.05 * s1 * sway + 0.05)
         amp = 0.12 + 0.22 * k
         p["G"] = (0.21, 0.04 - amp * c1, 1.02 + 0.08 * k + 0.05 * k * max(0, c1))
         p["LP"] = (-0.21, 0.04 + amp * c1, 1.02 + 0.08 * k + 0.05 * k * max(0, -c1))
@@ -109,7 +116,7 @@ def gait(k, heading):
         p["LBE"] = ((-0.15, 0.3 + 0.8 * c1 * k, -1), (0, 1, 0.3))
         p["skirt"] = 0.3 * c1 * k
         p["lidR"], p["lidL"] = 0.12, 0.12
-        p["smile"] = 0.55
+        p["smile"] = 0.8
         return p
     return fn
 
