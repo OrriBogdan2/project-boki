@@ -36,7 +36,10 @@ func _run(m: Match, P: Hunter, frames: int, seen: Dictionary) -> float:
 	var top := 0.0
 	for f in frames:
 		_frame(m, P)
-		seen[_clips(P).cur] = true
+		var c := _clips(P)
+		seen[c.cur] = true
+		if c.up_w > 0.5:
+			seen[String(c._node("anim_u").animation)] = true
 		top = maxf(top, _flare(P))
 	return top
 
@@ -67,6 +70,9 @@ func run(main: Node) -> void:
 	K._release_rmb()
 	_run(m, P, 50, seen)
 	ok(seen.has("rmb_hold") and seen.has("rmb"), "Storm Rod plays its hold and its throw")
+	K.on_dash(false)
+	_run(m, P, 90, seen)
+	ok(seen.has("dash") or seen.has("dash_go"), "Wirerun plays its clips")
 	K.cast_e()
 	_run(m, P, 150, seen)
 	ok(seen.has("sky"), "Skycall plays sky")
