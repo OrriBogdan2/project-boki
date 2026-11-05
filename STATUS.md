@@ -1009,3 +1009,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Kit side for 136 doesn't exist yet. Ready for it: ostra_flurry (0.90 s, upper body, cards from 0.08 s, 8 by 0.64; the kit only needs play("ostra_flurry")); ostra_orb alternates hands in the clip layer, but true alternating fire needs the kit to spawn at anchor_hand_l every other shot.
 - Void card prop: VoidCard.make() in scripts/heroes/void_card.gd, 0.11 x 0.16 m, 1.8x in flight, long edge along -Z.
 - Item 136b's orb look (3-option strip) is S3's VFX, not done.
+
+## 2026-11-05 20:05 UTC S2: ext/art1-motley 4dae63dc pushed: polish + item 136 art half, not READY yet
+- Contains item 117 (kit-ostra-60-75 66a9c6f2). No weapon: palm cast points, flurry and alternating orb clips, VoidCard prop. 13,821 tris. No Kael art, merge-tree clean with main.
+- Lane scores about 75. I viewed the match strip and hand-cast shots: he reads well, the ruff and hat are very clear, and the cards are lilac rather than the sheet's deep violet.
+- Blocks READY: no full suite since item 117 and the polish, and --bot-sanity is still open. Kit half of 136 is S5's: until then RMB still plays the Snap, and shots leave the right hand only.
+- Default (alternative in brackets): the void orb the sheet shows in his hand is dropped per item 136, so his hand is empty apart from the charge glow [keep a small orb]. The fan of cards stays.
+- Shots: hero-shots-s2 art1/motley/.
