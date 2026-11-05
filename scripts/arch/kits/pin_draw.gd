@@ -17,13 +17,13 @@ extends RefCounted
 ##   until its stage 1 (no extra damage), a brief gold fletch burst with a ring at the bow.
 ## - Overdraw: held overdraw_t past the last stage, the arrow does overdraw_k of its damage.
 
-const LINE_A := 0.35           # the faint resting aim line's strength
+const LINE_A := 0.8            # the thin aim line's strength (a paler red, it has to show on grass at the match zoom)
 const FILL_START := 0.6        # m ahead of Hem where the filling line begins
 const MIN_LEN := 2.5           # m: the shortest the filling line runs, so a short aim still reads
 const SUPER_COL := Color("fff6f0")
 const FLASH_R := Vector2(0.5, 0.32)  # m: the circle's flash, as it pops and as it settles over the window
 const MARK_R := 0.22           # m: the quiet circle
-const REST_LW := 0.03         # m: the thin line under the fill
+const REST_LW := 0.045        # m: the thin line under the fill
 const TGT_COL := Color("d8ff6a")
 
 var k: ArcherKit
@@ -114,7 +114,7 @@ func tick() -> void:
 	var s := stage_t()
 	var col := Color(String(k.d.get("color", "#e8483e")))
 	if h.wpn.has("draw") and not drawing and k.tells_visible() and h.can_fire():
-		AimKit.line(h, "draw_rest", {"from": line_start(), "alpha": LINE_A, "col": col, "lw": REST_LW})
+		AimKit.line(h, "draw_rest", {"from": line_start(), "alpha": LINE_A, "col": col.lightened(0.35), "lw": REST_LW})
 	if drawing:
 		if was < s.x and t >= s.x:
 			k.m.sfx("pin_stage", h.pos, -6.0 if h.is_local() else -10.0)
@@ -162,9 +162,10 @@ func _reticle(t: float, s: Vector2, col: Color) -> void:
 	var cur := cursor_len()
 	if t < s.y:
 		# the filling line: the faint line to the cursor with the bright fill growing out of Hem along it
-		AimKit.line(h, "draw", {"from": o, "len": cur, "col": col, "alpha": LINE_A, "lw": REST_LW, "arrow": false})
-		var bright := {"from": o, "len": maxf(0.05, cur * fill_frac(t)), "col": col, "hot": 0.7, "lw": 0.09}
-		bright["alpha"] = 1.3
+		var thin := {"from": o, "len": cur, "col": col.lightened(0.35), "alpha": LINE_A, "lw": REST_LW}
+		thin["arrow"] = false
+		AimKit.line(h, "draw", thin)
+		var bright := {"from": o, "len": maxf(0.05, cur * fill_frac(t)), "col": col, "lw": 0.16, "alpha": 1.4}
 		bright["arrow"] = false
 		AimKit.line(h, "draw_fill", bright)
 		tgt = null
@@ -173,9 +174,9 @@ func _reticle(t: float, s: Vector2, col: Color) -> void:
 		AimKit.hide(h, "draw_fill")
 		var over := t > over_t()
 		var rng := float((wpn_draw()[-1] as Array)[2]) if not wpn_draw().is_empty() else 16.0
-		var far := {"from": o, "len": rng - FILL_START, "col": SUPER_COL, "lw": 0.09, "hot": 0.25, "alpha": 1.3}
+		var far := {"from": o, "len": rng - FILL_START, "col": SUPER_COL, "lw": 0.11, "hot": 0.25, "alpha": 1.3}
 		if over:
-			far.merge({"col": Color("b8a8a4"), "lw": 0.03, "hot": 0.0, "alpha": 0.45}, true)
+			far.merge({"col": Color("e8d8d4"), "lw": 0.03, "hot": 0.0, "alpha": 0.55}, true)
 		AimKit.line(h, "draw", far)
 		tgt = _under_line(rng)
 		if tgt != null and not over:

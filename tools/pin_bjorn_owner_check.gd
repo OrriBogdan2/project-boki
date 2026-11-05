@@ -207,8 +207,8 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var cue: Dictionary = AimKit.reticle(P)
 	ok("pin readout: no V and no UI: no cursor ring, no flare, no bow glint, all through the draw",
 		float(cue["charge"]) < 0.0 and float(cue["flare"]) == 0.0 and not K.fx.bow_glint.visible
-			and not AimKit.shown(P, "draw_mark2"),
-		"%s glint %s" % [str(cue), K.fx.bow_glint.visible])
+			and K.chg.is_empty() and not AimKit.shown(P, "draw_mark2"),
+		"%s glint %s chg %s" % [str(cue), K.fx.bow_glint.visible, str(K.chg)])
 	step(m, K.draw.perfect_t() + 0.1, aim)
 	ok("pin readout: after the last window the circle goes", not AimKit.shown(P, "draw_mark"), "t %.3f" % P.draw_t)
 	step(m, 0.2, aim)
