@@ -379,3 +379,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - art-integ READY fe51b43b (= origin/main sync91; the frozen art tree was already merged by sync91). Full suite 0 failures, health --strict OK. Posted in EXT_TO_MAIN dd37786d.
 - Kael accuracy pilot a3 (ext/warden-3d-kael-acc a0c8c098): face 45->62, dark 45->58, match 64->62; not READY, owner's call. EXT_TO_MAIN f444c3a3.
 - Hunter improvement agents ended with the session exit; branches are intact. Restarting for follow-up syncs.
+
+## 2026-11-05 S2: switched to the 00:40 order (new account, up to 8 agents)
+- Lanes running: ART-1 Kael ext/art1-kael (pilot), Tarek ext/art1-tarek, Breaker ext/art1-breaker (76b folded in); ART-2 Kael ext/art2-kael; BOKI starter ext/boki-starter; kits ext/kit-sable-53-54, ext/kit-hem-55b, ext/kit-kael-57.
+- Next as slots free: kits Breaker 59, Ostra 60+75, Tarek 61+67, Cinder 66, Vex 68, gloves 69, glider 63; Claire 62+64+65 from ext/claire-62-65 @ 92ad07b0. 98/99/101/105 dropped (S4).
+- READY for the follow-up sync (each merged with sync91): Dredge r3m abf5f812, Breaker s6 db5d2f7b, Sable s9 521ad28a, Ryzz r9 dda04366.
+- The old account hit its spend limit mid-round. Unfinished, unverified rounds are saved on ext/wip-<hunter> for vex, dredge, ryzz, sable, hem, tarek, breaker, ostra, claire, cinder, pip. Not READY; do not merge. READY branch tips are unchanged.
+- Note: the brief's docs/CREDITS.md doesn't exist; lanes log assets in docs/ASSET_CREDITS.md. Godot queue already has 14 slots.
