@@ -1061,10 +1061,13 @@ class Springs:
 				var r: Transform3D = rest[j]
 				var a := inv * pts[j]
 				var from := ((rest[j + 1] as Transform3D).origin - r.origin).normalized()
+				if ch["hang"]:       # (off the model's own rest, not the parent's: the fist's turn doesn't twist the hook edge on)
+					r = skel.get_bone_global_rest(int(ids[j]))
+					from = (skel.get_bone_global_rest(int(ids[j + 1])).origin - r.origin).normalized()
 				var to := (inv * pts[j + 1] - a).normalized()
 				var c := from.dot(to)
 				var q := Quaternion.IDENTITY
-				if c <= -0.999:      # (a raised arm flips a hanging chain end for end: Quaternion(from, to) has no answer there)
+				if c <= -0.999:      # (a chain flipped end for end: Quaternion(from, to) has no answer there)
 					var side := Vector3.RIGHT if absf(from.x) < 0.9 else Vector3.FORWARD
 					q = Quaternion(from.cross(side).normalized(), PI)
 				elif c < 0.99999:
