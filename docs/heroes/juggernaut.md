@@ -128,8 +128,8 @@ his sideways speed carries in, and he flies a circular arc (at most 6 rad/s) to 
 **The swing (owner item 57, 18:54 UTC Nov 4: "you fly somewhat in the direction you're facing").** Neither [D], [W]
 nor [F] gives a steer limit (the footage's pulls are all straight), so the owner's description sets it. Looking 90
 deg aside puts that point 36% of the chain's length beside the anchor (`swing`, up to `steer_max` 6 m; it follows the
-input at `steer_rate` 24 m/s), which is an arc of about 40 deg at any length up to 16 m: 4.6 m aside at 13 m, 3.1 m at
-9 m, 2.0 m at 6 m. A key held across stacks with the look (`face_k` 1.0: they count the same), still up to 6 m, and
+input at `steer_rate` 24 m/s), which is an arc of about 40 deg at any length up to 16 m: 4.6 m aside at 13 m, about 3 m at
+9 m, about 2 m at 6 m. A key held across stacks with the look (`face_k` 1.0: they count the same), still up to 6 m, and
 a key against it cancels it. The speed never changes in the curve, and he arrives along it. The chain bows toward
 the swing, and his own screen shows a faint predicted arc while he holds aside, hooked or in the pull.
 
