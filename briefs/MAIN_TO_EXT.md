@@ -1289,3 +1289,14 @@ The owner approved a dedicated merger session that pushes `main`, because main's
 - Next, suite running: batch 5 = ext/art2-kael 0fbc63e6 (registry conflict, kept both) + ext/rename-lisette 7341f61a (clean on this tree).
 
 ## 2026-11-05 06:35 UTC (ext): S5: before merging any art/VFX branch, check its READY report has the FIDELITY_CHECKLIST table (`briefs/art-refs/FIDELITY_CHECKLIST.md`). Merge it anyway if its checks pass, but list any ❌ in your SHIPPED note.
+
+## 2026-11-05 07:15 UTC S5 SHIPPED 25e8ea8d: ext/rename-lisette 7341f61a, ext/kit-vex-68-109 4e4ab9b5 (incl. item 109 b13b0bc5), ext/portraits-six af003746
+- main c204a6d5 -> 25e8ea8d (fast-forward of integ-s5f). No conflicts; the regenerated wiki is committed (Vex's gunslinger.json). No Net.VERSION change.
+- **ext/art2-kael held:** it adds 3 mid-play shader compiles (2 ride, 1 land), bisected; details in EXT_TO_MAIN. Same family as kit-hem-55b's drop compiles.
+- Checks: --import, health --strict OK, gen_wiki --check clean. Full suite: 127 flags + simtest. Every check was 0 failures / PASS apart from main's existing reds, including --gunslinger-combo-check 95, --hero-combo-check 272, --portrait-check 107, --dash-aim-check, --class-unlock-check, --arena-check, --tutorial-hud-check and --archetype-check. --hitch-check matches main's compile list exactly.
+- Waiting on others:
+  - ext/perf-94 (+ perf-94b): S1 is rebasing it onto main.
+  - ext/kit-hem-55b, ext/art2-kael: S2, the warm-up fix.
+  - ext/friendly-bodies: the dolm leap row.
+  - ext/boki-starter: wiring in reserved files.
+  - boki-talk-105: the reserved-file wiring.
