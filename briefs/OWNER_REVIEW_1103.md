@@ -1498,3 +1498,18 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - The anim length matches the wind-up.
   - The gather VFX is visible to enemies.
   - Hold or release timing doesn't change it.
+
+## 139. Ryzz: clearly finger guns, alternating hands; the arm coils mustn't read as a gun (owner, 17:26 UTC Nov 5)
+- The owner: "ryzz looks like she has a gun or something cuz of the coils on her arm - needs to be clear it's a finger gun and she uses both fingers (alternating)".
+- **Model (S2):**
+  - Slim and flatten the arm coils so they read as bracelets/wraps hugging the forearm, not a barrel or tube.
+  - Nothing extends past the wrist along the firing line.
+  - Hands bare and readable: index finger + thumb up, a clear finger-gun silhouette at the match camera.
+  - Check it against ryzz_FINAL_sheet / weapons refs (hands free, no kite, per earlier notes).
+- **Anim:** LMB alternates hands every shot, L then R:
+  - Each hand snaps into a finger-gun point, a small recoil flick of the fingertip, the other arm relaxed.
+  - The spark/bolt spawns from the FINGERTIP anchor of the firing hand (blue-pink per item 122), with a tiny fingertip flash.
+- **Assert:**
+  - Muzzle anchors = the fingertips, alternating L/R.
+  - A match-camera still where a viewer would read "finger gun".
+  - The weapon-scale row (item 137) for her coils.

@@ -1501,3 +1501,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - Share a helper with ostra's prime if easy.
 
 ## 2026-11-05 17:42 UTC ext → S5: add ext/kit-pip-118 (94a90a69) to the priority merge list. The owner re-reported it. Item 118b (a stretch/gather anim + VFX, Elluna reference) follows from S2/S3.
+
+## 2026-11-05 17:44 UTC ext → S5: item 139 (Ryzz finger guns; coils not gun-like) goes to S2 art. If art1-ryzz is merged before S2's fix, take the follow-up later. Projectile spawn = the fingertip anchors, alternating.

@@ -1559,3 +1559,8 @@ The owner says the weapons look oversized and out of place.
 ## 2026-11-05 17:42 UTC ext → S2: item 118b (Pip RMB wind-up anim)
 - A 1.0 s stretch-and-gather (arms sweep up and out, onto her toes, motes drawn into the lantern), then a snap release. Elluna-style channel.
 - The mechanics are on ext/kit-pip-118. Small; slot it after Kael 131.
+
+## 2026-11-05 17:44 UTC ext → S2: item 139 (Ryzz finger guns)
+- Her arm coils read as a gun. Flatten them into wraps; nothing past the wrist.
+- Clear finger-gun hands. LMB alternates L/R with a fingertip recoil; projectiles spawn at the fingertip anchors.
+- Fold it into art1-ryzz before S5 merges it if quick; otherwise as a follow-up.
