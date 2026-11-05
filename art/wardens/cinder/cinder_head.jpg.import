@@ -3,18 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bwaoh2jd87arl"
-path="res://.godot/imported/cinder_head.jpg-7758f57c7f7e14f3419aff1281f76344.ctex"
+path.bptc="res://.godot/imported/cinder_head.jpg-7758f57c7f7e14f3419aff1281f76344.bptc.ctex"
+path.astc="res://.godot/imported/cinder_head.jpg-7758f57c7f7e14f3419aff1281f76344.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "15705c52631ba2dfbcaf1faf81a12c8a"
+"md5": "c20a087dd9e1d4e439ac8b34ac7ddda5"
 }
 
 [deps]
 
 source_file="res://art/wardens/cinder/cinder_head.jpg"
-dest_files=["res://.godot/imported/cinder_head.jpg-7758f57c7f7e14f3419aff1281f76344.ctex"]
+dest_files=["res://.godot/imported/cinder_head.jpg-7758f57c7f7e14f3419aff1281f76344.bptc.ctex", "res://.godot/imported/cinder_head.jpg-7758f57c7f7e14f3419aff1281f76344.astc.ctex"]
 
 [params]
 

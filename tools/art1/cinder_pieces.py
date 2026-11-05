@@ -373,7 +373,7 @@ def hair():
     for i, (az, ln, w) in enumerate(crown):
         a = np.radians(az)
         back = i >= 5
-        p0, d0 = _on_skull(np.radians(112 if back else 70), a)
+        p0, d0 = _on_skull(np.radians(128 if back else 96), a)        # (behind the goggles)
         o = norm(d0 * 0.34 + np.array([0, -0.16, 1.0]))
         side = norm(np.cross(o, (0, 1, 0)) + 1e-6)
         k_ = 0.05 * (1 if i % 2 else -1)
