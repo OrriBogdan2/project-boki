@@ -475,6 +475,16 @@ OUTC[ys, xs] = P.scan_grade(np.clip(col, 0, 1), pp, AO[ys, xs].astype(np.float64
 dm = np.linalg.norm(pp - K.MARK_OFF, axis=1)
 near = OUTC[ys, xs][(dm > 0.012) & (dm < 0.018)].mean(0)
 OUTC[ys[dm < 0.012], xs[dm < 0.012]] = near
+# the master's black eyes, the glints kept; her one beauty mark, a touch stronger
+cc_ = OUTC[ys, xs].astype(np.float64)
+for s_ in (1.0, -1.0):
+    ec = K.eye_c(s_)
+    q_ = np.hypot((pp[:, 0] - ec[0]) / K.EYE_W, (pp[:, 2] - ec[2]) / K.EYE_H) * (pp[:, 1] > 0.05)
+    dark = smooth(1.0, 0.7, q_) * (pp[:, 1] > 0.05) * smooth(0.72, 0.5, cc_.mean(1))
+    cc_ = mix(cc_, hexc("#120d1a"), dark * 0.85)
+dmk = np.linalg.norm(pp - K.MARK_ON, axis=1)
+cc_ = mix(cc_, hexc("#2c2138"), smooth(0.0062, 0.0045, dmk))
+OUTC[ys, xs] = cc_
 
 
 def paint(pred, fn):
@@ -485,8 +495,10 @@ def paint(pred, fn):
         OUTC[yy, xx] = fn(POS[yy, xx].astype(np.float64), NOR[yy, xx].astype(np.float64), AO[yy, xx].astype(np.float64))
 
 
-paint(lambda n: n.startswith("palm"), P.glove)
-paint(lambda n: n.startswith(("finger", "thumb")), P.skin)
+# (in the rest pose the pistols and hands hang inside the coat: its occlusion doesn't belong on them)
+free = lambda fn: (lambda p, n, ao: fn(p, n, np.minimum(1.0, ao + 0.65)))
+paint(lambda n: n.startswith("palm"), free(P.glove))
+paint(lambda n: n.startswith(("finger", "thumb")), free(P.skin))
 paint(lambda n: n.startswith("antenna"), lambda p, n, ao: P.feather(p, n, ao))
 paint(lambda n: n == "braid", lambda p, n, ao: P.braid(p, n, ao, br.path))
 paint(lambda n: n == "tuft", P.tuft)
@@ -496,8 +508,8 @@ for q_ in tails:
     paint(lambda n, nm=q_[1].name: n == nm, lambda p, n, ao: P.lining(p, n, ao))
 for w_ in wings:
     paint(lambda n, nm=w_.name: n == nm, lambda p, n, ao, q=w_: P.wing(p, n, ao, q.root, q.along, q.across))
-paint(lambda n: n.startswith(("barrel", "rod", "lock", "cock", "frizzen", "guard", "cap")), P.silver_engraved)
-paint(lambda n: n.startswith("stock"), P.wood)
+paint(lambda n: n.startswith(("barrel", "rod", "lock", "cock", "frizzen", "guard", "cap")), free(P.silver_engraved))
+paint(lambda n: n.startswith("stock"), free(P.wood))
 paint(lambda n: n.startswith("mouth"), P.mouth_glow)
 paint(lambda n: n.startswith("rune"), P.runes)
 paint(lambda n: n.startswith("crystal") or n == "gemstone", P.crystal)

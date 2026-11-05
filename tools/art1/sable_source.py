@@ -123,6 +123,8 @@ for i, (nm, j0, j1, rad, _) in enumerate(SEG):
     qq = P - (a0 + h[:, None] * u)
     d = np.linalg.norm(qq * [0.8, 1.05, 1.0], axis=1) if nm == "torso" else np.linalg.norm(qq, axis=1)
     D[:, i] = d - rad
+    if nm == "torso":
+        D[(np.abs(x) > 0.2) & (Z0 > 1.12), i] = 9.0     # the sleeve's inner side stays on the arm: a bent arm would stretch it back to the waist
     if nm.endswith(".R"):
         D[x < -0.02, i] = 9.0
     if nm.endswith(".L"):

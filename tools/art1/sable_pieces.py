@@ -37,6 +37,7 @@ EYE_W, EYE_H = 0.0295, 0.0125
 BROW = np.array([0.04, 0.097, 1.632])
 MOUTH = np.array([0.023, 0.113, 1.536])
 MARK_OFF = np.array([-0.058, 0.074, 1.575])    # the scan's second beauty mark, painted out: the master has one, on her right cheek
+MARK_ON = np.array([0.058, 0.074, 1.577])
 FACE_X = 0.002
 
 

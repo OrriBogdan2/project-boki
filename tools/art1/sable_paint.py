@@ -10,7 +10,7 @@ LINING = [hexc("#2d1147"), hexc("#46196e"), hexc("#5f2595"), hexc("#7a35b5"), he
 HAIR = [hexc("#8f8a9c"), hexc("#b6b2c2"), hexc("#d5d2dd"), hexc("#ecebf1"), hexc("#ffffff")]
 SKIN = [hexc("#5e5470"), hexc("#7e7492"), hexc("#a097b2"), hexc("#bcb4cb"), hexc("#d6d0e0")]
 SILVER = [hexc("#4c4a58"), hexc("#7b7988"), hexc("#a9a8b5"), hexc("#d3d3dc"), hexc("#fbfbff")]
-WOOD = [hexc("#1f0f14"), hexc("#34191f"), hexc("#4a252b"), hexc("#633440"), hexc("#7f4a55")]
+WOOD = [hexc("#35202a"), hexc("#4c2c36"), hexc("#643b45"), hexc("#7f4f5a"), hexc("#9d6a75")]
 TRIM = hexc("#6a2aa8")
 
 
@@ -35,7 +35,7 @@ def glove(p, n, ao):
 
 
 def silver(p, n, ao):
-    return ramp(np.clip(lit(n, ao) * 1.2 + 0.08, 0, 1), SILVER)
+    return ramp(np.clip(lit(n, ao) * 1.05 + 0.04, 0, 1), SILVER)
 
 
 def silver_engraved(p, n, ao):
@@ -72,7 +72,7 @@ def crystal(p, n, ao):
 
 
 def bola(p, n, ao):
-    t = lit(n, ao) * 1.2 + 0.1
+    t = lit(n, ao) * 1.0 + 0.04
     band = smooth(0.012, 0.007, np.abs(np.modf((p[:, 2] + p[:, 0] * 0.0) * 14.0 + 40)[0] - 0.5) / 14.0 * 3.0)
     return ramp(np.clip(t - band * 0.28, 0, 1), SILVER)
 
@@ -81,7 +81,7 @@ def feather(p, n, ao):
     """White, a fine comb of barbs along the feather, a grey quill."""
     x = p[:, 0] * 520.0 + p[:, 2] * 640.0
     barbs = 0.5 + 0.5 * np.sin(x + 3.0 * fbm(p * 30.0, 2))
-    return ramp(np.clip(lit(n, ao) * 0.85 + 0.42 + (barbs - 0.5) * 0.12, 0, 1), HAIR)
+    return ramp(np.clip(0.74 + lit(n, ao) * 0.26 + (barbs - 0.5) * 0.1, 0, 1), HAIR)
 
 
 def path_u(p, path):
