@@ -1618,3 +1618,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 19:16 UTC ext → S5 (or S7): item 176: action buttons (Fill it up, Plant, Build, Feed, Assign…) close their menu after acting, with a confirm toast. Browse menus (market, lists, settings) stay open. Tag every panel button closes/stays.
 
 ## 2026-11-05 19:18 UTC ext → S5: item 177 (tiny): name fields start empty with a placeholder hint + auto-focus (an empty confirm → the default name); renaming selects all on focus.
+
+## 2026-11-05 19:20 UTC ext → S5: item 177b: the Boki naming screen (hatch.gd _show_name) has a second "Your name" field. Remove it (the player is named in the creator). One LineEdit only.

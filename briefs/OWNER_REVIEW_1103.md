@@ -2231,3 +2231,12 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - On the name stage, the LineEdit text == "" with a placeholder set and focus owned.
   - An empty confirm → the default name.
+
+## 177b. The Boki naming screen asks for YOUR name again: remove it (owner, 18:04 UTC Nov 5)
+- The owner: "why is there two name options after the boki name?"
+- Cause: hatch.gd `_show_name` (~:708) adds a "Your name" row (ye, pre-filled from Save "name") under the Boki's name. You already named yourself in the creator (~:428).
+- **Fix:**
+  - Remove the "Your name" row from the Boki naming screen. _finish takes the saved player name.
+  - The player name is set only in the creator (with item 177's empty-placeholder behaviour) and is editable later in settings/profile.
+  - Also check "Skip the tutorial" on this screen. It's subtext-ish and risky for new players; keep it only as a small link, per the item 155 text diet.
+- **Assert:** the Boki name screen has exactly one LineEdit.
