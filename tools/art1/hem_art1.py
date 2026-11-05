@@ -366,7 +366,7 @@ def main():
         return np.clip(np.maximum(1.15 - d / 0.03, np.maximum(1.0 - mouth / 0.034, 0.9 - nose / 0.03)), 0.02, 1)
 
     part("skin_head", hd, 4000, "head", 3.6, hxf, "head", "skin", head_cull, eye_keep)
-    part("mask", mk, 380, "mask", 2.4, hxf, "head", None)
+    part("mask", mk, 460, "mask", 2.4, hxf, "head", None)
     part("hair", hr, 1400, "hair", 1.4, hxf, "head", None)
     part("lockR", locks["lockR"], 200, "lock", 0.6, hxf, "lockR", "hair")
     part("lockL", locks["lockL"], 200, "lock", 0.6, hxf, "lockL", "hair")
@@ -389,7 +389,7 @@ def main():
     u = (b - a) / np.linalg.norm(b - a)
     side = np.cross(u, (0, -1, 0))
     side = side / np.linalg.norm(side)
-    ar_at = b + u * 0.30 + side * 0.008        # the nock
+    ar_at = b + u * 0.42 + side * 0.008        # the nock
     ar_y = -u
     ar_x = np.cross(ar_y, (0.3, 0.6, 0.74))
     ar_x /= np.linalg.norm(ar_x)
@@ -538,10 +538,12 @@ def main():
             set_verts(ob, p["xf"](vs))
             nrm = (p["xf"](nrm) - p["xf"](np.zeros((1, 3), F)))
         p["nrm"] = nrm
-        if p["name"] == "string":      # (one solid red: every loop on the island's middle, so nothing bleeds in dashes)
-            cu = uv.reshape(-1, 2).mean(0)
-            me.uv_layers.active.data.foreach_set("uv", np.tile(cu, len(uv) // 2).astype(F))
+        if p["name"] == "scarftailR":  # (a texel in the middle of the scarf's island: the string samples solid red, at every mip)
+            mi = len(idx[0]) // 2
+            mid_uv = ((idx[1][mi] + 0.5) / ATLAS, (idx[0][mi] + 0.5) / ATLAS)
         print("painted", p["name"], len(tri), int(m.sum()), round(time.time() - t0, 1), flush=True)
+    so = next(p["ob"] for p in parts if p["name"] == "string")
+    so.data.uv_layers.active.data.foreach_set("uv", np.tile(np.array(mid_uv, F), len(so.data.loops)))
     img = S.dilate(atlas, mask, 10)
     os.makedirs(WORK, exist_ok=True)
     png = os.path.join(WORK, "atlas.png")

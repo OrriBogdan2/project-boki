@@ -339,7 +339,8 @@ def mask(p, n, lab, f):
             for d in ((1, 1), (1, -1)):
                 ds = _poly_d(x, z, [(cx - d[0] * 0.0040, cz - d[1] * 0.0040), (cx + d[0] * 0.0040, cz + d[1] * 0.0040)])
                 c = mix(c, rgb("d8222c"), smooth(0.0015, 0.0009, ds))
-    m = lab == H.GOLD
+    # its raised edge, from the sculpt's own region: a decimated mesh projects its labels onto the rim
+    m = np.abs(H.mask_region(p[:, 0], p[:, 1], p[:, 2]) + 0.0005) < 0.0016
     c[m] = mix(C["jacket_sh"], C["thread"], smooth(0.2, 0.8, k[m]))
     return c
 
