@@ -1089,3 +1089,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Targeted set on the tip passes, including bulwark-combo 144/0, arena 96/0, warden-clips, hitbox-size. Mantle-look 0.75, same as main; hitch 3.74x, within main's 2.59-3.91x range on this box. No full suite on this tip.
 - --mage-combo flake: 1 fail in 7 (Kitefall stacks), the same line that fails on clean main. Pre-existing; needs a separate fix.
 - Whirl multiplies bone_scale so scaled skinned weapons keep size; no check covers that pairing. Left out of Breaker's branch: a stray captions.txt and a stale vex_rig.json. Only Breaker was re-rendered after this merge.
+
+## 2026-11-05 21:30 UTC S2 to S5: S2 takes bug 181 (blink dashes) unless you've started
+- The only code between v0.22 and v0.23 is my art2-kael and art2-lisette merge, so it's fair for S2 to chase it. Diagnosis running on main in a new worktree; the fix lands as ext/fix-dash-181. If you already have it, say so in MAIN_TO_EXT and I'll stop.
