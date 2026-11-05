@@ -168,9 +168,9 @@ def clips():
     h1 = dict(h0, G=(0.1, 0.48, 1.12), BE=spr(-1, 8, (0.1, -0.5, -0.85)), tor=(0.14, 0.24, 0), prt=(0.1, 0.1, 0), pel=(0, 0.06, -0.06), smile=0.2)
     out.append(C("dart_heavy", 0.18, [(0.0, END), (0.04, h0, "out"), (0.08, h1, "out"), (0.18, dict(h1, G=(0.14, 0.38, 1.08), BE=spr(2, 22, (0.0, -0.55, -0.83))))]))
     # LMB while skating (tm_beam): both hands level the spear straight ahead along the line, the head steady behind it
-    b0 = dict(AIM_G, G=(0.06, 0.40, 1.12), tor=(0.14, 0.0, 0.0), hed=(-0.06, 0.0, 0), brow=0.3, lid=0.1)
-    b1 = dict(b0, G=(0.06, 0.5, 1.14), BE=spr(0, 2, (0.1, -0.5, -0.86)))
-    out.append(C("beam", 0.22, [(0.0, b0), (0.04, dict(b0, G=(0.06, 0.34, 1.12)), "out"), (0.08, b1, "out"), (0.14, dict(b1, G=(0.06, 0.46, 1.13))), (0.22, b0)]))
+    b0 = {"G": (0.2, 0.2, 1.06), "BE": spr(1, 3, (-0.1, -0.5, -0.86)), "Lw": 1.0, "tor": (0.14, 0.0, 0.0), "hed": (-0.06, 0.0, 0), "brow": 0.3, "lid": 0.1}
+    b1 = dict(b0, G=(0.19, 0.28, 1.07))
+    out.append(C("beam", 0.22, [(0.0, b0), (0.04, dict(b0, G=(0.2, 0.16, 1.06)), "out"), (0.08, b1, "out"), (0.14, dict(b1, G=(0.195, 0.25, 1.065))), (0.22, b0)]))
 
     # RMB held (tm_spear_aim, 0.12): the spear drawn level between her hands at her chest, weight on the back blade, the head down and looking along it; a slow breath while it's held
     ai = dict(AIM_G, G=(0.055, 0.36, 1.13), tor=(0.03, 0.06, 0.0), prt=(-0.04, 0.04, 0), pel=(0, -0.035, -0.05), hed=(0.06, -0.02, 0), FR=(0.095, -0.08, A_Z), FL=(-0.08, 0.14, A_Z), FRy=-0.3, FLy=0.1, brow=0.15, lid=0.2, smile=0.25, skirt=-0.1)
@@ -191,12 +191,12 @@ def clips():
     # Shift, the Skate. Go (tm_skate_go, 0.16): the knee sinks and the back blade drives out; a distinct push-off
     sg0 = {"pel": (0, -0.04, -0.12), "prt": (0.3, 0, 0), "tor": (0.16, -0.1, 0), "hed": (-0.26, 0, 0), "FR": (0.1, -0.26, A_Z), "FL": (-0.08, 0.14, A_Z), "FRy": -0.75, "FLy": 0.05, "LP": (-0.36, 0.0, 1.0), "LH": (0.3, 0, 0), "skirt": -0.3, "smile": 0.7, "lid": 0.1}
     sg0.update(LOWS)
-    sg1 = dict(sg0, pel=(0.04, 0.09, -0.13), prt=(0.42, 0, 0.1), FR=(0.14, -0.36, A_Z + 0.02), FL=(-0.09, 0.2, A_Z), skirt=-0.4, G=(0.31, -0.08, 0.98), LP=(-0.36, 0.24, 1.07))
+    sg1 = dict(sg0, pel=(0.04, 0.09, -0.13), prt=(0.42, 0, 0.1), FR=(0.14, -0.36, A_Z + 0.02), FL=(-0.09, 0.2, A_Z), skirt=-0.4, G=(0.31, -0.04, 0.98), LP=(-0.36, 0.24, 1.07))
     out.append(C("skate_go", 0.16, [(0.0, END), (0.08, sg0, "out"), (0.16, sg1)]))
     # held (tm_skate, looped every 0.56 s by the kit): long edges, the free leg trailing low, the arms opposed: the kit's speed made calm
     def sk(sw):
         return {"pel": (sw * 0.05, 0.08, -0.115), "prt": (0.4, 0.08 * sw, 0.11 * sw), "tor": (0.1, -0.16 * sw, -0.05 * sw), "hed": (-0.32, 0.12 * sw, 0.05 * sw),
-                "G": (0.31, 0.0 - 0.1 * sw, 0.98), "BE": spr(4, 12 - 3 * sw, (-0.3, -0.5, 0.8)), "LP": (-0.36, 0.16 + 0.12 * sw, 1.08), "LH": (0.25, 0, 0.15),
+                "G": (0.31, 0.0 - 0.04 * sw, 0.98), "BE": spr(4, 12 - 3 * sw, (-0.3, -0.5, 0.8)), "LP": (-0.36, 0.16 + 0.12 * sw, 1.08), "LH": (0.25, 0, 0.15),
                 "FR": (0.09 + 0.1 * max(0, sw), 0.2 - 0.58 * max(0.0, sw), A_Z + 0.03 * max(0, sw)), "FL": (-0.09 - 0.1 * max(0, -sw), 0.2 - 0.58 * max(0.0, -sw), A_Z + 0.03 * max(0, -sw)),
                 "FRy": -0.5 * max(0, sw), "FLy": 0.5 * max(0, -sw), "skirt": -0.35, "skirtz": 0.5 * sw, "brow": -0.15, "lid": 0.1, "smile": 0.8, "fing": 0.1}
     out.append(C("skate", 0.56, [(0.0, sk(1.0)), (0.28, sk(-1.0)), (0.56, sk(1.0))]))

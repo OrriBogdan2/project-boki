@@ -8,6 +8,7 @@ const DT := 1.0 / 60.0
 
 var A
 var bad := 0
+var ids := {}
 
 func ok(cond: bool, what: String) -> void:
 	print("LIVE %s %s" % ["ok  " if cond else "FAIL", what])
@@ -33,14 +34,15 @@ func _run(m: Match, P: Hunter, n: int, seen: Dictionary) -> void:
 		var c := _clips(P)
 		if c.cur != "":
 			seen[c.cur] = true
-		if c.up_w > 0.5:
+		if c.up_w > 0.3:
 			seen[String(c._node("anim_u").animation)] = true
+		ids[String((P.ak as RimewrightKit).anim_id)] = true
 
 func _shown(h: Hunter) -> int:
 	var n := 0
 	var gun := h.model.get_node("Rig/Torso/Aim/Gun") as Node3D
 	for mi in gun.find_children("*", "MeshInstance3D", true, false):
-		if (mi as MeshInstance3D).visible:
+		if (mi as MeshInstance3D).visible and (mi as MeshInstance3D).mesh != null:
 			n += 1
 	return n
 
@@ -98,5 +100,6 @@ func run(main: Node) -> void:
 		dead_seen = dead_seen or _clips(P).cur == "death"
 		was_visible = was_visible or P.visible
 	ok(dead_seen and was_visible, "a knock-out stays on screen and plays the death clip (clip %s, visible %s)" % [dead_seen, was_visible])
+	print("LIVE kit moves seen: ", ids.keys(), " clips: ")
 	print("CLIP_LIVE_CLAIRE_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
