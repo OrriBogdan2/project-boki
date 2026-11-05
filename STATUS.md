@@ -574,3 +574,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 S2: READY ext/rename-lisette 1228b324 (replaces 7341f61a)
 - Strings only, origin/main merged: Lisette the Red Stitch, Motley the Void Jester (he/him), Breaker "the Sunken Bulwark", Grimble the Scrap King. Wiki pages renamed: Class-Sunken-Bulwark, Class-Scrap-King. Ids, file names, art keys and code comments unchanged. No reserved-file lines. Checks 0 failures: import, --check, portrait 107, archetype 339, class-unlock 153, tutorial-hud, hero-title, health --strict, gen_wiki 34 unchanged. No in-game visual pass.
 - Left for a Grimble rewrite: gender is still "robot", the personality text is the old one, and his ult is still "Brass Broadside".
+
+## 2026-11-05 S2: ext/kit-ostra-60-75 bfcf7393 (replaces f55930d5): READY, one owner call before merge
+- Normal merge of origin/main 8f7a33d2, then a patch on main's items 60+75 (13 files, +484/-174). Keeps main's data keys, size x1.9, docs, asserts. **Changes main's shipped balance: held fire goes from charged ~43% (10.27 dmg, ~+15% DPS) to plain 9.0 (DPS unchanged), via charge_from 0.6. Set charge_from 0 to keep main's curve.**
+- Fixes measured on both: 0/5 -> 5/5 orbs reach past a rock when fired pressed against it; point-blank full orb now slows; other clients get the right size and pierce (kind 2); one skin brightening smoothly instead of a jump at 50%; no per-tick weapon dict copy; card.lmb text fixed.
+- Checks: ostra-combo 165/0, hero-combo 263/0, --check 0, health --strict, gen_wiki 34 unchanged, 5 net asserts on the sending side. Full suite not rerun since f55930d5. Not checked: real-speed motion, chime, two real clients, bots using the charge. Placed walls/domes still stop orbs (code read, not asserted).
+- Shots: ext/hero-shots-s2 kits/ostra/.
+- Owner Qs: held fire plain, or main's +15% curve? x1.9 size with hit radius 0.53 m OK? Should placed walls and domes keep stopping orbs?
+- Slot: ART-1 Cinder started.
