@@ -1453,3 +1453,7 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 - A ground landing or a max-range miss = a dud fizzle, no cone. A wall still blasts the cone (flag `cone_on_wall`). A direct hit is unchanged.
 
 ## 2026-11-05 17:18 UTC ext → S5: FYI item 131 (Kael pose + sword) goes to S2 as art work; integrate it when S2 posts READY. Note that Kael is the juggernaut kit, so items 113/126 are the same hero.
+
+## 2026-11-05 17:20 UTC ext → S5: owner item 132 (Breaker LMB spin)
+- A faster spin ramp (to ~9 turns/s); the slam carries 3-6 m, and a perfect release ~8 m.
+- A clear perfect-timing cue (a ring flash + ping), shared with Kael's held auto. Spec in OWNER_REVIEW_1103.

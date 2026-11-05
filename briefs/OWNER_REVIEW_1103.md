@@ -1302,3 +1302,23 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert/screens:**
   - A side-by-side of the in-game sword vs kael_weapons.png.
   - A 4-frame strip of the RMB hold (front + side).
+
+## 132. Breaker LMB hold spin: a faster ramp, carries him further, a clear timing release (owner, 17:15 UTC Nov 5, v0.23.0)
+- The owner: "his spin doesnt spin / ramp up to fast enough speed and doesnt take him far enough - it also needs a 'timing' cast like brall auto and myth auto being held".
+  - "ice guy" = Breaker; the owner knows his look is changing.
+- Today (bulwark.json lmb): full 1.25 s, spin_turns [2.5, 4.0]/s, carry [1.5, 1.8] m, plus a `perfect` launch on the flash.
+- **Change:**
+  - **Ramp:** spin_turns ~[3, 9]/s on an ease-in curve, so it visibly whips up to a blur, with the motion trail thickening and a rising whoosh pitch.
+  - **Carry:** the release slam carries him [3, 6] m (tune).
+    - The perfect-timing release launches further (~8 m) with extra knockback and a "clang" hit-stop.
+    - Momentum is kept into the landing (the same momentum feel as item 126).
+  - **Timing cue,** the same language as Kael's (juggernaut) LMB hold and Myth's held auto:
+    - A charge ring/bar on him that fills and then flashes bright in a short perfect window (~0.18 s).
+    - A distinct ping sound on the window, and the hammer head flaring.
+    - Releasing in the window = the perfect launch. Holding past it = a normal full slam (no penalty beyond losing the bonus).
+    - The cue is readable to the player and subtle to enemies.
+  - Use the same timing-window component for every held auto with a perfect release, so they all read alike.
+- **Assert:**
+  - Turns/s at full ≥ 8.
+  - Normal full carry ≥ 5 m; a perfect release ≥ 7.5 m.
+  - The window fx/sfx fire once per hold.
