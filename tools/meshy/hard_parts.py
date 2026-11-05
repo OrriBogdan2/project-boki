@@ -755,6 +755,16 @@ def wings(spec, body, arm, rig):
     wscale = spec.get("scale", 1.0)
     wscale = [float(wscale), float(wscale)] if not isinstance(wscale, list) else [float(x) for x in wscale]
     objs = []
+    # (one triangulation of the outline, flat in sheet pixels, shared by both cards and layers: ear-clipping each
+    # placed card on its own filled the left card's concave notches, its scalloped edge and inner diagonal, with
+    # the bleed's streaks, b4)
+    bm2 = bmesh.new()
+    vs2 = [bm2.verts.new((px, -py, 0.0)) for px, py in outline]
+    bm2.faces.new(vs2)
+    bm2.verts.index_update()
+    tri = bmesh.ops.triangulate(bm2, faces=bm2.faces[:], quad_method="BEAUTY", ngon_method="EAR_CLIP")["faces"]
+    tris = [tuple(v.index for v in f.verts) for f in tri]
+    bm2.free()
     for side in ("L", "R"):
         sx = -1.0 if side == "L" else 1.0
         root = np.array([abs(root_l[0]) * sx, root_l[1], root_l[2]])
@@ -774,10 +784,12 @@ def wings(spec, body, arm, rig):
 
         for layer in (0, 1):
             vs = [bm.verts.new(place(px, py, layer)) for px, py in outline]
-            f = bm.faces.new(vs)
-            for lp, (px, py) in zip(f.loops, outline):
-                lp[uvl].uv = ((px + 0.5) / tw, 1.0 - (py + 0.5) / th)
-        bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method="BEAUTY", ngon_method="EAR_CLIP")
+            for t in tris:
+                f = bm.faces.new([vs[i] for i in t])
+                for lp, i in zip(f.loops, t):
+                    px, py = outline[i]
+                    lp[uvl].uv = ((px + 0.5) / tw, 1.0 - (py + 0.5) / th)
+        bm.verts.index_update()
         bm.normal_update()
         m = len(outline)
         for f in bm.faces:          # the layer nearer her back faces her, the outer one faces away
