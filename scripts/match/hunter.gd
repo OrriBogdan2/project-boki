@@ -2940,6 +2940,7 @@ func gain_xp(x: float) -> void:
 			m.hud.level_up(lvl, wstep)
 			# the level-up chime: its own rising bell run over a warm swell (tools/gen_level_sfx.py)
 			m.sfx("level_up", null, -2.0, 1.0)
+			if kin is Kin: BokiChatter.say(m, kin, "level_up")
 			level_ups += 1
 	if not is_local():
 		_bot_spend()
@@ -3144,6 +3145,8 @@ func _on_ability_used(caster: Node, _id: String, slot: String) -> void:
 	if caster == self and slot != "dodge" and slot != "primary" and m:
 		cast_at = m.time
 		cast_slot = "ult" if slot in ["ult", "ultimate"] else slot
+	if slot in ["k1", "k2"] and kin is Kin and (caster == kin or caster == self) and is_local() and m:
+		BokiChatter.say(m, kin, "ability")      # its own ability, used by it or through you
 
 func _on_kin_thrown(_k: Node, owner: Node) -> void:
 	if owner == self and m:

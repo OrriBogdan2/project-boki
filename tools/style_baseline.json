@@ -254,8 +254,8 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 221,
-"nested_ternary": 33,
+"long_line": 212,
+"nested_ternary": 29,
 "semicolon": 248,
 "shadow": 3
 },
@@ -266,7 +266,7 @@
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
-"long_line": 41,
+"long_line": 40,
 "nested_ternary": 5,
 "semicolon": 41,
 "shadow": 1
@@ -641,7 +641,7 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 232,
+"long_line": 231,
 "nested_ternary": 21,
 "semicolon": 146,
 "shadow": 9
