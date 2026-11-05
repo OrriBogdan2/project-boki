@@ -1437,3 +1437,6 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 - Her pistols glow for the whole post-dash empowered window (everyone sees it).
 - A much stronger hit sound when the empowered bolt lands.
 - Batch with 119-126.
+
+## 2026-11-05 17:13 UTC ext → S5: owner item 121b
+- Sable Bola carry past the first foe: 3.8 → 5.5 m (the owner is on v0.23.0 and feels it's short). Bundle with 121.

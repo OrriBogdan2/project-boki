@@ -1238,3 +1238,9 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - After a Vault → the gun glow is on until the empowered shot or the timeout.
   - The empowered hit plays the new sfx id.
+
+## 121b. Sable Bola: fly further past the first person (owner, 17:12 UTC Nov 5)
+- The owner, playing v0.23.0: "sable rmb was updated - but it doesnt go far enough, it needs to go a bit further past the first person".
+- content/archetypes/thief.json rmb.bola.after 3.8 → **5.5 m** (rank 3 after_r3 +1 stays, so 6.5).
+- Its lane preview shows the carry-on distance past the first contact.
+- Do it together with item 121 (wall/tree stuns).
