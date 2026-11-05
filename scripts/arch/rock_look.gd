@@ -1,8 +1,8 @@
 class_name RockLook
 extends RefCounted
 ## What Tarek's raised rocks look like (Stone Row, Basalt Spine; owner item 67): a craggy crown of tapered
-## columns in warm earth tones, each tallest column broken off at HeroZones.ROCK_TOP (you stand there), pale
-## sunlit tops that read from the match camera, warm light on the edges, thin molten cracks in the ground at
+## columns in warm earth tones, the main one peaking at HeroZones.ROCK_TOP (you stand there), pale sunlit
+## upward faces that read from the match camera, warm light on the edges, thin molten cracks in the ground at
 ## the foot that cool off, and a soft shadow on the ground. They heave up with dust and a short rumble and,
 ## broken or timed out, crack and crumble into the ground. No other wall in the game looks like it.
 ## The rules (collision, climbing, Net) stay in HeroZones and StoneStand.
@@ -10,57 +10,91 @@ extends RefCounted
 const TOP := HeroZones.ROCK_TOP
 const CRACK_T := 0.6                 # s: a fresh rock's ground cracks cool off
 const CRUMBLE_T := 0.34              # s: a broken rock slumps into the ground
-const STONE := Color("4f3323")       # umber in the cracks and shadows
-const STONE_HI := Color("b5804c")    # warm sandstone on the faces
-const CAP := Color("e6c08a")         # the broken tops, in the sun
-const RIM := 1.1
+const STONE := Color("3d2618")       # umber in the cracks and shadows
+const STONE_HI := Color("96663c")    # warm sandstone on the faces
+const CAP := Color("eccb96")         # the upward faces, in the sun: what the match camera sees most
+const RIM := 0.4
 const RUMBLE_GAP := 0.09             # s: a ridge of rocks rumbles as one, not nine times over
+const SIDES := 6
+# a crag's rings going up: [share of its height, share of its base radius]
+const TIERS := [[0.0, 1.0], [0.36, 0.84], [0.62, 0.72], [0.84, 0.56], [0.94, 0.4]]
 # [x, z, base radius, height under the top, lean]
 const COLS := [
-	[-0.3, 0.05, 0.42, 0.0, -0.06], [0.14, -0.14, 0.38, 0.28, 0.07], [0.42, 0.16, 0.3, -0.12, 0.1],
-	[-0.08, 0.27, 0.3, 0.8, -0.1], [0.58, -0.2, 0.22, 1.15, 0.16], [-0.58, -0.16, 0.24, 1.3, -0.16]
+	[-0.3, 0.05, 0.44, 0.0, -0.06], [0.14, -0.14, 0.4, 0.28, 0.07], [0.42, 0.16, 0.32, -0.12, 0.1],
+	[-0.08, 0.27, 0.32, 0.8, -0.1], [0.58, -0.2, 0.24, 1.15, 0.16], [-0.58, -0.16, 0.26, 1.3, -0.16]
 ]
 
 static var _rumble_at := -9.0
+static var _crags: Dictionary = {}   # column index -> [mesh, material], shared by every rock
 
 static func make() -> Node3D:
 	var n := Node3D.new()
 	_shadow(n)
-	for c in COLS:
-		_column(n, Vector3(float(c[0]), 0, float(c[1])), float(c[2]), TOP - float(c[3]), float(c[4]))
+	for i in COLS.size():
+		var c: Array = COLS[i]
+		var col := Node3D.new()
+		col.name = "Col"
+		col.position = Vector3(float(c[0]), 0, float(c[1]))
+		col.rotation = Vector3(float(c[4]) * 0.6, 0.0, float(c[4]))
+		n.add_child(col)
+		var crag: Array = _crag(i)
+		Models.part(col, crag[0], crag[1])
 	_cracks(n)
 	return n
 
 ## The soft ground shadow: from the match camera it plants the rock on the ground.
 static func _shadow(n: Node3D) -> void:
 	var s := Models.part(
-		n, Models.cyl(1.0, 1.0, 0.01, 18), KitLooks.shade_mat(Color(0.05, 0.03, 0.02, 0.42)), Vector3(0.1, 0.03, 0.05),
-		Vector3(1.15, 1.0, 0.8)
+		n, Models.cyl(1.0, 1.0, 0.01, 18), KitLooks.shade_mat(Color(0.05, 0.03, 0.02, 0.34)), Vector3(0.06, 0.03, 0.03),
+		Vector3(0.95, 1.0, 0.68)
 	)
 	s.name = "Shadow"
 	s.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
-## One column: six-sided, tapering hard to a broken tip, leaning by `lean` (rad) away from the middle, with a
-## pale tilted cap (the part the top-down camera sees).
-static func _column(n: Node3D, at: Vector3, r: float, hgt: float, lean: float) -> void:
-	var tip := r * (0.42 + KitLooks.vis_rng.randf() * 0.18)
-	var col := Node3D.new()
-	col.name = "Col"
-	col.position = at
-	col.rotation = Vector3(lean * 0.6, KitLooks.vis_rng.randf() * TAU, lean)
-	n.add_child(col)
-	Models.part(col, Models.cyl(tip, r, hgt, 6), _stone(), Vector3(0, hgt * 0.5, 0))
-	Models.part(
-		col, Models.cyl(tip * 0.75, tip * 1.1, 0.16, 5), Models.toon(CAP, false, 0.0), Vector3(0, hgt + 0.06, 0),
-		Vector3.ONE, Vector3(0.35, 0.0, -0.25)
-	)
-
-static func _stone() -> ShaderMaterial:
-	var mt := KitLooks.rock_mat(0.3, KitLooks.vis_rng.randf() * 10.0)
+## One crag, built once: rings of jittered points narrowing and wandering upward to a broken peak at its
+## full height, flat-shaded, so the outline is jagged from above and from the side.
+static func _crag(i: int) -> Array:
+	if _crags.has(i):
+		return _crags[i]
+	var c: Array = COLS[i]
+	var r := float(c[2])
+	var hgt := TOP - float(c[3])
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 4100 + i
+	var rings: Array = []
+	var off := Vector2.ZERO
+	for tier in TIERS:
+		var ring: Array = []
+		for s in SIDES:
+			var a := TAU * (float(s) + rng.randf_range(-0.2, 0.2)) / SIDES
+			var rr := r * float(tier[1]) * rng.randf_range(0.82, 1.16)
+			ring.append(Vector3(off.x + cos(a) * rr, hgt * float(tier[0]) * rng.randf_range(0.94, 1.04), off.y + sin(a) * rr))
+		rings.append(ring)
+		off += Vector2(rng.randf_range(-0.05, 0.05), rng.randf_range(-0.05, 0.05))
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_smooth_group(-1)
+	for j in rings.size() - 1:
+		for s in SIDES:
+			var a0: Vector3 = rings[j][s]
+			var a1: Vector3 = rings[j][(s + 1) % SIDES]
+			var b0: Vector3 = rings[j + 1][s]
+			var b1: Vector3 = rings[j + 1][(s + 1) % SIDES]
+			for v in [a0, a1, b1, a0, b1, b0]:
+				st.add_vertex(v)
+	var peak := Vector3(off.x, hgt, off.y)
+	for s in SIDES:
+		for v in [rings[-1][s], rings[-1][(s + 1) % SIDES], peak]:
+			st.add_vertex(v)
+	st.generate_normals()
+	var mt := KitLooks.rock_mat(0.3, float(i) * 1.7)
 	mt.set_shader_parameter("stone", STONE)
 	mt.set_shader_parameter("stone_hi", STONE_HI)
 	mt.set_shader_parameter("rim", RIM)
-	return mt
+	mt.set_shader_parameter("cap_col", CAP)
+	mt.set_shader_parameter("cap", 1.0)
+	_crags[i] = [st.commit(), mt]
+	return _crags[i]
 
 ## Thin glowing cracks in the ground at the rock's foot.
 static func _cracks(n: Node3D) -> void:

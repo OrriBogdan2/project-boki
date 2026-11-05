@@ -225,7 +225,7 @@ func _breah() -> void:
 	var tallest := 0.0
 	for c in (w0["node"] as Node3D).get_children():
 		if c.name.begins_with("Col"):
-			tallest = maxf(tallest, (c as Node3D).get_child(0).position.y * 2.0)
+			tallest = maxf(tallest, ((c as Node3D).get_child(0) as MeshInstance3D).mesh.get_aabb().end.y)
 	ok("item 67: the look reaches the top (tallest column at least the rock's top)", tallest >= float(w0["top"]), "%.2f" % tallest)
 	ok("item 67: every rock has a ground shadow", (w0["node"] as Node3D).get_node_or_null("Shadow") != null)
 	P.teleport(Vector3(mid0.x, top + 0.02, mid0.z))
@@ -242,6 +242,7 @@ func _breah() -> void:
 	ok(
 		"rock (item 25): walking into her own rock lifts her onto it and over, no jump, in 0.6s or less",
 		float(cross["t"]) > 0.0 and float(cross["t"]) <= 0.6 and float(cross["peak"]) >= top - home.y - 0.05
+			and float(cross["peak"]) <= top - home.y + 0.6
 			and not bool(cross["jumped"]),
 		"cross %.2fs peak %.2f top %.2f" % [float(cross["t"]), float(cross["peak"]), top - home.y]
 	)

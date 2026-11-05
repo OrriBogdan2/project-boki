@@ -17,8 +17,8 @@ const CLIMB_MAX := 2.7         # m: how far below the top you can still climb it
 const LAND_SLACK := 0.6        # m: a body this far under the top while falling still lands on it
 const FOOT_K := 0.55           # share of the body radius that must be over the rock to stand on it
 const RISE_V := 8.5            # m/s: the caster's lift up her own rock's face (owner item 67: no slower than before)
-const SETTLE := 0.55           # m under the top where the lift eases off, so it ends at the top instead of throwing you
-const SETTLE_OVER := 0.12      # m: the lift's last carry past the top
+const SETTLE := 0.85           # m under the top where the lift eases off, so it ends at the top instead of throwing you
+const SETTLE_OVER := 0.2       # m: how far past the top it carries you
 const CARRY_K := 0.9          # share of her run speed kept pressing into the face while she rises
 const ON_TOP := 0.05           # m: feet this close to the top count as standing on it
 
@@ -80,9 +80,7 @@ static func climb(h: Hunter, blk: float) -> bool:
 	var into := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"]) - p2
 	if into.length() < 0.01 or (h.inp["move"] as Vector2).dot(into.normalized()) < 0.3:
 		return false
-	var left := rise - World.STEP
-	var lift := RISE_V if left > SETTLE else sqrt(2.0 * Hunter.H_GRAV * (maxf(left, 0.0) + SETTLE_OVER))
-	h.vel.y = maxf(h.vel.y, lift)
+	h.vel.y = RISE_V if rise > SETTLE else sqrt(2.0 * Hunter.H_GRAV * (rise + SETTLE_OVER))
 	h.grounded = false
 	var push := into.normalized() * h.base_speed * CARRY_K      # her walk carries on as she rises: no hard stop
 	h.vel.x = push.x
