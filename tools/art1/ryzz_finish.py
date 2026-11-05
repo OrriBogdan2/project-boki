@@ -266,7 +266,7 @@ names.append("Low")
 for v in me_l.vertices:
     verts.append(tuple(v.co))
     vw.append({gn[g.group]: g.weight for g in v.groups if g.weight > 0.01})
-    rooms.append(1.0)
+    rooms.append(0.0 if v.co.z > K.NECK_Z + 0.03 else 1.0)       # (no ink shell on the sculpt: it breaks into dashes round the eyes and mouth)
 # the scan's forearms sit against the skirt in the rest pose: nothing on an arm follows the hips
 for d_ in vw:
     if d_.get("forearm.R", 0) + d_.get("forearm.L", 0) + d_.get("hand.R", 0) + d_.get("hand.L", 0) > 0.15:
@@ -673,7 +673,7 @@ hd_ = imgio.load(HEAD)
 HU, HE, HM = 402.5, 743.0, 856.0                 # the sheet's face centre, eye line and mouth line (px)
 SU = 95.0 * 1.376 / (2 * EYE_X)                  # its eyes are 131 px apart
 SV = (HM - HE) / (EYE_Z - MOUTH_Z)
-fm = mask & (POS[..., 1] > 0.0) & (NOR[..., 1] > 0.1) & (z_t > K.NECK_Z + 0.04)
+fm = mask & (POS[..., 1] > 0.0) & (NOR[..., 1] > 0.38) & (z_t > K.NECK_Z + 0.04)      # (front-facing only: the sheet has nothing for her cheeks' sides)
 yy_, xx_ = np.nonzero(fm)
 px_, pz_ = POS[yy_, xx_, 0], z_t[yy_, xx_]
 uu_ = HU - px_ * SU
@@ -683,6 +683,7 @@ blue_eye = np.hypot(px_ + EYE_X, pz_ - EYE_Z) < 0.022
 not_hair = (cc_[:, 2] < cc_[:, 0] * 1.0) | blue_eye
 rr_ = np.hypot(px_ / 0.094, (pz_ - (EYE_Z - 0.03)) / 0.125)
 kk_ = (1 - smooth(0.86, 1.0, rr_)) * not_hair
+cc_[blue_eye] = np.clip(cc_[blue_eye] * np.array([0.8, 1.02, 1.3]), 0, 1)     # the blue eye stays clearly blue under the toon light
 OUTC[yy_, xx_] = (OUTC[yy_, xx_] * (1 - kk_[:, None]) + cc_ * kk_[:, None]).astype(np.float32)
 hot_ = (cc_[:, 0] > 0.8) & (cc_[:, 2] > 0.6) & (cc_[:, 1] < 0.45) & (kk_ > 0.5)
 core[yy_, xx_] = False

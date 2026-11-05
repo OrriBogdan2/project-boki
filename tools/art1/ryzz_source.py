@@ -214,7 +214,15 @@ def hidden_thigh(f):
     return all(under[v.index] for v in f.verts)
 
 
-kill = [f for f in bm.faces if past_wrist(f) or hidden_thigh(f)]
+
+
+def bridge(f):
+    """A face from the arm to the body (the scan's sleeve or cuff touches the hip at rest): it stretches as a blade whenever the arm moves."""
+    w_ = [all_arm[v.index] for v in f.verts]
+    return max(w_) > 0.5 and min(w_) < 0.08 and f.calc_center_median().z < 1.08
+
+
+kill = [f for f in bm.faces if past_wrist(f) or hidden_thigh(f) or bridge(f)]
 print("under the skirt", int(under.sum()), "verts;", len(kill), "faces cut")
 bmesh.ops.delete(bm, geom=kill, context="FACES")
 bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")

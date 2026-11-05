@@ -87,7 +87,7 @@ func run(main: Node) -> void:
 	ok(seen.has("ult") and seen.has("ult_air"), "Kitefall plays its crouch and its hang")
 	ok(blaze >= 3.0, "the rods blaze on Kitefall (flare %.2f)" % blaze)
 	_run(m, P, 60, seen)
-	var blown := K.gum.blow()
+	var blown: bool = K.gum.blow()
 	_run(m, P, 80, seen)
 	ok(blown and seen.has("gum"), "she blows and pops her gum")
 	print("LIVE clips seen: ", seen.keys())

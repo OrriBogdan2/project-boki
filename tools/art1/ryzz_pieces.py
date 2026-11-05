@@ -343,9 +343,10 @@ def hand(s):
     a, k, o = np.array([0, 0, -1.0]), np.array([0, 1.0, 0]), np.array([s, 0, 0])
     out = []
     knuck = wrist + a * KNUCK_D
-    cen = np.array([wrist - a * 0.012, wrist + a * 0.026, wrist + a * 0.058, knuck - a * 0.002])
-    wid = np.array([0.031, 0.040, 0.046, 0.044])
-    dep = np.array([0.026, 0.024, 0.023, 0.018])
+    # (the glove's cuff runs up under the hazard band: the scan's arm stops above the wrist)
+    cen = np.array([wrist - a * 0.062, wrist + a * 0.026, wrist + a * 0.058, knuck - a * 0.002])
+    wid = np.array([0.034, 0.040, 0.046, 0.044])
+    dep = np.array([0.031, 0.024, 0.023, 0.018])
     v = []
     SEC = [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 8, endpoint=False)]
     for c, w, d in zip(cen, wid, dep):
