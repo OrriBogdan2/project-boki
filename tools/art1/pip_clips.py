@@ -187,12 +187,12 @@ def clips():
     e2 = dict(e1)
     e2.update({"pel": (0.0, 0.07, 0.015), "G": (0.12, 0.50, 1.05), "LP": (-0.10, 0.50, 1.05)})
     out.append(C("shot_emp", 0.55, [(0.0, END), (0.09, e0), (0.14, e1, "out"), (0.3, e2, "lin"), (0.55, END)]))
-    # Burrseed held: side-on, the left hand's seed cupped by her ear, the lantern out down the lane to sight along; loops
+    # Burrseed wind-up: side-on, the left hand's seed cupped by her ear, the lantern out down the lane to sight along
     s0 = {"pel": (0.0, 0.0, -0.075), "prt": (0.1, 0.9, 0.05), "tor": (0.1, 0.32, 0.03), "hed": (-0.1, -1.0, 0.0), "G": (0.04, 0.46, 0.98), "BE": be((0, 0.3, -0.95), (0, 0.95, 0.3)), "LP": (-0.24, -0.02, 1.08), "Lh": (0.4, 0.4, 0.0),
           "FL": (-0.15, 0.09, A), "FR": (0.15, -0.10, A), "FLy": 0.8, "FRy": 0.5, "brow": 0.7, "lid": 0.1, "ear": 0.1, "fing": 0.9, "wing": -0.1}
     s1 = dict(s0)
     s1.update({"pel": (0.0, 0.0, -0.085), "LP": (-0.24, -0.02, 1.095), "G": (0.04, 0.455, 0.97)})
-    out.append(C("seed_aim", 0.72, [(0.0, END), (0.12, s0, "out"), (0.42, s1), (0.72, s0)]))
+    out.append(C("seed_aim", 1.0, [(0.0, END), (0.2, s0, "out"), (0.62, s1), (1.0, s0)]))     # item 118: the fixed wind-up, ending on the throw's first pose
     # ... let go: a small hop with a two-handed push
     h0 = dict(s0)
     h0.update({"pel": (0.0, -0.05, -0.12), "tor": (0.2, 0.1, 0.0), "LP": (-0.2, 0.02, 0.92)})

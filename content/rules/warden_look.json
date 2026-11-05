@@ -1062,7 +1062,9 @@
 					0.9
 				],
 				"light_neutral_warm": 0.5,
-				"shade": 0.6
+				"shade": 0.9,
+				"ramp": 1.8,
+				"dark_lift": 0.1
 			},
 			"cloth": {
 				"far_lift": 0.15,
@@ -1098,16 +1100,19 @@
 				"far_edge": 0.6
 			},
 			"skin-face": {
-				"fres": 0.05,
-				"top_light": 0.05,
-				"far_lift": 0.08,
-				"sss": 0.12,
-				"shade": 0.5,
+				"fres": 0.03,
+				"top_light": 0.1,
+				"far_lift": 0.1,
+				"sss": 0.1,
+				"shade": 0.93,
 				"albedo": [
 					0.98,
 					1.0,
 					1.0
-				]
+				],
+				"ramp": 1.5,
+				"dark_lift": 0.12,
+				"rim_amount": 0.15
 			}
 		},
 		"lights": [
@@ -1163,9 +1168,9 @@
 		"ink": {
 			"far_thin": 1.0,
 			"color": [
-				0.4,
-				0.18,
-				0.28
+				0.62,
+				0.36,
+				0.42
 			]
 		}
 	}

@@ -127,9 +127,9 @@ armR = lowpoly("armR", armR_f, 500, protect=lambda v: smooth(K.WRIST_Z + 0.02, K
 armL = lowpoly("armL", armL_f, 500, protect=lambda v: smooth(K.WRIST_Z + 0.02, K.WRIST_Z - 0.03, v[:, 2]) * 0.8 + 0.2)
 BODY_FLOWER = (0.0, 0.0, 0.0)
 hv, hf, huv = pickle.load(open(os.path.join(WORK, "head_scan.pkl"), "rb"))    # tools/art1/pip_head_scan.py: head, ears, bandage, goggles, band, flowers
-head = Piece("head", "skin", hv, hf, huv, room=0.25)
+head = Piece("head", "skin", hv, hf, huv, room=0.08)
 bs = pickle.load(open(os.path.join(WORK, "body_scan.pkl"), "rb"))    # tools/art1/pip_source.py
-body = Piece("body", "skin", bs["v"], bs["f"], bs["uv"], room=0.4)
+body = Piece("body", "skin", bs["v"], bs["f"], bs["uv"], room=0.15)
 pieces = [body, armR, armL, head]
 for s_, sd in ((1.0, "R"), (-1.0, "L")):
     # a skin dome behind each eye, slid out through it to shut the eye (the scan's eyes are paint)
