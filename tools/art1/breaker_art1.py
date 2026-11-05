@@ -44,14 +44,17 @@ def ob_from(name, v, q):
     return ob
 
 
-def lowpoly(name, fld, tris, outer=None):
+def lowpoly(name, fld, tris, outer=None, blur=0.0):
     """Surface nets, then a decimate down to `tris`, dropping specks. outer: keep only the side of a thin shell that
     faces away from this field (a mantle over a body), as a clean open sheet: decimating both skins of a thin
     cloth bridges them into tents."""
+    keep_d = fld.d
+    fld.d = S.blurred(fld.d, int(round(blur / fld.vox)))
     v, q = S.surface_nets(fld)
     fn = np.cross(v[q[:, 1]] - v[q[:, 0]], v[q[:, 2]] - v[q[:, 0]])
     cn = v[q].mean(1)
     gr = fld.grad(cn.astype(np.float32))
+    fld.d = keep_d
     if (fn * gr).sum(1).mean() < 0:      # (outward winding)
         q = q[:, ::-1]
         fn = -fn
@@ -99,7 +102,7 @@ def lowpoly(name, fld, tris, outer=None):
             break
         bm = bmesh.new()
         bm.from_mesh(ob.data)
-        bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.004)
+        bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.002)
         bmesh.ops.holes_fill(bm, edges=bm.edges, sides=8)
         bmesh.ops.triangulate(bm, faces=bm.faces)
         bm.to_mesh(ob.data)
@@ -277,27 +280,27 @@ def main():
     print("sculpting", flush=True)
     parts = []
 
-    def part(name, fld, tris, mat, paint, density=1.0, xf=None, group="body", bone="hips", outer=None, **kw):
-        ob = lowpoly(name, fld, tris, outer)
+    def part(name, fld, tris, mat, paint, density=1.0, xf=None, group="body", bone="hips", outer=None, blur=0.0, **kw):
+        ob = lowpoly(name, fld, tris, outer, blur)
         for pr, lab, bn in getattr(fld, "rv", []):      # (the rivets: on the paint's field, not the mesh)
             fld.add(pr, 0.0015, lab, bn)
         p = {"ob": ob, "slot": mat, "paint": paint, "density": density, "xf": xf, "group": group, "f": fld, "f2": None,
-             "aux": None, "name": name, "bone": bone}
+             "aux": None, "name": name, "bone": bone, "blur": blur}
         p.update(kw)
         parts.append(p)
         return p
 
     hl = B.hull(J)
-    part("hull", hl, 2300, "wood", "hull", 1.25)
+    part("hull", hl, 1900, "wood", "hull", 1.25, blur=0.016)
     st = B.straps(hl)
-    part("straps", st, 900, "iron", "iron", 1.1)
+    part("straps", st, 800, "iron", "iron", 1.1, blur=0.004)
     cp, c_at, c_n = B.compass_field(hl)
     part("compass", cp, 200, "brass", "brass", 2.2)
     fc = S.Field(c_at - 0.1, c_at + 0.1, 0.0018)
     fc.add(S.cap(c_at - c_n * 0.012, c_at + c_n * 0.004, 0.074, 0.074), 0.0, 1)
     part("compass_face", fc, 60, "face", "compass", 3.0, centre=c_at, normal=c_n)
     hm = B.helmet()
-    part("helmet", hm, 1100, "brass", "brass", 2.2, bone="head")
+    part("helmet", hm, 1300, "brass", "brass", 2.2, bone="head", blur=0.005)
     ms = B.moss(hl, None)
     part("moss", ms, 1400, "moss", "moss", 1.0)
     mt = B.masts()
@@ -308,8 +311,8 @@ def main():
     for s, n in ((1, "R"), (-1, "L")):
         pd, up, fa, fi = B.arm(J, s)
         part("pauldron" + n, pd, 170, "iron", "iron", 1.1, bone="pauldron." + n)
-        part("upper" + n, up, 180, "wood", "limb", 1.0, bone="upper_arm." + n)
-        part("fore" + n, fa, 620, "wood", "limb", 1.1, bone="forearm." + n)
+        part("upper" + n, up, 180, "wood", "limb", 1.0, bone="upper_arm." + n, blur=0.008)
+        part("fore" + n, fa, 620, "wood", "limb", 1.1, bone="forearm." + n, blur=0.006)
         pf = part("fist" + n, fi, 380, "wood", "limb", 1.2, bone=None, side=n)
         th, sn, ft = B.leg(J, s)
         part("thigh" + n, th, 90, "wood", "limb", 0.8, bone="thigh." + n)
@@ -325,11 +328,11 @@ def main():
     Sh = np.array((-sx - 0.16, 0.0, 0.31), np.float32)
     S_M = lambda p: np.stack((p[:, 1], -p[:, 0], p[:, 2]), 1) + Sh
     hW, hM, hC, zc = B.hammer()
-    part("hammer_wood", hW, 420, "wood", "drum", 1.3, xf=H_M, group="hammer", bone="x_weapon")
+    part("hammer_wood", hW, 380, "wood", "drum", 1.3, xf=H_M, group="hammer", bone="x_weapon", blur=0.008)
     part("hammer_iron", hM, 480, "iron", "iron", 1.2, xf=H_M, group="hammer", bone="x_weapon")
     part("hammer_chain", hC, 620, "iron", "iron", 1.0, xf=H_M, group="hammer", bone="x_weapon")
     sW, sM = B.shield()
-    part("shield_wood", sW, 950, "wood", "door", 1.25, xf=S_M, bone="x_shield")
+    part("shield_wood", sW, 1250, "wood", "door", 1.25, xf=S_M, bone="x_shield", blur=0.005)
     part("shield_iron", sM, 280, "iron", "iron", 1.1, xf=S_M, bone="x_shield")
     fs, lure_at = B.fish()
     part("fish", fs, 320, "soft", "fish", 2.0, bone="x_fish")
@@ -423,7 +426,7 @@ def main():
         tri = lv.reshape(-1, 3)
         f = p["f"]
         if f is not None:
-            nrm = f.grad(vs.astype(np.float32), f.vox * 1.5)
+            nrm = f.grad(vs.astype(np.float32), max(f.vox * 1.5, p.get("blur", 0.0)))
         else:
             me.update()
             nn = np.empty(len(vs) * 3, np.float32)

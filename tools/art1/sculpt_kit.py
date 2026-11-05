@@ -333,6 +333,26 @@ def _tri(d, q):
     return (c00 * (1 - v) + c10 * v) * (1 - w) + (c01 * (1 - v) + c11 * v) * w
 
 
+def blurred(d, r):
+    """A low-pass of a distance grid: three box passes of radius r voxels (the game mesh is cut from this, the paint keeps the
+    detail: a decimate left to the detail spends its budget there and collapses the big forms)."""
+    if r < 1:
+        return d
+    out = d
+    w = 2 * r + 1
+    for _ in range(2):
+        for ax in range(3):
+            pad = [(0, 0)] * 3
+            pad[ax] = (r + 1, r)
+            c = np.cumsum(np.pad(out, pad, mode="edge"), axis=ax, dtype=np.float64)
+            hi = [slice(None)] * 3
+            lo = [slice(None)] * 3
+            hi[ax] = slice(w, None)
+            lo[ax] = slice(0, -w)
+            out = ((c[tuple(hi)] - c[tuple(lo)]) / w).astype(F)
+    return out
+
+
 def surface_nets(fld):
     """The iso surface of a Field as a quad mesh: (verts (N, 3) in metres, quads (M, 4))."""
     d = fld.d

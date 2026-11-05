@@ -33,7 +33,7 @@ def joints(rig_path):
 
 
 def onsurf(fld, pts, off=0.0):
-    p = fld.project(np.array(pts, F), 4)
+    p = fld.project(np.array(pts, F), 14)      # (a point can start well off the surface: 3 cm a step)
     return p + fld.grad(p) * off
 
 
@@ -263,14 +263,14 @@ def moss(hl, pads):
     for i, (x0, fr, zt, zb, w) in enumerate(beards):
         n = 9
         ts = np.linspace(0, 1, n)
-        pts = [(x0 + 0.02 * math.sin(t * 8 + i) * t, 0.5 if fr else -0.5, zt + (zb - zt) * t) for t in ts]
+        pts = [(x0 + 0.02 * math.sin(t * 8 + i) * t, 0.3 if fr else -0.3, zt + (zb - zt) * t) for t in ts]
         pp = onsurf(hl, pts, 0.022)
         f.add(path(pp, [w * (1 - 0.82 * t ** 1.4) for t in ts]), 0.014, MOSS, None, fine)
         # two side tails on the wider ones
         if w >= 0.05:
             for sd in (-1, 1):
                 ts2 = np.linspace(0.2, 0.8, 5)
-                p2 = [(x0 + sd * 0.042 + 0.012 * math.sin(t * 9), 0.5 if fr else -0.5, zt + (zb - zt) * t) for t in ts2]
+                p2 = [(x0 + sd * 0.042 + 0.012 * math.sin(t * 9), 0.3 if fr else -0.3, zt + (zb - zt) * t) for t in ts2]
                 f.add(path(onsurf(hl, p2, 0.016), [0.02 * (1 - 0.8 * (t - 0.2) / 0.6) for t in ts2]), 0.012, MOSS, None, fine)
     return f
 

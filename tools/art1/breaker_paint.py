@@ -120,7 +120,7 @@ def p_hull(p, n, c):
     col = col * (0.8 + 0.42 * vnoise(pid * 3.1, pid * 1.7, pid, 1.0))[:, None]
     # butt joints along each strake
     a = np.arctan2(x, y)
-    butt = smooth(0.012, 0.004, np.abs((a * 1.4 + pid * 0.37) % 1.0 - 0.5) / 1.4) * (kk < 0.5)
+    butt = smooth(0.012, 0.004, np.abs((a * 0.55 + pid * 0.37) % 1.0 - 0.5) / 0.55) * (kk < 0.5) * 0.5
     col = stains(col, p)
     col = mix(col, C("1a110c"), np.maximum(seam, butt) * 0.92)
     col = shade(col, ao, cv * 0.45, n, 0.45, 0.25, (0.6, 0.62, 0.72))
