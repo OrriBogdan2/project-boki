@@ -131,6 +131,8 @@ def add_ob(ob, name, room):
             q = float(smooth(0.68, 0.46, z_)) * float(smooth(0.0, 0.08, abs(x_)))
             d = {"hips": 1 - float(smooth(0.74, 0.62, z_)), "skirt": float(smooth(0.74, 0.62, z_)) * (1 - 0.75 * q),
                  "thigh." + sd: float(smooth(0.74, 0.62, z_)) * 0.75 * q}
+        elif name == "Low" and abs(x_) > 0.212 and z_ < 0.85 and max(d, key=d.get, default="") in ("hips", "root"):
+            d = {"forearm." + ("R" if x_ > 0 else "L"): 1.0}      # (a3 left the wrist's end on the hips)
         elif z_ < K.ANKLE_Z + 0.015:
             sd = "R" if x_ > 0 else "L"
             k = float(smooth(K.ANKLE_Z + 0.015, K.ANKLE_Z - 0.03, z_))
@@ -183,7 +185,7 @@ def base_name(n):
 
 
 def is_tile(n):
-    return n == "cap" or n.startswith(("crown", "temple", "fore", "side", "back", "over", "brow", "chain_", "wrap", "hook", "eye", "core"))
+    return n == "cap" or n.startswith(("crown", "temple", "fore", "part", "side", "back", "over", "brow", "chain_", "wrap", "hook", "eye", "core"))
 
 
 # material per face
@@ -440,8 +442,11 @@ print("source atlas", im.name, sw, sh, SP.mean())
 mask = np.isin(PID, [low_pid, skirt_pid])
 ys, xs = np.nonzero(mask)
 pos = POS[ys, xs].copy()
-mirror = (pos[:, 0] > 0.145) & (pos[:, 2] > 0.86)
+mirror = (pos[:, 0] > 0.145) & (pos[:, 2] > 0.84)
 pos[mirror, 0] *= -1
+# (the left arm's iron band is no skin: that stretch of the sword arm takes the muscle above it)
+band = mirror & (pos[:, 2] < 0.985)
+pos[band, 2] = 0.99 + (pos[band, 2] - 0.84) * 0.5
 hit_i = np.zeros(len(pos), np.int64)
 hit_p = np.zeros((len(pos), 3))
 for i, p in enumerate(pos):
@@ -468,6 +473,25 @@ col = SP[sy, sx]
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 col = np.power(np.clip(col, 0, 1), 0.86) * 1.2
 OUTC[ys, xs] = col
+# the scan's mottling off the skin: a band-stop on the brightness, inside the islands
+def blur(a, m, r):
+    """Box blur of a over the mask m (normalised), radius r."""
+    def box(z):
+        c_ = np.cumsum(np.cumsum(z, 0), 1)
+        c_ = np.pad(c_, ((r + 1, r), (r + 1, r)), mode="edge")
+        c_[:r + 1, :] = 0
+        c_[:, :r + 1] = 0
+        return c_[2 * r + 1:, 2 * r + 1:] - c_[:-2 * r - 1, 2 * r + 1:] - c_[2 * r + 1:, :-2 * r - 1] + c_[:-2 * r - 1, :-2 * r - 1]
+    return box(a * m) / np.maximum(box(m), 1e-3)
+
+
+lum = OUTC.mean(2)
+skin_t = (mask & (OUTC[..., 0] > OUTC[..., 2] * 1.04) & (OUTC[..., 0] < OUTC[..., 2] * 1.7) & (lum < 0.5)).astype(np.float32)
+a_ = blur(lum, skin_t, 7)
+b_ = blur(lum, skin_t, 34)
+flat = np.clip(b_ / np.maximum(a_, 0.03), 0.6, 1.5)
+k_ = 1 + (flat - 1) * 0.8 * skin_t
+OUTC *= k_[..., None]
 # a little of the shared light's occlusion on the scan too
 OUTC[ys, xs] *= (0.62 + 0.38 * np.clip(AO[ys, xs], 0, 1))[:, None]
 # the scan's old pale collar under the new one

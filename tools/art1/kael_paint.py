@@ -67,7 +67,7 @@ def ramp(t, cols):
 
 SKIN = [hexc("#2d1c22"), hexc("#4a2f31"), hexc("#694744"), hexc("#88625a"), hexc("#a98370")]
 CLOTH = [hexc("#1c070d"), hexc("#340d16"), hexc("#4e1520"), hexc("#68202b"), hexc("#84333a")]
-GOLD = [hexc("#6e4410"), hexc("#b57a1c"), hexc("#e6ab34"), hexc("#ffd468"), hexc("#fff0b0")]
+GOLD = [hexc("#5c360c"), hexc("#99621a"), hexc("#c98a2a"), hexc("#e8b24c"), hexc("#ffe08c")]
 IRON = [hexc("#1e1b1f"), hexc("#3a363a"), hexc("#5b5659"), hexc("#7f7a7b"), hexc("#b0abaa")]
 RUST = hexc("#6a3a24")
 
@@ -91,7 +91,7 @@ def face(p, ao):
     avg = sum(K.head_sdf(q + np.array(o) * w) for o in ([1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1])) / 4 - d0
     cav = smooth(0.0, 0.0028, avg)
     ridge = smooth(0.0, 0.0022, -avg)
-    t = (lit(n, np.maximum(ao, 0.9)) + 0.12) * (1 - 0.5 * cav) + 0.16 * ridge
+    t = (lit(n, np.maximum(ao, 0.9)) + 0.12) * (1 - 0.22 * cav) + 0.14 * ridge
     # the socket's deep shadow, and a scowl's line from the nose wing up to the brow
     for s in (-1.0, 1.0):
         r = np.linalg.norm((q - [s * 0.037, 0.08, 0.008]) / [0.03, 1, 0.024] * [1, 0, 1], axis=-1)
@@ -135,10 +135,10 @@ def cowl_cloth(p, n, ao):
     wob = (fbm(p * [9, 9, 3]) - 0.5) * 0.03
     t = lit(n, np.maximum(ao, 0.7)) * 0.86
     a2 = np.sin(a * 3 + 1.0) * 0.012
-    for z0, dip, k in ((1.30, 0.03, 0.6), (1.262, 0.05, 1.0), (1.222, 0.09, 0.9)):
+    for z0, dip, k in ((1.30, 0.03, 0.6), (1.272, 0.045, 0.7), (1.25, 0.06, 1.0), (1.226, 0.085, 0.8), (1.20, 0.1, 0.8)):
         k = k * (0.6 + 0.8 * (fbm(np.stack([a * 2, 0 * a + z0 * 9, 0 * a], -1)) ))
         d = p[..., 2] - (z0 - dip * fr + wob + a2)
-        t = t - k * 0.34 * np.exp(-((d + 0.004) / 0.0065) ** 2) + k * 0.13 * np.exp(-((d - 0.01) / 0.011) ** 2)
+        t = t - k * 0.42 * np.exp(-((d + 0.003) / 0.0042) ** 2) + k * 0.16 * np.exp(-((d - 0.008) / 0.009) ** 2)
     t = t + (fbm(p * 150, 3) - 0.5) * 0.05
     return ramp(np.clip(t, 0, 1), CLOTH)
 
@@ -248,7 +248,7 @@ def crack_map(W=1400, H=1000):
         for i in range(len(ln) - 1):
             n = max(2, int(np.hypot(rows[i + 1] - rows[i], (cols[i + 1] - cols[i] + W / 2) % W - W / 2)))
             k = i / (len(ln) - 1)
-            r = (5.0 + 8.0 * wd) * (1.0 - 0.45 * k)
+            r = (4.5 + 6.5 * wd) * (1.0 - 0.45 * k)
             for q in np.linspace(0, 1, n):
                 rr = rows[i] * (1 - q) + rows[i + 1] * q
                 dc = (cols[i + 1] - cols[i] + W / 2) % W - W / 2

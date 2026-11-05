@@ -70,7 +70,7 @@ kill, skirt = [], []
 for f in bm.faces:
     c = f.calc_center_median()
     hw = max(sum(v[dl].get(h, 0.0) for h in hid) for v in f.verts)
-    loose = abs(c.x) > 0.2 and c.z < 0.76 and all(v[dl].get(hipg, 0.0) > 0.5 for v in f.verts)  # (a3's cut-off hand)
+    loose = abs(c.x) > 0.185 and c.z < 0.8 and any(v[dl].get(hipg, 0.0) > 0.5 for v in f.verts)  # (a3's cut-off hand)
     if c.z > 1.26 or hw > 0.5 or loose or (abs(c.x) > 0.15 and 0.5 < c.z < 0.705):
         kill.append(f)
     elif "cloth" in mname[f.material_index] and c.z < 0.77:
