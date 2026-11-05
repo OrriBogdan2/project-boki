@@ -558,3 +558,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: READY ext/art2-kael dc35f97d (replaces 0fbc63e6 for S5)
 - origin/main 8f7a33d2 merged; only tools/check_registry.gd conflicted, both sides kept. On the tip: hero-vfx OK, juggernaut-combo 154/0, hero-combo 263/0, health --strict OK. Full-suite notes from the earlier entry still apply.
+
+## 2026-11-05 S2: READY FOR OWNER REVIEW: ART-2 Lisette ext/art2-lisette 496a4cb6
+- Contains origin/main 8f7a33d2 + Kael's shared system (dc35f97d), so merge ext/art2-kael first. 35 VFX recipes in content/vfx/archer.json: needle arrows with red-thread trails, missed arrows stay as needles with swaying thread for 4 s, glowing thread bowstring, Heavy Shot thread + stitched lane (HEAVY_SCALE 6.0 kept), Hail Wall needle rain, Spirit Walk thread, Starpiercer and Deadeye stitched seams. New shared looks: thread, string, ribbon, stitched lanes (docs/HERO_VFX.md). 46 sounds, ours, no new CC0.
+- Differs: Spirit Walk, Hail Wall and Starpiercer slot colours changed from green/teal to crimson, **this changes her E arc telegraph's hue: S3 please note**; blue Cremate flames kept; holds and arrow threads are local-only online.
+- Checks on the tip: hero-vfx OK, archer-combo 128/0, hero-combo 263/0, juggernaut-combo 154/0, health --strict, gen_wiki pass. On d2aba3bf: --check, archetype, ability, dash-flow, bot-sanity 0 fail. Full suite (119 flags, 2374effa, before the last fix and main merge): 105 clean; 2 were its own bug, fixed; 2 timeouts passed on rerun; 10 also red on baseline.
+- Merge note: with ext/kit-hem-55b one docs conflict in docs/heroes/archer.md, keep both; clean with ext/art1-hem. Not rendered on the art1 model.
+- Review: sheets on ext/hero-shots-s2 dca0b011 art2/lisette/; MP4 with sound on disk: /home/boki/shots-s2/art2/lisette/lisette_vfx_sound_set.mp4 (44 s). **Sheets and MP4 predate restoring the Heavy release burst**, so it's missing from them. Agent didn't watch the MP4. Sound unheard: -25.9 LUFS, peak -6.9 dBFS. Forward+ untested.
+- Owner Qs: Heavy's head silver to match the needles? 4 s of lingering needles in a busy fight OK? Real voice instead of synthesized grunts?
