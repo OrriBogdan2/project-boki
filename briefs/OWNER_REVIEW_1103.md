@@ -1615,3 +1615,46 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - A 180° cursor flick at the press → the beam fires within 60° of the initial direction (at 90°/s × 0.6 s ≈ 54°).
   - A small tracking adjustment still works.
+
+## 125b. Vex Slipstep ~10% faster (owner, 17:30 UTC Nov 5)
+- Both the tap and the hold, ground and air: the same distances as item 125, ~10% shorter durations (roll_t 0.45 → ~0.41, slide_t 0.55 → ~0.5; air the same ratio).
+
+## 144b. Vex E camera pull scales with aim distance (owner, 17:30 UTC Nov 5)
+- The owner: "if you're hitting someone close range with your E, it shouldn't make the screen pull away; if you're aiming further away it should push the screen out further, but close to you less so, so it's not disorienting".
+- view_zoom 0.25 is applied flat today. Scale the camera push-out by the aim distance:
+  - ~0 for an aim within ~5 m.
+  - Ramping smoothly up to the full 0.25 (or a bit more) at the full 18 m range.
+  - It follows the (turn-capped, item 144) aim point, eased, with no sudden jumps.
+- **Assert:** an aim at 3 m → camera offset ≈0; an aim at 18 m → the full push.
+
+## 121c. Sable Bola: instant cast, no wind-up (owner, 17:31 UTC Nov 5)
+- thief.json rmb.bola.cast 0.4 → 0. It throws on the press.
+- Keep the lane preview only while aiming if the input model needs it; otherwise none.
+- Bundle with 121/121b.
+
+## 145. The little things flying around their head → MOTHS (owner, 17:31 UTC Nov 5)
+- The owner: "the little things flying around their head should be moths, not random squares".
+- Ext's reading: Pip's Kindle stacks shown orbiting a foe's head (her lantern theme: moths drawn to the light).
+- If the squares are actually Sable's Marks or another status orbit, apply the same idea wherever these square orbiters are, and tell ext which it was.
+- Replace the square particles with small moth sprites/meshes: two flapping wing quads, warm-lit wings, a fluttering erratic orbit, the count = the stacks.
+- The VFX is S3's (or S5's).
+- **Assert:** no square orbit particles remain; the moth count tracks the stacks.
+
+## 146. Lisette dash: slightly farther + clearly 2 charges (owner, 17:32 UTC Nov 5)
+- The owner: "stitch should go slightly farther with dash" + "she should also clearly have 2".
+- +~15% dash distance (tune).
+- She has 2 dash charges, shown clearly on the HUD (item 147).
+
+## 147. Dash charges, resets and the dash UI: copy SUPERVIVE (owner, 17:32 UTC Nov 5)
+- The owner: "check how supervive does dash resets, especially where characters like myth or brall have 2 charges. also check their ui for it / if they do it on the bottom etc - i want to copy it".
+- **Research first, using the footage** (now on branch `ext/hero-ref-footage`, folders `pin` = Myth, `juggernaut` = Brall, `venator` = Ghost, etc.; see its README) + briefs/hero-ref/HUD.md:
+  - How multi-charge dashes recharge: one at a time, or all together? Is the gap between uses ~0.4 s (Brall's notes say Quick Dash has 3 charges, 0.4 s between uses)?
+  - How resets show: what refills (one charge or all), and the flash/sound.
+  - Where the charge count is drawn (HUD.md: "small pink pips under the slot"; the old HUD had a circular dash gauge). Is there anything at the character's feet or under the health bar?
+  - Write the findings to briefs/hero-ref/DASH_UI.md with cited frame numbers.
+- **Then implement it to match:**
+  - Charge pips on the Shift slot (and wherever SV shows them).
+  - Recharge behaviour per the findings.
+  - The reset cue matching SV.
+  - Heroes with 2+ charges (Lisette, Cinder 133b, Kael's Rampage, etc.) show them clearly.
+- **Owner:** S5 (UI + DashReset). Post the DASH_UI.md summary to ext before building, so ext can show the owner.

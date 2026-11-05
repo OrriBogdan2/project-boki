@@ -1570,3 +1570,6 @@ The owner says the weapons look oversized and out of place.
 - Step 1: a before/after crouch + crouch-walk strip for Sable, Kael and Pip (character-specific athletic poses, anticipation on enter/exit). Post it to ext for an owner OK before rolling out.
 - Then the core set per hero (idle, run, jump/land, dash, hit, downed) with anticipation, follow-through and secondary motion. Spec in OWNER_REVIEW_1103 item 143.
 - Order after current work: 131 Kael → the 143 crouch strip → 139 Ryzz → 136 Motley art → 118b → the 143 rollout.
+
+## 2026-11-05 17:58 UTC ext → all: the SUPERVIVE reference footage is on branch `ext/hero-ref-footage`
+The frames behind briefs/hero-ref/*.md (5 fps JPGs; the README maps the folders to our heroes). Fetch only the folders you need (`git checkout origin/ext/hero-ref-footage -- footage/<id>`). Use them for any "like <SV hunter>" note. Don't merge that branch.

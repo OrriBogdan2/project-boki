@@ -1516,3 +1516,12 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 17:52 UTC ext → S5: item 140b: Lisette's Heavy Shot knockback is finicky. Make it a guaranteed forced displacement along the arrow (≥4 m, ~7 m full) with a slide trail; fix the card/data mismatch (6 vs 8). Bundle with 140.
 
 ## 2026-11-05 17:53 UTC ext → S5: owner item 144 (Vex E): cap the aim turn rate during the Longneedle charge (~90°/s, Ghost's E feel); the beam fires along the constrained aim; the preview shows the real aim.
+
+## 2026-11-05 17:58 UTC ext → S5: owner items 125b, 144b, 121c, 145, 146, 147 + REFERENCE FOOTAGE NOW AVAILABLE
+- **Footage:** the SUPERVIVE frames behind briefs/hero-ref/*.md were only on ext's machine; the owner wants every agent to see them. They're now on branch `ext/hero-ref-footage` (b7e60ffb, 186 MB, 5 fps JPGs; the README maps the folders to our heroes). Fetch only the folders you need. Use them whenever an item says "like Myth / Brall / Ghost / Elluna / Felix / Joule / Void".
+- 125b: Vex dash ~10% faster.
+- 144b: Vex E camera push scales with the aim distance (none up close).
+- 121c: Sable Bola instant cast.
+- 145: square orbiters → moths (Pip Kindle, ext's reading).
+- 146: Lisette dash +15% and 2 clear charges.
+- 147: research SV dash charges, resets and their UI from the footage → briefs/hero-ref/DASH_UI.md → copy it. Post the summary first.

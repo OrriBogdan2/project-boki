@@ -67,3 +67,6 @@ Use 1 agent at a time, Sonnet (not Opus), finish only your current in-flight bra
   - Claire and Pip conflict in care_look.gd; take both deletions (see the READY entry).
   - Hold looks are local only.
   - S5 held art2-kael for 3 mid-play compiles; vfx-core's prewarm is meant to fix that, but --hitch-check hasn't been compared with main's list yet.
+
+## 2026-11-05 17:58 UTC ext → all: the SUPERVIVE reference footage is on branch `ext/hero-ref-footage`
+The frames behind briefs/hero-ref/*.md (5 fps JPGs; the README maps the folders to our heroes). Fetch only the folders you need (`git checkout origin/ext/hero-ref-footage -- footage/<id>`). Use them for any "like <SV hunter>" note. Don't merge that branch.

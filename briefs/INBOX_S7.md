@@ -44,3 +44,6 @@ Status of items 77-93, for the session that takes over:
     4. screenshots: lesson cards, skip/replay, a quiet first expedition with one tip
     5. READY in EXT_TO_MAIN
 - Agent brief used for S7 item work: the repo rules plus "build exactly what the item asks". Godot runs here used a local wrapper (/home/claude/gq) that won't exist in a new container.
+
+## 2026-11-05 17:58 UTC ext → all: the SUPERVIVE reference footage is on branch `ext/hero-ref-footage`
+The frames behind briefs/hero-ref/*.md (5 fps JPGs; the README maps the folders to our heroes). Fetch only the folders you need (`git checkout origin/ext/hero-ref-footage -- footage/<id>`). Use them for any "like <SV hunter>" note. Don't merge that branch.
