@@ -264,6 +264,8 @@ func _shading(a: String) -> void:
 	var wrong := 0
 	var surfaces := 0
 	var textured := 0
+	var relief := 0
+	var no_relief := 0
 	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		for si in (mi as MeshInstance3D).mesh.get_surface_count():
 			surfaces += 1
@@ -272,6 +274,12 @@ func _shading(a: String) -> void:
 			var atlas := src != null and src.albedo_texture != null
 			if atlas:
 				textured += 1
+			# a .glb's normal map reaches the toon shader (use_nrm, the one path)
+			if sm and sm.shader == Models.HERO and src and src.normal_enabled and src.normal_texture:
+				relief += 1
+				var tex: Variant = sm.get_shader_parameter("normal_tex")
+				if not sm.get_shader_parameter("use_nrm") or tex != src.normal_texture:
+					no_relief += 1
 			# a textured surface shows its atlas; a flat-painted one (hand-modelled, no atlas) its own colour
 			var shows := false
 			if sm and sm.shader == WardenGlb.FLAME:
@@ -287,6 +295,8 @@ func _shading(a: String) -> void:
 	ok(surfaces > 0 and wrong == 0,
 			"%s: all %d surfaces on the hero toon shader (%d with an atlas, rest flat), in the hit flash (%d not)" \
 			% [a, surfaces, textured, wrong])
+	ok(no_relief == 0, "%s: all %d of its normal maps reach the shader (%d lost)" % [a, relief, no_relief])
+	print("WARDENGLB %s normal-mapped surfaces: %d" % [a, relief])
 	m.free()
 
 ## The hit radius and the ring that shows it are the same with the .glb as without, and the .glb brings no
