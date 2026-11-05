@@ -220,6 +220,27 @@ C.bake("x_wind", 0.5, [(0, CARRY), (0.2, merged(UW, pos=(0, 0, -0.05), e="out"))
 C.bake("x_slam", 0.6, [(0, UW), (0.1, merged(IMP, pos=(0, 0.1, -0.06), rot=(-30, 0, 2), gr=sp(-0.14, 0.42, -0.36), gd=(0, 0.45, -0.9), ga=(0, 0.9, 0.45))),
                        (0.2, dict(pos=(0, 0.1, -0.07), rot=(-32, 0, 2))), (0.36, dict(pos=(0, 0.08, -0.06), rot=(-24, 0, 2))), (0.6, merged(STANCE, fra=0.0))])
 
+# ---------------------------------------------------------------------- crouch (item 143): a hammer-brace. The hull sinks and tips
+# forward behind the door held low ahead, the hammer hauled in on his shoulder ready to swing, one foot forward, the helmet up scanning.
+BRACE = merged(CARRY, pos=(0, 0.03, -0.1), rot=(-16, 0, -7), hips=(-3, 0, -4), head=(13, 0, 9),
+               gr=sp(0.03, 0.04, 0.02), gd=(0.06, -0.62, 0.78), ga=(0.05, 0.78, 0.62), er=(1.0, -0.2, -0.6),
+               sh=sl(-0.2, 0.34, -0.36), sn=(-0.3, 0.95, 0.0), su=(0.0, 0.0, 1.0), el=(-0.9, 0.0, -0.5),
+               fr=(AX + 0.03, -0.09, AZ + 0.025), fl=(-AX - 0.02, 0.09, AZ), fra=-18.0, fla=0.0)
+
+
+def scan(t, p):
+    add(p, "head", (0, 0, 16.0 * math.sin(t / 2.4 * tau)))
+    add(p, "pos", (0, 0, 0.004 * math.sin(t / 1.2 * tau)))
+    add(p, "sh", (0, 0, 0.005 * math.sin(t / 1.2 * tau - 1)))
+
+
+C.bake("crouch_idle", 2.4, [(0, BRACE), (2.4, {})], over=scan, loop=True)
+# (the sneak: 2.42 m/s in game, so a planted foot travels back at that: stride x 2 / (period x duty) x his 2.0 size)
+for nm, d in DIRS.items():
+    C.bake("crouch_" + nm, 0.6, [(0, BRACE), (0.6, {})], loop=True, over=gait(0.6, 0.113, 0.035, 0.0, d, 0.01, 5.0, 5.0, 0.03, 0.62))
+C.bake("crouch_in", 0.3, [(0, CARRY), (0.1, merged(BRACE, pos=(0, 0.03, -0.125), e="out")), (0.3, BRACE)])
+C.bake("crouch_out", 0.3, [(0, BRACE), (0.1, dict(pos=(0, 0, 0.012), rot=(-3, 0, -2), e="out")), (0.3, CARRY)])
+
 # ---------------------------------------------------------------------- body states
 JUMP = merged(CARRY, pos=(0, 0, 0.04), rot=(6, 0, 0), head=(-4, 0, 3), sh=sl(0.1, 0.1, -0.28), gr=sp(0.1, 0.16, -0.36), fr=(AX, -0.02, AZ + 0.05), fl=(-AX, 0.05, AZ + 0.09), fra=14.0, fla=10.0)
 C.bake("jump", 0.4, [(0, JUMP), (0.4, dict(fr=(AX, 0.0, AZ + 0.08), fl=(-AX, 0.03, AZ + 0.06)))])

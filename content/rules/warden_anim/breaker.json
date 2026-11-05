@@ -196,5 +196,17 @@
 	},
 	"offset_bones": [
 		"root"
-	]
+	],
+	"crouch": {
+		"idle": "crouch_idle",
+		"walk": {
+			"f": "crouch_f",
+			"b": "crouch_b",
+			"l": "crouch_l",
+			"r": "crouch_r"
+		},
+		"in": "crouch_in",
+		"out": "crouch_out",
+		"speed": 2.42
+	}
 }

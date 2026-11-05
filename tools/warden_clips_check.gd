@@ -148,6 +148,8 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	m.set_meta(WardenClips.WEAPON_OUT, false)
 	_play(m, an, sync, st, 3)
 	ok(sk.get_bone_pose_scale(wp).is_equal_approx(Vector3.ONE), "%s: and comes back" % art_name)
+	if art_name == "breaker":
+		_hammer_scale(w, sk)
 	var tip := WardenGlb.anchor(m, "anchor_hammer_head")
 	ok(tip != null, "%s: an FX anchor rides the weapon" % art_name)
 	var piece := WardenGlb.thrown_piece(m, "hammer")
@@ -163,6 +165,14 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			tris += mesh.surface_get_array_index_len(si) / 3
 	ok(tris <= MAX_TRIS, "%s: %d triangles, the budget %d" % [art_name, tris, MAX_TRIS])
 	m.free()
+
+## Item 137: the hammer on the sheet is 0.79 of his height (breaker_FINAL_sheet, breaker_weapons), neutral size both.
+func _hammer_scale(w: Node, sk: Skeleton3D) -> void:
+	var box := (w.find_child("hammer", true, false) as MeshInstance3D).get_aabb()
+	var top := (w.find_child("anchor_head_top", true, false) as Node3D)
+	var h := sk.get_bone_global_rest(WardenSkeleton.find(sk, "head")).origin.y + top.position.y
+	var k := box.size[box.get_longest_axis_index()] / maxf(h, 0.01)
+	ok(absf(k - 0.79) <= 0.06, "breaker: the hammer is %.2f of his height (sheet 0.79)" % k)
 
 ## The porthole's moods and the fish: cosmetic, off the state and the kit's pokes.
 func _mood(m: Node3D, sync: WardenGlb.Sync, sk: Skeleton3D) -> void:
