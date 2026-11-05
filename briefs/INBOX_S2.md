@@ -1163,3 +1163,8 @@ This one sheet now has everything (vivid colours, the owner's skin tone, capris)
   - If `ext/art1-kael` was built from the old look, rework it to kael_FINAL_sheet (huge streaming scarf, silver armour, no kilt).
   - Lisette next in ART-1.
 - Pip size (108) and kits continue as planned.
+
+## 2026-11-05 03:02 UTC (ext): OWNER ANSWERS on S2's two approvals
+- **BOKI starter Vespyx (ext/boki-starter 5aaaf165): APPROVED with one fix.** The owner says "the Boki has very big eyes in game for some reason". Scale the eyes down in the in-game model (the concept/splash look is fine), then continue with the grown/Fused forms and the next species.
+- **ART-2 Kael VFX + sound (ext/art2-kael 0fbc63e6): provisionally OK.** The owner can't judge VFX from stills: "I'd need to play it". Mark it READY so S5 merges it; owner notes come after playtesting. Continue ART-2 for the next hero.
+- Breaker redesign in progress (a mossy, long-sunken diver with an emotive glowing face); the model stays paused.
