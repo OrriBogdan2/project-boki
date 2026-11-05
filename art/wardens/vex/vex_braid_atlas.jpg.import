@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bppd6i6e2d8et"
-path="res://.godot/imported/vex_braid_atlas.jpg-00c7cbdac5694b98ce43c8e02e4a4027.ctex"
+path.bptc="res://.godot/imported/vex_braid_atlas.jpg-00c7cbdac5694b98ce43c8e02e4a4027.bptc.ctex"
+path.astc="res://.godot/imported/vex_braid_atlas.jpg-00c7cbdac5694b98ce43c8e02e4a4027.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2d88094a12a7141786abd68d91cea601"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/vex/vex_braid_atlas.jpg"
-dest_files=["res://.godot/imported/vex_braid_atlas.jpg-00c7cbdac5694b98ce43c8e02e4a4027.ctex"]
+dest_files=["res://.godot/imported/vex_braid_atlas.jpg-00c7cbdac5694b98ce43c8e02e4a4027.bptc.ctex", "res://.godot/imported/vex_braid_atlas.jpg-00c7cbdac5694b98ce43c8e02e4a4027.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -39,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=0
+process/size_limit=2048
 detect_3d/compress_to=0

@@ -8,7 +8,7 @@ The lamplighter who floats. Stuns from range, drops a growing bomb on the stunne
 |  |  |
 |---|---|
 | Class title | Void Jester |
-| Base character | Ostra, male |
+| Base character | Motley, male |
 | Personality | A sinister, grinning jester who floats a little above the ground and plays with the dark. Menacing and gleeful, he treats every fight as a joke only he gets. |
 
 <!-- /gen:profile -->

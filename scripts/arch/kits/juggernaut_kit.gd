@@ -121,8 +121,7 @@ func cd_k(slot: String) -> float:
 func _enrage_fx() -> void:
 	var rc := res_col()
 	if lunge.is_empty() and slam_w.is_empty() and not rmb_down: play("jug_roar")
-	m.sfx("knock", h.pos, 0.0, 0.6)          # the roar, audible within 25m
-	m.sfx("charge", h.pos, -3.0, 0.45)
+	m.sfx("juggernaut_enrage", h.pos, 0.0, 1.0)          # the growl, audible within 25m
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), "ENRAGED", rc, true)
 	m.fx.burst(h.pos + Vector3(0, 1.2, 0), rc, 30, 6.0, 0.6, -2.0, 1.4)      # flaring off the body (no ground ring)
 	if h.is_local():
@@ -242,7 +241,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		fx().pillar(h.pos, Color("5ae07a"), 3.6, 0.7, 0.75)
 		fx().star(t.pos + Vector3(0, 1.3, 0), Color("ff2a2a"), 3.2, 0.55, Color(1, 0.85, 0.8))
 		m.fx.word(h.pos + Vector3(0, 2.7, 0), "+%d" % int(round(h.hp - hp0)), Color("7fe08a"), true)
-		m.sfx("dj_heal", h.pos, -4.0, 0.8)
+		m.sfx("juggernaut_heal", h.pos, -4.0, 1.0)
 		if h.is_local() and m.hud: m.hud.flash(Color(1, 0.1, 0.05), 0.12)      # the red tint of a kill
 	var key := t.get_instance_id() if is_instance_valid(t) else -1
 	if slam_hit.has(key) and m.time - float(slam_hit[key]) <= float(rmb_def()["slam"].get("reset_t", 2.0)):
@@ -536,7 +535,7 @@ func _rampage(dir: Vector2) -> void:
 	travel(float(dd["dist"]), t,
 			{"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk,
 					"trail": "dust", "dir": dir})
-	m.sfx("jug_dash", h.pos, -4.0 if h.is_local() else -8.0, 1.0)
+	m.sfx("juggernaut_dash", h.pos, -4.0 if h.is_local() else -8.0, 1.0)
 	m.later(t * 0.85, func(): if is_instance_valid(h) and not h.downed: _tip())
 	m.sfx("ab_whirr", h.pos, -4.0, 0.7)
 
@@ -847,7 +846,7 @@ func _tick_lunge() -> void:
 				f.hurt(1.0, h,
 						{"src": "abil", "ab": "utility", "tags": ["utility", "chain_lunge"], "stun": 0.35, "dr": true})
 				m.fx.word(f.pos + Vector3(0, 2.4, 0), "RUN THROUGH", Color("ffcf6a"), true)
-				m.sfx("ab_tether", f.pos, -2.0, 1.3)
+				m.sfx("juggernaut_chain_bite", f.pos, -2.0, 1.0)
 			var dmg := lerpf(float(ld["dmg"][0]), float(ld["dmg"][1]), k) * smash_k() * (1.25 if was_chain else 1.0)
 			var stg := stage("rmb",
 					{"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
@@ -896,7 +895,7 @@ func _chain_lunge(k: float) -> void:
 	lunge = {"end": m.time + t + 0.02, "dir": dv.normalized(), "k": k, "chain": true}
 	play("jug_chainlunge")
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CHAIN LUNGE", Color("ffcf6a"), true)
-	m.sfx("ab_tether", h.pos, -1.0, 0.9)
+	m.sfx("juggernaut_chain_rattle", h.pos, -1.0, 1.0)
 	m.sfx("charge", h.pos, -2.0, 1.1)
 
 ## The pull starting with the Lunge charging: the charge becomes a Haul Slam for the arrival.
@@ -946,7 +945,7 @@ func _haul_land(k: float) -> void:
 	m.fx.burst(at + Vector3(0, 0.4, 0), Color("ffcf6a"), 24, 6.0, 0.5, 6.0, 1.2)
 	m.sfx("ab_slam", at, 0.0, 0.65)
 	m.sfx("boom", at, -4.0, 0.9)
-	m.sfx("ab_tether", at, -6.0, 0.6)
+	m.sfx("juggernaut_chain_rattle", at, -6.0, 0.8)
 	net_ring(at, float(hd["radius"]), Color("ffcf6a"))
 
 ## The reads that aren't a key press: the wounded outlined red while the Smash is ready (yours only),

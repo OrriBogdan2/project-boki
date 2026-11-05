@@ -106,6 +106,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return
 	add_chill(t)
 	if String(o.get("ab", "")) == "fan":
+		m.sfx("rimewright_dart_hit", t.pos, -5.0, 1.0)
 		var key := t.get_instance_id()
 		var e: Dictionary = fan_hits.get(key, {"n": 0, "left": 3.0, "t": t})
 		e["n"] = int(e["n"]) + 1
@@ -116,6 +117,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 			fan_hits.erase(key)
 			# an icy shell closes over them for a beat, then it bursts
 			lk().burst("shell", t.pos, {"dur": SHELL_T + 0.05, "ent": t})
+			m.sfx("rimewright_chime", t.pos, -3.0, 1.0)
 			var at := t.pos
 			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), float(pd["splinter_r"]) * 0.8, t))
 
@@ -329,6 +331,10 @@ func dash_left() -> float:
 func fires_in_dash() -> bool:
 	return in_dash() and String(flow.row("lmb")["mode"]) == "fire"
 
+## She skates along her line and turns to the cursor only while the darts fly.
+func aims_in_dash() -> bool:
+	return fires_in_dash() and bool(h.inp.get("fire", false))
+
 ## No class long dash: Shift is only ever the skate (the HUD shows no long-dash segment for her).
 func has_long_dash() -> bool: return false
 
@@ -352,7 +358,7 @@ func _begin_skate() -> void:
 	var dir := dash_dir()
 	rinkrun = {"t": 0.0, "dir": dir.normalized(), "loop": 0.16, "slab": 0.0}
 	play("tm_skate_go")
-	m.sfx("rime_run", h.pos, -3.0, 1.0)
+	m.sfx("rimewright_dash", h.pos, -3.0, 1.0)
 	# ice kicked back off the pushing blade (no ring: a dash never bursts)
 	m.fx.burst(
 			h.pos + Vector3(0, 0.12, 0), Color("bff7ef"), 10, 3.0, 0.3, 6.0, 0.8, Vector3(-dir.x, 0.5, -dir.y), 30.0)
@@ -407,6 +413,7 @@ func _tick_rinkrun(dt: float) -> void:
 	if float(rinkrun["loop"]) <= 0.0 and stride_free:
 		rinkrun["loop"] = KMovesCare.length("tm_skate")
 		play("tm_skate")
+		m.sfx("rimewright_skate_scrape", h.pos, -5.0, 1.0)     # each stride's blade on the ice
 	_lay_ice(cur, dt)
 
 ## Rank 3: skating over the Abyss lays ice underfoot, a short span just ahead of her every `ice_gap`
@@ -591,8 +598,7 @@ func _release_spear() -> void:
 	var land_y: float = ground(start + Vector3(dir.x, 0, dir.y) * dist).y + 0.1
 	lk().skin(s, "spear", {"dist": dist, "y": land_y, "h": SPEAR_ARC})
 	stats["spears"] += 1
-	m.sfx("rime_lance", h.pos, 0.0, 0.7)          # pitched down: a heavy shaft, not a dart
-	m.sfx("rime_wall_tell", h.pos, -6.0, 0.6)
+	m.sfx("rime_lance", h.pos, 0.0, 1.0)
 	m.fx.burst(start, Color("dffcff"), 8, 3.0, 0.25, 2.0, 0.8, Vector3(dir.x, 0.2, dir.y), 25.0)
 
 ## The spear lands: shards burst up, the slow zone (its real radius) spreads with a spinning crystal and a
@@ -606,7 +612,7 @@ func _spear_land(at0: Vector3) -> void:
 	m.fx.burst(at + Vector3(0, 0.3, 0), Color("bff7ef"), 18, 4.0, 0.4, 8.0, 1.0)
 	m.fx.burst(at + Vector3(0, 0.4, 0), Color(0.9, 1.0, 1.0, 0.6), 10, 1.2, 0.8, -1.0, 2.2)      # the chill puff
 	m.sfx("rime_zone", at, -1.0, 0.85)
-	m.sfx("rime_shard", at, -4.0, 0.6)
+	m.sfx("rimewright_chime", at, -5.0, 0.9)          # the spinning crystal
 	# the landing hit (the source's small area): foes right where it lands take it and a short slow
 	for f in foes_in(at, float(ld["impact_r"])):
 		f.hurt(
@@ -745,6 +751,7 @@ func _freeze_wall() -> void:
 			"flare", Vector3(mid.x, float(w["y"]), mid.y),
 			{"col": Color("e8ffff"), "rim": Color(1, 1, 1), "r": 2.4, "dur": 0.3, "pattern": 2.0})
 	m.sfx("rime_freeze", h.pos, -3.0, 1.0)
+	m.sfx("rimewright_chime", Vector3(mid.x, float(w["y"]), mid.y), -5.0, 1.1)
 
 ## Sliding toward the cursor and widening from a narrow block to its full width; it stops at the
 ## cursor distance, at a cliff or a wall, then stands until its time runs out.

@@ -1,6 +1,6 @@
 extends "res://tools/vv_shots.gd"
-## --ostra-orb-shots --shots-dir=<dir>: item 60's review shots in a live Arena match (xvfb with a renderer),
-## on the Ryzz/Vex shot rig. Strips crop round the orb (or Ostra, for the glow) at gameplay zoom;
+## --ostra-orb-shots --shots-dir=<dir>: items 60 and 117's review shots in a live Arena match (xvfb with a renderer),
+## on the Ryzz/Vex shot rig. Strips crop round the orb (or Motley, for the glow) at gameplay zoom;
 ## <dir>/MANIFEST_ostra.txt gets one line per file. The rock row is a real blocking row with a box drawn on it.
 
 const ROW_X := 4.0           # m east of Ostra: the rock row
@@ -21,6 +21,7 @@ func run(main_node: Node) -> void:
 	K = P.ak
 	await _quick_vs_full()
 	await _glow()
+	await _impacts()
 	_rock_row()
 	await _through_wall()
 	var f := FileAccess.open(dir.path_join("MANIFEST_ostra.txt"), FileAccess.WRITE)
@@ -49,17 +50,20 @@ func _take(kind: String, file: String, caption: String, focus: Callable) -> void
 	_save_strip(strip_file)
 
 ## Fires one orb `wait` s after the last and plays on for `secs`, taking `marks`.
-func _shot(wait: float, secs: float, marks: Array) -> void:
+func _shot(wait: float, secs: float, marks: Array, each := Callable()) -> void:
 	var shots0 := P.shot_n
 	K.last_shot_t = m.time - wait
 	K._set_charge(K.wait_charge())
 	P.fire_cd = 0.0
-	await _go(secs, func(_t): P.inp["fire"] = P.shot_n == shots0, marks, 3.0)
+	var tick := func(_t):
+		P.inp["fire"] = P.shot_n == shots0
+		if each.is_valid(): each.call()
+	await _go(secs, tick, marks, 3.0)
 	P.inp["fire"] = false
 
 func _quick_vs_full() -> void:
 	var file := "orb_quick_vs_full"
-	var cap := "The same moment after the shot: a quick orb (0.6s wait), halfway (1.0s), full (1.4s, x1.9 size)"
+	var cap := "The same moment after the shot: a quick orb (0.6s wait), halfway (1.0s), full (1.4s, x1.9 size and hit)"
 	await _reset(11.0, 3.0)
 	_aim(home + Vector3(8.0, 0, 0))
 	for w in [0.6, 1.0, 1.4]:
@@ -70,6 +74,34 @@ func _quick_vs_full() -> void:
 	await _reset(11.0, 3.0)
 	_aim(home + Vector3(8.0, 0, 0))
 	await _shot(0.6, 0.5, [[0.14, "full", "orb_quick", "A quick orb at gameplay zoom", _orb_at]])
+	for w in [0.6, 1.4]:
+		await _reset(11.0, 3.0)
+		_aim(home + Vector3(8.0, 0, 0))
+		var px := [0.0]
+		var shots0 := P.shot_n
+		await _shot(w, 0.3, [], func(): px[0] = maxf(px[0], _orb_px() if P.shot_n > shots0 else 0.0))
+		print("ORBPX wait %.1f: %.1f px wide at the match camera" % [w, px[0]])
+
+## The orb's drawn width at the match camera, in screen pixels.
+func _orb_px() -> float:
+	var at := _orb_at()
+	var cam := main.get_viewport().get_camera_3d()
+	var mine: Array = m.shots.filter(func(s): return s["by"] == P)
+	var r := float(mine[-1]["r"]) if not mine.is_empty() else 0.0
+	return cam.unproject_position(at + cam.global_transform.basis.x * r).distance_to(cam.unproject_position(at)) * 2.0
+
+## Quick and full on a dummy, a moment after the hit: the impact grows with the charge too.
+func _impacts() -> void:
+	var file := "orb_impact"
+	var cap := "The impact on the dummy, three frames from the hit: a quick orb, then a full one"
+	for row in [[0.6, 30.0], [1.4, 42.0]]:
+		await _reset(5.0)
+		_aim(T.position)
+		var hit_t := (5.0 - float(T.r) - 0.6) / float(row[1])
+		var marks: Array = []
+		for after in [0.0, 0.03, 0.06]:
+			marks.append([hit_t + after, file, file, cap, _on_target])
+		await _shot(float(row[0]), 0.5, marks)
 
 func _hand_at() -> Vector3:
 	return K.hand_pos(true)

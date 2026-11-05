@@ -1,5 +1,5 @@
 extends "res://tools/hero_pair_check.gd"
-## --ostra-combo-check: Ostra, docs/heroes/ostra.md. His reticle (the aim line, the Snap's rails, the
+## --ostra-combo-check: Motley, docs/heroes/ostra.md. His reticle (the aim line, the Snap's rails, the
 ## Trade's two ends), charge and wind-up timings, where each thing lands, the payoffs, the owner's notes
 ## (Shift never travels on its own, keeps his height, one Snap charge that visibly stuns the training
 ## dummy), the small mechanics, the merge-start drops, and that every move, sound and look exists.
@@ -12,6 +12,10 @@ func run(main_node: Node) -> void:
 	await orb_check.orbs(main)
 	n += orb_check.n
 	fails += orb_check.fails
+	var arena_check = load("res://tools/ostra_arena_check.gd").new()
+	await arena_check.arena(main)
+	n += arena_check.n
+	fails += arena_check.fails
 	var ult_check = load("res://tools/ostra_ult_check.gd").new()
 	await ult_check.ult(main)
 	n += ult_check.n
@@ -534,13 +538,13 @@ func _ostra() -> void:
 		"ostra_arrive", "ostra_seed", "ostra_pop", "ostra_empower", "ostra_well", "ostra_well_snap", "ostra_well_end"
 	]
 	ok(
-		"anim: every Ostra move is keyed (KMovesStone)",
+		"anim: every Motley move is keyed (KMovesStone)",
 		moves.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty()),
 		str(moves.filter(func(mv): return HunterAnim.km_sample(mv, 0.1).is_empty()))
 	)
 	var snd := SfxKits.NAMES.filter(func(s): return String(s).begins_with("os_"))
 	ok(
-		"sfx: every Ostra sound is loaded by Sfx", snd.size() >= 12 and snd.all(func(s): return Sfx.has(s)),
+		"sfx: every Motley sound is loaded by Sfx", snd.size() >= 12 and snd.all(func(s): return Sfx.has(s)),
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)

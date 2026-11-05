@@ -1,6 +1,6 @@
 class_name OstraKit
 extends ArchKit
-## Ostra (medium): Swell, Tether Lantern (the wait between shots charges the next orb), Lantern Trade, Shard Snap,
+## Motley (medium): Swell, Tether Lantern (the wait between shots charges the next orb), Lantern Trade, Shard Snap,
 ## Brimseed, and Nightwell on X (ostra_well.gd). docs/heroes/ostra.md. The loop: hits (ten times as much on
 ## hunters) fill Swell; Swollen, the seed grows bigger and quicker, Trade lands sooner and Snap hits harder.
 ## Snap to stun at range, drop the seed on the stunned foe, let it grow, pop it; Trade puts you or the foe
@@ -552,7 +552,7 @@ func _tick_seed(dt: float) -> void:
 	)
 	if seed_k() >= float(ed["tell_k"]) and seed.get("col") == null:
 		seed["col"] = KitLooks.of(m).column(p, 30.0)
-		m.sfx("os_full", p, -6.0, 1.0)
+		m.sfx("ostra_music_box", p, -6.0, 1.0)      # the crank's tune: the box is about to pop
 	if rank("kin") >= 3:
 		seed["burn"] = float(seed["burn"]) - dt
 		if float(seed["burn"]) <= 0.0:
@@ -615,6 +615,7 @@ func _pop(hit: bool) -> void:
 	)
 	m.fx.flash(p + Vector3(0, 0.8, 0), Color("f2eaff"), 1.0 + k, 0.1)
 	m.sfx("os_pop", p, -2.0, 1.0)
+	m.sfx("ostra_spring_boing", p, -3.0, 1.0)     # the jack springs out
 	net_ring(p, rad, TEAL)
 	var caught_hunter: Ent = null
 	for f in foes_in(p, rad):
