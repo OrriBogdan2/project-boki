@@ -34,7 +34,9 @@ const SLOT_MAX := 8
 const MOTION_BONES := ["hips", "thigh.L", "shin.L", "thigh.R", "shin.R", "upper_arm.L", "forearm.L", "upper_arm.R",
 	"forearm.R", "head"]
 const OWN_MOTION := 0.05       # rad: two Wardens' idle or run joint angles differ by more than this on average
-const TRIS_MAX := 45000         # a Warden baked from Meshy (PIPELINE.md r3): ~30-40k body and weapon, the face kept
+const TRIS_MAX := 15000         # the game budget (RIG_CONTRACT "Budget"): tools/blender/decimate_warden.py
+## Over the budget until an art pass: Kael's mane (14.5k of hair cards) breaks when decimated, so it is kept whole.
+const TRIS_OVER := {"juggernaut": 24000}
 
 var bad := 0
 var n := 0
@@ -130,9 +132,10 @@ func _contract(a: String) -> void:
 			var src := mesh.surface_get_material(si)
 			slots[String(src.resource_name).get_slice("-", 0) if src else ""] = true
 	var unknown := slots.keys().filter(func(s): return not WardenGlb.SLOTS.has(s))
-	ok(unskinned == 0 and tris <= TRIS_MAX and slots.size() <= SLOT_MAX and unknown.is_empty(),
+	var cap: int = TRIS_OVER.get(a, TRIS_MAX)
+	ok(unskinned == 0 and tris <= cap and slots.size() <= SLOT_MAX and unknown.is_empty(),
 			"%s: skinned (%d meshes not), %d triangles (at most %d), slots %s (at most %d, all toon slots)"
-			% [a, unskinned, tris, TRIS_MAX, str(slots.keys()), SLOT_MAX])
+			% [a, unskinned, tris, cap, str(slots.keys()), SLOT_MAX])
 	m.free()
 
 ## Every kit move of every table, played on this Warden: after each key, every bone is exactly where its rig

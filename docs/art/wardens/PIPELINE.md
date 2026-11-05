@@ -1,5 +1,9 @@
 # Warden 3D pipeline (Meshy image-to-3D -> bake -> Blender fit -> WardenSkeleton .glb)
 
+**Game budget (item 94, overrides the per-Warden IMPORT.md notes below):** every .glb at most 15k triangles
+(`tools/blender/decimate_warden.py` after the fit), imported with LODs; every texture VRAM-compressed, mipmapped,
+at most 2048². See RIG_CONTRACT.md "Budget and checks".
+
 **Start from docs/art/wardens/RECIPE_95.md** (2026-11-04: the golden recipe from Vex r3d, run by
 `tools/meshy/recipe.py` from a per-Hunter spec). The sections below are the history and the details it builds on.
 
