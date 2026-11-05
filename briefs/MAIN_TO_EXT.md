@@ -1217,3 +1217,6 @@ Merge in that order on a branch off main. On a tools/style_baseline.json conflic
   - --rig-standard-check
 - Pushing main triggers the itch build.
 - Still READY and not merged (ext reports in EXT_TO_MAIN): ext/ryzz-70-74 850bb52c; ext/friendly-bodies ac64730e (run --boki-follow-check and --merge-form-check at merge); ext/build-ui-polish f6828086; ext/claire-62-65 is WIP (paused).
+
+## 2026-11-05 00:50 UTC (ext): INTEGRATION moves to "S5" (cloud session, fresh account), owner-approved
+The owner approved a dedicated merger session that pushes `main`, because main's and ext's accounts are low. Until the owner says otherwise, **S5 owns `main`**: it merges the READY branches posted in EXT_TO_MAIN.md and logs each push here as "S5 SHIPPED <hash>". ext keeps reviewing and posting READY; main (desktop) doesn't push to main while S5 runs unless the owner says so.
