@@ -9,13 +9,6 @@ extends RefCounted
 
 const PURPLE := Color("b06aff")       # the landing marker (the damage area)
 const CORE := Color("ff5ad8")         # its centre ring: the stun area, and the shock ring on impact
-const STREAK := Color("ff7a1a")       # the dive's flame streaks
-const STREAK_HOT := Color("ffd04a")
-const CRACK := Color("3a2010")        # the cracks in the ground
-const DEBRIS := Color("8a7058")
-const CRACK_T := 1.6                  # s the crack in the ground stays, fading over the last half
-const CRACK_N := 7                    # cracks running out from the impact
-const CRACK_SEGS := 4                 # jagged pieces in each
 
 var k: JuggernautKit
 var phase := ""                       # "" | hang | dive | recover
@@ -31,9 +24,6 @@ var phases: Array = []                # the phases the last one went through
 var last_air := 0.0                   # s from the press to the impact
 var last_recover := 0.0               # s the last recovery ran
 var last_shock_r := 0.0               # m, the shock ring drawn on impact
-var cracks: Node3D = null             # the crack decal (built once, moved to each impact)
-var crack_mat: StandardMaterial3D = null
-var crack_t := 0.0
 
 func _init(kit: JuggernautKit) -> void:
 	k = kit
@@ -77,7 +67,7 @@ func start() -> void:
 	h.gliding = false
 	h.vel = Vector3.ZERO
 	k.play("jug_meteor")
-	k.m.sfx("jug_drop", h.pos, -2.0, 0.85)
+	k.vfx("drop_tell")
 	_marker(0.0)
 
 ## The marker at the landing point (everyone sees it): the damage area, and the stun core inside it.
@@ -96,10 +86,6 @@ func cancel() -> void:
 	phase = ""
 
 func tick(dt: float) -> void:
-	if crack_t > 0.0:
-		crack_t -= dt
-		crack_mat.albedo_color.a = clampf(crack_t / (CRACK_T * 0.5), 0.0, 1.0) * 0.7
-		cracks.visible = crack_t > 0.0
 	if phase == "":
 		return
 	var h := k.h
@@ -122,6 +108,7 @@ func _tick_hang(dt: float) -> void:
 	var h := k.h
 	var hang := float(data()["hang"])
 	_marker(0.5 * minf(t / hang, 1.0))
+	HeroVfx.of(k.m).hold(h, "drop_gather", minf(t / hang, 1.0))
 	if h.roll_t > 0.0:
 		return
 	h.vel = Vector3(0.0, 0.6 * (1.0 - t / hang) + Hunter.H_GRAV * dt, 0.0)
@@ -133,7 +120,7 @@ func _tick_hang(dt: float) -> void:
 		from = h.pos
 		var span := from.distance_to(land)
 		dive_t = clampf(span / float(dd["dive_speed"]), float(dd["dive_t"][0]), float(dd["dive_t"][1]))
-		k.m.sfx("juggernaut_dash", h.pos, -3.0, 0.7)
+		k.vfx("drop_dive", h.pos, Vector2(land.x - from.x, land.z - from.z).normalized())
 
 ## The dive: down along a steepening curve onto the marker (seen all the way, not a teleport), flame streaks.
 func _tick_dive() -> void:
@@ -145,9 +132,7 @@ func _tick_dive() -> void:
 	h.teleport(at)
 	_marker(0.5 + 0.5 * u)
 	if k.tells_visible():
-		var back := Vector2(from.x - land.x, from.z - land.z).normalized()
-		k.fx().streak(h.pos + Vector3(randf_range(-0.3, 0.3), randf_range(0.6, 1.6), 0), back, 1.6, 0.4, STREAK,
-				STREAK_HOT, 0.25)
+		HeroVfx.of(k.m).hold(h, "drop_comet")
 	if u >= 1.0:
 		_impact()
 
@@ -173,7 +158,7 @@ func _hit(at: Vector3) -> void:
 	var stg := k.stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(dd["radius"])},
 		"effects": [{"type": "damage", "amount": float(dd["dmg"]) * k.smash_k()},
 				{"type": "slow", "duration": float(dd["slow_t"]), "strength": float(dd["slow"])}]})
-	k.run(stg, k.cx("rmb", "meteor_drop", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+	k.run_own(stg, k.cx("rmb", "meteor_drop", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f) or f.dead: return
 		if stunned_at(f.pos, f.r, at):
 			f.hurt(float(dd["dmg"]) * k.smash_k() * float(dd["core_k"]) * k.power("sec"), k.h,
@@ -185,54 +170,10 @@ func _hit(at: Vector3) -> void:
 func stunned_at(p: Vector3, r: float, at: Vector3) -> bool:
 	return Vector2(p.x - at.x, p.z - at.z).length() < float(data()["core"]) + r
 
-## The landing: a crack in the ground, the shock ring at the stun's edge, dust and debris, a shake, the boom.
+## The landing: the ground breaking open across the damage area, a wall of flame at the stun's edge, dust and
+## debris, a shake, the boom.
 func _impact_fx(at: Vector3) -> void:
 	var dd := data()
-	var m := k.m
 	last_shock_r = float(dd["core"])
-	m.fx.ring(at, last_shock_r, CORE, 0.45)
-	_crack(at)
-	m.fx.dust(at, 22)
-	m.fx.burst(at + Vector3(0, 0.3, 0), DEBRIS, 18, 6.5, 0.7, 16.0, 1.1, Vector3.UP, 55.0)
-	m.sfx("jug_meteor", at, 0.0, 1.0)
-	m.sfx("jug_slam_hit", at, -5.0, 0.8)
-	Shake.incoming_big(m, at, 0.5, k.h)
-	k.net_ring(at, last_shock_r, CORE)
-
-## The crack in the ground: dark jagged fissures of uneven length running out of the impact, kinking as
-## they go, toward the damage area's edge (tapering pieces).
-func _crack(at: Vector3) -> void:
-	if not k.tells_visible():
-		return
-	if cracks == null or not is_instance_valid(cracks):
-		cracks = k.own_node()
-		crack_mat = StandardMaterial3D.new()
-		crack_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		crack_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		crack_mat.albedo_color = CRACK
-		for i in CRACK_N * CRACK_SEGS:
-			var seg := MeshInstance3D.new()
-			var q := QuadMesh.new()
-			q.orientation = PlaneMesh.FACE_Y
-			seg.mesh = q
-			seg.material_override = crack_mat
-			cracks.add_child(seg)
-	cracks.global_position = at + Vector3(0, 0.03, 0)
-	var reach := float(data()["radius"]) * 0.85
-	for i in CRACK_N:
-		var a := TAU * float(i) / float(CRACK_N) + randf_range(-0.3, 0.3)
-		var from := Vector3(cos(a), 0, sin(a)) * 0.25
-		var out := randf_range(0.3, 1.0) * reach
-		for j in CRACK_SEGS:
-			a += randf_range(-0.8, 0.8)
-			var to := from + Vector3(cos(a), 0, sin(a)) * out / float(CRACK_SEGS) * randf_range(0.6, 1.4)
-			_crack_seg(cracks.get_child(i * CRACK_SEGS + j) as MeshInstance3D, from, to, 0.18 - 0.04 * j)
-			from = to
-	crack_t = CRACK_T
-	crack_mat.albedo_color.a = 0.7
-	cracks.visible = true
-
-func _crack_seg(seg: MeshInstance3D, a: Vector3, b: Vector3, width: float) -> void:
-	(seg.mesh as QuadMesh).size = Vector2(width, a.distance_to(b) + width * 0.5)
-	seg.position = (a + b) * 0.5
-	seg.rotation = Vector3(0, atan2(b.x - a.x, b.z - a.z), 0)
+	k.vfx("drop_hit", at, k.h.aim_dir(), {"r": float(dd["radius"]), "core": last_shock_r})
+	Shake.incoming_big(k.m, at, 0.5, k.h)

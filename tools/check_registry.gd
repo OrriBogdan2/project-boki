@@ -39,7 +39,9 @@ const CHECKS := {
 	"--rank-ui-check": ["res://tools/rank_ui_check.gd", "rank_ui_check", null],      # choose what to rank: + and pips
 	"--rank-ui-shots": ["res://tools/rank_ui_shots.gd", "rank_ui_shots", null],      # --shots-dir=<dir>
 	"--sfx-set-check": ["res://tools/sfx_set_check.gd", "sfx_set_check", null],      # sound sets, loudness
-	"--stamina-bar-check": ["res://tools/stamina_bar_check.gd", "stamina_bar_check", null],
+	"--outpost-look-shots": ["res://tools/outpost_look_shots.gd", "outpost_look_shots", null],
+	"--outpost-look-check": ["res://tools/outpost_look_check.gd", "outpost_look_check", null],
+	"--dash-slot-check": ["res://tools/dash_slot_check.gd", "dash_slot_check", null],
 	"--reticle-check": ["res://tools/reticle_check.gd", "reticle_check", null],
 	"--ping-check": ["res://tools/ping_check.gd", "ping_check", null],
 	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],      # dash -> ability rows
@@ -65,10 +67,12 @@ const CHECKS := {
 	"--breah-shots": ["res://tools/breah_shots.gd", "breah_shots", null],          # Tarek review screenshots
 	"--loot-full-check": ["res://tools/loot_full_check.gd", "loot_full_check", null],      # full-inventory looting
 	"--loot-full-shots": ["res://tools/loot_full_shots.gd", "loot_full_shots", null],      # --shots-dir=<dir>
-	"--stamina-bar-shots": ["res://tools/stamina_bar_shots.gd", "stamina_bar_shots", null],
+	"--dash-slot-shots": ["res://tools/dash_slot_shots.gd", "dash_slot_shots", null],
 	"--reticle-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "reticle"],
 	"--ping-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "ping"],
 	"--combo51-shots": ["res://tools/combo51_shots.gd", "combo51_shots", null],      # item 51 combo strips
+	"--hero-vfx-check": ["res://tools/hero_vfx_check.gd", "hero_vfx_check", null],
+	"--hero-vfx-reel": ["res://tools/hero_vfx_reel.gd", "hero_vfx_reel", null],
 	"--ostra-orb-shots": ["res://tools/ostra_orb_shots.gd", "ostra_orb_shots", null],      # item 60 screenshots
 	"--title-check": ["res://tools/title_check.gd", "title_check", null],      # the title: menu, key art, frame budget
 	"--hatch-check": ["res://tools/hatch_check.gd", "hatch_check", null],      # the hatch: a quiet, personal moment
@@ -90,6 +94,8 @@ const CHECKS := {
 	"--boki-lines-check": ["res://tools/boki_lines_check.gd", "boki_lines_check", null],      # Boki talk (item 105)
 	"--boki-talk-shots": ["res://tools/boki_talk_shots.gd", "boki_talk_shots", null],      # --shots-dir=<dir>
 	"--build-ui-check": ["res://tools/build_ui_check.gd", "build_ui_check", null],      # also --build-ui-shots=<dir>
+	"--build-hold-shots": ["res://tools/build_hold_shots.gd", "build_hold_shots", null],
+	"--build-hold-check": ["res://tools/build_hold_check.gd", "build_hold_check", null],
 	"--farm-tutorial-check": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],      # also --shots-dir=<dir>

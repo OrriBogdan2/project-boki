@@ -126,8 +126,8 @@ func run(main_node: Node) -> void:
 	var seen := 0
 	for f in foes:
 		var fh: Hunter = f
-		if fh.unseen:
-			continue     # hidden in grass: no plate for anyone, by design
+		if fh.unseen or fh.out:
+			continue     # hidden in grass, or eliminated: no plate for anyone, by design
 		seen += 1
 		var fs := _shown(hud, fh)
 		if fs.is_empty() or int(fs.get("lvl", -1)) != fh.lvl:
