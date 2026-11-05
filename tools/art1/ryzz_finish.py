@@ -87,7 +87,7 @@ def surf(D):
     for ix in np.ndindex(out.shape):
         d = Vector(tuple(M.norm(D[ix])))
         h = bvh.ray_cast(Vector(tuple(o_ + np.array(d) * 0.4)), -d, 0.4)
-        out[ix] = (0.4 - h[3]) / K.HS if h[0] is not None else 0.1
+        out[ix] = min((0.4 - h[3]) / K.HS, 0.112) if h[0] is not None else 0.1      # (low rays can reach the shoulders)
     return out
 
 
@@ -237,10 +237,14 @@ for s, sd in ((1.0, "R"), (-1.0, "L")):
 # ---- the chain slung on the skirt, her left hip across, with the arrow
 ctl = [(-0.055, 0.118, 0.985), (-0.085, 0.142, 0.92), (0.02, 0.17, 0.875), (0.15, 0.16, 0.86), (0.20, 0.09, 0.91), (0.19, 0.06, 0.975)]
 path = on_surface(catmull(ctl, 14), 0.007)
-ch = sweep("chain0", "metal-ryzz", path, K.SQ, np.full(14, 0.0055), side_hint=np.array([0, 1.0, 0.2]), uv_rect=(0.885, 0.13, 0.995, 0.23), twist=np.linspace(0, 8, 14), room=0.2).rigid("root")
+CHAIN_UV = (K.COPPER_R[0], K.COPPER_R[1], K.COPPER_R[2], K.COPPER_R[3])
+ch = K.chain_along("chain0", path, step=0.0235, uv=CHAIN_UV, ln=0.028, wid=0.016, th=0.0036).rigid("root")
+ch.mat = "metal-ryzz"
 pieces.append(ch)
 drop = on_surface(catmull([(-0.055, 0.118, 0.985), (-0.058, 0.148, 0.92), (-0.056, 0.168, 0.86)], 5), 0.007)
-pieces.append(sweep("chain1", "metal-ryzz", drop, K.SQ, np.full(5, 0.005), side_hint=np.array([0, 1.0, 0.2]), uv_rect=(0.885, 0.13, 0.995, 0.23), twist=np.linspace(0, 3, 5), room=0.2).rigid("skirt"))
+c1 = K.chain_along("chain1", drop, step=0.0235, uv=CHAIN_UV, ln=0.028, wid=0.016, th=0.0036).rigid("skirt")
+c1.mat = "metal-ryzz"
+pieces.append(c1)
 tipc = drop[-1]
 pieces.append(Piece("arrow", "metal-ryzz", [tipc + [-0.018, 0.002, 0.0], tipc + [0.018, 0.002, 0.0], tipc + [0, 0.005, -0.042], tipc + [0, 0.0, 0.006]], [[0, 2, 1], [0, 1, 3]],
                     [[(0.77, 0.34), (0.77, 0.40), (0.86, 0.37)], [(0.77, 0.34), (0.86, 0.37), (0.8, 0.40)]]).rigid("skirt"))
@@ -575,7 +579,8 @@ lumi = OUTC.mean(2)
 z_t = POS[..., 2]
 # near-black leather lifted to charcoal with a cool cast (the toon rim reads it as gloss otherwise)
 rawL = blur(lumi, mask.astype(np.float32), 5)
-dk_k = smooth(0.34, 0.12, blur(OUTC.max(2), mask.astype(np.float32), 2))[..., None] * mask[..., None]
+yel_ = blur(((ri > 0.6) & (gi > 0.5) & (bi < 0.4)).astype(np.float32), mask.astype(np.float32), 6)
+dk_k = smooth(0.34, 0.12, blur(OUTC.max(2), mask.astype(np.float32), 2))[..., None] * mask[..., None] * (yel_ < 0.04)[..., None]
 OUTC = OUTC + np.array([0.2, 0.18, 0.235], dtype=np.float32) * dk_k
 # the neon: bright magenta line art, corset, chest bolt, forearm veins -> the glow key (the shader's model_glow colour)
 neon = mask & (ri > 0.86) & (bi > 0.62) & (gi < 0.6) & (ri > gi * 1.6) & (z_t > 0.95)
@@ -589,7 +594,7 @@ core &= ~bw
 # fishnets: from the top of the thigh band to the skirt's hem, repainted crisp
 yl = mask & (ri > 0.65) & (gi > 0.55) & (bi < 0.35) & (z_t < 0.8) & (z_t > 0.5) & (np.abs(POS[..., 0]) < 0.17)
 BAND = float(np.percentile(z_t[yl], 99)) if yl.any() else 0.68
-net = mask & (z_t > BAND + 0.004) & (z_t < 0.84) & (np.hypot(np.abs(POS[..., 0]) - 0.085, POS[..., 1]) < 0.1) & (rawL > 0.2)
+net = mask & (z_t > BAND + 0.004) & (z_t < 0.84) & (np.hypot(np.abs(POS[..., 0]) - 0.085, POS[..., 1]) < 0.1) & (rawL > 0.33)
 print("thigh band top", round(BAND, 3), "net texels", int(net.sum()))
 skin_sm = blur(OUTC.mean(2), net.astype(np.float32), 9)
 base = P.skin(POS[net].astype(np.float64), NOR[net].astype(np.float64), AO[net].astype(np.float64))
@@ -647,8 +652,6 @@ x0, y0, x1, y1 = rect(K.HAIR_R)
 OUTC[y0:y1, x0:x1] = P.hair_tile(y1 - y0, x1 - x0)
 x0, y0, x1, y1 = rect(K.COPPER_R)
 OUTC[y0:y1, x0:x1] = P.copper_tile(y1 - y0, x1 - x0)
-x0, y0, x1, y1 = rect((0.885, 0.13, 0.995, 0.23))
-OUTC[y0:y1, x0:x1] = P.chain_tile(y1 - y0, x1 - x0)
 x0, y0, x1, y1 = rect(K.GLOWC_R)
 OUTC[y0:y1, x0:x1] = P.hexc("#ffd6f2")
 x0, y0, x1, y1 = rect(K.GLOWW_R)
