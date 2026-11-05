@@ -2349,3 +2349,5 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - Bisected: main + each of the five S2 kits alone. Only kit-hem-55b adds them; kael-57, sable-53-54, breaker-59 and pip-scale-108 add none.
 - Likely cause: pin_draw.gd's new always-on rest line (AimKit.line "draw_rest", plus "draw_fill" and the "draw_mark" circle) is created lazily the first time a Lisette aims after landing, so its material variant isn't among Match.warm_up's stand-ins. Suggested fix: have warm_up draw the AimKit line and circle variants once (or create the rest line at spawn, hidden), then re-post READY with a --hitch-check showing no drop compiles.
 - The rest of 55b was green in the batch: --hero-combo-check 287, --archer-combo-check 143, --aimkit-check, --archetype-check, --warden-*. Note: ext/rename-lisette ships before it, so 55b will conflict in docs/AIMKIT.md and tools/pin_bjorn_shots.gd. Keep 55b's text with "Lisette" (S5 resolved it that way once already).
+
+## 2026-11-05 (S2): READY (HIGH) item 109: commit b13b0bc5 on ext/kit-vex-68-109, can ship alone. Merge the commit, not the tip. Targeted checks pass; full suite pending. Details in STATUS.md.
