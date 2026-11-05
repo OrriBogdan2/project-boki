@@ -409,7 +409,7 @@ FACE_TILT = np.radians(16)          # the face plane looks up a little: the matc
 
 def face_point(u, v):
     """a point on the face plane: an oval, dished, tipped up"""
-    hw, hh = 0.112, 0.168
+    hw, hh = 0.116, 0.182
     x = u * hw
     z = v * hh
     y = 0.112 - 0.03 * (1 - u * u) * (1 - v * v)
@@ -419,7 +419,7 @@ def face_point(u, v):
 
 def face():
     """the void face: an oval grid; x_jaw, x_brow, x_cheek bend the painted grin and slits"""
-    nu, nv = 13, 17
+    nu, nv = 17, 23
     us, vs = np.meshgrid(np.linspace(-1, 1, nu), np.linspace(1, -1, nv))
     # squeeze the square into the oval, the chin coming to a point
     wd = np.sqrt(np.clip(1 - vs ** 2, 0.0, 1)) * (1 - 0.32 * M.sm(0.0, -1.0, vs))
@@ -433,7 +433,7 @@ def face():
     for f in F:
         corners.append([(pu[i] * 0.5 + 0.5, 0.5 - pv[i] * 0.5) for i in f])
     au = np.abs(pu)
-    top, bot = -0.26 + 0.62 * (au / 0.86) ** 2.6, -0.74 + 0.98 * (au / 0.86) ** 2.1
+    top, bot = -0.34 + 0.70 * (au / 0.80) ** 2.5, -0.72 + 1.10 * (au / 0.80) ** 2.3
     mid = top + (bot - top) * 0.5
     jaw = M.sm(mid + 0.02, mid - 0.06, pv) * M.sm(1.0, 0.7, au)
     W = {"x_jaw": jaw}
@@ -448,14 +448,14 @@ def face():
 def hood():
     """the cap's skull: a bag from the oval round the face to the back of the head"""
     C = HEAD_C
-    R = np.array((0.138, 0.16, 0.186))
+    R = np.array((0.15, 0.17, 0.215))
     n = 44
     loop = []
     for k in range(n):
         a = 2 * np.pi * k / n          # from the top, round his right
         u, v = np.sin(a), np.cos(a)
         # the V of the cap's edge on the brow, and the chin's point
-        v2 = v * (1.04 - 0.16 * M.sm(0.75, 1.0, v) * M.sm(0.35, 0.0, np.abs(u)))
+        v2 = v * (1.05 - 0.30 * M.sm(0.7, 1.0, v) * M.sm(0.3, 0.0, np.abs(u)))
         wd = 1.03 * (1 - 0.3 * M.sm(0.0, -1.0, v))
         loop.append(face_point(np.array(u * wd), np.array(v2)) + np.array((0, 0.005, 0)))
     E = np.array(loop)
@@ -481,11 +481,11 @@ def hood():
 def horn(side):
     """a floppy horn, rising then drooping to its bell, swinging on a spring chain"""
     n = "R" if side > 0 else "L"
-    pts = np.array(((0.05, -0.05, 1.77), (0.115, -0.06, 1.85), (0.2, -0.07, 1.895), (0.27, -0.07, 1.86), (0.315, -0.06, 1.77), (0.33, -0.05, 1.68), (0.332, -0.045, 1.64)))
+    pts = np.array(((0.05, -0.05, 1.78), (0.115, -0.06, 1.865), (0.2, -0.07, 1.885), (0.275, -0.07, 1.82), (0.32, -0.06, 1.72), (0.338, -0.05, 1.61), (0.34, -0.045, 1.56)))
     pts[:, 0] *= side
     path = resample(pts, 22)
     t = np.linspace(0, 1, 22)
-    rd = rmp(t, [0, 0.15, 0.35, 0.6, 0.85, 1.0], [0.082, 0.09, 0.074, 0.05, 0.024, 0.01])
+    rd = rmp(t, [0, 0.15, 0.35, 0.6, 0.85, 1.0], [0.095, 0.105, 0.092, 0.066, 0.03, 0.012])
     V, F, ST = grid(tube(path, rd, 14, lambda a, tt: 1 + 0.08 * np.cos(2 * a) * (1 - tt)), closed=True)
     return Part("horn" + n, "cloth", V, F, ST, chain_w("spring_horn%s" % n, np.repeat(t, 14), 3, 0.35, "head"), "horn" + n, (320, 120)), path
 
@@ -501,25 +501,26 @@ def chain_w(prefix, t, bones, start, parent):
 
 
 def ruff():
-    """the great white ruff: the match camera's first read. A thick pleated drum of loops, tipped down at the front"""
-    pleats, per = 27, 3
+    """the great white ruff, a separate drum of folded cloth (ostra_head): radial pleats on top, S-looped accordion folds round its outer wall,
+    tipped down at the front. The first read at the match camera"""
+    pleats, per = 29, 3
     nu = pleats * per
-    rows = 9
     a = np.linspace(0, 2 * np.pi, nu, endpoint=False)
+    sec = ((0.075, 0.035), (0.14, 0.05), (0.21, 0.058), (0.265, 0.056), (0.292, 0.03), (0.297, 0.0), (0.292, -0.03), (0.265, -0.056), (0.21, -0.058), (0.14, -0.05), (0.075, -0.035))
+    rows = len(sec)
     P = np.zeros((rows, nu, 3))
-    # section: from the neck out over the top, round the outer wall, back under
-    sec = ((0.07, 0.03), (0.13, 0.05), (0.2, 0.056), (0.262, 0.046), (0.285, 0.0), (0.262, -0.046), (0.2, -0.056), (0.13, -0.05), (0.07, -0.03))
     for i, (rr, h) in enumerate(sec):
-        q = rr / 0.285
-        ph = a * pleats
-        scal = 1 + 0.07 * np.cos(ph) * q ** 2
+        q = rr / 0.297
+        wall = M.sm(0.75, 0.95, q)
+        ph = a * pleats + 2.2 * (h / 0.058) * wall      # (the folds snake down the wall)
+        scal = 1 + (0.03 * q ** 2 + 0.05 * wall) * np.cos(ph)
         P[i, :, 0] = np.sin(a) * rr * scal * 1.04
         P[i, :, 1] = np.cos(a) * rr * scal * 0.96
-        P[i, :, 2] = 1.435 + h * (1 + 0.42 * np.sin(ph) * q ** 3) - 0.16 * P[i, :, 1]
+        P[i, :, 2] = 1.435 + h * (1 + 0.22 * np.sin(a * pleats) * q ** 3) - 0.16 * P[i, :, 1]
     V, F, ST = grid(P, closed=True)
     r = np.hypot(V[:, 0], V[:, 1])
     k = M.sm(0.15, 0.07, r) * 0.4
-    return Part("ruff", "cloth", V, F, ST, {"hips": 1 - k, "head": k}, "ruff", (420, 110))
+    return Part("ruff", "cloth", V, F, ST, {"hips": 1 - k, "head": k}, "ruff", (560, 140))
 
 
 def collar():

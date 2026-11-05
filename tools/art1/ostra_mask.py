@@ -28,28 +28,28 @@ def seg_dist(u, v, pts):
 
 
 def grin(u, v):
-    """0..1 inside the grin: a huge crescent, corners hooked up into points; and the teeth's dark cuts"""
+    """0..1 inside the grin (ostra_head): one huge solid white crescent, the corners hooked up to points, a few small fangs cut down into its
+    top edge toward the corners; -> the shape, and the fangs' cuts"""
     au = np.abs(u)
-    top = -0.26 + 0.62 * (au / 0.86) ** 2.6
-    bot = -0.74 + 0.98 * (au / 0.86) ** 2.1
-    inside = sm(-0.012, 0.012, top - v) * sm(-0.012, 0.012, v - bot) * (au < 0.86)
-    # sharp teeth from above and below, meeting along a jagged seam
-    saw = np.abs(((u * 7.0) % 1.0) - 0.5) * 2.0
-    mid = top + (bot - top) * 0.5
-    seam = sm(0.024, 0.008, np.abs(v - mid - (saw - 0.5) * (top - bot) * 0.34))
-    return inside, inside * seam
+    top = -0.34 + 0.70 * (au / 0.80) ** 2.5
+    bot = -0.72 + 1.10 * (au / 0.80) ** 2.3
+    saw = np.abs(((u * 8.5) % 1.0) - 0.5) * 2.0
+    cut = 0.055 * saw * sm(0.22, 0.42, au) * sm(0.8, 0.6, au)
+    inside = sm(-0.012, 0.012, top - cut - v) * sm(-0.012, 0.012, v - bot) * (au < 0.80)
+    return inside, np.zeros_like(inside)
 
 
 def slits(u, v):
-    """the eyes: two thin arcs, tipped up and out, a cruel squint"""
+    """the eyes: two crescents, thick in the middle, drawn to points, the outer tip high: a laughing, cruel squint"""
     au = np.abs(u)
-    x = (au - 0.42) / 0.33
-    arch = 0.30 + 0.14 * (1.0 - x * x) - 0.20 * x * -1.0 * 0.55
-    w = 0.062 * np.clip(1.0 - np.abs(x) ** 2.0, 0.0, 1.0)
-    return sm(0.012, -0.004, np.abs(v - arch) - w) * (np.abs(x) < 1.0)
+    x = (au - 0.40) / 0.30
+    mid = 0.30 + 0.20 * x + 0.10 * (1.0 - x * x) * 0 - 0.02
+    top = mid + 0.075 * (1.0 - x * x) + 0.05 * x
+    low = mid - 0.055 * (1.0 - x * x) + 0.05 * x
+    return sm(0.012, -0.006, v - top) * sm(-0.012, 0.006, v - low) * (np.abs(x) < 1.0)
 
 
-def textures(size=768):
+def textures(size=1024):
     """-> albedo, emission (rows top to bottom, v = 1 on top), floats 0..1: the deep with its stars, the grin and eyes glowing white-violet"""
     xs = (np.arange(size) + 0.5) / size * 2 - 1
     U, V = np.meshgrid(xs, -xs)
@@ -67,12 +67,12 @@ def textures(size=768):
     neb = noise(5, 1) * 0.6 + noise(11, 2) * 0.3 + noise(23, 3) * 0.1
     ang = np.arctan2(V + 0.1, U)
     rad = np.hypot(U, V + 0.1)
-    swirl = 0.5 + 0.5 * np.sin(ang * 2 + rad * 7 + neb * 4)
+    swirl = 0.5 + 0.5 * np.sin(ang * 2 + rad * 8 + neb * 5)
     deep = np.array((0.03, 0.02, 0.10))
-    mid = np.array((0.16, 0.08, 0.42))
-    c = deep + (mid - deep) * np.clip((neb * swirl * 2.2 - 0.25), 0, 1)[..., None]
+    mid = np.array((0.34, 0.14, 0.78))
+    c = deep + (mid - deep) * np.clip((neb * swirl * 2.6 - 0.3), 0, 1)[..., None]
     stars = np.zeros(U.shape, np.float32)
-    n = 260
+    n = 420
     ys, xs2, b = rng.randint(2, size - 2, n), rng.randint(2, size - 2, n), rng.rand(n)
     stars[ys, xs2] = b
     stars[ys + 1, xs2] = b * 0.7
@@ -91,13 +91,12 @@ def textures(size=768):
             out = (hi - lo) / k
         return out
 
-    bloom = np.clip(blur(shape, 14) * 1.0 + blur(shape, 5) * 0.5, 0, 1)
+    bloom = np.clip(blur(shape, 22) * 1.3 + blur(shape, 7) * 0.9, 0, 1)
     hot = np.array((1.0, 0.97, 1.0))
     vio = np.array((0.62, 0.26, 1.0))
-    em = vio * (bloom * 0.6)[..., None]
+    em = vio * (bloom * 0.85)[..., None] + c * 0.75
     em = em + stars[..., None] * np.array((0.9, 0.85, 1.0)) * (1 - shape[..., None])
-    teeth = shape * (1 - cut * 0.92)
+    teeth = shape
     em = em * (1 - teeth[..., None]) + hot * teeth[..., None]
-    em = em * (1 - (cut * g)[..., None]) + vio * 0.55 * (cut * g)[..., None]
     alb = c * (1 - shape[..., None]) + np.array((0.9, 0.85, 1.0)) * teeth[..., None]
     return np.clip(alb, 0, 1).astype(np.float32), np.clip(em, 0, 1).astype(np.float32)

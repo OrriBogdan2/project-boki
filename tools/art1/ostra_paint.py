@@ -206,12 +206,17 @@ def p_glove(S, T):
 
 
 def p_hood(S, T):
-    # (the loop starts at the brow and runs round his right: s < 0.5 is his right, violet)
+    # (ostra_head: quartered: the brow's right of the V dark, its left violet; behind, the other way; a broad band round the face in the opposite colour.
+    # The loop starts at the brow and runs round his right, so s < 0.5 is his right; t runs from the face to the back of the head)
     f = folds(S, T, 8, 31, 0.0)
     cv = shade(ramp(0.55 + f * 0.3, [DUSK, VIOLET, VIOLET_HI]), f, 0.25)
     ck = shade(BLACK2 * np.ones_like(cv), f, 0.5)
-    c = mix(ck, cv, M.sm(0.0, 0.004, S) * M.sm(0.5, 0.496, S))
-    return c * (0.5 + 0.5 * M.sm(0.0, 0.12, T))[..., None]
+    right = (S < 0.5)
+    back = T > 0.55
+    violet = right == back
+    band = T < 0.13
+    violet = np.where(band, ~violet, violet)
+    return mix(ck, cv, violet.astype(np.float32))
 
 
 def horn_paint(dark):
@@ -223,10 +228,14 @@ def horn_paint(dark):
 
 
 def p_ruff(S, T):
-    ph = S * 17 * 6.283
-    q = 1 - np.abs(T * 2 - 1)
-    c = ramp((0.5 + 0.5 * np.cos(ph + 1.0)) * (0.5 + 0.5 * q) + 0.28, [WHITE_D, WHITE_M, WHITE_L], [0, 0.5, 1])
-    return c * (0.68 + 0.32 * M.sm(0.05, 0.3, T))[..., None]
+    # (T 0..1 from the neck over the top, down the wall at 0.4..0.6, back under; the pleats snake on the wall, each with its dark outline)
+    wall = M.sm(0.32, 0.42, T) * M.sm(0.68, 0.58, T)
+    ph = S * 29 * 6.283 + 2.2 * np.cos((T - 0.5) * 3.14 * 3.0) * 0 + 7.0 * (T - 0.5) * wall
+    fold = 0.5 + 0.5 * np.cos(ph + 1.0)
+    c = ramp(fold * 0.7 + 0.32, [WHITE_D, WHITE_M, WHITE_L], [0, 0.5, 1])
+    line = np.exp(-((np.abs(((ph + 1.0) / 6.283) % 1.0 - 0.5)) / 0.06) ** 2)
+    c = mix(c, hx("5a5468"), line * (0.25 + 0.6 * wall))
+    return c * (0.66 + 0.34 * M.sm(0.03, 0.22, T) * M.sm(0.97, 0.78, T))[..., None]
 
 
 def collar_paint(col_a, col_b, seed):
