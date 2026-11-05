@@ -33,6 +33,8 @@ static func crowd_at(m: Match, h: Hunter, p: Vector3, r: float) -> int:
 static func fresh(m: Match, o: Ent) -> bool:
 	return o is Hunter and ((o as Hunter).dropping or m.time - float(o.get_meta("landed_t", -99.0)) < float(m.opts.get("fresh_t", FRESH_T)))
 
+## Goals a bot holds its ground for: it never bases away to a teammate from these.
+const STAY_GOALS := ["yard", "board", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon"]
 const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "board", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
 
 func think(m: Match, h: Hunter, dt: float) -> void:
@@ -236,16 +238,16 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				inp["aim"] = Vector3(h.pos.x + ah.x * 3.0, h.pos.y + 0.9, h.pos.z + ah.y * 3.0)
 			inp["aim_y"] = h.pos.y
 			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "dock", "uplink", "hatch", "lair_dial", "lair_lever"]:
-				inp["interact"] = true
+				inp["interact"] = not h.get_meta("box_broke", false)      # a broken box revive: let go, hold again
 				move = Vector2.ZERO
 			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "board", "yard", "lair_camp"]:
 				move = Vector2.ZERO
 		BotKin.upkeep(h)
 		# far from the squad with nothing to fight: now and then, base to a teammate
-		# (not while holding a spot: an uplink's yard, a skiff's deck, a lair: basing away from a
-		# charging uplink left its yard empty to drain)
+		# (not while holding a spot: an uplink's yard, a skiff's deck, a lair, a teammate's box or a
+		# beacon: basing away from a charging uplink left its yard empty to drain)
 		if h.base_t <= 0.0 and h.base_cd <= 0.0 and h.grounded and randf() < dt * 0.05 and not a.has("ping_goal") \
-				and not String(a.get("goal_kind", "")) in ["yard", "board", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever"]:
+				and not String(a.get("goal_kind", "")) in STAY_GOALS:
 			var mate := m.base_target(h)
 			if mate and h.flat_dist(mate) > 30.0:
 				h.start_base(mate)

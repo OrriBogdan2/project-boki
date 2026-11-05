@@ -303,7 +303,7 @@ static func tick(A: Arena, dt: float) -> void:
 				at_t = go + 0.7 if "--hold-shot" in OS.get_cmdline_user_args() else go + 1.05
 		_ when w.begins_with("dj_"):
 			at_t = DJDemo.still(A, P, D, w.substr(3), t, dt)      # Sable and Kael stills (scripts/arch/dj_demo.gd)
-			if m.hud: m.hud.toasts.clear()
+			if m.hud: m.hud.msgs.clear()
 		_ when w.begins_with("pair_"):
 			at_t = PairDemo.tick(A, P, D, t, dt, w)          # Tarek and Ostra (scripts/arch/pair_demo.gd)
 		_ when w.begins_with("anim_"):
@@ -324,7 +324,7 @@ static func tick(A: Arena, dt: float) -> void:
 			P.inp["move"] = Vector2.ZERO
 			P.hp = P.max_hp
 			_anim_trigger(A, P, D, mv, t, dt)
-			if m.hud: m.hud.toasts.clear()        # the hero line from the swap would sit over the frames
+			if m.hud: m.hud.msgs.clear()        # the hero line from the swap would sit over the frames
 			var times: Array = spec[2]
 			for i in times.size():
 				if _at(t, dt, float(times[i])):

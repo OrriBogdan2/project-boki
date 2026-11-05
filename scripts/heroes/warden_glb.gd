@@ -53,6 +53,7 @@ const SLOTS := {"skin": 4, "hair": 5, "cloth": 1, "leather": 2, "metal": 3, "bra
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].
 const TINTS := {"skin": ["skin_col", "skin"], "hair": ["hair_col", "hair_col"], "eyes": ["eye_col", "eyes"]}
 const TINT_MAX := 0.35         # a pick moves a painted slot's colour at most this much (x, per channel)
+const GUM_TAG := "gum"         # a bubble drawn with the gloss pass (gum_gloss.gdshader) instead of an ink shell
 const NO_INK := ["hair", "eyes", "glow", "card"]   # slots drawn without the ink outline shell
 ## The `void` slot is no lit surface but a window onto the Void (shaders/hero_void.gdshader: a drifting
 ## starfield over its painted colour, Ostra's coat tears); "<void>-<tag>" with a SOFT_TAGS tag also fades
@@ -107,6 +108,7 @@ const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: 
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
 static var _ink: ShaderMaterial  # the painted atlas's ink shell (INK_WIDTH), shared
+static var _gloss_m: ShaderMaterial
 static var _measuring := false  # building that neutral model: no .glb on it
 static var _variants = null     # art name -> the design variant the command line picks (variant())
 static var _look = null         # content/rules/warden_look.json, read once (look())
@@ -631,6 +633,8 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 				m.set_shader_parameter("emit", EMIT)
 				m.set_shader_parameter("emit_flicker", EMIT_FLICKER)
 				_emit_colour(m, arch)
+			if tag == GUM_TAG:
+				m.next_pass = _gloss()      # (a gum bubble: a glossy see-through skin over its toon pass, no ink)
 			if slot == "ice":
 				for k in ICE:
 					m.set_shader_parameter(k, ICE[k])
@@ -685,6 +689,12 @@ static func _emit_colour(m: ShaderMaterial, arch: String) -> void:
 	var g: Dictionary = Arch.def(arch).get("model_glow", {}) if arch != "" else {}
 	if g.has("core"):
 		m.set_shader_parameter("emit_tint", Color(String(g["core"])))
+
+static func _gloss() -> ShaderMaterial:
+	if _gloss_m == null:
+		_gloss_m = ShaderMaterial.new()
+		_gloss_m.shader = load("res://shaders/gum_gloss.gdshader")
+	return _gloss_m
 
 static func _painted_ink() -> ShaderMaterial:
 	if _ink == null:

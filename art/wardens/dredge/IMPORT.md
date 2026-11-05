@@ -102,4 +102,25 @@ drum on top with the rope and cargo hook on his left, iron limbs, boots, tar dri
   winch at 0.25 on their own, the rest taking what is left; `drop_small` removes the collapse's leftover shards.
   Smaller shoulder pods (x0.86, set in), warmer gold brass, a bright gold far rim (rim_far 0.35), a smaller, darker
   tar pool. Review frames: ext/warden-matchzoom-v2's `pose_clear` (no aim line, props or overlays).
+- **r3k (credit-free):** the cargo hook x1.9 about its top (`scale_parts`), so it reads at the match camera; deeper,
+  larger dents breaking the hull's outline (18, 5-11% of the radius); jointed legs (knee balls on shin.L/R, the
+  stance's knee 0.22 and gait knee 0.26); smoke wisps off the shoulders (DredgeKit: a grey puff off a pauldron bone
+  every ~0.55 s, the 3D model only; small and faint so it never covers a pod at the match camera); a brighter hull
+  (gain 1.25) and brass, lighter iron limbs (7a746e) against the grass, and a stronger gold far rim (0.4, in
+  content/rules/warden_look.json since main's look move).
+- **r3l (credit-free, ORCH's r3k review):** the hull from saturated yellow-orange to the art's tarnished olive bronze
+  (hull tint 0.88/0.95/0.84 at gain 1.38, olive brass and helm, the look's `desat` 0.16 and `light_neutral_warm` 0.5,
+  an olive-gold far rim): the same luminance at the match camera, hue 30 -> 35 degrees, saturation 0.71 -> 0.51;
+  five torn holes (`hull.bursts`, warden_hull.py `_burst`): a jagged ring of thick brass teeth peeled 45-55 degrees
+  out over a dark hole with a red heart, two on the shoulder pods' outer edges (the front view's outline), one low
+  on the belly, one upper left, one on the back; the winch seated (fit mode `shift` 2 cm down, a brass saddle
+  collar under it); a short iron stack behind the winch (`anchor_stack`, an anchor at a fixed `pos`) trailing a
+  thin wavering smoke ribbon (LDFx.wisp, ld_fx mode 13) in place of the round puffs; the porthole's glass wider
+  (inner 0.058) in dark blue-grey with eight white crack strips (`glow-crack`) and a small red pupil (orb 0.02).
+- **r3m (credit-free, ORCH's r3l review):** seven heavy tar runs (r 13-19 mm, `bulb`: each ends in a drop) from the
+  porthole's lip, the grille and the side port down the front, two on the back, in place of nine thin ones; three
+  bigger torn holes (rh 0.1-0.11, 6-7 teeth 12 mm thick: the pods' outer edges and the low belly) in place of five
+  small ones; smoke ribbons from the stack and over both shoulders in turn (`anchor_smoke_l/r` on the pods); the
+  pupil pink-red (ff2a50) with a white heart (`glow-shine`); the grille under the porthole (a dark plate, six brass
+  slats); the hull's top softer at the match camera (the look's `top_light` 0.55, a darker painted highlight).
 - `dredge.glb.import`: `generate_lods=false`, `force_disable_compression=true`.

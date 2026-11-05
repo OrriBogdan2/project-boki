@@ -94,6 +94,8 @@ static func stage(id: String) -> String:
 			return _crop_stage()
 		"buy", "sell":
 			return "stall" if not HomeLayout.fixtures(Save.d, "stall").is_empty() else "bar"
+		"task":
+			return "page" if FarmTaskGuide.page_up() else "go"
 	return "go"
 
 static func _crop_stage() -> String:
@@ -115,7 +117,8 @@ static func hint_text(id: String) -> String:
 	if s.is_empty():
 		return ""
 	var raw := String((s["hints"] as Dictionary).get(stage(id), ""))
-	return raw.replace("{build}", Settings.key_cap("build")).replace("{interact}", Settings.key_cap("interact"))
+	var txt := FarmTaskGuide.fill(raw).replace("{build}", Settings.key_cap("build"))
+	return txt.replace("{interact}", Settings.key_cap("interact")).replace("{details}", Settings.key_cap("details"))
 
 static func world_text(id: String) -> String:
 	var s := step_def(id)

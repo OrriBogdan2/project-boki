@@ -1,84 +1,75 @@
 class_name BuildKeys
 extends Control
-## The controls of build and decorate mode: a strip of buttons with their key caps above the catalog bar, and a
-## small tag by the cursor that lists the same keys and says why a spot is refused.
+## The controls of build and decorate mode: one card by the cursor that names the piece, lists its action keys and
+## says why a spot is refused. It keeps clear of the catalog bar, the top of the screen and any card in `avoid`.
 
 const TAG_OFFSET := Vector2(26, 20)
+const TOP_BAND := 56.0
+const MARGIN := 8.0
 
-## Callables to run: rotate, place, store, cancel, sweep (the quick put-away mode).
-var actions: Dictionary = {}
-var above: Control               # the catalog bar the strip sits on top of
-var strip: PanelContainer
+var above: Control               # the catalog bar the card keeps off
+var avoid: Array = []            # more Controls (the Goals card) the card and the piece menu keep off
 var tag: PanelContainer
-var _strip_sig := ""
 var _tag_sig := ""
 
 func _init() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	strip = UI.glass(6, 12)
-	strip.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	strip.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	strip.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	add_child(strip)
 	tag = UI.glass(8, 10)
 	tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tag.visible = false
 	add_child(tag)
 
-## state: held (bool), item (String), tool (line or brush), can_rotate, can_store, fresh (a new piece from the
-## catalog, not one picked up off the ground), ok, reason, sweep (put-away mode), over (a placed piece's name
-## under the cursor when nothing is held).
+## state: held (bool), item (String), tool (line or brush), can_rotate, can_store, reason, ok, sweep (put-away
+## mode), over (a placed piece's name under the cursor when nothing is held).
 func show_state(state: Dictionary) -> void:
-	_set_strip(state)
 	_set_tag(state)
 
 func _process(_delta: float) -> void:
-	if not tag.visible:
-		return
-	var vp := get_viewport().get_visible_rect().size
-	var at := get_viewport().get_mouse_position() + TAG_OFFSET
-	at.x = minf(at.x, vp.x - tag.size.x - 8.0)
-	at.y = minf(at.y, vp.y - tag.size.y - _bottom_pad() - 8.0)
-	tag.position = at
+	if tag.visible:
+		var cursor := get_viewport().get_mouse_position()
+		tag.position = place_card(tag.size, cursor, TAG_OFFSET, blocked_rects(above, avoid))
 
-func _bottom_pad() -> float:
-	return above.size.y + 28.0 if is_instance_valid(above) else 214.0
+## Screen rects a floating card must not cover: the top band, the catalog bar and each visible control in `others`.
+static func blocked_rects(bar: Control, others: Array) -> Array:
+	var rects: Array = []
+	var width := 4096.0
+	if is_instance_valid(bar):
+		width = bar.get_viewport().get_visible_rect().size.x
+		rects.append(bar.get_global_rect())
+	rects.append(Rect2(0.0, 0.0, width, TOP_BAND))
+	for ctl in others:
+		if is_instance_valid(ctl) and (ctl as Control).is_visible_in_tree():
+			rects.append((ctl as Control).get_global_rect())
+	return rects
 
-func _call(action: String) -> Callable:
-	return actions.get(action, Callable())
-
-func _set_strip(state: Dictionary) -> void:
-	var sig := "%s%s%s%s%s%s" % [state.get("held", false), state.get("tool", false), state.get("can_rotate", false),
-		state.get("can_store", false), state.get("fresh", false), state.get("sweep", false)]
-	strip.offset_bottom = -_bottom_pad()
-	strip.offset_top = strip.offset_bottom - 40.0
-	if sig == _strip_sig:
-		return
-	_strip_sig = sig
-	for old in strip.get_children():
-		old.queue_free()
-	var row := UI.hbox(8)
-	strip.add_child(row)
-	if bool(state.get("held", false)):
-		if bool(state.get("can_rotate", false)):
-			row.add_child(_button("Rotate  (or RMB)", Settings.key_cap("rotate"), _call("rotate")))
-		row.add_child(_button("Place", "LMB", _call("place"), true))
-		if bool(state.get("can_store", false)):
-			var store_label := "Put back" if bool(state.get("fresh", false)) else "Store"
-			row.add_child(_button(store_label, Settings.key_cap("store"), _call("store")))
-		row.add_child(_button("Cancel", Settings.key_cap("menu"), _call("cancel")))
-		if not bool(state.get("tool", false)):
-			row.add_child(UI.label("Hold Shift to place more", 13, UI.MUTED))
-	else:
-		var sweep := bool(state.get("sweep", false))
-		row.add_child(UI.choice("Move", not sweep, _call("sweep_off")))
-		row.add_child(UI.choice("Store: click a piece", sweep, _call("sweep_on")))
-
-func _button(label: String, key: String, cb: Callable, primary := false) -> Button:
-	var b := UI.primary(label, cb) if primary else UI.button(label, cb)
-	b.add_theme_font_size_override("font_size", 15)
-	return UI.with_key(b, key)
+## Where a card of `card_size` goes next to `cursor`: below-right first, then flipped across the cursor, so it never
+## covers a rect in `blocked` or leaves the screen. The cursor itself stays clear of it.
+static func place_card(card_size: Vector2, cursor: Vector2, offset: Vector2, blocked: Array,
+		vp := Vector2.ZERO) -> Vector2:
+	if vp == Vector2.ZERO:
+		vp = Engine.get_main_loop().root.get_visible_rect().size
+	var xs := [cursor.x + offset.x, cursor.x - offset.x - card_size.x]
+	var ys := [cursor.y + offset.y, cursor.y - offset.y - card_size.y]
+	for y in ys:
+		for x in xs:
+			var rect := Rect2(x, y, card_size.x, card_size.y)
+			if rect.position.x < MARGIN or rect.position.y < MARGIN:
+				continue
+			if rect.end.x > vp.x - MARGIN or rect.end.y > vp.y - MARGIN:
+				continue
+			if not blocked.any(func(r: Rect2) -> bool: return r.intersects(rect)):
+				return rect.position
+	var low := MARGIN
+	for r in blocked:
+		if (r as Rect2).position.y <= MARGIN + 1.0:
+			low = maxf(low, (r as Rect2).end.y + MARGIN)
+	var high := vp.y - card_size.y - MARGIN
+	for r in blocked:
+		if (r as Rect2).end.y >= vp.y - 1.0 or (r as Rect2).position.y > vp.y * 0.5:
+			high = minf(high, (r as Rect2).position.y - card_size.y - MARGIN)
+	var left := clampf(xs[0], MARGIN, maxf(MARGIN, vp.x - card_size.x - MARGIN))
+	return Vector2(left, clampf(ys[0], low, maxf(low, high)))
 
 func _set_tag(state: Dictionary) -> void:
 	var held := bool(state.get("held", false))
@@ -87,13 +78,14 @@ func _set_tag(state: Dictionary) -> void:
 	if not tag.visible:
 		return
 	var reason := String(state.get("reason", "")) if held and not bool(state.get("ok", true)) else ""
-	var flags := "%s%s%s%s" % [held, state.get("tool", false), state.get("can_rotate", false),
-		state.get("sweep", false)]
+	var flags := "%s%s%s%s%s" % [held, state.get("tool", false), state.get("can_rotate", false),
+		state.get("can_store", false), state.get("sweep", false)]
 	var sig := "%s|%s|%s" % [item, reason, flags]
 	if sig == _tag_sig:
 		return
 	_tag_sig = sig
 	for old in tag.get_children():
+		tag.remove_child(old)
 		old.queue_free()
 	var col := UI.vbox(4)
 	tag.add_child(col)
