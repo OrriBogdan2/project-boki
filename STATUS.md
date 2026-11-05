@@ -802,3 +802,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Owner Qs: ground rings hidden at the match camera OK? Open left hand (turnaround) or closed stone fist (master)?
 
 ## 2026-11-05 S2: ext/art2-kael 37e5033e READY (merges clean into a4b39fd7); one extra dj_fx ride compile vs main, S5's call. ext/art2-lisette df95ffe5 merges clean, report pending.
+
+## 2026-11-05 S2: owner review + fine-detail pass taken (INBOX_S2 11:40)
+- All ART-1 lanes moved to it: Meshy base mesh, projected textures, separate face pass, normal maps, two-camera shots. Order Kael (full face redo), Breaker (one clean hull, clean porthole, round eyes), Pip (eyes scaled to the sheet), then the rest; Claire and Motley polish only.
