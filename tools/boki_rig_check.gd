@@ -11,7 +11,7 @@ const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat
 	"tend"]
 const SHAPES := ["blink", "closed", "happy", "sad", "sleepy", "angry", "m_smile", "m_frown", "m_snarl", "m_chomp",
 	"m_o"]
-const MAX_TRIS := 12000
+const MAX_TRIS := 5000         # Boki and props (S1's perf rule)
 const MAX_BONES := 64
 
 var bad := 0
@@ -55,8 +55,19 @@ func _contents(rig: BokiRig) -> void:
 		for si in m.get_surface_count():
 			tris += (m.surface_get_arrays(si)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
 	ok(tris <= MAX_TRIS, "%d tris, budget %d" % [tris, MAX_TRIS])
+	_lods(rig)
 	var skel := rig.model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	ok(skel.get_bone_count() <= MAX_BONES, "%d bones, budget %d" % [skel.get_bone_count(), MAX_BONES])
+
+## The coat has generated LODs (the art budget), the face stays whole (BokiRig.FACE_LOD_BIAS).
+func _lods(rig: BokiRig) -> void:
+	for mi in rig.model.find_children("*", "MeshInstance3D", true, false):
+		var inst := mi as MeshInstance3D
+		if inst == rig.face:
+			continue
+		var data: Dictionary = RenderingServer.mesh_get_surface(inst.mesh.get_rid(), 0)
+		var lods: Array = data.get("lods", [])
+		print("BOKIRIG %s LODs: %d" % [kin_id, lods.size()])
 
 func _clip_for(rig: BokiRig, key: String, value: Variant) -> String:
 	rig.root.set_meta(key, value)
