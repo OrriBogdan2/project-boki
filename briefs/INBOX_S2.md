@@ -1375,3 +1375,7 @@ Use them for shape and detail; **the master sheet wins on any difference.**
 - **Eye-stones (three floating stones with glowing eyes = his sight):** keep them always visible, orbiting his head.
 - The climber version is kept as `tarek_alt_climber.png` (skin idea).
 - The Rock Hop dash (item 111) is unchanged.
+
+## 2026-11-05 05:33 UTC (ext): Tarek complete.
+- **Files:** `tarek_FINAL_sheet.png` (eye-stones now in every view), `tarek_turnaround_apose.png`, `tarek_portrait.png`, `tarek_splash.png` (Rock Hop across a canyon).
+- **Model note:** the turnaround shows stone on BOTH forearms; follow the master: one huge stone RIGHT arm + shoulder, the left arm mostly bare (a small stone bracer at most).
