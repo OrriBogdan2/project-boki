@@ -276,7 +276,7 @@ def _ring(c, ax, r, t, wide=0.8):
 
 def monocle(vox=0.0012):
     m = Field(EYE_C - (0.14, 0.05, 0.09), EYE_C + (0.08, 0.09, 0.11), vox)
-    m.add(_ring(MONO_C, MONO_AX, MONO_R, 0.0125, 1.2), 0.0, BRASS)
+    m.add(_ring(MONO_C, MONO_AX, MONO_R, 0.0105, 1.2), 0.0, BRASS)
     m.add(_ring(MONO_C - MONO_AX * 0.024, MONO_AX, MONO_R - 0.004, 0.0100, 2.2), 0.002, BRASS)
     for off, r in LENS:
         c = MONO_C + np.array(off, F) * (1, 0, 1)

@@ -28,7 +28,7 @@ C = {"skin": rgb("85848b"), "skin_hi": rgb("b4b3b6"), "skin_sh": rgb("4c4954"), 
      "leather": rgb("64402a"), "leather_hi": rgb("8e6442"), "leather_sh": rgb("3e2414"),
      "loin": rgb("7c7642"), "loin_hi": rgb("aba564"), "loin_sh": rgb("423e22"),
      "lip": rgb("6a2a32"), "gum": rgb("7a1f2a"), "throat": rgb("1a0a0e"), "tooth": rgb("efe6c8"), "tooth_sh": rgb("a6966e"),
-     "dark": rgb("1e1a1e"), "glass": rgb("a8d8b0"), "lamp": rgb("ffcf4a")}
+     "dark": rgb("2e2422"), "glass": rgb("a8d8b0"), "lamp": rgb("ffcf4a")}
 
 
 def mix(a, b, t):

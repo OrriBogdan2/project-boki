@@ -262,8 +262,8 @@ def clips():
     o.append(C("quake", 0.75, [(0.0, dict(hit, LP=(-0.06, 0.62, 0.22), pel=(0, 0.10, -0.32))), (0.3, dict(hit, pel=(0, 0.10, -0.26), LP=(-0.1, 0.60, 0.26), hd=(-0.05, 0, 0)), "out"), (0.55, dict(hit, pel=(0, 0.06, -0.17), prt=(0.32, 0, 0), tor=(0.34, 0, 0), LP=(-0.26, 0.42, 0.46))), (0.75, END)]))
 
     # the junk ball: he folds up inside it (a dash is 0.16 s of travel, the clip tucks fast and opens as he stops). Hands and feet in the root's frame
-    tuck = {"rel": 1.0, "prt": (0.0, 0, 0), "tor": (0.85, 0, 0), "hed": (-0.42, 0, 0), "pel": (0, 0.0, -0.14), "G": (0.20, 0.33, 0.76), "BE": be(-5, -40, FLAT), "LP": (-0.20, 0.33, 0.76), "Lh": (0.2, 0, 0), "fing": 1.0,
-            "FL": (-0.12, 0.20, 0.44), "FR": (0.12, 0.20, 0.44), "FLp": -0.5, "FRp": -0.5, "hs": 0.42, "hl": (0, 0.18, -0.10), "hd": (0.0, 0, 0), "bs": 3.8, "bl": 1.0, "jaw": 0.9, "lid": -0.3, "brow": 0.8, "gw": 0.0}
+    tuck = {"rel": 1.0, "prt": (0.0, 0, 0), "tor": (0.85, 0, 0), "hed": (-0.42, 0, 0), "pel": (0, 0.0, -0.14), "G": (0.15, 0.24, 0.74), "BE": be(-5, -40, FLAT), "LP": (-0.15, 0.24, 0.74), "Lh": (0.2, 0, 0), "fing": 1.0,
+            "FL": (-0.12, 0.20, 0.44), "FR": (0.12, 0.20, 0.44), "FLp": -0.5, "FRp": -0.5, "hs": 0.42, "hl": (0, 0.18, -0.10), "hd": (0.0, 0, 0), "bs": 4.2, "bl": 1.0, "jaw": 0.9, "lid": -0.3, "brow": 0.8, "gw": 0.0}
     # (only the ball turns: he is folded still inside it, the root never spins, so a crossfade can't swing him off his line)
     t0 = dict(tuck, prt=(0.45, 0, 0), spin=0.3)
     t1 = dict(t0, spin=2 * math.tau)

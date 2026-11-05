@@ -69,7 +69,7 @@ func run(main: Node) -> void:
 		P.inp["dash"] = false
 		most = maxf(most, _bone_scale(P, "ball"))
 	P.inp["move"] = Vector2.ZERO
-	ok(most > 2.5, "the dash is the junk ball (ball scale %.2f)" % most)
+	ok(most > 3.0, "the dash is the junk ball (ball scale %.2f)" % most)
 	# the Muzzle on the gun you see
 	var sync: Node = P.model.get_node("Warden/Sync")
 	var muzzle := sync.get("muzzle") as Node3D
