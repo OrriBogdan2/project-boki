@@ -2935,7 +2935,7 @@ func gain_xp(x: float) -> void:
 			m.fx.burst(pos + Vector3(0, 1.2, 0), Color("ffd27a"), 12, 2.5, 0.5, -2.0)
 		if is_local() and m and m.hud:
 			m.hud.level_up(lvl, wstep)
-			# the level-up chime: its own rising bell run over a warm swell (tools/gen_level_sfx.py)
+			# the level-up chime: its own rising bell run over a warm swell (tools/gen_sfx_ui.py)
 			m.sfx("level_up", null, -2.0, 1.0)
 			if kin is Kin: BokiChatter.say(m, kin, "level_up")
 			level_ups += 1

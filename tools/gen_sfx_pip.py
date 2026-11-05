@@ -13,7 +13,7 @@ import os, sys
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
-from sfx_lib import N, T, noise, lpf, hpf, bpf, env, mix, at, kick, click, crack, grains
+from sfx_lib import N, T, noise, lpf, hpf, bpf, env, mix, at, kick, click, crack, grains, shape, soft_in
 
 S.reseed(9203)
 
@@ -21,21 +21,6 @@ STAR = (784.0, 988.0, 1175.0, 1568.0)     # G5 B5 D6 G6: the lantern's star (a b
 
 
 # ------------------------------------------------------------------ building blocks
-def shape(d, a, hold, rel):
-    """Raised-cosine attack over a, flat for hold, raised-cosine release over rel (length d)."""
-    n = N(d); t = np.arange(n) / S.SR
-    up = np.clip(t / max(a, 1e-4), 0, 1)
-    down = np.clip((t - a - hold) / max(rel, 1e-4), 0, 1)
-    return (0.5 - 0.5 * np.cos(np.pi * up)) * (0.5 + 0.5 * np.cos(np.pi * down))
-
-
-def soft_in(x, ms=1.5):
-    """A short raised-cosine fade-in, so a sound played many times a second never starts on a click."""
-    n = N(ms / 1000.0); x = x.copy()
-    x[:n] *= 0.5 - 0.5 * np.cos(np.pi * np.arange(n) / n)
-    return x
-
-
 def slow(d, rate, depth):
     """A smooth random wobble around 1: `rate` new values a second."""
     pts = max(4, int(d * rate) + 3)

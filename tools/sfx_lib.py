@@ -9,7 +9,8 @@ tail, reflections, ring, grains, mix, at, sat) and adds:
   - CATS: one loudness target per category, so every Hunter, Boki and UI sound sits at the same level
     for what it is (docs/AUDIO.md). save_cat / takes_cat level a sound to its category and write it.
   - voice(): a wordless voice (grunt, gasp, cry) from a glottal pulse train through vowel formants.
-  - chime(), creak(), fm(), sweep(), rattle(), hiss(): the textures several kits need.
+  - chime(), creak(), fm(), sweep(), rattle(), hiss(): the textures several kits need; shape() and
+    soft_in(): click-free envelopes.
 
 44.1 kHz mono 16-bit, written to audio/. Original synthesis, no samples.
 """
@@ -21,7 +22,7 @@ from sfx_combat import (SR, N, T, noise, lpf, hpf, bpf, env, mix, at, sat, kick,
 
 __all__ = ['SR', 'N', 'T', 'noise', 'lpf', 'hpf', 'bpf', 'env', 'mix', 'at', 'sat', 'kick', 'click', 'crack',
            'sub', 'tail', 'reflections', 'ring', 'grains', 'level', 'CATS', 'reseed', 'rng', 'save_cat',
-           'takes_cat', 'voice', 'chime', 'creak', 'fm', 'sweep', 'rattle', 'hiss', 'pad']
+           'takes_cat', 'shape', 'soft_in', 'voice', 'chime', 'creak', 'fm', 'sweep', 'rattle', 'hiss', 'pad']
 
 # Category loudness (content/rules/sfx_levels.json, the same table --sfx-set-check measures against):
 # RMS in dBFS over the audible part, and the peak ceiling. The game's volume_db at the call site then
@@ -56,6 +57,22 @@ def pad(x, d):
     return np.concatenate([x, np.zeros(max(0, N(d) - len(x)))])
 
 
+# ------------------------------------------------------------------ envelopes
+def shape(d, a, hold, rel):
+    """Raised-cosine attack over a, flat for hold, raised-cosine release over rel (length d)."""
+    n = N(d); t = np.arange(n) / SR
+    up = np.clip(t / max(a, 1e-4), 0, 1)
+    down = np.clip((t - a - hold) / max(rel, 1e-4), 0, 1)
+    return (0.5 - 0.5 * np.cos(np.pi * up)) * (0.5 + 0.5 * np.cos(np.pi * down))
+
+
+def soft_in(x, ms=1.5):
+    """A short raised-cosine fade-in, so a sound played many times a second never starts on a click."""
+    n = N(ms / 1000.0); x = x.copy()
+    x[:n] *= 0.5 - 0.5 * np.cos(np.pi * np.arange(n) / n)
+    return x
+
+
 # ------------------------------------------------------------------ textures
 def sweep(f0, f1, d, shape='sin', curve=1.0):
     """A tone gliding from f0 to f1 (exponentially; curve > 1 holds the start longer)."""
@@ -81,7 +98,7 @@ def chime(f, d=0.8, decay=0.35, partials=((1.0, 1.0), (2.76, 0.45), (5.4, 0.22),
     t = T(d); out = np.zeros(N(d))
     for k, g in partials:
         out += g * np.sin(2 * np.pi * f * k * t + rng.uniform(0, 6.28)) * np.exp(-t / (decay / k ** 0.5))
-    return out * env(N(d), 0.0008, d)
+    return out * shape(d, 0.003, 0.0, d * 0.25)
 
 
 def creak(d, f0=90, f1=60, roughness=0.6, bright=2500):
@@ -140,4 +157,5 @@ def voice(d, f0, f1, vowel='uh', breath=0.25, rasp=0.0, vib=0.0, scale=1.0, a=0.
     for fc, g in VOWELS[vowel]:
         fc *= scale
         out += g * bpf(src, fc * 0.82, fc * 1.18)
-    return sat(out * env(n, a, decay if decay else d * 0.45), 1.5)
+    tail_fade = shape(d, 0.0, d * 0.7, d * 0.3)      # a release, so the voice never stops dead
+    return sat(out * env(n, a, decay if decay else d * 0.45) * tail_fade, 1.5)

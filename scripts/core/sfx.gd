@@ -12,7 +12,7 @@ const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit"
 	"ab_throw", "ab_rail", "ab_charge", "ab_blast", "ab_leap", "ab_slam", "ab_wall", "ab_shield_hit", "ab_guard", "ab_parry",
 	"ab_plant", "ab_tether", "ab_blink", "ab_whirr", "ab_stun", "ab_slow", "ab_hit", "ab_ready",
 	"pay_deadeye", "pay_flashpoint", "pay_called", "pay_slam", "pay_cashin", "pay_rage", "level_up",
-	"hero_blowout", "hero_skewer", "pay_salvage", "dr_haul", "dr_anchor", "as_flame", "as_ignite", "as_cloak", "pay_rockfall", "pay_collapse",
+	"hero_blowout", "hero_skewer", "dr_anchor", "as_ignite", "pay_rockfall", "pay_collapse",
 	"rustle", "squeak", "key_get", "lock_rattle", "reset_a", "reset_b", "reset_c",
 	"break_wood", "break_clay", "break_metal", "fuse_hiss"]
 const POOL := 24
@@ -71,7 +71,7 @@ func _ready() -> void:
 		add_child(mp); music.append(mp)
 	amb = AudioStreamPlayer.new(); amb.bus = "Ambience"; amb.volume_db = -80.0
 	add_child(amb)
-	for n in NAMES + VOICES + SfxKits.NAMES + VVSfx.NAMES:      # (VVSfx: Ryzz and Vex, tools/gen_vv_sfx.py)
+	for n in NAMES + VOICES + SfxKits.NAMES + VVSfx.NAMES:      # (VVSfx: Ryzz and Vex)
 		var takes: Array = []
 		var s = load("res://audio/%s.wav" % n) if ResourceLoader.exists("res://audio/%s.wav" % n) else null
 		if s: takes.append(s)

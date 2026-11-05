@@ -320,7 +320,7 @@ gather and turn, then the dive) / `jug_meteor_land` (the crouch onto the knees a
 
 Effects in scripts/arch/kits/dj_fx.gd and shaders/dj_fx.gdshader (pooled): the two-tone slash crescents, the
 red flame crescent of the Searing Wave, the white impact bursts, the gold guard shell, the upward gold cleave, the purple dive ring, the
-wavy and striped chains, the heal column. Sounds: tools/gen_dj_sfx.py (`jug_*`), synthesized, including the
+wavy and striped chains, the heal column. Sounds: tools/gen_sfx_kael.py (`jug_*`, `juggernaut_*`), synthesized, including the
 rising Lunge whine (`jug_charge`) and its full ping (`jug_full`).
 
 ## Originality
