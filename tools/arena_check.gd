@@ -63,17 +63,32 @@ func _breaker_whirl() -> void:
 				turns += absf(angle_difference(atan2(last.x, last.z), atan2(v.x, v.z)))
 			last = v
 			if mesh and is_instance_valid(mesh):
-				long_m = maxf(long_m, mesh.global_basis.get_scale().x * mesh.get_aabb().size[mesh.get_aabb().get_longest_axis_index()])
+				var box := mesh.get_aabb()
+				long_m = maxf(long_m, mesh.global_basis.get_scale().x * box.size[box.get_longest_axis_index()])
 		var rate := turns / TAU / (59.0 * DT)
 		ok("arena Breaker (%s): held, the hammer whirls at the data's rate" % how,
 			K.fx.held and K.anim_id == "bul_smash_wind" and rate >= float(K.lmb_def()["spin_turns"][0]) - 0.1,
 			"%.2f turns/s" % rate)
-		ok("arena Breaker (%s): the whirled hammer reads at the match camera (>= 2.5 m long)" % how, long_m >= 2.5,
+		ok("arena Breaker (%s): the whirled hammer reads at the match camera (>= 2.5 m long)" % how,
+			long_m >= 2.5,
 			"%.2f m" % long_m)
 		var s0 := K.slams
 		P.inp["fire"] = false
 		m.step(DT)
-		ok("arena Breaker (%s): the release slams" % how, K.slams == s0 + 1 and not K.fx.held, "slams +%d" % (K.slams - s0))
+		ok("arena Breaker (%s): the release slams" % how, K.slams == s0 + 1 and not K.fx.held,
+			"slams +%d" % (K.slams - s0))
+		# the usual order in play: throw it, then press and keep holding: it comes back and he goes into the whirl
+		step(m, 1.0)
+		P.inp["fire"] = true
+		m.step(DT)
+		P.inp["fire"] = false
+		step(m, 0.8)
+		var out := not K.mace.is_empty()
+		P.inp["fire"] = true
+		step(m, 2.0)
+		ok("arena Breaker (%s): held through a recall, the catch goes into the whirl" % how,
+			out and K.mace.is_empty() and K.fx.held, "out %s back %s held %s" % [out, K.mace.is_empty(), K.fx.held])
+		P.inp["fire"] = false
 		m.queue_free()
 		await main.get_tree().process_frame
 
