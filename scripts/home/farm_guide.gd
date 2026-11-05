@@ -272,7 +272,7 @@ func _update_marker(dt: float) -> void:
 	marker.visible = true
 	marker.text = "%s\n▼" % txt
 	marker.position = at + Vector3(0, 3.6 + sin(t * 3.0) * 0.18, 0)
-	_yield_to_bubbles(dt)
+	_yield_to_covers(dt)
 
 ## A Boki's speech bubble fades back while a message card (MsgLane) covers it on screen.
 func _bubbles_under_lane(dt: float) -> void:
@@ -282,12 +282,12 @@ func _bubbles_under_lane(dt: float) -> void:
 		if say and say.visible:
 			MsgLane.yield_label(say, h.cam, cards, dt)
 
-## The marker fades back while a Boki's speech bubble covers it on screen, so the two never print
-## over each other; it comes back when the Boki is done talking.
-func _yield_to_bubbles(dt: float) -> void:
-	var bubbles: Array[Rect2] = []
+## The marker fades back while a Boki's speech bubble or a message card covers it on screen, so two
+## lines never print over each other; it comes back when the Boki is done talking and the card goes.
+func _yield_to_covers(dt: float) -> void:
+	var covers: Array[Rect2] = MsgLane.of(h.root_ui).rects()
 	for k in h.kins:
 		var say: Label3D = k.get("say")
 		if say and say.visible:
-			bubbles.append(MsgLane.label_rect(say, h.cam))
-	MsgLane.yield_label(marker, h.cam, bubbles, dt)
+			covers.append(MsgLane.label_rect(say, h.cam))
+	MsgLane.yield_label(marker, h.cam, covers, dt)

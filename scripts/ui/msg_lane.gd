@@ -103,8 +103,12 @@ static func yield_label(lbl: Label3D, cam: Camera3D, rects: Array[Rect2], delta:
 		var mine := label_rect(lbl, cam)
 		for r in rects:
 			if r.intersects(mine):
-				want = 0.9
+				want = 1.0
+	if lbl.transparency == want:
+		return
 	lbl.transparency = move_toward(lbl.transparency, want, delta * 6.0)
+	lbl.modulate.a = 1.0 - lbl.transparency            # (the outline ignores transparency on some renderers)
+	lbl.outline_modulate.a = 1.0 - lbl.transparency
 
 ## A billboarded Label3D's box on screen, in px, from its text and font (centred on its position).
 static func label_rect(lbl: Label3D, cam: Camera3D) -> Rect2:
