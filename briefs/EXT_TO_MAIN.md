@@ -2375,3 +2375,23 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - Buses: every sound goes through Sfx.play / Sfx.loop_start (SFX bus, SFXFar when far); no new AudioStreamPlayers. Item 103's teardown (Sfx.reset_scene_audio stopping keyed loops + pool voices) is on ext/perf-94, not merged yet; the sound branches rely on it once it lands.
 - Checks on the base: --check 0, --sfx-set-check 0, health --strict OK.
 - Per-hero branches follow as READY entries; after all land, S4 posts ext/sfx-cleanup (removes the superseded functions from the old shared generator scripts).
+
+## 2026-11-05 (S4): READY `ext/sfx-ui` @ 50f3c45f (sound pass: UI) — after ext/sfx-base
+- vs ext/sfx-base: 87 files changed, 1006 insertions(+), 11 deletions(-) (mostly .wav/.import). tools/gen_sfx_ui.py, content/sfx/ui.json (15 sounds, cat ui, -22 dB RMS).
+- Palette: one soft marimba/kalimba pluck family in C-major pentatonic with a small room, low-passed.
+- Replaced under the same names: click, hover, pickup (4 takes each), unlock, level_up, ping (3 takes). New: ui_confirm, ui_back, ui_deny, ui_tab, ui_open, ui_close, ui_toast, ui_charge.
+- **Kept the old `warn`** (S4 review): it is a combat danger cue (Grimble's blast, Breaker's ult, the R tell, Fusion timeout), not UI; UI denials use ui_deny instead. Note `ping` is also the squad ping and some ability cues: it is now the softer UI ping.
+- Wiring (non-reserved files): ui.gd button() picks ui_confirm (primary), ui_tab (tabs), ui_back (Back/Close/Cancel/✕/"Leave it (Esc)"), else click; msg_lane.gd push() plays ui_toast on a new line (**S3's file: one line, possible merge conflict with clarity work**); full_map.gd, overlay.gd (pause menu), home_build.gd, decorate.gd: ui_open/ui_close; hud.gd: loot/pack open ui_open instead of whoosh (string swaps); kinbox_view, decorate (blocked), home_trade, home_black_market (failed buy): ui_deny; hold_unlock.gd: ui_charge. `charge` kept (Fusion uses it).
+- Checks: --sfx-set-check 0 (re-run after the warn fix), --check 0, health --strict OK. Sheet: briefs/shots/s4/sfx/ui_sheet.png (made before two renames: `charge` there ships as ui_charge, and its `warn` row is not shipped).
+
+## 2026-11-05 (S4): READY `ext/sfx-boki` @ cb04f986 (sound pass: Boki) — after ext/sfx-base
+- vs ext/sfx-base: 117 files changed, 1451 insertions(+) (mostly .wav/.import). tools/gen_sfx_boki.py, content/sfx/boki.json (22 sounds, cat boki, -19 dB RMS). Code: 1 line in home_work.gd.
+- Voices: a bright chirp over a soft wordless vowel through scaled-up formants (small, cute); species variety from the existing Unique.voice pitch plus takes.
+- Replaced under existing names: kin_happy, kin_unsure, kin_alert, kinhit (4 takes), recall, throw, skill (3), catch, bond, and the element moves k_venom (bubbling gloop + spit), k_spore (puffs + sparkle), k_gravity (reverse suck + soft thud), k_prism (glassy chime fan), k_lunar (moonlit wind + pale bell), k_echo (a ping bouncing away), 4 takes each. Note: `skill` also plays on item use and `throw` on utility throws (both neutral enough; flag if they read too "Boki").
+- New: boki_downed, boki_revive, boki_eat, boki_sleep, boki_work (played when a Boki finishes a farm task, home_work.gd:705), boki_fuse, boki_unfuse.
+- **Wiring main must do (reserved files):**
+  - scripts/match/merge_xform.gd:25 and :168: add `m.sfx("boki_fuse", h.pos, SOUND_RANGE_DB - 4.0)` (`at` at :168) next to the existing `charge` line.
+  - merge_xform.gd:85: `m.sfx("recall", h.pos, -2.0, 1.3)` -> `m.sfx("boki_unfuse", h.pos, -2.0)`.
+  - scripts/match/kin_downed.gd:167: "kin_unsure" -> "boki_downed"; :256 add `k.m.sfx("boki_revive", k.pos, -4.0)` next to revive_done.
+  - boki_eat / boki_sleep have no call site yet (e.g. `Sfx.play("boki_sleep", pos, -10.0)` when a sleeper settles in kin_burrow.gd).
+- Checks: --sfx-set-check 0, --check 0, --boki-system-check 0, health --strict OK. Sheets: briefs/shots/s4/sfx/boki_sheet.png, boki_sheet2.png.
