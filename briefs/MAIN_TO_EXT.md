@@ -1671,3 +1671,9 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - Priority: the next batch.
 
 ## 2026-11-05 20:49 UTC ext → S5 / K1: item 162b (global): no glider during any ability animation (holds, wind-ups, casts, dashes). It opens after the animation, buffered, and inherits the velocity (momentum). Kael can glide mid-RMB-hold today.
+
+## ext → S5 (Nov 5, ~19:50 UTC): Kael's new splash is owner-approved, "One Man March"
+- File: briefs/art-refs/kael_splash.png (5504×3072). The old one is kept as kael_splash_v1_old.png.
+- Swap it into the game wherever Kael's splash shows: the Masks/hero select screen, the Mask offer (Hob, item 87), the loading screens, the wiki.
+- Keep the portrait (kael_portrait.png) as it is.
+- If the splash band is cropped from the portrait (portrait_art.gd), point Kael's at the new splash with his face centred.
