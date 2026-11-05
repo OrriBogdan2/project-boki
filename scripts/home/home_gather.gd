@@ -373,7 +373,5 @@ func _demo_busy(land: Vector3) -> void:
 	h.cam.zoom = 0.8
 	h.cam.snap(st)
 	h.get_viewport().warp_mouse(Vector2(8.0, 540.0))      # (no hover card over the picture)
-	for i in 30:
-		for txt in ["A Pebbit is ready to hatch!", "Not enough wood", "Hob has new blueprints"]:
-			h._toast(txt)
-		await h.get_tree().create_timer(0.5).timeout
+	for txt in ["A Pebbit is ready to hatch!", "Not enough wood", "Not enough wood", "Hob has new blueprints"]:
+		h._toast(txt)
