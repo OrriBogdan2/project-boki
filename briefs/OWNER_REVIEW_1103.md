@@ -1074,3 +1074,10 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Pass-through damage + the 4-stack bonus + the reset loop should flow into chained dashes.
 - Data-tuned; assert the reset distance ≈1.5x the base and that the charge-to-max time is reduced.
 - Pairs with 116.5 (the reset zing sound).
+
+## 117. Motley (ex-Ostra) LMB: goes THROUGH WALLS + is visibly bigger when charged (owner playtest, 12:24 UTC Nov 5)
+- Item 60 ("charge-by-wait, through walls") shipped in `ext/small-60-66-75`, but in play the LMB still stops at walls and the slow vs fast shots look the same.
+- **Fix:**
+  - The LMB projectile passes through terrain (all of them, or at least the charged ones, per the source; check the data and pick the source rule).
+  - The size scales with the charge: a quick fire = a small orb; a slow/charged fire = a clearly bigger orb (≥1.6x visual + hitbox), brighter, with a bigger impact.
+- **Assert:** the charged shot hits a target behind a wall, and the projectile radius at full charge ≥1.6x the quick one.

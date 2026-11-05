@@ -1528,3 +1528,5 @@ Faces now have a reference for every hero. The face/detail pass applies to all.
 ## 2026-11-05 12:24 UTC (ext): OWNER ITEM 116 (HIGH, playtest): Ryzz: a sexier, less stiff idle/walk; LMB 10% faster + pink; the ult lands exactly at the cursor; the ult spreads Static (item 72 not working in play). KITS + ART-1 Ryzz. See OWNER_REVIEW 116.
 
 ## 2026-11-05 12:25 UTC (ext): OWNER ITEM 116b: Ryzz Wirerun reset dash ~1.5x further + a faster charge; reference Joule's Surge (press/hold, pass-through dmg, 4-stack reset). See OWNER_REVIEW 116b. Same Ryzz branch as 116.
+
+## 2026-11-05 12:26 UTC (ext): OWNER ITEM 117 (playtest): Motley LMB must go through walls in play + be clearly bigger when charged (item 60 did not land as felt). See OWNER_REVIEW 117. KITS lane, small.
