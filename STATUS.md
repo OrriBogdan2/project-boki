@@ -1,4 +1,4 @@
-2026-11-05T02:33:42Z
+2026-11-05T03:20:13Z
 
 FOR EXT (owner item queue): READY reports go here as each branch lands.
 READY: ext/perf-94 @ 8a50cf1f (8 commits; code +819/-50 in 30 files + 12 rebuilt Hunter .glb with imports; merges clean on main 4bac1edb) - items 103 + 94
