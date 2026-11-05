@@ -4,7 +4,7 @@ extends RefCounted
 ##   2. every take sits at its category's loudness (content/rules/sfx_levels.json) and under the peak ceiling
 ##   3. a Hunter set has its wordless voice (hurt, down, death), its dash, footsteps on every surface,
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
-##   4. every literal m.sfx("...") in that Hunter's kit names a sound that exists
+##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
 ## Reads the files only; never touches the save.
 
@@ -76,19 +76,22 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	h.free()
 	var want := [arch + "_dash", arch + "_step_wood", arch + "_hurt"]
 	ok(picked == want, "%s: HeroSfx picks its own (%s)" % [arch, picked])
-	_kit_names(arch)
+	_kit_names(arch, d.get("kit_files", []))
 
-## 4. Every literal sound name the kit plays exists (a typo plays silence).
-func _kit_names(arch: String) -> void:
-	var kit := "res://scripts/arch/kits/%s_kit.gd" % arch
-	if not FileAccess.file_exists(kit):
-		return
+## 4. Every literal sound name the kit plays exists (a typo plays silence): <arch>_kit.gd plus the helper
+## files the set lists under "kit_files" (paths under scripts/arch/kits/).
+func _kit_names(arch: String, extra: Array) -> void:
 	var re := RegEx.create_from_string("\\.sfx\\(\"([a-z0-9_]+)\"")
 	var silent := []
-	for hit in re.search_all(FileAccess.get_file_as_string(kit)):
-		var sname := hit.get_string(1)
-		if not Sfx.ensure(sname) and not silent.has(sname):
-			silent.append(sname)
+	for f in ["%s_kit.gd" % arch] + extra:
+		var path := "res://scripts/arch/kits/" + String(f)
+		if not FileAccess.file_exists(path):
+			ok(false, "%s: kit file %s exists" % [arch, f])
+			continue
+		for hit in re.search_all(FileAccess.get_file_as_string(path)):
+			var sname := hit.get_string(1)
+			if not Sfx.ensure(sname) and not silent.has(sname):
+				silent.append(sname)
 	ok(silent.is_empty(), "%s: every sound its kit plays exists (silent: %s)" % [arch, silent])
 
 ## 5. A Hunter without its own set plays the shared sounds.
