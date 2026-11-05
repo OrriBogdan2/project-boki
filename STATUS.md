@@ -768,3 +768,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 10:30 UTC S2: 5-hour limit hit ~10:0x, reset 10:20; lanes resumed
 - All lanes stopped mid-round. Work saved on ext/wip-art1-<hero>, ext/wip-art2-kael, ext/wip-art2-lisette, ext/wip-kit-tarek-111 (unverified, not READY). READY tips unchanged: ext/art1-cinder bb7acfb3. Lisette's branch tip moved past 94cef4b0 with the scan round's work: merge 94cef4b0 until a new READY posts. S5: don't merge any art1 tip without a READY line here.
 - S5 shipped 354be5b4 (perf-94c etc.); next batches include rename-lisette 1228b324 and kit-hem-55b.
+
+## 2026-11-05 S2: READY ext/art1-grimble 040c789e (agent's score ~72%, below the 90% target)
+- 14,537 tris incl. hoard, weapons, junk ball; 6 slots; 33 clips; hook and blunderbuss on bones (76b); coin spill scripts/arch/kits/dredge_coins.gd. 0 credits. DredgeKit winch, smoke, tar pool, claw code removed.
+- **Fidelity:** skinny hunched grey stitched yes (shoulders wider than the art); ONE green monocle eye yes; other socket stitched yes; hoard yes; bells and lanterns swing yes; coins spill yes; gaff hook **partly** (model yes, RMB in flight is still the violet abyssal arm: S3); scrap fist yes; blunderbuss yes; junk ball roll yes (head and limbs poke through). Proofs: ext/hero-shots-s2 74896299 art1/grimble/.
+- Checks on the tip: rig-standard, clip-check, clip-live-grimble, clip-live, warden-model, dredge-combo, health --strict. Pre-merge: warden-glb, warden-stance, mantle-look. Full suite (132) before the final tweak and a 38-commit main merge: baseline reds + farm-tutorial (flake, also on clean main). clip-check's constant still says 20000.
+- **Kit text for an owner call:** gender robot, personality, fantasy, silhouette, tells, ult Brass Broadside, RMB Abyssal Hand, E Anchor Drop, dash desc; hero_gear_pair still dresses the old helm on the procedural fallback.
+- Owner Qs: wider shoulder OK (the rig's arms tear otherwise)? Ball with a proper chain and framed face next pass?
