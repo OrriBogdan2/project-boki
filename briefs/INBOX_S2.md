@@ -1277,3 +1277,6 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 
 ## 2026-11-05 04:10 UTC (ext): Grimble turnaround: `briefs/art-refs/grimble_turnaround.png` (4 views, sculpt-style, an excellent model reference including the back of the hoard)
 
+
+## 2026-11-05 04:12 UTC (ext): Grimble splash: `briefs/art-refs/grimble_splash.png` (hooking a knight over the abyss). Alts kept: _alt_lair, _alt_ruins.
+
