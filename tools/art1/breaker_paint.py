@@ -255,7 +255,7 @@ def p_door(p, n, c):
     lips = smooth(0.0045, 0.002, np.abs(fz + 0.04 - 60 * ax ** 2)) * (ax < 0.02)
     st = mix(st, C("4a4640"), np.maximum.reduce([eyes, brow * 0.7, nose * 0.5, lips]))
     hair = 0.5 + 0.5 * np.sin(x * 240.0 + np.sin(z * 9.0) * 3.0)
-    st = st * (0.86 + 0.2 * hair[:, None] * (np.abs(fz) > 0.08) * (z > 0.45))
+    st = st * (0.86 + 0.2 * (hair * (np.abs(fz) > 0.08) * (z > 0.45))[:, None])
     fig = shade(st, 0.45 + 0.55 * ao, cv * 1.0, n, 0.9, 0.5, (0.6, 0.58, 0.66))
     return np.where((lab == 4)[:, None], fig, col)
 

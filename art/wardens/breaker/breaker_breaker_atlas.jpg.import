@@ -3,18 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ddk5w17tbu15u"
-path="res://.godot/imported/breaker_breaker_atlas.jpg-72edb3d10a795675bc438765884fee22.ctex"
+path.bptc="res://.godot/imported/breaker_breaker_atlas.jpg-72edb3d10a795675bc438765884fee22.bptc.ctex"
+path.astc="res://.godot/imported/breaker_breaker_atlas.jpg-72edb3d10a795675bc438765884fee22.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "89a5f3e62b793b50aca56b18cb039576"
+"md5": "61377228b6871464fbc5e2168389d979"
 }
 
 [deps]
 
 source_file="res://art/wardens/breaker/breaker_breaker_atlas.jpg"
-dest_files=["res://.godot/imported/breaker_breaker_atlas.jpg-72edb3d10a795675bc438765884fee22.ctex"]
+dest_files=["res://.godot/imported/breaker_breaker_atlas.jpg-72edb3d10a795675bc438765884fee22.bptc.ctex", "res://.godot/imported/breaker_breaker_atlas.jpg-72edb3d10a795675bc438765884fee22.astc.ctex"]
 
 [params]
 
