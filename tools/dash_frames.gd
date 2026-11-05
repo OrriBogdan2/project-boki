@@ -5,10 +5,10 @@ extends Node
 ## from the idle before the press, with no frame over FRAME_MS.
 ##   xvfb-run -a -s "-screen 0 1280x720x24" godot --path . --rendering-driver opengl3 --audio-driver Dummy
 ##       --fixed-fps 60 -- --dash-frames-check [--dash-out=f.csv] [--dash-shots=dir]
-## --dash-frames=<archetype> runs that Hunter's dash alone. --fixed-fps sets the delta the game sees, so the positions
-## and poses are those of that frame rate on any box (the assert holds at any rate, thanks to DashPace: run it at 15 too)
-## and the ms columns are what this box really took. Also runs --headless, where nothing is drawn and only travel and
-## pose are judged.
+## --dash-only=<archetype> runs that Hunter's dash alone. --fixed-fps sets the delta the game sees, so the positions
+## and poses are those of that frame rate on any box (the assert holds at any rate, thanks to DashPace: run it at 15
+## too) and the ms columns are what this box really took. Also runs --headless, where nothing is drawn and only travel
+## and pose are judged.
 ##
 ## The frame budget: a real GPU has FRAME_MS, two 60 fps frames. A software rasterizer (no GPU in the run environment,
 ## and a box other lanes load to 60) spends 130-300 ms on every frame, so a fixed number means nothing: there a frame
@@ -30,11 +30,14 @@ const SEQ := {
 			["dash", 0.0, ["jug_dash"]], ["dash", 0.0, ["jug_dash"]]],
 }
 const PIPELINES := [RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_CANVAS,
-	RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_MESH, RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_SURFACE,
-	RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW, RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_SPECIALIZATION]
+	RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_MESH,
+	RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_SURFACE,
+	RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW,
+	RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_SPECIALIZATION]
 const POSE_NODES := ["Rig", "Rig/Torso", "Rig/Torso/ArmLPivot", "Rig/Torso/ArmRPivot", "Rig/Legs/LegL", "Rig/Legs/LegR"]
 const POSE_BONES := ["root", "hips", "upper_arm.L", "upper_arm.R", "thigh.L", "thigh.R"]
-const CSV_HEAD := "arch,use,slot,frame,wall_ms,script_ms,render_ms,compiles,mtime,drawx,drawz,scrx,scry,roll_t,kmove,model_vis,pose_rig,pose_bones,step_m"
+const CSV_HEAD := "arch,use,slot,frame,wall_ms,script_ms,render_ms,compiles,mtime,drawx,drawz,scrx,scry,roll_t,kmove," \
+		+ "model_vis,pose_rig,pose_bones,step_m"
 
 class Tail extends Node:
 	var d
@@ -67,13 +70,15 @@ var want_press := false
 var want_release := false
 var was := Vector3.ZERO
 var failures := 0
-var base := []
 var headless := false
 var software := false
 
+func run(main_node: Node) -> void:
+	main_node.add_child(self)
+
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--dash-frames="): todo = [a.substr(14)]
+		if a.begins_with("--dash-only="): todo = [a.substr(12)]
 		if a.begins_with("--dash-out="): out_path = a.substr(11)
 		if a.begins_with("--dash-shots="): shots_dir = a.substr(13)
 	if todo.is_empty():
@@ -99,7 +104,8 @@ func _ready() -> void:
 		var tk := Save.new_kin("zapple", "Pip")
 		Save.d["roster"].append(tk)
 		Save.d["active"] = tk["uid"]
-	print("DASHF renderer=%s adapter=%s software=%s" % [RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), software])
+	print("DASHF renderer=%s adapter=%s software=%s" % [RenderingServer.get_current_rendering_method(),
+			RenderingServer.get_video_adapter_name(), software])
 	_open(String(todo.pop_front()))
 
 func _open(a: String) -> void:
@@ -171,7 +177,7 @@ func _process(_dt: float) -> void:
 		Input.action_release("secondary")
 	if m == null:
 		var cur = Game.main.current
-		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null and (cur as Match).player != null:
+		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null and cur.player != null:
 			m = cur
 			P = m.player
 			fr = 0
@@ -182,18 +188,16 @@ func _log(wall: float) -> void:
 	var p: Array = _pose()
 	var step := Vector2(P.position.x - was.x, P.position.z - was.z).length()
 	var c := _compiles()
-	var e := {"f": fr - press_fr, "wall": wall, "script": (Time.get_ticks_usec() - head_us) / 1000.0, "render": render_us / 1000.0,
+	var script_ms := (Time.get_ticks_usec() - head_us) / 1000.0
+	var e := {"f": fr - press_fr, "wall": wall, "script": script_ms, "render": render_us / 1000.0,
 		"comp": c - compiles_seen, "t": m.time, "x": P.position.x, "z": P.position.z, "scr": scr, "roll": P.roll_t,
 		"move": P.ak.anim_id, "vis": P.model.visible and P.visible, "rig": p[0], "bones": p[1], "step": step}
 	compiles_seen = c
 	was = P.position
-	if int(e["comp"]) > 0:
-		var parts := []
-		for k: int in PIPELINES: parts.append(RenderingServer.get_rendering_info(k))
-		print("DBG use=%d f=%d comp=%d cum canvas/mesh/surface/draw/spec=%s pressbase=%s" % [use, e["f"], e["comp"], parts, base])
 	(uses[use] as Array).append(e)
-	rows.append("%s,%d,%s,%d,%.1f,%.2f,%.1f,%d,%.3f,%.3f,%.3f,%.1f,%.1f,%.3f,%s,%d,%.3f,%.3f,%.3f" % [arch, use, seq[use][0], e["f"], wall, e["script"], e["render"], e["comp"], e["t"],
-		e["x"], e["z"], scr.x, scr.y, e["roll"], e["move"], int(e["vis"]), e["rig"], e["bones"], step])
+	var row: Array = [arch, use, seq[use][0], e["f"], wall, script_ms, e["render"], e["comp"], e["t"],
+		e["x"], e["z"], scr.x, scr.y, e["roll"], e["move"], int(e["vis"]), e["rig"], e["bones"], step]
+	rows.append(",".join(row.map(func(v): return str(v))))
 
 func tail() -> void:
 	var now := Time.get_ticks_usec()
@@ -250,8 +254,6 @@ func _press() -> void:
 	_pose()
 	was = P.position
 	compiles_seen = _compiles()
-	base = []
-	for k: int in PIPELINES: base.append(RenderingServer.get_rendering_info(k))
 	Input.action_press("right")
 	t_s = 0.0
 	press_fr = fr
@@ -271,7 +273,7 @@ func _ok(what: String, good: bool, detail: String) -> void:
 func _judge() -> void:
 	for i in uses.size():
 		var fs: Array = uses[i]
-		var run: Array = fs.filter(func(e): return float(e["roll"]) > 0.0)
+		var run: Array = _dash_of(fs)
 		var moves: Array = seq[i][2]
 		var shown := 0
 		var at := Vector2.INF
@@ -299,6 +301,21 @@ func _judge() -> void:
 		var limit := med * SOFT_K if software else FRAME_MS
 		_ok(name_i + ": no hitch", worst <= limit and (comp == 0 or not software),
 				"worst %.0f ms, limit %.0f ms (window median %.0f), %d compiles" % [worst, limit, med, comp])
+
+## The frames of the first dash in a window (a press held a frame too long buffers a second one; Rampage's crouch and
+## drive, a frame or two apart, are one).
+func _dash_of(fs: Array) -> Array:
+	var out: Array = []
+	var gap := 0
+	for e: Dictionary in fs:
+		if float(e["roll"]) > 0.0:
+			out.append(e)
+			gap = 0
+		elif not out.is_empty():
+			gap += 1
+			if gap > 3:
+				break
+	return out
 
 func _end_hunter() -> void:
 	if not todo.is_empty():
