@@ -2551,3 +2551,7 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Any other hero on the generic default → identical, unless DECISIONS/OWNER_REVIEW gives them a special one.
   - Write the audit table to docs/heroes/AIR_DASH.md.
 - **Assert:** for each hero, an air dash's distance/time == the ground ±5%, or the hero is in the "special" list, and no hero uses the class default path.
+- 163 addendum (owner, 21:37 UTC): the skyship itself must be clearly visible while you fly. Today the camera only shows its edge.
+  - Raise its flight altitude well above the players' drop camera and pull the camera back/up during the ride, so the whole ship is in frame (hull, balloon, props) with the squad aboard.
+  - On launch, the camera follows the squad down and away, so the ship recedes overhead.
+  - This goes with the 163 "high start" work.
