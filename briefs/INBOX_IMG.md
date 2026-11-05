@@ -80,3 +80,6 @@ The owner wants these redone and approved before we commit to 3D models. Common 
 
 ## 2026-11-05 (S2): Vex splash request updated
 - The 00:52 request's design note is out of date: use briefs/art-refs/vex_FINAL_sheet.png (the street racer version, one hybrid arm-cannon) for any Vex splash. Skip it if the owner already made one.
+
+## 2026-11-05 (S2): Vex splash request closed
+- The owner delivered vex_splash.png, vex_portrait.png and the final sheet. No Vex splash needed from IMG.
