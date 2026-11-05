@@ -56,6 +56,7 @@ const STILLS := {
 	"pull_steer": ["juggernaut", Vector3(-10.0, 0, 0)],
 }
 
+const SLOW_STRIPS := ["thf_vault", "thf_exdash", "thf_loop", "thf_primed", "thf_chain", "thf_dance", "thf_dance_still"]
 const STRIP_SLOW := 0.15     # Engine.time_scale while Kael's strips and Sable's dash strips play
 
 static func at(t: float, dt: float, when: float) -> bool:
@@ -65,7 +66,7 @@ static func at(t: float, dt: float, when: float) -> bool:
 static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	if P.ammo < 3: P.ammo = int(P.wpn["mag"])
-	if t < 0.05 and (mv.begins_with("jug_") or mv in ["thf_vault", "thf_exdash", "thf_loop", "thf_primed", "thf_chain", "thf_dance", "thf_dance_still"]):
+	if t < 0.05 and (mv.begins_with("jug_") or mv in SLOW_STRIPS):
 		Engine.time_scale = STRIP_SLOW       # (a slow software render must not skip the frames a strip asks for)
 	match mv:
 		"thf_lmb":

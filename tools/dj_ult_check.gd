@@ -79,7 +79,8 @@ func dancer(a) -> void:
 	for i in range(1, gaps.size()):
 		even = even and absf(float(gaps[i]) - float(gaps[i - 1]) - 0.2) < 0.03
 	A.ok("dancer X: a blade at each foe every 0.2s, the ring pulsing on the beat",
-			gaps.size() >= 9 and even and float(beat["pulse"]) > 1.6, "%d beats, pulse %.2f" % [gaps.size(), beat["pulse"]])
+			gaps.size() >= 9 and even and float(beat["pulse"]) > 1.6,
+			"%d beats, pulse %.2f" % [gaps.size(), beat["pulse"]])
 	A.ok("dancer X: she dances from the first beat on", bool(beat["danced"]))
 	A.ok("dancer X: still running at 2.3s", U.running())
 	A.step(m, 0.5)
@@ -128,7 +129,8 @@ func dancer(a) -> void:
 	P.inp["move"] = Vector2.ZERO
 	var off_beat := fmod(m.time - K.anim_at - into - 0.55 + 0.8, 0.8)
 	A.ok("dancer X: a Vault flips out of the dance and it picks up again on the beat", flip in ThiefKit.CARTWHEELS
-			and K.anim_id == ThiefUlt.DANCE and minf(off_beat, 0.8 - off_beat) < 0.05, "%s, off %.3f" % [flip, off_beat])
+			and K.anim_id == ThiefUlt.DANCE and minf(off_beat, 0.8 - off_beat) < 0.05,
+			"%s, off %.3f" % [flip, off_beat])
 	A.step(m, 1.1)
 	A.ok("dancer X: no foe in the ring, no bond (never on the cast alone)", U.casts == 2 and not U.running()
 			and _owed(P) == 0.0, "owed %.2f" % _owed(P))
