@@ -91,7 +91,13 @@ func _flare_glow(glb: Node3D) -> void:
 	m.albedo_texture = WardenGlb._puff()
 	puff = WardenGlb._bloom_quad(m, FLARE_M, Vector3.ZERO)
 	puff.visible = false
-	at.add_child(puff)
+	# (on the root, following the anchor: nothing that walks the .glb's meshes sees it)
+	root.add_child(puff)
+	var follow := RemoteTransform3D.new()
+	follow.update_scale = false
+	follow.update_rotation = false
+	at.add_child(follow)
+	follow.remote_path = follow.get_path_to(puff)
 
 func _want(s: Dictionary) -> String:
 	if bool(s.get("downed", false)) or bool(s.get("dead", false)):
