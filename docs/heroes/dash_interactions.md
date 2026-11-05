@@ -285,7 +285,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | rimewright | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
 | rimewright | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
 | rimewright | E -> jump |  | the move goes at once, the ability keeps running (default) |
-| rimewright | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
+| rimewright | ult (X) -> jump | Owner item 65; footage (ult f25-f55): she is rooted in the crystal. | **exception:** the move is refused while it runs (Owner item 65: she is a frozen statue; only the recast and Shift end it.) |
 | rimewright | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
 | rimewright | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | rimewright | hold RMB through an air dash |  | the hold carries through and lets go there |

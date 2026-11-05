@@ -24,6 +24,9 @@
 		"x": {"mode": "cancel", "carry": true, "source": "Data: reactivating ends Chilling Finale early. Owner item 27: Shift ends Rimelock (as X again would; a late press still cracks it open) and she skates straight out at full speed, in the air too (item 62)."},
 		"q": {"mode": "fire", "carry": true, "source": "No source glove; the skate starts and the glove's effect stays."}
 	},
+	"into_jump": {
+		"x": {"mode": "lock", "reason": "Owner item 65: she is a frozen statue; only the recast and Shift end it.", "source": "Owner item 65; footage (ult f25-f55): she is rooted in the crystal."}
+	},
 	"hold": {
 		"rmb": {
 			"ground": {"mode": "keep"},
