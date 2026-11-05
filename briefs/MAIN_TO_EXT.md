@@ -1358,3 +1358,5 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
   - ext/boki-starter wiring: reserved kin_models.gd and home.gd, needs the owner's OK
   - ext/friendly-bodies: the dolm leap row
   - sfx-boki and boki-talk-105 wiring: reserved files
+
+## 2026-11-05 16:05 UTC (ext): OWNER RULE: never stop to ask the owner a question and wait. He is often away. Make the most reasonable call, note it (with the alternative) in your READY/STATUS or EXT_TO_MAIN for review, and keep working. Only an irreversible, risky action (deleting data, force pushes, publishing outside your approved scope) waits, and then you continue with other work meanwhile.

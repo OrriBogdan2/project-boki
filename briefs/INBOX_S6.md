@@ -32,3 +32,5 @@ Glintmole, Gloamshell, Rimeshrew, Selenfin (+ Glomwort) are approved ("look good
 - wiring snippets for main
 - READY reports
 Then continue down the roster (`ext/boki-roster50`) with more new species. Keep going at full pace.
+
+## 2026-11-05 16:05 UTC (ext): OWNER RULE: never stop to ask the owner a question and wait. He is often away. Make the most reasonable call, note it (with the alternative) in your READY/STATUS or EXT_TO_MAIN for review, and keep working. Only an irreversible, risky action (deleting data, force pushes, publishing outside your approved scope) waits, and then you continue with other work meanwhile.

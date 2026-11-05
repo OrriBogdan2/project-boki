@@ -36,3 +36,5 @@ Combat clarity (96) is merged, thanks. New job.
 ## 2026-11-05 12:22 UTC (ext): OWNER (playtest): (a) Lisette's E VFX starts GREEN then turns red: make it RED the whole time (item 114.5). (b) **Vex's ult VFX must be GREEN** (item 115); check all Vex VFX for off-palette colours.
 
 ## 2026-11-05 12:24 UTC (ext): OWNER (playtest, item 116.3): Ryzz Static stacks: a PINK counter over the enemy head + a small lightning-bolt icon attached per stack (like the source; our own art). Her LMB bolts pink.
+
+## 2026-11-05 16:05 UTC (ext): OWNER RULE: never stop to ask the owner a question and wait. He is often away. Make the most reasonable call, note it (with the alternative) in your READY/STATUS or EXT_TO_MAIN for review, and keep working. Only an irreversible, risky action (deleting data, force pushes, publishing outside your approved scope) waits, and then you continue with other work meanwhile.
