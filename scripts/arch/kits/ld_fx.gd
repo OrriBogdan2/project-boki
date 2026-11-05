@@ -10,7 +10,7 @@ extends Node3D
 ##                         "pip", "spiral", "pilot", "anchor", "glow", "hand" (the Abyssal Hand); stop calling
 ##                         and they hide
 ## - rope(id, a, b)        the Abyssal Hand's arm (twisting strands), drawn through walls
-## - one-shots: sunburst, scorch, crescent, wave, dot, lava, orb, anchor_drop, embers, puff, wisp, volley
+## - one-shots: sunburst, scorch, crescent, wave, dot, lava, orb, anchor_drop, puff, wisp, volley
 ##   (a Broadside slug)
 ##
 ## Each look is two passes (shaders/ld_fx.gdshaderinc): an alpha-blended body, so colour and dark rims read
@@ -61,7 +61,6 @@ var riders: Array = []         # looks riding on a shot: {node, sd, kind, last, 
 var placed := {}               # id -> {node, kind, t}
 var flames := {}               # id -> {node, t}
 var ropes := {}                # id -> {node, mesh, t}
-var emitters: Array = []       # ember fountains: {at, t, dur, acc, col}
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
 var _quad: QuadMesh
 var _plane: PlaneMesh
@@ -457,10 +456,6 @@ func anchor_drop(at: Vector3, fall: float, scl := 1.2) -> Dictionary:
 func stop(e: Dictionary) -> void:
 	if not e.is_empty(): e["t"] = float(e["dur"])
 
-## Embers sprayed up and out of a spot for `dur` (Cinder Shot's impact).
-func embers(at: Vector3, dur := 0.6, col := Color("ff5a3a")) -> void:
-	emitters.append({"at": at, "t": 0.0, "dur": dur, "acc": 0.0, "col": col})
-
 # ------------------------------------------------------------------ immediate looks
 func _build_place(kind: String, col: Color, col2: Color) -> Node3D:
 	match kind:
@@ -703,17 +698,6 @@ func _process(_delta: float) -> void:
 		if u >= 1.0:
 			n.visible = false
 			live.erase(e)
-	for em in emitters.duplicate():
-		em["t"] = float(em["t"]) + delta
-		em["acc"] = float(em["acc"]) + delta
-		if float(em["acc"]) >= 0.07 and m.get("fx") != null:
-			em["acc"] = 0.0
-			m.fx.spark(
-				(em["at"] as Vector3) + Vector3(0, 0.9, 0),
-				Vector3(randf_range(-0.3, 0.3), 1.0, randf_range(-0.3, 0.3)), em["col"], 6, 5.0, 60.0, 0.45, 9.0, 1.3
-			)
-		if float(em["t"]) >= float(em["dur"]):
-			emitters.erase(em)
 	track()
 	for r in riders:
 		_pose(r["node"], r["sd"]["pos"], r["sd"]["vel"], float(r["trail"]), float(r["width"]))
