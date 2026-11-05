@@ -8,7 +8,7 @@ metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "be8e17d888ee744ea45f324c1d7deedf"
+"md5": "4d19f2ef6cec8d3e6c07447c2613d22a"
 }
 
 [deps]
@@ -18,8 +18,8 @@ dest_files=["res://.godot/imported/kael_head.jpg-3c5d98799939e0256bab29de28545d9
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
@@ -40,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0
