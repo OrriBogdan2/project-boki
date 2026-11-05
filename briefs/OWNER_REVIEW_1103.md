@@ -1673,3 +1673,24 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Levelling 1→10 grants no WeaponUps.
   - Nothing new appears on the bottom HUD on level-up other than the rank prompts.
   - TTK is within ~10% of before at level 8.
+
+## 149. Mantle/wall-bounce without the glider, repeatable, with sound, like SUPERVIVE (owner, 17:34 UTC Nov 5)
+- The owner: "mantling up a wall without gliding still feels weird - i want to be able to just dance/bounce by the wall and not use glider like in supervive, making a sound when you do it but you can do it indefinitely there".
+- **Goal:** next to a wall/ledge, jumping into it gives a springy upward hop (SV's mantle suction + mini-mantle). Do it again and again, "dancing" along or up the wall, no glider involved, no cooldown or limit.
+- **Use SV's numbers** from briefs/supervive-data/supervive_physics.md §Mantle:
+  - Suction upward force up to 1.5 m above you.
+  - Z speed cap 250 uu/s.
+  - The mini-mantle post-launch 0.75 s.
+  - XY speed target 0.6 / min 350 uu/s.
+  - Forward force multiplier 8.
+  - Mantling from the abyss allowed.
+- Compare the feel against the footage on `ext/hero-ref-footage` (any hero hopping on ledges).
+- **Rules:**
+  - Jump while touching or facing a wall within reach → a bounce/hop up (a mantle if the ledge is within reach, else a small wall-hop that keeps you near the wall).
+  - The glider never auto-opens from this.
+  - Repeatable indefinitely.
+  - Each bounce plays a short scuff/tap sound (a footstep on stone), varied pitch, heard by others nearby.
+- **Assert:**
+  - 10 consecutive wall-bounces without the glider opening.
+  - A ledge at ≤1.5 m above → a mantle succeeds from a standing jump.
+  - The bounce sfx plays every time.
