@@ -1118,3 +1118,13 @@ Use it with hem_v4_needlebow.png for the weapon/prop meshes:
 
 ## 2026-11-05 02:22 UTC (ext): HEM MASTER SHEET: `briefs/art-refs/hem_FINAL_sheet.png`
 This one sheet now has everything (vivid colours, the owner's skin tone, capris). It **supersedes** hem_v4_needlebow + hem_v5_sheet_vivid for the outfit and colour. The props sheet and splash stay as they are.
+
+## 2026-11-05 02:24 UTC (ext): RENAME Hem → **Lisette** ("the Red Stitch"), owner decision (DECISIONS.md updated)
+- **Rename sweep** (small, Sonnet, a KITS-lane branch `ext/rename-lisette` from main):
+  - every player-facing string, i.e. the archetype JSON display name, hero_kit, HUD/menus, tutorial/lore text and the wiki via gen_wiki
+  - the id `archer` and file names unchanged
+  - reserved kin_* text: list the lines for main
+- **Model reference for 3D:** `briefs/art-refs/lisette_turnaround_apose.png`, a clean A-pose in 4 views (front, left, back, right).
+  - It shows full-length pants: **build CAPRIS (mid-calf) per hem_FINAL_sheet.png**.
+  - The long hanging red scarf here is fine for the rest pose (cloth sim).
+  - No weapons on the turnaround: build them from hem_v4_props.png.
