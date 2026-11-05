@@ -107,6 +107,15 @@ def hand(side, grip_dir, curl, spread=0.0):
     return pieces
 
 
+def cuff_cap(side):
+    """Closes the sleeve's cut end inside the fur cuff."""
+    s = ARM[side]
+    c = np.array([s * SH, 0.0, HAND_Z])
+    path = [c + [0, 0, 0.05], c + [0, 0, 0.012], c + [0, 0, -0.012]]
+    p = sweep("cuffcap" + side, "fur-trim", path, SEC8, np.array([0.05, 0.05, 0.022]), side_hint=np.array([1.0, 0, 0]))
+    return p.rigid("forearm." + side)
+
+
 # ---- rabbit ears: long, soft, cupped toward the front; they spill out and down off the hood so they read from above
 EAR_N = 5
 

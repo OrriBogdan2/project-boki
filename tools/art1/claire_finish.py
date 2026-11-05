@@ -127,7 +127,7 @@ lids = [lid_piece(1.0), lid_piece(-1.0)]
 hR = K.hand("R", K.GRIP_K, (1.3, 1.45, 0.95))
 hL = K.hand("L", (0.0, 1.0, -0.15), (0.32, 0.42, 0.3), 0.07)
 hornR, hornL = K.horn(1.0), K.horn(-1.0)
-pieces = [el, er, hornR, hornL, tl, th] + bw + [rr, rl, K.blade(1.0), K.blade(-1.0)] + sp + [wr, wl] + wr_rods + wl_rods + lids + hR + hL
+pieces = [el, er, hornR, hornL, tl, th] + bw + [rr, rl, K.blade(1.0), K.blade(-1.0)] + sp + [wr, wl] + wr_rods + wl_rods + lids + hR + hL + [K.cuff_cap("R"), K.cuff_cap("L")]
 
 
 def chain_w(p, pts, names, tip_free=True):
@@ -490,7 +490,7 @@ def paint(pred, fn):
         OUTC[yy, xx] = fn(POS[yy, xx].astype(np.float64), NOR[yy, xx].astype(np.float64), AO[yy, xx].astype(np.float64))
 
 
-paint(lambda n: n.startswith(("palm", "finger", "thumb")), P.glove)
+paint(lambda n: n.startswith(("palm", "finger", "thumb", "cuffcap")), P.glove)
 paint(lambda n: n == "earR", lambda p, n, ao: P.ear(p, n, ao, el.path, 1.0))
 paint(lambda n: n == "earL", lambda p, n, ao: P.ear(p, n, ao, er.path, -1.0))
 paint(lambda n: n == "hornR", lambda p, n, ao: P.horn(p, n, ao, hornR.path))

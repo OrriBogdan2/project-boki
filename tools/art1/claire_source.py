@@ -77,7 +77,7 @@ for s_ in (1.0, -1.0):
     e_, w_ = np.array([s_ * 0.244, 0, 1.206]), np.array([s_ * 0.40, 0, 1.02])
     u_ = w_ - e_
     h_ = np.clip(((P - e_) @ u_) / (u_ @ u_), 0, 1)
-    sk *= smooth(0.095, 0.115, np.linalg.norm(P - (e_ + h_[:, None] * u_), axis=1))
+    sk *= 1 - smooth(0.115, 0.095, np.linalg.norm(P - (e_ + h_[:, None] * u_), axis=1)) * ((P[:, 2] > 0.985) | (np.abs(P[:, 0]) > 0.345))      # (the cuff and glove, not the hem beside them)
 ZT = 1.10
 stretch = sk * smooth(ZT, ZT - 0.08, P[:, 2])
 Z0 = P[:, 2].copy()

@@ -191,7 +191,7 @@ def clips():
     # Shift, the Skate. Go (tm_skate_go, 0.16): the knee sinks and the back blade drives out; a distinct push-off
     sg0 = {"pel": (0, -0.04, -0.12), "prt": (0.3, 0, 0), "tor": (0.16, -0.1, 0), "hed": (-0.26, 0, 0), "FR": (0.1, -0.26, A_Z), "FL": (-0.08, 0.14, A_Z), "FRy": -0.75, "FLy": 0.05, "LP": (-0.36, 0.0, 1.0), "LH": (0.3, 0, 0), "skirt": -0.3, "smile": 0.7, "lid": 0.1}
     sg0.update(LOWS)
-    sg1 = dict(sg0, pel=(0, 0.1, -0.13), prt=(0.42, 0, 0), FR=(0.13, -0.4, A_Z + 0.015), FL=(-0.08, 0.2, A_Z), skirt=-0.5)
+    sg1 = dict(sg0, pel=(0.04, 0.09, -0.13), prt=(0.42, 0, 0.1), FR=(0.14, -0.36, A_Z + 0.02), FL=(-0.09, 0.2, A_Z), skirt=-0.4, G=(0.31, -0.08, 0.98), LP=(-0.36, 0.24, 1.07))
     out.append(C("skate_go", 0.16, [(0.0, END), (0.08, sg0, "out"), (0.16, sg1)]))
     # held (tm_skate, looped every 0.56 s by the kit): long edges, the free leg trailing low, the arms opposed: the kit's speed made calm
     def sk(sw):

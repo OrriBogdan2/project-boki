@@ -8,7 +8,7 @@
 	"weight": "light",
 	"body": {
 		"size": 1.1,
-		"bulk": 0.78,
+		"bulk": 1.0,
 		"hit_r": 0.38,
 		"head": 0.6,
 		"legs": 2.04,

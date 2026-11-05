@@ -64,7 +64,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	var shown := 0
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
 	for mi in gun.find_children("*", "MeshInstance3D", true, false):
-		if (mi as MeshInstance3D).is_visible_in_tree():
+		if (mi as MeshInstance3D).is_visible_in_tree() and (mi as MeshInstance3D).mesh != null:      # (the emptied Mag stays for its motion)
 			shown += 1
 	ok(shown == 0, "%s: one weapon drawn (%d procedural pieces showing)" % [id, shown])
 	_sliders(id, sync)
