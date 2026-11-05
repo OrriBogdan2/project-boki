@@ -243,7 +243,7 @@ func _layer(layer: Dictionary, h: Hunter, at: Vector3, dir: Vector2, o: Dictiona
 			_ribbon(layer, h, o)
 		elif kind == "bolt":
 			var from := _where(layer, h, at, dir, o)
-			_bolt(layer, h, from, _bolt_end(layer, h, from, dir, o), o)
+			_bolt(layer, h, from, _bolt_end(layer, h, at, from, dir, o), o)
 		else:
 			_surface(kind, layer, h, _where(layer, h, at, dir, o), dir, o)
 	else:
@@ -420,12 +420,13 @@ func _ribbon(layer: Dictionary, h: Hunter, o: Dictionary) -> void:
 			"dur": _num(layer, "life", o, 0.3), "tail": float(layer.get("tail", 0.2)),
 			"width": _num(layer, "size", o, 0.4), "pts": []})
 
-## Where a bolt ends: the kit's `o.to`, else a named anchor ("to"), else `len` metres along the aim.
-func _bolt_end(layer: Dictionary, h: Hunter, from: Vector3, dir: Vector2, o: Dictionary) -> Vector3:
+## Where a bolt ends: the kit's `o.to`, else "to" (an anchor, "here" the moment's spot or "h" the body, raised by
+## "to_y": a strike out of the sky that other games draw too), else `len` metres along the aim.
+func _bolt_end(layer: Dictionary, h: Hunter, at: Vector3, from: Vector3, dir: Vector2, o: Dictionary) -> Vector3:
 	if o.get("to") is Vector3:
 		return o["to"]
 	if layer.has("to"):
-		return anchor_pos(h, String(layer["to"]))
+		return _where({"at": layer["to"], "y": layer.get("to_y", 0.0)}, h, at, dir)
 	var ln := _num(layer, "len", o, 3.0)
 	return from + Vector3(dir.x, 0, dir.y) * ln
 
