@@ -1206,3 +1206,16 @@ His ult moment: a teal sea path over the abyss, allies crossing behind him, shie
 
 ## 2026-11-05 03:31 UTC (ext): Breaker splash final: `briefs/art-refs/breaker_splash.png`
 The dock defence. **The model follows `breaker_FINAL_sheet.png`, NOT this splash's body:** the splash drifted to shell plates, a rope belt and longer legs.
+
+## 2026-11-05 03:38 UTC (ext): OSTRA NEW DESIGN (owner-picked): `briefs/art-refs/ostra_FINAL_sheet.png`
+A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner deciding; ext suggested "Motley").
+- **The design:** a cursed jack-in-the-box jester.
+  - **Body:** a thin jester upper body (violet/black, white ruff, bells on the coat tails), its face a starry void with a sharp glowing grin and slit eyes.
+  - **Spring and box:** he rises on a brass spring from an antique card-suit music box with a crank. A starry void tail pours from the box.
+  - **Cards:** a chaotic swirl of glowing cards tumbles around him (some burnt or torn), not a halo.
+- **Movement (owner + ext):** the box HOVERS a hand's width above the ground. No feet means no footstep sounds; he glides silently over lava and water (source trait). Animations:
+  - **Move:** the box tilts toward the motion; the upper body sways on the spring with lag.
+  - **Dash:** the spring compresses and launches, or the lid snaps shut and he reappears with a void pop.
+  - **Cast:** he leans out on the spring.
+  - **Nightwell ult:** the lid opens wide and the void pulls enemies toward the box.
+- **Hitbox:** the box + spring column.
