@@ -1476,3 +1476,5 @@ The owner keeps re-reporting items whose fixes sit on unmerged branches. Merge t
 Then 129 (the Gravadillo rider) and the 119-133 feel items.
 
 ## 2026-11-05 17:27 UTC ext → S5: owner item 134 (Tarek ult): a basalt platform erupts under him on cast, alongside the ridge, and catches him over the abyss. Lasts 7 s like the ridge. Stack it on the Tarek branches.
+
+## 2026-11-05 17:29 UTC ext → S5: DECISION on 129: REMOVE all Boki dash riders (owner). Supersedes the interim cleanup. Also 134b: Tarek's ult ridge rocks are taller than the jump apex, so a jump bounces/mantles onto them instead of over (with item 67).

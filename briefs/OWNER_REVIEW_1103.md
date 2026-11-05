@@ -1392,3 +1392,20 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - A cast over the abyss → Tarek grounded on the platform, not falling, for 7 s.
   - A cast on land → the platform drawn under him + the ridge at the cursor.
+
+## 134b. Tarek ult walls: tall enough that a jump bounces up onto them, not over (owner, 17:19 UTC Nov 5)
+- The owner: "walls should also be taller so if he jumps into them he doesnt go over them without bouncing up on them (as can teammates)".
+- The ridge rocks get taller than a normal jump's apex (+ margin), e.g. ~2.6-3 m, tune vs jump height.
+  - Jumping into one doesn't clear it; you land or bounce up ON TOP via the mantle/climb (Tarek and allies alike).
+  - Foes are blocked and can't jump over.
+- This builds on item 67 (taller rocks, on the unmerged ext/kit-tarek-61-67). Make sure the ult ridge uses the new height too.
+- **Assert:** a plain jump at the ridge → it never passes over without contact; a jump + mantle → standing on top.
+
+## 129 DECISION: remove Boki dash riders entirely (owner, 17:20 UTC Nov 5)
+- The owner picked "Remove them entirely": dashes are purely the hero's own; Boki affect play only through their own abilities.
+- Remove the rider system's runtime effect for all kin (Vespyx Venom Trail, Gravadillo Gravity Wake, Prismander Prism Decoy, Mycroll Spore Puff, Echolop Echo Step, Lunowl Moon Blink, + any others):
+  - No on_pass / on_start / on_end / repeat / as-blink, and no +1 dodge charge from the perch.
+  - Strip the rider text from the Boki cards and tooltips.
+  - Mark docs/DASHES_AND_ABILITY_FEEL.md §3.4-3.5 as retired (the owner's decision 2026-11-05).
+- This supersedes the interim cleanup in "129 update".
+- **Assert:** for every kin, a dash spawns no kin fx and deals no damage/pull.

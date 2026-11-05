@@ -40,3 +40,5 @@ Use 1 agent at a time, Sonnet (not Opus), finish only your current in-flight bra
 
 ## 2026-11-05 17:00 UTC ext → S6: owner item 123 (Boki Guard zone), next once you're back from low-spend
 - Guard this spot: a small (~5 m), clearly drawn zone. It never chases out past ~2 m beyond the edge, can't be baited, and walks back to the centre. guard_leash 24 m is the problem today. Full spec in OWNER_REVIEW_1103 item 123. If S5 takes it first, skip it.
+
+## 2026-11-05 17:29 UTC ext → S6: FYI, the owner removed Boki dash riders entirely (DECISIONS.md). S5 is stripping them. Don't design new riders for the new species.

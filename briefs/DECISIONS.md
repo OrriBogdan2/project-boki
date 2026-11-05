@@ -141,3 +141,5 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
   - **Expression:** nervous but determined.
   - **Voice / anims:** she talks to her lantern, flinches when it flickers, cheers when she heals.
   - **Reads as a Hunter, not a Boki:** upright, clothed, carrying tools and gear.
+
+- 2026-11-05: Boki dash riders are removed. Dashes are purely the hero's own; Boki act only through their own abilities. Reason: the purple "explosion" (Gravadillo's Gravity Wake) on every dash was confusing and unexplained.
