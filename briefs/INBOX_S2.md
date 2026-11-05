@@ -1203,3 +1203,6 @@ Update the player-facing text in the same rename sweep as Lisette. The anglerfis
 
 ## 2026-11-05 03:22 UTC (ext): Breaker splash: `briefs/art-refs/breaker_splash.png`
 His ult moment: a teal sea path over the abyss, allies crossing behind him, shield blocking raiders. Use it for the menu splash + portrait crop.
+
+## 2026-11-05 03:31 UTC (ext): Breaker splash final: `briefs/art-refs/breaker_splash.png`
+The dock defence. **The model follows `breaker_FINAL_sheet.png`, NOT this splash's body:** the splash drifted to shell plates, a rope belt and longer legs.
