@@ -974,3 +974,35 @@ Improved: the eye is now a small glowing red orb in a wide brass ring, close to 
 ## 2026-11-04 19:40 UTC (ext): ACCOUNTS: S2's and main's accounts are at 95%+; ext's has the most left until Friday. ext now BUILDS the owner's item queue itself (Sonnet, locally).
 - ext takes OWNER_REVIEW items 53–75 (Sable 53/54, Hem 55/55b, Boki/Fused collision 56/58, Kael 57, Breaker 59, Ostra 60/75, Tarek 61/67, Claire 62/64/65, glider 63, Cinder 66, Vex E 68, gloves 69, Ryzz 70–74). **S2/S1: don't start any of them.** If you already started one, post its branch/state in STATUS and stop; ext will pick it up from there.
 - Item 76/76b (weapons on the .glb) and the face pass need the server's Meshy/Blender: they wait for S2's reset unless S2 has budget for them.
+
+## 2026-11-05 00:15 UTC (ext): NEW ACCOUNT for S2: big work order (owner: "offload a bunch of important work there")
+The owner is signing this window into a fresh account (full weekly usage). The 19:40 "ext takes 53–75" note is lifted for the items below. Re-read `briefs/DECISIONS.md` and the items in `briefs/OWNER_REVIEW_1103.md` before each branch (a later item, e.g. 55b, 101b, overrides an earlier one).
+
+**S1 keeps:** 94 perf (103 sound first), then 96 combat clarity (+96b, 97, 100, 102, 106). **ext keeps:** ext/tut-airdash (85/104), merges/review. Don't touch those.
+
+**S2 takes, in this order (up to 4 agents at once; Sonnet default, Opus 5.5 medium where noted):**
+1. **Kits A (one branch per hero, from origin/main):**
+   - Sable 53+54 (Opus)
+   - Hem 55b (Opus; it's a filling line + small perfect-timing circle, no V, no UI)
+   - Kael 57
+   - Breaker 59 (the LMB hold spin is RESTORED)
+   - Ostra 60+75
+   - Tarek 61+67
+   - Cinder 66
+   - Vex 68 (Opus, camera)
+   - gloves 69
+   - glider 63
+2. **Claire 62+64+65:** continue S1's WIP `ext/claire-62-65` @ 92ad07b0 (Opus).
+3. **98:** choose ability ranks (Ctrl+key / "+" on the slot, max one first; bots keep the fixed order; `bonus_point_at_max` flag off).
+4. **99:** full-inventory looting (honest smart-loot message, swap/drop panel).
+5. **101 + 101b:** ally boxes team-coloured on the map / in the world; box revive ~7.5 s channel with the potion vulnerability; respawn beacons (revive all, loud + global notice).
+6. **105:** Boki talk banks to data, ≤6 words, 5x lines, no repeat within 10, situational triggers (farm + match). Text-heavy: Sonnet. **Note:** `scripts/ui/boki_speech.gd` (shared speech SCALE) lands on ext/tut-airdash; build on it once merged, or keep 105 to the line banks + triggers.
+7. **If budget remains:** 76b weapons skinned on the .glb + the face pass (Blender/Meshy on the box, Opus).
+
+**Already done (don't redo):** 56/58 (`ext/friendly-bodies`), 70–74 (`ext/ryzz-70-74`), 76's rigfix (merged in sync91).
+
+**Rules:** as SERVER2_START.md.
+- Base each branch on current origin/main (fe51b43b or later).
+- One full suite per branch at the end, targeted checks while working.
+- Mark READY in STATUS.md (ext/server-status2) with the branch, commit, items done/differs, a check table, screenshot paths and owner Qs.
+- ext reviews and merges. Update STATUS at least hourly.
