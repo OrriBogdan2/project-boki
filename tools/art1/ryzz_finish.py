@@ -682,6 +682,7 @@ print("neon texels", int(core.sum()))
 # the forearm's veins, caught by the sleeve hanging over it: leather has no pink
 jk = mask & (np.abs(POS[..., 0]) > 0.1) & (z_t > 1.1) & (z_t < 1.36) & (ri > gi * 1.5) & (bi > gi)
 OUTC[jk] = np.array([0.17, 0.15, 0.19], dtype=np.float32)
+core &= ~jk
 # the bare back at the waist: the turnaround's corset band out, the master's skin in
 bw = mask & (POS[..., 1] < 0.03) & (z_t > 1.0) & (z_t < 1.16) & (ri > gi * 1.35) & (bi > gi * 0.95) & (ri > 0.42)
 OUTC[bw] = P.skin(POS[bw].astype(np.float64), NOR[bw].astype(np.float64), AO[bw].astype(np.float64)).astype(np.float32)
@@ -689,11 +690,19 @@ core &= ~bw
 # fishnets: from the top of the thigh band to the skirt's hem, repainted crisp
 yl = mask & (ri > 0.65) & (gi > 0.55) & (bi < 0.35) & (z_t < 0.8) & (z_t > 0.5) & (np.abs(POS[..., 0]) < 0.17)
 BAND = float(np.percentile(z_t[yl], 99)) if yl.any() else 0.68
-net = mask & (z_t > BAND + 0.004) & (z_t < 0.84) & (np.hypot(np.abs(POS[..., 0]) - 0.085, POS[..., 1]) < 0.1) & (rawL > 0.33)
+net = mask & (z_t > BAND + 0.004) & (z_t < 0.84) & (np.hypot(np.abs(POS[..., 0]) - 0.085, POS[..., 1]) < 0.122) & (rawL > 0.33)
 print("thigh band top", round(BAND, 3), "net texels", int(net.sum()))
 skin_sm = blur(OUTC.mean(2), net.astype(np.float32), 9)
 base = P.skin(POS[net].astype(np.float64), NOR[net].astype(np.float64), AO[net].astype(np.float64))
 OUTC[net] = P.fishnet(POS[net].astype(np.float64), base).astype(np.float32)
+# the skirt's hem: skin-coloured chips the scan left between the pleats go to the skirt's own charcoal
+chip = mask & ~net & (z_t > BAND + 0.03) & (z_t < 0.97) & (np.abs(POS[..., 0]) < 0.32) & ~_is_arm[FID]      # (her forearms hang through here at rest)
+chip &= (OUTC[..., 0] > OUTC[..., 1] * 1.25) & (OUTC[..., 1] > OUTC[..., 2] * 1.03) & (OUTC.mean(2) > 0.36)      # warm like skin: the skirt's purple isn't
+OUTC[chip] = np.array([0.2, 0.18, 0.235], dtype=np.float32)
+# the waist: the band's dark smear on the bare midriff (not the navel)
+smear = mask & (POS[..., 1] > 0.0) & (z_t > 1.022) & (z_t < 1.06) & (np.abs(POS[..., 0]) < 0.118) & (np.abs(POS[..., 0]) > 0.02) & (OUTC.mean(2) < 0.5)
+OUTC[smear] = P.skin(POS[smear].astype(np.float64), NOR[smear].astype(np.float64), np.ones(int(smear.sum())) * 0.8).astype(np.float32)
+print("hem chips", int(chip.sum()), "waist smear", int(smear.sum()))
 
 
 def bil(img, u, v):
@@ -764,26 +773,26 @@ hot_ &= np.hypot(px_ - EYE_X, pz_ - EYE_Z) > 0.024        # (the pink eye keeps 
 core[yy_, xx_] = False
 core[yy_[hot_], xx_[hot_]] = True
 # the chest bolt from the head sheet (crisp, a bright heart): registered by its own bounds, like the corset
-cb = core & (z_t > 1.3) & (z_t < K.NECK_Z) & (np.abs(POS[..., 0]) < 0.08) & (POS[..., 1] > 0.0)      # (below the choker: the face has its own bolt)
+cb = core & (z_t > 1.362) & (z_t < K.NECK_Z) & (np.abs(POS[..., 0]) < 0.05) & (POS[..., 1] > 0.0)      # (above the corset's neckline, below the choker)
 hwin = np.zeros(hd_.shape[:2], bool)
 hwin[960:1100, 340:470] = True
 hn = hwin & (hd_[..., 0] > 0.8) & (hd_[..., 2] > 0.55) & (hd_[..., 1] < 0.5)
 hy, hx = np.nonzero(hn)
 if cb.sum() > 100 and len(hy) > 100:
-    bz0, bz1 = np.percentile(z_t[cb], 1), np.percentile(z_t[cb], 99)
-    bx0, bx1 = np.percentile(POS[..., 0][cb], 1), np.percentile(POS[..., 0][cb], 99)
-    hv0, hv1, hu0, hu1 = np.percentile(hy, 1), np.percentile(hy, 99), np.percentile(hx, 1), np.percentile(hx, 99)
-    mg = 0.016
-    pb_ = mask & (POS[..., 1] > 0.0) & (z_t > bz0 - mg) & (z_t < bz1 + mg) & (POS[..., 0] > bx0 - mg) & (POS[..., 0] < bx1 + mg)
+    # placed by its centre at the sheet's own scale, the same as her face: it can't stretch
+    xc_, zc_ = float(np.median(POS[..., 0][cb])), float(np.median(z_t[cb]))
+    hu_, hv_ = float(np.median(hx)), float(np.median(hy))
+    rx_, rz_ = 0.052, 0.066
+    pb_ = mask & (POS[..., 1] > 0.0) & (np.abs(POS[..., 0] - xc_) < rx_) & (np.abs(z_t - zc_) < rz_)
     yy_, xx_ = np.nonzero(pb_)
-    uu_ = hu0 + (bx1 - POS[yy_, xx_, 0]) / (bx1 - bx0) * (hu1 - hu0)
-    vv_ = hv0 + (bz1 - z_t[yy_, xx_]) / (bz1 - bz0) * (hv1 - hv0)
+    uu_ = hu_ - (POS[yy_, xx_, 0] - xc_) * SU
+    vv_ = hv_ + (zc_ - z_t[yy_, xx_]) * SV
     cc_ = bil(hd_, uu_, vv_)
-    bd_ = np.minimum.reduce([z_t[yy_, xx_] - (bz0 - mg), (bz1 + mg) - z_t[yy_, xx_], POS[yy_, xx_, 0] - (bx0 - mg), (bx1 + mg) - POS[yy_, xx_, 0]])
-    kb_ = smooth(0.0, 0.012, bd_)[:, None]
+    bd_ = np.minimum(rx_ - np.abs(POS[yy_, xx_, 0] - xc_), rz_ - np.abs(z_t[yy_, xx_] - zc_))
+    kb_ = smooth(0.0, 0.014, bd_)[:, None]
     OUTC[yy_, xx_] = (OUTC[yy_, xx_] * (1 - kb_) + cc_ * kb_).astype(np.float32)
     core[yy_, xx_] = (cc_[:, 0] > 0.86) & (cc_[:, 2] > 0.7) & (cc_[:, 1] < 0.42)
-    print("chest bolt projected", len(yy_), "glow", int(core[yy_, xx_].sum()))
+    print("chest bolt at", round(xc_, 3), round(zc_, 3), "texels", len(yy_), "glow", int(core[yy_, xx_].sum()))
 # a soft edge on the neon: a hard magenta edge rings yellow in the atlas's JPEG
 kf_ = np.clip(blur(core.astype(np.float32), mask.astype(np.float32), 2) * 1.5, 0, 1)[..., None]
 OUTC = OUTC * (1 - kf_) + P.KEY.astype(np.float32) * kf_
