@@ -504,3 +504,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Differs: built from SDF sculpts, not the scan-body recipe, so owner notes on Kael's finish may not map directly. Not compared with the final Kael look.
 - Shots: ext/hero-shots-s2 art1/tarek/. Not tested live; perf unmeasured; 6.7 MB .glb.
 - Owner Qs: new proportions OK (arms 1.5x, shorter legs, larger size)? Stones higher and wider so they clear his face?
+
+## 2026-11-05 S2: Vespyx eye fix pushed: ext/boki-starter 71957021 (merge the tip)
+- Eyes scaled down and seated deeper (eye commit e81ba5b4); seen smaller in the wired game at the match camera, not yet confirmed at the farm camera. Farm fixes: new `tend` clip with Body level; carry shows one item (asserted, not yet seen in a shot). --boki-rig-check 0 failures; wider suite not rerun since the origin/main merge. Wiring unchanged (3 lines, see the Vespyx entry above). Grown/Fused forms next.
