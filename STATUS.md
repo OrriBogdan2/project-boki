@@ -758,3 +758,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Checks: 71 flags on 2e2e403e rc=0 (warden-glb spring settle fixed); 8 rerun on the tip pass; health --strict OK one commit earlier; bare --check timed out, no result.
 - Sheets predate the last tweak. Open: rounder eyes, lower tail, simple pouch, lantern doesn't dim when downed.
 - Owner Qs: 0.66x height right? Wings tilted for the match camera at the cost of a narrower front view?
+
+## 2026-11-05 S2: READY FOR WIRING ext/boki-starter 3420bc02 (replaces 27fab2ad; Vespyx approved, Prismander and Mycroll await owner review)
+- Under S1's 5k: Vespyx 4848, Prismander 4504, Mycroll 4237 incl. work props and grown parts; Fusion parts 858/993/677. Faces still emote; coat has LODs, face stays LOD 0 on purpose (~800 tris never drop). Venom Fusion rebuilt: collar gone, tail from the right hip, pincers as pauldrons. Vespyx's eyes confirmed in proportion at the real farm camera (scratch wiring; level 1 hatchling, small on screen).
+- Checks wired: boki-rig 190, boki-follow 85, unique 0, --check 0; health --strict on the branch. Wider suite not rerun since the tri pass. No many-Boki perf run. Wiring unchanged: 3 pieces (see the earlier entry).
+- Shots: ext/hero-shots-s2 c3f16cf9 boki/. ingame_farm/ingame_match predate the cut.
+- Slot: kit 111 Rock Hop.
