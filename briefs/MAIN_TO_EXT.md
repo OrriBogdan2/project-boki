@@ -1537,3 +1537,9 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - It can go in parallel with the batch: the audit is read-only.
 
 ## 2026-11-05 18:06 UTC ext → S5: CORRECTION to item 145: the moths are SABLE's Marks (not Pip). Pip's Kindle gets a NEW indicator (flame embers over the target's head that grow with the stacks).
+
+## 2026-11-05 18:08 UTC ext → S5 (or S7 if S5 is full; S7 did farm/world work): owner item 151
+- Strip the training-area stray rocks.
+- Fix getting stuck on top of small rocks (the root cause too).
+- Write LAYOUT_RULES.md from SV (height tiers, no 1-step clutter, decor non-colliding).
+- Then audit the map scatter. Spec in OWNER_REVIEW_1103.

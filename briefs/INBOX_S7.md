@@ -47,3 +47,5 @@ Status of items 77-93, for the session that takes over:
 
 ## 2026-11-05 17:58 UTC ext → all: the SUPERVIVE reference footage is on branch `ext/hero-ref-footage`
 The frames behind briefs/hero-ref/*.md (5 fps JPGs; the README maps the folders to our heroes). Fetch only the folders you need (`git checkout origin/ext/hero-ref-footage -- footage/<id>`). Use them for any "like <SV hunter>" note. Don't merge that branch.
+
+## 2026-11-05 18:08 UTC ext → S7: owner item 151 (layout: no 1-high rocks, SV layout rules) is a good fit for you when your low-spend window ends (Fri 6am). Check MAIN_TO_EXT first; if S5 hasn't taken it, it's yours.

@@ -1726,3 +1726,24 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - Sable Marks render as moths, with the count = the stacks.
   - A Pip Kindle hit on a foe → the flame indicator appears and scales with the stacks.
+
+## 151. Training area + map layout: no stray 1-high rocks you get stuck on; copy SUPERVIVE's layout rules (owner, 17:37 UTC Nov 5)
+- The owner: "in the training area there are random rocks - you can get on top and then get stuck in these - supervive intentionally does not have many things where it's like 1 block up - lets try to copy their map layout / general layout so this isnt the case".
+- **Immediate:**
+  - In the training area, remove the scattered small rocks/props.
+  - Anything left must be either flat walkable ground or a clearly climbable ledge (a full mantle height), never a 1-block step you snag on.
+  - Fix the stuck case: standing on top of a small rock must never trap you (a collider/nav seam bug). Find and fix the root cause too (step height vs collider shape).
+- **Layout rules** (a doc, briefs/supervive-data/LAYOUT_RULES.md, derived from the footage on `ext/hero-ref-footage` + SV knowledge):
+  - Terrain comes in a few clear height tiers: ground, raised plateaus/cliffs (mantle-able, ≈1.5 m+ per SV mantle), abyss.
+  - Few or no small 1-step obstacles. Cover is tall (blocks shots) or nothing.
+  - Clean, readable edges with a visual lip.
+  - Open lanes between POIs; chokepoints from big shapes, not clutter.
+  - Small decor props are non-colliding (walk through) or tall enough to be walls.
+  - Grass/brush for vision, not collision.
+- **Apply:**
+  - The training area first.
+  - Then audit the match map generator (scatter, rocks, rubble) and remove collision from small decor, or snap its heights to the tiers.
+  - Tarek's rocks/ridge are gameplay objects; keep them, but they follow the "climbable or wall" rule (item 134b).
+- **Assert:**
+  - A probe walking a grid over the training area never gets stuck (no position unchanged >1 s with move input).
+  - A count of colliding props shorter than mantle height but taller than the step height == 0.
