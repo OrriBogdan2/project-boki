@@ -1448,3 +1448,6 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 ## 2026-11-05 17:16 UTC ext → S5: owner item 129 (a bug: priority over the feel items)
 - A weird explosion in mid-air on dash heroes (Vex, Sable) in v0.23.0. Find it (suspect the glide_handoff boost fx or a shared air-dash burst) and remove it; check all heroes.
 - Sable's air dash must be identical to her ground dash.
+
+## 2026-11-05 17:17 UTC ext → S5: owner item 130 (Vex grenade)
+- A ground landing or a max-range miss = a dud fizzle, no cone. A wall still blasts the cone (flag `cone_on_wall`). A direct hit is unchanged.

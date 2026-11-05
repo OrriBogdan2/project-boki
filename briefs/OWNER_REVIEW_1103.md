@@ -1274,3 +1274,16 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - No unexpected fx spawns (log the fx ids) on an air dash for all 12 heroes.
   - Sable's air dash distance and time == ground ±5%.
+
+## 130. Vex Burr Charge: a miss is a miss, with no cone on the ground (owner, 17:13 UTC Nov 5)
+- The owner: "if vex misses her grenade and it hits the ground/no one, it shouldnt explode with the cone - it just misses".
+- Today (gunslinger.json rmb): a direct hit hurts and Dazes; meeting a wall OR the ground blasts a cone back at her.
+- **Change:**
+  - Landing on the ground or running out of range with no foe hit → a small dud puff + a fizzle sound, no damage, no Daze, no cone.
+  - A direct hit is unchanged.
+  - **Walls keep the cone-back blast** (ext's reading: the owner said "ground/no one"). If he wants walls to fizzle too, it's one flag: add `cone_on_wall` true by default.
+- Update the desc/clip/tutorial text ("A direct hit Dazes; off a wall it blasts a cone back; anything else misses").
+- **Assert:**
+  - A ground landing → 0 damage events, no cone fx.
+  - A wall → the cone as now.
+  - A direct hit → as now.
