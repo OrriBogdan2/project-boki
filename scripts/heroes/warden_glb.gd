@@ -103,6 +103,7 @@ const WEAPON_OFF := "weapon_offhand"
 const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
 ## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire).
 const WING_FOLD := "wing_fold"
+const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
@@ -427,6 +428,28 @@ static func _hold_shield(root: Node3D, glb: Node3D) -> void:
 	shield.owner = null
 	holder.add_child(shield)
 	shield.transform = Transform3D.IDENTITY
+
+## The part of a skinned weapon that truly leaves the hand (item 76b): a plain copy of the mesh `mesh_name` on its own
+## node, the grip at the origin, -Z toward the head (WEAPON_THROWN's frame), for the kit to fly and plant. The skinned
+## one hides meanwhile (WardenClips "weapon_bone"). null on a procedural model.
+static func thrown_piece(root: Node3D, mesh_name: String) -> Node3D:
+	var w := root.get_node_or_null("Warden")
+	var src := w.find_child(mesh_name, true, false) as MeshInstance3D if w else null
+	var sk := skeleton(w)
+	var frame := w.find_child(WEAPON_THROWN, true, false) as Node3D if w else null
+	if src == null or sk == null or frame == null:
+		return null
+	var at := frame.get_parent() as BoneAttachment3D
+	var base := sk.get_bone_global_rest(WardenSkeleton.find(sk, at.bone_name)) if at else Transform3D.IDENTITY
+	var mi := MeshInstance3D.new()
+	mi.mesh = src.mesh
+	mi.transform = (base * frame.transform).affine_inverse()
+	for si in src.get_surface_override_material_count():
+		mi.set_surface_override_material(si, src.get_surface_override_material(si))
+	var holder := Node3D.new()
+	holder.name = "ThrownPiece"
+	holder.add_child(mi)
+	return holder
 
 ## Poses one of the Warden's variant bones (EXTRA) on its rest, riding its parent: turned by `rot` about its head
 ## (an axis in model space as the model rests: Vector3.RIGHT turns a drum about its side-to-side axle), scaled by `scl`

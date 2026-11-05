@@ -4,8 +4,10 @@
 	"rig_root": true,
 	"extra_bones": {"x_weapon": "hand.R", "x_halo": "head", "x_jaw": "head", "x_brow.L": "head", "x_brow.R": "head", "x_cheek.L": "head", "x_cheek.R": "head", "x_lid.L": "head", "x_lid.R": "head"},
 	"blade": {"root": "anchor_orb", "tip": "weapon_muzzle"},
+	"fx_anchor": "anchor_orb",
+	"weapon_tol": 0.06,
 	"loco": {
-		"idle": "idle", "stance": "stance", "stance_after": 4.0,
+		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
 		"walk_speed": 2.2, "run_speed": 4.6
