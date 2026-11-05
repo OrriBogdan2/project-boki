@@ -24,7 +24,8 @@ const WARDENS := {
 	"dolm": {"hit_r": 0.388, "height": 1.19, "width": [0.7, 1.5], "moves": "breah_"},     # (lean, the locs: his art)
 	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
 	"ostra": {"hit_r": 0.412, "height": 1.33, "height_3d": 1.31, "width": [0.5, 1.3], "moves": "ostra_"},
-	"rimewright": {"hit_r": 0.38, "height": 1.11, "width": [0.6, 1.1], "moves": "tm_"},     # (tall and slim)
+	# (Claire, the final design: the hood and horns stand over her head; capelet and skirt widen the old slim build)
+	"rimewright": {"hit_r": 0.38, "height": 1.08, "height_3d": 1.21, "width": [0.6, 1.25], "moves": "tm_"},
 	# (Cinder's fire stands over her head)
 	"ashwick": {"hit_r": 0.376, "height": 1.02, "height_3d": 1.14, "width": [0.7, 1.5], "moves": "as_"},
 	# (Kael: body size 1.06, owner Nov 4: 9% bigger; juggernaut.md's 1.12x was at 1.0)
