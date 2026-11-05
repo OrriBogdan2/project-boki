@@ -80,7 +80,9 @@ func _update(h: Hunter, delta: float) -> void:
 	var over_void: bool = land["void"]
 	var col: Color = RED if over_void else Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
 	var pulse := 1.0 + 0.07 * sin(t * TAU * PULSE_HZ)
-	_place(at, RADIUS * pulse, col, h.pos.y, 1.0)
+	var far_k := maxf(1.0, h.m.cam.zoom * 0.28)      # it stays readable with the camera pulled out (DropCam)
+	beam.scale.x = far_k
+	_place(at, RADIUS * pulse * far_k, col, h.pos.y, 1.0)
 	tag.visible = over_void
 	tag.position = Vector3(0, 2.2, 0)
 	var k := 0
@@ -91,7 +93,8 @@ func _update(h: Hunter, delta: float) -> void:
 		if fresh or not mates.has(o.nid):
 			mates[o.nid] = project(o, o.fall_dir * 0.45)
 		var ml: Dictionary = mates[o.nid]
-		mate._place(ml["at"], MATE_RADIUS, RED if ml["void"] else col, o.pos.y, 0.55)
+		mate.beam.scale.x = far_k * 0.7
+		mate._place(ml["at"], MATE_RADIUS * far_k, RED if ml["void"] else col, o.pos.y, 0.55)
 		mate.visible = true
 		k += 1
 	for j in range(k, get_child_count()):
@@ -119,6 +122,6 @@ func _place(at: Vector3, radius: float, col: Color, top_y: float, alpha: float) 
 	ring_mat.set_shader_parameter("color", col)
 	var hgt := maxf(top_y - base.y, 0.1)
 	beam.global_position = base + Vector3(0, hgt * 0.5, 0)
-	beam.scale = Vector3(1.0, hgt, 1.0)
+	beam.scale = Vector3(beam.scale.x, hgt, beam.scale.x)
 	col.a = 0.35 * alpha
 	beam_mat.albedo_color = col

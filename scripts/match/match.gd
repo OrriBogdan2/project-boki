@@ -40,6 +40,7 @@ var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.g
 var exits: Exits = null     # the ways out: skiff docks, rift hatches, outpost uplinks (see Exits)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var truce: Truce = null     # emotes and truces between squads (see Truce)
+var drop_fx: DropFx = null     # the drop's look and sound
 var skydrop: DropSquad = null  # the planning phase before the ship sets off, drop leaders and formations (see DropSquad)
 var spawn_plan: SpawnPlan = null   # which of the map's candidate spawns are live this match (see SpawnPlan)
 var time := 0.0
@@ -797,7 +798,9 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.spawns")
 	skydrop = DropSquad.new(self)
 	skydrop.setup()
-	if not opts.get("no_drop", false): add_child(DropFx.new(self))
+	if not opts.get("no_drop", false):
+		drop_fx = DropFx.new(self)
+		add_child(drop_fx)
 	if opts.get("demo_match", false): _demo_drop()
 	await _slice()
 	var Hud = take_prefetched(HUD_SCRIPT)
@@ -1184,7 +1187,7 @@ func _start_drop(h: Hunter, at: Vector3) -> void:
 	h.ai["land"] = at
 
 # ---- the skyship
-const SHIP_Y := SkyFall.SKY_Y
+static var SHIP_Y: float = DropData.rules["sky_y"]
 const SHIP_SPEED := 11.0
 var big := false
 var ship := {}
@@ -1248,7 +1251,7 @@ func ship_jump(h: Hunter, force := false) -> void:
 	h.teleport(ship_pos_of(hs) + Vector3(0, -1.5, 0) + off)
 	SkyFall.start(h, Vector2((hs["dir"] as Vector3).x, (hs["dir"] as Vector3).z))
 	if h == player:
-		sfx("whoosh", null, -2.0)
+		sfx("drop_jump", null, -3.0, 0.03)
 		if hud and not force:
 			hud.toast("%s dives  ·  %s %s turn  ·  %s opens your glider" % [Settings.key_cap("up"), Settings.key_cap("left"), Settings.key_cap("right"), Settings.key_cap("jump")], Color("cfeaff"))
 		elif hud:
@@ -3588,7 +3591,7 @@ func _process(delta: float) -> void:
 		cam.chase_to = 0.0
 		cam.yaw_to = 0.0
 		if player.dropping:
-			DropFx.frame_freefall(self, player)     # pulled back, looking down, turned with your heading
+			DropCam.frame(self, player)     # the pull-out over the whole island, easing back to play zoom
 		else:
 			# high in the air or out over the abyss the camera pulls back so you can see where you'll land
 			# the camera only eases back while gliding, so jumps and falls never change the framing
@@ -3603,7 +3606,7 @@ func _process(delta: float) -> void:
 				cam.zoom_to *= 1.0 + clampf((alt - 4.0) / 24.0, 0.0, 0.7)
 			cam.top_to = 0.0
 		cam.lead_vel = cam_lead_vel()
-		cam.follow(player.render_pos(alpha), delta, not player.dropping)
+		cam.follow(DropCam.focus(self, player, player.render_pos(alpha)), delta, not player.dropping)
 	elif player and (player.downed or player.out):
 		# death camera: frame you and whoever got you
 		var foc := player.prev.lerp(player.pos, alpha)
@@ -3671,7 +3674,8 @@ func _gather_input() -> void:
 	var on_panel: bool = hud != null and hud.mouse_on_panel()      # ... and so do the item windows under the cursor
 	if paused:
 		player.inp["move"] = Vector2.ZERO
-	if KinCommand.poll(player, get_process_delta_time(), paused or map_up or on_panel) == "tap":       # G: tap sics / calls back, hold opens the order wheel
+	DropPing.poll(self, map_up)        # middle mouse in the sky pings the ground (items 100, 107)
+	if KinCommand.poll(player, get_process_delta_time(), paused or map_up or on_panel or DropPing.in_sky(self)) == "tap":       # G: tap sics / calls back, hold opens the order wheel
 		pending_input["throw"] = true
 	player.inp["interact"] = Input.is_action_pressed("interact")
 	if lairs and not lairs.puzzle_of(player).is_empty():

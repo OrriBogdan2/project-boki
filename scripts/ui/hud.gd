@@ -357,6 +357,8 @@ func _draw_all() -> void:
 		_ctext(Vector2(sz.x * 0.5, 40), "The ship sets off in %ds  ·  %s opens the map" % [int(ceil(m.skydrop.plan_t)), Settings.key_cap("map")], 18, GOLD, big)
 
 func _draw_world_labels() -> void:
+	if DropCam.plates_off(m):
+		return        # (the drop's wide view: a whole island of plates at once)
 	var cam := m.cam
 	# deathboxes and revive beacons
 	for b in m.boxes:

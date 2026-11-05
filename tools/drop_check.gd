@@ -5,14 +5,14 @@ extends RefCounted
 ##      into the comet, which holds together while the jumpmaster steers; the lead passes in the air;
 ##      a break-away frees only that player (and they can't get back in); the burst lands everyone
 ##      still in it on solid ground, spread out, together; the Boki leaps off on landing
-##   3. a solo drop: the ship's height, 18-22 s from the ship to the ground untouched, the dive faster
+##   3. a solo drop: the ship's height, 21-25 s from the ship to the ground untouched, the dive faster
 ##      than the float, the glider opening by itself DEPLOY_H over the ground
 ##   4. bots: every bot rider has picked whether and where to break off, one that does leaves the
 ##      comet for a spot of its own, and every bot comet lands on solid ground
 ##   5. Net: boarding, a break-away, the burst and the dive flag round trip through the handlers
 ##   6. on the ground: squad pings, the spawn candidates, rare kin, scouting
 
-const BAND := Vector2(18.0, 22.0)      # s: ship to ground, untouched (the owner's target)
+const BAND := Vector2(21.0, 25.0)      # s: ship to ground, untouched (item 107: the 18-22 s drop, only slightly longer)
 
 var bad := 0
 var main: Node

@@ -1,0 +1,29 @@
+{
+	"_doc": {
+		"doc": "The opening drop's numbers (owner item 107, docs/decisions/0012). Ship to ground, untouched, is about 24 s (--drop-check's band); raise sky_y and the fall speeds together to keep that. float: no keys. dive: forward held. deploy_h / burst_h: m over the ground below where the glider opens / a comet bursts. camera: wide_zoom is the pull-out's distance over the match camera's (the whole island in view from the jump), pull_s how fast it gets there, ease_from / ease_to the height (share of sky_y) over which it comes back to near_zoom, near the play zoom, wide_chase the tilt (0 = the match angle, 1 = low behind), island_focus how far the wide view leans to the island's middle. look: cloud_y the cloud deck, puffs the clouds you fall past (scaled by the quality's fx), rush_float / rush_dive the speed lines at a float and a dive, trail_pts a diver's contrail, wind_build_s how long the wind takes to build."
+	},
+	"sky_y": 210.0,
+	"float_fall": 12.5,
+	"float_speed": 9.0,
+	"dive_fall": 26.0,
+	"dive_speed": 11.0,
+	"deploy_h": 14.0,
+	"burst_h": 16.0,
+	"camera": {
+		"wide_zoom": 17.0,
+		"near_zoom": 1.5,
+		"pull_s": 2.2,
+		"ease_from": 0.62,
+		"ease_to": 0.12,
+		"wide_chase": 0.2,
+		"island_focus": 0.75
+	},
+	"look": {
+		"cloud_y": 128.0,
+		"puffs": 48,
+		"rush_float": 0.3,
+		"rush_dive": 1.0,
+		"trail_pts": 30,
+		"wind_build_s": 5.0
+	}
+}

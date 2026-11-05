@@ -7,7 +7,7 @@ extends RefCounted
 ## Online the jumpmaster's game runs the comet; boarding ("comet") and the burst ("cburst") are sent
 ## so every game knows who rides it and where it came down. Break-aways go as DropSquad's "dsep".
 
-const BURST_H := 14.0         # m over the ground below: the comet bursts (above SkyFall.DEPLOY_H)
+static var BURST_H: float = DropData.rules["burst_h"]     # m over the ground below: the comet bursts (above SkyFall.DEPLOY_H)
 const SPOT_GAP := 2.2         # m between the burst's landing spots
 const BURST_ARC := 1.6        # m: the hop out of the burst, over the straight line down
 const BOT_BREAK_CHANCE := 0.4 # a bot rider picks a break-off height this often

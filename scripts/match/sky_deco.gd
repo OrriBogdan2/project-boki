@@ -85,6 +85,7 @@ func _shafts(parent: Node3D, rng: RandomNumberGenerator) -> void:
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		if Settings.q("shafts"):
 			parent.add_child(mi)
+			mi.add_to_group("sky_shaft")
 		else:
 			mi.free()
 

@@ -7,18 +7,18 @@ extends RefCounted
 ## float. The glider opens by itself DEPLOY_H over the ground below you (or on Space), and from then
 ## on it's the normal glide until you land (Hunter.deploy). The landing has its own kick (land).
 
-const SKY_Y := 122.0          # m: the skyship's height. Leaving it to landing takes ~20 s untouched (--drop-check)
-const FLOAT_FALL := 8.0       # m/s down while floating (no keys)
-const FLOAT_SPEED := 8.5      # m/s across while floating: ~1.06 m of reach per metre of height
-const DIVE_FALL := 17.0       # m/s down while diving (forward held)
-const DIVE_SPEED := 10.0      # m/s across while diving: steep, ~0.6 m per metre
+static var SKY_Y: float = DropData.rules["sky_y"]         # m: the skyship's height. Leaving it to landing takes ~24 s untouched (--drop-check)
+static var FLOAT_FALL: float = DropData.rules["float_fall"]      # m/s down while floating (no keys)
+static var FLOAT_SPEED: float = DropData.rules["float_speed"]    # m/s across while floating: ~0.72 m of reach per metre of height: about as far as before the sky got higher
+static var DIVE_FALL: float = DropData.rules["dive_fall"]        # m/s down while diving (forward held)
+static var DIVE_SPEED: float = DropData.rules["dive_speed"]      # m/s across while diving: steep, ~0.42 m per metre
 const BRAKE_SPEED := 2.0      # m/s across while holding back: nearly straight down
 const TURN_RATE := 2.4        # rad/s: how fast the side keys turn your heading
 const STEER_RATE := 10.0      # 1/s: the speed across reaches 90% of a new target in ~0.23 s
 const VY_RATE := 7.0          # 1/s: the fall reaches 90% of a new speed in ~0.33 s
 const FORWARD_DOT := 0.5      # keys at least this far along your heading count as forward (dive)
 const BACK_DOT := -0.5        # ... and this far against it as back (a full brake; less brakes less)
-const DEPLOY_H := 12.0        # m over the ground below you: the glider opens by itself
+static var DEPLOY_H: float = DropData.rules["deploy_h"]          # m over the ground below you: the glider opens by itself
 const LOW_DEPLOY_H := 4.0     # m: the same for a short drop (a small map, a respawn): a plunge, over in a few seconds
 const VOID_DEPLOY_Y := 16.0   # m (world height): over the abyss it opens here, high enough to glide to land
 const DEPLOY_POP := -1.6      # m/s: the canopy catching checks your fall to this
@@ -39,6 +39,7 @@ static func start(h: Hunter, dir: Vector2, low := false) -> void:
 	h.glide_k = 1.0
 	h.grounded = false
 	h.fall_dir = dir.normalized()       # (none: straight down until the keys pick a heading)
+	h.set_meta("drop_t", (h.m as Match).time)      # (the camera's pull-out runs from here: DropCam)
 	h.vel = Vector3(h.fall_dir.x, 0.0, h.fall_dir.y) * 3.0
 	var k: Kin = h.kin
 	if k != null and not k.dead and k.state == "active":
@@ -113,12 +114,7 @@ static func land(h: Hunter) -> void:
 	if m.world.is_block(h.pos.x, h.pos.z):
 		var spot := m.world.free_spot_near(h.pos, [], 1.0, 0.45, 2.5)
 		h.teleport(Vector3(spot.x, m.world.ground_at(spot.x, spot.z), spot.z))
-	m.fx.dust(h.pos, 16)
-	m.fx.ring(h.pos + Vector3(0, 0.05, 0), 2.6, Color(1, 1, 1, 0.85), 0.35)
-	m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.3, Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 0.22)
-	m.sfx("land", h.pos, -2.0 if h.is_local() else -8.0, 0.8)
-	m.sfx("thump", h.pos, -8.0 if h.is_local() else -14.0, 0.9)
-	h.squash = LAND_SQUASH        # (no self-shake: item 50)
+	h.squash = LAND_SQUASH        # (the impact's dust and sound: DropFx, no self-shake: item 50)
 	var k: Kin = h.kin
 	if k != null and not k.dead and k.state == "shoulder" and k.cmd != "return":
 		KinFollow.hop_off(k)

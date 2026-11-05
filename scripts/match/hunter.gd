@@ -3342,6 +3342,8 @@ func render(delta: float, alpha: float) -> void:
 	if gl.visible:
 		var gk := glide_k - 1.0
 		var ek := 1.0 + 2.7 * gk * gk * gk + 1.7 * gk * gk      # pops open with a little overshoot
+		if drop_glide:
+			ek += sin(glide_k * PI) * 0.45       # (the drop's canopy cracks open harder: item 107)
 		gl.scale = Vector3(ek * (1.0 + sin(m.time * 9.0) * 0.02), ek, ek)
 		gl.rotation.x = 0.35 * ek - 0.1
 	var halo := torso.get_node_or_null("Halo")

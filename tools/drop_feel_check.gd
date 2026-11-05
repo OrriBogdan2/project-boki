@@ -100,17 +100,18 @@ func _steering() -> void:
 	ok(absf(a0.angle_to(P.fall_dir)) > 0.3, "the side keys turn the heading in the air")
 
 func _reticle() -> void:
-	var P := _arena(20.0)
+	var P := _arena(SkyFall.DEPLOY_H + 2.0)
 	P.diving = false
-	P.fall_dir = Vector2(0.6, 0.8)
-	P.inp["move"] = Vector2.ZERO
+	P.fall_dir = Vector2.ZERO
+	var keys := Vector2.ZERO                     # (any float would carry you off this small map: --drop-check has a long one)
+	P.inp["move"] = keys
 	var pr: Dictionary = DropReticle.project(P, P.inp["move"])
 	DropReticle.tick(P, 0.016)
 	var r: DropReticle = P.get_node_or_null("DropReticle")
 	ok(r != null and r.visible, "the reticle shows while dropping")
 	var landed_at := Vector3.ZERO
 	for i in 1800:
-		P.inp["move"] = Vector2.ZERO
+		P.inp["move"] = keys
 		m.step(Match.DT)
 		if P.grounded:
 			landed_at = P.pos
@@ -125,17 +126,17 @@ func _reticle() -> void:
 	# over the void: red warning
 	P = _arena(14.0)
 	P.diving = false
-	P.fall_dir = Vector2(1, 0)
+	P.fall_dir = Vector2.ZERO
 	var W = m.world
-	var far := Vector2(0.45, 0)
+	var far := Vector2.ZERO
 	var pv: Dictionary = DropReticle.project(P, far)
-	ok(not pv["void"], "steering over solid ground is not flagged")
+	ok(not pv["void"], "coming down over solid ground is not flagged")
 	for dz in range(-40, 41):
 		for dx in range(-40, 41):
 			var i: int = W.idx(int(P.pos.x) + dx, int(P.pos.z) + dz)
-			if W.inb(int(P.pos.x) + dx, int(P.pos.z) + dz) and dx > 6:
+			if W.inb(int(P.pos.x) + dx, int(P.pos.z) + dz) and dx > -3:
 				W.kind[i] = World.T_VOID
-	ok(DropReticle.project(P, far)["void"], "a projected spot over the void is flagged")
+	ok(DropReticle.project(P, far)["void"], "coming down over the void is flagged")
 
 func run(mn: Node) -> void:
 	main = mn

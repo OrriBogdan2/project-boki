@@ -182,6 +182,7 @@ func _apply(shake: Vector3) -> void:
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
 	var z := zoom * (1.0 + pull)
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
+	near = clampf(z * 0.6, 1.0, 30.0)         # (the drop's wide view: a sane depth range over the whole island)
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)
 	# pitch: the style's angle, tipped toward straight down for a bird's-eye view, or low behind
