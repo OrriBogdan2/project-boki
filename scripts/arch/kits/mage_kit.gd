@@ -27,6 +27,8 @@ var strikes: Array = []        # Skycall: {at, t, dir, phase ("flick" | "count")
 var rod: Node3D = null         # the Storm Rod held in the hand while RMB is down
 var rod_full := false
 var blowouts := 0              # tests and the demo
+var reset_dash_boost := false  # a reset armed the next Wirerun: further, charged quicker
+var reset_boost_t := 0.0       # s left on it
 var slams := 0
 var orb_bursts := 0
 var lmb_n := 0                 # finger bolts fired (left, right, left...)
@@ -37,10 +39,12 @@ var last_push := 0.0           # tests: how hard the last rod knocked
 var echo_t := 0.0
 var ult: MageUlt               # Kitefall, her ultimate on X
 var sky: MageSky               # Skycall (E) and the orbs it flings
+var gum                        # the bubble she blows and pops (mage_gum.gd)
 
 func _setup() -> void:
 	ult = MageUlt.new(self)
 	sky = MageSky.new(self)
+	gum = load("res://scripts/arch/kits/mage_gum.gd").new(self)
 	# her round is fired after this kit's tick, so its stock orb would draw one frame as a white ball at
 	# her hand before _tick_lmb skins it: hide it just before that frame is drawn
 	RenderingServer.frame_pre_draw.connect(_hide_fresh_round)
@@ -56,6 +60,11 @@ func _hide_fresh_round() -> void:
 			if orb != null and is_instance_valid(orb):
 				orb.visible = false
 			return
+
+## A rival went down: she pops her gum at them.
+func on_knock(_t: Hunter, mine: bool) -> void:
+	if mine:
+		gum.blow()
 
 func fx() -> VVFx:
 	return VVFx.of(m)
@@ -150,7 +159,8 @@ func _tick_sparks(dt: float) -> void:
 		var s: Dictionary = sparks[key]
 		var fv = s["e"]     # untyped first: a freed foe can't be assigned to a typed var
 		var f: Ent = fv if is_instance_valid(fv) else null
-		s["t"] = float(s["t"]) - dt
+		if not ult.busy():                 # (Kitefall can't refresh it: it waits for the strike that spreads it)
+			s["t"] = float(s["t"]) - dt
 		if not is_instance_valid(f) or f.dead or float(s["t"]) <= 0.0 or (f is Hunter and (f as Hunter).downed):
 			sparks.erase(key)
 			fx().unmark("vs%d" % key)
@@ -164,6 +174,10 @@ func _tick_sparks(dt: float) -> void:
 
 func _tick(dt: float) -> void:
 	_tick_sparks(dt)
+	gum.tick(dt)
+	if reset_dash_boost:
+		reset_boost_t -= dt
+		reset_dash_boost = reset_boost_t > 0.0
 	ult.tick(dt)
 	_tick_echo(dt)
 	_tick_trail()
@@ -291,11 +305,29 @@ func _bolt_end(at: Vector3, vel: Vector2, from: Vector3) -> void:
 
 # ------------------------------------------------------------------ dash: Wirerun
 func dash_charge() -> float:
-	return clampf(float(wire["t"]) / float(dash_def()["hold"]), 0.0, 1.0) if not wire.is_empty() else -1.0
+	return clampf(float(wire["t"]) / wire_hold(), 0.0, 1.0) if not wire.is_empty() else -1.0
+
+## The Wirerun comes back (a Blowout, a charge orb): the next one runs further and charges quicker, so resets chain.
+func grant_reset() -> void:
+	h.dashes = h.max_dashes()
+	reset_dash_boost = true
+	reset_boost_t = float(dash_def()["reset_window"])
+
+## Seconds to a full charge: the running one's, or the next one's.
+func wire_hold() -> float:
+	var dd := dash_def()
+	var boosted := bool(wire.get("boost", false)) if not wire.is_empty() else reset_dash_boost
+	return float(dd["hold"]) * (float(dd["reset_charge"]) if boosted else 1.0)
+
+func wire_reach() -> float:
+	var dd := dash_def()
+	var boosted := bool(wire.get("boost", false)) if not wire.is_empty() else reset_dash_boost
+	return float(dd["reset_mult"]) if boosted else 1.0
 
 func wire_len(t: float) -> float:
 	var dd := dash_def()
-	return lerpf(float(dd["dist"][0]), float(dd["dist"][1]), clampf(t / float(dd["hold"]), 0.0, 1.0))
+	var L := lerpf(float(dd["dist"][0]), float(dd["dist"][1]), clampf(t / wire_hold(), 0.0, 1.0))
+	return L * wire_reach()
 
 func run_time(L: float) -> float:
 	var dd := dash_def()
@@ -323,7 +355,8 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	if not spend_dash(false):          # the cooldown starts on the press
 		return true
-	wire = {"t": 0.0, "y": h.pos.y, "air": not h.grounded}
+	wire = {"t": 0.0, "y": h.pos.y, "air": not h.grounded, "boost": reset_dash_boost}
+	reset_dash_boost = false
 	play("mage_dash")
 	# a bolt slams down onto her: the charging tell
 	fx().arc(h.position + Vector3(0, 8.0, 0), h.position + Vector3(0, 0.3, 0), col_of(dash_def()), GOLD, 0.8, 0.22)
@@ -373,12 +406,12 @@ func _tick_wire(dt: float) -> void:
 		h.pos.y = float(wire["y"])
 	var d := h.aim_dir()
 	var L := wire_len(t)
-	var k := clampf(t / float(dd["hold"]), 0.0, 1.0)
+	var k := clampf(t / wire_hold(), 0.0, 1.0)
 	var dr := _drift()
 	var end := h.pos + Vector3(d.x * L, 0, d.y * L) + Vector3(dr.x, 0, dr.y) * run_time(L)
 	wire["end"] = end
 	wire["len"] = L
-	var full_len := float(dd["dist"][1])
+	var full_len := float(dd["dist"][1]) * wire_reach()
 	var lane := {"len": full_len, "width": 0.35, "rails": true, "chevrons": 5, "fill": L / full_len, "col": col_of(dd)}
 	AimKit.lane(h, "dash", lane)
 	var ring := {"at": end, "r": float(dd["end_r"]), "ticks": true, "star": true, "col": col_of(dd), "col2": GOLD}
@@ -388,7 +421,8 @@ func _tick_wire(dt: float) -> void:
 	AimKit.charge(h, k, {"col": col_of(dd), "col2": GOLD})
 	if fx().rng.randf() < 0.35:
 		fx().arc(h.position + _jitter(0.4, 0.2, 1.4), h.position + _jitter(0.5, 0.2, 1.6), TEAL, GOLD, 0.18, 0.08)
-	if not held("dash") or t >= float(dd.get("auto", float(dd["hold"]) + 0.3)):
+	var auto_t := float(dd.get("auto", float(dd["hold"]) + 0.3)) * wire_hold() / float(dd["hold"])
+	if not held("dash") or t >= auto_t:
 		_end_wire(false)
 		_run(L, d, dr)
 
@@ -451,7 +485,7 @@ func _blowout(f: Ent) -> void:
 	clear_sparks(f)
 	blowouts += 1
 	f.hurt(dmg, h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "blowout"], "payoff": true, "crit": true})
-	h.dashes = h.max_dashes()                 # the dash comes straight back: the only reset
+	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
 	fx().arc(f.position + Vector3(0, 6.0, 0), f.position + Vector3(0, 0.1, 0), TEAL, GOLD, 1.0, 0.3)
 	payoff_fx(f.pos, "BLOWOUT", GOLD, "", h.dir_to(f), f)
@@ -723,6 +757,7 @@ func _grab_mote(mt: Dictionary) -> void:
 	h.dashes = h.max_dashes()
 	h.dash_buf = 0.0
 	if was_spent:
+		grant_reset()
 		m.fx.flash(h.position + Vector3(0, 1.0, 0), GOLD, 2.4, 0.16)
 		m.fx.flash(h.position + Vector3(0, 1.6, 0), TEAL, 0.9, 0.08)
 		DashReset.cue(h, "orb")

@@ -112,6 +112,8 @@ const MOVES := {
 		[0.07, {"p": 0.18, "fl": Vector3(0.05, 0.62, -0.1), "hw": 1.0, "sq": -0.2}],
 		[0.3, {"p": 0.1, "fl": Vector3(0.05, 0.55, -0.1), "hw": 0.8}],
 		[0.55, {}]]},
+	# the gum (MageGum): head and bubble only, the keyed clip does the work; the rig just waits it out
+	"mage_gum": {"keys": [[0.0, {}], [1.2, {}]]},
 	# Kitefall (X), on the sheet's 10 fps beats. The crouch (f28-f31, 0.3 s): knees deep, arms swept down and
 	# back, a squash that loads the launch
 	"mage_x": {"hold": true, "keys": [
