@@ -183,10 +183,10 @@ func _beacon(A: Hunter, B: Hunter, C: Hunter, foe: Hunter) -> void:
 	# every player is told: a teammate's view and a rival's
 	for viewer in [A, foe]:
 		m.player = viewer
-		m.hud.toasts.clear()
+		m.hud.msgs.clear()
 		_spot(A, bc["pos"])
 		_run(Match.DT * 2.0)
-		var told: bool = m.hud.toasts.any(func(t): return String(t["text"]).contains("eacon"))
+		var told: bool = m.hud.msgs.texts().any(func(t): return t.contains("eacon"))
 		var side := "ally" if viewer.team == A.team else "rival"
 		ok(bc["lit"] and told, "%s (%s) gets the beacon notice" % [viewer.pname, side])
 		_spot(A, bc["pos"] + Vector3(12, 0, 0))

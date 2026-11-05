@@ -2203,7 +2203,7 @@ func _use(it: Dictionary) -> void:
 				_hatch_nest_egg()
 			else:
 				fx.burst(NEST_AT + Vector3(0, 0.5, 0), Color("ffd28a"), 8, 1.4)
-				_toast("Warm and still. It hatches after your next expedition, or in a few minutes")
+				_toast("It hatches after your next expedition")
 		"yard":
 			var ak := Save.active_kin()
 			if not ak.is_empty(): _open_train(ak)
@@ -2595,7 +2595,7 @@ func _water(arr: String, i: int, who = "you") -> void:
 		fx.burst(pn.position + Vector3(0, 0.8, 0), Color("7ac8ff"), 14, 2.0)
 		if already:
 			fx.burst(pn.position + Vector3(0, 0.9, 0), Color("bfefff"), 10, 2.4)
-			_toast("Tended! Rain only soaks it; your watering counts toward a bigger harvest.")
+			_toast("Tended: a bigger harvest")
 	_refresh_plot(arr, i)
 	Save.save_game()
 
@@ -3151,7 +3151,7 @@ func _open_kin(rec: Dictionary) -> void:
 			fl.add_child(UI.ghost("Bring as second", func():
 				Save.d["active2"] = rec["uid"]
 				Save.save_game()
-				_toast("%s will come along on your next expedition (%s swaps it in)" % [rec["name"], Settings.key_cap("swap_kin")])
+				_toast("%s joins your next expedition (%s swaps)" % [rec["name"], Settings.key_cap("swap_kin")])
 				_open_kin(rec)))
 	# the Kin Burrow: put it to sleep there, or wake it and bring it out
 	if KinBox.is_boxed(rec):
@@ -3180,7 +3180,7 @@ func _open_kin(rec: Dictionary) -> void:
 			rec["farmhand"] = true
 			Save.remember(rec, "farm", "was put in charge of watering the farm", 1.0)
 			Save.save_game()
-			_toast("%s will water your plants (a farmhand counts as Tide 1 on the Job Board)" % rec["name"])
+			_toast("%s will water your plants" % rec["name"])
 			_open_kin(rec)))
 
 # ---- talking: speech bubbles over the kin and a slim bar to type in

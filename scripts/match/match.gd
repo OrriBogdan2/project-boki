@@ -2037,8 +2037,8 @@ func mate_col(h: Hunter) -> Color:
 
 const SQUAD_PING_T := 45.0
 ## A squad ping: one per hunter (a new one moves it), seen by their squad on the map, the minimap and
-## as a marker in the world; it lasts a while or until its owner takes it down.
-func squad_ping(h: Hunter, p: Vector3, from_net := false) -> void:
+## as a marker in the world; it lasts a while or until its owner takes it down. `kind`: "", "enemy" or "loot".
+func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "") -> void:
 	if h == null:
 		return
 	if not world.is_void(p.x, p.z):
@@ -2046,11 +2046,12 @@ func squad_ping(h: Hunter, p: Vector3, from_net := false) -> void:
 	else:
 		p.y = 0.0
 	unping(h, true)
-	pings.append({"pos": p, "col": mate_col(h), "t": 0.0, "by": h, "team": h.team, "life": SQUAD_PING_T})
+	pings.append({"pos": p, "col": PingInput.color(self, h, kind), "t": 0.0, "by": h, "team": h.team,
+		"life": SQUAD_PING_T, "kind": kind})
 	if player and h.team == player.team:
 		sfx("ping", null, -6.0, 1.15)
 	if net_on and not from_net:
-		net_event(["sping", h.nid, p.x, p.y, p.z])
+		net_event(["sping", h.nid, p.x, p.y, p.z, kind])
 	if skydrop:
 		skydrop.on_ping(h, p)
 	if not from_net:
@@ -2669,7 +2670,7 @@ func on_merge(h: Hunter, k: Kin, u: MergeSpec) -> void:
 	if h == player:
 		player.add_stat("ults")
 		if hud:
-			hud.toast_small("%s  ·  %s again for %s" % [String(form["name"]).to_upper(), Settings.key_cap("ultimate"), String(MergeKit.of(h).ult_def()["name"]) if MergeKit.of(h) else "the burst"], form["glow"])
+			hud.toast_small(String(form["name"]).to_upper(), form["glow"])
 
 func on_merge_end(h: Hunter, why: String) -> void:
 	if h == player and hud and why in ["time", "throw"]:
@@ -2853,15 +2854,14 @@ func on_armor_break(h: Hunter, by: Ent) -> void:
 		hud.toast_small("Armor down", Color("7ac8ff"))
 
 ## Knocked into a wall: stunned for a moment, which is the whole point of knockback near walls.
-func on_wall_slam(e: Ent, st: float) -> void:
+func on_wall_slam(e: Ent) -> void:
 	fx.burst(e.pos + Vector3(0, 0.9, 0), Color("e6dccb"), 16, 4.0, 0.4)
 	fx.ring(e.pos, 1.2, Color("fff27a"), 0.3)
 	sfx("knock", e.pos, -2.0, 1.2)
 	var sc: Ent = e.last_hit_by
 	if sc is Kin and (sc as Kin).owner_h: sc = (sc as Kin).owner_h
 	if sc is Hunter and sc != e: (sc as Hunter).add_stat("slams")
-	if e == player and hud: hud.toast_small("WALL SLAM", Color("fff27a"))
-	elif player and e.last_hit_by == player and hud: hud.toast_small("WALL SLAM  ·  stunned %.1fs" % st, Color("fff27a"))
+	if hud and player and (e == player or e.last_hit_by == player): hud.toast_small("WALL SLAM", Color("fff27a"))
 
 ## Sight. Each hunter sees a cone in front of them (where they aim) out to VIEW_RANGE, plus a
 ## small circle all around; a team shares what its members see. Walls and high ground block
@@ -3707,6 +3707,7 @@ func _gather_input() -> void:
 		player.draw_t = -1.0           # a menu opened mid-draw: the draw is dropped, nothing is loosed
 	var map_up: bool = hud != null and hud.map_open()      # the map takes the mouse buttons
 	var on_panel: bool = hud != null and hud.mouse_on_panel()      # ... and so do the item windows under the cursor
+	PingInput.poll(self, map_up)
 	if paused:
 		player.inp["move"] = Vector2.ZERO
 	if KinCommand.poll(player, get_process_delta_time(), paused or map_up or on_panel) == "tap":       # G: tap sics / calls back, hold opens the order wheel
@@ -5795,7 +5796,8 @@ func _net_ev(x, from: String) -> void:
 				kk.comp.heard(String(x[2]), Vector3(float(x[3]), float(x[4]), float(x[5])))
 		"sping":
 			var ph: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
-			if ph: squad_ping(ph, Vector3(x[2], x[3], x[4]), true)
+			if ph:
+				squad_ping(ph, Vector3(x[2], x[3], x[4]), true, String(x[5]) if x.size() > 5 else "")
 		"unping":
 			var uh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if uh: unping(uh, true, true)
@@ -6011,17 +6013,17 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
-	_tip("move", "WASD to move, aim with the mouse, hold left click to shoot. Shift dashes, Space jumps. Hold Space in the air to glide.")
+	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  hold Space to glide")
 	if _tip_t > 14.0:
 		if player.ak:
-			_tip("ability", "Your Boki uses its own ability by itself. %s sends it at a foe (tap), calls it back when it is away, and opens the order wheel (hold). Fighting together fills the bond meter, and a full one lets you press %s to fuse." % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
+			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
 		else:
-			_tip("ability", "%s is your Boki's ability. Fighting together fills the bond meter, and %s calls your Boki's bond ultimate." % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
+			_tip("ability", "%s: your Boki's ability  ·  full bond: %s" % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
 	if player.ult >= 1.0 and player.kin:
 		var ud := KinMerge.def_for(player.kin)
-		if ud and player.ak == null: _tip("ult", "Your bond is full. %s fuses you with your Boki: %s." % [Settings.key_cap("ultimate"), ud.display_name])
+		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
-			_tip("ult", "Your bond is full: your next %s is bonded, and fuses you with your Boki (%s) as it goes off." % [Settings.key_cap("ultimate"), ud.display_name])
+			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 	var k: Kin = player.kin
 	if k == null:
 		return
@@ -6031,20 +6033,20 @@ func _tips() -> void:
 			if player.flat_dist(f) < 9.0:
 				near_foe = true; break
 		if near_foe:
-			_tip("throw", (Settings.key_cap("throw") + " sends %s at the cursor. A Boki that hits a foe stuns it, and your shots crit stunned foes. Hold " + Settings.key_cap("throw") + " and flick the mouse for Chase, Guard, Return or Follow.") % k.rec.get("name", "your Boki"))
+			_tip("throw", "%s sends %s: its hit stuns, and stunned foes take crits" % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")])
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
-		_tip("skill", "%s uses %s's %s. Stun or root a foe with your Boki, then shoot it for a combo. %s sends it at a foe, and calls it back to your side when it is away." % ["Your Boki" if player.ak else Settings.key_cap("signature"), k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability", Settings.key_cap("throw")])
+		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
 	if not interact.is_empty() and interact["kind"] == "catch":
-		_tip("catch", "Hold %s to scan it. The scan runs 4 seconds on its own: you can't move or shoot, rivals can see and hear it, and a dash cancels it. A Boki you catch only comes home if you extract." % Settings.key_cap("interact"))
+		_tip("catch", "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % Settings.key_cap("interact"))
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
 		match String(interact["x"]["kind"]):
-			"dock": _tip("exit_dock", "Skiff docks: call the skiff at the horn beacon, survive the monsters it draws until it ties up, then stand on its deck before it leaves.")
-			"hatch": _tip("exit_hatch", "Press %s at a rift hatch with a Rift Key: it opens 10s later, and three can drop through. Keys are rare loot (vaults, bosses, elites) and drop in your deathbox if you go down." % Settings.key_cap("interact"))
-			"outpost": _tip("exit_uplink", "Outposts: start the uplink and hold the yard while it charges. A rival standing in it stalls the charge. When it's done, step into the lift.")
+			"dock": _tip("exit_dock", "Call the skiff at the horn, hold out, board before it leaves")
+			"hatch": _tip("exit_hatch", "A Rift Key opens this hatch (%s)  ·  three can drop through" % Settings.key_cap("interact"))
+			"outpost": _tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
 	if player.downed:
-		_tip("down", "You're down. Your Boki will try to pick you up if it trusts you enough.")
+		_tip("down", "Down  ·  a trusting Boki may pick you up")
 
 # ------------------------------------------------------------------ aim indicators
 # ---- ability previews: hold E, R or Q to see the reach and where it lands

@@ -1037,7 +1037,7 @@ func start_base(to: Hunter) -> void:
 	base_to = to
 	_ab_feedback("base", "cast")
 	m.sfx("portal", pos, -6.0, 1.2)
-	if is_local() and m.hud: m.hud.toast_small("Basing to %s  ·  hold still" % to.pname, Color("8fe3c8"))
+	if is_local() and m.hud: m.hud.toast_small("Basing  ·  hold still", Color("8fe3c8"))
 
 func cancel_base(why := "") -> void:
 	if base_t <= 0.0:
@@ -1076,7 +1076,7 @@ func _tick_base(dt: float) -> void:
 		base_cd = BASE_CD
 		m.fx.ring(at, 1.8, Color("8fe3c8"), 0.45)
 		m.sfx("portal", at, -2.0, 1.5)
-		if is_local() and m.hud: m.hud.toast_small("Recall weakness: half damage and effects for 3s", Color("ffb36a"))
+		if is_local() and m.hud: m.hud.toast_small("Weakened 3s", Color("ffb36a"))
 var air_peak := 0.0              # the highest point of this time in the air (for skyfall landings)
 const SKYFALL_H := 8.0           # drop at least this far, fast, onto rivals and you land a skyfall
 
@@ -2411,7 +2411,7 @@ func _physics(dt: float) -> void:
 			var st := maxf(0.9, wallstun)
 			wallstun = 0.0
 			stun_t = maxf(stun_t, st)
-			m.on_wall_slam(self, st)
+			m.on_wall_slam(self)
 			hurt(10.0, last_hit_by, {"src": "wall"})
 	if grounded:
 		wall_moves.land()
@@ -3370,6 +3370,8 @@ func render(delta: float, alpha: float) -> void:
 		else:
 			see = int(m.time * 14.0) % 3 != 0
 	model.visible = see and not Hex.active(self)       # hexed: the critter stands in for the model
+	ShieldLook.tick(self)
+	SideRings.tick(self)
 	var ring := model.get_node("TeamRing") as MeshInstance3D
 	ring.visible = not downed
 	_render_balloon(delta)

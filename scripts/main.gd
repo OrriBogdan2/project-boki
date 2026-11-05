@@ -3184,9 +3184,9 @@ func _record_check() -> void:
 	ok.call(not dbg.visible and m.hud.visible and not Overlay.fps_lbl.visible, "clean: debug label and fps hidden, the HUD stays")
 	ok.call(float(Record.cam_rates()[0]) < float(cam_off[0]) and float(Record.cam_rates()[4]) < 1.0, "clean: the camera follows softer, less shake")
 	m.hud.tip("a tip"); m._tip_t = 99.0
-	var tips_before: int = m.hud.tips.size()
+	var tips_before: int = m.hud.msgs.count()
 	m._tips()
-	ok.call(m.hud.tips.size() == tips_before, "clean: no new tips queued")
+	ok.call(m.hud.msgs.count() == tips_before, "clean: no new tips queued")
 	press.call(false)
 	await get_tree().process_frame
 	ok.call(Record.level == 2 and not m.hud.visible, "F10 again: no HUD (level %d, hud visible %s)" % [Record.level, m.hud.visible])

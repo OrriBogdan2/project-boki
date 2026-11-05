@@ -116,7 +116,7 @@
 "semicolon": 5
 },
 "scripts/core/game.gd": {
-"long_line": 9,
+"long_line": 8,
 "nested_ternary": 1,
 "semicolon": 4
 },
@@ -253,7 +253,7 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 212,
+"long_line": 211,
 "nested_ternary": 29,
 "semicolon": 248,
 "shadow": 3
@@ -271,7 +271,7 @@
 "shadow": 1
 },
 "scripts/home/home_gather.gd": {
-"long_line": 10,
+"long_line": 9,
 "nested_ternary": 3,
 "semicolon": 29
 },
@@ -481,7 +481,7 @@
 },
 "scripts/match/drop_squad.gd": {
 "history_comment": 1,
-"long_line": 4,
+"long_line": 3,
 "semicolon": 5
 },
 "scripts/match/duel.gd": {
@@ -498,7 +498,7 @@
 "semicolon": 47
 },
 "scripts/match/exits.gd": {
-"long_line": 34,
+"long_line": 33,
 "nested_ternary": 1,
 "semicolon": 20
 },
@@ -634,14 +634,13 @@
 "semicolon": 25
 },
 "scripts/match/life.gd": {
-"long_line": 14,
-"nested_ternary": 1,
+"long_line": 13,
 "semicolon": 3
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 229,
-"nested_ternary": 20,
+"long_line": 222,
+"nested_ternary": 19,
 "semicolon": 146,
 "shadow": 9
 },
@@ -832,8 +831,8 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 195,
-"nested_ternary": 40,
+"long_line": 191,
+"nested_ternary": 39,
 "semicolon": 52,
 "shadow": 2
 },
@@ -870,9 +869,6 @@
 "long_line": 31,
 "nested_ternary": 5,
 "semicolon": 4
-},
-"scripts/ui/level_pop.gd": {
-"long_line": 1
 },
 "scripts/ui/loading.gd": {
 "long_line": 27,
@@ -1140,7 +1136,7 @@
 "semicolon": 7
 },
 "tools/perkorb_check.gd": {
-"long_line": 33,
+"long_line": 31,
 "semicolon": 4,
 "shadow": 1
 },

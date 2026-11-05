@@ -27,7 +27,6 @@ static func apply(h: Hunter, dur: float, send := true) -> void:
 		m.fx.word(h.pos + Vector3(0, 2.2, 0), "HEXED", Color("e2b8ff"), true)
 		m.sfx("portal", h.pos, -2.0, 1.6)
 		m.sfx("kin_unsure", h.pos, -4.0, 1.6)
-		if h == m.get("player") and m.hud: m.hud.toast_small("HEXED  ·  you can't fight for a moment", Color("e2b8ff"))
 	if send and m.get("net_on") and not h.dead:
 		m.net_event(["hex", h.nid, snappedf(dur, 0.01)])
 

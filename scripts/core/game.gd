@@ -65,8 +65,8 @@ func _setup_input() -> void:
 	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your archetype's right-click ability (its variants: tap, hold, air...)
 	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the archetype's ability, Shift the archetype's
 	# dash, Space jump and glide (Mouse 5 glides too), Q your active glove, E the archetype's utility,
-	# R the hunter's ultimate, X Fuse with your Boki (a full bond meter), G (or middle mouse) send out / call back
-	# your Boki (hold G for the order wheel; the Boki casts its own ability), 1-4 the utility belt, F interact.
+	# R the hunter's ultimate, X Fuse with your Boki (a full bond meter), G send out / call back your Boki
+	# (hold G for the order wheel; the Boki casts its own ability), middle mouse ping, 1-4 the belt, F interact.
 	_key("signature", [KEY_E])                # the archetype's utility (E)
 	_key("kin_skill", [])                     # a kin's second ability: retired from the kit (data kept)
 	_key("interact", [KEY_F])                 # catch, open, pick up, finish a downed enemy (Supervive: F)
@@ -76,7 +76,8 @@ func _setup_input() -> void:
 	_key("gear1", [KEY_Q])                    # glove 1 (Q)
 	_key("gear2", [KEY_V])                    # glove 2 (V; in a match only, so it shares V with "play" at home)
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
-	_key("throw", [KEY_G], MOUSE_BUTTON_MIDDLE)  # send your kin out to fight on its own, or recall it (G or middle mouse)
+	_key("throw", [KEY_G])                    # send your kin out to fight on its own, or recall it
+	_key("ping", [], MOUSE_BUTTON_MIDDLE)     # ping for your squad: the spot, enemy or loot at the cursor (PingInput)
 	_key("base", [KEY_B])                     # base to a teammate: a 3s channel (squads only)
 	_key("swap_kin", [])                      # one kin per expedition now; kept so old code paths compile
 	_key("dash", [KEY_SHIFT])
