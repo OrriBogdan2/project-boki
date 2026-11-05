@@ -145,7 +145,8 @@ func _bake_tone(list: Array) -> ArrayMesh:
 			ns.append((xf.basis * (src[Mesh.ARRAY_NORMAL] as PackedVector3Array)[i]).normalized())
 			uvs.append((src[Mesh.ARRAY_TEX_UV] as PackedVector2Array)[i])
 			uv2.append(Vector2(lo, hi))
-			cols.append((src[Mesh.ARRAY_COLOR] as PackedColorArray)[i] if src[Mesh.ARRAY_COLOR] != null else Color.WHITE)
+			var col: Variant = src[Mesh.ARRAY_COLOR]
+			cols.append(Color.WHITE if col == null else (col as PackedColorArray)[i])
 			_top4(_weigh(p, pc[1]), bones, weights)
 		for j in (src[Mesh.ARRAY_INDEX] as PackedInt32Array):
 			idx.append(base + j)
@@ -215,4 +216,4 @@ static func _top4(w: PackedFloat32Array, bones: PackedInt32Array, weights: Packe
 		sum += w[order[i]]
 	for i in 4:
 		bones.append(order[i])
-		weights.append(w[order[i]] / sum if sum > 0.0 else (1.0 if i == 0 else 0.0))
+		weights.append(w[order[i]] / sum)

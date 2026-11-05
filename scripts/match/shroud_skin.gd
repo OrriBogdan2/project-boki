@@ -33,7 +33,8 @@ func bind(top: Node3D) -> void:
 	rest_inv.resize(COUNT)
 	var me := _chain(self, top)
 	for b in COUNT:
-		rest_inv[b] = Transform3D.IDENTITY if src[b] == null else (me.affine_inverse() * _chain(src[b], top)).affine_inverse()
+		if src[b] != null:
+			rest_inv[b] = (me.affine_inverse() * _chain(src[b], top)).affine_inverse()
 
 static func _chain(n: Node3D, top: Node3D) -> Transform3D:
 	var xf := Transform3D.IDENTITY

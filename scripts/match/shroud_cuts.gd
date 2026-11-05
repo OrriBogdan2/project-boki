@@ -77,13 +77,18 @@ static func _hood_for(t: ShroudTailor, nm: String, up: bool, peak: float, flop :
 	else:
 		_hood_down(t, nm, t.m[tone])
 
+## A point on a smooth curve through pts, v 0..1 along it.
+static func _curve(pts: PackedVector3Array, v: float) -> Vector3:
+	var last := pts.size() - 1
+	var k := v * last
+	var i := mini(int(k), last - 1)
+	return pts[i].cubic_interpolate(pts[i + 1], pts[maxi(i - 1, 0)], pts[mini(i + 2, last)], k - i)
+
 ## A strip of cloth along a curve (a tail, a sash end, a bandage). u across, v along; widths w0..w1.
 static func _ribbon(t: ShroudTailor, nm: String, pts: PackedVector3Array, w0: float, w1: float, side := Vector3.RIGHT,
 		rows := 12, point := false) -> ArrayMesh:
 	var fn := func(u: float, v: float) -> Vector3:
-		var k := v * (pts.size() - 1)
-		var i := mini(int(k), pts.size() - 2)
-		var c: Vector3 = pts[i].cubic_interpolate(pts[i + 1], pts[maxi(i - 1, 0)], pts[mini(i + 2, pts.size() - 1)], k - i)
+		var c := _curve(pts, v)
 		var wid := lerpf(w0, w1, v) * (1.0 - smoothstep(0.86, 1.0, v) * 0.9 if point else 1.0)
 		return c + side * (u - 0.5) * wid + Vector3(0, 0, 0.012 * sin(v * 17.0)) * (1.0 + 2.0 * absf(u - 0.5))
 	return _shell(t, "ribbon|" + nm, fn, 3, rows, 0.012, false, -1.0)
@@ -118,12 +123,14 @@ static func _lay(at: Vector3, dir: Vector3, th: float) -> Transform3D:
 static func _cloak(t: ShroudTailor, hood_up: bool) -> void:
 	var f := t.floor_y
 	var s := t.span
+	var flare := 0.29 if t.fem else 0.15        # a woman's shoulders are narrower and her hem wider
 	var fn := func(u: float, v: float) -> Vector3:
 		var gap := 0.03 + 0.3 * v * v
 		var th := PI * 0.5 + (2.0 * u - 1.0) * (PI - gap)
-		var rr := lerpf(0.13, 0.385 * s, smoothstep(-0.04, 0.3, v)) + 0.15 * pow(v, 1.6)
+		var rr := lerpf(0.13, 0.385 * s, smoothstep(-0.04, 0.3, v)) + flare * pow(v, 1.6)
 		rr *= 1.0 + 0.07 * v * _fold(th, 7.0)
-		return Vector3(cos(th) * rr, lerpf(0.67, f + 0.02, v), sin(th) * rr * 0.94 + 0.3 * maxf(sin(th), 0.0) * v * v * v)
+		var train := 0.3 * maxf(sin(th), 0.0) * v * v * v
+		return Vector3(cos(th) * rr, lerpf(0.67, f + 0.02, v), sin(th) * rr * 0.94 + train)
 	t.keep = 0.85       # (one big surface: its folds are all it has)
 	t.add("body", _shell(t, "cloak", fn, 48, 14), {"legs": 0.8, "arms": 0.9})
 	t.band(_edge(fn, 0.95, 1.0), 2.8, LIMB)
@@ -147,6 +154,10 @@ static func _wrap(t: ShroudTailor) -> void:
 	var y_top := 0.33 + HeroKit.torso_prof(0.1).y
 	var y_bot := 0.33 + HeroKit.torso_prof(0.92).y
 	t.rigid(torso, _helix("chest|" + t.tag, chest, y_top, y_bot, 6.0, 0.1), body)
+	var waist := func(u: float, w: float) -> Vector3:
+		var rr := 0.26 * t.bw
+		return Vector3(cos(u * TAU) * rr, 0.1 - 0.09 * w, sin(u * TAU) * rr * 0.94)
+	t.band(waist, 1.5, {})
 	var hips := func(k: float) -> float: return lerpf(0.23, 0.24, k) * t.bw
 	t.rigid(torso, _helix("hips|" + t.tag, hips, 0.1, -0.1, 3.0, 0.1), body)
 	for sd in ["L", "R"]:
@@ -170,7 +181,8 @@ static func _wrap(t: ShroudTailor) -> void:
 	var tails := [
 		[PackedVector3Array([Vector3(0.14, 0.02, 0.2), Vector3(0.2, -0.16, 0.34), Vector3(0.28, -0.3, 0.52),
 			Vector3(0.22, -0.36, 0.8)]), 0.09, 0.05],
-		[PackedVector3Array([Vector3(-0.12, 0.0, 0.19), Vector3(-0.22, -0.2, 0.3), Vector3(-0.34, -0.3, 0.44)]), 0.08, 0.05],
+		[PackedVector3Array([Vector3(-0.12, 0.0, 0.19), Vector3(-0.22, -0.2, 0.3), Vector3(-0.34, -0.3, 0.44)]),
+			0.08, 0.05],
 		[PackedVector3Array([Vector3(0.03, 0.8, 0.26), Vector3(0.1, 0.72, 0.42), Vector3(0.05, 0.66, 0.62),
 			Vector3(0.14, 0.62, 0.82)]), 0.09, 0.05],
 	]
@@ -179,8 +191,9 @@ static func _wrap(t: ShroudTailor) -> void:
 		t.add("trim" if i == 2 else "body", _ribbon(t, "wrap%d" % i, tails[i][0], tails[i][1], tails[i][2]),
 			{"bone": ShroudSkin.SCARF, "from": at, "reach": 0.5})
 	var cuff: Vector3 = t.joints["ha"][0]
-	t.add("body", _ribbon(t, "wrapwrist", PackedVector3Array([cuff + Vector3(-0.03, 0.05, 0), cuff + Vector3(-0.1, -0.08, 0.05),
-		cuff + Vector3(-0.15, -0.26, 0.1)]), 0.07, 0.04), {"arms": 1.0})
+	var loose := PackedVector3Array([cuff + Vector3(-0.03, 0.05, 0), cuff + Vector3(-0.1, -0.08, 0.05),
+		cuff + Vector3(-0.15, -0.26, 0.1)])
+	t.add("body", _ribbon(t, "wrapwrist", loose, 0.07, 0.04), {"arms": 1.0})
 
 # --------------------------------------------------------------------------------------------------- 2 Tatters
 ## The spikes: a torn yoke and long separate strips of uneven length that flare out into a star, with gaps through
@@ -315,8 +328,8 @@ static func _robe(t: ShroudTailor, hood_up: bool) -> void:
 	t.add("trim", _ribbon(t, "sashshort", short_end, 0.1, 0.11), {"legs": 0.8})
 	_hood_for(t, "robe", hood_up, 0.06)
 	for sg in [-1.0, 1.0]:
-		var lap := PackedVector3Array([Vector3(0.11 * sg, 0.62, -0.14), Vector3(0.0, 0.42, -0.27 * t.bw),
-			Vector3(-0.12 * sg, 0.2, -0.27 * t.bw)])
+		var lap := PackedVector3Array([Vector3(0.12 * sg, 0.62, -0.15), Vector3(0.06 * sg, 0.42, -0.25 * t.bw),
+			Vector3(-0.01 * sg, 0.2, -0.26 * t.bw)])
 		t.add("trim", _ribbon(t, "lapel%d" % int(sg), lap, 0.06, 0.06, Vector3.RIGHT, 5), {})
 
 # ----------------------------------------------------------------------------------------------- 6 Mantle Cape
@@ -390,6 +403,7 @@ static func _shawl(t: ShroudTailor) -> void:
 ## The fan: a raised collar of long feathers standing out behind the head like a crest, a shorter feathered mantle on
 ## the shoulders, and a spray of tail feathers behind a knee-length under-robe.
 static func _feathers(t: ShroudTailor, hood_up: bool) -> void:
+	t.keep = 1.0        # (each feather is a handful of triangles already: fewer would thin the fan)
 	var big := _feather(t, "big", 0.56, 0.17, 0.08)
 	var mid := _feather(t, "mid", 0.34, 0.15, -0.04)
 	var tail := _feather(t, "tail", 0.82, 0.17, 0.1)
@@ -432,7 +446,7 @@ static func _patchwork(t: ShroudTailor, hood_up: bool) -> void:
 	var s := t.span
 	var f := t.floor_y
 	var lens := [0.78, 1.05, 0.62, 1.16, 0.74, 0.5, 0.86, 0.56]
-	var out_by := [0.0, 0.09, -0.04, 0.13, 0.02, -0.07, 0.08, -0.05]      # the panels stand out unevenly: a stepped outline
+	var out_by := [0.0, 0.09, -0.04, 0.13, 0.02, -0.07, 0.08, -0.05]      # each panel stands out its own way
 	var n := lens.size()
 	var bodice := func(v: float, th: float) -> float:
 		return (lerpf(0.13, 0.36 * s, smoothstep(0.0, 0.22, v)) + 0.1 * v) * (1.0 + 0.012 * sin(th * 11.0))
@@ -466,10 +480,7 @@ static func _sock(t: ShroudTailor) -> void:
 	var ends := PackedVector3Array([Vector3(0.02, 0.1, 0.1), Vector3(0.16, 0.3, 0.16), Vector3(0.4, 0.27, 0.2),
 		Vector3(0.56, 0.06, 0.2), Vector3(0.6, -0.14, 0.2)])
 	var fn := func(u: float, v: float) -> Vector3:
-		var k := v * (ends.size() - 1)
-		var i := mini(int(k), ends.size() - 2)
-		var c: Vector3 = ends[i].cubic_interpolate(ends[i + 1], ends[maxi(i - 1, 0)], ends[mini(i + 2, ends.size() - 1)], k - i)
 		var r := lerpf(0.17, 0.045, pow(v, 0.8))
-		return c + Vector3(0, cos(u * TAU), sin(u * TAU)) * r
+		return _curve(ends, v) + Vector3(0, cos(u * TAU), sin(u * TAU)) * r
 	t.rigid(t.torso, HeroKit.surf("shroud|sock", fn, 10, 10, Callable(), -1.0), t.m["alt"], Vector3(0, 0.86, 0.015))
 	t.rigid(t.torso, Models.sphere(0.06, 8), t.m["trim"], Vector3(0.6, 0.86 - 0.17, 0.215))

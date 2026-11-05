@@ -50,7 +50,7 @@ func _data() -> void:
 		same = same and Shrouds.STYLES[i]["name"] == Shrouds.LABELS[i]
 		ids[Shrouds.STYLES[i]["id"]] = true
 	ok(same and ids.size() == Shrouds.STYLES.size(), "labels match the table and every id is its own")
-	ok(Shrouds.LABELS.slice(0, 3)[1] == "Wrap" and Shrouds.LABELS[2] == "Tatters", "old saves' Wrap and Tatters keep their index")
+	ok(Shrouds.LABELS[1] == "Wrap" and Shrouds.LABELS[2] == "Tatters", "old saves' Wrap and Tatters keep their index")
 	var junk := Shrouds.settings({"shroud": 99, "hood": "x", "trim": -3, "accent": 500, "accessory": null})
 	ok(int(junk["style"]) == Shrouds.STYLES.size() - 1 and int(junk["trim"]) == 0 and int(junk["accessory"]) == 0
 		and int(junk["accent"]) == Unmasked.COLOURS.size() - 1, "bad values land in range (%s)" % str(junk))
@@ -73,7 +73,7 @@ func _builds() -> void:
 			var mats := _worn_mats(m)
 			var skin := m.find_child("ShroudBones", true, false) as ShroudSkin
 			ok(skin != null and skin.get_child_count() > 0 and _whole_weights(skin) and mats <= MAX_MATS,
-				"%s (%s) is skinned, its weights whole, %d materials" % [Shrouds.LABELS[s], "F" if g == 0 else "M", mats])
+				"%s (%s) is skinned, its weights whole, %d materials" % [Shrouds.LABELS[s], "FM"[g], mats])
 			if g == 1:
 				var plain := _build({"shroud": s, "gender": 1})
 				print("SHROUD_TABLE %s plain=%d loaded=%d cloth=%d" % [Shrouds.LABELS[s], _tris(plain), tris,
@@ -87,7 +87,7 @@ func _builds() -> void:
 				var m := _build({"shroud": s, "gender": 1, "trim": 4, "accent": 3, "accessory": a, "hood": hood})
 				worst = maxi(worst, _tris(m))
 				m.free()
-	ok(worst <= MAX_TRIS, "every cut with its heaviest trim and accessory is within %d tris (worst %d)" % [MAX_TRIS, worst])
+	ok(worst <= MAX_TRIS, "every cut, trim and accessory is within %d tris (worst %d)" % [MAX_TRIS, worst])
 
 ## The materials on what the body wears: the glider and the weapon are their own items.
 func _worn_mats(m: Node3D) -> int:
@@ -126,7 +126,10 @@ func _tris(n: Node) -> int:
 		for i in mesh.get_surface_count():
 			var arr: Array = mesh.surface_get_arrays(i)
 			var idx: Variant = arr[Mesh.ARRAY_INDEX]
-			total += (idx as PackedInt32Array).size() / 3 if idx != null else (arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
+			if idx != null:
+				total += (idx as PackedInt32Array).size() / 3
+			else:
+				total += (arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
 	return total
 
 func _whole_weights(skin: ShroudSkin) -> bool:

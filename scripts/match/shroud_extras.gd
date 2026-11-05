@@ -28,7 +28,8 @@ static func _marks(fn: Callable, metres: float, kind: int) -> ArrayMesh:
 				var g := k % 3
 				rects.append([(k + 0.42) / n, (k + 0.58) / n, 0.16, 0.84, 0.0])
 				if g != 1:
-					rects.append([(k + 0.25) / n, (k + 0.75) / n, 0.72 if g == 0 else 0.42, 0.84 if g == 0 else 0.54, 0.0])
+					var low := 0.72 if g == 0 else 0.42
+					rects.append([(k + 0.25) / n, (k + 0.75) / n, low, low + 0.12, 0.0])
 				if g != 2:
 					rects.append([(k + 0.25) / n, (k + 0.75) / n, 0.2, 0.32, 0.0])
 		3:
@@ -116,7 +117,8 @@ static func _charm(t: ShroudTailor, fit: Dictionary) -> void:
 		return Vector3(sin(a) * 0.16, 0.6 - 0.3 * cos(a * 0.72) + 0.12 + (v - 0.5) * 0.016, -cr + 0.12 * a * a * 0.5)
 	t.rigid(t.torso, HeroKit.surf("shroud|charm|%.3f" % cr, fn, 14, 1, Callable(), -1.0), t.m["gold"])
 	t.rigid(t.torso, Models.sphere(0.05, 8), t.m["glow"], Vector3(0, 0.38, -cr - 0.02))
-	t.rigid(t.torso, Models.cyl(0.058, 0.058, 0.014, 10), t.m["gold"], Vector3(0, 0.38, -cr - 0.012), Vector3(PI * 0.5, 0, 0))
+	var rim := Models.cyl(0.058, 0.058, 0.014, 10)
+	t.rigid(t.torso, rim, t.m["gold"], Vector3(0, 0.38, -cr - 0.012), Vector3(PI * 0.5, 0, 0))
 
 static func _lantern(t: ShroudTailor, fit: Dictionary) -> void:
 	_belt(t, fit)

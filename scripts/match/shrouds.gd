@@ -1,6 +1,6 @@
 class_name Shrouds
 extends RefCounted
-## The Empty's shrouds (owner item 153): ten cuts with different silhouettes, a hood where the cut has one, a trim
+## The Empty's shrouds: ten cuts with different silhouettes, a hood where the cut has one, a trim
 ## pattern, an accent colour and an accessory. All of it is procedural (HeroKit shells) and costs no texture: the
 ## cloth takes the shroud colour from Models.hunter and the trim takes the accent colour.
 ##

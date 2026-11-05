@@ -5,7 +5,7 @@ extends RefCounted
 ## that; this reduces each part's triangle list in place, with a further LOD for distance. The head under the void
 ## shell never shows, so it goes. Runs once a model is built (Shrouds.bind), before its materials are collected.
 
-const BODY_KEEP := 0.26             # of each body part's triangles
+const BODY_KEEP := 0.23             # of each body part's triangles
 const SHELL_KEEP := 0.5             # of the void shell's: it is the silhouette of the head
 const LOD_KEEP := 0.45              # of those again, at a distance
 const MIN_TRIS := 40                # a part this small is left alone

@@ -2,7 +2,8 @@ extends "res://tools/warden_shots.gd"
 ## --shroud-shots --shots-dir=<dir>: the Empty's ten shrouds on one body (item 153). Writes contact.png (a flat-black
 ## silhouette row, the match camera at true pixels and enlarged, then a close row), poses.png (idle, run, jump, crouch
 ## and glide for every cut, at the match camera and close), and extras.png (hoods, trims, accessories).
-## Add --only=contact|poses|extras for one sheet, --cols=<cuts> for a subset as a,b,c. Needs a renderer.
+## run.png has the run pose alone. Add --only=contact|run|poses|extras for one sheet, --cols=a,b,c for some of the
+## cuts. Needs a renderer.
 
 const BODY := {"unmasked": true, "colour": 5, "hollow": 0, "glow": 0, "ghost": 1, "aura": 0}
 const POSE_NAMES := ["idle", "run", "jump", "crouch", "glide"]
@@ -27,8 +28,10 @@ func run(main: Node) -> void:
 	_stage(main)
 	if only in ["", "contact"]:
 		await _contact(out)
+	if only in ["", "run"]:
+		await _poses(out, ["run"], "run")
 	if only in ["", "poses"]:
-		await _poses(out)
+		await _poses(out, POSE_NAMES, "poses_")
 	if only in ["", "extras"]:
 		await _extras(out)
 	print("SHROUD_SHOTS_DONE")
@@ -158,7 +161,8 @@ func _close(row: Array) -> Image:
 func _silhouette(row: Array, k := 2) -> Image:
 	if black == null:
 		var sh := Shader.new()
-		sh.code = "shader_type spatial;\nrender_mode unshaded, cull_disabled;\nvoid fragment() { ALBEDO = vec3(0.0); }\n"
+		sh.code = "shader_type spatial;\nrender_mode unshaded, cull_disabled;\n"
+		sh.code += "void fragment() { ALBEDO = vec3(0.0); }\n"
 		black = ShaderMaterial.new()
 		black.shader = sh
 	var swap: Array = []
@@ -192,11 +196,12 @@ func _silhouette(row: Array, k := 2) -> Image:
 			img.set_pixel(x, y, Color.BLACK if c.r + c.g + c.b < 0.03 else Color.WHITE)
 	return img
 
-func _poses(out: String) -> void:
+## A sheet per five cuts in each pose ("poses_1.png"...), or one sheet of all ten when `stem` doesn't end in "_".
+func _poses(out: String, states: Array, stem: String) -> void:
 	var rows: Array = []
 	for start in range(0, cuts.size(), CUTS_PER_ROW):
 		var some := cuts.slice(start, start + CUTS_PER_ROW)
-		for st in POSE_NAMES:
+		for st in states:
 			var looks: Array = []
 			for k in some:
 				looks.append({"shroud": k, "gender": 1})
@@ -204,18 +209,23 @@ func _poses(out: String) -> void:
 			for i in row.size():
 				_state(i, st)
 			rows.append(await _match_crop(row, 2))
+			_names(row, looks)
 			rows.append(await _close(row))
 			_clear()
 			await tree.process_frame
-		_stack(rows).save_png(out.path_join("poses_%d.png" % (start / CUTS_PER_ROW + 1)))
-		rows.clear()
+		if stem.ends_with("_"):
+			_stack(rows).save_png(out.path_join("%s%d.png" % [stem, start / CUTS_PER_ROW + 1]))
+			rows.clear()
+	if not stem.ends_with("_"):
+		_stack(rows).save_png(out.path_join(stem + ".png"))
 
 func _extras(out: String) -> void:
 	var sets := [
 		[{"shroud": 0, "hood": 1}, {"shroud": 0, "hood": 0}, {"shroud": 5, "hood": 1}, {"shroud": 4, "hood": 1},
 			{"shroud": 9, "hood": 0}, {"shroud": 8, "hood": 1}],
-		[{"shroud": 0, "trim": 0, "accent": 7}, {"shroud": 0, "trim": 1, "accent": 7}, {"shroud": 0, "trim": 2, "accent": 7},
-			{"shroud": 0, "trim": 3, "accent": 7}, {"shroud": 0, "trim": 4, "accent": 7}, {"shroud": 5, "trim": 4, "accent": 9}],
+		[{"shroud": 0, "trim": 0, "accent": 7}, {"shroud": 0, "trim": 1, "accent": 7},
+			{"shroud": 0, "trim": 2, "accent": 7}, {"shroud": 0, "trim": 3, "accent": 7},
+			{"shroud": 0, "trim": 4, "accent": 7}, {"shroud": 5, "trim": 4, "accent": 9}],
 		[{"shroud": 3, "accessory": 1}, {"shroud": 3, "accessory": 2}, {"shroud": 3, "accessory": 3},
 			{"shroud": 3, "accessory": 4}, {"shroud": 3, "accessory": 5}, {"shroud": 0, "accessory": 5}],
 	]

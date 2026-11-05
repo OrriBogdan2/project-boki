@@ -20,6 +20,7 @@ const GHOSTS := ["None", "Eyes", "Whole face", "Stitched"]
 const AURA := ["None", "Faint", "Strong"]
 const AURA_COUNT := [0, 16, 40]       # specks drifting round the head, shoulders and shroud
 const SHROUDS := Shrouds.LABELS
+const OLD_SHROUDS := 3                  # the first three cuts: what an outfit from before the shroud maps onto
 ## The shroud's colours (look["colour"]; an old save's skin colour keeps its index, so it becomes the shroud
 ## colour in the same slot).
 const COLOURS := [Color("6b6f7a"), Color("3f4a63"), Color("2d3561"), Color("4f6b4a"), Color("2f6f73"), Color("7a2f45"),
@@ -85,7 +86,7 @@ static func _hollow_from_face(out: Dictionary, src: Dictionary) -> void:
 ## colour index in "colour" now picks the shroud colour, the same slot.)
 static func _shroud_from_outfit(out: Dictionary, src: Dictionary) -> void:
 	if src.has("outfit") and not src.has("shroud"):
-		out["shroud"] = posmod(_i(src["outfit"], 0), SHROUDS.size())
+		out["shroud"] = posmod(_i(src["outfit"], 0), OLD_SHROUDS)
 	if src.has("motes") and not src.has("aura"):
 		out["aura"] = _i(src["motes"], 1)
 	out.erase("outfit")
@@ -116,7 +117,7 @@ static func from_old(old: Dictionary) -> Dictionary:
 	out["hollow"] = HOLLOW_FROM_EYES[EYES_FROM_FACE[face]]
 	out["ghost"] = GHOST_FROM_BROWS[_brows_for(face, gender)]
 	out["glow"] = 3 if gender == 0 or face == 3 else 0
-	out["shroud"] = outfit % SHROUDS.size()
+	out["shroud"] = outfit % OLD_SHROUDS
 	out["colour"] = skin % COLOURS.size()
 	return out
 
