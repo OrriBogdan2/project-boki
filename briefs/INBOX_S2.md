@@ -1298,3 +1298,9 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
   - **Demon details:** small ice bat wings, a heart-tipped tail, glowing slit-pupil eyes.
 - **Alt (cuter, modest):** `claire_alt_cute.png`.
 - **Don't start her model until the owner confirms which.**
+
+## 2026-11-05 04:32 UTC (ext): CLAIRE CONFIRMED: `briefs/art-refs/claire_FINAL_sheet.png` (the owner's pick: the genuinely innocent, gentle version)
+- **Personality:** sincere and shy, NOT sultry. The demon details (ice ram horns, small ice bat wings, heart-tipped tail, glowing slit-pupil eyes) are a quiet mystery.
+- **Visuals:** the wings are now visible from the front; the skate blades glow with a frost trail.
+- **Animation tone:** gentle and graceful (figure-skating flourishes), never seductive.
+- She can start ART-1 after the current queue. The cute alt is withdrawn.
