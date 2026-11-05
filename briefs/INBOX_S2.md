@@ -1288,3 +1288,13 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 
 ## 2026-11-05 04:24 UTC (ext): Breaker portrait: `briefs/art-refs/breaker_portrait.png` (happy). Alt `_alt_determined` (the same image with determined eyes) can be swapped in by mood. All six portraits are now in.
 
+
+## 2026-11-05 04:30 UTC (ext): CLAIRE REDESIGN (candidate, owner confirming): `briefs/art-refs/claire_FINAL_sheet.png`
+- **Design:** an ice succubus "snow bunny" on skates, clearly adult.
+  - **Hood and capelet:** a fur-trimmed bunny-ear hood + capelet with a jewel clasp; curled ice ram horns through the hood.
+  - **Outfit:** an ornate blue corset with silver filigree, a fur-hemmed skirt, a big bow at the back, white thigh-highs.
+  - **Skates:** fur-cuffed white skates with glowing ice blades that leave a frost trail (her skate kit).
+  - **Spear:** a candy-cane-striped ice spear.
+  - **Demon details:** small ice bat wings, a heart-tipped tail, glowing slit-pupil eyes.
+- **Alt (cuter, modest):** `claire_alt_cute.png`.
+- **Don't start her model until the owner confirms which.**
