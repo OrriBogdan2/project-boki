@@ -121,7 +121,7 @@ for i, nm in enumerate(names):
     if nm != "torso":
         GROUP[nm] = W[:, i].copy()
 tw = W[:, 0]
-k = smooth(1.03, 1.26, P[:, 2])                # the waist, wide: the chest turns 66 degrees at full draw (scan heights)
+k = smooth(0.98, 1.32, P[:, 2])                # the waist, wide: the chest turns 66 degrees at full draw (scan heights)
 GROUP["root"], GROUP["hips"] = tw * (1 - k), tw * k
 for sd in "RL":
     f = smooth(0.17, 0.11, P[:, 2])

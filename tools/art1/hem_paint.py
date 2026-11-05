@@ -175,7 +175,7 @@ def plate(p):
     ys = np.array([q[1] for q in H.PLATE_Z], F)
     py = np.interp(p[:, 2], zs, ys)
     # (past the head's outline the plate is its grey ground: hold the skin's edge, well inside it)
-    lim = np.interp(py, (55.0, 120.0, 300.0, 400.0, 460.0, 520.0, 565.0, 640.0), (60.0, 140.0, 172.0, 160.0, 140.0, 92.0, 30.0, 30.0))
+    lim = np.interp(py, (55.0, 120.0, 300.0, 345.0, 400.0, 460.0, 520.0, 565.0, 640.0), (60.0, 140.0, 174.0, 152.0, 132.0, 124.0, 88.0, 30.0, 30.0))
     px = 320.0 + np.clip(p[:, 0] * H.PLATE_PX, -lim, lim)
     return PLATE[np.clip((py * k).astype(int), 0, h - 1), np.clip((px * k).astype(int), 0, w - 1)]
 
