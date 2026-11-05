@@ -1,7 +1,7 @@
 extends "res://tools/breah_shots.gd"
 ## --combo51-shots --shots-dir=<dir> --combo51-hero=<id>: owner item 51's new combos as strips (the Breah
 ## rig's 3-wide grid of crops round the hero, tools/breah_shots.gd) in a live Arena match, under xvfb with a
-## renderer: archer|mage|dolm (Hem, Ryzz, Tarek) and juggernaut|dredge|ashwick (Kael, Dredge, Cinder).
+## renderer: archer|mage|dolm (Lisette, Ryzz, Tarek) and juggernaut|dredge|ashwick (Kael, Dredge, Cinder).
 ## <dir>/captions.txt gets "file: caption" per file.
 ## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Ryzz, Tarek: the audit's strips) or Kael's
 ## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS).
@@ -29,7 +29,7 @@ func run(main_node: Node) -> void:
 	print("COMBO51SHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
 
-## Hem: the draw held through the roll, then let go; the draw held through a jump and an air flick, let go up there.
+## Lisette: the draw held through the roll, then let go; the draw held through a jump and an air flick, let go up there.
 func _archer() -> void:
 	var K: ArcherKit = P.ak
 	await _reset(9.0)
@@ -40,7 +40,7 @@ func _archer() -> void:
 			P.do_dash()
 	var marks := _strip(
 		"combo_draw_roll_strip",
-		"Hem (item 51): drawing; Shift mid-draw, the roll goes at once with the draw kept; still rolling, the"
+		"Lisette (item 51): drawing; Shift mid-draw, the roll goes at once with the draw kept; still rolling, the"
 			+ " reticle charging on; out of the roll, still drawn; let go, the arrow leaves; the follow-through",
 		[0.3, 0.45, 0.52, 0.7, 1.03, 1.15]
 	)
@@ -55,7 +55,7 @@ func _archer() -> void:
 			P.do_dash()
 	var air_marks := _strip(
 		"combo_draw_jump_flick_strip",
-		"Hem (item 51): drawing; a jump with the draw held; the air flick with it still held; let go in the air,"
+		"Lisette (item 51): drawing; a jump with the draw held; the air flick with it still held; let go in the air,"
 			+ " the arrow leaves and she carries on with her speed; landing",
 		[0.25, 0.4, 0.58, 0.78, 0.9, 1.2]
 	)
