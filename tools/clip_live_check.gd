@@ -39,6 +39,12 @@ func _shown(h: Hunter) -> int:
 
 func run(main: Node) -> void:
 	Save.no_write = true
+	# (a Hero with no clip file stays procedural: nothing to check)
+	if not FileAccess.file_exists("res://content/rules/warden_anim/kael.json"):
+		print("LIVE ok   Kael has no clip file here: procedural, skipped")
+		print("CLIP_LIVE_DONE, failures: 0")
+		main.get_tree().quit(0)
+		return
 	A = load("res://tools/archetype_check.gd").new()
 	A.main = main
 	var r: Array = A.setup("juggernaut", 11.0, "", true)
