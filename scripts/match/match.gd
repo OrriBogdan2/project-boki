@@ -501,7 +501,7 @@ static func _warm_key(gi: GeometryInstance3D) -> String:
 			mats.append(_warm_mat_key(mt))
 	if gi.material_overlay:
 		mats.append("+" + _warm_mat_key(gi.material_overlay))
-	return kind + ":" + ",".join(mats) + DashPace.formats(mesh)
+	return kind + ":" + ",".join(mats)
 
 static var _mat_keys := {}
 static func _warm_mat_key(mt: Material) -> String:

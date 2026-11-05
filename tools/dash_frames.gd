@@ -12,7 +12,7 @@ extends Node
 ##
 ## The frame budget: a real GPU has FRAME_MS, two 60 fps frames. A software rasterizer (no GPU in the run environment,
 ## and a box other lanes load to 60) spends 130-300 ms on every frame, so a fixed number means nothing: there a frame
-## fails if it costs over SOFT_K x the median of its dash's window, or a pipeline or shader compiles in the dash.
+## fails if it costs over SOFT_K x the median of its dash's window, or a compile stops a frame in the dash.
 ## (Plain noise on that box reached 1.9x; the compile count is the sharp test there, the ratio a backstop.)
 
 const MIN_STEPS := 5
@@ -30,11 +30,6 @@ const SEQ := {
 	"juggernaut": [["rmb", LUNGE_HOLD, ["jug_lunge"]], ["rmb", LUNGE_HOLD, ["jug_lunge"]], ["rmb", 1.1, ["jug_lunge"]],
 			["dash", 0.0, ["jug_dash"]], ["dash", 0.0, ["jug_dash"]]],
 }
-const PIPELINES := [RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_CANVAS,
-	RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_MESH,
-	RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_SURFACE,
-	RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW,
-	RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_SPECIALIZATION]
 const POSE_NODES := ["Rig", "Rig/Torso", "Rig/Torso/ArmLPivot", "Rig/Torso/ArmRPivot", "Rig/Legs/LegL", "Rig/Legs/LegR"]
 const POSE_BONES := ["root", "hips", "upper_arm.L", "upper_arm.R", "thigh.L", "thigh.R"]
 const CSV_HEAD := "arch,use,slot,frame,wall_ms,script_ms,render_ms,compiles,mtime,drawx,drawz,scrx,scry,roll_t,kmove," \
@@ -123,11 +118,11 @@ func _open(a: String) -> void:
 	o["probe"] = true
 	Game.main.show_screen("match", o)
 
-## Pipelines this renderer has compiled (Forward+), and shader variants written to its cache (Compatibility).
+## Compiles that stop a frame: Forward+'s pipelines built at draw time (the ones it builds when a surface first shows
+## and its specializations go on background threads, nothing waits for them), and shader variants written to the
+## Compatibility renderer's cache.
 func _compiles() -> int:
-	var n := 0
-	for k: int in PIPELINES:
-		n += RenderingServer.get_rendering_info(k)
+	var n: int = RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW)
 	var stack := ["user://shader_cache"]
 	while not stack.is_empty():
 		var p: String = stack.pop_back()

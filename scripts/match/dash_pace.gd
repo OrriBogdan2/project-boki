@@ -20,7 +20,7 @@ static func frame_dt(m: Match, d: float) -> float:
 
 ## The last of Match.warm_up, behind the loading screen: one of every effect a dash or Lunge draws, on the view and
 ## settings play starts with, held until the pipelines settle. Forward+, cold cache: Sable's first dash built 15
-## pipelines mid-move and Kael's first Lunge 12; with this, none (--dash-frames-check).
+## pipelines mid-move and Kael's first Lunge 12; with this, none at draw time (--dash-frames-check).
 static func rehearse(m: Match) -> void:
 	var cam: Camera3D = m.cam
 	var at: Vector3 = cam.global_position - cam.global_transform.basis.z * 6.0
@@ -53,17 +53,6 @@ static func rehearse(m: Match) -> void:
 		fx.end_telegraph(mark)
 	HeroVfx.of(m).prewarm_end()
 	DJFx.of(m).prewarm_end()
-
-## What Match._warm_key adds for a mesh: a surface's vertex format picks a pipeline too, so a star and a ball with one
-## material are two first draws (without it Kael's first Lunge still built 4).
-static func formats(mesh: Mesh) -> String:
-	var s := ""
-	if mesh is ArrayMesh:
-		for si in mesh.get_surface_count():
-			s += "/%d" % (mesh as ArrayMesh).surface_get_format(si)
-	else:
-		s = "/" + mesh.get_class()
-	return s
 
 static func _pipelines() -> int:
 	return RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_SURFACE) \
