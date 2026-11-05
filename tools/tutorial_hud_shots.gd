@@ -112,6 +112,7 @@ func _first_expedition() -> void:
 	m.add_child(c["node"])
 	(c["node"] as Node3D).position = m.player.pos + Vector3(1.5, 0, 0)
 	KeyChest.dress(c["node"])
+	KeyChest.take(m.player, "chest", KeyChest.count(m.player, "chest"))      # (no key: the chest can't open)
 	KeyChest.deny(m, m.player, c)
 	await _settle(20)
 	await _shot("expedition_reminder_card")

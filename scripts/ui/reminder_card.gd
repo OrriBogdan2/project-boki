@@ -14,6 +14,6 @@ static func draw(h, sz: Vector2) -> void:
 		return
 	var a := clampf(tips.remind_t / FADE_S, 0.0, 1.0)
 	var w: float = h.big.get_string_size(tips.remind_text, HORIZONTAL_ALIGNMENT_LEFT, -1, PX).x + 44.0
-	var r := Rect2(Vector2((sz.x - w) * 0.5, sz.y * 0.6), Vector2(w, PX * 2.2))
+	var r := Rect2(Vector2((sz.x - w) * 0.5, sz.y * 0.56), Vector2(w, PX * 2.2))
 	h._rounded(r, Color(0.08, 0.05, 0.06, 0.9 * a), 12, Color(COL, 0.5 * a), 2)
 	h._ctext(r.get_center() + Vector2(0, PX * 0.36), tips.remind_text, PX, Color(COL, a), h.big)
