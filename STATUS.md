@@ -884,3 +884,5 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Owner Qs: normal maps vs painted cavity? Launcher swing-over the right read of the sheet?
 
 ## 2026-11-05 S2: READY ext/kit-lisette-114 43ca4513 (item 114); details in EXT_TO_MAIN. ext/art1-hem still needs an upright idle/stance clip, arrow hidden during heavy_wind, bow forward. Owner Qs: needle glow strong enough? Loosed shot a silver needle too (ext/vfx-lisette)?
+
+## 2026-11-05 S2: bot-sanity closed: no ART-1 regression (table in EXT_TO_MAIN). Latent bot roam facing jitter remains, not traced. Hem and Tarek not tested.
