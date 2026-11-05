@@ -206,7 +206,7 @@ COCK = m(STANCE, pos=(0.02, -0.06, -0.16), hips=(-6, 8, -38), head=(4, -6, 40), 
 FLUNG = m(STANCE, pos=(-0.02, 0.1, -0.12), hips=(-20, -6, 34), head=(12, 0, -28), hr=hand(-0.06, 0.66, -0.08), hl=lhand(0.2, -0.22, -0.4), er=(0.7, -0.7, 0.1), lip=0.5, jaw=0.5, fing_r=0.05, thumb_r=0.1,
           fr=(AX + 0.12, -0.3, AZ), fl=(-AX - 0.1, 0.32, AZ), fra=-30.0)
 THRU = m(FLUNG, hips=(-24, -4, 46), hr=hand(-0.3, 0.42, -0.34), hl=lhand(0.24, -0.26, -0.42), fing_r=0.5)
-C.bake("lmb_throw", 0.55, [(0, STANCE), (0.07, m(COCK, e="out")), (0.13, m(FLUNG, e="snap")), (0.24, THRU), (0.55, STANCE)])
+C.bake("lmb_throw", 0.55, [(0, STANCE), (0.07, m(COCK, e="out")), (0.13, m(FLUNG, e="lin")), (0.24, THRU), (0.55, STANCE)])
 # LMB hold, the wind: sunk and twisted far, the right fist behind the hip, the left forearm up; it holds, trembling
 WIND = m(STANCE, pos=(0.03, -0.1, -0.24), hips=(-12, 8, -44), head=(8, -8, 44), hr=hand(0.24, -0.5, -0.46), hl=lhand(-0.02, 0.36, 0.06), el=(-0.8, 0.0, -0.7), lip=-0.8, jaw=0.08,
          fr=(AX + 0.14, -0.34, AZ), fl=(-AX - 0.12, 0.3, AZ), fra=-18.0)
@@ -225,7 +225,7 @@ C.bake("lmb_wind", 0.64, [(0, STANCE), (0.1, m(WIND, e="out")), (0.24, m(WIND, p
 PUNCH = m(STANCE, pos=(0, 0.3, -0.12), rot=(0, 0, 8), hips=(-26, -4, 30), head=(14, 0, -24), hr=hand(-0.06, 0.74, 0.02), hl=lhand(0.2, -0.3, -0.34), er=(0.8, -0.5, 0.1), lip=0.2, jaw=0.75,
           fr=(AX + 0.12, -0.5, AZ + 0.02), fl=(-AX - 0.1, 0.52, AZ), fra=-38.0, flt=0.0, frt=-10.0)
 OVER = m(PUNCH, pos=(0, 0.38, -0.14), hips=(-32, -6, 42), hr=hand(-0.12, 0.78, -0.04), head=(18, 0, -34))
-C.bake("lmb_punch", 0.6, [(0, WIND), (0.05, m(PUNCH, e="snap")), (0.12, OVER), (0.3, m(PUNCH, pos=(0, 0.2, -0.14), hips=(-20, -2, 12), hr=hand(0.02, 0.5, -0.1))), (0.6, STANCE)])
+C.bake("lmb_punch", 0.6, [(0, WIND), (0.05, m(PUNCH, e="lin")), (0.12, OVER), (0.3, m(PUNCH, pos=(0, 0.2, -0.14), hips=(-20, -2, 12), hr=hand(0.02, 0.5, -0.1))), (0.6, STANCE)])
 # RMB hold: a low gather, both fists drawn in at the hips
 GATHER = m(STANCE, pos=(0, -0.04, -0.34), rot=(0, 0, 0), hips=(-24, 0, 0), head=(18, 0, 0), hr=hand(0.0, 0.2, -0.52), hl=lhand(0.0, 0.2, -0.52), er=(0.9, -0.5, 0), el=(-0.9, -0.5, 0),
            fr=(AX + 0.16, -0.06, AZ), fl=(-AX - 0.16, 0.06, AZ), frt=-16.0, flt=16.0, fra=0.0, fla=0.0, kr=(0.6, 1, 0), kl=(-0.6, 1, 0), lip=-0.7, jaw=0.06)
@@ -246,7 +246,7 @@ C.bake("rmb_dive", 0.5, [(0, LEAP), (0.12, m(DIVEFIST, e="out")), (0.3, DIVEFIST
 C.bake("rmb_land", 0.75, [(0, m(SMASH, e="snap")), (0.28, m(SMASH, pos=(0, 0.1, -0.5))), (0.75, STANCE)])
 # a punch out of the charge: both fists thrown long off the back foot (0.05-0.16), back into the gather
 LUNGE = m(PUNCH, pos=(0, 0.42, -0.2), rot=(0, 0, 0), hips=(-36, 0, 0), head=(26, 0, 0), hr=hand(-0.16, 0.74, -0.02), hl=lhand(-0.16, 0.74, -0.02), el=(-0.8, -0.5, 0.1), fr=(AX + 0.1, -0.56, AZ + 0.04), fl=(-AX - 0.08, 0.44, AZ), jaw=0.8)
-C.bake("rmb_lunge", 0.36, [(0, GATHER), (0.05, m(LUNGE, e="snap")), (0.16, m(LUNGE, pos=(0, 0.46, -0.22))), (0.36, GATHER)])
+C.bake("rmb_lunge", 0.36, [(0, GATHER), (0.05, m(LUNGE, e="lin")), (0.16, m(LUNGE, pos=(0, 0.46, -0.22))), (0.36, GATHER)])
 # Shift, Rubble Leap (0.58): crouched on the rock (0.06), kicked off long, fists swept back (0.12), tucked at the top,
 # fists overhead (0.3), legs reaching down (0.46), the fists-high drop the landing picks up (0.58)
 C.bake("dash_leap", 0.58, [(0, STANCE), (0.06, m(GATHER, pos=(0, 0, -0.3), e="out")),
@@ -293,7 +293,7 @@ def chuckle(t, p):
 
 C.bake("emote_toss", 2.2, [(0, LOOSE), (0.3, EM1), (0.5, m(EM2, e="out")), (0.95, EM2), (1.05, m(EM3, e="snap")), (1.8, EM3), (2.2, LOOSE)], over=chuckle)
 # Fusion: fists to the ground, the stone rises through him, he stands into it arms wide
-C.bake("fuse", 1.2, [(0, LOOSE), (0.3, m(SPAIM, pos=(0, 0, -0.5))), (0.7, m(HEAVE, pos=(0, 0, 0.04), hr=hand(0.56, 0.1, 0.44), hl=lhand(0.56, 0.1, 0.44), jaw=0.7, lip=1.0, e="out")), (1.0, m(HEAVE, pos=(0, 0, 0.0))), (1.2, LOOSE)])
+C.bake("fuse", 0.8, [(0, LOOSE), (0.22, m(SPAIM, pos=(0, 0, -0.5))), (0.5, m(HEAVE, pos=(0, 0, 0.04), hr=hand(0.56, 0.1, 0.44), hl=lhand(0.56, 0.1, 0.44), jaw=0.7, lip=1.0, e="out")), (0.66, m(HEAVE, pos=(0, 0, 0.0))), (0.8, LOOSE)])
 
 bpy.context.scene.render.fps = A.FPS
 arm.animation_data_create()

@@ -41,6 +41,11 @@ follows the hand in every state. `HunterAnim._weapon_to_hand` pulls a weapon who
 a long lunge) to the hand, so it never detaches. Moves that deliberately free a hand (`fl`/`fr` keys: throws,
 palm casts) are exempt.
 
+Item 76b (ART-1): a Hero rebuilt with `skinned_weapon` (docs/art/wardens/CLIPS.md) carries no `weapon` node: its weapon is
+skinned to its bones in the .glb, its FX points are empties on them (`weapon_muzzle`, the blade's root), and the Gun is
+an invisible reference kept on the blade. `body.shoulder` in the archetype moves the arm pivots in or out (keep the
+Hero's own width there, never by `body.chest`). A Hero's variant bones can sit in its data file (`extra_bones`).
+
 ## The check
 `--rig-standard-check` (all 12): the armature matches the standard; the attachment points exist; the rest pose has
 the arms hanging; the weapon's bounds hold the grip; and in the run, both casts and every kit move that keeps a hand

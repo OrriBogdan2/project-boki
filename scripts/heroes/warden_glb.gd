@@ -104,6 +104,9 @@ const WEAPON_OFF := "weapon_offhand"
 const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
 ## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire).
 const WING_FOLD := "wing_fold"
+## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air): the bones the Hero's data
+## lists in "hide_while_chain" shrink away (item 76b.4), so one chain shows, never two.
+const CHAIN_OUT := "chain_out"
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
@@ -464,8 +467,9 @@ static func _skinned_weapon(root: Node3D) -> void:
 		(mi as MeshInstance3D).visible = false
 		mi.set_meta("glb_hidden", true)
 	var mag := gun.get_node_or_null("Mag")
-	if mag is MeshInstance3D:
-		(mag as MeshInstance3D).mesh = null      # (HunterAnim shows the Mag again for the reload)
+	if mag:
+		gun.remove_child(mag)      # (HunterAnim would show it again for the reload)
+		mag.free()
 
 ## The rig rest of the Warden's model in the neutral look (built once a session).
 static func neutral_rest(arch: String) -> Dictionary:
@@ -780,9 +784,11 @@ class Sync extends Node:
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
 	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
 	var blade_tip: Node3D
+	var blade_bone := -1
 	var gun: Node3D
 	var muzzle: Node3D
 	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
+	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -808,8 +814,11 @@ class Sync extends Node:
 		if not bl.is_empty():
 			blade_root = glb.find_child(String(bl["root"]), true, false) as Node3D
 			blade_tip = glb.find_child(String(bl["tip"]), true, false) as Node3D
+			blade_bone = WardenSkeleton.find(skel, String(bl.get("bone", "hand.R")))
 			gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 			muzzle = gun.get_node_or_null("Muzzle") as Node3D if gun else null
+		for b in dd.get("hide_while_chain", []):
+			hide_out.append(WardenSkeleton.find(skel, String(b)))
 		clips = WardenClips.make(root, glb, skel, art_name)
 		if clips:
 			for sd in ["L", "R"]:
@@ -827,6 +836,9 @@ class Sync extends Node:
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
 		orbits.step(dt)
+		if bool(root.get_meta(CHAIN_OUT, false)):
+			for bi in hide_out:
+				skel.set_bone_pose_scale(int(bi), Vector3.ONE * 0.001)
 
 	func apply() -> void:
 		for l in links:
@@ -862,8 +874,10 @@ class Sync extends Node:
 	func apply_blade() -> void:
 		if blade_tip == null or blade_root == null or gun == null or not gun.is_inside_tree():
 			return
-		var a := blade_root.global_position
-		var b := blade_tip.global_position
+		# (from the bone, not the attachment nodes: those update after the skeleton does, a frame late)
+		var hand := skel.global_transform * skel.get_bone_global_pose(blade_bone)
+		var a := hand * blade_root.position
+		var b := hand * blade_tip.position
 		if a.distance_squared_to(b) < 0.0001:
 			return
 		var up := Vector3.UP if absf((b - a).normalized().y) < 0.95 else Vector3.RIGHT
@@ -881,8 +895,6 @@ class Springs:
 	const PREFIX := "spring_"
 	const PULL := 0.2           # the share of the way back to the rest shape per 1/60 s, at the root
 	const PULL_TIP := 0.07      # and at the tip
-	const LONG_CHAIN := 0.3     # m: a chain longer than this (in the model) pulls back firmer, by its length over this
-	const MAX_FIRM := 3.0       # and at most this many times
 	const DAMP := 0.84          # the velocity kept per 1/60 s
 	const FOLD := 0.75          # radians a folded wing tips back about the side axis through its root
 	const TUCK := 0.8           # and turns in behind the back about the vertical
@@ -949,11 +961,6 @@ class Springs:
 					var seg := (xf * (rest[i] as Transform3D).origin).distance_to(
 							xf * (rest[i - 1] as Transform3D).origin)
 					want[i] = want[i - 1] + Vector3.DOWN * seg
-			# (a long chain's links eat the pull: Tarek's locs would creep home for seconds)
-			var length := 0.0
-			for i in range(1, n):
-				length += want[i].distance_to(want[i - 1]) / xf.basis.get_scale().y
-			var firm := clampf(length / LONG_CHAIN, 1.0, MAX_FIRM)
 			var pts: PackedVector3Array = ch["pts"]
 			var prev: PackedVector3Array = ch["prev"]
 			if pts.size() != n or pts[0].distance_to(want[0]) > 1.5:      # (the first frame, or a teleport)
@@ -964,7 +971,7 @@ class Springs:
 				var v := (p - prev[i]) * pow(DAMP, k)
 				prev[i] = p
 				p += v
-				var pull := lerpf(PULL, PULL_TIP, float(i) / float(n - 1)) * firm
+				var pull := lerpf(PULL, PULL_TIP, float(i) / float(n - 1))
 				pts[i] = p.lerp(want[i], 1.0 - pow(1.0 - pull, k))
 			pts[0] = want[0]
 			prev[0] = want[0]
