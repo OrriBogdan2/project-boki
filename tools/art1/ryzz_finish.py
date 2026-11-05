@@ -287,10 +287,20 @@ for i_, q_ in enumerate(verts):
         k_ = float(1 - smooth(r_ * 0.25, r_, np.linalg.norm(q_ - c_)))
         if k_ > 0.01:
             vw[i_] = {"head": 1 - k_, b_: k_}
+def on_arm(d_):
+    return d_.get("forearm.R", 0) + d_.get("forearm.L", 0) + d_.get("hand.R", 0) + d_.get("hand.L", 0)
+
+
+cut_ = 0
 for pl in me_l.polygons:
+    a_ = [on_arm(vw[v]) for v in pl.vertices]
+    if max(a_) > 0.5 and min(a_) < 0.05 and pl.center.z < 1.1:      # (the decimate's own bridges from the wrist to the skirt: they'd stretch to a blade)
+        cut_ += 1
+        continue
     faces_v.append(list(pl.vertices))
     faces_pid.append(0)
     faces_uv.append(None)
+print("arm-to-body faces cut", cut_)
 for pc in pieces:
     pid = len(names)
     names.append(pc.name)

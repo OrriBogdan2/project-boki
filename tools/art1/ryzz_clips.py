@@ -26,7 +26,7 @@ READY = {
     "pel": (0.022, 0.0, -0.022), "prt": (0.03, -0.1, -0.05), "tor": (0.0, 0.14, 0.05), "hed": (0.02, -0.08, 0.09),
     "G": (0.215, 0.05, 1.0), "BE": ((0.1, 0.25, -1), (0.1, 1, 0.1)), "LP": (-0.235, 0.055, 0.985), "LBE": ((-0.1, 0.25, -1), (-0.1, 1, 0.1)),
     "FL": (-0.085, 0.09, A_Z), "FR": (0.115, -0.06, A_Z), "FLy": 0.14, "FRy": -0.34, "FLp": 0.0, "FRp": 0.0,
-    "brow": 0.15, "lidR": 0.12, "lidL": 0.12, "smile": 0.7, "gunR": 0.0, "gunL": 0.0, "skirt": 0.0, "gum": 0.55, "fan": 0.0, "lit": 0.0,
+    "brow": 0.15, "lidR": 0.12, "lidL": 0.12, "smile": 0.7, "gunR": 0.0, "gunL": 0.0, "skirt": 0.0, "gum": 0.72, "fan": 0.0, "lit": 0.0,
 }
 GUN = {"gunR": 1.0, "gunL": 1.0}
 BOTH_UP = {"G": (0.27, 0.2, 1.3), "BE": aim(-14, 26), "LP": (-0.27, 0.2, 1.3), "LBE": aim(14, 26), "gunR": 1.0, "gunL": 1.0}
@@ -66,7 +66,7 @@ def stance(u):
     p.update({"pel": (0.05, 0.0, -0.03), "prt": (0.02, -0.16, -0.12), "tor": (0.0, 0.2, 0.13), "hed": (0.06, -0.12, 0.12),
               "G": (0.25, 0.14, 1.31 - 0.006 * a), "BE": aim(-24, 22), "LP": (-0.25, 0.15, 1.29 - 0.006 * a), "LBE": aim(24, 22), "gunR": 1.0, "gunL": 1.0,
               "FL": (-0.05, 0.11, A_Z), "FR": (0.13, -0.08, A_Z), "FLy": 0.0, "FRy": -0.45, "smile": 1.0, "brow": 0.3})
-    p["gum"] = 0.55 + 0.75 * u if u < 0.92 else 0.1
+    p["gum"] = 0.72 + 0.6 * u if u < 0.92 else 0.1
     return p
 
 
@@ -195,7 +195,7 @@ def clips():
     # the emote: a cocky pair of finger guns, the wink, she blows the smoke off the right finger and holsters it
     G0 = {**BOTH_UP, "G": (0.3, 0.42, 1.3), "LP": (-0.3, 0.42, 1.3), "BE": aim(-8, 8), "LBE": aim(8, 8), "tor": (-0.05, 0.1, 0), "hed": (-0.05, -0.05, 0.12), "prt": (0.02, -0.14, -0.1), "pel": (0.05, 0, -0.03), "smile": 1.0, "lidR": 1.0, "lidL": 0.1, "brow": 0.4}
     BL = {"G": (0.09, 0.26, 1.52), "BE": ((-0.35, 0.3, 0.9), (0, 1, 0)), "LP": (-0.22, 0.08, 1.05), "LBE": READY["LBE"], "gunL": 0.1, "hed": (0.1, 0.18, 0.05), "lidR": 0.7, "lidL": 0.7, "smile": 0.2, "gum": 0.2}
-    out.append(C("emote", 3.0, [(0.0, END), (0.25, G0, "out"), (0.32, dict(G0, BE=aim(-8, 26), LBE=aim(8, 26)), "out"), (0.42, G0), (1.0, dict(G0, pel=(0.06, 0, -0.04))), (1.4, BL), (1.95, dict(BL, gum=1.1)), (2.0, dict(BL, gum=0.03), "out"), (2.3, {"G": READY["G"], "BE": READY["BE"], "gunR": 0.0, "gunL": 0.0, "hed": READY["hed"], "smile": 1.0, "lidR": 0.12, "lidL": 0.12, "gum": 0.55}), (3.0, END)]))
+    out.append(C("emote", 3.0, [(0.0, END), (0.25, G0, "out"), (0.32, dict(G0, BE=aim(-8, 26), LBE=aim(8, 26)), "out"), (0.42, G0), (1.0, dict(G0, pel=(0.06, 0, -0.04))), (1.4, BL), (1.95, dict(BL, gum=1.1)), (2.0, dict(BL, gum=0.03), "out"), (2.3, {"G": READY["G"], "BE": READY["BE"], "gunR": 0.0, "gunL": 0.0, "hed": READY["hed"], "smile": 1.0, "lidR": 0.12, "lidL": 0.12, "gum": 0.72}), (3.0, END)]))
     return out
 
 

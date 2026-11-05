@@ -96,7 +96,7 @@
 			"glow": {"glow": 1.8}, "glow-wire": {"glow": 0.7}
 		},
 		"no_ink": ["gum"],
-		"bloom": [{"at": "anchor_eye_glow", "color": [1, 0.3, 0.75, 0.42], "size": 0.055, "depth_test": false}, {"at": "anchor_rod_0", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}, {"at": "anchor_rod_1", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}, {"at": "anchor_rod_2", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}, {"at": "anchor_rod_3", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}]
+		"bloom": [{"at": "anchor_eye_glow", "color": [1, 0.3, 0.75, 0.2], "size": 0.04, "depth_test": false}, {"at": "anchor_rod_0", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}, {"at": "anchor_rod_1", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}, {"at": "anchor_rod_2", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}, {"at": "anchor_rod_3", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}]
 	},
 	"sable": {
 		"painted": {
