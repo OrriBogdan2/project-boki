@@ -144,7 +144,8 @@ def whirl_over(t, p):
         return
     a2 = (t - 0.2) / SPIN_T * tau
     p["gr"] = (0.38 + 0.2 * math.cos(a2), 0.2 * math.sin(a2), 1.02)
-    p["gd"] = (math.cos(a2), math.sin(a2), 0.22)
+    # (the haft aims the head at the kit's angle round his axis, not round the shoulder the hand circles)
+    p["gd"] = (0.95 * math.cos(a2) - p["gr"][0], 0.95 * math.sin(a2) - p["gr"][1], 0.2)
     p["ga"] = (0, 0, 1)
     p["er"] = (0.6, -0.3, -0.6)
     add(p, "rot", (3.0 * math.sin(a2), -4.0 * math.cos(a2), 0))

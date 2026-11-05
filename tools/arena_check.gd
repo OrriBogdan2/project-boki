@@ -48,9 +48,10 @@ func _breaker_whirl() -> void:
 		var how := "opened as him" if start == "bulwark" else "swapped to him"
 		var pv: Node3D = K.fx._pivot()
 		var mesh := pv.get_node_or_null(WardenGlb.WEAPON) as MeshInstance3D
-		var skinned: bool = K.fx.own_piece != null
+		var warden := P.model.get_node_or_null("Warden")
+		var skinned := warden != null and warden.find_child("hammer", true, false) != null
 		if skinned:      # (skinned in the .glb, item 76b: on its bone, the pivot stays as the reference)
-			mesh = P.model.get_node("Warden").find_child("hammer", true, false) as MeshInstance3D
+			mesh = warden.find_child("hammer", true, false) as MeshInstance3D
 		ok("arena Breaker (%s): his 3D hammer is %s" % [how, "skinned on him" if skinned else "on the swing's pivot"],
 			mesh != null and mesh.is_visible_in_tree())
 		P.fire_cd = 0.0

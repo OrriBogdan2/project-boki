@@ -129,12 +129,7 @@ func _ready() -> void:
 	hammer.visible = false
 	add_child(hammer)
 	# (the skinned hammer's own mesh on a 3D model, else the procedural one)
-	own_piece = WardenGlb.thrown_piece(h.model, "hammer") if h.model else null
-	if own_piece:
-		hammer.add_child(own_piece)
-		own_piece.scale = Vector3.ONE * h.model.scale.x
-		_build_chain()
-	else:
+	if not _own_hammer():
 		PinBjornWeapons.hammer(hammer, 1.25)
 	hammer_glow = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", Color(GOLD, 0.9), true))
 	trail = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", Color(1.0, 0.62, 0.2), true))
@@ -169,6 +164,20 @@ func _ready() -> void:
 	column.material_override.set_shader_parameter("speed", -1.2)
 	disc = KitMeshes.inst(self, KitMeshes.band(0.2, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GREEN))
 	disc.material_override.set_shader_parameter("color2", Color("e8fff0"))
+
+## The model's own hammer on the thrown piece, once the model wears it (an Arena swap dresses him after the kit starts).
+func _own_hammer() -> bool:
+	if own_piece:
+		return true
+	own_piece = WardenGlb.thrown_piece(h.model, "hammer") if h.model else null
+	if own_piece == null:
+		return false
+	for c in hammer.get_children():
+		c.queue_free()
+	hammer.add_child(own_piece)
+	own_piece.scale = Vector3.ONE * h.model.scale.x
+	_build_chain()
+	return true
 
 ## The chain from his wrist to the thrown hammer: pooled iron links, shown only while it is out of the hand.
 func _build_chain() -> void:
@@ -252,6 +261,7 @@ func _build_aegis() -> void:
 # ------------------------------------------------------------------ the thrown hammer
 ## In flight at `p` along `dir`, tumbling at `spin_rate` rad/s.
 func hammer_fly(p: Vector3, dir: Vector2, spin_rate: float) -> void:
+	_own_hammer()
 	hammer.visible = true
 	hammer.global_position = p
 	hammer.rotation = Vector3(Time.get_ticks_msec() * 0.001 * spin_rate, atan2(-dir.x, -dir.y), 0.0)
@@ -292,7 +302,7 @@ func hold(held_t: float, k: float, window: bool, turn: float) -> void:
 	held = true
 	spin = turn
 	spin_k = k
-	if own_piece:
+	if _own_hammer():
 		# (the skinned hammer whirls in the clip: its loop runs on the kit's angle. The clip's a = 0 is his right, the
 		# kit's 0 his front, so a quarter turn on.)
 		h.model.set_meta(WardenClips.PHASE, fposmod((turn - h.model.rotation.y + PI * 0.5) / TAU, 1.0))
