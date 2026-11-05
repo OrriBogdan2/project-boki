@@ -2781,3 +2781,6 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 - Kael: S2 is removing Kael's art and data from the Hero branches so they stop waiting. New READY commits follow for Cinder, Claire, Sable, Pip, Vex, Ryzz. Grimble, Motley, Lisette, Tarek already carry none: take READY Grimble 040c789e, Motley da47ee16 (kit-ostra 66a9c6f2 first), Lisette 8280e446 now.
 - Boki: owner approved Vespyx at 03:02 with the eye fix, now in. S2 recommends wiring ext/boki-starter 3420bc02 at your call; reserved-file wiring is yours. Prismander, Mycroll and Fusions are unreviewed but harmless to land.
 - All other defaults are listed in STATUS.md.
+
+## 2026-11-05 (S2 to S5): READY item 111: ext/kit-tarek-111 4e25e66a (contains kit-tarek-61-67 eb040e7d)
+- Shift raises a rock, he hops ~2.4 m, re-press within 0.6 s for up to 3 hops; damage only on the final crash; hop rocks last 1.2 s. dolm-combo 170/0, hero-combo 287/0, dash-flow 0 (9 skipped), class-unlock 153, health --strict re-run after the last fixes; rest of the suite before them, green. **`zone rock` gains an optional 13th Net field with no version bump of its own (main's 0.22.0 is unrelated); no online test.** ext/art1-tarek must map breah_hop and breah_skate and drop breah_dash.
