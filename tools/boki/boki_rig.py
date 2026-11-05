@@ -5,9 +5,10 @@ import mathutils
 import numpy as np
 
 KEEP_INFLUENCES = 4
+HARD_PIECES = ("tail", "collar", "sting", "tail_fin", "gills", "shards")
 CLIP_SCALE = 0.95    # clip offsets are in the build's metres
 # where an unused prop sits (from its rest place), collapsed inside the body so its ink shell never shows
-HIDE_AT = {"prop_berry": (0, -0.09, 0.40)}
+HIDE_AT = {}
 
 
 def armature(bones, bl):
@@ -60,8 +61,7 @@ def skin_only(body, arm, pieces, sigma=0.012):
         d = np.stack([p.d(pc.v) for p in prims], -1)
         bones = sorted({p.bone for p in prims})
         w = np.zeros((len(pc.v), len(bones)))
-        hard = pc.name in ("tail", "collar", "sting") or pc.slot == 0 and pc.name.split("_")[0] in (
-            "axe", "pick", "berry") or pc.name.startswith("gp_")
+        hard = pc.prop or pc.name in HARD_PIECES
         s = 0.002 if hard else sigma
         for j, b in enumerate(bones):
             sel = [i for i, p in enumerate(prims) if p.bone == b]

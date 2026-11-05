@@ -24,6 +24,8 @@ TONGUE = hexc("f0708a")
 WOOD = hexc("8a5a30")
 STEEL = hexc("aeb8c8")
 BERRY = hexc("e23a5a")
+IRIS = hexc("9de23a")
+LID = PLUM
 
 
 def sat(x):
@@ -75,19 +77,44 @@ def paint_body(p, n, prim):
     return col
 
 
-def paint_shell(p, n, nearest_gap, light=SHELL_LIGHT):
-    """Glossy plates: wine shell, pale catch-light, ink in the creases (nearest_gap small between two plates)."""
+def paint_shell(p, n, nearest_gap, light=SHELL_LIGHT, shell=SHELL, dark=SHELL_DARK):
+    """Glossy plates: pale catch-light, ink in the creases (nearest_gap small between two plates)."""
     h = np.array([-0.35, 0.8, -0.48])
     h = h / np.linalg.norm(h)
     spec = sat((n @ h - 0.82) / 0.11) ** 2
     up = sat(n[:, 1] * 0.5 + 0.5)
-    col = mixc(SHELL_DARK, SHELL, sat(up * 1.5))
+    col = mixc(dark, shell, sat(up * 1.5))
     col = mixc(col, light, spec * 0.85)
     gloss = sat((n @ h - 0.965) / 0.02)
     col = mixc(col, np.array([1.0, 0.86, 0.94]), gloss * 0.8)
-    return mixc(col, SHELL_DARK * 0.5, edge(0.006 - nearest_gap, 0.003))
+    return mixc(col, dark * 0.5, edge(0.006 - nearest_gap, 0.003))
 
 
 def v3s(*a):
     return np.array(a, dtype=float)
 
+
+
+def paint_piece(pc, q, nn, prim):
+    """The colour of one piece of the creature at q."""
+    if pc.name == "body":
+        return paint_body(q, nn, prim)
+    if pc.name == "tail" or pc.name.startswith("claw") or pc.name == "collar":
+        ds = np.sort(np.stack([pr.d(q) for pr in pc.shape.prims], -1), axis=-1)
+        gap = ds[:, 1] - ds[:, 0] if pc.name == "tail" else np.full(len(q), 1.0)
+        return paint_shell(q, nn, gap)
+    if pc.name.startswith("gp_"):
+        if pc.look == "white":
+            return np.ones((len(q), 3))
+        return paint_shell(q, nn, np.full(len(q), 1.0))
+    if pc.name == "sting":
+        return np.tile(np.array([0.72, 1.0, 0.3]), (len(q), 1))
+    return tool_colour(pc.name, q)
+
+
+def tool_colour(name, q):
+    if name.endswith("handle"):
+        return np.tile(WOOD, (len(q), 1))
+    if name == "berry":
+        return np.tile(BERRY, (len(q), 1))
+    return np.tile(STEEL, (len(q), 1))

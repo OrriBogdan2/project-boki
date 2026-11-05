@@ -6,15 +6,19 @@ import math
 
 import numpy as np
 
+import boki_grown
+import boki_tools
 from boki_sdf import Cone, Ellipsoid, Shape, frame, v3
 
-SIDES = (("L", -1.0), ("R", 1.0))
+from vespyx_sides import SIDES
 HEAD_C = v3(0, 0.47, -0.13)
 HEAD_R = v3(0.25, 0.208, 0.208)
 # the eye dome: centre and radii in the head's frame, set into the socket the head carves for it
 EYE_C = v3(0.116, 0.452, -0.283)
 EYE_R = v3(0.080, 0.096, 0.056)
 EYE_YAW = 0.42
+GLOW_PIECES = ("sting",)
+FACE = {}          # face.FACE's defaults are this fox's
 
 
 def eye_frame(sx):
@@ -103,6 +107,7 @@ def tail_prims():
     return out
 
 
+BERRY_C = v3(0, 0.285, -0.365)
 STING_C = v3(0, 0.770, 0.040)
 STING_DIR = np.array((0.0, -0.62, -0.78))
 
@@ -147,105 +152,30 @@ def parts():
     return out
 
 
-# ---------------------------------------------------------------- work props: skinned to their own bones, scaled to
-# nothing except in the clips that use them
+# ---------------------------------------------------------------- work props: a hatchet and a pick gripped in the tail
 AXIS = STING_DIR / np.linalg.norm(STING_DIR)
-SIDE = v3(1, 0, 0)
-AX_UP = np.cross(SIDE, AXIS)
-
-
-def axe_blade(base):
-    """A fan from the eye of the axe to a straight cutting edge."""
-    c1 = base + AX_UP * 0.155 + AXIS * 0.080
-    c2 = base + AX_UP * 0.155 - AXIS * 0.090
-    mid = (c1 + c2) * 0.5
-    flat = {"flat": 0.24, "flat_axis": SIDE}
-    return [Cone("b0", "prop_axe", base, mid, 0.034, 0.078, k=0.0, **flat),
-            Cone("b1", "prop_axe", base, c1, 0.030, 0.012, k=0.01, **flat),
-            Cone("b2", "prop_axe", base, c2, 0.030, 0.012, k=0.01, **flat),
-            Cone("b3", "prop_axe", c1, c2, 0.012, 0.012, k=0.01, **flat)]
 
 
 def prop_parts():
-    """name -> (Shape, step, tris, bone)."""
-    g = STING_C + AXIS * 0.06
-    end = g + AXIS * 0.30
-    blade = end - AXIS * 0.045
-    out = {
-        "axe_handle": (Shape([Cone("h", "prop_axe", g, end, 0.017, 0.015, k=0)]), 0.004, 60),
-        "axe_blade": (Shape(axe_blade(blade)), 0.003, 170),
-        "pick_handle": (Shape([Cone("h", "prop_pick", g, end, 0.017, 0.015, k=0)]), 0.004, 60),
-        "pick_head": (Shape([Cone("a", "prop_pick", end, end + AX_UP * 0.17 + AXIS * -0.06, 0.034, 0.006, k=0.0),
-                             Cone("b", "prop_pick", end, end - AX_UP * 0.17 + AXIS * -0.06, 0.034, 0.006, k=0.005)]),
-                      0.003, 160),
-        "berry": (Shape([Ellipsoid("b", "prop_berry", v3(0, 0.285, -0.365), v3(0.054, 0.052, 0.054), k=0)]), 0.003, 90),
-    }
+    out = boki_tools.tools(STING_C + AXIS * 0.06, AXIS)
+    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 90)
     return out
 
 
-# ---------------------------------------------------------------- grown parts (Evo's mutations), one bone each, shown
-# only on a Boki that has grown them (BokiDna). id -> (parent bone, bone head, look, tris, primitives)
+# ---------------------------------------------------------------- grown parts (Evo's mutations)
+GROWN = {
+    "horn": ((0.075, 0.645, -0.17), (0.15, 0.80, -0.235), 0.042), "fang": ((0.052, 0.352, -0.345), (0.058, 0.298, -0.355), 0.017),
+    "antenna": ((0.05, 0.655, -0.2), (0.125, 0.83, -0.30), 0.014), "brow": ((0.015, 0.545, -0.325), (0.195, 0.585, -0.235), 0.024),
+    "head_top": (0, 0.66, -0.2), "fang_at": (0, 0.34, -0.34), "brow_at": (0, 0.56, -0.29), "third_eye": (0, 0.583, -0.312),
+    "back": ((0, 0.335, -0.02), (0, 0.33, 0.07), (0, 0.32, 0.16)), "back_at": (0, 0.36, 0.05), "plates": (0, 0.348, 0.03),
+    "plate_r": (0.128, 0.040, 0.082), "shell_c": (0, 0.238, 0.085), "shell_r": (0.142, 0.138, 0.058), "tail_bone": "tail6",
+    "club_at": tuple(TAIL_PTS[6]), "club_dir": tuple(TAIL_PTS[7] - TAIL_PTS[5]), "club_r": 0.076,
+    "spots": ((0.122, 0.27, -0.01, 0.026), (0.125, 0.22, 0.09, 0.022), (0.125, 0.28, 0.13, 0.024)), "spots_at": (0, 0.25, 0.08),
+    "wing": ((0.10, 0.345, 0.0), (0.30, 0.44, 0.10), (0.25, 0.40, 0.19)), "wing_at": (0, 0.345, 0.02),
+    "fin": ((0.118, 0.265, 0.12), (0.15, 0.40, 0.25)), "fin_at": (0, 0.26, 0.12), "crest": (0.655, -0.17, 0.05, 0.075),
+    "crest_at": (0, 0.66, -0.1),
+}
+
+
 def grown_parts():
-    def pair(fn):
-        return [p for _, sx in SIDES for p in fn(sx)]
-
-    def horns(sx):
-        return [Cone("h", "part_horns", v3(sx * 0.075, 0.645, -0.17), v3(sx * 0.15, 0.80, -0.235), 0.042, 0.004, k=0)]
-
-    def fangs(sx):
-        return [Cone("f", "part_fangs", v3(sx * 0.052, 0.352, -0.345), v3(sx * 0.058, 0.298, -0.355), 0.017, 0.002, k=0)]
-
-    def antennae(sx):
-        return [Cone("a", "part_antennae", v3(sx * 0.05, 0.655, -0.2), v3(sx * 0.125, 0.83, -0.30), 0.014, 0.008, k=0)]
-
-    def antenna_tips(sx):
-        return [Ellipsoid("t", "part_antennae", v3(sx * 0.13, 0.84, -0.31), v3(0.034, 0.034, 0.034), k=0)]
-
-    def spots(sx):
-        return [Ellipsoid("s", "part_spots", v3(sx * x, y, z), v3(0.016, r, r), k=0)
-                for x, y, z, r in ((0.122, 0.27, -0.01, 0.026), (0.125, 0.22, 0.09, 0.022), (0.125, 0.28, 0.13, 0.024))]
-
-    def wings(sx):
-        n = v3(0, 1, 0.3)
-        return [Cone("w0", "part_wings", v3(sx * 0.10, 0.345, 0.0), v3(sx * 0.30, 0.44, 0.10), 0.040, 0.012, k=0.0,
-                     flat=0.22, flat_axis=n),
-                Cone("w1", "part_wings", v3(sx * 0.10, 0.345, 0.03), v3(sx * 0.25, 0.40, 0.19), 0.034, 0.010, k=0.02,
-                     flat=0.22, flat_axis=n)]
-
-    def fins(sx):
-        n = v3(1, 0, 0)
-        return [Cone("f", "part_fins", v3(sx * 0.118, 0.265, 0.12), v3(sx * 0.15, 0.40, 0.25), 0.055, 0.006, k=0,
-                     flat=0.2, flat_axis=n)]
-
-    back = v3(0, -0.35, 1)
-    side = v3(1, 0, 0)
-    return {
-        "horns": ("head", v3(0, 0.66, -0.2), "shell", 90, pair(horns)),
-        "spikes": ("spine", v3(0, 0.36, 0.05), "shell", 110, [
-            Cone("s%d" % i, "part_spikes", v3(0, 0.335 - i * 0.006, z), v3(0, 0.335 - i * 0.006 + h, z + 0.035),
-                 0.042, 0.004, k=0, flat=0.45, flat_axis=side) for i, (z, h) in enumerate(((-0.02, 0.105), (0.07, 0.12),
-                                                                                       (0.16, 0.10)))]),
-        "fangs": ("head", v3(0, 0.34, -0.34), "white", 40, pair(fangs)),
-        "brow": ("head", v3(0, 0.56, -0.29), "shell", 110, [
-            Cone("b" + sd, "part_brow", v3(sx * 0.015, 0.545, -0.325), v3(sx * 0.195, 0.585, -0.235), 0.024, 0.018, k=0.012)
-            for sd, sx in SIDES]),
-        "plates": ("spine", v3(0, 0.34, 0.08), "shell", 130, [
-            Ellipsoid("p0", "part_plates", v3(0, 0.348, 0.03), v3(0.128, 0.040, 0.082), k=0),
-            Ellipsoid("p1", "part_plates", v3(0, 0.335, 0.165), v3(0.12, 0.040, 0.082), k=0.004)]),
-        "shell": ("hips", v3(0, 0.235, 0.085), "shell", 170, [
-            Ellipsoid("s", "part_shell", v3(0, 0.238, 0.085), v3(0.142, 0.138, 0.058), k=0)]),
-        "club": ("tail6", tuple(TAIL_PTS[6]), "shell", 120, [
-            Ellipsoid("c", "part_club", TAIL_PTS[6], v3(0.076, 0.076, 0.05), rot=frame(TAIL_PTS[7] - TAIL_PTS[5],
-                                                                                    v3(1, 0, 0)), k=0)]),
-        "antennae": ("head", v3(0, 0.66, -0.2), "shell", 60, pair(antennae)),
-        "antenna_tips": ("part_antennae", None, "glow", 50, pair(antenna_tips)),
-        "spots": ("hips", v3(0, 0.25, 0.08), "glow", 100, pair(spots)),
-        "third_eye": ("head", v3(0, 0.585, -0.3), "glow", 40, [
-            Ellipsoid("e", "part_third_eye", v3(0, 0.583, -0.312), v3(0.030, 0.034, 0.018), k=0)]),
-        "crest": ("head", v3(0, 0.66, -0.1), "shell", 110, [
-            Cone("c%d" % i, "part_crest", v3(0, 0.655 - i * 0.05, -0.17 + i * 0.075),
-                 v3(0, 0.655 - i * 0.05 + 0.13 - i * 0.02, -0.17 + i * 0.075 + 0.05), 0.046, 0.005, k=0, flat=0.3,
-                 flat_axis=side) for i in range(3)]),
-        "wings": ("spine", v3(0, 0.345, 0.02), "shell", 110, pair(wings)),
-        "fins": ("hips", v3(0, 0.26, 0.12), "shell", 70, pair(fins)),
-    }
+    return boki_grown.grown_parts(GROWN)

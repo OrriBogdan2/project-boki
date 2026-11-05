@@ -8,7 +8,20 @@ extends Node
 
 const PATH := "res://art/kin/%s/%s.glb"
 ## Where the eyes and the top of the head sit (m), per species: what KinModels.build returns for the accessories.
-const FRAME := {"cindle": {"head": Vector3(0, 0.45, -0.34), "top": 0.72}}
+const FRAME := {
+	"cindle": {"head": Vector3(0, 0.45, -0.34), "top": 0.72, "carry": Vector3(0, 0.3, -0.34),
+		"ear_tip": Vector3(0.218, 0.838, -0.081), "tail_tip": Vector3(0, 0.77, 0.10), "tip_bone": "tail7", "hip": 0.22,
+		"marks": {"left flank": Vector3(-0.115, 0.25, 0.09), "right flank": Vector3(0.115, 0.25, 0.09),
+			"back": Vector3(0, 0.335, 0.10), "chest": Vector3(0, 0.235, -0.165)}},
+	"puddlet": {"head": Vector3(0, 0.3, -0.36), "top": 0.45, "carry": Vector3(0, 0.42, 0.1),
+		"ear_tip": Vector3(0.36, 0.56, -0.13), "tail_tip": Vector3(0, 0.34, 0.86), "tip_bone": "tail5", "hip": 0.14,
+		"marks": {"left flank": Vector3(-0.12, 0.2, 0.1), "right flank": Vector3(0.12, 0.2, 0.1),
+			"back": Vector3(0, 0.3, 0.1), "chest": Vector3(0, 0.15, -0.14)}},
+	"burrlet": {"head": Vector3(0, 0.28, -0.33), "top": 0.42, "carry": Vector3(0, 0.56, 0.05),
+		"ear_tip": Vector3(0.16, 0.43, -0.14), "tail_tip": Vector3(0, 0.34, 0.55), "tip_bone": "tail2", "hip": 0.11,
+		"marks": {"left flank": Vector3(-0.225, 0.2, 0.1), "right flank": Vector3(0.225, 0.2, 0.1),
+			"back": Vector3(0, 0.5, 0.1), "chest": Vector3(0, 0.16, -0.2)}},
+}
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
 const WALK_SPEED := 0.5       # m/s: below this it stands
@@ -23,7 +36,6 @@ const EYE_VALUE := 0.86       # iris brightness: the eye is the first thing read
 ## Godot's LODs are cut from the rest pose, where the lids lie folded: they would drop the rows that cover the eye.
 const FACE_LOD_BIAS := 1000.0
 const OWN_BODY := ["chop", "mine", "carry", "tend"]
-const CARRY_AT := Vector3(0, 0.3, -0.34)     # m: home's Held item hugged in the pincers
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
@@ -168,7 +180,7 @@ func _keep_flex() -> void:
 	if clip == "carry":
 		var held := root.get_node_or_null("Held") as Node3D
 		if held:
-			held.position = CARRY_AT
+			held.position = FRAME[species]["carry"]
 	model.position.y = -body.position.y if clip == "hop" else 0.0       # the clip does the hopping, not home
 	var cam := get_viewport().get_camera_3d() as CamRig
 	if cam:
@@ -284,6 +296,8 @@ func _material_for(src: Material, c: Dictionary, mats: Array) -> Material:
 		var iris := c["eye"].get_meta("iris", Color("9de23a")) as Color
 		eye_mat.set_shader_parameter("iris", Color.from_hsv(iris.h, minf(iris.s * 1.15, 1.0), EYE_VALUE))
 		return eye_mat
+	if id == "boki_lit":
+		return _lit_material(src, c)
 	var m := Models.toon(Color.WHITE, false)
 	Models.hero_look(m)
 	m.set_shader_parameter("use_tex", true)
@@ -297,6 +311,16 @@ func _material_for(src: Material, c: Dictionary, mats: Array) -> Material:
 		_coat = m
 		m.next_pass = _ink()
 	mats.append(m)
+	return m
+
+## A painted part that glows: its own colours, shifted with the species' glow (a shimmer's caps).
+func _lit_material(src: Material, c: Dictionary) -> Material:
+	var m := Models.toon(Color.WHITE, false, 0.55)
+	m.set_shader_parameter("use_tex", true)
+	m.set_shader_parameter("albedo_tex", (src as BaseMaterial3D).albedo_texture)
+	var base: Color = Data.KIN[species]["glow"]
+	var now := (c["glow"] as ShaderMaterial).get_shader_parameter("albedo") as Color
+	m.set_shader_parameter("albedo", _tint(now, base))
 	return m
 
 static func _ink() -> ShaderMaterial:
@@ -314,8 +338,7 @@ func _copy_coat() -> void:
 	var body := mats[0] as ShaderMaterial
 	var base: Color = Data.KIN[species]["color"]
 	var now := body.get_shader_parameter("albedo") as Color
-	var tint := Color(now.r / maxf(base.r, 0.01), now.g / maxf(base.g, 0.01), now.b / maxf(base.b, 0.01))
-	_coat.set_shader_parameter("albedo", tint)
+	_coat.set_shader_parameter("albedo", _tint(now, base))
 	if body.get_shader_parameter("mark_kind") == null:
 		return
 	var marks := ShaderMaterial.new()
@@ -324,3 +347,7 @@ func _copy_coat() -> void:
 		marks.set_shader_parameter(k, body.get_shader_parameter(k))
 	marks.next_pass = _coat.next_pass
 	_coat.next_pass = marks
+
+## How far a colour has moved from the species' own (white: not at all), to multiply a painted atlas with.
+static func _tint(now: Color, base: Color) -> Color:
+	return Color(now.r / maxf(base.r, 0.01), now.g / maxf(base.g, 0.01), now.b / maxf(base.b, 0.01))

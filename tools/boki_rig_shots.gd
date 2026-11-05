@@ -125,7 +125,7 @@ func _strip(n: int) -> Image:
 func _turntable() -> void:
 	var vp := _stage(Vector2i(px, px))
 	var cam := _close_cam(vp)
-	cam.position = Vector3(0, 0.8, 2.9)
+	cam.position = Vector3(0, 0.8, 3.3)
 	cam.look_at(Vector3(0, 0.42, 0))
 	var kr := _kin(vp)
 	await RenderingServer.frame_post_draw
@@ -144,8 +144,9 @@ func _faces() -> void:
 	var vp := _stage(Vector2i(px, px), false)
 	var cam := _close_cam(vp)
 	cam.fov = 13.0
-	cam.position = Vector3(0.0, 0.62, 3.3)
-	cam.look_at(Vector3(0, 0.46, -0.1))
+	var head: Vector3 = BokiRig.FRAME[species]["head"]
+	cam.position = Vector3(0.0, head.y + 0.16, 3.3)
+	cam.look_at(Vector3(0, head.y + 0.01, -0.1))
 	var kr := _kin(vp)
 	(kr[0] as Node3D).rotation.y = PI
 	await RenderingServer.frame_post_draw
@@ -189,7 +190,7 @@ func _coats() -> void:
 
 ## The Fusion on a Hunter, close (front, 3/4, back) and at the match camera.
 func _fusion() -> void:
-	var form := {"type": "venom", "glow": Data.KIN[species]["glow"]}
+	var form := {"type": BokiFusion.type_of(species), "glow": Data.KIN[species]["glow"]}
 	if not BokiFusion.has(form):
 		return
 	var vp := _stage(Vector2i(px, px))
@@ -307,7 +308,7 @@ func _hold_load(rig: BokiRig, on: bool) -> void:
 	if on:
 		var it := WorkModels.held("chop", "")
 		rig.root.add_child(it)
-		it.position = BokiRig.CARRY_AT
+		it.position = BokiRig.FRAME[species]["carry"]
 
 func _far(file: String, dist: float, boki_scale: float, picks: Array, yaw: float) -> void:
 	var vp := _stage(Vector2i(1920, 1080))

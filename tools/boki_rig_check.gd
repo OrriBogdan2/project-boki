@@ -1,10 +1,12 @@
 extends RefCounted
-## --boki-rig-check: a rigged Boki (BokiRig, art/kin/cindle/cindle.glb) has its clips and faces, picks them from
-## the same metas KinPuppet reads, wears each Boki's own colours and marks, stays inside its budgets.
+## --boki-rig-check: a rigged Boki (BokiRig, art/kin/<id>/<id>.glb) has its clips and faces, picks them from
+## the same metas KinPuppet reads,
+## wears each Boki's own colours and marks, stays inside its budgets.
 ## Prints PASS/FAIL lines.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
-const SPECIES := "cindle"
+const SPECIES_LIST := ["cindle", "puddlet", "burrlet"]
+var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
 	"tend"]
 const SHAPES := ["blink", "closed", "happy", "sad", "sleepy", "angry", "m_smile", "m_frown", "m_snarl", "m_chomp",
@@ -20,9 +22,17 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
-	ok(BokiRig.has(SPECIES), "the starter has a rigged model")
 	ok(not BokiRig.has("pebbit"), "a species without one keeps its KinModels body")
-	var k := Shots.rigged_kin(SPECIES)
+	for id in SPECIES_LIST:
+		kin_id = id
+		await _species(main)
+	print("BOKIRIG DONE, failures: %d" % bad)
+	main.get_tree().quit(1 if bad > 0 else 0)
+
+func _species(main: Node) -> void:
+	print("BOKIRIG species %s" % kin_id)
+	ok(BokiRig.has(kin_id), "%s has a rigged model" % kin_id)
+	var k := Shots.rigged_kin(kin_id)
 	main.add_child(k)
 	await main.get_tree().process_frame
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
@@ -30,8 +40,6 @@ func run(main: Node) -> void:
 	await _states(main, k, rig)
 	await _own_look(main)
 	k.queue_free()
-	print("BOKIRIG DONE, failures: %d" % bad)
-	main.get_tree().quit(1 if bad > 0 else 0)
 
 func _contents(rig: BokiRig) -> void:
 	for c in CLIPS:
@@ -110,7 +118,8 @@ func _body_stays_level(main: Node, k: Node3D, rig: BokiRig) -> void:
 	body.rotation.z = 0.16
 	rig._keep_flex()
 	ok(is_zero_approx(body.rotation.z), "a work clip keeps Body level")
-	ok(held.position.is_equal_approx(BokiRig.CARRY_AT), "carrying, the load sits in its pincers, not over its head")
+	var carry_at: Vector3 = BokiRig.FRAME[kin_id]["carry"]
+	ok(held.position.is_equal_approx(carry_at), "carrying, the load sits where it holds it, not over its head")
 	k.remove_meta("kwork")
 	rig._pick_clip(0.016)
 	held.free()
@@ -118,9 +127,9 @@ func _body_stays_level(main: Node, k: Node3D, rig: BokiRig) -> void:
 
 ## A mutation shows as its part of the mesh, nothing else does, and it never falls back on Evo's primitives.
 func _grown_parts(main: Node) -> void:
-	var rec := Save.new_kin(SPECIES, "Horny")
+	var rec := Save.new_kin(kin_id, "Horny")
 	rec["muts"] = [{"id": "horns", "lv": 2, "aff": "fierce"}]
-	var k := Shots.rigged_kin(SPECIES, rec)
+	var k := Shots.rigged_kin(kin_id, rec)
 	main.add_child(k)
 	await main.get_tree().process_frame
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
@@ -132,14 +141,14 @@ func _grown_parts(main: Node) -> void:
 	k.queue_free()
 
 func _own_look(main: Node) -> void:
-	var rec := Save.new_kin(SPECIES, "Spot")
+	var rec := Save.new_kin(kin_id, "Spot")
 	rec["dna"] = Unique.roll(12345)
 	rec["dna"]["mark"] = "spots"
 	rec["dna"]["eye"] = "sky"
 	rec["dna"]["ears"] = "tufted"
 	rec["dna"]["tailv"] = "tufted"
 	rec["dna"]["birth"] = ["star", "chest"]
-	var k := Shots.rigged_kin(SPECIES, rec)
+	var k := Shots.rigged_kin(kin_id, rec)
 	main.add_child(k)
 	await main.get_tree().process_frame
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig

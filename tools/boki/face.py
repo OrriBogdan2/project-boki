@@ -32,32 +32,38 @@ BROWS = {  # dx outward, dy, tilt (radians, + is the inner end down)
     "closed": (0.0, -0.004, 0.0),
     "blink": (0.0, -0.002, 0.1),
 }
-MOUTH_W = 0.084
-MOUTH_Y = 0.385
+# the species' numbers (its module's FACE overrides these before the build)
+FACE = {"mouth_w": 0.084, "mouth_y": 0.385, "mouth_z": -0.36, "cat_mouth": True, "brow_x": 0.100, "brow_up": 0.040,
+        "brow_k": 1.0, "fang_k": 1.0}
 
 
-def m_rest_u(x):
-    t = np.abs(x) / MOUTH_W
-    return MOUTH_Y + 0.020 * (t - 0.42) ** 2 * 2.4 - 0.008 + 0.012 * t
+def mouth_shapes():
+    """Shape -> (upper edge(x), lower edge(x), width scale), with x in -w..w."""
+    w, y0 = FACE["mouth_w"], FACE["mouth_y"]
+    h_k = w / 0.084
+
+    def rest_u(x):
+        t = np.abs(x) / w
+        if FACE["cat_mouth"]:
+            return y0 + 0.020 * (t - 0.42) ** 2 * 2.4 - 0.008 + 0.012 * t
+        return y0 - 0.016 * h_k * (1 - t * t)
+
+    def line_l(x):
+        return rest_u(x) - 0.0085
+
+    def open_u(x, d, ws):
+        return lambda xx: y0 + d - 0.012 * (xx / w) ** 2
+
+    return {
+        "rest": (rest_u, line_l, 1.0),
+        "m_smile": (lambda x: rest_u(x) + 0.004, lambda x: rest_u(x) - 0.058 * (1 - (x / w) ** 2) - 0.004, 1.1),
+        "m_frown": (lambda x: y0 - 0.006 - 0.018 * (x / w) ** 2, lambda x: y0 - 0.018 - 0.018 * (x / w) ** 2, 0.8),
+        "m_snarl": (lambda x: y0 + 0.006 - 0.005 * (x / w) ** 2, lambda x: y0 - 0.050 + 0.026 * (x / w) ** 2, 1.05),
+        "m_chomp": (lambda x: y0 + 0.002 - 0.010 * (x / w) ** 2, lambda x: y0 - 0.064 * (1 - (x / w) ** 2) - 0.006, 0.72),
+        "m_o": (lambda x: y0 - 0.006 + 0.014 * (1 - (x / w) ** 2), lambda x: y0 - 0.006 - 0.016 * (1 - (x / w) ** 2), 0.34),
+    }
 
 
-def m_line_l(x):
-    return m_rest_u(x) - 0.0085
-
-
-MOUTHS = {
-    # shape -> (upper edge(x), lower edge(x), width scale)
-    "rest": (m_rest_u, m_line_l, 1.0),
-    "m_smile": (lambda x: m_rest_u(x) + 0.004, lambda x: m_rest_u(x) - 0.058 * (1 - (x / MOUTH_W) ** 2) - 0.004, 1.1),
-    "m_frown": (lambda x: MOUTH_Y - 0.012 - 0.018 * (x / MOUTH_W) ** 2 + 0.006,
-                lambda x: MOUTH_Y - 0.018 - 0.018 * (x / MOUTH_W) ** 2, 0.8),
-    "m_snarl": (lambda x: MOUTH_Y + 0.006 - 0.005 * (x / MOUTH_W) ** 2,
-                lambda x: MOUTH_Y - 0.050 + 0.026 * (x / MOUTH_W) ** 2, 1.05),
-    "m_chomp": (lambda x: MOUTH_Y + 0.002 - 0.010 * (x / MOUTH_W) ** 2,
-                lambda x: MOUTH_Y - 0.064 * (1 - (x / MOUTH_W) ** 2) - 0.006, 0.72),
-    "m_o": (lambda x: MOUTH_Y + 0.0 * x - 0.006 + 0.014 * (1 - (x / MOUTH_W) ** 2),
-            lambda x: MOUTH_Y - 0.006 - 0.016 * (1 - (x / MOUTH_W) ** 2), 0.34),
-}
 # atlas strips (u0, u1)
 STRIP = {"upper": (0.02, 0.18), "lower": (0.24, 0.40), "brow": (0.46, 0.58), "mouth": (0.64, 0.82), "fang": (0.88, 0.98)}
 UPPER_ROWS, COLS = 9, 22
@@ -164,19 +170,20 @@ def build_face(shape, eye_c, eye_r, eye_frame):
 
 def fm_brow(fm, shape, sx, c, r):
     n = 10
-    ctr = np.array([sx * 0.100, c[1] + r[1] + 0.040])
+    ctr = np.array([sx * FACE["brow_x"], c[1] + r[1] + FACE["brow_up"]])
+    bk = FACE["brow_k"]
 
     def patch(dx, dy, tilt):
         th = np.linspace(0, 2 * math.pi, n, endpoint=False)
-        ex = 0.031 * np.cos(th)
-        ey = 0.0135 * np.sin(th)
+        ex = 0.031 * bk * np.cos(th)
+        ey = 0.0135 * bk * np.sin(th)
         ca, sa = math.cos(tilt), math.sin(tilt)
         px = ex * ca + ey * sa
         py = -ex * sa + ey * ca
         # +x of the patch runs toward the nose
         xs = ctr[0] + sx * (dx - px)
         ys = ctr[1] + dy + py
-        pts = np.stack([np.append(xs, ctr[0] + sx * dx), np.append(ys, ctr[1] + dy), np.full(n + 1, -0.30)], -1)
+        pts = np.stack([np.append(xs, ctr[0] + sx * dx), np.append(ys, ctr[1] + dy), np.full(n + 1, FACE["mouth_z"] + 0.06)], -1)
         return shape.project(pts, LIFT, steps=8)
 
     base = patch(*BROWS["rest"])
@@ -191,33 +198,38 @@ def fm_brow(fm, shape, sx, c, r):
 
 
 def fm_mouth(fm, shape):
+    mouths = mouth_shapes()
+    z0 = FACE["mouth_z"]
+
     def patch(upper, lower, ws, lift=LIFT):
-        xs = np.linspace(-1, 1, MOUTH_COLS) * MOUTH_W * ws
+        xs = np.linspace(-1, 1, MOUTH_COLS) * FACE["mouth_w"] * ws
         pts = []
         for v in np.linspace(0, 1, MOUTH_ROWS):
             ys = lower(xs / ws) * (1 - v) + upper(xs / ws) * v
-            pts.append(np.stack([xs, ys, np.full(MOUTH_COLS, -0.36)], -1))
+            pts.append(np.stack([xs, ys, np.full(MOUTH_COLS, z0)], -1))
         return shape.project(np.array(pts).reshape(-1, 3), lift, steps=10)
 
-    upper, lower, ws = MOUTHS["rest"]
+    upper, lower, ws = mouths["rest"]
     base = patch(upper, lower, ws)
-    keys = {k: patch(*v) for k, v in MOUTHS.items() if k != "rest"}
+    keys = {k: patch(*v) for k, v in mouths.items() if k != "rest"}
     u0, u1 = STRIP["mouth"]
     uv = []
     for rr in np.linspace(0, 1, MOUTH_ROWS):
         for cc in np.linspace(0, 1, MOUTH_COLS):
             uv.append((u0 + (u1 - u0) * cc, rr))
     fm.add(base, np.array(uv), grid_tris(MOUTH_ROWS, MOUTH_COLS, flip=True), keys)
-    fm_fang(fm, shape, MOUTHS)
+    fm_fang(fm, shape, mouths)
 
 
 def fm_fang(fm, shape, mouths):
     """Fangs hang from the upper lip: the right one always shows (its sly look), both when it snarls."""
     def tri(sx, upper, ws, length):
-        x0 = sx * 0.043 * ws
+        x0 = sx * FACE["mouth_w"] * 0.5 * ws
         w = 0.011
+        length *= FACE["fang_k"]
         y = float(upper(np.array([x0 / ws])))
-        pts = np.array([[x0 - w, y + 0.002, -0.36], [x0 + w, y + 0.002, -0.36], [x0 + 0.002 * sx, y - length, -0.36]])
+        z = FACE["mouth_z"]
+        pts = np.array([[x0 - w, y + 0.002, z], [x0 + w, y + 0.002, z], [x0 + 0.002 * sx, y - length, z]])
         return shape.project(pts, LIFT + 0.0008, steps=10)
 
     u0, u1 = STRIP["fang"]
@@ -267,9 +279,9 @@ def eye_dome(eye_c, eye_r, eye_frame):
     return np.array(verts), np.array(uvs), np.array(tris)
 
 
-def face_atlas(px=256):
-    """RGB (0..1, sRGB) of the strips: lids plum to a dark lash, pale brows, mouth, fangs."""
-    from vespyx_paint import PLUM, LILAC, INK, MOUTH_DARK, TONGUE
+def face_atlas(pal, px=256):
+    """RGB (0..1, sRGB) of the strips: lids the skin's colour to a dark lash, pale brows, mouth, fangs."""
+    INK, MOUTH_DARK, TONGUE = pal.INK, pal.MOUTH_DARK, pal.TONGUE
     img = np.zeros((px, px, 3))
     v = np.linspace(0, 1, px)[:, None]    # rows bottom to top of the strip
 
@@ -277,13 +289,13 @@ def face_atlas(px=256):
         u0, u1 = STRIP[name]
         i0, i1 = int(u0 * px) - 3, int(u1 * px) + 3
         img[:, i0:i1] = col
-    skin = np.minimum(PLUM * LID_LIGHT, 1.0)
+    skin = np.minimum(pal.LID * LID_LIGHT, 1.0)
     dark = np.clip((v - 0.72) / 0.1, 0, 1)
     up = skin * (1 - dark) + INK * dark
     lo = up
     strip("upper", up[:, None, :].repeat(1, 1))
     strip("lower", lo[:, None, :].repeat(1, 1))
-    strip("brow", LILAC)
+    strip("brow", pal.LILAC)
     t = np.clip((0.42 - v) / 0.1, 0, 1)
     mouth = MOUTH_DARK * (1 - t) + TONGUE * t
     edge = np.clip((np.abs(v - 0.5) - 0.40) / 0.06, 0, 1)

@@ -1,12 +1,14 @@
-"""Vespyx's skeleton and clips. A clip is a function of t (0..1) returning bone -> (rx, ry, rz) in the creature's own
-axes: rx lifts the nose (or lifts a limb forward), ry turns it toward its right (-z towards +x is negative), rz rolls.
-Keys: "root_at" / "hips_at" (metres), "root_sc" (squash), and prop bones set to "on"."""
-import math
-
+"""Vespyx's skeleton and the clips that are its own: pincers, and tools in the tail."""
+import boki_clips
 import vespyx
+from boki_clips import LOOK_UP, add, ear_pose, s, seq, tail_wave, TAU
+from boki_clips import SHARED, idle
 from vespyx import SIDES, STING_C, TAIL_PTS
 
-TAU = math.tau
+# the tail reaching forward over the head, joint by joint: base swings forward, the tip unrolls
+STAB = (-0.35, -0.45, -0.5, -0.25, 0.25, 0.5, 0.55)
+HACK = (-0.42, -0.46, -0.46, -0.22, 0.28, 0.5, 0.6)
+GROUND = (-0.6, -0.6, -0.6, -0.42, 0.4, 0.5, 0.6)
 
 
 def p3(x, y, z):
@@ -41,135 +43,12 @@ def _bones():
     b["sting"] = (tuple(TAIL_PTS[7]), tuple(STING_C + (STING_C - TAIL_PTS[7])), "tail7")
     b["prop_axe"] = (tuple(STING_C), tuple(STING_C + vespyx.AXIS * 0.1), "sting")
     b["prop_pick"] = (tuple(STING_C), tuple(STING_C + vespyx.AXIS * 0.1), "sting")
-    b["prop_berry"] = (p3(0, 0.285, -0.365), p3(0, 0.385, -0.365), "spine")
-    for pid, (parent, head, _, _, _) in vespyx.grown_parts().items():
-        if head is not None:
-            b["part_" + pid] = (tuple(head), (head[0], head[1] + 0.1, head[2]), parent)
+    b["prop_berry"] = (tuple(vespyx.BERRY_C), tuple(vespyx.BERRY_C + vespyx.v3(0, 0.1, 0)), "spine")
+    b.update(boki_clips.part_bones(vespyx.grown_parts()))
     return b
 
 
 BONES = _bones()
-LOOK_UP = 0.36      # standing, it looks up at you: the high cameras then see its face, not the top of its head
-# the tail reaching forward over the head, joint by joint: base swings forward, the tip unrolls
-STAB = (-0.35, -0.45, -0.5, -0.25, 0.25, 0.5, 0.55)
-HACK = (-0.42, -0.46, -0.46, -0.22, 0.28, 0.5, 0.6)
-GROUND = (-0.6, -0.6, -0.6, -0.42, 0.4, 0.5, 0.6)
-
-
-def s(t, n=1.0, ph=0.0):
-    return math.sin(TAU * (n * t + ph))
-
-
-def c(t, n=1.0, ph=0.0):
-    return math.cos(TAU * (n * t + ph))
-
-
-def ease(x):
-    x = max(0.0, min(1.0, x))
-    return x * x * (3 - 2 * x)
-
-
-def seq(t, keys):
-    """keys: (t, value), eased between. Values may be numbers."""
-    if t <= keys[0][0]:
-        return keys[0][1]
-    for (t0, v0), (t1, v1) in zip(keys, keys[1:]):
-        if t <= t1:
-            k = ease((t - t0) / max(t1 - t0, 1e-6))
-            return v0 + (v1 - v0) * k
-    return keys[-1][1]
-
-
-def add(pose, bone, rx=0.0, ry=0.0, rz=0.0):
-    o = pose.get(bone, (0, 0, 0))
-    pose[bone] = (o[0] + rx, o[1] + ry, o[2] + rz)
-
-
-def tail_wave(pose, phase, amp, up=0.0, side=0.0, roll=0.0, lag=0.09):
-    """Sends a wave down the tail: each plate repeats the one before, a little late (follow-through)."""
-    for i in range(7):
-        k = 0.45 + 0.55 * i / 6
-        add(pose, "tail%d" % (i + 1), rx=up / 7 + amp * math.sin(TAU * (phase - i * lag)) * k,
-            ry=side / 7 + roll * math.sin(TAU * (phase - i * lag - 0.15)) * k)
-
-
-def ear_pose(pose, back=0.0, out=0.0, flick=0.0):
-    for sd, sx in SIDES:
-        add(pose, "ear1." + sd, rx=back, rz=-sx * out + (flick if sd == "R" else 0))
-        add(pose, "ear2." + sd, rx=back * 0.6)
-
-
-def idle(t):
-    p = {}
-    br = s(t, 2)
-    add(p, "spine", rx=br * 0.02)
-    add(p, "neck", rx=-br * 0.01, ry=s(t, 1) * 0.05, rz=s(t, 1, 0.2) * 0.02)
-    add(p, "head", rx=LOOK_UP + br * 0.03, ry=s(t, 1, 0.1) * 0.08, rz=s(t, 1, 0.3) * 0.04)
-    p["root_at"] = (0, -0.006 + br * 0.004, 0)
-    tw = seq(t, [(0, 0), (0.7, 0), (0.74, 1), (0.8, 0), (0.84, 1), (0.9, 0), (1, 0)])
-    ear_pose(p, back=0.02 + br * 0.015, flick=tw * 0.22)
-    tail_wave(p, t * 2, 0.022, roll=0.04)
-    for sd, sx in SIDES:
-        add(p, "arm." + sd, rx=br * 0.04)
-        add(p, "nip." + sd, ry=sx * seq(t, [(0, 0), (0.3, 0), (0.34, 0.5), (0.38, 0), (0.42, 0.5), (0.46, 0), (1, 0)]))
-    for leg, sgn in (("fleg1.L", 1), ("fleg1.R", 1), ("hleg1.L", 1), ("hleg1.R", 1)):
-        add(p, leg, rx=br * 0.012 * sgn)
-    return p
-
-
-def trot(t, swing, bob, tail_up, pitch):
-    p = {}
-    # diagonal pairs
-    phases = {"fleg1.L": 0.0, "hleg1.R": 0.0, "fleg1.R": 0.5, "hleg1.L": 0.5}
-    for leg, ph in phases.items():
-        a = s(t, 1, ph)
-        add(p, leg, rx=a * swing)
-        low = leg.replace("1.", "2.")
-        add(p, low, rx=-max(0.0, -c(t, 1, ph)) * swing * 1.2 if leg[0] == "f" else max(0.0, -c(t, 1, ph)) * swing * 1.2)
-        paw = leg.replace("leg1.", "paw.")
-        add(p, paw, rx=-a * swing * 0.5)
-    p["root_at"] = (0, abs(c(t, 1)) * bob - bob * 0.3, 0)
-    add(p, "root", rz=s(t, 1) * 0.035, ry=s(t, 1) * 0.04)
-    add(p, "spine", rx=-pitch)
-    add(p, "neck", rx=pitch * 0.6 + c(t, 2) * 0.03)
-    add(p, "head", rx=LOOK_UP + pitch * 0.4 + c(t, 2, 0.1) * 0.04, ry=-s(t, 1) * 0.04)
-    ear_pose(p, back=0.14, out=0.03)
-    tail_wave(p, t * 2, 0.05, up=tail_up, roll=0.06)
-    for sd, sx in SIDES:
-        add(p, "arm." + sd, rx=-s(t, 1, 0.5 if sd == "L" else 0) * 0.12)
-    return p
-
-
-def walk(t):
-    return trot(t, 0.5, 0.012, 0.0, 0.0)
-
-
-def run(t):
-    """A bounding gallop: the spine bunches and stretches, ears pinned, tail streaming back."""
-    p = {}
-    fr = s(t, 1, 0.0)
-    hi = s(t, 1, 0.5)
-    for sd, sx in SIDES:
-        off = 0.05 if sd == "R" else 0.0
-        a = s(t, 1, off)
-        b = s(t, 1, 0.42 + off)
-        add(p, "fleg1." + sd, rx=a * 0.95)
-        add(p, "fleg2." + sd, rx=-max(0.0, -c(t, 1, off)) * 0.9)
-        add(p, "fpaw." + sd, rx=-a * 0.45)
-        add(p, "hleg1." + sd, rx=b * 0.85)
-        add(p, "hleg2." + sd, rx=max(0.0, -c(t, 1, 0.42 + off)) * 0.8)
-        add(p, "hpaw." + sd, rx=-b * 0.4)
-        add(p, "arm." + sd, rx=-0.25, rz=-sx * 0.2)
-    p["root_at"] = (0, 0.012 + 0.05 * max(0.0, s(t, 1, 0.2)), 0)
-    add(p, "hips", rx=fr * 0.2)
-    add(p, "spine", rx=-fr * 0.34)
-    add(p, "root", rx=fr * 0.08)
-    add(p, "neck", rx=fr * 0.2 - 0.12)
-    add(p, "head", rx=fr * 0.14 - 0.04)
-    ear_pose(p, back=0.62 + fr * 0.08, out=0.08)
-    tail_wave(p, t, 0.09, up=0.7, roll=0.03, lag=0.07)
-    return p
-
 
 def attack(t):
     """A pounce with both pincers: rear back, snap forward, settle."""
@@ -221,29 +100,6 @@ def ability(t):
     return p
 
 
-def hop(t):
-    """A happy hop: down, up with the legs tucked and a spin of the tail, a soft landing."""
-    p = {}
-    air = seq(t, [(0, 0), (0.18, -0.55), (0.3, 0.2), (0.48, 1), (0.66, 0.2), (0.76, -0.45), (1, 0)])
-    up = max(air, 0)
-    down = max(-air, 0)
-    p["root_at"] = (0, 0.21 * up - 0.08 * down, 0)
-    p["root_sc"] = (1 + 0.14 * down - 0.05 * up, 1 - 0.20 * down + 0.10 * up, 1 + 0.06 * down)
-    add(p, "root", rx=0.22 * (seq(t, [(0.2, 0), (0.4, 1), (0.6, -0.8), (0.75, 0)])))
-    add(p, "head", rx=0.22 * up - 0.14 * down, rz=s(t, 2) * 0.1)
-    add(p, "neck", rx=0.08 * up)
-    ear_pose(p, back=-0.2 * up + 0.5 * down + 0.2, out=0.26 * down)
-    for sd, sx in SIDES:
-        add(p, "fleg1." + sd, rx=-0.7 * up + 0.3 * down)
-        add(p, "fleg2." + sd, rx=-0.9 * up - 0.5 * down)
-        add(p, "hleg1." + sd, rx=0.7 * up - 0.3 * down)
-        add(p, "hleg2." + sd, rx=0.9 * up + 0.5 * down)
-        add(p, "arm." + sd, rx=0.8 * up, rz=sx * 0.6 * up)
-        add(p, "nip." + sd, ry=sx * up * 0.5)
-    tail_wave(p, t, 0.09, up=0.15 * up - 0.3 * down, roll=0.12, lag=0.05)
-    return p
-
-
 def curled(t, br):
     """Lying down: legs folded under, chin on the ground beside its forepaws, the tail laid round to its nose."""
     p = {}
@@ -291,24 +147,6 @@ def eat(t):
     return p
 
 
-def pet(t):
-    """Leans up into a hand, eyes shut: a slow push of the head, ears flat, the tail wagging."""
-    p = {}
-    lean = 0.5 + 0.5 * s(t, 1)
-    add(p, "neck", rx=0.10 + lean * 0.06, rz=lean * 0.10)
-    add(p, "head", rx=0.08 + lean * 0.08, rz=0.16 + lean * 0.2, ry=lean * 0.1)
-    ear_pose(p, back=0.6 - lean * 0.15, out=0.5)
-    add(p, "spine", rx=0.05)
-    p["root_at"] = (0, 0.012 * lean, 0)
-    for i in range(7):
-        k = 0.4 + 0.6 * i / 6
-        add(p, "tail%d" % (i + 1), ry=0.17 * k * math.sin(TAU * (3 * t - i * 0.06)), rx=-0.02)
-    for sd, sx in SIDES:
-        add(p, "hleg1." + sd, rx=0.07)
-        add(p, "fleg1." + sd, rx=-0.06)
-    return p
-
-
 def chop(t):
     """Hefts a hatchet on its tail and hacks it down at a trunk ahead, leaning its whole weight in."""
     p = {}
@@ -344,46 +182,13 @@ def mine(t):
     return p
 
 
-def carry(t):
-    """Trots with its load hugged in both pincers (home's own Held item, BokiRig.CARRY_AT), head up, leaning back."""
-    p = trot(t, 0.42, 0.010, -0.14, -0.05)
-    for sd, sx in SIDES:
-        add(p, "arm." + sd, rx=0.6, rz=-sx * 0.08)
-        add(p, "claw." + sd, rx=0.25, ry=sx * 0.25)
-    add(p, "neck", rx=0.1)
-    add(p, "head", rx=0.1)
-    return p
-
-
-def tend(t):
-    """Any other farm job: head down over the work, pincers snipping in turn, the tail ticking along."""
-    p = {}
-    bob = s(t, 2)
-    add(p, "spine", rx=-0.14)
-    add(p, "neck", rx=-0.20 + bob * 0.04)
-    add(p, "head", rx=LOOK_UP * 0.5 + bob * 0.06, ry=s(t, 1) * 0.12)
-    p["root_at"] = (0, -0.02 + bob * 0.006, 0)
-    for sd, sx in SIDES:
-        ph = 0.0 if sd == "L" else 0.5
-        add(p, "arm." + sd, rx=-0.15 + 0.35 * max(0.0, s(t, 2, ph)), ry=sx * 0.2)
-        add(p, "nip." + sd, ry=sx * (0.25 + 0.25 * s(t, 4, ph)))
-    ear_pose(p, back=0.16)
-    tail_wave(p, t * 2, 0.03, roll=0.05)
-    return p
-
-
-CLIPS = {
-    "idle": (2.8, True, idle),
-    "walk": (0.7, True, walk),
-    "run": (0.44, True, run),
+CLIPS = dict(SHARED)
+CLIPS.update({
     "attack": (0.8, False, attack),
     "ability": (1.1, False, ability),
-    "hop": (0.95, True, hop),
     "sleep": (3.4, True, sleep),
     "eat": (2.0, True, eat),
-    "pet": (2.2, True, pet),
     "chop": (1.1, True, chop),
     "mine": (1.0, True, mine),
-    "carry": (0.8, True, carry),
-    "tend": (1.3, True, tend),
-}
+})
+HIDE_AT = {"prop_berry": (0, -0.09, 0.40)}

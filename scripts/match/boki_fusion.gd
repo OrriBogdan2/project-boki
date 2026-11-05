@@ -8,6 +8,10 @@ const PATH := "res://art/kin/%s/%s_fusion.glb"
 const HIP_Y := 0.42        # m: the torso height the parts are modelled for; 3D Hunters carry theirs higher
 const SPECIES := {"venom": "cindle"}
 
+## The Fusion type a species wears.
+static func type_of(kin_id: String) -> String:
+	return String(SPECIES.find_key(kin_id)) if SPECIES.find_key(kin_id) != null else ""
+
 ## True when this form has Blender parts.
 static func has(form: Dictionary) -> bool:
 	var id := String(SPECIES.get(String(form.get("type", "")), ""))

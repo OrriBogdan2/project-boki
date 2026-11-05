@@ -15,15 +15,25 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import boki_sdf
 import face
+import importlib
+
 import boki_rig
-import vespyx
-import vespyx_anim
-import vespyx_paint as paint
 
 REPO = os.path.dirname(os.path.dirname(HERE))
 SPECIES = "cindle"
+# id -> (shapes module, paint module, skeleton and clips module)
+SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prismander", "prismander", "prismander_anim"),
+         "burrlet": ("mycroll", "mycroll", "mycroll_anim")}
+creature = paint = anim = None
 ATLAS_PX = 2048
 SCALE = 0.95             # the whole Boki, so its body sits near the other species' 0.8 m frame
+
+
+def use_species(species):
+    global SPECIES, creature, paint, anim, SCALE
+    SPECIES = species
+    creature, paint, anim = [importlib.import_module(m) for m in SPECS[species]]
+    SCALE = getattr(creature, "SCALE", SCALE)
 
 
 def bl(p):
@@ -66,27 +76,28 @@ def vertex_normals(v, t):
 class Piece:
     """One separately meshed part of the creature, in game axes."""
 
-    def __init__(self, name, shape, v, t, slot):
-        self.name, self.shape, self.v, self.t, self.slot = name, shape, v, t, slot
+    def __init__(self, name, shape, v, t, slot, prop=False):
+        self.name, self.shape, self.v, self.t, self.slot, self.prop = name, shape, v, t, slot, prop
 
 
 def mesh_pieces():
     out = []
-    for name, (shape, h, tris) in vespyx.parts().items():
+    for name, (shape, h, tris) in creature.parts().items():
         v, q = boki_sdf.mesh_shape(shape, h)
         v, t = decimated(v, q, tris)
         v = shape.project(v, steps=2)
-        out.append(Piece(name, shape, v, t, 1 if name == "sting" else 0))
+        slot = 2 if name in getattr(creature, "LIT_PIECES", ()) else 1 if name in creature.GLOW_PIECES else 0
+        out.append(Piece(name, shape, v, t, slot))
         print("piece", name, len(v), len(t))
-    for name, (shape, h, tris) in vespyx.prop_parts().items():
+    for name, (shape, h, tris) in creature.prop_parts().items():
         v, q = boki_sdf.mesh_shape(shape, h)
         v, t = decimated(v, q, tris)
-        out.append(Piece(name, shape, v, t, 0))
-    for pid, (_, _, look, tris, prims) in vespyx.grown_parts().items():
+        out.append(Piece(name, shape, v, t, 0, prop=True))
+    for pid, (_, _, look, tris, prims) in creature.grown_parts().items():
         shape = boki_sdf.Shape(prims)
         v, q = boki_sdf.mesh_shape(shape, 0.003)
         v, t = decimated(v, q, tris)
-        pc = Piece("gp_" + pid, shape, v, t, 1 if look == "glow" else 0)
+        pc = Piece("gp_" + pid, shape, v, t, 1 if look == "glow" else 0, prop=True)
         pc.look = look
         out.append(pc)
     return out
@@ -161,7 +172,7 @@ def occlusion(pieces, p, n):
     def scene(q):
         d = None
         for pc in pieces:
-            if pc.name.split("_")[0] in ("axe", "pick", "berry") or pc.name.startswith("gp_"):
+            if pc.prop:
                 continue
             e = pc.shape.eval(q)
             d = e if d is None else np.minimum(d, e)
@@ -181,26 +192,8 @@ def paint_texels(pieces, piece_id, p, n, vao):
     prim = {pr.name: pr for pr in body.shape.prims}
     for i, pc in enumerate(pieces):
         m = piece_id == i
-        if not m.any():
-            continue
-        q, nn = p[m], n[m]
-        if pc.name == "body":
-            c = paint.paint_body(q, nn, prim)
-        elif pc.name == "tail" or pc.name.startswith("claw") or pc.name == "collar":
-            ds = np.sort(np.stack([pr.d(q) for pr in pc.shape.prims], -1), axis=-1)
-            gap = ds[:, 1] - ds[:, 0] if pc.name == "tail" else np.full(len(q), 1.0)
-            c = paint.paint_shell(q, nn, gap)
-        elif pc.name.startswith("gp_"):
-            c = np.ones((len(q), 3)) if pc.look == "white" else paint.paint_shell(q, nn, np.full(len(q), 1.0))
-        elif pc.name == "sting":
-            c = np.tile(np.array([0.72, 1.0, 0.3]), (len(q), 1))
-        elif pc.name.endswith("handle"):
-            c = np.tile(paint.WOOD, (len(q), 1))
-        elif pc.name == "berry":
-            c = np.tile(paint.BERRY, (len(q), 1))
-        else:
-            c = np.tile(paint.STEEL, (len(q), 1))
-        col[m] = c
+        if m.any():
+            col[m] = paint.paint_piece(pc, p[m], n[m], prim)
     shadow = np.clip(vao, 0, 1)[:, None] ** 1.4
     tint = np.array([0.60, 0.50, 0.72])
     return col * (tint + (1 - tint) * shadow)
@@ -271,7 +264,7 @@ def eye_tex(px=256):
     q = np.stack([(x + 0.5) / px * 2 - 1, (y + 0.5) / px * 2 - 1], -1)
     r = np.hypot(q[..., 0], q[..., 1] * 1.04)
     white = np.array([1.0, 1.0, 1.0])
-    iris = paint.hexc("9de23a")
+    iris = paint.IRIS
     deep = paint.hexc("2f5a12")
     t = np.clip((r - 0.2) / 0.62, 0, 1)[..., None]
     col = deep * (1 - t) + iris * t
@@ -294,22 +287,24 @@ def rest_colors(obj, verts, pieces, piece_of):
 
 
 def build_geometry():
+    face.FACE.update(creature.FACE)
     pieces = mesh_pieces()
     verts, tris, piece_of = join(pieces)
     obj = mesh_object("Body", verts, tris)
     uv = uv_unwrap(obj)
     print("uv done", time.time())
     atlas = bake_atlas(pieces, verts, tris, piece_of, uv, ATLAS_PX)
-    img = image_from("cindle_atlas", atlas)
+    img = image_from(SPECIES + "_atlas", atlas)
     obj.data.materials.append(material("boki_coat", img))
     obj.data.materials.append(material("boki_glow", color=(0.45, 1.0, 0.1, 1.0)))
+    obj.data.materials.append(material("boki_lit", img))
     rest_colors(obj, verts, pieces, piece_of)
     slots = np.array([pieces[piece_of[t[0]]].slot for t in tris])
     obj.data.polygons.foreach_set("material_index", slots.tolist())
     # the face
     body = next(pc for pc in pieces if pc.name == "body")
-    fv, fuv, ft, keys = face.build_face(body.shape, vespyx.EYE_C, vespyx.EYE_R, vespyx.eye_frame)
-    ev, euv, et = face.eye_dome(vespyx.EYE_C, vespyx.EYE_R, vespyx.eye_frame)
+    fv, fuv, ft, keys = face.build_face(body.shape, creature.EYE_C, creature.EYE_R, creature.eye_frame)
+    ev, euv, et = face.eye_dome(creature.EYE_C, creature.EYE_R, creature.eye_frame)
     n = len(fv)
     all_v = np.concatenate([fv, ev])
     all_uv = np.concatenate([fuv, euv])
@@ -317,8 +312,8 @@ def build_geometry():
     uv_flat = all_uv[all_t].reshape(-1, 2)
     fslots = np.concatenate([np.zeros(len(ft), dtype=int), np.ones(len(et), dtype=int)])
     fobj = mesh_object("Face", all_v, all_t, uv_flat, fslots)
-    fimg = image_from("cindle_face", face.face_atlas())
-    eimg = image_from("cindle_eye", eye_tex())
+    fimg = image_from(SPECIES + "_face", face.face_atlas(paint))
+    eimg = image_from(SPECIES + "_eye", eye_tex())
     fobj.data.materials.append(material("boki_face", fimg))
     fobj.data.materials.append(material("boki_eye", eimg))
     fobj.shape_key_add(name="Basis", from_mix=False)
@@ -375,11 +370,15 @@ def main():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     bpy.ops.wm.read_factory_settings(use_empty=True)
     t0 = time.time()
+    species = next((a[10:] for a in argv if a.startswith("--species=")), "cindle")
+    use_species(species)
+    boki_rig.HIDE_AT.clear()
+    boki_rig.HIDE_AT.update(anim.HIDE_AT)
     pieces, body_obj, face_obj, piece_of, _, face_n = build_geometry()
     print("geometry", time.time() - t0)
-    arm = boki_rig.armature(vespyx_anim.BONES, bl)
+    arm = boki_rig.armature(anim.BONES, bl)
     boki_rig.skin(body_obj, face_obj, arm, pieces, piece_of, bl)
-    boki_rig.make_clips(arm, vespyx_anim.CLIPS)
+    boki_rig.make_clips(arm, anim.CLIPS)
     print("rig", time.time() - t0)
     for a in argv:
         if a.startswith("--blend="):
