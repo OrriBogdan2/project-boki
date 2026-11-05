@@ -21,7 +21,7 @@ def all_pieces():
     hr, chains = K.hair()
     tk, tips = K.tank()
     v, spots = K.vials()
-    ps = K.face_parts() + [K.mouth_back(), K.skull()] + K.fangs() + K.goggles() + [K.fin(1.0), K.fin(-1.0)] + hr + [tl] + fl + tk + K.jet_flames(tips) + K.gun() + K.hoses() + v
+    ps = K.face_parts() + [K.mouth_back(), K.teeth(), K.skull()] + K.fangs() + K.goggles() + [K.fin(1.0), K.fin(-1.0)] + hr + [tl] + fl + tk + K.jet_flames(tips) + K.gun() + K.hoses() + v
     for s in (1.0, -1.0):
         ps.append(K.lids(s))
         ps += K.brows(s)
@@ -31,7 +31,7 @@ def all_pieces():
 
 
 pieces = all_pieces()
-COL = {"skin-cinder-hot": (0.13, 0.12, 0.15, 1), "flame-hair": (1, 0.45, 0.05, 1), "flame-jet": (1, 0.6, 0.1, 1), "flame-liquid": (1, 0.5, 0.0, 1), "metal-cinder": (0.5, 0.25, 0.12, 1), "leather-cinder": (0.16, 0.08, 0.05, 1)}
+COL = {"skin-cinderhead-hot": (0.13, 0.12, 0.15, 1), "skin-cinder-hot": (0.13, 0.12, 0.15, 1), "flame-hair": (1, 0.45, 0.05, 1), "flame-jet": (1, 0.6, 0.1, 1), "flame-liquid": (1, 0.5, 0.0, 1), "metal-cinder": (0.5, 0.25, 0.12, 1), "leather-cinder": (0.16, 0.08, 0.05, 1)}
 mats = {}
 for k, c in COL.items():
     m = bpy.data.materials.new(k)

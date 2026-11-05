@@ -21,6 +21,7 @@ HIPS_Z = J("hips")[2]
 THIGH_Z = J("thigh.R")[2]
 THIGH_X = J("thigh.R")[0]
 ANKLE_Z = 0.09
+HEAD_MAT = "skin-cinderhead-hot"              # the head's own surface and texture (2x density)
 HS = 0.9                                      # head size
 C = np.array([0.0, 0.016, NECK_Z + 0.127])    # the head's centre
 EYE = np.array([0.042, 0.066, -0.0085])       # head-local; x mirrored
@@ -36,23 +37,24 @@ def hl(p):
 
 def mouth_z(x):
     """The lips' parting (the bottom of the upper teeth), head-local: the grin, corners high."""
-    return -0.0905 + 12.0 * np.asarray(x) ** 2
+    return -0.0745 + 5.5 * np.asarray(x) ** 2
 
 
 def head_sdf(p):
+    """To the head sheet: an oval face, a small pointed chin, a fine nose, a closed smile."""
     d = sd_ell(p, (0, -0.014, 0.030), (0.080, 0.094, 0.084))
-    d = smin(d, sd_ell(p, (0, 0.016, -0.030), (0.067, 0.072, 0.086)), 0.02)
-    d = smin(d, sd_ell(p, (0, 0.032, -0.096), (0.039, 0.046, 0.038)), 0.024)
+    d = smin(d, sd_ell(p, (0, 0.016, -0.030), (0.066, 0.072, 0.082)), 0.02)
+    d = smin(d, sd_ell(p, (0, 0.034, -0.086), (0.036, 0.044, 0.036)), 0.024)
     for s in (-1.0, 1.0):
-        d = smin(d, sd_cap(p, (s * 0.012, 0.083, 0.014), (s * 0.066, 0.056, 0.028), 0.0065), 0.014)     # the brow's bone
-        d = smin(d, sd_ell(p, (s * 0.052, 0.062, -0.036), (0.023, 0.022, 0.017)), 0.016)                # the grin's cheek
-        d = smax(d, -sd_ell(p, (s * 0.042, 0.098, -0.0085), (0.027, 0.018, 0.0135)), 0.008)             # the socket
-        d = smax(d, -sd_ell(p, (s * 0.047, 0.083, -0.071), (0.006, 0.012, 0.011)), 0.007)               # the grin's corner
-        d = smin(d, sd_ell(p, (s * 0.012, 0.097, -0.049), (0.0065, 0.007, 0.006)), 0.005)               # the nose's wing
-        d = smin(d, sd_cap(p, (s * 0.032, 0.078, -0.087), (s * 0.006, 0.090, -0.098), 0.007), 0.007)    # the lower lip
-    d = smin(d, sd_cap(p, (0, 0.082, 0.008), (0, 0.103, -0.040), 0.0062), 0.012)                        # the nose
-    d = smin(d, sd_ell(p, (0, 0.1045, -0.045), (0.0105, 0.0095, 0.008)), 0.006)
-    d = smax(d, -sd_ell(p, (0, 0.100, -0.081), (0.034, 0.0095, 0.0095)), 0.004)                         # the teeth sit back
+        d = smin(d, sd_cap(p, (s * 0.014, 0.082, 0.012), (s * 0.066, 0.056, 0.024), 0.0055), 0.014)     # the brow's bone
+        d = smin(d, sd_ell(p, (s * 0.052, 0.062, -0.034), (0.022, 0.021, 0.016)), 0.016)                # the cheek
+        d = smax(d, -sd_ell(p, (s * 0.042, 0.098, -0.0085), (0.027, 0.016, 0.012)), 0.008)              # the socket
+        d = smax(d, -sd_ell(p, (s * 0.0345, 0.092, -0.069), (0.004, 0.009, 0.006)), 0.005)              # the smile's corner
+        d = smin(d, sd_ell(p, (s * 0.0105, 0.094, -0.0555), (0.0055, 0.006, 0.005)), 0.005)             # the nose's wing
+    d = smin(d, sd_cap(p, (0, 0.080, 0.004), (0, 0.0985, -0.046), 0.0052), 0.012)                       # the nose
+    d = smin(d, sd_ell(p, (0, 0.0995, -0.0515), (0.0085, 0.008, 0.0068)), 0.006)
+    d = smin(d, sd_cap(p, (-0.02, 0.0885, -0.0725), (0.02, 0.0885, -0.0725), 0.0042), 0.007)            # the upper lip
+    d = smin(d, sd_cap(p, (-0.016, 0.0875, -0.0805), (0.016, 0.0875, -0.0805), 0.0052), 0.007)          # the lower lip
     return d
 
 
@@ -96,57 +98,66 @@ def half_width(z):
     return x
 
 
-FACE_XS = np.concatenate([np.linspace(-0.098, -0.072, 3), np.linspace(-0.062, 0.062, 15), np.linspace(0.072, 0.098, 3)])
+FACE_U = np.concatenate([np.linspace(-1.0, -0.8, 3), np.linspace(-0.68, 0.68, 21), np.linspace(0.8, 1.0, 3)])
 
 
 def face_parts():
-    """The front of the face: an upper patch and a jaw patch split along the lips, so the jaw bone opens a real mouth; past the
-    corners both share a line. The jaw patch's top row at the corners stays with the head."""
-    xs = FACE_XS
-    mz = mouth_z(np.minimum(np.abs(xs), 0.056))
-    ztop = np.linspace(0.104, 0.0, 6).tolist() + [-0.012, -0.024, -0.036]
-    ks = (0.28, 0.56, 0.8, 1.0)                  # (the last rows ease down onto the lips' line, which runs high at the corners)
-    U_rows = len(ztop) + len(ks)
-    ZU = np.zeros((U_rows, len(xs)))
+    """The front of the head, its own dense pass: an upper patch and a jaw patch split along the lips, so the jaw bone opens a real mouth; past the corners both share a
+    line. Columns stop at the head's real edge."""
+    U = FACE_U
+    x_est = np.abs(U) * 0.072
+    mz = mouth_z(np.minimum(x_est, 0.05))
+    ztop = [0.104, 0.08, 0.055, 0.032, 0.02, 0.008, -0.004, -0.016, -0.028, -0.04, -0.05, -0.058]
+    ks = (0.4, 0.75, 1.0)                        # (the last rows ease down onto the lips' line, which runs high at the corners)
+    ZU = np.zeros((len(ztop) + len(ks), len(U)))
     for i, z in enumerate(ztop):
         ZU[i] = z
     for i, k in enumerate(ks):
         ZU[len(ztop) + i] = ztop[-1] + (mz - ztop[-1]) * k
-    XU = xs[None, :] / xs[-1] * half_width(ZU[:, 10:11])
+    XU = U[None, :] * half_width(ZU)
     YU = np.maximum(ray_y(XU, ZU), 0.0)
-    up = Piece("face", "skin-cinder-hot", hl(np.stack([XU, YU, ZU], -1).reshape(-1, 3)), grid_faces(U_rows, len(xs))).rigid("head")
-    fr = np.array([0.0, 0.3, 0.62, 1.0])
-    ZL = np.stack([mz + (-0.134 - mz) * k for k in fr])
-    # (the top row keeps the upper patch's columns: the split's corners meet)
-    XL = np.tile(XU[-1], (len(ZL), 1))
-    XL[1:] = xs[None, :] / xs[-1] * half_width(ZL[1:, 10:11])
+    up = Piece("face", HEAD_MAT, hl(np.stack([XU, YU, ZU], -1).reshape(-1, 3)), grid_faces(ZU.shape[0], len(U))).rigid("head")
+    fr = np.array([0.0, 0.14, 0.3, 0.5, 0.74, 1.0])
+    ZL = np.stack([mz + (-0.126 - mz) * k for k in fr])
+    XL = U[None, :] * half_width(ZL)
+    XL[0] = XU[-1]
     YL = np.maximum(ray_y(XL, ZL), 0.0)
     v = hl(np.stack([XL, YL, ZL], -1).reshape(-1, 3))
-    lo = Piece("jaw", "skin-cinder-hot", v, grid_faces(len(ZL), len(xs)))
-    w = (smooth(0.058, 0.036, np.abs(XL)) * (1 - 0.0 * ZL)).ravel()
+    lo = Piece("jaw", HEAD_MAT, v, grid_faces(len(ZL), len(U)))
+    w = smooth(0.05, 0.03, np.abs(XL)).ravel()
     lo.w = {"jaw": w, "head": 1 - w}
     return [up, lo]
 
 
 def mouth_back():
     """What a parted jaw shows: dark, set back, on the head."""
-    xs = np.linspace(-0.038, 0.038, 4)
-    zs = np.linspace(-0.07, -0.104, 3)
+    xs = np.linspace(-0.034, 0.034, 4)
+    zs = np.linspace(-0.066, -0.1, 3)
     X, Z = np.meshgrid(xs, zs)
-    Y = np.full(X.shape, 0.058)
-    return Piece("mouthb", "skin-cinder-hot", hl(np.stack([X, Y, Z], -1).reshape(-1, 3)), grid_faces(3, 4)).rigid("head")
+    Y = np.full(X.shape, 0.06)
+    return Piece("mouthb", HEAD_MAT, hl(np.stack([X, Y, Z], -1).reshape(-1, 3)), grid_faces(3, 4)).rigid("head")
+
+
+def teeth():
+    """The upper teeth, behind the lips: only a parted jaw shows them."""
+    xs = np.linspace(-0.027, 0.027, 5)
+    Z0 = mouth_z(xs) + 0.0015
+    Z1 = Z0 - 0.0095
+    Y0 = ray_y(xs, Z0) - 0.0065
+    v = [(x, y, z) for x, y, z in zip(xs, Y0, Z0)] + [(x, y, z) for x, y, z in zip(xs, Y0 - 0.0015, Z1)]
+    return Piece("teeth", HEAD_MAT, hl(np.array(v)), grid_faces(2, 5)).rigid("head")
 
 
 def fangs():
     """Two small upper fangs, real geometry so they catch in profile."""
     out = []
     for s in (1.0, -1.0):
-        x = s * 0.0215
-        z0 = mouth_z(x) + 0.006
-        y = float(ray_y(np.array([x]), np.array([z0]))[0]) + 0.0015
-        base = [(x - 0.0042, y, z0), (x + 0.0042, y, z0), (x, y + 0.0035, z0), (x, y - 0.004, z0)]
-        tip = (x, y + 0.001, z0 - 0.0165)
-        out.append(Piece("fang" + ("R" if s > 0 else "L"), "skin-cinder-hot", hl(np.array(base + [tip])),
+        x = s * 0.0178
+        z0 = float(mouth_z(x)) + 0.0015
+        y = float(ray_y(np.array([x]), np.array([z0]))[0]) + 0.0008
+        base = [(x - 0.0031, y, z0), (x + 0.0031, y, z0), (x, y + 0.0024, z0), (x, y - 0.003, z0)]
+        tip = (x, y + 0.0008, z0 - 0.0125)
+        out.append(Piece("fang" + ("R" if s > 0 else "L"), HEAD_MAT, hl(np.array(base + [tip])),
                          [[1, 0, 4], [2, 1, 4], [0, 2, 4], [0, 3, 2], [3, 1, 2]]).rigid("head"))
     return out
 
@@ -175,20 +186,19 @@ def lids(s):
             el = 0.95 + 0.8 * i / (rows - 1)
             r = EYE_R * 1.15
             v.append(c + np.array([np.sin(az) * s * np.cos(el) * 1.34, np.cos(az) * np.cos(el), np.sin(el) * 0.82]) * r)
-    p = Piece("lid" + ("R" if s > 0 else "L"), "skin-cinder-hot", hl(v), grid_faces(rows, cols))
+    p = Piece("lid" + ("R" if s > 0 else "L"), HEAD_MAT, hl(v), grid_faces(rows, cols))
     p.rigid("lid." + ("R" if s > 0 else "L"))
     return p
 
 
 def brows(s):
-    """Thin, high, arched and sharp at the tail, lying over the plate's painted brow (painted out under it)."""
+    """The head sheet's glowing arched brows, lying on the plate's own, so a raise moves fire over fire."""
     side = "R" if s > 0 else "L"
-    pts = [(0.012, 0.094, 0.0035), (0.030, 0.088, 0.0145), (0.052, 0.074, 0.0215), (0.075, 0.046, 0.0125)]
-    q = np.array(pts) * [s, 1, 1] + [0, 0.0045, 0]
-    path = catmull(q, 6)
-    wd = 0.0062 * np.array([0.7, 1.0, 1.0, 0.8, 0.5, 0.06])
-    b = sweep("brow" + side, "leather-cinder", hl(path), [(-1, 0), (0, 0.3), (1, 0), (0, -0.3)], wd * HS,
-              side_hint=np.array([0, 0.5, 1.0]), room=0.0)
+    pts = [(0.0155, 0.0905, 0.0122), (0.03, 0.0865, 0.0255), (0.0447, 0.0765, 0.0304), (0.0678, 0.0545, 0.0287)]
+    q = np.array(pts) * [s, 1, 1] + [0, 0.002, 0]
+    path = catmull(q, 7)
+    wd = 0.0042 * np.array([0.8, 1.0, 1.0, 0.92, 0.78, 0.5, 0.06])
+    b = sweep("brow" + side, HEAD_MAT, hl(path), [(-1, 0), (0, 0.3), (1, 0), (0, -0.3)], wd * HS, side_hint=np.array([0, 0.5, 1.0]), room=0.0)
     return [b.rigid("brow." + side)]
 
 
@@ -199,7 +209,7 @@ def goggles():
     up = np.array([0, np.sin(tilt), np.cos(tilt)])
     for s in (1.0, -1.0):
         side = "R" if s > 0 else "L"
-        c = np.array([s * 0.036, 0.078, 0.083])
+        c = np.array([s * 0.04, 0.073, 0.094])
         d = norm(np.array([s * 0.26, 0.72, 0.62]))
         loc = lambda t, r: None
         k = norm(np.cross(d, (0, 0, 1)))
@@ -221,11 +231,11 @@ def goggles():
         lens = Piece("lens" + side, "metal-cinder", hl(v2), f2).rigid("head")
         lens.frame = (hl(c), k, l2, 0.0228 * HS, s)
         out.append(lens)
-    bridge = sweep("gogB", "metal-cinder", hl(catmull([(-0.011, 0.104, 0.096), (0, 0.108, 0.1), (0.011, 0.104, 0.096)], 3)), SEC6[::2] + SEC6[1::2][:0], np.full(3, 0.0065), side_hint=np.array([0, 0, 1.0]))
+    bridge = sweep("gogB", "metal-cinder", hl(catmull([(-0.013, 0.1, 0.108), (0, 0.104, 0.112), (0.013, 0.1, 0.108)], 3)), SEC6[::2] + SEC6[1::2][:0], np.full(3, 0.0065), side_hint=np.array([0, 0, 1.0]))
     out.append(bridge.rigid("head"))
     # the strap: round the skull from cup to cup, behind
     angs = np.radians(np.linspace(52, 308, 11))
-    z0 = 0.074
+    z0 = 0.08
     r = ray_out(angs, np.full(angs.shape, z0)) + 0.0045
     path = np.stack([np.sin(angs) * r, np.cos(angs) * r, z0 + 0.004 * np.cos(angs) - 0.012 * (1 - np.cos(angs))], -1)
     st = sweep("strap", "leather-cinder", hl(path), [(-1, 0.25), (1, 0.25), (1, -0.25), (-1, -0.25)], np.full(11, 0.0125),
@@ -235,39 +245,43 @@ def goggles():
 
 
 def fin(s):
-    """A fin ear: a webbed fan of four spines from behind the cheek, the long one up and back. Two sheets back to back."""
+    """A fin ear (head sheet): a tall point up and out, a scalloped web under it down to the jaw. Two sheets back to back."""
     side = "R" if s > 0 else "L"
-    root = np.array([s * 0.074, -0.004, -0.006])
-    tips = [np.array([s * 0.112, -0.086, 0.104]), np.array([s * 0.136, -0.098, 0.040]), np.array([s * 0.128, -0.082, -0.022]),
-            np.array([s * 0.100, -0.050, -0.060])]
-    roots = [root + [0, 0.012, 0.024], root + [0, 0.006, 0.010], root + [0, 0, -0.004], root + [0, 0, -0.020]]
-    rows = 3
+    tips = [np.array([s * 0.164, -0.05, 0.088]), np.array([s * 0.15, -0.062, 0.03]), np.array([s * 0.13, -0.056, -0.022]), np.array([s * 0.104, -0.038, -0.066])]
+    roots = [np.array([s * 0.074, -0.008, 0.026]), np.array([s * 0.077, -0.012, 0.008]), np.array([s * 0.077, -0.012, -0.012]), np.array([s * 0.072, -0.004, -0.034])]
+    rows = 4
     G = []
-    for i, (r0, t) in enumerate(zip(roots, tips)):
+    for r0, t in zip(roots, tips):
         for k in range(rows):
             u = k / (rows - 1)
-            sag = 0.0
-            G.append(r0 + (t - r0) * u + np.array([s * 0.0, 0.0, 0.0]) * sag)
-    G = np.array(G)
-    # the web between the spines' tips sags in
-    for i in range(0, len(tips) - 1):
-        pass
-    verts = hl(G)
+            G.append(r0 + (t - r0) * u + np.array([0, 0.012, 0]) * np.sin(u * np.pi))
+    # the web between: a column sagging in from the spines, for the scallop
+    sp = len(tips)
+    verts, kk = [], []
+    for i in range(sp):
+        for k in range(rows):
+            verts.append(G[i * rows + k])
+            kk.append(k / (rows - 1))
+        if i < sp - 1:
+            for k in range(rows):
+                u = k / (rows - 1)
+                m = (G[i * rows + k] + G[(i + 1) * rows + k]) / 2
+                r_m = (G[i * rows] + G[(i + 1) * rows]) / 2
+                verts.append(r_m + (m - r_m) * (1 - 0.24 * u * u))
+                kk.append(u * 0.8)
+    cols = 2 * sp - 1
+    verts = hl(np.array(verts))
     fa = []
-    for i in range(len(tips) - 1):
+    for i in range(cols - 1):
         for k in range(rows - 1):
             a = i * rows + k
-            q = [a, a + 1, a + rows + 1, a + rows]
-            fa.append(q)
-    nrm = norm(np.array([s, -0.15, 0.1]))
+            fa.append([a, a + 1, a + rows + 1, a + rows])
+    nrm = norm(np.array([s, -0.2, 0.1]))
     n = len(verts)
-    back = verts - nrm * 0.0022
-    allv = np.vstack([verts, back])
-    faces = fa + [[x + n for x in q[::-1]] for q in fa]
-    p = Piece("fin" + side, "skin-cinder-hot", allv, faces)
-    kk = np.tile(np.repeat(np.linspace(0, 1, rows)[None, :], len(tips), 0).ravel(), 2)
+    allv = np.vstack([verts, verts - nrm * 0.0022])
+    p = Piece("fin" + side, HEAD_MAT, allv, fa + [[x + n for x in q[::-1]] for q in fa])
+    kk = np.tile(np.array(kk), 2)
     p.w = {"head": 1 - smooth(0.0, 0.3, kk), "fin." + side: smooth(0.0, 0.3, kk)}
-    p.finT = kk
     return p
 
 
@@ -297,7 +311,38 @@ def strip(name, mat, pts, width, rows=6, hint=(0, 1, 0), seed=None, bright=0.0, 
     p.t = np.repeat(k, 3)
     p.path = path
     sd = (hash(name) % 997) / 997.0 if seed is None else seed
-    p.fire = (sd, bright)
+    p.fire = (sd, bright, 1.0)
+    return p
+
+
+def drape(name, pts, width, rows=9, cols=5, hint=(0, 1, 0), seed=0.5, bright=0.0, bulge=0.2, root=0.75, peak=0.45, outward=None):
+    """A broad curtain of fire: a curved sheet along a path, wide most of its way and tapering at its end. Its fire runs in long streaks, no strip's outline (vertex colour b: 0)."""
+    path = catmull(pts, rows)
+    k = np.linspace(0, 1, rows)
+    prof = np.minimum(1.0, root + k / peak * (1 - root)) * (1 - smooth(0.62, 1.0, k) * 0.72)
+    wd = width * prof
+    t, s, nn = frames(path, np.asarray(hint, float))
+    if outward is not None and np.dot(nn[rows // 2], outward) < 0:
+        nn = -nn
+    v, uv = [], []
+    for i in range(rows):
+        for c in range(cols):
+            u = c / (cols - 1)
+            a = (u - 0.5) * np.pi
+            v.append(path[i] + s[i] * np.sin(a) * wd[i] * 0.5 + nn[i] * np.cos(a) * wd[i] * bulge)
+            uv.append((u, k[i]))
+    f, fuv = [], []
+    for i in range(rows - 1):
+        for j in range(cols - 1):
+            a = i * cols + j
+            q = [a, a + 1, a + cols + 1, a + cols]
+            f.append(q)
+            fuv.append([uv[x] for x in q])
+    p = Piece(name, "flame-hair", v, f, fuv, room=0.0)
+    p.flame = True
+    p.t = np.repeat(k, cols)
+    p.path = path
+    p.fire = (seed, bright, 0.0)
     return p
 
 
@@ -313,57 +358,56 @@ def _on_skull(th, al):
 
 
 def hair():
-    """A blaze, not locks: a crown that stands up off the head and splays out so it reads from straight above, then big side falls
-    that pour back past the shoulders round the tank, and a short fall down the nape. Crown: rigid on the head (the shader licks it);
-    falls: on spring chains."""
+    """A soft mass of fire, as the sheets: a body swept back off the brow, long curtains pouring past the shoulders round the tank, a short fall at the nape; tall
+    smooth flames stand off the crown (the master sheet) so it reads from straight above. Crown: on the head (the shader licks it); curtains: on spring chains."""
     out = []
-    # the crown: from behind the goggles' strap, up and out. (theta from the nose, 90 is the top of the head from the side; alpha from straight up toward her right)
-    crown = [(-64, 70, 0.17, 0.09), (-44, 64, 0.22, 0.10), (-26, 62, 0.20, 0.085), (-9, 60, 0.27, 0.11), (9, 60, 0.25, 0.11), (26, 62, 0.19, 0.085), (44, 64, 0.21, 0.10), (64, 70, 0.16, 0.09),
-             (-52, 112, 0.2, 0.11), (-30, 108, 0.24, 0.1), (-10, 106, 0.27, 0.12), (10, 106, 0.25, 0.12), (30, 108, 0.23, 0.1), (52, 112, 0.19, 0.11), (0, 138, 0.2, 0.12)]
-    for i, (az, th0, ln, w) in enumerate(crown):
-        a = np.radians(az)
-        p0, d0 = _on_skull(np.radians(th0), a)
-        out_ = norm(d0 * 0.42 + np.array([0, -0.18, 1.0]))
-        side = norm(np.cross(out_, (0, 1, 0)) + 1e-6)
-        wob = np.sin(i * 2.1) * 0.05 + 0.012
-        pts = [p0 - out_ * 0.03, p0 + out_ * ln * 0.33 + side * wob, p0 + out_ * ln * 0.68 - side * wob * 1.3 + [0, -0.02, 0],
-               p0 + out_ * ln + side * wob * 0.5 + [0, -0.05, 0]]
-        hint = np.cross(d0, out_) if abs(az) > 30 else np.array([0, 1.0, 0.0])
-        out.append(strip("crown%d" % i, "flame-hair", pts, w * 1.15, rows=7, hint=hint + 1e-3, seed=i * 0.083, bright=0.25, root=0.8).rigid("head"))
-    # low flames round the sides and back of the head, filling under the crown
-    for i, (th0, az) in enumerate(((98, -92), (98, 92), (128, -108), (128, 108), (150, -140), (150, 140), (168, 0))):
-        a = np.radians(az)
-        p0, d0 = _on_skull(np.radians(th0), a)
-        o = norm(d0 + np.array([0, -0.35, 0.7]))
-        pts = [p0 - o * 0.015, p0 + o * 0.05, p0 + o * 0.11, p0 + o * 0.17]
-        out.append(strip("cap%d" % i, "flame-hair", pts, 0.14, rows=4, hint=d0 + 1e-3, seed=0.5 + i * 0.07, bright=0.1, root=0.95).rigid("head"))
     top = C[2] + 0.06
+    h = C[2]
+    # the body over the skull, brow to nape, three sheets side by side
+    for i, x in enumerate((-0.062, 0.0, 0.062)):
+        b_ = drape("crownb%d" % i, [(x * 1.25, 0.05, h + 0.098), (x * 1.5, 0.0, h + 0.15), (x * 1.6, -0.075, h + 0.155), (x * 1.6, -0.135, h + 0.1), (x * 1.5, -0.145, h + 0.02)], 0.15, rows=7, cols=4, hint=(0, 0, 1),
+                   seed=0.12 + 0.3 * i, bright=0.1, outward=np.array([0, 0, 1.0]), root=0.9, peak=0.3)
+        out.append(b_.rigid("head"))
+    # tall flames off the crown (master sheet), smooth S curves
+    crown = [(-48, 0.19, 0.115), (-24, 0.26, 0.135), (-4, 0.31, 0.15), (18, 0.27, 0.14), (42, 0.2, 0.12), (-30, 0.2, 0.12), (6, 0.24, 0.13), (32, 0.18, 0.115)]
+    for i, (az, ln, w) in enumerate(crown):
+        a = np.radians(az)
+        back = i >= 5
+        p0, d0 = _on_skull(np.radians(112 if back else 70), a)
+        o = norm(d0 * 0.34 + np.array([0, -0.16, 1.0]))
+        side = norm(np.cross(o, (0, 1, 0)) + 1e-6)
+        k_ = 0.05 * (1 if i % 2 else -1)
+        pts = [p0 - o * 0.03, p0 + o * ln * 0.3 + side * k_ * 0.6, p0 + o * ln * 0.62 - side * k_ * 0.3 + [0, -0.015, 0], p0 + o * ln * 0.84 - side * k_ + [0, -0.03, 0], p0 + o * ln + side * k_ * 0.2 + [0, -0.05, 0]]
+        s_ = strip("crown%d" % i, "flame-hair", pts, w * 1.2, rows=9, hint=np.array([0, 1.0, 0.0]) + np.cross(d0, o) * (abs(az) / 60.0) + 1e-3, seed=i * 0.083, bright=0.2, root=0.85, tent=0.3)
+        out.append(s_.rigid("head"))
     chains = {}
-
-    def fall(name, group, pts, w, seed, hint, bright=0.15):
-        s_ = strip(name, "flame-hair", pts, w, rows=7, hint=hint, seed=seed, bright=bright, peak=0.42, root=0.72)
-        s_.group = group
-        out.append(s_)
-        return s_
-    # the side falls: past the fin, over the shoulder, out and back round the tank
+    # the curtains: past the fin, over the shoulder, out and back round the tank; a second layer behind it
     for sg, g in ((1.0, "r"), (-1.0, "l")):
-        h = np.array([0.0, 0.25, 1.0])
-        a = fall("sideA" + g, g, [(sg * .07, -.03, top + .02), (sg * .135, -.08, top - .1), (sg * .155, -.10, top - .25), (sg * .21, -.12, top - .4),
-                                  (sg * .225, -.14, top - .5), (sg * .27, -.17, top - .6)], 0.19, 0.11 + sg * .03, h)
-        b = fall("sideB" + g, g, [(sg * .06, -.07, top + .03), (sg * .15, -.13, top - .08), (sg * .185, -.16, top - .24), (sg * .235, -.17, top - .36),
-                                  (sg * .28, -.19, top - .45), (sg * .31, -.22, top - .52)], 0.18, 0.37 + sg * .04, h)
-        c = fall("sideC" + g, g, [(sg * .05, -.09, top + .02), (sg * .11, -.14, top - .12), (sg * .13, -.15, top - .3), (sg * .16, -.145, top - .46),
-                                  (sg * .17, -.15, top - .6), (sg * .2, -.16, top - .7)], 0.2, 0.62 + sg * .02, h)
-        d = fall("sideD" + g, g, [(sg * .082, .03, top - .035), (sg * .112, .012, top - .13), (sg * .118, .03, top - .24), (sg * .135, .02, top - .34),
-                                  (sg * .13, .035, top - .42)], 0.085, 0.84 + sg * .02, np.array([0.3 * sg, 1.0, 0.2]), bright=0.3)
-        # (the bones run down the middle one)
-        chains[g] = np.array([c.path[int(round(x))] for x in np.linspace(1, 6, HAIR_BONES[g] + 1)])
-    # the nape
-    for i, x in enumerate((-.055, .0, .055)):
-        s_ = fall("nape%d" % i, "c", [(x * .7, -.09, top + .01), (x, -.135, top - .1), (x * 1.3, -.14, top - .24), (x * 1.2, -.135, top - .38), (x * 1.5, -.13, top - .52)],
-                  0.13, 0.2 + i * 0.27, np.array([0, 1.0, 0.1]))
-        if i == 1:
-            chains["c"] = np.array([s_.path[int(round(x_))] for x_ in np.linspace(1, 6, HAIR_BONES["c"] + 1)])
+        rad = norm(np.array([sg, -0.6, 0.0]))
+        a_ = drape("sideA" + g, [(sg * .066, -.0, top + .03), (sg * .112, -.05, top - .08), (sg * .15, -.085, top - .22), (sg * .185, -.1, top - .38), (sg * .205, -.125, top - .54), (sg * .245, -.14, top - .68), (sg * .275, -.165, top - .8)],
+                   0.25, rows=10, hint=rad, seed=0.11 + sg * .03, bright=0.12, outward=rad)
+        out.append(a_)
+        a_.group = g
+        rad2 = norm(np.array([sg, -1.2, 0.0]))
+        b_ = drape("sideB" + g, [(sg * .045, -.085, top + .03), (sg * .095, -.13, top - .1), (sg * .135, -.15, top - .26), (sg * .185, -.165, top - .42), (sg * .235, -.185, top - .56), (sg * .285, -.215, top - .66)],
+                   0.23, rows=9, hint=rad2, seed=0.47 + sg * .04, bright=0.0, outward=rad2)
+        out.append(b_)
+        b_.group = g
+        # loose tongues off the curtains' ends and one framing the face
+        for j, (x0, y0, z0, wd_) in enumerate(((.25, -.15, -.5, .1), (.205, -.12, -.66, .09), (.3, -.2, -.42, .085))):
+            t_ = strip("sidetg%s%d" % (g, j), "flame-hair", [(sg * x0, y0, top + z0), (sg * (x0 + .03), y0 - .01, top + z0 - .1), (sg * (x0 + .015), y0 - .02, top + z0 - .2), (sg * (x0 + .05), y0 - .03, top + z0 - .3)],
+                       wd_, rows=6, hint=rad, seed=0.21 * j + 0.4, bright=0.1, root=0.8)
+            t_.group = g
+            out.append(t_)
+        d_ = strip("sideD" + g, "flame-hair", [(sg * .074, .03, top - .025), (sg * .096, .014, top - .12), (sg * .108, .028, top - .24), (sg * .112, .018, top - .36), (sg * .126, .03, top - .46)], 0.08, rows=7,
+                   hint=np.array([0.3 * sg, 1.0, 0.2]), seed=0.84 + sg * .02, bright=0.2)
+        d_.group = g
+        out.append(d_)
+        chains[g] = np.array([a_.path[int(round(x))] for x in np.linspace(2, 9, HAIR_BONES[g] + 1)])
+    nape = drape("nape", [(0, -.1, top + .0), (0, -.13, top - .1), (0, -.135, top - .22), (.012, -.125, top - .34), (0, -.12, top - .42)], 0.2, rows=7, hint=(0, -1.0, 0), seed=0.33, outward=np.array([0, -1.0, 0]))
+    nape.group = "c"
+    out.append(nape)
+    chains["c"] = np.array([nape.path[int(round(x))] for x in np.linspace(1, 6, HAIR_BONES["c"] + 1)])
     return out, chains
 
 

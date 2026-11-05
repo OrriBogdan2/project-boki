@@ -7,8 +7,8 @@ import cinder_pieces as K
 HOT = np.array([1.0, 0.56, 0.12])        # keyed fully hot by hero_toon's glow_key; she keeps her painted colours (no model_glow core), so the iris stays
 HOT_RIM = np.array([0.86, 0.3, 0.07])    # keyed partly
 SKIN = [hexc("#2c2228"), hexc("#3f323a"), hexc("#54444e"), hexc("#6a5862"), hexc("#826e7a")]
-COPPER = [hexc("#4a2210"), hexc("#7c3f1c"), hexc("#ad6230"), hexc("#d68a4c"), hexc("#f6c08c")]
-BRASS = [hexc("#4a3414"), hexc("#7e5e24"), hexc("#b08a3c"), hexc("#d8b45c"), hexc("#f6e0a0")]
+COPPER = [hexc("#7a3a18"), hexc("#a85a28"), hexc("#d07c3c"), hexc("#ee9e5c"), hexc("#ffd0a0")]
+BRASS = [hexc("#6e5020"), hexc("#a07c30"), hexc("#c8a048"), hexc("#e6c66c"), hexc("#fbe8ac")]
 STEEL = [hexc("#35343a"), hexc("#55535a"), hexc("#7a7880"), hexc("#a09ea6"), hexc("#cfced4")]
 LEATHER = [hexc("#1c0f0a"), hexc("#351d12"), hexc("#50301d"), hexc("#6d452b"), hexc("#8d6141")]
 RUBBER = [hexc("#170d0c"), hexc("#2b1612"), hexc("#422219"), hexc("#5a3122"), hexc("#74432e")]
@@ -108,7 +108,10 @@ def metal(rampc, p, n, ao, grime=0.25, sheen=0.25):
 
 
 def copper(p, n, ao):
-    c = metal(COPPER, p, n, ao, 0.45, 0.32)
+    c = metal(COPPER, p, n, np.maximum(ao, 0.7), 0.3, 0.42)
+    # a broad painted shine, as the sheet's beaten copper
+    d = np.clip(np.sum(n * norm(np.array([-0.3, -0.5, 0.8])), -1), 0, 1)
+    c = c + (d ** 12)[..., None] * np.array([0.5, 0.36, 0.26])
     # a green-blue bloom low in the seams
     v = smooth(0.62, 0.8, fbm(p * 19 + 3.0)) * (1 - np.clip(ao, 0, 1)) * 2.0
     return mix(c, hexc("#4e7a6a"), np.clip(v, 0, 0.5))
@@ -153,7 +156,7 @@ def lens(p, frame):
     d = p - c
     x, y = d @ k / r, d @ l2 / r
     q = np.sqrt(x * x + y * y)
-    col = mix(hexc("#1f2a30"), hexc("#7a5a3c"), smooth(0.2, 1.0, y * 0.7 + 0.45))
+    col = mix(hexc("#8a4a1e"), hexc("#d89050"), smooth(0.2, 1.0, y * 0.7 + 0.45))
     glint = np.exp(-((x * 0.8 + y - 0.35) / 0.12) ** 2) * 0.75 + np.exp(-((x * 0.8 + y + 0.1) / 0.05) ** 2) * 0.4
     col = col + glint[..., None] * 0.55
     crack = np.minimum(np.abs(x + 0.5 * y + 0.2 * s), np.abs(y - 0.65 * x * s - 0.25))
@@ -184,26 +187,30 @@ def gauge(p, gc, gd, rad=0.046):
     return c
 
 
-def face(plate, p, n, ao):
-    """The plate: a straight-on painted head (from the owner's sheet and portrait, Meshy image edit), projected flat on the sculpt. Its eyes,
-    cracks and the iris go to the hot key; its painted brows are out, the brow geometry moves over clean skin. Past its edge: plain skin."""
+def head_skin(plates, p, n):
+    """The head sheet's plates (Meshy image edits of it, front and profile) projected on the head: the front's eyes and cracks, the profile round the side."""
+    f, sd = plates
     q = (p - K.C) / K.HS
-    img, clean, H = plate
-    sc = 895.0 / 0.25
-    px = (510.0 + q[..., 0] * sc)
-    py = (40.0 + (0.115 - q[..., 2]) * sc)
-    ix = np.clip(px, 0, H - 1).astype(int)
-    iy = np.clip(py, 0, H - 1).astype(int)
-    c = img[iy, ix]
-    # the lit relief of the sculpt over the flat plate
-    c0 = clean[iy, ix]
-    lum = c.mean(-1)
-    r_ = np.sqrt(((px - 510) / 300.0) ** 2 + ((py - 487) / 442.0) ** 2)
-    sh = 0.72 + 0.42 * smooth(-0.4, 0.8, n[..., 2] * 0.45 + n[..., 1] * 0.75)
-    out = c * (sh * 0.94)[..., None] * np.array([1.14, 0.93, 1.0])
-    # the cracks and the eyes keep the plate's own fire, a little lifted
+    H = f.shape[0]
+    fx = np.clip(512.0 + q[..., 0] * 2975.0, 0, H - 1).astype(int)
+    fy = np.clip(517.0 + (-0.0085 - q[..., 2]) * 2975.0, 0, H - 1).astype(int)
+    sx = np.clip(146.0 + (0.105 - q[..., 1]) * 2918.0, 0, H - 1).astype(int)
+    sy = np.clip(466.0 + (-0.0085 - q[..., 2]) * 2918.0, 0, H - 1).astype(int)
+    k = smooth(0.52, 0.8, np.abs(n[..., 0]))
+    return mix(f[fy, fx], sd[sy, sx], k)
+
+
+def face(plates, p, n, ao):
+    c = head_skin(plates, p, n)
+    sh = 0.86 + 0.26 * smooth(-0.4, 0.8, n[..., 2] * 0.45 + n[..., 1] * 0.75)
+    out = c * sh[..., None] * np.array([1.05, 0.99, 1.0])
     hot = smooth(0.14, 0.3, c[..., 0] - c[..., 2]) * smooth(0.34, 0.5, c[..., 0])
-    out = mix(out, np.minimum(c * 1.18, 1.0), hot)
-    edge = smooth(0.84, 0.97, r_)
-    s = skin(p, n, ao)
-    return mix(out, s, edge)
+    return mix(out, np.minimum(c * 1.12, 1.0), hot)
+
+
+def fin_new(p, n, ao, rootp):
+    """Dark web, an ember flush toward its scallops, thin lit spines."""
+    d = np.linalg.norm(p - rootp, axis=-1)
+    t = smooth(0.05, 0.13, d)
+    c = mix(ramp(lit(n, ao) * 0.72, SKIN), hexc("#8a2c12"), t * 0.75)
+    return mix(c, hexc("#ff6a1c"), smooth(0.115, 0.15, d) * 0.8)

@@ -24,10 +24,12 @@ uniform vec4 c_core : source_color = vec4(1.0, 0.95, 0.62, 1.0);
 
 varying float seed;
 varying float bright;
+varying float strip;
 
 void vertex() {
 	seed = COLOR.r;
 	bright = COLOR.g;
+	strip = COLOR.b;
 	if (!liquid) {
 		float v = UV.y;
 		float t = TIME * 3.1 + seed * 40.0;
@@ -79,14 +81,16 @@ void fragment() {
 		vec2 p = vec2(u * scale_u + seed * 17.0, UV.y * scale_v - t + seed * 9.0);
 		float n = fbm3(p);
 		float n2 = vnoise(p * 2.3 + vec2(3.1, -t * 0.7));
-		float edge = 1.0 - pow(clamp(abs(u - 0.5) * 2.0, 0.0, 1.0), 1.7);
+		// (a strip burns to its edges; a curtain, colour b 0, stays whole to its sides)
+		float edge = 1.0 - pow(clamp(abs(u - 0.5) * 2.0, 0.0, 1.0), mix(7.0, 1.7, strip));
 		float fall = 1.0 - pow(UV.y, 1.9);
 		float h = edge * fall + (n - 0.5) * lick * (0.35 + UV.y) + (n2 - 0.5) * lick * 0.5 * (0.2 + UV.y);
 		if (h < 0.1 && UV.y > 0.04) {
 			discard;
 		}
-		float streak = vnoise(vec2(u * 7.0 + seed * 5.0, UV.y * 1.6 - t * 0.55)) * 0.6 + vnoise(vec2(u * 15.0 - seed * 3.0, UV.y * 2.6 - t * 0.8)) * 0.4;
-		h = h * 0.55 + 0.12 + (streak - 0.3) * 0.62;
+		// long soft streaks climbing the fire, no hard band following the mesh
+		float streak = vnoise(vec2(u * 5.0 + seed * 5.0, UV.y * 1.3 - t * 0.5)) * 0.6 + vnoise(vec2(u * 11.0 - seed * 3.0, UV.y * 2.2 - t * 0.7)) * 0.4;
+		h = mix(h * 0.55, 0.3, 0.45) + 0.1 + (streak - 0.3) * 0.7;
 		// (a strip is mostly saturated fire; the pale core is a thin heart, or it reads as a hole against a bright sky)
 		c = ramp(clamp(h * 1.0 + bright * 0.16 - 0.04, 0.0, 1.0));
 	}

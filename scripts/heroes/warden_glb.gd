@@ -965,6 +965,8 @@ class Springs:
 	const PULL_TIP := 0.07      # and at the tip
 	const DAMP := 0.84          # the velocity kept per 1/60 s
 	const WIND := 0.09          # m: how far a scarf tail's tip ripples at rest
+	const FLOOR_CHAIN := PREFIX + "scarftail_tail"     # a tail lies on the ground, not through it (the feet's height)
+	const FLOOR_UP := 0.04      # m its joints stay over the model's origin
 	const FOLD := 0.75          # radians a folded wing tips back about the side axis through its root
 	const TUCK := 0.8           # and turns in behind the back about the vertical
 	const FLARE := 1.15         # radians a flared wing swings out to her side about the front-back axis
@@ -995,7 +997,8 @@ class Springs:
 				chains.append({"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array(),
 					"hang": skel.get_bone_name(bi).begins_with(PREFIX + "hang"),
 					"wing": skel.get_bone_name(bi).begins_with(PREFIX + "wing"),
-					"wind": skel.get_bone_name(bi).begins_with(PREFIX + "scarftail")})
+					"wind": skel.get_bone_name(bi).begins_with(PREFIX + "scarftail"),
+					"floor": skel.get_bone_name(bi).begins_with(FLOOR_CHAIN)})
 
 	func _spring(bi: int) -> bool:
 		return skel.get_bone_name(bi).begins_with(PREFIX)
@@ -1062,6 +1065,8 @@ class Springs:
 				var d := pts[i] - pts[i - 1]
 				var ln := want[i].distance_to(want[i - 1])
 				pts[i] = pts[i - 1] + d.normalized() * ln if d.length() > 1e-5 else want[i]
+				if ch["floor"]:
+					pts[i].y = maxf(pts[i].y, xf.origin.y + FLOOR_UP)
 			ch["pts"] = pts
 			ch["prev"] = prev
 			for j in n - 1:

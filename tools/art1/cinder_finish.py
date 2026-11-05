@@ -13,14 +13,21 @@ from meshkit import smooth
 import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
-SRC, RIG, OUT, PLATE = a[0], a[1], a[2], a[3]
+SRC, RIG, OUT, PLATE, PLATE_S = a[0], a[1], a[2], a[3], a[4]
 ATLAS = 2048
-MATS = ["skin-cinder-hot", "leather-cinder", "metal-cinder", "flame-hair", "flame-jet", "flame-liquid"]
+HEADT = 1024                         # the head's own texture: about 2x the body's density on the face
+MATS = ["skin-cinder-hot", "skin-cinderhead-hot", "leather-cinder", "metal-cinder", "flame-hair", "flame-jet", "flame-liquid"]
 SCALE = {"ggface": 2.2, "gface": 1.6, "face": 3.6, "jaw": 3.6, "lid": 2.4, "finger": 1.7, "thumb": 1.7, "palm": 1.8, "skull": 0.5, "tail": 0.9, "gface": 1.6, "lens": 1.6, "fin": 1.3,
          "fang": 2.0, "mouthb": 0.4, "rivet": 0.5, "Low": 1.0}
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
+# (decimation leaves stray flipped faces; the game culls them, and you see through her: the red sternum facet)
+bm0 = bmesh.new()
+bm0.from_mesh(low.data)
+bmesh.ops.recalc_face_normals(bm0, faces=bm0.faces)
+bm0.to_mesh(low.data)
+bm0.free()
 
 tl = K.tail()
 tl_fl = K.tail_flames(tl)
@@ -30,7 +37,7 @@ tail_pts = [tuple(np.interp(t_, np.linspace(0, 1, len(tl.path)), tl.path[:, i]) 
 K.weight_tail(tl, tl_fl, tail_pts)
 tk, tips = K.tank()
 vl, spots = K.vials()
-pieces = K.face_parts() + [K.mouth_back(), K.skull()] + K.fangs() + K.goggles() + [K.fin(1.0), K.fin(-1.0)] + locks + [tl] + tl_fl + tk + K.jet_flames(tips) + K.gun() + K.hoses() + vl
+pieces = K.face_parts() + [K.mouth_back(), K.teeth(), K.skull()] + K.fangs() + K.goggles() + [K.fin(1.0), K.fin(-1.0)] + locks + [tl] + tl_fl + tk + K.jet_flames(tips) + K.gun() + K.hoses() + vl
 for s in (1.0, -1.0):
     pieces.append(K.lids(s))
     pieces += K.brows(s)
@@ -55,7 +62,7 @@ for p_ in pieces:
 
 # (the ink shell folds on so small a face: no room on it)
 for p_ in pieces:
-    if p_.name in ("face", "jaw", "mouthb", "skull") or p_.name.startswith(("lid", "brow", "fang", "fin", "lens")):
+    if p_.name in ("face", "jaw", "mouthb", "skull", "teeth") or p_.name.startswith(("lid", "brow", "fang", "fin", "lens")):
         p_.room = 0.0
     elif p_.name.startswith(("finger", "thumb")):
         p_.room = 0.3
@@ -86,8 +93,8 @@ for pc in pieces:
     for i in range(len(pc.v)):
         vw.append({b: float(arr[i]) for b, arr in pc.w.items() if arr[i] > 0.005})
     rooms.extend([pc.room] * len(pc.v))
-    fc_ = getattr(pc, "fire", (1.0, 1.0))
-    colors.extend([(fc_[0], fc_[1], 1.0)] * len(pc.v))
+    fc_ = getattr(pc, "fire", (1.0, 1.0, 1.0))
+    colors.extend([(fc_[0], fc_[1], fc_[2] if len(fc_) > 2 else 1.0)] * len(pc.v))
     for j, f in enumerate(pc.f):
         faces_v.append([base + i for i in f])
         faces_pid.append(pid)
@@ -197,13 +204,15 @@ for i in uniq:
     for l in bm.faces[i].loops:
         l[uvl].uv = l[uvl].uv * s
 bmesh.update_edit_mesh(me)
-bpy.ops.mesh.select_all(action="DESELECT")
-bm = bmesh.from_edit_mesh(me)
-bm.faces.ensure_lookup_table()
-for i in uniq:
-    bm.faces[i].select = True
-bmesh.update_edit_mesh(me)
-bpy.ops.uv.pack_islands(rotate=True, scale=True, margin_method="FRACTION", margin=0.003, shape_method="CONCAVE")
+is_head = {n: PIECE_MAT.get(n) == K.HEAD_MAT for n in names}
+for grp, mg in ((False, 0.003), (True, 0.006)):       # the body's atlas and the head's own texture each fill 0..1
+    bpy.ops.mesh.select_all(action="DESELECT")
+    bm = bmesh.from_edit_mesh(me)
+    bm.faces.ensure_lookup_table()
+    for i in uniq:
+        bm.faces[i].select = is_head[names[faces_pid[i]]] == grp
+    bmesh.update_edit_mesh(me)
+    bpy.ops.uv.pack_islands(rotate=True, scale=True, margin_method="FRACTION", margin=mg, shape_method="CONCAVE")
 bpy.ops.object.mode_set(mode="OBJECT")
 uvd = me.uv_layers["UV"].data
 loop_uv = np.zeros(len(me.loops) * 2)
@@ -224,36 +233,43 @@ vco = np.array(verts)
 vn = np.zeros(len(me.vertices) * 3)
 me.vertices.foreach_get("normal", vn)
 vn = vn.reshape(-1, 3)
-PID = -np.ones((ATLAS, ATLAS), np.int32)
-POS = np.zeros((ATLAS, ATLAS, 3), np.float32)
-NOR = np.zeros((ATLAS, ATLAS, 3), np.float32)
-for t in me.loop_triangles:
-    n = names[faces_pid[t.polygon_index]]
-    if is_fl[n]:
-        continue
-    uvp = loop_uv[list(t.loops)] * ATLAS - 0.5
-    x0, y0 = np.floor(uvp.min(0)).astype(int) - 1
-    x1, y1 = np.ceil(uvp.max(0)).astype(int) + 1
-    x0, y0, x1, y1 = max(x0, 0), max(y0, 0), min(x1, ATLAS - 1), min(y1, ATLAS - 1)
-    if x1 < x0 or y1 < y0:
-        continue
-    ys, xs = np.mgrid[y0:y1 + 1, x0:x1 + 1]
-    a_, b_, c_ = uvp
-    den = (b_[1] - c_[1]) * (a_[0] - c_[0]) + (c_[0] - b_[0]) * (a_[1] - c_[1])
-    if abs(den) < 1e-9:
-        continue
-    l0 = ((b_[1] - c_[1]) * (xs - c_[0]) + (c_[0] - b_[0]) * (ys - c_[1])) / den
-    l1 = ((c_[1] - a_[1]) * (xs - c_[0]) + (a_[0] - c_[0]) * (ys - c_[1])) / den
-    l2 = 1 - l0 - l1
-    m = (l0 >= -0.04) & (l1 >= -0.04) & (l2 >= -0.04)
-    if not m.any():
-        continue
-    tv = list(t.vertices)
-    w = np.stack([l0[m], l1[m], l2[m]], -1)
-    POS[ys[m], xs[m]] = w @ vco[tv]
-    NOR[ys[m], xs[m]] = w @ vn[tv]
-    PID[ys[m], xs[m]] = faces_pid[t.polygon_index]
-NOR = M.norm(NOR)
+
+
+def texel_maps(size, head):
+    PID_ = -np.ones((size, size), np.int32)
+    POS_ = np.zeros((size, size, 3), np.float32)
+    NOR_ = np.zeros((size, size, 3), np.float32)
+    for t in me.loop_triangles:
+        n = names[faces_pid[t.polygon_index]]
+        if is_fl[n] or is_head[n] != head:
+            continue
+        uvp = loop_uv[list(t.loops)] * size - 0.5
+        x0, y0 = np.floor(uvp.min(0)).astype(int) - 1
+        x1, y1 = np.ceil(uvp.max(0)).astype(int) + 1
+        x0, y0, x1, y1 = max(x0, 0), max(y0, 0), min(x1, size - 1), min(y1, size - 1)
+        if x1 < x0 or y1 < y0:
+            continue
+        ys, xs = np.mgrid[y0:y1 + 1, x0:x1 + 1]
+        a_, b_, c_ = uvp
+        den = (b_[1] - c_[1]) * (a_[0] - c_[0]) + (c_[0] - b_[0]) * (a_[1] - c_[1])
+        if abs(den) < 1e-9:
+            continue
+        l0 = ((b_[1] - c_[1]) * (xs - c_[0]) + (c_[0] - b_[0]) * (ys - c_[1])) / den
+        l1 = ((c_[1] - a_[1]) * (xs - c_[0]) + (a_[0] - c_[0]) * (ys - c_[1])) / den
+        l2 = 1 - l0 - l1
+        m = (l0 >= -0.04) & (l1 >= -0.04) & (l2 >= -0.04)
+        if not m.any():
+            continue
+        tv = list(t.vertices)
+        w = np.stack([l0[m], l1[m], l2[m]], -1)
+        POS_[ys[m], xs[m]] = w @ vco[tv]
+        NOR_[ys[m], xs[m]] = w @ vn[tv]
+        PID_[ys[m], xs[m]] = faces_pid[t.polygon_index]
+    return PID_, POS_, M.norm(NOR_)
+
+
+PID, POS, NOR = texel_maps(ATLAS, False)
+PID2, POS2, NOR2 = texel_maps(HEADT, True)
 print("texels", (PID >= 0).sum(), "of", ATLAS * ATLAS)
 
 # ---- ambient occlusion, baked by Cycles
@@ -273,7 +289,12 @@ bpy.ops.object.select_all(action="DESELECT")
 ob.select_set(True)
 bpy.context.view_layer.objects.active = ob
 bpy.context.view_layer.update()
+head_loops = np.array([l for p in me.polygons if is_head[names[faces_pid[p.index]]] for l in p.loop_indices], np.int64)
+uv_bake = loop_uv.copy()
+uv_bake[head_loops, 0] += 1.0                     # (out of the 0..1 tile: only the body's islands bake into this image)
+uvd.foreach_set("uv", uv_bake.ravel())
 bpy.ops.object.bake(type="AO", use_clear=True, margin=6)
+uvd.foreach_set("uv", loop_uv.ravel())
 AO = np.array(ao_img.pixels[:], dtype=np.float32).reshape(ATLAS, ATLAS, 4)[..., 0]
 
 
@@ -392,33 +413,8 @@ def paint(pred, fn):
 
 
 import imgio_blender as IB
-plate = IB.load(PLATE)
-H = plate.shape[0]
-lum = plate.mean(-1)
-hotm = (plate[..., 0] - plate[..., 2]) > 0.16
-# brows out: dark marks in their band, filled from the skin round them
-skinm = ((lum > 0.27) & ~hotm).astype(np.float32)
-fill = blur(plate[..., 0], skinm, 26)[..., None] * [1, 0, 0] + blur(plate[..., 1], skinm, 26)[..., None] * [0, 1, 0] + blur(plate[..., 2], skinm, 26)[..., None] * [0, 0, 1]
-yy, xx = np.mgrid[0:H, 0:H]
-dx = np.abs(xx - 510.0)
-browy = 348 + 0.0026 * (dx - 165) ** 2 + 0.28 * np.maximum(165 - dx, 0)
-band = (np.abs(yy - browy) < 42) & (dx > 38) & (dx < 300) & (yy < 452)
-bm_ = smooth(0.34, 0.27, lum) * band
-bm_ = blur(bm_.astype(np.float32), np.ones_like(lum, np.float32), 4) * 1.5
-clean = plate * (1 - np.clip(bm_, 0, 1)[..., None]) + fill * np.clip(bm_, 0, 1)[..., None]
-# the plate's nose is drawn very dark for a head this small: most of the way to the skin round it
-nd = smooth(95.0, 40.0, np.abs(xx - 510.0)) * smooth(95.0, 45.0, np.abs(yy - 612.0))
-clean = clean * (1 - 0.55 * nd[..., None]) + fill * 0.55 * nd[..., None]
-PL = (clean, clean, H)
-paint(lambda n: n in ("face", "jaw"), lambda p, n, ao: P.face(PL, p, n, ao))
-paint(lambda n: n == "mouthb", lambda p, n, ao: np.broadcast_to(P.hexc("#16090b"), p.shape))
-paint(lambda n: n.startswith("fang"), lambda p, n, ao: np.broadcast_to(P.hexc("#f4efe6"), p.shape))
+plates = (IB.load(PLATE), IB.load(PLATE_S))
 paint(lambda n: n == "skull", P.skull)
-paint(lambda n: n.startswith("lid"), lambda p, n, ao: P.skin(p, n, np.maximum(ao, 0.85)) * 0.8)
-paint(lambda n: n.startswith("brow"), lambda p, n, ao: np.broadcast_to(P.hexc("#1c1518"), p.shape))
-for sd, sg in (("R", 1.0), ("L", -1.0)):
-    root = K.hl(np.array([sg * 0.074, -0.004, -0.006]))
-    paint(lambda n, q="fin" + sd: n == q, lambda p, n, ao, r=root: P.fin(p, n, ao, r))
 segs = [q.claw for q in hR + hL if hasattr(q, "claw")]
 paint(lambda n: n.startswith(("palm", "finger", "thumb")), lambda p, n, ao: P.claws(P.hands(p, n, ao), p, segs))
 paint(lambda n: n == "tail", lambda p, n, ao: P.tail(p, n, ao, tl.path, tl.wd))
@@ -440,18 +436,44 @@ gf2 = next(q for q in pieces if q.name == "ggface")
 paint(lambda n: n == "ggface", lambda p, n, ao: P.gauge(p, *gf2.gauge))
 paint(lambda n: n == "gungrip", lambda p, n, ao: P.wrap(p, n, ao, K.GRIP_AT, K.GRIP_K))
 
-# dilate past the island edges
-known = PID >= 0
-for _ in range(10):
-    acc = np.zeros_like(OUTC)
-    cnt = np.zeros((ATLAS, ATLAS), np.float32)
-    for dy, dx_ in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-        k = np.roll(known, (dy, dx_), (0, 1))
-        acc += np.roll(OUTC, (dy, dx_), (0, 1)) * k[..., None]
-        cnt += k
-    new = (~known) & (cnt > 0)
-    OUTC[new] = acc[new] / cnt[new][:, None]
-    known |= new
+# ---- the head's own texture
+OUT2 = np.zeros((HEADT, HEADT, 3), np.float32)
+
+
+def paint2(pred, fn):
+    ids = [i for i, n in enumerate(names) if pred(n)]
+    ys, xs = np.nonzero(np.isin(PID2, ids))
+    if len(ys):
+        OUT2[ys, xs] = fn(POS2[ys, xs].astype(np.float64), NOR2[ys, xs].astype(np.float64))
+
+
+paint2(lambda n: n in ("face", "jaw"), lambda p, n: P.face(plates, p, n, np.ones(len(p))))
+paint2(lambda n: n == "mouthb", lambda p, n: np.broadcast_to(P.hexc("#120708"), p.shape))
+paint2(lambda n: n.startswith("fang"), lambda p, n: np.broadcast_to(P.hexc("#f4efe6"), p.shape))
+paint2(lambda n: n == "teeth", lambda p, n: np.broadcast_to(P.hexc("#e6dfd2"), p.shape))
+paint2(lambda n: n.startswith("lid"), lambda p, n: P.skin(p, n, np.ones(len(p))) * 0.72)
+paint2(lambda n: n.startswith("brow"), lambda p, n: np.broadcast_to(P.hexc("#ff7a1c"), p.shape))
+for sd, sg in (("R", 1.0), ("L", -1.0)):
+    root = K.hl(np.array([sg * 0.074, -0.004, -0.006]))
+    paint2(lambda n, q="fin" + sd: n == q, lambda p, n, r=root: P.fin_new(p, n, np.ones(len(p)), r))
+
+
+def dilate(img, pid, size):
+    known = pid >= 0
+    for _ in range(10):
+        acc = np.zeros_like(img)
+        cnt = np.zeros((size, size), np.float32)
+        for dy, dx_ in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            k = np.roll(known, (dy, dx_), (0, 1))
+            acc += np.roll(img, (dy, dx_), (0, 1)) * k[..., None]
+            cnt += k
+        new = (~known) & (cnt > 0)
+        img[new] = acc[new] / cnt[new][:, None]
+        known |= new
+
+
+dilate(OUTC, PID, ATLAS)
+dilate(OUT2, PID2, HEADT)
 
 atlas = bpy.data.images.new("cinder_atlas", ATLAS, ATLAS)
 px = np.ones((ATLAS, ATLAS, 4), np.float32)
@@ -461,6 +483,13 @@ atlas.filepath_raw = os.path.join(os.path.dirname(OUT), "atlas.png")
 atlas.file_format = "PNG"
 atlas.save()
 print("atlas saved")
+headt = bpy.data.images.new("cinder_head", HEADT, HEADT)
+px = np.ones((HEADT, HEADT, 4), np.float32)
+px[..., :3] = np.clip(OUT2, 0, 1)
+headt.pixels.foreach_set(px.ravel())
+headt.filepath_raw = os.path.join(os.path.dirname(OUT), "head.png")
+headt.file_format = "PNG"
+headt.save()
 
 # ---- materials
 for mt in me.materials:
@@ -474,7 +503,7 @@ for mt in me.materials:
     if mt.name.startswith("flame"):
         continue
     t = nt.nodes.new("ShaderNodeTexImage")
-    t.image = atlas
+    t.image = headt if "cinderhead" in mt.name else atlas
     nt.links.new(t.outputs[0], pb.inputs[0])
 
 # ---- ink room; fire's seed in the colour

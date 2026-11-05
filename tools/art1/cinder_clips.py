@@ -244,7 +244,7 @@ def extras(P):
     # the apron rides over the leading thigh
     lead = max(P["FL"][1], P["FR"][1], 0.0) * 1.15 + 0.5 * max(P["FL"][2] - A_Z, P["FR"][2] - A_Z, 0.0)
     o["skirt"] = (Quaternion((1, 0, 0), SKIRT_SIGN * (0.35 * P.get("skirt", 0.0) + min(lead, 0.6))), None)
-    o["jaw"] = (Quaternion((1, 0, 0), JAW_SIGN * 0.3 * P.get("jaw", 0.0)), None)
+    o["jaw"] = (Quaternion((1, 0, 0), JAW_SIGN * 0.2 * P.get("jaw", 0.0)), None)
     return o
 
 
