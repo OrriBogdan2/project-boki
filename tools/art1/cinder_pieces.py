@@ -247,8 +247,8 @@ def goggles():
 def fin(s):
     """A fin ear (head sheet): a tall point up and out, a scalloped web under it down to the jaw. Two sheets back to back."""
     side = "R" if s > 0 else "L"
-    tips = [np.array([s * 0.164, -0.05, 0.088]), np.array([s * 0.15, -0.062, 0.03]), np.array([s * 0.13, -0.056, -0.022]), np.array([s * 0.104, -0.038, -0.066])]
-    roots = [np.array([s * 0.074, -0.008, 0.026]), np.array([s * 0.077, -0.012, 0.008]), np.array([s * 0.077, -0.012, -0.012]), np.array([s * 0.072, -0.004, -0.034])]
+    tips = [np.array([s * 0.172, -0.012, 0.094]), np.array([s * 0.158, -0.02, 0.032]), np.array([s * 0.136, -0.016, -0.022]), np.array([s * 0.106, -0.004, -0.066])]
+    roots = [np.array([s * 0.074, 0.006, 0.026]), np.array([s * 0.077, 0.002, 0.008]), np.array([s * 0.077, 0.002, -0.012]), np.array([s * 0.072, 0.012, -0.034])]
     rows = 4
     G = []
     for r0, t in zip(roots, tips):
@@ -384,8 +384,8 @@ def hair():
     # the curtains: past the fin, over the shoulder, out and back round the tank; a second layer behind it
     for sg, g in ((1.0, "r"), (-1.0, "l")):
         rad = norm(np.array([sg, -0.6, 0.0]))
-        a_ = drape("sideA" + g, [(sg * .066, -.0, top + .03), (sg * .112, -.05, top - .08), (sg * .15, -.085, top - .22), (sg * .185, -.1, top - .38), (sg * .205, -.125, top - .54), (sg * .245, -.14, top - .68), (sg * .275, -.165, top - .8)],
-                   0.25, rows=10, hint=rad, seed=0.11 + sg * .03, bright=0.12, outward=rad)
+        a_ = drape("sideA" + g, [(sg * .05, -.05, top + .04), (sg * .082, -.1, top - .06), (sg * .13, -.125, top - .2), (sg * .185, -.125, top - .38), (sg * .21, -.135, top - .54), (sg * .245, -.15, top - .68), (sg * .275, -.17, top - .8)],
+                   0.25, rows=10, hint=rad, seed=0.11 + sg * .03, bright=0.12, outward=rad, root=0.42, peak=0.5)
         out.append(a_)
         a_.group = g
         rad2 = norm(np.array([sg, -1.2, 0.0]))

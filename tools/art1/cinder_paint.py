@@ -111,7 +111,7 @@ def copper(p, n, ao):
     c = metal(COPPER, p, n, np.maximum(ao, 0.7), 0.3, 0.42)
     # a broad painted shine, as the sheet's beaten copper
     d = np.clip(np.sum(n * norm(np.array([-0.3, -0.5, 0.8])), -1), 0, 1)
-    c = c + (d ** 12)[..., None] * np.array([0.5, 0.36, 0.26])
+    c = c + (d ** 16)[..., None] * np.array([0.26, 0.18, 0.12])
     # a green-blue bloom low in the seams
     v = smooth(0.62, 0.8, fbm(p * 19 + 3.0)) * (1 - np.clip(ao, 0, 1)) * 2.0
     return mix(c, hexc("#4e7a6a"), np.clip(v, 0, 0.5))

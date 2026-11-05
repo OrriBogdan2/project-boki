@@ -401,7 +401,7 @@ c2 = c2 * (1 - k2[:, None]) + P.HOT * k2[:, None]
 # the skin down to the sheet's warm charcoal (the scan runs light and lilac); leather and the cracks stay
 sk = np.clip(1.0 - smooth(0.05, 0.13, r_ - b_), 0, 1)[:, None]
 lum_ = c2.mean(1, keepdims=True)
-c2 = c2 * (1 - sk) + (lum_ * 0.56 + c2 * 0.26) * np.array([1.14, 0.93, 1.0]) * sk
+c2 = c2 * (1 - sk) + np.clip(0.2 + 0.55 * (lum_ - 0.2), 0.1, 0.42) * np.array([1.16, 0.95, 1.0]) * sk
 OUTC[ys, xs] = c2
 
 # ---- the rebuilt pieces

@@ -90,7 +90,7 @@ void fragment() {
 		}
 		// long soft streaks climbing the fire, no hard band following the mesh
 		float streak = vnoise(vec2(u * 5.0 + seed * 5.0, UV.y * 1.3 - t * 0.5)) * 0.6 + vnoise(vec2(u * 11.0 - seed * 3.0, UV.y * 2.2 - t * 0.7)) * 0.4;
-		h = mix(h * 0.55, 0.3, 0.45) + 0.1 + (streak - 0.3) * 0.7;
+		h = mix(h * 0.55, 0.3, 0.45) + 0.04 + (streak - 0.3) * 1.05;
 		// (a strip is mostly saturated fire; the pale core is a thin heart, or it reads as a hole against a bright sky)
 		c = ramp(clamp(h * 1.0 + bright * 0.16 - 0.04, 0.0, 1.0));
 	}
