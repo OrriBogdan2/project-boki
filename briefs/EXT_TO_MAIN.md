@@ -2878,3 +2878,21 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
   - `ext/vfx-ryzz` d39d0bce, `ext/vfx-breaker` 65a229ff, `ext/vfx-motley` 26cbf641 (these still need core 16f66b8e merged)
   - Grimble: not started.
 - None of the 9 has a final report, a fidelity table or a final check run. Friday's session picks them up from briefs/INBOX_S3.md (the "PAUSED STATE" section).
+
+## 2026-11-05 (S4): READY `ext/sfx-base-2` @ 015d545f (base for the owner's sound playtest orders; from origin/main 0237eb8d, +96/-20, 6 files)
+- `tools/sfx_lib.py` `save_loop(name, x, cat)`: a seamless loop (tail cross-faded into the head, no fades), for held sounds played with Sfx.loop_start (minigun spin, charge hums). Until now every file got a 30 ms end fade, so loops dipped each cycle (why Cinder's roar and Pip's hum are overlapping one-shots).
+- `scripts/core/sfx.gd`: reads `"reach"` (metres) from every content/sfx/<group>.json at start (`Sfx.sound_reach`) and uses it in play() and loop_start(): a heavy sound carries past the 22 m hear_range; past 9 m it still plays through the muffled SFXFar bus, so the low end is what carries ("hear Vex coming"). Each branch edits only its own set file.
+- `content/rules/sfx_levels.json`: new categories heavy_fire (-15.5 dB RMS) and heavy_impact (-14.5) for the damage carries.
+- `--sfx-set-check`: reach entries name the set's sounds and stay within 22-80 m; every sound under `"loops"` repeats seamlessly; heavy_fire counts as weapon fire. Verified with a throwaway set: a save_loop file passes, a one-shot listed as a loop and a 200 m reach both fail.
+- docs/AUDIO.md (loops, reach, the two categories), docs/wiki/Rules.md regenerated.
+- Checks: --sfx-set-check 0 (14 sets), --check 0, health --strict OK, gen_wiki --check unchanged. Merges cleanly onto main (built on it). No reserved files, no Net or save change.
+
+## 2026-11-05 (S4): LOW-SPEND STOP. Handoff for Friday's session
+Per the owner (25% usage left until Friday 6am Toronto): S4 finished only ext/sfx-base-2 above and stopped. **Not started** (all in INBOX_S4, still open):
+1. `ext/sfx-vex-2` (12:17): heavy, intimidating Vex: minigun roar with spin-up on press / spin loop / spin-down on release (use save_loop + Sfx.loop_start keyed per hunter), low thump per shot, brass casings; the grenade now fires from the arm-cannon top tube (item 112): a deep hollow THUNK + a big bassy explosion with debris and rumble; servo/hydraulic dash and slide, heavier metal-clank steps; Longneedle: a building charge hum (loop) then a loud crack/boom; meatier hit impacts; `reach` ~45 m on fire/explosion; cats heavy_fire / heavy_impact. Post a short old-vs-new A/B note.
+2. Weight check on the other carries (Kael's greatsword, Grimble's blunderbuss, Breaker's hammer): move their weapon/hit sounds to heavy_fire / heavy_impact where thin, maybe reach.
+3. `ext/sfx-lisette-2` (item 114.4): RMB Heavy Shot held: a rising tension creak + thread hum (a loop while drawing, pitch rising with the draw), then a heavy release twang/whoosh.
+4. `ext/sfx-ryzz-2` (item 116.5 + 12:00): a crackling zap per finger-gun shot, a sizzling stack-apply tick, a big thunder crack on the ult, a bright electric "reset" zing when Wirerun resets from the orb pull (item 71); a bubblegum blow + pop hooked to her idle / emote / kill (S2 adds the anim; mage_bubble_pop exists, the blow does not).
+- Every READY for these needs the Hunter's FIDELITY_CHECKLIST rows as a ✅/❌ table (for sound: the sound-related must-haves, with the sfx_look sheets as proof).
+- Branch each from origin/ext/sfx-base-2 (or main once S5 merges it). Brief and rules: the S4 SFX brief pattern (gen_sfx_<hero>.py on sfx_lib, content/sfx/<arch>.json, --sfx-set-check + the hero's combo check).
+- Still waiting on main (reserved files): the sfx-boki wiring in merge_xform.gd / kin_downed.gd, and boki-talk-105's kin_voice/kin_speak/kin.gd wiring.
