@@ -18,7 +18,8 @@ var fx: PinFx                  # Hem's pooled effects
 var ult: PinUlt                # X: Starpiercer
 var perfects: int:
 	get: return draw.perfects if draw else 0
-var pin_aim := false           # the Heavy Shot is being held (its gold V and growing bar show)
+var pin_aim := false           # the Heavy Shot is being held (the needle on the bow and its growing bar show)
+var needle: PinNeedle          # the Heavy Shot's needle while it's held
 var high_t := 0.0              # re-checks high ground now and then
 var on_high := false
 var loosed := 0.0              # a Focus shot is in the air until this time (its hit can be a Deadeye)
@@ -37,6 +38,9 @@ func _setup() -> void:
 	fx = PinFx.new(h)
 	h.add_child(fx)
 	self_nodes.append(fx)
+	needle = PinNeedle.new()
+	h.add_child(needle)
+	self_nodes.append(needle)
 	draw = PinDraw.new(self)
 	ult = PinUlt.new(self)
 	h.add_child(ult)
@@ -146,6 +150,10 @@ func _tick(dt: float) -> void:
 	net_pulse(dt, full)
 	if pin_aim and rmb_down:
 		_heavy_tele()
+	if pin_aim and rmb_down and tells_visible():
+		needle.hold(h.position, h.aim_dir(), heavy_k(), float(h.cdat.get("scale", 1.0)), dt)
+	elif needle.visible:
+		needle.put_away()
 	if not rain.is_empty():
 		_tick_rain(dt)
 	draw.tick()
@@ -355,13 +363,15 @@ func on_dash(use_ex: bool) -> bool:
 
 ## While walking as a spirit she moves quicker; at rank 3 inside something she starts faster still and
 ## that fades with the walk. A draw right after a perfect release slows her less (wiki: perfect shots ease
-## the self-slow).
+## the self-slow). Holding the Heavy Shot slows her hard (pin.hold_move of her speed).
 func move_k() -> float:
 	var k := 1.0
 	if spirit and spirit.active():
 		k = float(dash_def().get("walk_k", 1.1)) + spirit.inside_boost()
 	if draw and draw.quick and h.draw_t >= 0.0:
 		k *= float(h.wpn.get("perfect_slow", 0.85)) / maxf(0.05, float(h.wpn.get("draw_slow", 0.7)))
+	if pin_aim and rmb_down:
+		k *= float(rmb_def()["pin"]["hold_move"])
 	return k
 
 # ------------------------------------------------------------------ RMB: Heavy Shot
@@ -385,7 +395,7 @@ func press_rmb() -> void:
 
 func rmb_hold_tick(t: float) -> void:
 	if t > 0.15 and not pin_aim:
-		# the Heavy Shot's draw: a red bar growing from the bow (its own creak)
+		# the Heavy Shot's draw: the needle on the bow, a red bar growing from it (its own creak)
 		play("arc_heavy_wind")
 		pin_aim = true
 		m.sfx("pin_heavy_draw", h.pos, -6.0 if h.is_local() else -10.0)
@@ -436,7 +446,8 @@ func _drop_holds() -> void:
 func _drop_tele() -> void:
 	pin_aim = false
 	fx.bow_glint_at(Vector3.ZERO, 0.0, HEAVY_GOLD)
-	AimKit.hide(h, "rmb_v"); AimKit.hide(h, "rmb_bar")
+	needle.put_away()
+	AimKit.hide(h, "rmb_bar")
 
 func fire_rmb(c: Dictionary) -> void:
 	_drop_tele()

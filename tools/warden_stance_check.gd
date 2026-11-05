@@ -63,6 +63,15 @@ func _warden(id: String, lim: Dictionary) -> PackedFloat32Array:
 	var straight := lean < float(lim["min_spine"]) and shift < float(lim["min_hip"])
 	ok(not straight, "%s: standing spine %.3f rad off upright, hips %.3f m over (>= %.2f or >= %.2f)"
 			% [id, lean, shift, float(lim["min_spine"]), float(lim["min_hip"])])
+	if id == "archer":
+		# owner item 114: Lisette stands upright with her weight forward, never leaning back, the bow low
+		var ref := (none[0] as HunterAnim)
+		var up0 := (ref.rig.basis * ref.torso.basis).y.normalized()
+		var tip := up.dot(Vector3.BACK) - up0.dot(Vector3.BACK)
+		ok(tip < -0.1 and lean < 0.35, "archer: the torso pitched forward (%.3f), %.3f rad off upright (under 0.35)"
+				% [tip, lean])
+		var carry: Array = Content.rules(WardenStance.RULES)["archer"]["pose"]["carry"]["pos"]
+		ok(float(carry[1]) <= -0.35, "archer: the bow carried low (%.2f m)" % float(carry[1]))
 	var applied := _dist(pose, _pose(none))
 	ok(applied > float(lim["min_diff"]), "%s: the stance moves the procedural model by %.3f" % [id, applied])
 	await _glb(id, with, none)
