@@ -523,3 +523,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Check changes to review:** warden-model limits raised for Kael (height 1.35, 3D 1.28, width floor 0.85); warden-stance skips the bone test for clip Heroes; clip-check pop limit 1 m/frame (catches teleports only). Sliders under clips strip position/scale tracks from contract bones. Rig data: body.torso, legs 2.09, size 1.08, shoulder 0.9.
 - Shots: ext/hero-shots-s2 art1/kael/. Death clip tested only as a data flag, never seen live.
 - Owner Qs: the brief says scar on his LEFT, but sheet and splash show it on image left = his RIGHT: which? Only left eye white, or both orange as in the splash? Is in-game 1.08 tall enough (RIG_STANDARD says 1.06)?
+
+## 2026-11-05 S2: Motley (was Ostra) refs received; queue
+- ext/art1-ostra 3f00915a is superseded: restart as the jack-in-the-box Motley from ostra_FINAL_sheet, motley_turnaround, motley_splash when a slot frees (rig/clip groundwork reusable; the hover box changes the hitbox: box + spring column). All 8 slots are full.
+- Queue: ART-1 Motley, then the sweep on ext/rename-lisette (Motley "the Void Jester", he/him; Breaker "the Sunken Bulwark"), then Vex 68, gloves 69, glider 63, Claire 62+64+65.
+- ext/kit-ostra-60-75's hand glow and swap clip notes carry to Motley.
