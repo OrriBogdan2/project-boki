@@ -6,14 +6,19 @@ const DT := 1.0 / 60.0
 
 func run(main: Node) -> void:
 	var out := ""
+	var arch := "rimewright"      # (--arch=<id>: another Hero on the same spot, to compare the live look)
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="):
 			out = a.substr(12)
+		if a.begins_with("--arch="):
+			arch = a.substr(7)
+		if a == "--no-lod":
+			main.get_viewport().mesh_lod_threshold = 0.0
 	DirAccess.make_dir_recursive_absolute(out)
 	Save.no_write = true
 	var A = load("res://tools/archetype_check.gd").new()
 	A.main = main
-	var r: Array = A.setup("rimewright", 11.0, "", true)
+	var r: Array = A.setup(arch, 11.0, "", true)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	if main.get("fade") != null:
