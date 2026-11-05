@@ -2316,3 +2316,8 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
   - Net.VERSION 0.19.2 (bump again if another branch also changed sync).
   - Optional for main (reserved): kin.gd still creates the Boki ring in team colour at spawn; SideRings repaints it each colour change, so nothing is needed unless kin.gd's ring is rebuilt.
   - Match.on_wall_slam lost its unused stun arg (callers updated).
+
+## 2026-11-05 (S2): OWNER APPROVAL NEEDED: ART-2 Kael VFX + sound ext/art2-kael 0fbc63e6
+- Ability sheets: ext/hero-shots-s2 art2/kael/ (3b268471). Video with sound: /home/boki/shots-s2/art2/kael/kael_vfx_sound_set.mp4 on the server (not in git, per the no-video rule; say if you want it on hero-shots-s2). Details and 3 owner questions in STATUS.md.
+- READY kits, in STATUS: ext/kit-hem-55b 8b2c04f1, ext/kit-kael-57 249bc11b, ext/kit-sable-53-54 157cffe4.
+- Heads-up: --teammate-check is red on main fe51b43b (2 failures: rival called before the chest; leads you to the chest and outpost).
