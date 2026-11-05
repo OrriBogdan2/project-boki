@@ -896,3 +896,20 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: READY ext/art1-hem 8280e446 (replaces 36307ae4; contains kit-lisette-114)
 - Idle and stance upright, head 7 cm ahead of the feet centre; bow forward in heavy_wind; pin thread red; arrow stays in the spool during heavy_wind. Checks on this build, 0 FAIL: --check, clip, rig-standard, warden-stance, warden-glb 182, warden-model 157, archer-combo 153, health --strict. Full suite not rerun. PinNeedle + bow alignment by numbers, not seen together live. Sheets and GIFs predate this round.
+
+## 2026-11-05 16:10 UTC S2: open questions closed with defaults, per the 16:05 owner rule (reversible; owner can overrule)
+- **Kael hold:** split. Hero branches drop Kael's art and data so S5 can merge them; Kael lands alone later. Alternative: approve Kael now.
+- **Motley charge:** held fire stays plain (charge_from 0.6), needed for item 117's 1.6x; x1.9 kept; placed walls and breakables still stop orbs. Alternative: main's +15% curve.
+- **Breaker:** 2.5-4 turns/s kept, spin hits nobody, hitbox 0.46, T-head hammer, hammer right and shield left. Alternative: slower, heavier.
+- **Pip:** hitbox stays at the 0.85x floor; 0.66x height; wings tilted for the match camera; painted eyes; charge spent at the throw.
+- **Lisette:** closed neckline and hand-on-hip idle stay; two perfect stages; no draw ticks; 4 s needles; Heavy head stays red.
+- **Kael:** scar on his right, both eyes white per the art; 1.08 size; guard extends during the haul; glide blocked 0.75 s; RMB hold on a hooked chain still runs down it; swing doesn't shrink for Haul Slam; slash arc 3 m.
+- **Sable:** no Encore self-slow; GROUNDED alone for the Bola; antennae enlarged; card text "shots".
+- **Claire:** closed neckline, mid-thigh skirt; darts from the spear tip; merge can end Rimelock; 1.5 m/s sink after a skate jump.
+- **Tarek:** closed smile; closed stone fist; ground rings hidden at match distance; stones tilted; full power only at the hold cap; rocks don't need to clear Breaker.
+- **Ryzz:** Storm Rod stays until S3 replaces it; both eyes open in idle, wink in the emote; pulled orbs give the reset boost.
+- **Vex:** launcher swing-over kept; painted cavity unless the shared normal path lands; no RMB preview.
+- **Grimble:** wider shoulders; proper ball chain in the second pass; kit text to the new design in a text pass.
+- **Cinder:** spearhead tip; 4 vials in leather loops; wide tail arc; LMB returns after the 0.2 s pilot.
+- **Boki:** Vespyx palette #7c4fa2 (readable); tools in the tail; wiring recommended to S5.
+- **Drop:** 17x pull-out; comet riders break away only; snap and landing stay on the compressor until S4 reviews.
