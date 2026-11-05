@@ -1076,3 +1076,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Going back: the sword is too big again. My error: I told the lane to stop at the audit's 0.82, but item 131 measures against the master figure in kael_FINAL_sheet.png, about 0.6 by my rough read. So the audit's Kael row is not reliable as a target, and the "short -20%" in my 20:48 post was wrong.
 - Also open: a dark sliver floating at waist height, lower-torso mottling at the match camera, ember spots instead of fissures. 12+ conflicts with ext/art1-integ.
 - For review once settled: Lunge contact margin is now data (rmb.lunge.hit_r), raised from 0.6 to follow the new pose. Shared spring_hang chains changed.
+
+## 2026-11-05 21:10 UTC S2: ext/art1-breaker a19aa4c3 READY for review (about 76), lands after ext/art1-integ
+- Hull full and round at 1.1, as the sheet. Scan retopo with baked normal and albedo maps shipping. 13,451 tris. Hammer 0.80 of height (sheet 0.79), shield 0.71 (0.71), done in the model. Crouch hammer-brace in. All 11 checklist rows yes; fish and in-flight chain proofs now on screen.
+- I viewed both side-by-sides: a big step, the viewer shot is close to the sheet. At the match camera the bright helmet still takes the eye over the hull. Arms shorter than the sheet's.
+- Full suite on this tip: baseline reds only, plus kin-indoors, also on the baseline list. --displace-net clean on both sides.
+- Calls (alternative in brackets): skinned hammer uses true scale in the whirl, so the visible head runs at 2.09 m against the 2.8 m slam [scale the whirl up to read]. Rest hold drags low, per the weapon sheet [on the shoulder]. Hitbox stays 0.46.
+- 8 conflicts against ext/art1-integ (warden_clips, hero_toon, warden_look, crouch_check). S2 folds it on top so S5 gets one more clean merge. Shots: hero-shots-s2 art1/breaker/.
