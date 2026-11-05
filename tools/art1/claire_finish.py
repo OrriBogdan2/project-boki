@@ -16,7 +16,7 @@ import warden_kit as WK
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
 ATLAS = 2048
-MATS = ["skin-face-hot", "skin-body", "cloth-dress", "fur-trim", "hair-fringe", "ice-horn", "ice-bright"]
+MATS = ["skin-face", "skin-body", "cloth-dress", "fur-trim", "hair-fringe", "ice-horn", "ice-bright"]
 SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "ear": 0.7, "horn": 0.9, "tail": 0.7, "wing": 0.55, "wingarm": 0.5, "wingrod": 0.4, "bowknot": 0.6, "bowloop": 0.6, "ribbon": 0.5,
          "blade": 0.5, "shaft": 1.1, "head": 0.6, "butt": 0.5, "heart": 0.7, "heartcore": 0.6, "prong": 0.4, "collarA": 0.3, "collarB": 0.3, "Low": 1.0, "tailheart": 0.7}
 FACE_K = 3.4                # texel density on the face against the body
@@ -127,8 +127,8 @@ lids = [lid_piece(1.0), lid_piece(-1.0)]
 hR = K.hand("R", K.GRIP_K, (1.3, 1.45, 0.95))
 hL = K.hand("L", (0.0, 1.0, -0.15), (0.32, 0.42, 0.3), 0.07)
 hornR, hornL = K.horn(1.0), K.horn(-1.0)
-for q_ in hR + hL:
-    q_.room = 0.25        # (a full ink line round each finger is a black mitt at the match camera)
+for q_ in hR + hL + [wr, wl] + wr_rods + wl_rods:
+    q_.room = 0.2        # (a full ink line round each finger is a black mitt at the match camera)
 pieces = [el, er, hornR, hornL, tl, th] + bw + [rr, rl, K.blade(1.0), K.blade(-1.0)] + sp + [wr, wl] + wr_rods + wl_rods + lids + hR + hL + [K.cuff_cap("R"), K.cuff_cap("L")]
 
 
@@ -426,11 +426,11 @@ for k_, i in enumerate(low_faces):
     pink = r_ > b_ * 1.04
     blue = (b_ - r_) > 0.1 and (mx - mn) / max(mx, 0.01) > 0.3
     if i in face_i and pink:
-        m = "skin-face-hot"
+        m = "skin-face"
     elif i in face_i:
-        m = "skin-face-hot" if abs(fc[k_][0]) < 0.075 and fc[k_][2] < K.hs([0, 0, 1.72])[2] else "hair-fringe"
+        m = "skin-face" if abs(fc[k_][0]) < 0.075 and fc[k_][2] < K.hs([0, 0, 1.72])[2] else "hair-fringe"
     elif pink and fc[k_][2] > K.NECK_Z:
-        m = "skin-face-hot"
+        m = "skin-face"
     elif blue and (mx < 0.62):
         m = "cloth-dress"
     else:
@@ -479,9 +479,6 @@ for s_ in (1.0, -1.0):
     cc = mix(cc, P.HOT, iris * (1 - ring) * 0.0)
     cc = mix(cc, hexc("#123a6e"), slit)
     OUTC[ys, xs] = cc
-    # the hot key on the pale iris, not on the slit
-    hk = (iris > 0.6) & (slit < 0.3) & (ring < 0.5)
-    OUTC[ys[hk], xs[hk]] = P.HOT
 
 
 def paint(pred, fn):
