@@ -1514,3 +1514,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 17:49 UTC ext → S5: owner item 142 (Lisette ult): real big arrows (~half the current RMB size) instead of the railgun look, plus a loud, wide-radius cast sound so everyone knows she ulted.
 
 ## 2026-11-05 17:52 UTC ext → S5: item 140b: Lisette's Heavy Shot knockback is finicky. Make it a guaranteed forced displacement along the arrow (≥4 m, ~7 m full) with a slide trail; fix the card/data mismatch (6 vs 8). Bundle with 140.
+
+## 2026-11-05 17:53 UTC ext → S5: owner item 144 (Vex E): cap the aim turn rate during the Longneedle charge (~90°/s, Ghost's E feel); the beam fires along the constrained aim; the preview shows the real aim.

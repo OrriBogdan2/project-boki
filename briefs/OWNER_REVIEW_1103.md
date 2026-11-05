@@ -1601,3 +1601,17 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - On 20 test shots (varied charge, a moving target), the displacement is always ≥4 m in the arrow direction.
   - The card text matches the data.
+
+## 144. Vex E (Longneedle): a limited turn rate while charging, Ghost's E as the reference (owner, 17:29 UTC Nov 5)
+- The owner: "vex should have restricted movement on how far she can turn during her e, right now its too much - look at ghost e for reference".
+- Today: a 0.6 s charge where the line "tracks your aim" freely; she stands still.
+- **Change:**
+  - During the charge, the aim direction follows the cursor at a capped turn rate (e.g. ~90°/s, tune 60-120; Ghost's E feel).
+  - The aim is locked on the cast direction at the press, then can only drift slowly, so a flick across the screen doesn't drag the beam.
+  - The line preview shows the actual (lagging) aim, not the cursor.
+  - At fire, the beam goes along the constrained aim.
+  - Her body rotation follows the same capped rate.
+  - Online: send the constrained aim, not the cursor.
+- **Assert:**
+  - A 180° cursor flick at the press → the beam fires within 60° of the initial direction (at 90°/s × 0.6 s ≈ 54°).
+  - A small tracking adjustment still works.
