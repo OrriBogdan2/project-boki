@@ -23,8 +23,8 @@ ext/imagegen fb523188), built as the design variant `vex_r3b` and picked by the 
 - **Cyber eye:** her right eye plate and its glowing lens, drawn from the face sheet as a decal (`glow` slot for the lens; see r3e).
 - **Texture:** the bake, smoothed within its UV islands and recoloured by ramps of the art's colours per slot
   and hue (toxic-green hair and trim, flat blacks, pale skin, gunmetal, brass); the face keeps its own paint.
-- Imports: the three extracted atlases lossless (`compress/mode=0`); `vex.glb.import`:
-  `generate_lods=false`, `force_disable_compression=true`.
+- Imports: the extracted atlases VRAM-compressed at most 2048², and the .glb decimated to 14k triangles with
+  LODs (item 94; docs/art/wardens/RIG_CONTRACT.md "Budget and checks"); `force_disable_compression=true`.
 
 r3c (the polish pass, INBOX_S2 09:00; the reference recipe in PIPELINE.md):
 - **Proportions:** gunslinger body legs 1.95 and size 0.89 (was 1.58 / 0.97): the art's long legs at the same
