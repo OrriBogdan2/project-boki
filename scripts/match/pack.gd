@@ -159,11 +159,11 @@ static func haul(h) -> Array:
 static func smart_loot(m, h, b: Dictionary) -> int:
 	var n := 0
 	for it in Life.box_items(m, h, b):
-		if String(it["key"]) in ["keys", "chest_keys", "gems", "seeds", "belt", "backpack"]:
+		if String(it["key"]) in ["keys", "chest_keys", "gems", "seeds", "belt", "backpack"] and LootFull.fits(h, it, b):
 			Life.take_item(m, h, b, it)
 			n += 1
-	# kin one at a time from the front (taking one shifts the rest down)
-	while not (b["caught"] as Array).is_empty():
+	# kin one at a time from the front (taking one shifts the rest down), while the capsule box has room
+	while not (b["caught"] as Array).is_empty() and LootFull.fits(h, {"key": "caught", "i": 0}, b):
 		Life.take_item(m, h, b, {"key": "caught", "i": 0})
 		n += 1
 	# worn: the best piece for each gear slot if it beats yours (yours goes back in the box, so it can still be packed)

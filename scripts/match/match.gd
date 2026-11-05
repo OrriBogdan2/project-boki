@@ -4677,8 +4677,7 @@ func _update_interact(dt: float) -> void:
 					h.set_meta("loot_hold", true)
 					var b0: Dictionary = best["box"]
 					if hud.loot_is(b0):
-						var got := Life.smart_loot(self, h, b0)
-						hud.toast_small(("Smart looted %d thing%s" % [got, "" if got == 1 else "s"]) if got > 0 else "Nothing here beats what you've got", Color("ffd36a"))
+						var got := LootFull.smart(self, h, b0)
 						if b0["empty"] or got > 0: hud.close_loot()
 					else:
 						hud.open_loot(b0)
