@@ -14,6 +14,8 @@ var gain := 0.009            # radians of lean per m/s^2 of the body's accelerat
 var limit := 0.45            # radians at most
 var tumble_hz := 0.35        # turns a second of a tumbling prop
 var swirl_m := 0.13          # m, how far a prop wanders up and down
+var clear_m := 0.0           # m: a prop passing in front of the face drops this far, so it never covers it
+var clear_orbit := ""        # the orbit that happens on
 var lean := Vector2.ZERO     # radians, in the model's frame: x sideways, y along
 var rate := Vector2.ZERO
 var last_pos := Vector3.INF
@@ -34,6 +36,8 @@ static func make(model: Node3D, sk: Skeleton3D, cfg: Dictionary) -> WardenSway:
 	s.limit = float(cfg.get("max", s.limit))
 	s.tumble_hz = float(cfg.get("tumble_hz", s.tumble_hz))
 	s.swirl_m = float(cfg.get("swirl_m", s.swirl_m))
+	s.clear_m = float(cfg.get("clear_m", 0.0))
+	s.clear_orbit = String(cfg.get("clear_orbit", ""))
 	return s
 
 ## One frame, after the clips posed the bones. (lean.y + is back, lean.x + his right.)
@@ -64,6 +68,16 @@ func step(dt: float) -> void:
 	var turn := Quaternion(Vector3(lean.y, 0.0, -lean.x).normalized(), lean.length())
 	skel.set_bone_pose_rotation(bone, turn * skel.get_bone_pose_rotation(bone))
 
+## 0..1: how far in front of him a prop is (the model faces -Z).
+func _in_front(pivot: Node3D, nd: Node3D) -> float:
+	var d := nd.global_position - pivot.global_position
+	d.y = 0.0
+	var fwd := -root.global_basis.z
+	fwd.y = 0.0
+	if d.length_squared() < 0.0001 or fwd.length_squared() < 0.0001:
+		return 0.0
+	return smoothstep(0.25, 0.8, d.normalized().dot(fwd.normalized()))
+
 ## The props on the orbits (WardenGlb.Orbits) tumble, after the orbit placed them: each its own axis, speed and height.
 func tumble(dt: float, pivots: Array) -> void:
 	t += dt
@@ -74,6 +88,8 @@ func tumble(dt: float, pivots: Array) -> void:
 			var ph := float(i) * 1.7
 			var hz := tumble_hz * (0.7 + 0.13 * (i % 5))
 			nd.position.y += sin(t * TAU * 0.17 * (1.0 + 0.11 * i) + ph) * swirl_m
+			if String((pv[0] as Node3D).name) == clear_orbit:
+				nd.position.y -= clear_m * _in_front(pv[0], nd)
 			var a := t * TAU * hz
 			nd.rotation = Vector3(sin(a * 0.6 + ph) * 0.5, a + ph, cos(a * 0.45 + ph) * 0.4)
 			i += 1

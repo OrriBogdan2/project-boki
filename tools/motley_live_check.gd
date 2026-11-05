@@ -75,6 +75,23 @@ func run(main: Node) -> void:
 	for f in 60:
 		_frame(m, P)
 	ok(sk.get_bone_pose_scale(hips).x > 0.9, "and he is out again (%.2f)" % sk.get_bone_pose_scale(hips).x)
+	# the cards tumble round him, and none passes over the face
+	var grin := WardenGlb.anchor(P.model, "anchor_grin")
+	var pivots: Array = (sync.get("orbits") as WardenGlb.Orbits).pivots
+	var nearest := 9.0
+	var cam_off := Vector3(0.0, 0.25, -5.0).normalized()      # (the viewer, straight in front and a little above)
+	for f in 400:
+		_frame(m, P)
+		var fwd := -P.model.global_basis.z
+		var eye := grin.global_position + (fwd + Vector3.UP * 0.05 + cam_off * 0.0).normalized()
+		for pv in pivots:
+			for pr in pv[2]:
+				var at: Vector3 = (pr[0] as Node3D).global_position
+				if (at - grin.global_position).dot(fwd) > 0.0:
+					var line := (eye - grin.global_position).normalized()
+					var off := (at - grin.global_position) - line * (at - grin.global_position).dot(line)
+					nearest = minf(nearest, off.length())
+	ok(nearest > 0.2, "no card passes over the face (closest %.2f m off its line of sight)" % nearest)
 	# a knock-out
 	P.lives = 1
 	m.eliminate(P, r[2], "finished")

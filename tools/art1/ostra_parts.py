@@ -461,7 +461,7 @@ def hood():
     E = np.array(loop)
     back = np.array((0.0, -1.0, 0.08))
     back /= np.linalg.norm(back)
-    rows = 13
+    rows = 16
     P = np.zeros((rows, n, 3))
     for i in range(n):
         d0 = E[i] - C
@@ -473,7 +473,9 @@ def hood():
             t = k / (rows - 1)
             d = (np.sin((1 - t) * ang) * d0 + np.sin(t * ang) * back) / so
             q = np.linalg.norm(d / R) ** -1
-            P[k, i] = C + d * (r0 + (q - r0) * M.sm(0.0, 0.2, t))
+            # (a broad rim standing proud round the face, then the hood proper behind a soft crease)
+            lip = 0.022 * M.sm(0.0, 0.05, t) * M.sm(0.27, 0.17, t)
+            P[k, i] = C + d * (r0 + (q - r0) * M.sm(0.0, 0.2, t) + lip)
     V, F, ST = grid(P, closed=True)
     return Part("hood", "cloth", V, F, ST, rigid("head", len(V)), "hood", (340, 180))
 
@@ -520,7 +522,7 @@ def ruff():
     V, F, ST = grid(P, closed=True)
     r = np.hypot(V[:, 0], V[:, 1])
     k = M.sm(0.15, 0.07, r) * 0.4
-    return Part("ruff", "cloth", V, F, ST, {"hips": 1 - k, "head": k}, "ruff", (560, 140))
+    return Part("ruff", "cloth-ruff", V, F, ST, {"hips": 1 - k, "head": k}, "ruff", (560, 140))
 
 
 def collar():

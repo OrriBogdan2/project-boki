@@ -8,7 +8,7 @@ def hx(s):
     return np.array([int(s[i:i + 2], 16) / 255.0 for i in (0, 2, 4)], np.float32)
 
 
-BLACK, PLUM, DUSK, VIOLET, VIOLET_HI, TRIM, HOT = map(hx, ("150f1c", "261b30", "45295c", "6e36a0", "9a52d0", "bb66f2", "e0aaff"))
+BLACK, PLUM, DUSK, VIOLET, VIOLET_HI, TRIM, HOT = map(hx, ("150f1c", "261b30", "45305f", "62428f", "7f5db0", "a877e0", "e0aaff"))
 RUFF_D, RUFF_M, RUFF_L = map(hx, ("3e3a48", "7b7686", "b4afbb"))
 BLUE = hx("3a2f7c")
 
@@ -93,7 +93,7 @@ IRON = hx("3a2a2c")
 GOLD_D, GOLD_M, GOLD_L = map(hx, ("6e4a1e", "b5873a", "f0d48a"))
 RED, SLATE = hx("b23a34"), hx("3e4a78")
 WHITE_D, WHITE_M, WHITE_L = map(hx, ("9a93ad", "dcd8e6", "fbf9ff"))
-BLACK2 = hx("1c1524")
+BLACK2 = hx("261c30")
 
 
 def suit(kind, x, y):
@@ -160,7 +160,7 @@ def p_bell(S, T):
 
 def harlequin(S, T, a, b, seed):
     f = folds(S, T, 9, seed, 0.01)
-    return mix(shade(ramp(0.5 + f * 0.3, [DUSK, VIOLET, VIOLET_HI]), f, 0.25), shade(BLACK2 * np.ones(S.shape + (3,)), f, 0.5), np.clip(a, 0, 1))
+    return mix(shade(ramp(0.5 + f * 0.3, [DUSK, VIOLET, VIOLET_HI]), f, 0.1), shade(BLACK2 * np.ones(S.shape + (3,)), f, 0.14), np.clip(a, 0, 1))
 
 
 def p_torso(S, T):
@@ -168,8 +168,7 @@ def p_torso(S, T):
     q = (S % 1.0)
     dark = ((q >= 0.0) & (q < 0.25)) | ((q >= 0.5) & (q < 0.75))
     c = harlequin(S, T, dark.astype(np.float32), None, 3)
-    c = mix(c, hx("c79a4a") * 0.5, np.exp(-((np.abs(S - 0.25)) / 0.0035) ** 2) * 0.5)
-    belt = M.sm(0.74, 0.76, T) * M.sm(0.88, 0.86, T)
+        belt = M.sm(0.74, 0.76, T) * M.sm(0.88, 0.86, T)
     c = mix(c, BLACK2, belt * 0.8)
     return c * (0.72 + 0.28 * M.sm(0.05, 0.3, T))[..., None]
 
@@ -188,7 +187,7 @@ def p_lining(S, T):
 def tail_paint(dark, seed):
     def fn(S, T):
         f = folds(S, T, 3, seed, 0.02)
-        c = shade(ramp(0.55 + f * 0.3, [DUSK, VIOLET, VIOLET_HI]), f, 0.3) if not dark else shade(BLACK2 * np.ones(S.shape + (3,)), f, 0.6)
+        c = shade(ramp(0.5 + f * 0.1, [DUSK, VIOLET, VIOLET_HI]), f, 0.1) if not dark else shade(BLACK2 * np.ones(S.shape + (3,)), f, 0.14)
         return mix(c, TRIM, edges(S, T, 0.05) * (0.9 if dark else 0.6))
     return fn
 
@@ -196,7 +195,7 @@ def tail_paint(dark, seed):
 def sleeve_paint(dark, seed):
     def fn(S, T):
         f = folds(S, T, 6, seed)
-        c = shade(ramp(0.55 + f * 0.3, [DUSK, VIOLET, VIOLET_HI]), f, 0.25) if not dark else shade(BLACK2 * np.ones(S.shape + (3,)), f, 0.5)
+        c = shade(ramp(0.5 + f * 0.1, [DUSK, VIOLET, VIOLET_HI]), f, 0.1) if not dark else shade(BLACK2 * np.ones(S.shape + (3,)), f, 0.14)
         return c * (0.75 + 0.25 * M.sm(0.0, 0.2, T))[..., None]
     return fn
 
@@ -206,23 +205,21 @@ def p_glove(S, T):
 
 
 def p_hood(S, T):
-    # (ostra_head: quartered: the brow's right of the V dark, its left violet; behind, the other way; a broad band round the face in the opposite colour.
-    # The loop starts at the brow and runs round his right, so s < 0.5 is his right; t runs from the face to the back of the head)
+    # (ostra_head: his right dark and his left violet in front, the other way behind, each opposite its horn. s < 0.5 is his right; t from the face back)
     f = folds(S, T, 8, 31, 0.0)
-    cv = shade(ramp(0.55 + f * 0.3, [DUSK, VIOLET, VIOLET_HI]), f, 0.25)
-    ck = shade(BLACK2 * np.ones_like(cv), f, 0.5)
-    right = (S < 0.5)
-    back = T > 0.55
-    violet = right == back
-    band = T < 0.13
-    violet = np.where(band, ~violet, violet)
-    return mix(ck, cv, violet.astype(np.float32))
+    cv = shade(ramp(0.5 + f * 0.1, [DUSK, VIOLET, VIOLET_HI]), f, 0.1)
+    ck = shade(BLACK2 * np.ones_like(cv), f, 0.14)
+    violet = (S < 0.5) == (T > 0.6)
+    c = mix(ck, cv, violet.astype(np.float32))
+    # the broad rim stands proud of the hood: a soft shadow behind it, and its inner edge falling into the void
+    c = c * (1 - 0.4 * np.exp(-((T - 0.27) / 0.035) ** 2))[..., None]
+    return c * (0.55 + 0.45 * M.sm(0.0, 0.06, T))[..., None]
 
 
 def horn_paint(dark):
     def fn(S, T):
         f = folds(S, T, 6, 37, 0.01)
-        c = shade(BLACK2 * np.ones(S.shape + (3,)), f, 0.6) if dark else shade(ramp(0.55 + f * 0.3, [DUSK, VIOLET, VIOLET_HI]), f, 0.3)
+        c = shade(BLACK2 * np.ones(S.shape + (3,)), f, 0.14) if dark else shade(ramp(0.5 + f * 0.1, [DUSK, VIOLET, VIOLET_HI]), f, 0.1)
         return mix(c, GOLD_M, M.sm(0.965, 0.99, T))
     return fn
 
@@ -234,7 +231,7 @@ def p_ruff(S, T):
     fold = 0.5 + 0.5 * np.cos(ph + 1.0)
     c = ramp(fold * 0.7 + 0.32, [WHITE_D, WHITE_M, WHITE_L], [0, 0.5, 1])
     line = np.exp(-((np.abs(((ph + 1.0) / 6.283) % 1.0 - 0.5)) / 0.06) ** 2)
-    c = mix(c, hx("5a5468"), line * (0.25 + 0.6 * wall))
+    c = mix(c, hx("8e889c"), line * (0.2 + 0.45 * wall))
     return c * (0.66 + 0.34 * M.sm(0.03, 0.22, T) * M.sm(0.97, 0.78, T))[..., None]
 
 
@@ -260,30 +257,38 @@ def p_wisp(S, T):
     return ramp(0.25 + 0.4 * T + (st - 0.5) * 1.2, [hx("120826"), hx("2a1458"), hx("4e2a96"), hx("7a50c4")])
 
 
+def glow_rim(S, T, c):
+    """a card lit from within: its edge burns violet, its heart stays pale"""
+    d = np.minimum(np.minimum(S, 1 - S) * 1.4, np.minimum(T, 1 - T))
+    c = mix(c, hx("9a58ff"), M.sm(0.16, 0.0, d))
+    return mix(c, hx("e4d0ff"), M.sm(0.03, 0.0, d))
+
+
 def p_card(S, T):
-    """a card's face: pale, its pip violet, as the sheet's glowing cards"""
-    c = ramp(T, [hx("cdb4f4"), hx("b89ae8")])
-    c = mix(c, hx("5a18c8"), suit("diamond", (S - 0.5) * 2.0, (0.5 - T) * 2.0))
-    return mix(c, hx("b88cff"), np.maximum(edges(S, T, 0.05), np.maximum(M.sm(0.05, 0.0, T), M.sm(0.95, 1.0, T))))
+    """a card's face: lilac, lit from within, its pip deep violet"""
+    c = ramp(T, [hx("c8aef6"), hx("b596ee")])
+    c = mix(c, hx("4e14c0"), suit("diamond", (S - 0.5) * 2.0, (0.5 - T) * 2.0))
+    return glow_rim(S, T, c)
 
 
 def p_cardback(S, T):
     c = ramp(0.5 + 0.5 * np.sin((S + T) * 40) * np.sin((S - T) * 40), [hx("3a1a90"), hx("6a3ae0")])
     d = np.abs(S - 0.5) * 1.5 + np.abs(T - 0.5)
     c = mix(c, hx("c8a0ff"), np.exp(-((d - 0.3) / 0.015) ** 2))
-    return mix(c, hx("d8c0ff"), np.maximum(edges(S, T, 0.05), np.maximum(M.sm(0.04, 0.0, T), M.sm(0.96, 1.0, T))))
+    return glow_rim(S, T, c)
 
 
 def p_cardburn(S, T):
-    """a burnt card: charred from one corner, the edge of the burn still alight"""
+    """a burnt card: charred from one corner, the burn's edge an ember, soft, not a stroke"""
     c = p_card(S, T)
     d = np.hypot(S - 1.0, T) + 0.14 * (fbm(S, T, 7, 7, 15, 3) - 0.5)
-    c = mix(c, hx("ffa030"), np.exp(-((d - 0.62) / 0.06) ** 2))
-    return mix(c, hx("20100c"), M.sm(0.6, 0.52, d))
+    c = mix(c, hx("4a2418"), M.sm(0.78, 0.62, d) * 0.8)
+    c = mix(c, hx("ff8a3a"), np.exp(-((d - 0.6) / 0.05) ** 2) * 0.85)
+    return mix(c, hx("1c0e0c"), M.sm(0.58, 0.5, d))
 
 
 def p_flame(S, T):
-    return ramp(T, [hx("ff5a14"), hx("ff9a2a"), hx("ffe08a")])
+    return ramp(T, [hx("7a2a60"), hx("e0622a"), hx("ffb060")])
 
 
 PAINTERS = {"flame": p_flame, "wall_s": wall("spade", SLATE, 11), "wall_d": wall("diamond", RED, 12), "wall_c": wall("club", SLATE, 13), "wall_h": wall("heart", RED, 14), "rail": p_rail,
@@ -351,7 +356,7 @@ def blur(a, r):
 
 
 RELIEF = {"wall_s": 1.3, "wall_d": 1.3, "wall_c": 1.3, "wall_h": 1.3, "lid": 1.3, "rail": 1.0, "brass": 0.7, "bell": 0.7, "knob": 0.6, "torso": 0.8, "peplum": 0.9,
-          "tail_v": 0.9, "tail_k": 0.9, "sleeve_k": 0.8, "sleeve_v": 0.8, "glove": 0.5, "hood": 0.8, "hornR": 0.9, "hornL": 0.9, "ruff": 1.4, "collar_v": 0.9, "collar_k": 0.9}
+          "tail_v": 0.9, "tail_k": 0.9, "sleeve_k": 0.8, "sleeve_v": 0.8, "glove": 0.5, "hood": 0.8, "hornR": 0.9, "hornL": 0.9, "ruff": 0.8, "collar_v": 0.9, "collar_k": 0.9}
 
 
 def normal_map(at):

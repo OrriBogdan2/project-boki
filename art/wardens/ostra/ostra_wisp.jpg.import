@@ -3,11 +3,9 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://43bcdr4ln85d"
-path.bptc="res://.godot/imported/ostra_wisp.jpg-452379d78a76149fed94327c965fd541.bptc.ctex"
-path.astc="res://.godot/imported/ostra_wisp.jpg-452379d78a76149fed94327c965fd541.astc.ctex"
+path="res://.godot/imported/ostra_wisp.jpg-452379d78a76149fed94327c965fd541.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
 "md5": "a303cc0e6a47fa4dc970c69ea0fb1a9f"
@@ -16,7 +14,7 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/ostra/ostra_wisp.jpg"
-dest_files=["res://.godot/imported/ostra_wisp.jpg-452379d78a76149fed94327c965fd541.bptc.ctex", "res://.godot/imported/ostra_wisp.jpg-452379d78a76149fed94327c965fd541.astc.ctex"]
+dest_files=["res://.godot/imported/ostra_wisp.jpg-452379d78a76149fed94327c965fd541.ctex"]
 
 [params]
 

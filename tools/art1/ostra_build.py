@@ -170,7 +170,7 @@ def add_cards(arm, at, mat):
             if key == "cardburn":     # a corner burnt away
                 pts = [pts[0], pts[1], side * w + up * hh * 0.2, side * w * 0.1 + up * hh, pts[3]]
                 uv = [(0, 1), (1, 1), (1, 0.4), (0.55, 0), (0, 0)]
-                flame = [side * w * 1.0 + up * hh * 0.2, side * w * 1.45 + up * hh * 1.05, side * w * 0.95 + up * hh * 0.85, side * w * 0.72 + up * hh * 1.5, side * w * 0.42 + up * hh * 0.98, side * w * 0.1 + up * hh * 1.0]
+                flame = [side * w * 1.0 + up * hh * 0.2, side * w * 1.16 + up * hh * 0.72, side * w * 0.92 + up * hh * 0.78, side * w * 0.72 + up * hh * 1.08, side * w * 0.46 + up * hh * 0.92, side * w * 0.1 + up * hh * 1.0]
             n = len(pts)
             me = bpy.data.meshes.new("card%d" % idx)
             faces = [tuple(range(n)), tuple(range(n - 1, -1, -1))]
@@ -199,7 +199,7 @@ def add_cards(arm, at, mat):
 def main():
     bpy.ops.wm.read_factory_settings(use_empty=True)
     os.makedirs(OUT, exist_ok=True)
-    groups = {"cloth": [], "metal": [], "void-body": [], "void-wisp": [], "glow-cards": [], "leather-face": []}
+    groups = {"cloth": [], "cloth-ruff": [], "metal": [], "void-body": [], "void-wisp": [], "glow-cards": [], "leather-face": []}
     joints = [("x_box", ((0, 0, 0.18), (0, 0, 0.3), "root"))]
     def add(p):
         groups[p.mat].append(p)
@@ -276,7 +276,7 @@ def main():
     for g, ps in groups.items():
         if g == "leather-face":
             continue
-        at = atlas if g in ("cloth", "metal") else (aglow if g.startswith("glow") else (awisp if g == "void-wisp" else avoid))
+        at = atlas if g in ("cloth", "cloth-ruff", "metal") else (aglow if g.startswith("glow") else (awisp if g == "void-wisp" else avoid))
         for p in ps:
             at.put(p.paint, p.px)
         pending.append((g, ps, at))
@@ -291,12 +291,12 @@ def main():
     im_face = image("face", alb, tex + "face.png")
     im_emit = image("face_emit", emit, tex + "face_emit.png")
     obs = []
-    names = {"cloth": ("Body", "cloth-body", im_main), "metal": ("Brass", "metal-body", im_main), "void-body": ("Lining", "void-body", im_void),
+    names = {"cloth": ("Body", "cloth-body", im_main), "cloth-ruff": ("Ruff", "cloth-ruff", im_main), "metal": ("Brass", "metal-body", im_main), "void-body": ("Lining", "void-body", im_void),
              "void-wisp": ("Wisp", "void-wisp", im_wisp), "glow-cards": ("OrbSwirl", "glow-cards", im_glow)}
     mats = {}
     for g, ps, at in pending:
         nm, mn, im = names[g]
-        mats[g] = material(mn, im, normal=im_nrm if g in ("cloth", "metal") else None)
+        mats[g] = material(mn, im, normal=im_nrm if g in ("cloth", "cloth-ruff", "metal") else None)
         obs.append(make_part_object(nm, ps, at, mats[g]))
     # the face: its corners are already the face texture's
     fp = groups["leather-face"][0]

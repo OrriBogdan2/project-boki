@@ -513,7 +513,7 @@
 		},
 		"slots": {
 			"cloth": {
-				"fres": 0.3,
+				"fres": 0.1,
 				"fres_tint": 0.0,
 				"fres_color": [
 					0.62,
@@ -521,7 +521,7 @@
 					1.0
 				],
 				"far_lift": 0.35,
-				"top_light": 0.15,
+				"top_light": 0.06,
 				"own_ambient": [
 					0.52,
 					0.5,
@@ -529,12 +529,15 @@
 				],
 				"dark_lift": 0.02,
 				"albedo": [
-					1.05,
-					1.02,
-					1.1
+					1.0,
+					0.98,
+					1.04
 				],
 				"light_neutral_warm": 0.7,
-				"normal_k": 1.8
+				"normal_k": 0.9,
+				"gloss": 0.0,
+				"sheen": 0.0,
+				"rim_amount": 0.1
 			},
 			"metal": {
 				"fres": 0.2,
@@ -555,6 +558,26 @@
 				"fres": 0.0,
 				"top_light": 0.0,
 				"far_lift": 0.0
+			},
+			"cloth-ruff": {
+				"fres": 0.0,
+				"normal_k": 0.9,
+				"top_light": 0.1,
+				"rim_amount": 0.1,
+				"far_lift": 0.3,
+				"albedo": [
+					1.0,
+					1.0,
+					1.02
+				],
+				"own_ambient": [
+					0.56,
+					0.55,
+					0.58
+				]
+			},
+			"glow-cards": {
+				"glow": 1.15
 			}
 		},
 		"halos": [
@@ -641,12 +664,103 @@
 					0.34
 				],
 				"size": 0.46
+			},
+			{
+				"at": "anchor_orbit_cards_0",
+				"color": [
+					0.46,
+					0.2,
+					1.0,
+					0.3
+				],
+				"size": 0.5,
+				"depth_test": true
+			},
+			{
+				"at": "anchor_orbit_cards_1",
+				"color": [
+					0.46,
+					0.2,
+					1.0,
+					0.3
+				],
+				"size": 0.5,
+				"depth_test": true
+			},
+			{
+				"at": "anchor_orbit_cards_2",
+				"color": [
+					0.46,
+					0.2,
+					1.0,
+					0.3
+				],
+				"size": 0.5,
+				"depth_test": true
+			},
+			{
+				"at": "anchor_orbit_cards_3",
+				"color": [
+					0.46,
+					0.2,
+					1.0,
+					0.3
+				],
+				"size": 0.5,
+				"depth_test": true
+			},
+			{
+				"at": "anchor_orbit_cards_4",
+				"color": [
+					0.46,
+					0.2,
+					1.0,
+					0.3
+				],
+				"size": 0.5,
+				"depth_test": true
+			},
+			{
+				"at": "anchor_orbit_cards_5",
+				"color": [
+					0.46,
+					0.2,
+					1.0,
+					0.3
+				],
+				"size": 0.5,
+				"depth_test": true
+			},
+			{
+				"at": "anchor_orbit_cards_6",
+				"color": [
+					0.46,
+					0.2,
+					1.0,
+					0.3
+				],
+				"size": 0.5,
+				"depth_test": true
+			},
+			{
+				"at": "anchor_orbit_cards_7",
+				"color": [
+					0.46,
+					0.2,
+					1.0,
+					0.3
+				],
+				"size": 0.5,
+				"depth_test": true
 			}
 		],
 		"closeup": {
 			"fov": 34.0,
 			"up": 0.12
-		}
+		},
+		"no_ink": [
+			"ruff"
+		]
 	},
 	"claire": {
 		"painted": {
