@@ -620,3 +620,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - One commit on origin/main 8f7a33d2. Rounds already left along the aim, but Hunter.tick turned the body to the dash line, so the rifle pointed the wrong way. New ArchKit.aims_in_dash() opts out; legs still follow the dash. Changed: Vex (slide, air slide, air roll), Sable (Vault), Claire (Rink Run, LMB down only). Others have no lock: Lisette, Ryzz, Cinder, Pip, Grimble are buffer rows; Motley, Tarek no lock measured. Lisette and Cinder are from rows and code only.
 - Checks: gunslinger-combo 91/91, dash-aim 0, dash-flow 0 (6 skipped), dash-dir 0, archetype 339, health --strict, gen_wiki unchanged. **Full suite not run on this commit.** Merge the commit, not the branch tip: items 68 and RMB tap-only follow on the same branch.
 - Sheets: ext/hero-shots-s2 kits/vex/109_*.png.
+
+## 2026-11-05 S2: Tarek redesign, weapon sheets, item 111
+- ext/art1-tarek redirected to the stone-arm monk (tarek_FINAL_sheet, tarek_turnaround_apose). The 95e0e243 look is superseded; its rig and clip groundwork carries over.
+- Weapon sheets logged (pip, grimble, claire, sable, cinder); master sheet wins. Cinder's agent has hers.
+- Item 111 (Rock Hop dash, Opus) added to KITS. Queue: ART-1 Grimble, Claire, Pip, Sable, Ryzz; kits 111, gloves 69, glider 63, Claire 62+64+65. Portraits next pass: Tarek, Ryzz.
