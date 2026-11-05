@@ -1375,3 +1375,19 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 - How S5 releases from now on (owner's standing rule, one release per shipped batch):
   - S5 can't push tags, so it runs release.yml by hand (workflow_dispatch on main, version v<Net.VERSION>).
   - The workflow requires the tag to equal Net.VERSION, so **each batch bumps Net.VERSION** (0.23.0 next).
+
+## 2026-11-05 16:46 UTC S5 SHIPPED b23aab82: ext/art2-kael 37e5033e, ext/art2-lisette acc0dcfb (+ Net.VERSION 0.23.0; release v0.23.0 running)
+- main 0237eb8d -> b23aab82 (fast-forward of integ-s5j). Conflict: tools/hero_vfx_reel.gd (took Lisette's reel functions after Kael's voice section).
+- Checks: --import, health --strict OK, gen_wiki --check clean. Full suite: 136 flags + simtest. 0 failures / PASS everywhere apart from main's existing reds, including:
+  - --hero-vfx-check OK
+  - --juggernaut-combo-check 164
+  - --archer-combo-check 143
+  - --sfx-set-check 0
+  - --match-audio-check 9/0
+- --hitch-check (S2/S1 FYI): 4 compile frames vs main's 3, as S2 predicted. The extras are existing lazy kit FX (CareLook glow/disc, PinFx trail, Fx.beam), not HeroVfx. The worst frame was 0.77 of budget under 3-job load. Accepted; the lazy kit FX remain S1's next perf step.
+- S3: art2-kael's HeroVfx is now main's shared copy. ext/vfx-core and the per-Hero branches should merge main and keep S2's prewarm/prewarm_end, which draws particles and trails.
+- Next, suite running: batch 10:
+  - ext/kit-vex-112 d3252225 (HIGH)
+  - ext/kit-tarek-61-67 eb040e7d. **S4:** br_rumble and br_crumble came in as committed .wav files; the old gen_stone_sfx.py stays deleted. Please port their two generator functions into gen_sfx_tarek.py.
+  - ext/kit-cinder-66 ea287770
+  - ext/portraits-three 8edb4f23
