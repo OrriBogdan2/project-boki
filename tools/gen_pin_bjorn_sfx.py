@@ -1,27 +1,11 @@
-"""Synthesizes Hem's and Breaker's ability sounds into audio/*.wav (mono, 22.05 kHz, 16-bit).
+"""Synthesizes Breaker's ability sounds into audio/*.wav (mono, 22.05 kHz, 16-bit).
 
     python3 tools/gen_pin_bjorn_sfx.py      (then: godot --headless --import)
 
 Pure Python (math, random, wave): no numpy. Every sound is original, made here from noise, sines and
 envelopes; its own random stream, so no other generator's output changes. Sfx loads these on first use.
 
-Hem (archer)
-  pin_draw         the bow drawn: a rising wooden creak of the limbs and a soft string stretch
-  pin_stage        Empowered ready: a small bright ping with a short shimmer
-  pin_super        Supercharged ready: a fuller two-note chime over a low swell
-  pin_perfect      the perfect release: a clean metallic shing that rings up and out
-  pin_overdraw     held too long: a dull, falling creak
-  pin_loose        an Empowered arrow: a taut twang and a thin air whip
-  pin_loose_super  a Supercharged arrow: a heavy twang, a tearing whoosh, a bass punch
-  pin_super_hit    the Supercharged hit: a glassy crack with a teal ring
-  pin_heavy_draw   the Heavy Shot's draw: a deep, slow creak
-  pin_heavy        the Heavy Shot loosed: a thick thrum and a low whoosh
-  pin_heavy_hit    the Heavy Shot landing: a meaty thunk and a short dust burst
-  pin_hail         Hail Wall cast: a flight of arrows swishing up
-  pin_rain         the rain starting: a hush of many shafts falling
-  pin_patter       one arrow of the rain striking: a small dry tick
-  pin_spirit       Spirit Walk: a quick roll whoosh into an airy, hollow shimmer
-  pin_spirit_end   Spirit Walk ending: a soft falling chime
+(Lisette's pin_* sounds moved to tools/gen_lisette_sfx.py.)
 Breaker (bulwark)
   bjorn_throw      the hammer thrown: a heavy whoof and a tumbling whirr
   bjorn_recall     the hammer called back: a rising whirr
@@ -38,10 +22,6 @@ Breaker (bulwark)
   bjorn_purify     Mending Ground cast: a soft rising chord
   bjorn_purify_burst  the heal landing: a bright chord bloom
 The ultimates (X)
-  pin_ult_cast     Starpiercer: a bright rising shimmer over a low swell, a chord blooming out
-  pin_ult_nock     a beam nocked: a short tight string-stretch whine
-  pin_ult_beam     a beam: a deep bowstring thrum and a cracking boom
-  pin_ult_final    the last beam: the same, heavier, with a long ringing tail
   bjorn_ult_wind   Faultline wind-up: a low strained groan rising as the hammer goes up
   bjorn_ult_slam   the slam: a huge ground thud with a stone crack
   bjorn_ult_rumble the fissure: a rolling rumble with rock pops, running away from him

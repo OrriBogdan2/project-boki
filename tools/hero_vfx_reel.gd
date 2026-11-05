@@ -267,10 +267,10 @@ func _archer_lmb() -> void:
 
 func _archer_miss() -> void:
 	await _reset(8.0)
-	var off := T.pos + Vector3(0, 0, 5.0)
+	var off := home + Vector3(5.5, 0, -2.5)
 	var shots := func(t: float):
 		P.inp["fire"] = fmod(t, 0.9) < 0.04 and t < 1.9
-		_aim(off + Vector3(0, 0, t * 2.0 if t < 0.7 else 2.0 * floor(t / 0.9) - 2.0))
+		_aim(off + Vector3(0, 0, 1.6 * floor(t / 0.9)))
 	await _go(4.6, shots, _sheet("miss",
 			"Missed needles stay stuck in the ground with their red threads attached, 4 s, swaying, then they run out",
 			[0.1, 0.3, 0.6, 1.2, 2.0, 2.8, 3.6, 4.2, 4.5], func() -> Vector3: return off), 3.0)
@@ -298,7 +298,8 @@ func _archer_heavy() -> void:
 		_aim(T.pos)
 	await _go(3.0, heavy, _sheet("heavy",
 			"RMB Heavy Shot: the bar (AimKit) and thread gathering, the big red needle (HEAVY_SCALE) with "
-			+ "its thick thread, the shove, the seam it leaves", [0.6, 1.2, 1.33, 1.38, 1.44, 1.52, 1.7, 2.2, 2.9]), 3.0)
+			+ "its thick thread, the shove, the seam it leaves",
+			[0.6, 1.2, 1.33, 1.38, 1.44, 1.52, 1.7, 2.2, 2.9]), 3.0)
 	await _go(GAP)
 
 func _archer_dash() -> void:
@@ -325,7 +326,8 @@ func _archer_e() -> void:
 		_aim(T.pos)
 	await _go(5.4, hail, _sheet("e",
 			"E Hail Wall: the volley up, needles raining on the arc, silver sparks where they land, the red "
-			+ "thread stitched post to post", [0.2, 0.42, 0.6, 1.0, 2.0, 3.0, 4.0, 4.7, 5.2]), 3.0)
+			+ "thread stitched post to post", [0.2, 0.42, 0.6, 1.0, 2.0, 3.0, 4.0, 4.7, 5.2],
+			func() -> Vector3: return T.position + Vector3(0, 0.9, 0)), 3.0)
 	await _go(GAP)
 
 func _archer_r() -> void:

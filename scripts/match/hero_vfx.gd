@@ -501,7 +501,7 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		if n < 1:
 			node.visible = false
 			continue
-		node.global_transform = Transform3D(Basis.IDENTITY, _where(layer, h, h.pos if not o.has("at") else o["at"], aim))
+		node.global_transform = Transform3D(Basis.IDENTITY, _where(layer, h, o.get("at", h.pos), aim))
 		node.one_shot = false
 		node.explosiveness = 0.0
 		node.emitting = true

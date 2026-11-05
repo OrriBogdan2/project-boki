@@ -149,6 +149,7 @@ const LOOK := {
 	"arrow": [SILVER, Color.WHITE, FLETCH, Color(1.0, 0.16, 0.22, 0.6), 2.4, 0.07, 1.0],
 	"super": [Color.WHITE, Color.WHITE, THREAD, Color(1.0, 0.2, 0.26, 0.9), 5.0, 0.3, 1.35],
 	"over": [Color("8fa0b4"), Color("c0c8d4"), Color("7a6a58"), Color(0.6, 0.12, 0.16, 0.35), 1.0, 0.04, 0.9],
+	"ult": [Color.WHITE, Color.WHITE, THREAD, Color(1.0, 0.2, 0.26, 0.9), 5.0, 0.3, 2.4],
 	"heavy": [Color("e02a2a"), TEAL, GREEN, Color(1.0, 0.25, 0.2, 0.95), 7.0, 0.9, HEAVY_SCALE],
 }
 

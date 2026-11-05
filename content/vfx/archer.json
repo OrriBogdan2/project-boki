@@ -21,6 +21,7 @@
 				{"p": "flare", "at": "bow_root", "size": 1.3, "life": 0.13, "c": "thread", "c2": "silver"},
 				{"p": "ember", "at": "bow_root", "way": "fwd", "n": 12, "speed": 8.0, "spread": 0.2, "grav": 3.0, "life": 0.28, "size": 0.035, "stretch": 0.05, "c": "silver", "c2": "white", "near": true}]},
 		"fire_over": {"net": false, "fx": [{"p": "ribbon", "follow": true, "life": 1.2, "tail": 0.14, "size": 0.08, "wave": 0.2, "c": "deep", "c2": "steel"}]},
+		"fire_ult": {"net": false, "fx": [{"p": "ribbon", "follow": true, "life": 1.2, "tail": 0.14, "size": 0.5, "wave": 0.1, "c": "thread", "c2": "silver"}]},
 		"fire_heavy": {"net": false, "fx": [{"p": "ribbon", "follow": true, "life": 1.2, "tail": 0.3, "size": 0.5, "wave": 0.18, "c": "thread", "c2": "silver"}]},
 
 		"focus_shot": {"sfx": [{"n": "lis_focus", "db": -6.0, "other": -3.0}],
@@ -33,7 +34,7 @@
 				{"p": "ember", "y": 1.0, "way": "fwd", "n": 18, "speed": 8.0, "spread": 0.4, "grav": 6.0, "life": 0.36, "size": 0.045, "stretch": 0.05, "c": "silver", "c2": "white"},
 				{"p": "thread", "y": 0.0, "len": 1.5, "w": 0.6, "life": 1.4, "c": "thread", "c2": "thread"}]},
 		"needle_stuck": {"net": false, "sfx": [{"n": "lis_stick", "db": -7.0, "var": 0.08}],
-			"fx": [{"p": "thread", "len": 1.5, "w": 0.55, "life": "t", "c": "thread", "c2": "thread"},
+			"fx": [{"p": "thread", "len": 2.0, "w": 0.7, "life": "t", "c": "thread", "c2": "thread"},
 				{"p": "flare", "y": 0.15, "size": 0.45, "life": 0.1, "c": "silver", "c2": "white"}]},
 
 		"heavy_hold": {"fx": [{"p": "ember", "at": "nock", "shape": "gather", "radius": 1.0, "n": 22, "speed": 3.0, "drag": 0.0, "curl": 0.2, "life": 0.34, "size": 0.05, "c": "thread", "c2": "silver"}]},
@@ -46,7 +47,6 @@
 			"fx": [{"p": "flare", "y": 1.0, "size": 2.4, "size_k": 0.5, "life": 0.22, "c": "thread", "c2": "silver"},
 				{"p": "sweep", "y": 1.0, "size": 1.6, "arc": 130, "yaw": 90, "life": 0.22, "c": "thread", "c2": "silver"},
 				{"p": "ember", "y": 1.0, "way": "fwd", "n": 26, "speed": 9.0, "spread": 0.45, "grav": 7.0, "life": 0.42, "size": 0.05, "stretch": 0.05, "c": "thread", "c2": "silver"},
-				{"p": "smoke", "y": 0.2, "n": 6, "speed": 1.4, "spread": 0.9, "grav": -0.4, "life": 0.7, "size": 0.45, "radius": 0.4, "c": "steel", "c3": "steel", "near": true},
 				{"p": "thread", "len": 1.8, "w": 0.7, "life": 1.6, "c": "thread", "c2": "thread"}]},
 		"heavy_pin": {"sfx": [{"n": "lis_pin", "db": -3.0}],
 			"fx": [{"p": "flare", "size": 2.0, "life": 0.2, "c": "silver", "c2": "white"},
@@ -69,9 +69,8 @@
 		"hail_go": {"sfx": [{"n": "pin_hail", "db": -2.0}],
 			"fx": [{"p": "flare", "at": "bow_root", "size": 1.4, "life": 0.14, "c": "thread", "c2": "silver"},
 				{"p": "ember", "at": "bow_root", "way": "up", "n": 20, "speed": 12.0, "spread": 0.12, "drag": 0.2, "life": 0.3, "size": 0.05, "stretch": 0.06, "c": "silver", "c2": "white"}]},
-		"rain_thread": {"net": false, "fx": [{"p": "thread", "len": "len", "w": 0.5, "life": "t", "c": "thread", "c2": "thread"}]},
-		"rain": {"fx": [{"p": "ember", "at": "here", "shape": "arc", "radius": "radius", "arc": "deg", "w": 1.6, "way": "up", "n": 40, "speed": 3.0, "spread": 0.5, "grav": 9.0, "life": 0.3, "size": 0.035, "stretch": 0.05, "c": "silver", "c2": "white"},
-				{"p": "smoke", "at": "here", "shape": "arc", "radius": "radius", "arc": "deg", "w": 1.4, "way": "up", "n": 8, "speed": 0.5, "spread": 0.8, "grav": -0.3, "life": 0.7, "size": 0.4, "c": "thread", "c3": "deep", "near": true}]},
+		"rain_thread": {"net": false, "fx": [{"p": "thread", "len": "len", "w": 0.45, "life": "t", "c": "thread", "c2": "thread"}]},
+		"rain": {"fx": [{"p": "ember", "at": "here", "shape": "arc", "radius": "radius", "arc": "deg", "w": 1.6, "way": "up", "n": 40, "speed": 3.0, "spread": 0.5, "grav": 9.0, "life": 0.3, "size": 0.035, "stretch": 0.05, "c": "silver", "c2": "white"}]},
 
 		"ult_cast": {"sfx": [{"n": "pin_ult_cast", "db": -2.0}],
 			"fx": [{"p": "flare", "at": "chest", "size": 3.0, "life": 0.26, "c": "thread", "c2": "silver"},

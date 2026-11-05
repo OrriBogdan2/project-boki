@@ -13,7 +13,7 @@ const KIT_CALLS := {"juggernaut": [
 	"res://scripts/arch/kits/pin_ult.gd", "res://scripts/arch/kits/pin_fx.gd"]}
 ## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
 const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
-	"fire_super", "fire_over", "fire_heavy"]
+	"fire_super", "fire_over", "fire_heavy", "fire_ult"]
 
 var bad := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()

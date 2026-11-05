@@ -212,7 +212,9 @@ func _tag_shots() -> void:
 		if x.get("cos", false):
 			continue
 		var kind := "arrow"
-		if String(x.get("src", "")) == "abil" or x.has("ab"):
+		if String(x.get("ab", "")) == "ultimate":
+			kind = "ult"
+		elif String(x.get("src", "")) == "abil" or x.has("ab"):
 			kind = "heavy"          # (an ability's projectile carries its slot as "ab"; the bow's arrows have none)
 		elif draw.pending != "":
 			kind = draw.pending

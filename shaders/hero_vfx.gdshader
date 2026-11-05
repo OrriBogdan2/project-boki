@@ -98,7 +98,7 @@ vec4 thread(vec2 uv) {
 	float wander = sin(uv.y * 8.0 + seed) * 0.17 + sin(uv.y * 3.1 + seed * 1.7) * 0.13;
 	float sway = sin(TIME * 2.2 + seed + uv.y * 5.0) * 0.03 * uv.y;
 	float d = abs(uv.x - 0.5 - (wander + sway) * smoothstep(0.0, 0.5, uv.y));
-	float line = 1.0 - smoothstep(0.012, 0.045, d);
+	float line = 1.0 - smoothstep(0.03, 0.075, d);
 	float fade = 1.0 - smoothstep(0.7, 1.0, life);
 	float end = 1.0 - smoothstep(0.82 * (1.0 - life * 0.6), 1.0 * (1.0 - life * 0.6), uv.y);
 	float a = line * fade * end;

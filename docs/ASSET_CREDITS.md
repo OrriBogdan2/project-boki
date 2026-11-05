@@ -59,8 +59,8 @@ Every sound effect is synthesized from scratch by `tools/gen_sfx.py`, `tools/gen
 abyss, ruins). `tools/sfx_stats.py` measures the sound effects (peak, loudness, attack, onset, spectral
 centroid), `tools/sfx_loudness.py` their EBU R128 loudness.
 
-The one exception to "synthesized": Kael's sounds (`audio/jug_*.wav`, `tools/gen_kael_sfx.py`) layer our synthesis over
-recorded foley, pitched and filtered:
+The one exception to "synthesized": Kael's and Lisette's sounds (`audio/jug_*.wav`, `tools/gen_kael_sfx.py`; `audio/pin_*.wav`,
+`audio/lis_*.wav`, `tools/gen_lisette_sfx.py`) layer our synthesis over recorded foley, pitched and filtered:
 
 | Pack | Author | Source | License |
 | --- | --- | --- | --- |
