@@ -4233,7 +4233,7 @@ func step(dt: float) -> void:
 	_prof("pre")
 	for h in hunters:
 		if h.ctrl == "bot" and not h.remote and not h.out and not h.extracted:
-			bot_brain.think(self, h, dt)
+			bot_brain.tick(self, h, dt)
 	Capture.tick(self, dt)          # a running scan roots its hunter, after the bots have decided
 	_prof("bots")
 	if skytrain: skytrain.tick(dt)
