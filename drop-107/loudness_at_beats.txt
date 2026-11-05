@@ -1,0 +1,18 @@
+('solo', 'start') 0.3s after Mmax -29.2   before Mmax -120.7
+('solo', 'jump') 5.8s after Mmax -21.2   before Mmax -27.8
+('solo', 'ping') 12.8s after Mmax -22.6   before Mmax -21.6
+('solo', 'snap') 17.3s after Mmax -23.5   before Mmax -25.2
+('solo', 'land') 24.9s after Mmax -23.7   before Mmax -24.9
+('squad', 'start') 27.1s after Mmax -27.2   before Mmax -27.7
+('squad', 'jump') 32.3s after Mmax -21.6   before Mmax -27.3
+('squad', 'break') 34.6s after Mmax -28.0   before Mmax -21.2
+('squad', 'snap') 47.9s after Mmax -23.3   before Mmax -24.4
+('squad', 'land') 55.5s after Mmax -24.4   before Mmax -26.8
+('comet', 'start') 57.6s after Mmax -27.3   before Mmax -23.8
+('comet', 'jump') 63.6s after Mmax -21.6   before Mmax -27.4
+('comet', 'snap') 72.9s after Mmax -22.2   before Mmax -21.9
+('comet', 'land') 74.0s after Mmax -24.2   before Mmax -21.9
++0:-27.2 +2:-31.6 +4:-26.9 +6:-22.4 +8:-24.5 +10:-25.3 +12:-27.9 +14:-27.7 +16:-27.6 +18:-28.0
+    I:         -25.9 LUFS
+    LRA:         4.8 LU
+    Peak:       -7.6 dBFS
