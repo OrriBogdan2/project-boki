@@ -1142,3 +1142,8 @@ This one sheet now has everything (vivid colours, the owner's skin tone, capris)
   - **armour:** engraved silver on the left shoulder, forearms and shins; leather straps; dark trousers; boots
   - **weapon:** a straight, broad, jagged greatsword glowing white-hot, with sparks and dark smoke
 - No kilt (owner choice). An A-pose turnaround will follow.
+
+## 2026-11-05 02:37 UTC (ext): Kael model turnaround: `briefs/art-refs/kael_turnaround_apose.png`
+- Four views (front, left, back, right), consistent: silver pauldron on his LEFT shoulder, the cracked glowing arm on his RIGHT.
+- The arms hang closer than a true A-pose; rig to the shared armature anyway.
+- The scarf's burn-hole glow and the sword come from kael_FINAL_sheet.png.
