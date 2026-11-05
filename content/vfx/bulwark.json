@@ -178,8 +178,9 @@
 				"c": "foam", "near": true}
 		]},
 		"ult_cell": {"fx": [
-			{"p": "drop", "shape": "disc", "radius": 1.8, "y": 0.1, "n": 26, "speed": 7.5, "spread": 0.3, "grav": 12.0,
-				"life": 0.75, "size": 0.09, "stretch": 0.08, "c2": "foam"},
+			{"p": "flare", "y": 0.7, "size": 2.2, "grow": 1.3, "life": 0.32, "c": "main", "c2": "foam", "c3": "deep"},
+			{"p": "drop", "shape": "disc", "radius": 1.8, "y": 0.1, "n": 34, "speed": 8.0, "spread": 0.3, "grav": 12.0,
+				"life": 0.75, "size": 0.11, "stretch": 0.08, "c2": "foam"},
 			{"p": "chunk", "shape": "disc", "radius": 1.4, "n": 6, "speed": 5.0, "spread": 0.5, "grav": 14.0,
 				"life": 0.8, "size": 0.18, "c": "wood", "c3": "char", "near": true},
 			{"p": "smoke", "shape": "disc", "radius": 1.6, "y": 0.3, "n": 5, "speed": 1.5, "spread": 1.0, "life": 1.3,
