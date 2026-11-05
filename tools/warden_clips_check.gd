@@ -133,6 +133,15 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 		if (mi as MeshInstance3D).visible:
 			drawn += 1
 	ok(drawn == 0, "%s: no second weapon on the rig (%d drawn)" % [art_name, drawn])
+	# Hunter.equip rebuilds the rig's weapon and prow: they stay hidden
+	Models.gun_parts(gun, Arch.signature(id), Models.toon(Color.GRAY), Models.toon(Color.GRAY), Models.toon(Color.GRAY))
+	_play(m, an, sync, st, 2)
+	var shown := 0
+	for nd in [gun, m.get_node(WardenGlb.SHIELD_PATH)]:
+		for mi in (nd as Node).find_children("*", "MeshInstance3D", true, false):
+			if (mi as MeshInstance3D).visible:
+				shown += 1
+	ok(shown == 0, "%s: a rebuilt rig weapon stays hidden (%d drawn)" % [art_name, shown])
 	m.set_meta(WardenClips.WEAPON_OUT, true)
 	_play(m, an, sync, st, 3)
 	ok(sk.get_bone_pose_scale(wp).is_zero_approx(), "%s: the weapon hides when it leaves the hand" % art_name)

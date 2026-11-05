@@ -100,6 +100,7 @@ const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (Hunte
 ## the second weapon of a twin hold (Sable's left crossbow), a child of WEAPON placed so that HunterAnim's twin
 ## hold hands it to the left hand (its node x < -0.04: _setup_weapon moves it into the Offhand)
 const WEAPON_OFF := "weapon_offhand"
+const SHIELD_PATH := "Rig/Torso/ArmLPivot/Elbow/Hand/Shield"
 const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
 ## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire).
 const WING_FOLD := "wing_fold"
@@ -419,14 +420,21 @@ static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vect
 		mag.name = "Mag"
 		mag.set_meta("glb", true)          # (the .glb's own, not the procedural one: --warden-glb-check)
 
-## The .glb's shield (SHIELD, modelled in the Shield node's space) replaces the procedural one on the left hand.
-static func _hold_shield(root: Node3D, glb: Node3D) -> void:
-	var shield := glb.find_child(SHIELD, true, false) as Node3D
-	var holder := root.get_node_or_null("Rig/Torso/ArmLPivot/Elbow/Hand/Shield") as Node3D
-	if shield == null or holder == null:
+## The rig's procedural prow goes (the .glb draws its own).
+static func _hide_shield(root: Node3D) -> void:
+	var holder := root.get_node_or_null(SHIELD_PATH) as Node3D
+	if holder == null:
 		return
 	for mi in holder.find_children("*", "MeshInstance3D", true, false):
 		(mi as MeshInstance3D).visible = false
+
+## The .glb's shield (SHIELD, modelled in the Shield node's space) replaces the procedural one on the left hand.
+static func _hold_shield(root: Node3D, glb: Node3D) -> void:
+	var shield := glb.find_child(SHIELD, true, false) as Node3D
+	var holder := root.get_node_or_null(SHIELD_PATH) as Node3D
+	if shield == null or holder == null:
+		return
+	_hide_shield(root)
 	shield.get_parent().remove_child(shield)
 	shield.owner = null
 	holder.add_child(shield)
@@ -783,6 +791,7 @@ class Sync extends Node:
 	var gun: Node3D
 	var muzzle: Node3D
 	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
+	var built: Array = []         # the rig's weapon and prow last hidden (ids; _keep_one_weapon)
 	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
@@ -819,7 +828,20 @@ class Sync extends Node:
 				if nd and bi >= 0:
 					hand_nodes.append([nd, bi])
 
+	## Hunter.equip rebuilds the rig's weapon and prow (a new match, a practice swap): on a skinned weapon those pieces
+	## must stay hidden, so one weapon is drawn in every mode (item 76b.5).
+	func _keep_one_weapon() -> void:
+		if gun == null:
+			return
+		var holder := root.get_node_or_null(SHIELD_PATH)
+		var now := [gun.get_child(gun.get_child_count() - 1).get_instance_id(), holder.get_instance_id() if holder else 0]
+		if now != built:
+			built = now
+			WardenGlb._skinned_weapon(root)
+			WardenGlb._hide_shield(root)
+
 	func _process(dt: float) -> void:
+		_keep_one_weapon()
 		if clips:
 			_play(dt)
 		else:
