@@ -90,7 +90,7 @@ Params: `from`, `dir`, `len` (8), `width` (0.72), `gap` (0.6 m between dots), `d
 
 ### V that closes into one line
 ```gdscript
-# Hem's draw: the V opens 25 deg and closes as the stage charges; one bright line at k = 1
+# Lisette's draw: the V opens 25 deg and closes as the stage charges; one bright line at k = 1
 AimKit.vee(h, "draw", {"k": stage_k, "glint": stage_k * 0.4, "col2": Color("b6ff8a")})
 ```
 Params: `from`, `dir`, `len` (to the cursor, clamped 1.5-20), `k`, `open` (degrees, 25), `glint`
@@ -124,7 +124,7 @@ Params: as for the circle (`r` defaults to 4.5 m), plus `k`, `core0` (0.9) and `
 
 ### Curved arc wall
 ```gdscript
-AimKit.arc_wall(h, "e", {"rmax": reach})       # Hem's Rain of Arrows: at the cursor distance, 120 deg
+AimKit.arc_wall(h, "e", {"rmax": reach})       # Lisette's Rain of Arrows: at the cursor distance, 120 deg
 var w := AimKit.entry(h, "e")                  # read the radius back for the cast
 ```
 Params: `center` (the hunter), `dir`, `radius` (the cursor distance clamped to `rmin`..`rmax`, 2..9),
@@ -140,7 +140,7 @@ Params: `a` (the hunter), `b` (the cursor point, clamped to `range`), `r` (1.35)
 ```gdscript
 AimKit.line(h, "aim")                                        # the thin aim line to the cursor (Ostra, Claire)
 AimKit.line(h, "aim", {"col": Color("ffd25a"), "hot": 0.6})   # Sable's gold empowered line
-AimKit.line(h, "aim", {"len": 20.0})                          # past the cursor to max range (Hem stage 2)
+AimKit.line(h, "aim", {"len": 20.0})                          # past the cursor to max range (Lisette stage 2)
 AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Tarek Tetraform: a long line, inward chevrons, centre ring
 AimKit.star(h, "lock", {"at": foe.pos, "size": 0.5})          # a glint on the ground
 ```
@@ -189,7 +189,7 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - Use `col2` for the accent, and `col_full` for a lane that changes colour at full charge.
   - Keep `alpha` near 1. These are meant to be readable, not loud.
 - **Aim mode.**
-  - For the signature weapon, set `"aim"` in the weapon JSON, or `h.shot_aim` per shot (Hem: stage 1
+  - For the signature weapon, set `"aim"` in the weapon JSON, or `h.shot_aim` per shot (Lisette: stage 1
     cursor, stage 2 `MAX`).
   - For kit-spawned shots, use `AimMode.dist` and `AimMode.point` so the telegraph and the shot agree.
 - **Checks.** In combo checks, assert `AimKit.shown(h, id)` while aiming or holding, and read
