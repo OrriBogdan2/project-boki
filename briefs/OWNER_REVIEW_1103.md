@@ -2218,3 +2218,16 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - Trough → Fill it up → the panel is closed, the trough filled.
   - Market buy ×3 → the panel is still open.
+
+## 177. Name fields: placeholder hint, not pre-filled text (owner, 18:03 UTC Nov 5)
+- The owner: "naming yourself or your boki should delete the placeholder text (hunter) so the player can just type in whatever".
+- In the hatch flow (hatch.gd "Your name" / "Its name") and anywhere else a name is entered (the creator, renaming a Boki), the fields are pre-filled with real text ("Hunter", a default Boki name).
+- **Fix:**
+  - The field starts EMPTY with a greyed `placeholder_text` ("Your name" / "Name your Boki").
+  - Auto-focus the field so typing works immediately.
+  - If the player confirms empty, fall back to the default name ("Hunter" / the species name).
+  - When renaming an existing name, select-all on focus so typing replaces it.
+  - The "Ideas" chips still fill the field when clicked.
+- **Assert:**
+  - On the name stage, the LineEdit text == "" with a placeholder set and focus owned.
+  - An empty confirm → the default name.
