@@ -6,6 +6,8 @@ extends RefCounted
 ## mass, and a woman's silhouette and stance differ from a man's; it animates with HunterAnim and shows kept
 ## mask marks; a match and the Hunter screens use the Hunter's look, never yours.
 
+const FOOT_TOLERANCE := 0.02     # m: how far the lowest foot point may sit above or below the ground
+
 var bad := 0
 
 func ok(cond: bool, what: String) -> void:
@@ -37,6 +39,7 @@ func run(main: Node) -> void:
 	_old_looks()
 	_model(main)
 	await _anim(main)
+	await _feet(main)
 	_who_shows()
 	_blend(main)
 	print("UNMASKED CHECK DONE, failures: %d" % bad)
@@ -214,3 +217,40 @@ func _blend(main: Node) -> void:
 	var want := tint_before.lerp(Unmasked.colour(Save.d["look"]), Unmasked.SHOW)
 	ok(tint_after.is_equal_approx(want), "and your body colour tints the Hunter a tenth")
 	hero.free()
+
+## The lowest point of the model's feet (the boots under each Knee), in world metres; the ground is y = 0.
+func _sole_y(m: Node3D) -> float:
+	var low := 1e9
+	for knee in m.find_children("Knee", "Node3D", true, false):
+		for mi in knee.find_children("*", "MeshInstance3D", false, false):
+			var gi := mi as MeshInstance3D
+			var xf := gi.global_transform
+			for sidx in gi.mesh.get_surface_count():
+				for v in gi.mesh.surface_get_arrays(sidx)[Mesh.ARRAY_VERTEX] as PackedVector3Array:
+					low = minf(low, (xf * v).y)
+	return low
+
+## Item 81: at every height, build and sex the soles rest on the ground, standing and across a walk cycle.
+func _feet(main: Node) -> void:
+	var worst := 0.0
+	var cases := 0
+	var tree := main.get_tree()
+	for g in 2:
+		for h in Unmasked.HEIGHTS.size():
+			for b in Unmasked.BUILDS.size():
+				var m := _build({"unmasked": true, "gender": g, "height": h, "build": b})
+				main.add_child(m)
+				var anim := HunterAnim.new(m)
+				var lows := []
+				for i in 240:
+					var walking := i >= 60
+					anim.update(1.0 / 60.0, {"fired": 99.0, "face": 0.0,
+						"vel": Vector3(0, 0, -3.5) if walking else Vector3.ZERO})
+					if i == 59 or (walking and i % 4 == 0):
+						lows.append(_sole_y(m))
+				for y in lows:
+					worst = maxf(worst, absf(y))
+				cases += 1
+				m.free()
+				await tree.process_frame
+	ok(worst <= FOOT_TOLERANCE, "feet stay on the ground at min/mid/max height, every build and both sexes, idle and walking (%d bodies, worst %.1f cm)" % [cases, worst * 100.0])
