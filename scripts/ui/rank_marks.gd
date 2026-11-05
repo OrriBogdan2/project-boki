@@ -42,7 +42,7 @@ static func plus(H, r: Rect2, id: String, slot: String, key: String) -> void:
 	var glow := Color(1.0, 0.82, 0.48, 0.35 + 0.5 * pulse)
 	H._rounded(r.grow(2.0 + pulse * 3.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 3, glow, 3)
 	if H.hover_id == id or t < _hint_until:
-		HudStyle.ctext(c, Vector2(r.get_center().x, r.position.y - 16), "ALT+" + key, 12, HudStyle.GOLD)
+		_hint(H, Vector2(r.get_center().x, r.position.y - 14.0), "ALT+" + key)
 	var cp := Vector2(r.end.x - 3.0, r.position.y + 3.0)
 	var rad := PLUS_R + pulse * 1.5
 	c.draw_circle(cp, rad + 1.5, HudStyle.SHADE_EDGE)
@@ -60,3 +60,10 @@ static func spot(slot: String) -> Rect2:
 	if s.is_empty() or Engine.get_process_frames() - int(s[1]) > 1:
 		return Rect2()
 	return s[0]
+
+## The ALT+key hint on a dark pill, so it reads over the bars and labels above the slot.
+static func _hint(H, at: Vector2, text: String) -> void:
+	var w := HudStyle.BIG.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 12.0
+	var pill := Rect2(Vector2(at.x - w * 0.5, at.y - 13.0), Vector2(w, 17.0))
+	H._rounded(pill, HudStyle.KEY_BG, 6, Color(HudStyle.GOLD, 0.8), 1)
+	HudStyle.ctext(H.c, Vector2(at.x, pill.end.y - 4.0), text, 12, HudStyle.GOLD, 0)

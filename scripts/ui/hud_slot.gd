@@ -6,8 +6,8 @@ extends RefCounted
 ## pop when a press lands, a red shake when it can't, a ring when it comes back, and ResetPop's swell
 ## when a reset hands it straight back. skill_slot adds
 ## run levels on top: locked (padlock, UNLOCK when a point can open it, LV 6 on R), rank pips over
-## it, and a gold + to spend a point (RankMarks; click it or Alt + the key). Hud._ab_slot / Hud._skill_slot call these (the Boki slots in
-## BokiHud go through the same two, so every slot on the bar looks alike).
+## it, and a gold + to spend a point (RankMarks; click it or Alt + the key). Hud._ab_slot /
+## Hud._skill_slot call these (the Boki slots in BokiHud go through the same two, so every slot on the bar looks alike).
 ## Per-slot animation state lives on Hud (slot_fx, ready_was, ready_flash, hover_spots) and the last
 ## countdown text shown per slot on Hud.slot_text (checks read it).
 
