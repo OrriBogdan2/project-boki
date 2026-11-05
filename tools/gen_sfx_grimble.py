@@ -316,7 +316,7 @@ def hurt(i):
     v = ('eh', 'ah', 'uh', 'eh')[i]
     f0 = (205, 225, 190, 240)[i]
     yelp = gvoice(0.17 + 0.02 * (i % 2), f0, f0 * 0.8, v, 0.75)
-    return mix(yelp, at(wheeze(0.22, 1000, 2800) * 0.8, 0.17))
+    return mix(yelp, at(wheeze(0.22, 1000, 2800) * 0.45, 0.17))
 
 
 def down():
