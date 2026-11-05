@@ -8,7 +8,7 @@ extends RefCounted
 const TRI_BUDGET := 20000
 const DT := 1.0 / 30.0
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
-const POP := 0.16              # of the Hero's height: how much further a frame may take the hand than the clip alone
+const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
 
 var bad := 0
 var holder: Node3D
@@ -160,8 +160,8 @@ func _sliders(id: String, sync: Node) -> void:
 	ok(not (clips.d.get("states", {}) as Dictionary).has("dead") or stays > 0.0,
 			"%s: a knocked-out Hero stays on screen for its death clip" % id)
 
-## Moves handed over as the game does, the state fed frame by frame. A strike is meant to snap, so a pop is the hand moving
-## further in a frame than the clip alone moves it there: that excess stays small against the Hero's height.
+## Moves handed over as the game does, the state fed frame by frame. A strike is meant to snap, so a pop is the hand
+## moving further in a frame than the clip alone moves it there: that excess stays small against the Hero's height.
 func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
 	var hand := m.get_node(String(WardenGlb.BONES["hand.R"])) as Node3D
 	var moves: Dictionary = dd.get("kmoves", {})
