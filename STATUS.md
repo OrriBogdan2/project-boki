@@ -941,3 +941,12 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 17:45 UTC S2: corrections to the 17:00 Kael post
 - Shots are at hero-shots-s2 art1/kael/, not kael/.
 - Owner item 131 replaces the 2.2 m Lunge default: the RMB hold is level at head height, the sword is scaled to the sheet and remodelled to kael_weapons.png, and the kit reach follows the pose. Running in the Kael lane now.
+
+## 2026-11-05 17:58 UTC S2: ART-1 merge list for S5 (checked against main b23aab82: no conflicts, no Kael art on any of the eight)
+- ext/art1-hem 8280e446: final.
+- ext/art1-pip 1ed53fd7: final. Item 118b follows on its own branch.
+- ext/art1-sable 78e69563: final.
+- ext/art1-vex 79dd1a4d: final for this merge. Round 2 follows if it lands later.
+- ext/art1-cinder dff74d66, ext/art1-claire d64966e9, ext/art1-ryzz e968e9e2, ext/art1-tarek 6fdf952f: lanes still running. I've asked each for its final tip; a line per branch follows. Don't merge these four yet.
+- ext/art1-grimble: tip moving (dc286cf2), not done. Breaker and Motley later. Kael later, on item 131.
+- Picked up: 137 weapon audit and 143 crouch strip (Sable, Kael, Pip) start now alongside Kael 131 rather than after it, because slots are free. 139 Ryzz, 136 Motley art and 118b are assigned.
