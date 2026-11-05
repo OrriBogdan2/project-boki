@@ -8,7 +8,8 @@ extends ArchKit
 ##
 ## Rocks are Verbs walls that block movement (HeroZones.rock), so they respect collision, placement
 ## legality and the abyss edge; they are synced over Net as ["zone", ...] events.
-## The RMB charge and slam live in BreahSlam (breah_slam.gd), the dash in BreahHop (breah_hop.gd); the looks in KitLooks.
+## The RMB charge and slam live in BreahSlam (breah_slam.gd), the dash in BreahHop (breah_hop.gd); the looks in
+## KitLooks.
 
 const ROCK_PAY := "ROCKFALL"
 const STONE := Color("d9a35b")

@@ -687,7 +687,8 @@ func _breah() -> void:
 	K.drop_holds()
 	ok(
 		"merge hold: the dive, the charge, its leap and Rock Hop all drop",
-		leaping and not K.dive and K.lmb_t < 0.0 and not K.hop.chaining() and not K.slam.leapt
+		leaping and not K.dive and K.lmb_t < 0.0 and not K.hop.chaining()
+			and not K.slam.leapt
 		and not AimKit.shown(P, "rmb")
 	)
 	P.inp["sec_hold"] = false
@@ -908,7 +909,7 @@ func _air_dash_hold(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	P.inp["move"] = Vector2.ZERO
 	step(m, 0.8)
 
-## Item 35: her own ground (Rubble Leap) and air (the long dash) moves, ids no other hero's table has, each one
+## Item 35: her own ground (Rock Hop) and air (the long dash) moves, ids no other hero's table has, each one
 ## keyed to end with its dash (the leap's crouch and flight; the air dash's time with the dash feel), and
 ## neither dash draws a ground ring or a blast (the leap's hit area is its landing circle, shown in flight).
 func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
@@ -981,7 +982,7 @@ func _chain(m: Match, P: Hunter, K: DolmKit, aims: Array) -> Array:
 	seen.append(P.pos)
 	return seen
 
-## Rock Hop (owner item 111): 2-3 steerable hops off rocks he raises.
+## Rock Hop: 2-3 steerable hops off rocks he raises.
 func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
 	var dd := K.dash_def()
 	var reach := float(dd["dist"]) * float(K.dash_feel()["dist"])
@@ -1083,7 +1084,8 @@ func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Cal
 	await _chain_over(m, P, K, far, func(): if K.leap_lands > lands0 and K.landslides == rolls0: rock_first[0] = true)
 	ok(
 		"crash: the last landing hits and shoves a foe beside it",
-		K.leap_hits == hits0 + 1 and dmg(T) >= float(dd["land_dmg"]) * 0.9, "hits %d took %.1f" % [K.leap_hits - hits0, dmg(T)]
+		K.leap_hits == hits0 + 1 and dmg(T) >= float(dd["land_dmg"]) * 0.9,
+		"hits %d took %.1f" % [K.leap_hits - hits0, dmg(T)]
 	)
 	ok("crash: the rock comes down after him (two hits, not one)", rock_first[0])
 	reset.call()
@@ -1093,7 +1095,8 @@ func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Cal
 	step(m, 1.7)
 	ok(
 		"crash: the rock rolls on and hits: shred and a slow",
-		K.landslides >= 1 and dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t > 0.0, "took %.1f slow %.2f" % [dmg(T), T.slow_t]
+		K.landslides >= 1 and dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t > 0.0,
+		"took %.1f slow %.2f" % [dmg(T), T.slow_t]
 	)
 	reset.call()
 	T.teleport(home + Vector3(reach + 8.5, 0, 0))
@@ -1107,8 +1110,9 @@ func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Cal
 	aim_at(P, far)
 	P.ak.on_dash(false)
 	step(m, 0.2)
-	ok("hop rocks: never launched", not K.launchable(hop_rocks(m)[0]) and hop_rocks(m)[0].get("top") == dd["hop_top"])
-	ok("hop rocks: they carry the top allies hop (StoneStand)", hop_rocks(m)[0].get("by") == P and hop_rocks(m)[0].has("th"))
+	var hr: Dictionary = hop_rocks(m)[0]
+	ok("hop rocks: never launched", not K.launchable(hr) and hr.get("top") == dd["hop_top"])
+	ok("hop rocks: they carry the top allies hop (StoneStand)", hr.get("by") == P and hr.has("th"))
 	# over the abyss, on rough ground, at the map's edge
 	await _hop_terrain(m, P, T, home, K, reset, reach)
 
@@ -1191,7 +1195,10 @@ func _hop_terrain(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, res
 		not K.hop.chaining() and P.pos.y > home.y - 1.0, "over %s" % W.is_void(P.pos.x, P.pos.z)
 	)
 	step(m, float(K.dash_def()["hop_rock_t"]) + 0.2)
-	ok("abyss: when the rock crumbles, he falls", P.vel.y < 0.0 or P.pos.y < home.y - 0.5 or P.gliding, "y %.2f" % (P.pos.y - home.y))
+	ok(
+		"abyss: when the rock crumbles, he falls", P.vel.y < 0.0 or P.pos.y < home.y - 0.5 or P.gliding,
+		"y %.2f" % (P.pos.y - home.y)
+	)
 	restore.call()
 	P.teleport(home)
 	step(m, 0.3)
@@ -1222,8 +1229,9 @@ func _hop_terrain(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, res
 	P.ak.on_dash(false)
 	step(m, 0.8)
 	ok(
-		"rough: a hop up a terrace lands on top", P.pos.x > home.x + 2.0 and P.pos.y >= W.ground_at(P.pos.x, P.pos.z) - 0.05
-			and not K.hop.chaining(), "x %.2f y %.2f" % [P.pos.x - home.x, P.pos.y - home.y]
+		"rough: a hop up a terrace lands on top",
+		P.pos.x > home.x + 2.0 and P.pos.y >= W.ground_at(P.pos.x, P.pos.z) - 0.05 and not K.hop.chaining(),
+		"x %.2f y %.2f" % [P.pos.x - home.x, P.pos.y - home.y]
 	)
 	restore.call()
 	reset.call()

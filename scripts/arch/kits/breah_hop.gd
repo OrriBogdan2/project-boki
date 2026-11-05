@@ -1,6 +1,6 @@
 class_name BreahHop
 extends RefCounted
-## Tarek's ground dash, Rock Hop (owner item 111, docs/heroes/dolm.md): a rock bursts up under him and he springs
+## Tarek's ground dash, Rock Hop (docs/heroes/dolm.md): a rock bursts up under him and he springs
 ## off it toward the cursor, up to `hops` times. Fast, low arcs; a fresh low rock rises to meet his feet at each
 ## landing, laid along the hop like a rail, and he skids along it. A press inside `window` of the last take-off
 ## sends the next hop toward the cursor as it is then; no press and the skid ends in the landing. Each landing but
@@ -64,7 +64,9 @@ func start() -> void:
 	if not st.is_empty():
 		_roll_on()         # the last chain's rock was still to come
 	spots = []
-	st = {"n": 0, "phase": "crouch", "t": 0.0, "T": _flight(), "from": h.pos, "start": h.pos, "press": false, "left": 0.0}
+	st = {
+		"n": 0, "phase": "crouch", "t": 0.0, "T": _flight(), "from": h.pos, "start": h.pos, "press": false, "left": 0.0
+	}
 	dash_was = true
 	_aim_hop()
 	k.play("breah_hop")
