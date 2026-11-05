@@ -1324,3 +1324,6 @@ See OWNER_REVIEW item 109: the aim is currently stuck to one direction during he
 
 ## 2026-11-05 04:55 UTC (ext): Pip master sheet updated (subtle glowing gold constellation markings in her fur, a glowing tail tip, gold wing veins, glowing flowers; the markings brighten when she heals) + splash `pip_splash.png` (a dark cave, healing a knight, eyes in the dark).
 
+
+## 2026-11-05 04:58 UTC (ext): Pip turnaround: `briefs/art-refs/pip_turnaround.png` (4 clean views). Pip, Claire portraits added (`pip_portrait.png`, `claire_portrait.png`). Eight heroes now have a full set: master sheet, turnaround, splash, portrait.
+
