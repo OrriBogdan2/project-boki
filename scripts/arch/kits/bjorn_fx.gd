@@ -5,7 +5,7 @@ extends Node3D
 ## colour on bright grass.
 ## - the thrown hammer (tumbling, a gold-orange glow and trail), planted head-down in the ground under an
 ##   upright gold beacon with rising chevrons
-## - the held swing (owner item 59): the hammer whirled round him at arm's length, flat over his shoulder, with a
+## - the held swing: the hammer whirled round him at arm's length, flat over his shoulder, with a
 ##   gold-orange trail behind its head, a gold glint on the head from 0.6 s that grows; at full charge a short
 ##   ring-free flash on it, the glint burning white-hot while the perfect window is open. It never stops until
 ##   he lets go: the charge motion only, the damage comes on the release

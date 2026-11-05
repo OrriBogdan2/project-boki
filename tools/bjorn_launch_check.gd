@@ -477,14 +477,15 @@ func _hold_spin() -> void:
 		var head: Vector3 = K.fx._head_world()
 		reach = maxf(reach, Vector2(head.x - P.pos.x, head.z - P.pos.z).length())
 		trail = trail and K.fx.orbit_trail.visible
-	ok("bjorn #59: held, the hammer turns continuously, >= %.1f turns/s in every %.2f s, through the perfect window and on"
+	ok("bjorn #59: held, the hammer keeps turning, >= %.1f turns/s in every %.2f s, through the window and on"
 			% [MIN_TURNS, SPIN_STRETCH],
 		slowest >= MIN_TURNS and passed_window and K.smash_k() >= 0.99, "%.2f-%.2f turns/s" % [slowest, fastest])
-	ok("bjorn #59: the whirl speeds up with the charge", fastest >= slowest + 0.8 and fastest <= float(md["spin_turns"][1]) + 0.1,
+	ok("bjorn #59: the whirl speeds up with the charge",
+		fastest >= slowest + 0.8 and fastest <= float(md["spin_turns"][1]) + 0.1,
 		"%.2f-%.2f turns/s" % [slowest, fastest])
 	ok("bjorn #59: the head runs at arm's length with its trail behind it", reach >= 1.5 and trail,
 		"head %.2f m out, trail %s" % [reach, trail])
-	ok("bjorn #59: the whirl hurts nobody (default until the owner answers): a foe inside its circle took nothing in 2 s",
+	ok("bjorn #59: the whirl hurts nobody (the default for now): a foe inside its circle took nothing in 2 s",
 		dmg(T) == 0.0, "took %.0f" % dmg(T))
 	# walking: the hold's speed (55% of his run, kept from the source), the hammer still round
 	_ready_swing(m, P, T, home)
@@ -508,7 +509,8 @@ func _hold_spin() -> void:
 	step(m, 0.5, press_at.bind(P, at))
 	_tap_key(m, P, "jump", at)
 	var jumped := await _spun(m, P, K, at, 0.3) / 0.3
-	ok("bjorn #59: a jump keeps the whirl", jumped >= MIN_TURNS and K.fx.held and not P.grounded, "%.2f turns/s" % jumped)
+	ok("bjorn #59: a jump keeps the whirl", jumped >= MIN_TURNS and K.fx.held and not P.grounded,
+		"%.2f turns/s" % jumped)
 	_ready_swing(m, P, T, home)
 	step(m, 0.5, press_at.bind(P, at))
 	_tap_key(m, P, "dash", at)

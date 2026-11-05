@@ -5,7 +5,7 @@ extends ArchKit
 ## - LMB (War Hammer): tap throws the hammer to the cursor (clamped to its range; it passes through foes
 ##   and stays planted under a gold beacon, showing foes near it to your team, until you tap again to
 ##   call it back, hitting on the way). Hold whirls the hammer round him at arm's length, turning faster as it
-##   charges (owner item 59; a glint on its head from 0.6 s, no damage until he lets go); at full (1.25 s) a flash
+##   charges (a glint on its head from 0.6 s, no damage until he lets go); at full (1.25 s) a flash
 ##   on its head and a click open the perfect window, the whirl still going. Let go and it's a Crushing Blow: a
 ##   flaming 180 degree crescent in front that steps him forward with it; let go in the window and it's the
 ##   perfect swing, a leaping launch (BjornLaunch).

@@ -317,7 +317,7 @@ const MOVES := {
 		[0.176, {"hw": 1.0, "fl": Vector3(0.05, 0.1, -0.6), "p": -0.15}],
 		[0.299, {"hw": 1.0, "fl": Vector3(-0.05, -0.05, -0.15), "p": 0.1, "sq": 0.12}],
 		[0.484, {}]]},
-	# LMB held (owner item 59): whirling the hammer, side-on and crouched, the hammer arm out to the side, the
+	# LMB held: whirling the hammer, side-on and crouched, the hammer arm out to the side, the
 	# shield arm forward; the hammer circles him (BjornFx) while the body keeps facing the cursor. At full (1.05 s
 	# into the move, 1.25 s held) he is sunk lowest and leaning into it, the whirl still going; the release keys
 	# start from the coil (BUL_COIL), so the hammer hauls back on the swing's first frame
