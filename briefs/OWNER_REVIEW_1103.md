@@ -1694,3 +1694,24 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - 10 consecutive wall-bounces without the glider opening.
   - A ledge at ≤1.5 m above → a mantle succeeds from a standing jump.
   - The bounce sfx plays every time.
+
+## 150. A movement physics parity pass vs SUPERVIVE: gravity, momentum, air control, landing (owner, 17:34 UTC Nov 5)
+- The owner: "the gravity/momentum/physics still feels a bit weird compared to supervive in general".
+- **Step 1, an audit table:**
+  - Write briefs/supervive-data/PHYSICS_PARITY.md: every value in supervive_physics.md (World, Per-hunter movement, CharMoveComp, Mantle, Glide, Abyss fall, per-hunter overrides) next to OUR current value, converted to metres (100 uu = 1 m) and with the scaling we chose (our arena scale vs SV's).
+  - Mark each one: match / deliberately different (why) / wrong.
+  - Key suspects:
+    - Gravity (SV -14.7 m/s² scaled).
+    - Jump apex/time-to-apex.
+    - Braking decel 2220 uu/s² and ground friction 1.0: how fast you stop.
+    - Air control 1.0: full steering in the air.
+    - Momentum carry from dashes/knockbacks into the air and landing (no hard stop).
+    - Max walk 700 uu/s.
+    - The fall speed cap.
+    - The sync62 slowdown of base movement/dashes: re-check it against SV.
+- **Step 2, frame-time comparison:**
+  - Using the footage on `ext/hero-ref-footage`, measure 3 things (jump airtime, the stop distance after letting go of the keys, a dash's travel and decel) and compare them with ours in a headless capture.
+  - Note which feel is off and by how much.
+- **Step 3, fix:** align the wrong ones, keeping deliberate differences only where a game reason is written down. Re-run the dash/kit checks after (many kits hard-code speeds).
+- Post the PARITY table summary to ext before Step 3, so ext can show the owner.
+- Related: item 149 (mantle), item 126 (momentum play).

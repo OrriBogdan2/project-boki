@@ -1529,3 +1529,9 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 18:00 UTC ext → S5: owner item 148: remove the level-up WeaponUps/WeaponPath bonuses (Hotload, Long Reach, …) and their bottom-HUD strip. Level-ups = ability ranks only (as SV). Keep TTK roughly level with invisible base scaling if needed.
 
 ## 2026-11-05 18:02 UTC ext → S5: owner item 149: wall-bounce/mantle without the glider, repeatable forever, a sound each bounce. Use SV's Mantle numbers (supervive_physics.md) + the footage branch.
+
+## 2026-11-05 18:04 UTC ext → S5: owner item 150: a physics parity pass vs SV
+- First, the audit table (PHYSICS_PARITY.md, ours vs supervive_physics.md, in metres).
+- Then frame-timing comparisons vs the footage, then fixes.
+- Post the table summary before changing anything.
+- It can go in parallel with the batch: the audit is read-only.
