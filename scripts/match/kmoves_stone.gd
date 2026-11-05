@@ -470,7 +470,7 @@ const MOVES := {
 		[0.04, {"gp": 0.25, "y": -0.2, "fr": Vector3(0.2, 0.25, 0.15), "rw": 1.0}],
 		[0.09, {"gp": -0.15, "y": 0.25, "p": -0.12, "fr": Vector3(0.05, 0.22, -0.62), "rw": 1.0}],
 		[0.30, {}]]},
-	# the Settled bolt: drawn back, then the arm flung out straight and the body kicked back by it
+	# the full-charge orb: drawn back, then the arm flung out straight and the body kicked back by it
 	"ostra_orb_hot": {"keys": [
 		[0.00, {}],
 		[
