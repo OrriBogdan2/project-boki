@@ -896,8 +896,8 @@ func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 		c.draw_colored_polygon(PackedVector2Array([edge + d * 38.0, edge - d * 9.0 + perp * 23.0, edge - d * 9.0 - perp * 23.0]), col)
 		_ctext(edge - d * 62.0, "%s  %dm" % [label, dist], 22, col, big)
 
-## An exit on the minimap: a little boat for a skiff dock, a diamond for a rift hatch, a walled square
-## with a mast for an outpost. Bright when it's usable, grey when not; a pulsing ring while it's going.
+## An exit on the minimap: a little boat for a skiff dock, a diamond for a rift hatch, an outpost's banner
+## post (OutpostGlyph). Bright when it's usable, grey when not; a pulsing ring while it's going.
 func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
 	var col: Color = Exits.color_of(x)
 	var usable: bool = m.exits.live(x)
@@ -919,12 +919,11 @@ func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
 			c.draw_colored_polygon(dm, col if st == "open" or (m.player and m.player.rift_keys > 0) else Color(col, 0.55))
 			c.draw_circle(pv, 1.6 * k, dark)
 		"outpost":
-			var r := Rect2(pv - Vector2(5.5, 5.5) * k, Vector2(11, 11) * k)
-			c.draw_rect(r.grow(1.5), dark)
-			c.draw_rect(r, col, false, 2.0)
-			c.draw_circle(pv, 2.2 * k, col)
+			var held := OutpostLook.held(x)
+			var flag: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if held else Color(0.55, 0.58, 0.64, 0.9)
+			OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x))
 			if st == "charging":
-				_arc(pv, 9.0 * k, float(x["prog"]), col, 2.0)
+				_arc(pv, 11.0 * k, float(x["prog"]), col, 2.0)
 	if st in ["called", "boarding", "charging", "open", "unlocking"]:
 		var ph := fmod(m.time * 1.2, 1.0)
 		c.draw_arc(pv, (8.0 + ph * 8.0) * k, 0, TAU, 24, Color(col, 0.8 * (1.0 - ph)), 2.0, true)
@@ -1006,8 +1005,6 @@ var slot_fx := {}          # slot id -> {kind: "cast"|"deny", t}: a pop when a p
 ## A press on an ability slot: "cast" pops it, "deny" (on cooldown, not ready) shakes it red; "reset" (it just came back) swells it with a ring.
 func ability_feedback(id: String, kind: String) -> void:
 	slot_fx[id] = {"kind": kind, "t": 0.0}
-	if id == "dash" and kind == "deny" and m.player:
-		plates.stam.deny(m.player)
 var hurt_dirs: Array = []  # {ang, t}
 
 func hurt_from(at: Vector3) -> void:
@@ -1056,12 +1053,7 @@ func _hud_tick(delta: float) -> void:
 	if hd and not _h_down and (m.opts.get("training", false) or m.opts.get("duel", false)):
 		guide_hidden = not guide_hidden
 	_h_down = hd
-	for id in slot_fx.keys():
-		slot_fx[id]["t"] = float(slot_fx[id]["t"]) + delta
-		if float(slot_fx[id]["t"]) > ResetPop.LEN: slot_fx.erase(id)
-	for id in ready_flash.keys():
-		ready_flash[id] = float(ready_flash[id]) - delta
-		if float(ready_flash[id]) <= 0.0: ready_flash.erase(id)
+	HudSlot.decay(self, delta)
 	for h in hurt_dirs.duplicate():
 		h["t"] = float(h["t"]) + delta
 		if float(h["t"]) > 1.2: hurt_dirs.erase(h)
@@ -1163,9 +1155,7 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 		_skill_slot("sec", "sec", sr, util.icon, Settings.key_cap("secondary"), util.color, p.runner.cd_frac("utility"), p.runner.cd_left("utility") if not p.runner.is_ready("utility") else 0.0, p.runner.is_ready("utility"), p.runner.charges("utility") if util.charges > 1 else -1, util.charges if util.charges > 1 else 0)
 	x += s + gap
 	# Shift: your dash
-	var dmax := p.max_dashes()
-	var dcd := (1.0 - fposmod(p.dashes, 1.0)) if p.dashes < dmax - 0.001 else 0.0
-	_skill_slot("dash", "dash", Rect2(Vector2(x, y), Vector2(s, s)), "dash", Settings.key_cap("dash"), Color("bfe6ff"), dcd, dcd * p.dash_regen(), p.dashes >= 1.0, int(floor(p.dashes)), int(dmax))
+	DashSlot.row_slot(self, Rect2(Vector2(x, y), Vector2(s, s)), p)
 	x += s + gap
 	# E: your kin's ability
 	var er := Rect2(Vector2(x, y), Vector2(s, s))
@@ -1210,8 +1200,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	BokiHud.aug_mark(self, p, sr, "rmb")
 	x += s + gap
 	var di := p.slot_info("dash")
-	var dmax := int(di["max_charges"])
-	_skill_slot("dash", "dash", Rect2(Vector2(x, y), Vector2(s, s)), String(di["icon"]), Settings.key_cap("dash"), di["col"], float(di["cd"]) / maxf(0.01, float(di["cd_max"])) if float(di["cd"]) > 0.0 else 0.0, float(di["cd"]), bool(di["ready"]), int(di["charges"]), dmax)
+	DashSlot.row_slot(self, Rect2(Vector2(x, y), Vector2(s, s)), p)
 	if di.get("full", false):
 		# the payoff lives on the dash (the Thief's Primed shot into 3 Marks): the same gold dot
 		c.draw_circle(Vector2(x, y) + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
@@ -1464,8 +1453,6 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 					HudStyle.strip(c, Rect2(Vector2(tx, r.position.y + 38), Vector2(tw, 3)), h.armor / h.max_armor, h.armor_col())
 				if _has_status(h):
 					_status_row(Vector2(tx + tw * 0.5, r.position.y + 52), h)
-				else:
-					plates.stam.draw(c, Rect2(Vector2(tx, r.position.y + 46), Vector2(tw * 0.6, 3)), h)
 			"WISP":
 				var left := _bleed_left(h)
 				var stp: bool = h.get_meta("stomped", false)
@@ -2061,7 +2048,7 @@ var abyss_fx: CanvasLayer = null
 func _head(h: Node3D, up: float) -> Vector3:
 	return h.position + (m.cam.char_lean() * Vector3(0, up, 0) if m.cam else Vector3(0, up, 0))
 
-## Health and stamina (dash charges) right above your hunter, where your eyes already are.
+## Health right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:
 	var cam := m.cam
 	var at := _head(p, 2.7 * float(p.cdat["scale"]))

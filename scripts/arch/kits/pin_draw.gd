@@ -6,22 +6,24 @@ extends RefCounted
 ## - Stages (content/weapons/longbow.json "draw"): a tap shot before stage 1, Empowered at stage 1,
 ##   Supercharged at stage 2. A tap or Empowered shot lands at the cursor (clamped to its range); a
 ##   Supercharged shot flies its full range past the cursor (AimMode via h.shot_aim).
-## - Reticle (world, own player), all feathered (barbs swept back toward the bow): a thin line to the
-##   cursor at rest; drawing, a V of two lines from the bow that close on the cursor, the cursor charge
-##   ring filling over the whole draw. Stage 1 ready: the lines merge into one bright line, a leaf glint
-##   rides out along it and a green fletch burst flashes at the bow. Stage 2 ready: the body flashes, a
-##   thick mint line runs past the cursor to the shot's full range, the first foe under it ringed at the
-##   feet. The fletch glint at the bow hand shows only while a stage is ready. Overdrawn: all of it dims.
+## - Reticle (world, own player; owner item 55b): a thin line to the cursor at rest. Drawing, a bright
+##   fill grows out from Hem along that line like a progress bar (full at Supercharged), with one small
+##   circle on the line at the next perfect point; it flashes gold when the fill reaches it and for the
+##   perfect window, and releasing then is the perfect shot. Then it moves on to the end of the line for
+##   Supercharged. Nothing else: no V, no glints, no cursor ring or other UI. Supercharged ready: the body
+##   flashes, a thick white line runs past the cursor to the shot's full range, the first foe under it
+##   ringed at the feet. Overdrawn: it dims to a thin pale line.
 ## - Perfect release: let go within perfect_t of a stage coming up: the next draw runs quick_k faster
-##   until its stage 1 (no extra damage), a brief gold fletch burst with a ring at the bow hand.
+##   until its stage 1 (no extra damage), a brief gold fletch burst with a ring at the bow.
 ## - Overdraw: held overdraw_t past the last stage, the arrow does overdraw_k of its damage.
 
-const LINE_A := 0.35           # the faint resting aim line's strength
-const MERGE_T := 0.12          # s the merged bright line holds at stage 1 before the V re-opens
-const SUPER_COL := Color("a8ffe0")
-const STAGE_COL := Color("e6ffd0")
-## the feather barbs on her draw lines (m at the bow end)
-const FLETCH := 0.22
+const LINE_A := 0.8            # the thin aim line's strength (a paler red, it has to show on grass at the match zoom)
+const FILL_START := 0.6        # m ahead of Hem where the filling line begins
+const MIN_LEN := 2.5           # m: the shortest the filling line runs, so a short aim still reads
+const SUPER_COL := Color("fff6f0")
+const FLASH_R := Vector2(0.5, 0.32)  # m: the circle's flash, as it pops and as it settles over the window
+const MARK_R := 0.22           # m: the quiet circle
+const REST_LW := 0.045        # m: the thin line under the fill
 const TGT_COL := Color("d8ff6a")
 
 var k: ArcherKit
@@ -93,9 +95,7 @@ func _perfect() -> void:
 	perfects += 1
 	quick = true
 	perfect_now = true
-	var d := h.aim_dir()
 	k.fx.fletch_burst(bow_at(), 1.1, PinFx.GOLD, 0.13, 0.07, 1.0)
-	AimKit.perfect(h)
 	k.m.sfx("pin_perfect", h.pos, -3.0 if h.is_local() else -8.0, 1.25)
 
 func _sc() -> float:
@@ -114,24 +114,19 @@ func tick() -> void:
 	var s := stage_t()
 	var col := Color(String(k.d.get("color", "#e8483e")))
 	if h.wpn.has("draw") and not drawing and k.tells_visible() and h.can_fire():
-		AimKit.line(h, "draw_rest", {"alpha": LINE_A, "col": col, "fletch": FLETCH * 0.6})
+		AimKit.line(h, "draw_rest", {"from": line_start(), "alpha": LINE_A, "col": col.lightened(0.35), "lw": REST_LW})
 	if drawing:
 		if was < s.x and t >= s.x:
 			k.m.sfx("pin_stage", h.pos, -6.0 if h.is_local() else -10.0)
-			k.fx.fletch_burst(bow_at(), 0.8, PinFx.GREEN, 0.05, 0.1, 0.0, 5.0)
-			AimKit.flare(h, {"col2": STAGE_COL})
 		if was < s.y and t >= s.y:
 			k.m.sfx("pin_super", h.pos, -3.0 if h.is_local() else -7.0)
 			h.flash_t = 0.12           # the whole body flashes once
-			k.fx.fletch_burst(bow_at(), 1.0, SUPER_COL, 0.06, 0.12, 0.6, 5.0)
-			AimKit.flare(h, {"col2": SUPER_COL})
 			k.net_ring(h.pos, 1.3, k.res_col())
 		if was < over_t() and t >= over_t():
 			k.m.sfx("pin_overdraw", h.pos, -10.0, 0.9)
 			k.play("arc_over")
 		_reticle(t, s, col)
 	elif was >= 0.0:
-		k.fx.bow_glint_at(Vector3.ZERO, 0.0, col)
 		tgt = null
 	if drawing and was < 0.0:
 		k.play("arc_draw")
@@ -161,41 +156,73 @@ func release_move() -> String:
 	}.get(last_kind, "arc_loose")
 
 func _reticle(t: float, s: Vector2, col: Color) -> void:
-	AimKit.charge(h, clampf(t / s.y, 0.0, 1.0), {"col": col, "flare": false})
+	AimKit.hide(h, "draw_rest")
+	var o := line_start()
+	var d := h.aim_dir()
+	var cur := cursor_len()
 	if t < s.y:
-		var kv: float
-		if t < s.x:
-			kv = t / s.x
-		elif t < s.x + MERGE_T:
-			kv = 1.0
-		else:
-			kv = clampf((t - s.x - MERGE_T) / maxf(0.05, s.y - s.x - MERGE_T), 0.0, 0.999)
-		var c2 := Color("b6ff8a") if t < s.x else STAGE_COL
-		# the leaf glint rides out along the line only while it's merged (a stage just came up)
-		var glint := clampf((t - s.x) / MERGE_T, 0.0, 1.0) if kv >= 1.0 else -1.0
-		AimKit.vee(h, "draw", {"k": kv, "glint": glint, "col": col, "col2": c2, "fletch": FLETCH})
-		k.fx.bow_glint_at(bow_at(), 0.55 if t >= s.x else 0.0, PinFx.GREEN)
+		# the filling line: the faint line to the cursor with the bright fill growing out of Hem along it
+		var thin := {"from": o, "len": cur, "col": col.lightened(0.35), "alpha": LINE_A, "lw": REST_LW}
+		thin["arrow"] = false
+		AimKit.line(h, "draw", thin)
+		var bright := {"from": o, "len": maxf(0.05, cur * fill_frac(t)), "col": col, "lw": 0.16, "alpha": 1.4}
+		bright["arrow"] = false
+		AimKit.line(h, "draw_fill", bright)
 		tgt = null
+	else:
+		# Supercharged: the thick white line to max range (dims once overdrawn); the fill is full
+		AimKit.hide(h, "draw_fill")
+		var over := t > over_t()
+		var rng := float((wpn_draw()[-1] as Array)[2]) if not wpn_draw().is_empty() else 16.0
+		var far := {"from": o, "len": rng - FILL_START, "col": SUPER_COL, "lw": 0.11, "hot": 0.25, "alpha": 1.3}
+		if over:
+			far.merge({"col": Color("e8d8d4"), "lw": 0.03, "hot": 0.0, "alpha": 0.55}, true)
+		AimKit.line(h, "draw", far)
+		tgt = _under_line(rng)
+		if tgt != null and not over:
+			AimKit.circle(h, "draw_tgt", {"at": tgt.pos, "r": 0.85, "col": TGT_COL, "hot": 0.5})
+	_circle(t, s, o, d, cur, col)
+
+## The one perfect-timing circle: on the next stage's point, flashing from the frame the fill reaches it
+## to the end of that stage's perfect window. Past the last window there's nothing left to time.
+func _circle(t: float, s: Vector2, o: Vector3, d: Vector2, cur: float, col: Color) -> void:
+	var stage := mark_stage(t)
+	if stage == 0:
+		AimKit.hide(h, "draw_mark")
 		return
-	# Supercharged: the thick white line to max range (dims once overdrawn)
-	var over := t > over_t()
-	var rng := float((wpn_draw()[-1] as Array)[2]) if not wpn_draw().is_empty() else 16.0
-	AimKit.line(
-		h,
-		"draw",
-		{
-			"len": rng,
-			"col": SUPER_COL if not over else Color("9fb8a0"),
-			"lw": 0.03 if over else 0.09,
-			"hot": 0.0 if over else 0.25,
-			"alpha": 0.45 if over else 1.3,
-			"fletch": FLETCH * (0.5 if over else 1.3)
-		}
-	)
-	k.fx.bow_glint_at(bow_at() + Vector3(0, 0.05, 0), 0.3 if over else 1.0, SUPER_COL)
-	tgt = _under_line(rng)
-	if tgt != null and not over:
-		AimKit.circle(h, "draw_tgt", {"at": tgt.pos, "r": 0.85, "col": TGT_COL, "hot": 0.5})
+	var p := o + Vector3(d.x, 0, d.y) * (cur * mark_frac(stage))
+	var reached := s.x if stage == 1 else s.y
+	if t < reached:
+		AimKit.circle(h, "draw_mark", {"at": p, "r": MARK_R, "col": col, "hot": 0.15, "alpha": 1.3})
+		return
+	var r := lerpf(FLASH_R.x, FLASH_R.y, clampf((t - reached) / perfect_t(), 0.0, 1.0))
+	AimKit.circle(h, "draw_mark", {"at": p, "r": r, "col": PinFx.GOLD, "hot": 1.0, "fill": 1.0, "alpha": 1.3})
+
+## How far along the draw's fill is (0..1 over the whole draw to Supercharged).
+func fill_frac(t: float) -> float:
+	return clampf(t / stage_t().y, 0.0, 1.0)
+
+## Where along the line the perfect-timing circle for a stage sits (0..1, the same scale as fill_frac).
+func mark_frac(stage: int) -> float:
+	var s := stage_t()
+	return s.x / s.y if stage == 1 else 1.0
+
+## Which stage's circle is up at draw time t: 1, then 2 once stage 1's perfect window has passed, 0 after both.
+func mark_stage(t: float) -> int:
+	var s := stage_t()
+	if t <= s.x + perfect_t():
+		return 1
+	return 2 if t <= s.y + perfect_t() else 0
+
+## Where the aim line starts: just ahead of Hem, so it reads as leaving her.
+func line_start() -> Vector3:
+	var d := h.aim_dir()
+	return h.pos + Vector3(d.x, 0, d.y) * FILL_START
+
+## The filling line's length: out to the cursor (clamped to the Empowered range), never shorter than MIN_LEN.
+func cursor_len() -> float:
+	var rng1 := float((wpn_draw()[0] as Array)[2]) if not wpn_draw().is_empty() else 12.0
+	return maxf(MIN_LEN, AimMode.point(h, rng1).distance_to(line_start()))
 
 ## The first foe under the aim line within reach (the Supercharged target highlight).
 func _under_line(rng: float) -> Ent:
@@ -215,4 +242,3 @@ func _under_line(rng: float) -> Ent:
 func drop() -> void:
 	was = -1.0
 	tgt = null
-	k.fx.bow_glint_at(Vector3.ZERO, 0.0, Color.WHITE)
