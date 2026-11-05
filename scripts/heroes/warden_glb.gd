@@ -108,7 +108,6 @@ const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the fra
 ## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air): the bones the Hero's data
 ## lists in "hide_while_chain" shrink away (item 76b.4), so one chain shows, never two.
 const CHAIN_OUT := "chain_out"
-const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
@@ -845,7 +844,8 @@ class Sync extends Node:
 		if gun == null:
 			return
 		var holder := root.get_node_or_null(SHIELD_PATH)
-		var now := [gun.get_child(gun.get_child_count() - 1).get_instance_id(), holder.get_instance_id() if holder else 0]
+		var last := gun.get_child(gun.get_child_count() - 1)
+		var now := [last.get_instance_id(), holder.get_instance_id() if holder else 0]
 		if now != built:
 			built = now
 			WardenGlb._skinned_weapon(root)
