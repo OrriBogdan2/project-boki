@@ -99,7 +99,7 @@
 "semicolon": 9
 },
 "scripts/core/data.gd": {
-"long_line": 55
+"long_line": 54
 },
 "scripts/core/econ.gd": {
 "long_line": 10,
@@ -116,7 +116,7 @@
 "semicolon": 5
 },
 "scripts/core/game.gd": {
-"long_line": 9,
+"long_line": 8,
 "nested_ternary": 1,
 "semicolon": 4
 },
@@ -237,7 +237,6 @@
 "shadow": 2
 },
 "scripts/home/farm_build_ui.gd": {
-"long_line": 3,
 "semicolon": 9
 },
 "scripts/home/farm_icons.gd": {
@@ -254,25 +253,25 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 221,
-"nested_ternary": 33,
+"long_line": 211,
+"nested_ternary": 29,
 "semicolon": 248,
 "shadow": 3
 },
 "scripts/home/home_build.gd": {
-"long_line": 78,
-"nested_ternary": 6,
-"semicolon": 87,
+"long_line": 55,
+"nested_ternary": 2,
+"semicolon": 73,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
-"long_line": 41,
+"long_line": 40,
 "nested_ternary": 5,
 "semicolon": 41,
 "shadow": 1
 },
 "scripts/home/home_gather.gd": {
-"long_line": 10,
+"long_line": 9,
 "nested_ternary": 3,
 "semicolon": 29
 },
@@ -307,9 +306,9 @@
 "shadow": 2
 },
 "scripts/home/interior.gd": {
-"long_line": 15,
+"long_line": 8,
 "nested_ternary": 1,
-"semicolon": 30
+"semicolon": 17
 },
 "scripts/home/kin_brain.gd": {
 "long_line": 8,
@@ -390,9 +389,9 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 392,
+"long_line": 388,
 "nested_ternary": 7,
-"semicolon": 408,
+"semicolon": 407,
 "shadow": 3
 },
 "scripts/match/abilities.gd": {
@@ -465,7 +464,7 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 25,
+"long_line": 24,
 "nested_ternary": 1,
 "semicolon": 49
 },
@@ -482,7 +481,7 @@
 },
 "scripts/match/drop_squad.gd": {
 "history_comment": 1,
-"long_line": 4,
+"long_line": 3,
 "semicolon": 5
 },
 "scripts/match/duel.gd": {
@@ -499,7 +498,7 @@
 "semicolon": 47
 },
 "scripts/match/exits.gd": {
-"long_line": 34,
+"long_line": 33,
 "nested_ternary": 1,
 "semicolon": 20
 },
@@ -635,14 +634,13 @@
 "semicolon": 25
 },
 "scripts/match/life.gd": {
-"long_line": 15,
-"nested_ternary": 1,
-"semicolon": 4
+"long_line": 13,
+"semicolon": 3
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 232,
-"nested_ternary": 21,
+"long_line": 222,
+"nested_ternary": 19,
 "semicolon": 146,
 "shadow": 9
 },
@@ -669,9 +667,9 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 283,
+"long_line": 282,
 "nested_ternary": 12,
-"semicolon": 277,
+"semicolon": 276,
 "shadow": 3
 },
 "scripts/match/music_dir.gd": {
@@ -815,7 +813,7 @@
 "long_line": 2
 },
 "scripts/ui/hatch.gd": {
-"long_line": 31,
+"long_line": 30,
 "nested_ternary": 2,
 "semicolon": 66
 },
@@ -833,9 +831,9 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 199,
-"nested_ternary": 41,
-"semicolon": 56,
+"long_line": 191,
+"nested_ternary": 39,
+"semicolon": 52,
 "shadow": 2
 },
 "scripts/ui/hud_tip.gd": {
@@ -870,10 +868,7 @@
 "scripts/ui/kit_card.gd": {
 "long_line": 31,
 "nested_ternary": 5,
-"semicolon": 5
-},
-"scripts/ui/level_pop.gd": {
-"long_line": 1
+"semicolon": 4
 },
 "scripts/ui/loading.gd": {
 "long_line": 27,
@@ -1028,7 +1023,7 @@
 "semicolon": 2
 },
 "tools/farmbuild_check.gd": {
-"long_line": 28,
+"long_line": 27,
 "semicolon": 15
 },
 "tools/farmbuild_shots.gd": {
@@ -1141,7 +1136,7 @@
 "semicolon": 7
 },
 "tools/perkorb_check.gd": {
-"long_line": 33,
+"long_line": 31,
 "semicolon": 4,
 "shadow": 1
 },
@@ -1190,8 +1185,8 @@
 "semicolon": 11
 },
 "tools/teammate_check.gd": {
-"long_line": 30,
-"semicolon": 26
+"long_line": 29,
+"semicolon": 24
 },
 "tools/title_check.gd": {
 "long_line": 7,

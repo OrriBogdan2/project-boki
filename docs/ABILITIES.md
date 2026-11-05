@@ -96,7 +96,7 @@ The old class dashes and weapon RMBs below are kept as data (the verbs return as
 
 ## Ranks
 
-Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). Per rank past the first:
+Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). You choose where each point goes: Alt + the ability's key, or click the gold + on its slot (`RankMarks`, `RankClick`), so one ability can be maxed first; tier pips over each slot show its rank and turn gold at max, and a new point shows the ALT+key hint for a few seconds. Bots spend by their kit's `order`. Per rank past the first:
 
 - damage +15% (`Effects.level_k`)
 - cooldown 10% shorter (RMB, Q via `AbilityRunner`/`Hunter.rank_cd_k`, E via `KinRunner`); Shift dashes recharge 15% faster

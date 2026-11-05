@@ -97,7 +97,7 @@ static func use(h, id: String) -> bool:
 		m.ping(best, col)
 		if m.hud:
 			var what := UtilityBelt.name_of(id).to_lower()
-			m.hud.toast_small("Nearest lock for your %s pinged on the map" % what, col)
+			m.hud.toast_small("Nearest %s lock pinged" % what, col)
 	return true
 
 ## The locks a key opens that are still shut: sealed hatches, or locked chests.
@@ -173,7 +173,7 @@ static func _prompt(m, h, id: String) -> void:
 	h.set_meta("belt_full_at", m.time)
 	var first := Settings.key_cap(UtilityBelt.KEYS[0])
 	var last := Settings.key_cap(UtilityBelt.KEYS[UtilityBelt.SLOTS - 1])
-	var line := "Belt full: press %s-%s to swap a slot for the %s" % [first, last, UtilityBelt.name_of(id)]
+	var line := "Belt full  ·  %s-%s swaps" % [first, last]
 	m.hud.toast_small(line, UtilityBelt.col_of(id))
 
 ## The belt slot worth least (price times charges), never a key. -1 when every slot holds a key.

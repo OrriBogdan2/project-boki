@@ -88,8 +88,7 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 			if toast == "":
 				m.fx.word(e.pos + Vector3(0, 2.0, 0), "GROUNDED", GROUND_COL, false)
 			m.fx.ring(e.pos, 1.1, GROUND_COL, 0.3)
-			var line := toast if toast != "" else "no dash, jump or glide"
-			if e == m.get("player") and m.hud: m.hud.toast_small("GROUNDED  ·  " + line, GROUND_COL)
+			if e == m.get("player") and m.hud and toast != "": m.hud.toast_small("GROUNDED  ·  " + toast, GROUND_COL)
 		"rat":
 			var old2 := e.get_node_or_null("Rattled")
 			if old2: old2.queue_free(); old2.name = "RattledGone"

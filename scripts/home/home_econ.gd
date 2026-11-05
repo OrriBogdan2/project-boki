@@ -137,7 +137,7 @@ func tick(d: float) -> void:
 				var k: Dictionary = h._kin_entry(rec)
 				if not k.is_empty():
 					h._emote(k, "!", true)
-					h._say(k, KinSpeak.say(rec, "sad", "food") if Care.speech(rec) < 3 else "I'm so hungry...", 3.0, false)
+					h._say(k, BokiLines.say(rec, "want_food"), 0.0, false)
 				h._toast("%s: %s" % [rec["name"], String(Care.STARVE_INFO[st][0]).to_lower()])
 
 func _kin_died(rec: Dictionary, g: Dictionary) -> void:
