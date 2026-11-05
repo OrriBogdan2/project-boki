@@ -2421,3 +2421,15 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Each target is in view from the landing camera, or the guide (178i) points to it.
   - Enforce it in the farm generator: those spots are reserved clearings.
   - Assert: a probe raycasts from the camera to Hob and to each tutorial target with no occluder hits, and none has a tree within 3 m.
+
+## 174b. F on a Boki opens its sheet at any range; C becomes Pet (owner, 18:19 UTC Nov 5)
+- The owner: "pressing on a boki with f should pull up the menu for them and work at any range. can change c to pet".
+- **On the farm/home:**
+  - With the cursor over a Boki (any distance on screen, a generous pick radius), pressing F (interact) opens that Boki's individual sheet (174).
+  - If no Boki is under the cursor, F keeps its normal nearest-interactable behaviour.
+  - Clicking a Boki with the mouse does the same (174).
+  - Pet moves to C (near the Boki, or the hovered one within a short range; it plays the pet reaction).
+  - Update the keybind table/settings, world prompts ("F Details · C Pet" over a hovered Boki) and the tutorial text.
+- A Boki under the cursor gets a soft outline (item 166) so it's clear which one F will open.
+- In matches, nothing changes (F/C keep their match meanings) unless the bindings conflict; check the match bindings for C.
+- **Assert:** hover a Boki 15 m away + F → its sheet opens; C near a Boki → the pet reaction.

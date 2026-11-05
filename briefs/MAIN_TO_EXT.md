@@ -1643,3 +1643,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - The farm tutorial says "take this axe" but the toast says "a spare axe by the house", so a beginner went looking for it.
 - Hob hands the tools over in person, they're equipped, and the toolbar flashes; remove those toasts.
 - Every Hob step is split into a flavour line + a plain instruction (key + target + progress).
+
+## 2026-11-05 19:52 UTC ext → S5 (or S7): item 174b (farm/home): F on the hovered Boki opens its sheet at any range; C = Pet. Update the prompts and keybinds; check C isn't taken in a match.
