@@ -2351,3 +2351,8 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Update gunslinger.json (name/short/desc/clip lines/variants/rank text, and passive text that mentions it), the wiki, docs/heroes/gunslinger.md and any code strings.
   - Keep the internal ids unchanged.
 - **Assert:** no tutorial prompt string starts with an ability name; a grep for "Longneedle" in player-facing text = 0.
+- 178g addendum (owner, 18:12): his dad didn't know "RMB" means the right mouse button. In ALL player-facing text, never use the abbreviations LMB/RMB/MMB.
+  - Show a mouse glyph with the correct button highlighted. Where text is needed: "Left click" / "Right click" / "Middle click" (e.g. "Right click (Bola)").
+  - Keyboard keys as keycap glyphs ("Shift", "Space", "E").
+  - Covers ability cards, the HUD key pills, the tutorial, tooltips and settings.
+  - Assert: a grep of the player-facing strings for \bLMB\b|\bRMB\b|\bMMB\b = 0.
