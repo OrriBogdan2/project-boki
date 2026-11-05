@@ -168,7 +168,7 @@ def p_torso(S, T):
     q = (S % 1.0)
     dark = ((q >= 0.0) & (q < 0.25)) | ((q >= 0.5) & (q < 0.75))
     c = harlequin(S, T, dark.astype(np.float32), None, 3)
-        belt = M.sm(0.74, 0.76, T) * M.sm(0.88, 0.86, T)
+    belt = M.sm(0.74, 0.76, T) * M.sm(0.88, 0.86, T)
     c = mix(c, BLACK2, belt * 0.8)
     return c * (0.72 + 0.28 * M.sm(0.05, 0.3, T))[..., None]
 
@@ -266,7 +266,7 @@ def glow_rim(S, T, c):
 
 def p_card(S, T):
     """a card's face: lilac, lit from within, its pip deep violet"""
-    c = ramp(T, [hx("c8aef6"), hx("b596ee")])
+    c = ramp(T, [hx("a27ce8"), hx("8e62dc")])
     c = mix(c, hx("4e14c0"), suit("diamond", (S - 0.5) * 2.0, (0.5 - T) * 2.0))
     return glow_rim(S, T, c)
 

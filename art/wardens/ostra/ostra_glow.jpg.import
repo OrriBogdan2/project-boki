@@ -3,18 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bolsihk40haoh"
-path="res://.godot/imported/ostra_glow.jpg-617f0fea6a200e74a3473c3bc5ffe02e.ctex"
+path.bptc="res://.godot/imported/ostra_glow.jpg-617f0fea6a200e74a3473c3bc5ffe02e.bptc.ctex"
+path.astc="res://.godot/imported/ostra_glow.jpg-617f0fea6a200e74a3473c3bc5ffe02e.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "6e3fe613e262c65f4c6bc34577b17c29"
+"md5": "c773ac453f38e6f1ab8cc901d52f0502"
 }
 
 [deps]
 
 source_file="res://art/wardens/ostra/ostra_glow.jpg"
-dest_files=["res://.godot/imported/ostra_glow.jpg-617f0fea6a200e74a3473c3bc5ffe02e.ctex"]
+dest_files=["res://.godot/imported/ostra_glow.jpg-617f0fea6a200e74a3473c3bc5ffe02e.bptc.ctex", "res://.godot/imported/ostra_glow.jpg-617f0fea6a200e74a3473c3bc5ffe02e.astc.ctex"]
 
 [params]
 

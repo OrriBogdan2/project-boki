@@ -577,7 +577,7 @@
 				]
 			},
 			"glow-cards": {
-				"glow": 1.15
+				"glow": 1.0
 			}
 		},
 		"halos": [
@@ -668,89 +668,89 @@
 			{
 				"at": "anchor_orbit_cards_0",
 				"color": [
-					0.46,
-					0.2,
+					0.4,
+					0.12,
 					1.0,
-					0.3
+					0.17
 				],
-				"size": 0.5,
+				"size": 0.42,
 				"depth_test": true
 			},
 			{
 				"at": "anchor_orbit_cards_1",
 				"color": [
-					0.46,
-					0.2,
+					0.4,
+					0.12,
 					1.0,
-					0.3
+					0.17
 				],
-				"size": 0.5,
+				"size": 0.42,
 				"depth_test": true
 			},
 			{
 				"at": "anchor_orbit_cards_2",
 				"color": [
-					0.46,
-					0.2,
+					0.4,
+					0.12,
 					1.0,
-					0.3
+					0.17
 				],
-				"size": 0.5,
+				"size": 0.42,
 				"depth_test": true
 			},
 			{
 				"at": "anchor_orbit_cards_3",
 				"color": [
-					0.46,
-					0.2,
+					0.4,
+					0.12,
 					1.0,
-					0.3
+					0.17
 				],
-				"size": 0.5,
+				"size": 0.42,
 				"depth_test": true
 			},
 			{
 				"at": "anchor_orbit_cards_4",
 				"color": [
-					0.46,
-					0.2,
+					0.4,
+					0.12,
 					1.0,
-					0.3
+					0.17
 				],
-				"size": 0.5,
+				"size": 0.42,
 				"depth_test": true
 			},
 			{
 				"at": "anchor_orbit_cards_5",
 				"color": [
-					0.46,
-					0.2,
+					0.4,
+					0.12,
 					1.0,
-					0.3
+					0.17
 				],
-				"size": 0.5,
+				"size": 0.42,
 				"depth_test": true
 			},
 			{
 				"at": "anchor_orbit_cards_6",
 				"color": [
-					0.46,
-					0.2,
+					0.4,
+					0.12,
 					1.0,
-					0.3
+					0.17
 				],
-				"size": 0.5,
+				"size": 0.42,
 				"depth_test": true
 			},
 			{
 				"at": "anchor_orbit_cards_7",
 				"color": [
-					0.46,
-					0.2,
+					0.4,
+					0.12,
 					1.0,
-					0.3
+					0.17
 				],
-				"size": 0.5,
+				"size": 0.42,
 				"depth_test": true
 			}
 		],
