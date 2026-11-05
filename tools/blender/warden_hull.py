@@ -237,7 +237,7 @@ def _burst(ob, c, r, b, mat, gash_mat, dark_mat, bone, rnd):
 
     # the hole: a dark fan, its rim jagged, and the red glow deep in it (a smaller fan)
     segs = n * 2
-    for k_r, lift, m in ((1.0, 1.003, dark_mat), (0.5, 1.004, gash_mat)):
+    for k_r, lift, m in ((1.0, 1.003, dark_mat), (float(b.get("heart", 0.5)), 1.004, gash_mat)):
         bm = bmesh.new()
         mid = bm.verts.new(surf(0.0, 0.0, lift))
         ring = [bm.verts.new(surf(rh * k_r * (1.12 if k % 2 else 0.92) * rnd.uniform(0.9, 1.1), 2 * math.pi * k / segs,
@@ -417,7 +417,7 @@ def extras(ob, spec, seed=1):
         tar = WP._mat_index(ob, rn["material"], rn.get("colour", "1a1416"))
         la0, lo = rn["at"]
         la1 = rn.get("to", -62.0)
-        pts = [on(la0 + (la1 - la0) * i / 6, lo + rnd.uniform(-1.5, 1.5), 0.012) for i in range(7)]
+        pts = [on(la0 + (la1 - la0) * i / 6, lo + rnd.uniform(-1.5, 1.5), rn.get("off", 0.012)) for i in range(7)]
         last = pts[-1]
         pts += [last + Vector((0, 0, -rn["hang"] * k / 2)) for k in (1, 2)]
         WP._append(ob, _tube(pts, rn["r"], 5), rn["bone"], tar)
