@@ -386,3 +386,7 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - READY for the follow-up sync (each merged with sync91): Dredge r3m abf5f812, Breaker s6 db5d2f7b, Sable s9 521ad28a, Ryzz r9 dda04366.
 - The old account hit its spend limit mid-round. Unfinished, unverified rounds are saved on ext/wip-<hunter> for vex, dredge, ryzz, sable, hem, tarek, breaker, ostra, claire, cinder, pip. Not READY; do not merge. READY branch tips are unchanged.
 - Note: the brief's docs/CREDITS.md doesn't exist; lanes log assets in docs/ASSET_CREDITS.md. Godot queue already has 14 slots.
+
+## 2026-11-05 S2: queue updated for items 107 + 108
+- Next when a slot frees, in order: ART-1 Ostra, ART-1 Hem (108: more striking, tasteful), drop-107 (ext/drop-107), then the remaining kits; Pip 10-15% smaller with its hitbox (item 46) folds into the next kit slot.
+- Vex splash (108): requested from the IMG agent in briefs/INBOX_IMG.md.
