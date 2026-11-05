@@ -2,7 +2,8 @@ class_name ThiefUlt
 extends RefCounted
 ## Sable's ultimate on X, Encore (her "x" data in content/archetypes/thief.json; the source's Death Blossom,
 ## briefs/hero-ref/dancer.md "Ultimate (on X)"). A violet ring grows out from her over 0.4s (the short delay),
-## then rides with her for 2s while a blade flies from her at every foe inside it every 0.4s (up to 5 each).
+## then rides with her for 2s while she dances (thf_encore_dance, upper body over her walking legs) and on every
+## beat a blade leaves one hand or the other at every foe inside it (0.2s apart, up to 10 each), the ring pulsing.
 ## Blades from the outer band of the ring (past 75% of its radius) hit harder and blight (healing barely
 ## takes) for 6s. She keeps moving, shooting and dashing; the cast gives her Vault back, and every blade
 ## refreshes her Marks. A blade landing on a rival hunter fills the bond meter (HeroUlt.landed: the best of
@@ -16,12 +17,18 @@ const HIT_COL := Color("e070ff")       # the flash a blade leaves on what it hit
 const BLADE_SPEED := 30.0              # m/s: the cosmetic blade's flight (the hit lands when it arrives)
 const ORBITERS := 3                    # blades circling her while it runs
 const ORBIT_R := 0.9                   # m
+const DANCE := "thf_encore_dance"
+const DANCED_OVER := ["thf_lmb_r", "thf_lmb_l"]   # her plain throws don't break the dance (the bolts still fly)
+const PULSE_FADE := 7.0                # per s: how fast a beat's pulse leaves the ring
+const PULSE_R := 0.02                  # of the radius: the ring's swell on a beat
 
 var k: ThiefKit
 var st := {}                           # running: {t, next, n, hits: {foe id: blades landed}}
 var casts := 0                         # (tests, demo)
 var blades := 0                        # blades landed
 var rim_blades := 0                    # of which from the outer band
+var pulse := 0.0                       # 1 on a beat, fading
+var beat := 0                          # the volleys so far this cast (which hand throws)
 
 func _init(kit: ThiefKit) -> void:
 	k = kit
@@ -43,6 +50,7 @@ func start() -> void:
 	var d := data()
 	casts += 1
 	st = {"t": 0.0, "next": float(d["grow"]), "n": int(d["shots"]), "hits": {}}
+	beat = 0
 	var h := k.h
 	k.play("thf_encore")
 	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(d["short"]).to_upper(), RING_COL, false)
@@ -55,6 +63,8 @@ func start() -> void:
 ## The cast ends (its time ran out, a merge, a knock): nothing more flies.
 func drop() -> void:
 	st = {}
+	if k.anim_id == DANCE:
+		k.play("")
 	AimKit.hide(k.h, "ult")
 	AimKit.hide(k.h, "ult_rim")
 
@@ -67,21 +77,35 @@ func tick(dt: float) -> void:
 		drop()
 		return
 	st["t"] = float(st["t"]) + dt
-	_draw_ring(d)
-	_orbit(d)
+	pulse = maxf(0.0, pulse - dt * PULSE_FADE)
+	_keep_dancing(d)
 	if float(st["t"]) >= float(st["next"]) and int(st["n"]) > 0:
 		st["n"] = int(st["n"]) - 1
 		st["next"] = float(st["next"]) + float(d["time"]) / float(d["shots"])
 		_volley(d)
+	_draw_ring(d)
+	_orbit(d)
 	if int(st["n"]) <= 0 and float(st["t"]) >= float(d["grow"]) + float(d["time"]):
 		drop()                             # a plain fade: no final burst
 
-## The ring everyone sees: it grows out from her, then rides with her; a dashed line marks the outer band.
+## From the first beat on the dance runs, on the beat: back in time after a flip, a Bola or anything else she did.
+func _keep_dancing(d: Dictionary) -> void:
+	var into := float(st["t"]) - float(d["grow"])
+	if into < 0.0 or k.anim_id == DANCE or not k.vault.is_empty() or k.landing_due:
+		return
+	var other := HunterAnim.km_def(k.anim_id)
+	var other_left: float = float(other["keys"][-1][0]) - (k.m.time - k.anim_at) if not other.is_empty() else 0.0
+	if k.anim_id == "thf_encore" or other_left <= 0.0:
+		k.anim_id = DANCE
+		k.anim_at = k.m.time - into
+
+## The ring everyone sees: it grows out from her, then rides with her; a dashed line marks the outer band. It
+## brightens and swells a little on every beat.
 func _draw_ring(d: Dictionary) -> void:
 	var gk := clampf(float(st["t"]) / float(d["grow"]), 0.0, 1.0)
 	var r := radius()
-	AimKit.circle(k.h, "ult", {"self": true, "r": r, "col": RING_COL, "col2": RIM_COL, "all": true, "ticks": true,
-			"fill": 0.3 * gk, "alpha": 1.2})
+	AimKit.circle(k.h, "ult", {"self": true, "r": r * (1.0 + PULSE_R * pulse), "col": RING_COL, "col2": RIM_COL,
+			"all": true, "ticks": true, "fill": (0.3 + 0.1 * pulse) * gk, "alpha": 1.2 + 0.8 * pulse})
 	AimKit.circle(k.h, "ult_rim", {"self": true, "r": r * float(d["rim"]), "col": Color(RIM_COL, 0.7), "all": true,
 			"dashed": true, "alpha": 0.7})
 
@@ -98,11 +122,14 @@ func _orbit(d: Dictionary) -> void:
 		for i in ORBITERS:
 			k.fx().unplace("enc_orb%d" % i)
 
-## One blade at every foe inside the ring (each at most `shots` times), and the spin-throw pose.
+## A beat: the ring pulses and one blade leaves her hand at every foe inside the ring (each at most `shots` times).
 func _volley(d: Dictionary) -> void:
 	var h := k.h
 	var r := radius()
+	var right := beat % 2 == 0
 	var thrown := false
+	beat += 1
+	pulse = 1.0
 	for f in k.foes_in(h.pos, r):
 		if f is Kin or not k.sees(f):
 			continue
@@ -112,16 +139,16 @@ func _volley(d: Dictionary) -> void:
 			continue
 		st["hits"][key] = got + 1
 		var rim := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z).length() > r * float(d["rim"])
-		_blade(f, rim)
+		_blade(f, rim, right)
 		thrown = true
 	if thrown:
-		k.play("thf_encore_throw_l" if int(st["n"]) % 2 == 0 else "thf_encore_throw_r")
-		k.m.sfx("dj_blade", h.pos, -6.0, randf_range(0.95, 1.1))
+		k.fx().star(k.hand_pos(right), RIM_COL, 0.5, 0.1, BLADE_TIP)
+		k.m.sfx("dj_blade", h.pos, -8.0, randf_range(0.95, 1.1))
 
 ## A cosmetic blade flies from her hand; the hit lands when it arrives.
-func _blade(f: Ent, rim: bool) -> void:
+func _blade(f: Ent, rim: bool, right: bool) -> void:
 	var h := k.h
-	var from := h.pos + Vector3(0, 1.1, 0)
+	var from := k.hand_pos(right)
 	var to := f.pos + Vector3(0, 1.0, 0)
 	var dv := Vector2(to.x - from.x, to.z - from.z)
 	var dist := dv.length()
@@ -154,6 +181,6 @@ func _hit(f: Ent, rim: bool) -> void:
 			# once, as the blight lands (above the damage numbers, so they don't overprint)
 			k.m.fx.word(f.pos + Vector3(0, 3.0, 0), "BLIGHT", Color("b08aff"), false)
 	k.fx().star(f.pos + Vector3(0, 1.0, 0), HIT_COL, 0.8 if rim else 0.55, 0.16)
-	k.m.sfx("dj_encore_hit", f.pos, -8.0, randf_range(0.9, 1.15) * (0.85 if rim else 1.0))
+	k.m.sfx("dj_encore_hit", f.pos, -10.0, randf_range(0.9, 1.15) * (0.85 if rim else 1.0))
 	k.refresh_marks()
 	HeroUlt.landed(k, f)
