@@ -2,7 +2,7 @@
 SLOT = {"head": "skin", "teeth": "skin", "torso": "skin", "arms": "skin", "hands": "skin", "legs": "skin",
         "bandana": "cloth", "band_tails": "cloth", "wrap": "cloth", "sash": "cloth-accent", "skirt": "cloth-accent",
         "sash_tails": "cloth-accent", "trousers": "cloth", "wraps": "cloth", "stone": "leather", "gauntlet": "leather",
-        "prayer": "leather-beads", "beads": "metal", "cap": "hair", "locs": "hair-braid"}
+        "prayer": "leather", "beads": "metal", "cap": "hair", "locs": "hair"}
 FX = float(R.kn[0])
 
 
@@ -327,10 +327,11 @@ def assemble(objs, img, emit):
     mod.object = arm
     main_ob.parent = arm
     # the stones: three instances on an orbit round his head
-    rock_m = material("leather", img, emit)
-    rock_m.name = "leather-stone"
+    global RING_UV
+    lu = iris.data.uv_layers.active.data
+    RING_UV = lu[len(lu) // 2].uv[:]
+    rock_m = mats["leather"]
     glow_m = material("glow", img, None)
-    glow_m.name = "glow-stone"
     geo.data.materials.append(rock_m)
     iris.data.materials.append(glow_m)
     bpy.ops.object.select_all(action="DESELECT")
@@ -338,11 +339,7 @@ def assemble(objs, img, emit):
     iris.select_set(True)
     bpy.context.view_layer.objects.active = geo
     bpy.ops.object.join()
-    # (a shard is a few tris: one flat rock colour, no atlas space)
-    shard_m = bpy.data.materials.new("leather-shard")
-    shard_m.use_nodes = True
-    shard_m.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (*[c ** 2.2 for c in S.hexc("c9b796")], 1)
-    shard.data.materials.append(shard_m)
+    shard.data.materials.append(rock_m)
     log("stone mesh fixed:", geo.data.validate(verbose=True), shard.data.validate(verbose=True))
     n_geo, n_shard = K.tris([geo]), K.tris([shard])
     extras = orbits(arm, geo, shard)
@@ -356,13 +353,13 @@ def assemble(objs, img, emit):
     # (the Gun node, which kit FX read, rides the right fist: WardenClips "blade")
     extras.append(K.anchor(arm, "hand.R", "anchor_wrist_R", R.wr))
     extras.append(K.anchor(arm, "hand.R", "weapon_muzzle", R.wr + S.vec(0, 0, -0.17)))
-    extras.append(ground_rings(arm))
+    extras.append(ground_rings(arm, glow_m, iris))
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, "tarek.blend"))
     log("tris total", K.tris([main_ob, beads]) + 3 * n_geo + 5 * n_shard)
     K.export(os.path.join(OUT, "tarek.glb"), [arm, main_ob, beads] + extras, image_format="JPEG")
 
 
-def ground_rings(arm):
+def ground_rings(arm, mat, uv_from):
     """The glowing rings under his feet: two broken arcs on the ground (they travel with him)."""
     bm = bmesh.new()
     for rad, w, arcs in ((0.62, 0.016, ((0.1, 2.9), (3.4, 5.9))), (0.46, 0.013, ((1.2, 3.9), (4.5, 6.9)))):
@@ -379,10 +376,10 @@ def ground_rings(arm):
     me = bpy.data.meshes.new("ground_rings")
     bm.to_mesh(me)
     bm.free()
-    m = bpy.data.materials.new("glow-rings")
-    m.use_nodes = True
-    m.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (1.0, 0.55, 0.16, 1)
-    me.materials.append(m)
+    me.materials.append(mat)
+    lay = me.uv_layers.new(name="UVMap")
+    for d in lay.data:
+        d.uv = RING_UV       # (one amber texel of the iris)
     ob = bpy.data.objects.new("ground_rings", me)
     bpy.context.scene.collection.objects.link(ob)
     ob.parent = arm

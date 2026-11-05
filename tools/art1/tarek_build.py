@@ -70,21 +70,21 @@ Z_S = float(R.sh[2])
 
 # name: field, bounds (lo, hi), low step, target tris, clay colour, slot
 PARTS = {
-    "head": dict(f=head_f, lo=HC + S.vec(-0.14, -0.17, -0.3), hi=HC + S.vec(0.14, 0.17, 0.17), h=0.0032, tris=2400, col="8a5a3c"),
-    "teeth": dict(f=teeth_f, lo=HC + S.vec(-0.07, 0.06, -0.11), hi=HC + S.vec(0.07, 0.13, -0.03), h=0.003, tris=100, col="f0ece0"),
-    "bandana": dict(f=bandana_f, lo=HC + S.vec(-0.14, -0.19, -0.06), hi=HC + S.vec(0.14, 0.17, 0.14), h=0.0035, tris=650, col="c9b89a"),
-    "cap": dict(f=cap_f, lo=HC + S.vec(-0.16, -0.19, -0.14), hi=HC + S.vec(0.16, 0.17, 0.2), h=0.0075, tris=800, col="1c1618"),
-    "torso": dict(f=lambda P: T.torso(P, R), lo=S.vec(-0.33, -0.2, R.waist[2] - 0.03), hi=S.vec(0.33, 0.2, R.neck[2] + 0.03), h=0.005, tris=1150, col="8a5a3c"),
-    "arms": dict(f=lambda P: T.arm(P, R), lo=S.vec(0.14, -0.13, R.el[2] - 0.12), hi=S.vec(0.43, 0.13, Z_S + 0.11), h=0.005, tris=620, col="8a5a3c"),
-    "hands": dict(f=lambda P: T.hand(P, R), lo=S.vec(-0.42, -0.15, R.wr[2] - 0.32), hi=S.vec(-0.12, 0.2, R.wr[2] + 0.08), h=0.0028, tris=800, col="8a5a3c"),
-    "stone": dict(f=lambda P: T.stone_arm(mx(P), R, SEEDS_A, H_A), lo=S.vec(-0.58, -0.26, R.wr[2] - 0.06), hi=S.vec(-0.02, 0.26, Z_S + 0.24), h=0.0065, tris=2500, col="8c90a0"),
-    "gauntlet": dict(f=lambda P: T.stone_arm(P, R, SEEDS_G, H_G, T.gauntlet_core), lo=S.vec(0.04, -0.24, R.wr[2] - 0.29), hi=S.vec(0.54, 0.24, R.el[2] + 0.14), h=0.0058, tris=1300, col="8c90a0"),
-    "wrap": dict(f=lambda P: T.wrap_band(P, R), lo=S.vec(-0.22, -0.17, R.waist[2] + 0.04), hi=S.vec(0.22, 0.17, R.waist[2] + 0.2), h=0.006, tris=240, col="d8cfba"),
-    "sash": dict(f=lambda P: T.sash(P, R), lo=S.vec(-0.27, -0.2, R.waist[2] - 0.06), hi=S.vec(0.27, 0.25, R.waist[2] + 0.18), h=0.0045, tris=560, col="b04a26"),
-    "skirt": dict(f=lambda P: T.skirt(P, R), lo=S.vec(-0.33, -0.27, R.waist[2] - 0.46), hi=S.vec(0.33, 0.27, R.waist[2] + 0.1), h=0.0055, tris=900, col="b04a26"),
-    "trousers": dict(f=lambda P: T.trousers(P, R), lo=S.vec(-0.31, -0.18, 0.35), hi=S.vec(0.31, 0.18, R.hip[2] + 0.12), h=0.006, tris=1320, col="4a3c34"),
-    "legs": dict(f=lambda P: T.shin_foot(P, R), lo=S.vec(-0.26, -0.14, -0.01), hi=S.vec(0.26, 0.26, 0.5), h=0.0045, tris=900, col="8a5a3c"),
-    "wraps": dict(f=lambda P: T.foot_wraps(P, R), lo=S.vec(-0.26, -0.14, -0.01), hi=S.vec(0.26, 0.26, 0.44), h=0.004, tris=720, col="8a7258"),
+    "head": dict(f=head_f, lo=HC + S.vec(-0.14, -0.17, -0.3), hi=HC + S.vec(0.14, 0.17, 0.17), h=0.0032, tris=1800, col="8a5a3c"),
+    "teeth": dict(f=teeth_f, lo=HC + S.vec(-0.07, 0.06, -0.11), hi=HC + S.vec(0.07, 0.13, -0.03), h=0.003, tris=80, col="f0ece0"),
+    "bandana": dict(f=bandana_f, lo=HC + S.vec(-0.14, -0.19, -0.06), hi=HC + S.vec(0.14, 0.17, 0.14), h=0.0035, tris=450, col="c9b89a"),
+    "cap": dict(f=cap_f, lo=HC + S.vec(-0.16, -0.19, -0.14), hi=HC + S.vec(0.16, 0.17, 0.2), h=0.0075, tris=560, col="1c1618"),
+    "torso": dict(f=lambda P: T.torso(P, R), lo=S.vec(-0.33, -0.2, R.waist[2] - 0.03), hi=S.vec(0.33, 0.2, R.neck[2] + 0.03), h=0.005, tris=850, col="8a5a3c"),
+    "arms": dict(f=lambda P: T.arm(P, R), lo=S.vec(0.14, -0.13, R.el[2] - 0.12), hi=S.vec(0.43, 0.13, Z_S + 0.11), h=0.005, tris=400, col="8a5a3c"),
+    "hands": dict(f=lambda P: T.hand(P, R), lo=S.vec(-0.42, -0.15, R.wr[2] - 0.32), hi=S.vec(-0.12, 0.2, R.wr[2] + 0.08), h=0.0028, tris=560, col="8a5a3c"),
+    "stone": dict(f=lambda P: T.stone_arm(mx(P), R, SEEDS_A, H_A), lo=S.vec(-0.58, -0.26, R.wr[2] - 0.06), hi=S.vec(-0.02, 0.26, Z_S + 0.24), h=0.0065, tris=1750, col="8c90a0"),
+    "gauntlet": dict(f=lambda P: T.stone_arm(P, R, SEEDS_G, H_G, T.gauntlet_core), lo=S.vec(0.04, -0.24, R.wr[2] - 0.29), hi=S.vec(0.54, 0.24, R.el[2] + 0.14), h=0.0058, tris=950, col="8c90a0"),
+    "wrap": dict(f=lambda P: T.wrap_band(P, R), lo=S.vec(-0.22, -0.17, R.waist[2] + 0.04), hi=S.vec(0.22, 0.17, R.waist[2] + 0.2), h=0.006, tris=140, col="d8cfba"),
+    "sash": dict(f=lambda P: T.sash(P, R), lo=S.vec(-0.27, -0.2, R.waist[2] - 0.06), hi=S.vec(0.27, 0.25, R.waist[2] + 0.18), h=0.0045, tris=380, col="b04a26"),
+    "skirt": dict(f=lambda P: T.skirt(P, R), lo=S.vec(-0.33, -0.27, R.waist[2] - 0.46), hi=S.vec(0.33, 0.27, R.waist[2] + 0.1), h=0.0055, tris=560, col="b04a26"),
+    "trousers": dict(f=lambda P: T.trousers(P, R), lo=S.vec(-0.31, -0.18, 0.35), hi=S.vec(0.31, 0.18, R.hip[2] + 0.12), h=0.006, tris=880, col="4a3c34"),
+    "legs": dict(f=lambda P: T.shin_foot(P, R), lo=S.vec(-0.26, -0.14, -0.01), hi=S.vec(0.26, 0.26, 0.5), h=0.0045, tris=480, col="8a5a3c"),
+    "wraps": dict(f=lambda P: T.foot_wraps(P, R), lo=S.vec(-0.26, -0.14, -0.01), hi=S.vec(0.26, 0.26, 0.44), h=0.004, tris=340, col="8a7258"),
 }
 
 
@@ -263,15 +263,15 @@ def prayer_bag():
     front = [(0.075, 0.075, nz - 0.03), (0.03, 0.135, nz - 0.2), (-0.05, 0.158, nz - 0.36), (-0.12, 0.158, z0 + 0.25), (-0.2, 0.1, z0 + 0.16), (-0.215, 0.0, z0 + 0.15)]
     back = [(-0.215, 0.0, z0 + 0.15), (-0.16, -0.135, z0 + 0.2), (-0.04, -0.15, z0 + 0.4), (0.05, -0.12, nz - 0.1), (0.075, 0.075, nz - 0.03)]
     i = 0
-    for c in along(front, 0.066) + along(back, 0.07):
+    for c in along(front, 0.074) + along(back, 0.085):
         lowball(b, c, 0.03, (0.0, 0.0, 12.0, float(i % 5 == 4)), (0.13 * (i % 7), 4.0 + 0.1 * (i // 7)))
         i += 1
     strand = [(0.03, 0.2, z0 + 0.03), (0.11, 0.215, z0 - 0.09), (0.2, 0.21, z0 - 0.19), (0.27, 0.16, z0 - 0.27)]
     d = 0.0
-    for c in along(strand, 0.058):
+    for c in along(strand, 0.066):
         lowball(b, c, 0.027, (d, 0.0, 11.0, float(i % 5 == 4)), (0.13 * (i % 7), 4.0 + 0.1 * (i // 7)))
         i += 1
-        d += 0.058
+        d += 0.066
     return [b]
 
 
@@ -281,7 +281,7 @@ def locs_bag():
     for li, (ch, rad, pts) in enumerate(T.LOCS):
         P = np.array(pts, np.float32) + HC
         L = float(np.linalg.norm(np.diff(P, axis=0), axis=1).sum())
-        n = max(7, int(L / 0.05) + 1)
+        n = max(6, int(L / 0.07) + 1)
         path = T.smooth_path(P, n)
         s = np.linspace(0, 1, n)
         rr = [rad * 1.14 * (0.82 + 0.28 * min(1.0, x * 6)) * (1.0 - 0.28 * x ** 3) if x < 0.97 else rad * 0.64 for x in s]
@@ -444,8 +444,8 @@ def sharp_edges(ob, deg=38):
 
 def geode_parts():
     """The seeing-stone's rock and its iris, one mesh shared by the three stones (in its own space, the face to +Y)."""
-    rk = dict(f=lambda P: T.geode(P, GEO_R), lo=S.vec(-0.12, -0.11, -0.13), hi=S.vec(0.12, 0.09, 0.13), h=0.0035, tris=380)
-    ir = dict(f=lambda P: T.geode_iris(P, GEO_R), lo=S.vec(-0.06, -0.01, -0.06), hi=S.vec(0.06, 0.05, 0.06), h=0.003, tris=80)
+    rk = dict(f=lambda P: T.geode(P, GEO_R), lo=S.vec(-0.12, -0.11, -0.13), hi=S.vec(0.12, 0.09, 0.13), h=0.0035, tris=260)
+    ir = dict(f=lambda P: T.geode_iris(P, GEO_R), lo=S.vec(-0.06, -0.01, -0.06), hi=S.vec(0.06, 0.05, 0.06), h=0.003, tris=60)
     shard = dict(f=lambda P: S.ellipsoid(P, (0, 0, 0), (0.03, 0.022, 0.04)) + 0.008 * S.fbm(P, 50.0, 4, 2), lo=S.vec(-0.05, -0.04, -0.06), hi=S.vec(0.05, 0.04, 0.06), h=0.004, tris=24)
     PARTS["geode"] = rk
     PARTS["iris"] = ir

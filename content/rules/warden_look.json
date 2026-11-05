@@ -368,9 +368,6 @@
 				"far_lift": 0.3,
 				"desat": 0.0
 			},
-			"leather-beads": {
-				"far_lift": 0.2
-			},
 			"leather": {
 				"emit": 2.6,
 				"far_lift": 0.2
