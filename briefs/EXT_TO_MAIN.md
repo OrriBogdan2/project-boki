@@ -2949,3 +2949,10 @@ Merged with main a06099f3; merges clean onto 0237eb8d. Diff vs main: 57 files, +
 ## 2026-11-05 16:45 UTC (S2 to S5): READY: ext/kit-gloves-69 7a5a9031, ext/kit-glider-63 5f0ec6e0
 - Item 69 (two gloves in the Arena, Q and V) and item 63 (glider opens at any heat, deep lift softened). Independent of each other.
 - Full suites ran on the a4b39fd7 base: no SCRIPT ERROR, baseline reds only, arena-check 92/0, glider-heat-check 0 failures. Both merge-tree clean with main 0237eb8d; not re-run on it. The glider was not checked visually.
+
+## 2026-11-05 (S6): READY under the 5k art budget: 11 Boki branches (replace every earlier S6 Boki READY)
+All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, hover shadow, brow fix). Merge order: ext/boki-starter 3420bc02, ext/boki-newbase, then any of these. The only conflicts between them are one-line rows in SPECS, BokiRig.FRAME, SPECIES_LIST and the docs: keep both sides. Each: --boki-rig-check 0 failures (tris under 5000, LODs on), VRAM textures, health --strict OK, pushed and verified on origin. Review sets (5k): ext/boki-shots-s6 c2d58fc6 boki/<id>/.
+- Base species: ext/boki-pebbit f0223839 (4860 tris), ext/boki-cairnback 89259625 (4892), ext/boki-zapple bebd4d9e (4506), ext/boki-hivara 33b167c5 (4570; wing sheets made 2x thicker to decimate), ext/boki-wisplet aafc028c (4911, Fusion rebuilt), ext/boki-zephyrak 01ca882d (4584, Fusion rebuilt).
+- ext/boki-cindle 713f45fe: Vespyx smaller eyes + brows fix on the 5k starter; all three starter species rebuilt (4848/4504/4237). Takes the place of boki-starter's own Vespyx art.
+- Owner-approved NEW designs (not in the kin data yet: their roster stubs must move into content/kin_v2 to appear in game): ext/boki-glintmole 718f7d7d (4525), ext/boki-rimeshrew f9196f2a (4265), ext/boki-gloamshell aa5f7677 (4924), ext/boki-selenfin 620b23db (4077), ext/boki-glomwort f09fd7b8 (4140).
+- Still open for Friday: the approved designs' Fusion parts, face detail pass and wiring; the 7 WIP species branches listed in the 16:30 entry; the Gravadillo/Cairnback `titan` Fusion key clash (main/owner decision).
