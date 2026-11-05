@@ -96,6 +96,7 @@ func run(main: Node) -> void:
 		_orbits(a)
 		_own_look(a)
 		await _halo(main, a)
+	_stones_look()
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
 	print("WARDENGLB_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
 	main.get_tree().quit()
@@ -300,6 +301,21 @@ func _hitbox(a: String) -> void:
 ## leave), the procedural weapon is hidden, and its magazine (if it has one apart) is the Gun's Mag.
 ## A model's spring chains (RIG_CONTRACT "Spring chains": braids) swing: moved sideways, each chain's tip trails
 ## its rigid place, and standing still it settles back on it. (No chains: nothing to check.)
+## Tarek's seeing-stones turn their eyes to a point the kit gives them (WardenGlb.ORBIT_LOOK).
+func _stones_look() -> void:
+	var m := _model("dolm")
+	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync
+	var stone := m.find_child("stone_0", true, false) as Node3D
+	var at := stone.global_position + Vector3(4.0, 0.0, 3.0)
+	m.set_meta(WardenGlb.ORBIT_LOOK, at)
+	for i in 90:
+		sync._process(1.0 / 60.0)
+		at = m.get_meta(WardenGlb.ORBIT_LOOK)
+	var fwd := -stone.global_basis.z.normalized()
+	var off := fwd.angle_to((at - stone.global_position).normalized())
+	ok(off < 0.3, "dolm: the seeing-stones turn to what they watch (%.2f rad off)" % off)
+	m.free()
+
 func _springs(a: String) -> void:
 	var m := _model(a)
 	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync

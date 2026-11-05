@@ -52,6 +52,10 @@ var sweeps := 0                # punches that launched 2+ rocks in a stream
 var last_sweep := 0            # rocks the last punch launched
 var splashes := 0              # boulder splash hits
 
+const STONES_RANGE := 12.0     # m: how far the seeing-stones watch a foe
+const STONES_EVERY := 0.2      # s between picks
+var stones_t := 0.0
+
 func rock_def() -> Dictionary: return d.get("rock", {})
 func slam_def() -> Dictionary: return rmb_def()["slam"]
 
@@ -197,6 +201,7 @@ func _repeat_k(f: Ent) -> float:
 
 # ------------------------------------------------------------------ per step
 func _tick(dt: float) -> void:
+	_tick_stones(dt)
 	var n := rocks_up()
 	res = float(n)
 	self_pips(6, mini(6, n), false, dt)
@@ -216,6 +221,21 @@ func _tick(dt: float) -> void:
 ## The pending air slam: it lands with her, or plunges if pressed in the air. After a hop, a leap or an air
 ## press the glider wins (item 26): holding glide drops the slam and hands the arc over, never dragging her
 ## down. Pressed in a glide (the source's slam out of a glide), the dive is committed: the glider stays shut.
+## His three seeing-stones are his sight: they turn toward the nearest foe in range.
+func _tick_stones(dt: float) -> void:
+	stones_t -= dt
+	if stones_t > 0.0 or h.model == null:
+		return
+	stones_t = STONES_EVERY
+	var best: Variant = null
+	var near := INF
+	for f in foes_in(h.pos, STONES_RANGE):
+		var d := h.pos.distance_squared_to(f.pos)
+		if d < near:
+			near = d
+			best = f
+	h.model.set_meta(WardenGlb.ORBIT_LOOK, best.pos + Vector3.UP if best else Vector3.INF)
+
 func _tick_dive() -> void:
 	if dive_glide:
 		h.glide_cd = maxf(h.glide_cd, 0.1)

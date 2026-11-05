@@ -3,18 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://baiur65k8nr5w"
-path="res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.ctex"
+path.bptc="res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.bptc.ctex"
+path.astc="res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "8cb90200d30cf63a843ac42beb980d82"
+"md5": "9a2213a113f4259f0142cd74fbd44cbe"
 }
 
 [deps]
 
 source_file="res://art/wardens/tarek/tarek_tarek_emit.jpg"
-dest_files=["res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.ctex"]
+dest_files=["res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.bptc.ctex", "res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.astc.ctex"]
 
 [params]
 

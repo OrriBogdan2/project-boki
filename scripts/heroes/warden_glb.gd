@@ -97,6 +97,7 @@ const ANCHORS := ["anchor_head_top", "anchor_chest"]
 ## variant's name, art()).
 const SETTING := "warden_models"
 const FAR_HIDE_D := 13.0        # m from the camera: "far_hide" pieces stop being drawn
+const ORBIT_LOOK := "orbit_look"   # root meta, a world point: the seeing-stones turn to it (DolmKit)
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
 const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
 const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (HunterAnim spins them while firing)
@@ -907,6 +908,7 @@ class Sync extends Node:
 			apply_blade()
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
+		orbits.look = root.get_meta(ORBIT_LOOK, Vector3.INF)
 		orbits.step(dt)
 		if bool(root.get_meta(CHAIN_OUT, false)):
 			for bi in hide_out:
@@ -1105,6 +1107,9 @@ class Orbits:
 	const ORBIT_HZ := 0.12      # turns a second
 	const BOB := 0.025          # m, each prop up and down
 	const BOB_HZ := 0.5
+	const LOOKERS := "orbit_stones"   # the orbit whose props are eyes (Tarek's seeing-stones)
+	const LOOK_RATE := 7.0      # 1/s: how fast they turn to what they watch
+	var look := Vector3.INF     # world point they watch (ORBIT_LOOK), INF for none
 	var pivots: Array = []      # [node, its rest transform, [prop, its rest position]...]
 	var t := 0.0
 
@@ -1116,7 +1121,7 @@ class Orbits:
 			var props: Array = []
 			for ch in nd.get_children():
 				if ch is Node3D:
-					props.append([ch, (ch as Node3D).position])
+					props.append([ch, (ch as Node3D).position, (ch as Node3D).quaternion])
 			pivots.append([nd, nd.transform, props])
 
 	func step(dt: float) -> void:
@@ -1129,3 +1134,13 @@ class Orbits:
 			for i in props.size():
 				var pr: Node3D = props[i][0]
 				pr.position = (props[i][1] as Vector3) + Vector3.UP * BOB * sin(TAU * BOB_HZ * t + i * 2.1)
+				if nd.name == LOOKERS and pr.is_inside_tree():
+					_face(pr, props[i][2], dt)
+
+	## A seeing-stone's eye (-Z on the prop) turns toward what the kit is watching, then back to looking outward.
+	func _face(pr: Node3D, rest: Quaternion, dt: float) -> void:
+		var want := rest
+		if look.is_finite() and pr.global_position.distance_squared_to(look) > 0.01:
+			var to := Basis.looking_at(look - pr.global_position, Vector3.UP).get_rotation_quaternion()
+			want = (pr.get_parent() as Node3D).global_basis.get_rotation_quaternion().inverse() * to
+		pr.quaternion = pr.quaternion.slerp(want, 1.0 - exp(-LOOK_RATE * dt))
