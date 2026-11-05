@@ -59,8 +59,8 @@ func _chain(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
 		A.step(m, 0.5)
 		P.inp["move"] = Vector2.ZERO
 		_click(m, P, T)
-		var want := hits0 + i + 1
-		A.step(m, 0.4, func(): pass)
+		var want: int = hits0 + i + 1
+		A.step(m, 0.4)
 		back_at_once = back_at_once and K.primed_hits == want and P.dashes >= P.max_dashes() - 0.01
 	A.ok("dancer loop: %d chained Vault -> empowered hit cycles all reset (no cap)" % CYCLES,
 			K.primed_hits == hits0 + CYCLES and back_at_once, "hits +%d" % [K.primed_hits - hits0])
@@ -72,15 +72,17 @@ func _chain(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
 
 ## Every flip is a full turn off the ground with the crossbows tucked and the wings flaring, on the same beats.
 func _flips() -> void:
-	var good := ["thf_vault_r", "thf_vault_l", "thf_vault_f", "thf_vault_b", "thf_vault_twist"].all(func(id):
-		var top := HunterAnim.km_sample(id, 0.2)
-		var turn := absf(float(top["fz"])) + absf(float(top["fx"]))
-		var tucked := absf((top["fl"] as Vector3).x) < 0.25 and absf((top["fr"] as Vector3).x) < 0.25
-		var keys: Array = KMovesDJ.MOVES[id]["keys"]
-		return turn > 2.0 and float(top["lift"]) > 0.3 and float(top["wg"]) >= 0.9 and tucked
-				and float(keys[-1][0]) == 0.48 and is_equal_approx(absf(float(keys[-1][1].get("fz", 0.0)) +
-						float(keys[-1][1].get("fx", 0.0))), 6.283))
+	var good := ["thf_vault_r", "thf_vault_l", "thf_vault_f", "thf_vault_b", "thf_vault_twist"].all(_flip_ok)
 	A.ok("dancer loop: every flip turns a full circle in the air, crossbows tucked, wings flared", good)
+
+func _flip_ok(id: String) -> bool:
+	var top := HunterAnim.km_sample(id, 0.2)
+	var turn := absf(float(top["fz"])) + absf(float(top["fx"]))
+	var tucked := absf((top["fl"] as Vector3).x) < 0.25 and absf((top["fr"] as Vector3).x) < 0.25
+	var end: Array = KMovesDJ.MOVES[id]["keys"][-1]
+	var whole := absf(float(end[1].get("fz", 0.0)) + float(end[1].get("fx", 0.0)))
+	return turn > 2.0 and float(top["lift"]) > 0.3 and float(top["wg"]) >= 0.9 and tucked \
+			and float(end[0]) == 0.48 and is_equal_approx(whole, 6.283)
 
 ## Shift mid-flip, long before the shared buffer's last 0.18s, with the bolt that resets it still to land.
 func _press_mid_flip(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:

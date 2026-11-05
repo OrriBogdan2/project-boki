@@ -79,12 +79,12 @@ func tick(dt: float) -> void:
 	st["t"] = float(st["t"]) + dt
 	pulse = maxf(0.0, pulse - dt * PULSE_FADE)
 	_keep_dancing(d)
-	_draw_ring(d)
-	_orbit(d)
 	if float(st["t"]) >= float(st["next"]) and int(st["n"]) > 0:
 		st["n"] = int(st["n"]) - 1
 		st["next"] = float(st["next"]) + float(d["time"]) / float(d["shots"])
 		_volley(d)
+	_draw_ring(d)
+	_orbit(d)
 	if int(st["n"]) <= 0 and float(st["t"]) >= float(d["grow"]) + float(d["time"]):
 		drop()                             # a plain fade: no final burst
 
@@ -94,7 +94,7 @@ func _keep_dancing(d: Dictionary) -> void:
 	if into < 0.0 or k.anim_id == DANCE or not k.vault.is_empty() or k.landing_due:
 		return
 	var other := HunterAnim.km_def(k.anim_id)
-	var other_left := float(other["keys"][-1][0]) - (k.m.time - k.anim_at) if not other.is_empty() else 0.0
+	var other_left: float = float(other["keys"][-1][0]) - (k.m.time - k.anim_at) if not other.is_empty() else 0.0
 	if k.anim_id == "thf_encore" or other_left <= 0.0:
 		k.anim_id = DANCE
 		k.anim_at = k.m.time - into
@@ -105,7 +105,7 @@ func _draw_ring(d: Dictionary) -> void:
 	var gk := clampf(float(st["t"]) / float(d["grow"]), 0.0, 1.0)
 	var r := radius()
 	AimKit.circle(k.h, "ult", {"self": true, "r": r * (1.0 + PULSE_R * pulse), "col": RING_COL, "col2": RIM_COL,
-			"all": true, "ticks": true, "fill": (0.3 + 0.18 * pulse) * gk, "alpha": 1.2 + 0.8 * pulse})
+			"all": true, "ticks": true, "fill": (0.3 + 0.1 * pulse) * gk, "alpha": 1.2 + 0.8 * pulse})
 	AimKit.circle(k.h, "ult_rim", {"self": true, "r": r * float(d["rim"]), "col": Color(RIM_COL, 0.7), "all": true,
 			"dashed": true, "alpha": 0.7})
 

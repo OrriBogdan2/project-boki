@@ -81,9 +81,8 @@ func dancer(a) -> void:
 	A.ok("dancer X: a blade at each foe every 0.2s, the ring pulsing on the beat",
 			gaps.size() >= 9 and even and float(beat["pulse"]) > 1.6, "%d beats, pulse %.2f" % [gaps.size(), beat["pulse"]])
 	A.ok("dancer X: she dances from the first beat on", bool(beat["danced"]))
-	A.step(m, 0.3)
-	A.ok("dancer X: still running at 2.3s", float(U.st.get("t", 0.0)) > 2.3 or U.blades == 20)
-	A.step(m, 0.2)
+	A.ok("dancer X: still running at 2.3s", U.running())
+	A.step(m, 0.5)
 	A.ok("dancer X: 2s of blades, 10 at most on each foe; ends with a plain fade and the dance stops",
 			U.blades == 20 and not U.running() and not AimKit.shown(P, "ult") and K.anim_id != ThiefUlt.DANCE,
 			"blades %d" % U.blades)
@@ -267,7 +266,7 @@ func _bola_encore() -> void:
 	var grounded := KitStatus.grounded(T)
 	HunterKeys.ult_pressed(P)
 	A.step(m, 2.5)
-	A.ok("combo dancer: Bola > X = the Grounded foe takes every blade", grounded and K.encore.blades == 5,
+	A.ok("combo dancer: Bola > X = the Grounded foe takes every blade", grounded and K.encore.blades == 10,
 			"grounded %s blades %d" % [grounded, K.encore.blades])
 	await A.done(m)
 

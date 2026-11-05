@@ -1653,8 +1653,10 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	_ik(arm_r, el_r, sh_r + bsh, tr2, pole_r)
 	if hd.get("fist", false):
 		_fists_to_hands(grip_r)
-	elif gun and free_r < 0.5:
+	elif gun and (free_r < 0.5 or hold == "twin"):
 		_weapon_to_hand(grip_r)
+	if hold == "twin" and offhand:
+		_offhand_to_hand()      # (twin weapons stay in the hands a kit move carries: fl / fr)
 	# the flask in the left hand
 	if drink_k > 0.0 and flask == null and hand_l:
 		flask = Node3D.new(); flask.name = "Flask"
@@ -1789,6 +1791,11 @@ func _weapon_to_hand(grip: Vector3) -> void:
 	var off := hand - gun.transform * grip
 	if off.length() > WEAPON_SLACK:
 		gun.position += off
+
+func _offhand_to_hand() -> void:
+	var hand := aim.transform.affine_inverse() * (arm_l.transform * (el_l.transform * hand_l.position))
+	if hand.distance_to(offhand.position) > WEAPON_SLACK:
+		offhand.position = hand
 
 static func _reachable(sh: Vector3, want: Vector3, back_to: Vector3, reach: float) -> Vector3:
 	if sh.distance_to(want) <= reach:

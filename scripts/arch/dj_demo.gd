@@ -15,6 +15,7 @@ const ANIM := {
 	"thf_loop": ["thief", "arc_bolts", [0.53, 0.68, 0.86, 0.97, 1.03, 1.1, 1.22, 1.28, 1.36, 1.49, 1.65, 1.8]],
 	"thf_chain": ["thief", "arc_bolts", [0.6, 0.68, 0.76, 1.26, 1.32, 1.44, 1.52, 2.1, 2.16, 2.3, 2.42, 2.9, 2.96]],
 	"thf_dance": ["thief", "arc_bolts", [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 2.0, 2.2, 2.4]],
+	"thf_dance_still": ["thief", "arc_bolts", [0.96, 1.0, 1.16, 1.2, 1.36, 1.56]],
 	"thf_bola": ["thief", "arc_bolts", [0.5, 0.6, 0.7, 0.8, 0.92, 1.05]],
 	"thf_bola_pair": ["thief", "arc_bolts", [0.5, 0.92, 1.0, 1.1, 1.3, 1.6]],
 	"thf_knife": ["thief", "arc_bolts", [0.5, 0.54, 0.58, 0.62, 0.72, 0.92]],
@@ -64,7 +65,7 @@ static func at(t: float, dt: float, when: float) -> bool:
 static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	if P.ammo < 3: P.ammo = int(P.wpn["mag"])
-	if t < 0.05 and (mv.begins_with("jug_") or mv in ["thf_vault", "thf_exdash", "thf_loop", "thf_primed", "thf_chain", "thf_dance"]):
+	if t < 0.05 and (mv.begins_with("jug_") or mv in ["thf_vault", "thf_exdash", "thf_loop", "thf_primed", "thf_chain", "thf_dance", "thf_dance_still"]):
 		Engine.time_scale = STRIP_SLOW       # (a slow software render must not skip the frames a strip asks for)
 	match mv:
 		"thf_lmb":
@@ -90,9 +91,9 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 			loop(P, t, dt)
 		"thf_chain":
 			chain(P, t, dt)
-		"thf_dance":
+		"thf_dance", "thf_dance_still":
 			if at(t, dt, 0.5): cast_ult(P)
-			P.inp["move"] = Vector2(0, 1) if t > 0.6 else Vector2.ZERO
+			if mv == "thf_dance" and t > 0.6: P.inp["move"] = Vector2(0, 1)
 		"thf_exdash":
 			# sideways, away from the dummy (toward it the hunter ends up inside its model, which filled
 			# the old strips' last frames with a big pink blur)
@@ -102,10 +103,10 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				P.inp["move"] = Vector2(0, -1)
 				K.on_dash(true)
 		"thf_bola", "thf_bola_pair":
-			if mv == "thf_bola_pair" and t < 0.45:
-				P.teleport(D.pos + Vector3(-3.0, 0, 0))
+			if mv == "thf_bola_pair" and t < 1.2:
+				if t < 0.45: P.teleport(D.pos + Vector3(-3.0, 0, 0))
 				var second: Hunter = P.m.arena.dummies[1]["h"]
-				second.teleport(D.pos + Vector3(3.0, 0, 0))
+				second.teleport(D.pos + Vector3(3.0, 0, 0))       # (it strafes: held in the lane)
 			if at(t, dt, 0.5):
 				K.ch_rmb = 1.0
 				K.cd["rmb"] = 0.0

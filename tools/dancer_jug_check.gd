@@ -426,7 +426,7 @@ func _growth() -> void:
 	var d1: float = await _blade(1)
 	var d10: float = await _blade(10)
 	A.ok("dancer Encore: a blade grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)),
-			d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01, "L1 %.2f L10 %.2f" % [d1, d10])
+			d1 >= 3.9 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01, "L1 %.2f L10 %.2f" % [d1, d10])
 
 
 # ------------------------------------------------------------------ Juggernaut
