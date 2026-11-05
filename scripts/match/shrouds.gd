@@ -22,7 +22,7 @@ const STYLES := [
 	{"id": "tatters", "name": "Tatters", "hood": 0, "fit": {"chest": 0.25, "waist": 0.27, "belt": 0.06}},
 	{"id": "long_coat", "name": "Long Coat", "hood": -1, "fit": {"chest": 0.235, "waist": 0.235, "belt": 0.04}},
 	{"id": "poncho", "name": "Poncho", "hood": 0, "fit": {"chest": 0.33, "waist": 0.3, "belt": 0.02}},
-	{"id": "robe_sash", "name": "Robe & Sash", "hood": 0, "fit": {"chest": 0.25, "waist": 0.27, "belt": 0.14}},
+	{"id": "robe_sash", "name": "Robe & Sash", "hood": 0, "fit": {"chest": 0.27, "waist": 0.35, "belt": 0.14}},
 	{"id": "mantle_cape", "name": "Mantle Cape", "hood": -1, "fit": {"chest": 0.23, "waist": 0.225, "belt": 0.04}},
 	{"id": "shawl_scarf", "name": "Shawl & Scarf", "hood": -1, "fit": {"chest": 0.25, "waist": 0.25, "belt": 0.04}},
 	{"id": "cowl_feathers", "name": "Cowl & Feathers", "hood": 0, "fit": {"chest": 0.28, "waist": 0.26, "belt": 0.04}},

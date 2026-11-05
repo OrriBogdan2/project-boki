@@ -313,12 +313,11 @@ static func _robe(t: ShroudTailor, hood_up: bool) -> void:
 		t.add("body", _shell(t, "sleeve%d" % i, sleeve, 18, 6, 0.014, true), {"arms": 1.0})
 		t.band(_edge(sleeve, 0.9, 1.0), 1.2, {"arms": 1.0})
 	var y := float(Shrouds.STYLES[5]["fit"]["belt"])
-	var sash := func(u: float, v: float) -> Vector3:
-		var th := u * TAU
-		var rr := 0.285 * t.bw * (1.0 + 0.03 * sin(v * PI))
-		return Vector3(cos(th) * rr, y + 0.06 - 0.12 * v, sin(th) * rr * 0.94)
-	t.add("trim", HeroKit.surf("shroud|sash|" + t.tag, sash, 26, 2), {})
-	var knot := Vector3(0.21, y, -0.19)
+	var sash := func(u: float, v: float) -> Vector3:          # on the robe's own folds, a little proud of them
+		var p: Vector3 = fn.call(u, (0.66 - (y + 0.07 - 0.14 * v)) / (0.66 - f))
+		return Vector3(p.x * 1.05, p.y, p.z * 1.05)
+	t.add("trim", HeroKit.surf("shroud|sash|" + t.tag, sash, 40, 2), {"legs": 0.9})
+	var knot := Vector3(0.25, y, -0.25)
 	t.add("trim", Models.sphere(0.055, 8), {}, Transform3D(Basis.IDENTITY, knot))
 	var long_end := PackedVector3Array([knot, knot + Vector3(0.2, -0.14, 0.2), knot + Vector3(0.3, -0.28, 0.5),
 		knot + Vector3(0.2, -0.32, 0.8), knot + Vector3(0.28, -0.36, 1.1)])
