@@ -2,21 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://be2mmcdlu84id"
-path.bptc="res://.godot/imported/tarek_orbit_stones_cells.jpg-c8e8a686793461684f58c1c21189d3f5.bptc.ctex"
-path.astc="res://.godot/imported/tarek_orbit_stones_cells.jpg-c8e8a686793461684f58c1c21189d3f5.astc.ctex"
+uid="uid://baiur65k8nr5w"
+path.bptc="res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.bptc.ctex"
+path.astc="res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "e7076e538b93971386bad2ff8537438b"
+"md5": "33196026e65aad4e265e0a09be6fd8b5"
 }
 
 [deps]
 
-source_file="res://art/wardens/tarek/tarek_orbit_stones_cells.jpg"
-dest_files=["res://.godot/imported/tarek_orbit_stones_cells.jpg-c8e8a686793461684f58c1c21189d3f5.bptc.ctex", "res://.godot/imported/tarek_orbit_stones_cells.jpg-c8e8a686793461684f58c1c21189d3f5.astc.ctex"]
+source_file="res://art/wardens/tarek/tarek_tarek_emit.jpg"
+dest_files=["res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.bptc.ctex", "res://.godot/imported/tarek_tarek_emit.jpg-1e111488f650f4a23f6c7551637e1663.astc.ctex"]
 
 [params]
 
@@ -41,5 +41,5 @@ process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
-process/size_limit=2048
-detect_3d/compress_to=0
+process/size_limit=0
+detect_3d/compress_to=1

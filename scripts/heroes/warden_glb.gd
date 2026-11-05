@@ -35,6 +35,7 @@ const BONES := {
 	"wings": "Rig/Torso/Wings",
 }
 const OPTIONAL := ["cape", "scarf", "tail", "wings"]
+const LEG_BONES := ["thigh.L", "shin.L", "thigh.R", "shin.R"]
 ## A Warden's variant of the contract (RIG_CONTRACT "Variant bones"): its own extra bones -> their parents. A .glb of
 ## that Warden must carry them (WardenSkeleton.mismatches); they are skinned like the rest and follow their parent
 ## bone, and the Warden's kit poses them on top of that (pose_extra): Dredge's grab-claw fingers, the eye, the winch
@@ -98,6 +99,8 @@ const ANCHORS := ["anchor_head_top", "anchor_chest"]
 ## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model (or a design
 ## variant's name, art()).
 const SETTING := "warden_models"
+const FAR_HIDE_D := 13.0        # m from the camera: "far_hide" pieces stop being drawn
+const ORBIT_LOOK := "orbit_look"   # root meta, a world point: the seeing-stones turn to it (DolmKit)
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
 const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
 const WEAPON_SPIN := "weapon_spin"  # its spinning barrels, a child of it (HunterAnim spins them while firing)
@@ -215,6 +218,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
 	_lights(glb, look(art(arch)))
+	_far_hide(glb, look(art(arch)))
 	root.set_meta("mats", mats)
 	root.set_meta("glb", true)
 	var own := look(art(arch))
@@ -227,6 +231,14 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
 	_smoke(root, look(art(arch)))
 	_bloom(root, glb, look(art(arch)))
+
+## Small pieces the match camera only sees as speckle (warden_look "far_hide": node names, Tarek's beads and fist
+## shards) are drawn only up to FAR_HIDE_D from the camera; close-ups keep them.
+static func _far_hide(glb: Node3D, own: Dictionary) -> void:
+	for nm in own.get("far_hide", []):
+		for n in glb.find_children(String(nm) + "*", "GeometryInstance3D", true, false):
+			(n as GeometryInstance3D).visibility_range_end = FAR_HIDE_D
+			(n as GeometryInstance3D).visibility_range_end_margin = 1.0
 
 ## A model's wisps of smoke off its held weapon (warden_look.json "smoke": colour [r, g, b, a], amount, life (s),
 ## size (m), rise (m/s); Kael's demon blade): dark soft puffs from along the weapon's length that drift up and
@@ -686,9 +698,6 @@ static func _toon(glb: Node, lk: Dictionary, warden: Dictionary, own := {}, arch
 			if src and src.albedo_texture:
 				m.set_shader_parameter("albedo_tex", src.albedo_texture)
 				m.set_shader_parameter("use_tex", true)
-				if src.normal_enabled and src.normal_texture:
-					m.set_shader_parameter("normal_tex", src.normal_texture)
-					m.set_shader_parameter("use_nrm", true)
 				m.set_shader_parameter("albedo", _tint(slot, lk, warden))
 				for k in PAINTED:
 					m.set_shader_parameter(k, PAINTED[k])
@@ -810,12 +819,35 @@ static func model_xf(root: Node3D, nd: Node3D) -> Transform3D:
 static func retarget(now: Transform3D, link: Array) -> Transform3D:
 	return now * (link[2] as Transform3D) * (link[3] as Transform3D)
 
+## retarget for a leg bone without the shear (warden_anim "legs_rigid": Tarek): the rig's Legs node is scaled by
+## the archetype's leg length on y only (Models.hunter), so a leg swung inside it is sheared, which a thin
+## procedural leg hides but a baggy trouser and a big foot don't. The bone keeps retarget's origin and turns as the
+## rig's leg points; along that line it shortens as the rig's leg does, and its girth stays.
+static func retarget_rigid(now: Transform3D, link: Array) -> Transform3D:
+	var xf := retarget(now, link)
+	var rest := (link[2] as Transform3D).affine_inverse()
+	var d := now.basis.y.normalized()
+	var k := now.basis.y.length() / maxf(rest.basis.y.length(), 1e-6)
+	var turn := _along_y(now.basis) * _along_y(rest.basis).inverse()
+	var stretch := Basis.IDENTITY
+	for i in 3:
+		stretch[i] += d * d[i] * (k - 1.0)      # (I + (k - 1) d d^T: a scale by k along d)
+	xf.basis = stretch * turn * (link[3] as Transform3D).basis
+	return xf
+
+## A basis's rotation keeping its y axis's direction (the leg's line), x then z made square to it.
+static func _along_y(b: Basis) -> Basis:
+	var y := b.y.normalized()
+	var x := (b.x - y * b.x.dot(y)).normalized()
+	return Basis(x, y, x.cross(y))
+
 ## Each frame, after the hunter's animation, puts every mapped bone where its rig node has moved it.
 class Sync extends Node:
 	var root: Node3D
 	var skel: Skeleton3D
 	var links: Array = []       # [bone index, rig node, node rest (model space) inverse, bone rest (skeleton space)]
 	var springs := Springs.new()  # the spring_ bone chains (braids) swinging on top
+	var rigid_legs := {}        # bone index -> true: legs retargeted without the Legs node's shear (retarget_rigid)
 	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
 	var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
@@ -847,6 +879,9 @@ class Sync extends Node:
 	## Plays the Hero's clips when its art has them; and finds a skinned weapon's FX points.
 	func use_clips(glb: Node3D, art_name: String) -> void:
 		var dd := WardenClips.data(art_name)
+		if bool(dd.get("legs_rigid", false)):
+			for b in LEG_BONES:
+				rigid_legs[WardenSkeleton.find(skel, b)] = true
 		var bl: Dictionary = dd.get("blade", {})
 		if not bl.is_empty():
 			blade_root = glb.find_child(String(bl["root"]), true, false) as Node3D
@@ -893,6 +928,7 @@ class Sync extends Node:
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
 		apply_blade()       # (again: a weapon that hangs on a chain, Pip's lantern, moved with the springs)
+		orbits.look = root.get_meta(ORBIT_LOOK, Vector3.INF)
 		orbits.step(dt)
 		if sway:
 			sway.tumble(dt, orbits.pivots)
@@ -902,7 +938,11 @@ class Sync extends Node:
 
 	func apply() -> void:
 		for l in links:
-			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
+			skel.set_bone_global_pose(int(l[0]), _rig_pose(l))
+
+	func _rig_pose(l: Array) -> Transform3D:
+		var now := WardenGlb.model_xf(root, l[1])
+		return WardenGlb.retarget_rigid(now, l) if rigid_legs.has(int(l[0])) else WardenGlb.retarget(now, l)
 
 	## The player's MantleLook sliders under the clips: each contract bone's offset and scale for this look, against the
 	## neutral rig the clips were keyed on. The clips key rotations; these stay on the bones (WardenClips strips the
@@ -940,7 +980,7 @@ class Sync extends Node:
 				var l: Array = links[i]
 				var pose: Transform3D = poses[i]
 				skel.set_bone_global_pose(int(l[0]), pose.interpolate_with(
-						WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l), w))
+						_rig_pose(l), w))
 		for l in rig_root:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
 		if sway:
@@ -1102,6 +1142,9 @@ class Orbits:
 	const ORBIT_HZ := 0.12      # turns a second
 	const BOB := 0.025          # m, each prop up and down
 	const BOB_HZ := 0.5
+	const LOOKERS := "orbit_stones"   # the orbit whose props are eyes (Tarek's seeing-stones)
+	const LOOK_RATE := 7.0      # 1/s: how fast they turn to what they watch
+	var look := Vector3.INF     # world point they watch (ORBIT_LOOK), INF for none
 	var pivots: Array = []      # [node, its rest transform, [prop, its rest position]...]
 	var t := 0.0
 
@@ -1113,7 +1156,7 @@ class Orbits:
 			var props: Array = []
 			for ch in nd.get_children():
 				if ch is Node3D:
-					props.append([ch, (ch as Node3D).position])
+					props.append([ch, (ch as Node3D).position, (ch as Node3D).quaternion])
 			pivots.append([nd, nd.transform, props])
 
 	func step(dt: float) -> void:
@@ -1126,3 +1169,13 @@ class Orbits:
 			for i in props.size():
 				var pr: Node3D = props[i][0]
 				pr.position = (props[i][1] as Vector3) + Vector3.UP * BOB * sin(TAU * BOB_HZ * t + i * 2.1)
+				if nd.name == LOOKERS and pr.is_inside_tree():
+					_face(pr, props[i][2], dt)
+
+	## A seeing-stone's eye (-Z on the prop) turns toward what the kit is watching, then back to looking outward.
+	func _face(pr: Node3D, rest: Quaternion, dt: float) -> void:
+		var want := rest
+		if look.is_finite() and pr.global_position.distance_squared_to(look) > 0.01:
+			var to := Basis.looking_at(look - pr.global_position, Vector3.UP).get_rotation_quaternion()
+			want = (pr.get_parent() as Node3D).global_basis.get_rotation_quaternion().inverse() * to
+		pr.quaternion = pr.quaternion.slerp(want, 1.0 - exp(-LOOK_RATE * dt))

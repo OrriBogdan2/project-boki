@@ -210,38 +210,37 @@
 			],
 			"far_smooth": 1.0
 		},
+		"far_hide": ["tarek_beads", "shard_", "ground_rings"],
 		"slots": {
 			"skin": {
 				"top_light": 0.0,
 				"fres": 0.15,
 				"rim_amount": 0.15,
-				"far_lift": 0.05,
+				"far_lift": 0.1,
 				"sheen": 0.0,
-				"light_tint": [
-					0.9,
-					0.86,
-					0.86
-				],
-				"light_neutral": 1.0,
 				"shade": 0.78,
-				"albedo": [
-					0.95,
-					0.88,
-					0.86
-				],
-				"light_neutral_warm": 0.85,
-				"desat": 0.45,
+				"desat": 0.2,
+				"albedo": [0.72, 0.62, 0.56],
+								"light_neutral": 1.0,
 				"rim_far": 0.0
 			},
 			"hair": {
-				"far_lift": 0.1,
-				"fres": 0.55
+				"far_lift": 0.0,
+				"fres": 0.2
 			},
 			"cloth": {
-				"far_lift": 0.3
+				"far_lift": 0.12,
+				"desat": 0.2
+			},
+			"cloth-accent": {
+				"far_lift": 0.3,
+				"desat": 0.0
 			},
 			"leather": {
-				"emit": 5.0,
+				"emit": 1.8,
+				"rim_far": 0.0,
+				"rim_amount": 0.2,
+				"desat": 0.3,
 				"far_lift": 0.2
 			},
 			"glow": {
@@ -289,7 +288,7 @@
 				"far_d": 14.0
 			},
 			{
-				"anchor": "anchor_gauntlet_L",
+				"anchor": "anchor_fist_L",
 				"color": [
 					1.0,
 					0.62,
@@ -301,7 +300,7 @@
 				"far_d": 14.0
 			},
 			{
-				"anchor": "anchor_gauntlet_R",
+				"anchor": "anchor_fist_R",
 				"color": [
 					1.0,
 					0.62,

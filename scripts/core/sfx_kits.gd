@@ -14,5 +14,5 @@ const NAMES := [
 	"br_throw", "br_boulder_hit", "br_wind", "br_punch", "br_launch", "br_burst", "br_rise", "br_roll", "br_shove",
 	"br_leap", "br_slam", "br_crack", "br_raise", "br_sense",
 	"os_orb", "os_orb_hot", "os_prime", "os_snap_wind", "os_snap", "os_snap_hit", "os_swap_lob", "os_swap", "os_seed",
-	"os_pop", "os_empower", "br_spine", "os_well", "os_well_hum",
+	"os_pop", "os_empower", "br_spine", "br_rumble", "br_crumble", "os_well", "os_well_hum",
 ]
