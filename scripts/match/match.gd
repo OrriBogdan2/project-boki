@@ -2936,8 +2936,7 @@ func _exit_tree() -> void:
 	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
 	SeeThrough.off()
 	Capture.teardown(self)           # scan beams and hums outlive the match otherwise
-	for key in box_hums.keys():
-		Sfx.loop_stop(String(key))
+	Sfx.reset_scene_audio()          # every sound the match started stops with it, owner item 103
 	box_hums.clear()
 	if biomes: biomes.free_up()
 	if duel:
