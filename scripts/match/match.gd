@@ -240,10 +240,13 @@ func warm_up(progress := Callable()) -> void:
 				pn.call("_make_stars")
 				break
 		break
+	if player: player.warm_marker()      # and the hit-marker balloon over a Hunter
 	var seen := {}
 	var batch_cb := func(f: float) -> void:
 		if progress.is_valid(): progress.call(0.7 * f)
+	var aim_warm := _warm_aim_stand_in()      # (item 94c: the aim kit's one material draws only once somebody aims)
 	var batched: bool = await _warm_batches(batch_cb, seen)
+	if is_instance_valid(aim_warm): aim_warm.queue_free()
 	if not batched:
 		return
 	var shown: Array = []
@@ -323,6 +326,27 @@ const WARM_FRAME_MS := 45.0
 
 ## The stand-ins of warm_up, a batch a frame, each batch drawn once under each light setup.
 ## False if the match went away meanwhile.
+## The aim kit (AimKit: every kit's aim lines, rings and the Hem draw's fill line and perfect circle) draws one
+## ImmediateMesh that is empty until a Hunter aims, so the scan below never sees its material and the first
+## aim after landing compiled its shader mid-play. A one-triangle mesh with the same material and vertex
+## format stands in for it for the warm-up.
+func _warm_aim_stand_in() -> MeshInstance3D:
+	var d := AimKit.layer(self)
+	if d == null or d.mat == null:
+		return null
+	var arr := []
+	arr.resize(Mesh.ARRAY_MAX)
+	arr[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3.ZERO, Vector3.RIGHT, Vector3.UP])
+	arr[Mesh.ARRAY_COLOR] = PackedColorArray([Color.WHITE, Color.WHITE, Color.WHITE])
+	var am := ArrayMesh.new()
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	am.surface_set_material(0, d.mat)
+	var mi := MeshInstance3D.new()
+	mi.mesh = am
+	mi.visible = false
+	add_child(mi)
+	return mi
+
 func _warm_batches(progress: Callable, seen: Dictionary) -> bool:
 	var list: Array = await _warm_sources(seen)
 	if not is_inside_tree():
@@ -647,6 +671,7 @@ static func _trim_shadows(root: Node) -> void:
 				stack.append(ch)
 
 func _start(o: Dictionary) -> void:
+	ShadowPolicy.watch_particles(get_tree())      # no particle system casts a shadow (item 94)
 	PerfLog.reset()
 	_stage_done_ms = 0.0
 	opts = o
@@ -2165,7 +2190,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if target == player and by and hud:
 		hud.hurt_from(by.pos)
 	if target == player:
-		sfx("hurt", null, -4.0)
+		sfx(HeroSfx.of(player, "hurt", "hurt"), null, -4.0)
 		if hud: hud.hurt_flash(d)
 	Juice.hit(self, target, by, d, o, crit, armor_hit)
 
@@ -2217,6 +2242,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		add_feed("%s went down" % HeroTitle.of_hunter(h))
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
 	sfx("knock", h.pos, 0.0)
+	HeroSfx.voice(self, h, "down")
 	fx.burst(h.pos + Vector3(0, 0.8, 0), Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 24, 5.0, 0.6)
 	Juice.knock(self, h, credit)
 	if net_on and not h.remote:
@@ -2936,8 +2962,7 @@ func _exit_tree() -> void:
 	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
 	SeeThrough.off()
 	Capture.teardown(self)           # scan beams and hums outlive the match otherwise
-	for key in box_hums.keys():
-		Sfx.loop_stop(String(key))
+	Sfx.reset_scene_audio()          # every sound the match started stops with it, owner item 103
 	box_hums.clear()
 	Beacons.stop_sounds(self)
 	if biomes: biomes.free_up()
@@ -4236,7 +4261,7 @@ func step(dt: float) -> void:
 	_prof("pre")
 	for h in hunters:
 		if h.ctrl == "bot" and not h.remote and not h.out and not h.extracted:
-			bot_brain.think(self, h, dt)
+			bot_brain.tick(self, h, dt)
 	Capture.tick(self, dt)          # a running scan roots its hunter, after the bots have decided
 	_prof("bots")
 	if skytrain: skytrain.tick(dt)
@@ -5756,6 +5781,7 @@ func _net_ev(x, from: String) -> void:
 				var by: Ent = ents_by_id.get(String(x[2]), null)
 				who.downed = true
 				sfx("knock", who.pos, 0.0)
+				HeroSfx.voice(self, who, "down")
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
 				if by == player:
 					player.knocks += 1

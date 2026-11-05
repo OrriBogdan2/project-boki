@@ -1,4 +1,4 @@
-# Brass Abomination (base character Dredge; archetype `dredge`, heavy)
+# Scrap King (base character Grimble; archetype `dredge`, heavy)
 
 Internal design doc. Source behaviour: the hero named in the Inspired-by table in docs/ARCHETYPES.md (traceability only; none of its names, text
 or looks appear in the game). Everything the player sees and hears is ours. The kitfix pass (Nov 2026) rebuilt the kit against the reference
@@ -54,7 +54,7 @@ the rest are the existing asserts named in "Combinations".
 
 ## Audit (Nov 3 23:40)
 
-Every Dredge row of briefs/specs/kit-audit/cinder_dredge_moosh.md (it audited main 200effce): (a) already done on
+Every Grimble row of briefs/specs/kit-audit/cinder_dredge_moosh.md (it audited main 200effce): (a) already done on
 this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--dredge-combo-check`.
 
 | Row | Sev | Verdict | Where / why |
@@ -67,7 +67,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--dre
 | Shift shoves foes | MED | (b) | it touches nobody (the source's Brute Dash). "barge: it shoves and hurts nobody ..." |
 | Shift turn lock after the slam | LOW | (c) | kept, wiki-sourced; it limits only the turn, Shift still acts at once (item 51) |
 | Shift distance / time | LOW | (c) | DECISIONS: slower and shorter |
-| Air dash cooldown | LOW | (c) | the class long-dash slot is shared by every hunter (stamina bar); a per-kit value is main's call |
+| Air dash cooldown | LOW | (c) | the class long-dash slot is shared by every hunter (the dash slot's air-dash diamond); a per-kit value is main's call |
 | Shift rank 3 | ok | (c) | matches |
 | E cooldown | ok | (c) | fine |
 | E walk in the wind-up, stale docstring | LOW | (b)+(c) | the docstring is fixed; the 70% walk stays (item 51 combos and his barge out of it need him free to move) |
@@ -148,8 +148,8 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | Do this | You get | Asserted by (check line) |
 |---|---|---|
 | Hold the gun | a shot every 0.5s, the spread's edge lines out to 6.3m, the body rocks back; idle, one aim line | "gun: a shot every half second"; "gun: the spread's edge lines lie on the ground out to the slug range"; "gun: each shot rocks the body back (dr_shot)"; "gun: idle, the cone folds into one aim line" |
-| Abyssal Hand hit | reel begins; you are Grounded, they are stunned; the braided rope shows | "abyssal hand: hooks the first foe, reel begins"; "reel: Dredge is Grounded while he reels, the foe is stunned"; "reel: the braided rope is drawn (through rocks)" |
-| Wait for the arrival | foe lands at your feet (not Grounded), "HAULED"; your Grounded ends | "abyssal hand: foe arrives at your feet and does not land Grounded"; "reel: Dredge's own Grounded ends with the reel" |
+| Abyssal Hand hit | reel begins; you are Grounded, they are stunned; the braided rope shows | "abyssal hand: hooks the first foe, reel begins"; "reel: Grimble is Grounded while he reels, the foe is stunned"; "reel: the braided rope is drawn (through rocks)" |
+| Wait for the arrival | foe lands at your feet (not Grounded), "HAULED"; your Grounded ends | "abyssal hand: foe arrives at your feet and does not land Grounded"; "reel: Grimble's own Grounded ends with the reel" |
 | During the reel: RMB, E, the gun | denied (only the barge works) | "reel: a second Abyssal Hand is denied"; "reel: E is denied while reeling"; "reel: the gun is locked" |
 | During the reel: barge | works; the reel continues | "reel: the barge still works" |
 | Reel, then Anchor Drop | the fist raised over the filling cone, the slam at ~0.38s: damage, a long stun with a spiral, Grounded | "anchor: planted, the damage lands on the slam frame (~0.38s), not at the cast"; "anchor tell: the hit cone is drawn for everyone, the slam's own radius, angle and direction"; "anchor tell: the slam hits inside the drawn cone and nothing outside it"; "combo: reel > Anchor Drop = damage, stun, Grounded"; "anchor: the stunned foe shows a stun spiral"; "anchor: E cooldown set" |
@@ -206,9 +206,12 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
   scorch of the air smash (he rides the anchor down); clods of turf torn up where the lunge sets off, iron and brass
   after-images along it.
 - Weapon: `HeroGearPair.scattergun`: a fat iron barrel with a flared brass bell, a rope-wrapped pump, a slug drum, a glowing seam.
-- Sounds (tools/sfx_linwick_dredge.py): `dr_shot`, `dr_throw`, `dr_grab`, `dr_reel`, `dr_barge`, `dr_anchor_wind`, `dr_dive`,
-  `dr_quake`, `dr_hop`, `dr_blast_charge` (a rising brass hum), `dr_blast` (a heavy thump, pitched down for wave 2) (plus the older
-  `dr_anchor`, `pay_salvage`).
+- Sounds (`tools/gen_sfx_grimble.py`, set `content/sfx/dredge.json`, docs/AUDIO.md): the junk blunderbuss `dr_shot` (three
+  takes), the gaff hook on its chain (`dr_throw`, `dr_grab`, the winch ratchet `dr_reel`), the scrap fist (`dr_anchor_wind`,
+  `dr_anchor`, the air smash `dr_dive`/`dr_quake`), the barge `dr_barge` with his hoard's `dredge_junk_clatter`, the pounce
+  `dr_hop`, Brass Broadside (`dr_blast_charge`: junk crammed in and a crank ratcheting; `dr_blast`, pitched down for wave 2),
+  coins for every Salvage stack and a hauled foe (`dredge_coin_jingle`) and for loot he pockets (`dredge_pickup`, with a wheezy
+  chuckle), skittery claw footsteps and a wheezy, creaturely wordless voice (`dredge_hurt`, `_down`, `_death`).
 - Brass Broadside (`scripts/arch/kits/dredge_blast.gd`): the growing fan in saturated brass, sparks arcing between his fists
   while charging, six big orbs per wave with a dark core and a smear (`LDFx.volley`: saturated brass for wave 1, violet for wave
   2) that fly the whole fan in the shot's 0.2s and hang at its edge fading for 0.35s as the source's orbs do (f35-f38), a
@@ -216,11 +219,11 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
 
 ## Engine notes
 The reel is a Displace "haul" tow (`scripts/combat/displace.gd`, decision 0016): the body moves in small steps toward wherever
-Dredge is now, with a weighted velocity (`SWING`), so it swings when he moves. It is hauled over rock tiles (`World.T_BLOCK`) and
+Grimble is now, with a weighted velocity (`SWING`), so it swings when he moves. It is hauled over rock tiles (`World.T_BLOCK`) and
 props to the first clear spot, stopped by a cliff rise (`Displace.CLIFF`) or a placed wall (`Verbs.wall_blocks`); the void is not
 special. A player online is reeled on their own game the same way; the kit ends the reel when that game says it arrived. The hook's shot carries `"rocks": true`, which the match's shot step
 reads to let it fly over rocks (one condition in `match.gd`). Grounded on the caster uses `KitStatus` "gnd"; `Hunter.do_dash` lets a
-reeling Dredge barge anyway (`DredgeKit.reeling`).
+reeling Grimble barge anyway (`DredgeKit.reeling`).
 Holds dropped on a merge (`_drop_holds`): `wind`, `dive`, `flying`, `hook_sd`, `scoop`, `pull` (with the caster's own Grounded),
 and `broadside.blast` (Brass Broadside's charge and waves).
 Dash flow (item 32): `content/dash_flow/dredge.json`; LMB waits for the lunge's end, the rest fire from it; Shift barges at once out of everything (item 51): out of the slam's wind-up the raised fist rides the barge and slams where it arrives, out of the air smash the pounce goes and the smash drops from where it ends, out of the Broadside the charge and waves follow him. Only a jump is refused from the hook's throw to the end of the reel (owner item 31, the source's Grounded while reeling: `into_jump.rmb`).
