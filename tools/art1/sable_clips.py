@@ -240,7 +240,7 @@ def clips():
 
     # LMB (thf_lmb_r / _l: the shot at 0, the reach by 0.04, overshoot 0.12, settled 0.26, wound to the other hand by 0.45, let go by 0.7)
     c, s, k, r = shot_r()
-    other = mirror(c)
+    other = dict(mirror(c), G=READY["G"], BE=READY["BE"])
     keys_r = [(0.0, c), (0.04, s, "out"), (0.12, k, "out"), (0.26, r), (0.45, dict(other)), (0.7, END)]
     out.append(C("lmb_r", 0.7, keys_r))
     out.append(C("lmb_l", 0.7, [(t_, mirror(q_)) + tuple(e) for t_, q_, *e in keys_r[:-1]] + [(0.7, END)]))

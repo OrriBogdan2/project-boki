@@ -74,7 +74,7 @@ vuv[lv] = luv
 tx = np.clip((vuv[:, 0] % 1) * tw, 0, tw - 1).astype(int)
 ty = np.clip((vuv[:, 1] % 1) * th_, 0, th_ - 1).astype(int)
 lum = tp[ty, tx].mean(1)
-bright = lum > 0.30
+bright = lum > 0.38
 
 # ---- the head: turned back to the front, by the line through the ear tips
 hd = bright & (P[:, 2] > 1.6)
@@ -90,9 +90,11 @@ t2 = d2[oth][np.argmax(rr[oth])]
 ax = t1 - t2
 if ax[0] < 0:
     ax = -ax
-YAW = -np.arctan2(ax[1], ax[0])
+YAW = -np.arctan2(ax[1], ax[0]) + np.radians(5.0)     # (the ears sit a little off the face's own line)
 print("ears", t1.round(3), t2.round(3), "yaw deg", round(float(np.degrees(YAW)), 1))
-ramp = smooth(1.545, 1.60, P[:, 2]) * bright
+E_C, E_R = np.array([0, cen[1], 1.75]), np.array([0.135, 0.15, 0.165])
+inside = (np.linalg.norm((P - E_C) / E_R, axis=1) < 1.2) & (P[:, 2] > 1.66)       # the dark eyes and lashes turn with the head
+ramp = smooth(1.545, 1.60, P[:, 2]) * (bright | inside)
 ang = YAW * ramp
 c_, s_ = np.cos(ang), np.sin(ang)
 q = P[:, :2] - cen[:2]
@@ -103,7 +105,7 @@ P[:, 0], P[:, 1] = q[:, 0] * c_ - q[:, 1] * s_ + cen[0] + shift[0] * ramp, q[:, 
 E_C, E_R = np.array([0, SKY, 1.75]), np.array([0.135, 0.15, 0.165])
 e = (P - E_C) / E_R
 er = np.linalg.norm(e, axis=1)
-bun = (P[:, 2] > 1.585) & (P[:, 1] < -0.06) & (er > 0.98) & (np.abs(P[:, 0]) < 0.2) & (lum > 0.2)
+bun = (P[:, 2] > 1.42) & (P[:, 1] < -0.05) & (er > 0.98) & (np.abs(P[:, 0]) < 0.2) & (lum > 0.3)
 P[bun] = E_C + e[bun] / er[bun, None] * 0.98 * E_R
 print("bun verts", int(bun.sum()))
 
@@ -111,9 +113,7 @@ print("bun verts", int(bun.sum()))
 names = [s[0] for s in SEG]
 D = np.zeros((n, len(SEG)))
 Z0, x = P[:, 2].copy(), P[:, 0]
-is_head = bright & (Z0 > 1.588)
-is_head |= (Z0 > 1.66) & (np.hypot(P[:, 0], P[:, 1] - SKY) < 0.095)
-is_head |= Z0 > 1.67
+is_head = (bright & (Z0 > 1.588)) | (Z0 > 1.67) | ((Z0 > 1.64) & (np.hypot(P[:, 0], P[:, 1] - SKY) < 0.1))
 rt = np.minimum.reduce([np.hypot(P[:, 0] - sg * (0.105 + (0.955 - Z0) * 0.24), P[:, 1]) for sg in (1.0, -1.0)])
 jacket = (Z0 > 0.925) & (rt > 0.098)                    # the jacket's flared hem stays on the pelvis
 for i, (nm, j0, j1, rad, _) in enumerate(SEG):
@@ -213,12 +213,10 @@ hand_w = GROUP["hand.R"] + GROUP["hand.L"]
 bm = bmesh.new()
 bm.from_mesh(low.data)
 bm.faces.ensure_lookup_table()
-# the hands go (rebuilt); the bun's crumpled patch goes too and the hole is capped flat: left in, its folds take the whole decimate budget
+# the hands go (rebuilt); the bun's crumpled patch goes too (left in, its folds take the whole decimate budget); the holes are capped after the decimate, which stalls on caps
 kill = [f for f in bm.faces if max(hand_w[v.index] for v in f.verts) > 0.5 or any(bun[v.index] for v in f.verts)]
 bmesh.ops.delete(bm, geom=kill, context="FACES")
 bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
-cap = bmesh.ops.holes_fill(bm, edges=[e for e in bm.edges if e.is_boundary], sides=4000)
-bmesh.ops.triangulate(bm, faces=[f for f in cap["faces"] if len(f.verts) > 3])
 bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0004)
 bm.to_mesh(low.data)
 bm.free()
@@ -252,5 +250,11 @@ def is_face(c):
 
 decimate(is_face, FACE_TRIS)
 decimate(lambda c: ~is_face(c), LOW_TRIS - FACE_TRIS)
+bm = bmesh.new()
+bm.from_mesh(low.data)
+cap = bmesh.ops.holes_fill(bm, edges=[e for e in bm.edges if e.is_boundary], sides=400)
+bmesh.ops.triangulate(bm, faces=[f for f in cap["faces"] if len(f.verts) > 3])
+bm.to_mesh(low.data)
+bm.free()
 print("Low tris", sum(len(p.vertices) - 2 for p in low.data.polygons))
 bpy.ops.wm.save_as_mainfile(filepath=OUT)

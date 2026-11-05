@@ -32,14 +32,16 @@ def hs(p):
 
 
 # ---- the eyes and mouth, on the scan (measured off the grid renders)
-EYE = np.array([0.05, 0.125, 1.73])
-EYE_W, EYE_H = 0.024, 0.0135
-BROW = np.array([0.06, 0.125, 1.765])
-MOUTH = np.array([0.03, 0.135, 1.645])
+EYE = np.array([0.045, 0.094, 1.607])         # rig space, read off the fitted head (x from the face's centre line)
+EYE_W, EYE_H = 0.0295, 0.0125
+BROW = np.array([0.04, 0.097, 1.632])
+MOUTH = np.array([0.023, 0.113, 1.536])
+MARK_OFF = np.array([-0.058, 0.074, 1.575])    # the scan's second beauty mark, painted out: the master has one, on her right cheek
+FACE_X = 0.002
 
 
 def eye_c(s):
-    return hs(EYE * [s, 1, 1])
+    return EYE * [s, 1, 1] + [FACE_X, 0, 0]
 
 
 # ---- hands: a leather palm, bare lilac fingers (the master's fingerless gloves); each closes on its pistol's grip
@@ -193,7 +195,7 @@ def antenna(s):
     side_v = norm(np.cross(t_, np.array([0, 1.0, 0])))                # in her front plane
     if side_v[n // 2, 2] > 0:
         side_v = -side_v                                               # the barbs point out and down
-    wd = 0.052 * smooth(0.2, 0.55, u) * smooth(1.0, 0.72, u) + 0.0045
+    wd = 0.076 * smooth(0.16, 0.5, u) * smooth(1.0, 0.74, u) + 0.0055
     up_w = 0.012 * smooth(0.25, 0.6, u) * smooth(1.0, 0.8, u) + 0.003
     v, f = [], []
     barb = np.array([1.0 if i % 2 == 0 else 0.76 for i in range(n)])     # the feather's notched edge
@@ -211,7 +213,9 @@ def antenna(s):
                 q = [a, a + 1, a + rows + 1, a + rows]
                 f.append(q if lay == 0 else q[::-1])
     p = Piece("antenna" + side, "hair-feather", np.array(v), f)
-    if s < 0:
+    # the front sheet winds toward the front (+y), its twin away
+    a_, b_, c_ = (p.v[f[len(f) // 8][i]] for i in (0, 1, 2))
+    if np.cross(b_ - a_, c_ - a_)[1] < 0:
         p.f = [q[::-1] for q in p.f]
     p.path, p.u = path, u
     return p
@@ -237,11 +241,11 @@ def braid():
     for i in range(rings):
         ph = i / 3.0
         fr = ph - np.floor(ph)
-        wd[i] = (0.031 - 0.011 * u[i]) * (0.72 + 0.28 * np.sin(fr * np.pi))
-        offs[i] = (1 if int(ph) % 2 else -1) * 0.009 * np.sin(fr * np.pi)
+        wd[i] = (0.044 - 0.014 * u[i]) * (0.74 + 0.26 * np.sin(fr * np.pi))
+        offs[i] = (1 if int(ph) % 2 else -1) * 0.011 * np.sin(fr * np.pi)
     t, s_, n_ = frames(path, (1, 0, 0))
     centre = path + s_ * offs[:, None]
-    p = sweep("braid", "hair-braid", centre, SEC6, wd, side_hint=np.array([1.0, 0, 0]), depth=wd * 0.82)
+    p = sweep("braid", "hair-braid", centre, SEC6, wd, side_hint=np.array([1.0, 0, 0]), depth=wd * 0.86)
     p.path, p.u = path, u
     return p
 

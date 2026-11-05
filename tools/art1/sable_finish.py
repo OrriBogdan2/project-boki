@@ -115,7 +115,7 @@ def lid_piece(s):
 
 ant = [K.antenna(1.0), K.antenna(-1.0)]
 br = K.braid()
-ties = [K.braid_tie(br, 0.03, "tieA", 0.034), K.braid_tie(br, 0.965, "tieB", 0.029)]
+ties = [K.braid_tie(br, 0.03, "tieA", 0.045), K.braid_tie(br, 0.965, "tieB", 0.036)]
 tuft = K.braid_tuft(br)
 top_z, r0 = float(src.get("hem_z", 0.8)), (float(src.get("hem_rx", 0.165)), float(src.get("hem_ry", 0.128)))
 hip_cy = float(src.get("hem_cy", -0.012))
@@ -244,8 +244,8 @@ for p in me0.polygons:
 HEAD = np.array(verts)
 DEFORM = {}
 for sg, sd in ((1.0, "R"), (-1.0, "L")):
-    DEFORM["brow." + sd] = (K.hs(K.BROW * [sg, 1, 1]), 0.026)
-    DEFORM["mouth." + sd] = (K.hs(K.MOUTH * [sg, 1, 1]), 0.015)
+    DEFORM["brow." + sd] = (K.BROW * [sg, 1, 1], 0.026)
+    DEFORM["mouth." + sd] = (K.MOUTH * [sg, 1, 1], 0.015)
 for b, (c_, r_) in DEFORM.items():
     d_ = np.linalg.norm((HEAD - c_) * [1, 0.6, 1.1], axis=1)
     k_ = np.exp(-(d_ / r_) ** 2) * (HEAD[:, 1] > 0.06)
@@ -315,7 +315,7 @@ bm.faces.ensure_lookup_table()
 uvl = bm.loops.layers.uv["UV"]
 PARTS = {"upper_arm.R": "armR", "forearm.R": "armR", "hand.R": "armR", "upper_arm.L": "armL", "forearm.L": "armL", "hand.L": "armL", "thigh.R": "legR", "shin.R": "legR", "foot.R": "legR",
          "thigh.L": "legL", "shin.L": "legL", "foot.L": "legL", "head": "head", "brow.R": "head", "brow.L": "head", "mouth.R": "head", "mouth.L": "head"}
-FACE_C = K.hs([0, 0.0, K.EYE[2] - 0.005])
+FACE_C = np.array([0, 0.0, K.EYE[2] - 0.005])
 region, face_i = {}, set()
 for i in range(nf):
     if names[faces_pid[i]] != "Low":
@@ -472,6 +472,9 @@ col = sample_scan(pp)
 print("scan paint", col.mean(0))
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 OUTC[ys, xs] = P.scan_grade(np.clip(col, 0, 1), pp, AO[ys, xs].astype(np.float64))
+dm = np.linalg.norm(pp - K.MARK_OFF, axis=1)
+near = OUTC[ys, xs][(dm > 0.012) & (dm < 0.018)].mean(0)
+OUTC[ys[dm < 0.012], xs[dm < 0.012]] = near
 
 
 def paint(pred, fn):
@@ -501,7 +504,7 @@ paint(lambda n: n.startswith("crystal") or n == "gemstone", P.crystal)
 paint(lambda n: n.startswith(("keyring", "keyshaft", "keybit", "gemchain", "gemframe")), P.silver)
 paint(lambda n: n.startswith("bola"), P.bola)
 paint(lambda n: n.startswith("cord"), P.glove)
-skin_c = sample_scan([K.hs(K.EYE + [0.03, 0.0, -0.035])])[0] * 1.03
+skin_c = sample_scan([K.EYE + [0.03, 0.0, -0.035]])[0] * 1.03
 for q, sg in ((lids[0], 1.0), (lids[1], -1.0)):
     def liner(p_, qq=q):
         ca, sa = math.cos(-LID_A), math.sin(-LID_A)
