@@ -1584,3 +1584,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - ALL gliding moves to SV physics (force-based, ~5 m/s scaled, swoop speed transfer, dive). Ours is too fast and twitchy.
 - Fold the glide numbers into the item 150 parity work.
 - 165: tutorial combat walls for the RMB wall-cone lesson.
+
+## 2026-11-05 18:46 UTC ext → S5: item 166: tutorial highlights. Replace the blue ground circles: a gold light-pillar + rotating ring for go-here, object outline + key prompt for interactables, outline + chevron for targets, a mote trail when lost, shimmer barriers. S3 polishes the VFX later.

@@ -2016,3 +2016,15 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - Add 2-3 tall walls/pillars (full cover height, no 1-high steps, item 151) in the tutorial combat arena, placed for Vex's Burr Charge wall cone (item 130):
   - A prompt "Bounce your grenade off a wall to hit enemies behind it", with a dummy positioned so the cone catches it.
   - Also useful for Lisette pins etc. when the tutorial uses other heroes.
+
+## 166. Tutorial highlighting: replace the plain blue circles with polished, diegetic markers (owner, 17:51 UTC Nov 5)
+- The owner: "the blue circles in the tutorial are a bit weird to see - make the tutorial section better to look at in terms of highlighting stuff".
+- **Replace** the flat blue ground circles (objective/target markers) with a consistent highlight language:
+  - **Go-here spots:** a soft glowing pillar of light (a beam fading upward) + a gentle ground ring with animated dashes rotating, in a warm gold, not flat blue. It pulses subtly and fades out when reached.
+  - **Interactables** (chest, Boki, egg, lever): a rim/outline glow on the object itself (a fresnel shader) + a small bobbing key prompt above it; no ground disc.
+  - **Targets** (dummies): a red-orange outline + a small chevron above the head; a hit flash on success.
+  - **Paths:** a short trail of floating motes/footprints leading to the next step, only when the player seems lost (idle > ~6 s).
+  - **Barriers** (item 164 island gates): a shimmer wall with a soft hex/rune pattern.
+- Everything fades in/out (no popping) and sits in the hero palette / gold UI accent (match item 157's UI style).
+- The VFX are S3's (when it's back); S5 swaps the logic hooks now, using placeholders that already follow these shapes.
+- **Assert:** no flat blue circle meshes remain in the tutorial scene; each marker type is used per the above.

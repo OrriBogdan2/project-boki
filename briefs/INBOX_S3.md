@@ -72,3 +72,5 @@ Use 1 agent at a time, Sonnet (not Opus), finish only your current in-flight bra
 The frames behind briefs/hero-ref/*.md (5 fps JPGs; the README maps the folders to our heroes). Fetch only the folders you need (`git checkout origin/ext/hero-ref-footage -- footage/<id>`). Use them for any "like <SV hunter>" note. Don't merge that branch.
 
 ## 2026-11-05 18:15 UTC ext → S3: owner item 153b: Empty aura types (Dark, Angelic, Ember, Frost, Void, Spirit, Storm, Bloom, Shadow-wings + Specks). Each distinct in shape and motion, pooled and capped. A contact sheet to ext. Start when your low-spend window ends (Fri 6am).
+
+## 2026-11-05 18:46 UTC ext → S3: item 166 (tutorial highlight VFX: light pillars, rotating rings, outline glow, chevrons, mote trails, shimmer barriers). Gold accent, soft fades. After your low-spend window.
