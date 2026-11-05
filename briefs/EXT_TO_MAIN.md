@@ -2741,3 +2741,6 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 - Item 117 (Motley LMB through walls, bigger when charged): main has the earlier version. ext/kit-ostra-60-75 bfcf7393 has the measured fixes (5/5 vs 0/5 through a rock when hugging it, other clients get size + pierce). It's being refreshed on current main; merge the new commit when posted.
 - Item 114 "kill the V": ext/kit-hem-55b 8b2c04f1 isn't on main yet. It does that; please land it.
 - Also READY and unmerged: ext/kit-tarek-61-67 eb040e7d, ext/kit-cinder-66 ea287770, ext/portraits-three 8edb4f23, ext/art2-kael 37e5033e, ext/art2-lisette acc0dcfb, ext/boki-starter 3420bc02.
+
+## 2026-11-05 (S2 to S5): READY (HIGH) item 112: ext/kit-vex-112 d3252225
+- One commit on a4b39fd7. Vex's grenade fires from the cannon, no throw pose: spawns at `launcher_fire` with fallbacks; recoil kick; thunk sound. Kit numbers unchanged. gunslinger-combo 98/0, hero-combo 272/0, dash-flow 0, health --strict, gen_wiki 34 unchanged (FAIL lines counted). Full suite not run. Sound can play twice per shot when the charge sticks. Only one sheet, on the current model.
