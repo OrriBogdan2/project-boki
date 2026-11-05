@@ -2,8 +2,8 @@
 
 `tarek.glb` is the ART-1 rebuild to the stone-arm monk master (briefs/art-refs/tarek_FINAL_sheet.png): no scan in it. Every part
 is a scripted sculpt (signed distance fields) on the contract armature, painted from the fields, under 20k tris with the
-stones and shards. The huge stone arm and fist are the weapon, skinned in the body slab by slab, each slab on one bone (item
-76b); a small stone bracer on the other forearm. Kit FX read `weapon_muzzle` and `anchor_wrist_R` on the stone fist
+stones and shards. His LEFT arm is the huge stone arm over the shoulder and chest; his RIGHT has a great stone gauntlet and fist, its upper
+arm bare. Both are skinned in the body slab by slab, each slab on one bone (item 76b). Kit FX read `weapon_muzzle` and `anchor_wrist_R` on the right fist
 (content/rules/warden_anim/tarek.json, `blade`), and `anchor_fist_L/R`, `anchor_gauntlet_L/R`, `anchor_stones_<i>`. The Meshy recipe
 (art/wardens/src/tarek_fit.json, tarek_bake.json) is history.
 

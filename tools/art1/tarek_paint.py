@@ -61,8 +61,8 @@ def p_arm(P, N, occ, cav, a):
     return S.mix(c, S.hexc("1e1a20")[None, :], T.left_tattoos(P, R) * 0.92), None
 
 
-def p_stone(P, N, occ, cav, a):
-    idx, d1, gap = S.voronoi(P, SEEDS_A)
+def p_stone(P, N, occ, cav, a, seeds=None):
+    idx, d1, gap = S.voronoi(mx(P) if seeds is None else P, SEEDS_A if seeds is None else seeds)
     v = lightness(T.key_shade(N), occ, cav * 0.5, 0.74) + 0.05 * S.fbm(P, 24.0, 6, 3) + 0.05
     tint = 0.94 + 0.09 * np.sin(idx * 2.7)
     c = tones("3a3e4a", "6c7180", "a4aab8", v) * tint[:, None]
@@ -78,9 +78,11 @@ def p_stone(P, N, occ, cav, a):
 
 
 def p_hands(P, N, occ, cav, a):
-    c = skin(P, N, occ, cav)
+    # (the left hand, greyed by the stone arm above it)
+    v = lightness(T.key_shade(N), occ, cav, 0.74)
+    c = tones("3a3634", "6a6464", "a09a98", v + 0.06)
     # amber cracks run from the bracer over the backs of his hands
-    Q = T.fold_x(P) - R.wr
+    Q = (T.fold_x(P) - R.wr) / T.HAND_K
     seeds = HAND_SEEDS
     q2 = Q * S.vec(0.0, 1.0, 1.0)
     idx, d1, gap = S.voronoi(q2, seeds)
@@ -91,26 +93,6 @@ def p_hands(P, N, occ, cav, a):
     e = AMBER[None, :] * ln[:, None]
     # a warm spill at the wrist
     c = S.mix(c, S.hexc("c86a30")[None, :], back * S.sstep(-0.04, 0.03, Q[:, 2]) * 0.3)
-    return c, e
-
-
-def p_rock(P, N, occ, cav, a, seeds):
-    idx, d1, gap = S.voronoi(P, seeds)
-    v = lightness(T.key_shade(N), occ, cav * 0.6, 0.7) + 0.08 * S.fbm(P, 30.0, 6, 3)
-    tint = 0.92 + 0.14 * np.sin(idx * 2.7)
-    c = tones("3a3e4a", "6c7180", "a4aab8", v + 0.06)
-    # chipped lighter edges, dark grit
-    speck = S.fbm(P, 90.0, 12, 2)
-    c = crease(c, np.maximum(cav, 0.0) * 0.8, "241a14", 0.8)
-    crack = S.sstep(0.012, 0.006, gap)
-    c = S.mix(c, S.hexc("6a2c10")[None, :], crack)
-    # only some seams burn, in long runs, as the art draws them
-    run = S.sstep(-0.2, 0.05, S.fbm(P, 7.0, 21, 2))
-    burn = S.sstep(0.016, 0.007, gap) * run
-    spill = S.sstep(0.04, 0.01, gap) * run
-    c = S.mix(c, S.hexc("c8501a")[None, :], spill * 0.4)
-    c = S.mix(c, S.mix(AMBER[None, :], HOT[None, :], S.sstep(0.007, 0.002, gap)), burn)
-    e = S.mix(S.hexc("ff8a1c")[None, :], HOT[None, :], S.sstep(0.007, 0.002, gap)) * burn[:, None]
     return c, e
 
 
@@ -245,7 +227,7 @@ P_FN = {"head": p_head, "teeth": p_teeth, "torso": p_torso, "arms": p_arm, "hand
         "wraps": p_wraps, "locs": p_locs, "beads": p_beads,
         "sash_tails": p_tails, "band_tails": p_band_tails, "geode": p_geode, "iris": p_iris,
         "shard": lambda P, N, o, c, a: p_shard(P, N, o, c, a),
-        "bracer_L": lambda P, N, o, c, a: p_rock(P, N, o, c, a, SEEDS_L)}
+        "gauntlet": lambda P, N, o, c, a: p_stone(P, N, o, c, a, SEEDS_G)}
 
 
 def p_prayer(P, N, occ, cav, a):
@@ -262,7 +244,7 @@ def p_shard(P, N, occ, cav, a):
 
 _rs = np.random.RandomState(7)
 HAND_SEEDS = np.stack((np.zeros(9), _rs.uniform(-0.08, 0.08, 9), _rs.uniform(-0.13, 0.04, 9)), 1).astype(np.float32)
-ARMS = ("arms", "hands", "stone", "bracer_L")
+ARMS = ("arms", "hands", "stone", "gauntlet")
 
 
 def corners(ob):

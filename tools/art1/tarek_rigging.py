@@ -1,7 +1,7 @@
 # Tarek's armature, weights and assembly (exec'd by tarek_build.py).
 SLOT = {"head": "skin", "teeth": "skin", "torso": "skin", "arms": "skin", "hands": "skin", "legs": "skin",
         "bandana": "cloth", "band_tails": "cloth", "wrap": "cloth", "sash": "cloth-accent", "skirt": "cloth-accent",
-        "sash_tails": "cloth-accent", "trousers": "cloth", "wraps": "cloth", "stone": "leather", "bracer_L": "leather",
+        "sash_tails": "cloth-accent", "trousers": "cloth", "wraps": "cloth", "stone": "leather", "gauntlet": "leather",
         "prayer": "leather-beads", "beads": "metal", "cap": "hair", "locs": "hair-braid"}
 FX = float(R.kn[0])
 
@@ -26,14 +26,14 @@ def add_bones(arm):
     for sd, sx in (("L", -1.0), ("R", 1.0)):
         f = S.vec(sx, 1, 1)
         wr = R.wr * f
-        K_ = S.vec(0, 0, T.KNUCKLE_Z)
+        K_ = S.vec(0, 0, T.KNUCKLE_Z) * T.HAND_K
         bone("foot." + sd, "shin." + sd, R.ankle * f, R.ankle * f + S.vec(0, 0.12, -0.04), (0, 0, 1))
         bone("lip." + sd, "head", HC + S.vec(0.062 * sx, 0.1, -0.068), HC + S.vec(0.062 * sx, 0.125, -0.068), (0, 0, 1))
         if sd == "R":
             continue        # (his stone fist never opens)
-        bone("fingers." + sd, "hand." + sd, wr + K_ * f, wr + (K_ + S.vec(-0.02, 0, -0.045)) * f, (sx, 0, 0))
-        bone("fingers2." + sd, "fingers." + sd, wr + (K_ + S.vec(-0.02, 0, -0.045)) * f, wr + (K_ + S.vec(-0.06, 0, -0.09)) * f, (sx, 0, 0))
-        th = T.THUMB
+        bone("fingers." + sd, "hand." + sd, wr + K_ * f, wr + (K_ + S.vec(-0.024, 0, -0.054)) * f, (sx, 0, 0))
+        bone("fingers2." + sd, "fingers." + sd, wr + (K_ + S.vec(-0.024, 0, -0.054)) * f, wr + (K_ + S.vec(-0.07, 0, -0.11)) * f, (sx, 0, 0))
+        th = T.THUMB * T.HAND_K
         bone("thumb." + sd, "hand." + sd, wr + th[0] * f, wr + th[1] * f, (sx, 0, 0))
         bone("thumb2." + sd, "thumb." + sd, wr + th[1] * f, wr + th[3] * f, (sx, 0, 0))
     bone("jaw", "head", HC + S.vec(0, -0.02, -0.055), HC + S.vec(0, 0.09, -0.125), (0, 0, 1))
@@ -75,13 +75,19 @@ def w_arm(P):
 
 def w_stone(P):
     """Each slab rides one bone whole: stone doesn't bend, the cracks open instead."""
-    idx, _, _ = S.voronoi(P, SEEDS_A)
+    idx, _, _ = S.voronoi(mx(P), SEEDS_A)
     sz = SEEDS_A[idx, 2]
     sx = SEEDS_A[idx, 0]
     chest = (sx < R.sh[0] - 0.05) & (sz > R.sh[2] - 0.22)
     fore = sz <= R.el[2] + 0.03
     hand_ = sz <= R.wr[2] - 0.02
-    return {"hips": chest * 1.0, "upper_arm.R": (~chest & ~fore) * 1.0, "forearm.R": (~chest & fore & ~hand_) * 1.0, "hand.R": (~chest & hand_) * 1.0}
+    return {"hips": chest * 1.0, "upper_arm.L": (~chest & ~fore) * 1.0, "forearm.L": (~chest & fore & ~hand_) * 1.0, "hand.L": (~chest & hand_) * 1.0}
+
+
+def w_gauntlet(P):
+    idx, _, _ = S.voronoi(P, SEEDS_G)
+    hand_ = SEEDS_G[idx, 2] <= R.wr[2] - 0.02
+    return {"forearm.R": (~hand_) * 1.0, "hand.R": hand_ * 1.0}
 
 
 def w_skirt(P):
@@ -102,7 +108,7 @@ def w_prayer(P, a):
 
 
 def w_hand(P):
-    Q = T.fold_x(P) - R.wr
+    Q = (T.fold_x(P) - R.wr) / T.HAND_K
     z = Q[:, 2]
     kz = T.KNUCKLE_Z
     f1 = smooth(kz + 0.012, kz - 0.012, z)
@@ -230,10 +236,10 @@ def w_swept(nm, P, a):
 
 WEIGHT = {"head": w_head, "teeth": lambda P: {"head": np.ones(P.shape[0], np.float32)},
           "bandana": lambda P: {"head": np.ones(P.shape[0], np.float32)}, "cap": lambda P: {"head": np.ones(P.shape[0], np.float32)},
-          "stone": w_stone, "skirt": w_skirt,
+          "stone": w_stone, "gauntlet": w_gauntlet, "skirt": w_skirt,
           "torso": w_torso, "arms": w_arm, "hands": w_hand, "wrap": w_hips, "sash": w_root, "trousers": w_legs,
           "legs": w_legs, "wraps": w_legs,
-          "bracer_L": lambda P: {"forearm.L": np.ones(P.shape[0], np.float32)}}
+          }
 
 
 def set_weights(ob):
@@ -419,9 +425,9 @@ def orbits(arm, geo, shard):
     bpy.context.scene.collection.objects.link(s)
     s.parent = arm
     s.parent_type = "BONE"
-    s.parent_bone = "hand.L"
+    s.parent_bone = "hand.R"
     bpy.context.view_layer.update()
-    cs = R.wr * S.vec(-1, 1, 1) + S.vec(0, 0, -0.1)
+    cs = R.wr + S.vec(0, 0, -0.1)
     s.matrix_world = Matrix.Translation(Vector(cs))
     out.append(s)
     for i in range(5):

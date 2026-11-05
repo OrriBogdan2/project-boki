@@ -43,7 +43,7 @@ def hand(x, y, z):
 
 
 def lhand(x, y, z):
-    return (-SX - x, y, SZ + z)
+    return (-SX - x - 0.07, y, SZ + z)
 
 
 # his loose rest: the weight on the left leg, the right foot turned out, fists half shut and heavy, a little out from
@@ -126,8 +126,8 @@ def gait(T, stride, lift, duty, dx, dy, lean, bob, armsw, base_y=0.0, back=0.0, 
         p["rot"] = (0, 0, turn * 0.4)
         # the arms pump against the legs, the heavy fists a beat late
         a1 = math.sin(ph * tau - 0.45)
-        p["hr"] = hand(0.11, -0.03 + base_y + armsw * -a1 * 0.42, -0.5 + 0.06 * max(0.0, -a1) * (armsw / 0.4))
-        p["hl"] = lhand(0.11, -0.05 + base_y + armsw * a1 * 0.6, -0.5 + 0.1 * max(0.0, a1) * (armsw / 0.4))
+        p["hr"] = hand(0.11, -0.05 + base_y + armsw * -a1 * 0.6, -0.5 + 0.1 * max(0.0, -a1) * (armsw / 0.4))
+        p["hl"] = lhand(0.11, -0.03 + base_y + armsw * a1 * 0.42, -0.5 + 0.06 * max(0.0, a1) * (armsw / 0.4))
         p["er"] = (0.75, -0.65, -0.1)
         p["el"] = (-0.75, -0.65, -0.1)
     return f

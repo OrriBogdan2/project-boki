@@ -205,7 +205,7 @@ def arm(P, R):
 
 def hand(P, R, curl=1.0):
     """His right hand and, mirrored, the left: hanging, palm in, a loose curl; big, as his kit is his fists."""
-    Q = fold_x(P) - R.wr         # (x out, y forward, z up, the wrist at the origin)
+    Q = (fold_x(P) - R.wr) / HAND_K         # (x out, y forward, z up, the wrist at the origin)
     d = cone(Q, (0, 0, 0.06), (0, 0.0, -0.01), 0.04, 0.041)
     d = smin(d, box(Q, (-0.004, 0.002, -0.06), (0.029, 0.073, 0.056), None, 0.024), 0.018)              # palm
     d = smin(d, ellipsoid(Q, (-0.027, 0.04, -0.04), (0.02, 0.036, 0.04)), 0.012)                        # thenar pad
@@ -216,12 +216,13 @@ def hand(P, R, curl=1.0):
         d = smin(d, polyline(Q, pts, [r * 1.08, r * 1.02, r * 0.94, r * 0.8]), 0.0075)
         d = smin(d, sphere(Q, pts[0] + np.array((0.008, 0, 0.002)), r * 1.05), 0.012)                    # knuckle
     d = smin(d, polyline(Q, THUMB, [0.02, 0.0185, 0.0165, 0.0135]), 0.012)
-    return d
+    return d * HAND_K
 
 
 FINGERS = ((0.054, 0.104, 0.0205), (0.0185, 0.114, 0.0215), (-0.0185, 0.106, 0.0205), (-0.054, 0.086, 0.0185))
 THUMB = np.array(((-0.008, 0.06, -0.01), (-0.016, 0.104, -0.038), (-0.03, 0.122, -0.08), (-0.04, 0.127, -0.112)), np.float32)
 KNUCKLE_Z = -0.112
+HAND_K = 1.2                 # his big hand, under the stone arm
 
 
 def finger_pts(y, ln):
@@ -265,8 +266,8 @@ def stone_seeds(R, seed=31):
     sh, el, wr = R.sh, R.el, R.wr
     fist = wr + vec(0, 0, -0.11)
     path = ((sh + vec(0.03, 0, 0.1), 3, 0.1), (sh + vec(0.05, 0, -0.03), 4, 0.17), (sh + vec(0.02, 0, -0.16), 4, 0.13),
-            (mix(sh, el, 0.72), 4, 0.12), (el + vec(0, 0, -0.03), 4, 0.12), (mix(el, wr, 0.38), 4, 0.14), (mix(el, wr, 0.72), 4, 0.15),
-            (wr + vec(0, 0, 0.0), 4, 0.13), (fist, 4, 0.11))
+            (mix(sh, el, 0.72), 4, 0.12), (el + vec(0, 0, -0.03), 4, 0.12), (mix(el, wr, 0.38), 4, 0.13), (mix(el, wr, 0.72), 4, 0.13),
+            (wr + vec(0, 0, 0.03), 4, 0.1))
     pts = []
     for ri, (c, n, r) in enumerate(path):
         for i in range(n):
@@ -284,7 +285,31 @@ def stone_core(P, R):
     d = smin(d, cone(P, sh, el, 0.112, 0.098), 0.05)
     d = smin(d, ellipsoid(P, mix(sh, el, 0.5), (0.122, 0.125, 0.15)), 0.04)
     d = smin(d, cone(P, el, wr, 0.098, 0.118), 0.03)
-    d = smin(d, ellipsoid(P, mix(el, wr, 0.6), (0.132, 0.14, 0.2)), 0.04)
+    d = smin(d, ellipsoid(P, mix(el, wr, 0.55), (0.118, 0.125, 0.19)), 0.04)
+    # (it stops at the wrist: the hand below is his own, greyed and cracked)
+    return smax(d, wr[2] - 0.015 - P[..., 2], 0.012)
+
+
+def gauntlet_seeds(R, seed=37):
+    """The right arm's slabs: tall ones up the forearm, smaller over the fist."""
+    rs = np.random.RandomState(seed)
+    el, wr = R.el, R.wr
+    fist = wr + vec(0, 0, -0.11)
+    path = ((mix(el, wr, 0.2), 4, 0.12), (mix(el, wr, 0.62), 4, 0.15), (wr + vec(0, 0, 0.02), 4, 0.13), (fist, 4, 0.11))
+    pts = []
+    for ri, (c, n, r) in enumerate(path):
+        for i in range(n):
+            a = 2 * math.pi * (i + 0.5 * (ri % 2)) / n + rs.uniform(-0.2, 0.2)
+            pts.append(c + vec(math.cos(a) * r, math.sin(a) * r, rs.uniform(-0.03, 0.03)))
+    return np.array(pts, np.float32)
+
+
+def gauntlet_core(P, R):
+    """A great stone gauntlet and fist on the right forearm: flaring to the wrist, two slabs standing past the elbow."""
+    el, wr = R.el, R.wr
+    d = ellipsoid(P, mix(el, wr, 0.58), (0.135, 0.145, 0.235))
+    d = smin(d, cone(P, el + vec(0.05, 0.02, 0.06), mix(el, wr, 0.4), 0.03, 0.09), 0.03)
+    d = smin(d, cone(P, el + vec(0.015, -0.05, 0.03), mix(el, wr, 0.4), 0.025, 0.09), 0.03)
     # the fist, closed for good: a block of stone with four knuckles and a thumb slab
     f = wr + vec(0, 0.0, -0.115)
     d = smin(d, ellipsoid(P, f, (0.1, 0.122, 0.112)), 0.03)
@@ -293,22 +318,22 @@ def stone_core(P, R):
     return smin(d, ellipsoid(P, f + vec(-0.07, 0.07, 0.01), (0.04, 0.06, 0.08)), 0.02)
 
 
-def stone_arm(P, R, seeds, heights):
-    """One huge arm of stone: thick faceted slabs on the arm's mass, deep cracks between them."""
-    core = stone_core(P, R)
+def stone_arm(P, R, seeds, heights, core_fn=None):
+    """Stone slabs on an arm's mass: thick and faceted, cracks between them. P in the right-side frame."""
+    core = (core_fn or stone_core)(P, R)
     idx, d1, gap = voronoi(P, seeds)
     q = P - seeds[idx]
     tilt = (np.sin(idx * 2.3)[:, None] * vec(1, 0, 0) + np.cos(idx * 1.7)[:, None] * vec(0, 1, 0) +
             np.sin(idx * 3.1)[:, None] * vec(0, 0, 1))
     # (wide bevels, no groove: the cracks are painted and glow; deep thin grooves collapse into duplicate faces at this tri
     # budget, and at the match camera only the slabs' big shapes count)
-    crack = sstep(0.0, 0.05, gap)
+    crack = sstep(0.0, 0.026, gap)
     return core - heights[idx] * crack - (q * tilt).sum(-1) * 0.2 * crack + (1.0 - crack) * 0.006
 
 
 def strata(P, R):
     """His strata tattoos on the stone side of the chest, ribs and back: 1 on a dark angular band, fading to his middle."""
-    x, y, z = P[..., 0], P[..., 1], P[..., 2]
+    x, y, z = -P[..., 0], P[..., 1], P[..., 2]       # (the stone arm is his left)
     z0 = float(R.waist[2])
     band = np.sin((z - 0.75 * x + 0.05 * noise(P, 7.0, 3)) * 48.0 + 2.0 * noise(P, 5.0, 6))
     m = sstep(-0.01, 0.07, x + 0.1 * (z - z0 - 0.3)) * sstep(z0 + 0.1, z0 + 0.22, z)
@@ -316,11 +341,11 @@ def strata(P, R):
 
 
 def left_tattoos(P, R):
-    """The crescent on his bare shoulder and the band round that forearm."""
-    Q = P - vec(-float(R.sh[0]) - 0.03, 0.0, float(R.sh[2]) - 0.06)
+    """The crescent on his bare right shoulder and a band under it."""
+    Q = P - vec(float(R.sh[0]) + 0.03, 0.0, float(R.sh[2]) - 0.06)
     r = np.sqrt(Q[..., 2] ** 2 + Q[..., 1] ** 2)
-    moon = sstep(0.012, 0.004, np.abs(r - 0.05)) * sstep(0.03, -0.01, Q[..., 1] * 0.7 - Q[..., 2] * 0.7) * sstep(0.02, 0.05, -Q[..., 0] + 0.03)
-    bands = sstep(0.022, 0.012, np.abs(P[..., 2] - float(R.el[2]) - 0.1 - 0.15 * P[..., 1]))
+    moon = sstep(0.012, 0.004, np.abs(r - 0.05)) * sstep(0.03, -0.01, Q[..., 1] * 0.7 - Q[..., 2] * 0.7) * sstep(0.02, 0.05, Q[..., 0] + 0.03)
+    bands = sstep(0.022, 0.012, np.abs(P[..., 2] - float(R.el[2]) - 0.1 - 0.15 * P[..., 1])) * (P[..., 0] > 0)
     return np.maximum(moon, bands)
 
 

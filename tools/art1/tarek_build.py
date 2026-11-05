@@ -52,17 +52,18 @@ def cap_f(P):
     return T.hair_cap(P - HC)
 
 
-def bracer_f(sx, seed):
-    seeds = T.bracer_seeds(R, sx, seed)
-    rs = np.random.RandomState(seed + 1)
-    heights = np.asarray(rs.uniform(0.016, 0.052, seeds.shape[0]), np.float32)
-    return (lambda P: T.bracer(P, R, sx, seeds, heights)), seeds
-
-
 SEEDS_A = T.stone_seeds(R)
+SEEDS_G = T.gauntlet_seeds(R)
 _rs = np.random.RandomState(41)
 H_A = np.asarray(_rs.uniform(0.018, 0.05, SEEDS_A.shape[0]), np.float32)
-BR_L, SEEDS_L = bracer_f(-1.0, 23)
+H_G = np.asarray(_rs.uniform(0.02, 0.055, SEEDS_G.shape[0]), np.float32)
+
+
+def mx(P):
+    """His left side in the right-side frame the stone arm is built in."""
+    return P * S.vec(-1, 1, 1)
+
+
 X = float(R.sh[0])
 GEO_R = 0.1
 Z_S = float(R.sh[2])
@@ -74,10 +75,10 @@ PARTS = {
     "bandana": dict(f=bandana_f, lo=HC + S.vec(-0.14, -0.19, -0.06), hi=HC + S.vec(0.14, 0.17, 0.14), h=0.0035, tris=650, col="c9b89a"),
     "cap": dict(f=cap_f, lo=HC + S.vec(-0.16, -0.19, -0.14), hi=HC + S.vec(0.16, 0.17, 0.2), h=0.0075, tris=800, col="1c1618"),
     "torso": dict(f=lambda P: T.torso(P, R), lo=S.vec(-0.33, -0.2, R.waist[2] - 0.03), hi=S.vec(0.33, 0.2, R.neck[2] + 0.03), h=0.005, tris=1150, col="8a5a3c"),
-    "arms": dict(f=lambda P: T.arm(P, R), lo=S.vec(-0.43, -0.13, R.wr[2]), hi=S.vec(-0.14, 0.13, Z_S + 0.11), h=0.005, tris=680, col="8a5a3c"),
-    "hands": dict(f=lambda P: T.hand(P, R), lo=S.vec(-0.38, -0.12, R.wr[2] - 0.27), hi=S.vec(-0.14, 0.16, R.wr[2] + 0.08), h=0.0028, tris=800, col="8a5a3c"),
-    "stone": dict(f=lambda P: T.stone_arm(P, R, SEEDS_A, H_A), lo=S.vec(0.02, -0.26, R.wr[2] - 0.28), hi=S.vec(0.58, 0.26, Z_S + 0.24), h=0.0065, tris=2950, col="8c90a0"),
-    "bracer_L": dict(f=BR_L, lo=R.wr * S.vec(-1, 1, 1) + S.vec(-0.14, -0.14, -0.06), hi=R.el * S.vec(-1, 1, 1) + S.vec(0.14, 0.14, -0.1), h=0.005, tris=460, col="8c90a0"),
+    "arms": dict(f=lambda P: T.arm(P, R), lo=S.vec(0.14, -0.13, R.el[2] - 0.12), hi=S.vec(0.43, 0.13, Z_S + 0.11), h=0.005, tris=620, col="8a5a3c"),
+    "hands": dict(f=lambda P: T.hand(P, R), lo=S.vec(-0.42, -0.15, R.wr[2] - 0.32), hi=S.vec(-0.12, 0.2, R.wr[2] + 0.08), h=0.0028, tris=800, col="8a5a3c"),
+    "stone": dict(f=lambda P: T.stone_arm(mx(P), R, SEEDS_A, H_A), lo=S.vec(-0.58, -0.26, R.wr[2] - 0.06), hi=S.vec(-0.02, 0.26, Z_S + 0.24), h=0.0065, tris=2500, col="8c90a0"),
+    "gauntlet": dict(f=lambda P: T.stone_arm(P, R, SEEDS_G, H_G, T.gauntlet_core), lo=S.vec(0.04, -0.24, R.wr[2] - 0.29), hi=S.vec(0.54, 0.24, R.el[2] + 0.14), h=0.0058, tris=1300, col="8c90a0"),
     "wrap": dict(f=lambda P: T.wrap_band(P, R), lo=S.vec(-0.22, -0.17, R.waist[2] + 0.04), hi=S.vec(0.22, 0.17, R.waist[2] + 0.2), h=0.006, tris=240, col="d8cfba"),
     "sash": dict(f=lambda P: T.sash(P, R), lo=S.vec(-0.27, -0.2, R.waist[2] - 0.06), hi=S.vec(0.27, 0.25, R.waist[2] + 0.18), h=0.0045, tris=560, col="b04a26"),
     "skirt": dict(f=lambda P: T.skirt(P, R), lo=S.vec(-0.33, -0.27, R.waist[2] - 0.46), hi=S.vec(0.33, 0.27, R.waist[2] + 0.1), h=0.0055, tris=900, col="b04a26"),
@@ -258,8 +259,9 @@ def prayer_bag():
     b = Bag("prayer")
     z0 = float(R.waist[2])
     nz = float(R.neck[2])
-    front = [(-0.075, 0.075, nz - 0.03), (-0.03, 0.135, nz - 0.2), (0.05, 0.158, nz - 0.36), (0.12, 0.158, z0 + 0.25), (0.2, 0.1, z0 + 0.16), (0.215, 0.0, z0 + 0.15)]
-    back = [(0.215, 0.0, z0 + 0.15), (0.16, -0.135, z0 + 0.2), (0.04, -0.15, z0 + 0.4), (-0.05, -0.12, nz - 0.1), (-0.075, 0.075, nz - 0.03)]
+    # (from the right of his neck down across the stone's chest to his left hip, and back up)
+    front = [(0.075, 0.075, nz - 0.03), (0.03, 0.135, nz - 0.2), (-0.05, 0.158, nz - 0.36), (-0.12, 0.158, z0 + 0.25), (-0.2, 0.1, z0 + 0.16), (-0.215, 0.0, z0 + 0.15)]
+    back = [(-0.215, 0.0, z0 + 0.15), (-0.16, -0.135, z0 + 0.2), (-0.04, -0.15, z0 + 0.4), (0.05, -0.12, nz - 0.1), (0.075, 0.075, nz - 0.03)]
     i = 0
     for c in along(front, 0.066) + along(back, 0.07):
         lowball(b, c, 0.03, (0.0, 0.0, 12.0, float(i % 5 == 4)), (0.13 * (i % 7), 4.0 + 0.1 * (i // 7)))
@@ -457,7 +459,7 @@ def geode_parts():
 
 
 # ---------------------------------------------------------------------------------------------------------- uvs
-UV_K = {"head": 2.4, "teeth": 1.2, "bandana": 1.3, "hands": 1.4, "torso": 1.5, "stone": 1.4, "geode": 2.2, "iris": 3.0, "locs": 0.7, "beads": 0.6, "prayer": 0.5,
+UV_K = {"head": 2.4, "teeth": 1.2, "bandana": 1.3, "hands": 1.4, "torso": 1.5, "stone": 1.4, "gauntlet": 1.4, "geode": 2.2, "iris": 3.0, "locs": 0.7, "beads": 0.6, "prayer": 0.5,
         "cap": 0.8, "shard": 8.0, "wraps": 1.1, "legs": 1.0}
 
 
@@ -623,7 +625,7 @@ def world_grids():
     hi = np.array((0.5, 0.34, float(HC[2] + 0.24)), np.float32)
     n = np.ceil((hi - lo) / h).astype(int)
     pts = np.stack(np.meshgrid(*[lo[i] + np.arange(n[i]) * h for i in range(3)], indexing="ij"), -1).reshape(-1, 3).astype(np.float32)
-    arms = ("arms", "hands", "stone", "bracer_L")
+    arms = ("arms", "hands", "stone", "gauntlet")
     b = np.full(pts.shape[0], 9.0, np.float32)
     a = b.copy()
     for nm, p in PARTS.items():
