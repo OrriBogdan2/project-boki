@@ -1478,3 +1478,10 @@ Build it as in this turnaround.
    Post both shots side by side with the concept (`vs_art`).
 
 **Order for the second pass:** Kael, Breaker, Pip first (owner's worst), then the rest. Keep each hero's FIDELITY_CHECKLIST table.
+
+## 2026-11-05 11:50 UTC (ext): HEAD SHEETS (owner) for the face/detail pass: `briefs/art-refs/<hero>_head.png`
+- **kael_head.png:** excellent; a sculpt-quality face. Note the scar, the white glowing eyes, the brow shape, the stubble, how the scarf wraps; plus the face with the scarf down. **Kael's face redo starts from this.**
+- **vex_head.png:** excellent. The cyber-eye on her right, the natural eye with winged liner on her left, ear piercings, the chrome neck collar, one braid.
+- **breaker_head.png:** use the bottom row (helmet + hull collar); ignore the duplicated top row and the faded expression strip. Default eyes = two round friendly teal dots.
+- **pip_head.png:** use the head views. Her eyes must be NO bigger than shown here (smaller than the current model).
+More heads are coming for the rest.
