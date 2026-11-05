@@ -132,7 +132,8 @@ func _setup_out() -> void:
 func _out(dt: float) -> void:
 	var out := bool(root.get_meta(WEAPON_OUT, false))
 	if weapon_bi >= 0:
-		skel.set_bone_pose_scale(weapon_bi, Vector3.ZERO if out else Vector3.ONE * float(root.get_meta(WEAPON_K, 1.0)))
+		var k := 0.0 if out else float(root.get_meta(WEAPON_K, 1.0))
+		skel.set_bone_pose_scale(weapon_bi, Vector3.ONE * k)
 	var busy := act_w > 0.5 or up_w > 0.5
 	out_w = move_toward(out_w, 1.0 if out and not busy else 0.0, OUT_RATE * dt)
 	if out_w > 0.0:
