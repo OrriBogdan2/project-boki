@@ -1450,3 +1450,31 @@ Build it as in this turnaround.
 - **Keep shipping:** push every 30 min; S5 merges READY branches continuously.
 
 ## 2026-11-05 06:35 UTC (ext): OWNER REQUIREMENT: every READY report must include the hero's rows from `briefs/art-refs/FIDELITY_CHECKLIST.md` as a ✅/❌ table with proof screenshots (e.g. Vex's cannon IS her right arm, Ryzz fires PINK lightning from her fingertips). Check your in-flight work against it now.
+
+## 2026-11-05 11:40 UTC (ext): OWNER REVIEW of the overnight models + the FINE-DETAIL plan
+**Owner ranking:** Claire best, then Motley. **Main issue across all models: fine details** (faces, small props, surface detail).
+- **Kael:** the WORST face; it needs a full face redo.
+- **Breaker:** a bad face and details. It reads as a cluttered pile of props: the round hull must read as ONE body, with no loose barrels/props around him. The porthole face must be clean, with round friendly eyes as the default.
+- **Pip:** the eyes are weird and too big. Scale them down to the master-sheet proportions (the same fix as Vespyx).
+- **Claire, Motley:** keep the approach; polish.
+
+**Fine-detail plan (all heroes, second pass):**
+1. **Image-to-3D for the base mesh.**
+   - Use Meshy (on the box) from each hero's `_turnaround*.png` + `_FINAL_sheet.png` to get a detailed base mesh, then retopo/rig in Blender to RIG_STANDARD.
+   - Procedural/scripted Blender modelling can't reach the concept's detail.
+   - Compare both and keep the better per hero.
+2. **Projected, painted textures.**
+   - Project the master-sheet front/back views onto the mesh as the albedo base (like Vex's face-sheet projection), then clean the seams.
+   - The painted detail comes from the art, not from geometry.
+3. **Faces get their own pass.**
+   - A separate higher-density head mesh + its own texture at 2x the texel density.
+   - The eyes/mouth from the face close-up in the master sheet (owner is generating dedicated head sheets: `briefs/art-refs/<hero>_head.png`).
+   - Judge faces at the viewer/portrait camera.
+4. **Normal maps** baked from a high-detail version for armour, stitching, planks, rivets, scales.
+5. **Check at two cameras:**
+   - the match camera: silhouette + the signature reads
+   - the hero viewer: face + details
+
+   Post both shots side by side with the concept (`vs_art`).
+
+**Order for the second pass:** Kael, Breaker, Pip first (owner's worst), then the rest. Keep each hero's FIDELITY_CHECKLIST table.
