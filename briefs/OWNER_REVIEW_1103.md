@@ -1986,3 +1986,33 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - The tutorial has ≤N intended chests.
   - You can't leave island k before step k is done.
   - The dash cd resets during the lesson.
+
+## 163 REDEFINED: the skyship "upgrade" is the DROP itself: a squad rocket-launch, then SV-style physics gliding (owner, 17:50 UTC Nov 5)
+- The owner: "the skyship upgrade is mostly for the height, and the way you drop with a squad (as a rocket together you can separate from mid air) - it should lock you into an animation for the first like 2-3s, then let you glide out your own way after - and it should be like supervive, not super fast gliding high in the air. they intentionally have a high z axis for more player control, and gliding is a physics based thing - our gliding is generally too fast and controllable relative to theirs".
+- The art pass (the ship model) from the first version of 163 is secondary. This is the core:
+  1. **Squad launch:**
+     - When the squad jumps, all members launch together as one "rocket" (a shared streak/capsule VFX, a team-colour trail) along an arc.
+     - Each player is LOCKED into the launch animation for ~2-3 s (tune 2.5): no steering, no input except an optional early "separate" press after ~1.5 s.
+  2. **Separation:** after the lock, each player breaks off (a burst + their glider opens) and glides their own way.
+  3. **Height:** start high (a high Z), so the descent is long and readable, with time to choose a landing and see others. The skyship altitude / launch apex raised accordingly.
+  4. **SV glide physics** (briefs/supervive-data/supervive_physics.md §Glide; also applies to ALL gliding, not just the drop):
+     - Glide speed ~MaxGlide 500 uu/s (5 m/s scaled to our world).
+     - A force-based approach to the target speed (GlideTargetXYForce), not instant velocity.
+     - A downward force toward the height target; MinZVelocity -350, exit -40.
+     - **The swoop:** diving then pulling up converts fall speed into forward speed (ratio 2.5, fading over 1.5 s): the "feathering" skill.
+     - The dive: Z target -3250 uu/s for a deliberate fast descent.
+     - The net feel is slower, heavier, less twitchy than ours; steering has inertia.
+  5. **Movement limits while dropping:** item 162.
+- **Owners:** S5 (physics + drop flow), with item 150 (the parity table) covering the glide numbers; S3 the rocket/separation VFX; S4 the launch whoosh/rumble; S2 the ship art later.
+- **Assert:**
+  - Input is ignored for the lock window.
+  - Members are co-located until separation.
+  - Glide top speed ≈ SV-scaled ±10%.
+  - A swoop gives forward speed.
+  - Our glide accel is no longer instant.
+
+## 165. Tutorial fight area: add walls so RMB can be used in interesting ways (owner, 17:50 UTC Nov 5)
+- The owner: "maybe some walls in the fighting part of the tutorial so you can use your rmb in a more interesting way for them".
+- Add 2-3 tall walls/pillars (full cover height, no 1-high steps, item 151) in the tutorial combat arena, placed for Vex's Burr Charge wall cone (item 130):
+  - A prompt "Bounce your grenade off a wall to hit enemies behind it", with a dummy positioned so the cone catches it.
+  - Also useful for Lisette pins etc. when the tutorial uses other heroes.

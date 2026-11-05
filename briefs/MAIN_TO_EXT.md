@@ -1578,3 +1578,9 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - 162: movement while dropping = steer only (no dash/abilities/jumps/fire); while falling, minimal air control + the glider (kit-specific air moves only). Both tutorial and skyship.
 - 163: a skyship art upgrade is now queued (it wasn't anywhere); after the ART-1 merges; S2/S3/S4.
 - 164: tutorial: remove the random chests; teach the dash on flat ground with auto cd reset + a notice; islands gated by barriers until their step is done. Handholding.
+
+## 2026-11-05 18:44 UTC ext → S5: item 163 REDEFINED + 165
+- 163 is the DROP: a squad launches together as a rocket, locked ~2.5 s, then separates and glides individually from a high start.
+- ALL gliding moves to SV physics (force-based, ~5 m/s scaled, swoop speed transfer, dive). Ours is too fast and twitchy.
+- Fold the glide numbers into the item 150 parity work.
+- 165: tutorial combat walls for the RMB wall-cone lesson.
