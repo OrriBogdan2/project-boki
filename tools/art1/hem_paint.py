@@ -19,13 +19,13 @@ def rgb(h):
     return np.array([int(h[i:i + 2], 16) / 255.0 for i in (0, 2, 4)], F)
 
 
-C = {"skin": rgb("c47b4f"), "skin_sh": rgb("7e4029"), "blush": rgb("b45a3e"), "lip": rgb("a02a2e"), "ear": rgb("7e4029"),
+C = {"skin": rgb("bb8560"), "skin_sh": rgb("85503b"), "blush": rgb("ae6a50"), "lip": rgb("a83a40"), "ear": rgb("85503b"),
      "hair": rgb("1a161c"), "hair_hi": rgb("5e6a88"), "hair_dk": rgb("0b0a0f"),
      "porc": rgb("f4f0ea"), "porc_sh": rgb("b6b2c0"), "gold": rgb("e0ae42"), "gold_dk": rgb("8c5e1a"), "thread": rgb("e8141e"),
-     "corset": rgb("26222b"), "corset_hi": rgb("565064"), "seam": rgb("0e0c10"), "trouser": rgb("232027"), "trouser_hi": rgb("4a4655"),
-     "boot": rgb("38201f"), "boot_hi": rgb("6e4a42"), "boot_top": rgb("4a2a28"), "lace": rgb("140f12"),
-     "jacket": rgb("cc1420"), "jacket_hi": rgb("f4383a"), "jacket_sh": rgb("6e0a16"), "jacket_dk": rgb("6c0f22"), "cuff": rgb("1c1a20"),
-     "tape": rgb("d9c49c"), "tape_dk": rgb("8b7654"), "leather": rgb("5a3524"), "leather_hi": rgb("8c5c3c"), "buckle": rgb("b9b7bd"),
+     "corset": rgb("3a3236"), "corset_hi": rgb("7c6e70"), "seam": rgb("1a1618"), "trouser": rgb("383036"), "trouser_hi": rgb("6e6268"),
+     "boot": rgb("4e2c28"), "boot_hi": rgb("93645a"), "boot_top": rgb("5e3632"), "lace": rgb("140f12"),
+     "jacket": rgb("cc1420"), "jacket_hi": rgb("f4383a"), "jacket_sh": rgb("6e0a16"), "jacket_dk": rgb("6c0f22"), "cuff": rgb("322a2e"),
+     "tape": rgb("d9c49c"), "tape_dk": rgb("8b7654"), "leather": rgb("6e4228"), "leather_hi": rgb("a8724a"), "buckle": rgb("b9b7bd"),
      "steel": rgb("d6dae2"), "steel_dk": rgb("6c7284"), "wood": rgb("c49a6c"), "nail": rgb("e6b4ac"),
      "lacquer": rgb("15141a"), "lacquer_hi": rgb("6b6c7c")}
 
@@ -52,9 +52,9 @@ def form(n, lo=0.0, hi=1.0):
 
 def _fabric(p, n, base, hi, sh, cav, sheen=1.0):
     k = form(n)
-    c = mix(sh, base, smooth(0.22, 0.62, k))
-    c = mix(c, hi, smooth(0.66, 1.0, k) * 0.55 * sheen)
-    return c * (1 - 0.55 * smooth(0.25, 0.9, cav))[:, None]
+    c = mix(sh, base, smooth(0.18, 0.55, k))
+    c = mix(c, hi, smooth(0.60, 0.96, k) * 0.7 * sheen)
+    return c * (1 - 0.5 * smooth(0.25, 0.9, cav))[:, None]
 
 
 def stitch(d, along, w=0.0024, per=170.0):
@@ -213,9 +213,9 @@ def head(p, n, lab, f):
     # warmth on the cheek and the ears
     c = mix(c, C["blush"], smooth(1.62, 1.60, p[:, 2]) * smooth(0.03, 0.06, np.abs(p[:, 0])) * 0.38)
     c = mix(c, C["ear"], (lab == H.EAR_IN) * 0.8)
-    c = c * (1 - 0.42 * smooth(0.45, 0.95, cav))[:, None]
+    c = c * (1 - 0.18 * smooth(0.6, 1.0, cav))[:, None]
     # the neck in the jaw's shadow
-    c = mix(c, C["skin_sh"] * 0.82, smooth(1.51, 1.455, p[:, 2]) * 0.0 + smooth(1.492, 1.462, p[:, 2]) * smooth(0.2, 1.0, n[:, 2] * -1.0 + 0.7) * 0.55)
+    c = mix(c, C["skin_sh"] * 0.8, smooth(1.505, 1.470, p[:, 2]) * 0.7)
     for s in (-1, 1):
         u, v = _eye_uv(p, s)
         front = (p[:, 1] > 0.03) & (s * p[:, 0] > 0)
@@ -230,27 +230,34 @@ def head(p, n, lab, f):
         c = mix(c, C["hair_dk"], np.clip(liner + wing + low * 0.7, 0, 1))
         # the brow: strong, arched, tapering outward
         bu = (u + 0.1) / 1.35
-        bz = 1.02 + 0.30 * np.maximum(1 - (bu - 0.2) ** 2 * 1.6, -0.6) - 0.22 * smooth(0.0, 1.0, bu) ** 3
-        th = (0.22 - 0.15 * smooth(-0.6, 1.1, bu))
+        bz = 1.62 + 0.16 * np.maximum(1 - (bu - 0.1) ** 2 * 1.6, -0.6) + 0.16 * bu - 0.22 * smooth(0.45, 1.0, bu) ** 2
+        th = (0.26 - 0.17 * smooth(-0.6, 1.1, bu))
         br = smooth(th * 1.25, th * 0.6, np.abs(v - bz)) * smooth(-1.02, -0.8, bu) * smooth(1.2, 1.0, bu) * front
         hairs = 0.75 + 0.25 * np.sin((u * 3.0 + v * 1.6) * 34.0)
         c = mix(c, rgb("1b1518"), br * hairs)
-    # the mouth: painted to the curve (a voxel label is too coarse here), full, a slight knowing lift at the corners
+    # the mouth: painted to the sculpt's own curve, a cupid's bow, the lower lip the fuller, a soft shine on it
     x, z = p[:, 0], p[:, 2]
     ax = np.abs(x)
     fr = p[:, 1] > 0.05
-    mid = 1.5418 + 0.0058 * smooth(0.004, 0.024, ax) ** 1.6
-    top = mid + 0.0066 * np.exp(-((ax - 0.0064) / 0.0095) ** 2) + 0.0012
-    bot = mid - 0.0110 * np.exp(-(ax / 0.0140) ** 2) - 0.0008
-    lm = smooth(-0.0006, 0.0005, z - bot) * smooth(-0.0006, 0.0005, top - z) * smooth(0.0245, 0.0215, ax) * fr
-    c = mix(c, C["lip"], lm)
-    c = mix(c, rgb("c9666c"), lm * np.exp(-((ax - 0.002) / 0.0085) ** 2 - ((z - 1.5372) / 0.0026) ** 2) * 0.85)
-    c = mix(c, rgb("4a1218"), smooth(0.0008, 0.0003, np.abs(z - mid)) * smooth(0.0250, 0.0225, ax) * fr)
-    # the shadows that carry a low mesh: under the nose and its wings, under the lip, the jaw's turn, the nose's side
-    c = mix(c, C["skin_sh"], smooth(0.0052, 0.0, np.abs(z - 1.5675)) * smooth(0.0145, 0.004, ax) * fr * 0.75)
-    c = mix(c, C["skin_sh"], smooth(0.0045, 0.0, np.abs(z - 1.5292)) * smooth(0.0150, 0.006, ax) * fr * 0.5)
-    c = mix(c, C["skin_sh"], smooth(0.0035, 0.0, np.abs(ax - 0.0108)) * smooth(1.570, 1.584, z) * smooth(1.604, 1.590, z) * fr * 0.35)
-    c = mix(c, rgb("dd9a68"), np.exp(-(x / 0.0052) ** 2) * smooth(1.578, 1.590, z) * smooth(1.622, 1.606, z) * fr * 0.5)
+    mid = 1.5424 + 0.0066 * smooth(0.006, 0.0245, ax) ** 1.5
+    top = mid + 0.0030 * smooth(0.0245, 0.012, ax) + 0.0062 * np.exp(-((ax - 0.0056) / 0.0072) ** 2) - 0.0004
+    bot = mid - 0.0108 * np.exp(-(ax / 0.0150) ** 2) - 0.0010 * smooth(0.0245, 0.016, ax)
+    lm = smooth(-0.0006, 0.0005, z - bot) * smooth(-0.0006, 0.0005, top - z) * smooth(0.0255, 0.0232, ax) * fr
+    c = mix(c, mix(rgb("8e2a30"), C["lip"], smooth(0.25, 0.7, k)), lm)
+    c = mix(c, rgb("d8797a"), lm * np.exp(-((ax - 0.0015) / 0.0088) ** 2 - ((z - 1.5362) / 0.0024) ** 2) * 0.9)
+    c = mix(c, rgb("c25a60"), lm * np.exp(-((ax - 0.0052) / 0.0050) ** 2 - ((z - 1.5478) / 0.0014) ** 2) * 0.55)
+    c = mix(c, rgb("4a161a"), smooth(0.0005, 0.0002, np.abs(z - mid)) * smooth(0.0262, 0.024, ax) * fr * 0.85)
+    c = mix(c, rgb("5a2418"), smooth(0.0022, 0.0005, np.hypot(ax - 0.0262, z - (mid + 0.0))) * fr * 0.35)
+    # what carries a low mesh: the nose's underside and side, nostrils, under the lip, the cheek's hollow, the jaw's turn
+    c = mix(c, C["skin_sh"], smooth(0.0046, 0.0, np.abs(z - 1.5690)) * smooth(0.0125, 0.003, ax) * fr * 0.8)
+    c = mix(c, rgb("5a2c20"), smooth(0.0018, 0.0008, np.hypot(ax - 0.0050, (z - 1.5712) * 1.6)) * fr * 0.8)
+    c = mix(c, C["skin_sh"], smooth(0.0045, 0.0, np.abs(z - 1.5292)) * smooth(0.0150, 0.006, ax) * fr * 0.6)
+    c = mix(c, C["skin_sh"], smooth(0.0034, 0.0, np.abs(ax - 0.0098)) * smooth(1.574, 1.584, z) * smooth(1.606, 1.592, z) * fr * 0.45)
+    c = mix(c, rgb("eaae7c"), np.exp(-(x / 0.0040) ** 2) * smooth(1.578, 1.590, z) * smooth(1.622, 1.606, z) * fr * 0.6)
+    c = mix(c, rgb("eaae7c"), np.exp(-(x / 0.0065) ** 2 - ((z - 1.5825) / 0.0040) ** 2) * fr * 0.55)     # the nose's tip
+    c = mix(c, rgb("e4a474"), np.exp(-(x / 0.0085) ** 2 - ((z - 1.5175) / 0.0055) ** 2) * fr * 0.4)      # the chin's light
+    c = mix(c, C["blush"], np.exp(-((ax - 0.050) / 0.018) ** 2 - ((z - 1.585) / 0.014) ** 2) * fr * 0.5)
+    c = mix(c, C["skin_sh"], smooth(0.012, 0.0, np.abs(ax + (z - 1.52) * -0.42 - 0.052)) * smooth(1.60, 1.56, z) * fr * 0.4)
     # the mask's strap, running back from its points under the hair
     c = mix(c, rgb("1c1518"), smooth(0.0046, 0.0028, np.abs(p[:, 2] - 1.645 - 0.05 * np.minimum(p[:, 1] - 0.012, 0.0))) * (p[:, 1] < 0.03))
     return c
@@ -266,7 +273,7 @@ def eyes(p, n):
     dx = dx * 1.0 + 0.0009
     dz = p[:, 2] - ez + 0.0004
     r = np.sqrt(dx * dx + dz * dz)
-    white = mix(rgb("bfb6b8"), rgb("efe8e6"), smooth(0.016, 0.006, r))
+    white = mix(rgb("d8cfca"), rgb("fbf5f0"), smooth(0.016, 0.006, r))
     iris = mix(rgb("9cf23c"), rgb("2fd02c"), smooth(0.0035, 0.0072, r))
     iris = mix(iris, rgb("0e4a14"), smooth(0.0076, 0.0088, r))
     # radial streaks
@@ -327,11 +334,11 @@ def mask(p, n, lab, f):
     c = mix(c, rgb("6a5258"), smooth(0.8, 1.0, k) * 0.5)
     for s in (-1, 1):
         ex, ez = H.EYE[0] * s, H.EYE[2]
-        for a in np.linspace(0, math.tau, 13)[:-1]:
-            cx, cz = ex + 0.0300 * math.cos(a), ez + 0.0172 * math.sin(a) + 0.0
+        for a in np.linspace(0.3, math.tau + 0.3, 9)[:-1]:
+            cx, cz = ex + 0.0290 * math.cos(a), ez + 0.0160 * math.sin(a) + 0.0
             for d in ((1, 1), (1, -1)):
-                ds = _poly_d(x, z, [(cx - d[0] * 0.0034, cz - d[1] * 0.0034), (cx + d[0] * 0.0034, cz + d[1] * 0.0034)])
-                c = mix(c, rgb("d8222c"), smooth(0.0011, 0.0006, ds))
+                ds = _poly_d(x, z, [(cx - d[0] * 0.0040, cz - d[1] * 0.0040), (cx + d[0] * 0.0040, cz + d[1] * 0.0040)])
+                c = mix(c, rgb("d8222c"), smooth(0.0015, 0.0009, ds))
     m = lab == H.GOLD
     c[m] = mix(C["jacket_sh"], C["thread"], smooth(0.2, 0.8, k[m]))
     return c
@@ -397,10 +404,10 @@ def gearlab(p, n, lab):
 def scarf(p, n, f):
     """Saturated crimson, soft folds: the brightest thing she wears, for the top-down read."""
     cav = cavity(f, p, n, 0.012) if f is not None else np.zeros(len(p), F)
-    fold = (fbm(p[:, 0] * 1.2, p[:, 1] * 1.2, p[:, 2] * 1.2, 7.0, 2) - 0.5) * 0.5
-    k = np.clip(form(n) + fold, 0, 1)
-    c = mix(rgb("860812"), rgb("e4101a"), smooth(0.15, 0.6, k))
-    c = mix(c, rgb("ff4038"), smooth(0.72, 1.0, k) * 0.55)
+    fold = (fbm(p[:, 0] * 1.2, p[:, 1] * 1.2, p[:, 2] * 1.2, 7.0, 2) - 0.5) * 0.9
+    k = np.clip(form(n) * 0.9 + fold, 0, 1)
+    c = mix(rgb("6e0810"), rgb("c80e18"), smooth(0.12, 0.55, k))
+    c = mix(c, rgb("f23830"), smooth(0.66, 0.95, k) * 0.6)
     return c * (1 - 0.55 * smooth(0.25, 0.9, cav))[:, None]
 
 

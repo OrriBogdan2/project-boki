@@ -112,6 +112,23 @@ class Solver:
         self.Y0 = {n: (b.matrix_local.to_3x3() @ Vector((0, 1, 0))).normalized() for n, b in self.b.items()}
         self.rest_frame = frame_of(rig["blade_rest"], rig["edge_rest"])
 
+    def remap(self, P):
+        """Keys written for one build, played on this Hero's rig: rig["dz"] lifts the hands and the grip with the shoulders, rig["leg_k"]
+        stretches the feet's air height and pelvis drops with the leg."""
+        dz, lk, a0, a1 = self.rig.get("dz", 0.0), self.rig.get("leg_k", 1.0), self.rig.get("ankle_keys", 0.0), self.rig.get("ankle", 0.0)
+        if dz == 0.0 and lk == 1.0:
+            return P
+        P = dict(P)
+        for k in ("G", "LP"):
+            v = P[k]
+            P[k] = (v[0], v[1], v[2] + dz)
+        for k in ("FL", "FR"):
+            v = P[k]
+            P[k] = (v[0], v[1] * 1.15, a1 + (v[2] - a0) * lk)
+        v = P["pel"]
+        P["pel"] = (v[0], v[1], v[2] * lk)
+        return P
+
     def arm_ik(self, side, S, W, pole, parent_q):
         up, fo = "upper_arm." + side, "forearm." + side
         hand = "hand." + side
@@ -139,6 +156,7 @@ class Solver:
 
     def solve(self, P):
         """-> {bone: world delta quaternion}, root location."""
+        P = self.remap(P)
         H0 = self.H0
         pz = self.rig["pelvis"]
         piv = Vector((0, 0, pz))
@@ -242,18 +260,18 @@ def bake(arm, clip, solver, extras):
             pb = pbs[b]
             pb.rotation_mode = "QUATERNION"
             pb.rotation_quaternion = q.normalized()
-            pb.keyframe_insert("rotation_quaternion", frame=f + 1)
+            pb.keyframe_insert("rotation_quaternion", frame=f)
         loc = R0["root"].inverted() @ (root_at - solver.H0["root"])
         pbs["root"].location = loc
-        pbs["root"].keyframe_insert("location", frame=f + 1)
+        pbs["root"].keyframe_insert("location", frame=f)
         for b, (q, l) in extras(P).items():
             pb = pbs[b]
             pb.rotation_mode = "QUATERNION"
             if q is not None:
                 pb.rotation_quaternion = q
-                pb.keyframe_insert("rotation_quaternion", frame=f + 1)
+                pb.keyframe_insert("rotation_quaternion", frame=f)
             if l is not None:
                 pb.location = l
-                pb.keyframe_insert("location", frame=f + 1)
+                pb.keyframe_insert("location", frame=f)
     arm.animation_data.action = None
     return act

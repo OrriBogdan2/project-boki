@@ -2,7 +2,7 @@
 	"doc": "Framing for the Wardens' painted portraits and splashes (Portraits, art/portraits). face: where the face's centre sits in the portrait, as fractions of its width and height; a small frame crops in on it. splash: the point a splash is cropped around (the Warden's head and shoulders), same units.",
 	"face": {
 		"bulwark": [0.45, 0.28],
-		"archer": [0.32, 0.30],
+		"archer": [0.56, 0.52],
 		"juggernaut": [0.42, 0.30],
 		"thief": [0.40, 0.31],
 		"mage": [0.43, 0.35],
@@ -16,7 +16,7 @@
 	},
 	"splash": {
 		"bulwark": [0.61, 0.18],
-		"archer": [0.28, 0.20],
+		"archer": [0.43, 0.20],
 		"juggernaut": [0.40, 0.22],
 		"thief": [0.44, 0.40],
 		"mage": [0.68, 0.18],

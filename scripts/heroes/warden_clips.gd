@@ -1,10 +1,10 @@
 class_name WardenClips
 extends RefCounted
-## A Hero's hand-keyed clips (ART-1, docs/art/wardens/CLIPS.md): the .glb's animations played through an AnimationTree so
-## the moves flow. Which state plays what is data, content/rules/warden_anim/<art>.json; a Hero without that file stays
-## on HunterAnim. HunterAnim still runs and stays the source of truth for the state (it hands its state dictionary over
-## as the model's meta STATE), the kit keeps its timing: a keyed move's clip is seeked to the kit's own kmove_t, so a clip
-## can never drift from the hit it shows. States the data lists as "procedural" (ledges, stomps) blend back to the
+## A Hero's hand-keyed clips (ART-1, docs/art/wardens/CLIPS.md): the .glb's animations played through an AnimationTree
+## so the moves flow. Which state plays what is data, content/rules/warden_anim/<art>.json; no file: it
+## stays on HunterAnim. HunterAnim still runs and stays the source of truth for the state (it hands its state over
+## as the model's meta STATE), the kit keeps its timing: a keyed move's clip is seeked to the kit's own kmove_t, so a
+## clip can never drift from the hit it shows. States the data lists as "procedural" (ledges, stomps) blend back to the
 ## retargeted rig, and so does any Hero model played by something that feeds no state (galleries, portraits).
 ##
 ## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
@@ -14,10 +14,13 @@ extends RefCounted
 
 const DIR := "res://content/rules/warden_anim/"
 const STATE := "anim_state"
+const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-out Hero on screen (0: not at all)
 const FADE := 0.1            # s: one clip into the next, and into or out of an action
 const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
 const STILL := 0.25          # m/s: below this he is standing
+const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
+const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
 var root: Node3D
@@ -43,6 +46,9 @@ var land_t := 99.0
 var hit_seen := 99.0
 var last_emote := ""
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
+var out_w := 0.0             # the "weapon_out" data: how far the free-arm pose lies over the clips
+var out_pose: Array = []     # [bone index, rotation]: the free arm, sampled once from its clip
+var weapon_bi := -1          # "weapon_bone": the bone a thrown weapon hides on
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -53,6 +59,12 @@ static func data(art_name: String) -> Dictionary:
 	return _data[art_name]
 
 ## Clips for this model, or null when the .glb brought none.
+## A hunter just eliminated whose Hero has a death clip: it stays visible until the clip has played.
+static func dying(h: Hunter) -> bool:
+	if not h.out or h.model == null or String(h.get_meta("died_why", "")) == "abyss":
+		return false
+	return h.m.time - float(h.get_meta("died_at", -99.0)) < float(h.model.get_meta(DEATH_T, 0.0))
+
 static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -> WardenClips:
 	var dd := data(art_name)
 	var players: Array = glb.find_children("*", "AnimationPlayer", true, false)
@@ -71,9 +83,18 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	if names.is_empty():
 		return false
 	lib = player.get_animation_library(names[0])
+	var contract: Array = []
+	for b in WardenGlb.BONES:
+		if b != "root" and WardenSkeleton.find(sk, b) >= 0:
+			contract.append(sk.get_bone_name(WardenSkeleton.find(sk, b)))
 	for nm in lib.get_animation_list():
 		var a := lib.get_animation(nm)
 		a.loop_mode = Animation.LOOP_LINEAR if _is_loop(String(nm)) else Animation.LOOP_NONE
+		# (rotations only on the contract bones: their offsets and scale are the player's sliders, Sync._look_pose)
+		for i in range(a.get_track_count() - 1, -1, -1):
+			var bone_name := String(a.track_get_path(i).get_concatenated_subnames())
+			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract:
+				a.remove_track(i)
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -82,7 +103,34 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.tree_root = _build()
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
+	_setup_out()
 	return true
+
+## "weapon_out": {"clip", "bones"}: an arm pose laid over everything while the weapon is out of the hand; "weapon_bone"
+## scales to zero meanwhile.
+func _setup_out() -> void:
+	weapon_bi = WardenSkeleton.find(skel, String(d.get("weapon_bone", ""))) if d.has("weapon_bone") else -1
+	var wo: Dictionary = d.get("weapon_out", {})
+	if wo.is_empty() or not lib.has_animation(String(wo["clip"])):
+		return
+	var a := lib.get_animation(String(wo["clip"]))
+	for i in a.get_track_count():
+		if a.track_get_type(i) != Animation.TYPE_ROTATION_3D:
+			continue
+		var bone := String(a.track_get_path(i).get_concatenated_subnames())
+		if bone in wo["bones"]:
+			out_pose.append([skel.find_bone(bone), a.rotation_track_interpolate(i, 0.0)])
+
+func _out(dt: float) -> void:
+	var out := bool(root.get_meta(WEAPON_OUT, false))
+	if weapon_bi >= 0:
+		skel.set_bone_pose_scale(weapon_bi, Vector3.ZERO if out else Vector3.ONE)
+	var busy := act_w > 0.5 or up_w > 0.5
+	out_w = move_toward(out_w, 1.0 if out and not busy else 0.0, OUT_RATE * dt)
+	if out_w > 0.0:
+		for b in out_pose:
+			var bi := int(b[0])
+			skel.set_bone_pose_rotation(bi, skel.get_bone_pose_rotation(bi).slerp(b[1], out_w))
 
 func _is_loop(nm: String) -> bool:
 	var lc: Dictionary = d.get("loco", {})
@@ -158,10 +206,13 @@ func _track(bone: String) -> NodePath:
 	var path := String(tree.get_node(tree.root_node).get_path_to(skel))
 	return NodePath("%s:%s" % [path, skel.get_bone_name(bi) if bi >= 0 else bone])
 
+func _node(nm: String) -> AnimationNodeAnimation:
+	return (tree.tree_root as AnimationNodeBlendTree).get_node(nm) as AnimationNodeAnimation
+
 func _p(nm: String, v: Variant) -> void:
 	tree.set("parameters/" + nm, v)
 
-## What the state asks for: {clip, t (s, or -1: it plays on its own), upper} or {}; {"proc": true} hands back to the rig.
+## What the state asks for: {clip, t (s, or -1: it plays on its own), upper} or {}; {"proc": true}: back to the rig.
 func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var st: Dictionary = d.get("states", {})
 	for k in d.get("procedural", []):
@@ -184,7 +235,12 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 				return {}
 			var from := float(mv["hold_from"])
 			tt = from + fmod(tt - from, maxf(length - from, 0.01)) if length > from + 0.02 else length - 0.001
-		return {"clip": clip, "t": tt, "upper": bool(mv.get("upper", false))}
+		# ("upper": true, or "moving": the legs keep walking only while he walks)
+		var up = mv.get("upper", false)
+		if up is String:
+			var vel: Vector3 = s.get("vel", Vector3.ZERO)
+			up = Vector2(vel.x, vel.z).length() >= STILL
+		return {"clip": clip, "t": tt, "upper": up}
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	if bool(s.get("reviving", false)) and st.has("reviving"):
@@ -208,11 +264,13 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
-	var want := force if not force.is_empty() else (_pick(s, dt) if not s.is_empty() else {"proc": true})
+	var want := force
+	if want.is_empty():
+		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
 	var proc := bool(want.get("proc", false))
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
 	if not proc and bool(want.get("upper", false)):
-		((tree.tree_root as AnimationNodeBlendTree).get_node("anim_u") as AnimationNodeAnimation).animation = String(want["clip"])
+		_node("anim_u").animation = String(want["clip"])
 		_p("seek_u/seek_request", float(want.get("t", 0.0)))
 		up_w = move_toward(up_w, 1.0, dt / FADE)
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
@@ -223,7 +281,7 @@ func step(dt: float) -> void:
 			cur = clip
 			chan = 1 - chan
 			var ch := "a" if chan == 0 else "b"
-			((tree.tree_root as AnimationNodeBlendTree).get_node("anim_" + ch) as AnimationNodeAnimation).animation = clip
+			_node("anim_" + ch).animation = clip
 			_p("seek_%s/seek_request" % ch, maxf(tt, 0.0))
 		var live := "a" if chan == 0 else "b"
 		if tt >= 0.0:
@@ -244,6 +302,7 @@ func step(dt: float) -> void:
 	_p("full/blend_amount", act_w)
 	_loco(s, dt)
 	tree.advance(dt)
+	_out(dt)
 
 func _loco(s: Dictionary, dt: float) -> void:
 	var lc: Dictionary = d["loco"]
@@ -261,7 +320,8 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
-	_p("loco_rate/scale", clampf(spd / lerpf(walk, run, clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0)), 0.6, 1.5) if spd >= STILL else 1.0)
+	var gait := lerpf(walk, run, clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0))
+	_p("loco_rate/scale", clampf(spd / gait, 0.6, 1.5) if spd >= STILL else 1.0)
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
 	_p("stance_w/blend_amount", stance_w)

@@ -334,9 +334,11 @@ def main():
     def eye_keep(v):
         a = np.array((H.EYE[0], H.EYE[1] + 0.012, H.EYE[2] + 0.004), F)
         d = np.minimum(np.linalg.norm((v - a * (1, 1, 1)) * (1, 1, 1.1), axis=1), np.linalg.norm((v - a * (-1, 1, 1)) * (1, 1, 1.1), axis=1))
-        return np.clip(1.15 - d / 0.03, 0.02, 1)
+        mouth = np.linalg.norm((v - np.array((0, 0.094, 1.552), F)) * (0.8, 1, 1), axis=1)
+        nose = np.linalg.norm((v - np.array((0, 0.100, 1.590), F)) * (1.3, 1, 0.8), axis=1)
+        return np.clip(np.maximum(1.15 - d / 0.03, np.maximum(1.0 - mouth / 0.034, 0.9 - nose / 0.03)), 0.02, 1)
 
-    part("skin_head", hd, 4700, "head", 3.0, hxf, "head", "skin", head_cull, eye_keep)
+    part("skin_head", hd, 5000, "head", 3.6, hxf, "head", "skin", head_cull, eye_keep)
     part("mask", mk, 520, "mask", 2.4, hxf, "head", None)
     part("hair", hr, 1900, "hair", 1.4, hxf, "head", None)
     part("lockR", locks["lockR"], 320, "lock", 0.6, hxf, "lockR", "hair")
@@ -344,14 +346,14 @@ def main():
     part("tail", locks["tail"], 700, "lock", 0.8, hxf, "tail", "hair")
     part("eyes", ey, 220, "eyes", 5.0, hxf, "head", "skin")   # (on the skin slot: the eyes slot would take the player's tint, hers stay green)
     part("hair_needles", hn, 120, "needle", 1.0, hxf, "head", "metal")
-    part("trunk", tr, 3900, "trunk", 1.0, None, "trunk", None, lambda v: (v[:, 2] > 1.40))
+    part("trunk", tr, 3800, "trunk", 1.0, None, "trunk", None, lambda v: (v[:, 2] > 1.40))
     part("armR", armR, 900, "trunk", 1.0, None, "arm")
     part("armL", armL, 900, "trunk", 1.0, None, "arm")
     part("handR", hR, 1150, "handR", 2.0, None, "hand")
     part("handL", hL, 750, "handL", 1.7, None, "hand")
     part("cowl", cw, 560, "scarf", 1.0, None, "gear", "cloth")
     part("quiver", qv, 340, "quiver", 0.9, None, "gear")
-    part("quiver_arrows", qn, 420, "gearlab", 1.0, None, "gear")
+    part("quiver_arrows", qn, 340, "gearlab", 1.0, None, "gear")
     part("shears", sh, 240, "gearlab", 1.0, H.shears_to_model, "gear")
     bxf = lambda p: H.bow_to_model(p, J)
     pb = part("bow", bw, 1150, "bow", 1.2, bxf, "bow")
@@ -370,7 +372,7 @@ def main():
     print("low parts", time.time() - t0, flush=True)
 
     # the scarf's tails, each two-sided
-    for tail in ("scarfR", "scarfL"):
+    for tail in ("scarftailR", "scarftailL"):
         for nm, g, dens in ((tail, ribbon_grid(H.SCARF_PATHS[tail], 0.0), 0.7), (tail + "_in", ribbon_grid(H.SCARF_PATHS[tail], -0.004), 0.45)):
             ob = grid_mesh(nm, g)
             bm = bmesh.new()
@@ -506,6 +508,9 @@ def main():
             set_verts(ob, p["xf"](vs))
             nrm = (p["xf"](nrm) - p["xf"](np.zeros((1, 3), F)))
         p["nrm"] = nrm
+        if p["name"] == "string":      # (one solid red: every loop on the island's middle, so nothing bleeds in dashes)
+            cu = uv.reshape(-1, 2).mean(0)
+            me.uv_layers.active.data.foreach_set("uv", np.tile(cu, len(uv) // 2).astype(F))
         print("painted", p["name"], len(tri), int(m.sum()), round(time.time() - t0, 1), flush=True)
     img = S.dilate(atlas, mask, 10)
     os.makedirs(WORK, exist_ok=True)
@@ -552,7 +557,7 @@ def main():
             add_bone(arm, "spring_%s_%d" % (nm, i), js[i], js[i + 1], "head" if i == 0 else "spring_%s_%d" % (nm, i - 1))
         add_bone(arm, "spring_%s_%d" % (nm, count), js[-1], js[-1] + (js[-1] - js[-2]) * 0.3, "spring_%s_%d" % (nm, count - 1))
     # the scarf's chains
-    for tail in ("scarfR", "scarfL"):
+    for tail in ("scarftailR", "scarftailL"):
         js = spline(np.array(H.SCARF_PATHS[tail], F), 7)
         chains[tail] = js
         for i in range(6):
@@ -578,7 +583,7 @@ def main():
             W = {"head": S.smooth(1.385, 1.445, vs[:, 2]) + 1e-3, "hips": S.smooth(1.445, 1.385, vs[:, 2])}
         elif grp == "head":
             W = {"head": one}
-        elif grp in ("scarfR", "scarfL"):
+        elif grp in ("scarftailR", "scarftailL"):
             W = chain(chains[grp], ["spring_%s_%d" % (grp, i) for i in range(6)], vs)
             W["hips"] = S.smooth(0.09, 0.03, np.linalg.norm(vs - chains[grp][0], axis=1)) * 3.0
         elif nm == "trunk":
@@ -666,7 +671,7 @@ def main():
         me.normals_split_custom_set_from_vertices(n.tolist())
 
     ROOM = {"lockR": 0.25, "lockL": 0.25, "tail": 0.5, "hair_needles": 0.0, "quiver_arrows": 0.0, "arrow": 0.0, "shears": 0.1, "string": 0.0,
-            "skin_head": 0.4, "mask": 0.25, "eyes": 0.0, "handR": 0.3, "handL": 0.3, "bow": 0.0, "scarfR": 0.3, "scarfL": 0.3, "scarfR_in": 0.0, "scarfL_in": 0.0}
+            "skin_head": 0.1, "mask": 0.1, "eyes": 0.0, "handR": 0.3, "handL": 0.3, "bow": 0.0, "scarftailR": 0.3, "scarftailL": 0.3, "scarftailR_in": 0.0, "scarftailL_in": 0.0}
     for p in parts:
         me = p["ob"].data
         at = me.color_attributes.new("Col", "FLOAT_COLOR", "POINT")

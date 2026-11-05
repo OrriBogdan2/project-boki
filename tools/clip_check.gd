@@ -1,13 +1,14 @@
 extends RefCounted
-## --clip-check: every Hero with hand-keyed clips (content/rules/warden_anim/<art>.json). Per Hero: the .glb stays in the tri
-## budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the timings are
-## the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the Gun and Muzzle
-## lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop. Never touches the save.
+## --clip-check: every Hero with hand-keyed clips (content/rules/warden_anim/<art>.json). Per Hero: the .glb stays in
+## the tri budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the
+## timings are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the
+## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop. Never
+## touches the save.
 
 const TRI_BUDGET := 20000
 const DT := 1.0 / 30.0
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
-const POP := 0.7               # m: no teleport across a hand-over (a raw cut between two poses is 1 m and more)
+const POP := 1.0               # m a frame: no teleport across a hand-over (the fastest strikes move 0.5 m on their own)
 
 var bad := 0
 var holder: Node3D
@@ -57,7 +58,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	for c in named:
 		if not clips.lib.has_animation(String(c)):
 			missing.append(c)
-	ok(missing.is_empty(), "%s: the file's %d clips are all in the .glb (missing %s)" % [id, named.size(), str(missing)])
+	ok(missing.is_empty(), "%s: the file's %d clips are in the .glb (missing %s)" % [id, named.size(), str(missing)])
 	_timings(id, dd, clips)
 	# one weapon: the procedural pieces are hidden
 	var shown := 0
@@ -66,6 +67,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		if (mi as MeshInstance3D).is_visible_in_tree():
 			shown += 1
 	ok(shown == 0, "%s: one weapon drawn (%d procedural pieces showing)" % [id, shown])
+	_sliders(id, sync)
 	await _on_blade(id, m, sync, clips)
 	await _handover(id, m, sync, clips, dd)
 	m.free()
@@ -100,8 +102,8 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 		var off := maxf(end_t - length, 0.0) if moves[km].has("hold_from") else absf(length - end_t)
 		if off > worst:
 			worst = off
-			where = String(km)
-	ok(worst <= 0.034, "%s: every clip lasts as long as its kit move, to a frame (worst %.3f s, %s)" % [id, worst, where])
+			where = "%s, clip %.3f s, keys %.3f s" % [km, length, end_t]
+	ok(worst <= 0.034, "%s: every clip lasts as long as its kit move (worst %.3f s, %s)" % [id, worst, where])
 	var unmapped: Array = []
 	var pre: String = {"juggernaut": "jug_"}.get(id, "")
 	for km in KMovesDJ.MOVES:
@@ -114,7 +116,7 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 	var tip := sync.get("blade_tip") as Node3D
 	var muzzle := sync.get("muzzle") as Node3D
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
-	var hb := int(sync.get("blade_bone"))      # (the bone the Data file names: a bow rides the left hand)
+	var hb := int(sync.get("blade_bone"))
 	var rest := tip.position.length()
 	var far := 0.0
 	var drift := 0.0
@@ -129,12 +131,34 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 			var sees: Vector3 = sk.global_transform * (sk.get_bone_global_pose(hb) * tip.position)
 			far = maxf(far, muzzle.global_position.distance_to(sees))
 			var hand: Vector3 = sk.global_transform * sk.get_bone_global_pose(hb).origin
-			var size := absf(sk.global_transform.basis.get_scale().x)
-			drift = maxf(drift, absf(hand.distance_to(sees) / size - rest))
+			var body_k := absf(sk.global_transform.basis.get_scale().x)
+			drift = maxf(drift, absf(hand.distance_to(sees) / body_k - rest))
 			n += 1
 	clips.force = {}
 	ok(far <= FX_ON_BLADE, "%s: the Muzzle stays on the visible tip in %d frames (worst %.3f m)" % [id, n, far])
 	ok(drift <= 0.02, "%s: the blade never leaves the hand (worst drift %.3f m)" % [id, drift])
+
+## The clips keep rotations only on the contract bones, so MantleLook's sliders (bone offsets) stay on under them; and
+## the death state has its time on screen.
+func _sliders(id: String, sync: Node) -> void:
+	var clips: WardenClips = sync.get("clips")
+	var strays := 0
+	var sk := clips.skel
+	var names: Array = []
+	for b in WardenGlb.BONES:
+		if b != "root" and WardenSkeleton.find(sk, b) >= 0:
+			names.append(sk.get_bone_name(WardenSkeleton.find(sk, b)))
+	for nm in clips.lib.get_animation_list():
+		var a := clips.lib.get_animation(nm)
+		for i in a.get_track_count():
+			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D \
+					and String(a.track_get_path(i).get_concatenated_subnames()) in names:
+				strays += 1
+	ok(strays == 0, "%s: no clip keys a contract bone's offset (%d tracks), the sliders stay on" % [id, strays])
+	ok((sync.get("look_pose") as Array).size() >= 10, "%s: the look's bone offsets are held under the clips" % id)
+	var stays := float(sync.get("root").get_meta(WardenClips.DEATH_T, 0.0))
+	ok(not (clips.d.get("states", {}) as Dictionary).has("dead") or stays > 0.0,
+			"%s: a knocked-out Hero stays on screen for its death clip" % id)
 
 ## A dash into an ability into the run: states fed as the game does, the hand never jumps.
 func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
