@@ -3,7 +3,7 @@ extends ArchKit
 ## Hem (id archer, light; docs/heroes/archer.md, hero sheet pin.md). Spirit Walk (Shift), Focus, the Heavy Shot
 ## (RMB, hold only: a charged arrow that knocks the first foe back and stuns it into a wall), Hail Wall (E, a curved arc of rain at the cursor distance), and on X
 ## Starpiercer (level 6, PinUlt: three empowered piercing beams). R is the Merge.
-## The bow (PinDraw): hold to draw through two stages with a V reticle that closes at each; tap and
+## The bow (PinDraw): hold to draw through two stages with a filling aim line and a perfect-timing circle; tap and
 ## Empowered shots land at the cursor, Supercharged ones fly past it to max range; let go right as a stage
 ## comes up (a gold fletch burst) and the next draw is faster; hold too long and the arrow is overdrawn (half).
 ##
@@ -154,6 +154,12 @@ func _tick(dt: float) -> void:
 	spirit.tick_orbs(dt)
 	_tag_shots()
 	fx.tick_shots()
+
+## The player's own draw shows only on the filling line: no shared wind-up ring at her feet, ticks or ping.
+## Anyone else still sees the ring (the wind-up tell), and the Heavy Shot keeps it.
+func charge_now() -> Array:
+	var cn := super.charge_now()
+	return ["", -1.0] if h.is_local() and String(cn[0]) == "draw" else cn
 
 ## Her bow hand carries its own tell (PinFx's fletch glint), so the shared charge orb stays off.
 func charge_orb() -> bool:
