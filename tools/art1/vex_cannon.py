@@ -202,7 +202,7 @@ def hose(name, pts, r=0.0125, n=9, bones=None, sec=5):
 def gear_pack(z_top, back_y):
     """The gear pack: the brass-rimmed round magazine high on her left shoulder blade (it leaves the spine bare), the belt loop round it, the feed hose over the
     neck to the socket. -> pieces, the belt's start."""
-    c = np.array([-0.135, back_y - 0.075, z_top])
+    c = np.array([-0.12, back_y - 0.05, z_top + 0.06])
     d = np.array([0, 1.0, 0.12])
     d = norm(d)
     a = norm(np.cross(d, (1.0, 0, 0)))
@@ -218,8 +218,8 @@ def gear_pack(z_top, back_y):
                 p, q = i * n + j, i * n + (j + 1) % n
                 f.append([p, q, q + n, p + n])
         return Piece(name, mat, np.array(v), f).rigid("hips")
-    out = [lat("packdisc", "metal-vex", [(0.045, 0.0), (0.045, 0.1), (0.0, 0.108), (-0.05, 0.108), (-0.058, 0.09), (-0.058, 0.0)]),
-           lat("packrim", "brass-vex", [(-0.075, 0.098), (-0.082, 0.082), (-0.062, 0.062), (-0.052, 0.062), (-0.05, 0.11), (-0.066, 0.11)])]
+    out = [lat("packdisc", "metal-vex", [(0.03, 0.0), (0.03, 0.07), (0.0, 0.076), (-0.036, 0.076), (-0.042, 0.062), (-0.042, 0.0)]),
+           lat("packrim", "brass-vex", [(-0.052, 0.07), (-0.058, 0.058), (-0.044, 0.044), (-0.037, 0.044), (-0.036, 0.078), (-0.046, 0.078)])]
     return out, c, a, b
 
 

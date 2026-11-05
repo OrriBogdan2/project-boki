@@ -45,7 +45,7 @@ cam.data.ortho_scale = 2.1
 for name, loc in (("front", (0, 5, .9)), ("back", (0, -5, .9)), ("side", (5, 0, .9)), ("left", (-5, 0, .9)), ("top", (0.001, 0.001, 6))):
     cam.location = loc
     tgt = Vector((0, 0, .9))
-    cam.rotation_euler = (tgt - Vector(loc)).to_track_quat("-Z", "Y" if name == "top" else "Z").to_euler()
+    cam.rotation_euler = (tgt - Vector(loc)).to_track_quat("-Z", "X" if name == "top" else "Y").to_euler()
     sc.render.filepath = PNG + name + ".png"
     bpy.ops.render.render(write_still=True)
 bpy.ops.wm.save_as_mainfile(filepath=OUT)
