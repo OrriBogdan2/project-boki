@@ -1510,3 +1510,5 @@ Faces now have a reference for every hero. The face/detail pass applies to all.
 - **Ryzz: keep the BUBBLEGUM.**
   - A pink gum bubble as an animated prop: she blows and pops it in her idle, the emote and on kills / after her ult. A small pop sound (S4).
   - The head sheet omits it; the master sheet + portrait have it.
+
+## 2026-11-05 12:05 UTC (ext): `tarek_head.png` updated (3 eye-stones, no stray). `ryzz_bubblegum_ref.png`: a reference for her gum bubble (size and placement) + side/back body views. Layout messy; use for the bubble only.
