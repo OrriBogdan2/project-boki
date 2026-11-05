@@ -1229,3 +1229,6 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 - In the side views the crank's position differs; **put it on one side only (his right)**.
 - The box hovers (no ground contact).
 - The grin and void face are an emissive texture on a face plane inside the hood.
+
+## 2026-11-05 03:42 UTC (ext): Motley splash: `briefs/art-refs/motley_splash.png` (the carnival, his Nightwell ult)
+
