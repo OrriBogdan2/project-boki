@@ -404,7 +404,7 @@ func _aim_emitter(p: GPUParticles3D, kind: String, layer: Dictionary, h: Hunter,
 	pm.set_shader_parameter("size", _num(layer, "size", o, 0.08))
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
 	mt.set_shader_parameter("col2", _pal(h, layer.get("c2"), "hot"))
-	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "char"))
+	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "smoke" if kind == "smoke" else "char"))
 	mt.set_shader_parameter("stretch", float(layer.get("stretch", 0.05)))
 	mt.set_shader_parameter("gain", view_k(h))
 	var want := _num(layer, "n", o, 12.0) * float(Settings.q("fx")) * lod * view_k(h)

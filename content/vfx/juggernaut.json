@@ -148,7 +148,7 @@
 		"enrage": {"sfx": [{"n": "jug_enrage", "db": -1.0}],
 			"fx": [{"p": "flare", "at": "chest", "size": 3.0, "life": 0.3, "c": "red", "c2": "hot"},
 				{"p": "ember", "at": "chest", "n": 30, "speed": 6.0, "spread": 0.9, "grav": -2.0, "life": 0.6, "size": 0.07, "radius": 0.4, "c": "red"}]},
-		"enraged": {"fx": [{"p": "ember", "at": "chest", "radius": 0.55, "way": "up", "n": 30, "speed": 2.2, "spread": 0.3, "grav": -2.0, "life": 0.6, "size": 0.06, "c": "red", "c2": "hot"},
+		"enraged": {"fx": [{"p": "ember", "at": "chest", "radius": 0.55, "way": "up", "n": 40, "speed": 2.4, "spread": 0.3, "grav": -2.0, "life": 0.65, "size": 0.08, "c": "red", "c2": "hot"},
 				{"p": "smoke", "at": "chest", "radius": 0.3, "n": 3, "speed": 0.5, "spread": 0.6, "grav": -0.8, "life": 0.7, "size": 0.28, "c": "red", "near": true}]},
 		"heat": {"fx": [{"p": "ember", "at": "chest", "y": 0.35, "radius": 0.45, "way": "up", "n": 7, "n_k": 1.6, "speed": 1.2, "spread": 0.4, "grav": -1.5, "life": 0.5, "size": 0.04, "c": "red"}]},
 

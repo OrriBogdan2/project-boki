@@ -103,7 +103,7 @@ vec4 scorch(vec2 uv) {
 	float width = 0.035 + 0.06 * open;
 	float cr = (1.0 - smoothstep(0.0, width, cracks(q + (vec2(n) - 0.5) * 0.5 + vec2(seed, 0.0)))) * open;
 	float cool = 1.0 - smoothstep(0.15, 0.8, life);
-	float a_char = reach * lit * (0.1 + 0.22 * smoothstep(0.35, 0.7, n)) * dissolve * mask;
+	float a_char = reach * lit * (0.06 + 0.14 * smoothstep(0.35, 0.7, n)) * dissolve * mask;
 	float a_crack = cr * reach * lit * mask * (0.35 + 0.65 * fade) * dissolve;
 	float flash = (1.0 - smoothstep(0.0, 0.24, life)) * reach * lit * mask * smoothstep(0.3, 0.62, n + (1.0 - d) * 0.25);
 	vec3 c = ramp(0.2 + 0.5 * cool) * a_crack + ramp(0.3 + n * 0.35) * flash * (1.0 - a_crack) + col3.rgb * a_char;

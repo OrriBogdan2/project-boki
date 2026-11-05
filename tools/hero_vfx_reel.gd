@@ -34,6 +34,8 @@ func run(main_node: Node) -> void:
 		if only != "" and part != only:
 			continue
 		print("REEL_MARK %d %s" % [Engine.get_frames_drawn(), part])
+		P.ak.res = 0.0              # (each part starts cool: Rage from the last one would go off in this one)
+		P.ak.set("enraged_t", 0.0)
 		await Callable(self, "_%s_%s" % [who, part]).call()
 	_write_captions()
 	print("REEL_DONE %d in %s" % [lines.size(), dir])
