@@ -139,7 +139,8 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 			far = maxf(far, muzzle.global_position.distance_to(sees))
 			var hand: Vector3 = sk.global_transform * sk.get_bone_global_pose(hb).origin
 			var body_k := absf(sk.global_transform.basis.get_scale().x)
-			drift = maxf(drift, absf(hand.distance_to(sees) / body_k - rest * sk.get_bone_pose_scale(hb).y))    # ("bone_scale")
+			var len_now := rest * sk.get_bone_pose_scale(hb).y      # ("bone_scale")
+			drift = maxf(drift, absf(hand.distance_to(sees) / body_k - len_now))
 			n += 1
 	clips.force = {}
 	ok(far <= FX_ON_BLADE, "%s: the Muzzle stays on the visible tip in %d frames (worst %.3f m)" % [id, n, far])

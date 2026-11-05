@@ -24,7 +24,8 @@ const LABEL := {"ashwick": "Cinder", "rimewright": "Claire", "juggernaut": "Kael
 	"ostra": "Motley"}
 ## arch -> [body ref file, rect (orig px)], [weapon ref file, rect]
 const REFS := {
-	"ashwick": [["cinder_weapons.png", [1630, 1460, 390, 560]], ["cinder_weapons.png", [360, 70, 1100, 470]]],
+	"ashwick": [["cinder_weapons.png", [1630, 1460, 390, 560]],
+		["cinder_weapons.png", [360, 70, 1100, 470]]],
 	"rimewright": [["claire_weapons.png", [1740, 1490, 280, 550]], ["claire_weapons.png", [60, 40, 210, 1960]]],
 	"juggernaut": [["kael_weapons.png", [1450, 1200, 560, 800]], ["kael_weapons.png", [130, 70, 260, 1220]]],
 	"thief": [["sable_weapons.png", [1600, 1400, 330, 610]], ["sable_weapons.png", [1190, 480, 810, 400]]],
@@ -170,7 +171,8 @@ func _audit(id: String, out: String) -> Dictionary:
 		for it in ITEMS.get(id, []):
 			var pts := _spans(h, skel, it[1], it[2])
 			var dia := _diameter(pts)
-			line[it[0]] = {"len": snappedf(dia[0], 0.001), "n": pts.size(), "ratio": snappedf(dia[0] / maxf(head, 0.1), 0.001),
+			var ratio := snappedf(dia[0] / maxf(head, 0.1), 0.001)
+			line[it[0]] = {"len": snappedf(dia[0], 0.001), "n": pts.size(), "ratio": ratio,
 				"a": [snappedf(dia[1].x, 0.01), snappedf(dia[1].y, 0.01), snappedf(dia[1].z, 0.01)],
 				"b": [snappedf(dia[2].x, 0.01), snappedf(dia[2].y, 0.01), snappedf(dia[2].z, 0.01)]}
 			if it == ITEMS[id][0]:
@@ -272,7 +274,8 @@ func _compose(cells: Dictionary, wardens: Array, out: String) -> void:
 		note.size = Vector2(190, CH - hdr - 210)
 		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		note.add_theme_font_size_override("font_size", 16)
-		note.text = String(verdict.get(id + "_note", "ref (left), in-game idle (right), match camera x, weapon ref, weapon close"))
+		var how := "ref (left), in-game idle (right), match camera, weapon ref, weapon close"
+		note.text = String(verdict.get(id + "_note", how))
 		note.add_theme_color_override("font_color", Color("c8c4d4"))
 		vp.add_child(l)
 		vp.add_child(note)
