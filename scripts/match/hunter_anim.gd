@@ -114,7 +114,6 @@ const SWINGS := {
 	],
 }
 
-var last_s: Dictionary = {}     # this frame's state (WardenClips reads it)
 var model: Node3D
 var rig: Node3D
 var torso: Node3D
@@ -295,7 +294,6 @@ var hip_y := 0.42              # the torso's rest height on the legs (longer leg
 
 func _init(m: Node3D) -> void:
 	model = m
-	m.set_meta(WardenGlb.ANIM, self)
 	hip_y = float(m.get_meta("hip_y", hip_y))
 	rig = m.get_node("Rig")
 	torso = rig.get_node("Torso")
@@ -516,10 +514,10 @@ static func _spin_e(p: float) -> float:
 	return p - sin(p * TAU) / TAU
 
 func update(dt: float, s: Dictionary) -> void:
+	model.set_meta(WardenClips.STATE, s)     # (a Hero's hand-keyed clips read the same state)
 	if dt <= 0.0:
 		return
 	t += dt
-	last_s = s
 	stepped = false
 	slammed = false
 	_check_weapon(s)

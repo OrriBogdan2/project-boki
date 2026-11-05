@@ -236,7 +236,8 @@ C.bake("death", 1.3, [(0, merged(CARRY, jaw=0.9)), (0.2, dict(pos=(0, -0.04, -0.
 
 # ---------------------------------------------------------------------- one-shots
 C.bake("land", 0.36, [(0, merged(CARRY, pos=(0, 0, -0.14), hips=(-22, 0, 0), head=(16, 0, 0), sh=(-0.58, 0.12, 0.62), gr=(0.3, 0.32, 0.82), fr=(AX + 0.05, -0.04, AZ), fl=(-AX - 0.05, 0.08, AZ), jaw=0.6)), (0.36, CARRY)])
-C.bake("hit", 0.36, [(0, CARRY), (0.06, dict(pos=(0, -0.05, -0.03), hips=(11, 7, 6), head=(-14, 0, -6), jaw=0.7, lid=0.5, brow=1.0, e="snap")), (0.36, CARRY)])
+C.bake("hit_f", 0.36, [(0, CARRY), (0.06, dict(pos=(0, -0.05, -0.03), hips=(11, 7, 6), head=(-14, 0, -6), jaw=0.7, lid=0.5, brow=1.0, e="snap")), (0.36, CARRY)])
+C.bake("hit_b", 0.36, [(0, CARRY), (0.06, dict(pos=(0, 0.05, -0.04), hips=(-13, -5, -5), head=(12, 0, 5), jaw=0.7, lid=0.5, brow=1.0, e="snap")), (0.36, CARRY)])
 # the emote: a great belly laugh, head back, slapping the belly with the shield hand... he is enjoying himself
 LAUGH = merged(CARRY, hips=(11, 0, 0), head=(-16, 0, 0), jaw=1.0, lid=0.8)
 
@@ -249,7 +250,7 @@ def laugh(t, p):
     add(p, "gr", (0, 0, 0.012 * s))
 
 
-C.bake("emote_laugh", 2.0, [(0, CARRY), (0.3, LAUGH), (1.7, dict(hips=(9, 0, 0))), (2.0, CARRY)], over=laugh)
+C.bake("emote", 2.0, [(0, CARRY), (0.3, LAUGH), (1.7, dict(hips=(9, 0, 0))), (2.0, CARRY)], over=laugh)
 # Fusion: he braces, drives the hammer down and heaves up with the power, arms wide
 C.bake("fuse", 1.2, [(0, CARRY), (0.3, merged(WIND, pos=(0, 0, -0.16), hips=(-30, 0, 0), head=(26, 0, 0), gr=(0.3, 0.42, 0.72), sh=(-0.3, 0.3, 0.72), lid=1.0, jaw=0.0)),
                      (0.7, dict(pos=(0, 0, 0.02), hips=(14, 0, 0), head=(-22, 0, 0), gr=(0.72, 0.1, 1.46), gd=(0.4, 0, 0.9), ga=(0, 1, 0), sh=(-0.8, 0.1, 1.3), sn=(-0.5, 0.7, 0.4), lid=0.0, jaw=1.0, brow=1.0, e="out")),

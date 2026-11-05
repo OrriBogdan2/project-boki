@@ -1,0 +1,176 @@
+{
+	"doc": "Breaker's hand-keyed clips (art/wardens/breaker/breaker.glb) and which game state plays which (scripts/heroes/warden_clips.gd).",
+	"skinned_weapon": true,
+	"extra_bones": {
+		"x_weapon": "hand.R",
+		"x_shield": "hand.L",
+		"x_foot.L": "shin.L",
+		"x_foot.R": "shin.R",
+		"x_jaw": "head",
+		"x_lid.L": "head",
+		"x_lid.R": "head",
+		"x_brow.L": "head",
+		"x_brow.R": "head",
+		"x_fing.L": "hand.L",
+		"x_fing.R": "hand.R",
+		"x_fing2.L": "x_fing.L",
+		"x_fing2.R": "x_fing.R",
+		"x_thumb.L": "hand.L",
+		"x_thumb.R": "hand.R"
+	},
+	"blade": {
+		"root": "anchor_hammer_grip",
+		"tip": "weapon_muzzle"
+	},
+	"weapon_bone": "x_weapon",
+	"weapon_out": {
+		"clip": "arm_free",
+		"bones": [
+			"upper_arm.R",
+			"forearm.R",
+			"hand.R",
+			"x_fing.R",
+			"x_fing2.R",
+			"x_thumb.R"
+		]
+	},
+	"loco": {
+		"idle": "idle",
+		"stance": "stance",
+		"stance_after": 4.0,
+		"walk": {
+			"f": "walk_f",
+			"b": "walk_b",
+			"l": "walk_l",
+			"r": "walk_r"
+		},
+		"run": {
+			"f": "run_f",
+			"b": "run_b",
+			"l": "run_l",
+			"r": "run_r"
+		},
+		"walk_speed": 2.0,
+		"run_speed": 4.8
+	},
+	"air": {
+		"rise": "jump",
+		"fall": "fall",
+		"glide": "glide",
+		"dive": "dive"
+	},
+	"land": {
+		"clip": "land",
+		"dur": 0.36,
+		"min_fall": 0.25
+	},
+	"kmoves": {
+		"bul_throw": {
+			"clip": "lmb_throw",
+			"upper": "moving"
+		},
+		"bul_recall": {
+			"clip": "lmb_recall",
+			"upper": true
+		},
+		"bul_smash_wind": {
+			"clip": "lmb_hold",
+			"upper": "moving",
+			"hold_from": 0.2
+		},
+		"bul_smash": {
+			"clip": "lmb_slam"
+		},
+		"bul_launch": {
+			"clip": "lmb_launch"
+		},
+		"bul_guard": {
+			"clip": "rmb_guard",
+			"upper": "moving",
+			"hold_from": 0.12
+		},
+		"bul_break": {
+			"clip": "guard_break",
+			"upper": true
+		},
+		"bul_armed": {
+			"clip": "guard_armed",
+			"upper": true
+		},
+		"bul_whirl": {
+			"clip": "shift_whirl"
+		},
+		"bul_charge": {
+			"clip": "shift_charge"
+		},
+		"bul_short": {
+			"clip": "dash_short"
+		},
+		"bul_lumber": {
+			"clip": "dash_air"
+		},
+		"bul_crush": {
+			"clip": "crush",
+			"upper": true
+		},
+		"bul_slamshield": {
+			"clip": "shield_slam"
+		},
+		"bul_mend": {
+			"clip": "e_mend",
+			"upper": "moving"
+		},
+		"bul_ult_wind": {
+			"clip": "x_wind",
+			"hold_from": 0.4
+		},
+		"bul_ult_slam": {
+			"clip": "x_slam"
+		},
+		"mf_xform": {
+			"clip": "fuse"
+		}
+	},
+	"states": {
+		"downed": "downed",
+		"reviving": "revive",
+		"dead": "death",
+		"stun": "stun",
+		"emote": "emote",
+		"hit": {
+			"front": "hit_f",
+			"back": "hit_b",
+			"dur": 0.36
+		}
+	},
+	"procedural": [
+		"ledge",
+		"mantle",
+		"stomp",
+		"base",
+		"drink"
+	],
+	"upper": [
+		"hips",
+		"head",
+		"upper_arm.L",
+		"forearm.L",
+		"hand.L",
+		"upper_arm.R",
+		"forearm.R",
+		"hand.R",
+		"x_fing.L",
+		"x_fing.R",
+		"x_fing2.L",
+		"x_fing2.R",
+		"x_thumb.L",
+		"x_thumb.R",
+		"x_weapon",
+		"x_shield",
+		"x_jaw",
+		"x_lid.L",
+		"x_lid.R",
+		"x_brow.L",
+		"x_brow.R"
+	]
+}

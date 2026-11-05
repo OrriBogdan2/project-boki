@@ -40,7 +40,6 @@ const OPTIONAL := ["cape", "scarf", "tail", "wings"]
 ## bone, and the Warden's kit poses them on top of that (pose_extra): Dredge's grab-claw fingers, the eye, the winch
 ## drum, the rope and cargo hook that hang from it, and the tar pool at his feet.
 const EXTRA := {
-	"bulwark": {"x_weapon": "hand.R", "x_shield": "hand.L", "x_foot.L": "shin.L", "x_foot.R": "shin.R", "x_jaw": "head"},
 	"dredge": {"eye": "head", "claw1.L": "hand.L", "claw1_tip.L": "claw1.L", "claw2.L": "hand.L",
 		"claw2_tip.L": "claw2.L", "claw3.L": "hand.L", "claw3_tip.L": "claw3.L", "winch": "hips", "rope1": "hips",
 		"rope2": "rope1", "hook": "rope2", "pool": "root"},
@@ -104,8 +103,7 @@ const WEAPON_OFF := "weapon_offhand"
 const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
 ## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire).
 const WING_FOLD := "wing_fold"
-const SEAT := "seat_"           # seat_<bone>: the skinned weapon's bone follows the rig's weapon node (Sync.ready_seats)
-const ANIM := "hunter_anim"     # root meta: this model's HunterAnim (its last state drives WardenClips)
+const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: its grip frame, for the piece that leaves the hand
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
@@ -190,7 +188,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	var scene := load(path(arch)) as PackedScene
 	var glb: Node3D = scene.instantiate() as Node3D if scene else null
 	var skel := skeleton(glb)
-	var bad: Array = WardenSkeleton.mismatches(skel, rest, EXTRA.get(arch, {})) if skel else ["no armature"]
+	var bad: Array = WardenSkeleton.mismatches(skel, rest, extra_bones(arch)) if skel else ["no armature"]
 	if not bad.is_empty():
 		push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [path(arch), str(bad)])
 		if glb:
@@ -203,6 +201,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	sync.name = "Sync"
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
+	sync.use_clips(glb, art(arch))
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
 	_lights(glb, look(art(arch)))
@@ -210,10 +209,11 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	root.set_meta("glb", true)
 	var own := look(art(arch))
 	var off: Array = own.get("weapon_offset", [0.0, 0.0, 0.0])
-	_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]))
+	if bool(WardenClips.data(art(arch)).get("skinned_weapon", false)):
+		_skinned_weapon(root)
+	else:
+		_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]))
 	_hold_shield(root, glb)
-	sync.ready_seats(glb)
-	sync.clips = WardenClips.setup(root, glb, skel, art(arch))
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
 	_smoke(root, look(art(arch)))
 	_bloom(root, glb, look(art(arch)))
@@ -225,16 +225,21 @@ static func _smoke(root: Node3D, own: Dictionary) -> void:
 	var sm: Dictionary = own.get("smoke", {})
 	var gun := root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 	var weapon := gun.get_node_or_null(WEAPON) as Node3D if gun else null
-	if sm.is_empty() or weapon == null:
+	# (a skinned weapon: "at" names an anchor on it, "box" the half size round that anchor)
+	var at_anchor := anchor(root, String(sm.get("at", ""))) if sm.has("at") else null
+	if sm.is_empty() or (weapon == null and at_anchor == null):
 		return
 	var box := AABB()
 	var meshes: Array = []
 	if weapon is MeshInstance3D:
 		meshes.append(weapon)
-	meshes.append_array(weapon.find_children("*", "MeshInstance3D", true, false))
+	if weapon:
+		meshes.append_array(weapon.find_children("*", "MeshInstance3D", true, false))
 	for mi in meshes:
 		var a := (mi as MeshInstance3D).get_aabb()
 		box = a if box.size == Vector3.ZERO else box.merge(a)
+	if at_anchor:
+		box = AABB(Vector3.ONE * -0.2, Vector3.ONE * 0.4)
 	var p := CPUParticles3D.new()
 	p.name = "Smoke"
 	p.amount = int(sm.get("amount", 16))
@@ -285,7 +290,7 @@ static func _smoke(root: Node3D, own: Dictionary) -> void:
 	q.material = m
 	p.mesh = q
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	weapon.add_child(p)
+	(at_anchor if at_anchor else weapon).add_child(p)
 
 ## A model's soft glow around what burns (warden_look.json "bloom": a list of {at: "weapon" or an anchor name,
 ## color [r, g, b, a], size (m), count (along the weapon's length, from `from` of it), depth_test}): additive
@@ -424,24 +429,21 @@ static func _hold_shield(root: Node3D, glb: Node3D) -> void:
 	holder.add_child(shield)
 	shield.transform = Transform3D.IDENTITY
 
-## The node's own visible flags up to the model (visible_in_tree needs the tree; a kit hides one node).
-static func in_tree_visible(nd: Node3D) -> bool:
-	return nd.visible
-
-## The hand-held weapon that leaves the hand (item 76b): a plain copy of the skinned mesh "hammer", on its own node with
-## the grip at the origin in the rig's hammer frame, for the kit to fly and plant. null on a procedural model.
-static func thrown_piece(root: Node3D, mesh_name: String, bone: String) -> Node3D:
+## The part of a skinned weapon that truly leaves the hand (item 76b): a plain copy of the mesh `mesh_name` on its own
+## node, the grip at the origin, -Z toward the head (WEAPON_THROWN's frame), for the kit to fly and plant. The skinned one
+## hides meanwhile (WardenClips "weapon_bone"). null on a procedural model.
+static func thrown_piece(root: Node3D, mesh_name: String) -> Node3D:
 	var w := root.get_node_or_null("Warden")
 	var src := w.find_child(mesh_name, true, false) as MeshInstance3D if w else null
 	var sk := skeleton(w)
-	var seat := w.find_child(SEAT + bone, true, false) as Node3D if w else null
-	if src == null or sk == null or seat == null:
+	var frame := w.find_child(WEAPON_THROWN, true, false) as Node3D if w else null
+	if src == null or sk == null or frame == null:
 		return null
-	var at := seat.get_parent() as BoneAttachment3D
+	var at := frame.get_parent() as BoneAttachment3D
 	var base := sk.get_bone_global_rest(WardenSkeleton.find(sk, at.bone_name)) if at else Transform3D.IDENTITY
 	var mi := MeshInstance3D.new()
 	mi.mesh = src.mesh
-	mi.transform = (base * seat.transform).affine_inverse()
+	mi.transform = (base * frame.transform).affine_inverse()
 	for si in src.get_surface_override_material_count():
 		mi.set_surface_override_material(si, src.get_surface_override_material(si))
 	var holder := Node3D.new()
@@ -467,6 +469,22 @@ static func extra_skeleton(root: Node3D) -> Skeleton3D:
 	if root == null or not bool(root.get_meta("glb", false)):
 		return null
 	return skeleton(root.get_node_or_null("Warden"))
+
+## A Warden's variant bones: the code table above, plus its art's data file (content/rules/warden_anim/<art>.json).
+static func extra_bones(arch: String) -> Dictionary:
+	var out: Dictionary = (EXTRA.get(arch, {}) as Dictionary).duplicate()
+	out.merge(WardenClips.data(art(arch)).get("extra_bones", {}), true)
+	return out
+
+## A weapon skinned in the .glb (item 76b): the procedural weapon's meshes go, its Gun node stays as the invisible aim
+## and FX reference, which Sync keeps on the blade you see (Sync.apply_blade).
+static func _skinned_weapon(root: Node3D) -> void:
+	var gun := root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
+	if gun == null:
+		return
+	for mi in gun.find_children("*", "MeshInstance3D", true, false):
+		(mi as MeshInstance3D).visible = false
+		mi.set_meta("glb_hidden", true)
 
 ## The rig rest of the Warden's model in the neutral look (built once a session).
 static func neutral_rest(arch: String) -> Dictionary:
@@ -755,8 +773,12 @@ class Sync extends Node:
 	var links: Array = []       # [bone index, rig node, node rest (model space) inverse, bone rest (skeleton space)]
 	var springs := Springs.new()  # the spring_ bone chains (braids) swinging on top
 	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
-	var seats: Array = []         # [bone, node it follows, the node's rest inverse x the bone's rest]: seat_ empties
-	var clips: WardenClips        # the hand-keyed clips, when the Hunter has them (WardenClips)
+	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
+	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
+	var blade_tip: Node3D
+	var gun: Node3D
+	var muzzle: Node3D
+	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -772,34 +794,29 @@ class Sync extends Node:
 		springs.setup(skel)
 		orbits.setup(skel)      # (the glTF import hangs a node riding a bone on a BoneAttachment3D under it)
 
-	## A skinned weapon (ART-1, item 76b): an empty seat_<bone> says which frame of the bone's rest stands for the
-	## rig's weapon node, so a procedural move carries the skinned weapon as it did the pinned one, and the weapon
-	## hides when the kit hides that node (Breaker's thrown hammer). Clips pose the bone on top of this.
-	func ready_seats(glb: Node) -> void:
-		for n in glb.find_children(SEAT + "*", "Node3D", true, false):
-			var bi := WardenSkeleton.find(skel, String(n.name).trim_prefix(SEAT))
-			var w := root.get_node_or_null("Rig/Torso/Aim/Gun").find_child(WEAPON, true, false) as Node3D
-			if bi < 0 or w == null or w.get_parent() == null:
-				continue
-			var at := n.get_parent() as BoneAttachment3D
-			var base := skel.get_bone_global_rest(WardenSkeleton.find(skel, at.bone_name)) if at else Transform3D.IDENTITY
-			var rest: Transform3D = base * (n as Node3D).transform
-			seats.append([bi, w.get_parent(), rest.affine_inverse() * skel.get_bone_global_rest(bi)])
-
-	func _seat() -> void:
-		for st in seats:
-			var nd: Node3D = st[1]
-			var xf := WardenGlb.model_xf(root, nd)
-			xf.basis = xf.basis.orthonormalized()
-			skel.set_bone_global_pose(int(st[0]), xf * (st[2] as Transform3D))
+	## Plays the Hero's clips when its art has them; and finds a skinned weapon's FX points.
+	func use_clips(glb: Node3D, art_name: String) -> void:
+		var dd := WardenClips.data(art_name)
+		var bl: Dictionary = dd.get("blade", {})
+		if not bl.is_empty():
+			blade_root = glb.find_child(String(bl["root"]), true, false) as Node3D
+			blade_tip = glb.find_child(String(bl["tip"]), true, false) as Node3D
+			gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
+			muzzle = gun.get_node_or_null("Muzzle") as Node3D if gun else null
+		clips = WardenClips.make(root, glb, skel, art_name)
+		if clips:
+			for sd in ["L", "R"]:
+				var nd := root.get_node_or_null(String(BONES["hand." + sd])) as Node3D
+				var bi := WardenSkeleton.find(skel, "hand." + sd)
+				if nd and bi >= 0:
+					hand_nodes.append([nd, bi])
 
 	func _process(dt: float) -> void:
-		apply()
-		_seat()
 		if clips:
-			clips.step(dt, root.get_meta(ANIM, null) as HunterAnim)
-		for st in seats:
-			skel.set_bone_pose_scale(int(st[0]), Vector3.ONE if WardenGlb.in_tree_visible(st[1]) else Vector3.ZERO)
+			_play(dt)
+		else:
+			apply()
+			apply_blade()
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
 		orbits.step(dt)
@@ -807,6 +824,41 @@ class Sync extends Node:
 	func apply() -> void:
 		for l in links:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
+
+	## The clips' pose, mixed with the retargeted rig while a state hands over (clips.proc_w), then the rig's hands and
+	## the Gun laid on what is shown, so kit FX leave the bodies you see.
+	func _play(dt: float) -> void:
+		clips.step(dt)
+		var w := clips.proc_w
+		if w >= 1.0:
+			apply()
+		elif w > 0.0:
+			var poses: Array = []
+			for l in links:
+				poses.append(skel.get_bone_global_pose(int(l[0])))
+			for i in links.size():
+				var l: Array = links[i]
+				var pose: Transform3D = poses[i]
+				skel.set_bone_global_pose(int(l[0]), pose.interpolate_with(
+						WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l), w))
+		if w < 1.0:
+			var inv := skel.global_transform
+			for h in hand_nodes:
+				(h[0] as Node3D).global_position = inv * skel.get_bone_global_pose(int(h[1])).origin
+		apply_blade()
+
+	## The Gun on the skinned blade: its origin at the blade's root, -Z along the blade, the Muzzle on the tip.
+	func apply_blade() -> void:
+		if blade_tip == null or blade_root == null or gun == null or not gun.is_inside_tree():
+			return
+		var a := blade_root.global_position
+		var b := blade_tip.global_position
+		if a.distance_squared_to(b) < 0.0001:
+			return
+		var up := Vector3.UP if absf((b - a).normalized().y) < 0.95 else Vector3.RIGHT
+		gun.global_transform = Transform3D(Basis.looking_at(b - a, up), a)
+		if muzzle:
+			muzzle.global_position = b
 
 ## Hanging pieces on bone chains (RIG_CONTRACT "Spring chains"): bones named spring_<name>_<i>, each the next
 ## one's parent, the first a child of a contract bone (a braid hangs from the head). Each chain is a rope of its

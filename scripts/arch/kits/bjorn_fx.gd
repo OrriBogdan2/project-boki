@@ -105,7 +105,7 @@ func _ready() -> void:
 	hammer.visible = false
 	add_child(hammer)
 	# (the skinned hammer's own mesh on a 3D model, else the procedural one)
-	var own := WardenGlb.thrown_piece(h.model, "hammer", "x_weapon") if h.model else null
+	var own := WardenGlb.thrown_piece(h.model, "hammer") if h.model else null
 	if own:
 		hammer.add_child(own)
 	else:

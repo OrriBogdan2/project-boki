@@ -1,0 +1,32 @@
+{
+	"doc": "Kael's hand-keyed clips (art/wardens/kael/kael.glb) and which game state plays which (scripts/heroes/warden_clips.gd). One file per Hero, so ART-1 branches never touch shared code.",
+	"skinned_weapon": true,
+	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R"},
+	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
+	"hide_while_chain": ["spring_hangwarchain_0"],
+	"loco": {
+		"idle": "idle", "stance": "stance", "stance_after": 6.0,
+		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
+		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
+		"walk_speed": 2.2, "run_speed": 4.6
+	},
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "exdash"},
+	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
+	"kmoves": {
+		"jug_slash_r": {"clip": "slash_r"}, "jug_slash_l": {"clip": "slash_l"},
+		"jug_wave_wind": {"clip": "wave_wind", "hold_from": 0.5}, "jug_wave": {"clip": "wave"},
+		"jug_slam": {"clip": "slam"},
+		"jug_lunge_wind": {"clip": "lunge_wind", "hold_from": 0.45}, "jug_lunge": {"clip": "lunge"},
+		"jug_meteor": {"clip": "meteor", "hold_from": 0.3}, "jug_meteor_land": {"clip": "meteor_land"},
+		"jug_dash": {"clip": "dash"}, "jug_exdash": {"clip": "exdash"},
+		"jug_chain": {"clip": "chain"}, "jug_reel": {"clip": "reel", "hold_from": 0.25},
+		"jug_spin": {"clip": "spin"}, "jug_chainlunge": {"clip": "chainlunge"},
+		"jug_haul_wind": {"clip": "haul_wind", "hold_from": 0.15}, "jug_haulslam": {"clip": "haulslam"},
+		"jug_guard": {"clip": "guard", "hold_from": 0.2}, "jug_riposte": {"clip": "riposte"},
+		"jug_roar": {"clip": "roar", "upper": true},
+		"mf_xform": {"clip": "fusion"}
+	},
+	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
+	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "lid.R"]
+}

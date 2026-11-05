@@ -621,14 +621,10 @@ def main():
     K.anchor(arm, "x_weapon", "anchor_hammer_grip", tuple(G))
     K.anchor(arm, "x_shield", "anchor_shield_face", tuple(S_M(np.array([[0, -0.08, 0.05]], np.float32))[0]))
     K.anchor(arm, "x_shield", "anchor_prow_crack", tuple(S_M(np.array([[0.05, -0.04, -0.2]], np.float32))[0]))
-    # the procedural Hammer pivot's frame as the skinned hammer rests: its origin on the grip, its -Z along the haft
-    # toward the head and its +Y along the block's long axis (the swing), so a procedural move can carry the bone
-    seat = K.anchor(arm, "x_weapon", "seat_x_weapon", tuple(G))
-    M = Matrix(((1, 0, 0, G[0]), (0, 0, 1, G[1]), (0, -1, 0, G[2]), (0, 0, 0, 1)))    # pivot x,y,z -> model
-    M = Matrix(((-1, 0, 0, G[0]), (0, 0, -1, G[1]), (0, 1, 0, G[2]), (0, 0, 0, 1)))
-    M = Matrix(((1, 0, 0, G[0]), (0, 0, -1, G[1]), (0, 1, 0, G[2]), (0, 0, 0, 1)))
-    seat.matrix_world = M
-    for nm in ("weapon", "shield"):      # (markers: the loader hides the procedural weapon and prow)
+    K.anchor(arm, "x_weapon", "weapon_muzzle", tuple(H_M(np.array([[0, 0, zc]], np.float32))[0]))
+    # the frame the thrown piece flies in: grip at the origin, the head along -Z (Godot axes = model axes at rest)
+    K.anchor(arm, "x_weapon", "weapon_thrown", tuple(G))
+    for nm in ("shield",):      # (a marker: the loader hides the procedural prow)
         w = bpy.data.objects.new(nm, None)
         bpy.context.scene.collection.objects.link(w)
         w.parent = arm

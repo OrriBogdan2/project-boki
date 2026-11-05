@@ -39,22 +39,28 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	var sk := WardenGlb.skeleton(w)
 	var sync := w.get_node("Sync") as WardenGlb.Sync
 	var clips: WardenClips = sync.clips
+	var lib: AnimationLibrary = clips.lib if clips else null
 	ok(clips != null, "%s: the clip tree was built" % art_name)
 	if clips == null:
 		m.free()
 		return
 	# the names
-	var moves: Dictionary = cfg["moves"]
+	var moves: Dictionary = cfg["kmoves"]
 	var want: Array = []
 	for k in moves:
 		want.append(String((moves[k] as Dictionary)["clip"]))
-	want.append_array((cfg["body"] as Dictionary).values())
-	want.append_array((cfg["over"] as Dictionary).values())
 	var lc: Dictionary = cfg["loco"]
-	want.append_array([lc["idle"], lc["stance"]])
-	want.append_array(lc["walk"])
-	want.append_array(lc["run"])
-	var missing: Array = want.filter(func(c): return not clips.player.has_animation(String(c)))
+	want.append_array([lc["idle"], lc["stance"], cfg["land"]["clip"], cfg["weapon_out"]["clip"]])
+	want.append_array((lc["walk"] as Dictionary).values())
+	want.append_array((lc["run"] as Dictionary).values())
+	want.append_array([cfg["air"]["rise"], cfg["air"]["fall"], cfg["air"]["glide"]])
+	var sts: Dictionary = cfg["states"]
+	for k in sts:
+		if sts[k] is Dictionary:
+			want.append_array([sts[k]["front"], sts[k]["back"]])
+		else:
+			want.append(sts[k])
+	var missing: Array = want.filter(func(c): return not lib.has_animation(String(c)))
 	ok(missing.is_empty(), "%s: all %d clips are in the .glb (missing %s)" % [art_name, want.size(), str(missing)])
 	# every kit move mapped, and long enough for the kit's clock
 	var short: Array = []
@@ -69,9 +75,9 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			var keys: Array = (table[k] as Dictionary)["keys"]
 			var end_t := float((keys[keys.size() - 1] as Array)[0])
 			var cl := String((moves[k] as Dictionary)["clip"])
-			if not (moves[k] as Dictionary).has("loop_from") and clips.player.has_animation(cl) \
-					and clips.player.get_animation(cl).length < end_t - 0.04:
-				short.append("%s %.2f < %.2f" % [k, clips.player.get_animation(cl).length, end_t])
+			if not (moves[k] as Dictionary).has("hold_from") and lib.has_animation(cl) \
+					and lib.get_animation(cl).length < end_t - 0.04:
+				short.append("%s %.2f < %.2f" % [k, lib.get_animation(cl).length, end_t])
 	ok(unmapped.is_empty(), "%s: every kit move has a clip (%s)" % [art_name, str(unmapped)])
 	ok(short.is_empty(), "%s: each clip lasts its kit move (%s)" % [art_name, str(short)])
 	var an := HunterAnim.new(m)
@@ -99,7 +105,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	for k in moves:
 		var moved := 0.0
 		var tt := 0.0
-		var ln := clips.player.get_animation(String((moves[k] as Dictionary)["clip"])).length
+		var ln := lib.get_animation(String((moves[k] as Dictionary)["clip"])).length
 		while tt < ln:
 			var s2 := st.duplicate()
 			s2["kmove"] = k
@@ -124,16 +130,15 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 		if (mi as MeshInstance3D).visible:
 			drawn += 1
 	ok(drawn == 0, "%s: no second weapon on the rig (%d drawn)" % [art_name, drawn])
-	var seat: Node3D = (sync.seats[0] as Array)[1]
-	seat.visible = false
+	m.set_meta(WardenClips.WEAPON_OUT, true)
 	_play(m, an, sync, st, 3)
 	ok(sk.get_bone_pose_scale(wp).is_zero_approx(), "%s: the weapon hides when the kit takes it out of the hand" % art_name)
-	seat.visible = true
+	m.set_meta(WardenClips.WEAPON_OUT, false)
 	_play(m, an, sync, st, 3)
 	ok(sk.get_bone_pose_scale(wp).is_equal_approx(Vector3.ONE), "%s: and comes back" % art_name)
 	var tip := WardenGlb.anchor(m, "anchor_hammer_head")
 	ok(tip != null, "%s: an FX anchor rides the weapon" % art_name)
-	var piece := WardenGlb.thrown_piece(m, "hammer", "x_weapon")
+	var piece := WardenGlb.thrown_piece(m, "hammer")
 	ok(piece != null, "%s: the thrown hammer is the model's own mesh" % art_name)
 	if piece:
 		piece.free()
