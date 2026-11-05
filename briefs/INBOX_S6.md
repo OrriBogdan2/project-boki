@@ -24,3 +24,11 @@ The owner wants new Boki too. Look at `ext/boki-roster50` (the planned 50-specie
   2. Save it to `briefs/art-refs/boki/<species>_concept.png` on ext/agent-briefs.
   3. Model and animate it like the others.
   4. **Mark these "NEW: owner approval pending"** in the READY report. The owner reviews new designs before they ship to players. Original designs only (no existing creature IPs).
+
+## 2026-11-05 12:12 UTC (ext): OWNER APPROVED the new Boki designs
+Glintmole, Gloamshell, Rimeshrew, Selenfin (+ Glomwort) are approved ("look good"). Finish them like the others:
+- grown/Fused forms
+- the face detail pass (same issue as the Heroes: fine detail; eyes not oversized)
+- wiring snippets for main
+- READY reports
+Then continue down the roster (`ext/boki-roster50`) with more new species. Keep going at full pace.
