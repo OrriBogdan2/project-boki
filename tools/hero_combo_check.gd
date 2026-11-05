@@ -566,7 +566,7 @@ func _gunslinger() -> void:
 	ac.step(m, 0.03)
 	ok("LMB: rounds fly the full 11m past a near cursor",
 			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 11.0) < 0.6)
-	ok("LMB: each round is an ember tracer (a pooled rider)", VVFx.of(m).riders.size() >= 1)
+	ok("LMB: each round trails a toxic-green tracer (HeroVfx)", int(HeroVfx.of(m).plays.get("lmb_tracer", 0)) >= 1)
 	KitStatus.apply(T, "rat", 3.0)
 	var o := {"src": "shot"}
 	ok("Dazed: the rifle does +90%", is_equal_approx(K.outgoing(T, 10.0, o), 19.0))

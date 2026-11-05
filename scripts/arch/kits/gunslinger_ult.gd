@@ -11,7 +11,7 @@ const FALL := "fall"
 const BURN := "burn"
 const DROP_T := 0.8              # s: the shell is seen falling through the column for the last part of the fall
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
-const CHAR := Color("2a1018")    # the disc's scorched inside
+const BURN_GAP := 0.4            # s between the burning patch's rising sparks
 
 var kit: GunslingerKit
 var shells: Array = []         # {at, t, phase, node, tick, n}
@@ -47,18 +47,10 @@ func cast() -> bool:
 	shell["n"] = casts
 	shells.append(shell)
 	kit.play("gunslinger_x")
-	# the shot goes straight up off the raised barrel; the disc and the column show at once
-	var top := h.position + Vector3(0, 2.4, 0)
-	kit.fx().star(top, GunslingerKit.EMBER, GunslingerKit.HOT, 1.4, 0.14)
-	kit.fx().beam(top, top + Vector3(0, 14.0, 0), GunslingerKit.EMBER, GunslingerKit.HOT, 0.5, 0.3)
-	kit.m.fx.flash(top, GunslingerKit.HOT, 1.2, 0.08)
-	var r := float(xd["radius"])
-	var delay := float(xd["delay"])
-	kit.fx().disc(at, r, CHAR, GunslingerKit.DEEP, delay, GunslingerKit.EMBER)
-	kit.fx().pillar(at, Color(GunslingerKit.EMBER, 0.4), GunslingerKit.HOT, 12.0, r * 0.55, delay, false)
-	kit.m.sfx("vn_nuke_fire", h.pos, -1.0)
-	kit.m.sfx("vn_nuke_fall", at, -2.0)
-	kit.net_ring(at, r, GunslingerKit.EMBER)
+	# the shot goes straight up off the raised barrel; a thread of fire hangs over the spot (the disc is AimKit's)
+	kit.vfx("ult_fire")
+	kit.vfx("ult_fall", at)
+	kit.net_ring(at, float(xd["radius"]), GunslingerKit.EMBER)
 	return true
 
 ## The shell: a big Burr Charge with its spikes out, made once and reused.
@@ -107,11 +99,11 @@ func _drop_shell(s: Dictionary, delay: float) -> void:
 	if not n.visible:
 		return
 	var at: Vector3 = s["at"]
-	var was := n.global_position
 	n.global_position = at + Vector3(0, DROP_H * (1.0 - u * u), 0)
 	n.rotation.y += 0.3
-	if u > 0.05:
-		kit.fx().smear(was + Vector3(0, 0.8, 0), n.global_position, GunslingerKit.DEEP, GunslingerKit.HOT, 0.7, 0.25)
+	if not s.has("trail"):
+		s["trail"] = true
+		HeroVfx.of(kit.m).trail(kit.h, "ult_shell", n)       # a smoking fire streak behind it
 
 func _impact(s: Dictionary) -> void:
 	var xd := data()
@@ -125,7 +117,7 @@ func _impact(s: Dictionary) -> void:
 	s["phase"] = BURN
 	s["t"] = 0.0
 	impacts += 1
-	_impact_fx(at, r)
+	_impact_fx(at)
 	var dmg := float(xd["dmg"]) * power()
 	var n := 0
 	var centre := 0
@@ -141,20 +133,9 @@ func _impact(s: Dictionary) -> void:
 	if centre > 0:
 		kit.m.fx.word(at + Vector3(0, 2.6, 0) + kit.fx().screen_up() * 1.2, "DEAD CENTRE", GunslingerKit.HOT, true)
 
-## The impact: a white-hot flash column, an ember shock ring, a spray of embers, a boom, and the scorched
-## patch with its burning rim that stays for the zone.
-func _impact_fx(at: Vector3, r: float) -> void:
-	var xd := data()
-	var fx := kit.fx()
-	fx.pillar(at, Color(GunslingerKit.HOT, 0.95), Color.WHITE, 10.0, r * 0.6, 0.3, true)
-	fx.ring(at, r * 1.3, GunslingerKit.EMBER, GunslingerKit.HOT, 0.45)
-	fx.ring(at, r * 0.7, GunslingerKit.HOT, GunslingerKit.EMBER, 0.3)
-	fx.disc(at, r, CHAR, GunslingerKit.EMBER, float(xd["zone_t"]), GunslingerKit.EMBER)
-	kit.m.fx.burst(at + Vector3(0, 0.5, 0), GunslingerKit.EMBER, 30, 9.0, 0.6, 6.0, 1.6)
-	kit.m.fx.flash(at + Vector3(0, 1.0, 0), GunslingerKit.HOT, 3.0, 0.14)
-	kit.net_ring(at, r, GunslingerKit.EMBER)
-	kit.m.sfx("vn_nuke_boom", at, 1.0)
-	kit.m.sfx("vn_nuke_burn", at, -6.0)
+## The impact: a fireball with green sparks, scrap thrown out, smoke rolling over the scorched patch, a boom.
+func _impact_fx(at: Vector3) -> void:
+	kit.vfx("ult_impact", at)
 	Shake.incoming_big(kit.m, at, 0.6, kit.h)
 
 ## The burning patch: every tick it hurts and slows everyone on it; its rim stays lit for everyone and flames
@@ -166,7 +147,7 @@ func _burn_tick(s: Dictionary, dt: float) -> void:
 	var rim := {"at": at, "r": r, "all": true, "col": GunslingerKit.EMBER, "col2": GunslingerKit.HOT, "lw": 0.08}
 	rim["alpha"] = 1.0 - 0.5 * float(s["t"]) / float(xd["zone_t"])
 	AimKit.circle(kit.h, "xz%d" % int(s["n"]), rim)
-	_flames(at, r, dt)
+	_flames(s, dt)
 	s["tick"] = float(s["tick"]) + dt
 	if float(s["tick"]) >= float(xd["tick"]):
 		s["tick"] = 0.0
@@ -183,14 +164,12 @@ func _zone_hit(at: Vector3, r: float, xd: Dictionary) -> void:
 		f.hurt(dmg, kit.h, o)
 		zone_ticks += 1
 
-func _flames(at: Vector3, r: float, dt: float) -> void:
-	var rng := kit.fx().rng
-	if rng.randf() > 20.0 * dt:
-		return
-	var a := rng.randf() * TAU
-	var d := sqrt(rng.randf()) * r
-	var p := kit.ground(at + Vector3(cos(a) * d, 0, sin(a) * d)) + Vector3(0, 0.1, 0)
-	kit.m.fx.spark(p, Vector3.UP, GunslingerKit.EMBER, 3, 3.5, 25.0, 0.45, -2.0, 1.1)
+## Sparks rise across the burning patch every BURN_GAP.
+func _flames(s: Dictionary, dt: float) -> void:
+	s["fl"] = float(s.get("fl", 0.0)) - dt
+	if float(s["fl"]) <= 0.0:
+		s["fl"] = BURN_GAP
+		kit.vfx("ult_burn", s["at"])
 
 # ------------------------------------------------------------------ ends
 ## A kit swap: shells in the air and burning patches go with the kit.
