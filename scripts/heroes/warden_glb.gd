@@ -964,13 +964,9 @@ class Springs:
 	const FLARE := 1.15         # radians a flared wing swings out to her side about the front-back axis
 	var skel: Skeleton3D
 	var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world), wing}
-<<<<<<< HEAD
-	var fold := 0.0             # 0..1: how far the wing chains are folded (WING_FOLD)
+	var fold := 0.0             # how far the wing chains are folded (1) or flared (-1) (WING_FOLD)
 	var wind_t := 0.0
 	var calm := false           # no ripple (a check measuring how a chain settles)
-=======
-	var fold := 0.0             # how far the wing chains are folded (1) or flared (-1) (WING_FOLD)
->>>>>>> origin/main
 
 	func setup(skeleton: Skeleton3D) -> void:
 		skel = skeleton
