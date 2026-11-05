@@ -2402,3 +2402,7 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - After the axe step, the player has the axe equipped with no toast mentioning a location.
   - Every farm tutorial instruction contains a key glyph + a target noun.
+- 169b addendum (owner, 18:16): beginners don't read the top-of-screen hint. The action prompt must be IN THE WORLD, at the object.
+  - When in range of a tree/rock/site, a big world-anchored prompt right by it: the keycap "HOLD F" (the actual bound interact key) + a hold ring that fills while held + "to chop" / "to mine" / "to build".
+  - The top hint is secondary only.
+  - Apply this to every interactable in the farm and the tutorial (the item 166/178d interactable highlight + keycap).
