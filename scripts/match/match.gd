@@ -240,6 +240,7 @@ func warm_up(progress := Callable()) -> void:
 				pn.call("_make_stars")
 				break
 		break
+	if player: player.warm_marker()      # and the hit-marker balloon over a Hunter
 	var seen := {}
 	var batch_cb := func(f: float) -> void:
 		if progress.is_valid(): progress.call(0.7 * f)
