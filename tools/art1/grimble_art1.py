@@ -427,10 +427,40 @@ def main():
 
     pts = [on_face(sc[0] + t, sc[1] + 0.05 * t * t * 40 * 0.2) for t in np.linspace(-0.027, 0.027, 7)]
     for a_, b_ in zip(pts[:-1], pts[1:]):
-        bar(a_, b_, 0.0017)
+        bar(a_, b_, 0.0022)
     for t in (-0.022, -0.011, 0.0, 0.011, 0.022):
-        bar(on_face(sc[0] + t - 0.0015, sc[1] + 0.012), on_face(sc[0] + t + 0.0015, sc[1] - 0.011), 0.0017)
-    part("sewn", None, 0, "stitch", 0.6, None, "head", "leather", ob=ob_from("sewn", np.array(sv, F), np.array(sq, np.int32)))
+        bar(on_face(sc[0] + t - 0.0015, sc[1] + 0.016), on_face(sc[0] + t + 0.0015, sc[1] - 0.015), 0.0027)
+    sewn = ob_from("sewn", np.array(sv, F), np.array(sq, np.int32))
+    bm = bmesh.new()
+    bm.from_mesh(sewn.data)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(sewn.data)
+    bm.free()
+    part("sewn", None, 0, "stitch", 0.6, None, "head", "leather", ob=sewn)
+    # the two small lenses: plain glowing discs in their rings
+    lv_, lf_ = [], []
+    au = np.cross(G.MONO_AX, (0, 0, 1))
+    au /= np.linalg.norm(au)
+    aw = np.cross(au, G.MONO_AX)
+    for off, r in G.LENS:
+        c = G.MONO_C + np.array(off, F) * (1, 0, 1) + G.MONO_AX * 0.0045
+        k = len(lv_)
+        lv_.append(c + G.MONO_AX * 0.004)
+        for j in range(10):
+            th = j / 10 * math.tau
+            lv_.append(c + (au * math.cos(th) + aw * math.sin(th)) * r * 1.02)
+        for j in range(10):
+            lf_.append((k, k + 1 + j, k + 1 + (j + 1) % 10))
+    lens = ob_from("lenses", np.array(lv_, F), np.array(lf_, np.int32))
+    bm = bmesh.new()
+    bm.from_mesh(lens.data)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    for fc in bm.faces:
+        if fc.normal.dot(Vector(tuple(float(a2) for a2 in G.MONO_AX))) < 0:
+            fc.normal_flip()
+    bm.to_mesh(lens.data)
+    bm.free()
+    part("lenses", None, 0, "lens", 0.5, None, "head", "glow", ob=lens)
 
     # ----------------------------------------------------- UVs
     bpy.ops.object.select_all(action="DESELECT")
@@ -523,6 +553,8 @@ def main():
             rgb = P.tooth(pts, nn, lab, f)
         elif nm == "stitch":
             rgb = np.tile(P.C["stitch"], (len(pts), 1))
+        elif nm == "lens":
+            rgb = np.tile(P.rgb("2fd878"), (len(pts), 1))
         elif nm == "eye":
             rgb = P.eye(pts, nn)
         elif nm == "hoard":
@@ -706,7 +738,7 @@ def main():
         me.normals_split_custom_set_from_vertices(n.tolist())
 
     ROOM = {"eye": 0.0, "lid": 0.0, "skin_head": 0.15, "monocle": 0.1, "monochain": 0.0, "hookchain": 0.0, "lampchainR": 0.0, "lampchainL": 0.0,
-            "ball": 0.0, "ballframe": 0.0, "ballchain0": 0.0, "ballchain1": 0.0, "sewn": 0.0, "hoard": 0.55, "body": 0.5, "hook": 0.9, "gauntlet": 0.5}
+            "ball": 0.0, "ballframe": 0.0, "ballchain0": 0.0, "ballchain1": 0.0, "sewn": 0.0, "lenses": 0.0, "hoard": 0.55, "body": 0.5, "hook": 0.9, "gauntlet": 0.5}
     for p in parts:
         me = p["ob"].data
         at = me.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
