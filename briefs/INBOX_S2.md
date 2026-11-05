@@ -1280,3 +1280,8 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 
 ## 2026-11-05 04:12 UTC (ext): Grimble splash: `briefs/art-refs/grimble_splash.png` (hooking a knight over the abyss). Alts kept: _alt_lair, _alt_ruins.
 
+
+## 2026-11-05 04:22 UTC (ext): PORTRAITS (owner-made): `briefs/art-refs/<hero>_portrait.png`
+- **Delivered:** lisette, kael, motley, cinder, grimble. Breaker's is still to come.
+- **Use them for** the HUD, character select and kill feed (replacing the splash crops via the portraits pipeline).
+- **Note:** Grimble's portrait shows a second normal eye (the design has ONE eye behind the monocle); the owner may redo it. Use it until then.
