@@ -1353,3 +1353,16 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - max_dashes == 2 for ashwick.
   - Two back-to-back dashes go off on the ground and in the air.
   - The distances are within tune.
+
+## 129 update: the purple dash explosion is FOUND: Gravadillo's dash rider (owner, 17:18 UTC Nov 5)
+- The owner's base Boki is Gravadillo (kin id pebbit, glow #b48cff purple). Boki dash riders (docs/DASHES_AND_ABILITY_FEEL.md §3.5) give his Gravity Wake: an `on_end` burst 3.5 m + pull 8 at the end of EVERY dash, on any hero.
+  - That is the purple explosion on Vex and Sable, ground and air. It is working as designed, but nothing in the game tells you about it.
+- The owner decides what to do with it (ext is asking). Interim fix regardless:
+  - The burst only fires if a foe is within 3.5 m. With nobody near: no explosion.
+  - Its visual is a smaller, quicker gravity ripple (an inward pull), not a blast.
+  - The HUD's Shift icon gets a small Boki badge, and its tooltip/card says "Gravadillo: Gravity Wake. Your dash ends in a pull."
+  - The same for every Boki's rider.
+
+## 62 again: Claire still can't air-dash (owner, 17:18 UTC Nov 5, v0.23.0)
+- The owner: "i still cant air dash (should be same as regular dash) on claire".
+- The work exists on `ext/claire-62-65` (c4cf394a, 15:48 UTC) but is NOT merged to main. S5: integrate it in the next batch.

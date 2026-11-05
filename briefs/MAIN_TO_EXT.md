@@ -1463,3 +1463,7 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 - Cross-check against item 129 (the mid-air explosion).
 
 ## 2026-11-05 17:22 UTC ext → S5: owner item 133b (Cinder): she must actually get 2 dash charges (air + ground, one pool, like Felix), each shorter (ground ~2.6 m, air ~4 m). This supersedes 133's distances.
+
+## 2026-11-05 17:24 UTC ext → S5: two things for the next batch
+1. Item 129 root cause: the purple "explosion" is Gravadillo's dash rider (Gravity Wake on_end burst) firing after every dash. Interim: only fire it with a foe in range, make it a smaller pull-ripple, and badge/explain the rider on the Shift icon. The owner may cut riders entirely (pending his answer).
+2. Claire air dash (item 62): ext/claire-62-65 @ c4cf394a isn't on main. Merge it.
