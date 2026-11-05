@@ -15,14 +15,14 @@ def rgb(h):
     return np.array([int(h[i:i + 2], 16) / 255.0 for i in (0, 2, 4)], F)
 
 
-PINK, PINK_HI, ROSE, PLUM = rgb("ef9db0"), rgb("f9bcc6"), rgb("dc7e98"), rgb("ac6480")
-CREAM, CREAM_T = rgb("fbe4d4"), rgb("fff1c9")
+PINK, PINK_HI, ROSE, PLUM = rgb("df949c"), rgb("efb4ae"), rgb("cf8390"), rgb("9e5f74")
+CREAM, CREAM_T = rgb("f7dabf"), rgb("fff0cc")
 INNER = rgb("f6c3c6")
 GOLD = rgb("ffd98a")
 APRON, APRON_DK = rgb("efe2cc"), rgb("c8ab7c")
 LEAF, LEAF_DK, LEAF_HI = rgb("5f9e42"), rgb("2f6a34"), rgb("a2c65c")
 PET_C, PET_E = rgb("d9567e"), rgb("fbb7c0")
-BRASS, BRASS_HI, BRASS_DK = rgb("c69245"), rgb("f0cc7c"), rgb("70461e")
+BRASS, BRASS_HI, BRASS_DK = rgb("b0833f"), rgb("e4c078"), rgb("654120")
 LEATHER, LEATHER_DK, LEATHER_HI = rgb("8c5a2c"), rgb("53321a"), rgb("b98a4c")
 INK = rgb("3a1f35")
 
@@ -153,8 +153,6 @@ def head(p, n, ao, mouth_d):
         e = K.EYE * (s, 1, 1)
         rr = np.hypot((x - e[0]) / K.EYE_R, (z - e[2]) / K.EYE_R)
         front = smooth(0.02, 0.06, y)
-        rim = smooth(0.93, 0.985, rr) * smooth(1.05, 0.995, rr) * front * smooth(-0.3, 0.2, (z - e[2]) / K.EYE_R)
-        c = mix(c, INK, 0.75 * rim)
         # the small pale pad under the eye
     # mouth
     c = mix(c, INK, smooth(0.0052, 0.0022, mouth_d))
@@ -164,20 +162,34 @@ def head(p, n, ao, mouth_d):
     return c
 
 
+def eyeball_art(path, n):
+    """The sheet's eye as the ball's tile: pip_head.png front view, her right eye."""
+    im = head_views(path)[0]
+    cx, cy, r = 271.0, 745.0, 50.0        # the eye's centre and half size, pixels
+    v, u = np.mgrid[0:n, 0:n]
+    x = (u + 0.5) / n * 2 - 1
+    y = (v + 0.5) / n * 2 - 1
+    # (tile radius sin(b): 0.66 at the eye's rim on a 52 mm ball)
+    px = cx + x.ravel() / 0.66 * r
+    py = cy - y.ravel() / 0.66 * r
+    return sample2(im, px.astype(F), py.astype(F)).reshape(n, n, 3)
+
+
 def eyeball_tile(n=256):
     v, u = np.mgrid[0:n, 0:n]
     x = (u + 0.5) / n * 2 - 1
     y = (v + 0.5) / n * 2 - 1
     r = np.hypot(x, y)
-    c = np.ones((n, n, 3), F) * rgb("3a1a12")
-    iris = smooth(0.80, 0.74, r)
+    c = np.ones((n, n, 3), F) * rgb("f3e2cd")
+    iris = smooth(0.78, 0.73, r)
     t = np.clip((y + 0.72) / 1.44, 0, 1)        # (image v runs up in Blender)
-    col = mix(mix(np.broadcast_to(rgb("6e3010"), (n, n, 3)).astype(F), rgb("d98a1e"), smooth(0.8, 0.42, r)), rgb("ffcf4a"), smooth(0.2, -0.7, y) * 0.9)
+    col = mix(mix(np.broadcast_to(rgb("6e3010"), (n, n, 3)).astype(F), rgb("a8642a"), smooth(0.66, 0.34, r)), rgb("d99a45"), smooth(0.2, -0.6, y) * 0.9)
     c = mix(c, col, iris)
     a = np.arctan2(y, x)
-    c = mix(c, rgb("1c0d0e"), smooth(0.47, 0.42, np.hypot(x * 0.98, y * 0.9)))
-    c = mix(c, np.ones(3, F), smooth(0.19, 0.145, np.hypot(x + 0.24, y - 0.27)))
-    c = mix(c, np.ones(3, F), 0.75 * smooth(0.09, 0.065, np.hypot(x - 0.22, y + 0.22)))
+    c = mix(c, rgb("4a2412"), smooth(0.66, 0.72, r) * smooth(0.82, 0.74, r))
+    c = mix(c, rgb("1c0d0e"), smooth(0.40, 0.36, np.hypot(x * 0.98, y * 0.9)))
+    c = mix(c, np.ones(3, F), smooth(0.15, 0.12, np.hypot(x + 0.2, y - 0.24)))
+    c = mix(c, np.ones(3, F), 0.75 * smooth(0.06, 0.045, np.hypot(x - 0.16, y + 0.16)))
     return np.clip(c, 0, 1)
 
 
@@ -321,8 +333,10 @@ def pane(p, pc):
 
 
 def lens(p, n, ao):
-    c = mix(np.broadcast_to(rgb("5d7a54"), p.shape).astype(F), rgb("b6c79a"), smooth(0.0, 1.0, p[:, 1] * 10.0 - 1.9 + p[:, 0] * 2))
-    return c
+    r = p - p.mean(0)
+    c = mix(np.broadcast_to(rgb("6c7350"), p.shape).astype(F), rgb("a9ad7c"), smooth(-0.05, 0.05, r[:, 0] * 0.6 - r[:, 1] + r[:, 2]))
+    arc = smooth(0.006, 0.0, np.abs(np.hypot(r[:, 0] + 0.012, r[:, 2] - 0.012) - 0.034))
+    return mix(c, rgb("eef0cf"), arc * 0.8)
 
 
 # ---------------------------------------------------------------- the wing cards, an RGBA atlas
@@ -366,3 +380,107 @@ def wing_atlas(w=1024, h=1024):
         out[row0:row1, :, :3] = c
         out[row0:row1, :, 3] = a * inside
     return out
+
+
+# ---------------------------------------------------------------- the head's own texture: pip_head.png's views, projected
+HEAD_K = 0.000807            # m a pixel of pip_head.png
+FRONT_C = 396.0              # the front view's x = 0, pixels
+SIDE_NOSE = 1424.0           # the side view's nose tip
+BACK_C = 2349.0
+NOSE_ROW = 842.0             # the row of the nose, all views
+_views = {}
+
+
+def blur(a, n=2):
+    for _ in range(n):
+        a = (a + np.roll(a, 1, 0) + np.roll(a, -1, 0) + np.roll(a, 1, 1) + np.roll(a, -1, 1)) / 5
+    return a
+
+
+def sample2(img, x, y):
+    h, w = img.shape[:2]
+    x = np.clip(x, 0, w - 1.001)
+    y = np.clip(y, 0, h - 1.001)
+    i, j = x.astype(int), y.astype(int)
+    fx, fy = (x - i).astype(F), (y - j).astype(F)
+    if img.ndim == 3:
+        fx, fy = fx[:, None], fy[:, None]
+    return (img[j, i] * (1 - fx) + img[j, i + 1] * fx) * (1 - fy) + (img[j + 1, i] * (1 - fx) + img[j + 1, i + 1] * fx) * fy
+
+
+def head_views(path):
+    if path in _views:
+        return _views[path]
+    import imgio
+    im = imgio.load(path)
+    r, g, b = im[..., 0], im[..., 1], im[..., 2]
+    sat = im.max(2) - im.min(2)
+    gold = smooth(0.12, 0.3, np.minimum(r, g) - b) * smooth(0.75, 0.92, r)
+    # her fur, cream and marks; not the bronze, leather, iris or the grey behind
+    fur = smooth(0.5, 0.6, b / np.maximum(r, 0.01)) * smooth(0.05, 0.12, sat) * smooth(0.25, 0.38, r)
+    keep = blur(np.maximum(fur, gold), 2)
+    _views[path] = (im, blur((keep > 0.7).astype(F), 4), gold)
+    return _views[path]
+
+
+def head_project(p, n, base, ref, mirror=False):
+    """Front, side and back views by the normal over `base`; -> colour, emission. mirror: both sides read her right side of the front view."""
+    im, keep, gold = ref
+    q = p - K.HC.astype(F)
+    z_px = NOSE_ROW - (q[:, 2] - K.NOSE[2]) / HEAD_K
+    xf = FRONT_C - (np.abs(q[:, 0]) if mirror else q[:, 0]) / HEAD_K
+    xb = BACK_C + (-np.abs(q[:, 0]) if mirror else q[:, 0]) / HEAD_K
+    xs = SIDE_NOSE + (K.NOSE[1] + 0.02 - q[:, 1]) / HEAD_K
+    wf = smooth(0.05, 0.5, n[:, 1])
+    # (the face reads off the front view alone, or the eyes ghost)
+    wf = wf * (1.0 + 8.0 * smooth(0.16, 0.08, np.hypot(np.abs(q[:, 0]) - 0.09, q[:, 2] - 0.02)))
+    wb = smooth(0.05, 0.5, -n[:, 1])
+    ws = smooth(0.25, 0.7, np.abs(n[:, 0])) * (0.0 if mirror else 1.0)
+    tot = np.maximum(wf + wb + ws, 1e-4)
+    c = np.zeros_like(base)
+    k = np.zeros(len(p), F)
+    g = np.zeros(len(p), F)
+    for x, w in ((xf, wf), (xb, wb), (xs, ws)):
+        kk = sample2(keep, x, z_px)
+        ww = (w * w) / np.maximum(wf * wf + wb * wb + ws * ws, 1e-4)
+        c += sample2(im, x, z_px) * (ww * kk)[:, None]
+        k += ww * kk
+        g += ww * sample2(gold, x, z_px)
+    c = c + base * (1 - np.clip(k, 0, 1))[:, None]
+    return np.clip(c, 0, 1), GOLD[None, :] * g[:, None]
+
+
+# ---------------------------------------------------------------- the apron: the turnaround's painted cloth, projected from the front
+APRON_K = 0.00139            # m a pixel of pip_turnaround.png
+APRON_C = (457.0, 1053.0)    # its pixel at x = 0 on the hem
+
+
+def apron_ref(path):
+    import imgio
+    im = imgio.load(path)
+    return im
+
+
+def apron_project(p, n, base, im):
+    x = APRON_C[0] - p[:, 0] / APRON_K
+    y = APRON_C[1] - (p[:, 2] - K.APRON_HEM) / APRON_K
+    a = sample2(im, x, y)
+    # cloth, patch and cross, not the strap, the pouch or the grey behind her
+    sat = a.max(1) - a.min(1)
+    brown = smooth(0.62, 0.5, a[:, 2] / np.maximum(a[:, 0], 0.01)) * smooth(0.75, 0.55, a[:, 1] / np.maximum(a[:, 0], 0.01))
+    grey = smooth(0.06, 0.02, sat)
+    w = (1 - brown) * (1 - grey) * smooth(-0.3, 0.1, n[:, 1])
+    return mix(base, a, w)
+
+
+RELIEF = 2.4                 # the relief map's slope per unit of painted height
+
+
+def relief_map(col, mask):
+    """A normal map from the paint, atlas space: weave, stitches, veins stand up, dark seams sink."""
+    lum = col @ np.array((0.3, 0.55, 0.15), F)
+    hgt = blur(lum * mask, 1)
+    du = (np.roll(hgt, -1, 1) - np.roll(hgt, 1, 1)) * RELIEF
+    dv = (np.roll(hgt, -1, 0) - np.roll(hgt, 1, 0)) * RELIEF
+    nm = np.stack((-du, -dv, np.ones(du.shape, F)), 2)
+    return nm / np.linalg.norm(nm, axis=2, keepdims=True)

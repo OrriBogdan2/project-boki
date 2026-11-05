@@ -49,10 +49,12 @@ sc.render.resolution_x = sc.render.resolution_y = px
 ims = []
 V = [("front", 180, 6, (0, 0, 0.8), 2.0), ("left", 90, 6, (0, -0.1, 0.8), 2.0), ("back", 0, 6, (0, 0, 0.8), 2.0), ("q34", 215, 12, (0, 0, 0.8), 2.0),
      ("top", 180, 65, (0, -0.1, 0.8), 2.0), ("topb", 0, 65, (0, -0.1, 0.8), 2.0), ("head", 180, 4, (0, 0.03, 1.35), 0.72), ("head34", 212, 8, (0, 0.03, 1.35), 0.72)]
+if MODE == "head":
+    V = V[-2:] + [("head_l", 110, 6, (0, 0.03, 1.35), 0.72)]
 for nm, az, el, c, r in V:
     aim(az, el, c, r)
     sc.render.filepath = os.path.join(OUT, nm + ".png")
     bpy.ops.render.render(write_still=True)
     ims.append(sc.render.filepath)
-subprocess.run(["ffmpeg", "-loglevel", "error", "-y"] + sum([["-i", p] for p in ims], [])
-               + ["-filter_complex", "[0][1][2][3]hstack=4[a];[4][5][6][7]hstack=4[b];[a][b]vstack", os.path.join(OUT, "sheet.png")], check=True)
+ff = "[0][1][2]hstack=3" if MODE == "head" else "[0][1][2][3]hstack=4[a];[4][5][6][7]hstack=4[b];[a][b]vstack"
+subprocess.run(["ffmpeg", "-loglevel", "error", "-y"] + sum([["-i", p] for p in ims], []) + ["-filter_complex", ff, os.path.join(OUT, "sheet.png")], check=True)

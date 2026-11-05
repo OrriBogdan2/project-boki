@@ -326,13 +326,13 @@ class Extras:
         e = P.get("ear", 0.0)
         for s, sd in ((1.0, "R"), (-1.0, "L")):
             out["brow." + sd] = (Quaternion((0, 1, 0), -s * 0.3 * b), Vector((0, 0, -0.008 * b)))
-            out["lid." + sd] = (Quaternion((1, 0, 0), -1.5 * l), None)
+            out["lid." + sd] = (Quaternion((1, 0, 0), -1.75 * l), None)
             ee = e + P.get("ear" + sd, 0.0)
             out["ear." + sd] = (Quaternion((1, 0, 0), -1.05 * ee) @ Quaternion((0, 0, 1), s * 0.25 * ee), None)
             n = max(1.0, round(P.get("wfq", 1.0) * self.dur))
             fl = P.get("wfl", 0.05) * math.sin(2 * math.pi * n * t / self.dur + (0.4 if s > 0 else 0.0))
             out["wing." + sd] = (Quaternion((1, 0, 0), P.get("wing", 0.0) + fl) @ Quaternion((0, 0, 1), s * P.get("wb", 0.0)), None)
-        out["jaw"] = (Quaternion((1, 0, 0), -0.42 * P.get("jaw", 0.0)), None)
+        out["jaw"] = (Quaternion((1, 0, 0), -0.16 * P.get("jaw", 0.0)), None)
         out["apron"] = (Quaternion((1, 0, 0), 0.8 * P.get("skirt", 0.0)), None)
         # the tail keeps level while the body pitches: it lies on the ground when she falls, never stands on end
         qh, r0 = self.sol.last["hips"], self.sol.R0["tail"]

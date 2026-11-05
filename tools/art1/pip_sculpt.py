@@ -16,8 +16,10 @@ from meshkit import Piece, catmull, norm, smooth, sweep
 F = np.float32
 ANKLE_Z = 0.085
 HC = np.array((0.0, 0.03, 1.285))       # the head's sculpt centre
-EYE = np.array((0.083, 0.128, 0.014))  # right eyeball centre, from HC
-EYE_R = 0.057
+EYE = np.array((0.097, 0.086, 0.026))  # right eyeball centre, from HC; only the almond the socket cuts shows of it (sheet: 17% of the head's width)
+EYE_R = 0.052
+OPEN = (0.036, 0.040)                  # half width, half height of the opening (pip_head.png)
+NOSE = np.array((0.0, 0.246, -0.052))
 HEAD_K = 1.0
 PIVOT_DROP = 0.066                     # the ring's top sits this far under the wrist, in the curled fingers
 
@@ -97,28 +99,18 @@ def arm_field(side):
 def head_field():
     o = HC
     w = lambda p: tuple(np.asarray(p, dtype=np.float64) + o)
-    f = Field(w((-0.30, -0.22, -0.20)), w((0.30, 0.28, 0.22)), 0.0032)
-    f.add(ell(w((0, -0.012, 0.02)), (0.168, 0.158, 0.146)), k=0.0)
+    f = Field(w((-0.30, -0.22, -0.20)), w((0.30, 0.28, 0.27)), 0.0032)
+    f.add(ell(w((0, -0.012, 0.06)), (0.172, 0.158, 0.185)), k=0.0)
     for s in (1.0, -1.0):
-        f.add(ell(w((s * 0.098, 0.042, -0.048)), (0.098, 0.10, 0.078)), k=0.055)      # cheeks
+        f.add(ell(w((s * 0.10, 0.04, -0.026)), (0.10, 0.10, 0.082)), k=0.055)      # cheeks
         # the fox's cheek ruff: three tufts swept out and down
-        for a, b, r in (((0.17, 0.02, -0.05), (0.268, -0.018, -0.082), 0.046), ((0.15, 0.02, -0.09), (0.232, -0.006, -0.152), 0.04),
-                        ((0.18, -0.01, -0.01), (0.25, -0.05, -0.01), 0.032)):
-            f.add(cap(w((s * a[0], a[1], a[2])), w((s * b[0], b[1], b[2])), r, 0.003), k=0.022)
-        f.add(ell(w((s * 0.08, 0.10, 0.06)), (0.075, 0.05, 0.03)), k=0.03)             # the brow's ridge
-    f.add(ell(w((0, 0.158, -0.070)), (0.072, 0.09, 0.054)), k=0.05)                    # muzzle
-    f.add(cap(w((0, 0.10, 0.012)), w((0, 0.205, -0.046)), 0.04, 0.027), k=0.04)         # the bridge
-    f.add(ell(w((0, 0.125, -0.118)), (0.056, 0.066, 0.030)), k=0.03)                   # chin
+        for a, b, r in (((0.17, 0.02, 0.0), (0.262, -0.02, 0.0), 0.052), ((0.15, 0.02, -0.05), (0.215, -0.01, -0.074), 0.042)):
+            f.add(cap(w((s * a[0], a[1], a[2])), w((s * b[0], b[1], b[2])), r, 0.009), k=0.034)
+        f.add(ell(w((s * 0.09, 0.105, 0.09)), (0.08, 0.05, 0.03)), k=0.04)             # the brow's ridge
+    f.add(ell(w((0, 0.17, -0.072)), (0.066, 0.094, 0.05)), k=0.05)                    # muzzle
+    f.add(cap(w((0, 0.10, 0.02)), w((0, 0.22, -0.05)), 0.042, 0.024), k=0.05)         # the bridge
+    f.add(ell(w((0, 0.13, -0.108)), (0.052, 0.07, 0.028)), k=0.03)                   # chin
     f.add(ell(w((0, -0.06, -0.09)), (0.13, 0.12, 0.09)), k=0.05)                        # the neck's ruff behind the jaw
-    for s in (1.0, -1.0):
-        e = EYE * (s, 1, 1)
-        f.sub(ell(w(e + (s * 0.002, 0.032, 0.0)), (0.062, 0.042, 0.061)), k=0.014)     # the socket
-        f.add(ell(w(e * (1, 1, 1) + (s * 0.012, 0.02, -0.076)), (0.046, 0.024, 0.011)), k=0.018)  # the lower lid's pad
-    # the mouth: a fox's wide shallow W cut in, under the nose
-    mouth = [(-0.062, 0.156, -0.087), (-0.036, 0.195, -0.100), (-0.012, 0.222, -0.103), (0.0, 0.226, -0.096)]
-    for s in (1.0, -1.0):
-        f.sub(path([w((s * p[0], p[1], p[2])) for p in mouth], [0.0035, 0.0045, 0.0045, 0.004]), k=0.003)
-    f.sub(ell(w((0, 0.17, -0.102)), (0.052, 0.058, 0.008)), k=0.002)                   # behind it, the dark of the mouth
     return f
 
 
@@ -289,8 +281,8 @@ def _ear_ring(c, ax, sd, fr, w, d, cup, n=10, grow=0.0):
 
 def ear(s, grow=0.0, name=None, mat="skin", t0=0.0, t1=1.0, room=0.6):
     """s: +1 her right. Base inside the skull, tip well above it."""
-    base = h((s * 0.112, -0.022, 0.085))
-    tip = h((s * 0.185, -0.03, 0.335))
+    base = h((s * 0.122, -0.022, 0.12))
+    tip = h((s * 0.215, -0.03, 0.378))
     ax = _unit(tip - base)
     fr = _unit(np.array((s * 0.32, 1.0, 0.0)) - ax * np.dot((s * 0.32, 1.0, 0.0), ax))
     sd = np.cross(ax, fr) * s
@@ -299,8 +291,8 @@ def ear(s, grow=0.0, name=None, mat="skin", t0=0.0, t1=1.0, room=0.6):
     L = np.linalg.norm(tip - base)
     for t in ts:
         c = base + ax * L * t
-        w = 0.098 * (1 - t) ** 0.62 + 0.0015
-        rings.append(_ear_ring(c, ax, sd, fr, w, 0.04 * (1 - t) ** 0.7 + 0.002, 0.03 * (1 - t) ** 0.8, grow=grow))
+        w = (0.112 * (1 - t) ** 0.5 + 0.004) * (0.62 + 0.38 * smooth(0.0, 0.32, t))
+        rings.append(_ear_ring(c, ax, sd, fr, float(w), 0.04 * (1 - t) ** 0.7 + 0.002, 0.03 * (1 - t) ** 0.8, grow=grow))
     p = loft(name or ("ear" + ("R" if s > 0 else "L")), mat, rings, room=room)
     p.c0, p.ax, p.fr, p.sd, p.L = base, ax, fr, sd, L
     return p
@@ -351,7 +343,7 @@ def lid(s):
     n, m = 11, 4
     vs, fa = [], []
     for i in range(m + 1):
-        e = 0.74 + (2.0 - 0.74) * i / m          # from the rim (angle above the axis) over the top and back
+        e = 0.86 + (2.2 - 0.86) * i / m          # from the rim (angle above the axis) over the top and back
         for j in range(n):
             a = -1.55 + 3.1 * j / (n - 1)
             d = ax * math.cos(e) * math.cos(a) + up * math.sin(e) * math.cos(a * 0.9) + sd * math.sin(a) * math.cos(e * 0.6)
@@ -364,8 +356,8 @@ def lid(s):
 
 def brow(s, fld):
     """The sheet's pale oval brow mark, a thin pad lying on the forehead, moved by a bone."""
-    c = h((s * 0.062, 0.135, 0.085))
-    u = _unit((s * 1.0, -0.15, 0.22))
+    c = h((s * 0.06, 0.13, 0.098))
+    u = _unit((s * 1.0, -0.12, 0.22))
     rings = []
     k = np.linspace(-1, 1, 6)
     out = []
@@ -397,14 +389,14 @@ def brow(s, fld):
 
 
 def nose():
-    return ball("nose", "leather", h((0, 0.2285, -0.052)), (0.027, 0.018, 0.019), n=8, m=5, room=0.0)
+    return ball("nose", "leather", h(NOSE), (0.03, 0.02, 0.02), n=8, m=5, room=0.0)
 
 
 # ---------------------------------------------------------------- goggles, band, head flowers, bandage
 def _skull_out(fld, c, d, gap):
     """From a point c along direction d, the far edge of the head + a gap (rays per ring point)."""
-    t = 0.32
-    for _ in range(40):
+    t = 0.36
+    for _ in range(46):
         q = np.array([c + d * t], F)
         if fld.sample(q)[0] < gap:
             break
@@ -413,8 +405,8 @@ def _skull_out(fld, c, d, gap):
 
 
 def band(fld):
-    c0 = h((0, -0.015, 0.065))
-    nrm = _unit((0, -0.40, 1.0))       # a ring tipped: high on the brow, lower at the back
+    c0 = h((0, -0.015, 0.095))
+    nrm = _unit((0, -0.2, 1.0))       # a ring tipped: high on the brow, lower at the back
     a_ = _unit(np.cross(nrm, (1, 0, 0)))
     b_ = np.cross(nrm, a_)
     pts = []
@@ -441,18 +433,18 @@ def band(fld):
 def goggles():
     out = []
     for s in (1.0, -1.0):
-        c = h((s * 0.083, 0.098, 0.152))
-        ax = _unit((s * 0.20, 0.58, 0.80))             # they sit pushed up, lenses to the sky: the top-down read
+        c = h((s * 0.095, 0.098, 0.19))
+        ax = _unit((s * 0.24, 0.70, 0.66))             # they sit pushed up, lenses to the sky: the top-down read
         u = _unit(np.cross(ax, (1, 0, 0)))
         v = np.cross(ax, u)
         tag = "R" if s > 0 else "L"
-        out.append(ring_tube("gogrim" + tag, "metal", c, u, v, 0.056, 0.0135, n=14, sides=5))
-        out.append(ring_tube("gogrim2" + tag, "metal", c - ax * 0.02, u, v, 0.052, 0.012, n=10, sides=4))
+        out.append(ring_tube("gogrim" + tag, "metal", c, u, v, 0.056, 0.0145, n=14, sides=5))
+        out.append(ring_tube("gogrim2" + tag, "metal", c - ax * 0.02, u, v, 0.053, 0.0125, n=10, sides=4))
         n = 12
-        vs = [c + ax * 0.006] + [c + ax * 0.002 + (u * math.cos(i / n * 2 * math.pi) + v * math.sin(i / n * 2 * math.pi)) * 0.048 for i in range(n)]
+        vs = [c + ax * 0.006] + [c + ax * 0.002 + (u * math.cos(i / n * 2 * math.pi) + v * math.sin(i / n * 2 * math.pi)) * 0.05 for i in range(n)]
         fa = [[0, i + 1, (i + 1) % n + 1] for i in range(n)]
         out.append(Piece("lens" + tag, "metal", vs, fa, room=0.0).orient(c - ax * 0.05))
-    a, b = h((0.03, 0.112, 0.17)), h((-0.03, 0.112, 0.17))
+    a, b = h((0.036, 0.13, 0.212)), h((-0.036, 0.13, 0.212))
     out.append(tube("gogbridge", "metal", [a, (a + b) / 2 + (0, 0.004, 0.01), b], 0.009, sides=5))
     return out
 
@@ -476,11 +468,11 @@ def flower(name, mat, c, nrm, R, petals=5, rot=0.0, centre="glow", w=0.72, n=3):
 def bandage(ear_p):
     """Wraps of cream cloth round her left ear: a second, fatter ear, its top rounded off; the paint draws the wraps."""
     s = -1.0
-    p = ear(s, grow=0.0115, name="bandage", mat="cloth", t0=0.30, t1=0.86, room=0.4)
+    p = ear(s, grow=0.008, name="bandage", mat="cloth", t0=0.30, t1=0.80, room=0.4)
     n = 10
     c = p.v[len(p.v) - 2 - n:len(p.v) - 2]
     m = c.mean(0)
-    p.v[len(p.v) - 2 - n:len(p.v) - 2] = m + (c - m) * 0.62
+    p.v[len(p.v) - 2 - n:len(p.v) - 2] = m + (c - m) * 0.66
     p.v[-1] = m + p.ax * 0.018
     return p
 
@@ -746,3 +738,11 @@ def wing(s, upper):
     p = Piece("wing%s%s" % ("U" if upper else "D", "R" if s > 0 else "L"), "card", vs, fa, fus, room=0.0)
     p.u = np.array(us)
     return p
+
+
+def seat_eyes(fld):
+    """The eyeball pokes 12 mm through the head's surface: its visible disc is then the sheet's eye (r ~ 34 mm), no socket to read as a hole."""
+    q = np.array([[EYE[0] + HC[0], y, EYE[2] + HC[2]] for y in np.arange(0.35, 0.0, -0.002) + HC[1]], F)
+    d = fld.sample(q)
+    surf = q[np.argmax(d < 0), 1] - HC[1]
+    EYE[1] = surf + 0.012 - EYE_R
