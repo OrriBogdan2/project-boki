@@ -1669,3 +1669,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - The rift key (and objective keys) get their own slot and are always picked up, even with a full belt.
 - A full belt: F swaps with the selected slot; hold a number key to drop it; a first-time hint.
 - Priority: the next batch.
+
+## 2026-11-05 20:49 UTC ext → S5 / K1: item 162b (global): no glider during any ability animation (holds, wind-ups, casts, dashes). It opens after the animation, buffered, and inherits the velocity (momentum). Kael can glide mid-RMB-hold today.

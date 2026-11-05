@@ -2496,3 +2496,15 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - With a full belt, the rift key is picked up into the key slot.
   - With a full belt + F on an item → a swap.
   - Holding a number key drops that slot.
+
+## 162b. No glider during ability animations; open it only after, to carry momentum (owner, 18:45 UTC Nov 5)
+- The owner: "should not be able to use glider during any animation, only after to maintain momentum (kael is using during rmb hold)".
+- **Global rule:**
+  - While any ability/attack animation is running (a wind-up, a charge/hold (Kael's RMB Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash/blink, the release/recovery), the glider input is ignored.
+  - Once the animation ends, the glider can open (item 179 tap-then-hold), and it inherits the current velocity, so momentum carries into the glide (the 126 momentum play).
+  - If the player is holding Space as the animation ends, the glide opens then (a buffer), not mid-animation.
+  - Applies to every hero.
+  - The glider doesn't cancel abilities, and abilities don't cancel an open glider unless the kit says so.
+- **Assert:**
+  - Holding Kael's RMB + pressing Space in the air → no glider until release + recovery end, then it opens with the carried velocity.
+  - The same for every kit's hold.
