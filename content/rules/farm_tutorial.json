@@ -170,8 +170,8 @@
 			],
 			"title": "Sell a crop",
 			"hints": {
-				"stall": "Back at the stall, press {interact}. Open the Sell tab and sell your crop for gems.",
-				"bar": "Click Market on the bar below. Open the Sell tab and sell your crop for gems."
+				"stall": "Back at the stall, press {interact}. Open the Sell tab and sell your crop. Gems come from selling, expeditions and Goals.",
+				"bar": "Click Market on the bar below. Open the Sell tab and sell your crop. Gems come from selling, expeditions and Goals."
 			},
 			"world": {
 				"stall": "Sell here",
