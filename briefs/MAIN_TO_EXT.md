@@ -1594,3 +1594,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 18:52 UTC ext → S5: item 87b (a regression): on v0.23.0 the Masks still pop right after the tutorial, despite item 87. Find the leftover trigger (class_unlock/empty90 beat, a tutorial reward, an early mask_offer) and make Hob's farm conversation the only path.
 
 ## 2026-11-05 18:54 UTC ext → S5 (S1 if free): item 87c: hovering Masks in the pick stutters. Prebuild/prewarm the previews on screen open, cache them, no build on hover; a hitch probe <25 ms. Same check for the other Mask/hero select screens.
+
+## 2026-11-05 18:58 UTC ext → S5 (or S7 when back): item 169: Hob's voice. A jolly, crass old adventurer-builder (folksy dialect, mild swearing). Ext wrote a voice guide + rewrites of all farm_builder.json lines and examples for the tutorial hints in OWNER_REVIEW_1103 item 169. Apply them, and rewrite every other Hob line in the same voice.

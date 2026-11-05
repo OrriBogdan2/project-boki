@@ -2094,3 +2094,34 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Check the same pattern in the hero/Mask select screens elsewhere (Masks screen, class pick).
 - **Assert:** a frame-time probe while hovering across the 3 Masks repeatedly: no frame >25 ms after the screen's open (S1's hitch-check style).
 - Owner: S5 (or S1, the perf owner, if it's free).
+
+## 169. Hob's voice: a jolly old adventurers' helper with a crass mouth; rewrite all his lines (owner, 17:55 UTC Nov 5)
+- The owner: "hob's language and character needs work - his english is bad, but let's turn it into his character - he's an old dude who helps adventurers, jolly, bit of a crass mouth".
+- **The voice guide** (add to docs/wiki + LORE as Hob's character note):
+  - Hob Brackenridge, old builder and retired adventurer.
+  - Warm, booming laugh, calls you "kid"/"sprout".
+  - Folksy, dropped g's ("buildin'"), playful exaggeration, mild crude humour, and light swearing ("bloody", "damn", "arse", "piss off" in jest). Never slurs, never mean-spirited.
+  - Short lines (1-2 sentences, item 155's text diet).
+  - Gives real info, wrapped in personality.
+  - "Bad English" becomes deliberate dialect, not grammar errors.
+- **Rewrites** (content/rules/farm_builder.json lines; use these):
+  - first: "Name's Hob! I draw up the buildin's 'round here. House, patch, pot and pen to start. Grow this dump and I'll draw you fancier."
+  - nothing: "Nothin' new, kid. Harvest, hatch, scan, and come back from an expedition in one piece. Then we'll talk."
+  - level_2: "Ha! You've got a crew now. Let's give the little buggers somethin' to swing at."
+  - level_3: "Real work needs a real bench. Can't saw planks on your knee forever."
+  - level_4: "Pens, kilns, a proper hospital! Now we're bloody talkin'."
+  - level_5: "Cold store. Keeps the meat fresh and my beer colder. Mind the draught."
+  - level_6: "That's every blueprint I've got, sprout. Rest is up to you."
+  - first_run: "First run done and you're not even dead! Here, a Challenge House. Six wood, four stone."
+  - first_extract: "Came back breathin'! That's more'n most. Take this blueprint."
+  - first_boss: "Bring me a trophy off somethin' big and ugly, and I'll carve the bastard in stone."
+  - scan3: "Three Boki scanned? You'll be wantin' somewhere to stuff 'em."
+  - toast: "New blueprints! Go bother Hob." / hint_more: "Talk to Hob for more."
+- **Farm tutorial hints** (farm_tutorial.json) that Hob speaks get his voice too; keep the {keys} tokens. E.g.:
+  - axe: "Here, take this axe. Trees give wood, wood builds everythin'. Don't lose a finger."
+  - pickaxe: "Rocks give stone. Pickaxe, {interact}, swing. Easy."
+  - house place: "Time for a roof over your head. Hit {build}, pick House, slap it on the marked spot. Costs nothin' 'til it goes up."
+  - meet: "Oi! Come say hello. Press {interact} and I'll show you what you can build."
+  - The Mask offer (item 87): "By the way… that's a Vex mask on your face, innit? Could I interest you in another? Pick one. Don't take all day."
+- **Apply** the voice to every Hob line in the code (the farm_hob.gd conversation, item 87/92 dialogue, toasts). S5/S7: grep for every Hob string and rewrite it in this voice. Non-Hob system text stays neutral.
+- Content rating: mild language only (the owner asked for "a bit crass"). Keep a settings toggle "Mild language: on/off" that swaps the swear words for gentler ones, if it's cheap.
