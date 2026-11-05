@@ -17,8 +17,8 @@ from sculpt_kit import Field, box, cap, cyl, ell, fbm, path, smooth, sph, vnoise
 F = np.float32
 # labels
 WOOD, IRON, RIVET, BRASS, MOSS, BARN, GLASS = 1, 2, 3, 4, 5, 6, 7
-HULL_C = (0.0, 0.0, 0.5)
-HULL_R = (0.475, 0.4, 0.34)
+HULL_C = (0.0, 0.0, 0.56)
+HULL_R = (0.475, 0.4, 0.32)
 HELM_C = (0.0, 0.03, 0.8)
 HELM_R = (0.235, 0.205, 0.185)     # squat, wider than tall, sunk in the hull (breaker_head_squat)
 PORT_C = (0.0, 0.8)
@@ -68,8 +68,8 @@ def strake(x, y, z):
 def hull(J):
     """The hull: one wide egg, full at the shoulders; the turnaround is projected onto it, so it carries no carved detail."""
     f = Field((-0.56, -0.46, 0.06), (0.56, 0.5, 1.0), 0.0045)
-    f.add(ell((0, 0, 0.53), HULL_R), 0.0, WOOD)
-    f.add(ell((0, 0, 0.32), (0.34, 0.3, 0.2)), 0.1, WOOD)
+    f.add(ell(HULL_C, HULL_R), 0.0, WOOD)
+    f.add(ell((0, 0, 0.4), (0.42, 0.36, 0.2)), 0.08, WOOD)
     return f
 
 
@@ -147,10 +147,10 @@ def helmet():
     f.d = np.maximum(f.d, 0.72 - f.grid()[2])
     cl = Field((-0.56, -0.48, 0.64), (0.56, 0.48, 0.86), 0.0035)
     x, y, z = cl.grid()
-    r = np.sqrt((x / 0.5) ** 2 + ((y - 0.0) / 0.43) ** 2)
-    sag = 0.045 * np.clip(y / 0.43, 0, 1) ** 2         # it dips at the front, as the art
-    top = 0.785 - 0.11 * r ** 3 - sag
-    d = np.maximum(np.maximum(z - top, top - 0.05 - z), r - 1.0)
+    r = np.sqrt((x / 0.47) ** 2 + (y / 0.41) ** 2)
+    sag = 0.05 * np.clip(y / 0.41, 0, 1) ** 2          # it dips at the front, as the art
+    top = 0.8 - 0.15 * r ** 3 - sag
+    d = np.maximum(np.maximum(z - top, top - 0.075 - z), r - 1.0)
     cl.d = (d * 0.8).astype(F)
     cl.lab[:] = BRASS
     return f, cl

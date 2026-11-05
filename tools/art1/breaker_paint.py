@@ -298,7 +298,11 @@ _art = {}
 
 def art(name):
     if name not in _art:
-        _art[name] = imgio.load(os.path.join(REFS, name + ".png"))
+        im = imgio.load(os.path.join(REFS, name + ".png"))
+        # the sheet's pale background is bled over from the figure, so a texel past the drawn edge never paints white
+        lo, hi = im.min(2), im.max(2)
+        fg = ~((lo > 0.55) & (hi - lo < 0.07))
+        _art[name] = S.dilate(im, fg, 90)
     return _art[name]
 
 
@@ -401,9 +405,9 @@ def p_collar(p, n, c):
     """The collar, plan-mapped: round the ring its art runs left to right across the front and back views."""
     x, y = p[:, 0], p[:, 1]
     ang = np.abs(np.arctan2(x, y)) / np.pi      # 0 at the front, 1 at the back
-    u = x / 0.5
-    r = np.clip(np.sqrt((x / 0.5) ** 2 + (y / 0.43) ** 2), 0, 1)
-    py = 232.0 + (r - 0.7) * 170.0 + 55.0 * (y > 0) * np.clip(y / 0.43, 0, 1)
+    u = x / 0.47
+    r = np.clip(np.sqrt((x / 0.47) ** 2 + (y / 0.41) ** 2), 0, 1)
+    py = 232.0 + (r - 0.7) * 170.0 + 55.0 * (y > 0) * np.clip(y / 0.41, 0, 1)
     f = sample(SQ, 140.0 - u * 118.0, py, 1000.0)
     b = sample(SQ, 855.0 + u * 118.0, py, 1000.0)
     return mix(b, f, smooth(-0.15, 0.15, y))
