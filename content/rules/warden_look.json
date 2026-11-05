@@ -1095,6 +1095,12 @@
 				"alpha_k": 1.25,
 				"far_alpha": 1.9,
 				"far_edge": 0.6
+			},
+			"skin-face": {
+				"fres": 0.05,
+				"top_light": 0.1,
+				"far_lift": 0.08,
+				"sss": 0.3
 			}
 		},
 		"lights": [
