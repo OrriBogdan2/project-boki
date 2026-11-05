@@ -2627,3 +2627,8 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
   - Owner questions: its eye colour from the game's iris system comes out grey-blue (gold would be more owl-like); waddle and hop on the ground (now) or hover? Weak spots: a wing edge-on can read as a green spike at the farm camera; the antennae read a bit like gold brows from high; the run is one long bound per cycle (feet slide a little at walk).
 - **Gloamshell (NEW)**, roster 50 #15 (shadow, small): a squat grey-violet snail, a glassy smoked-obsidian spiral shell with a faint violet glow from its mouth, two feelers with glowing tips (the eyes stay on the head so it emotes like the others; the art note's eye stalks became feelers). No legs (FRAME hip 0.0): glides on a ripple of its foot with the shell rocking; ability = hunkers, the shell spins half round as the glow wells up, then a head sweep lays the trail; attack = smug headbutt; sleep = drawn down behind its shell. Concept sheet `briefs/art-refs/boki/gloamshell_concept.png`; review set 748b5968 boki/gloamshell/. Base ext/boki-newbase.
 - Checks on both: --boki-rig-check 0 failures, health --strict OK.
+
+## 2026-11-05 08:10 UTC (S7): UPDATE ext/s7-boki-82-92 is now c10dfaef (origin/main 25e8ea8d merged in)
+- check_registry conflict with --dash-aim-check: kept both entries. Re-run after the merge: --boki-moves-check 0 failures, health --strict OK, gen_wiki --check 34 unchanged.
+- ext/s7-empty-77-81 a4808f68 still merges clean onto 25e8ea8d.
+- ext/s7-dash-outpost-84-86 is held. On this box --simtest --seed=5 ends "team wiped" at sim 46 s on the branch; plain 25e8ea8d extracts at sim 236 s. Its agent is bisecting now.
