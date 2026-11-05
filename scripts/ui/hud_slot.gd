@@ -119,8 +119,9 @@ static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: Strin
 ## The part of a slot still cooling: a slice from 12 o'clock, clockwise, cut to the slot's square so
 ## it never spills past the frame.
 static func sweep(c: CanvasItem, r: Rect2, frac: float, col: Color) -> void:
-	if frac <= 0.001:
+	if frac <= 0.005:
 		return
+	frac = minf(frac, 0.995)      # (a full turn closes on itself: the polygon would not triangulate)
 	var ctr := r.get_center()
 	var half := r.size * 0.5
 	var pts := PackedVector2Array([ctr])

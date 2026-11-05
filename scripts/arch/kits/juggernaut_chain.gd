@@ -238,6 +238,8 @@ func _arced(dir: Vector2, to: Vector2, step: float, most: float) -> Vector2:
 
 ## Each step (before the hunter moves).
 func tick(dt: float) -> void:
+	if k.h.model:
+		k.h.model.set_meta(WardenGlb.CHAIN_OUT, state != "ready")      # (the arm's chain is the one in the air: 76b)
 	match state:
 		"hooked": _tick_hooked(dt)
 		"pulling": _tick_pull(dt)
@@ -304,7 +306,7 @@ func _draw_hooked(stretch: float) -> void:
 	strained = stretch >= TAUT
 	if not (k.tells_visible() or target != null):
 		return
-	var a := h.pos + Vector3(0, 1.0, 0)
+	var a := _chain_from()
 	var b := anchor + Vector3(0, 1.0 if target != null else 0.6, 0)
 	_launch(Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z))      # the pull as it would start now, for the preview
 	k.fx().chain(_fx_id(), a, b, 0.3 * (1.0 - tension), ORANGE.lerp(HOT, tension * 0.6), DARK,
@@ -341,10 +343,15 @@ func _draw_preview() -> void:
 		preview.append(Vector3(pos.x, y, pos.y))
 	k.fx().path_line(_fx_id() + "arc", preview, Color(HOT, 0.4), 0.12)
 
+## Where the chain leaves him: the socket on his wrist on the 3D model, else the chest.
+func _chain_from() -> Vector3:
+	var at := WardenGlb.anchor(k.h.model, "anchor_chain") if k.h.model else null
+	return at.global_position if at else k.h.pos + Vector3(0, 1.0, 0)
+
 func _draw_flight() -> void:
 	for s in k.m.shots:
 		if s["by"] == k.h and (s["x"] as Dictionary).get("rope", false):
-			k.fx().chain(_fx_id(), k.h.pos + Vector3(0, 1.0, 0), s["pos"], 1.0, ORANGE, ORANGE, 0.12)
+			k.fx().chain(_fx_id(), _chain_from(), s["pos"], 1.0, ORANGE, ORANGE, 0.12)
 			return
 
 func _tick_pull(dt: float) -> void:

@@ -17,7 +17,8 @@ const WARDENS := {
 	"bulwark": {"hit_r": 0.46, "height": 1.5, "width": [1.3, 2.2], "moves": "bul_"},     # (1.5x, owner)
 	"archer": {"hit_r": 0.392, "height": 0.98, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
 	"gunslinger": {"hit_r": 0.416, "height": 1.04, "width": [0.7, 1.3], "moves": "gunslinger_"},   # (slim)
-	"mage": {"hit_r": 0.4, "height": 1.04, "width": [0.6, 1.3], "moves": "mage_"},     # (slim and long-legged)
+	# (slim and long-legged; height_3d: her rods stand over the head)
+	"mage": {"hit_r": 0.4, "height": 1.04, "height_3d": 1.11, "width": [0.6, 1.3], "moves": "mage_"},
 	# (Sable's feather plumes stand ~0.2 m over her head)
 	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.05, "width": [0.6, 1.3], "moves": "thf_"},
 	"dolm": {"hit_r": 0.388, "height": 1.19, "width": [0.7, 1.5], "moves": "breah_"},     # (lean, the locs: his art)
@@ -27,7 +28,7 @@ const WARDENS := {
 	# (Cinder's fin-crest stands over her head)
 	"ashwick": {"hit_r": 0.376, "height": 1.02, "height_3d": 1.11, "width": [0.7, 1.5], "moves": "as_"},
 	# (Kael: body size 1.06, owner Nov 4: 9% bigger; juggernaut.md's 1.12x was at 1.0)
-	"juggernaut": {"hit_r": 0.428, "height": 1.26, "height_3d": 1.19, "width": [1.0, 2.0], "moves": "jug"},
+	"juggernaut": {"hit_r": 0.428, "height": 1.35, "height_3d": 1.28, "width": [0.85, 2.0], "moves": "jug"},
 	"dredge": {"hit_r": 0.452, "height": 1.28, "width": [1.3, 2.4], "moves": "dr_"},     # (~2.25 m, very broad)
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
 	# (Pip: body size 0.68, item 108; her sheet's 0.74, 3D 0.84, was at 0.78)

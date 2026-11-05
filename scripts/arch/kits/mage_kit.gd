@@ -39,10 +39,12 @@ var last_push := 0.0           # tests: how hard the last rod knocked
 var echo_t := 0.0
 var ult: MageUlt               # Kitefall, her ultimate on X
 var sky: MageSky               # Skycall (E) and the orbs it flings
+var gum                        # the bubble she blows and pops (mage_gum.gd)
 
 func _setup() -> void:
 	ult = MageUlt.new(self)
 	sky = MageSky.new(self)
+	gum = load("res://scripts/arch/kits/mage_gum.gd").new(self)
 	# her round is fired after this kit's tick, so its stock orb would draw one frame as a white ball at
 	# her hand before _tick_lmb skins it: hide it just before that frame is drawn
 	RenderingServer.frame_pre_draw.connect(_hide_fresh_round)
@@ -58,6 +60,11 @@ func _hide_fresh_round() -> void:
 			if orb != null and is_instance_valid(orb):
 				orb.visible = false
 			return
+
+## A rival went down: she pops her gum at them.
+func on_knock(_t: Hunter, mine: bool) -> void:
+	if mine:
+		gum.blow()
 
 func fx() -> VVFx:
 	return VVFx.of(m)
@@ -167,6 +174,7 @@ func _tick_sparks(dt: float) -> void:
 
 func _tick(dt: float) -> void:
 	_tick_sparks(dt)
+	gum.tick(dt)
 	if reset_dash_boost:
 		reset_boost_t -= dt
 		reset_dash_boost = reset_boost_t > 0.0

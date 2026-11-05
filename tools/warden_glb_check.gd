@@ -310,6 +310,7 @@ func _springs(a: String) -> void:
 		m.free()
 		return
 	var sk := _skel(m)
+	sync.springs.calm = true
 	sync._process(1.0 / 60.0)
 	var lag := 0.0
 	for i in 6:

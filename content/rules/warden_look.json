@@ -86,61 +86,17 @@
 		]
 	},
 	"ryzz": {
-		"painted": {
-			"emit": 2.6,
-			"emit_flicker": 0.12,
-			"far_emit": 1.2,
-			"rim_far": 0.22,
-			"rim_far_color": [
-				0.2,
-				0.45,
-				1.0
-			]
-		},
+		"painted": {"rim_far": 0.3, "rim_far_color": [1.0, 0.3, 0.72]},
 		"slots": {
-			"skin": {
-				"top_light": 0.3,
-				"fres": 0.22,
-				"far_lift": 0.3,
-				"shade": 0.9,
-				"fres_tint": 0.4
-			},
-			"hair": {
-				"top_light": 0.6,
-				"fres": 0.45,
-				"far_lift": 0.15,
-				"glow": 0.14,
-				"shadow_tint": [
-					0.88,
-					0.94,
-					1.0
-				],
-				"fres_tint": 0.9
-			},
-			"cloth": {
-				"fres": 0.6,
-				"far_lift": 0.8,
-				"light_neutral_warm": 0.4
-			},
-			"leather": {
-				"top_light": 0.45,
-				"fres": 0.4,
-				"fres_tint": 0.5,
-				"far_lift": 0.5,
-				"light_neutral_warm": 0.8
-			},
-			"metal": {
-				"top_light": 0.5,
-				"fres": 0.5,
-				"fres_tint": 0.8,
-				"far_lift": 0.8,
-				"sheen": 0.0,
-				"shade": 0.9
-			}
+			"skin": {"top_light": 0.15, "fres": 0.18, "fres_tint": 0.3, "far_lift": 0.08, "shade": 0.95, "light_neutral_warm": 0.7, "paint_glow": 1.5, "paint_glow_color": [1.0, 0.16, 0.74], "paint_glow_width": 0.045},
+			"cloth": {"fres": 0.25, "far_lift": 0.12, "paint_glow": 1.5, "paint_glow_color": [1.0, 0.16, 0.74], "paint_glow_width": 0.045},
+			"leather": {"top_light": 0.3, "fres": 0.25, "fres_tint": 0.5, "far_lift": 0.12, "light_neutral_warm": 0.8},
+			"hair": {"vertex_ao": false, "top_light": 0.5, "fres": 0.35, "far_lift": 0.2, "glow": 0.1, "fres_tint": 0.9},
+			"metal": {"top_light": 0.6, "fres": 0.5, "fres_tint": 0.8, "far_lift": 0.45, "sheen": 0.15},
+			"glow": {"glow": 1.8}, "glow-wire": {"glow": 0.7}
 		},
-		"no_ink": [
-			"gum"
-		]
+		"no_ink": ["gum"],
+		"bloom": [{"at": "anchor_eye_glow", "color": [1, 0.3, 0.75, 0.2], "size": 0.04, "depth_test": false}, {"at": "anchor_rod_0", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}, {"at": "anchor_rod_1", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}, {"at": "anchor_rod_2", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}, {"at": "anchor_rod_3", "color": [1, 0.45, 0.85, 0.3], "size": 0.13, "depth_test": true}]
 	},
 	"sable": {
 		"painted": {
@@ -811,9 +767,9 @@
 		"slots": {
 			"skin": {
 				"top_light": 0.45,
-				"fres": 0.45,
+				"fres": 0.22,
 				"fres_tint": 0.2,
-				"far_lift": 0.25,
+				"far_lift": 0.32,
 				"shade": 0.95,
 				"shadow_tint": [
 					0.8,
@@ -823,68 +779,35 @@
 				"light_neutral_warm": 0.65
 			},
 			"cloth": {
-				"fres": 0.6,
+				"fres": 0.25,
 				"far_lift": 0.3
 			},
 			"hair": {
-				"far_lift": 0.5,
-				"fres": 0.6,
-				"glow": 0.12,
-				"top_light": 0.4
+				"vertex_ao": true,
+				"far_lift": 0.2,
+				"fres": 0.25,
+				"glow": 0.0,
+				"top_light": 0.25
 			},
 			"metal": {
-				"top_light": 0.5,
-				"fres": 0.55,
+				"top_light": 0.3,
+				"fres": 0.3,
 				"fres_tint": 0.8,
-				"far_lift": 0.25,
+				"far_lift": 0.15,
 				"sheen": 0.1
 			},
 			"leather": {
 				"far_lift": 0.3,
-				"fres": 0.5
+				"fres": 0.25
 			},
 			"glow": {
-				"glow": 2.8
+				"glow": 1.9
+			},
+			"cloth-ember": {
+				"glow": 1.5
 			}
 		},
-		"smoke": {
-			"color": [
-				0.04,
-				0.035,
-				0.045,
-				0.32
-			],
-			"amount": 24,
-			"life": 1.8,
-			"size": 0.26,
-			"rise": 0.35,
-			"from": 0.45
-		},
 		"bloom": [
-			{
-				"at": "weapon",
-				"color": [
-					1.0,
-					0.93,
-					0.78,
-					0.42
-				],
-				"size": 0.34,
-				"count": 6,
-				"from": 0.3
-			},
-			{
-				"at": "weapon",
-				"color": [
-					1.0,
-					0.97,
-					0.9,
-					0.5
-				],
-				"size": 0.16,
-				"count": 8,
-				"from": 0.3
-			},
 			{
 				"at": "anchor_arm_up",
 				"color": [
@@ -914,9 +837,118 @@
 					0.22
 				],
 				"size": 0.2
+			},
+			{
+				"at": "anchor_blade_mid",
+				"color": [
+					1,
+					0.93,
+					0.78,
+					0.14
+				],
+				"size": 0.26,
+				"depth_test": true
+			},
+			{
+				"at": "anchor_blade_root",
+				"color": [
+					1,
+					0.9,
+					0.72,
+					0.14
+				],
+				"size": 0.2,
+				"depth_test": true
+			},
+			{
+				"at": "weapon_muzzle",
+				"color": [
+					1,
+					0.93,
+					0.8,
+					0.14
+				],
+				"size": 0.2,
+				"depth_test": true
+			},
+			{
+				"at": "anchor_blade_mid",
+				"color": [
+					1,
+					0.97,
+					0.9,
+					0.14
+				],
+				"size": 0.2,
+				"depth_test": true
+			},
+			{
+				"at": "anchor_ember_0",
+				"color": [
+					1,
+					0.42,
+					0.1,
+					0.4
+				],
+				"size": 0.09,
+				"depth_test": true
+			},
+			{
+				"at": "anchor_ember_1",
+				"color": [
+					1,
+					0.42,
+					0.1,
+					0.4
+				],
+				"size": 0.09,
+				"depth_test": true
+			},
+			{
+				"at": "anchor_ember_2",
+				"color": [
+					1,
+					0.42,
+					0.1,
+					0.4
+				],
+				"size": 0.09,
+				"depth_test": true
+			},
+			{
+				"at": "anchor_ember_3",
+				"color": [
+					1,
+					0.42,
+					0.1,
+					0.4
+				],
+				"size": 0.09,
+				"depth_test": true
+			},
+			{
+				"at": "anchor_ember_4",
+				"color": [
+					1,
+					0.42,
+					0.1,
+					0.4
+				],
+				"size": 0.09,
+				"depth_test": true
+			},
+			{
+				"at": "anchor_eye_glow",
+				"color": [
+					1,
+					0.92,
+					0.88,
+					0.6
+				],
+				"size": 0.07,
+				"depth_test": false
 			}
-		],
-		"weapon_scale": 0.85
+		]
 	},
 	"dredge": {
 		"painted": {
