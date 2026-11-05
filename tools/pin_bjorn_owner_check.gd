@@ -112,7 +112,8 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		"visible %s dot %.2f" % [n.visible, Vector2(along.x, along.z).dot(d)])
 	ok("114 needle: oversized, over 2.5 times a loosed arrow", n.eye.distance_to(n.tip) >= 2.0,
 		"%.2f m" % n.eye.distance_to(n.tip))
-	var eye_ahead := func() -> float: return Vector2(n.eye.x - P.position.x, n.eye.z - P.position.z).dot(d)
+	var eye_ahead := func() -> float:
+		return Vector2(n.eye.x - P.position.x, n.eye.z - P.position.z).dot(d)
 	var eye0: float = eye_ahead.call()
 	var glow0: float = n.shell_mat.get_shader_parameter("color").a
 	var thread_back: float = Vector2((n.points[-1] as Vector3).x - n.eye.x, (n.points[-1] as Vector3).z - n.eye.z).dot(d)
