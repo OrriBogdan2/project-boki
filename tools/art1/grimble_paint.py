@@ -19,13 +19,13 @@ def rgb(h):
     return np.array([int(h[i:i + 2], 16) / 255.0 for i in (0, 2, 4)], F)
 
 
-C = {"skin": rgb("9a999e"), "skin_hi": rgb("d6d4d4"), "skin_sh": rgb("58545f"), "skin_warm": rgb("8c6a62"), "stitch": rgb("26222a"),
-     "iron": rgb("868e9a"), "iron_hi": rgb("d6dde6"), "iron_sh": rgb("3f4450"), "rust": rgb("8e4c2a"), "rust_hi": rgb("c47a44"),
-     "wood": rgb("99652f"), "wood_hi": rgb("cf9a58"), "wood_sh": rgb("5a3518"), "wood_gap": rgb("2c180c"),
-     "burlap": rgb("86694a"), "burlap_hi": rgb("b89a70"), "burlap_sh": rgb("4c3a2a"),
-     "gold": rgb("f5b81f"), "gold_hi": rgb("fff0a0"), "gold_sh": rgb("a8640e"),
-     "brass": rgb("c9992f"), "brass_hi": rgb("fbe29a"), "brass_sh": rgb("6a4514"),
-     "leather": rgb("7a4c2a"), "leather_hi": rgb("b47e4e"), "leather_sh": rgb("3e2414"),
+C = {"skin": rgb("85848b"), "skin_hi": rgb("b4b3b6"), "skin_sh": rgb("4c4954"), "skin_warm": rgb("8c6a62"), "stitch": rgb("26222a"),
+     "iron": rgb("646b78"), "iron_hi": rgb("a2aab6"), "iron_sh": rgb("343843"), "rust": rgb("74402a"), "rust_hi": rgb("9a6038"),
+     "wood": rgb("6e4726"), "wood_hi": rgb("97693e"), "wood_sh": rgb("432815"), "wood_gap": rgb("2c180c"),
+     "burlap": rgb("6e573e"), "burlap_hi": rgb("93795a"), "burlap_sh": rgb("4c3a2a"),
+     "gold": rgb("e0a418"), "gold_hi": rgb("f8d868"), "gold_sh": rgb("a8640e"),
+     "brass": rgb("b08428"), "brass_hi": rgb("e2c070"), "brass_sh": rgb("6a4514"),
+     "leather": rgb("64402a"), "leather_hi": rgb("8e6442"), "leather_sh": rgb("3e2414"),
      "loin": rgb("7c7642"), "loin_hi": rgb("aba564"), "loin_sh": rgb("423e22"),
      "lip": rgb("6a2a32"), "gum": rgb("7a1f2a"), "throat": rgb("1a0a0e"), "tooth": rgb("efe6c8"), "tooth_sh": rgb("a6966e"),
      "dark": rgb("1e1a1e"), "glass": rgb("a8d8b0"), "lamp": rgb("ffcf4a")}

@@ -922,9 +922,9 @@
 		"painted": {
 			"gloss": 0.0,
 			"sheen": 0.0,
-			"desat": 0.06,
+			"desat": 0.1,
 			"light_neutral_warm": 0.5,
-			"top_light": 0.4,
+			"top_light": 0.12,
 			"rim_far": 0.3,
 			"rim_far_color": [
 				0.72,

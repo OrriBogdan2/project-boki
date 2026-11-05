@@ -54,6 +54,12 @@ def aim(az, el, c, r):
     so.rotation_euler = (math.radians(50), 0, x + math.radians(30))
 
 
+if len(a) > 4:            # (a pose: ... turn <px> <action> <frame>)
+    arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
+    arm.animation_data_create()
+    arm.animation_data.action = bpy.data.actions[a[3]]
+    sc.frame_set(int(a[4]))
+
 if MODE == "turn":
     px = int(a[2]) if len(a) > 2 else 620
     sc.render.resolution_x = sc.render.resolution_y = px

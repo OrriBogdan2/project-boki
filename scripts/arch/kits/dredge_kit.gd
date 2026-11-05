@@ -37,7 +37,7 @@ const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: t
 const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 
-var coins := DredgeCoins.new()    # the hoard's spill on a hit (3D model)
+var coins := DredgeCoins.new()  # the hoard's spill on a hit
 var pull := {}                  # hold: the reel {t (the foe), tow (its Displace record), ally, wisp, from, scoop}
 var hook_hold: CastHold         # throw to the end of the reel or the miss: height held, a slow walk in flight
 var flying := false             # hold: the hook is in the air
@@ -260,8 +260,8 @@ func _tick_looks(dt: float) -> void:
 			Color("1a5a6a"), 0.6
 		)
 
-## Grimble's 3D model: the hook leaves his wrist while the kit flies and reels it (one hook on screen, item 76b), and a hit
-## knocks coins off the hoard.
+## Grimble's 3D model: the hook leaves his wrist while the kit flies and reels it (one hook on screen, 76b).
+## A hit knocks coins off the hoard.
 func _tick_model(_dt: float) -> void:
 	if h.model == null:
 		return

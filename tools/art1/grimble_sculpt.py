@@ -103,11 +103,11 @@ def figure(J, vox=0.0042):
     # the ribcage and the hump
     t.add(ell((0, -0.016, 0.985), (0.160, 0.112, 0.155)), 0.04, SKIN, "hips")
     t.add(ell((0, -0.085, 1.075), (0.170, 0.128, 0.135)), 0.05, SKIN, "hips")
-    t.add(ell((0, -0.050, 1.170), (0.205, 0.118, 0.066)), 0.05, SKIN, "hips")               # the yoke, shoulder to shoulder
+    t.add(ell((0, -0.050, 1.170), (0.245, 0.118, 0.066)), 0.05, SKIN, "hips")               # the yoke, shoulder to shoulder
     for s in (1, -1):
         t.add(ell((s * 0.082, 0.082, 1.058), (0.083, 0.044, 0.056), (0.18, s * 0.26, 0)), 0.016, SKIN, "hips")     # pecs
         t.add(ell((s * 0.140, -0.040, 0.935), (0.046, 0.082, 0.105)), 0.03, SKIN, "hips")        # lats
-        t.add(cap((s * 0.055, 0.02, 1.215), (s * 0.20, -0.02, 1.145), 0.040, 0.030), 0.03, SKIN, "hips")     # traps
+        t.add(cap((s * 0.055, 0.02, 1.215), (s * 0.25, -0.02, 1.145), 0.042, 0.032), 0.03, SKIN, "hips")     # traps
     # the abs: three pairs, sunken
     for i, z in enumerate((0.905, 0.850, 0.797)):
         for s in (1, -1):

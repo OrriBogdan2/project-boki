@@ -1,7 +1,7 @@
 class_name DredgeCoins
 extends RefCounted
-## Grimble's hoard spills: a hit knocks a few coins off the heap behind his head (cosmetic, 3D model only). Gold discs on one
-## CPU burst per hunter, in world space, so they stay where they fall. The heap is the anchor `anchor_coins`.
+## Grimble's hoard spills: a hit knocks a few coins off the heap behind his head (cosmetic, 3D model only).
+## Gold discs on one CPU burst per hunter, in world space. The heap is the anchor `anchor_coins`.
 
 const AMOUNT := 7
 const GAP := 0.35             # s between spills, however fast the hits come
