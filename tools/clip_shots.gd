@@ -88,6 +88,8 @@ func run(main: Node) -> void:
 			clips.force = {"clip": anim_name, "t": t}
 			sync.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
+	if OS.get_cmdline_user_args().has("--moods"):
+		await _moods(model, sync, clips, out)
 	print("CLIP_SHOTS_DONE")
 	tree.quit()
 
@@ -112,3 +114,16 @@ func _stage(main: Node) -> void:
 	cam = Camera3D.new()
 	holder.add_child(cam)
 	cam.make_current()
+
+## --moods: one frame of each face a Hero's mood data draws (WardenMood), <dir>/moods/<mood>.png.
+func _moods(model: Node3D, sync: Node, clips: WardenClips, out: String) -> void:
+	var dir := out.path_join("moods")
+	DirAccess.make_dir_recursive_absolute(dir)
+	clips.force = {"clip": "idle", "t": 0.0}
+	var states := {"calm": {}, "happy": {"emote": "x"}, "angry": {"kmove": "bul_smash"},
+		"determined": {"kmove": "bul_guard"}, "sad": {"downed": true}}
+	for nm in states:
+		model.set_meta(WardenClips.STATE, states[nm])
+		for k in 20:
+			sync.call("_process", 1.0 / 30.0)
+		await _grab(dir.path_join("%s.png" % nm))

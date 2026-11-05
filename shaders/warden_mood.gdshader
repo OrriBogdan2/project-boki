@@ -34,7 +34,7 @@ float face(vec2 p, int m) {
 		d = length((q - vec2(0.36, 0.08)) * vec2(1.0, 1.0 / max(1.0 - blink, 0.08))) - 0.13;
 	} else if (m == 1) {
 		float sm = length((p - vec2(0.0, -0.3)) * vec2(1.0, 1.7)) - 0.34;
-		d = min(arc(q, vec2(0.38, -0.02), 0.2, -1.3, 1.3) - 0.055, max(sm, -(p.y + 0.2)));
+		d = min(arc(q, vec2(0.38, -0.02), 0.2, -1.3, 1.3) - 0.055, max(sm, p.y + 0.2));
 	} else if (m == 2) {
 		float tri = max(seg(q, vec2(0.14, 0.02), vec2(0.6, 0.3)) - 0.075, q.y - 0.62 * (q.x - 0.14) - 0.06);
 		d = min(tri, arc(p, vec2(0.0, -0.62), 0.3, -0.75, 0.75) - 0.04);

@@ -43,6 +43,7 @@ const BASH_HALF := 0.6
 ## the whirled hammer: how far above the hand the circle runs (m), its tilt (rad, the head a little up) and the
 ## s it eases out of the hand into the circle
 const ORBIT_RISE := 0.45
+const WHIRL_HEAD_R := 0.89     # the skinned hammer's head from his axis in the hold clip (m, neutral; 1.78 in game)
 const ORBIT_TILT := 0.12
 const WHIRL_IN := 0.12
 ## the whirl's trail ribbon: inner and outer radius (m at scale 1), how far past the head's circle its outer
@@ -284,6 +285,10 @@ func _pivot() -> Node3D:
 func _head_world() -> Vector3:
 	var at := WardenGlb.anchor(h.model, "anchor_hammer_head") if h.model else null
 	if at and at.is_inside_tree():
+		if held:      # (whirling: on the kit's own angle, the clip seeks to it; the anchor gives the height)
+			var out := Basis(Vector3.UP, spin) * Vector3(0, 0, -WHIRL_HEAD_R * h.model.scale.x)
+			var c := h.model.global_position
+			return Vector3(c.x + out.x, at.global_position.y, c.z + out.z)
 		return at.global_position
 	var pv := _pivot()
 	if pv == null or not pv.is_inside_tree():

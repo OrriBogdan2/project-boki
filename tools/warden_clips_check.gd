@@ -154,6 +154,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	ok(piece != null, "%s: the thrown hammer is the model's own mesh" % art_name)
 	if piece:
 		piece.free()
+	_mood(m, sync, sk)
 	# the budget
 	var tris := 0
 	for mi in w.find_children("*", "MeshInstance3D", true, false):
@@ -162,6 +163,30 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			tris += mesh.surface_get_array_index_len(si) / 3
 	ok(tris <= MAX_TRIS, "%s: %d triangles, the budget %d" % [art_name, tris, MAX_TRIS])
 	m.free()
+
+## The porthole's moods and the fish: cosmetic, off the state and the kit's pokes.
+func _mood(m: Node3D, sync: WardenGlb.Sync, sk: Skeleton3D) -> void:
+	var md: WardenMood = sync.mood
+	ok(md != null and md.face != null and not md.lure.is_empty(), "the porthole and the lure are on their materials")
+	var seen := {}
+	for st in [{}, {"emote": "x"}, {"kmove": "bul_smash"}, {"kmove": "bul_guard"}, {"downed": true}]:
+		m.set_meta(WardenClips.STATE, st)
+		md.step(0.5)
+		seen[md.face.get_shader_parameter("to_mood")] = true
+	ok(seen.size() == 5, "five moods from the state (%d)" % seen.size())
+	var fish := WardenSkeleton.find(sk, "x_fish")
+	m.set_meta(WardenClips.STATE, {})
+	md.step(0.01)
+	var calm := sk.get_bone_pose_rotation(fish)
+	WardenMood.poke(m)
+	md.step(0.03)
+	ok(not sk.get_bone_pose_rotation(fish).is_equal_approx(calm), "a blocked hit shivers the fish")
+	var rest_glow := float((md.lure[0] as ShaderMaterial).get_shader_parameter("glow"))
+	m.set_meta(WardenMood.FLARE, true)
+	md.step(1.0)
+	ok(float((md.lure[0] as ShaderMaterial).get_shader_parameter("glow")) > rest_glow * 2.0, "the ult flares the lure")
+	m.set_meta(WardenMood.FLARE, false)
+	md.step(1.0)
 
 ## Item 59: the kit's angle seeks the hold's loop: the head goes where the phase says, inside the slam's reach.
 func _whirl(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, st: Dictionary) -> void:

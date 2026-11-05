@@ -1,8 +1,8 @@
-# Breaker (bulwark, was Bjorn): ART-1 rebuild
+# Breaker, the Sunken Bulwark (bulwark): ART-1 rebuild on the final design
 
-`breaker.glb` is built entirely by script in Blender 4.5, with no scan and no hand-edited geometry: an SDF sculpt on voxel
-grids, surface nets, a decimate to the game mesh, a per-texel paint that samples the sculpt, and hand-keyed clips.
-Art: docs/art/gen/wardens_r3/breaker_front, _head_sheet, _hammer_sheet, _shield_sheet, BREAKER_KIT.md (ext/imagegen).
+`breaker.glb` is built entirely by script in Blender 4.5: SDF sculpt on voxel grids, surface nets, a decimate, a per-texel paint that
+samples the sculpt, and hand-keyed clips. No scan. Art: briefs/art-refs/breaker_FINAL_sheet (master, expression row), breaker_turnaround,
+breaker_weapons (shape only). The menu splash and portrait (art/portraits/bulwark*.jpg) are crops of breaker_splash.
 
     godot --headless --path . --import                   # once in a fresh worktree
     godot --headless --path . -- --warden-rig-json --warden=bulwark --out=res://art/wardens/src/breaker_rig.json
@@ -10,18 +10,13 @@ Art: docs/art/gen/wardens_r3/breaker_front, _head_sheet, _hammer_sheet, _shield_
     blender -b WORK/breaker_art1.blend --python tools/art1/breaker_anims.py -- WORK/breaker_anims.blend art/wardens/breaker/breaker.glb
     godot --headless --path . --import
 
-- **Files:** tools/art1/sculpt_kit.py (SDFs, surface nets, texel raster; nothing Breaker-specific), breaker_sculpt.py (the
-  shapes), breaker_paint.py (the paint), breaker_art1.py (meshes, UVs, armature, weights), anim_kit.py (keys -> IK -> baked
-  clips), breaker_anims.py (the clips), art1_render.py (review turntables and sheets).
-- **Budget:** under 20k triangles with hammer and shield (--warden-clips-check holds it). One 2048 atlas, eight slots.
-- **Skinned weapon (76b):** the hammer is its own mesh `hammer`, skinned 100% to `x_weapon` (a child of hand.R), so it moves with
-  the hand in every clip. `weapon_muzzle` sits on the block, `anchor_hammer_grip`, `anchor_hammer_head`, `anchor_weapon_tip`
-  and `weapon_thrown` ride the bone. While the hammer is thrown the bone scales to zero and the kit flies a plain copy of
-  the same mesh (WardenGlb.thrown_piece). The shield is skinned to `x_shield` (hand.L) in the body mesh; the empty `shield`
-  only tells the loader to hide the procedural prow.
-- **Hold:** the art's mirror: hammer in the right hand across the right shoulder, the prow at the left side (the rig's
-  sides), so the compass moves to his left and the teddy to his right hip as the art has them against the weapon.
-- **Bones beyond the contract:** content/rules/warden_anim/breaker.json `extra_bones`; springs spring_braidR/L/C_*, spring_apronF/B_*,
-  spring_teddy_*.
-- **Size:** body.size stays 1.335 (1.5x a medium hunter), body.build 1.18 -> 1.4 so the arms hang clear of the belly and
-  the silhouette has the art's width; hit radius unchanged.
+- **Files:** tools/art1/sculpt_kit.py (hero-independent), breaker_sculpt.py (shapes), breaker_paint.py (paint), breaker_art1.py (mesh, UVs,
+  armature, rigid weights), anim_kit.py (keys -> IK -> baked clips), breaker_anims.py (clips), art1_render.py (Cycles review).
+- **Body:** content/archetypes/bulwark.json body: legs 0.46, torso 1.06, shoulder 1.15, build 1.4, head 0.3, size 2.0: the rig's arms are a
+  fixed length, so the art's proportions need a 1.03 m neutral body; size 2.0 keeps the helmet's top at 1.5x a medium hunter. The masts stand over
+  that (1.9x). The hit radius stays 0.46 (docs/HITBOX_SIZE.md): the hull's own radius is 0.77 m.
+- **Budget:** under 20k triangles, weapon and shield included. Rivets are painted, not modelled: a decimate spends everything on them.
+- **Pieces are rigid**, each on its bone, overlapping at the joints. Glow: `leather-wood-hot` keys per texel to archetype model_glow.
+- **Weapon (76b):** mesh `hammer` skinned to `x_weapon`; `anchor_hammer_head`, `weapon_muzzle`, `anchor_hammer_grip`, `weapon_thrown` on it. The hold
+  whirl seeks from the kit's angle (WardenClips.PHASE). Mirrored from the art: hammer in the right hand, shield in the left (the rig's sides).
+- **Mood and fish:** scripts/heroes/warden_mood.gd + shaders/warden_mood.gdshader, data in warden_anim/breaker.json "mood". Fish on spring_hangfish_*, cosmetic.

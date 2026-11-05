@@ -1,11 +1,11 @@
 class_name WardenMood
 extends RefCounted
-## A construct's little life (ART-1, Breaker): a face drawn on glass that changes with what he is doing, and a hanging
-## companion that reacts. Cosmetic only; nothing here touches the kit. Data: warden_anim/<art>.json "mood":
+## A construct's little life (ART-1, Breaker): a face drawn on glass that changes with what he is doing, and a
+## hanging companion that reacts. Cosmetic only; nothing here touches the kit. Data: warden_anim/<art>.json "mood":
 ##   "kmoves": kit move -> mood; "downed", "hit", "emote", "default": moods; "hit_t": s a hit's mood lasts
-##   "companion": the bone it wiggles and shivers; "lure": the material tag of its glow; "flare_kmoves": moves it flares in
-## Moods: calm, happy, angry, determined, sad. A kit calls poke(model, "shiver") for a blocked hit, and sets the root meta
-## FLARE while its big moment runs.
+##   "companion": the bone it wiggles and shivers; "lure": the material tag of its glow; "flare_kmoves": its moves
+## Moods: calm, happy, angry, determined, sad. A kit calls poke(model, "shiver") for a blocked hit, and sets the root
+## meta FLARE while its big moment runs.
 
 const IDS := {"calm": 0, "happy": 1, "angry": 2, "determined": 3, "sad": 4}
 const FACE_SHADER := preload("res://shaders/warden_mood.gdshader")

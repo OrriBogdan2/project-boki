@@ -198,7 +198,7 @@ def p_compass(p, n, c):
     u, v = q @ rt, q @ up
     r = np.sqrt(u * u + v * v)
     ang = np.arctan2(u, v)
-    col = C("a8905c") * ones(p)
+    col = C("9a9a84") * ones(p)
     st = r - (0.012 + 0.052 * np.abs(np.cos(ang + 0.4)) ** 7)
     rose = smooth(0.002, -0.002, st)
     col = mix(col, np.where(((np.cos(ang + 0.4) > 0))[:, None], C("c23a2a") * ones(p), C("1f6a78") * ones(p)), rose)

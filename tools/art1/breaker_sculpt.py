@@ -243,7 +243,7 @@ def moss(hl, pads):
         pts = []
         for t in np.linspace(0, 1, 8):
             pts.append((x0 + 0.018 * math.sin(t * 9 + i) * t, 0.5 if fr else -0.5, z0 - l * t))
-        pp = onsurf(hl, pts, 0.008)
+        pp = onsurf(hl, pts, 0.03)
         f.add(path(pp, [0.034 * (1 - 0.72 * t) for t in np.linspace(0, 1, 8)]), 0.012, MOSS, None, lambda x, y, z: (fbm(x, y, z, 26.0, 2) - 0.5) * 0.012)
     # the skirt of hanging weed round the waist
     for i in range(9):

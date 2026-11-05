@@ -80,6 +80,7 @@ def lowpoly(name, fld, tris, outer=None):
         isl.append(cur)
     keep = max(len(c) for c in isl) * 0.004
     bmesh.ops.delete(bm, geom=[a for c in isl if len(c) < max(keep, 40) for a in c], context="VERTS")
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)      # (every island outward: small ones hide behind a flipped wall)
     bm.to_mesh(ob.data)
     bm.free()
     nt = sum(len(pl.vertices) - 2 for pl in ob.data.polygons)
@@ -261,7 +262,7 @@ def rigid(n, bone):
 
 HOT = "leather-wood-hot"
 MATS = {"wood": HOT, "iron": "metal-atlas", "brass": "brass-atlas", "soft": "cloth-atlas", "face": "brass-compass-hot",
-        "lure": "glow-lure", "eyes": "eyes-mood"}
+        "lure": "glow-lure", "eyes": "eyes-mood", "moss": "cloth-moss"}
 
 
 def main():
@@ -296,7 +297,7 @@ def main():
     hm = B.helmet()
     part("helmet", hm, 1500, "brass", "brass", 2.2, bone="head")
     ms = B.moss(hl, None)
-    part("moss", ms, 1700, "soft", "moss", 1.0)
+    part("moss", ms, 1700, "moss", "moss", 1.0)
     mt = B.masts()
     part("masts", mt, 600, "wood", "mast", 0.9)
     sl = B.sails()
