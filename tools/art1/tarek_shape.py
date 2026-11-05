@@ -160,7 +160,7 @@ def hair_cap(q):
     d = s - 0.026 * np.sqrt(rope) + 0.012
     d = d + 0.0035 * np.sin(length(c) * 110.0 + az * 3.0)
     # only above the bandana's top edge, and down the back of the head to the nape
-        t = band_t(q)
+    t = band_t(q)
     above = t - 0.056
     back = np.minimum(np.minimum(-0.035 - q[..., 1], q[..., 2] + 0.125), -0.05 - t)      # (under the band, down the nape)
     return smax(d, -np.maximum(above, back), 0.008)
