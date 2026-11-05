@@ -2238,3 +2238,38 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - Shots (in this branch): briefs/shots/s4/revive-101/boxes_world.png (ally box cyan + face/name/timer beside a red rival box), boxes_minimap.png, boxes_full_map.png, revive_ring.png (rings on the box and reviver, the prompt bar), beacon_notice.png (a rival's beacon far off: toast + world arrow; they sit close, item 102's queue should space them), beacon_full_map.png; captions.txt.
 - Wiring for main: none; no reserved files touched.
 - Seen in every S4 shot (not ours): the top-left session timer prints garbage ("16666...999:58") when a match runs with length 1e9, as the shot tools do. Probably only the test setup, worth a glance.
+
+## 2026-11-05 (S4): READY `ext/boki-talk-105` @ 364fde44 (owner item 105: Boki talk short, varied, about the moment)
+- Base main fe51b43b; 24 files +2819/-53 (+2075 is the lines file). New: content/rules/boki_lines.json (63 triggers, 905 lines + tuning: max_words 6, bubble_s 2.0, cooldown_s 6.0, no_repeat 10, min_lines 8), scripts/core/boki_lines.gd (BokiLines: picker with per-Boki last-10 memory, cooldown, speech stage via Care.speech), scripts/home/farm_chatter.gd (FarmChatter: context lines on the farm), scripts/match/boki_chatter.gd (BokiChatter: match lines through Match.kin_bark), tools/boki_lines_check.gd, tools/boki_talk_shots.gd, docs/BOKI_TALK.md. Wiring only in home.gd (net smaller), match.gd (19 changed lines), hunter.gd +3, chest_loot.gd +2, home_econ/home_work 1 each. Named boki_lines (not kin_lines) to stay off the reserved kin* pattern.
+- Item 105, point by point:
+  - **In data, <= 6 words, one sentence, ~2 s bubbles:** done; enforced by the check (and at runtime). Tutorial bubbles keep their 4 s.
+  - **~5x lines:** done: 12-14 general lines per trigger (old banks had 2-3 per trait), plus element lines for greet, petted, rain, night, chat, ability and more.
+  - **No repeat within 10 + per-Boki cooldown:** done.
+  - **Flavour:** element flavour done (per species type). **Personality flavour not done** (no personality key used).
+  - **Speech stages kept:** young Boki say only their name in a tone + an action.
+  - **Farm triggers (all live now):** crop ready/watered, building, working, rain, night, friend chat with a reply, a new Boki welcomed, petted/fed/brushed/bath/nap/trained/hatched, low needs, back from an expedition by how it went (`back_<kind>` from rec.recall; the place name is dropped to fit 6 words).
+  - **Match triggers live now:** kill, owner downed, caught, extract, results line, storm (islands falling), loot (chest), the Boki's own ability, level-up. **Enemy spotted, Hunter hurt, revived and the other callouts have their lines in the JSON but still play the OLD lines until main does wiring 1 below** (they're fired from reserved kin_voice.gd).
+  - **English pass:** every line rewritten.
+  - Not migrated: KinSpeak.reply/SIMPLE/WORDS (answers to typed chat) and KinVoice.TUT_HINT (ext/tut-airdash is editing it).
+- **Wiring main must do (reserved files):**
+  1. scripts/match/kin_voice.gd:118 (`line`) and :146 (`callout`): body -> `return BokiChatter.line(k, cat)`; then delete BASE (:5), CALL (:48), CALL_ACT (:77), dominant (:110). Keep TUT_HINT / tut_hint.
+  2. scripts/match/kin.gd:253-255: drop the `bark_cd` gate (BokiLines' cooldown + `direct` triggers replace it), or keep both.
+  3. scripts/core/kin_speak.gd: delete RECALL, RECALL_SIMPLE, RECALL_ACT, RECALL_FEEL (:213-234) and recall_line (:236) (no callers left); optional `static var FEEL: Dictionary = BokiLines.rules()["tones"]`; fix the doc comment in kin_companion.gd:17 that names KinSpeak.recall_line.
+  4. When ext/tut-airdash lands: BokiSpeech.SCALE = size, BokiLines = words + lifetime; if BokiSpeech has its own lifetime, point it at BokiLines.bubble_s().
+- Debt: docs/DEBT.md entry (KinVoice's old banks until wiring 1; Kin.bark_cd doubles the cooldown until wiring 2).
+- Checks:
+
+| Check | Result |
+|---|---|
+| --boki-lines-check (new) | 0 failures / 26 |
+| --teammate-check | 1 failure = the known "rival behind called before chest" (main fails 2). Its recall assert moved to the `back_<kind>` line Home now says (KinSpeak.recall_line has no callers). |
+| --merge-form-check | 1 failure = the known "Rescue Gravadillo to fuse", same on main |
+| --kin-indoors-check, --level-hud-check, --tutorial-hud-check, --farmbuild, --keys-check --keys-part=chest | 0 each |
+| health --strict | OK, no budget raised |
+| gen_wiki --check | up to date (Rules.md regenerated) |
+
+- Shots (in this branch): briefs/shots/s4/boki-talk-105/farm_1_crop_ready.png ("Can I have a bite?" by a ripe crop), farm_2_young_petted.png (young Boki: "Cin-cin~ (purrs softly)"), farm_3_rain_night.png (night + rain chatter), match_1_ability.png (the Boki's ability line), match_2_level_up.png ("Power up!").
+
+## 2026-11-05 (S4): all four S4 branches READY (98, 99, 101+101b, 105)
+- Merge order suggestion: rank-ui-98, loot-full-99, revive-101, boki-talk-105. All four edit tools/check_registry.gd and tools/style_baseline.json (keep both sides; re-run style_lint --update only for merged lines). 99 and 101 both touch hud.gd and match.gd's interact path (99: the smart-loot toast; 101: the box revive moved out); expect a small conflict there.
+- DECISION? items for the owner: 98 tier IV / R III ranks (kit pass) and `bonus_point_at_max`; 101 the diminishing repeat-revive curve; 101 online deathboxes (follow-up item).
