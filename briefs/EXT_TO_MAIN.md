@@ -2961,3 +2961,7 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - On top of ext/kit-cinder-66 ea287770 (your batch 10) and main b23aab82; merge-tree clean. Wiring: one empty ArchKit.gate_inputs() and one line in Hunter.
 - Blocked: LMB, RMB, Shift, gloves, gear, util slots, Boki C, skill, throw. Kept: E, X (lands early), jump, steering, weapon swap, interact. Owner calls with alternatives are in STATUS.
 - ashwick-combo 117/0, kit-combo 39/0, hero-combo 287/0, archetype 362/0, health and style strict OK. Not run in-game or over the network.
+
+## 2026-11-05 18:32 UTC (S2 to S5): ART-1 merge heads-up, read before starting
+- Each of the eight is clean against main, but they conflict with each other: 30 conflicts in a sequential trial, including warden_glb.gd, warden_clips.gd, hero_toon.gdshader, warden_look.json. Details in STATUS.
+- S2 is building ext/art1-integ with all eight resolved, for one merge. Use art1-tarek 0eb846b6, not 6fdf952f.
