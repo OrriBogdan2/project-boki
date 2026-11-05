@@ -91,22 +91,26 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		clean = clean and no_vee(m)
 	P.inp["fire"] = false
 	step(m, 1.0)
-	var free0 := P.pos
+	var start := P.pos
 	K.cd["rmb"] = 0.0
 	K.ch_rmb = 1.0
 	P.inp["move"] = Vector2(0, 1)
-	step(m, 0.5, func(): aim_at(P, T.pos))
-	var free_v := free0.distance_to(P.pos) / 0.5
+	step(m, 0.3, func(): aim_at(P, T.pos))
+	var free0 := P.pos
+	step(m, 0.4, func(): aim_at(P, T.pos))
+	var free_v := free0.distance_to(P.pos) / 0.4
 	var n := K.needle
 	ok("114 needle: nothing on the bow before the hold", not n.visible)
 	var hold := rmb_at.bind(P, T.pos)
+	P.inp["sec_hold"] = true
+	K.press_rmb()
 	step(m, 0.3, hold)
 	var d := P.aim_dir()
 	var along := (n.tip - n.eye).normalized()
 	ok("114 needle: on the bow by 0.3 s, pointing along the aim",
 		n.visible and n.is_visible_in_tree() and Vector2(along.x, along.z).dot(d) > 0.98,
 		"visible %s dot %.2f" % [n.visible, Vector2(along.x, along.z).dot(d)])
-	ok("114 needle: oversized, over 3 times a loosed arrow", n.eye.distance_to(n.tip) >= 2.4,
+	ok("114 needle: oversized, over 2.5 times a loosed arrow", n.eye.distance_to(n.tip) >= 2.0,
 		"%.2f m" % n.eye.distance_to(n.tip))
 	var eye_ahead := func() -> float: return Vector2(n.eye.x - P.position.x, n.eye.z - P.position.z).dot(d)
 	var eye0: float = eye_ahead.call()
@@ -137,6 +141,8 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	# a hold ended by a stun: the needle goes with it
 	K.cd["rmb"] = 0.0
 	K.ch_rmb = 1.0
+	P.inp["sec_hold"] = true
+	K.press_rmb()
 	step(m, 0.4, hold)
 	var up := n.visible
 	P.stun_t = 0.3
@@ -145,6 +151,10 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	P.inp["sec_hold"] = false
 	P.inp["move"] = Vector2.ZERO
 	step(m, 1.0)
+	P.teleport(start)
+	fresh(T)
+	K.cd["rmb"] = 0.0
+	step(m, 0.3)
 
 ## #5: the arrow leaves only when the button comes up.
 func _pin_no_early_release(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:

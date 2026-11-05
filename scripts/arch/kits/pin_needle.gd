@@ -6,7 +6,7 @@ extends Node3D
 ## The materials are the toon and glow shaders every Hunter already draws, so it adds no shader compile.
 
 const LENGTH := 2.6            # m, tip to eye (a loosed arrow is about 0.8)
-const RADIUS := 0.075          # m at the eye end, so it holds at the match camera
+const RADIUS := 0.09           # m at the eye end, so it holds at the match camera
 const HEIGHT := 1.12           # m above her feet, x her scale
 const NOCK_AT := 0.5           # m ahead of her where the bow holds it
 const DRAW_BACK := Vector2(0.35, 0.95)  # m the eye sits behind the bow: as nocked, fully drawn
@@ -16,7 +16,7 @@ const SILVER := Color("e4ebf2")
 const THREAD_COL := Color("ff3a30")
 const THREAD_N := 9            # thread segments
 const THREAD_SEG := 0.26       # m each
-const THREAD_R := 0.03         # m half width
+const THREAD_R := 0.04         # m half width
 const THREAD_DROOP := 1.2      # m/s it sags behind the eye
 const GLOW_A := Vector2(0.1, 0.85)  # the shell's alpha at no charge and full
 
@@ -33,9 +33,8 @@ func _init() -> void:
 	top_level = true
 	visible = false
 	name = "PinNeedle"
-	var shaft := KitMeshes.pillar(0.008, RADIUS, LENGTH, 8)
 	var steel := Models.toon(SILVER, true, 0.25)
-	_flat(_lie(KitMeshes.inst(self, shaft, steel)))
+	_flat(_lie(KitMeshes.inst(self, _taper(0.01, RADIUS, LENGTH), steel), LENGTH))
 	var ring := TorusMesh.new()
 	ring.inner_radius = RADIUS * 0.8
 	ring.outer_radius = RADIUS * 1.7
@@ -44,9 +43,9 @@ func _init() -> void:
 	eye_node.scale = Vector3(1.0, 1.0, 1.7)
 	_flat(eye_node)
 	shell_mat = Models.glow_mat(Color(THREAD_COL, GLOW_A.x))
-	shell = _lie(KitMeshes.inst(self, KitMeshes.pillar(0.02, RADIUS * SHELL, LENGTH * 1.03, 8), shell_mat))
+	shell = _lie(KitMeshes.inst(self, _taper(0.02, RADIUS * SHELL, LENGTH * 1.03), shell_mat), LENGTH * 1.03)
 	_flat(shell)
-	var thread := Models.glow_mat(Color(THREAD_COL, 0.95))
+	var thread := Models.toon(THREAD_COL, false, 0.7)
 	for i in THREAD_N:
 		var link := MeshInstance3D.new()
 		link.top_level = true
@@ -56,9 +55,19 @@ func _init() -> void:
 		links.append(link)
 		points.append(Vector3.ZERO)
 
-## The pillar stands up +Y from its foot: lay it along -Z, foot (the eye end) at the origin.
-func _lie(mi: MeshInstance3D) -> MeshInstance3D:
+func _taper(top: float, foot: float, len_: float) -> CylinderMesh:
+	var c := CylinderMesh.new()
+	c.top_radius = top
+	c.bottom_radius = foot
+	c.height = len_
+	c.radial_segments = 8
+	c.rings = 1
+	return c
+
+## A cylinder stands centred on its +Y: lay it along -Z with its foot (the eye end) at the origin.
+func _lie(mi: MeshInstance3D, len_: float) -> MeshInstance3D:
 	mi.rotation = Vector3(-PI * 0.5, 0, 0)
+	mi.position = Vector3(0, 0, -len_ * 0.5)
 	return mi
 
 func _flat(mi: MeshInstance3D) -> MeshInstance3D:
