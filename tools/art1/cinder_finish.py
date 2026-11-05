@@ -366,9 +366,9 @@ k2 = smooth(0.42, 0.62, r_ - b_) * smooth(0.5, 0.72, r_)
 c2 = col * (1 - k1[:, None]) + P.HOT_RIM * k1[:, None]
 c2 = c2 * (1 - k2[:, None]) + P.HOT * k2[:, None]
 # the skin down to the sheet's warm charcoal (the scan runs light and lilac); leather and the cracks stay
-sk = np.clip(1.0 - np.maximum(k1, smooth(1.12, 1.3, r_ / np.maximum(b_, 0.01))), 0, 1)[:, None]
+sk = np.clip(1.0 - smooth(0.05, 0.13, r_ - b_), 0, 1)[:, None]
 lum_ = c2.mean(1, keepdims=True)
-c2 = c2 * (1 - sk) + (lum_ * 0.62 + c2 * 0.3) * np.array([1.1, 1.0, 0.96]) * sk
+c2 = c2 * (1 - sk) + (lum_ * 0.56 + c2 * 0.26) * np.array([1.14, 0.93, 1.0]) * sk
 OUTC[ys, xs] = c2
 
 # ---- the rebuilt pieces
@@ -395,6 +395,9 @@ band = (np.abs(yy - browy) < 42) & (dx > 38) & (dx < 300) & (yy < 452)
 bm_ = smooth(0.34, 0.27, lum) * band
 bm_ = blur(bm_.astype(np.float32), np.ones_like(lum, np.float32), 4) * 1.5
 clean = plate * (1 - np.clip(bm_, 0, 1)[..., None]) + fill * np.clip(bm_, 0, 1)[..., None]
+# the plate's nose is drawn very dark for a head this small: most of the way to the skin round it
+nd = smooth(95.0, 40.0, np.abs(xx - 510.0)) * smooth(95.0, 45.0, np.abs(yy - 612.0))
+clean = clean * (1 - 0.55 * nd[..., None]) + fill * 0.55 * nd[..., None]
 PL = (clean, clean, H)
 paint(lambda n: n in ("face", "jaw"), lambda p, n, ao: P.face(PL, p, n, ao))
 paint(lambda n: n == "mouthb", lambda p, n, ao: np.broadcast_to(P.hexc("#16090b"), p.shape))

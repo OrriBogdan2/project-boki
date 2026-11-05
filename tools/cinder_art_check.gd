@@ -43,6 +43,8 @@ func run(main: Node) -> void:
 	var fire := 0
 	for mat in P.model.find_children("*", "MeshInstance3D", true, false):
 		var mesh: Mesh = (mat as MeshInstance3D).mesh
+		if mesh == null:
+			continue
 		for si in mesh.get_surface_count():
 			var sm := (mat as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
 			if sm and sm.shader == WardenGlb.FLAME:

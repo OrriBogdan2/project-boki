@@ -6,7 +6,7 @@ import cinder_pieces as K
 
 HOT = np.array([1.0, 0.68, 0.2])         # keyed fully hot by hero_toon's glow_key; she keeps her painted colours (no model_glow core), so the iris stays
 HOT_RIM = np.array([0.86, 0.3, 0.07])    # keyed partly
-SKIN = [hexc("#30282a"), hexc("#463c3e"), hexc("#5f5254"), hexc("#77686a"), hexc("#918082")]
+SKIN = [hexc("#2c2228"), hexc("#3f323a"), hexc("#54444e"), hexc("#6a5862"), hexc("#826e7a")]
 COPPER = [hexc("#4a2210"), hexc("#7c3f1c"), hexc("#ad6230"), hexc("#d68a4c"), hexc("#f6c08c")]
 BRASS = [hexc("#4a3414"), hexc("#7e5e24"), hexc("#b08a3c"), hexc("#d8b45c"), hexc("#f6e0a0")]
 STEEL = [hexc("#35343a"), hexc("#55535a"), hexc("#7a7880"), hexc("#a09ea6"), hexc("#cfced4")]
@@ -200,7 +200,7 @@ def face(plate, p, n, ao):
     lum = c.mean(-1)
     r_ = np.sqrt(((px - 510) / 300.0) ** 2 + ((py - 487) / 442.0) ** 2)
     sh = 0.72 + 0.42 * smooth(-0.4, 0.8, n[..., 2] * 0.45 + n[..., 1] * 0.75)
-    out = c * (sh * 1.08)[..., None] * np.array([1.1, 1.0, 0.97])
+    out = c * (sh * 0.94)[..., None] * np.array([1.14, 0.93, 1.0])
     # the cracks and the eyes keep the plate's own fire, a little lifted
     hot = smooth(0.14, 0.3, c[..., 0] - c[..., 2]) * smooth(0.34, 0.5, c[..., 0])
     out = mix(out, np.minimum(c * 1.18, 1.0), hot)
