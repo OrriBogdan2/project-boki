@@ -258,8 +258,10 @@ def p_door(p, n, c):
     st = st * (0.86 + 0.2 * (hair * (np.abs(fz) > 0.08) * (z > 0.45))[:, None])
     fig = st * (0.72 + 0.28 * smooth(0.2, 0.8, ao) + 0.12 * n[:, 2])[:, None]      # (flat: the mesh is too coarse to shade her face)
     # (her silhouette seen face-on, so no wood shows through her hair)
-    near = np.minimum.reduce([f.fig.sample(p + np.array((0, dy, 0), np.float32)) for dy in (-0.05, -0.03, -0.015, 0.0, 0.015, 0.03)])
-    return np.where((near < 0.02)[:, None], fig, col)
+    sil = f.fig.d.min(axis=1)
+    q = np.rint((p - f.fig.lo) / f.fig.vox).astype(int)
+    near = sil[np.clip(q[:, 0], 0, sil.shape[0] - 1), np.clip(q[:, 2], 0, sil.shape[1] - 1)]
+    return np.where((near < 0.006)[:, None], fig, col)
 
 
 def p_fish(p, n, c):
