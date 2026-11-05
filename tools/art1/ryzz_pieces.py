@@ -69,7 +69,7 @@ def face_patch():
     X, Z = np.meshgrid(xs, zs)
     Y = np.maximum(ray_y(X, Z), 0.0)
     v = hl(np.stack([X, Y, Z], -1).reshape(-1, 3))
-    p = Piece("face", "skin-ryzz-hot", v, grid_faces(len(zs), len(xs)))
+    p = Piece("face", "skin-ryzz", v, grid_faces(len(zs), len(xs)))
     # the mouth's corners on their own bones, so she can grin
     mw = {"head": np.ones(len(v))}
     for s, nm in ((1.0, "mouth.R"), (-1.0, "mouth.L")):
@@ -91,7 +91,7 @@ def skull():
     D = np.stack([np.sin(A), np.cos(A), np.zeros_like(A)], -1)
     R = ray_dir(D, c=np.stack([np.zeros_like(A), np.zeros_like(A), Z], -1), r0=0.14) * 0.985
     v = hl(np.stack([np.sin(A) * R, np.cos(A) * R, Z], -1).reshape(-1, 3))
-    return Piece("skull", "skin-ryzz-hot", v, grid_faces(rows, cols, True)).rigid("head")
+    return Piece("skull", "skin-ryzz", v, grid_faces(rows, cols, True)).rigid("head")
 
 
 def eyeball(s):
@@ -131,7 +131,7 @@ def lids(s):
                 el = edge + (top - edge) * i / (rows - 1)
                 d = np.array([np.sin(az) * s * np.cos(el), np.cos(az) * np.cos(el), np.sin(el)])
                 v.append(c + d * (EYE_R * (1.08 + 0.05 * i / (rows - 1))))
-        p = Piece("lid%s%s" % ("U" if up else "D", "R" if s > 0 else "L"), "skin-ryzz-hot", hl(v), grid_faces(rows, cols))
+        p = Piece("lid%s%s" % ("U" if up else "D", "R" if s > 0 else "L"), "skin-ryzz", hl(v), grid_faces(rows, cols))
         p.rigid(("lid.%s" % ("R" if s > 0 else "L")) if up else "head")
         out.append(p)
     return out
@@ -149,7 +149,7 @@ def brow(s):
 def ear(s):
     side = "R" if s > 0 else "L"
     p = hl(np.array([(0.086, -0.004, 0.012), (0.094, -0.016, 0.0), (0.090, -0.012, -0.024), (0.080, 0.0, -0.036)]) * [s, 1, 1])
-    e = sweep("ear" + side, "skin-ryzz-hot", p, HEX5, np.array([0.009, 0.012, 0.010, 0.005]), side_hint=np.array([0, 1.0, 0]))
+    e = sweep("ear" + side, "skin-ryzz", p, HEX5, np.array([0.009, 0.012, 0.010, 0.005]), side_hint=np.array([0, 1.0, 0]))
     return e.rigid("head")
 
 
@@ -350,7 +350,7 @@ def hand(s):
             pts.append(cur.copy())
         pts = np.array(pts)
         wd = np.array([1.05, 1.05, 1.0, 0.92, 0.72]) * FINGER_R_[fi]
-        fp = sweep("finger%d%s" % (fi, sd), "skin-ryzz-hot", pts, HEX5, wd, side_hint=k)
+        fp = sweep("finger%d%s" % (fi, sd), "skin-ryzz", pts, HEX5, wd, side_hint=k)
         b0, b1 = ("index.", "index2.") if fi == 0 else ("curl.", "curl2.")
         rr = fp.v - base
         along = np.linalg.norm(rr, axis=1)
@@ -365,7 +365,7 @@ def hand(s):
     t1 = base + norm(a * 0.66 + k * 0.55 - o * 0.42) * 0.040
     t2 = t1 + norm(a * 0.86 + k * 0.28 - o * 0.32) * 0.032
     t3 = t2 + norm(a * 0.92 + k * 0.05 - o * 0.25) * 0.028
-    tp = sweep("thumb" + sd, "skin-ryzz-hot", [base - a * 0.008, t1, t2, t3], HEX5, np.array([0.017, 0.0135, 0.0115, 0.0088]), side_hint=o)
+    tp = sweep("thumb" + sd, "skin-ryzz", [base - a * 0.008, t1, t2, t3], HEX5, np.array([0.017, 0.0135, 0.0115, 0.0088]), side_hint=o)
     q = smooth(0.0, 0.02, np.linalg.norm(tp.v - base, axis=1))
     tp.w = {"hand." + sd: 1 - q, "thumb." + sd: q}
     tp.tip = t3
@@ -434,7 +434,7 @@ def gum():
     last = len(v) - 1
     for j in range(cols):
         f.append([last, 1 + (rows - 2) * cols + (j + 1) % cols, 1 + (rows - 2) * cols + j])
-    p = Piece("gum", "gum-ryzz", v, f, room=0.0).rigid("gum")
+    p = Piece("gum", "cloth-gum", v, f, room=0.0).rigid("gum")
     p.c = c
     return p
 
