@@ -34,8 +34,8 @@ const POOF_PUFFS := 5                  # smoke puffs the bellows blow out behind
 const CLOAK_POSE_T := 0.25            # s the Furnace Cloak flare holds the flamer up off the aim (as_cloak)
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
-const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the nozzle's tip from the feet in the aim pose, with no model to read: forward, up, right (m)
-const NOZZLE_REACH := 2.6                 # m: a model's nozzle further than this from her isn't posed yet (a frame's teleport): use NOZZLE
+const NOZZLE := Vector3(1.3, 0.9, 0.15)  # the tip from the feet in the aim pose, no model to read: fwd, up, right (m)
+const NOZZLE_REACH := 2.6                # m: a model's nozzle further off than this isn't posed yet: use NOZZLE
 
 var chars := {}                 # foe id -> {e, n, t}
 var ignites := {}               # foe id -> {e, lvl, until}

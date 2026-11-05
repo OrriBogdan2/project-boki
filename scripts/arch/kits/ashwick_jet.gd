@@ -254,8 +254,8 @@ func _liftoff_fx() -> void:
 	m.sfx("lw_jet", h.pos, -1.0, 1.0)
 	k.net_ring(at, r, k.col_of(x))
 
-## The tank's two exhaust stacks: a hot core on each (the model's anchor_jet_*; its flight clip stretches their flames) and
-## embers blown down behind her. With no model: one core at her back.
+## The tank's two exhaust stacks: a hot core on each (the model's anchor_jet_*; its flight clip stretches
+## their flames) and embers blown down behind her. With no model: one core at her back.
 func _jet_fx(dir: Vector2) -> void:
 	if not k.tells_visible():
 		return
@@ -263,7 +263,8 @@ func _jet_fx(dir: Vector2) -> void:
 	var down := Vector3(-dir.x * 0.6, -1.0, -dir.y * 0.6).normalized()
 	for at in cores:
 		k.fx.orb(at, Color("ff9a3a"), Color("fff4c0"), 0.55 / sqrt(float(cores.size())), 0.06)
-		m.fx.burst(at, Color("ff7a2a"), 2 if cores.size() == 1 else 1, 4.0, 0.3, 2.0, 0.9, down, 25.0)
+		var embers := 2 if cores.size() == 1 else 1
+		m.fx.burst(at, Color("ff7a2a"), embers, 4.0, 0.3, 2.0, 0.9, down, 25.0)
 
 ## Where the jets burn: each stack's mouth on the model, else the one point at her back.
 func jet_points(dir: Vector2) -> Array:

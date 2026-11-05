@@ -1,8 +1,8 @@
 extends RefCounted
-## --cinder-art-check: Cinder's model (ART-1) against her kit, through the real match code and render path. The nozzle FX leave the
-## gun you see, through the idle hold and the hose (item 76b); the stream starts about where the procedural one did, so its reach
-## holds; in Flue Flight both stacks carry a jet (their flames stretched by the clip), the nozzle is stowed and no pilot burns;
-## the fire surfaces are on the flame shader. Never touches the save.
+## --cinder-art-check: Cinder's model (ART-1) against her kit, through the real match code and render path.
+## The nozzle FX leave the gun you see, through the idle hold and the hose (item 76b); the stream starts about where
+## the procedural one did, so its reach holds; in Flue Flight both stacks carry a jet (their flames stretched by the
+## clip) and the nozzle is stowed; the fire surfaces are on the flame shader. Never touches the save.
 
 const DT := 1.0 / 60.0
 const NEAR := 0.04              # m: FX to the visible nozzle
@@ -71,7 +71,8 @@ func run(main: Node) -> void:
 	ok(cl.has("lance"), "held LMB plays the hose clip (%s)" % str(cl.keys()))
 	ok(worst < NEAR, "through the hose the FX stay on the gun's tip (worst %.3f m)" % worst)
 	var reach := fwd_sum / maxf(1.0, float(n))
-	ok(absf(reach - AshwickKit.NOZZLE.x) < REACH_OFF, "the braced nozzle reaches %.2f m ahead (kit %.2f m), so the stream's range holds" % [reach, AshwickKit.NOZZLE.x])
+	ok(absf(reach - AshwickKit.NOZZLE.x) < REACH_OFF, "the braced nozzle reaches %.2f m ahead (kit %.2f m)"
+			% [reach, AshwickKit.NOZZLE.x])
 	ok(kit.hose.emitted > 0, "the stream ran (%d puffs)" % kit.hose.emitted)
 	for f in 40:
 		_frame(m, P)

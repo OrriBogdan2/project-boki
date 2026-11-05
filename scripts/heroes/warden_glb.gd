@@ -60,8 +60,8 @@ const NO_INK := ["hair", "eyes", "glow", "card", "flame"]   # slots drawn withou
 ## out toward its tip and edges (a body that dissolves into smoke: Ostra's wisp).
 const VOID := preload("res://shaders/hero_void.gdshader")
 const SOFT_TAGS := ["wisp"]
-## The `flame` slot: strips of living fire (shaders/hero_flame.gdshader), "flame-<tag>"; warden_look's "slots" "flame-<tag>"
-## sets its shader parameters. "flame-liquid" is a tank's bubbling fuel behind glass.
+## The `flame` slot: strips of living fire (shaders/hero_flame.gdshader), "flame-<tag>"; warden_look's "slots"
+## "flame-<tag>" sets its shader parameters. "flame-liquid" is a tank's bubbling fuel behind glass.
 const FLAME: Shader = preload("res://shaders/hero_flame.gdshader")
 ## The "card" slot: see-through alpha cards (wings) on their own shader, both sides drawn, no ink.
 const CARD: Shader = preload("res://shaders/warden_card.gdshader")
