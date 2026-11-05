@@ -1215,12 +1215,14 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Remove that. The Lunge always goes where you aim, tethered or not; the chain stays attached and stretches.
   - Remove the Chain Lunge as the forced result.
   - A Lunge that hits still lets you recast E to pull afterwards.
-- **The boost tech:**
+- **Momentum play (owner's clarification, 17:12 UTC: "its not a speed boost trick but more how you can play with momentum to move in interesting ways"):**
+  - The goal is a movement system: the pull's velocity and the Lunge combine as real momentum (vector add), so the aim angle vs the pull direction shapes the path (curves, swings, slingshots, redirects). It is not a fixed boost number.
+  - The sequence below is one example of that.
   1. Hold RMB (the Lunge charging; he can look and aim anywhere).
   2. Recast E (the pull starts; :833 currently converts the charge into a Haul Slam, so remove that auto-conversion).
   3. Release RMB mid-pull or mid-air → the Lunge fires the aimed way, carrying the pull's momentum: a speed boost (e.g. pull velocity + the Lunge impulse, capped ~1.4x the normal Lunge distance).
   - The Haul Slam stays only if he releases RMB on arrival at the anchor (tune), or drop it if it conflicts.
-  - It should feel like a slingshot.
+  - It should feel like a slingshot when aimed with the pull, and like a swing or redirect when aimed across it. Momentum carries on into the landing (no hard stop).
 - **Assert:**
   - Tethered + aiming 120° off the chain → the Lunge goes the aimed way.
   - Hold RMB → recast E → release mid-pull → the travel is longer/faster than a plain Lunge, in the aimed direction.
@@ -1244,3 +1246,13 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - content/archetypes/thief.json rmb.bola.after 3.8 → **5.5 m** (rank 3 after_r3 +1 stays, so 6.5).
 - Its lane preview shows the carry-on distance past the first contact.
 - Do it together with item 121 (wall/tree stuns).
+
+## 128. Sable E (Shadow Knife) works on walls: blink to beside where it sticks (owner, 17:12 UTC Nov 5)
+- The owner: "sable e wont tp her if its in a wall - it should work on walls, just put her next to it".
+- Today a knife that hits a wall (refund_wall 0.25) doesn't let her recast-blink to it.
+- **Change:** a knife stuck in a wall/tree/rock is a valid blink target. She lands at the nearest walkable spot on her side of the surface, ~0.6 m out from the knife (snap to the nav ground; never inside or behind the wall).
+  - The auto-step after 6 s works the same.
+  - Keep the 25% wall refund.
+- **Assert:**
+  - Knife into a wall → recast → she is within 1 m of the knife, on the thrower's side, not overlapping collision.
+  - The same for a tree.

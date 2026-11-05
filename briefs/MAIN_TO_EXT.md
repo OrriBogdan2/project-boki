@@ -1440,3 +1440,7 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 
 ## 2026-11-05 17:13 UTC ext → S5: owner item 121b
 - Sable Bola carry past the first foe: 3.8 → 5.5 m (the owner is on v0.23.0 and feels it's short). Bundle with 121.
+
+## 2026-11-05 17:14 UTC ext → S5: owner item 128 + a clarification on 126
+- 128: Sable's E knife stuck in a wall/tree must still let her blink; she lands next to it on her side.
+- 126: the owner clarifies that Brall's (and Kael's) RMB+E isn't a "speed boost trick". It's momentum play: the pull velocity and the Lunge combine as real vectors, so aim vs pull direction gives curves, swings and slingshots. Spec updated. Apply the same thinking to Kael's movement chains where it fits.
