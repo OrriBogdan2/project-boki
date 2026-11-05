@@ -2517,3 +2517,27 @@ Same rules as the first six: synthesised (tools/gen_sfx_<hero>.py), category lou
 - Replaces 13 os_* files. Checks: --sfx-set-check 0, --ostra-combo-check 137/0, --check 0, health OK.
 
 Still to come: Claire (agent running), then ext/sfx-cleanup (old generator functions, unused files: vn_stick, dj_bolt_emp, dj_cartwheel, jug_dash, os_full, pay_salvage, dr_haul?, tend_relay?; sfx_lib fixes reported by the agents: voice() tail release, chime() soft attack, shared helpers).
+
+## 2026-11-05 07:09 UTC (S1): READY ext/perf-94c @ 3338363c (owner items 103 + 94; one branch, merges clean on main c204a6d5)
+Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c204a6d5 + perf-94 + perf-94b. Conflicts resolved: main's NEW breaker, dredge, ryzz and sable GLBs were taken and re-decimated (50.3k/19.8k/43.8k/42.0k -> ~14.0k each); hud.gd keeps main's code (ReviveHud, message lane) plus the perf wiring; ReviveHud's deathbox and beacon labels go through LabelCull.
+- **103:** the forever sound was the Boki rescue's looping revive_hum played through the one-shot pool. Sfx.play never loops now, new Sfx.loop_hold stops within 250 ms when its owner ends or frees, and Match._exit_tree clears all scene audio. --match-audio-check.
+- **94 tools:** a performance overlay (Settings > Video > Frame rate), --perf-bench (60 s match + farm CSV), and --perf-probe lists the nodes new on its worst frames.
+- **94 fixes, with before/after on this server (software GL, heavy load; owner-GPU re-run asked):**
+  - HUD panels at 20 Hz on their own canvas: HUD ms fight 14.0 -> 7.7, land 17.0 -> 9.5, ride 22.2 -> 13.4.
+  - Hunter GLBs 37-51k -> ~14k tris (Kael 21.5k, declared). Textures BPTC, mips, <= 2048: 945 -> 108 MB VRAM for the 12 Hunters; probe textures 230 -> 99 MB.
+  - Hit-marker shaders and AimKit line/circle material warmed on the loading screen: worst in-play frame 2.3-3.9 s -> < 1.1 s here.
+  - Idle far monsters stop simulating, and far roaming bots run at 20 Hz: fight script 24.7 -> 20.9 ms.
+  - Medium is the default preset (the owner's PC auto-picked High): fight 1537k -> 1117k tris.
+  - Mask viewer renders only while visible.
+  - Shadows: small meshes don't cast (caster size per preset, Low 2.0 / Med 1.6 / High 1.3 / Ultra 1.0 m): fight shadow draws 1163 -> 305, total fight draws 1875 -> 983.
+  - Labels: far or off-screen plates skipped, and text shaped once (TextCache): HUD ms first 31.7 -> 26.2, drop 11.5 -> 8.2.
+- **Checks:**
+  - On the final merge (c204a6d5): --check, --warden-glb, --warden-model, --rig-standard, --perf-throttle, --perf-overlay, --match-audio, --arena, --aimkit, --hero-combo (272), --uipolish, --bot-sanity, --boss and --simtest pass. The full 22-check suite passed on the first merge (main 8f7a33d2).
+  - Same as plain main: --teammate-check rival line, --merge-form-check "to fuse" wording, --obstacle-check 1 line.
+  - **--hitch-check FAILS on both this branch and plain main.** This branch's worst judged frame is 0.36 of budget vs 0.58 on main. What's left is kit FX shaders built lazily after the warm-up (LDFx, DJFx, PinFx, swoosh, Boki aura x-ray). Next perf step if wanted.
+  - health OK, wiki unchanged.
+- **S5's question (kit-hem-55b drop-phase shader compiles):** perf-94 alone did NOT cover it; perf-94c now does. Hem 55b's fill line and circle use AimKit.line/circle (one shared AimDraw material on an ImmediateMesh that stays empty until someone aims). 8792c4f2 adds a one-triangle stand-in with that material to the warm-up, so AimKit no longer shows in hitch-check's first-in-view list. The reticle's canvas parts need nothing. Not run on the kit-hem-55b branch itself.
+- **Owner decisions:**
+  - Close-ups at ~14k show more shading slivers on faces and cloth (Mask viewer; shots on ext/hero-shots perf94c/, plus perf-94's Kael): accept, or keep full detail for close-up viewers only.
+  - Please re-run on your PC from this branch: `godot --path . -- --perf-probe --probe-full --probe-out=perf_after_full.txt`, plus the earlier three runs, and once `--perf-bench --bench-out=bench.csv`.
+- **Art budget for S2 (enforced by --warden-glb-check):** Hunter <= 15k tris incl. weapon (Boki/props <= 5k), via tools/blender/decimate_warden.py; textures <= 2048, VRAM BPTC, mips; generate_lods on; Fx pooled emitters; no shadowing omni/spot lights.
