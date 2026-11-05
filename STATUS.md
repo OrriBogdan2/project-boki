@@ -612,3 +612,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Open: no element VFX, Mutations.dress extras stick to Flex, accessories don't follow the head bone, no blend tree, no many-Boki perf number.
 - Owner Qs: palette (#7c4fa2 vs #4a2f5c); tail or pincer tools.
 - Slot: small sweep lane (Sable crossbows -> pistols; Pip, Claire, Sable portraits).
+
+## 2026-11-05 S2: Ryzz final set received
+- ryzz_FINAL refs, ryzz_turnaround_apose, ryzz_portrait, ryzz_splash logged; ART-1 Ryzz queued after Sable. Add her portrait to ext/portraits-six next pass.
