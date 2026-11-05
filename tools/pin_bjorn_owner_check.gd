@@ -116,7 +116,8 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		return Vector2(n.eye.x - P.position.x, n.eye.z - P.position.z).dot(d)
 	var eye0: float = eye_ahead.call()
 	var glow0: float = n.shell_mat.get_shader_parameter("color").a
-	var thread_back: float = Vector2((n.points[-1] as Vector3).x - n.eye.x, (n.points[-1] as Vector3).z - n.eye.z).dot(d)
+	var end: Vector3 = n.points[-1]
+	var thread_back := Vector2(end.x - n.eye.x, end.z - n.eye.z).dot(d)
 	ok("114 needle: the red thread trails behind the eye", thread_back < -0.8, "%.2f m" % thread_back)
 	var p0 := P.pos
 	step(m, 0.4, hold)
