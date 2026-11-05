@@ -490,13 +490,17 @@ def main():
         bpy.ops.mesh.select_all(action="SELECT")
         bpy.ops.mesh.quads_convert_to_tris()
         bpy.ops.object.mode_set(mode="OBJECT")
-        chart_seams(ob, 24 if len(ob.data.polygons) > 300 else 8)
+        if p["group"] != "scan":
+            chart_seams(ob, 24 if len(ob.data.polygons) > 300 else 8)
         face = face_chart(ob) if p["name"] == "skin_head" else None
         bpy.ops.object.mode_set(mode="EDIT")
         bpy.ops.mesh.select_all(action="SELECT")
         if not ob.data.uv_layers:
             ob.data.uv_layers.new(name="UVMap")
-        bpy.ops.uv.unwrap(method="ANGLE_BASED", margin=0.0, correct_aspect=False)
+        if p["group"] == "scan":      # (charts by facing folded over themselves here, two triangles sharing paint: smart project never overlaps)
+            bpy.ops.uv.smart_project(angle_limit=math.radians(60), island_margin=0.0, correct_aspect=False)
+        else:
+            bpy.ops.uv.unwrap(method="ANGLE_BASED", margin=0.0, correct_aspect=False)
         bpy.ops.object.mode_set(mode="OBJECT")
         ob.select_set(False)
         if face is not None:
