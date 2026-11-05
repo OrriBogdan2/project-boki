@@ -258,12 +258,7 @@ def chain_tile(h, w):
 
 
 def hook_tile(h, w):
-    v, u = np.mgrid[0:h, 0:w]
-    v = (v + 0.5) / h
-    c = chain_tile(h, w)
-    # red-hot toward the tip: keyed as heat by the shader (white-hot glow)
-    k = smooth(0.62, 0.8, v)[..., None]
-    return c * (1 - k) + np.array([1.0, 0.76, 0.44]) * k
+    return chain_tile(h, w)
 
 
 # ---- the cracks: a net of cells round the sword arm (the master sheet's giraffe pattern), edges of a stretched Voronoi
