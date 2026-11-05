@@ -1379,3 +1379,16 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - Holding RMB for 5 s → the slam fires at the cap.
   - Move input during it changes nothing (position delta only the forward carry).
+
+## 134. Tarek ult (Basalt Spine) also raises a platform under him, which works over the abyss (owner, 17:19 UTC Nov 5)
+- The owner: "tarek ult should spawn ground beneath him as well as the walls he can shoot - and that ground should spawn under him in abyss".
+- Today: a 9-rock ridge at the cursor (12 m arc), his rocks for 7 s. Over the abyss the ridge is walkable, but nothing appears under HIM.
+- **Add:** on cast, a basalt platform erupts under Tarek's feet at the same moment as the ridge.
+  - A disc ~3.5 m radius (tune), flush ground-level stone with molten cracks; it lasts the ridge's 7 s.
+  - Over the abyss or mid-air (he's above the abyss) it spawns directly under him and catches him: a real walkable floor, so the ult works as an abyss save/escape and a stage.
+  - It crumbles with the ridge, with the same warning, and whoever stands on it falls.
+  - Allies can stand on it too.
+  - It counts as his rock for his kit interactions (punch launches, Rock Hop item 111 targets).
+- **Assert:**
+  - A cast over the abyss → Tarek grounded on the platform, not falling, for 7 s.
+  - A cast on land → the platform drawn under him + the ridge at the cursor.

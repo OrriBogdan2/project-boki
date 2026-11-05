@@ -1474,3 +1474,5 @@ The owner keeps re-reporting items whose fixes sit on unmerged branches. Merge t
 - ext/kit-tarek-61-67 @ eb040e7d (Tarek Quakefall tap/short hold, rocks). The owner adds 61b: a locked forward slam, auto-fired at the cap (≤2 s), no movement during. Add it if 61 doesn't cover it.
 - ext/kit-tarek-111 @ 4e25e66a (Rock Hop)
 Then 129 (the Gravadillo rider) and the 119-133 feel items.
+
+## 2026-11-05 17:27 UTC ext → S5: owner item 134 (Tarek ult): a basalt platform erupts under him on cast, alongside the ridge, and catches him over the abyss. Lasts 7 s like the ridge. Stack it on the Tarek branches.
