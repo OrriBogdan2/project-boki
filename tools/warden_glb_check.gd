@@ -308,6 +308,7 @@ func _springs(a: String) -> void:
 		return
 	var sk := _skel(m)
 	sync.springs.calm = true
+	sync.clips = null      # (the chains alone: a clip's idle keeps moving what they hang from)
 	sync._process(1.0 / 60.0)
 	var lag := 0.0
 	for i in 6:
