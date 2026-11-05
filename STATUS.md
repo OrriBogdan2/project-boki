@@ -727,3 +727,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: S5 shipped 25e8ea8d
 - On main now: rename 7341f61a (Lisette only), Vex 68+109, portraits-six af003746. Held: ext/art2-kael (3 mid-play shader compiles): warm-up fix running. rename-lisette 1228b324 still to go. Waiting on S1: kit-hem-55b needs perf-94c.
+
+## 2026-11-05 S2: Ryzz ability ids + FX points for S3/S4 (ext/art1-ryzz; rig-standard 0 failures, anchors final)
+- LMB mage_lmb_l/r (0.35, release 0.06); RMB mage_rmb_hold, mage_rmb (0.7, release ~0.06-0.16); Shift mage_dash, mage_dash_go (0.5), mage_dash_land (0.42), air mage_dash_ex (0.5); E mage_e (1.4), mage_e_snap (0.55, strike 0.06); mage_live (0.55); X mage_x (crouch 0.3), mage_x_air, mage_x_dive (0.1), mage_x_land (0.5).
+- Empties: weapon_muzzle (right index), anchor_finger_L, anchor_thumb_R/L, anchor_gun_R/L, anchor_wire_R/L, anchor_rod_0..3, anchor_harness, anchor_gum, anchor_head_top, anchor_chest. Already in the model: rods blazing on the ult, pink arcs between rods, bubble scale.
+- **S3 action (fidelity row "PINK lightning from copper fingertips"):** the kit is still teal/gold (mage_kit.gd TEAL, GOLD; mage_sky, mage_ult); needs recolouring. _fingertip() spawns at hand + 0.15 m; use weapon_muzzle / anchor_finger_L.
+- Owner Q: the kit's Storm Rod is a procedural mesh held in her hand on RMB, awkward with HANDS-FREE. Keep it?
