@@ -1011,7 +1011,7 @@ func e_recastable() -> bool:
 ## E: throw the chain, or pull yourself along it (JuggernautChain.press).
 func use_e() -> void:
 	if not slam_w.is_empty() and warchain.state == "ready":
-		slam_w["pinned"] = true        # owner 113.5: the cursor moved on to the throw, the Slam goes where it was started
+		slam_w["pinned"] = true        # the cursor moved on to the throw: the Slam goes where it was started
 	if warchain.hooked() and riposte.move_k() <= 0.0 and not super.busy():
 		riposte.pull_through()         # owner 113.7: the held chain hauls him in, the ult's strike on the way
 		return

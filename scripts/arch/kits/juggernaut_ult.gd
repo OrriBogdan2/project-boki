@@ -6,8 +6,8 @@ extends RefCounted
 ## out and makes the answer harder, up to two). Then he lunges 1.8m and cleaves up through the strip ahead
 ## (1.8m wide, 3.6m long, shown to everyone through the guard): he heals 80% of what it deals, and knocking a
 ## hunter with it makes it ready again at once. Landing it on a rival hunter fills the bond meter
-## (HeroUlt.landed: a hit, a knock or a kill, the best of the cast). A chain still held pulls him through it
-## (owner 113.7): E in the guard or the cleave hauls him along the chain, the guard up, and the cleave goes into
+## (HeroUlt.landed: a hit, a knock or a kill, the best of the cast). A chain still held pulls him through it:
+## E in the guard or the cleave hauls him along the chain, the guard up, and the cleave goes into
 ## the hooked foe as he reaches them. Owned by JuggernautKit.
 
 const GOLD := Color("ffc94a")          # the guard's glow and the cleave's outer edge (the source's is red)

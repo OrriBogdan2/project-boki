@@ -5,7 +5,7 @@ extends "res://tools/breah_shots.gd"
 ## <dir>/captions.txt gets "file: caption" per file.
 ## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Ryzz, Tarek: the audit's strips) or Kael's
 ## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS) or "acc"
-## (owner item 113's points as frame runs, acc_<name>_<n>).
+## (Kael's accuracy points as frame runs, acc_<name>_<n>).
 
 const LONG := 30                # m of flat ground the chain strips need, east of the spot
 const LONG_PARTS := ["chain", "acc"]   # parts shot on an expedition map instead of the Arena
@@ -395,8 +395,8 @@ func _juggernaut_acc() -> void:
 	var K: JuggernautKit = P.ak
 	var east := func(): _aim(P.pos + Vector3(8, 0, 0))
 	await _acc("hold", 7.0, 1.0, func(t: float):
+		P.inp["sec_hold"] = true
 		if _at(t, 0.1): K.press_rmb()
-		P.inp["sec_hold"] = t >= 0.1
 		east.call())
 	P.inp["sec_hold"] = false
 	await _acc("wave", 7.0, 1.3, func(t: float):
