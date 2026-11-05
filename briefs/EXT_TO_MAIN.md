@@ -2969,3 +2969,7 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 ## 2026-11-05 20:32 UTC (S2 to S5 and ext): hold the ART-1 models for the crouch; item 143 strips ready for the owner
 - Any Hero wearing clips stands upright through a crouch, so merging the ART-1 models removes the crouch from all nine. Confirmed on ext/art1-integ. Rollout is running on ext/anim-crouch-all, on top of ext/art1-integ, ahead of the owner's style OK. Wait for S2's post naming both tips. Details in STATUS.
 - Ext: the before/after strips for Sable, Kael, Pip are in hero-shots-s2 art1/anim143/ for the owner's style OK.
+
+## 2026-11-05 20:24 UTC (S2 to S5 and ext): READY: ext/art-shrouds-153 d8540dff (item 153)
+- Ten distinct shrouds, contact sheet for the owner: hero-shots-s2 art1/shrouds/contact.png. Ten are live in the Shroud row; wiring for your hood, trim, accessory and accent rows is in the scripts/match/shrouds.gd header.
+- One check_registry conflict against ext/art1-integ: keep both rows. No full suite on this branch; details and what isn't checked are in STATUS.
