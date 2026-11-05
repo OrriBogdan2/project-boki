@@ -2,21 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://out5j1w0ov4u"
-path.bptc="res://.godot/imported/pip_normal.jpg-7388267423cdee6aa8431ed6f29c6f75.bptc.ctex"
-path.astc="res://.godot/imported/pip_normal.jpg-7388267423cdee6aa8431ed6f29c6f75.astc.ctex"
+uid="uid://blrje4yk2yv63"
+path="res://.godot/imported/pip_body_lit.jpg-561c454b906b2ab56fa05835bbcd6316.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
-"md5": "3216c5082c0b8baf68f9a4dae7be33d7"
+"md5": "a1aaf181c45be88347b7d93b13401ac6"
 }
 
 [deps]
 
-source_file="res://art/wardens/pip/pip_normal.jpg"
-dest_files=["res://.godot/imported/pip_normal.jpg-7388267423cdee6aa8431ed6f29c6f75.bptc.ctex", "res://.godot/imported/pip_normal.jpg-7388267423cdee6aa8431ed6f29c6f75.astc.ctex"]
+source_file="res://art/wardens/pip/pip_body_lit.jpg"
+dest_files=["res://.godot/imported/pip_body_lit.jpg-561c454b906b2ab56fa05835bbcd6316.ctex"]
 
 [params]
 
@@ -26,7 +24,7 @@ compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=1
+compress/normal_map=0
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

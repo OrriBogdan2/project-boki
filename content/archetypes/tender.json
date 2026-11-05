@@ -12,9 +12,9 @@
 		"hit_r": 0.34,
 		"head": 0.78,
 		"legs": 0.98,
-		"torso": 1.32,
+		"torso": 1.02,
 		"shoulder": 1.12,
-		"neck": -0.16
+		"neck": -0.036
 	},
 	"color": "#ffc46a",
 	"clip": {"lines": {"dash": "A quick hop, a long glide in the air.", "lmb": "Embers from both hands mark foes.", "rmb": "A seed that roots its target.", "e": "A healing ring for you and your team.", "x": "Tether a teammate and heal them as you go."}, "fx": {"e": "heal", "x": "tether"}},

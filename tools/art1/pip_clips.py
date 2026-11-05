@@ -347,7 +347,7 @@ if __name__ == "__main__":
     bpy.ops.wm.open_mainfile(filepath=a[0])
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
     grip = tuple(K.GRIP)
-    rig = {"grip_rest": grip, "blade_rest": (0, 0, -1), "edge_rest": (0, 1, 0), "pelvis": float(K.J["hips"][2]), "hilt_l": 0.05,
+    rig = {"grip_rest": grip, "blade_rest": (0, 0, -1), "edge_rest": (0, 1, 0), "pelvis": float(K.J["hips"][2]), "hilt_l": 0.05, "dz": SZ - 1.072, "ankle": A, "ankle_keys": A,
            "lhand": {"k": (0, 1, 0), "o": (1, 0, 0), "palm": (-SH, 0, K.WRIST_Z - 0.05)}}
     bpy.context.scene.render.fps = FPS
     sol = PipSolver(arm, rig)
