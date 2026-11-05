@@ -46,7 +46,6 @@ var t := 0.0                 # s in this step
 var card_t := 0.0            # s since the card (re)appeared
 var done_t := 0.0            # s left of the step-done check
 var flash_t := 0.0           # s the marker flashes (after a stall)
-var held_toasts: Array = []  # toasts held back while the banner was up: [text, col, small]
 var nag_t := 0.0             # s the pill pulses (after a stall)
 var spot_t := 0.0            # s left of "You spotted it!" and the chest beam
 var wait := 0.0
@@ -176,11 +175,8 @@ func update(dt: float) -> void:
 	flash_t = maxf(0.0, flash_t - dt)
 	nag_t = maxf(0.0, nag_t - dt)
 	spot_t = maxf(0.0, spot_t - dt)
-	if not held_toasts.is_empty() and not card_up() and m.hud:
-		for q in held_toasts:
-			if q[2]: m.hud.toast_small(q[0], q[1])
-			else: m.hud.toast(q[0], q[1])
-		held_toasts.clear()
+	if m.hud:
+		m.hud.msgs.hold = card_up()      # messages wait while the banner is up
 	var sid := id()
 	var done := _is_done(sid, dt)
 	_point(sid)
@@ -220,8 +216,8 @@ func _enter() -> void:
 	card_t = 0.0
 	m.bubbles.clear()       # one voice at a time: the old step's lines go, the banner has the floor
 	if m.hud:
-		m.hud.toasts.clear()
-		m.hud.small_toasts.clear()
+		m.hud.msgs.clear()
+		m.hud.msgs.hold = true
 	stall_t = 0.0
 	best_d = 1e9
 	crouch_t = 0.0
@@ -341,7 +337,7 @@ func _is_done(sid: String, dt: float) -> bool:
 			if crouch_t >= CROUCH_HOLD:
 				spot_t = SPOT_T
 				m.ping(stop("chest"), Color("dfe8f2"))
-				held_toasts.append(["You spotted it! A chest across the bridge", MINT, false])
+				if m.hud: m.hud.toast("Chest spotted across the bridge", MINT)
 				return true
 			return false
 		"pickup": return ground_item().is_empty()

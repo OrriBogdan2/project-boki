@@ -52,7 +52,8 @@ func tick(dt: float) -> void:
 	if detect_t <= 0.0:
 		detect_t = 0.5
 		_poll()
-	_update_marker()
+	_update_marker(dt)
+	_bubbles_under_lane(dt)
 
 func _poll() -> void:
 	var was_done := bool(FarmTutorial.state()["done"])
@@ -250,7 +251,7 @@ func _nearest_wild(what: String) -> Vector3:
 			tree_at = at
 	return tree_at
 
-func _update_marker() -> void:
+func _update_marker(dt: float) -> void:
 	var id := FarmTutorial.current()
 	var txt := FarmTutorial.world_text(id)
 	var at := _target(id) if id != "" and txt != "" else Vector3.INF
@@ -271,3 +272,22 @@ func _update_marker() -> void:
 	marker.visible = true
 	marker.text = "%s\n▼" % txt
 	marker.position = at + Vector3(0, 3.6 + sin(t * 3.0) * 0.18, 0)
+	_yield_to_covers(dt)
+
+## A Boki's speech bubble fades back while a message card (MsgLane) covers it on screen.
+func _bubbles_under_lane(dt: float) -> void:
+	var cards := MsgLane.of(h.root_ui).rects()
+	for k in h.kins:
+		var say: Label3D = k.get("say")
+		if say and say.visible:
+			MsgLane.yield_label(say, h.cam, cards, dt)
+
+## The marker fades back while a Boki's speech bubble or a message card covers it on screen, so two
+## lines never print over each other; it comes back when the Boki is done talking and the card goes.
+func _yield_to_covers(dt: float) -> void:
+	var covers: Array[Rect2] = MsgLane.of(h.root_ui).rects()
+	for k in h.kins:
+		var say: Label3D = k.get("say")
+		if say and say.visible:
+			covers.append(MsgLane.label_rect(say, h.cam))
+	MsgLane.yield_label(marker, h.cam, covers, dt)
