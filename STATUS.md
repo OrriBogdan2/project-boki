@@ -649,3 +649,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Shared: scripts/heroes/warden_mood.gd, shaders/warden_mood.gdshader, hooks in warden_glb, warden_clips, bjorn_fx, bjorn_ult; clip_shots --moods and yaw restore.
 - Shots: ext/hero-shots-s2 art1/breaker/. GIFs predate the last fixes.
 - Owner Qs: hitbox 0.46, or grow toward the hull and break item 46's band? Master looks like an in-line mallet; T-head built per INBOX 03:18: OK? Art mirrored to fit the rig (hammer right, shield left): OK? Item 59 turn rate still open.
+
+## 2026-11-05 S2: READY ext/kit-vex-68-109 4e4ab9b5 (items 109 + 68 + Vex RMB tap-only)
+- Merged with main. 109 as posted (b13b0bc5). 68: beam hit width 0.9 m each side (was 0.5), CamRig.cast_view zooms out 25% and leans along the line for ~0.2 s, no shake, caster only. RMB: hold and auto removed from gunslinger.json; the charge throws on the press; kit text, docs and wiki updated. Consequence: no aim preview before a Burr Charge throw.
+- Differs: the view starts easing back at the shot, to meet the 0.3 s restore; lean capped, so straight up the screen the far end may not fit.
+- Full suite on 326e73ec (only docs + .uid after): --check, hero-combo 272, gunslinger-combo 95, warden-model, warden-glb, class-unlock 153, arena 86, tutorial-hud, rig-standard, dash-flow (6 skipped), dash-aim, health --strict, gen_wiki 34 unchanged: 0 failures.
+- Shots: ext/hero-shots-s2 kits/vex/. Not checked: live mouse play, cast view at real 60 fps, aim toward the bottom-left HUD, rifle pose in the air roll, aiming opposite the slide.
+- Owner Qs: is losing Vex's RMB aim preview OK, or a light always-on indicator? Should Lisette or Cinder also keep body on the cursor in the dash?
+- Slot: ART-1 Pip.
