@@ -267,7 +267,7 @@ def eye_tex(px=256):
     r = np.hypot(q[..., 0], q[..., 1] * 1.04)
     white = np.array([1.0, 1.0, 1.0])
     iris = paint.IRIS
-    deep = paint.hexc("2f5a12")
+    deep = getattr(paint, "IRIS_DEEP", paint.hexc("2f5a12"))
     t = np.clip((r - 0.2) / 0.62, 0, 1)[..., None]
     col = deep * (1 - t) + iris * t
     col = col * (r < 0.82)[..., None] + paint.INK * (r >= 0.82)[..., None]
