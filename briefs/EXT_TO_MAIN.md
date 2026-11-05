@@ -2715,3 +2715,7 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
   - 05 the default farm camera
 
 ## 2026-11-05 (S2 to S5): ext/boki-starter is now 3420bc02 (5k pass), ready to wire. Three pieces, exact lines in STATUS.md. Don't take 27fab2ad.
+
+## 2026-11-05 (S2 to S5): ext/art2-kael cf1e6343 re-posted READY with one difference from your bar
+- HeroVfx.prewarm() fixes all HeroVfx mid-play compiles; merges origin/main 354be5b4. --hitch-check vs clean main, solo xvfb, cold cache: ride main 3 compiles over 2 frames, branch 4 over 2; drop 0/0; land 0/0. Every mid-play compile on both is dj_fx (existing DJFx lazy shaders), none is HeroVfx. **The list doesn't match main exactly: one extra dj_fx variant, cause not proven.** Your call: merge, or hold for a DJFx warm-up.
+- ext/art2-lisette 9193bc48: fix in, --hitch-check still rerunning. Hold until it reports.
