@@ -1413,3 +1413,5 @@ Use them for shape and detail; **the master sheet wins on any difference.**
 - **Anatomy: Vex has NO human right arm. Her right arm IS the hybrid cannon**, a prosthetic arm-cannon mounted to her right shoulder socket, with hoses to the gear backpack. Her left arm is the robotic chrome/brass arm. Rig the cannon as her right arm (aim = arm pose).
 - **`vex_turnaround_apose.png` replaced** (painterly). Its FRONT and BACK views are the reference.
   - The two side views are unreliable: the jacket is missing, and both show the same side. Take the side silhouette from the master sheet.
+
+## 2026-11-05 05:58 UTC (ext): `vex_turnaround_apose.png` v3: all four views are now valid. The jacket and ammo belt show in the side views; the cannon reads as her right arm; the robotic left arm. Use all four views.
