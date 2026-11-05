@@ -73,7 +73,6 @@ func ready_label() -> String: return "FLASHOVER" if not ignites.is_empty() else 
 
 func _setup() -> void:
 	fx = LDFx.of(m)
-	LDSfx.ensure()
 	jet = AshwickJet.new(self)
 
 func _best_char() -> float:
@@ -311,6 +310,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	if not held or not h.can_fire() or merging or (relight_t > 0.0 and not was_held):
 		if was_held and not hose_paused:
 			play("as_lance_end")
+			m.sfx("ashwick_tank_hiss", h.pos, -4.0, 1.0)      # the tank's valve vents as she lets go
 		if was_held:
 			after_t = float(lmbd().get("slow_after", 0.35))
 			relight_t = float(lmbd().get("relight", 0.35))      # a short gap before the lance can roar again
@@ -632,6 +632,8 @@ func _cloak_blast() -> void:
 		if not sees(f):
 			continue
 		hit += 1
+		if hit == 1:
+			m.sfx("ashwick_cloak_hit", f.pos, -2.0, 1.0)
 		f.hurt(float(ed["dmg"]) * power("kin"), h, {"src": "flame", "ab": "k1", "tags": ["flame", "cloak"]})
 		add_char(f, float(ed["char"]))
 		KitStatus.apply(f, "blt", float(ed["blt_t"]))

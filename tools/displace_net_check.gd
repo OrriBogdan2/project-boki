@@ -4,7 +4,7 @@ extends RefCounted
 ## games over the desktop relay: this process is the host (it runs the relay in-process too) and starts a
 ## second headless game, the guest (--displace-net-check=guest), through the queue wrapper. Both build the
 ## same flat training strip; the host plays each ability first on a local bot, then on the guest's hunter,
-## and the guest reports where its own game put it. Cinder's cloak pull, Dredge's reel, Ostra's Trade,
+## and the guest reports where its own game put it. Cinder's cloak pull, Grimble's reel, Motley's Trade,
 ## Ryzz's Skycall drag, Breaker's shield push; Kael's Warchain pulls Kael to the player (not the player).
 ## Then the hit path: a hazard striking on both games hurts the player once; a knock's wall stun, a burn's
 ## length and a slow's strength reach the player's own game.
@@ -90,11 +90,11 @@ func _host() -> void:
 		return _finish()
 	var B: Hunter = m.make_hunter("B", 1, "medium", "Bot", "idle", {}, home + Vector3(-6.0, 0, 9.0), {"arch": "none"})
 	await _case(G, B, "ashwick", Vector3(3.8, 0, 0), _cinder, 1.0, "Cinder's cloak pull", "step")
-	await _case(G, B, "dredge", Vector3(6.0, 0, 0), _dredge, 2.0, "Dredge's reel", "haul")
+	await _case(G, B, "dredge", Vector3(6.0, 0, 0), _dredge, 2.0, "Grimble's reel", "haul")
 	var DK: DredgeKit = m.player.ak
 	ok(DK.arrivals == 2 and DK.pull.is_empty(),
-		"Dredge's reel: on the player too it ends as an arrival (HAULED), the reel let go", "arrivals %d" % DK.arrivals)
-	await _case(G, B, "ostra", Vector3(8.0, 0, 0), _ostra, 2.2, "Ostra's Trade")
+		"Grimble's reel: on the player too it ends as an arrival (HAULED), reel let go", "arrivals %d" % DK.arrivals)
+	await _case(G, B, "ostra", Vector3(8.0, 0, 0), _ostra, 2.2, "Motley's Trade")
 	await _case(G, B, "mage", Vector3(7.0, 0, 0), _vireo, 2.4, "Ryzz's Skycall drag", "slide")
 	await _case(G, B, "bulwark", Vector3(1.7, 0, 0), _bjorn, 1.2, "Breaker's shield push", "push")
 	await _zedran(G)

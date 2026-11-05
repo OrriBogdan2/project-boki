@@ -96,6 +96,7 @@ func _bar(m: Match, P: Hunter) -> void:
 	click.pressed = true
 	rc._gui_input(click)
 	ok(int(P.slot_lv["sec"]) == 1 and P.skill_pts == 0, "clicking the + spent the point on RMB")
+	await m.hud.panels.draw
 	await _frames(3)
 	ok(not RankMarks.spot("sec").has_area() and not rc.visible, "no points left: the + and its target are gone")
 

@@ -33,12 +33,14 @@ func _init(h, match_node: Match) -> void:
 
 func open(by_plan := false) -> void:
 	is_open = true
+	Sfx.play("ui_open", null, -8.0)
 	auto = by_plan
 	zoom = 1.0
 	zoom_to = 1.0
 	center = Vector2(m.world.w, m.world.h) * 0.5
 
 func close() -> void:
+	if is_open: Sfx.play("ui_close", null, -8.0)
 	is_open = false
 	auto = false
 	_press = Vector2.INF

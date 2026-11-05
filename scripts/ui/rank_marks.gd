@@ -11,9 +11,8 @@ const PIP_GAP := 3.0
 const PLUS_R := 11.0           # px: the "+" badge's radius before its pulse
 const PLUS_HIT := 16.0         # px: half the clickable square round the "+"
 const HINT_SECS := 5.0         # s: the ALT+key hint shows on every rankable slot after a new point
-const STALE_MS := 75           # ms: 1.5 HudPanels redraw periods; a "+" not redrawn by then is gone
 
-static var plus_spots := {}    # slot -> [Rect2 the "+" covers, frame drawn, msec drawn] (RankClick reads it)
+static var plus_spots := {}    # slot -> [Rect2 the "+" covers, HudPanels.draws when drawn] (RankClick reads it)
 static var _pts_was := 0
 static var _hint_until := 0.0
 
@@ -53,17 +52,13 @@ static func plus(H, r: Rect2, id: String, slot: String, key: String) -> void:
 
 ## Make `at` the clickable spot that spends a point on `slot` this frame (a locked slot's whole face).
 static func mark(slot: String, at: Rect2) -> void:
-	plus_spots[slot] = [at, Engine.get_process_frames(), Time.get_ticks_msec()]
+	plus_spots[slot] = [at, HudPanels.draws]
 
-## The "+" rect for `slot` if HudPanels' latest redraw drew it, else an empty Rect2. The panels redraw
-## only after HudPanels.MIN_FRAMES frames and a REDRAW_HZ period, so the spot goes stale once both passed.
+## The "+" rect for `slot` if HudPanels' latest redraw drew it, else an empty Rect2 (the panels redraw
+## REDRAW_HZ times a second, so a "+" lives until the next redraw leaves it out).
 static func spot(slot: String) -> Rect2:
 	var s: Array = plus_spots.get(slot, [])
-	if s.is_empty():
-		return Rect2()
-	var frames_since := Engine.get_process_frames() - int(s[1])
-	var ms_since := Time.get_ticks_msec() - int(s[2])
-	if frames_since > HudPanels.MIN_FRAMES + 1 and ms_since > STALE_MS:
+	if s.is_empty() or int(s[1]) != HudPanels.draws:
 		return Rect2()
 	return s[0]
 
