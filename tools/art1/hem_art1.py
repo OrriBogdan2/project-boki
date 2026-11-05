@@ -378,7 +378,6 @@ def main():
     J = H.joints(rig_path)
     print("sculpting", flush=True)
     hd = H.head()
-    mk = H.mask(hd)
     hr = H.hair(hd)
     locks = {k: H.lock(v, H.LOCK_R[k][0], H.LOCK_R[k][1], spread=0.0 if k == "tail" else 0.0125) for k, v in H.LOCKS.items()}
     ey = H.eyes()
@@ -425,8 +424,7 @@ def main():
         nose = np.linalg.norm((v - np.array((0, 0.100, 1.590), F)) * (1.3, 1, 0.8), axis=1)
         return np.clip(np.maximum(1.15 - d / 0.03, np.maximum(1.0 - mouth / 0.034, 0.9 - nose / 0.03)), 0.02, 1)
 
-    part("skin_head", hd, 3000, "head", 3.6, hxf, "head", "skin", head_cull, eye_keep)
-    part("mask", mk, 240, "mask", 2.4, hxf, "head", None)
+    part("skin_head", hd, 3220, "head", 3.6, hxf, "head", "skin", head_cull, eye_keep)
     part("hair", hr, 1500, "hair", 1.4, hxf, "head", None)
     part("lockR", locks["lockR"], 300, "lock", 0.6, hxf, "lockR", "hair")
     part("lockL", locks["lockL"], 300, "lock", 0.6, hxf, "lockL", "hair")
@@ -566,7 +564,7 @@ def main():
         elif nm == "needle":
             rgb = P.needle(pts, nn)
         elif nm == "scan":
-            rgb = P.scan(sp.sample(pts))
+            rgb = P.scan(sp.sample(pts), pts, nn)
         elif nm in ("handR", "handL"):
             rgb = P.skin_hand(pts, nn, lab, f)
         elif nm == "quiver":

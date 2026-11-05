@@ -261,9 +261,12 @@ def hair(h):
     fade = smooth(0.0, 0.035, z - zh)
     thick = 0.0022 + (0.0070 + 0.0130 * smooth(1.60, 1.70, z) + 0.009 * smooth(0.02, -0.08, y)) * fade
     # the volume: over the flat top of the skull (no ears, no face: the base field)
-    cr = ell((0, -0.016, 1.660), (0.0905, 0.1300, 0.0960))
+    cr = ell((0, -0.016, 1.655), (0.0880, 0.1270, 0.0930))
     base = h.base
-    a = np.minimum(base - thick, cr.fn(x, y, z) + 0.02 * (1 - fade))
+    b0, b1 = base - thick, cr.fn(x, y, z) + 0.02 * (1 - fade)
+    kk = 0.022
+    hh = np.clip(0.5 + 0.5 * (b0 - b1) / kk, 0, 1)
+    a = b0 * (1 - hh) + b1 * hh - kk * hh * (1 - hh)        # (a smooth union: no shelf at the temple)
     # raked strands: grooves running from the hairline to the bun
     ph = np.arctan2(x - BUN[0], y - BUN[1])
     a = a + 0.0022 * np.sin(ph * 7 + 3.6 * fbm(x, y, z, 9.0, 2)) * fade
@@ -772,15 +775,15 @@ def shears_to_model(p):
 
 def cowl(vox=0.0028):
     """The scarf wrapped loose round her neck: soft folds slanting round it, its front sagging over the collarbones."""
-    f = Field((-0.2, -0.17, 1.27), (0.2, 0.19, 1.52), vox)
+    f = Field((-0.2, -0.17, 1.29), (0.2, 0.19, 1.54), vox)
 
     def folds(x, y, z):
         th = np.arctan2(x, y)
         return 0.0050 * np.sin(th * 3.0 + z * 34.0) + 0.0028 * np.sin(th * 7.0 - z * 52.0)
-    f.add(loft([(1.312, 0.022, 0.086, 0.088, 0.078), (1.345, 0.012, 0.106, 0.098, 0.096), (1.385, 0.004, 0.096, 0.088, 0.092),
-                (1.425, -0.006, 0.076, 0.076, 0.076), (1.450, -0.010, 0.066, 0.068, 0.068)], 2.0), 0.0, SCARF, "hips", folds)
+    f.add(loft([(1.330, 0.022, 0.086, 0.088, 0.078), (1.363, 0.012, 0.106, 0.098, 0.096), (1.403, 0.004, 0.096, 0.088, 0.092),
+                (1.443, -0.006, 0.074, 0.074, 0.074), (1.470, -0.010, 0.062, 0.064, 0.064)], 2.0), 0.0, SCARF, "hips", folds)
     # two loose wraps, slanting opposite ways, the top one under her chin
-    for z0, slant, r, rad in ((1.378, 0.016, 0.0235, 0.098), (1.426, -0.012, 0.0205, 0.082)):
+    for z0, slant, r, rad in ((1.396, 0.016, 0.0235, 0.098), (1.444, -0.012, 0.0205, 0.080)):
         pts = [(rad * math.sin(t), 0.004 + (rad + 0.004) * math.cos(t), z0 + slant * math.sin(t) - 0.016 * (0.5 + 0.5 * math.cos(t))) for t in np.linspace(0, math.tau, 21)]
         f.add(path(pts, [r] * 21), 0.016, SCARF, "hips", folds)
     # the head and neck's room

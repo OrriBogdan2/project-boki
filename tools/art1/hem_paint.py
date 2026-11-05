@@ -174,8 +174,8 @@ def plate(p):
     zs = np.array([q[0] for q in H.PLATE_Z], F)
     ys = np.array([q[1] for q in H.PLATE_Z], F)
     py = np.interp(p[:, 2], zs, ys)
-    # (past the head's outline the plate is its grey ground: hold the skin's edge)
-    lim = np.interp(py, (55.0, 120.0, 300.0, 460.0, 540.0, 575.0, 640.0), (70.0, 150.0, 178.0, 160.0, 96.0, 90.0, 92.0))
+    # (past the head's outline the plate is its grey ground: hold the skin's edge, well inside it)
+    lim = np.interp(py, (55.0, 120.0, 300.0, 400.0, 460.0, 520.0, 565.0, 640.0), (60.0, 140.0, 172.0, 160.0, 140.0, 92.0, 30.0, 30.0))
     px = 320.0 + np.clip(p[:, 0] * H.PLATE_PX, -lim, lim)
     return PLATE[np.clip((py * k).astype(int), 0, h - 1), np.clip((px * k).astype(int), 0, w - 1)]
 
@@ -186,6 +186,8 @@ def head(p, n, lab, f):
     k = form(n)
     back = mix(C["skin_sh"], C["skin"], smooth(0.15, 0.6, k))
     c = mix(c, back, smooth(0.035, 0.0, p[:, 1]))
+    # below the jaw: the neck in its shadow, not the plate's
+    c = mix(c, mix(C["skin_sh"], back, 0.35), smooth(1.512, 1.498, p[:, 2]))
     return mix(c, C["ear"], (lab == H.EAR_IN) * 0.7)
 
 
@@ -193,12 +195,13 @@ def eyes(p, n):
     return plate(p)
 
 
-def scan(c):
-    """The scan's paint for the toon shader: blacks up to a charcoal that shows form, reds crisper."""
+def scan(c, p, n):
+    """The scan's paint for the toon shader: blacks up to a charcoal that shows form, reds crisper; the shoulders' tops take more red (the top-down read)."""
     c = np.clip(c, 0, 1) ** 0.82
-    v = c.max(1, keepdims=True)
     red = np.clip((c[:, 0:1] - c[:, 1:2] * 1.6) * 4.0, 0, 1)
-    return np.clip(c + (c - c.mean(1, keepdims=True)) * red * 0.55 + red * 0.05, 0, 1)
+    c = np.clip(c + (c - c.mean(1, keepdims=True)) * red * 0.55 + red * 0.05, 0, 1)
+    sh = smooth(0.105, 0.14, np.abs(p[:, 0])) * smooth(1.20, 1.25, p[:, 2]) * smooth(0.25, 0.7, n[:, 2])
+    return mix(c, rgb("c0141e"), sh * 0.8)
 
 
 def hairc(p, n, f, lab):
@@ -296,7 +299,7 @@ def gearlab(p, n, lab):
 def scarf(p, n, f):
     """Saturated crimson, soft folds: the brightest thing she wears, for the top-down read."""
     cav = cavity(f, p, n, 0.012) if f is not None else np.zeros(len(p), F)
-    fold = (fbm(p[:, 0] * 1.2, p[:, 1] * 1.2, p[:, 2] * 1.2, 7.0, 2) - 0.5) * 0.9
+    fold = (fbm(p[:, 0] * 1.2, p[:, 1] * 1.2, p[:, 2] * 1.2, 7.0, 2) - 0.5) * (0.9 if f is not None else 0.3)
     k = np.clip(form(n) * 0.9 + fold, 0, 1)
     c = mix(rgb("6e0810"), rgb("c80e18"), smooth(0.12, 0.55, k))
     c = mix(c, rgb("f23830"), smooth(0.66, 0.95, k) * 0.6)
