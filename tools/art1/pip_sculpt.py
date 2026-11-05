@@ -413,8 +413,8 @@ def _skull_out(fld, c, d, gap):
 
 
 def band(fld):
-    c0 = h((0, -0.015, 0.03))
-    nrm = _unit((0, -0.30, 1.0))       # a ring tipped: high on the brow, lower at the back
+    c0 = h((0, -0.015, 0.065))
+    nrm = _unit((0, -0.40, 1.0))       # a ring tipped: high on the brow, lower at the back
     a_ = _unit(np.cross(nrm, (1, 0, 0)))
     b_ = np.cross(nrm, a_)
     pts = []

@@ -19,7 +19,7 @@ PINK, PINK_HI, ROSE, PLUM = rgb("ef9db0"), rgb("f9bcc6"), rgb("dc7e98"), rgb("ac
 CREAM, CREAM_T = rgb("fbe4d4"), rgb("fff1c9")
 INNER = rgb("f6c3c6")
 GOLD = rgb("ffd98a")
-APRON, APRON_DK = rgb("f1dfb4"), rgb("c8ab7c")
+APRON, APRON_DK = rgb("efe2cc"), rgb("c8ab7c")
 LEAF, LEAF_DK, LEAF_HI = rgb("5f9e42"), rgb("2f6a34"), rgb("a2c65c")
 PET_C, PET_E = rgb("d9567e"), rgb("fbb7c0")
 BRASS, BRASS_HI, BRASS_DK = rgb("c69245"), rgb("f0cc7c"), rgb("70461e")
@@ -237,7 +237,7 @@ def flower_paint(p, n, ao, pc, big):
 
 def apron(p, n, ao):
     x, y, z = p.T
-    c = mix(np.broadcast_to(APRON, p.shape).astype(F), rgb("fff2d0"), 0.5 * S.fbm(x, z, y, f=9.0, oct=3))
+    c = mix(np.broadcast_to(APRON, p.shape).astype(F), rgb("fbf1e0"), 0.5 * S.fbm(x, z, y, f=9.0, oct=3))
     front = n[:, 1] > -0.2
     # stitching: dashes above the hem and down the sides
     half = 0.10 + 0.112 * smooth(0.0, 0.62, (K.APRON_TOP - z) / (K.APRON_TOP - K.APRON_HEM)) + 0.012

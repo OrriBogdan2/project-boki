@@ -571,10 +571,10 @@ for pi_, p in enumerate(pieces):
         emi[np.nonzero(m)[0]] = P.rgb("ffdf9c")[None, :] * (K.smooth(0.72, 0.97, tt) * 0.42)[:, None]
         c = P.mix(c, P.rgb("ffeeb4"), K.smooth(0.72, 0.95, tt))
     elif nm.startswith("lid"):
-        c = np.broadcast_to(P.ROSE * 0.98 + P.PINK * 0.02, q.shape).astype(F).copy()
+        c = np.broadcast_to(P.PINK, q.shape).astype(F).copy()
         e_ = K.h(K.EYE * (1 if nm.endswith("R") else -1, 1, 1)).astype(F)
         ax = K.eye_axis(1 if nm.endswith("R") else -1).astype(F)
-        c = P.mix(c, P.INK, K.smooth(0.55, 0.72, ((q - e_) @ ax) / K.EYE_R))
+        c = P.mix(c, P.INK, K.smooth(0.64, 0.72, ((q - e_) @ ax) / K.EYE_R))
     elif nm.startswith("brow"):
         c = np.broadcast_to(P.rgb("fbd3d2"), q.shape).astype(F)
     elif nm == "nose":
