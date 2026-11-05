@@ -1,0 +1,83 @@
+0278 _— ™ 
+0279 Fire a projectile. 
+0280 Fire a projectile. 
+0281 _ — = | Fire a projectile. 
+0282 Fire a projectile. 
+0283 ARCSLINGER Fire a projectile. 
+0284 ARCSLINGER Fire a projectile. 
+0285 ARCSLINGER Fire a projectile. 
+0286 ARCSLINGER Fire a projectile. 
+0287 Fire a projectile. 
+0288 Fire a projectile. 
+0289 ——_<, | Fire a projectile. 
+0290 ——_<€, Fire a projectile. 
+0291 ——_<, Fire a projectile. 
+0292 ——-, Fire a projectile. 
+0293 TRICKSHOT 7s [RMB] 08 Throw chain bolas, stunning if they hit 2 targets. —— 
+0294 (] TRICKSHOT sis 8 A) remei 400 Throw chain bolas, stunning if they hit 2 targets. — A 
+0295 (] TRICKSHOT sis 8 ’ | ramet 400 Throw chain bolas, stunning if they hit 2 targets. ———— ll 
+0296 (] TRICKSHOT sis 8 j | tamei 400 Throw chain bolas, stunning if they hit 2 targets. ———————— 
+0297 (] TRICKSHOT sis 8 j | remei 400 Throw chain bolas, stunning if they hit 2 targets. —————— 
+0298 (] TRICKSHOT sis 8 j | remei 400 Throw chain bolas, stunning if they hit 2 targets. —————— 
+0299 = ll Ea TRICKSHOT ois 8 IRMBI 400 Throw chain bolas, stunning if they hit 2 targets. 1. 2. 
+0300 —_— Fell ee TRICKSHOT ois 8 IRMBI 400 Throw chain bolas, stunning if they hit 2 targets. —_ fo 
+0301 ee TRICKSHOT Gis . | A>) meme) wr Throw chain bolas, stunning if they hit 2 targets. 
+0302 le i" ee Throw chain bolas, stunning if they hit 2 targets. j 
+0303 ee & TRICKSHOT sis 8 LAS) Met arg Throw chain bolas, stunning if they hit 2 targets. 
+0304 
+0305 CARTWHEEL az Z\ I SHIFTI Efe} Short dash that empowers next Arcslinger (LMB). Hitting the empowered shot resets Cartwheel. 
+0306 CARTWHEEL 423 8 Z\ I SHIFTI 50 Short dash that empowers next Arcslinger (LMB). Hitting the empowered shot resets Cartwheel, 
+0307 CARTWHEEL 423 8 A\ iL SHIFTI 504 Short dash that empowers next Arcslinger (LMB). Hitting the ‘empowered shot resets Cartwheel. 
+0308 CARTWHEEL 423 8 A iL SHIFTI 50, Short dash that empowers next Arcslinger (LMB). Hitting the empowered shot resets Cartwheel. 
+0309 CARTWHEEL 423 8 2) I SHIFTI 50 ‘ Short dash that empowers next Areslinger (LMB). Hitting the empowered shot resets Cartwheel. 
+0310 CARTWHEEL 423 8 Z\ I SHIFTI 86 Short dash that empowers next Arcslinger (LMB). Hitting the empowered shot resets Cartwheel. 
+0311 CARTWHEEL 423 8 Z\ I SHIFTI 86 Short dash that empowers next Arcslinger (LMB). Hitting the empowered shot resets Cartwheel. 
+0312 CARTWHEEL 423 © Z| I SHIFTI 86 Short dash that empowers next Arcslinger (LMB). Hitting the empowered shot resets Cartwheel. 
+0313 CARTWHEEL 423 8 2) IL SHIFT] 86 Short dash that empowers next Arcslinger (LMB). Hitting the empowered shot resets Cartwheel. j 
+0314 = L. CARTWHEEL 423 8 Z| I SHIFTI 86 Short dash that empowers next Arcslinger (LMB). Hitting the empowered shot resets Cartwheel. 
+0315 CARTWHEEL 423 4 Z\ I SHIFTI 86 Short dash that empowers next Arcslinger (LMB). Hitting the empowered shot resets Cartwheel. 
+0316 CARTWHEEL 423 8 Z\ I SHIFTI 86 r Short dash that empowers next Arcslinger (LMB). Hitting the ‘empowered shot resets Cartwheel. 
+0317 CARTWHEEL 423 8 Z\ I SHIFTI 86 Short dash that empowers next Arcslinger (LMB). Hitting the ‘empowered shot resets Cartwheel. 
+0318 CARTWIHEEL 423 8 Z\ I SHIFTI 86 Short dash that empowers next Arcslinger (LMB). Hitting the ‘empowered shot resets Cartwheel, 
+0319 CARTWIHEEL 423 8 Z\ I SHIFTI 86 Short dash that empowers next Arcslinger (LMB). Hitting the ‘empowered shot resets Cartwheel. 
+0320 CARTWHEEL 423 8 Z\ I SHIFTI 86 Short dash that empowers next Arcslinger (LMB). Hitting the ‘empowered shot resets Cartwheel, 
+0321 , 2 . x 
+0322 PHANTOM DAGGER ts § | 300 Throw a dagger. Re-activate to teleport to its location. 
+0323 | PHANTOM DAGGER 1 8 r3) ° Throw a dagger. Re-activate to teleport to its location. 
+0324 PHANTOM DAGGER ts § | 306 Throw a dagger. Re-activate to teleport to its location. ar —_— 
+0325 PHANTOM DAGGER ts § _| 306 Throw a dagger. Re-activate to teleport to its location. 
+0326 PHANTOM DAGGER ts § _| 306 Throw a dagger. Re-activate to teleport to its location. 
+0327 PHANTOM DAGGER ts 8 13] 300 Throw a dagger. Re-activate to teleport to its location. 
+0328 >| PHANTOM DAGGER ts 8 i] 200 Throw a dagger. Re-activate to teleport to its location. 
+0329 >| PHANTOM DAGGER ts 8 v3] 300 Throw a dagger. Re-activate to teleport to its location. 
+0330 | PHANTOM DAGGER ts re] 00 Throw a dagger. Re-activate to teleport to its location. | % 
+0331 | PHANTOM DAGGER ts 8 11 100 Throw a dagger. Re-activate to teleport to its location. | = 
+0332 ==, SS] PHANTOM DAGGER ts 8 tel 300 Throw a dagger. Re-activate to teleport to its location. 
+0333 a PHANTOM DAGGER ts 8 S| er 300» Throw a dagger. Re-activate to teleport to its location. 
+0334 PHANTOM DAGGER ts § | 306 Throw a dagger. Re-activate to teleport to its location. 
+0335 PHANTOM DAGGER ts 4 i] 200 Throw a dagger. Re-activate to teleport to its location. 
+0336 
+0337 ———————E———EE lai) DEATH BLOSSOM 23.18 | mam 200 Shoot at each nearby enemy over 2s. ‘Ww. Sell , 
+0338 SSS lay DEATH BLOSSOM 2o1s § | im 200 Shoot at each nearby enemy over 2s. 
+0339 lay DEATH BLOSSOM 23.8 | m 200 Shoot at each nearby enemy over 2s. 
+0340 _—— DEATH BLOSSOM 2a.is IRI 206 Shoot at each nearby enemy over 2s. ae 
+0341 DEATH BLOSSOM 23.18 | 206 Shoot at each nearby enemy over 2s. 
+0342 —EEE DEATH BLOSSOM 2a.is J im 200 Shoot at each nearby enemy over 2s. a 
+0343 ——E DEATH BLOSSOM 2a.1s | i 206 ‘Shoot at each nearby enemy over 2s. i ———— oe 
+0344 i ly DEATH BLOSSOM 2a.is J m 200 Shoot at each nearby enemy over 2s. ~~ ~ 
+0345 lay] DEATH BLOSSOM 2o.1s § | i 200 Shoot at each nearby enemy over 2s. 
+0346 DEATH BLOSSOM 20.18 RI 200 ‘Shoot at each nearby enemy over 2s. \ ——EE 
+0347 EEE lil DEATH BLOSSOM 2.18 | iri 206 We ‘Shoot at each nearby enemy over 2s. | —— 
+0348 - ly] DEATH BLOSSOM 29.18 i} m 200 Shoot at each nearby enemy over 2s. oo = 
+0349 “ ly DEATH BLOSSOM 20.18 | im 200 Shoot at each nearby enemy over 2s. EE * 
+0350 ly] DEATH BLOSSOM 2.18 | iri 206 ‘Shoot at each nearby enemy over 2s. a ss («sl [ | 
+0351 ) | DEATH BLOSSOM 23.18 § | 200 Shoot at each nearby enemy over 2s. 
+0352 ) | DEATH BLOSSOM 23.18 § | me 200 Shoot at each nearby enemy over 2s. 
+0353 a [—_ ) | DEATH BLOSSOM 20.18 | ms 200 Shoot at each nearby enemy over 2s. ee 
+0354 a ly DEATH BLOSSOM 23.18 | iri 206 | Shoot at each nearby enemy over 2s. > 
+0355 LW] DEATH BLOSSOM 2a.is ’ J 1p 206 Shoot at each nearby enemy over 2s. 
+0356 ——_— —_ ly] DEATH BLOSSOM 2a.1s | i 200 Shoot at each nearby enemy over 2s. 
+0357 = Ly] DEATH BLOSSOM 2a.is 1] 206 a ss ee Shoot at each nearby enemy over 2s. 
+0358 _— 
+0359 i 
+0360 aif 

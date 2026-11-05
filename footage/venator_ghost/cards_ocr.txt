@@ -1,0 +1,56 @@
+0523 ~~ Ss 
+0524 ~~ Ss 
+0525 vr a 
+0526 = 2a _ se” cl Hold to fire, deals extra damage to dazed enemies. 
+0527 ae” cl Hold to fire, deals extra damage to dazed enemies. 
+0528 vei a ae” cl Hold to fire, deals extra damage to dazed enemies. 
+0529 A” lS Hold to fire, deals extra damage to dazed enemies. 
+0530 A” ls Hold to fire, deals extra damage to dazed enemies. 
+0531 
+0532 = uk ~ Throw a sticky grenade, dazes enemies. | 
+0533 SPIKE GRENADE sas, © . IRMBI 200 rhron aaticyineretel teres enerieel 
+0534 SS oT, SPIKE GRENADE Sas ty) Z 200 Throw a sticky grenade, dazes enemies. JJ 
+0535 ee EE SPIKE Sas . IRMBI Di Throw a sticky grenade, dazes enemies. “a T 
+0536 = Se eee ) SPIKE GRENADE sas 2 Throw a sticky grenade, dazes enemies. f . y 4 
+0537 ‘ SPIKE GRENADE Sas : IRMBI 206 oe Throw a sticky grenade, dazes enemies. r r a 
+0538 shee D oy Throw a sticky grenade, dazes enemies. 
+0539 SPIKE GRENADE 5.4s is OD Throw a sticky grenade, dazes enemies. 
+0540 SPIKE GRENADE 5.48 is aD Throw a sticky grenade, dazes enemies. 
+0541 SPIKE GRENADE 5.48 is aD Throw a sticky grenade, dazes enemies. 
+0542 S| SPIKE GRENADE Sas . IRMBI. 200 Throw a sticky grenade, dazes enemies. 
+0543 — SPIKE GRENADE Sas . IRMBI 200 Throw a sticky grenade, dazes enemies. — ee 
+0544 -_ — SPIKE GRENADE Sas . IRMBI 200 Throw a sticky grenade, dazes enemies. _— £_eee 
+0545 -_ — SPIKE GRENADE Sas . IRMBI 200 Throw a sticky grenade, dazes enemies. 4, gE 32 
+0546 | A. 
+0547 COMBAT SLIDE 158 8 A\ a suieri 86 Slide forward, hold to slide further. 
+0548 a | COMBAT SLIDE om | 1 sHETI BO Slide forward, hold to slide further. | aw 
+0549 ——— | COMBAT SLIDE iss 8 ‘1 SHIFTI BO Slide forward, hold to slide further. a 
+0550 eel = a | COMBAT SLIDE om | ‘IL SHIETI BO Slide forward, hold to slide further. | 
+0551 be | COMBAT SLIDE iss 1 SHIFTI wo | Slide forward, hold to slide further. 
+0552 Sa i) Come sree iss 4 1 SHIFTI or God 
+0553 COMBAT SLIDE 15s § A) it sHieTI BO Slide forward, hold to slide further. 
+0554 COMBAT SLIDE om | I SHIFTI BO Slide forward, hold to slide further. a. = ee ll OO 
+0555 COMBAT SLIDE iss ML SHIFTI BO Slide forward, hold to slide further. 
+0556 i, 
+0557 A ION CANNON tos 4 11 00 Fire a long range laser beam. &§ 
+0558 7 ION CANNON os wr) cr 400 Fire a long range laser beam. 
+0559 eel ION CANNON mS v3) 406 * Fire a long range laser beam. | 
+0560 |Z ION CANHON tos § 7"! 400 Fire a long range laser beam. 
+0561 4 A ION CANI 7" te] Fire a long range lase 1 
+0562 eal MINI NUKE arss tsa} (RY 406 Fire a mini nuke at target location. 
+0563 —_ EE E ] MINI NUKE 37.58 Ler} IRI 406 Fire a mini nuke at target location. Ee ee "|, 
+0564 MINI NUKE 37.58 Ler} IRI 400 Fire a mini nuke at target location. 
+0565 MINI NUKE ars tsa} (RY 406 Fire a mini nuke at target location. 
+0566 MINI NUKE anss tse] (RI 406 Fire a mini nuke at target location. 
+0567 MINI NUKE ars tse] (RI 406 Fire a mini nuke at target location. 
+0568 MINI NUKE arss tse] (RI 406 Fire a mini nuke at target location. 
+0569 ee at E ] MINI NUKE 3758 bse} (RI 406 Fire a mini nuke at target location. rs - 
+0570 Ell E } MINI NUKE 375s ber} (RI 406 Fire a mini nuke at target location. rs - 
+0571 eat E } MINI NUKE 375s bse} (RI 406 Fire a mini nuke at target location. rs - 
+0572 eat E } MINI NUKE 375s bse} (RI 406 Fire a mini nuke at target location. rs - 
+0573 eal E MINI NUKE 375s bse} (RI 406 Fire a mini nuke at target location. rs - 
+0574 Et E MINI NUKE 375s bse} (RI 406 Fire a mini nuke at target location. rs wT 
+0575 Wf 
+0576 — ~~ 
+0577 ~ an 
+0578 rt. \ etal _— , Navy) Gain vision of injured hunters through the fog of war. {| Huntress can climb double highground walls with jump. She 

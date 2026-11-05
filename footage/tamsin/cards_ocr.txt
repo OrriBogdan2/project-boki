@@ -1,0 +1,120 @@
+1055  —— 
+1056  —— 
+1057 ICE DART Hold to fire homing Ice Darts. H stacks to deal damage in an are 
+1058 ICE DART oss) © la (ILMB Hold to fire homing Ice Darts. Hits add Shatter, detonating at 8 stacks to deal damage in an area, 
+1059 ICE DART oss) © la (ILMB Hold to fire homing Ice Darts. Hits add Shatter, detonating at 8 stacks to deal damage in an area. 
+1060 ICE DART oss) © la {ILMB Hold to fire homing Ice Darts. Hits add Shatter, detonating at 8 stacks to deal damage in an area. 
+1061 ICE DART oss) © # ILMB Hold to fire homing Ice Darts. Hits add Shatter, detonating at 8 stacks to deal damage in an area. 
+1062 ICE DART oss) © # ILMB Hold to fire homing Ice Darts. Hits add Shatter, detonating at 8 stacks to deal damage in an area. 
+1063 ICE DART oss) © # ILMB Hold to fire homing Ice Darts. Hits add Shatter, detonating at 8 stacks to deal damage in an area. 
+1064 Peal = [LM Hold to fire homing Ice Darts. Hits add Shatter, detonating at 8 stacks to deal damage in an area. 
+1065 _ ve [LME Hold to fire homing Ice Darts. Hits add Shatter, detonating at 8 stacks to deal damage in an area. 
+1066 _ ve [LME Hold to fire homing Ice Darts. Hits add Shatter, detonating at 8 stacks to deal damage in an area. 
+1067 _ ve [LME Hold to fire homing Ice Darts. Hits add Shatter, detonating at 8 stacks to deal damage in an area. 
+1068 _ ve [LME Hold to fire homing Ice Darts. Hits add Shatter, detonating at 8 stacks to deal damage in an area. 
+1069 _ ve [LME Hold to fire homing Ice Darts. Hits add Shatter, detonating at 8 stacks to deal damage in an area. 
+1070 ICE DART oss) & la {LMB Hold to fire homing Ice Darts. Hits add Shatter, detonating at 8 stacks to deal damage in an area, 
+1071 ICE DART oss) 8 4 {LMB Hold to fire homing Ice Darts. Hits add Shatter, detonating at 8 stacks to deal damage in an area. 
+1072 ICE DART oss) 8 4 {LMB Hold to fire homing Ice Darts. Hits add Shatter, detonating at 8 stacks to deal damage in an area. 
+1073 ee 
+1074 Fi ICE SPEAR oss |} emer 26 Fire a spear that creates an slow zone, detonating after a short delay. 
+1075 Fi ICE SPEAR oss | emer 26 Fire a spear that creates an slow zone, detonating after a short delay. 
+1076 Fi ICE SPEAR oss § [| emer 26 Fire a spear that creates an slow zone, detonating after a short delay. 
+1077 Fi ICE SPEAR oss | emer 26 Fire a spear that creates an slow zone, detonating after a short delay. 
+1078 [ gv| ICE SPEAR oss (A) comes 26 Fire a spear that creates an slow zone, detonating after a short delay. 
+1079 [ gr| ICE SPEAR oss § (A) comes 26 Fire a spear that creates an slow zone, detonating after a short delay. 
+1080 [ gr| ICE SPEAR oss (A) comes 26 Fire a spear that creates an slow zone, detonating after a short delay. 
+1081 [ gy| ICE SPEAR 03s § 1) comes 26 Fire a spear that creates an slow zone, detonating after a short delay. 
+1082 [ gv| ICE SPEAR 03s § 1) comes 26 Fire a spear that creates an slow zone, detonating after a short delay. 
+1083 [ gr| ICE SPEAR 03s § 1) comes 26 Fire a spear that creates an slow zone, detonating after a short delay. 
+1084 [laa | ICE SPEAR oss § | emer 26 Fire a spear that creates an slow zone, detonating after a short delay. 
+1085 [aa | ICE SPEAR 03s § [| emer 26 Fire a spear that creates an slow zone, detonating after a short delay. 
+1086 Fi ICE SPEAR oss § [| emer 26 Fire a spear that creates an slow zone, detonating after a short delay. 
+1087 Fi ICE SPEAR oss | | emer 26 Fire a spear that creates an slow zone, detonating after a short delay. 
+1088 Fi ICE SPEAR oss § | emer 26 Fire a spear that creates an slow zone, detonating after a short delay. 
+1089 ao. * 
+1090 ps SHATE 8.38 y I SHIFTI 60 Hold to skate in your direction, release to stop. a ae | 
+1091 ————_ el eB SHATE a3s © IL SHIFTI 60 Hold to skate in your direction, release to stop. ——E—ErErErErErErrr— ES ae 
+1092 EE SB SHATE eas I SHIFTI 60 Hold to skate in your direction, release to stop. 7 i SS }8£3 =x 
+1093 —— eee —EEE—————— SB SHATE eas IL SHIFTI 60 Hold to skate in your direction, release to stop. << 7 
+1094 SSS. SB SHATE a33 4 ez 1L SHIFTI bo Hold to skate in your direction, release to stop. | - ee 
+1095 — a SHATE sas I SHIFTI 6O Hold to skate in your direction, release to stop. ——_ 
+1096 SHATE sas I SHIFTI 6O Hold to skate in your direction, release to stop. 
+1097 SKATE 033 © I SHIFTI 6O Hold to skate in your direction, release to stop. 
+1098 = SHATE sas I SHIFTI 6O Hold to skate in your direction, release to stop. ‘Tr ' 
+1099 SHATE sas I SHIFTI 6O Hold to skate in your direction, release to stop. 
+1100 bs SHATE sas I SHIFTI 6O Hold to skate in your direction, release to stop. 
+1101 il SKATE sas I SHIFTI 6O Hold to skate in your direction, release to stop. . | 
+1102 = SHATE sas 1 SHIFT 50 Hold to skate in your direction, release to stop. a 
+1103 SHATE sas 1 SHIFT 50 Hold to skate in your direction, release to stop. 
+1104 ———e aE bs SHATE eas Pz 1 SHIFTI 60 Hold to skate in your direction, release to stop. ee 
+1105 — eB SHATE eas I SHIFTI %O | Hold to skate in your direction, release to stop. | 
+1106 a — SB SHATE eas 8 I SHIFTI %O Hold to skate in your direction, release to stop. | 
+1107 SHATE a3s § bs I SHIFTI 6O Hold to skate in your direction, release to stop. 
+1108 SHATE as 2 “| 1 SHIFTI 60 Hold to skate in your direction, release to stop. 
+1109 OO ———— SHATE ass §) I SHIFTI 6O Hold to skate in your direction, release to stop. we ry) 
+1110 = SHATE 83s Uy bs 1 SHIFT 66 Hold to skate in your direction, release to stop. 
+1111 bs SHATE a33 © IL SHIFTI 60 Hold to skate in your direction, release to stop. 0 _ 
+1112 SHATE sas 1 SHIFT 50 Hold to skate in your direction, release to stop. 
+1113 = SKATE 13 IL SHIFTI 50 Hold to skate in your direction, release to stop. > y} 
+1114 SHATE sas 4 IL SHIFTI 66 Hold to skate in your direction, release to stop. 
+1115 ia : Ss 10 WALL / Wl ‘Summon en ice wall thet pushes enemies, {Som 
+1116 . = ICE WALL wis § h 3) 306 ‘Summon an ice wall that pushes enemies. A —e wee 
+1117 ICE WALL 17s § ey 306 ‘Summon an ice wall that pushes enemies. 
+1118 ICE WALL 17s § Ye 306 ‘Summon an ice wall that pushes enemies. 
+1119 eee ICE WALL 17s § U Ua] 306 ‘Summon an ice wall that pushes enemies. 
+1120 ICE WALL wis § B) 00 ‘Summon an ice wall that pushes enemies. 7 
+1121 ICE WALL wis § B) 00 ‘Summon an ice wall that pushes enemies. : , 
+1122 | ICE WALL 1e7s § yc 306 Summon an ice wall that pushes enemies. 
+1123 ry ICE WALL 17s @ B) 300 ‘Summon an ice wall that pushes enemies. 
+1124 ICE WALL wis § a) 300 ‘Summon an ice wall that pushes enemies. 
+1125 ICE WALL wis § a) 100 ‘Summon an ice wall that pushes enemies. 
+1126 ICE WALL wis § a) 100 ‘Summon an ice wall that pushes enemies. 
+1127 | 
+1128 Ed ICE CRASH 45as & —— Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1129 Ed ICE CRASH 458s & —— Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1130 Ed ICE CRASH 458s & —— Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1131 Ed ICE CRASH 458s & —— Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1132 Ed ICE CRASH 458s 4 RI 90 Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1133 Ed ICE CRASH 458s 4 RI 90 Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1134 Ed ICE CRASH 458s 4 RI 90 Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1135 Ed ICE CRASH 458s 4 RI 90 Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1136 Ed ICE CRASH 458s 4 RI 90 Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1137 Ed ICE CRASH 458s 4 RI 90 Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1138 Ed ICE CRASH 458s & RI} 90 Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1139 L Ed ICE CRASH 4588 8 RI} Ke) Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1140 L Ed ICE CRASH 458s 8 RI} Ke) Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1141 L Ed ICE CRASH 458s 8 RI} Ke) Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1142 L Ed ICE CRASH 458s 8 RI} Ke) Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1143 L Ed ICE CRASH 458s 8 RI} 90 Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1144 Ed ICE CRASH 458s & RI Ke) Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1145 Ed ICE CRASH 458s & [RI 590 Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1146 Ed ICE CRASH 458s & RI Ke) Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1147 Ed ICE CRASH Coe [RI Ke) Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1148 Ed ICE CRASH 458s &) [Ry Ke) Become invulnerable and create a large slowing zone. Stuns all targets after a delay. 
+1149 
+1150 
+1151 _ z=, 
+1152 
+1153 antl —————S 
+1154 > 
+1155 . a *. ci —— a 
+1156 ———ti(‘é~S 
+1157 
+1158 ~*~ | 
+1159 LY > 
+1160 _- , 
+1161 - £ _. \ ‘ef 
+1162 
+1163 
+1164 ; a : Mm 
+1165 ss ‘Ne vn = 
+1166 yy 
+1167 a 
+1168 7 a 
+1169 a 
+1170 
+1171 = Ae 
+1172 | acl ) ; ee 2 | 
+1173 
+1174 

@@ -1,0 +1,65 @@
+0214 _ ™ 
+0215 _ = 
+0216 Hold to fire your flamethrower. 
+0217 Hold to fire your flamethrower. 
+0218 Hold to fire your flamethrower. io 
+0219 Hold to fire your flamethrower. 
+0220 Hold to fire your flamethrower. 
+0221 Hold to fire your flamethrower. 
+0222 Hold to fire your flamethrower. 
+0223 Hold to fire your flamethrower. 
+0224 Hold to fire your flamethrower. 
+0225 Hold to fire your flamethrower. FF 
+0226 Hold to fire your flamethrower. FF 
+0227 Hold to fire your flamethrower. 
+0228 Sie Hold to fire your flamethrower. 
+0229 | FIRE BOLT sas § IRMBI 206 Shoot a long-range projectile that deals damage and spreads ignite to nearby enemies. 
+0230 | FIRE BOLT sas § IRMBI 206 Shoot a long-range projectile that deals damage and spreads ignite to nearby enemies. 
+0231 | FIRE BOLT sas § IRMBI 206 Shoot a long-range projectile that deals damage and spreads ignite to nearby enemies. 
+0232 | FIRE BOLT sas § IRMBI 206 Shoot a long-range projectile that deals damage and spreads ignite to nearby enemies. 
+0233 | FIRE BOLT sas § IRMBI 206 Shoot a long-range projectile that deals damage and spreads ignite to nearby enemies. | 
+0234 A| FIRE BOLT Sas § RMB] 206 Shoot a long-range projectile that deals damage and spreads ignite to nearby enemies. 
+0235 A| FIRE BOLT Sas § RMB 2006 Shoot a long-range projectile that deals damage and spreads ignite to nearby enemies. 
+0236 A| FIRE BOLT Sas RMB 206 Shoot a long-range projectile that deals damage and spreads ignite to nearby enemies. 
+0237 A| FIRE BOLT sas @ IRMBI 200 Shoot a long-range projectile that deals damage and spreads ignite to nearby enemies. 
+0238 A| FIRE BOLT Sas RMB] 200 Shoot a long-range projectile that deals damage and spreads ignite to nearby enemies. 
+0239 A| FIRE BOLT sas RMB] 200 Shoot a long-range projectile that deals damage and spreads ignite to nearby enemies. ag ool CD” 
+0240 A| FIRE BOLT sas RMB] 200 Shoot a long-range projectile that deals damage and spreads ignite § to nearby enemies. | 
+0241 A| FIRE BOLT sas @ RMB] 200 Shoot a long-range projectile that deals damage and spreads ignite § to nearby enemies. | 
+0242 ig 
+0243 Ce EE [*] FLAME SKULL BASH oas| IL SHIFTI 206 Dash a short distance and impact enemies, applying Ignite. a wa F; 
+0244 = - [@] FLAME SHULL BASH oas| IL SHIFTI 20° Dash a short distance and impact enemies, applying Ignite. Z > s: 
+0245 ——_ == a [*] FLAME SKULL BASH oas IL SHIFTI 206 Dash a short distance and impact enemies, applying \gnite. —_—.:— Se 
+0246 [#] FLAME SHULL BASH oas| IL SHIFT © Dash a short distance and impact enemies, applying Ignite. 
+0247 f “4 a FLAME Si Af I SHIFTI Dash a short distance a 
+0248 | FLAME SHIELD 83s LS] 66 Damage nearby enemies, apply Anti-Hea!, and pull them in. Gain a shield based on the number of enemies hit. 
+0249 | FLAME SHIELD 83s LS] 66 Damage nearby enemies, apply Anti-Hea!, and pull them in. Gain a shield based on the number of enemies hit. 
+0250 | FLAME SHIELD 83s LS] 66 Damage nearby enemies, apply Anti-Hea!, and pull them in. Gain a shield based on the number of enemies hit. 
+0251 | FLAME SHIELD 83s i Ey bo Damage nearby enemies, apply Anti-Hea!, and pull them in. Gain a shield based on the number of enemies hit. 
+0252 | FLAME SHIELD 83s LS] 66 Damage nearby enemies, apply Anti-Hea!, and pull them in. Gain a shield based on the number of enemies hit. 
+0253 | FLAME SHIELD 83s 8 LS] 66 Damage nearby enemies, apply Anti-Hea!, and pull them in. Gain a shield based on the number of enemies hit. 
+0254 | FLAME SHIELD 83s i La] bo Damage nearby enemies, apply Anti-Hea!, and pull them in. Gain a shield based on the number of enemies hit. ae a sed 
+0255 r 4 FLAME SHIELD 83s i j IED 5O Damage nearby enemies, apply Ant-Hea!, and pull them in. Gain a shield based on the number of enemies hit. 
+0256 F 4 FLAME SHIELD 83s iu j IED 50 Damage nearby enemies, apply Anti-Hes!, and pull them in. Gain a shield based on the number of enemies hit. 
+0257 F 4 FLAME SHIELD 83s iu j IED bo Damage nearby enemies, apply Anti-Hes!, and pull them in. Gain a shield based on the number of enemies hit. 
+0258 y a 
+0259 a ri JETPACK 255 8 IRI 06 Lift off and fly forward, setting the ground on fire behind you. QW: — 
+0260 JETPACK 255 4 IRI 06 Lift off and fly forward, setting the ground on fire behind you. 
+0261 _— JETPACK 2 8 IRI 06 ee elle © Lift off and fly forward, setting the ground on fire behind you. 
+0262 JETPACK 255 8 IRI 406 Lift off and fly forward, setting the ground on fire behind you. 
+0263 JETPACK 255 4 IRI 406 Lift off and fly forward, setting the ground on fire behind you. 
+0264 —————— ae JETPACK 255 8 IRI 406 Lift off and fly forward, setting the ground on fire behind you. = . “ a 
+0265 — a rd JETPACK 258 vl IRI 406 Lift off and fly forward, setting the ground on fire behind you. } ——— i 
+0266 — = | JETPACK as 8 7) 406 Lift off and fly forward, setting the ground on fire behind you. ee 
+0267 hh JETPACK 2s 8 [RI 400 Lift off and fly forward, setting the ground on fire behind you. g 
+0268 JETPACK 255 4 IRI 06 Lift off and fly forward, setting the ground on fire behind you. 
+0269 en JETPACK 2s 4” IRI 406 Lift off and fly forward, setting the ground on fire behind you. 
+0270 JETPACK 255 4 IRI cre} Lift off and fly forward, setting the ground on fire behind you. oe " 2 oo 
+0271 EE ’ ri JETPACK 2s 8 | im 06 _— a Lift off and fly forward, setting the ground on fire behind you. ee. —_" 
+0272 EE ri JETPACK 2s 8 TRI 406 Lift off and fly forward, setting the ground on fire behind you. — i 
+0273 EE ri JETPACK 2s 8 [RI 406 Lift off and fly forward, setting the ground on fire behind you. — i 
+0274 ee rl JETPACK 2s 8 RI 406 Lift off and fly forward, setting the ground on fire behind you. ee a 
+0275 —S /~ - ir JETPACK 2s 8 40 f RI ( i Lift off and fly forward, setting the ground on fire behind you. 
+0276 a 4 
+0277 _— ™ 
+0278 _— ™ 

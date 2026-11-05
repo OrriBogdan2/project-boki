@@ -1,0 +1,81 @@
+0001 Spells apply Static to enemies. At 4 stacks, they are fully S' Charged and can be dashed through to consume this for he damage. 
+0002 ‘Spells apply Static to enemies. At 4 stacks, they are fully Static Charged and can be dashed through to consume this for heavy damage. 
+0003 ‘Spells apply Static to enemies. At 4 stacks, they are fully Static Charged and can be dashed through to consume this for heavy damage. 
+0004 == Spells apply Static to enemies. At 4 stacks, they are fully Static Charged and can be dashed through to consume this for heavy damage. 
+0005 a LIGHTNING = Min Shoot a bolt of lightning. 
+0006 LIGHTNING Shoot a bolt of lightning. 
+0007 LIGHTNING Shoot a bolt of lightning. 
+0008 
+0009 LIGHTNING SPEAR m8 we (RMBI 206 Throw a lightning spear that deals damage, knocks enemies back, and creates one Lightning Orb. 
+0010 LIGHTNING SPEAR w 8 me IRMBI 206 Throw a lightning spear that deals damage, knocks enemies back, and creates one Lightning Orb. 
+0011 LIGHTNING SPEAR w 8 me IRMBI 206 Throw a lightning spear that deals damage, knocks enemies back, and creates one Lightning Orb. 
+0012 LIGHTNING SPEAR m8 we IRMBI 206 Throw a lightning spear that deals damage, knocks enemies back, and creates one Lightning Orb. 
+0013 LIGHTNING SPEAR m8 we IRMBI 206 Throw a lightning spear that deals damage, knocks enemies back, and creates one Lightning Orb. 
+0014 LIGHTNING SPEAR ws 8 we IRMBI 200 Throw a lightning spear that deals damage, knocks enemies back, and creates one Lightning Orb. 
+0015 LIGHTNING SPEAR ws 8 we IRMBI 200 Throw a lightning spear that deals damage, knocks enemies back, and creates one Lightning Orb. 
+0016 KS LIGHTNING SPEAR i 8 we IRMBI 206 | Throw a lightning spear that deals damage, knocks enemies back, and creates one Lightning Orb. 
+0017 KS LIGHTNING SPEAR im) we IRMBI 206 | Throw a lightning spear that deals damage, knocks enemies back, and creates one Lightning Orb. 
+0018 KS LIGHTNING SPEAR im) we IRMBI 206 | Throw a lightning spear that deals damage, knocks enemies back, and creates one Lightning Orb. 
+0019 u mi Throw a lig and creates 
+0020 SURGE 67s 4 11 SHIFT 250 Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0021 SURGE e715 11 SHIFTI 250} Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0022 heme SURGE ois § 11 SHIFTI 250 EES Ee Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0023 SURGE eis § 1 SHIFTI xs) Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0024 SURGE ois § 1 SHIFTI xs) Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0025 SURGE ois § 1 SHIFTI xs) Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0026 SURGE ois § 1 SHIFTI xs) Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0027 SURGE ois § 1 SHIFTI Ux) Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0028 SURGE ois 8 1 SHIFTI Ux) Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0029 SURGE ois § 1 SHIFTI 20 Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0030 SURGE ois § 1 SHIFTI 20 Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0031 SURGE eis § 1 SHIFTI 20 Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0032 SURGE eis 11 SHIFTI 250 Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0033 SURGE eis 11 SHIFTI 250 Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0034 SURGE eis § 1 SHIFTI 20 Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0035 SURGE e7s I f SHIFTI 20 Hold to charge up and release to dash. Detonates fully Static Charged enemies that are passed through. 
+0036 — We 
+0037 LIGHTNING JAVELIN 925 8 Ua EX 0) Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0038 LIGHTNING JAVELIN 925 4 Ua Xo} Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0039 LIGHTNING JAVELIN 925 4 Ua] Xo} Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0040 LIGHTNING JAVELIN 92s 4 ia] 20 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0041 LIGHTNING JAVELIN 92s 4 ia] 26 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0042 LIGHTNING JAVELIN 92s 4 ia] 20 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0043 LIGHTNING JAVELIN 92s EI 230 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0044 LIGHTNING JAVELIN 92s EI 230 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0045 LIGHTNING JAVELIN 92s 8 I 230 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0046 LIGHTNING JAVELIN 92s 4 EI 230 Strike the ground with lightning and pull enemies and wisps in the given direction, 
+0047 LIGHTNING JAVELIN 92s 4 EI 230 Strike the ground with lightning and pull enemies and wisps in the given direction, 
+0048 LIGHTNING JAVELIN 92s 4 EI 230 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0049 LIGHTNING JAVELIN 92s 4 EI 230 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0050 LIGHTNING JAVELIN 92s 4 EI 230 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0051 LIGHTNING JAVELIN 92s 4 EI 230 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0052 LIGHTNING JAVELIN 92s 4 EI 230 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0053 (z 7 LIGHTNING JAVELIN 925 8 Lame) LET 20 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0054 (z | LIGHTNING JAVELIN 925 8 Lame) LET 20 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0055 LIGHTNING JAVELIN 925 8 tL 20 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0056 LIGHTNING JAVELIN 925 8 tL 20 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0057 LIGHTNING JAVELIN 92s 4 1 20 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0058 LIGHTNING JAVELIN 92s 4 1 20 Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0059 LIGHTNING JAVELIN 923 4 [a] 20 Strike the ground with lightning and pull enemies and wisps in the given direction, 
+0060 LIGHTNING JAVELIN 928 4 [a] 250 Strike the ground with lightning and pull enemies and wisps in the given direction, 
+0061 LIGHTNING JAVELIN 925 8) EI 230° Strike the ground with lightning and pull enemies and wisps in the given direction. 
+0062 —— 
+0063 ee 
+0064 — 
+0065 — 
+0066 — 
+0067 
+0068 y —— 
+0069 ev a 
+0070 Kaa EVE OF THE STORM 375s Nia] py 56 Launch into the air, then pick a location on the ground to forcefully land. 
+0071 Kaa EVE OF THE STORM 375s WY) ca 506 Launch into the air, then pick a location on the ground to forcefully land. 
+0072 Kaa EVE OF THE STORM 375s Naw] ry 590, Launch into the air, then pick a location on the ground to forcefully land. 
+0073 iz | EVE OF THE STORM arss 8 NAY) rr 08 Launch into the air, then pick a location on the ground to forcefully land. 
+0074 Kaa EVE OF THE STORM ars ia] py 56 Launch into the air, then pick a location on the ground to forcefully land. 
+0075 Kea EVE OF THE STORM 375s & A) ey 500 | Launch into the air, then pick a location on the ground to forcefully land. 
+0076 | EVE OF THE STORM 37.58 v a ir 500 Launch into the air, then pick a location on the ground to forcefully land. 
+0077 | EVE OF THE STORM 375s 9 NAY) sr 500 Launch into the air, then pick a location on the ground to forcefully land. | 
+0078 Kaa EVE OF THE STORM 375s NAY) cr 500 Launch into the air, then pick a location on the ground to forcefully land. 
+0079 a EVE OF THE STO Launch into the air, then pick a | land. 
+0080 — =i 
+0081 GHTMINGJAVELIN 

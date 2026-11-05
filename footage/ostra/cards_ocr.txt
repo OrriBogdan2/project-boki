@@ -1,0 +1,103 @@
+0954 ~~ NS 
+0955 ~~ NS 
+0956 
+0957 A, Taherhe tial =» A Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. pS ee ee ee ree 
+0958 ww a ‘oh =» _ Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. nore SL ye ee 
+0959 ww ‘oh =» _ Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. aes ee 
+0960 Cy =» in Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. ares ee 
+0961 Cy =» in Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. nes NL i ee 
+0962 Ce =» ri‘ Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. aes NL i ee 
+0963 Cy =» ri‘ Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. ees Ne ee 
+0964 Cy =» ri‘ Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. ees Ne ee 
+0965 Le S © beet taf allel = An ] Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. a ee en ee ee ee 
+0966 Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when jf not firing, and firing faster reduces projectile speed and damage. a -< A, am 0 
+0967 Oe a Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when 7 not firing, and firing faster reduces projectile speed and damage. Ro ee a ee ee ee 
+0968 Oe = ,F!.Oté‘é Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. Pe ee 
+0969 OO ee =» _ Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. Fe ae eee 
+0970 OO ee =» a Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. a ee ae ee ee 
+0971 Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. 
+0972 Le , * lhe ++ latina a= - | Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. PEP -. 6. « wl er ee 
+0973 Le ; * lhe ++ latina a= yO | Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. aay .. 6+ We) eae 
+0974 Le ; * lhe ++ latina a= iz | Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. Parry -. 6. « wey ee 
+0975 “st , * lhe ++ latina a= yO | Fire an orb of energy, dealing 140 (+68) damage. Orbs charge when not firing, and firing faster reduces projectile speed and damage. Pay .. 6. ~ whe) eae 
+0976 Le 
+0977 " — -heefure 4 he gi — i IS} IRMBI 300 Fire a cluster of shards that deals 190 (+357) damage and stuns for 0.8to 1.88. 
+0978 " — “heel Ie gi — i IS} IRMBI 300 Fire a cluster of shards that deals 190 (+357) damage and stuns for 0.8to 1.88. 
+0979 " — -heenfur Ie gi —— IS} IRMBI 300 Fire a cluster of shards that deals 190 (+357) damage and stuns for 0.8to 1.88. 
+0980 " — -heenfur Ie gi — i | [RMB 00 [ ee Fire a cluster of shards that deals 190 (+357) damage and stuns for 0.8 to 1.8s. 
+0981 " — -heenfur Ie gi — i IS} IRMBI 3018 Fire a cluster of shards that deals 190 (+357) damage and stuns for 0.8to 1.88. 
+0982 " otha pet —‘_etemeth i IS} IRMBI 3016 Fire a cluster of shards that deals 190 (+357) damage and stuns for 0.8to 1.85. 
+0983 " ocho — peel ween) Wind IS} IRMBI 3016 Fire a cluster of shards that deals 190 (+357) damage and stuns for 0.8to 1.85. 
+0984 " ocho — peel veend Tins IS} IRMBI 3016 Fire a cluster of shards that deals 190 (+357) damage and stuns for 0.8to 1.85. 
+0985 oe 
+0986 —— sn! PN i SHIFTI 306 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+0987 —— Us! PN iL SHIFTI 306 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+0988 —— on PAN ML SHIFT 300 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+0989 —— en PAN ML SHIFT 300 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+0990 —— ee PN ML SHIFT 300 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+0991 —— eA PAN ML SHIFT 300 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+0992 —— een PN ML SHIFT 300 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+0993 —— a PN ML SHIFT 300 Lob a projectile at target location, teleporting to the spot where it. lands and swapping places with any units located there. 
+0994 —— Ven PAN IL SHIFT 300 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+0995 —— i BN 11 SHIFTI 306 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+0996 —— 1" BS saen 06 aa EEE Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+0997 a nw" id PN IL SHIFT 30 ny Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. (Sao er ee ee | LO re ae 
+0998 tend on PN SHIFT 306 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+0999 tend i PN i SHIFT 306 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+1000 teen i PIES a surn 0 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+1001 tend on PRS a surn 0 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+1002 tend i PRS a surn 0 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+1003 tend i PRS a surn 0 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+1004 —— nine iin fl SHIFT 306 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+1005 —— Vn ine igi fl SHIFTI 306 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+1006 —— ‘nine igi fl SHIFTI 306 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+1007 _— ‘nie iin fl SHIFTI 06 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+1008 _—— 1 PN i SHIFTI 306 ———————— CS Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+1009 _— en PN i SHIFTI 306 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+1010 _— a PN 1 SHIFTI 306 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+1011 _— 1 PN 1 SHIFTI 306 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+1012 — 1! PN i SHIFT 306 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. 
+1013 — en PN IL SHIFT 300 Lob a projectile at target location, teleporting to the spot where it lands and swapping places with any units located there. a ee et a i 
+1014 LZ 
+1015 es Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.58. The bomb grows slowly, increasing its area of effect. 
+1016 SS Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.58. The bomb grows slowly, increasing its area of effect. 
+1017 SS Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.58. The bomb grows slowly, increasing its area of effect. 
+1018 EEE ‘Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.58. The bomb grows slowly, increasing its area of effect. 
+1019 Ee ee Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.58. The bomb grows slowly, increasing its area of effect. 
+1020 ze ee ‘Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.58. The bomb grows slowly, increasing its area of effect. 
+1021 EES ee ‘Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.58. The bomb grows slowly, increasing its area of effect. 
+1022 EES ee ‘Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.58. The bomb grows slowly, increasing its area of effect. 
+1023 EES ee ‘Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.58. The bomb grows slowly, increasing its area of effect. 
+1024 SS Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.5s. The bomb grows slowly, increasing its area of effect. 
+1025 SSS Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.5s. The bomb grows slowly, increasing its area of effect. 
+1026 SSS Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.5s. The bomb grows slowly, increasing its area of effect. 
+1027 SSS Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.5s. The bomb grows slowly, increasing its area of effect. 
+1028 SSS Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.5s. The bomb grows slowly, increasing its area of effect. 
+1029 SSS Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.5s. The bomb grows slowly, increasing its area of effect. 
+1030 ES Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.5s. The bomb grows slowly, increasing its area of effect. 
+1031 SS Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.5s. The bomb grows slowly, increasing its area of effect. 
+1032 OO Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.5s. The bomb grows slowly, increasing its area of effect. 
+1033 TE Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.58. The bomb grows slowly, increasing its area of effect. 
+1034 TE Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.58. The bomb grows slowly, increasing its area of effect. 
+1035 ee Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.58. The bomb grows slowly, increasing its area of effect. 
+1036 TE Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.58. The bomb grows slowly, increasing its area of effect. 
+1037 ee Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.58. The bomb grows slowly, increasing its area of effect. 
+1038 Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.5s. The bomb grows slowly, increasing its area of effect. 
+1039 Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.5s. The bomb grows slowly, increasing its area of effect. 
+1040 Create a bomb at target location. Reactivate after 0.3s to detonate and deal a minimum of 180 (+489.6) damage, increasing to 2.5x damage over 6.5s. The bomb grows slowly, increasing its area of effect. 
+1041 yy rf 
+1042 oot eee mt SS} a 38 ‘Summon a powerful vortex that stuns and pulls enemies toward its center for 3.5s and deals 2.5 damage every 0.18. r 
+1043 eeteeaieneteietiee yaa ae mt SS} #0 | Summon a powerful vortex that stuns and pulls enemies toward its center for 3.5s and deals 2.5 damage every 0.1s. ' 
+1044 rte ee Smt ES SS} a 0 ‘Summon a powerful vortex that stuns and pulls enemies toward its center for 3.5s and deals 2.5 damage every 0.18. 
+1045 ore el SS} a 0 ‘Summon a powerful vortex that stuns and pulls enemies toward its center for 3.5s and deals 2.5 damage every 0.18. 
+1046 oot ee el SS} a 0 ‘Summon a powerful vortex that stuns and pulls enemies toward its center for 3.5s and deals 2.5 damage every 0.18. 
+1047 oot ee el SS} a 0 ‘Summon a powerful vortex that stuns and pulls enemies toward its center for 3.5s and deals 2.5 damage every 0.18. 
+1048 Se eteetatasieetien staal Seeeete al SS} a 306 ‘Summon a powerful vortex that stuns and pulls enemies toward its center for 3.5s and deals 2.5 damage every 0.18. | 
+1049 ee Seven al SS} a 306 ‘Summon a powerful vortex that stuns and pulls enemies toward its center for 3.5s and deals 2.5 damage every 0.18. | 
+1050 ee inte SS} a 306 ‘Summon a powerful vortex that stuns and pulls enemies toward its center for 3.5s and deals 2.5 damage every 0.18. 
+1051 Se etemelataiameiie staal inte SS} ca 300 ‘Summon a powerful vortex that stuns and pulls enemies toward its center for 3.5s and deals 2.5 damage every 0.18. 
+1052 Se etemelataiameiie staal inte SS} a 300 ‘Summon a powerful vortex that stuns and pulls enemies toward its center for 3.5s and deals 2.5 damage every 0.18. 
+1053 — 
+1054  —— 
+1055  —— 
+1056  —— 

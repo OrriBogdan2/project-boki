@@ -1,0 +1,119 @@
+0758 [ ; | DIVINE INTERVENTION eaO| 1h Channel a heal on an ally, teleporting them to you at knocked. 
+0759 | 6 Si 
+0760 a ie : i L “7 mt Throw hammer or hold to swing hammer. 
+0761 a ie : ei L “7 mt Throw hammer or hold to swing hammer. 
+0762 ie! : i L “A Mt Throw hammer or hold to swing hammer. 
+0763 Throw hammer or hold to swing hammer. 
+0764 ie - eit, t Throw hammer or hold to swing hammer. 
+0765 ie a , a t Throw hammer or hold to swing hammer. 
+0766 ie ~ eit, t Throw hammer or hold to swing hammer. 
+0767 i ~ eit, t Throw hammer or hold to swing hammer. 
+0768 i ~ eit, t Throw hammer or hold to swing hammer. 
+0769 = aay 8 “Ns dF Throw hammer or hold to swing hammer. 
+0770 * ie) ~ at a Throw hammer or hold to swing hammer. 
+0771 sn ie ~ at a Throw hammer or hold to swing hammer. 
+0772 —l——— Throw hammer or hold to swing hammer. ZZ ™ | 
+0773 — Oh ‘?) ILMBI ! Throw hammer or hold to swing hammer. [_ o——— - 
+0774 Throw hammer or hold to swing hammer. 
+0775 = 0s Throw hammer or hold to swing hammer. 
+0776 ) it Throw hammer or hold to swing hammer. 
+0777 ie! HAMMER : iii L ) it Throw hammer or hold to swing hammer. 
+0778 ' iss oy 8 Wn Throw hammer or hold to swing hammer. \ 
+0779 ‘A ie! ~ ai Throw hammer or hold to swing hammer. 
+0780 oul 8 Wn Throw hammer or hold to swing hammer. 
+0781 ie ~ Ais Throw hammer or hold to swing hammer. f 
+0782 | ove) 8 Throw hammer or hold to swing hammer. 
+0783 rf ove) 8 Throw hammer or hold to swing hammer. 
+0784 ove) 8 Throw hammer or hold to swing hammer. 
+0785 = ove) 8 Throw hammer or hold to swing hammer. 
+0786 = ous) ‘Vs i Throw hammer or hold to swing hammer. 
+0787 a us) © ‘ii Throw hammer or hold to swing hammer. 
+0788 ous) © ‘it Throw hammer or hold to swing hammer. 
+0789 
+0790 KNOCKOUT (PA Hitting enemies into walls stun them. 
+0791 KNOCKOUT [PASSIVE] Hitting enemies into walls stun them. 
+0792 KNOCKOUT (PA Hitting enemies into walls stun them. 
+0793 KNOCKOUT (PA Hitting enemies into walls stun them. 
+0794 we A 
+0795 BARRIER SHIELD ors 8 | iamB1 10 Hold to create shield. 
+0796 BARRIER SHIELD os 8 | inmB1 00 Hold to create shield. 
+0797 8 az BARRIER SHIELD os © | IRMBI 00 Hold to create shield. Se 
+0798 BARRIER SHIELD ors 8 | inmB1 10 Hold to create shield. 
+0799 BARRIER SHIELD ors 8 | fame) 10 Hold to create shield. 
+0800 BARRIER SHIELD ors 4 IRMBI re} Hold to create shield. 
+0801 BARRIER SHIELD ors 8 IRMBI 06 Hold to create shield. 
+0802 BARRIER SHIELD ors 8 IRMBI 06 Hold to create shield. 
+0803 BARRIER SHIELD ors 4 IRMBI 06 Hold to create shield. 
+0804 BARRIER SHIELD ors 4 IRMBI 06 Hold to create shield. 
+0805 BARRIER SHIELD ors 4 __<} IRMBI 00 Hold to create shield. 
+0806 BARRIER SHIELD ors 4 ~_+} IRMBI 00 Hold to create shield. 
+0807 BARRIER SHIELD ors 4 __+) IRMBI 00 Hold to create shield. 
+0808 BARRIER SHIELD ors 4 ~_<} IRMBI 00 Hold to create shield. 
+0809 BARRIER SHIELD ors 4 __+} IRMBI 00 Hold to create shield. 
+0810 BARRIER SHIELD ors 4 __<} IRMBI 00 Hold to create shield. 
+0811 BARRIER SHIELD ors 4 [RMBI 0O Hold to create shield. 
+0812 BARRIER SHIELD ors [RMBI 0O Hold to create shield. 
+0813 BARRIER SHIELD ors [RMBI 0d Hold to create shield. 
+0814 BARRIER SHIELD ors 4 [RMBI 0d Hold to create shield. 
+0815 BARRIER SHIELD ors 4 [RMBI 0d Hold to create shield. 
+0816 BARRIER SHIELD ors 4 [RMBI 0d Hold to create shield. 
+0817 Se BARRIER SHIELD or |) mme1 Do Hold to create shield. } 
+0818 alii ae (6) BARRIER SHIELD os © L IRMBI De} Hold to create shield. i i 
+0819 BARRIER SHIELD os © L IRMBI 0 Hold to create shield. j Vr ————————essssssss—<“‘i—s—s 
+0820 EO ee (6) BARRIER SHIELD os © L IRMBI 0 Hold to create shield. SE —s—“‘_—Os—s 
+0821 ee BARRIER SHIELD ad : | emer 1016 Hold to create shield. ee 
+0822 en BARRIER SHIELD os © L IRMBI 0d Hold to create shield. CC 
+0823 a ee BARRIER SHIELD ous . L IRMBI 0d Hold to create shield. CC 
+0824 el BARRIER SHIELD os © L IRMBI 0d Hold to create shield. CC 
+0825 ee BARRIER SHIELD ors 8 L IRMBI 0d Hold to create shield. ee eeeses—iseeeeee 
+0826 BARRIER SHIELD ors 8 | IRMBI 0d Hold to create shield. 
+0827 BARRIER SHIELD ors 8 } IRMBI 0d Hold to create shield. 
+0828 6) BARRIER SHIELD ors | (RMBI 06 Hold to create shield. 
+0829 BARRIER SHIELD ors 8 ) iRMBI 0d Hold to create shield. 
+0830 BARRIER SHIELD ors | iRMBI 0O Hold to create shield. 
+0831 “~~ 
+0832 360 SMASH 2s 4 1 SHIFT 206 Dash attack that hits in a radius around you. 
+0833 _—___——— 360 SMASH 2s 4 SHIFT 206 eee Dash attack that hits in a radius around you. a ee ere 
+0834 360 SMASH ozs 4 SHIFT 206 Dash attack that hits in a radius around you. 
+0835 ™_ 
+0836 [ae | PURIFY ZONE os 8 SS x 60 Create a healing zone at hammer location. 
+0837 [ue | PURIFY ZONE os § Sn 06 Create a healing zone at hammer location. 
+0838 PURIFY ZONE tos 8 tl 506 Create a healing zone at hammer location. ~~] 
+0839 —_—_—_—_——————_ [ce | PURIFY ZONE 1 8 SI a 06 Create a healing zone at hammer location. 
+0840 = _iIt«—_— PURIFY ZONE os § ey 60 Create a healing zone at hammer location. oe 
+0841 —E —_ ie PURIFY ZONE os § SF a 006 Create a healing zone at hammer location. “= 
+0842 a —_ [pe | PURIFY ZONE os & SS 0 Create a healing zone at hammer location. a 
+0843 a = [ye | PURIFY ZONE os § SS 0 Create a healing zone at hammer location. a 
+0844 ia = [ye | PURIFY ZONE os § 5 00 Create a healing zone at hammer location. —— 
+0845 PURIFY ZONE tos § : v2] carey Create a healing zone at hammer location. 
+0846 PURIFY ZONE tos § v2] carey Create a healing zone at hammer location. 
+0847 [oe | PURIFY ZONE tos § a 06 Create a healing zone at hammer location. 
+0848 [oe | PURIFY ZONE tos § a carey Create a healing zone at hammer location. 
+0849 ll ra PURIFY ZONE tos § So iw 600 Create a healing zone at hammer location. 7 
+0850 PURIFY ZONE tos U3) 606 Create a healing zone at hammer location. 
+0851 [ae | PURIFY ZONE tos § SF a 006 Create a healing zone at hammer location. 
+0852 [ae | PURIFY ZONE tos § SF a 006 Create a healing zone at hammer location. 
+0853 [ae | PURIFY ZONE tos § SF a 006 Create a healing zone at hammer location. 
+0854 [| PURIFY ZONE tos 8 Sa 06 Create a healing zone at hammer location. 
+0855 [| PURIFY ZONE tos Sa 06 Create a healing zone at hammer location. 
+0856 [| PURIFY ZONE tos Sa 08 Create a healing zone at hammer location. 
+0857 ar” 4 
+0858 Jj| EARTHSHATTER 333s 4 4 py 300 Create a large fissure that damages enemies caught in it. 
+0859 Jj| EARTHSHATTER 333s 8 4 tpi 300 Create a large fissure that damages enemies caught in it. 
+0860 WY ] EARTHSHATTER 3333 8 | it 300 Create a large fissure that damages enemies caught in it. 8 = 
+0861 Wy ] EARTHSHATTER sas 8 (| tr 30 © Create a large fissure that damages enemies caught in it. | ¥ 
+0862 Jj| EARTHSHATTER ass § 4 try 300 Create a large fissure that damages enemies caught in it. 
+0863 Jj| EARTHSHATTER 333s § 4 try 300 Create a large fissure that damages enemies caught in it. 
+0864 Jj EARTHSHATTER 33.38 4 ao) 300 Create a large fissure that damages enemies caught in it. 
+0865 Jj EARTHSHATTER 33.38 § A) iy 300 Create a large fissure that damages enemies caught in it. 
+0866 Jj EARTHSHATTER 33.38 § A iy 300 Create a large fissure that damages enemies caught in it. 
+0867 Jj EARTHSHATTER 33.38 4 A iy 300 Create a large fissure that damages enemies caught in it. 
+0868 Jj EARTHSHATTER 33.38 § A iy 300 Create a large fissure that damages enemies caught in it. 
+0869 Jj EARTHSHATTER 33.38 4 A iy 300 Create a large fissure that damages enemies caught in it. 
+0870 —_ Jj) EARTHSHATTER 333s 8 | tpt 300 [ Create a large fissure that damages enemies caught in it. =, “™._ oe a 
+0871 J Jj| EARTHSHATTER 333s § “| iRi 300 Create a large fissure that damages enemies caught in it. 
+0872 eI r W | EARTHSHATTER 333s 8 24 im 306 Create a large fissure that damages enemies caught in it. > ss ! _ 7 
+0873 W | EARTHSHATTER 3338 8 LA ir 306 Create a large fissure that damages enemies caught init. 
+0874 ~~ SN 
+0875 ~ NS 
+0876 ———_. | Tap: fire a gust of wind. Hold: fire a large passthrough gust. 

@@ -1,0 +1,79 @@
+0081 GHTMINGJAVELIN 
+0082 Fire your sniper rifle. = 
+0083 Pel SNIPE ray 8 ; Fire your sniper rifle. Hl 
+0084 Pel SNIPE me ; Fire your sniper rifle. if 
+0085 Pel SNIPE me ; Fire your sniper rifle. — 
+0086 I] SNIPE irs) © f Fire your sniper rifle. Pd 
+0087 i] SNIPE irs) © f Fire your sniper rifle. 
+0088 i] SNIPE ize) © f Fire your sniper rifle. 
+0089 pH SNIPE is) © f Fire your sniper rifle. —_ — 
+0090 pri SNIPE irs) © f Fire your sniper rifle. Ja _ 
+0091 pel SNIPE irs) © f Fire your sniper rifle. ga _—_ 
+0092 Pel SNIPE mh Fire your sniper rifle. —— oo - 
+0093 * ry SWIPE me | Fire your sniper rifle. | 
+0094 x ie] SNIPE is) © | Fire your sniper rifle. | 
+0095 x i] SNIPE is) © | Fire your sniper rifle. | 
+0096 ia oe } 
+0097 BIRD BO CaS) temas Lob an explosive bird 
+0098 (| BIRD BOMB fs 8 Cae emer Axe} Lob an explosive bird that deals damage in an area and stuns. 
+0099 (| BIRD BOMB a) Cae | emer Axe} Lob an explosive bird that deals damage in an area and stuns. 
+0100 BIRD BOMB fs § Cae) ewe 20 Lob an explosive bird that deals damage in an area and stuns. 
+0101 BIRD BOMB fs § (ae) ewe Exe) Lob an explosive bird that deals damage in an area and stuns. 
+0102 BIRD BOMB fs § (ae) ewe Exe) Lob an explosive bird that deals damage in an area and stuns. 
+0103 BIRD BOMB fs 8 (ae) emer Biro) Lob an explosive bird that deals damage in an area and stuns. 
+0104 BIRD BOMB a) (ae) emer Biro) Lob an explosive bird that deals damage in an area and stuns. 
+0105 BIRD BOMB fs 8 (ae) emer Bro) Lob an explosive bird that deals damage in an area and stuns. 
+0106 BIRD BOMB fs 4 [ae | emer 50 Lob an explosive bird that deals damage in an area and stuns. 
+0107 BIRD BOMB a) [ae | emer 20 Lob an explosive bird that deals damage in an area and stuns. 
+0108 £ BIRD BOMB fs § [ae | emer Bio} Lob an explosive bird that deals damage in an area and stuns. a 
+0109 # BIRD BOMB fs § [ae | emer xo} Lob an explosive bird that deals damage in an area and stuns. a 
+0110 a BIRD BOMB fs 8 [ae | emer xo} Lob an explosive bird that deals damage in an area and stuns. a 
+0111 BIRD BOMB fs 4 [a | ewe xe) Lob an explosive bird that deals damage in an area and stuns. 
+0112 BIRD BOMB fs 4 (ae) emer Xe) Lob an explosive bird that deals damage in an area and stuns. 
+0113 BIRD BOMB a) Cae) emer Exo} Lob an explosive bird that deals damage in an area and stuns. 
+0114 BIRD BOMB fs § Cae) emer Exo} Lob an explosive bird that deals damage in an area and stuns. 
+0115 BIRD BOMB fs § [ae emer Exo} Lob an explosive bird that deals damage in an area and stuns. 
+0116 BIRD BOMB fs 8 Cae) ewer Exo) Lob an explosive bird that deals damage in an area and stuns. 
+0117 BIRD BOMB fs 8 Cae) emer Exo) Lob an explosive bird that deals damage in an area and stuns. 
+0118 
+0119 A DISENGAGE iss & 4 1 SHIFTI 250 Flip backwards while firing a short-range shot that grounds enemies hit. 
+0120 A DISENGAGE iss & 4 11 SHIFTI 20 Flip backwards while firing a short-range shot that grounds enemies hit. 
+0121 A DISENGAGE iss & 4 i SHIFTI 20 Flip backwards while firing a short-range shot that grounds enemies hit. 
+0122 [ag bisenance is a! 4 SHIFT ce Flip backwards while firing a short-range shot that grounds enemies hit. 
+0123 [F ] DISENGAGE 75s 4 =} SHIFTI 20 Flip backwards while firing a short-range shot that grounds enemies | hit. ee 
+0124 A DISENGAGE iss & 24 i SHIFT 250 Flip backwards while firing a short-range shot that grounds enemies hit. 
+0125 |? , ] DISENGAGE iss & 4 1 swe By Flip backwards while firing a short-range shot that grounds enemies hit. 
+0126 A DISENGAGE iss & =} 1 SHIFTI 26 Flip backwards while firing a short-range shot that grounds enemies hit. 
+0127 , § 
+0128 \)| EVES IN THE SHY 2088 . ] o 20 Launch your phoenix scout to gain vision of enemies and anti-hea! them. se _ SS =sSeesr 
+0129 \)| EVES IN THE SHY 208s . ] o 26 Launch your phoenix scout to gain vision of enemies and anti-hea! them. be _ lL 
+0130 § EVES IN THE SKY 208s E [ED 20 Launch your phoenix scout to gain vision of enemies and anti-lvea! them. het — ——— oe 
+0131 § EVES IN THE SKY 2085 ©. E [ED 20 Launch your phoenix scout to gain vision of enemies and anti-lvea! them. 
+0132 § EVES IN THE SKY 2085 § i] 250 Launch your phoenix scout to gain vision of enemies and them. 
+0133 § EVES IN THE SKY 208s 4 U3] 20 Launch your phoenix scout to gain vision of enemies and anti-hea them. 
+0134 BS] ] EVES IN THE SKY 208s § Uz) 250 Launch your phoenix scout to gain vision of enemies and anti-heal them. 
+0135 § EVES IN THE SKY a | Uz) 26 Launch your phoenix scout to gain vision of enemies and anti-heal them. 
+0136 S ] EVES IN THE SKY a | Uz) 250 Launch your phoenix scout to gain vision of enemies and anti-heal them. 
+0137 S ] EVES IN THE SKY a | Uz} 20 Launch your phoenix scout to gain vision of enemies and anti-heal them. 
+0138 S ] EVES IN THE SKY a | Uz} 20 Launch your phoenix scout to gain vision of enemies and anti-heal them. 
+0139 —_ 
+0140 _— ae (gam) LEGENDARY BULLET 375s 8 all 00 Fire a long-range shot that goes through walls and penetrates armor. 
+0141 [aay] LEGENDARY BULLET mrss 4 Va ir 00 Fire a long-range shot that goes through walls and penetrates armor. 
+0142 (gam) LEGENDARY BULLET Erm | Wa es 00 Fire a long-range shot that goes through walls and penetrates armor. 
+0143 (gam) LEGENDARY BULLET 75s 8 Wa! es 00 Fire a long-range shot that goes through walls and penetrates armor. 
+0144 (a| LEGENDARY BULLET 375s © P| ims 30 Fire a long-range shot that goes through walls and penetrates armor. 
+0145 (a| LEGENDARY BULLET 375s & P| ims 30 Fire a long-range shot that goes through walls and penetrates armor. 
+0146 (a| LEGENDARY BULLET 375s & ls 30 Fire a long-range shot that goes through walls and penetrates armor. 
+0147 A il —- (gam) LEGENDARY BULLET a75s 8 a! es 300 Fire a long-range shot that goes through walls and penetrates armor. 
+0148 (a| LEGENDARY BULLET 375s 8 all IRI 300 Fire a long-range shot that goes through walls and penetrates armor. 
+0149 [a] LEGENDARY BULLET 375s 8 all IRI 300 Fire a long-range shot that goes through walls and penetrates armor. — 
+0150 (al| LEGENDARY BULLET 375s P| ims 300 Fire a long-range shot that goes through walls and penetrates armor. | = 
+0151 (al| LEGENDARY BULLET 375s & al 200 Fire a long-range shot that goes through walls and penetrates armor. | ¢ 
+0152 . =: (gam) LEGENDARY BULLET a7ss 8 a im 00 Fire a long-range shot that goes through walls and penetrates armor. —— 
+0153 __ (4am) LEGENDARY BULLET 375s 4 lr 30 Fire a long-range shot that goes through walls and penetrates armor. 
+0154 = (gal) LEGENDARY BULLET ass 8 Pa! es 300 Fire a long-range shot that goes through walls and penetrates armor. 
+0155 =z (gam) LEGENDARY BULLET ass 8 Pa! es 300 Fire a long-range shot that goes through walls and penetrates armor. 
+0156 Sas (gam) LEGENDARY BULLET 375s 8 a) ie 300 Fire a long-range shot that goes through walls and penetrates armor. 
+0157 — (gam) LEGENDARY BULLET 37.68 @> al 306 Fire a long-range shot that goes through walls and penetrates armor. 
+0158 — 
+0159 > 

@@ -1,0 +1,61 @@
+0700 
+0701 
+0702 BACKPACK [PASSIVEI Walk over ally wisps to carry them away. 
+0703 BACKPACK [PASSIVE Walk over ally wisps to carry them away. 
+0704 BACKPACK [PASSIVE] Walk over ally wisps to carry them away. 
+0705 BACKPACK [PASSIVEI Walk over ally wisps to carry them away. 
+0706 BACKPACK [PASSIVE] Walk over ally wisps to carry them away. 
+0707 BACKPACK 7 [PASSIVE] Walk over ally wisps to carry them away. 
+0708 P — _— BACKPACK [PASSIVE] Walk over ally wisps to carry them away. ye 
+0709 BACKPACK [PASSIVEI Walk over ally wisps to carry them away. 
+0710 es 
+0711 ro Fire mana restoring shots that deal ramping damage. 
+0712 “ee Fire mana restoring shots that deal ramping damage. 
+0713 “eR, | Fire mana restoring shots that deal ramping damage. 
+0714 —“_e Fire mana restoring shots that deal ramping damage. 
+0715 MOON SHOT Fire mana restoring shots that deal ramping damage. 
+0716 = MOON SHOT mt Fire mana restoring shots that deal ramping damage. Zz 
+0717 MOON SHOT Fire mana restoring shots that deal ramping damage. 
+0718 “eR, | Fire mana restoring shots that deal ramping damage. 
+0719 “eR, Fire mana restoring shots that deal ramping damage. 
+0720 ———_“_e, | Fire mana restoring shots that deal ramping damage. 
+0721 ’ a 
+0722 TE a BOUND BY FATE i IRMBI 00 Fire a projectile that roots in an AoE after a delay. —— 
+0723 = ie] BOUND BY FATE rs 4 [RMB]. 406 oss bleed es esis Sueeee Sca 
+0724 [| BOUND BY FATE 1s 4 IRMBY 400 Fire a projectile that roots in an AoE after a delay. 
+0725 BOUND BY FATE 11s 4 IRMBY 400 Fire a projectile that roots in an AoE after a delay. 
+0726 BOUND BY FATE 1s 4 [RMB]. 400 Fire a projectile that roots in an AoE after a delay. 
+0727 BOUND BY FATE 1s 8 IRMBI 400 Fire a projectile that roots in an AoE after a delay. 
+0728 BOUND BY FATE iis § IRMBI 406 f Fire a projectile that roots in an AoE after a delay. j 
+0729  _ 
+0730 | = 
+0731 i a i! «0 Long dash in your direction. Dashing through allies refunds half of this ability’s cooldown and 1s 
+0732 i ee a i! «0 Long dash in your direction. Dashing through allies refunds half of this ability’s cooldown and 1s 
+0733 ne i a i! «0 Long dash in your direction. Dashing through allies refunds half of this ability’s cooldown and 1s 
+0734 thet mt I i i! «0 Long dash in your direction. Dashing through allies refunds half of this ability’s cooldown and 1s 
+0735 Stet amt I a i! «0 Long dash in your direction. Dashing through allies refunds half of this ability’s cooldown and 1s ee Oe le Oa — ee ee i 
+0736 thet Nc I a Mt «0 Long dash in your direction. Dashing through allies refunds half of this ability’s cooldown and 1s 
+0737 ne a Mi! #6 | Long dash in your direction. Dashing through allies refunds half of this ability’s cooldown and 1s 
+0738 Ll othe > 4 Long dash in your dire Dashing through allies 
+0739 a =—= REJUVENATING AURA ws § [= | (eI 460 Summon a healing zone. Reactivate to throw. —_— — 
+0740 REJUVENATING AURA tos 4 (Sas) cer 50 ‘Summon a healing zone. Reactivate to throw. 
+0741 ‘’ REJUVENATING AURA tos 4 (as) cer 450 ‘Summon a healing zone. Reactivate to throw. ' 
+0742 REJUVENATING AURA tos 4 (ae) ces 450 ‘Summon a healing zone. Reactivate to throw. 
+0743 0 i REJUVENATING AURA ws § [em cer 450 Summon a healing zone. Reactivate to throw. a 
+0744 _—————— [ae] REJUVENATING AURA wos § [aa 450 ‘Summon a healing zone. Reactivate to throw. Te 
+0745 — a [ie] REJUVENATING AURA wos § [aa 450 ‘Summon a healing zone. Reactivate to throw. “aaa 
+0746 —_—__——~—— J REJUVENATING AURA tos 4 ae] cer 450 ‘Summon a healing zone. Reactivate to throw. - a 
+0747 _ REJUVENATING AURA wos 8 a] cer EY.) Summon a healing zone. Reactivate to throw. = 
+0748 REJUVENATING AURA wos § a] cer 450 ‘Summon a healing zone. Reactivate to throw. ——— £8 a 
+0749 = 
+0750 f } i] DIVINE INTERVENTION 4ues sae] 1RI 500 Channel a heal on an ally, teleporting them to you at the end if theyre knocked. 
+0751 f } | DIVINE INTERVENTION aes Bae] RI 506 Channel a heal on an ally, teleporting them to you at the end if theyre knocked. 
+0752 f } | DIVINE INTERVENTION 4ues Bae | RI 500 Channel a heal on an ally, teleporting them to you at the end if theyre knocked. 
+0753 f } | DIVINE INTERVENTION aes Bae | RI 506 Channel a heal on an ally, teleporting them to you at the end if theyre knocked. 
+0754 f } | DIVINE INTERVENTION 4ues Bae | RI 500 Channel a heal on an ally, teleporting them to you at the end if theyre knocked. 
+0755 f } 1 DIVINE INTERVENTION 4ues Bee) RI 506 Channel a heal on an ally, teleporting them to you at the end if theyre knocked. 
+0756 f } | DIVINE INTERVENTION 4ues Bee] 1RI 500 Channel a heal on an ally, teleporting them to you at the end if theyre knocked. 
+0757 f } | DIVINE INTERVENTION aes 8 Bee) RI 500 Channel a heal on an ally, teleporting them to you at the end if theyre knocked. 
+0758 [ ; | DIVINE INTERVENTION eaO| 1h Channel a heal on an ally, teleporting them to you at knocked. 
+0759 | 6 Si 
+0760 a ie : i L “7 mt Throw hammer or hold to swing hammer. 

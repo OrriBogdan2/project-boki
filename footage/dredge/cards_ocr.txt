@@ -1,0 +1,71 @@
+0456 ii 
+0457 ii 
+0458 = Ee” dil Fire a burst of slugs. BB z= 
+0459 Cea | Fire a burst of slugs. 
+0460 =! C= || Fire a burst of slugs. 
+0461 ee” lS Fire a burst of slugs. a 
+0462 Cm | Fire a burst of slugs. |= 
+0463 ee” le Fire a burst of slugs. j= 
+0464 Ee” lS Fire a burst of slugs. 
+0465 Ee” lS Fire a burst of slugs. ‘ Smell —* 
+0466 Ee” lS Fire a burst of slugs. ' _ _—— 
+0467 Cm | Fire a burst of slugs. ' _ 
+0468 Ee” lS Fire a burst of slugs. 
+0469 ee” lS Fire a burst of slugs. 4 
+0470 Ee” lS Fire a burst of slugs. ; 
+0471 Ee” lS Fire a burst of slugs. { 
+0472 ee” lS Fire a burst of slugs. 7 
+0473 Ca Fire a burst of slugs. 
+0474 Se” lS Fire a burst of slugs. ca 
+0475 Ee” lS Fire a burst of slugs. 
+0476 ee” lS Fire a burst of slugs. 
+0477 A | Fire a burst of slugs. 
+0478 A“ | Fire a burst of slugs. 
+0479 A“ | Fire a burst of slugs. 
+0480 fe 
+0481 la KAIJU GRASP nis © [=] temey 00 Massively extend your arm, grabbing the first target hit. 
+0482 KAIJU GRASP nis & le ERMB] 400 Massively extend your arm, grabbing the first target hit. 
+0483 KAIJU GRASP nis & le IRMB] 400 Massively extend your arm, grabbing the first target hit. 
+0484 al KAIJU GRASP nis & [ESS] rmey 400 Massively extend your arm, grabbing the first target hit. 
+0485 = KAIJU GRASP nis & [eS] rmey 400 Massively extend your arm, grabbing the first target hit. 
+0486 ——EE fag KAIJU GRASP nis © iRMBI 00 Massively extend your arm, grabbing the first target hit. 
+0487 ll KAIJU GRASP is IRMBI 400 Massively extend your arm, grabbing the first target hit. Vr ___ 
+0488 Sell KAIJU GRASP is © iRMBI nore) Massively extend your arm, grabbing the first target hit. a 
+0489 KAIJU GRASP nis & le“ | :RMBI 00 Massively extend your arm, grabbing the first target hit. 
+0490 KAIJU GRASP nis & le“ | :RMBI 00 Massively extend your arm, grabbing the first target hit. 
+0491 KAIJU GRASP nis & le“ | (MBI 0d Massively extend your arm, grabbing the first target hit. 
+0492 f ’ y ; = 
+0493 BRUTE DASH 5s § es} i SHIFT } Short dash, goes further while airborne. 
+0494 [s BRUTE DASH so 8 as} 1 SIFT } Short dash, goes further while airborne. 
+0495 cc BRUTE DASH fs QD es} mn sHier 60 Short dash, goes further while airborne. 
+0496 BRUTE DASH 5s § esd 1 SHIFT nx.) Short dash, goes further while airborne. 
+0497 BRUTE DASH 5s § es} 1 SHIFT nx-) Short dash, goes further while airborne. 
+0498 BRUTE DASH 5s § esd 1 Swit to) Short dash, goes further while airborne. 
+0499 BRUTE DASH 5s § esd 1 SHIFT } Short dash, goes further while airborne. 
+0500 a! A 
+0501 lll EE IRON SMASH 67s § 200 ‘Smash your fist down, damaging and stunning enemies. i, LSE 
+0502 ll IRON SMASH 67s § 200 ‘Smash your fist down, damaging and stunning enemies. — ls 
+0503 ae en Bx IRON SMASH 67s § 206 ‘Smash your fist down, damaging and stunning enemies. | ee > 0 eee 
+0504 a i Bx IRON SMASH 67s § 206 ‘Smash your fist down, damaging and stunning enemies. Be —> 
+0505 a ee Bx IRON SMASH 67s § 206 ‘Smash your fist down, damaging and stunning enemies. Ce —aEy 
+0506 IRON SMASH eis 4 lil ‘| 300 ‘Smash your fist down, damaging and stunning enemies. 
+0507 of K IRON SMASH eis il [eI 306 ‘Smash your fist down, damaging and stunning enemies. 7 
+0508 IRON SMASH 67s & il i) Ki) ‘Smash your fist down, damaging and stunning enemies. a 
+0509 SS IRON SMASH 67s § 206 ‘Smash your fist down, damaging and stunning enemies. 
+0510 UU IRON SMASH 67s § 206 ‘Smash your fist down, damaging and stunning enemies. 
+0511 —— Bx IRON SMASH 67s § 206 ‘Smash your fist down, damaging and stunning enemies. 
+0512 So Bx IRON SMASH 67s § 206 ‘Smash your fist down, damaging and stunning enemies. 
+0513 ba . 
+0514 [apg] KAIJU BLAST 208s § a 250 Fire a double energy blast, damaging and anti-healing. | ZA 
+0515 [apa] KAIJU BLAST 208s § Se) 1A 250 Fire a double energy blast, damaging and anti-healing. 
+0516 [apa] KAIJU BLAST 2085 § 22m) 1A 250 Fire a double energy blast, damaging and anti-healing. 
+0517 [apa] KAIJU BLAST 208s § Bem) 1A 250 Fire a double energy blast, damaging and anti-healing. 
+0518 [ap] KAIJU BLAST 208s § 22m) 1a 250 Fire a double energy blast, damaging and anti-healing. 
+0519 a aga) MAIJU BLAST 208s 8 28) 1h 0 Fire a double energy blast, damaging and anti-healing. v orn eee 
+0520 KAIJU BLAST 208s § Aa) ii s0| Fire a double energy blast, damaging and anti-healing. i” 
+0521 KAIJU BLAST 208s 4 28) tr 20 Fire a double energy blast, damaging and anti-healing. Fr 
+0522 KAIJU BLAST 208s § 28) tr 20 Fire a double energy blast, damaging and anti-healing. . a 
+0523 ~~ Ss 
+0524 ~~ Ss 
+0525 vr a 
+0526 = 2a _ se” cl Hold to fire, deals extra damage to dazed enemies. 

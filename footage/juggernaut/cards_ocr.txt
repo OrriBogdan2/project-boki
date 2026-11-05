@@ -1,0 +1,97 @@
+0360 aif 
+0361 he 
+0362 el 
+0363 i 
+0364 
+0365 = ee ~s QUICK ATT: ~ i Quick attack, hold to fire a projectile. - oa 
+0366 i: = QUICK ATT! if Quick attack, hold to fire a projectile. ._ 
+0367 = = QUICK ATT! if Quick attack, hold to fire a projectile. ._ a 
+0368 *- = QUICK ATT! it Quick attack, hold to fire a projectile. [ oe 
+0369 QUICK ATT! it Quick attack, hold to fire a projectile. wl a” 
+0370 QUICK ATT. Quick attack, hold to fire a projectile. —_— 
+0371 B vo QUICK ATT. Quick attack, hold to fire a projectile. 
+0372 QUICK ATT Quick attack, hold to fire a projectile. 
+0373 all QUICK ATT ia Quick attack, hold to fire a projectile. :\ 
+0374 QUICK ATT w Quick attack, hold to fire a projectile. 
+0375 QUICK ATT! ia Quick attack, hold to fire a projectile. 
+0376 a SE QUICK ATT ia Quick attack, hold to fire a projectile. — 
+0377 QUICK ATT. ia Quick attack, hold to fire a projectile. 
+0378 a. QUICK ATT ia Quick attack, hold to fire a projectile. |, 
+0379 2. el QUICK ATT! ia Quick attack, hold to fire a projectile. ._ ££ 
+0380 QUICK ATT Quick attack, hold to fire a projectile. 
+0381 QUICK ATT! Quick attack, hold to fire a projectile. 
+0382 QUICK ATT! Quick attack, hold to fire a projectile. 
+0383 QUICK ATT Quick attack, hold to fire a projectile. 
+0384 QUICK ATT Quick attack, hold to fire a projectile. 
+0385 i ) —— 
+0386 e HEAUY ATTACK 12s § es | reaer 200 Heavy attack, hold to charge up dash melee. 
+0387 e HEAUY ATTACK 12s & les | reer 200 Heavy attack, hold to charge up dash melee. 
+0388 HEAUY ATTACK 12s |= | 200 Heavy attack, hold to charge up dash melee. 
+0389 — HEAUY ATTACK 12s 4 le | comer 200 Heavy attack, hold to charge up dash melee. ww —- 
+0390 HEAUY ATTACK 1.28 v les | rarer 200 Heavy attack, hold to charge up dash melee. r 2 > as 
+0391 [jae] HEAVY ATTACK 12s 4 | les | rarer 200 Heavy attack, hold to charge up dash melee. _ — 
+0392 HEAUY ATTACK 12s l= | comer 200 Heavy attack, hold to charge up dash melee. 
+0393 HEAUY ATTACK 12s 4 le | cmer 200 Heavy attack, hold to charge up dash melee. 
+0394 HEAUY ATTACK 12s le | rmer 200 Heavy attack, hold to charge up dash melee. 
+0395 HEAUY ATTACK 12s l=] comer 200 Heavy attack, hold to charge up dash melee. 
+0396 HEAUY ATTACK 12s 4 le=| comer 206 Heavy attack, hold to charge up dash melee. 
+0397 HEAUY ATTACK 12s § le=| comer 200 Heavy attack, hold to charge up dash melee. 
+0398 HEAUY ATTACK 123 4 le=| comer 200 Heavy attack, hold to charge up dash melee. wee 
+0399 a HEAUY ATTACK 12s § l= | rmer 200 Heavy attack, hold to charge up dash melee. 
+0400 HEAUY ATTACK 12s 4 l= | cmer 200 Heavy attack, hold to charge up dash melee. 
+0401 a HEAUY ATTACK 12s & =| rmer 200 ESS EEE Heavy attack, hold to charge up dash melee. 
+0402 e HEAUY ATTACK zs 4 IRMBI 200 Heavy attack, hold to charge up dash melee. 
+0403 ani HEAUY ATTACK 128 4 =| comer 200 Heavy attack, hold to charge up dash melee. 
+0404 HEAUY ATTACK 128 4 =| ier 20 Heavy attack, hold to charge up dash melee. 
+0405 NE HEAUY ATTACK 12s § [=| comer 200 Heavy attack, hold to charge up dash melee. 
+0406 HEAUY ATTACK 12s § l= | rmer 200 Heavy attack, hold to charge up dash melee. 
+0407 HEAUY ATTACK 12s & l= | rmer 200 Heavy attack, hold to charge up dash melee. 
+0408 HEAUY ATTACK 128 Py l= | comer 200 Heavy attack, hold to charge up dash melee. 
+0409 = 
+0410 AIR SLAM ait 72S | 2O "Strike downward, slowing and stunning enemies. 
+0411 AIR SLAM 8 72s 200 Strike downward, slowing and stunning enemies. 
+0412 —_ AIR SLAM & 8 72 200 Strike downward, slowing and stunning enemies. 
+0413 -_— AUR SLAM ss 8 72s 200 | Strike downward, slowing and stunning enemies. . 
+0414 = ~~ Ss AIR SLAM 5s 8 72s) 200 Strike downward, slowing and stunning enemies. . . 
+0415 = ee ee Eg AIR SLAM &s 4 od 200 Strike downward, slowing and stunning enemies. 
+0416 —- a_i [4 AIR SLAM [e) 72s 2010 Strike downward, slowing and stunning enemies. 
+0417 AIR SLAM 5s 8 xt 2010 Strike downward, slowing and stunning enemies. 
+0418 AIR SLAM 5s 8 xt 200 Strike downward, slowing and stunning enemies. 
+0419 AIR SLAM a) xt 200 Strike downward, slowing and stunning enemies. 
+0420 
+0421 a 
+0422 TETHER ¢ fe1 ‘Throw hook that attac yourself towards the t 
+0423 7 TETHER CHAIN o4s 4 tel 20 Throw hook that attaches to enemies or walls. Reactivate to pull yourself towards the target. 
+0424 P| TETHER CHAIN o4s Uc} 20 Throw hook that attaches to enemies or walls. Reactivate to pull yourself towards the target. 
+0425 7 TETHER CHAIN o4s Us} 20 Throw hook that attaches to enemies or walls. Reactivate to pull yourself towards the target. 
+0426 7 TETHER CHAIN o4s 4 Us} 20 Throw hook that attaches to enemies or walls. Reactivate to pull yourself towards the target. 
+0427 7 TETHER CHAIN o4s 4 Us} 20 Throw hook that attaches to enemies or walls. Reactivate to pull yourself towards the target. 
+0428 P| TETHER CHAIN o4s U3} 20 Throw hook that attaches to enemies or walls. Reactivate to pull yourself towards the target. 
+0429 7 TETHER CHAIN o4s 4 tel 20 Throw hook that attaches to enemies or walls. Reactivate to pull yourself towards the target. 
+0430 (| TETHER CHAIN ous U3 20 Throw hook that attaches to enemies or walls. Reactivate to pull yourself towards the target. 
+0431 (| TETHER CHAIN ous U3 20 Throw hook that attaches to enemies or walls. Reactivate to pull yourself towards the target. 
+0432 (j| TETHER CHAIN sas 4 Us] 250 Throw hook that attaches to enemies or walls. Reactivate to pull f yourself towards the target. } 
+0433 id TETHER “a Throw hook that attaches to enemies or v yourself towards the target. ee as 
+0434 bs QUICK DASH oas § 1 SHIFTI 206 Dash while attacking in your facing direction. 4 
+0435 bs QUICK DASH as § 1 SHIFTI 206 Dash while attacking in your facing direction. 
+0436 bs QUICK DASH ous 8 <>! nsw 200 Dash while attacking in your facing direction. 
+0437 EE bs QUICK DASH ous 8 <>! a snr 200 Dash while attacking in your facing direction. 
+0438 bs QUICK DASH oas 8 1 SHIFTI 200 Dash while attacking in your facing direction. 
+0439 ———————E psi QUICK DASH as 1 SHIFTI 206 Dash while attacking in your facing direction. i a 
+0440 QUICK DASH o4s 8 1 SHIFTI 206 Dash while attacking in your facing direction. 
+0441 QUICK DASH oas § 1 SHIFTI 200 Dash while attacking in your facing direction. 
+0442 QUICK DASH oas § I SHIFTI 206 Dash while attacking in your facing direction. = ¥ 
+0443 QUICK DASH os 1 SHIFTI 206 Dash while attacking in your facing direction. 
+0444 > —_ 
+0445 [_7| RETALIATION aus © A ro] 200 Block damage then strike back with a heavy attack. 
+0446 [ 7) RETALIATION aus © A mR 206 Block damage then strike back with a heavy attack. 
+0447 [7 RETALIATION aus © A mR 206 Block damage then strike back with a heavy attack. 
+0448 [_7| RETALIATION ais @ f | im 200 | Block damage then strike back with a heavy attack. 
+0449 [_7| RETALIATION aus & f | U7] 200 | Block damage then strike back with a heavy attack. 
+0450 —EEee ia [_7| RETALIATION aus 8 Fl IRI 200 Block damage then strike back with a heavy attack. — a, Sa 
+0451 ——EEee a [_7| RETALIATION aus § 4 IRI 200 Block damage then strike back with a heavy attack. SS w=. 
+0452 Eee ~~ [_7| RETALIATION aus § Fl IRI 200 Block damage then strike back with a heavy attack. | — eo lc ll Fe 
+0453 —— [_7| RETALIATION aus § Fl IRI 200 Block damage then strike back with a heavy attack. i 
+0454 
+0455 ii 
+0456 ii 
