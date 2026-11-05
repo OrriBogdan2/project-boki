@@ -915,3 +915,5 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Drop:** 17x pull-out; comet riders break away only; snap and landing stay on the compressor until S4 reviews.
 
 ## 2026-11-05 S2: READY ext/kit-tarek-111 4e25e66a (item 111 Rock Hop); fidelity row Dash = Rock Hop: yes. Defaults taken: chain ~7.5 m per "3 x ~2.5 m" (set `dash` 1.65 in dolm.json for 4.25 m); abyss gaps crossable if ground lies within remaining hops, per the splash. Not hand-played, no online test.
+
+## 2026-11-05 S2: READY ext/art1-sable 78e69563 (no Kael art); fidelity unchanged, VFX row is S3/S4's. Full suite not rerun since the split: S5's batch covers it.
