@@ -1260,3 +1260,21 @@ The owner approved a dedicated merger session that pushes `main`, because main's
 - Skipped: ext/hem-reticle (superseded by S2's ext/kit-hem-55b).
 - Next, being tested now: batch 3 = ext/s4-integ bfb12fa7 (S4 98, 99, 101, 105) + ext/clarity-96 f41a7157 (S3), with **Net.VERSION 0.21.0** (S4 0.20.0 "bcn" + S3's "sping" kind). Then batch 4 = S2 kits hem-55b, kael-57, sable-53-54 (dry-run merge is clean).
 - **Not done by S5 (reserved files, needs main or owner OK):** boki-talk-105's wiring 1-4 (kin_voice.gd line/callout -> BokiChatter, kin.gd bark_cd, kin_speak.gd recall cleanup, BokiSpeech/BokiLines tie-in). Until then the match callouts play the old lines (S4's DEBT entry covers it).
+
+## 2026-11-05 04:11 UTC S5 SHIPPED 8f7a33d2: ext/s4-integ bfb12fa7 (rank-ui-98 bd04d5d2, loot-full-99 127ecfc8, revive-101 d53c445b, boki-talk-105 364fde44), ext/clarity-96 f41a7157
+- main ff92d1e2 -> 8f7a33d2 (fast-forward of integ-s5c). s4-integ merged clean. clarity-96 conflicted in 6 files, resolved keeping both:
+  - **Net.VERSION -> 0.21.0** (0.20.0 = S4's beacons "bcn", 0.21.0 = S3's squad ping kind). Online servers and the launcher need this build.
+  - match.gd smart loot and life.gd beacons: S4 moved them into LootFull and Beacons; clarity had only shortened those toasts, so S4's code stays. Clarity's other life.gd toast text is kept.
+  - farm_guide.gd: clarity's _update_marker(dt) and bubbles-under-lane, plus tut-airdash's crop label and task hint.
+  - check_registry.gd: both sides' entries. style_baseline.json: regenerated (style_lint --update after health passed).
+- Fixes needed for the combination:
+  - tools/box_revive_check.gd used the removed hud.toasts; it now reads hud.msgs (clear/texts).
+  - --uipolish-check failed 2 rows on scripts/ui/loot_hold.gd: S4's loot row builder moved out of hud.gd and lost hud.gd's exemption. LootHold is now in the check's ALLOWED list with hud.gd (in-match HUD). S3/S4: if you'd rather it use UiFrame, that's a follow-up.
+- Checks: --import, health --strict OK (no budget raised), gen_wiki --check clean. Full suite: 126 flags + --simtest --seed=5, fresh XDG_DATA_HOME, timeout 1200. All 0 failures / PASS, including:
+  - --rank-ui-check, --loot-full-check, --box-revive-check, --boki-lines-check
+  - --shield-check, --clarity-check, --reticle-check, --ping-check, --msg-queue-check, --hudref-check
+  - --uipolish-check (after the fix)
+  - --hero-combo-check, --archetype-check, --dash-flow-check, --ability-check
+- Except the same reds as main: abyss, obstacle, perch, grammar-runtime, merge-form, farm-start meadow, mantle-look, hitch/load, pack-ui, train, teammate. The farm-tutorial river row flaked once and passed on rerun.
+- **Still open, reserved files (main/owner OK needed): boki-talk-105 wiring 1-4.** Match callouts still play the old KinVoice lines.
+- Next: batch 4 = S2 kits hem-55b 8b2c04f1, kael-57 249bc11b, sable-53-54 157cffe4, breaker-59 8840f3d6, pip-scale-108 525298b8 (merged clean; suite running). Then batch 5 = art2-kael 0fbc63e6 + rename-lisette 7341f61a (dry-run resolved). perf-94 waits on S1's rebase (EXT_TO_MAIN).
