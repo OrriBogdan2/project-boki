@@ -19,6 +19,7 @@ func run(main: Node) -> void:
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	var tree := main.get_tree()
+	_clear_view(m, P)
 	for f in 20:
 		await _step(m, P, tree)
 	P.dashes = 1.0
@@ -36,6 +37,14 @@ func run(main: Node) -> void:
 			shot += 1
 	print("CLAIRE_SKATE_SHOTS_DONE ", shot)
 	tree.quit(0)
+
+## Trees and rocks hide her on this spot: everything standing above the ground goes for the shot, but the hunters.
+func _clear_view(m: Match, P: Hunter) -> void:
+	for g in m.find_children("*", "GeometryInstance3D", true, false):
+		var n := g as GeometryInstance3D
+		if P.is_ancestor_of(n) or n.global_transform.origin.y > P.pos.y + 0.4 or n is MultiMeshInstance3D:
+			if not P.is_ancestor_of(n):
+				n.visible = false
 
 func _step(m: Match, P: Hunter, tree: SceneTree) -> void:
 	m.step(DT)
