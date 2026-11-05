@@ -18,6 +18,7 @@ func run(a) -> void:
 	await dash_moves()
 	await parity_lmb()
 	await parity_rmb()
+	await load("res://tools/kael_accuracy_check.gd").new().run(A)
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(A.main, "juggernaut")
 	A.ok("jug item 51: every slot casts mid-jump, holds through a jump and a dash and lets go in the air, and a "
 			+ "jump or Shift moves him out of it in 0.1s (or its row's exception)",
