@@ -1327,3 +1327,9 @@ See OWNER_REVIEW item 109: the aim is currently stuck to one direction during he
 
 ## 2026-11-05 04:58 UTC (ext): Pip turnaround: `briefs/art-refs/pip_turnaround.png` (4 clean views). Pip, Claire portraits added (`pip_portrait.png`, `claire_portrait.png`). Eight heroes now have a full set: master sheet, turnaround, splash, portrait.
 
+
+## 2026-11-05 05:05 UTC (ext): SABLE UPGRADE (owner): `briefs/art-refs/sable_FINAL_sheet.png`
+- **Same Sable, evolved:** grey-lilac skin, a sly smile + beauty mark, pointed ears, feathery moth antennae (no hood), a long white braid.
+- **Costume:** a long dark plum leather coat with a high collar, buckled cuffs and split tails; moth-wing tails with eye-spots beneath; a vest; tall buckled boots; keys, a bola and a gem on her belt.
+- **WEAPON CHANGE (owner):** twin ornate enchanted flintlock pistols (dark wood + silver, glowing violet runes and crystals, violet smoke) REPLACE her crossbows. Kit numbers unchanged; visual + VFX + sound swap only (bolts become violet magic shots, a muzzle puff of violet smoke).
+- Update `hero_kit` / description text from "crossbows" to "pistols" in the rename sweep.
