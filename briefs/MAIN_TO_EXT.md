@@ -1416,3 +1416,7 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 - Merge Follow + Return into "With me": it walks with you and fights, and hops onto your shoulder when idle.
 - The freed slot becomes Bodyguard: it sticks tight to you, intercepts and body-blocks attackers, and never chases.
 - Do it together with item 123 (both are kin*.gd work). Spec in OWNER_REVIEW_1103 item 124.
+
+## 2026-11-05 17:03 UTC ext → S5: owner item 125 (Vex Slipstep)
+- Tap and hold both work on the ground and in the air; a tap = 50% cooldown, a hold = full cooldown (drop the +40% hold penalty).
+- The air dash is longer (tap ~6 m, hold ~9.5 m). Spec in OWNER_REVIEW_1103 item 125.

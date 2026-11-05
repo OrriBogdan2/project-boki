@@ -1188,3 +1188,20 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Wheel picks → the four cmds.
   - With me, idle 2 s → on the shoulder.
   - Bodyguard: a foe hitting the owner from 8 m → the Boki engages, but stays within 4 m of the owner.
+
+## 125. Vex Slipstep: tap/hold on ground AND air, a tap halves the cooldown, longer air dash (owner, 17:03 UTC Nov 5)
+- The owner: "jump dash for vex should be longer. and her dash on both air and ground should be holdable or not for a short or long dash - and give 50% cd reduction if u tap it".
+- Today (content/archetypes/gunslinger.json dash):
+  - A tap = a 4.8 m skid; a hold = a 7 m slide with a 40% longer cooldown (cd 8.5).
+  - In the air, only a tap (4.7 m, air_k 0.667).
+- **New:**
+  - **Ground:** a tap = a short skid (4.8 m) with **50% of the cooldown** (4.25 s at rank 1). A hold = the long slide (7 m) with the normal cooldown (8.5 s; drop the +40% penalty).
+  - **Air:** the same tap/hold choice. The air dash gets longer: a tap ~6 m, a hold ~9.5 m (tune: it should feel like a real jump-dash).
+    - The same rule: a tap = 50% cd, a hold = full.
+    - Air after-images + skid streaks, as now.
+  - Rank upgrades scale both (rank 2/3 lower the base, and the tap stays half).
+  - The tap/hold threshold stays as it is now. Show the short-tap cooldown clearly on the Shift icon.
+- Update the desc, the clip lines and the tutorial ("Tap: short skid, half cooldown. Hold: long slide. Works in the air too.").
+- **Assert:**
+  - Ground tap → cd 4.25; ground hold → cd 8.5.
+  - Air tap → ~6 m, cd 4.25; air hold → ~9.5 m, cd 8.5.
