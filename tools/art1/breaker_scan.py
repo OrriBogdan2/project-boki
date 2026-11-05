@@ -129,6 +129,55 @@ Q, BONE = Q[keep], BONE[keep]
 n = len(Q)
 print("cut, left", len(src.data.vertices), flush=True)
 
+AXES = np.array(((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1)), np.float32)
+
+
+def chart_seams(ob, min_faces=24):
+    """Seams for a clean unwrap: each face goes to the axis it faces, the labels are smoothed over neighbours and small
+    islands merged, so the charts follow the form instead of the decimated triangles."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bm.faces.ensure_lookup_table()
+    n = len(bm.faces)
+    nrm = np.array([f.normal for f in bm.faces], np.float32)
+    lab = np.argmax(nrm @ AXES.T, axis=1)
+    nb = [[e2.index for e in f.edges for e2 in e.link_faces if e2.index != f.index] for f in bm.faces]
+    for _ in range(4):
+        new = lab.copy()
+        for i in range(n):
+            c = np.bincount(lab[nb[i]], minlength=6) if nb[i] else None
+            if c is not None and c.max() >= 2:
+                new[i] = int(np.argmax(c))
+        lab = new
+    for _ in range(6):
+        seen = np.zeros(n, bool)
+        changed = False
+        for i in range(n):
+            if seen[i]:
+                continue
+            st, comp = [i], []
+            seen[i] = True
+            while st:
+                a = st.pop()
+                comp.append(a)
+                for b in nb[a]:
+                    if not seen[b] and lab[b] == lab[a]:
+                        seen[b] = True
+                        st.append(b)
+            if len(comp) < min_faces:
+                out = [lab[b] for a in comp for b in nb[a] if lab[b] != lab[a]]
+                if out:
+                    lab[comp] = int(np.bincount(out).argmax())
+                    changed = True
+        if not changed:
+            break
+    for e in bm.edges:
+        fs = e.link_faces
+        e.seam = len(fs) == 2 and lab[fs[0].index] != lab[fs[1].index]
+    bm.to_mesh(ob.data)
+    bm.free()
+
+
 # ---- the game mesh
 bpy.context.view_layer.objects.active = src
 low = src.copy()
@@ -139,19 +188,25 @@ bpy.context.view_layer.objects.active = low
 m = low.modifiers.new("d", "DECIMATE")
 m.ratio = TRIS / max(len(low.data.polygons), 1)
 bpy.ops.object.modifier_apply(modifier="d")
-for u in list(low.data.uv_layers):
-    low.data.uv_layers.remove(u)
-low.data.materials.clear()
 bpy.ops.object.select_all(action="DESELECT")
 low.select_set(True)
 bpy.ops.object.mode_set(mode="EDIT")
 bpy.ops.mesh.select_all(action="SELECT")
 bpy.ops.mesh.quads_convert_to_tris()
-bpy.ops.uv.smart_project(angle_limit=1.13, island_margin=0.004)
 bpy.ops.object.mode_set(mode="OBJECT")
 print("low", len(low.data.polygons), flush=True)
 
-# ---- bake
+# ---- a clean unwrap by form (decimating the scan's own UVs drags triangles across its islands), then the bake
+for u in list(low.data.uv_layers):
+    low.data.uv_layers.remove(u)
+low.data.materials.clear()
+low.data.uv_layers.new(name="UVMap")
+chart_seams(low, 60)
+bpy.ops.object.mode_set(mode="EDIT")
+bpy.ops.mesh.select_all(action="SELECT")
+bpy.ops.uv.unwrap(method="ANGLE_BASED", margin=0.004)
+bpy.ops.uv.pack_islands(rotate=True, scale=True, margin=0.004)
+bpy.ops.object.mode_set(mode="OBJECT")
 sc = bpy.context.scene
 sc.render.engine = "CYCLES"
 sc.cycles.device = "CPU"
@@ -161,7 +216,6 @@ sc.render.threads = 6
 mat = bpy.data.materials.new("bake")
 mat.use_nodes = True
 low.data.materials.append(mat)
-out = {}
 for nm, kind, cs in (("scan_albedo", "DIFFUSE", "sRGB"), ("scan_normal", "NORMAL", "Non-Color")):
     img = bpy.data.images.new(nm, SIZE, SIZE, alpha=False)
     img.colorspace_settings.name = cs
@@ -172,7 +226,7 @@ for nm, kind, cs in (("scan_albedo", "DIFFUSE", "sRGB"), ("scan_normal", "NORMAL
     src.select_set(True)
     low.select_set(True)
     bpy.context.view_layer.objects.active = low
-    kw = dict(type=kind, use_selected_to_active=True, cage_extrusion=0.03, max_ray_distance=0.08, margin=8)
+    kw = dict(type=kind, use_selected_to_active=True, cage_extrusion=0.09, max_ray_distance=0.22, margin=12)
     if kind == "DIFFUSE":
         kw["pass_filter"] = {"COLOR"}
     bpy.ops.object.bake(**kw)
