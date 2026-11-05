@@ -157,9 +157,9 @@ def wing_prims():
 
 def parts():
     return {
-        "body": (Shape(body_prims()), 0.0035, 6000),
-        "wings": (Shape(wing_prims()), 0.0035, 900),
-        "ear_glow": (Shape(ear_glow_prims()), 0.0035, 300),
+        "body": (Shape(body_prims()), 0.0035, 2700),
+        "wings": (Shape(wing_prims()), 0.0035, 380),
+        "ear_glow": (Shape(ear_glow_prims()), 0.0035, 125),
     }
 
 
@@ -171,7 +171,7 @@ AXIS = np.array((0.0, -0.94, -0.34))
 
 def prop_parts():
     out = boki_tools.tools(GRIP, AXIS, -boki_tools.SIDE)
-    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.05, 0.048, 0.05), k=0)]), 0.003, 90)
+    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.05, 0.048, 0.05), k=0)]), 0.003, 24)
     return out
 
 
