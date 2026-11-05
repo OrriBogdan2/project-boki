@@ -41,3 +41,29 @@ Combat clarity (96) is merged, thanks. New job.
 
 ## 2026-11-05 16:10 UTC (ext): OWNER: LOW-SPEND MODE until Fri 06:00 Toronto (the account has ~25% left; S5 + S2 get priority)
 Use 1 agent at a time, Sonnet (not Opus), finish only your current in-flight branch(es), push, post READY, then wait. No new big tasks, no full-suite reruns. Full speed resumes Friday on a fresh account.
+
+## 2026-11-05 16:30 UTC (S3): PAUSED STATE for the next S3 session (owner's low-spend mode until Fri 6am Toronto)
+- **Job:** ability VFX for all 12 Hunters (the 06:30 entry above). Shared base `ext/vfx-core` @ 16f66b8e (HeroVfx + bolt/vortex/shard/card/coin/star/drop, trail(), bone anchors, prewarm, gallery; merged with main 25e8ea8d). The agent brief I used: everything in the 06:30 entry, plus:
+  - one branch per Hero from vfx-core
+  - `content/vfx/<arch>.json` with a telegraph, impact and linger per ability
+  - no flat rings; delete the old fx calls
+  - anchors: nodes, then bone, then gun, then body
+  - `vfx-core:` commits for shared changes (lift them into vfx-core)
+  - checks: --hero-vfx-check, the Hero's combo check, health --strict
+  - shots: --hero-vfx-gallery at 1920x1080 and --hero-vfx-reel at **1280x720** (the reel's crops are off at 1920)
+  - every READY carries the FIDELITY_CHECKLIST rows with proof shots
+- **READY (posted in EXT_TO_MAIN):** Cinder `ext/vfx-cinder` 602e6b7d, Claire `ext/vfx-claire` 05815856, Pip `ext/vfx-pip` 45a1949b. Shots are on `ext/vfx-shots-s3`.
+- **To finish:** for each, merge origin/ext/vfx-core if missing, finish the remaining moves, run the checks, shoot the fidelity proofs, and post READY.
+  - Kael `ext/vfx-kael` 024ce284: art2-kael on core + white-hot blade/scarf. Looked done; needs verify + report.
+  - Lisette `ext/vfx-lisette` 766e5475: was adding a `cue` anchor and pointing the release flares at it.
+  - Sable `ext/vfx-sable` 192284ad: progress unknown, check the diff vs core.
+  - Ryzz `ext/vfx-ryzz` d39d0bce: lightning and rod arcs committed, core not merged; was recolouring the echo and the charge's heart.
+  - Vex `ext/vfx-vex` 424c639d: tracers and grenade committed, core merged; was re-shooting proofs.
+  - Grimble: not started (`ext/vfx-grimble` doesn't exist).
+  - Breaker `ext/vfx-breaker` 65a229ff: core not merged.
+  - Motley `ext/vfx-motley` 26cbf641: core merged.
+  - Tarek `ext/vfx-tarek` ac8128d8: was on the Rock Hop/eye-stone edit lists.
+- **Known:**
+  - Claire and Pip conflict in care_look.gd; take both deletions (see the READY entry).
+  - Hold looks are local only.
+  - S5 held art2-kael for 3 mid-play compiles; vfx-core's prewarm is meant to fix that, but --hitch-check hasn't been compared with main's list yet.

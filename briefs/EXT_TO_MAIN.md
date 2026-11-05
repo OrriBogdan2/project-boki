@@ -2794,3 +2794,87 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
   - owner-approved NEW designs: ext/boki-rimeshrew 5763ca81, ext/boki-gloamshell e7b1885e, ext/boki-selenfin ba573892, ext/boki-glomwort 62c49396 (then their Fusion parts, face pass, wiring, like Glintmole).
 - **WIP, stopped mid-work (not READY, unchecked):** ext/boki-kindlewren 7b18f564, ext/boki-kestrike 572286fd, ext/boki-thrumbird 3ff052e6, ext/boki-lodestick 1d56362f, ext/boki-marchleaf 8d363f1d, ext/boki-mossgrade 77d6522f, ext/boki-nettlynx 2c57d035 (some already merged newbase 7c946d9e). ext/boki-opalisk has no work yet.
 - Tools for the next session: Blender = `pip install bpy==4.5.15` into a Python 3.11 venv (wheel from PyPI), run build_boki.py with `import bpy` first; Godot 4.6.2 from GitHub releases; renders under `xvfb-run`. Concept sheets: briefs/art-refs/boki/<id>_concept.png.
+
+## 2026-11-05 (S3): READY ability VFX: `ext/vfx-cinder` @ 602e6b7d, `ext/vfx-claire` @ 05815856, `ext/vfx-pip` @ 45a1949b (+ base `ext/vfx-core` @ 16f66b8e)
+- **Merge order: `ext/vfx-core` first** (or with the first of these). Each branch is vfx-core + one Hero, already merged with origin/main 25e8ea8d, so any one can go alone. vfx-core since the IN PROGRESS note: held looks turn with the aim (the flamethrower bends with a sweep); the gallery starts a Hero in its own class; the trail test no longer flakes under load; merged with main 25e8ea8d.
+- **Claire + Pip conflict in one file:** `scripts/arch/kits/care_look.gd`. Each branch deletes CareLook kinds the other keeps. Resolution: take BOTH deletions. In the header comment, take Pip's two "Pip:" lines and Claire's two "Claire:" lines. In `_build()`, delete both the `"mote"` block (Pip's) and the `"dome"` block (Claire's). Once both are in, `CareUtil.payoff` (care_util.gd) has no callers left and can go.
+- **All three:**
+  - Each look is a shader look in `content/vfx/<arch>.json`: noise and dissolve surfaces, GPU particles, mesh trails on projectiles.
+  - Each moment has a telegraph, an impact and a linger, in the Hero's art-sheet palette.
+  - The old effect calls are deleted: `m.fx.burst/spark/flash/ring`, every `net_ring`, the shared payoff rings, and the LDFx/CareLook one-shots that were replaced.
+  - Gameplay, damage, timing, hitboxes and AimKit danger shapes are unchanged.
+  - Anchors are weapon empties, then contract bones (`hand.R`, `hips`), then body fallbacks, so the looks attach to S2's rebuilt models.
+  - The heaviest moment is Cinder's hose at about 118 particles in 4 layers. MAX_LIVE 420 and the pools are unchanged.
+  - God files and reserved files are untouched.
+
+### Cinder (`ashwick`), `ext/vfx-cinder` @ 602e6b7d: 5 files +300/-99 vs vfx-core (new content/vfx/ashwick.json, tools/vfx_reel/ashwick.gd; ashwick_kit, ashwick_jet, ld_fx -18)
+| Ability | Telegraph | Impact | Linger |
+|---|---|---|---|
+| LMB Torch Lance (signature) | cyan pilot flare + gathering motes at the nozzle | held flame stream (3 ember layers + smoke) that bends with the sweep, flame tongues, sparks on the foe | scorch where the stream licks the ground, smoke on release |
+| RMB Cinder Shot | pink embers gather at the nozzle | muzzle flare, smoke-and-fire trail, red flare + ember shower on hit, forked flame to each spread target | scorch, smoke; violet fizzle on a miss |
+| Shift Soot Ram | burner flare at her back | flame tails while ramming; flare + flame arc + ember spray on impact | scorch, smoke cloud |
+| E Furnace Cloak | embers sucked inward | chest flare, flame wall round her, ember burst | cracked scorch, smoke |
+| R Flue Flight (signature) | lift-off flame wall + flare | **two held jets from the tank's exhaust nozzles**, back and down, with a hot glow at each | 2.2 s scorched lane over the carpet (networked), embers off the lava, smoke on landing |
+| Passive Flashover | embers drift off a charred foe | Ablaze flame column; Flashover white-hot flare + column | scorch, smoke; rising embers on the knock heal |
+
+- **Kept on purpose:**
+  - The LDFx hose puffs: they are the stream's real reach, stop at walls, and are asserted by the combo check.
+  - The lava carpet, ram skull, burn pips, cloak swirl and pilot flame: these show gameplay state.
+- **Not converted:** held looks are local only (the core design), so other players don't see the hose embers or tank jets. Other players see the networked impacts and the scorch lane.
+
+| Fidelity (Cinder) | VFX | Proof |
+|---|---|---|
+| Flamethrower, held LMB, through the hose | ✅ | `ext/vfx-shots-s3` b8c1dd3d vfx/cinder/ashwick_lmb.png |
+| Tank's 2 exhaust nozzles = jets in Flue Flight | ✅ (anchors `anchor_tank_l/r`, else the `hips` bone, else the body) | `ext/vfx-shots-s3` b8c1dd3d vfx/cinder/ashwick_r.png (jets read, but small at match zoom) |
+| Living-fire hair, magma skin, tank, hose, flame-tipped tail | model (S2) | - |
+
+### Claire (`rimewright`), `ext/vfx-claire` @ 05815856: 5 files +257/-79 vs vfx-core (new content/vfx/rimewright.json, tools/vfx_reel/rimewright.gd; rimewright_kit, care_look -21, care_combo_check)
+| Ability | Telegraph | Impact | Linger |
+|---|---|---|---|
+| LMB darts / skate beams | small frost flare at her hand | icy ribbon trail on each dart (wider on beams) | - |
+| RMB Ice Spear | frost gathers between her palms | push flare, long white trail; shard burst on landing | frosted scorch + mist |
+| Shift skate (signature: frost trail) | push-off spray | held trail of ice chips, snow stars and mist off her feet; carve spray; stop spray | frost patch under every 3rd ice plate, melting within 2 s |
+| E Rink Wall | lilac shards gather at her feet | shards + mist as it rises; frost flare + shards when E freezes it | mist |
+| R Rimelock (signature: freeze) | seal flare | shard crystals + frosted scorch at the seal; crash: big flare, shard bursts | snow + mist held round her, shards where the rink creaks |
+| Shatter / Chill | - | shard burst on the Shatter; a chill puff on each freshly Chilled foe | frost scorch, mist |
+
+- **Kept:** the darts, spear, wall, slow zone, rink, frost bud, ice plates (DECISIONS' ice path), spikes and shells.
+- **Check updated, same intent:** `--rimewright-combo-check`'s two chip-count asserts now assert the ice plates + frost patches and the carve spray.
+
+| Fidelity (Claire) | VFX | Proof |
+|---|---|---|
+| Ice-blade skates with a frost trail | ✅ | `ext/vfx-shots-s3` b8c1dd3d vfx/claire/rimewright_dash.png (the trail reads as ice plates + mist; the frost patches are faint) |
+| Candy-cane ice spear | spear model kept; ✅ trail + shard landing | `ext/vfx-shots-s3` b8c1dd3d vfx/claire/rimewright_rmb.png |
+| Gentle look, bunny hood, horns, wings, tail, dress, skating anims | model (S2) | - |
+
+### Pip (`tender`), `ext/vfx-pip` @ 45a1949b: 5 files +235/-121 vs vfx-core (new content/vfx/tender.json, tools/vfx_reel/tender.gd; tender_kit, care_look -73, care_combo_check)
+| Ability | Telegraph | Impact | Linger |
+|---|---|---|---|
+| LMB comet | small lantern flare | comet recoloured soft gold with a pink halo, starlit ribbon trail; gold impact; Kindled foes burst in lilac stars | - |
+| RMB Burrseed | lilac stars gather at the lantern | flare, trail, stars on the stick; starlight swirl (vortex) on the root | the swirl |
+| Shift hop / glide | - | stars off her heels | faint held star trail |
+| E Hearthlight | lantern flare + rising stars | starlight swirl where it lands; the bloom: swirl, flare, stars | slow stars drift up while it heals |
+| R Hearth Call | lantern flare | swirl on the target | MENDED: flare, swirl, stars |
+| Heals (signature) | - | every heal (Hearthlight pulses, the bloom, Hearth Call ticks) releases gold and pink twinkling stars rising off the target | - |
+
+- **No flame anywhere:** the orange ember motes and green rays are gone.
+- **Check updated, same intent:** `--tender-combo-check`'s dash assert counted the deleted motes; it now asserts the hop's star-trail hold.
+
+| Fidelity (Pip) | VFX | Proof |
+|---|---|---|
+| The STAR LANTERN glowing, healing light | ✅ the lantern is the anchor of her casts (`anchor_hang_lantern`, else the `hand.R` bone); heals are starlight | `ext/vfx-shots-s3` b8c1dd3d vfx/pip/tender_e.png |
+| Gold constellation markings brighten when she heals | ❌ needs the model's markings material (S2); the VFX side is the stars rising off healed allies | - |
+| Fairy-fox body, wings, goggles, leaf cape, apron | model (S2) | - |
+
+- **Checks:** run on the final trees, each with a fresh XDG_DATA_HOME and timeout 1200. --hero-vfx-check HEROVFX OK on each; --ashwick-combo-check 97/0, --rimewright-combo-check 78/0, --tender-combo-check 82/0, --hero-combo-check 272/0 (on Cinder's tree); health --strict OK on each. Not run (low-spend mode): the full suite and --hitch-check (vfx-core's own --hitch-check run listed no hero_vfx shader among the mid-play compiles: prewarm covers them).
+- **Screenshots:** `ext/vfx-shots-s3` b8c1dd3d vfx/{cinder,claire,pip}/: <arch>_{lmb,rmb,dash,e,r}.png reel sheets + gallery_<arch>_0-3.png.
+- **Owner questions:**
+  - Should the remaining persistent looks (Cinder's skull and cloak swirl, the Kindle foot glow, the Burrseed disc) move into HeroVfx later?
+  - Pip's LMB is still named "Ember Cast" in her kit text; it may want a starlit name.
+
+### PAUSED (owner's low-spend mode until Fri 6am Toronto): the other 9 Heroes are NOT ready, please don't merge them yet
+- Pushed work in progress; each is vfx-core + one Hero:
+  - `ext/vfx-kael` 024ce284, `ext/vfx-lisette` 766e5475, `ext/vfx-sable` 192284ad, `ext/vfx-vex` 424c639d, `ext/vfx-tarek` ac8128d8 (these have core 16f66b8e)
+  - `ext/vfx-ryzz` d39d0bce, `ext/vfx-breaker` 65a229ff, `ext/vfx-motley` 26cbf641 (these still need core 16f66b8e merged)
+  - Grimble: not started.
+- None of the 9 has a final report, a fidelity table or a final check run. Friday's session picks them up from briefs/INBOX_S3.md (the "PAUSED STATE" section).
