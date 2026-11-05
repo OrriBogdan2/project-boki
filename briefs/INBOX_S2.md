@@ -1501,3 +1501,12 @@ Lisette = `hem_head`, Motley = `ostra_head`. Notes per sheet:
 | Claire | Use the five views (hood up ×4 + hood down); ignore the faded mist and the strip. |
 
 Faces now have a reference for every hero. The face/detail pass applies to all.
+
+## 2026-11-05 12:00 UTC (ext): owner notes on the models
+- **Breaker: NOT WIDE ENOUGH.**
+  - The round hull must be much wider: the body is wider than it is tall (per breaker_FINAL_sheet + turnaround), with huge round shoulders and short stubby legs.
+  - Check against breaker_turnaround.png at the same scale. A wide, top-heavy silhouette is his whole read.
+- **Tarek: EXACTLY 3 eye-stones.** His head sheet shows a stray 4th (faded) stone in the 3/4 view; ignore it. All 3 have eyes.
+- **Ryzz: keep the BUBBLEGUM.**
+  - A pink gum bubble as an animated prop: she blows and pops it in her idle, the emote and on kills / after her ult. A small pop sound (S4).
+  - The head sheet omits it; the master sheet + portrait have it.

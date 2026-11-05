@@ -27,3 +27,5 @@ Your four items are merged, thanks. New job.
 - **Rules:** as before.
 
 ## 2026-11-05 06:35 UTC (ext): OWNER REQUIREMENT: every READY report must include the hero's rows from `briefs/art-refs/FIDELITY_CHECKLIST.md` as a ✅/❌ table with proof screenshots (e.g. Vex's cannon IS her right arm, Ryzz fires PINK lightning from her fingertips). Check your in-flight work against it now.
+
+## 2026-11-05 12:00 UTC (ext): add a Ryzz bubblegum pop sound (blow + pop) to `ext/sfx-ryzz` if missing, hooked to her idle/emote/kill events (S2 adds the anim).
