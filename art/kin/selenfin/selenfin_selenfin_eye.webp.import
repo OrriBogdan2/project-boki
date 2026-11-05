@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://mjc3oe21ky1e"
-path="res://.godot/imported/selenfin_selenfin_eye.webp-958868cc233ad7dc857df64c8c4c506c.ctex"
+path.bptc="res://.godot/imported/selenfin_selenfin_eye.webp-958868cc233ad7dc857df64c8c4c506c.bptc.ctex"
+path.astc="res://.godot/imported/selenfin_selenfin_eye.webp-958868cc233ad7dc857df64c8c4c506c.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6a6506055bd4db4b7038a53abd0c36a0"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/selenfin/selenfin_selenfin_eye.webp"
-dest_files=["res://.godot/imported/selenfin_selenfin_eye.webp-958868cc233ad7dc857df64c8c4c506c.ctex"]
+dest_files=["res://.godot/imported/selenfin_selenfin_eye.webp-958868cc233ad7dc857df64c8c4c506c.bptc.ctex", "res://.godot/imported/selenfin_selenfin_eye.webp-958868cc233ad7dc857df64c8c4c506c.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

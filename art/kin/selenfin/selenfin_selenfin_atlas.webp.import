@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b2rkrshxei87i"
-path="res://.godot/imported/selenfin_selenfin_atlas.webp-b9d8d237d4ef81a04fc01fd121084451.ctex"
+path.bptc="res://.godot/imported/selenfin_selenfin_atlas.webp-b9d8d237d4ef81a04fc01fd121084451.bptc.ctex"
+path.astc="res://.godot/imported/selenfin_selenfin_atlas.webp-b9d8d237d4ef81a04fc01fd121084451.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "04e3939448c43f09b5dc03b5e02189f4"
+"md5": "751b97e0062c97150c0c19a643e88566"
 }
 
 [deps]
 
 source_file="res://art/kin/selenfin/selenfin_selenfin_atlas.webp"
-dest_files=["res://.godot/imported/selenfin_selenfin_atlas.webp-b9d8d237d4ef81a04fc01fd121084451.ctex"]
+dest_files=["res://.godot/imported/selenfin_selenfin_atlas.webp-b9d8d237d4ef81a04fc01fd121084451.bptc.ctex", "res://.godot/imported/selenfin_selenfin_atlas.webp-b9d8d237d4ef81a04fc01fd121084451.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

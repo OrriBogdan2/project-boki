@@ -77,9 +77,9 @@ def gem_prims():
 
 def parts():
     return {
-        "body": (Shape(body_prims()), 0.003, 5200),
-        "fins": (Shape(fin_prims()), 0.0025, 900),
-        "moonstone": (Shape(gem_prims()), 0.0025, 260),
+        "body": (Shape(body_prims()), 0.003, 2300),
+        "fins": (Shape(fin_prims()), 0.0025, 380),
+        "moonstone": (Shape(gem_prims()), 0.0025, 110),
     }
 
 
@@ -89,7 +89,7 @@ GRIP = v3(0, 0.42, -0.3)
 
 def prop_parts():
     out = boki_tools.tools(GRIP, AXIS)
-    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.05, 0.048, 0.05), k=0)]), 0.003, 90)
+    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.05, 0.048, 0.05), k=0)]), 0.003, 24)
     return out
 
 
