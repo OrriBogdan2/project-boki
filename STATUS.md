@@ -919,3 +919,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 S2: READY ext/art1-sable 78e69563 (no Kael art); fidelity unchanged, VFX row is S3/S4's. Full suite not rerun since the split: S5's batch covers it.
 
 ## 2026-11-05 S2: READY ext/art1-pip 1ed53fd7 and ext/art1-vex 79dd1a4d, Kael art removed; details in EXT_TO_MAIN. Remaining Kael split: Cinder, Claire, Ryzz (in their current rounds).
+
+## 2026-11-05 16:45 UTC S2: ext/kit-gloves-69 7a5a9031 and ext/kit-glider-63 5f0ec6e0 READY
+- Full suites finished, 140 logs each: no SCRIPT ERROR. Reds are main's baseline only (abyss, farm-start, grammar-runtime, load, pack-ui, merge-form, obstacle, train, hitch, teammate, perch). The same list on both branches.
+- Those suites ran on the a4b39fd7 base. Both still merge-tree clean with main 0237eb8d; not re-run on 0237eb8d.
+- ART-1: Pip 1ed53fd7 and Vex 79dd1a4d carry no Kael art. Kael at f8523114 and Vex round 2 are running.
