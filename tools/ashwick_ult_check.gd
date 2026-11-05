@@ -222,7 +222,7 @@ func _carpet() -> void:
 		"ult payoff: standing in it, Ablaze after about 2.4s", at_14 == 0 and K.burning(T) >= 1,
 		"at 1.4s %d, at 2.6s %d" % [at_14, K.burning(T)]
 	)
-	await _lance_off(m, P, K, T)
+	await _lance_off(m, P, K, T, home)
 	await _abyss(m, P, K, home, m.world)
 	await _knock_stun_merge(m, P, K, home)
 	await ak.done(m)
@@ -291,39 +291,50 @@ func _knock_stun_merge(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> voi
 
 ## Owner item 66: LMB does nothing in Flue Flight (no flame, nothing queued, a soft tick on a press), and the lance
 ## is back on the first frame after it, however the flight ended.
-func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter) -> void:
+func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter, home: Vector3) -> void:
 	# held through the whole flight, a foe at the nozzle, watched every frame
 	var pilot := "pilot%d" % P.get_instance_id()
-	ak.step(m, 1.0)
+	ak.step(m, 6.0)                 # (the carpet of the last flight gone)
+	P.teleport(home + Vector3(-5.0, 0, 0))      # the flight runs along the flat strip
+	P.vel = Vector3.ZERO
+	ak.step(m, 0.3)
 	ok("ult 66: the idle pilot flame shows on the ground", K.fx.shown(pilot))
 	ak.fresh(T)
 	K.chars = {}
 	K.ignites = {}
-	T.teleport(P.pos + Vector3(3.0, 0, 0))
-	var at := P.pos + Vector3(0, 0, 40.0)
+	var side := Vector3(0, 0, 3.0)      # beside her, off the carpet, inside the lance's reach
+	T.teleport(P.pos + side)
+	var at := home + Vector3(40.0, 0, 0)
 	var J := _cast(P, at)
 	var em := K.hose.emitted
 	var denied := K.lmb_denied
-	var lit_in_flight := false
+	var held_in := 0
+	var pilot_in := 0
 	var frames := 0
 	while J.running() and frames < 300:
 		P.inp["fire"] = true
-		T.teleport(P.pos + Vector3(3.0, 0, 0))
-		ak.aim_at(P, P.pos + Vector3(3.0, 0, 0))
+		T.teleport(P.pos + side)
+		ak.aim_at(P, at)
 		ak.step(m, 0.001)
 		frames += 1
 		if J.running():
-			lit_in_flight = lit_in_flight or K.was_held or K.fx.shown(pilot) or K.hose.emitted != em
+			held_in += int(K.was_held)
+			pilot_in += int(K.fx.shown(pilot))
 	ok("ult 66: LMB held through the whole flight: no flame, no pilot, no lance damage, Char or burn",
-			frames > 90 and not lit_in_flight and K.hose.emitted == em and ak.dmg(T) < 0.5 and K.chars.is_empty()
-			and K.burning(T) == 0, "%d frames, puffs +%d, dmg %.1f" % [frames, K.hose.emitted - em, ak.dmg(T)])
+			frames > 90 and held_in == 0 and pilot_in == 0 and K.hose.emitted == em and ak.dmg(T) < 0.5
+			and K.chars.is_empty() and K.burning(T) == 0,
+			"%d frames, held %d, pilot %d, puffs +%d, dmg %.1f, chars %d, burn %d" % [
+				frames, held_in, pilot_in, K.hose.emitted - em, ak.dmg(T), K.chars.size(), K.burning(T)])
 	ok("ult 66: that hold ticks once, on its press", K.lmb_denied == denied + 1, "denied +%d" % (K.lmb_denied - denied))
-	ok("ult 66: LMB works on the first frame after the flight (the lance lights, its pilot up)",
-			K.was_held and K.spool > 0.0 and K.fx.shown(pilot) and P.ak.anim_id == "as_lance",
+	ok("ult 66: LMB works on the first frame after the flight (the lance lights)",
+			K.was_held and K.spool > 0.0 and P.ak.anim_id == "as_lance",
 			"held %s spool %.3f anim %s" % [K.was_held, K.spool, P.ak.anim_id])
+	P.inp["fire"] = true
+	m.step(ak.DT)
+	ok("ult 66: its pilot flame is back a frame later", K.fx.shown(pilot))
 	ak.step(m, float(K.lmbd()["spool"]) + 0.3, func():
 		P.inp["fire"] = true
-		T.teleport(P.pos + Vector3(3.0, 0, 0))
+		T.teleport(P.pos + side)
 		ak.aim_at(P, T.pos))
 	P.inp["fire"] = false
 	ok("ult 66: out of the flight the lance roars and hits, after only its usual pilot",

@@ -211,8 +211,9 @@ func _tick(dt: float) -> void:
 func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
 	var flamer_up: bool = anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
-	var lance_off := jet.running()      # item 66: not even the pilot flame in the flight
-	if vis and h.wid == "flamethrower" and not h.downed and not KinMerge.active(h) and not flamer_up and not lance_off:
+	if jet.running():
+		fx.unplace("pilot%d" % h.get_instance_id())      # item 66: the lance is out, its pilot flame too
+	elif vis and h.wid == "flamethrower" and not h.downed and not KinMerge.active(h) and not flamer_up:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		var big := 1.0 + (1.2 if was_held and spool < float(lmbd()["spool"]) else 0.0)
 		fx.place("pilot%d" % h.get_instance_id(), "pilot", nozzle(), FLAME_CYAN, PILOT_CORE, 0.4 * fl * big)

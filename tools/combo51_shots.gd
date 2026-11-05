@@ -335,8 +335,8 @@ func _ashwick() -> void:
 	)
 	await _go(1.7, leap, lmarks)
 
-## Cinder, owner item 66 (--combo51-part=item66): LMB held from before the cast to after the landing. She circles
-## so the flight stays over the island, and the camera follows her.
+## Cinder, owner item 66 (--combo51-part=item66): LMB held from before the cast to after the landing. She weaves so
+## the flight stays over the island, and the camera follows her.
 func _ashwick_item66() -> void:
 	var K: AshwickKit = P.ak
 	P.lvl = 6
@@ -347,7 +347,7 @@ func _ashwick_item66() -> void:
 			K.cd["x"] = 0.0
 			HunterKeys.ult_pressed(P)
 		if K.jet.running():
-			var d: Vector2 = (K.jet.flight["dir"] as Vector2).rotated(1.7)
+			var d: Vector2 = (K.jet.flight["dir"] as Vector2).rotated(1.7 if fmod(t, 1.0) < 0.5 else -1.7)
 			P.inp["aim"] = P.pos + Vector3(d.x * 6.0, 0.9, d.y * 6.0)
 		else:
 			P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
