@@ -58,7 +58,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	for k in sts:
 		if sts[k] is Dictionary:
 			want.append_array([sts[k]["front"], sts[k]["back"]])
-		else:
+		elif sts[k] is String:
 			want.append(sts[k])
 	var missing: Array = want.filter(func(c): return not lib.has_animation(String(c)))
 	ok(missing.is_empty(), "%s: all %d clips are in the .glb (missing %s)" % [art_name, want.size(), str(missing)])
