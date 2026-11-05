@@ -733,3 +733,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Empties: weapon_muzzle (right index), anchor_finger_L, anchor_thumb_R/L, anchor_gun_R/L, anchor_wire_R/L, anchor_rod_0..3, anchor_harness, anchor_gum, anchor_head_top, anchor_chest. Already in the model: rods blazing on the ult, pink arcs between rods, bubble scale.
 - **S3 action (fidelity row "PINK lightning from copper fingertips"):** the kit is still teal/gold (mage_kit.gd TEAL, GOLD; mage_sky, mage_ult); needs recolouring. _fingertip() spawns at hand + 0.15 m; use weapon_muzzle / anchor_finger_L.
 - Owner Q: the kit's Storm Rod is a procedural mesh held in her hand on RMB, awkward with HANDS-FREE. Keep it?
+
+## 2026-11-05 S2: READY ext/art1-cinder bb7acfb3 (with fidelity table; contains art1-kael and kit-cinder-66)
+- 14,740 tris, 6 surfaces, one 2048 atlas; 34 clips; hero_flame shader for hair, tail, tank fuel, jets; gun skinned; nozzle() stays the rules point, tip() is the drawn tip. 85 credits (balance 2779).
+- **Fidelity (all yes):** beautiful salamander woman, living-fire hair, fangs, magma-cracked charcoal skin, corset, copper/glass tank (copper reads dark), 2 exhaust nozzles as Flue Flight jets, hose to flamethrower, flame-tipped tail. Proofs in ext/hero-shots-s2 05574641 art1/cinder/ (fidelity/, closeups, turntable, match strip).
+- Checks pass: rig-standard, clip-check, cinder-art, warden-glb, warden-model, warden-stance, ashwick-combo, health --strict, gen_wiki. Suite: known reds + displace-net (same 25 on main) + mantle-look (also red on main). **bot-sanity: 1 flag here, 0 on main, repeats on seed 3 (bot Daemek, 21 facing flips): unexplained.** height_3d limit 1.11 -> 1.14. generate_lods=false vs S1's rule: question for S1.
+- Gaps: hair facets close up, tail sinks into the ground in downed/revive, a small red polygon on the sternum, dark copper, painted toe claws.
+- Owner Qs: spearhead tip on the gun OK? Vial belt per cinder_weapons (does the "cooler holder" note stand)? Wide tail arc for the top-down read OK?
+- Slot: Boki budget pass.
