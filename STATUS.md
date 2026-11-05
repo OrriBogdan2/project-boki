@@ -436,3 +436,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Shots: ext/hero-shots-s2 b8273409 boki/starter/ (turntable, animation_sheet, faces, coats, match, farm, ingame_*, 12 clip GIFs).
 - Open: on the farm non-chop/ore jobs idle while home_work still rocks Body, so she looks tipped (visible in ingame_farm.png); carry shows two held items; no blend tree; hop cancels home's bounce; no element VFX; no perf number from S1; night looks unchecked.
 - Owner Qs: Vespyx as "the starter", or all three eggs (Prismander, Mycroll next)? Palette: model is brighter #7c4fa2 vs data #4a2f5c; keep or match data? Tools in the tail, or in the pincers?
+
+## 2026-11-05 S2: Lisette (was Hem) updates taken
+- ART-1 lane ext/art1-hem has the owner's new refs (lisette_turnaround_apose, hem_FINAL_sheet, hem_v4_props, hem_v4_splash). All 8 slots full; ext/rename-lisette takes the next free slot, then Tarek 61+67, Cinder 66, Vex 68, gloves 69, glider 63, Claire 62+64+65.
