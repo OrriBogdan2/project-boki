@@ -1,7 +1,7 @@
 # Hem (archer; was Pin): import note, ART-1 rebuild (2026-11-05, owner item 108 + 76b)
 
 `hem.glb` is built by script in Blender, no scan: an SDF sculpt on the rig's own joints, a per-texel paint from the sculpt, and
-41 clips keyed as targets. Budget: 19.6k triangles with the bow (under the 20k ART-1 budget). One 2048 atlas. Slots: skin, hair,
+41 clips keyed as targets. Budget: under 15k triangles with the bow (S1 perf). One 2048 atlas. Slots: skin, hair,
 cloth, leather, metal, brass, glow.
 
     B=~/tools/blender-4.5.15-linux-x64/blender

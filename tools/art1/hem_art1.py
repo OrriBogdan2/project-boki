@@ -1,7 +1,7 @@
 """Hem (ART-1, item 108 + 76b): the sculpt to a game mesh on the contract armature with a painted atlas, saved as a .blend
 for tools/art1/hem_anims.py, which keys the clips and exports the .glb:
   blender -b --factory-startup --python tools/art1/hem_art1.py -- WORKDIR
-Shapes: hem_sculpt.py; paint: hem_paint.py. Budget: 20k triangles, the bow included. The bow is skinned in the .glb on
+Shapes: hem_sculpt.py; paint: hem_paint.py. Budget: 15k triangles, the bow included (S1). The bow is skinned in the .glb on
 x_weapon (hand.L); the nocked needle stays a separate piece on x_arrow, resting in the quiver (item 76b).
 tools/blender/breaker_art1.py is the pattern (sculpt_kit's chart seams, density-scaled unwrap, per-texel paint)."""
 import math
@@ -365,25 +365,25 @@ def main():
         nose = np.linalg.norm((v - np.array((0, 0.100, 1.590), F)) * (1.3, 1, 0.8), axis=1)
         return np.clip(np.maximum(1.15 - d / 0.03, np.maximum(1.0 - mouth / 0.034, 0.9 - nose / 0.03)), 0.02, 1)
 
-    part("skin_head", hd, 5000, "head", 3.6, hxf, "head", "skin", head_cull, eye_keep)
-    part("mask", mk, 520, "mask", 2.4, hxf, "head", None)
-    part("hair", hr, 1900, "hair", 1.4, hxf, "head", None)
-    part("lockR", locks["lockR"], 320, "lock", 0.6, hxf, "lockR", "hair")
-    part("lockL", locks["lockL"], 320, "lock", 0.6, hxf, "lockL", "hair")
-    part("tail", locks["tail"], 700, "lock", 0.8, hxf, "tail", "hair")
-    part("eyes", ey, 220, "eyes", 5.0, hxf, "head", "skin")   # (on the skin slot: the eyes slot would take the player's tint, hers stay green)
-    part("hair_needles", hn, 120, "needle", 1.0, hxf, "head", "metal")
-    part("trunk", tr, 3800, "trunk", 1.0, None, "trunk", None, lambda v: (v[:, 2] > 1.40))
-    part("armR", armR, 900, "trunk", 1.0, None, "arm")
-    part("armL", armL, 900, "trunk", 1.0, None, "arm")
-    part("handR", hR, 1150, "handR", 2.0, None, "hand")
-    part("handL", hL, 750, "handL", 1.7, None, "hand")
-    part("cowl", cw, 560, "scarf", 1.0, None, "gear", "cloth")
-    part("quiver", qv, 340, "quiver", 0.9, None, "gear")
-    part("quiver_arrows", qn, 340, "gearlab", 1.0, None, "gear")
-    part("shears", sh, 240, "gearlab", 1.0, H.shears_to_model, "gear")
+    part("skin_head", hd, 4000, "head", 3.6, hxf, "head", "skin", head_cull, eye_keep)
+    part("mask", mk, 380, "mask", 2.4, hxf, "head", None)
+    part("hair", hr, 1400, "hair", 1.4, hxf, "head", None)
+    part("lockR", locks["lockR"], 200, "lock", 0.6, hxf, "lockR", "hair")
+    part("lockL", locks["lockL"], 200, "lock", 0.6, hxf, "lockL", "hair")
+    part("tail", locks["tail"], 450, "lock", 0.8, hxf, "tail", "hair")
+    part("eyes", ey, 120, "eyes", 5.0, hxf, "head", "skin")   # (on the skin slot: the eyes slot would take the player's tint, hers stay green)
+    part("hair_needles", hn, 80, "needle", 1.0, hxf, "head", "metal")
+    part("trunk", tr, 3000, "trunk", 1.0, None, "trunk", None, lambda v: (v[:, 2] > 1.40))
+    part("armR", armR, 650, "trunk", 1.0, None, "arm")
+    part("armL", armL, 650, "trunk", 1.0, None, "arm")
+    part("handR", hR, 800, "handR", 2.0, None, "hand")
+    part("handL", hL, 500, "handL", 1.7, None, "hand")
+    part("cowl", cw, 380, "scarf", 1.0, None, "gear", "cloth")
+    part("quiver", qv, 240, "quiver", 0.9, None, "gear")
+    part("quiver_arrows", qn, 240, "gearlab", 1.0, None, "gear")
+    part("shears", sh, 140, "gearlab", 1.0, H.shears_to_model, "gear")
     bxf = lambda p: H.bow_to_model(p, J)
-    pb = part("bow", bw, 1150, "bow", 1.2, bxf, "bow")
+    pb = part("bow", bw, 850, "bow", 1.2, bxf, "bow")
     # the arrow: at rest it stands in the quiver as one more needle, eye up (x_arrow's rest)
     a, b = H.QUIVER_A, H.QUIVER_B
     u = (b - a) / np.linalg.norm(b - a)
@@ -395,7 +395,7 @@ def main():
     ar_x /= np.linalg.norm(ar_x)
     ar_z = np.cross(ar_x, ar_y)
     arxf = lambda p: ar_at + np.asarray(p, F)[..., 0:1] * ar_x + np.asarray(p, F)[..., 1:2] * ar_y + np.asarray(p, F)[..., 2:3] * ar_z
-    part("arrow", ar, 200, "gearlab", 1.4, arxf, "arrow")
+    part("arrow", ar, 120, "gearlab", 1.4, arxf, "arrow")
     print("low parts", time.time() - t0, flush=True)
 
     # the scarf's tails, each two-sided

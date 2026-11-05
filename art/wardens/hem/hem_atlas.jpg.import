@@ -18,8 +18,8 @@ dest_files=["res://.godot/imported/hem_atlas.jpg-9244ee7d52d299e39e5156570a7ae71
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
