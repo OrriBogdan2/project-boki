@@ -1,30 +1,30 @@
 {
 	"doc": "Framing for the Wardens' painted portraits and splashes (Portraits, art/portraits). face: where the face's centre sits in the portrait, as fractions of its width and height; a small frame crops in on it. splash: the point a splash is cropped around (the Warden's head and shoulders), same units.",
 	"face": {
-		"bulwark": [0.45, 0.28],
-		"archer": [0.32, 0.30],
-		"juggernaut": [0.42, 0.30],
+		"bulwark": [0.52, 0.29],
+		"archer": [0.39, 0.38],
+		"juggernaut": [0.49, 0.33],
 		"thief": [0.40, 0.31],
 		"mage": [0.43, 0.35],
 		"dolm": [0.53, 0.20],
-		"ostra": [0.46, 0.33],
-		"ashwick": [0.46, 0.28],
+		"ostra": [0.44, 0.47],
+		"ashwick": [0.55, 0.38],
 		"gunslinger": [0.40, 0.27],
 		"tender": [0.50, 0.34],
 		"rimewright": [0.43, 0.32],
-		"dredge": [0.60, 0.42]
+		"dredge": [0.41, 0.44]
 	},
 	"splash": {
-		"bulwark": [0.61, 0.18],
-		"archer": [0.28, 0.20],
-		"juggernaut": [0.40, 0.22],
+		"bulwark": [0.52, 0.26],
+		"archer": [0.36, 0.34],
+		"juggernaut": [0.49, 0.30],
 		"thief": [0.44, 0.40],
 		"mage": [0.68, 0.18],
 		"dolm": [0.55, 0.22],
-		"ostra": [0.40, 0.20],
-		"ashwick": [0.41, 0.18],
+		"ostra": [0.44, 0.42],
+		"ashwick": [0.55, 0.33],
 		"rimewright": [0.61, 0.22],
-		"dredge": [0.31, 0.22],
+		"dredge": [0.41, 0.40],
 		"gunslinger": [0.29, 0.22],
 		"tender": [0.64, 0.15]
 	}
