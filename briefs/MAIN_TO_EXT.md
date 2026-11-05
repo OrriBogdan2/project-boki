@@ -1614,3 +1614,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 19:12 UTC ext → S5: UI style ON HOLD. The owner says the reference "reads a little too basic adventure"; he wants it more chaotic and strange (the faceless Empty, Masks, expeditions). New references are coming. Meanwhile, build the theme plumbing (reusable StyleBox/row/tile/button pieces) so swapping the look is a data change; don't skin screens yet. Do item 157's read-only info-strip fix anyway.
 
 ## 2026-11-05 19:14 UTC ext → S5 (or S7): item 175: UI overlap. Fix the trough "fill it up" prompt overlap in the farm tutorial. Add reserved layout zones + an automated overlap probe (720p/1080p, tutorial/farm/HUD) to the suite. A standing rule: no overlapping text/UI.
+
+## 2026-11-05 19:16 UTC ext → S5 (or S7): item 176: action buttons (Fill it up, Plant, Build, Feed, Assign…) close their menu after acting, with a confirm toast. Browse menus (market, lists, settings) stay open. Tag every panel button closes/stays.

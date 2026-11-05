@@ -2205,3 +2205,16 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Add a check:** a headless UI-overlap probe that walks the tutorial + farm steps + match HUD at 1280×720 and 1920×1080, collects the visible Control rects (and projected world prompts), and fails on intersecting text rects.
   - Run it in the suite.
   - Post a screenshot of each fixed spot to ext.
+
+## 176. Action buttons close their menu (owner, 18:00 UTC Nov 5)
+- The owner: "pressing 'fill it up' or most things should take you out of the menu, to save you having to hit escape".
+- **The rule:** a button that completes the purpose of a menu (Fill it up, Plant, Place/Build, Assign job, Buy one, Confirm, Cook, Feed) performs the action AND closes the menu, returning you to the world.
+  - A short toast confirms ("Trough filled").
+- Menus stay open only for browsing/multi-actions: the market's repeated buying/selling (a stack-buy stays open), the Boki list/sheet navigation (174), the inventory sorting, the settings.
+  - When in doubt: close.
+- Audit every farm/home panel button and tag it as `closes` / `stays`.
+  - Default `closes` for single-purpose interact menus (trough, patch, station, house, pot).
+- The tutorial steps that wait on the menu closing must still complete.
+- **Assert:**
+  - Trough → Fill it up → the panel is closed, the trough filled.
+  - Market buy ×3 → the panel is still open.
