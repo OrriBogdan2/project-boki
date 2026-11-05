@@ -70,6 +70,7 @@ func run(main: Node) -> void:
 			clips.force = {"clip": "idle", "t": fmod(i / 15.0, 3.2)}
 			sync.call("_process", 1.0 / 15.0)
 			await _grab(dir.path_join("f%03d.png" % i))
+		model.rotation.y = deg_to_rad(yaw)
 	var names: Array = wanted if not wanted.is_empty() else Array(clips.lib.get_animation_list())
 	for nm in names:
 		var anim_name := String(nm)

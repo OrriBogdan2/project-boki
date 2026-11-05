@@ -59,7 +59,7 @@ if MODE == "turn":
     sc.render.resolution_x = sc.render.resolution_y = px
     ims = []
     for i, az in enumerate((180, 135, 90, 0, 270, 225)):
-        aim(az, 8, (0, 0.05, 0.86), 2.15)
+        aim(az, 8, (0, 0.05, 0.62), 2.2)
         sc.render.filepath = os.path.join(OUT, "turn_%d.png" % i)
         bpy.ops.render.render(write_still=True)
         ims.append(sc.render.filepath)
@@ -67,7 +67,7 @@ if MODE == "turn":
                    + ["-filter_complex", "[0][1][2]hstack=3[a];[3][4][5]hstack=3[b];[a][b]vstack", os.path.join(OUT, "turntable.png")], check=True)
     # the close view of the head, and the match camera
     sc.render.resolution_x = sc.render.resolution_y = 620
-    for nm, az, el, c, r in (("head", 180, 4, (0, 0.1, 1.36), 0.6), ("head34", 215, 8, (0, 0.1, 1.36), 0.6), ("top", 180, 55, (0, 0, 0.8), 2.3)):
+    for nm, az, el, c, r in (("head", 180, 4, (0, 0.1, 0.9), 0.62), ("head34", 215, 8, (0, 0.1, 0.9), 0.62), ("top", 180, 55, (0, 0, 0.6), 2.6)):
         aim(az, el, c, r)
         sc.render.filepath = os.path.join(OUT, nm + ".png")
         bpy.ops.render.render(write_still=True)

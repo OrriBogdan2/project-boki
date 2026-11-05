@@ -38,8 +38,12 @@ def onsurf(fld, pts, off=0.0):
 
 
 def rivets(fld, pts, r=0.0095, lab=RIVET, bone=None):
+    """Rivets go on after the game mesh is cut (Field.rv): they are paint and shading; a decimate would spend its whole
+    budget on them and flatten the forms round them."""
+    if not hasattr(fld, "rv"):
+        fld.rv = []
     for p in pts:
-        fld.add(sph(tuple(p), r), 0.0015, lab, bone)
+        fld.rv.append((sph(tuple(p), r), lab, bone))
 
 
 def barnacle(fld, c, n, r, lab=BARN):
@@ -227,20 +231,20 @@ def moss(hl, pads):
     f = Field((-0.62, -0.46, 0.2), (0.62, 0.48, 1.02), 0.0042)
     lump = lambda x, y, z: (fbm(x, y, z, 13.0, 3) - 0.5) * 0.09
     for s in (-1, 1):
-        f.add(ell((s * 0.27, -0.03, 0.8), (0.17, 0.2, 0.05)), 0.05, MOSS, None, lump)
-        f.add(ell((s * 0.43, -0.02, 0.8), (0.11, 0.13, 0.045)), 0.05, MOSS, None, lump)
+        f.add(ell((s * 0.27, -0.03, 0.8), (0.19, 0.22, 0.065)), 0.05, MOSS, None, lump)
+        f.add(ell((s * 0.45, -0.02, 0.83), (0.135, 0.15, 0.06)), 0.05, MOSS, None, lump)
     rng = np.random.default_rng(21)
     for i in range(16):
         s = 1 if i % 2 else -1
         x0 = s * float(rng.uniform(0.17, 0.36))
         fr = rng.random() > 0.3
         z0 = float(rng.uniform(0.7, 0.79))
-        l = float(rng.uniform(0.14, 0.4))
+        l = float(rng.uniform(0.18, 0.44))
         pts = []
         for t in np.linspace(0, 1, 8):
             pts.append((x0 + 0.018 * math.sin(t * 9 + i) * t, 0.5 if fr else -0.5, z0 - l * t))
         pp = onsurf(hl, pts, 0.008)
-        f.add(path(pp, [0.024 * (1 - 0.72 * t) for t in np.linspace(0, 1, 8)]), 0.012, MOSS, None, lambda x, y, z: (fbm(x, y, z, 26.0, 2) - 0.5) * 0.012)
+        f.add(path(pp, [0.034 * (1 - 0.72 * t) for t in np.linspace(0, 1, 8)]), 0.012, MOSS, None, lambda x, y, z: (fbm(x, y, z, 26.0, 2) - 0.5) * 0.012)
     # the skirt of hanging weed round the waist
     for i in range(9):
         a = i / 9 * math.tau + 0.3
@@ -366,7 +370,7 @@ def hammer():
     of iron-bound staves across the haft's end, spikes on both ends, chain wound round its waist; an iron haft as long as
     his arm. Returns (wood field, iron field, chain field, ZC)."""
     ZC = 0.5
-    BL, BR, BW = 0.245, 0.205, 0.168      # half length, end radius, waist radius (a capstan)
+    BL, BR, BW = 0.215, 0.178, 0.148      # half length, end radius, waist radius (a capstan)
     lo, hi = (-0.42, -0.27, -0.3), (0.42, 0.27, 0.78)
     W = Field(lo, hi, 0.0036)
     x, y, z = W.grid()
@@ -379,9 +383,9 @@ def hammer():
     W.d = (W.d + smooth(0.08, 0.0, np.abs((ang + 0.5) % 1.0 - 0.5)) * 0.004).astype(F)
     M = W.like()
     for sd in (-1, 1):
-        q = sd * 0.215
+        q = sd * 0.188
         M.add(cyl((q, 0, ZC), "x", BR + 0.016, 0.034, 0.008), 0.0, IRON)
-        M.add(cap((sd * BL, 0, ZC), (sd * (BL + 0.125), 0, ZC), 0.066, 0.002), 0.0, IRON)
+        M.add(cap((sd * BL, 0, ZC), (sd * (BL + 0.105), 0, ZC), 0.058, 0.002), 0.0, IRON)
         for a in np.linspace(0, 6.28, 11)[:-1]:
             rivets(M, [(q, (BR + 0.016) * math.cos(a), ZC + (BR + 0.016) * math.sin(a))], 0.0095)
     M.add(cyl((0, 0, ZC - BW - 0.012), "z", 0.07, 0.03, 0.01), 0.0, IRON)      # the haft's socket
@@ -402,8 +406,8 @@ def hammer():
     k = 0
     while a < math.tau * 2.3:
         rr = BW + 0.014
-        c = (-0.075 + a * 0.024, rr * math.cos(a), ZC + rr * math.sin(a))
-        tg = (0.024, -math.sin(a), math.cos(a))
+        c = (-0.06 + a * 0.02, rr * math.cos(a), ZC + rr * math.sin(a))
+        tg = (0.02, -math.sin(a), math.cos(a))
         rad_n = (0, math.cos(a), math.sin(a))
         side = (1, 0, 0)
         link(c, tg, rad_n if k % 2 else side)

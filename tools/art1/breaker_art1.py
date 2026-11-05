@@ -89,6 +89,21 @@ def lowpoly(name, fld, tris, outer=None):
     m.use_collapse_triangulate = True
     bpy.context.view_layer.objects.active = ob
     bpy.ops.object.modifier_apply(modifier="d")
+    # (a sharp sculpt leaves non-manifold knots that stop the collapse: weld them and go again)
+    for _ in range(3):
+        nt = len(ob.data.polygons)
+        if nt <= tris * 1.15:
+            break
+        bm = bmesh.new()
+        bm.from_mesh(ob.data)
+        bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.004)
+        bmesh.ops.holes_fill(bm, edges=bm.edges, sides=8)
+        bmesh.ops.triangulate(bm, faces=bm.faces)
+        bm.to_mesh(ob.data)
+        bm.free()
+        m = ob.modifiers.new("d", "DECIMATE")
+        m.ratio = min(1.0, tris / max(len(ob.data.polygons), 1))
+        bpy.ops.object.modifier_apply(modifier="d")
     return ob
 
 
@@ -261,6 +276,8 @@ def main():
 
     def part(name, fld, tris, mat, paint, density=1.0, xf=None, group="body", bone="hips", outer=None, **kw):
         ob = lowpoly(name, fld, tris, outer)
+        for pr, lab, bn in getattr(fld, "rv", []):      # (the rivets: on the paint's field, not the mesh)
+            fld.add(pr, 0.0015, lab, bn)
         p = {"ob": ob, "slot": mat, "paint": paint, "density": density, "xf": xf, "group": group, "f": fld, "f2": None,
              "aux": None, "name": name, "bone": bone}
         p.update(kw)
@@ -268,7 +285,7 @@ def main():
         return p
 
     hl = B.hull(J)
-    part("hull", hl, 2700, "wood", "hull", 1.25)
+    part("hull", hl, 2600, "wood", "hull", 1.25)
     st = B.straps(hl)
     part("straps", st, 1300, "iron", "iron", 1.1)
     cp, c_at, c_n = B.compass_field(hl)
@@ -279,7 +296,7 @@ def main():
     hm = B.helmet()
     part("helmet", hm, 1500, "brass", "brass", 2.2, bone="head")
     ms = B.moss(hl, None)
-    part("moss", ms, 1500, "soft", "moss", 1.0)
+    part("moss", ms, 1700, "soft", "moss", 1.0)
     mt = B.masts()
     part("masts", mt, 600, "wood", "mast", 0.9)
     sl = B.sails()
@@ -351,8 +368,20 @@ def main():
         else:
             bpy.ops.uv.smart_project(angle_limit=math.radians(85), island_margin=0.0)
         bpy.ops.object.mode_set(mode="OBJECT")
-        ob.select_set(False)
         me = ob.data
+        if p["aux"] is None:
+            # (a closed chart has no seam and fails to solve: its faces come back with no UV area)
+            cu = np.empty(len(me.loops) * 2, np.float32)
+            me.uv_layers.active.data.foreach_get("uv", cu)
+            tq = cu.reshape(-1, 3, 2)
+            e1, e2 = tq[:, 1] - tq[:, 0], tq[:, 2] - tq[:, 0]
+            if (np.abs(e1[:, 0] * e2[:, 1] - e1[:, 1] * e2[:, 0]) < 1e-10).mean() > 0.002:
+                print("smart project", p["name"], flush=True)
+                bpy.ops.object.mode_set(mode="EDIT")
+                bpy.ops.mesh.select_all(action="SELECT")
+                bpy.ops.uv.smart_project(angle_limit=math.radians(64), island_margin=0.0)
+                bpy.ops.object.mode_set(mode="OBJECT")
+        ob.select_set(False)
         lv = np.empty(len(me.loops), np.int32)
         me.loops.foreach_get("vertex_index", lv)
         uv = np.empty(len(me.loops) * 2, np.float32)

@@ -143,7 +143,7 @@ def p_limb(p, n, c):
     a = np.arctan2(y, np.abs(x) - 0.44)
     col = shade(col, ao, cv * 0.7, n, 0.65, 0.3, (0.6, 0.62, 0.72))
     iron = mix(C("5b5048"), C("3e342e"), fbm(x, y, z, 14.0, 3)[:, None] * 1.1)
-    iron = mix(iron, C("8c4d28"), smooth(0.48, 0.64, fbm(x + 5, y, z, 12.0, 4)) * 0.75)
+    iron = mix(iron, C("6e4a34"), smooth(0.48, 0.64, fbm(x + 5, y, z, 12.0, 4)) * 0.6)
     col = np.where((lab == B.IRON)[:, None], shade(iron, ao, cv * 0.8, n, 0.6, 0.9, (0.65, 0.6, 0.7)), col)
     col = np.where((lab == B.RIVET)[:, None], shade(C("8a7f74") * ones(p), ao, cv * 0.5, n, 0.5, 0.9), col)
     barn = C("c4bcaa") * ones(p) * (0.8 + 0.4 * fbm(x, y, z, 90.0, 2))[:, None]
@@ -169,10 +169,10 @@ def p_iron(p, n, c):
     lab = f.label(p)
     col = mix(C("665a50"), C("40362f"), fbm(x, y, z, 14.0, 3)[:, None] * 1.1)
     rust = smooth(0.46, 0.62, fbm(x + 5, y, z, 11.0, 4))
-    col = mix(col, C("8a4a26"), rust * 0.85)
-    col = mix(col, C("b86a34"), smooth(0.6, 0.72, fbm(x, y + 3, z, 26.0, 2)) * rust * 0.6)
+    col = mix(col, C("6e4a34"), rust * 0.7)
+    col = mix(col, C("8c5a38"), smooth(0.6, 0.72, fbm(x, y + 3, z, 26.0, 2)) * rust * 0.4)
     col = mix(col, C("a09488"), (lab == B.RIVET) * 0.7)
-    return shade(col, ao, cv * 0.8, n, 0.6, 1.0, (0.65, 0.6, 0.7))
+    return shade(col, ao, cv * 0.8, n, 0.6, 0.6, (0.65, 0.6, 0.7))
 
 
 def p_brass(p, n, c):
@@ -198,7 +198,7 @@ def p_compass(p, n, c):
     u, v = q @ rt, q @ up
     r = np.sqrt(u * u + v * v)
     ang = np.arctan2(u, v)
-    col = C("d8c79a") * ones(p)
+    col = C("a8905c") * ones(p)
     st = r - (0.012 + 0.052 * np.abs(np.cos(ang + 0.4)) ** 7)
     rose = smooth(0.002, -0.002, st)
     col = mix(col, np.where(((np.cos(ang + 0.4) > 0))[:, None], C("c23a2a") * ones(p), C("1f6a78") * ones(p)), rose)
@@ -247,7 +247,7 @@ def p_door(p, n, c):
     col = mix(col, C("1e140e"), seam * 0.9)
     st = C("8d887e") * (0.8 + 0.4 * vnoise(x * 3.0, y, z * 0.7, 110.0))[:, None]
     col = np.where((lab == 4)[:, None], st, col)
-    return shade(col, ao, cv * 0.8, n, 0.75, 0.6, (0.65, 0.62, 0.68))
+    return shade(col, ao, cv * 1.0, n, 0.85, 0.7, (0.6, 0.58, 0.66))
 
 
 def p_fish(p, n, c):

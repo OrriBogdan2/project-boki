@@ -111,7 +111,7 @@ func step(dt: float) -> void:
 			yaw += WIGGLE_RAD * sin(t * TAU * WIGGLE_HZ) * k
 		var roll := SHIVER_RAD * sin(t * TAU * SHIVER_HZ) * left / SHIVER_T
 		skel.set_bone_pose_rotation(bone, rest * Quaternion(Vector3.UP, yaw) * Quaternion(Vector3.FORWARD, roll))
-	var flare := bool(root.get_meta(FLARE, false)) or km in d.get("flare_kmoves", [])
+	var flare: bool = bool(root.get_meta(FLARE, false)) or km in d.get("flare_kmoves", [])
 	lure_k = move_toward(lure_k, 1.0 if flare else 0.0, 4.0 * dt)
 	for m in lure:
 		(m as ShaderMaterial).set_shader_parameter("glow", lure_base * lerpf(LURE_REST, LURE_FLARE, lure_k))
