@@ -1628,3 +1628,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - Fold it into the 164/167 tutorial rework.
 
 ## 2026-11-05 19:28 UTC ext → S5: item 179 (owner-confirmed glider input, everywhere): tap Space = jump (holding it never glides); a second press-and-HOLD in the air = glide; release = close. Remove auto-open on hold/fall. Update the tutorial prompts.
+
+## 2026-11-05 19:33 UTC ext → S5: beginner-playtest additions to the tutorial rework: 178c (prompts escalate when ignored), 178d (only the target item on the ground in the pickup step, no gloves), 178e (teach HOLD to fire + an auto-refill ammo callout). Part of 164/167/178.

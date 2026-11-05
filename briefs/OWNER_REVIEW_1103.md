@@ -2305,3 +2305,15 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Gloves (gust etc.) aren't introduced in the first tutorial at all. They come later, with their own short explainer the first time one is picked up in a real match ("Gloves give a special move on {key}").
   - If a non-target item somehow appears, it isn't highlighted and the prompt points at the right one.
 - **Assert:** during the pickup step, the count of ground gear == 1 (the tutorial item).
+
+## 178e. Teach "hold to fire" and "unlimited ammo"; hold-to-glide is covered by 179 (owner playtest with his dad, 18:09 UTC Nov 5)
+- The owner: "he doesn't realize he can hold lmb instead of tapping (same with glider) and he didn't realize he has unlimited ammo".
+- **LMB step:**
+  - The keycap shows a mouse with the left button and the label "HOLD to fire", with an animated hold bar.
+  - The step completes after ~1.5 s of continuous fire (not taps).
+  - If he only taps, after 3 taps the nudge says "Try holding it down".
+- **Ammo:**
+  - The first time the drum/magazine empties, a big friendly callout: "Ammo refills by itself, just keep going".
+  - Make the HUD ammo readout show a refill animation / ∞-style auto-refill icon, so it never reads as "out of ammo".
+- **Glider:** the item 179 "SPACE, then HOLD SPACE" keycap with an animated hold bar (the same visual language as hold-to-fire).
+- **Assert:** the LMB step requires a sustained hold; the ammo callout fires once, on the first empty.
