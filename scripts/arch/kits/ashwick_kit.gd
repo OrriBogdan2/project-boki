@@ -666,8 +666,9 @@ func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
 func has_ult() -> bool: return true
 func ult_recast() -> bool: return jet.recast()
 func ult_running() -> bool: return jet.running()
-## In the flight (a roll) the Cinder Shot still works (item 51); the lance does not (item 66).
+## In the flight (a roll) only E works (item 66: AshwickJet.lock_inputs).
 func fires_in_dash() -> bool: return jet.running()
+func gate_inputs() -> void: jet.lock_inputs()
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
