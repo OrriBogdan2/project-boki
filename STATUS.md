@@ -850,3 +850,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Eyes are paint: no gaze, brow bones gone. Sheets and 25 GIFs predate the last apron fix. Stale kael image files on the branch: the merge should clear them.
 - Owner Qs: 0.66x height? Lose gaze for painted eyes? Wings tilted for the match camera?
 - Slot: Pip 118.
+
+## 2026-11-05 S2: READY ext/art1-motley da47ee16 (agent ~75%; ult vortex row is S3's)
+- 13,989 tris; normal path in hero_toon; face rebuilt to ostra_head; ruff separate; new --motley-live-check through real match code; bfcf7393 merged (rebase on 66a9c6f2 needed for item 117).
+- **Fidelity:** jester on a spring from a card box yes; box hovers yes; silent yes (footsteps; landing thud stays); glides over lava/water by code; starry void face yes; burning cards yes; **ult ground vortex No** (S3); spring compresses on dash yes. Proofs: ext/hero-shots-s2 1cbab813 art1/motley/.
+- Checks pass on the final code: motley-live, clip, rig-standard, warden-model, warden-glb, warden-stance, ostra-combo 165, hitbox-size, mantle-look, health --strict. Full suite 139: baseline reds; **bot-sanity inconsistent**. Teammate row flaky on clean main too, so not this branch.
+- Height 1.18x / 1.2x with the lower hover (1.33x on main). warden-model targets moved.
+- Owner Qs: orb in his right hand mirrors the sheet? 1.2x height OK?
+- bot-sanity is now flagged on Cinder and Motley; a lane is checking the shared runtime.
