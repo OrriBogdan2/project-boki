@@ -48,7 +48,8 @@ func _breaker_whirl() -> void:
 		var how := "opened as him" if start == "bulwark" else "swapped to him"
 		var pv: Node3D = K.fx._pivot()
 		var mesh := pv.get_node_or_null(WardenGlb.WEAPON) as MeshInstance3D
-		ok("arena Breaker (%s): his 3D hammer is on the swing's pivot" % how, mesh != null and mesh.is_visible_in_tree())
+		ok("arena Breaker (%s): his 3D hammer is on the swing's pivot" % how,
+			mesh != null and mesh.is_visible_in_tree())
 		P.fire_cd = 0.0
 		var last := Vector3.ZERO
 		var turns := 0.0
