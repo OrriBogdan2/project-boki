@@ -1205,3 +1205,23 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Assert:**
   - Ground tap → cd 4.25; ground hold → cd 8.5.
   - Air tap → ~6 m, cd 4.25; air hold → ~9.5 m, cd 8.5.
+
+## 126. Brall (Juggernaut) Warchain + Lunge: a straighter chain, a free Lunge aim, the Lunge + pull boost tech (owner, 17:10 UTC Nov 5)
+- The owner: "his e works better now but it bends too much, looks weird. also his rmb hold forces you to go down his e still, it should be able to go anywhere and then trigger his e. also should be able to look away while holding rmb, use second pull of e, then release rmb mid air for a boost of speed type of thing".
+- **Chain look:** the Warchain bends/sags too much.
+  - Make it near-straight and taut: at most a slight sag at rest, dead straight under the pull.
+  - A little whip only on the throw.
+- **Lunge while tethered** (juggernaut_kit.gd:695 `_chain_lunge`, :811): today a charged Lunge released while chained is forced to run along the chain.
+  - Remove that. The Lunge always goes where you aim, tethered or not; the chain stays attached and stretches.
+  - Remove the Chain Lunge as the forced result.
+  - A Lunge that hits still lets you recast E to pull afterwards.
+- **The boost tech:**
+  1. Hold RMB (the Lunge charging; he can look and aim anywhere).
+  2. Recast E (the pull starts; :833 currently converts the charge into a Haul Slam, so remove that auto-conversion).
+  3. Release RMB mid-pull or mid-air → the Lunge fires the aimed way, carrying the pull's momentum: a speed boost (e.g. pull velocity + the Lunge impulse, capped ~1.4x the normal Lunge distance).
+  - The Haul Slam stays only if he releases RMB on arrival at the anchor (tune), or drop it if it conflicts.
+  - It should feel like a slingshot.
+- **Assert:**
+  - Tethered + aiming 120° off the chain → the Lunge goes the aimed way.
+  - Hold RMB → recast E → release mid-pull → the travel is longer/faster than a plain Lunge, in the aimed direction.
+  - The chain's sag is ≤0.15 m at rest.

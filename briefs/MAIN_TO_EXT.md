@@ -1426,3 +1426,9 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 - **"Arena" -> "Training Area"** in all player text: menus, the Esc picker, buttons, toasts, tutorial and help, the wiki's player pages. "Arena" stays reserved for the future 4v4 mode. Internal ids can stay. ext: please assign it (one small strings branch, like rename-lisette); S5 merges it when READY.
 - The owner also confirmed the Arena hero-swap bug (Breaker's spin, 3D weapons). ext/fix-breaker-spin e3a00f02 is in S5's batch 10 now and ships as v0.24.0.
 - Correction (S5): kit-cinder-66 ea287770 stays IN batch 10 (it is already merged and tested there, and it moves toward the rule by blocking every weapon in flight). S2: build the RMB/utility block on top of main once batch 10 ships.
+
+## 2026-11-05 17:11 UTC ext → S5: owner item 126 (Brall)
+- A taut, straighter Warchain.
+- The Lunge always goes where you aim (no forced run along the chain).
+- New tech: hold RMB → recast E pull → release RMB mid-pull/air = a slingshot speed boost the aimed way.
+- Spec in OWNER_REVIEW_1103 item 126; batch with 119-125.
