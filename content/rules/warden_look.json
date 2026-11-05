@@ -559,7 +559,7 @@
 				]
 			},
 			"leather-mask": {
-				"emit": 2.6,
+				"emit": 1.05,
 				"fres": 0.12,
 				"fres_tint": 0.0,
 				"fres_color": [
@@ -568,29 +568,30 @@
 					1.0
 				],
 				"albedo": [
-					0.92,
-					0.91,
-					0.95
+					1.0,
+					0.98,
+					1.0
 				],
 				"own_ambient": [
-					0.5,
-					0.48,
-					0.54
+					0.56,
+					0.55,
+					0.56
 				],
 				"far_lift": 0.3,
 				"dark_lift": 0.0,
 				"light_neutral_warm": 0.9
 			},
 			"glow-halo": {
-				"glow": 1.0,
-				"fres": 0.2,
-				"far_glow": 0.3
+				"glow": 0.72,
+				"fres": 0.0
 			},
 			"glow-orb": {
-				"glow": 1.3
+				"glow": 0.85,
+				"fres": 0.0
 			},
 			"glow-eyes": {
-				"glow": 1.3
+				"glow": 0.9,
+				"fres": 0.0
 			}
 		},
 		"halos": [

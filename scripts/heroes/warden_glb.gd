@@ -462,7 +462,7 @@ static func _skinned_weapon(root: Node3D) -> void:
 	for mi in gun.find_children("*", "MeshInstance3D", true, false):
 		(mi as MeshInstance3D).visible = false
 		mi.set_meta("glb_hidden", true)
-	var mag := gun.get_node_or_null("Mag") as MeshInstance3D      # (the reload's motion stays; HunterAnim shows it again)
+	var mag := gun.get_node_or_null("Mag") as MeshInstance3D      # (the reload's motion stays, shown or not)
 	if mag:
 		mag.mesh = null
 
@@ -759,7 +759,7 @@ class Sync extends Node:
 	var gun: Node3D
 	var muzzle: Node3D
 	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
-	var rig_root: Array = []      # data "rig_root": the root bone's link: its bone stays on the Rig under the clips (a hover)
+	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model

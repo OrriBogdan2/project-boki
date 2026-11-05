@@ -75,10 +75,10 @@ def eye_socket(u, v):
     au = np.abs(u)
     # almond tipped up and out, its top cut flat by the brow: the anger
     slant = v - 0.235 - 0.34 * (au - 0.43)
-    du = (au - 0.42) / 0.235
-    dv = slant / 0.112
+    du = (au - 0.42) / 0.265
+    dv = slant / 0.135
     d = np.sqrt(du * du + dv * dv)
-    return sm(1.05, 0.74, d) * sm(0.095, 0.05, slant)
+    return sm(1.05, 0.74, d) * sm(0.115, 0.065, slant)
 
 
 def height(u, v):

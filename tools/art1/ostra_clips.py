@@ -7,7 +7,7 @@ import math
 TAU = 2 * math.pi
 
 # his two signature holds
-ORB_UP = {"hR": (0.31, 0.20, 1.05), "fR": (0.05, 0.75, 0.65), "pR": (-0.25, -0.45, 0.85), "eR": (1.0, -0.7, -0.6), "cR": 0.5, "sR": 0.8}
+ORB_UP = {"hR": (0.31, 0.20, 1.05), "fR": (0.05, 0.75, 0.65), "pR": (-0.25, -0.45, 0.85), "eR": (1.0, -0.7, -0.6), "cR": 0.3, "sR": 1.0}
 OFF_LOW = {"hL": (-0.31, 0.12, 0.88), "fL": (-0.45, 0.35, -0.8), "pL": (0.3, 0.85, 0.2), "eL": (-1.0, -0.5, 0.0), "cL": 0.35, "sL": 1.0}
 STILL = dict(ORB_UP, **OFF_LOW, spine=(14.0, -6.0, 3.0), head=(-8.0, 6.0, 13.0), brow=-0.8, cheek=0.3, lid=0.3, jaw=0.0)
 
@@ -31,7 +31,7 @@ LIMP = {"hR": (0.2, 0.07, 0.82), "hL": (-0.2, 0.07, 0.82), "fR": (0.05, 0.1, -1.
         "cR": 0.3, "cL": 0.3, "sR": 0.2, "sL": 0.2, "eR": (1.0, -0.5, 0.0), "eL": (-1.0, -0.5, 0.0)}
 
 
-def breath(P, t, period, amp=1.2):
+def breath(P, t, period, amp=0.75):
     s = P["spine"]
     P["spine"] = (s[0] + amp * math.sin(t / period * TAU), s[1], s[2])
 
@@ -43,7 +43,7 @@ def idle_add(P, t):
 
 
 def stance_add(P, t):
-    breath(P, t, 2.0, 1.8)
+    breath(P, t, 2.0, 0.8)
     P["wR"] = 0.2
     P["wL"] = 0.26
 

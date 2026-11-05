@@ -16,7 +16,7 @@ import ostra_parts as P
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 OUT = os.environ.get("OSTRA_WORK", os.path.expanduser("~/art1/ostra"))
-MASK_TRIS = 3400
+MASK_TRIS = 4600
 
 
 def to_blender(p):
@@ -226,7 +226,7 @@ def main():
         add(h)
         add(P.bell(side, path[-1], "spring_horn%s_2" % n))
         # the chain: from a third along the horn to its tip (a last unskinned bone is the rope's end)
-        ks = [6, 9, 12, 16, 16]
+        ks = [8, 12, 16, 21, 21]
         pts = [path[i] for i in ks[:4]] + [path[-1] + (0, 0, -0.07)]
         for i in range(4):
             parent = "head" if i == 0 else "spring_horn%s_%d" % (n, i - 1)

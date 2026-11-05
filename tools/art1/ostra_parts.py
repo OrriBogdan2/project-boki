@@ -240,7 +240,7 @@ def hand(side):
         tip = j2 + np.array((palm_dir * 0.03, spread * L * 0.2, -L * 0.27))
         path = resample([k + (0, 0, 0.012), k, mid, j2, tip], 9)
         rd = rmp(np.linspace(0, 1, 9), [0, 0.1, 0.42, 0.5, 0.72, 0.8, 1.0], [0.0105, 0.0125, 0.0098, 0.0108, 0.0085, 0.0075, 0.0008])
-        Pf = tube(path, rd, 7)
+        Pf = tube(path, rd, 8)
         V, F, ST = grid(Pf, closed=True)
         d = np.linalg.norm(V - k, axis=1)
         kb = M.sm(L * 0.40, L * 0.52, d)
@@ -255,7 +255,7 @@ def hand(side):
     tip = mid + np.array((palm_dir * 0.03, 0.035, -0.06))
     path = resample([k, mid, tip], 8)
     rd = rmp(np.linspace(0, 1, 8), [0, 0.45, 0.7, 1.0], [0.014, 0.0105, 0.008, 0.0008])
-    V, F, ST = grid(tube(path, rd, 7), closed=True)
+    V, F, ST = grid(tube(path, rd, 8), closed=True)
     d = np.linalg.norm(V - k, axis=1)
     kb = M.sm(0.05, 0.07, d)
     out.append(Part("thumb" + n, "leather", V, F, ST, {"x_thumb." + n: 1 - kb, "x_thumbb." + n: kb}, "finger", (40, 128)))
@@ -306,13 +306,13 @@ def horn(side):
     pts = np.array(((0.055, -0.04, 1.765), (0.135, -0.055, 1.815), (0.225, -0.07, 1.836), (0.31, -0.075, 1.80),
                     (0.375, -0.068, 1.72), (0.405, -0.058, 1.625), (0.412, -0.052, 1.58)))
     pts[:, 0] *= side
-    path = resample(pts, 17)
-    t = np.linspace(0, 1, 17)
+    path = resample(pts, 22)
+    t = np.linspace(0, 1, 22)
     rd = rmp(t, [0, 0.15, 0.33, 0.55, 0.8, 1.0], [0.085, 0.098, 0.082, 0.058, 0.03, 0.012])
     rd = rd * (1 + 0.07 * np.sin(t * 19.0) * (t > 0.08) * (t < 0.9))      # the cloth's dents
-    P = tube(path, rd, 11, lambda a, tt: 1 + 0.1 * np.cos(2 * a) * (1 - tt))
+    P = tube(path, rd, 14, lambda a, tt: 1 + 0.1 * np.cos(2 * a) * (1 - tt))
     V, F, ST = grid(P, closed=True)
-    ts = np.repeat(t, 11)
+    ts = np.repeat(t, 14)
     return Part("horn" + n, "cloth", V, F, ST, chain_w("spring_horn%s" % n, ts, 3, 0.35, "head"), "horn", (420, 160)), path
 
 
@@ -531,21 +531,25 @@ def orb(at):
         P[i, :, 2] = c[2] + np.cos(p) * 0.098
     V, F, ST = grid(P, closed=True)
     out.append(Part("orbcore", "void-orb", V, F, ST, rigid("x_weapon", len(V)), "orbcore", (64, 64)))
-    # three swirling ribbons hugging it, opposite faces glowing
-    for j in range(3):
-        n = 22
-        tt = np.linspace(0, 1, n)
-        ang = tt * 4.4 + j * 2.09
-        tilt = 0.55 + j * 0.5
-        r = 0.104 + 0.075 * (tt ** 1.4)
-        ca, sa = np.cos(ang), np.sin(ang)
-        p = np.stack((ca * r, sa * r * np.cos(tilt), sa * r * np.sin(tilt)), axis=1) + c
-        nrm = np.array((0, -np.sin(tilt), np.cos(tilt)))
-        wd = rmp(tt, [0, 0.3, 1], [0.05, 0.03, 0.002])
-        P = np.zeros((n, 2, 3))
-        for i in range(n):
-            P[i, 0] = p[i] - (p[i] - c) / np.linalg.norm(p[i] - c) * wd[i] * 0.5 + nrm * 0.0
-            P[i, 1] = p[i] + (p[i] - c) / np.linalg.norm(p[i] - c) * wd[i] * 0.5
+    # the swirl: spiral arms in two crossed planes, the near plane open to the palm (up, at the match camera, in his held pose)
+    planes = ((np.array((1.0, 0, 0)), np.array((0, 1.0, 0)), np.array((0, 0, 1.0))),
+              (np.array((0.0, 1.0, 0.0)), np.array((0, 0, 1.0)), np.array((1.0, 0, 0))))
+    for j in range(6):
+        n, e1, e2 = planes[j % 2]
+        k = len(planes)
+        tilt = 0.26
+        nn = n * np.cos(tilt) + e1 * np.sin(tilt)
+        e1b = e1 * np.cos(tilt) - n * np.sin(tilt)
+        m = 20
+        tt = np.linspace(0, 1, m)
+        ang = tt * 3.3 + (j // 2) * 2.094 + (j % 2) * 0.7
+        r = 0.100 + 0.105 * tt ** 1.35
+        wd = rmp(tt, [0, 0.35, 1], [0.052, 0.042, 0.002])
+        P = np.zeros((m, 2, 3))
+        for i in range(m):
+            rad = e1b * np.cos(ang[i]) + e2 * np.sin(ang[i])
+            P[i, 0] = c + rad * (r[i] - wd[i] * 0.2)
+            P[i, 1] = c + rad * (r[i] + wd[i])
         V, F, ST = both(*grid(P))
         out.append(Part("orbswirl%d" % j, "glow-orb", V, F, ST, rigid("x_weapon", len(V)), "orbswirl", (64, 128)))
     return out
@@ -599,18 +603,19 @@ def halo():
 
 def eye_ball(side):
     u, v = M.eyes()[0 if side > 0 else 1]
+    v = v - 0.03
     u, v = np.array([u]), np.array([v])
     x = u * M.HALF_W
     _, y, z = M.shape(u / np.maximum(M.outline(v), 0.3), v)
     h = M.height(u, v)
-    c = np.array((x[0], y[0] + M.DEPTH * h[0] + 0.003, z[0]))
+    c = np.array((x[0], y[0] + M.DEPTH * h[0] + 0.001, z[0]))
     rows, cols = 6, 8
     P = np.zeros((rows, cols, 3))
     a = np.linspace(0, 2 * np.pi, cols, endpoint=False)
     for i in range(rows):
         p = np.pi * i / (rows - 1)
         P[i, :, 0] = c[0] + np.cos(a) * np.sin(p) * 0.024
-        P[i, :, 1] = c[1] + np.sin(a) * np.sin(p) * 0.01
-        P[i, :, 2] = c[2] + np.cos(p) * 0.016
+        P[i, :, 1] = c[1] + np.sin(a) * np.sin(p) * 0.012
+        P[i, :, 2] = c[2] + np.cos(p) * 0.021
     V, F, ST = grid(P, closed=True)
     return Part("eye" + ("R" if side > 0 else "L"), "glow-eyes", V, F, ST, rigid("x_lid." + ("R" if side > 0 else "L"), len(V)), "eye", (32, 32)), c

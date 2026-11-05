@@ -223,7 +223,7 @@ def p_bell(S, T):
 def p_halo(S, T):
     # S along the crescent, T round its plate's section (front face in the middle of rows 0..0.6)
     n = fbm(S, T, 16, 3, 51)
-    base = ramp(n * 1.2 - 0.1, [hx("6a38d6"), hx("8a5cf0"), hx("c4a8f4")])
+    base = ramp(n * 1.2 - 0.1, [hx("5a2ac8"), hx("7a44e8"), hx("b08cf8")])
     # cracks: each a jagged walk across the plate, some forking
     cr = np.zeros(S.shape)
     rng = np.random.RandomState(8)
@@ -237,7 +237,7 @@ def p_halo(S, T):
         cr = np.maximum(cr, M.sm(0.003, 0.001, d))
     base = mix(base, hx("1e0640"), cr)
     edge = np.maximum(M.sm(0.08, 0.0, T), M.sm(0.5, 0.62, T) * M.sm(0.72, 0.62, T))
-    return mix(base, hx("e4d4ff"), edge * 0.6)
+    return mix(base, hx("d0b4ff"), edge * 0.7)
 
 
 def p_orbcore(S, T):
@@ -245,11 +245,13 @@ def p_orbcore(S, T):
 
 
 def p_swirl(S, T):
-    return ramp((1 - T) * (0.55 + 0.45 * (1 - np.abs(S - 0.5) * 2)), [hx("5a20c8"), hx("9a50f0"), hx("dcb0ff"), hx("f8ecff")], [0, 0.4, 0.8, 1])
+    return ramp((1 - T) * (0.4 + 0.6 * (1 - np.abs(S - 0.5) * 2)), [hx("3a12a0"), hx("6a2ae0"), hx("a868ff"), hx("e8c8ff")], [0, 0.45, 0.8, 1])
 
 
 def p_eye(S, T):
-    return ramp(T, [hx("6a20f0"), hx("9a50ff"), hx("f0e0ff"), hx("9a50ff"), hx("6a20f0")], [0, 0.38, 0.5, 0.62, 1])
+    # (the ball's front is at s = 0.25: a pinpoint in a violet iris)
+    d = np.hypot((S - 0.25) * 2.2, T - 0.5)
+    return ramp(d, [hx("ffffff"), hx("d0a0ff"), hx("7a28f0"), hx("5a14d0")], [0, 0.1, 0.22, 0.5])
 
 
 def p_card(S, T):
@@ -381,15 +383,15 @@ def mask_textures(size=1024):
     m = M.mouth_mask(U, V, 0.008)
     t, seam, rows = M.teeth(U, V)
     tooth = M.sm(0.42, 0.72, t)
-    mc = ramp(tooth, [hx("2a0a6a"), hx("8a5cf0"), hx("e8d4ff")], [0, 0.45, 1])
+    mc = ramp(tooth, [hx("1c0650"), hx("5a30b8"), hx("a184e0")], [0, 0.45, 1])
     c = mix(c, mc, m)
     top, bot = M.lips(U)
     ink = (np.exp(-((V - top) / 0.012) ** 2) + np.exp(-((V - bot) / 0.012) ** 2)) * (np.abs(U) < 0.82)
     c = mix(c, hx("1a1024"), np.clip(ink, 0, 1) * 0.85)
     # the corners of the grin bite hard
     em = np.zeros(U.shape + (3,), np.float32)
-    em = em + (hx("8a46ff") * 1.0 - em) * (m * (0.35 + 0.65 * tooth))[..., None]
-    em = em + (hx("f0dcff") - em) * (m * tooth * 0.75)[..., None]
+    em = em + (hx("7a30ff") - em) * (m * (0.55 + 0.45 * tooth))[..., None]
+    em = em + (hx("c8a0ff") - em) * (m * tooth * 0.6)[..., None]
     # the tear under his right eye
     tu, tv = 0.43, -0.03
     du2 = (U - tu) / 0.06

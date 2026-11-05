@@ -96,7 +96,8 @@ iris out and its plain back in). `WardenGlb.Orbits` (run by Sync) turns the empt
 ### Hovering bodies
 A body with no feet (Ostra) is built with its ground below its hem (fit spec `sole_z`); the rig's own hover
 (`KMovesStone.hover`, which lifts `Rig`, so the `root` bone) floats it and keeps the gap above the shadow. Its
-lower body is a `void` wisp on a `spring_wisp_*` chain under `hips` (`warden_parts.wisp()`).
+lower body is a `void` wisp on a `spring_wisp_*` chain under `hips` (`warden_parts.wisp()`). With hand-keyed clips, `"rig_root": true`
+in its content/rules/warden_anim file keeps the `root` bone on `Rig` under them, so the hover and the kit's lifts carry on.
 
 ### Design variants
 Another design of the same Warden can sit beside the shipped model while the owner compares them:

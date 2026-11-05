@@ -1,12 +1,13 @@
 extends RefCounted
-## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]: a Hero's
-## hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png..., and with
-## --turn a turntable in <dir>/turntable/. Needs a renderer. ffmpeg makes the GIFs and sheets.
+## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn]
+## [--match]: a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets):
+## <dir>/<clip>/f000.png..., and with --turn a turntable in <dir>/turntable/. Needs a renderer. ffmpeg makes the
+## GIFs and sheets.
 
 var holder: Node3D
 var cam: Camera3D
 var tree: SceneTree
-var size := 480
+var shot_px := 480
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -24,7 +25,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--warden="): id = a.substr(9)
 		if a.begins_with("--clips="): wanted = Array(a.substr(8).split(",", false))
 		if a.begins_with("--fps="): fps = float(a.substr(6))
-		if a.begins_with("--size="): size = int(a.substr(7))
+		if a.begins_with("--size="): shot_px = int(a.substr(7))
 		if a.begins_with("--yaw="): yaw = float(a.substr(6))
 		if a.begins_with("--dist="): dist = float(a.substr(7))
 		if a.begins_with("--at="): at_y = float(a.substr(5))
@@ -32,8 +33,8 @@ func run(main: Node) -> void:
 		if a == "--match": game_cam = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
-	main.get_window().size = Vector2i(size, size)
-	main.get_viewport().size = Vector2i(size, size)
+	main.get_window().size = Vector2i(shot_px, shot_px)
+	main.get_viewport().size = Vector2i(shot_px, shot_px)
 	_stage(main)
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	model.set_meta("anim_seed", 1)
