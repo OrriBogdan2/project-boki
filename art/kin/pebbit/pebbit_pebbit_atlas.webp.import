@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b8n6w1j6y2trk"
-path="res://.godot/imported/pebbit_pebbit_atlas.webp-d3f6950447d08eaea7dfd9e76c9ccd58.ctex"
+path.bptc="res://.godot/imported/pebbit_pebbit_atlas.webp-d3f6950447d08eaea7dfd9e76c9ccd58.bptc.ctex"
+path.astc="res://.godot/imported/pebbit_pebbit_atlas.webp-d3f6950447d08eaea7dfd9e76c9ccd58.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "de27d7cd13f72c7e750cb63e39cd6206"
+"md5": "39a4641df9102dc1531eecd04ab471c6"
 }
 
 [deps]
 
 source_file="res://art/kin/pebbit/pebbit_pebbit_atlas.webp"
-dest_files=["res://.godot/imported/pebbit_pebbit_atlas.webp-d3f6950447d08eaea7dfd9e76c9ccd58.ctex"]
+dest_files=["res://.godot/imported/pebbit_pebbit_atlas.webp-d3f6950447d08eaea7dfd9e76c9ccd58.bptc.ctex", "res://.godot/imported/pebbit_pebbit_atlas.webp-d3f6950447d08eaea7dfd9e76c9ccd58.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

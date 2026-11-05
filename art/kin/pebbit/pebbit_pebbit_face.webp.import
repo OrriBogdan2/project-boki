@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bttqhlcbxysog"
-path="res://.godot/imported/pebbit_pebbit_face.webp-84a859bf407a73abbee1f60b8b5a5c59.ctex"
+path.bptc="res://.godot/imported/pebbit_pebbit_face.webp-84a859bf407a73abbee1f60b8b5a5c59.bptc.ctex"
+path.astc="res://.godot/imported/pebbit_pebbit_face.webp-84a859bf407a73abbee1f60b8b5a5c59.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5aab88716a6f2a1277758e993d039e84"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/pebbit/pebbit_pebbit_face.webp"
-dest_files=["res://.godot/imported/pebbit_pebbit_face.webp-84a859bf407a73abbee1f60b8b5a5c59.ctex"]
+dest_files=["res://.godot/imported/pebbit_pebbit_face.webp-84a859bf407a73abbee1f60b8b5a5c59.bptc.ctex", "res://.godot/imported/pebbit_pebbit_face.webp-84a859bf407a73abbee1f60b8b5a5c59.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

@@ -150,11 +150,11 @@ def glow_prims():
 
 def parts():
     return {
-        "body": (Shape(body_prims()), 0.0035, 4000),
-        "shell": (Shape(shell_prims()), 0.0035, 2400),
-        "horn": (Shape(horn_prims()), 0.0035, 320),
-        "tail": (Shape(tail_prims()), 0.0035, 320),
-        "glow": (Shape(glow_prims()), 0.0025, 820),
+        "body": (Shape(body_prims()), 0.0035, 2050),
+        "shell": (Shape(shell_prims()), 0.0035, 900),
+        "horn": (Shape(horn_prims()), 0.0035, 135),
+        "tail": (Shape(tail_prims()), 0.0035, 135),
+        "glow": (Shape(glow_prims()), 0.0025, 345),
     }
 
 
@@ -164,7 +164,7 @@ GRIP = v3(0, 0.222, -0.485)
 
 def prop_parts():
     out = boki_tools.tools(GRIP, AXIS)
-    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 90)
+    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 24)
     return out
 
 
