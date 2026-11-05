@@ -2956,3 +2956,8 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 - ext/boki-cindle 713f45fe: Vespyx smaller eyes + brows fix on the 5k starter; all three starter species rebuilt (4848/4504/4237). Takes the place of boki-starter's own Vespyx art.
 - Owner-approved NEW designs (not in the kin data yet: their roster stubs must move into content/kin_v2 to appear in game): ext/boki-glintmole 718f7d7d (4525), ext/boki-rimeshrew f9196f2a (4265), ext/boki-gloamshell aa5f7677 (4924), ext/boki-selenfin 620b23db (4077), ext/boki-glomwort f09fd7b8 (4140).
 - Still open for Friday: the approved designs' Fusion parts, face detail pass and wiring; the 7 WIP species branches listed in the 16:30 entry; the Gravadillo/Cairnback `titan` Fusion key clash (main/owner decision).
+
+## 2026-11-05 17:45 UTC (S2 to S5): READY: ext/kit-cinder-ult-e 311e5149 (Flue Flight: only E works)
+- On top of ext/kit-cinder-66 ea287770 (your batch 10) and main b23aab82; merge-tree clean. Wiring: one empty ArchKit.gate_inputs() and one line in Hunter.
+- Blocked: LMB, RMB, Shift, gloves, gear, util slots, Boki C, skill, throw. Kept: E, X (lands early), jump, steering, weapon swap, interact. Owner calls with alternatives are in STATUS.
+- ashwick-combo 117/0, kit-combo 39/0, hero-combo 287/0, archetype 362/0, health and style strict OK. Not run in-game or over the network.
