@@ -754,7 +754,8 @@ const MOVES := {
 }
 
 # ---------------------------------------------------------------- locomotion (HunterAnim asks per frame)
-## m (the model's, ~0.67 of a world metre: a hand's width): Motley's box floats this high over its ground point (visual only: her hitbox and ring stay on the ground)
+## m (the model's: a hand's width): Motley's box floats this high over its ground point (visual only: the hitbox and
+## ring stay on the ground)
 const HOVER_H := 0.15
 const HOVER_BOB := 0.015               # m, up and down
 const HOVER_HZ := 0.6                  # bobs a second

@@ -22,7 +22,7 @@ const WARDENS := {
 	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.05, "width": [0.6, 1.3], "moves": "thf_"},
 	"dolm": {"hit_r": 0.388, "height": 1.19, "width": [0.7, 1.5], "moves": "breah_"},     # (lean, the locs: his art)
 	# (Ostra: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
-	# (Motley on his box: the hover came down to a hand's width, Nov 5, so his top is 0.1 m lower; the swirl of cards widens him)
+	# (Motley on his box: the hover came down to a hand's width, Nov 5, so his top is 0.1 m lower; the cards widen him)
 	"ostra": {"hit_r": 0.412, "height": 1.24, "height_3d": 1.26, "width": [0.5, 1.6], "moves": "ostra_"},
 	"rimewright": {"hit_r": 0.38, "height": 1.11, "width": [0.6, 1.1], "moves": "tm_"},     # (tall and slim)
 	# (Cinder's fin-crest stands over her head)

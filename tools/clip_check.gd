@@ -105,7 +105,7 @@ func _sway(id: String, m: Node3D, sync: Node, dd: Dictionary) -> void:
 	var peak := sw.lean.y
 	for i in 240:
 		sw.step(DT)
-	ok(peak > 0.03 and sw.lean.length() < 0.01, "%s: accelerating forward leans it back (%.3f rad), and it settles (%.4f)"
+	ok(peak > 0.03 and sw.lean.length() < 0.01, "%s: accelerating forward leans it back (%.3f rad), then settles (%.4f)"
 			% [id, peak, sw.lean.length()])
 	m.position = Vector3.ZERO
 
