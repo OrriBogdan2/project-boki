@@ -1190,8 +1190,8 @@
 "semicolon": 11
 },
 "tools/teammate_check.gd": {
-"long_line": 30,
-"semicolon": 26
+"long_line": 29,
+"semicolon": 24
 },
 "tools/title_check.gd": {
 "long_line": 7,

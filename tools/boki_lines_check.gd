@@ -71,14 +71,15 @@ func _data() -> void:
 			and BokiLines.fits("Hmm... okay, fine.") and BokiLines.fits("That tickles! ♥"))
 
 # ------------------------------------------------------------------ 2. the old banks are covered
+## The categories the old banks had (KinVoice BASE and CALL, KinSpeak RECALL as back_<kind>): the
+## callers still pass these names, so each must have lines here before the old banks go.
+const OLD_NAMES := ["throw", "refuse", "hesitate", "ignore", "scared", "revive", "revive_low", "callout", "wild",
+	"kill", "owner_down", "caught", "extract", "behind", "hunter", "sniper", "pack", "boss", "egg", "loot", "exit",
+	"collapse", "low_hp", "tonic", "cover", "goad", "yelp", "relief", "boss_kill", "comfort", "back_carried_out",
+	"back_boss_kill", "back_revived", "back_stood_over", "back_comforted", "back_knock_together", "back_escaped"]
+
 func _coverage() -> void:
-	var missing: Array = []
-	for cat in KinVoice.BASE:
-		if BokiLines.trigger(String(cat)).is_empty(): missing.append(cat)
-	for cat in KinVoice.CALL:
-		if BokiLines.trigger(String(cat)).is_empty(): missing.append(cat)
-	for kind in KinSpeak.RECALL:
-		if BokiLines.trigger("back_" + String(kind)).is_empty(): missing.append("back_" + String(kind))
+	var missing := OLD_NAMES.filter(func(cat): return BokiLines.trigger(String(cat)).is_empty())
 	ok("every old match category and recall kind has a trigger", missing.is_empty(), str(missing))
 
 # ------------------------------------------------------------------ 3. no repeats
