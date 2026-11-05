@@ -118,8 +118,8 @@ def p_skin(p, n, c):
     col = mix(col, C("8a7fb2"), fl * 0.5)
     # the belly a shade paler
     col = mix(col, C("7fb0d6"), (lab == B.BELLY) * 0.3)
-    crk = cracks(p)
-    col = mix(col, C("2a4a7a"), crk * 0.85)
+    crk = cracks(p, 5.0, 0.022)
+    col = mix(col, C("2a4a7a"), crk * 0.8)
     edge = cracks(p + n * 0.0, 6.5, 0.07) - crk
     col = mix(col, C("a8d0ea"), np.clip(edge, 0, 1) * 0.35)
     col = shade(col, ao, cv, n)
@@ -140,7 +140,7 @@ def p_head(p, n, c):
     ax = np.abs(x)
     # the face's warmth: mauve round the eyes, cheeks and ears, a rosy nose
     socket = np.exp(-(((ax - 0.056) / 0.05) ** 2 + ((z - 1.45) / 0.03) ** 2)) * (y > 0.08)
-    col = mix(col, C("4c4a7e"), socket * 0.75)
+    col = mix(col, C("56609a"), socket * 0.55)
     cheek = np.exp(-(((ax - 0.085) / 0.04) ** 2 + ((z - 1.4) / 0.028) ** 2)) * (y > 0.08)
     col = mix(col, C("9c82b4"), cheek * 0.4)
     # crow's feet and forehead lines

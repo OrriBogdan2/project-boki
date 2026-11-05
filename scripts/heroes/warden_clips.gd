@@ -1,10 +1,10 @@
 class_name WardenClips
 extends RefCounted
-## A Hero's hand-keyed clips (ART-1, docs/art/wardens/CLIPS.md): the .glb's animations played through an AnimationTree so
-## the moves flow. Which state plays what is data, content/rules/warden_anim/<art>.json; a Hero without that file stays
-## on HunterAnim. HunterAnim still runs and stays the source of truth for the state (it hands its state dictionary over
-## as the model's meta STATE), the kit keeps its timing: a keyed move's clip is seeked to the kit's own kmove_t, so a clip
-## can never drift from the hit it shows. States the data lists as "procedural" (ledges, stomps) blend back to the
+## A Hero's hand-keyed clips (ART-1, docs/art/wardens/CLIPS.md): the .glb's animations played through an AnimationTree
+## so the moves flow. Which state plays what is data, content/rules/warden_anim/<art>.json; no file: it
+## stays on HunterAnim. HunterAnim still runs and stays the source of truth for the state (it hands its state over
+## as the model's meta STATE), the kit keeps its timing: a keyed move's clip is seeked to the kit's own kmove_t, so a
+## clip can never drift from the hit it shows. States the data lists as "procedural" (ledges, stomps) blend back to the
 ## retargeted rig, and so does any Hero model played by something that feeds no state (galleries, portraits).
 ##
 ## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
@@ -190,10 +190,13 @@ func _track(bone: String) -> NodePath:
 	var path := String(tree.get_node(tree.root_node).get_path_to(skel))
 	return NodePath("%s:%s" % [path, skel.get_bone_name(bi) if bi >= 0 else bone])
 
+func _node(nm: String) -> AnimationNodeAnimation:
+	return (tree.tree_root as AnimationNodeBlendTree).get_node(nm) as AnimationNodeAnimation
+
 func _p(nm: String, v: Variant) -> void:
 	tree.set("parameters/" + nm, v)
 
-## What the state asks for: {clip, t (s, or -1: it plays on its own), upper} or {}; {"proc": true} hands back to the rig.
+## What the state asks for: {clip, t (s, or -1: it plays on its own), upper} or {}; {"proc": true}: back to the rig.
 func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var st: Dictionary = d.get("states", {})
 	for k in d.get("procedural", []):
@@ -245,11 +248,13 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
-	var want := force if not force.is_empty() else (_pick(s, dt) if not s.is_empty() else {"proc": true})
+	var want := force
+	if want.is_empty():
+		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
 	var proc := bool(want.get("proc", false))
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
 	if not proc and bool(want.get("upper", false)):
-		((tree.tree_root as AnimationNodeBlendTree).get_node("anim_u") as AnimationNodeAnimation).animation = String(want["clip"])
+		_node("anim_u").animation = String(want["clip"])
 		_p("seek_u/seek_request", float(want.get("t", 0.0)))
 		up_w = move_toward(up_w, 1.0, dt / FADE)
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
@@ -260,7 +265,7 @@ func step(dt: float) -> void:
 			cur = clip
 			chan = 1 - chan
 			var ch := "a" if chan == 0 else "b"
-			((tree.tree_root as AnimationNodeBlendTree).get_node("anim_" + ch) as AnimationNodeAnimation).animation = clip
+			_node("anim_" + ch).animation = clip
 			_p("seek_%s/seek_request" % ch, maxf(tt, 0.0))
 		var live := "a" if chan == 0 else "b"
 		if tt >= 0.0:
@@ -299,7 +304,8 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
-	_p("loco_rate/scale", clampf(spd / lerpf(walk, run, clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0)), 0.6, 1.5) if spd >= STILL else 1.0)
+	var gait := lerpf(walk, run, clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0))
+	_p("loco_rate/scale", clampf(spd / gait, 0.6, 1.5) if spd >= STILL else 1.0)
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
 	_p("stance_w/blend_amount", stance_w)

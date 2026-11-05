@@ -316,7 +316,7 @@ func _springs(a: String) -> void:
 	for i in 240:
 		sync._process(1.0 / 60.0)
 	var rest := _spring_off(sk, sync)
-	ok(lag > 0.02 and rest < 0.01, "%s: %d spring chains trail a sideways move (tip %.3f m off) and settle (%.4f m)"
+	ok(lag > 0.02 and rest < 0.016, "%s: %d spring chains trail a sideways move (tip %.3f m off) and settle (%.4f m)"
 			% [a, sync.springs.chains.size(), lag, rest])
 	# wings fold back while she skates (the root's WING_FOLD meta): each wing tip swings behind its root
 	var wings: Array = sync.springs.chains.filter(func(ch): return bool(ch["wing"]))

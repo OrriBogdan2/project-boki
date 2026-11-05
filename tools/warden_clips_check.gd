@@ -122,7 +122,8 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			still.append(k)
 		_play(m, an, sync, st, 12)
 	ok(still.is_empty(), "%s: each move's clip moves the hand (%s)" % [art_name, str(still)])
-	ok(worst <= GRIP_TOL, "%s: the weapon stays in the hand in every move (worst %.3f m, %s)" % [art_name, worst, worst_mv])
+	ok(worst <= GRIP_TOL, "%s: the weapon stays in the hand in every move (worst %.3f m, %s)"
+			% [art_name, worst, worst_mv])
 	# the weapon: one drawn; hidden when out of the hand; anchors on it
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
 	var drawn := 0
@@ -132,7 +133,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	ok(drawn == 0, "%s: no second weapon on the rig (%d drawn)" % [art_name, drawn])
 	m.set_meta(WardenClips.WEAPON_OUT, true)
 	_play(m, an, sync, st, 3)
-	ok(sk.get_bone_pose_scale(wp).is_zero_approx(), "%s: the weapon hides when the kit takes it out of the hand" % art_name)
+	ok(sk.get_bone_pose_scale(wp).is_zero_approx(), "%s: the weapon hides when it leaves the hand" % art_name)
 	m.set_meta(WardenClips.WEAPON_OUT, false)
 	_play(m, an, sync, st, 3)
 	ok(sk.get_bone_pose_scale(wp).is_equal_approx(Vector3.ONE), "%s: and comes back" % art_name)

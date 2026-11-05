@@ -297,7 +297,7 @@ def rags(J, skin):
     """The hanging rags at the waist: a front apron and a back one, each a curved torn sheet off the belt."""
     lo, hi = (-0.5, -0.5, 0.15), (0.5, 0.5, 0.74)
     out = {}
-    for nm, ang, half, low in (("front", 0.0, 0.8, 0.26), ("back", math.pi, 0.95, 0.3)):
+    for nm, ang, half, low in (("front", 0.0, 0.85, 0.26), ("back", math.pi, 1.3, 0.3)):
         f = Field(lo, hi, 0.0045)
         x, y, z = f.grid()
         a = np.arctan2(x, y if nm == "front" else -y)
@@ -306,7 +306,7 @@ def rags(J, skin):
         rz = 0.3 + (0.71 - z) * 0.2 + 0.07 * (nm == "front")
         sh = np.abs(r - rz - fold) - 0.007
         hem = low + tear(x, y, z, 0.075, 0.03) + 0.1 * (np.abs(a) / half) ** 2
-        d = np.maximum(np.maximum(sh, hem - z), np.abs(a) - half + (fbm(x, y, z, 9.0, 2) - 0.5) * 0.25)
+        d = np.maximum(np.maximum(sh, hem - z), np.abs(a) - half + (fbm(x, y, z, 9.0, 2) - 0.5) * 0.18)
         d = np.maximum(d, z - 0.7)
         f.d = d.astype(np.float32)
         f.lab[:] = 1

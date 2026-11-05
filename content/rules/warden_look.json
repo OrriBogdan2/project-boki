@@ -449,7 +449,8 @@
 	},
 	"breaker": {
 		"painted": {
-			"far_lift": 0.2,
+			"top_light": 0.2,
+			"far_lift": 0.12,
 			"rim_far": 0.3,
 			"rim_far_color": [
 				0.45,
@@ -458,10 +459,16 @@
 			]
 		},
 		"slots": {
+			"cloth": {
+				"albedo": [0.8, 0.8, 0.8],
+				"fres": 0.3,
+				"far_lift": 0.1
+			},
 			"skin": {
+				"albedo": [0.94, 0.97, 1.0],
 				"top_light": 0.1,
 				"fres": 0.35,
-				"far_lift": 0.15,
+				"far_lift": 0.1,
 				"shade": 0.84,
 				"light_neutral_warm": 0.8,
 				"shadow_tint": [

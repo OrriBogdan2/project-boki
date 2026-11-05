@@ -26,7 +26,7 @@ tau = math.tau
 
 # the carry: the hammer resting across the right shoulder, the fist low in front; the prow at his left side
 CARRY = dict(pos=(0, 0, -0.012), hips=(-7, 0, -3), head=(5, 0, 3),
-             gr=(0.27, 0.34, 0.95), gd=(0.07, -0.6, 0.8), ga=(0.0, 0.8, 0.6), er=(0.95, -0.15, -0.3), fing_r=1.0, thumb_r=1.0,
+             gr=(0.33, 0.3, 0.97), gd=(0.16, -0.68, 0.72), ga=(0.0, 0.72, 0.68), er=(0.95, -0.15, -0.3), fing_r=1.0, thumb_r=1.0,
              sh=(-0.525, 0.14, 0.7), sn=(-0.92, 0.38, 0.0), su=(0.04, -0.06, 1.0), el=(-0.8, -0.6, -0.1), fing_l=0.85, thumb_l=0.8,
              fr=FR, fl=FL, fra=0.0, fla=0.0, jaw=0.09, brow=0.0, lid=0.0, wtw=(0, 0, 0))
 # the right hand with nothing in it, loose at his side (the hammer is out)
@@ -105,7 +105,7 @@ def gait(period, stride, lift, lean, dirv, bob, roll, twist, swing, base):
 DIRS = {"f": (0, 1), "b": (0, -1), "l": (-1, 0), "r": (1, 0)}
 for nm, d in DIRS.items():
     C.bake("walk_" + nm, 1.1, [(0, CARRY), (1.1, {})], loop=True,
-           over=gait(1.1, 0.19, 0.075, -5.0, d, 0.012, 3.0, 7.0, 0.06, CARRY))
+           over=gait(1.1, 0.2, 0.085, -6.0, d, 0.02, 5.0, 9.0, 0.07, CARRY))
     C.bake("run_" + nm, 0.68, [(0, merged(CARRY, gr=(0.3, 0.3, 0.9), sh=(-0.48, 0.22, 0.76), head=(14, 0, 3)) ), (0.68, {})], loop=True,
            over=gait(0.68, 0.29, 0.16, -17.0, d, 0.03, 5.0, 12.0, 0.13, CARRY))
 
@@ -151,18 +151,18 @@ def whirl_over(t, p):
 C.bake("lmb_hold", 0.2 + SPIN_T, [(0, CARRY), (0.2, merged(WIND, gr=(0.44, 0.04, 1.4), gd=(1, 0, 0.22), ga=(0, 0, 1))), (0.2 + SPIN_T, {})], over=whirl_over)
 
 # release (0.5 s): up and over, the impact at 0.08, a shudder, 0.4 s to haul it back
-IMP = dict(pos=(0, 0.13, -0.17), hips=(-36, 0, 14), head=(22, 0, -10), gr=(0.1, 0.62, 0.68), gd=(-0.12, 0.8, -0.58), ga=(0.05, 0.58, 0.8), er=(0.9, 0.2, -0.3),
+IMP = dict(pos=(0, 0.13, -0.15), hips=(-26, 0, 14), head=(18, 0, -10), gr=(0.1, 0.74, 0.66), gd=(-0.12, 0.8, -0.58), ga=(0.05, 0.58, 0.8), er=(0.9, 0.2, -0.3),
            fr=(AX + 0.08, -0.34, AZ), fl=(-AX, 0.36, AZ), fra=-24.0, jaw=0.95, brow=1.0, e="out")
 C.bake("lmb_slam", 0.5, [(0, merged(WIND, gr=(0.42, -0.1, 1.42), gd=(0.3, -0.5, 0.8), ga=(0, 0.8, 0.5), hips=(12, 0, -12))), (0.08, IMP),
-                         (0.16, dict(pos=(0, 0.13, -0.19), hips=(-38, 0, 13), e="io")),
+                         (0.16, dict(pos=(0, 0.13, -0.17), hips=(-28, 0, 13), e="io")),
                          (0.5, merged(STANCE, jaw=0.3, fra=0.0))])
 # the perfect launch (0.85 s): a full-body heave, airborne to 0.3, a hard plant, a slow rise
 C.bake("lmb_launch", 0.85, [(0, merged(WIND, gr=(0.42, -0.1, 1.42), gd=(0.3, -0.5, 0.8), ga=(0, 0.8, 0.5), hips=(12, 0, -12))),
                             (0.05, dict(pos=(0, 0.1, 0.1), hips=(-20, 0, 12), gr=(0.25, 0.25, 1.46), gd=(0.05, 0.3, 0.95), ga=(0, 0.95, -0.3), fr=(AX, -0.3, AZ - 0.0), fl=(-AX, 0.3, AZ + 0.14), jaw=0.9, e="out")),
                             (0.15, dict(pos=(0, 0.1, 0.22), hips=(-14, 0, 8), gr=(0.2, 0.42, 1.34), gd=(0.0, 0.75, 0.65), ga=(0, 0.65, -0.75), fr=(AX + 0.04, -0.05, AZ + 0.22), fl=(-AX - 0.04, 0.22, AZ + 0.26), jaw=1.0)),
                             (0.26, dict(pos=(0, 0.12, 0.1), hips=(-30, 0, 10), gr=(0.15, 0.6, 1.0), gd=(-0.05, 0.95, -0.1), ga=(0, 0.1, 1), fr=(AX + 0.06, -0.2, AZ + 0.1), fl=(-AX, 0.34, AZ + 0.02))),
-                            (0.32, merged(IMP, pos=(0, 0.14, -0.22), hips=(-42, 0, 12))),
-                            (0.48, dict(pos=(0, 0.13, -0.2), hips=(-38, 0, 12), e="io")),
+                            (0.32, merged(IMP, pos=(0, 0.14, -0.2), hips=(-32, 0, 12))),
+                            (0.48, dict(pos=(0, 0.13, -0.18), hips=(-29, 0, 12), e="io")),
                             (0.85, merged(STANCE, jaw=0.3, fra=0.0))])
 
 # ---------------------------------------------------------------------- RMB, the aegis
@@ -215,11 +215,11 @@ C.bake("e_mend", 0.95, [(0, CARRY),
 UW = merged(WIND, pos=(0, 0, -0.1), hips=(14, 0, 0), head=(-12, 0, 0), gr=(0.26, -0.04, 1.54), gd=(-0.2, -0.45, 0.85), ga=(0, 0.88, 0.47), er=(1, 0, 0.1),
             sh=(-0.56, 0.1, 0.62), jaw=1.0, brow=1.0, fr=(AX + 0.09, -0.12, AZ), fl=(-AX - 0.05, 0.14, AZ))
 C.bake("x_wind", 0.5, [(0, CARRY), (0.2, merged(UW, pos=(0, 0, -0.14), e="out")), (0.4, UW), (0.5, dict(pos=(0, 0, -0.095)))])
-C.bake("x_slam", 0.6, [(0, UW), (0.1, merged(IMP, pos=(0, 0.1, -0.22), hips=(-46, 0, 2), gr=(0.05, 0.56, 0.5), gd=(0, 0.45, -0.9), ga=(0, 0.9, 0.45))),
-                       (0.2, dict(pos=(0, 0.1, -0.24), hips=(-47, 0, 2))), (0.36, dict(pos=(0, 0.08, -0.2), head=(8, 0, 0), jaw=1.0)), (0.6, merged(STANCE, jaw=0.5, fra=0.0))])
+C.bake("x_slam", 0.6, [(0, UW), (0.1, merged(IMP, pos=(0, 0.1, -0.2), hips=(-33, 0, 2), gr=(0.05, 0.68, 0.5), gd=(0, 0.45, -0.9), ga=(0, 0.9, 0.45))),
+                       (0.2, dict(pos=(0, 0.1, -0.22), hips=(-34, 0, 2))), (0.36, dict(pos=(0, 0.08, -0.2), head=(8, 0, 0), jaw=1.0)), (0.6, merged(STANCE, jaw=0.5, fra=0.0))])
 
 # ---------------------------------------------------------------------- body states
-JUMP = merged(CARRY, pos=(0, 0, 0.03), hips=(-4, 0, 0), sh=(-0.56, 0.12, 0.84), fr=(AX, -0.04, AZ + 0.12), fl=(-AX, 0.12, AZ + 0.2), fra=18.0, fla=12.0, jaw=0.4)
+JUMP = merged(CARRY, pos=(0, 0, 0.05), hips=(7, 0, 0), head=(-6, 0, 3), sh=(-0.62, 0.1, 0.98), fr=(AX, -0.04, AZ + 0.12), fl=(-AX, 0.12, AZ + 0.2), fra=18.0, fla=12.0, jaw=0.4)
 C.bake("jump", 0.4, [(0, JUMP), (0.4, dict(fr=(AX, 0.0, AZ + 0.17), fl=(-AX, 0.06, AZ + 0.14)))])
 C.bake("fall", 0.6, [(0, merged(JUMP, hips=(6, 0, 0), sh=(-0.58, 0.1, 0.9), gr=(0.3, 0.3, 1.02), fr=(AX + 0.03, 0.07, AZ + 0.12), fl=(-AX - 0.03, -0.04, AZ + 0.17))), (0.3, dict(fr=(AX + 0.03, 0.03, AZ + 0.16), fl=(-AX - 0.03, 0.02, AZ + 0.13))), (0.6, dict(fr=(AX + 0.03, 0.07, AZ + 0.12), fl=(-AX - 0.03, -0.04, AZ + 0.17)))])
 C.bake("glide", 1.2, [(0, merged(CARRY, hips=(-24, 0, 0), head=(20, 0, 0), sh=(-0.6, 0.0, 0.92), sn=(-0.2, 0, -1), su=(0, 1, 0), gr=(0.56, 0.05, 1.28), gd=(0.05, -0.6, 0.8), fr=(AX, -0.2, AZ + 0.1), fl=(-AX, -0.14, AZ + 0.14), fra=30.0, fla=30.0, jaw=0.5)),
@@ -239,18 +239,19 @@ C.bake("land", 0.36, [(0, merged(CARRY, pos=(0, 0, -0.14), hips=(-22, 0, 0), hea
 C.bake("hit_f", 0.36, [(0, CARRY), (0.06, dict(pos=(0, -0.05, -0.03), hips=(11, 7, 6), head=(-14, 0, -6), jaw=0.7, lid=0.5, brow=1.0, e="snap")), (0.36, CARRY)])
 C.bake("hit_b", 0.36, [(0, CARRY), (0.06, dict(pos=(0, 0.05, -0.04), hips=(-13, -5, -5), head=(12, 0, 5), jaw=0.7, lid=0.5, brow=1.0, e="snap")), (0.36, CARRY)])
 # the emote: a great belly laugh, head back, slapping the belly with the shield hand... he is enjoying himself
-LAUGH = merged(CARRY, hips=(11, 0, 0), head=(-16, 0, 0), jaw=1.0, lid=0.8)
+LAUGH = merged(CARRY, hips=(17, 0, 0), head=(-26, 0, 0), jaw=1.0, lid=0.8, sh=(-0.2, 0.44, 0.74), sn=(-0.6, 0.75, 0.1), el=(-0.9, 0.1, -0.5))
 
 
 def laugh(t, p):
     s = math.sin(t * 15.0) * min(1.0, t * 4) * min(1.0, (2.0 - t) * 4)
-    add(p, "pos", (0, 0, 0.02 * abs(s)))
-    add(p, "hips", (2.5 * s, 0, 0))
+    add(p, "pos", (0, 0, 0.03 * abs(s)))
+    add(p, "hips", (4.0 * s, 0, 0))
+    add(p, "sh", (0, 0.04 * abs(s), 0))
     add(p, "head", (3.0 * s, 0, 0))
     add(p, "gr", (0, 0, 0.012 * s))
 
 
-C.bake("emote", 2.0, [(0, CARRY), (0.3, LAUGH), (1.7, dict(hips=(9, 0, 0))), (2.0, CARRY)], over=laugh)
+C.bake("emote", 2.0, [(0, CARRY), (0.3, LAUGH), (1.7, dict(hips=(14, 0, 0))), (2.0, CARRY)], over=laugh)
 # Fusion: he braces, drives the hammer down and heaves up with the power, arms wide
 C.bake("fuse", 1.2, [(0, CARRY), (0.3, merged(WIND, pos=(0, 0, -0.16), hips=(-30, 0, 0), head=(26, 0, 0), gr=(0.3, 0.42, 0.72), sh=(-0.3, 0.3, 0.72), lid=1.0, jaw=0.0)),
                      (0.7, dict(pos=(0, 0, 0.02), hips=(14, 0, 0), head=(-22, 0, 0), gr=(0.72, 0.1, 1.46), gd=(0.4, 0, 0.9), ga=(0, 1, 0), sh=(-0.8, 0.1, 1.3), sn=(-0.5, 0.7, 0.4), lid=0.0, jaw=1.0, brow=1.0, e="out")),
