@@ -165,18 +165,18 @@ def body_prims():
 
 def parts():
     return {
-        "body": (Shape(body_prims()), 0.0035, 5000),
-        "fins": (Shape(ear_fin_prims()), 0.0035, 300),
-        "wings": (Shape(wing_prims()), 0.0035, 1100),
-        "tail_fin": (Shape(tail_fin_prims()), 0.0035, 260),
-        "ridge": (Shape(ridge_prims()), 0.0035, 420),
-        "sparks": (Shape(spark_prims()), 0.0035, 220),
+        "body": (Shape(body_prims()), 0.0035, 2200),
+        "fins": (Shape(ear_fin_prims()), 0.0035, 125),
+        "wings": (Shape(wing_prims()), 0.0035, 480),
+        "tail_fin": (Shape(tail_fin_prims()), 0.0035, 110),
+        "ridge": (Shape(ridge_prims()), 0.0035, 175),
+        "sparks": (Shape(spark_prims()), 0.0035, 90),
     }
 
 
 def prop_parts():
     out = boki_tools.tools(GRIP, AXIS)
-    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 90)
+    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 24)
     return out
 
 

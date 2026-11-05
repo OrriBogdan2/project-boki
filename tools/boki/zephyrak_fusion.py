@@ -73,8 +73,8 @@ def ridge_shape():
 
 def parts():
     """name -> (Shape, tris, slot, paint name)."""
-    return {"wings": (wing_shape(), 900, 0, "wing"), "tail": (tail_shape(), 700, 0, "skin"),
-            "ridge": (ridge_shape(), 220, 1, "glow"), "sparks": (spark_shape(), 200, 1, "glow")}
+    return {"wings": (wing_shape(), 405, 0, "wing"), "tail": (tail_shape(), 315, 0, "skin"),
+            "ridge": (ridge_shape(), 100, 1, "glow"), "sparks": (spark_shape(), 90, 1, "glow")}
 
 
 def bones():
