@@ -1232,3 +1232,19 @@ A full redesign; `ext/art1-ostra` restarts from this. A rename may follow (owner
 
 ## 2026-11-05 03:42 UTC (ext): Motley splash: `briefs/art-refs/motley_splash.png` (the carnival, his Nightwell ult)
 
+
+## 2026-11-05 03:50 UTC (ext): CINDER REDESIGN (owner-picked): `briefs/art-refs/cinder_FINAL_sheet.png`
+- **Body:** an attractive, unhinged salamander femme fatale.
+  - **Face:** mostly human and beautiful, with fin ears, ember slit-pupil eyes and a manic grin.
+  - **Hair and skin:** long flowing hair of living fire; charcoal skin with glowing magma cracks.
+  - **Figure:** voluptuous, in a laced leather corset, torn shorts and a shredded apron.
+  - **Feet and tail:** clawed bare feet; a long tail with a burning tip.
+- **Gear:**
+  - **Tank:** a riveted copper-and-glass tank of bubbling liquid fire on her back, with a gauge and two exhaust nozzles venting flame.
+  - **Hoses and nozzle:** hoses to a flamethrower nozzle (her held LMB), which replaces the lance as her weapon visual.
+  - **The rest:** goggles, a vial belt.
+- **Kit hooks:**
+  - The tank's exhaust nozzles flare as jets during Flue Flight (ult).
+  - The vials can feed her vial abilities.
+- The art direction for her is sex appeal (per DECISIONS: adult, stylised, not explicit).
+- The hair and tail are cheap spring/flame shaders (item 94 budget).
