@@ -31,11 +31,11 @@ def n3(v):
 
 # ---- poses
 READY = {
-    "pel": (0.042, 0.004, -0.030), "prt": (0.02, 0.10, -0.085), "tor": (0.0, 0.10, 0.145), "hed": (-0.05, -0.10, -0.13),
-    "FL": (-0.135, 0.150, A_Z), "FR": (0.085, -0.035, A_Z), "FLy": 0.46, "FRy": -0.34, "FLp": 0.0, "FRp": 0.0,
+    "pel": (0.036, 0.006, -0.040), "prt": (0.08, 0.10, -0.070), "tor": (0.14, 0.10, 0.11), "hed": (-0.22, -0.10, -0.04),
+    "FL": (-0.130, 0.115, A_Z), "FR": (0.085, -0.040, A_Z), "FLy": 0.42, "FRy": -0.30, "FLp": 0.0, "FRp": 0.0,
     # the bow low and easy in the left hand, the right on her hip
-    "G": (-0.262, 0.135, 0.790), "BA": n3((-0.30, 0.34, 0.89)), "BS": n3((0.95, 0.10, 0.28)),
-    "Rw": 0.0, "RF": (0.208, -0.040, 0.968), "RD": n3((-0.42, 0.68, -0.60)), "RP": n3((-0.82, -0.40, 0.10)), "Rpole": (1.0, -0.45, 0.0),
+    "G": (-0.255, 0.215, 0.720), "BA": n3((-0.24, 0.60, 0.76)), "BS": n3((0.95, 0.20, 0.22)),
+    "Rw": 0.0, "RF": (0.208, 0.010, 0.962), "RD": n3((-0.42, 0.68, -0.60)), "RP": n3((-0.82, -0.40, 0.10)), "Rpole": (1.0, -0.45, 0.0),
     "Lpole": (-0.9, -0.3, -0.3), "dr": 0.0, "ar": 0.0, "brow": 0.25, "lid": 0.08, "fing": 0.45, "pin": 0.25,
 }
 AIM_Y = -0.98
@@ -127,27 +127,27 @@ def _breath(p, a):
 def idle(u):
     a, b = math.sin(u * 2 * math.pi), math.cos(u * 2 * math.pi)
     p = _breath(dict(READY), a)
-    p["hed"] = (-0.05 - 0.012 * a, -0.10 + 0.06 * math.sin(u * 2 * math.pi + 1.0), -0.13)
-    p["prt"] = (0.02, 0.10 + 0.012 * a, -0.085 + 0.012 * b)
-    p["pel"] = (0.042 + 0.006 * b, p["pel"][1], p["pel"][2])
+    p["hed"] = (-0.22 - 0.012 * a, -0.10 + 0.06 * math.sin(u * 2 * math.pi + 1.0), -0.04)
+    p["prt"] = (0.08, 0.10 + 0.012 * a, -0.070 + 0.012 * b)
+    p["pel"] = (0.036 + 0.006 * b, p["pel"][1], p["pel"][2])
     p["fing"] = 0.45 + 0.08 * math.sin(u * 4 * math.pi)     # the claws tap on her hip
     p["lid"] = 1.0 if 0.46 < u < 0.49 else 0.08
     return p
 
 
-STANCE = {"pel": (0.012, 0.01, -0.03), "prt": (0.0, 0.22, -0.03), "tor": (0.0, 0.14, 0.03), "hed": (-0.08, -0.34, 0.09),
-          "FL": (-0.15, 0.15, A_Z), "FR": (0.12, -0.05, A_Z), "FLy": 0.42, "FRy": -0.24,
-          "G": (-0.335, 0.20, 0.71), "BA": n3((-0.05, 0.05, 1.0)), "BS": n3((0.40, -0.92, 0.0)), "Lpole": (-1.0, -0.4, -0.3),
+STANCE = {"pel": (0.012, 0.02, -0.045), "prt": (0.08, 0.20, -0.03), "tor": (0.14, 0.14, 0.03), "hed": (-0.22, -0.30, 0.04),
+          "FL": (-0.15, 0.13, A_Z), "FR": (0.12, -0.06, A_Z), "FLy": 0.40, "FRy": -0.24,
+          "G": (-0.30, 0.26, 0.70), "BA": n3((-0.20, 0.70, 0.68)), "BS": n3((0.96, 0.24, 0.12)), "Lpole": (-1.0, -0.4, -0.3),
           "brow": 0.55, "lid": 0.24}
 
 
 def stance(u):
-    """The bow stood at her side like a tall staff, chin raised, sizing you up over the mask, claws on her hip."""
+    """Weight forward, the bow low and ready at her side, head level and turned, sizing you up; a hand on her hip (item 114)."""
     a = math.sin(u * 2 * math.pi)
     p = dict(READY)
     p.update(STANCE)
     p = _breath(p, a)
-    p["hed"] = (-0.08 - 0.015 * a, -0.34 + 0.06 * math.sin(u * 2 * math.pi + 2.0), 0.09)
+    p["hed"] = (-0.22 - 0.015 * a, -0.30 + 0.06 * math.sin(u * 2 * math.pi + 2.0), 0.04)
     p["lid"] = 1.0 if 0.7 < u < 0.73 else 0.24
     return p
 
@@ -246,12 +246,12 @@ def clips():
     out.append(C("over", 0.56, [(0.0, FULL)] + [(0.08 * i, dict(OVER, dr=1.0, G=(-0.046 + 0.0035 * (-1) ** i, 0.575, 1.288 + 0.003 * (-1) ** (i // 2))), "lin") for i in range(1, 8)]))
     out.append(loose("over_loose", 0.55, OVER, 0.06, 0.3, 0.6))
     # --- RMB: Heavy Shot. Sunk low, weight back, the shoulders turned hard; a held creak; thrown back by the shot
-    HW = dict(NOCK, dr=1.0, tor=(0.2, AIM_Y - 0.32, -0.08), hed=(-0.16, -AIM_Y + 0.14, 0.12), G=(-0.02, 0.60, 1.25), BA=n3((0.42, 0.05, 0.90)), BS=(0.0, -1.0, 0.0), CH=(0.0, 0.10, 1.285), brow=1.0, lid=0.42,
+    HW = dict(NOCK, ar=0.0, dr=1.0, tor=(0.2, AIM_Y - 0.32, -0.08), hed=(-0.16, -AIM_Y + 0.14, 0.12), G=(0.0, 0.60, 1.13), BA=n3((0.30, 0.05, 0.95)), BS=(0.0, -1.0, 0.0), CH=(0.02, 0.03, 1.15), brow=1.0, lid=0.42,
               pel=(0.0, -0.05, -0.10), prt=(0.05, -0.1, 0.0), FL=(-0.15, 0.24, A_Z), FR=(0.13, -0.22, A_Z), FLy=0.12, FRy=-0.7)
-    out.append(C("heavy_wind", 1.2, [(0.0, dict(HIP)), (0.2, dict(HW, dr=0.2), "out"), (0.8, dict(HW, dr=0.85)), (1.1, HW), (1.2, dict(HW, G=(-0.02, 0.598, 1.248)))]))
+    out.append(C("heavy_wind", 1.2, [(0.0, dict(HIP)), (0.2, dict(HW, dr=0.2), "out"), (0.8, dict(HW, dr=0.85)), (1.1, HW), (1.2, dict(HW, G=(0.0, 0.598, 1.128)))]))
     hrel = dict(HW, Rw=0.0, ar=0.0, dr=0.0, RF=(0.14, -0.2, 1.32), RD=n3((0.3, -0.5, 0.8)), RP=(-0.8, 0.3, 0.1), fing=0.0, pin=0.0, tor=(-0.1, AIM_Y - 0.5, -0.14), hed=(0.08, -AIM_Y + 0.2, 0.16),
-                pel=(0.0, -0.13, -0.08), G=(-0.02, 0.56, 1.30), BA=n3((0.22, -0.32, 0.92)), brow=1.0, lid=0.1)
-    out.append(C("heavy", 0.6, [(0.0, HW), (0.06, hrel, "out"), (0.28, dict(hrel, tor=(0.0, AIM_Y - 0.3, -0.08), pel=(0.0, -0.09, -0.12), G=(-0.04, 0.55, 1.26))), (0.6, READY)]))
+                pel=(0.0, -0.13, -0.08), G=(0.0, 0.56, 1.18), BA=n3((0.22, -0.32, 0.92)), brow=1.0, lid=0.1)
+    out.append(C("heavy", 0.6, [(0.0, HW), (0.06, hrel, "out"), (0.28, dict(hrel, tor=(0.0, AIM_Y - 0.3, -0.08), pel=(0.0, -0.09, -0.12), G=(-0.02, 0.55, 1.14))), (0.6, READY)]))
     # --- E: Hail Wall. The bow high, the body arched back, the volley lobbed up in an arc
     H0 = dict(NOCK, dr=0.75, tor=(-0.32, AIM_Y + 0.1, 0.0), hed=(-0.3, -AIM_Y - 0.1, 0.0), G=(-0.09, 0.36, 1.70), BA=n3((0.1, -0.72, 0.68)), BS=n3((0.0, -0.68, -0.72)), RD=n3((0.0, 0.6, 0.8)), brow=0.7, lid=0.2, Lpole=(-0.9, 0.1, 0.2), Rpole=(0.5, -1.0, -0.4))
     H1 = dict(H0, Rw=0.0, ar=0.0, dr=0.0, RF=(0.05, 0.02, 1.52), RD=n3((-0.1, 0.5, 0.85)), RP=(-1.0, 0.0, 0.0), fing=0.05, pin=0.0, tor=(-0.36, AIM_Y, 0.0))

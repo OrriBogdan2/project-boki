@@ -401,7 +401,7 @@ def main():
     part("skin_head", None, 0, "headscan", 3.4, None, "headscan", None, ob=hlow)
     part("hair_needles", hn, 110, "needle", 2.6, None, "head", "metal")
     th = tube("pin_thread", [(-0.108, -0.080, 1.822), (-0.124, -0.082, 1.795), (-0.132, -0.085, 1.760), (-0.122, -0.090, 1.728)], 0.0015, 3)
-    part("pin_thread", None, 0, "string", 1.2, None, "head", "cloth", ob=th)
+    part("pin_thread", None, 0, "string", 0.15, None, "head", "glow", ob=th)
     part("Low", None, 0, "scan", 1.25, None, "scan", None, ob=low)
     part("handR", hR, 800, "handR", 2.0, None, "hand")
     part("handL", hL, 500, "handL", 1.7, None, "hand")
@@ -567,8 +567,8 @@ def main():
             mi = len(idx[0]) // 2
             mid_uv = ((idx[1][mi] + 0.5) / ATLAS, (idx[0][mi] + 0.5) / ATLAS)
         print("painted", p["name"], len(tri), int(m.sum()), round(time.time() - t0, 1), flush=True)
-    so = next(p["ob"] for p in parts if p["name"] == "string")
-    so.data.uv_layers.active.data.foreach_set("uv", np.tile(np.array(mid_uv, F), len(so.data.loops)))
+    for so in [p["ob"] for p in parts if p["name"] in ("string", "pin_thread")]:
+        so.data.uv_layers.active.data.foreach_set("uv", np.tile(np.array(mid_uv, F), len(so.data.loops)))
     img = S.dilate(atlas, mask, 10)
     # fine relief: a normal map from the paint, in atlas space (tangent +U, bitangent +V): red stitches stand up, dark seams sink
     lum = img @ np.array((0.3, 0.55, 0.15), F)

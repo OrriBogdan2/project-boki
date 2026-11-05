@@ -205,6 +205,9 @@ def headscan(c, p, n):
     c[dark] = h[dark]
     light = ~dark
     c[light] = (c * (0.76 + 0.3 * smooth(0.15, 0.7, k))[:, None])[light]
+    # a stray tip of hair the scan left on her throat
+    tip = dark & (p[:, 2] < 1.505) & (np.abs(p[:, 0]) < 0.052) & (p[:, 1] > 0.015)
+    c[tip] = mix(C["skin_sh"], C["skin"], 0.45)
     # the features from the art: the plate over the face, fading out before the hair and jaw
     ax = np.abs(p[:, 0])
     fw = smooth(0.0585, 0.046, ax) * smooth(1.492, 1.503, p[:, 2]) * smooth(1.668, 1.652, p[:, 2]) * smooth(0.03, 0.06, p[:, 1]) * smooth(0.2, 0.45, n[:, 1])
