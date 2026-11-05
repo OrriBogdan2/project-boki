@@ -1,4 +1,4 @@
-# Red Stitch (base character Hem; id `archer`, Light) - fidelity pass (hero sheet pin.md)
+# Red Stitch (base character Lisette; id `archer`, Light) - fidelity pass (hero sheet pin.md)
 
 Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name is the class title Red Stitch; the id, files and save keys stay `archer`.
 
@@ -24,7 +24,7 @@ Source vs ours per slot; [data] = the game data (supervive-data), [footage] = he
 | RMB Heartpiercer | hold to charge, release; 16 s, 1 charge [data]; the newer footage also fires a tap uncharged | hold only, 16 s, 1 charge, gold V and bar | data wins over footage |
 | E Rain of Arrows | an arc at the cursor distance, about 120 degrees, 4.4 s [footage] | the same | matches |
 | X Primal Forces | 3 empowered no-draw shots, the 3rd executes [data] | Starpiercer: the same rules | matches |
-| Shift Spirit Walk | a dodge roll of about 3 m in 0.27 s (peak 17 m/s at 0.13 s), straight into the crouched walk [footage 655.55-655.65] | **was 2.55 m in 0.18 s** (the owner found Hem's Shift fast): now 3.0 m in 0.28 s (`roll` 3.5, `roll_t` 0.24, with the dash feel); `pin_roll` retimed to match; the start burst and ring are gone (owner: no rings or bursts on dashes), a dust puff instead | fixed |
+| Shift Spirit Walk | a dodge roll of about 3 m in 0.27 s (peak 17 m/s at 0.13 s), straight into the crouched walk [footage 655.55-655.65] | **was 2.55 m in 0.18 s** (the owner found Lisette's Shift fast): now 3.0 m in 0.28 s (`roll` 3.5, `roll_t` 0.24, with the dash feel); `pin_roll` retimed to match; the start burst and ring are gone (owner: no rings or bursts on dashes), a dust puff instead | fixed |
 
 ## Audit (Nov 3 23:40)
 Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (a) done on this branch, (b) fixed now,
@@ -169,7 +169,7 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>` (scripts/match/arena_demo.gd
 - Kit: `scripts/arch/kits/archer_kit.gd` (wiring), `pin_draw.gd` (draw stages, reticle, perfect, overdraw), `pin_spirit.gd` (Spirit Walk), `pin_fx.gd` (pooled effects), `kit_shaders.gd` / `kit_meshes.gd` (our shaders and meshes), `scripts/match/pin_bjorn_weapons.gd` (the recurve bow model), `scripts/match/kmoves_pin_bjorn.gd` (moves). Data: `content/archetypes/archer.json`, `content/weapons/longbow.json` (`draw`, `overdraw_t`, `overdraw_k`, `quick_k`, `aim`).
 - Hunter hooks: `ArchKit.draw_rate()` scales the bow's draw; `draw_bonus(t)` sets `h.shot_aim` (AimMode: stage 1 cursor, stage 2 max) and the damage factor; `Hunter.spirit_t` makes `World.occupy(..., ghost)` and the block push-out skip rocks, trees and barriers.
 - Telegraphs are AimKit: `draw_rest` (line), `draw` (vee, then line), `draw_tgt` (circle), `rmb_v` + `rmb_bar`, `e` (arc_wall, all, for the tell). Cursor: `AimKit.charge`, `flare`, `perfect`.
-- Sounds: `tools/gen_pin_bjorn_sfx.py` writes `audio/pin_*.wav` (Sfx loads them on first use).
+- Sounds: `tools/gen_sfx_lisette.py` writes `audio/pin_*.wav` and `archer_*` (Sfx loads them on first use).
 - Merge: `_drop_holds()` clears the draw (`h.draw_t`), the Heavy Shot hold (`rmb_down`, `pin_aim`), Spirit Walk (`h.spirit_t`), and Starpiercer (`PinUlt.left`, `PinUlt.nock_t`, `window`).
 - Ult on X: `scripts/arch/hero_ult.gd` (HeroUlt, the shared X base: main's `HunterKeys.ult_pressed` takes the `hunter_ult` press and the level gate, then `cast_ult` returns `HeroUlt.press(self, ult.cast)`: the cooldown in `ArchKit.cd["x"]`, the recast, a cast id), `scripts/arch/kits/pin_ult.gd` (PinUlt: the window, nock, beams, execute, pooled ribbons and pips). Data: `content/archetypes/archer.json` `x`. Sounds: `pin_ult_cast`, `pin_ult_nock`, `pin_ult_beam`, `pin_ult_final`. Bond: `HeroUlt.landed` sends `KinBond.from_ult(h, "hit" / "knock" / "kill", cast_id)`, the best event of a cast.
 - No Net shape change: remote players see the shots and the existing fx events (rings, bolts).

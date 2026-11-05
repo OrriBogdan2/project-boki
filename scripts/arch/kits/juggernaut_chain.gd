@@ -110,7 +110,7 @@ func _throw() -> void:
 		if sd.has("deco") and is_instance_valid(sd["deco"]):
 			(sd["deco"] as Node3D).visible = false
 	k.m.sfx("jug_chain", h.pos, -3.0, 1.0)
-	k.m.sfx("ab_tether", h.pos, -6.0, 0.7)
+	k.m.sfx("juggernaut_chain_rattle", h.pos, -4.0, 1.0)
 
 func _hook(f: Ent, at: Vector3) -> void:
 	var ed := data()
@@ -127,7 +127,7 @@ func _hook(f: Ent, at: Vector3) -> void:
 		m.fx.word(f.pos + Vector3(0, 2.3, 0), "CHAINED", k.col_of(ed), true)
 	else:
 		m.fx.word(at + Vector3(0, 1.4, 0), "ANCHORED", k.col_of(ed), false)
-	m.sfx("ab_tether", at, -2.0, 1.0)
+	m.sfx("juggernaut_chain_bite", at, -2.0, 1.0)
 	m.sfx("jug_taut", at, -6.0, 1.1)
 	k.net_bolt(k.h.pos + Vector3(0, 1.0, 0), at + Vector3(0, 1.0, 0), k.col_of(ed))
 	if m.time - e_pressed_at <= JuggernautKit.BUFFER:
@@ -404,7 +404,7 @@ func _arrive() -> void:
 	state = "arriving"
 	arrive_t = float(ed["arrive_t"])
 	k.m.fx.dust(h.pos, 10)
-	k.m.sfx("ab_tether", h.pos, -6.0, 1.3)
+	k.m.sfx("juggernaut_chain_rattle", h.pos, -6.0, 1.0)
 	k.land_haul()
 
 ## Shift mid-pull: the pull ends and the dash takes over the movement.

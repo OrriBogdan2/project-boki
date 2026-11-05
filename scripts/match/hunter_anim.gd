@@ -680,7 +680,7 @@ func update(dt: float, s: Dictionary) -> void:
 			stepped = true
 	# strafing and backpedalling: the legs turn toward where you're going; backwards they swing the other way
 	var want_yaw := 0.0
-	if spd > 0.6 and grounded:
+	if spd > 0.6 and (grounded or rolling):
 		var rel := atan2(ms, mf)
 		if absf(rel) > PI * 0.62:
 			back = _ease(back, -1.0, 12.0, dt)
@@ -1013,7 +1013,12 @@ func update(dt: float, s: Dictionary) -> void:
 	# a Warden's and the leg-length slider's)
 	var dl2 := (THIGH * cos(hl) + SHIN * cos(hl + kl)) * cos(wl)
 	var dr2 := (THIGH * cos(hr) + SHIN * cos(hr + kr)) * cos(wr)
-	var drop := (LEG - maxf(dl2, dr2)) * legs.scale.y * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - down_k) * (1.0 - dive_k) * (1.0 if roll_t < 0.0 else 0.0)
+	var leg_ref := LEG
+	if arch == "unmasked":      # the Empty's soles, not a point foot, meet the ground
+		dl2 = FootPlant.reach(hl, kl, wl)
+		dr2 = FootPlant.reach(hr, kr, wr)
+		leg_ref = FootPlant.HIP
+	var drop := (leg_ref - maxf(dl2, dr2)) * legs.scale.y * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - down_k) * (1.0 - dive_k) * (1.0 if roll_t < 0.0 else 0.0)
 	var off := Vector3(wk * 0.028 * still, -drop + bounce * 0.008, 0.0) + ws.hip
 	if arch == "juggernaut":
 		off.y -= absf(cos(ph)) * 0.035 * r1        # each footfall lands with weight

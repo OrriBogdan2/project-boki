@@ -76,6 +76,7 @@ func _bar(m: Match, P: Hunter) -> void:
 	P.level_slot("dash")
 	await _frames(3)
 	P.gain_xp(float(Hunter.XP_TO[P.lvl]) - P.xp + 1.0)
+	await m.hud.panels.draw      # the slots are drawn on HudPanels, REDRAW_HZ times a second
 	await _frames(3)
 	ok(P.skill_pts == 1 and P.can_level("sec") and P.can_level("dash"), "a new point that RMB or dash can take")
 	ok(RankMarks.spot("sec").has_area() and RankMarks.spot("dash").has_area(),
@@ -95,6 +96,7 @@ func _bar(m: Match, P: Hunter) -> void:
 	click.pressed = true
 	rc._gui_input(click)
 	ok(int(P.slot_lv["sec"]) == 1 and P.skill_pts == 0, "clicking the + spent the point on RMB")
+	await m.hud.panels.draw
 	await _frames(3)
 	ok(not RankMarks.spot("sec").has_area() and not rc.visible, "no points left: the + and its target are gone")
 
