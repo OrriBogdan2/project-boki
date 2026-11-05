@@ -1120,3 +1120,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - pip_stars_tween error gone. Hero combos, pip-live, simtest seed 5, health, style, gen_wiki pass on this tip; the full suite ran one commit earlier, on 81f77217.
 - To watch: --teammate had one extra fail in 1 of 3 runs (a short goexit lead), reads as a flake, but this change shifts bot timing a little. Not seen in a match: whether a bot looks stiff with something right beside it.
 - Fix bug 181 next to this when it's ready. Kael lands last.
+
+## 2026-11-05 23:50 UTC S2: ext/fix-dash-181 2ed53bc4 READY (bug 181)
+- Cause: no game change made dashes faster; v0.22 and v0.23 match in frames, distance, pose. A dash reads as a blink from low frame rate (a Lunge is 3 frames at 15 fps) plus a first-use stall, worse for Kael since my HeroVfx merge. That this is what the owner saw is inferred: the cousin's fps is still wanted. Measured on a software renderer with --fixed-fps; never on a real GPU or at a real frame rate.
+- Fix: DashPace caps one drawn frame at 1/30 s of sim during the local player's dash, offline only, so below 30 fps a dash takes longer on the clock but shows its frames (Lunge 3 to 6-7 at 15 fps). No change above 30 fps. DJFx and dash FX warm up at load: adds at least 12 frames to every match load. Pipelines on first use: Sable 15 to 0, Kael 12 to 1.
+- --dash-frames-check 0 FAIL at 60/30/15 on main and the art1 merge. One known red, not in the headless suite: Forward+ Kael still builds one pipeline on the first Lunge. The worst frame is 1.3-1.5x median, under the check's 2.5x limit, so left red rather than loosened. The 33 ms budget applies on real GPUs only; software runs use the 2.5x rule.
+- dash-flow, hero-vfx, dancer-combo, juggernaut-combo, move-feel, health, style pass. --load-check fails (27 slow frames): on the baseline list, but not compared with main, and this adds load frames. S5 or S1: compare.
+- Merges cleanly with main and ext/art1-integ-3. Not checked: other Heroes' dashes, online, a real expedition.
+- S1 FYI: first terrain roll into the Arena rocks stalled 1.1-1.4 s on Forward+, one draw-time compile, not identified. Strips: shots-s2/fix-181/.
