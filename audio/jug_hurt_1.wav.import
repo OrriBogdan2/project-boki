@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://b3gsgwixd4c05"
-path="res://.godot/imported/jug_slash.wav-502d110fed99f2eac3bf7c17d71b61ca.sample"
+uid="uid://cd7xyegt8xi14"
+path="res://.godot/imported/jug_hurt_1.wav-cb2e6eff9e6bf261869d2d4daf557f91.sample"
 
 [deps]
 
-source_file="res://audio/jug_slash.wav"
-dest_files=["res://.godot/imported/jug_slash.wav-502d110fed99f2eac3bf7c17d71b61ca.sample"]
+source_file="res://audio/jug_hurt_1.wav"
+dest_files=["res://.godot/imported/jug_hurt_1.wav-cb2e6eff9e6bf261869d2d4daf557f91.sample"]
 
 [params]
 

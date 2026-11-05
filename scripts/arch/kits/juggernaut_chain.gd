@@ -87,7 +87,7 @@ func _throw() -> void:
 			"range": float(ed["range"]), "size": 0.22, "rope": true},
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}]})
 	var shots0: int = k.m.shots.size()
-	k.run(stg, k.cx("e", "warchain", k.aim(), {
+	k.run_own(stg, k.cx("e", "warchain", k.aim(), {
 		"on_foe": func(f: Ent, _c: Dictionary):
 			if state == "throwing" and is_instance_valid(f) and not f.dead: _hook(f, f.pos),
 		"on_shot_end": func(at: Vector3, why: String, e: Ent):
@@ -100,8 +100,7 @@ func _throw() -> void:
 		# the shared hook look and its thin pale rope would draw over the Warchain's own chain
 		if sd.has("deco") and is_instance_valid(sd["deco"]):
 			(sd["deco"] as Node3D).visible = false
-	k.m.sfx("jug_chain", h.pos, -3.0, 1.0)
-	k.m.sfx("ab_tether", h.pos, -6.0, 0.7)
+	k.vfx("chain_throw")
 
 func _hook(f: Ent, at: Vector3) -> void:
 	var ed := data()
@@ -113,14 +112,11 @@ func _hook(f: Ent, at: Vector3) -> void:
 	strained = false
 	tightened = false
 	hooks += 1
-	k.fx().star(at + Vector3(0, 1.0 if f else 0.5, 0), Color("ffd84a"), 0.9, 0.18)      # the spark at the anchor
+	k.vfx("chain_hook", at + Vector3(0, 1.0 if f else 0.5, 0))
 	if f:
 		m.fx.word(f.pos + Vector3(0, 2.3, 0), "CHAINED", k.col_of(ed), true)
 	else:
 		m.fx.word(at + Vector3(0, 1.4, 0), "ANCHORED", k.col_of(ed), false)
-	m.sfx("ab_tether", at, -2.0, 1.0)
-	m.sfx("jug_taut", at, -6.0, 1.1)
-	k.net_bolt(k.h.pos + Vector3(0, 1.0, 0), at + Vector3(0, 1.0, 0), k.col_of(ed))
 	if m.time - e_pressed_at <= JuggernautKit.BUFFER:
 		pull()                      # E was pressed a hair before it bit
 
@@ -128,6 +124,7 @@ func _miss(at: Vector3) -> void:
 	state = "ready"
 	misses += 1
 	k.start_e_cd()                  # hooked nothing: the chain breaks, its cooldown starts
+	k.vfx("chain_snap", at)
 	k.m.fx.word(at + Vector3(0, 1.2, 0), "MISS", Color("c0b0a0"), false)
 
 ## Breaks a throw or a hold (a stun, the time, a merge): the cooldown starts.
@@ -135,7 +132,9 @@ func snap(word := "CHAIN BROKE") -> void:
 	if state == "throwing" or state == "hooked":
 		breaks += 1
 		k.start_e_cd()
-		if word != "": k.m.fx.word(k.h.pos + Vector3(0, 2.2, 0), word, Color("c0b0a0"), false)
+		if word != "":
+			k.vfx("chain_snap", k.h.pos + Vector3(0, 1.0, 0))
+			k.m.fx.word(k.h.pos + Vector3(0, 2.2, 0), word, Color("c0b0a0"), false)
 	elif state == "pulling":
 		_stop("stopped", false)
 	state = "ready"
@@ -176,9 +175,7 @@ func pull() -> void:
 	h.dash_with({"type": "dash", "speed": pull_speed, "time": pull_t, "kind": "rush", "dir": pull_dir,
 			"invuln": 0.0})
 	if k.anim_id != "jug_haul_wind": k.play("jug_reel")
-	k.fx().puff(h.pos + Vector3(0, 0.2, 0), Color(1, 1, 1, 0.8), 0.9, 0.35)        # the start puff (footage 0333)
-	k.m.fx.dust(h.pos, 8)
-	k.m.sfx("jug_reel", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
+	k.vfx("chain_pull", h.pos, pull_dir)
 	k.last_e = "reel"
 
 ## The pull's start along `toward` (the chain's line): the reel speed, plus a slingshot from his speed away from
@@ -269,15 +266,14 @@ func _hold_taut(most: float) -> void:
 	if not tightened:
 		tightened = true
 		holds += 1
-		k.m.sfx("jug_taut", h.pos, -3.0, 0.75)          # the chain snapping taut at its length
+		k.vfx("chain_tight", h.pos)     # the chain snapping taut at its length
 
 ## The attached chain: straight striped links that pull taut and glow hotter as it stretches (with a creak).
 func _draw_hooked(stretch: float) -> void:
 	var h := k.h
 	var tension := clampf((stretch - 0.5) / (TAUT - 0.5), 0.0, 1.0)
 	if stretch >= TAUT and not strained:
-		k.m.sfx("jug_taut", h.pos, -5.0, 0.9)
-		k.fx().star(anchor + Vector3(0, 1.0, 0), HOT, 0.6, 0.15)
+		k.vfx("chain_taut", anchor + Vector3(0, 1.0, 0))
 	strained = stretch >= TAUT
 	if not (k.tells_visible() or target != null):
 		return
@@ -323,6 +319,7 @@ func _tick_pull(dt: float) -> void:
 	h.roll_t = maxf(h.roll_t, dt * 2.0)
 	var a := h.pos + Vector3(0, 1.0, 0)
 	k.fx().chain(_fx_id(), a, at + Vector3(0, 1.0 if target != null else 0.6, 0), 0.0, HOT, DARK, 0.16)
+	HeroVfx.of(k.m).hold(h, "chain_drag")
 
 func _anchor_now() -> Vector3:
 	return target.pos if target != null and is_instance_valid(target) else anchor
@@ -340,8 +337,7 @@ func _arrive() -> void:
 	last_arrival = h.pos
 	state = "arriving"
 	arrive_t = float(ed["arrive_t"])
-	k.m.fx.dust(h.pos, 10)
-	k.m.sfx("ab_tether", h.pos, -6.0, 1.3)
+	k.vfx("chain_arrive", h.pos, dir)
 	k.land_haul()
 
 ## Shift mid-pull: the pull ends and the dash takes over the movement.

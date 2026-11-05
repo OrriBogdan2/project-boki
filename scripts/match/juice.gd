@@ -108,6 +108,7 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.ring(h.pos, 3.4, Color(tc, 0.9), 0.4)
 	m.fx.ring(h.pos, 1.8, Color(1, 1, 1, 0.8), 0.25)
 	m.fx.dust(h.pos, 14)
+	HeroVfx.of(m).play(h, "downed", h.pos, h.aim_dir())
 	if credit == m.player and h != m.player:
 		m.sfx("knock_confirm", null, -6.0)
 
@@ -224,4 +225,4 @@ static func footstep(h: Hunter) -> void:
 	if w.bridge.has(i): surf = "wood"
 	elif w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND: surf = "stone"
 	elif w.style_at(i) == "frost": surf = "snow"
-	Sfx.play("step_" + surf, h.pos, -13.0 if h == p else -17.0, 0.08)
+	Sfx.play(HeroVfx.step_sound(h.arch, surf), h.pos, -13.0 if h == p else -17.0, 0.08)
