@@ -294,7 +294,7 @@ def main():
     part("hull", hl, 1500, "scan", "hull", 2.6)
     cp, c_at, c_n = B.compass_field(hl)
     dl = S.Field(c_at - 0.16, c_at + 0.16, 0.0022)
-    dl.add(S.cap(c_at - c_n * 0.02, c_at + c_n * 0.014, 0.13, 0.126), 0.0, 1)
+    dl.add(S.cap(c_at - c_n * 0.05, c_at - c_n * 0.012, 0.13, 0.126), 0.0, 1)      # (sunk: it lies on the scan's hull)
     part("compass_dial", dl, 120, "brass", "dial", 3.0, centre=c_at)
     hm, cl = B.helmet()
     part("helmet", hm, 1300, "brass", "helmet", 2.6, bone="head", blur=0.003)

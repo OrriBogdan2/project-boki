@@ -55,7 +55,7 @@ src.matrix_world.identity()
 P = np.stack((-co[:, 0], -co[:, 1], co[:, 2]), 1)         # to +Y facing, his right +X
 print("scan", n, P.min(0).round(3), P.max(0).round(3), flush=True)
 
-SJ = {k: np.array(v, float) for k, v in J.items()}
+SJ = {k: np.array(v, float) for k, v in J.items() if isinstance(v, list)}
 D = np.zeros((n, len(SEG)))
 for i, (nm, j0, j1, rad, _) in enumerate(SEG):
     a0, a1 = SJ[j0], SJ[j1]
