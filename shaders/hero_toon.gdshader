@@ -112,6 +112,9 @@ uniform int surface = 0;
 // a painted emission layer on a .glb's atlas (Ryzz's lightning veins and hair crackle, Tarek's bracer cracks):
 // its texture x emit, crackling over time by emit_flicker (0 steady .. 1 strobing along the body)
 uniform bool use_emit = false;
+uniform bool use_normal = false;        // a painted model's baked normal map (a .glb material's normal texture)
+uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap, repeat_disable;
+uniform float normal_k = 1.0;
 uniform sampler2D emit_tex : source_color, filter_linear_mipmap, repeat_disable;
 uniform float emit = 0.0;
 uniform float emit_flicker = 0.0;
@@ -138,6 +141,10 @@ void vertex() {
 }
 
 void fragment() {
+	if (use_normal) {
+		NORMAL_MAP = texture(normal_tex, UV).xyz;
+		NORMAL_MAP_DEPTH = normal_k;
+	}
 	vec3 c = albedo.rgb;
 	float heat = 1.0;
 	float far_k = smoothstep(8.0, 18.0, length(VERTEX));

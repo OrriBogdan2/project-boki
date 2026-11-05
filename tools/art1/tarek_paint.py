@@ -26,6 +26,72 @@ def skin(P, N, occ, cav):
     return crease(c, cav, "2a140e", 0.7)
 
 
+# ------------------------------------------------------------------------- projected from the art (FINE-DETAIL PASS)
+ART = {}
+
+
+def art_img(name):
+    """A reference sheet as float rgb, loaded once (ffmpeg, display space)."""
+    if name not in ART:
+        path = os.path.join(REF, name + ".png")
+        w, h = [int(v) for v in subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "stream=width,height", "-of", "csv=p=0", path]).decode().split(",")[:2]]
+        raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", path, "-f", "rawvideo", "-pix_fmt", "rgb24", "-"])
+        ART[name] = np.frombuffer(raw, np.uint8).reshape(h, w, 3).astype(np.float32) / 255.0
+    return ART[name]
+
+
+def sample(img, x, y):
+    """Bilinear lookup at pixel coordinates."""
+    h, w = img.shape[:2]
+    x = np.clip(x, 0, w - 2)
+    y = np.clip(y, 0, h - 2)
+    i, j = x.astype(int), y.astype(int)
+    fx, fy = (x - i)[:, None], (y - j)[:, None]
+    return (img[j, i] * (1 - fx) + img[j, i + 1] * fx) * (1 - fy) + (img[j + 1, i] * (1 - fx) + img[j + 1, i + 1] * fx) * fy
+
+
+def p_face(P, N, c):
+    """The head inset of the master sheet, on the front of the head: the skin, the nose, the mouth, the bandage's folds."""
+    img = art_img("tarek_FINAL_sheet")
+    q = P - HC
+    k = FACE_PX
+    px = FACE_CX - q[:, 0] * k
+    py = FACE_MOUTH_Y - (q[:, 2] + 0.084) * k
+    art = sample(img, px, py)
+    m = S.sstep(0.115, 0.075, np.abs(q[:, 0])) * S.sstep(0.0, 0.3, N[:, 1]) * S.sstep(-0.19, -0.165, q[:, 2]) * S.sstep(0.115, 0.09, q[:, 2])
+    return S.mix(c, art, m)
+
+
+# model z -> sheet y (in the turnaround's px) and each leg's offset from the view's centre: the landmarks of the A-pose sheet
+Z_MODEL = np.array((0.0, 0.1, 0.4, 0.7, 1.12, 1.3, 1.4, 1.6, 1.72, 1.9), np.float32)
+Z_SHEET = np.array((1451, 1400, 1215, 1042, 875, 660, 605, 462, 374, 295), np.float32)
+LEG_OFF = np.array((130, 130, 128, 108, 60, 30, 0, 0, 0, 0), np.float32)
+VIEW = {"front": (417.0, -1.0), "back": (1726.0, 1.0)}
+ART_K = 600.0                  # sheet px per model m across
+
+
+def p_proj(P, N, c, parts_k=0.92):
+    """The A-pose turnaround's front and back on the cloth and skin: the art's folds, stains and tattoos over the paint. Its
+    prayer beads (the pale, greyless dots) are left out: the beads are geometry."""
+    img = art_img("tarek_turnaround_apose")
+    y = np.interp(P[:, 2], Z_MODEL, Z_SHEET)
+    off = np.interp(P[:, 2], Z_MODEL, LEG_OFF)
+    # legs part by side below the crotch: each leg's own centre on the sheet, not the model's stance
+    leg = S.sstep(1.2, 1.1, P[:, 2])
+    sx = np.sign(P[:, 0]) + (P[:, 0] == 0)
+    xs = P[:, 0] + leg * sx * (off / ART_K - float(R.hip[0]))
+    out = c
+    for nm, (cx, sg) in VIEW.items():
+        art = sample(img, cx + sg * xs * ART_K, y)
+        face = N[:, 1] if nm == "front" else -N[:, 1]
+        hi, lo = art.max(1), art.min(1)
+        pale = S.sstep(0.22, 0.12, (hi - lo) / np.maximum(hi, 1e-3)) * S.sstep(0.5, 0.62, hi)
+        bg = S.sstep(0.82, 0.86, lo)
+        m = S.sstep(0.05, 0.4, face) * (1 - pale) * (1 - bg) * parts_k
+        out = S.mix(out, art, m)
+    return out
+
+
 def p_head(P, N, occ, cav, a):
     q = P - HC
     c = skin(P, N, occ, cav)
@@ -37,7 +103,7 @@ def p_head(P, N, occ, cav, a):
     Qf = T.fold_x(q)
     c = S.mix(c, c * S.hexc("ffb090") * 1.2, S.sstep(0.06, 0.0, S.length(Qf - S.vec(0.07, 0.11, -0.04))) * 0.35)
     c = S.mix(c, c * 1.3, S.sstep(0.03, 0.0, S.length(q - S.vec(0, 0.15, -0.03))) * 0.5)
-    return c, None
+    return p_face(P, N, c), None
 
 
 def p_teeth(P, N, occ, cav, a):
@@ -97,18 +163,18 @@ def p_bandana(P, N, occ, cav, a):
     v = lightness(T.key_shade(N), occ, cav) + 0.04 * T.strokes(P, 40.0, 5)
     c = tones("80705a", "c4b296", "ece2cc", v)
     stain = S.sstep(0.05, 0.4, S.fbm(P, 18.0, 15, 3))
-    return crease(S.mix(c, c * S.hexc("c8a888"), stain * 0.7), cav, "4e4032", 0.8), None
+    return p_face(P, N, crease(S.mix(c, c * S.hexc("c8a888"), stain * 0.7), cav, "4e4032", 0.8)), None
 
 
 def p_sash(P, N, occ, cav, a):
     v = lightness(T.key_shade(N), occ, cav) + 0.04 * T.strokes(P, 34.0, 9)
-    return crease(tones("6e2010", "c84a1c", "f08c4a", v), cav, "34100a"), None
+    return crease(tones("6a2a14", "b4542a", "dc8450", v), cav, "34100a"), None
 
 
 def p_tails(P, N, occ, cav, a):
     v = lightness(T.key_shade(N), occ, 0.85, 0.7) + 0.05 * S.noise(P, 40.0, 3)
     s = a[:, 0]
-    c = tones("6e2010", "c84a1c", "f08c4a", v)
+    c = tones("6a2a14", "b4542a", "dc8450", v)
     streak = 0.5 + 0.5 * np.sin(a[:, 1] * 6.28 * 2 + s * 16.0)
     c = S.mix(c, c * 0.72, S.sstep(0.6, 0.95, streak))
     frayed = S.sstep(0.0, 0.1, s - np.maximum(0.0, (a[:, 0].max() - 0.12)))
@@ -164,10 +230,10 @@ def p_locs(P, N, occ, cav, a):
     key = T.key_shade(N)
     ph = a[:, 1] * 6.283 * 2.0 + a[:, 0] * 86.0
     groove = 0.5 + 0.5 * np.sin(ph)
-    v = (0.3 + 0.7 * key) * (0.4 + 0.6 * S.sstep(0.05, 0.55, groove)) * (0.55 + 0.45 * occ)
+    v = (0.3 + 0.7 * key) * (0.72 + 0.28 * S.sstep(0.05, 0.55, groove)) * (0.55 + 0.45 * occ)
     c = tones("08080c", "16161c", "3c3e4c", v)
     sheen = S.sstep(0.74, 0.95, key) * S.sstep(0.45, 0.9, groove)
-    return S.mix(c, S.hexc("6c7694")[None, :], sheen * 0.5), None
+    return S.mix(c, S.hexc("555a72")[None, :], sheen * 0.3), None
 
 
 def p_beads(P, N, occ, cav, a):
@@ -219,8 +285,14 @@ def p_iris(P, N, occ, cav, a):
     return c, c * 0.8
 
 
-P_FN = {"head": p_head, "teeth": p_teeth, "torso": p_torso, "arms": p_arm, "hands": p_hands, "legs": p_legs,
-        "bandana": p_bandana, "cap": p_hair, "skirt": p_sash, "stone": p_stone, "prayer": lambda P, N, o, c, a: p_prayer(P, N, o, c, a), "wrap": p_wrap, "sash": p_sash, "trousers": p_trousers,
+def proj(fn, P, N, occ, cav, a):
+    c, e = fn(P, N, occ, cav, a)
+    return p_proj(P, N, c), e
+
+
+P_FN = {"head": p_head, "teeth": p_teeth, "torso": lambda P, N, o, c, a: proj(p_torso, P, N, o, c, a), "arms": p_arm, "hands": p_hands, "legs": p_legs,
+        "bandana": p_bandana, "cap": p_hair, "skirt": lambda P, N, o, c, a: proj(p_sash, P, N, o, c, a), "stone": p_stone, "prayer": lambda P, N, o, c, a: p_prayer(P, N, o, c, a), "wrap": lambda P, N, o, c, a: proj(p_wrap, P, N, o, c, a), "sash": lambda P, N, o, c, a: proj(p_sash, P, N, o, c, a),
+        "trousers": lambda P, N, o, c, a: proj(p_trousers, P, N, o, c, a),
         "wraps": p_wraps, "locs": p_locs, "beads": p_beads,
         "sash_tails": p_tails, "band_tails": p_band_tails, "geode": p_geode, "iris": p_iris,
         "shard": lambda P, N, o, c, a: p_shard(P, N, o, c, a),
@@ -261,9 +333,45 @@ def corners(ob):
     return uv, V, cn, vt.reshape(n, 3)
 
 
+NRM_IMG = None
+HI_FIELD = {"stone": lambda P: T.stone_hi(mx(P), R, SEEDS_A, H_A), "gauntlet": lambda P: T.stone_hi(P, R, SEEDS_G, H_G, T.gauntlet_core),
+            "geode": lambda P: T.geode(P, GEO_R)}
+
+
+def loop_tangents(ob):
+    """MikkTSpace tangents per triangle corner (what the glTF exporter writes), xyz + bitangent sign."""
+    me = ob.data
+    me.calc_tangents()
+    n = len(me.loops)
+    t = np.zeros(n * 3, np.float32)
+    me.loops.foreach_get("tangent", t)
+    b = np.zeros(n, np.float32)
+    me.loops.foreach_get("bitangent_sign", b)
+    me.calc_loop_triangles()
+    lt = np.zeros(len(me.loop_triangles) * 3, np.int32)
+    me.loop_triangles.foreach_get("loops", lt)
+    return np.concatenate((t.reshape(-1, 3), b[:, None]), 1)[lt].reshape(-1, 3, 4)
+
+
+def bake_normal(fn, P, Nl, Tt):
+    """The high field's normal in the low mesh's tangent space, as rgb."""
+    f = lambda X_: S.chunked(fn, X_)
+    Nl = Nl / np.maximum(S.length(Nl), 1e-6)[:, None]
+    H = P.copy()
+    for _ in range(2):
+        H = H - S.gradient(f, H, 0.0015) * np.clip(f(H), -0.02, 0.02)[:, None]
+    Nh = S.gradient(f, H, 0.0015)
+    Ta = Tt[:, :3] - Nl * (Tt[:, :3] * Nl).sum(1, keepdims=True)
+    Ta = Ta / np.maximum(S.length(Ta), 1e-6)[:, None]
+    B = np.cross(Nl, Ta) * np.sign(Tt[:, 3:4] + 1e-6)
+    v = np.stack(((Nh * Ta).sum(1), (Nh * B).sum(1), np.maximum((Nh * Nl).sum(1), 0.05)), 1)
+    return v / S.length(v)[:, None] * 0.5 + 0.5
+
+
 def paint_all(objs):
     img = np.zeros((PX, PX, 3), np.float32)
     em = np.zeros((PX, PX, 3), np.float32)
+    nrm = np.tile(np.array((0.5, 0.5, 1.0), np.float32), (PX, PX, 1))
     all_mask = np.zeros((PX, PX), bool)
     g_body, g_all = world_grids()
     for ob in objs:
@@ -272,8 +380,9 @@ def paint_all(objs):
         uv, V, Nn, vt = corners(ob)
         attrs = [V, Nn]
         swept = bool(ob.get("swept"))
-        if swept:
-            attrs.append(ATTR[nm][vt])
+        attrs.append(ATTR[nm][vt] if swept else Nn)
+        if nm in HI_FIELD:
+            attrs.append(loop_tangents(ob))
         mask, out, _ = S.rasterize(uv, None, PX, attrs)
         idx = np.nonzero(mask)
         if idx[0].size == 0:
@@ -299,12 +408,17 @@ def paint_all(objs):
             cav = S.cavity(f, P, N, 0.005)
         c, e = P_FN[nm](P, N, occ, cav, a)
         img[idx] = c
+        if nm in HI_FIELD:
+            nrm[idx] = bake_normal(HI_FIELD[nm], P, out[1][idx], out[3][idx])
         if e is not None:
             em[idx] = e
         all_mask |= mask
         log("painted %s: %d texels, %.1f s" % (nm, P.shape[0], time.time() - t0))
     img = S.dilate(img, all_mask, 6)
     em = S.dilate(em, all_mask, 6)
+    global NRM_IMG
+    NRM_IMG = save_img(S.dilate(nrm, all_mask, 4)[::2, ::2], "tarek_normal")
+    NRM_IMG.colorspace_settings.name = "Non-Color"
     return save_img(img, "tarek_atlas"), save_img(em[::2, ::2], "tarek_emit")
 
 

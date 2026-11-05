@@ -64,6 +64,10 @@ def mx(P):
     return P * S.vec(-1, 1, 1)
 
 
+REF = os.environ.get("TAREK_REF", os.path.expanduser("~/shots-s2/art1/tarek/ref2"))     # the master sheets (briefs/art-refs)
+FACE_PX = 1260.0               # sheet px per model m on the head inset of tarek_FINAL_sheet
+FACE_CX = 1682.0               # the inset's nose line, sheet px
+FACE_MOUTH_Y = 497.0           # the mouth line, sheet px
 X = float(R.sh[0])
 GEO_R = 0.1
 Z_S = float(R.sh[2])
@@ -590,7 +594,7 @@ def unwrap(objs):
     for o in sdf:
         o.select_set(True)
         keep[o.name] = verts_np(o).copy()
-        o.data.vertices.foreach_set("co", smoothed(o, 6 if o.name == "stone" else 30).ravel())
+        o.data.vertices.foreach_set("co", smoothed(o, {"stone": 6, "iris": 0, "geode": 3}.get(o.name, 30)).ravel())
         o.data.update()
     bpy.context.view_layer.objects.active = sdf[0]
     bpy.ops.object.mode_set(mode="EDIT")

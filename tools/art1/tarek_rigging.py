@@ -243,6 +243,12 @@ def material(slot, img, emit):
     t.image = img
     nt.links.new(t.outputs[0], b.inputs["Base Color"])
     b.inputs["Roughness"].default_value = 1.0
+    if slot == "leather":
+        t2 = nt.nodes.new("ShaderNodeTexImage")
+        t2.image = NRM_IMG
+        nm = nt.nodes.new("ShaderNodeNormalMap")
+        nt.links.new(t2.outputs[0], nm.inputs["Color"])
+        nt.links.new(nm.outputs[0], b.inputs["Normal"])
     if emit is not None:
         e = nt.nodes.new("ShaderNodeTexImage")
         e.image = emit

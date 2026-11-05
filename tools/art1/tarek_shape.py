@@ -50,7 +50,7 @@ def mouth_arc(n=9, grin=1.0):
 
 
 def mouth_open(x):
-    return 0.0035 + 0.0125 * np.sqrt(np.clip(1.0 - (x / 0.062) ** 2, 0.0, 1.0))
+    return 0.003 + 0.0035 * np.sqrt(np.clip(1.0 - (x / 0.062) ** 2, 0.0, 1.0))
 
 
 def head_base(q):
@@ -321,6 +321,12 @@ def gauntlet_core(P, R):
     d = ellipsoid(P, mix(el, wr, 0.68), (0.088, 0.094, 0.165))
     d = smin(d, cone(P, mix(el, wr, 0.2) + vec(0.045, 0.0, 0.02), mix(el, wr, 0.55), 0.016, 0.06), 0.02)
     return smax(d, wr[2] + 0.002 - P[..., 2], 0.01)
+
+
+def stone_hi(P, R, seeds, heights, core_fn=None):
+    """The same stone with deep narrow cracks and chipped faces: what the normal map is baked from."""
+    idx, d1, gap = voronoi(P, seeds)
+    return stone_arm(P, R, seeds, heights, core_fn) + 0.012 * sstep(0.012, 0.002, gap) + 0.0035 * fbm(P, 38.0, 8, 3)
 
 
 def stone_arm(P, R, seeds, heights, core_fn=None):
