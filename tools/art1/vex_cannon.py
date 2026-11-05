@@ -22,8 +22,8 @@ SLEEVE_F, SLEEVE_R = 0.05, 0.072
 GATLING_F = -0.052
 TUBE_F, TUBE_R = 0.15, 0.041      # the launcher: its axis ahead of the sleeve; radius of the scrap pipe
 POST_S = -0.24                    # the launcher's pivot along the cannon
-BELL_S, BREECH_S = -0.55, -0.11    # bell mouth and breech at rest
-TIP_S = 0.60                      # the gatling's mouths
+BELL_S, BREECH_S = -0.52, -0.11    # bell mouth and breech at rest
+TIP_S = 0.535                      # the gatling's mouths
 
 
 def C(s, u=0.0, f=0.0):
@@ -80,8 +80,8 @@ def gatling():
     hub = lathe("gcollar0", "metal-vex", cu, cf, [(0.02, 0.0), (0.02, 0.05), (0.06, 0.056), (0.15, 0.056), (0.2, 0.05), (0.2, 0.0)], n=10, bone="forearm.R")
     out.append(hub)
     out.append(lathe("gspindle", "metal-vex", cu, cf, [(0.15, 0.022), (TIP_S - 0.02, 0.022)], n=6, bone="gatling", cap=False))
-    for s0, s1, r in ((0.38, 0.415, 0.058), (0.555, 0.585, 0.057)):
-        out.append(lathe("gband%d" % int(s0 * 100), "brass-vex" if s0 < 0.5 else "metal-vex", cu, cf, [(s0, 0.03), (s0, r), (s1, r), (s1, 0.03)], n=10, bone="gatling", cap=False))
+    for s0, s1, r in ((0.36, 0.395, 0.058), (0.49, 0.52, 0.057)):
+        out.append(lathe("gband%d" % int(s0 * 100), "brass-vex" if s0 < 0.45 else "metal-vex", cu, cf, [(s0, 0.03), (s0, r), (s1, r), (s1, 0.03)], n=10, bone="gatling", cap=False))
     for i in range(6):
         t = i / 6 * 2 * np.pi
         bu, bf = cu + 0.036 * np.cos(t), cf + 0.036 * np.sin(t)

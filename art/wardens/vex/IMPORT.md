@@ -12,3 +12,5 @@ Anatomy (owner): NO human right arm. `upper_arm.R` is the socket plate and strut
 makeshift tube on its post: it rests bell-up past the shoulder (the master sheet) and swings 178 degrees over the top, bell forward, for the RMB (clip key LN). The left forearm and hand are rigid machine parts.
 
 FX points (empties on bones): `gatling_muzzle` (= `weapon_muzzle`), `launcher_muzzle` (on `launcher`, it travels with the swing), `launcher_fire` (the bell's forward place, fixed on `forearm.R`), `anchor_gatling_root`, `anchor_sleeve_mouth`, `anchor_grenade_drum`, `anchor_eye_glow` (= `anchor_lens`), `anchor_spine`, `anchor_coin`, `anchor_left_hand`, `anchor_pack`, `anchor_chest`, `anchor_head_top`.
+
+Fine-detail pass: the head is a separate Meshy scan of briefs/art-refs/vex_head.png (~/meshy/vex_h, tools/art1/vex_headscan.py), placed on the body by its eye line and chin. `vex_normal.jpg` is baked from both scans onto the shipped mesh (use_nrm in hero_toon, from ext/art1-hem); rebuilt pieces stay flat. Cannon length 1.08 m = 57% of her height (the sheet: about 56%).

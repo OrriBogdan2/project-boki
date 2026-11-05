@@ -488,21 +488,23 @@ fm0 = np.array([p.material_index for p in me.polygons])
 skin_faces[FACEI >= 0] = (fm0[FACEI[FACEI >= 0]] == mat_i["skin-vex"])
 skin_faces &= mask
 Zs_ = VC.J("upper_arm.R")[2]
-hue_g = (OUTC[..., 1] > OUTC[..., 0] * 1.02)
+hue_g = (OUTC[..., 1] > OUTC[..., 0] * 0.87)
 back_t = mask & (POS[..., 1] < 0.0) & (NOR[..., 1] < 0.1) & (POS[..., 2] > Z_BELT + 0.012) & (POS[..., 2] < Zs_ - 0.03) & (np.abs(POS[..., 0]) < 0.085 + 0.1 * smooth(Z_BELT + 0.32, Z_BELT + 0.16, POS[..., 2]))
-back_jacket = back_t & hue_g & (OUTC[..., 1] > 0.34) & (OUTC.max(2) - OUTC.min(2) > 0.12)
+back_jacket = back_t & (OUTC[..., 1] > OUTC[..., 0] * 1.04) & (OUTC[..., 1] > 0.34) & (OUTC.max(2) - OUTC.min(2) > 0.12)
 back_bare = back_t & ~back_jacket
-fill = skin_faces & hue_g | back_bare | (skin_faces & (OUTC.mean(2) < 0.34) & (POS[..., 2] > 0.74) & (POS[..., 2] < Zs_ - 0.02) & (np.abs(POS[..., 0]) < 0.24))
+fill = (skin_faces & hue_g & (OUTC.mean(2) > 0.3)) | back_bare | (skin_faces & (OUTC.mean(2) < 0.34) & (POS[..., 2] > Z_BELT + 0.03) & (POS[..., 2] < Zs_ - 0.02) & (np.abs(POS[..., 0]) < 0.2))
 sm_ = (skin_faces & ~fill).astype(np.float32)
 base_ = np.stack([blur(OUTC[..., c], sm_, 14) for c in range(3)], -1)
 OUTC[fill] = base_[fill]
-skin_all = (skin_faces | back_bare) & (OUTC[..., 0] > OUTC[..., 1] * 1.04) & (OUTC.mean(2) > 0.3) | fill
+orange = (OUTC[..., 0] > OUTC[..., 1] * 1.5) & (OUTC[..., 1] > OUTC[..., 2] * 1.25)
+skin_all = (skin_faces | back_bare) & (OUTC[..., 0] > OUTC[..., 1] * 1.04) & (OUTC.mean(2) > 0.3) & ~orange | (fill & ~orange)
 OUTC = P.clean_skin(OUTC, skin_all, blur)
 OUTC[skin_all] *= (0.74 + 0.26 * np.clip(AO[skin_all], 0, 1))[..., None]
 mz_ = (skin_faces | back_bare)
 ys_c, xs_c = np.nonzero(mz_)
 lines = P.draw_circuits(POS[ys_c, xs_c, 0].astype(np.float64), POS[ys_c, xs_c, 2].astype(np.float64), NOR[ys_c, xs_c, 1] > 0, Z_BELT, Zs_ - 0.13)
 OUTC[ys_c[lines], xs_c[lines]] = np.array(P.CIRCUIT, np.float32)
+print("circuit texels", int(lines.sum()), "of", len(ys_c), "front", int((NOR[ys_c, xs_c, 1] > 0).sum()))
 CIRC = np.zeros((ATLAS, ATLAS), bool)
 CIRC[ys_c[lines], xs_c[lines]] = True
 # the jacket: her lime green, the scan's paint lost it; the scan's dark scribbles on the slipped sleeve go
@@ -519,9 +521,9 @@ paint(lambda n: n.startswith("ebrow"), lambda p, n, ao: np.broadcast_to(hexc("#2
 paint(lambda n: n == "ear", SKIN)
 paint(lambda n: n == "sleeve", P.sleeve)
 paint(lambda n: n == "tube", P.tube)
-paint(lambda n: n in ("bell", "pivot", "dbrkt", "packrim", "eyerim", "wristband", "coin", "braidtie") or n.startswith("gband38"), P.brass)
+paint(lambda n: n in ("bell", "pivot", "dbrkt", "packrim", "eyerim", "wristband", "coin", "braidtie") or n.startswith("gband36"), P.brass)
 paint(lambda n: n == "plate", P.plate)
-paint(lambda n: n.startswith(("barrel", "gspindle", "gcollar", "gband55", "post", "clamp", "strut", "dlid", "packdisc", "stalk", "sightring", "hose", "gfr", "gbridge", "gstrap", "earring", "dfoot")), lambda p, n, ao: P.steel(p, n, ao))
+paint(lambda n: n.startswith(("barrel", "gspindle", "gcollar", "gband49", "post", "clamp", "strut", "dlid", "packdisc", "stalk", "sightring", "hose", "gfr", "gbridge", "gstrap", "earring", "dfoot")), lambda p, n, ao: P.steel(p, n, ao))
 paint(lambda n: n.startswith(("barrel", "gspindle", "hose", "gstrap")), lambda p, n, ao: P.steel(p, n, ao, P.BLACKM))
 paint(lambda n: n in ("glR", "glL"), P.goggle_lens)
 paint(lambda n: n in ("eyering", "eyepupil"), lambda p, n, ao: np.broadcast_to(np.array([0.04, 0.06, 0.05]), p.shape).copy())
