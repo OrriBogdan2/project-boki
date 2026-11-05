@@ -613,6 +613,7 @@ def main():
     md.object = arm
     # empties: anchors, FX points
     K.anchor(arm, "head", "anchor_head_top", (0, float(G.HEAD_C[1]), 1.285))
+    K.anchor(arm, "head", "anchor_eye", tuple(G.MONO_C))
     K.anchor(arm, "hips", "anchor_chest", (0, 0.10, 1.02))
     K.anchor(arm, "gun", "weapon_muzzle", tuple(G.gun_xf(np.array((0, 0.30, 0.012), F))))
     K.anchor(arm, "gun", "anchor_gun_root", tuple(G.gun_xf(np.array((0, 0.0, 0.012), F))))
