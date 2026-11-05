@@ -79,3 +79,30 @@ def clips(C, ready, hold, idle, cfg, upper, dip, up=None, idle_t=3.6, dip_t=0.15
     out.append(C("crouch_in", dip_t + 0.19, [(0.0, ready), (dip_t, dip), (dip_t + 0.19, first)]))
     out.append(C("crouch_out", 0.36, [(0.0, first), (0.08, dip), (0.24, up or ready), (0.36, ready)]))
     return out
+
+
+def quick(C, ready, hold, cfg, hands=("G", "LP"), up=None, scan=0.3, dip_t=0.18, bounce=0.0, idle_t=3.6):
+    """clips() from a hold pose alone: a breath, the head scanning scan rad either way, the hands riding the steps; a Hero's own look is its hold and cfg.
+    hands: the keys of the hand targets. bounce: m of a coil's spring in the idle, twice a loop."""
+    h0, g0, t0 = hold["hed"], hold["pel"], hold["tor"]
+
+    def idle(u):
+        a, b = math.sin(u * TAU), math.cos(u * TAU)
+        p = dict(hold)
+        p["pel"] = (g0[0] + 0.006 * a, g0[1], g0[2] - 0.006 * (b - 1) - bounce * (1 - math.cos(u * 2 * TAU)) / 2)
+        p["tor"] = (t0[0] + 0.012 * (b - 1), t0[1], t0[2])
+        p["hed"] = (h0[0], h0[1] + scan * a, h0[2] - 0.05 * a)
+        for k in hands:
+            v = hold[k]
+            p[k] = (v[0], v[1], v[2] + 0.005 * (b - 1))
+        return p
+
+    def upper(p, u, c1, s2, d):
+        k = max(d.y, 0.6)
+        for key in hands:
+            v = hold[key]
+            p[key] = (v[0] + 0.02 * d.x, v[1] * k + 0.012 * c1, v[2] + 0.007 * s2)
+        p["hed"] = (h0[0] * (0.6 + 0.4 * max(d.y, 0.0)), h0[1] - 0.05 * c1, h0[2])
+
+    dip = off(hold, pel=(0.0, 0.0, -cfg.get("dip", 0.05)), prt=(0.08, 0, 0), hed=(-0.06, 0, 0), **{k: (0.0, -0.06, -0.04) for k in hands})
+    return clips(C, ready, hold, idle, cfg, upper, dip, up=up, idle_t=idle_t, dip_t=dip_t)

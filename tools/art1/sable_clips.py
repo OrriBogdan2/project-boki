@@ -236,7 +236,7 @@ def shot_r():
 
 # ---- the crouch (item 143): a stalking cat. Belly down, shoulders ahead of the hips, the head level and hunting; the right pistol out low, sighting along the ground, the left held wide for balance, like the second claw.
 PROWL = {
-    "pel": (0.03, -0.05, -0.37), "prt": (0.40, 0.16, -0.04), "tor": (0.52, -0.24, 0.05), "hed": (-0.82, 0.10, -0.04),
+    "pel": (0.03, -0.03, -0.33), "prt": (0.26, 0.16, -0.04), "tor": (0.66, -0.24, 0.05), "hed": (-0.82, 0.10, -0.04),
     "G": (0.20, 0.66, 0.60), "BE": PR(-3, -4), "GL": (-0.40, 0.34, 0.50), "BL": PR(38, -12),
     "FL": (-0.13, 0.26, A_Z + 0.03), "FR": (0.17, -0.25, A_Z + 0.06), "FLy": 0.22, "FRy": -0.5, "FLp": 0.25, "FRp": 0.55,
     "brow": 0.25, "cock": 0.7, "lid": 0.2, "smile": 0.85,
@@ -248,8 +248,8 @@ def prowl(u):
     """Held dead still but for the breath, the head swinging slowly over the ground ahead; the tail end of the scan, a sly look back at you."""
     a, b = math.sin(u * TAU), math.cos(u * TAU)
     p = dict(PROWL)
-    p["pel"] = (0.03 + 0.008 * a, -0.05, -0.37 - 0.008 * b)
-    p["tor"] = (0.52 + 0.012 * b, -0.24, 0.05)
+    p["pel"] = (0.03 + 0.008 * a, -0.03, -0.33 - 0.008 * b)
+    p["tor"] = (0.66 + 0.012 * b, -0.24, 0.05)
     p["hed"] = (-0.82, 0.10 + 0.34 * a, -0.04 - 0.05 * a)
     p["G"] = (0.20 + 0.01 * a, 0.66, 0.60 + 0.006 * b)
     p["GL"] = (-0.40, 0.34, 0.50 - 0.006 * b)

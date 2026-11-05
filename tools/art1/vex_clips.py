@@ -11,6 +11,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
 import vex_cannon as VC, vex_arm as VA
+import crouchkit
 
 A_Z = 0.16
 SP = 0.0
@@ -139,8 +140,23 @@ def named(c, n):
     return c
 
 
+# ---- the crouch (item 143): a cocky half-kneel. The back knee nearly down, the front knee up with the cannon resting across it, chin up, the left hand loose on her thigh; bored by you.
+KNEEL = dict(READY, **{
+    "pel": (0.02, -0.08, -0.46), "prt": (0.16, 0.22, 0.03), "tor": (0.22, -0.24, -0.03), "hed": (-0.40, 0.14, 0.08),
+    "LP": (-0.26, 0.20, 0.72), "LQ": (0.3, 0.0, 0.0), "BE": aim(-6, -10), "UA": (-26, -58),
+    "FR": (0.16, 0.32, A_Z), "FL": (-0.13, -0.34, A_Z + 0.07), "FRy": -0.2, "FLy": 0.3, "FRp": 0.05, "FLp": 0.75,
+    "brow": 0.2, "lid": 0.15,
+})
+PROWL = {"ankle": A_Z, "foot": 0.11, "width": 0.13, "stride": 0.32, "lift": 0.05, "toe": 0.26, "share": 0.6, "sway": 0.04, "bob": 0.016, "twist": 0.12, "T": 0.62, "toe_out": -0.24}
+
+
+def crouch_set():
+    return crouchkit.quick(C, READY, KNEEL, PROWL, hands=("LP",), scan=0.26, dip_t=0.2)
+
+
 def clips():
     out = [FnClip("idle", 3.2, idle), FnClip("stance", 3.0, stance)]
+    out += crouch_set()
     for nm, h in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
         out.append(named(gait(0.45, h, 0.86), "walk_" + nm))
         out.append(named(gait(1.0, h, 0.58), "run_" + nm))

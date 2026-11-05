@@ -2,7 +2,8 @@ extends RefCounted
 ## --crouch-check: every Hero whose clip file has "crouch" (item 143), through the game state (HunterAnim, WardenClips).
 ## Held: the head comes down a good share of the height, the feet stay on the ground, one foot leads. Going down: a dip
 ## below the hold and a settle, no pop. Sneaking: the feet step, the head rides level. Coming up: back on the idle, no
-## pop. A Hero with the data taken away stands through a crouch, so nothing changes for the ones not rolled out yet.
+## pop. Every Hero with clips must have a crouch, but for LATER, which still stand through one: with the data taken
+## away a Hero's clips stand, so nothing changes for those.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -13,6 +14,7 @@ const POP := 0.12          # m: the head's most in one frame at 60 fps, down or 
 const BOB := 0.07          # m: the head's rise and fall over a sneak
 const STEP := 0.14         # m: how far a foot travels over a sneak
 const K := 8.0             # 1/s: Hunter.render's crouch rate
+const LATER := ["juggernaut", "ostra", "bulwark"]    # Kael, Motley, Breaker: landing after art1-integ
 
 var bad := 0
 var holder: Node3D
@@ -29,9 +31,12 @@ func run(main: Node) -> void:
 	var n := 0
 	for id in Arch.ids():
 		var art_name := WardenGlb.art(String(id))
-		if WardenClips.data(art_name).has("crouch"):
+		var dd := WardenClips.data(art_name)
+		if dd.has("crouch"):
 			n += 1
 			await _hero(main, String(id), art_name)
+		elif not dd.is_empty():
+			ok(id in LATER, "%s: has clips and a crouch" % id)
 	ok(n > 0, "at least one Hero has a crouch (%d)" % n)
 	print("CROUCH_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

@@ -160,12 +160,12 @@ def gait(k, heading):
 
 # ---- the crouch (item 143): a small scared thing keeping out of sight. Knees in, toes in, up on her toes, curled round the lantern with both paws so it won't show; the ears flat, big eyes over her shoulder.
 HUDDLE = {
-    "pel": (0.0, -0.035, -0.135), "prt": (0.52, 0.0, 0.0), "tor": (0.38, 0.08, 0.0), "hed": (-0.74, -0.16, 0.05),
+    "pel": (0.0, -0.035, -0.115), "prt": (0.52, 0.0, 0.0), "tor": (0.38, 0.08, 0.0), "hed": (-0.74, -0.16, 0.05),
     "G": (0.055, 0.38, 0.83), "BE": be((0.0, 0.12, -1.0)), "Lw": 0.0, "LP": (-0.115, 0.40, 0.82), "Lh": (-1.1, 0.9, 0.0),
-    "FL": (-0.085, 0.085, A + 0.03), "FR": (0.095, -0.075, A + 0.04), "FLy": -0.16, "FRy": 0.12, "FLp": 0.4, "FRp": 0.5,
-    "brow": -0.95, "lid": -0.1, "jaw": 0.0, "ear": 0.72, "earR": 0.0, "earL": 0.0, "fing": 0.85, "skirt": 0.05, "wing": -0.1, "wfl": 0.02, "wfq": 2.0, "wb": -0.75,
+    "FL": (-0.125, 0.14, A + 0.03), "FR": (0.135, -0.12, A + 0.04), "FLy": -0.16, "FRy": 0.12, "FLp": 0.4, "FRp": 0.5,
+    "brow": -0.95, "lid": -0.1, "jaw": 0.0, "ear": 0.72, "earR": 0.0, "earL": 0.0, "fing": 0.85, "skirt": 0.3, "wing": -0.1, "wfl": 0.02, "wfq": 2.0, "wb": -0.75,
 }
-TIPTOE = {"ankle": A, "foot": 0.07, "width": 0.085, "stride": 0.16, "lift": 0.03, "toe": 0.4, "share": 0.6, "sway": 0.018, "bob": 0.009, "twist": 0.06, "T": 0.38, "toe_out": 0.12}
+TIPTOE = {"ankle": A, "foot": 0.07, "width": 0.115, "stride": 0.16, "lift": 0.03, "toe": 0.4, "share": 0.6, "sway": 0.018, "bob": 0.009, "twist": 0.06, "T": 0.38, "toe_out": 0.12}
 
 
 def huddle(u):
@@ -174,7 +174,7 @@ def huddle(u):
     p = dict(HUDDLE)
     look = bump(u, 0.08, 0.30) - 1.0 * bump(u, 0.46, 0.82)
     shiver = 0.0025 * math.sin(u * 2 * math.pi * 26)
-    p["pel"] = (shiver, -0.035, -0.135 - 0.004 * s)
+    p["pel"] = (shiver, -0.035, -0.115 - 0.004 * s)
     p["tor"] = (0.38 + 0.022 * s, 0.08, 0.0)
     p["hed"] = (-0.74, -0.16 + 0.75 * look, 0.05 - 0.1 * look)
     p["earL"] = 0.3 * bump(u, 0.14, 0.2) - 0.22 * bump(u, 0.6, 0.66)

@@ -15,6 +15,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
 import hem_sculpt as H
+import crouchkit
 from posekit import Clip, FnClip, Solver, ang_dir as D, frame_of, two_bone
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
@@ -214,8 +215,23 @@ def draw_t(t):
     return max(0.0, min(1.0, (t - 0.05) / 1.10)) ** 0.82
 
 
+# ---- the crouch (item 143): a hunter's stillness. Low and level, the bow held out low in the left hand, the right drawn up by the quiver, the chin up, cold eyes on the far treeline.
+STALK = dict(READY, **{
+    "pel": (0.02, -0.05, -0.30), "prt": (0.36, 0.14, -0.05), "tor": (0.34, 0.06, 0.06), "hed": (-0.62, -0.08, -0.02),
+    "G": (-0.27, 0.46, 0.60), "RF": (0.22, 0.30, 0.70),
+    "FL": (-0.12, 0.24, A_Z + 0.03), "FR": (0.13, -0.24, A_Z + 0.06), "FLy": 0.34, "FRy": -0.46, "FLp": 0.25, "FRp": 0.55,
+    "brow": 0.45, "lid": 0.14,
+})
+STILL = {"ankle": A_Z, "foot": 0.10, "width": 0.10, "stride": 0.31, "lift": 0.04, "toe": 0.24, "share": 0.62, "sway": 0.03, "bob": 0.012, "twist": 0.09, "T": 0.62, "toe_out": -0.24}
+
+
+def crouch_set():
+    return crouchkit.quick(C, READY, STALK, STILL, hands=("G", "RF"), scan=0.22)
+
+
 def clips():
     out = [F("idle", 3.6, idle), F("stance", 4.6, stance)]
+    out += crouch_set()
     wk, rn = 1.04, 0.66
     for n, h in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
         out.append(F("walk_" + n, wk, gait(0.45, h)))
