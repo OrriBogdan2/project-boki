@@ -397,3 +397,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Checks 0 failures: --check, hero-combo 278, archer-combo 143, warden-model, warden-glb, class-unlock 153, arena 86, tutorial-hud, rig-standard, aimkit 55, archetype 339, dash-flow, health --strict, gen_wiki 34 unchanged.
 - Shots: /home/boki/shots-s2/kits/hem/strip_55b.png, strip_close_55b.png. Not checked: live feel at real speed, sand/dark terrain.
 - Owner Qs: two perfect stages with one moving circle OK? Fine to lose the rising draw ticks?
+
+## 2026-11-05 S2: READY ext/kit-kael-57 249bc11b (item 57, Warchain haul swing)
+- Based on origin/main fe51b43b. Looking 90 deg aside swings the pull on a true circular arc: at 13 m lands 4.56 m aside, arc 41.3 deg, speed 22 m/s held through the curve. Move keys stack with the look, capped at 6 m. Chain bows toward the swing; a faint predicted arc shows on his own screen only.
+- Differs from the brief: >=3 m holds at 13 m (2.96 m on a 9 m wall pull; ~2 m at 6 m, simulated); not a fixed-radius pendulum (that lands only ~1 m aside). Changed existing asserts: "looking aside less than a strafe" is now "just as far", and three pull asserts hold the cursor fixed on screen.
+- Timing: a curved 13 m haul takes 0.65 s vs 0.55 s straight. Heading ends up to ~41 deg off the chain line. DJFx.chain() gains `bow`; new DJFx.path_line().
+- Checks 0 failures: --check, hero-combo 263, juggernaut-combo 164, kit-combo 39, warden-model, warden-glb, class-unlock 153, arena 86, rig-standard, health --strict, gen_wiki 34 unchanged. **--tutorial-hud-check: 4 failures in the suite run (load 43), 0 in 2 solo reruns (load ~30); looks like load flake, cause not proven.** Suite ran on 6bdd940d; 249bc11b changes only two doc figures.
+- Shots: /home/boki/shots-s2/kits/kael/. Not hand-tested live.
+- Owner Qs: a swung arrival 3 m+ aside now misses armed Haul Slam (2.8 m) and Cinder Spin (2.6 m); should the swing shrink while Haul Slam is armed? Is the chain bow right, and should allies see the line?
