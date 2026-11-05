@@ -68,6 +68,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		if (mi as MeshInstance3D).is_visible_in_tree():
 			shown += 1
 	ok(shown == 0, "%s: one weapon drawn (%d procedural pieces showing)" % [id, shown])
+	_sliders(id, sync)
 	await _on_blade(id, m, sync, clips)
 	await _handover(id, m, sync, clips, dd)
 	m.free()
@@ -138,6 +139,27 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 	clips.force = {}
 	ok(far <= FX_ON_BLADE, "%s: the Muzzle stays on the visible tip in %d frames (worst %.3f m)" % [id, n, far])
 	ok(drift <= 0.02, "%s: the blade never leaves the hand (worst drift %.3f m)" % [id, drift])
+
+## The clips keep rotations only on the contract bones, so MantleLook's sliders (bone offsets) stay on under them; and
+## the death state has its time on screen.
+func _sliders(id: String, sync: Node) -> void:
+	var clips: WardenClips = sync.get("clips")
+	var strays := 0
+	var sk := clips.skel
+	var names: Array = []
+	for b in WardenGlb.BONES:
+		if b != "root" and WardenSkeleton.find(sk, b) >= 0:
+			names.append(sk.get_bone_name(WardenSkeleton.find(sk, b)))
+	for nm in clips.lib.get_animation_list():
+		var a := clips.lib.get_animation(nm)
+		for i in a.get_track_count():
+			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D \
+					and String(a.track_get_path(i).get_concatenated_subnames()) in names:
+				strays += 1
+	ok(strays == 0, "%s: no clip keys a contract bone's offset (%d tracks), the sliders stay on" % [id, strays])
+	ok((sync.get("look_pose") as Array).size() >= 10, "%s: the look's bone offsets are held under the clips" % id)
+	ok(not (clips.d.get("states", {}) as Dictionary).has("dead") or float(sync.get("root").get_meta(WardenClips.DEATH_T, 0.0)) > 0.0,
+			"%s: a knocked-out Hero stays on screen for its death clip" % id)
 
 ## A dash into an ability into the run: states fed as the game does, the hand never jumps.
 func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
