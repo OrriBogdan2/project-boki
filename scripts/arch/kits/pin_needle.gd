@@ -19,9 +19,11 @@ const THREAD_SEG := 0.26       # m each
 const THREAD_R := 0.04         # m half width
 const THREAD_DROOP := 1.2      # m/s it sags behind the eye
 const GLOW_A := Vector2(0.1, 0.85)  # the shell's alpha at no charge and full
+const HOT_K := 0.7             # how far the steel itself reddens at full charge
 
 var shell: MeshInstance3D
 var shell_mat: ShaderMaterial
+var steel: ShaderMaterial
 var links: Array = []          # the thread's segments
 var points: Array = []         # the thread's joints, world space, [0] at the eye
 var eye := Vector3.ZERO        # where the eye is now (world)
@@ -33,7 +35,7 @@ func _init() -> void:
 	top_level = true
 	visible = false
 	name = "PinNeedle"
-	var steel := Models.toon(SILVER, true, 0.25)
+	steel = Models.toon(SILVER, true, 0.25)
 	_flat(_lie(KitMeshes.inst(self, _taper(0.01, RADIUS, LENGTH), steel), LENGTH))
 	var ring := TorusMesh.new()
 	ring.inner_radius = RADIUS * 0.8
@@ -48,10 +50,10 @@ func _init() -> void:
 	var thread := Models.toon(THREAD_COL, false, 0.7)
 	for i in THREAD_N:
 		var link := MeshInstance3D.new()
-		link.top_level = true
 		link.mesh = Models.box(THREAD_R * 2.0, THREAD_R * 2.0, 1.0)
 		link.material_override = thread
-		add_child(_flat(link))
+		_flat(link).top_level = true
+		add_child(link)
 		links.append(link)
 		points.append(Vector3.ZERO)
 
@@ -70,7 +72,10 @@ func _lie(mi: MeshInstance3D, len_: float) -> MeshInstance3D:
 	mi.position = Vector3(0, 0, -len_ * 0.5)
 	return mi
 
+## KitMeshes.inst hands back a pool piece (top level, hidden): this one rides the needle.
 func _flat(mi: MeshInstance3D) -> MeshInstance3D:
+	mi.top_level = false
+	mi.visible = true
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return mi
 
@@ -90,6 +95,8 @@ func hold(at: Vector3, dir: Vector2, k: float, sc: float, dt: float) -> void:
 	scale = Vector3.ONE * sc
 	var pulse := 0.1 * sin(Time.get_ticks_msec() * 0.018) if k >= 0.99 else 0.0
 	shell_mat.set_shader_parameter("color", Color(THREAD_COL, lerpf(GLOW_A.x, GLOW_A.y, k) + pulse))
+	steel.set_shader_parameter("albedo", SILVER.lerp(THREAD_COL, HOT_K * k))
+	steel.set_shader_parameter("glow", lerpf(0.25, 0.9, k) + pulse)
 	_thread(d, dt, nocking)
 
 ## The thread hangs from the eye and lags behind it.
@@ -99,7 +106,7 @@ func _thread(d: Vector3, dt: float, snap: bool) -> void:
 		var prev: Vector3 = points[i - 1]
 		var p: Vector3 = prev - d * THREAD_SEG if snap else points[i]
 		p += Vector3(0, -THREAD_DROOP * dt, 0)
-		p.y = maxf(p.y, global_position.y - 0.9)
+		p.y = maxf(p.y, global_position.y - 0.45)
 		var off := p - prev
 		points[i] = prev + off.normalized() * THREAD_SEG
 	for i in links.size():
