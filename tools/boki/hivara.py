@@ -147,7 +147,7 @@ def wing_prims():
             d = b - a
             n = np.cross(d, v3(0, 0, 1) if i == 0 else v3(0, 0.3, 1))
             out.append(Ellipsoid("w%s%d" % (sd, i), "wing%d.%s" % (i + 1, sd), a + d * 0.55,
-                                 v3(w, np.linalg.norm(d) * 0.58, 0.006), rot=frame(n, d), k=0))
+                                 v3(w, np.linalg.norm(d) * 0.58, 0.012), rot=frame(n, d), k=0))
     return out
 
 
@@ -168,14 +168,14 @@ def swarm_prims():
 
 def parts():
     out = {
-        "body": (Shape(body_prims()), 0.0035, 4900),
-        "crown": (Shape(crown_prims()), 0.0035, 440),
-        "honey": (Shape(honey_prims()), 0.0035, 260),
-        "wings": (Shape(wing_prims()), 0.0035, 360),
-        "swarm": (Shape(swarm_prims()), 0.0025, 330),
+        "body": (Shape(body_prims()), 0.0035, 2300),
+        "crown": (Shape(crown_prims()), 0.0035, 185),
+        "honey": (Shape(honey_prims()), 0.0035, 110),
+        "wings": (Shape(wing_prims()), 0.005, 150),
+        "swarm": (Shape(swarm_prims()), 0.0025, 140),
     }
     for sd, sx in SIDES:
-        out["blade" + sd] = (Shape(blade_prims(sd, sx)), 0.0035, 340)
+        out["blade" + sd] = (Shape(blade_prims(sd, sx)), 0.0035, 145)
     return out
 
 
@@ -186,7 +186,7 @@ AXIS = np.array((0.0, -0.94, -0.34))
 
 def prop_parts():
     out = {k: v for k, v in boki_tools.tools(GRIP, AXIS, -boki_tools.SIDE).items() if k.startswith("pick")}
-    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.05, 0.048, 0.05), k=0)]), 0.003, 90)
+    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.05, 0.048, 0.05), k=0)]), 0.003, 24)
     return out
 
 

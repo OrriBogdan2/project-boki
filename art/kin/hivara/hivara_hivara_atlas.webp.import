@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bmg73qq4wek44"
-path="res://.godot/imported/hivara_hivara_atlas.webp-bed663b4534d095f718e87eab5b73ec4.ctex"
+path.bptc="res://.godot/imported/hivara_hivara_atlas.webp-bed663b4534d095f718e87eab5b73ec4.bptc.ctex"
+path.astc="res://.godot/imported/hivara_hivara_atlas.webp-bed663b4534d095f718e87eab5b73ec4.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "d0bc22a8ba419db1f1c96effe40fc55c"
+"md5": "13944cfbb342c12bf167383f488fe257"
 }
 
 [deps]
 
 source_file="res://art/kin/hivara/hivara_hivara_atlas.webp"
-dest_files=["res://.godot/imported/hivara_hivara_atlas.webp-bed663b4534d095f718e87eab5b73ec4.ctex"]
+dest_files=["res://.godot/imported/hivara_hivara_atlas.webp-bed663b4534d095f718e87eab5b73ec4.bptc.ctex", "res://.godot/imported/hivara_hivara_atlas.webp-bed663b4534d095f718e87eab5b73ec4.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
