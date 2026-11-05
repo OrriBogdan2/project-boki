@@ -295,7 +295,7 @@ def lock(pts, r0, r1, vox=0.0013, lab=HAIR, spread=0.0):
     cc.append(pts[-1])
     cc = np.array(cc, F)
     n = len(cc)
-    rr = [float(r0 + (r1 - r0) * (i / (n - 1)) ** 1.2) * (min(1.0, 0.62 + 2.4 * i / (n - 1)) if r0 > 0.02 else 1.0) for i in range(n)]
+    rr = [float(r0 + (r1 - r0) * (i / (n - 1)) ** 1.2) * min(1.0, (0.62 if r0 > 0.02 else 0.28) + (2.4 if r0 > 0.02 else 3.2) * i / (n - 1)) for i in range(n)]
     f = Field(lo, hi, vox)
     f.add(path([tuple(c) for c in cc], rr), 0.0, lab, "head")
     if r0 > 0.03:
@@ -314,9 +314,9 @@ def lock(pts, r0, r1, vox=0.0013, lab=HAIR, spread=0.0):
 
 LOCKS = {
     # two thick curtains from the centre part, sweeping over the temples, falling past the jaw, the tips turning in
-    "lockR": [(0.004, 0.086, 1.706), (0.040, 0.087, 1.682), (0.0690, 0.067, 1.640), (0.0830, 0.052, 1.585), (0.0860, 0.048, 1.530),
+    "lockR": [(0.004, 0.083, 1.700), (0.040, 0.081, 1.678), (0.0690, 0.067, 1.640), (0.0830, 0.052, 1.585), (0.0860, 0.048, 1.530),
               (0.0790, 0.056, 1.478), (0.0620, 0.074, 1.440)],
-    "lockL": [(-0.004, 0.086, 1.706), (-0.040, 0.087, 1.682), (-0.0690, 0.067, 1.640), (-0.0830, 0.052, 1.585), (-0.0860, 0.048, 1.530),
+    "lockL": [(-0.004, 0.083, 1.700), (-0.040, 0.081, 1.678), (-0.0690, 0.067, 1.640), (-0.0830, 0.052, 1.585), (-0.0860, 0.048, 1.530),
               (-0.0790, 0.056, 1.478), (-0.0620, 0.074, 1.440)],
     # the high ponytail: up off the tie, arching back, full through the middle, an S down to her waist
     "tail": [(0.0, -0.078, 1.748), (0.003, -0.116, 1.772), (0.008, -0.158, 1.740), (0.016, -0.190, 1.650), (0.028, -0.200, 1.530),

@@ -149,11 +149,20 @@ hand_w = GROUP["hand.R"] + GROUP["hand.L"]
 bm = bmesh.new()
 bm.from_mesh(low.data)
 bm.faces.ensure_lookup_table()
-neck_z = T["neck"][2] + 0.0
+bm.verts.ensure_lookup_table()
+neck_z = T["neck"][2] - 0.045       # (under the cowl: the scan's stand collar must not show past the scarf)
 kill = [f for f in bm.faces if f.calc_center_median().z > neck_z or max(hand_w[v.index] for v in f.verts) > 0.5]
+# weld in the scan's pose, not the fitted one: fitted, the arms hang through the hips, and a weld there sews them together
+fit = bm.verts.layers.float_vector.new("fit")
+for v in bm.verts:
+    v[fit] = v.co.copy()
+    v.co = P[v.index].tolist()
 bmesh.ops.delete(bm, geom=kill, context="FACES")
 bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
 bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0006)
+for v in bm.verts:
+    v.co = v[fit]
+bm.verts.layers.float_vector.remove(fit)
 bm.to_mesh(low.data)
 bm.free()
 now = sum(len(p.vertices) - 2 for p in low.data.polygons)

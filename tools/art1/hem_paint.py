@@ -185,9 +185,9 @@ def head(p, n, lab, f):
     # behind the cheek the plate has nothing to say: its skin tone, shaded
     k = form(n)
     back = mix(C["skin_sh"], C["skin"], smooth(0.15, 0.6, k))
-    c = mix(c, back, smooth(0.035, 0.0, p[:, 1]))
+    c = mix(c, back, smooth(0.050, 0.010, p[:, 1]))
     # below the jaw: the neck in its shadow, not the plate's
-    c = mix(c, mix(C["skin_sh"], back, 0.35), smooth(1.512, 1.498, p[:, 2]))
+    c = mix(c, mix(C["skin_sh"], back, 0.35), smooth(1.522, 1.490, p[:, 2]))
     return mix(c, C["ear"], (lab == H.EAR_IN) * 0.7)
 
 
