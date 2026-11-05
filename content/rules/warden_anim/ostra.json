@@ -12,6 +12,7 @@
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
 		"walk_speed": 2.2, "run_speed": 4.6
 	},
+	"flow": [["ostra_swap_aim", 0.2], ["ostra_swap", 0.2], ["ostra_orb", 0.2], ["ostra_snap_wind", 0.2], ["ostra_snap", 0.2], ["ostra_seed", 0.2], ["ostra_pop", 0.2]],
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {

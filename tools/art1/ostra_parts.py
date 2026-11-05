@@ -159,6 +159,17 @@ def box_rim():
     for i, (p0, p1, r) in enumerate(edges_):
         V, F, ST = grid(bar(np.array(p0, float), np.array(p1, float), r), closed=True)
         out.append(Part("rail%d" % i, "cloth", V, F, ST, rigid("x_box", len(V)), "rail", (64, 64)))
+    # the iron corner plates, nailed over the rails: a bent L on each face of each corner, top and bottom
+    k = 0.062
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            for z0, zd in ((t + 0.006, -1), (b - 0.003, 1)):
+                x, y = sx * (w + 0.026), sy * (w + 0.026)
+                L1 = np.array(((x, y, z0), (x - sx * k, y, z0), (x - sx * k * 0.45, y, z0 + zd * k * 0.5), (x, y, z0 + zd * k)))
+                L2 = np.array(((x, y, z0), (x, y - sy * k, z0), (x, y - sy * k * 0.45, z0 + zd * k * 0.5), (x, y, z0 + zd * k)))
+                for q in (L1, L2):
+                    V, F, ST = both(q, [[0, 1, 2, 3]], [[(0, 0), (1, 0), (1, 1), (0, 1)]])
+                    out.append(Part("iron", "metal", V, F, ST, rigid("x_box", len(V)), "bell", (64, 64)))
     # the mouth: a shallow dark tray just under the rim
     q = w - 0.012
     V = np.array(((-q, q, t - 0.05), (q, q, t - 0.05), (q, -q, t - 0.05), (-q, -q, t - 0.05)))
@@ -221,8 +232,8 @@ def spring():
     ang = t * 2 * np.pi * 4.4
     r = 0.098 + 0.03 * np.sin(t * np.pi * 4.4 * 0.5) ** 2 + 0.018 * t
     path = np.stack((np.cos(ang) * r, np.sin(ang) * r - 0.01, z0 + (z1 - z0) * t), axis=1)
-    V, F, ST = grid(tube(path, np.full(n, 0.0135), 6), closed=True)
-    tt = np.repeat(t, 6)
+    V, F, ST = grid(tube(path, np.full(n, 0.0135), 8), closed=True)
+    tt = np.repeat(t, 8)
     k = M.sm(0.0, 1.0, tt)
     return Part("spring", "metal", V, F, ST, {"x_box": (1 - k), "hips": k}, "brass", (64, 64))
 
@@ -308,11 +319,11 @@ def tails():
             parent = "hips" if j == 0 else "%s_%d" % (n, j - 1)
             tail_ = path[ks[j + 1]] if j < 2 else path[-1] + (path[-1] - path[-2]) * 0.9
             joints.append(("%s_%d" % (n, j), (path[ks[j]], tail_, parent)))
-        out.append(ball("tbell%d" % i, path[-1] + (0, 0, -0.024), 0.03, "%s_1" % n))
+        out.append(ball("tbell%d" % i, path[-1] + (0, 0, -0.024), 0.032, "%s_1" % n))
     return out, joints
 
 
-def ball(nm, c, r, bone, rows=5, cols=7):
+def ball(nm, c, r, bone, rows=7, cols=10):
     c = np.array(c)
     a = np.linspace(0, 2 * np.pi, cols, endpoint=False)
     P = np.zeros((rows, cols, 3))
@@ -375,7 +386,7 @@ def hand(side):
         tip = mid + np.array((pd * 0.016, sp * L * 0.5, -L * 0.5))
         path = resample([k + (0, 0, 0.012), k, mid, tip], 8)
         rd = rmp(np.linspace(0, 1, 8), [0, 0.15, 0.5, 0.8, 1.0], [0.012, 0.0135, 0.0115, 0.0095, 0.002])
-        V, F, ST = grid(tube(path, rd, 7), closed=True)
+        V, F, ST = grid(tube(path, rd, 8), closed=True)
         kb = M.sm(L * 0.42, L * 0.56, np.linalg.norm(V - k, axis=1))
         wa, wb = "x_fing%s.%s" % (nm, n), "x_fing%sb.%s" % (nm, n)
         out.append(Part("fing%s%s" % (nm, n), "cloth", V, F, ST, {wa: 1 - kb, wb: kb}, "glove", (64, 64)))
@@ -491,13 +502,13 @@ def chain_w(prefix, t, bones, start, parent):
 
 def ruff():
     """the great white ruff: the match camera's first read. A thick pleated drum of loops, tipped down at the front"""
-    pleats, per = 21, 3
+    pleats, per = 27, 3
     nu = pleats * per
-    rows = 7
+    rows = 9
     a = np.linspace(0, 2 * np.pi, nu, endpoint=False)
     P = np.zeros((rows, nu, 3))
     # section: from the neck out over the top, round the outer wall, back under
-    sec = ((0.07, 0.03), (0.17, 0.052), (0.255, 0.05), (0.285, 0.0), (0.255, -0.05), (0.17, -0.052), (0.07, -0.03))
+    sec = ((0.07, 0.03), (0.13, 0.05), (0.2, 0.056), (0.262, 0.046), (0.285, 0.0), (0.262, -0.046), (0.2, -0.056), (0.13, -0.05), (0.07, -0.03))
     for i, (rr, h) in enumerate(sec):
         q = rr / 0.285
         ph = a * pleats
