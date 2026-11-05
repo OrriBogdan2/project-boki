@@ -2167,3 +2167,12 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Hob is present from the first arrival, standing at a fixed visible spot near the landing (e.g. by a small camp: a crate, his drafting table, a lantern), where item 171's camera pan finds him.
   - Once the house is built, he can walk over to his spot by the house (a short walk, not a teleport), or keep his camp. Either way, he's never absent.
 - **Assert:** a fresh save, frame 1 at home → the Hob node exists and is visible.
+
+## 173. Build progress bar only moves forward, smoothly (owner, 17:57 UTC Nov 5)
+- The owner: "i dont like how building stuff the bar goes forward then back, it should slowly go forward only".
+- Likely cause: the bar shows a per-swing beat (fill on the hammer beat, then a reset/decay between swings), or it eases toward a target that's recomputed from the materials spent and overshoots.
+- **Fix:**
+  - The displayed progress is monotonic: displayed = max(displayed, true_progress), eased smoothly forward (lerp toward the true value, never down).
+  - If there's a separate swing-timing indicator, show it as a small pulse on the hammer icon, not on the progress bar.
+  - The same rule for every build/craft/chop/mine progress bar in the farm (HunterTool / farm_sites / builder).
+- **Assert:** over a full build, the bar's displayed value never decreases between frames.
