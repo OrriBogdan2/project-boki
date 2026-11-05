@@ -55,7 +55,7 @@ def stripes(bvh):
             for p, n in pts:
                 s_ = norm(np.cross(n, (0, 0, 1.0)))
                 for off in (-1, 1):
-                    v.append(p + n * 0.003 + s_ * off * 0.0075)
+                    v.append(p + n * 0.007 + s_ * off * 0.0085)
             for i in range(len(pts) - 1):
                 f.append([i * 2, i * 2 + 1, i * 2 + 3, i * 2 + 2])
             q = Piece(nm + sd, "glow-vex", np.array(v), f).rigid(bone)
