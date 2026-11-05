@@ -106,6 +106,7 @@ const WING_FOLD := "wing_fold"
 ## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air): the bones the Hero's data
 ## lists in "hide_while_chain" shrink away (item 76b.4), so one chain shows, never two.
 const CHAIN_OUT := "chain_out"
+const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
 const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: the Gun's Muzzle moves there
 
 static var _neutral := {}       # Warden id -> the rig rest of its model in the neutral look (what a .glb is built on)
@@ -431,6 +432,28 @@ static func _hold_shield(root: Node3D, glb: Node3D) -> void:
 	holder.add_child(shield)
 	shield.transform = Transform3D.IDENTITY
 
+## The part of a skinned weapon that truly leaves the hand (item 76b): a plain copy of the mesh `mesh_name` on its own
+## node, the grip at the origin, -Z toward the head (WEAPON_THROWN's frame), for the kit to fly and plant. The skinned
+## one hides meanwhile (WardenClips "weapon_bone"). null on a procedural model.
+static func thrown_piece(root: Node3D, mesh_name: String) -> Node3D:
+	var w := root.get_node_or_null("Warden")
+	var src := w.find_child(mesh_name, true, false) as MeshInstance3D if w else null
+	var sk := skeleton(w)
+	var frame := w.find_child(WEAPON_THROWN, true, false) as Node3D if w else null
+	if src == null or sk == null or frame == null:
+		return null
+	var at := frame.get_parent() as BoneAttachment3D
+	var base := sk.get_bone_global_rest(WardenSkeleton.find(sk, at.bone_name)) if at else Transform3D.IDENTITY
+	var mi := MeshInstance3D.new()
+	mi.mesh = src.mesh
+	mi.transform = (base * frame.transform).affine_inverse()
+	for si in src.get_surface_override_material_count():
+		mi.set_surface_override_material(si, src.get_surface_override_material(si))
+	var holder := Node3D.new()
+	holder.name = "ThrownPiece"
+	holder.add_child(mi)
+	return holder
+
 ## Poses one of the Warden's variant bones (EXTRA) on its rest, riding its parent: turned by `rot` about its head
 ## (an axis in model space as the model rests: Vector3.RIGHT turns a drum about its side-to-side axle), scaled by `scl`
 ## (zero hides what rides it). False on a procedural model or a bone the .glb lacks.
@@ -465,6 +488,9 @@ static func _skinned_weapon(root: Node3D) -> void:
 	for mi in gun.find_children("*", "MeshInstance3D", true, false):
 		(mi as MeshInstance3D).visible = false
 		mi.set_meta("glb_hidden", true)
+	var mag := gun.get_node_or_null("Mag") as MeshInstance3D      # (the reload's motion stays, shown or not)
+	if mag:
+		mag.mesh = null
 
 ## The rig rest of the Warden's model in the neutral look (built once a session).
 static func neutral_rest(arch: String) -> Dictionary:
@@ -761,6 +787,8 @@ class Sync extends Node:
 	var muzzle: Node3D
 	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
 	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
+	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
+	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -790,6 +818,11 @@ class Sync extends Node:
 			hide_out.append(WardenSkeleton.find(skel, String(b)))
 		clips = WardenClips.make(root, glb, skel, art_name)
 		if clips:
+			_look_pose()
+			root.set_meta(WardenClips.DEATH_T, float((dd.get("states", {}) as Dictionary).get("dead_t", 0.0)))
+		if clips and bool(dd.get("rig_root", false)):
+			rig_root = links.filter(func(l): return int(l[0]) == WardenSkeleton.find(skel, "root"))
+		if clips:
 			for sd in ["L", "R"]:
 				var nd := root.get_node_or_null(String(BONES["hand." + sd])) as Node3D
 				var bi := WardenSkeleton.find(skel, "hand." + sd)
@@ -813,9 +846,30 @@ class Sync extends Node:
 		for l in links:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
 
+	## The player's MantleLook sliders under the clips: each contract bone's offset and scale for this look, against the
+	## neutral rig the clips were keyed on. The clips key rotations; these stay on the bones (WardenClips strips the
+	## position and scale tracks of the contract bones, the root's position aside).
+	func _look_pose() -> void:
+		var now: Dictionary = root.get_meta("rig_rest", {})
+		var glob := {}
+		for b in BONES:
+			var bi := WardenSkeleton.find(skel, b)
+			for l in links:
+				if int(l[0]) == bi and now.has(b):
+					glob[bi] = WardenGlb.retarget(now[b] as Transform3D, l)
+		for bi in glob:
+			var par := skel.get_bone_parent(int(bi))
+			if par < 0 or not glob.has(par):
+				continue
+			var local: Transform3D = (glob[par] as Transform3D).affine_inverse() * (glob[bi] as Transform3D)
+			look_pose.append([int(bi), local.origin, local.basis.get_scale()])
+
 	## The clips' pose, mixed with the retargeted rig while a state hands over (clips.proc_w), then the rig's hands and
 	## the Gun laid on what is shown, so kit FX leave the bodies you see.
 	func _play(dt: float) -> void:
+		for o in look_pose:
+			skel.set_bone_pose_position(int(o[0]), o[1])
+			skel.set_bone_pose_scale(int(o[0]), o[2])
 		clips.step(dt)
 		var w := clips.proc_w
 		if w >= 1.0:
@@ -829,6 +883,8 @@ class Sync extends Node:
 				var pose: Transform3D = poses[i]
 				skel.set_bone_global_pose(int(l[0]), pose.interpolate_with(
 						WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l), w))
+		for l in rig_root:
+			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
 		if w < 1.0:
 			var inv := skel.global_transform
 			for h in hand_nodes:
