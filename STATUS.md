@@ -814,3 +814,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: playtest items 113-118 queued
 - Running now: Breaker hold-spin arena bug, Motley 117 (refreshing bfcf7393). Next as slots free: Kael 113 (Opus), Lisette 114, Ryzz 116 + 116b, Pip 118. gloves 69 and glider 63 told to wrap up to free a slot.
+
+## 2026-11-05 S2: ext/kit-glider-63 5f0ec6e0 and ext/kit-gloves-69 7a5a9031: pushed, full suites still running, not READY yet
+- Glider 63: opens at any heat (3 refusals removed in hunter.gd), deep lift softened (ABYSS_LIFT_CAP 26 -> 18.2), HUD text updated, new --glider-heat-check. Brake zone near the lip not halved. Glider not checked visually.
+- Gloves 69: arena two slots Q and V with pickers, duel bot V row, --glove=a,b. Rest of the game already two-glove (read, not played). arena-check 92/0.
+- Both trial-merge clean with a4b39fd7. Suite results land in /home/boki/suite-s2/s2-kit-{gloves,glider}/ with a DONE file; so far only baseline reds.
