@@ -240,7 +240,7 @@ def crown_wrap(q):
     """A terracotta wrap tying the locs at the crown: from the match camera, the head's colour and shape."""
     c = (0.0, -0.035, 0.172)
     d = ellipsoid(q, c, (0.082, 0.094, 0.043))
-    d = smin(d, ellipsoid(q, (0.0, -0.035, 0.2), (0.046, 0.052, 0.03)), 0.02)
+    d = smin(d, ellipsoid(q, (0.0, -0.035, 0.192), (0.056, 0.062, 0.024)), 0.02)
     az = np.arctan2(q[..., 1] - c[1], q[..., 0])
     return d + 0.004 * np.sin(az * 9.0 + 18.0 * q[..., 2]) + 0.002 * noise(q, 40.0, 3)
 

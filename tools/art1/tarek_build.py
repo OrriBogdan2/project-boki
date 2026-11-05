@@ -418,7 +418,7 @@ def geode_parts():
 
 # ---------------------------------------------------------------------------------------------------------- uvs
 UV_K = {"head": 2.4, "teeth": 1.2, "bandana": 1.3, "hands": 1.5, "torso": 1.2, "geode": 2.2, "iris": 3.0, "locs": 0.7, "beads": 0.6,
-        "cap": 0.8, "crown": 0.8, "shoulders": 0.9, "crystals": 0.8, "shard": 1.2, "wraps": 1.1, "harness": 0.8, "gear": 1.0, "legs": 1.0}
+        "cap": 0.8, "crown": 0.8, "shoulders": 0.9, "crystals": 0.8, "shard": 8.0, "wraps": 1.1, "harness": 0.8, "gear": 1.0, "legs": 1.0}
 
 
 def smoothed(ob, iters=30, k=0.8):

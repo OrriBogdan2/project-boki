@@ -74,12 +74,12 @@ def p_rock(P, N, occ, cav, a, seeds):
     idx, d1, gap = S.voronoi(P, seeds)
     v = lightness(T.key_shade(N), occ, cav * 0.6, 0.7) + 0.08 * S.fbm(P, 30.0, 6, 3)
     tint = 0.92 + 0.14 * np.sin(idx * 2.7)
-    c = tones("94805f", "e2d4b8", "fff8e8", v + 0.16)
+    c = tones("7c6648", "c9b796", "f2e6cc", v + 0.06)
     # chipped lighter edges, dark grit
     speck = S.fbm(P, 90.0, 12, 2)
     c = crease(c, np.maximum(cav, 0.0) * 0.8, "241a14", 0.8)
     crack = S.sstep(0.012, 0.006, gap)
-    c = S.mix(c, S.hexc("8a3a14")[None, :], crack)
+    c = S.mix(c, S.hexc("6a2c10")[None, :], crack)
     # only some seams burn, in long runs, as the art draws them
     run = S.sstep(-0.2, 0.05, S.fbm(P, 7.0, 21, 2))
     burn = S.sstep(0.016, 0.007, gap) * run
@@ -111,13 +111,13 @@ def p_vest(P, N, occ, cav, a):
 
 def p_sash(P, N, occ, cav, a):
     v = lightness(T.key_shade(N), occ, cav) + 0.04 * T.strokes(P, 34.0, 9)
-    return crease(tones("7c2410", "d4501e", "fb9a52", v), cav, "34100a"), None
+    return crease(tones("6e2010", "c84a1c", "f08c4a", v), cav, "34100a"), None
 
 
 def p_tails(P, N, occ, cav, a):
     v = lightness(T.key_shade(N), occ, 0.85, 0.7) + 0.05 * S.noise(P, 40.0, 3)
     s = a[:, 0]
-    c = tones("7c2410", "d4501e", "fb9a52", v)
+    c = tones("6e2010", "c84a1c", "f08c4a", v)
     streak = 0.5 + 0.5 * np.sin(a[:, 1] * 6.28 * 2 + s * 16.0)
     c = S.mix(c, c * 0.72, S.sstep(0.6, 0.95, streak))
     frayed = S.sstep(0.0, 0.1, s - np.maximum(0.0, (a[:, 0].max() - 0.12)))
@@ -263,7 +263,7 @@ P_FN = {"head": p_head, "teeth": p_teeth, "torso": p_skin, "arms": p_skin, "hand
 
 def p_shard(P, N, occ, cav, a):
     v = lightness(T.key_shade(N), occ, cav, 0.75)
-    return tones("3e3128", "85725c", "c9b797", v), None
+    return tones("7c6648", "c9b796", "f2e6cc", v + 0.1), None
 
 
 _rs = np.random.RandomState(7)

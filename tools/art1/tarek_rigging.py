@@ -302,7 +302,11 @@ def assemble(objs, img, emit):
     iris.select_set(True)
     bpy.context.view_layer.objects.active = geo
     bpy.ops.object.join()
-    shard.data.materials.append(rock_m)
+    # (a shard is a few tris: one flat rock colour, no atlas space)
+    shard_m = bpy.data.materials.new("leather-shard")
+    shard_m.use_nodes = True
+    shard_m.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (*[c ** 2.2 for c in S.hexc("c9b796")], 1)
+    shard.data.materials.append(shard_m)
     log("stone mesh fixed:", geo.data.validate(verbose=True), shard.data.validate(verbose=True))
     n_geo, n_shard = K.tris([geo]), K.tris([shard])
     extras = orbits(arm, geo, shard)
