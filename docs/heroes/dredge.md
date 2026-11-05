@@ -206,9 +206,12 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
   scorch of the air smash (he rides the anchor down); clods of turf torn up where the lunge sets off, iron and brass
   after-images along it.
 - Weapon: `HeroGearPair.scattergun`: a fat iron barrel with a flared brass bell, a rope-wrapped pump, a slug drum, a glowing seam.
-- Sounds (tools/sfx_linwick_dredge.py): `dr_shot`, `dr_throw`, `dr_grab`, `dr_reel`, `dr_barge`, `dr_anchor_wind`, `dr_dive`,
-  `dr_quake`, `dr_hop`, `dr_blast_charge` (a rising brass hum), `dr_blast` (a heavy thump, pitched down for wave 2) (plus the older
-  `dr_anchor`, `pay_salvage`).
+- Sounds (`tools/gen_sfx_grimble.py`, set `content/sfx/dredge.json`, docs/AUDIO.md): the junk blunderbuss `dr_shot` (three
+  takes), the gaff hook on its chain (`dr_throw`, `dr_grab`, the winch ratchet `dr_reel`), the scrap fist (`dr_anchor_wind`,
+  `dr_anchor`, the air smash `dr_dive`/`dr_quake`), the barge `dr_barge` with his hoard's `dredge_junk_clatter`, the pounce
+  `dr_hop`, Brass Broadside (`dr_blast_charge`: junk crammed in and a crank ratcheting; `dr_blast`, pitched down for wave 2),
+  coins for every Salvage stack and a hauled foe (`dredge_coin_jingle`) and for loot he pockets (`dredge_pickup`, with a wheezy
+  chuckle), skittery claw footsteps and a wheezy, creaturely wordless voice (`dredge_hurt`, `_down`, `_death`).
 - Brass Broadside (`scripts/arch/kits/dredge_blast.gd`): the growing fan in saturated brass, sparks arcing between his fists
   while charging, six big orbs per wave with a dark core and a smear (`LDFx.volley`: saturated brass for wave 1, violet for wave
   2) that fly the whole fan in the shot's 0.2s and hang at its edge fading for 0.35s as the source's orbs do (f35-f38), a
