@@ -346,7 +346,7 @@ def p_compass(p, n, c):
     ones = np.ones((len(p), 1), np.float32)
     col = mix(C("d8b45a"), C("8e6a2a"), vnoise(p[:, 0], p[:, 1], p[:, 2], 90.0)[:, None] * 1.1)
     col = shade(col, ao, cv * 0.5, n, 0.7, 1.2, (0.8, 0.6, 0.45))
-    face = C("efe6cc") * ones
+    face = C("c9bea0") * ones
     # the rose: a four-point star, the north half red
     st = r - (0.008 + 0.034 * np.abs(np.cos(ang * 2.0)) ** 6)
     star = smooth(0.0015, -0.0015, st)

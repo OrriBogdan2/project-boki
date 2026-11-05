@@ -322,7 +322,7 @@ def main():
     ef = S.Field((-0.1, 0.1, 1.41), (0.1, 0.175, 1.49), 0.0012)
     for c, r in B.eyes(J):
         ef.add(S.ell(c, (r * 1.1, r * 0.95, r * 0.5), (0, 0.32 if c[0] < 0 else -0.32, 0)), 0.0, 1, "head")
-    pey = part("eyes", ef, 90, "eyes", "eyes", 2.0)
+    pey = part("eyes", ef, 90, "glow", "eyes", 2.0)
     bf = B.brows(hd)
     pbw = part("brows", bf, 150, "hair", "beard", 2.2)
 
