@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bdr0wkd0go3go"
-path="res://.godot/imported/kael_atlas_1.jpg-97b5bda2565cee0e195457d263feae2f.ctex"
+path.bptc="res://.godot/imported/kael_atlas_1.jpg-97b5bda2565cee0e195457d263feae2f.bptc.ctex"
+path.astc="res://.godot/imported/kael_atlas_1.jpg-97b5bda2565cee0e195457d263feae2f.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "888f8164f6381e843b26a4b2d15686bc"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/kael/kael_atlas_1.jpg"
-dest_files=["res://.godot/imported/kael_atlas_1.jpg-97b5bda2565cee0e195457d263feae2f.ctex"]
+dest_files=["res://.godot/imported/kael_atlas_1.jpg-97b5bda2565cee0e195457d263feae2f.bptc.ctex", "res://.godot/imported/kael_atlas_1.jpg-97b5bda2565cee0e195457d263feae2f.astc.ctex"]
 
 [params]
 

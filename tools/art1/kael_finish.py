@@ -154,10 +154,15 @@ head_tex = head_tex.reshape(head_img.size[1], head_img.size[0], head_img.channel
 ch_ = head_tex[..., :3]
 lum_ = ch_.mean(2, keepdims=True)
 k_ = 1 - smooth(0.3, 0.55, lum_)
-ch_ = ch_ * (1 - k_) + (np.power(np.maximum(ch_, 1e-4), 0.72) * 1.28 + np.array([0.035, 0.018, 0.012])) * k_
+ch_ = ch_ * (1 - k_) + (np.power(np.maximum(ch_, 1e-4), 0.62) * 1.32 + np.array([0.04, 0.02, 0.012])) * k_
 head_tex[..., :3] = np.clip(ch_, 0, 1)
-head_img.pixels.foreach_set(head_tex.ravel())
-head_img.update()
+# (a new image: the exporter writes an imported image's packed original, whatever its pixels say)
+head_new = bpy.data.images.new("kael_head", head_img.size[0], head_img.size[1])
+head_new.pixels.foreach_set(head_tex.ravel())
+head_new.filepath_raw = os.path.join(os.path.dirname(OUT), "head.png")
+head_new.file_format = "PNG"
+head_new.save()
+head_img = head_new
 head_tex = head_tex[..., :3]
 bpy.data.objects.remove(head_ob)
 
