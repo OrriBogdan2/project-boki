@@ -23,7 +23,7 @@ EYE_R = (UNIQ_W + 0.005, 0.20, 0.875, 0.295)
 EYE2_R = (UNIQ_W + 0.005, 0.10, 0.875, 0.195)
 GLOW_R = (0.88, 0.20, 1.0, 0.295)
 HALO_R = (0.88, 0.10, 1.0, 0.195)
-MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "metal-kael-hot", "hair-mane", "eyes-glow-hot", "glow-sword"]
+MATS = ["skin-kael", "skin-kael-hot", "cloth-kael", "cloth-ember-hot", "metal-kael", "hair-mane", "eyes-glow-hot", "glow-sword"]
 SCALE = {"face": 4.0, "lidU": 2.6, "lidD": 2.6, "mask": 1.2, "cowl": 2.0, "cowlcore": 0.2, "stail": 1.3, "palm": 2.0, "finger": 1.8,
          "thumb": 1.8, "skull": 0.4, "blade": 1.5, "guard": 1.4, "grip": 1.6, "pommel": 1.6, "Low": 1.15}
 
@@ -187,9 +187,9 @@ for i, p in enumerate(me.polygons):
         m2 = "skin-kael"          # (by the scan's paint, below)
     else:
         pm = PIECE_MAT[n]
-        m2 = {"metal-chain": "metal-kael-hot", "metal-hook": "metal-kael-hot", "metal-blade": "metal-kael-hot", "metal-guard": "metal-kael-hot", "metal-kael": "metal-kael-hot",
+        m2 = {"metal-chain": "metal-kael", "metal-hook": "metal-kael", "metal-blade": "cloth-kael", "metal-guard": "metal-kael", "metal-kael": "metal-kael",
               "leather-grip": "cloth-kael", "hair-brow": "hair-mane"}.get(pm, pm)
-        if n.startswith(("cowl", "stail")):
+        if n.startswith(("cowl", "stail", "coreh")):
             m2 = "cloth-ember-hot"
         if n == "eye" + K.GLOW_EYE:
             m2 = "eyes-glow-hot"    # the eye under the scar glows
@@ -485,7 +485,7 @@ sat = (fcol.max(1) - fcol.min(1)) / np.maximum(fcol.max(1), 0.01)
 for k_, i in enumerate(low_faces):
     r_, g_, b_ = fcol[k_]
     if sat[k_] < 0.14 and L_[k_] > 0.34:
-        m = "metal-kael-hot"
+        m = "metal-kael"
     elif sat[k_] < 0.24:
         m = "cloth-kael"
     elif L_[k_] > 0.5 or (r_ > g_ * 1.7 and b_ > g_ * 0.7):
@@ -633,7 +633,7 @@ x0, y0, x1, y1 = rect(GLOW_R)
 OUTC[y0:y1, x0:x1] = (1.0, 0.98, 0.93)
 
 x0, y0, x1, y1 = rect(HALO_R)
-OUTC[y0:y1, x0:x1] = (0.62, 0.47, 0.22)       # (keyed part hot: the gold round the core)
+OUTC[y0:y1, x0:x1] = (0.52, 0.4, 0.2)       # (keyed part hot: the gold round the core)
 
 atlas = bpy.data.images.new("kael_atlas", ATLAS, ATLAS)
 px = np.ones((ATLAS, ATLAS, 4), np.float32)
