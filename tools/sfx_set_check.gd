@@ -6,10 +6,14 @@ extends RefCounted
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
+##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
+##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
+const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
+const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 
 var bad := 0
 var levels := {}
@@ -54,6 +58,7 @@ func _check_set(path: String) -> void:
 				off.append("%s rms %.1f / %.1f, peak %.1f" % [t.get_file(), m["rms"], cats[cat], m["peak"]])
 	var why := "" if off.is_empty() else str(off)
 	ok(off.is_empty(), "%s: %d sounds on file and at level %s" % [group, sounds.size(), why])
+	_reach_and_loops(group, d)
 	if Arch.ids().has(group):
 		_check_hunter(group, d)
 
@@ -64,7 +69,7 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 		need.append("step_" + s)
 	var missing := need.filter(func(k): return not sounds.has("%s_%s" % [arch, k]))
 	ok(missing.is_empty(), "%s: voice, dash and footsteps on every surface (missing %s)" % [arch, missing])
-	ok(sounds.values().has("fire"), "%s: a weapon fire sound" % arch)
+	ok(sounds.values().has("fire") or sounds.values().has("heavy_fire"), "%s: a weapon fire sound" % arch)
 	var sig: Array = d.get("signature", [])
 	var sig_missing := sig.filter(func(s): return not sounds.has(s))
 	ok(not sig.is_empty() and sig_missing.is_empty(), "%s: signature sounds %s (missing %s)" % [arch, sig, sig_missing])
@@ -94,6 +99,33 @@ func _kit_names(arch: String, extra: Array) -> void:
 				silent.append(sname)
 	ok(silent.is_empty(), "%s: every sound its kit plays exists (silent: %s)" % [arch, silent])
 
+## 6. Heavy sounds that carry, and held sounds that loop.
+func _reach_and_loops(group: String, d: Dictionary) -> void:
+	var sounds: Dictionary = d["sounds"]
+	var reach: Dictionary = d.get("reach", {})
+	var wrong := []
+	for sname in reach:
+		var m := float(reach[sname])
+		if not sounds.has(sname) or m < Sfx.hear_range or m > REACH_MAX:
+			wrong.append("%s %.0f m" % [sname, m])
+	ok(wrong.is_empty(), "%s: %d sounds carry further (wrong: %s)" % [group, reach.size(), wrong])
+	var rough := []
+	for sname in d.get("loops", []):
+		var takes := _takes(String(sname))
+		if not sounds.has(sname) or takes.is_empty():
+			rough.append("%s (not in the set)" % sname)
+			continue
+		var data := _data(takes[0])
+		var n := data.size() / 2
+		var first := data.decode_s16(0) / 32768.0
+		var last := data.decode_s16((n - 1) * 2) / 32768.0
+		var mid := 0.0
+		for k in range(n / 2, n / 2 + 200):
+			mid = maxf(mid, absf(data.decode_s16(k * 2) / 32768.0))
+		if absf(last - first) > SEAM_MAX or absf(last) < mid * 0.02:
+			rough.append("%s seam %.3f, end %.3f of %.3f" % [sname, absf(last - first), absf(last), mid])
+	ok(rough.is_empty(), "%s: %d loops repeat seamlessly %s" % [group, (d.get("loops", []) as Array).size(), rough])
+
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
 	var h := Hunter.new()
@@ -114,16 +146,7 @@ func _takes(sname: String) -> Array:
 
 ## Peak and RMS (dBFS) of a 16-bit PCM wav; RMS over samples above 2% of the peak, as tools/sfx_lib.py levels.
 func _measure(path: String) -> Dictionary:
-	var b := FileAccess.get_file_as_bytes(path)
-	var i := 12
-	var data := PackedByteArray()
-	while i + 8 <= b.size():
-		var id := b.slice(i, i + 4).get_string_from_ascii()
-		var chunk := b.decode_u32(i + 4)
-		if id == "data":
-			data = b.slice(i + 8, i + 8 + chunk)
-			break
-		i += 8 + chunk + (chunk & 1)
+	var data := _data(path)
 	var n := data.size() / 2
 	var pk := 0.0
 	for k in n:
@@ -137,3 +160,15 @@ func _measure(path: String) -> Dictionary:
 			cnt += 1
 	var rms := sqrt(sum / maxf(1.0, cnt))
 	return {"peak": linear_to_db(maxf(pk, 1e-6)), "rms": linear_to_db(maxf(rms, 1e-6))}
+
+## The 16-bit PCM samples of a wav file (its "data" chunk).
+func _data(path: String) -> PackedByteArray:
+	var b := FileAccess.get_file_as_bytes(path)
+	var i := 12
+	while i + 8 <= b.size():
+		var id := b.slice(i, i + 4).get_string_from_ascii()
+		var chunk := b.decode_u32(i + 4)
+		if id == "data":
+			return b.slice(i + 8, i + 8 + chunk)
+		i += 8 + chunk + (chunk & 1)
+	return PackedByteArray()
