@@ -150,7 +150,7 @@ static func set_need(n: Node3D, e: Dictionary) -> void:
 		tag = Label3D.new()
 		tag.name = "Need"
 		tag.font_size = 44
-		tag.pixel_size = 0.0065
+		tag.pixel_size = 0.01
 		tag.outline_size = 14
 		tag.modulate = Color("ffd36a")
 		tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
