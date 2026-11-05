@@ -372,7 +372,7 @@ def main():
     part("lockL", locks["lockL"], 200, "lock", 0.6, hxf, "lockL", "hair")
     part("tail", locks["tail"], 450, "lock", 0.8, hxf, "tail", "hair")
     part("eyes", ey, 120, "eyes", 5.0, hxf, "head", "skin")   # (on the skin slot: the eyes slot would take the player's tint, hers stay green)
-    part("hair_needles", hn, 80, "needle", 1.0, hxf, "head", "metal")
+    part("hair_needles", hn, 110, "needle", 2.6, hxf, "head", "metal")
     part("trunk", tr, 3000, "trunk", 1.0, None, "trunk", None, lambda v: (v[:, 2] > 1.40))
     part("armR", armR, 650, "trunk", 1.0, None, "arm")
     part("armL", armL, 650, "trunk", 1.0, None, "arm")
