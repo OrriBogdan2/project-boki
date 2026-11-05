@@ -269,6 +269,23 @@ ALL = [br_throw, br_boulder_hit, br_wind, br_punch, br_launch, br_burst, br_rise
        br_slam, br_crack, br_raise, br_sense, os_orb, os_orb_hot, os_prime, os_snap_wind, os_snap, os_snap_hit,
        os_swap_lob, os_swap, os_seed, os_full, os_pop, os_empower, br_spine, os_well, os_well_hum]
 
+def br_rumble():
+    T = 0.42
+    low = env(lowpass(noise(T), 170), 0.16)
+    grind = ramp_in(env(lowpass(noise(T), 520), 0.2), 0.5)
+    save('br_rumble', level(mix([v * 1.3 for v in low], [v * 0.5 for v in grind], grains(T, 0.02, 0.3, 4.0, 500, 1500, (0.02, 0.05))), 0.2))
+
+
+def br_crumble():
+    T = 0.6
+    snap = at(env(highpass(lowpass(noise(0.08), 3800), 900), 0.012), 0.0, T)
+    thud = at(env(lowpass(noise(0.2), 240), 0.06), 0.03, T)
+    save('br_crumble', level(mix(snap, [v * 0.8 for v in thud], grains(T, 0.03, 0.5, 3.5, 500, 2400, (0.015, 0.05))), 0.2))
+
+
+ALL = ALL + [br_rumble, br_crumble]
+
+
 if __name__ == '__main__':
     only = sys.argv[1:]          # names to write, or every sound
     done = [f for f in ALL if not only or f.__name__ in only]

@@ -217,7 +217,17 @@ func _breah() -> void:
 	var w0: Dictionary = rs[0]
 	var top := K.rock_mid(w0).y + float(w0["top"])
 	var mid0 := K.rock_mid(w0)
-	ok("rock: a rock is a low wall with a top you can stand on (1.25m)", absf(float(w0["top"]) - 1.25) < 0.01)
+	ok(
+		"item 67: a rock's top is at least 1.6x the old 1.25m, taller than a hunter's head, and you can stand on it",
+		float(w0["top"]) >= 1.25 * 1.6 and float(w0["top"]) == HeroZones.ROCK_TOP and float(K.rock_def()["top"]) == HeroZones.ROCK_TOP,
+		"top %.2f" % float(w0["top"])
+	)
+	var tallest := 0.0
+	for c in (w0["node"] as Node3D).get_children():
+		if c.name.begins_with("Col"):
+			tallest = maxf(tallest, (c as Node3D).get_child(0).position.y * 2.0)
+	ok("item 67: the look reaches the top (tallest column at least the rock's top)", tallest >= float(w0["top"]), "%.2f" % tallest)
+	ok("item 67: every rock has a ground shadow", (w0["node"] as Node3D).get_node_or_null("Shadow") != null)
 	P.teleport(Vector3(mid0.x, top + 0.02, mid0.z))
 	P.grounded = false
 	P.vel = Vector3.ZERO
@@ -311,40 +321,51 @@ func _breah() -> void:
 		"small: a second burst on the same foe inside 0.8s deals 30% less", k1 == 1.0 and absf(k2 - 0.7) < 0.01,
 		"%.2f %.2f" % [k1, k2]
 	)
-	# ---- RMB: the circle a hop ahead, everyone sees it, the sweet spot grows, the charge timing
+	# ---- RMB: the circle a hop ahead, everyone sees it, the sweet spot grows, the short hold (owner item 61)
 	reset.call()
-	T.teleport(home + Vector3(2.4, 0, 0))
+	T.teleport(home + Vector3(2.5, 0, 0))
 	aim_at(P, T.pos)
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
-	step(m, 0.4, func(): P.inp["sec_hold"] = true)
+	step(m, 0.25, func(): P.inp["sec_hold"] = true)
 	var e1 := AimKit.entry(P, "rmb")
 	ok(
 		"rmb hold: the slam circle shows for everyone, a hop ahead",
 		AimKit.shown(P, "rmb") and bool(e1.get("all", false)) and absf(
-			(e1.get("at", Vector2.ZERO) as Vector2).x - (home.x + 2.0)
+			(e1.get("at", Vector2.ZERO) as Vector2).x - (home.x + 2.5)
 		) < 0.3,
 		str(e1.get("at"))
 	)
 	ok("rmb hold: she can walk slowly while charging", absf(K.move_k() - 0.55) < 0.01, "%.2f" % K.move_k())
 	ok("anim: the charge is a crouch (breah_crouch)", K.anim_id == "breah_crouch")
-	step(m, 1.0, func(): P.inp["sec_hold"] = true)
+	step(m, 0.17, func(): P.inp["sec_hold"] = true)
 	var e2 := AimKit.entry(P, "rmb")
 	ok(
-		"rmb hold: circle and sweet spot grow to full at 1.4s (0.2 + 1.2)",
-		absf(float(e2.get("r", 0.0)) - 4.5) < 0.01 and absf(
-			float(e2.get("core", 0.0)) - 1.8
-		) < 0.01 and float(e2.get("core", 9.0)) > float(e1.get("core", 0.0)) + 0.5,
+		"rmb hold: circle and sweet spot grow through the short hold",
+		float(e2.get("r", 0.0)) > float(e1.get("r", 9.0)) + 0.3 and float(e2.get("core", 0.0)) > float(e1.get("core", 9.0)) + 0.4,
 		"core %.2f -> %.2f r %.2f -> %.2f" % [
 			float(e1.get("core", 0)), float(e2.get("core", 0)), float(e1.get("r", 0)), float(e2.get("r", 0))
 		]
 	)
 	ok(
-		"rmb hold: the cursor shows the full flare",
-		float(AimKit.reticle(P)["flare"]) > 0.0 or float(AimKit.reticle(P)["charge"]) >= 0.99
+		"rmb hold: the cursor shows the charge filling",
+		float(AimKit.reticle(P)["flare"]) > 0.0 or float(AimKit.reticle(P)["charge"]) >= 0.85
 	)
 	var hx := P.pos.x
 	var walls0: int = m.verbs.walls.size()
+	# still held: the hold's cap fires it, nothing charges past it
+	var cap_t: float = K.rmb_charge_full()
+	var longest := [0.0]
+	step(m, 0.1, func():
+		P.inp["sec_hold"] = true
+		longest[0] = maxf(longest[0], K.rmb_t))
+	ok(
+		"item 61: the charge never passes the cap (0.4-0.5s); at the cap it goes by itself, still held",
+		cap_t >= 0.4 and cap_t <= 0.5 and longest[0] <= cap_t + DT * 1.5 and not K.rmb_down and K.slam.hops == 1,
+		"cap %.2f longest %.2f down %s hops %d" % [cap_t, longest[0], str(K.rmb_down), K.slam.hops]
+	)
+	ok("item 61: a slam at the cap is the full circle and centre", absf(K.slam.radius(K.dive_k) - 4.5) < 0.01 and absf(K.slam.core(K.dive_k) - 1.8) < 0.01,
+		"charge %.2f" % K.dive_k)
 	P.inp["sec_hold"] = false
 	var hop := _hop(m, P, K)
 	var looks := KitLooks.of(m)
@@ -353,10 +374,8 @@ func _breah() -> void:
 	)
 	step(m, 0.3)
 	ok(
-		"rmb (item 14): let go = a short hop, 1-1.5 body heights (1.8-2.7m) forward, off the ground, slam on landing",
-		hop["x"] - hx >= 1.8 and hop["x"] - hx <= 2.7 and hop["peak"] > 0.3 and hop["peak"] < 0.9 and K.slams == 1
-			and hop["t"] > 0.25 and hop["t"] < 0.45,
-		"hop %.2fm up %.2fm in %.2fs slams %d" % [hop["x"] - hx, hop["peak"], hop["t"], K.slams]
+		"rmb: the hop's slam lands once, at the foe it hopped to", K.slams == 1 and K.slam.hops == 1 and hop["x"] > hx,
+		"moved %.2fm slams %d" % [hop["x"] - hx, K.slams]
 	)
 	var hit_key := 0.0
 	var deepest := -9.0
@@ -366,7 +385,8 @@ func _breah() -> void:
 			hit_key = float(key[0])
 	ok(
 		"anim (item 14): breah_slam smashes down (its deepest squash) on the hop's landing frame",
-		absf(hit_key - float(hop["t"])) < 0.05, "key %.2f landing %.2f" % [hit_key, float(hop["t"])]
+		absf(hit_key - K.slam._flight(float(K.slam_def()["hop_up"]))) < 0.05,
+		"key %.2f landing %.2f" % [hit_key, K.slam._flight(float(K.slam_def()["hop_up"]))]
 	)
 	ok(
 		"rmb (item 14): no rock comes from Quakefall (rocks come from E, the dash and X)",
@@ -384,9 +404,20 @@ func _breah() -> void:
 	reset.call()
 	T.teleport(home + Vector3(2.4, 0, 0))
 	aim_at(P, T.pos)
+	K.slam.taps = 0
+	K.slam.hops = 0
+	var tap_peak := [0.0]
 	tap(m, P)
-	step(m, 0.5)
+	step(m, 0.3, func(): tap_peak[0] = maxf(tap_peak[0], P.pos.y - home.y))
 	var d_tap := dmg(T)
+	ok(
+		"item 61: the tap is a slam on the spot, no hop and nothing vertical, in about 0.85 of the hold's circle",
+		K.slam.taps == 1 and K.slam.hops == 0 and absf(P.pos.x - home.x) < 0.05 and tap_peak[0] < 0.01
+			and absf(K.slam.radius(0.0) / K.slam.radius(1.0) - 0.85) < 0.01,
+		"taps %d hops %d moved %.2f rose %.2f k %.3f" % [
+			K.slam.taps, K.slam.hops, P.pos.x - home.x, tap_peak[0], K.slam.radius(0.0) / K.slam.radius(1.0)
+		]
+	)
 	ok(
 		"rmb: tap slam hits the centre and stuns", d_tap >= 13.0 and T.stun_t > 0.0,
 		"took %.1f stun %.2f" % [d_tap, T.stun_t]
@@ -400,7 +431,7 @@ func _breah() -> void:
 	hold(m, P, 1.4)
 	step(m, 0.6)
 	ok(
-		"rmb (item 14): only the sweet spot stuns (a foe 3.2m from the centre takes the outer hit, no stun)",
+		"rmb (item 14): only the sweet spot stuns (a foe 2.7m from the centre takes the outer hit, no stun)",
 		dmg(T) >= 13.0 and T.stun_t <= 0.0,
 		"took %.1f stun %.2f" % [dmg(T), T.stun_t]
 	)
@@ -409,11 +440,11 @@ func _breah() -> void:
 	aim_at(P, home + Vector3(10, 0, 0))
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
-	step(m, 0.4, func(): P.inp["sec_hold"] = true)
+	step(m, 0.22, func(): P.inp["sec_hold"] = true)
 	var lx0 := P.pos.x
 	P.inp["jump"] = true
 	m.step(DT)
-	step(m, 0.35, func(): P.inp["sec_hold"] = true)
+	step(m, 0.18, func(): P.inp["sec_hold"] = true)
 	var e3 := AimKit.entry(P, "rmb")
 	var ly_mid := P.pos.y - home.y
 	ok("rmb: the circle comes with her", (e3.get("at", Vector2.ZERO) as Vector2).x - lx0 > 2.5, str(e3.get("at")))
@@ -431,16 +462,17 @@ func _breah() -> void:
 		"rmb: let go mid-leap = the leap's arc carries on (no plunge), slam where she lands",
 		K.slams == sl0 + 1 and P.grounded and leap_dive_vy > -12.0, "slams %d vy %.1f" % [K.slams - sl0, leap_dive_vy]
 	)
+	_hop_item61(m, P, K, home, reset)
 	# punch during the charge: a lunge
 	reset.call()
 	aim_at(P, home + Vector3(10, 0, 0))
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
-	step(m, 0.4, func(): P.inp["sec_hold"] = true)
+	step(m, 0.22, func(): P.inp["sec_hold"] = true)
 	var ux := P.pos.x
 	var pn0 := K.punches
 	P.inp["fire"] = true
-	step(m, 0.25, func():
+	step(m, 0.18, func():
 		P.inp["sec_hold"] = true
 		P.inp["fire"] = true
 	)
@@ -706,6 +738,53 @@ func _hop(m: Match, P: Hunter, K: DolmKit) -> Dictionary:
 	out["x"] = P.pos.x
 	return out
 
+## Owner item 61: the short hold's hop, standing, steered and off a run. Returns how far it went (x, z) and rose.
+func _hop_run(m: Match, P: Hunter, K: DolmKit, move: Vector2, steer: Vector2) -> Dictionary:
+	var at0 := P.pos
+	var out := {"up": 0.0, "t": 0.0}
+	var s0 := K.slams
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.25, func():
+		P.inp["sec_hold"] = true
+		P.inp["move"] = move)
+	P.inp["sec_hold"] = false
+	P.inp["move"] = steer
+	var from := P.pos
+	while K.slams == s0 and float(out["t"]) < 1.2:
+		m.step(DT)
+		out["t"] = float(out["t"]) + DT
+		out["up"] = maxf(float(out["up"]), P.pos.y - at0.y)
+	out["x"] = P.pos.x - from.x
+	out["z"] = P.pos.z - from.z
+	P.inp["move"] = Vector2.ZERO
+	return out
+
+func _hop_item61(m: Match, P: Hunter, K: DolmKit, home: Vector3, reset: Callable) -> void:
+	reset.call()
+	aim_at(P, home + Vector3(10, 0, 0))
+	var plain := _hop_run(m, P, K, Vector2.ZERO, Vector2.ZERO)
+	ok(
+		"item 61: the hold carries him at least 2m forward with a rise, then slams on landing",
+		float(plain["x"]) >= 2.0 and float(plain["up"]) >= 0.4 and float(plain["up"]) <= 1.0
+			and absf(float(plain["t"]) - K.slam._flight(float(K.slam_def()["hop_up"]))) < 0.07,
+		"forward %.2f up %.2f in %.2fs" % [float(plain["x"]), float(plain["up"]), float(plain["t"])]
+	)
+	reset.call()
+	aim_at(P, home + Vector3(10, 0, 0))
+	var steered := _hop_run(m, P, K, Vector2.ZERO, Vector2(0, 1))
+	ok(
+		"item 61: the move keys nudge the landing, by under a metre",
+		absf(float(steered["z"])) >= 0.4 and absf(float(steered["z"])) <= 1.0, "aside %.2f" % float(steered["z"])
+	)
+	reset.call()
+	aim_at(P, home + Vector3(10, 0, 0))
+	var ran := _hop_run(m, P, K, Vector2(1, 0), Vector2.ZERO)
+	ok(
+		"item 61: a hop off a run keeps some of its speed (goes further than one from standing)",
+		float(ran["x"]) > float(plain["x"]) + 0.3, "run %.2f standing %.2f" % [float(ran["x"]), float(plain["x"])]
+	)
+
 ## Item 26: Quakefall then the glider. Glide held from the hop, or pressed after a charge leap or an air
 ## press: the glider opens, she never drops below where she took off (for the first 0.3s), and it sinks
 ## like a normal glide.
@@ -715,7 +794,7 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 		aim_at(P, home + Vector3(8, 0, 0))
 		var z0 := P.pos.y
 		if mode == "hop":
-			tap(m, P)
+			hold(m, P, 0.25)
 		elif mode == "leap":
 			P.inp["sec_hold"] = true
 			P.ak.press_rmb()

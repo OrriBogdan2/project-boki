@@ -480,7 +480,7 @@ func sweep_rocks(dir: Vector2) -> Array:
 		if not w.get("rock", false) or int(w["team"]) != h.team:
 			continue
 		var mid := rock_mid(w)
-		if absf(mid.y - h.pos.y) >= 2.0: continue
+		if not HeroZones.rock_in_reach(mid.y, h.pos.y): continue
 		var to := Vector2(mid.x - h.pos.x, mid.z - h.pos.z)
 		var along := to.dot(dir)
 		var perp := absf(to.dot(Vector2(-dir.y, dir.x)))
@@ -573,7 +573,7 @@ func _tick_leap(dt: float) -> void:
 	var to: Vector3 = leap["to"]
 	if float(leap["wait"]) > 0.0:
 		leap["wait"] = float(leap["wait"]) - dt
-		KitLooks.of(m).hold_on("br_carry", "dashrock", h, from + Vector3(0, 0.35, 0))
+		KitLooks.of(m).hold_on("br_carry", "dashrock", h, from + Vector3(0, 0.6, 0))
 		if float(leap["wait"]) <= 0.0:
 			_leap_off()
 		return
@@ -589,7 +589,7 @@ func _tick_leap(dt: float) -> void:
 	# the rock follows her arc a beat behind, tumbling
 	var lag := float(dd["rock_lag"])
 	var ur := clampf((flown - lag) / flight, 0.0, 1.0)
-	var rock_at := from.lerp(to, ur) + Vector3(0, 0.5 + sin(ur * PI) * LEAP_ROCK_UP, 0)
+	var rock_at := from.lerp(to, ur) + Vector3(0, 0.85 + sin(ur * PI) * LEAP_ROCK_UP, 0)
 	var land_at := float(leap["land_at"])
 	if land_at < 0.0 and not h.grounded and h.pad.is_empty():
 		h.vel.y -= _leap_pull() * dt
@@ -650,7 +650,7 @@ func _leap_land() -> void:
 func _landslide_launch(at: Vector3, dir: Vector2) -> void:
 	var dd := dash_def()
 	landslides += 1
-	var start := at + Vector3(dir.x * 0.9, 0.5, dir.y * 0.9)
+	var start := at + Vector3(dir.x * 0.9, 0.85, dir.y * 0.9)
 	m.fx.burst(start, Color("a8805a"), 14, 5.0, 0.4, 6.0, 1.2, Vector3(dir.x, 0.3, dir.y), 50.0)
 	m.fx.dust(start, 8)
 	_fire_rock(start, dir, float(dd["dmg"]) * power("dash"), "dash", "dashrock", float(dd["rock_range"]))
@@ -688,7 +688,7 @@ func rmb_charge_full() -> float:
 	return float(rmb_def()["hold"]) + float(slam_def()["time"])
 
 func rmb_auto_t() -> float:
-	return rmb_charge_full() + 0.5
+	return rmb_charge_full()      # (owner item 61) past the short hold's cap it goes by itself
 
 func rmb_hold_tick(t: float) -> void:
 	slam.hold_tick(t)
