@@ -1300,3 +1300,17 @@ The owner approved a dedicated merger session that pushes `main`, because main's
   - ext/friendly-bodies: the dolm leap row.
   - ext/boki-starter: wiring in reserved files.
   - boki-talk-105: the reserved-file wiring.
+
+## 2026-11-05 10:22 UTC S5 SHIPPED 354be5b4 (pushed 07:45 UTC; this log was delayed by a session restart): ext/perf-94c 3338363c, ext/s7-empty-77-81 a4808f68, ext/s7-boki-82-92 aeac83fe
+- main 25e8ea8d -> 354be5b4 (fast-forward of integ-s5g). Merge conflicts: only tools/check_registry.gd (kept both).
+- s7-empty carries a save-format change, with its migration (Unmasked.clean). No Net change.
+- Fixes needed for the combination (S1, S4, S7: FYI):
+  - **perf-94c x rank-ui-98:** HudPanels redraws the slots at 20 Hz, but RankMarks.spot dropped a "+" one frame after it was drawn, so the click target blinked out between redraws (--rank-ui-check: 2 rows; real in game). A spot now goes stale only once a panel redraw was due (frames > MIN_FRAMES+1 and > 75 ms). --rank-ui-check and --hudref-check (its "X tile shows its cooldown" row) now wait for HudPanels' draw signal before reading drawn state.
+  - **s7-boki-82-92:** scripts/ui/boki_moves.gd built a StyleBoxFlat (--uipolish-check). It now uses UI.frame (same fill, edge and padding). --boki-moves-check 0.
+- Checks: --import, health --strict OK, gen_wiki --check clean. Full suite: 131 flags + simtest.
+  - 0 failures / PASS everywhere apart from main's existing reds. That includes --match-audio-check, --perf-overlay-check, --perf-throttle-check, --unmasked-check, --hatch-check, --prologue-check, --boki-moves-check, --warden-glb-check, --warden-model-check, --rig-standard-check, --hero-combo-check and --gunslinger-combo-check.
+  - After the fixes: --rank-ui-check, --hudref-check, --uipolish-check, --tutorial-hud-check and --level-hud-check are all 0.
+  - --hitch-check improved: 2 compile frames vs 4 on main.
+  - --teammate-check: 2, the known rows (one rerun printed a third, "the tutorial still finishes", which did not repeat).
+- s7-boki-82-92's later tip c10dfaef only merges main in, so there's nothing more to take.
+- Next: batch 7 = ext/sfx-cleanup c35d44e2 (the whole sound pass) + ext/rename-lisette 1228b324. Batch 8 = ext/s7-dash-outpost-84-86 f1eac1a2 + ext/s7-build-90-91 f08e6c04 + ext/kit-hem-55b (perf-94c is in now).
