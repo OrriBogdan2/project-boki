@@ -23,8 +23,6 @@ const CLIP := Vector2(200, 112)      # px: each ability clip beside the Hunter
 static func maybe_show(home: Node) -> ClassReveal:
 	if home == null or not home.is_inside_tree():
 		return null
-	if MaskOffer.offer(home):
-		return null
 	var waiting := ClassUnlock.pending_reveal()
 	if waiting.is_empty():
 		announce_fresh(home)

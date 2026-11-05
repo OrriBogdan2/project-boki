@@ -107,9 +107,11 @@ func _time(scenario: String, act: Callable, max_views := -1, judged := true) -> 
 	var worst := float(plain[-1]) if not plain.is_empty() else 0.0
 	var build_max := float(builds.max()) if not builds.is_empty() else 0.0
 	print("MASKLAG %-13s frames=%3d  max=%7.1f ms  median=%6.1f ms  model builds=%d (max %.1f ms)  views=%d" % [
-			scenario, plain.size() + builds.size(), worst, float(plain[plain.size() / 2]), builds.size(), build_max, views])
+			scenario, plain.size() + builds.size(), worst, float(plain[plain.size() / 2]), builds.size(), build_max,
+			views])
 	if headless and judged:
-		ok(worst <= BUDGET_MS, "%s: no frame over %d ms outside a model build (%.1f)" % [scenario, int(BUDGET_MS), worst])
+		var what := "%s: no frame over %d ms outside a model build (%.1f)" % [scenario, int(BUDGET_MS), worst]
+		ok(worst <= BUDGET_MS, what)
 	if max_views >= 0:
 		ok(views <= max_views, "%s: at most %d 3D previews render a frame (%d)" % [scenario, max_views, views])
 

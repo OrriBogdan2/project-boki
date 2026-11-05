@@ -82,7 +82,7 @@ static func _first_ready() -> String:
 static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 	var st := ClassUnlock.status(id)
 	var col := Arch.color(id)
-	var card := UI.tile_card(on, func(): _show.call_deferred(home, id), 6, col)      # (after the click: it swaps this tile)
+	var card := UI.tile_card(on, func(): _show.call_deferred(home, id), 6, col)      # (deferred: it swaps this tile)
 	card.custom_minimum_size = Vector2(TILE_W, 0)
 	card.set_meta("arch", id)
 	card.set_meta("class_status", st)

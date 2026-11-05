@@ -245,7 +245,8 @@ func _flicker_ghost(k: float) -> void:
 		_ghost.material_override = Models.glow_mat(Color(0.97, 0.95, 0.9, 0.0))
 		_ghost.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		body.get_parent().add_child(_ghost)
-		_ghost.global_transform = Transform3D(Basis.looking_at(_front, Vector3.UP).scaled(Vector3.ONE * body.scale.y * 1.05),
+		var turn := Basis.looking_at(_front, Vector3.UP).scaled(Vector3.ONE * body.scale.y * 1.05)
+		_ghost.global_transform = Transform3D(turn,
 				_head + _front * 0.12 * body.scale.y)
 	var on := randf() < lerpf(0.3, 0.75, k)
 	var a := (0.18 + 0.35 * k) if on else 0.04

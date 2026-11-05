@@ -2,7 +2,8 @@ class_name FarmGuide
 extends RefCounted
 ## The farm's guidance on screen (home.gd owns one): the Goals tracker in the top-right slot
 ## (GoalTracker), and while the tutorial runs, one prompt in the world over what to do next and one
-## hint line at the bottom with a Skip button. The rules are FarmTutorial; none of it shows when
+## line reminding you of the current goal, with a Skip button (Hob explains each step face to face:
+## HobTalk). The rules are FarmTutorial; none of it shows when
 ## visiting. Skipping puts the house down as a site if it isn't, so a skipper isn't stuck.
 
 var h
@@ -101,14 +102,13 @@ func _refresh_hint() -> void:
 	var s := FarmTutorial.hint_text(id)
 	if id == "house" and FarmTutorial.stage(id) == "wait":
 		s = "%s (%s)" % [s, _site_progress()]
-	var voice := String(FarmTutorial.rules()["voice"])
 	var grow := FarmCropGuide.growing()
 	if not grow.is_empty() and id != "crop":
 		s += "  (Your seed is ripe in %ds)" % int(ceil(float(grow["left"])))
 	elif id == "crop" and not grow.is_empty():
 		s = s.replace("{secs}", str(int(ceil(float(grow["left"])))))
 	s = s.replace("{secs}", "a few")
-	hint_lbl.text = "%d/%d  %s: %s" % [FarmTutorial.done_count() + 1, FarmTutorial.steps().size(), voice, s]
+	hint_lbl.text = "%d/%d  %s" % [FarmTutorial.done_count() + 1, FarmTutorial.steps().size(), s]
 	# a long hint wraps at about 600 px (under the chips, clear of the Goals card) instead of running wide
 	var fw := hint_lbl.get_theme_font("font").get_string_size(hint_lbl.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 6.0
 	hint_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -208,7 +208,8 @@ func place_house() -> bool:
 	return found
 
 # ------------------------------------------------------------------ the world prompt
-func _target(id: String) -> Vector3:
+## Where a step's work is (its marker; Hob points there when he explains it).
+func target(id: String) -> Vector3:
 	match id:
 		"chop":
 			return _nearest_wild("tree")
@@ -287,7 +288,7 @@ func _update_marker(dt: float) -> void:
 	_update_crop_label()
 	var id := FarmTutorial.current()
 	var txt := FarmTutorial.world_text(id)
-	var at := _target(id) if id != "" and txt != "" else Vector3.INF
+	var at := target(id) if id != "" and txt != "" else Vector3.INF
 	if at.x == INF or at.x < -100.0:
 		if is_instance_valid(marker):
 			marker.visible = false

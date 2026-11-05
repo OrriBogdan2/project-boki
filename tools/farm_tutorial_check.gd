@@ -132,7 +132,9 @@ func _tutorial_rules() -> void:
 	Save.d = _new_save()
 	var L := HomeLayout.ensure(Save.d)
 	_stats()
-	ok(FarmTutorial.active() and FarmTutorial.current() == "axe", "a new farm starts the tutorial on the axe")
+	ok(FarmTutorial.active() and FarmTutorial.current() == "hob", "a new farm starts with Hob calling you over")
+	FarmTutorial.event("hob")
+	ok(FarmTutorial.did("hob") and FarmTutorial.current() == "axe", "talking to him moves it on to the axe")
 	ok(not FarmTutorial.available("house") and not FarmTutorial.available("expedition"),
 			"the house waits for the wood, the last step for all")
 	ok(FarmTutorial.give_step_tool("axe") == "axe" and HomeGather.has_tool("axe") and FarmTutorial.give_step_tool("axe") == "",
@@ -142,8 +144,8 @@ func _tutorial_rules() -> void:
 	Work.add_mat("wood", int(FarmSites.build_cost("house")["wood"]))
 	FarmTutorial.detect()
 	ok(FarmTutorial.did("chop") and FarmTutorial.current() == "house", "enough wood for the house finishes chopping")
-	FarmTutorial.event("hob")
-	ok(not FarmTutorial.did("hob"), "doing a later step early does not count")
+	FarmTutorial.event("swing")
+	ok(not FarmTutorial.did("hammer"), "doing a later step early does not count")
 	var site := _add_house(L, true)
 	FarmTutorial.detect()
 	ok(FarmTutorial.did("house") and FarmTutorial.current() == "hammer",
@@ -156,9 +158,8 @@ func _tutorial_rules() -> void:
 	var feed_hint := FarmTutorial.hint_text("feed")
 	var has_key := feed_hint.contains(Settings.key_cap("build")) and not feed_hint.contains("{")
 	ok(FarmTutorial.stage("feed") == "place" and has_key, "the hint names the real key, no leftovers")
-	FarmTutorial.event("hob")
 	ok(FarmTutorial.did("hob") and FarmTutorial.current() == "stone",
-			"free order: meeting Hob first is fine, the prompt stays on the first step left")
+			"free order: the prompt stays on the first step left")
 	site.erase("site")
 	ok(FarmTutorial.available("task") and FarmTutorial.current() == "task",
 			"once the house stands the job step is next")
@@ -336,19 +337,24 @@ func _home(kin_count: int):
 
 func _world() -> void:
 	var home = await _home(1)
-	ok(home.guide != null and home.hob != null and home.hob.node == null, "no Hob before there is a house")
-	ok(is_instance_valid(home.guide.hint_box) and home.guide.hint_lbl.text.contains("axe"),
+	var stall := HomeLayout.deco_center(HomeLayout.fixtures(Save.d, "stall")[0])
+	ok(home.guide != null and home.hob != null and is_instance_valid(home.hob.node)
+			and Vector2(home.hob.pos.x - stall.x, home.hob.pos.z - stall.z).length() < 4.0,
+			"Hob waits by the market stall from the start")
+	ok(is_instance_valid(home.guide.hint_box) and home.guide.hint_lbl.text.contains("Hob"),
 			"the first prompt is on screen: %s" % home.guide.hint_lbl.text)
+	FarmTutorial.event("hob")
 	ok(home.get("day1_box") == null, "the old first-day card is gone")
 	var g0 := int(Save.d["gems"])
 	Work.add_mat("wood", 3)
 	ok(home.guide.place_house() and FarmSites.is_site(_entry("house")), "the house goes down as a site")
 	ok(int(Save.d["gems"]) == g0 and Work.mat("wood") == 0, "and costs a little wood (3) and no gems on a new save")
 	home._sync_fixtures()
-	ok(is_instance_valid(home.hob.node), "Hob turns up once the house is down")
 	var hc: Vector3 = HomeLayout.deco_center(_entry("house"))
 	var hd: float = Vector2(home.hob.pos.x - hc.x, home.hob.pos.z - hc.z).length()
-	ok(hd > 3.0 and hd < 8.0, "he stands near the house, not on it (%.1f m)" % hd)
+	ok(is_instance_valid(home.hob.node) and hd > 3.0 and hd < 8.0,
+			"while the house goes up he works beside it, not on it (%.1f m)" % hd)
+	home.hob.node.position = home.hob.pos      # (he walks over from the stall)
 	var w: World = home.world
 	ok(not w.is_void(home.hob.pos.x, home.hob.pos.z), "on solid ground")
 	# talking
@@ -373,8 +379,8 @@ func _world() -> void:
 	ok(is_instance_valid(home.guide.tracker) and home.guide.tracker.get_parent() == home.root_ui,
 			"the Goals card is on screen")
 	home.hob.talk()
-	ok(home.panel_open == "Hob Brackenridge" and FarmTutorial.did("hob"),
-			"talking opens his panel and ticks the meet-Hob step")
+	ok(home.panel_open == HobTalk.TALK and home.hob.chat.talking() and FarmTutorial.did("hob"),
+			"talking opens the talk box face to face")
 	home._close_panel()
 	# the build menu
 	home.hb.toggle()
