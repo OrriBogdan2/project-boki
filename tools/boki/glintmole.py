@@ -126,10 +126,10 @@ def quartz_prims():
 
 def parts():
     return {
-        "body": (Shape(body_prims()), 0.0035, 5200),
-        "claws": (Shape(claw_prims()), 0.0025, 360),
-        "star": (Shape(star_prims()), 0.0025, 700),
-        "quartz": (Shape(quartz_prims()), 0.0035, 900),
+        "body": (Shape(body_prims()), 0.0035, 2300),
+        "claws": (Shape(claw_prims()), 0.0025, 130),
+        "star": (Shape(star_prims()), 0.0025, 260),
+        "quartz": (Shape(quartz_prims()), 0.0035, 420),
     }
 
 
@@ -139,7 +139,7 @@ GRIP = v3(0, 0.19, -0.40)
 
 def prop_parts():
     out = boki_tools.tools(GRIP, AXIS)
-    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 90)
+    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 24)
     return out
 
 

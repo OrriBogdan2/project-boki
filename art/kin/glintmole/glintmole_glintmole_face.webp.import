@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://by0xvsylc8g6y"
-path="res://.godot/imported/glintmole_glintmole_face.webp-c6a4d450a2ff229f0c98135b7cffc925.ctex"
+path.bptc="res://.godot/imported/glintmole_glintmole_face.webp-c6a4d450a2ff229f0c98135b7cffc925.bptc.ctex"
+path.astc="res://.godot/imported/glintmole_glintmole_face.webp-c6a4d450a2ff229f0c98135b7cffc925.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "014e3db035fb5ffb25540c4f233e1ded"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/glintmole/glintmole_glintmole_face.webp"
-dest_files=["res://.godot/imported/glintmole_glintmole_face.webp-c6a4d450a2ff229f0c98135b7cffc925.ctex"]
+dest_files=["res://.godot/imported/glintmole_glintmole_face.webp-c6a4d450a2ff229f0c98135b7cffc925.bptc.ctex", "res://.godot/imported/glintmole_glintmole_face.webp-c6a4d450a2ff229f0c98135b7cffc925.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

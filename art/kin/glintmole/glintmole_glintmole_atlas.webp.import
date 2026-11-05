@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d2bqe35npmxge"
-path="res://.godot/imported/glintmole_glintmole_atlas.webp-912cbf3b8c266800fe053d1caa3364b9.ctex"
+path.bptc="res://.godot/imported/glintmole_glintmole_atlas.webp-912cbf3b8c266800fe053d1caa3364b9.bptc.ctex"
+path.astc="res://.godot/imported/glintmole_glintmole_atlas.webp-912cbf3b8c266800fe053d1caa3364b9.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "ef55484089e07e81a0de0498742bac4b"
+"md5": "300645756805b1261677156d6ea8d223"
 }
 
 [deps]
 
 source_file="res://art/kin/glintmole/glintmole_glintmole_atlas.webp"
-dest_files=["res://.godot/imported/glintmole_glintmole_atlas.webp-912cbf3b8c266800fe053d1caa3364b9.ctex"]
+dest_files=["res://.godot/imported/glintmole_glintmole_atlas.webp-912cbf3b8c266800fe053d1caa3364b9.bptc.ctex", "res://.godot/imported/glintmole_glintmole_atlas.webp-912cbf3b8c266800fe053d1caa3364b9.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
