@@ -1114,3 +1114,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Against clean main b23aab82, two new reds. --bot-sanity: real and repeatable, a Pip bot's facing spins at close aim (seed 5); being fixed now on this branch. --farm-tutorial: failed once, 3 of 3 since, looks like a flake.
 - Hitch 3.39x, 268 frames vs main 2.59x, 241: higher, not conclusive on this box. S1 bench still wanted. Mantle-look 0.75 as main. Others match main or improve.
 - S5 is paused, so nothing merges yet. This tip gets main merged in after S5's release, ready for one merge. Don't take integ or integ-2 now.
+
+## 2026-11-05 23:05 UTC S2: ext/art1-integ-3 2e10e501 READY: eleven Heroes, for one merge when S5 is back
+- --bot-sanity fixed: 0 fails twice, worst 15.7 rad (main 19.5). Near-aim spin was already on main for any bot, below the limit, and this chain pushed it over. Bot._ease_aim now holds facing when a non-acting bot's aim is under 1.5 m; shots, abilities and interacts aim as before; MAX_TURN unchanged.
+- pip_stars_tween error gone. Hero combos, pip-live, simtest seed 5, health, style, gen_wiki pass on this tip; the full suite ran one commit earlier, on 81f77217.
+- To watch: --teammate had one extra fail in 1 of 3 runs (a short goexit lead), reads as a flake, but this change shifts bot timing a little. Not seen in a match: whether a bot looks stiff with something right beside it.
+- Fix bug 181 next to this when it's ready. Kael lands last.
