@@ -21,6 +21,10 @@ const FRAME := {
 		"ear_tip": Vector3(0.16, 0.43, -0.14), "tail_tip": Vector3(0, 0.34, 0.55), "tip_bone": "tail2", "hip": 0.11,
 		"marks": {"left flank": Vector3(-0.225, 0.2, 0.1), "right flank": Vector3(0.225, 0.2, 0.1),
 			"back": Vector3(0, 0.5, 0.1), "chest": Vector3(0, 0.16, -0.2)}},
+	"zapple": {"head": Vector3(0, 0.43, -0.32), "top": 0.6, "carry": Vector3(0, 0.42, 0.06),
+		"ear_tip": Vector3(0.135, 0.86, -0.087), "tail_tip": Vector3(0, 0.285, 0.295), "tip_bone": "tail2", "hip": 0.2,
+		"marks": {"left flank": Vector3(-0.165, 0.19, 0.07), "right flank": Vector3(0.165, 0.19, 0.07),
+			"back": Vector3(0, 0.32, 0.06), "chest": Vector3(0, 0.2, -0.16)}},
 }
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
