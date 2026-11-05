@@ -22,7 +22,7 @@ HAIR_R = (UNIQ_W + 0.005, 0.40, 1.0, 1.0)
 BELT_R = (UNIQ_W + 0.005, 0.30, 1.0, 0.395)
 EYE_R = (UNIQ_W + 0.005, 0.20, 0.875, 0.295)
 MATS = ["skin-vex", "cloth-vex", "leather-vex-hot", "metal-vex", "brass-vex", "hair-mane", "eyes-vex", "glow-vex"]
-SCALE = {"face": 2.1, "lidU": 2.2, "lidD": 2.2, "sleeve": 2.2, "tube": 1.5, "plate": 1.4, "bell": 1.2, "Low": 1.15, "eyerim": 1.5, "ear": 1.2}
+SCALE = {"face": 4.2, "lidU": 2.2, "lidD": 2.2, "sleeve": 2.2, "tube": 1.5, "plate": 1.4, "bell": 1.2, "Low": 1.15, "eyerim": 1.5, "ear": 1.2}
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
@@ -321,7 +321,13 @@ def sample_scan(points):
     vv = bu * luv[:, 0, 1] + bv * luv[:, 1, 1] + bw * luv[:, 2, 1]
     sx = np.clip((uu % 1) * sw, 0, sw - 1).astype(int)
     sy = np.clip((vv % 1) * sh, 0, sh - 1).astype(int)
+    LAST[:] = [sx, sy]
     return SP[sy, sx]
+
+
+LAST = [None, None]
+NRM = P.imgio.load(os.path.expanduser("~/meshy/vex_f/runA/tex0_normal.png"))[::-1]
+print("normal map", NRM.shape)
 
 
 Z_BELT = VC.J("hips")[2] + 0.02
@@ -357,7 +363,11 @@ for k_, i in enumerate(low_faces):
 mask = PID == 0
 ys, xs = np.nonzero(mask)
 col = sample_scan(POS[ys, xs])
-col = np.power(np.clip(col, 0, 1), 0.88) * 1.1
+# the scan's high detail (seams, stitching, panel lines) painted in as cavity: hero_toon has no normal-map path
+sx_, sy_ = LAST
+nz_ = NRM[(sy_ * NRM.shape[0] // sh), (sx_ * NRM.shape[1] // sw), 2]
+cav = np.clip(1.0 - 2.4 * np.clip(0.93 - nz_, 0, 0.45), 0.45, 1.0)[:, None]
+col = np.power(np.clip(col, 0, 1), 0.88) * 1.1 * cav
 dk = (col.max(1) < 0.2)[:, None]
 col = col * (1 - dk) + (col * 1.3 + np.array([0.08, 0.08, 0.09])) * dk
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
@@ -405,6 +415,7 @@ skin_m = (m & (OUTC.mean(2) > 0.3) & (OUTC[..., 1] < OUTC[..., 0] * 1.03) & ~lip
 OUTC = P.clean_skin(OUTC, skin_m, blur)
 OUTC[lips] = OUTC[lips] * np.array([1.0, 0.72, 0.78], np.float32)
 hc = OUTC[ys_, xs_]
+hc = P.project_portrait(POS[ys_, xs_].astype(np.float64), hc.astype(np.float64), VH)
 OUTC[ys_, xs_] = P.apply_face(POS[ys_, xs_].astype(np.float64), hc.astype(np.float64), VH)
 # the jacket: her lime green, the scan's paint lost it; the scan's dark scribbles on the slipped sleeve go
 sl_ = mask & (POS[..., 0] < -0.17) & (POS[..., 2] > VC.J("forearm.L")[2] - 0.12) & (POS[..., 2] < VC.J("upper_arm.L")[2] - 0.1) & (OUTC.max(2) < 0.3)

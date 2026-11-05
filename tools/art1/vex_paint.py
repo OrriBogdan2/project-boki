@@ -147,7 +147,7 @@ def eye_tile(h, w):
     a, b = (u + .5) / w * 2 - 1, ((v + .5) / h - .5) * 1.5
     c = ramp(np.clip(0.8 - 0.3 * b, 0, 1), [hexc("#b9b4ae"), hexc("#e4dfd8"), hexc("#f6f2ec")])
     r = np.sqrt((a * 1.0) ** 2 + (b * 1.05) ** 2)
-    iris = ramp(np.clip(r / 0.46 + 0.1 * np.sin(np.arctan2(b, a) * 24), 0, 1), [hexc("#d6f06a"), hexc("#9fd24a"), hexc("#4f9a35"), hexc("#1f4f24")])
+    iris = ramp(np.clip(r / 0.46 + 0.1 * np.sin(np.arctan2(b, a) * 24), 0, 1), [hexc("#e6e8a0"), hexc("#c0cf78"), hexc("#7f9a48"), hexc("#34482a")])
     c = np.where((r < .48)[..., None], iris, c)
     c = np.where((r < .2)[..., None], hexc("#0c0f0c") + 0 * c, c)
     c = np.where((np.hypot(a + .1, b - .12) < .075)[..., None], np.ones(3) + 0 * c, c)
@@ -179,6 +179,7 @@ def apply_face(pos, col, H):
     # (a cheek seam, a circuit line)
     seam = (np.abs((z - (ez - 0.06)) + (x - ex) * 0.5) < 0.0016) & (x > ex - 0.03) & (x < ex + 0.05) & front
     col = np.where(seam[..., None], CIRCUIT + 0 * col, col)
+    return col
     # left eye: smoky shadow, the wing out past the corner
     lx = -ex
     dx, dz = (x - lx) * -1, z - ez                   # dx > 0 is outward
@@ -207,3 +208,21 @@ def clean_skin(col, m, blur):
     t = np.clip(0.52 + (l1 - l2) * 3.0, 0, 1)
     new = ramp(t, SKIN_R) + (l - l1)[..., None] * 0.5
     return np.where(m[..., None], new.astype(np.float32), col)
+
+
+def project_portrait(pos, col, H):
+    """The face pass: the portrait's painted face on the head by an affine through her eyes and mouth (front view), soft at its edge; its hair stays out, tone matched to the body."""
+    img = _decal("portrait")
+    ex, ez = H.EYE_X * H.SK * 0.95, H.EYE_Z
+    zm = ez - 0.062
+    A = np.array([[ex, ez, 1], [-ex, ez, 1], [0, zm, 1]])
+    B = np.array([[790, 641], [980, 583], [933, 800.0]])
+    M_ = np.linalg.solve(A, B)
+    x, y, z = pos[..., 0], pos[..., 1], pos[..., 2]
+    q = np.stack([x, z, np.ones_like(x)], -1) @ M_
+    px_ = img[np.clip(q[..., 1].astype(int), 0, 2047), np.clip(q[..., 0].astype(int), 0, 2047)]
+    r = np.sqrt((x / 0.098) ** 2 + ((z - (ez - 0.022)) / 0.092) ** 2)
+    w = (1 - smooth(0.74, 1.0, r)) * (y > H.HC[1] + 0.02)
+    green = (px_[..., 1] > px_[..., 0] * 1.02)
+    w = w * (1 - green)
+    return col * (1 - w[..., None]) + np.clip(px_ * np.array([1.1, 1.0, 0.94]) * 1.06, 0, 1) * w[..., None]
