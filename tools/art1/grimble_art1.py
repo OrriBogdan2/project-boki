@@ -397,6 +397,41 @@ def main():
     MJ = spline([MC, MC + (0.004, 0.0, -0.075), MC + (-0.002, -0.004, -0.14)], 4)
     part("monochain", None, 0, "gold", 0.5, None, "monochain", "brass", ob=chain_links("monochain", spline(MJ, 12), 0.016, 0.0072, 0.0024))
 
+    # the sewn left eye: the scan's paint blurs at 2k, so real stitches, set on the head's surface
+    hd_ob = parts[0]["ob"]
+    hv = verts(hd_ob)
+    hf = np.empty(len(hd_ob.data.polygons) * 3, np.int32)
+    hd_ob.data.polygons.foreach_get("vertices", hf)
+    hb = BVHTree.FromPolygons(hv.tolist(), hf.reshape(-1, 3).tolist(), all_triangles=True)
+    sc = (float(-G.EYE_C[0] - 0.006), float(G.EYE_C[2] - 0.002))
+
+    def on_face(x, z):
+        hit = hb.ray_cast((x, 0.7, z), (0, -1, 0))
+        return np.array(hit[0], F) + np.array(hit[1], F) * 0.0016
+
+    sv, sq = [], []
+
+    def bar(a, b, wd):
+        a, b = np.array(a, F), np.array(b, F)
+        u = (b - a) / np.linalg.norm(b - a)
+        n = np.array((0, 1, 0), F)
+        s_ = np.cross(u, n)
+        s_ /= np.linalg.norm(s_)
+        k = len(sv)
+        for p_ in (a, b):
+            for o in (s_ * wd + n * 0.0006, -s_ * wd + n * 0.0006, -s_ * wd - n * 0.0022, s_ * wd - n * 0.0022):
+                sv.append(p_ + o)
+        for j in range(4):
+            j2 = (j + 1) % 4
+            sq.append((k + j, k + j2, k + 4 + j2, k + 4 + j))
+
+    pts = [on_face(sc[0] + t, sc[1] + 0.05 * t * t * 40 * 0.2) for t in np.linspace(-0.027, 0.027, 7)]
+    for a_, b_ in zip(pts[:-1], pts[1:]):
+        bar(a_, b_, 0.0017)
+    for t in (-0.022, -0.011, 0.0, 0.011, 0.022):
+        bar(on_face(sc[0] + t - 0.0015, sc[1] + 0.012), on_face(sc[0] + t + 0.0015, sc[1] - 0.011), 0.0017)
+    part("sewn", None, 0, "stitch", 0.6, None, "head", "leather", ob=ob_from("sewn", np.array(sv, F), np.array(sq, np.int32)))
+
     # ----------------------------------------------------- UVs
     bpy.ops.object.select_all(action="DESELECT")
     for p in parts:
@@ -486,6 +521,8 @@ def main():
             rgb = P.skin(pts, nn, lab, f)
         elif nm == "tooth":
             rgb = P.tooth(pts, nn, lab, f)
+        elif nm == "stitch":
+            rgb = np.tile(P.C["stitch"], (len(pts), 1))
         elif nm == "eye":
             rgb = P.eye(pts, nn)
         elif nm == "hoard":
@@ -669,7 +706,7 @@ def main():
         me.normals_split_custom_set_from_vertices(n.tolist())
 
     ROOM = {"eye": 0.0, "lid": 0.0, "skin_head": 0.15, "monocle": 0.1, "monochain": 0.0, "hookchain": 0.0, "lampchainR": 0.0, "lampchainL": 0.0,
-            "ball": 0.5, "hoard": 0.35, "frames": 0.5, "body": 0.5, "hook": 0.9, "gauntlet": 0.5}
+            "ball": 0.0, "ballframe": 0.0, "ballchain0": 0.0, "ballchain1": 0.0, "sewn": 0.0, "hoard": 0.55, "body": 0.5, "hook": 0.9, "gauntlet": 0.5}
     for p in parts:
         me = p["ob"].data
         at = me.color_attributes.new("Col", "FLOAT_COLOR", "POINT")

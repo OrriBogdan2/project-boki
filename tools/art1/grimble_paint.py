@@ -274,7 +274,7 @@ def gear(p, n, lab, f):
         c[m] = ramp(n[m], C["wood_sh"], C["wood"], C["wood_hi"], cav[m], 0.4)
     m = lab == G.GLASS
     if m.any():
-        c[m] = mix(C["glass"], rgb("f2fff0"), smooth(0.6, 0.98, form(n[m])))
+        c[m] = mix(rgb("1fbf62"), rgb("c8ffd0"), smooth(0.62, 0.98, form(n[m])))
     m = lab == G.LAMP
     if m.any():
         q = p[m]

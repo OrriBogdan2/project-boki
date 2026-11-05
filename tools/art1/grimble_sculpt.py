@@ -281,7 +281,7 @@ def monocle(vox=0.0012):
     for off, r in LENS:
         c = MONO_C + np.array(off, F) * (1, 0, 1)
         m.add(_ring(c, MONO_AX, r, 0.0060, 1.3), 0.0, BRASS)
-        m.add(cyl(c, MONO_AX, r + 0.0005, 0.003), 0.0, GLASS)
+        m.add(cyl(c, MONO_AX, r + 0.0015, 0.0075), 0.0, GLASS)
         m.add(cap(MONO_C + (off[0] * 0.70, 0, off[2] * 0.70), c, 0.0060, 0.0052), 0.002, BRASS)
     # the chain's lug on the ring's far side
     m.add(sph(tuple(MONO_C + (MONO_R + 0.012, -0.004, -0.008)), 0.0085), 0.002, BRASS)
