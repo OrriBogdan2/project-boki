@@ -135,6 +135,8 @@ func add_spark(f: Ent, n := 1) -> void:
 		m.fx.word(f.pos + Vector3(0, _top(f) + MARK_LIFT, 0) + fx().screen_up() * 1.6, "LIVE", GOLD, false)
 		if anim_id == "" or m.time - anim_at > 0.3: play("mage_live")
 		net_bolt(top, f.position, TEAL)
+	elif int(s["n"]) > was:
+		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(s["n"]))     # the zap climbs with each stack
 
 func clear_sparks(f: Ent) -> void:
 	var key := f.get_instance_id()
@@ -430,6 +432,7 @@ func _arrive() -> void:
 	run_t = 0.0
 	if h.model: h.model.visible = true
 	m.fx.dust(h.pos, 5)           # a quiet arrival: no ring or burst on a dash, the hits are on the way
+	m.sfx("mage_bubble_pop", h.pos, -5.0)     # she snaps back into her body with a pop of her gum
 	if ult.phase() != MageUlt.CROUCH:
 		play("mage_dash_land")      # (a run out of Kitefall's crouch lands in the crouch: it plays that instead)
 
@@ -600,6 +603,7 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 		return
 	var cd_ := rmb_def()["coil"] as Dictionary
 	add_spark(f)
+	m.sfx("mage_rod_hit", f.pos, -2.0)
 	# the gold blast, a teal crackle and a shock ring round them
 	m.fx.flash(f.position + Vector3(0, 1.0, 0), GOLD, 1.6, 0.12)
 	m.fx.burst(f.position + Vector3(0, 1.0, 0), GOLD, 18, 4.5, 0.45, 1.0, 1.8)

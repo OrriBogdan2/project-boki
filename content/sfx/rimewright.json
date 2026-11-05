@@ -1,0 +1,40 @@
+{
+	"group": "rimewright",
+	"name": "Claire",
+	"script": "tools/gen_sfx_claire.py",
+	"sounds": {
+		"rime_shard": "fire",
+		"rime_beam": "fire",
+		"rimewright_dart_hit": "impact",
+		"rime_spear_aim": "cast",
+		"rime_lance": "cast",
+		"rime_zone": "impact",
+		"rime_burst": "impact",
+		"rime_splinter": "impact",
+		"rime_wall_tell": "cast",
+		"rime_wall": "impact",
+		"rime_freeze": "impact",
+		"rime_lock": "cast",
+		"rime_creak": "cast",
+		"rime_crash": "impact",
+		"rime_crack": "impact",
+		"rimewright_dash": "dash",
+		"rime_stop": "dash",
+		"rimewright_skate_scrape": "signature",
+		"rimewright_chime": "signature",
+		"rimewright_hurt": "grunt",
+		"rimewright_down": "grunt",
+		"rimewright_death": "grunt",
+		"rimewright_step_grass": "step",
+		"rimewright_step_stone": "step",
+		"rimewright_step_wood": "step",
+		"rimewright_step_snow": "step"
+	},
+	"signature": ["rimewright_skate_scrape", "rimewright_chime"],
+	"kit_files": [],
+	"replaces": [
+		"rime_shard", "rime_beam", "rime_spear_aim", "rime_lance", "rime_zone", "rime_burst", "rime_splinter",
+		"rime_wall_tell", "rime_wall", "rime_freeze", "rime_lock", "rime_creak", "rime_crash", "rime_crack",
+		"rime_stop"
+	]
+}
