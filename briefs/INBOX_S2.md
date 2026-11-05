@@ -1401,3 +1401,5 @@ Use them for shape and detail; **the master sheet wins on any difference.**
 - **Back:** the glowing cyber-spine fully visible on her bare back (the jacket is cropped short).
 - **Outfit:** the light green racing jacket, a low-cut crop top, a studded "VEX" belt, bike shorts with an orange stripe, glowing thigh-highs with chrome knees.
 - **Weapon:** gatling barrels below + a MAKESHIFT grenade launcher on top (welded scrap pipe, a flared brass muzzle, a spoon sight, duct tape, hazard tape, a green skull, a grenade drum); the wanted poster + kill tallies on the gun.
+
+## 2026-11-05 05:52 UTC (ext): VEX FINAL v2: `vex_FINAL_sheet.png` updated. The jacket slips off her left shoulder (baring the robotic arm) and the ammo belt crosses her chest from the cannon in both front views. Everything else is as in the 05:50 note.
