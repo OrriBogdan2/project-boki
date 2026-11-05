@@ -891,3 +891,5 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Meshy scan beat the scripted body: 12,967 tris, 41 clips, closed stone fists, 3 eye-stones. normal_tex added to hero_toon (another normal path alongside use_nrm: merge needs one).
 - **Fidelity:** blindfold yes; 3 stones yes; stones turn yes (check only); huge left arm yes; right gauntlet yes; dreads yes, copper beads partial; prayer beads yes; sash yes; **Rock Hop no**. Proofs: ext/hero-shots-s2 e4a798b6 art1/tarek/.
 - Full suite before the last skin-tone commit: baseline reds; clip, rig-standard, warden-glb, warden-model, portrait 0 FAIL on the tip. Clips keyed on the scripted body: arm clipping on the scan unchecked. Owner Qs: closed smile per the head sheet? Stone eye tilt for the match camera?
+
+## 2026-11-05 S2: READY ext/claire-62-65 c4cf394a (items 62, 64, 65); details in EXT_TO_MAIN. Owner Qs: Boki merge allowed out of Rimelock? 1.5 m/s sink after a skate jump, or normal fall?
