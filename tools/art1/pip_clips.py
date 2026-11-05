@@ -276,7 +276,7 @@ def clips():
     out.append(C("downed", 2.4, [(0.0, dn), (1.2, d2), (2.4, dn)]))
     out.append(C("revive", 1.6, [(0.0, dn), (0.5, dict(dn, hed=(-0.1, 0, 0), lid=0.05, brow=-0.5, ear=0.5)), (0.95, {"pel": (0.0, -0.01, -0.12), "prt": (0.26, 0, 0), "tor": (0.2, 0, 0), "hed": (-0.26, 0, 0), "G": (0.2, 0.26, 0.78), "LP": (-0.2, 0.2, 0.62), "FL": (-0.13, 0.08, A), "FR": (0.13, -0.08, A), "FLy": 0.16, "FRy": -0.22, "lid": 0.0, "ear": 0.3, "brow": 0.4}), (1.6, END)]))
     # death: the lantern arm drops last: she sinks, curls over it and goes still
-    dd = {"pel": (0.0, -0.04, -0.27), "prt": (0.72, 0.1, 0.2), "tor": (0.62, 0.1, 0.2), "hed": (0.3, 0.4, 0.2), "G": (0.16, 0.44, 0.12), "BE": be((0.3, 0.3, -0.9)), "LP": (-0.20, 0.50, 0.14), "Lh": (-1.4, 0, 0), "FL": (-0.16, -0.26, 0.11), "FR": (0.18, -0.30, 0.11), "FLp": 1.3, "FRp": 1.3, "FLy": 0.0, "FRy": 0.0, "lid": 1.0, "brow": -0.5, "ear": 1.0, "fing": 0.1, "jaw": 0.15, "skirt": 0.4, "wing": -0.4, "wb": 0.7}
+    dd = {"pel": (0.0, -0.04, -0.27), "prt": (0.72, 0.1, 0.2), "tor": (0.62, 0.1, 0.2), "hed": (0.3, 0.4, 0.2), "G": (0.16, 0.44, 0.12), "BE": be((0.3, 0.3, -0.9)), "LP": (-0.20, 0.50, 0.14), "Lh": (-1.4, 0, 0), "FL": (-0.16, -0.26, 0.11), "FR": (0.18, -0.30, 0.11), "FLp": 1.3, "FRp": 1.3, "FLy": 0.0, "FRy": 0.0, "lid": 1.0, "brow": -0.5, "ear": 1.0, "fing": 0.1, "jaw": 0.15, "skirt": 0.4, "wing": -0.4, "wb": 0.7, "tailw": 1.0}
     out.append(C("death", 1.5, [(0.0, END), (0.18, {"pel": (0, -0.07, -0.05), "prt": (-0.22, 0, 0), "tor": (-0.3, 0, 0), "hed": (-0.34, 0, 0), "lid": -0.1, "brow": -1, "jaw": 0.8, "ear": 0.8, "G": (SH + 0.2, 0.14, 0.86)}, "out"),
                                 (0.6, {"pel": (0, 0.0, -0.23), "prt": (0.5, 0, 0.1), "tor": (0.4, 0, 0.1), "hed": (0.3, 0.1, 0), "G": (0.2, 0.34, 0.42), "LP": (-0.2, 0.3, 0.44), "Lh": (-1.2, 0, 0), "FL": (-0.15, 0.05, A + 0.03), "FR": (0.15, -0.2, A + 0.05), "FLp": 0.8, "FRp": 1.0, "lid": 0.7}),
                                 (1.05, dd), (1.2, dict(dd, pel=(0, -0.04, -0.255))), (1.5, dd)]))
@@ -297,6 +297,7 @@ def clips():
 class PipSolver(Solver):
     def solve(self, P):
         Q, root_at = super().solve(P)
+        self.last = Q
         Lh = P.get("Lh")
         if Lh is not None:
             Q["hand.L"] = Q["hips"] @ eul(Lh)
@@ -306,9 +307,10 @@ class PipSolver(Solver):
 class Extras:
     """Face, ears, apron, wings. Wing flutter is on the clip's clock: a whole number of beats, so loops close."""
 
-    def __init__(self):
+    def __init__(self, sol):
         self.f = 0
         self.dur = 1.0
+        self.sol = sol
 
     def start(self, clip):
         self.f, self.dur = 0, clip.dur
@@ -332,6 +334,10 @@ class Extras:
             out["wing." + sd] = (Quaternion((1, 0, 0), P.get("wing", 0.0) + fl) @ Quaternion((0, 0, 1), s * P.get("wb", 0.0)), None)
         out["jaw"] = (Quaternion((1, 0, 0), -0.42 * P.get("jaw", 0.0)), None)
         out["apron"] = (Quaternion((1, 0, 0), 0.8 * P.get("skirt", 0.0)), None)
+        # the tail keeps level while the body pitches: it lies on the ground when she falls, never stands on end
+        qh, r0 = self.sol.last["hips"], self.sol.R0["tail"]
+        qw = qh.slerp(Quaternion(), P.get("tailw", 0.65))
+        out["tail"] = ((r0.inverted() @ qh.inverted() @ qw @ r0).normalized(), None)
         f = P.get("fing", 0.35)
         out["fingers.L"] = (Quaternion((0, 0, 1), -1.15 * f), None)
         out["thumb.L"] = (Quaternion((0, 0, 1), -0.6 * f), None)
@@ -349,7 +355,7 @@ if __name__ == "__main__":
     sol = PipSolver(arm, rig)
     bpy.context.view_layer.objects.active = arm
     wanted = a[2].split(",") if len(a) > 2 and a[2] else None
-    ex = Extras()
+    ex = Extras(sol)
     names = []
     for c in clips():
         if wanted and c.name not in wanted:
