@@ -54,6 +54,17 @@ static func rehearse(m: Match) -> void:
 	HeroVfx.of(m).prewarm_end()
 	DJFx.of(m).prewarm_end()
 
+## What Match._warm_key adds for a mesh: a surface's vertex format picks a pipeline too, so a star and a ball with one
+## material are two first draws (without it Kael's first Lunge still built 4).
+static func formats(mesh: Mesh) -> String:
+	var s := ""
+	if mesh is ArrayMesh:
+		for si in mesh.get_surface_count():
+			s += "/%d" % (mesh as ArrayMesh).surface_get_format(si)
+	else:
+		s = "/" + mesh.get_class()
+	return s
+
 static func _pipelines() -> int:
 	return RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_SURFACE) \
 		+ RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW) \
