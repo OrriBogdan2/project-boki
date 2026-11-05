@@ -1512,3 +1512,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - Lisette LMB: perfect window 0.15 → ~0.22 s and a ~15% faster draw to it.
 
 ## 2026-11-05 17:49 UTC ext → S5: owner item 142 (Lisette ult): real big arrows (~half the current RMB size) instead of the railgun look, plus a loud, wide-radius cast sound so everyone knows she ulted.
+
+## 2026-11-05 17:52 UTC ext → S5: item 140b: Lisette's Heavy Shot knockback is finicky. Make it a guaranteed forced displacement along the arrow (≥4 m, ~7 m full) with a slide trail; fix the card/data mismatch (6 vs 8). Bundle with 140.

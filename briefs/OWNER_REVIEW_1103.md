@@ -1588,3 +1588,16 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - First, a before/after contact strip of the crouch for 3 heroes (Sable, Kael, Pip) to the owner via ext for a style OK.
   - Then roll out to all 12 alongside the ART-1 merges.
   - Weave in the anim notes already queued (131 Kael pose, 136 Motley casts, 139 Ryzz alternating, 118b Pip stretch).
+
+## 140b. Lisette Heavy Shot knockback: reliable and obvious (owner, 17:29 UTC Nov 5)
+- The owner: "her rmb also isnt knocking people back like it should, its very finicky - it should clearly push back".
+- Data: pin.push [8, 12] (the card text says 6 → 12, so fix the mismatch). In play it's inconsistent.
+- **Investigate:** is the push applied along the arrow's direction or from the shooter position? Is it eaten by the target's movement input/friction, cancelled by the stop-on-hit, or applied on a frame where the knock is overridden? Is it smaller for an uncharged release?
+- **Fix:**
+  - A guaranteed knockback along the arrow's travel direction: a minimum ~4 m displacement at the minimum charge and ~7 m at full (tune).
+  - Applied as a short forced-movement (0.2-0.3 s, the target can't steer during it), not a velocity nudge.
+  - A visible slide/dust trail on the target + a hit-stop on the impact.
+  - The wall pin (within 3 m) still triggers off this travel.
+- **Assert:**
+  - On 20 test shots (varied charge, a moving target), the displacement is always ≥4 m in the arrow direction.
+  - The card text matches the data.
