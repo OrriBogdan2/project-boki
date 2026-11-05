@@ -11,8 +11,8 @@ from meshkit import smooth
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, RIG, OUT = a[0], a[1], a[2]
-LOW_TRIS = 8500
-FACE_TRIS = 1500
+LOW_TRIS = 8900
+FACE_TRIS = 2000
 SOLE = -0.946
 K_ = 0.90
 ANKLE = 0.135

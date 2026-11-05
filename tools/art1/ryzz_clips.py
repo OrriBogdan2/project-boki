@@ -26,7 +26,7 @@ READY = {
     "pel": (0.022, 0.0, -0.022), "prt": (0.03, -0.1, -0.05), "tor": (0.0, 0.14, 0.05), "hed": (0.02, -0.08, 0.09),
     "G": (0.215, 0.05, 1.0), "BE": ((0.1, 0.25, -1), (0.1, 1, 0.1)), "LP": (-0.235, 0.055, 0.985), "LBE": ((-0.1, 0.25, -1), (-0.1, 1, 0.1)),
     "FL": (-0.085, 0.09, A_Z), "FR": (0.115, -0.06, A_Z), "FLy": 0.14, "FRy": -0.34, "FLp": 0.0, "FRp": 0.0,
-    "brow": 0.15, "lidR": 0.92, "lidL": 0.12, "smile": 0.7, "gunR": 0.0, "gunL": 0.0, "skirt": 0.0, "gum": 0.6, "fan": 0.0, "lit": 0.0,
+    "brow": 0.15, "lidR": 0.12, "lidL": 0.12, "smile": 0.7, "gunR": 0.0, "gunL": 0.0, "skirt": 0.0, "gum": 0.55, "fan": 0.0, "lit": 0.0,
 }
 GUN = {"gunR": 1.0, "gunL": 1.0}
 BOTH_UP = {"G": (0.27, 0.2, 1.3), "BE": aim(-14, 26), "LP": (-0.27, 0.2, 1.3), "LBE": aim(14, 26), "gunR": 1.0, "gunL": 1.0}
@@ -55,9 +55,7 @@ def idle(u):
     p["hed"] = (0.02 - 0.012 * a, -0.08 + 0.04 * math.sin(u * 4 * math.pi), 0.09)
     p["G"] = (0.215, 0.05, 1.0 - 0.006 * a)
     p["LP"] = (-0.235, 0.055, 0.985 - 0.006 * a)
-    p["lidL"] = 1.0 if 0.60 < u < 0.63 else 0.12
-    # the gum grows and shrinks once a loop
-    p["gum"] = 0.5 + 0.3 * max(0.0, math.sin(u * 2 * math.pi))
+    p["lidL"] = p["lidR"] = 1.0 if 0.60 < u < 0.63 else 0.12
     return p
 
 
@@ -68,7 +66,7 @@ def stance(u):
     p.update({"pel": (0.05, 0.0, -0.03), "prt": (0.02, -0.16, -0.12), "tor": (0.0, 0.2, 0.13), "hed": (0.06, -0.12, 0.12),
               "G": (0.25, 0.14, 1.31 - 0.006 * a), "BE": aim(-24, 22), "LP": (-0.25, 0.15, 1.29 - 0.006 * a), "LBE": aim(24, 22), "gunR": 1.0, "gunL": 1.0,
               "FL": (-0.05, 0.11, A_Z), "FR": (0.13, -0.08, A_Z), "FLy": 0.0, "FRy": -0.45, "smile": 1.0, "brow": 0.3})
-    p["gum"] = 0.7 + 0.75 * u if u < 0.92 else 0.1
+    p["gum"] = 0.55 + 0.75 * u if u < 0.92 else 0.1
     return p
 
 
@@ -110,14 +108,14 @@ def gait(k, heading):
         p["BE"] = ((0.15, 0.3 - 0.8 * c1 * k, -1), (0, 1, 0.3))
         p["LBE"] = ((-0.15, 0.3 + 0.8 * c1 * k, -1), (0, 1, 0.3))
         p["skirt"] = 0.3 * c1 * k
-        p["lidR"], p["lidL"] = 0.32 if k > 0.7 else 0.92, 0.12
+        p["lidR"], p["lidL"] = 0.12, 0.12
         p["smile"] = 0.55
         return p
     return fn
 
 
 END = {k: READY[k] for k in ("pel", "prt", "tor", "hed", "G", "BE", "LP", "LBE", "FL", "FR", "FLy", "FRy", "FLp", "FRp", "brow", "lidR", "lidL", "smile", "gunR", "gunL", "skirt", "gum", "fan", "lit")}
-OPEN = {"lidR": 0.25, "lidL": 0.12}                # the wink opens to aim
+OPEN = {"lidR": 0.12, "lidL": 0.12}                # the wink opens to aim
 
 
 def shot(name, right):
@@ -175,6 +173,9 @@ def clips():
     out.append(C("ult_dive", 0.1, [(0.0, XA), (0.1, XD, "out")]))
     XL = {"pel": (0, 0.0, -0.46), "prt": (0.5, 0.1, 0), "tor": (0.45, 0, 0), "hed": (-0.75, 0, 0), "G": (0.32, 0.26, 0.58), "BE": ((0.1, 0.5, -0.85), (0, 1, 0.3)), "LP": (-0.3, 0.42, 0.14), "LBE": ((0, 0.3, -1), (0, 1, 0)), "FL": (-0.15, 0.2, A_Z), "FR": (0.15, -0.36, 0.12), "FRp": 1.2, "skirt": 0.9, "lit": 1.0, "fan": 0.6, "smile": 1.0}
     out.append(C("ult_land", 0.5, [(0.0, XL), (0.1, dict(XL, pel=(0, 0, -0.42), lit=0.8)), (0.3, {"pel": (0.02, 0, 0.0), "prt": (0.0, 0, 0), "tor": (-0.08, 0, 0), "hed": (0.1, 0, 0.05), "G": (0.42, 0.1, 1.25), "BE": aim(-50, 15), "LP": (-0.42, 0.1, 1.25), "LBE": aim(50, 15), "gunR": 1.0, "gunL": 1.0, "FL": READY["FL"], "FR": READY["FR"], "FRp": 0.0, "lit": 0.3, "fan": 0.2}, "out"), (0.5, END)]))
+    # the gum: she blows it up, it pops (0.9 s, the kit's mage_bubble_pop), she sucks it back. Idle fidget, kills, after the ult. Head and gum only do anything.
+    BLOW = {"hed": (0.04, 0.1, 0.06), "smile": 0.2, "lidL": 0.3, "lidR": 0.3, "brow": 0.3}
+    out.append(C("gum", 1.2, [(0.0, {}), (0.2, dict(BLOW, gum=0.65)), (0.86, dict(BLOW, gum=1.25)), (0.9, {"gum": 0.03, "smile": 1.0, "lidL": 0.7, "lidR": 0.7, "hed": (-0.03, -0.05, 0.0)}, "out"), (0.98, {"gum": 0.05, "lidL": 0.12, "lidR": 0.12}), (1.2, END)]))
     # air, landing
     out.append(C("jump", 0.4, [(0.0, {"pel": (0, 0, -0.1), "tor": (0.15, 0, 0), "G": (0.28, -0.05, 0.95), "LP": (-0.28, -0.05, 0.95)}), (0.15, {"pel": (0, 0, 0.0), "tor": (-0.08, 0, 0), "G": (0.3, 0.1, 1.28), "LP": (-0.3, 0.05, 1.2), "FL": (-0.09, 0.14, 0.32), "FLp": 0.6, "FR": (0.09, -0.05, 0.16), "skirt": 0.5}, "out"), (0.4, {"FR": (0.09, -0.08, 0.24)})]))
     out.append(C("fall", 0.8, [(0.0, {"tor": (-0.05, 0, 0), "G": (0.36, 0.03, 1.32), "BE": ((1, 0, -0.5), (0, 1, 0)), "LP": (-0.36, 0.03, 1.32), "LBE": ((-1, 0, -0.5), (0, 1, 0)), "FL": (-0.1, 0.1, 0.3), "FR": (0.1, -0.1, 0.22), "FLp": 0.4, "FRp": 0.5, "skirt": 0.8, "smile": 0.3, "lidR": 0.12}), (0.4, {"G": (0.37, 0.03, 1.35), "LP": (-0.37, 0.03, 1.35)}), (0.8, {"G": (0.36, 0.03, 1.32), "LP": (-0.36, 0.03, 1.32)})]))
@@ -194,7 +195,7 @@ def clips():
     # the emote: a cocky pair of finger guns, the wink, she blows the smoke off the right finger and holsters it
     G0 = {**BOTH_UP, "G": (0.3, 0.42, 1.3), "LP": (-0.3, 0.42, 1.3), "BE": aim(-8, 8), "LBE": aim(8, 8), "tor": (-0.05, 0.1, 0), "hed": (-0.05, -0.05, 0.12), "prt": (0.02, -0.14, -0.1), "pel": (0.05, 0, -0.03), "smile": 1.0, "lidR": 1.0, "lidL": 0.1, "brow": 0.4}
     BL = {"G": (0.09, 0.26, 1.52), "BE": ((-0.35, 0.3, 0.9), (0, 1, 0)), "LP": (-0.22, 0.08, 1.05), "LBE": READY["LBE"], "gunL": 0.1, "hed": (0.1, 0.18, 0.05), "lidR": 0.7, "lidL": 0.7, "smile": 0.2, "gum": 0.2}
-    out.append(C("emote", 3.0, [(0.0, END), (0.25, G0, "out"), (0.32, dict(G0, BE=aim(-8, 26), LBE=aim(8, 26)), "out"), (0.42, G0), (1.0, dict(G0, pel=(0.06, 0, -0.04))), (1.4, BL), (2.0, dict(BL, gum=0.2)), (2.3, {"G": READY["G"], "BE": READY["BE"], "gunR": 0.0, "gunL": 0.0, "hed": READY["hed"], "smile": 1.0, "lidR": 0.92, "lidL": 0.12, "gum": 1.0}), (3.0, END)]))
+    out.append(C("emote", 3.0, [(0.0, END), (0.25, G0, "out"), (0.32, dict(G0, BE=aim(-8, 26), LBE=aim(8, 26)), "out"), (0.42, G0), (1.0, dict(G0, pel=(0.06, 0, -0.04))), (1.4, BL), (1.95, dict(BL, gum=1.1)), (2.0, dict(BL, gum=0.03), "out"), (2.3, {"G": READY["G"], "BE": READY["BE"], "gunR": 0.0, "gunL": 0.0, "hed": READY["hed"], "smile": 1.0, "lidR": 0.12, "lidL": 0.12, "gum": 0.55}), (3.0, END)]))
     return out
 
 

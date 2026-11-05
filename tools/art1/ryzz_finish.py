@@ -126,8 +126,9 @@ def lid_piece(s):
     return p
 
 
-gum_c = MOUTH_C + np.array([-0.016, 0.052, -0.014])
-pieces = [K.hair_cap(), K.gum(gum_c), K.nose_ring((0.0, front_y(0.0, NZ + 0.09) + 0.002, NZ + 0.09))]
+GUM_R = 0.042
+gum_c = MOUTH_C + np.array([0.0, GUM_R * 0.92, -0.003])          # centred on the lips, one radius out: it reads in profile (ryzz_bubblegum_ref)
+pieces = [K.hair_cap(), K.gum(gum_c, GUM_R), K.nose_ring((0.0, front_y(0.0, NZ + 0.09) + 0.002, NZ + 0.09))]
 for s in (1.0, -1.0):
     pieces.append(lid_piece(s))
     pieces += K.tie_band(s)
@@ -372,8 +373,8 @@ for i in range(nf):
             tally[p_] = tally.get(p_, 0) + w_
     part = max(tally, key=tally.get) if tally else "torso"
     c = np.mean([verts[v] for v in faces_v[i]], axis=0)
-    # (a seam at the waist too: one island from the chest to the hem unwraps the chest down to nothing)
-    region[i] = (part, c[1] > 0.0, part == "torso" and c[2] > 1.04)
+    # (seams at the waist and down the skirt's centre: one big island round its holes folds over itself, and paint lands on the wrong place)
+    region[i] = (part, c[1] > 0.0, part == "torso" and c[2] > 1.04, part == "torso" and c[2] <= 1.04 and c[0] > 0.0)
 for e in bm.edges:
     lf = [f.index for f in e.link_faces]
     if len(lf) == 2 and lf[0] in region and lf[1] in region:
@@ -381,12 +382,36 @@ for e in bm.edges:
 for f in bm.faces:
     f.select = f.index in region
 bmesh.update_edit_mesh(me)
-bpy.ops.uv.unwrap(method="ANGLE_BASED", margin=0.0)
+bpy.ops.uv.unwrap(method="CONFORMAL", margin=0.0)
 bm = bmesh.from_edit_mesh(me)
 bm.faces.ensure_lookup_table()
 uvl = bm.loops.layers.uv["UV"]
-for i in uniq:
-    pass
+# faces the solver squashed to nothing (a 6 cm triangle in 0.002 of the atlas: it takes its neighbour's colour as a hard wedge) get their own flat island
+_r, _fi = [], []
+for i in region:
+    f = bm.faces[i]
+    pts = [l[uvl].uv.copy() for l in f.loops]
+    a2 = sum(abs((pts[k] - pts[0]).cross(pts[k + 1] - pts[0])) * 0.5 for k in range(1, len(pts) - 1))
+    _r.append(a2 / max(f.calc_area(), 1e-9))
+    _fi.append(i)
+_r = np.array(_r)
+_keys = {}
+for j_, i in enumerate(_fi):
+    _keys.setdefault(region[i], []).append(j_)       # (each island has its own scale: judged against its own median)
+_bad = []
+for ids_ in _keys.values():
+    _med = float(np.median(_r[ids_]))
+    _k = math.sqrt(_med)
+    for j_ in ids_:
+        if _r[j_] < 0.08 * _med:
+            i = _fi[j_]
+            _bad.append(i)
+            f = bm.faces[i]
+            ax = int(np.argmax(np.abs(np.array(f.normal))))
+            u_, v_ = [(1, 2), (0, 2), (0, 1)][ax]
+            for l in f.loops:
+                l[uvl].uv = (l.vert.co[u_] * _k, l.vert.co[v_] * _k)
+print("squashed faces re-flattened", len(_bad), "of", len(_fi))
 
 
 def base_name(n):
@@ -408,7 +433,7 @@ for i in uniq:
     n = names[faces_pid[i]]
     wgt = SCALE.get(base_name(n), 1.0)
     if i in region:
-        wgt = 2.6 if region[i][0] == "head" else 1.0
+        wgt = 3.4 if region[i][0] == "head" else 1.0
         n = n + region[i][0]
     s_ = wgt * math.sqrt(stats[n][0] / max(stats[n][1], 1e-12))
     for l in bm.faces[i].loops:
@@ -449,6 +474,8 @@ vn = np.zeros(len(me.vertices) * 3)
 me.vertices.foreach_get("normal", vn)
 vn = vn.reshape(-1, 3)
 PID = -np.ones((ATLAS, ATLAS), np.int32)
+COVER = np.zeros((ATLAS, ATLAS), np.int16)
+OVER = 0
 POS = np.zeros((ATLAS, ATLAS, 3), np.float32)
 NOR = np.zeros((ATLAS, ATLAS, 3), np.float32)
 for t in me.loop_triangles:
@@ -473,11 +500,14 @@ for t in me.loop_triangles:
         continue
     tv = list(t.vertices)
     w = np.stack([l0[m], l1[m], l2[m]], -1)
+    OVER += int((PID[ys[m], xs[m]] >= 0).sum()) if l0.size else 0
+    COVER[ys[m], xs[m]] += (l0[m] >= 0.02) & (l1[m] >= 0.02) & (l2[m] >= 0.02)
     POS[ys[m], xs[m]] = w @ vco[tv]
     NOR[ys[m], xs[m]] = w @ vn[tv]
     PID[ys[m], xs[m]] = faces_pid[t.polygon_index]
 NOR = M.norm(NOR)
 print("texels", (PID >= 0).sum(), "of", ATLAS * ATLAS)
+print("uv overlap: texels inside two faces", int((COVER > 1).sum()))
 
 me.polygons.foreach_set("use_smooth", [True] * nf)
 src.hide_render = low.hide_render = True     # (only the shipped body shades itself; and Cycles leaves the scan's 8k maps unloaded)
@@ -600,7 +630,65 @@ print("thigh band top", round(BAND, 3), "net texels", int(net.sum()))
 skin_sm = blur(OUTC.mean(2), net.astype(np.float32), 9)
 base = P.skin(POS[net].astype(np.float64), NOR[net].astype(np.float64), AO[net].astype(np.float64))
 OUTC[net] = P.fishnet(POS[net].astype(np.float64), base).astype(np.float32)
+
+
+# ---- the master sheet projected on the corset and chest: the detail comes from the art. Registered by the neon outline's bounds, so no hand-placed numbers.
+SHEET = "/home/boki/briefs-wt/briefs/art-refs/ryzz_FINAL_sheet.png"
+sh_ = imgio.load(SHEET)
+SHH, SHW = sh_.shape[:2]
+sn = (sh_[..., 0] > 0.8) & (sh_[..., 2] > 0.55) & (sh_[..., 1] < 0.5)
+win = np.zeros_like(sn)
+win[int(SHH * 0.315):int(SHH * 0.425), int(SHW * 0.15):int(SHW * 0.32)] = True      # the front view's corset
+sy_, sx_ = np.nonzero(sn & win)
+core_f = core & (POS[..., 1] > 0.0) & (z_t > 1.0) & (z_t < 1.36) & (np.abs(POS[..., 0]) < 0.14)
+mz = z_t[core_f]
+mx = POS[..., 0][core_f]
+if len(sy_) > 200 and len(mz) > 200:
+    z0_, z1_ = np.percentile(mz, 1), np.percentile(mz, 99)
+    x0_, x1_ = np.percentile(mx, 1), np.percentile(mx, 99)
+    v0_, v1_ = np.percentile(sy_, 1), np.percentile(sy_, 99)
+    u0_, u1_ = np.percentile(sx_, 1), np.percentile(sx_, 99)
+    print("corset map: model x", round(float(x0_), 3), round(float(x1_), 3), "z", round(float(z0_), 3), round(float(z1_), 3), "sheet u", u0_, u1_, "v", v0_, v1_)
+    # (sheet u grows toward her left, -X; v grows downward)
+    pj = mask & (POS[..., 1] > 0.02) & (NOR[..., 1] > 0.15) & (z_t > z0_ - 0.012) & (z_t < z1_ + 0.012) & (np.abs(POS[..., 0]) < x1_ + 0.012) & (ri > gi * 1.3)
+    yy_, xx_ = np.nonzero(pj)
+    uu_ = u0_ + (x1_ - POS[yy_, xx_, 0]) / (x1_ - x0_) * (u1_ - u0_)
+    vv_ = v0_ + (z1_ - POS[yy_, xx_, 2]) / (z1_ - z0_) * (v1_ - v0_)
+    cc_ = sh_[np.clip(vv_.astype(int), 0, SHH - 1), np.clip(uu_.astype(int), 0, SHW - 1)]
+    skin_like = (cc_[:, 1] > cc_[:, 2] * 1.02) & (cc_[:, 0] > 0.6)     # the sheet's skin between the cups stays the scan's
+    keep_ = ~skin_like
+    new_neon = (cc_[:, 0] > 0.8) & (cc_[:, 2] > 0.55) & (cc_[:, 1] < 0.5)
+    OUTC[yy_[keep_], xx_[keep_]] = cc_[keep_].astype(np.float32)
+    core[yy_, xx_] = False
+    core[yy_[new_neon], xx_[new_neon]] = True
+    print("projected texels", int(keep_.sum()), "neon", int(new_neon.sum()))
 OUTC[core] = P.KEY
+# ---- the face: its own pass. The scan's paint unsharpened (eyes, lashes, brows, lips), the art's pink shadow over the wink
+head_m = mask & (z_t > K.NECK_Z + 0.04) & (POS[..., 1] > 0.0)
+hb = blur(OUTC.mean(2), head_m.astype(np.float32), 4)
+OUTC[head_m] = np.clip(OUTC[head_m] + (OUTC.mean(2) - hb)[head_m][:, None] * 1.1, 0, 1)
+# the owner's head sheet, front view, projected on the face: eyes (pink glowing under the bolt, blue), brows, nose, grin. Scaled by its eyes and mouth.
+HEAD = "/home/boki/briefs-wt/briefs/art-refs/ryzz_head.png"
+hd_ = imgio.load(HEAD)
+HU, HE, HM = 402.5, 743.0, 856.0                 # the sheet's face centre, eye line and mouth line (px)
+SU = 95.0 * 1.376 / (2 * EYE_X)                  # its eyes are 131 px apart
+SV = (HM - HE) / (EYE_Z - MOUTH_Z)
+fm = mask & (POS[..., 1] > 0.0) & (NOR[..., 1] > 0.1) & (z_t > K.NECK_Z + 0.04)
+yy_, xx_ = np.nonzero(fm)
+px_, pz_ = POS[yy_, xx_, 0], z_t[yy_, xx_]
+uu_ = HU - px_ * SU
+vv_ = HE + (EYE_Z - pz_) * SV
+cc_ = hd_[np.clip(vv_.astype(int), 0, hd_.shape[0] - 1), np.clip(uu_.astype(int), 0, hd_.shape[1] - 1)]
+blue_eye = np.hypot(px_ + EYE_X, pz_ - EYE_Z) < 0.022
+not_hair = (cc_[:, 2] < cc_[:, 0] * 1.0) | blue_eye
+rr_ = np.hypot(px_ / 0.094, (pz_ - (EYE_Z - 0.03)) / 0.125)
+kk_ = (1 - smooth(0.86, 1.0, rr_)) * not_hair
+OUTC[yy_, xx_] = (OUTC[yy_, xx_] * (1 - kk_[:, None]) + cc_ * kk_[:, None]).astype(np.float32)
+hot_ = (cc_[:, 0] > 0.8) & (cc_[:, 2] > 0.6) & (cc_[:, 1] < 0.45) & (kk_ > 0.5)
+core[yy_, xx_] = False
+core[yy_[hot_], xx_[hot_]] = True
+OUTC[core] = P.KEY
+print("face projected", int((kk_ > 0.5).sum()), "glow", int(hot_.sum()))
 
 
 def paint(pred, fn):
@@ -684,6 +772,34 @@ ic = np.ones((len(me.vertices), 4), np.float32)
 ic[:, 3] = rooms
 attr.data.foreach_set("color", ic.ravel())
 me.color_attributes.active_color = attr
+
+# ---- a relief normal map from the paint (leather grain, pleats, stitches, rivets; the skin stays smooth). hero_toon use_nrm
+lum_ = np.clip(OUTC, 0, 1).mean(2)
+paintm = (PID >= 0).astype(np.float32)
+hp = blur(lum_, paintm, 1) - blur(lum_, paintm, 10)
+skinish = (OUTC[..., 0] > OUTC[..., 1] * 1.15) & (lum_ > 0.42) & (OUTC[..., 2] < OUTC[..., 1] * 1.1)
+hp = hp * (~skinish) * paintm * (POS[..., 2] < K.NECK_Z + 0.03)
+dx = np.roll(hp, -1, 1) - np.roll(hp, 1, 1)
+dy = np.roll(hp, -1, 0) - np.roll(hp, 1, 0)
+NK = 5.0
+nm_ = np.stack([-dx * NK, -dy * NK, np.ones_like(hp)], -1)
+nm_ /= np.linalg.norm(nm_, axis=-1, keepdims=True)
+nimg = bpy.data.images.new("ryzz_nrm", ATLAS, ATLAS)
+nimg.colorspace_settings.name = "Non-Color"
+pxn = np.ones((ATLAS, ATLAS, 4), np.float32)
+pxn[..., :3] = nm_ * 0.5 + 0.5
+nimg.pixels.foreach_set(pxn.ravel())
+nimg.filepath_raw = os.path.join(os.path.dirname(OUT), "nrm.png")
+nimg.file_format = "PNG"
+nimg.save()
+for mt in me.materials:
+    if mt.name.startswith(("leather", "cloth-ryzz", "metal")):
+        nt = mt.node_tree
+        ti = nt.nodes.new("ShaderNodeTexImage")
+        ti.image = nimg
+        nmn = nt.nodes.new("ShaderNodeNormalMap")
+        nt.links.new(ti.outputs[0], nmn.inputs[1])
+        nt.links.new(nmn.outputs[0], nt.nodes["Principled BSDF"].inputs["Normal"])
 
 # ---- armature
 rig = json.load(open(RIG))
