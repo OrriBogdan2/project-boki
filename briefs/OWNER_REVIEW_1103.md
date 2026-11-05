@@ -898,3 +898,19 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
      - Short channel, data-tuned.
 - Ally boxes stay team-coloured on the map (101) so you know whom you can save.
 - Assert: a box revive takes ~7.5 s with extra damage taken and cancels per the rule; a beacon revives all dead allies and every player gets the notification + sound.
+
+## 107. A cooler, higher drop into the match (owner, 00:44 UTC Nov 5)
+- Owner asked whether "the cooler / higher drop" is queued. It wasn't logged before, so here it is.
+- Start the drop much higher, with a longer, more dramatic descent:
+  - the camera pulls far out at the jump and the whole island is visible
+  - clouds rush past
+  - wind sound builds
+  - a speed-lines / trail VFX
+  - the glide opens with a satisfying snap
+  - the camera eases back to the play zoom just before landing
+  - a landing impact (dust ring + sound, no self screen shake per item 50)
+- Steering keeps working the whole way; the total drop time is only slightly longer (data-tuned).
+- Teammates are visible dropping beside you.
+- MMB pings work during it (item 100).
+- Keep it cheap (item 94 budget).
+- Video/GIF of the drop for owner review.

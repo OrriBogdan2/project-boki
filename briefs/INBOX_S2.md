@@ -1077,3 +1077,5 @@ Items 98/99/101b/105 slot into KITS after the kits.
 - **The approval gates still apply** (Kael pilot, first Boki), but don't idle while waiting: keep building Tarek/Breaker in the same style and adjust after the owner's notes.
 - **Items 98, 99, 101/101b, 105 are MOVED to a new cloud session ("S4")**; drop them from your list. Combat clarity is "S3" (cloud). S1 = perf.
 - Commit + push every 30 min so nothing is lost at the reset. Post READY branches in STATUS as each lands.
+
+## 2026-11-05 00:47 UTC (ext): add OWNER_REVIEW item 107 (a cooler, higher drop) as a lane when a slot frees: Opus, with ART-2 VFX/sound. Branch `ext/drop-107`. Post a drop video for owner review.
