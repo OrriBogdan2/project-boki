@@ -276,13 +276,13 @@ CLIPS = {
         (2.4, dict(STILL, jaw=0.0)),
     ]},
     # Fusion: wound down into the box, the orb taken in, flung open as the form takes him
-    "fuse": {"len": 1.6, "base": STILL, "keys": [
+    "fuse": {"len": 0.8, "base": STILL, "keys": [
         (0.00, {}),
-        (0.3, CLENCH),
-        (0.7, dict(CLENCH, hR=(0.03, 0.12, 1.14), hL=(-0.03, 0.12, 1.14), spine=(10.0, 0.0, 0.0), head=(-12.0, 0.0, 0.0), orb=0.2, lift=(0.0, 0.0, -0.28))),
-        (0.95, dict(SPREAD, orb=0.0, lidb=-0.3, smoke=0.0, lift=(0.0, 0.0, 0.14)), "snap"),
-        (1.3, {"spine": (-12.0, 0.0, 0.0), "wR": 0.2}),
-        (1.6, dict(STILL, jaw=0.0, pld=(0.0, 0.0), orb=1.0, lidb=0.0, lift=(0.0, 0.0, 0.0))),
+        (0.17, CLENCH),
+        (0.37, dict(CLENCH, hR=(0.03, 0.12, 1.14), hL=(-0.03, 0.12, 1.14), spine=(10.0, 0.0, 0.0), head=(-12.0, 0.0, 0.0), orb=0.2, lift=(0.0, 0.0, -0.28))),
+        (0.50, dict(SPREAD, orb=0.0, lidb=-0.3, smoke=0.0, lift=(0.0, 0.0, 0.14)), "snap"),
+        (0.63, {"spine": (-12.0, 0.0, 0.0), "wR": 0.2}),
+        (0.80, dict(STILL, jaw=0.0, pld=(0.0, 0.0), orb=1.0, lidb=0.0, lift=(0.0, 0.0, 0.0))),
     ]},
     # death: the spring gives, the jack folds down into his box, the lid drops shut on him
     "death": {"len": 1.6, "base": STILL, "keys": [

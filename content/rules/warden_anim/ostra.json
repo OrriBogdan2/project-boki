@@ -2,9 +2,10 @@
 	"doc": "Motley's hand-keyed clips (art/wardens/ostra/ostra.glb, tools/art1/ostra_clips.py) and which game state plays which (scripts/heroes/warden_clips.gd). rig_root: the root bone stays on the Rig under the clips, so the kit's lifts, squashes and whole-body turns and his hover (KMovesStone.hover) carry on; the clips key from the box and the hips up. sway: the upper body lags on the spring (WardenSway).",
 	"skinned_weapon": true,
 	"rig_root": true,
+	"offset_bones": ["hips"],
 	"extra_bones": {"x_box": "root", "x_boxlid": "x_box", "x_crank": "x_box", "x_smoke": "x_box", "x_void": "x_box", "x_weapon": "hand.R", "x_fan": "hand.L", "x_jaw": "head", "x_brow.L": "head", "x_brow.R": "head", "x_cheek.L": "head", "x_cheek.R": "head"},
 	"blade": {"root": "anchor_orb", "tip": "weapon_muzzle", "bone": "x_weapon"},
-	"sway": {"bone": "hips", "stiff": 70.0, "damp": 7.0, "gain": 0.016, "max": 0.45, "tumble_hz": 0.35, "swirl_m": 0.13},
+	"sway": {"bone": "hips", "stiff": 70.0, "damp": 7.0, "gain": 0.009, "max": 0.45, "tumble_hz": 0.35, "swirl_m": 0.13},
 	"loco": {
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
@@ -23,7 +24,7 @@
 		"ostra_empower": {"clip": "empower"},
 		"mf_xform": {"clip": "fuse"}
 	},
-	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "stun": "stun", "emote": "emote", "hit": {"front": "hit", "back": "hit", "dur": 0.35}},
+	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.6, "stun": "stun", "emote": "emote", "hit": {"front": "hit", "back": "hit", "dur": 0.35}},
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "pauldron.L", "pauldron.R", "x_weapon", "x_fan", "x_jaw", "x_brow.L", "x_brow.R", "x_cheek.L", "x_cheek.R",
 		"x_fing1.L", "x_fing1b.L", "x_fing2.L", "x_fing2b.L", "x_fing3.L", "x_fing3b.L", "x_fing4.L", "x_fing4b.L", "x_thumb.L", "x_thumbb.L",

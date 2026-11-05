@@ -94,9 +94,9 @@ iris out and its plain back in). `WardenGlb.Orbits` (run by Sync) turns the empt
 `--warden-glb-check` and stay out of `--warden-model-check`'s height.
 
 ### Hovering bodies
-A body with no feet (Ostra) is built with its ground below its hem (fit spec `sole_z`); the rig's own hover
-(`KMovesStone.hover`, which lifts `Rig`, so the `root` bone) floats it and keeps the gap above the shadow. Its
-lower body is a `void` wisp on a `spring_wisp_*` chain under `hips` (`warden_parts.wisp()`).
+A body with no feet (Motley on his box, id `ostra`) is built with its ground at the box's foot; the rig's own hover (`KMovesStone.hover`, which lifts
+`Rig`, so the `root` bone) floats it a hand's width over the shadow. With hand-keyed clips, `"rig_root": true` in its content/rules/warden_anim file keeps
+the `root` bone on `Rig` under them, so the hover and the kit's lifts carry on. Its legs are unskinned.
 
 ### Design variants
 Another design of the same Warden can sit beside the shipped model while the owner compares them:

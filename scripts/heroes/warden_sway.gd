@@ -10,7 +10,7 @@ var skel: Skeleton3D
 var bone := -1
 var stiff := 70.0            # 1/s^2: the spring's pull back
 var damp := 7.0              # 1/s: its damping
-var gain := 0.016            # radians of lean per m/s^2 of the body's acceleration
+var gain := 0.009            # radians of lean per m/s^2 of the body's acceleration
 var limit := 0.45            # radians at most
 var tumble_hz := 0.35        # turns a second of a tumbling prop
 var swirl_m := 0.13          # m, how far a prop wanders up and down
@@ -36,7 +36,7 @@ static func make(model: Node3D, sk: Skeleton3D, cfg: Dictionary) -> WardenSway:
 	s.swirl_m = float(cfg.get("swirl_m", s.swirl_m))
 	return s
 
-## One frame, after the clips posed the bones.
+## One frame, after the clips posed the bones. (lean.y + is back, lean.x + his right.)
 func step(dt: float) -> void:
 	if dt <= 0.0 or bone < 0 or not root.is_inside_tree():
 		return
