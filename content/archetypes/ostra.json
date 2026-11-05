@@ -11,13 +11,13 @@
 	"card": {
 		"role": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
 		"loop": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
-		"lmb": "Tether Lantern: quick orbs to full range; pause and the next one is a fast bright bolt that slows and goes through terrain.",
+		"lmb": "Tether Lantern: quick orbs to full range, through walls; the longer you wait between shots, the bigger and harder the next one, and a full one slows.",
 		"rmb": "Shard Snap: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew.",
 		"e": "Brimseed: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew.",
 		"dash": "Lantern Trade: lob a lantern to the cursor and hover where you are; when it lands, everyone in its circle goes to your spot and you go to theirs.",
 		"passive": "Swell: your hits fill Swell (much faster on hunters); full, you are Swollen for 9s and everything grows. You float, so ground hazards pass you by.",
 		"weapons": {
-			"tether_lantern": "Quick orbs to full range; pause 1.4s and the next one is a fast bright bolt that slows and goes through terrain."
+			"tether_lantern": "Quick orbs to full range, through walls. Wait between shots and the next one grows bigger, brighter, harder and faster; full after 1.4s, it also slows."
 		},
 		"x": "Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle."
 	},
@@ -42,10 +42,12 @@
 	},
 	"lmb": {
 		"idle": 1.4,
-		"prime_dmg": 0.34,
-		"prime_speed": 1.4,
-		"prime_slow": 0.1,
-		"prime_slow_t": 1.5
+		"charge_from": 0.6,
+		"full_dmg": 0.34,
+		"full_speed": 1.4,
+		"full_size": 1.8,
+		"full_slow": 0.1,
+		"full_slow_t": 1.5
 	},
 	"dash": {
 		"id": "swap",
@@ -59,11 +61,11 @@
 		"radius": 1.5,
 		"ally_shield": 26.0,
 		"ally_r": 3.0,
-		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 20% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.",
+		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 30% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.",
 		"lob": 4.5,
 		"aim_max": 1.5,
 		"keep_h": 3.0,
-		"fly_slow": 0.2
+		"fly_slow": 0.3
 	},
 	"rmb": {
 		"delivery": "projectile",

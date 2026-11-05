@@ -7,7 +7,10 @@ extends "res://tools/hero_pair_check.gd"
 func run(main_node: Node) -> void:
 	main = main_node
 	await _ostra()
-	await _bolt_through_terrain()
+	var orb_check = load("res://tools/ostra_orb_check.gd").new()
+	await orb_check.orbs(main)
+	n += orb_check.n
+	fails += orb_check.fails
 	var ult_check = load("res://tools/ostra_ult_check.gd").new()
 	await ult_check.ult(main)
 	n += ult_check.n
@@ -80,7 +83,7 @@ func _ostra() -> void:
 		"swollen %.1f" % K.swollen_t
 	)
 	ok("anim: Swollen plays ostra_empower", K.anim_id == "ostra_empower")
-	# ---- LMB: plain orbs fly to full range past the cursor; a pause primes a fast bright bolt
+	# ---- LMB: plain orbs fly to full range past the cursor (the charge: ostra_orb_check.gd)
 	reset.call()
 	aim_at(P, home + Vector3(3.0, 0, 0))
 	T.teleport(home + Vector3(12.0, 0, 0))
@@ -95,30 +98,6 @@ func _ostra() -> void:
 	ok("lmb: the orb is his own violet teardrop (skin)", KitLooks.of(m).skins_live("orb") >= 1)
 	step(m, 1.0)
 	ok("lmb: ...and hits a foe well past the cursor", dmg(T) > 5.0, "took %.1f" % dmg(T))
-	reset.call()
-	step(m, 1.6)
-	ok(
-		"lmb: a pause primes the next orb (a charge held at his hand)",
-		K.primed and KitLooks.of(m).holding("os_charge"), "primed %s" % K.primed
-	)
-	var spd_hot := float(P.wpn["speed"])
-	P.inp["fire"] = true
-	step(m, 0.05, func(): P.inp["fire"] = true)
-	P.inp["fire"] = false
-	ok(
-		"lmb: the Settled orb is a long bright bolt, faster (1.4x)",
-		KitLooks.of(m).skins_live("orb_hot") >= 1 and spd_hot > 40.0, "speed %.0f" % spd_hot
-	)
-	ok("anim: the Settled bolt plays ostra_orb_hot", K.anim_id == "ostra_orb_hot")
-	step(m, 1.0)
-	ok(
-		"lmb: the Settled orb hits harder and slows", K.settled_shots == 1 and dmg(T) >= 11.0 and T.slow_t > 0.0,
-		"took %.1f slow %.1f" % [dmg(T), T.slow_t]
-	)
-	ok(
-		"small: the charge is stepped, not gradual (one Settled orb, then plain)",
-		not K.primed and float(P.wpn["speed"]) < 35.0, "speed %.0f" % float(P.wpn["speed"])
-	)
 	_orb_parity(m, P, home, K)
 	# ---- RMB: one charge, a visible wind-up with the two rails, one bundle, a stun that reads
 	reset.call()
@@ -212,8 +191,8 @@ func _ostra() -> void:
 		) < 0.01 and absf(float(K.e_def()["cooldown"]) - 10.0) < 0.01
 	)
 	ok(
-		"data: a Settled orb is 34% harder (353 vs 263)",
-		absf(float(K.lmb_def()["prime_dmg"]) - (353.0 / 263.0 - 1.0)) < 0.01
+		"data: a full orb is 34% harder (353 vs 263)",
+		absf(float(K.lmb_def()["full_dmg"]) - (353.0 / 263.0 - 1.0)) < 0.01
 	)
 	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
 	# ---- Shift: hold to see both ends, let go to lob; the foe at the landing goes to where he was
@@ -516,15 +495,15 @@ func _ostra() -> void:
 	home = r[3]
 	K = P.ak
 	step(m, 1.6)
-	ok("merge hold: the orb is Settled before the merge", K.primed)
+	ok("merge hold: the orb is charged before the merge", K.orb_k >= 1.0)
 	K.swap_aim = 0.2
 	K.snap = {"t": 0.1, "T": 0.32}
 	ok("merge hold: a merge is under way", _merge(P))
 	step(m, 0.2)
 	ok(
-		"merge hold: the prime, the Shift aim and the Snap wind-up drop with the merge",
-		not K.primed and K.prime_until < 0.0 and K.swap_aim < 0.0 and K.snap.is_empty() and K.snaps == 0,
-		"primed %s" % K.primed
+		"merge hold: the orb's charge, the Shift aim and the Snap wind-up drop with the merge",
+		K.orb_k <= 0.0 and K.swap_aim < 0.0 and K.snap.is_empty() and K.snaps == 0,
+		"charge %.2f" % K.orb_k
 	)
 	_dash_moves(K)
 	# ---- every move, sound and look exists
@@ -545,36 +524,6 @@ func _ostra() -> void:
 	await done(m)
 
 ## Item 35: his own ground and air dash moves (the Trade's lob), ids no other hero's table has, and each one's
-## The data: the Settled orb "goes through terrain"; a plain orb is stopped by it.
-func _bolt_through_terrain() -> void:
-	var r := setup("ostra", 6.0)
-	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var home: Vector3 = r[3]
-	var K: OstraKit = P.ak
-	var W = m.world
-	var wx := int(floor(home.x)) + 3
-	var wz := int(floor(home.z))
-	for dz in range(-2, 3):
-		W.kind[W.idx(wx, wz + dz)] = World.T_BLOCK
-	aim_at(P, T.pos)
-	step(m, float(K.lmb_def()["idle"]) + 0.3)
-	var shots0 := P.shot_n
-	var hot_n := K.settled_shots
-	P.fire_cd = 0.0
-	# held: the first orb is the Settled bolt (primed by the pause), the next a plain orb 0.6 s later
-	step(m, 0.7, func(): P.inp["fire"] = true)
-	P.inp["fire"] = false
-	step(m, 0.6)
-	var settled_dmg := float(P.wpn["dmg"]) * (1.0 + float(K.lmb_def()["prime_dmg"]))
-	ok(
-		"lmb data: the Settled bolt goes through terrain; the plain orb after it is stopped by the same rock",
-		P.shot_n >= shots0 + 2 and K.settled_shots == hot_n + 1 and absf(dmg(T) - settled_dmg) < 0.5,
-		"took %.1f (the Settled bolt alone is %.1f), %d shots" % [dmg(T), settled_dmg, P.shot_n - shots0]
-	)
-	await done(m)
-
 ## Void's Gravity Orb (parity pass): held, an orb every 0.6 s (footage 0031 -> 0034), each a one-hand flick
 ## (ostra_orb) that leaves along the aim; he turns to the cursor, so while he drifts sideways every orb
 ## leaves at it as it swings round him.
@@ -631,7 +580,7 @@ func _dash_moves(K: OstraKit) -> void:
 		lengths.all(func(l): return l > 0.2 and l <= quickest), str(lengths)
 	)
 
-## Item 17: while the lantern flies he drifts slowly (15-25% of run speed), holds his height even over the abyss,
+## Items 17 and 75: while the lantern flies he drifts slowly (30% of run speed), holds his height even over the abyss,
 ## and the Trade sends everyone to where he is when it lands.
 func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	var W = m.world
@@ -671,9 +620,8 @@ func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	var speed := drift / (float(ticks[0]) * DT)
 	var fly_slow := float(K.dash_def()["fly_slow"])
 	ok(
-		"item 17: in flight he drifts at dash.fly_slow (in the 15-25% band) of his run speed",
-		flying and run_speed > 1.0 and fly_slow >= 0.15 and fly_slow <= 0.25
-			and absf(speed / run_speed - fly_slow) < 0.03,
+		"item 75: in flight he drifts at dash.fly_slow, 30% of his run speed",
+		flying and run_speed > 1.0 and absf(fly_slow - 0.3) < 0.001 and absf(speed / run_speed - 0.3) < 0.03,
 		"%.2f of %.2f (data %.2f)" % [speed, run_speed, fly_slow]
 	)
 	ok(
