@@ -52,7 +52,7 @@ var trail_t := 0.0              # the next dash after-image puff
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
-var nozzle_at: Node3D           # the skinned gun's weapon_muzzle (WardenGlb.anchor), once the model has it
+var nozzle_at: Node3D           # the Gun's Muzzle, kept on the skinned gun's tip by the model (Sync.apply_blade)
 var lmb_key_was := false         # the LMB key last step: only a press in the flight ticks, not a hold carried in
 var lmb_denied := 0              # (tests) presses refused during Flue Flight
 var jet: AshwickJet             # X, Flue Flight (its flight is a hold: jet.flight)
@@ -89,11 +89,12 @@ func _fwd() -> Vector3:
 	var d2 := h.aim_dir()
 	return Vector3(d2.x, 0.0, d2.y)
 
-## The nozzle: the tip of the gun you see (the skinned gun's weapon_muzzle, item 76b); with no model (or the old
-## procedural one), held low at the right hip, pointed forward (sheet: LMB animation).
+## The nozzle: the tip of the gun you see (item 76b); with no model (or the old procedural one), held low at the
+## right hip, pointed forward (sheet: LMB animation).
 func nozzle() -> Vector3:
 	if nozzle_at == null or not is_instance_valid(nozzle_at):
-		nozzle_at = WardenGlb.anchor(h.model, "weapon_muzzle") if h.model else null
+		var skinned: bool = h.model != null and WardenGlb.anchor(h.model, "weapon_muzzle") != null
+		nozzle_at = h.model.get_node_or_null("Rig/Torso/Aim/Gun/Muzzle") if skinned else null
 	if nozzle_at != null and nozzle_at.is_inside_tree():
 		var at := nozzle_at.global_position
 		if at.distance_to(h.pos) < NOZZLE_REACH:

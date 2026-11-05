@@ -146,10 +146,10 @@ def clips():
     out.append(C("lance_stoke", 0.625, [(0.0, braced), (0.1, fist, "out"), (0.22, dict(fist, tor=(-0.08, 0.0, -0.05))), (0.5, braced), (0.5625, buck, "lin"), (0.625, braced, "lin")]))
     out.append(C("lance_end", 0.3, [(0.0, braced), (0.08, dict(braced, G=(0.12, 0.13, 0.98), BE=be(3, 24), jaw=0.3, tor=(-0.06, 0.05, 0)), "out"), (0.3, END)]))
     # RMB: up to the shoulder, one eye shut along the barrel; the shot kicks; a little shimmy of delight
-    aim = dict(braced, G=(0.1, 0.13, 1.17), BE=be(0, 1), hed=(0.06, 0.36, 0.2), tor=(0.08, 0.1, 0), prt=(0.1, -0.5, 0.0), brow=0.7, lid=0.18, jaw=0.08, fin=0.2)
-    out.append(C("aim", 0.3, [(0.0, END), (0.12, aim, "out"), (0.3, dict(aim, G=(0.1, 0.135, 1.172)))]))
-    sh0 = dict(aim, G=(0.1, 0.03, 1.22), BE=be(0, 16), tor=(-0.2, 0.1, 0), hed=(-0.1, 0.3, 0.1), jaw=0.9, lid=0.08, fin=1.0, brow=-0.4)
-    out.append(C("shot", 0.48, [(0.0, aim), (0.06, sh0, "out"), (0.14, dict(sh0, G=(0.1, 0.07, 1.2), BE=be(0, 10)), "out"), (0.3, dict(aim, Lw=0.4, jaw=0.5, tor=(0.0, -0.06, 0.05))), (0.48, END)]))
+    aim = dict(braced, G=(0.1, 0.13, 1.1), BE=be(0, 1), hed=(0.06, 0.36, 0.2), tor=(0.08, 0.1, 0), prt=(0.1, -0.5, 0.0), brow=0.7, lid=0.18, jaw=0.08, fin=0.2)
+    out.append(C("aim", 0.3, [(0.0, END), (0.12, aim), (0.3, dict(aim, G=(0.1, 0.135, 1.102)))]))
+    sh0 = dict(aim, G=(0.1, 0.03, 1.15), BE=be(0, 16), tor=(-0.2, 0.1, 0), hed=(-0.1, 0.3, 0.1), jaw=0.9, lid=0.08, fin=1.0, brow=-0.4)
+    out.append(C("shot", 0.48, [(0.0, aim), (0.06, sh0, "out"), (0.14, dict(sh0, G=(0.1, 0.07, 1.13), BE=be(0, 10)), "out"), (0.3, dict(aim, Lw=0.4, jaw=0.5, tor=(0.0, -0.06, 0.05))), (0.48, END)]))
     # Shift, Soot Ram: head first, horns of her own making: crouched, then flat out behind her own forehead, gun flung back, teeth first; the hit stops her dead and she bounces
     cr = {"pel": (0, -0.06, -0.2), "prt": (0.35, 0, 0), "tor": (0.35, 0, 0), "hed": (-0.3, 0, 0), "G": (0.25, -0.1, 0.76), "BE": be(-150, -5), "LP": (-0.24, -0.12, 0.74), "brow": 0.8, "lid": 0.1, "jaw": 0.2, "fin": 0.6, "fing": 1.0,
           "FL": (-0.11, 0.14, A_Z), "FR": (0.12, -0.18, A_Z), "FRp": 0.5}

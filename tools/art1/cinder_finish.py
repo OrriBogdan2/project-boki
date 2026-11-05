@@ -53,6 +53,13 @@ for p_ in pieces:
     else:
         p_.orient()
 
+# (the ink shell folds on so small a face: no room on it)
+for p_ in pieces:
+    if p_.name in ("face", "jaw", "mouthb") or p_.name.startswith(("lid", "brow", "fang", "fin", "lens")):
+        p_.room = 0.0
+    elif p_.name.startswith(("finger", "thumb")):
+        p_.room = 0.3
+
 # ---- one mesh: the scan first, then the pieces
 faces_v, faces_pid, faces_uv, verts, vw, rooms, colors = [], [], [], [], [], [], []
 names = []
@@ -340,11 +347,13 @@ def sample_scan(points):
 # each scan face's slot, by its paint: leather where it's brown; a crack stays skin
 low_faces = [i for i in range(nf) if faces_pid[i] == 0]
 fc = np.array([np.mean([verts[v] for v in faces_v[i]], axis=0) for i in low_faces])
-fcol = sample_scan(fc)
+# (the median of the middle and corners: an orange crack's bleed through one point doesn't make a face leather)
+fcorn = [sample_scan(np.array([verts[faces_v[i][k]] for i in low_faces])) for k in range(3)]
+fcol = np.median(np.stack([sample_scan(fc)] + fcorn, 0), 0)
 for k_, i in enumerate(low_faces):
     r_, g_, b_ = fcol[k_]
     mx = max(r_, g_, b_)
-    brown = r_ > b_ * 1.28 and r_ < 0.5 and g_ > b_ * 0.95
+    brown = r_ > b_ * 1.34 and r_ < 0.5 and g_ > b_ * 0.95
     grey_hi = (mx - min(r_, g_, b_)) / max(mx, 0.01) < 0.12 and mx > 0.42
     m = "metal-cinder" if grey_hi else ("leather-cinder" if brown else "skin-cinder-hot")
     me.polygons[i].material_index = mat_i[m]

@@ -4,7 +4,7 @@ from meshkit import norm, smooth
 from kael_paint import hexc, mix, fbm, vnoise, lit, ramp
 import cinder_pieces as K
 
-HOT = np.array([1.0, 0.68, 0.2])         # keyed fully hot by hero_toon's glow_key; she keeps her painted colours (no model_glow core), so the iris stays
+HOT = np.array([1.0, 0.56, 0.12])        # keyed fully hot by hero_toon's glow_key; she keeps her painted colours (no model_glow core), so the iris stays
 HOT_RIM = np.array([0.86, 0.3, 0.07])    # keyed partly
 SKIN = [hexc("#2c2228"), hexc("#3f323a"), hexc("#54444e"), hexc("#6a5862"), hexc("#826e7a")]
 COPPER = [hexc("#4a2210"), hexc("#7c3f1c"), hexc("#ad6230"), hexc("#d68a4c"), hexc("#f6c08c")]
