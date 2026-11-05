@@ -9,9 +9,9 @@ extends RefCounted
 ## arriving (a short window that keeps some of the pull's speed and still takes the Cinder Spin) -> ready.
 ## A miss, a stun or the time running out breaks it. Owned by JuggernautKit.
 
-const ORANGE := Color("ff8a2a")     # the bright links (and the zig-zag in flight)
+const RUST := Color("b8745a")       # the bright links (and the zig-zag in flight): rusted iron
 const DARK := Color("3a2418")       # the dark iron links
-const HOT := Color("ffd04a")        # the links pulled taut, and while it hauls you in
+const HOT := Color("fff1dc")        # the links pulled taut, and while it hauls you in: white-hot
 const TAUT := 0.85                  # share of its full length where the chain starts to strain (glow and creak)
 const BOW := 0.3                    # share of the swing the chain bows out by (it bends with the pull)
 const PREVIEW_MIN := 0.6            # m of swing before the predicted arc shows (looking almost straight: no line)
@@ -105,7 +105,7 @@ func _throw() -> void:
 			else: _miss(at)}))
 	if k.m.shots.size() > shots0 and k.m.shots[-1]["by"] == h:
 		var sd: Dictionary = k.m.shots[-1]
-		k.fx().ride(sd, "hook", ORANGE, Color("ffcf6a"), 0.6, 0.15)
+		k.fx().ride(sd, "hook", RUST, HOT, 0.6, 0.15)
 		# the shared hook look and its thin pale rope would draw over the Warchain's own chain
 		if sd.has("deco") and is_instance_valid(sd["deco"]):
 			(sd["deco"] as Node3D).visible = false
@@ -303,7 +303,7 @@ func _draw_hooked(stretch: float) -> void:
 	var a := h.pos + Vector3(0, 1.0, 0)
 	var b := anchor + Vector3(0, 1.0 if target != null else 0.6, 0)
 	_launch(Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z))      # the pull as it would start now, for the preview
-	k.fx().chain(_fx_id(), a, b, 0.3 * (1.0 - tension), ORANGE.lerp(HOT, tension * 0.6), DARK,
+	k.fx().chain(_fx_id(), a, b, 0.3 * (1.0 - tension), RUST.lerp(HOT, tension * 0.6), DARK,
 			0.13 + 0.03 * tension, _bow(_aimed()))
 	_draw_preview()
 
@@ -340,7 +340,7 @@ func _draw_preview() -> void:
 func _draw_flight() -> void:
 	for s in k.m.shots:
 		if s["by"] == k.h and (s["x"] as Dictionary).get("rope", false):
-			k.fx().chain(_fx_id(), k.h.pos + Vector3(0, 1.0, 0), s["pos"], 1.0, ORANGE, ORANGE, 0.12)
+			k.fx().chain(_fx_id(), k.h.pos + Vector3(0, 1.0, 0), s["pos"], 1.0, RUST, RUST, 0.12)
 			return
 
 func _tick_pull(dt: float) -> void:

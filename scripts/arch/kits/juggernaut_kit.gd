@@ -24,9 +24,9 @@ const SLASH_OUT := Color("ff3df0")     # the Slam's magenta strike lane
 const LUNGE_RED := Color("ff4a3a")     # the Lunge lane while charging
 const LUNGE_FULL := Color("ff3df0")    # ... at full
 const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
-const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent
-const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
-const WAVE_FULL := Color("ffc23a")     # ... gold-hot at full charge
+const WAVE_RED := Color("c81e2e")      # the Searing Wave's crescent: the scarf's crimson
+const WAVE_EDGE := Color("fff1dc")     # ... its white-hot inner edge
+const WAVE_FULL := Color("ffffff")     # ... pure white at full charge
 const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
 
 var enraged_t := 0.0
@@ -134,12 +134,6 @@ func _drop_aura() -> void:
 	if aura and is_instance_valid(aura):
 		aura.queue_free()
 	aura = null
-
-## Spending the Rage: the shell bursts outward and the hunter shrinks back.
-func _spend_fx() -> void:
-	var rc := res_col()
-	m.fx.burst(h.pos + Vector3(0, 1.0, 0), rc, 26, 7.0, 0.5, 4.0, 1.3)
-	_drop_aura()
 
 func _tick_look(dt: float) -> void:
 	var want := 1.0 if enraged_t > 0.0 else 0.0
@@ -435,13 +429,16 @@ func _wave() -> void:
 	var c := KinExec.make_cx(m, h, h.kin, h, aim(), _wk(), "primary", "searing_wave")
 	_shots0 = m.shots.size()
 	run_own(stg, c)
-	# the fire rolling along its line: a red standing crescent of flame (pooled) riding the wave's shot
+	# the fire rolling along its line: a crimson crescent with a white-hot edge riding the wave's shot, a
+	# white-hot streak behind it
 	var dv := h.aim_dir()
 	var from := h.pos
 	var sd: Variant = _my_last_shot()
 	if sd != null:
 		sd["col"] = WAVE_RED              # its sparks along the way are red too
-		fx().ride(sd, "crescent_bolt", WAVE_RED, WAVE_EDGE if not full else WAVE_FULL, 1.6, wave_size * 3.6)
+		var rider := fx().ride(sd, "crescent_bolt", WAVE_RED, WAVE_EDGE if not full else WAVE_FULL, 1.6,
+				wave_size * 3.6)
+		HeroVfx.of(m).trail(h, "wave_trail", rider)
 	vfx("wave_fire", from, dv, {"k": k, "full": full, "len": rng, "w": wave_size * 2.0})
 	h.swing_t = 0.18
 	h.swing_n += 1
@@ -913,7 +910,7 @@ func _spin() -> void:
 	run_own(stg, cx("rmb", "cinder_spin", h.pos, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if is_instance_valid(f) and not f.dead: KitStatus.apply(f, "blt", float(sp["blight"]))}))
 	vfx("spin", h.pos, h.aim_dir(), {"r": float(sp["radius"])})
-	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CINDER SPIN", Color("ff7a3a"), false)
+	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CINDER SPIN", Color("fff0dc"), false)
 
 # ------------------------------------------------------------------ E: Warchain (JuggernautChain)
 ## "During E" for the Smash is the pull and the moment after it (the Cinder Spin).

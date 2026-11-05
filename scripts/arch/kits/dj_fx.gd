@@ -366,9 +366,10 @@ func _rider(kind: String, col: Color, col2: Color) -> Node3D:
 	return n
 
 ## Rides a look on a shot (match.gd's shot dictionary) until it ends; `on_end(at)` runs when it does.
-## trail: the streak's length in m, width: its width.
+## trail: the streak's length in m, width: its width. Returns the look's node (hidden when the shot ends), for a
+## HeroVfx trail to follow.
 func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, width := 0.3,
-		on_end := Callable()) -> void:
+		on_end := Callable()) -> Node3D:
 	var n := _rider(kind, col, col2)
 	# this look replaces the shared shot mesh (a pale streak or blob that would show through it)
 	if sd.get("node") != null and is_instance_valid(sd["node"]):
@@ -376,6 +377,7 @@ func ride(sd: Dictionary, kind: String, col: Color, col2: Color, trail := 1.2, w
 	riders.append({"node": n, "sd": sd, "kind": kind, "spin": randf() * TAU, "trail": trail, "width": width,
 			"on_end": on_end, "last": sd["pos"]})
 	_pose(n, kind, sd["pos"], sd["vel"], trail, width, 0.0)
+	return n
 
 ## Shows a projectile look this step (a kit-run projectile: the Bola flying on). Stop calling and it hides.
 func place(id: String, kind: String, at: Vector3, vel: Vector2, col: Color, col2: Color, trail := 1.0,
