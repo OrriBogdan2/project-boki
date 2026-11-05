@@ -640,3 +640,12 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: Vex street racer design received
 - vex_FINAL_sheet logged: racing jacket, thigh-highs, cyber-spine, one hybrid arm-cannon (gatling below, grenade tube on top). ART-1 Vex stays last, per the 00:20 order. IMG agent's splash request updated. Item 68/109 kit lane unaffected.
+
+## 2026-11-05 S2: ART-1 Breaker (Sunken Bulwark) first pass: ext/art1-breaker f23e7899, not approval-ready
+- Built on ext/art1-kael 555fb02c + ext/kit-breaker-59. 17,505 tris, 41 clips at 30 fps (attack keys remapped from the old rig, so they read as old-rig moves), 5 porthole moods, spring anglerfish, T-head capstan hammer skinned (76b). Body data: legs 0.46, torso 1.06, shoulder 1.15, head 0.3, size 2.0. Drum is 0.33 of his height, shrunk 15% from "torso-sized".
+- Hitbox stays 0.46 (hull radius 0.77 m would be 1.9x standard and fail item 46's band); --hitbox-size-check passes.
+- Checks 0 failures: warden-clips, clip-check, rig-standard, bulwark-combo 144, hitbox-size. Model and glb totals fail on Kael's juggernaut rows from the older shared commit; bulwark rows pass. Full suite 122: 13 with FAILs, 9 same on clean main, portrait on Kael's splash, hitch and title under load not compared.
+- warden-model bounds changed: width 4.4 (he's 4.14x), height_3d 1.9, hammer excluded.
+- Shared: scripts/heroes/warden_mood.gd, shaders/warden_mood.gdshader, hooks in warden_glb, warden_clips, bjorn_fx, bjorn_ult; clip_shots --moods and yaw restore.
+- Shots: ext/hero-shots-s2 art1/breaker/. GIFs predate the last fixes.
+- Owner Qs: hitbox 0.46, or grow toward the hull and break item 46's band? Master looks like an in-line mallet; T-head built per INBOX 03:18: OK? Art mirrored to fit the rig (hammer right, shield left): OK? Item 59 turn rate still open.
