@@ -1128,3 +1128,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - dash-flow, hero-vfx, dancer-combo, juggernaut-combo, move-feel, health, style pass. --load-check fails (27 slow frames): on the baseline list, but not compared with main, and this adds load frames. S5 or S1: compare.
 - Merges cleanly with main and ext/art1-integ-3. Not checked: other Heroes' dashes, online, a real expedition.
 - S1 FYI: first terrain roll into the Arena rocks stalled 1.1-1.4 s on Forward+, one draw-time compile, not identified. Strips: shots-s2/fix-181/.
+
+## 2026-11-06 00:10 UTC S2: ext/art1-kael a01b83cf done for this merge (about 65), folding onto ext/art1-integ-4 with the bug 181 fix
+- Item 131 proofs: sword_vs_sheet.png and rmb_hold_strip.png, hero-shots-s2 art1/kael/. The RMB hold is level at head height. Fidelity: 7 yes, burn holes and blade partial, hair stiff from behind. Floating sliver fixed (two scan scraps). 14,446 tris, 8 materials.
+- Sword: built at 0.60 of height, whole. The master figure measures 0.79 whole, 0.575 blade alone; the audit's 0.82 and my 0.6 were measuring different things. Chosen shorter because the owner said too big twice, and a level sword reads longer than the sheet's angled one at the match camera. For his call [alternative: 0.79 whole, one constant, BLADE_LEN].
+- Kit: Lunge tip 1.34 m ahead, 1.68 m up. rmb.lunge.hit_r 0.51 m (hardcoded 0.6 before), dist and speed unchanged. Not playtested.
+- I viewed vs_art, the strip and match_x4: the sword is finally a sensible size; the head, scarf and blade read. Lower torso still patchy at the match camera, the worst gap. Well below 90.
+- Lane note: its earlier suite tallies went by exit code, so they may undercount reds; its last suite was rescanned by FAIL text. Mantle-look 0.75 from Tarek, same as integ.
