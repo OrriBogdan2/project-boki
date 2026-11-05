@@ -240,6 +240,7 @@ func warm_up(progress := Callable()) -> void:
 				pn.call("_make_stars")
 				break
 		break
+	if player: player.warm_marker()      # and the hit-marker balloon over a Hunter
 	var seen := {}
 	var batch_cb := func(f: float) -> void:
 		if progress.is_valid(): progress.call(0.7 * f)
@@ -647,6 +648,7 @@ static func _trim_shadows(root: Node) -> void:
 				stack.append(ch)
 
 func _start(o: Dictionary) -> void:
+	ShadowPolicy.watch_particles(get_tree())      # no particle system casts a shadow (item 94)
 	PerfLog.reset()
 	_stage_done_ms = 0.0
 	opts = o
@@ -2936,8 +2938,7 @@ func _exit_tree() -> void:
 	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
 	SeeThrough.off()
 	Capture.teardown(self)           # scan beams and hums outlive the match otherwise
-	for key in box_hums.keys():
-		Sfx.loop_stop(String(key))
+	Sfx.reset_scene_audio()          # every sound the match started stops with it, owner item 103
 	box_hums.clear()
 	Beacons.stop_sounds(self)
 	if biomes: biomes.free_up()
@@ -4236,7 +4237,7 @@ func step(dt: float) -> void:
 	_prof("pre")
 	for h in hunters:
 		if h.ctrl == "bot" and not h.remote and not h.out and not h.extracted:
-			bot_brain.think(self, h, dt)
+			bot_brain.tick(self, h, dt)
 	Capture.tick(self, dt)          # a running scan roots its hunter, after the bots have decided
 	_prof("bots")
 	if skytrain: skytrain.tick(dt)
