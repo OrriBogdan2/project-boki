@@ -4,10 +4,11 @@ extends RefCounted
 ## anchors fall back from the model's node to the Gun to the body; pools and live particles stay capped; distance
 ## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game.
 
-const MAX_LIFE := 2.2          # s a look may linger (owner item 96: no long-lived noise)
+const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
-const KIT_CALLS := {"juggernaut": ["res://scripts/arch/kits/juggernaut_kit.gd", "res://scripts/arch/kits/juggernaut_chain.gd",
-		"res://scripts/arch/kits/juggernaut_drop.gd", "res://scripts/arch/kits/juggernaut_ult.gd"]}
+const KIT_CALLS := {"juggernaut": [
+	"res://scripts/arch/kits/juggernaut_kit.gd", "res://scripts/arch/kits/juggernaut_chain.gd",
+	"res://scripts/arch/kits/juggernaut_drop.gd", "res://scripts/arch/kits/juggernaut_ult.gd"]}
 
 var bad := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()
@@ -47,8 +48,10 @@ func _recipes(arch: String) -> void:
 		for hit in re.search_all(FileAccess.get_file_as_string(path)):
 			called[hit.get_string(1)] = true
 	var missing := called.keys().filter(func(k): return not moves.has(k))
-	ok(called.size() >= 30 and missing.is_empty(), "%s: all %d moves its kit calls have recipes %s" % [arch, called.size(), missing])
-	var unused := moves.keys().filter(func(k): return not called.has(k) and not k in ["hurt", "downed", "guard_shell"])
+	ok(called.size() >= 30 and missing.is_empty(),
+			"%s: all %d moves its kit calls have recipes %s" % [arch, called.size(), missing])
+	var own := ["hurt", "downed", "guard_shell"]
+	var unused := moves.keys().filter(func(k): return not called.has(k) and not k in own)
 	ok(unused.is_empty(), "%s: no recipe is left unused %s" % [arch, unused])
 	var pal: Dictionary = d["palette"]
 	var bad_sound: Array = []
@@ -57,13 +60,14 @@ func _recipes(arch: String) -> void:
 	var flat_only: Array = []
 	for mv: String in moves:
 		for s: Dictionary in moves[mv].get("sfx", []):
-			if not ResourceLoader.exists("res://audio/%s.wav" % s["n"]) and not ResourceLoader.exists("res://audio/%s_1.wav" % s["n"]):
+			if not _sound_exists(String(s["n"])):
 				bad_sound.append(s["n"])
 		for layer: Dictionary in moves[mv].get("fx", []):
 			for key in ["c", "c2", "c3"]:
 				if layer.has(key) and not pal.has(layer[key]):
 					bad_col.append(layer[key])
-			if float(layer.get("life", 0.0)) > MAX_LIFE or (layer["p"] == "flare" and float(layer.get("size", 0.0)) > MAX_FLARE):
+			var flare_big: bool = layer["p"] == "flare" and float(layer.get("size", 0.0)) > MAX_FLARE
+			if float(layer.get("life", 0.0)) > MAX_LIFE or flare_big:
 				over.append(mv)
 			if not (HeroVfx.MODES.has(layer["p"]) or HeroVfx.LOOKS.has(layer["p"])):
 				flat_only.append(layer["p"])
@@ -77,10 +81,13 @@ func _recipes(arch: String) -> void:
 			var st: Variant = Sfx.streams.get(s["n"], null)
 			if st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode != AudioStreamWAV.LOOP_DISABLED:
 				loops.append(s["n"])
-	ok(loops.is_empty(), "%s: every sound is a one-shot, nothing can outlive the match (item 103) %s" % [arch, loops])
+	ok(loops.is_empty(), "%s: every sound is a one-shot, nothing can outlive the match %s" % [arch, loops])
 	for surface in ["grass", "stone", "snow", "wood"]:
 		ok(HeroVfx.step_sound(arch, surface) != "step_" + surface and Sfx.has(HeroVfx.step_sound(arch, surface)),
 				"%s has its own %s footstep" % [arch, surface])
+
+func _sound_exists(sname: String) -> bool:
+	return ResourceLoader.exists("res://audio/%s.wav" % sname) or ResourceLoader.exists("res://audio/%s_1.wav" % sname)
 
 ## Model node, then the Gun, then the body. Works on today's model and on one with the named anchors.
 func _anchors(V: HeroVfx, P: Hunter) -> void:
@@ -97,7 +104,8 @@ func _anchors(V: HeroVfx, P: Hunter) -> void:
 		host.add_child(fake)
 		fake.global_position = P.pos + Vector3(1, 2, 3)
 		V._anchors.clear()
-		ok(V.anchor_pos(P, "blade_tip").distance_to(fake.global_position) < 0.001, "a model's own anchor_blade_tip wins")
+		var seen := V.anchor_pos(P, "blade_tip")
+		ok(seen.distance_to(fake.global_position) < 0.001, "a model's own anchor_blade_tip wins")
 		host.remove_child(fake)
 		V._anchors.clear()
 	fake.free()
@@ -170,10 +178,11 @@ func _holds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 func _view(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(is_equal_approx(V.view_k(P), 1.0), "your own effects at full")
 	var keep: Hunter = m.player
-	var ally: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, P.pos + Vector3(3, 0, 0), {"arch": "none"})
-	var foe: Hunter = m.make_hunter("B", P.team + 1, "medium", "Foe", "idle", {}, P.pos + Vector3(-3, 0, 0), {"arch": "none"})
-	ok(is_equal_approx(V.view_k(ally), HeroVfx.ALLY_K), "an ally's effects sit at ALLY_K (item 96)")
-	ok(is_equal_approx(V.view_k(foe), 1.0), "an enemy's effects at full (item 96)")
+	var none := {"arch": "none"}
+	var ally: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, P.pos + Vector3(3, 0, 0), none)
+	var foe: Hunter = m.make_hunter("B", P.team + 1, "medium", "Foe", "idle", {}, P.pos + Vector3(-3, 0, 0), none)
+	ok(is_equal_approx(V.view_k(ally), HeroVfx.ALLY_K), "an ally's effects sit at ALLY_K")
+	ok(is_equal_approx(V.view_k(foe), 1.0), "an enemy's effects at full")
 	ok(keep == m.player, "the viewer is unchanged")
 
 ## The kit really goes through the shared helper, and with the own look the shared cast language stays out.
