@@ -25,7 +25,8 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `cast_on_press` | Controls > How keys behave | `match.gd` | moved from Gameplay: it's about how a key press acts |
 | `dash_to_cursor` | Controls > How keys behave | `hunter.gd` | moved from Gameplay |
 | `crouch_toggle` | Controls > How keys behave | `match.gd`, `home.gd` | moved from Gameplay, renamed "Tap to sneak" (the action is Sneak) |
-| `keys`, `keys_v`, `keys2_v`, `keys3_v` | Controls (bindings) | `settings.gd` | internal version markers stay |
+| `keys`, `keys_v`, `keys2_v` ... `keys5_v` | Controls (bindings) | `settings.gd`, `key_migrate.gd` | internal version markers stay; step 5 moved middle mouse from the Boki key to Ping |
+| `reticle_shape`, `reticle_size`, `reticle_col`, `reticle_alpha`, `reticle_outline` | Gameplay > Reticle | `reticle.gd` | the aiming reticle's style (`--reticle-check`) |
 | `cam_style` | Camera | `cam.gd`, `match.gd` | new Camera tab (was a Gameplay group) |
 | `cam_follow` | Camera | `cam.gd`, `match.gd` | |
 | `cam_lead` | Camera | `match.gd` -> `cam.gd` | |
