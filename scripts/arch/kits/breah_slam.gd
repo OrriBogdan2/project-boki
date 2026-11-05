@@ -52,7 +52,9 @@ func hold_tick(t: float) -> void:
 	if t <= float(k.rmb_def()["hold"]):
 		return
 	var c := charge_k(t)
-	if k.anim_id != "breah_crouch" and not leapt: k.play("breah_crouch")
+	if k.anim_id != "breah_crouch" and not leapt:
+		k.play("breah_crouch")
+		k.vfx("eye_flare")
 	AimKit.sweet(
 		h, "rmb",
 		{
@@ -67,10 +69,7 @@ func hold_tick(t: float) -> void:
 		var at := h.pos + Vector3(dd.x * 0.3 - dd.y * 0.32 * side, 0.75, dd.y * 0.3 + dd.x * 0.32 * side)
 		var hot := DolmKit.MOLTEN.lerp(Color("ffc23a"), c)
 		looks.hold_on("br_slamfist%d" % int(side), "mote", h, at, 0.8 + 1.0 * c, hot)
-	if fmod(k.m.time, 0.12) < 1.0 / 60.0:
-		k.m.fx.spark(
-			h.pos + Vector3(0, 0.2, 0), Vector3.UP, DolmKit.MOLTEN, int(2 + 4 * c), 2.0 + 2.0 * c, 70.0, 0.3, -2.0, 0.8
-		)
+	HeroVfx.of(k.m).hold(h, "slam_charge", c)
 	# jump while charging: leap forward, the circle rides along
 	if not leapt and was_ground and not h.grounded and h.vel.y > 0.5:
 		leapt = true
@@ -78,7 +77,7 @@ func hold_tick(t: float) -> void:
 		arc(float(sd()["leap"]), maxf(h.vel.y, float(sd()["leap_up"])), dd)
 		k.play("breah_leap")
 		k.m.sfx("br_leap", h.pos, -3.0, 1.0)
-		k.m.fx.dust(h.pos, 8)
+		k.vfx("leap")
 
 ## A punch pressed during the charge: a lunge forward (the source's "punch to extend").
 func extend() -> void:
@@ -89,7 +88,7 @@ func extend() -> void:
 	k._lunge(float(sd()["lunge"]), 0.12, k.h.aim_dir())
 	k.play("breah_lunge")
 	k.m.sfx("br_shove", k.h.pos, -5.0, 1.2)
-	k.m.fx.dust(k.h.pos, 6)
+	k.vfx("dust_step")
 
 func fire(c: Dictionary) -> void:
 	var h := k.h
@@ -118,7 +117,7 @@ func fire(c: Dictionary) -> void:
 	hops += 1
 	k.dive_fall = false
 	k.play("breah_slam")
-	k.m.fx.dust(h.pos, 8)                # the push-off kicks up the ground she leaves
+	k.vfx("dust_step")                   # the push-off kicks up the ground she leaves
 	k.m.sfx("br_leap", h.pos, -6.0, 1.15)
 	arc(float(sd()["reach"]), float(sd()["hop_up"]), h.aim_dir())
 
@@ -150,15 +149,8 @@ func slam(c: float, at_feet: bool) -> void:
 	var r := radius(c)
 	var cr := core(c)
 	var dmg := lerpf(float(s["dmg"][0]), float(s["dmg"][1]), c) * k.power("sec")
-	m.fx.ring(at, cr, Color("ffb020"), 0.22)
-	m.fx.burst(at + Vector3(0, 0.3, 0), Color(1.0, 0.45, 0.1, 0.9), int(16 + 20 * c), 6.0 + 3.0 * c, 0.6, 8.0, 1.3)
-	m.fx.spark(
-		at + Vector3(0, 0.2, 0), Vector3.UP, Color("ffb347"), int(10 + 10 * c), 9.0 + 4.0 * c, 75.0, 0.35, 14.0, 1.3
-	)
-	m.fx.flash(at + Vector3(0, 0.5, 0), Color("ff8a2c"), 0.6 + 0.3 * c, 0.08)
-	KitLooks.of(m).impact(at, r, c, float(s["scorch_t"]))
+	k.vfx("quakefall", at, h.aim_dir(), {"r": r, "k": c})
 	m.sfx("br_slam", at, 0.0, 1.0)
-	k.net_ring(at, r, Color("ff5a2a"))
 	var gained := false
 	for f in k.foes_in(at, r, 3.2):
 		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
@@ -176,7 +168,7 @@ func slam(c: float, at_feet: bool) -> void:
 			o.erase("lift")
 			k.dunks += 1
 			m.fx.word(f.pos + Vector3(0, 2.0, 0), "DUNKED", Color("ffb36a"), true)
-			m.fx.beam(f.pos, f.pos + Vector3(0, 6.0, 0), Color("ffe08a"), 0.5, 0.3)
+			k.vfx("dunk", f.pos)
 		f.hurt(d2, h, o)
 		if in_core: KitLooks.of(m).crown(f, float(o["stun"]))
 		if air:

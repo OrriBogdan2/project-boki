@@ -346,11 +346,10 @@ func _breah() -> void:
 	var hx := P.pos.x
 	var walls0: int = m.verbs.walls.size()
 	P.inp["sec_hold"] = false
+	var V := HeroVfx.of(m)
+	var quakes0 := int(V.plays.get("quakefall", 0))
 	var hop := _hop(m, P, K)
-	var looks := KitLooks.of(m)
-	var slam_looks := ["burst", "shard", "crater"].all(
-		func(kind): return looks.timed.any(func(e): return e["kind"] == kind)
-	)
+	var slam_looks := int(V.plays.get("quakefall", 0)) == quakes0 + 1 and _showing(V, "scorch") and _showing(V, "chunk")
 	step(m, 0.3)
 	ok(
 		"rmb (item 14): let go = a short hop, 1-1.5 body heights (1.8-2.7m) forward, off the ground, slam on landing",
@@ -377,8 +376,8 @@ func _breah() -> void:
 		"stun %.2f" % T.stun_t
 	)
 	ok(
-		"rmb: a molten starburst, rock chips flying, and the dark red crater lingering about 1s",
-		slam_looks and looks.timed.any(func(e): return e["kind"] == "crater")
+		"rmb: the slam's eruption, stone chunks flying, and the cracked ground still lingering 0.3s on",
+		slam_looks and _showing(V, "scorch")
 	)
 	var d_full := dmg(T)
 	reset.call()
@@ -859,10 +858,12 @@ func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, rese
 				K.anim_id == "breah_exdash" and String(P.anim_s.get("dash_kind", "")) == "kit",
 				"anim %s kind %s roll %.2f" % [K.anim_id, str(P.anim_s.get("dash_kind")), P.roll_t]
 			)
-		var seen: Array = m.fx.rings.duplicate() + KitLooks.of(m).timed.duplicate()
+		var V := HeroVfx.of(m)
+		var seen: Array = m.fx.rings.duplicate() + V.live.duplicate()
 		var blasts := [0]
 		step(m, 0.9, func():
-			for e in m.fx.rings + KitLooks.of(m).timed.filter(func(e): return e["kind"] in ["burst", "crater"]):
+			var ground_looks := V.live.filter(func(e): return _blast_kind(V, e["node"]))
+			for e in m.fx.rings + ground_looks:
 				if not seen.any(func(o): return is_same(o, e)):
 					seen.append(e)
 					blasts[0] += 1)
@@ -870,6 +871,17 @@ func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, rese
 			"item 35: her %s dash draws no ground ring and no blast" % ("air" if air else "ground"),
 			blasts[0] == 0, "rings/blasts %d" % blasts[0]
 		)
+
+## Whether a HeroVfx look of `kind` (a layer kind: "scorch", "chunk"...) is showing now.
+func _showing(V: HeroVfx, kind: String) -> bool:
+	return (V.pools.get(kind, []) as Array).any(func(n): return (n as Node3D).visible)
+
+## A HeroVfx look that reads as a ground ring or a blast: a scorch, a swirl, a flare or a wall of flame.
+func _blast_kind(V: HeroVfx, node: Node3D) -> bool:
+	for kind in ["scorch", "vortex", "flare", "skirt"]:
+		if (V.pools.get(kind, []) as Array).has(node):
+			return true
+	return false
 
 ## Rubble Leap (owner's dash note: a leap, not the source's odd dash): the rock first, an arc to the cursor
 ## clamped by the dash feel, the landing marker for everyone, the landing crash, then the rock's roll-on hit.
