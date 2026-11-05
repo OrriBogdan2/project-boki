@@ -14,7 +14,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `hide_while_chain`: bones that shrink away while a kit sets the root meta `chain_out` (a runtime piece of the weapon).
 - `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
-- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
+- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `fade` (s, a slower blend into a far pose), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.

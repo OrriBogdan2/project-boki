@@ -1061,7 +1061,7 @@ class Springs:
 				var r: Transform3D = rest[j]
 				var a := inv * pts[j]
 				var from := ((rest[j + 1] as Transform3D).origin - r.origin).normalized()
-				if ch["hang"]:       # (off the model's own rest, not the parent's: the fist's turn doesn't twist the hook edge on)
+				if ch["hang"]:       # (off the model's own rest: the fist's turn doesn't twist the hook edge on)
 					r = skel.get_bone_global_rest(int(ids[j]))
 					from = (skel.get_bone_global_rest(int(ids[j + 1])).origin - r.origin).normalized()
 				var to := (inv * pts[j + 1] - a).normalized()
