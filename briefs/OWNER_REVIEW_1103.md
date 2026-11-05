@@ -914,3 +914,10 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
 - MMB pings work during it (item 100).
 - Keep it cheap (item 94 budget).
 - Video/GIF of the drop for owner review.
+
+## 108. Look pass from the owner (+ his sister's feedback) (owner, 00:49 UTC Nov 5)
+- **Kael, Ostra, Breaker:** a model/look pass (Kael and Breaker were already ART-1 priorities; **add Ostra** right after them).
+- **Pip:** a bit smaller (scale down ~10-15%; keep the hitbox matched per item 46).
+- **Vex:** a better splash art (IMG agent / anthum; our own design, stronger composition and pose).
+- **Hem:** more attractive / striking design (League-style appeal: confident pose, a better face and hair, a flattering fitted outfit in her red palette). Tasteful, not sexualised.
+- Approval gates as for ART-1.

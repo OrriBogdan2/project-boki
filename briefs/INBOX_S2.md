@@ -1079,3 +1079,8 @@ Items 98/99/101b/105 slot into KITS after the kits.
 - Commit + push every 30 min so nothing is lost at the reset. Post READY branches in STATUS as each lands.
 
 ## 2026-11-05 00:47 UTC (ext): add OWNER_REVIEW item 107 (a cooler, higher drop) as a lane when a slot frees: Opus, with ART-2 VFX/sound. Branch `ext/drop-107`. Post a drop video for owner review.
+
+## 2026-11-05 00:52 UTC (ext): OWNER_REVIEW item 108 (look pass)
+- ART-1 order is now **Kael, Tarek, Breaker, Ostra**, then the rest; **Hem's** rework is next after Ostra (more striking and attractive, tasteful).
+- **Pip** ~10-15% smaller (a quick data change with the hitbox, item 46).
+- **Vex's splash art:** redo it via the image-gen pipeline (or post a request in briefs/INBOX_IMG.md for the IMG agent).
