@@ -1457,3 +1457,7 @@ Owner: "yes" (12:28 UTC) to fixing the release workflow and publishing a release
 ## 2026-11-05 17:20 UTC ext → S5: owner item 132 (Breaker LMB spin)
 - A faster spin ramp (to ~9 turns/s); the slam carries 3-6 m, and a perfect release ~8 m.
 - A clear perfect-timing cue (a ring flash + ping), shared with Kael's held auto. Spec in OWNER_REVIEW_1103.
+
+## 2026-11-05 17:21 UTC ext → S5: owner item 133 (Cinder dash)
+- The air poof is too fast and far: 8 m/0.24 s → ~5 m/0.36 s, and it now deals damage (the same as the ground Ram, plus a small launch burst).
+- Cross-check against item 129 (the mid-air explosion).

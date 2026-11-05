@@ -1322,3 +1322,20 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Turns/s at full ≥ 8.
   - Normal full carry ≥ 5 m; a perfect release ≥ 7.5 m.
   - The window fx/sfx fire once per hold.
+
+## 133. Cinder (the "pyromancer") dash: slower, shorter, and it always deals damage (owner, 17:16 UTC Nov 5)
+- The owner: "pyromancer dash is too fast and takes her too far - it should also do dmg".
+- Today (ashwick.json dash, Soot Ram):
+  - Ground: 3.4 m / 0.28 s, stops on the first foe for 16 damage + shove + 17 Char.
+  - Air: an 8 m / 0.24 s poof (~33 m/s) with no damage.
+  - The ground one already deals damage, so the complaint is the air poof (ext's reading). Apply the feel to both.
+- **Change:**
+  - Air poof: 8 m → ~5 m and 0.24 → ~0.36 s (~14 m/s); keep a little momentum (air_keep 0.5 → 0.3).
+  - Ground: unchanged distance; ease the start burst so it reads less snappy (tune).
+  - **Damage on both:** the air poof hits the first foe it meets the same way the ground Ram does (16 + shove + 17 Char, stops on them).
+    - Plus a small soot burst at the launch point: ~1.5 m, 6 damage, Char 5. It fits the "poof".
+  - Check whether the poof's smoke cloud is the "weird explosion in air" from item 129. If it's oversized or misfiring on other heroes, fix it there.
+- **Assert:**
+  - Air dash distance ≤5.5 m and speed ≤15 m/s.
+  - An air dash into a foe → a damage event + Char.
+  - A ground dash is unchanged.
