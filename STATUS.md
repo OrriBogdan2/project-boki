@@ -599,3 +599,7 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: Pip and Claire full sets in
 - pip_turnaround, pip_portrait, claire_portrait received. Add Pip and Claire to ext/portraits-six when a slot frees; ART-1 Pip and Claire have full refs.
+
+## 2026-11-05 S2: Sable upgrade received
+- sable_FINAL_sheet, sable_turnaround_apose, sable_portrait, sable_splash logged: twin flintlock pistols replace her crossbows (visual, VFX and sound only; kit numbers unchanged).
+- Next small lane when a slot frees: on ext/rename-lisette, "crossbows" -> "pistols" in kit text; on ext/portraits-six, add Pip, Claire and Sable. ART-1 Sable queued after Pip.
