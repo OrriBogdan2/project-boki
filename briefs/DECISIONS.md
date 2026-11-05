@@ -144,3 +144,4 @@ Full canon: briefs/LORE_MASKS.md. This replaces the Nov 3 draft (the chained gir
 
 - 2026-11-05: Boki dash riders are removed. Dashes are purely the hero's own; Boki act only through their own abilities. Reason: the purple "explosion" (Gravadillo's Gravity Wake) on every dash was confusing and unexplained.
 - 2026-11-05: No random weapon stat bonuses on level-up (Hotload, Long Reach, etc.); level-ups only rank abilities, as in SUPERVIVE. The owner found them confusing and they blocked the HUD.
+- 2026-11-05: The UI style is "Void & Masks" (briefs/UI_STYLE.md; refs in art-refs/ui/ui_style_void_A2_base.png + A1_alt) for ALL UI, the title screen included. The match HUD borrows the palette, edges and fonts but stays minimal.

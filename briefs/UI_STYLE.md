@@ -1,4 +1,4 @@
-# UI style: "Void & Masks" (owner direction 2026-11-05; ext's pick of the base, pending a final owner nod)
+# UI style: "Void & Masks" (OWNER-APPROVED 2026-11-05 18:35 UTC: "make all the ui like this - including title screen / everywhere")
 
 **References:**
 - **Base:** `briefs/art-refs/ui/ui_style_void_A2_base.png`.
@@ -29,3 +29,8 @@
   - a void portrait window (a starfield shader + a crack overlay),
   - a stamp label.
 - Rollout: the hatch flow (157) → the Boki list/sheet (174) → the Black Market (170) → home panels → everything else. The HUD in matches stays clean and minimal (only borrow colours/edges).
+
+## Scope (owner-approved): EVERYTHING
+- The title screen / main menu: the logo over a blurred broken-isle dusk with drifting void specks; the menu items as stacked torn parchment strips or ticket stubs with the neon edge on hover; no subtext (item 155).
+- Loading screens, settings, the pause menu, the creator, hatch/naming, the Boki list/sheet, the Black Market, Market, Build menu, Hob dialogue box, tutorial prompts/keycaps, results/extract screens, the Masks screen, toasts.
+- The match HUD: the same palette, edges and fonts, but kept minimal and readable (no parchment clutter over gameplay).
