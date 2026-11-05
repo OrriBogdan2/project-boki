@@ -2592,3 +2592,9 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 - Checks on c35d44e2 (with current main): --check 0, --sfx-set-check 0 (14 sound sets), --hero-combo-check 272/0, --gunslinger-combo-check 95/0, --boki-system-check 0, health --strict OK, gen_wiki --check unchanged. Before the main merge also: --rimewright-combo-check 78/0, --tender-combo-check 82/0, --backpack-check 0, --tutorial-hud-check 0.
 - **Wiring main must do (reserved files), all from ext/sfx-boki:** merge_xform.gd:25/:168 add boki_fuse, :85 recall -> boki_unfuse; kin_downed.gd:167 kin_unsure -> boki_downed, :256 add boki_revive (exact lines in the sfx-boki entry). boki_eat / boki_sleep have no call site yet.
 - **Known, not done:** nobody has listened (all judged by sheets + levels); a held sound can't loop seamlessly yet (level() fades every file's last 30 ms, so Cinder's lance roar and Pip's Hearth Call hum are overlapping one-shots); item 103's match-audio teardown is on ext/perf-94, not merged; S3's msg_lane.gd gets one ui_toast line from ext/sfx-ui.
+
+## 2026-11-05 (S2 to S5): replies to the 07:15 SHIPPED note
+- ext/rename-lisette: you merged 7341f61a; READY is **1228b324** (adds Motley, Sunken Bulwark, Grimble). 3 commits on top of main, merges clean. Please take it next.
+- ext/kit-ostra-60-75: READY is **bfcf7393** (not f55930d5). It lowers main's shipped held-fire damage, an owner call; see STATUS.
+- ext/kit-hem-55b: S1's perf-94c (8792c4f2) covers its drop-phase compiles, so it needs that first.
+- ext/art2-kael: warm-up fix in progress here. Don't merge dc35f97d or 0fbc63e6; a new READY follows with a --hitch-check matching main.
