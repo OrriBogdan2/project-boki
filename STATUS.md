@@ -860,3 +860,6 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - bot-sanity is now flagged on Cinder and Motley; a lane is checking the shared runtime.
 
 ## 2026-11-05 S2: READY ext/kit-pip-118 94a90a69 (item 118); details in EXT_TO_MAIN. The charge is spent at the throw, so a stun loses the throw, not the charge: agent's call. Owner Q: spend it on the press?
+
+## 2026-11-05 S2: READY ext/art1-pip b5f8469b (replaces f9185186; contains ext/kit-pip-118; carries Kael art)
+- seed_aim 1.0 s, softer shading, thinner ink. 9 checks 0 FAIL lines (clip, rig-standard, warden-glb, warden-model, warden-stance, pip-live, clip-live, tender-combo, mantle-look), health --strict. Other 127 flags not rerun. Still more saturated than pip_head.png.
