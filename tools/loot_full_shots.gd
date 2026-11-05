@@ -25,8 +25,8 @@ func run(main_node: Node) -> void:
 	var p: Hunter = m.player
 	var q: Hunter = m.hunters.filter(func(x): return x != p)[0]
 	p.pack_cap = 3
-	p.pack = [Loot.valuable("old_coin"), Loot.valuable("kin_idol"), Loot.valuable("sky_pearl")]
-	var things: Array = [Loot.valuable("crown_shard"), Loot.valuable("old_coin")]
+	p.pack = [Loot.valuable("kin_idol"), Loot.valuable("sky_pearl"), Loot.valuable("crown_shard")]
+	var things: Array = [Loot.valuable("old_coin"), Loot.valuable("old_coin")]
 	var bx: Dictionary = load("res://tools/loot_full_check.gd").make_box(q, p.pos + Vector3(1.0, 0, 0), things)
 	bx["gems"] = 14
 	m.boxes.append(bx)
@@ -37,14 +37,14 @@ func run(main_node: Node) -> void:
 	m.hud.open_hold(row)
 	await _frames(6)
 	await _shot("hold_window", "Deathbox with a full backpack: the box (things that do not fit outlined red), "
-		+ "your backpack beside it, the clicked crown shard held in red, Swap and Drop on each of yours")
+		+ "your backpack beside it, the clicked old coin held in red, Swap and Drop on each of yours")
 	LootFull.swap_held(m, p, bx, int(row["i"]), 0)
 	m.hud.close_loot()
 	m.hud.open_loot(bx)
 	await _frames(6)
-	await _shot("after_swap", "After swapping: the old coin is now in the box, the crown shard in your backpack")
+	await _shot("after_swap", "After swapping: your Boki Idol is now in the box, the old coin in your backpack")
 	m.hud.close_loot()
-	m.spawn_val(Loot.valuable("crown_shard"), p.pos + Vector3(0.6, 0, 0))
+	m.spawn_val(Loot.valuable("old_coin"), p.pos + Vector3(0.6, 0, 0))
 	m.hud.open_swap(m.wpicks[m.wpicks.size() - 1])
 	await _frames(8)
 	await _shot("ground_full", "A ground item with a full backpack: the incoming item outlined red above your things")

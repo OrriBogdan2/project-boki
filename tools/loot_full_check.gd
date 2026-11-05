@@ -92,6 +92,12 @@ func run(main: Node) -> void:
 	m.boxes.append(bw)
 	m.hud.open_loot(bw)
 	ok(m.hud.loot_panel != null and is_instance_valid(m.hud.loot_panel), "the box window opens")
+	m.hud.open_hold(Life.box_items(m, P, bw)[0])
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	var lh: PanelContainer = m.hud.loot_hold
+	ok(lh != null and is_instance_valid(lh) and lh.visible, "clicking a thing that doesn't fit opens the hold window")
+	print("LOOTFULL hold pos=%s size=%s modulate=%s scale=%s" % [lh.position, lh.size, lh.modulate, lh.scale])
 	var noop := func(_i: int): pass
 	var hold := LootHold.build(P, bw["pack"][0], noop, noop, func(): pass)
 	var buttons := hold.find_children("*", "Button", true, false).filter(
