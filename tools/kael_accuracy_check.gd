@@ -79,9 +79,8 @@ func no_glide() -> void:
 		t += A.DT
 	var in_recover := K.riposte.running()
 	P.do_jump()
-	A.step(m, 0.15)
+	A.step(m, 0.3)
 	P.do_jump()
-	A.step(m, 0.05)
 	A.ok("jug 113.2: in the ult's last beat a jump and a glide input end the rest of it in a glide",
 			in_recover and P.gliding and not K.riposte.running(), "recover %s gliding %s ult %s" % [
 			in_recover, P.gliding, K.riposte.running()])
@@ -139,6 +138,20 @@ func e_free() -> void:
 		var r := await _throw_after(m, P, K, home, how)
 		A.ok("jug 113.5: RMB/dash north (%s) then E at once at the east: the hook flies at the cursor" % how,
 				r["state"] == "throwing" and (r["dir"] as Vector2).dot(Vector2(1, 0)) > 0.97, str(r))
+	# both work: the Slam started north still strikes north though the cursor has gone east with the throw
+	var T: Hunter = g["T"]
+	_fresh(m, P, K, home)
+	T.teleport(home + Vector3(0, 0, -3.2))
+	A.fresh(T)
+	A.aim_at(P, T.pos)
+	A.tap(m, P)
+	A.step(m, 0.1)
+	A.aim_at(P, home + Vector3(8.0, 0, 0))
+	K.use_e()
+	var thrown := K.warchain.state == "throwing"
+	A.step(m, float(K.rmb_def()["windup"]))
+	A.ok("jug 113.5: the Slam started north strikes north after E goes east (both work)",
+			thrown and A.dmg(T) >= 20.0, "thrown %s, foe took %.0f" % [thrown, A.dmg(T)])
 	await A.done(m)
 
 # ------------------------------------------------------------------ 6: the Meteor Drop straight down

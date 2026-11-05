@@ -42,7 +42,7 @@ var lmb_buf := 0.0
 var bot_wave_t := 0.0
 var slash_n := 0
 var slash_at := -9.0
-var slam_w := {}               # the Finishing Slam winding up: {t, warn}
+var slam_w := {}               # the Finishing Slam winding up: {t, dir (at the press), pinned (to dir: E went)}
 var lunge := {}                # the running Lunge: {end, dir, k, hit}
 var warchain: JuggernautChain  # E (its state machine)
 var meteor: JuggernautDrop     # the airborne Smash
@@ -747,7 +747,7 @@ func fire_rmb(c: Dictionary) -> void:
 		_lunge(lunge_k(held_t), perfect_window(held_t) >= 0)
 	else:
 		# the Finishing Slam winds up first (you keep aiming); everyone sees the warning over you
-		slam_w = {"t": float(rmb_def()["windup"])}
+		slam_w = {"t": float(rmb_def()["windup"]), "dir": h.aim_dir()}
 		play("jug_slam")                # keyed to the wind-up: the strike lands at 0.6s
 		m.sfx("jug_slam_wind", h.pos, -3.0, 1.0)
 
@@ -759,26 +759,30 @@ func _tick_slam(dt: float) -> void:
 	# the short magenta strike lane ahead of him, filling as the wind-up runs (everyone sees it)
 	var sl: Dictionary = rmb_def()["slam"]
 	var wk := 1.0 - clampf(float(slam_w["t"]) / float(rmb_def()["windup"]), 0.0, 1.0)
-	AimKit.lane(h, "slam",
-			{"len": float(sl["radius"]), "width": 1.9, "fill": wk, "col": SLASH_OUT, "all": true, "chevrons": 2})
+	var pin: Vector2 = slam_w["dir"] if slam_w.get("pinned", false) else Vector2.ZERO
+	var lane := {"len": float(sl["radius"]), "width": 1.9, "fill": wk, "col": SLASH_OUT, "all": true, "chevrons": 2}
+	if pin != Vector2.ZERO:
+		lane["dir"] = pin
+	AimKit.lane(h, "slam", lane)
 	if randf() < 0.5: m.fx.burst(h.pos + Vector3(0, 2.3, 0), Color("ff5a3a"), 1, 1.0, 0.25, 0.0, 0.8)
 	if float(slam_w["t"]) <= 0.0:
 		slam_w = {}
-		_slam()
+		_slam(pin)
 
 ## The Finishing Slam: a heavy cone; the wounded (under 35%) take +50%; a foe in the sweet spot (the far
 ## tip, dead ahead) is the payoff, and a knock on that foe within 2s makes the Gilded Riposte ready again.
-func _slam() -> void:
+func _slam(pin := Vector2.ZERO) -> void:
 	var sd := rmb_def()
 	var sl: Dictionary = sd["slam"]
-	var dd := h.aim_dir()
+	var dd := h.aim_dir() if pin == Vector2.ZERO else pin
 	var effs: Array = [{"type": "damage", "amount": float(sl["dmg"]) * smash_k()},
 			{"type": "push", "strength": float(sl["push"]), "from": "caster"}]
 	var stg := stage("rmb",
 			{"delivery": {"type": "cone", "radius": float(sl["radius"]), "angle": float(sl["angle"])}, "effects": effs})
 	var from := h.pos
 	var paid := {}
-	run(stg, cx("rmb", "finishing_slam", aim(), {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+	var at := aim() if pin == Vector2.ZERO else h.pos + Vector3(pin.x, 0, pin.y) * float(sl["radius"])
+	run(stg, cx("rmb", "finishing_slam", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return
 		if not f.dead and f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
 			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["low_k"]) * power("sec"), h,
@@ -1006,6 +1010,8 @@ func e_recastable() -> bool:
 
 ## E: throw the chain, or pull yourself along it (JuggernautChain.press).
 func use_e() -> void:
+	if not slam_w.is_empty() and warchain.state == "ready":
+		slam_w["pinned"] = true        # owner 113.5: the cursor moved on to the throw, the Slam goes where it was started
 	if warchain.hooked() and riposte.move_k() <= 0.0 and not super.busy():
 		riposte.pull_through()         # owner 113.7: the held chain hauls him in, the ult's strike on the way
 		return
