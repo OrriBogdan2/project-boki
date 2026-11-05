@@ -117,8 +117,8 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	return true
 
 ## "weapon_out": {"clip", "bones"}: an arm pose laid over everything while the weapon is out of the hand; "weapon_bone"
-## scales to zero meanwhile. "bone_scale": {bone: size}: a skinned weapon's size against the sheet (item 137), the skinned
-## twin of warden_look "weapon_scale": the bone and all it carries, its empties included.
+## scales to zero meanwhile. "bone_scale": {bone: size}: a skinned weapon's size against the sheet (item 137), the
+## skinned twin of warden_look "weapon_scale": the bone and all it carries, its empties included.
 func _setup_out() -> void:
 	weapon_bi = WardenSkeleton.find(skel, String(d.get("weapon_bone", ""))) if d.has("weapon_bone") else -1
 	var sizes: Dictionary = d.get("bone_scale", {})

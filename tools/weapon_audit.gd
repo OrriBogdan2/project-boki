@@ -19,7 +19,8 @@ const ITEMS := {
 	"mage": [],
 	"ostra": [["orb", ["x_weapon"], []]],
 }
-const LABEL := {"ashwick": "Cinder", "rimewright": "Claire", "juggernaut": "Kael", "thief": "Sable", "gunslinger": "Vex",
+const LABEL := {"ashwick": "Cinder", "rimewright": "Claire",
+	"juggernaut": "Kael", "thief": "Sable", "gunslinger": "Vex",
 	"dredge": "Grimble", "archer": "Lisette", "bulwark": "Breaker", "tender": "Pip", "dolm": "Tarek", "mage": "Ryzz",
 	"ostra": "Motley"}
 ## arch -> [body ref file, rect (orig px)], [weapon ref file, rect]
