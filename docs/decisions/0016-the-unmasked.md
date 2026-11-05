@@ -42,3 +42,16 @@ before the egg: after you name your Boki, Vex's Mask drifts to you and you put i
 with the name and title; content/rules/mask_moment.json). The second Mask comes from Hob on the farm after
 the first expedition (`HobTalk`, `HobOffer`: a pick of Kael, Pip or Cinder in conversation, then a short
 Mask moment).
+
+## Update: the shroud, the void head, the aura, the soles (owner, Nov 4, items 77-81)
+- The whole head is the void (`void_face.gdshader`: a dim starfield all round with a lit edge); the hollow's socket
+  and ghost features float on it. The heart on the chest is gone: the body is wrapped in a **shroud** (collar,
+  mantle, drape to the ankles, a cowl), in three styles (Cloak, Wrap, Tatters), and head, neck and hands are the
+  void colour: no skin shows, so there is no skin colour. `look["colour"]` is now the **shroud colour** (an old
+  skin colour keeps its slot index), `look["shroud"]` the style (from the old outfit), `look["aura"]` (from the
+  old motes). `Unmasked.clean` migrates all three; old saves load.
+- **Aura** (None / Faint / Strong, tooltip "Glowing specks that drift around you"): big bright specks that swirl
+  round the head, shoulders and shroud.
+- **Soles**: `FootPlant.reach` gives HunterAnim the real lowest boot point so the hips drop or lift until the sole
+  meets the ground, standing and walking, at every height, build and sex (`--unmasked-check` asserts 2 cm).
+- Prologue captions wrap inside 86% of the width and grow upward from the bottom, never off screen.

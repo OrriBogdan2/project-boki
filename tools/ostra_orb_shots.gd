@@ -46,7 +46,7 @@ func _pair() -> void:
 	out.blit_rect(a, Rect2i(Vector2i.ZERO, a.get_size()), Vector2i.ZERO)
 	out.blit_rect(b, Rect2i(Vector2i.ZERO, b.get_size()), Vector2i(a.get_width() + 4, 0))
 	out.save_png(dir.path_join("ostra_orb_pair.png"))
-	lines.append("ostra|ostra_orb_pair.png|Ostra's LMB (item 60): left, a quick orb fired right after the last; "
+	lines.append("ostra|ostra_orb_pair.png|Motley's LMB (item 60): left, a quick orb fired right after the last; "
 		+ "right, the orb after waiting the full 1.4s (bigger, brighter, faster)")
 
 ## A full orb passing a wall between him and the dummy.

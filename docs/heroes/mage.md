@@ -144,7 +144,7 @@ slot changes. R reloads and the Boki Merge is on its own key (T by default).
 ## Engine notes
 - Kit `scripts/arch/kits/mage_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd` + `shaders/vv_fx.gdshader`;
   moves `scripts/match/kmoves_vv.gd`; the finger-gun hold `"finger"` in `HunterAnim.HOLDS`; the wrist
-  coil `scripts/match/hero_arms_vv.gd`; sounds `tools/gen_vv_sfx.py` (pure Python) listed in `VVSfx.NAMES`.
+  coil `scripts/match/hero_arms_vv.gd`; sounds `tools/gen_sfx_ryzz.py` listed in `VVSfx.NAMES` and content/sfx/mage.json.
 - Telegraphs and cursor states through AimKit (docs/AIMKIT.md). No Net change.
 - Kitefall: `scripts/arch/kits/mage_ult.gd` (MageUlt), on the shared ult base `scripts/arch/hero_ult.gd` (HeroUlt: the
   cooldown in `cd["x"]`, the recast, one bond id per cast, KinBond.from_ult on a land). X reaches

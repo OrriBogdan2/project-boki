@@ -993,7 +993,7 @@ func toggle() -> void:
 		return
 	cat = "Buildings"      # B always opens on Buildings
 	_enter()
-	Sfx.play("whoosh", null, -8.0)
+	Sfx.play("ui_open", null, -8.0)
 	_build_bar()
 
 ## Takes the catalog bar, the key hints and any open menu off the screen.

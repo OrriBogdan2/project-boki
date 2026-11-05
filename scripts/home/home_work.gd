@@ -704,6 +704,7 @@ func _finish(k: Dictionary, J: Dictionary) -> bool:
 	var lv := int(J["lv"])
 	var at: Vector3 = J["look"]
 	var nm := String(rec["name"])
+	Sfx.play("boki_work", at, -8.0, 0.1, Unique.voice(rec))
 	rec["trust"] = minf(100.0, float(rec["trust"]) + 0.15)
 	match String(J["kind"]):
 		"build":
