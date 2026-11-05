@@ -4,11 +4,11 @@ extends ArchKit
 ##
 ## - LMB (War Hammer): tap throws the hammer to the cursor (clamped to its range; it passes through foes
 ##   and stays planted under a gold beacon, showing foes near it to your team, until you tap again to
-##   call it back, hitting on the way). Hold drags the hammer back low behind him, side-on and crouched,
-##   turning with the cursor (a glint on its head from 0.6 s); at full (1.25 s) he coils deepest, and a flash
-##   on its head and a click open the perfect window. Let go and it's a Crushing Blow: a flaming 180 degree
-##   crescent in front that steps him forward with it; let go in the window and it's the perfect swing, a
-##   leaping launch (BjornLaunch).
+##   call it back, hitting on the way). Hold whirls the hammer round him at arm's length, turning faster as it
+##   charges (a glint on its head from 0.6 s, no damage until he lets go); at full (1.25 s) a flash
+##   on its head and a click open the perfect window, the whirl still going. Let go and it's a Crushing Blow: a
+##   flaming 180 degree crescent in front that steps him forward with it; let go in the window and it's the
+##   perfect swing, a leaping launch (BjornLaunch).
 ## - RMB: hold to raise his aegis (its own HP, regenerates); letting go only lowers it.
 ## - Dash: 360 Smash, a short dash that ends in one full spin hit around him; with the aegis raised it's
 ##   the Shield Charge (the Bash: invulnerable for its length, a heavier knock) on the RMB slot's own cooldown.
@@ -37,6 +37,7 @@ var fx: BjornFx                # Breaker's pooled effects
 var ult: BjornUlt              # X: Faultline
 var launch: BjornLaunch        # the perfect swing's launch
 var flared := false            # this hold's full-charge flare has gone off
+var spin := 0.0                # the whirled hammer's angle (rad), counted on match time (BjornFx draws it)
 var throws := 0                # (checks) hammers thrown, and the last throw's landing distance
 var throw_d := 0.0
 var slams := 0                 # (checks) Crushing Blows let go, the last one's charge and carry start
@@ -418,16 +419,23 @@ func cancel_hold() -> void:
 			anim_id = ""
 	hold_blocked = bool(h.inp.get("fire", false))
 
-## The swing held: the hammer dragged back behind him (BjornFx, one whoosh as it goes back), the glint from
-## 0.6 s; at full he coils deepest and the perfect window opens with a flash on its head, a click and the
-## cursor ring's flare (the glint burns hot until the window shuts); the body keeps facing the cursor (Hunter
-## faces its aim).
+## The swing held: the hammer whirls round him (BjornFx draws it; the angle is counted here on match time, the
+## rate is lmb.spin_turns from no charge to full, a whoosh each turn), the glint from 0.6 s; at full the perfect
+## window opens with a flash on its head, a click and the cursor ring's flare (the glint burns hot until the
+## window shuts); the body keeps facing the cursor (Hunter faces its aim). The whirl itself never hits.
 func _hold_tell() -> void:
 	if lmb_t < float(lmb_def()["tap"]):
 		return
 	var k := smash_k()
-	fx.hold(lmb_t, k, launch.in_window(lmb_t))
+	if not fx.held:
+		spin = h.face         # (the head leaves from in front of him)
+	var was := spin
+	var rate: Array = lmb_def()["spin_turns"]
+	spin += TAU * lerpf(float(rate[0]), float(rate[1]), k) * Match.DT
+	fx.hold(lmb_t, k, launch.in_window(lmb_t), spin)
 	AimKit.charge(h, k, {"col": Color("ffc94a"), "col2": Color("fff1c0"), "flare": false})
+	if floori(spin / TAU) > floori(was / TAU):
+		m.sfx("bjorn_spin", h.pos, -9.0 if h.is_local() else -13.0, lerpf(0.9, 1.25, k))
 	if k >= 0.99 and not flared:
 		flared = true
 		fx.full_flare()
