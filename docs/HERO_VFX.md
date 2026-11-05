@@ -38,7 +38,8 @@ hot, char), `near` (dropped past LOD_NEAR). Sounds: `n`, `db`, `other` (extra dB
 
 ## FX anchors
 `"anchors"` in the data names points on the Hero. Each resolves in order: `nodes` (empties on the .glb, e.g.
-`anchor_blade_tip`, or `weapon_muzzle`), `gun` (a point in the Gun node's space), `body` ([side, up, forward] from the feet along
+`anchor_blade_tip`, or `weapon_muzzle`), `bone` (a contract bone such as `hand.R`, `forearm.L`, `head`, with `off`
+[x, y, z] in the bone's space: follows the live pose on any .glb model), `gun` (a point in the Gun node's space), `body` ([side, up, forward] from the feet along
 the aim). So a look works on today's model and picks the new anchors up when a model ships them. `docs/RIG_STANDARD.md` lists
 the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_hand`, `anchor_feet` when present.
 

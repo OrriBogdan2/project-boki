@@ -21,7 +21,8 @@ const OWN := ["hurt", "downed", "guard_shell"]      # moves played from shared c
 ## The synthetic recipes the runtime parts play: one layer of every kind.
 const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008", "smoke": "#404040"},
 	"anchors": {"tip": {"nodes": ["anchor_test_tip"], "gun": [0.0, 0.0, -0.6], "body": [0.2, 1.1, 0.5]},
-		"chest": {"body": [0.0, 1.15, 0.0]}},
+		"chest": {"body": [0.0, 1.15, 0.0]},
+		"palm": {"bone": "hand.R", "off": [0.0, 0.05, 0.0], "body": [0.3, 1.0, 0.2]}},
 	"moves": {
 		"all": {"fx": [{"p": "sweep", "size": 2.0}, {"p": "scorch", "size": 2.0}, {"p": "skirt", "size": 1.5},
 			{"p": "flare", "size": 1.5, "near": true}, {"p": "ribbon", "at": "tip"},
@@ -124,7 +125,7 @@ func _over(layer: Dictionary) -> bool:
 	var big := float(layer.get("size", 0.0)) if layer.get("size", 0.0) is float else 0.0
 	if layer["p"] == "ribbon" and layer.has("tail"):
 		life = minf(life, HeroVfx.TRAIL_MAX)     # a projectile trail runs as long as its shot, capped
-	var too_big := (layer["p"] == "flare" and big > MAX_FLARE) or (layer["p"] == "vortex" and big > MAX_VORTEX)
+	var too_big: bool = (layer["p"] == "flare" and big > MAX_FLARE) or (layer["p"] == "vortex" and big > MAX_VORTEX)
 	return life > MAX_LIFE or too_big
 
 ## Model node, then the Gun, then the body. Works on today's model and on one with the named anchors.
@@ -144,6 +145,14 @@ func _anchors(V: HeroVfx, P: Hunter) -> void:
 		host.remove_child(fake)
 		V._anchors.clear()
 	fake.free()
+	var sk := WardenGlb.skeleton(P.model.get_node_or_null("Warden"))
+	var palm := V.anchor_pos(P, "palm")
+	if sk != null:
+		var bi := WardenSkeleton.find(sk, "hand.R")
+		var want := sk.global_transform * (sk.get_bone_global_pose(bi) * Vector3(0.0, 0.05, 0.0))
+		ok(bi >= 0 and palm.distance_to(want) < 0.001, "a bone anchor follows the model's hand.R")
+	else:
+		ok(palm.distance_to(P.pos) < 1.6, "a bone anchor on a model without a skeleton falls back to the body")
 	var keep := P.model
 	P.model = null
 	ok(V.anchor_pos(P, "chest").distance_to(P.pos + Vector3(0, 1.15, 0)) < 0.2, "no model: the body offset places it")

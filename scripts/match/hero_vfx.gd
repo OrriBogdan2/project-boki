@@ -109,6 +109,10 @@ func anchor_pos(h: Hunter, anchor_name: String) -> Vector3:
 	var node := _anchor_node(h, anchor_name, a)
 	if node != null:
 		return node.global_position
+	if a.has("bone"):
+		var on_bone := _bone_pos(h, String(a["bone"]), _vec(a.get("off", [0.0, 0.0, 0.0])))
+		if on_bone != Vector3.INF:
+			return on_bone
 	var gun: Node3D = h.model.get_node_or_null("Rig/Torso/Aim/Gun") if h.model else null
 	if gun != null and gun.is_inside_tree() and a.has("gun"):
 		return gun.global_transform * _vec(a["gun"])
@@ -130,6 +134,22 @@ func _anchor_node(h: Hunter, anchor_name: String, a: Dictionary) -> Node3D:
 			_anchors[key] = an
 			return an
 	return null
+
+## A point on one of the model's contract bones (docs/RIG_STANDARD.md: "hand.R", "head", ...), `off` in the bone's
+## own space; INF on a model without a skeleton or that bone (the bone index is looked up once per model).
+func _bone_pos(h: Hunter, bone: String, off: Vector3) -> Vector3:
+	if h.model == null or not h.model.is_inside_tree():
+		return Vector3.INF
+	var key := "%d/bone/%s" % [h.model.get_instance_id(), bone]
+	if not _anchors.has(key):
+		var sk := WardenGlb.skeleton(h.model.get_node_or_null("Warden"))
+		var bi := WardenSkeleton.find(sk, bone) if sk else -1
+		_anchors[key] = [sk, bi] if bi >= 0 else null
+	var hit: Variant = _anchors[key]
+	if hit == null or not is_instance_valid(hit[0]):
+		return Vector3.INF
+	var sk2: Skeleton3D = hit[0]
+	return sk2.global_transform * (sk2.get_bone_global_pose(int(hit[1])) * off)
 
 static func _vec(v: Array) -> Vector3:
 	return Vector3(float(v[0]), float(v[1]), float(v[2]))
