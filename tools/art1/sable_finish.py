@@ -124,10 +124,10 @@ wings = [K.wing(1.0), K.wing(-1.0)]
 lids = [lid_piece(1.0), lid_piece(-1.0)]
 hR, hL = K.hand("R"), K.hand("L")
 pR, pL = K.pistol("R"), K.pistol("L")
-BY = K.hem_front_y(top_z, r0, hip_cy) if hasattr(K, "hem_front_y") else 0.115
-TOP_K = (0.052, BY, K.BELT_Z)
-TOP_B = (0.128, BY - 0.052, K.BELT_Z - 0.005)
-TOP_G = (-0.112, BY - 0.04, K.BELT_Z - 0.005)
+BZ, BY = float(src.get("belt_z", K.BELT_Z)), float(src.get("belt_y", 0.115))
+TOP_K = (0.05, BY + 0.012, BZ)
+TOP_B = (0.128, BY - 0.04, BZ - 0.005)
+TOP_G = (-0.118, BY - 0.03, BZ - 0.005)
 ks = K.keys(TOP_K)
 bl = K.bola(TOP_B)
 gm, GEM_C = K.gem(TOP_G)
@@ -215,7 +215,6 @@ for nm, top, drop, ps in (("keys", TOP_K, 0.12, ks), ("bola", TOP_B, 0.2, bl), (
     names_ = ["spring_hang%s_%d" % (nm, i) for i in range(len(pts))]
     hang[nm] = (names_, pts)
     for q in ps:
-        q.rigid(names_[0]) if False else None
         z_ = (np.asarray(top)[2] - q.v[:, 2]) / drop
         q.w = {names_[0]: np.clip(1 - z_ * 1.6, 0, 1), names_[1]: 1 - np.clip(1 - z_ * 1.6, 0, 1)}
 

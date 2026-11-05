@@ -17,13 +17,13 @@ def J(b):
 SH, THIGH_X = J("upper_arm.R")[0], J("thigh.R")[0]
 SHOULDER_Z, ELBOW_Z, HAND_Z, NECK_Z, HIPS_Z = J("upper_arm.R")[2], J("forearm.R")[2], J("hand.R")[2], J("head")[2], J("hips")[2]
 THIGH_Z = J("thigh.R")[2]
-ANKLE_Z, SOLE_Z = 0.125, 0.0
+ANKLE_Z, SOLE_Z = 0.145, 0.0
 HK = 0.92                                      # the scan's head scale (sable_source.py sets it)
 SEC4 = [(1, 0), (0, 1), (-1, 0), (0, -1)]
 SEC6 = [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 6, endpoint=False)]
 SEC8 = [(np.cos(t), np.sin(t)) for t in np.linspace(0, 2 * np.pi, 8, endpoint=False)]
 ARM = {"R": 1.0, "L": -1.0}
-S_NECK = 1.40                                  # the scan's neck z (sable_source.py)
+S_NECK = 1.60                                  # the scan's neck z (sable_source.py)
 
 
 def hs(p):
@@ -32,10 +32,10 @@ def hs(p):
 
 
 # ---- the eyes and mouth, on the scan (measured off the grid renders)
-EYE = np.array([0.036, 0.098, 1.59])
+EYE = np.array([0.05, 0.125, 1.73])
 EYE_W, EYE_H = 0.024, 0.0135
-BROW = np.array([0.046, 0.104, 1.626])
-MOUTH = np.array([0.0255, 0.118, 1.50])
+BROW = np.array([0.06, 0.125, 1.765])
+MOUTH = np.array([0.03, 0.135, 1.645])
 
 
 def eye_c(s):
@@ -145,7 +145,7 @@ def pistol(side):
     # trigger guard
     th = np.linspace(0.15, np.pi - 0.15, 8)
     g0 = p(0.045, 0.0)
-    guard = np.array([g0 + B_REST * (0.045 * np.cos(t)) - U_REST * (0.018 + 0.03 * np.sin(t)) * -0.0 + U_REST * (0.033 - 0.05 * np.sin(t) - 0.033) for t in th])
+    guard = np.array([g0 + B_REST * (0.045 * np.cos(t)) + U_REST * (0.03 - 0.05 * np.sin(t)) for t in th])
     out.append(sweep("guard" + side, "metal-silver", guard, SEC4, np.full(8, 0.0042), side_hint=x_))
     # runes: a raised strip on each flank and on top of the barrel, painted with glyphs (bright on dark) in the glow slot
     for nm, w, n_ in (("runeA", 0.0165, x_), ("runeB", -0.0165, -x_)):
@@ -184,7 +184,7 @@ ANT_N = 4
 
 def antenna(s):
     side = "R" if s > 0 else "L"
-    top = hs([0, 0, 1.70])[2]
+    top = hs([0, 0, 1.87])[2]
     pts = np.array([(0.030, 0.036, top - 0.02), (0.046, 0.018, top + 0.055), (0.068, 0.0, top + 0.125), (0.112, -0.012, top + 0.200), (0.178, -0.018, top + 0.262), (0.238, -0.018, top + 0.335)]) * [s, 1, 1]
     n = 11
     path = catmull(pts, n)

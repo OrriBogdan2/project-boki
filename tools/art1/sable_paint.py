@@ -61,6 +61,7 @@ def runes(p, n, ao):
     cu = np.floor(u / 0.0115)
     glyph = (cu.astype(int) % 3) != 2
     cell = np.stack([np.floor(u / 0.0038), np.floor((v + 0.01) / 0.0036), np.abs(p[:, 0]) * 0 + 7 * side], 1)
+    cell = cell.astype(np.int64) + 1000
     on = (hash3(cell[:, 0], cell[:, 1], cell[:, 2]) > 0.42) & glyph
     return mix(hexc("#1c0d2c"), hexc("#d865ff"), on.astype(float))
 
