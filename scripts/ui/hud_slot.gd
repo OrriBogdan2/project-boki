@@ -17,6 +17,15 @@ const POP_T := 0.3             # s: the pop when a press lands
 
 static var shown_keys := {}    # slot id -> the key cap last drawn under it (checks read it)
 
+## Moves the per-slot animation state of host `H` on by `delta` s: presses age out, "ready" rings fade.
+static func decay(H, delta: float) -> void:
+	for id in H.slot_fx.keys():
+		H.slot_fx[id]["t"] = float(H.slot_fx[id]["t"]) + delta
+		if float(H.slot_fx[id]["t"]) > ResetPop.LEN: H.slot_fx.erase(id)
+	for id in H.ready_flash.keys():
+		H.ready_flash[id] = float(H.ready_flash[id]) - delta
+		if float(H.ready_flash[id]) <= 0.0: H.ready_flash.erase(id)
+
 ## The countdown as shown: whole seconds from 1s up, tenths under it.
 static func cd_text(secs: float) -> String:
 	return str(int(ceil(secs))) if secs >= 1.0 else "%.1f" % secs
