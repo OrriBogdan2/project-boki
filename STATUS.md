@@ -566,3 +566,7 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Merge note: with ext/kit-hem-55b one docs conflict in docs/heroes/archer.md, keep both; clean with ext/art1-hem. Not rendered on the art1 model.
 - Review: sheets on ext/hero-shots-s2 dca0b011 art2/lisette/; MP4 with sound on disk: /home/boki/shots-s2/art2/lisette/lisette_vfx_sound_set.mp4 (44 s). **Sheets and MP4 predate restoring the Heavy release burst**, so it's missing from them. Agent didn't watch the MP4. Sound unheard: -25.9 LUFS, peak -6.9 dBFS. Forward+ untested.
 - Owner Qs: Heavy's head silver to match the needles? 4 s of lingering needles in a busy fight OK? Real voice instead of synthesized grunts?
+
+## 2026-11-05 S2: six owner portraits received
+- briefs/art-refs/<hero>_portrait.png for lisette, kael, motley, cinder, grimble, breaker (+ breaker alt_determined). Queued as ext/portraits-six from main (HUD, character select, kill feed via the portraits pipeline). Merge note: ext/art1-hem and ext/art1-kael already replaced archer.jpg and juggernaut.jpg with splash crops; the owner's portraits win on conflict.
+- Queue: portraits (small), ART-1 Cinder, ART-1 Grimble, then Vex 68, gloves 69, glider 63, Claire 62+64+65.
