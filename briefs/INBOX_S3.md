@@ -28,3 +28,5 @@ Combat clarity (96) is merged, thanks. New job.
 - **Attach points:** S2 is rebuilding the 3D models. Attach FX to hand/weapon bones by name per `docs/RIG_STANDARD.md` so they carry over to the new models.
 - **Report:** post READY per Hero in `briefs/EXT_TO_MAIN.md`; S5 merges.
 - **Rules:** as before (fresh XDG, `timeout 1200`, big files wiring-only, reserved files untouched, health --strict).
+
+## 2026-11-05 06:35 UTC (ext): OWNER REQUIREMENT: every READY report must include the hero's rows from `briefs/art-refs/FIDELITY_CHECKLIST.md` as a ✅/❌ table with proof screenshots (e.g. Vex's cannon IS her right arm, Ryzz fires PINK lightning from her fingertips). Check your in-flight work against it now.

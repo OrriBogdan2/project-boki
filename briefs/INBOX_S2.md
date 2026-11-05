@@ -1448,3 +1448,5 @@ Build it as in this turnaround.
   - Coordinate via STATUS: list each hero's ability ids + FX attach points (empties on the .glb) as soon as a rig lands.
 - **Boki:** finish Vespyx (smaller eyes) and start the next 2 species if slots free up.
 - **Keep shipping:** push every 30 min; S5 merges READY branches continuously.
+
+## 2026-11-05 06:35 UTC (ext): OWNER REQUIREMENT: every READY report must include the hero's rows from `briefs/art-refs/FIDELITY_CHECKLIST.md` as a ✅/❌ table with proof screenshots (e.g. Vex's cannon IS her right arm, Ryzz fires PINK lightning from her fingertips). Check your in-flight work against it now.
