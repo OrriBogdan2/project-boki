@@ -67,6 +67,7 @@ func run(main: Node) -> void:
 	var calm := _flare(P)
 	P.grounded = true          # (in the air the rod goes on the press, with no hold)
 	P.gliding = false
+	K.bot_hold["rmb"] = 0.7    # (held as a bot holds it: no key is down in a check)
 	K.press_rmb()
 	_run(m, P, 40, seen)
 	K._release_rmb()

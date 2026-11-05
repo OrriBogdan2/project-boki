@@ -32,3 +32,7 @@ cam.data.ortho_scale = 0.5
 cam.location = Vector((0.5, 2.0, 1.0)); cam.rotation_euler = (Vector((0.15, 0, 0.95)) - cam.location).to_track_quat("-Z", "Y").to_euler()
 sc.render.filepath = a[1] + "_hand.png"
 bpy.ops.render.render(write_still=True)
+cam.data.ortho_scale = 0.62
+cam.location = Vector((0.0, 3.0, 0.86)); cam.rotation_euler = (Vector((0, 0, 0.86)) - cam.location).to_track_quat("-Z", "Y").to_euler()
+sc.render.filepath = a[1] + "_skirt.png"
+bpy.ops.render.render(write_still=True)

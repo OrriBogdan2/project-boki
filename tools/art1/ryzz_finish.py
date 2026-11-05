@@ -193,7 +193,7 @@ for v_ in range(2):
             if 0 < j < n_ - 1:
                 q = q + rng.uniform(-0.024, 0.024, 3) * [1, 0.6, 1.5]
             pts.append(q)
-        pieces.append(sweep("arc%d_%d" % (v_, i), "glow-ryzz", pts, K.TRI, np.full(n_, 0.0072), side_hint=np.array([0, 1.0, 0.2]), uv_rect=K.GLOWC_R, room=0.0).rigid("arc.%d" % v_))
+        pieces.append(sweep("arc%d_%d" % (v_, i), "glow-ryzz", pts, K.TRI, np.full(n_, 0.0098), side_hint=np.array([0, 1.0, 0.2]), uv_rect=K.GLOWC_R, room=0.0).rigid("arc.%d" % v_))
 
 # ---- the wires, two down each arm to the copper-capped hand
 def wire_w(p):
@@ -228,7 +228,7 @@ for s, sd in ((1.0, "R"), (-1.0, "L")):
 for s, sd in ((1.0, "R"), (-1.0, "L")):
     ctl = [(s * 0.082, -0.10, 1.372), (s * 0.095, -0.02, 1.415), (s * 0.103, 0.06, 1.385), (s * 0.103, 0.105, 1.325), (s * 0.098, 0.135, 1.275)]
     path = on_surface(catmull(ctl, 11), 0.004)
-    st = K.strip("strap" + sd, "leather-ryzz", path, 0.0135, 0.0022, hint=np.array([1.0, 0, 0]))
+    st = K.strip("strap" + sd, "leather-ryzz", path, 0.0185, 0.0024, hint=np.array([1.0, 0, 0]))
     st.w = {"hips": np.ones(len(st.v))}
     pieces.append(st)
     bc = path[7]
@@ -372,7 +372,8 @@ for i in range(nf):
             tally[p_] = tally.get(p_, 0) + w_
     part = max(tally, key=tally.get) if tally else "torso"
     c = np.mean([verts[v] for v in faces_v[i]], axis=0)
-    region[i] = (part, c[1] > 0.0)
+    # (a seam at the waist too: one island from the chest to the hem unwraps the chest down to nothing)
+    region[i] = (part, c[1] > 0.0, part == "torso" and c[2] > 1.04)
 for e in bm.edges:
     lf = [f.index for f in e.link_faces]
     if len(lf) == 2 and lf[0] in region and lf[1] in region:

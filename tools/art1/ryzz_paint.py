@@ -11,8 +11,8 @@ def mix(a, b, t):
 
 KEY = np.array([1.0, 0.16, 0.74])        # the neon: warden_look paint_glow lights texels of this colour on any surface
 SKIN = [hexc("#b9735f"), hexc("#dd9c84"), hexc("#f2bda6"), hexc("#fcd8c4")]
-COPPER = [hexc("#5a2a16"), hexc("#a85a2e"), hexc("#d98a50"), hexc("#ffc998")]
-LEATHER_C = [hexc("#4a2413"), hexc("#7c4122"), hexc("#a8602f")]
+COPPER = [hexc("#7a3e20"), hexc("#c87a44"), hexc("#eda56c"), hexc("#ffd6a8")]
+LEATHER_C = [hexc("#6a3a1e"), hexc("#a9683a"), hexc("#d39a62")]
 
 
 def shade(n, ao):
