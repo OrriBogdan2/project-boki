@@ -142,13 +142,13 @@ def claw_prims(sd, sx):
 def parts():
     """name -> (Shape, grid step m, target tris) of each separately meshed piece."""
     out = {
-        "body": (Shape(body_prims()), 0.0035, 5400),
-        "tail": (Shape(tail_prims()), 0.0035, 1150),
-        "collar": (Shape(collar_prims()), 0.0035, 120),
-        "sting": (Shape(sting_prims()), 0.0035, 260),
+        "body": (Shape(body_prims()), 0.0035, 2500),
+        "tail": (Shape(tail_prims()), 0.0035, 400),
+        "collar": (Shape(collar_prims()), 0.0035, 30),
+        "sting": (Shape(sting_prims()), 0.0035, 70),
     }
     for sd, sx in SIDES:
-        out["claw" + sd] = (Shape(claw_prims(sd, sx)), 0.0035, 520)
+        out["claw" + sd] = (Shape(claw_prims(sd, sx)), 0.0035, 190)
     return out
 
 
@@ -158,7 +158,7 @@ AXIS = STING_DIR / np.linalg.norm(STING_DIR)
 
 def prop_parts():
     out = boki_tools.tools(STING_C + AXIS * 0.06, AXIS)
-    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 90)
+    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 24)
     return out
 
 
