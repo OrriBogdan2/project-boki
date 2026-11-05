@@ -116,6 +116,21 @@ func _body_stays_level(main: Node, k: Node3D, rig: BokiRig) -> void:
 	held.free()
 	await main.get_tree().process_frame
 
+## A mutation shows as its part of the mesh, nothing else does, and it never falls back on Evo's primitives.
+func _grown_parts(main: Node) -> void:
+	var rec := Save.new_kin(SPECIES, "Horny")
+	rec["muts"] = [{"id": "horns", "lv": 2, "aff": "fierce"}]
+	var k := Shots.rigged_kin(SPECIES, rec)
+	main.add_child(k)
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+	var skel := rig.skeleton()
+	var horns := skel.get_bone_pose_scale(skel.find_bone("part_horns")).x
+	var spikes := skel.get_bone_pose_scale(skel.find_bone("part_spikes")).x
+	ok(horns > 0.9 and spikes < 0.01, "horns out (%.2f), spikes still folded away (%.3f)" % [horns, spikes])
+	k.queue_free()
+
 func _own_look(main: Node) -> void:
 	var rec := Save.new_kin(SPECIES, "Spot")
 	rec["dna"] = Unique.roll(12345)
@@ -130,6 +145,7 @@ func _own_look(main: Node) -> void:
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 	var marks := rig._coat.next_pass as ShaderMaterial
 	ok(marks != null and marks.shader.resource_path.ends_with("boki_marks.gdshader"), "its coat marks are on")
+	await _grown_parts(main)
 	var iris := rig.eye_mat.get_shader_parameter("iris") as Color
 	for nm in ["Tuft", "TailTuft", "Birthmark"]:
 		ok(k.find_child(nm, true, false) != null, "%s is on the model" % nm)

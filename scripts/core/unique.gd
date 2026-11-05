@@ -396,7 +396,7 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 		_birthmark(flex, d, mats)
 		var rig := flex.get_node_or_null("BokiRig") as BokiRig
 		if rig:
-			BokiDna.wear(rig.skeleton(), flex, d, mats)
+			BokiDna.wear(rig.skeleton(), flex, d, mats, rec)
 	root.set_meta("quirk", String(d.get("quirk", "")))
 	root.set_meta("girth", float(d.get("girth", 1.0)))
 	root.set_meta("voice", float(d.get("voice", 1.0)))

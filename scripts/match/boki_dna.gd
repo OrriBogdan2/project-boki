@@ -3,6 +3,7 @@ extends SkeletonModifier3D
 ## The inborn shapes (Unique.roll) on a rigged Boki: proportions and ear and tail shapes as a tweak over the clips, and
 ## the small extras (tufts, birthmark) on their bones. KinModels' bodies get these from Unique._variants.
 
+const LEVEL_GROW := 0.3        # as Evo.dress
 const SPLAY := 0.32            # rad, as Unique._variants
 const FOLD := 0.8
 const KINK := 0.32
@@ -14,19 +15,28 @@ const TAIL_TIP := Vector3(0, 0.77, 0.10)
 const MARKS := {"left flank": Vector3(-0.115, 0.25, 0.09), "right flank": Vector3(0.115, 0.25, 0.09),
 	"back": Vector3(0, 0.335, 0.10), "chest": Vector3(0, 0.235, -0.165)}
 
+## Grown parts that are more than one bone.
+const PART_EXTRA := {}
+
 var skel: Skeleton3D
 var tweaks: Array = []         # [bone index, Basis] applied after the clip poses it
+var shown: Array = []          # [bone index, size] of grown parts: at rest, instead of collapsed
 
 ## Applies a Boki's rolls (`d`, Unique.of) to its skeleton. `mats` is Models.kin's material list.
-static func wear(skeleton: Skeleton3D, flex: Node3D, d: Dictionary, mats: Array) -> void:
+static func wear(skeleton: Skeleton3D, flex: Node3D, d: Dictionary, mats: Array, rec: Dictionary) -> void:
 	var mod := BokiDna.new()
 	mod.skel = skeleton
 	skeleton.add_child(mod)
 	mod._proportions(flex, d)
 	mod._shapes(d, mats)
 	mod._birthmark(d, mats)
+	mod._grown(rec.get("muts", []))
 
 func _process_modification_with_delta(_delta: float) -> void:
+	for s in shown:
+		var i: int = s[0]
+		var rest := skel.get_bone_rest(i)
+		skel.set_bone_pose(i, Transform3D(rest.basis.scaled_local(Vector3.ONE * float(s[1])), rest.origin))
 	for t in tweaks:
 		var i: int = t[0]
 		var pose := skel.get_bone_pose(i)
@@ -74,6 +84,22 @@ func _shapes(d: Dictionary, mats: Array) -> void:
 			_turn("tail3", Vector3.BACK, KINK * side)
 		"bobbed":
 			_grow("tail1", BOB)
+
+## Evo's mutations: each is a part of the mesh on a bone of its own, bigger with its level.
+func _grown(muts: Array) -> void:
+	for m in muts:
+		var id := String(m["id"])
+		var k := 1.0 + (int(m["lv"]) - 1) * LEVEL_GROW
+		if id == "tail_long":
+			_grow("tail1", 1.0 + 0.12 * k)
+		_show("part_" + id, k)
+		for extra in PART_EXTRA.get(id, []):
+			_show(String(extra), 1.0)
+
+func _show(bone: String, k: float) -> void:
+	var i := skel.find_bone(bone)
+	if i >= 0:
+		shown.append([i, k])
 
 func _birthmark(d: Dictionary, mats: Array) -> void:
 	var b: Variant = d.get("birth", [])

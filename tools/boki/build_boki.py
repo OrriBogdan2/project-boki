@@ -82,6 +82,13 @@ def mesh_pieces():
         v, q = boki_sdf.mesh_shape(shape, h)
         v, t = decimated(v, q, tris)
         out.append(Piece(name, shape, v, t, 0))
+    for pid, (_, _, look, tris, prims) in vespyx.grown_parts().items():
+        shape = boki_sdf.Shape(prims)
+        v, q = boki_sdf.mesh_shape(shape, 0.003)
+        v, t = decimated(v, q, tris)
+        pc = Piece("gp_" + pid, shape, v, t, 1 if look == "glow" else 0)
+        pc.look = look
+        out.append(pc)
     return out
 
 
@@ -154,7 +161,7 @@ def occlusion(pieces, p, n):
     def scene(q):
         d = None
         for pc in pieces:
-            if pc.name.split("_")[0] in ("axe", "pick", "berry"):
+            if pc.name.split("_")[0] in ("axe", "pick", "berry") or pc.name.startswith("gp_"):
                 continue
             e = pc.shape.eval(q)
             d = e if d is None else np.minimum(d, e)
@@ -183,6 +190,8 @@ def paint_texels(pieces, piece_id, p, n, vao):
             ds = np.sort(np.stack([pr.d(q) for pr in pc.shape.prims], -1), axis=-1)
             gap = ds[:, 1] - ds[:, 0] if pc.name == "tail" else np.full(len(q), 1.0)
             c = paint.paint_shell(q, nn, gap)
+        elif pc.name.startswith("gp_"):
+            c = np.ones((len(q), 3)) if pc.look == "white" else paint.paint_shell(q, nn, np.full(len(q), 1.0))
         elif pc.name == "sting":
             c = np.tile(np.array([0.72, 1.0, 0.3]), (len(q), 1))
         elif pc.name.endswith("handle"):
@@ -382,4 +391,5 @@ def main():
             preview(a[10:])
 
 
-main()
+if __name__ == "__main__":
+    main()

@@ -42,6 +42,9 @@ def _bones():
     b["prop_axe"] = (tuple(STING_C), tuple(STING_C + vespyx.AXIS * 0.1), "sting")
     b["prop_pick"] = (tuple(STING_C), tuple(STING_C + vespyx.AXIS * 0.1), "sting")
     b["prop_berry"] = (p3(0, 0.285, -0.365), p3(0, 0.385, -0.365), "spine")
+    for pid, (parent, head, _, _, _) in vespyx.grown_parts().items():
+        if head is not None:
+            b["part_" + pid] = (tuple(head), (head[0], head[1] + 0.1, head[2]), parent)
     return b
 
 

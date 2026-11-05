@@ -26,6 +26,7 @@ const FARM_BOKI_SCALE := 1.7        # Home's farm scale
 const FARM_DIST := 33.6             # 23 m x the farm's framing (1.216) x HOME_ZOOM (1.2)
 const FARM_CLOSE_DIST := 22.4       # the wheel all the way in (0.8)
 const ENLARGE := 4
+const FUSION_PART_K := 1.3            # merge_forms "part_k" of the fallback forms
 ## CamRig.char_lean, which BokiRig applies in the game: the top tips away from the camera.
 const LEAN := deg_to_rad(20.0)
 
@@ -48,7 +49,9 @@ func run(m: Node) -> void:
 	await _turntable()
 	await _faces()
 	await _coats()
+	await _grown()
 	await _anims()
+	await _fusion()
 	await _far("match.png", MATCH_DIST, 1.0, ACTION, PI * 0.8)
 	await _far("farm.png", FARM_DIST, FARM_BOKI_SCALE, ACTION, PI * 0.8)
 	await _far("farm_faces.png", FARM_DIST, FARM_BOKI_SCALE, EMOTES, PI)
@@ -91,7 +94,7 @@ static func rigged_kin(id: String, rec := {}) -> Node3D:
 	var c := {"body": mats[0], "belly": mats[1], "dark": mats[2], "glow": mats[3], "eye": mats[4]}
 	BokiRig.build(id, flex, c, extra)
 	if not d.is_empty():
-		BokiDna.wear(flex.get_node("BokiRig").skeleton(), flex, d, k.get_meta("mats"))
+		BokiDna.wear(flex.get_node("BokiRig").skeleton(), flex, d, k.get_meta("mats"), rec)
 	return k
 
 func _kin(vp: SubViewport) -> Array:
@@ -182,6 +185,73 @@ func _coats() -> void:
 		sheet.blit_rect(img, Rect2i(0, 0, px, px), Vector2i(i * px, 0))
 		k.queue_free()
 	sheet.save_png(out.path_join("coats.png"))
+	vp.queue_free()
+
+## The Fusion on a Hunter, close (front, 3/4, back) and at the match camera.
+func _fusion() -> void:
+	var form := {"type": "venom", "glow": Data.KIN[species]["glow"]}
+	if not BokiFusion.has(form):
+		return
+	var vp := _stage(Vector2i(px, px))
+	var cam := _close_cam(vp)
+	cam.fov = 26.0
+	cam.position = Vector3(0, 1.5, 5.6)
+	cam.look_at(Vector3(0, 1.0, 0))
+	var h := Models.hunter(Arch.weight("gunslinger"), Data.TEAM_COLORS[0], Arch.signature("gunslinger"), "",
+		PlayerLook.neutral(), "gunslinger")
+	var box := Node3D.new()
+	box.scale = Vector3.ONE * FUSION_PART_K
+	h.get_node("Rig/Torso").add_child(box)
+	BokiFusion.build(box, form, Vector3.ZERO)
+	vp.add_child(h)
+	var sheet := _strip(4)
+	for i in 3:
+		h.rotation.y = [PI, PI * 0.72, 0.15][i]
+		var img: Image = await _grab(vp)
+		img.convert(Image.FORMAT_RGBA8)
+		sheet.blit_rect(img, Rect2i(0, 0, px, px), Vector2i(i * px, 0))
+	var p := deg_to_rad(MATCH_PITCH)
+	cam.fov = MATCH_FOV
+	cam.position = Vector3(0, sin(p), cos(p)) * MATCH_DIST
+	cam.rotation = Vector3(-p, 0, 0)
+	h.rotation.y = PI * 0.8
+	var far: Image = await _grab(vp)
+	var mid := Vector2i(cam.unproject_position(Vector3(0, 0.9, 0)))
+	var crop := far.get_region(Rect2i(mid - Vector2i(64, 64), Vector2i(128, 128)))
+	crop.resize(px, px, Image.INTERPOLATE_NEAREST)
+	crop.convert(Image.FORMAT_RGBA8)
+	sheet.blit_rect(crop, Rect2i(0, 0, px, px), Vector2i(3 * px, 0))
+	sheet.save_png(out.path_join("fusion.png"))
+	vp.queue_free()
+
+## The four ways of growing up: Evo's tint and size with every part of that path, at level 2.
+func _grown() -> void:
+	var vp := _stage(Vector2i(px, px))
+	var cam := _close_cam(vp)
+	cam.position = Vector3(0, 0.95, 3.5)
+	cam.look_at(Vector3(0, 0.5, 0))
+	var sheet := _strip(Evo.AFF.size())
+	var i := 0
+	for aff in Evo.AFF:
+		var rec := Save.new_kin(species, "Grown")
+		rec["level"] = 12
+		rec["forms"] = [aff, aff]
+		rec["muts"] = []
+		for part in Evo.AFF[aff]["parts"]:
+			rec["muts"].append({"id": part, "lv": 2, "aff": aff})
+		var k := rigged_kin(species, rec)
+		vp.add_child(k)
+		k.rotation.y = PI * 0.78
+		var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+		rig.manual = true
+		await RenderingServer.frame_post_draw
+		rig.seek(0.5)
+		var img: Image = await _grab(vp)
+		img.convert(Image.FORMAT_RGBA8)
+		sheet.blit_rect(img, Rect2i(0, 0, px, px), Vector2i(i * px, 0))
+		k.queue_free()
+		i += 1
+	sheet.save_png(out.path_join("grown.png"))
 	vp.queue_free()
 
 func _face_for(rig: BokiRig, clip_id: String, k: float) -> String:

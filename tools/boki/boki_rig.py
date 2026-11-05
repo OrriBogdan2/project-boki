@@ -5,6 +5,7 @@ import mathutils
 import numpy as np
 
 KEEP_INFLUENCES = 4
+CLIP_SCALE = 0.95    # clip offsets are in the build's metres
 # where an unused prop sits (from its rest place), collapsed inside the body so its ink shell never shows
 HIDE_AT = {"prop_berry": (0, -0.09, 0.40)}
 
@@ -36,6 +37,14 @@ def bind(obj, arm):
 
 
 def skin(body, face_obj, arm, pieces, piece_of, bl, sigma=0.012):
+    """The creature: its body from the primitives, its face all on the head."""
+    skin_only(body, arm, pieces, sigma)
+    g = face_obj.vertex_groups.new(name="head")
+    g.add(list(range(len(face_obj.data.vertices))), 1.0, "REPLACE")
+    bind(face_obj, arm)
+
+
+def skin_only(body, arm, pieces, sigma=0.012):
     """Each vertex follows the primitives it sits on, softened by their blend radii."""
     offset = 0
     groups = {}
@@ -52,7 +61,7 @@ def skin(body, face_obj, arm, pieces, piece_of, bl, sigma=0.012):
         bones = sorted({p.bone for p in prims})
         w = np.zeros((len(pc.v), len(bones)))
         hard = pc.name in ("tail", "collar", "sting") or pc.slot == 0 and pc.name.split("_")[0] in (
-            "axe", "pick", "berry")
+            "axe", "pick", "berry") or pc.name.startswith("gp_")
         s = 0.002 if hard else sigma
         for j, b in enumerate(bones):
             sel = [i for i, p in enumerate(prims) if p.bone == b]
@@ -67,9 +76,6 @@ def skin(body, face_obj, arm, pieces, piece_of, bl, sigma=0.012):
                     group(body, bones[j]).add([offset + i], float(val), "REPLACE")
         offset += len(pc.v)
     bind(body, arm)
-    g = face_obj.vertex_groups.new(name="head")
-    g.add(list(range(len(face_obj.data.vertices))), 1.0, "REPLACE")
-    bind(face_obj, arm)
 
 
 def game_axis(v):
@@ -80,6 +86,11 @@ def quat_of(rx, ry, rz):
     """Game-axis euler to a Blender rotation."""
     return (mathutils.Quaternion(game_axis((0, 1, 0)), ry) @ mathutils.Quaternion(game_axis((1, 0, 0)), rx)
             @ mathutils.Quaternion(game_axis((0, 0, 1)), rz))
+
+
+def bone_home(b, arm):
+    """From a grown part's rest place to its parent's: collapsed there, inside the body, until BokiDna shows it."""
+    return (b.parent.bone.head_local - b.bone.head_local)
 
 
 def make_clips(arm, clips, fps=30):
@@ -102,11 +113,18 @@ def make_clips(arm, clips, fps=30):
                 b.rotation_quaternion = q
                 b.keyframe_insert("rotation_quaternion", frame=f + 1)
                 hide = HIDE_AT.get(b.name)
+                part = b.name.startswith("part_")
+                if part:
+                    off = bone_home(b, arm)
+                    b.location = rest[b.name].inverted() @ off
+                    b.keyframe_insert("location", frame=f + 1)
+                    b.scale = (0.001, 0.001, 0.001)
+                    b.keyframe_insert("scale", frame=f + 1)
                 if b.name in ("root", "hips") or hide:
                     off = pose.get(b.name + "_at", (0, 0, 0))
                     if hide and pose.get(b.name) != "on":
                         off = hide
-                    w = game_axis(off) * 0.95
+                    w = game_axis(off) * CLIP_SCALE
                     b.location = rest[b.name].inverted() @ w
                     b.keyframe_insert("location", frame=f + 1)
                 sc = pose.get(b.name + "_sc", None)
