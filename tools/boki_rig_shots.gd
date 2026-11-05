@@ -8,7 +8,8 @@ const YAWS := 8
 const STRIP := 6
 const FACES := ["neutral", "happy", "sad", "sleepy", "angry", "bliss"]
 const COATS := [
-	{"mark": "spots", "mark_col": "dark", "eye": "sky", "ears": "tufted", "tailv": "bobbed", "birth": ["star", "chest"]},
+	{"mark": "spots", "mark_col": "dark", "eye": "sky", "ears": "tufted", "tailv": "bobbed",
+		"birth": ["star", "chest"]},
 	{"mark": "stripes", "mark_col": "light", "eye": "amber", "ears": "folded", "tailv": "kinked", "limb": 1.09},
 	{"mark": "patches", "mark_col": "glow", "eye": "rose", "ears": "splayed", "tailv": "tufted", "ear": 1.1},
 	{"mark": "plain", "eye": "classic", "ears": "standard", "tailv": "standard"}]
@@ -24,7 +25,8 @@ const FARM_BOKI_SCALE := 1.7        # Home's farm scale
 const FARM_DIST := 33.6             # 23 m x the farm's framing (1.216) x HOME_ZOOM (1.2)
 const FARM_CLOSE_DIST := 22.4       # the wheel all the way in (0.8)
 const ENLARGE := 4
-const LEAN := deg_to_rad(20.0)       # CamRig.char_lean, which BokiRig applies in the game: the top tips away
+## CamRig.char_lean, which BokiRig applies in the game: the top tips away from the camera.
+const LEAN := deg_to_rad(20.0)
 
 var main: Node
 var out := ""
