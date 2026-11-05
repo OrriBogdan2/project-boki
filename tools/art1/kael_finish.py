@@ -848,7 +848,7 @@ A = {"anchor_head_top": ("head", (0, 0.0, K.C[2] + 0.12)), "anchor_chest": ("hip
      "anchor_arm_fore": ("forearm.R", (K.SH, 0.03, K.ELBOW_Z - 0.09)), "anchor_chain": ("forearm.R", (K.SH + 0.05, 0.0, K.HAND_Z + 0.02)),
      "weapon_muzzle": ("hand.R", tuple(g + b_ * K.BLADE_LEN)), "anchor_blade_root": ("hand.R", tuple(g + b_ * 0.05)),
      "anchor_blade_mid": ("hand.R", tuple(g + b_ * K.BLADE_LEN * 0.55)),
-     "anchor_hook_mouth": (HANG[-2], tuple(np.array(hang_pts[0]) + [0, 0.10, -0.5]))}
+     "anchor_hook_mouth": (HANG[-2], tuple(np.array(hang_pts[0]) + [-0.10, 0, -0.5]))}
 # the embers and eyes, found on the head's own paint: the hottest spots, kept apart
 vi_ = np.array([faces_v[i_][j_] for i_ in range(nf) if names[faces_pid[i_]] == "headscan" for j_ in range(len(faces_v[i_]))])
 uu_ = np.array([u_ for i_ in range(nf) if names[faces_pid[i_]] == "headscan" for u_ in faces_uv[i_]])

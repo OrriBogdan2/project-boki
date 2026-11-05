@@ -883,50 +883,6 @@
 				"size": 0.2
 			},
 			{
-				"at": "anchor_blade_mid",
-				"color": [
-					1,
-					0.93,
-					0.78,
-					0.14
-				],
-				"size": 0.26,
-				"depth_test": true
-			},
-			{
-				"at": "anchor_blade_root",
-				"color": [
-					1,
-					0.9,
-					0.72,
-					0.14
-				],
-				"size": 0.2,
-				"depth_test": true
-			},
-			{
-				"at": "weapon_muzzle",
-				"color": [
-					1,
-					0.93,
-					0.8,
-					0.14
-				],
-				"size": 0.2,
-				"depth_test": true
-			},
-			{
-				"at": "anchor_blade_mid",
-				"color": [
-					1,
-					0.97,
-					0.9,
-					0.14
-				],
-				"size": 0.2,
-				"depth_test": true
-			},
-			{
 				"at": "anchor_ember_0",
 				"color": [
 					1,
@@ -991,6 +947,17 @@
 				],
 				"size": 0.035,
 				"depth_test": false
+			},
+			{
+				"at": "anchor_blade_mid",
+				"color": [
+					1,
+					0.93,
+					0.8,
+					0.1
+				],
+				"size": 0.16,
+				"depth_test": true
 			}
 		]
 	},

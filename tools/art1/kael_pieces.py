@@ -506,11 +506,11 @@ def hanging_chain(uv):
     path = [top + [0, 0, -k * drop] for k in np.linspace(0, 1, 12)]
     p = chain_along("chain_hang", path, step=0.0395, uv=uv, ln=0.046, wid=0.026, th=0.0068)
     ring_c = top + [0, 0, -drop - 0.022]
-    pts = catmull([ring_c, ring_c + [0.0, 0.0, -0.05], ring_c + [0.0, 0.016, -0.115], ring_c + [0, 0.05, -0.15], ring_c + [0, 0.098, -0.13],
-                   ring_c + [0, 0.112, -0.082], ring_c + [0, 0.098, -0.05]], 10)
+    pts = catmull([ring_c, ring_c + [0.0, 0.0, -0.05], ring_c + [-0.016, 0.0, -0.115], ring_c + [-0.05, 0, -0.15], ring_c + [-0.098, 0, -0.13],
+                   ring_c + [-0.112, 0, -0.082], ring_c + [-0.098, 0, -0.05]], 10)
     wd = np.array([0.018, 0.018, 0.019, 0.021, 0.021, 0.02, 0.018, 0.015, 0.01, 0.0015])
     sec = [(-1, 0), (0, 0.55), (1, 0), (0, -0.55)]
-    hook = sweep("hook", "metal-hook", pts, sec, wd * 0.72, side_hint=np.array([1.0, 0, 0]), depth=wd * 1.05, uv_rect=uv)
+    hook = sweep("hook", "metal-hook", pts, sec, wd * 0.72, side_hint=np.array([0, 1.0, 0]), depth=wd * 1.05, uv_rect=uv)
     chain_pts = [top + [0, 0, -(drop + 0.06) * i / 6.0] for i in range(7)]
     return p, hook, chain_pts
 
