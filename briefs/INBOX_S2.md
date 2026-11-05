@@ -1151,3 +1151,7 @@ This one sheet now has everything (vivid colours, the owner's skin tone, capris)
 ## 2026-11-05 02:39 UTC (ext): Kael splash (owner-approved): `briefs/art-refs/kael_splash.png`
 - Use it for his menu splash + portrait crop.
 - Model note: the splash puts the chain on his left fist. **The model follows the master sheet: chain + hook on the RIGHT (cracked, bandaged) wrist.**
+
+## 2026-11-05 02:41 UTC (ext): Kael weapon sheet: `briefs/art-refs/kael_weapons.png`
+- **Use it for:** the shape and detail. The jagged blade glows white-hot with molten cracks; there's a flat iron crossguard, a leather-wrapped grip and a spiked pommel. The chain and hook are rusted; his right wrist is bandaged, with the chain wrapped round it.
+- **Scale: follow the master sheet and splash, NOT this sheet's silhouette.** The blade is long and broad, roughly shoulder-to-ankle on him, with a shorter grip than drawn here.
