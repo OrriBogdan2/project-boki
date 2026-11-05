@@ -2,11 +2,13 @@ class_name HomeGather
 extends RefCounted
 ## Light survival at home. Buy an axe at the market (Farm tab) and you can chop the wild trees on
 ## your island for wood; buy a pickaxe and you can mine its boulders for stone (cliffs stay put).
-## Walk up to one and press use: three swings and it comes down. What you cut grows back slowly
+## Walk up to one and hold use: the right tool (an axe, a pickaxe) comes out, the weapon goes away, and
+## it swings until you let go; three hits and it comes down (it keeps the hits you gave it). What you cut
+## grows back slowly
 ## (the layout's "regrow" list, HomeBuild.regrow_due), so the wild never runs out. Wood and stone
 ## go into Save.d["mats"] (Work.add_mat) and pay for buildings and stations in build mode.
 ## home.gd calls find(p2) from _find_interact, label(it) / use(it) for the prompt, tick(d) every
-## frame, busy() and face() while you're mid-chop.
+## frame and busy() while you're mid-chop (the swing itself is ToolWork, the pose HunterTool).
 
 ## The tools: what each cuts, what that gives, its price at the market.
 const TOOLS := {
@@ -19,11 +21,17 @@ const TOOLS := {
 ## you're out on an expedition).
 const REGROW := {"tree": 900.0, "rock": 1500.0}
 const HITS := 3
-const HIT_T := 0.42
 const REACH := 1.55
+## Wood chips, rock chips and falling leaves, by what is being worked.
+const CHIP_COL := {"tree": Color("c8955a"), "rock": Color("b8b4ae")}
+const LEAF_COL := Color("6fb35a")
+const TREE_TOP_Y := 2.2          # m: where the leaves shake loose
+const CRACK_COL := Color("2a2622")
 
 var h                                    # the Home screen
-var job := {}                            # {i, what, at: Vector3, t, hits}
+var tile := -1                           # the wild tile being worked
+var damage := {}                         # tile index -> hits it has taken (it keeps them when you stop)
+var cracks := {}                         # tile index -> the crack marks drawn on a boulder
 var regrow_t := 1.0
 
 func _init(home) -> void:
@@ -51,11 +59,7 @@ static func shop_goods() -> Array:
 	return out
 
 func busy() -> bool:
-	return not job.is_empty()
-
-func face() -> float:
-	var at: Vector3 = job["at"]
-	return atan2(-(at.x - h.ppos.x), -(at.z - h.ppos.z))
+	return tile >= 0 and h.tw.active()
 
 ## The nearest wild tree or boulder within reach of p2, as an interact entry (or {}).
 func find(p2: Vector2) -> Dictionary:
@@ -94,11 +98,12 @@ func use(it: Dictionary) -> void:
 		h._toast("Needs a%s %s (Market)" % ["n" if t == "axe" else "", String(TOOLS[t]["name"]).to_lower()])
 		return
 	var w: World = h.world
-	var i := int(it["i"])
-	job = {"i": i, "what": String(it["what"]), "at": Vector3(i % w.w + 0.5, 0, i / w.w + 0.5), "t": 0.0, "hits": 0}
+	tile = int(it["i"])
+	h.tw.begin(t, Vector3(tile % w.w + 0.5, 0, tile / w.w + 0.5), _hit, HunterTool.period(t) * 0.4)
 
 func cancel() -> void:
-	job = {}
+	h.tw.stop()
+	tile = -1
 
 func tick(d: float) -> void:
 	if not h.visit.is_empty() or h.hb == null:
@@ -107,36 +112,70 @@ func tick(d: float) -> void:
 	if regrow_t <= 0.0:
 		regrow_t = 5.0
 		h.hb.regrow_due()
-	if job.is_empty():
+	if tile < 0:
 		return
 	# walking away (or the tile going) stops it
 	var mv := Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
-	if mv.length() > 0.2 or not h.hb.wild_t.has(int(job["i"])) or h.panel_open != "" or (h.hb and h.hb.active):
-		job = {}
+	if mv.length() > 0.2 or not h.hb.wild_t.has(tile) or h.panel_open != "" or (h.hb and h.hb.active):
+		cancel()
 		return
-	job["t"] = float(job["t"]) + d
-	if float(job["t"]) < HIT_T:
-		return
-	job["t"] = 0.0
-	job["hits"] = int(job["hits"]) + 1
-	if demo_loop and int(job["hits"]) >= HITS: job["hits"] = 0
-	var at: Vector3 = job["at"]
-	h.p_fired = 0.0
-	h.p_swing_n += 1
-	var tree: bool = job["what"] == "tree"
-	if h.fx:
-		h.fx.burst(at + Vector3(0, 0.9 if tree else 0.5, 0), Color("c8955a") if tree else Color("b8b4ae"), 8, 2.2)
-	Sfx.play("thump", at, -8.0, 0.12, 1.1 if tree else 0.8)
-	if int(job["hits"]) >= HITS:
-		finish()
+	h.tw.tick(d, h.tw.held())
+	if not h.tw.active():
+		tile = -1
 
-## The last swing: it comes down, you get its wood or stone, and it starts growing back.
+## The head lands: chips, a sound, the target reacting. False once it is down (or gone).
+func _hit() -> bool:
+	if not h.hb.wild_t.has(tile):
+		return false
+	var w: World = h.world
+	var at := Vector3(tile % w.w + 0.5, 0, tile / w.w + 0.5)
+	var tree: bool = h.hb.wild_t[tile] == "tree"
+	var hits := int(damage.get(tile, 0)) + 1
+	damage[tile] = hits
+	if h.fx:
+		var chip_y := 0.9
+		if not tree:
+			chip_y = 0.5
+		h.fx.burst(at + Vector3(0, chip_y, 0), CHIP_COL[String(h.hb.wild_t[tile])], 10, 2.6)
+		if tree:
+			h.fx.burst(at + Vector3(0, TREE_TOP_Y, 0), LEAF_COL, 6, 1.0, 0.9, 2.0)
+		else:
+			h.fx.spark(at + Vector3(0, 0.6, 0), Vector3.UP, Color("ffe2a0"), 6, 5.0, 70.0)
+	Sfx.play("break_wood" if tree else "armor_hit", at, -6.0, 0.1)
+	Sfx.play("rustle" if tree else "thump", at, -10.0, 0.1, 0.8)
+	if not tree:
+		_crack(at, hits)
+	if hits >= HITS and demo_loop:
+		damage[tile] = 0
+	elif hits >= HITS:
+		finish()
+		return false
+	return true
+
+## Dark cracks on the boulder, one more for every hit.
+func _crack(at: Vector3, hits: int) -> void:
+	var holder: Node3D = cracks.get(tile)
+	if holder == null or not is_instance_valid(holder):
+		holder = Node3D.new()
+		holder.position = at
+		h.add_child(holder)
+		cracks[tile] = holder
+	var mat := Models.toon(CRACK_COL, false)
+	var ang := float(hits) * 2.1 + float(tile)
+	var at_rock := Vector3(sin(ang) * 0.35, 0.5 + float(hits) * 0.08, 0.7)      # on the face you see from the south
+	Models.part(holder, Models.box(0.07, 0.6, 0.07), mat, at_rock, Vector3.ONE, Vector3(0.4, ang, 0.7))
+
+## The last hit: it comes down, you get its wood or stone, and it starts growing back.
 func finish() -> int:
 	var w: World = h.world
-	var i := int(job["i"])
-	var what := String(job["what"])
-	var at: Vector3 = job["at"]
-	job = {}
+	var i := tile
+	var what := String(h.hb.wild_t.get(i, ""))
+	var at := Vector3(i % w.w + 0.5, 0, i / w.w + 0.5)
+	damage.erase(i)
+	if cracks.has(i):
+		(cracks[i] as Node3D).queue_free()
+		cracks.erase(i)
+	tile = -1
 	if not h.hb.clear_wild(Vector2i(i % w.w, i / w.w), float(REGROW.get(what, 900.0))):
 		return 0
 	h.hb.mesh_t = 0.05
@@ -311,6 +350,7 @@ func demo(which: String) -> void:
 					k["pos"] = st + Vector3(2.0, 0, 1.0); (k["node"] as Node3D).position = k["pos"]
 				cam.zoom_to = 0.6; cam.zoom = 0.6; cam.snap(st)
 				demo_loop = true
+				h.tw.test_hold = true
 				use({"kind": "wild", "i": ti, "what": "tree"})
 				return
 			# the island's grove: the tree with the most trees round it, away from the landing

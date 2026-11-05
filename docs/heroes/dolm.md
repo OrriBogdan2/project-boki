@@ -23,7 +23,7 @@ ride her hands (HunterAnim's "fist" hold), so every move's arm reach shows. Body
 forearms and fists, a short wide read); the medium hitbox 0.40 is kept (the fists are not body). Palette ochre stone `#d9a35b`
 with molten orange `#ff7a2a`. Payoff word ROCKFALL. Kit: `scripts/arch/kits/dolm_kit.gd`, the slam in `breah_slam.gd`,
 looks in `kit_looks.gd`, standing on rocks in `scripts/arch/stone_stand.gd`, moves in `scripts/match/kmoves_stone.gd`,
-sounds from `tools/gen_stone_sfx.py` (names in `scripts/core/sfx_kits.gd`).
+sounds from `tools/gen_sfx_tarek.py` (names in `scripts/core/sfx_kits.gd`).
 
 ## Scaling used (ratios from the source)
 - Boulder 9 (source 169); a launched rock 14, about 1.5x the boulder (source 244 vs 169, 1.45x). Punch 12-24 (source 199).
@@ -255,7 +255,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 | LMB tap | `breah_throw` | `--arena-demo=anim_br_throw` |
 | LMB hold, release | `breah_wind` (hold), `breah_punch` | `anim_br_punch` |
 | RMB charge, leap, lunge, release, dive | `breah_crouch` (hold), `breah_leap`, `breah_lunge`, `breah_slam`, `breah_dive`, `breah_slam_land` | `anim_br_slam`, `anim_br_leap`, `anim_br_lunge`, `anim_br_dive`; `--breah-shots` (rmb) |
-| Shift (the leap and its landing), the long air dash | `breah_dash` (0.58s: ends on the landing, where `breah_leap_land` takes over), `breah_leap_land`, `breah_exdash` (0.23s, the air dash's own length); both dash moves are the whole pose (`dodge_anim` "kit": no shared roll) | `anim_br_dash`, `anim_br_exdash`; `--breah-shots` (dash) |
+| Shift (Rock Hop, its skid and crash), the long air dash | `breah_hop` (0.28s), `breah_skate`, `breah_leap_land` on the crash, `breah_leap_land`, `breah_exdash` (0.23s, the air dash's own length); both dash moves are the whole pose (`dodge_anim` "kit": no shared roll) | `anim_br_dash`, `anim_br_exdash`; `--breah-shots` (dash) |
 | E | `breah_raise` | `anim_br_raise` |
 | X | `breah_spine_aim` (hold), `breah_spine` | `anim_br_spine` |
 | Passive find | `breah_sense` | `anim_br_sense` |

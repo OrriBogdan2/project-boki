@@ -121,16 +121,16 @@ func spot_for(dir: Vector2, after: int) -> Dictionary:
 
 ## A body fits at p on ground g (his own rocks count as he would walk them).
 func _lands(p: Vector3, g: float) -> bool:
-	var was := StoneStand.mover
+	var asking := StoneStand.mover
 	StoneStand.mover = h
-	var free: bool = m.world.occupy(p.x, p.z, h.r, maxf(g, h.pos.y), false) == 0.0
-	StoneStand.mover = was
-	return free
+	var fits: bool = m.world.occupy(p.x, p.z, h.r, maxf(g, h.pos.y), false) == 0.0
+	StoneStand.mover = asking
+	return fits
 
 ## Nothing solid on the first `want` metres of the line: a hop is low, it doesn't go over walls or trees (a terrace
 ## is fine: it is measured from the terrain's own top). His own rocks count as he would walk them.
 func _clear(dir: Vector2, want: float) -> bool:
-	var was := StoneStand.mover
+	var asking := StoneStand.mover
 	StoneStand.mover = h
 	var free := true
 	var d := 0.25
@@ -139,7 +139,7 @@ func _clear(dir: Vector2, want: float) -> bool:
 		var y := maxf(h.pos.y, m.world.ground_at(q.x, q.z))
 		free = m.world.occupy(q.x, q.z, 0.05, y, false) == 0.0
 		d += 0.25
-	StoneStand.mover = was
+	StoneStand.mover = asking
 	return free
 
 ## Solid ground on the line from p, within `reach` metres and not out of a hop's rise?

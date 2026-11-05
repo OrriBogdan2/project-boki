@@ -285,7 +285,7 @@ func _move_player(d: float) -> void:
 		pface = lerp_angle(pface, atan2(-hv.x, -hv.y), minf(1.0, d * 14.0))
 	player.rotation.y = pface
 	if not player.has_meta("anim"): player.set_meta("anim", HunterAnim.new(player))
-	(player.get_meta("anim") as HunterAnim).update(d, {"vel": pvel, "face": pface, "fired": 99.0})
+	(player.get_meta("anim") as HunterAnim).update(d, {"vel": pvel, "face": pface, "fired": 99.0, "holster": true})
 
 func _find_interact() -> void:
 	var best := {}; var bd := 1.3

@@ -1115,7 +1115,40 @@ func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Cal
 	step(m, 0.2)
 	var hr: Dictionary = hop_rocks(m)[0]
 	ok("hop rocks: never launched", not K.launchable(hr) and hr.get("top") == dd["hop_top"])
-	ok("hop rocks: they carry the top allies hop (StoneStand)", hr.get("by") == P and hr.has("th"))
+	var team0 := T.team
+	StoneStand.mover = T
+	T.grounded = false
+	var foe_top := StoneStand.top_for(hr)
+	T.team = P.team
+	var ally_top := StoneStand.top_for(hr)
+	T.team = team0
+	StoneStand.mover = null
+	T.grounded = true
+	ok(
+		"hop rocks: an ally in the air hops them, a foe is stopped",
+		ally_top == float(dd["hop_top"]) and foe_top == Verbs.WALL_H, "ally %.1f foe %.1f" % [ally_top, foe_top]
+	)
+	# abilities go mid-chain: every hop is a dash for DashFlow
+	reset.call()
+	T.teleport(home + Vector3(0, 0, 12.0))
+	aim_at(P, far)
+	P.ak.on_dash(false)
+	for _s in 60:
+		m.step(DT)
+		if K.hop.chaining() and K.hop.st["phase"] == "skid":
+			break
+	P.ak.on_dash(true)
+	step(m, 0.2)
+	var hop2 := K.hop.chaining() and int(K.hop.st["n"]) == 2 and K.in_dash()
+	var b0 := K.boulders
+	P.inp["fire"] = true
+	m.step(DT)
+	P.inp["fire"] = false
+	step(m, 0.1)
+	ok(
+		"flow: a tap in hop 2 throws the boulder mid-chain", hop2 and K.boulders == b0 + 1,
+		"%s %d" % [hop2, K.boulders - b0]
+	)
 	# over the abyss, on rough ground, at the map's edge
 	await _hop_terrain(m, P, T, home, K, reset, reach)
 

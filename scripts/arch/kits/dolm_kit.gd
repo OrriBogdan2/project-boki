@@ -121,6 +121,7 @@ func launch(w: Dictionary, dir: Vector2, src: String) -> void:
 	var rd := rock_def()
 	var mid := rock_mid(w)
 	HeroZones.remove_rock(m, w)
+	m.sfx("dolm_rock_crunch", mid, -4.0, randf_range(0.92, 1.08))      # torn out of the ground
 	m.fx.burst(mid + Vector3(0, 0.6, 0), Color("d9b27a"), 14, 5.0, 0.4, 6.0, 1.1)
 	m.fx.spark(mid + Vector3(0, 0.4, 0), Vector3(dir.x, 0.6, dir.y), MOLTEN, 10, 7.0, 35.0, 0.3, 6.0, 1.2)
 	_fire_rock(mid + Vector3(0, 0.9, 0), dir, float(rd["dmg"]) * power("kin"), src, "rock", float(rd["range"]))
@@ -529,7 +530,7 @@ func on_dash(use_ex: bool) -> bool:
 		travel(
 			float(h.cdat.get("ex_dist", 4.6)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "trail": "dust"}, true
 		)
-		m.sfx("br_shove", h.pos, -4.0, 1.0)
+		m.sfx("dolm_dash", h.pos, -4.0, 1.0)
 		return true
 	if in_dash() or not spend_dash(false):
 		return true
