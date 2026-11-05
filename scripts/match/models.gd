@@ -730,10 +730,11 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	part(torso, lathe(smooth_curve(PackedVector2Array([Vector2(0, 0.0), Vector2(nr * 2.0, 0.0), Vector2(nr * 1.3, 0.035), Vector2(nr, 0.08), Vector2(nr * 0.98, 0.16), Vector2(0, 0.16)]), 3), 28, "neck%.3f" % nr), m_skin, Vector3(0, 0.58, 0))
 	var skirt_n := _pivot(torso, "Skirt", Vector3(0, 0.07, 0))
 	# the glider pack: a rolled wing on a back plate (under whatever the archetype carries)
-	part(torso, box(0.3, 0.32, 0.1), m_leather, Vector3(0, 0.36, 0.24 * bw))
-	part(torso, cyl(0.075, 0.075, 0.44, 12), toon(Color("f3eee2")), Vector3(0, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
-	for sx in [-1.0, 1.0]:
-		part(torso, cyl(0.08, 0.08, 0.06, 12), m_acc, Vector3(0.2 * sx, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
+	if not um:      # (the Empty's shroud covers its back)
+		part(torso, box(0.3, 0.32, 0.1), m_leather, Vector3(0, 0.36, 0.24 * bw))
+		part(torso, cyl(0.075, 0.075, 0.44, 12), toon(Color("f3eee2")), Vector3(0, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
+		for sx in [-1.0, 1.0]:
+			part(torso, cyl(0.08, 0.08, 0.06, 12), m_acc, Vector3(0.2 * sx, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
 	_class_marks(torso, cls, bw, m_acc, m_trim)
 	# head: the sculpted head (jaw, cheeks, brow, chin per race and gender) with its face
 	var hk := HeroKit.head_key(rid, fem)

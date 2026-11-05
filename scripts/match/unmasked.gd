@@ -35,7 +35,7 @@ const ROWS := [
 const HOLLOW_ROW := 5
 const VOID_SHADER := preload("res://shaders/void_face.gdshader")
 const AURA_RADIUS := 0.5               # m: how far from the shoulders the specks start
-const AURA_SPECK := 0.028             # m: a speck's radius (the old motes were 0.012: too small to see)
+const AURA_SPECK := 0.024             # m: a speck's radius (the old motes were 0.012: too small to see)
 const HEAD_SHELL := 1.012                 # x the head: the void's shell sits just over the head mesh
 
 ## The old face options (eyes, brows, blush) -> the closest hollow, ghost and glow.
@@ -239,7 +239,7 @@ static func _aura(torso: Node3D, count: int, glow: Color) -> void:
 	var fade := Gradient.new()
 	fade.set_color(0, Color(glow, 0.0))
 	fade.set_color(1, Color(glow, 0.0))
-	fade.add_point(0.3, Color(glow.lightened(0.45) * 1.6, 1.0))
+	fade.add_point(0.3, Color(glow.lightened(0.2), 1.0))
 	p.color_ramp = fade
 	var dot := SphereMesh.new()
 	dot.radius = AURA_SPECK
@@ -275,7 +275,7 @@ static func dress(c: Dictionary, lk: Dictionary) -> void:
 		m["body"], Vector3(0, 0.6, 0))
 	var hem := 0.3 * bw * (1.08 if fem else 1.0)
 	var ragged := style == 2
-	var skirt := HeroKit.drape("skirt|%s|%.3f" % [tag, hem], 0.2 * bw, hem, 0.42, 0.0, 1.0,
+	var skirt := HeroKit.drape("skirt|%s|%.3f" % [tag, hem], 0.245 * bw, hem, 0.42, 0.0, 1.0,
 		13.0 if ragged else 8.0, 0.1 if ragged else 0.05, 0.1 if ragged else 0.0, 0.18 if ragged else 0.0)
 	Models.part(c["skirt"], skirt, m["body"], Vector3(0, 0.02, 0))
 	var cowl := HeroKit.drape("cowl|" + tag, 0.2, 0.3, 0.3, 0.02, 0.48, 6.0, 0.04)
@@ -284,7 +284,7 @@ static func dress(c: Dictionary, lk: Dictionary) -> void:
 		Models.part(torso, Models.box(0.07, 0.5, 0.025), m["trim"], Vector3(0.0, 0.3, -0.2 * bw - 0.03), Vector3.ONE,
 			Vector3(0, 0, 0.7))
 	else:
-		Models.part(c["skirt"], HeroKit.drape_hem("hem|%s|%.3f" % [tag, hem], 0.2 * bw, hem, 0.42, 0.0, 1.0,
+		Models.part(c["skirt"], HeroKit.drape_hem("hem|%s|%.3f" % [tag, hem], 0.245 * bw, hem, 0.42, 0.0, 1.0,
 			13.0 if ragged else 8.0, 0.1 if ragged else 0.05, 0.1 if ragged else 0.0, 0.18 if ragged else 0.0),
 			m["trim"], Vector3(0, 0.02, 0))
 
@@ -293,8 +293,6 @@ static func dress(c: Dictionary, lk: Dictionary) -> void:
 ## "empty_m", read by HunterAnim through the model's "stance" meta).
 static func _shape(c: Dictionary, fem: bool) -> void:
 	var torso: Node3D = c["torso"]
-	var m: Dictionary = c["m"]
-	var bw: float = c["bw"]
 	torso.get_parent().get_parent().set_meta("stance", "empty_f" if fem else "empty_m")
 	for ch in torso.get_children():
 		if ch is MeshInstance3D and (ch as MeshInstance3D).mesh == HeroKit.torso(fem):
@@ -308,8 +306,6 @@ static func _shape(c: Dictionary, fem: bool) -> void:
 		(c["p" + sd.to_lower()] as Node3D).position.x *= shoulder
 	if not fem:
 		return
-	var peplum := HeroKit.drape("empty_peplum|%.3f" % bw, 0.215 * bw, 0.3 * bw, 0.2, 0.0, 1.0, 10.0, 0.025)
-	Models.part(c["skirt"], peplum, m["body"], Vector3(0, 0.02, 0))
 	var legs := torso.get_parent().get_node("Legs")
 	for nm in ["LegL", "LegR"]:
 		var leg := legs.get_node(nm) as Node3D

@@ -129,9 +129,9 @@ func _model(main: Node) -> void:
 	var man := _build({"unmasked": true, "gender": 1})
 	var w_sh := (woman.get_node("Rig/Torso/ArmLPivot") as Node3D).position.x
 	var m_sh := (man.get_node("Rig/Torso/ArmLPivot") as Node3D).position.x
-	var flare := _verts(woman.get_node("Rig/Torso/Skirt")) > _verts(man.get_node("Rig/Torso/Skirt"))
+	var flare := _width(woman.get_node("Rig/Torso/Skirt")) > _width(man.get_node("Rig/Torso/Skirt"))
 	ok(absf(w_sh) < absf(m_sh) * 0.9 and flare,
-		"a woman has narrower shoulders and a flared tunic over her hips")
+		"a woman has narrower shoulders and a shroud that flares wider at the hem")
 	ok(String(woman.get_meta("stance")) == "empty_f" and String(man.get_meta("stance")) == "empty_m"
 		and WardenStance.new("empty_f").has_stance() and WardenStance.new("empty_m").has_stance(),
 		"and her own stance (weight on one hip); his is square")
@@ -318,7 +318,7 @@ func _aura() -> void:
 		and p.amount == Unmasked.AURA_COUNT[2] and f.amount == Unmasked.AURA_COUNT[1] and p.amount > f.amount,
 		"the aura has none / faint / strong (%d / %d specks)" % [Unmasked.AURA_COUNT[1], Unmasked.AURA_COUNT[2]])
 	var dot := p.mesh as SphereMesh if p else null
-	ok(dot != null and dot.radius >= 0.025 and p.emission_sphere_radius >= 0.4 and p.orbit_velocity_max > 0.0,
+	ok(dot != null and dot.radius >= 0.02 and p.emission_sphere_radius >= 0.4 and p.orbit_velocity_max > 0.0,
 		"the specks are big (%.0f mm) and drift in a wide swirl round head and shoulders" % (dot.radius * 1000.0 if dot else 0.0))
 	var row: Array = Unmasked.ROWS[Unmasked.ROWS.size() - 1]
 	ok(String(row[1]) == "Aura" and row.size() > 3 and String(row[3]) == "Glowing specks that drift around you",
