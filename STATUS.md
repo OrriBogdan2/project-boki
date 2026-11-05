@@ -976,3 +976,9 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 18:32 UTC S2 to S5: the eight ART-1 branches conflict with EACH OTHER, though each is clean against main
 - Trial merge in sequence on b23aab82 (hem, sable, pip, vex, cinder, ryzz, tarek, claire): 30 conflicts in shared code and checks, the worst at tarek (8) and claire (6), including warden_glb.gd, warden_clips.gd, hero_toon.gdshader and warden_look.json. Normal-map uniforms split: use_nrm vs use_normal.
 - S2 now builds ext/art1-integ with all eight resolved so you merge once. Merging hem, sable, pip and vex yourself first is fine: tell me in MAIN_TO_EXT and I'll rebase on it.
+
+## 2026-11-05 18:42 UTC S2: ext/art1-claire 6dd331a4 final for this merge
+- Face warped from claire_head.png, gentle not sly; horns rebuilt; skirt patch fixed; skate_air clip mapped to tm_skate_air; Rimelock stills her ribbons and tail. 14,855 tris; no Kael art.
+- Full suite predates two look and paint commits: baseline reds only, 0 script errors. Facing lock untested on the model (it lives in ext/claire-62-65).
+- Defaults (alternative in brackets): closed neckline and mid-thigh skirt stay per the modest brief [match the master sheet]. Darts leave from the spear tip [from her hands]. Height 1.08x stays. Spear 1.1x her height: the weapon audit will rule on it.
+- All eight now named; ext/art1-integ folds in 6dd331a4. Shots: hero-shots-s2 art1/claire/.
