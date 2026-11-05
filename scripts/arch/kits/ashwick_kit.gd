@@ -16,7 +16,7 @@ extends ArchKit
 ## - E, Furnace Cloak: on the press, a blast round Cinder (a ring at its exact radius): scorch, Char,
 ##   Anti-Heal, drag foes in (walls block), and a swirling shield for what it hit.
 ## - X, Flue Flight (level 6): a steerable flight that lays a burning, slowing lava carpet (AshwickJet). No lance
-##   in it (owner item 66).
+##   in it.
 
 const FLAME_CYAN := Color("6fe8ff")    # the pilot flame: a cool nozzle against warm fire
 const BOLT_COL := Color("ff4a6a")      # Cinder Shot's red-pink body
@@ -212,7 +212,7 @@ func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
 	var flamer_up: bool = anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
 	if jet.running():
-		fx.unplace("pilot%d" % h.get_instance_id())      # item 66: the lance is out, its pilot flame too
+		fx.unplace("pilot%d" % h.get_instance_id())      # the lance is out, its pilot flame too
 	elif vis and h.wid == "flamethrower" and not h.downed and not KinMerge.active(h) and not flamer_up:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		var big := 1.0 + (1.2 if was_held and spool < float(lmbd()["spool"]) else 0.0)
@@ -335,7 +335,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		_flame_tick(tick)
 	return true
 
-## Flue Flight (owner item 66): LMB does nothing for the whole flight, whatever is in her hand. The key is ignored,
+## Flue Flight: LMB does nothing for the whole flight, whatever is in her hand. The key is ignored,
 ## not buffered, and a press answers with the soft "can't" tick. A stream running at lift-off goes out with no
 ## relight gap, so a held key lights the lance the step the flight ends (its usual pilot, then the roar).
 func _lance_off(pressed: bool) -> void:

@@ -1,8 +1,9 @@
 extends RefCounted
 ## Cinder's ultimate on X, Flue Flight, for --ashwick-combo-check (docs/heroes/ashwick.md): the level gate,
 ## the lift-off telegraph and move, the steering lane, the capped turn, the early landing, the carpet's burn,
-## slow and Char, bond only on a land (the best of hit or knock per cast), the cloak and the Cinder Shot mid-flight,
-## the lance off for the whole flight (owner item 66), a knockback speeding it up, a stun ending it, never over the abyss, the merge drop, the
+## slow and Char, bond only on a land (the best of hit or knock per cast), the cloak and the Cinder Shot
+## mid-flight, the lance off for the whole flight, a knockback speeding it up, a stun ending it, never over the
+## abyss, the merge drop, the
 ## cooldown and the burst cap.
 
 const BURST := preload("res://tools/ult_burst.gd")
@@ -289,7 +290,7 @@ func _knock_stun_merge(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> voi
 	)
 	KinMerge.end(P, "test")
 
-## Owner item 66: LMB does nothing in Flue Flight (no flame, nothing queued, a soft tick on a press), and the lance
+## LMB does nothing in Flue Flight (no flame, nothing queued, a soft tick on a press), and the lance
 ## is back on the first frame after it, however the flight ended.
 func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter, home: Vector3) -> void:
 	# held through the whole flight, a foe at the nozzle, watched every frame
