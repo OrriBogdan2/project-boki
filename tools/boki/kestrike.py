@@ -145,13 +145,13 @@ def bolt_pts():
 
 def parts():
     return {
-        "body": (Shape(body_prims()), 0.0032, 4500),
-        "wings": (Shape(wing_prims()), 0.003, 1100),
-        "tail": (Shape(tail_prims()), 0.003, 600),
-        "beak": (Shape(beak_prims()), 0.0022, 160),
-        "rod": (Shape(rod_prims()), 0.0018, 260),
+        "body": (Shape(body_prims()), 0.0032, 2300),
+        "wings": (Shape(wing_prims()), 0.003, 420),
+        "tail": (Shape(tail_prims()), 0.003, 200),
+        "beak": (Shape(beak_prims()), 0.0022, 50),
+        "rod": (Shape(rod_prims()), 0.0018, 80),
         "spark": (Shape(star("spark", "crest", SPARK_C, 0.017, ((1, 1, 0), (-1, 1, 0), (0, 1, 0.2)))), 0.0016,
-                  200),
+                  50),
     }
 
 
@@ -161,13 +161,13 @@ GRIP = v3(0, 0.43, -0.265)
 
 def prop_parts():
     out = boki_tools.tools(GRIP, AXIS)
-    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 90)
+    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 24)
     out["charge"] = (Shape(star("charge", "prop_charge", SPARK_C, 0.038,
                                 ((1, 0.4, 0), (-1, 0.4, 0), (0.3, 1, 0), (-0.3, 1, 0), (0, 0.3, 1), (0, 0.3, -1)))),
-                     0.003, 320)
+                     0.003, 90)
     pts = bolt_pts()
     out["bolt"] = (Shape([Cone("bolt%d" % i, "prop_bolt", pts[i], pts[i + 1], 0.024 - i * 0.003, 0.02 - i * 0.003,
-                               k=0.01) for i in range(len(pts) - 1)]), 0.003, 360)
+                               k=0.01) for i in range(len(pts) - 1)]), 0.003, 100)
     return out
 
 
