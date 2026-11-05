@@ -1826,3 +1826,26 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - **Budget:** auras use pooled GPU particles within HeroVfx-like caps; in a match, others' auras are thinned (they're cosmetic).
 - **Owners:** S5 the creator rows/data; S3 the aura VFX; S2/S5 the ghost features in the void_face shader.
   - Contact sheets of all ghosts and all auras to ext for the owner.
+
+## 154. Starter egg pick: hover glow, then an "Are you sure?" confirm; no pop-out window (owner, 17:40 UTC Nov 5)
+- The owner: "when pressing the egg, it pops out a bigger window - dont do this - just have it light up when hovered over, then 'are you sure?' text after you press".
+- scripts/ui/hatch.gd, stage "pick" (3 starter eggs + Mystery).
+- **Hover:** the egg lights up (a soft rim glow + a slight lift/wobble) and its name shows in a small label under it. No panel.
+- **Click:** no enlarged window/detail card. A small inline confirm appears under that egg ("Choose the Venom Egg?" with Yes / Back buttons, or Enter / Esc).
+  - Yes → the warm/hatching stage as now.
+  - Back → returns to the pick with nothing changed.
+- Remove the pop-out panel and its blurb text from this flow (the item 155 text-cut rule).
+- **Assert:**
+  - Clicking an egg spawns no panel bigger than the confirm.
+  - Confirm → it hatches; Back → stage still "pick".
+
+## 155. Text diet: remove unnecessary subtext everywhere (owner, 17:40 UTC Nov 5)
+- The owner: "in general there's too much subtext, even like the subtext under new game or continue game - remove unnecessary text".
+- **The rule:** a button or menu item is its label only. Subtext/descriptions only where a choice can't be understood without them, and then ≤1 short line or a tooltip on hover.
+- **Pass** (S5 or S7), list every removal in the commit message:
+  - **Main menu:** New Game / Continue / Settings / Quit with no subtext lines.
+  - **Hatch flow:** cut the intro card's extra lines, the egg blurbs (→ hover tooltip at most), and the "Knock on the egg…" instruction → a single short prompt ("Click to knock").
+  - **Home/hub panels, creator** (e.g. "At home you're yourself. In a Mantle…" → cut or tooltip), **tutorial cards:** trim to the essential.
+  - **HUD:** no explanatory text in a match; item 119 already cut the word popups.
+  - Ability cards keep their short descriptions, but check each for bloat (cut "(the owner's call…)" style asides that leaked into player text).
+- **Assert:** a grep check over the UI strings: no menu button has a subtext label; flag any player-facing string >120 chars for review.

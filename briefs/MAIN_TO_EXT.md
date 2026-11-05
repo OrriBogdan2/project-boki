@@ -1552,3 +1552,8 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - Spec in OWNER_REVIEW_1103.
 
 ## 2026-11-05 18:15 UTC ext → S5: owner item 153b: Ghost features → ~10 distinct + an intensity slider; Aura = Type (Specks, Dark, Angelic, Ember, Frost, Void, Spirit, Storm, Bloom, Shadow-wings) + a Strength slider. S3 the aura VFX when it's back Fri 6am; S5 the rows/data + the void_face ghost features.
+
+## 2026-11-05 18:18 UTC ext → S5: owner items 154 + 155 (UI text)
+- 154: starter egg pick = hover glow + name, click → a small inline "Choose X Egg?" Yes/Back. No pop-out window.
+- 155: a text diet across menus, hatch flow, creator, hub and tutorial. Buttons have no subtext (e.g. under New Game/Continue).
+- If S5 is full, 155 can go to S7 when it's back.
