@@ -20,8 +20,8 @@ CREAM, CREAM_T = rgb("f7dabf"), rgb("fff0cc")
 INNER = rgb("f6c3c6")
 GOLD = rgb("ffd98a")
 APRON, APRON_DK = rgb("efe2cc"), rgb("c8ab7c")
-LEAF, LEAF_DK, LEAF_HI = rgb("5f9e42"), rgb("2f6a34"), rgb("a2c65c")
-PET_C, PET_E = rgb("d9567e"), rgb("fbb7c0")
+LEAF, LEAF_DK, LEAF_HI = rgb("6a9140"), rgb("3f6a35"), rgb("a8bf62")
+PET_C, PET_E = rgb("d0768f"), rgb("f0b0b4")
 BRASS, BRASS_HI, BRASS_DK = rgb("b0833f"), rgb("e4c078"), rgb("654120")
 LEATHER, LEATHER_DK, LEATHER_HI = rgb("8c5a2c"), rgb("53321a"), rgb("b98a4c")
 INK = rgb("3a1f35")
@@ -451,8 +451,8 @@ def head_project(p, n, base, ref, mirror=False):
 
 
 # ---------------------------------------------------------------- the apron: the turnaround's painted cloth, projected from the front
-APRON_K = 0.00139            # m a pixel of pip_turnaround.png
-APRON_C = (457.0, 1053.0)    # its pixel at x = 0 on the hem
+APRON_K = 0.0016            # m a pixel of pip_turnaround.png
+APRON_C = (464.0, 1060.0)    # its pixel at x = 0 on the hem
 
 
 def apron_ref(path):

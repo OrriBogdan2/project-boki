@@ -1,7 +1,7 @@
 {
 	"doc": "Pip's hand-keyed clips (art/wardens/pip/pip.glb) and which game state plays which (scripts/heroes/warden_clips.gd). The lantern is her weapon: skinned on a hanging spring chain under hand.R, so the FX points ride that chain.",
 	"skinned_weapon": true,
-	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "ear.L": "head", "ear.R": "head", "jaw": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R", "wing.L": "hips", "wing.R": "hips", "apron": "hips"},
+	"extra_bones": {"lid.L": "head", "lid.R": "head", "ear.L": "head", "ear.R": "head", "jaw": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R", "wing.L": "hips", "wing.R": "hips", "apron": "hips"},
 	"blade": {"root": "anchor_lantern_top", "tip": "weapon_muzzle", "bone": "spring_hanglantern_0"},
 	"loco": {
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
@@ -24,5 +24,5 @@
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["mm_shot_r", 0.3], ["mm_shot_l", 0.3], ["mm_shot_r", 0.3], ["mm_skip", 0.24], ["mm_shot_emp", 0.4], ["mm_seed_aim", 0.4], ["mm_seed", 0.4], ["mm_shot_l", 0.3], ["mm_hearth", 0.62], ["mm_toss", 0.4], ["mm_shot_r", 0.4], ["mm_pickup", 0.5], ["mm_shot_l", 0.42]],
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
-	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "lid.R", "jaw", "ear.L", "ear.R", "wing.L", "wing.R"]
+	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "lid.L", "lid.R", "jaw", "ear.L", "ear.R", "wing.L", "wing.R"]
 }

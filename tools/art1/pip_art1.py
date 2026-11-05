@@ -124,33 +124,21 @@ for ob in list(bpy.data.objects):
 J = K.J
 body_f = K.body_field()
 armR_f, armL_f = K.arm_field("R"), K.arm_field("L")
-head_f = K.head_field()
-K.seat_eyes(head_f)
 print("fields", __import__("time").time() - t0)
 body = lowpoly("body", body_f, 2300, protect=lambda v: smooth(0.14, 0.05, v[:, 2]) * 0.8 + 0.2)
 armR = lowpoly("armR", armR_f, 640, protect=lambda v: smooth(K.WRIST_Z + 0.02, K.WRIST_Z - 0.03, v[:, 2]) * 0.8 + 0.2)
 armL = lowpoly("armL", armL_f, 640, protect=lambda v: smooth(K.WRIST_Z + 0.02, K.WRIST_Z - 0.03, v[:, 2]) * 0.8 + 0.2)
 
 
-def face_protect(v):
-    q = v - K.HC
-    r = np.linalg.norm((q - (0, 0.19, -0.06)) / (0.15, 0.13, 0.09), axis=1)
-    e = np.minimum(np.linalg.norm(q - K.EYE, axis=1), np.linalg.norm(q - K.EYE * (-1, 1, 1), axis=1))
-    return np.clip(0.12 + 0.88 * np.maximum(smooth(1.15, 0.7, r), smooth(0.12, 0.07, e)), 0, 1)
-
-
-head = lowpoly("head", head_f, 3400, protect=face_protect)
-
+hv, hf, huv = pickle.load(open(os.path.join(WORK, "head_scan.pkl"), "rb"))    # tools/art1/pip_head_scan.py: head, ears, bandage, goggles, band, flowers
+head = Piece("head", "skin", hv, hf, huv, room=0.25)
 pieces = [body, armR, armL, head]
-earR, earL = K.ear(1.0), K.ear(-1.0)
-pieces += [earR, earL, K.bandage(earL)]
-for s in (1.0, -1.0):
-    pieces += [K.eyeball(s), K.lid(s), K.brow(s, head_f)]
-pieces.append(K.nose())
-pieces.append(K.band(head_f))
-pieces += K.goggles()
-pieces += K.flower("flowerR", "cloth", K.h((0.178, 0.05, 0.13)), (0.6, 0.72, 0.32), 0.05, rot=0.3, w=0.8)
-pieces += K.flower("flowerL", "cloth", K.h((-0.178, 0.05, 0.13)), (-0.6, 0.72, 0.32), 0.05, rot=1.1, w=0.8)
+for s_, sd in ((1.0, "R"), (-1.0, "L")):
+    # a skin dome behind each eye, slid out through it to shut the eye (the scan's eyes are paint)
+    c_ = K.h(K.EYE * (s_, 1, 1))
+    near = hv[np.argmin(np.linalg.norm((hv - c_) * (1, 0, 1), axis=1) + (hv[:, 1] < c_[1] - 0.1) * 9)]
+    p_ = K.ball("lid" + sd, "skin", (c_[0], near[1] - 0.012, c_[2]), (0.046, 0.016, 0.048), n=10, m=5, room=0.0)
+    pieces.append(p_)
 tail = K.tail()
 pieces.append(tail)
 cape = K.cape(body_f, [armR_f, armL_f])
@@ -198,14 +186,10 @@ for sd, p, sx in (("R", armR, 1.0), ("L", armL, -1.0)):
         arm["hand.L"] = np.clip(arm["hand.L"] - fing - thm, 0, 1)
     p.w = arm
     norm_w(p)
-JAW = K.jaw_weight(head.v)
-head.w = {"jaw": JAW, "head": 1 - JAW}
-for p_, sd in ((earR, "R"), (earL, "L")):
-    q = (p_.v - p_.c0) @ p_.ax / p_.L
-    w = smooth(0.10, 0.24, q)
-    p_.w = {"ear." + sd: w, "head": 1 - w}
-ban = next(p for p in pieces if p.name == "bandage")
-ban.w = {"ear.L": np.ones(len(ban.v))}
+q_ = head.v - K.HC
+JAW = smooth(-0.088, -0.108, q_[:, 2]) * smooth(0.08, 0.13, q_[:, 1]) * smooth(0.085, 0.06, np.abs(q_[:, 0]))
+EAR = smooth(0.165, 0.235, q_[:, 2]) * smooth(0.07, 0.1, np.abs(q_[:, 0])) * smooth(0.075, 0.04, q_[:, 1])
+head.w = {"jaw": JAW, "ear.R": EAR * (q_[:, 0] > 0), "ear.L": EAR * (q_[:, 0] < 0), "head": np.clip(1 - JAW - EAR, 0, 1)}
 
 
 def rigid(names, bone):
@@ -214,11 +198,8 @@ def rigid(names, bone):
             p.w = {bone: np.ones(len(p.v))}
 
 
-rigid(("eyeR", "eyeL", "nose", "band", "gog", "lens", "flowerR", "flowerL"), "head")
 rigid(("lidR",), "lid.R")
 rigid(("lidL",), "lid.L")
-rigid(("browR",), "brow.R")
-rigid(("browL",), "brow.L")
 rigid(("cflower",), "hips")
 rigid(("strap",), "hips")
 rigid(("pouch", "flap", "buckle", "vial", "scroll"), "root")
@@ -289,7 +270,7 @@ for p in pieces:
         print("NO WEIGHTS", p.name)
         p.w = {"hips": np.ones(len(p.v))}
     norm_w(p)
-    if p.name.startswith(("wing", "lpane", "lens", "lidR", "lidL", "browR", "browL")):
+    if p.name.startswith(("wing", "lpane")):
         continue
     if p.name in ("body", "armR", "armL", "head"):
         continue
@@ -368,7 +349,6 @@ def smart_uv(p, angle):
     bpy.data.objects.remove(ob)
 
 
-smart_uv(head, 70)
 unique = [p for p in pieces if not p.name.startswith(("eye", "wing")) and p is not head]
 obs = []
 for pid, p in enumerate(unique):
@@ -446,7 +426,7 @@ for pid_all, p in enumerate(pieces):
             FV.append([i + base for i in q])
             FM.append(ORDER.index("face" if p is head else p.mat))
             FP.append(pid_all)
-            u0, v0, u1, v1 = (0, 0, 1, 1) if p is head else EYE_TILE if p.mat == "eyes" else (0, 0, 1, 1)
+            u0, v0, u1, v1 = (0, 0, 1, 1) if p.mat == "eyes" else (0, 0, 1, 1)
             FU.append([(u0 + (u1 - u0) * a, v0 + (v1 - v0) * b) for a, b in p.uv[k]])
     base += len(p.v)
 bpy.data.objects.remove(joined)
@@ -487,14 +467,6 @@ for pid_all in np.unique(tp):
     R = S.raster(tuv[m], V[tv[m]].astype(F), vn[tv[m]].astype(F), np.arange(m.sum()), ATLAS, part=int(pid_all), out=R)
 POS, NOR, PID = R["p"], R["n"], R["id"]
 NOR /= np.maximum(np.linalg.norm(NOR, axis=2, keepdims=True), 1e-6)
-ftv, ftuv = [], []
-for lt in me.loop_triangles:
-    if FM[lt.polygon_index] == ORDER.index("face"):
-        ftv.append(lt.vertices[:])
-        ftuv.append([uvd[li * 2:li * 2 + 2] for li in lt.loops])
-ftv, ftuv = np.array(ftv), np.array(ftuv, F)
-RF = S.raster(ftuv, V[ftv].astype(F), vn[ftv].astype(F), np.arange(len(ftv)), FACE, part=0)
-RF["n"] /= np.maximum(np.linalg.norm(RF["n"], axis=2, keepdims=True), 1e-6)
 print("raster", __import__("time").time() - t0)
 
 # ------------------------------------------------------------------ AO, baked by Cycles on the rest pose (the wings hidden)
@@ -541,9 +513,6 @@ aoi.pixels.foreach_get(ao.ravel())
 ao = ao[..., 0]
 bpy.data.objects.remove(ob_h)
 AO = np.repeat(np.repeat(ao, 2, 0), 2, 1)
-aofp = np.zeros((FACE, FACE, 4), F)
-aof.pixels.foreach_get(aofp.ravel())
-AOF = aofp[..., 0]
 print("ao", __import__("time").time() - t0, ao.mean())
 
 # ------------------------------------------------------------------ paint
@@ -585,11 +554,6 @@ for pi_, p in enumerate(pieces):
         c = P.body(q, n_, a)
     elif nm in ("armR", "armL"):
         c = P.arm(q, n_, a)
-    elif nm in ("earR", "earL"):
-        c, e_ = P.head_project(q, n_, P.ear_paint(q, n_, a, p, nm), P.head_views(os.path.join(HERE, "refs", "pip_head.png")), mirror=True)
-        emi[np.nonzero(m)[0]] = e_
-    elif nm == "bandage":
-        c = P.bandage(q, n_, a, p)
     elif nm == "tail":
         s_, sf, nf = [np.asarray(x, F) for x in p.frames]
         d2 = ((q[:, None, :] - s_[None, :, :]) ** 2).sum(2)
@@ -608,14 +572,8 @@ for pi_, p in enumerate(pieces):
         c = P.mix(c, P.rgb("ffeeb4"), K.smooth(0.72, 0.95, tt))
     elif nm.startswith("lid"):
         c = np.broadcast_to(P.PINK, q.shape).astype(F).copy()
-        e_ = K.h(K.EYE * (1 if nm.endswith("R") else -1, 1, 1)).astype(F)
-        ax = K.eye_axis(1 if nm.endswith("R") else -1).astype(F)
-        c = P.mix(c, P.INK, K.smooth(0.64, 0.72, ((q - e_) @ ax) / K.EYE_R))
-    elif nm.startswith("brow"):
-        c = np.broadcast_to(P.rgb("fbd3d2"), q.shape).astype(F)
-    elif nm == "nose":
-        c = np.broadcast_to(P.rgb("2a1a22"), q.shape).astype(F).copy()
-        c = P.mix(c, P.rgb("6b5560"), K.smooth(0.72, 0.95, n_[:, 2]) * 0.8)
+        e_ = np.array(p.v.mean(0), F)
+        c = P.mix(c, P.INK, K.smooth(0.006, 0.002, np.abs(q[:, 2] - e_[2] + 0.012 + ((q[:, 0] - e_[0]) / 0.046) ** 2 * -0.012)))
     elif nm == "apron":
         c = P.apron_project(q, n_, P.apron(q, n_, a), P.apron_ref(os.path.join(HERE, "refs", "pip_turnaround_ref.png")))
     elif nm.startswith("leafG") or nm.startswith("collar"):
@@ -664,26 +622,8 @@ OUTC[ys, xs] = col
 OUTE[ys, xs] = emi
 OUTC = S.dilate(OUTC, mask, it=8)
 OUTE = S.dilate(OUTE, mask, it=8)
-x0, y0 = int(EYE_TILE[0] * ATLAS), int(EYE_TILE[1] * ATLAS)
-x1, y1 = int(EYE_TILE[2] * ATLAS), int(EYE_TILE[3] * ATLAS)
-OUTC[y0:y1, x0:x1] = P.eyeball_art(os.path.join(HERE, "refs", "pip_head.png"), max(x1 - x0, y1 - y0))[: y1 - y0, : x1 - x0]
 # (the atlas's row 0 is Blender's v = 0)
-# the head's own texture: the sheet's face over the scripted fur
-fm = RF["id"] >= 0
-fy, fx = np.nonzero(fm)
-fp, fn = RF["p"][fy, fx], RF["n"][fy, fx]
-fa = np.clip(AOF[fy, fx], 0, 1)
-base_c = P.head(fp, fn, fa, mouth_dist(fp))
-ref = P.head_views(os.path.join(HERE, "refs", "pip_head.png"))
-fc, fe = P.head_project(fp, fn, base_c, ref)
-fak = 0.72 + 0.28 * np.clip(fa * 1.3, 0, 1)
-fc = fc * P.mix(np.broadcast_to(P.rgb("c98a90"), fc.shape).astype(F), np.ones(3, F), fak)
-FC, FE = np.zeros((FACE, FACE, 3), F), np.zeros((FACE, FACE, 3), F)
-FC[fy, fx], FE[fy, fx] = fc, fe
-FC, FE = S.dilate(FC, fm, it=10), S.dilate(FE, fm, it=10)
-imgio.save(FC[::-1], os.path.join(WORK, "face.jpg"))
-imgio.save(FE[::-1], os.path.join(WORK, "face_emit.jpg"))
-rel_ids = np.array([p.name.startswith(("apron", "pouch", "flap", "leafG", "petal", "collar", "lroof", "strap", "bandage", "scroll")) for p in pieces], F)
+rel_ids = np.array([p.name.startswith(("apron", "pouch", "flap", "leafG", "petal", "collar", "lroof", "strap", "scroll")) for p in pieces], F)
 RM = np.zeros((ATLAS, ATLAS), F)
 RM[ys, xs] = rel_ids[ids]
 imgio.save((P.relief_map(OUTC, RM) * 0.5 + 0.5)[::-1], os.path.join(WORK, "normal.jpg"))
@@ -707,6 +647,9 @@ face_i = bpy.data.images.load(os.path.join(WORK, "face.jpg"))
 face_i.name = "face"
 face_e = bpy.data.images.load(os.path.join(WORK, "face_emit.jpg"))
 face_e.name = "face_emit"
+face_n = bpy.data.images.load(os.path.join(WORK, "face_normal.jpg"))
+face_n.name = "face_normal"
+face_n.colorspace_settings.name = "Non-Color"
 for nm, mt in zip(ORDER, me.materials):
     nt = mt.node_tree
     nt.nodes.remove(nt.nodes["bake"])
@@ -720,9 +663,9 @@ for nm, mt in zip(ORDER, me.materials):
         pb.inputs["Alpha"].default_value = 1.0
         nt.links.new(t.outputs[1], pb.inputs["Alpha"])
         mt.blend_method = "BLEND"
-    if nm in ("cloth", "leather", "metal"):
+    if nm in ("cloth", "leather", "metal", "face"):
         tn = nt.nodes.new("ShaderNodeTexImage")
-        tn.image = nimg
+        tn.image = face_n if nm == "face" else nimg
         nn_ = nt.nodes.new("ShaderNodeNormalMap")
         nt.links.new(tn.outputs[0], nn_.inputs["Color"])
         nt.links.new(nn_.outputs[0], pb.inputs["Normal"])
@@ -769,8 +712,6 @@ def spring(names_, pts, parent):
 for s_, sd in ((1.0, "R"), (-1.0, "L")):
     c = K.h(K.EYE * (s_, 1, 1))
     bone("lid." + sd, "head", c, c + Vector((0, 0.03, 0)))
-    b = K.h((s_ * 0.06, 0.13, 0.098))
-    bone("brow." + sd, "head", b, b + Vector((0, 0.03, 0)))
     p0 = K.h((s_ * 0.13, -0.022, 0.17))
     bone("ear." + sd, "head", p0, p0 + Vector((s_ * 0.03, 0, 0.08)))
     hd = np.array([s_ * 0.118, -0.012, K.ANKLE_Z])
@@ -804,7 +745,7 @@ for vi, d in enumerate(W):
 # ------------------------------------------------------------------ anchors, FX points
 LZ = K.LZ
 gx, gy = K.GRIP[0], K.GRIP[1]
-A = {"anchor_head_top": ("head", K.h((0, 0, 0.22))), "anchor_chest": ("hips", (0, 0.17, 0.98)),
+A = {"anchor_head_top": ("head", K.h((0, 0, 0.26))), "anchor_chest": ("hips", (0, 0.17, 0.98)),
      "anchor_lantern_top": ("spring_hanglantern_0", (gx, gy, LZ["top"])), "anchor_hang_lantern": ("spring_hanglantern_0", (gx, gy, (LZ["eave"] + LZ["bottom"]) / 2)),
      "weapon_muzzle": ("spring_hanglantern_0", (gx, gy, (LZ["eave"] + LZ["bottom"]) / 2)),
      "anchor_flower": ("hips", (0.0, 0.20, 1.055)), "anchor_tail_tip": ("spring_tail_%d" % (K.TAIL_N - 2), tuple(K.TAIL_PATH[-1] * (1, 1, 1) + (0.03, 0.0, -0.06))),
