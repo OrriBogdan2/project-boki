@@ -1524,3 +1524,5 @@ Faces now have a reference for every hero. The face/detail pass applies to all.
 ## 2026-11-05 12:20 UTC (ext): OWNER ITEM 113 (HIGH, playtest): KAEL accuracy pass vs Brall: 8 points in OWNER_REVIEW 113 (sword size/model, no accidental glide, RMB pose forward, side-swing auto, E independent of RMB direction, vertical down-slam, E→R→self-pull combo, a short dash hit). KITS lane, Opus. The sword scale + mesh goes with ART-1 Kael.
 
 ## 2026-11-05 12:22 UTC (ext): OWNER ITEM 114 (HIGH, playtest): Lisette: upright idle (not leaning back); KILL the V attack (land 55b after fixing the shader stutter S5 flagged); RMB shows a big needle arrow drawn while charging; she is slowed while holding RMB. See OWNER_REVIEW 114. S4 does the charge sound, S3 the E colour.
+
+## 2026-11-05 12:24 UTC (ext): OWNER ITEM 116 (HIGH, playtest): Ryzz: a sexier, less stiff idle/walk; LMB 10% faster + pink; the ult lands exactly at the cursor; the ult spreads Static (item 72 not working in play). KITS + ART-1 Ryzz. See OWNER_REVIEW 116.

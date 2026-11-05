@@ -1046,3 +1046,18 @@ Source of truth: Brall in `briefs/supervive-data/supervive_kits.md` + footage re
 
 ## 115. Vex's ult should be GREEN (owner, 12:21 UTC Nov 5)
 Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, the spine), not the current colour. Check every Vex VFX for off-palette colours (S3).
+
+## 116. Ryzz playtest fixes (owner, 12:23 UTC Nov 5). HIGH
+1. **Idle + walk/run:** too stiff. Give her a sexier, confident, bouncy idle and walk (hip sway, swagger, attitude), still playful. Use the bubblegum blow/pop in the idle (ART-1 Ryzz anims).
+2. **LMB:** ~10% faster fire rate (data: the autos interval ×0.9) and PINK bolts (finger-gun lightning, per the FIDELITY_CHECKLIST).
+3. **Static stacks on enemies:**
+   - The counter over their head is PINK.
+   - Like the source: a small lightning-bolt icon attached to the enemy per stack (1 bolt per hit, up to the max), so stacks read at a glance.
+   - Copy the source's presentation; draw our own.
+4. **Ult (Kitefall):**
+   - It doesn't land exactly at the cursor. It must go exactly to the cursor position (clamped by range).
+   - It still doesn't spread Static (item 72 not working in play): on impact it spreads her highest Static count to everyone hit.
+   - Assert both in --mage-combo-check.
+5. **Sound:**
+   - Much better lightning sounds: a crackling zap per finger-gun shot, a sizzling stack-apply tick, a big thunder crack on the ult.
+   - A distinct "reset" sound (a bright electric chime/zing) when her dash (Wirerun) resets from the orb pull (item 71) (S4).

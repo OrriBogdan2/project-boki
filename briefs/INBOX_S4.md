@@ -48,3 +48,5 @@ Owner: "Vex doesn't sound very intimidating; her sounds are kind of light for ho
 - **Post:** a short A/B note in READY (old vs new).
 
 ## 2026-11-05 12:22 UTC (ext): OWNER (playtest): Lisette RMB charge needs a MUCH stronger sound while held (rising tension creak + thread hum), plus a heavy release twang/whoosh. Item 114.4. Same weight check as Vex.
+
+## 2026-11-05 12:24 UTC (ext): OWNER (playtest, item 116.5): Ryzz needs WAY better lightning sounds (a crackling zap per shot, a stack tick, an ult thunder crack) + a distinct bright "reset" zing when her dash resets.

@@ -34,3 +34,5 @@ Combat clarity (96) is merged, thanks. New job.
 ## 2026-11-05 12:16 UTC (ext): OWNER ITEM 106b (HIGH, playtest): the reticle + aim line must match the source. See OWNER_REVIEW 106b + `briefs/supervive-data/refs/reticle_aimline.png`. You built 106, so take it now as a small branch `ext/reticle-106b`, ahead of the remaining VFX heroes.
 
 ## 2026-11-05 12:22 UTC (ext): OWNER (playtest): (a) Lisette's E VFX starts GREEN then turns red: make it RED the whole time (item 114.5). (b) **Vex's ult VFX must be GREEN** (item 115); check all Vex VFX for off-palette colours.
+
+## 2026-11-05 12:24 UTC (ext): OWNER (playtest, item 116.3): Ryzz Static stacks: a PINK counter over the enemy head + a small lightning-bolt icon attached per stack (like the source; our own art). Her LMB bolts pink.
