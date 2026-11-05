@@ -482,3 +482,13 @@ Shots: `ext/hero-shots-s2` (README with captions).
 ## 2026-11-05 S2: ext/art1-breaker paused at c4290e8f (WIP, not READY; skip 7e092bf4, parse error)
 - The old look is a dead end, but the rig, sculpt_kit.py, anim_kit.py and warden_anim/breaker.json carry over. Shared fix found there and sent to ART-1 Kael: Hunter.equip rebuilds the procedural weapon, so skinned-weapon Heroes show a second copy in matches.
 - The restart still waits for the turnaround + weapon sheet.
+
+## 2026-11-05 S2: READY ext/kit-ostra-60-75 f55930d5 (items 60 + 75)
+- Base fe51b43b; merges cleanly into origin/main 4bac1edb. 60: the wait between shots charges the next orb: 9 dmg x1.0 up to 0.6 s, rising to 12.06 dmg x1.8 at 1.4 s; a full orb slows 10% for 1.5 s; every orb passes walls and terrain. The old bug where a plain orb after a missed full orb also slowed is gone. 75: fly_slow 0.3 (measured 1.35 of 4.65 m/s).
+- Differs: charge starts at 0.6 s (the fire rate) so held fire stays plain and DPS is unchanged; size is the real hit radius (0.28 -> 0.50 m); speed scales to x1.4 as before; the orb_hot skin is gone; placed ability walls/domes still stop orbs (read from code, not asserted).
+- Shared: hunter.gd +1 (wpn.shot_x); match.gd +3/-1: the "s" net event's last field gains value 2 for pierce, **no Net.VERSION bump, only the receiving end is asserted: reviewer please check**; kit_looks.gd tails now always draw under the shot glass (spear skin too).
+- Checks 0 failures: --check, hero-combo 263, ostra-combo 154, warden-model, warden-glb, class-unlock 153, arena 86, tutorial-hud, rig-standard, archetype 339, dash-flow, aimkit 55, simtest, health --strict, gen_wiki 34 unchanged.
+- Full run 120 flags, 14 red: 11 known baseline (not all rerun or read); perch 4 fails same on clean fe51b43b (new baseline red); kin-indoors fails the same line on baseline; farm-tutorial 1 fail under load, 0 on rerun and baseline, probable flake.
+- ART-1 note: ostra_orb_hot plays only at full charge; Trade drift ~1.4 m/s (was 0.93), so ostra_swap clips must hold up at it.
+- Shots: ext/hero-shots-s2 kits/ostra/. Not checked: real-speed motion, chime, online, bots using charge, night.
+- Owner Qs: charge from 0.6 s (DPS unchanged) or 0 s (+15% DPS)? x1.8 size with matching hit radius OK? Should placed walls/domes keep stopping orbs ("walls" taken as terrain)?
