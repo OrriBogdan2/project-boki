@@ -858,3 +858,5 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Height 1.18x / 1.2x with the lower hover (1.33x on main). warden-model targets moved.
 - Owner Qs: orb in his right hand mirrors the sheet? 1.2x height OK?
 - bot-sanity is now flagged on Cinder and Motley; a lane is checking the shared runtime.
+
+## 2026-11-05 S2: READY ext/kit-pip-118 94a90a69 (item 118); details in EXT_TO_MAIN. The charge is spent at the throw, so a stun loses the throw, not the charge: agent's call. Owner Q: spend it on the press?
