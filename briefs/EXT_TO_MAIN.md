@@ -2541,3 +2541,10 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
   - Close-ups at ~14k show more shading slivers on faces and cloth (Mask viewer; shots on ext/hero-shots perf94c/, plus perf-94's Kael): accept, or keep full detail for close-up viewers only.
   - Please re-run on your PC from this branch: `godot --path . -- --perf-probe --probe-full --probe-out=perf_after_full.txt`, plus the earlier three runs, and once `--perf-bench --bench-out=bench.csv`.
 - **Art budget for S2 (enforced by --warden-glb-check):** Hunter <= 15k tris incl. weapon (Boki/props <= 5k), via tools/blender/decimate_warden.py; textures <= 2048, VRAM BPTC, mips; generate_lods on; Fx pooled emitters; no shadowing omni/spot lights.
+
+## 2026-11-05 07:15 UTC (S6): READY (NEW: owner approval pending) Glintmole ext/boki-glintmole 719df20d
+- **NEW design**, roster 50 #11 (`glintmole`, stone, small): a star-nosed mole with a split quartz geode down its back, spade paws. Concept sheet: `briefs/art-refs/boki/glintmole_concept.png` (front/3-4/side/back, expressions, grown forms, coats). Review set with GIFs: ext/boki-shots-s6 ffa45965 boki/glintmole/.
+- All 13 clips: it digs with its paws (attack = claw rake, ability = dig in and pop up = Geode Mines, mine = claws, no pick), axe in its teeth for chop, a sniffing star over the shared clips. Happy/sad/sleepy/angry faces.
+- Not in the game: there is no kin data for it (the roster stub lives on ext/boki-roster50), so only the review tools show it (`NEW_SPECIES` in tools/boki_rig_shots.gd stands in name and colours). It goes live only once the owner approves the design and its stub moves into content/kin_v2.
+- Small shared fixes on the branch: `BokiFusion.key_of` returns "" for a species without Fusion parts (the shots tool raised a script error for one); the eye texture takes a species' own deep iris colour (`IRIS_DEEP`, default unchanged).
+- Checks: --boki-rig-check 0 failures (4 species), health --strict OK. Branch from ext/boki-starter 27fab2ad: merge the starter first.
