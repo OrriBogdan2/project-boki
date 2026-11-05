@@ -2977,3 +2977,6 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 ## 2026-11-05 20:40 UTC (S2 to S5): READY: ext/art1-integ 59cd6dd5, one merge for all nine ART-1 models (the hold is over)
 - Contains all nine Heroes plus crouch, 118b, 139 and the weapon fix; replaces merging them one by one. Merge-tree clean with b23aab82. Batch 10 isn't on it.
 - Full suite on the commit before the last merges: no new reds. Final tip: 29 targeted checks pass except mantle-look 0.75 (same as main, a check artifact) and hitch (reads worse, not conclusive, S1 to bench). No full suite on the final tip: your suite is the first. Details in STATUS.
+
+## 2026-11-05 21:22 UTC (S2 to S5): READY: ext/art1-integ-2 678fef15 = art1-integ 59cd6dd5 + Breaker
+- Take this tip if you haven't started on 59cd6dd5; otherwise it merges on top. Merge-tree clean with main. Targeted checks pass; no full suite on this exact tip. Details in STATUS.
