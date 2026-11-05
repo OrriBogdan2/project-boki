@@ -18,7 +18,7 @@ F = np.float32
 # labels
 WOOD, IRON, RIVET, BRASS, MOSS, BARN, GLASS = 1, 2, 3, 4, 5, 6, 7
 HULL_C = (0.0, 0.0, 0.5)
-HULL_R = (0.385, 0.365, 0.345)
+HULL_R = (0.385, 0.385, 0.315)
 HELM_C = (0.0, 0.13, 0.905)
 HELM_R = 0.122
 PORT_Y = HELM_C[1] + HELM_R - 0.012          # the porthole's glass
@@ -52,18 +52,33 @@ def barnacle(fld, c, n, r, lab=BARN):
     fld.sub(sph(c + n * r * 0.85, r * 0.42), r * 0.1, lab)
 
 
+def strake(x, y, z):
+    """Hull planks: long strakes that sweep round him and bow up to the sides in front, close to staves that gather at the
+    stern behind, as a ship's lines. Returns the plank coordinate (1 = one plank)."""
+    r = np.sqrt(x * x + y * y) + 1e-4
+    sw = 0.13 * (r / 0.38) ** 2 * smooth(0.0, 0.35, np.abs(x))
+    front = (z - 0.5 - sw) / 0.062
+    back = np.arctan2(x, -y) / 0.17
+    k = smooth(-0.22, -0.3, y)        # 1 astern
+    return front, back, k
+
+
 def hull(J):
-    """The hull: a big round barrel of planks, a little squashed; plank seams carved shallow."""
-    f = Field((-0.5, -0.46, 0.08), (0.5, 0.5, 1.0), 0.0045)
-    wob = lambda x, y, z: (fbm(x, y, z, 6.0, 2) - 0.5) * 0.014
-    f.add(ell(HULL_C, HULL_R), 0.0, WOOD, None, wob)
-    f.add(ell((0, 0.0, 0.2), (0.2, 0.17, 0.09)), 0.1, WOOD)             # the belly's keel into the hips
+    """The hull: an egg of timbers, full at the shoulders and drawn in to the keel, a keel beam under him."""
+    f = Field((-0.5, -0.46, 0.06), (0.5, 0.5, 1.0), 0.0045)
+    wob = lambda x, y, z: (fbm(x, y, z, 6.0, 2) - 0.5) * 0.012
+    f.add(ell((0, 0, 0.55), HULL_R), 0.0, WOOD, None, wob)
+    f.add(ell((0, 0, 0.36), (0.33, 0.33, 0.25)), 0.1, WOOD)
+    f.add(ell((0, 0, 0.2), (0.17, 0.2, 0.09)), 0.08, WOOD)
     x, y, z = f.grid()
-    r = np.sqrt(x * x + (y) ** 2) + 1e-4
-    # horizontal planks bowed round him, in the art's fan: seams carved 4 mm deep
-    v = (z - 0.5 - 0.12 * (r / 0.38) ** 2 * smooth(0.0, 0.35, np.abs(x))) / 0.058
-    seam = smooth(0.1, 0.0, np.abs(((v + 0.5) % 1.0) - 0.5))
-    f.d = (f.d + seam * 0.004).astype(F)
+    fr, bk, kk = strake(x, y, z)
+    # clinker: each strake laps the one below, a stepped edge you can see at the silhouette
+    q = fr % 1.0
+    lap = (1.0 - q) * 0.0075 * (1.0 - kk) * smooth(0.3, 0.42, z)
+    seam = smooth(0.14, 0.0, np.abs((bk + 0.5) % 1.0 - 0.5)) * 0.005 * kk
+    f.d = (f.d - lap + seam).astype(F)
+    # the stem down his front and the keel under him: heavy timbers
+    f.add(box((0, 0.0, 0.135), (0.035, 0.27, 0.04), 0.03), 0.02, WOOD)
     return f
 
 
@@ -83,7 +98,7 @@ def straps(hl):
         paths.append([(s * 0.34, back, 0.78), (s * 0.12, back, 0.65)])
         paths.append([(s * 0.12, back, 0.46), (s * 0.34, back, 0.3)])
     d_all = None
-    hw = 0.033
+    hw = 0.036
     x, y, z = f.grid()
     pts_r = []
     for pa in paths:
@@ -94,7 +109,7 @@ def straps(hl):
         d_all = d if d_all is None else np.minimum(d_all, d)
         pts_r.extend(pp[3::5])
     # the belt round his middle, low
-    zb = np.abs(z - (0.25 + 0.03 * ((np.abs(x) / 0.38) ** 2))) - 0.024
+    zb = np.abs(z - (0.235 + 0.03 * ((np.abs(x) / 0.38) ** 2))) - 0.024
     d_all = np.minimum(d_all, zb)
     sh = np.abs(hl.d - 0.009) - 0.009
     f.d = np.maximum(sh, d_all).astype(F)
@@ -166,12 +181,13 @@ def arm(J, s):
         fld.d = (fld.d + seam * 0.0035 * (fld.lab == WOOD)).astype(F)
 
     pd = Field(lo, hi, V)
-    # the iron cap on the shoulder: a heavy bent plate
-    pd.add(ell((sx + s * 0.03, 0, z_s + 0.075), (0.15, 0.155, 0.125)), 0.0, IRON, None, wob)
-    pd.sub(ell((sx - s * 0.13, 0, z_s), (0.13, 0.2, 0.16)), 0.02)
-    pd.add(ell((sx + s * 0.09, 0, z_s + 0.015), (0.09, 0.15, 0.07)), 0.02, IRON)
-    for a in np.linspace(-1.1, 1.1, 7):
-        rivets(pd, [(sx + s * (0.1 + 0.075 * math.cos(a)), 0.135 * math.sin(a), z_s + 0.1 - 0.05 * abs(a))], 0.009)
+    # the iron cap on the shoulder: a bent square slab, as the art, its edge turned down
+    tilt = (0, s * 0.42, 0)
+    pd.add(box((sx + s * 0.035, 0, z_s + 0.075), (0.135, 0.155, 0.03), 0.018, tilt), 0.0, IRON, None, wob)
+    pd.add(box((sx + s * 0.135, 0, z_s - 0.01), (0.035, 0.15, 0.09), 0.016, (0, s * 0.12, 0)), 0.02, IRON, None, wob)
+    pd.add(cyl((sx, 0, z_s + 0.015), "z", 0.118, 0.022, 0.008), 0.01, IRON)
+    for a in np.linspace(-0.13, 0.13, 4):
+        rivets(pd, [(sx + s * 0.172, a, z_s + 0.045), (sx + s * 0.172, a, z_s - 0.075)], 0.009)
     up = Field(lo, hi, V)
     up.add(cap((sx, 0, z_s + 0.02), (sx, 0, z_e + 0.01), 0.1, 0.105), 0.0, WOOD, None, wob)
     staves(up, sx, 8)
@@ -227,31 +243,35 @@ def leg(J, s):
 
 
 def moss(hl, pads):
-    """Moss, heaped on the shoulders and the collar, dribbling down the chest and back in strands."""
-    f = Field((-0.62, -0.46, 0.2), (0.62, 0.48, 1.02), 0.0042)
-    lump = lambda x, y, z: (fbm(x, y, z, 13.0, 3) - 0.5) * 0.09
+    """Moss heaped on the shoulder edges and the hull's flanks, hanging down the hull in long dripping beards; from above
+    the hull stays the big shape, so the heaps sit out by the shoulders."""
+    f = Field((-0.66, -0.5, 0.0), (0.66, 0.52, 1.0), 0.0042)
+    lump = lambda x, y, z: (fbm(x, y, z, 13.0, 3) - 0.5) * 0.08
+    fine = lambda x, y, z: (fbm(x, y, z, 26.0, 2) - 0.5) * 0.016
     for s in (-1, 1):
-        f.add(ell((s * 0.27, -0.03, 0.8), (0.19, 0.22, 0.065)), 0.05, MOSS, None, lump)
-        f.add(ell((s * 0.45, -0.02, 0.83), (0.135, 0.15, 0.06)), 0.05, MOSS, None, lump)
-    rng = np.random.default_rng(21)
-    for i in range(16):
-        s = 1 if i % 2 else -1
-        x0 = s * float(rng.uniform(0.17, 0.36))
-        fr = rng.random() > 0.3
-        z0 = float(rng.uniform(0.7, 0.79))
-        l = float(rng.uniform(0.18, 0.44))
-        pts = []
-        for t in np.linspace(0, 1, 8):
-            pts.append((x0 + 0.018 * math.sin(t * 9 + i) * t, 0.5 if fr else -0.5, z0 - l * t))
-        pp = onsurf(hl, pts, 0.03)
-        f.add(path(pp, [0.034 * (1 - 0.72 * t) for t in np.linspace(0, 1, 8)]), 0.012, MOSS, None, lambda x, y, z: (fbm(x, y, z, 26.0, 2) - 0.5) * 0.012)
-    # the skirt of hanging weed round the waist
-    for i in range(9):
-        a = i / 9 * math.tau + 0.3
-        x0, y0 = math.sin(a) * 0.3, math.cos(a) * 0.3
-        l = float(rng.uniform(0.08, 0.17))
-        pp = onsurf(hl, [(x0 * 1.3, y0 * 1.3, 0.3 - l * t) for t in np.linspace(0, 1, 6)], 0.004)
-        f.add(path(pp, [0.02 * (1 - 0.8 * t) for t in np.linspace(0, 1, 6)]), 0.01, MOSS)
+        f.add(ell((s * 0.34, 0.03, 0.8), (0.12, 0.2, 0.05)), 0.05, MOSS, None, lump)
+        f.add(ell((s * 0.48, 0.0, 0.8), (0.09, 0.15, 0.05)), 0.05, MOSS, None, lump)
+        f.add(ell((s * 0.3, 0.2, 0.74), (0.11, 0.09, 0.07)), 0.05, MOSS, None, lump)
+        f.add(ell((s * 0.28, -0.2, 0.76), (0.1, 0.09, 0.05)), 0.05, MOSS, None, lump)
+    # (x, front?, top, bottom, width): the art's beards, front then back
+    beards = [(0.33, 1, 0.8, 0.5, 0.05), (0.26, 1, 0.8, 0.42, 0.055), (0.18, 1, 0.78, 0.6, 0.04), (0.38, 1, 0.74, 0.5, 0.04),
+              (-0.33, 1, 0.8, 0.46, 0.05), (-0.25, 1, 0.8, 0.54, 0.055), (-0.17, 1, 0.78, 0.62, 0.04), (-0.38, 1, 0.74, 0.54, 0.04),
+              (0.22, 1, 0.48, 0.16, 0.05), (0.27, 1, 0.42, 0.06, 0.04), (0.17, 1, 0.44, 0.24, 0.035),
+              (-0.24, 1, 0.5, 0.18, 0.05), (-0.29, 1, 0.42, 0.08, 0.04),
+              (0.3, 0, 0.78, 0.5, 0.05), (-0.3, 0, 0.78, 0.52, 0.05), (0.02, 0, 0.66, 0.4, 0.05), (-0.26, 0, 0.5, 0.12, 0.05),
+              (0.27, 0, 0.5, 0.16, 0.045)]
+    for i, (x0, fr, zt, zb, w) in enumerate(beards):
+        n = 9
+        ts = np.linspace(0, 1, n)
+        pts = [(x0 + 0.02 * math.sin(t * 8 + i) * t, 0.5 if fr else -0.5, zt + (zb - zt) * t) for t in ts]
+        pp = onsurf(hl, pts, 0.022)
+        f.add(path(pp, [w * (1 - 0.82 * t ** 1.4) for t in ts]), 0.014, MOSS, None, fine)
+        # two side tails on the wider ones
+        if w >= 0.05:
+            for sd in (-1, 1):
+                ts2 = np.linspace(0.2, 0.8, 5)
+                p2 = [(x0 + sd * 0.042 + 0.012 * math.sin(t * 9), 0.5 if fr else -0.5, zt + (zb - zt) * t) for t in ts2]
+                f.add(path(onsurf(hl, p2, 0.016), [0.02 * (1 - 0.8 * (t - 0.2) / 0.6) for t in ts2]), 0.012, MOSS, None, fine)
     return f
 
 
@@ -318,7 +338,7 @@ def shield():
     """The hatch-door shield, in its own frame: face toward -Y, up +Z, the grip at the origin. Taller than he is: a chamfered
     door of planks in a heavy iron frame, a carved woman in low relief; a cross brace on the back."""
     H = 0.585                 # half height
-    W = 0.31                  # half width
+    W = 0.3                   # half width
     zc = 0.28                 # the door's middle above the grip
     lo, hi = (-0.38, -0.16, -0.36), (0.38, 0.1, 0.92)
     f = Field(lo, hi, 0.0032)
@@ -333,22 +353,29 @@ def shield():
         bt = (ax - v_ - (W + H - 0.09)) * 0.7071
         return np.maximum(np.maximum(c, tp), bt)
     bow = 0.02 * (x / W) ** 2
-    plate = np.abs(y + 0.0 - bow) - 0.02
+    plate = np.abs(y + 0.0 - bow) - 0.03
     f.d = np.maximum(plate, outline(x, v)).astype(F)
     f.lab[:] = WOOD
-    R = lambda p, k=0.014: f.add(p, k, 4)
-    # the woman: head, long hair, torso, a gown tapering down the door
+    # the panel sunk behind her, so she stands out of shadow
+    f.sub(box((0, -0.05, zc), (W - 0.055, 0.032, H - 0.06), 0.02), 0.012)
+    R = lambda p, k=0.012: f.add(p, k, 4)
     Z = lambda a: zc + a
-    R(ell((0, -0.026, Z(0.335)), (0.056, 0.03, 0.074)), 0.02)
-    R(ell((0, -0.016, Z(0.31)), (0.085, 0.022, 0.11)), 0.02)
-    R(path(((0, -0.026, Z(0.26)), (0, -0.03, Z(0.16))), (0.03, 0.05)), 0.03)
-    R(ell((-0.044, -0.042, Z(0.13)), (0.036, 0.028, 0.038)), 0.02)
-    R(ell((0.044, -0.042, Z(0.13)), (0.036, 0.028, 0.038)), 0.02)
-    R(path(((0, -0.034, Z(0.1)), (0, -0.028, Z(-0.03)), (0.0, -0.024, Z(-0.2)), (0, -0.016, Z(-0.46))), (0.07, 0.055, 0.06, 0.01)), 0.03)
+    bow2 = -0.03
+    # the head, thrown a little back: a clean oval, a long neck
+    R(ell((0, bow2 - 0.03, Z(0.405)), (0.058, 0.032, 0.076)), 0.012)
+    R(path(((0, bow2 - 0.018, Z(0.34)), (0, bow2 - 0.018, Z(0.285))), (0.024, 0.03)), 0.012)
+    # hair: two heavy falls over the shoulders to the waist, parted at the crown
     for s in (-1, 1):
-        R(path(((s * 0.07, -0.016, Z(0.22)), (s * 0.13, -0.014, Z(0.1)), (s * 0.08, -0.016, Z(-0.08))), (0.03, 0.022, 0.008)), 0.02)
-        R(path(((s * 0.08, -0.016, Z(0.02)), (s * 0.2, -0.012, Z(0.08)), (s * 0.24, -0.012, Z(0.2))), (0.02, 0.02, 0.006)), 0.02)
-        f.sub(ell((s * 0.021, -0.062, Z(0.34)), (0.011, 0.007, 0.0055)), 0.005, 4)
+        R(path(((s * 0.03, bow2 - 0.018, Z(0.47)), (s * 0.078, bow2 - 0.02, Z(0.41)), (s * 0.09, bow2 - 0.018, Z(0.3)), (s * 0.075, bow2 - 0.02, Z(0.17)), (s * 0.1, bow2 - 0.018, Z(0.06))),
+               (0.03, 0.036, 0.036, 0.03, 0.008)), 0.014)
+        R(path(((s * 0.05, bow2 - 0.018, Z(0.27)), (s * 0.16, bow2 - 0.012, Z(0.25))), (0.036, 0.024)), 0.018)        # shoulders
+        R(path(((s * 0.16, bow2 - 0.012, Z(0.25)), (s * 0.15, bow2 - 0.008, Z(0.1)), (s * 0.07, bow2 - 0.012, Z(0.02))), (0.024, 0.02, 0.017)), 0.012)   # arms, the hands folded
+        R(ell((s * 0.05, bow2 - 0.036, Z(0.17)), (0.046, 0.032, 0.042)), 0.014)                                       # breast
+        # the swept wings of carving either side of her
+        R(path(((s * 0.15, bow2 - 0.006, Z(-0.02)), (s * 0.23, bow2 - 0.006, Z(0.02)), (s * 0.24, bow2 - 0.006, Z(0.16))), (0.022, 0.018, 0.004)), 0.012)
+    R(path(((0, bow2 - 0.02, Z(0.22)), (0, bow2 - 0.02, Z(0.07))), (0.075, 0.056)), 0.018)                            # the waist
+    R(path(((0, bow2 - 0.02, Z(0.05)), (0, bow2 - 0.022, Z(-0.08))), (0.06, 0.082)), 0.02)                            # the hips
+    R(path(((0, bow2 - 0.02, Z(-0.08)), (0.0, bow2 - 0.018, Z(-0.3)), (0, bow2 - 0.012, Z(-0.5))), (0.082, 0.055, 0.008)), 0.02)   # the gown, tapering
     M = f.like()
     frame = np.abs(outline(x, v) + 0.03) - 0.03
     M.d = np.maximum(frame, np.abs(y + 0.008 - bow) - 0.036).astype(F)
@@ -369,9 +396,9 @@ def hammer():
     """The capstan hammer, upright with its grip on the origin (haft along +Z, the drum's middle at z = ZC): a waisted drum
     of iron-bound staves across the haft's end, spikes on both ends, chain wound round its waist; an iron haft as long as
     his arm. Returns (wood field, iron field, chain field, ZC)."""
-    ZC = 0.5
-    BL, BR, BW = 0.215, 0.178, 0.148      # half length, end radius, waist radius (a capstan)
-    lo, hi = (-0.42, -0.27, -0.3), (0.42, 0.27, 0.78)
+    ZC = 0.56
+    BL, BR, BW = 0.27, 0.235, 0.2      # half length, end radius, waist radius (a capstan)
+    lo, hi = (-0.42, -0.3, -0.3), (0.42, 0.3, 0.84)
     W = Field(lo, hi, 0.0036)
     x, y, z = W.grid()
     r = np.sqrt(y * y + (z - ZC) ** 2)
@@ -383,9 +410,9 @@ def hammer():
     W.d = (W.d + smooth(0.08, 0.0, np.abs((ang + 0.5) % 1.0 - 0.5)) * 0.004).astype(F)
     M = W.like()
     for sd in (-1, 1):
-        q = sd * 0.188
+        q = sd * 0.238
         M.add(cyl((q, 0, ZC), "x", BR + 0.016, 0.034, 0.008), 0.0, IRON)
-        M.add(cap((sd * BL, 0, ZC), (sd * (BL + 0.105), 0, ZC), 0.058, 0.002), 0.0, IRON)
+        M.add(cap((sd * BL, 0, ZC), (sd * (BL + 0.115), 0, ZC), 0.07, 0.002), 0.0, IRON)
         for a in np.linspace(0, 6.28, 11)[:-1]:
             rivets(M, [(q, (BR + 0.016) * math.cos(a), ZC + (BR + 0.016) * math.sin(a))], 0.0095)
     M.add(cyl((0, 0, ZC - BW - 0.012), "z", 0.07, 0.03, 0.01), 0.0, IRON)      # the haft's socket
@@ -394,7 +421,7 @@ def hammer():
     M.add(cyl((0, 0, -0.195), "z", 0.052, 0.042, 0.01), 0.0, IRON)
     Ch = Field(lo, hi, 0.0028)
 
-    def link(c, t, n, r=0.04, thick=0.0115):
+    def link(c, t, n, r=0.045, thick=0.0135):
         """One chain link at c: long along t, its plane holding n."""
         c, t, n = [np.array(a, F) for a in (c, t, n)]
         t = t / np.linalg.norm(t)
@@ -405,16 +432,16 @@ def hammer():
     a = 0.0
     k = 0
     while a < math.tau * 2.3:
-        rr = BW + 0.014
-        c = (-0.06 + a * 0.02, rr * math.cos(a), ZC + rr * math.sin(a))
-        tg = (0.02, -math.sin(a), math.cos(a))
+        rr = BW + 0.016
+        c = (-0.09 + a * 0.024, rr * math.cos(a), ZC + rr * math.sin(a))
+        tg = (0.024, -math.sin(a), math.cos(a))
         rad_n = (0, math.cos(a), math.sin(a))
         side = (1, 0, 0)
         link(c, tg, rad_n if k % 2 else side)
         k += 1
-        a += 0.082 / rr
+        a += 0.092 / rr
     # and the loose end down to the wrist, a sagging curve
-    pa = [(0.04, 0.14, ZC - 0.13), (0.1, 0.2, 0.2), (0.14, 0.2, -0.0), (0.12, 0.13, -0.12), (0.06, 0.05, -0.08)]
+    pa = [(0.04, 0.16, ZC - 0.16), (0.1, 0.22, 0.2), (0.14, 0.2, -0.0), (0.12, 0.13, -0.12), (0.06, 0.05, -0.08)]
     pts = []
     for i in range(len(pa) - 1):
         for t in np.linspace(0, 1, 8, endpoint=False):

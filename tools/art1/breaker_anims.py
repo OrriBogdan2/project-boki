@@ -1,9 +1,8 @@
 """Breaker the Sunken Bulwark's clips (ART-1), keyed by hand on the contract armature and timed to his kit's real numbers
 (content/archetypes/bulwark.json, KMovesPinBjorn), then the .glb export:
   blender -b WORK/breaker_art1.blend --python tools/art1/breaker_anims.py -- WORK/breaker_anims.blend OUT.glb
-He is a walking hull: everything starts from the barrel of his body rocking on two stubby legs, and the drum's weight
-arrives late. The attack keys were written on a taller rig; remap() puts them on this one (arm lengths are the rig's,
-so the hands' moves carry over, the legs' shrink)."""
+He is a walking hull: everything starts from the ball of his body rocking on two stubby legs, and the drum's weight
+arrives late."""
 import json
 import math
 import os
@@ -22,47 +21,9 @@ arm = bpy.data.objects["Armature"]
 C = A.Clips(arm)
 AX = float(C.rig.P["x_foot.R"].x)      # the ankle's rest x
 AZ = float(C.rig.P["x_foot.R"].z)
-FR, FL = (AX, -0.02, AZ), (-AX, 0.05, AZ)
+FR, FL = (AX, -0.02, AZ), (-AX, 0.04, AZ)
 tau = math.tau
-SHZ = float(C.rig.P["upper_arm.R"].z)
-SHX = float(C.rig.P["upper_arm.R"].x)
-DZ, DX = 1.046 - SHZ, SHX - 0.3843         # shoulders: the old rig's -> this one's
-
-
-def N(x, y, z):
-    """A point on this rig, written in the keys' old space."""
-    return (x - DX if x > 0 else x + DX, y, z + DZ)
-
-
-def remap(k):
-    o = dict(k)
-    if "gr" in o:
-        o["gr"] = (o["gr"][0] + DX, o["gr"][1], o["gr"][2] - DZ)
-    if "sh" in o:
-        o["sh"] = (o["sh"][0] - DX, o["sh"][1], o["sh"][2] - DZ)
-    if "pos" in o:
-        o["pos"] = (o["pos"][0], o["pos"][1] * 0.7, max(o["pos"][2] * 0.55, -0.1))
-    if "hips" in o:
-        o["hips"] = (o["hips"][0] * 0.72, o["hips"][1], o["hips"][2])
-    for c in ("fr", "fl"):
-        if c in o:
-            o[c] = (o[c][0], o[c][1] * 0.45, AZ + (o[c][2] - AZ) * 0.5)
-    return o
-
-
-C.remap = remap
-# the carry, as the art: the hammer low in the right fist, its drum by his feet in front, the shield at his left
-CARRY = dict(pos=(0, 0, 0.0), hips=(-3, 0, -2), head=(2, 0, 2),
-             gr=N(0.5, 0.2, 0.25), gd=(-0.28, 0.95, 0.12), ga=(0.95, 0.28, 0.0), er=(0.95, -0.25, -0.1), fing_r=1.0, thumb_r=1.0,
-             sh=N(-0.5, 0.1, 0.32), sn=(-0.86, 0.5, 0.0), su=(0.0, 0.0, 1.0), el=(-0.9, -0.4, 0.1), fing_l=0.9, thumb_l=0.8,
-             fr=FR, fl=FL, fra=0.0, fla=0.0, jaw=0.09, brow=0.0, lid=0.0, wtw=(0, 0, 0))
-# the right hand with nothing in it (the hammer is out)
-FREE = dict(gr=N(0.5, 0.1, 0.3), gd=(0.05, 1.0, -0.2), ga=(0.1, 0.2, 1.0), er=(0.9, -0.3, -0.3), fing_r=0.35, thumb_r=0.3)
-# his fighting stance (item 52): sunk on his stubs, the door square ahead, the hammer hauled up on his right
-STANCE = dict(pos=(0, 0, -0.07), rot=(0, 0, -4), hips=(-15, 0, -15), head=(9, 0, 14),
-              gr=(0.5, 0.2, 1.1), gd=(0.12, -0.32, 0.94), ga=(0.0, 0.95, 0.3), er=(1.0, -0.2, -0.5), fing_r=1.0, thumb_r=1.0,
-              sh=(-0.36, 0.34, 0.7), sn=(-0.6, 0.8, 0.0), su=(0.0, 0.0, 1.0), el=(-0.9, -0.1, -0.5), fing_l=0.9, thumb_l=0.9,
-              fr=(AX + 0.08, -0.15, AZ), fl=(-AX - 0.04, 0.17, AZ), jaw=0.35, brow=1.0)
+SZ = float(C.rig.P["upper_arm.R"].z)    # shoulder height, for reading the keys below
 
 
 def merged(*ps, **kw):
@@ -77,91 +38,104 @@ def add(p, c, v):
     p[c] = tuple(x + y for x, y in zip(p.get(c, (0, 0, 0)), v))
 
 
-# ---------------------------------------------------------------------- idle, stance
-def breathe(period, amp=1.0, blink=None):
+def sp(x, y, dz):
+    """The right hand, from the right shoulder: out x, forward y, up dz."""
+    return (0.44 + x, y, SZ + dz)
+
+
+def sl(x, y, dz):
+    """The left hand, from the left shoulder: out x (to his left), forward y, up dz."""
+    return (-0.44 - x, y, SZ + dz)
+
+
+# He is a ball on two stubs. The legs can't lunge, so his weight moves by the whole hull tipping on its feet (`rot`), and his
+# arms hang off the sides, so swings go wide round the hull instead of across it.
+CARRY = dict(pos=(0, 0, 0.0), hips=(-2, 0, -2), head=(1, 0, 2),
+             gr=sp(0.06, 0.2, -0.47), gd=(-0.3, 0.94, 0.14), ga=(0.94, 0.3, 0.0), er=(0.95, -0.25, -0.1), fing_r=1.0, thumb_r=1.0,
+             sh=sl(0.06, 0.1, -0.41), sn=(-0.86, 0.5, 0.0), su=(0.0, 0.0, 1.0), el=(-0.9, -0.4, 0.1), fing_l=0.9, thumb_l=0.8,
+             fr=FR, fl=FL, fra=0.0, fla=0.0, wtw=(0, 0, 0))
+FREE = dict(gr=sp(0.06, 0.1, -0.43), gd=(0.05, 1.0, -0.2), ga=(0.1, 0.2, 1.0), er=(0.9, -0.3, -0.3), fing_r=0.35, thumb_r=0.3)
+# the fighting stance (item 52): rocked onto the left foot, door half across him, hammer hauled up behind the right shoulder
+STANCE = dict(pos=(0, 0, -0.03), rot=(-5, 3, -8), hips=(-3, 0, -6), head=(4, 0, 12),
+              gr=sp(0.1, 0.05, 0.14), gd=(0.3, -0.5, 0.8), ga=(0.0, 0.85, 0.5), er=(1.0, -0.2, -0.6), fing_r=1.0, thumb_r=1.0,
+              sh=sl(-0.14, 0.3, -0.26), sn=(-0.55, 0.83, 0.0), su=(0.0, 0.0, 1.0), el=(-0.9, -0.1, -0.5), fing_l=0.9, thumb_l=0.9,
+              fr=(AX + 0.03, -0.06, AZ), fl=(-AX - 0.02, 0.07, AZ))
+OVER = dict(gr=sp(0.04, -0.12, 0.4), gd=(0.25, -0.45, 0.85), ga=(0.0, 0.88, 0.47), er=(1.0, 0.0, -0.3))   # up behind him
+
+
+def breathe(period, amp=1.0):
     def f(t, p):
         s = math.sin(t / period * tau)
-        add(p, "pos", (0, 0, 0.007 * amp * s))
-        add(p, "hips", (1.5 * amp * s, 0, 0))
-        add(p, "head", (-0.9 * amp * s, 0, 2.0 * math.sin(t / period * tau * 0.5 + 1)))
-        add(p, "gr", (0, 0, 0.009 * amp * math.sin(t / period * tau - 0.8)))
-        add(p, "sh", (0, 0, 0.006 * amp * math.sin(t / period * tau - 1.2)))
-        if blink is not None and abs(t - blink) < 0.09:
-            p["lid"] = 1.0
+        add(p, "pos", (0, 0, 0.005 * amp * s))
+        add(p, "rot", (1.0 * amp * s, 0.8 * amp * math.sin(t / period * tau * 0.5), 0))
+        add(p, "head", (-0.8 * amp * s, 0, 2.5 * math.sin(t / period * tau * 0.5 + 1)))
+        add(p, "gr", (0, 0, 0.007 * amp * math.sin(t / period * tau - 0.8)))
+        add(p, "sh", (0, 0, 0.005 * amp * math.sin(t / period * tau - 1.2)))
     return f
 
 
-C.bake("idle", 3.2, [(0, CARRY), (3.2, {})], over=breathe(3.2, 1.0, 1.7), loop=True)
+C.bake("idle", 3.2, [(0, CARRY), (3.2, {})], over=breathe(3.2, 1.0), loop=True)
 C.bake("stance", 1.6, [(0, STANCE), (1.6, {})], over=breathe(1.6, 1.3), loop=True)
 
 
-# ---------------------------------------------------------------------- walk, run
-def foot(ph, stride, lift, duty=0.56):
-    """(along the walk, up, foot pitch) at a phase 0..1 of one foot's cycle: planted, then swung through."""
+# ---------------------------------------------------------------------- walk, run: a waddle, the whole hull rocking
+def foot(ph, stride, lift, duty=0.58):
     ph = ph % 1.0
     if ph < duty:
         u = ph / duty
-        return stride * (1 - 2 * u), 0.0, -8.0 * max(0.0, (u - 0.7) / 0.3)
+        return stride * (1 - 2 * u), 0.0, 0.0
     u = (ph - duty) / (1 - duty)
     e = u * u * (3 - 2 * u)
-    return stride * (-1 + 2 * e), lift * math.sin(u * math.pi) ** 0.8, 22.0 * math.sin(u * math.pi) * (1 - u) - 10 * u * (1 - u)
+    return stride * (-1 + 2 * e), lift * math.sin(u * math.pi) ** 0.8, 18.0 * math.sin(u * math.pi) * (1 - u)
 
 
-def gait(period, stride, lift, lean, dirv, bob, roll, twist, swing, base):
+def gait(period, stride, lift, lean, dirv, bob, roll, twist, swing):
     dx, dy = dirv
 
     def f(t, p):
         ph = t / period
         for side, off, sign in (("r", 0.0, 1), ("l", 0.5, -1)):
             d, u, pit = foot(ph + off, stride, lift)
-            x0, y0 = AX * sign, (-0.02 if sign > 0 else 0.03)
-            p["f" + side] = (x0 + dx * d, y0 + dy * d, AZ + u)
-            p["f" + side + "a"] = pit * (1 if dy >= 0 else -0.5) * (abs(dy) if dy else 0.3)
-        # a heavy gait: down onto each planted foot, the belly and shoulders rolling over it
+            p["f" + side] = (AX * sign + dx * d, (-0.02 if sign > 0 else 0.03) + dy * d, AZ + u)
+            p["f" + side + "a"] = pit * abs(dy)
         w = math.sin(ph * tau)
         c2 = math.cos(ph * 2 * tau)
-        add(p, "pos", (w * 0.018, 0, -bob * (0.5 + 0.5 * c2) - bob * 0.4))
-        add(p, "rot", (0, roll * w, 0))
-        add(p, "hips", (lean * dy, -roll * 1.3 * w, twist * w * dy if dy else 0))
-        add(p, "head", (-lean * 0.7 * dy, roll * 0.7 * w, -twist * 0.6 * w * dy if dy else 0))
-        add(p, "gr", (0.0, swing * 0.35 * w, 0.02 * c2))
-        add(p, "sh", (0.0, swing * w, 0.015 * math.sin(ph * 2 * tau + 1)))
+        # the hull rolls onto each planted foot; that roll IS the walk
+        add(p, "pos", (w * 0.022, 0, -bob * (0.5 + 0.5 * c2)))
+        add(p, "rot", (lean * dy, roll * w, twist * w))
+        add(p, "head", (-lean * 0.6 * dy, -roll * 0.6 * w, -twist * 0.5 * w))
+        add(p, "gr", (0.0, swing * 0.3 * w, 0.015 * c2))
+        add(p, "sh", (0.0, swing * w, 0.012 * math.sin(ph * 2 * tau + 1)))
     return f
 
 
 DIRS = {"f": (0, 1), "b": (0, -1), "l": (-1, 0), "r": (1, 0)}
 for nm, d in DIRS.items():
-    C.bake("walk_" + nm, 1.1, [(0, CARRY), (1.1, {})], loop=True,
-           over=gait(1.1, 0.095, 0.05, -4.0, d, 0.014, 6.5, 9.0, 0.07, CARRY))
-    C.bake("run_" + nm, 0.56, [(0, merged(CARRY, gr=N(0.52, 0.26, 0.3), sh=N(-0.52, 0.2, 0.38), head=(9, 0, 3))), (0.56, {})], loop=True,
-           over=gait(0.56, 0.13, 0.075, -11.0, d, 0.022, 8.0, 12.0, 0.12, CARRY))
-
-# the free right arm (a layer: only the arm's tracks are used)
+    C.bake("walk_" + nm, 1.0, [(0, CARRY), (1.0, {})], loop=True, over=gait(1.0, 0.085, 0.045, -3.0, d, 0.012, 8.0, 6.0, 0.05))
+    C.bake("run_" + nm, 0.52, [(0, merged(CARRY, gr=sp(0.08, 0.26, -0.42), sh=sl(0.08, 0.2, -0.33))), (0.52, {})], loop=True,
+           over=gait(0.52, 0.125, 0.07, -13.0, d, 0.02, 11.0, 10.0, 0.11))
 C.bake("arm_free", 0.5, [(0, merged(CARRY, FREE)), (0.5, {})], loop=True)
 
 # ---------------------------------------------------------------------- LMB
-# throw (0.5 s; the hammer leaves ~0.12 s in, as the arm comes through)
-COCK = dict(pos=(0, -0.03, -0.09), hips=(10, 0, -40), head=(-6, 0, 34), gr=(0.62, -0.26, 1.2), gd=(0.3, -0.65, 0.72), ga=(0, 0.72, 0.65),
-            er=(0.9, -0.5, 0.1), fr=(AX + 0.06, -0.2, AZ), fl=(-AX, 0.12, AZ), jaw=0.45, brow=1.0)
-THROWN = dict(pos=(0, 0.09, -0.1), hips=(-30, 0, 34), head=(20, 0, -28), gr=(0.28, 0.62, 0.98), gd=(0.0, 0.95, 0.25), ga=(0, -0.25, 0.95),
-              er=(0.9, 0.1, -0.3), fing_r=0.05, thumb_r=0.1, fr=(AX + 0.06, -0.26, AZ), fl=(-AX, 0.26, AZ), fla=0.0, fra=-22.0, jaw=0.75, e="out")
-OVER = dict(pos=(0, 0.03, -0.1), hips=(-8, 0, -4), head=(4, 0, 8), gr=(0.5, 0.2, 1.4), gd=(0.2, 0.2, 0.95), ga=(0, 0.95, -0.2), er=(1, -0.2, 0.1), fing_r=0.8, e="in")
-C.bake("lmb_throw", 0.5, [(0, CARRY), (0.07, merged(COCK, e="io")), (0.11, OVER), (0.19, merged(THROWN, e="io")),
-                          (0.27, dict(hips=(-34, 0, 44), gr=(0.08, 0.5, 0.62), gd=(-0.2, 0.7, -0.7), ga=(0, 0.7, 0.7), e="io")),
-                          (0.38, dict(pos=(0, 0.03, -0.05), hips=(-16, 0, 18), gr=(0.3, 0.32, 0.62), fing_r=0.3, fr=(AX + 0.03, -0.1, AZ), fl=(-AX, 0.14, AZ), fra=-6.0, jaw=0.3)),
-                          (0.5, merged(CARRY, FREE, hips=(-7, 0, -3), head=(5, 0, 3)))])
-# recall (0.484 s): the empty right hand goes out for it, then the catch snaps it in onto the shoulder
+# the throw (0.5 s; it leaves ~0.12 s in): the hull rocks back and away, the arm hauls round the side and over, then the
+# whole ball tips after it
+TH_BACK = merged(OVER, pos=(0, -0.03, -0.02), rot=(10, 0, -24), head=(-6, 0, 20), fr=(AX, -0.05, AZ), fl=(-AX, 0.06, AZ))
+TH_TOP = dict(rot=(2, 0, -6), head=(0, 0, 6), gr=sp(0.02, 0.1, 0.42), gd=(0.1, 0.2, 0.97), ga=(0, 0.97, -0.2), er=(1, -0.2, 0.1), fing_r=0.8, thumb_r=0.8, e="in")
+TH_OUT = dict(pos=(0, 0.06, -0.03), rot=(-20, 4, 20), head=(12, 0, -14), gr=sp(-0.02, 0.42, 0.06), gd=(0, 0.95, 0.25), ga=(0, -0.25, 0.95), er=(0.9, 0.1, -0.3),
+              fing_r=0.05, thumb_r=0.1, fra=-14.0, fr=(AX, -0.08, AZ + 0.01), fl=(-AX, 0.09, AZ), e="io")
+C.bake("lmb_throw", 0.5, [(0, CARRY), (0.07, merged(TH_BACK, e="io")), (0.11, TH_TOP), (0.19, TH_OUT),
+                          (0.3, dict(rot=(-14, 2, 16), gr=sp(0.04, 0.34, -0.2), fing_r=0.25)),
+                          (0.5, merged(CARRY, FREE, rot=(0, 0, 0), fra=0.0))])
+# the recall: the empty hand goes out for it, the catch rocks him back on his heels
 C.bake("lmb_recall", 0.484, [(0, merged(CARRY, FREE)),
-                             (0.176, dict(pos=(0, 0.03, -0.04), hips=(-12, 0, 22), head=(4, 0, -16), gr=(0.3, 0.6, 1.02), gd=(0, 0.9, 0.4), ga=(0, -0.4, 0.9), er=(1, 0, -0.3), fing_r=0.0, thumb_r=0.0, jaw=0.4)),
-                             (0.3, dict(pos=(0, -0.05, -0.1), hips=(5, 0, -8), gr=(0.36, 0.3, 1.0), gd=(0.05, 0.1, 1.0), ga=(0, 1, -0.1), fing_r=1.0, thumb_r=1.0, e="snap")),
-                             (0.484, merged(CARRY))])
-
-# LMB held: the whirl (item 59): the hammer swung round over his head like a lasso, at arm's length, feet planted. 0..0.2
-# goes up into it; from 0.2 one full turn: the kit's angle seeks it (WardenClips.PHASE), so its 2.5-4 turns a second
-# (data, lmb.spin_turns) drive the clip and the head stays on the kit's trail.
+                             (0.176, dict(rot=(-8, 0, 12), head=(4, 0, -10), gr=sp(-0.03, 0.42, 0.02), gd=(0, 0.9, 0.4), ga=(0, -0.4, 0.9), er=(1, 0, -0.3), fing_r=0.0, thumb_r=0.0)),
+                             (0.3, dict(pos=(0, -0.04, -0.03), rot=(10, 0, -6), gr=sp(0.06, 0.22, -0.02), gd=(0.05, 0.1, 1.0), ga=(0, 1, -0.1), fing_r=1.0, thumb_r=1.0, e="snap")),
+                             (0.484, merged(CARRY, rot=(0, 0, 0)))])
+# LMB held: the whirl (item 59): the drum swung round over the helmet, the hull counter-rocking under it. 0..0.2 goes up;
+# from 0.2 one full turn: the kit's angle seeks it (WardenClips.PHASE), so lmb.spin_turns drives it
 SPIN_T = 0.85
-WIND = merged(CARRY, pos=(0, 0, -0.07), hips=(-6, 0, 0), head=(-8, 0, 0), sh=(-0.42, 0.36, 0.86), sn=(-0.4, 0.9, 0.1), er=(1, -0.2, 0.4),
-              fr=(AX + 0.07, -0.08, AZ), fl=(-AX - 0.07, 0.1, AZ), jaw=0.55, brow=1.0)
+WIND = merged(CARRY, pos=(0, 0, -0.03), hips=(0, 0, 0), head=(-6, 0, 0), sh=sl(-0.1, 0.26, -0.3), sn=(-0.5, 0.85, 0.1), er=(1, -0.2, 0.4),
+              fr=(AX + 0.02, -0.03, AZ), fl=(-AX - 0.02, 0.04, AZ))
 
 
 def whirl_over(t, p):
@@ -172,118 +146,115 @@ def whirl_over(t, p):
     p["gd"] = (math.cos(a2), math.sin(a2), 0.22)
     p["ga"] = (0, 0, 1)
     p["er"] = (0.6, -0.3, -0.6)
-    add(p, "hips", (0, 3.0 * math.cos(a2), 16.0 * math.sin(a2 - 0.6)))     # (the shoulder follows the hand round)
-    add(p, "head", (0, 0, -16.0 * math.sin(a2 - 0.6)))
-    add(p, "pos", (0.012 * math.cos(a2), 0.012 * math.sin(a2), 0.006 * math.sin(a2 * 2)))
+    add(p, "rot", (3.0 * math.sin(a2), -4.0 * math.cos(a2), 0))
+    add(p, "hips", (0, 0, 14.0 * math.sin(a2 - 0.6)))
+    add(p, "head", (0, 0, -14.0 * math.sin(a2 - 0.6)))
 
 
-C.bake("lmb_hold", 0.2 + SPIN_T, [(0, CARRY), (0.2, merged(WIND, gr=(0.44, 0.04, 1.4), gd=(1, 0, 0.22), ga=(0, 0, 1))), (0.2 + SPIN_T, {})], over=whirl_over)
+C.bake("lmb_hold", 0.2 + SPIN_T, [(0, CARRY), (0.2, merged(WIND, gr=(0.46, 0.0, 1.02), gd=(1, 0, 0.22), ga=(0, 0, 1))), (0.2 + SPIN_T, {})], over=whirl_over)
+# the release (0.5 s): up behind him, the impact at 0.08: the hull slams forward onto its toes, a shudder, then he hauls it up
+UP = merged(WIND, OVER, rot=(9, 0, -8))
+IMP = dict(pos=(0, 0.1, -0.05), rot=(-24, 3, 8), hips=(-6, 0, 6), head=(12, 0, -6), gr=sp(-0.1, 0.44, -0.3), gd=(-0.12, 0.8, -0.58), ga=(0.05, 0.58, 0.8), er=(0.9, 0.2, -0.3),
+           fr=(AX, -0.11, AZ + 0.02), fl=(-AX, 0.12, AZ), fra=-20.0, e="io")
+C.bake("lmb_slam", 0.5, [(0, UP), (0.08, IMP), (0.16, dict(pos=(0, 0.1, -0.06), rot=(-26, 3, 8), e="io")), (0.5, merged(STANCE, fra=0.0))])
+# the perfect launch (0.85 s): the ball leaves the ground, feet tucked under, and lands drum-first
+C.bake("lmb_launch", 0.85, [(0, UP),
+                            (0.09, dict(pos=(0, 0.06, 0.08), rot=(-8, 0, 6), gr=sp(0.0, 0.2, 0.42), gd=(0.05, 0.3, 0.95), ga=(0, 0.95, -0.3), fr=(AX, -0.08, AZ + 0.02), fl=(-AX, 0.1, AZ + 0.05), e="io")),
+                            (0.17, dict(pos=(0, 0.08, 0.15), rot=(-16, 0, 4), gr=sp(-0.02, 0.36, 0.2), gd=(0.0, 0.75, 0.65), ga=(0, 0.65, -0.75), fr=(AX, 0.0, AZ + 0.08), fl=(-AX, 0.06, AZ + 0.09))),
+                            (0.26, dict(pos=(0, 0.1, 0.07), rot=(-24, 0, 6), gr=sp(-0.06, 0.44, -0.08), gd=(-0.05, 0.95, -0.1), ga=(0, 0.1, 1), fr=(AX, -0.05, AZ + 0.04), fl=(-AX, 0.1, AZ + 0.02))),
+                            (0.32, merged(IMP, pos=(0, 0.12, -0.07), rot=(-28, 3, 8))),
+                            (0.48, dict(pos=(0, 0.12, -0.06), rot=(-25, 3, 8), e="io")),
+                            (0.85, merged(STANCE, fra=0.0))])
 
-# release (0.5 s): up and over, the impact at 0.08, a shudder, 0.4 s to haul it back
-IMP = dict(pos=(0, 0.13, -0.15), hips=(-26, 0, 14), head=(18, 0, -10), gr=(0.1, 0.74, 0.66), gd=(-0.12, 0.8, -0.58), ga=(0.05, 0.58, 0.8), er=(0.9, 0.2, -0.3),
-           fr=(AX + 0.08, -0.34, AZ), fl=(-AX, 0.36, AZ), fra=-24.0, jaw=0.95, brow=1.0, e="io")
-C.bake("lmb_slam", 0.5, [(0, merged(WIND, gr=(0.42, -0.1, 1.42), gd=(0.3, -0.5, 0.8), ga=(0, 0.8, 0.5), hips=(12, 0, -12))), (0.08, IMP),
-                         (0.16, dict(pos=(0, 0.13, -0.17), hips=(-28, 0, 13), e="io")),
-                         (0.5, merged(STANCE, jaw=0.3, fra=0.0))])
-# the perfect launch (0.85 s): a full-body heave, airborne to 0.3, a hard plant, a slow rise
-C.bake("lmb_launch", 0.85, [(0, merged(WIND, gr=(0.42, -0.1, 1.42), gd=(0.3, -0.5, 0.8), ga=(0, 0.8, 0.5), hips=(12, 0, -12))),
-                            (0.09, dict(pos=(0, 0.1, 0.1), hips=(-20, 0, 12), gr=(0.25, 0.25, 1.46), gd=(0.05, 0.3, 0.95), ga=(0, 0.95, -0.3), fr=(AX, -0.3, AZ - 0.0), fl=(-AX, 0.3, AZ + 0.14), jaw=0.9, e="io")),
-                            (0.17, dict(pos=(0, 0.1, 0.22), hips=(-14, 0, 8), gr=(0.2, 0.42, 1.34), gd=(0.0, 0.75, 0.65), ga=(0, 0.65, -0.75), fr=(AX + 0.04, -0.05, AZ + 0.22), fl=(-AX - 0.04, 0.22, AZ + 0.26), jaw=1.0)),
-                            (0.26, dict(pos=(0, 0.12, 0.1), hips=(-30, 0, 10), gr=(0.15, 0.6, 1.0), gd=(-0.05, 0.95, -0.1), ga=(0, 0.1, 1), fr=(AX + 0.06, -0.2, AZ + 0.1), fl=(-AX, 0.34, AZ + 0.02))),
-                            (0.32, merged(IMP, pos=(0, 0.14, -0.2), hips=(-32, 0, 12))),
-                            (0.48, dict(pos=(0, 0.13, -0.18), hips=(-29, 0, 12), e="io")),
-                            (0.85, merged(STANCE, jaw=0.3, fra=0.0))])
-
-# ---------------------------------------------------------------------- RMB, the aegis
-GUARD = merged(STANCE, pos=(0, 0.03, -0.09), hips=(-20, 0, -8), head=(16, 0, 8), sh=(-0.1, 0.5, 0.74), sn=(-0.1, 1, 0.1), su=(0, -0.1, 1), el=(-0.9, 0, -0.5),
-               gr=(0.5, -0.1, 0.84), gd=(0.25, -0.75, 0.55), ga=(0, 0.6, 0.8), jaw=0.5)
+# ---------------------------------------------------------------------- RMB, the aegis: the door dead ahead, the hull sunk behind it
+GUARD = merged(STANCE, pos=(0, 0.02, -0.05), rot=(-9, 0, -3), hips=(-3, 0, -2), head=(8, 0, 3), sh=sl(-0.3, 0.42, -0.34), sn=(-0.08, 1, 0.05), su=(0, -0.05, 1), el=(-0.9, 0, -0.5),
+               gr=sp(0.12, -0.12, -0.2), gd=(0.3, -0.8, 0.5), ga=(0, 0.55, 0.83))
 
 
 def guard_over(t, p):
     if t > 0.12:
         s = math.sin((t - 0.12) / 0.6 * tau)
-        add(p, "sh", (0, 0.008 * s, 0.006 * s))
-        add(p, "pos", (0, 0, 0.005 * s))
+        add(p, "sh", (0, 0.006 * s, 0.005 * s))
 
 
 C.bake("rmb_guard", 0.72, [(0, CARRY), (0.1, merged(GUARD, e="out")), (0.72, {})], over=guard_over)
-C.bake("guard_break", 0.65, [(0, GUARD), (0.06, dict(pos=(0, -0.1, -0.04), hips=(14, 0, 8), head=(-14, 0, 0), sh=(-0.5, 0.2, 1.1), sn=(-0.6, 0.6, 0.5), jaw=0.7, brow=0.0, e="snap")),
-                             (0.3, dict(pos=(0, -0.06, -0.1), hips=(-8, 0, 4), sh=(-0.53, 0.16, 0.74), sn=(-0.92, 0.38, 0))), (0.65, CARRY)])
-C.bake("guard_armed", 0.35, [(0, CARRY), (0.1, dict(hips=(-13, 0, -10), head=(10, 0, 10), jaw=0.6, brow=1.0, sh=(-0.45, 0.3, 0.86), e="out")), (0.35, CARRY)])
+C.bake("guard_break", 0.65, [(0, GUARD), (0.06, dict(pos=(0, -0.06, 0.0), rot=(14, -5, 6), head=(-10, 0, 0), sh=sl(0.06, 0.24, 0.0), sn=(-0.6, 0.6, 0.5), e="snap")),
+                             (0.3, dict(rot=(4, 0, 2), sh=sl(0.06, 0.12, -0.38), sn=(-0.86, 0.5, 0))), (0.65, CARRY)])
+C.bake("guard_armed", 0.35, [(0, CARRY), (0.1, dict(rot=(-5, 0, -8), head=(6, 0, 8), sh=sl(-0.04, 0.22, -0.3), e="out")), (0.35, CARRY)])
 
 # ---------------------------------------------------------------------- Shift
-# 360 Smash (0.75 s): 0.17 s of hard run-up, ONE turn 0.17..0.33 with the hammer at full reach, a low skidding recovery
-OUT_R = dict(gr=(0.82, 0.08, 1.02), gd=(1, 0.06, 0.05), ga=(0, 0, 1), er=(0.1, -1, 0.3), fing_r=1.0)
+# 360 Smash (0.75 s): 0.17 s of leaning in, ONE full spin of the whole ball 0.17..0.33, the hammer straight out, then a skid
+OUT_R = dict(gr=sp(0.43, 0.06, 0.0), gd=(1, 0.06, 0.05), ga=(0, 0, 1), er=(0.1, -1, 0.3), fing_r=1.0)
 C.bake("shift_whirl", 0.75, [(0, CARRY),
-                             (0.17, merged(OUT_R, pos=(0, 0.04, -0.13), rot=(0, 0, 25), hips=(-14, 0, -26), head=(4, 0, 20), sh=(-0.3, 0.3, 0.86), sn=(-0.5, 0.8, 0.1), fr=(AX + 0.08, -0.18, AZ), fl=(-AX, 0.22, AZ), jaw=0.7, brow=1.0, e="out")),
-                             (0.33, dict(rot=(0, 0, -335), hips=(-10, 0, 8), pos=(0, 0.0, -0.1), e="lin")),
-                             (0.58, merged(STANCE, rot=(0, 0, -360), pos=(0, 0, -0.14), gr=(0.56, 0.3, 0.86), gd=(0.5, 0.75, -0.3), ga=(0, 0.3, 1), e="out")),
+                             (0.17, merged(OUT_R, pos=(0, 0.03, -0.04), rot=(-12, 0, 28), head=(2, 0, 12), sh=sl(-0.1, 0.26, -0.2), sn=(-0.5, 0.8, 0.1), fr=(AX, -0.08, AZ), fl=(-AX, 0.08, AZ), e="out")),
+                             (0.33, dict(rot=(-8, 0, -332), pos=(0, 0.0, -0.03), e="lin")),
+                             (0.58, merged(STANCE, rot=(-6, 3, -360), pos=(0, 0, -0.05), gr=sp(0.3, 0.26, -0.15), gd=(0.5, 0.75, -0.3), ga=(0, 0.3, 1), e="out")),
                              (0.75, merged(CARRY, rot=(0, 0, -360)))])
-# Shield Charge (0.6 s): behind the prow at a full lean
-CH = merged(GUARD, pos=(0, 0.08, -0.12), hips=(-34, 0, -6), head=(26, 0, 4), sh=(0.02, 0.58, 0.84), fr=(AX + 0.03, -0.32, AZ), fl=(-AX, 0.26, AZ), fra=-20.0, jaw=0.9)
-C.bake("shift_charge", 0.6, [(0, CARRY), (0.16, merged(CH, e="out")), (0.34, dict(hips=(-36, 0, -4), fr=(AX + 0.03, 0.24, AZ + 0.06), fl=(-AX, -0.3, AZ), fla=-20.0, fra=0.0)), (0.6, GUARD)])
-# plain short dash out of a charge (0.25 s) and the air dash, a heavy lumbering hop (0.6 s)
-C.bake("dash_short", 0.25, [(0, CARRY), (0.1, dict(pos=(0, 0.04, -0.1), hips=(-22, 0, 0), fr=(AX, -0.26, AZ), fl=(-AX, 0.26, AZ), fra=-16.0, e="out")), (0.25, CARRY)])
-C.bake("dash_air", 0.6, [(0, CARRY), (0.12, dict(pos=(0, 0.02, 0.1), hips=(-28, 0, 0), head=(20, 0, 0), fr=(AX, -0.2, AZ + 0.1), fl=(-AX, 0.12, AZ + 0.24), sh=(-0.52, 0.28, 0.9), gr=(0.32, 0.4, 0.98), jaw=0.6, e="out")),
-                         (0.3, dict(pos=(0, 0, 0.14), fr=(AX, 0.06, AZ + 0.2), fl=(-AX, 0.0, AZ + 0.14))),
-                         (0.5, dict(pos=(0, 0, -0.1), hips=(-16, 0, 0), fr=(AX + 0.04, 0.0, AZ), fl=(-AX - 0.04, 0.1, AZ))), (0.6, CARRY)])
-C.bake("crush", 0.6, [(0, CARRY), (0.1, dict(hips=(-16, 0, 14), head=(8, 0, -12), jaw=1.0, brow=1.0, e="out")), (0.6, CARRY)])
-# Shield Slam (0.85 s): the wind-up behind the prow, the shove at 0.33
-C.bake("shield_slam", 0.85, [(0, GUARD), (0.25, merged(GUARD, pos=(0, -0.08, -0.14), hips=(-4, 0, -30), sh=(-0.42, 0.14, 0.86), sn=(-0.8, 0.5, 0.1), fr=(AX, -0.3, AZ), fl=(-AX, 0.1, AZ), jaw=0.5)),
-                             (0.33, merged(GUARD, pos=(0, 0.14, -0.13), hips=(-34, 0, 22), sh=(0.08, 0.72, 0.86), fr=(AX + 0.03, -0.36, AZ), fl=(-AX, 0.34, AZ), fra=-24.0, jaw=1.0, e="snap")),
-                             (0.55, dict(hips=(-30, 0, 18))), (0.85, CARRY)])
+# Shield Charge (0.6 s): the whole hull thrown behind the door
+CH = merged(GUARD, pos=(0, 0.06, -0.05), rot=(-22, 0, -2), head=(16, 0, 2), sh=sl(-0.3, 0.44, -0.3), fr=(AX, -0.11, AZ), fl=(-AX, 0.09, AZ), fra=-16.0)
+C.bake("shift_charge", 0.6, [(0, CARRY), (0.16, merged(CH, e="out")), (0.34, dict(rot=(-24, 0, -2), fr=(AX, 0.09, AZ + 0.03), fl=(-AX, -0.1, AZ), fla=-16.0, fra=0.0)), (0.6, GUARD)])
+C.bake("dash_short", 0.25, [(0, CARRY), (0.1, dict(pos=(0, 0.03, -0.03), rot=(-16, 0, 0), fr=(AX, -0.1, AZ), fl=(-AX, 0.1, AZ), fra=-12.0, e="out")), (0.25, CARRY)])
+C.bake("dash_air", 0.6, [(0, CARRY), (0.12, dict(pos=(0, 0.02, 0.07), rot=(-24, 0, 0), head=(14, 0, 0), fr=(AX, -0.08, AZ + 0.04), fl=(-AX, 0.05, AZ + 0.09), sh=sl(0.04, 0.18, -0.26), gr=sp(0.05, 0.3, -0.34), e="out")),
+                         (0.3, dict(pos=(0, 0, 0.1), rot=(-14, 0, 0), fr=(AX, 0.03, AZ + 0.08), fl=(-AX, 0.0, AZ + 0.06))),
+                         (0.5, dict(pos=(0, 0, -0.05), rot=(-10, 0, 0), fr=(AX + 0.02, 0.0, AZ), fl=(-AX - 0.02, 0.04, AZ))), (0.6, CARRY)])
+C.bake("crush", 0.6, [(0, CARRY), (0.1, dict(rot=(-10, 0, 12), head=(4, 0, -8), e="out")), (0.6, CARRY)])
+# Shield Slam (0.85 s): wound back behind the door, the shove at 0.33 with everything he has
+C.bake("shield_slam", 0.85, [(0, GUARD), (0.25, merged(GUARD, pos=(0, -0.05, -0.05), rot=(10, 0, -26), sh=sl(-0.14, 0.2, -0.3), sn=(-0.8, 0.5, 0.1), fr=(AX, -0.1, AZ), fl=(-AX, 0.03, AZ))),
+                             (0.33, merged(GUARD, pos=(0, 0.1, -0.05), rot=(-24, 0, 22), sh=sl(-0.36, 0.46, -0.3), fr=(AX, -0.12, AZ), fl=(-AX, 0.11, AZ), fra=-18.0, e="snap")),
+                             (0.55, dict(rot=(-20, 0, 18))), (0.85, CARRY)])
 
-# ---------------------------------------------------------------------- E, Mending Ground (0.95 s)
+# ---------------------------------------------------------------------- E, Mending Ground: the drum lifted and set down gently
 C.bake("e_mend", 0.95, [(0, CARRY),
-                        (0.16, dict(pos=(0, 0, -0.03), hips=(4, 0, 0), head=(-14, 0, 0), gr=(0.3, 0.34, 1.0), sh=(-0.56, 0.2, 0.84), lid=0.6, jaw=0.15)),
-                        (0.26, dict(pos=(0, 0.04, -0.13), hips=(-24, 0, 6), head=(16, 0, 0), gr=(0.28, 0.52, 0.5), gd=(0.05, 0.1, 1), ga=(0, 1, 0), er=(1, 0, 0), lid=0.3, e="out")),
-                        (0.45, dict(pos=(0, 0.03, -0.11), hips=(-22, 0, 6), gr=(0.28, 0.52, 0.52), lid=0.7, jaw=0.2)),
+                        (0.16, dict(rot=(5, 0, 0), head=(-10, 0, 0), gr=sp(-0.02, 0.26, -0.06), gd=(0, 0.3, 0.95), ga=(0, 0.95, -0.3))),
+                        (0.26, dict(pos=(0, 0.03, -0.05), rot=(-16, 0, 4), head=(10, 0, 0), gr=sp(-0.04, 0.42, -0.42), gd=(0.05, 0.1, -1), ga=(0, 1, 0.1), e="out")),
+                        (0.45, dict(pos=(0, 0.03, -0.05), rot=(-15, 0, 4))),
                         (0.95, CARRY)])
 
 # ---------------------------------------------------------------------- X, Faultline
-UW = merged(WIND, pos=(0, 0, -0.1), hips=(14, 0, 0), head=(-12, 0, 0), gr=(0.26, -0.04, 1.54), gd=(-0.2, -0.45, 0.85), ga=(0, 0.88, 0.47), er=(1, 0, 0.1),
-            sh=(-0.56, 0.1, 0.62), jaw=1.0, brow=1.0, fr=(AX + 0.09, -0.12, AZ), fl=(-AX - 0.05, 0.14, AZ))
-C.bake("x_wind", 0.5, [(0, CARRY), (0.2, merged(UW, pos=(0, 0, -0.14), e="out")), (0.4, UW), (0.5, dict(pos=(0, 0, -0.095)))])
-C.bake("x_slam", 0.6, [(0, UW), (0.1, merged(IMP, pos=(0, 0.1, -0.2), hips=(-33, 0, 2), gr=(0.05, 0.68, 0.5), gd=(0, 0.45, -0.9), ga=(0, 0.9, 0.45))),
-                       (0.2, dict(pos=(0, 0.1, -0.22), hips=(-34, 0, 2))), (0.36, dict(pos=(0, 0.08, -0.2), head=(8, 0, 0), jaw=1.0)), (0.6, merged(STANCE, jaw=0.5, fra=0.0))])
+UW = merged(WIND, pos=(0, 0, -0.04), rot=(12, 0, 0), head=(-10, 0, 0), gr=sp(-0.04, -0.06, 0.43), gd=(-0.1, -0.5, 0.85), ga=(0, 0.85, 0.5), er=(1, 0, 0.1),
+            sh=sl(0.06, 0.06, -0.32), fr=(AX + 0.03, -0.05, AZ), fl=(-AX - 0.02, 0.06, AZ))
+C.bake("x_wind", 0.5, [(0, CARRY), (0.2, merged(UW, pos=(0, 0, -0.05), e="out")), (0.4, UW), (0.5, dict(pos=(0, 0, -0.035)))])
+C.bake("x_slam", 0.6, [(0, UW), (0.1, merged(IMP, pos=(0, 0.1, -0.06), rot=(-30, 0, 2), gr=sp(-0.14, 0.42, -0.36), gd=(0, 0.45, -0.9), ga=(0, 0.9, 0.45))),
+                       (0.2, dict(pos=(0, 0.1, -0.07), rot=(-32, 0, 2))), (0.36, dict(pos=(0, 0.08, -0.06), rot=(-24, 0, 2))), (0.6, merged(STANCE, fra=0.0))])
 
 # ---------------------------------------------------------------------- body states
-JUMP = merged(CARRY, pos=(0, 0, 0.05), hips=(7, 0, 0), head=(-6, 0, 3), sh=(-0.62, 0.1, 0.98), fr=(AX, -0.04, AZ + 0.12), fl=(-AX, 0.12, AZ + 0.2), fra=18.0, fla=12.0, jaw=0.4)
-C.bake("jump", 0.4, [(0, JUMP), (0.4, dict(fr=(AX, 0.0, AZ + 0.17), fl=(-AX, 0.06, AZ + 0.14)))])
-C.bake("fall", 0.6, [(0, merged(JUMP, hips=(6, 0, 0), sh=(-0.58, 0.1, 0.9), gr=(0.3, 0.3, 1.02), fr=(AX + 0.03, 0.07, AZ + 0.12), fl=(-AX - 0.03, -0.04, AZ + 0.17))), (0.3, dict(fr=(AX + 0.03, 0.03, AZ + 0.16), fl=(-AX - 0.03, 0.02, AZ + 0.13))), (0.6, dict(fr=(AX + 0.03, 0.07, AZ + 0.12), fl=(-AX - 0.03, -0.04, AZ + 0.17)))])
-C.bake("glide", 1.2, [(0, merged(CARRY, hips=(-24, 0, 0), head=(20, 0, 0), sh=(-0.6, 0.0, 0.92), sn=(-0.2, 0, -1), su=(0, 1, 0), gr=(0.56, 0.05, 1.28), gd=(0.05, -0.6, 0.8), fr=(AX, -0.2, AZ + 0.1), fl=(-AX, -0.14, AZ + 0.14), fra=30.0, fla=30.0, jaw=0.5)),
-                      (0.6, dict(pos=(0, 0, 0.02), fr=(AX, -0.16, AZ + 0.14), fl=(-AX, -0.2, AZ + 0.1))), (1.2, dict(pos=(0, 0, -0.012), fr=(AX, -0.2, AZ + 0.1), fl=(-AX, -0.14, AZ + 0.14)))])
-C.bake("dive", 0.6, [(0, merged(CARRY, rot=(-58, 0, 0), hips=(-8, 0, 0), head=(50, 0, 0), sh=(-0.54, -0.1, 0.8), gr=(0.3, 0.2, 1.2), fr=(AX, -0.5, AZ + 0.3), fl=(-AX, -0.42, AZ + 0.3), fra=40.0, fla=40.0, jaw=0.9)), (0.6, {})])
-DOWN = merged(CARRY, pos=(0, -0.05, -0.32), rot=(14, 0, 0), hips=(-34, 0, 6), head=(30, 0, -6), gr=(0.42, 0.42, 0.32), gd=(0.3, 0.9, 0.1), ga=(0, -0.1, 1), sh=(-0.5, 0.36, 0.3), sn=(0.1, 0.1, 1), su=(0, 1, 0),
-              fr=(AX + 0.12, 0.34, AZ), fl=(-AX - 0.1, -0.26, AZ + 0.02), jaw=0.3, lid=0.5, brow=0.0)
+JUMP = merged(CARRY, pos=(0, 0, 0.04), rot=(6, 0, 0), head=(-4, 0, 3), sh=sl(0.1, 0.1, -0.28), gr=sp(0.1, 0.16, -0.36), fr=(AX, -0.02, AZ + 0.05), fl=(-AX, 0.05, AZ + 0.09), fra=14.0, fla=10.0)
+C.bake("jump", 0.4, [(0, JUMP), (0.4, dict(fr=(AX, 0.0, AZ + 0.08), fl=(-AX, 0.03, AZ + 0.06)))])
+FALLK = dict(sh=sl(0.14, 0.08, -0.2), gr=sp(0.14, 0.14, -0.28))
+C.bake("fall", 0.6, [(0, merged(JUMP, FALLK, rot=(9, 0, 0), fr=(AX + 0.01, 0.03, AZ + 0.05), fl=(-AX - 0.01, -0.02, AZ + 0.08))), (0.3, dict(fr=(AX + 0.01, 0.01, AZ + 0.07), fl=(-AX - 0.01, 0.01, AZ + 0.06))), (0.6, dict(fr=(AX + 0.01, 0.03, AZ + 0.05), fl=(-AX - 0.01, -0.02, AZ + 0.08)))])
+# the glider: both fists up on the bar over his shoulders (the rig's grips), the ball hanging under it, feet dangling
+GL = merged(CARRY, rot=(-12, 0, 0), head=(10, 0, 0), gr=sp(-0.04, -0.05, 0.36), gd=(0.1, -0.7, -0.7), ga=(0.95, 0, 0.1), sh=sl(-0.04, -0.05, 0.36), sn=(-0.2, 0, -1), su=(0, 1, 0),
+            fr=(AX, -0.06, AZ + 0.05), fl=(-AX, -0.04, AZ + 0.07), fra=24.0, fla=24.0)
+C.bake("glide", 1.2, [(0, GL), (0.6, dict(pos=(0, 0, 0.012), fr=(AX, -0.05, AZ + 0.07), fl=(-AX, -0.06, AZ + 0.05))), (1.2, dict(pos=(0, 0, -0.006), fr=(AX, -0.06, AZ + 0.05), fl=(-AX, -0.04, AZ + 0.07)))])
+C.bake("dive", 0.6, [(0, merged(CARRY, rot=(-58, 0, 0), head=(40, 0, 0), sh=sl(0.1, -0.1, -0.2), gr=sp(0.1, 0.1, -0.2), fr=(AX, -0.1, AZ + 0.08), fl=(-AX, -0.08, AZ + 0.08), fra=30.0, fla=30.0)), (0.6, {})])
+# downed: tipped over backwards onto the hull's round, feet up, drum and door dropped
+DOWN = merged(CARRY, pos=(0, -0.06, -0.09), rot=(38, 8, 6), hips=(0, 0, 4), head=(-14, 0, -6), gr=sp(0.08, 0.34, -0.42), gd=(0.3, 0.9, 0.1), ga=(0, -0.1, 1), sh=sl(0.06, 0.24, -0.42), sn=(0.1, 0.1, 1), su=(0, 1, 0),
+              fr=(AX + 0.03, 0.12, AZ + 0.04), fl=(-AX - 0.03, 0.1, AZ + 0.06))
 C.bake("downed", 1.6, [(0, DOWN), (1.6, {})], over=breathe(1.6, 0.8))
-C.bake("stun", 0.9, [(0, merged(CARRY, pos=(0, 0, -0.06), hips=(-16, 0, 0), head=(-6, 0, 0), jaw=0.5, lid=0.5)), (0.45, dict(hips=(-16, 8, 4), head=(-6, -10, -8))), (0.9, dict(hips=(-16, 0, 0), head=(-6, 0, 0)))], over=None)
-C.bake("revive", 1.0, [(0, merged(CARRY, pos=(0, 0.04, -0.3), hips=(-30, 0, 0), head=(18, 0, 0), sh=(-0.3, 0.5, 0.44), sn=(-0.5, 0.2, 0.7), su=(0.2, 0.9, 0), fr=(AX + 0.03, -0.34, AZ + 0.04), fl=(-AX, 0.3, AZ), fra=-30.0, gr=(0.2, 0.5, 0.58), gd=(0.3, 0.4, 0.8), lid=0.4, jaw=0.2)), (0.5, dict(hips=(-34, 0, 0))), (1.0, dict(hips=(-30, 0, 0)))])
-C.bake("death", 1.3, [(0, merged(CARRY, jaw=0.9)), (0.2, dict(pos=(0, -0.04, -0.1), hips=(10, 0, 0), head=(-20, 0, 0), jaw=1.0)),
-                      (0.75, merged(DOWN, e="in")), (1.0, dict(pos=(0, -0.2, -0.46), rot=(58, 0, 0), hips=(-5, 0, 0), head=(-20, 0, 10), lid=1.0, jaw=0.3, e="snap")),
-                      (1.3, dict(pos=(0, -0.22, -0.5), rot=(74, 0, 0), lid=1.0))])
+C.bake("stun", 0.9, [(0, merged(CARRY, rot=(-4, 5, 0), head=(-4, 0, 0))), (0.45, dict(rot=(-4, -5, 6), head=(-4, -10, -8))), (0.9, dict(rot=(-4, 5, 0), head=(-4, 0, 0)))])
+C.bake("revive", 1.0, [(0, merged(CARRY, pos=(0, 0.04, -0.07), rot=(-24, 0, 0), head=(14, 0, 0), sh=sl(-0.2, 0.42, -0.42), sn=(-0.5, 0.2, 0.7), su=(0.2, 0.9, 0), gr=sp(-0.1, 0.4, -0.4), gd=(0.3, 0.4, 0.8), fra=-14.0)), (0.5, dict(rot=(-27, 0, 0))), (1.0, dict(rot=(-24, 0, 0)))])
+C.bake("death", 1.3, [(0, CARRY), (0.2, dict(pos=(0, -0.03, -0.02), rot=(10, 0, 0), head=(-14, 0, 0))),
+                      (0.75, merged(DOWN, e="in")), (1.0, dict(pos=(0, -0.2, -0.16), rot=(84, 8, 8), e="snap")), (1.3, dict(pos=(0, -0.22, -0.18), rot=(90, 8, 10)))])
 
 # ---------------------------------------------------------------------- one-shots
-C.bake("land", 0.36, [(0, merged(CARRY, pos=(0, 0, -0.14), hips=(-22, 0, 0), head=(16, 0, 0), sh=(-0.58, 0.12, 0.62), gr=(0.3, 0.32, 0.82), fr=(AX + 0.05, -0.04, AZ), fl=(-AX - 0.05, 0.08, AZ), jaw=0.6)), (0.36, CARRY)])
-C.bake("hit_f", 0.36, [(0, CARRY), (0.06, dict(pos=(0, -0.05, -0.03), hips=(11, 7, 6), head=(-14, 0, -6), jaw=0.7, lid=0.5, brow=1.0, e="snap")), (0.36, CARRY)])
-C.bake("hit_b", 0.36, [(0, CARRY), (0.06, dict(pos=(0, 0.05, -0.04), hips=(-13, -5, -5), head=(12, 0, 5), jaw=0.7, lid=0.5, brow=1.0, e="snap")), (0.36, CARRY)])
-# the emote: a great belly laugh, head back, slapping the belly with the shield hand... he is enjoying himself
-LAUGH = merged(CARRY, hips=(17, 0, 0), head=(-26, 0, 0), jaw=1.0, lid=0.8, sh=(-0.2, 0.44, 0.74), sn=(-0.6, 0.75, 0.1), el=(-0.9, 0.1, -0.5))
+C.bake("land", 0.36, [(0, merged(CARRY, pos=(0, 0, -0.06), rot=(-12, 0, 0), head=(10, 0, 0), sh=sl(0.1, 0.12, -0.34), gr=sp(0.1, 0.2, -0.32), fr=(AX + 0.02, -0.02, AZ), fl=(-AX - 0.02, 0.04, AZ))), (0.36, CARRY)])
+C.bake("hit_f", 0.36, [(0, CARRY), (0.06, dict(pos=(0, -0.04, 0.0), rot=(10, 5, 6), head=(-10, 0, -6), e="snap")), (0.36, CARRY)])
+C.bake("hit_b", 0.36, [(0, CARRY), (0.06, dict(pos=(0, 0.04, -0.01), rot=(-10, -4, -5), head=(8, 0, 5), e="snap")), (0.36, CARRY)])
+# the emote: he rocks with laughter, the door hand patting his hull
+LAUGH = merged(CARRY, rot=(10, 0, 0), head=(-12, 0, 0), sh=sl(-0.2, 0.36, -0.3), sn=(-0.6, 0.75, 0.1), el=(-0.9, 0.1, -0.5))
 
 
 def laugh(t, p):
     s = math.sin(t * 15.0) * min(1.0, t * 4) * min(1.0, (2.0 - t) * 4)
-    add(p, "pos", (0, 0, 0.03 * abs(s)))
-    add(p, "hips", (4.0 * s, 0, 0))
+    add(p, "pos", (0, 0, 0.018 * abs(s)))
+    add(p, "rot", (3.5 * s, 3.0 * math.sin(t * 7.0), 0))
     add(p, "sh", (0, 0.04 * abs(s), 0))
-    add(p, "head", (3.0 * s, 0, 0))
-    add(p, "gr", (0, 0, 0.012 * s))
 
 
-C.bake("emote", 2.0, [(0, CARRY), (0.3, LAUGH), (1.7, dict(hips=(14, 0, 0))), (2.0, CARRY)], over=laugh)
-# Fusion: he braces, drives the hammer down and heaves up with the power, arms wide
-C.bake("fuse", 0.8, [(0, CARRY), (0.2, merged(WIND, pos=(0, 0, -0.16), hips=(-30, 0, 0), head=(26, 0, 0), gr=(0.3, 0.42, 0.72), sh=(-0.3, 0.3, 0.72), lid=1.0, jaw=0.0)),
-                     (0.45, dict(pos=(0, 0, 0.02), hips=(14, 0, 0), head=(-22, 0, 0), gr=(0.72, 0.1, 1.46), gd=(0.4, 0, 0.9), ga=(0, 1, 0), sh=(-0.8, 0.1, 1.3), sn=(-0.5, 0.7, 0.4), lid=0.0, jaw=1.0, brow=1.0, e="out")),
+C.bake("emote", 2.0, [(0, CARRY), (0.3, LAUGH), (1.7, dict(rot=(8, 0, 0))), (2.0, CARRY)], over=laugh)
+# Fusion: he sinks into himself, then throws both arms wide as the sea comes up through him
+C.bake("fuse", 0.8, [(0, CARRY), (0.2, merged(WIND, pos=(0, 0, -0.07), rot=(-20, 0, 0), head=(16, 0, 0), gr=sp(-0.06, 0.3, -0.26), sh=sl(-0.1, 0.3, -0.3))),
+                     (0.45, dict(pos=(0, 0, 0.03), rot=(10, 0, 0), head=(-16, 0, 0), gr=sp(0.3, 0.1, 0.3), gd=(0.4, 0, 0.9), ga=(0, 1, 0), sh=sl(0.3, 0.1, 0.3), sn=(-0.5, 0.7, 0.4), e="out")),
                      (0.6, dict(pos=(0, 0, 0.0))), (0.8, CARRY)])
 
 bpy.context.scene.render.fps = A.FPS

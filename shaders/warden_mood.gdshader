@@ -31,7 +31,7 @@ float face(vec2 p, int m) {
 	vec2 q = vec2(abs(p.x), p.y);
 	float d = 9.0;
 	if (m == 0) {
-		d = length((q - vec2(0.36, 0.08)) * vec2(1.0, 1.0 / max(1.0 - blink, 0.08))) - 0.13;
+		d = length((q - vec2(0.32, 0.02)) * vec2(1.0, 1.0 / max(1.0 - blink, 0.08))) - 0.17;
 	} else if (m == 1) {
 		float sm = length((p - vec2(0.0, -0.3)) * vec2(1.0, 1.7)) - 0.34;
 		d = min(arc(q, vec2(0.38, -0.02), 0.2, -1.3, 1.3) - 0.055, max(sm, p.y + 0.2));
@@ -52,7 +52,7 @@ void fragment() {
 	vec2 p = (UV - 0.5) * vec2(2.0, -2.0);
 	float d = mix(face(p, from_mood), face(p, to_mood), k);
 	float line = smoothstep(0.02, -0.02, d);
-	float halo = exp(-max(d, 0.0) * 9.0) * 0.5;
+	float halo = exp(-max(d, 0.0) * 7.0) * 0.6;
 	// the glass: dark, a soft highlight top left
 	float sheen = smoothstep(0.34, 0.0, length((p - vec2(-0.32, 0.5)) * vec2(1.0, 2.2))) * 0.18;
 	ALBEDO = glass + vec3(sheen) + glow * (line * strength + halo * 0.6);

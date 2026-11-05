@@ -111,25 +111,24 @@ def p_hull(p, n, c):
     f = c["f"]
     ao, cv = form(f, p, n)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    r = np.sqrt(x * x + y ** 2) + 1e-4
-    v = (z - 0.5 - 0.12 * (r / 0.38) ** 2 * smooth(0.0, 0.35, np.abs(x))) / 0.058
-    pid = np.floor(v + 0.5)
-    q = (v + 0.5) % 1.0 - 0.5
-    seam = smooth(0.09, 0.03, np.abs(np.abs(q) - 0.5))
-    col = wood_col(p, (0.35, 0.35, 4.0))
-    col = col * (0.82 + 0.36 * vnoise(pid * 3.1, pid * 1.7, pid, 1.0))[:, None]
-    col = stains(col, p)
-    col = mix(col, C("1e140e"), seam * 0.9)
-    col = shade(col, ao, cv * 0.5, n, 0.5, 0.25, (0.6, 0.62, 0.72))
-    # the sea's light between the planks: patches of seam, wider where the hull has sprung
+    fr, bk, kk = B.strake(x, y, z)
+    pid = np.floor(fr) * (1 - np.rint(kk)) + np.floor(bk) * np.rint(kk) + 40 * np.rint(kk)
+    q = (fr % 1.0) * (1 - kk) + ((bk + 0.5) % 1.0) * kk
+    seam = np.where(kk > 0.5, smooth(0.09, 0.03, np.abs(((bk + 0.5) % 1.0) - 0.5)), smooth(0.12, 0.03, np.minimum(fr % 1.0, 1 - fr % 1.0)))
+    along = np.where((kk > 0.5)[:, None], np.array((2.5, 2.5, 0.3), np.float32), np.array((0.35, 0.35, 4.0), np.float32))
+    col = wood_col(p * along * 1.0, (1.0, 1.0, 1.0))
+    col = col * (0.8 + 0.42 * vnoise(pid * 3.1, pid * 1.7, pid, 1.0))[:, None]
+    # butt joints along each strake
     a = np.arctan2(x, y)
+    butt = smooth(0.012, 0.004, np.abs((a * 1.4 + pid * 0.37) % 1.0 - 0.5) / 1.4) * (kk < 0.5)
+    col = stains(col, p)
+    col = mix(col, C("1a110c"), np.maximum(seam, butt) * 0.92)
+    col = shade(col, ao, cv * 0.45, n, 0.45, 0.25, (0.6, 0.62, 0.72))
+    # the sea's light: a few long sprung seams, and the collar running down under the helmet
     patch = smooth(0.6, 0.66, fbm(a * 0.7, a * 0.3, pid * 0.23, 4.0, 2))
-    wide = smooth(0.12, 0.02, np.abs(np.abs(q) - 0.5) + (vnoise(a * 6.0, pid, pid, 1.0) - 0.5) * 0.14)
-    lit = patch * wide * smooth(0.25, 0.32, z) * smooth(0.76, 0.68, z)
-    # and the collar: a ring of it under the helmet, running down in drips
+    lit = patch * seam * smooth(0.25, 0.32, z) * smooth(0.76, 0.68, z)
     ring = smooth(0.74, 0.77, z + (vnoise(a * 7.0, a, a, 1.0) - 0.5) * 0.12) * smooth(-0.02, 0.1, y)
-    run = smooth(0.08, 0.02, np.abs(((a * 3.1 + 0.4) % 1.0) - 0.5) * 0.14 + 0.0) * smooth(0.7, 0.83, z) * (y > 0.0)
-    hot = np.maximum(np.maximum(lit, ring), run * 0.0)
+    hot = np.maximum(lit, ring)
     col = mix(col, C("3fbfb4"), np.clip(smooth(0.0, 0.5, hot) * 0.55, 0, 1))
     return mix(col, KEY, smooth(0.45, 0.6, hot))
 
@@ -212,8 +211,8 @@ def p_moss(p, n, c):
     f = c["f"]
     ao, cv = form(f, p, n, (0.008, 0.02, 0.05), 1.5)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    col = mix(C("7f9a34"), C("38551e"), fbm(x, y, z, 26.0, 3)[:, None] * 1.3)
-    col = mix(col, C("b2c84e"), smooth(0.62, 0.8, fbm(x + 1, y, z, 44.0, 2)) * 0.6)
+    col = mix(C("6a8a30"), C("33501e"), fbm(x, y, z, 26.0, 3)[:, None] * 1.3)
+    col = mix(col, C("93ad42"), smooth(0.62, 0.8, fbm(x + 1, y, z, 44.0, 2)) * 0.5)
     return shade(col, ao, cv * 0.7, n, 0.6, 0.3, (0.45, 0.6, 0.55))
 
 
@@ -227,7 +226,7 @@ def p_drum(p, n, c):
     f = c["f"]
     ao, cv = form(f, p, n, (0.008, 0.02, 0.05), 1.0)
     x, y, z = p[:, 0], p[:, 1], p[:, 2]
-    ang = np.arctan2(z - 0.5, y) / 6.283 * 16
+    ang = np.arctan2(z - 0.56, y) / 6.283 * 16
     seam = smooth(0.1, 0.03, np.abs((ang + 0.5) % 1.0 - 0.5))
     col = wood_col(p, (0.3, 2.0, 2.0)) * (1.0 + 0.1)
     col = mix(col, C("1e140e"), seam * 0.9)
@@ -242,12 +241,23 @@ def p_door(p, n, c):
     px = (x + 0.46) / 0.11
     pid = np.floor(px)
     seam = smooth(0.06, 0.02, np.abs(px - np.round(px)))
-    col = wood_col(p, (2.5, 2.5, 0.28))
+    col = wood_col(p, (2.5, 2.5, 0.28)) * 0.82
     col = col * (0.85 + 0.3 * vnoise(pid * 7.3, pid * 2.1, pid * 0.7, 1.0))[:, None]
     col = mix(col, C("1e140e"), seam * 0.9)
-    st = C("8d887e") * (0.8 + 0.4 * vnoise(x * 3.0, y, z * 0.7, 110.0))[:, None]
-    col = np.where((lab == 4)[:, None], st, col)
-    return shade(col, ao, cv * 1.0, n, 0.85, 0.7, (0.6, 0.58, 0.66))
+    col = shade(col, ao, cv * 0.8, n, 0.75, 0.5, (0.6, 0.58, 0.66))
+    # the carved woman: pale weathered stone, with her face drawn in
+    st = C("c4beb2") * (0.92 + 0.14 * fbm(x, y, z, 18.0, 2))[:, None]
+    fz = z - (0.28 + 0.405)
+    ax = np.abs(x)
+    eyes = smooth(0.0045, 0.002, np.abs(fz - 0.012 + 40 * (ax - 0.024) ** 2)) * (ax < 0.044) * (ax > 0.008)
+    brow = smooth(0.0035, 0.0015, np.abs(fz - 0.03 + 30 * (ax - 0.024) ** 2)) * (ax < 0.048) * (ax > 0.006)
+    nose = smooth(0.0035, 0.0015, ax - 0.002 - 0.09 * (fz + 0.02)) * (fz < 0.01) * (fz > -0.022)
+    lips = smooth(0.0045, 0.002, np.abs(fz + 0.04 - 60 * ax ** 2)) * (ax < 0.02)
+    st = mix(st, C("4a4640"), np.maximum.reduce([eyes, brow * 0.7, nose * 0.5, lips]))
+    hair = 0.5 + 0.5 * np.sin(x * 240.0 + np.sin(z * 9.0) * 3.0)
+    st = st * (0.86 + 0.2 * hair[:, None] * (np.abs(fz) > 0.08) * (z > 0.45))
+    fig = shade(st, 0.45 + 0.55 * ao, cv * 1.0, n, 0.9, 0.5, (0.6, 0.58, 0.66))
+    return np.where((lab == 4)[:, None], fig, col)
 
 
 def p_fish(p, n, c):
