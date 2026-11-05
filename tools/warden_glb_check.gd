@@ -239,6 +239,10 @@ func _anchors(main: Node, a: String) -> void:
 			% [a, str(missing), str(off_bone)])
 	var top := WardenGlb.anchor(m, "anchor_head_top")
 	if top != null:
+		var clips: WardenClips = (m.get_node("Warden/Sync") as WardenGlb.Sync).clips
+		if clips:        # (a Hero with clips: hand the head to the rig, or this measures the idle clip's sway)
+			clips.force = {"proc": true}
+			clips.proc_w = 1.0
 		await main.get_tree().process_frame
 		var before := top.global_position
 		(m.get_node("Rig/Torso/HeadPivot") as Node3D).rotation.x += 0.6
@@ -307,6 +311,7 @@ func _springs(a: String) -> void:
 		m.free()
 		return
 	var sk := _skel(m)
+	sync.springs.calm = true
 	sync._process(1.0 / 60.0)
 	var lag := 0.0
 	for i in 6:
