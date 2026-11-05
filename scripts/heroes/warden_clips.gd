@@ -24,7 +24,7 @@ const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold m
 const HEADING_MIN := 2.0     # m/s: slower than this has no heading to lean into
 const HEADING_MAX := 1.4     # rad: the most the root turns off the facing
 const HEADING_RATE := 14.0   # 1/s: how fast it turns
-const WEAPON_K := "weapon_k"  # root meta: the skinned weapon's size over its rest (the whirl's read at the match camera)
+const WEAPON_K := "weapon_k"  # root meta: the skinned weapon's size over its rest (the whirl)
 const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
