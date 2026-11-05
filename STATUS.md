@@ -531,3 +531,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: Cinder redesign refs received
 - cinder_FINAL_sheet + cinder_turnaround logged. ART-1 Cinder joins the queue after ART-1 Motley; ext/wip-cinder (old look) is superseded for the model. Kit 66 continues.
+
+## 2026-11-05 S2: READY FOR OWNER REVIEW: ext/drop-107 0a31cdbd (item 107; includes ext/drop)
+- ext/drop (SkyFall, squad comet, DropFx) never reached main, so this branch merged it: merging ext/drop-107 replaces ext/drop. Ship at 210 m (was 40 on main), 22.4 s ship to ground, 15.7 s diving; 17x camera pull-out with all map corners in frame; cloud deck + 48 puffs; wind builds ~9 dB and cuts at the snap; glide snap; camera eases back; dust-ring landing with no self-shake. Steering verified high and low for solo divers and jumpmasters; comet riders only break away (decision 0012). DropPing added; item 50 shake removed.
+- Checks 0 failures: --check, hero-combo 286, warden-glb 182, arena 86, tutorial-hud 31, drop 44, drop-feel 13, drop-107 21, move-feel 74, rolling 62, health --strict, gen_wiki 34 unchanged. All six sounds are ours, logged.
+- **Before merge:** Net.VERSION still needs a bump for "comet" and "cburst" (TODO in net.gd, inherited from ext/drop); online drops untested. Perf: draws 1275/1714 -> 1946/2955, tris 765k -> 1426k in the wide view (software GL, squad 3): needs one capture on the owner's PC. Not reviewed on Forward+.
+- Review: strips and GIFs on ext/hero-shots-s2 2a400f61 drop-107/; video on disk, not in git: /home/boki/shots-s2/drop-107/drop_107_review.mp4 (64 s, sound). Nobody has heard the mix: -25.9 LUFS, peak -7.6 dBFS.
+- Owner Qs: are the snap and landing punchy enough (bus compressor holds them near -23)? 17x pull-out right? Comet riders OK with break-away only?
