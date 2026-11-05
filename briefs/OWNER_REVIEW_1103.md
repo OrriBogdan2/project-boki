@@ -1930,3 +1930,15 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - A knock heals her a chunk: SV's 500 on their HP scale. Map it to ours as ~the same % of max HP (S5 converts; ext's guess ≈ 20-25% of max).
   - The knock→Slipstep refresh comes from the global rule (159), not the passive.
   - The card text: "Combat Rush: abilities that land stack 6% lifesteal for 3.5s. Knocks heal you."
+
+## 161. The tutorial intro card waits for a key: no 2 s auto-start (owner, 17:46 UTC Nov 5)
+- The owner: "it says 'press any key' on the tutorial but then auto starts in a second anyways - make it pause until a key is pressed".
+- Cause:
+  - scripts/match/tutorial.gd `intro_wait`: `if intro_t >= INTRO_T: ack()`, with INTRO_T = 2.0.
+  - tutorial_hud.gd:118 also fades the dim over intro_t 1.6 → 2.0.
+- **Fix:**
+  - Remove the timeout: only a key/click calls ack().
+  - Keep the dim at full while the card is up; fade it out over ~0.3 s after ack (a separate timer).
+  - Ignore input for the first ~0.3 s so a held key from the loading screen doesn't skip it instantly.
+  - The match stays paused (the existing behaviour).
+- **Assert:** with no input for 10 s, the card is still up; a key → it closes.
