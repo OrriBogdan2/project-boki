@@ -40,8 +40,10 @@ const WAKE_POOL := 6
 const WAKE_EVERY := 0.06
 ## the Bash's gold fan: half its angle (rad) and its reach scale over the Bash's radius
 const BASH_HALF := 0.6
-## the whirled hammer: how far above the hand the circle runs (m), its tilt (rad, the head a little up) and the
-## s it eases out of the hand into the circle
+## the whirled hammer: the 3D model's size over the one in the hand (it reads at the match camera; the procedural
+## hammer is drawn big enough as it is), how far above the hand the circle runs (m), its tilt (rad, the head a
+## little up) and the s it eases out of the hand into the circle
+const ORBIT_SCALE := 1.4
 const ORBIT_RISE := 0.45
 const ORBIT_TILT := 0.12
 const WHIRL_IN := 0.12
@@ -284,6 +286,8 @@ func _whirl(pv: Node3D, delta: float) -> void:
 	whirl_k = minf(1.0, whirl_k + delta / WHIRL_IN)
 	var gun := pv.get_parent() as Node3D
 	var orbit_size := gun.global_basis.get_scale().x
+	if pv.has_node(WardenGlb.WEAPON):
+		orbit_size *= ORBIT_SCALE
 	var centre := gun.global_position + Vector3(0, ORBIT_RISE, 0)
 	var turn := Basis(Vector3.UP, spin)
 	var at := Transform3D(turn * Basis(Vector3.RIGHT, ORBIT_TILT).scaled(Vector3.ONE * orbit_size), centre)
