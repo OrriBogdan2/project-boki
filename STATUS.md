@@ -625,3 +625,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - ext/art1-tarek redirected to the stone-arm monk (tarek_FINAL_sheet, tarek_turnaround_apose). The 95e0e243 look is superseded; its rig and clip groundwork carries over.
 - Weapon sheets logged (pip, grimble, claire, sable, cinder); master sheet wins. Cinder's agent has hers.
 - Item 111 (Rock Hop dash, Opus) added to KITS. Queue: ART-1 Grimble, Claire, Pip, Sable, Ryzz; kits 111, gloves 69, glider 63, Claire 62+64+65. Portraits next pass: Tarek, Ryzz.
+
+## 2026-11-05 S2: ART-1 Kael round 2: ext/art1-kael ec4a1d7f, posted to the owner as a preview
+- Round 2: real burn holes, new hair and lids, blade rebuilt, stronger hit reacts, glide grips. New --clip-live-check drives a real Match headless: one weapon, chain + reel, heading lean 0.19 rad, death clip plays; passes also with ext/kit-kael-57. Fixed a shared hud_slot.gd "Invalid polygon data" bug.
+- S2's read: strong at the match camera; close-up about 55-60, below the agent's 70: the scarf still reads as a flat bib, the blade as a plank from the front, the hair spiky. Round 3 running on those.
+- Full suite (121 flags on 582233c2): 111 pass; grammar-runtime, merge-form, pack-ui, teammate, hitch, load same as main; clip-check and portrait fixed; bot-sanity passes with a longer limit; rolling 1 fail then pass, not diagnosed.
+- **Check changes to review:** warden-model limits for the taller design; clip-check pop assert replaced by a move-order test with its limit set just above the worst measured value; **mantle-look now skips Ostra's orbit quads because the branch shifted them and clean main passed: cause not traced, sent back.**
+- Owner Qs still open: scar side, eyes, in-game size 1.08 vs RIG_STANDARD 1.06.
