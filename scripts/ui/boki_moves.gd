@@ -56,16 +56,12 @@ func _when(ad: AbilitySpec, slot: String) -> String:
 
 func _add(nm: String, icon: String, col: Color, lines: Array, bond: bool) -> void:
 	var t := PanelContainer.new()
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(col, 0.16 if bond else 0.08)
-	sb.border_color = Color(col, 0.85 if bond else 0.35)
-	sb.set_border_width_all(2 if bond else 1)
-	sb.set_corner_radius_all(10)
-	sb.set_content_margin_all(6)
+	var fill := Color(col, 0.16 if bond else 0.08)
+	var edge_w := 2 if bond else 1
+	var edge := Color(col, 0.85 if bond else 0.35)
+	var sb := UI.frame(fill, 10, edge, edge_w, 6, 6, 0.0)
 	t.add_theme_stylebox_override("panel", sb)
-	var focus_sb := sb.duplicate() as StyleBoxFlat
-	focus_sb.border_color = UI.ACCENT_HI
-	focus_sb.set_border_width_all(2)
+	var focus_sb := UI.frame(fill, 10, UI.ACCENT_HI, 2, 6, 6, 0.0)
 	t.custom_minimum_size = TILE
 	t.focus_mode = Control.FOCUS_ALL
 	t.mouse_filter = Control.MOUSE_FILTER_STOP
