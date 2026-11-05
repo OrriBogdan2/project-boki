@@ -2670,3 +2670,8 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
   - the dash slot in a match and at home, at 2, 1 (recharging) and 0 charges
   - outposts: neutral, you inside, capturing at half, lift open, and three outposts with a monster wave (no hunter fight; the test hunters fell off)
 - **Not reviewed:** the tutorial map's outposts use the same model and weren't checked separately.
+
+## 2026-11-05 (S6): READY (NEW: owner approval pending) Selenfin ext/boki-selenfin ba573892; ext/boki-newbase now 58b59015
+- **Selenfin (NEW)**, roster 50 #19 (lunar, small): a pale silver hatchetfish that floats upright, with a round chibi head (so the face reads from the front), slightly upturned eyes, a deep keel with a milky moonstone set low in it, a row of soft yellow photophores, a forked tail and a little dorsal sail. It hovers (soft ground shadow) and swims through the air: tail sweeps, pectoral fins paddle in turn. Ability: rises and turns once round showing the moonstone, fins flared. Concept sheet `briefs/art-refs/boki/selenfin_concept.png`; review set ext/boki-shots-s6 91cea77a boki/selenfin/. Weak spot: from the side the pectoral fin can read as a pale disc.
+- **ext/boki-newbase is now 58b59015**: it carries Zephyrak's hover shadow and PALE_PIECES lines verbatim (checked: merges clean with ext/boki-zephyrak and every species branch), so floating NEW designs (Selenfin, Thrumbird) don't copy it.
+- Checks: --boki-rig-check 0 failures, health --strict OK.
