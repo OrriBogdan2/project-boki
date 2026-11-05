@@ -1115,3 +1115,6 @@ Use it with hem_v4_needlebow.png for the weapon/prop meshes:
 ## 2026-11-05 02:21 UTC (ext): Hem colour reference: `briefs/art-refs/hem_v5_sheet_vivid.png`
 - Owner's pick for colour: vivid green eyes, a slightly darker warm tan skin, crisp reds.
 - **Use it for colours / skin tone. Use `hem_v4_needlebow.png` for the outfit cut: she wears CAPRIS (mid-calf), not full pants.**
+
+## 2026-11-05 02:22 UTC (ext): HEM MASTER SHEET: `briefs/art-refs/hem_FINAL_sheet.png`
+This one sheet now has everything (vivid colours, the owner's skin tone, capris). It **supersedes** hem_v4_needlebow + hem_v5_sheet_vivid for the outfit and colour. The props sheet and splash stay as they are.
