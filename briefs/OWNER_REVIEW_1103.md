@@ -1513,3 +1513,23 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Muzzle anchors = the fingertips, alternating L/R.
   - A match-camera still where a viewer would read "finger gun".
   - The weapon-scale row (item 137) for her coils.
+
+## 140. Lisette (Red Stitch) RMB Heavy Shot: no arrow left on the ground, a smaller projectile, longer range, a better wind-up, a stronger slow, a loud Myth-like sound (owner, 17:27 UTC Nov 5)
+- The owner: "red stitch rmb shouldnt leave an arrow on the ground, and its way too big. also her range should be longer and the windup feel better. rmb should slow her more and have a louder sound like myth rmb".
+- Follows item 114 (the big needle arrow, slowed while charging, charge sound); that overshot on size.
+- **No ground arrow:** the needle vanishes on impact or at max range with a short spark/thread fizz. No lingering prop or decal (a wall pin can show a brief stitch flash, then disappear).
+- **Size:** the needle projectile goes down to ~half its current visual size (thin, long, needle-like). Its hitbox is unchanged unless it's oversized too.
+- **Range:** pin.range 14 → ~20 m (rank 3 +3 stays). The aim lane shows the full range.
+- **Wind-up feel:**
+  - A smoother, weightier draw: the needle drawn back visibly with string tension, a slight camera tighten and a subtle zoom/vignette at full, the ring closing into a crisp "ping" at full (1.1 s).
+  - No hitch at the 0.5 s start threshold; blend it.
+- **Slow while drawing:** a stronger move slow (e.g. to ~40% speed while drawing, tune), so committing to it matters.
+- **Sound:** a much louder, chunkier release like Myth's charged RMB: a deep bow thrum + a whip-crack + air tear on full charge, and a strong impact thunk.
+  - The draw creak rises in volume too.
+  - S4's sound set (S5 can pick from the library).
+- **Assert:**
+  - No node persists >0.3 s after impact.
+  - The projectile mesh length is ≤ half the previous.
+  - range == 20.
+  - Move speed while drawing is ≤0.45x.
+  - The release sfx is at least +4 dB vs today.

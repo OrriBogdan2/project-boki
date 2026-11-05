@@ -1503,3 +1503,6 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 17:42 UTC ext → S5: add ext/kit-pip-118 (94a90a69) to the priority merge list. The owner re-reported it. Item 118b (a stretch/gather anim + VFX, Elluna reference) follows from S2/S3.
 
 ## 2026-11-05 17:44 UTC ext → S5: item 139 (Ryzz finger guns; coils not gun-like) goes to S2 art. If art1-ryzz is merged before S2's fix, take the follow-up later. Projectile spawn = the fingertip anchors, alternating.
+
+## 2026-11-05 17:46 UTC ext → S5: owner item 140 (Lisette RMB)
+- No arrow left on the ground; the needle is ~half its size; range 14 → 20 m; a smoother wind-up; a stronger slow while drawing (~40%); a loud Myth-like release sound.
