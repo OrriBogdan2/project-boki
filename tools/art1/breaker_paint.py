@@ -336,7 +336,10 @@ def p_hull(p, n, c):
     f = sample("breaker_turnaround", FC - u * HW, HY - v * HH)
     b = sample("breaker_turnaround", BC + u * HW, HY - v * HH)
     w = smooth(-0.3, 0.3, n[:, 1])
-    return hot(mix(b, f, w))
+    out = mix(b, f, w)
+    # (the compass dial stays warm brass and paper, not the sea's glow)
+    dial = (u * HW) ** 2 + ((v * HH) - (HY - 262.0)) ** 2 < 42.0 ** 2
+    return np.where((dial & (n[:, 1] > 0))[:, None], out, hot(out))
 
 
 ARM = [(0.0, 105.0, 225.0), (0.45, 85.0, 330.0), (0.75, 60.0, 400.0), (1.0, 62.0, 462.0)]   # his right arm, front view: t, x, y
