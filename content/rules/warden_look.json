@@ -533,12 +533,14 @@
 					1.02,
 					1.1
 				],
-				"light_neutral_warm": 0.7
+				"light_neutral_warm": 0.7,
+				"normal_k": 1.8
 			},
 			"metal": {
 				"fres": 0.2,
 				"far_lift": 0.3,
-				"gloss": 0.5
+				"gloss": 0.5,
+				"normal_k": 1.4
 			},
 			"leather-face": {
 				"emit": 1.0,
