@@ -2632,3 +2632,41 @@ Supersedes ext/perf-94 and ext/perf-94b; don't merge those. It contains main c20
 - check_registry conflict with --dash-aim-check: kept both entries. Re-run after the merge: --boki-moves-check 0 failures, health --strict OK, gen_wiki --check 34 unchanged.
 - ext/s7-empty-77-81 a4808f68 still merges clean onto 25e8ea8d.
 - ext/s7-dash-outpost-84-86 is held. On this box --simtest --seed=5 ends "team wiped" at sim 46 s on the branch; plain 25e8ea8d extracts at sim 236 s. Its agent is bisecting now.
+
+## 2026-11-05 08:30 UTC (S7): READY ext/s7-dash-outpost-84-86 f1eac1a2: items 84 (+ the 84 addition under 88) and 86. Already merged with main 25e8ea8d.
+- **84, the dash slot:**
+  - Dash is a normal ability slot (new scripts/ui/dash_slot.gd, DashSlot, drawn through HudSlot.ab_slot) with:
+    - one pip per charge, the recharging pip filling
+    - a small countdown for the next charge
+    - dark with a red frame and a big countdown at 0 charges
+    - a flash and a tick when a charge returns
+    - a small air-dash diamond
+  - **The same component at home:** new scripts/home/home_dash_slot.gd calls the same DashSlot.draw, bottom centre.
+  - **Deleted:** StaminaBar (own and rival plates, vitals, squad frames), the farm's overhead dash pips, stamina_bar_check and stamina_bar_shots. --stamina-bar-check is replaced by --dash-slot-check.
+  - **Partial (DEBT entry):** at home the slot reads the home's own dash numbers, a mirror of the Hunter's rather than the same object. A shared DashState would need hunter.gd changes.
+  - **Owner question:** rivals' overhead dash bars are gone too, which loses the "they just used it" read. Easy to restore.
+- **86, outposts:**
+  - The uplink outpost is a built object: plinth, console, mast with a crystal, a banner, and 4 pylons with lamps.
+  - State shows on the object (new scripts/match/outpost_look.gd):
+    - neutral: dark, banner low
+    - charging: the crystal follows the charge, lamps light one by one, the banner climbs in the holder's team colour
+    - lift open: all lit
+  - The yard ring shows only when you're inside or it's contested.
+  - Removed: sparks, the 34 m charge column, the always-on ring and the floating badge. The lift column is now 9 m and fainter.
+  - The minimap and full map use a matching glyph (new scripts/ui/outpost_glyph.gd).
+- **simtest note:** --simtest --seed=5 ends "team wiped" at 46 s on this branch, while main extracts at 236 s. This is an RNG-sequence shift, not a regression:
+  - Removing the badge drops one randf().
+  - One extra randf() on plain main moves seed 5's ending from Thornwood 236 s to Saltmere 453 s.
+  - Seeds 3, 7 and 11 wipe early on both main and the branch.
+  - Please don't hold the merge on seed 5's ending.
+- **Checks** (0 failures):
+  - --dash-slot-check: all 12 archetypes, home and match.
+  - --outpost-look-check.
+  - --extract-check, --rank-ui-check, --dash-flow-check, --home-build-check, --check.
+  - --hudref-check: it assumed every rival keeps a plate. It now skips eliminated rivals; seen >= 5 is kept.
+  - health --strict OK; gen_wiki --check unchanged.
+- **Diff:** 37 files, +804/-473. home.gd +8/-36, hud.gd +10/-23, models.gd +2/-2. No Net or save change. No reserved files touched.
+- **Shots:** briefs/shots/s7/dash-outpost-84-86/
+  - the dash slot in a match and at home, at 2, 1 (recharging) and 0 charges
+  - outposts: neutral, you inside, capturing at half, lift open, and three outposts with a monster wave (no hunter fight; the test hunters fell off)
+- **Not reviewed:** the tutorial map's outposts use the same model and weren't checked separately.
