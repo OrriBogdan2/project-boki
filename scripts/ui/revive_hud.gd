@@ -20,7 +20,7 @@ static func world_labels(hud) -> void:
 	var m: Match = hud.m
 	var cam: Camera3D = m.cam
 	for b in m.boxes:
-		var bp := LabelCull.at(hud, b["pos"] + Vector3(0, 1.9, 0))      # (item 94: off screen or far away isn't laid out)
+		var bp := LabelCull.at(hud, b["pos"] + Vector3(0, 1.9, 0))      # (item 94)
 		if bp.is_finite():
 			_box_label(hud, b, bp)
 	for bc in m.beacons:
