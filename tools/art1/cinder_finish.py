@@ -55,7 +55,7 @@ for p_ in pieces:
 
 # (the ink shell folds on so small a face: no room on it)
 for p_ in pieces:
-    if p_.name in ("face", "jaw", "mouthb") or p_.name.startswith(("lid", "brow", "fang", "fin", "lens")):
+    if p_.name in ("face", "jaw", "mouthb", "skull") or p_.name.startswith(("lid", "brow", "fang", "fin", "lens")):
         p_.room = 0.0
     elif p_.name.startswith(("finger", "thumb")):
         p_.room = 0.3
@@ -426,7 +426,7 @@ paint(lambda n: n.startswith(("tankfoot", "tankring", "stack", "bar", "gpipe", "
 paint(lambda n: n.startswith("rivet"), P.brass)
 gf = next(q for q in tk if q.name == "gface")
 paint(lambda n: n == "gface", lambda p, n, ao: P.gauge(p, *gf.gauge))
-paint(lambda n: n.startswith(("gogR", "gogB")), P.brass)
+paint(lambda n: n.startswith(("gogR", "gogB")), lambda p, n, ao: P.brass(p, n, np.maximum(ao, 0.8)))
 paint(lambda n: n.startswith("vcap"), P.cork)
 for q in pieces:
     if q.name.startswith("lens"):
