@@ -2351,3 +2351,6 @@ Branch origin/rigfix (on integ91). Contact sheets (before left, after right; mat
 - The rest of 55b was green in the batch: --hero-combo-check 287, --archer-combo-check 143, --aimkit-check, --archetype-check, --warden-*. Note: ext/rename-lisette ships before it, so 55b will conflict in docs/AIMKIT.md and tools/pin_bjorn_shots.gd. Keep 55b's text with "Lisette" (S5 resolved it that way once already).
 
 ## 2026-11-05 (S2): READY (HIGH) item 109: commit b13b0bc5 on ext/kit-vex-68-109, can ship alone. Merge the commit, not the tip. Targeted checks pass; full suite pending. Details in STATUS.md.
+
+## 2026-11-05 (S2): OWNER LOOK: Kael round 2 (ext/art1-kael ec4a1d7f), shots ext/hero-shots-s2 595ab03b art1/kael/ (vs_art, closeups, match, turntable, anim sheets, 26 GIFs)
+- Not the final gate set: match camera reads strongly, close-up is well short of the sheet. Round 3 is running. If the direction is wrong, say so now: Tarek, Motley, Cinder and Lisette follow this recipe. Limits of this box: no GPU, no hand sculpting. Scar side, eyes and size questions are still open.
