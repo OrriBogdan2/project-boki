@@ -921,3 +921,19 @@ Goal: in a busy fight at match zoom, you can always tell where you are, where en
 - **Vex:** a better splash art (IMG agent / anthum; our own design, stronger composition and pose).
 - **Hem:** more attractive / striking design (League-style appeal: confident pose, a better face and hair, a flattering fitted outfit in her red palette). Tasteful, not sexualised.
 - Approval gates as for ART-1.
+
+## 108b. Romi's notes (owner's sister), as relayed (owner, 00:54 UTC Nov 5). Owner picks pending; ext's recommendations noted
+- **Hem:**
+  - long hair
+  - capris + a corset that shows her midriff
+  - tanner skin
+  - green eyes that pop (green against her red palette)
+  - Romi also suggests a rename "to something like Liza". **Rename = owner decision** (ext: "Hem" ties to "the Red Stitch"; if renamed, keep a sewing/thread meaning).
+- **Kael:** "not loving him": all gold, or **all silver with dark skin** (ext recommends silver + dark skin, crimson accents).
+- **Cinder:** a cooler potion holder (a striking bandolier/rig for her vials).
+- **Dredge:**
+  - stands on one foot and extends up tall
+  - can also roll like a ball (ext: a great fit for his own dash animation, item 35)
+  - grey with a single green eye
+  - Dredge uses the friend's Blender model, so a recolour + new animations, not a new model.
+- The image-gen concepts come first (the owner prompts them by hand); then S2 builds from the owner's picks.
