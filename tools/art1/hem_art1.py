@@ -1,6 +1,6 @@
 """Hem / Lisette (ART-1, item 108 + 76b): the fitted Meshy scan (hem_source.py) for the body and outfit, scripted geometry for the head, hair, hands, scarf and gear, on
 the contract armature with one painted atlas; saved as a .blend for tools/art1/hem_clips.py, which keys the clips and exports the .glb:
-  blender -b --factory-startup --python tools/art1/hem_art1.py -- WORKDIR SOURCE.blend SCAN_BASE_COLOR.png HEAD.blend HEAD_BASE_COLOR.png
+  blender -b --factory-startup --python tools/art1/hem_art1.py -- WORKDIR SOURCE.blend SCAN_BASE_COLOR.png HEAD.blend HEAD_BASE_COLOR.png FACE_PLATE.png
 Shapes: hem_sculpt.py; paint: hem_paint.py. Budget: 15k triangles, the bow included (S1). The bow is skinned in the .glb on
 x_weapon (hand.L); the nocked needle stays a separate piece on x_arrow, resting in the quiver (item 76b).
 tools/blender/breaker_art1.py is the pattern (sculpt_kit's chart seams, density-scaled unwrap, per-texel paint)."""
@@ -27,7 +27,7 @@ import warden_kit as K
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 _a = sys.argv[sys.argv.index("--") + 1:]
-WORK, SOURCE, SCAN_TEX, HEAD, HEAD_TEX = _a[0], _a[1], _a[2], _a[3], _a[4]
+WORK, SOURCE, SCAN_TEX, HEAD, HEAD_TEX, PLATE = _a[0], _a[1], _a[2], _a[3], _a[4], _a[5]
 ATLAS = 2048
 RELIEF = 2.6            # slope of the relief map per unit of painted height
 F = np.float32
@@ -358,7 +358,7 @@ def main():
     rig = K.load_rig(rig_path)
     J = H.joints(rig_path)
     print("sculpting", flush=True)
-    needle = [((0.108, -0.080, 1.822), (-0.128, -0.070, 1.694), 0.0040)]         # the silver pin, through the tie, eye up to her right
+    needle = [((-0.108, -0.080, 1.822), (0.128, -0.070, 1.694), 0.0040)]         # the silver pin, through the tie, eye up to her left
     hn = H.needle_field(needle, 0.0012, 0.0095, 0.030)
     with bpy.data.libraries.load(SOURCE) as (df, dt):
         dt.objects = ["Src", "Low"]
@@ -380,6 +380,7 @@ def main():
     bpy.context.scene.collection.objects.link(hlow)
     hlow.data.materials.clear()
     sp_head = ScanPaint(dh.objects[0].data, imgio.load(HEAD_TEX))
+    P.PLATE = imgio.load(PLATE)
     hR, hinfo = H.right_hand(J)
     hL = H.left_hand(J)
     qv = H.quiver()
@@ -397,10 +398,10 @@ def main():
         return parts[-1]
 
     hxf = H.head_xf
-    part("skin_head", None, 0, "headscan", 2.8, None, "headscan", None, ob=hlow)
+    part("skin_head", None, 0, "headscan", 3.4, None, "headscan", None, ob=hlow)
     part("hair_needles", hn, 110, "needle", 2.6, None, "head", "metal")
-    th = tube("pin_thread", [(0.108, -0.080, 1.822), (0.124, -0.082, 1.795), (0.132, -0.085, 1.760), (0.122, -0.090, 1.728)], 0.0017, 3)
-    part("pin_thread", None, 0, "string", 0.15, None, "head", "cloth", ob=th)
+    th = tube("pin_thread", [(-0.108, -0.080, 1.822), (-0.124, -0.082, 1.795), (-0.132, -0.085, 1.760), (-0.122, -0.090, 1.728)], 0.0015, 3)
+    part("pin_thread", None, 0, "string", 1.2, None, "head", "cloth", ob=th)
     part("Low", None, 0, "scan", 1.25, None, "scan", None, ob=low)
     part("handR", hR, 800, "handR", 2.0, None, "hand")
     part("handL", hL, 500, "handL", 1.7, None, "hand")
@@ -750,7 +751,7 @@ def main():
         n = n / np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-6)
         me.normals_split_custom_set_from_vertices(n.tolist())
 
-    ROOM = {"hair_needles": 0.0, "quiver_arrows": 0.0, "arrow": 0.0, "shears": 0.1, "string": 0.0,
+    ROOM = {"hair_needles": 0.0, "pin_thread": 0.0, "quiver_arrows": 0.0, "arrow": 0.0, "shears": 0.1, "string": 0.0,
             "skin_head": 0.0, "Low": 0.55, "handR": 0.3, "handL": 0.3, "bow": 0.0, "scarftailR": 0.3, "scarftailL": 0.3, "scarftailR_in": 0.0, "scarftailL_in": 0.0}
     for p in parts:
         me = p["ob"].data

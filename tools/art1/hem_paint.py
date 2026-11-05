@@ -167,16 +167,17 @@ def _eye_uv(p, s):
 PLATE = None         # the face plate (the owner's face, flat and frontal: edit_face), set by hem_art1
 
 
+# the face plate (px on a 640 frame) on the head scan: eyes' spacing for x; brow, eyes, nose, mouth, chin for z
+PLATE_X = 170.0 / 0.082
+PLATE_Z = ((1.4895, 545.0), (1.5318, 462.0), (1.5675, 400.0), (1.6065, 312.0), (1.629, 265.0), (1.70, 110.0))
+
+
 def plate(p):
-    """The plate's colour at sculpt points, straight from the front."""
+    """The plate's colour at model points, straight from the front."""
     h, w = PLATE.shape[:2]
     k = w / 640.0
-    zs = np.array([q[0] for q in H.PLATE_Z], F)
-    ys = np.array([q[1] for q in H.PLATE_Z], F)
-    py = np.interp(p[:, 2], zs, ys)
-    # (past the head's outline the plate is its grey ground: hold the skin's edge, well inside it)
-    lim = np.interp(py, (55.0, 120.0, 300.0, 345.0, 400.0, 460.0, 520.0, 565.0, 640.0), (60.0, 140.0, 174.0, 152.0, 132.0, 124.0, 88.0, 30.0, 30.0))
-    px = 320.0 + np.clip(p[:, 0] * H.PLATE_PX, -lim, lim)
+    py = np.interp(p[:, 2], [q[0] for q in PLATE_Z], [q[1] for q in PLATE_Z])
+    px = 320.0 + p[:, 0] * PLATE_X
     return PLATE[np.clip((py * k).astype(int), 0, h - 1), np.clip((px * k).astype(int), 0, w - 1)]
 
 
@@ -204,7 +205,10 @@ def headscan(c, p, n):
     c[dark] = h[dark]
     light = ~dark
     c[light] = (c * (0.76 + 0.3 * smooth(0.15, 0.7, k))[:, None])[light]
-    return np.clip(c, 0, 1)
+    # the features from the art: the plate over the face, fading out before the hair and jaw
+    ax = np.abs(p[:, 0])
+    fw = smooth(0.0585, 0.046, ax) * smooth(1.492, 1.503, p[:, 2]) * smooth(1.668, 1.652, p[:, 2]) * smooth(0.03, 0.06, p[:, 1]) * smooth(0.2, 0.45, n[:, 1])
+    return np.clip(mix(c, plate(p), fw), 0, 1)
 
 
 def scan(c, p, n):
