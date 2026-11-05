@@ -157,7 +157,8 @@ def skull():
     zs = np.linspace(0.112, -0.135, rows)
     angs = np.linspace(0, 2 * np.pi, cols, endpoint=False)
     A, Z = np.meshgrid(angs, zs)
-    R = ray_out(A, Z, r0=0.14) * 0.975
+    # (coarse: well inside the face patch at the front, or its corners poke through the cheeks)
+    R = ray_out(A, Z, r0=0.14) * (0.975 - 0.2 * smooth(0.0, 0.7, np.cos(A)))
     v = hl(np.stack([np.sin(A) * R, np.cos(A) * R, Z], -1).reshape(-1, 3))
     return Piece("skull", "skin-cinder-hot", v, grid_faces(rows, cols, True)).rigid("head")
 
