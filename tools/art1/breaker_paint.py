@@ -425,7 +425,7 @@ def p_scanpaint(p, n, c):
     col = im[np.clip(((1 - uv[:, 1] % 1.0) * h).astype(int), 0, h - 1), np.clip((uv[:, 0] % 1.0 * w).astype(int), 0, w - 1)]
     L = np.array((0.25, 0.55, 0.8), F32)
     relief = (hn @ L) - (n @ L)
-    return key_scan(col * (1.0 + np.clip(relief, -0.5, 0.5) * 0.7)[:, None])
+    return key_scan(np.clip(col * 1.22, 0, 1) * (1.0 + np.clip(relief, -0.5, 0.5) * 0.7)[:, None])
 
 
 def p_dial(p, n, c):
