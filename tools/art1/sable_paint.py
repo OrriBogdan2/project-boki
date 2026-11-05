@@ -50,7 +50,7 @@ def wood(p, n, ao):
 
 
 def mouth_glow(p, n, ao):
-    return np.tile(hexc("#ecb6ff"), (len(p), 1))
+    return np.tile(hexc("#c24dff"), (len(p), 1))
 
 
 def runes(p, n, ao):
@@ -60,10 +60,10 @@ def runes(p, n, ao):
     v = p[:, 1] - K.grip("R")[1] - 0.052
     cu = np.floor(u / 0.0115)
     glyph = (cu.astype(int) % 3) != 2
-    cell = np.stack([np.floor(u / 0.0038), np.floor((v + 0.01) / 0.0036), np.abs(p[:, 0]) * 0 + 7 * side], 1)
+    cell = np.stack([np.floor(u / 0.0038), np.floor((v + np.abs(p[:, 0]) * 3.0 + 0.01) / 0.0036), np.abs(p[:, 0]) * 0 + 7 * side], 1)
     cell = cell.astype(np.int64) + 1000
     on = (hash3(cell[:, 0], cell[:, 1], cell[:, 2]) > 0.42) & glyph
-    return mix(hexc("#1c0d2c"), hexc("#d865ff"), on.astype(float))
+    return mix(hexc("#2c0f4c"), hexc("#c43cff"), on.astype(float))
 
 
 def crystal(p, n, ao):
@@ -79,9 +79,9 @@ def bola(p, n, ao):
 
 def feather(p, n, ao):
     """White, a fine comb of barbs along the feather, a grey quill."""
-    x = p[:, 0] * 520.0 + p[:, 2] * 640.0
+    x = p[:, 0] * 300.0 + p[:, 2] * 380.0
     barbs = 0.5 + 0.5 * np.sin(x + 3.0 * fbm(p * 30.0, 2))
-    return ramp(np.clip(0.74 + lit(n, ao) * 0.26 + (barbs - 0.5) * 0.1, 0, 1), HAIR)
+    return ramp(np.clip(0.74 + lit(n, ao) * 0.26 + (barbs - 0.5) * 0.2, 0, 1), HAIR)
 
 
 def path_u(p, path):

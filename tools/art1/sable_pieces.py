@@ -159,6 +159,12 @@ def pistol(side):
         pc = Piece(nm + side, "glow-rune", np.array(q), [[0, 1, 2, 3]])
         pc.rune = (a0, a1)
         out.append(pc)
+    # ... and one along the top, the side the match camera sees
+    a0, a1 = 0.135, 0.285
+    hw = x_ * 0.0078
+    tn = U_REST * (0.0165 + 0.0012)
+    c0, c1 = p(a0, BV), p(a1, BV)
+    out.append(Piece("runeC" + side, "glow-rune", np.array([c0 + tn + hw * ARM[side], c0 + tn - hw * ARM[side], c1 + tn - hw * ARM[side], c1 + tn + hw * ARM[side]]), [[0, 1, 2, 3]]))
     for q in out:
         q.rigid(bone)
     return out

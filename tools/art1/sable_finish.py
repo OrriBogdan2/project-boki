@@ -18,7 +18,7 @@ SRC, RIG, OUT = a[0], a[1], a[2]
 ATLAS = 2048
 MATS = ["skin-face", "cloth-coat", "leather-dark", "metal-silver", "hair-braid", "fur-feather", "card-wing", "glow-rune"]     # S1's limit: <= 8
 SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "antenna": 0.9, "braid": 0.8, "tuft": 0.7, "tie": 0.5, "wing": 1.3, "tail": 0.7, "lining": 0.35,
-         "barrel": 1.6, "stock": 1.1, "rod": 0.4, "cap": 0.6, "lock": 1.2, "cock": 0.8, "frizzen": 0.8, "guard": 0.5, "mouth": 1.0, "crystal": 0.8, "runeA": 5.0, "runeB": 5.0,
+         "barrel": 1.6, "stock": 1.1, "rod": 0.4, "cap": 0.6, "lock": 1.2, "cock": 0.8, "frizzen": 0.8, "guard": 0.5, "mouth": 1.0, "crystal": 0.8, "runeA": 5.0, "runeB": 5.0, "runeC": 5.0,
          "key": 0.8, "keyring": 0.6, "keyshaft": 0.8, "keybit": 0.6, "bolaA": 0.9, "bolaB": 0.9, "cordA": 0.3, "cordB": 0.3, "gemchain": 0.4, "gemframe": 0.8, "gemstone": 1.4, "Low": 1.0}
 FACE_K = 3.4                # texel density on the face against the body
 
@@ -459,7 +459,7 @@ for k_, i in enumerate(low_faces):
     lum = (r_ + g_ + b_) / 3
     z_ = fc[k_][2]
     if z_ > K.NECK_Z - 0.09 and lum > 0.62:
-        m = "hair-braid" if z_ > K.NECK_Z + 0.02 else "skin-face"
+        m = "hair-braid" if z_ > K.NECK_Z + 0.02 and lum > 0.76 else "skin-face"
     elif z_ > K.NECK_Z - 0.16 and lum > 0.27:
         m = "skin-face"
     else:
@@ -481,8 +481,8 @@ cc_ = OUTC[ys, xs].astype(np.float64)
 for s_ in (1.0, -1.0):
     ec = K.eye_c(s_)
     q_ = np.hypot((pp[:, 0] - ec[0]) / K.EYE_W, (pp[:, 2] - ec[2]) / K.EYE_H) * (pp[:, 1] > 0.05)
-    dark = smooth(1.0, 0.7, q_) * (pp[:, 1] > 0.05) * smooth(0.72, 0.5, cc_.mean(1))
-    cc_ = mix(cc_, hexc("#120d1a"), dark * 0.85)
+    dark = smooth(0.92, 0.65, q_) * (pp[:, 1] > 0.05) * smooth(0.72, 0.5, cc_.mean(1))
+    cc_ = mix(cc_, hexc("#120d1a"), dark * 0.7)
 dmk = np.linalg.norm(pp - K.MARK_ON, axis=1)
 cc_ = mix(cc_, hexc("#2c2138"), smooth(0.0062, 0.0045, dmk))
 OUTC[ys, xs] = cc_
