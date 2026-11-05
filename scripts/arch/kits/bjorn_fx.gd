@@ -247,6 +247,10 @@ func hold(held_t: float, k: float, window: bool, turn: float) -> void:
 	held = true
 	spin = turn
 	spin_k = k
+	if own_piece:
+		# (the skinned hammer whirls in the clip: its loop runs on the kit's angle. The clip's a = 0 is his right, the
+		# kit's 0 his front, so a quarter turn on.)
+		h.model.set_meta(WardenClips.PHASE, fposmod((turn - h.model.rotation.y + PI * 0.5) / TAU, 1.0))
 	glint_k = k if held_t >= 0.6 else -1.0
 	glint.visible = glint_k >= 0.0
 	hot = window
@@ -257,6 +261,8 @@ func full_flare() -> void:
 
 func hold_end() -> void:
 	held = false
+	if h.model:
+		h.model.remove_meta(WardenClips.PHASE)
 	whirl_k = 0.0
 	hot = false
 	glint_k = -1.0
@@ -299,6 +305,8 @@ func _whirl(pv: Node3D, delta: float) -> void:
 	var gun := pv.get_parent() as Node3D
 	var orbit_size := gun.global_basis.get_scale().x
 	var centre := gun.global_position + Vector3(0, ORBIT_RISE, 0)
+	if own_piece:      # (the head you see runs round his body, at its own height)
+		centre = Vector3(h.model.global_position.x, _head_world().y, h.model.global_position.z)
 	var turn := Basis(Vector3.UP, spin)
 	var at := Transform3D(turn * Basis(Vector3.RIGHT, ORBIT_TILT).scaled(Vector3.ONE * orbit_size), centre)
 	pv.transform = Transform3D.IDENTITY.interpolate_with(gun.global_transform.affine_inverse() * at, whirl_k)

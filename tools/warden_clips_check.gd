@@ -124,6 +124,8 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	ok(still.is_empty(), "%s: each move's clip moves the hand (%s)" % [art_name, str(still)])
 	ok(worst <= GRIP_TOL, "%s: the weapon stays in the hand in every move (worst %.3f m, %s)"
 			% [art_name, worst, worst_mv])
+	if art_name == "breaker":
+		_whirl(m, an, sync, sk, st)
 	# the weapon: one drawn; hidden when out of the hand; anchors on it
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
 	var drawn := 0
@@ -151,6 +153,31 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			tris += mesh.surface_get_array_index_len(si) / 3
 	ok(tris <= MAX_TRIS, "%s: %d triangles, the budget %d" % [art_name, tris, MAX_TRIS])
 	m.free()
+
+## Item 59: the kit's angle seeks the hold's loop: the head goes where the phase says, inside the slam's reach.
+func _whirl(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, st: Dictionary) -> void:
+	var wp := WardenSkeleton.find(sk, "x_weapon")
+	var tip := WardenGlb.anchor(m, "anchor_hammer_head")
+	var at := tip.get_parent() as BoneAttachment3D
+	var off := sk.get_bone_global_rest(WardenSkeleton.find(sk, at.bone_name)) * tip.transform
+	var off_w := sk.get_bone_global_rest(wp).affine_inverse() * off
+	var worst := 0.0
+	var reach := 0.0
+	var s2: Dictionary = st.duplicate()
+	s2["kmove"] = "bul_smash_wind"
+	for i in 8:
+		var a := TAU * i / 8.0
+		m.set_meta(WardenClips.PHASE, i / 8.0)
+		s2["kmove_t"] = 0.4 + i * 0.1
+		_play(m, an, sync, s2, 12)
+		var head := (sk.get_bone_global_pose(wp) * off_w).origin
+		var flat := Vector2(head.x, head.z)
+		reach = maxf(reach, flat.length() * m.scale.x)
+		worst = maxf(worst, absf(angle_difference(flat.angle(), Vector2(cos(a), -sin(a)).angle())))
+	m.remove_meta(WardenClips.PHASE)
+	_play(m, an, sync, st, 12)
+	ok(worst < 0.6, "breaker: the kit's angle turns the skinned hammer (worst %.2f rad off)" % worst)
+	ok(reach <= 2.8, "breaker: the whirl's head stays inside the slam's reach (%.2f m of 2.8)" % reach)
 
 func _play(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
 	for i in n:

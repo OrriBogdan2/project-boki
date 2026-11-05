@@ -129,8 +129,9 @@ C.bake("lmb_recall", 0.484, [(0, merged(CARRY, FREE)),
                              (0.3, dict(pos=(0, -0.05, -0.1), hips=(5, 0, -8), gr=(0.36, 0.3, 1.0), gd=(0.05, 0.1, 1.0), ga=(0, 1, -0.1), fing_r=1.0, thumb_r=1.0, e="snap")),
                              (0.484, merged(CARRY))])
 
-# LMB held: the whirl (item 59): the hammer swung round over his head like a lasso, at arm's length, 1.18 turns a second
-# while the feet stay planted. 0..0.2 goes up into it; 0.2..1.0 loops.
+# LMB held: the whirl (item 59): the hammer swung round over his head like a lasso, at arm's length, feet planted. 0..0.2
+# goes up into it; from 0.2 one full turn: the kit's angle seeks it (WardenClips.PHASE), so its 2.5-4 turns a second
+# (data, lmb.spin_turns) drive the clip and the head stays on the kit's trail.
 SPIN_T = 0.85
 WIND = merged(CARRY, pos=(0, 0, -0.07), hips=(-6, 0, 0), head=(-8, 0, 0), sh=(-0.42, 0.36, 0.86), sn=(-0.4, 0.9, 0.1), er=(1, -0.2, 0.4),
               fr=(AX + 0.07, -0.08, AZ), fl=(-AX - 0.07, 0.1, AZ), jaw=0.55, brow=1.0)
@@ -140,12 +141,12 @@ def whirl_over(t, p):
     if t < 0.2:
         return
     a2 = (t - 0.2) / SPIN_T * tau
-    p["gr"] = (0.31 + 0.13 * math.cos(a2), 0.04 + 0.2 * math.sin(a2), 1.4)
+    p["gr"] = (0.2 + 0.26 * math.cos(a2), 0.02 + 0.26 * math.sin(a2), 1.4)
     p["gd"] = (math.cos(a2), math.sin(a2), 0.22)
     p["ga"] = (0, 0, 1)
     p["er"] = (0.6, -0.3, -0.6)
-    add(p, "hips", (0, 3.0 * math.cos(a2), 9.0 * math.sin(a2 + 0.5)))
-    add(p, "head", (0, 0, -9.0 * math.sin(a2 + 0.5)))
+    add(p, "hips", (0, 3.0 * math.cos(a2), 16.0 * math.sin(a2 - 0.6)))     # (the shoulder follows the hand round)
+    add(p, "head", (0, 0, -16.0 * math.sin(a2 - 0.6)))
     add(p, "pos", (0.012 * math.cos(a2), 0.012 * math.sin(a2), 0.006 * math.sin(a2 * 2)))
 
 
