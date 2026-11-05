@@ -27,6 +27,7 @@ const LOD_FAR := 34.0          # m: nothing is drawn beyond this
 const LOD_MID_K := 0.5         # share of the particles between the two
 const ALLY_K := 0.6            # an ally's effects, so yours and the enemy's stay on top
 const HOLD_LINGER := 0.15      # s a hold outlives its last ask
+const HOLD_RESIZE := 0.1       # change in a hold's charge k that re-thins its "n_k" layers
 const RIBBON_SAMPLES := 18     # points a mesh trail keeps
 const ARC_SEGS := 24           # segments of a sweep's arc mesh
 const SWEEP_INNER := 0.35      # the arc mesh's inner radius, as a share of its outer one
@@ -517,12 +518,17 @@ func _aim_emitter(p: GPUParticles3D, kind: String, layer: Dictionary, h: Hunter,
 	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "smoke" if kind == "smoke" else "char"))
 	mt.set_shader_parameter("stretch", float(layer.get("stretch", 0.05)))
 	mt.set_shader_parameter("gain", view_k(h))
-	var want := _num(layer, "n", o, 12.0) * float(Settings.q("fx")) * lod * view_k(h)
-	var room := maxi(0, MAX_LIVE - live_n)
-	var n := mini(mini(int(want), int(AMOUNT[kind])), room)
+	var n := _allowed(kind, layer, h, o, lod, 0)
 	p.amount_ratio = float(n) / float(AMOUNT[kind])
 	p.lifetime = _num(layer, "life", o, 0.5)
 	return n
+
+## How many particles a layer may have: its "n" thinned by the quality preset, the distance and the viewer, within
+## the node's AMOUNT and what is left of MAX_LIVE (plus `own`, the particles this node already holds).
+func _allowed(kind: String, layer: Dictionary, h: Hunter, o: Dictionary, lod: float, own: int) -> int:
+	var want := _num(layer, "n", o, 12.0) * float(Settings.q("fx")) * lod * view_k(h)
+	var room := maxi(0, MAX_LIVE - live_n + own)
+	return mini(mini(int(want), int(AMOUNT[kind])), room)
 
 func _way(layer: Dictionary, dir: Vector2) -> Vector3:
 	var flat := Vector3(dir.x, 0, dir.y)
@@ -569,7 +575,8 @@ func hold(h: Hunter, move: String, k := 0.0) -> void:
 	var key := "%d/%s" % [h.get_instance_id(), move]
 	if holds.has(key):
 		holds[key]["last"] = m.time
-		holds[key]["k"] = k
+		if absf(k - float(holds[key]["k"])) >= HOLD_RESIZE:
+			_resize_hold(holds[key], k)
 		return
 	var rec := _rec(h, move)
 	var lod := lod_at(h.pos)
@@ -594,6 +601,21 @@ func hold(h: Hunter, move: String, k := 0.0) -> void:
 		live_n += n
 		layers.append({"node": node, "layer": layer, "n": n})
 	holds[key] = {"h": h, "last": m.time, "k": k, "layers": layers}
+
+## A hold's charge moved on: layers whose "n" grows with it ("n_k") thicken or thin, without restarting.
+func _resize_hold(e: Dictionary, k: float) -> void:
+	e["k"] = k
+	var h: Hunter = e["h"]
+	var lod := lod_at(h.pos)
+	for lay: Dictionary in e["layers"]:
+		var layer: Dictionary = lay["layer"]
+		if not layer.has("n_k"):
+			continue
+		var kind := String(layer["p"])
+		var n := maxi(1, _allowed(kind, layer, h, {"k": k}, lod, int(lay["n"])))
+		live_n += n - int(lay["n"])
+		lay["n"] = n
+		(lay["node"] as GPUParticles3D).amount_ratio = float(n) / float(AMOUNT[kind])
 
 func _tick_holds() -> void:
 	for key: String in holds.keys():

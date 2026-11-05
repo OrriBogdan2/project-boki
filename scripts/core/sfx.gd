@@ -322,8 +322,9 @@ func step(pos = null, vol := -16.0) -> void:
 	_step_i = (_step_i + 1) % 3
 	play("step%d" % _step_i, pos, vol, 0.12)
 
+## Whether a sound can play: loaded, or an audio/<name>.wav that loads on first use.
 func has(sname: String) -> bool:
-	return streams.has(sname)
+	return streams.has(sname) or _lazy(sname)
 
 ## How much quieter (dB) a sound at pos is for the listener, or NAN when it's out of earshot.
 func _distance_db(pos, reach := 0.0) -> float:
