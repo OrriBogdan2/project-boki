@@ -3355,6 +3355,27 @@ def lengthen(ob, img, ln):
             me.vertices.foreach_set("co", co.ravel())
             me.update()
             log("straight back: %d vertices" % int(tgt.sum()))
+    fb = ln.get("flat_back")
+    if fb:
+        # (the scan's coat back wraps each leg like trousers: below from_z, across |x| < half_w, the back panel's
+        # inner vertices come back to the panel's outer face at their height, so one panel hangs over both legs)
+        z0f, hw = float(fb.get("from_z", 0.8)), float(fb.get("half_w", 0.16))
+        kf, qf = float(fb.get("k", 1.0)), float(fb.get("q", 8.0))
+        bk = coat & (co[:, 1] < float(fb.get("behind", 0.0))) & (co[:, 2] < z0f) & (np.abs(co[:, 0]) < hw)
+        zb = np.floor(co[:, 2] / 0.02).astype(int)
+        n_f = 0
+        for b in np.unique(zb[bk]):
+            m_ = bk & (zb == b)
+            if m_.sum() < 4:
+                continue
+            yb = float(np.percentile(co[m_, 1], qf))
+            t = np.clip(1.0 - (np.abs(co[m_, 0]) / hw) ** 2, 0.0, 1.0) * kf
+            y = co[m_, 1]
+            co[m_, 1] = np.where(y > yb, y + (yb - y) * t, y)
+            n_f += int(m_.sum())
+        me.vertices.foreach_set("co", co.ravel())
+        me.update()
+        log("flat back: %d vertices" % n_f)
     if ln.get("hem_colour"):
         # (the scan's dark dagged hem and lining, stretched, read as a zig-zag: the stretched coat's dark texels
         # take the coat's colour)

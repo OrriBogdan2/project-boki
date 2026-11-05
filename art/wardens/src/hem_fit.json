@@ -819,6 +819,13 @@
    "k": 0.92,
    "behind": 0.06,
    "slack": 0.01
+  },
+  "flat_back": {
+   "from_z": 0.82,
+   "half_w": 0.17,
+   "k": 0.85,
+   "q": 10.0,
+   "behind": 0.0
   }
  },
  "shears": {
@@ -859,7 +866,50 @@
    "val_hi": 1.05,
    "sat_max": 0.12,
    "slots": [
-    "metal"
+    "skin",
+    "metal",
+    "cloth",
+    "leather"
+   ]
+  },
+  {
+   "mode": "flat",
+   "colour": "e6e1de",
+   "box": [
+    -0.11,
+    0.11,
+    0.56,
+    0.69
+   ],
+   "side_only": 0.55,
+   "val_lo": 0.9,
+   "val_hi": 1.05,
+   "slots": [
+    "skin",
+    "metal",
+    "cloth",
+    "leather"
+   ],
+   "sat_max": 0.14
+  },
+  {
+   "mode": "flat",
+   "colour": "e6e1de",
+   "box": [
+    -0.075,
+    0.075,
+    0.6,
+    0.685
+   ],
+   "val_max": 0.55,
+   "sat_max": 0.14,
+   "val_lo": 0.9,
+   "val_hi": 1.05,
+   "slots": [
+    "skin",
+    "metal",
+    "cloth",
+    "leather"
    ]
   },
   {
