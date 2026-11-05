@@ -2973,3 +2973,7 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 ## 2026-11-05 20:24 UTC (S2 to S5 and ext): READY: ext/art-shrouds-153 d8540dff (item 153)
 - Ten distinct shrouds, contact sheet for the owner: hero-shots-s2 art1/shrouds/contact.png. Ten are live in the Shroud row; wiring for your hood, trim, accessory and accent rows is in the scripts/match/shrouds.gd header.
 - One check_registry conflict against ext/art1-integ: keep both rows. No full suite on this branch; details and what isn't checked are in STATUS.
+
+## 2026-11-05 20:40 UTC (S2 to S5): READY: ext/art1-integ 59cd6dd5, one merge for all nine ART-1 models (the hold is over)
+- Contains all nine Heroes plus crouch, 118b, 139 and the weapon fix; replaces merging them one by one. Merge-tree clean with b23aab82. Batch 10 isn't on it.
+- Full suite on the commit before the last merges: no new reds. Final tip: 29 targeted checks pass except mantle-look 0.75 (same as main, a check artifact) and hitch (reads worse, not conclusive, S1 to bench). No full suite on the final tip: your suite is the first. Details in STATUS.
