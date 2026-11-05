@@ -16,3 +16,9 @@ Each READY report (S2 models/anims, S3 VFX, S4 sound) includes this hero's rows 
 | **Pip** | A small (waist-high) upright fairy-fox medic: fairy wings, goggles with flowers, a bandaged ear, a leaf cape, a medic apron with a flower cross. The STAR LANTERN (glowing; healing light). Gold constellation markings that brighten when she heals. Reads as a Hunter, not a Boki. |
 | **Sable** | Grey-lilac skin, moth antennae, a white braid, a beauty mark. A long buckled coat + moth-wing tails. TWIN ENCHANTED FLINTLOCK PISTOLS (violet runes + crystals), NOT crossbows. **VFX:** violet magic shots + smoke puffs. |
 | **Tarek** | Blind (a plain cloth blindfold, no glow). THREE floating EYE-STONES orbit his head (they are his sight; they turn toward enemies). A HUGE stone left arm + shoulder onto his chest; a stone gauntlet on the right forearm. Dreadlocks with copper beads, prayer beads, an orange sash. **Dash = Rock Hop** (2-3 hops off rocks rising under him). |
+
+## Weapon scale + fit (mandatory, owner 2026-11-05)
+- [ ] The in-game weapon's length/size matches `<hero>_weapons.png` / `_FINAL_sheet.png` proportions against the body (state the measurement, e.g. "blade = hip→shoulder").
+- [ ] Shape, colours and details match the weapon sheet.
+- [ ] Attached at the right socket and reads as part of the character (not floating or oversized) at the match camera.
+- [ ] Evidence: a side-by-side in-game vs the ref + a match-camera still.

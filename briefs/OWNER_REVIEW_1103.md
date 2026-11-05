@@ -1461,3 +1461,13 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - A charged (waited) shot: bigger, with a crackling rim and the glyphs spinning faster.
   - On hit: an implosion pop (a quick inward pull), not a splash.
 - Post a 3-option VFX comparison strip (stills) to the owner via ext BEFORE integrating, so he picks.
+
+## 137. Weapons: true to scale and part of the character, on ALL heroes (owner, 17:23 UTC Nov 5)
+- The owner: "make sure the weapons dont all look oversized and out of place - they should look like they're part of the character / their kit". (Dredge looks bad, but he's becoming Grimble, so judge the Grimble model.)
+- **A rule for every hero model:** the weapon's size, shape, colours and attachment match that hero's `<hero>_weapons.png` and `_FINAL_sheet.png` in briefs/art-refs.
+  - Measured against the body on the sheet (e.g. "blade = hip-to-shoulder"), not eyeballed.
+  - Held/attached at the right socket, so it looks like it belongs: Vex's cannon IS her right arm; Sable's pistols; Ryzz is hands-free; Motley has no weapon (item 136).
+- **Add to FIDELITY_CHECKLIST.md:** a mandatory "Weapon scale + fit" row (the in-game weapon vs the sheet, a side-by-side at the match camera and a close-up).
+- **S2:** do a weapon-scale audit across all 12 (one contact sheet of each hero in-game vs its weapons ref) as part of the ART-1 merges.
+  - Fix the oversized ones before or with the merge.
+  - Kael is already item 131.

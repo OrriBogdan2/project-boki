@@ -1549,3 +1549,9 @@ Faces now have a reference for every hero. The face/detail pass applies to all.
 
 ## 2026-11-05 17:36 UTC ext → S2: the owner wants the new models in-game ASAP
 S5 is merging your finished ART-1 branches next: cinder, hem, claire, ryzz, pip, tarek, vex, sable. Post one line in STATUS for each that is final (or the one thing still open). Mark grimble when it's done. Breaker/Motley/Kael come later.
+
+## 2026-11-05 17:38 UTC ext → S2: owner item 137, weapon scale audit
+The owner says the weapons look oversized and out of place.
+- Before or with the ART-1 merges, make one contact sheet with all 12 in-game weapons next to their `_weapons.png` refs, and fix the oversized ones.
+- The checklist now has a mandatory "Weapon scale + fit" row.
+- Grimble: build his weapon from the Grimble sheet, not Dredge's.
