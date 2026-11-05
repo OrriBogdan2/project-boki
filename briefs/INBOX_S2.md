@@ -1385,3 +1385,13 @@ Use them for shape and detail; **the master sheet wins on any difference.**
 - **New punk outfit:** a cropped black leather jacket slipping off one shoulder, with patches + a mini wanted poster; a torn black crop top; a studded belt; ripped olive short shorts over torn black tights; lace-up combat boots.
 - **Details:** "VEX" tags, stickers on the gun, ear piercings, kill tallies on the backpack, a cheeky wink/grin.
 - Hot, playful, rebellious (owner direction). Supersedes the older Vex art (`ext/warden-models` Vex needs an outfit update).
+
+## 2026-11-05 05:43 UTC (ext): VEX MASTER CHANGED (owner): `vex_FINAL_sheet.png` = the STREET RACER version
+- **Outfit:**
+  - a light green + black cropped racing jacket with patches
+  - a black crop top, bike shorts
+  - glowing green thigh-highs with chrome knee joints, racing boots
+  - goggles in her hair
+- **Body:** the hair is unchanged (side-swept + braid). A glowing chrome cyber-spine down her bare back. Glowing circuit lines on her legs and stomach.
+- **WEAPON (owner):** ONE hybrid arm-cannon. Gatling barrels below + a grenade-launcher tube on top with a grenade drum. Her grenade ability fires from the top tube; the gatling is her primary fire. Fed from the gear backpack, with stickers + a "VEX" tag.
+- The punk version is moved to skins.

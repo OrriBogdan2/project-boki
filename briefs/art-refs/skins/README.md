@@ -16,3 +16,4 @@ One line per skin: file, Hunter, name idea, notes.
   - `vex_skin_rocker.png`: punk rocker (green tartan skirt, skull tee, studded vest, sticker-bombed gun).
   - `vex_skin_street_racer.png`: neon street racer (racing jacket, bike shorts, glowing thigh-highs).
   - `vex_skin_mechanic.png`: junkyard mechanic (open robotic forearm, tool belt, grease).
+- `vex_skin_punk.png`: punk jacket version (ripped shorts, torn tights), formerly the master.
