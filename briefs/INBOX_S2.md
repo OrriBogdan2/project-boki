@@ -1408,3 +1408,8 @@ Use them for shape and detail; **the master sheet wins on any difference.**
 - **Files:** `vex_splash.png` (the neon alley, hover-bike crash, cannon firing), `vex_portrait.png`, `vex_turnaround_apose.png`.
 - **Turnaround:** it is flatter/cel-shaded and the hair reads as two braids. **Follow the master sheet**: ONE long braid + side-swept hair; the robotic LEFT arm; the cyber-eye RIGHT. Use the turnaround only for proportions and the back/sides (spine, belt, gun mounting).
 - **ALL 12 HUNTERS NOW HAVE FULL ART SETS in `briefs/art-refs/`.**
+
+## 2026-11-05 05:57 UTC (ext): VEX ANATOMY (owner) + new turnaround
+- **Anatomy: Vex has NO human right arm. Her right arm IS the hybrid cannon**, a prosthetic arm-cannon mounted to her right shoulder socket, with hoses to the gear backpack. Her left arm is the robotic chrome/brass arm. Rig the cannon as her right arm (aim = arm pose).
+- **`vex_turnaround_apose.png` replaced** (painterly). Its FRONT and BACK views are the reference.
+  - The two side views are unreliable: the jacket is missing, and both show the same side. Take the side silhouette from the master sheet.
