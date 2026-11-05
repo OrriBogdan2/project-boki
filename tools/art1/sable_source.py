@@ -12,7 +12,7 @@ from meshkit import smooth
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, TEX, RIG, OUT = a[0], a[1], a[2], a[3]
-LOW_TRIS, FACE_TRIS = 10300, 2700
+LOW_TRIS, FACE_TRIS = 11000, 2600
 SOLE = -0.95                    # the scan's sole (z)
 K_ = 0.92                       # scan metres -> rig metres, where a bone's length doesn't set it
 SOLE_Z, ANKLE = 0.0, 0.145      # the rig: the boot's sole, the foot bone
@@ -213,9 +213,12 @@ hand_w = GROUP["hand.R"] + GROUP["hand.L"]
 bm = bmesh.new()
 bm.from_mesh(low.data)
 bm.faces.ensure_lookup_table()
-kill = [f for f in bm.faces if max(hand_w[v.index] for v in f.verts) > 0.5]
+# the hands go (rebuilt); the bun's crumpled patch goes too and the hole is capped flat: left in, its folds take the whole decimate budget
+kill = [f for f in bm.faces if max(hand_w[v.index] for v in f.verts) > 0.5 or any(bun[v.index] for v in f.verts)]
 bmesh.ops.delete(bm, geom=kill, context="FACES")
 bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+cap = bmesh.ops.holes_fill(bm, edges=[e for e in bm.edges if e.is_boundary], sides=4000)
+bmesh.ops.triangulate(bm, faces=[f for f in cap["faces"] if len(f.verts) > 3])
 bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0004)
 bm.to_mesh(low.data)
 bm.free()

@@ -108,7 +108,7 @@ def lid_piece(s):
         for i in range(cols - 1):
             q = j * cols + i
             f.append([q, q + 1, q + 1 + cols, q + cols])
-    p = Piece("lid" + side, "skin-body", v2, f).rigid("lid." + side)
+    p = Piece("lid" + side, "skin-face", v2, f).rigid("lid." + side)
     p.c = c
     return p
 

@@ -185,7 +185,7 @@ ANT_N = 4
 def antenna(s):
     side = "R" if s > 0 else "L"
     top = hs([0, 0, 1.87])[2]
-    pts = np.array([(0.030, 0.036, top - 0.02), (0.046, 0.018, top + 0.055), (0.068, 0.0, top + 0.125), (0.112, -0.012, top + 0.200), (0.178, -0.018, top + 0.262), (0.238, -0.018, top + 0.335)]) * [s, 1, 1]
+    pts = np.array([(0.030, 0.036, top - 0.02), (0.046, 0.018, top + 0.055), (0.068, 0.0, top + 0.125), (0.125, -0.012, top + 0.195), (0.205, -0.018, top + 0.25), (0.285, -0.018, top + 0.335)]) * [s, 1, 1]
     n = 11
     path = catmull(pts, n)
     u = np.linspace(0, 1, n)
@@ -274,7 +274,7 @@ TOP_Z = None     # set by the source (the scan's jacket hem)
 def tail_grid(s, top_z=0.80, r0=(0.165, 0.128), cy=-0.012):
     """(rows, cols, 3): row 0 the top ring, col 0 the front edge, the last col the back edge."""
     G = np.zeros((TAIL_ROWS, TAIL_COLS, 3))
-    a0, a1 = np.radians(16), np.radians(170)
+    a0, a1 = np.radians(16), np.radians(150)
     for r in range(TAIL_ROWS):
         t = r / (TAIL_ROWS - 1)
         for c in range(TAIL_COLS):
@@ -285,11 +285,11 @@ def tail_grid(s, top_z=0.80, r0=(0.165, 0.128), cy=-0.012):
             ln = (top_z - HEM_Z) * front_cut * back_lift
             z = top_z - ln * t ** 1.05
             a = a0 + (a1 - a0) * k
-            fl = 1.0 + 0.95 * t ** 1.2 + 0.25 * t * np.sin(k * np.pi)
+            fl = 1.0 + 0.34 * t ** 1.2 + 0.1 * t * np.sin(k * np.pi)
             fold = 1 + 0.05 * t * np.cos(k * 15.0)                     # three soft folds down the leather
             rx, ry = r0[0] * fl * fold, r0[1] * fl * fold
             x, y = np.sin(a) * rx, np.cos(a) * ry + cy
-            y -= 0.17 * t ** 1.5                                       # the rest shape leans back, so the tails read from above
+            y -= 0.1 * t ** 1.5                                       # the rest shape leans back, so the tails read from above
             G[r, c] = (s * x, y, z)
     return G
 

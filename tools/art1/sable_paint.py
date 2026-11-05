@@ -79,9 +79,9 @@ def bola(p, n, ao):
 
 def feather(p, n, ao):
     """White, a fine comb of barbs along the feather, a grey quill."""
-    x = p[:, 0] * 120.0 + p[:, 2] * 150.0
-    barbs = 0.5 + 0.5 * np.sin(x)
-    return ramp(np.clip(lit(n, ao) * 0.9 + 0.3 + (barbs - 0.5) * 0.3, 0, 1), HAIR)
+    x = p[:, 0] * 520.0 + p[:, 2] * 640.0
+    barbs = 0.5 + 0.5 * np.sin(x + 3.0 * fbm(p * 30.0, 2))
+    return ramp(np.clip(lit(n, ao) * 0.85 + 0.42 + (barbs - 0.5) * 0.12, 0, 1), HAIR)
 
 
 def path_u(p, path):
@@ -122,9 +122,14 @@ def coat_outer(p, n, ao, G):
     """Plum leather with soft creases; a purple piped hem and front edge."""
     c = ramp(np.clip(lit(n, ao) * 0.92 + (fbm(p * np.array([9.0, 9.0, 3.0])) - 0.5) * 0.3, 0, 1), LEATHER)
     # distance to the panel's free edges, in the grid
-    edge = np.vstack([G[-1], G[:, 0], G[:, -1]])
-    d = np.min(np.linalg.norm(p[:, None, :] - edge[None, :, :], axis=2), axis=1) if len(p) < 200000 else np.ones(len(p))
-    return mix(c, TRIM * (0.7 + 0.4 * np.clip(ao, 0, 1))[:, None], smooth(0.046, 0.034, d))
+    d = np.full(len(p), 9.0)
+    for line in (G[-1], G[:, 0], G[:, -1]):
+        a, b = line[:-1], line[1:]
+        for i in range(len(a)):
+            ab = b[i] - a[i]
+            t = np.clip((p - a[i]) @ ab / (ab @ ab), 0, 1)
+            d = np.minimum(d, np.linalg.norm(p - (a[i] + t[:, None] * ab), axis=1))
+    return mix(c, TRIM * (0.7 + 0.4 * np.clip(ao, 0, 1))[:, None], smooth(0.03, 0.022, d))
 
 
 def lining(p, n, ao):
