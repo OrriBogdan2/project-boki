@@ -1409,3 +1409,16 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - Mark docs/DASHES_AND_ABILITY_FEEL.md §3.4-3.5 as retired (the owner's decision 2026-11-05).
 - This supersedes the interim cleanup in "129 update".
 - **Assert:** for every kin, a dash spawns no kin fx and deals no damage/pull.
+
+## 135. Motley (Void Jester) Shift, Lantern Trade: a loud travel sound, and much less slowed (owner, 17:20 UTC Nov 5)
+- The owner: "his shift needs to make a noticeable sound as it's travelling. he's also slowed too much during it".
+- (The owner also re-confirmed the 129 decision: "no explosion on dashes through boki, i dont like that ability, too distracting".)
+- Today (ostra.json dash): the lantern lobs up to 12 m; he hovers and drifts at 30% speed (fly_slow 0.3) for 1.8 s until the swap.
+- **Sound:**
+  - A clearly audible looping travel sound on the lantern for its whole flight: an eerie chime/whirl with a rising pitch toward the landing, positional so foes hear where it's going.
+  - A distinct "arrival" tick just before the swap.
+  - S4's set if it's around; otherwise S5 picks from the library.
+- **Slow:** fly_slow 0.3 → ~0.7 (he moves at ~70% speed while it's in flight; tune 0.65-0.8). He still hovers at his height over the abyss.
+- **Assert:**
+  - The travel sfx plays from the throw to the landing (one loop instance).
+  - His move speed during it is ≥0.65x.
