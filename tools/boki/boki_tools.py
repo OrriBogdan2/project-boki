@@ -23,10 +23,10 @@ def tools(grip, axis, side=SIDE):
     up = np.cross(side, axis)
     end = grip + axis * 0.30
     return {
-        "axe_handle": (Shape([Cone("h", "prop_axe", grip, end, 0.017, 0.015, k=0)]), 0.004, 60),
-        "axe_blade": (Shape(axe_blade(end - axis * 0.045, axis, up)), 0.003, 170),
-        "pick_handle": (Shape([Cone("h", "prop_pick", grip, end, 0.017, 0.015, k=0)]), 0.004, 60),
+        "axe_handle": (Shape([Cone("h", "prop_axe", grip, end, 0.017, 0.015, k=0)]), 0.004, 12),
+        "axe_blade": (Shape(axe_blade(end - axis * 0.045, axis, up)), 0.003, 56),
+        "pick_handle": (Shape([Cone("h", "prop_pick", grip, end, 0.017, 0.015, k=0)]), 0.004, 12),
         "pick_head": (Shape([Cone("a", "prop_pick", end, end + up * 0.17 - axis * 0.06, 0.034, 0.006, k=0.0),
                              Cone("b", "prop_pick", end, end - up * 0.17 - axis * 0.06, 0.034, 0.006, k=0.005)]),
-                      0.003, 160),
+                      0.003, 56),
     }

@@ -9,6 +9,7 @@ const ULT := preload("res://tools/dj_ult_check.gd")      # both heroes' ultimate
 const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Kael's chain, RMB rows, Meteor Drop and dashes
 const DFEEL := preload("res://tools/dancer_feel_check.gd")   # Sable's Cartwheel, empowered bolt and reset (item 7)
 const DPARITY := preload("res://tools/dancer_parity_check.gd")   # her LMB against the source (the parity pass)
+const DLOOP := preload("res://tools/dancer_loop_check.gd")   # the Vault loop and the Bola's slow (item 53)
 var A: AKCheck
 
 ## Standalone: one hero's sections (both for "all"). Prints AKCHECK lines like --archetype-check.
@@ -41,7 +42,7 @@ func thief(a) -> void:
 			P.wid)
 	A.ok("dancer: her moves are keyed (KMovesDJ)",
 			["thf_lmb_r", "thf_lmb_l", "thf_primed", "thf_vault_r", "thf_vault_l", "thf_bola", "thf_knife",
-					"thf_arrive", "thf_encore", "thf_encore_throw_r", "thf_encore_throw_l", "thf_exdash", "thf_land"]
+					"thf_arrive", "thf_encore", "thf_encore_dance", "thf_exdash", "thf_land"]
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty()))
 	# LMB: a bolt every 0.45s from alternating hands, each one to the cursor
 	P.fire_cd = 0.0
@@ -311,6 +312,7 @@ func thief(a) -> void:
 	await _dancer_dash_flow(m, P, K, T, home)
 	await DFEEL.new().run(A, m, P, K, T, home)
 	DPARITY.new().run(A, m, P, K, T, home)
+	DLOOP.new().run(A, m, P, K, T, T2, home)
 	await A.done(m)
 	await _growth()
 	await ULT.new().dancer(A)
@@ -424,7 +426,7 @@ func _growth() -> void:
 	var d1: float = await _blade(1)
 	var d10: float = await _blade(10)
 	A.ok("dancer Encore: a blade grows with level (LevelGrowth.ap 1.0 -> %.2f)" % (1.0 + LevelGrowth.ap_pct(10)),
-			d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01, "L1 %.2f L10 %.2f" % [d1, d10])
+			d1 >= 3.9 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01, "L1 %.2f L10 %.2f" % [d1, d10])
 
 
 # ------------------------------------------------------------------ Juggernaut

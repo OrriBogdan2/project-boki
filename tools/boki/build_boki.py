@@ -26,6 +26,7 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "burrlet": ("mycroll", "mycroll", "mycroll_anim"), "hivara": ("hivara", "hivara", "hivara_anim")}
 creature = paint = anim = None
 ATLAS_PX = 2048
+GROWN_K = 0.22         # most Boki show one or two grown parts; all of them hide in every tri count
 SCALE = 0.95             # the whole Boki, so its body sits near the other species' 0.8 m frame
 
 
@@ -96,7 +97,7 @@ def mesh_pieces():
     for pid, (_, _, look, tris, prims) in creature.grown_parts().items():
         shape = boki_sdf.Shape(prims)
         v, q = boki_sdf.mesh_shape(shape, 0.003)
-        v, t = decimated(v, q, tris)
+        v, t = decimated(v, q, max(int(tris * GROWN_K), 12))
         pc = Piece("gp_" + pid, shape, v, t, 1 if look == "glow" else 0, prop=True)
         pc.look = look
         out.append(pc)
@@ -195,8 +196,9 @@ def paint_texels(pieces, piece_id, p, n, vao):
         if m.any():
             col[m] = paint.paint_piece(pc, p[m], n[m], prim)
     shadow = np.clip(vao, 0, 1)[:, None] ** 1.4
-    lit = np.isin(piece_id, [i for i, pc in enumerate(pieces) if pc.name in ("stalks", "caps")])
-    shadow[lit] = np.maximum(shadow[lit], 0.75)      # pale stalks in deep crevices went violet
+    # pale pieces in deep crevices (and thin ones, which shade themselves) went violet
+    pale = np.isin(piece_id, [i for i, pc in enumerate(pieces) if pc.name in getattr(creature, "PALE_PIECES", ())])
+    shadow[pale] = np.maximum(shadow[pale], 0.75)
     tint = np.array([0.60, 0.50, 0.72])
     return col * (tint + (1 - tint) * shadow)
 
@@ -267,7 +269,7 @@ def eye_tex(px=256):
     r = np.hypot(q[..., 0], q[..., 1] * 1.04)
     white = np.array([1.0, 1.0, 1.0])
     iris = paint.IRIS
-    deep = paint.hexc("2f5a12")
+    deep = getattr(paint, "IRIS_DEEP", paint.hexc("2f5a12"))
     t = np.clip((r - 0.2) / 0.62, 0, 1)[..., None]
     col = deep * (1 - t) + iris * t
     col = col * (r < 0.82)[..., None] + paint.INK * (r >= 0.82)[..., None]
