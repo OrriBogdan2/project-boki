@@ -1,9 +1,9 @@
 class_name WardenSway
 extends RefCounted
-## What a Hero's clips can't key because it depends on how the player moves (content/rules/warden_anim/<art>.json "sway"):
-## a body on a spring (Motley, the jack on his box) lags behind every change of speed, overshoots and wobbles back, in
-## whichever direction; and the cards round him tumble, each on its own turn and height, instead of circling in a ring.
-## Runs after the clips each frame. A Hero without the block has no WardenSway.
+## What a Hero's clips can't key because it depends on how the player moves (warden_anim/<art>.json "sway"): a body on
+## a spring (Motley, the jack on his box) lags behind every change of speed, overshoots and wobbles back, in whichever
+## direction; and the cards round him tumble, each on its own turn and height, instead of circling in a ring. Runs
+## after the clips each frame. A Hero without the block has no WardenSway.
 
 var root: Node3D
 var skel: Skeleton3D
@@ -74,5 +74,6 @@ func tumble(dt: float, pivots: Array) -> void:
 			var ph := float(i) * 1.7
 			var hz := tumble_hz * (0.7 + 0.13 * (i % 5))
 			nd.position.y += sin(t * TAU * 0.17 * (1.0 + 0.11 * i) + ph) * swirl_m
-			nd.rotation = Vector3(sin(t * TAU * hz * 0.6 + ph) * 0.5, t * TAU * hz + ph, cos(t * TAU * hz * 0.45 + ph) * 0.4)
+			var a := t * TAU * hz
+			nd.rotation = Vector3(sin(a * 0.6 + ph) * 0.5, a + ph, cos(a * 0.45 + ph) * 0.4)
 			i += 1
