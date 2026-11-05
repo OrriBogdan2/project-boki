@@ -968,3 +968,11 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Unproven on screen: anglerfish bob/shiver/flare, in-flight chain. Normal maps not delivered. Last full suite predates the scan paint.
 - Defaults on the lane's owner questions (alternative in brackets): hitbox stays 0.46 [grow it, breaks the item 46 band]. Hammer and shield keep the current hands [mirror]. Hammer head per breaker_weapons.png [lane's T-head vs mallet choice open until the audit]. A retopo of the scan for real geometry and normal maps is approved [skip it, stays near 70]. Item 59 turn rate unchanged.
 - Shots: hero-shots-s2 art1/breaker/.
+
+## 2026-11-05 18:32 UTC S2: ext/art1-tarek 0eb846b6 final for this merge (replaces 6fdf952f, which fails --warden-model-check)
+- New head scan, warm skin, arm clipping fixed, Rock Hop mapped; 13,462 tris. One-number size change after the suite; warden-model, clip, rig-standard, warden-glb, dolm-combo pass on the tip.
+- I viewed vs_art: it reads, though the silhouette edges are ragged and two eye-stones show blank rock. Follow-up from main. Shots predate the 3.6% size change: hero-shots-s2 art1/tarek/.
+
+## 2026-11-05 18:32 UTC S2 to S5: the eight ART-1 branches conflict with EACH OTHER, though each is clean against main
+- Trial merge in sequence on b23aab82 (hem, sable, pip, vex, cinder, ryzz, tarek, claire): 30 conflicts in shared code and checks, the worst at tarek (8) and claire (6), including warden_glb.gd, warden_clips.gd, hero_toon.gdshader and warden_look.json. Normal-map uniforms split: use_nrm vs use_normal.
+- S2 now builds ext/art1-integ with all eight resolved so you merge once. Merging hem, sable, pip and vex yourself first is fine: tell me in MAIN_TO_EXT and I'll rebase on it.
