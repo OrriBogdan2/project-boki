@@ -479,7 +479,22 @@ def gem(arm, body, spec, tag="gem"):
     y = (hit[0].y if hit[0] is not None else 0.1) + float(spec.get("out", 0.012))
     c = np.array([x, y, z], float)
     L, r = float(spec.get("length", 0.05)), float(spec.get("r", 0.012))
-    cells = Cells({"gem": spec.get("colour", "ff2a48"), "cap": spec.get("cap", "c8ccd6"), "core": spec.get("core", "ffd0d8")})
+    cells = Cells({"gem": spec.get("colour", "ff2a48"), "cap": spec.get("cap", "c8ccd6"), "core": spec.get("core", "ffd0d8")},
+                  size=256)
+    if spec.get("facets"):
+        # (facets: the gem's cell striped across its 6 sides, light / dark by `facets`, toward `core` by the middle of
+        # its length, so the glow reads as a cut crystal and not a flat blob)
+        u0, v0, u1, v1 = cells.box["gem"]
+        n = cells.size
+        x0, x1, y0, y1 = int(u0 * n) - 2, int(u1 * n) + 2, int(v0 * n) - 2, int(v1 * n) + 2
+        base, core = hexcol(spec.get("colour", "ff2a48")), hexcol(spec.get("core", "ffd0d8"))
+        for x in range(x0, x1):
+            j = min(5, max(0, int((x / n - u0) / (u1 - u0) * 6)))
+            k = float(spec["facets"][j % len(spec["facets"])])
+            for y in range(y0, y1):
+                t = min(1.0, max(0.0, (y / n - v0) / (v1 - v0)))
+                mid = max(0.0, 1.0 - abs(t - 0.35) / 0.35) * float(spec.get("core_k", 0.35)) * k
+                cells.px[y, x, :3] = np.clip(base * k * (1 - mid) + core * mid, 0, 1)
     img = cells.image(tag + "_atlas")
     bld = WP.Builder()
     top = c + np.array([0, 0, L * 0.45])
@@ -505,7 +520,8 @@ def gem(arm, body, spec, tag="gem"):
     e.parent_type = "BONE"
     e.parent_bone = spec.get("bone", "hips")
     bpy.context.view_layer.update()
-    e.matrix_world = Matrix.Translation(Vector((c + np.array([0, 0.03, 0])).tolist()))
+    mid = np.array([ob.matrix_world @ v.co for v in ob.data.vertices]).mean(axis=0)     # (the gem's own middle)
+    e.matrix_world = Matrix.Translation(Vector(mid.tolist()))
     log("gem at %s: %d tris" % (tuple(round(float(v), 3) for v in c), sum(len(f) - 2 for f in bld.f)))
     return ob
 

@@ -153,9 +153,10 @@
 		},
 		"slots": {
 			"skin": {
-				"top_light": 0.45,
-				"fres": 0.55,
-				"far_lift": 0.25
+				"top_light": 0.38,
+				"fres": 0.4,
+				"far_lift": 0.25,
+				"light_neutral_warm": 0.8
 			},
 			"cloth": {
 				"far_lift": 0.5,
@@ -209,13 +210,16 @@
 				"light_neutral_warm": 0.8
 			},
 			"glow": {
-				"glow": 2.0
+				"glow": 2.0,
+				"far_glow": 1.2
 			},
 			"card": {
 				"sheen": 1.0,
-				"glow": 0.3,
+				"glow": 0.55,
 				"alpha_k": 1.0,
-				"irid": 0.05
+				"irid": 0.05,
+				"far_alpha": 1.6,
+				"far_edge": 1.4
 			}
 		},
 		"halos": [
@@ -223,11 +227,11 @@
 				"anchor": "anchor_gem",
 				"color": [
 					1.0,
-					0.2,
-					0.3
+					0.12,
+					0.2
 				],
-				"strength": 3.0,
-				"px": 10.0,
+				"strength": 2.2,
+				"px": 12.0,
 				"near_d": 0.0,
 				"far_d": 3.0
 			}
