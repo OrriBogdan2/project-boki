@@ -8,9 +8,10 @@ const HIP_Y := 0.54        # m: the torso height the parts are modelled for; 3D 
 ## A kit form's id, or a fallback form's type -> the species whose parts it wears.
 const SPECIES := {"venom": "cindle", "tidal_shell": "puddlet", "spore": "burrlet", "stormwing": "zephyrak"}
 
-## The form key of a species, for tools.
+## The form key of a species, for tools ("" when it has no Fusion parts).
 static func key_of(kin_id: String) -> String:
-	return String(SPECIES.find_key(kin_id))
+	var key: Variant = SPECIES.find_key(kin_id)
+	return "" if key == null else String(key)
 
 static func _key(form: Dictionary) -> String:
 	return String(form["id"]) if form.get("kit", false) else String(form.get("type", ""))
