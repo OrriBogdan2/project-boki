@@ -2028,3 +2028,31 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
 - Everything fades in/out (no popping) and sits in the hero palette / gold UI accent (match item 157's UI style).
 - The VFX are S3's (when it's back); S5 swaps the logic hooks now, using placeholders that already follow these shapes.
 - **Assert:** no flat blue circle meshes remain in the tutorial scene; each marker type is used per the above.
+
+## 167. Tutorial: add a creature-taming step early, and make the first island a teach-then-test hub (owner, 17:52 UTC Nov 5)
+- The owner: "we should have a creature taming part of the tutorial - maybe near the beginning, where it explains they go into your inventory and come out of the expedition with you. the first island you land on (and are restricted to) should teach a lot before making the player test it".
+- **First island = the teaching island** (gated, item 164):
+  - Teach in small calm steps, each with a prompt + a success check + an auto-reset, BEFORE any combat test:
+    1. Move/look.
+    2. Jump + the wall-bounce/mantle (item 149).
+    3. Dash on flat ground (164).
+    4. LMB on a dummy.
+    5. RMB (with the walls, item 165).
+    6. E.
+    7. Crouch/sneak.
+    8. Glider open/close from a ledge.
+    9. Your Boki: G throw / the command wheel basics (124).
+    10. **Taming** (below).
+    11. Pick up a chest item.
+  - Only after all of them does the barrier drop to the combat/test island.
+- **The taming step** (early, after movement basics):
+  - A wild, weakened, friendly-looking Boki (a starter species) on the island.
+  - Prompts: weaken it (a few hits) → the tame prompt (the real tame input/flow from the game) → success.
+  - A clear card: "Tamed Boki go into your box (inventory). They come home with you when you extract."
+  - Show the box/inventory slot it went into, with an arrow/highlight on the HUD box (ally boxes item 101) and the belt.
+  - A safe retry: it can't die or flee during the tutorial; a failed tame resets it.
+- Follow the handholding rules (one instruction at a time, the item 166 highlight language).
+- **Assert:**
+  - The tutorial order has taming within the first island.
+  - Tamed → the Boki appears in the inventory/box UI.
+  - The barrier stays up until every first-island step is done.

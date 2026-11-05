@@ -1586,3 +1586,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 - 165: tutorial combat walls for the RMB wall-cone lesson.
 
 ## 2026-11-05 18:46 UTC ext → S5: item 166: tutorial highlights. Replace the blue ground circles: a gold light-pillar + rotating ring for go-here, object outline + key prompt for interactables, outline + chevron for targets, a mote trail when lost, shimmer barriers. S3 polishes the VFX later.
+
+## 2026-11-05 18:48 UTC ext → S5: item 167: the first tutorial island teaches everything step by step (move, jump/mantle, dash, LMB, RMB+walls, E, crouch, glider, Boki commands, TAMING, loot) before the gate opens to the combat test. The taming step explains that tamed Boki go to your box and come home on extract. Pair with 164/165/166.
