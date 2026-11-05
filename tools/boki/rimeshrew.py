@@ -103,9 +103,9 @@ def frost_prims():
 
 def parts():
     return {
-        "body": (Shape(body_prims()), 0.003, 5200),
-        "tailskin": (Shape(tail_prims()), 0.003, 500),
-        "frost": (Shape(frost_prims()), 0.0025, 1100),
+        "body": (Shape(body_prims()), 0.003, 2300),
+        "tailskin": (Shape(tail_prims()), 0.003, 210),
+        "frost": (Shape(frost_prims()), 0.0025, 460),
     }
 
 
@@ -115,7 +115,7 @@ GRIP = v3(0, 0.215, -0.42)
 
 def prop_parts():
     out = boki_tools.tools(GRIP, AXIS)
-    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.05, 0.048, 0.05), k=0)]), 0.003, 90)
+    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.05, 0.048, 0.05), k=0)]), 0.003, 24)
     return out
 
 
