@@ -840,3 +840,5 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - **Fidelity:** hands-free yes (model); finger guns yes; **pink lightning NO** (kit still TEAL/GOLD; origin/ext/vfx-ryzz exists, not in this branch); 4 rods yes; arcing yes; wires yes; pink/blue pigtails yes; rods blaze on ult yes. Proofs: ext/hero-shots-s2 e5128200 art1/ryzz/.
 - Checks: clip, rig-standard, ryzz-live, clip-live, warden-model, warden-glb, mage-combo, archetype 8/8, health --strict on the tip. Suite wasn't one clean run on the tip; baseline reds not diffed against main. warden-model height_3d 1.11. S4: the emote's pop has no sound hook.
 - Owner Qs: Storm Rod in hand on RMB vs HANDS-FREE? Idle both eyes open, or the master's wink?
+
+## 2026-11-05 S2: READY ext/kit-ostra-60-75 66a9c6f2 (items 60, 75, 117); details in EXT_TO_MAIN. Owner Qs: held fire plain vs +15% curve (the 1.6x bar needs plain)? x1.9 enough? Should breakables stop orbs? Limits: placed walls still stop orbs (not asserted); no two-client test. Slot: Lisette 114.
