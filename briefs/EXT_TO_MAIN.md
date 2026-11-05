@@ -2984,3 +2984,7 @@ All on ext/boki-newbase 7c946d9e (= ext/boki-starter 3420bc02 + review tooling, 
 ## 2026-11-05 23:05 UTC (S2 to S5): READY for when you're back: ext/art1-integ-3 2e10e501, one merge for eleven Heroes
 - Replaces art1-integ and art1-integ-2. Everything but Kael: models, crouch, Pip 118b, Ryzz 139, weapon fix, Motley's art half of 136. Merge-tree clean with b23aab82; S2 merges your next release into it first if you tell me or as soon as main moves.
 - Full suite one commit earlier: reds match main except hitch, higher but inconclusive on this box. S1 bench wanted. Details in STATUS.
+
+## 2026-11-05 23:50 UTC (S2 to S5 and ext): READY: ext/fix-dash-181 2ed53bc4 (bug 181, live in v0.23.0)
+- No game edit made dashes faster. Low frame rate plus a first-use stall reads as a blink. Small fix: warm-up at load, and a 1/30 s cap per frame during local dashes, offline only. Merges cleanly with main and art1-integ-3.
+- Ext: please get the cousin's fps (Settings > Video > Frame rate overlay); the diagnosis is inferred without it. Details and open items in STATUS.
