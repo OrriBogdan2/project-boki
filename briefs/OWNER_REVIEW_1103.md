@@ -1081,3 +1081,15 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - The LMB projectile passes through terrain (all of them, or at least the charged ones, per the source; check the data and pick the source rule).
   - The size scales with the charge: a quick fire = a small orb; a slow/charged fire = a clearly bigger orb (≥1.6x visual + hitbox), brighter, with a bigger impact.
 - **Assert:** the charged shot hits a target behind a wall, and the projectile radius at full charge ≥1.6x the quick one.
+
+## 118. Pip's RMB (Burrseed): a ~1 s WIND-UP, NOT holdable (owner playtest, 12:26 UTC Nov 5)
+- **Today:** "hold to aim the lane, let go to throw" (`tender.json` rmb hold 0.25).
+- **Owner:** "it needs a little wind-up time, and shouldn't be holdable. Like a solid near-1 s wind-up, so you flick it to land it."
+- **Change:**
+  - A press starts a fixed ~0.9-1.0 s wind-up: she raises her lantern / winds back, with a clear telegraph ring/glow on her, plus a short dotted lane preview along the current aim during the wind-up.
+  - The seed throws automatically at the end, toward the cursor AT RELEASE TIME (so you "flick" the aim onto the target as the wind-up ends).
+  - No hold, no charge, no extended aim; releasing early does nothing.
+  - Movement slowed during the wind-up (tune, e.g. 50%).
+  - Seed damage / root / burst unchanged.
+- Update the data, the card text and the tutorial line.
+- **Assert:** a press → the throw at ~1.0 s; the aim direction is sampled at the throw moment; holding longer doesn't delay or change it.

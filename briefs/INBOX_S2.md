@@ -1532,3 +1532,5 @@ Faces now have a reference for every hero. The face/detail pass applies to all.
 ## 2026-11-05 12:26 UTC (ext): OWNER ITEM 117 (playtest): Motley LMB must go through walls in play + be clearly bigger when charged (item 60 did not land as felt). See OWNER_REVIEW 117. KITS lane, small.
 
 ## 2026-11-05 12:27 UTC (ext): OWNER BUG (playtest, arena): Breaker's LMB hold spin is NOT back in play, though `ext/kit-breaker-59` (8840f3d6) is merged in main (fb1bcc90). Verify in ARENA specifically (`--arena` / the arena loadout path) and in an expedition: hold LMB means the hammer whirls (2.5-4 turns/s), release means the slam. Find why it does not trigger (an arena kit override? an input remap? the old bot path?) and fix with an arena assert. HIGH, small.
+
+## 2026-11-05 12:28 UTC (ext): OWNER ITEM 118 (playtest): Pip RMB = a fixed ~1 s wind-up then an auto-throw at the cursor (aim sampled at the throw, "flick to land"); not holdable. See OWNER_REVIEW 118. KITS lane, small.
