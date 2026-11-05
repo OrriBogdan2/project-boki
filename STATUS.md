@@ -585,3 +585,8 @@ Shots: `ext/hero-shots-s2` (README with captions).
 
 ## 2026-11-05 S2: Claire final design received
 - claire_FINAL_sheet, claire_turnaround_apose, claire_splash logged (gentle, sincere; adult; animations graceful, never seductive). ART-1 Claire joins the queue after ART-1 Grimble. ext/wip-claire (old look) is superseded for the model. Kit items 62+64+65 stay queued.
+
+## 2026-11-05 S2: item 109 (HIGH) and Pip upgrade received
+- Next free slot: ext/kit-vex-68-109 (Vex aims and shoots freely while dashing, other ranged primaries checked, plus camera item 68).
+- pip_FINAL_sheet + pip_splash logged; ART-1 Pip queued (size per ext/pip-scale-108).
+- Queue: Vex 68+109, ART-1 Grimble, ART-1 Claire, ART-1 Pip, gloves 69, glider 63, Claire 62+64+65.
