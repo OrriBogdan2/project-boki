@@ -358,7 +358,13 @@ def shield():
     f.lab[:] = WOOD
     # the panel sunk behind her, so she stands out of shadow
     f.sub(box((0, -0.05, zc), (W - 0.055, 0.032, H - 0.06), 0.02), 0.012)
-    R = lambda p, k=0.012: f.add(p, k, 4)
+    # (her own hard shape beside the door's, for the paint: a blend's skin carries no label)
+    fig = f.like()
+    f.fig = fig
+
+    def R(p, k=0.012):
+        f.add(p, k, 4)
+        fig.add(p, 0.0, 4)
     Z = lambda a: zc + a
     bow2 = -0.03
     # the head, thrown a little back: a clean oval, a long neck
