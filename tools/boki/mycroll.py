@@ -59,7 +59,7 @@ def body_prims():
         Ellipsoid("nose", "head", NOSE_C, v3(0.03, 0.023, 0.022), k=0.005),
     ]
     rng = random.Random(4711)
-    for i in range(46):
+    for i in range(26):
         a = rng.uniform(-math.pi * 0.98, math.pi * 0.98)
         up = rng.uniform(0.05, 1.0)
         d = v3(math.sin(a) * (1 - up * 0.65), up, math.cos(a) * (1 - up * 0.65) + 0.25)
@@ -116,9 +116,9 @@ def cap_prims():
 
 def parts():
     return {
-        "body": (Shape(body_prims()), 0.0035, 4600),
-        "stalks": (Shape(stalk_prims()), 0.0035, 500),
-        "caps": (Shape(cap_prims()), 0.0035, 1100),
+        "body": (Shape(body_prims()), 0.0035, 2200),
+        "stalks": (Shape(stalk_prims()), 0.0035, 170),
+        "caps": (Shape(cap_prims()), 0.0035, 500),
     }
 
 
@@ -128,7 +128,7 @@ GRIP = v3(0, 0.165, -0.40)
 
 def prop_parts():
     out = boki_tools.tools(GRIP, AXIS)
-    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 90)
+    out["berry"] = (Shape([Ellipsoid("b", "prop_berry", BERRY_C, v3(0.054, 0.052, 0.054), k=0)]), 0.003, 24)
     return out
 
 

@@ -66,9 +66,9 @@ def mouth_shapes():
 
 # atlas strips (u0, u1)
 STRIP = {"upper": (0.02, 0.18), "lower": (0.24, 0.40), "brow": (0.46, 0.58), "mouth": (0.64, 0.82), "fang": (0.88, 0.98)}
-UPPER_ROWS, COLS = 9, 22
+UPPER_ROWS, COLS = 7, 13
 LID_V = tuple(np.linspace(0.0, 0.72, UPPER_ROWS - 1)) + (1.0,)     # atlas v of the rows: the dark starts at 0.72
-MOUTH_ROWS, MOUTH_COLS = 3, 16
+MOUTH_ROWS, MOUTH_COLS = 2, 11
 LIFT = 0.0065   # decals float this far off the true surface: the decimated head cuts corners
 
 
@@ -113,7 +113,7 @@ def dome(c, fr, r, a, b, lift):
     return c + (a[..., None] * r[0]) * fr[0] + (b[..., None] * r[1]) * fr[1] + (z[..., None] * r[2] + np.asarray(lift)[..., None]) * fr[2]
 
 
-LID_LIFT = 0.005
+LID_LIFT = 0.008    # over a coarse dome: its chords, and the lid's, must not cross
 LID_LIGHT = 1.13    # lids have no top light of their own: paint them lighter so they meet the head's colour
 LASH = {True: 0.15, False: 0.07}   # dome units: the dark line along a lid's edge, the same width in every expression
 
@@ -169,7 +169,7 @@ def build_face(shape, eye_c, eye_r, eye_frame):
 
 
 def fm_brow(fm, shape, sx, c, r):
-    n = 10
+    n = 7
     ctr = np.array([sx * FACE["brow_x"], c[1] + r[1] + FACE["brow_up"]])
     bk = FACE["brow_k"]
 
@@ -193,7 +193,7 @@ def fm_brow(fm, shape, sx, c, r):
     tris = []
     for i in range(n):
         j = (i + 1) % n
-        tris.append((n, j, i) if sx > 0 else (n, i, j))
+        tris.append((n, i, j) if sx > 0 else (n, j, i))      # facing out, as the mouth does
     fm.add(base, uv, tris, keys)
 
 
@@ -250,7 +250,7 @@ def fm_fang(fm, shape, mouths):
 
 def eye_dome(eye_c, eye_r, eye_frame):
     verts, uvs, tris = [], [], []
-    rings, seg = 8, 24
+    rings, seg = 4, 13
     for sx in (-1.0, 1.0):
         c = eye_c * np.array([sx, 1, 1])
         fr = eye_frame(sx)
