@@ -1632,3 +1632,5 @@ Then 129 (the Gravadillo rider) and the 119-133 feel items.
 ## 2026-11-05 19:33 UTC ext → S5: beginner-playtest additions to the tutorial rework: 178c (prompts escalate when ignored), 178d (only the target item on the ground in the pickup step, no gloves), 178e (teach HOLD to fire + an auto-refill ammo callout). Part of 164/167/178.
 
 ## 2026-11-05 19:36 UTC ext → S5: item 98b: rank-up discoverability. A glowing + on rankable slots; hover = a tooltip of the next rank; click + = rank up; the prompt says "Alt + {key} or click an ability's +"; a tutorial step on the first level-up. Plus 178f (the G wheel accepts release or click).
+
+## 2026-11-05 19:38 UTC ext → S5: item 178g: all prompts say the key first: "Use your E (Railgun)". Rename Vex's E Longneedle → Railgun in the player-facing text (ids unchanged).

@@ -2342,3 +2342,12 @@ Her R/ult VFX colour = toxic/neon green (her palette: tracers, the cyber-eye, th
   - It uses the actual bound keys (e.g. Alt+E).
 - **The tutorial:** the first level-up gets a dedicated step with the keycaps "ALT + E" and a pointer to the "+", completing on either method.
 - **Assert:** with a point available, clicking a slot's + ranks it; Alt+E still works; the prompt shows both methods.
+
+## 178g. Tutorial/prompts lead with the KEY, not the ability name; rename Vex's E "Longneedle" → "Railgun" (owner, 18:11 UTC Nov 5)
+- The owner: "don't use ability names - it says use long needle, it should say use your E (longneedle). also that name should be changed to railgun".
+- **Prompt format everywhere** (tutorial steps, hints, rank-up prompts, toasts): "Use your {key} ({Ability})", i.e. the key first (with the keycap glyph), the name in brackets after. E.g. "Use your E (Railgun)".
+  - Applies to all heroes and slots (LMB, RMB, E, Shift, X/ult, G).
+- **Rename:** Vex's E: name "Longneedle" → "Railgun", short "Needle" → "Rail".
+  - Update gunslinger.json (name/short/desc/clip lines/variants/rank text, and passive text that mentions it), the wiki, docs/heroes/gunslinger.md and any code strings.
+  - Keep the internal ids unchanged.
+- **Assert:** no tutorial prompt string starts with an ability name; a grep for "Longneedle" in player-facing text = 0.
