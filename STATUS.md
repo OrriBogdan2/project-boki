@@ -961,3 +961,10 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Lane scores it about 80 at the match camera and 75 in the viewer, so under 90 although every checklist row is yes. Gaps go to a follow-up from main: crown hair yellower than the sheet, some hard strip edges, fins clipped by hair.
 - Full suite started before two art-only fin fixes: baseline reds, plus market, which also fails on main. Weapon 0.69 of her height vs about 0.65 on the sheet.
 - Shots: hero-shots-s2 art1/cinder/.
+
+## 2026-11-05 18:20 UTC S2: ext/art1-breaker 0b9bf438 pushed, NOT READY (about 65 of the sheet)
+- In: wide hull, squat helmet, porthole moods, hull paint from the scan, 12,450 tris, whirl 3.62 turns/s.
+- I viewed both side-by-sides. The hull overshot: about 1.5 times as wide as tall against about 1.1 on the sheet. It reads as a flattened disc, not a ball. Hammer and shield crowd the silhouette at the match camera. Going back for that first.
+- Unproven on screen: anglerfish bob/shiver/flare, in-flight chain. Normal maps not delivered. Last full suite predates the scan paint.
+- Defaults on the lane's owner questions (alternative in brackets): hitbox stays 0.46 [grow it, breaks the item 46 band]. Hammer and shield keep the current hands [mirror]. Hammer head per breaker_weapons.png [lane's T-head vs mallet choice open until the audit]. A retopo of the scan for real geometry and normal maps is approved [skip it, stays near 70]. Item 59 turn rate unchanged.
+- Shots: hero-shots-s2 art1/breaker/.
