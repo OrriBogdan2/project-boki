@@ -21,8 +21,8 @@ UNIQ_W = 0.755
 HAIR_R = (UNIQ_W + 0.005, 0.40, 1.0, 1.0)
 BELT_R = (UNIQ_W + 0.005, 0.30, 1.0, 0.395)
 EYE_R = (UNIQ_W + 0.005, 0.20, 0.875, 0.295)
-MATS = ["skin-vex-hot", "cloth-vex", "leather-vex-hot", "metal-vex", "brass-vex", "hair-mane", "eyes-vex", "glow-vex"]
-SCALE = {"face": 3.4, "lidU": 2.2, "lidD": 2.2, "sleeve": 2.2, "tube": 1.5, "plate": 1.4, "bell": 1.2, "Low": 1.15, "eyerim": 1.5, "ear": 1.2}
+MATS = ["skin-vex", "cloth-vex", "leather-vex-hot", "metal-vex", "brass-vex", "hair-mane", "eyes-vex", "glow-vex"]
+SCALE = {"face": 2.1, "lidU": 2.2, "lidD": 2.2, "sleeve": 2.2, "tube": 1.5, "plate": 1.4, "bell": 1.2, "Low": 1.15, "eyerim": 1.5, "ear": 1.2}
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
@@ -43,7 +43,7 @@ def is_tile(n):
 
 
 def slot_of(pm):
-    return {"metal-hose": "metal-vex", "metal-belt": "metal-vex", "skin-vex": "skin-vex-hot", "leather-vex": "leather-vex-hot"}.get(pm, pm)
+    return {"metal-hose": "metal-vex", "metal-belt": "metal-vex", "leather-vex": "leather-vex-hot"}.get(pm, pm)
 
 
 # ---- one mesh
@@ -343,7 +343,7 @@ for k_, i in enumerate(low_faces):
     elif r_ > g_ * 1.5 and g_ > b_ * 1.4 and z > Z_BELT:
         m = "cloth-vex"              # the jacket's orange stripe
     elif r_ > g_ * 1.08 and L_[k_] > 0.3:
-        m = "skin-vex-hot"
+        m = "skin-vex"
     else:
         m = "leather-vex-hot"
     me.polygons[i].material_index = mat_i[m]
@@ -387,7 +387,21 @@ ys_, xs_ = np.nonzero(m)
 hc = sample_scan(POS[ys_, xs_])
 hc = np.power(np.clip(hc, 0, 1), 0.85) * 1.14
 hc = hc * (0.74 + 0.26 * np.clip(AO[ys_, xs_], 0, 1))[:, None]
-OUTC[ys_, xs_] = P.apply_face(POS[ys_, xs_].astype(np.float64), hc, VH)
+OUTC[ys_, xs_] = hc
+fr_ = OUTC.max(2)
+lips = m & (OUTC[..., 0] > OUTC[..., 1] * 1.32) & (OUTC.mean(2) > 0.3)
+skin_m = (m & (OUTC.mean(2) > 0.3) & (OUTC[..., 1] < OUTC[..., 0] * 1.03) & ~lips) | (mask & (OUTC[..., 0] > OUTC[..., 1] * 1.08) & (OUTC[..., 0] < OUTC[..., 1] * 1.6) & (OUTC.mean(2) > 0.36))
+OUTC = P.clean_skin(OUTC, skin_m, blur)
+OUTC[lips] = OUTC[lips] * np.array([1.0, 0.72, 0.78], np.float32)
+hc = OUTC[ys_, xs_]
+OUTC[ys_, xs_] = P.apply_face(POS[ys_, xs_].astype(np.float64), hc.astype(np.float64), VH)
+# the jacket: her lime green, the scan's paint lost it; the scan's dark scribbles on the slipped sleeve go
+sl_ = mask & (POS[..., 0] < -0.17) & (POS[..., 2] > VC.J("forearm.L")[2] - 0.12) & (POS[..., 2] < VC.J("upper_arm.L")[2] - 0.1) & (OUTC.max(2) < 0.3)
+OUTC[sl_] = np.array([0.42, 0.56, 0.28], np.float32) * (0.75 + 0.25 * AO[sl_])[..., None]
+c0_ = OUTC
+jm = mask & (POS[..., 2] > Z_BELT) & (c0_[..., 1] > c0_[..., 0] * 1.02) & (c0_[..., 1] > c0_[..., 2] * 1.12) & (c0_.mean(2) > 0.2) & (c0_[..., 1] < c0_[..., 0] * 1.6)
+g_ = OUTC[jm].mean(1, keepdims=True)
+OUTC[jm] = np.clip((g_ + (OUTC[jm] - g_) * 1.55) * np.array([1.05, 1.17, 0.9], np.float32), 0, 1)
 
 SKIN = lambda p, n, ao: ramp(np.clip(lit(n, ao) * 1.05, 0, 1), [hexc("#8c5a5c"), hexc("#c58a84"), hexc("#e5ac9f"), hexc("#f3c9bb"), hexc("#fde4d7")])
 for nm_, up in (("lidUL", True), ("lidDL", False)):
@@ -404,20 +418,17 @@ for nm_, up in (("lidUL", True), ("lidDL", False)):
 paint(lambda n: n == "ear", SKIN)
 paint(lambda n: n == "sleeve", P.sleeve)
 paint(lambda n: n == "tube", P.tube)
-paint(lambda n: n in ("bell", "pivot", "dbrkt", "packrim", "eyerim", "wristband", "coin", "braidtie", "dfoot") or n.startswith("gband38"), P.brass)
+paint(lambda n: n in ("bell", "pivot", "dbrkt", "packrim", "eyerim", "wristband", "coin", "braidtie") or n.startswith("gband38"), P.brass)
 paint(lambda n: n == "plate", P.plate)
-paint(lambda n: n.startswith(("barrel", "gspindle", "gcollar", "gband55", "post", "clamp", "strut", "dlid", "packdisc", "stalk", "sightring", "hose", "gfr", "gbridge", "gstrap", "earring")), lambda p, n, ao: P.steel(p, n, ao))
+paint(lambda n: n.startswith(("barrel", "gspindle", "gcollar", "gband55", "post", "clamp", "strut", "dlid", "packdisc", "stalk", "sightring", "hose", "gfr", "gbridge", "gstrap", "earring", "dfoot")), lambda p, n, ao: P.steel(p, n, ao))
 paint(lambda n: n.startswith(("barrel", "gspindle", "hose", "gstrap")), lambda p, n, ao: P.steel(p, n, ao, P.BLACKM))
+paint(lambda n: n in ("glR", "glL"), P.goggle_lens)
+paint(lambda n: n in ("eyering", "eyepupil"), lambda p, n, ao: np.broadcast_to(np.array([0.04, 0.06, 0.05]), p.shape).copy())
 paint(lambda n: n.startswith("gren"), lambda p, n, ao: ramp(np.clip(lit(n, ao) * 1.12, 0, 1), [hexc("#14391a"), hexc("#256a2c"), hexc("#3e9a3e"), hexc("#74c863"), hexc("#c0f09e")]))
 paint(lambda n: n == "tapetail", lambda p, n, ao: ramp(np.clip(lit(n, ao) * 1.2, 0, 1), [hexc("#8a8778"), hexc("#b7b4a6"), hexc("#dcd9cb")]))
-paint(lambda n: n in ("forearm", "elbowball", "palm", "thumbL") or n.startswith("finger"), P.chrome)
+paint(lambda n: n in ("robofore", "elbowball", "palm", "thumbL") or n.startswith("finger"), P.chrome)
 paint(lambda n: n.startswith(("vert", "vstub")), P.chrome)
-# the forearm's brass underside, per the sheet: the half toward her body
-def fore(p, n, ao):
-    k = smooth(-0.012, 0.012, (p[..., 0] + VC.J("forearm.L")[0] * -1) * 1.0 + 0 * p[..., 1])
-    return mix(P.brass(p, n, ao), P.chrome(p, n, ao), 1 - k) if False else P.chrome(p, n, ao)
-paint(lambda n: n == "forearm", fore)
-paint(lambda n: n.startswith(("elbowglow", "fpad", "thumbpad", "gl", "vglow", "eyelens")), lambda p, n, ao: np.broadcast_to(np.array([0.72, 1.0, 0.45]), p.shape).copy())
+paint(lambda n: n.startswith(("elbowglow", "fpad", "thumbpad", "vglow", "eyelens")), lambda p, n, ao: np.broadcast_to(np.array([0.72, 1.0, 0.45]), p.shape).copy())
 
 # hot key on the scan's lines
 ys, xs = np.nonzero(mask)
@@ -436,7 +447,7 @@ for t in me.loop_triangles:
     if x1 < x0 or y1 < y0:
         continue
     q = me.polygons[t.polygon_index].material_index
-    if q in (mat_i["skin-vex-hot"], mat_i["leather-vex-hot"]):
+    if q in (mat_i["skin-vex"], mat_i["leather-vex-hot"]):
         yy, xx = np.mgrid[y0:y1 + 1, x0:x1 + 1]
         a_, b_, c1 = uvp
         den = (b_[1] - c1[1]) * (a_[0] - c1[0]) + (c1[0] - b_[0]) * (a_[1] - c1[1])
@@ -445,10 +456,12 @@ for t in me.loop_triangles:
         l0 = ((b_[1] - c1[1]) * (xx - c1[0]) + (c1[0] - b_[0]) * (yy - c1[1])) / den
         l1 = ((c1[1] - a_[1]) * (xx - c1[0]) + (a_[0] - c1[0]) * (yy - c1[1])) / den
         m_ = (l0 >= 0) & (l1 >= 0) & (l0 + l1 <= 1)
-        fmap[yy[m_], xx[m_]] = 1
+        fmap[yy[m_], xx[m_]] = 1 if q == mat_i["leather-vex-hot"] else 2
 kk = hotk & (fmap[ys, xs] == 1)
 OUTC[ys[kk], xs[kk]] = KEEP
-print("hot texels", int(kk.sum()))
+k2 = hotk & (fmap[ys, xs] == 2)
+OUTC[ys[k2], xs[k2]] = np.array(P.CIRCUIT, np.float32)      # the skin slot's paint_glow colour (warden_look)
+print("hot texels", int(kk.sum()), int(k2.sum()))
 
 known = PID >= 0
 for _ in range(10):

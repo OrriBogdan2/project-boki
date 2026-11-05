@@ -30,7 +30,7 @@ def forearm():
     ps.append(_lat("elbowball", "metal-vex", EL, (1.0, 0, 0), [(-0.042, 0.0), (-0.042, 0.022), (-0.03, 0.04), (0.03, 0.04), (0.042, 0.022), (0.042, 0.0)], 9, "forearm.L"))
     ps.append(_lat("elbowglow", "glow-vex", EL, (-1.0, 0, 0), [(0.043, 0.0), (0.043, 0.024)], 8, "forearm.L"))
     prof = [(0.02, 0.03), (0.045, 0.043), (L * 0.32, 0.05), (L * 0.55, 0.046), (L * 0.8, 0.036), (L * 0.97, 0.03)]
-    ps.append(_lat("forearm", "metal-vex", EL, FA, prof, 9, "forearm.L", flat=0.9))
+    ps.append(_lat("robofore", "metal-vex", EL, FA, prof, 9, "forearm.L", flat=0.9))
     ps.append(_lat("wristband", "brass-vex", EL, FA, [(L * 0.82, 0.037), (L * 0.84, 0.042), (L * 1.0, 0.038), (L * 1.02, 0.03)], 9, "forearm.L", flat=0.92))
     return ps
 

@@ -11,6 +11,12 @@
 		},
 		"slots": {
 			"skin": {
+				"paint_glow": 1.2,
+				"paint_glow_color": [
+					0.298,
+					0.765,
+					0.369
+				],
 				"top_light": 0.45,
 				"fres": 0.2,
 				"fres_tint": 0.2,

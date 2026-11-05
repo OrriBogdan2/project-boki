@@ -27,13 +27,13 @@ def ammo(bvh):
     top = SH[2]
     H = VC.J("hips")[2]
     key = [(-.20, .10 * -1, top + .03), (-.15, .06, top + .055), (-.085, .135, top - .08), (-.03, .165, top - .2), (.05, .165, top - .34), (.13, .13, top - .45), (.205, .09, top - .52)]
-    path = catmull(np.array(key, float), 34)
+    path = catmull(np.array(key, float), 44)
     path = project(bvh, path, 0.012)
     # smooth what the projection jittered
     for _ in range(3):
         path[1:-1] = (path[:-2] + path[2:] + path[1:-1] * 2) / 4
     side_hint = np.array([0.5, -0.1, 0.85])
-    p = VC.belt_path_tile("ammo", path, 0.024, hint=side_hint)
+    p = VC.belt_path_tile("ammo", path, 0.028, hint=side_hint)
     return p
 
 
@@ -85,7 +85,7 @@ def build(bvh_src, bvh_low):
     hs = hoses(pack_c)
     pieces = [face, eye] + lids + brows + cyber + hair + bd + gog + ear + cannon + arm + hnd + [coin] + sp + pack + [belt] + hs
     for p in pieces:
-        if p.name.startswith(("ammo", "lid", "face", "gfr", "gl", "stail")):
+        if p.name.startswith(("ammo", "lid", "face", "gfr", "gl", "eyeL")):
             continue
         p.orient()
     return {"pieces": pieces, "hair": hair, "braid": bd, "bnames": bnames, "bpts": bpts, "fnames": fnames, "fpts": fpts, "cyber": cyber, "coin": coin_c, "pack_c": pack_c}

@@ -155,9 +155,10 @@ def cyber_eye():
                 f.append([p, q, q + n, p + n])
         return Piece(name, mat, np.array(v), f).rigid("head")
     rim = lat("eyerim", "brass-vex", [(-0.012, 0.043), (0.006, 0.043), (0.014, 0.037), (0.014, 0.03), (0.006, 0.026)])
-    lens = lat("eyelens", "glow-vex", [(0.006, 0.0265), (0.009, 0.019), (0.011, 0.01), (0.0115, 0.0)])
-    lens.lens = (c, d, a, b)
-    return [rim, lens]
+    lens = lat("eyelens", "glow-vex", [(0.006, 0.0265), (0.0095, 0.02), (0.0095, 0.0085), (0.0095, 0.0)], n=12)
+    ringd = lat("eyering", "metal-vex", [(0.0095, 0.017), (0.0115, 0.0165), (0.0115, 0.0115), (0.0095, 0.011)], n=12)
+    pup = lat("eyepupil", "metal-vex", [(0.0095, 0.0055), (0.0125, 0.0045), (0.0125, 0.0)], n=8)
+    return [rim, lens, ringd, pup]
 
 
 # ---- hair
@@ -325,7 +326,7 @@ def goggles(bvh):
         up = -up
     for s in (1.0, -1.0):
         c = np.array([s * 0.056 + 0.004, y0, z - 0.004 * s])
-        for nm, mat, r0, wf, hf, th in (("gfr", "metal-vex", 1.0, 0.052, 0.036, 0.02), ("gl", "glass-vex", 0.8, 0.052, 0.036, 0.0225)):
+        for nm, mat, r0, wf, hf, th in (("gfr", "metal-vex", 1.0, 0.052, 0.036, 0.02), ("gl", "metal-vex", 0.8, 0.052, 0.036, 0.0225)):
             v = [c - tilt * 0.012]
             f = []
             n = 11
@@ -338,7 +339,7 @@ def goggles(bvh):
                 a, b = j, (j + 1) % n
                 f.append([a, b, b + n, a + n])
                 f.append([a + n, b + n, 2 * n])
-            p = Piece(nm + ("R" if s > 0 else "L"), "metal-vex" if mat.startswith("metal") else "glow-vex", np.array(v), f).rigid("head")
+            p = Piece(nm + ("R" if s > 0 else "L"), mat, np.array(v), f).rigid("head")
             p.orient(tuple(c - tilt * 0.02))
             out.append(p)
     out.append(box("gbridge", "metal-vex", (0, y0 + 0.01, z), (0.012, 0, 0), tilt * 0.006, up * 0.01, "head"))

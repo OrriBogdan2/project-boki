@@ -10,11 +10,12 @@ import imgio
 
 DEC = os.path.expanduser("~/meshy/vex_f/decals/")
 OLIVE = [hexc("#23261c"), hexc("#3c4232"), hexc("#5b6249"), hexc("#7f8668"), hexc("#a7ab8c")]
-STEEL = [hexc("#2c2d33"), hexc("#55575f"), hexc("#868992"), hexc("#b5b8c0"), hexc("#e3e5ea")]
-CHROME = [hexc("#3d4048"), hexc("#7b808b"), hexc("#b3b8c2"), hexc("#dfe3ea"), hexc("#ffffff")]
+STEEL = [hexc("#222329"), hexc("#3f4148"), hexc("#61636c"), hexc("#868992"), hexc("#b0b3ba")]
+CHROME = [hexc("#30333a"), hexc("#5f646f"), hexc("#8f95a1"), hexc("#bfc4ce"), hexc("#e8ebf0")]
 BLACKM = [hexc("#141417"), hexc("#26262b"), hexc("#3b3b42"), hexc("#585862"), hexc("#7a7a86")]
 BRASS = [hexc("#4a3512"), hexc("#7d5c1e"), hexc("#b4892f"), hexc("#dcb654"), hexc("#f7e29a")]
 KEY = np.array([1.0, 0.76, 0.44])        # the shader's glow key
+CIRCUIT = np.array([0.298, 0.765, 0.369])  # warden_look skin paint_glow_color
 
 
 def _decal(name):
@@ -92,11 +93,11 @@ def tube(p, n, ao):
     s, u, f = scs(p)
     c = steel(p, n, ao, OLIVE)
     # duct tape: grey wraps; hazard tape in the middle
-    w1 = (s > -0.385) & (s < -0.33)
-    w2 = (s > -0.20) & (s < -0.14)
-    w3 = (s > -0.03) & (s < 0.02)
+    w1 = (s > -0.46) & (s < -0.425)
+    w2 = (s > -0.185) & (s < -0.15)
+    w3 = (s > -0.37) & (s < -0.335)
     wave = np.sin((s + f * .4) * 240) > 0
-    tp = ramp(np.clip(lit(n, ao) * 1.2, 0, 1), [hexc("#6d6a60"), hexc("#918e84"), hexc("#b3b0a5"), hexc("#d2cfc5"), hexc("#ece9df")]) * (0.9 + 0.1 * wave[..., None])
+    tp = ramp(np.clip(lit(n, ao) * 1.2, 0, 1), [hexc("#5a574e"), hexc("#7a776d"), hexc("#98958a"), hexc("#b3b0a5"), hexc("#c9c6bb")]) * (0.9 + 0.1 * wave[..., None])
     c = np.where((w1 | w3)[..., None], tp, c)
     hz = np.where((np.sin((s + u * 1.5) * 120) > 0)[..., None], hexc("#e7b61c") * (0.55 + 0.6 * lit(n, ao))[..., None], hexc("#171512") + 0 * c)
     return np.where(w2[..., None], hz, c)
@@ -137,7 +138,7 @@ def hair_tile(h, w):
     t -= 0.34 * (1 - smooth(0.0, 0.2, v))
     t += 0.2 * np.exp(-((v - 0.38 - warp) / 0.12) ** 2)
     t *= 1 - 0.26 * (np.abs(((u * 4) % 1) * 2 - 1) ** 5)
-    return ramp(np.clip(t, 0, 1), [hexc("#0b3b2c"), hexc("#10694a"), hexc("#17966a"), hexc("#35c48d"), hexc("#9af0c6")])
+    return ramp(np.clip(t, 0, 1), [hexc("#0c3a1a"), hexc("#10652c"), hexc("#1a913f"), hexc("#46c464"), hexc("#b4f2a0")])
 
 
 def eye_tile(h, w):
@@ -177,7 +178,7 @@ def apply_face(pos, col, H):
     col = np.where((edge & front)[..., None], ramp(np.full(x.shape, .55), BRASS), col)
     # (a cheek seam, a circuit line)
     seam = (np.abs((z - (ez - 0.06)) + (x - ex) * 0.5) < 0.0016) & (x > ex - 0.03) & (x < ex + 0.05) & front
-    col = np.where(seam[..., None], KEY + 0 * col, col)
+    col = np.where(seam[..., None], CIRCUIT + 0 * col, col)
     # left eye: smoky shadow, the wing out past the corner
     lx = -ex
     dx, dz = (x - lx) * -1, z - ez                   # dx > 0 is outward
@@ -187,3 +188,22 @@ def apply_face(pos, col, H):
     wing = (dx > 0.016) & (dx < 0.052) & (np.abs(dz - ly * 0.62 - 0.003) < 0.0042 * (1.0 - (dx - .016) / .038) + .0006) & front & (x < 0)
     col = np.where(wing[..., None], hexc("#120d10") + 0 * col, col)
     return col
+
+
+SKIN_R = [hexc("#9a5f60"), hexc("#c98680"), hexc("#e3a596"), hexc("#f2c2b2"), hexc("#fcdccd")]
+
+
+def goggle_lens(p, n, ao):
+    t = np.clip(0.5 + 0.5 * n[..., 0] + 0.3 * n[..., 2], 0, 1)
+    c = ramp(t, [hexc("#1f7a3a"), hexc("#2fbf63"), hexc("#7be08a"), hexc("#9a6ad8")])
+    return c
+
+
+def clean_skin(col, m, blur):
+    """The scan's skin rebuilt on a warm ramp from a band-pass of its light: baked highlights and mottling off, forms kept."""
+    l = col.mean(-1)
+    mf = m.astype(np.float32)
+    l1, l2 = blur(l, mf, 2), blur(l, mf, 20)
+    t = np.clip(0.52 + (l1 - l2) * 3.0, 0, 1)
+    new = ramp(t, SKIN_R) + (l - l1)[..., None] * 0.5
+    return np.where(m[..., None], new.astype(np.float32), col)

@@ -20,9 +20,9 @@ E = J("forearm.R")                # the pivot
 OUT = 0.085                       # the cannon axis sits this far outside the elbow, clear of the hip
 SLEEVE_F, SLEEVE_R = 0.05, 0.072
 GATLING_F = -0.052
-TUBE_F, TUBE_R = 0.158, 0.041      # the launcher: its axis ahead of the sleeve; radius of the scrap pipe
-POST_S = -0.10                    # the launcher's pivot along the cannon
-BELL_S, BREECH_S = -0.48, 0.05    # bell mouth and breech at rest
+TUBE_F, TUBE_R = 0.15, 0.041      # the launcher: its axis ahead of the sleeve; radius of the scrap pipe
+POST_S = -0.24                    # the launcher's pivot along the cannon
+BELL_S, BREECH_S = -0.55, -0.11    # bell mouth and breech at rest
 TIP_S = 0.60                      # the gatling's mouths
 
 
@@ -92,17 +92,18 @@ def gatling():
 def launcher():
     """On `launcher`: the scrap pipe, tape, the flared brass bell, the ring sight on its stalk, the clamp at the post."""
     b = "launcher"
-    prof = [(BREECH_S, 0.0), (BREECH_S, 0.03), (BREECH_S - 0.006, TUBE_R + 0.008), (BREECH_S - 0.04, TUBE_R + 0.008), (BREECH_S - 0.046, TUBE_R), (-0.36, TUBE_R), (-0.365, TUBE_R + 0.007), (-0.40, TUBE_R + 0.007), (-0.405, TUBE_R)]
+    B0 = BELL_S + 0.09
+    prof = [(BREECH_S, 0.0), (BREECH_S, 0.03), (BREECH_S - 0.006, TUBE_R + 0.008), (BREECH_S - 0.04, TUBE_R + 0.008), (BREECH_S - 0.046, TUBE_R), (-0.385, TUBE_R), (-0.39, TUBE_R + 0.007), (-0.42, TUBE_R + 0.007), (-0.425, TUBE_R), (B0, TUBE_R)]
     out = [lathe("tube", "metal-vex", 0.0, TUBE_F, prof, n=11, bone=b, cap=False)]
-    bell = [(-0.40, TUBE_R), (-0.43, TUBE_R + 0.004), (-0.455, TUBE_R + 0.016), (BELL_S + 0.008, TUBE_R + 0.042), (BELL_S, TUBE_R + 0.062), (BELL_S - 0.002, TUBE_R + 0.056), (BELL_S + 0.02, TUBE_R + 0.022), (BELL_S + 0.07, 0.024), (BELL_S + 0.07, 0.0)]
+    bell = [(B0, TUBE_R), (B0 - 0.03, TUBE_R + 0.004), (B0 - 0.055, TUBE_R + 0.016), (BELL_S + 0.008, TUBE_R + 0.042), (BELL_S, TUBE_R + 0.062), (BELL_S - 0.002, TUBE_R + 0.056), (BELL_S + 0.02, TUBE_R + 0.022), (BELL_S + 0.07, 0.024), (BELL_S + 0.07, 0.0)]
     out.append(lathe("bell", "brass-vex", 0.0, TUBE_F, bell, n=13, bone=b, cap=False))
     out.append(lathe("clamp", "metal-vex", 0.0, TUBE_F, [(POST_S - 0.05, TUBE_R + 0.002), (POST_S - 0.05, TUBE_R + 0.016), (POST_S + 0.05, TUBE_R + 0.016), (POST_S + 0.05, TUBE_R + 0.002)], n=9, bone=b, cap=False))
     # the post: fixed to the sleeve
     out.append(box("post", "metal-vex", C(POST_S, 0, (SLEEVE_F + TUBE_F) / 2), (0.014, 0, 0), (0, 0.032, 0), (0, 0, 0.035), "forearm.R"))
     out.append(lathe("hub", "metal-vex", 0, 0, [(0, 0)], n=3, bone=b, cap=False)) if False else None
     # the ring sight: a stalk off the tube's outer side, a flat ring
-    st = C(-0.27, TUBE_R * 0.4, TUBE_F + TUBE_R * 0.9)
-    tip = C(-0.27, 0.075, TUBE_F + 0.10)
+    st = C(-0.36, TUBE_R * 0.4, TUBE_F + TUBE_R * 0.9)
+    tip = C(-0.36, 0.075, TUBE_F + 0.10)
     out.append(sweep("stalk", "metal-vex", [st, (st + tip) / 2, tip], ring(4), np.full(3, 0.005), side_hint=np.array([0, 0, 1.0]), tip=False).rigid(b))
     th = np.linspace(0, 2 * np.pi, 11)
     c0 = tip + norm(tip - st) * 0.034
@@ -110,7 +111,7 @@ def launcher():
     pts = [c0 + u_ * np.cos(t) * 0.034 + v_ * np.sin(t) * 0.034 for t in th]
     out.append(sweep("sightring", "metal-vex", pts, ring(4), np.full(11, 0.0048), side_hint=np.cross(u_, v_), tip=False).rigid(b))
     # the tape's loose tail: a thin strip, double-faced
-    a, n_ = C(-0.385, TUBE_R * 0.9, TUBE_F - 0.02), np.array([0, 1.0, 0])
+    a, n_ = C(-0.445, TUBE_R * 0.9, TUBE_F - 0.02), np.array([0, 1.0, 0])
     strip = np.array([a, a + [0.012, 0.004, -0.022], a + [0.03, 0.002, -0.05], a + [0.052, -0.006, -0.07]])
     v = np.vstack([strip - n_ * 0 - [0, 0.0, 0] + [0, 0.012, 0], strip + [0, -0.012, 0]])
     f = [[i, i + 1, i + 5, i + 4] for i in range(3)] + [[i + 4, i + 5, i + 1, i] for i in range(3)]
@@ -226,10 +227,13 @@ def gear_pack(z_top, back_y):
 def belt_path_tile(name, path, width=0.021, uvrect=(0, 0, 1, 1), hint=None):
     """The ammunition belt: a saw-tooth ribbon, each cartridge a raised step, with a tiled paint."""
     p = np.asarray(path, float)
-    t, s, n = frames(p, hint if hint is not None else (0, 1.0, 0.0))
+    t = norm(np.gradient(p, axis=0))
+    n = norm(p * [1, 1, 0] - [0, -0.02, 0])
+    s = norm(np.cross(t, n))
+    n = norm(np.cross(s, t)) * np.sign(np.sum(np.cross(s, t) * n, axis=1, keepdims=True))
     v, f, uv = [], [], []
     for i in range(len(p)):
-        h = 0.016 if i % 2 == 0 else 0.0065
+        h = 0.021 if i % 2 == 0 else 0.007
         v.append(p[i] + s[i] * width)
         v.append(p[i] + n[i] * h)
         v.append(p[i] - s[i] * width)
@@ -237,10 +241,10 @@ def belt_path_tile(name, path, width=0.021, uvrect=(0, 0, 1, 1), hint=None):
     for i in range(len(p) - 1):
         for k in range(2):
             a = i * 3 + k
-            f.append([a, a + 1, a + 4, a + 3])
+            f.append([a + 3, a + 4, a + 1, a])
             uk0, uk1 = v0 + (v1 - v0) * k / 2, v0 + (v1 - v0) * (k + 1) / 2
             ua, ub = (u0, u1) if i % 2 == 0 else (u1, u0)
-            uv.append([(ua, uk0), (ua, uk1), (ub, uk1), (ub, uk0)])
+            uv.append([(ub, uk0), (ub, uk1), (ua, uk1), (ua, uk0)])
     return Piece(name, "metal-belt", np.array(v), f, uv, room=0.3)
 
 
