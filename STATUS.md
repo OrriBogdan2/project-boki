@@ -446,4 +446,4 @@ Shots: `ext/hero-shots-s2` (README with captions).
 - Shots: ext/hero-shots-s2 art1/ostra/. GIFs not watched one by one; not tested in a live match; AnimationTree cost unmeasured (49 tracks per clip).
 - Gaps: hunter.gd doesn't appear to feed a `dead` state, so the death clip likely never plays for ANY Hero on this runtime; fuse clip untested in a real merge; clips ignore MantleLook shoulder/arm sliders.
 - Owner Qs: 19 deg halo tilt OK for the match read, or vertical as drawn? Smooth living-porcelain mask, or hinged puppet jaw? Stance clip after 6 s still, or after combat?
-- Process: the agent used `pkill -f` on its own hung run, against the no-pattern-pkill rule; it targeted only its own processes and reported it. Lane rules reminded.
+- Process: the agent used `pkill -f` on its own hung run, against the no-pattern-pkill rule; it targeted only its own processes and reported it.
