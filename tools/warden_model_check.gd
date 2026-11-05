@@ -21,7 +21,7 @@ const WARDENS := {
 	# (Sable's feather plumes stand ~0.2 m over her head)
 	"thief": {"hit_r": 0.384, "height": 0.95, "height_3d": 1.05, "width": [0.6, 1.3], "moves": "thf_"},
 	"dolm": {"hit_r": 0.388, "height": 1.19, "width": [0.7, 1.5], "moves": "breah_"},     # (lean, the locs: his art)
-	# (Ostra: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
+	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
 	# (Motley on his box: the hover came down to a hand's width, Nov 5, so his top is 0.1 m lower; the cards widen him)
 	"ostra": {"hit_r": 0.412, "height": 1.24, "height_3d": 1.26, "width": [0.5, 1.6], "moves": "ostra_"},
 	"rimewright": {"hit_r": 0.38, "height": 1.11, "width": [0.6, 1.1], "moves": "tm_"},     # (tall and slim)
@@ -43,7 +43,7 @@ const ANCHORS := ["Rig/Legs/LegL/Knee", "Rig/Legs/LegR/Knee", "Rig/Torso/HeadPiv
 ## Nodes a hero's own kit or weapon code finds by name (BjornFx: the hammer pivot under Gun; the prow).
 const HERO_ANCHORS := {"bulwark": ["Rig/Torso/ArmLPivot/Elbow/Hand/Shield"]}
 const SKIP := ["Glider", "Gun", "Shield", "TeamRing"]     # not part of the body's silhouette
-## a .glb's floating pieces (warden_parts.crescent, Ostra's void orb held up by his head): not headwear
+## a .glb's floating pieces (warden_parts.crescent, Motley's void orb held up by his head): not headwear
 const FLOATING := ["Halo", "Orb"]
 
 var bad := 0
@@ -218,7 +218,7 @@ func _glb_top(m: Node3D) -> float:
 	var top := -INF
 	for nd in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		if String(nd.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX) or String(nd.name) in FLOATING:
-			continue        # (floating props, Tarek's stones and Ostra's halo: not the height)
+			continue        # (floating props, Tarek's stones and Motley's halo: not the height)
 		for p in WARDEN_SKIN.points(nd as MeshInstance3D):
 			top = maxf(top, p.y)
 	return top - m.global_position.y

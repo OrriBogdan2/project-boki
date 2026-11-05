@@ -162,7 +162,7 @@ func run(main_node: Node) -> void:
 	# ---------------------------------------------------------------- 5. cooldown text
 	P.slot_lv["kin"] = 1
 	P.ak.cd["e"] = 6.4
-	await main.get_tree().process_frame
+	await hud.panels.draw      # the slots are drawn on HudPanels, REDRAW_HZ times a second
 	await main.get_tree().process_frame
 	var ei := P.slot_info("k1")
 	var txt := String(hud.slot_text.get("k1", ""))
